@@ -1,0 +1,88 @@
+# Native (x86, 32-bit) target for the Vagrant Story port.
+#
+# Standalone by design: it does NOT touch the matching PSX build. Run the PSX
+# build with plain `make`; run this with `make -f Makefile.native`.
+#
+#   make -f Makefile.native          build the native binary
+#   make -f Makefile.native stubs    regenerate the stub layer
+#   make -f Makefile.native test     build + run the GTE test harness
+#
+# Phase 0: compile the fully-decompiled MENU + TITLE subset against a stub layer.
+# Phase 1: real software GTE (gte_core.c + libgte.c) replaces the GTE stubs.
+
+NATIVE_CC ?= gcc
+BUILD     := native/build
+OBJ       := $(BUILD)/obj
+BIN       := $(BUILD)/vagrant-native
+TESTBIN   := $(BUILD)/test_gte
+
+# Game code: PSYQ headers only (-nostdinc), 1997-compiler semantics preserved.
+# -D_LANGUAGE_C is REQUIRED: most of include/psx/kernel.h (incl. struct DIRENTRY)
+# is gated behind it, and the PSYQ compiler predefines it while modern GCC does not.
+GAME_CFLAGS := -m32 -std=gnu89 -nostdinc -DNATIVE_BUILD -D_LANGUAGE_C \
+               -I include/psx -I src/include -I native/include -I ./ \
+               -include native/include/psx_compat.h \
+               -fno-builtin -fno-strict-aliasing -fwrapv -fno-pic \
+               -fno-stack-protector -w
+
+# Platform layer: normal hosted C, may use libc.
+PLAT_CFLAGS := -m32 -I native/include -fno-strict-aliasing -fwrapv -fno-pic -w
+LDFLAGS     := -m32 -no-pie
+
+# Deferred: these need linkage-sensitive source fixes (static vs non-static
+# declarations) that must be individually verified against the byte-matching
+# PSX build before they can be changed.
+NATIVE_EXCLUDE := \
+    src/MENU/MENUB.PRG/260.c \
+    src/MENU/MENUF.PRG/3B8.c \
+    src/TITLE/TITLE.PRG/libpress/LIBPRESS.c
+
+GAME_SRCS := $(filter-out $(NATIVE_EXCLUDE),$(shell grep -rL INCLUDE_ASM src/MENU src/TITLE --include=*.c | sort))
+
+# Real implementations (must be linked BEFORE stubs are generated so their
+# symbols are excluded from stubbing).
+PLAT_REAL := native/platform/unimpl.c native/platform/scratchpad.c \
+             native/platform/gte_core.c native/platform/libgte.c native/platform/main.c
+PLAT_SRCS := $(PLAT_REAL) native/platform/stubs.c
+
+GAME_OBJS := $(foreach s,$(GAME_SRCS),$(OBJ)/game_$(subst /,_,$(patsubst src/%.c,%,$(s))).o)
+REAL_OBJS := $(patsubst native/platform/%.c,$(OBJ)/plat_%.o,$(PLAT_REAL))
+STUB_OBJ  := $(OBJ)/plat_stubs.o
+
+.PHONY: all clean run stubs test
+all: $(BIN)
+
+$(OBJ):
+	@mkdir -p $(OBJ)
+
+define GAME_RULE
+$(OBJ)/game_$(subst /,_,$(patsubst src/%.c,%,$(1))).o: $(1) | $(OBJ)
+	@echo "  CC(game) $(1)"
+	@$(NATIVE_CC) $(GAME_CFLAGS) -c $(1) -o $$@
+endef
+$(foreach s,$(GAME_SRCS),$(eval $(call GAME_RULE,$(s))))
+
+$(OBJ)/plat_%.o: native/platform/%.c | $(OBJ)
+	@echo "  CC(plat) $<"
+	@$(NATIVE_CC) $(PLAT_CFLAGS) -c $< -o $@
+
+$(BIN): $(GAME_OBJS) $(REAL_OBJS) $(STUB_OBJ)
+	@echo "  LD       $@"
+	@$(NATIVE_CC) $(LDFLAGS) $^ -o $@
+	@echo "native target linked: $@"
+
+# Regenerate the stub layer from whatever is still unresolved after the real
+# implementations are accounted for.
+LIBC := $(shell $(NATIVE_CC) -m32 -print-file-name=libc.so.6)
+stubs: $(GAME_OBJS) $(REAL_OBJS)
+	@python3 native/tools/gen_stubs.py $(OBJ) native/platform/stubs.c $(LIBC)
+
+test: | $(OBJ)
+	@$(NATIVE_CC) $(PLAT_CFLAGS) -no-pie native/tests/test_gte.c native/platform/gte_core.c -o $(TESTBIN)
+	@./$(TESTBIN) native/tests/gte_golden.txt
+
+run: $(BIN)
+	@./$(BIN)
+
+clean:
+	$(RM) -r $(BUILD)

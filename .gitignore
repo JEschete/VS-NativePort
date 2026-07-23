@@ -13,3 +13,6 @@ include/macro.inc
 nonmatchings/
 tools/.sysdeps
 tools/python
+native/build/
+native/platform/stubs.c
+native/tests/psx/*.exe
