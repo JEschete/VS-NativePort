@@ -335,3 +335,52 @@ Half-space triangle rasterisation handles either winding without sorting edges,
 which matters because quad vertex order (0,1,2 then 1,2,3) is not consistently
 counter-clockwise. Gouraud shading interpolates with the unsigned barycentric
 weights divided by the absolute triangle area.
+
+---
+
+## Demand-driven menu bring-up
+
+### The stub generator must classify data vs functions correctly
+**Symptom:** writing to a game global segfaults; the symbol shows as `T`
+(text/code) in `nm`.
+
+`gen_stubs.py` originally emitted any non-`D_` symbol as a *function* stub, so
+named data globals (`vs_battle_menuState`, `vs_main_inventory`, …) landed in
+read-only `.text` and any write faulted. Fix: classify by the disassembly --
+a symbol is a function only if defined with `glabel`/`alabel`; everything else
+is a writable data blob. This reclassified ~216 symbols and is what let the
+harness run at all.
+
+### Some "data" globals are POINTERS the game allocates at init
+**Symptom:** `mov <addr>,%eax` (a load, not an `lea`) followed by a deref of a
+small/zero value. The disassembly loads the symbol *contents* as a pointer.
+
+`vs_battle_menuItems` is `extern vs_battle_menuItem_t*` -- a pointer the game
+sets during battle init, not an array. Stubbed as a zeroed blob it reads as
+null. Others: `vs_battle_characterState`, `vs_battle_rowTypeBuf`. The bring-up
+harness supplies backing buffers ("synthetic game state"); the real fix is to
+run the game init that allocates them.
+
+### The scratchpad must live at its real address 0x1F800000
+**Symptom:** deref of an address like `0x1F800008`.
+
+Game code accesses the scratchpad by literal address (`*(void**)0x1F800000`),
+not only through a helper. So the native scratchpad is `mmap`ed with `MAP_FIXED`
+at `0x1F800000` by a constructor, and `_psx_scratchpad()` returns that address.
+
+### Per-frame render init sets up the primitive buffers
+**Symptom:** after the scratchpad is mapped, a GPU-packet write
+(`movl $0xE100002D,(%eax)`) faults because the primitive pointer at
+`scratchpad[0]` is null.
+
+The game initialises `scratchpad[0..2]` (next-free primitive pointer, ordering
+table base, tpage list) each frame in its render setup. A menu harness that
+jumps straight to the menu skips this. Next step for bring-up: call the real
+frame/render-init path (or replicate its scratchpad setup) rather than patch
+one pointer at a time.
+
+### Reaching the render path
+`func_800C97BC` (per-frame menu driver) → `vs_mainMenu_exec` →
+`vs_mainMenu_renderScreen` → `_renderMenuItems` → `vs_battle_renderMenuItem` →
+`vs_battle_printVariableWidthFontChar`. This is real menu render code executing
+natively; what remains before pixels is the frame-buffer/scratchpad setup above.

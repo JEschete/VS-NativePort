@@ -9,3 +9,9 @@ void _native_unimplemented(const char* name)
     fflush(stderr);
     abort();
 }
+
+/* GCC emits a call to __main() to run global constructors. The decompiled
+ * game entry references it; there are no C++ constructors here, so it is a
+ * no-op. Provided in the platform layer because gen_stubs skips __-prefixed
+ * symbols. */
+void __main(void) { }

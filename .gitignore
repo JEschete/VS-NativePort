@@ -18,3 +18,5 @@ native/platform/stubs.c
 native/tests/psx/*.exe
 native/build/*.ppm
 native/build/test_gpu
+native/build/menu_harness
+native/build/menu.ppm

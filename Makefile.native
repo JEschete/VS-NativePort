@@ -37,7 +37,7 @@ LDFLAGS     := -m32 -no-pie -Wl,-Ttext-segment=0x10000
 #  - static vs non-static declaration conflicts (linkage-changing; must be
 #    re-verified against the byte-matching build before touching)
 NATIVE_EXCLUDE := \
-    src/BATTLE/BATTLE.PRG/38C1C.c \    src/BATTLE/BATTLE.PRG/4A0A8.c \    src/MENU/MENUB.PRG/260.c \    src/MENU/MENUF.PRG/3B8.c \    src/SLUS_010.40/libapi/COUNTER.c \    src/SLUS_010.40/libsn/SNMAIN.c \    src/SLUS_010.40/main.c \    src/SLUS_010.40/overlay.c \    src/TITLE/TITLE.PRG/libpress/LIBPRESS.c
+    src/BATTLE/BATTLE.PRG/38C1C.c \    src/BATTLE/BATTLE.PRG/4A0A8.c \    src/MENU/MENUB.PRG/260.c \    src/MENU/MENUF.PRG/3B8.c \    src/SLUS_010.40/libapi/COUNTER.c \    src/SLUS_010.40/libsn/SNMAIN.c \    src/SLUS_010.40/overlay.c \    src/TITLE/TITLE.PRG/libpress/LIBPRESS.c
 
 # Everything else. INCLUDE_ASM is a no-op under NATIVE_BUILD, so TUs that still
 # contain assembly contribute their data tables and decompiled functions, and
@@ -56,7 +56,7 @@ GAME_OBJS := $(foreach s,$(GAME_SRCS),$(OBJ)/game_$(subst /,_,$(patsubst src/%.c
 REAL_OBJS := $(patsubst native/platform/%.c,$(OBJ)/plat_%.o,$(PLAT_REAL))
 STUB_OBJ  := $(OBJ)/plat_stubs.o
 
-.PHONY: all clean run stubs test
+.PHONY: all clean run stubs test menu
 all: $(BIN)
 
 $(OBJ):
@@ -98,3 +98,9 @@ run: $(BIN)
 
 clean:
 	$(RM) -r $(BUILD)
+
+menu: $(GAME_OBJS) $(REAL_OBJS) $(STUB_OBJ)
+	@$(NATIVE_CC) $(PLAT_CFLAGS) -c native/tests/menu_harness.c -o $(OBJ)/menu_harness.o
+	@$(NATIVE_CC) $(LDFLAGS) $(filter-out $(OBJ)/plat_main.o,$^) $(OBJ)/menu_harness.o -o $(BUILD)/menu_harness
+	@echo ---- run ----
+	-@./$(BUILD)/menu_harness

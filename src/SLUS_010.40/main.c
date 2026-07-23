@@ -11657,7 +11657,11 @@ void vs_main_clutInit(void)
     }
 }
 
-static void _asmNop(void) { __asm__(".nop;"); }
+static void _asmNop(void) {
+#ifndef NATIVE_BUILD
+    __asm__(".nop;");
+#endif
+}
 
 void vs_main_nop9(int arg0 __attribute__((unused)), int arg1 __attribute__((unused))) { }
 
@@ -11667,6 +11671,14 @@ static void nop11(void) { }
 
 void vs_main_memcpy(void* dest, void* src, u_int sz)
 {
+#ifdef NATIVE_BUILD
+    /* The asm copies whole words: (sz>>4) 16-byte blocks then (sz&12) bytes,
+     * i.e. sz rounded down to a multiple of 4. */
+    u_int n = sz & ~3u, i;
+    char* d = (char*)dest;
+    const char* s = (const char*)src;
+    for (i = 0; i < n; i++) d[i] = s[i];
+#else
     __asm__("srl $t0, %2, 4;"
             "beqz $t0, 1f;"
             "and $t5, %2, 12;"
@@ -11693,10 +11705,17 @@ void vs_main_memcpy(void* dest, void* src, u_int sz)
             "addu %0, 4;"
             "2:" ::"r"(dest),
         "r"(src), "r"(sz));
+#endif
 }
 
 void vs_main_bzero(void* dest, int sz)
 {
+#ifdef NATIVE_BUILD
+    /* The asm zeroes (sz & 0xFFFC) bytes a word at a time. */
+    unsigned n = (unsigned)sz & 0xFFFCu, i;
+    char* d = (char*)dest;
+    for (i = 0; i < n; i++) d[i] = 0;
+#else
     __asm__("and $t0, %1, 0xFFFC;"
             "beqz $t0, 1f;"
             "0:"
@@ -11706,6 +11725,7 @@ void vs_main_bzero(void* dest, int sz)
             "addu %0, 4;"
             "1:" ::"r"(dest),
         "r"(sz));
+#endif
 }
 
 static void nop12(void) { }
