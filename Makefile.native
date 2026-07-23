@@ -36,7 +36,8 @@ LDFLAGS     := -m32 -no-pie -Wl,-Ttext-segment=0x10000
 #    same pattern as src/include/insertTPage.h)
 #  - static vs non-static declaration conflicts (linkage-changing; must be
 #    re-verified against the byte-matching build before touching)
-NATIVE_EXCLUDE :=     src/BATTLE/BATTLE.PRG/38C1C.c     src/BATTLE/BATTLE.PRG/4A0A8.c     src/BATTLE/BATTLE.PRG/573B8.c     src/BATTLE/BATTLE.PRG/5BF94.c     src/MENU/MENUB.PRG/260.c     src/MENU/MENUF.PRG/3B8.c     src/SLUS_010.40/libapi/COUNTER.c     src/SLUS_010.40/libsn/SNMAIN.c     src/SLUS_010.40/main.c     src/SLUS_010.40/overlay.c     src/TITLE/TITLE.PRG/libpress/LIBPRESS.c
+NATIVE_EXCLUDE := \
+    src/BATTLE/BATTLE.PRG/38C1C.c \    src/BATTLE/BATTLE.PRG/4A0A8.c \    src/MENU/MENUB.PRG/260.c \    src/MENU/MENUF.PRG/3B8.c \    src/SLUS_010.40/libapi/COUNTER.c \    src/SLUS_010.40/libsn/SNMAIN.c \    src/SLUS_010.40/main.c \    src/SLUS_010.40/overlay.c \    src/TITLE/TITLE.PRG/libpress/LIBPRESS.c
 
 # Everything else. INCLUDE_ASM is a no-op under NATIVE_BUILD, so TUs that still
 # contain assembly contribute their data tables and decompiled functions, and
@@ -48,7 +49,7 @@ GAME_SRCS := $(filter-out $(NATIVE_EXCLUDE),$(shell find src -name "*.c" | sort)
 PLAT_REAL := native/platform/unimpl.c native/platform/scratchpad.c \
              native/platform/gte_core.c native/platform/libgte.c \
              native/platform/libgpu.c native/platform/libetc.c \
-             native/platform/psx_vram.c native/platform/libapi.c native/platform/main.c
+             native/platform/psx_vram.c native/platform/libapi.c native/platform/battle_asm.c native/platform/main.c
 PLAT_SRCS := $(PLAT_REAL) native/platform/stubs.c
 
 GAME_OBJS := $(foreach s,$(GAME_SRCS),$(OBJ)/game_$(subst /,_,$(patsubst src/%.c,%,$(s))).o)

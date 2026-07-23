@@ -954,6 +954,7 @@ void _printVariableWidthFont(vs_battle_textBox* arg0)
 
 // Looks like some unholy union of hasm and compiled code, leaving as raw asm
 int _printFixedWidthFontChar(int charId, int x, int y, int width, int height, int scale);
+#ifndef NATIVE_BUILD
 __asm__("glabel _printFixedWidthFontChar;"
         "addu       $sp, -8;"
         "addu       $t7, $a0, $zero;"
@@ -1071,6 +1072,7 @@ __asm__("glabel _printFixedWidthFontChar;"
         "j          $ra;"
         "addiu      $sp, 0x8;"
         "endlabel _printFixedWidthFontChar;");
+#endif /* NATIVE_BUILD */
 
 #pragma vsstring(start)
 void _printFixedWidthFont(vs_battle_textBox* ctx, int scale)

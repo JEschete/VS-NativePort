@@ -79,6 +79,7 @@ void func_800C00E8(int arg0, void* arg1)
 
 INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/573B8", func_800C0150);
 
+#ifndef NATIVE_BUILD
 __asm__("glabel vs_battle_copyAligned;"
         "and       $t0, $a2, 0x7;"
         "beqz      $t0, vs_battle_memcpy;"
@@ -89,9 +90,11 @@ __asm__("glabel vs_battle_copyAligned;"
         "j         vs_battle_copyAligned;"
         "add       $a2, -2;"
         "endlabel vs_battle_copyAligned;");
+#endif /* NATIVE_BUILD */
 
 INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/573B8", vs_battle_memcpy);
 
+#ifndef NATIVE_BUILD
 __asm__("glabel vs_battle_setSpriteDefault;"
         "lui      $v1, 0x1F80;"
         "addu     $a2, $a0, $zero;"
@@ -136,9 +139,11 @@ __asm__("glabel vs_battle_setSpriteDefault;"
         "j          $ra;"
         "sw         $t4, ($v1);"
         "endlabel vs_battle_setSprite;");
+#endif /* NATIVE_BUILD */
 
 INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/573B8", func_800C02A8);
 
+#ifndef NATIVE_BUILD
 __asm__("glabel vs_battle_playSfx10;"
         "j         .L800C02FC;"
         "li        $a1, 10;"
@@ -171,6 +176,7 @@ __asm__("glabel vs_battle_playSfx10;"
         "j        $ra;"
         "addu     $sp, 0x8;"
         "endlabel vs_battle_playMenuChangeSfx;");
+#endif /* NATIVE_BUILD */
 
 INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/573B8", func_800C031C);
 

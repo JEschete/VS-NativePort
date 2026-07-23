@@ -340,12 +340,127 @@ all.** Only ~59 are actual platform surface.
    streaming (`libds`) is not needed for menus and should be deferred.
 
 **Exit criterion:** the equipment/status menu renders natively and responds to a
-gamepad. This proves GPU + input + timing + asset loading end-to-end **without
-needing the engine at all.**
+gamepad. This proves GPU + input + timing + asset loading end-to-end.
 
 **Guard rails:** PSX build stays 21/21; prefer `#ifdef NATIVE_BUILD` branches
 inside existing headers (as done for `_insertTPage`) over edits that could
 perturb matching.
+
+---
+
+#### Phase 2 status (updated) — platform layer DONE, exit criterion BLOCKED on decomp
+
+**The platform layer is complete for the menu path.** Steps 1–6 above are done:
+
+| Component | State |
+|---|---|
+| `libgte` | complete, hardware-verified (Phase 1 + 1b) |
+| `libetc` | VSync + 60Hz monotonic frame pacer |
+| `libgpu` | ordering table, DISP/DRAW env, VRAM (1024×512, 5551), TILE + POLY_F4 flat + POLY_G4 Gouraud raster, VRAM transfers; SPRT/CLUT texturing still to come |
+| `libapi` | events (EvCB model), memory-card + directory calls |
+| `libpad` | already real (its code was decompiled and is now linked) |
+
+`INCLUDE_ASM`, `BIOS_STUB` and `SYSCALL` are all no-ops under `NATIVE_BUILD`, so
+**206 of 217 TUs compile** and **1319 real functions** are linked. The binary is
+linked at `0x10000` so the PS1's 24-bit ordering-table addresses work natively
+with no translation layer (heap/static/bss fit under 16MB; the **stack does
+not** — `check_24bit()` guards against stack-allocated OTs). **No PSYQ function
+the menu references is stubbed any more.** Tests: GTE 891 checks / 0 fail, GPU
+18 checks / 0 fail; PSX still 21/21.
+
+**Why the exit criterion is blocked — and the plan's beachhead premise was
+wrong.** Measured from the object files, the menu is *not* independent of the
+engine. It references **408 external symbols; 205 are real, 203 missing**:
+
+| Missing | count | nature |
+|---|---:|---|
+| Functions | **118** | 78 `vs_battle_*`, 19 `func_*`, plus `vs_main_*` — still MIPS assembly |
+| Data | **85** | 18 have known addresses; `.bss` is zero-correct, `.rodata`/`.data` is harvestable from the retail binary |
+
+So "menu renders" is gated on **~118 `BATTLE.PRG` functions** — decompilation,
+not port work. And the *static* closure is large: those 118 reference ~131 more
+new symbols one level down, i.e. several hundred total. Blanket-decompiling the
+closure is the long pole in disguise.
+
+**Revised strategy: demand-driven ("abort-driven") bring-up.** The static
+closure is large, but the *runtime* init+render path is a small subset of it,
+and the stub layer's `UNIMPLEMENTED: <name>` abort is a perfect oracle for
+exactly which functions that path touches, in call order. So: run the menu,
+satisfy the function it aborts on, repeat — decompiling only the hot path
+(tens of functions), never the whole closure. Sequence:
+
+1. **Harvest data (extraction, not decomp).** Copy the 85 data symbols from the
+   retail `SLUS`/`BATTLE` binaries at known addresses (`.rodata`/`.data`); leave
+   `.bss` as zero-blobs. Removes a class of null-deref crashes for near-zero
+   effort.
+2. **Menu render harness + a stub "continue" mode** (log-and-return-0 instead of
+   abort) so one run surfaces the whole missing hot-path set at once.
+3. **Demand-driven decompile/implement** each function the harness actually
+   hits — real upstreamable `BATTLE.PRG` progress, or a minimal honest stub if
+   it is off the render path (save I/O, inventory mutation).
+4. **Synthetic game state from the RA struct layouts** (see Phase 2.5) so the
+   menu renders a real loadout instead of an empty screen, skipping the
+   population logic entirely.
+
+**Risk:** if the render path bottoms out in the battle actor/item system despite
+a synthetic state, that is itself a definitive answer — the menu genuinely can't
+be decoupled — and it redirects effort to `BATTLE.PRG` proper with no waste.
+
+---
+
+#### Phase 2 progress — the TU-unblock lever (partly spent)
+
+A large accelerator surfaced: the 11 TUs in `NATIVE_EXCLUDE` are excluded only
+because each contains a *few* hand-written inline-MIPS functions, yet they hold
+**hundreds of already-matched functions**. `5BF94.c` alone is 212 functions
+gated by one asm block (`_printFixedWidthFontChar`); `573B8.c` is 9 more.
+
+Unblocking pattern (same as `_insertTPage`): wrap each file-scope
+`__asm__("glabel …")` in `#ifndef NATIVE_BUILD` and provide C in
+`native/platform/battle_asm.c`. Trivial functions (memcpy, sfx dispatch) get
+faithful C; sprite/glyph builders get memory-SAFE stubs (bump a zeroed,
+non-drawing primitive from scratchpad) marked `TODO(render)` for
+DuckStation-verified reimplementation once the render path runs.
+
+Done: `573B8.c` + `5BF94.c`. Result: **+197 real functions** (1319 → 1516),
+menu dependency completion **50% → 57%**, PSX still 21/21.
+
+Lever now mostly spent for the menu: `4A0A8.c` (236 fns) and `38C1C.c` (16 fns)
+remain excluded, but between them they define only **1** of the menu's 173
+remaining missing symbols — battle-engine code, not menu code, and their
+inline-asm-inside-functions form is harder. Deferred. What the menu still needs
+is **~88 undecompiled functions + ~21 data** — real decomp, so **demand-driven
+ordering (run → abort → decompile the named function) is the right loop now**.
+
+---
+
+### Phase 2.1 — "See something" milestone *(do this next; independent of the menu)*
+
+Right now rendering goes to a VRAM buffer dumped as PPM. Before the menu works,
+stand up a **live window** that presents the VRAM framebuffer, so there is a
+real running application to look at and iterate against:
+
+- SDL3 (available; DuckStation ships `SDL3.dll`, and WSLg gives WSL a display)
+  window that blits the 1024×512 VRAM, or just the display-area sub-rect.
+- Drive it with the 60Hz `libetc` pacer already written.
+- Present the existing GPU test scene live; later, whatever the game renders
+  appears in the same window with zero extra work.
+
+**Exit criterion:** `vagrant-native` opens a window and shows moving/rendered
+content at 60fps. This proves window + present + timing end-to-end and gives
+every subsequent step a visible target — valuable even though no game logic
+runs yet. It also de-risks the eventual menu render: the pipeline that will
+display it is already proven.
+
+### Phase 2.5 — RA-data structs *(parallel track, needs no decomp)*
+`docs/RAInfo.md` (RetroAchievements code notes) documents the persistent
+game-state layout — inventory at `0x60168` (weapon slots, stride `0x20`), item
+/armor/material IDs, the full map-visited bitfield. Turn it into typed,
+`static_assert`-checked structs and named symbols. This is independent of the
+decomp, cross-corroborated by our own symbol map (`vs_main_inventory`,
+`vs_main_scoredata`, `vs_main_mapStatus` all land on the documented addresses),
+and it is what makes the synthetic game state in Phase 2 step 4 possible — and
+the eventual foundation for the weapon-loadout hotkey mod.
 
 ### Phase 3 — Audio
 - `libspu`: ADPCM decode, voice mixing, then reverb. SDL audio backend.
