@@ -14,12 +14,6 @@ typedef struct {
     u_short description[48];
 } _itemsText_t;
 
-typedef struct textHeader_t {
-    char text[14];
-    char disabled;
-    char x;
-} textHeader_t;
-
 extern u_long* D_1F800000[];
 
 char vs_mainMenu_actionMenuState = 0;

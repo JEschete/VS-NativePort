@@ -3825,7 +3825,7 @@ static void _copyTitleBgData(void)
     p = data;
 
 #ifndef MENUBGSZ
-#define MENUBGSZ 222932 * sizeof int
+#define MENUBGSZ 222932 * sizeof(int)
 #endif
 
     for (; i < MENUBGSZ / sizeof(int);) {

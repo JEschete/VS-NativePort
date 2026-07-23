@@ -379,6 +379,11 @@ extern char vs_mainMenu_enabledStatPages;
 extern char vs_mainMenu_equipmentSubtype;
 
 extern char bss_4[18];
+typedef struct textHeader_t {
+    char text[14];
+    char disabled;
+    char x;
+} textHeader_t;
 extern struct textHeader_t _textHeaders[];
 
 /**
