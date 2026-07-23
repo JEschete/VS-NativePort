@@ -10,6 +10,27 @@ retail disc byte-for-byte**.
 
 ---
 
+## 0. Current status — START HERE (resume point)
+
+**Branch `work`, tip `66dec87c`.** Both builds green:
+- **PSX matching build:** `make -j"$(nproc)"` → 21/21 byte-identical (the oracle; must never break).
+- **Native build:** `make -f Makefile.native stubs && make -f Makefile.native` → `native/build/vagrant-native` links and runs (32-bit x86 ELF).
+- **Tests:** `make -f Makefile.native test` → GTE 891/0 (hardware-verified), GPU 18/0. `make -f Makefile.native menu` runs the demand-driven menu harness.
+
+**What is done (Phases 0–1b + most of 2):**
+- `libgte` complete and **verified bit-exact vs real COP2** (DuckStation capture ROMs).
+- `libetc` (60Hz pacer), `libgpu` (OT, VRAM 1024×512, TILE/POLY_F4/POLY_G4 raster, VRAM transfers), `libapi` (events, card). Binary linked at `0x10000` so PS1 24-bit OT addresses work natively. Scratchpad `mmap(MAP_FIXED)`'d at real `0x1F800000`.
+- **1615 real functions** linked (was 1319). Menu dependency completion **62%** (256/408).
+
+**Exactly where execution stops now (the resume task):** the menu harness runs real render code —
+`func_800C97BC → vs_mainMenu_exec → vs_mainMenu_renderScreen → _renderMenuItems → vs_battle_renderMenuItem → vs_battle_printVariableWidthFontChar` — then faults writing a GPU packet because **`scratchpad[0..2]` (primitive-buffer pointer, OT base, tpage list) are null**: the game's per-frame render init never ran.
+
+**Next step:** replicate or call the game's frame/render-init so `scratchpad[0..2]` are valid, then the already-built+verified GTE→OT→raster→VRAM pipeline takes over → first pixels. Two known caveats: (1) `setSprite`/glyph builders in `native/platform/battle_asm.c` are memory-safe *stubs* that draw nothing (marked `TODO(render)`) — reimplement against DuckStation once it runs; (2) menu strings/char-class data are zeroed — real init (or a data harvest) fixes that. Detailed traps in [`PSX_NOTES.md`](PSX_NOTES.md) → "Demand-driven menu bring-up".
+
+**Working rule:** every change keeps PSX 21/21. Diverge freely in `native/`, `docs/`, tooling; keep `src/` edits minimal and guarded with `#ifndef NATIVE_BUILD` so upstream merges stay cheap.
+
+---
+
 ## 1. Where we actually stand
 
 From `progress.json` at `c346ab20`:
@@ -425,12 +446,35 @@ DuckStation-verified reimplementation once the render path runs.
 Done: `573B8.c` + `5BF94.c`. Result: **+197 real functions** (1319 → 1516),
 menu dependency completion **50% → 57%**, PSX still 21/21.
 
-Lever now mostly spent for the menu: `4A0A8.c` (236 fns) and `38C1C.c` (16 fns)
-remain excluded, but between them they define only **1** of the menu's 173
-remaining missing symbols — battle-engine code, not menu code, and their
-inline-asm-inside-functions form is harder. Deferred. What the menu still needs
-is **~88 undecompiled functions + ~21 data** — real decomp, so **demand-driven
-ordering (run → abort → decompile the named function) is the right loop now**.
+Then `main.c` (356KB, 178 functions) — only 3 `__asm__` spots (`_asmNop`,
+`vs_main_memcpy`, `vs_main_bzero`), guarded and given self-contained C. It alone
+held 21 menu deps. Needed a no-op `__main` runtime shim.
+
+`4A0A8.c` (236 fns) and `38C1C.c` (16 fns) stay excluded: between them they
+define only **1** of the menu's remaining missing symbols — battle-engine code,
+not menu code, and their inline-asm-inside-functions form is harder. Deferred.
+
+**Cumulative: +296 real functions (1319 → 1615), menu deps 50% → 62%.**
+
+#### Phase 2 progress — demand-driven bring-up reaches the render path
+
+Two correctness fixes made the harness possible:
+- **`gen_stubs.py` data/function classification.** It emitted any non-`D_`
+  symbol as a *function*, so named data globals landed in read-only `.text` and
+  writing them segfaulted. Now: a symbol is a function only if the disassembly
+  defines it with `glabel`/`alabel`; else a writable 4KB blob. (~216 symbols
+  reclassified.)
+- **Scratchpad at `0x1F800000`.** Game code touches it by literal address, so
+  it is `mmap(MAP_FIXED)`'d there by a constructor.
+
+`native/tests/menu_harness.c` (`make -f Makefile.native menu`) drives the real
+per-frame menu function `func_800C97BC`; the stub layer's `UNIMPLEMENTED` abort
+names the next needed function in call order. It supplies synthetic backing
+buffers for the pointer-globals the game allocates at init
+(`vs_battle_menuItems/characterState/rowTypeBuf`).
+
+Execution now reaches real menu render code and stops at the per-frame render
+init gap — see §0 "Current status" for the exact call chain and next step.
 
 ---
 
