@@ -286,3 +286,52 @@ as a real newline, producing `missing terminating " character`.
 Write the C to its own file with a **quoted** heredoc (`<<"EOF"`, which disables
 all expansion), then have Python splice that file in. Same rule for assembly
 containing `$` register names.
+
+---
+
+## Native GPU layer
+
+### 24-bit ordering-table addresses, solved by linking low
+The PS1 ordering table stores a 24-bit next-address in each tag word, so a host
+pointer must fit in 24 bits. Rather than adding a translation layer, the native
+binary is linked at `0x10000` (`-Wl,-Ttext-segment=0x10000`). The whole image
+then spans roughly `0x011000..0x0E5A20` and `malloc` returns around `0xac81a0`,
+all inside 16MB, so `AddPrim` and `DrawOTag` link primitives exactly as the
+hardware does with no indirection.
+
+### ...but the STACK is still high
+**Symptom:** segfault the moment a primitive or ordering table declared as a
+local array is added to the list.
+
+Linking low moves text, data and bss; it does not move the stack, which stays
+near the top of the address space. A stack address silently truncates to 24
+bits and the walk dereferences garbage.
+
+**Rule: ordering tables and primitives must be static/global or heap
+allocated, never locals.** `check_24bit()` in `libgpu.c` now aborts with an
+explanatory message instead of corrupting the display list. The retail game is
+unaffected by this distinction because on PS1 the stack lives in the same 2MB
+as everything else.
+
+### Primitive tag layout
+The first word is `addr:24 | len:8`, then `r0,g0,b0,code`. So the length byte
+sits at offset 3 and the code byte at offset 7 -- which is exactly what the
+original setters write:
+
+| function | len | code |
+|---|---|---|
+| `SetPolyF4` | 5 | `0x28` |
+| `SetPolyG4` | 8 | `0x38` |
+| `SetSprt`   | 4 | `0x64` |
+| `SetTile`   | 3 | `0x60` |
+
+`AddPrim` swaps only the 24-bit address halves and preserves both length bytes.
+`SetSemiTrans` toggles bit 1 of the code byte. `GetClut(x,y)` is
+`(y << 6) | ((x >> 4) & 0x3F)`, and `GetTPage(tp,abr,x,y)` packs
+`((tp&3)<<7) | ((abr&3)<<5) | ((y&0x100)>>4) | ((x&0x3FF)>>6) | ((y&0x200)<<2)`.
+
+### Rasterising
+Half-space triangle rasterisation handles either winding without sorting edges,
+which matters because quad vertex order (0,1,2 then 1,2,3) is not consistently
+counter-clockwise. Gouraud shading interpolates with the unsigned barycentric
+weights divided by the absolute triangle area.

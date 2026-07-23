@@ -9,6 +9,7 @@
  */
 #include <psx_gpu.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define OT_TERM 0xFFFFFFu
@@ -25,6 +26,21 @@ void psx_gpu_reset_stats(void)       { prims_drawn = 0; }
 
 static uint32_t tag_addr(const void* p) { return ((const P_TAG*)p)->addr; }
 
+/* The ordering table stores 24-bit addresses. The binary is linked below 16MB
+ * so static, .bss and heap pointers fit -- but the STACK lives high, so an
+ * ordering table or primitive placed on the stack would be silently truncated.
+ * Fail loudly instead of corrupting the display list. */
+static void check_24bit(const void* p)
+{
+    uintptr_t a = (uintptr_t)p;
+    if (a > OT_TERM) {
+        printf("[native] FATAL: %p does not fit in the 24-bit ordering-table "
+               "address field.\n         Ordering tables and primitives must be "
+               "static/global or heap allocated, never on the stack.\n", p);
+        abort();
+    }
+}
+
 static void tag_set_addr(void* p, uint32_t a)
 {
     uint32_t* w = (uint32_t*)p;
@@ -36,6 +52,7 @@ static void tag_set_addr(void* p, uint32_t a)
 unsigned long* ClearOTag(unsigned long* ot, int n)
 {
     int i;
+    check_24bit(ot);
     for (i = 0; i < n - 1; i++) {
         ot[i] = 0;
         tag_set_addr(&ot[i], (uint32_t)(uintptr_t)&ot[i + 1]);
@@ -47,6 +64,7 @@ unsigned long* ClearOTag(unsigned long* ot, int n)
 unsigned long* ClearOTagR(unsigned long* ot, int n)
 {
     int i;
+    check_24bit(ot);
     for (i = n - 1; i > 0; i--) {
         ot[i] = 0;
         tag_set_addr(&ot[i], (uint32_t)(uintptr_t)&ot[i - 1]);
@@ -60,6 +78,8 @@ unsigned long* ClearOTagR(unsigned long* ot, int n)
  * the original assembly. */
 void AddPrim(void* ot, void* p)
 {
+    check_24bit(ot);
+    check_24bit(p);
     tag_set_addr(p, tag_addr(ot));
     tag_set_addr(ot, (uint32_t)(uintptr_t)p);
 }
@@ -100,8 +120,71 @@ static void fill_rect(int x, int y, int w, int h, uint16_t c)
             vram[j * PSX_VRAM_W + i] = c;
 }
 
+/* ---- triangle rasteriser (flat and Gouraud) ---- */
+
+typedef struct { int x, y, r, g, b; } VERT;
+
+static void put_px(int x, int y, uint16_t c)
+{
+    if (x < cur_draw.clip.x || y < cur_draw.clip.y) return;
+    if (x >= cur_draw.clip.x + cur_draw.clip.w) return;
+    if (y >= cur_draw.clip.y + cur_draw.clip.h) return;
+    if (x < 0 || y < 0 || x >= PSX_VRAM_W || y >= PSX_VRAM_H) return;
+    psx_vram()[y * PSX_VRAM_W + x] = c;
+}
+
+/* Half-space rasterisation: robust for any winding, no edge sorting needed. */
+static void draw_tri(const VERT* a, const VERT* b, const VERT* c, int gouraud)
+{
+    int minx, maxx, miny, maxy, x, y;
+    long area = (long)(b->x - a->x) * (c->y - a->y)
+              - (long)(b->y - a->y) * (c->x - a->x);
+    if (area == 0) return;
+
+    minx = a->x < b->x ? (a->x < c->x ? a->x : c->x) : (b->x < c->x ? b->x : c->x);
+    maxx = a->x > b->x ? (a->x > c->x ? a->x : c->x) : (b->x > c->x ? b->x : c->x);
+    miny = a->y < b->y ? (a->y < c->y ? a->y : c->y) : (b->y < c->y ? b->y : c->y);
+    maxy = a->y > b->y ? (a->y > c->y ? a->y : c->y) : (b->y > c->y ? b->y : c->y);
+
+    if (minx < cur_draw.clip.x) minx = cur_draw.clip.x;
+    if (miny < cur_draw.clip.y) miny = cur_draw.clip.y;
+    if (maxx > cur_draw.clip.x + cur_draw.clip.w) maxx = cur_draw.clip.x + cur_draw.clip.w;
+    if (maxy > cur_draw.clip.y + cur_draw.clip.h) maxy = cur_draw.clip.y + cur_draw.clip.h;
+
+    for (y = miny; y < maxy; y++) {
+        for (x = minx; x < maxx; x++) {
+            long w0 = (long)(c->x - b->x) * (y - b->y) - (long)(c->y - b->y) * (x - b->x);
+            long w1 = (long)(a->x - c->x) * (y - c->y) - (long)(a->y - c->y) * (x - c->x);
+            long w2 = (long)(b->x - a->x) * (y - a->y) - (long)(b->y - a->y) * (x - a->x);
+            int inside = (area > 0) ? (w0 >= 0 && w1 >= 0 && w2 >= 0)
+                                    : (w0 <= 0 && w1 <= 0 && w2 <= 0);
+            if (!inside) continue;
+            if (gouraud) {
+                long A = area > 0 ? area : -area;
+                long u0 = w0 > 0 ? w0 : -w0;
+                long u1 = w1 > 0 ? w1 : -w1;
+                long u2 = w2 > 0 ? w2 : -w2;
+                int r = (int)((u0 * a->r + u1 * b->r + u2 * c->r) / A);
+                int g = (int)((u0 * a->g + u1 * b->g + u2 * c->g) / A);
+                int bl = (int)((u0 * a->b + u1 * b->b + u2 * c->b) / A);
+                put_px(x, y, rgb555((unsigned)r, (unsigned)g, (unsigned)bl));
+            } else {
+                put_px(x, y, rgb555((unsigned)a->r, (unsigned)a->g, (unsigned)a->b));
+            }
+        }
+    }
+}
+
+static void set_vert(VERT* v, const short* xy, unsigned r, unsigned g, unsigned b)
+{
+    v->x = xy[0] + cur_draw.ofs[0];
+    v->y = xy[1] + cur_draw.ofs[1];
+    v->r = (int)r; v->g = (int)g; v->b = (int)b;
+}
+
 static void draw_one(const P_TAG* p)
 {
+    const unsigned char* body = (const unsigned char*)p + 4;
     const short* s = (const short*)((const char*)p + 8);
     prims_drawn++;
     if (ot_dump)
@@ -109,12 +192,38 @@ static void draw_one(const P_TAG* p)
                p->code, p->len, p->r0, p->g0, p->b0);
 
     switch (p->code & 0xFC) {
-    case 0x60:   /* TILE: x0, y0, w, h */
+    case 0x60: {  /* TILE: x0, y0, w, h */
         fill_rect(s[0] + cur_draw.ofs[0], s[1] + cur_draw.ofs[1],
                   s[2], s[3], rgb555(p->r0, p->g0, p->b0));
         break;
+    }
+    case 0x64: {  /* SPRT: x0,y0, u0,v0,clut, w,h -- untextured fill for now */
+        fill_rect(s[0] + cur_draw.ofs[0], s[1] + cur_draw.ofs[1],
+                  s[4], s[5], rgb555(p->r0, p->g0, p->b0));
+        break;
+    }
+    case 0x28: {  /* POLY_F4: flat quad, 4 vertices after the colour word */
+        VERT v[4];
+        int i;
+        for (i = 0; i < 4; i++) set_vert(&v[i], s + i * 2, p->r0, p->g0, p->b0);
+        draw_tri(&v[0], &v[1], &v[2], 0);
+        draw_tri(&v[1], &v[2], &v[3], 0);
+        break;
+    }
+    case 0x38: {  /* POLY_G4: colour and vertex interleaved, 8 words */
+        VERT v[4];
+        int i;
+        for (i = 0; i < 4; i++) {
+            const unsigned char* col = body + i * 8;
+            const short* xy = (const short*)(body + i * 8 + 4);
+            set_vert(&v[i], xy, col[0], col[1], col[2]);
+        }
+        draw_tri(&v[0], &v[1], &v[2], 1);
+        draw_tri(&v[1], &v[2], &v[3], 1);
+        break;
+    }
     default:
-        break;   /* textured and polygon primitives land here until step 3b */
+        break;   /* textured primitives still to come */
     }
 }
 

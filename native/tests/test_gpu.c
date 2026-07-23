@@ -20,6 +20,27 @@ typedef struct {
     short w, h;
 } TILE;
 
+typedef struct {
+    unsigned long tag;
+    unsigned char r0, g0, b0, code;
+    short x0, y0, x1, y1, x2, y2, x3, y3;
+} POLY_F4;
+
+typedef struct {
+    unsigned long tag;
+    unsigned char r0, g0, b0, code;
+    short x0, y0;
+    unsigned char r1, g1, b1, p1;
+    short x1, y1;
+    unsigned char r2, g2, b2, p2;
+    short x2, y2;
+    unsigned char r3, g3, b3, p3;
+    short x3, y3;
+} POLY_G4;
+
+extern void SetPolyF4(void* p);
+extern void SetPolyG4(void* p);
+
 extern unsigned long* ClearOTagR(unsigned long* ot, int n);
 extern void AddPrim(void* ot, void* p);
 extern void DrawOTag(unsigned long* ot);
@@ -105,6 +126,56 @@ int main(void)
 
     /* ---- ordering: tile2 (drawn last) wins where all three overlap ---- */
     eq("overlap shows last-drawn", px(35, 35), 0x7C00);
+
+    /* ---- polygons ---- */
+    {
+        static POLY_F4 f4;
+        static POLY_G4 g4;
+        static unsigned long ot2[4];
+
+        ClearOTagR(ot2, 4);
+
+        SetPolyF4(&f4);
+        f4.r0 = 0xF8; f4.g0 = 0xF8; f4.b0 = 0x00;      /* yellow */
+        f4.x0 = 100; f4.y0 = 100;
+        f4.x1 = 180; f4.y1 = 100;
+        f4.x2 = 100; f4.y2 = 180;
+        f4.x3 = 180; f4.y3 = 180;
+        eq("SetPolyF4 len", ((P_TAG*)&f4)->len, 5);
+        eq("SetPolyF4 code", ((P_TAG*)&f4)->code, 0x28);
+
+        SetPolyG4(&g4);
+        g4.r0 = 0xF8; g4.g0 = 0;    g4.b0 = 0;
+        g4.r1 = 0;    g4.g1 = 0xF8; g4.b1 = 0;
+        g4.r2 = 0;    g4.g2 = 0;    g4.b2 = 0xF8;
+        g4.r3 = 0xF8; g4.g3 = 0xF8; g4.b3 = 0xF8;
+        g4.x0 = 200; g4.y0 = 100;
+        g4.x1 = 290; g4.y1 = 100;
+        g4.x2 = 200; g4.y2 = 190;
+        g4.x3 = 290; g4.y3 = 190;
+        eq("SetPolyG4 len", ((P_TAG*)&g4)->len, 8);
+        eq("SetPolyG4 code", ((P_TAG*)&g4)->code, 0x38);
+
+        AddPrim(&ot2[2], &f4);
+        AddPrim(&ot2[1], &g4);
+
+        psx_gpu_reset_stats();
+        DrawOTag(&ot2[3]);
+        eq("polys walked", psx_gpu_prims_drawn(), 2);
+
+        eq("flat quad centre is yellow", px(140, 140), 0x03FF);
+        eq("flat quad outside is clear", px(190, 140), 0x0000);
+
+        /* Gouraud corners approach their vertex colours. */
+        checks++;
+        {
+            unsigned c0 = px(202, 102), c3 = px(288, 188);
+            if ((c0 & 0x001F) < 0x18 || (c3 & 0x7FFF) < 0x4000) {
+                failures++;
+                printf("  FAIL gouraud corners c0=%04X c3=%04X\n", c0, c3);
+            }
+        }
+    }
 
     psx_vram_write_ppm("native/build/ot_test.ppm", 0, 0, 320, 240);
     printf("  wrote native/build/ot_test.ppm\n");

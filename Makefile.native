@@ -48,7 +48,7 @@ GAME_SRCS := $(filter-out $(NATIVE_EXCLUDE),$(shell find src -name "*.c" | sort)
 PLAT_REAL := native/platform/unimpl.c native/platform/scratchpad.c \
              native/platform/gte_core.c native/platform/libgte.c \
              native/platform/libgpu.c native/platform/libetc.c \
-             native/platform/psx_vram.c native/platform/main.c
+             native/platform/psx_vram.c native/platform/libapi.c native/platform/main.c
 PLAT_SRCS := $(PLAT_REAL) native/platform/stubs.c
 
 GAME_OBJS := $(foreach s,$(GAME_SRCS),$(OBJ)/game_$(subst /,_,$(patsubst src/%.c,%,$(s))).o)
