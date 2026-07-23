@@ -25,7 +25,7 @@
     __asm__("li $a0, " #id ";"                                                           \
             "syscall 0;");
 
-#if !defined(PERMUTER) && !defined(OBJDIFF)
+#if !defined(PERMUTER) && !defined(OBJDIFF) && !defined(NATIVE_BUILD)
 #define INCLUDE_ASM(FOLDER, NAME) INCLUDE_CMN(text, FOLDER, NAME)
 #define INCLUDE_RODATA(FOLDER, NAME) INCLUDE_CMN(rodata, FOLDER, NAME)
 #else

@@ -305,10 +305,22 @@ all.** Only ~59 are actual platform surface.
 
 **Ordered steps:**
 
-1. **Finish `libgte` (7 functions) first — cheap.** `SetGeomOffset`,
-   `SetGeomScreen`, `SetFarColor`, `SetFogNear`, `DpqColor` are plain control
-   register writes (OFX/OFY, H, FC, DQA/DQB) against the COP2 built in Phase 1.
-   `rsin`/`rcos` are fixed-point trig lookups. Half a day, closes out libgte.
+1. ~~**Finish `libgte` (7 functions).**~~ DONE. It turned out to be three tiers,
+   not one: four plain control-register writes (`SetFarColor`, `SetGeomOffset`,
+   `SetGeomScreen`, `SetFogNear`); a table-lookup pair (`rsin`/`rcos`, folding
+   onto the 513 sin/cos pairs in `_trig_table`); and `DpqColor`, which issues
+   the **DPCS** GTE op and so required implementing depth-cue interpolation,
+   the colour FIFO and RGB saturation.
+
+   **`libgte` now has zero stubs.** Verified: `rsin` matches `round(sin*4096)`
+   with max deviation 0 across all 4096 angles; DPCS verified bit-exact against
+   real COP2 (12 cases x 8 registers, 0 mismatches). Suite: 891 checks, 0
+   failures. Stubs 264 to 257; PSX build still 21/21.
+
+   Side effect worth knowing: `INCLUDE_ASM` is now a no-op under `NATIVE_BUILD`
+   (the live guard is in `src/include/common.h`), so assembly-bearing TUs can be
+   opted into the native build via `NATIVE_EXTRA` to harvest their data tables
+   and already-decompiled functions. That is how `_trig_table` was obtained.
 2. **`libetc` VSync + frame loop.** Per §4 decision, keep 60Hz: host loop that
    paces frames and drives the callback the game expects.
 3. **`libgpu` in two stages.**

@@ -229,3 +229,66 @@ void gte_op_mvmva(int sf, int mx, int v, int cv, int lm)
     store_mac_ir(mac, sf, lm);
     flag_finish();
 }
+
+/* ---- colour saturation for the RGB FIFO (0..255) ---- */
+static int lim_rgb(int64_t v, uint32_t bit)
+{
+    if (v > 255) { flag_set(bit); return 255; }
+    if (v < 0)   { flag_set(bit); return 0; }
+    return (int)v;
+}
+
+/* ---- DPCS: depth-cue a single colour toward the far colour ----
+ * Encoding used by DpqColor is 0x4A780010 -> cmd 0x10, sf=1, lm=0.
+ *
+ *   MAC1..3 = [R,G,B] << 16                     (from RGBC)
+ *   IR1..3  = ((FC << 12) - MAC) >> 12
+ *   MAC1..3 = ((IR * IR0) + MAC) >> 12
+ *   IR1..3  = MAC1..3
+ *   colour FIFO <- [MAC1/16, MAC2/16, MAC3/16, CODE]
+ */
+void gte_op_dpcs(void)
+{
+    const int sf = 1, lm = 0;
+    uint32_t rgbc = g.cop2d[GTE_D_RGBC];
+    int32_t  ir0  = (int16_t)g.cop2d[GTE_D_IR0];
+    uint32_t code = (rgbc >> 24) & 0xFF;
+    int64_t  mac[3];
+    int32_t  fc[3];
+    int i, col[3];
+
+    g.cop2c[GTE_C_FLAG] = 0;
+
+    mac[0] = (int64_t)((rgbc >>  0) & 0xFF) << 16;
+    mac[1] = (int64_t)((rgbc >>  8) & 0xFF) << 16;
+    mac[2] = (int64_t)((rgbc >> 16) & 0xFF) << 16;
+
+    fc[0] = (int32_t)g.cop2c[GTE_C_RFC];
+    fc[1] = (int32_t)g.cop2c[GTE_C_GFC];
+    fc[2] = (int32_t)g.cop2c[GTE_C_BFC];
+
+    /* IR = ((FC << 12) - MAC) >> (sf*12) */
+    for (i = 0; i < 3; i++) {
+        int64_t d = mac_check(((int64_t)fc[i] << 12) - mac[i], i) >> (sf ? 12 : 0);
+        g.cop2d[GTE_D_IR1 + i] = (uint32_t)lim_ir((int32_t)d, lm, i);
+    }
+
+    /* MAC = ((IR * IR0) + MAC) >> (sf*12) ; IR = MAC */
+    for (i = 0; i < 3; i++) {
+        int32_t ir = (int16_t)g.cop2d[GTE_D_IR1 + i];
+        int64_t m  = mac_check((int64_t)ir * ir0 + mac[i], i) >> (sf ? 12 : 0);
+        g.cop2d[GTE_D_MAC1 + i] = (uint32_t)(int32_t)m;
+        g.cop2d[GTE_D_IR1 + i]  = (uint32_t)lim_ir((int32_t)m, lm, i);
+        col[i] = m >> 4;
+    }
+
+    /* colour FIFO */
+    g.cop2d[GTE_D_RGB0] = g.cop2d[GTE_D_RGB1];
+    g.cop2d[GTE_D_RGB1] = g.cop2d[GTE_D_RGB2];
+    g.cop2d[GTE_D_RGB2] = (code << 24)
+        | ((uint32_t)lim_rgb(col[2], GTE_FLAG_RGB_B_SAT) << 16)
+        | ((uint32_t)lim_rgb(col[1], GTE_FLAG_RGB_G_SAT) << 8)
+        |  (uint32_t)lim_rgb(col[0], GTE_FLAG_RGB_R_SAT);
+
+    flag_finish();
+}

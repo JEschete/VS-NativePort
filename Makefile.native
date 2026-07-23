@@ -37,7 +37,12 @@ NATIVE_EXCLUDE := \
     src/MENU/MENUF.PRG/3B8.c \
     src/TITLE/TITLE.PRG/libpress/LIBPRESS.c
 
-GAME_SRCS := $(filter-out $(NATIVE_EXCLUDE),$(shell grep -rL INCLUDE_ASM src/MENU src/TITLE --include=*.c | sort))
+# Opt-in TUs that DO contain INCLUDE_ASM. Safe because INCLUDE_ASM is a no-op
+# under NATIVE_BUILD: the C content (data tables, decompiled functions) compiles
+# and the still-assembly functions simply become undefined symbols -> stubbed.
+NATIVE_EXTRA := src/SLUS_010.40/31724.c
+
+GAME_SRCS := $(filter-out $(NATIVE_EXCLUDE),$(shell grep -rL INCLUDE_ASM src/MENU src/TITLE --include=*.c | sort)) $(NATIVE_EXTRA)
 
 # Real implementations (must be linked BEFORE stubs are generated so their
 # symbols are excluded from stubbing).
@@ -78,7 +83,9 @@ stubs: $(GAME_OBJS) $(REAL_OBJS)
 	@python3 native/tools/gen_stubs.py $(OBJ) native/platform/stubs.c $(LIBC)
 
 test: | $(OBJ)
-	@$(NATIVE_CC) $(PLAT_CFLAGS) -no-pie native/tests/test_gte.c native/platform/gte_core.c -o $(TESTBIN)
+	@$(NATIVE_CC) $(GAME_CFLAGS) -c src/SLUS_010.40/31724.c -o $(OBJ)/t_trigdata.o
+	@$(NATIVE_CC) $(PLAT_CFLAGS) -c native/platform/libgte.c -o $(OBJ)/t_libgte.o
+	@$(NATIVE_CC) $(PLAT_CFLAGS) -no-pie native/tests/test_gte.c native/platform/gte_core.c 		$(OBJ)/t_libgte.o $(OBJ)/t_trigdata.o -lm -o $(TESTBIN)
 	@./$(TESTBIN) native/tests/gte_golden.txt
 
 run: $(BIN)

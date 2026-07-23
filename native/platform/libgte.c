@@ -61,3 +61,74 @@ long RotTransPers(SVECTOR* v0, DVECTOR* sxy, long* p, long* flag)
     *flag = (long)gte_get_ctrl(GTE_C_FLAG);
     return (long)(gte_get_data(GTE_D_SZ3) >> 2);
 }
+
+/* ---- remaining libgte entry points ----
+ * Semantics read from the original assembly:
+ *   SetFarColor    : args <<4  -> ctc2 21,22,23 (RFC/GFC/BFC)
+ *   SetGeomOffset  : args <<16 -> ctc2 24,25    (OFX/OFY, 1.15.16)
+ *   SetGeomScreen  : arg       -> ctc2 26       (H)
+ *   SetFogNear     : DQA = -(a*320)/h, DQB = 0x1400000
+ *   rcos(a)        : falls through to rsin(a + 0x400)  (0x1000 = full circle)
+ *   rsin(a)        : quadrant-folded lookup into _trig_table, 513 (sin,cos)
+ *                    pairs covering 0..0x200 (0..45 degrees)
+ */
+
+extern const unsigned short _trig_table[];
+
+void SetFarColor(long r, long g, long b)
+{
+    gte_set_ctrl(GTE_C_RFC, (unsigned long)(r << 4));
+    gte_set_ctrl(GTE_C_GFC, (unsigned long)(g << 4));
+    gte_set_ctrl(GTE_C_BFC, (unsigned long)(b << 4));
+}
+
+void SetGeomOffset(long ofx, long ofy)
+{
+    gte_set_ctrl(GTE_C_OFX, (unsigned long)(ofx << 16));
+    gte_set_ctrl(GTE_C_OFY, (unsigned long)(ofy << 16));
+}
+
+void SetGeomScreen(long h)
+{
+    gte_set_ctrl(GTE_C_H, (unsigned long)h);
+}
+
+void SetFogNear(long a, long h)
+{
+    gte_set_ctrl(GTE_C_DQB, 0x1400000);
+    gte_set_ctrl(GTE_C_DQA, (unsigned long)(-(a * 320) / h));
+}
+
+int rsin(int a)
+{
+    int v;
+
+    if (a & 0x400) {
+        if ((a & 0x3FF) == 0)
+            return (a & 0x800) ? -0x1000 : 0x1000;
+        a = 0x800 - a;
+    }
+
+    if (a & 0x200)
+        v = _trig_table[(0x200 - (a & 0x1FF)) * 2 + 1];   /* cos column */
+    else
+        v = _trig_table[(a & 0x1FF) * 2];                 /* sin column */
+
+    return (a & 0x800) ? -v : v;
+}
+
+int rcos(int a)
+{
+    return rsin(a + 0x400);
+}
+
+typedef struct { unsigned char r, g, b, cd; } CVECTOR;
+
+/* DpqColor: load RGBC + IR0, run dpcs, read the colour FIFO head. */
+void DpqColor(CVECTOR* v0, long p, CVECTOR* v1)
+{
+    gte_set_data(GTE_D_RGBC, *(const unsigned long*)v0);
+    gte_set_data(GTE_D_IR0, (unsigned long)p);
+    gte_op_dpcs();
+    *(unsigned long*)v1 = gte_get_data(GTE_D_RGB2);
+}

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 static int checks = 0, failures = 0;
 
@@ -222,6 +223,106 @@ static void test_golden_vectors(const char* path)
     printf("  %d cases, %d with mismatches\n", ncase, badcase);
 }
 
+/* rsin/rcos use no GTE hardware -- pure lookup into _trig_table with quadrant
+ * folding -- so mathematics is a sufficient oracle here. 0x1000 = 1.0, and
+ * 0x1000 angle units = one full circle. */
+extern int rsin(int a);
+extern int rcos(int a);
+
+static void test_trig(void)
+{
+    int a, worst = 0;
+    printf("test: rsin/rcos\n");
+
+    eq("rsin(0)",      rsin(0x000),  0);
+    eq("rsin(90deg)",  rsin(0x400),  0x1000);
+    eq("rsin(180deg)", rsin(0x800),  0);
+    eq("rsin(270deg)", rsin(0xC00), -0x1000);
+    eq("rcos(0)",      rcos(0x000),  0x1000);
+    eq("rcos(90deg)",  rcos(0x400),  0);
+    eq("rcos(180deg)", rcos(0x800), -0x1000);
+
+    for (a = 0; a < 0x1000; a += 7) {
+        checks++;
+        if (rcos(a) != rsin(a + 0x400)) {
+            failures++;
+            printf("  FAIL rcos(%#x) != rsin(a+0x400)\n", a);
+            break;
+        }
+    }
+
+    for (a = 0; a < 0x1000; a++) {
+        double want = sin((double)a * 2.0 * 3.14159265358979323846 / 4096.0) * 4096.0;
+        int r = (int)(want < 0 ? want - 0.5 : want + 0.5);
+        int d = rsin(a) - r;
+        if (d < 0) d = -d;
+        if (d > worst) worst = d;
+    }
+    printf("  full 4096-angle sweep vs sin(): max deviation %d\n", worst);
+    checks++;
+    if (worst > 2) { failures++; printf("  FAIL deviation exceeds table precision\n"); }
+}
+
+/* Differential test for DPCS against real COP2 captures. */
+static const char* DPCSOUT[8] = {
+    "RGB2","MAC1","MAC2","MAC3","IR1","IR2","IR3","FLAG"
+};
+
+static void test_golden_dpcs(const char* path)
+{
+    FILE* f = fopen(path, "r");
+    char line[1024];
+    int ncase = 0, badcase = 0;
+
+    if (!f) {
+        printf("test: DPCS golden vectors -- none present, skipped\n");
+        return;
+    }
+    printf("test: DPCS golden vectors (differential vs real COP2)\n");
+    gte_reset();
+
+    while (fgets(line, sizeof line, f)) {
+        unsigned w[13];
+        int n = 0, i, bad = 0;
+        uint32_t got[8];
+        char* tok;
+
+        if (line[0] == 35 || line[0] == 10) continue;
+        for (tok = strtok(line, " \t\r\n"); tok && n < 13; tok = strtok(NULL, " \t\r\n"))
+            w[n++] = (unsigned)strtoul(tok, NULL, 16);
+        if (n != 13) continue;
+        ncase++;
+
+        gte_set_ctrl(GTE_C_RFC, w[0]);
+        gte_set_ctrl(GTE_C_GFC, w[1]);
+        gte_set_ctrl(GTE_C_BFC, w[2]);
+        gte_set_data(GTE_D_RGBC, w[3]);
+        gte_set_data(GTE_D_IR0,  w[4]);
+        gte_op_dpcs();
+
+        got[0] = gte_get_data(GTE_D_RGB2);
+        got[1] = gte_get_data(GTE_D_MAC1);
+        got[2] = gte_get_data(GTE_D_MAC2);
+        got[3] = gte_get_data(GTE_D_MAC3);
+        got[4] = gte_get_data(GTE_D_IR1);
+        got[5] = gte_get_data(GTE_D_IR2);
+        got[6] = gte_get_data(GTE_D_IR3);
+        got[7] = gte_get_ctrl(GTE_C_FLAG);
+
+        for (i = 0; i < 8; i++) {
+            checks++;
+            if (got[i] != w[5 + i]) {
+                if (!bad) printf("  case %d:\n", ncase);
+                bad = 1; failures++;
+                printf("    %-5s got %08X  want %08X\n", DPCSOUT[i], got[i], w[5 + i]);
+            }
+        }
+        if (bad) badcase++;
+    }
+    fclose(f);
+    printf("  %d cases, %d with mismatches\n", ncase, badcase);
+}
+
 int main(int argc, char** argv)
 {
     printf("=== GTE spec tests ===\n");
@@ -232,7 +333,9 @@ int main(int argc, char** argv)
     test_ir_saturation();
     test_lm_clamp();
     test_divide_sweep();
+    test_trig();
     test_golden_vectors(argc > 1 ? argv[1] : "native/tests/gte_golden.txt");
+    test_golden_dpcs("native/tests/gte_golden_dpcs.txt");
     printf("=== %d checks, %d failures ===\n", checks, failures);
     return failures ? 1 : 0;
 }

@@ -216,3 +216,73 @@ Git for Windows defaults to `core.autocrlf=true`; the WSL repo is `false`. Any
 Windows-git command that writes the tree rewrites all ~510 tracked files as
 CRLF and breaks the byte-matching build. Use `wsl -e bash -lc "cd ~/... && git ..."`
 or VS Code Remote-WSL.
+
+---
+
+## Decomp build internals
+
+### `INCLUDE_ASM` is defined in `src/include/common.h`, not `include/include_asm.h`
+**Symptom:** you add a guard to `include/include_asm.h`, the macro keeps
+expanding anyway, and the x86 assembler chokes on MIPS text with errors like
+`expected comma after "pop"`.
+
+Both headers define `INCLUDE_ASM`, but `common.h` wins because it is included
+first and `include_asm.h` guards its definition with `#ifndef`. The live one is:
+
+```c
+#if !defined(PERMUTER) && !defined(OBJDIFF)
+#define INCLUDE_ASM(FOLDER, NAME) INCLUDE_CMN(text, FOLDER, NAME)
+```
+
+Check with `grep -rn "define INCLUDE_ASM" include/ src/include/` before editing.
+
+### Making `INCLUDE_ASM` a no-op under `NATIVE_BUILD` is a big lever
+With `&& !defined(NATIVE_BUILD)` added to that guard, translation units that
+still contain assembly **compile natively anyway**: their C content (data
+tables, already-decompiled functions) is emitted, and the still-assembly
+functions simply become undefined symbols that the stub generator handles.
+
+That is how `_trig_table` became available to the native `rsin` without
+duplicating 513 entries. Opt TUs in one at a time via `NATIVE_EXTRA` in
+`Makefile.native` rather than blanket-enabling all of them.
+
+---
+
+## libgte specifics
+
+### `rcos` falls through into `rsin`
+`rcos` is a single instruction — `addiu $a0, $a0, 0x400` — and then execution
+runs straight into `rsin`. So `rcos(a) == rsin(a + 0x400)`, with `0x1000`
+angle units per full circle (`0x400` = 90 degrees).
+
+### `_trig_table` layout
+513 `(sin, cos)` pairs covering 0..0x200 (0..45 degrees), i.e. `table[i*2]` is
+sin and `table[i*2+1]` is cos. First pair `0x0000,0x1000` (sin0=0, cos0=1.0);
+last `0x0B50,0x0B50` (sin45 = cos45 = 2896/4096 = 0.7071). `rsin` folds the
+other seven octants onto it, using the cos column for the 45..90 range via
+`sin(a) = cos(0x400 - a)`.
+
+Our C implementation matches `round(sin(x) * 4096)` with **max deviation 0**
+across all 4096 angles.
+
+### `SetFogNear(a, h)`
+`DQA = -(a * 320) / h`, `DQB = 0x1400000`. The `* 320` appears in the assembly
+as `(a << 2 + a) << 6`.
+
+### `DpqColor` uses the DPCS GTE op
+Opcode `0x4A780010` decodes to command `0x10` (DPCS), `sf=1`, `lm=0`. It reads
+`RGBC` (data 6) and `IR0` (data 8), interpolates toward the far colour
+(`RFC/GFC/BFC`, control 21/22/23), and pushes the result into the colour FIFO —
+`DpqColor` then reads `RGB2` (data 22). Verified bit-exact against hardware.
+
+---
+
+## Tooling gotcha (cost time twice)
+
+**Do not build C source inside nested bash-heredoc + Python string layers.**
+Escape sequences get mangled: `\n` inside a generated C string literal ends up
+as a real newline, producing `missing terminating " character`.
+
+Write the C to its own file with a **quoted** heredoc (`<<"EOF"`, which disables
+all expansion), then have Python splice that file in. Same rule for assembly
+containing `$` register names.

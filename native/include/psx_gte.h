@@ -15,6 +15,7 @@ enum {
     GTE_C_R11R12 = 0, GTE_C_R13R21 = 1, GTE_C_R22R23 = 2,
     GTE_C_R31R32 = 3, GTE_C_R33 = 4,
     GTE_C_TRX = 5, GTE_C_TRY = 6, GTE_C_TRZ = 7,
+    GTE_C_RFC = 21, GTE_C_GFC = 22, GTE_C_BFC = 23,   /* far colour */
     GTE_C_OFX = 24, GTE_C_OFY = 25, GTE_C_H = 26,
     GTE_C_DQA = 27, GTE_C_DQB = 28,
     GTE_C_ZSF3 = 29, GTE_C_ZSF4 = 30, GTE_C_FLAG = 31
@@ -23,6 +24,8 @@ enum {
 /* ---- data registers (cop2d) ---- */
 enum {
     GTE_D_VXY0 = 0, GTE_D_VZ0 = 1,
+    GTE_D_RGBC = 6,
+    GTE_D_RGB0 = 20, GTE_D_RGB1 = 21, GTE_D_RGB2 = 22,   /* colour FIFO */
     GTE_D_IR0 = 8, GTE_D_IR1 = 9, GTE_D_IR2 = 10, GTE_D_IR3 = 11,
     GTE_D_SXY0 = 12, GTE_D_SXY1 = 13, GTE_D_SXY2 = 14, GTE_D_SXYP = 15,
     GTE_D_SZ0 = 16, GTE_D_SZ1 = 17, GTE_D_SZ2 = 18, GTE_D_SZ3 = 19,
@@ -35,6 +38,9 @@ enum {
 #define GTE_FLAG_SX2_SAT      (1u << 14)
 #define GTE_FLAG_DIV_OVF      (1u << 17)
 #define GTE_FLAG_SZ3_SAT      (1u << 18)
+#define GTE_FLAG_RGB_B_SAT    (1u << 19)
+#define GTE_FLAG_RGB_G_SAT    (1u << 20)
+#define GTE_FLAG_RGB_R_SAT    (1u << 21)
 #define GTE_FLAG_IR3_SAT      (1u << 22)
 #define GTE_FLAG_IR2_SAT      (1u << 23)
 #define GTE_FLAG_IR1_SAT      (1u << 24)
@@ -63,6 +69,7 @@ uint32_t gte_get_data(int reg);
 /* operations */
 void gte_op_rtps(void);
 void gte_op_mvmva(int sf, int mx, int v, int cv, int lm);
+void gte_op_dpcs(void);   /* depth-cue single colour */
 
 /* exposed for testing: the hardware reciprocal used by RTPS */
 uint32_t gte_divide(uint32_t h, uint32_t sz3);
