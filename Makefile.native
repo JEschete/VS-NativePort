@@ -27,27 +27,28 @@ GAME_CFLAGS := -m32 -std=gnu89 -nostdinc -DNATIVE_BUILD -D_LANGUAGE_C \
 
 # Platform layer: normal hosted C, may use libc.
 PLAT_CFLAGS := -m32 -I native/include -fno-strict-aliasing -fwrapv -fno-pic -w
-LDFLAGS     := -m32 -no-pie
+# Link below 16MB so real host pointers fit the 24-bit address fields the
+# PS1 ordering table uses (see native/include/psx_gpu.h).
+LDFLAGS     := -m32 -no-pie -Wl,-Ttext-segment=0x10000
 
-# Deferred: these need linkage-sensitive source fixes (static vs non-static
-# declarations) that must be individually verified against the byte-matching
-# PSX build before they can be changed.
-NATIVE_EXCLUDE := \
-    src/MENU/MENUB.PRG/260.c \
-    src/MENU/MENUF.PRG/3B8.c \
-    src/TITLE/TITLE.PRG/libpress/LIBPRESS.c
+# Translation units that cannot compile for x86 yet:
+#  - hand-written inline MIPS asm in the C body (needs a NATIVE_BUILD C path,
+#    same pattern as src/include/insertTPage.h)
+#  - static vs non-static declaration conflicts (linkage-changing; must be
+#    re-verified against the byte-matching build before touching)
+NATIVE_EXCLUDE :=     src/BATTLE/BATTLE.PRG/38C1C.c     src/BATTLE/BATTLE.PRG/4A0A8.c     src/BATTLE/BATTLE.PRG/573B8.c     src/BATTLE/BATTLE.PRG/5BF94.c     src/MENU/MENUB.PRG/260.c     src/MENU/MENUF.PRG/3B8.c     src/SLUS_010.40/libapi/COUNTER.c     src/SLUS_010.40/libsn/SNMAIN.c     src/SLUS_010.40/main.c     src/SLUS_010.40/overlay.c     src/TITLE/TITLE.PRG/libpress/LIBPRESS.c
 
-# Opt-in TUs that DO contain INCLUDE_ASM. Safe because INCLUDE_ASM is a no-op
-# under NATIVE_BUILD: the C content (data tables, decompiled functions) compiles
-# and the still-assembly functions simply become undefined symbols -> stubbed.
-NATIVE_EXTRA := src/SLUS_010.40/31724.c
-
-GAME_SRCS := $(filter-out $(NATIVE_EXCLUDE),$(shell grep -rL INCLUDE_ASM src/MENU src/TITLE --include=*.c | sort)) $(NATIVE_EXTRA)
+# Everything else. INCLUDE_ASM is a no-op under NATIVE_BUILD, so TUs that still
+# contain assembly contribute their data tables and decompiled functions, and
+# the remaining assembly functions fall through to the generated stub layer.
+GAME_SRCS := $(filter-out $(NATIVE_EXCLUDE),$(shell find src -name "*.c" | sort))
 
 # Real implementations (must be linked BEFORE stubs are generated so their
 # symbols are excluded from stubbing).
 PLAT_REAL := native/platform/unimpl.c native/platform/scratchpad.c \
-             native/platform/gte_core.c native/platform/libgte.c native/platform/main.c
+             native/platform/gte_core.c native/platform/libgte.c \
+             native/platform/libgpu.c native/platform/libetc.c \
+             native/platform/psx_vram.c native/platform/main.c
 PLAT_SRCS := $(PLAT_REAL) native/platform/stubs.c
 
 GAME_OBJS := $(foreach s,$(GAME_SRCS),$(OBJ)/game_$(subst /,_,$(patsubst src/%.c,%,$(s))).o)
@@ -87,6 +88,9 @@ test: | $(OBJ)
 	@$(NATIVE_CC) $(PLAT_CFLAGS) -c native/platform/libgte.c -o $(OBJ)/t_libgte.o
 	@$(NATIVE_CC) $(PLAT_CFLAGS) -no-pie native/tests/test_gte.c native/platform/gte_core.c 		$(OBJ)/t_libgte.o $(OBJ)/t_trigdata.o -lm -o $(TESTBIN)
 	@./$(TESTBIN) native/tests/gte_golden.txt
+	@$(NATIVE_CC) $(PLAT_CFLAGS) $(LDFLAGS) native/tests/test_gpu.c \
+		native/platform/libgpu.c native/platform/psx_vram.c -o $(BUILD)/test_gpu
+	@./$(BUILD)/test_gpu
 
 run: $(BIN)
 	@./$(BIN)

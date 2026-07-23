@@ -28,7 +28,11 @@ def main(objdir, out, libc):
             undef.add(f[1])
     for line in nm(objs).splitlines():
         f = line.split()
-        if len(f) == 3 and f[1] not in ("U", "u"):
+        # Only GLOBAL definitions satisfy an external reference. nm uses
+        # uppercase for global and lowercase for local/static, so a lowercase
+        # entry (e.g. "b _score", a static in some other TU) must NOT count as
+        # defined -- otherwise the symbol is skipped here and the link fails.
+        if len(f) == 3 and f[1].isupper() and f[1] != "U":
             defined.add(f[2])
     libcsyms = set()
     for line in nm(["-D", "--defined-only", libc]).splitlines():

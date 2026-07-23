@@ -33,6 +33,17 @@
 #define INCLUDE_RODATA(FOLDER, NAME)
 #endif // PERMUTER && OBJDIFF
 
+/* The native (x86) target cannot emit MIPS. NATIVE_BUILD stubs out the macros
+ * that inject assembly; the affected functions become undefined symbols and are
+ * picked up by the generated stub layer until the platform layer implements
+ * them for real. The PSX build is unaffected. */
+#ifdef NATIVE_BUILD
+#undef BIOS_STUB
+#define BIOS_STUB(name, table, id)
+#undef SYSCALL
+#define SYSCALL(id)
+#endif
+
 #if defined(PERMUTER)
 #define __attribute__(x)
 #define __asm__(...)

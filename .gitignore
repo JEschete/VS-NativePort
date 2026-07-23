@@ -16,3 +16,5 @@ tools/python
 native/build/
 native/platform/stubs.c
 native/tests/psx/*.exe
+native/build/*.ppm
+native/build/test_gpu
