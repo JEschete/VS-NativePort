@@ -12,6 +12,19 @@ retail disc byte-for-byte**.
 
 ## 0. Current status — START HERE (resume point)
 
+> **Every native-only no-op, no-draw stub, and synthetic shortcut is tracked in
+> [`docs/NATIVE_DEVIATIONS.md`](NATIVE_DEVIATIONS.md).** When you add or remove
+> one, update that ledger. The running "not yet implemented" frontier is the 371
+> auto-generated abort stubs in `native/platform/stubs.c` (self-maintaining).
+
+### ✅ ITEMS SUBMENU ENTERED + RENDERS (tip `b380fbe8`)
+`make -f Makefile.native menu` now confirms into the ITEMS submenu and renders
+it natively: category icon row, OPTIONS/EQUIP/SETUP list + cursor, and real
+text. Deviations vs. the real screen (all logged in the ledger): no 3D Ashley
+portrait (A1), no animated rune backdrop (A2), no INFORMATION box yet (A4).
+In-submenu category nav needs real inventory (a loaded `.mcd`) — deferred to
+the save system. See the deviations ledger for the full bring-up chain.
+
 ### ✅ PHASE 2 EXIT CRITERION MET (tip `20f1becf`)
 `make -f Makefile.native menu` renders the **full Vagrant Story command menu**
 natively — all tabs (MAGIC, BREAK ARTS, BATTLE ABILITIES, ITEMS, STATUS, MAP,
