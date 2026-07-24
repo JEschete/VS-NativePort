@@ -32,6 +32,7 @@
  */
 #include <psx_gpu.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 extern void func_800C97BC(void);
 extern char vs_battle_menuState;               /* [0] = currentState (char) */
@@ -41,6 +42,48 @@ extern void* vs_battle_rowTypeBuf;
 static unsigned char items_buf[64 * 64];
 static unsigned char charstate_buf[16 * 1024];
 static unsigned char rowtype_buf[4 * 1024];
+
+/* Load the font + UI textures the way _loadSystemDat (INITBTL) does, but read
+ * SYSTEM.DAT from the extracted file instead of the disc. Drives the real game
+ * loaders (LoadImage, vs_main_loadClut, func_800CA9C0) so the font lands in
+ * VRAM exactly where the menu's glyph sprites sample it (tpage 0x2D -> 832,0).
+ * SYSTEM.DAT header = eight u32 offsets (unk0..unk1C); each texture block is an
+ * 8-byte RECT then pixel data; unk8 is a CLUT; unk1C is the font buffer. */
+extern int  LoadImage(RECT* r, void* data);
+extern void vs_main_loadClut(void* clut, int a, int b, int x);
+extern void func_800CA9C0(void* arg0);
+
+static void load_system_dat(void)
+{
+    FILE* f = fopen("data/BATTLE/SYSTEM.DAT", "rb");
+    long sz;
+    unsigned char* buf;
+    unsigned* off;
+    RECT rect;
+    short* h;
+    int i;
+    static const int tex[] = { 0, 1, 3, 4, 5 };    /* texture blocks */
+
+    if (!f) { printf("[harness] SYSTEM.DAT not found; glyphs will be blank\n"); return; }
+    fseek(f, 0, SEEK_END); sz = ftell(f); fseek(f, 0, SEEK_SET);
+    buf = (unsigned char*)malloc(sz);
+    if (fread(buf, 1, sz, f) != (size_t)sz) { fclose(f); return; }
+    fclose(f);
+    off = (unsigned*)buf;
+
+    for (i = 0; i < (int)(sizeof tex / sizeof tex[0]); i++) {
+        h = (short*)(buf + off[tex[i]]);
+        rect.x = h[0]; rect.y = h[1]; rect.w = h[2]; rect.h = h[3];
+        LoadImage(&rect, (unsigned*)h + 2);
+    }
+    h = (short*)(buf + off[2]);                     /* unk8: CLUT */
+    vs_main_loadClut((unsigned*)h + 2, 0xF, 0, h[0]);
+    h = (short*)(buf + off[6]);                     /* unk18: fixed dest */
+    rect.x = 0x300; rect.y = 0xF0; rect.w = h[0]; rect.h = h[1];
+    LoadImage(&rect, (unsigned*)h + 1);
+    func_800CA9C0(buf + off[7]);                    /* unk1C: font -> (832,0) */
+    printf("[harness] loaded SYSTEM.DAT textures (%ld bytes)\n", sz);
+}
 
 /* Synthetic actor state (Phase 2.5). The equipment/status panel dereferences
  * vs_battle_actors[idx]->unk3C (a vs_battle_actor2 = the stat block). Zeroed
@@ -120,6 +163,10 @@ int main(void)
     PutDrawEnv(&draw);
 
     printf("[harness] wiring synthetic game-state buffers\n");
+    printf("[harness] loading font + UI textures from SYSTEM.DAT\n");
+    load_system_dat();   /* func_800CA9C0 resets menu state + nulls menuItems */
+
+    /* Wire synthetic state AFTER the reset above, or it gets clobbered. */
     vs_battle_menuItems = items_buf;
     vs_battle_characterState = charstate_buf;
     vs_battle_rowTypeBuf = rowtype_buf;

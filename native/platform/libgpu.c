@@ -225,6 +225,41 @@ static unsigned gp0_words(uint32_t w)
     return 1;   /* unknown: step one word to avoid desyncing */
 }
 
+/* Sample one texel from VRAM via the current texture page + CLUT.
+ * Returns 0 for the transparent (index 0 / all-zero) texel. */
+static uint16_t gp0_sample(int u, int v, uint16_t tp, uint16_t clut)
+{
+    uint16_t* vram = psx_vram();
+    int mode = (tp >> 7) & 3;
+    int bx = (tp & 0x0F) * 64;
+    int by = ((tp >> 4) & 1) * 256;
+    if (mode == 2) {                                  /* 15-bit direct */
+        return vram[((by + v) & 0x1FF) * PSX_VRAM_W + ((bx + u) & 0x3FF)];
+    } else {                                          /* 4-bit or 8-bit CLUT */
+        int shift = (mode == 0) ? 2 : 1;
+        uint16_t word = vram[((by + v) & 0x1FF) * PSX_VRAM_W
+                             + ((bx + (u >> shift)) & 0x3FF)];
+        int idx = (mode == 0) ? ((word >> ((u & 3) * 4)) & 0x0F)
+                              : ((word >> ((u & 1) * 8)) & 0xFF);
+        int cx, cy;
+        if (idx == 0) return 0;
+        cx = (clut & 0x3F) * 16;
+        cy = (clut >> 6) & 0x1FF;
+        return vram[(cy & 0x1FF) * PSX_VRAM_W + ((cx + idx) & 0x3FF)];
+    }
+}
+
+static void blit_sprite(int x, int y, int w, int h,
+                        int u0, int v0, uint16_t tp, uint16_t clut)
+{
+    int i, j;
+    for (j = 0; j < h; j++)
+        for (i = 0; i < w; i++) {
+            uint16_t t = gp0_sample(u0 + i, v0 + j, tp, clut);
+            if (t) put_px(x + i, y + j, t);           /* 0 = transparent */
+        }
+}
+
 static void gp0_exec(const uint32_t* w)
 {
     unsigned cmd = w[0] >> 24;
@@ -256,7 +291,13 @@ static void gp0_exec(const uint32_t* w)
         else if (size == 2) { rw = rh = 8; }
         else if (size == 3) { rw = rh = 16; }
         else { rw = (int)(int16_t)(*whw & 0xFFFF); rh = (int)(int16_t)(*whw >> 16); }
-        fill_rect(x, y, rw, rh, c);                  /* TODO(texture): sample */
+        if (tex) {                                   /* textured sprite: sample */
+            int u0 = w[2] & 0xFF, v0 = (w[2] >> 8) & 0xFF;
+            uint16_t clut = (uint16_t)((w[2] >> 16) & 0xFFFF);
+            blit_sprite(x, y, rw, rh, u0, v0, gp0_tpage, clut);
+        } else {
+            fill_rect(x, y, rw, rh, c);
+        }
         prims_drawn++;
     } else if (cmd == 0x02) {                        /* fill rect (raw VRAM) */
         int x = (int)(w[1] & 0xFFFF), y = (int)(w[1] >> 16);
