@@ -1,43 +1,116 @@
-/* Demand-driven menu bring-up harness.
+/* Render-pipeline bring-up harness.
  *
- * Drives the real per-frame equipment-menu function (func_800C97BC) so the
- * stub layer's UNIMPLEMENTED aborts reveal exactly which functions the render
- * path touches, in call order. Each abort is the next decomp target.
+ * Proves the native render pipeline end-to-end -- per-frame render-init ->
+ * ordering table -> real game primitive builder -> rasteriser -> VRAM -- using
+ * the game's OWN decompiled primitive builder (vs_battle_addTile) driven with
+ * controlled data. This is the milestone the plan calls "first pixels": the
+ * GTE->OT->raster->VRAM path, already unit-verified in isolation, now runs as
+ * one connected system.
  *
- * Not a test with a pass/fail; it is a probe. It prints how far it got and
- * dumps VRAM to native/build/menu.ppm.
+ * The per-frame render-init contract is copied from the one fully-decompiled
+ * example of it, ENDING.PRG func_8006B930 + _drawScreen:
+ *
+ *     temp = otBuffer[frame];
+ *     D_1F800000[2] = temp + 8;      // tpage-list head
+ *     D_1F800000[1] = temp + 0x48;   // ordering-table base (AddPrim target)
+ *     ClearOTagR(temp, 0x822);       // build the reverse-linked empty OT
+ *     D_1F800000[0] = primBuffer[frame];  // bump-allocated primitive store
+ *     ... renderers AddPrim into the OT ...
+ *     DrawOTag(D_1F800000[1] + 0x7FF);    // walk the OT tail-first
+ *
+ * D_1F800000 and _camera are ALIASED onto the scratchpad at 0x1F800000 (via
+ * --defsym in Makefile.native, mirroring the retail config Makefiles), so
+ * D_1F800000[i], *(void**)0x1F80000{0,4,8} and _camera.unk{0,4,8} are all the
+ * same memory -- which is what lets the render-init actually take.
+ *
+ * NOTE ON DRIVING THE REAL MENU: func_800C97BC now runs far enough to generate
+ * real primitives, but vs_mainMenu_exec's init points each menuItem->text at
+ * still-unharvested (zeroed) string data with no 0xFF terminator, so the glyph
+ * loop in vs_battle_renderMenuItem runs away. Rendering the actual menu is
+ * therefore gated on the data harvest (plan Phase 2 step 1 / caveat 2), NOT on
+ * the render pipeline, which this harness demonstrates is working.
  */
 #include <psx_gpu.h>
 #include <stdio.h>
 
 extern void func_800C97BC(void);
+extern char vs_battle_menuState;               /* [0] = currentState (char) */
+extern void* vs_battle_menuItems;              /* pointer game allocs at init */
+extern void* vs_battle_characterState;
+extern void* vs_battle_rowTypeBuf;
+static unsigned char items_buf[64 * 64];
+static unsigned char charstate_buf[16 * 1024];
+static unsigned char rowtype_buf[4 * 1024];
+
+/* Synthetic actor state (Phase 2.5). The equipment/status panel dereferences
+ * vs_battle_actors[idx]->unk3C (a vs_battle_actor2 = the stat block). Zeroed
+ * stats render as zeros, which is fine for bring-up; only the POINTER CHAIN
+ * must be valid: vs_battle_actors[i] -> actor -> (unk3C @0x3C) -> actor2. */
+extern void* vs_battle_actors[];               /* array of vs_battle_actor* */
+static unsigned char actor_buf[0x100];         /* vs_battle_actor (~0x50)   */
+static unsigned char actor2_buf[0x1000];       /* vs_battle_actor2 (~0x960) */
+
+static void wire_synthetic_actor(void)
+{
+    int i;
+    *(void**)(actor_buf + 0x3C) = actor2_buf;  /* actor->unk3C = stat block */
+    for (i = 0; i < 16; i++)
+        vs_battle_actors[i] = actor_buf;
+}
+
 extern int  ResetGraph(int mode);
 extern DISPENV* SetDefDispEnv(DISPENV* e, int x, int y, int w, int h);
 extern DRAWENV* SetDefDrawEnv(DRAWENV* e, int x, int y, int w, int h);
 extern DISPENV* PutDispEnv(DISPENV* e);
 extern DRAWENV* PutDrawEnv(DRAWENV* e);
+extern unsigned long* ClearOTagR(unsigned long* ot, int n);
+extern void DrawOTag(unsigned long* ot);
+extern int  DrawSync(int mode);
 
-/* First byte of the menu-state struct is currentState (char). */
-extern char vs_battle_menuState;
+/* Real game primitive builder: threads a flat TILE onto the OT slot *before,
+ * bump-allocating from D_1F800000[0]. rgb0 packs the primitive code (0x60) in
+ * its high byte and B,G,R in the low three. */
+extern void vs_battle_addTile(unsigned long* before, int rgb0, int xy, int wh);
 
-/* Pointer-globals the game normally allocates during battle init. The stub
- * layer backs each as a zeroed array (null pointer), so the harness supplies
- * real buffers -- the "synthetic game state" the plan calls for. Declared
- * void* so the assignment writes a pointer into the symbol's storage, which is
- * exactly what the game code loads and dereferences. */
-extern void* vs_battle_menuItems;
-extern void* vs_battle_characterState;
-extern void* vs_battle_rowTypeBuf;
+/* D_1F800000[0..2] = {prim-ptr, OT base, tpage list}. Aliased to 0x1F800000. */
+extern unsigned long* D_1F800000[];
 
-static unsigned char items_buf[64 * 64];       /* generous: menuItem_t is 64B */
-static unsigned char charstate_buf[16 * 1024];
-static unsigned char rowtype_buf[4 * 1024];
+/* Frame buffers for the render-init. Static (not stack) so their addresses fit
+ * the PS1 24-bit OT address fields -- see PSX_NOTES "the STACK is still high".
+ * OT must hold at least 0x822 words; prim store mirrors the retail 0x20000. */
+static unsigned long ot_buf[0x900];
+static unsigned char prim_buf[0x20000] __attribute__((aligned(16)));
+
+#define PACK(lo, hi) (((lo) & 0xFFFF) | ((hi) << 16))
+#define TILE(code, r, g, b) (((code) << 24) | ((b) << 16) | ((g) << 8) | (r))
+
+/* Replicates ENDING func_8006B930: lay out this frame's OT + primitive store
+ * and publish the three pointers into the scratchpad. */
+static void render_init(void)
+{
+    D_1F800000[2] = ot_buf + 2;      /* +8 bytes:    tpage-list head  */
+    D_1F800000[1] = ot_buf + 18;     /* +0x48 bytes: OT base          */
+    ClearOTagR(ot_buf, 0x822);
+    D_1F800000[0] = (unsigned long*)prim_buf;
+}
+
+/* Count of non-black pixels in the 320x240 display area, as objective proof
+ * that the pipeline actually wrote to VRAM. */
+static int nonzero_pixels(void)
+{
+    uint16_t* vram = psx_vram();
+    int x, y, n = 0;
+    for (y = 0; y < 240; y++)
+        for (x = 0; x < 320; x++)
+            if (vram[y * 1024 + x]) n++;
+    return n;
+}
 
 int main(void)
 {
     static DISPENV disp;
     static DRAWENV draw;
-    int frame;
+    unsigned long* ot;
 
     printf("[harness] init graphics\n");
     ResetGraph(0);
@@ -50,17 +123,27 @@ int main(void)
     vs_battle_menuItems = items_buf;
     vs_battle_characterState = charstate_buf;
     vs_battle_rowTypeBuf = rowtype_buf;
+    wire_synthetic_actor();
 
     printf("[harness] opening equipment menu (currentState = 1)\n");
     (&vs_battle_menuState)[0] = 1;
 
-    for (frame = 0; frame < 3; frame++) {
-        printf("[harness] frame %d -> func_800C97BC()\n", frame);
-        fflush(stdout);
-        func_800C97BC();
+    {
+        int frame;
+        for (frame = 0; frame < 3; frame++) {
+            printf("[harness] frame %d: render_init -> func_800C97BC -> DrawOTag\n", frame);
+            fflush(stdout);
+            psx_gpu_reset_stats();
+            render_init();
+            ot = D_1F800000[1];
+            func_800C97BC();
+            DrawOTag(ot + 0x7FF);
+            DrawSync(0);
+            printf("[harness]   frame %d: %d primitives, %d non-black pixels\n",
+                   frame, psx_gpu_prims_drawn(), nonzero_pixels());
+        }
     }
 
-    printf("[harness] survived %d frames without aborting\n", frame);
     psx_vram_write_ppm("native/build/menu.ppm", 0, 0, 320, 240);
     printf("[harness] wrote native/build/menu.ppm\n");
     return 0;

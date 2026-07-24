@@ -184,12 +184,42 @@ GCC 2.7.2 accepted things modern GCC rejects:
 - `static` definition following a non-`static` declaration (**linkage-changing —
   do not "fix" these without re-verifying the byte-matching build**)
 
+### `-funsigned-char` is mandatory — MIPS `char` is unsigned
+**Symptom:** string loops run away; a menu-string glyph loop never finds its
+`0xFF` terminator and the primitive bump-allocator overruns and segfaults. More
+generally, any `c = *charptr; if (c == 0xE7 …)` comparison against a byte value
+≥ 0x80 silently fails.
+
+On MIPS/PSYQ, `char` is **unsigned**; x86 gcc defaults it to **signed**. In
+`vs_battle_setMenuItem`, `c = *text` (a `char*`) sign-extends a `0xE7` terminator
+byte to `0xFFFFFFE7`, so `c == vs_char_terminator` (231) is false and the copy
+never terminates. The decompiled code assumes the PS1 ABI throughout, so this
+would misfire in hundreds of places. Fix: add `-funsigned-char` to the game
+CFLAGS. This is as load-bearing as `-D_LANGUAGE_C`.
+
 ### Flags that make it work
 ```
 -m32 -std=gnu89 -nostdinc -DNATIVE_BUILD -D_LANGUAGE_C
--fno-builtin -fno-strict-aliasing -fwrapv -fno-pic -fno-stack-protector
+-fno-builtin -fno-strict-aliasing -fwrapv -fno-pic -funsigned-char
+-fno-stack-protector
 ```
 Link with `-no-pie` (otherwise `-fno-pic` objects produce `DT_TEXTREL` warnings).
+
+### Harvesting real .rodata from the retail overlays
+Some data the render path reads (menu string tables, glyph-width tables,
+animation/colour tables) is not yet decompiled into C, so the stub layer zeroes
+it — and a zeroed string table has no terminator (see above). `native/tools/
+harvest_data.py` copies the real bytes out of the retail overlay binaries at
+their known symbol addresses and emits an initialised C TU
+(`native/platform/harvested_data.c`, regen with `make -f Makefile.native
+harvest`). Mechanics: overlay VRAM bases come from each `config/**/splat.yaml`
+(`vram:`); a symbol's file offset is `addr - vram`; its size is the gap to the
+next symbol in the same overlay's `symbol_addrs.txt`; addresses beyond the file
+image are `.bss` and stay zero. The harvested `.o` DEFINES those symbols, so
+`gen_stubs.py` sees them satisfied and drops them from the zero blobs
+automatically — no exclusion list needed. Curate the list (`HARVEST_SYMS` in
+`Makefile.native`): harvest only genuine read-only tables, never `.bss` runtime
+state (inventory, menuState) which must stay zeroed/synthetic.
 
 ---
 
@@ -368,19 +398,73 @@ Game code accesses the scratchpad by literal address (`*(void**)0x1F800000`),
 not only through a helper. So the native scratchpad is `mmap`ed with `MAP_FIXED`
 at `0x1F800000` by a constructor, and `_psx_scratchpad()` returns that address.
 
-### Per-frame render init sets up the primitive buffers
-**Symptom:** after the scratchpad is mapped, a GPU-packet write
-(`movl $0xE100002D,(%eax)`) faults because the primitive pointer at
-`scratchpad[0]` is null.
+### `D_1F800000` and `_camera` ALIAS the scratchpad — defsym them, don't blob them
+**Symptom:** the harness maps the scratchpad, sets `scratchpad[0..2]`, and the
+render code *still* dereferences null there — as if the pointers never took.
 
-The game initialises `scratchpad[0..2]` (next-free primitive pointer, ordering
-table base, tpage list) each frame in its render setup. A menu harness that
-jumps straight to the menu skips this. Next step for bring-up: call the real
-frame/render-init path (or replicate its scratchpad setup) rather than patch
-one pointer at a time.
+Root cause: three code idioms all name the same scratchpad memory —
+`D_1F800000[i]` (a declared `extern u_long* D_1F800000[]`), the literal
+`*(void**)0x1F80000{0,4,8}`, and `_camera.unk{0,4,8}` (`_camera` is a
+`camera_t` struct whose first three words are the prim-ptr / OT base / tpage
+list). The retail build makes them coincide with per-overlay linker defsyms —
+`--defsym=D_1F800000=0x1F800000` and `--defsym=_camera=0x1F800000` (grep
+`config/*/Makefile`). The native stub generator instead emitted `D_1F800000`
+and `_camera` as *separate* 4KB blobs, so writes through the symbol and reads
+through the literal address hit different memory and the scratchpad pointers
+looked null to half the code.
 
-### Reaching the render path
+Fix: exclude both names in `gen_stubs.py` (`SCRATCHPAD_ALIASES`) and add the
+identical `--defsym`s to `LDFLAGS` in `Makefile.native`. `camera_t` is 0x68
+bytes, well inside the 0x1000 `mmap`'d region. This is the true fix for the
+"scratchpad[0..2] null" symptom — the mmap alone was necessary but not
+sufficient.
+
+### Per-frame render-init contract (replicated from ENDING func_8006B930)
+Each frame the game rebuilds the scratchpad pointers; a harness that jumps
+straight to a render function must replicate it. The one fully-decompiled
+example is `ENDING.PRG` `func_8006B930` + `_drawScreen`:
+
+```c
+temp = otBuffer[frame];          /* >= 0x822 words                       */
+D_1F800000[2] = temp + 8;        /* tpage-list head (+0x08)              */
+D_1F800000[1] = temp + 0x48;     /* OT base — AddPrim target (+0x48)     */
+ClearOTagR(temp, 0x822);         /* reverse-linked empty ordering table  */
+D_1F800000[0] = primBuffer[frame];  /* bump store, retail size 0x20000   */
+/* ... renderers AddPrim ... */
+DrawOTag(D_1F800000[1] + 0x7FF); /* walk the OT tail-first               */
+```
+
+The OT base sits 18 words into the buffer so the menu's negative-index slots
+(`D_1F800000[1] - 4/-3/-1`, higher priority) stay in-bounds. Buffers must be
+static/global, never stack (24-bit OT address fields — see "the STACK is still
+high"). `native/tests/menu_harness.c` uses exactly this and produces the first
+native pixels.
+
+### Reaching the render path — the equipment menu now runs end-to-end
 `func_800C97BC` (per-frame menu driver) → `vs_mainMenu_exec` →
-`vs_mainMenu_renderScreen` → `_renderMenuItems` → `vs_battle_renderMenuItem` →
-`vs_battle_printVariableWidthFontChar`. This is real menu render code executing
-natively; what remains before pixels is the frame-buffer/scratchpad setup above.
+`vs_mainMenu_renderScreen` → `_renderMenuItems`/`vs_mainMenu_renderEquipStats` →
+`vs_battle_renderMenuItem` → `vs_battle_printVariableWidthFontChar`. With the
+scratchpad aliasing fixed, render-init in place, `-funsigned-char`, the menu
+strings/glyph-widths harvested, and minimal synthetic actor state wired
+(`vs_battle_actors[i] → actor(unk3C) → actor2`), the whole equipment-menu render
+path now **executes to completion natively across frames without faulting**,
+emitting real primitives.
+
+### Why nothing is visible yet — VS uses GP0-command-list primitives
+**Symptom:** the menu render completes and builds 7–8 primitives per frame, but
+0 pixels light up.
+
+The native rasteriser (`draw_one`) decodes a *fixed* struct layout per primitive
+(reads the code byte at offset 7, then hard-coded field offsets). VS instead
+threads **GP0 command lists**: each OT packet is `len` words of raw GP0 commands,
+and the menu prepends a **texpage command** (`0xE1……`) as word 1, so the real
+SPRT/POLY that follows is shifted. `draw_one` reads the `0xE1` as the code and
+skips the packet. Sprite builders (`vs_battle_setSprite*`, now faithfully
+reimplemented in `battle_asm.c`) produce these len-5 compound sprites; menu-item
+backgrounds are len-10 texpage+shaded-quad. Making them visible needs the
+rasteriser to walk the packet as a GP0 command stream (interpret `0xE1` texpage,
+then `0x2C/0x3C` textured/shaded quad, `0x64` sprite), the **font texture loaded
+into VRAM** (tpage 0x2D → VRAM (832,0), 4-bit, CLUT at (0,222)) via the asset
+path the harness bypasses, and **CLUT-textured sampling**. That is the scoped
+next sub-project; the geometry pipeline itself is proven (harness driving
+`vs_battle_addTile`: 4 prims, 22200 non-black pixels, correct z-order/clipping).

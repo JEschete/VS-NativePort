@@ -18,6 +18,7 @@
 #include <string.h>
 
 typedef unsigned long u_long;
+typedef unsigned int  u_int;
 
 /* ---- memory copies (573B8) ---- */
 
@@ -45,36 +46,56 @@ void vs_battle_playInvalidSfx(void)    { vs_main_playSfxDefault(0x7E, 7); }
 void vs_battle_playSfx10(void)         { vs_main_playSfxDefault(0x7E, 10); }
 
 /* ---- sprite builders (573B8) ----
- * TODO(render): the originals build a textured sprite primitive (with an
- * E100000C tpage command) in the scratchpad primitive buffer and thread it
- * onto a tpage list. These stubs bump-allocate a zeroed 0x18-byte primitive so
- * the caller gets a valid, non-drawing pointer. */
-static u_long* sprite_alloc(void)
+ * Faithful C translation of the hand-written asm (matchings/573B8/*.s). Each
+ * builds a len-5 "compound" primitive in the scratchpad primitive buffer:
+ *   word0: tag  = link | 0x05000000            (len 5)
+ *   word1: tpageCmd (0 / 0xE100000C)           (GP0 texpage command)
+ *   word2: rgb | code<<24, code = 0x64|0x66    (SPRT, semi-trans from bit 7)
+ *   word3: xy
+ *   word4: 0        (caller overwrites with u/v + CLUT)
+ *   word5: wh
+ * and threads it onto the OT slot *nextPrim. D_1F800000[0] is the bump pointer.
+ * NOTE(render): these primitives are textured font/UI sprites; the native
+ * rasteriser does not yet texture them (needs the font in VRAM + CLUT SPRT
+ * raster), so they build correctly but do not yet produce pixels. */
+extern u_long* D_1F800000[];
+
+static u_long* setSprite_impl(int brightnessTransparency, int xy, int wh,
+                              u_long* nextPrim, u_long tpageCmd)
 {
-    unsigned long* scratch = _psx_scratchpad();
-    unsigned long* prim = (unsigned long*)scratch[0];
-    if (!prim) return 0;
-    memset(prim, 0, 0x18);
-    scratch[0] = (unsigned long)((char*)prim + 0x18);
-    return (u_long*)prim;
+    u_long* prim = D_1F800000[0];
+    int b = brightnessTransparency & 0xFF;
+    u_long rgb = (u_long)b | (b << 8) | (b << 16);
+    u_long code = (((u_int)brightnessTransparency >> 7) & 2) + 0x64;
+
+    prim[0] = (*nextPrim & 0xFFFFFF) | 0x05000000;
+    prim[1] = tpageCmd;
+    prim[2] = rgb | (code << 24);
+    prim[3] = (u_long)xy;
+    prim[4] = 0;
+    prim[5] = (u_long)wh;
+
+    *nextPrim = (u_long)prim & 0xFFFFFF;
+    D_1F800000[0] = (u_long*)((char*)prim + 0x18);
+    return prim;
 }
 
-u_long* vs_battle_setSprite(int brightnessTransparency, int xy, int wh, int uv)
+u_long* vs_battle_setSprite(int brightnessTransparency, int xy, int wh, u_long* nextPrim)
 {
-    (void)brightnessTransparency; (void)xy; (void)wh; (void)uv;
-    return sprite_alloc();
+    return setSprite_impl(brightnessTransparency, xy, wh, nextPrim, 0);
 }
 
+/* Presets the texpage command to 0xE100000C (x offset 768). */
+u_long* vs_battle_setSpriteDefaultTexPage(int brightnessTransparency, int xy, int wh,
+                                          u_long* nextPrim)
+{
+    return setSprite_impl(brightnessTransparency, xy, wh, nextPrim, 0xE100000C);
+}
+
+/* Brightness fixed at 0x80, transparency off, chained after D_1F800000[2]. */
 u_long* vs_battle_setSpriteDefault(int wh, int xy)
 {
-    (void)wh; (void)xy;
-    return sprite_alloc();
-}
-
-u_long* vs_battle_setSpriteDefaultTexPage(int wh, int xy, int texpage)
-{
-    (void)wh; (void)xy; (void)texpage;
-    return sprite_alloc();
+    return setSprite_impl(0x80, xy, wh, D_1F800000[2], 0);
 }
 
 /* ---- fixed-width font glyph (5BF94) ----

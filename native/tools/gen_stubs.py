@@ -16,6 +16,15 @@ as a function lands in read-only .text, so any write to it segfaults.
 import subprocess, sys, pathlib, re
 
 PLATFORM_PROVIDED = {"_psx_scratchpad", "_native_unimplemented", "main"}
+
+# Symbols the retail build defsym's onto the 1KB scratchpad at 0x1F800000, so
+# they ALIAS that region rather than being distinct objects (see the
+# --defsym lines in config/*/Makefile). The native build reproduces this with
+# matching --defsym flags in Makefile.native, so these must NOT be emitted as
+# separate blobs here -- doing so gives each its own memory and the three views
+# of the scratchpad (D_1F800000[i], *(void**)0x1F800000, _camera.x) diverge,
+# which strands the per-frame render pointers as null.
+SCRATCHPAD_ALIASES = {"D_1F800000", "_camera"}
 NL = chr(10)
 
 
@@ -66,7 +75,8 @@ def main(objdir, out, libc):
     syms = sorted(s for s in undef - defined
                   if not s.startswith("__")
                   and s not in libcsyms
-                  and s not in PLATFORM_PROVIDED)
+                  and s not in PLATFORM_PROVIDED
+                  and s not in SCRATCHPAD_ALIASES)
 
     # A symbol is a function iff the disassembly defines it as code (glabel).
     # D_* that are also glabel'd (rare) still count as functions. Everything

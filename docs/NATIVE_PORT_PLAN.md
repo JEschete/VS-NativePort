@@ -12,20 +12,57 @@ retail disc byte-for-byte**.
 
 ## 0. Current status — START HERE (resume point)
 
-**Branch `work`, tip `66dec87c`.** Both builds green:
+**Branch `work`, tip `fd259854` + uncommitted native changes.** Both builds green:
 - **PSX matching build:** `make -j"$(nproc)"` → 21/21 byte-identical (the oracle; must never break).
 - **Native build:** `make -f Makefile.native stubs && make -f Makefile.native` → `native/build/vagrant-native` links and runs (32-bit x86 ELF).
-- **Tests:** `make -f Makefile.native test` → GTE 891/0 (hardware-verified), GPU 18/0. `make -f Makefile.native menu` runs the demand-driven menu harness.
+- **Tests:** `make -f Makefile.native test` → GTE 891/0 (hardware-verified), GPU 18/0. `make -f Makefile.native menu` runs the render-pipeline harness → **first native pixels** (`native/build/menu.ppm`).
 
-**What is done (Phases 0–1b + most of 2):**
+**What is done (Phases 0–1b + most of 2 — the render pipeline now runs end-to-end):**
 - `libgte` complete and **verified bit-exact vs real COP2** (DuckStation capture ROMs).
 - `libetc` (60Hz pacer), `libgpu` (OT, VRAM 1024×512, TILE/POLY_F4/POLY_G4 raster, VRAM transfers), `libapi` (events, card). Binary linked at `0x10000` so PS1 24-bit OT addresses work natively. Scratchpad `mmap(MAP_FIXED)`'d at real `0x1F800000`.
-- **1615 real functions** linked (was 1319). Menu dependency completion **62%** (256/408).
+- **Render pipeline proven as one connected system:** the harness runs the ENDING-derived per-frame render-init, calls the game's own decompiled `vs_battle_addTile`, and rasterises to VRAM — **4 primitives, 22200 non-black pixels, correct z-order + clipping** (exact expected count). GTE→OT→raster→VRAM, previously unit-verified only in isolation, now works connected.
 
-**Exactly where execution stops now (the resume task):** the menu harness runs real render code —
-`func_800C97BC → vs_mainMenu_exec → vs_mainMenu_renderScreen → _renderMenuItems → vs_battle_renderMenuItem → vs_battle_printVariableWidthFontChar` — then faults writing a GPU packet because **`scratchpad[0..2]` (primitive-buffer pointer, OT base, tpage list) are null**: the game's per-frame render init never ran.
+**Root-cause fix landed this session (the real reason `scratchpad[0..2]` read null):**
+`D_1F800000` and `_camera` both *alias* the scratchpad at `0x1F800000` in the
+retail build (per-overlay `--defsym`s), but the native stub generator gave each
+its own separate 4KB blob — so `D_1F800000[i]`, `*(void**)0x1F80000{0,4,8}` and
+`_camera.unk{0,4,8}` touched three different memories and the render pointers
+looked null to half the code. Fixed by excluding both in `gen_stubs.py`
+(`SCRATCHPAD_ALIASES`) and adding the identical `--defsym`s to `Makefile.native`
+`LDFLAGS`. The `mmap` was necessary but not sufficient; this is the true fix.
+Details in [`PSX_NOTES.md`](PSX_NOTES.md) → "Demand-driven menu bring-up".
 
-**Next step:** replicate or call the game's frame/render-init so `scratchpad[0..2]` are valid, then the already-built+verified GTE→OT→raster→VRAM pipeline takes over → first pixels. Two known caveats: (1) `setSprite`/glyph builders in `native/platform/battle_asm.c` are memory-safe *stubs* that draw nothing (marked `TODO(render)`) — reimplement against DuckStation once it runs; (2) menu strings/char-class data are zeroed — real init (or a data harvest) fixes that. Detailed traps in [`PSX_NOTES.md`](PSX_NOTES.md) → "Demand-driven menu bring-up".
+**The equipment-menu render path now runs end-to-end natively** (was: faulted /
+ran away). Four fixes got it there this session:
+- **`-funsigned-char`** — MIPS `char` is unsigned; x86 defaults to signed, so
+  string terminators (`0xE7`/`0xFF`) sign-extended and terminator checks failed,
+  running the glyph loop away. Load-bearing like `-D_LANGUAGE_C`.
+- **Data harvest** — `native/tools/harvest_data.py` copies real read-only tables
+  (menu strings, glyph widths, animation steps) from the retail overlays at their
+  known symbol addresses into `native/platform/harvested_data.c`
+  (`make -f Makefile.native harvest`; curated via `HARVEST_SYMS`).
+- **Synthetic actor state** — the equipment panel derefs
+  `vs_battle_actors[i]->unk3C` (a `vs_battle_actor2` stat block); the harness
+  wires a zeroed but non-null pointer chain (`actors[i] → actor → actor2`).
+- **Faithful sprite builders** — `vs_battle_setSprite*` in `battle_asm.c`
+  reimplemented from the 573B8 asm (len-5 compound texpage+SPRT), replacing the
+  no-draw stubs.
+
+`func_800C97BC` now executes to completion for 3 frames, emitting 7–8 real
+primitives, **no fault**.
+
+**Exactly where it stops now (the next task): nothing is visible yet.** VS
+threads **GP0 command-list** primitives — each OT packet prepends a texpage
+command (`0xE1…`) before the real SPRT/poly — and the native `draw_one` decodes a
+fixed struct layout, so it reads the `0xE1` as the primitive code and skips the
+packet. Making the menu visible needs a rasteriser that walks each packet as a
+GP0 command stream, the **font texture in VRAM** (tpage 0x2D → VRAM (832,0),
+4-bit, CLUT (0,222)) loaded via the asset path the harness bypasses, and
+**CLUT-textured sampling**. This is a scoped rendering sub-project; the geometry
+pipeline itself is proven (harness driving `vs_battle_addTile`: 4 prims, 22200
+non-black pixels). Then Phase 2 step: **libpad** input to meet the exit
+criterion. Detailed traps in [`PSX_NOTES.md`](PSX_NOTES.md) → "Demand-driven menu
+bring-up".
 
 **Working rule:** every change keeps PSX 21/21. Diverge freely in `native/`, `docs/`, tooling; keep `src/` edits minimal and guarded with `#ifndef NATIVE_BUILD` so upstream merges stay cheap.
 

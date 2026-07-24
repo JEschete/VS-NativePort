@@ -19,17 +19,29 @@ TESTBIN   := $(BUILD)/test_gte
 # Game code: PSYQ headers only (-nostdinc), 1997-compiler semantics preserved.
 # -D_LANGUAGE_C is REQUIRED: most of include/psx/kernel.h (incl. struct DIRENTRY)
 # is gated behind it, and the PSYQ compiler predefines it while modern GCC does not.
+# -funsigned-char is REQUIRED and non-obvious: on MIPS/PSYQ `char` is UNSIGNED,
+# and the decompiled code relies on it (e.g. string terminators read as
+# `c = *charptr` and compared to 0xE7 / 0xFF). x86 gcc defaults `char` to
+# SIGNED, so 0xE7 sign-extends to 0xFFFFFFE7, terminator checks fail, and string
+# loops run away. Matching the PS1 ABI here fixes a whole class of latent bugs.
 GAME_CFLAGS := -m32 -std=gnu89 -nostdinc -DNATIVE_BUILD -D_LANGUAGE_C \
                -I include/psx -I src/include -I native/include -I ./ \
                -include native/include/psx_compat.h \
                -fno-builtin -fno-strict-aliasing -fwrapv -fno-pic \
-               -fno-stack-protector -w
+               -funsigned-char -fno-stack-protector -w
 
 # Platform layer: normal hosted C, may use libc.
 PLAT_CFLAGS := -m32 -I native/include -fno-strict-aliasing -fwrapv -fno-pic -w
 # Link below 16MB so real host pointers fit the 24-bit address fields the
 # PS1 ordering table uses (see native/include/psx_gpu.h).
-LDFLAGS     := -m32 -no-pie -Wl,-Ttext-segment=0x10000
+#
+# --defsym D_1F800000/_camera=0x1F800000 mirrors the retail per-overlay Makefiles
+# (config/*/Makefile): both symbols ALIAS the 1KB scratchpad. Without this they
+# would be distinct blobs and the scratchpad views would diverge. The region is
+# mmap(MAP_FIXED)'d at 0x1F800000 by native/platform/scratchpad.c before main().
+LDFLAGS     := -m32 -no-pie -Wl,-Ttext-segment=0x10000 \
+               -Wl,--defsym=D_1F800000=0x1F800000 \
+               -Wl,--defsym=_camera=0x1F800000
 
 # Translation units that cannot compile for x86 yet:
 #  - hand-written inline MIPS asm in the C body (needs a NATIVE_BUILD C path,
@@ -44,20 +56,40 @@ NATIVE_EXCLUDE := \
 # the remaining assembly functions fall through to the generated stub layer.
 GAME_SRCS := $(filter-out $(NATIVE_EXCLUDE),$(shell find src -name "*.c" | sort))
 
+# Read-only data tables copied verbatim from the retail overlays (menu strings,
+# glyph widths, animation/colour tables). Curated -- only genuine .rodata the
+# render path reads, never .bss runtime state. Regenerate with `make harvest`.
+# Harvested symbols are DEFINED by harvested_data.o, so gen_stubs.py sees them
+# as satisfied and does not emit zero blobs for them -- no exclusion list needed.
+HARVEST_SYMS := vs_battle_menuStrings vs_battle_characterWidths \
+                vs_battle_rowAnimationSteps
+
 # Real implementations (must be linked BEFORE stubs are generated so their
 # symbols are excluded from stubbing).
 PLAT_REAL := native/platform/unimpl.c native/platform/scratchpad.c \
              native/platform/gte_core.c native/platform/libgte.c \
              native/platform/libgpu.c native/platform/libetc.c \
-             native/platform/psx_vram.c native/platform/libapi.c native/platform/battle_asm.c native/platform/main.c
+             native/platform/psx_vram.c native/platform/libapi.c \
+             native/platform/battle_asm.c native/platform/harvested_data.c \
+             native/platform/main.c
 PLAT_SRCS := $(PLAT_REAL) native/platform/stubs.c
 
 GAME_OBJS := $(foreach s,$(GAME_SRCS),$(OBJ)/game_$(subst /,_,$(patsubst src/%.c,%,$(s))).o)
 REAL_OBJS := $(patsubst native/platform/%.c,$(OBJ)/plat_%.o,$(PLAT_REAL))
 STUB_OBJ  := $(OBJ)/plat_stubs.o
 
-.PHONY: all clean run stubs test menu
+.PHONY: all clean run stubs test menu harvest
 all: $(BIN)
+
+# harvested_data.c holds real read-only bytes copied from the retail overlays,
+# so it is GENERATED (never committed), exactly like data/ and disks/. The build
+# regenerates it from the user-owned binaries, so a fresh checkout just works.
+native/platform/harvested_data.c: native/tools/harvest_data.py
+	@echo "  HARVEST  $@"
+	@python3 native/tools/harvest_data.py native/platform/harvested_data.c \
+		native/platform/harvested.syms $(HARVEST_SYMS)
+
+harvest: native/platform/harvested_data.c
 
 $(OBJ):
 	@mkdir -p $(OBJ)
