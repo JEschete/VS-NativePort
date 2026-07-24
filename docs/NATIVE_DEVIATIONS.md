@@ -24,7 +24,7 @@ These make the native menu render *incompletely* vs. the real game. Compare
 | A4 | INFORMATION box TEXT | **DONE** — `func_800CB83C` decompiled (`battle_textbox.c`) + text-box OT wired | Renders "Choose items to equip." (matches retail) | — | Complete |
 | A4b | INFORMATION box FRAME | `func_800CD158` no-op (`battle_textbox.c`) | Text renders on plain background; no shaded backing bar | Shaded/bordered bar behind the info text | Diff the 146-instr per-segment sprite build against DuckStation |
 | A4c | Dialogue/menu box frame | `func_800CD3E4` no-op (`battle_textbox.c`) | Box states 2 & 7 draw no frame | Full dialogue/menu box border+gradient | A dialogue/menu-box screen is brought up (566-instr renderer) |
-| A5 | Per-category item list | needs real inventory | Blanks out on in-submenu navigation | Lists the items in the selected category | Real inventory from a loaded `.mcd` (save-system work) |
+| A5 | Per-category item list | **DONE** | Renders the real loaded inventory (e.g. WEAPONS 3/8: Fandango, Tovarisch, Seventh Heaven) | — | Complete — needed the save load (`.mcd`) + item-name text (`load_item_text` reads ITEMNAME/ITEMHELP/MENU12.BIN) |
 
 **Screenshot cross-check (ITEMS submenu):** our render has the category icon
 row, the OPTIONS/EQUIP/SETUP list + cursor, STATUS and MENU labels — all
