@@ -12,15 +12,37 @@ retail disc byte-for-byte**.
 
 ## 0. Current status — START HERE (resume point)
 
-**Branch `work`, tip `fd259854` + uncommitted native changes.** Both builds green:
+**Branch `work`, tip `b3ed3282`.** Both builds green:
 - **PSX matching build:** `make -j"$(nproc)"` → 21/21 byte-identical (the oracle; must never break).
 - **Native build:** `make -f Makefile.native stubs && make -f Makefile.native` → `native/build/vagrant-native` links and runs (32-bit x86 ELF).
-- **Tests:** `make -f Makefile.native test` → GTE 891/0 (hardware-verified), GPU 18/0. `make -f Makefile.native menu` runs the render-pipeline harness → **first native pixels** (`native/build/menu.ppm`).
+- **Tests:** `make -f Makefile.native test` → GTE 891/0 (hardware-verified), GPU 18/0.
+- **`make -f Makefile.native menu`** runs the equipment menu and renders **real Vagrant Story menu text** ("MENU", "MAGIC") to `native/build/menu.ppm`.
 
-**What is done (Phases 0–1b + most of 2 — the render pipeline now runs end-to-end):**
+**🎉 The equipment menu renders natively with real glyphs.** The full path
+executes and rasterises: `func_800C97BC → vs_mainMenu_exec → renderScreen →
+_renderMenuItems → vs_battle_renderMenuItem → printVariableWidthFontChar`, the
+selected-menu bar slides in from the right and settles, and the font (loaded
+from `SYSTEM.DAT`) draws as readable text.
+
+**What is done (Phases 0–1b + Phase 2 render pipeline COMPLETE):**
 - `libgte` complete and **verified bit-exact vs real COP2** (DuckStation capture ROMs).
-- `libetc` (60Hz pacer), `libgpu` (OT, VRAM 1024×512, TILE/POLY_F4/POLY_G4 raster, VRAM transfers), `libapi` (events, card). Binary linked at `0x10000` so PS1 24-bit OT addresses work natively. Scratchpad `mmap(MAP_FIXED)`'d at real `0x1F800000`.
-- **Render pipeline proven as one connected system:** the harness runs the ENDING-derived per-frame render-init, calls the game's own decompiled `vs_battle_addTile`, and rasterises to VRAM — **4 primitives, 22200 non-black pixels, correct z-order + clipping** (exact expected count). GTE→OT→raster→VRAM, previously unit-verified only in isolation, now works connected.
+- `libetc` (60Hz pacer), `libapi` (events, card). Binary linked at `0x10000` so PS1 24-bit OT addresses work natively; scratchpad `mmap(MAP_FIXED)`'d at real `0x1F800000`.
+- **`libgpu` — full GP0 command-list rasteriser:** walks each OT packet as a GP0 word stream (texpage `0xE1`, polygons `0x20-0x3F`, rects/sprites `0x60-0x7F`), with **CLUT texture sampling** (4/8-bit + 15-bit) for sprites AND **affine-UV textured triangles** (POLY_FT4/POLY_GT4). Flat + Gouraud + textured all work.
+- **Font/UI textures load via the real game loaders:** `menu_harness.c load_system_dat()` reads `data/BATTLE/SYSTEM.DAT` from the extracted file (not disc) and drives `LoadImage` / `vs_main_loadClut` / `func_800CA9C0` → font at VRAM (832,0), tpage 0x2D.
+
+**RESUME POINT — the menu is rendering but SPARSE because the synthetic game
+state is empty (no inventory to enumerate). Next = feed real menu data:**
+1. Populate `vs_main_inventory` (layout in `docs/RAInfo.md`: weapon slots at
+   0x60168 stride 0x20, blades/grips/shields/armor/gems, items) and the actor
+   stat block so `_renderMenuItems` / `renderEquipStats` list real content.
+2. Then **input responds**: the menu reads `vs_main_buttonsPressed.all`
+   (offset 0; `PADRright=0x20 PADRleft=0x80 PADRup=0x10 PADRdown=0x40`) — inject
+   presses in the harness to move the cursor. (Verified the write path works;
+   it just has nothing to navigate until step 1.) This is the Phase 2 exit
+   criterion.
+3. Minor: menu-panel POLY backgrounds — textured-quad path exists; confirm the
+   panels sample their art (currently the tab bar + glyphs are the visible
+   content).
 
 **Root-cause fix landed this session (the real reason `scratchpad[0..2]` read null):**
 `D_1F800000` and `_camera` both *alias* the scratchpad at `0x1F800000` in the
