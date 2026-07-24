@@ -85,6 +85,40 @@ static void load_system_dat(void)
     printf("[harness] loaded SYSTEM.DAT textures (%ld bytes)\n", sz);
 }
 
+/* Item name / help / menu12 text. The real submenu CD-loads these contiguously
+ * (ITEMNAME.BIN|ITEMHELP.BIN|MENU12.BIN) into one buffer; the harness's CD stub
+ * marks the load complete without transferring data, so the name tables would be
+ * zero and vs_mainMenu_setWeaponRow -> vs_battle_printf faults. Load the real
+ * files up front and publish the pointers, so the submenu (which skips its own
+ * load when vs_mainMenu_itemNames != NULL) enumerates real item names. */
+extern unsigned short* vs_mainMenu_itemNames;
+extern unsigned short* vs_mainMenu_itemHelp;
+extern unsigned short* vs_mainMenu_menu12Text;
+
+static void load_item_text(void)
+{
+    /* sizes from build/src/include/lbas.h */
+    enum { NAME = 12288, HELP = 28672, MENU12 = 4096 };
+    static unsigned char buf[NAME + HELP + MENU12] __attribute__((aligned(16)));
+    static const struct { const char* path; long off, len; } parts[] = {
+        { "data/MENU/ITEMNAME.BIN", 0,           NAME },
+        { "data/MENU/ITEMHELP.BIN", NAME,        HELP },
+        { "data/MENU/MENU12.BIN",   NAME + HELP, MENU12 },
+    };
+    int i;
+    for (i = 0; i < 3; i++) {
+        FILE* f = fopen(parts[i].path, "rb");
+        if (!f) { printf("[harness] missing %s; item names blank\n", parts[i].path); return; }
+        if (fread(buf + parts[i].off, 1, parts[i].len, f) != (size_t)parts[i].len)
+            printf("[harness] short read on %s\n", parts[i].path);
+        fclose(f);
+    }
+    vs_mainMenu_itemNames  = (unsigned short*)buf;
+    vs_mainMenu_itemHelp   = (unsigned short*)(buf + NAME);
+    vs_mainMenu_menu12Text = (unsigned short*)(buf + NAME + HELP);
+    printf("[harness] loaded item name/help text (%d bytes)\n", NAME + HELP + MENU12);
+}
+
 /* Synthetic actor state (Phase 2.5). The equipment/status panel dereferences
  * vs_battle_actors[idx]->unk3C (a vs_battle_actor2 = the stat block). Zeroed
  * stats render as zeros, which is fine for bring-up; only the POINTER CHAIN
@@ -193,6 +227,7 @@ int main(void)
     *(void**)(charstate_buf + 0x3C) = actor2_buf;
     vs_battle_rowTypeBuf = rowtype_buf;
     wire_synthetic_actor();
+    load_item_text();   /* real item name/help tables (for the item list) */
 
     /* Load the player's REAL inventory from their save card via VS's own
      * read+decode+apply (vs_native_loadSaveFile -> _applyLoadedSaveFile). The
@@ -262,6 +297,7 @@ int main(void)
         extern unsigned char D_800F4CD0[];
         extern unsigned long* ClearOTagR(unsigned long*, int);
         extern int vs_gametime_tickspeed;
+        extern unsigned char D_800F4EE8[];   /* +0x3A = currentItemCategory */
         int frame, k;
 
         /* Drive the box open/close animation, and prime the text-box OT before
@@ -272,7 +308,7 @@ int main(void)
         D_800F51B8 = (unsigned long*)D_800F4CD0;
         ClearOTagR(D_800F51B8, 0x22);
 
-        for (frame = 0; frame < 90; frame++) {
+        for (frame = 0; frame < 110; frame++) {
             for (k = 0; k < 32; k++) {
                 short* st = (short*)(_cdQueue + k * 0x14);
                 if (*st != 0 && *st != 4) *st = 4;   /* -> Loaded */
@@ -282,6 +318,11 @@ int main(void)
             vs_main_buttonRepeat = (frame == 45 || frame == 47 || frame == 49)
                                  ? 0x4000u : 0u;                  /* down */
             vs_main_buttonsPressed = (frame == 55) ? 0x20u : 0u;  /* confirm */
+            /* Once inside the ITEMS submenu, select the WEAPON category so the
+             * item list enumerates the real loaded weapons (currentItemCategory
+             * = 1 -> itemCategory (x-1)&7 = 0 = itemCategoryWeapon). Default is
+             * itemCategoryManage (the OPTIONS/EQUIP/SETUP command list). */
+            if (frame >= 64) D_800F4EE8[0x3A] = 1;
             fflush(stdout);
             psx_gpu_reset_stats();
             render_init();
