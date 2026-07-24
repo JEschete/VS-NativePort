@@ -78,8 +78,30 @@ def harvest_one(name, ovls):
     return (data[off:off + size], addr, binpath), None
 
 
+def register_auto_names(names, ovls):
+    """Auto-named `D_<8 hex>` symbols encode their own address but are absent
+    from the friendly symbol_addrs.txt maps. Inject each into the overlay whose
+    image contains that address so find_home resolves it and the gap-based size
+    computation sees it as a boundary. Only injects when the address actually
+    lands inside an overlay's file image."""
+    for name in names:
+        m = re.match(r"^D_([0-9A-Fa-f]{8})$", name)
+        if not m:
+            continue
+        if any(name in syms for _, _, syms in ovls):
+            continue
+        addr = int(m.group(1), 16)
+        for vram, binpath, syms in ovls:
+            if not os.path.exists(binpath):
+                continue
+            if vram <= addr < vram + len(open(binpath, "rb").read()):
+                syms[name] = addr
+                break
+
+
 def main(out_c, out_syms, names):
     ovls = overlays()
+    register_auto_names(names, ovls)
     blocks, harvested = [], []
     report = []
     for name in names:

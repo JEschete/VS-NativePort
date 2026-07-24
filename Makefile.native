@@ -62,7 +62,8 @@ GAME_SRCS := $(filter-out $(NATIVE_EXCLUDE),$(shell find src -name "*.c" | sort)
 # Harvested symbols are DEFINED by harvested_data.o, so gen_stubs.py sees them
 # as satisfied and does not emit zero blobs for them -- no exclusion list needed.
 HARVEST_SYMS := vs_battle_menuStrings vs_battle_characterWidths \
-                vs_battle_rowAnimationSteps
+                vs_battle_rowAnimationSteps \
+                D_800EB708 D_800EB7B4 D_800EB7D4
 
 # Real implementations (must be linked BEFORE stubs are generated so their
 # symbols are excluded from stubbing).

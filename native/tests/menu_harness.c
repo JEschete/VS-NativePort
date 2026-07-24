@@ -171,6 +171,16 @@ int main(void)
     SetDefDrawEnv(&draw, 0, 0, 320, 240);
     PutDrawEnv(&draw);
 
+    /* The game inits its heap at a hardcoded PS1 address (0x8010C000) that is
+     * not mapped natively; give it a real native buffer instead. Must run
+     * before anything calls vs_main_allocHeapR (e.g. the item-text loader). */
+    {
+        extern void vs_main_initHeap(void* node, unsigned size);
+        static unsigned char heap_buf[0xF2000] __attribute__((aligned(16)));
+        vs_main_initHeap(heap_buf, sizeof heap_buf);
+        printf("[harness] heap initialised (%u bytes)\n", (unsigned)sizeof heap_buf);
+    }
+
     printf("[harness] wiring synthetic game-state buffers\n");
     printf("[harness] loading font + UI textures from SYSTEM.DAT\n");
     load_system_dat();   /* func_800CA9C0 resets menu state + nulls menuItems */
@@ -178,6 +188,9 @@ int main(void)
     /* Wire synthetic state AFTER the reset above, or it gets clobbered. */
     vs_battle_menuItems = items_buf;
     vs_battle_characterState = charstate_buf;
+    /* characterState->unk3C is the stat block (statuses @+0x948); the ITEMS
+     * submenu reads it. Point it at the same synthetic actor2 stat block. */
+    *(void**)(charstate_buf + 0x3C) = actor2_buf;
     vs_battle_rowTypeBuf = rowtype_buf;
     wire_synthetic_actor();
 
@@ -222,11 +235,23 @@ int main(void)
 
     {
         extern unsigned vs_main_buttonRepeat;
-        int frame;
+        extern unsigned vs_main_buttonsPressed;
+        /* _cdQueue: 32 slots x 0x14, state (short) at offset 0. The real CD
+         * reader (stubbed natively) advances Enqueued->Loaded; since submenu
+         * overlays are already linked, just mark queued slots Loaded so
+         * vs_battle_loadMenuPrg completes. */
+        extern unsigned char _cdQueue[];
+        int frame, k;
         for (frame = 0; frame < 90; frame++) {
-            /* Inject a "down" press every 15 frames past the slide-in so the
-             * cursor visibly walks the tabs -- the input-response demo. */
-            vs_main_buttonRepeat = (frame >= 45 && frame % 15 == 0) ? 0x1000u : 0u;
+            for (k = 0; k < 32; k++) {
+                short* st = (short*)(_cdQueue + k * 0x14);
+                if (*st != 0 && *st != 4) *st = 4;   /* -> Loaded */
+            }
+            /* Slide-in settles ~frame 44. Walk down to ITEMS (tab 3) then
+             * confirm to open the submenu (its category list + Ashley view). */
+            vs_main_buttonRepeat = (frame == 45 || frame == 47 || frame == 49)
+                                 ? 0x4000u : 0u;                  /* down */
+            vs_main_buttonsPressed = (frame == 55) ? 0x20u : 0u;  /* confirm */
             fflush(stdout);
             psx_gpu_reset_stats();
             render_init();

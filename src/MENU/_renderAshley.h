@@ -26,6 +26,14 @@ enum ashleyRenderMode {
  */
 static void _renderAshley(int mode)
 {
+#ifdef NATIVE_BUILD
+    /* The 3D character model (Ashley + equipped weapons) is populated from
+     * D_800F4538 data slots that the synthetic menu harness never loads, so
+     * func_800F9A78 would deref a null slot. Skip the 3D portrait natively and
+     * let the 2D item list render; PSX build is unaffected. */
+    (void)mode;
+    return;
+#endif
     static int render = 0;
     static char skipFrame = 0;
 

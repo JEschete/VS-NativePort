@@ -111,3 +111,151 @@ int _printFixedWidthFontChar(int charId, int x, int y, int width, int height, in
     (void)charId; (void)y; (void)height;
     return x + ((width * (scale ? scale : 0x1000)) >> 12);
 }
+
+/* overlay.c is excluded from the native build (inline MIPS asm), and the
+ * overlay system is moot natively -- every overlay is statically linked, so
+ * there is nothing to load or wait for. */
+void vs_overlay_wait(void) { }
+void vs_overlay_getSp(int* sp) { int local; *sp = (int)(long)&local; }
+
+/* func_8007ACB0: sets up the GTE camera matrix for the ITEMS submenu 3D
+ * background scene (rotating character/weapon model). The synthetic harness
+ * loads no 3D models (D_800F4538 slots null), so the scene has nothing to
+ * draw -- no-op it and let the 2D item list render. Phase-3+ work will load
+ * real models and reinstate the full decomp. */
+void func_8007ACB0(void) { (void)0; }
+
+/* ---- variable-width font string renderer (5BF94) ----
+ *
+ * Faithful native decomp of vs_battle_renderTextRawColor, translated from
+ * build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94/vs_battle_renderTextRawColor.s.
+ * Builds the same GP0 command list (E1 texpage + per-char textured SPRTs) that
+ * the native libgpu rasteriser already walks, so it renders like the real game.
+ *
+ *   text     : ASCII string (0x20-based glyph indices)
+ *   xy       : packed position, x = (s16)xy, y = xy >> 16
+ *   rgb      : 0x00BBGGRR modulation colour
+ *   nextPrim : OT slot to splice the chain into (NULL -> D_1F800000[2])
+ *
+ * Three harvested font tables drive metrics:
+ *   D_800EB7B4 : per-glyph width, 4-bit nibbles (even idx low, odd idx high)
+ *   D_800EB708 : letter-pair kerning, 2-bit fields, index 26*l1 + l2
+ *   D_800EB7D4 : per-glyph VRAM u base / clut-parity byte
+ */
+extern unsigned char D_800EB7B4[];   /* glyph widths (nibbles)        */
+extern unsigned char D_800EB708[];   /* kerning pairs (2-bit)         */
+extern unsigned char D_800EB7D4[];   /* glyph tile map (u base|parity) */
+
+static int vs_glyph_width(int ci)
+{
+    return (D_800EB7B4[ci >> 1] >> ((ci & 1) << 2)) & 0xF;
+}
+
+/* Kerning adjustment between two A-Z letter indices (0..25). */
+static int vs_kern(int l1, int l2)
+{
+    int idx = 26 * l1 + l2;
+    return (D_800EB708[idx >> 2] >> ((idx & 3) << 1)) & 3;
+}
+
+void vs_battle_renderTextRawColor(const char* text, int xy, int rgb, u_long* nextPrim)
+{
+    const unsigned char* s = (const unsigned char*)text;
+    u_long* prim = D_1F800000[0];
+    int y = xy >> 16;
+    int x = (short)(xy & 0xFFFF);
+    unsigned char c;
+
+    if (nextPrim == 0)
+        nextPrim = D_1F800000[2];
+
+    /* texpage primitive (1 GP0 word, 0xE100000C) */
+    {
+        u_long* next = prim + 2;
+        prim[0] = ((u_long)(unsigned long)next & 0xFFFFFF) | 0x01000000;
+        prim[1] = 0xE100000C;
+        prim = next;
+    }
+
+    c = *s++;
+    while (c != 0) {
+        int t6 = (unsigned char)(c - 0x20);   /* raw glyph offset (kept for kerning) */
+        int ci = t6 & 0xFF;                    /* glyph index */
+
+        if (ci >= 0x3B) {
+            if (ci == 0x3B) x -= 1;            /* narrow control glyph */
+            c = *s++;
+            continue;
+        }
+
+        if (ci == 3 || ci == 4) {
+            /* auto-advance control code: shift x left by the measured width of
+             * the following run (# full,  half). */
+            int total = 0;
+            const unsigned char* m = s;
+            unsigned char mc = *m;
+            while (mc != 0) {
+                int mi = (mc - 0x20) & 0xFF;
+                if (mi < 0x3C) {
+                    int letter = (mi - 0x21) & 0xFF;
+                    total += vs_glyph_width(mi);
+                    if (letter < 0x1A) {
+                        int nc = m[1] - 0x41;
+                        if ((nc & 0xFF) < 0x1A)
+                            total -= vs_kern(letter, nc);
+                    }
+                }
+                mc = *(++m);
+            }
+            x -= total >> (ci - 3);
+            c = *s++;
+            continue;
+        }
+
+        /* normal glyph */
+        {
+            int w = vs_glyph_width(ci);
+            if (w != 0) {
+                unsigned char tile = D_800EB7D4[ci];
+                u_long* next = (u_long*)((char*)prim + 0x14);
+                int parity = tile & 1;
+                u_long uvclut = (u_long)(tile & 0xFE)
+                              | (u_long)(((parity * 5) << 9) + 0x4C00)
+                              | 0x37F60000u;
+
+                prim[0] = ((u_long)(unsigned long)next & 0xFFFFFF) | 0x04000000;
+                prim[1] = (u_long)rgb | 0x64000000u;
+                prim[2] = ((u_long)(x & 0xFFFF)) | ((u_long)(y & 0xFFFF) << 16);
+                prim[4] = (u_long)w | 0x000A0000u;
+                if (ci != 0xA) {
+                    prim[3] = uvclut;
+                } else {
+                    /* special glyph (index 0x0A): fixed clut, 1px up/left, h=0x0B */
+                    prim[2] = ((u_long)((x - 1) & 0xFFFF))
+                            | ((u_long)((y - 1) & 0xFFFF) << 16);
+                    prim[3] = 0x37F64BE8u;
+                    prim[4] = (u_long)w | 0x000B0000u;
+                }
+                prim = next;
+            }
+
+            /* advance pen + kerning to the next char */
+            x += w;
+            {
+                int letter = (t6 - 0x21) & 0xFF;   /* (c - 0x41) letter index */
+                if (letter < 0x1A) {
+                    int nc = *s - 0x41;
+                    if ((nc & 0xFF) < 0x1A)
+                        x -= vs_kern(letter, nc);
+                }
+            }
+        }
+
+        c = *s++;
+    }
+
+    /* splice the chain into the OT slot and bump the free-prim cursor */
+    prim[0] = *nextPrim & 0xFFFFFF;
+    *nextPrim = (u_long)((unsigned long)D_1F800000[0] & 0xFFFFFF);
+    D_1F800000[0] = (u_long*)((char*)prim + 4);
+}
