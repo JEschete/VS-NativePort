@@ -19,6 +19,7 @@ static DISPENV cur_disp;
 static int disp_mask;
 static int ot_dump;
 static int prims_drawn;
+static uint16_t gp0_tpage;   /* current GP0 texture page (from 0xE1) */
 
 void psx_gpu_set_ot_dump(int enable) { ot_dump = enable; }
 int  psx_gpu_prims_drawn(void)       { return prims_drawn; }
@@ -182,48 +183,102 @@ static void set_vert(VERT* v, const short* xy, unsigned r, unsigned g, unsigned 
     v->r = (int)r; v->g = (int)g; v->b = (int)b;
 }
 
+/* ---- GP0 command-list rasteriser ----
+ * VS builds each ordering-table packet as a stream of raw GP0 words -- usually
+ * a texpage command (0xE1) followed by a textured sprite/polygon. The old code
+ * decoded a fixed PSYQ struct and read the 0xE1 as the primitive code, skipping
+ * everything. This walks the packet body (len words at offset 4) as a GP0
+ * command stream and dispatches each command by its top byte.
+ *
+ * STAGE 1: parse every command with the correct word count (so the walk stays
+ * in sync) and rasterise geometry with flat colour. Textured primitives are
+ * drawn with their modulation colour as a visible placeholder -- real
+ * CLUT-texture sampling and font upload come next (see TODO(texture)). */
+
+static int gp0_x(uint32_t w) { return (int)(int16_t)(w & 0xFFFF) + cur_draw.ofs[0]; }
+static int gp0_y(uint32_t w) { return (int)(int16_t)(w >> 16)    + cur_draw.ofs[1]; }
+
+static void gp0_setv(VERT* v, uint32_t xy, uint32_t col)
+{
+    v->x = gp0_x(xy); v->y = gp0_y(xy);
+    v->r = col & 0xFF; v->g = (col >> 8) & 0xFF; v->b = (col >> 16) & 0xFF;
+}
+
+/* Number of GP0 words a command occupies (command word included). */
+static unsigned gp0_words(uint32_t w)
+{
+    unsigned cmd = w >> 24;
+    if (cmd == 0x00 || cmd == 0x01 || cmd == 0x03 || (cmd >= 0xE1 && cmd <= 0xE6))
+        return 1;
+    if (cmd == 0x02) return 3;                       /* fill rect */
+    if (cmd >= 0x20 && cmd <= 0x3F) {                /* polygon */
+        unsigned n = (cmd & 0x08) ? 4 : 3;
+        unsigned shaded = cmd & 0x10, tex = cmd & 0x04;
+        return shaded ? (tex ? 3 * n : 2 * n) : (1 + (tex ? 2 : 1) * n);
+    }
+    if (cmd >= 0x40 && cmd <= 0x5F)                  /* line: mono=3, shaded=4 */
+        return (cmd & 0x10) ? 4 : 3;
+    if (cmd >= 0x60 && cmd <= 0x7F) {                /* rect / sprite */
+        unsigned tex = cmd & 0x04, size = (cmd >> 3) & 3;
+        return 1 /*colour*/ + 1 /*xy*/ + (tex ? 1 : 0) + (size == 0 ? 1 : 0);
+    }
+    return 1;   /* unknown: step one word to avoid desyncing */
+}
+
+static void gp0_exec(const uint32_t* w)
+{
+    unsigned cmd = w[0] >> 24;
+    uint32_t col = w[0] & 0xFFFFFF;
+    uint16_t c = rgb555(col & 0xFF, (col >> 8) & 0xFF, (col >> 16) & 0xFF);
+
+    if (cmd >= 0x20 && cmd <= 0x3F) {                /* polygon */
+        int n = (cmd & 0x08) ? 4 : 3;
+        int shaded = cmd & 0x10, tex = cmd & 0x04;
+        int stride = shaded ? (tex ? 3 : 2) : (tex ? 2 : 1);
+        int base = shaded ? 0 : 1;                   /* flat: skip colour word */
+        VERT v[4];
+        int i;
+        for (i = 0; i < n; i++) {
+            const uint32_t* e = w + base + i * stride;
+            uint32_t vcol = shaded ? e[0] : col;
+            uint32_t xy = shaded ? e[1] : e[0];
+            gp0_setv(&v[i], xy, vcol);
+        }
+        draw_tri(&v[0], &v[1], &v[2], shaded);
+        if (n == 4) draw_tri(&v[1], &v[2], &v[3], shaded);
+        prims_drawn++;
+    } else if (cmd >= 0x60 && cmd <= 0x7F) {         /* rect / sprite */
+        int size = (cmd >> 3) & 3, tex = cmd & 0x04;
+        int x = gp0_x(w[1]), y = gp0_y(w[1]);
+        int rw, rh;
+        const uint32_t* whw = w + 2 + (tex ? 1 : 0);
+        if (size == 1) { rw = rh = 1; }
+        else if (size == 2) { rw = rh = 8; }
+        else if (size == 3) { rw = rh = 16; }
+        else { rw = (int)(int16_t)(*whw & 0xFFFF); rh = (int)(int16_t)(*whw >> 16); }
+        fill_rect(x, y, rw, rh, c);                  /* TODO(texture): sample */
+        prims_drawn++;
+    } else if (cmd == 0x02) {                        /* fill rect (raw VRAM) */
+        int x = (int)(w[1] & 0xFFFF), y = (int)(w[1] >> 16);
+        int rw = (int)(w[2] & 0xFFFF), rh = (int)(w[2] >> 16);
+        fill_rect(x, y, rw, rh, c);
+    } else if (cmd == 0xE1) {
+        gp0_tpage = (uint16_t)(w[0] & 0xFFFF);       /* current texture page */
+    }
+    /* 0xE2..0xE6 (tex window, draw area/offset, mask) and 0x00/0x01/0x03: nop */
+}
+
 static void draw_one(const P_TAG* p)
 {
-    const unsigned char* body = (const unsigned char*)p + 4;
-    const short* s = (const short*)((const char*)p + 8);
-    prims_drawn++;
+    const uint32_t* w = (const uint32_t*)((const char*)p + 4);
+    unsigned n = p->len, i = 0, guard = 0;
     if (ot_dump)
-        printf("  prim code=%02X len=%u rgb=%02X%02X%02X\n",
-               p->code, p->len, p->r0, p->g0, p->b0);
-
-    switch (p->code & 0xFC) {
-    case 0x60: {  /* TILE: x0, y0, w, h */
-        fill_rect(s[0] + cur_draw.ofs[0], s[1] + cur_draw.ofs[1],
-                  s[2], s[3], rgb555(p->r0, p->g0, p->b0));
-        break;
-    }
-    case 0x64: {  /* SPRT: x0,y0, u0,v0,clut, w,h -- untextured fill for now */
-        fill_rect(s[0] + cur_draw.ofs[0], s[1] + cur_draw.ofs[1],
-                  s[4], s[5], rgb555(p->r0, p->g0, p->b0));
-        break;
-    }
-    case 0x28: {  /* POLY_F4: flat quad, 4 vertices after the colour word */
-        VERT v[4];
-        int i;
-        for (i = 0; i < 4; i++) set_vert(&v[i], s + i * 2, p->r0, p->g0, p->b0);
-        draw_tri(&v[0], &v[1], &v[2], 0);
-        draw_tri(&v[1], &v[2], &v[3], 0);
-        break;
-    }
-    case 0x38: {  /* POLY_G4: colour and vertex interleaved, 8 words */
-        VERT v[4];
-        int i;
-        for (i = 0; i < 4; i++) {
-            const unsigned char* col = body + i * 8;
-            const short* xy = (const short*)(body + i * 8 + 4);
-            set_vert(&v[i], xy, col[0], col[1], col[2]);
-        }
-        draw_tri(&v[0], &v[1], &v[2], 1);
-        draw_tri(&v[1], &v[2], &v[3], 1);
-        break;
-    }
-    default:
-        break;   /* textured primitives still to come */
+        printf("  packet len=%u first=%08X\n", p->len, n ? w[0] : 0);
+    while (i < n && guard++ < 64) {
+        unsigned step = gp0_words(w[i]);
+        if (i + step > n) break;                     /* malformed: stop */
+        gp0_exec(w + i);
+        i += step;
     }
 }
 

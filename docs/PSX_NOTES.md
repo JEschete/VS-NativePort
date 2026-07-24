@@ -468,3 +468,33 @@ into VRAM** (tpage 0x2D → VRAM (832,0), 4-bit, CLUT at (0,222)) via the asset
 path the harness bypasses, and **CLUT-textured sampling**. That is the scoped
 next sub-project; the geometry pipeline itself is proven (harness driving
 `vs_battle_addTile`: 4 prims, 22200 non-black pixels, correct z-order/clipping).
+
+---
+
+## GP0 command-list rendering
+
+### VS primitives are raw GP0 command streams, not fixed PSYQ structs
+**Symptom:** the menu builds primitives but nothing draws; a primitive dump
+shows `code=E1` on packets whose real content is a sprite/poly.
+
+Each ordering-table packet is `len` raw GP0 words. The menu prepends a texpage
+command (`0xE1000xxx`) before the actual textured sprite/polygon, so a decoder
+that reads the PSYQ `code` byte (offset 7) sees `0xE1` and skips the packet.
+Observed packets: `60000000` (tile), `E1000200`+9-word POLY_FT4 (panel),
+`E100002D`+4-word SPRT (glyph, texpage 0x2D).
+
+**Fix:** draw_one walks the packet body as a GP0 stream, dispatching each
+command by its top byte and advancing by that commands word count (gp0_words):
+0xE1 sets the current texture page; 0x20-0x3F polygons (word count depends on
+the shaded/quad/textured bits); 0x60-0x7F rects/sprites (size + textured bits).
+This also stays compatible with plain PSYQ-struct primitives, since those use
+the same GP0 encoding -- the GPU test still passes.
+
+### First native menu render
+With the walker the equipment-menu chrome renders: the selected-menu bar slides
+in from the right edge (x from ~260 to 180 over frames, matching VS
+targetPosition0=180) and settles, ~2300 non-black pixels. Currently solid-colour
+placeholders (textured prims filled with the modulation colour) because the
+font/panel textures are not yet uploaded to VRAM and the synthetic game state
+has no inventory to list. Next: CLUT-textured sampling in gp0_exec plus a font
+upload, then real glyphs.

@@ -125,12 +125,14 @@ int main(void)
     vs_battle_rowTypeBuf = rowtype_buf;
     wire_synthetic_actor();
 
+    extern void psx_gpu_set_ot_dump(int);
+    psx_gpu_set_ot_dump(0);
     printf("[harness] opening equipment menu (currentState = 1)\n");
     (&vs_battle_menuState)[0] = 1;
 
     {
         int frame;
-        for (frame = 0; frame < 3; frame++) {
+        for (frame = 0; frame < 90; frame++) {
             printf("[harness] frame %d: render_init -> func_800C97BC -> DrawOTag\n", frame);
             fflush(stdout);
             psx_gpu_reset_stats();
