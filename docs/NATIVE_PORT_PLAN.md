@@ -17,6 +17,24 @@ retail disc byte-for-byte**.
 > one, update that ledger. The running "not yet implemented" frontier is the 371
 > auto-generated abort stubs in `native/platform/stubs.c` (self-maintaining).
 
+### ✅ INFO-BOX TEXT + vsString FIX + SAVE-CARD FOUNDATION (tips `029c241b`, `e27c19ec`)
+- **Info box renders** "Choose items to equip." natively (text-box render driver
+  `func_800CB83C` decompiled in `native/platform/battle_textbox.c`; box-frame
+  renderers `func_800CD158`/`CD3E4` are documented no-ops — text renders without them).
+- **Root fix (broad):** the native build was skipping the **vsString transformer**.
+  The PSX pipeline is `cpp | vsStringTransformer | cc1` (`tools/make/compile.mk`);
+  it re-encodes `#pragma vsstring` char/string literals into VS font encoding
+  (e.g. `'\f'`→`0xE5`). `Makefile.native` now mirrors it (`-E | transformer | -c`).
+  Affects ALL vsstring-encoded content, not just the info box.
+- **Save system — REAL SAVE LOADS (tips `cad5cc70`, `14a46c94`):** full PS1 memory-card
+  filesystem over `native/saves/test_card.mcd` (the user's real card, gitignored):
+  `_card_read`/`_card_write` frame I/O + `vs_bios_open/read/write/lseek/close` + real
+  `firstfile/nextfile/erase`. `vs_native_loadSaveFile` (MENU7/260.c, guarded) drives VS's
+  own `_applyLoadedSaveFile` → the player's actual inventory lands in `vs_main_inventory`
+  ("3 weapons, 6 misc items" from `BASLUS-01040VAG1`). **NEXT:** render the real item
+  list — navigate ITEMS→EQUIP so `renderItemsList` enumerates the loaded items ([A5] in
+  the deviations ledger). Write-back (real saving) reuses `vs_bios_write` + `_saveFile`.
+
 ### ✅ ITEMS SUBMENU ENTERED + RENDERS (tip `b380fbe8`)
 `make -f Makefile.native menu` now confirms into the ITEMS submenu and renders
 it natively: category icon row, OPTIONS/EQUIP/SETUP list + cursor, and real
