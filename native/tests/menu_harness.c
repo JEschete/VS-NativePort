@@ -240,12 +240,16 @@ int main(void)
         unsigned char* inv = &vs_main_inventory;
         int rc = vs_native_loadSaveFile(0, 1);
         if (rc == 0) {
-            int i, weapons = 0, misc = 0;
-            for (i = 0; i < 8; i++) if (inv[i * 0x20 + 1]) weapons++;
-            for (i = 0; i < 64; i++)
-                if (*(unsigned short*)&inv[0xE00 + i * 8]) misc++;
+            /* count each category (present iff the id/blade field is nonzero) */
+            int i, w = 0, sh = 0, ar = 0, gm = 0, ms = 0;
+            for (i = 0; i < 8;  i++) if (inv[0x000 + i * 0x20 + 1]) w++;
+            for (i = 0; i < 8;  i++) if (inv[0x100 + i * 0x20 + 1]) sh++;
+            for (i = 0; i < 16; i++) if (inv[0x640 + i * 0x10])     ar++;
+            for (i = 0; i < 48; i++) if (*(unsigned short*)&inv[0x8C0 + i * 8]) gm++;
+            for (i = 0; i < 64; i++) if (*(unsigned short*)&inv[0xE00 + i * 8]) ms++;
             printf("[harness] loaded REAL save (BASLUS-01040VAG1): "
-                   "%d weapons, %d misc items in inventory\n", weapons, misc);
+                   "%d weapons, %d shields, %d armor, %d gems, %d misc\n",
+                   w, sh, ar, gm, ms);
         } else {
             int i;
             printf("[harness] save load failed (rc=%d); using synthetic inventory\n", rc);
@@ -299,6 +303,13 @@ int main(void)
         extern int vs_gametime_tickspeed;
         extern unsigned char D_800F4EE8[];   /* +0x3A = currentItemCategory */
         int frame, k;
+        /* currentItemCategory to show (env VS_ITEM_CAT, default 1=weapons):
+         * 1=weapon 4=shield 5=armor 6=gem 7=misc. In-list cursor steps (env
+         * VS_ITEM_DOWN) issue N down-presses once the list is up. */
+        const char* cat_env = getenv("VS_ITEM_CAT");
+        const char* dn_env  = getenv("VS_ITEM_DOWN");
+        int item_cat  = cat_env ? atoi(cat_env) : 1;
+        int downsteps = dn_env  ? atoi(dn_env)  : 0;
 
         /* Drive the box open/close animation, and prime the text-box OT before
          * the first driver call (the driver clears it at the END of each frame
@@ -308,7 +319,7 @@ int main(void)
         D_800F51B8 = (unsigned long*)D_800F4CD0;
         ClearOTagR(D_800F51B8, 0x22);
 
-        for (frame = 0; frame < 110; frame++) {
+        for (frame = 0; frame < 130; frame++) {
             for (k = 0; k < 32; k++) {
                 short* st = (short*)(_cdQueue + k * 0x14);
                 if (*st != 0 && *st != 4) *st = 4;   /* -> Loaded */
@@ -318,11 +329,16 @@ int main(void)
             vs_main_buttonRepeat = (frame == 45 || frame == 47 || frame == 49)
                                  ? 0x4000u : 0u;                  /* down */
             vs_main_buttonsPressed = (frame == 55) ? 0x20u : 0u;  /* confirm */
-            /* Once inside the ITEMS submenu, select the WEAPON category so the
-             * item list enumerates the real loaded weapons (currentItemCategory
-             * = 1 -> itemCategory (x-1)&7 = 0 = itemCategoryWeapon). Default is
-             * itemCategoryManage (the OPTIONS/EQUIP/SETUP command list). */
-            if (frame >= 64) D_800F4EE8[0x3A] = 1;
+            /* Once inside the ITEMS submenu, select the target category so the
+             * item list enumerates the real loaded items. Default weapons. */
+            if (frame >= 64) D_800F4EE8[0x3A] = (unsigned char)item_cat;
+            /* After the list settles into its interactive state (~frame 100),
+             * step the in-list cursor down N times with the D-pad (PADLdown
+             * 0x4000 via buttonRepeat) to show row highlighting. (Face-button X
+             * 0x40 is cancel/back, not cursor.) */
+            if (downsteps > 0 && frame >= 100 && frame < 100 + downsteps * 4
+                && ((frame - 100) % 4) == 0)
+                vs_main_buttonRepeat = 0x4000u;
             fflush(stdout);
             psx_gpu_reset_stats();
             render_init();
@@ -342,7 +358,13 @@ int main(void)
         }
     }
 
-    psx_vram_write_ppm("native/build/menu.ppm", 0, 0, 320, 240);
-    printf("[harness] wrote native/build/menu.ppm\n");
+    {
+        char path[64];
+        const char* c = getenv("VS_ITEM_CAT");
+        snprintf(path, sizeof path, "native/build/menu_cat%s.ppm", c ? c : "1");
+        psx_vram_write_ppm(path, 0, 0, 320, 240);
+        psx_vram_write_ppm("native/build/menu.ppm", 0, 0, 320, 240);
+        printf("[harness] wrote %s\n", path);
+    }
     return 0;
 }
