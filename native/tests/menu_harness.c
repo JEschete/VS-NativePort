@@ -172,6 +172,22 @@ int main(void)
     vs_battle_rowTypeBuf = rowtype_buf;
     wire_synthetic_actor();
 
+    /* Populate a minimal but valid inventory so the menu has content to list.
+     * Layout from src/SLUS_010.40/main.h + _getItemId:
+     *   weapons[8] @0x000, stride 0x20, present iff .blade (+1) != 0
+     *   misc[64]   @0xE00, stride 8,    present iff .id (u_short @0) != 0
+     * Grimoires (the MAGIC menu) are misc items with IDs 0x82+. */
+    {
+        extern unsigned char vs_main_inventory;
+        unsigned char* inv = &vs_main_inventory;
+        int i;
+        inv[0 * 0x20 + 1] = 0x11;                 /* weapons[0].blade */
+        inv[1 * 0x20 + 1] = 0x21;                 /* weapons[1].blade */
+        for (i = 0; i < 10; i++)                  /* 10 grimoires */
+            *(unsigned short*)&inv[0xE00 + i * 8] = (unsigned short)(0x82 + i);
+        printf("[harness] populated inventory: 2 weapons, 10 grimoires\n");
+    }
+
     extern void psx_gpu_set_ot_dump(int);
     psx_gpu_set_ot_dump(0);
     printf("[harness] opening equipment menu (currentState = 1)\n");

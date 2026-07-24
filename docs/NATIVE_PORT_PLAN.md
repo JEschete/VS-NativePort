@@ -30,19 +30,30 @@ from `SYSTEM.DAT`) draws as readable text.
 - **`libgpu` — full GP0 command-list rasteriser:** walks each OT packet as a GP0 word stream (texpage `0xE1`, polygons `0x20-0x3F`, rects/sprites `0x60-0x7F`), with **CLUT texture sampling** (4/8-bit + 15-bit) for sprites AND **affine-UV textured triangles** (POLY_FT4/POLY_GT4). Flat + Gouraud + textured all work.
 - **Font/UI textures load via the real game loaders:** `menu_harness.c load_system_dat()` reads `data/BATTLE/SYSTEM.DAT` from the extracted file (not disc) and drives `LoadImage` / `vs_main_loadClut` / `func_800CA9C0` → font at VRAM (832,0), tpage 0x2D.
 
-**RESUME POINT — the menu is rendering but SPARSE because the synthetic game
-state is empty (no inventory to enumerate). Next = feed real menu data:**
-1. Populate `vs_main_inventory` (layout in `docs/RAInfo.md`: weapon slots at
-   0x60168 stride 0x20, blades/grips/shields/armor/gems, items) and the actor
-   stat block so `_renderMenuItems` / `renderEquipStats` list real content.
-2. Then **input responds**: the menu reads `vs_main_buttonsPressed.all`
-   (offset 0; `PADRright=0x20 PADRleft=0x80 PADRup=0x10 PADRdown=0x40`) — inject
-   presses in the harness to move the cursor. (Verified the write path works;
-   it just has nothing to navigate until step 1.) This is the Phase 2 exit
-   criterion.
-3. Minor: menu-panel POLY backgrounds — textured-quad path exists; confirm the
-   panels sample their art (currently the tab bar + glyphs are the visible
-   content).
+**RESUME POINT — render is done; the menu shows the TAB BAR, and displaying a
+submenu item-list needs driving the menu's cursor navigation.**
+
+Findings this session:
+- **Inventory data path works.** `menu_harness.c` now populates `vs_main_inventory`
+  (2 weapons + 10 grimoires) using the verified layout — weapons[8]@0x000 stride
+  0x20, present iff `.blade`(+1)!=0; misc[64]@0xE00 stride 8, present iff
+  `.id`(u16@0)!=0; grimoires are misc IDs 0x82+. `vs_main_inventory` is a writable
+  0x1000 blob (exact struct size). This alone changes nothing on screen, because
+  the current render is the top-level **tab bar** (`vs_mainMenu_exec` → the 10
+  `vs_battle_renderMenuItem`s), not a submenu list.
+- **Navigation is analog-stick, not discrete buttons.** Tab/row selection goes
+  through `vs_mainmenu_getSelectedRow()` (reads the stick position buffer), and
+  `func_800C930C` maps the cursor to a `currentState` that opens a submenu. So to
+  render an item list you must script the cursor: set the stick-position state
+  (`vs_main_stickPosBuf` / the pad analog buffer) so `getSelectedRow` returns a
+  row, then confirm. `vs_main_buttonsPressed.all` (offset 0;
+  `PADRright=0x20 left=0x80 up=0x10 down=0x40`, `PADn=0x04` etc.) is the discrete
+  side; the write path is verified.
+
+**Next = script menu navigation into a submenu → item list renders → that IS the
+Phase 2 exit criterion (render + input).** Then optionally load a real save
+(memory card) instead of synthetic inventory. Minor: confirm textured POLY
+panels sample their art.
 
 **Root-cause fix landed this session (the real reason `scratchpad[0..2]` read null):**
 `D_1F800000` and `_camera` both *alias* the scratchpad at `0x1F800000` in the
