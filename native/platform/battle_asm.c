@@ -48,6 +48,12 @@ void vs_battle_playMenuLeaveSfx(void)  { (void)0; }
 void vs_battle_playInvalidSfx(void)    { (void)0; }
 void vs_battle_playSfx10(void)         { (void)0; }
 
+/* func_80018C30: Akao sound-driver command dispatch (SLUS 25AC), reached when a
+ * loaded save applies its monoSound/audio settings (vs_main_setMonoSound). SPU
+ * is uninitialised (audio is Phase 3), so no-op it; returns 0 for callers that
+ * read a result. See docs/NATIVE_DEVIATIONS.md (B). */
+unsigned int func_80018C30(int cmd) { (void)cmd; return 0; }
+
 /* ---- sprite builders (573B8) ----
  * Faithful C translation of the hand-written asm (matchings/573B8/*.s). Each
  * builds a len-5 "compound" primitive in the scratchpad primitive buffer:

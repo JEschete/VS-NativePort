@@ -194,20 +194,31 @@ int main(void)
     vs_battle_rowTypeBuf = rowtype_buf;
     wire_synthetic_actor();
 
-    /* Populate a minimal but valid inventory so the menu has content to list.
-     * Layout from src/SLUS_010.40/main.h + _getItemId:
-     *   weapons[8] @0x000, stride 0x20, present iff .blade (+1) != 0
-     *   misc[64]   @0xE00, stride 8,    present iff .id (u_short @0) != 0
-     * Grimoires (the MAGIC menu) are misc items with IDs 0x82+. */
+    /* Load the player's REAL inventory from their save card via VS's own
+     * read+decode+apply (vs_native_loadSaveFile -> _applyLoadedSaveFile). The
+     * card is native/saves/test_card.mcd (a copy of the user's DuckStation
+     * card); slot 1, file 1 is BASLUS-01040VAG1. Falls back to a synthetic
+     * inventory if the load fails, so the harness still runs without a card. */
     {
+        extern int vs_native_loadSaveFile(int port, int file);
         extern unsigned char vs_main_inventory;
         unsigned char* inv = &vs_main_inventory;
-        int i;
-        inv[0 * 0x20 + 1] = 0x11;                 /* weapons[0].blade */
-        inv[1 * 0x20 + 1] = 0x21;                 /* weapons[1].blade */
-        for (i = 0; i < 10; i++)                  /* 10 grimoires */
-            *(unsigned short*)&inv[0xE00 + i * 8] = (unsigned short)(0x82 + i);
-        printf("[harness] populated inventory: 2 weapons, 10 grimoires\n");
+        int rc = vs_native_loadSaveFile(0, 1);
+        if (rc == 0) {
+            int i, weapons = 0, misc = 0;
+            for (i = 0; i < 8; i++) if (inv[i * 0x20 + 1]) weapons++;
+            for (i = 0; i < 64; i++)
+                if (*(unsigned short*)&inv[0xE00 + i * 8]) misc++;
+            printf("[harness] loaded REAL save (BASLUS-01040VAG1): "
+                   "%d weapons, %d misc items in inventory\n", weapons, misc);
+        } else {
+            int i;
+            printf("[harness] save load failed (rc=%d); using synthetic inventory\n", rc);
+            inv[0 * 0x20 + 1] = 0x11;
+            inv[1 * 0x20 + 1] = 0x21;
+            for (i = 0; i < 10; i++)
+                *(unsigned short*)&inv[0xE00 + i * 8] = (unsigned short)(0x82 + i);
+        }
     }
 
     /* vs_battle_getCurrentSceneId reads vs_battle_roomData.sectionB(+0x8C)

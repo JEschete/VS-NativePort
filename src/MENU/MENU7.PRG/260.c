@@ -842,6 +842,32 @@ static int _loadSaveData(int portFileno)
     return errors == 3 ? -1 : 0;
 }
 
+#ifdef NATIVE_BUILD
+/* Native bring-up entry: synchronously load a save file into game state using
+ * VS's own read + decode + apply, so the item menus see the player's real
+ * inventory. Mirrors _loadSaveData's init state (read one savedata_t sector into
+ * _spmcimg[1]) then _applyLoadedSaveFile(1). The native file API is synchronous,
+ * so the async event loop is unnecessary. Returns 0 on success. Not part of the
+ * PSX build. */
+int vs_native_loadSaveFile(int port, int file)
+{
+    static char spmc[VS_SPMCIMG_BIN_SIZE];
+    int fd, n;
+
+    _spmcimg = spmc;
+    fd = open(_memcardMakeFilename(port, file), 0x8000 | 1);
+    if (fd == -1) {
+        return -1;
+    }
+    n = read(fd, (savedata_t*)_spmcimg + 1, sizeof(savedata_t));
+    close(fd);
+    if (n != sizeof(savedata_t)) {
+        return -2;
+    }
+    return _applyLoadedSaveFile(1);   /* decode + copy save -> vs_main_inventory */
+}
+#endif
+
 static int _saveFile(int portFile)
 {
     enum state {
