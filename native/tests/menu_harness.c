@@ -131,6 +131,15 @@ static unsigned char prim_buf[0x20000] __attribute__((aligned(16)));
  * and publish the three pointers into the scratchpad. */
 static void render_init(void)
 {
+    /* Clear the display area each frame (the real game redraws a full-screen
+     * background; the harness has none, so a moving cursor would otherwise
+     * leave a trail). The font page at VRAM (832,0) is outside 320x240, so it
+     * is preserved. */
+    RECT clr;
+    extern int ClearImage(RECT*, unsigned char, unsigned char, unsigned char);
+    clr.x = 0; clr.y = 0; clr.w = 320; clr.h = 240;
+    ClearImage(&clr, 0, 0, 0);
+
     D_1F800000[2] = ot_buf + 2;      /* +8 bytes:    tpage-list head  */
     D_1F800000[1] = ot_buf + 18;     /* +0x48 bytes: OT base          */
     ClearOTagR(ot_buf, 0x822);
