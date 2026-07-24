@@ -12,7 +12,34 @@ retail disc byte-for-byte**.
 
 ## 0. Current status — START HERE (resume point)
 
-**Branch `work`, tip `b3ed3282`.** Both builds green:
+### ✅ PHASE 2 EXIT CRITERION MET (tip `20f1becf`)
+`make -f Makefile.native menu` renders the **full Vagrant Story command menu**
+natively — all tabs (MAGIC, BREAK ARTS, BATTLE ABILITIES, ITEMS, STATUS, MAP,
+DATA, OPTIONS, SCORE, QUICK MANUAL) as real text with cursor + gradient
+highlights — and it **responds to input** (injected presses move the cursor;
+95 primitives, ~16k pixels). That is Phase 2: *the menu renders natively and
+responds to a gamepad.*
+
+The unlock was decompiling **`func_800C930C`** (the 300-instruction main-menu
+tab input/build handler) to native-functional C in
+`native/platform/battle_menu.c` — it was assembly, stubbed, aborting at
+`currentState=0`. PSX build keeps the asm; native gets the C.
+
+**Immediate polish / next items:**
+- **Cursor cosmetic:** multiple selection highlights can persist as the cursor
+  moves (a cursor-clear nuance in the native `func_800C930C`, or prim-buffer
+  reuse between frames). Cosmetic; tidy first.
+- **Audio (Phase 3):** the menu SFX dispatchers in `battle_asm.c` are no-oped
+  because the SPU voice state is uninitialised (`vs_main_playSfxDefault` faults).
+  Restore real dispatch when audio lands.
+- **Submenu content:** entering a tab (confirm) should open its item list
+  (`vs_mainMenu_renderItemsList`, already real, reads `vs_main_buttonsPressed`).
+  Inventory is populated; wire the confirm → submenu path.
+- **Real save:** optionally load a memory-card save instead of synthetic state.
+
+---
+
+**Branch `work`, tip `20f1becf`.** Both builds green:
 - **PSX matching build:** `make -j"$(nproc)"` → 21/21 byte-identical (the oracle; must never break).
 - **Native build:** `make -f Makefile.native stubs && make -f Makefile.native` → `native/build/vagrant-native` links and runs (32-bit x86 ELF).
 - **Tests:** `make -f Makefile.native test` → GTE 891/0 (hardware-verified), GPU 18/0.
