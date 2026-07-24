@@ -3652,6 +3652,14 @@ static void _displayPublisherAndDeveloper()
 
 static void _initIntroMovie(void)
 {
+#ifdef NATIVE_BUILD
+    /* The intro is an MDEC video stream, and the native port has no MDEC
+     * decoder yet, so the loop at the end of this function -- which spins until
+     * _decodeNextMovieFrame() succeeds -- would never terminate. Skip straight
+     * to the title screen until the decoder lands. See docs/NATIVE_DEVIATIONS.md
+     * (A6). The PSX build is unaffected. */
+    return;
+#else
     _dslMode = DslModeStream2 | DslModeSpeed | DslModeRT;
     DsIntToPos(VS_TITLE_STR_LBA, &_introMovieLoc);
     _movieRingBuf = vs_main_allocHeap(0x20000);
@@ -3669,6 +3677,7 @@ static void _initIntroMovie(void)
     }
     _introMoviePlaying = 1;
     _introMovieDisplayedAt = VSync(-1);
+#endif
 }
 
 static void _stopIntroMovie(void)
@@ -3700,6 +3709,10 @@ static int _playIntroMovie(void)
     DISPENV disp;
     int var_s2;
     u_int dataSize;
+
+#ifdef NATIVE_BUILD
+    return 0;   /* no MDEC decoder yet -- see _initIntroMovie above */
+#endif
 
     var_s2 = 0;
 

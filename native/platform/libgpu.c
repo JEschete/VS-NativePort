@@ -426,7 +426,17 @@ DRAWENV* SetDefDrawEnv(DRAWENV* env, int x, int y, int w, int h)
     return env;
 }
 
-DISPENV* PutDispEnv(DISPENV* env) { cur_disp = *env; return env; }
+/* Selecting the displayed region also re-aims the host window at it (no-op when
+ * running headless) -- the boot sequence moves between a 320x240 menu area and
+ * the title screen's 512x480 area at x=512. */
+void psx_present_set_display(int x, int y, int w, int h);
+
+DISPENV* PutDispEnv(DISPENV* env)
+{
+    cur_disp = *env;
+    psx_present_set_display(env->disp.x, env->disp.y, env->disp.w, env->disp.h);
+    return env;
+}
 DRAWENV* PutDrawEnv(DRAWENV* env) { cur_draw = *env; return env; }
 int SetDispMask(int mask) { disp_mask = mask; return mask; }
 
@@ -475,11 +485,21 @@ unsigned short GetClut(int x, int y)
 
 /* ---- VRAM transfers ---- */
 
+/* VS_GPU_TRACE=1 logs every VRAM upload with a cheap checksum of the source.
+ * "the rect is right but the pixels are zero" and "nothing called LoadImage at
+ * all" look identical from a VRAM dump, and they have very different causes. */
 int LoadImage(RECT* r, unsigned long* p)
 {
     uint16_t* vram = psx_vram();
     const uint16_t* src = (const uint16_t*)p;
     int j;
+
+    if (getenv("VS_GPU_TRACE")) {
+        unsigned sum = 0, n = (unsigned)r->w * (unsigned)r->h, i;
+        for (i = 0; i < n; i++) sum += src[i];
+        printf("[gpu] LoadImage (%d,%d %dx%d) src=%p checksum=%08X\n",
+               r->x, r->y, r->w, r->h, (void*)p, sum);
+    }
     for (j = 0; j < r->h; j++) {
         int y = r->y + j;
         if (y < 0 || y >= PSX_VRAM_H) continue;
@@ -534,6 +554,14 @@ int ClearImage(RECT* r, unsigned char red, unsigned char green, unsigned char bl
     return 0;
 }
 
+/* Same fill, but returns without waiting for the GPU to finish. There is no
+ * asynchronous GPU here -- ClearImage already completed -- so they are one and
+ * the same. Used by _displayLoadingScreen on the boot path. */
+int ClearImage2(RECT* r, unsigned char red, unsigned char green, unsigned char blue)
+{
+    return ClearImage(r, red, green, blue);
+}
+
 /* ---- debug font: inert, menus do not need it ---- */
 
 int FntOpen(int x, int y, int w, int h, int isbg, int n)
@@ -541,3 +569,15 @@ int FntOpen(int x, int y, int w, int h, int isbg, int n)
 void FntLoad(int x, int y) { (void)x; (void)y; }
 unsigned long* FntFlush(int id) { (void)id; return 0; }
 void SetDumpFnt(int id) { (void)id; }
+
+/* Called when a DrawOTag finishes. Drawing is synchronous here, so the callback
+ * is recorded and fired at the end of each DrawOTag. Retail installs an empty
+ * function (_gpuSyncVoidCallback), so nothing depends on the timing. */
+static void (*draw_sync_cb)(void);
+void* DrawSyncCallback(void (*func)(void))
+{
+    void* old = (void*)draw_sync_cb;
+    draw_sync_cb = func;
+    return old;
+}
+void psx_gpu_fire_draw_sync(void) { if (draw_sync_cb) draw_sync_cb(); }

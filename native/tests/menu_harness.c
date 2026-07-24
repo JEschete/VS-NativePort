@@ -31,6 +31,7 @@
  * the render pipeline, which this harness demonstrates is working.
  */
 #include <psx_gpu.h>
+#include <psx_present.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -42,6 +43,10 @@ extern void* vs_battle_rowTypeBuf;
 static unsigned char items_buf[64 * 64];
 static unsigned char charstate_buf[16 * 1024];
 static unsigned char rowtype_buf[4 * 1024];
+/* characterState->unk44 (a D_800F4538_unk0*, the equipped-weapon slot). Read by
+ * func_800CABE0 -> ->weaponDrawn when the menu is opened; a zeroed block is
+ * enough, but it must not be NULL. */
+static unsigned char equipslot_buf[0x100];
 
 /* Load the font + UI textures the way _loadSystemDat (INITBTL) does, but read
  * SYSTEM.DAT from the extracted file instead of the disc. Drives the real game
@@ -192,14 +197,203 @@ static int nonzero_pixels(void)
     return n;
 }
 
+/* text-box render subsystem (func_800CB83C) + its triple-buffered OT */
+extern void func_800CB83C(void);
+extern unsigned char vs_battle_textBoxes[];
+extern int VSync(int mode);
+
+/* _cdQueue: 32 slots x 0x14, state (short) at offset 0. The real CD reader
+ * (stubbed natively) advances Enqueued->Loaded; since submenu overlays are
+ * already linked in, just mark queued slots Loaded so vs_battle_loadMenuPrg
+ * completes. */
+extern unsigned char _cdQueue[];
+
+static void pump_cd_queue(void)
+{
+    int k;
+    for (k = 0; k < 32; k++) {
+        short* st = (short*)(_cdQueue + k * 0x14);
+        if (*st != 0 && *st != 4) *st = 4;      /* -> Loaded */
+    }
+}
+
+/* One frame of the menu: lay out the OT, run the menu driver and the text-box
+ * pass, then walk the OT into VRAM. */
+static void menu_frame(void)
+{
+    unsigned long* ot;
+
+    psx_gpu_reset_stats();
+    render_init();
+    ot = D_1F800000[1];
+    func_800C97BC();
+    /* The synthetic submenu re-sets the info message every frame, which resets
+     * the info box's type-out counter (box->speed) to 1. Reveal it fully so the
+     * whole message shows instead of one character. (Real gameplay sets the
+     * message once per change.) vs_battle_textBoxes[7].speed is at 0x150+0x0C. */
+    *(unsigned short*)(vs_battle_textBoxes + 0x150 + 0x0C) = 0xFFFF;
+    func_800CB83C();   /* text-box render pass (info box etc.) */
+    DrawOTag(ot + 0x7FF);
+    DrawSync(0);
+}
+
+/* Reopen the menu after it has been closed.
+ *
+ * Backing out of the top level (Cross), or Triangle from a submenu, closes the
+ * menu: currentState walks 00 -> 1F -> 7F -> 3F and stays there. That is
+ * correct game behaviour -- it hands control back to the game world -- but
+ * there is no world yet, so the screen goes black and the window becomes
+ * useless until restarted.
+ *
+ * AUTO-REOPEN IS NOT SAFE YET -- investigated and deliberately not shipped:
+ *   - Restoring currentState alone leaves the next close stalled at 0x1F: the
+ *     flags func_800CACD0 resets (shortcutInvoked, D_800F4FDB, D_800F4EA0,
+ *     D_800F4E98) matter.
+ *   - Calling func_800CACD0 directly faults, because closing NULLs
+ *     vs_battle_menuItems and its `menuItems == 0` branch reallocates from the
+ *     heap into state the harness only fakes. Re-wiring the buffers first makes
+ *     it skip that branch and the reopen then succeeds (0x3F -> 0x00).
+ *   - It also needed characterState->unk44 wired (func_800CABE0 reads
+ *     ->weaponDrawn through it) -- that fix is kept, it is correct regardless.
+ *   - But ~20 frames after a successful reopen the process dies inside SDL with
+ *     a garbage jump, called from psx_present_pump. The reopened menu is
+ *     scribbling over the C heap, which is where SDL's renderer lives. Root
+ *     cause is in the menu's close/rebuild path against synthetic state, not in
+ *     the presenter.
+ * So: close the window cleanly instead, and say why. */
+
+/* Interactive mode: a real game loop driven by a real controller.
+ *
+ * Rather than poking vs_main_buttonsPressed directly (what the scripted mode
+ * below does), this registers the game's own pad buffers and calls the game's
+ * own vs_main_processPadState() -- the native pad layer writes a genuine PS1
+ * controller packet into those buffers every vblank, so held/pressed/released,
+ * auto-repeat and the analog-stick-to-d-pad mapping are all computed by
+ * untouched game code, exactly as on hardware. */
+static void interactive_loop(void)
+{
+    extern int  vs_main_processPadState(void);
+    extern char vs_main_padBuffer[2][34];
+    extern void PadInitDirect(unsigned char*, unsigned char*);
+    extern unsigned vs_main_buttonsPressed;
+    unsigned long frames = 0;
+    int shots = 0;
+    char last_state = -1;
+    /* Frame cap for automated runs (VS_MAX_FRAMES=N); 0 = run until quit. */
+    const char* cap_env = getenv("VS_MAX_FRAMES");
+    unsigned long cap = cap_env ? (unsigned long)atol(cap_env) : 0;
+
+    PadInitDirect((unsigned char*)vs_main_padBuffer[0],
+                  (unsigned char*)vs_main_padBuffer[1]);
+
+    printf("[harness] interactive. D-pad/left stick or arrow keys navigate, "
+           "Circle/Z confirms, Cross/X cancels,\n"
+           "[harness] L1-R1 (Q/E) switch item category, ESC quits, "
+           "F2 writes a screenshot.\n");
+    fflush(stdout);
+
+    while (!psx_present_quit_requested()) {
+        pump_cd_queue();
+        vs_main_processPadState();
+        if (vs_battle_menuState != last_state) {
+            printf("[state] frame %lu: currentState %02X -> %02X\n",
+                   frames, last_state & 0xFF, vs_battle_menuState & 0xFF);
+            fflush(stdout);
+            last_state = vs_battle_menuState;
+        }
+        if (vs_battle_menuState == 0x3F) {
+            printf("[harness] menu closed (Triangle, or Cross at the top level)"
+                   " -- the game would hand back to the world here, and there\n"
+                   "[harness] isn't one yet. Re-run `make -f Makefile.native "
+                   "window` to go again. See the reopen note above.\n");
+            break;
+        }
+        /* Echo what the GAME decoded, not what we injected -- this is the
+         * whole input chain (host -> PS1 packet -> vs_main_updatePadState ->
+         * edge/repeat logic) reporting for itself. */
+        if (vs_main_buttonsPressed) {
+            printf("[input] frame %lu: buttonsPressed=%04X\n",
+                   frames, vs_main_buttonsPressed & 0xFFFF);
+            fflush(stdout);
+        }
+        menu_frame();
+        if (psx_present_screenshot_requested()) {
+            char path[64];
+            snprintf(path, sizeof path, "native/build/shot%02d.ppm", ++shots);
+            psx_vram_write_ppm(path, 0, 0, 320, 240);
+            printf("[harness] wrote %s\n", path);
+        }
+        /* Paces to 60Hz, presents the frame we just drew, samples the host
+         * input and republishes it into the pad buffer. */
+        VSync(0);
+        frames++;
+        if (cap && frames >= cap) break;
+    }
+    psx_vram_write_ppm("native/build/window.ppm", 0, 0, 320, 240);
+    printf("[harness] %lu frames; input source: %s; wrote native/build/window.ppm\n",
+           frames, psx_pad_host_source());
+}
+
+/* Headless mode: the original fixed 130-frame script, kept verbatim so batch
+ * runs and PPM regression comparisons behave exactly as before. */
+static void scripted_loop(void)
+{
+    extern unsigned vs_main_buttonRepeat;
+    extern unsigned vs_main_buttonsPressed;
+    extern unsigned char D_800F4EE8[];   /* +0x3A = currentItemCategory */
+    int frame;
+    /* currentItemCategory to show (env VS_ITEM_CAT, default 1=weapons):
+     * 1=weapon 4=shield 5=armor 6=gem 7=misc. In-list cursor steps (env
+     * VS_ITEM_DOWN) issue N down-presses once the list is up. */
+    const char* cat_env = getenv("VS_ITEM_CAT");
+    const char* dn_env  = getenv("VS_ITEM_DOWN");
+    int item_cat  = cat_env ? atoi(cat_env) : 1;
+    int downsteps = dn_env  ? atoi(dn_env)  : 0;
+
+    for (frame = 0; frame < 130; frame++) {
+        pump_cd_queue();
+        /* Slide-in settles ~frame 44. Walk down to ITEMS (tab 3) then
+         * confirm to open the submenu (its category list + Ashley view). */
+        vs_main_buttonRepeat = (frame == 45 || frame == 47 || frame == 49)
+                             ? 0x4000u : 0u;                  /* down */
+        vs_main_buttonsPressed = (frame == 55) ? 0x20u : 0u;  /* confirm */
+        /* Once inside the ITEMS submenu, select the target category so the
+         * item list enumerates the real loaded items. Default weapons. */
+        if (frame >= 64) D_800F4EE8[0x3A] = (unsigned char)item_cat;
+        /* After the list settles into its interactive state (~frame 100),
+         * step the in-list cursor down N times with the D-pad (PADLdown
+         * 0x4000 via buttonRepeat) to show row highlighting. (Face-button X
+         * 0x40 is cancel/back, not cursor.) */
+        if (downsteps > 0 && frame >= 100 && frame < 100 + downsteps * 4
+            && ((frame - 100) % 4) == 0)
+            vs_main_buttonRepeat = 0x4000u;
+        fflush(stdout);
+        menu_frame();
+        printf("[harness]   frame %d: %d primitives, %d non-black pixels\n",
+               frame, psx_gpu_prims_drawn(), nonzero_pixels());
+    }
+
+    {
+        char path[64];
+        snprintf(path, sizeof path, "native/build/menu_cat%s.ppm",
+                 cat_env ? cat_env : "1");
+        psx_vram_write_ppm(path, 0, 0, 320, 240);
+        psx_vram_write_ppm("native/build/menu.ppm", 0, 0, 320, 240);
+        printf("[harness] wrote %s\n", path);
+    }
+}
+
 int main(void)
 {
     static DISPENV disp;
     static DRAWENV draw;
-    unsigned long* ot;
+    int windowed;
 
     printf("[harness] init graphics\n");
     ResetGraph(0);
+    /* Open the host window first so it is up (and the pad bridge is accepting
+     * connections) while the assets below load. */
+    windowed = (psx_present_init("Vagrant Story (native)", 3) == 0);
     SetDefDispEnv(&disp, 0, 0, 320, 240);
     PutDispEnv(&disp);
     SetDefDrawEnv(&draw, 0, 0, 320, 240);
@@ -225,6 +419,7 @@ int main(void)
     /* characterState->unk3C is the stat block (statuses @+0x948); the ITEMS
      * submenu reads it. Point it at the same synthetic actor2 stat block. */
     *(void**)(charstate_buf + 0x3C) = actor2_buf;
+    *(void**)(charstate_buf + 0x44) = equipslot_buf;
     vs_battle_rowTypeBuf = rowtype_buf;
     wire_synthetic_actor();
     load_item_text();   /* real item name/help tables (for the item list) */
@@ -307,86 +502,28 @@ int main(void)
     printf("[harness] opening equipment menu (currentState = 0, navigating)\n");
     (&vs_battle_menuState)[0] = 0;
 
+    /* Drive the box open/close animation, and prime the text-box OT before the
+     * first driver call (the driver clears it at the END of each frame for the
+     * NEXT frame, so frame 0 needs a valid buffer already). */
     {
-        extern unsigned vs_main_buttonRepeat;
-        extern unsigned vs_main_buttonsPressed;
-        /* _cdQueue: 32 slots x 0x14, state (short) at offset 0. The real CD
-         * reader (stubbed natively) advances Enqueued->Loaded; since submenu
-         * overlays are already linked, just mark queued slots Loaded so
-         * vs_battle_loadMenuPrg completes. */
-        extern unsigned char _cdQueue[];
-        /* text-box render subsystem (func_800CB83C) + its triple-buffered OT */
-        extern void func_800CB83C(void);
-        extern unsigned char vs_battle_textBoxes[];
         extern unsigned long* D_800F51B8;
         extern unsigned char D_800EB9CE;
         extern unsigned char D_800F4CD0[];
-        extern unsigned long* ClearOTagR(unsigned long*, int);
         extern int vs_gametime_tickspeed;
-        extern unsigned char D_800F4EE8[];   /* +0x3A = currentItemCategory */
-        int frame, k;
-        /* currentItemCategory to show (env VS_ITEM_CAT, default 1=weapons):
-         * 1=weapon 4=shield 5=armor 6=gem 7=misc. In-list cursor steps (env
-         * VS_ITEM_DOWN) issue N down-presses once the list is up. */
-        const char* cat_env = getenv("VS_ITEM_CAT");
-        const char* dn_env  = getenv("VS_ITEM_DOWN");
-        int item_cat  = cat_env ? atoi(cat_env) : 1;
-        int downsteps = dn_env  ? atoi(dn_env)  : 0;
-
-        /* Drive the box open/close animation, and prime the text-box OT before
-         * the first driver call (the driver clears it at the END of each frame
-         * for the NEXT frame, so frame 0 needs a valid buffer already). */
         vs_gametime_tickspeed = 2;
         D_800EB9CE = 0;
         D_800F51B8 = (unsigned long*)D_800F4CD0;
         ClearOTagR(D_800F51B8, 0x22);
-
-        for (frame = 0; frame < 130; frame++) {
-            for (k = 0; k < 32; k++) {
-                short* st = (short*)(_cdQueue + k * 0x14);
-                if (*st != 0 && *st != 4) *st = 4;   /* -> Loaded */
-            }
-            /* Slide-in settles ~frame 44. Walk down to ITEMS (tab 3) then
-             * confirm to open the submenu (its category list + Ashley view). */
-            vs_main_buttonRepeat = (frame == 45 || frame == 47 || frame == 49)
-                                 ? 0x4000u : 0u;                  /* down */
-            vs_main_buttonsPressed = (frame == 55) ? 0x20u : 0u;  /* confirm */
-            /* Once inside the ITEMS submenu, select the target category so the
-             * item list enumerates the real loaded items. Default weapons. */
-            if (frame >= 64) D_800F4EE8[0x3A] = (unsigned char)item_cat;
-            /* After the list settles into its interactive state (~frame 100),
-             * step the in-list cursor down N times with the D-pad (PADLdown
-             * 0x4000 via buttonRepeat) to show row highlighting. (Face-button X
-             * 0x40 is cancel/back, not cursor.) */
-            if (downsteps > 0 && frame >= 100 && frame < 100 + downsteps * 4
-                && ((frame - 100) % 4) == 0)
-                vs_main_buttonRepeat = 0x4000u;
-            fflush(stdout);
-            psx_gpu_reset_stats();
-            render_init();
-            ot = D_1F800000[1];
-            func_800C97BC();
-            /* The synthetic submenu re-sets the info message every frame, which
-             * resets the info box's type-out counter (box->speed) to 1. Reveal
-             * it fully so the static demo shows the whole message instead of
-             * one character. (Real gameplay sets the message once per change.)
-             * vs_battle_textBoxes[7].speed is at offset 0x150 + 0x0C. */
-            *(unsigned short*)(vs_battle_textBoxes + 0x150 + 0x0C) = 0xFFFF;
-            func_800CB83C();   /* text-box render pass (info box etc.) */
-            DrawOTag(ot + 0x7FF);
-            DrawSync(0);
-            printf("[harness]   frame %d: %d primitives, %d non-black pixels\n",
-                   frame, psx_gpu_prims_drawn(), nonzero_pixels());
-        }
     }
 
-    {
-        char path[64];
-        const char* c = getenv("VS_ITEM_CAT");
-        snprintf(path, sizeof path, "native/build/menu_cat%s.ppm", c ? c : "1");
-        psx_vram_write_ppm(path, 0, 0, 320, 240);
-        psx_vram_write_ppm("native/build/menu.ppm", 0, 0, 320, 240);
-        printf("[harness] wrote %s\n", path);
-    }
+    /* A window means a person is driving: run the real game loop against real
+     * input. No window (no SDL / no display / VS_HEADLESS) falls back to the
+     * scripted batch run that dumps a PPM. */
+    if (windowed)
+        interactive_loop();
+    else
+        scripted_loop();
+
+    psx_present_shutdown();
     return 0;
 }

@@ -132,3 +132,14 @@ void DpqColor(CVECTOR* v0, long p, CVECTOR* v1)
     gte_op_dpcs();
     *(unsigned long*)v1 = gte_get_data(GTE_D_RGB2);
 }
+
+/* Bring the geometry engine up. On hardware this enables COP2 and clears its
+ * control registers; the software GTE keeps its state in gte_core.c and starts
+ * zeroed, so there is nothing to switch on.
+ *
+ * NOTE: without this definition the stub generator emits InitGeom as a *data*
+ * blob rather than an abort stub -- it only classifies a symbol as a function
+ * when the disassembly glabels it, and InitGeom is never defined in src/. The
+ * call then jumps into a zeroed array and segfaults instead of reporting
+ * itself. The same applies to the DecDCT* (MDEC) family. */
+void InitGeom(void) { }

@@ -24,14 +24,33 @@ TESTBIN   := $(BUILD)/test_gte
 # `c = *charptr` and compared to 0xE7 / 0xFF). x86 gcc defaults `char` to
 # SIGNED, so 0xE7 sign-extends to 0xFFFFFFE7, terminator checks fail, and string
 # loops run away. Matching the PS1 ABI here fixes a whole class of latent bugs.
-GAME_CFLAGS := -m32 -std=gnu89 -nostdinc -DNATIVE_BUILD -D_LANGUAGE_C \
+# _copyTitleBgData walks the compressed title background for MENUBGSZ bytes.
+# Retail gets that from the extracted asset's size (config/TITLE/TITLE.PRG/
+# Makefile does the same shell-out); the header's #ifndef fallback is wrong, so
+# derive it the same way here rather than trusting the default.
+TITLEBG_OBJ := build/assets/TITLE/TITLE.PRG/_titleScreenBg.rgba16Compressed.img.o
+MENUBGSZ    := $(shell mipsel-linux-gnu-size $(TITLEBG_OBJ) 2>/dev/null | tail -n1 | awk '{print $$2}')
+ifneq ($(MENUBGSZ),)
+MENUBG_DEF  := -DMENUBGSZ=$(MENUBGSZ)
+endif
+
+GAME_CFLAGS := -m32 -std=gnu89 -nostdinc -DNATIVE_BUILD -D_LANGUAGE_C $(MENUBG_DEF) \
                -I include/psx -I src/include -I native/include -I ./ \
                -include native/include/psx_compat.h \
                -fno-builtin -fno-strict-aliasing -fwrapv -fno-pic \
                -funsigned-char -fno-stack-protector -w
 
 # Platform layer: normal hosted C, may use libc.
-PLAT_CFLAGS := -m32 -I native/include -fno-strict-aliasing -fwrapv -fno-pic -w
+#
+# -idirafter: for -m32 gcc searches /usr/include/i386-linux-gnu, which does not
+# exist here (libc6-dev-i386 provides the 32-bit libs, but the kernel UAPI
+# headers only ship in the amd64 multiarch dir). Without this, anything pulling
+# in <asm/*> -- errno.h, the socket headers used by the pad bridge -- fails to
+# compile. Appending the dir (rather than -I, which prepends) means it is only
+# consulted for headers not found elsewhere, so nothing already resolving gets
+# shadowed. The x86 UAPI headers are shared between i386 and x86_64.
+PLAT_CFLAGS := -m32 -I native/include -idirafter /usr/include/x86_64-linux-gnu \
+               -fno-strict-aliasing -fwrapv -fno-pic -w
 # Link below 16MB so real host pointers fit the 24-bit address fields the
 # PS1 ordering table uses (see native/include/psx_gpu.h).
 #
@@ -42,14 +61,24 @@ PLAT_CFLAGS := -m32 -I native/include -fno-strict-aliasing -fwrapv -fno-pic -w
 LDFLAGS     := -m32 -no-pie -Wl,-Ttext-segment=0x10000 \
                -Wl,--defsym=D_1F800000=0x1F800000 \
                -Wl,--defsym=_camera=0x1F800000
+# SDL2 is dlopen'd at runtime rather than linked (native/include/psx_present.h
+# explains why: -m32 + Ubuntu's multiarch SDL headers would drag in i386 dev
+# packages that can displace the mipsel cross-toolchain, and the window should
+# stay optional so headless batch runs keep working). Hence just -ldl.
+LDLIBS      := -ldl
 
 # Translation units that cannot compile for x86 yet:
 #  - hand-written inline MIPS asm in the C body (needs a NATIVE_BUILD C path,
 #    same pattern as src/include/insertTPage.h)
 #  - static vs non-static declaration conflicts (linkage-changing; must be
 #    re-verified against the byte-matching build before touching)
+#  - decompiled PSYQ functions that call straight into BIOS internals (e.g.
+#    INTR.c's ResetCallback is `D_800320D4->unkC()`, a jump through the kernel's
+#    callback vector table, which natively is a zeroed blob). The platform layer
+#    owns those instead; everything else in such a TU is already assembly, so
+#    excluding it costs no real code.
 NATIVE_EXCLUDE := \
-    src/BATTLE/BATTLE.PRG/38C1C.c \    src/BATTLE/BATTLE.PRG/4A0A8.c \    src/MENU/MENUB.PRG/260.c \    src/MENU/MENUF.PRG/3B8.c \    src/SLUS_010.40/libapi/COUNTER.c \    src/SLUS_010.40/libsn/SNMAIN.c \    src/SLUS_010.40/overlay.c \    src/TITLE/TITLE.PRG/libpress/LIBPRESS.c
+    src/BATTLE/BATTLE.PRG/38C1C.c \    src/BATTLE/BATTLE.PRG/4A0A8.c \    src/MENU/MENUB.PRG/260.c \    src/MENU/MENUF.PRG/3B8.c \    src/SLUS_010.40/libapi/COUNTER.c \    src/SLUS_010.40/libetc/INTR.c \    src/SLUS_010.40/libsn/SNMAIN.c \    src/SLUS_010.40/overlay.c \    src/TITLE/TITLE.PRG/libpress/LIBPRESS.c
 
 # Everything else. INCLUDE_ASM is a no-op under NATIVE_BUILD, so TUs that still
 # contain assembly contribute their data tables and decompiled functions, and
@@ -63,7 +92,8 @@ GAME_SRCS := $(filter-out $(NATIVE_EXCLUDE),$(shell find src -name "*.c" | sort)
 # as satisfied and does not emit zero blobs for them -- no exclusion list needed.
 HARVEST_SYMS := vs_battle_menuStrings vs_battle_characterWidths \
                 vs_battle_rowAnimationSteps \
-                D_800EB708 D_800EB7B4 D_800EB7D4
+                D_800EB708 D_800EB7B4 D_800EB7D4 \
+                _titleScreenBg
 
 # Real implementations (must be linked BEFORE stubs are generated so their
 # symbols are excluded from stubbing).
@@ -73,6 +103,10 @@ PLAT_REAL := native/platform/unimpl.c native/platform/scratchpad.c \
              native/platform/psx_vram.c native/platform/libapi.c \
              native/platform/battle_asm.c native/platform/battle_menu.c \
              native/platform/battle_textbox.c native/platform/harvested_data.c \
+             native/platform/libpad.c native/platform/present.c \
+             native/platform/libds.c native/platform/libspu.c \
+             native/platform/disc_index.c native/platform/kernel.c \
+             native/platform/sound_asm.c native/platform/assets.c \
              native/platform/main.c
 PLAT_SRCS := $(PLAT_REAL) native/platform/stubs.c
 
@@ -80,7 +114,7 @@ GAME_OBJS := $(foreach s,$(GAME_SRCS),$(OBJ)/game_$(subst /,_,$(patsubst src/%.c
 REAL_OBJS := $(patsubst native/platform/%.c,$(OBJ)/plat_%.o,$(PLAT_REAL))
 STUB_OBJ  := $(OBJ)/plat_stubs.o
 
-.PHONY: all clean run stubs test menu harvest
+.PHONY: all clean run stubs test menu window harvest discindex assets
 all: $(BIN)
 
 # harvested_data.c holds real read-only bytes copied from the retail overlays,
@@ -92,6 +126,22 @@ native/platform/harvested_data.c: native/tools/harvest_data.py
 		native/platform/harvested.syms $(HARVEST_SYMS)
 
 harvest: native/platform/harvested_data.c
+
+# LBA -> extracted-file map, so the port reads assets from data/ instead of
+# needing the disc image at runtime. Generated (never committed), like data/.
+native/platform/disc_index.c: native/tools/gen_disc_index.py config/SLUS-01040.xml
+	@echo "  DISCIDX  $@"
+	@python3 native/tools/gen_disc_index.py $@
+
+discindex: native/platform/disc_index.c
+
+# Overlay binary assets (compressed title background, font tables). Generated,
+# never committed -- same rationale as data/ and harvested_data.c.
+native/platform/assets.c: native/tools/gen_assets.py
+	@echo "  ASSETS   $@"
+	@python3 native/tools/gen_assets.py $@
+
+assets: native/platform/assets.c
 
 $(OBJ):
 	@mkdir -p $(OBJ)
@@ -119,7 +169,7 @@ $(OBJ)/plat_%.o: native/platform/%.c | $(OBJ)
 
 $(BIN): $(GAME_OBJS) $(REAL_OBJS) $(STUB_OBJ)
 	@echo "  LD       $@"
-	@$(NATIVE_CC) $(LDFLAGS) $^ -o $@
+	@$(NATIVE_CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 	@echo "native target linked: $@"
 
 # Regenerate the stub layer from whatever is still unresolved after the real
@@ -143,8 +193,25 @@ run: $(BIN)
 clean:
 	$(RM) -r $(BUILD)
 
-menu: $(GAME_OBJS) $(REAL_OBJS) $(STUB_OBJ)
+MENUBIN := $(BUILD)/menu_harness
+
+$(MENUBIN): $(GAME_OBJS) $(REAL_OBJS) $(STUB_OBJ) native/tests/menu_harness.c
+	@echo "  CC(test) native/tests/menu_harness.c"
 	@$(NATIVE_CC) $(PLAT_CFLAGS) -c native/tests/menu_harness.c -o $(OBJ)/menu_harness.o
-	@$(NATIVE_CC) $(LDFLAGS) $(filter-out $(OBJ)/plat_main.o,$^) $(OBJ)/menu_harness.o -o $(BUILD)/menu_harness
-	@echo ---- run ----
-	-@./$(BUILD)/menu_harness
+	@echo "  LD       $@"
+	@$(NATIVE_CC) $(LDFLAGS) \
+		$(filter-out $(OBJ)/plat_main.o,$(GAME_OBJS) $(REAL_OBJS) $(STUB_OBJ)) \
+		$(OBJ)/menu_harness.o $(LDLIBS) -o $@
+
+# Batch run: no window, fixed 130-frame script, dumps native/build/menu.ppm.
+# This is the regression path -- keep its output stable.
+menu: $(MENUBIN)
+	@echo "---- run: headless ----"
+	-@VS_HEADLESS=1 ./$(MENUBIN)
+
+# Interactive run: opens a real window and takes live input. Plug in a pad on
+# the Windows side with `python native/tools/pad_bridge.py` (WSL cannot see USB
+# or Bluetooth devices); the keyboard always works.
+window: $(MENUBIN)
+	@echo "---- run: windowed ----"
+	-@./$(MENUBIN)
