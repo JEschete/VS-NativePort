@@ -211,23 +211,207 @@ long _card_write(long chan, long sector, unsigned char* buf)
  * report "no card" instead of hanging. */
 long _card_status(long chan) { (void)chan; return card_file() ? 0 : 1; }
 
-/* Directory enumeration. The menus use firstfile/nextfile to list saves; with
- * no host save directory yet this reports an empty card, which is a valid
- * state the menus already handle. */
-static struct DIRENTRY* dir_cursor;
+/* ---- PS1 memory-card filesystem over the .mcd image ----
+ * Block 0 is the directory: frame 0 is a header, frames 1..15 are one entry per
+ * data block. Directory entry at 0x80*n: [0x00]=u32 state (0x51 first-in-use,
+ * 0x52 middle, 0x53 last, 0xA*=free), [0x04]=u32 file size, [0x08]=u16 next
+ * block (0xFFFF terminator), [0x0A]=NUL-terminated name. Data block n lives at
+ * 0x2000*n. A file is a chain of 8 KB blocks. The whole image is cached in RAM
+ * and flushed back on write. The game's open/read/write/close/lseek reach here
+ * via the vs_bios_* asm labels in <libapi.h>; erase/firstfile/nextfile keep
+ * their names (no POSIX clash). */
+#define MCD_BLOCK   0x2000
+#define MCD_BLOCKS  16
+#define MCD_SIZE    (MCD_BLOCK * MCD_BLOCKS)
 
-struct DIRENTRY* firstfile(char* name, struct DIRENTRY* dir)
+static unsigned char mcd_img[MCD_SIZE];
+static int mcd_loaded = 0;
+
+static unsigned char* mcd_image(void)
 {
-    (void)name;
-    dir_cursor = 0;
-    if (dir) memset(dir, 0, sizeof *dir);
+    FILE* fp;
+    if (mcd_loaded) return mcd_img;
+    fp = card_file();
+    if (!fp) return 0;
+    if (fseek(fp, 0, SEEK_SET) != 0 || fread(mcd_img, 1, MCD_SIZE, fp) != MCD_SIZE)
+        return 0;
+    mcd_loaded = 1;
+    return mcd_img;
+}
+
+static void mcd_flush(void)
+{
+    FILE* fp = card_file();
+    if (fp && mcd_loaded) {
+        fseek(fp, 0, SEEK_SET);
+        fwrite(mcd_img, 1, MCD_SIZE, fp);
+        fflush(fp);
+    }
+}
+
+static unsigned mcd_state(unsigned char* img, int b) { return *(unsigned*)(img + 0x80 * b); }
+static unsigned mcd_fsize(unsigned char* img, int b) { return *(unsigned*)(img + 0x80 * b + 4); }
+static int      mcd_next (unsigned char* img, int b) { return *(unsigned short*)(img + 0x80 * b + 8); }
+static char*    mcd_name (unsigned char* img, int b) { return (char*)(img + 0x80 * b + 0x0A); }
+static int      mcd_isfirst(unsigned char* img, int b)
+{ unsigned s = mcd_state(img, b); return (s & 0xF0) == 0x50 && (s & 0xF) == 1; }
+
+/* strip a "buNN:" (or any "dev:") device prefix */
+static const char* mcd_basename(const char* path)
+{
+    const char* c = path;
+    for (; *c; c++) if (*c == ':') return c + 1;
+    return path;
+}
+
+#define MCD_MAXFD 8
+static struct { int used, block; unsigned pos, size; } mcd_fd[MCD_MAXFD];
+
+long vs_bios_open(char* name, unsigned long mode)
+{
+    unsigned char* img = mcd_image();
+    const char* base;
+    int b, fd;
+    (void)mode;
+    if (!img) return -1;
+    base = mcd_basename(name);
+    for (b = 1; b < MCD_BLOCKS; b++) {
+        if (mcd_isfirst(img, b) && strcmp(mcd_name(img, b), base) == 0) {
+            for (fd = 0; fd < MCD_MAXFD; fd++) {
+                if (!mcd_fd[fd].used) {
+                    mcd_fd[fd].used = 1;
+                    mcd_fd[fd].block = b;
+                    mcd_fd[fd].pos = 0;
+                    mcd_fd[fd].size = mcd_fsize(img, b);
+                    return fd + 3;               /* keep 0/1/2 for std streams */
+                }
+            }
+            return -1;                            /* no free descriptor */
+        }
+    }
+    return -1;                                    /* not found (new-file create: TODO) */
+}
+
+long vs_bios_read(long fd, void* buf, long n)
+{
+    unsigned char* img = mcd_image();
+    int i = (int)fd - 3, blk, boff, got = 0;
+    if (!img || i < 0 || i >= MCD_MAXFD || !mcd_fd[i].used) return -1;
+    if ((unsigned)(mcd_fd[i].pos + n) > mcd_fd[i].size) n = (long)mcd_fd[i].size - mcd_fd[i].pos;
+    if (n < 0) n = 0;
+    blk = mcd_fd[i].block;
+    boff = (int)mcd_fd[i].pos;
+    while (boff >= MCD_BLOCK) { blk = mcd_next(img, blk); boff -= MCD_BLOCK;
+                               if (blk <= 0 || blk >= MCD_BLOCKS) return got; }
+    while (n > 0) {
+        int chunk = MCD_BLOCK - boff;
+        if (chunk > n) chunk = (int)n;
+        memcpy((char*)buf + got, img + MCD_BLOCK * blk + boff, chunk);
+        got += chunk; n -= chunk; mcd_fd[i].pos += chunk; boff += chunk;
+        if (boff >= MCD_BLOCK && n > 0) { blk = mcd_next(img, blk); boff = 0;
+                                          if (blk <= 0 || blk >= MCD_BLOCKS) break; }
+    }
+    return got;
+}
+
+long vs_bios_write(long fd, void* buf, long n)
+{
+    unsigned char* img = mcd_image();
+    int i = (int)fd - 3, blk, boff, put = 0;
+    if (!img || i < 0 || i >= MCD_MAXFD || !mcd_fd[i].used) return -1;
+    blk = mcd_fd[i].block;
+    boff = (int)mcd_fd[i].pos;
+    while (boff >= MCD_BLOCK) { blk = mcd_next(img, blk); boff -= MCD_BLOCK;
+                               if (blk <= 0 || blk >= MCD_BLOCKS) return put; }
+    while (n > 0) {
+        int chunk = MCD_BLOCK - boff;
+        if (chunk > n) chunk = (int)n;
+        memcpy(img + MCD_BLOCK * blk + boff, (char*)buf + put, chunk);
+        put += chunk; n -= chunk; mcd_fd[i].pos += chunk; boff += chunk;
+        if (boff >= MCD_BLOCK && n > 0) { blk = mcd_next(img, blk); boff = 0;
+                                          if (blk <= 0 || blk >= MCD_BLOCKS) break; }
+    }
+    mcd_flush();
+    return put;
+}
+
+long vs_bios_lseek(long fd, long off, long whence)
+{
+    int i = (int)fd - 3;
+    if (i < 0 || i >= MCD_MAXFD || !mcd_fd[i].used) return -1;
+    if (whence == 0)      mcd_fd[i].pos = (unsigned)off;              /* SEEK_SET */
+    else if (whence == 1) mcd_fd[i].pos += (unsigned)off;            /* SEEK_CUR */
+    else                  mcd_fd[i].pos = mcd_fd[i].size + off;      /* SEEK_END */
+    return (long)mcd_fd[i].pos;
+}
+
+long vs_bios_close(long fd)
+{
+    int i = (int)fd - 3;
+    if (i >= 0 && i < MCD_MAXFD) mcd_fd[i].used = 0;
     return 0;
+}
+
+/* Directory enumeration. firstfile(pattern, dir) matches the basename against
+ * the leading, pre-'*' portion of the pattern; nextfile continues. VS uses this
+ * to list its save files, then filters by name itself. */
+static int  dir_blk;
+static char dir_prefix[24];
+
+static int mcd_prefix_match(const char* name)
+{
+    return dir_prefix[0] == 0 || strncmp(name, dir_prefix, strlen(dir_prefix)) == 0;
 }
 
 struct DIRENTRY* nextfile(struct DIRENTRY* dir)
 {
-    (void)dir;
+    unsigned char* img = mcd_image();
+    if (!img || !dir) return 0;
+    for (; dir_blk < MCD_BLOCKS; dir_blk++) {
+        if (mcd_isfirst(img, dir_blk) && mcd_prefix_match(mcd_name(img, dir_blk))) {
+            memset(dir, 0, sizeof *dir);
+            strncpy(dir->name, mcd_name(img, dir_blk), sizeof dir->name - 1);
+            dir->size = (long)mcd_fsize(img, dir_blk);
+            dir->head = dir_blk;
+            dir_blk++;
+            return dir;
+        }
+    }
     return 0;
 }
 
-long erase(char* name) { (void)name; return 0; }
+struct DIRENTRY* firstfile(char* name, struct DIRENTRY* dir)
+{
+    const char* base = name ? mcd_basename(name) : "";
+    const char* star = strchr(base, '*');
+    size_t plen = star ? (size_t)(star - base) : strlen(base);
+    if (plen >= sizeof dir_prefix) plen = sizeof dir_prefix - 1;
+    memcpy(dir_prefix, base, plen);
+    dir_prefix[plen] = 0;
+    dir_blk = 1;
+    return nextfile(dir);
+}
+
+long erase(char* name)
+{
+    unsigned char* img = mcd_image();
+    const char* base;
+    int b;
+    if (!img) return 0;
+    base = mcd_basename(name);
+    for (b = 1; b < MCD_BLOCKS; b++) {
+        if (mcd_isfirst(img, b) && strcmp(mcd_name(img, b), base) == 0) {
+            int cur = b;
+            while (cur > 0 && cur < MCD_BLOCKS) {
+                int last = (mcd_state(img, cur) & 0xF) == 3;   /* read before clearing */
+                int nxt  = mcd_next(img, cur);
+                *(unsigned*)(img + 0x80 * cur) = 0xA0;         /* mark free */
+                if (last || nxt == 0xFFFF) break;
+                cur = nxt;
+            }
+            mcd_flush();
+            return 1;
+        }
+    }
+    return 0;
+}

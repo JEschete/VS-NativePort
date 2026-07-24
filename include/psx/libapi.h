@@ -45,11 +45,25 @@ extern long OpenTh(long (*func)(), unsigned long , unsigned long);
 extern int CloseTh(long);
 extern int ChangeTh(long);
 
+#ifdef NATIVE_BUILD
+/* The PS1 BIOS file API shares names with POSIX open/read/write/close/lseek.
+ * In the native build the platform layer implements them over the virtual
+ * memory card, but glibc (used by the platform layer itself) owns the POSIX
+ * symbols. Redirect ONLY the game's calls to vs_bios_* link symbols via asm
+ * labels -- this renames the function symbol without a macro that would clobber
+ * unrelated identifiers named read/open/etc. */
+extern long open(char *, unsigned long)   __asm__("vs_bios_open");
+extern long close(long)                   __asm__("vs_bios_close");
+extern long lseek(long, long, long)       __asm__("vs_bios_lseek");
+extern long read(long, void *, long)      __asm__("vs_bios_read");
+extern long write(long, void *, long)     __asm__("vs_bios_write");
+#else
 extern long open(char *, unsigned long);
 extern long close(long);
 extern long lseek(long, long, long);
 extern long read(long, void *, long);
 extern long write(long, void *, long);
+#endif
 extern long ioctl(long, long, long);
 extern struct DIRENTRY * firstfile(char *, struct DIRENTRY *);
 extern struct DIRENTRY * nextfile(struct DIRENTRY *);
