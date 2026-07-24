@@ -39,11 +39,14 @@ void vs_battle_copyAligned(void* dst, const void* src, int numBytes)
  * so these correctly surface the audio dependency when a sfx actually fires. */
 extern void vs_main_playSfxDefault(int a, int b);
 
-void vs_battle_playMenuChangeSfx(void) { vs_main_playSfxDefault(0x7E, 4); }
-void vs_battle_playMenuSelectSfx(void) { vs_main_playSfxDefault(0x7E, 5); }
-void vs_battle_playMenuLeaveSfx(void)  { vs_main_playSfxDefault(0x7E, 6); }
-void vs_battle_playInvalidSfx(void)    { vs_main_playSfxDefault(0x7E, 7); }
-void vs_battle_playSfx10(void)         { vs_main_playSfxDefault(0x7E, 10); }
+/* Audio is Phase 3 and the SPU voice state is not initialised in the menu
+ * harness, so these are no-ops for now (calling vs_main_playSfxDefault faults
+ * in the uninitialised SPU path). Restore the real dispatch once audio lands. */
+void vs_battle_playMenuChangeSfx(void) { (void)0; }
+void vs_battle_playMenuSelectSfx(void) { (void)0; }
+void vs_battle_playMenuLeaveSfx(void)  { (void)0; }
+void vs_battle_playInvalidSfx(void)    { (void)0; }
+void vs_battle_playSfx10(void)         { (void)0; }
 
 /* ---- sprite builders (573B8) ----
  * Faithful C translation of the hand-written asm (matchings/573B8/*.s). Each

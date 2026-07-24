@@ -188,15 +188,36 @@ int main(void)
         printf("[harness] populated inventory: 2 weapons, 10 grimoires\n");
     }
 
+    /* vs_battle_getCurrentSceneId reads vs_battle_roomData.sectionB(+0x8C)
+     * ->sceneId(+0x50); wire sectionB to a zeroed buffer so it reads 0. */
+    {
+        extern unsigned char vs_battle_roomData[];
+        static unsigned char sectionB_buf[256];
+        *(void**)(vs_battle_roomData + 0x8C) = sectionB_buf;
+    }
+
+    /* Enable menu tabs and build the tab list. menuFlags (settings+2) is the
+     * enabled-menu bitmask; func_800C930C(2) rebuilds the items + starts the
+     * slide-in. currentState=0 is the tab-navigating state. */
+    {
+        extern unsigned char vs_main_settings[];
+        extern int func_800C930C(int);
+        *(unsigned short*)(vs_main_settings + 2) = 0x03FF;   /* enable 10 tabs */
+        func_800C930C(2);
+    }
+
     extern void psx_gpu_set_ot_dump(int);
     psx_gpu_set_ot_dump(0);
-    printf("[harness] opening equipment menu (currentState = 1)\n");
-    (&vs_battle_menuState)[0] = 1;
+    printf("[harness] opening equipment menu (currentState = 0, navigating)\n");
+    (&vs_battle_menuState)[0] = 0;
 
     {
+        extern unsigned vs_main_buttonRepeat;
         int frame;
         for (frame = 0; frame < 90; frame++) {
-            printf("[harness] frame %d: render_init -> func_800C97BC -> DrawOTag\n", frame);
+            /* Inject a "down" press every 15 frames past the slide-in so the
+             * cursor visibly walks the tabs -- the input-response demo. */
+            vs_main_buttonRepeat = (frame >= 45 && frame % 15 == 0) ? 0x1000u : 0u;
             fflush(stdout);
             psx_gpu_reset_stats();
             render_init();
