@@ -22,7 +22,7 @@ These make the native menu render *incompletely* vs. the real game. Compare
 | A2 | `func_8007ACB0` | `native/platform/battle_asm.c` | No-op | Builds the GTE camera matrix for the submenu's 3D scene (rotating rune/cross backdrop + model) | Same as A1 — 3D scene is stood up |
 | A3 | `_printFixedWidthFontChar` | `native/platform/battle_asm.c` | Draws nothing; returns a plausible pen x-advance so layout still flows | Emits a textured fixed-width glyph sprite | A screen that uses fixed-width text is brought up and can be diffed |
 | A4 | INFORMATION box TEXT | **DONE** — `func_800CB83C` decompiled (`battle_textbox.c`) + text-box OT wired | Renders "Choose items to equip." (matches retail) | — | Complete |
-| A4b | INFORMATION box FRAME | `func_800CD158` no-op (`battle_textbox.c`) | Text renders on plain background; no shaded backing bar | Shaded/bordered bar behind the info text | Diff the 146-instr per-segment sprite build against DuckStation |
+| A4b | INFORMATION box FRAME | **DONE** — `func_800CD158` decompiled (`battle_textbox.c`) | Renders the shaded backing bar (semi-transparent, visible over a non-black background) | — | Complete |
 | A4c | Dialogue/menu box frame | `func_800CD3E4` no-op (`battle_textbox.c`) | Box states 2 & 7 draw no frame | Full dialogue/menu box border+gradient | A dialogue/menu-box screen is brought up (566-instr renderer) |
 | A5 | Per-category item list | **DONE** | Renders the real loaded inventory (e.g. WEAPONS 3/8: Fandango, Tovarisch, Seventh Heaven) | — | Complete — needed the save load (`.mcd`) + item-name text (`load_item_text` reads ITEMNAME/ITEMHELP/MENU12.BIN) |
 

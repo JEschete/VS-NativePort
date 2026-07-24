@@ -177,10 +177,58 @@ void func_800CB83C(void)
  * up and can be diffed against DuckStation. See docs/NATIVE_DEVIATIONS.md. */
 void func_800CD3E4(int boxIdx) { (void)boxIdx; }
 
-/* func_800CD158: draws the info box's background frame (state 4) -- the shaded
- * bar behind the info text, built from per-segment edge sprites + a tile fill.
- * The info-box TEXT already renders without it (via _printVariableWidthFont);
- * this is the decorative backing. Deferred (safe no-op) because its 146-instr
- * two-sprites-per-segment GP0 build needs a DuckStation diff to verify pixel
- * placement. See docs/NATIVE_DEVIATIONS.md. */
-void func_800CD158(int boxIdx) { (void)boxIdx; }
+/* func_800CD158: draws the info box's background frame (render state 4) -- the
+ * shaded bar behind the info text. It emits `count` pairs of edge sprites with a
+ * brightness gradient, expanding from the box's centre line outward, then a
+ * semi-transparent TILE fill, and (once fully open) the corner decoration via
+ * func_800CD0FC. Faithful native decomp of
+ * build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94/func_800CD158.s. */
+extern int      vs_main_frameBuf;
+extern u_long*  vs_battle_setSprite(int brightnessTransparency, int xy, int wh, u_long* before);
+extern void     vs_battle_addTile(u_long* before, int rgb0, int xy, int wh);
+extern void     func_800CD0FC(int a, int b);
+
+void func_800CD158(int boxIdx)
+{
+    u_char* box = BOX(boxIdx * 0x30);
+    u_long* slot = D_800F51B8 + boxIdx * 4 + 1;   /* +boxIdx*16 +4 bytes */
+    int y      = SH(box + 0x16);
+    int height = SH(box + 0x2A);
+    int s7     = vs_main_frameBuf ? 0 : 0x140;
+    int count, s3;
+
+    y = (y != 0) ? (0xF0 - height) : height;      /* box centre-line Y */
+
+    count = 13 * SB(box + 0x21) - (height - 4);
+    if (count >= 0x11) count = 0x10;
+    else if (count < 4) count = 4;
+
+    if (count != 0) {
+        u_long tp1 = (u_long)(((s7 + 0x100) >> 6) | 0x100) | 0xE1000000u;
+        u_long tp2 = (u_long)((s7 >> 6) | 0x100) | 0xE1000000u;
+        for (s3 = 0; s3 < count; s3++) {
+            int bright = ((count - s3) << 7) / (count + 1);   /* gradient */
+            int xy = y << 16;
+            u_long wh = (u_long)(y << 8);
+            u_long* p1 = vs_battle_setSprite(bright, xy | 0x100, 0x10040, slot);
+            u_long* p2;
+            p1[4] = wh; p1[1] = tp1;
+            p2 = vs_battle_setSprite(bright, xy, 0x10100, slot);
+            p2[1] = tp2; p2[4] = wh;
+            if (y < 0x80) { if (--y < 0)    break; }
+            else          { if (++y >= 0xF0) break; }
+        }
+    }
+
+    /* semi-transparent background fill */
+    if (y < 0x80) {
+        if (y >= 0)
+            vs_battle_addTile(slot, 0x60000000, 0, ((y + 1) << 16) | 0x140);
+    } else if (y < 0xF0) {
+        vs_battle_addTile(slot, 0x60000000, y << 16, (0xF00000 - (y << 16)) | 0x140);
+    }
+
+    /* corner decoration once the box is fully open */
+    if (SH(box + 0x1C) == SB(box + 0x22) + 1)
+        func_800CD0FC(y - 7, ((IW(box + 0x0) >> 8) & 0xF) - 1);
+}
