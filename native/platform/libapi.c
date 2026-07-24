@@ -251,7 +251,10 @@ static void mcd_flush(void)
 
 static unsigned mcd_state(unsigned char* img, int b) { return *(unsigned*)(img + 0x80 * b); }
 static unsigned mcd_fsize(unsigned char* img, int b) { return *(unsigned*)(img + 0x80 * b + 4); }
-static int      mcd_next (unsigned char* img, int b) { return *(unsigned short*)(img + 0x80 * b + 8); }
+/* The directory "next block" field is a 0-based DATA-block index (data block 1
+ * is stored as 0), so the next block NUMBER is raw + 1; 0xFFFF terminates. */
+static int      mcd_next (unsigned char* img, int b)
+{ int raw = *(unsigned short*)(img + 0x80 * b + 8); return raw == 0xFFFF ? 0xFFFF : raw + 1; }
 static char*    mcd_name (unsigned char* img, int b) { return (char*)(img + 0x80 * b + 0x0A); }
 static int      mcd_isfirst(unsigned char* img, int b)
 { unsigned s = mcd_state(img, b); return (s & 0xF0) == 0x50 && (s & 0xF) == 1; }

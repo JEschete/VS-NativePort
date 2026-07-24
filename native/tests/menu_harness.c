@@ -250,6 +250,28 @@ int main(void)
             printf("[harness] loaded REAL save (BASLUS-01040VAG1): "
                    "%d weapons, %d shields, %d armor, %d gems, %d misc\n",
                    w, sh, ar, gm, ms);
+
+            /* Save write-back round-trip (VS_SAVE_TEST=1). Change the first
+             * misc item's quantity, save via VS's encode, corrupt the in-memory
+             * copy, reload from the card, verify the change persisted, then
+             * restore. Writes only the virtual card image (a copy). */
+            if (getenv("VS_SAVE_TEST")) {
+                extern int vs_native_saveSaveFile(int, int);
+                unsigned char* qty = &inv[0xE00 + 2];   /* misc[0] quantity */
+                unsigned char orig = *qty, want = (unsigned char)(orig + 7);
+                int wr, rl;
+                printf("[savetest] misc[0] qty %d -> %d, saving...\n", orig, want);
+                *qty = want;
+                wr = vs_native_saveSaveFile(0, 1);
+                *qty = 0;                                 /* corrupt in-memory */
+                rl = vs_native_loadSaveFile(0, 1);
+                printf("[savetest] save rc=%d, reload rc=%d, misc[0] qty now %d "
+                       "(expected %d) -> %s\n", wr, rl, *qty, want,
+                       (*qty == want) ? "ROUND-TRIP OK" : "MISMATCH");
+                *qty = orig;                              /* restore + persist */
+                vs_native_saveSaveFile(0, 1);
+                printf("[savetest] restored original (qty %d)\n", orig);
+            }
         } else {
             int i;
             printf("[harness] save load failed (rc=%d); using synthetic inventory\n", rc);

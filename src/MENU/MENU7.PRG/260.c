@@ -649,7 +649,13 @@ static void _packageGameSaveData(int targetFile)
     savedata_t* savedata3 = savedata;
     savedata_unk180_t* s5 = &savedata->unk180;
 
-    func_80042CB0();
+#ifndef NATIVE_BUILD
+    func_80042CB0();   /* sync live BATTLE stats (HP/MP/skills) into the save
+                        * globals. The native menu harness has no battle state,
+                        * so skip it -- the values loaded from the save are kept
+                        * and re-saved unchanged. Battle-state-driven saving is
+                        * reinstated once the battle engine runs natively. */
+#endif
     memset(savedata, 0, sizeof *savedata);
     ((char*)&savedata->fileInfo.key)[0] = 0x53;
     ((char*)&savedata->fileInfo.key)[1] = 0x43;
@@ -865,6 +871,41 @@ int vs_native_loadSaveFile(int port, int file)
         return -2;
     }
     return _applyLoadedSaveFile(1);   /* decode + copy save -> vs_main_inventory */
+}
+
+/* Native write-back: package the current game state into a save image and write
+ * it to the card, using VS's own encode. Mirrors _saveFile's core synchronously:
+ * _packageGameSaveData copies the globals into _spmcimg[0], computes the 92 XOR
+ * checksums, and keystream-scrambles the tail; then write() stores one
+ * savedata_t sector to the file. Returns 0 on success. Writes only to the
+ * virtual card image (native/saves/test_card.mcd). Not part of the PSX build. */
+int vs_native_saveSaveFile(int port, int file)
+{
+    static char spmc[VS_SPMCIMG_BIN_SIZE];
+    int fd, n;
+
+    static saveFileInfo_t sfi[5];
+
+    if (_spmcimg == NULL) {
+        _spmcimg = spmc;
+    }
+    /* _mcData (the memory-card save-icon block) is normally set when the memcard
+     * menu allocates _spmcimg; _packageGameSaveData copies the icon from it.
+     * _saveFileInfo is normally filled by the load menu (_readSaveFileInfo); its
+     * generation scan just needs a valid (zeroed) buffer here. */
+    _mcData = (mcdata_t*)(_spmcimg + sizeof(savedata_t) * 3);
+    if (_saveFileInfo == NULL) {
+        _saveFileInfo = sfi;
+    }
+    _packageGameSaveData(file);       /* globals -> _spmcimg[0] (+checksums+scramble) */
+
+    fd = open(_memcardMakeFilename(port, file), 0x8000 | 0x0002);
+    if (fd == -1) {
+        return -1;
+    }
+    n = write(fd, _spmcimg, sizeof(savedata_t));
+    close(fd);
+    return (n == sizeof(savedata_t)) ? 0 : -2;
 }
 #endif
 

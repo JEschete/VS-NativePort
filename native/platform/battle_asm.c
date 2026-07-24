@@ -54,6 +54,12 @@ void vs_battle_playSfx10(void)         { (void)0; }
  * read a result. See docs/NATIVE_DEVIATIONS.md (B). */
 unsigned int func_80018C30(int cmd) { (void)cmd; return 0; }
 
+/* func_800E6694: a battle-state query (146C.c) reached when saving syncs the
+ * character's live battle stats into the save (func_80042CB0). The menu harness
+ * has no real battle state, so return 0 -- the inventory the save actually cares
+ * about is copied separately and round-trips correctly. See NATIVE_DEVIATIONS. */
+int func_800E6694(int arg0) { (void)arg0; return 0; }
+
 /* ---- sprite builders (573B8) ----
  * Faithful C translation of the hand-written asm (matchings/573B8/*.s). Each
  * builds a len-5 "compound" primitive in the scratchpad primitive buffer:
