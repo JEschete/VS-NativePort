@@ -21,7 +21,9 @@ These make the native menu render *incompletely* vs. the real game. Compare
 | A1 | `_renderAshley` | `src/MENU/_renderAshley.h:29` (`#ifdef NATIVE_BUILD` early return) | Skips the 3D character portrait entirely | Draws Ashley + equipped weapons as a rotating 3D model (GTE-transformed, lit) | 3D model data slots (`D_800F4538`) are populated — needs the model loader + a real save/inventory |
 | A2 | `func_8007ACB0` | `native/platform/battle_asm.c` | No-op | Builds the GTE camera matrix for the submenu's 3D scene (rotating rune/cross backdrop + model) | Same as A1 — 3D scene is stood up |
 | A3 | `_printFixedWidthFontChar` | `native/platform/battle_asm.c` | Draws nothing; returns a plausible pen x-advance so layout still flows | Emits a textured fixed-width glyph sprite | A screen that uses fixed-width text is brought up and can be diffed |
-| A4 | INFORMATION text box | (not yet wired in harness) | Absent | Bottom-of-screen info box, e.g. "Choose items to equip." | Wire the info-string context in the harness (the real submenu sets it) |
+| A4 | INFORMATION box TEXT | **DONE** — `func_800CB83C` decompiled (`battle_textbox.c`) + text-box OT wired | Renders "Choose items to equip." (matches retail) | — | Complete |
+| A4b | INFORMATION box FRAME | `func_800CD158` no-op (`battle_textbox.c`) | Text renders on plain background; no shaded backing bar | Shaded/bordered bar behind the info text | Diff the 146-instr per-segment sprite build against DuckStation |
+| A4c | Dialogue/menu box frame | `func_800CD3E4` no-op (`battle_textbox.c`) | Box states 2 & 7 draw no frame | Full dialogue/menu box border+gradient | A dialogue/menu-box screen is brought up (566-instr renderer) |
 | A5 | Per-category item list | needs real inventory | Blanks out on in-submenu navigation | Lists the items in the selected category | Real inventory from a loaded `.mcd` (save-system work) |
 
 **Screenshot cross-check (ITEMS submenu):** our render has the category icon

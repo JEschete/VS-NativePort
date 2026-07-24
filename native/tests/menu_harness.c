@@ -225,6 +225,8 @@ int main(void)
         extern unsigned char vs_main_settings[];
         extern int func_800C930C(int);
         *(unsigned short*)(vs_main_settings + 2) = 0x03FF;   /* enable 10 tabs */
+        vs_main_settings[8] = 1;   /* .information = on (else the submenu
+                                    * dismisses its INFORMATION box) */
         func_800C930C(2);
     }
 
@@ -241,7 +243,24 @@ int main(void)
          * overlays are already linked, just mark queued slots Loaded so
          * vs_battle_loadMenuPrg completes. */
         extern unsigned char _cdQueue[];
+        /* text-box render subsystem (func_800CB83C) + its triple-buffered OT */
+        extern void func_800CB83C(void);
+        extern unsigned char vs_battle_textBoxes[];
+        extern unsigned long* D_800F51B8;
+        extern unsigned char D_800EB9CE;
+        extern unsigned char D_800F4CD0[];
+        extern unsigned long* ClearOTagR(unsigned long*, int);
+        extern int vs_gametime_tickspeed;
         int frame, k;
+
+        /* Drive the box open/close animation, and prime the text-box OT before
+         * the first driver call (the driver clears it at the END of each frame
+         * for the NEXT frame, so frame 0 needs a valid buffer already). */
+        vs_gametime_tickspeed = 2;
+        D_800EB9CE = 0;
+        D_800F51B8 = (unsigned long*)D_800F4CD0;
+        ClearOTagR(D_800F51B8, 0x22);
+
         for (frame = 0; frame < 90; frame++) {
             for (k = 0; k < 32; k++) {
                 short* st = (short*)(_cdQueue + k * 0x14);
@@ -257,6 +276,13 @@ int main(void)
             render_init();
             ot = D_1F800000[1];
             func_800C97BC();
+            /* The synthetic submenu re-sets the info message every frame, which
+             * resets the info box's type-out counter (box->speed) to 1. Reveal
+             * it fully so the static demo shows the whole message instead of
+             * one character. (Real gameplay sets the message once per change.)
+             * vs_battle_textBoxes[7].speed is at offset 0x150 + 0x0C. */
+            *(unsigned short*)(vs_battle_textBoxes + 0x150 + 0x0C) = 0xFFFF;
+            func_800CB83C();   /* text-box render pass (info box etc.) */
             DrawOTag(ot + 0x7FF);
             DrawSync(0);
             printf("[harness]   frame %d: %d primitives, %d non-black pixels\n",

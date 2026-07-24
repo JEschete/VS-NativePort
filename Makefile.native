@@ -71,7 +71,8 @@ PLAT_REAL := native/platform/unimpl.c native/platform/scratchpad.c \
              native/platform/gte_core.c native/platform/libgte.c \
              native/platform/libgpu.c native/platform/libetc.c \
              native/platform/psx_vram.c native/platform/libapi.c \
-             native/platform/battle_asm.c native/platform/battle_menu.c native/platform/harvested_data.c \
+             native/platform/battle_asm.c native/platform/battle_menu.c \
+             native/platform/battle_textbox.c native/platform/harvested_data.c \
              native/platform/main.c
 PLAT_SRCS := $(PLAT_REAL) native/platform/stubs.c
 
@@ -95,10 +96,20 @@ harvest: native/platform/harvested_data.c
 $(OBJ):
 	@mkdir -p $(OBJ)
 
+# The PSX build pipes every C file through the vsString transformer
+# (tools/make/compile.mk: cpp | vsStringTransformer | cc1 | maspsx). It re-encodes
+# character/string literals inside `#pragma vsstring` blocks into VS's font
+# encoding (e.g. '\f' -> 0xE5, the "new page" control code). Without it, the
+# native build compiles those literals as plain ASCII, which breaks glyph
+# thresholds in the text renderers (_printVariableWidthFont) and any vsstring
+# table. Mirror the PSX pipeline: preprocess, transform, then compile.
+VSSTRING := PYTHONPATH=tools/etc python3 tools/etc/vsStringTransformer.py
+
 define GAME_RULE
 $(OBJ)/game_$(subst /,_,$(patsubst src/%.c,%,$(1))).o: $(1) | $(OBJ)
 	@echo "  CC(game) $(1)"
-	@$(NATIVE_CC) $(GAME_CFLAGS) -c $(1) -o $$@
+	@$(NATIVE_CC) $(GAME_CFLAGS) -E $(1) | $(VSSTRING) | \
+	 $(NATIVE_CC) $(GAME_CFLAGS) -x cpp-output -c - -o $$@
 endef
 $(foreach s,$(GAME_SRCS),$(eval $(call GAME_RULE,$(s))))
 
