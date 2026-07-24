@@ -25,6 +25,8 @@ These make the native menu render *incompletely* vs. the real game. Compare
 | A4b | INFORMATION box FRAME | **DONE** — `func_800CD158` decompiled (`battle_textbox.c`) | Renders the shaded backing bar (semi-transparent, visible over a non-black background) | — | Complete |
 | A4c | Dialogue/menu box frame | `func_800CD3E4` no-op (`battle_textbox.c`) | Box states 2 & 7 draw no frame | Full dialogue/menu box border+gradient | A dialogue/menu-box screen is brought up (566-instr renderer) |
 | A5 | Per-category item list | **DONE** | Renders the real loaded inventory (e.g. WEAPONS 3/8: Fandango, Tovarisch, Seventh Heaven) | — | Complete — needed the save load (`.mcd`) + item-name text (`load_item_text` reads ITEMNAME/ITEMHELP/MENU12.BIN) |
+| A6 | Intro FMV | `_initIntroMovie` / `_playIntroMovie` (`src/TITLE/TITLE.PRG/22C.c`, `#ifdef NATIVE_BUILD` early return) | Skipped entirely — boot goes straight to the title screen | Plays the opening MDEC video stream (`TITLE.STR`) | **An MDEC decoder exists.** Not optional-looking but genuinely blocking: `_initIntroMovie` spins in `while (_decodeNextMovieFrame() == -1)`, so without a decoder it never returns. Needs VLC decode + IDCT + YUV→RGB, plus the `DecDCT*` entry points |
+| A7 | Title background / menu items | **NOT A DEFECT** — renders correctly | Full title art, logo, rune backdrop, and the SOUND / NEW GAME / CONTINUE items | — | Was a false alarm: every VRAM snapshot had been taken during the ~12s publisher/developer sequence that precedes the title. `_copyTitleBgData` uploads real data (`LoadImage (480,0 544x512)` checksum `2C23F9CD`). **Boot takes ~17s of wall time before the title appears** — two 364-frame screens, plus loading |
 
 **Screenshot cross-check (ITEMS submenu):** our render has the category icon
 row, the OPTIONS/EQUIP/SETUP list + cursor, STATUS and MENU labels — all
@@ -38,8 +40,19 @@ rune backdrop), **A4** (the "Choose items to equip." info box).
 SPU is uninitialised natively, so every sound entry point is a safe no-op.
 Calling the real `vs_main_playSfxDefault` faults.
 
+The whole of `native/platform/libspu.c` is inert-but-present: the boot sequence
+calls it, so it must exist, but it makes no sound. One entry point there is
+load-bearing rather than cosmetic — `SpuWrite` **must** invoke the callback
+registered by `SpuSetTransferCallback`, because the sound driver sets
+`_isSpuTransfer = 1` and then spins in `_waitTransferAvailable()` until the
+completion callback clears it. A no-op there hangs the boot before the first
+frame.
+
 | Symbol | File | Restore when |
 |---|---|---|
+| `libspu.c` (all of it) | `native/platform/libspu.c` | Phase 3b — real SPU: ADPCM decode, voice mixing, reverb, SDL audio backend |
+| `func_800135D8` | `native/platform/sound_asm.c` | Phase 3b. Uploads an Akao instrument bank to SPU RAM; no-op while `_writeSpu` discards its data |
+| `CdMix` | `native/platform/libds.c` | Phase 3b — CD-audio volume routing |
 | `vs_battle_playMenuChangeSfx` | `native/platform/battle_asm.c` | Phase 3 (native SPU) |
 | `vs_battle_playMenuSelectSfx` | `native/platform/battle_asm.c` | Phase 3 |
 | `vs_battle_playMenuLeaveSfx` | `native/platform/battle_asm.c` | Phase 3 |
@@ -58,6 +71,15 @@ Correct *for the synthetic harness state*, but not general reimplementations.
 | CD queue completion | `native/tests/menu_harness.c` | Marks every queued `_cdQueue` slot `Loaded` each frame | Overlays are statically linked natively, so "loads" just need to signal complete |
 | `vs_overlay_wait` / `vs_overlay_getSp` | `native/platform/battle_asm.c` | No-op / returns a stack address | Overlay system is moot when everything is statically linked |
 | Heap base | `native/tests/menu_harness.c` | `vs_main_initHeap` fed a native `heap_buf[0xF2000]` instead of PS1 addr `0x8010C000` | Correct; the literal PS1 address just isn't mapped natively |
+| `PadSetAct` / `PadSetActAlign` | `native/platform/libpad.c` | Rumble commands accepted and ignored; `PadSetActAlign` returns success | Restore when host haptics are wired (the DualSense supports them) |
+| `PadInfoMode` / `PadGetState` | `native/platform/libpad.c` | Port 0 always reports a connected analog pad (id `0x73`, mode 7); port 1 always empty; `PadInitMtap` falls through to `PadInitDirect` | Single-controller assumption. Restore for multitap / hot-plug reporting |
+
+### Known issues (found by playing the windowed build)
+
+| # | Issue | Detail |
+|---|---|---|
+| C1 | Closing the menu ends the session | Triangle, or Cross at the top level, closes the menu (`currentState` `00→1F→7F→3F`). Correct behaviour — it hands back to the game world — but no world exists, so the harness exits cleanly with a message instead of showing a black window. **Auto-reopen investigated and not shipped:** it works at the state level (needs `func_800CACD0`'s flag resets *and* the synthetic buffers re-wired first, or it takes the faulting `menuItems == NULL` heap path), but ~20 frames later the reopened menu corrupts the C heap and kills the process inside SDL. Root cause is the menu's close/rebuild path against synthetic state. |
+| C2 | BREAK ARTS submenu can't be exited | With a save that has no break arts unlocked, backing out of the submenu appears to loop; only Triangle (which closes the whole menu) escapes. Not yet diagnosed — likely an empty list with a cancel handler gated on a valid selection. |
 
 ---
 
@@ -68,6 +90,7 @@ correctly; noted so they're not mistaken for stubs.
 
 | Symbol | File | Source of truth |
 |---|---|---|
+| `func_8001369C` | `native/platform/sound_asm.c` | `25AC/func_8001369C.s` (167-instruction sound-driver reset; on the boot path via `StartSound`) |
 | `func_800C930C` | `native/platform/battle_menu.c` | `5BF94/func_800C930C.s` (main-menu tab handler) |
 | `vs_battle_renderTextRawColor` | `native/platform/battle_asm.c` | `5BF94/vs_battle_renderTextRawColor.s` (var-width font string renderer) |
 | `vs_battle_setSprite` / `setSpriteDefault` / `setSpriteDefaultTexPage` | `native/platform/battle_asm.c` | `573B8/*.s` (compound texpage+SPRT builders) |
@@ -77,7 +100,7 @@ correctly; noted so they're not mistaken for stubs.
 
 ## E. Auto-generated abort stubs (the "not yet reached" frontier)
 
-`native/platform/stubs.c` currently holds **371** function stubs that `abort()`
+`native/platform/stubs.c` currently holds **362** function stubs that `abort()`
 with `UNIMPLEMENTED: <name>` if called. These are *not* silent — hitting one is
 how the demand-driven bring-up finds the next function to implement. This file
 is regenerated by `native/tools/gen_stubs.py`; the count shrinks as real code

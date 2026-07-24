@@ -14,8 +14,225 @@ retail disc byte-for-byte**.
 
 > **Every native-only no-op, no-draw stub, and synthetic shortcut is tracked in
 > [`docs/NATIVE_DEVIATIONS.md`](NATIVE_DEVIATIONS.md).** When you add or remove
-> one, update that ledger. The running "not yet implemented" frontier is the 371
+> one, update that ledger. The running "not yet implemented" frontier is the 369
 > auto-generated abort stubs in `native/platform/stubs.c` (self-maintaining).
+
+### ✅ REAL ITEM LISTS, ALL CATEGORIES, IN-LIST CURSOR, SAVE WRITE-BACK, BOX FRAME
+**(tips `60343d81` → `2736e12b`; current branch tip = `2736e12b`)**
+
+The ITEMS submenu now enumerates the player's **actual** inventory, loaded from
+their real memory card, in every category, with a working cursor — and saving
+round-trips back to the card.
+
+- **Real item list** (`60343d81`): "WEAPONS 3/8: Fandango, Tovarisch, Seventh
+  Heaven" + info box "Class: Weapon / Bronze Sword". Chain proven end-to-end:
+  `.mcd` → memcard FS → `_applyLoadedSaveFile` → `vs_main_inventory` →
+  `vs_mainMenu_renderItemsList`. Two enablers: `D_800F4EE8[0x3A]`
+  (currentItemCategory) must be set (default is `itemCategoryManage`, the
+  OPTIONS/EQUIP/SETUP command list), and `load_item_text()` loads
+  `ITEMNAME.BIN`/`ITEMHELP.BIN`/`MENU12.BIN` contiguously (the CD stub transfers
+  no data, so name lookups faulted in `vs_battle_printf`).
+- **All categories** (`185747d4`): env `VS_ITEM_CAT` (1=weapon 4=shield 5=armor
+  6=gem 7=misc) — ARMOR 8/16, MISC 10/64 with quantities and descriptions.
+- **In-list cursor** (`185747d4`): D-pad via `vs_main_buttonRepeat`=PADLdown
+  (`0x4000`), env `VS_ITEM_DOWN`. Face-button X (`0x40`) is cancel.
+- **Save write-back** (`87dd84e0`, env `VS_SAVE_TEST`): `vs_native_saveSaveFile`
+  → `_packageGameSaveData` (encode + 92 XOR checksums + keystream scramble) →
+  `vs_bios_write`. **Key bug fixed:** the memcard directory "next block" field is
+  a **0-based data-block index** (block 2 stores `next=2`, meaning block 3);
+  `mcd_next` now returns index+1. Reads only appeared to work because magic,
+  checksum and inventory all live in block 1; multi-block writes self-looped and
+  corrupted it. `savedata_t` = 0x5C00 (3 blocks).
+  **⚠ Always restore `native/saves/test_card.mcd` from
+  `F:\Emulators\PlayStation\memcards\shared_card_1.mcd` after a save test** — the
+  tests mutate the copy.
+- **Info-box frame** (`2736e12b`): `func_800CD158` decompiled — the shaded
+  semi-transparent backing bar (invisible on black, visible over the 3D scene).
+- Deviations ledger **A4b and A5 are now DONE**.
+
+### ✅ PHASE 3a — THE GAME BOOTS TO THE TITLE MENU
+
+**`native/build/vagrant-native` boots Vagrant Story to its title menu.** The
+retail sequence runs end to end — publisher screen, developer screen, title
+screen with the logo, rune backdrop and the **SOUND / NEW GAME / CONTINUE**
+items — driven entirely by the game's own code.
+
+**Timing matters when testing this.** `_displayPublisherAndDeveloper` runs two
+364-frame loops, so **~17 seconds of wall time elapse before the title
+appears** (any button press skips the developer half). Sampling VRAM earlier
+than that shows only the publisher screen, which is exactly how the title was
+briefly misdiagnosed as broken — see A7 in the ledger. The title loop then
+**times out after ~1000 idle frames** and returns, which drops the boot into
+`vs_battle_exec` (BATTLE.PRG, ~35% decompiled) and aborts. That is the game
+starting its attract mode, not a crash.
+
+
+
+`native/build/vagrant-native` now runs **the retail boot sequence**, not a
+harness: `vs_main_exec() → _sysInit() → _sysReinit() → _loadTitlePrg() →
+vs_title_exec()`, all game code, all unmodified. It gets as far as the title
+screen, which renders its real text ("Published by SQUARESOFT / Square
+Electronic Arts L.L.C.") natively.
+
+**The port does NOT need the disc image.** This was the key design point. The
+game asks its CD driver for data by **LBA**, because that is what a PlayStation
+does — so `native/platform/libds.c` answers those requests out of the already
+extracted `data/` tree, via `native/platform/disc_index.c`: a generated
+LBA→file map (5150 files) built from `build/src/include/lbas.h` +
+`config/SLUS-01040.xml`, both of which the normal build already produces from
+the user's own disc. A raw `.bin` is consulted **only** for sectors outside that
+map, and only if `VS_DISC` points at one. Assets are the same story: code is
+fully native, assets come from the user's own copy, extracted once.
+
+What had to be built:
+
+- **`native/platform/libds.c` — a virtual CD drive.** PSYQ's `libds` is
+  undecompiled library assembly, so every `Ds*` entry point is ours, while the
+  entire disk state machine above it (`_processCdQueue` → `func_800443CC` →
+  `_diskInitRead`) is decompiled game code that now runs untouched. Implements
+  the real protocol: `DsPacket(DslReadN)` → command-complete callback →
+  `DsStartReadySystem` → one `DslDataReady` per sector → `DsGetSector`. Sectors
+  are delivered from `VSync()`, where the drive interrupt would land, at an
+  authentic 2x rate (`VS_CD_SPEED` overrides, `VS_CD_TRACE` logs).
+- **`native/platform/disc_index.c`** + `native/tools/gen_disc_index.py`
+  (`make -f Makefile.native discindex`).
+- **`native/platform/assets.c`** + `native/tools/gen_assets.py`
+  (`make -f Makefile.native assets`). splat extracts overlay assets (the
+  compressed title background, font tables) as separate objects that the PSX
+  build links per-overlay; the native build needs the same bytes or they fall
+  through to the stub generator as zeroed blobs — which is exactly why
+  `_copyTitleBgData` was decompressing garbage. Emitted with `.incbin`.
+  `MENUBGSZ` is derived from the asset's size the same way retail does it.
+- **PS1 main RAM is mapped where the hardware has it** (2MB at `0x80000000`,
+  `native/platform/scratchpad.c`), plus the I/O register page at `0x1F801000`.
+  This is what lets the boot path run verbatim: `_sysReinit` hands its allocator
+  the literal address `0x8010C000`, overlays load to their real addresses
+  (`vs_overlay_slots` = `0x80068800`…, so TITLE.PRG's 555KB lands exactly where
+  it does on console), and the sound driver's SPU register writes
+  (`0x1F801D80`, SPUCNT at `0x1F801DAA`) become harmless stores instead of
+  segfaults.
+- **`native/platform/sound_asm.c`** — `func_8001369C`, the 167-instruction
+  sound-driver reset, transcribed faithfully (it is on the boot path).
+- **`native/platform/libspu.c`** — inert SPU so the boot completes silently.
+  One entry point is load-bearing: `SpuWrite` must fire the callback registered
+  by `SpuSetTransferCallback`, or `_waitTransferAvailable()` spins forever.
+- **`native/platform/kernel.c`** — `SetVideoMode`, `SetGraphDebug`, `InitCARD`,
+  `ResetCallback`, root counters driven from the host clock, overlay slots.
+- **Debugging:** WSL blocks ptrace-attaching, and "stuck in a poll loop" is the
+  normal failure mode here, so the binary traps for itself —
+  `VS_WATCHDOG=N` bails out with a backtrace and a VRAM dump
+  (`native/build/boot_vram.ppm`), and SIGSEGV/SIGABRT do the same. Resolve
+  frames with `addr2line -f -e native/build/vagrant-native <addr>`.
+
+**Known gaps (both logged in the ledger):**
+- **A6 — the intro FMV is skipped.** It is an MDEC video stream and there is no
+  MDEC decoder yet. Not cosmetic: `_initIntroMovie` spins in
+  `while (_decodeNextMovieFrame() == -1)`, so it cannot simply be left to fail;
+  it is bypassed with an `#ifdef NATIVE_BUILD` early return. **This is the next
+  substantial piece of work** — VLC decode + IDCT + YUV→RGB behind the
+  `DecDCT*` entry points.
+- **A7 — the title background and the NEW GAME / CONTINUE items are not
+  rendering correctly yet.** The copyright text does. The RLE asset and
+  `MENUBGSZ` are verified correct (the decode produces exactly the expected
+  626,688 bytes), so the fault is downstream of the decompression — most likely
+  `LoadImage` placement or the interlaced 512×480 display setup.
+
+**Trap for the next session:** the stub generator classifies a symbol as a
+function only when the disassembly `glabel`s it, so PSYQ functions that are
+never defined in `src/` (`InitGeom`, and the whole `DecDCT*` family) come out as
+*data blobs* — calling one jumps into a zeroed array and segfaults instead of
+reporting itself by name. If a boot crash lands somewhere nonsensical, check
+whether the callee is a data blob in `stubs.c`.
+
+**Guard rail held:** the `src/` edit is `#ifdef NATIVE_BUILD`-guarded and the
+PSX build still verifies **✔ All files match** (21/21 byte-identical).
+
+### ✅ PHASE 2.1 COMPLETE — LIVE WINDOW + REAL CONTROLLER
+
+`make -f Makefile.native window` opens a real window and plays the menu at 60Hz
+with a **DualSense Edge**. The scripted 130-frame batch is no longer the only
+way to run: it survives as the headless regression path.
+
+- **`native/platform/present.c`** — SDL2 window, 1024×512 VRAM → ARGB blit of
+  the display rect, 3× integer scale, keyboard + SDL-gamepad + bridge input.
+  **SDL2 is `dlopen`'d at runtime, not linked.** Two reasons, both load-bearing:
+  the binary is `-m32` and Ubuntu's SDL headers are a multiarch shim requiring
+  `libsdl2-dev:i386`, whose dependency chain can displace the mipsel
+  cross-toolchain the matching build needs (see the gcc-multilib trap); and it
+  keeps the window *optional*, so headless batch runs still work with no SDL.
+  No SDL headers are used at all — only its stable ABI constants.
+- **`native/platform/libpad.c`** — the PSYQ pad API (`PadInitDirect`,
+  `PadInfoMode`, `PadGetState`, `PadSetAct`, …). It writes a **genuine PS1
+  controller packet** into the game's own `vs_main_padBuffer`, so
+  `vs_main_processPadState()` — untouched game code — derives held / pressed /
+  released / auto-repeat and the analog-stick-to-d-pad mapping exactly as it
+  does on hardware. Nothing pokes `vs_main_buttonsPressed` any more.
+  Packet layout and the reason the *left* stick steers the menu (VS's
+  `rStick*` fields are fed from pad bytes 6-7) are documented in that file.
+- **Present + input happen at the vblank boundary**, inside `VSync()` — the same
+  point where the hardware flips the framebuffer and the pad DMA lands. Any PS1
+  code that already calls `VSync()` therefore gets a live window and a live
+  controller with no call-site changes.
+- **`native/tools/pad_bridge.py`** — WSL2 exposes **no `/dev/input` at all**
+  (USB and Bluetooth are not passed through to the VM), so a controller attached
+  to Windows is invisible to a Linux binary. This runs on the *Windows* side,
+  reads the DualSense over raw HID with pure `ctypes` (no pip installs), and
+  streams 12-byte state packets to the game's TCP listener on
+  `127.0.0.1:27015`. WSL2 forwards Windows-localhost connections into the VM, so
+  the game is the server. `--probe` prints decoded state; `--list` shows the
+  Sony HID collections. USB report `0x01` and both Bluetooth report forms are
+  handled.
+- Build note: `PLAT_CFLAGS` gained `-idirafter /usr/include/x86_64-linux-gnu`.
+  For `-m32`, gcc searches `/usr/include/i386-linux-gnu`, which does not exist
+  here, so anything pulling in `<asm/*>` (`errno.h`, the socket headers) failed
+  to compile. Appending — rather than `-I`, which would prepend and could shadow
+  headers that already resolve — makes it a pure fallback for the kernel UAPI
+  headers, which are shared between i386 and x86_64.
+
+**Verified end-to-end:** injected packets and then a real DualSense both arrive
+as `buttonsPressed=4000` (d-pad down) / `1000` (up) / `0020` (circle) *as decoded
+by the game*, and drive the menu into the ITEMS submenu on screen. A ~45-second
+live session on the Edge exercised both d-pad directions and all four face
+buttons.
+
+**Two known rough edges found by actually playing it** (this is the payoff of
+having a window — neither was visible from PPM diffs):
+
+1. **Closing the menu ends the session.** Triangle, or Cross at the top level,
+   closes the menu (`currentState` walks `00 → 1F → 7F → 3F`). That is correct
+   behaviour — it hands back to the game world — but there is no world yet, so
+   the screen goes black. The harness now detects `0x3F`, explains itself and
+   exits cleanly rather than sitting on a black window.
+   **Auto-reopen was tried and deliberately not shipped:** it needs the flag
+   resets in `func_800CACD0` (restoring `currentState` alone leaves the next
+   close stalled at `0x1F`), and that function must be called with the synthetic
+   buffers re-wired first or it takes its `menuItems == NULL` heap path and
+   faults. With both fixed the reopen succeeds — and then the process dies
+   ~20 frames later inside SDL, from `psx_present_pump`, on a garbage jump: the
+   reopened menu scribbles over the C heap where SDL's renderer lives. The root
+   cause is in the menu's close/rebuild path against synthetic state, not in the
+   presenter. Worth picking up when more surrounding state is real.
+   One fix from that investigation was kept because it is correct regardless:
+   `characterState->unk44` is now wired (`func_800CABE0` reads `->weaponDrawn`
+   through it).
+2. **The BREAK ARTS submenu can't be backed out of** when the save has no break
+   arts unlocked — it appears to hit an error loop, and Triangle (which exits
+   the menu entirely) is the only way out. Not yet diagnosed; likely an empty
+   list with a cancel handler gated on a valid selection.
+
+Targets: **`window`** = interactive; **`menu`** = headless batch (`VS_HEADLESS=1`,
+fixed 130 frames, writes `native/build/menu.ppm`) — keep its output stable, it is
+the regression path. In-window: arrows/d-pad/left stick navigate, Z/Circle
+confirms, X/Cross cancels, Q-E/L1-R1 switch item category, F2 screenshots, ESC
+quits. `VS_MAX_FRAMES=N` caps an interactive run for automation.
+
+**➡ RESUME POINT — Phase 3: audio.** `libspu` (ADPCM decode, voice mixing, then
+reverb) behind an SDL audio backend. The five menu SFX dispatchers in
+`battle_asm.c` are no-oped only because the SPU voice state is uninitialised
+(section B of the ledger); menu SFX is the natural first exit criterion, then
+title-screen music. The other open track is **A1/A2** (3D Ashley portrait +
+animated rune backdrop), still gated on a model loader — but now much cheaper to
+iterate on, since it can be watched live instead of diffed as PPMs.
 
 ### ✅ INFO-BOX TEXT + vsString FIX + SAVE-CARD FOUNDATION (tips `029c241b`, `e27c19ec`)
 - **Info box renders** "Choose items to equip." natively (text-box render driver
@@ -606,7 +823,7 @@ init gap — see §0 "Current status" for the exact call chain and next step.
 
 ---
 
-### Phase 2.1 — "See something" milestone *(do this next; independent of the menu)*
+### Phase 2.1 — "See something" milestone — ✅ **COMPLETE** (see §0)
 
 Right now rendering goes to a VRAM buffer dumped as PPM. Before the menu works,
 stand up a **live window** that presents the VRAM framebuffer, so there is a
