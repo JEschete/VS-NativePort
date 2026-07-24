@@ -141,6 +141,76 @@ long _card_clear(long chan) { (void)chan; return 1; }
 long _card_load(long chan)  { (void)chan; return 1; }
 long _card_format(long chan){ (void)chan; return 1; }
 
+/* ---- raw frame I/O, host-file-backed ("virtual memory card") ----
+ * A PS1 card is 0x400 frames of 128 bytes (128 KB). The BIOS primitives
+ * _card_read/_card_write transfer one frame and complete asynchronously,
+ * signalling via the card event classes. We back channel 0 (slot 1) with a
+ * real .mcd image so VS's own save-load code reads genuine save data; the
+ * transfer is synchronous here, so we deliver the completion event inline.
+ *
+ * Standard PSY-Q card event classes/specs:
+ *   SwCARD 0xF4000001, HwCARD 0xF0000011; EvSpIOE(complete)=0x0004, error=0x8000. */
+#define CARD_FRAME    128
+#define CARD_FRAMES   0x400
+#define CARD_PATH     "native/saves/test_card.mcd"
+#define EvSwCARD      0xF4000001UL
+#define EvHwCARD      0xF0000011UL
+#define EvSpIOE       0x0004UL
+#define EvSpERROR     0x8000UL
+
+static FILE* card_file(void)
+{
+    static FILE* fp = NULL;
+    static int   tried = 0;
+    if (!fp && !tried) {
+        tried = 1;
+        fp = fopen(CARD_PATH, "r+b");   /* read/write, must exist */
+        if (!fp) fprintf(stderr, "[memcard] no card image at %s\n", CARD_PATH);
+    }
+    return fp;
+}
+
+static void card_complete(int ok)
+{
+    unsigned long spec = ok ? EvSpIOE : EvSpERROR;
+    DeliverEvent(EvHwCARD, spec);
+    DeliverEvent(EvSwCARD, spec);
+}
+
+long _card_read(long chan, long sector, unsigned char* buf)
+{
+    FILE* fp = card_file();
+    (void)chan;
+    if (fp && sector >= 0 && sector < CARD_FRAMES
+        && fseek(fp, sector * CARD_FRAME, SEEK_SET) == 0
+        && fread(buf, 1, CARD_FRAME, fp) == CARD_FRAME) {
+        card_complete(1);
+        return 1;
+    }
+    card_complete(0);
+    return 0;
+}
+
+long _card_write(long chan, long sector, unsigned char* buf)
+{
+    FILE* fp = card_file();
+    (void)chan;
+    if (fp && sector >= 0 && sector < CARD_FRAMES
+        && fseek(fp, sector * CARD_FRAME, SEEK_SET) == 0
+        && fwrite(buf, 1, CARD_FRAME, fp) == CARD_FRAME) {
+        fflush(fp);
+        card_complete(1);
+        return 1;
+    }
+    card_complete(0);
+    return 0;
+}
+
+/* Card present + not-new. Bit layout mirrors what StartCARD's poll expects:
+ * 0 = connected & ready. Returns 0 when the image is missing so the menus
+ * report "no card" instead of hanging. */
+long _card_status(long chan) { (void)chan; return card_file() ? 0 : 1; }
+
 /* Directory enumeration. The menus use firstfile/nextfile to list saves; with
  * no host save directory yet this reports an empty card, which is a valid
  * state the menus already handle. */

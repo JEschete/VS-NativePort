@@ -22,3 +22,6 @@ native/build/menu_harness
 native/build/menu.ppm
 native/platform/harvested_data.c
 native/platform/harvested.syms
+
+# Personal PS1 memory-card saves (user data, never commit)
+native/saves/
