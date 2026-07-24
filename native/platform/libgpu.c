@@ -123,7 +123,7 @@ static void fill_rect(int x, int y, int w, int h, uint16_t c)
 
 /* ---- triangle rasteriser (flat and Gouraud) ---- */
 
-typedef struct { int x, y, r, g, b; } VERT;
+typedef struct { int x, y, r, g, b, u, v; } VERT;
 
 static void put_px(int x, int y, uint16_t c)
 {
@@ -260,6 +260,55 @@ static void blit_sprite(int x, int y, int w, int h,
         }
 }
 
+/* Textured triangle: affine u,v interpolation + CLUT sample, modulated by the
+ * (optionally Gouraud) primitive colour. 0x80 per channel is neutral (texture
+ * shown as-is), matching PS1 texture modulation. */
+static void draw_tri_tex(const VERT* a, const VERT* b, const VERT* c,
+                         uint16_t tp, uint16_t clut, int shaded)
+{
+    int minx, maxx, miny, maxy, x, y;
+    long area = (long)(b->x - a->x) * (c->y - a->y)
+              - (long)(b->y - a->y) * (c->x - a->x);
+    long A = area < 0 ? -area : area;
+    if (area == 0) return;
+
+    minx = a->x < b->x ? (a->x < c->x ? a->x : c->x) : (b->x < c->x ? b->x : c->x);
+    maxx = a->x > b->x ? (a->x > c->x ? a->x : c->x) : (b->x > c->x ? b->x : c->x);
+    miny = a->y < b->y ? (a->y < c->y ? a->y : c->y) : (b->y < c->y ? b->y : c->y);
+    maxy = a->y > b->y ? (a->y > c->y ? a->y : c->y) : (b->y > c->y ? b->y : c->y);
+    if (minx < cur_draw.clip.x) minx = cur_draw.clip.x;
+    if (miny < cur_draw.clip.y) miny = cur_draw.clip.y;
+    if (maxx > cur_draw.clip.x + cur_draw.clip.w) maxx = cur_draw.clip.x + cur_draw.clip.w;
+    if (maxy > cur_draw.clip.y + cur_draw.clip.h) maxy = cur_draw.clip.y + cur_draw.clip.h;
+
+    for (y = miny; y < maxy; y++)
+        for (x = minx; x < maxx; x++) {
+            long w0 = (long)(c->x - b->x) * (y - b->y) - (long)(c->y - b->y) * (x - b->x);
+            long w1 = (long)(a->x - c->x) * (y - c->y) - (long)(a->y - c->y) * (x - c->x);
+            long w2 = (long)(b->x - a->x) * (y - a->y) - (long)(b->y - a->y) * (x - a->x);
+            int inside = (area > 0) ? (w0 >= 0 && w1 >= 0 && w2 >= 0)
+                                    : (w0 <= 0 && w1 <= 0 && w2 <= 0);
+            long u0, u1, u2;
+            int tu, tv, cr, cg, cb, tr, tg, tb;
+            uint16_t t;
+            if (!inside) continue;
+            u0 = w0 < 0 ? -w0 : w0; u1 = w1 < 0 ? -w1 : w1; u2 = w2 < 0 ? -w2 : w2;
+            tu = (int)((u0 * a->u + u1 * b->u + u2 * c->u) / A);
+            tv = (int)((u0 * a->v + u1 * b->v + u2 * c->v) / A);
+            t = gp0_sample(tu, tv, tp, clut);
+            if (!t) continue;                         /* transparent texel */
+            if (shaded) {
+                cr = (int)((u0 * a->r + u1 * b->r + u2 * c->r) / A);
+                cg = (int)((u0 * a->g + u1 * b->g + u2 * c->g) / A);
+                cb = (int)((u0 * a->b + u1 * b->b + u2 * c->b) / A);
+            } else { cr = a->r; cg = a->g; cb = a->b; }
+            tr = (t & 0x1F) * cr / 128; if (tr > 31) tr = 31;
+            tg = ((t >> 5) & 0x1F) * cg / 128; if (tg > 31) tg = 31;
+            tb = ((t >> 10) & 0x1F) * cb / 128; if (tb > 31) tb = 31;
+            put_px(x, y, (uint16_t)(tr | (tg << 5) | (tb << 10)));
+        }
+}
+
 static void gp0_exec(const uint32_t* w)
 {
     unsigned cmd = w[0] >> 24;
@@ -271,6 +320,7 @@ static void gp0_exec(const uint32_t* w)
         int shaded = cmd & 0x10, tex = cmd & 0x04;
         int stride = shaded ? (tex ? 3 : 2) : (tex ? 2 : 1);
         int base = shaded ? 0 : 1;                   /* flat: skip colour word */
+        int uvoff = shaded ? 2 : 1;                  /* uv word within a vertex */
         VERT v[4];
         int i;
         for (i = 0; i < n; i++) {
@@ -278,9 +328,18 @@ static void gp0_exec(const uint32_t* w)
             uint32_t vcol = shaded ? e[0] : col;
             uint32_t xy = shaded ? e[1] : e[0];
             gp0_setv(&v[i], xy, vcol);
+            if (tex) { uint32_t uv = e[uvoff]; v[i].u = uv & 0xFF; v[i].v = (uv >> 8) & 0xFF; }
         }
-        draw_tri(&v[0], &v[1], &v[2], shaded);
-        if (n == 4) draw_tri(&v[1], &v[2], &v[3], shaded);
+        if (tex) {
+            /* CLUT is in vertex0's uv word, texpage in vertex1's. */
+            uint16_t clut = (uint16_t)((w[base + uvoff] >> 16) & 0xFFFF);
+            uint16_t tp   = (uint16_t)((w[base + stride + uvoff] >> 16) & 0xFFFF);
+            draw_tri_tex(&v[0], &v[1], &v[2], tp, clut, shaded);
+            if (n == 4) draw_tri_tex(&v[1], &v[2], &v[3], tp, clut, shaded);
+        } else {
+            draw_tri(&v[0], &v[1], &v[2], shaded);
+            if (n == 4) draw_tri(&v[1], &v[2], &v[3], shaded);
+        }
         prims_drawn++;
     } else if (cmd >= 0x60 && cmd <= 0x7F) {         /* rect / sprite */
         int size = (cmd >> 3) & 3, tex = cmd & 0x04;
