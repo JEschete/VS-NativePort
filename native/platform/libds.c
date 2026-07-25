@@ -41,10 +41,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define SECTOR_RAW  2352
 #define SECTOR_DATA 2048
 #define SECTOR_HDR  24
+/* MODE2/FORM2 as extracted: subheader + 2324 data + EDC, no sync or header. */
+#define SECTOR_RAW_F2 2336
+#define SUBHEADER     8
 
 /* From include/psx/libds.h -- the platform layer is built without the PSYQ
  * headers, so the handful of constants we need are restated here. */
@@ -87,6 +91,15 @@ static long   sectors_read;
  * the next pump. */
 static DslCB  pending_cmd_cb;
 static int    pending_seek_only;
+
+/* When the streaming layer is armed it consumes every delivered sector; see
+ * psx_cd_set_stream_sink below. */
+static void (*stream_sink)(const unsigned char*);
+
+/* VS_CD_TRACE=1 logs every command and the sector flow. The CD is the spine of
+ * the boot sequence, and a stalled read looks exactly like a hang from outside. */
+static int trace;
+#define CDTRACE(...) do { if (trace) printf(__VA_ARGS__); } while (0)
 
 /* Optional raw-image fallback, only consulted for sectors the index does not
  * cover (and only if the user points us at an image). */
@@ -131,6 +144,29 @@ static const psx_disc_entry* find_entry(int lba)
 static FILE*       cached_fp;
 static const char* cached_path;
 
+/* Stride of the cached file, and where its 2048 bytes of user data begin.
+ *
+ * Most files are plain MODE2/FORM1: one 2048-byte sector per 2048 bytes of
+ * file. Streaming files (TITLE.STR) are MODE2/FORM2 and were extracted with
+ * their raw 2336-byte sectors intact -- 8 bytes of CD-XA subheader, 2324 of
+ * data, 4 of EDC -- because the subheader is what distinguishes video sectors
+ * from the interleaved XA audio. The 2048 bytes the drive hands the streaming
+ * layer are the 32-byte STR chunk header plus 2016 bytes of frame data, which
+ * start immediately after the subheader.
+ *
+ * The two cases are told apart by the data rather than a hardcoded list. A
+ * whole number of 2336-byte sectors is necessary but not sufficient, so the
+ * deciding evidence is the subheader itself: CD-XA writes it twice, back to
+ * back, precisely so it can be recovered from a damaged sector. Four bytes
+ * repeated at the very start of the file, in a file that is an exact multiple
+ * of the form 2 sector size, means form 2.
+ *
+ * Note the index cannot help here: it sizes each file by the gap to the next
+ * one on the disc, not by its ISO length, so its sector count says nothing
+ * about the stride. */
+static int    cached_stride;
+static int    cached_skip;
+
 static int read_from_data(const psx_disc_entry* e, int lba, unsigned char* out)
 {
     char path[512];
@@ -142,8 +178,24 @@ static int read_from_data(const psx_disc_entry* e, int lba, unsigned char* out)
         cached_fp = fopen(path, "rb");
         cached_path = cached_fp ? e->path : 0;
         if (!cached_fp) return 0;
+        cached_stride = SECTOR_DATA;
+        cached_skip = 0;
+        if (fseek(cached_fp, 0, SEEK_END) == 0) {
+            long size = ftell(cached_fp);
+            unsigned char sub[SUBHEADER];
+            if (size > 0 && size % SECTOR_RAW_F2 == 0
+                && fseek(cached_fp, 0, SEEK_SET) == 0
+                && fread(sub, 1, SUBHEADER, cached_fp) == SUBHEADER
+                && memcmp(sub, sub + 4, 4) == 0) {
+                cached_stride = SECTOR_RAW_F2;
+                cached_skip = SUBHEADER;
+                CDTRACE("[libds] %s is MODE2/FORM2 (%ld sectors)\n",
+                        e->path, size / SECTOR_RAW_F2);
+            }
+        }
     }
-    if (fseek(cached_fp, (long)(lba - e->lba) * SECTOR_DATA, SEEK_SET) != 0) return 0;
+    if (fseek(cached_fp, (long)(lba - e->lba) * cached_stride + cached_skip, SEEK_SET) != 0)
+        return 0;
     got = fread(out, 1, SECTOR_DATA, cached_fp);
     /* The last sector of a file is partial on disc too; pad it. */
     if (got < SECTOR_DATA) memset(out + got, 0, SECTOR_DATA - got);
@@ -192,11 +244,6 @@ int DsPosToInt(DslLOC* p)
 {
     return (btoi(p->minute) * 4500) + (btoi(p->second) * 75) + btoi(p->sector) - 150;
 }
-
-/* VS_CD_TRACE=1 logs every command and the sector flow. The CD is the spine of
- * the boot sequence, and a stalled read looks exactly like a hang from outside. */
-static int trace;
-#define CDTRACE(...) do { if (trace) printf(__VA_ARGS__); } while (0)
 
 int DsInit(void)
 {
@@ -339,13 +386,87 @@ void DsReadBreak(void) { reading = 0; }
 
 DslLOC* DsLastPos(DslLOC* p) { return DsIntToPos(cur_lba, p); }
 
-/* --- the pump: called once per frame from VSync() --- */
-void psx_cd_pump(void)
+/* --- sector delivery ---
+ *
+ * Paced by wall-clock time rather than by frames. That distinction is not
+ * cosmetic: the drive spins at its own rate and raises an interrupt per sector
+ * no matter what the CPU is doing, and the movie player leans on exactly that.
+ * _getNextMovieFrame and _decodeNextMovieFrame busy-wait thousands of
+ * iterations for the next frame WITHOUT calling VSync, so delivery tied to the
+ * frame boundary starves them: _playMovie then restarts the read from the top
+ * of the stream, and the first frame never finishes arriving. Charging sectors
+ * against elapsed time, and servicing the drive from the streaming layer's
+ * polling loop as well as from VSync, reproduces the hardware's behaviour and
+ * keeps the authentic 150 sectors/second. */
+static unsigned long long cd_last_ns;
+static unsigned long long cd_ns_accum;   /* time owed to the drive, nanoseconds */
+
+static unsigned long long cd_now_ns(void)
 {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (unsigned long long)ts.tv_sec * 1000000000ull + (unsigned long long)ts.tv_nsec;
+}
+
+#define FRAME_NS 16683333ull
+
+void psx_cd_service(void)
+{
+    unsigned long long now = cd_now_ns();
+    unsigned long long elapsed;
+    unsigned long long ns_per_sector;
     int budget;
 
-    /* Raise a queued command completion first: the game's callback responds by
-     * calling DsStartReadySystem, which arms the delivery below. */
+    if (!cd_last_ns) cd_last_ns = now;
+    elapsed = now - cd_last_ns;
+    cd_last_ns = now;
+
+    /* NB: do not gate this on `disc` -- reads normally come from the extracted
+     * data index and the raw image is only an optional fallback. */
+    if (!reading || (!ready_sys_cb && !stream_sink)) return;
+
+    /* Accumulate TIME, not sectors. This function is called from the movie
+     * player's polling loop, so `elapsed` is routinely tens of nanoseconds --
+     * converting each interval to sectors independently would floor to zero
+     * every time and the drive would never advance. */
+    if (elapsed > 10 * FRAME_NS) elapsed = 10 * FRAME_NS;   /* cap catch-up */
+    cd_ns_accum += elapsed;
+
+    ns_per_sector = FRAME_NS * 4ull / (unsigned long long)(speed_q > 0 ? speed_q : 1);
+    budget = 0;
+    while (cd_ns_accum >= ns_per_sector) {
+        cd_ns_accum -= ns_per_sector;
+        budget++;
+    }
+
+    while (budget-- > 0) {
+        if (!reading || (!ready_sys_cb && !stream_sink)) break;
+        if (!read_sector(cur_lba, sector_buf)) {
+            /* Off the end of the disc: report an error rather than spinning. */
+            if (ready_sys_cb && !stream_sink) ready_sys_cb(DslDiskError, result_buf);
+            reading = 0;
+            break;
+        }
+        cur_lba++;
+        sectors_read++;
+        /* While a stream is set up the drive's sectors belong to it: on
+         * hardware they are routed by the XA filter straight into the ring
+         * buffer, never surfacing as ready-system callbacks. */
+        if (stream_sink) {
+            stream_sink(sector_buf);
+        } else {
+            memset(result_buf, 0, sizeof result_buf);
+            ready_sys_cb(DslDataReady, result_buf);
+        }
+    }
+}
+
+/* Called once per frame from VSync(). Command completions are raised here and
+ * only here: the game issues its next command from inside the callback, so
+ * keeping that on the frame boundary preserves the ordering the disk state
+ * machine expects. */
+void psx_cd_pump(void)
+{
     if (pending_cmd_cb) {
         DslCB cb = pending_cmd_cb;
         pending_cmd_cb = 0;
@@ -365,28 +486,16 @@ void psx_cd_pump(void)
         }
     }
 
-    /* NB: do not gate this on `disc` -- reads normally come from the extracted
-     * data index and the raw image is only an optional fallback. */
-    if (!reading || !ready_sys_cb) return;
-
-    accum_q += speed_q;
-    budget = accum_q / 4;
-    accum_q -= budget * 4;
-
-    while (budget-- > 0) {
-        if (!reading || !ready_sys_cb) break;
-        if (!read_sector(cur_lba, sector_buf)) {
-            /* Off the end of the disc: report an error rather than spinning. */
-            if (ready_sys_cb) ready_sys_cb(DslDiskError, result_buf);
-            reading = 0;
-            break;
-        }
-        cur_lba++;
-        sectors_read++;
-        memset(result_buf, 0, sizeof result_buf);
-        ready_sys_cb(DslDataReady, result_buf);
-    }
+    psx_cd_service();
 }
+
+/* --- streaming hook (native/platform/libstream.c) --- */
+void psx_cd_set_stream_sink(void (*sink)(const unsigned char*))
+{
+    stream_sink = sink;
+}
+
+int psx_cd_cur_lba(void) { return cur_lba; }
 
 long psx_cd_sectors_read(void) { return sectors_read; }
 

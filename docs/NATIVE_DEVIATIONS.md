@@ -25,7 +25,7 @@ These make the native menu render *incompletely* vs. the real game. Compare
 | A4b | INFORMATION box FRAME | **DONE** — `func_800CD158` decompiled (`battle_textbox.c`) | Renders the shaded backing bar (semi-transparent, visible over a non-black background) | — | Complete |
 | A4c | Dialogue/menu box frame | `func_800CD3E4` no-op (`battle_textbox.c`) | Box states 2 & 7 draw no frame | Full dialogue/menu box border+gradient | A dialogue/menu-box screen is brought up (566-instr renderer) |
 | A5 | Per-category item list | **DONE** | Renders the real loaded inventory (e.g. WEAPONS 3/8: Fandango, Tovarisch, Seventh Heaven) | — | Complete — needed the save load (`.mcd`) + item-name text (`load_item_text` reads ITEMNAME/ITEMHELP/MENU12.BIN) |
-| A6 | Intro FMV | `_initIntroMovie` / `_playIntroMovie` (`src/TITLE/TITLE.PRG/22C.c`, `#ifdef NATIVE_BUILD` early return) | Skipped entirely — boot goes straight to the title screen | Plays the opening MDEC video stream (`TITLE.STR`) | **An MDEC decoder exists.** Not optional-looking but genuinely blocking: `_initIntroMovie` spins in `while (_decodeNextMovieFrame() == -1)`, so without a decoder it never returns. Needs VLC decode + IDCT + YUV→RGB, plus the `DecDCT*` entry points |
+| A6 | Intro FMV | **DONE** — software MDEC (`native/platform/mdec.c`, `libpress.c`, `libstream.c`) | Plays the opening MDEC video stream (`TITLE.STR`), all 593 frames | — | Complete. **The `src/` tree now has no `NATIVE_BUILD` edits at all** — the two early returns in `22C.c` are gone. Video only: the interleaved XA audio track is still discarded (see B) |
 | A7 | Title background / menu items | **NOT A DEFECT** — renders correctly | Full title art, logo, rune backdrop, and the SOUND / NEW GAME / CONTINUE items | — | Was a false alarm: every VRAM snapshot had been taken during the ~12s publisher/developer sequence that precedes the title. `_copyTitleBgData` uploads real data (`LoadImage (480,0 544x512)` checksum `2C23F9CD`). **Boot takes ~17s of wall time before the title appears** — two 364-frame screens, plus loading |
 
 **Screenshot cross-check (ITEMS submenu):** our render has the category icon
@@ -51,6 +51,7 @@ frame.
 | Symbol | File | Restore when |
 |---|---|---|
 | `libspu.c` (all of it) | `native/platform/libspu.c` | Phase 3b — real SPU: ADPCM decode, voice mixing, reverb, SDL audio backend |
+| XA audio in `TITLE.STR` | `native/platform/libstream.c` | Phase 3b. The intro's sectors interleave video with CD-XA ADPCM audio (1401 of 11216 sectors, submode `0x64`). The streaming layer drops anything that is not an STR video chunk, so the intro plays silent |
 | `func_800135D8` | `native/platform/sound_asm.c` | Phase 3b. Uploads an Akao instrument bank to SPU RAM; no-op while `_writeSpu` discards its data |
 | `CdMix` | `native/platform/libds.c` | Phase 3b — CD-audio volume routing |
 | `vs_battle_playMenuChangeSfx` | `native/platform/battle_asm.c` | Phase 3 (native SPU) |
@@ -73,6 +74,8 @@ Correct *for the synthetic harness state*, but not general reimplementations.
 | Heap base | `native/tests/menu_harness.c` | `vs_main_initHeap` fed a native `heap_buf[0xF2000]` instead of PS1 addr `0x8010C000` | Correct; the literal PS1 address just isn't mapped natively |
 | `PadSetAct` / `PadSetActAlign` | `native/platform/libpad.c` | Rumble commands accepted and ignored; `PadSetActAlign` returns success | Restore when host haptics are wired (the DualSense supports them) |
 | `PadInfoMode` / `PadGetState` | `native/platform/libpad.c` | Port 0 always reports a connected analog pad (id `0x73`, mode 7); port 1 always empty; `PadInitMtap` falls through to `PadInitDirect` | Single-controller assumption. Restore for multitap / hot-plug reporting |
+| `DecDCTin` / `DecDCTout` | `native/platform/libpress.c` | Decode is synchronous; the DMA completion callback is queued and run from a trampoline instead of an interrupt | Observably identical — one transfer finishes, its callback runs and starts the next. Direct recursion is what would be wrong: the callback issues the next `DecDCTout` *before* uploading its strip, so recursing runs every transfer before any upload and the game's two decode buffers end up holding only the last two strips |
+| Frame assembly | `native/platform/libstream.c` | Each frame is gathered into one contiguous span of the caller's ring, rather than left as ring sectors with a header every 2016 bytes | The game only uses `StGetNext`'s `addr` as a frame pointer and hands it back to `StFreeRing`, so nothing above can tell. Restore only if something starts walking the ring itself |
 
 ### Known issues (found by playing the windowed build)
 

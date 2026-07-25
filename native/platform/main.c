@@ -41,8 +41,25 @@ static void dump_backtrace(int sig)
 static void dump_screen(void)
 {
     extern int psx_vram_write_ppm(const char* path, int x, int y, int w, int h);
+    extern unsigned short* psx_vram(void);
+    const char* raw;
+
     psx_vram_write_ppm("native/build/boot_vram.ppm", 0, 0, 1024, 512);
     fprintf(stderr, "[boot] wrote native/build/boot_vram.ppm\n");
+
+    /* VS_VRAM_RAW=<path> also writes VRAM verbatim. The PPM above reads every
+     * halfword as a 15-bit pixel, which is wrong for regions holding 24-bit
+     * colour -- the movie framebuffers, notably -- so inspecting those needs the
+     * untranslated bytes. */
+    raw = getenv("VS_VRAM_RAW");
+    if (raw && *raw) {
+        FILE* f = fopen(raw, "wb");
+        if (f) {
+            fwrite(psx_vram(), 2, 1024 * 512, f);
+            fclose(f);
+            fprintf(stderr, "[boot] wrote %s (raw 1024x512x16bpp)\n", raw);
+        }
+    }
 }
 
 static void watchdog_fired(int sig)

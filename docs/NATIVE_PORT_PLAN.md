@@ -17,6 +17,64 @@ retail disc byte-for-byte**.
 > one, update that ledger. The running "not yet implemented" frontier is the 369
 > auto-generated abort stubs in `native/platform/stubs.c` (self-maintaining).
 
+### ✅ THE INTRO FMV PLAYS — SOFTWARE MDEC (ledger A6 done)
+
+**`native/build/vagrant-native` plays Vagrant Story's opening movie**, all 593
+frames of `TITLE.STR`, decoded in software and uploaded to VRAM by the game's
+own code, then hands off to the title screen. **`src/` now contains no
+`NATIVE_BUILD` edits at all** — the two early returns in `22C.c` are gone and
+the matching build is still 21/21.
+
+Three new files, and the seam is the same one libds uses: everything PSYQ
+shipped as library assembly is ours, everything decompiled runs untouched.
+
+- **`native/platform/mdec.c`** — the variable-length decoder and the MDEC
+  itself. **The Huffman table is not reconstructed: it is the game's own.**
+  `DecDCTvlc2` is table-driven, and `DecDCTvlcBuild` (BUILD.c) is ordinary C
+  that compiles natively, so the port decodes with the retail table
+  decompressed by the retail routine. The decoder is a transcription of
+  `VLC_C.s`, whose indexing gives the table's layout away: a 13-bit primary
+  lookup into 8-byte entries carrying up to three output codes each, a 9-bit
+  secondary for the long codes, `0x7C1F` meaning "the next 16 raw bits are the
+  code", `0xFE00` ending a block, and an all-ones DC field ending the frame.
+  Below that, dequantise → IDCT → YCbCr→RGB.
+- **`native/platform/libpress.c`** — the `DecDCT*` API. See the ledger for why
+  the completion callback is a trampoline rather than a direct call.
+- **`native/platform/libstream.c`** — the `St*` streaming layer, reassembling
+  STR chunks into whole frames over the virtual drive.
+
+**Verification:** `make -f Makefile.native mdectest` demuxes `TITLE.STR` and
+decodes every frame, checking each codes exactly the macroblocks its dimensions
+call for — **593/593 clean**. That count is the sharp test: one wrong table
+entry desynchronises the bitstream, and a desynchronised frame cannot land on
+the right macroblock count by accident.
+
+**Four things this cost real debugging time, all worth remembering:**
+
+1. **An STR chunk is 2048 bytes, not the whole sector.** The extracted
+   `TITLE.STR` has raw 2336-byte form 2 sectors; only 32 + 2016 bytes of each
+   are the chunk. Taking the whole sector splices junk into the bitstream
+   partway through the first chunk, which decodes as *plausible-looking
+   coefficients* rather than failing — the frame just quietly ends early.
+2. **`cos` and `floor` came out as zeroed data blobs.** The stub generator only
+   knew about libc, and libm is not libc, so calls to them linked happily and
+   jumped into an array of zeroes. `gen_stubs.py` now takes a list of host
+   libraries; `mdec.c` avoids libm entirely.
+3. **The vblank counter has to be free-running.** It now derives from elapsed
+   time, as the hardware's does, instead of counting `VSync` calls. The movie
+   player records `VSync(-1)` and returns after 0x8F5 (2293) vblanks — 38
+   seconds, exactly TITLE.STR's length — but only calls `VSync` once per movie
+   frame, so a call-counted total needed two and a half minutes and the intro
+   never ended.
+4. **Sector delivery is paced by wall-clock time, not by frames.**
+   `_getNextMovieFrame` busy-waits thousands of iterations without calling
+   `VSync`, so frame-boundary delivery starved it, `_playMovie` restarted the
+   stream from the top, and the first frame never finished arriving. libds now
+   charges sectors against elapsed time and is serviced from `StGetNext` as
+   well as `VSync` — still an authentic 150 sectors/second. Note the rate has to
+   accumulate *time*, not sectors: polled every few tens of nanoseconds, a
+   per-call conversion to sectors floors to zero every time.
+
 ### ✅ REAL ITEM LISTS, ALL CATEGORIES, IN-LIST CURSOR, SAVE WRITE-BACK, BOX FRAME
 **(tips `60343d81` → `2736e12b`; current branch tip = `2736e12b`)**
 
@@ -125,12 +183,8 @@ What had to be built:
   frames with `addr2line -f -e native/build/vagrant-native <addr>`.
 
 **Known gaps (both logged in the ledger):**
-- **A6 — the intro FMV is skipped.** It is an MDEC video stream and there is no
-  MDEC decoder yet. Not cosmetic: `_initIntroMovie` spins in
-  `while (_decodeNextMovieFrame() == -1)`, so it cannot simply be left to fail;
-  it is bypassed with an `#ifdef NATIVE_BUILD` early return. **This is the next
-  substantial piece of work** — VLC decode + IDCT + YUV→RGB behind the
-  `DecDCT*` entry points.
+- **A6 — the intro FMV.** DONE — see the MDEC section at the top of this file.
+  A software decoder now plays it and the `#ifdef NATIVE_BUILD` bypass is gone.
 - **A7 — the title background and the NEW GAME / CONTINUE items are not
   rendering correctly yet.** The copyright text does. The RLE asset and
   `MENUBGSZ` are verified correct (the decode produces exactly the expected
@@ -144,8 +198,9 @@ never defined in `src/` (`InitGeom`, and the whole `DecDCT*` family) come out as
 reporting itself by name. If a boot crash lands somewhere nonsensical, check
 whether the callee is a data blob in `stubs.c`.
 
-**Guard rail held:** the `src/` edit is `#ifdef NATIVE_BUILD`-guarded and the
-PSX build still verifies **✔ All files match** (21/21 byte-identical).
+**Guard rail held:** the PSX build still verifies **✔ All files match** (21/21
+byte-identical) — and since the MDEC landed there are no `NATIVE_BUILD` edits
+left in `src/` at all.
 
 ### ✅ PHASE 2.1 COMPLETE — LIVE WINDOW + REAL CONTROLLER
 

@@ -17,8 +17,8 @@ void psx_pad_update(void);
  * (vs_main_gametimeUpdate -> VSync -> _processCdQueue). */
 void psx_cd_pump(void);
 
-static uint64_t vblank_count;
 static uint64_t start_ns;
+static uint64_t next_vblank_ns;
 static void (*vsync_cb)(void);
 
 static uint64_t now_ns(void)
@@ -31,11 +31,34 @@ static uint64_t now_ns(void)
 /* NTSC vertical blank period. */
 #define FRAME_NS 16683333ull
 
+static void start_clock(void)
+{
+    if (!start_ns) {
+        start_ns = now_ns();
+        next_vblank_ns = start_ns;
+    }
+}
+
+/* The vblank counter is FREE-RUNNING, driven by elapsed time rather than by how
+ * often the game happens to call VSync -- because on hardware it is incremented
+ * by the vblank interrupt whether anyone is looking or not.
+ *
+ * This is load-bearing, not pedantry. The movie player starts the intro, records
+ * VSync(-1), and returns once 0x8F5 (2293) vblanks have passed -- 38 seconds,
+ * which is exactly how long TITLE.STR runs. But it only calls VSync once per
+ * *movie* frame, about 15 times a second, so a counter that advanced per call
+ * would need two and a half minutes to reach the same total and the intro would
+ * never end. The same idiom paces _stopMovieIfComplete and the title screen's
+ * idle timeout. */
+static uint64_t vblanks_elapsed(void)
+{
+    start_clock();
+    return (now_ns() - start_ns) / FRAME_NS;
+}
+
 static void wait_one_vblank(void)
 {
-    uint64_t target;
-    if (!start_ns) start_ns = now_ns();
-    vblank_count++;
+    start_clock();
 
     /* Show the frame we just drew and refresh the pad, then pace. No-ops when
      * running headless (no window was opened). */
@@ -43,13 +66,18 @@ static void wait_one_vblank(void)
     psx_pad_update();
     psx_cd_pump();
 
-    target = start_ns + vblank_count * FRAME_NS;
+    next_vblank_ns += FRAME_NS;
     for (;;) {
         uint64_t t = now_ns();
-        if (t >= target) break;
+        if (t >= next_vblank_ns) {
+            /* Ran long: resync rather than trying to claw back the lost time,
+             * which would spin through several frames with no delay at all. */
+            if (t - next_vblank_ns > FRAME_NS) next_vblank_ns = t;
+            break;
+        }
         {
             struct timespec rq;
-            uint64_t d = target - t;
+            uint64_t d = next_vblank_ns - t;
             rq.tv_sec = (time_t)(d / 1000000000ull);
             rq.tv_nsec = (long)(d % 1000000000ull);
             nanosleep(&rq, 0);
@@ -64,10 +92,10 @@ static void wait_one_vblank(void)
 int VSync(int mode)
 {
     int i, n;
-    if (mode < 0) return (int)vblank_count;
+    if (mode < 0) return (int)vblanks_elapsed();
     n = (mode == 0) ? 1 : mode;
     for (i = 0; i < n; i++) wait_one_vblank();
-    return (int)vblank_count;
+    return (int)vblanks_elapsed();
 }
 
 int VSyncCallback(void (*f)(void))

@@ -107,6 +107,8 @@ PLAT_REAL := native/platform/unimpl.c native/platform/scratchpad.c \
              native/platform/libds.c native/platform/libspu.c \
              native/platform/disc_index.c native/platform/kernel.c \
              native/platform/sound_asm.c native/platform/assets.c \
+             native/platform/mdec.c native/platform/libpress.c \
+             native/platform/libstream.c \
              native/platform/main.c
 PLAT_SRCS := $(PLAT_REAL) native/platform/stubs.c
 
@@ -114,7 +116,7 @@ GAME_OBJS := $(foreach s,$(GAME_SRCS),$(OBJ)/game_$(subst /,_,$(patsubst src/%.c
 REAL_OBJS := $(patsubst native/platform/%.c,$(OBJ)/plat_%.o,$(PLAT_REAL))
 STUB_OBJ  := $(OBJ)/plat_stubs.o
 
-.PHONY: all clean run stubs test menu window harvest discindex assets
+.PHONY: all clean run stubs test menu window harvest discindex assets mdectest
 all: $(BIN)
 
 # harvested_data.c holds real read-only bytes copied from the retail overlays,
@@ -174,9 +176,14 @@ $(BIN): $(GAME_OBJS) $(REAL_OBJS) $(STUB_OBJ)
 
 # Regenerate the stub layer from whatever is still unresolved after the real
 # implementations are accounted for.
+# Every host library whose symbols must bind for real rather than be stubbed.
+# libm matters as much as libc: an unlisted library function is not glabel'd in
+# the disassembly either, so it would be emitted as a zeroed DATA blob and
+# calling it would jump into an array of zeroes.
 LIBC := $(shell $(NATIVE_CC) -m32 -print-file-name=libc.so.6)
+LIBM := $(shell $(NATIVE_CC) -m32 -print-file-name=libm.so.6)
 stubs: $(GAME_OBJS) $(REAL_OBJS)
-	@python3 native/tools/gen_stubs.py $(OBJ) native/platform/stubs.c $(LIBC)
+	@python3 native/tools/gen_stubs.py $(OBJ) native/platform/stubs.c $(LIBC),$(LIBM)
 
 test: | $(OBJ)
 	@$(NATIVE_CC) $(GAME_CFLAGS) -c src/SLUS_010.40/31724.c -o $(OBJ)/t_trigdata.o
@@ -186,6 +193,17 @@ test: | $(OBJ)
 	@$(NATIVE_CC) $(PLAT_CFLAGS) $(LDFLAGS) native/tests/test_gpu.c \
 		native/platform/libgpu.c native/platform/psx_vram.c -o $(BUILD)/test_gpu
 	@./$(BUILD)/test_gpu
+
+# Offline check of the software MDEC against the real movie stream: demuxes
+# data/MOV/TITLE.STR and decodes every frame, reporting any whose macroblock
+# count does not match its dimensions. Also dumps the first few frames as PPMs.
+# BUILD.c is game code (PSYQ headers, -nostdinc), so it needs GAME_CFLAGS: the
+# decode table the test uses is built by the retail routine, not reconstructed.
+mdectest: | $(OBJ)
+	@$(NATIVE_CC) $(GAME_CFLAGS) -c src/TITLE/TITLE.PRG/libpress/BUILD.c -o $(OBJ)/t_vlcbuild.o
+	@$(NATIVE_CC) $(PLAT_CFLAGS) -no-pie native/tests/mdec_test.c \
+		native/platform/mdec.c $(OBJ)/t_vlcbuild.o -lm -o $(BUILD)/mdec_test
+	@./$(BUILD)/mdec_test
 
 run: $(BIN)
 	@./$(BIN)

@@ -47,7 +47,7 @@ def glabel_functions(asmroot):
     return fns
 
 
-def main(objdir, out, libc):
+def main(objdir, out, hostlibs):
     objs = sorted(str(p) for p in pathlib.Path(objdir).glob("*.o")
                   if "plat_stubs" not in p.name)
     undef, defined = set(), set()
@@ -63,11 +63,19 @@ def main(objdir, out, libc):
         # defined -- otherwise the symbol is skipped here and the link fails.
         if len(f) == 3 and f[1].isupper() and f[1] != "U":
             defined.add(f[2])
+    # Anything the host libraries define must be left to bind to the real
+    # implementation. Getting this list wrong is quiet and nasty: an unlisted
+    # library function (cos, floor, ...) is not recognised as code by the
+    # glabel test either, so it comes out as a zeroed DATA blob and calling it
+    # jumps into an array of zeroes. Hence libm alongside libc.
     libcsyms = set()
-    for line in nm(["-D", "--defined-only", libc]).splitlines():
-        f = line.split()
-        if f:
-            libcsyms.add(f[-1].split("@")[0])
+    for lib in hostlibs.split(","):
+        if not lib:
+            continue
+        for line in nm(["-D", "--defined-only", lib]).splitlines():
+            f = line.split()
+            if f:
+                libcsyms.add(f[-1].split("@")[0])
 
     asmroot = sys.argv[4] if len(sys.argv) > 4 else "build/src"
     functions_in_asm = glabel_functions(asmroot)
