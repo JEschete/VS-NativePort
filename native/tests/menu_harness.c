@@ -292,6 +292,14 @@ static void interactive_loop(void)
            "F2 writes a screenshot.\n");
     fflush(stdout);
 
+    /* This harness owns its loop and dumps a PPM after it, so it handles the
+     * quit request itself rather than letting the pump exit the process. */
+    psx_present_cooperative_quit(1);
+
+    /* The display starts blanked, as on hardware, and the boot sequence is what
+     * normally enables it. This harness skips the boot, so it has to say so. */
+    SetDispMask(1);
+
     while (!psx_present_quit_requested()) {
         pump_cd_queue();
         vs_main_processPadState();

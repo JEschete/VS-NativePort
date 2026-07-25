@@ -160,6 +160,11 @@ static void*  tex;
 static void*  gamepad;
 static int    active;
 static int    quit_req;
+/* Set by callers that run their own loop and poll psx_present_quit_requested()
+ * themselves, so they can shut down in their own time. Everything else is
+ * driven by the game's loop, which never returns, so a quit request there has
+ * to end the process from inside the pump. */
+static int    coop_quit;
 static int    src_x, src_y, src_w = 320, src_h = 240;
 static int    src_rgb24;            /* display region holds 24-bit colour */
 static unsigned* argb;              /* conversion scratch, src_w * src_h */
@@ -384,10 +389,20 @@ static void poll_gamepad(unsigned* btn, unsigned char sticks[4])
 /* ------------------------------------------------------------------ */
 /* Presentation                                                         */
 /* ------------------------------------------------------------------ */
+int psx_gpu_display_enabled(void);
+
 static void blit_vram(void)
 {
     const uint16_t* vram = psx_vram();
     int x, y;
+
+    /* Display off. The game blanks the screen across transitions and expects
+     * whatever it draws meanwhile to stay hidden, so show black rather than
+     * the contents of VRAM. */
+    if (!psx_gpu_display_enabled()) {
+        memset(argb, 0, (size_t)src_w * src_h * sizeof *argb);
+        return;
+    }
 
     /* 24-bit mode. VRAM is addressed in halfwords whatever the display depth,
      * so a row of `src_w` pixels occupies src_w*3 bytes starting at the same
@@ -520,6 +535,8 @@ int psx_present_init(const char* title, int scale)
 int psx_present_active(void) { return active; }
 int psx_present_quit_requested(void) { return quit_req; }
 
+void psx_present_cooperative_quit(int on) { coop_quit = on; }
+
 void psx_present_set_source(int x, int y, int w, int h)
 {
     if (active) return;                 /* size is fixed once the texture exists */
@@ -573,6 +590,22 @@ void psx_present_pump(void)
     poll_keyboard(&btn);
     poll_gamepad(&btn, sticks);
     bridge_poll();
+
+    /* Closing the window has to actually close the program. The boot path is
+     * the game's own loop, which never returns and never polls anything, so
+     * without this the close button and ESC set a flag that nobody reads, and
+     * the only way out is to kill the process.
+     *
+     * Checked after the keyboard poll so ESC takes effect on the same frame it
+     * is pressed. exit() rather than a longjmp or a flag, because it runs the
+     * atexit handlers, so an in-progress audio capture still gets its WAV
+     * header fixed up. */
+    if (quit_req && !coop_quit) {
+        printf("[present] quit requested, exiting\n");
+        fflush(stdout);
+        psx_present_shutdown();
+        exit(0);
+    }
 
     if (bridge_live) {
         btn |= bridge_buttons;

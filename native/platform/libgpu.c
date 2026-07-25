@@ -249,14 +249,31 @@ static uint16_t gp0_sample(int u, int v, uint16_t tp, uint16_t clut)
     }
 }
 
+/* Textured sprite. The primitive's colour MODULATES the texture, exactly as it
+ * does for textured polygons: 0x80 per channel means "unchanged", 0 means
+ * black. Ignoring it does not merely lose a tint, it breaks fades, because
+ * that is how the game fades sprites in and out.
+ *
+ * _displayPublisherAndDeveloper (22C.c) is the case that exposed it. It never
+ * clears the framebuffers; it erases the publisher text by redrawing the same
+ * sprite with the colour walked down to 0 over the last 32 frames, so the text
+ * overwrites itself in black. With modulation dropped, the text stayed at full
+ * brightness and was still on screen underneath the SQUARESOFT logo that the
+ * next loop draws. */
 static void blit_sprite(int x, int y, int w, int h,
-                        int u0, int v0, uint16_t tp, uint16_t clut)
+                        int u0, int v0, uint16_t tp, uint16_t clut,
+                        int cr, int cg, int cb)
 {
     int i, j;
     for (j = 0; j < h; j++)
         for (i = 0; i < w; i++) {
             uint16_t t = gp0_sample(u0 + i, v0 + j, tp, clut);
-            if (t) put_px(x + i, y + j, t);           /* 0 = transparent */
+            int tr, tg, tb;
+            if (!t) continue;                         /* 0 = transparent */
+            tr = (t & 0x1F) * cr / 128;         if (tr > 31) tr = 31;
+            tg = ((t >> 5) & 0x1F) * cg / 128;  if (tg > 31) tg = 31;
+            tb = ((t >> 10) & 0x1F) * cb / 128; if (tb > 31) tb = 31;
+            put_px(x + i, y + j, (uint16_t)(tr | (tg << 5) | (tb << 10)));
         }
 }
 
@@ -353,7 +370,8 @@ static void gp0_exec(const uint32_t* w)
         if (tex) {                                   /* textured sprite: sample */
             int u0 = w[2] & 0xFF, v0 = (w[2] >> 8) & 0xFF;
             uint16_t clut = (uint16_t)((w[2] >> 16) & 0xFFFF);
-            blit_sprite(x, y, rw, rh, u0, v0, gp0_tpage, clut);
+            blit_sprite(x, y, rw, rh, u0, v0, gp0_tpage, clut,
+                        col & 0xFF, (col >> 8) & 0xFF, (col >> 16) & 0xFF);
         } else {
             fill_rect(x, y, rw, rh, c);
         }
@@ -465,7 +483,28 @@ DISPENV* PutDispEnv(DISPENV* env)
     return env;
 }
 DRAWENV* PutDrawEnv(DRAWENV* env) { cur_draw = *env; return env; }
-int SetDispMask(int mask) { disp_mask = mask; return mask; }
+/* Display enable. The game uses this as a shutter around transitions, so it has
+ * to be honoured: anything drawn while the display is off is meant to be
+ * invisible.
+ *
+ * The intro is the case that exposed it. _displayPublisherAndDeveloper ends
+ * with SetDispMask(0), and _playIntroMovie deliberately skips re-enabling on
+ * its first iteration (`if (++var_s2 != 1)`), so the screen stays black while
+ * the movie loads and while its first frame is composed. Ignoring the mask
+ * showed the leftover developer logo and then a half-built frame before the
+ * video began.
+ *
+ * Starts at 0, blanked, as the hardware does. Everything on the boot path
+ * enables it explicitly. */
+int SetDispMask(int mask)
+{
+    if (mask != disp_mask && getenv("VS_GPU_TRACE"))
+        printf("[gpu] SetDispMask %d -> %d\n", disp_mask, mask);
+    disp_mask = mask;
+    return mask;
+}
+
+int psx_gpu_display_enabled(void) { return disp_mask; }
 
 int ResetGraph(int mode)
 {

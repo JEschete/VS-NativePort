@@ -22,8 +22,13 @@ int  psx_present_active(void);
 /* Called once per frame from VSync(): present VRAM and refresh input. */
 void psx_present_pump(void);
 
-/* Window close / ESC. */
+/* Window close / ESC. By default a quit request ends the process from inside
+ * psx_present_pump(), because the game's own loop never returns and never polls
+ * anything. Callers that run their own loop should call
+ * psx_present_cooperative_quit(1) and poll psx_present_quit_requested()
+ * instead, so they can shut down cleanly. */
 int  psx_present_quit_requested(void);
+void psx_present_cooperative_quit(int on);
 void psx_present_shutdown(void);
 
 /* Returns 1 exactly once per F2 press, for dumping a PPM to diff against a
