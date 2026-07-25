@@ -174,11 +174,73 @@ void func_8001369C(void)
     SpuSetReverb(1);
 }
 
-/* func_800135D8: upload an Akao instrument bank into SPU local memory
- * (Sound_CopyAndRelocateInstruments + SpuSetTransferStartAddr + _writeSpu).
- * No-op while the SPU is silent -- _writeSpu discards its data anyway, so the
- * only thing lost is the copy. Phase 3b restores it. Ledger section B. */
-void func_800135D8(void* file, int arg1, int arg2, int arg3)
+/* func_800135D8: upload an Akao instrument bank into SPU local memory.
+ * Transcribed from 25AC/func_800135D8.s.
+ *
+ * An Akao bank is a 0x40-byte header, then `data[7]` instrument records of 16
+ * bytes each, then the ADPCM sample data. The samples go to SPU RAM at
+ * in_SpuAddr, and the records are copied into the driver's own instrument
+ * table with their start and loop addresses relocated by that same offset.
+ *
+ * Three of the callees in 25AC.c are file-static (_waitTransferAvailable,
+ * _writeSpu, Sound_IsNotAkaoFile), so they are restated here. The two that
+ * matter are not: Sound_CopyAndRelocateInstruments and g_InstrumentInfo are
+ * both global, so the real driver code does the relocation.
+ *
+ * This was the last thing standing between the software SPU and audible sound.
+ * Until it landed, SPU RAM held 64 bytes (StartSound's flush buffer) and no
+ * voice ever keyed on, because the driver had no instruments to play. */
+
+/* Mirrors FSoundInstrumentInfo in the game headers; the driver indexes
+ * g_InstrumentInfo with a 4-bit shift, so the record is 16 bytes. */
+typedef struct {
+    unsigned short StartAddr;
+    unsigned short LoopAddr;
+    unsigned short FineTune;
+    unsigned short Pad;
+    unsigned short AdsrLower;
+    unsigned short AdsrUpper;
+    unsigned short Unk0C;
+    unsigned short Unk0E;
+} FSoundInstrumentInfo_native;
+
+extern FSoundInstrumentInfo_native g_InstrumentInfo[256];
+extern volatile int _isSpuTransfer;
+extern void Sound_CopyAndRelocateInstruments(void* in_A, void* in_B,
+    int in_AddrOffset, int in_Count);
+
+extern unsigned SpuSetTransferStartAddr(unsigned addr);
+extern unsigned SpuWrite(unsigned char* addr, unsigned size);
+extern void* SpuSetTransferCallback(void (*func)(void));
+
+static void spu_write_complete(void)
 {
-    (void)file; (void)arg1; (void)arg2; (void)arg3;
+    SpuSetTransferCallback(0);
+    _isSpuTransfer = 0;
+}
+
+int func_800135D8(void* in_File, int in_Wait, int in_InstrumentIndex, int in_SpuAddr)
+{
+    FSoundInstrumentInfo_native* instruments = (FSoundInstrumentInfo_native*)in_File;
+    int* data = (int*)in_File;
+
+    /* Transfers complete synchronously here, so there is never anything to
+     * wait for; the flag is maintained anyway because the driver polls it. */
+    if (data[0] != ('A' | ('K' << 8) | ('A' << 16) | ('O' << 24))) {
+        _isSpuTransfer = -1;
+        return -1;
+    }
+
+    SpuSetTransferStartAddr((unsigned)in_SpuAddr);
+    instruments += 4;                       /* past the 0x40-byte header */
+
+    _isSpuTransfer = 1;
+    SpuSetTransferCallback(spu_write_complete);
+    SpuWrite((unsigned char*)instruments + (data[7] << 4), (unsigned)data[5]);
+
+    Sound_CopyAndRelocateInstruments(instruments,
+        &g_InstrumentInfo[in_InstrumentIndex], in_SpuAddr, data[7]);
+
+    (void)in_Wait;
+    return 0;
 }

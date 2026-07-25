@@ -6,6 +6,7 @@
  * there is no video encoder to configure, no BIOS to hand a card filesystem to.
  * They exist so the retail boot sequence runs unmodified. */
 #include <stdio.h>
+#include <stdlib.h>
 
 /* Restore the BIOS's default interrupt callbacks. Retail's decompiled version
  * (libetc/INTR.c) is `D_800320D4->unkC()` -- a jump through the kernel callback
@@ -85,15 +86,78 @@ static double rcnt_hz(int c)
     }
 }
 
+/* A counter set to interrupt mode raises an event every time it reaches its
+ * target. This is what drives the sound driver: StartSound arms counter 2 at
+ * 0x44E8 (4233600 / 17640 = exactly 240Hz, the Akao tick rate) and registers
+ * func_80019A58 as an EvMdINTR handler on it. Without the interrupt the
+ * sequencer never advances, so no note is ever keyed on and the SPU stays
+ * silent no matter how well the mixer works. */
+#define RCntMdINTR_BIT 0x1000
+#define RCNT_CLASS(c)  (0xF2000000UL | (unsigned long)(c))
+#define EvSpINT_SPEC   0x0002UL
+
+extern void DeliverEvent(unsigned long cls, unsigned long spec);
+
+static unsigned short    rcnt_target[4];
+static int               rcnt_intr[4];
+static unsigned long long rcnt_last_ns[4];
+
 int SetRCnt(int spec, unsigned short target, int mode)
 {
-    (void)target; (void)mode;
+    int c = rcnt_of(spec);
     if (!rcnt_start_ns) rcnt_start_ns = now_ns();
-    rcnt_running[rcnt_of(spec)] = 1;
+    rcnt_target[c] = target;
+    rcnt_intr[c] = (mode & RCntMdINTR_BIT) != 0;
+    rcnt_last_ns[c] = now_ns();
+    rcnt_running[c] = 1;
+    if (getenv("VS_RCNT_TRACE"))
+        printf("[rcnt] SetRCnt cnt%d target=%u intr=%d\n", c, (unsigned)target, rcnt_intr[c]);
     return 1;
 }
 
-int StartRCnt(int spec) { return SetRCnt(spec, 0, 0); }
+/* Starting a counter must not clear the target the game just programmed. */
+int StartRCnt(int spec)
+{
+    int c = rcnt_of(spec);
+    if (!rcnt_start_ns) rcnt_start_ns = now_ns();
+    rcnt_last_ns[c] = now_ns();
+    rcnt_running[c] = 1;
+    return 1;
+}
+
+/* Raise whatever counter interrupts are due. Called once per frame from
+ * VSync(), so a 240Hz counter delivers four ticks per frame. */
+void psx_rcnt_pump(void)
+{
+    unsigned long long now = now_ns();
+    int c;
+
+    for (c = 0; c < 4; c++) {
+        unsigned long long period_ns, elapsed;
+        int n;
+
+        if (!rcnt_running[c] || !rcnt_intr[c] || rcnt_target[c] == 0) continue;
+
+        period_ns = (unsigned long long)(rcnt_target[c] * 1e9 / rcnt_hz(c));
+        if (period_ns == 0) continue;
+
+        elapsed = now - rcnt_last_ns[c];
+        n = (int)(elapsed / period_ns);
+        if (n <= 0) continue;
+        /* Cap the catch-up so a long stall cannot fire hundreds of ticks at
+         * once and race the sequencer ahead of the music. */
+        if (n > 8) n = 8;
+        rcnt_last_ns[c] += (unsigned long long)n * period_ns;
+
+        {
+            static unsigned long fired;
+            if (getenv("VS_RCNT_TRACE") && (fired += n) % 240 < n)
+                printf("[rcnt] cnt%d delivered %lu ticks\n", c, fired);
+        }
+        while (n-- > 0) DeliverEvent(RCNT_CLASS(c), EvSpINT_SPEC);
+    }
+}
+
 int StopRCnt(int spec) { rcnt_running[rcnt_of(spec)] = 0; return 1; }
 int ResetRCnt(int spec) { (void)spec; rcnt_start_ns = now_ns(); return 1; }
 

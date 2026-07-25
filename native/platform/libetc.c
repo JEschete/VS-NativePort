@@ -18,6 +18,9 @@ void psx_pad_update(void);
 void psx_cd_pump(void);
 /* Mixes a frame of audio (native/platform/libspu.c). */
 void psx_spu_pump(void);
+/* Raises root-counter interrupts, which is what ticks the sound driver
+ * (native/platform/kernel.c). */
+void psx_rcnt_pump(void);
 
 static uint64_t start_ns;
 static uint64_t next_vblank_ns;
@@ -67,6 +70,7 @@ static void wait_one_vblank(void)
     psx_present_pump();
     psx_pad_update();
     psx_cd_pump();
+    psx_rcnt_pump();
     psx_spu_pump();
 
     next_vblank_ns += FRAME_NS;

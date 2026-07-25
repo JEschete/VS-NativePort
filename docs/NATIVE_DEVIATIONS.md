@@ -54,19 +54,34 @@ the register block the Akao driver writes — the driver is decompiled C
 (`src/SLUS_010.40/25AC.c`, ~5300 lines, 17 `INCLUDE_ASM`) and already runs
 natively, so nothing above the hardware needed changing.
 
-It is still silent, and the reason is measured rather than guessed:
-`VS_AUDIO_WAV=<path>` captures the mix, and after 30s the counters read
-**0 key-ons, 64 bytes in SPU RAM** — 64 being just `StartSound`'s flush buffer.
-The instrument bank never arrives, so the driver has nothing to play. That is
-**`func_800135D8`**, the row below: until it uploads a bank, everything
-downstream is correct and inaudible.
+Two of the three things it needed are now done, and the state is measured with
+`VS_AUDIO_WAV=<path>` plus the counters it prints:
+
+1. **The instrument bank uploads.** `func_800135D8` is implemented in
+   `sound_asm.c` (transcribed from `25AC/func_800135D8.s`). SPU RAM went from
+   **64 bytes** (just `StartSound`'s flush buffer) to **204,096 bytes**.
+2. **The sequencer ticks.** `StartSound` arms root counter 2 at `0x44E8`, which
+   is exactly 240Hz, and registers `func_80019A58` as an `EvMdINTR` handler.
+   The kernel could read counters but never delivered their interrupt, so the
+   Akao tick had never once run. `psx_rcnt_pump()` (kernel.c) now raises it from
+   VSync, verified with `VS_RCNT_TRACE=1`.
+3. **Still 0 key-ons.** Neither the title sequence nor menu SFX reach the SPU,
+   across runs of 80s with scripted input. So the driver has instruments and a
+   clock, and nothing asks it to play.
+
+**Next place to look:** the path from `vs_main_playSfxDefault` (main.c:9877) ->
+`vs_main_playSfx` down into the driver, and whether an SFX/sequence bank is ever
+loaded. Music files are separate: `_musicLBAs[]` in main.c indexes
+`MUSIC000.DAT` and friends by LBA, so something has to load one and start it.
+Check whether that load ever happens on the title path before assuming the
+driver is at fault.
 
 | Symbol | File | Restore when |
 |---|---|---|
 | `SpuSetVoiceAttr`, reverb, IRQ | `native/platform/libspu.c` | Phase 3b. Reverb, noise voices and pitch/amplitude modulation are requested through registers `spu_core.c` ignores; interpolation is linear, not the hardware's four-tap Gaussian |
 | Audio output | `native/platform/libspu.c` | **No sound card yet** — the mix is only written to a WAV. Needs an SDL audio sink (SDL2 is already `dlopen`'d by present.c) |
 | XA audio in `TITLE.STR` | `native/platform/libstream.c` | Phase 3b. The intro's sectors interleave video with CD-XA ADPCM audio (1401 of 11216 sectors, submode `0x64`). The streaming layer drops anything that is not an STR video chunk, so the intro plays silent |
-| `func_800135D8` | `native/platform/sound_asm.c` | **THE BLOCKER FOR AUDIO.** Uploads an Akao instrument bank to SPU RAM. `_writeSpu` now stores what it is given, so this no-op is the only reason SPU RAM holds 64 bytes and no voice ever keys on. Needs transcribing from `25AC/func_800135D8.s`, the same way `func_8001369C` was |
+| `func_800135D8` | `native/platform/sound_asm.c` | **DONE** natively. Uploads an Akao instrument bank to SPU RAM; verified by SPU RAM going 64 -> 204,096 bytes. Three callees in 25AC.c are file-static and are restated in the native file; `Sound_CopyAndRelocateInstruments` and `g_InstrumentInfo` are global, so the real driver code does the relocation. Still `INCLUDE_ASM` for the PSX build: a matching decomp reached 49/49 instructions with the right structure and failed only on register allocation, which is permuter work |
 | `CdMix` | `native/platform/libds.c` | Phase 3b — CD-audio volume routing |
 | `vs_battle_playMenuChangeSfx` | `native/platform/battle_asm.c` | Phase 3 (native SPU) |
 | `vs_battle_playMenuSelectSfx` | `native/platform/battle_asm.c` | Phase 3 |
