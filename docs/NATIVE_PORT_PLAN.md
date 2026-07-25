@@ -49,7 +49,17 @@ call for — **593/593 clean**. That count is the sharp test: one wrong table
 entry desynchronises the bitstream, and a desynchronised frame cannot land on
 the right macroblock count by accident.
 
-**Four things this cost real debugging time, all worth remembering:**
+**Five things this cost real debugging time, all worth remembering:**
+
+0. **Display depth is per-DISPENV, and the window has to honour it.** The decode
+   was correct long before the movie *looked* correct: `_playIntroMovie` sets
+   `isrgb24 = 1` (having already scaled the width by 2/3, so 480 halfwords of
+   MDEC output are 320 pixels), and the present layer was reading every halfword
+   as a 15-bit pixel. That shows up as coloured static with the shapes faintly
+   visible through it — which reads as "the decoder is nearly working" when in
+   fact the decoder was fine. `VS_GPU_TRACE` now logs each `PutDispEnv` with its
+   rect and depth.
+
 
 1. **An STR chunk is 2048 bytes, not the whole sector.** The extracted
    `TITLE.STR` has raw 2336-byte form 2 sectors; only 32 + 2016 bytes of each
