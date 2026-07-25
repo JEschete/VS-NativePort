@@ -48,11 +48,25 @@ registered by `SpuSetTransferCallback`, because the sound driver sets
 completion callback clears it. A no-op there hangs the boot before the first
 frame.
 
+**Status:** the SPU itself now exists (`native/platform/spu_core.c`): 24 ADPCM
+voices, ADSR, pitch and volume, mixing to 44.1kHz stereo. It works by *reading*
+the register block the Akao driver writes — the driver is decompiled C
+(`src/SLUS_010.40/25AC.c`, ~5300 lines, 17 `INCLUDE_ASM`) and already runs
+natively, so nothing above the hardware needed changing.
+
+It is still silent, and the reason is measured rather than guessed:
+`VS_AUDIO_WAV=<path>` captures the mix, and after 30s the counters read
+**0 key-ons, 64 bytes in SPU RAM** — 64 being just `StartSound`'s flush buffer.
+The instrument bank never arrives, so the driver has nothing to play. That is
+**`func_800135D8`**, the row below: until it uploads a bank, everything
+downstream is correct and inaudible.
+
 | Symbol | File | Restore when |
 |---|---|---|
-| `libspu.c` (all of it) | `native/platform/libspu.c` | Phase 3b — real SPU: ADPCM decode, voice mixing, reverb, SDL audio backend |
+| `SpuSetVoiceAttr`, reverb, IRQ | `native/platform/libspu.c` | Phase 3b. Reverb, noise voices and pitch/amplitude modulation are requested through registers `spu_core.c` ignores; interpolation is linear, not the hardware's four-tap Gaussian |
+| Audio output | `native/platform/libspu.c` | **No sound card yet** — the mix is only written to a WAV. Needs an SDL audio sink (SDL2 is already `dlopen`'d by present.c) |
 | XA audio in `TITLE.STR` | `native/platform/libstream.c` | Phase 3b. The intro's sectors interleave video with CD-XA ADPCM audio (1401 of 11216 sectors, submode `0x64`). The streaming layer drops anything that is not an STR video chunk, so the intro plays silent |
-| `func_800135D8` | `native/platform/sound_asm.c` | Phase 3b. Uploads an Akao instrument bank to SPU RAM; no-op while `_writeSpu` discards its data |
+| `func_800135D8` | `native/platform/sound_asm.c` | **THE BLOCKER FOR AUDIO.** Uploads an Akao instrument bank to SPU RAM. `_writeSpu` now stores what it is given, so this no-op is the only reason SPU RAM holds 64 bytes and no voice ever keys on. Needs transcribing from `25AC/func_800135D8.s`, the same way `func_8001369C` was |
 | `CdMix` | `native/platform/libds.c` | Phase 3b — CD-audio volume routing |
 | `vs_battle_playMenuChangeSfx` | `native/platform/battle_asm.c` | Phase 3 (native SPU) |
 | `vs_battle_playMenuSelectSfx` | `native/platform/battle_asm.c` | Phase 3 |

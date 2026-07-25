@@ -108,7 +108,7 @@ PLAT_REAL := native/platform/unimpl.c native/platform/scratchpad.c \
              native/platform/disc_index.c native/platform/kernel.c \
              native/platform/sound_asm.c native/platform/assets.c \
              native/platform/mdec.c native/platform/libpress.c \
-             native/platform/libstream.c \
+             native/platform/libstream.c native/platform/spu_core.c \
              native/platform/main.c
 PLAT_SRCS := $(PLAT_REAL) native/platform/stubs.c
 
