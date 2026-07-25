@@ -437,11 +437,31 @@ DISPENV* PutDispEnv(DISPENV* env)
     /* isrgb24 matters as much as the rect: the intro movie displays MDEC output
      * in 24-bit colour, which the window has to unpack differently. */
     if (getenv("VS_GPU_TRACE"))
-        printf("[gpu] PutDispEnv (%d,%d %dx%d) rgb24=%d inter=%d\n",
+        printf("[gpu] PutDispEnv disp(%d,%d %dx%d) screen(%d,%d %dx%d) rgb24=%d inter=%d\n",
                env->disp.x, env->disp.y, env->disp.w, env->disp.h,
+               env->screen.x, env->screen.y, env->screen.w, env->screen.h,
                env->isrgb24, env->isinter);
-    psx_present_set_display(env->disp.x, env->disp.y, env->disp.w, env->disp.h,
-        env->isrgb24 != 0);
+    /* DISPENV has two rectangles and they mean different things. `disp` is
+     * where in VRAM the picture starts; `screen` is how much of it the video
+     * signal actually carries -- on hardware it sets the display range, so
+     * anything past screen.h is simply never scanned out.
+     *
+     * The game relies on that: it draws into 240-line buffers and asks for 224
+     * lines (screen.y = 8, screen.h = 224), the standard way of centring a
+     * 240-line buffer in NTSC's visible area. Showing the full disp.h instead
+     * put 16 lines of whatever VRAM sits below the picture on screen, which is
+     * font and texture data -- the band of coloured garbage along the bottom
+     * edge of the title and publisher screens. Interlaced modes carry two
+     * fields per frame, so their visible height is twice screen.h. */
+    {
+        int h = env->disp.h;
+        if (env->screen.h > 0) {
+            int visible = env->screen.h * (env->isinter ? 2 : 1);
+            if (visible < h) h = visible;
+        }
+        psx_present_set_display(env->disp.x, env->disp.y, env->disp.w, h,
+            env->isrgb24 != 0);
+    }
     return env;
 }
 DRAWENV* PutDrawEnv(DRAWENV* env) { cur_draw = *env; return env; }

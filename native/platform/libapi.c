@@ -365,7 +365,17 @@ long vs_bios_open(char* name, unsigned long mode)
     return -1;                                    /* not found (new-file create: TODO) */
 }
 
-long vs_bios_read(long fd, void* buf, long n)
+/* File I/O on a memory card completes ASYNCHRONOUSLY, exactly like the raw
+ * frame transfers and the _card_* commands: the return value reports the
+ * request, and the completion arrives as a card event. _loadSaveData (22C.c)
+ * issues read() and then polls _testMemcardEvents for IoEnd, so a read that
+ * never signals leaves it returning "pending" forever -- which is what hung the
+ * LOAD screen after the file list appeared, with the save data already
+ * correctly read.
+ *
+ * Every exit path signals, errors included, so a failure drives the game's
+ * error handling instead of the same hang. */
+static long mcd_read(long fd, void* buf, long n)
 {
     unsigned char* img = mcd_image();
     int i = (int)fd - 3, blk, boff, got = 0;
@@ -387,7 +397,14 @@ long vs_bios_read(long fd, void* buf, long n)
     return got;
 }
 
-long vs_bios_write(long fd, void* buf, long n)
+long vs_bios_read(long fd, void* buf, long n)
+{
+    long r = mcd_read(fd, buf, n);
+    card_complete(r >= 0);
+    return r;
+}
+
+static long mcd_write(long fd, void* buf, long n)
 {
     unsigned char* img = mcd_image();
     int i = (int)fd - 3, blk, boff, put = 0;
@@ -406,6 +423,13 @@ long vs_bios_write(long fd, void* buf, long n)
     }
     mcd_flush();
     return put;
+}
+
+long vs_bios_write(long fd, void* buf, long n)
+{
+    long r = mcd_write(fd, buf, n);
+    card_complete(r >= 0);
+    return r;
 }
 
 long vs_bios_lseek(long fd, long off, long whence)
