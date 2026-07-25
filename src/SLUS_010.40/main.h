@@ -74,16 +74,18 @@ typedef struct {
     int angle : 5;
     int aoe;
     char flags_0;
-    u_int flags_7 : 7;
+    u_int flagsD_0 : 4;
+    u_int flagsD_4 : 2;
+    u_int flagsD_6 : 1;
     u_int unlocked : 1;
-    u_int flags_16 : 16;
+    u_int flagsD_8 : 16;
     int unk10;
     struct {
         u_int effect : 7;
         u_int prerequisiteFunction : 6;
         u_int hitFunction : 3;
-        u_int damageCalculator : 6;
-        u_int damageFactor : 5;
+        u_int statCalculator : 6;
+        u_int statFactor : 5;
         u_int type : 2;
         u_int affinity : 3;
     } hitParams[2];
