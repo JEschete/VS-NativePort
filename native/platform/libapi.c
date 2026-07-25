@@ -136,10 +136,79 @@ struct DIRENTRY {
 
 #define CARD_DIR "saves"
 
-long _card_info(long chan)  { (void)chan; return 1; }
-long _card_clear(long chan) { (void)chan; return 1; }
-long _card_load(long chan)  { (void)chan; return 1; }
-long _card_format(long chan){ (void)chan; return 1; }
+/* The card commands are ASYNCHRONOUS: the return value only says the request
+ * was accepted, and completion is signalled later through the card event
+ * classes. Accepting without ever delivering the event is exactly what made the
+ * title screen report "MEMORY CARD is not inserted correctly" --
+ * _memcardEventHandler (22C.c) polls TestEvent for IoEnd, never sees it, gives
+ * up after 64 polls, and gives up entirely after four retries.
+ *
+ * `chan` is port * 16 + card, so slot 1 is 0..15. Only slot 1 is backed, and
+ * refusing the command for slot 2 is what an empty slot looks like: the handler
+ * turns that into the same timeout the real console reports for it.
+ *
+ * card_complete() is defined below, next to the frame I/O that already used it. */
+static void card_complete(int ok);
+static FILE* card_file(void);
+
+static int card_present(long chan)
+{
+    return chan >= 0 && chan < 16 && card_file() != 0;
+}
+
+/* VS_CARD_TRACE=1 logs the command sequence. The card is driven by a polling
+ * state machine that reports every failure as the same "not inserted correctly"
+ * message, so knowing which command went unanswered is most of the diagnosis. */
+static int card_trace(void)
+{
+    static int t = -1;
+    if (t < 0) t = getenv("VS_CARD_TRACE") ? 1 : 0;
+    return t;
+}
+#define CARDTRACE(...) do { if (card_trace()) printf(__VA_ARGS__); } while (0)
+
+/* Probe the card. A formatted card answers IoEnd; the "new" event that would
+ * send the handler down its format path is never raised, because the image we
+ * are backed by is a real, formatted card. */
+long _card_info(long chan)
+{
+    if (!card_present(chan)) {
+        CARDTRACE("[memcard] _card_info(chan %ld): no card\n", chan);
+        return 0;
+    }
+    CARDTRACE("[memcard] _card_info(chan %ld): complete\n", chan);
+    card_complete(1);
+    return 1;
+}
+
+/* Read the directory into the BIOS's own cache. Ours lives in mcd_img, filled
+ * on demand, so there is nothing to do but complete. */
+long _card_load(long chan)
+{
+    if (!card_present(chan)) {
+        CARDTRACE("[memcard] _card_load(chan %ld): no card\n", chan);
+        return 0;
+    }
+    CARDTRACE("[memcard] _card_load(chan %ld): complete\n", chan);
+    card_complete(1);
+    return 1;
+}
+
+/* Format. Unreachable while _card_info reports a formatted card, and
+ * deliberately NOT destructive if something does reach it: the backing image is
+ * the user's own memory card, and silently erasing it on a path that cannot be
+ * exercised here is a bad trade for the fidelity it would buy. */
+long _card_clear(long chan)
+{
+    if (!card_present(chan)) {
+        CARDTRACE("[memcard] _card_clear(chan %ld): no card\n", chan);
+        return 0;
+    }
+    CARDTRACE("[memcard] _card_clear(chan %ld): complete\n", chan);
+    card_complete(1);
+    return 1;
+}
+long _card_format(long chan) { return _card_clear(chan); }
 
 /* ---- raw frame I/O, host-file-backed ("virtual memory card") ----
  * A PS1 card is 0x400 frames of 128 bytes (128 KB). The BIOS primitives
@@ -278,6 +347,7 @@ long vs_bios_open(char* name, unsigned long mode)
     (void)mode;
     if (!img) return -1;
     base = mcd_basename(name);
+    CARDTRACE("[memcard] open(\"%s\")\n", base);
     for (b = 1; b < MCD_BLOCKS; b++) {
         if (mcd_isfirst(img, b) && strcmp(mcd_name(img, b), base) == 0) {
             for (fd = 0; fd < MCD_MAXFD; fd++) {
@@ -359,11 +429,30 @@ long vs_bios_close(long fd)
  * the leading, pre-'*' portion of the pattern; nextfile continues. VS uses this
  * to list its save files, then filters by name itself. */
 static int  dir_blk;
-static char dir_prefix[24];
+static char dir_pattern[24];
 
-static int mcd_prefix_match(const char* name)
+/* The BIOS matches with two wildcards, and BOTH are used here: VS lists a
+ * slot's cards with "bu00:*" but finds its own saves with
+ * "bu00:BASLUS-01040VAG?", where '?' stands for the single save-slot digit.
+ * Treating the pattern as a literal prefix -- which is what this did -- matches
+ * "bu00:*" fine and silently matches nothing for the '?' form, so the title
+ * screen's save probe came back empty and CONTINUE had nothing to offer.
+ *
+ * '?' matches exactly one character; '*' matches the whole remainder. */
+static int mcd_pattern_match(const char* name)
 {
-    return dir_prefix[0] == 0 || strncmp(name, dir_prefix, strlen(dir_prefix)) == 0;
+    const char* pat = dir_pattern;
+
+    if (!*pat) return 1;
+    for (; *pat; pat++, name++) {
+        if (*pat == '*') return 1;
+        if (*pat == '?') {
+            if (!*name) return 0;
+            continue;
+        }
+        if (*pat != *name) return 0;
+    }
+    return *name == 0;
 }
 
 struct DIRENTRY* nextfile(struct DIRENTRY* dir)
@@ -371,9 +460,11 @@ struct DIRENTRY* nextfile(struct DIRENTRY* dir)
     unsigned char* img = mcd_image();
     if (!img || !dir) return 0;
     for (; dir_blk < MCD_BLOCKS; dir_blk++) {
-        if (mcd_isfirst(img, dir_blk) && mcd_prefix_match(mcd_name(img, dir_blk))) {
+        if (mcd_isfirst(img, dir_blk) && mcd_pattern_match(mcd_name(img, dir_blk))) {
             memset(dir, 0, sizeof *dir);
             strncpy(dir->name, mcd_name(img, dir_blk), sizeof dir->name - 1);
+            CARDTRACE("[memcard] dir: %s (%u bytes)\n", dir->name,
+                      (unsigned)mcd_fsize(img, dir_blk));
             dir->size = (long)mcd_fsize(img, dir_blk);
             dir->head = dir_blk;
             dir_blk++;
@@ -386,11 +477,12 @@ struct DIRENTRY* nextfile(struct DIRENTRY* dir)
 struct DIRENTRY* firstfile(char* name, struct DIRENTRY* dir)
 {
     const char* base = name ? mcd_basename(name) : "";
-    const char* star = strchr(base, '*');
-    size_t plen = star ? (size_t)(star - base) : strlen(base);
-    if (plen >= sizeof dir_prefix) plen = sizeof dir_prefix - 1;
-    memcpy(dir_prefix, base, plen);
-    dir_prefix[plen] = 0;
+    size_t len = strlen(base);
+
+    CARDTRACE("[memcard] firstfile(\"%s\")\n", name ? name : "(null)");
+    if (len >= sizeof dir_pattern) len = sizeof dir_pattern - 1;
+    memcpy(dir_pattern, base, len);
+    dir_pattern[len] = 0;
     dir_blk = 1;
     return nextfile(dir);
 }

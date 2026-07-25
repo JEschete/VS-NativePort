@@ -19,6 +19,8 @@
  */
 #include <psx_present.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define PadStateFindPad  1
 #define PadStateStable   6
@@ -65,6 +67,63 @@ int PadSetMainMode(int socket, int offs, int lock) { (void)socket; (void)offs; (
 void PadSetAct(int portID, unsigned char* data, int len) { (void)portID; (void)data; (void)len; }
 int  PadSetActAlign(int portID, unsigned char* data) { (void)portID; (void)data; return 1; }
 
+/* Scripted input, for headless runs.
+ *
+ * A windowless run has no way to press anything, which makes most of the boot
+ * untestable past the title screen -- CONTINUE, the memory-card screens, the
+ * save list. VS_PAD_SCRIPT drives it: a comma-separated list of
+ * `<frame>:<mask>` steps, where frame is a vblank number and mask is a PSYQ PAD*
+ * bitmask (PADstart 0x0800, PADRright/circle 0x0020, PADRdown/cross 0x0040,
+ * PADLup 0x1000, PADLdown 0x4000). Each step is held for HOLD_FRAMES so the
+ * game's edge detection sees a real press and release. Masks are OR'd onto
+ * whatever the host is doing, so it composes with a real pad.
+ *
+ *   VS_PAD_SCRIPT=2400:0x0800,2460:0x0020
+ */
+#define SCRIPT_MAX    16
+#define SCRIPT_HOLD   6
+
+static struct { long frame; unsigned mask; } script[SCRIPT_MAX];
+static int script_n = -1;
+
+int VSync(int mode);
+
+static void script_load(void)
+{
+    const char* s = getenv("VS_PAD_SCRIPT");
+    script_n = 0;
+    if (!s || !*s) return;
+    while (*s && script_n < SCRIPT_MAX) {
+        char* end;
+        long frame = strtol(s, &end, 0);
+        if (end == s || *end != ':') break;
+        s = end + 1;
+        script[script_n].frame = frame;
+        script[script_n].mask = (unsigned)strtoul(s, &end, 0);
+        if (end == s) break;
+        s = end;
+        script_n++;
+        if (*s == ',') s++;
+    }
+    printf("[pad] script: %d step(s)\n", script_n);
+}
+
+static unsigned script_buttons(void)
+{
+    long now;
+    unsigned mask = 0;
+    int i;
+
+    if (script_n < 0) script_load();
+    if (script_n == 0) return 0;
+
+    now = VSync(-1);
+    for (i = 0; i < script_n; i++)
+        if (now >= script[i].frame && now < script[i].frame + SCRIPT_HOLD)
+            mask |= script[i].mask;
+    return mask;
+}
+
 /* Publish the current host input as a PS1 packet. Called once per frame from
  * VSync(), which is where the hardware's pad DMA would have landed. */
 void psx_pad_update(void)
@@ -74,7 +133,7 @@ void psx_pad_update(void)
 
     if (!padbuf[0]) return;
 
-    btn = psx_pad_host_buttons();
+    btn = psx_pad_host_buttons() | script_buttons();
     psx_pad_host_sticks(s);
 
     padbuf[0][0] = 0x00;                              /* connected */
