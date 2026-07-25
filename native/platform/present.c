@@ -161,6 +161,7 @@ static void*  gamepad;
 static int    active;
 static int    quit_req;
 static int    src_x, src_y, src_w = 320, src_h = 240;
+static int    src_rgb24;            /* display region holds 24-bit colour */
 static unsigned* argb;              /* conversion scratch, src_w * src_h */
 static int    argb_cap;
 static unsigned frame_no;
@@ -388,6 +389,27 @@ static void blit_vram(void)
     const uint16_t* vram = psx_vram();
     int x, y;
 
+    /* 24-bit mode. VRAM is addressed in halfwords whatever the display depth,
+     * so a row of `src_w` pixels occupies src_w*3 bytes starting at the same
+     * halfword; there is no separate 24-bit framebuffer. The game turns this on
+     * for the intro movie (disp.isrgb24 = 1 in _playIntroMovie), having already
+     * scaled the width by 2/3 -- 480 halfwords of MDEC output is 320 pixels.
+     * Reading those bytes as 15-bit pixels is what made the movie come out as
+     * coloured noise with the shapes faintly visible through it. */
+    if (src_rgb24) {
+        for (y = 0; y < src_h; y++) {
+            const unsigned char* row =
+                (const unsigned char*)(vram + (size_t)(src_y + y) * PSX_VRAM_W + src_x);
+            unsigned* out = argb + (size_t)y * src_w;
+            for (x = 0; x < src_w; x++) {
+                out[x] = 0xFF000000u | ((unsigned)row[0] << 16)
+                       | ((unsigned)row[1] << 8) | (unsigned)row[2];
+                row += 3;
+            }
+        }
+        return;
+    }
+
     for (y = 0; y < src_h; y++) {
         const uint16_t* row = vram + (size_t)(src_y + y) * PSX_VRAM_W + src_x;
         unsigned* out = argb + (size_t)y * src_w;
@@ -509,13 +531,16 @@ void psx_present_set_source(int x, int y, int w, int h)
  * a 512x480 area at x=512 -- so the window has to track PutDispEnv rather than
  * assume one layout. The texture is allocated at full VRAM size, so any display
  * rect fits without reallocating. */
-void psx_present_set_display(int x, int y, int w, int h)
+void psx_present_set_display(int x, int y, int w, int h, int rgb24)
 {
     if (w <= 0 || h <= 0) return;
-    if (x == src_x && y == src_y && w == src_w && h == src_h) return;
+    if (x == src_x && y == src_y && w == src_w && h == src_h && rgb24 == src_rgb24)
+        return;
     if (w > PSX_VRAM_W) w = PSX_VRAM_W;
     if (h > PSX_VRAM_H) h = PSX_VRAM_H;
-    src_x = x; src_y = y; src_w = w; src_h = h;
+    /* A 24-bit row spans w*3 bytes of a 2048-byte VRAM line. */
+    if (rgb24 && x * 2 + w * 3 > PSX_VRAM_W * 2) w = (PSX_VRAM_W * 2 - x * 2) / 3;
+    src_x = x; src_y = y; src_w = w; src_h = h; src_rgb24 = rgb24;
     if (active) {
         int need = src_w * src_h;
         if (need > argb_cap) {

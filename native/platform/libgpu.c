@@ -429,12 +429,19 @@ DRAWENV* SetDefDrawEnv(DRAWENV* env, int x, int y, int w, int h)
 /* Selecting the displayed region also re-aims the host window at it (no-op when
  * running headless) -- the boot sequence moves between a 320x240 menu area and
  * the title screen's 512x480 area at x=512. */
-void psx_present_set_display(int x, int y, int w, int h);
+void psx_present_set_display(int x, int y, int w, int h, int rgb24);
 
 DISPENV* PutDispEnv(DISPENV* env)
 {
     cur_disp = *env;
-    psx_present_set_display(env->disp.x, env->disp.y, env->disp.w, env->disp.h);
+    /* isrgb24 matters as much as the rect: the intro movie displays MDEC output
+     * in 24-bit colour, which the window has to unpack differently. */
+    if (getenv("VS_GPU_TRACE"))
+        printf("[gpu] PutDispEnv (%d,%d %dx%d) rgb24=%d inter=%d\n",
+               env->disp.x, env->disp.y, env->disp.w, env->disp.h,
+               env->isrgb24, env->isinter);
+    psx_present_set_display(env->disp.x, env->disp.y, env->disp.w, env->disp.h,
+        env->isrgb24 != 0);
     return env;
 }
 DRAWENV* PutDrawEnv(DRAWENV* env) { cur_draw = *env; return env; }
