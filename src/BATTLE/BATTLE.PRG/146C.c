@@ -1,14 +1,8 @@
 #include "common.h"
-#include <libetc.h>
-#include <libgte.h>
-#include <libgpu.h>
-#include <rand.h>
 #include "146C.h"
-#include "2842C.h"
 #include "2EA3C.h"
 #include "30D14.h"
 #include "38C1C.h"
-#include "3A1A0.h"
 #include "40564.h"
 #include "44F14.h"
 #include "4A0A8.h"
@@ -16,27 +10,15 @@
 #include "58578.h"
 #include "5BF94.h"
 #include "6E644.h"
-#include "../../SLUS_010.40/main.h"
-#include "../../SLUS_010.40/31724.h"
-#include "../../SLUS_010.40/32154.h"
+#include "src/SLUS_010.40/31724.h"
+#include "src/SLUS_010.40/32154.h"
 #include <abs.h>
-#include <limits.h>
+#include <libetc.h>
 #include <libgpu.h>
+#include <libgte.h>
+#include <limits.h>
 #include <memory.h>
-
-typedef struct {
-    u_char unk0;
-    char unk1;
-    short unk2;
-    short unk4;
-    char unk6;
-    char unk7;
-    int unk8;
-    int unkC;
-    int unk10;
-    int unk14;
-    int unk18;
-} func_8008418C_t;
+#include <rand.h>
 
 typedef struct {
     short value0;
@@ -94,74 +76,8 @@ typedef struct {
 } func_8008631C_t2;
 
 typedef struct {
-    u_short skillIndex;
-    char unk2;
-    char unk3;
-    u_char unk4;
-    char unk5;
-    short unk6;
-    short unk8;
-    short unkA;
-    int unkC;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    short unk48;
-    u_short unk4A;
-    struct {
-        union {
-            func_8008631C_t2 unk;
-            SVECTOR vec;
-        } unk4C;
-        int unk54;
-        int unk58;
-        int unk5C;
-        int unk60;
-        int unk64;
-        int unk68;
-        int unk6C;
-        int unk70;
-        int unk74;
-        int unk78;
-        int unk7C;
-        int unk80;
-        int unk84;
-        int unk88;
-        int unk8C;
-    } unk4C[2];
-    int unk90[474];
-    short unk83C; // These three are probably a vector
-    short unk83E;
-    short unk840;
-    short unk842;
-    SVECTOR unk844;
-} func_8008631C_t;
-
-typedef struct {
-    u_char unk0;
-    signed char unk1;
-    char unk2;
-    char unk3;
-    char unk4;
-    char unk5;
-    char unk6;
-    char unk7;
-} func_8006C4C4_t2;
-
-typedef struct {
     union {
-        func_8006C4C4_t2 unk;
+        func_8008631C_t2 unk;
         SVECTOR vec;
     } unk0;
     int unk8;
@@ -179,16 +95,16 @@ typedef struct {
     int unk38;
     int unk3C;
     int unk40;
-} func_8006C4C4_t3;
+} func_8008631C_t3;
 
 typedef struct {
-    u_short unk0;
+    u_short skillIndex;
     char unk2;
     char unk3;
     _hitEntity_t unk4;
     u_short unk48;
     u_short unk4A;
-    func_8006C4C4_t3 unk4C[30];
+    func_8008631C_t3 unk4C[30];
     SVECTOR unk844;
 } D_800F19CC_t2;
 
@@ -208,7 +124,7 @@ typedef struct {
 typedef struct {
     u_int unk0;
     u_int unk4;
-    func_8008631C_t unk8;
+    D_800F19CC_t2 unk8;
     D_800F19CC_t2 unk854[4];
     int unk2984;
     int unk2988;
@@ -380,7 +296,7 @@ typedef struct {
     int unkC;
     short unk10;
     short unk12;
-    func_8006C4C4_t2 unk14;
+    func_8008631C_t2 unk14;
     int unk18[50];
 } func_8006C4C4_t;
 
@@ -599,7 +515,7 @@ int _getSkillCost(u_int, vs_battle_actor2*, int);
 void func_80085008(_hitEntity_t*);
 void func_80085390(
     vs_skill_t* arg0, _hitEntity_t* arg1, _hitEntity_t* arg2, int arg3, int arg4);
-void func_80085B10(int, D_800F19CC_t2*, func_8008631C_t*, int);
+void func_80085B10(int, D_800F19CC_t2*, D_800F19CC_t2*, int);
 void func_80086754(int, vs_battle_actor2*);
 void _applyBattleAbilityEffect(_hitEntity_t*);
 void func_80088554(void);
@@ -2001,7 +1917,7 @@ void func_8006C480(int arg0, int arg1) { func_800CF7A8(arg0, arg1, 0, 0); }
 
 void func_8006C4A4(int arg0, int arg1) { func_800CF830(arg0, arg1); }
 
-void func_8006C4C4(int arg0, func_8006C4C4_t3* arg1, int arg2)
+void func_8006C4C4(int arg0, func_8008631C_t3* arg1, int arg2)
 {
     func_8006C4C4_t sp10;
     D_800F19CC_t2* temp_s0 = &D_800F19CC->unk854[D_800F19CC->unk0 & 3];
@@ -2126,12 +2042,14 @@ int func_8006C84C(int arg0)
 
     for (i = 0; i < temp_s0->unk4A; ++i) {
         if (temp_s0->unk4C[i].unk40 == 0) {
-            if (temp_s0->unk0 < 0x28) {
+            if (temp_s0->skillIndex < 0x28) {
 
-                if (((vs_main_skills[temp_s0->unk0].hitParams[0].prerequisiteFunction))
+                if (((vs_main_skills[temp_s0->skillIndex]
+                            .hitParams[0]
+                            .prerequisiteFunction))
                     == 3) {
 
-                    func_8006C4C4(temp_s0->unk0, &temp_s0->unk4C[i],
+                    func_8006C4C4(temp_s0->skillIndex, &temp_s0->unk4C[i],
                         temp_s0->unk4C[i].unk0.unk.unk3);
 
                 } else {
@@ -2139,11 +2057,11 @@ int func_8006C84C(int arg0)
                     case 0:
                     case 2:
                     case 5:
-                        if (temp_s0->unk0 < 0x16) {
+                        if (temp_s0->skillIndex < 0x16) {
                             func_8006C4C4(
                                 1, &temp_s0->unk4C[i], temp_s0->unk4C[i].unk0.unk.unk3);
                         } else {
-                            func_8006C4C4(temp_s0->unk0, &temp_s0->unk4C[i],
+                            func_8006C4C4(temp_s0->skillIndex, &temp_s0->unk4C[i],
                                 temp_s0->unk4C[i].unk0.unk.unk3);
                         }
                         break;
@@ -2163,8 +2081,8 @@ int func_8006C84C(int arg0)
                 }
 
             } else {
-                func_8006C4C4(
-                    temp_s0->unk0, &temp_s0->unk4C[i], temp_s0->unk4C[i].unk0.unk.unk3);
+                func_8006C4C4(temp_s0->skillIndex, &temp_s0->unk4C[i],
+                    temp_s0->unk4C[i].unk0.unk.unk3);
             }
 
         } else {
@@ -3120,8 +3038,8 @@ void func_8006F89C(void)
             func_8008D594(1);
         } else if ((D_800F19CC->unk8.skillIndex != 0)
                    && !(vs_main_skills[D_800F19CC->unk8.skillIndex].unlocked)
-                   && (D_800F19CC->unk8.unk44 == 0) && (D_800F19CC->unk2C07 == 0)
-                   && (D_800F19CC->unk8.unk4 == 0)) {
+                   && (D_800F19CC->unk8.unk4.unk40 == 0) && (D_800F19CC->unk2C07 == 0)
+                   && (D_800F19CC->unk8.unk4.targetActor == 0)) {
             _cameraMode = 0xD;
             func_8009E070(0, NULL, 6);
             func_8006F848();
@@ -3133,8 +3051,8 @@ void func_8006F89C(void)
     default:
         if ((D_800F19CC->unk8.skillIndex != 0)
             && !(vs_main_skills[D_800F19CC->unk8.skillIndex].unlocked)
-            && (D_800F19CC->unk8.unk44 == 0) && (D_800F19CC->unk2C07 == 0)
-            && (D_800F19CC->unk8.unk4 == 0)) {
+            && (D_800F19CC->unk8.unk4.unk40 == 0) && (D_800F19CC->unk2C07 == 0)
+            && (D_800F19CC->unk8.unk4.targetActor == 0)) {
             _cameraMode = 0xD;
             func_8009E070(0, NULL, 6);
             func_8006F848();
@@ -3152,8 +3070,8 @@ void func_8006FA20(void)
 
     if ((D_800F19CC->unk8.skillIndex != 0)
         && !((vs_main_skills[D_800F19CC->unk8.skillIndex].unlocked))
-        && (D_800F19CC->unk8.unk44 == 0) && (D_800F19CC->unk2C07 == 0)
-        && (D_800F19CC->unk8.unk4 == 0)) {
+        && (D_800F19CC->unk8.unk4.unk40 == 0) && (D_800F19CC->unk2C07 == 0)
+        && (D_800F19CC->unk8.unk4.targetActor == 0)) {
         _cameraMode = 0xE;
         func_8006C39C();
         vs_battle_displaySceneMessage(0xC, (int)D_800F19CC->unk8.skillIndex, 1);
@@ -3187,7 +3105,7 @@ void func_8006FBCC(int arg0)
     int i;
 
     for (i = 0; i < 16; ++i) {
-        if ((i != D_800F19CC->unk8.unk4) && !(func_800A0BE0(i) & 0x01000000)
+        if ((i != D_800F19CC->unk8.unk4.targetActor) && !(func_800A0BE0(i) & 0x01000000)
             && (func_800A0BE0(i) & 1)) {
             func_8009E5C4(i);
         }
@@ -3225,7 +3143,7 @@ void func_80070278(void)
     D_800F19CC->battleAbilityTimer = 0;
     temp_s0 = &D_800F19CC->unk854[D_800F19CC->unk0 & 3];
 
-    if (((temp_s0->unk0 - 0x16u) < 0x20) && (temp_s0->unk4.unk40 == 0)
+    if (((temp_s0->skillIndex - 0x16u) < 0x20) && (temp_s0->unk4.unk40 == 0)
         && (temp_s0->unk4.targetActor == 0)) {
         vs_battle_setStateFlag(0xB8, 1);
     }
@@ -3233,16 +3151,16 @@ void func_80070278(void)
     temp_a3 = D_800F19CC->unk0;
 
     if (temp_a3 == 0) {
-        if (!(vs_main_skills[temp_s0->unk0].unk2_0)) {
+        if (!(vs_main_skills[temp_s0->skillIndex].unk2_0)) {
             func_8009DD00(
                 temp_s0->unk4.targetActor, &D_800F19CC->unk8.unk844, temp_s0->unk48);
             D_800F19CC->battleAbilityTargetWindow =
                 func_8009F8DC(temp_s0->unk4.targetActor) * 2;
         } else {
-            if (temp_s0->unk0 >= 0x8D) {
-                if (temp_s0->unk0 < 0xB8) {
+            if (temp_s0->skillIndex >= 0x8D) {
+                if (temp_s0->skillIndex < 0xB8) {
                     func_8009F298(temp_s0->unk4.targetActor, &D_800F19CC->unk8.unk844, 1);
-                } else if (temp_s0->unk0 < 0xE0) {
+                } else if (temp_s0->skillIndex < 0xE0) {
                     func_8009EFEC(temp_s0->unk4.targetActor, &D_800F19CC->unk8.unk844, 1);
                 } else {
                     func_8009E2E0(temp_s0->unk4.targetActor, &D_800F19CC->unk8.unk844, 1);
@@ -3254,7 +3172,7 @@ void func_80070278(void)
             vs_gametime_tickspeed = 4;
         }
     } else {
-        if (temp_s0->unk0 < 0x28) {
+        if (temp_s0->skillIndex < 0x28) {
             func_8009EC9C(temp_s0->unk4.targetActor, &D_800F19CC->unk8.unk844,
                 vs_main_settings.mappedChainAbilities[D_800F19CC->unk2C03 - 1] - 0x16,
                 temp_a3);
@@ -3295,11 +3213,14 @@ INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/146C", func_8007053C);
 void func_8007087C(D_800F19CC_t* arg0)
 {
     func_8006EBF8_t sp10;
+    SVECTOR* v;
 
     func_800A1108((char)arg0->unk4, &sp10);
-    arg0->unk8.unk83C = sp10.unk0.unk4.vx + rsin(sp10.unk0.unk4.pad + 0x800);
-    arg0->unk8.unk840 = sp10.unk0.unk4.vz + rcos(sp10.unk0.unk4.pad + 0x800);
-    arg0->unk8.unk83E = sp10.unk0.unk4.vy;
+    ((SVECTOR*)&arg0->unk8.unk4C[29].unk3C)->vx =
+        sp10.unk0.unk4.vx + rsin(sp10.unk0.unk4.pad + 0x800);
+    ((SVECTOR*)&arg0->unk8.unk4C[29].unk3C)->vz =
+        sp10.unk0.unk4.vz + rcos(sp10.unk0.unk4.pad + 0x800);
+    ((SVECTOR*)&arg0->unk8.unk4C[29].unk3C)->vy = sp10.unk0.unk4.vy;
 }
 
 void func_800708EC(void)
@@ -3309,24 +3230,25 @@ void func_800708EC(void)
     D_800F19CC->unk8.unk4A = 1;
     temp_v1 = D_800F19CC->unk29C0[D_800F19CC->unk298C].unk9;
     if (temp_v1 < 16) {
-        D_800F19CC->unk8.unk4C[0].unk8C = 0;
-        D_800F19CC->unk8.unk4C[0].unk4C.unk.unk0 =
+        D_800F19CC->unk8.unk4C[0].unk40 = 0;
+        D_800F19CC->unk8.unk4C[0].unk0.unk.unk0 =
             D_800F19CC->unk29C0[D_800F19CC->unk298C].unk9;
-        D_800F19CC->unk8.unk4C[0].unk4C.unk.unk1 =
+        D_800F19CC->unk8.unk4C[0].unk0.unk.unk1 =
             D_800F19CC->unk29C0[D_800F19CC->unk298C].unkA;
-        if (D_800F19CC->unk8.unk4C[0].unk4C.unk.unk1 == -1) {
-            D_800F19CC->unk8.unk4C[0].unk4C.unk.unk1 =
-                vs_battle_actors[D_800F19CC->unk8.unk4C[0].unk4C.unk.unk0]->unk3C->unk36;
+        if (D_800F19CC->unk8.unk4C[0].unk0.unk.unk1 == -1) {
+            D_800F19CC->unk8.unk4C[0].unk0.unk.unk1 =
+                vs_battle_actors[D_800F19CC->unk8.unk4C[0].unk0.unk.unk0]->unk3C->unk36;
         }
     } else {
-        D_800F19CC->unk8.unk4C[0].unk8C = temp_v1 & 0x10 ? 4 : 1;
-        D_800F19CC->unk8.unk4C[0].unk4C.vec =
+        D_800F19CC->unk8.unk4C[0].unk40 = temp_v1 & 0x10 ? 4 : 1;
+        D_800F19CC->unk8.unk4C[0].unk0.vec =
             D_800F19CC->unk29C0[D_800F19CC->unk298C].unk0;
-        D_800F19CC->unk8.unk4C[0].unk4C.vec.pad =
+        D_800F19CC->unk8.unk4C[0].unk0.vec.pad =
             D_800F19CC->unk29C0[D_800F19CC->unk298C].unk9;
     }
-    if (D_800F19CC->unk8.unk44 == 0) {
-        if (D_800F19CC->unk29C0[D_800F19CC->unk298C].unk9 == D_800F19CC->unk8.unk4) {
+    if (D_800F19CC->unk8.unk4.unk40 == 0) {
+        if (D_800F19CC->unk29C0[D_800F19CC->unk298C].unk9
+            == D_800F19CC->unk8.unk4.targetActor) {
             func_8007087C((D_800F19CC_t*)&D_800F19CC->unk8);
             return;
         }
@@ -3344,25 +3266,25 @@ void func_80070B04(void)
 
     for (i = 0; i < D_800F19CC->unk8.unk4A; ++i) {
         if (D_800F19CC->unk29C0[i].unk9 < 0x10) {
-            D_800F19CC->unk8.unk4C[i].unk8C = 0;
-            D_800F19CC->unk8.unk4C[i].unk4C.unk.unk0 = D_800F19CC->unk29C0[i].unk9;
-            D_800F19CC->unk8.unk4C[i].unk4C.unk.unk1 = D_800F19CC->unk29C0[i].unkA;
+            D_800F19CC->unk8.unk4C[i].unk40 = 0;
+            D_800F19CC->unk8.unk4C[i].unk0.unk.unk0 = D_800F19CC->unk29C0[i].unk9;
+            D_800F19CC->unk8.unk4C[i].unk0.unk.unk1 = D_800F19CC->unk29C0[i].unkA;
 
-            if (D_800F19CC->unk8.unk4C[i].unk4C.unk.unk1 == -1) {
-                D_800F19CC->unk8.unk4C[i].unk4C.unk.unk1 =
-                    vs_battle_actors[D_800F19CC->unk8.unk4C[i].unk4C.unk.unk0]
+            if (D_800F19CC->unk8.unk4C[i].unk0.unk.unk1 == -1) {
+                D_800F19CC->unk8.unk4C[i].unk0.unk.unk1 =
+                    vs_battle_actors[D_800F19CC->unk8.unk4C[i].unk0.unk.unk0]
                         ->unk3C->unk36;
             }
         } else {
-            D_800F19CC->unk8.unk4C[i].unk8C = 1;
-            D_800F19CC->unk8.unk4C[i].unk4C.vec = D_800F19CC->unk29C0[i].unk0;
-            D_800F19CC->unk8.unk4C[i].unk4C.vec.pad = D_800F19CC->unk29C0[i].unk9;
+            D_800F19CC->unk8.unk4C[i].unk40 = 1;
+            D_800F19CC->unk8.unk4C[i].unk0.vec = D_800F19CC->unk29C0[i].unk0;
+            D_800F19CC->unk8.unk4C[i].unk0.vec.pad = D_800F19CC->unk29C0[i].unk9;
         }
     }
 
-    if (D_800F19CC->unk8.unk4 != 0) {
+    if (D_800F19CC->unk8.unk4.targetActor != 0) {
         D_800F19CC->unk8.unk844 =
-            *(SVECTOR*)&vs_battle_actors[D_800F19CC->unk8.unk4]->unk10;
+            *(SVECTOR*)&vs_battle_actors[D_800F19CC->unk8.unk4.targetActor]->unk10;
         return;
     }
     D_800F19CC->unk8.unk844 = D_800F19CC->unk2990;
@@ -3387,9 +3309,9 @@ void func_80070F28(int arg0)
 
     if (arg0 != 0) {
         if (temp_s0 == 0xFF) {
-            if (D_800F19CC->unk8.unk4 != 0) {
+            if (D_800F19CC->unk8.unk4.targetActor != 0) {
                 func_800CB114();
-                func_800E4C64(D_800F19CC->unk8.unk4);
+                func_800E4C64(D_800F19CC->unk8.unk4.targetActor);
                 D_800F19CC->unk8.skillIndex = 0;
                 func_8006FBCC(0);
                 return;
@@ -3409,7 +3331,7 @@ void func_80070F28(int arg0)
     D_800F19CC->unk4 = 1;
     D_800F19CC->unk0 = 0;
 
-    if (D_800F19CC->unk8.unk4 == 0) {
+    if (D_800F19CC->unk8.unk4.targetActor == 0) {
         if (D_800F18EC->unk2 != 7) {
             if (D_800F18EC->unk2 == 8) {
                 vs_battle_decreaseMiscCount(D_800F18EC->unk4.u16[1]);
@@ -3417,7 +3339,7 @@ void func_80070F28(int arg0)
         }
         D_800F18EC->unk2 = 0;
     } else {
-        func_800D82A8(D_800F19CC->unk8.unk4);
+        func_800D82A8(D_800F19CC->unk8.unk4.targetActor);
     }
     func_800CB114();
     if (arg0 == 0) {
@@ -3430,11 +3352,11 @@ void func_80070F28(int arg0)
 
     func_80085B10(D_800F19CC->unk8.skillIndex, D_800F19CC->unk854, &D_800F19CC->unk8, 1);
 
-    if ((D_800F19CC->unk8.unk4 == 0)
+    if ((D_800F19CC->unk8.unk4.targetActor == 0)
         && ((temp_v1_2 = D_800F19CC->unk8.skillIndex, (temp_v1_2 == 1))
             || ((temp_v1_2 - 0xB8) < 0x28U))
-        && (D_800F19CC->unk8.unk4C[0].unk8C == 0)
-        && (vs_battle_actors[D_800F19CC->unk8.unk4C[0].unk4C.unk.unk0]->unk27 != 0x80)) {
+        && (D_800F19CC->unk8.unk4C[0].unk40 == 0)
+        && (vs_battle_actors[D_800F19CC->unk8.unk4C[0].unk0.unk.unk0]->unk27 != 0x80)) {
         if (vs_battle_characterState->equippedWeaponCategory == 0xA) {
 
             if (vs_main_scoredata.weaponAttacks[0] <= 0xFFFEU) {
@@ -3488,7 +3410,7 @@ void func_80070F28(int arg0)
     _cameraMode = 4;
 
     for (i = 0; i < 16; ++i) {
-        if (i != D_800F19CC->unk8.unk4) {
+        if (i != D_800F19CC->unk8.unk4.targetActor) {
             func_8009E5C4(i);
         }
     }
@@ -3523,8 +3445,8 @@ void func_80072EC4(int arg0, u_short arg1)
 
     D_800F196C = 2;
     vs_main_bzero(&D_800F19CC->unk8, 0x84C);
-    D_800F19CC->unk8.unk44 = 0;
-    D_800F19CC->unk8.unk4 = arg0;
+    D_800F19CC->unk8.unk4.unk40 = 0;
+    D_800F19CC->unk8.unk4.targetActor = arg0;
     D_800F19CC->unk8.skillIndex = arg1;
     func_8006EF10();
     func_80088CA0();
@@ -3540,7 +3462,7 @@ void func_80072EC4(int arg0, u_short arg1)
     D_800F19CC->unk8.unk4A = 0;
     D_800F19CC->unk298E = 0;
     D_800F19CC->unk4 = 0;
-    func_8009E5C4(D_800F19CC->unk8.unk4);
+    func_8009E5C4(D_800F19CC->unk8.unk4.targetActor);
 
     if (D_800F19CC->unk2984 != 0) {
         func_800C031C();
@@ -3550,7 +3472,7 @@ void func_80072EC4(int arg0, u_short arg1)
     func_8006C250();
 
     for (i = 0; i < 16; ++i) {
-        if (i != D_800F19CC->unk8.unk4) {
+        if (i != D_800F19CC->unk8.unk4.targetActor) {
             temp_v0 = func_800A0BE0(i);
             if (temp_v0 & 4) {
                 func_800A087C(i, temp_v0 & ~4);
@@ -3936,11 +3858,11 @@ void func_80073D30(_mpdRoomSectionA* arg0, func_8006EBF8_t* arg1, int arg2)
 {
     func_800CF0E8_t sp10;
 
-    D_800F19CC->unk8.unk44 = 3;
+    D_800F19CC->unk8.unk4.unk40 = 3;
     D_800F19CC->unk8.unk4A = 1;
-    D_800F19CC->unk8.unk4C[0].unk8C = 0;
-    D_800F19CC->unk8.unk4C[0].unk4C.unk.unk0 = arg2;
-    D_800F19CC->unk8.unk4C[0].unk4C.unk.unk1 = vs_battle_actors[arg2]->unk3C->unk36;
+    D_800F19CC->unk8.unk4C[0].unk40 = 0;
+    D_800F19CC->unk8.unk4C[0].unk0.unk.unk0 = arg2;
+    D_800F19CC->unk8.unk4C[0].unk0.unk.unk1 = vs_battle_actors[arg2]->unk3C->unk36;
     D_800F19CC->unk4 = 1;
     D_800F19CC->unk0 = 0;
     D_800F19CC->unk29A8 = arg1->unk0.unk4.vx;
@@ -5232,7 +5154,7 @@ void func_8007820C(int arg0)
 void func_80078248(void)
 {
     if (D_800F19CC->unk2984 != 0) {
-        if (D_800F19CC->unk8.unk4 != 0) {
+        if (D_800F19CC->unk8.unk4.targetActor != 0) {
             if (++D_800F19CC->unk298E >= 0x1F) {
                 func_80070F28(1);
             }
@@ -5248,7 +5170,7 @@ void func_80078248(void)
 void func_800782E4(void)
 {
     if (D_800F19CC->unk2984 != 0) {
-        if (D_800F19CC->unk8.unk4 != 0) {
+        if (D_800F19CC->unk8.unk4.targetActor != 0) {
             u_int v = ++D_800F19CC->unk298E;
             if (v < 0x1F) {
                 return;
@@ -5263,7 +5185,7 @@ void func_800782E4(void)
 void func_80078364(void)
 {
     if (D_800F19CC->unk2984 != 0) {
-        if (D_800F19CC->unk8.unk4 != 0) {
+        if (D_800F19CC->unk8.unk4.targetActor != 0) {
             if (++D_800F19CC->unk298E >= 0x1F) {
                 D_800F19CC->unk298C = 0;
                 func_80070F28(2);
@@ -5436,11 +5358,11 @@ int func_80078828(int arg0)
             if (temp_s1->unk4C[0].unk0.unk.unk0 != 0) {
                 ret = 0;
             }
-        } else if (temp_s1->unk0 >= 40) {
+        } else if (temp_s1->skillIndex >= 40) {
             ret = 0;
         }
 
-        if ((temp_s1->unk0 - 40u) < 14) {
+        if ((temp_s1->skillIndex - 40u) < 14) {
             ret = 0;
         }
 
@@ -5495,7 +5417,7 @@ void func_80078AB4(void)
         margin = vs_battle_getStateFlag(1) ? 8 : 10;
     } else {
         margin = vs_battle_getStateFlag(1) ? 8 : 10;
-        if (temp_s3->unk0 >= 54) {
+        if (temp_s3->skillIndex >= 54) {
             margin += 4;
         }
     }
@@ -6021,8 +5943,8 @@ void func_8007B508(void)
     }
     if ((D_800F19CC->unk8.skillIndex != 0)
         && !((vs_main_skills[D_800F19CC->unk8.skillIndex].unlocked))
-        && (D_800F19CC->unk8.unk44 == 0) && (D_800F19CC->unk2C07 == 0)
-        && (D_800F19CC->unk8.unk4 == 0)) {
+        && (D_800F19CC->unk8.unk4.unk40 == 0) && (D_800F19CC->unk2C07 == 0)
+        && (D_800F19CC->unk8.unk4.targetActor == 0)) {
         _cameraMode = 5;
         if (D_800F1864 != 0) {
             func_8009E070(0, NULL, 6);
@@ -6040,8 +5962,8 @@ void func_8007B63C(void)
 
     if ((D_800F19CC->unk8.skillIndex != 0)
         && !((vs_main_skills[D_800F19CC->unk8.skillIndex].unlocked))
-        && (D_800F19CC->unk8.unk44 == 0) && (D_800F19CC->unk2C07 == 0)
-        && (D_800F19CC->unk8.unk4 == 0)) {
+        && (D_800F19CC->unk8.unk4.unk40 == 0) && (D_800F19CC->unk2C07 == 0)
+        && (D_800F19CC->unk8.unk4.targetActor == 0)) {
         _cameraMode = 6;
         func_8007B410();
         vs_battle_displaySceneMessage(0xC, D_800F19CC->unk8.skillIndex, 1);
@@ -8486,8 +8408,8 @@ short func_80082144(vs_skill_t* arg0, _hitEntity_t* arg1 __attribute__((unused))
     _hitEntity_t* arg2 __attribute__((unused)), int arg3 __attribute__((unused)),
     int arg4 __attribute__((unused)))
 {
-    int v = (D_800F19CC->unk8.unk4C[0].unk4C.unk.unk4
-                + D_800F19CC->unk8.unk4C[0].unk4C.unk.unk6)
+    int v = (D_800F19CC->unk8.unk4C[0].unk0.unk.unk4
+                + D_800F19CC->unk8.unk4C[0].unk0.unk.unk6)
           * arg0->hitParams[arg3].statFactor;
     return (v / 10) + (D_800F19CC->unk0 - 1);
 }
@@ -8505,8 +8427,8 @@ short func_80082234(vs_skill_t* arg0, _hitEntity_t* arg1 __attribute__((unused))
     _hitEntity_t* arg2 __attribute__((unused)), int arg3,
     int arg4 __attribute__((unused)))
 {
-    int v = (D_800F19CC->unk8.unk4C[0].unk4C.unk.unk4
-                + D_800F19CC->unk8.unk4C[0].unk4C.unk.unk6)
+    int v = (D_800F19CC->unk8.unk4C[0].unk0.unk.unk4
+                + D_800F19CC->unk8.unk4C[0].unk0.unk.unk6)
           * arg0->hitParams[arg3].statFactor;
     return (v / 10) + (D_800F19CC->unk0 - 1);
 }
@@ -8534,8 +8456,9 @@ short func_80082360(vs_skill_t* skill, _hitEntity_t* arg1 __attribute__((unused)
 {
     short var_a2 = 0;
     if (((vs_main_skills[D_800F19CC->unk8.skillIndex].type)) == skillTypeSpell) {
-        if (((D_800F19CC->unk8.unk20 & 3) == 1) || ((D_800F19CC->unk8.unk20 & 3) == 3)) {
-            var_a2 = ((D_800F19CC->unk8.unk8 + D_800F19CC->unk8.unkA)
+        if ((D_800F19CC->unk8.unk4.hpEffect == 1)
+            || (D_800F19CC->unk8.unk4.hpEffect == 3)) {
+            var_a2 = ((D_800F19CC->unk8.unk4.hp + D_800F19CC->unk8.unk4.mp)
                          * skill->hitParams[arg3].statFactor)
                    / 10;
         }
@@ -8549,8 +8472,9 @@ short func_8008241C(vs_skill_t* skill, _hitEntity_t* arg1 __attribute__((unused)
 {
     short var_a2 = 0;
     if (((vs_main_skills[D_800F19CC->unk8.skillIndex].type)) != skillTypeSpell) {
-        if (((D_800F19CC->unk8.unk20 & 3) == 1) || ((D_800F19CC->unk8.unk20 & 3) == 3)) {
-            var_a2 = ((D_800F19CC->unk8.unk8 + D_800F19CC->unk8.unkA)
+        if ((D_800F19CC->unk8.unk4.hpEffect == 1)
+            || (D_800F19CC->unk8.unk4.hpEffect == 3)) {
+            var_a2 = ((D_800F19CC->unk8.unk4.hp + D_800F19CC->unk8.unk4.mp)
                          * skill->hitParams[arg3].statFactor)
                    / 10;
         }
@@ -8624,8 +8548,8 @@ short func_80083524(vs_skill_t* arg0, _hitEntity_t* arg1 __attribute__((unused))
     _hitEntity_t* arg2 __attribute__((unused)), int arg3,
     int arg4 __attribute__((unused)))
 {
-    return (((D_800F19CC->unk8.unk4C[0].unk4C.unk.unk4
-                 + D_800F19CC->unk8.unk4C[0].unk4C.unk.unk6)
+    return (((D_800F19CC->unk8.unk4C[0].unk0.unk.unk4
+                 + D_800F19CC->unk8.unk4C[0].unk0.unk.unk6)
                 * arg0->hitParams[arg3].statFactor)
                / 10)
          + (D_800F19CC->unk0 - 1);
@@ -8637,10 +8561,10 @@ short func_80083590(vs_skill_t* skill, _hitEntity_t* arg1 __attribute__((unused)
 {
     short var_a2 = 0;
     if (vs_main_skills[D_800F19CC->unk8.skillIndex].type == skillTypeSpell) {
-        if (((D_800F19CC->unk8.unk20 & 3)
+        if ((D_800F19CC->unk8.unk4.hpEffect
                 == vs_main_skills[D_800F19CC->unk8.skillIndex].type)
-            || ((D_800F19CC->unk8.unk20 & 3) == 3)) {
-            var_a2 = ((D_800F19CC->unk8.unk8 + D_800F19CC->unk8.unkA)
+            || (D_800F19CC->unk8.unk4.hpEffect == 3)) {
+            var_a2 = ((D_800F19CC->unk8.unk4.hp + D_800F19CC->unk8.unk4.mp)
                          * skill->hitParams[arg3].statFactor)
                    / 10;
         }
@@ -8654,8 +8578,9 @@ short func_8008364C(vs_skill_t* skill, _hitEntity_t* arg1 __attribute__((unused)
 {
     short var_a2 = 0;
     if (((vs_main_skills[D_800F19CC->unk8.skillIndex].type)) != skillTypeSpell) {
-        if (((D_800F19CC->unk8.unk20 & 3) == 1) || ((D_800F19CC->unk8.unk20 & 3) == 3)) {
-            var_a2 = ((D_800F19CC->unk8.unk8 + D_800F19CC->unk8.unkA)
+        if ((D_800F19CC->unk8.unk4.hpEffect == 1)
+            || (D_800F19CC->unk8.unk4.hpEffect == 3)) {
+            var_a2 = ((D_800F19CC->unk8.unk4.hp + D_800F19CC->unk8.unk4.mp)
                          * skill->hitParams[arg3].statFactor)
                    / 10;
         }
@@ -8685,8 +8610,8 @@ short func_8008379C(vs_skill_t* arg0, _hitEntity_t* arg1 __attribute__((unused))
     int arg4 __attribute__((unused)))
 {
     short var_a2 = 0;
-    if (((D_800F19CC->unk8.unk20 & 3) == 1) || ((D_800F19CC->unk8.unk20 & 3) == 3)) {
-        var_a2 = ((D_800F19CC->unk8.unk8 + D_800F19CC->unk8.unkA)
+    if ((D_800F19CC->unk8.unk4.hpEffect == 1) || (D_800F19CC->unk8.unk4.hpEffect == 3)) {
+        var_a2 = ((D_800F19CC->unk8.unk4.hp + D_800F19CC->unk8.unk4.mp)
                      * arg0->hitParams[arg3].statFactor)
                / 10;
     }
@@ -9180,7 +9105,7 @@ int func_800847F0(
 int func_80084870(
     vs_skill_t* arg0, _hitEntity_t* arg1, _hitEntity_t* arg2, int arg3, int arg4)
 {
-    int temp_v1 = D_800F19CC->unk8.unk20 & 3;
+    int temp_v1 = D_800F19CC->unk8.unk4.hpEffect;
     if ((temp_v1 == 1) || ((temp_v1 == 3))) {
         short amount = _calculateStatChange(arg0, arg1, arg2, arg3, arg4);
         arg2->hp += amount;
@@ -9324,7 +9249,7 @@ int func_80084DA8(vs_skill_t* arg0 __attribute__((unused)),
 {
     vs_battle_actor2* actor = vs_battle_actors[arg2->targetActor]->unk3C;
 
-    if (((D_800F19CC->unk8.unk20 & 3) == 1) || ((D_800F19CC->unk8.unk20 & 3) == 3)) {
+    if ((D_800F19CC->unk8.unk4.hpEffect == 1) || (D_800F19CC->unk8.unk4.hpEffect == 3)) {
         if (actor->shield.base.id != 0) {
             short amount = actor->shield.currentPp;
             arg2->shieldPp += amount;
@@ -9693,22 +9618,383 @@ INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/146C", func_80085B10);
 
 int func_8008631C(int arg0, int arg1, int arg2, int arg3, void* arg4)
 {
-    func_8008631C_t sp10;
+    D_800F19CC_t2 sp10;
 
-    sp10.unk4C[0].unk4C.unk.unk0 = arg2;
+    sp10.unk4C[0].unk0.unk.unk0 = arg2;
     sp10.skillIndex = arg0;
-    sp10.unk44 = 0;
-    sp10.unk4 = arg1;
+    sp10.unk4.unk40 = 0;
+    sp10.unk4.targetActor = arg1;
     sp10.unk4A = 1;
-    sp10.unk4C[0].unk8C = 0;
-    sp10.unk4C[0].unk4C.unk.unk1 = arg3;
+    sp10.unk4C[0].unk40 = 0;
+    sp10.unk4C[0].unk0.unk.unk1 = arg3;
     func_80085B10(arg0, arg4, &sp10, 0);
     return _getSkillCost(arg0, vs_battle_actors[arg1]->unk3C, 0) & 0xFF000000;
 }
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/146C", func_800863A4);
+int func_800863A4(int arg0, int arg1, int arg2, int arg3, func_800C1564_t2* arg4,
+    func_800C1564_t2* arg5, D_800F19CC_t2* arg6)
+{
+    D_800F19CC_t2 sp10;
+    func_800C1564_t sp860;
+    u_short sp870[2];
+    int var_s2;
+    int temp_s0;
+    int temp_s0_2;
+    int temp_s1;
+    int temp_v0;
+    int i;
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/146C", func_80086754);
+    sp10.skillIndex = arg0;
+    sp10.unk4.unk40 = 0;
+    sp10.unk4.targetActor = arg1;
+    sp10.unk4A = 0;
+    temp_v0 = (vs_main_skills[arg0].unk2_4);
+
+    switch (temp_v0) {
+    case 11:
+    case 12:
+        sp860.unk0 = vs_main_skills[arg0].shape;
+        sp860.unk1 = 1;
+        sp860.unk4.values[0] = vs_main_skills[arg0].rangeX;
+        sp860.unk4.values[1] = vs_main_skills[arg0].rangeY;
+        sp860.unk4.values[2] = vs_main_skills[arg0].rangeZ;
+        temp_s1 = arg5->unk0[0] - arg4->unk0[0];
+        temp_s0 = arg5->unk0[2] - arg4->unk0[2];
+        sp860.unk2 = ratan2(temp_s1, temp_s0);
+        temp_s0_2 = arg5->unk0[1] - arg4->unk0[1];
+        sp860.unk4.values[3] =
+            (ratan2(temp_s0_2, vs_gte_rsqrt((temp_s1 * temp_s1) + (temp_s0 * temp_s0)))
+                / 16)
+            + 0x40;
+        sp860.unk8 = *arg4;
+        break;
+
+    case 2:
+    case 4:
+    case 6:
+    case 8:
+        sp860.unk0 = vs_main_skills[arg0].aoe_24 & 7;
+        sp860.unk1 = 1;
+        sp860.unk4.values[0] = vs_main_skills[arg0].aoe_0;
+        sp860.unk4.values[1] = vs_main_skills[arg0].aoe_8;
+        sp860.unk4.values[2] = vs_main_skills[arg0].aoe_16;
+        sp860.unk2 = 0;
+        sp860.unk4.values[3] = vs_main_skills[arg0].aoe_24 & 0xF8;
+        sp860.unk8 = *arg5;
+        break;
+    }
+
+    switch (vs_main_skills[arg0].unk2_4) {
+    case 6:
+    case 8:
+    case 11:
+    case 12:
+        var_s2 = 0;
+
+        for (i = 0; i < 6; ++i) {
+            if ((func_800A1B9C(arg2, i, sp870, 2) >= 0)
+                && (func_800C1564(&sp860, sp870) != 0)) {
+                sp10.unk4C[var_s2].unk40 = 0;
+                sp10.unk4C[var_s2].unk0.unk.unk0 = arg2;
+                sp10.unk4C[var_s2].unk0.unk.unk1 = i;
+                ++var_s2;
+            }
+        }
+
+        sp10.unk4A = var_s2;
+        break;
+
+    case 5:
+    case 7:
+        sp10.unk4C[0].unk40 = 0;
+        sp10.unk4C[0].unk0.unk.unk0 = arg2;
+        sp10.unk4C[0].unk0.unk.unk1 = arg3;
+        sp10.unk4A = 1;
+        break;
+
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        sp10.unk4C[0].unk40 = 0;
+        sp10.unk4C[0].unk0.unk.unk0 = arg2;
+        sp10.unk4C[0].unk0.unk.unk1 = vs_battle_actors[arg2]->unk3C->unk36;
+        sp10.unk4A = 1;
+        break;
+    }
+
+    func_80085B10(arg0, arg6, &sp10, 0);
+    return _getSkillCost(arg0, vs_battle_actors[arg1]->unk3C, 0) & 0xFF000000;
+}
+
+void func_80086754(int arg0, vs_battle_actor2* arg1)
+{
+    int i;
+    int statDecrease;
+    int statIncrease;
+    u_int temp_v1_2;
+
+    arg1->statuses &= ~arg0;
+
+    if (arg0 & 0x7E0) {
+        if (!(arg1->statuses & 0x7E0)) {
+            arg1->unk94C[0] = 0;
+        }
+    }
+
+    if (arg0 & 0x810) {
+        if (!(arg1->statuses & 0x810)) {
+            arg1->unk94C[1] = 0;
+        }
+    }
+
+    if (arg0 & 0x1FF80000) {
+        if (!(arg1->statuses & 0x1FF80000)) {
+            arg1->unk94C[2] = 0;
+        }
+    }
+
+    if (arg0 & 0x2000) {
+        if (!(arg1->statuses & 0x2000)) {
+            arg1->unk94C[3] = 0;
+        }
+    }
+
+    if (arg0 & 0x8000) {
+        if (!(arg1->statuses & 0x8000)) {
+            arg1->unk94C[4] = 0;
+        }
+    }
+
+    if (arg0 & 0x24000) {
+        if (!(arg1->statuses & 0x24000)) {
+            arg1->unk94C[5] = 0;
+        }
+    }
+
+    if (arg0 & 0x60) {
+        arg1->strength = arg1->totalStrength;
+    }
+
+    if (arg0 & 0x180) {
+        arg1->intelligence = arg1->totalIntelligence;
+    }
+
+    if (arg0 & 0x600) {
+        arg1->agility = arg1->totalAgility;
+    }
+
+    if (arg0 & 0x10000) {
+        arg1->strength = arg1->totalStrength;
+        arg1->intelligence = arg1->totalIntelligence;
+        arg1->agility = arg1->totalAgility;
+    }
+
+    if (arg0 & 0x8010) {
+        if (arg0 & 0x10) {
+
+            if ((arg1->unk34 != 0) && (arg1->limbs[arg1->unk34].maxHp != 0)
+                && (arg1->limbs[arg1->unk34].hp < 2)) {
+                arg1->limbs[arg1->unk34].hp = 2;
+            }
+
+            if ((arg1->unk35 != 0) && (arg1->limbs[arg1->unk35].maxHp != 0)
+                && (arg1->limbs[arg1->unk35].hp < 2)) {
+                arg1->limbs[arg1->unk35].hp = 2;
+            }
+        }
+
+        if (!(arg1->statuses & 0x10)) {
+            arg1->unk31 = arg1->unk2E;
+            arg1->unk33 = arg1->unk2F;
+        }
+
+        func_800E685C(arg1->unk957, arg1->unk31, arg1->unk33);
+    }
+
+    if ((arg0 & 0x800) && !(arg1->statuses & 0x8010)) {
+
+        arg1->unk31 = arg1->unk2E;
+        arg1->unk33 = arg1->unk2F;
+
+        func_800E685C(arg1->unk957, arg1->unk31, arg1->unk33);
+    }
+
+    if (arg0 & 0x180000) {
+        if (arg1->weapon.blade.id != 0) {
+            arg1->weapon.currentStr = arg1->weapon.baseStr;
+            arg1->weapon.currentInt = arg1->weapon.baseInt;
+        }
+
+        if (arg1->shield.base.id != 0) {
+            arg1->shield.currentStr = arg1->shield.baseStr;
+            arg1->shield.currentInt = arg1->shield.baseInt;
+        }
+
+        for (i = 0; i < 6; ++i) {
+            if (arg1->limbs[i].armor.armor.id != 0) {
+                arg1->limbs[i].armor.currentStr = arg1->limbs[i].armor.baseStr;
+                arg1->limbs[i].armor.currentInt = arg1->limbs[i].armor.baseInt;
+            }
+        }
+    }
+
+    temp_v1_2 = arg0 & 0x01E00000;
+
+    if (temp_v1_2 != 0) {
+        switch (temp_v1_2) {
+        case 0x200000:
+            statIncrease = 1;
+            statDecrease = 3;
+            break;
+
+        case 0x400000:
+            statIncrease = 2;
+            statDecrease = 4;
+            break;
+
+        case 0x800000:
+            statIncrease = 3;
+            statDecrease = 1;
+            break;
+
+        case 0x01000000:
+            statIncrease = 4;
+            statDecrease = 2;
+            break;
+
+        default:
+            statDecrease = 7;
+            statIncrease = 7;
+            break;
+        }
+
+        if (statIncrease != 7) {
+            if (arg1->weapon.blade.id != 0) {
+
+                if ((arg1->weapon.blade.affinities[statIncrease] < 50)
+                    && (vs_main_getRand(8) == 0)) {
+
+                    ++arg1->weapon.blade.affinities[statIncrease];
+
+                    if (arg1->unk957 == 0) {
+                        func_80096768(240, statIncrease + 6, 1);
+                    }
+                }
+
+                if ((arg1->weapon.blade.affinities[statDecrease] > -100)
+                    && (vs_main_getRand(16) == 0)) {
+
+                    --arg1->weapon.blade.affinities[statDecrease];
+
+                    if (arg1->unk957 == 0) {
+                        func_80096768(240, statDecrease + 6, 0x80000001);
+                    }
+                }
+            }
+
+            arg1->weapon.unk168[statIncrease] = 0;
+            arg1->weapon.unk168[statDecrease] = 0;
+
+            _calculateWeaponClassAffinity(arg1);
+        }
+    }
+
+    temp_v1_2 = arg0 & 0x1E000000;
+
+    if (temp_v1_2 != 0) {
+
+        switch (temp_v1_2) {
+        case 0x2000000:
+            statIncrease = 1;
+            statDecrease = 3;
+            break;
+
+        case 0x4000000:
+            statIncrease = 2;
+            statDecrease = 4;
+            break;
+
+        case 0x8000000:
+            statIncrease = 3;
+            statDecrease = 1;
+            break;
+
+        case 0x10000000:
+            statIncrease = 4;
+            statDecrease = 2;
+            break;
+
+        default:
+            statDecrease = 7;
+            statIncrease = 7;
+            break;
+        }
+
+        if (statIncrease != 7) {
+            if (arg1->shield.base.id != 0) {
+
+                if ((arg1->shield.base.affinities[statIncrease] < 50)
+                    && (vs_main_getRand(8) == 0)) {
+
+                    ++arg1->shield.base.affinities[statIncrease];
+
+                    if (arg1->unk957 == 0) {
+                        func_80096768(241, statIncrease + 6, 1);
+                    }
+                }
+
+                if ((arg1->shield.base.affinities[statDecrease] > -100)
+                    && (vs_main_getRand(0x10) == 0)) {
+
+                    --arg1->shield.base.affinities[statDecrease];
+
+                    if (arg1->unk957 == 0) {
+                        func_80096768(241, statDecrease + 6, 0x80000001);
+                    }
+                }
+            }
+
+            arg1->shield.unk134[statIncrease] = 0;
+            arg1->shield.unk134[statDecrease] = 0;
+
+            _calculateShieldClassAffinity(arg1);
+
+            for (i = 0; i < 6; ++i) {
+                if (arg1->limbs[i].armor.armor.id != 0) {
+
+                    if ((arg1->limbs[i].armor.armor.affinities[statIncrease] < 50)
+                        && (vs_main_getRand(8) == 0)) {
+
+                        ++arg1->limbs[i].armor.armor.affinities[statIncrease];
+
+                        if (arg1->unk957 == 0) {
+                            func_80096768(arg1->limbs[i].nameIndex, statIncrease + 6, 1);
+                        }
+                    }
+
+                    if ((arg1->limbs[i].armor.armor.affinities[statDecrease] > -100)
+                        && (vs_main_getRand(16) == 0)) {
+
+                        --arg1->limbs[i].armor.armor.affinities[statDecrease];
+
+                        if (arg1->unk957 == 0) {
+                            func_80096768(
+                                arg1->limbs[i].nameIndex, statDecrease + 6, 0x80000001);
+                        }
+                    }
+                }
+
+                arg1->limbs[i].armor.unk88[statIncrease] = 0;
+                arg1->limbs[i].armor.unk88[statDecrease] = 0;
+
+                _calculateArmorClassAffinity(arg1, i);
+            }
+        }
+
+        func_800971D4();
+    }
+}
 
 void func_80086EA4(vs_battle_actor2* arg0, int arg1, int arg2, int arg3)
 {
@@ -10294,9 +10580,11 @@ void func_80088B8C(void)
 {
     if ((D_800F196C == 2) && (_cameraMode < 4) && (_cameraMode != 0)) {
         if ((D_800E8498 == 0)
-            && (((vs_battle_actors[D_800F19CC->unk8.unk4]->unk3C->statuses & 8) != 0))
-            && (D_800F19CC->unk8.unk44 == 0)) {
-            if (D_800F19CC->unk8.unk4 == 0) {
+            && ((
+                (vs_battle_actors[D_800F19CC->unk8.unk4.targetActor]->unk3C->statuses & 8)
+                != 0))
+            && (D_800F19CC->unk8.unk4.unk40 == 0)) {
+            if (D_800F19CC->unk8.unk4.targetActor == 0) {
                 if (vs_battle_characterState->unk3C->risk < 100) {
                     ++vs_battle_characterState->unk3C->risk;
                 }
