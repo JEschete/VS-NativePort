@@ -18,6 +18,7 @@
  * four-tap Gaussian, which is audible only as a slightly brighter top end.
  */
 
+#include <stdio.h>
 #include <string.h>
 #include <psx_spu.h>
 
@@ -44,6 +45,8 @@
 #define R_KON_HI       0x18A
 #define R_KOFF_LO      0x18C
 #define R_KOFF_HI      0x18E
+#define R_CDVOL_L      0x1B0   /* CD audio input, the XA track's path in */
+#define R_CDVOL_R      0x1B2
 
 /* ---- ADPCM ---- */
 
@@ -249,6 +252,23 @@ static void key_on(int i)
 {
     voice_t* v = &voices[i];
     spu_stat_keyons++;
+
+    /* VS_SND_TRACE also dumps what each voice was keyed on WITH -- a key-on
+     * with a zero volume or a zero pitch is silent, and looks identical to a
+     * working one in the counters. */
+    {
+        extern int _sndTrace;
+        if (_sndTrace > 0) {
+            fprintf(stderr,
+                "[spu] key-on v%-2d start=%05X repeat=%05X pitch=%04X "
+                "vol=%04X/%04X adsr=%04X%04X mvol=%04X/%04X\n",
+                i, (unsigned)VOICE_REG(i, V_START) << 3,
+                (unsigned)VOICE_REG(i, V_REPEAT) << 3, VOICE_REG(i, V_PITCH),
+                VOICE_REG(i, V_VOL_L), VOICE_REG(i, V_VOL_R),
+                VOICE_REG(i, V_ADSR_HI), VOICE_REG(i, V_ADSR_LO), REG(R_MVOL_L),
+                REG(R_MVOL_R));
+        }
+    }
     v->on = 1;
     v->addr = (unsigned)VOICE_REG(i, V_START) << 3;
     v->repeat = (unsigned)VOICE_REG(i, V_REPEAT) << 3;
@@ -290,25 +310,65 @@ static void consume_keys(void)
     }
 }
 
-/* Volume registers are either a plain level (bit 15 clear, 15-bit signed,
- * doubled) or a sweep. Sweeps are not modelled; their current level is taken as
- * the sweep's target so a swept voice is at least audible at a sane volume. */
+/* Voice and main volume registers: bit 15 selects sweep mode, and in volume
+ * mode bits 14..0 are a signed 15-bit value holding *half* the volume, so the
+ * effective level is twice the register (-4000h..+3FFFh means -100%..+100%).
+ * Returning the doubled value is what makes `>> 15` at the call site the right
+ * scaling; returning the raw 15-bit field instead costs 6dB per multiply, which
+ * with the main volume applied on top was a 12dB loss across the whole mix.
+ *
+ * Sweeps are not modelled; their current level is taken as the sweep's target
+ * so a swept voice is at least audible at a sane volume. */
 static int voice_volume(unsigned reg)
 {
-    if (reg & 0x8000) return 0x3FFF;
-    return (int)(short)(reg << 1) >> 1;
+    if (reg & 0x8000) return 0x7FFE;
+    return ((int)(short)(reg << 1) >> 1) * 2;
 }
+
+/* The CD input volume registers are NOT in that format: they are plain signed
+ * 16-bit, -8000h..+7FFFh. Running them through voice_volume() reads the 0x7FFF
+ * the driver writes for "full" as bit14..0 = -1, which is how the movie's
+ * soundtrack came out at a peak amplitude of exactly 1. */
+static int cd_volume(unsigned reg)
+{
+    return (int)(short)reg;
+}
+
+/* CD audio input. On the console the drive decodes XA sectors and feeds the
+ * result in here; native/platform/cdxa.c does the decoding and this mixes it,
+ * under the CD volume registers exactly as the hardware does. That is what
+ * makes the game's own fades (vs_sound_setCdVol, UpdateCdVolume) work on the
+ * movie's soundtrack without any special-casing. */
+extern int psx_cdxa_pull(short* out, int frames);
+
+#define CD_CHUNK 1024
+static short cd_buf[CD_CHUNK * 2];
 
 void spu_render(short* out, int frames)
 {
     int f, i;
     int mvol_l = voice_volume(REG(R_MVOL_L));
     int mvol_r = voice_volume(REG(R_MVOL_R));
+    int cdvol_l = cd_volume(REG(R_CDVOL_L));
+    int cdvol_r = cd_volume(REG(R_CDVOL_R));
+    int cd_have = 0, cd_pos = 0;
 
     consume_keys();
 
     for (f = 0; f < frames; f++) {
         int accum_l = 0, accum_r = 0;
+
+        if (cd_pos >= cd_have) {
+            int want = frames - f;
+            if (want > CD_CHUNK) want = CD_CHUNK;
+            cd_have = psx_cdxa_pull(cd_buf, want);
+            cd_pos = 0;
+        }
+        if (cd_pos < cd_have) {
+            accum_l += (int)((long long)cd_buf[cd_pos * 2 + 0] * cdvol_l >> 15);
+            accum_r += (int)((long long)cd_buf[cd_pos * 2 + 1] * cdvol_r >> 15);
+            cd_pos++;
+        }
 
         for (i = 0; i < SPU_VOICES; i++) {
             voice_t* v = &voices[i];

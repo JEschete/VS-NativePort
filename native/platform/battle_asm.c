@@ -39,20 +39,19 @@ void vs_battle_copyAligned(void* dst, const void* src, int numBytes)
  * so these correctly surface the audio dependency when a sfx actually fires. */
 extern void vs_main_playSfxDefault(int a, int b);
 
-/* Audio is Phase 3 and the SPU voice state is not initialised in the menu
- * harness, so these are no-ops for now (calling vs_main_playSfxDefault faults
- * in the uninitialised SPU path). Restore the real dispatch once audio lands. */
-void vs_battle_playMenuChangeSfx(void) { (void)0; }
-void vs_battle_playMenuSelectSfx(void) { (void)0; }
-void vs_battle_playMenuLeaveSfx(void)  { (void)0; }
-void vs_battle_playInvalidSfx(void)    { (void)0; }
-void vs_battle_playSfx10(void)         { (void)0; }
-
-/* func_80018C30: Akao sound-driver command dispatch (SLUS 25AC), reached when a
- * loaded save applies its monoSound/audio settings (vs_main_setMonoSound). SPU
- * is uninitialised (audio is Phase 3), so no-op it; returns 0 for callers that
- * read a result. See docs/NATIVE_DEVIATIONS.md (B). */
-unsigned int func_80018C30(int cmd) { (void)cmd; return 0; }
+/* Five one-line helpers that the PSX build writes as hand-rolled assembly
+ * (573B8.c, a shared tail that loads $a1 and falls into a single call). They
+ * were no-ops while audio was Phase 3, because reaching the uninitialised SPU
+ * path faulted; the driver works now, so they do the real thing.
+ *
+ * The ids are the ones the assembly loads: VS_SFX_MENUCHANGE 4, MENUSELECT 5,
+ * MENULEAVE 6, INVALID 7, and 10 for the unnamed one. 0x7E is the SFX bank
+ * selector vs_main_playSfx switches on. */
+void vs_battle_playMenuChangeSfx(void) { vs_main_playSfxDefault(0x7E, 4); }
+void vs_battle_playMenuSelectSfx(void) { vs_main_playSfxDefault(0x7E, 5); }
+void vs_battle_playMenuLeaveSfx(void)  { vs_main_playSfxDefault(0x7E, 6); }
+void vs_battle_playInvalidSfx(void)    { vs_main_playSfxDefault(0x7E, 7); }
+void vs_battle_playSfx10(void)         { vs_main_playSfxDefault(0x7E, 10); }
 
 /* func_800E6694: a battle-state query (146C.c) reached when saving syncs the
  * character's live battle stats into the save (func_80042CB0). The menu harness

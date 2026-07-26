@@ -77,7 +77,18 @@ void SpuSetCommonMasterVolume(short left, short right)
     *(volatile unsigned short*)0x1F801D80 = (unsigned short)left;
     *(volatile unsigned short*)0x1F801D82 = (unsigned short)right;
 }
-void SpuSetCommonCDVolume(short left, short right) { (void)left; (void)right; }
+/* CD input volume. The game reaches these registers directly from
+ * UpdateCdVolume(), so this exists for completeness rather than because
+ * anything calls it -- but it is a register write either way, and spu_core
+ * scales the decoded XA track by exactly this. */
+void SpuSetCommonCDVolume(short left, short right)
+{
+    *(volatile unsigned short*)0x1F801DB0 = (unsigned short)left;
+    *(volatile unsigned short*)0x1F801DB2 = (unsigned short)right;
+}
+
+/* Muting the CD input is not modelled; nothing in the game calls it. Were it
+ * to, the mix would keep playing the XA track. */
 void SpuSetCommonCDMix(int on_off) { (void)on_off; }
 
 int  SpuSetReverb(int on_off) { (void)on_off; return 0; }
@@ -117,6 +128,7 @@ void SsQuit(void) { }
  * before any of it reaches a speaker. */
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define FRAMES_PER_VBLANK (SPU_RATE / 60)   /* 735 */
 
@@ -165,21 +177,97 @@ static void wav_open(const char* path)
     atexit(wav_finish);
 }
 
-/* Called once per frame from VSync(). */
+/* The sound driver polls this to find out whether a voice has finished: when
+ * the envelope reaches zero it hands the voice back (func_80015080 ->
+ * UnassignVoicesFromChannels). spu_core keeps the current envelope level in the
+ * voice's ADSR_VOL register as it mixes, so this is a plain register read --
+ * and it has to be real, because a stub returning 0 would have every voice
+ * reclaimed on the tick after it started. */
+void SpuGetVoiceEnvelope(int vNum, short* envx)
+{
+    if (envx) {
+        *envx = (short)(*(volatile unsigned short*)(0x1F801C00 + vNum * 0x10 + 0xC));
+    }
+}
+
+/* Reverb is not modelled by the software SPU (see native/include/psx_spu.h), so
+ * depth is accepted and dropped. Noise is not modelled either. Both are
+ * recorded in docs/NATIVE_DEVIATIONS.md. */
+void SpuSetReverbModeDepth(short depth_left, short depth_right)
+{
+    (void)depth_left;
+    (void)depth_right;
+}
+
+long SpuSetNoiseClock(long n_clock) { return n_clock; }
+
+extern int psx_audio_sink_open(void);
+extern void psx_audio_sink_push(const short* frames, int nframes);
+
+static unsigned long long spu_now_ns(void)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (unsigned long long)ts.tv_sec * 1000000000ull + (unsigned long long)ts.tv_nsec;
+}
+
+/* Called from VSync().
+ *
+ * The mix runs unconditionally. It used to be gated on VS_AUDIO_WAV, which made
+ * an ordinary run not merely silent but inert: `spu_render` is what consumes
+ * the key-on register, so without it no voice ever started and the counters
+ * stayed at zero, which reads as "the driver is broken" rather than "nothing is
+ * listening".
+ *
+ * How much to render is decided by ELAPSED TIME, not by one vblank per call --
+ * the same correction the vblank counter needed, and for the same reason. The
+ * game does not call VSync sixty times a second: during the intro movie it
+ * calls it once per movie frame, about fifteen times a second. Rendering a
+ * fixed 735 frames per call therefore produced audio at a quarter of real time,
+ * which starved the movie's soundtrack into short bursts separated by silence
+ * and left a 50-second run holding 24 seconds of audio. */
 void psx_spu_pump(void)
 {
     static int checked;
+    static unsigned long long last_ns;
+    unsigned long long now = spu_now_ns();
+    long need;
 
     if (!checked) {
         const char* path = getenv("VS_AUDIO_WAV");
         checked = 1;
         if (path && *path) wav_open(path);
+        psx_audio_sink_open();
+        last_ns = now;
+        return;
     }
-    if (!wav) return;
 
-    spu_render(mixbuf, FRAMES_PER_VBLANK);
-    fwrite(mixbuf, sizeof(short) * 2, FRAMES_PER_VBLANK, wav);
-    wav_frames += FRAMES_PER_VBLANK;
+    need = (long)((now - last_ns) * SPU_RATE / 1000000000ull);
+    if (need <= 0) return;
+
+    /* After a long stall (a load, a breakpoint) do not try to catch up by
+     * emitting a second of audio in one go: drop the backlog and resync. */
+    if (need > SPU_RATE / 4) {
+        need = FRAMES_PER_VBLANK;
+        last_ns = now;
+    } else {
+        /* Advance by exactly what was rendered, keeping the sub-frame
+         * remainder, so the render rate tracks the clock instead of drifting. */
+        last_ns += (unsigned long long)need * 1000000000ull / SPU_RATE;
+    }
+
+    while (need > 0) {
+        int n = need > FRAMES_PER_VBLANK ? FRAMES_PER_VBLANK : (int)need;
+
+        spu_render(mixbuf, n);
+        psx_audio_sink_push(mixbuf, n);
+
+        if (wav) {
+            fwrite(mixbuf, sizeof(short) * 2, (size_t)n, wav);
+            wav_frames += (unsigned long)n;
+        }
+        need -= n;
+    }
 
     /* Periodic, because the watchdog kills the process with a signal and
      * atexit never runs -- and a silent capture is exactly the case where these

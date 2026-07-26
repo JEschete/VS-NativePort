@@ -163,7 +163,9 @@ settles.
 | `VS_DISC=path` | Optional raw disc image, consulted only for sectors outside the extracted data |
 | `VS_CD_SPEED=N` | Sectors per frame. The default is an authentic 2x (150/sec); raise it to skip load times |
 | `VS_PAD_SCRIPT=…` | Scripted input for headless runs: `<frame>:<mask>` steps, e.g. `1000:0x0800` presses START at vblank 1000 |
-| `VS_AUDIO_WAV=path` | Capture the SPU mix to a WAV file |
+| `VS_AUDIO_WAV=path` | Also capture the mix to a WAV file. Independent of playback; useful headless, and for checking output exactly |
+| `VS_NO_AUDIO=1` | Disable sound output |
+| `VS_SND_TRACE=1` | Log every command that reaches the sound driver, and dump each voice's registers at key-on |
 | `VS_VRAM_RAW=path` | Dump raw VRAM alongside the PPM. Needed to inspect 24-bit regions such as the movie |
 | `VS_CD_TRACE=1` | Log CD commands and sector flow |
 | `VS_STR_TRACE=1` | Log STR video frame assembly |
@@ -237,12 +239,13 @@ are at 100%. `BATTLE.PRG` is the long pole.
 - Memory card reads and writes a real `.mcd`, and the in-game LOAD screens
   enumerate genuine saves
 - Live SDL window and real controller input at 60Hz
-- Software SPU (24 ADPCM voices, ADSR, stereo mix), present but **silent**
-  pending the Akao instrument-bank upload
+- **Sound**, out of the host's speakers, from two sources mixed as on the
+  console: a software SPU (24 ADPCM voices, ADSR, stereo) driven by the game's
+  own Akao sound driver, and the CD-XA soundtrack interleaved into the movie
 
-**Not yet:** audio output, the 3D scene, and the game world itself. The last of
-those is gated on `BATTLE.PRG`, which is the bulk of the remaining
-decompilation.
+**Not yet:** music (nothing on the boot path asks for any yet), reverb, the 3D
+scene, and the game world itself. The last of those is gated on `BATTLE.PRG`,
+which is the bulk of the remaining decompilation.
 
 Every native-only shortcut, no-op and stub is tracked in
 [`docs/NATIVE_DEVIATIONS.md`](docs/NATIVE_DEVIATIONS.md). Nothing is quietly

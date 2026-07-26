@@ -29,15 +29,29 @@ SIZE_CAP = 0x2000
 
 
 def overlays():
-    """(vram, binary_path, {name: addr}) for every overlay with a splat.yaml."""
+    """(vram, binary_path, {name: addr}) for every overlay with a splat.yaml.
+
+    `vram` is returned already adjusted so that `addr - vram` is a file offset.
+    The overlays load at file offset 0, but SLUS_010.40 is a PS-EXE: its code
+    segment starts 0x800 bytes in, past the header, and its splat.yaml says so
+    with `start: 0x800`. Ignoring that reads every main-executable symbol 0x800
+    bytes early -- which is not a crash, just the wrong table, so it shows up
+    much later as (for instance) a semitone table whose first entry is 0 and
+    therefore every note playing at zero pitch."""
     out = []
     for y in sorted(glob.glob("config/**/splat.yaml", recursive=True)):
         txt = open(y).read()
+        # The code segment carries both the file offset and the vram it maps to.
+        seg = re.search(r"start:\s*(0x[0-9A-Fa-f]+)\s*\n\s*type:\s*code\s*\n"
+                        r"\s*vram:\s*(0x[0-9A-Fa-f]+)", txt)
         vram = re.search(r"vram:\s*(0x[0-9A-Fa-f]+)", txt)
         target = re.search(r"target_path:\s*(\S+)", txt)
         if not (vram and target):
             continue
-        vram = int(vram.group(1), 16)
+        if seg:
+            vram = int(seg.group(2), 16) - int(seg.group(1), 16)
+        else:
+            vram = int(vram.group(1), 16)
         binpath = target.group(1)
         # Primary symbol map for this overlay: config/<same dirs>/symbol_addrs.txt
         symfile = os.path.join(os.path.dirname(y), "symbol_addrs.txt")

@@ -43,6 +43,10 @@
 #include <string.h>
 #include <time.h>
 
+/* native/platform/cdxa.c: decodes the interleaved XA audio track. */
+extern int psx_cdxa_sector(const unsigned char* raw);
+extern void psx_cdxa_reset(void);
+
 #define SECTOR_RAW  2352
 #define SECTOR_DATA 2048
 #define SECTOR_HDR  24
@@ -194,6 +198,26 @@ static int read_from_data(const psx_disc_entry* e, int lba, unsigned char* out)
             }
         }
     }
+    if (cached_stride == SECTOR_RAW_F2) {
+        /* Form 2: read the whole raw sector so the subheader is visible. The
+         * interleaved XA audio lives in the sectors whose submode says audio,
+         * and on the console the drive decodes those itself and feeds the SPU's
+         * CD input -- the host never sees them as data. Do the same here.
+         *
+         * They are still handed up afterwards. The streaming layer rejects them
+         * on the STR magic, as it always has, so nothing downstream changes and
+         * the sector pacing stays exactly as it was. */
+        unsigned char raw[SECTOR_RAW_F2];
+
+        if (fseek(cached_fp, (long)(lba - e->lba) * SECTOR_RAW_F2, SEEK_SET) != 0)
+            return 0;
+        got = fread(raw, 1, SECTOR_RAW_F2, cached_fp);
+        if (got < SECTOR_RAW_F2) memset(raw + got, 0, SECTOR_RAW_F2 - got);
+        psx_cdxa_sector(raw);
+        memcpy(out, raw + SUBHEADER, SECTOR_DATA);
+        return 1;
+    }
+
     if (fseek(cached_fp, (long)(lba - e->lba) * cached_stride + cached_skip, SEEK_SET) != 0)
         return 0;
     got = fread(out, 1, SECTOR_DATA, cached_fp);
@@ -492,6 +516,10 @@ void psx_cd_pump(void)
 /* --- streaming hook (native/platform/libstream.c) --- */
 void psx_cd_set_stream_sink(void (*sink)(const unsigned char*))
 {
+    /* Tearing the stream down ends the movie. Drop whatever XA audio is still
+     * buffered, so the last fraction of a second of the soundtrack does not
+     * play over the screen that follows. */
+    if (!sink && stream_sink) psx_cdxa_reset();
     stream_sink = sink;
 }
 

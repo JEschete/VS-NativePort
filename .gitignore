@@ -25,3 +25,6 @@ native/platform/harvested.syms
 
 # Personal PS1 memory-card saves (user data, never commit)
 native/saves/
+
+# Upstream build log, committed by accident upstream. Not ours to keep.
+make.log

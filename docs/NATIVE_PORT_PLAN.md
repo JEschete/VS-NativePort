@@ -17,6 +17,76 @@ retail disc byte-for-byte**.
 > one, update that ledger. The running "not yet implemented" frontier is the 369
 > auto-generated abort stubs in `native/platform/stubs.c` (self-maintaining).
 
+### ✅ THE PORT HAS SOUND (ledger B, Phase 3b)
+
+**Audio plays through the host's sound card, by default, with nothing
+configured.** The intro movie has its soundtrack, and the title screen's menu
+SFX sound as you move through it.
+
+```sh
+VS_HEADLESS=1 VS_WATCHDOG=95 VS_AUDIO_WAV=/tmp/a.wav \
+VS_PAD_SCRIPT=2400:0x0800,2520:0x1000,2600:0x4000,2700:0x0020 \
+  ./native/build/vagrant-native
+# [audio] 44100Hz stereo via SDL "pulseaudio"
+# /tmp/a.wav: 95s, peak 23883, 31% non-silent
+```
+
+Two sources feed one mix, as on the console:
+
+- **SFX** from the game's own Akao driver over the software SPU.
+- **The movie's soundtrack** from the CD-XA ADPCM interleaved into
+  `TITLE.STR`, decoded in `native/platform/cdxa.c` behind libds and fed into
+  the SPU's CD input under the CD volume registers. That placement is the
+  hardware's: the drive decodes XA itself and the CPU never sees it, which is
+  why the game's own `UpdateCdVolume` fades apply with no special-casing.
+
+Under WSL this reaches Windows through WSLg's PulseAudio socket with no setup,
+given the 32-bit `libpulse` and `libSDL2` packages (the build is `-m32`).
+`VS_NO_AUDIO=1` turns output off.
+
+The Akao driver is decompiled C and was already running. What was missing was
+everything underneath it, and none of it announced itself:
+
+- **The command front door was a stub.** `func_80018C30`, where every sound
+  request in the game arrives, returned 0 without doing anything, so no
+  handler behind it had ever been called. It and the rest of the SFX path that
+  was still assembly (`func_8001653C`, `func_800161C4`, `func_80019FC4`,
+  `func_80015220`, `func_80015080`, `func_80015970`, `func_800147CC`) are now
+  transcribed in `native/platform/sound_asm.c`. That is 8 of the 17 remaining
+  `INCLUDE_ASM` functions in `25AC.c`.
+- **Three dispatch tables were arrays of zeroes**, because they hold PSX code
+  addresses in `.data` and the stub generator zero-fills unknown data symbols.
+  Rebuilt as real C in `native/platform/sound_tables.c`.
+- **The driver's shared `.bss` state was fragmented into unrelated blobs**, so
+  the test that gates the per-tick SPU flush read two variables the VM never
+  wrote. This is a whole bug class rather than one bug. **Read ledger section
+  F1 before debugging any other subsystem that "runs but does nothing".**
+- **Every sound lookup table read as zeroes**, and once harvested, read from the
+  wrong file offset. `harvest_data.py` ignored the PS-EXE's 0x800-byte header,
+  so the semitone pitch table started with 0 and every note played at pitch 0.
+  Ledger F2.
+
+Three more fixes stood between "a voice keys on" and "you can hear it", and all
+three are worth recognising elsewhere:
+
+- **The mix was gated on `VS_AUDIO_WAV`**, and `spu_render` is what consumes the
+  key-on register, so an ordinary run was inert rather than merely silent.
+- **The SPU rendered per `VSync` call rather than per unit of time.** The game
+  calls VSync about fifteen times a second during the movie, not sixty, so a
+  fixed 735 frames per call produced audio at quarter speed. The vblank counter
+  once had this exact bug.
+- **The volume registers were decoded wrong, twice.** Voice and main volume hold
+  *half* the level in a signed 15-bit field, so returning the raw field cost
+  12dB across the mix. The CD input registers are not in that format at all
+  (plain signed 16-bit), and reading the driver's 0x7FFF as a 15-bit field gives
+  -1 — which is why the movie's soundtrack first arrived at peak amplitude 1.
+
+**What is left:** music. That is structural, not a driver problem — nothing on
+the boot path loads a `MUSIC0xx.DAT`, and `src/MENU/MENUF.PRG/3B8.c`, the one
+place that starts music from a menu, is in `NATIVE_EXCLUDE`. A 95-second boot
+issues only commands 0x80 and 0x20. Also outstanding: reverb, noise voices and
+pitch/amplitude modulation, all of which `spu_core.c` ignores.
+
 ### ✅ THE INTRO FMV PLAYS — SOFTWARE MDEC (ledger A6 done)
 
 **`native/build/vagrant-native` plays Vagrant Story's opening movie**, all 593

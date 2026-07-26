@@ -90,10 +90,33 @@ GAME_SRCS := $(filter-out $(NATIVE_EXCLUDE),$(shell find src -name "*.c" | sort)
 # render path reads, never .bss runtime state. Regenerate with `make harvest`.
 # Harvested symbols are DEFINED by harvested_data.o, so gen_stubs.py sees them
 # as satisfied and does not emit zero blobs for them -- no exclusion list needed.
+# The sound driver's lookup tables. All of these are initialised .data in the
+# retail executable that no decompiled C defines, so without harvesting them the
+# stub layer hands the driver arrays of zeroes -- silently, and with the driver
+# then reading every opcode as zero-length and every note as zero-duration.
+#
+#   D_8002F5A0/D_8002F600  operand byte counts, per VM opcode
+#   D_8002F620             note-length table
+#   D_8002F69C/D_8002F89C  pitch and envelope curves
+#   g_Sound_StereoPanGainTableQ15  pan law
+#   D_8002F99C..D_80030184 the sixteen LFO waveforms g_Sound_LfoTable indexes
+#
+# g_Sound_LfoTable itself is deliberately NOT harvested: it is an array of
+# pointers, and the retail bytes are PSX addresses. It is rebuilt as real C in
+# native/platform/sound_tables.c, same as the three dispatch tables.
+SOUND_HARVEST := D_8002F548 D_8002F54C D_8002F550 D_8002F5A0 D_8002F600 \
+                 D_8002F620 D_8002F63C D_8002F66C D_8002F69C D_8002F89C \
+                 g_Sound_StereoPanGainTableQ15 \
+                 D_8002F99C D_8002F9B4 D_8002F9C0 D_8002F9D4 D_8002F9E0 \
+                 D_8002F9F4 D_8002FA00 D_8002FB40 D_8002FB94 D_8002FC3C \
+                 D_8002FC6C D_8002FCF4 D_8002FD1C D_8002FF24 D_8003012C \
+                 D_80030184
+
 HARVEST_SYMS := vs_battle_menuStrings vs_battle_characterWidths \
                 vs_battle_rowAnimationSteps \
                 D_800EB708 D_800EB7B4 D_800EB7D4 \
-                _titleScreenBg
+                _titleScreenBg \
+                $(SOUND_HARVEST)
 
 # Real implementations (must be linked BEFORE stubs are generated so their
 # symbols are excluded from stubbing).
@@ -106,7 +129,9 @@ PLAT_REAL := native/platform/unimpl.c native/platform/scratchpad.c \
              native/platform/libpad.c native/platform/present.c \
              native/platform/libds.c native/platform/libspu.c \
              native/platform/disc_index.c native/platform/kernel.c \
-             native/platform/sound_asm.c native/platform/assets.c \
+             native/platform/sound_asm.c native/platform/sound_tables.c \
+             native/platform/audio_sink.c native/platform/cdxa.c \
+             native/platform/assets.c \
              native/platform/mdec.c native/platform/libpress.c \
              native/platform/libstream.c native/platform/spu_core.c \
              native/platform/main.c
