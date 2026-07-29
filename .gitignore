@@ -1,30 +1,30 @@
 **/__pycache__
-.claude
-.direnv
-.vscode
-build
-config/*.xml
-data/
-disks/
-include/gte_macros.inc
-include/include_asm.h
-include/labels.inc
-include/macro.inc
-nonmatchings/
-tools/.sysdeps
-tools/python
-native/build/
-native/platform/stubs.c
-native/tests/psx/*.exe
-native/build/*.ppm
-native/build/test_gpu
-native/build/menu_harness
-native/build/menu.ppm
-native/platform/harvested_data.c
-native/platform/harvested.syms
+/.claude
+/.direnv
+/.vscode
+/build
+/config/*.xml
+/data/
+/disks/
+/include/gte_macros.inc
+/include/include_asm.h
+/include/labels.inc
+/include/macro.inc
+/nonmatchings/
+/tools/.sysdeps
+/tools/python
+/native/build/
+/native/platform/stubs.c
+/native/tests/psx/*.exe
+/native/build/*.ppm
+/native/build/test_gpu
+/native/build/menu_harness
+/native/build/menu.ppm
+/native/platform/harvested_data.c
+/native/platform/harvested.syms
 
 # Personal PS1 memory-card saves (user data, never commit)
-native/saves/
+/native/saves/
 
 # Upstream build log, committed by accident upstream. Not ours to keep.
-make.log
+/make.log
