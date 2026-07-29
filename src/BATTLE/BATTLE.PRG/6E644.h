@@ -1,4 +1,5 @@
 #pragma once
+#include "146C.h"
 
 void func_800D6E44(void);
 void func_800D7814(void);
