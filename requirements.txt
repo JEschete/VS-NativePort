@@ -1,4 +1,10 @@
-splat64[mips] == 0.41.1
+splat64[mips]==0.50.0
 pandas
 toml
 cffi
+PyYAML>=6,<7
+Pillow
+numpy
+kaitaistruct>=0.11,<1
+tree-sitter==0.25.2
+tree-sitter-c==0.24.1

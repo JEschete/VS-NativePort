@@ -56,7 +56,7 @@ unsigned char D_800378E8[0x2400] __attribute__((aligned(16)));
  * have to be right, and the C headers size some of these structs generously.
  */
 #define ALIAS(sym, base, off)                                                            \
-    __asm__(".globl " #sym "\n.set " #sym ", " #base " + " #off "\n")
+    __asm__(".globl _" #sym "\n.set _" #sym ", _" #base " + " #off "\n")
 
 /* SfxSoundChannels is the tail of D_80035910: the driver treats all twelve
  * channels as one array and depends on the adjacency -- Sound_PlaySfxProgram

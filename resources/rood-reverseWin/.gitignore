@@ -1,0 +1,17 @@
+**/__pycache__
+/.vscode
+/build
+/config/*.xml
+/data/
+/disks/
+/include/gte_macros.inc
+/include/include_asm.h
+/include/labels.inc
+/include/macro.inc
+/nonmatchings/
+/tools/.sysdeps
+/tools/python
+/tools/old-gcc
+/tools/mkpsxiso
+/tools/xdelta
+/progress.json

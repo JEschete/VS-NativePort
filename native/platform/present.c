@@ -1,30 +1,16 @@
-/* SDL2 window + host input. See native/include/psx_present.h for why SDL is
- * dlopen'd instead of linked.
+/* SDL2 window + host input. See native/include/psx_present.h for runtime loading.
  *
  * Input sources, merged (OR'd) every frame:
- *   1. keyboard              -- always available under WSLg
+ *   1. keyboard              -- native Windows input
  *   2. SDL game controller   -- used when the host exposes a real pad device
- *   3. the Windows pad bridge (native/tools/pad_bridge.py) over TCP
- *
- * (3) exists because WSL2 has no /dev/input at all: USB and Bluetooth devices
- * are not passed through to the VM, so a DualSense connected to Windows is
- * invisible to a Linux binary. The bridge reads the pad on the Windows side and
- * streams its state to us. WSL2 forwards Windows localhost connections to
- * listeners inside the VM, so we are the server and the bridge is the client.
  */
 #include <psx_present.h>
 #include <psx_gpu.h>
 
-#include <dlfcn.h>
+#include <psx_host.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
 
 /* ------------------------------------------------------------------ */
 /* PS1 pad bits (mirrors include/psx/libetc.h, which the platform layer
@@ -177,113 +163,6 @@ static unsigned      host_buttons;
 static unsigned char host_sticks[4] = { 128, 128, 128, 128 };
 static int           host_connected;
 static const char*   host_source = "keyboard";
-
-/* ------------------------------------------------------------------ */
-/* Windows pad bridge (TCP server on 127.0.0.1).                        */
-/* ------------------------------------------------------------------ */
-#define BRIDGE_PORT_DEFAULT 27015
-#define BRIDGE_MAGIC 0x44505356u        /* 'V','S','P','D' little-endian */
-#define BRIDGE_PKT   12
-
-static int bridge_listen = -1;
-static int bridge_conn   = -1;
-static unsigned char bridge_buf[BRIDGE_PKT * 8];
-static int bridge_len;
-static unsigned      bridge_buttons;
-static unsigned char bridge_sticks[4] = { 128, 128, 128, 128 };
-static int           bridge_live;
-static int           bridge_idle;       /* frames since last packet */
-
-static void bridge_open(void)
-{
-    struct sockaddr_in a;
-    int port = BRIDGE_PORT_DEFAULT;
-    const char* e = getenv("VS_PAD_PORT");
-    int yes = 1;
-
-    if (e && atoi(e) > 0) port = atoi(e);
-    if (getenv("VS_NO_PAD_BRIDGE")) return;
-
-    bridge_listen = socket(AF_INET, SOCK_STREAM, 0);
-    if (bridge_listen < 0) return;
-    setsockopt(bridge_listen, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
-    fcntl(bridge_listen, F_SETFL, O_NONBLOCK);
-
-    memset(&a, 0, sizeof a);
-    a.sin_family = AF_INET;
-    a.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    a.sin_port = htons((unsigned short)port);
-    if (bind(bridge_listen, (struct sockaddr*)&a, sizeof a) < 0 ||
-        listen(bridge_listen, 1) < 0) {
-        close(bridge_listen);
-        bridge_listen = -1;
-        return;
-    }
-    printf("[present] pad bridge listening on 127.0.0.1:%d "
-           "(run native/tools/pad_bridge.py on Windows)\n", port);
-}
-
-/* Decode every complete packet available; keep the most recent. */
-static void bridge_poll(void)
-{
-    int n;
-
-    if (bridge_listen < 0) return;
-
-    if (bridge_conn < 0) {
-        int c = accept(bridge_listen, 0, 0);
-        if (c >= 0) {
-            int yes = 1;
-            fcntl(c, F_SETFL, O_NONBLOCK);
-            setsockopt(c, IPPROTO_TCP, TCP_NODELAY, &yes, sizeof yes);
-            bridge_conn = c;
-            bridge_len = 0;
-            printf("[present] pad bridge connected\n");
-        }
-        return;
-    }
-
-    for (;;) {
-        n = (int)recv(bridge_conn, bridge_buf + bridge_len,
-                      (size_t)(sizeof bridge_buf - bridge_len), 0);
-        if (n > 0) {
-            bridge_len += n;
-        } else if (n == 0) {
-            printf("[present] pad bridge disconnected\n");
-            close(bridge_conn);
-            bridge_conn = -1;
-            bridge_live = 0;
-            return;
-        } else {
-            if (errno == EINTR) continue;
-            break;                              /* EAGAIN: drained */
-        }
-
-        /* Consume whole packets; resync on a bad magic. */
-        while (bridge_len >= BRIDGE_PKT) {
-            unsigned magic;
-            memcpy(&magic, bridge_buf, 4);
-            if (magic != BRIDGE_MAGIC) {
-                memmove(bridge_buf, bridge_buf + 1, (size_t)(bridge_len - 1));
-                bridge_len--;
-                continue;
-            }
-            bridge_buttons = (unsigned)(bridge_buf[4] | (bridge_buf[5] << 8));
-            bridge_sticks[0] = bridge_buf[6];
-            bridge_sticks[1] = bridge_buf[7];
-            bridge_sticks[2] = bridge_buf[8];
-            bridge_sticks[3] = bridge_buf[9];
-            bridge_live = (bridge_buf[10] & 1);
-            bridge_idle = 0;
-            memmove(bridge_buf, bridge_buf + BRIDGE_PKT,
-                    (size_t)(bridge_len - BRIDGE_PKT));
-            bridge_len -= BRIDGE_PKT;
-        }
-        if (bridge_len == (int)sizeof bridge_buf) bridge_len = 0;  /* garbage guard */
-    }
-
-    if (++bridge_idle > 120) bridge_live = 0;   /* bridge went quiet */
-}
 
 /* ------------------------------------------------------------------ */
 /* Input collection                                                     */
@@ -452,17 +331,16 @@ int psx_present_init(const char* title, int scale)
         return -1;
     }
 
-    sdl.lib = dlopen("libSDL2-2.0.so.0", RTLD_NOW | RTLD_LOCAL);
-    if (!sdl.lib) sdl.lib = dlopen("libSDL2.so", RTLD_NOW | RTLD_LOCAL);
+    sdl.lib = psx_host_load_library("SDL2.dll");
     if (!sdl.lib) {
-        printf("[present] SDL2 not available (%s) -- headless\n", dlerror());
+        printf("[present] SDL2.dll not available -- headless\n");
         return -1;
     }
 
 #define SYM(field, type, name)                                                 \
-    sdl.field = (type)dlsym(sdl.lib, name);                                    \
+    sdl.field = (type)psx_host_library_symbol(sdl.lib, name);                   \
     if (!sdl.field) { printf("[present] missing %s -- headless\n", name);      \
-                      dlclose(sdl.lib); sdl.lib = 0; return -1; }
+                      psx_host_free_library(sdl.lib); sdl.lib = 0; return -1; }
     SYM(Init, pfn_Init, "SDL_Init")
     SYM(Quit, pfn_Quit, "SDL_Quit")
     SYM(GetError, pfn_GetError, "SDL_GetError")
@@ -487,7 +365,7 @@ int psx_present_init(const char* title, int scale)
     SYM(GameControllerUpdate, pfn_GameControllerUpdate, "SDL_GameControllerUpdate")
 #undef SYM
 
-    /* Game controller init is allowed to fail (WSL has no /dev/input). */
+    /* A machine without a controller can still use the keyboard. */
     if (sdl.Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) != 0) {
         if (sdl.Init(SDL_INIT_VIDEO) != 0) {
             err = sdl.GetError();
@@ -527,7 +405,6 @@ int psx_present_init(const char* title, int scale)
     if (!argb) return -1;
 
     active = 1;
-    bridge_open();
     printf("[present] window open: %dx%d (x%d)\n", src_w, src_h, scale);
     return 0;
 }
@@ -589,7 +466,6 @@ void psx_present_pump(void)
 
     poll_keyboard(&btn);
     poll_gamepad(&btn, sticks);
-    bridge_poll();
 
     /* Closing the window has to actually close the program. The boot path is
      * the game's own loop, which never returns and never polls anything, so
@@ -605,13 +481,6 @@ void psx_present_pump(void)
         fflush(stdout);
         psx_present_shutdown();
         exit(0);
-    }
-
-    if (bridge_live) {
-        btn |= bridge_buttons;
-        memcpy(sticks, bridge_sticks, 4);
-        host_connected = 1;
-        host_source = "DualSense (Windows bridge)";
     }
 
     host_buttons = btn;
@@ -631,12 +500,12 @@ void psx_present_pump(void)
 
 void psx_present_shutdown(void)
 {
-    if (bridge_conn >= 0) { close(bridge_conn); bridge_conn = -1; }
-    if (bridge_listen >= 0) { close(bridge_listen); bridge_listen = -1; }
     if (!active) return;
     active = 0;
     if (win) sdl.DestroyWindow(win);
     sdl.Quit();
+    psx_host_free_library(sdl.lib);
+    sdl.lib = 0;
     free(argb);
     argb = 0;
 }

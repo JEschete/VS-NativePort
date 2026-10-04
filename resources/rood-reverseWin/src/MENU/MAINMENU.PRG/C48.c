@@ -1,0 +1,1215 @@
+#include "C48.h"
+#include "2D10.h"
+#include "58EC.h"
+#include "src/SLUS_010.40/main.h"
+#include "src/MENU/MENUD.PRG/234.h"
+#include "src/BATTLE/BATTLE.PRG/146C.h"
+#include "src/BATTLE/BATTLE.PRG/2842C.h"
+#include "src/BATTLE/BATTLE.PRG/30DB0.h"
+#include "src/BATTLE/BATTLE.PRG/44F14.h"
+#include "src/BATTLE/BATTLE.PRG/573B8.h"
+#include "src/BATTLE/BATTLE.PRG/5BF94.h"
+#include "src/BATTLE/BATTLE.PRG/func_8006B57C_t.h"
+#include "src/MENU/MENU0.PRG/15AC.h"
+#include "src/MENU/MENU1.PRG/30.h"
+#include "src/MENU/MENU2.PRG/64.h"
+#include "src/MENU/MENU2.PRG/143C.h"
+#include "src/MENU/MENU3.PRG/16C.h"
+#include "src/MENU/MENU4.PRG/120.h"
+#include "src/MENU/MENU5.PRG/4D8.h"
+#include "src/MENU/MENU7.PRG/260.h"
+#include "src/MENU/MENU8.PRG/88.h"
+#include "src/MENU/MENU8.PRG/21A0.h"
+#include "src/MENU/MENU9.PRG/238.h"
+#include "src/MENU/MENUB.PRG/260.h"
+#include "src/MENU/MENUC.PRG/168.h"
+#include "src/MENU/MENUD.PRG/234.h"
+#include "src/MENU/MENUE.PRG/494.h"
+#include "src/MENU/MENUF.PRG/3B8.h"
+#include "build/assets/MENU/ITEMHELP.BIN.h"
+#include "build/assets/BATTLE/BATTLE.PRG/menuStrings.h"
+#include "gpu.h"
+#include "vs_string.h"
+#include <libetc.h>
+#include <limits.h>
+
+vs_main_inventoryGem* vs_mainMenu_gems;
+vs_menu_inventoryStorage_t* vs_menu_inventoryStorage;
+vs_main_inventoryGrip* vs_mainMenu_grips;
+vs_main_inventoryBlade* vs_mainMenu_blades;
+vs_main_inventoryArmor* vs_mainMenu_armor;
+vs_main_inventoryShield* vs_mainMenu_shields;
+vs_main_inventoryWeapon* vs_mainMenu_weapons;
+
+void vs_mainMenu_initInventory(void)
+{
+    int i;
+    vs_battle_actor2* actor = vs_battle_characterState->unk3C;
+
+    if (actor->weapon.index != 0) {
+        vs_battle_copyUiWeaponStats(
+            &vs_main_inventory.weapons[actor->weapon.index - 1], &actor->weapon);
+    }
+
+    if (actor->shield.index != 0) {
+        vs_battle_copyUiShieldStats(
+            &vs_main_inventory.shields[actor->shield.index - 1], &actor->shield);
+    }
+
+    for (i = 0; i < 6; ++i) {
+        if (actor->limbs[i].armor.index != 0) {
+            vs_battle_copyUiArmorStats(
+                &vs_main_inventory.armor[actor->limbs[i].armor.index - 1],
+                &actor->limbs[i].armor);
+        }
+    }
+
+    if (actor->accessory.index != 0) {
+        vs_battle_copyUiAccessoryStats(
+            &vs_main_inventory.armor[actor->accessory.index - 1], &actor->accessory);
+    }
+}
+
+static void _nop(void) __attribute__((unused));
+static void _nop(void) { }
+
+/**
+ * Processes the object queue in the hope of finding a free slot.
+ * Unused.
+ */
+static int _getNextEmptyObjectDataSlot(void) __attribute__((unused));
+static int _getNextEmptyObjectDataSlot(void)
+{
+    vs_battle_processObjectDataQueue();
+    return vs_battle_getEmptyObjectDataSlot();
+}
+
+int vs_mainMenu_getEquipmentMaxStats(void* item, u_int itemCategory)
+{
+    static short _weaponTitleSubmaxThresholds[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90,
+        100, SHRT_MAX };
+
+    static short _weaponTitleMaxThresholds[] = { 50, 95, SHRT_MAX,
+        8192 }; // Last one junk?
+
+    int i;
+    int subMaxRank;
+    int maxRank;
+    int isAffinity = 0;
+    int param = 0;
+    int maxParam = 0;
+    int subMaxParam = 0;
+
+    switch (itemCategory) {
+    case 0:
+        for (i = 0; i < 6; ++i) {
+            if (maxParam
+                < ((vs_battle_uiWeapon*)(item))->classAffinityCurrent.class[1][i]) {
+                subMaxParam = maxParam;
+                maxParam =
+                    ((vs_battle_uiWeapon*)(item))->classAffinityCurrent.class[1][i];
+                param = i;
+            } else if (subMaxParam < ((vs_battle_uiWeapon*)(item))
+                           ->classAffinityCurrent.class[1][i]) {
+                subMaxParam =
+                    ((vs_battle_uiWeapon*)(item))->classAffinityCurrent.class[1][i];
+            }
+        }
+
+        for (i = 0; i < 7; ++i) {
+            if (maxParam
+                < ((vs_battle_uiWeapon*)(item))->classAffinityCurrent.affinity[1][i]) {
+                subMaxParam = maxParam;
+                maxParam =
+                    ((vs_battle_uiWeapon*)(item))->classAffinityCurrent.affinity[1][i];
+                param = i;
+                isAffinity = 1;
+            } else if (subMaxParam < ((vs_battle_uiWeapon*)(item))
+                           ->classAffinityCurrent.affinity[1][i]) {
+                subMaxParam =
+                    ((vs_battle_uiWeapon*)(item))->classAffinityCurrent.affinity[1][i];
+            }
+        }
+
+        break;
+
+    case 1:
+        for (i = 0; i < 6; ++i) {
+            if (maxParam
+                < ((vs_battle_uiShield*)(item))->classAffinityCurrent.class[1][i]) {
+                subMaxParam = maxParam;
+                maxParam =
+                    ((vs_battle_uiShield*)(item))->classAffinityCurrent.class[1][i];
+                param = i;
+            } else if (subMaxParam < ((vs_battle_uiShield*)(item))
+                           ->classAffinityCurrent.class[1][i]) {
+                subMaxParam =
+                    ((vs_battle_uiShield*)(item))->classAffinityCurrent.class[1][i];
+            }
+        }
+
+        for (i = 0; i < 7; ++i) {
+            if (maxParam
+                < ((vs_battle_uiShield*)(item))->classAffinityCurrent.affinity[1][i]) {
+                subMaxParam = maxParam;
+                maxParam =
+                    ((vs_battle_uiShield*)(item))->classAffinityCurrent.affinity[1][i];
+                param = i;
+                isAffinity = 1;
+            } else if (subMaxParam < ((vs_battle_uiShield*)(item))
+                           ->classAffinityCurrent.affinity[1][i]) {
+                subMaxParam =
+                    ((vs_battle_uiShield*)(item))->classAffinityCurrent.affinity[1][i];
+            }
+        }
+
+        break;
+
+    case 2:
+    default:
+        for (i = 0; i < 6; ++i) {
+            if (maxParam
+                < ((vs_battle_uiArmor*)(item))->classAffinityCurrent.class[1][i]) {
+                subMaxParam = maxParam;
+                maxParam = ((vs_battle_uiArmor*)(item))->classAffinityCurrent.class[1][i];
+                param = i;
+            } else if (subMaxParam
+                       < ((vs_battle_uiArmor*)(item))->classAffinityCurrent.class[1][i]) {
+                subMaxParam =
+                    ((vs_battle_uiArmor*)(item))->classAffinityCurrent.class[1][i];
+            }
+        }
+
+        for (i = 0; i < 7; ++i) {
+            if (maxParam
+                < ((vs_battle_uiArmor*)(item))->classAffinityCurrent.affinity[1][i]) {
+                subMaxParam = maxParam;
+                maxParam =
+                    ((vs_battle_uiArmor*)(item))->classAffinityCurrent.affinity[1][i];
+                param = i;
+                isAffinity = 1;
+            } else if (subMaxParam < ((vs_battle_uiArmor*)(item))
+                           ->classAffinityCurrent.affinity[1][i]) {
+                subMaxParam =
+                    ((vs_battle_uiArmor*)(item))->classAffinityCurrent.affinity[1][i];
+            }
+        }
+
+        break;
+    }
+
+    subMaxRank = 0;
+
+    for (i = 0; i < 11; ++i) {
+        if (subMaxParam < _weaponTitleSubmaxThresholds[i]) {
+            subMaxRank = i;
+            break;
+        }
+    }
+
+    maxRank = 0;
+
+    for (i = 0; i < 3; ++i) {
+        if (maxParam < _weaponTitleMaxThresholds[i]) {
+            maxRank = i;
+            break;
+        }
+    }
+
+    {
+        int a = (isAffinity * 6) + param;
+        int b = subMaxRank + (maxRank << 8);
+        return b + (a << 16);
+    }
+}
+
+void vs_mainMenu_menuItemFlyoutLeft(int row)
+{
+    vs_battle_menuItem_t* menuItem = vs_battle_getMenuItem(row + 32);
+
+    if (menuItem->state != menuItemStateInactive) {
+        menuItem->state = menuItemStateDismiss;
+        menuItem->targetPosition0 = -menuItem->w;
+    }
+}
+
+void vs_mainMenu_flyoutLeftExcept(int row)
+{
+    int i;
+
+    for (i = 0; i < 8; ++i) {
+        if (i != row) {
+            vs_mainMenu_menuItemFlyoutLeft(i);
+        }
+    }
+}
+
+void vs_mainMenu_menuItemFlyoutRight(int row)
+{
+    vs_battle_menuItem_t* menuItem = vs_battle_getMenuItem(row);
+
+    if (menuItem->state != menuItemStateInactive) {
+        menuItem->state = menuItemStateSlideX;
+        menuItem->targetPosition0 = 320;
+    }
+}
+
+void vs_mainMenu_clearMenuExcept(enum vs_mainMenu_menuItemIds id)
+{
+    int i;
+
+    for (i = 0; i < 32; ++i) {
+        if (i != id) {
+            vs_mainMenu_menuItemFlyoutRight(i);
+        }
+    }
+}
+
+void vs_mainMenu_flyoutMenuRightAndHoistSelection(int row, int offset)
+{
+    vs_battle_menuItem_t* menuItem;
+    int i;
+
+    for (i = offset * 10; i < 30; ++i) {
+        vs_mainMenu_menuItemFlyoutRight(i);
+    }
+
+    menuItem = vs_battle_getMenuItem(row + (offset * 10));
+    menuItem->state = 4;
+    menuItem->targetPosition0 = 180;
+    menuItem->targetPosition1 = (offset * 16) + 18;
+
+    if (menuItem->backgroundWidth == 0) {
+        menuItem->backgroundWidth = 1;
+    }
+}
+
+int vs_mainmenu_ready(void)
+{
+    int i;
+    vs_battle_menuItem_t* menuItem = vs_battle_getMenuItem(0);
+
+    for (i = 0; i < 40; ++i) {
+        if (menuItem->state > 1) {
+            return 0;
+        }
+        ++menuItem;
+    }
+    return 1;
+}
+
+/**
+ * Called when menu is closing to add a 4 frame delay before
+ * relinquishing control.
+ */
+static int _quitDelay(void)
+{
+    static int delay = 0;
+
+    int ret = ++delay;
+
+    vs_mainMenu_clearMenuExcept(vs_mainMenu_menuItemIds_none);
+
+    return ret == 5;
+}
+
+static int func_800FAA5C(int arg0)
+{
+    if (arg0 & menuStateOpenedFromMainMenu) {
+        vs_battle_menuState.currentMenu = 0;
+
+        func_800C930C(1);
+
+        return 0;
+    }
+
+    if (D_800F4FDB == 0) {
+        func_8007E0A8(26, 3, 6);
+    }
+
+    vs_battle_menuState.currentMenu = 0x7F;
+    return 1;
+}
+
+void vs_mainMenu_exec(int arg0)
+{
+    static int (*submenuEntrypoints[])(u_char*) = { vs_menu0_exec, vs_menu1_exec,
+        vs_menu2_exec, vs_menu3_exec, vs_menu4_exec, vs_menu5_exec, vs_menu7_dataMenu,
+        vs_menu8_exec, vs_menu9_exec, vs_menuE_exec };
+
+    int selectedMenu;
+    int menuLoaded;
+    int state;
+    char* submenuState;
+    vs_battle_menuState_t* menuState = &vs_battle_menuState;
+    vs_battle_menuItem_t* menuItem = vs_battle_getMenuItem((arg0 - 1) & 0xF);
+    int submenuReturn = 0;
+    vs_main_inventory_t* inventory = &vs_main_inventory;
+
+    vs_mainMenu_weapons = inventory->weapons;
+    vs_mainMenu_blades = inventory->blades;
+    vs_mainMenu_grips = inventory->grips;
+    vs_mainMenu_shields = inventory->shields;
+    vs_mainMenu_armor = inventory->armor;
+    vs_mainMenu_gems = inventory->gems;
+
+    submenuState = &vs_battle_submenuStates[arg0 & 0xF];
+    menuLoaded = vs_battle_loadMenuPrg(arg0);
+    selectedMenu = arg0 & 0x3F;
+
+    if (selectedMenu != 0) {
+        if (selectedMenu == 31) {
+            submenuReturn = _quitDelay();
+        } else if (D_800F4EA0 & 0x200) {
+            if (menuLoaded) {
+                if (selectedMenu == 15) {
+                    submenuReturn = vs_menuF_exec(submenuState);
+                } else if (selectedMenu == 3) {
+                    submenuReturn = vs_menu2_actionUnlock(submenuState);
+                } else if (selectedMenu == 14) {
+                    submenuReturn = vs_menuD_exec(submenuState);
+                } else if (selectedMenu == 8) {
+                    submenuReturn = vs_menu8_execRename(submenuState);
+                } else if (selectedMenu == 13) {
+                    submenuReturn = vs_menuC_exec(submenuState);
+                } else if (selectedMenu == 12) {
+                    submenuReturn = vs_menuB_exec(submenuState);
+                } else if (selectedMenu == 7 && (D_800F4EA0 & 0x400)) {
+                    submenuReturn = vs_menu7_saveContainerMenu(submenuState);
+                } else if (selectedMenu == 7 && vs_main_stateFlags.gameOver == 1) {
+                    submenuReturn = vs_menu7_gameOver(submenuState);
+                } else {
+                    D_800F4EA0 = 0;
+                }
+            }
+        } else {
+
+            switch (*submenuState) {
+            case 0:
+                if (!(arg0 & 0x40)) {
+
+                    state = 0;
+
+                    if (selectedMenu == 1) {
+                        state = (D_800F4EA0 & 0xB7) != 0;
+                    }
+
+                    if (selectedMenu == 2) {
+                        state = (D_800F4EA0 & 0x15F) != 0;
+                    }
+
+                    vs_battle_setMenuItem(selectedMenu - 1, 320, 18, 140, 8,
+                        (char*)&vs_battle_menuStrings[vs_battle_menuStrings[selectedMenu
+                                                                            - 1]])
+                        ->unselectable = state;
+                }
+
+                if (((selectedMenu - 4) < 2U) || (selectedMenu == 7)
+                    || (selectedMenu == 9)) {
+                    vs_mainMenu_toggleBackgroundFade(1);
+                }
+
+                vs_mainMenu_setMenuCommand(menuActionMenu);
+                vs_mainMenu_clearMenuExcept(selectedMenu - 1);
+
+                menuItem->state = menuItemStateSlideX;
+                menuItem->targetPosition0 = 180;
+                menuItem->selected = 1;
+
+                if (selectedMenu == 5) {
+
+                    vs_mainMenu_setBackgroundRenderPriority(-2, 128);
+
+                    menuItem->targetPosition0 = 320;
+                }
+
+                *submenuState = 1;
+                break;
+
+            case 1:
+                state = menuItem->state;
+
+                if (state != 1) {
+                    break;
+                }
+
+                menuItem->state = menuItemStateSlideY;
+                menuItem->targetPosition0 = 18;
+
+                if (selectedMenu == 5) {
+                    menuItem = vs_battle_setMenuItem(
+                        4, 320, 18, 140, 8, vs_battle_characterState->unk3C->name);
+                    menuItem->state = 2;
+                    menuItem->targetPosition0 = 0xB4;
+                    menuItem->selected = state;
+                }
+
+                *submenuState = 3;
+                // Fallthrough
+
+            default:
+                if (menuLoaded) {
+                    submenuReturn = submenuEntrypoints[selectedMenu - 1](submenuState);
+                }
+
+                break;
+            }
+        }
+    } else {
+        vs_mainMenu_setMenuCommand(menuActionCommand);
+
+        state = func_800C930C(0);
+
+        if (state != 0) {
+            if (state > 0) {
+                state |= menuStateOpenedFromMainMenu;
+            } else {
+                state = menuStateNoneClosing;
+                vs_mainMenu_setMenuCommand(menuActionNone);
+            }
+
+            menuState->currentMenu = state;
+        }
+    }
+
+    if ((submenuReturn == 0) || (func_800FAA5C(menuState->currentMenu) == 0)) {
+        vs_mainMenu_renderScreen();
+    }
+}
+
+void vs_mainMenu_miscItemsShortcutMenu(int initialize)
+{
+    enum state { init, waitTitle, initItemRows, waitForInput, quit };
+
+#pragma vsstring(start)
+    static char misc[] = "MISC\00000|0xF8|";
+#pragma vsstring(end)
+
+    static int _0 __attribute__((unused)); // Garbage, patched in MAINMENU_PRG.py
+    static char actions[64];
+    static int selectedRow;
+    static char state;
+    static char noItems;
+    static char noForceCursorMemory;
+    static char _1 __attribute__((unused));
+
+    int j;
+    int i;
+    int rowCount;
+    int* rowTypes;
+    char** menuText;
+    void* buf;
+    vs_battle_menuItem_t* menuItem;
+
+    if (initialize != 0) {
+        vs_mainMenu_initInformationBox();
+
+        if (initialize & 1) {
+            noForceCursorMemory = 1;
+        }
+
+        state = init;
+        return;
+    }
+
+    switch (state) {
+    case init:
+        menuItem = vs_battle_setMenuItem(0, 320, 18, 140, 8,
+            (char*)&vs_battle_menuStrings
+                [vs_battle_menuStrings[VS_menuStrings_INDEX_items]]);
+        menuItem->state = menuItemStateSlideX;
+        menuItem->selected = 1;
+        menuItem->targetPosition0 = 180;
+        menuItem->unselectable = (D_800F4EA0 & 7) != 0;
+        state = waitTitle;
+
+        vs_mainMenu_loadItemText(1);
+
+        break;
+
+    case waitTitle:
+        if (!vs_mainmenu_ready() || !vs_mainMenu_loadItemText(0)) {
+            break;
+        }
+
+        menuItem = vs_battle_setMenuItem(10, 320, 34, 140, 8, misc);
+        menuItem->state = menuItemStateSlideX;
+        menuItem->targetPosition0 = 180;
+        menuItem->selected = 1;
+        state = initItemRows;
+        break;
+
+    case initItemRows:
+        buf = vs_main_allocHeapR(0x1B00);
+        rowCount = 0;
+
+        vs_mainMenu_rebuildInventory(itemCategoryMisc);
+
+        rowTypes = buf + 0x1800;
+        menuText = buf + 0x1900;
+
+        for (i = 0; i < 64; ++i, ++rowCount) {
+
+            vs_main_inventoryMisc* misc;
+            int index = vs_main_inventoryIndices.misc[i];
+
+            if (index == 0) {
+                break;
+            }
+
+            misc = &vs_main_inventory.misc[index - 1];
+
+            vs_mainMenu_setMiscRow(misc, &menuText[i * 2], rowTypes - -i, buf + i * 96);
+
+            if (misc->id < bronzeKey) {
+
+                u_int action = vs_mainMenu_miscItemToActionMap[misc->id - 323];
+
+                if ((action - 106) < 28) {
+                    for (j = 0; j < 3; ++j) {
+                        if (vs_main_actions[action].unlocked) {
+                            ++action;
+                        }
+                    }
+                }
+
+                actions[i] = action;
+            }
+
+            if ((D_800F4EA0 & 7) || (misc->id >= bronzeKey)
+                || (vs_battle_getActionFlags(0, actions[i]) & 2)) {
+                rowTypes[i] |= rowTypeDisabled;
+            }
+        }
+
+        noItems = rowCount == 0;
+
+        if (noItems != 0) {
+            vs_mainmenu_setInformationMessage(
+                (char*)&vs_mainMenu_itemHelp[VS_ITEMHELP_BIN_OFFSET_noItemsInCategory]);
+        } else {
+
+            i = vs_main_settings.cursorMemory;
+
+            if (noForceCursorMemory != 0) {
+                noForceCursorMemory = 0;
+            } else {
+                vs_main_settings.cursorMemory = 1;
+            }
+
+            vs_mainmenu_setMenuRows(
+                rowCount, (25 << 12) | (2 << 8) | 36, menuText, rowTypes);
+
+            vs_main_settings.cursorMemory = i;
+        }
+
+        vs_main_freeHeapR(buf);
+
+        state = waitForInput;
+        break;
+
+    case waitForInput:
+        if (noItems) {
+            if (vs_main_buttonsPressed.all & (PADRup | PADRright | PADRdown)) {
+                if (vs_main_buttonsPressed.all & PADRright) {
+
+                    vs_battle_playInvalidSfx();
+
+                } else {
+
+                    vs_battle_playMenuLeaveSfx();
+                    vs_mainMenu_clearMenuExcept(vs_mainMenu_menuItemIds_none);
+                    vs_mainMenu_dismissInformationBox();
+
+                    selectedRow = -1;
+                    state = quit;
+                }
+            }
+        } else {
+            selectedRow = vs_mainmenu_getSelectedRow() + 1;
+
+            if (selectedRow != 0) {
+
+                vs_mainMenu_clearMenuExcept(vs_mainMenu_menuItemIds_none);
+                vs_mainMenu_dismissInformationBox();
+
+                if (selectedRow > 0) {
+                    vs_battle_miscItemInvoked =
+                        vs_main_inventoryIndices.misc[selectedRow - 1] - 1;
+                    D_800F4E98.executeAbility.u16[0] = actions[selectedRow - 1];
+                    D_800F4E98.executeAbility.u16[1] =
+                        vs_main_inventory.misc[vs_battle_miscItemInvoked].id;
+                }
+
+                state = quit;
+            }
+        }
+        break;
+
+    case quit:
+        if (!vs_mainmenu_ready() || !vs_mainMenu_ensureItemTextUnloaded()) {
+            break;
+        }
+
+        if (selectedRow > 0) {
+            D_800F4E98.unk2 = 8;
+        }
+
+        vs_battle_menuState.currentMenu = menuStateNoneClosed;
+        D_800F4E98.unk0 = 2;
+        return;
+    }
+
+    vs_mainMenu_renderScreen();
+
+    return;
+}
+
+static inline int _subtract(int a0, int a1, int a2) { return (u_short)(a0 - (a1 - a2)); }
+
+/**
+ * Draws the class / affinity / type pages
+ */
+static void _renderStatPage(int xOffset)
+{
+    static char const* statHeaders[] = { "#HUMAN", "#BEAST", "#UNDEAD", "#PHANTOM",
+        "#DRAGON", "#EVIL", NULL, NULL, "#PHYSICAL", "#AIR", "#FIRE", "#EARTH", "#WATER",
+        "#LIGHT", "#DARK", NULL, "#BLUNT", "#EDGED", "#PIERCING" };
+    static int positiveStatColors[] = { vs_getRGB0(primLineF2, 24, 115, 129),
+        vs_getRGB0(primLineF2, 48, 224, 208), vs_getRGB0(primLineF2, 48, 224, 208),
+        vs_getRGB0(primLineF2, 24, 115, 129) };
+    static int negativeStatColors[] = { vs_getRGB0(primLineF2, 110, 63, 105),
+        vs_getRGB0(primLineF2, 220, 120, 159), vs_getRGB0(primLineF2, 220, 120, 159),
+        vs_getRGB0(primLineF2, 110, 63, 105) };
+#pragma vsstring(start)
+    static char pageHeader[] = "|f0|CLASS|f0|/|f0|AFFINITY|f0|/|f0|TYPE";
+#pragma vsstring(end)
+
+    int statPage;
+    int sp14;
+    int sp18;
+    int sp1C;
+    short* sp20;
+    short* sp24;
+    int sp28;
+    short* var_s7;
+    int temp_a0;
+    int temp_a0_2;
+    int i;
+    int i_2;
+    int j;
+    int temp_v0_2;
+    int temp_v0_3;
+    int temp_v1_3;
+    int var_s6;
+    u_long* prim;
+    int a0;
+
+    u_long* before = vs_scratch.unk4 - 0xC;
+    statPage = vs_mainMenu_itemStatPage;
+
+    switch (statPage) {
+    case statPageClass:
+        var_s7 = vs_mainMenu_equipmentStats;
+        sp20 = &var_s7[8];
+        sp24 = &var_s7[0x30];
+        sp18 = 0x60;
+        break;
+
+    case statPageAffinity:
+        var_s7 = vs_mainMenu_equipmentStats + 16;
+        sp20 = &var_s7[8];
+        sp24 = &var_s7[0x28];
+        sp18 = 0x70;
+        sp1C = var_s7[0];
+        for (i = 0; i < 7; ++i) {
+            if (sp1C < var_s7[i]) {
+                sp1C = var_s7[i];
+            }
+        }
+        break;
+
+    case statPageType:
+        var_s7 = vs_mainMenu_equipmentStats + 33;
+        sp20 = var_s7;
+        sp18 = 48;
+        break;
+    }
+
+    for (var_s6 = 0; var_s6 < sp18; var_s6 += 16) {
+
+        sp14 = (xOffset + 116) & 0xFFFF;
+        sp28 = (xOffset + 88) & 0xFFFF;
+
+        j = var_s6 >> 4;
+
+        if ((vs_mainMenu_equipmentStats[63] != 0)
+            && ((vs_mainMenu_enabledStatPages == 7) && (statPage != 2))) {
+
+            i = vs_mainMenu_renderIntWithThreshold(var_s7[j] - sp24[j],
+                ((xOffset + 0xA4) & 0xFFFF) | (0x400000 + var_s6 * 0x10000), 0, before);
+
+            if (var_s7[j] > sp24[j]) {
+                vs_battle_renderTextRawColor("#+", i + 1, 0x804020, before);
+            }
+
+            if (var_s7[j] == sp24[j]) {
+                vs_battle_renderTextRawColor("#*", i + 1, 0x808080, before);
+            }
+        }
+
+        i = 0x808080;
+        a0 = vs_mainMenu_equipmentSubtype;
+
+        if ((a0 == 1) && ((vs_mainMenu_enabledStatPages == 7) && (statPage != 0))) {
+            if (statPage == a0) {
+                if (sp20[j] != var_s7[j]) {
+                    if (sp20[j] < var_s7[j]) {
+                        i = 0x804020;
+                    } else {
+                        i = 0x204080;
+                    }
+                } else {
+                    i = 0x808080;
+                    if (sp20[j] != sp1C) {
+                        i = 0x404040;
+                    }
+                }
+                vs_mainMenu_renderIntColor(
+                    var_s7[j], sp28 | (0x400000 + var_s6 * 0x10000), i, before);
+                i = 0x404040;
+                if (var_s7[j] == sp1C) {
+                    i = 0x808080;
+                    sp1C = 0xFFFF;
+                }
+            } else {
+                if (j != (vs_mainMenu_equipmentStats[36] - 1)) {
+                    i = 0x404040;
+                }
+                vs_mainMenu_renderIntColor(
+                    var_s7[j], sp28 | (0x400000 + var_s6 * 0x10000), i, before);
+            }
+        } else {
+            vs_mainMenu_renderIntWithThreshold(
+                var_s7[j], sp28 | (0x400000 + var_s6 * 0x10000), sp20[j], before);
+        }
+
+        vs_battle_renderTextRawColor(statHeaders[j + (statPage * 8)],
+            ((xOffset + 0x40) & 0xFFFF) | (0x400000 + var_s6 * 0x10000), i, before);
+        vs_battle_addTile(before, 0x40D0E030, sp14 | ((var_s6 + 0x42) << 0x10),
+            sp14 | ((var_s6 + 0x45) << 0x10));
+        vs_battle_addTile(before, 0x40978918, sp14 | (0x400000 + var_s6 * 0x10000),
+            sp14 | ((var_s6 + 0x47) << 0x10));
+
+        j = (var_s7[j] * 24) / 100;
+
+        if (j > 24) {
+            j = 24;
+        }
+
+        if (j < -24) {
+            j = -24;
+        }
+
+        if (j >= 0) {
+            for (i = 0; i < 4; ++i) {
+
+                temp_v0_2 = (var_s6 + i + 66) << 0x10;
+
+                vs_battle_addTile(before, positiveStatColors[i], sp14 | temp_v0_2,
+                    ((xOffset + j + 116) & 0xFFFF) | temp_v0_2);
+
+                if (j == (24 - i)) {
+                    --j;
+                }
+            }
+        } else {
+            for (i = 0; i < 4; ++i) {
+
+                temp_v0_3 = ((var_s6 - i) + 0x45) << 0x10;
+
+                vs_battle_addTile(before, negativeStatColors[i], sp14 | temp_v0_3,
+                    ((xOffset + j + 0x74) & 0xFFFF) | temp_v0_3);
+
+                if (j == (i - 24)) {
+                    j = i - 23;
+                }
+            }
+        }
+
+        for (j = 2; j < 6; ++j) {
+            vs_battle_addTile(before, 0x40330500,
+                _subtract(xOffset, j, 97) | ((var_s6 + j + 64) << 0x10),
+                _subtract(xOffset, j, 142) | ((var_s6 + j + 64) << 0x10));
+        }
+
+        for (j = 0; j < 8; ++j) {
+            vs_battle_addTile(before, 0x405D3200,
+                _subtract(xOffset, j, 97) | ((var_s6 + j + 64) << 0x10),
+                _subtract(xOffset, j, 145) | ((var_s6 + j + 64) << 0x10));
+        }
+
+        vs_battle_insertTpage(
+            vs_getTpage(0, 0, clut4Bit, semiTransparencyHalf, ditheringOff), before);
+
+        prim = vs_scratch.unk0;
+
+        for (j = 0; j < 11; ++j) {
+            temp_a0 = var_s6 + j;
+            temp_v1_3 = j - 0x60;
+            temp_a0_2 = (temp_a0 + 0x40) << 0x10;
+            prim[0] = (*before & 0xFFFFFF) | 0x04000000;
+            prim[1] = 0x50330500;
+            prim[2] = ((xOffset & 0xFFFF) | temp_a0_2);
+            prim[3] = 0x5D3200;
+            prim[4] = (((xOffset - temp_v1_3) & 0xFFFF) | temp_a0_2);
+            *before = ((u_long)prim << 8) >> 8;
+            prim += 5;
+        }
+
+        vs_scratch.unk0 = prim;
+
+        vs_battle_insertTpage(
+            vs_getTpage(0, 0, clut4Bit, semiTransparencyHalf, ditheringOn), before);
+    }
+
+    vs_mainmenu_renderButtonBackground(xOffset + 24, 48, 135, 12);
+    vs_mainmenu_renderButton(buttonIdSquare, xOffset + 16, 46, before - 1);
+
+    xOffset = (xOffset & 0xFFFF) + 0x22;
+
+    for (j = 0; j < 3; ++j) {
+        pageHeader[(0x180B01 >> (j * 8)) & 0xFF] =
+            ((vs_mainMenu_enabledStatPages >> j) & 1) ? 0 : 3;
+    }
+
+    pageHeader[(0x180B01 >> (vs_mainMenu_itemStatPage * 8)) & 0xFF] = 1;
+
+    for (i_2 = 0; i_2 < 29; ++i_2) {
+        i = pageHeader[i_2];
+        if (i == 0xFB) {
+            ++i_2;
+            vs_battle_setFontStyle(pageHeader[i_2] + 4);
+        } else {
+            xOffset = vs_battle_printVariableWidthFontChar(i, xOffset, 0x30, before - 4);
+        }
+    }
+}
+
+/**
+ * Cycles to the next available stat page.
+ */
+static int _getNextStatPage(int currentPage)
+{
+    do {
+        currentPage = (currentPage + 1) & 3;
+    } while (!((vs_mainMenu_enabledStatPages >> currentPage) & 1));
+
+    return currentPage;
+}
+
+void vs_mainMenu_updateStatPage(int enabledPage)
+{
+    vs_mainMenu_enabledStatPages = enabledPage;
+
+    if (!((enabledPage >> vs_mainMenu_itemStatPage) & 1)) {
+        vs_mainMenu_itemStatPage = _getNextStatPage(vs_mainMenu_itemStatPage);
+    }
+}
+
+void vs_mainMenu_drawClassAffinityType(int arg0)
+{
+    static int D_801020F4 = 0;
+    static u_char D_801020F8 = 0;
+
+    int var_s1;
+    int statPage;
+
+    var_s1 = 1;
+
+    if (arg0 != 0) {
+
+        if (arg0 > 0) {
+            vs_mainMenu_itemStatPage = statPageNone;
+            vs_mainMenu_updateStatPage(arg0);
+        }
+
+        D_801020F4 = arg0;
+        D_801020F8 = 10;
+
+        return;
+    }
+
+    statPage = vs_mainMenu_itemStatPage;
+
+    if (D_801020F4 > 0) {
+
+        var_s1 = -vs_battle_rowAnimationSteps[D_801020F8];
+
+        if (D_801020F8 != 0) {
+            --D_801020F8;
+        } else if (vs_main_buttonsPressed.all & PADRleft) {
+            statPage = _getNextStatPage(statPage);
+            if (statPage != vs_mainMenu_itemStatPage) {
+                vs_main_playSfxDefault(0x7E, 14);
+            } else {
+                vs_battle_playInvalidSfx();
+            }
+        }
+    } else {
+        if (D_801020F8 != 0) {
+            --D_801020F8;
+            var_s1 = (D_801020F8 - 10) * 24;
+        }
+    }
+
+    if (var_s1 <= 0) {
+        _renderStatPage(var_s1);
+    }
+
+    vs_mainMenu_itemStatPage = statPage;
+}
+
+void vs_mainMenu_setRangeRisk(int range, int risk, int arg2, int arg3)
+{
+    _rangeRiskData[0] = range;
+    _rangeRiskData[1] = risk;
+    _rangeRiskData[2] = arg2;
+    _rangeRiskData[3] = arg3;
+}
+
+void vs_mainMenu_setStrIntAgi(
+    int strength, int intelligence, int agility, int valuesKnown)
+{
+    vs_mainMenu_strIntAgi[0] = strength;
+    vs_mainMenu_strIntAgi[1] = intelligence;
+    vs_mainMenu_strIntAgi[2] = agility;
+    vs_mainMenu_strIntAgi[3] = valuesKnown;
+    vs_mainMenu_setRangeRisk(0, 0, 0, 0);
+    vs_battle_memcpy(&vs_mainMenu_strIntAgi[4], &vs_mainMenu_strIntAgi[0], 8);
+}
+
+void vs_mainMenu_populateBaseStats(int actorId)
+{
+    vs_battle_actor2* temp_t0 = vs_battle_actors[actorId & 0xF]->unk3C;
+    D_80102488[3] = actorId & 0xF;
+    D_80102498[0] = temp_t0->accessory.currentStr;
+    D_80102498[1] = temp_t0->accessory.currentInt;
+    D_80102498[2] = temp_t0->accessory.currentAgility;
+    D_80102488[0] = temp_t0->strength;
+    D_80102488[1] = temp_t0->intelligence;
+    D_80102488[2] = temp_t0->agility;
+    D_80102488[4] = temp_t0->totalStrength;
+    D_80102488[5] = temp_t0->totalIntelligence;
+    vs_mainMenu_equipmentSubtype = 0;
+    D_80102488[6] = temp_t0->totalAgility;
+
+    if (actorId < 16) {
+        int i;
+
+        for (i = 0; i < 3; ++i) {
+            D_80102488[i] -= D_80102488[4 + i];
+        }
+
+        vs_mainMenu_setStrIntAgi(temp_t0->totalStrength, temp_t0->totalIntelligence,
+            temp_t0->totalAgility, temp_t0->isAnalyzed | (actorId == 0));
+        vs_battle_rMemzero(&D_80102490, 8);
+    }
+}
+
+/**
+ * Prints the stats on the lower right of the screen.
+ *
+ * @param animate 1 = slide in, 2 = slide out
+ */
+void vs_mainMenu_renderEquipStats(int animate)
+{
+    static char const* rangeRiskStr[] = { "#RANGE", "#RISK" };
+    static char const* statStr[] = { "#STRENGTH", "#INTELLIGENCE", "#AGILITY", NULL,
+        "#ATTACK/STR", "#ATTACK/INT", "#AGILITY", NULL, "#DEFENSE/STR", "#DEFENSE/INT",
+        "#AGILITY" };
+    static char statsAnimation = 0;
+    static u_char D_80102131 = 0;
+
+    int valuesKnown;
+    int stat;
+    int var_a3;
+    int statName;
+    int i;
+    u_long* temp_s4;
+    int position;
+    vs_battle_actor2* actor;
+
+    position = vs_getXY(248, 126);
+    actor = vs_battle_actors[D_80102488[3]]->unk3C;
+    temp_s4 = vs_scratch.unk4 - 0x18;
+
+    if (animate != 0) {
+        if (statsAnimation != animate) {
+            statsAnimation = animate;
+            D_80102131 = 15 - (animate * 4);
+        }
+        return;
+    }
+
+    valuesKnown = vs_mainMenu_strIntAgi[3];
+
+    if (statsAnimation == 1) {
+        if (D_80102131 != 0) {
+            position += vs_battle_rowAnimationSteps[D_80102131];
+            --D_80102131;
+        }
+    } else if (D_80102131 == 0) {
+        return;
+    } else {
+        position += ((8 - D_80102131) << 5);
+        --D_80102131;
+    }
+
+    if (_rangeRiskData[3] != 0) {
+        vs_battle_renderTextRaw("ORG/EQP", position + 4, temp_s4);
+
+        for (i = 0; i < 2; ++i) {
+            position += vs_getXY(0, 10);
+            vs_battle_renderTextRaw(rangeRiskStr[i], position, temp_s4);
+            if (valuesKnown != 0) {
+                stat = _rangeRiskData[i];
+                vs_mainMenu_renderIntColorDefault(stat, position + 28, temp_s4);
+                if (i == 0) {
+                    stat += actor->currentRange - actor->weapon.range.range;
+                }
+                vs_mainMenu_renderIntColorDefault(stat, position + 60, temp_s4);
+            } else {
+                vs_battle_renderTextRaw("#??", position + 28, temp_s4);
+                vs_battle_renderTextRaw("#??", position + 60, temp_s4);
+            }
+        }
+    } else {
+        position += vs_getXY(0, 20);
+        vs_battle_renderTextRaw("ORG/EQP", position + 4, temp_s4);
+    }
+
+    for (i = 0; i < 3; ++i) {
+        position += vs_getXY(0, 10);
+        statName = ((vs_mainMenu_equipmentSubtype & 7) != 0) * 4;
+        vs_battle_renderTextRaw(
+            statStr[vs_mainMenu_equipmentSubtype & 0x18 ? 8 + statName + i
+                                                        : statName + i],
+            position, temp_s4);
+
+        if (valuesKnown != 0) {
+            int new_var2;
+            stat = vs_mainMenu_strIntAgi[i];
+            vs_mainMenu_renderIntWithThreshold(
+                stat, position + 28, vs_mainMenu_strIntAgi[i + 4], temp_s4);
+            new_var2 = stat + D_80102488[i + 4];
+            stat += D_80102488[i];
+            var_a3 = valuesKnown & 1;
+            if (var_a3 != 0) {
+                var_a3 = D_80102498[i];
+            }
+            vs_mainMenu_renderIntWithThreshold(
+                stat + var_a3, position + 60, new_var2 + var_a3, temp_s4);
+        } else {
+            vs_battle_renderTextRaw("#??", position + 28, temp_s4);
+            vs_battle_renderTextRaw("#??", position + 60, temp_s4);
+        }
+    }
+}
+
+static u_short dpPpBarAnimState = 0;
+static u_short _currentDp = 0;
+static u_short _maxDp = 0;
+static u_short _currentPp = 0;
+static u_short _maxPp = 0;
+
+void vs_mainMenu_setDpPp(int currentDp, int maxDp, int currentPp, int maxPp)
+{
+    _currentPp = currentPp;
+    _maxPp = maxPp;
+    _currentDp = (currentDp + 99) / 100;
+    _maxDp = (maxDp + 99) / 100;
+}
+
+void vs_mainMenu_renderDpPpBars(int flags)
+{
+    static char state = 1;
+    static char target = 0;
+
+    void* before = vs_scratch.unk4 - 0xC;
+
+    if (flags != 0) {
+
+        state = flags >> 2;
+
+        if (!(state & 1)) {
+            target = flags & 3;
+        }
+    } else {
+        int temp = dpPpBarAnimState;
+
+        switch (state) {
+        case 0:
+            if (temp < 5) {
+                ++dpPpBarAnimState;
+            }
+            break;
+
+        case 1:
+            if (temp != 0) {
+                --dpPpBarAnimState;
+            }
+            break;
+
+        case 2:
+            dpPpBarAnimState = 5;
+            break;
+        }
+
+        if (dpPpBarAnimState != 0) {
+
+            int temp_s1 = ((dpPpBarAnimState * 8) - 8) << 0x10;
+
+            if (target & 1) {
+                vs_battle_renderTextRaw("DP", (temp_s1 + vs_getXY(0, -1)) | 10, before);
+
+                temp = vs_battle_renderValue(0, temp_s1 | 66, _maxDp, before);
+                vs_battle_renderValue(2, temp, 0, before);
+                vs_battle_renderValue(1, temp + vs_getXY(-7, -2), _currentDp, before);
+            }
+
+            if (target & 2) {
+                vs_battle_renderTextRaw("PP", (temp_s1 + vs_getXY(0, -1)) | 80, before);
+
+                temp = vs_battle_renderValue(0, temp_s1 | 136, _maxPp, before);
+                vs_battle_renderValue(2, temp, 0, before);
+                vs_battle_renderValue(1, temp + vs_getXY(-7, -2), _currentPp, before);
+            }
+
+            temp_s1 += 8 << 16;
+
+            if (target & 1) {
+
+                temp = _maxDp;
+
+                if (temp == 0) {
+                    temp = 1;
+                }
+
+                vs_battle_renderStatBar(
+                    0, (((_currentDp << 6) + temp) - 1) / temp, before, temp_s1 | 10);
+            }
+            if (target & 2) {
+
+                temp = _maxPp;
+
+                if (temp == 0) {
+                    temp = 1;
+                }
+
+                vs_battle_renderStatBar(
+                    1, (((_currentPp << 6) + temp) - 1) / temp, before, temp_s1 | 80);
+            }
+        }
+    }
+}

@@ -1,0 +1,5323 @@
+// Largely copied from
+// https://github.com/jdperos/chrono-cross-decomp/blob/master/src/slps_023.64/system/sound.c
+
+#include "common.h"
+#include "25AC.h"
+#include "hw.h"
+#include "sound.h"
+#include <kernel.h>
+#include <libspu.h>
+#include <libapi.h>
+#include <libetc.h>
+#include <libcd.h>
+
+#define SPU_VOICE_INDEX_STRIDE                                                           \
+    8 // u16s to skip per voice when indexing voice register arrays
+
+typedef struct {
+    int unk0;
+    int unk4;
+    int unk8;
+    int unkC;
+} D_80036770_t;
+
+// From https://ff7-mods.github.io/ff7-flat-wiki/FF7/PSX/Sound/AKAO_sequence.html
+
+typedef struct {
+    char year_bcd;
+    char month_bcd;
+    char day_bcd;
+    char hours_bcd;
+    char minutes_bcd;
+    char seconds_bcd;
+} AkaoTimeStamp;
+
+typedef struct {
+    char magic[4];
+    u_short id;
+    u_short length;
+    u_short reverb_type;
+    AkaoTimeStamp timestamp;
+} AkaoSeqHeader;
+
+// Format used for EFFECT00.DAT:
+// 384 sfx slots total
+// AkaoSeqHeader (Magic string only, everything else is 0)
+// Block 0: 84 pairs of u16 offsets into data block, 0xFFFF == no data
+// Block 1: 384 u16 flags, one for each sfx, function TBD but only value seems to be 0xC8
+// Block 2: Akao data indexed by block 0 offsets
+
+typedef struct {
+    int index;
+    int unk4;
+    int unk8;
+    int unkC;
+    int unk10;
+} func_800172D4_t;
+
+typedef struct {
+    void* unk0;
+    int unk4;
+    int unk8;
+    int unkC;
+} D_800378C0_t;
+
+static int Sound_IsNotAkaoFile(int*);
+int func_80013588(void*, int);
+int func_800135D8(void*, int, int, int);
+void func_8001369C(void);
+static void StartSound(void);
+static void SetVoiceKeyOff(u_int);
+void func_800161C4(int, int);
+void func_8001653C(FSoundChannel*, FSoundCommandParams*, int, char*);
+void Sound_PlaySfxProgram(FSoundCommandParams*, char*, char*, int);
+int func_80016DA8(int);
+u_int func_80018C30(int);
+long func_80019A58(void);
+static void StopSound(void);
+static void _writeSpu(char* data, u_int len);
+void Sound_Cutscene_OnInitialTransferComplete(void);
+void Sound_Cutscene_InitVoice(int, int, int, int);
+void Sound_Cutscene_BeginPlayback(int, int, void (*)(void));
+void Sound_Cutscene_LoadNextBuffer(int, int, int, void (*)(void));
+void Sound_Cutscene_OnBufferAComplete(void);
+void Sound_Cutscene_OnBufferBComplete(void);
+void IRQCallbackProc(void);
+void Sound_LoadAkaoSequence(FAkaoSequence* in_Sequence);
+void Sound_SetMusicSequence(FAkaoSequence* in_Sequence, int in_SwapWithSavedState);
+void func_80015BAC(void);
+void Sound_memcpy32(void* in_Src, void* in_Dst, u_int in_Size);
+void UpdateCdVolume(void);
+int func_8001A1F4(int, int);
+int func_8001A22C(int, u_int);
+void Sound_CopyInstrumentInfoToChannel(FSoundChannel*, FSoundInstrumentInfo*, int);
+void func_8001A8D8(FSoundChannel*, int);
+void Sound_SetReverbMode(int in_ReverbMode);
+
+void func_80015220();
+
+extern int _soundEvent;
+extern char _soundFlush[64];
+extern short D_800358FE;
+extern CdlATV _cdlAtv;
+extern D_80036770_t D_80036770;
+extern int D_800377E0[3];
+extern u_int* g_Sound_SfxProgramOffsets;
+extern u_short* g_Sound_SfxMetadataTable;
+extern char* g_Sound_SfxProgramData;
+extern int D_800378A0;
+extern D_800378C0_t D_800378C0;
+extern int D_800378E4;
+extern char _spuMemInfo;
+extern volatile int _isSpuTransfer;
+extern FSoundChannel D_80035910[10];
+extern int D_80039AFC;
+extern int D_80039B14;
+extern int D_80039B64;
+extern int g_Sound_CdVolumeFadeStep;
+extern short g_Sound_CdVolumeFadeLength;
+extern int g_CdVolume;
+extern short D_800378E2;
+extern char D_8002F66C[];
+extern int D_800378D4;
+extern char D_80039AF2;
+extern int D_8002F548;
+extern u_short D_8002F54C;
+extern int D_8002F550[];
+extern FSoundCommandParams D_80037788;
+extern int D_80037898;
+extern int D_8003789C;
+extern int D_80039B00;
+extern u_int D_8002F63C[];
+extern int D_80039BCC;
+
+extern FSoundChannelConfig* g_pActiveMusicConfig;
+extern FSoundVoiceSchedulerState g_Sound_VoiceSchedulerState;
+extern FSoundGlobalFlags g_Sound_GlobalFlags;
+extern FSpuVoiceInfo g_SpuVoiceInfo[VOICE_COUNT];
+extern FSoundChannel g_ActiveMusicChannels[0x20];
+extern FSoundChannelConfig* g_pSavedMousicConfig;
+extern FSoundChannel* g_pSecondaryMusicChannels;
+extern FSoundFadeTimer g_Sound_MasterFadeTimer;
+extern FSoundCutsceneStreamState g_Sound_Cutscene_StreamState;
+extern u_int g_Sound_ProgramCounter;
+extern FSoundChannelConfig* g_Sound_VoiceChannelConfigs[VOICE_COUNT];
+extern FSoundChannel SfxSoundChannels[12];
+extern volatile int g_bSpuTransferring;
+#define SPU_PAN_TABLE_SIZE (0x100)
+#define PAN_CENTER_INDEX (SPU_PAN_TABLE_SIZE / 2)
+extern short g_Sound_StereoPanGainTableQ15[SPU_PAN_TABLE_SIZE];
+extern short D_8002F89C;
+extern FSoundChannelConfig g_PushedMusicConfig;
+extern u_int g_Music_LoopCounter;
+extern FSoundChannelConfig D_800366F0;
+extern FSoundChannel D_800378E8[];
+extern FSoundInstrumentInfo g_InstrumentInfo[256];
+extern short* g_Sound_LfoTable[];
+extern FSoundCommandParams D_80037800;
+extern int D_80036778;
+extern int D_8003677C;
+extern short D_80036780;
+extern short D_80036782;
+extern int g_Sound_MasterPitchScaleQ16_16;
+extern int g_Sound_TempoMultiplier;
+extern int D_80039B48;
+extern int g_Sound_LfoPhase;
+extern FSoundVoiceModeFlags g_Sound_VoiceModeFlags;
+
+int InitSound(void)
+{
+    StartSound();
+    return 0;
+}
+
+int TeardownSound(void)
+{
+    StopSound();
+    return 0;
+}
+
+int Sound_BindAkaoSfxBlob(void* in_Blob)
+{
+    int notAkao = Sound_IsNotAkaoFile(in_Blob);
+
+    in_Blob += sizeof(AkaoSeqHeader);
+
+    if (notAkao == 0) {
+        g_Sound_SfxProgramOffsets = in_Blob;
+        in_Blob += 0x600;
+        g_Sound_SfxMetadataTable = in_Blob;
+        in_Blob += 0x300;
+        g_Sound_SfxProgramData = in_Blob;
+    }
+    return notAkao;
+}
+
+int func_80011E40(void)
+{
+    int var_v1 = g_pActiveMusicConfig->ActiveChannelMask != 0;
+    if (g_pSavedMousicConfig != NULL) {
+        if (g_pSavedMousicConfig->ActiveChannelMask != 0) {
+            var_v1 |= 2;
+        }
+    }
+    if (D_80037788.Param1 != 0) {
+        var_v1 |= 0x10;
+    }
+    if (g_Sound_VoiceSchedulerState.ActiveChannelMask != 0) {
+        var_v1 |= 0x100;
+    }
+    if (D_80039B14 != 0) {
+        var_v1 |= 0x10000;
+    }
+    return var_v1;
+}
+
+int func_80011EBC(u_int arg0)
+{
+    FSoundChannelConfig* var_v1 = g_pActiveMusicConfig;
+    int var_a1 = 0;
+
+    if ((var_v1->MusicId == arg0)
+        || ((var_v1 = g_pSavedMousicConfig, (var_v1 != NULL))
+            && (var_v1->MusicId == arg0))) {
+        var_a1 = (var_v1->A_Volume >> 0x10);
+    }
+    return var_a1;
+}
+
+int func_80011F08(void)
+{
+    return (u_short)D_80036770.unk0 | ((u_short)D_80036770.unk4 << 0x10);
+}
+
+int func_80011F24(int arg0)
+{
+    int var_a1 = 0;
+    if (arg0 & 1) {
+        var_a1 = g_pActiveMusicConfig->unk68;
+    }
+    if (arg0 & 2) {
+        if (var_a1 < D_80036782) {
+            var_a1 = D_80036782;
+        }
+    }
+    if ((arg0 & 4) && (var_a1 < D_80036780)) {
+        var_a1 = D_80036780;
+    }
+    return var_a1;
+}
+
+int func_80011F90(void)
+{
+    int upper = g_pActiveMusicConfig->TimerUpperCurrent;
+    int top = g_pActiveMusicConfig->TimerTopCurrent;
+    top = (top << 16) | (upper + 1);
+    return top;
+}
+
+u_int func_80011FB4(void* arg0)
+{
+    D_800378C0.unk0 = arg0;
+    return func_80018C30(0x10);
+}
+
+void func_80011FDC(u_int arg0)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    func_80018C30(0x11);
+}
+
+void func_80012004(void) { func_80018C30(0x40); }
+
+int func_80012024(void)
+{
+    D_800358FE = 0;
+    return 0;
+}
+
+void func_8001286C(u_long, int);
+
+u_int func_80012034(void* arg0, int arg1)
+{
+    u_int temp_v0;
+
+    D_800378C0.unk0 = arg0;
+    temp_v0 = func_80018C30(0x19);
+    func_8001286C(temp_v0, arg1);
+    return temp_v0;
+}
+
+u_int func_80012080(void* arg0, u_int arg1, int arg2)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1;
+    D_800378C0.unk8 = arg2 & 0x7F;
+    return func_80018C30(0x1A);
+}
+
+void func_800120B8(void* arg0, int arg1)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1;
+    func_80018C30(0x12);
+}
+
+u_int func_800120E8(void* arg0)
+{
+    D_800378C0.unk0 = arg0;
+    return func_80018C30(0x14);
+}
+
+void* func_80012110(void* arg0, int arg1)
+{
+    u_long v0;
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1;
+    func_80018C30(0x16);
+    v0 = D_800378C0.unk4 << 0x10;
+    v0 += (u_long)D_800378C0.unk0;
+    return (void*)v0;
+}
+
+void func_8001215C(void) { func_80018C30(0x17); }
+
+int func_8001217C(u_long arg0, int arg1, int arg2, int arg3)
+{
+    int temp_s0 = g_Sound_SfxProgramOffsets[arg0 & 0x3FF];
+    if (temp_s0 != -1) {
+        D_800378C0.unk0 = (void*)(arg0 & 0x3FF);
+        D_800378C0.unk4 = arg1 & 0xFFFFFF;
+        D_800378C0.unk8 = arg2 & 0xFF;
+        D_800378C0.unkC = arg3 & 0x7F;
+        func_80018C30(0x20);
+    }
+    return temp_s0;
+}
+
+int func_800121F0(void* arg0, int arg1, int arg2, int arg3)
+{
+    void* var_v0;
+
+    var_v0 = (void*)-1;
+    if (Sound_IsNotAkaoFile(arg0) == 0) {
+        D_800378C0.unk0 = arg0;
+        D_800378C0.unk4 = (int)(arg1 & 0xFFFFFF);
+        D_800378C0.unk8 = (int)(arg2 & 0xFF);
+        D_800378C0.unkC = (int)(arg3 & 0x7F);
+        func_80018C30(0x24);
+        var_v0 = arg0;
+    }
+    return (u_long)var_v0;
+}
+
+void func_80012288(u_long arg0, int arg1)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    D_800378C0.unk4 = arg1 & 0xFFFFFF;
+    func_80018C30(0x21);
+}
+
+void func_800122C4(u_long arg0)
+{
+    D_800378C0.unk0 = (void*)(arg0 & 0x3FF);
+    func_80018C30(0x30);
+}
+
+int func_800122F0(void)
+{
+    FSoundChannel* var_a1;
+    int var_a0;
+    int var_v1;
+    int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+
+    var_a0 = mask == 0;
+    if (var_a0) {
+        return 0;
+    }
+
+    var_a1 = D_80035910;
+    var_a0 = 0;
+    var_v1 = 0x1000;
+
+    do {
+        if (mask & var_v1) {
+            var_a0 |= var_a1->unk28;
+        }
+        var_v1 *= 2;
+        ++var_a1;
+    } while (var_v1 & 0xFFFFFF);
+
+    return var_a0 & 0xFFFFFF;
+}
+
+int func_80012358(int arg0)
+{
+    FSoundChannel* var_a1;
+    int var_v1;
+    int a2;
+    if ((arg0 == 0) || ((a2 = g_Sound_VoiceSchedulerState.ActiveChannelMask) == 0)) {
+        return 0;
+    }
+    for (var_a1 = SfxSoundChannels - 10, var_v1 = 0x1000; var_v1 & 0xFFFFFF;
+        var_v1 *= 2, ++var_a1) {
+        if ((a2 & var_v1) && (arg0 == var_a1->unk28)) {
+            return var_a1->unk3C;
+        }
+    }
+
+    return 0;
+}
+
+int func_800123C8(vs_main_sfxContext* arg0)
+{
+    int ret = 0;
+    if ((long)arg0 >= 0x80000000) {
+        ret = arg0->unk9 >> 7;
+    } else if (g_Sound_SfxMetadataTable[(long)arg0] & 0x8000) {
+        ret = 1;
+    }
+    return ret;
+}
+
+void vs_sound_setMonoSound(int arg0)
+{
+    if (arg0 == 1) {
+        func_80018C30(0x81);
+    } else {
+        func_80018C30(0x80);
+    }
+}
+
+void func_80012440(void* arg0)
+{
+    D_800378C0.unk0 = arg0;
+    func_80018C30(0x90);
+}
+
+void func_80012468(void* arg0)
+{
+    D_800378C0.unk0 = arg0;
+    func_80018C30(0x92);
+}
+
+void func_80012490(u_int arg0)
+{
+    switch (arg0) {
+    case 1:
+        func_80018C30(0x9B);
+        break;
+    case 2:
+        func_80018C30(0x9D);
+        break;
+    case 3:
+        func_80018C30(0x9F);
+        break;
+    default:
+        func_80018C30(0x99);
+        break;
+    }
+}
+
+void func_800124FC(u_int arg0)
+{
+    switch (arg0) {
+    case 1:
+        func_80018C30(0x9A);
+        break;
+    case 2:
+        func_80018C30(0x9C);
+        break;
+    case 3:
+        func_80018C30(0x9E);
+        break;
+    default:
+        func_80018C30(0x98);
+        break;
+    }
+}
+
+int func_80012568(int arg0)
+{
+    if (arg0 != 0) {
+        g_Sound_GlobalFlags.MixBehavior |= 0x10;
+    } else {
+        g_Sound_GlobalFlags.MixBehavior &= ~0x10;
+    }
+    return 0;
+}
+
+void func_800125A8(u_long arg0)
+{
+    D_800378C0.unk0 = (void*)(arg0 & 0x7F);
+    func_80018C30(0xA8);
+}
+
+void func_800125D4(void* arg0, int arg1)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1 & 0x7F;
+    func_80018C30(0xA9);
+}
+
+void func_80012608(void* arg0, int arg1, int arg2)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1 & 0xFFFFFF;
+    D_800378C0.unk8 = arg2 & 0x7F;
+    func_80018C30(0xA0);
+}
+
+void func_8001264C(int arg0, int arg1, int arg2, int arg3)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    D_800378C0.unk4 = arg1 & 0xFFFFFF;
+    D_800378C0.unk8 = arg2;
+    D_800378C0.unkC = arg3 & 0x7F;
+    func_80018C30(0xA1);
+}
+
+void func_80012694(int arg0)
+{
+    D_800378C0.unk0 = (void*)(arg0 & 0xFF);
+    func_80018C30(0xAA);
+}
+
+void func_800126C0(void* arg0, int arg1)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1 & 0xFF;
+    func_80018C30(0xAB);
+}
+
+void func_800126F4(void* arg0, int arg1, int arg2)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1 & 0xFFFFFF;
+    D_800378C0.unk8 = arg2 & 0xFF;
+    func_80018C30(0xA2);
+}
+
+void func_80012738(int arg0, int arg1, int arg2, int arg3)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    D_800378C0.unk4 = arg1 & 0xFFFFFF;
+    D_800378C0.unk8 = arg2;
+    D_800378C0.unkC = arg3 & 0xFF;
+    func_80018C30(0xA3);
+}
+
+void func_80012780(int arg0)
+{
+    D_800378C0.unk0 = (void*)(arg0 & 0xFF);
+    func_80018C30(0xAC);
+}
+
+void func_800127AC(void* arg0, int arg1)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1 & 0xFF;
+    func_80018C30(0xAD);
+}
+
+void func_800127E0(void* arg0, int arg1, int arg2)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1 & 0xFFFFFF;
+    D_800378C0.unk8 = arg2 & 0xFF;
+    func_80018C30(0xA4);
+}
+
+void func_80012824(int arg0, int arg1, int arg2, int arg3)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    D_800378C0.unk4 = arg1 & 0xFFFFFF;
+    D_800378C0.unk8 = arg2;
+    D_800378C0.unkC = arg3 & 0xFF;
+    func_80018C30(0xA5);
+}
+
+void func_8001286C(u_long arg0, int arg1)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    D_800378C0.unk4 = arg1 & 0x7F;
+    func_80018C30(0xC0);
+}
+
+void func_800128A0(u_long arg0, int arg1, int arg2)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    D_800378C0.unk4 = arg1;
+    D_800378C0.unk8 = arg2 & 0x7F;
+    func_80018C30(0xC1);
+}
+
+void func_800128D8(void* arg0, int arg1, int arg2, int arg3)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1;
+    D_800378C0.unk8 = arg2 & 0x7F;
+    D_800378C0.unkC = arg3 & 0x7F;
+    func_80018C30(0xC2);
+}
+
+void func_80012918(int arg0)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    func_80018C30(0xC8);
+}
+
+void func_80012940(int arg0, int arg1)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    D_800378C0.unk4 = arg1;
+    func_80018C30(0xC9);
+}
+
+void func_80012970(void* arg0, int arg1, int arg2)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1;
+    D_800378C0.unk8 = arg2;
+    func_80018C30(0xCA);
+}
+
+void func_800129A4(int arg0)
+{
+    D_800378C0.unk0 = (void*)(arg0 & 0xFF);
+    func_80018C30(0xD0);
+}
+
+void func_800129D0(int arg0, int arg1)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    D_800378C0.unk4 = arg1 & 0xFF;
+    func_80018C30(0xD1);
+}
+
+void func_80012A04(void* arg0, int arg1, int arg2)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1 & 0xFF;
+    D_800378C0.unk8 = arg2 & 0xFF;
+    func_80018C30(0xD2);
+}
+
+void func_80012A40(int arg0)
+{
+    D_800378C0.unk0 = (void*)(arg0 & 0xFF);
+    func_80018C30(0xD4);
+}
+
+int func_80012A6C(int arg0, int arg1)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    D_800378C0.unk4 = arg1 & 0xFF;
+    return func_80018C30(0xD5);
+}
+
+void func_80012AA0(void* arg0, int arg1, int arg2)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1 & 0xFF;
+    D_800378C0.unk8 = arg2 & 0xFF;
+    func_80018C30(0xD6);
+}
+
+void func_80012ADC(int arg0)
+{
+    D_800378C0.unk0 = (void*)(arg0 & 0xFF);
+    func_80018C30(0xD8);
+}
+
+void func_80012B08(void* arg0, int arg1)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1 & 0xFF;
+    func_80018C30(0xD9);
+}
+
+void func_80012B3C(void* arg0, int arg1, int arg2)
+{
+    D_800378C0.unk0 = arg0;
+    D_800378C0.unk4 = arg1 & 0xFF;
+    D_800378C0.unk8 = arg2 & 0xFF;
+    func_80018C30(0xDA);
+}
+
+void func_80012B78(void) { func_80018C30(240); }
+
+void func_80012B98(void) { func_80018C30(241); }
+
+void func_80012BB8(void* arg0, int arg1)
+{
+    while (func_80013588(arg0, arg1) == 1)
+        ;
+}
+
+int vs_sound_spuTransferring(void) { return _isSpuTransfer; }
+
+int func_80012C14(u_int* arg0, int* arg1, int* arg2)
+{
+    int var_a3;
+
+    if (g_pActiveMusicConfig->ActiveChannelMask == 0) {
+        g_pActiveMusicConfig->StatusFlags &= ~0x60;
+    }
+
+    var_a3 = 0;
+
+    if ((arg0[7] >= 0x21U) || (arg0[5] > 0x20000U)) {
+        g_Sound_GlobalFlags.MixBehavior &= 0xFFFEFFFF;
+        D_80036770.unk4 = 0;
+        D_80036770.unk0 = 0;
+    } else {
+        if ((g_pActiveMusicConfig->StatusFlags & 0x20)
+            || (!(g_pActiveMusicConfig->StatusFlags & 0x40) && (D_80039AFC & 0x10000))) {
+            var_a3 = 1;
+            g_Sound_GlobalFlags.MixBehavior &= 0xFFFEFFFF;
+        } else {
+            g_Sound_GlobalFlags.MixBehavior |= 0x10000;
+        }
+    }
+    if (var_a3 == 0) {
+        *arg1 = 0x40;
+        *arg2 = 0x35100;
+        D_80036770.unk0 = arg0[1];
+        if (D_80036770.unk4 == arg0[1]) {
+            D_80036770.unk4 = 0;
+        }
+    } else {
+        *arg1 = 0x60;
+        *arg2 = 0x55100;
+        D_80036770.unk4 = arg0[1];
+        if (D_80036770.unk0 == arg0[1]) {
+            D_80036770.unk0 = 0;
+        }
+    }
+    return var_a3;
+}
+
+static int func_80012D9C(int* arg0, int* arg1, int* arg2, int arg3)
+{
+    u_int i;
+
+    for (i = 0; i < 3; ++i) {
+        if (D_800377E0[i] == arg0[1]) {
+            D_800377E0[i] = 0;
+        }
+    }
+    switch (arg3) {
+    case 1:
+        *arg1 = 0xA0;
+        *arg2 = 0x13100;
+        D_800377E0[1] = arg0[1];
+        break;
+    case 2:
+        *arg1 = 0xC0;
+        *arg2 = 0x1B100;
+        D_800377E0[2] = arg0[1];
+        break;
+    default:
+        *arg1 = 0x80;
+        *arg2 = 0xB100;
+        D_800377E0[0] = arg0[1];
+        break;
+    }
+    return arg3;
+}
+
+int func_80012E50(int arg0)
+{
+    if (D_80036770.unk0 == arg0) {
+        g_Sound_GlobalFlags.MixBehavior |= 0x10000;
+    } else if (D_80036770.unk4 == arg0) {
+        g_Sound_GlobalFlags.MixBehavior &= 0xFFFEFFFF;
+    }
+    return D_80039AFC & 0x10000;
+}
+
+int func_80012EBC(void)
+{
+    g_Sound_GlobalFlags.MixBehavior &= ~0x10000;
+    D_80036770.unk4 = 0;
+    D_80036770.unk0 = 0;
+    return 0;
+}
+
+int func_80012EF0(void)
+{
+    D_80039BCC = 0;
+    g_Sound_GlobalFlags.ControlLatches |= 1;
+    return 0;
+}
+
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_80012F10);
+
+int func_80013188(void* arg0, int arg1)
+{
+    int sp10;
+    int sp14;
+    int temp_s0 = func_80012C14(arg0, &sp10, &sp14);
+    func_800135D8(arg0, arg1, sp10, sp14);
+    return temp_s0;
+}
+
+int func_800131DC(void* arg0, int arg1, int arg2)
+{
+    int sp10;
+    int sp14;
+
+    func_80012D9C((int*)arg0, &sp10, &sp14, arg1);
+    func_800135D8(arg0, arg2, sp10, sp14);
+    return 0;
+}
+
+int vs_sound_setCdVol(u_int arg0)
+{
+    if (D_80039AFC & 2) {
+        _cdlAtv.val0 = _cdlAtv.val2 = _cdlAtv.val1 = _cdlAtv.val3 =
+            (arg0 * 0xB570) >> 0x11;
+    } else {
+        _cdlAtv.val2 = arg0;
+        _cdlAtv.val0 = arg0;
+        _cdlAtv.val3 = 0;
+        _cdlAtv.val1 = 0;
+    }
+    CdMix(&_cdlAtv);
+    return 0;
+}
+
+void func_800132C4(void* arg0, int arg1, int arg2)
+{
+    if (Sound_IsNotAkaoFile(arg0) == 0) {
+        D_800378C0.unk0 = arg0;
+        D_800378C0.unk4 = (arg1 & 0xFF) << 8;
+        D_800378C0.unk8 = arg2;
+        func_80018C30(0xE0);
+    }
+}
+
+void func_80013328(void) { func_80018C30(0xE2); }
+
+void func_80013348(int arg0)
+{
+    D_800378C0.unk0 = (void*)((arg0 & 0x7F) << 8);
+    func_80018C30(0xE4);
+}
+
+void func_80013378(int arg0, int arg1)
+{
+    D_800378C0.unk0 = (void*)arg0;
+    D_800378C0.unk4 = (arg1 & 0x7F) << 8;
+    func_80018C30(0xE5);
+}
+
+void func_800133B0(int arg0)
+{
+    D_800378C0.unk0 = (void*)((arg0 & 0xFF) << 8);
+    func_80018C30(0xE6);
+}
+
+u_int func_800133E0(u_int* arg0)
+{
+    int i;
+    FSoundChannel* var_a1 = D_80035910;
+
+    for (i = 0; i < 12; ++i) {
+        *arg0++ = (var_a1++)->unk3C;
+    }
+    return g_Sound_VoiceSchedulerState.ActiveChannelMask;
+}
+
+void Sound_CopyAndRelocateInstruments(FSoundInstrumentInfo* in_A,
+    FSoundInstrumentInfo* in_B, int in_AddrOffset, int in_Count)
+{
+    do {
+        in_B->StartAddr = in_A->StartAddr + in_AddrOffset;
+        in_B->LoopAddr = in_A->LoopAddr + in_AddrOffset;
+        *(int*)&in_B->FineTune = *(int*)&in_A->FineTune;
+        *(int*)&in_B->AdsrLower = *(int*)&in_A->AdsrLower;
+        in_A++;
+        in_B++;
+        in_Count--;
+    } while (in_Count != 0);
+}
+
+static int Sound_IsNotAkaoFile(int* data)
+{
+    return data[0] - ('A' | ('K' << 8) | ('A' << 16) | ('O' << 24));
+}
+
+static void _spuWriteComplete(void)
+{
+    SpuSetTransferCallback(NULL);
+    _isSpuTransfer = 0;
+}
+
+void spuSetTransferCallback(void)
+{
+    _isSpuTransfer = 1;
+    SpuSetTransferCallback(_spuWriteComplete);
+}
+
+static void _writeSpu(char* data, u_int len)
+{
+    _isSpuTransfer = 1;
+    SpuSetTransferCallback(_spuWriteComplete);
+    SpuWrite(data, len);
+}
+
+static void _readSpu(char* data, u_int len)
+{
+    spuSetTransferCallback();
+    SpuRead(data, len);
+}
+
+static void _waitTransferAvailable(void)
+{
+    if (_isSpuTransfer == 1) {
+        do {
+
+        } while (_isSpuTransfer == 1);
+    }
+}
+
+int func_80013588(void* arg0, int arg1)
+{
+    if (Sound_IsNotAkaoFile(arg0) == 0) {
+        func_800135D8(arg0, arg1, ((int*)arg0)[6], ((int*)arg0)[4]);
+        return 0;
+    }
+    return -1;
+}
+
+// https://decomp.me/scratch/xpW1h
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_800135D8);
+
+// https://decomp.me/scratch/nDizh
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_8001369C);
+
+static void StartSound(void)
+{
+    int event;
+
+    SpuStart();
+    SpuInitMalloc(4, &_spuMemInfo);
+    SpuSetTransferMode(SPU_TRANSFER_BY_DMA);
+    SpuSetTransferStartAddr(0x1010);
+    _writeSpu(_soundFlush, 64);
+    _waitTransferAvailable();
+    func_8001369C();
+    SpuSetIRQ(SPU_OFF);
+    SpuSetIRQCallback(NULL);
+    while (SetRCnt(RCntCNT2, 0x44E8, RCntMdINTR) == 0)
+        ;
+    while (StartRCnt(RCntCNT2) == 0)
+        ;
+    do {
+        event = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, func_80019A58);
+        _soundEvent = event;
+    } while (event == -1);
+    while (EnableEvent(_soundEvent) == 0)
+        ;
+}
+
+static void StopSound(void)
+{
+    if (_isSpuTransfer == 1) {
+        _writeSpu(_soundFlush, 64);
+        _waitTransferAvailable();
+    }
+    while (StopRCnt(RCntCNT2) == 0)
+        ;
+    UnDeliverEvent(RCntCNT2, EvSpINT);
+    while (DisableEvent(_soundEvent) == 0)
+        ;
+    while (CloseEvent(_soundEvent) == 0)
+        ;
+    SetVoiceKeyOff(0xFFFFFF);
+    SpuQuit();
+}
+
+static void SetVoiceKeyOn(u_int in_KeyOn)
+{
+    *SPU_VOICE_KEY_ON_LO = in_KeyOn;
+    *SPU_VOICE_KEY_ON_HI = (in_KeyOn >> 0x10);
+}
+
+static void SetVoiceKeyOff(u_int in_KeyOff)
+{
+    *SPU_VOICE_KEY_OFF_LO = in_KeyOff;
+    *SPU_VOICE_KEY_OFF_HI = (in_KeyOff >> 0x10);
+}
+
+static void SetVoiceReverbMode(u_int in_ReverbMode)
+{
+    *SPU_VOICE_CHN_REVERB_MODE_LO = in_ReverbMode;
+    *SPU_VOICE_CHN_REVERB_MODE_HI = (in_ReverbMode >> 0x10);
+}
+
+static void SetVoiceNoiseMode(u_int in_NoiseMode)
+{
+    *SPU_VOICE_CHN_NOISE_MODE_LO = in_NoiseMode;
+    *SPU_VOICE_CHN_NOISE_MODE_HI = (in_NoiseMode >> 0x10);
+}
+
+static void SetVoiceFmMode(u_int in_FmMode)
+{
+    *SPU_VOICE_CHN_FM_MODE_LO = in_FmMode;
+    *SPU_VOICE_CHN_FM_MODE_HI = (in_FmMode >> 0x10);
+}
+
+void SetVoiceVolume(int in_VoiceIndex, u_int in_VolL, u_int in_VolR, u_int in_VolumeScale)
+{
+    SpuVolume* pVolume;
+
+    if (in_VolumeScale != 0) {
+        in_VolL = in_VolL * in_VolumeScale;
+        in_VolR = in_VolR * in_VolumeScale;
+        in_VolL = in_VolL >> 7;
+        in_VolR = in_VolR >> 7;
+    }
+
+    pVolume = (SpuVolume*)&VOICE_00_LEFT_RIGHT[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE];
+    pVolume->left = in_VolL & 0x7FFF;
+    pVolume->right = in_VolR & 0x7FFF;
+}
+
+static void SetVoiceSampleRate(int in_VoiceIndex, int in_SampleRate)
+{
+    VOICE_00_ADPCM_SAMPLE_RATE[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE] = in_SampleRate;
+}
+
+static void SetVoiceStartAddr(int in_VoiceIndex, u_int in_Addr)
+{
+    VOICE_00_ADPCM_START_ADDR[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE] = (in_Addr >> 3);
+}
+
+static void SetVoiceRepeatAddr(int in_VoiceIndex, u_int in_Addr)
+{
+    VOICE_00_ADPCM_REPEAT_ADDR[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE] = (in_Addr >> 3);
+}
+
+static void SetVoiceAdsrLower(int in_VoiceIndex, u_short in_Register)
+{
+    VOICE_00_ADPCM_ADSR_LOWER[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE] = in_Register;
+}
+
+static void SetVoiceAdsrUpper(int in_VoiceIndex, u_short in_Register)
+{
+    VOICE_00_ADPCM_ADSR_UPPER[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE] = in_Register;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// ADSR LOWER 16-bit (at 1F801C08h+N*10h)
+//----------------------------------------------------------------------------------------------------------------------
+
+// Bit positions
+#define ADSR_ATTACK_MODE_BIT 15
+#define ADSR_ATTACK_SHIFT_POS 10 // 5 bits (14-10)
+#define ADSR_ATTACK_STEP_POS 8 // 2 bits (9-8)
+#define ADSR_DECAY_SHIFT_POS 4 // 4 bits (7-4)
+#define ADSR_SUSTAIN_LEVEL_POS 0 // 4 bits (3-0)
+
+// Bit masks (for masking out fields)
+#define ADSR_ATTACK_MODE_MASK (0x1 << ADSR_ATTACK_MODE_BIT)
+#define ADSR_ATTACK_SHIFT_MASK (0x1F << ADSR_ATTACK_SHIFT_POS)
+#define ADSR_ATTACK_STEP_MASK (0x3 << ADSR_ATTACK_STEP_POS)
+#define ADSR_DECAY_SHIFT_MASK (0xF << ADSR_DECAY_SHIFT_POS)
+#define ADSR_SUSTAIN_LEVEL_MASK (0xF << ADSR_SUSTAIN_LEVEL_POS)
+
+// Attack Mode values
+#define ADSR_ATTACK_MODE_LINEAR 0
+#define ADSR_ATTACK_MODE_EXPONENTIAL 1
+
+// Attack Step values ("+7,+6,+5,+4")
+#define ADSR_ATTACK_STEP_PLUS_7 0
+#define ADSR_ATTACK_STEP_PLUS_6 1
+#define ADSR_ATTACK_STEP_PLUS_5 2
+#define ADSR_ATTACK_STEP_PLUS_4 3
+
+// Helper macros to build fields
+#define ADSR_ATTACK_MODE(mode) ((mode) << ADSR_ATTACK_MODE_BIT)
+#define ADSR_ATTACK_SHIFT(shift) (((shift) & 0x1F) << ADSR_ATTACK_SHIFT_POS)
+#define ADSR_ATTACK_STEP(step) (((step) & 0x3) << ADSR_ATTACK_STEP_POS)
+#define ADSR_DECAY_SHIFT(shift) (((shift) & 0xF) << ADSR_DECAY_SHIFT_POS)
+#define ADSR_SUSTAIN_LEVEL(level) (((level) & 0xF) << ADSR_SUSTAIN_LEVEL_POS)
+
+//----------------------------------------------------------------------------------------------------------------------
+// ADSR UPPER 16-bit (at 1F801C0Ah+N*10h)
+//----------------------------------------------------------------------------------------------------------------------
+
+// Bit positions (relative to the upper 16-bit word, bits 0-15)
+#define ADSR_SUSTAIN_MODE_BIT 15
+#define ADSR_SUSTAIN_DIRECTION_BIT 14
+// Bit 13 unused
+#define ADSR_SUSTAIN_SHIFT_POS 8 // 5 bits (12-8)
+#define ADSR_SUSTAIN_STEP_POS 6 // 2 bits (7-6)
+#define ADSR_RELEASE_MODE_BIT 5
+#define ADSR_RELEASE_SHIFT_POS 0 // 5 bits (4-0)
+
+// Bit masks (for masking out fields)
+#define ADSR_SUSTAIN_MODE_MASK (0x1 << ADSR_SUSTAIN_MODE_BIT)
+#define ADSR_SUSTAIN_DIRECTION_MASK (0x1 << ADSR_SUSTAIN_DIRECTION_BIT)
+#define ADSR_SUSTAIN_SHIFT_MASK (0x1F << ADSR_SUSTAIN_SHIFT_POS)
+#define ADSR_SUSTAIN_STEP_MASK (0x3 << ADSR_SUSTAIN_STEP_POS)
+#define ADSR_RELEASE_MODE_MASK (0x1 << ADSR_RELEASE_MODE_BIT)
+#define ADSR_RELEASE_SHIFT_MASK (0x1F << ADSR_RELEASE_SHIFT_POS)
+
+// Sustain Mode values
+#define ADSR_SUSTAIN_MODE_LINEAR 0
+#define ADSR_SUSTAIN_MODE_EXPONENTIAL 1
+
+// Sustain Direction values
+#define ADSR_SUSTAIN_DIR_INCREASE 0
+#define ADSR_SUSTAIN_DIR_DECREASE 1
+
+// Sustain Step values
+// When Increase: "+7,+6,+5,+4"
+#define ADSR_SUSTAIN_STEP_INC_PLUS_7 0
+#define ADSR_SUSTAIN_STEP_INC_PLUS_6 1
+#define ADSR_SUSTAIN_STEP_INC_PLUS_5 2
+#define ADSR_SUSTAIN_STEP_INC_PLUS_4 3
+
+// When Decrease: "-8,-7,-6,-5"
+#define ADSR_SUSTAIN_STEP_DEC_MINUS_8 0
+#define ADSR_SUSTAIN_STEP_DEC_MINUS_7 1
+#define ADSR_SUSTAIN_STEP_DEC_MINUS_6 2
+#define ADSR_SUSTAIN_STEP_DEC_MINUS_5 3
+
+// Release Mode values
+#define ADSR_RELEASE_MODE_LINEAR 0
+#define ADSR_RELEASE_MODE_EXPONENTIAL 1
+
+// Helper macros to build fields
+#define ADSR_SUSTAIN_MODE(mode) ((mode) << ADSR_SUSTAIN_MODE_BIT)
+#define ADSR_SUSTAIN_DIRECTION(dir) ((dir) << ADSR_SUSTAIN_DIRECTION_BIT)
+#define ADSR_SUSTAIN_SHIFT(shift) (((shift) & 0x1F) << ADSR_SUSTAIN_SHIFT_POS)
+#define ADSR_SUSTAIN_STEP(step) (((step) & 0x3) << ADSR_SUSTAIN_STEP_POS)
+#define ADSR_RELEASE_MODE(mode) ((mode) << ADSR_RELEASE_MODE_BIT)
+#define ADSR_RELEASE_SHIFT(shift) (((shift) & 0x1F) << ADSR_RELEASE_SHIFT_POS)
+
+void SetVoiceAdsrAttackRateAndMode(
+    int in_VoiceIndex, int in_AttackStep, u_int in_AttackMode)
+{
+    u_short* AdsrLower =
+        &VOICE_00_ADPCM_ADSR_LOWER[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE];
+    // Extract Attack Mode bit (bit 2 of in_AttackRate -> bit 15 of ADSR)
+    u_short AttackMode = ADSR_ATTACK_MODE(in_AttackMode >> 2);
+    // Position Attack Step (0-3) at bits 8-9
+    u_short AttackStep = in_AttackStep << ADSR_ATTACK_STEP_POS;
+    *AdsrLower = AttackMode | AttackStep | *(char*)AdsrLower;
+}
+
+void SetVoiceAdsrDecayRate(int in_VoiceIndex, int in_DecayRate)
+{
+    u_short* AdsrLower =
+        &VOICE_00_ADPCM_ADSR_LOWER[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE];
+    u_short AttackStep = in_DecayRate * 0x10;
+    u_short Masked = (*AdsrLower & 0xFF0F);
+    *AdsrLower = Masked | AttackStep;
+}
+
+void SetVoiceAdsrSustainLevel(int in_VoiceIndex, int in_SustainLevel)
+{
+    u_short* AdsrLower =
+        &VOICE_00_ADPCM_ADSR_LOWER[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE];
+    *AdsrLower = (*AdsrLower & 0xFFF0) | in_SustainLevel;
+}
+
+void SetVoiceAdsrSustainRateAndDirection(
+    int in_VoiceIndex, int in_SustainRate, u_int in_SustainDirection)
+{
+    u_short* AdsrUpper =
+        &VOICE_00_ADPCM_ADSR_UPPER[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE];
+    u_short SustainDirection = ADSR_SUSTAIN_DIRECTION(in_SustainDirection >> 1);
+    u_short SustainRate = in_SustainRate << ADSR_SUSTAIN_STEP_POS;
+    u_short Masked = *AdsrUpper & 0x3F;
+    *AdsrUpper = Masked | (SustainDirection | SustainRate);
+}
+
+void SetVoiceAdsrReleaseRateAndMode(
+    int in_VoiceIndex, int in_ReleaseRate, u_int in_ReleaseMode)
+{
+    u_short* AdsrUpper =
+        &VOICE_00_ADPCM_ADSR_UPPER[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE];
+    u_short ReleaseMode = (in_ReleaseMode >> 2) << ADSR_RELEASE_MODE_BIT;
+    u_short ReleaseRate = in_ReleaseRate << ADSR_RELEASE_SHIFT_POS;
+    u_short Masked = *AdsrUpper & 0xFFC0;
+    *AdsrUpper = Masked | (ReleaseMode | ReleaseRate);
+}
+
+void SetVoiceParams(
+    int in_VoiceIndex, FSoundVoiceParams* in_VoiceParams, int in_VolumeScale)
+{
+    int left;
+    int right;
+    short* p;
+
+    in_VoiceParams->VoiceParamFlags = 0;
+    p = (short*)&VOICE_00_LEFT_RIGHT[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE];
+    if (in_VolumeScale == 0) {
+        left = in_VoiceParams->Volume.left;
+        right = in_VoiceParams->Volume.right;
+    } else {
+        left = in_VoiceParams->Volume.left * in_VolumeScale;
+        right = in_VoiceParams->Volume.right * in_VolumeScale;
+        left >>= 7;
+        right >>= 7;
+    }
+
+    // This is the dumbest shit, but I can't find any other way that compiles correctly
+    *p++ = left & 0x7FFF;
+    *p++ = right & 0x7FFF;
+    *p++ = in_VoiceParams->SampleRate;
+    *p++ = in_VoiceParams->StartAddress >> 3;
+    *p++ = in_VoiceParams->AdsrLower;
+    *p++ = in_VoiceParams->AdsrUpper;
+    p++;
+    *p = in_VoiceParams->LoopAddress >> 3;
+}
+
+void SetVoiceParamsByFlags(u_int in_VoiceIndex, FSoundVoiceParams* in_VoiceParams,
+    int arg2 __attribute__((unused)))
+{
+    int flags;
+
+    flags = in_VoiceParams->VoiceParamFlags;
+    if (flags == 0) {
+        return;
+    }
+
+    in_VoiceParams->VoiceParamFlags = 0;
+
+    if (flags & VOICE_PARAM_SAMPLE_RATE) {
+        flags &= ~VOICE_PARAM_SAMPLE_RATE;
+        SetVoiceSampleRate(in_VoiceIndex, in_VoiceParams->SampleRate);
+        if (flags == 0)
+            return;
+    }
+
+    if (flags & VOICE_PARAM_VOLUME) {
+        flags &= ~VOICE_PARAM_VOLUME;
+        SetVoiceVolume(in_VoiceIndex, in_VoiceParams->Volume.left,
+            in_VoiceParams->Volume.right, in_VoiceParams->VolumeScale);
+        if (flags == 0)
+            return;
+    }
+
+    if (flags & VOICE_PARAM_START_ADDR) {
+        flags &= ~VOICE_PARAM_START_ADDR;
+        SetVoiceStartAddr(in_VoiceIndex, in_VoiceParams->StartAddress);
+        if (flags == 0)
+            return;
+    }
+
+    if (flags & VOICE_PARAM_LOOP_ADDR) {
+        flags &= ~VOICE_PARAM_LOOP_ADDR;
+        SetVoiceRepeatAddr(in_VoiceIndex, in_VoiceParams->LoopAddress);
+        if (flags == 0)
+            return;
+    }
+
+    if (flags & VOICE_PARAM_ADSR_UPPER) {
+        flags &= ~VOICE_PARAM_ADSR_UPPER;
+        SetVoiceAdsrUpper(in_VoiceIndex, in_VoiceParams->AdsrUpper);
+        if (flags == 0)
+            return;
+    }
+
+    if (flags & VOICE_PARAM_ADSR_LOWER) {
+        SetVoiceAdsrLower(in_VoiceIndex, in_VoiceParams->AdsrLower);
+    }
+}
+
+void Sound_UpdateSlidesAndDelays(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags, int in_Arg2)
+{
+
+    short* Wave;
+    int temp;
+
+    if (in_Arg2 == 0) {
+        if (in_pChannel->VolumeBalanceSlideLength != 0) {
+            in_pChannel->VolumeBalanceSlideLength--;
+            temp = in_pChannel->VolumeBalance + in_pChannel->VolumeBalanceSlideStep;
+            if ((temp & 0x7F00) != (in_pChannel->VolumeBalance & 0x7F00)) {
+                in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+            }
+            in_pChannel->VolumeBalance = temp;
+        }
+    }
+
+    if (in_pChannel->ChannelVolumeSlideLength != 0) {
+        int Volume;
+        in_pChannel->ChannelVolumeSlideLength--;
+        Volume = in_pChannel->Volume;
+        temp = Volume + in_pChannel->VolumeSlideStep;
+        if ((temp & 0xFFE00000) != (Volume & 0xFFE00000)) {
+            in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+        }
+        in_pChannel->Volume = temp;
+    }
+
+    if (in_pChannel->ChannelPanSlideLength != 0) {
+        u_short Pan;
+        in_pChannel->ChannelPanSlideLength--;
+        Pan = in_pChannel->ChannelPan;
+        temp = Pan + in_pChannel->PanSlideStep;
+        if ((temp & 0xFF00) != (Pan & 0xFF00)) {
+            in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+        }
+        in_pChannel->ChannelPan = temp;
+    }
+
+    if (in_pChannel->VibratoDelayCurrent != 0) {
+        in_pChannel->VibratoDelayCurrent--;
+    }
+
+    if (in_pChannel->TremeloDelayCurrent != 0) {
+        in_pChannel->TremeloDelayCurrent--;
+    }
+
+    if (in_pChannel->NoiseTimer != 0) {
+        in_pChannel->NoiseTimer--;
+        if (!(in_pChannel->NoiseTimer & 0xFFFF)) {
+            if (in_Arg2 == 0) {
+                g_pActiveMusicConfig->NoiseChannelFlags ^= in_VoiceFlags;
+            } else {
+                g_Sound_VoiceSchedulerState.NoiseVoiceFlags ^= in_VoiceFlags;
+            }
+            g_Sound_GlobalFlags.UpdateFlags |=
+                (SOUND_GLOBAL_UPDATE_04 | SOUND_GLOBAL_UPDATE_08);
+        }
+    }
+
+    if (in_pChannel->FmTimer != 0) {
+        in_pChannel->FmTimer--;
+        if (!(in_pChannel->FmTimer & 0xFFFF)) {
+            if (in_Arg2 == 0) {
+                g_pActiveMusicConfig->FmChannelFlags ^= in_VoiceFlags;
+            } else {
+                g_Sound_VoiceSchedulerState.FmVoiceFlags ^= in_VoiceFlags;
+            }
+            g_Sound_GlobalFlags.UpdateFlags |= SOUND_GLOBAL_UPDATE_08;
+        }
+    }
+
+    if (in_pChannel->VibratoDepthSlideLength != 0) {
+        u_int var_lo;
+        u_short VibratoDepth;
+        int NewVibratoDepth;
+
+        in_pChannel->VibratoDepthSlideLength--;
+        VibratoDepth = in_pChannel->VibratoDepth + in_pChannel->VibratoDepthSlideStep;
+        in_pChannel->VibratoDepth = VibratoDepth;
+        NewVibratoDepth = (u_int)(VibratoDepth & 0x7F00) >> 8;
+        if (VibratoDepth & 0x8000) {
+            var_lo = (u_int)(NewVibratoDepth * in_pChannel->PitchBase) >> 7;
+        } else {
+            var_lo = (NewVibratoDepth * ((u_int)(in_pChannel->PitchBase * 15) >> 8)) >> 7;
+        }
+
+        in_pChannel->VibratoBase = var_lo;
+
+        if ((in_pChannel->VibratoDelayCurrent == 0) && (in_pChannel->unkA4 != 1)) {
+            Wave = in_pChannel->VibratoWave;
+            if (Wave[0] == 0 && Wave[1] == 0) {
+                Wave += Wave[2];
+            }
+
+            temp = (in_pChannel->VibratoBase * Wave[0]) >> 16;
+            if (temp != in_pChannel->VibratoPitch) {
+                in_pChannel->VibratoPitch = temp;
+                in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_SAMPLE_RATE;
+                if (temp >= 0) {
+                    in_pChannel->VibratoPitch = temp * 2;
+                }
+            }
+        }
+    }
+
+    if (in_pChannel->TremeloDepthSlideLength != 0) {
+
+        in_pChannel->TremeloDepthSlideLength--;
+        in_pChannel->TremeloDepth += (u_short)in_pChannel->TremeloDepthSlideStep;
+        if (((u_short)in_pChannel->TremeloDelayCurrent == 0)
+            && ((u_short)in_pChannel->unkB6 != 1)) {
+            int FinalVolume;
+            int TremeloDepthHi8;
+            int VolumeBalanceHigh8;
+            int VolumeHigh16;
+
+            Wave = in_pChannel->TremeloWave;
+            if (Wave[0] == 0 && Wave[1] == 0) {
+                Wave += Wave[2];
+            }
+
+            VolumeBalanceHigh8 = (u_short)in_pChannel->VolumeBalance >> 8;
+            VolumeHigh16 = in_pChannel->Volume >> 16;
+            FinalVolume = (VolumeHigh16 * VolumeBalanceHigh8) >> 7;
+            TremeloDepthHi8 = in_pChannel->TremeloDepth >> 8;
+            temp = ((FinalVolume * TremeloDepthHi8) << 9) >> 16;
+            temp = (temp * *Wave) >> 15;
+            if (temp != in_pChannel->TremeloVolume) {
+                in_pChannel->TremeloVolume = temp;
+                in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+            }
+        }
+    }
+
+    if (in_pChannel->AutoPanDepthSlideLength != 0) {
+        in_pChannel->AutoPanDepthSlideLength--;
+        in_pChannel->AutoPanDepth += in_pChannel->AutoPanDepthSlideStep;
+        if (in_pChannel->AutoPanRateCurrent != 1) {
+            Wave = in_pChannel->AutoPanWave;
+            if ((Wave[0] == 0) && (Wave[1] == 0)) {
+                Wave += Wave[2];
+            }
+
+            temp = ((in_pChannel->AutoPanDepth >> 8) * *Wave) >> 15;
+            if (temp != in_pChannel->AutoPanVolume) {
+                in_pChannel->AutoPanVolume = temp;
+                in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+            }
+        }
+    }
+
+    if (in_pChannel->PitchSlideStepsCurrent != 0) {
+        int PitchSlide;
+
+        in_pChannel->PitchSlideStepsCurrent--;
+        PitchSlide = in_pChannel->PitchSlide;
+        temp = PitchSlide + in_pChannel->PitchSlideStep;
+        if ((temp & 0xFFFF0000) != (PitchSlide & 0xFFFF0000)) {
+            in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_SAMPLE_RATE;
+        }
+        in_pChannel->PitchSlide = temp;
+    }
+}
+
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_8001436C);
+
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_800147CC);
+
+void UnassignVoicesFromChannels(FSoundChannel* in_pChannel, int);
+
+int Sound_StealQuietestVoice(int in_bForceFullScan)
+{
+    FSpuVoiceInfo* pVoiceInfo;
+    short EnvX;
+    int i;
+    int out_VoiceIndex;
+
+    if (in_bForceFullScan) {
+        i = 0;
+    } else {
+        i = g_pActiveMusicConfig->SomeIndexRelatedToSpuVoiceInfo;
+    }
+
+    EnvX = 0x7FFF;
+    out_VoiceIndex = VOICE_COUNT;
+    pVoiceInfo = &g_SpuVoiceInfo[i];
+
+    do {
+        if (pVoiceInfo->pEnvx < EnvX) {
+            EnvX = pVoiceInfo->pEnvx;
+            out_VoiceIndex = i;
+        }
+        i++;
+        pVoiceInfo++;
+    } while (i < VOICE_COUNT);
+
+    if (EnvX == 0x7FFF) {
+        return VOICE_COUNT;
+    }
+    UnassignVoicesFromChannels(g_ActiveMusicChannels, out_VoiceIndex);
+    return out_VoiceIndex;
+}
+
+int Sound_FindFreeVoice(int arg0)
+{
+    FSpuVoiceInfo* var_v1;
+
+    if (arg0 != 0) {
+        arg0 = 0;
+    } else {
+        arg0 = g_pActiveMusicConfig->SomeIndexRelatedToSpuVoiceInfo;
+    }
+
+    var_v1 = &g_SpuVoiceInfo[arg0];
+
+    if (var_v1->pEnvx != 0) {
+        ++arg0;
+        while (1) {
+            if (arg0 >= 0x18) {
+                break;
+            }
+            ++var_v1;
+            ++arg0;
+            if (var_v1->pEnvx == 0) {
+                --arg0;
+                break;
+            }
+        }
+    }
+    return arg0;
+}
+
+void func_8001436C(FSoundChannel*, int);
+
+void func_80014D70(
+    FSoundChannel* in_pChannel, u_int in_Flags1, u_int in_Flags2, u_int* out_KeyOnFlags)
+{
+    int var_s2 = 1;
+    int var_s5 = 0;
+    int sp10 = in_Flags1 & g_pActiveMusicConfig->PendingKeyOnMask;
+
+    do {
+        if (in_Flags1 & var_s2) {
+            func_8001436C(in_pChannel, var_s2);
+            if (in_pChannel->VoiceParams.VoiceParamFlags != 0) {
+                if (D_800378E4 & var_s2) {
+                    in_pChannel->VoiceParams.Volume.right = 0;
+                    in_pChannel->VoiceParams.Volume.left = 0;
+                }
+                if (sp10 & var_s2) {
+                    if (in_Flags2 & var_s2) {
+                        *out_KeyOnFlags |= 1 << var_s5;
+                        in_pChannel->VoiceParams.AssignedVoiceNumber = var_s5;
+                    } else {
+                        int temp_s0 = g_pActiveMusicConfig->KeyedMask & var_s2;
+                        int var_a0 = Sound_FindFreeVoice(temp_s0);
+                        if (var_a0 == 0x18) {
+                            g_pActiveMusicConfig->StatusFlags |= 2;
+                            var_a0 = Sound_StealQuietestVoice(temp_s0);
+                            if (var_a0 == 0x18) {
+                                in_pChannel->VoiceParams.AssignedVoiceNumber = var_a0;
+                                g_pActiveMusicConfig->StatusFlags |= 1;
+                            } else {
+                                *out_KeyOnFlags |= 1 << var_a0;
+                                in_pChannel->VoiceParams.AssignedVoiceNumber = var_a0;
+                                g_SpuVoiceInfo[var_a0].pEnvx = 0x7FFF;
+                            }
+                        } else {
+                            *out_KeyOnFlags |= 1 << var_a0;
+                            in_pChannel->VoiceParams.AssignedVoiceNumber = var_a0;
+                            g_SpuVoiceInfo[var_a0].pEnvx = 0x7FFF;
+                        }
+                    }
+                    if (in_pChannel->VoiceParams.AssignedVoiceNumber < 0x18) {
+                        SetVoiceParams(in_pChannel->VoiceParams.AssignedVoiceNumber,
+                            &in_pChannel->VoiceParams,
+                            in_pChannel->VoiceParams.VolumeScale);
+                        g_Sound_VoiceChannelConfigs[in_pChannel->VoiceParams
+                                .AssignedVoiceNumber] = g_pActiveMusicConfig;
+                        g_Sound_GlobalFlags.UpdateFlags |= 0x100;
+                    }
+                } else {
+                    if (in_pChannel->VoiceParams.AssignedVoiceNumber < 0x18) {
+                        SetVoiceParamsByFlags(
+                            in_pChannel->VoiceParams.AssignedVoiceNumber,
+                            &in_pChannel->VoiceParams, in_pChannel->UpdateFlags);
+                    }
+                }
+            }
+            in_Flags1 &= ~var_s2;
+        }
+        var_s2 *= 2;
+        ++in_pChannel;
+        ++var_s5;
+    } while (in_Flags1 != 0);
+}
+
+void UnassignVoicesFromChannels(FSoundChannel* in_pChannel, int arg1)
+{
+    FSoundChannel* pChannel;
+    u_int Count;
+
+    Count = 0;
+    pChannel = in_pChannel;
+
+    do {
+        if (arg1 == pChannel->VoiceParams.AssignedVoiceNumber) {
+            pChannel->VoiceParams.AssignedVoiceNumber = VOICE_COUNT;
+        }
+        Count++;
+        pChannel++;
+    } while (Count < SOUND_CHANNEL_COUNT);
+
+    Count = 0;
+
+    if (g_pSavedMousicConfig != NULL) {
+        pChannel = g_pSecondaryMusicChannels;
+        do {
+            if (arg1 == pChannel->VoiceParams.AssignedVoiceNumber) {
+                pChannel->VoiceParams.AssignedVoiceNumber = VOICE_COUNT;
+            }
+            Count++;
+            pChannel++;
+        } while (Count < SOUND_CHANNEL_COUNT);
+    }
+}
+
+int func_8001503C(FSoundChannel* channels, int mask, int voiceNumber)
+{
+    u_int i;
+    for (i = 0; i < 32; i++) {
+        int v = 1;
+        if (voiceNumber == channels[i].VoiceParams.AssignedVoiceNumber) {
+            if (mask & (v << i)) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+// https://decomp.me/scratch/VmgoV
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_80015080);
+
+void Sound_ApplyMasterFadeToChannelVolume(
+    FSoundChannelConfig* in_Context, FSoundChannel* arg1 __attribute__((unused)))
+{
+    int Volume;
+
+    Volume = in_Context->A_Volume;
+    g_Sound_MasterFadeTimer.SavedValue = in_Context->A_Volume;
+    Volume >>= 16;
+    Volume *= g_Sound_MasterFadeTimer.Value >> 8;
+    Volume /= 127;
+    Volume <<= 8;
+    in_Context->A_Volume = Volume;
+}
+
+void Sound_RestoreChannelVolumeFromMasterFade(
+    FSoundChannelConfig* in_Config, FSoundChannel* arg1 __attribute__((unused)))
+{
+    in_Config->A_Volume = g_Sound_MasterFadeTimer.SavedValue;
+}
+
+// https://decomp.me/scratch/0wUZ7
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_80015220);
+
+void ChannelMaskToVoiceMaskFiltered(FSoundChannel* in_Channel, int* io_VoiceMask,
+    int in_ChannelMask, int in_VoiceMaskFilter)
+{
+    u_int bit = 1;
+
+    do {
+        if (in_ChannelMask & bit) {
+            if (in_Channel->VoiceParams.AssignedVoiceNumber < VOICE_COUNT) {
+                *io_VoiceMask |= 1 << in_Channel->VoiceParams.AssignedVoiceNumber;
+            }
+        }
+        in_ChannelMask &= ~bit;
+        in_Channel++;
+        bit <<= 1;
+    } while (in_ChannelMask != 0);
+
+    *io_VoiceMask &= in_VoiceMaskFilter;
+}
+
+void Sound_ProcessKeyOffRequests(void)
+{
+    int VoiceMask;
+    int SavedConfigKeyedMask;
+    int ActiveKeyedMask;
+    int Filter;
+    int ActiveOffMask;
+    int SavedOffMask;
+
+    Filter = ~(g_Sound_VoiceSchedulerState.ActiveChannelMask
+               | g_Sound_VoiceSchedulerState.unk_Flags_0x10
+               | g_Sound_Cutscene_StreamState.VoicesInUseFlags);
+    VoiceMask = 0;
+    SavedOffMask = 0;
+
+    if (g_pSavedMousicConfig) {
+        SavedOffMask = g_pSavedMousicConfig->PendingKeyOffMask;
+        SavedConfigKeyedMask = SavedOffMask & g_pSavedMousicConfig->KeyedMask;
+
+        if (SavedConfigKeyedMask != 0) {
+            ChannelMaskToVoiceMaskFiltered(
+                g_pSecondaryMusicChannels, &VoiceMask, SavedConfigKeyedMask, Filter);
+            g_pSavedMousicConfig->PendingKeyOffMask &= ~g_pSavedMousicConfig->KeyedMask;
+            SavedOffMask &= ~g_pSavedMousicConfig->KeyedMask;
+        }
+    }
+
+    ActiveOffMask = g_pActiveMusicConfig->PendingKeyOffMask;
+    ActiveKeyedMask = ActiveOffMask & g_pActiveMusicConfig->KeyedMask;
+
+    if (ActiveKeyedMask != 0) {
+        ChannelMaskToVoiceMaskFiltered(
+            g_ActiveMusicChannels, &VoiceMask, ActiveKeyedMask, Filter);
+        g_pActiveMusicConfig->PendingKeyOffMask &= ~g_pActiveMusicConfig->KeyedMask;
+        ActiveOffMask &= ~g_pActiveMusicConfig->KeyedMask;
+    }
+
+    if (g_pSavedMousicConfig && (SavedOffMask != 0)) {
+        ChannelMaskToVoiceMaskFiltered(
+            g_pSecondaryMusicChannels, &VoiceMask, SavedOffMask, Filter);
+        g_pSavedMousicConfig->PendingKeyOffMask = 0;
+    }
+
+    if (ActiveOffMask != 0) {
+        ChannelMaskToVoiceMaskFiltered(
+            g_ActiveMusicChannels, &VoiceMask, ActiveOffMask, Filter);
+        g_pActiveMusicConfig->PendingKeyOffMask = 0;
+    }
+
+    VoiceMask |= g_Sound_VoiceSchedulerState.KeyOffFlags;
+    g_Sound_VoiceSchedulerState.KeyOffFlags = 0;
+
+    if (VoiceMask != 0) {
+        SetVoiceKeyOff(VoiceMask);
+    }
+}
+
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_80015970);
+
+// 0x20 toggles whether we use the alternate sample bank
+#define SOUND_BANK_FLAG_ALT_SAMPLE_BANK (1u << 6) // 0x40
+
+// the instrument index window that is eligible for bank remap
+#define SOUND_BANK_REMAP_BASE_INDEX 0x20u // first remappable instrument
+#define SOUND_BANK_REMAP_COUNT 0x60u // 64 instruments (0x20..0x5F)
+
+// how far to shift SPU sample addresses when remapping
+#define SOUND_BANK_SPU_ADDR_OFFSET 0x20000u
+
+extern int D_80094FAC[];
+extern int D_80094FFC;
+
+u_short Sound_MapInstrumentToAltSampleBank(u_int in_Flags, FSoundChannel* in_pChannel)
+{
+    if (in_Flags & SOUND_BANK_FLAG_ALT_SAMPLE_BANK && 0x40 <= in_pChannel->InstrumentIndex
+        && in_pChannel->InstrumentIndex < SOUND_BANK_REMAP_COUNT) {
+        in_pChannel->VoiceParams.StartAddress += SOUND_BANK_SPU_ADDR_OFFSET;
+        in_pChannel->VoiceParams.LoopAddress += SOUND_BANK_SPU_ADDR_OFFSET;
+        in_pChannel->InstrumentIndex +=
+            SOUND_BANK_REMAP_BASE_INDEX; // mirror into alt-bank instrument table
+    }
+    return in_pChannel->InstrumentIndex;
+}
+
+u_short Sound_MapInstrumentToBaseSampleBank(u_int in_Flags, FSoundChannel* in_Channel)
+{
+    if ((in_Flags & SOUND_BANK_FLAG_ALT_SAMPLE_BANK)
+        && 0x60 <= in_Channel->InstrumentIndex && in_Channel->InstrumentIndex < 0x80) {
+        in_Channel->VoiceParams.StartAddress -= SOUND_BANK_SPU_ADDR_OFFSET;
+        in_Channel->VoiceParams.LoopAddress -= SOUND_BANK_SPU_ADDR_OFFSET;
+        in_Channel->InstrumentIndex -= SOUND_BANK_REMAP_BASE_INDEX;
+    }
+    return in_Channel->InstrumentIndex;
+}
+
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_80015BAC);
+
+void func_8001B094(FSoundChannel* arg0, int arg1);
+
+void func_80015C9C(FSoundChannel* arg0, char* arg1)
+{
+    arg0->VolumeBalance = 0x6E00;
+    arg0->Volume = 0x32000000;
+    arg0->ProgramCounter = arg1;
+    arg0->Transpose = 0;
+    arg0->FineTune = 0;
+    arg0->PortamentoSteps = 0;
+    arg0->PitchSlide = 0;
+    arg0->PitchBendSlideTranspose = 0;
+    arg0->PitchSlideStepsCurrent = 0;
+    arg0->LengthFixed = 0;
+    arg0->LengthStored = 0;
+    arg0->ChannelVolumeSlideLength = 0;
+    arg0->FinePitchDelta = 0;
+    arg0->RandomPitchDepth = 0;
+    arg0->LoopStackTop = 0;
+    arg0->UpdateFlags = 0;
+    arg0->AutoPanVolume = 0;
+    arg0->SfxMask = 0;
+    arg0->OpcodeStepCounter = 0xFFFF;
+    arg0->VoiceParams.VolumeScale = 0;
+    arg0->AutoPanDepth = 0;
+    arg0->TremeloDepth = 0;
+    arg0->VibratoDepth = 0;
+    arg0->AutoPanDepthSlideLength = 0;
+    arg0->TremeloDepthSlideLength = 0;
+    arg0->VibratoDepthSlideLength = 0;
+    arg0->FmTimer = 0;
+    arg0->NoiseTimer = 0;
+    func_8001B094(arg0, 0);
+}
+
+u_int func_80015D38(FSoundChannel* arg0, u_int arg1)
+{
+    u_int i;
+    u_int var_a3;
+
+    for (i = 0, var_a3 = 0; i < 32; ++i) {
+        if (arg1 & (1 << i)) {
+            if (arg0->VoiceParams.AssignedVoiceNumber < 0x18) {
+                var_a3 |= 1 << arg0->VoiceParams.AssignedVoiceNumber;
+            }
+        }
+        ++arg0;
+    }
+    return var_a3;
+}
+
+// https://decomp.me/scratch/1nmK4
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", Sound_LoadAkaoSequence);
+
+void Sound_KillMusicConfig(
+    FSoundChannelConfig* in_Config, FSoundChannel* in_pChannel, u_int arg2)
+{
+    FSoundChannel* pChannel;
+    FSoundChannelConfig** ppThisChannelConfig;
+    u_int Count;
+
+    pChannel = in_pChannel;
+    if ((in_Config->ActiveChannelMask != 0)
+        && ((arg2 == 0) || (arg2 == in_Config->MusicId))) {
+        in_Config->PendingKeyOffMask = -1;
+        for (Count = SOUND_CHANNEL_COUNT; Count != 0; Count--) {
+            pChannel->Length1 = 3;
+            pChannel->Length2 = 1;
+            pChannel->ProgramCounter = (char*)&g_Sound_ProgramCounter;
+            pChannel++;
+        };
+
+        ppThisChannelConfig = g_Sound_VoiceChannelConfigs;
+        in_Config->MusicId = 0;
+        in_Config->ActiveNoteMask = 0;
+        in_Config->PendingKeyOnMask = 0;
+
+        for (Count = 0; Count < VOICE_COUNT; Count++) {
+            if (*ppThisChannelConfig == in_Config) {
+                *ppThisChannelConfig = NULL;
+                SetVoiceAdsrReleaseRateAndMode(Count, 5, 3U);
+            }
+            ppThisChannelConfig++;
+        };
+    }
+}
+
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_800161C4);
+
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_8001653C);
+
+void FreeVoiceChannels(FSoundChannel* in_Channel, u_int in_Voice)
+{
+    u_int VoiceIndex;
+
+    if (in_Voice < VOICE_COUNT) {
+        VoiceIndex = 0;
+        while (VoiceIndex < SOUND_CHANNEL_COUNT) {
+            if (in_Channel->VoiceParams.AssignedVoiceNumber == in_Voice) {
+                in_Channel->VoiceParams.AssignedVoiceNumber = VOICE_COUNT;
+                g_pActiveMusicConfig->ActiveNoteMask &= ~(1 << VoiceIndex);
+            }
+            in_Channel++;
+            VoiceIndex++;
+        };
+    }
+}
+
+#define SOUND_UPDATE_STEREO_LINKED (1 << 16) // Second channel of stereo pair
+
+void Sound_PlaySfxProgram(FSoundCommandParams* in_CommandParams, char* in_ProgramCounter1,
+    char* in_ProgramCounter2, int in_SkipRelease)
+{
+    FSoundChannel* channel;
+    int activeVoices;
+    int slotsRemaining;
+    u_int voiceBit;
+
+    if ((in_ProgramCounter1 == NULL) && (in_ProgramCounter2 == NULL)) {
+        return;
+    }
+
+    if ((in_SkipRelease == 0) && (in_CommandParams->Param2 != 0)) {
+        func_800161C4(0, in_CommandParams->Param2);
+    }
+
+    while (1) {
+        channel = SfxSoundChannels;
+        voiceBit = 0x400000;
+
+        activeVoices = g_Sound_VoiceSchedulerState.ActiveChannelMask
+                     | g_Sound_VoiceSchedulerState.unk_Flags_0x10
+                     | g_Sound_Cutscene_StreamState.VoicesInUseFlags;
+
+        for (slotsRemaining = 0xC; slotsRemaining != 0;
+            slotsRemaining -= 2, channel -= 2, voiceBit /= 4) {
+            if (!(activeVoices & (voiceBit | (voiceBit * 2)))) {
+                break;
+            }
+        }
+
+        if (slotsRemaining != 0) {
+            break;
+        }
+
+        func_800161C4(0, 0x40000000);
+
+        if (activeVoices
+            == (g_Sound_VoiceSchedulerState.ActiveChannelMask
+                | g_Sound_VoiceSchedulerState.unk_Flags_0x10
+                | g_Sound_Cutscene_StreamState.VoicesInUseFlags)) {
+            return;
+        }
+    }
+
+    if (in_ProgramCounter1 != NULL) {
+        func_8001653C(channel, in_CommandParams, voiceBit, in_ProgramCounter1);
+        FreeVoiceChannels(
+            g_ActiveMusicChannels, channel->VoiceParams.AssignedVoiceNumber);
+    }
+
+    if (in_ProgramCounter2 != NULL) {
+        if (in_ProgramCounter1 != NULL) {
+            ++channel;
+            voiceBit *= 2;
+        }
+
+        func_8001653C(channel, in_CommandParams, voiceBit, in_ProgramCounter2);
+        FreeVoiceChannels(
+            g_ActiveMusicChannels, channel->VoiceParams.AssignedVoiceNumber);
+
+        if (in_ProgramCounter1 != NULL) {
+            channel->UpdateFlags |= SOUND_UPDATE_STEREO_LINKED;
+        }
+    }
+    g_Sound_GlobalFlags.UpdateFlags |= SOUND_GLOBAL_UPDATE_04 | SOUND_GLOBAL_UPDATE_08;
+}
+
+void Sound_GetProgramCounters(
+    char** out_ProgramCounter1, char** out_ProgramCounter2, int in_SfxIndex)
+{
+    char* block2;
+    u_short* block0;
+
+    in_SfxIndex &= 0x3FF;
+    in_SfxIndex *= 2;
+    block2 = g_Sound_SfxProgramData;
+    block0 = (u_short*)g_Sound_SfxProgramOffsets;
+
+    *out_ProgramCounter1 =
+        block0[in_SfxIndex] == 0xFFFF ? NULL : block2 + block0[in_SfxIndex];
+
+    ++in_SfxIndex;
+
+    *out_ProgramCounter2 =
+        block0[in_SfxIndex] == 0xFFFF ? NULL : block2 + block0[in_SfxIndex];
+}
+
+void Sound_MarkActiveChannelsVolumeDirty(
+    FSoundChannelConfig* in_pChannelConfig, FSoundChannel* in_pChannel)
+{
+    u_int ActiveChannelMask;
+    u_int Flags;
+    u_int Mask;
+
+    ActiveChannelMask = in_pChannelConfig->ActiveChannelMask;
+    if (ActiveChannelMask == 0) {
+        return;
+    }
+
+    Flags = ActiveChannelMask;
+    Mask = 1;
+
+    while (Flags != 0) {
+        if (Flags & Mask) {
+            in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+            Flags ^= Mask;
+        }
+        in_pChannel++;
+        Mask <<= 1;
+    }
+}
+
+void Sound_MarkScheduledSfxChannelsVolumeDirty(void)
+{
+    u_int Mask;
+    u_int ActiveChannelMask;
+    FSoundChannel* pChannel = SfxSoundChannels - 10;
+
+    if (g_Sound_VoiceSchedulerState.ActiveChannelMask == 0) {
+        return;
+    }
+
+    ActiveChannelMask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+
+    Mask = (1 << 12); // SFX Channels start at channel 12
+    while (ActiveChannelMask != 0) {
+        if (ActiveChannelMask & Mask) {
+            ActiveChannelMask ^= Mask;
+            pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+        }
+        pChannel++;
+        Mask <<= 1;
+    };
+}
+
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", Sound_SetMusicSequence);
+
+int func_80016DA8(int flags)
+{
+    int var_v1 = 0;
+
+    flags &= 0x7FFF;
+
+    if (flags == 0) {
+        return 0;
+    }
+    if (flags == D_800377E0[1]) {
+        var_v1 = 1;
+    } else if (flags == D_800377E0[2]) {
+        var_v1 = 2;
+    }
+    return var_v1;
+}
+
+void Sound_Cmd_10_StartFieldMusic(FSoundCommandParams* in_Params)
+{
+    if ((g_PushedMusicConfig.MusicId != 0)
+        && (g_PushedMusicConfig.MusicId == in_Params->Param3)) {
+        Sound_SetMusicSequence((FAkaoSequence*)in_Params->Param1, 0);
+        return;
+    }
+    Sound_LoadAkaoSequence((FAkaoSequence*)in_Params->Param1);
+    g_pActiveMusicConfig->MusicId = in_Params->Param3;
+}
+
+void Sound_Cmd_40_PushMusicState(void)
+{
+    u_int i;
+
+    if (g_pActiveMusicConfig->ActiveChannelMask != 0) {
+        FSoundChannel* c;
+        Sound_memcpy32(&D_800366F0, &g_PushedMusicConfig, 0x80);
+        Sound_memcpy32(g_ActiveMusicChannels, (FSoundChannelConfig*)D_800378E8, 0x2200);
+        for (i = 0, c = D_800378E8; i < 32; ++i, ++c) {
+            Sound_MapInstrumentToBaseSampleBank(g_PushedMusicConfig.StatusFlags, c);
+        }
+    }
+}
+
+void Sound_Cmd_19_Unk(FSoundCommandParams* arg0)
+{
+    if ((g_pActiveMusicConfig->ActiveChannelMask != 0)
+        && ((g_pSavedMousicConfig == NULL) || (g_pSavedMousicConfig->MusicId == 0))) {
+        g_pSavedMousicConfig = &g_PushedMusicConfig;
+        g_pSecondaryMusicChannels = D_800378E8;
+        Sound_memcpy32(&D_800366F0, &g_PushedMusicConfig, 0x80);
+        Sound_memcpy32(g_ActiveMusicChannels,
+            (FSoundChannelConfig*)g_pSecondaryMusicChannels, 0x2200);
+    }
+    Sound_LoadAkaoSequence((FAkaoSequence*)arg0->Param1);
+    g_pActiveMusicConfig->A_Volume = (arg0->ExtParam1 & 0x7F) << 0x10;
+    g_pActiveMusicConfig->unk68 = 0;
+    g_pActiveMusicConfig->MusicId = arg0->Param3;
+    func_80015BAC();
+    g_Sound_GlobalFlags.MixBehavior &= ~0x100;
+}
+
+void Sound_Cmd_1A_Unk(FSoundCommandParams* arg0)
+{
+    if ((g_PushedMusicConfig.MusicId != 0)
+        && (g_PushedMusicConfig.MusicId == arg0->Param3)) {
+        g_pSavedMousicConfig = &g_PushedMusicConfig;
+        g_pSecondaryMusicChannels = D_800378E8;
+        Sound_SetMusicSequence((FAkaoSequence*)arg0->Param1, 1);
+    } else {
+        if ((g_pActiveMusicConfig->ActiveChannelMask != 0)
+            && ((g_pSavedMousicConfig == NULL) || (g_pSavedMousicConfig->MusicId == 0))) {
+            g_pSavedMousicConfig = &g_PushedMusicConfig;
+            g_pSecondaryMusicChannels = D_800378E8;
+            Sound_memcpy32(&D_800366F0, &g_PushedMusicConfig, 0x80);
+            Sound_memcpy32(g_ActiveMusicChannels,
+                (FSoundChannelConfig*)g_pSecondaryMusicChannels, 0x2200);
+        }
+        Sound_LoadAkaoSequence((FAkaoSequence*)arg0->Param1);
+        g_pActiveMusicConfig->MusicId = arg0->Param3;
+    }
+    g_Sound_GlobalFlags.MixBehavior &= ~0x100;
+    if (g_pSavedMousicConfig != NULL) {
+        int temp_a1 = arg0->ExtParam1;
+        g_Sound_MasterFadeTimer.Value = 0x7F0000;
+        g_Sound_GlobalFlags.MixBehavior |= 0x100;
+        g_Sound_MasterFadeTimer.TicksRemaining = temp_a1;
+        g_Sound_MasterFadeTimer.Step = (int)0xFF810000 / temp_a1;
+    }
+    g_pActiveMusicConfig->A_Volume = 0;
+    g_pActiveMusicConfig->unk68 = arg0->ExtParam1;
+    g_pActiveMusicConfig->unk64 = ((arg0->ExtParam2 & 0x7F) << 0x10) / arg0->ExtParam1;
+    func_80015BAC();
+}
+
+void Sound_Cmd_12_unk(FSoundCommandParams* in_Params)
+{
+    int LoopCounter;
+
+    Sound_Cmd_10_StartFieldMusic(in_Params);
+    LoopCounter = 0;
+    if (in_Params->Param4 != 0) {
+        LoopCounter = in_Params->Param4 - 1;
+    }
+    g_Music_LoopCounter = LoopCounter;
+}
+
+void Sound_Cmd_34_unk(FSoundCommandParams* arg0)
+{
+    char* temp_a1;
+    char* temp_a2;
+
+    temp_a1 = (char*)arg0->Param1;
+    temp_a2 = (char*)arg0->Param2;
+    arg0->Param1 = 0x400;
+    arg0->Param2 = 0x01000000;
+    arg0->Param3 = 0x80;
+    arg0->Param4 = 0x7F;
+    arg0->ExtParam1 = 0;
+    Sound_PlaySfxProgram(arg0, temp_a1, temp_a2, 0);
+}
+
+void Sound_Cmd_30_unk(FSoundCommandParams* arg0)
+{
+    char* sp10;
+    char* sp14;
+
+    Sound_GetProgramCounters(&sp10, &sp14, arg0->Param1);
+    arg0->Param2 = 0x02000000;
+    arg0->Param3 = 0x80;
+    arg0->Param4 = 0x7F;
+    arg0->ExtParam1 = func_80016DA8(g_Sound_SfxMetadataTable[arg0->Param1]);
+    Sound_PlaySfxProgram(arg0, sp10, sp14, 0);
+}
+
+void Sound_Cmd_20_unk(FSoundCommandParams* arg0)
+{
+    char* akaoOffset;
+    char* akaoData;
+
+    Sound_GetProgramCounters(&akaoOffset, &akaoData, arg0->Param1);
+    arg0->ExtParam1 = func_80016DA8(g_Sound_SfxMetadataTable[arg0->Param1]);
+    Sound_PlaySfxProgram(arg0, akaoOffset, akaoData, 0);
+}
+
+// https://decomp.me/scratch/wOmFh
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_8001733C);
+
+void Sound_Cmd_21_unk(FSoundCommandParams* arg0)
+{
+    func_800161C4(arg0->Param1, arg0->Param2);
+}
+
+void Sound_Cmd_C0_unk(FSoundCommandParams* arg0)
+{
+    FSoundChannel* var_a1;
+    FSoundChannelConfig* var_a0;
+    int temp_v1;
+
+    temp_v1 = arg0->Param1;
+    if ((temp_v1 == 0) || (temp_v1 == g_pActiveMusicConfig->MusicId)) {
+        var_a0 = g_pActiveMusicConfig;
+        var_a1 = g_ActiveMusicChannels;
+        var_a0->A_Volume = (arg0->Param2 & 0x7F) << 0x10;
+        var_a0->unk68 = 0;
+        Sound_MarkActiveChannelsVolumeDirty(var_a0, var_a1);
+    } else {
+        var_a0 = g_pSavedMousicConfig;
+        if ((var_a0 != NULL) && (temp_v1 != 0) && (temp_v1 == var_a0->MusicId)) {
+            var_a1 = g_pSecondaryMusicChannels;
+            var_a0->A_Volume = (arg0->Param2 & 0x7F) << 0x10;
+            var_a0->unk68 = 0;
+            Sound_MarkActiveChannelsVolumeDirty(var_a0, var_a1);
+        }
+    }
+}
+
+void Sound_Cmd_C1_unk(FSoundCommandParams* arg0)
+{
+    FSoundChannel* var_a1;
+    FSoundChannelConfig* var_a0;
+    int temp_a1;
+    int var_v1;
+
+    int var_a2 = 1;
+
+    if (arg0->Param2 != 0) {
+        var_a2 = arg0->Param2;
+    }
+
+    temp_a1 = arg0->Param1;
+    var_v1 = (arg0->Param3 & 0x7F) << 0x10;
+
+    if ((temp_a1 == 0) || (temp_a1 == g_pActiveMusicConfig->MusicId)) {
+        var_a0 = g_pActiveMusicConfig;
+        var_v1 = (int)(var_v1 - var_a0->A_Volume);
+        var_v1 = var_v1 / var_a2;
+        var_a1 = g_ActiveMusicChannels;
+        var_a0->unk68 = var_a2;
+        var_a0->unk64 = var_v1;
+        Sound_MarkActiveChannelsVolumeDirty(var_a0, var_a1);
+    } else {
+        var_a0 = g_pSavedMousicConfig;
+        if ((var_a0 != NULL) && (temp_a1 != 0) && (temp_a1 == var_a0->MusicId)) {
+            var_v1 = (int)(var_v1 - var_a0->A_Volume);
+            var_v1 = var_v1 / var_a2;
+            var_a1 = g_pSecondaryMusicChannels;
+            var_a0->unk68 = var_a2;
+            var_a0->unk64 = var_v1;
+            Sound_MarkActiveChannelsVolumeDirty(var_a0, var_a1);
+        }
+    }
+}
+
+void Sound_Cmd_C2_unk(FSoundCommandParams* arg0)
+{
+    FSoundChannel* var_a1;
+    FSoundChannelConfig* var_a0;
+    int temp_v0;
+    int temp_v1;
+    int var_a2;
+    u_int temp_v1_2;
+
+    temp_v0 = arg0->Param2;
+    var_a2 = 1;
+    if (temp_v0 != 0) {
+        var_a2 = temp_v0;
+    }
+    temp_v1 = arg0->Param1;
+    if ((temp_v1 == 0) || (temp_v1 == g_pActiveMusicConfig->MusicId)) {
+        var_a0 = g_pActiveMusicConfig;
+        var_a1 = g_ActiveMusicChannels;
+    } else {
+        var_a0 = g_pSavedMousicConfig;
+        if ((var_a0 == NULL) || (temp_v1 == 0) || (temp_v1 != var_a0->MusicId)) {
+            return;
+        }
+        var_a1 = g_pSecondaryMusicChannels;
+    }
+    temp_v1_2 = (arg0->Param3 & 0x7F) << 0x10;
+    var_a0->A_Volume = temp_v1_2;
+    var_a0->unk64 = (int)(((arg0->Param4 & 0x7F) << 0x10) - temp_v1_2) / var_a2;
+    var_a0->unk68 = var_a2;
+    Sound_MarkActiveChannelsVolumeDirty(var_a0, var_a1);
+}
+
+void Sound_Cmd_C8_unk(FSoundCommandParams* arg0)
+{
+    g_Sound_CdVolumeFadeLength = 0;
+    g_CdVolume = (u_short)arg0->Param1 << 0x10;
+    UpdateCdVolume();
+}
+
+void Sound_Cmd_C9_unk(FSoundCommandParams* arg0)
+{
+    int temp_v0;
+    int var_a1;
+
+    temp_v0 = arg0->Param1;
+    var_a1 = 1;
+    if (temp_v0 != 0) {
+        var_a1 = temp_v0;
+    }
+    g_Sound_CdVolumeFadeLength = var_a1;
+    g_Sound_CdVolumeFadeStep = (((u_short)arg0->Param2 << 0x10) - g_CdVolume) / var_a1;
+}
+
+void Sound_Cmd_CA_unk(FSoundCommandParams* arg0)
+{
+    unsigned int new_var;
+    int var_a1 = 1;
+    if (arg0->Param1 != 0) {
+        var_a1 = arg0->Param1;
+    }
+    g_Sound_CdVolumeFadeLength = var_a1;
+    new_var = ((u_short)arg0->Param3) << 0x10;
+    g_CdVolume = (u_short)arg0->Param2 << 0x10;
+    g_Sound_CdVolumeFadeStep = (int)(new_var - g_CdVolume) / var_a1;
+}
+
+void Sound_Cmd_A0_unk(FSoundCommandParams* arg0)
+{
+    u_int i;
+    FSoundChannel* var_a1 = D_80035910;
+    u_int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+    int var_a3 = 0x1000;
+
+    if (arg0->Param2 != 0) {
+        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
+            if ((mask & var_a3) && (var_a1->unk28 & arg0->Param2)) {
+                var_a1->unkDC = (arg0->Param3 & 0x7F) << 8;
+                var_a1->unk8C = 0;
+                var_a1->VoiceParams.VoiceParamFlags |= 3;
+            }
+        }
+    } else {
+        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
+            if ((mask & var_a3) && (var_a1->unk3C == arg0->Param1)) {
+                var_a1->unkDC = (arg0->Param3 & 0x7F) << 8;
+                var_a1->unk8C = 0;
+                var_a1->VoiceParams.VoiceParamFlags |= 3;
+            }
+        }
+    }
+}
+
+void Sound_Cmd_A1_unk(FSoundCommandParams* arg0)
+{
+    u_int i;
+    FSoundChannel* var_a2 = D_80035910;
+    int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+    int var_t0 = 0x1000;
+
+    if (arg0->Param2 != 0) {
+        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
+            if ((mask & var_t0) && (var_a2->unk28 & arg0->Param2)) {
+                short v = arg0->Param3 != 0 ? arg0->Param3 : 1;
+                var_a2->unkDE = (short)(((arg0->Param4 & 0x7F) << 8) - var_a2->unkDC) / v;
+                var_a2->unk8C = v;
+            }
+        }
+    } else {
+        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
+            if ((mask & var_t0) && (var_a2->unk3C == arg0->Param1)) {
+                short v = arg0->Param3 != 0 ? arg0->Param3 : 1;
+                var_a2->unkDE = (short)(((arg0->Param4 & 0x7F) << 8) - var_a2->unkDC) / v;
+                var_a2->unk8C = v;
+            }
+        }
+    }
+}
+
+void Sound_Cmd_A8_unk(FSoundCommandParams* arg0)
+{
+    int var_a3 = 0x1000;
+    int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+    u_int i;
+    FSoundChannel* var_a1;
+
+    for (i = 0, var_a1 = D_80035910; i < 12; ++i, ++var_a1, var_a3 *= 2) {
+        if ((mask & var_a3) && !(var_a1->unk28 & 0x02000000)) {
+            var_a1->unkDC = (arg0->Param1 & 0x7F) << 8;
+            var_a1->unk8C = 0;
+            var_a1->VoiceParams.VoiceParamFlags |= 3;
+        }
+    }
+}
+
+void Sound_Cmd_A9_unk(FSoundCommandParams* arg0)
+{
+    short var_a1;
+    int var_t0 = 0x1000;
+    int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+    u_int i;
+    FSoundChannel* var_a2;
+
+    for (i = 0, var_a2 = D_80035910; i < 12; ++i, ++var_a2, var_t0 *= 2) {
+        if ((mask & var_t0) && !(var_a2->unk28 & 0x02000000)) {
+            var_a1 = 1;
+            if (arg0->Param1 != 0) {
+                var_a1 = arg0->Param1;
+            }
+            var_a2->unkDE =
+                ((short)(((arg0->Param2 & 0x7F) << 8) - var_a2->unkDC) / var_a1);
+            var_a2->unk8C = var_a1;
+        }
+    }
+}
+
+void Sound_Cmd_A2_unk(FSoundCommandParams* arg0)
+{
+    u_int i;
+    FSoundChannel* var_a1 = D_80035910;
+    u_int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+    int var_a3 = 0x1000;
+
+    if (arg0->Param2 != 0) {
+        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
+            if ((mask & var_a3) && (var_a1->unk28 & arg0->Param2)) {
+                var_a1->unk6C = ((char)arg0->Param3) << 8;
+                var_a1->unk6E = 0;
+                var_a1->VoiceParams.VoiceParamFlags |= 3;
+            }
+        }
+    } else {
+        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
+            if ((mask & var_a3) && (var_a1->unk3C == arg0->Param1)) {
+                var_a1->unk6C = ((char)arg0->Param3) << 8;
+                var_a1->unk6E = 0;
+                var_a1->VoiceParams.VoiceParamFlags |= 3;
+            }
+        }
+    }
+}
+
+void Sound_Cmd_A3_unk(FSoundCommandParams* arg0)
+{
+    u_int i;
+    FSoundChannel* var_a2 = D_80035910;
+    int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+    int var_t0 = 0x1000;
+
+    if (arg0->Param2 != 0) {
+        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
+            if ((mask & var_t0) && (var_a2->unk28 & arg0->Param2)) {
+                short v = arg0->Param3 != 0 ? arg0->Param3 : 1;
+                var_a2->unkDA = (short)((((char)arg0->Param4) << 8) - var_a2->unk6C) / v;
+                var_a2->unk6E = v;
+            }
+        }
+    } else {
+        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
+            if ((mask & var_t0) && (var_a2->unk3C == arg0->Param1)) {
+                short v = arg0->Param3 != 0 ? arg0->Param3 : 1;
+                var_a2->unkDA = (short)((((char)arg0->Param4) << 8) - var_a2->unk6C) / v;
+                var_a2->unk6E = v;
+            }
+        }
+    }
+}
+
+void Sound_Cmd_AA_unk(FSoundCommandParams* arg0)
+{
+    int var_a3 = 0x1000;
+    int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+    u_int i;
+    FSoundChannel* var_a1;
+
+    for (i = 0, var_a1 = D_80035910; i < 12; ++i, ++var_a1, var_a3 *= 2) {
+        if ((mask & var_a3) && !(var_a1->unk28 & 0x02000000)) {
+            var_a1->unk6C = ((char)arg0->Param1) << 8;
+            var_a1->unk6E = 0;
+            var_a1->VoiceParams.VoiceParamFlags |= 3;
+        }
+    }
+}
+
+void Sound_Cmd_AB_unk(FSoundCommandParams* arg0)
+{
+    short var_a1;
+    int var_t0 = 0x1000;
+    int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+    u_int i;
+    FSoundChannel* var_a2;
+
+    for (i = 0, var_a2 = D_80035910; i < 12; ++i, ++var_a2, var_t0 *= 2) {
+        if ((mask & var_t0) && !(var_a2->unk28 & 0x02000000)) {
+            var_a1 = 1;
+            if (arg0->Param1 != 0) {
+                var_a1 = arg0->Param1;
+            }
+            var_a2->unkDA = (short)((((char)arg0->Param2) << 8) - var_a2->unk6C) / var_a1;
+            var_a2->unk6E = var_a1;
+        }
+    }
+}
+
+void Sound_Cmd_A4_unk(FSoundCommandParams* arg0)
+{
+    u_int i;
+    FSoundChannel* var_a1 = D_80035910;
+    u_int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+    int var_a3 = 0x1000;
+
+    if (arg0->Param2 != 0) {
+        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
+            if ((mask & var_a3) && (var_a1->unk28 & arg0->Param2)) {
+                var_a1->unk40 = ((char)arg0->Param3) << 8;
+                var_a1->unk86 = 0;
+                var_a1->VoiceParams.VoiceParamFlags |= 16;
+            }
+        }
+    } else {
+        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
+            if ((mask & var_a3) && (var_a1->unk3C == arg0->Param1)) {
+                var_a1->unk40 = ((char)arg0->Param3) << 8;
+                var_a1->unk86 = 0;
+                var_a1->VoiceParams.VoiceParamFlags |= 16;
+            }
+        }
+    }
+}
+
+void Sound_Cmd_A5_unk(FSoundCommandParams* arg0)
+{
+    u_int i;
+    FSoundChannel* var_a2 = D_80035910;
+    int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+    int var_t0 = 0x1000;
+
+    if (arg0->Param2 != 0) {
+        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
+            if ((mask & var_t0) && (var_a2->unk28 & arg0->Param2)) {
+                short v = arg0->Param3 != 0 ? arg0->Param3 : 1;
+                var_a2->unk44 =
+                    (short)((short)((((char)arg0->Param4) << 8) - var_a2->unk40) / v);
+                var_a2->unk86 = v;
+            }
+        }
+    } else {
+        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
+            if ((mask & var_t0) && (var_a2->unk3C == arg0->Param1)) {
+                short v = arg0->Param3 != 0 ? arg0->Param3 : 1;
+                var_a2->unk44 =
+                    (short)((short)((((char)arg0->Param4) << 8) - var_a2->unk40) / v);
+                var_a2->unk86 = v;
+            }
+        }
+    }
+}
+
+void Sound_Cmd_AC_unk(FSoundCommandParams* arg0)
+{
+    int i;
+    FSoundChannel* var_a1 = D_80035910;
+    for (i = 12; i != 0; --i, ++var_a1) {
+        if (!(var_a1->unk28 & 0x02000000)) {
+            var_a1->unk40 = (char)arg0->Param1 << 8;
+            var_a1->unk86 = 0;
+            var_a1->VoiceParams.VoiceParamFlags |= 0x10;
+        }
+    }
+}
+
+void Sound_Cmd_AD_unk(FSoundCommandParams* arg0)
+{
+    short var_a1;
+    int var_t0 = 0x1000;
+    int mask = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+    u_int i;
+    FSoundChannel* var_a2;
+
+    for (i = 0, var_a2 = D_80035910; i < 12; ++i, ++var_a2, var_t0 *= 2) {
+        if ((mask & var_t0) && !(var_a2->unk28 & 0x02000000)) {
+            var_a1 = 1;
+            if (arg0->Param1 != 0) {
+                var_a1 = arg0->Param1;
+            }
+            var_a2->unk44 =
+                (short)((short)((((char)arg0->Param2) << 8) - var_a2->unk40) / var_a1);
+            var_a2->unk86 = var_a1;
+        }
+    }
+}
+
+void func_8001833C(signed char* arg0)
+{
+    g_Sound_TempoMultiplier = *arg0 << 0x10;
+    D_80036782 = 0;
+}
+
+void func_80018358(FSoundCommandParams* arg0)
+{
+    int temp_v0 = arg0->Param1;
+    int var_a1 = 1;
+    if (temp_v0 != 0) {
+        var_a1 = temp_v0;
+    }
+    D_8003677C = (((signed char)arg0->Param2 << 0x10) - g_Sound_TempoMultiplier) / var_a1;
+    D_80036782 = var_a1;
+}
+
+void func_800183C0(FSoundCommandParams* arg0)
+{
+    int var_a1;
+
+    var_a1 = 1;
+    if (arg0->Param2 != 0) {
+        var_a1 = arg0->Param1;
+    }
+    g_Sound_TempoMultiplier = (signed char)arg0->Param2 << 0x10;
+    D_8003677C =
+        (int)(((signed char)arg0->Param3 << 0x10) - g_Sound_TempoMultiplier) / var_a1;
+    D_80036782 = var_a1;
+}
+
+void func_80018434(signed char* arg0)
+{
+    g_Sound_MasterPitchScaleQ16_16 = *arg0 << 0x10;
+    D_80036780 = 0;
+}
+
+void func_80018450(FSoundCommandParams* arg0)
+{
+    int temp_v0;
+    int var_a1;
+
+    temp_v0 = arg0->Param1;
+    var_a1 = 1;
+    if (temp_v0 != 0) {
+        var_a1 = temp_v0;
+    }
+    D_80036778 =
+        (int)(((signed char)arg0->Param2 << 0x10) - g_Sound_MasterPitchScaleQ16_16)
+        / var_a1;
+    D_80036780 = (short)var_a1;
+}
+
+void func_800184B8(FSoundCommandParams* arg0)
+{
+    int var_a1;
+
+    var_a1 = 1;
+    if (arg0->Param2 != 0) {
+        var_a1 = arg0->Param1;
+    }
+    g_Sound_MasterPitchScaleQ16_16 = (signed char)arg0->Param2 << 0x10;
+    D_80036778 =
+        (((signed char)arg0->Param3 << 0x10) - g_Sound_MasterPitchScaleQ16_16) / var_a1;
+    D_80036780 = var_a1;
+}
+
+void func_8001852C(void)
+{
+    Sound_KillMusicConfig(g_pActiveMusicConfig, g_ActiveMusicChannels, 0);
+
+    if (g_pSavedMousicConfig != NULL) {
+        Sound_KillMusicConfig(g_pSavedMousicConfig, g_pSecondaryMusicChannels, 0);
+    }
+
+    g_pActiveMusicConfig->StatusFlags &= 0xFFFEFFFF;
+    *(int*)&D_80037788.Param1 = 0;
+}
+
+void Sound_Cmd_11_StopAllMusic(FSoundCommandParams* in_Params)
+{
+    Sound_KillMusicConfig(g_pActiveMusicConfig, g_ActiveMusicChannels, in_Params->Param1);
+    if (g_pSavedMousicConfig != NULL) {
+        if (in_Params->Param1 != 0) {
+            Sound_KillMusicConfig(
+                g_pSavedMousicConfig, g_pSecondaryMusicChannels, in_Params->Param1);
+        }
+    }
+}
+
+void Sound_ClearVoiceFromSchedulerState(FSoundChannel* arg0, int arg1);
+
+void func_80018608(void)
+{
+    FSoundChannel* var_s2;
+    int var_s1;
+    u_int i;
+
+    var_s2 = D_80035910;
+    var_s1 = 0x1000;
+    for (i = 0; i < 12; ++i, ++var_s2, var_s1 *= 2) {
+        if ((g_Sound_VoiceSchedulerState.ActiveChannelMask & var_s1)
+            && !(var_s2->unk28 & 0x02000000)) {
+            g_Sound_VoiceSchedulerState.KeyOffFlags |= var_s1;
+            Sound_ClearVoiceFromSchedulerState(var_s2, var_s1);
+            var_s2->UpdateFlags = 0;
+        }
+    }
+    g_Sound_GlobalFlags.UpdateFlags |= 0x110;
+}
+
+void Sound_Cmd_80_unk(FSoundCommandParams* in_Params __attribute__((unused)))
+{
+    D_80039AFC = 1;
+    Sound_MarkActiveChannelsVolumeDirty(g_pActiveMusicConfig, g_ActiveMusicChannels);
+    if (g_pSavedMousicConfig != NULL) {
+        Sound_MarkActiveChannelsVolumeDirty(
+            g_pSavedMousicConfig, g_pSecondaryMusicChannels);
+    }
+    Sound_MarkScheduledSfxChannelsVolumeDirty();
+}
+
+void Sound_Cmd_81_unk(FSoundCommandParams* in_Params __attribute__((unused)))
+{
+    D_80039AFC = 2;
+    Sound_MarkActiveChannelsVolumeDirty(g_pActiveMusicConfig, g_ActiveMusicChannels);
+    if (g_pSavedMousicConfig != NULL) {
+        Sound_MarkActiveChannelsVolumeDirty(
+            g_pSavedMousicConfig, g_pSecondaryMusicChannels);
+    }
+    Sound_MarkScheduledSfxChannelsVolumeDirty();
+}
+
+void Sound_Cmd_90_unk(FSoundCommandParams* arg0)
+{
+    u_int i;
+    FSoundChannel* c;
+
+    D_800378E4 = arg0->Param1;
+
+    for (i = 0, c = g_ActiveMusicChannels; i < 32; ++i, ++c) {
+        c->VoiceParams.VoiceParamFlags |= 3;
+    }
+}
+
+void Sound_Cmd_92_unk(FSoundCommandParams* arg0)
+{
+    g_pActiveMusicConfig->JumpThresholdValue = arg0->Param1;
+}
+
+void Sound_Cmd_9B_unk(FSoundCommandParams* arg0 __attribute__((unused)))
+{
+    int temp_v1;
+    int var_s0;
+    int var_s1;
+    int var_s2;
+
+    if (g_pActiveMusicConfig->ActiveChannelMask != 0) {
+        int v0 = ~(g_Sound_VoiceSchedulerState.ActiveChannelMask | D_80039B14);
+        var_s2 = 1;
+        var_s1 = v0 & 0xFFFFFF;
+
+        if (var_s1 != 0) {
+            var_s0 = 0;
+            while (var_s1 != 0) {
+                if (var_s1 & var_s2) {
+                    SetVoiceVolume(var_s0, 0, 0, 0);
+                    SetVoiceSampleRate(var_s0, 0);
+                    SetVoiceAdsrAttackRateAndMode(var_s0, 0x7F, 1);
+                    SetVoiceAdsrSustainRateAndDirection(var_s0, 0x7F, 3);
+                    var_s1 &= ~var_s2;
+                }
+                var_s2 *= 2;
+                var_s0 += 1;
+            }
+        }
+        temp_v1 = g_pActiveMusicConfig->ActiveChannelMask;
+        g_pActiveMusicConfig->ActiveChannelMask = 0;
+        g_pActiveMusicConfig->unk1C = temp_v1;
+    }
+    D_80039B64 |= 1;
+}
+
+void Sound_Cmd_9A_unk(FSoundCommandParams* in_Params __attribute__((unused)))
+{
+    if (g_pActiveMusicConfig->unk1C != 0) {
+        FSoundChannel* c = g_ActiveMusicChannels;
+        int var_a2 = g_pActiveMusicConfig->unk1C;
+        int var_a1 = 1;
+        u_int temp_v1;
+        do {
+            if (var_a2 & var_a1) {
+                var_a2 &= ~var_a1;
+                c->VoiceParams.VoiceParamFlags |= 0x2B13;
+            }
+            var_a1 *= 2;
+            ++c;
+        } while (var_a2 != 0);
+
+        temp_v1 = g_pActiveMusicConfig->unk1C;
+        g_pActiveMusicConfig->unk1C = 0;
+        g_pActiveMusicConfig->ActiveChannelMask = temp_v1;
+        g_Sound_GlobalFlags.UpdateFlags |= 0x100;
+    }
+    D_80039B64 &= ~1;
+}
+
+void Sound_Cmd_9D_unk(FSoundCommandParams* in_Params __attribute__((unused)))
+{
+    FSoundChannel* var_a0;
+    int var_s0;
+    int var_s2;
+    int var_s1;
+    u_int i;
+
+    if (g_Sound_VoiceSchedulerState.ActiveChannelMask != 0) {
+        var_s1 = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+        var_a0 = D_80035910;
+        var_s0 = 0x1000;
+
+        for (i = 0; i < 12; ++i, ++var_a0, var_s0 *= 2) {
+            if ((var_s1 & var_s0) && (var_a0->unk28 & 0x02000000)) {
+                var_s1 &= ~var_s0;
+            }
+        }
+
+        var_s0 = 0x1000;
+        var_s2 = 0xC;
+        g_Sound_VoiceSchedulerState.unk_Flags_0x10 = var_s1;
+        g_Sound_VoiceSchedulerState.ActiveChannelMask &= ~var_s1;
+
+        while (var_s1 != 0) {
+            if (var_s1 & var_s0) {
+                SetVoiceVolume(var_s2, 0, 0, 0);
+                SetVoiceSampleRate(var_s2, 0);
+                SetVoiceAdsrAttackRateAndMode(var_s2, 0x7F, 1);
+                SetVoiceAdsrSustainRateAndDirection(var_s2, 0x7F, 3);
+                var_s1 &= ~var_s0;
+            }
+            var_s0 *= 2;
+            var_s2 += 1;
+        }
+    }
+    D_80039B64 |= 2;
+}
+
+void Sound_Cmd_9C_unk(FSoundCommandParams* in_Params __attribute__((unused)))
+{
+    if (D_800378A0 != 0) {
+        u_int temp_a2;
+        FSoundChannel* c = D_80035910;
+        int var_a2 = D_800378A0;
+        int var_a1 = 0x1000;
+
+        do {
+            if (var_a2 & var_a1) {
+                var_a2 &= ~var_a1;
+                c->VoiceParams.VoiceParamFlags |= 0x2B13;
+            }
+            var_a1 *= 2;
+            ++c;
+        } while (var_a2 != 0);
+
+        temp_a2 = g_Sound_VoiceSchedulerState.unk_Flags_0x10;
+        g_Sound_VoiceSchedulerState.unk_Flags_0x10 = 0;
+        g_Sound_VoiceSchedulerState.ActiveChannelMask |= temp_a2;
+        g_Sound_GlobalFlags.UpdateFlags |= 0x100;
+    }
+    D_80039B64 &= ~2;
+}
+
+void Sound_Cmd_9F_unk(FSoundCommandParams* in_Params __attribute__((unused)))
+{
+    if (g_Sound_Cutscene_StreamState.VoicesInUseFlags != 0) {
+        SetVoiceSampleRate(g_Sound_Cutscene_StreamState.VoiceIndex, 0);
+        SetVoiceSampleRate(g_Sound_Cutscene_StreamState.VoiceIndex + 1, 0);
+    }
+}
+
+void Sound_Cmd_9E_unk(FSoundCommandParams* in_Params __attribute__((unused)))
+{
+    if (g_Sound_Cutscene_StreamState.VoicesInUseFlags != 0) {
+        SetVoiceSampleRate(g_Sound_Cutscene_StreamState.VoiceIndex,
+            g_Sound_Cutscene_StreamState.VoiceSampleRate);
+        SetVoiceSampleRate(g_Sound_Cutscene_StreamState.VoiceIndex + 1,
+            g_Sound_Cutscene_StreamState.VoiceSampleRate);
+    }
+}
+
+void Sound_Cmd_11_Nop(FSoundCommandParams* in_Params __attribute__((unused))) { }
+
+void Sound_SetReverbMode(int in_ReverbMode)
+{
+    long curMode;
+
+    SpuGetReverbModeType(&curMode);
+    if (curMode != in_ReverbMode) {
+        SpuSetReverb(SPU_OFF);
+        SpuSetReverbModeType(in_ReverbMode | SPU_REV_MODE_CLEAR_WA);
+        SpuSetReverb(SPU_ON);
+    }
+}
+
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_80018C30);
+
+void UpdateCdVolume(void)
+{
+    int v = D_800378E2;
+    *CD_VOL_L = v;
+    *CD_VOL_R = v;
+}
+
+void Sound_memcpy32(void* in_Src, void* in_Dst, u_int in_Size)
+{
+    int w0, w1, w2, w3;
+
+    in_Size >>= 2;
+
+    while ((in_Size >> 2) != 0) {
+        w0 = ((int*)in_Src)[0];
+        w1 = ((int*)in_Src)[1];
+        w2 = ((int*)in_Src)[2];
+        w3 = ((int*)in_Src)[3];
+        ((int*)in_Dst)[0] = w0;
+        ((int*)in_Dst)[1] = w1;
+        ((int*)in_Dst)[2] = w2;
+        ((int*)in_Dst)[3] = w3;
+        in_Src += 0x10;
+        in_Dst += 0x10;
+        in_Size -= 4;
+    }
+
+    while (in_Size != 0) {
+        *(int*)in_Dst = *(int*)in_Src;
+        in_Dst += 4;
+        in_Src += 4;
+        in_Size--;
+    }
+}
+
+void Sound_memswp32(void* in_A, void* in_B, u_int in_Size)
+{
+    int a0, a1, b0, b1;
+
+    in_Size >>= 2;
+
+    while ((in_Size >> 1) != 0) {
+        a0 = ((int*)in_A)[0];
+        b0 = ((int*)in_B)[0];
+        a1 = ((int*)in_A)[1];
+        b1 = ((int*)in_B)[1];
+
+        ((int*)in_B)[0] = a0;
+        ((int*)in_B)[1] = a1;
+        ((int*)in_A)[0] = b0;
+        ((int*)in_A)[1] = b1;
+
+        in_A += 8;
+        in_B += 8;
+
+        in_Size -= 2;
+    }
+
+    if (in_Size != 0) {
+        a0 = *(int*)in_A;
+        b0 = *(int*)in_B;
+        *(int*)in_B = a0;
+        *(int*)in_A = b0;
+    }
+}
+
+void func_8001924C(void)
+{
+    int temp_s1;
+    int var_a2;
+    FSoundChannel* var_a1_2;
+    int var_a3;
+    FSoundChannel* var_v1;
+
+    g_Sound_LfoPhase = (g_Sound_LfoPhase + 1) & 0xFF;
+    if (g_Sound_CdVolumeFadeLength != 0) {
+        --g_Sound_CdVolumeFadeLength;
+        g_CdVolume += g_Sound_CdVolumeFadeStep;
+        UpdateCdVolume();
+    }
+    if ((g_Sound_Cutscene_StreamState.VoicesInUseFlags != 0)
+        && (g_Sound_Cutscene_StreamState.VolFadeStepsRemaining != 0)) {
+        --g_Sound_Cutscene_StreamState.VolFadeStepsRemaining;
+        temp_s1 = g_Sound_Cutscene_StreamState.Volume
+                + g_Sound_Cutscene_StreamState.VolFadeStepSize;
+        if ((temp_s1 & 0xFF00) != (g_Sound_Cutscene_StreamState.Volume & 0xFF00)) {
+            if (D_80039AFC & 2) {
+                int temp_s0 = (g_Sound_Cutscene_StreamState.Volume * D_8002F89C) >> 0x10;
+                SetVoiceVolume(
+                    g_Sound_Cutscene_StreamState.VoiceIndex, temp_s0, temp_s0, 0);
+                SetVoiceVolume(
+                    g_Sound_Cutscene_StreamState.VoiceIndex + 1, temp_s0, temp_s0, 0);
+            } else {
+                int temp_s0 = (temp_s1 << 0xF) >> 0x10;
+                SetVoiceVolume(g_Sound_Cutscene_StreamState.VoiceIndex, temp_s0, 0, 0);
+                SetVoiceVolume(
+                    g_Sound_Cutscene_StreamState.VoiceIndex + 1, 0, temp_s0, 0);
+            }
+        }
+        D_80039B48 = temp_s1 & 0xFFFF;
+    }
+    if (D_80036782 != 0) {
+        --D_80036782;
+        g_Sound_TempoMultiplier += D_8003677C;
+    }
+    if (D_80036780 != 0) {
+        --D_80036780;
+        temp_s1 = g_Sound_MasterPitchScaleQ16_16 + D_80036778;
+
+        if ((temp_s1 & 0xFF0000) != (g_Sound_MasterPitchScaleQ16_16 & 0xFF0000)) {
+            var_v1 = g_ActiveMusicChannels;
+            for (var_a2 = 0x20; var_a2 != 0; --var_a2, ++var_v1) {
+                var_v1->VoiceParams.VoiceParamFlags |= 0x10;
+            }
+        }
+        g_Sound_MasterPitchScaleQ16_16 = temp_s1;
+    }
+    if ((g_pActiveMusicConfig->ActiveChannelMask != 0)
+        && (g_pActiveMusicConfig->unk68 != 0)) {
+        --g_pActiveMusicConfig->unk68;
+        temp_s1 = g_pActiveMusicConfig->A_Volume + g_pActiveMusicConfig->unk64;
+        if ((temp_s1 & 0x7F0000) != (g_pActiveMusicConfig->A_Volume & 0x7F0000)) {
+            Sound_MarkActiveChannelsVolumeDirty(
+                g_pActiveMusicConfig, g_ActiveMusicChannels);
+        }
+        g_pActiveMusicConfig->A_Volume = temp_s1;
+    }
+    if ((g_pSavedMousicConfig != NULL)
+        && (g_pSavedMousicConfig->ActiveChannelMask != 0)) {
+        if (g_pSavedMousicConfig->unk68 != 0) {
+            --g_pSavedMousicConfig->unk68;
+            temp_s1 = g_pSavedMousicConfig->A_Volume + g_pSavedMousicConfig->unk64;
+            if ((temp_s1 & 0x7F0000) != (g_pSavedMousicConfig->A_Volume & 0x7F0000)) {
+                Sound_MarkActiveChannelsVolumeDirty(
+                    g_pSavedMousicConfig, g_pSecondaryMusicChannels);
+            }
+            g_pSavedMousicConfig->A_Volume = temp_s1;
+        }
+    }
+    if (g_Sound_VoiceSchedulerState.ActiveChannelMask != 0) {
+        var_a3 = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+        var_a1_2 = D_80035910;
+        do {
+        } while (0);
+        for (var_a2 = 0x1000; var_a3 != 0; var_a2 <<= 1, ++var_a1_2) {
+            if (!(var_a3 & var_a2)) {
+                continue;
+            }
+
+            if (var_a1_2->unk8C != 0) {
+                --var_a1_2->unk8C;
+                temp_s1 = var_a1_2->unkDC + var_a1_2->unkDE;
+                if ((temp_s1 & 0xFF00) != (var_a1_2->unkDC & 0xFF00)) {
+                    var_a1_2->VoiceParams.VoiceParamFlags |= 3;
+                }
+                var_a1_2->unkDC = temp_s1;
+            }
+
+            if (var_a1_2->unk6E != 0) {
+                --var_a1_2->unk6E;
+                temp_s1 = var_a1_2->unk6C + var_a1_2->unkDA;
+                if ((temp_s1 & 0xFF00) != (var_a1_2->unk6C & 0xFF00)) {
+                    var_a1_2->VoiceParams.VoiceParamFlags |= 3;
+                }
+                var_a1_2->unk6C = temp_s1;
+            }
+
+            if (var_a1_2->unk86 != 0) {
+                --var_a1_2->unk86;
+                temp_s1 = var_a1_2->unk40 + var_a1_2->unk44;
+                if ((temp_s1 & 0xFF00) != (var_a1_2->unk40 & 0xFF00)) {
+                    var_a1_2->VoiceParams.VoiceParamFlags |= 0x10;
+                }
+                var_a1_2->unk40 = temp_s1;
+            }
+            var_a3 ^= var_a2;
+        }
+    }
+}
+
+void func_80019614(void)
+{
+    int temp_v1;
+    if (g_Sound_GlobalFlags.ControlLatches & 0x6600) {
+        temp_v1 = g_pActiveMusicConfig->TimerLowerCurrent
+                + (g_pActiveMusicConfig->TimerUpperCurrent << 0x10);
+        D_800378D4 = temp_v1;
+        if (D_800378D4 == 0) {
+            if (g_Sound_GlobalFlags.ControlLatches & 0x100) {
+                if (g_Sound_GlobalFlags.ControlLatches & 0x4000) {
+                    g_Sound_GlobalFlags.ControlLatches =
+                        (g_Sound_GlobalFlags.ControlLatches & ~0x4000) | 0x2000;
+                    return;
+                }
+                g_Sound_GlobalFlags.ControlLatches =
+                    (g_Sound_GlobalFlags.ControlLatches & ~0x2100) | 0x1000;
+                g_pActiveMusicConfig->PendingKeyOffMask |=
+                    g_pActiveMusicConfig->ActiveChannelMask
+                    & ~g_pActiveMusicConfig->unk30;
+                g_pActiveMusicConfig->ActiveNoteMask &= g_pActiveMusicConfig->unk30;
+                return;
+            }
+            if (g_Sound_GlobalFlags.ControlLatches & 0x400) {
+                g_Sound_GlobalFlags.ControlLatches =
+                    (g_Sound_GlobalFlags.ControlLatches & ~0x400) | 0x200;
+                return;
+            }
+            g_Sound_GlobalFlags.ControlLatches =
+                (g_Sound_GlobalFlags.ControlLatches & ~0x1200) | 0x100;
+            g_pSavedMousicConfig->ActiveNoteMask = 0;
+            g_pSavedMousicConfig->PendingKeyOffMask |=
+                g_pSavedMousicConfig->ActiveChannelMask;
+        }
+    }
+}
+
+int func_80019704(FSoundChannel* arg0, int arg1)
+{
+    FSoundChannel* var_s2;
+    int var_s3;
+    u_int var_s1;
+
+    int var_a0 = (u_short)(g_pActiveMusicConfig->Tempo >> 16);
+    u_int tempoScale = D_80039AF2;
+
+    if (tempoScale != 0) {
+        if (tempoScale < 0x80) {
+            var_a0 += (var_a0 * tempoScale) >> 7;
+        } else {
+            var_a0 = (var_a0 * tempoScale) >> 8;
+        }
+    }
+
+    g_pActiveMusicConfig->unk28 += var_a0;
+
+    if ((g_pActiveMusicConfig->unk28 & 0xFFFF0000) || (D_80039B64 & 4)) {
+        g_pActiveMusicConfig->unk28 = g_pActiveMusicConfig->unk28 & 0xFFFF;
+
+        do {
+            var_s2 = arg0;
+            var_s1 = 1;
+            var_s3 = g_pActiveMusicConfig->ActiveChannelMask;
+
+            do {
+                if (var_s3 & var_s1) {
+                    --var_s2->Length1;
+                    --var_s2->Length2;
+                    if (var_s2->Length1 == 0) {
+                        func_8001A8D8(var_s2, var_s1);
+                    } else if (var_s2->Length2 == 0) {
+                        g_pActiveMusicConfig->PendingKeyOffMask |= var_s1;
+                    }
+                    Sound_UpdateSlidesAndDelays(var_s2, var_s1, 0);
+                    var_s3 &= ~var_s1;
+                }
+                ++var_s2;
+                var_s1 *= 2;
+            } while (var_s3 != 0);
+
+            if (g_pActiveMusicConfig->TempoSlideLength != 0) {
+                --g_pActiveMusicConfig->TempoSlideLength;
+                g_pActiveMusicConfig->Tempo += g_pActiveMusicConfig->TempoSlideStep;
+            }
+
+            if (g_pActiveMusicConfig->ReverbDepthSlideLength != 0) {
+                --g_pActiveMusicConfig->ReverbDepthSlideLength;
+                g_pActiveMusicConfig->RevDepth += g_pActiveMusicConfig->unk5C;
+                g_Sound_GlobalFlags.UpdateFlags |= (arg1 == 0) ? 0x80 : 0;
+            }
+
+            if (g_pActiveMusicConfig->TimerLower == 0) {
+                continue;
+            }
+
+            ++g_pActiveMusicConfig->TimerLowerCurrent;
+
+            if (g_pActiveMusicConfig->TimerLowerCurrent
+                != g_pActiveMusicConfig->TimerLower) {
+                continue;
+            }
+
+            g_pActiveMusicConfig->TimerLowerCurrent = 0;
+            ++g_pActiveMusicConfig->TimerUpperCurrent;
+
+            if (g_pActiveMusicConfig->TimerUpperCurrent
+                != g_pActiveMusicConfig->TimerUpper) {
+                continue;
+            }
+
+            g_pActiveMusicConfig->TimerUpperCurrent = 0;
+            ++g_pActiveMusicConfig->TimerTopCurrent;
+
+            if ((arg1 == 0) && (g_Music_LoopCounter != 0)) {
+                --g_Music_LoopCounter;
+            }
+
+            if (g_pActiveMusicConfig == &D_800366F0) {
+                func_80019614();
+            }
+        } while (arg1 == 0 && g_Music_LoopCounter != 0);
+    }
+    while (0)
+        ;
+    return g_pActiveMusicConfig->ActiveChannelMask;
+}
+
+void func_800199C4(FSoundChannelConfig* arg0, FSoundChannel* arg1)
+{
+    int temp_s0;
+
+    if (g_Sound_MasterFadeTimer.TicksRemaining != 0) {
+        --g_Sound_MasterFadeTimer.TicksRemaining;
+        if (g_Sound_MasterFadeTimer.TicksRemaining == 0) {
+            int temp_v0 = arg0->ActiveChannelMask;
+            arg0->MusicId = 0;
+            arg0->ActiveChannelMask = 0;
+            arg0->PendingKeyOnMask = 0;
+            arg0->ActiveNoteMask = 0;
+            arg0->PendingKeyOffMask = temp_v0;
+            return;
+        }
+        temp_s0 = g_Sound_MasterFadeTimer.Value + g_Sound_MasterFadeTimer.Step;
+        if ((temp_s0 & 0xFFFF0000) != (g_Sound_MasterFadeTimer.Value & 0xFFFF0000)) {
+            Sound_MarkActiveChannelsVolumeDirty(arg0, arg1);
+        }
+        g_Sound_MasterFadeTimer.Value = temp_s0;
+    }
+}
+
+long func_80019A58(void)
+{
+    FSoundChannel* var_s2_2;
+    FSoundChannelConfig* temp_v0;
+    FSoundChannelConfig* var_a0;
+    int var_s5;
+    int var_s1;
+    int i;
+    u_short* p;
+
+    var_s5 = GetRCnt(RCntCNT2);
+    ++D_8002F54C;
+    if (g_Sound_GlobalFlags.ControlLatches & 0x1100) {
+        if (g_Sound_GlobalFlags.ControlLatches & 0x100) {
+            if (g_Sound_GlobalFlags.ControlLatches & 0x6000) {
+                g_pSavedMousicConfig->PendingKeyOnMask &= g_pSavedMousicConfig->unk2C;
+                g_pSavedMousicConfig->ActiveNoteMask &= g_pSavedMousicConfig->unk2C;
+            } else {
+                g_pSavedMousicConfig->PendingKeyOnMask = 0;
+                g_pSavedMousicConfig->ActiveNoteMask = 0;
+            }
+            var_a0 = g_pActiveMusicConfig;
+        } else {
+            if (g_Sound_GlobalFlags.ControlLatches & 0x600) {
+                g_pActiveMusicConfig->PendingKeyOnMask &=
+                    g_pActiveMusicConfig->unk2C | g_pActiveMusicConfig->unk30;
+                g_pActiveMusicConfig->ActiveNoteMask &=
+                    g_pActiveMusicConfig->unk2C | g_pActiveMusicConfig->unk30;
+            } else {
+                g_pActiveMusicConfig->PendingKeyOnMask &= g_pActiveMusicConfig->unk30;
+                g_pActiveMusicConfig->ActiveNoteMask &= g_pActiveMusicConfig->unk30;
+            }
+            var_a0 = g_pSavedMousicConfig;
+        }
+        var_a0->PendingKeyOnMask &= ~var_a0->unk2C;
+        var_a0->ActiveNoteMask &= ~var_a0->unk2C;
+    }
+    if ((g_pActiveMusicConfig->PendingKeyOffMask != 0) || (D_8003789C != 0)
+        || (g_pSavedMousicConfig != NULL
+            && g_pSavedMousicConfig->PendingKeyOffMask != 0)) {
+        Sound_ProcessKeyOffRequests();
+    }
+
+    if (g_pSavedMousicConfig != NULL) {
+        if (g_pSavedMousicConfig->ActiveChannelMask == 0) {
+            g_pSavedMousicConfig = NULL;
+        } else if ((g_pActiveMusicConfig->ActiveChannelMask | g_pActiveMusicConfig->unk1C)
+                   == 0) {
+            Sound_memcpy32(g_pSavedMousicConfig, g_pActiveMusicConfig, 0x80);
+            Sound_memcpy32(g_pSecondaryMusicChannels, g_ActiveMusicChannels, 0x2200);
+            temp_v0 = g_pSavedMousicConfig;
+            g_pSavedMousicConfig = NULL;
+            temp_v0->MusicId = 0;
+            temp_v0->ActiveChannelMask = 0;
+        }
+    }
+    p = (u_short*)D_80037788.Param1;
+    if (p != 0) {
+        if (g_pActiveMusicConfig->ActiveChannelMask == 0) {
+            D_80037800.Param1 = (u_int)p;
+            D_80037800.Param3 = p[2];
+            Sound_Cmd_10_StartFieldMusic(&D_80037800);
+
+            var_s2_2 = g_ActiveMusicChannels;
+            for (i = 32; i != 0; --i) {
+                var_s2_2->Length1 = 1;
+                ++var_s2_2;
+            }
+
+            D_80037788.Param1 = 0;
+        }
+    }
+    if (((D_80039B00 | g_pActiveMusicConfig->ActiveNoteMask | D_80037898) != 0)
+        || ((g_pSavedMousicConfig != NULL)
+            && (g_pSavedMousicConfig->ActiveNoteMask != 0))) {
+        func_80015220();
+    }
+    if (g_pActiveMusicConfig->ActiveChannelMask != 0) {
+        func_80019704(g_ActiveMusicChannels, 0);
+    }
+    if (g_pSavedMousicConfig != NULL) {
+        if (g_pSavedMousicConfig->ActiveChannelMask != 0) {
+            g_pActiveMusicConfig = g_pSavedMousicConfig;
+            func_80019704(g_pSecondaryMusicChannels, 1);
+            g_pActiveMusicConfig = &D_800366F0;
+        }
+        if (g_Sound_GlobalFlags.MixBehavior & 0x100) {
+            if (!(D_8002F54C & 3)) {
+                func_800199C4(g_pSavedMousicConfig, g_pSecondaryMusicChannels);
+                if (g_pSavedMousicConfig->ActiveChannelMask == 0) {
+                    g_Sound_GlobalFlags.MixBehavior &= ~0x100;
+                }
+            }
+        }
+    }
+    if (g_Sound_VoiceSchedulerState.ActiveChannelMask != 0) {
+        i = g_Sound_VoiceSchedulerState.ActiveChannelMask;
+        g_Sound_VoiceSchedulerState.TempoAccumumulator +=
+            (g_Sound_VoiceSchedulerState.unk14 >> 0x10) & 0xFFFF;
+        if ((g_Sound_VoiceSchedulerState.TempoAccumumulator & 0xFFFF0000)
+            || (D_80039B64 & 4)) {
+            g_Sound_VoiceSchedulerState.TempoAccumumulator &= 0xFFFF;
+            var_s1 = 0x1000;
+            var_s2_2 = D_80035910;
+            do {
+                if (i & var_s1) {
+                    if (!(D_80039B64 & 2) || (var_s2_2->unk28 & 0x02000000)) {
+                        ++var_s2_2->unk58;
+                        --var_s2_2->Length1;
+                        --var_s2_2->Length2;
+                        if (var_s2_2->Length1 == 0) {
+                            func_8001A8D8(var_s2_2, var_s1);
+                        } else if (var_s2_2->Length2 == 0) {
+                            g_Sound_VoiceSchedulerState.KeyOffFlags |= var_s1;
+                            g_Sound_VoiceSchedulerState.KeyedFlags &= ~var_s1;
+                        }
+                        Sound_UpdateSlidesAndDelays(var_s2_2, var_s1, 1);
+                    }
+                    i ^= var_s1;
+                }
+                ++var_s2_2;
+                var_s1 *= 2;
+            } while (i != 0);
+        }
+    }
+    if (!(D_8002F54C & 3)) {
+        func_8001924C();
+    }
+    var_s5 = GetRCnt(RCntCNT2) - var_s5;
+    if (var_s5 <= 0) {
+        var_s5 += 0x44E8;
+    }
+
+    D_8002F550[0] = D_8002F550[1];
+    D_8002F550[1] = D_8002F550[2];
+    D_8002F550[2] = D_8002F550[3];
+    D_8002F550[3] = var_s5;
+    D_8002F548 = D_8002F550[0] + D_8002F550[1] + D_8002F550[2] + D_8002F550[3];
+    return var_s5;
+}
+
+// https://decomp.me/scratch/qmxvP
+char func_80019FC4(FSoundChannel* channel);
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_80019FC4);
+
+int func_8001A1F4(int arg0, int arg1)
+{
+    if ((arg1 - 0x80u) < 0x20) {
+        if (arg0 & 2) {
+            return arg1 + 0x20;
+        }
+        if (arg0 & 4) {
+            return arg1 + 0x40;
+        }
+    }
+    return arg1;
+}
+
+int func_8001A22C(int arg0, u_int arg1)
+{
+    if ((arg0 & 0x40) && (arg1 >= 0x40) && (arg1 < 0x80)) {
+        return arg1 + 0x20;
+    }
+    return arg1;
+}
+
+void func_8001A258(FSoundChannel* arg0, u_int arg1)
+{
+    FSoundInstrumentInfo* temp_a0;
+    char* var_s0;
+    int temp_v0;
+    int temp_s2;
+
+    if ((arg0->Key < arg1) || (arg0->Key == 0xFF)) {
+        var_s0 = arg0->Keymap;
+        while (var_s0[13] != 0 && var_s0[2] < arg1) {
+            var_s0 += 8;
+        }
+    } else {
+        if (arg1 >= arg0->Key) {
+            return;
+        }
+        var_s0 = arg0->Keymap;
+        while (var_s0[13] != 0 && arg1 >= var_s0[9]) {
+            var_s0 += 8;
+        }
+    }
+
+    temp_s2 = arg0->UpdateFlags;
+
+    temp_v0 = func_8001A22C(g_pActiveMusicConfig->StatusFlags, var_s0[0]);
+    arg0->InstrumentIndex = temp_v0;
+    temp_a0 = &g_InstrumentInfo[temp_v0];
+    arg0->VoiceParams.StartAddress = temp_a0->StartAddr;
+    arg0->VoiceParams.LoopAddress = temp_a0->LoopAddr;
+
+    if (!(temp_s2 & 0x01000000)) {
+        arg0->VoiceParams.AdsrLower = var_s0[3] << 8;
+    } else {
+        arg0->VoiceParams.AdsrLower &= 0x7F00;
+    }
+
+    arg0->VoiceParams.AdsrLower |= temp_a0->AdsrLower & 0x80FF;
+
+    if (!(temp_s2 & 0x08000000)) {
+        arg0->VoiceParams.AdsrUpper &= 0x201F;
+        arg0->VoiceParams.AdsrUpper |= var_s0[4] << 6;
+    } else {
+        arg0->VoiceParams.AdsrUpper &= 0x3FDF;
+    }
+
+    switch (var_s0[5]) {
+    case 3:
+        arg0->VoiceParams.AdsrUpper |= 0x4000;
+        break;
+    case 5:
+        arg0->VoiceParams.AdsrUpper |= 0x8000;
+        break;
+    case 7:
+        arg0->VoiceParams.AdsrUpper |= 0xC000;
+        break;
+    }
+
+    if ((temp_s2 & 0x10000000) == 0) {
+        arg0->VoiceParams.AdsrUpper &= 0xFFE0;
+        arg0->VoiceParams.AdsrUpper |= var_s0[6];
+    }
+
+    arg0->VoiceParams.AdsrUpper |= temp_a0->AdsrUpper & 0x20;
+    arg0->VoiceParams.VolumeScale = var_s0[7];
+}
+
+int func_8001A4BC(FSoundInstrumentInfo* arg0, int arg1, u_int arg2, int* arg3)
+{
+    int var_a0;
+    int var_t0;
+
+    var_a0 = arg1 - arg0->SampleNote;
+
+    while (var_a0 < 0) {
+        var_a0 += 0xC;
+    }
+
+    var_a0 %= 12;
+
+    if (arg0->FineTune == 0) {
+        var_t0 = D_8002F63C[var_a0] << 8;
+    } else if (arg0->FineTune < 0) {
+        var_t0 = (D_8002F63C[var_a0] * (u_short)arg0->FineTune) >> 8;
+    } else {
+        var_t0 = (D_8002F63C[var_a0] * arg0->FineTune) >> 7;
+        var_t0 += D_8002F63C[var_a0] << 8;
+    }
+
+    arg2 &= 0xFF;
+
+    if (arg2 != 0) {
+        if (arg2 < 0x80) {
+            *arg3 = (var_t0 * arg2) >> 7;
+        } else {
+            *arg3 = ((var_t0 * arg2) >> 8) - var_t0;
+        }
+    }
+
+    if (arg1 < arg0->SampleNote) {
+        for (; arg1 < arg0->SampleNote; arg1 += 0xC) {
+            *arg3 = *arg3 >> 1;
+            var_t0 = (var_t0 >> 1);
+        }
+    } else {
+        var_a0 = (arg1 - arg0->SampleNote) / 12;
+        if (var_a0 != 0) {
+            var_t0 <<= var_a0;
+            *arg3 <<= var_a0;
+        }
+    }
+    var_t0 >>= 8;
+    *arg3 >>= 8;
+    return (u_short)var_t0;
+}
+
+int func_8001A64C(FSoundChannel* arg0, int arg1, int arg2)
+{
+    FSoundInstrumentInfo* temp_a0;
+    int temp_v0;
+    int temp_v0_2;
+    int temp_s2;
+    char* temp_s1;
+
+    temp_s1 = (char*)g_pActiveMusicConfig->KeymapTable;
+    temp_s1 += arg2 * 8;
+    g_pActiveMusicConfig->PendingKeyOnMask |= arg1;
+
+    if (g_pActiveMusicConfig->ActiveNoteMask & arg1) {
+        g_pActiveMusicConfig->PendingKeyOffMask |= arg1;
+    }
+
+    temp_s2 = arg0->UpdateFlags;
+    temp_v0_2 = func_8001A22C(g_pActiveMusicConfig->StatusFlags, (u_int)temp_s1[0]);
+    arg0->InstrumentIndex = temp_v0_2;
+    temp_a0 = &g_InstrumentInfo[temp_v0_2];
+    arg0->VoiceParams.StartAddress = temp_a0->StartAddr;
+    arg0->VoiceParams.LoopAddress = temp_a0->LoopAddr;
+
+    if (!(temp_s2 & 0x01000000)) {
+        arg0->VoiceParams.AdsrLower = temp_s1[2] << 8;
+    } else {
+        arg0->VoiceParams.AdsrLower &= 0x7F00;
+    }
+
+    arg0->VoiceParams.AdsrLower |= temp_a0->AdsrLower & 0x80FF;
+
+    if (!(temp_s2 & 0x08000000)) {
+        arg0->VoiceParams.AdsrUpper &= 0x201F;
+        arg0->VoiceParams.AdsrUpper |= temp_s1[3] << 6;
+    } else {
+        arg0->VoiceParams.AdsrUpper &= 0x3FDF;
+    }
+
+    switch (temp_s1[4]) {
+    case 3:
+        arg0->VoiceParams.AdsrUpper |= 0x4000;
+        break;
+    case 5:
+        arg0->VoiceParams.AdsrUpper |= 0x8000;
+        break;
+    case 7:
+        arg0->VoiceParams.AdsrUpper |= 0xC000;
+        break;
+    }
+
+    if ((temp_s2 & 0x10000000) == 0) {
+        arg0->VoiceParams.AdsrUpper &= 0xFFE0;
+        arg0->VoiceParams.AdsrUpper |= temp_s1[5];
+    }
+
+    arg0->VoiceParams.AdsrUpper |= temp_a0->AdsrUpper & 0x20;
+    temp_v0 = func_8001A4BC(temp_a0, temp_s1[1], arg0->FineTune, &arg0->FinePitchDelta);
+    arg0->VoiceParams.VolumeScale = temp_s1[6];
+    arg0->ChannelPan = ((temp_s1[7] & 0x7F) + 0x40) << 8;
+
+    if (temp_s1[7] & 0x80) {
+        g_pActiveMusicConfig->ReverbChannelFlags |= arg1;
+    } else {
+        g_pActiveMusicConfig->ReverbChannelFlags &= ~arg1;
+    }
+    g_Sound_GlobalFlags.UpdateFlags |= 0x100;
+    return temp_v0;
+}
+
+extern u_short D_8002F620[];
+extern char D_8002F69C[];
+extern void (*D_800305E0[])(FSoundChannel*, int);
+extern void (*D_80030760[])(FSoundChannel*, int);
+
+void func_8001A8D8(FSoundChannel* arg0, int arg1)
+{
+    u_int sp10;
+    u_int temp_a2_2;
+    u_int temp_s0;
+    u_int temp_v0;
+    u_char* temp_a1;
+    int var_v1;
+    u_int temp_a1_2;
+    u_int temp_v1;
+    u_int temp_v1_6;
+    u_int var_s0;
+
+    do {
+        temp_a1 = arg0->ProgramCounter;
+        var_s0 = temp_a1[0];
+        arg0->ProgramCounter = ++temp_a1;
+
+        if (var_s0 >= 0xA0) {
+            temp_v1 = var_s0 - 0xF0;
+            if (var_s0 == 0xFE) {
+                temp_a2_2 = temp_a1[0];
+                arg0->ProgramCounter = temp_a1 + 1;
+                D_80030760[temp_a2_2](arg0, arg1);
+            } else {
+                if (temp_v1 < 0xE) {
+                    var_s0 = temp_v1 * 0xB;
+                    arg0->Length1 = temp_a1[0];
+                    arg0->ProgramCounter = temp_a1 + 1;
+                } else {
+                    if (var_s0 == 0xFF) {
+                        var_s0 = 0xA0;
+                    } else if ((var_s0 == 0xCA) && (arg0->UpdateFlags & 0x200000)) {
+                        var_s0 = 0xA0;
+                        g_Sound_VoiceSchedulerState.KeyOffFlags |= arg1;
+                    }
+                    D_800305E0[var_s0 - 0xA0](arg0, arg1);
+                }
+            }
+        }
+        ++arg0->OpcodeStepCounter;
+    } while (var_s0 > 0xA0);
+
+    if (var_s0 == 0xA0) {
+        if (arg0->Type == 0) {
+            g_pActiveMusicConfig->PendingKeyOffMask |= arg1;
+        }
+    } else {
+        temp_a2_2 = func_80019FC4(arg0);
+        if (arg0->LengthFixed != 0) {
+            arg0->Length1 = arg0->Length2 = arg0->LengthFixed;
+        }
+        if (arg0->Length1 != 0) {
+            if ((temp_a2_2 >= 0x8F) || ((temp_a2_2 < 0x84) && !(arg0->SfxMask & 5))) {
+                arg0->Length2 -= 2;
+            }
+        } else {
+            int tmp = D_8002F620[var_s0 % 11];
+            arg0->Length1 = tmp;
+            var_v1 = tmp;
+            if (((temp_a2_2 - 0x84) >= 0xB) && !(arg0->SfxMask & 5)) {
+                var_v1 -= 2;
+            }
+            arg0->Length2 = var_v1;
+        }
+        if ((arg0->Type == 0) && (arg0->UpdateFlags & 0x40)) {
+            arg0->Length2 = arg0->Length1;
+        }
+
+        arg0->LengthStored = arg0->Length1;
+        arg0->VoiceParams.VoiceParamFlags |= 0x4000;
+
+        if (var_s0 >= 0x8F) {
+            if (arg0->Type == 0) {
+                g_pActiveMusicConfig->ActiveNoteMask &= ~arg1;
+                if (arg0->VoiceParams.AssignedVoiceNumber < 0x18) {
+                    g_pActiveMusicConfig->PendingKeyOffMask |= arg1;
+                }
+            }
+            arg0->PortamentoSteps = 0;
+            arg0->VibratoPitch = 0;
+            arg0->TremeloVolume = 0;
+            arg0->SfxMask &= 0xFFFD;
+            return;
+        }
+        if (var_s0 < 0x84) {
+            temp_a1_2 = arg0->UpdateFlags;
+            temp_v0 = arg0->Octave * 0xC;
+            temp_s0 = var_s0 / 11;
+            temp_s0 += temp_v0;
+            if (temp_a1_2 & 8) {
+                temp_a2_2 = func_8001A64C(arg0, arg1, temp_s0);
+            } else {
+                if (!(arg0->SfxMask & 2)) {
+                    if (arg0->Type == 0) {
+                        if (D_80039AFC & 0x10) {
+                            temp_s0 += *((signed char*)g_pActiveMusicConfig->unk44
+                                         + ((temp_s0) % 12));
+                        }
+                        if (temp_a1_2 & 0x1000) {
+                            func_8001A258(arg0, temp_s0);
+                        }
+                        g_pActiveMusicConfig->PendingKeyOnMask |= arg1;
+                        if ((g_pActiveMusicConfig->ActiveNoteMask & arg1)
+                            && (arg0->VoiceParams.AssignedVoiceNumber < 0x18)) {
+                            g_pActiveMusicConfig->PendingKeyOffMask |= arg1;
+                        }
+
+                        if (arg0->KeyOnVolumeSlideLength != 0) {
+                            arg0->ChannelVolumeSlideLength = arg0->KeyOnVolumeSlideLength;
+                            arg0->Volume = arg0->unk5C;
+                            arg0->VolumeSlideStep = arg0->unk60;
+                        }
+                    } else {
+                        g_Sound_VoiceSchedulerState.KeyOnFlags |= arg1;
+                    }
+                    arg0->PitchSlideStepsCurrent = 0;
+                }
+
+                if ((arg0->PortamentoSteps != 0) && (arg0->KeyStored != 0)) {
+                    arg0->PitchBendSlideLength = arg0->PortamentoSteps;
+                    arg0->PitchBendSlideTranspose =
+                        ((arg0->Transpose + temp_s0) - arg0->KeyStored)
+                        - arg0->TransposeStored;
+                    arg0->Key =
+                        arg0->KeyStored - (arg0->Transpose - arg0->TransposeStored);
+                    temp_s0 = arg0->KeyStored + arg0->TransposeStored;
+                } else {
+                    arg0->Key = temp_s0;
+                    temp_s0 = temp_s0 + arg0->Transpose;
+                }
+
+                temp_a2_2 = func_8001A4BC(&g_InstrumentInfo[arg0->InstrumentIndex],
+                    temp_s0, arg0->FineTune, &arg0->FinePitchDelta);
+                if (arg0->RandomPitchDepth != 0) {
+                    sp10 = (temp_a2_2 * arg0->RandomPitchDepth) >> 8;
+                    sp10 *= D_8002F69C[g_Sound_LfoPhase];
+                    if (D_8002F69C[g_Sound_LfoPhase] & 0x80) {
+                        sp10 >>= 9;
+                        temp_a2_2 -= sp10;
+                    } else {
+                        sp10 >>= 7;
+                        temp_a2_2 += sp10;
+                    }
+                }
+            }
+            arg0->PitchBase = temp_a2_2;
+            if (arg0->Type == 0) {
+                g_pActiveMusicConfig->ActiveNoteMask |= arg1;
+            } else {
+                g_Sound_VoiceSchedulerState.KeyedFlags |= arg1;
+            }
+            temp_s0 = arg0->UpdateFlags;
+            arg0->VoiceParams.VoiceParamFlags |= 0x13;
+            if (temp_s0 & 1) {
+                temp_v1_6 = ((arg0->VibratoDepth & 0x7F00) >> 8);
+                arg0->VibratoBase = (!(arg0->VibratoDepth & 0x8000)
+                                            ? (temp_v1_6 * ((temp_a2_2 * 0xF) >> 8))
+                                            : (temp_v1_6 * temp_a2_2))
+                                 >> 7;
+                if (!(arg0->SfxMask & 2)) {
+                    arg0->VibratoWave = g_Sound_LfoTable[arg0->VibratoType];
+                    arg0->VibratoDelayCurrent = arg0->VibratoDelay;
+                    arg0->unkA4 = 1;
+                }
+            }
+            if ((temp_s0 & 2) && !(arg0->SfxMask & 2)) {
+                arg0->TremeloWave = g_Sound_LfoTable[arg0->TremeloType];
+                arg0->TremeloDelayCurrent = arg0->TremeloDelay;
+                arg0->unkB6 = 1;
+            }
+            arg0->VibratoPitch = 0;
+            arg0->TremeloVolume = 0;
+            arg0->PitchSlide = 0;
+        }
+
+        arg0->SfxMask = (arg0->SfxMask & 0xFFFD) | ((arg0->SfxMask & 1) * 2);
+        if (arg0->PitchBendSlideTranspose != 0) {
+            arg0->Key += arg0->PitchBendSlideTranspose;
+            temp_a2_2 = func_8001A4BC(&g_InstrumentInfo[arg0->InstrumentIndex],
+                arg0->Key + arg0->Transpose, arg0->FineTune, (int*)&sp10);
+            temp_a2_2 <<= 0x10;
+            arg0->PitchSlideStepsCurrent = arg0->PitchBendSlideLength;
+            arg0->PitchBendSlideTranspose = 0;
+            arg0->PitchSlideStep =
+                ((int)temp_a2_2 - ((arg0->PitchBase << 0x10) + arg0->PitchSlide))
+                / arg0->PitchSlideStepsCurrent;
+        }
+        arg0->KeyStored = arg0->Key;
+        arg0->TransposeStored = arg0->Transpose;
+    }
+}
+
+void Sound_CopyInstrumentInfoToChannel(
+    FSoundChannel* arg0, FSoundInstrumentInfo* arg1, int arg2)
+{
+    arg0->VoiceParams.StartAddress = arg2;
+    arg0->VoiceParams.LoopAddress = arg1->LoopAddr;
+    arg0->VoiceParams.AdsrLower = arg1->AdsrLower;
+    arg0->VoiceParams.AdsrUpper = arg1->AdsrUpper;
+    arg0->VoiceParams.VoiceParamFlags |= 0x1FF80;
+}
+
+void func_8001B094(FSoundChannel* arg0, int arg1)
+{
+    arg0->InstrumentIndex = arg1;
+    Sound_CopyInstrumentInfoToChannel(
+        arg0, &g_InstrumentInfo[arg1], g_InstrumentInfo[arg1].StartAddr);
+}
+
+void Sound_ClearVoiceFromSchedulerState(FSoundChannel* arg0, int arg1)
+{
+    int temp_a1 = ~arg1;
+    g_Sound_VoiceSchedulerState.ActiveChannelMask &= temp_a1;
+    g_Sound_VoiceSchedulerState.unk_Flags_0x10 &= temp_a1;
+    g_Sound_VoiceSchedulerState.NoiseVoiceFlags &= temp_a1;
+    g_Sound_VoiceSchedulerState.ReverbVoiceFlags &= temp_a1;
+    g_Sound_VoiceSchedulerState.FmVoiceFlags &= temp_a1;
+    g_Sound_VoiceSchedulerState.KeyOnFlags &= temp_a1;
+    g_Sound_VoiceSchedulerState.KeyedFlags &= temp_a1;
+    arg0->unk28 = 0;
+    arg0->unk3C = 0;
+}
+
+#define SOUND_DEFAULT_PORTAMENTO_STEPS (0x100) // 256 steps
+#define SOUND_DEFAULT_DELAY_TIME (0x101) // 256 + 1
+
+#define READ_16LE_PC(pc) ((pc[0]) | (pc[1] << 8))
+
+void SoundVM_A0_FinishChannel(FSoundChannel* in_pChannel, u_int in_VoiceFlags)
+{
+    if (in_pChannel->Type == SOUND_CHANNEL_TYPE_MUSIC) {
+        g_pActiveMusicConfig->ActiveChannelMask &= ~in_VoiceFlags;
+        if (g_pActiveMusicConfig->ActiveChannelMask == 0) {
+            g_Music_LoopCounter = 0;
+            g_pActiveMusicConfig->MusicId = 0;
+            g_pActiveMusicConfig->StatusFlags = 0;
+        }
+        g_pActiveMusicConfig->ActiveNoteMask &= ~in_VoiceFlags;
+        g_pActiveMusicConfig->KeyedMask &= ~in_VoiceFlags;
+        g_pActiveMusicConfig->AllocatedVoiceMask &= ~in_VoiceFlags;
+        g_pActiveMusicConfig->NoiseChannelFlags &= ~in_VoiceFlags;
+        g_pActiveMusicConfig->ReverbChannelFlags &= ~in_VoiceFlags;
+        g_pActiveMusicConfig->FmChannelFlags &= ~in_VoiceFlags;
+    } else {
+        Sound_ClearVoiceFromSchedulerState(in_pChannel, in_VoiceFlags);
+    }
+    in_pChannel->UpdateFlags = 0;
+    g_Sound_GlobalFlags.UpdateFlags |= SOUND_GLOBAL_UPDATE_04 | SOUND_GLOBAL_UPDATE_08;
+}
+
+void SoundVM_FE1F_unk(FSoundChannel* in_pChannel, u_int in_VoiceFlags)
+{
+    if (g_pActiveMusicConfig->StatusFlags & 0x10000) {
+        SoundVM_A0_FinishChannel(in_pChannel, in_VoiceFlags);
+    }
+}
+
+void SoundVM_FE00_SetTempo(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    g_pActiveMusicConfig->Tempo = in_pChannel->ProgramCounter[0] << 0x10;
+    g_pActiveMusicConfig->Tempo |= in_pChannel->ProgramCounter[1] << 0x18;
+    in_pChannel->ProgramCounter += sizeof(short);
+    g_pActiveMusicConfig->TempoSlideLength = 0;
+}
+
+void SoundVM_FE01_SetTempoSlide(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    char* pc;
+    int Dest;
+    int Prev;
+    int Delta;
+
+    if ((g_pActiveMusicConfig->TempoSlideLength = *in_pChannel->ProgramCounter++) == 0) {
+        g_pActiveMusicConfig->TempoSlideLength = 0x100;
+    }
+    pc = in_pChannel->ProgramCounter;
+    Dest = pc[0] << 0x10;
+    Dest |= pc[1] << 0x18;
+    in_pChannel->ProgramCounter += 2;
+    Prev = g_pActiveMusicConfig->Tempo & 0xFFFF0000;
+    Delta = Dest - Prev;
+    g_pActiveMusicConfig->TempoSlideStep = Delta / g_pActiveMusicConfig->TempoSlideLength;
+    g_pActiveMusicConfig->Tempo = Prev;
+}
+
+void SoundVM_FE02_SetMasterReverbDepth(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    char* pc;
+    u_int Depth;
+
+    pc = in_pChannel->ProgramCounter;
+    Depth = (signed char)pc[1] << 0x14;
+    Depth |= pc[0] << 0xC;
+    in_pChannel->ProgramCounter += sizeof(short);
+    g_pActiveMusicConfig->ReverbDepthSlideLength = 0;
+    g_Sound_GlobalFlags.UpdateFlags |= SOUND_GLOBAL_UPDATE_07;
+    g_pActiveMusicConfig->RevDepth = Depth;
+}
+
+void SoundVM_FE03_SetMasterReverbSlide(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int Prev;
+    int Dest;
+    int Delta;
+    char* pc;
+
+    g_pActiveMusicConfig->ReverbDepthSlideLength = *in_pChannel->ProgramCounter++;
+    if (g_pActiveMusicConfig->ReverbDepthSlideLength == 0) {
+        g_pActiveMusicConfig->ReverbDepthSlideLength = 0x100;
+    }
+    pc = in_pChannel->ProgramCounter;
+    Dest = (signed char)pc[1] << 0x14;
+    Dest |= (char)pc[0] << 0xC;
+    in_pChannel->ProgramCounter += 2;
+    Prev = g_pActiveMusicConfig->RevDepth & ~0xFFF;
+    g_pActiveMusicConfig->RevDepth = Prev;
+    Delta = Dest - Prev;
+    g_pActiveMusicConfig->unk5C = Delta / g_pActiveMusicConfig->ReverbDepthSlideLength;
+}
+
+void SoundVM_FE06_JumpRelativeOffset(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    short Offset = READ_16LE_PC(in_pChannel->ProgramCounter);
+    in_pChannel->ProgramCounter += Offset;
+}
+
+void SoundVM_FE07_JumpRelativeWithThreshold(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    short Threshold;
+    short Offset;
+
+    Threshold = *in_pChannel->ProgramCounter++;
+
+    if (g_pActiveMusicConfig->JumpThresholdValue >= Threshold) {
+        // Read signed 16-bit LE offset at current pc, jump relative to pc
+        Offset = READ_16LE_PC(in_pChannel->ProgramCounter);
+        in_pChannel->ProgramCounter += Offset;
+        return;
+    }
+
+    // Skip over the 16-bit offset operand
+    in_pChannel->ProgramCounter += sizeof(short);
+}
+
+void SoundVM_FE0E_CallRelativeOffset(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    short Offset = READ_16LE_PC(in_pChannel->ProgramCounter);
+    in_pChannel->ReturnProgramCounter = in_pChannel->ProgramCounter + sizeof(short);
+    in_pChannel->ProgramCounter += Offset;
+}
+
+void SoundVM_FE0F_Return(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->ProgramCounter = in_pChannel->ReturnProgramCounter;
+}
+
+void SoundVM_A3_ChannelMasterVolume(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->VolumeBalance = *in_pChannel->ProgramCounter++ << 8;
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+}
+
+void SoundVM_FE12_VolumeBalanceSlide(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short VolumeBalance;
+    u_short Length;
+    int Target;
+    int Delta;
+
+    Length = *in_pChannel->ProgramCounter++;
+    in_pChannel->VolumeBalanceSlideLength = Length;
+    if (Length == 0) {
+        in_pChannel->VolumeBalanceSlideLength = 0x100;
+    }
+
+    Target = *in_pChannel->ProgramCounter++ << 8;
+
+    VolumeBalance = in_pChannel->VolumeBalance & 0x7F00;
+    in_pChannel->VolumeBalance = VolumeBalance;
+    Delta = Target - VolumeBalance;
+    in_pChannel->VolumeBalanceSlideStep = Delta / in_pChannel->VolumeBalanceSlideLength;
+}
+
+void SoundVM_A8_ChannelVolume(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->Volume = (signed char)*in_pChannel->ProgramCounter++ << 0x17;
+    in_pChannel->ChannelVolumeSlideLength = 0;
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+    in_pChannel->KeyOnVolumeSlideLength = 0;
+}
+
+void SoundVM_A9_ChannelVolumeSlide(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int Prev;
+    int Dest;
+    u_short Length;
+    int Delta;
+
+    Length = *in_pChannel->ProgramCounter++;
+    in_pChannel->ChannelVolumeSlideLength = Length;
+    if (Length == 0) {
+        in_pChannel->ChannelVolumeSlideLength = 0x100;
+    }
+    Dest = ((signed char)*in_pChannel->ProgramCounter++ << 0x17);
+
+    Prev = in_pChannel->Volume & 0xFFFF0000;
+    in_pChannel->Volume = Prev;
+
+    Delta = Dest - Prev;
+    in_pChannel->VolumeSlideStep = Delta / in_pChannel->ChannelVolumeSlideLength;
+
+    in_pChannel->KeyOnVolumeSlideLength = 0;
+}
+
+void SoundVM_FE19_unk(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short pPc1;
+    int Dest;
+    int Prev;
+    int Delta;
+
+    in_pChannel->unk5C = ((signed char)*in_pChannel->ProgramCounter++) << 0x17;
+    pPc1 = *in_pChannel->ProgramCounter++;
+    in_pChannel->KeyOnVolumeSlideLength = (short)pPc1;
+
+    if (pPc1 == 0) {
+        in_pChannel->KeyOnVolumeSlideLength = 0x100;
+    }
+
+    Dest = ((signed char)*in_pChannel->ProgramCounter++) << 0x17;
+    Prev = in_pChannel->unk5C;
+    Delta = Dest - Prev;
+    in_pChannel->unk60 = Delta / in_pChannel->KeyOnVolumeSlideLength;
+}
+
+void SoundVM_FE1A_unk(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->UpdateFlags |= SOUND_UPDATE_UNKNOWN_01;
+}
+
+void SoundVM_FE1B_unk(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->UpdateFlags &= ~SOUND_UPDATE_UNKNOWN_01;
+}
+
+void SoundVM_FE0C_unk(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    g_pActiveMusicConfig->unk34 = *in_pChannel->ProgramCounter++;
+}
+
+static void SoundVM_nop(FSoundChannel* in_pChannels, u_int in_VoiceFlags)
+    __attribute__((unused));
+static void SoundVM_nop(FSoundChannel* in_pChannels __attribute__((unused)),
+    u_int in_VoiceFlags __attribute__((unused)))
+{
+}
+
+void SoundVM_unused1(FSoundChannel* in_pChannel, u_int in_VoiceFlags)
+    __attribute__((unused));
+void SoundVM_unused1(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->unkDC = *in_pChannel->ProgramCounter++ << 8;
+    in_pChannel->unk8C = 0;
+    if (in_pChannel->UpdateFlags & 0x100) {
+        in_pChannel->VoiceParams.VoiceParamFlags |= 3;
+    }
+}
+
+void SoundVM_unused2(FSoundChannel* in_pChannel, u_int in_VoiceFlags)
+    __attribute__((unused));
+void SoundVM_unused2(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    short v;
+    int pc;
+
+    if ((in_pChannel->unk8C = *in_pChannel->ProgramCounter++) == 0) {
+        in_pChannel->unk8C = 0x100;
+    }
+
+    pc = *(in_pChannel->ProgramCounter++) << 8;
+    v = in_pChannel->unkDC & 0xFF00;
+    in_pChannel->unkDE = ((pc - v) / in_pChannel->unk8C);
+    in_pChannel->unkDC = v;
+}
+
+void SoundVM_AA_ChannelPan(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    // Convert signed pan (-64..+63) to unsigned 0..255, center at 0x40 and store as Q8.8
+    // pan value
+    in_pChannel->ChannelPan = ((*in_pChannel->ProgramCounter++ + 0x40) & 0xFF) << 8;
+    in_pChannel->ChannelPanSlideLength = 0;
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+}
+
+void SoundVM_AB_ChannelPanSlide(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short Prev;
+    u_short Length;
+    u_short Dest;
+    int Delta;
+
+    Length = *in_pChannel->ProgramCounter++;
+    in_pChannel->ChannelPanSlideLength = Length;
+    if (Length == 0) {
+        in_pChannel->ChannelPanSlideLength = 0x100;
+    }
+
+    Dest = *in_pChannel->ProgramCounter++;
+    Dest = ((Dest + 0x40) & 0xFF) << 8; // Center it
+    Prev = in_pChannel->ChannelPan & 0xFF00;
+    Delta = Dest - Prev;
+    in_pChannel->PanSlideStep = Delta / in_pChannel->ChannelPanSlideLength;
+    in_pChannel->ChannelPan = Prev;
+}
+
+void SoundVM_A5_SetOctave(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->Octave = *in_pChannel->ProgramCounter++;
+}
+
+void SoundVM_A6_IncreaseOctave(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->Octave = (in_pChannel->Octave + 1) & 0xF;
+}
+
+void SoundVM_A7_DecreaseOctave(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->Octave = (in_pChannel->Octave - 1) & 0xF;
+}
+
+void SoundVM_A1_LoadInstrument(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int pc = *in_pChannel->ProgramCounter++;
+
+    int var_s0 = in_pChannel->Type == 0
+                   ? func_8001A22C(g_pActiveMusicConfig->StatusFlags, pc)
+                   : func_8001A1F4(in_pChannel->unk38, pc);
+    Sound_CopyInstrumentInfoToChannel(
+        in_pChannel, &g_InstrumentInfo[var_s0], g_InstrumentInfo[var_s0].StartAddr);
+    in_pChannel->InstrumentIndex = var_s0;
+    in_pChannel->VoiceParams.VolumeScale = 0;
+    in_pChannel->UpdateFlags &= 0xE6FFEFF7;
+}
+
+void SoundVM_FE0A_ClearInstrument(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short Index;
+
+    Index = *in_pChannel->ProgramCounter++;
+    Sound_CopyInstrumentInfoToChannel(in_pChannel, &g_InstrumentInfo[Index], 0x1010);
+    in_pChannel->InstrumentIndex = Index;
+    in_pChannel->VoiceParams.VolumeScale = 0;
+    in_pChannel->UpdateFlags &=
+        ~(SOUND_UPDATE_DRUM_MODE | SOUND_UPDATE_UNKNOWN_12 | SOUND_UPDATE_UNKNOWN_24
+            | SOUND_UPDATE_UNKNOWN_27 | SOUND_UPDATE_UNKNOWN_28);
+}
+
+void SoundVM_FE14_ChangePatch(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short* pPatchTable;
+    u_char PatchIndex;
+
+    PatchIndex = *in_pChannel->ProgramCounter++;
+    if (g_pActiveMusicConfig->SequencePatchTable != NULL) {
+        pPatchTable = (u_short*)g_pActiveMusicConfig->SequencePatchTable;
+        if (pPatchTable[PatchIndex] > 0x8000) {
+            in_pChannel->VoiceParams.VolumeScale = 0;
+            in_pChannel->UpdateFlags &= ~SOUND_UPDATE_UNKNOWN_12;
+            return;
+        }
+        in_pChannel->Keymap = (char*)((int)pPatchTable + pPatchTable[PatchIndex] + 0x20);
+        in_pChannel->UpdateFlags &=
+            ~(SOUND_UPDATE_DRUM_MODE | SOUND_UPDATE_UNKNOWN_12 | SOUND_UPDATE_UNKNOWN_24
+                | SOUND_UPDATE_UNKNOWN_27 | SOUND_UPDATE_UNKNOWN_28);
+        in_pChannel->UpdateFlags |= SOUND_UPDATE_UNKNOWN_12;
+        in_pChannel->Key = 0xFF;
+    }
+}
+
+void SoundVM_B3_ResetAdsr(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    FSoundInstrumentInfo* InstrumentInfo =
+        &g_InstrumentInfo[in_pChannel->InstrumentIndex];
+    in_pChannel->VoiceParams.AdsrLower = InstrumentInfo->AdsrLower;
+    in_pChannel->VoiceParams.AdsrUpper = InstrumentInfo->AdsrUpper;
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_ADSR_FULL;
+    in_pChannel->UpdateFlags &=
+        ~(SOUND_UPDATE_UNKNOWN_24 | SOUND_UPDATE_UNKNOWN_27 | SOUND_UPDATE_UNKNOWN_28);
+}
+
+void SoundVM_C0_ChannelTranspose_Absolute(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->Transpose = (signed char)*in_pChannel->ProgramCounter++;
+}
+
+void SoundVM_C1_ChannelTranspose_Relative(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->Transpose += (signed char)*in_pChannel->ProgramCounter++;
+}
+
+void SoundVM_A4_PitchBendSlide(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int Length = *in_pChannel->ProgramCounter++;
+    in_pChannel->PitchBendSlideLength = Length;
+    if (Length == 0) {
+        in_pChannel->PitchBendSlideLength = 0x100;
+    }
+
+    in_pChannel->PitchBendSlideTranspose = (signed char)*in_pChannel->ProgramCounter++;
+}
+
+void SoundVM_DA_EnablePortamento(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int Steps = *in_pChannel->ProgramCounter++;
+    in_pChannel->PortamentoSteps = Steps;
+
+    if (Steps == 0) {
+        in_pChannel->PortamentoSteps = SOUND_DEFAULT_PORTAMENTO_STEPS;
+    }
+
+    in_pChannel->TransposeStored = 0;
+    in_pChannel->KeyStored = 0;
+    in_pChannel->SfxMask = 1;
+}
+
+void SoundVM_DB_DisablePortamento(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->PortamentoSteps = 0;
+}
+
+void SoundVM_D8_ChannelFineTune_Absolute(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_int ScaledFineTune;
+    int FinePitchDelta;
+
+    in_pChannel->FineTune = (signed char)*in_pChannel->ProgramCounter++;
+    ScaledFineTune = in_pChannel->PitchBase * (char)in_pChannel->FineTune;
+
+    if (in_pChannel->FineTune < 0) {
+        FinePitchDelta = (ScaledFineTune >> 8) - in_pChannel->PitchBase;
+    } else {
+        FinePitchDelta = ScaledFineTune >> 7;
+    }
+
+    in_pChannel->FinePitchDelta = FinePitchDelta;
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_SAMPLE_RATE;
+}
+
+void SoundVM_D9_ChannelFineTune_Relative(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_int ScaledFineTune;
+    int FinePitchDelta;
+
+    in_pChannel->FineTune =
+        in_pChannel->FineTune + (signed char)*in_pChannel->ProgramCounter++;
+    ScaledFineTune = in_pChannel->PitchBase * (char)in_pChannel->FineTune;
+
+    if (in_pChannel->FineTune < 0) {
+        FinePitchDelta = (ScaledFineTune >> 8) - in_pChannel->PitchBase;
+    } else {
+        FinePitchDelta = ScaledFineTune >> 7;
+    }
+
+    in_pChannel->FinePitchDelta = FinePitchDelta;
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_SAMPLE_RATE;
+}
+
+void SoundVM_B4_Vibrato(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short PitchBase;
+    int DepthHigh;
+    u_int VibratoBase;
+    int VibratoDepth;
+    int VibratoRatePhase;
+    int new_var;
+
+    in_pChannel->UpdateFlags |= 1;
+
+    if (in_pChannel->Type != 0) {
+        in_pChannel->VibratoDelay = 0;
+        VibratoDepth = *in_pChannel->ProgramCounter++;
+        if (VibratoDepth != 0) {
+            in_pChannel->VibratoDepth = VibratoDepth << 8;
+        }
+    } else {
+        in_pChannel->VibratoDelay = *in_pChannel->ProgramCounter++;
+    }
+
+    VibratoRatePhase = *in_pChannel->ProgramCounter++;
+    in_pChannel->VibratoRatePhase = VibratoRatePhase;
+
+    if (VibratoRatePhase == 0) {
+        in_pChannel->VibratoRatePhase = 0x100;
+    }
+
+    in_pChannel->VibratoType = *in_pChannel->ProgramCounter++;
+    PitchBase = in_pChannel->PitchBase;
+    new_var = PitchBase;
+    DepthHigh = (in_pChannel->VibratoDepth & 0x7F00) >> 8;
+
+    if (!(in_pChannel->VibratoDepth & 0x8000)) {
+        VibratoBase = DepthHigh * ((new_var * 0xF) >> 8);
+    } else {
+        VibratoBase = DepthHigh * new_var;
+    }
+    in_pChannel->VibratoBase = VibratoBase >> 7;
+    in_pChannel->VibratoWave = g_Sound_LfoTable[in_pChannel->VibratoType];
+    in_pChannel->VibratoDelayCurrent = in_pChannel->VibratoDelay;
+    in_pChannel->unkA4 = 1;
+}
+
+void SoundVM_B5_VibratoDepth(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int PitchBase; // Base pitch around which the vibrato will oscillate
+    u_int DepthAmount; // This is just the magnitude part of the vibrato depth parameter,
+                       // 0-127 depth scalar
+    u_int VibratoProduct; // Intermediate scaled value
+
+    PitchBase = in_pChannel->PitchBase;
+
+    // Read vibrato depth parameter from the sequence.
+    // Stored in the high byte so bit 15 can act as a mode flag.
+    in_pChannel->VibratoDepth = *in_pChannel->ProgramCounter++ << 8;
+
+    // Extract the depth magnitude (bits 8–14)
+    DepthAmount = (in_pChannel->VibratoDepth & 0x7F00) >> 8;
+    if (!(in_pChannel->VibratoDepth & VIBRATO_FLAG_ABSOLUTE)) {
+        // Relative mode:
+        // Vibrato depth is scaled down relative to pitch so higher notes
+        // don’t produce excessively wide vibrato.
+        // (PitchBase * 15) >> 8 ≈ PitchBase * 0.0586
+        VibratoProduct = DepthAmount * ((PitchBase * 15) >> 8);
+    } else {
+        // Absolute mode:
+        // Vibrato depth is directly proportional to pitch.
+        VibratoProduct = DepthAmount * PitchBase;
+    }
+
+    // Final vibrato amplitude in pitch units.
+    // The >> 7 normalizes the multiplication into a usable range.
+    in_pChannel->VibratoBase = VibratoProduct >> 7;
+}
+
+void SoundVM_DD_VibratoDepthSlide(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short Length;
+    u_short Prev;
+    u_short Dest;
+    int Delta;
+
+    Length = *in_pChannel->ProgramCounter++;
+    if (Length == 0) {
+        Length = 0x100;
+    }
+    Dest = *in_pChannel->ProgramCounter++;
+    Dest = Dest << 8;
+    Prev = in_pChannel->VibratoDepth;
+    Delta = Dest - Prev;
+    in_pChannel->VibratoDepthSlideStep = Delta / Length;
+    in_pChannel->VibratoDepthSlideLength = Length;
+}
+
+void SoundVM_B6_DisableVibrato(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->VibratoPitch = 0;
+    in_pChannel->UpdateFlags &= ~SOUND_UPDATE_VIBRATO;
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_SAMPLE_RATE;
+}
+
+void SoundVM_B8_Tremelo(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int Delay;
+    int Rate;
+
+    in_pChannel->UpdateFlags |= SOUND_UPDATE_TREMOLO;
+    Delay = *in_pChannel->ProgramCounter++;
+    if (in_pChannel->Type != 0) {
+        in_pChannel->TremeloDelay = 0;
+        if (Delay != 0) {
+            in_pChannel->TremeloDepth = (Delay & 0x7F) << 8;
+        }
+    } else {
+        in_pChannel->TremeloDelay = Delay;
+    }
+
+    Rate = *in_pChannel->ProgramCounter++;
+    in_pChannel->TremeloRatePhase = Rate;
+
+    if (Rate == 0) {
+        in_pChannel->TremeloRatePhase = 0x100;
+    }
+
+    in_pChannel->TremeloType = *in_pChannel->ProgramCounter++;
+    in_pChannel->TremeloWave = g_Sound_LfoTable[in_pChannel->TremeloType];
+    in_pChannel->TremeloDelayCurrent = in_pChannel->TremeloDelay;
+    in_pChannel->unkB6 = 1;
+}
+
+void SoundVM_B9_TremeloDepth(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->TremeloDepth = (*in_pChannel->ProgramCounter++ & 0x7F) << 8;
+}
+
+void SoundVM_DE_TremeloDepthSlide(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int Length;
+    int Prev;
+    u_int Dest;
+    int Delta;
+
+    Length = *in_pChannel->ProgramCounter++;
+    if (Length == 0) {
+        Length = 0x100;
+    }
+    Dest = (*in_pChannel->ProgramCounter++ & 0x7f) << 8;
+    Prev = in_pChannel->TremeloDepth;
+    Delta = Dest - Prev;
+    in_pChannel->TremeloDepthSlideStep = Delta / Length;
+    in_pChannel->TremeloDepthSlideLength = Length;
+}
+
+void SoundVM_BA_DisableTremelo(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->TremeloVolume = 0;
+    in_pChannel->UpdateFlags &= ~SOUND_UPDATE_TREMOLO;
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+}
+
+void SoundVM_BC_AutoPan(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int Rate;
+
+    in_pChannel->UpdateFlags |= SOUND_UPDATE_PAN_LFO;
+    Rate = *in_pChannel->ProgramCounter++;
+    in_pChannel->AutoPanRatePhase = Rate;
+
+    if (Rate == 0) {
+        in_pChannel->AutoPanRatePhase = 0x100;
+    }
+
+    in_pChannel->AutoPanType = *in_pChannel->ProgramCounter++;
+    in_pChannel->AutoPanWave = g_Sound_LfoTable[in_pChannel->AutoPanType];
+    in_pChannel->AutoPanRateCurrent = 1;
+}
+
+void SoundVM_BD_AutoPanDepth(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->AutoPanDepth = *in_pChannel->ProgramCounter++ << 7;
+}
+
+void SoundVM_DF_AutoPanDepthSlide(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short Length;
+    u_short Prev;
+    u_short Dest;
+    int Delta;
+
+    Length = *in_pChannel->ProgramCounter++;
+    if (Length == 0) {
+        Length = 0x100;
+    }
+    Dest = *in_pChannel->ProgramCounter++;
+    Dest = Dest << 7;
+    Prev = in_pChannel->AutoPanDepth;
+
+    Delta = Dest - Prev;
+    in_pChannel->AutoPanDepthSlideStep = Delta / Length;
+    in_pChannel->AutoPanDepthSlideLength = Length;
+}
+
+void SoundVM_BE_DisableAutoPan(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->AutoPanVolume = 0;
+    in_pChannel->UpdateFlags &= ~SOUND_UPDATE_PAN_LFO;
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_VOLUME;
+}
+
+void SoundVM_C4_EnableNoiseVoices(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    if (in_pChannel->Type == SOUND_CHANNEL_TYPE_MUSIC) {
+        g_pActiveMusicConfig->NoiseChannelFlags |= in_VoiceFlags;
+    } else {
+        g_Sound_VoiceSchedulerState.NoiseVoiceFlags |= in_VoiceFlags;
+    }
+    g_Sound_GlobalFlags.UpdateFlags |= SOUND_GLOBAL_UPDATE_04 | SOUND_GLOBAL_UPDATE_08;
+}
+
+void SoundVM_C5_DisableNoiseVoices(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    if (in_pChannel->Type == SOUND_CHANNEL_TYPE_MUSIC) {
+        g_pActiveMusicConfig->NoiseChannelFlags &= ~in_VoiceFlags;
+    } else {
+        g_Sound_VoiceSchedulerState.NoiseVoiceFlags &= ~in_VoiceFlags;
+    }
+    g_Sound_GlobalFlags.UpdateFlags |= SOUND_GLOBAL_UPDATE_04 | SOUND_GLOBAL_UPDATE_08;
+    in_pChannel->NoiseTimer = 0;
+}
+
+void SoundVM_C6_EnableFmVoices(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    if (in_pChannel->Type == SOUND_CHANNEL_TYPE_MUSIC) {
+        g_pActiveMusicConfig->FmChannelFlags |= in_VoiceFlags;
+    } else if (in_pChannel->UpdateFlags & SOUND_UPDATE_UNKNOWN_16) {
+        g_Sound_VoiceSchedulerState.FmVoiceFlags |= in_VoiceFlags;
+    }
+    g_Sound_GlobalFlags.UpdateFlags |= SOUND_GLOBAL_UPDATE_08;
+}
+
+void SoundVM_C7_DisableFmVoices(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    if (in_pChannel->Type == SOUND_CHANNEL_TYPE_MUSIC) {
+        g_pActiveMusicConfig->FmChannelFlags &= ~in_VoiceFlags;
+    } else {
+        g_Sound_VoiceSchedulerState.FmVoiceFlags &= ~in_VoiceFlags;
+    }
+    g_Sound_GlobalFlags.UpdateFlags |= SOUND_GLOBAL_UPDATE_08;
+    in_pChannel->FmTimer = 0;
+}
+
+void SoundVM_C2_EnableReverbVoices(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    if (in_pChannel->Type == SOUND_CHANNEL_TYPE_MUSIC) {
+        g_pActiveMusicConfig->ReverbChannelFlags |= in_VoiceFlags;
+    } else {
+        g_Sound_VoiceSchedulerState.ReverbVoiceFlags |= in_VoiceFlags;
+    }
+    g_Sound_GlobalFlags.UpdateFlags |= SOUND_GLOBAL_UPDATE_08;
+}
+
+void SoundVM_C3_DisableReverbVoices(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    if (in_pChannel->Type == SOUND_CHANNEL_TYPE_MUSIC) {
+        g_pActiveMusicConfig->ReverbChannelFlags &= ~in_VoiceFlags;
+    } else {
+        g_Sound_VoiceSchedulerState.ReverbVoiceFlags &= ~in_VoiceFlags;
+    }
+    g_Sound_GlobalFlags.UpdateFlags |= SOUND_GLOBAL_UPDATE_08;
+}
+
+void SoundVM_CC_EnableLegato(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->SfxMask = SOUND_SFX_LEGATO;
+}
+
+void SoundVM_CD_DEBUG(FSoundChannel* in_pChannel __attribute__((unused)),
+    u_int in_VoiceFlags __attribute__((unused)))
+{
+}
+
+void SoundVM_D0_EnableSustainedNote(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    if (in_pChannel->Type != SOUND_CHANNEL_TYPE_MUSIC) {
+        in_pChannel->SfxMask = SOUND_SFX_FULL_LENGTH;
+    }
+}
+
+void SoundVM_D1_DEBUG(FSoundChannel* in_pChannel __attribute__((unused)),
+    u_int in_VoiceFlags __attribute__((unused)))
+{
+}
+
+void SoundVM_AC_NoiseClockFrequency(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int Frequency = *in_pChannel->ProgramCounter++;
+    if (in_pChannel->Type == SOUND_CHANNEL_TYPE_MUSIC) {
+        if (Frequency & 0xC0) {
+            g_pActiveMusicConfig->NoiseClock =
+                (g_pActiveMusicConfig->NoiseClock + (Frequency & 0x3F)) & 0x3F;
+        } else {
+            g_pActiveMusicConfig->NoiseClock = Frequency;
+        }
+    } else if (Frequency & 0xC0) {
+        g_Sound_VoiceSchedulerState.NoiseClock =
+            (g_Sound_VoiceSchedulerState.NoiseClock + (Frequency & 0x3F)) & 0x3F;
+    } else {
+        g_Sound_VoiceSchedulerState.NoiseClock = Frequency;
+    }
+    g_Sound_GlobalFlags.UpdateFlags |= SOUND_GLOBAL_UPDATE_04;
+}
+
+void SoundVM_AD_AttackRate(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short AttackRate = *in_pChannel->ProgramCounter++;
+    in_pChannel->VoiceParams.AdsrLower &= ~SOUND_ADSR_ATTACK_RATE_MASK;
+    in_pChannel->VoiceParams.AdsrLower |= AttackRate << SOUND_ADSR_ATTACK_RATE_SHIFT;
+    in_pChannel->VoiceParams.VoiceParamFlags |=
+        (VOICE_PARAM_ADSR_AMODE | VOICE_PARAM_ADSR_AR);
+    in_pChannel->UpdateFlags |= SOUND_UPDATE_UNKNOWN_24;
+}
+
+void SoundVM_AE_DecayRate(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short DecayRate = *in_pChannel->ProgramCounter++;
+    in_pChannel->VoiceParams.AdsrLower &= ~SOUND_ADSR_DECAY_RATE_MASK;
+    in_pChannel->VoiceParams.AdsrLower |= DecayRate << SOUND_ADSR_DECAY_RATE_SHIFT;
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_ADSR_DR;
+}
+
+void SoundVM_AF_SustainLevel(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short SustainLevel = *in_pChannel->ProgramCounter++;
+    in_pChannel->VoiceParams.AdsrLower &= ~SOUND_ADSR_SUS_LEVEL_MASK;
+    in_pChannel->VoiceParams.AdsrLower |= SustainLevel;
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_ADSR_SL;
+}
+
+void SoundVM_B1_SustainRate(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short SustainRate = *in_pChannel->ProgramCounter++;
+    in_pChannel->VoiceParams.AdsrUpper &= ~SOUND_ADSR_SUS_RATE_MASK;
+    in_pChannel->VoiceParams.AdsrUpper |= SustainRate << SOUND_ADSR_SUS_RATE_SHIFT;
+    in_pChannel->VoiceParams.VoiceParamFlags |=
+        (VOICE_PARAM_ADSR_SR | VOICE_PARAM_ADSR_SMODE);
+    in_pChannel->UpdateFlags |= SOUND_UPDATE_UNKNOWN_27;
+}
+
+void SoundVM_B2_ReleaseRate(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short ReleaseRate = *in_pChannel->ProgramCounter++;
+    in_pChannel->VoiceParams.AdsrUpper &= ~SOUND_ADSR_RELEASE_RATE_MASK;
+    in_pChannel->VoiceParams.AdsrUpper |= ReleaseRate << SOUND_ADSR_RELEASE_RATE_SHIFT;
+    in_pChannel->VoiceParams.VoiceParamFlags |=
+        (VOICE_PARAM_ADSR_RR | VOICE_PARAM_ADSR_RMODE);
+    in_pChannel->UpdateFlags |= SOUND_UPDATE_UNKNOWN_28;
+}
+
+void SoundVM_B7_AttackMode(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short Mode = *in_pChannel->ProgramCounter++;
+
+    in_pChannel->VoiceParams.AdsrLower &= ~SOUND_ADSR_ATTACK_MODE_MASK;
+
+    if (Mode == SOUND_AMODE_5) {
+        in_pChannel->VoiceParams.AdsrLower |= SOUND_ADSR_ATTACK_MODE_MASK;
+    }
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_ADSR_AMODE;
+}
+
+void SoundVM_BB_SustainMode(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short mode = *(in_pChannel->ProgramCounter++);
+    in_pChannel->VoiceParams.AdsrUpper &= ~((1 << 14) | (1 << 15));
+
+    switch (mode) {
+    case 3:
+        in_pChannel->VoiceParams.AdsrUpper |= 0x4000;
+        break;
+    case 5:
+        in_pChannel->VoiceParams.AdsrUpper |= 0x8000;
+        break;
+    case 7:
+        in_pChannel->VoiceParams.AdsrUpper |= 0xC000;
+        break;
+    }
+    in_pChannel->VoiceParams.VoiceParamFlags |= 0x200;
+}
+
+void SoundVM_BF_ReleaseMode(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short Value = *in_pChannel->ProgramCounter++;
+
+    in_pChannel->VoiceParams.AdsrUpper &= ~SOUND_ADSR_RELEASE_MODE_MASK;
+    if (Value == SOUND_RMODE_7) {
+        in_pChannel->VoiceParams.AdsrUpper |= SOUND_ADSR_RELEASE_MODE_MASK;
+    }
+    in_pChannel->VoiceParams.VoiceParamFlags |= VOICE_PARAM_ADSR_RMODE;
+}
+
+void SoundVM_FE10_unk(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    g_pActiveMusicConfig->SomeIndexRelatedToSpuVoiceInfo = *in_pChannel->ProgramCounter++;
+}
+
+void SoundVM_FE11_unk(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    g_pActiveMusicConfig->SomeIndexRelatedToSpuVoiceInfo = 0;
+}
+
+void SoundVM_C8_LoopPoint(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->LoopStackTop = (in_pChannel->LoopStackTop + 1) & 3;
+    in_pChannel->LoopStartPc[in_pChannel->LoopStackTop] = in_pChannel->ProgramCounter;
+    in_pChannel->LoopIterationCount[in_pChannel->LoopStackTop] = 0;
+    in_pChannel->LoopStepCounterSnapshot[in_pChannel->LoopStackTop] =
+        in_pChannel->OpcodeStepCounter;
+}
+
+void SoundVM_C9_LoopN(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short NewCount;
+    u_short TopIndex;
+    u_short DesiredLoopCount;
+
+    DesiredLoopCount = *in_pChannel->ProgramCounter++;
+    if (DesiredLoopCount == 0) {
+        DesiredLoopCount = 0x100;
+    }
+
+    TopIndex = in_pChannel->LoopStackTop;
+    NewCount = in_pChannel->LoopIterationCount[TopIndex] + 1;
+    in_pChannel->LoopIterationCount[TopIndex] = NewCount;
+
+    if (NewCount != DesiredLoopCount) {
+        in_pChannel->ProgramCounter = in_pChannel->LoopStartPc[in_pChannel->LoopStackTop];
+        in_pChannel->OpcodeStepCounter =
+            in_pChannel->LoopStepCounterSnapshot[in_pChannel->LoopStackTop];
+        return;
+    }
+
+    in_pChannel->LoopStackTop =
+        (in_pChannel->LoopStackTop - 1) & SOUND_LOOP_STACK_MAX_INDEX;
+}
+
+void SoundVM_FE08_JumpOnNthLoopPass(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short N;
+    short JumpOffset;
+
+    // pLoopCount   pOffset
+    // 0x01         0x02          0x03         0x04
+
+    N = *in_pChannel->ProgramCounter++;
+    if (N == 0) {
+        N = 0x100;
+    }
+
+    // If current loop's iteration + 1 != N
+    if ((in_pChannel->LoopIterationCount[in_pChannel->LoopStackTop] + 1) != N) {
+        // Jumps to next program instruction
+        in_pChannel->ProgramCounter = in_pChannel->ProgramCounter + sizeof(u_short);
+        return;
+    }
+
+    // Read the relative offset
+    JumpOffset = READ_16LE_PC(in_pChannel->ProgramCounter);
+
+    // Jump from pOffset to the relative offset
+    in_pChannel->ProgramCounter += JumpOffset;
+}
+
+void SoundVM_FE09_JumpAndPopStackOnNthLoopPass(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short N;
+    short JumpOffset;
+
+    N = *in_pChannel->ProgramCounter++;
+    if (N == 0) {
+        N = 0x100;
+    }
+
+    if ((in_pChannel->LoopIterationCount[in_pChannel->LoopStackTop] + 1) != N) {
+        in_pChannel->ProgramCounter += sizeof(u_short);
+        return;
+    }
+
+    JumpOffset = READ_16LE_PC(in_pChannel->ProgramCounter);
+
+    in_pChannel->ProgramCounter += JumpOffset;
+    in_pChannel->LoopStackTop =
+        (in_pChannel->LoopStackTop - 1) & SOUND_LOOP_STACK_MAX_INDEX;
+}
+
+void SoundVM_CA_LoopInf(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->LoopIterationCount[in_pChannel->LoopStackTop] += 1;
+    in_pChannel->ProgramCounter = in_pChannel->LoopStartPc[in_pChannel->LoopStackTop];
+    in_pChannel->OpcodeStepCounter =
+        in_pChannel->LoopStepCounterSnapshot[in_pChannel->LoopStackTop];
+}
+
+void SoundVM_A2_OverwriteNextNoteLength(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short Length;
+
+    Length = *in_pChannel->ProgramCounter++;
+    in_pChannel->LengthFixed = 0;
+    in_pChannel->Length2 = Length;
+    in_pChannel->Length1 = Length;
+    in_pChannel->LengthStored = Length;
+}
+
+// Set the duration for all the upcoming notes (same as A2 except it doesn't apply only to
+// the next note)
+void SoundVM_DC_FixNoteLength(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int NoteLength;
+
+    NoteLength = *(signed char*)in_pChannel->ProgramCounter++;
+    if (NoteLength != 0) {
+        NoteLength += in_pChannel->LengthStored;
+        if (NoteLength <= 0) {
+            NoteLength = 1;
+        } else if (NoteLength >= 256) {
+            NoteLength = 255;
+        }
+    }
+    in_pChannel->LengthFixed = NoteLength;
+}
+
+void SoundVM_FE04_ClearKeymapTable(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    if (g_pActiveMusicConfig->KeymapTable != NULL) {
+        in_pChannel->UpdateFlags &=
+            ~(SOUND_UPDATE_DRUM_MODE | SOUND_UPDATE_UNKNOWN_12 | SOUND_UPDATE_UNKNOWN_24
+                | SOUND_UPDATE_UNKNOWN_27 | SOUND_UPDATE_UNKNOWN_28);
+        in_pChannel->UpdateFlags |= SOUND_UPDATE_DRUM_MODE;
+    }
+}
+
+void SoundVM_FE05_MuteVoice(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->VoiceParams.VolumeScale = 0;
+    in_pChannel->UpdateFlags &= ~SOUND_UPDATE_DRUM_MODE;
+}
+
+void SoundVM_FE15_unk(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    g_pActiveMusicConfig->TimerLower = *in_pChannel->ProgramCounter++;
+    g_pActiveMusicConfig->TimerUpper = *in_pChannel->ProgramCounter++;
+    g_pActiveMusicConfig->TimerLowerCurrent = 0;
+    g_pActiveMusicConfig->TimerUpperCurrent = 0;
+}
+
+void SoundVM_FE16_unk(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    g_pActiveMusicConfig->TimerTopCurrent = *in_pChannel->ProgramCounter++;
+    g_pActiveMusicConfig->TimerTopCurrent |= *in_pChannel->ProgramCounter++ << 8;
+}
+
+void SoundVM_B0_DecayRateAndSustainLevel(FSoundChannel* in_pChannel, u_int in_VoiceFlags)
+{
+    SoundVM_AE_DecayRate(in_pChannel, in_VoiceFlags);
+    SoundVM_AF_SustainLevel(in_pChannel, in_VoiceFlags);
+}
+
+void SoundVM_CE_EnableNoiseAndDelayToggle(FSoundChannel* in_pChannel, u_int in_VoiceFlags)
+{
+    u_short Timer;
+    u_short Value;
+
+    Value = *in_pChannel->ProgramCounter++;
+    if (Value != 0) {
+        Timer = Value + 1;
+    } else {
+        Timer = SOUND_DEFAULT_DELAY_TIME;
+    }
+
+    in_pChannel->NoiseTimer = Timer;
+
+    SoundVM_C4_EnableNoiseVoices(in_pChannel, in_VoiceFlags);
+}
+
+void SoundVM_CF_ToggleNoiseOnDelay(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short Delay = *in_pChannel->ProgramCounter++;
+    if (Delay != 0) {
+        in_pChannel->NoiseTimer = Delay + 1;
+        return;
+    }
+    in_pChannel->NoiseTimer = SOUND_DEFAULT_DELAY_TIME;
+}
+
+void SoundVM_D2_EnableFmAndDelayToggle(FSoundChannel* in_pChannel, u_int in_VoiceFlags)
+{
+    u_short Timer;
+    u_short Value;
+
+    Value = *in_pChannel->ProgramCounter++;
+    if (Value != 0) {
+        Timer = Value + 1;
+    } else {
+        Timer = SOUND_DEFAULT_DELAY_TIME;
+    }
+
+    in_pChannel->FmTimer = Timer;
+    SoundVM_C6_EnableFmVoices(in_pChannel, in_VoiceFlags);
+}
+
+void SoundVM_D3_ToggleFmDelay(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    u_short Delay = *in_pChannel->ProgramCounter++;
+    if (Delay != 0) {
+        in_pChannel->FmTimer = Delay + 1;
+        return;
+    }
+    in_pChannel->FmTimer = SOUND_DEFAULT_DELAY_TIME;
+}
+
+void SoundVM_CB_DisableVoiceModes(FSoundChannel* in_pChannel, u_int in_VoiceFlags)
+{
+    in_pChannel->UpdateFlags &=
+        ~(SOUND_UPDATE_SIDE_CHAIN_PITCH | SOUND_UPDATE_SIDE_CHAIN_VOL
+            | SOUND_UPDATE_PAN_LFO | SOUND_UPDATE_TREMOLO | SOUND_UPDATE_VIBRATO);
+    SoundVM_C5_DisableNoiseVoices(in_pChannel, in_VoiceFlags);
+    SoundVM_C7_DisableFmVoices(in_pChannel, in_VoiceFlags);
+    SoundVM_C3_DisableReverbVoices(in_pChannel, in_VoiceFlags);
+    in_pChannel->SfxMask &= ~(SOUND_SFX_LEGATO | SOUND_SFX_FULL_LENGTH);
+}
+
+void SoundVM_D4_EnablePlaybackRateSidechain(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->UpdateFlags |= SOUND_UPDATE_SIDE_CHAIN_PITCH;
+}
+
+void SoundVM_D5_DisablePlaybackRateSidechain(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->UpdateFlags &= ~SOUND_UPDATE_SIDE_CHAIN_PITCH;
+}
+
+void SoundVM_D6_EnablePitchVolumeSidechain(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->UpdateFlags |= SOUND_UPDATE_SIDE_CHAIN_VOL;
+}
+
+void SoundVM_D7_DisablePitchVolumeSidechain(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->UpdateFlags &= ~SOUND_UPDATE_SIDE_CHAIN_VOL;
+}
+
+void SoundVM_FE0B_unk(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int temp_v0;
+    char* pc;
+    char* var_a1;
+    char* var_a2;
+
+    pc = in_pChannel->ProgramCounter;
+    temp_v0 = (pc[1] << 8) | pc[0];
+
+    if (temp_v0 != 0) {
+        var_a1 = &pc[temp_v0] + 2;
+    } else {
+        var_a1 = NULL;
+    }
+
+    pc += 2;
+    temp_v0 = (pc[1] << 8) | pc[0];
+
+    if (temp_v0 != 0) {
+        var_a2 = &pc[temp_v0] + 2;
+    } else {
+        var_a2 = NULL;
+    }
+
+    D_80037800.Param1 = 0;
+    D_80037800.Param2 = 0;
+    D_80037800.Param3 = in_pChannel->ChannelPan >> 8;
+    D_80037800.Param4 = in_pChannel->Volume >> 0x17;
+    Sound_PlaySfxProgram(&D_80037800, var_a1, var_a2, 0);
+    in_pChannel->ProgramCounter += 4;
+}
+
+void SoundVM_E0_unk(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->UpdateFlags |= SOUND_UPDATE_UNKNOWN_20;
+}
+
+void SoundVM_FE1C_unk(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    int temp_v0 = *in_pChannel->ProgramCounter++;
+    g_pActiveMusicConfig->unk44 = (FSoundKeymapEntry8*)&D_8002F66C[temp_v0];
+}
+
+void SoundVM_FE1D_MarkVoicesKeyed(
+    FSoundChannel* in_pChannel __attribute__((unused)), u_int in_VoiceFlags)
+{
+    g_pActiveMusicConfig->KeyedMask |= in_VoiceFlags;
+}
+
+void SoundVM_FE1E_ClearVoicesKeyed(
+    FSoundChannel* in_pChannel __attribute__((unused)), u_int in_VoiceFlags)
+{
+    g_pActiveMusicConfig->KeyedMask &= ~in_VoiceFlags;
+}
+
+void SoundVM_E1_SetRandomPitchDepth(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->RandomPitchDepth = *in_pChannel->ProgramCounter++;
+}
+
+void SoundVM_E2_ResetRandomPitchDepth(
+    FSoundChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
+{
+    in_pChannel->RandomPitchDepth = 0;
+}
+
+void SoundVM_XX_Unimplemented(FSoundChannel* in_pChannel, u_int in_VoiceFlags)
+{
+    SoundVM_A0_FinishChannel(in_pChannel, in_VoiceFlags);
+}
+
+void IRQCallbackProc(void)
+{
+    int temp_a2;
+
+    if (g_Sound_Cutscene_StreamState.VoicesInUseFlags != 0) {
+        SpuSetIRQ(0);
+        SpuSetIRQCallback(NULL);
+        SetVoiceKeyOff(g_Sound_Cutscene_StreamState.VoicesInUseFlags);
+        temp_a2 = g_Sound_Cutscene_StreamState.VoicesInUseFlags;
+        g_Sound_Cutscene_StreamState.VoicesInUseFlags = 0;
+        g_Sound_VoiceSchedulerState.ReverbVoiceFlags &= ~temp_a2;
+        g_Sound_GlobalFlags.UpdateFlags |= 0x100;
+    }
+}
+
+// https://decomp.me/scratch/OSu3P
+INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/25AC", func_8001CDD0);
+
+void func_8001CE60(void)
+{
+    u_char* temp_s0 = g_Sound_Cutscene_StreamState.pCurrentChunk + 0x800;
+    SpuSetTransferStartAddr(0x2100);
+    SpuSetTransferCallback(Sound_Cutscene_OnInitialTransferComplete);
+    SpuWrite(temp_s0, 0x800);
+}
+
+int func_8001CDD0(void);
+void func_8001D3D4(void);
+
+void Sound_Cutscene_StartStream(u_int* arg0, int arg1, int arg2)
+{
+    int VoiceIndex;
+    u_int transferSize;
+
+    VoiceIndex = func_8001CDD0();
+    if (VoiceIndex != -1) {
+        u_int* s3;
+        g_Sound_Cutscene_StreamState.field19_0x4c.s32 = arg1;
+        SpuSetIRQ(0);
+        SpuSetIRQCallback(NULL);
+        s3 = arg0;
+        g_Sound_Cutscene_StreamState.pCurrentChunk = s3 + 0x10;
+        g_Sound_Cutscene_StreamState.TotalPages = s3[4];
+        g_Sound_Cutscene_StreamState.CurrentPage = s3[8];
+        g_Sound_Cutscene_StreamState.VoiceIndex = VoiceIndex;
+        g_Sound_Cutscene_StreamState.VoicesInUseFlags =
+            (1 << VoiceIndex) | (1 << (VoiceIndex + 1));
+        SetVoiceKeyOff(g_Sound_Cutscene_StreamState.VoicesInUseFlags);
+        g_Sound_Cutscene_StreamState.field2_0x8 = s3[6];
+        g_Sound_Cutscene_StreamState.VoiceSampleRate = (u_short)s3[7];
+        g_Sound_Cutscene_StreamState.VoiceIndex = VoiceIndex;
+        g_Sound_Cutscene_StreamState.VoicesInUseFlags =
+            (1 << VoiceIndex) | (1 << (VoiceIndex + 1));
+        SetVoiceKeyOff(g_Sound_Cutscene_StreamState.VoicesInUseFlags);
+        SpuSetTransferMode(0);
+        SpuSetTransferStartAddr(0x1100U);
+        _isSpuTransfer = 1;
+
+        g_Sound_Cutscene_StreamState.unk_Mask_0x4 =
+            (g_Sound_Cutscene_StreamState.field2_0x8 & 2)
+                ? g_Sound_Cutscene_StreamState.pCurrentChunk + s3[5]
+                : NULL;
+        if (g_Sound_Cutscene_StreamState.field2_0x8 & 1) {
+            g_Sound_Cutscene_StreamState.field7_0x1c =
+                (g_Sound_Cutscene_StreamState.field2_0x8 & 2)
+                    ? g_Sound_Cutscene_StreamState.TotalPages - (s3[5] >> 1)
+                    : 0;
+            SpuSetTransferCallback(func_8001D3D4);
+            transferSize = 0x2000;
+        } else {
+            g_Sound_Cutscene_StreamState.field7_0x1c =
+                (g_Sound_Cutscene_StreamState.field2_0x8 & 2)
+                    ? g_Sound_Cutscene_StreamState.TotalPages - s3[5]
+                    : 0;
+            SpuSetTransferCallback(func_8001CE60);
+            transferSize = 0x800;
+        }
+        SpuWrite((u_char*)g_Sound_Cutscene_StreamState.pCurrentChunk, transferSize);
+        if (arg2 != 0) {
+            g_Sound_VoiceSchedulerState.ReverbVoiceFlags |=
+                g_Sound_Cutscene_StreamState.VoicesInUseFlags;
+        } else {
+            g_Sound_VoiceSchedulerState.ReverbVoiceFlags &=
+                ~g_Sound_Cutscene_StreamState.VoicesInUseFlags;
+        }
+        g_Sound_VoiceSchedulerState.FmVoiceFlags &=
+            ~g_Sound_Cutscene_StreamState.VoicesInUseFlags;
+        g_Sound_VoiceSchedulerState.NoiseVoiceFlags &=
+            ~g_Sound_Cutscene_StreamState.VoicesInUseFlags;
+        g_Sound_GlobalFlags.UpdateFlags |= 0x100;
+    }
+}
+
+void Sound_Cutscene_InitVoice(
+    int in_Voice, int in_PanMode, int in_StartAddr, int in_RepeatAddr)
+{
+    short VolR;
+    short VolL;
+
+    if (D_80039AFC & 2) {
+        int volume = (g_Sound_Cutscene_StreamState.Volume
+                         * g_Sound_StereoPanGainTableQ15[PAN_CENTER_INDEX])
+                  >> 0x10;
+        VolR = volume;
+        VolL = volume;
+    } else {
+        if (in_PanMode == 1) {
+            VolR = 0;
+            VolL = g_Sound_Cutscene_StreamState.Volume >> 1;
+        } else if (in_PanMode == 2) {
+            VolL = 0;
+            VolR = g_Sound_Cutscene_StreamState.Volume >> 1;
+        } else if (in_PanMode == 3) {
+            int VolHalfQ16 = (g_Sound_Cutscene_StreamState.Volume >> 1) << 0x10;
+            VolR = (VolHalfQ16 >> 0x11) + (VolHalfQ16 >> 0x12);
+            VolL = VolR;
+        } else {
+            char Mask = 0xFF;
+            VolL = ((g_Sound_Cutscene_StreamState.Volume
+                        * g_Sound_StereoPanGainTableQ15[g_Sound_Cutscene_StreamState
+                                .field19_0x4c.u8[1]])
+                    >> 0x10);
+            VolR = ((g_Sound_Cutscene_StreamState.Volume
+                        * g_Sound_StereoPanGainTableQ15
+                            [g_Sound_Cutscene_StreamState.field19_0x4c.u8[1] ^ Mask])
+                    >> 0x10);
+        }
+    }
+    SetVoiceVolume(in_Voice, VolL, VolR, 0);
+    SetVoiceSampleRate(in_Voice, g_Sound_Cutscene_StreamState.VoiceSampleRate);
+    SetVoiceStartAddr(in_Voice, in_StartAddr);
+    SetVoiceRepeatAddr(in_Voice, in_RepeatAddr);
+    SetVoiceAdsrAttackRateAndMode(in_Voice, 0, 1);
+    SetVoiceAdsrDecayRate(in_Voice, 0xF);
+    SetVoiceAdsrSustainLevel(in_Voice, 0xF);
+    SetVoiceAdsrSustainRateAndDirection(in_Voice, 0x7F, 3);
+    SetVoiceAdsrReleaseRateAndMode(in_Voice, 6, 3);
+}
+
+void Sound_Cutscene_BeginPlayback(
+    int in_SomeIndex, int in_SampleAddr, void (*in_Callback)())
+{
+    int var_s2 = in_SampleAddr;
+    if (g_Sound_Cutscene_StreamState.VoicesInUseFlags != 0) {
+        SpuSetTransferCallback(NULL);
+        _isSpuTransfer = 0;
+        if (g_Sound_Cutscene_StreamState.TotalPages >= 0x1001) {
+            g_Sound_Cutscene_StreamState.TotalPages -= 0x1000;
+            g_Sound_Cutscene_StreamState.pCurrentChunk += in_SomeIndex;
+            SpuSetIRQCallback(in_Callback);
+        } else {
+            SpuSetIRQCallback(IRQCallbackProc);
+            var_s2 = 0x1030;
+            g_Sound_Cutscene_StreamState.TotalPages = 0;
+        }
+        SpuSetIRQAddr(var_s2 + 8);
+        SetVoiceKeyOn(g_Sound_Cutscene_StreamState.VoicesInUseFlags);
+        SpuSetIRQ(1);
+    }
+}
+
+void Sound_Cutscene_OnInitialTransferComplete(void)
+{
+    Sound_Cutscene_InitVoice(g_Sound_Cutscene_StreamState.VoiceIndex, 0, 0x1100, 0x2100);
+    Sound_Cutscene_InitVoice(
+        g_Sound_Cutscene_StreamState.VoiceIndex + 1, 0, 0x1100, 0x2100);
+    Sound_Cutscene_BeginPlayback(0x1000, 0x2100, Sound_Cutscene_OnBufferAComplete);
+}
+
+void func_8001D5E4(void);
+
+void func_8001D3D4(void)
+{
+    Sound_Cutscene_InitVoice(g_Sound_Cutscene_StreamState.VoiceIndex, 1, 0x1100, 0x2100);
+    Sound_Cutscene_InitVoice(
+        g_Sound_Cutscene_StreamState.VoiceIndex + 1, 2, 0x1900, 0x2900);
+    Sound_Cutscene_BeginPlayback(0x2000, 0x2100, func_8001D5E4);
+}
+
+void Sound_Cutscene_LoadNextBuffer(
+    int in_RepeatAddressL, int in_RepeatAddressR, int in_Param3, void (*in_IrqCallback)())
+{
+    if ((g_Sound_Cutscene_StreamState.VoicesInUseFlags != 0)
+        && (g_Sound_Cutscene_StreamState.TotalPages != 0)) {
+        SpuSetTransferStartAddr(in_RepeatAddressL);
+        spuSetTransferCallback();
+        SpuWrite((u_char*)g_Sound_Cutscene_StreamState.pCurrentChunk, in_Param3);
+        SpuSetIRQ(0);
+        if (g_Sound_Cutscene_StreamState.TotalPages > 0x800) {
+            SpuSetIRQCallback(in_IrqCallback);
+            g_Sound_Cutscene_StreamState.TotalPages -= 0x800;
+            g_Sound_Cutscene_StreamState.pCurrentChunk += in_Param3;
+        } else if (g_Sound_Cutscene_StreamState.unk_Mask_0x4 != 0) {
+            SpuSetIRQCallback(in_IrqCallback);
+            g_Sound_Cutscene_StreamState.pCurrentChunk =
+                g_Sound_Cutscene_StreamState.unk_Mask_0x4;
+            g_Sound_Cutscene_StreamState.TotalPages =
+                g_Sound_Cutscene_StreamState.field7_0x1c;
+        } else {
+            SpuSetIRQCallback(IRQCallbackProc);
+            in_RepeatAddressR = 0x1030;
+            in_RepeatAddressL = 0x1030;
+            g_Sound_Cutscene_StreamState.TotalPages = 0;
+        }
+        SetVoiceRepeatAddr(g_Sound_Cutscene_StreamState.VoiceIndex, in_RepeatAddressL);
+        SetVoiceRepeatAddr(
+            g_Sound_Cutscene_StreamState.VoiceIndex + 1, in_RepeatAddressR);
+        SpuSetIRQAddr(in_RepeatAddressL + 8);
+        SpuSetIRQ(1);
+    }
+}
+
+void Sound_Cutscene_OnBufferAComplete(void)
+{
+    Sound_Cutscene_LoadNextBuffer(
+        0x1100, 0x1100, 0x800, Sound_Cutscene_OnBufferBComplete);
+}
+
+void Sound_Cutscene_OnBufferBComplete(void)
+{
+    Sound_Cutscene_LoadNextBuffer(
+        0x2100, 0x2100, 0x800, Sound_Cutscene_OnBufferAComplete);
+}
+
+void func_8001D614();
+
+void func_8001D5E4(void)
+{
+    Sound_Cutscene_LoadNextBuffer(0x1100, 0x1900, 0x1000, func_8001D614);
+}
+
+void func_8001D614(void)
+{
+    Sound_Cutscene_LoadNextBuffer(0x2100, 0x2900, 0x1000, func_8001D5E4);
+}
+
+void Sound_Cutscene_StartStream(u_int*, int, int);
+
+void func_8001D644(int* arg0)
+{
+    IRQCallbackProc();
+    Sound_Cutscene_StartStream((u_int*)arg0[0], arg0[1], arg0[2]);
+    g_Sound_VoiceSchedulerState.ActiveChannelMask &=
+        ~g_Sound_Cutscene_StreamState.VoicesInUseFlags;
+}
+
+void func_8001D698(void) { IRQCallbackProc(); }
+
+void Sound_Cmd_E4_SetCutsceneVolume(FSoundCommandParams* in_Params)
+{
+    g_Sound_Cutscene_StreamState.Volume = in_Params->Param1;
+    g_Sound_Cutscene_StreamState.VolFadeStepsRemaining = 0;
+    if (g_Sound_Cutscene_StreamState.VoicesInUseFlags != 0) {
+        SetVoiceVolume(g_Sound_Cutscene_StreamState.VoiceIndex,
+            ((g_Sound_Cutscene_StreamState.Volume << 15) >> 16), 0, 0);
+        SetVoiceVolume(g_Sound_Cutscene_StreamState.VoiceIndex + 1, 0,
+            ((g_Sound_Cutscene_StreamState.Volume << 15) >> 16), 0);
+    }
+}
+
+void Sound_Cmd_E5_FadeOutCutscene(FSoundCommandParams* in_Params)
+{
+    short var_a1 = 1;
+    if (in_Params->Param1 != 0) {
+        var_a1 = in_Params->Param1;
+    }
+    g_Sound_Cutscene_StreamState.VolFadeStepSize =
+        (short)((short)(in_Params->Param2 - g_Sound_Cutscene_StreamState.Volume)
+                / var_a1);
+    g_Sound_Cutscene_StreamState.VolFadeStepsRemaining = var_a1;
+}
+
+void func_8001D7A8(int* arg0)
+{
+    g_Sound_Cutscene_StreamState.field19_0x4c.s32 = *arg0;
+
+    if (g_Sound_Cutscene_StreamState.VoicesInUseFlags != 0) {
+        if (D_80039AFC & 2) {
+            int var_s0 = (g_Sound_Cutscene_StreamState.Volume * D_8002F89C) >> 0x10;
+            SetVoiceVolume(g_Sound_Cutscene_StreamState.VoiceIndex, var_s0, var_s0, 0);
+            SetVoiceVolume(
+                g_Sound_Cutscene_StreamState.VoiceIndex + 1, var_s0, var_s0, 0);
+        } else if (g_Sound_Cutscene_StreamState.field2_0x8 & 1) {
+            int var_s0 = g_Sound_Cutscene_StreamState.Volume;
+            var_s0 <<= 0xF;
+            var_s0 >>= 0x10;
+            SetVoiceVolume(g_Sound_Cutscene_StreamState.VoiceIndex, var_s0, 0, 0);
+            SetVoiceVolume(g_Sound_Cutscene_StreamState.VoiceIndex + 1, 0, var_s0, 0);
+        } else {
+            int var_s0;
+            int v1 = (g_Sound_Cutscene_StreamState.field19_0x4c.s32 >> 8) & 0xFF;
+            short temp_s1 = g_Sound_StereoPanGainTableQ15[v1];
+            temp_s1 = (g_Sound_Cutscene_StreamState.Volume * temp_s1) >> 0x10;
+            var_s0 =
+                (g_Sound_Cutscene_StreamState.Volume
+                    * *(((((g_Sound_Cutscene_StreamState.field19_0x4c.s32 >> 8) & 0xFF)
+                            ^ 0xFF))
+                        + g_Sound_StereoPanGainTableQ15))
+                >> 0x10;
+            SetVoiceVolume(g_Sound_Cutscene_StreamState.VoiceIndex, temp_s1, var_s0, 0);
+            SetVoiceVolume(
+                g_Sound_Cutscene_StreamState.VoiceIndex + 1, temp_s1, var_s0, 0);
+        }
+    }
+}

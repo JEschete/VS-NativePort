@@ -1,7 +1,9 @@
 **/__pycache__
 /.claude
 /.direnv
-/.vscode
+/.vscode/*
+!/.vscode/settings.json
+!/.vscode/c_cpp_properties.json
 /build
 /config/*.xml
 /data/
@@ -28,3 +30,31 @@
 
 # Upstream build log, committed by accident upstream. Not ours to keep.
 /make.log
+
+# Windows build state and user-owned extraction products
+/.vs/
+*.vcxproj.user
+*.suo
+*.dmp
+/CMakeUserPresets.json
+/SLUS-01040/
+/native/platform/assets.c
+/native/platform/disc_index.c
+/resources/rood-reverseWin/build/
+/resources/rood-reverseWin/data/
+/resources/rood-reverseWin/disks/
+/resources/rood-reverseWin/tools/old-gcc/
+
+# Local tool/SDK/emulator installations and vendor checkouts
+/tools/Base/
+/tools/PSX/
+/resources/DataCrystal/
+
+# Optional 32-bit SDL runtime copies and download archives
+/SDL2.dll
+/native/SDL2.dll
+/SDL2-*.zip
+/native/SDL2-*.zip
+/resources/SDL2-*-win32-x86/
+/resources/SDL2-*-win32-x86.zip
+

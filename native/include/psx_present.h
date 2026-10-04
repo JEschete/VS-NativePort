@@ -4,10 +4,7 @@
  * normalised into the PS1 controller's own bit layout so the game's untouched
  * pad code (vs_main_processPadState) consumes it exactly as it does on hardware.
  *
- * SDL2 is loaded with dlopen at RUNTIME, deliberately:
- *   - the native binary is -m32, and Ubuntu's SDL headers are a multiarch shim
- *     that needs libsdl2-dev:i386; pulling i386 dev packages risks displacing
- *     the mipsel cross-toolchain the matching build depends on;
+ * SDL2.dll is loaded at RUNTIME, deliberately:
  *   - it keeps the window OPTIONAL -- with no SDL (or no display) the binary
  *     still runs headless and dumps PPMs, which is what batch/regression use.
  */
@@ -37,13 +34,14 @@ int  psx_present_screenshot_requested(void);
 
 /* Which VRAM rect to display (defaults to 0,0,320,240). */
 void psx_present_set_source(int x, int y, int w, int h);
+void psx_present_set_display(int x, int y, int w, int h, int rgb24);
 
 /* --- host pad state, already in PS1 bit layout (PADLup etc., active high) --- */
 unsigned psx_pad_host_buttons(void);
 /* Physical sticks, 0..255 with 128 centred: [0]=left X, [1]=left Y,
  * [2]=right X, [3]=right Y. */
 void     psx_pad_host_sticks(unsigned char out[4]);
-/* Non-zero once any real pad (SDL gamepad or the Windows bridge) has reported. */
+/* Non-zero once an SDL gamepad has reported. */
 int      psx_pad_host_connected(void);
 /* Human-readable description of the active input source, for logging. */
 const char* psx_pad_host_source(void);

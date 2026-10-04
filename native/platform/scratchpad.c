@@ -2,15 +2,14 @@
  *
  * Game code accesses the scratchpad by its literal hardware address
  * (e.g. `*(void**)0x1F800000 = …`), so we must place real, writable memory at
- * exactly that address rather than a buffer elsewhere. mmap(MAP_FIXED) does
- * this. A constructor runs it before any game code so even the earliest direct
- * access is valid.
+ * exactly that address rather than a buffer elsewhere. VirtualAlloc does
+ * this. Native startup initializes it before entering any game code.
  *
  * We map a full page (larger than the real 1KB) as slack; nothing should rely
  * on the region ending exactly at 0x1F800400.
  */
 #include <psx_scratchpad.h>
-#include <sys/mman.h>
+#include <psx_host.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -31,8 +30,8 @@
  * all of that run unmodified, exactly as with the scratchpad above, instead of
  * rewriting call sites to use host buffers.
  *
- * 0x80000000 is comfortably inside the 3GB user address space of 32-bit Linux,
- * well away from the binary (linked at 0x10000), the C heap and the stack. */
+ * The Windows executable uses a fixed low image base and LARGEADDRESSAWARE
+ * so this address is available to the 32-bit process on 64-bit Windows. */
 #define RAM_ADDR ((void*)0x80000000UL)
 #define RAM_SIZE 0x200000UL
 
@@ -40,9 +39,8 @@ static int mapped;
 
 static void map_region(void* addr, unsigned long size, const char* what)
 {
-    void* p = mmap(addr, size, PROT_READ | PROT_WRITE,
-                   MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (p == MAP_FAILED || p != addr) {
+    void* p = psx_host_map_memory(addr, size);
+    if (p != addr) {
         fprintf(stderr, "[native] FATAL: could not map %s at %p\n", what, addr);
         abort();
     }
@@ -56,9 +54,7 @@ static void map_scratchpad(void)
     map_region(RAM_ADDR, RAM_SIZE, "PS1 main RAM");
 }
 
-/* Map before main(), so hardcoded PS1 addresses are valid immediately. */
-__attribute__((constructor))
-static void _scratchpad_ctor(void) { map_scratchpad(); }
+void psx_scratchpad_init(void) { map_scratchpad(); }
 
 unsigned long* _psx_scratchpad(void)
 {

@@ -1,0 +1,34 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "windows",
+      "displayName": "Visual Studio 2022 - Win32 Clang",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "Win32",
+      "toolset": "v143",
+      "binaryDir": "${sourceDir}/build/windows",
+      "environment": {
+        "CL": "--target=i686-pc-windows-msvc"
+      },
+      "cacheVariables": {
+        "CMAKE_C_FLAGS": "--target=i686-pc-windows-msvc"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-debug",
+      "configurePreset": "windows",
+      "configuration": "Debug"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "windows-debug",
+      "configurePreset": "windows",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true }
+    }
+  ]
+}

@@ -72,7 +72,7 @@ int func_800E6694(int arg0) { (void)arg0; return 0; }
  * NOTE(render): these primitives are textured font/UI sprites; the native
  * rasteriser does not yet texture them (needs the font in VRAM + CLUT SPRT
  * raster), so they build correctly but do not yet produce pixels. */
-extern u_long* D_1F800000[];
+#define D_1F800000 ((u_long**)0x1F800000UL)
 
 static u_long* setSprite_impl(int brightnessTransparency, int xy, int wh,
                               u_long* nextPrim, u_long tpageCmd)

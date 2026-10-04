@@ -1,0 +1,5070 @@
+#include "common.h"
+#include "5BF94.h"
+#include "146C.h"
+#include "2842C.h"
+#include "30DB0.h"
+#include "38C1C.h"
+#include "3A1A0.h"
+#include "40564.h"
+#include "573B8.h"
+#include "vs_string.h"
+#include "gpu.h"
+#include "../../SLUS_010.40/main.h"
+#include "../../SLUS_010.40/overlay.h"
+#include "../../SLUS_010.40/31724.h"
+#include "../../SLUS_010.40/32154.h"
+#include "../../MENU/MAINMENU.PRG/C48.h"
+#include "../../MENU/MAINMENU.PRG/58EC.h"
+#include "../../GIM/SCREFF2.PRG/0.h"
+#include "build/src/include/lbas.h"
+#include "build/assets/BATTLE/BATTLE.PRG/menuStrings.h"
+#include <memory.h>
+#include <libetc.h>
+#include <rand.h>
+#include <abs.h>
+
+typedef struct {
+    u_int unk0_0 : 8;
+    u_int unk0_8 : 8;
+    u_int unk0_16 : 4;
+    u_int unk0_20 : 6;
+    u_int unk0_26 : 6;
+} func_800D57FC_t;
+
+typedef struct {
+    unsigned unk0_0 : 4;
+    unsigned unk0_4 : 5;
+} func_800D57FC_t2;
+
+typedef struct {
+    func_800D5780_t2 unk0;
+    u_short unk2;
+} func_800D55A4_t2;
+
+typedef struct {
+    int count;
+    func_800D55A4_t2 unk4[0];
+} func_800D55A4_t;
+
+typedef struct {
+    u_short unk0;
+    u_char unk2;
+    u_char unk3;
+} func_800D6894_t;
+
+typedef struct {
+    u_int unk0_0 : 1;
+    u_int unk0_1 : 1;
+    u_int unk0_2 : 1;
+    u_int unk0_3 : 3;
+    u_int unk0_6 : 3;
+    u_int unk0_9 : 3;
+    u_int unk0_12 : 1;
+    u_int unk0_13 : 3;
+    char unk2;
+    char unk3;
+    short unk4;
+    short id;
+    short unk8;
+    short unkA;
+    short unkC;
+    short unkE;
+    void* data;
+    vs_main_CdQueueSlot* cdQueueSlot;
+    short unk18[0x1EE];
+    int unk3F4;
+} gim_t;
+
+typedef struct {
+    D_800F53B8_t3* unk0;
+    D_800F53B8_t3* unk4;
+    D_800F53B8_t3* unk8;
+    D_800F53B8_t3* unkC;
+    int unk10;
+    char* unk14;
+    int unk18;
+    D_800F53B8_t* unk1C;
+    u_char unk20;
+    u_char unk21;
+    u_char unk22;
+    u_char unk23;
+    int unk24;
+} D_800F53B8_t2;
+
+typedef struct {
+    char unk0[0x22];
+    u_short unk22_0 : 2;
+    u_short unk22_2 : 1;
+    u_short unk22_3 : 13;
+    char unk24[0xAC];
+} func_800D6508_t;
+
+typedef struct {
+    int unk0;
+    int unk4;
+    int unk8;
+    int unkC;
+} D_800F5620_t;
+
+typedef struct {
+    char unk0[4];
+    short unk4;
+    short unk6;
+    short unk8;
+    short unkA;
+} func_800CF988_t2;
+
+typedef struct {
+    char unk0[8];
+    func_800CF988_t2 unk8[4];
+} func_800CF988_t;
+
+typedef struct {
+    char unk0[0xC];
+    short unkC;
+    short unkE;
+    short unk10;
+    short unk12;
+} func_800CFAAC_t;
+
+typedef struct {
+    u_char order[8];
+    u_char unk8;
+    u_char unk9;
+    u_char selectedIndex;
+    u_char count;
+    u_char unkC;
+} _textBoxSelector_t;
+
+typedef struct {
+    int unk0;
+    int unk4;
+    SVECTOR unk8;
+    VECTOR unk10;
+    VECTOR unk20;
+    int unk30[6];
+    MATRIX unk48;
+    int unk5C;
+    int unk60;
+    int unk64;
+} func_800D0B30_t2;
+
+typedef struct {
+    u_char unk0[0x34];
+    u_char unk34;
+    u_char unk35;
+    char unk36[0x42];
+    func_800CFE98_t unk78;
+    char unk9C[0x22];
+    short unkBE;
+} func_800D0C60_t;
+
+typedef struct {
+    short unk0;
+    short unk2;
+    unsigned char unk4;
+    unsigned char unk5;
+    unsigned char unk6;
+    unsigned char unk7;
+} func_800D6310_t;
+
+typedef struct {
+    char unk0[0x10];
+    D_800F53B8_t3_2 unk10[16];
+} func_800D6048_t;
+
+typedef struct {
+    u_int unk0_0 : 9;
+    u_int unk0_9 : 9;
+    u_int effectRenderer : 3;
+    u_int unk0_21 : 6;
+    u_int unk0_27 : 5;
+    u_short unk4;
+} func_800D5D74_t;
+
+typedef struct {
+    u_short unk0_0 : 9;
+    u_short unk0_9 : 7;
+    u_short unk2;
+    u_int unk4_0 : 4;
+    u_int unk4_4 : 5;
+    u_int unk4_9 : 7;
+    u_int unk4_16 : 1;
+    u_int unk4_17 : 7;
+    u_int unk4_24 : 1;
+    u_int unk4_25 : 7;
+} func_800D6A18_t;
+
+typedef struct {
+    u_char unk0;
+    u_char unk1_0 : 5;
+    u_char unk1_5 : 1;
+    u_char unk1_6 : 1;
+    u_char unk1_7 : 1;
+    u_char unk2;
+    u_char unk3;
+    u_char unk4;
+    u_char unk5;
+} D_800F54B8_t;
+
+typedef struct {
+    VECTOR position;
+    VECTOR lookAt;
+    int unk20;
+    int unk24;
+    int unk28;
+    int unk2C;
+    int roll;
+    int nearClip;
+    int projectionDistance;
+    int farClip;
+} D_800F54D8_t;
+
+typedef struct {
+    int count;
+    short offsets[0];
+} pFileBlock11;
+
+typedef struct {
+    u_short unk0;
+    u_short unk2;
+    u_char unk4;
+    u_char unk5;
+    u_char unk6;
+    u_char unk7;
+    int unk8;
+    int unkC;
+    int unk10;
+    short unk14[6];
+    short unk20[6];
+    short unk2C[6];
+} func_800D0B30_t;
+
+typedef struct {
+    int unk0;
+    int unk4;
+    u_char unk8;
+    char unk9[0xF];
+} func_800C5798_t;
+
+typedef struct {
+    char unk0;
+    char unk1[3];
+    short unk4;
+    u_char unk6;
+    char unk7;
+    int unk8;
+    int unkC;
+    char* limbName;
+} func_800C56C0_t2;
+
+typedef struct {
+    char unk0[0x40];
+    func_800C5798_t* unk40;
+    char unk44[0x94C];
+    func_800C56C0_t2 unk990[24];
+} func_800C56C0_t;
+
+void _renderDigit(int, int, int, u_long*);
+void func_800C51B4(int);
+void func_800CA97C(void);
+void func_800CBBCC(gim_t* arg0, int arg1, u_long* arg2);
+int _breakArtsUnlocked(void);
+extern int func_800CE174(func_800D4910_t*, u_int, int);
+void func_800CE67C(void);
+D_800F53B8_t* func_800CE83C(D_800F53B8_t2*);
+int func_800CE9B0(void);
+char func_800CF218(func_800CF0E8_t* arg0, int arg1, int arg2);
+void func_800CF478(int arg0);
+void func_800CF484(int arg0, D_800F53B8_t* arg1);
+int func_800CF49C();
+void func_800CF514(int arg0);
+void func_800CF614(D_800F53B8_t*);
+func_800D4910_t* func_800CF694(D_800F53B8_t*, effectExec, int);
+void func_800CF70C(D_800F53B8_t*, func_800D4910_t*);
+void func_800CFEF0(D_800F53B8_t*);
+void func_800CFE98(SVECTOR* arg0, func_800CFE98_t* arg1);
+void func_800D0984(int, void*, int);
+void func_800D0D08(D_800F53B8_t*);
+void func_800D1104(int);
+int func_800D12D8(int);
+void func_800D169C(SVECTOR*, SVECTOR*, int, SVECTOR*);
+void func_800D17A8(VECTOR*, VECTOR*, int, VECTOR*);
+void func_800D1930(void);
+void func_800D1B18(D_800F54D8_t*);
+void func_800D1B80(D_800F54D8_t*);
+void func_800D206C(void);
+void func_800D21C0(void);
+void func_800D236C(void);
+void func_800D2560(void);
+void func_800D268C(void);
+void func_800D2698(int);
+void func_800D278C(void);
+void func_800D2904(D_800F53B8_t*);
+void func_800D46DC(int, D_800F53B8_t*);
+u_char func_800D5170(D_800F53B8_t*);
+u_short func_800D5198(D_800F53B8_t*);
+int func_800D51D8(D_800F53B8_t* arg0);
+void func_800D55A4(D_800F53B8_t*, int, int);
+void func_800D5700(func_800D5780_t*);
+void func_800D5738(func_800D5780_t*);
+int func_800D5780(func_800D5780_t*);
+int func_800D57FC(D_800F53B8_t*, func_800D5780_t*);
+int func_800D5904(D_800F53B8_t*, func_800D5780_t*);
+int func_800D5A98(D_800F53B8_t*, func_800D5780_t*, int);
+int func_800D5D74(D_800F53B8_t*, func_800D5780_t*);
+int func_800D5E00(D_800F53B8_t*, func_800D5780_t*);
+int func_800D5F8C(D_800F53B8_t*, func_800D5780_t*);
+int func_800D6048(D_800F53B8_t*, func_800D5780_t*, int);
+int func_800D61AC(D_800F53B8_t*, func_800D5780_t*);
+int func_800D6298(D_800F53B8_t*, func_800D5780_t*);
+void func_800D6448(D_800F53B8_t*, u_char, u_char);
+void func_800D65D8(D_800F53B8_t*, u_char);
+void func_800D6628(D_800F53B8_t*, u_char);
+void func_800D66FC(D_800F53B8_t*, u_char, u_char);
+void func_800D67C4(D_800F53B8_t*, u_char);
+int func_800D6A18(D_800F53B8_t*, func_800D5780_t*);
+void func_800D1EF0(int, int, int, int, int, int, int);
+void func_800D6AEC(D_800F53B8_t*, int);
+void func_800D7890(int);
+void func_800D78B8(void);
+void func_800D78CC(void);
+int func_800D7BF8(void);
+void func_800D7C5C(void);
+int func_800D7CFC(void);
+int func_800D7EF4(void);
+void func_800D8060(void*);
+void vs_effpurge_exec(void);
+void func_800AE68C(int, int);
+
+extern u_int _gimLbas[];
+extern int _menuLbas[];
+extern char D_800EB9AC;
+extern signed char _loadedSubMenu;
+extern func_800C56C0_t* D_800EB9B8;
+extern gim_t* D_800EB9BC;
+extern char D_800EB9CC;
+extern char D_800EB9CD;
+extern char D_800EB9CE;
+extern union {
+    int s32;
+    u_char u8[4];
+} D_800EB9D0;
+extern u_int* _menuBgUnpackedBuf;
+extern int* D_800EB9D8;
+extern u_int D_800EBBB8[];
+extern u_int D_800EBBC0[];
+extern int D_800EBBDC[];
+extern int D_800EBC04[];
+extern u_short D_800EBC68[];
+extern char D_800EBC78;
+extern int D_800EBC88[];
+extern u_char D_800EBC98[];
+extern u_char D_800EBCA0[];
+extern int D_800EBCA8[];
+extern u_short D_800EBCB8[];
+extern u_char D_800EBCC0[];
+extern u_char D_800EBCC8[];
+extern int D_800EBCD0[];
+extern u_short D_800EBCE0[];
+extern u_char D_800EBCE8;
+extern u_char _spellClassCounts[];
+extern u_char* _spellIds[];
+extern char D_800EBD68[];
+extern u_short D_800EBDDC[];
+extern u_int _keystreamState;
+extern char D_800EBF58[][12];
+extern char* D_800EC258;
+extern void (*D_800EC25C[])(gim_t*, int, u_long*);
+extern int D_800EC2CC[];
+extern int D_800EC2D8[];
+extern u_char D_800EC2E4;
+extern effectExec D_800EC324[];
+extern char D_800EC32C[];
+extern u_char D_800EC330[][2][4];
+extern u_char D_800EC368[][5][4];
+extern int (*D_800EC3F4[])(void*);
+extern u_char D_800EC4B8;
+extern u_char D_800F522C;
+extern u_char D_800F4C70[2][16];
+extern u_char D_800F4CB0;
+extern u_char D_800F4CB1;
+extern char D_800F4CB8;
+extern char _fontTable;
+extern int _fontBrightness;
+extern u_long D_800F4CD0;
+extern char vs_battle_shortcutInvoked;
+extern char D_800F4E68;
+extern char D_800F4E69;
+extern char vs_battle_lowerScreenUiState;
+extern _textBoxSelector_t textBoxSelector;
+extern int D_800F4ED4;
+extern short D_800F4ED8[8];
+extern u_long* D_800F51B8;
+extern char D_800F51C8;
+extern vs_main_CdQueueSlot* D_800F5218;
+extern u_int D_800F521C;
+extern int D_800F5224;
+extern int D_800F5228;
+extern func_800CF0E8_t D_800F5230;
+extern u_char D_800F5238;
+extern char D_800F5318;
+extern u_int D_800F531C;
+extern int D_800F5320[];
+extern int D_800F5330[];
+extern int D_800F53B4;
+extern D_800F53B8_t* D_800F53B8;
+extern char D_800F54A8;
+extern char D_800F54A9;
+extern D_800F53B8_t* D_800F54B0;
+extern D_800F54B8_t D_800F54B8[];
+extern short D_800F54D0;
+extern D_800F54D8_t D_800F54D8;
+extern u_char D_800F4E80;
+extern D_800F53B8_t3 D_800F5234;
+extern char D_800F5518;
+extern D_800F54D8_t D_800F5520[2];
+extern short D_800F55A0;
+extern D_800F54D8_t D_800F55A8;
+extern u_int D_800F55E8;
+extern int D_800F55F0;
+extern func_800D2904_t* D_800F55F4;
+extern int D_800F55F8;
+extern int D_800F5600;
+extern int D_800F5610;
+extern int D_800F5618;
+extern D_800F5620_t D_800F5620;
+extern func_800D2904_t* D_800F55FC;
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800C4794);
+
+void func_800C513C(int arg0, int arg1)
+{
+    if (!(arg0 & 0xF0)) {
+        func_8009FE74(arg0, arg1);
+    }
+}
+
+void func_800C5164(int arg0, int arg1, int arg2)
+{
+    if (!(arg0 & 0xF0)) {
+        func_8009FD5C(arg0, arg1, arg2);
+    }
+}
+
+void func_800C518C(int arg0, void* arg1)
+{
+    if (!(arg0 & 0xF0)) {
+        func_800A07FC(arg0, arg1);
+    }
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800C51B4);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800C5360);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800C553C);
+
+void func_800C56C0(void)
+{
+    int i;
+
+    func_800C51B4(1);
+
+    for (i = 0; i < D_800F4CB1; ++i) {
+        D_800EB9B8->unk990[D_800F4C70[0][i]].unk0 = 3;
+    }
+
+    for (i = 0; i < D_800F4CB0; ++i) {
+        D_800EB9B8->unk990[D_800F4C70[1][i]].unk0 = 2;
+    }
+}
+
+func_800C56C0_t2* func_800C5798(int arg0, int arg1, int arg2)
+{
+    int temp_v1;
+    func_800C56C0_t2* item = &D_800EB9B8->unk990[arg0];
+    func_800C5798_t* src = &D_800EB9B8->unk40[arg0];
+
+    vs_battle_rMemzero(item, sizeof *item);
+    item->unk0 = arg1;
+    item->unk6 = arg2 * 11 + 32;
+    temp_v1 = src->unk4;
+    item->unk8 = src->unk0;
+    item->unkC = temp_v1;
+
+    if (arg1 == 2) {
+        item->unk4 = 320;
+        item->limbName = vs_battle_limbNames[src->unk8] + 1;
+    } else {
+        item->unk4 = -72;
+        item->limbName = vs_battle_limbNames[src->unk8];
+        item->unk7 = 1;
+    }
+    return item;
+}
+
+char* func_800C58A4(uint arg0)
+{
+    int i;
+    arg0 >>= 5;
+    for (i = 0; i < 0x18; i++) {
+        if ((arg0 >> i) & 1) {
+            return (char*)&vs_battle_statusStrings[vs_battle_statusStrings[0x39 + i]];
+        }
+    }
+    return (char*)&vs_battle_statusStrings[0xF6];
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800C58F8);
+
+void func_800C64D0(u_long* arg0, int* arg1)
+{
+    int a3 = 0xFFFFFF;
+    int temp_t0 = ((u_long)(arg0 - 1) & a3);
+
+    while ((*arg0 & a3) != temp_t0) {
+        arg0 = (u_long*)((*arg0 & a3) | 0x80000000);
+    }
+
+    *arg0 = (*arg0 & 0xFF000000) | ((u_long)arg1 & a3);
+    *arg1 = (int)((*arg1 & 0xFF000000) | temp_t0);
+}
+
+INCLUDE_ASM(
+    "build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", vs_battle_renderTextRawColor);
+
+void vs_battle_renderTextRaw(char const* text, int xy, void* nextPrim)
+{
+    vs_battle_renderTextRawColor(text, xy, vs_getRGB(128, 128, 128), nextPrim);
+}
+
+#pragma vsstring(start)
+
+void _writeStringTerminator(char* str) { *str = '\0'; }
+
+char* vs_battle_printf(char* dest, char* src)
+{
+    int divisor;
+    int integer;
+    int c;
+
+    c = *src++;
+
+    while (c != '\0') {
+        if (c >= vs_char_control) {
+            switch (c) {
+            case vs_char_printHex:
+                c = *src++;
+                integer = vs_battle_stringContext.integers[c % 10];
+                if (integer < 0) {
+                    integer = -integer;
+                    *dest++ = '-';
+                }
+                if (c < 10) {
+                    if (integer == 0) {
+                        *dest++ = '0';
+                    } else {
+                        for (divisor = 0x10000000; (integer / divisor) == 0;
+                            divisor >>= 4)
+                            ;
+                        while (divisor != 0) {
+                            *dest++ = (integer / divisor) & 0xF;
+                            divisor >>= 4;
+                        }
+                    }
+                } else {
+                    c = (c / 10) - 1;
+                    divisor = 1;
+                    while (c != 0) {
+                        --c;
+                        divisor *= 16;
+                    }
+                    while (divisor != 0) {
+                        *dest++ = (integer / divisor) & 0xF;
+                        divisor >>= 4;
+                    }
+                }
+                break;
+            case vs_char_printDecimal:
+                c = *src++;
+                integer = vs_battle_stringContext.integers[c % 10];
+                if (integer < 0) {
+                    integer = -integer;
+                    *dest++ = '-';
+                }
+                if (c < 10) {
+                    if (integer == 0) {
+                        *dest++ = 0;
+                    } else {
+                        for (divisor = 1000000000; (integer / divisor) == 0;
+                            divisor /= 10)
+                            ;
+                        while (divisor != 0) {
+                            *dest++ = (integer / divisor) % 10;
+                            divisor /= 10;
+                        }
+                    }
+                } else {
+                    c = (c / 10) - 1;
+                    for (divisor = 1; c != 0; --c) {
+                        divisor *= 10;
+                    }
+                    while (divisor != 0) {
+                        *dest++ = (integer / divisor) % 10;
+                        divisor /= 10;
+                    }
+                }
+                break;
+            case vs_char_printString:
+                dest = vs_battle_printf(
+                    dest, vs_battle_stringContext.strings[(u_char)*src++]);
+                break;
+            default:
+                *dest++ = c;
+                *dest++ = *src++;
+            }
+        } else {
+            *dest++ = c;
+        }
+        c = *src++;
+    }
+    *dest = c;
+    return dest;
+}
+#pragma vsstring(end)
+
+int vs_battle_setTextBox(int boxId, char* str)
+{
+    vs_battle_textBox* box = &vs_battle_textBoxes[boxId];
+
+    if (str != NULL) {
+        box->string = str;
+        box->speed = 1;
+        box->unk4 = 0;
+        box->prevChunksPrinted = 0;
+        if (!(box->unk0.unk0_24 & 0x20)) {
+            func_800AAD4C(box->unk0.unk0_24, 0, box->unk2E + 1, 1);
+            box->unk2C = 1;
+        }
+        return 0;
+    }
+
+    if ((box->speed != 0xFFFF) && (box->speed != 0)) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int vs_battle_selectTextBox(u_char boxMask)
+{
+    vs_battle_textBox tempBox;
+    short yPositions[8];
+    int i;
+    int j;
+    int tempOrder;
+    int selectedIndex;
+    u_int count = 0;
+
+    if (textBoxSelector.count == 0) {
+
+        for (i = 0; i < 8; ++i) {
+            yPositions[i] = 0x7FFF;
+            if ((boxMask >> i) & 1) {
+                ++count;
+                yPositions[i] = vs_battle_textBoxes[i].y;
+            }
+        }
+
+        for (i = 0; i < count; ++i) {
+            int sortedIndex = 0;
+            for (j = 0; j < 8; ++j) {
+                if (yPositions[sortedIndex] > yPositions[j]) {
+                    sortedIndex = j;
+                }
+            }
+            textBoxSelector.order[i] = sortedIndex;
+            yPositions[sortedIndex] = 0x7FFF;
+        }
+
+        selectedIndex = vs_main_stateFlags.unk11 - 1;
+
+        if (selectedIndex >= count) {
+            selectedIndex = 0;
+        }
+
+        textBoxSelector.selectedIndex = 0;
+        textBoxSelector.count = count;
+    } else {
+        selectedIndex = textBoxSelector.selectedIndex;
+        count = textBoxSelector.count;
+
+        if (vs_main_buttonsPressed.all
+            & (PADL2 | PADR2 | PADL1 | PADR1 | PADRup | PADRright | PADRdown
+                | PADRleft)) {
+            vs_battle_playMenuSelectSfx();
+            textBoxSelector.count = 0;
+            return selectedIndex + 1;
+        }
+
+        if (vs_main_buttonsPressed.all & PADLup) {
+            int v0 = selectedIndex - 1;
+            selectedIndex = v0 + count;
+        }
+
+        if (vs_main_buttonsPressed.all & PADLdown) {
+            ++selectedIndex;
+        }
+
+        selectedIndex %= count;
+    }
+
+    if (selectedIndex != textBoxSelector.selectedIndex) {
+        vs_battle_playMenuChangeSfx();
+        textBoxSelector.selectedIndex = selectedIndex;
+    }
+
+    j = selectedIndex;
+
+    for (i = 0; i < count; ++i) {
+        if (textBoxSelector.order[j] < textBoxSelector.order[i]) {
+            j = i;
+        }
+    }
+
+    tempOrder = textBoxSelector.order[selectedIndex];
+    textBoxSelector.order[selectedIndex] = textBoxSelector.order[j];
+    textBoxSelector.order[j] = tempOrder;
+
+    tempBox = vs_battle_textBoxes[tempOrder];
+    vs_battle_textBoxes[tempOrder] =
+        vs_battle_textBoxes[textBoxSelector.order[selectedIndex]];
+    vs_battle_textBoxes[textBoxSelector.order[selectedIndex]] = tempBox;
+
+    for (i = 0; i < count; ++i) {
+        vs_battle_textBoxes[textBoxSelector.order[i]].brightness =
+            i == selectedIndex ? 0x80 : 0x40;
+    }
+
+    return 0;
+}
+
+#pragma vsstring(start)
+
+int vs_battle_getTextLineLength(char* str)
+{
+    int length = 0;
+
+    while (1) {
+        u_char c = *str++;
+        if (c < '\f') {
+            length += vs_battle_characterWidths[c];
+            continue;
+        } else if ((c == '\f') || (c == '\0') || (c == '\n')) {
+            return length / 6;
+        } else if (c == vs_char_spacing) {
+            length += *str++;
+        } else if (c == vs_char_printDecimal) {
+            c = *str++;
+            if (c > '9') {
+                length += (c / 10) * 6;
+            }
+        } else if (c >= vs_char_chunkSize) {
+            ++str;
+        }
+    }
+}
+
+int vs_battle_printVariableWidthFontChar(u_int glyphId, int x, int y, u_long* ot)
+{
+    int glyphRow;
+    u_int glyphCol;
+    u_long* sprite;
+
+    if (glyphId == ' ') {
+        return x + 6;
+    }
+
+    glyphId += _fontTable * 0xBD;
+    sprite =
+        vs_battle_setSprite(_fontBrightness, (x & 0xFFFF) | (y << 0x10), 0xC000C, ot + 3);
+    sprite[1] = 0xE100002D;
+    glyphRow = glyphId / 21;
+    glyphCol = glyphId % 21;
+    sprite[4] = ((glyphCol * 0xC) | (glyphRow * 0xC00)
+                 | ((((((D_800F4CB8 * 0x10) + 0x340) >> 4) & 0x3F) | 0x3780) << 0x10));
+    return x + vs_battle_characterWidths[glyphId];
+}
+
+void vs_battle_setFontStyle(int arg0)
+{
+    _fontTable = 0;
+    _fontBrightness = 384;
+    D_800F4CB8 = arg0;
+}
+
+void _printVariableWidthFont(vs_battle_textBox* arg0)
+{
+    char intBuf[16];
+    u_long* sp20 = D_800F51B8 + D_800F4E80 * 4;
+    int done = 0;
+    int sfx = 0;
+    int chunksPrinted = 0;
+    char* savedString;
+    int speed = 1;
+    int justify = 0;
+    int inInlineString = 0;
+    int postContinuation = 0;
+    int charsRemaining = arg0->speed;
+
+    int printX;
+    int printY;
+    int temp_v0;
+    int var_a0;
+    int var_a2;
+    int hexBufPos;
+    int decInt;
+    int decBufPos;
+    char* currentString;
+    u_short temp_v1;
+    u_int currentChar;
+    u_int opcodeParam;
+
+    if (charsRemaining != 0) {
+
+        _fontTable = arg0->unk0.unk0_0 != 4;
+        _fontBrightness = arg0->brightness;
+        D_800F4CB8 = (1 - (*((char*)arg0) & 1)) * 4;
+
+        if (arg0->unk0.unk0_0 == 2) {
+            _fontTable = 0;
+            D_800F4CB8 = 0;
+        }
+        currentString = arg0->string;
+        printX = arg0->xIndent;
+        printY = arg0->yIndent;
+
+        arg0->unk0.done = 0;
+
+        while (charsRemaining > 0) {
+            if (postContinuation != 0) {
+                --postContinuation;
+            }
+            currentChar = *currentString;
+            ++currentString;
+            if (currentChar < 0xEC) {
+                if (currentChar < '\f') {
+                    printX = vs_battle_printVariableWidthFontChar(
+                        currentChar, printX, printY, sp20);
+                    charsRemaining -= speed;
+                    ++chunksPrinted;
+                    continue;
+                }
+
+                switch (currentChar - 0xE5) {
+                case 0: // 0xE5 New page
+                    arg0->string = currentString;
+                    done = (arg0->speed = 1);
+                    arg0->prevChunksPrinted = 0;
+                    break;
+                case 1: // 0xE6 Continuation arrow
+                    if (charsRemaining == 1) {
+                        if ((*(&vs_main_buttonsPressed.pad[0].low)) != 0) {
+                            charsRemaining = 0;
+                        } else {
+                            done =
+                                (arg0->unk0.arrowAnimFrame + vs_gametime_tickspeed) % 24;
+                            printX = vs_battle_printVariableWidthFontChar(
+                                0xBC - (done >> 3), printX, printY, sp20);
+                            arg0->unk0.arrowAnimFrame = done;
+                        }
+                        done = 1;
+                    } else {
+                        --charsRemaining;
+                        postContinuation = 2;
+                    }
+                    break;
+                case 2: // 0xE7 Termination
+                    if (inInlineString != 0) {
+                        currentString = savedString;
+                        inInlineString = 0;
+                    } else {
+                        temp_v1 = arg0->unk2C;
+                        temp_v0 = temp_v1 << 0x10;
+                        if (temp_v0 > 0) {
+                            arg0->unk2C = ((temp_v0 >> 0x12) - temp_v1);
+                        }
+                        arg0->unk0.done = 1;
+                        if (((*(&vs_main_buttonsPressed.pad[0].low)) != 0)
+                            || (postContinuation != 0)) {
+                            arg0->speed = 0xFFFF;
+                        }
+                        done = 1;
+                    }
+                    break;
+                case 3: // 0xE8 New line
+                    printX = arg0->xIndent;
+                    if (justify != 0) {
+                        printX += ((arg0->charsPerLine * 2)
+                                      - vs_battle_getTextLineLength(currentString))
+                                * 3;
+                    }
+                    printY += 13;
+                    break;
+                }
+                if (done != 0) {
+                    break;
+                }
+            } else {
+                opcodeParam = *currentString;
+                ++currentString;
+
+                switch (currentChar) {
+                case 0xF8: // Character buffer chunking size
+                    speed = opcodeParam;
+                    break;
+                case 0xF9: // Play sfx
+                    sfx = opcodeParam;
+                    break;
+                case 0xFA: // Offset x
+                    currentChar = 256;
+                    if (opcodeParam >= 240) {
+                        printX = printX - currentChar + opcodeParam;
+                    } else {
+                        printX += opcodeParam;
+                    }
+                    break;
+                case 0xFB: // Manipulate font
+                    if (opcodeParam & 0xF8) { // Offset y
+                        printY += opcodeParam >> 3;
+                    } else {
+                        if (opcodeParam == 6) { // Font table 0
+                            _fontTable = 0;
+                        } else if (opcodeParam == 5) { // Font table 1
+                            _fontTable = 1;
+                        } else if (opcodeParam == 4) { // Justify
+                            justify ^= 1;
+                            if (justify != 0) {
+                                printX =
+                                    (((arg0->charsPerLine * 2)
+                                         - vs_battle_getTextLineLength(currentString))
+                                        * 3)
+                                    + arg0->xIndent;
+                            }
+                        } else { // Color
+                            D_800F4CB8 = (D_800F4CB8 & 4) | opcodeParam;
+                        }
+                    }
+                    break;
+                case 0xFC:
+                    if (arg0->unk2C > 0) {
+                        arg0->unk2C = -opcodeParam;
+                    }
+                    break;
+                case 0xFD: // Print hex
+                    hexBufPos = 0;
+                    var_a2 = vs_battle_stringContext.integers[opcodeParam % 10];
+                    var_a0 = 0x10000000;
+                    if (var_a2 < 0) {
+                        var_a2 = -var_a2;
+                        intBuf[0] = 0xA7;
+                        hexBufPos = 1;
+                    }
+                    if (opcodeParam < 10) {
+                        if (var_a2 == 0) {
+                            intBuf[hexBufPos++] = 0;
+                        } else {
+
+                            while ((var_a2 / var_a0) == 0) {
+                                var_a0 >>= 4;
+                            }
+
+                            while (var_a0 != 0) {
+                                intBuf[hexBufPos++] = (var_a2 / var_a0) & 0xF;
+                                var_a0 >>= 4;
+                            }
+                        }
+                    } else {
+                        opcodeParam = (opcodeParam / 10) - 1;
+                        var_a0 = 1;
+                        while (opcodeParam != 0) {
+                            --opcodeParam;
+                            var_a0 *= 16;
+                        }
+                        while (var_a0 != 0) {
+                            intBuf[hexBufPos++] = (var_a2 / var_a0) & 0xF;
+                            var_a0 >>= 4;
+                        }
+                    }
+                    intBuf[hexBufPos] = 0xE7;
+                    savedString = currentString;
+                    currentString = intBuf;
+                    inInlineString = 1;
+                    break;
+                case 0xFE: // Print decimal
+                    decBufPos = 0;
+                    decInt = vs_battle_stringContext.integers[opcodeParam % 10];
+                    var_a2 = 1000000000;
+                    if (decInt < 0) {
+                        decInt = -decInt;
+                        intBuf[0] = 0xA7; // -
+                        decBufPos = 1;
+                    }
+                    if (opcodeParam < 10) {
+                        if (decInt == 0) {
+                            intBuf[decBufPos] = 0;
+                            ++decBufPos;
+                        } else {
+
+                            while ((decInt / var_a2) == 0) {
+                                var_a2 /= 10;
+                            }
+
+                            while (var_a2 != 0) {
+                                intBuf[decBufPos++] = (decInt / var_a2) % 10;
+                                var_a2 /= 10;
+                            }
+                        }
+                    } else {
+                        opcodeParam = (opcodeParam / 10) - 1;
+                        var_a2 = 1;
+                        while (opcodeParam != 0) {
+                            var_a2 *= 10;
+                            --opcodeParam;
+                        }
+                        while (var_a2 != 0) {
+                            intBuf[decBufPos++] = (decInt / var_a2) % 10;
+                            var_a2 /= 10;
+                        }
+                    }
+                    intBuf[decBufPos] = 0xE7;
+                    savedString = currentString;
+                    currentString = intBuf;
+                    inInlineString = 1;
+                    break;
+                case 0xFF: // Print string reference
+                    savedString = currentString;
+                    currentString = (char*)vs_battle_stringContext.strings[opcodeParam];
+                    inInlineString = 1;
+                    break;
+                }
+            }
+        }
+
+        if (charsRemaining <= 0) {
+            arg0->speed += vs_gametime_tickspeed >> 1;
+        }
+
+        if ((arg0->prevChunksPrinted != chunksPrinted) && (sfx != 0)) {
+            vs_main_playSfxDefault(0x7E, sfx);
+        }
+
+        if (!(arg0->unk0.unk0_24 & 0x20)) {
+            if (arg0->unk2C != 0) {
+                ++arg0->unk2C;
+            } else {
+                func_800AAD4C(arg0->unk0.unk0_24, 0, 0, 0);
+            }
+        }
+        arg0->prevChunksPrinted = chunksPrinted;
+    }
+}
+
+#pragma vsstring(end)
+
+// Looks like some unholy union of hasm and compiled code, leaving as raw asm
+int _printFixedWidthFontChar(int charId, int x, int y, int width, int height, int scale);
+__asm__("glabel _printFixedWidthFontChar;"
+        "addu       $sp, -8;"
+        "addu       $t7, $a0, $zero;"
+        "addu       $t3, $a1, $zero;"
+        "addu       $t0, $a2, $zero;"
+        "addu       $t5, $a3, $zero;"
+        "lui        $t9, (0x1F800000 >> 16);"
+        "lw         $t6, 0x18($sp);"
+        "lw         $t8, 0x1C($sp);"
+        "lw         $t4, (0x1F800000 & 0xFFFF)($t9);"
+        "li         $v0, 0x8F;"
+        "beq        $t7, $v0, 0f;"
+        "sw         $s0, 0x0($sp);"
+        "addu       $t5, $t3;"
+        "addu       $t6, $t0;"
+        "srl        $t5, 16;"
+        "sra        $v0, $t0, 16;"
+        "sll        $t0, $v0, 16;"
+        "sra        $v0, $t6, 16;"
+        "sll        $t6, $v0, 16;"
+        "lui        $a1, 0xFF;"
+        "lui        $v0, %hi(_fontTable);"
+        "or         $a1, 0xFFFF;"
+        "lui        $t2, %hi(D_800F51B8);"
+        "lui        $a0, %hi(D_800F4CB8);"
+        "lbu        $v0, %lo(_fontTable)($v0);"
+        "lbu        $a2, %lo(D_800F4CB8)($a0);"
+        "sll        $v1, $v0, 1;"
+        "addu       $v1, $v0;"
+        "sll        $v0, $v1, 6;"
+        "subu       $v0, $v1;"
+        "addu       $t7, $v0;"
+        "la         $v0, vs_battle_characterWidths;"
+        "addu       $v0, $t7, $v0;"
+        "lui        $v1, %hi(D_800F4E80);"
+        "sll        $a2, 4;"
+        "addu       $a2, 0x340;"
+        "srl        $a2, 4;"
+        "and        $a2, 0x3F;"
+        "or         $a2, 0x3780;"
+        "lbu        $v0, 0x0($v0);"
+        "lbu        $a3, %lo(D_800F4E80)($v1);"
+        "mult       $v0, $t8;"
+        "sll        $a2, 16;"
+        "sll        $a3, 4;"
+        "lw         $v0, %lo(D_800F51B8)($t2);"
+        "or         $a3, 0xC;"
+        "addu       $v0, $a3, $v0;"
+        "lw         $v1, 0x0($v0);"
+        "or         $v0, $t5, $t0;"
+        "sw         $v0, 0x10($t4);"
+        "lui        $v0, 0x900;"
+        "and        $v1, $a1;"
+        "li         $a1, 0x86186187;"
+        "mflo       $t1;"
+        "or         $v1, $v0;"
+        "lui        $v0, %hi(_fontBrightness);"
+        "multu      $t7, $a1;"
+        "sw         $v1, 0x0($t4);"
+        "lw         $v1, %lo(_fontBrightness)($v0);"
+        "or         $v0, $t5, $t6;"
+        "sw         $v0, 0x20($t4);"
+        "sw         $v1, 0x4($t4);"
+        "addu       $t8, $t3, $t1;"
+        "srl        $t3, 16;"
+        "or         $t0, $t3, $t0;"
+        "or         $t1, $t3, $t6;"
+        "sw         $t0, 0x8($t4);"
+        "sw         $t1, 0x18($t4);"
+        "mfhi       $a1;"
+        "subu       $v0, $t7, $a1;"
+        "srl        $v0, 1;"
+        "addu       $a1, $v0;"
+        "srl        $a1, 4;"
+        "sll        $v0, $a1, 2;"
+        "addu       $v0, $a1;"
+        "sll        $v0, 2;"
+        "addu       $v0, $a1;"
+        "subu       $v0, $t7, $v0;"
+        "sll        $v1, $v0, 1;"
+        "addu       $v1, $v0;"
+        "sll        $t3, $v1, 2;"
+        "addiu      $t5, $t3, 0xC;"
+        "sll        $a0, $a1, 1;"
+        "addu       $a0, $a1;"
+        "sll        $a0, 10;"
+        "addiu      $t6, $a0, 0xC00;"
+        "addu       $v0, $t8, $zero;"
+        "or         $v1, $t3, $a0;"
+        "or         $v1, $a2;"
+        "or         $a0, $t5, $a0;"
+        "sw         $v1, 0xC($t4);"
+        "lui        $v1, 0xD;"
+        "or         $a0, $v1;"
+        "or         $v1, $t3, $t6;"
+        "sw         $v1, 0x1C($t4);"
+        "or         $v1, $t5, $t6;"
+        "sw         $v1, 0x24($t4);"
+        "sll        $v1, $t4, 8;"
+        "sw         $a0, 0x14($t4);"
+        "lw         $a0, %lo(D_800F51B8)($t2);"
+        "srl        $v1, 8;"
+        "addu       $a3, $a0;"
+        "sw         $v1, 0x0($a3);"
+        "addiu      $v1, $t4, 0x28;"
+        "j          1f;"
+        "sw         $v1, 0($t9);"
+        "0:;"
+        "sll        $v0, $t8, 1;"
+        "addu       $v0, $t8;"
+        "sll        $v0, 1;"
+        "addu       $v0, $t3, $v0;"
+        "1:;"
+        "lw         $s0, 0x0($sp);"
+        "j          $ra;"
+        "addiu      $sp, 0x8;"
+        "endlabel _printFixedWidthFontChar;");
+
+#pragma vsstring(start)
+void _printFixedWidthFont(vs_battle_textBox* ctx, int scale)
+{
+    int justify = 0;
+    char* str = ctx->string;
+    int charWidth = scale * 12;
+    int charHeight = charWidth;
+    int lineHeight = scale * 13;
+
+    if (ctx->speed != 0) {
+        int temp_s6;
+        int done;
+        int printX = (ctx->unk24 << 0x10) + ((ctx->xIndent - ctx->x) * scale);
+        int printY = (ctx->unk26 << 0x10) + ((ctx->yIndent - ctx->y) * scale);
+
+        D_800F4CB8 = (1 - (*((char*)ctx) & 1)) * 4;
+        _fontTable = ctx->unk0.unk0_0 != 4;
+        _fontBrightness = ctx->brightness;
+
+        temp_s6 = printX;
+
+        if (ctx->unk0.unk0_0 == 2) {
+            _fontTable = 0;
+            D_800F4CB8 = 0;
+        }
+
+        done = ctx->brightness;
+        _fontBrightness = done | (done << 8) | (done << 0x10) | 0x2C000000;
+        done = 0;
+
+        while (1) {
+            u_int currentChar = *str++;
+
+            if (currentChar < 0xEC) {
+                if (currentChar < '\f') {
+                    printX = _printFixedWidthFontChar(
+                        currentChar, printX, printY, charWidth, charHeight, scale);
+                    continue;
+                }
+
+                switch (currentChar - '\f') {
+                case 2: // 0xE7 Termination
+                    done = 1;
+                    break;
+                case 3: // 0xE8 New line
+                    printX = temp_s6;
+                    if (justify != 0) {
+                        printX = temp_s6
+                               + (((ctx->charsPerLine * 2)
+                                      - vs_battle_getTextLineLength(str))
+                                   * (charWidth >> 2));
+                    }
+                    printY += lineHeight;
+                    break;
+                }
+                if (done != 0) {
+                    break;
+                }
+            } else {
+                u_int opcodeParam = *str++;
+
+                switch (currentChar - 0xF8) {
+                case 2: // Offset x
+                    if (opcodeParam >= 0xF0) {
+                        printX -= ((256 - opcodeParam) * charWidth) / 12;
+                    } else {
+                        printX += (opcodeParam * charWidth) / 12;
+                    }
+                    break;
+                case 3: // Manipulate font
+                    if (opcodeParam & 0xF8) { // Offset y
+                        printY += (opcodeParam >> 3) * scale;
+                    } else {
+                        if (opcodeParam == 6) { // Font table 0
+                            _fontTable = 0;
+                        } else if (opcodeParam == 5) { // Font table 1
+                            _fontTable = 1;
+                        } else if (opcodeParam == 4) { // Justify
+                            justify ^= 1;
+                            if (justify != 0) {
+                                printX = temp_s6
+                                       + (((ctx->charsPerLine * 2)
+                                              - vs_battle_getTextLineLength(str))
+                                           * (charWidth >> 2));
+                            }
+                        } else { // Color
+                            D_800F4CB8 = (D_800F4CB8 & 4) | opcodeParam;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+#pragma vsstring(end)
+
+void func_800C7EBC(void*, int, int, int);
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800C7EBC);
+
+#pragma vsstring(start)
+void _renderTextImmediate(vs_battle_textBox* arg0, int arg1)
+{
+    RECT rect;
+    int height;
+    int _y;
+    int done = 0;
+    u_short* buf;
+    int width;
+    int x = arg0->x;
+    int y = arg0->y;
+    int justify = 0;
+    char* str = arg0->string;
+    u_int printX = arg0->xIndent - x;
+    u_int printY;
+
+    _y = y;
+    printY = arg0->yIndent - y;
+    width = arg0->charsPerLine * 12 + 10;
+    height = arg0->lineCount * 13 + 4;
+
+    if ((x < 0) || (y < 0) || ((x + width) >= 320) || ((y + height) >= 224)) {
+        return;
+    }
+
+    buf = vs_main_allocHeapR(width * height * 2);
+
+    if ((arg1 >> 0x10) != 0) {
+        arg1 = 0x10000;
+    }
+
+    setRECT(&rect, x + vs_main_frameBuf * 320, y, width, height);
+    StoreImage(&rect, (void*)buf);
+
+    _fontTable = 1;
+
+    while (1) {
+        u_int currentChar = *str++;
+
+        if (currentChar < 0xEC) {
+            if (currentChar < '\f') {
+                if (currentChar != ' ') {
+                    currentChar += _fontTable * 21 * 9;
+                    if (((width - 12) >= printX) && ((height - 12) >= printY)) {
+                        func_800C7EBC(buf + ((printX + (printY * width))), currentChar,
+                            width, arg1);
+                    }
+                }
+                printX += vs_battle_characterWidths[currentChar];
+            } else {
+                switch (currentChar - '\f') {
+                case 2:
+                    if (vs_main_buttonsPressed.all & PADRright) {
+                        arg0->speed = 0xFFFF;
+                    }
+                    done = 1;
+                    break;
+                case 3:
+                    printX = arg0->xIndent - x;
+                    if (justify != 0) {
+                        printX +=
+                            ((arg0->charsPerLine * 2) - vs_battle_getTextLineLength(str))
+                            * 3;
+                    }
+                    printY += 13;
+                    break;
+                }
+                if (done != 0) {
+                    break;
+                }
+            }
+        } else {
+            u_int opcodeParam = *str++;
+            switch (currentChar - 0xF8) {
+            case 2:
+                currentChar = 256;
+                if (opcodeParam >= 0xF0) {
+                    printX = printX - currentChar + opcodeParam;
+                } else {
+                    printX += opcodeParam;
+                }
+                break;
+            case 3:
+                if (opcodeParam & 0xF8) {
+                    printY += opcodeParam >> 3;
+                } else {
+                    if (opcodeParam == 6) {
+                        _fontTable = 0;
+                    } else if (opcodeParam == 5) {
+                        _fontTable = 1;
+                    } else if (opcodeParam == 4) {
+                        justify ^= 1;
+                        if (justify != 0) {
+                            printX = ((((arg0->charsPerLine * 2)
+                                           - vs_battle_getTextLineLength(str))
+                                          * 3)
+                                         + arg0->xIndent)
+                                   - x;
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
+    vs_battle_renderImage(
+        (x + (vs_main_frameBuf * 320)) | (_y << 0x10), buf, width | (height << 0x10));
+    DrawSync(0);
+    vs_main_freeHeapR(buf);
+}
+#pragma vsstring(end)
+
+void vs_battle_loadGim(int id, int arg1)
+{
+    vs_main_CdFile file;
+    gim_t* var_s0;
+    int i;
+
+    if (D_800EB9BC == NULL) {
+        var_s0 = vs_main_allocHeapR(sizeof *var_s0 * 3);
+        D_800EB9BC = var_s0;
+        var_s0->data = vs_main_allocHeapR((char)_gimLbas[id] << 0xB);
+
+        for (i = 0; i < 3; ++i) {
+            *(u_short*)var_s0 = 0;
+            var_s0->unk0_1 = 1;
+            var_s0->unk0_6 = 1;
+            var_s0->unk2 = arg1;
+            var_s0->unk3 = 0x80;
+            var_s0->id = id;
+            var_s0->unk8 = 0;
+            var_s0->unkA = 0;
+            var_s0->unkC = 0x1000;
+            ++var_s0;
+        }
+        file.lba = _gimLbas[id] >> 8;
+        file.size = (u_char)_gimLbas[id] << 0xB;
+        D_800EB9BC->cdQueueSlot = vs_main_allocateCdQueueSlot(&file);
+        vs_main_cdEnqueue(D_800EB9BC->cdQueueSlot, D_800EB9BC->data);
+    }
+}
+
+void func_800C8550(u_int arg0, void* arg1, u_char* arg2)
+{
+    gim_t* gim = &D_800EB9BC[arg0];
+    int step;
+    int next;
+    int i;
+
+    gim->unk0_0 = 1;
+
+    if (gim->unk0_3 == 2) {
+        short* p = gim->unk18;
+        int angle = vs_battle_keystreamBits(9);
+        int target = vs_battle_keystreamBits(10);
+
+        for (i = 0; i < 240; ++i) {
+            p[i] = (rsin(angle) >> 3) + 320;
+            step = vs_battle_keystreamBits(8) - 64;
+            next = vs_battle_keystreamBits(10);
+
+            if (target < angle) {
+                angle -= step;
+
+                if (target >= angle) {
+                    target = next;
+                }
+            } else {
+                angle += step;
+
+                if (angle >= target) {
+                    target = next;
+                }
+            }
+
+            if (angle < 0) {
+                angle = 128;
+                target = vs_battle_keystreamBits(10);
+            }
+        }
+    }
+
+    if (gim->unk0_3 == 3) {
+        func_8007DFF0(D_800EB9BC->unk2 + D_800EB9BC->unk0_9, 1, 6);
+    }
+}
+
+void func_800C86AC(void)
+{
+    gim_t* var_s0 = D_800EB9BC;
+    int i;
+
+    if ((var_s0 != NULL) && (var_s0->unk0_6 == 3)) {
+        func_8007E0A8(var_s0->unk2, var_s0->unk0_9, 6);
+        for (i = 0; i < 3; ++i) {
+            if (var_s0->unk0_3 == 3) {
+                func_8007E0A8(D_800EB9BC->unk2 + D_800EB9BC->unk0_9, 1, 6);
+            }
+            ++var_s0;
+        }
+        vs_main_freeHeapR(D_800EB9BC);
+        D_800EB9BC = NULL;
+    }
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800C8778);
+
+int vs_battle_loadMenuPrg(int arg0)
+{
+    vs_battle_menuState_t* state = &vs_battle_menuState;
+    int subMenu = arg0 & 0x1F;
+
+    if (subMenu == 31) {
+        return 1;
+    }
+
+    if (subMenu == 0 && _loadedSubMenu > 0) {
+        return 1;
+    }
+
+    if (_loadedSubMenu != subMenu) {
+        void* overlaySlot;
+        vs_main_CdFile file;
+        u_int fileData;
+
+        _loadedSubMenu = subMenu;
+        state->loading = 1;
+
+        if (vs_battle_shortcutInvoked != 5) {
+            fileData = _menuLbas[subMenu];
+        } else {
+            fileData = VS_MAINMENU_PRG_LBA << 8 | VS_MAINMENU_PRG_SIZE >> 11;
+        }
+
+        file.lba = fileData >> 8;
+        file.size = (fileData & 0xFF) << 11;
+        state->cdQueue = vs_main_allocateCdQueueSlot(&file);
+
+        if (subMenu == 0) {
+            overlaySlot = vs_overlay_slots[1];
+        } else {
+            overlaySlot = vs_overlay_slots[2];
+        }
+
+        vs_main_cdEnqueue(state->cdQueue, overlaySlot);
+    }
+
+    if (state->loading == 0) {
+        if (_menuBgUnpackedBuf != NULL) {
+
+            vs_main_freeHeapR(_menuBgUnpackedBuf);
+
+            _menuBgUnpackedBuf = NULL;
+
+            vs_mainMenu_initInventory();
+        }
+
+        return 1;
+    }
+
+    if (state->cdQueue->state == vs_main_CdQueueStateLoaded) {
+
+        vs_main_freeCdQueueSlot(state->cdQueue);
+        vs_main_wait();
+
+        state->loading = 0;
+
+        if (D_800F4FDB != 0) {
+            if (vs_battle_shortcutInvoked == 5) {
+                vs_mainMenu_miscItemsShortcutMenu(1);
+                return 0;
+            }
+            return 1;
+        }
+
+        if (subMenu == 0) {
+            _menuBgUnpackedBuf = (u_int*)vs_main_allocHeapR(0xB400);
+            vs_mainMenu_unpackMenubg(_menuBgUnpackedBuf);
+        }
+    }
+
+    return 0;
+}
+
+void vs_battle_initInformationTextBox(enum vs_battle_informationTextBoxHeader header)
+{
+    vs_battle_initTextBox(7, (header << 8) | 4, 0, 1, 0, 4, 0, 0);
+}
+
+vs_battle_menuItem_t* vs_battle_getMenuItem(int id) { return vs_battle_menuItems + id; }
+
+vs_battle_menuItem_t* vs_battle_setMenuItem(
+    int row, int x, int y, int w, int backgroundWidth, char* text)
+{
+    vs_battle_menuItem_t* menuItem;
+    vs_battle_menuItem_t* var_a0;
+    int i;
+    u_int c;
+
+    menuItem = &vs_battle_menuItems[row];
+    menuItem->state = 1;
+    menuItem->w = w;
+    menuItem->backgroundWidth = backgroundWidth;
+
+    vs_battle_rMemzero(&menuItem->gradientState, 0x3C);
+
+    var_a0 = menuItem;
+    menuItem->x = x;
+    menuItem->y = y;
+
+    for (i = 0; i < 31;) {
+
+        c = *text++;
+        if (c == vs_char_spacing) {
+            var_a0->text[i++] = c;
+            c = *text++;
+        } else if (c == vs_char_terminator) {
+            var_a0->text[i] = 0xFF;
+            break;
+        } else if (c >= vs_char_nonPrinting) {
+            continue;
+        }
+
+        var_a0->text[i++] = c;
+    }
+
+    return menuItem;
+}
+
+/**
+ * Lerps between two colors.
+ *
+ * @param brightness Color multiplier
+ * @param blendFactor Proportion of color0 to color1
+ */
+u_int _lerpColor(u_int color0, u_int color1, int brightness, int blendFactor)
+{
+    u_int i;
+    u_int ret = 0;
+
+    for (i = 0; i < 3; ++i) {
+        u_int temp_lo = ((((color0 >> 0x10) & 0xFF) * (8 - blendFactor))
+                            + (((color1 >> 0x10) & 0xFF) * blendFactor))
+                      * brightness;
+        color0 <<= 8;
+        ret = (ret << 8) + (temp_lo >> 0xA);
+        color1 <<= 8;
+    }
+
+    return ret;
+}
+
+int vs_battle_uiGradientStop(u_int gradient, u_int colorIndex, int brightness)
+{
+    u_int color0;
+    u_int color1;
+
+    if (colorIndex < 9) {
+        color0 = _lerpColor(0x6B4100, 0x6C8219, 0x80, colorIndex);
+        color1 = _lerpColor(0x330500, 0x262801, 0x80, colorIndex);
+    } else {
+        color0 = D_800EBBB8[((colorIndex >> 3) - 2)];
+        color1 = D_800EBBC0[((colorIndex >> 3) - 2)];
+    }
+
+    return _lerpColor(color0, color1, brightness, gradient);
+}
+
+void vs_battle_renderMenuItem(vs_battle_menuItem_t* menuItem)
+{
+
+    int y = menuItem->gradientState;
+    u_long* scratch = *(void**)0x1F800008 + 8;
+    int w = menuItem->w;
+    int bgWidth = menuItem->backgroundWidth;
+    char* text = menuItem->text;
+
+    if (menuItem->state != 0) {
+        int temp_v1;
+        int x;
+        int c;
+        int var_s2;
+        char* pText;
+        int color;
+        u_long* prim;
+        char** v;
+
+        if ((menuItem->selected | menuItem->invertGradient) && !menuItem->unselectable) {
+            y = 8;
+        }
+
+        color = menuItem->fontColor;
+
+        if (color == 0) {
+            color = menuItem->unselectable * 3;
+        }
+
+        vs_battle_setFontStyle(color + 4);
+
+        temp_v1 = menuItem->x;
+        var_s2 = temp_v1 + 6;
+
+        if ((menuItem->rowIcon - 1) < 23u) {
+            var_s2 = temp_v1 + 22;
+        }
+
+        c = text[0];
+        pText = text + 1;
+
+        while (c != 0xFF) {
+            if (c == vs_char_spacing) {
+                var_s2 += *pText++;
+            } else {
+                var_s2 = vs_battle_printVariableWidthFontChar(
+                    c, var_s2, menuItem->y, scratch - 3);
+            }
+            c = *pText++;
+        }
+
+        c = vs_battle_uiGradientStop(8 - y, bgWidth, 128);
+        var_s2 = vs_battle_uiGradientStop(y, bgWidth, 128);
+
+        if (bgWidth & 7) {
+            menuItem->backgroundWidth = (bgWidth + 1) & 0xF;
+        }
+
+        if (y != 0) {
+            menuItem->gradientState = y - 1;
+        }
+
+        x = *(int*)&menuItem->x;
+        y = x >> 0x10;
+        x &= 0xFFFF;
+
+        vs_battle_addTile(scratch + 1, 0x60000000, vs_getXY_2(x + 2, y + 2), w | 0xC0000);
+
+        prim = *(void**)0x1F800000;
+
+        prim[0] = ((*scratch & 0xFFFFFF) | 0x0A000000);
+        prim[1] = vs_getTpage(0, 0, clut4Bit, semiTransparencyHalf, ditheringOn);
+        prim[2] = vs_getRGB0Raw(primPolyG4, c);
+        prim[3] = (x | (y << 0x10));
+        prim[4] = var_s2;
+        prim[5] = (((x + w) & 0xFFFF) | (y << 0x10));
+        prim[6] = c;
+        prim[7] = (x | ((y + 12) << 0x10));
+        prim[8] = var_s2;
+        prim[9] = (((x + w) & 0xFFFF) | ((y + 12) << 0x10));
+        prim[10] = vs_getTpage(0, 0, clut4Bit, semiTransparencyHalf, ditheringOff);
+
+        *scratch = (u_int)((u_long)prim << 8) >> 8;
+        *(void**)0x1F800000 = prim + 11;
+
+        v = &menuItem->subText;
+        if (*v != NULL) {
+            vs_battle_renderTextRaw(*v, (x - 10) | ((y + 1) << 0x10), scratch);
+        }
+    }
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800C930C);
+
+void func_800C97BC(void)
+{
+    vs_battle_menuItem_t* var_s2;
+    int temp_s1;
+    int miscIndex;
+    int i;
+    int var_s0;
+
+    var_s2 = vs_battle_menuItems;
+    var_s0 = vs_battle_menuState.currentMenu;
+
+    if (var_s0 == 0x7F) {
+        D_800F4E98.unk0 = 2;
+        vs_battle_menuState.currentMenu = 0x3F;
+    }
+
+    temp_s1 = var_s0 & 0x3F;
+
+    if (temp_s1 != 0x3F) {
+        if (vs_battle_loadMenuPrg(0) != 0) {
+
+            if (vs_battle_shortcutInvoked == 5) {
+                vs_mainMenu_miscItemsShortcutMenu(0);
+                return;
+            }
+
+            vs_mainMenu_exec(var_s0);
+            return;
+        }
+
+        if (temp_s1 == 0) {
+
+            miscIndex = func_800C930C(0);
+
+            if (miscIndex != 0) {
+
+                var_s0 = 0x1F;
+
+                if (miscIndex > 0) {
+                    var_s0 = miscIndex | 0x40;
+                }
+
+                vs_battle_menuState.currentMenu = var_s0;
+            }
+        }
+
+        if ((var_s0 >= 0x1F) || (temp_s1 == 0)) {
+            for (i = 0; i < 10; ++i) {
+                vs_battle_renderMenuItem(var_s2);
+                ++var_s2;
+            }
+        }
+    }
+}
+
+void _renderDigit(int font, int xy, int digit, u_long* before)
+{
+    u_long* prim = vs_battle_setSpriteDefaultTexPage(
+        128, xy + ((font & 2) << 0x10), (0x05CA0576 >> (font * 4)) & 0xF000F, before);
+
+    prim[4] = vs_getUV0Clut(32, 11, 832, 223);
+
+    if (font != 2) {
+        ((short*)prim)[8] = ((((digit * 2) + 64) * (font + 3)) - 192);
+    }
+}
+
+int vs_battle_renderValue(int font, int xy, int value, u_long* before)
+{
+    int new_var;
+
+    if (before == NULL) {
+        before = vs_scratch.unk4 - 0x10;
+    }
+
+    do {
+        value = vs_battle_toBCD(value);
+
+        _renderDigit(font, xy, value & 0xF, before);
+
+        new_var = xy - 5;
+        xy = new_var - font;
+        value >>= 4;
+    } while (value != 0);
+
+    return xy;
+}
+
+void vs_battle_renderStatBar(int colorIndex, int w, u_long* before, int xy)
+{
+    int rgb0;
+    u_int rgb1;
+    u_long* primBuf;
+
+    rgb1 = D_800EBC04[colorIndex];
+    primBuf = vs_scratch.unk0;
+
+    rgb0 = (((w * 0xFF) + ((rgb1 & 0xFF) * (0x40 - w))) >> 6)
+         | ((((w * 0xF0) + (((rgb1 >> 8) & 0xFF) * (0x40 - w))) >> 6) << 8)
+         | ((((w * 0x9E) + ((rgb1 >> 16) * (0x40 - w))) >> 6) << 16);
+
+    primBuf[0] = (*before & 0xFFFFFF) | (w == 0 ? 0x03000000 : 0x0D000000);
+    primBuf[1] = vs_getRGB0(primTile, 0x00, 0x28, 0x40);
+    primBuf[2] = xy;
+    primBuf[3] = 0x50042;
+    primBuf[4] = vs_getTpage(0, 0, clut4Bit, semiTransparencyHalf, ditheringOn);
+    primBuf[5] = rgb0 | (primPolyG4 << 24);
+    xy += vs_getXY(1, 1);
+    primBuf[6] = xy;
+    primBuf[7] = rgb1;
+    primBuf[8] = xy + w;
+    xy += vs_getXY(0, 3);
+    primBuf[9] = rgb0;
+    primBuf[10] = xy;
+    primBuf[11] = rgb1;
+    rgb1 = w;
+    primBuf[12] = xy + rgb1;
+    primBuf[13] = vs_getTpage(0, 0, 0, 0, 0);
+    *before = ((u_long)primBuf << 8) >> 8;
+    vs_scratch.unk0 = primBuf + 14;
+}
+
+void _renderStatBar(int colorIndex, int current, int max)
+{
+    u_long* prim = vs_scratch.unk4 - 0xC;
+    int xy = D_800EBBDC[colorIndex] - D_800EB9B0;
+
+    if (max != 0) {
+        vs_battle_renderStatBar(colorIndex, (((current << 6) + max) - 1) / max, prim, xy);
+        if (colorIndex & 2) {
+            xy += 54 | (3 << 0x10);
+            if (colorIndex == 3) {
+                current = (current + 0xFF) >> 8;
+            }
+        } else {
+            xy = vs_battle_renderValue(0, xy + (56 | ((u_short)-8 << 0x10)), max, NULL);
+            _renderDigit(2, xy, 0, prim);
+            xy += (u_short)-7 | ((u_short)-2 << 0x10);
+        }
+        vs_battle_renderValue(1, xy, current, NULL);
+        vs_battle_setSpriteDefaultTexPage(0x180, D_800EBBEC[colorIndex] - D_800EB9B0,
+            D_800EBBFC[colorIndex] | 0x90000, prim)[4] =
+            D_800EBC00[colorIndex] | 0x37F60000;
+    }
+}
+
+void func_800C9CB4(int arg0, int arg1, int arg2)
+{
+    int var_s1;
+    int var_s2;
+    u_long* temp_a0;
+
+    if ((arg0 != 0xFF) && (D_800EB9B0 == 0)) {
+
+        var_s2 = vs_battle_statusIconTexOffsets[arg0];
+        arg2 = (arg2 * 0x10) + 0xA0;
+
+        if (arg1 < 0) {
+            var_s2 -= arg1;
+            var_s1 = arg1 + 0x10;
+        } else {
+            arg2 += arg1;
+            var_s1 = 0x10 - arg1;
+        }
+
+        temp_a0 = vs_battle_setSpriteDefaultTexPage(
+            0x80, arg2 | 0x80000, var_s1 | 0x100000, vs_scratch.unk4 - 4);
+
+        temp_a0[4] = (var_s2 | (((0x0F0F906A >> arg0) & 1) ? 0x37F90000 : 0x37F80000));
+
+        if ((arg0 & 0x10) && !(arg2 & 8)) {
+            var_s2 = (arg0 & 3) * 8 + 0x3068;
+            if (var_s1 >= 9) {
+                if (arg2 & 7) {
+                    arg2 += 8;
+                    var_s1 -= 8;
+                } else {
+                    int v0 = arg2 - 8;
+                    arg2 = v0 + var_s1;
+                    var_s1 = 8;
+                }
+            } else {
+                int v0 = (arg0 & 3) * 8 + 0x3070;
+                var_s2 = v0 - var_s1;
+            }
+
+            vs_battle_setSpriteDefaultTexPage(0x80, arg2 | 0x80000, var_s1 | 0x80000,
+                vs_scratch.unk4 - 4)[4] = var_s2 | 0x37FF0000;
+        }
+    }
+}
+
+int vs_battle_getStatusFlags(vs_battle_actor2* arg0)
+{
+    int i;
+    int temp_v1 = (u_int)arg0->statuses >> 5;
+    int var_a2 = temp_v1 & 0xFFFF;
+    temp_v1 >>= 16;
+
+    for (i = 0; i < 8; ++i) {
+        if ((temp_v1 >> i) & 1) {
+            var_a2 |= D_800EBC68[i] << 16;
+        }
+    }
+
+    return var_a2;
+}
+
+int vs_battle_getLimbStatus(vs_battle_uiEquipment_limb* limb)
+{
+    int maxHp = limb->maxHp;
+
+    if (limb->hp < 2) {
+        return limbStatusCritical;
+    }
+
+    if ((limb->hp * 4) < maxHp) {
+        return limbStatusDamaged;
+    }
+
+    if ((limb->hp * 4) < (maxHp * 3)) {
+        return limbStatusWounded;
+    }
+
+    if (limb->hp < maxHp) {
+        return limbStatusGood;
+    }
+
+    return limbStatusExcellent;
+}
+
+int func_800C9EB8(int arg0)
+{
+    int temp_s0 = func_800CABE0(0);
+    int var_s2 = 0x180;
+
+    switch (arg0) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+        if (vs_battle_isSpellClassUnlocked((0x3021 >> (arg0 * 4)) & 0xF) == 0) {
+            return 0;
+        }
+        if (temp_s0 & 0xB7) {
+            var_s2 = 0x140;
+        }
+        break;
+    case 4:
+        if (temp_s0 & 0x7) {
+            var_s2 = 0x140;
+        }
+        break;
+    case 5:
+    case 6:
+        if (vs_battle_chainAbilitiesUnlocked(6 - arg0) == 0) {
+            return 0;
+        }
+        break;
+    case 7:
+        if (_breakArtsUnlocked() == 0) {
+            return 0;
+        }
+        if (temp_s0 & 0x15F) {
+            var_s2 = 0x140;
+        }
+        break;
+    default:
+        break;
+    }
+    return var_s2;
+}
+
+void func_800C9F88(void) { D_800EBC78 = 1; }
+
+void func_800C9F98(int arg0, int arg1)
+{
+    u_long* temp_v0 =
+        vs_battle_setSpriteDefaultTexPage(arg1, arg0, 0x60006, vs_scratch.unk8);
+    temp_v0[1] = 0xE1000017;
+    temp_v0[4] = 0x373D80C0;
+}
+
+void func_800C9FE8(void)
+{
+    int temp_s3;
+    int temp_v0;
+    int i;
+    u_long* temp_v0_2;
+
+    if (D_800EBC78 != 0) {
+        if (D_800EBCE8 != 0) {
+            D_800EBCE8 -= 1;
+        }
+    } else {
+        D_800EBCE8 = vs_battle_animationIndices[D_800EBCE8];
+    }
+
+    if (D_800EBCE8 != 10) {
+
+        temp_s3 = -vs_battle_rowAnimationSteps[D_800EBCE8];
+
+        for (i = 0; i < 4; ++i) {
+            temp_v0 = func_800C9EB8(i + 4);
+            if (temp_v0 != 0) {
+                func_800C9F98(
+                    ((temp_s3 + D_800EBC98[i]) & 0xFFFF) | (D_800EBC98[i + 4] << 0x10),
+                    temp_v0);
+                temp_v0_2 = vs_battle_setSpriteDefaultTexPage(temp_v0,
+                    ((temp_s3 + D_800EBCA0[i]) & 0xFFFF) | (D_800EBCA0[i + 4] << 0x10),
+                    D_800EBCA8[i], vs_scratch.unk8);
+                temp_v0_2[1] = 0xE1000017;
+                temp_v0_2[4] = (*((i) + D_800EBCB8) | 0x373D0000);
+            }
+        }
+
+        vs_battle_setSpriteDefaultTexPage(0x180, ((temp_s3 + 0x48) & 0xFFFF) | 0x660000,
+            0x1E001E, vs_scratch.unk8)[4] = 0x37FBA0B8;
+        temp_s3 = (0xA0 - temp_s3);
+
+        for (i = 0; i < 4; ++i) {
+            temp_v0 = func_800C9EB8(i);
+            if (temp_v0 != 0) {
+                func_800C9F98(
+                    ((temp_s3 + D_800EBCC0[i]) & 0xFFFF) | (D_800EBCC0[i + 4] << 0x10),
+                    temp_v0);
+                temp_v0_2 = vs_battle_setSpriteDefaultTexPage(temp_v0,
+                    (((temp_s3 + D_800EBCC8[i]) - 2) & 0xFFFF)
+                        | (D_800EBCC8[i + 4] << 0x10),
+                    D_800EBCD0[i], vs_scratch.unk8);
+                temp_v0_2[1] = 0xE1000017;
+                temp_v0_2[4] = D_800EBCE0[i] | 0x373D0000;
+            }
+            vs_battle_setSpriteDefaultTexPage(0x80, temp_s3 + D_800EBC88[3 - i], 0x100010,
+                vs_scratch.unk8)[4] = (((3 - i) * 0x10) | 0x37FB8000);
+        }
+    }
+    D_800EBC78 = 0;
+}
+
+// https://decomp.me/scratch/NSW3O
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CA2DC);
+
+void func_800CA97C(void)
+{
+    D_800EB9B4 = NULL;
+    memset(&D_800F4ED8, 0, sizeof D_800F4ED8);
+    D_800F4ED8[2] = 0x1000;
+}
+
+void func_800CA9C0(void* arg0)
+{
+    D_800EB9AC = 0;
+    _loadedSubMenu = 0;
+    D_800EB9AE = 0;
+    D_800EB9B0 = 0;
+    D_800F4ED4 = 0;
+    D_800EB9B4 = NULL;
+    D_800EB9B8 = NULL;
+    D_800EB9BC = NULL;
+    vs_battle_menuItems = 0;
+    D_800EB9CE = 0;
+    vs_battle_lowerScreenUiState = 0;
+    D_800EB9AF = 0;
+    D_800EB9CC = 0;
+    D_800EB9CD = 0;
+    D_800EB9D0.s32 = 0xFFFFFF;
+    _menuBgUnpackedBuf = NULL;
+    D_800EB9D8 = 0;
+    func_800CA97C();
+    vs_battle_rMemzero(&vs_battle_menuState, 8);
+    vs_battle_menuState.currentMenu = 0x3F;
+    vs_battle_rMemzero(&D_800F4E98, sizeof D_800F4E98);
+    vs_battle_rMemzero(&vs_battle_textBoxes[0], sizeof vs_battle_textBoxes[0]);
+    vs_battle_rMemzero(vs_battle_submenuStates, sizeof vs_battle_submenuStates);
+    D_800F4EE8 = (D_800F4EE8_t) { { 0 } };
+    D_800F51B8 = &D_800F4CD0;
+    vs_battle_renderImage(0x340, arg0, 0xE00040);
+    vs_battle_renderImage(0x380, arg0 + 0x7000, 0xE00040);
+    vs_battle_renderImage(0x4203C0, arg0 + 0xE000, 0x9E0040);
+    DrawSync(0);
+    ClearOTag(D_800F51B8, 0x22);
+}
+
+void func_800CAB40(void)
+{
+    D_800F4E98.unk2 = 0;
+    D_800F4E98.unk0 = 1;
+    if (vs_battle_shortcutInvoked == 5) {
+        vs_battle_menuState.currentMenu = 4;
+        vs_mainMenu_miscItemsShortcutMenu(2);
+    } else {
+        vs_battle_menuState.currentMenu = vs_battle_menuState.returnState;
+        vs_battle_submenuStates[vs_battle_menuState.returnState & 0xF] =
+            vs_battle_menuState.executeAbilityType;
+    }
+    if (D_800F4FDB == 0) {
+        func_8007DFF0(0x1A, 3, 6);
+    }
+}
+
+int func_800CABE0(int arg0)
+{
+    int ret;
+    vs_battle_actor2* actor = vs_battle_characterState->unk3C;
+    int temp_v0 = func_800A0BE0(0);
+    int var_a0 = ((temp_v0 & 0x80000) != 0) * 2;
+
+    if ((temp_v0 & 0x40100000) == 0x100000) {
+        var_a0 |= 4;
+    }
+
+    if (!(vs_battle_characterState->unk44->weaponDrawn)) {
+        var_a0 |= 8;
+    }
+
+    ret = var_a0;
+
+    if (actor->currentMP == 0) {
+        ret |= 0x20;
+    }
+
+    if (actor->currentHP == 0) {
+        ret |= 0x40;
+    }
+
+    if (actor->statuses & (vsBattleStatusRegen | vsBattleStatusStrDown)) {
+        ret |= 0x80;
+    }
+
+    if (actor->statuses & vsBattleStatusWard) {
+        ret |= 0x100;
+    }
+
+    if (arg0 == 2) {
+        ret |= 0x200;
+    }
+
+    return ret;
+}
+
+int func_800CACD0(int menuState, int arg1)
+{
+    int i;
+    u_short var_a1;
+    int var_a0;
+    void* miscIndex;
+
+    if (vs_battle_menuState.currentMenu == 0x3F) {
+        vs_battle_shortcutInvoked = 0;
+        D_800F4FDB = 0;
+        D_800F4EA0 = func_800CABE0(arg1);
+        D_800F4E98.unk2 = 0;
+        vs_battle_menuState.currentMenu = menuState;
+        D_800F4E98.unk0 = 1;
+
+        if (arg1 == 0) {
+            vs_battle_playSfx10();
+        }
+
+        if (vs_battle_menuItems == 0) {
+            _loadedSubMenu = -1;
+
+            func_8007E180(6);
+
+            miscIndex = vs_main_allocHeapR(0xB24);
+            var_a1 = vs_main_settings.menuFlags;
+            vs_battle_stringBuf = miscIndex + 0xA00;
+            vs_battle_menuItems = miscIndex;
+            vs_battle_rowTypeBuf = miscIndex + 0xA60;
+
+            for (i = 0; i < 3; ++i) {
+                for (var_a0 = D_800EBD68[i * 2]; var_a0 < D_800EBD68[i * 2 + 1];
+                    ++var_a0) {
+                    if (vs_main_actions[var_a0].unlocked) {
+                        var_a1 |= 1 << i;
+                        break;
+                    }
+                }
+            }
+
+            if (vs_main_stateFlags.unkB5 != 0) {
+                var_a1 |= 1;
+            }
+            if (vs_main_stateFlags.introState >= 3) {
+                var_a1 |= 0x120;
+            }
+            vs_main_settings.menuFlags = var_a1;
+            func_800C930C(2);
+        }
+        return 1;
+    }
+
+    vs_battle_playInvalidSfx();
+    return 0;
+}
+
+int vs_battle_isSpellClassUnlocked(int spellClass)
+{
+    int i;
+
+    for (i = 0; i < _spellClassCounts[spellClass]; ++i) {
+        if (vs_main_actions[_spellIds[spellClass][i]].unlocked) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int _breakArtsUnlocked(void)
+{
+    int i;
+    for (i = 0; i < 4; ++i) {
+        if ((vs_main_actions
+                    [0xB8 + ((vs_battle_characterState->equippedWeaponCategory - 1) * 4)
+                        + i]
+                        .unlocked)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int vs_battle_chainAbilitiesUnlocked(int defense)
+{
+    int i;
+    vs_action_t* v0;
+
+    for (i = 0; i < 14; ++i) {
+        v0 = vs_main_actions;
+        if (v0[defense == 0 ? vs_battle_chainAbilityOffsets[i]
+                            : vs_battle_defenseAbilityOffsets[i]]
+                .unlocked) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int vs_battle_validateShortcutSelection(int shortcut)
+{
+    int noneUnlocked = 0;
+    int menuState = 0;
+
+    switch (shortcut) {
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        noneUnlocked = vs_battle_isSpellClassUnlocked(shortcut - 1) == 0;
+        menuState = 1;
+        break;
+    case 5:
+        menuState = 4;
+        break;
+    case 6:
+        noneUnlocked = _breakArtsUnlocked() == 0;
+        menuState = 2;
+        break;
+    case 7:
+    case 8:
+        noneUnlocked = vs_battle_chainAbilitiesUnlocked(shortcut - 7) == 0;
+        menuState = 3;
+        break;
+    }
+
+    if (noneUnlocked) {
+        vs_battle_playInvalidSfx();
+        menuState = 0;
+        D_800F4E98.unk2 = 0;
+        D_800F4E98.unk0 = 2;
+    } else {
+        menuState = func_800CACD0(menuState, 0);
+        vs_battle_shortcutInvoked = shortcut;
+        D_800F4FDB = 1;
+    }
+
+    return menuState;
+}
+
+void func_800CB114(void)
+{
+    if (vs_battle_menuItems != 0) {
+        func_8007E1C0(6);
+        vs_main_freeHeapR(vs_battle_menuItems);
+        vs_battle_menuItems = 0;
+    }
+}
+
+void func_800CB158(vs_battle_lootListNode* arg0)
+{
+    D_800EB9C4 = arg0;
+    D_800EB9C8 = NULL;
+    func_800CACD0(0xC, 2);
+}
+
+void func_800CB18C(vs_battle_loot* arg0)
+{
+    D_800EB9C8 = arg0;
+    D_800EB9C4 = NULL;
+    func_800CACD0(0xC, 2);
+}
+
+void func_800CB1C0(int arg0)
+{
+    func_800CACD0(7, 2);
+    D_800F4E6B = arg0 + 0x40;
+    D_800F4EA0 |= 0x400;
+}
+
+void _setArtAndAbilityToUnlock(int art, int battleAbility)
+{
+    vs_battle_unlockedBreakArt = art;
+    vs_battle_unlockedBattleAbility = battleAbility;
+    func_800CACD0(3, 2);
+}
+
+void func_800CB23C(void)
+{
+    func_800CACD0(0xF, 2);
+    D_800F4FDB = 1;
+}
+
+int _dismissAllTextBoxes(void)
+{
+    int i;
+    int var_s1 = 1;
+
+    for (i = 0; i < 8; ++i) {
+        if (vs_battle_dismissTextBox(i) != 0) {
+            var_s1 = 0;
+        }
+    }
+
+    return var_s1;
+}
+
+void vs_battle_displaySceneMessage(int arg0, int arg1, int arg2)
+{
+    D_800EB9D8 = vs_main_allocHeapR(112);
+    D_800F4E69 = arg2;
+    if (D_800F4E69) {
+        D_800F4E68 = 0x78;
+    }
+
+    vs_battle_initTextBox(7, 0x304, 0, 1, 0, 3, 0, 0);
+
+    D_800EB9D8[0] = 0x00F8 | (0x04FB << 16);
+    vs_battle_stringContext.strings[0] = vs_main_actions[arg1].name;
+
+    if (arg0 == 12) {
+        vs_battle_printf((char*)&D_800EB9D8[1],
+            (char*)&vs_battle_menuStrings[VS_menuStrings_OFFSET_spellMastered]);
+    } else if (arg0 == 11) {
+        vs_battle_textBoxes[7].unk0.unk0_8 = 0;
+        vs_battle_printf((char*)&D_800EB9D8[1],
+            (char*)&vs_battle_menuStrings[vs_battle_menuStrings[vs_main_actions[arg1].type
+                                                                + 22]]);
+    } else {
+        if (arg1 != 0) {
+            vs_battle_stringContext.strings[0] = D_800EBF58[(arg1 - 0x1CA) * 2];
+        }
+        vs_battle_printf((char*)D_800EB9D8, (char*)&D_800EBDDC[D_800EBDDC[arg0]]);
+    }
+
+    vs_battle_setTextBox(7, (char*)D_800EB9D8);
+}
+
+int func_800CB45C(void)
+{
+    if (D_800EB9D8 != NULL) {
+
+        if (!vs_battle_textBoxes[7].unk0.done) {
+            return 1;
+        }
+
+        if (D_800F4E69 != 0) {
+
+            if (D_800F4E68 < 4) {
+                D_800F4E68 = 0;
+            } else {
+                D_800F4E68 -= vs_gametime_tickspeed;
+            }
+
+            if (D_800F4E68 != 0) {
+                return -vs_battle_setTextBox(7, NULL);
+            }
+
+            return 0;
+        }
+        return -vs_battle_setTextBox(7, NULL);
+    }
+    return 0;
+}
+
+void func_800CB50C(void)
+{
+    if (D_800EB9D8 != NULL) {
+        vs_battle_dismissTextBox(7);
+        vs_main_freeHeapR(D_800EB9D8);
+        D_800EB9D8 = NULL;
+    }
+}
+
+void func_800CB550(void) { vs_battle_lowerScreenUiState = 1; }
+
+void func_800CB560(void) { vs_battle_lowerScreenUiState = 0; }
+
+char const D_80069998[] = "00:00:00";
+
+void _renderTimer(int* value)
+{
+    char sp10[4];
+    int i;
+
+    *(int*)sp10 = *value;
+    sp10[0] = vs_main_stateFlags.puzzleTimerHundredths;
+
+    if (sp10[3] != 0) {
+        sp10[2] = 59;
+        sp10[1] = 59;
+        sp10[0] = 99;
+    }
+
+    for (i = 0; i < 3; ++i) {
+        int bcd = vs_battle_toBCD(sp10[i]);
+        D_800EC258[6 - i * 3] = (bcd >> 4) + '0';
+        D_800EC258[7 - i * 3] = (bcd & 0xF) + '0';
+    }
+
+    vs_battle_renderTextRaw(D_800EC258, vs_getXY(128, 200), vs_scratch.unk4 - 4);
+}
+
+void func_800CB654(int arg0) { D_800EB9AF = arg0; }
+
+void func_800CB660(int arg0) { D_800EB9CC = arg0; }
+
+D_800F18EC_t* func_800CB66C(void) { return &D_800F4E98; }
+
+void _loadScreff2(int arg0)
+{
+    vs_main_CdFile file;
+    D_800EB9B4_t* p = D_800EB9B4;
+    void* const* new_var;
+
+    if (arg0 != 0) {
+        p->unk0 = 1;
+        file.lba = VS_SCREFF2_PRG_LBA;
+        file.size = VS_SCREFF2_PRG_SIZE;
+        p->slot = vs_main_allocateCdQueueSlot(&file);
+        new_var = &vs_overlay_slots[1];
+        vs_main_cdEnqueue(p->slot, *new_var);
+        return;
+    }
+
+    if (p->slot->state == 4) {
+        vs_main_freeCdQueueSlot(p->slot);
+        p->unk0 = 0;
+        vs_main_wait();
+    }
+}
+
+void func_800CB708(void)
+{
+    D_800EB9B4_t* temp_s0 = D_800EB9B4;
+    if (temp_s0 != NULL) {
+        if (temp_s0->unk0 != 0) {
+            _loadScreff2(0);
+            return;
+        }
+        if (*(int*)&temp_s0->unk4 != 0x1000) {
+            func_800F9BD8();
+        }
+        if (temp_s0->unk2 != 0) {
+            func_800F986C();
+        }
+        if (temp_s0->unk8 != 0) {
+            func_800F9FB8();
+        }
+    }
+}
+
+void func_800CB79C(void)
+{
+    if (D_800EB9B4 == NULL) {
+        D_800EB9B4 = (D_800EB9B4_t*)D_800F4ED8;
+        func_8007E180(6);
+        _loadScreff2(1);
+    }
+}
+
+void func_800CB7DC(void)
+{
+    if (D_800EB9B4 != NULL) {
+        func_8007E1C0(6);
+        if (D_800EB9B4->unk1 == 1) {
+            func_8007E0A8(0x1B, 5, 6);
+        }
+        func_800CA97C();
+    }
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CB83C);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CBBCC);
+
+void func_800CC128(gim_t* arg0, int arg1, u_long* arg2)
+{
+    int var_s1;
+    int new_var;
+
+    int temp_s0 = arg0->unk3;
+
+    if (temp_s0 == 0x80) {
+        func_800CBBCC(arg0, arg1, arg2);
+        return;
+    }
+
+    D_800F51C8 = 1;
+
+    func_800CBBCC(arg0, arg1, arg2);
+    var_s1 = 0;
+
+    if (vs_main_frameBuf == 0) {
+        var_s1 = 0x140;
+    }
+
+    new_var = 0x120;
+    vs_battle_setSprite(0x80 - temp_s0, 0, 0xF00100, arg2)[1] =
+        ((u_int)var_s1 >> 6) | new_var | 0xE1000000;
+    vs_battle_setSprite(0x80 - temp_s0, 0x100, 0xF00040, arg2)[1] =
+        ((var_s1 + 0x100) >> 6) | new_var | 0xE1000000;
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CC204);
+
+void func_800CC580(u_long* arg0, int arg1)
+{
+    vs_battle_addTile(
+        arg0, arg1 | 0xE3040000, (arg1 + 0x3F) | 0xE407FC00, arg1 | 0xE5080000);
+}
+
+void func_800CC5C0(u_long* arg0, int arg1)
+{
+    vs_battle_addTile(
+        arg0, arg1 | 0xE3000000, (arg1 + 0x13F) | 0xE403BC00, arg1 | 0xE5000000);
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CC600);
+
+void func_800CCA90(int arg0)
+{
+    gim_t* gim = &D_800EB9BC[arg0];
+    int clut = (gim->unk2 - 16) << 6;
+
+    if ((gim->unk3 == 0) && (gim->unk0_3 != 2)) {
+        return;
+    }
+
+    if (gim->unk0_2) {
+        if (gim->unk0_12) {
+            clut = getClut(clut, 511);
+        } else {
+            clut = getClut(768, 227);
+        }
+    } else {
+        clut = getClut(clut + arg0 * 16, 511);
+    }
+
+    D_800F51C8 = 0;
+    D_800EC25C[gim->unk0_3](gim, clut << 16,
+        gim->unkC & 0x4000 ? vs_scratch.unk4 + 0x1FF8 - arg0 * 4
+                           : vs_scratch.unk8 + 0x18 - arg0 * 8);
+}
+
+int vs_battle_decreaseMiscCount(int miscId)
+{
+    int i;
+
+    if (miscId < 0x143) {
+        vs_battle_miscItemInvoked = 0;
+    }
+
+    for (i = 0; i < 64; ++i) {
+        int miscIndex = (vs_battle_miscItemInvoked + i) & 0x3F;
+        if (vs_main_inventory.misc[miscIndex].id == miscId) {
+            int count = vs_main_inventory.misc[miscIndex].count - 1;
+            vs_main_inventory.misc[miscIndex].count = count;
+            if (count == 0) {
+                vs_main_inventory.misc[miscIndex].id = 0;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void vs_battle_rMemzero(void* arg0, int arg1)
+{
+    int* var_v0;
+
+    var_v0 = arg0 + arg1;
+    do {
+        *(int*)--var_v0 = 0;
+    } while (arg0 != var_v0);
+}
+
+void vs_battle_rMemcpy(void* dest, void const* src, int size)
+{
+    do {
+        --size;
+        ((char*)dest)[size] = ((char const*)src)[size];
+    } while (size != 0);
+}
+
+int vs_battle_toBCD(int value) { return (value % 10) | ((value / 10) * 16); }
+
+u_int vs_battle_keystreamBits(int value)
+{
+    u_int temp_a1 = _keystreamState;
+    _keystreamState = temp_a1 * 0x19660D;
+    return temp_a1 >> (32 - value);
+}
+
+void vs_battle_addTile(u_long* before, int rgb0, int xy, int wh)
+{
+    u_long* prim = vs_scratch.unk0;
+    prim[0] = (int)((*before & 0xFFFFFF) | 0x03000000);
+    prim[1] = rgb0;
+    prim[2] = xy;
+    prim[3] = wh;
+    *before = ((u_long)prim << 8) >> 8;
+    vs_scratch.unk0 = prim + 4;
+}
+
+void vs_battle_insertTpage(int tpage, u_long* before)
+{
+    u_long* prim = vs_scratch.unk0;
+    prim[0] = vs_getTag(sizeof(int), *before);
+    prim[1] = tpage;
+    *before = ((u_long)prim << 8) >> 8;
+    vs_scratch.unk0 = prim + 2;
+}
+
+int vs_battle_drawCursor(int animStep, int position)
+{
+    vs_battle_setSpriteDefaultTexPage(vs_battle_cursorBrightnessAnimation[animStep],
+        (((position * 0x10) + 0xA) << 0x10) | 0xB4, 0x100010, vs_scratch.unk8)[4] =
+        0x37F83020;
+    return (animStep + 1) & 0xF;
+}
+
+void vs_battle_renderImage(int xy, void* buffer, int wh)
+{
+    extern int D_800EC280;
+    extern RECT D_800F51D0[];
+    RECT* rect;
+
+    rect = D_800EC280 + D_800F51D0;
+    D_800EC280 = (D_800EC280 + 1) & 7;
+    *(int*)&rect->x = xy;
+    *(int*)&rect->w = wh;
+    LoadImage(rect, buffer);
+}
+
+vs_battle_textBox* vs_battle_getTextBox(int id) { return &vs_battle_textBoxes[id]; }
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CCE10);
+
+void vs_battle_initTextBox(
+    int id, int flags, int x, int y, int charsPerLine, int h, int centerX, int centerY)
+{
+    vs_battle_textBox* box = &vs_battle_textBoxes[id];
+
+    *(int*)&box->unk0 = flags & 0xFFFF;
+    box->unk0.unk0_24 = 32;
+    box->x = x;
+    box->y = y;
+    box->unk4 = 0;
+    box->unk6 = 0;
+    box->speed = 0;
+    box->xIndent = x + 5;
+    box->yIndent = y + 3;
+    box->unk2E = 0;
+    box->brightness = 0x80;
+    box->charsPerLine = charsPerLine;
+    box->lineCount = h;
+    box->centerX = centerX;
+    box->centerY = centerY;
+    // looks up { 10, 20, 10, 8 };
+    box->unk22 = ((0x45A5 >> ((box->unk0.unk0_4 * 4))) & 0xF) * 2;
+
+    if (box->state <= 0) {
+        box->state = 1;
+    }
+
+    switch (box->unk0.unk0_0) {
+    case 1:
+        box->unk0.unk0_0 = 7;
+        box->unk0.unk0_8 = 0;
+        return;
+    case 4:
+        box->charsPerLine = 0x18;
+        box->centerX = 0xA0;
+        box->centerY = 0xF0;
+        box->xIndent = 0x10;
+        box->yIndent = 0xF2 - (h * 0xD);
+        return;
+    case 5:
+        box->unk0.unk0_0 = 7;
+        box->unk0.unk0_8 = 2;
+        return;
+    }
+}
+
+int vs_battle_dismissTextBox(int id)
+{
+    vs_battle_textBox* box = &vs_battle_textBoxes[id];
+
+    if (!(box->unk0.unk0_24 & 0x20)) {
+        func_800AAD4C(box->unk0.unk0_24, 0, 0, 0);
+    }
+
+    if (box->state != 0) {
+        if (box->state > 0) {
+            box->unk22 = 8;
+            box->state = -1;
+            box->unk0.unk0_4 = 0;
+        }
+        return -1;
+    }
+
+    return 0;
+}
+
+void func_800CD0FC(int arg0, u_int arg1)
+{
+    if (arg1 < 3) {
+        vs_battle_setSpriteDefault(D_800EC2CC[arg1], (arg0 << 0x10) | 0xA)[4] =
+            D_800EC2D8[arg1];
+    }
+}
+
+// https://decomp.me/scratch/qBmPY
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CD158);
+
+int func_800CD3A0(int arg0, int arg1)
+{
+    int var_v1 = arg0;
+
+    if (arg1 & 1) {
+        var_v1 = (var_v1 & 0xFF) | ((0xFF - (var_v1 >> 8)) << 8);
+    }
+
+    if (arg1 & 2) {
+        var_v1 = (~var_v1 & 0xFF) | (var_v1 & 0xFF00);
+    }
+
+    return var_v1;
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CD3E4);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CDCBC);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CE174);
+
+int func_800CE644(int arg0 __attribute__((unused))) { }
+
+void func_800CE64C(void)
+{
+    func_800CE67C();
+    func_800D7814();
+    func_800D268C();
+}
+
+void func_800CE67C(void)
+{
+    int i;
+    func_800CF478(0);
+    D_800F5228 = 0;
+    D_800F5224 = 0;
+    D_800F54A8 = 0;
+    D_800F5318 = 0;
+    D_800F54B0 = NULL;
+    D_800F53BC = 0;
+    D_800F53B4 = 0;
+    D_800F53B8 = 0;
+    D_800F5330[0] = 0;
+    D_800F522C = 0;
+    D_800F5218 = NULL;
+    for (i = 0; i < 4; ++i) {
+        D_800F5320[i] = 0;
+    }
+}
+
+void func_800CE714(D_800F53B8_t2* arg0, D_800F53B8_t* arg1)
+{
+    int i;
+
+    arg1->previous = arg0->unk1C;
+    arg1->unk8 = 0;
+    arg1->unk9 = arg0->unk10;
+    arg1->unkA = arg0->unk18;
+    arg1->unkC = arg0->unk14;
+    *(int*)&arg1->unk10 = 0;
+    arg1->unk14_0 = arg0->unk20;
+    arg1->unk18 = 0;
+    arg1->unk14_11 = 0;
+    arg1->unk14_16 = 0;
+
+    for (i = 0; i < 16; ++i) {
+        ((short*)&arg1->unk1C[i].unk4)[1] = 0;
+        arg1->unk1C[i].unk4 = 0;
+        arg1->unk1C[i].unk0 = 0;
+        arg1->unk1C[i].unkC = 0;
+        arg1->unk1C[i].unk8 = 0;
+        arg1->unk1C[i].unk18 = 0;
+        arg1->unk1C[i].unk14 = 0;
+        arg1->unk1C[i].unk10 = 0;
+        arg1->unk1C[i].unk30 = 0;
+        arg1->unk1C[i].unk2C = 0;
+        arg1->unk1C[i].unk28 = 0;
+        *(int*)&arg1->unk1C[i].unk34 = 0;
+    }
+
+    arg1->unkD1C.unk0 = arg0->unk0->unk0;
+    arg1->unkD1C.unkC = arg0->unk4->unk0;
+    arg1->unkD1C.unk18 = arg0->unk8->unk0;
+    arg1->unkD1C.unk24 = arg0->unkC->unk0;
+
+    arg1->unkD1C.unk30 = 0;
+    arg1->unkD1C.unk34 = 0;
+    arg1->unkD1C.unk3C = 0;
+}
+
+D_800F53B8_t* func_800CE83C(D_800F53B8_t2* arg0)
+{
+    D_800F53B8_t* currentNode;
+    D_800F53B8_t* newNode = vs_main_allocHeapR(sizeof *newNode);
+
+    func_800CE714(arg0, newNode);
+
+    currentNode = D_800F53B8;
+
+    if ((currentNode == NULL) || (arg0->unk10 < currentNode->unk9)) {
+        newNode->next = currentNode;
+        D_800F53B8 = newNode;
+    } else {
+        while (1) {
+            if ((currentNode->next == NULL) || (arg0->unk10 < currentNode->next->unk9)) {
+                newNode->next = currentNode->next;
+                currentNode->next = newNode;
+                break;
+            }
+            currentNode = currentNode->next;
+        }
+    }
+    return newNode;
+}
+
+void func_800CE8F4(D_800F53B8_t* arg0)
+{
+    func_800D4910_t* var_s1;
+    D_800F53B8_t* var_v1 = D_800F53B8;
+
+    if (var_v1 == arg0) {
+        D_800F53B8 = arg0->next;
+    } else {
+        while (var_v1->next != NULL) {
+            if (var_v1->next == arg0) {
+                var_v1->next = arg0->next;
+                break;
+            }
+            var_v1 = var_v1->next;
+        }
+    }
+
+    func_800D2904(arg0);
+
+    var_s1 = arg0->unkD1C.unk34;
+
+    while (var_s1 != NULL) {
+        func_800D4910_t* temp_s0 = var_s1->next;
+        var_s1->renderer(var_s1, 4, 0);
+        func_800CF70C(arg0, var_s1);
+        var_s1 = temp_s0;
+    }
+
+    vs_main_freeHeapR(arg0);
+}
+
+int func_800CE9B0(void)
+{
+    int _[10] __attribute__((unused));
+    vs_main_CdFile sp38;
+    D_800F53B8_t* temp_s1;
+    D_800F53B8_t* var_s0;
+    int i;
+    int var_s2;
+
+    var_s0 = D_800F53B8;
+    var_s2 = 1;
+
+    switch (D_800F531C) {
+    case 0:
+        var_s2 = 0;
+        break;
+
+    case 6:
+        if (vs_battle_loadEffPurge() == 0) {
+            vs_main_wait();
+            vs_effpurge_exec();
+            if ((D_800F5230.effectId != 0) && (vs_battle_pFileLoadContext.lba == 0)) {
+                func_800CF478(4);
+                D_800F5224 = 0;
+                D_800F5228 = 0;
+            } else {
+                func_800CF478(2);
+            }
+            if (D_800F5684 != 0) {
+                func_8007E1C0(2);
+                D_800F5684 = 0;
+            }
+        }
+        break;
+
+    case 2:
+        if (func_800D7CFC() == 0) {
+            func_800CF478(8);
+        }
+        break;
+
+    case 8:
+        if (func_800D7EF4() == 0) {
+            func_800CF478(3);
+            vs_main_wait();
+        }
+        break;
+
+    case 3:
+        if (func_800D7BF8() == 0) {
+            func_800D8060(vs_battle_pfileBuf);
+            func_800CF478(5);
+
+            D_800F5224 = D_800F569C->block9Data->unk14;
+            D_800F5228 = 0;
+
+            for (i = 0; i < D_800F5224; ++i) {
+                D_800F521C |= 1 << i;
+            }
+
+            D_800F54A8 = 1;
+            sp38.lba = vs_battle_getMainMenuLba();
+            sp38.size = 0;
+            D_800F5218 = vs_main_allocateCdQueueSlot(&sp38);
+            vs_main_cdEnqueue(D_800F5218, NULL);
+        }
+        break;
+
+    case 4:
+        while (var_s0 != NULL) {
+
+            temp_s1 = var_s0->next;
+            D_800F53BC = var_s0;
+
+            if (D_800F569C->curveBlock != NULL) {
+                func_800D1104(var_s0->unk14_16);
+            }
+
+            func_800D78F0();
+
+            if (func_800D51D8(var_s0) == 0) {
+                func_800CE8F4(var_s0);
+            } else {
+                ++var_s0->unk14_16;
+            }
+
+            var_s0 = temp_s1;
+        }
+
+        if (D_800F53B8 != NULL) {
+            break;
+        }
+
+        if (D_800F5224 <= D_800F5228) {
+
+            if (D_800F569C->block12Data != 0) {
+                func_80046194();
+                D_800F569C->block12Data = NULL;
+            }
+
+            if (D_800F569C->block13Data != NULL) {
+                func_80046634();
+                D_800F569C->block13Data = NULL;
+                D_800F569C->unkCC = 0;
+            }
+
+            func_800434A4(0, 1);
+            func_800D7C5C();
+            func_800D278C();
+            func_800CF514(D_800F5318);
+
+            D_800F54A8 = 0;
+            D_800F5318 = 0;
+
+            if (D_800F5684 != 0) {
+                func_8007E1C0(2);
+                D_800F5684 = 0;
+            }
+
+            func_800D1930();
+            func_800CF478(9);
+        } else {
+            func_800CF478(5);
+        }
+
+        var_s2 = 1;
+        break;
+
+    case 9:
+        if (D_800F5218 != NULL) {
+            if (D_800F5218->state != 4) {
+                // Ugly match hack
+                if (D_800F569C || var_s2) {
+                    var_s2 = 1;
+                    break;
+                } else {
+                    var_s2 = 1;
+                    break;
+                }
+            }
+            vs_main_freeCdQueueSlot(D_800F5218);
+            D_800F5218 = NULL;
+        }
+        func_800CF478(0);
+        var_s2 = 0;
+        break;
+    }
+
+    return var_s2;
+}
+
+int func_800CED60(void)
+{
+    D_800F53B8_t* temp_s4;
+    D_800F53B8_t* var_s1;
+    func_800D4910_t* var_s0;
+    int var_s3;
+
+    var_s1 = D_800F54B0;
+    var_s3 = 0;
+
+    while (var_s1 != NULL) {
+
+        D_800F53BC = var_s1;
+        temp_s4 = var_s1->next;
+
+        switch (var_s1->unkD1C.unk3A) {
+        case 2:
+            break;
+        case 3:
+            func_800D2698(0xFF);
+            func_800CF484(4, var_s1);
+            break;
+        case 4:
+            if (D_800F569C->curveBlock != NULL) {
+                func_800D1104(var_s1->unk14_16);
+            }
+
+            func_800D78F0();
+
+            var_s0 = var_s1->unkD1C.unk34;
+
+            while (var_s0 != NULL) {
+                func_800D4910_t* temp_s2 = var_s0->next;
+                if (var_s0->renderer(var_s0, 2, 0) == 0) {
+                    func_800CF70C(var_s1, var_s0);
+                }
+                var_s0 = temp_s2;
+            }
+            if (func_800D51D8(var_s1) == 0) {
+                func_800CF614(var_s1);
+                func_800D278C();
+            } else {
+                ++var_s1->unk14_16;
+            }
+            break;
+        }
+        var_s3 |= var_s1->unk14_8;
+        var_s1 = temp_s4;
+    }
+    return var_s3;
+}
+
+int func_800CEEBC(void)
+{
+    int var_a1 = 0;
+    if (((D_800F531C - 4) < 2) && (D_800F5224 > D_800F5228)) {
+        var_a1 = D_800F521C > 0;
+    }
+    return var_a1;
+}
+
+int func_800CEF0C(void)
+{
+    int var_v1 = 0;
+    if ((D_800F531C - 4) < 2) {
+        var_v1 = D_800F5224;
+    }
+    return var_v1;
+}
+
+void func_800CEF38(int arg0)
+{
+    D_800F5228 -= 1;
+    D_800F521C |= 1 << arg0;
+}
+
+int func_800CEF64(void) { return D_800F54A8 != 0; }
+
+int func_800CEF74(int arg0)
+{
+    D_800F53B8_t2 sp10;
+    int v;
+
+    func_800D7890(1);
+    v = func_800CEEBC();
+    if (v != 0) {
+        if (D_800F521C & (1 << arg0)) {
+            char* a1 = D_800F569C->block8Data;
+            sp10.unk18 = arg0 * 3;
+            sp10.unk0 = &D_800F5234;
+            sp10.unk4 = &D_800F5234;
+            sp10.unk10 = 0;
+            sp10.unk8 = (D_800F53B8_t3*)&D_800F5234.unkC;
+            sp10.unkC = (D_800F53B8_t3*)&D_800F5234.unkC;
+            sp10.unk1C = 0;
+            sp10.unk20 = D_800F5318;
+            sp10.unk14 = a1;
+            func_800CE83C(&sp10);
+            func_800CF478(4);
+            ++D_800F5228;
+            D_800F521C &= ~(1 << arg0);
+        }
+    }
+    return v;
+}
+
+int func_800CF060(void)
+{
+    int temp_s0;
+    int temp_s1;
+
+    D_800EC2E4 = 1 - D_800EC2E4;
+    func_800D7890(1);
+    temp_s1 = func_800CE9B0();
+    func_800D7890(0);
+    temp_s0 = func_800CED60();
+    func_800D7890(1);
+    if (D_800F531C == 4) {
+        func_800D2560();
+    }
+    return temp_s1 | temp_s0;
+}
+
+int func_800CF0E8(func_800CF0E8_t* arg0, int arg1, int arg2)
+{
+    D_800F5230 = *arg0;
+
+    if ((arg1 != 0) && (arg0->unk4 == 4)) {
+        D_800F522C = arg1;
+        D_800F54A9 = arg2;
+    }
+
+    D_800F5318 = func_800CF49C();
+    func_800D7890(1);
+    func_800D1B18(&D_800F55A8);
+    func_800D1B18(&D_800F54D8);
+    func_800CF478(6);
+
+    return D_800F5318;
+}
+
+void func_800CF1A8(void)
+{
+    D_800F53B8_t* var_s0 = D_800F53B8;
+
+    func_800434A4(0U, 1);
+
+    while (var_s0 != NULL) {
+        D_800F53B8_t* temp_s1 = var_s0->next;
+        if (var_s0->unkD1C.unk30 != NULL) {
+            vs_main_freeHeapR(var_s0->unkD1C.unk30);
+            var_s0->unkD1C.unk30 = NULL;
+        }
+        func_800CE8F4(var_s0);
+        var_s0 = temp_s1;
+    }
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CF218);
+
+int func_800CF3F8(func_800CF0E8_t* arg0, int arg1)
+{
+    int _[4] __attribute__((unused));
+    func_800D7890(0);
+    func_800D1B18(&D_800F55A8);
+    func_800D1B18(&D_800F54D8);
+    return func_800CF218(arg0, 0, arg1);
+}
+
+int func_800CF458(func_800CF0E8_t* arg0, int arg1, int arg2)
+{
+    return func_800CF218(arg0, arg1, arg2);
+}
+
+void func_800CF478(int arg0) { D_800F531C = arg0; }
+
+void func_800CF484(int arg0, D_800F53B8_t* arg1) { arg1->unkD1C.unk3A = arg0; }
+
+int func_800CF48C(void) { return D_800F531C; }
+
+int func_800CF49C(void)
+{
+    int temp_a1;
+    int j;
+    int i;
+    int var_t2;
+    int* var_a2;
+
+    var_t2 = 0;
+    var_a2 = D_800F5320;
+
+    for (i = 0; i < 4; ++i) {
+        temp_a1 = D_800F5320[i];
+        if (temp_a1 == -2) {
+            continue;
+        }
+
+        for (j = 1; j < 32; ++j) {
+            int v = 1 << j;
+            if (!(temp_a1 & v)) {
+                D_800F5320[i] = temp_a1 | v;
+                var_t2 = (i << 5) + j;
+                goto done;
+            }
+        }
+    }
+done:
+    return var_t2;
+}
+
+void func_800CF514(int arg0)
+{
+    int* ptr = D_800F5320;
+    int var_v1 = arg0;
+    if (arg0 < 0) {
+        var_v1 = arg0 + 0x1F;
+    }
+    var_v1 >>= 5;
+    ptr[var_v1] &= ~(1 << (arg0 - (var_v1 << 5)));
+}
+
+D_800F53B8_t* func_800CF55C(D_800F53B8_t2* arg0)
+{
+    D_800F53B8_t* var_a1;
+    D_800F53B8_t* temp_v0 = vs_main_allocHeapR(sizeof *temp_v0);
+    func_800CE714(arg0, temp_v0);
+    var_a1 = D_800F54B0;
+
+    if ((var_a1 == NULL) || (arg0->unk10 < var_a1->unk9)) {
+        temp_v0->next = var_a1;
+        D_800F54B0 = temp_v0;
+    } else {
+        while (1) {
+            D_800F53B8_t* temp_a0 = var_a1->next;
+            if ((temp_a0 == NULL) || (arg0->unk10 < temp_a0->unk9)) {
+                temp_v0->next = temp_a0;
+                var_a1->next = temp_v0;
+                break;
+            }
+            var_a1 = temp_a0;
+        }
+    }
+    return temp_v0;
+}
+
+void func_800CF614(D_800F53B8_t* arg0)
+{
+    D_800F53B8_t* var_v1 = D_800F54B0;
+    if (var_v1 == arg0) {
+        D_800F54B0 = arg0->next;
+    } else {
+        while (var_v1->next != NULL) {
+            if (var_v1->next == arg0) {
+                var_v1->next = arg0->next;
+                break;
+            }
+            var_v1 = var_v1->next;
+        }
+    }
+    func_800D2904(arg0);
+    func_800CF514(arg0->unk14_0);
+    vs_main_freeHeapR(arg0);
+}
+
+func_800D4910_t* func_800CF694(D_800F53B8_t* arg0, effectExec renderer, int arg2)
+{
+    func_800D4910_t* temp_v0 = vs_main_allocHeapR(sizeof *temp_v0);
+    temp_v0->next = arg0->unkD1C.unk34;
+    arg0->unkD1C.unk34 = temp_v0;
+    temp_v0->renderer = renderer;
+    temp_v0->unk8 = 0;
+    temp_v0->renderer(temp_v0, 1, arg2);
+    return temp_v0;
+}
+
+void func_800CF70C(D_800F53B8_t* arg0, func_800D4910_t* arg1)
+{
+    if (arg1->unk8 != NULL) {
+        vs_main_freeHeapR(arg1->unk8);
+    }
+
+    if (arg0->unkD1C.unk34 == arg1) {
+        arg0->unkD1C.unk34 = arg1->next;
+    } else {
+        func_800D4910_t* var_v1 = arg0->unkD1C.unk34;
+        while (var_v1->next != arg1) {
+            var_v1 = var_v1->next;
+        }
+        var_v1->next = arg1->next;
+    }
+
+    vs_main_freeHeapR(arg1);
+}
+
+void func_800CF7A8(int arg0, int arg1, int arg2, int arg3)
+{
+    func_800CF0E8_t sp10;
+
+    sp10.effectId = 54;
+    sp10.unk2 = 1;
+    sp10.unk4 = 5;
+    sp10.unk10 = 5;
+    sp10.unk8.s16 = 0;
+    sp10.unkA.s16 = 0;
+    sp10.unkC = 0;
+    sp10.unk14.u16 = 0;
+    sp10.unk16.u16 = 0;
+    sp10.unk18 = 0;
+    sp10.unk3 = 0;
+    func_800CF3F8(&sp10, (arg0 & 0xFF) | ((arg1 & 0xFF) << 8) | ((arg2 & 0xF) << 0x10)
+                             | ((arg3 & 0xF) << 0x14) | 0xFF000000);
+}
+
+void func_800CF830(int arg0, int arg1)
+{
+    D_800F53B8_t* var_s1 = D_800F54B0;
+
+    while (var_s1 != NULL) {
+        func_800D4910_t* var_s0 = var_s1->unkD1C.unk34;
+        while (var_s0 != NULL) {
+            if (var_s0->renderer == func_800CE174) {
+                var_s0->renderer(var_s0, 3, 0);
+            }
+            var_s0 = var_s0->next;
+        }
+        var_s1 = var_s1->next;
+    }
+}
+
+void func_800CF8BC(void)
+{
+    func_800CF0E8_t sp10;
+
+    sp10.effectId = 56;
+    sp10.unk2 = 1;
+    sp10.unk4 = 4;
+    sp10.unkA.u8[0] = 0;
+    sp10.unk10 = 5;
+    sp10.unk14.u16 = 0;
+    sp10.unk16.u16 = 0;
+    sp10.unk18 = 0;
+    sp10.unk3 = 0;
+    sp10.unk8.u8[0] = D_800F5238;
+    func_800CF3F8(&sp10, 0);
+}
+
+void func_800CF920(void) { D_800F522C = 0; }
+
+void func_800CF92C(int arg0, int arg1, int arg2, short* arg3)
+{
+    int var_v1;
+    int temp_a1;
+
+    var_v1 = (short)arg2 + arg0;
+
+    if (var_v1 <= 0) {
+        var_v1 = 1;
+    } else if (var_v1 >= 0xFF) {
+        var_v1 = 0xFE;
+    }
+
+    temp_a1 = (arg2 >> 16) + arg1;
+
+    if (temp_a1 <= 0) {
+        temp_a1 = 1;
+    } else if (temp_a1 >= 0xFF) {
+        temp_a1 = 0xFE;
+    }
+
+    *arg3 = var_v1 | temp_a1 << 8;
+}
+
+void func_800CF988(func_800CF988_t* arg0, int arg1, int arg2, int arg3)
+{
+    int page;
+    int offset;
+    int left = 320;
+
+    if (arg0->unk8[0].unk4 < left) {
+        left = arg0->unk8[0].unk4;
+    }
+
+    if (arg0->unk8[1].unk4 < left) {
+        left = arg0->unk8[1].unk4;
+    }
+
+    if (arg0->unk8[2].unk4 < left) {
+        left = arg0->unk8[2].unk4;
+    }
+
+    if (arg0->unk8[3].unk4 < left) {
+        left = arg0->unk8[3].unk4;
+    }
+
+    left &= ~0x3F;
+    page = left / 64;
+    arg0->unk8[1].unkA = ((vs_main_frameBuf & 1) ? page : page + 5) | arg3 | 0x100;
+    offset = arg1 - left;
+    func_800CF92C(offset, arg2, *(int*)&arg0->unk8[0].unk4, &arg0->unk8[0].unk8);
+    func_800CF92C(offset, arg2, *(int*)&arg0->unk8[1].unk4, &arg0->unk8[1].unk8);
+    func_800CF92C(offset, arg2, *(int*)&arg0->unk8[2].unk4, &arg0->unk8[2].unk8);
+    func_800CF92C(offset, arg2, *(int*)&arg0->unk8[3].unk4, &arg0->unk8[3].unk8);
+}
+
+void func_800CFAAC(func_800CFAAC_t* arg0)
+{
+    int dx;
+    int dy;
+    int sx;
+    int sy;
+
+    if (*(int*)&arg0->unkC == *(int*)&arg0->unk10) {
+        return;
+    }
+    sx = -1;
+    sy = -1;
+    dx = arg0->unk10 - arg0->unkC;
+    dy = arg0->unk12 - arg0->unkE;
+    if (dx < 0) {
+        dx = -dx;
+        sx = 1;
+    }
+    if (dy < 0) {
+        dy = -dy;
+        sy = 1;
+    }
+    if (dy < dx) {
+        arg0->unk10 += sx;
+        if (dx < dy * 2) {
+            arg0->unk12 += sy;
+        }
+    } else {
+        arg0->unk12 += sy;
+        if (dy < dx * 2) {
+            arg0->unk10 += sx;
+        }
+    }
+}
+
+int func_800CFB68(int arg0, int arg1, int arg2)
+{
+    return (((arg1 - arg0) * arg2) >> 7) + arg0;
+}
+
+int vs_battle_randUniformInt(int arg0, int arg1)
+{
+    if (arg0 != arg1) {
+        int new_var;
+
+        if (arg1 < arg0) {
+            new_var = rand() % (arg0 - arg1);
+            return new_var + arg1;
+        }
+
+        new_var = rand() % (arg1 - arg0);
+        return new_var + arg0;
+    }
+
+    return arg0;
+}
+
+int _absMax3(int arg0, int arg1, int arg2) __attribute__((unused));
+int _absMax3(int arg0, int arg1, int arg2)
+{
+    int var_v0;
+    int new_var = 0;
+    int var_t0 = arg0 >= new_var ? arg0 : -arg0;
+    int var_a3 = arg1 >= new_var ? arg1 : -arg1;
+    int var_v1 = arg2 >= new_var ? arg2 : -arg2;
+
+    if (var_t0 < var_a3) {
+        var_v0 = var_a3 < var_v1;
+        arg0 = arg1;
+    } else {
+        var_v0 = var_t0 < var_v1;
+    }
+    if (var_v0 != 0) {
+        arg0 = arg2;
+    }
+    return arg0;
+}
+
+int _absMax2(int arg0, int arg1) __attribute__((unused));
+int _absMax2(int arg0, int arg1)
+{
+    int abs0 = arg0 >= 0 ? arg0 : -arg0;
+
+    if (abs0 < (arg1 < 0 ? -arg1 : arg1)) {
+        return arg1;
+    }
+    return arg0;
+}
+
+int func_800CFC8C(int arg0, int arg1, int arg2, int arg3)
+{
+    return arg0
+         + ((int)((arg1 - arg0) * (ONE - rcos((int)(arg3 * ONE / 2) / arg2)))
+             / (ONE * 2));
+}
+
+void vs_battle_lerpVector(short* src, int t, VECTOR* vec)
+{
+    int start0 = src[0];
+    int end0 = src[1];
+    int start1 = src[2];
+    int end1 = src[3];
+    int start2 = src[4];
+    int end2 = src[5];
+
+    vec->vx = (((end0 - start0) * t) >> 7) + start0;
+    vec->vy = (((end1 - start1) * t) >> 7) + start1;
+    vec->vz = (((end2 - start2) * t) >> 7) + start2;
+}
+
+void vs_battle_lerpSvector(short* src, int t, SVECTOR* vec)
+{
+    int start0 = src[0];
+    int end0 = src[1];
+    int start1 = src[2];
+    int end1 = src[3];
+    int start2 = src[4];
+    int end2 = src[5];
+
+    vec->vx = (((end0 - start0) * t) >> 7) + start0;
+    vec->vy = (((end1 - start1) * t) >> 7) + start1;
+    vec->vz = (((end2 - start2) * t) >> 7) + start2;
+}
+
+void vs_battle_lerp2DVector(short* src, int t, int* vec)
+{
+    int start0 = src[0];
+    int end0 = src[1];
+    int start1 = src[2];
+    int end1 = src[3];
+
+    vec[0] = ((((end0 - start0) * t) >> 7) + start0);
+    vec[1] = ((((end1 - start1) * t) >> 7) + start1);
+}
+
+int func_800CFE1C(short* arg0, int arg1)
+{
+    int new_var = arg0[0];
+    return (((arg0[1] - new_var) * arg1) >> 7) + new_var;
+}
+
+void _addSVectorToVector(SVECTOR* svec, VECTOR* vec, VECTOR* out) __attribute__((unused));
+void _addSVectorToVector(SVECTOR* svec, VECTOR* vec, VECTOR* out)
+{
+    int v = svec->vy;
+    out->vx = vec->vx + svec->vx;
+    do {
+        out->vy = vec->vy + v;
+        out->vz = vec->vz + svec->vz;
+    } while (0);
+}
+
+void func_800CFE7C(func_800CFE98_t* arg0)
+{
+    arg0->unk10 = 0x1000;
+    arg0->unk8 = 0x1000;
+    arg0->unk0 = 0x1000;
+    arg0->unkC = 0;
+    arg0->unk4 = 0;
+}
+
+void func_800CFE98(SVECTOR* arg0, func_800CFE98_t* arg1)
+{
+    func_800CFE7C(arg1);
+    arg1->unk14.vx = arg0->vx;
+    arg1->unk14.vy = arg0->vy;
+    arg1->unk14.vz = arg0->vz;
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CFEF0);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D01E4);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D037C);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D0548);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D05F4);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D0984);
+
+void func_800D0B08(func_800CFE98_t* arg0) { func_800CFE98(D_800F5310, arg0); }
+
+void func_800D0B30(func_800D0B30_t* arg0, SVECTOR* arg1, func_800D0B30_t2* arg2)
+{
+    if (arg0->unk0 & 1) {
+        vs_battle_lerpSvector(arg0->unk14, D_800F5330[arg0->unk6], &arg2->unk8);
+        arg1->vx += arg2->unk8.vx;
+        arg1->vy = arg1->vy + arg2->unk8.vy;
+        arg1->vz += arg2->unk8.vz;
+        RotMatrix_gte(arg1, &arg2->unk48);
+        vs_battle_lerpVector(arg0->unk20, D_800F5330[arg0->unk4], &arg2->unk10);
+        TransMatrix(&arg2->unk48, &arg2->unk10);
+        vs_battle_lerpVector(arg0->unk2C, D_800F5330[arg0->unk7], &arg2->unk20);
+        func_8004140C(&arg2->unk48, &arg2->unk20);
+        return;
+    }
+    func_800CFE7C((func_800CFE98_t*)&arg2->unk48);
+    arg2->unk48.t[2] = 0;
+    arg2->unk48.t[1] = 0;
+    arg2->unk48.t[0] = 0;
+}
+
+void func_800D0C60(int arg0, func_800D0C60_t* arg1)
+{
+    func_8006EBF8_t sp10;
+    int sp20[2];
+
+    if (arg1->unk34 < 0x10U) {
+        func_800A1720(arg1->unk34, arg1->unk35, &arg1->unk78, sp20);
+        func_800A1108(arg1->unk34, &sp10);
+        arg1->unkBE = sp10.unk0.unk4.pad;
+        return;
+    }
+
+    switch (arg1->unk34) {
+    case 0x10:
+    case 0x11:
+        func_800D0984(arg0, arg1, arg1->unk34 != 0x10);
+        break;
+    case 0x12:
+        func_800D0B08(&arg1->unk78);
+        break;
+    }
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D0D08);
+
+void func_800D1104(int arg0)
+{
+    int i;
+    pFileCurveBlock* temp_a2 = D_800F569C->curveBlock;
+
+    for (i = 0; i < temp_a2->count; ++i) {
+        D_800F5330[i + 1] = D_800F569C->curves[i][arg0 % temp_a2->curveSizes[i]];
+    }
+}
+
+int vs_battle_sampleCurve(int curveId, int distance)
+{
+    pFileCurveBlock* block = D_800F569C->curveBlock;
+
+    if ((curveId != 0) && (block->count >= curveId)) {
+        return D_800F569C->curves[curveId - 1][distance % block->curveSizes[curveId - 1]];
+    }
+
+    return 0;
+}
+
+int func_800D11F4(int arg0, int arg1)
+{
+    u_char* buf = D_800F569C->block11Data;
+    pFileBlock11* table = (pFileBlock11*)buf;
+    int offset;
+    int v;
+
+    if (arg0 < table->count) {
+        offset = *(arg0 + table->offsets);
+        offset += buf[offset];
+        while (buf[offset] != 0) {
+            v = arg1 - buf[offset];
+            if (v < 0) {
+                break;
+            }
+            offset += 2;
+            arg1 = v;
+        }
+        if (buf[offset] != 0) {
+            return (buf[offset + 3] - buf[offset + 1]) * arg1 / buf[offset]
+                 + buf[offset + 1];
+        }
+        if (arg1 == 0) {
+            return buf[offset + 1];
+        }
+        return -1;
+    }
+    return 0;
+}
+
+int func_800D12D8(int arg0)
+{
+    u_char* table = D_800F569C->block11Data;
+    int sum = 0;
+
+    if (arg0 < *(int*)table) {
+        int off = ((short*)table)[arg0 + 2];
+        off += table[off];
+        while (table[off] != 0) {
+            sum += table[off];
+            off += 2;
+        }
+        sum += 1;
+    }
+    return sum;
+}
+
+int vs_battle_lerpRatio(int arg0, int arg1, int arg2, int arg3)
+{
+    int var_v0 = (arg1 - arg0) * ((arg2 * ONE) / arg3);
+    return arg0 + var_v0 / ONE;
+}
+
+void vs_battle_splineInterpolate(
+    SVECTOR* p0, SVECTOR* p1, SVECTOR* p2, SVECTOR* p3, int t, SVECTOR* out)
+{
+    int temp_t3 = -t;
+    int temp_t2 = t - ONE;
+    int temp_t1 = t + ONE;
+
+    int temp_t0 =
+        (((((temp_t3 * temp_t2) >> 0xC) * (t - ONE * 2)) >> 0xC) * (ONE * 2 / 3)) >> 0xE;
+    int temp_t3_2 = (((temp_t1 * temp_t2) >> 0xC) * (t - ONE * 2)) >> 0xD;
+    int temp_t2_2 = (((temp_t1 * temp_t3) >> 0xC) * (t - ONE * 2)) >> 0xD;
+    int temp_v1_2 = (((((temp_t1 * t) >> 0xC) * temp_t2) >> 0xC) * (ONE * 2 / 3)) >> 0xE;
+
+    out->vx = ((p0->vx * temp_t0) + (p1->vx * temp_t3_2) + (p2->vx * temp_t2_2)
+                  + (p3->vx * temp_v1_2))
+           >> 0xC;
+    out->vy = ((p0->vy * temp_t0) + (p1->vy * temp_t3_2) + (p2->vy * temp_t2_2)
+                  + (p3->vy * temp_v1_2))
+           >> 0xC;
+    out->vz = ((p0->vz * temp_t0) + (p1->vz * temp_t3_2) + (p2->vz * temp_t2_2)
+                  + (p3->vz * temp_v1_2))
+           >> 0xC;
+}
+
+void func_800D155C(int arg0, int arg1, int arg2, int arg3, int arg4, int* arg5)
+{
+    int p0 = ((-arg4 * (arg4 - ONE)) >> 12) * (arg4 - (ONE * 2));
+    int p1 = (((arg4 + ONE) * (arg4 - ONE)) >> 12) * (arg4 - (ONE * 2));
+    int p2 = (((arg4 + ONE) * -arg4) >> 12) * (arg4 - (ONE * 2));
+    int p3 = (((arg4 + ONE) * arg4) >> 12) * (arg4 - ONE);
+
+    *arg5 = ((arg0 * (((p0 >> 12) * (ONE * 2 / 3)) >> 14)) + (arg1 * (p1 >> 13))
+                + (arg2 * (p2 >> 13)) + (arg3 * (((p3 >> 12) * (ONE * 2 / 3)) >> 14)))
+         >> 12;
+}
+
+int vs_battle_lerp(int arg0, int arg1, int arg2)
+{
+    int var_v0 = (arg1 - arg0) * arg2;
+    return arg0 + (var_v0 / (ONE * 2));
+}
+
+void func_800D169C(SVECTOR* arg0, SVECTOR* arg1, int arg2, SVECTOR* arg3)
+{
+    arg3->vx = vs_battle_lerp(arg0->vx, arg1->vx, arg2);
+    arg3->vy = vs_battle_lerp(arg0->vy, arg1->vy, arg2);
+    arg3->vz = vs_battle_lerp(arg0->vz, arg1->vz, arg2);
+}
+
+void func_800D1718(SVECTOR* arg0, SVECTOR* arg1, int arg2, int arg3, SVECTOR* arg4)
+{
+    func_800D169C(arg0, arg1, ONE - rcos((arg3 * ONE / 2) / arg2), arg4);
+}
+
+void func_800D1778(SVECTOR* arg0, SVECTOR* arg1, int arg2, int arg3, SVECTOR* arg4)
+{
+    func_800D169C(arg0, arg1, (arg3 * (ONE * 2)) / arg2, arg4);
+}
+
+void func_800D17A8(VECTOR* arg0, VECTOR* arg1, int arg2, VECTOR* arg3)
+{
+    arg3->vx = vs_battle_lerp(arg0->vx, arg1->vx, arg2);
+    arg3->vy = vs_battle_lerp(arg0->vy, arg1->vy, arg2);
+    arg3->vz = vs_battle_lerp(arg0->vz, arg1->vz, arg2);
+}
+
+void func_800D1824(VECTOR* arg0, VECTOR* arg1, int arg2, int arg3, VECTOR* arg4)
+{
+    func_800D17A8(arg0, arg1, ONE - rcos((arg3 * ONE / 2) / arg2), arg4);
+}
+
+void func_800D1884(VECTOR* arg0, VECTOR* arg1, int arg2, int arg3, VECTOR* arg4)
+{
+    func_800D17A8(arg0, arg1, (arg3 * (ONE * 2)) / arg2, arg4);
+}
+
+void func_800D18B4(int arg0, int arg1, int arg2, int arg3)
+{
+    vs_battle_lerp(arg0, arg1, ONE - rcos((arg3 * ONE / 2) / arg2));
+}
+
+void func_800D1904(int arg0, int arg1, int arg2, int arg3)
+{
+    vs_battle_lerp(arg0, arg1, (arg3 * (ONE * 2)) / arg2);
+}
+
+void func_800D1930(void)
+{
+    int i;
+    D_800F5518 = 0;
+    D_800F55E8 = 0;
+    D_800F54D0 = 0;
+    D_800F55A0 = 0;
+
+    for (i = 0; i < 4; ++i) {
+        D_800F54B8[i].unk0 = 0xFF;
+    }
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D197C);
+
+void func_800D1B18(D_800F54D8_t* arg0)
+{
+    vs_battle_getCameraPosition(&arg0->position);
+    vs_battle_getCameraLookAt(&arg0->lookAt);
+    arg0->roll = vs_battle_getCameraRoll() + ONE * 8;
+    arg0->nearClip = vs_main_nearClip;
+    arg0->projectionDistance = vs_main_projectionDistance;
+    arg0->farClip = vs_scratch.camera.farClip;
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D1B80);
+
+void func_800D1DE4(int arg0) { D_800F5518 |= arg0; }
+
+void func_800D1DFC(int arg0)
+{
+    if (arg0 != 0) {
+        D_800F5518 &= ~arg0;
+        return;
+    }
+    D_800F5518 = 0;
+}
+
+void func_800D1E20(int arg0) { D_800F55E8 = arg0; }
+
+u_char func_800D1E2C(D_800F54B8_t* arg0)
+{
+    int var_v0;
+
+    if (arg0->unk1_5) {
+        var_v0 = vs_battle_sampleCurve(arg0->unk2, arg0->unk0);
+    } else {
+        var_v0 = arg0->unk2;
+    }
+    return var_v0;
+}
+
+u_char func_800D1E78(D_800F54B8_t* arg0)
+{
+    int var_s0;
+
+    if (arg0->unk1_6) {
+        var_s0 = vs_battle_sampleCurve(arg0->unk3, arg0->unk0);
+    } else {
+        var_s0 = arg0->unk3;
+    }
+
+    if (var_s0 == 0) {
+        return 0;
+    }
+
+    return (rand() % var_s0);
+}
+
+void func_800D1EF0(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6)
+{
+    int i;
+
+    for (i = 0; i < 4; ++i) {
+        if ((arg0 >> i) & 1) {
+            D_800F54B8_t* p = &D_800F54B8[i];
+            p->unk1_0 = arg1;
+            p->unk4 = arg2;
+            p->unk1_5 = arg3;
+            p->unk2 = arg4;
+            p->unk1_6 = arg5;
+            p->unk3 = arg6;
+            p->unk0 = 0;
+            p->unk5 = func_800D1E78(p);
+            func_800D1DE4(1 << i);
+        }
+    }
+}
+
+void func_800D1FEC(int arg0)
+{
+    int i;
+
+    for (i = 0; i < 4; ++i) {
+        if ((arg0 >> i) & 1) {
+            D_800F54B8[i].unk0 = 0xFF;
+            func_800D1DFC(1 << i);
+        }
+    }
+}
+
+void func_800D206C(void)
+{
+    int i;
+
+    for (i = 0; i < 4; ++i) {
+        int v;
+
+        if (!((D_800F5518 >> i) & 1)) {
+            continue;
+        }
+
+        v = func_800D11F4(D_800F54B8[i].unk1_0, D_800F54B8[i].unk0);
+
+        if (v >= 0) {
+            v = ((rsin(D_800F54B8[i].unk5 * 32) * v) * D_800F54B8[i].unk4) >> 8;
+
+            switch (i) {
+            case 0:
+                D_800F54D8.unk20 = v;
+                break;
+
+            case 1:
+                D_800F54D8.unk24 = v;
+                break;
+
+            case 2:
+                D_800F54D8.unk28 = v;
+                break;
+
+            case 3:
+                D_800F54D8.unk2C = v >> 12;
+                break;
+            }
+
+            D_800F54B8[i].unk5 +=
+                func_800D1E2C(&D_800F54B8[i]) + func_800D1E78(&D_800F54B8[i]);
+            ++D_800F54B8[i].unk0;
+        } else {
+            func_800D1FEC(1 << i);
+        }
+    }
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D21C0);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D236C);
+
+void func_800D2518(void) { D_800F54D8 = D_800F5520[0]; }
+
+void func_800D2560(void)
+{
+    int temp_s0 = D_800F55E8 != 0;
+
+    if (D_800F55A0 != 0) {
+        switch (D_800F55E8) {
+        case 0:
+            break;
+        case 1:
+            func_800D21C0();
+            break;
+        case 2:
+            func_800D236C();
+            break;
+        case 3:
+            func_800D2518();
+            break;
+        }
+        if (D_800F54D0 <= D_800F55A0) {
+            ++D_800F54D0;
+            if (D_800F54D0 > D_800F55A0) {
+                D_800F54D0 = 0;
+                D_800F55A0 = 0;
+                func_800D1E20(0);
+            }
+        }
+    }
+    if (D_800F5518 != 0) {
+        func_800D206C();
+    } else {
+        D_800F54D8.unk2C = 0;
+        D_800F54D8.unk28 = 0;
+        D_800F54D8.unk24 = 0;
+        D_800F54D8.unk20 = 0;
+    }
+    if (D_800F5518 != 0 || temp_s0) {
+        func_800D1B80(&D_800F54D8);
+    }
+}
+
+void func_800D268C(void) { D_800F5600 = 0; }
+
+void func_800D2698(int count)
+{
+    int i;
+
+    if (D_800F5600 != 0) {
+        ++D_800F5600;
+        return;
+    }
+
+    D_800F55FC = vs_main_allocHeapR(sizeof *D_800F55FC * count);
+    D_800F55FC[0].previous = NULL;
+    D_800F55FC[0].next = &D_800F55FC[1];
+
+    for (i = 1; i < count - 1; ++i) {
+        D_800F55FC[i].previous = &D_800F55FC[i - 1];
+        D_800F55FC[i].next = &D_800F55FC[i + 1];
+    }
+
+    D_800F55F8 = 0;
+    D_800F55F0 = count;
+    D_800F5600 = 1;
+    D_800F55FC[i].previous = &D_800F55FC[i - 1];
+    D_800F55FC[i].next = NULL;
+    D_800F55F4 = D_800F55FC;
+}
+
+void func_800D278C(void)
+{
+    if (D_800F5600 == 1) {
+        if (D_800F55FC != NULL) {
+            vs_main_freeHeapR(D_800F55FC);
+            D_800F55FC = NULL;
+        }
+        D_800F5600 = 0;
+        return;
+    }
+    --D_800F5600;
+}
+
+func_800D2904_t* func_800D27F0(D_800F53B8_t* arg0)
+{
+    func_800D2904_t* node = D_800F55F4;
+
+    if (node == NULL) {
+        func_800CE644(0x14);
+    }
+
+    func_800D6CCC(node->unk3C);
+
+    node->unk77 = 0xFF;
+    node->previous = NULL;
+    ++D_800F55F8;
+    D_800F55F4 = node->next;
+    node->next = arg0->unk18;
+
+    if (arg0->unk18 != NULL) {
+        arg0->unk18->previous = node;
+    }
+
+    arg0->unk18 = node;
+    ++arg0->unk8;
+
+    do {
+    } while (0);
+
+    return node;
+}
+
+void func_800D2888(func_800D2904_t* arg0, D_800F53B8_t* arg1)
+{
+    if (arg0->next != NULL) {
+        arg0->next->previous = arg0->previous;
+    }
+
+    if (arg0->previous != NULL) {
+        arg0->previous->next = arg0->next;
+    } else {
+        arg1->unk18 = arg0->next;
+    }
+
+    arg0->next = D_800F55F4;
+    D_800F55F4 = arg0;
+    --D_800F55F8;
+    --arg1->unk8;
+}
+
+void func_800D2904(D_800F53B8_t* arg0)
+{
+    func_800D2904_t* temp_a1;
+    func_800D2904_t* var_a0;
+
+    temp_a1 = arg0->unk18;
+    var_a0 = temp_a1;
+
+    if (temp_a1 == 0) {
+        return;
+    }
+
+    while (var_a0->next != 0) {
+        var_a0 = var_a0->next;
+    }
+
+    var_a0->next = D_800F55F4;
+    D_800F55F4 = temp_a1;
+    D_800F55F8 -= arg0->unk8;
+    arg0->unk8 = 0;
+}
+
+void vs_battle_addVector(VECTOR* arg0, VECTOR* arg1, VECTOR* arg2)
+{
+    arg2->vx = arg0->vx + arg1->vx;
+    arg2->vy = arg0->vy + arg1->vy;
+    arg2->vz = arg0->vz + arg1->vz;
+}
+
+void vs_battle_addVecToSvec(VECTOR* arg0, SVECTOR* arg1, VECTOR* arg2)
+{
+    arg2->vx = arg0->vx + arg1->vx;
+    arg2->vy = arg0->vy + arg1->vy;
+    arg2->vz = arg0->vz + arg1->vz;
+}
+
+void vs_battle_svecToVec(SVECTOR* arg0, VECTOR* arg1)
+{
+    arg1->vx = arg0->vx;
+    arg1->vy = arg0->vy;
+    arg1->vz = arg0->vz;
+}
+
+void vs_battle_vecToSvec(VECTOR* arg0, SVECTOR* arg1)
+{
+    arg1->vx = arg0->vx;
+    arg1->vy = arg0->vy;
+    arg1->vz = arg0->vz;
+}
+
+void func_800D2A38(func_800FA098_arg1* arg0, func_800D2904_t* arg1)
+{
+    if (arg0->flags & 0x40000) {
+        ApplyRotMatrix(&arg0->unk2C, &arg0->unk34);
+    } else {
+        arg0->unk34.vx = arg0->unk2C.vx;
+        arg0->unk34.vy = arg0->unk2C.vy;
+        arg0->unk34.vz = arg0->unk2C.vz;
+    }
+    arg1->unkC = arg0->unk98.vx + arg0->unk34.vx * ONE;
+    arg1->unk10 = arg0->unk98.vy + arg0->unk34.vy * ONE;
+    arg1->unk14 = arg0->unk98.vz + arg0->unk34.vz * ONE;
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D2ADC);
+
+void func_800D46DC(int arg0, D_800F53B8_t* arg1)
+{
+    if (arg0) {
+        arg1->unkA = func_800D5198(arg1);
+    } else {
+        arg1->unkA += 2;
+    }
+}
+
+int func_800D4720(D_800F53B8_t* arg0)
+{
+    arg0->unkA = func_800D5198(arg0);
+    return 0;
+}
+
+int func_800D474C(D_800F53B8_t* arg0)
+{
+    arg0->unkA = func_800D5198(arg0);
+    return 1;
+}
+
+int func_800D4778(D_800F53B8_t* arg0)
+{
+    D_800F53B8_t2 sp10;
+
+    sp10.unk14 = arg0->unkC;
+    sp10.unk18 = func_800D5198(arg0);
+    sp10.unk0 = &arg0->unkD1C;
+    func_800CE83C(&sp10);
+    return 1;
+}
+
+int func_800D47C0(D_800F53B8_t* arg0 __attribute__((unused))) { return 2; }
+
+int func_800D47C8(D_800F53B8_t* arg0)
+{
+    D_800F5610 = func_800D5170(arg0);
+    return 1;
+}
+
+int func_800D47F4(D_800F53B8_t* arg0)
+{
+    int temp_s0;
+    int temp_s2;
+
+    temp_s2 = func_800D5170(arg0);
+    temp_s0 = func_800D5198(arg0);
+    temp_s0 = temp_s0 + (func_800D5198(arg0) << 0x10);
+
+    if (arg0->unkD1C.unk3C != 0) {
+        temp_s0 = arg0->unkD1C.unk3C;
+    }
+
+    func_800CF694(arg0, D_800EC324[temp_s2], temp_s0);
+    return 1;
+}
+
+int func_800D487C(D_800F53B8_t* arg0)
+{
+    func_800D46DC(arg0->unkD1C.unk34 == 0, arg0);
+    return 1;
+}
+
+int func_800D48A4(D_800F53B8_t* arg0)
+{
+    func_800D55A4(arg0, func_800D5170(arg0) & 0xFF, 0);
+    arg0->unkA = 0xB7;
+    return 1;
+}
+
+int func_800D48E4(D_800F53B8_t* arg0)
+{
+    func_800D46DC(D_800F522C == 0, arg0);
+    return 1;
+}
+
+int func_800D4910(D_800F53B8_t* arg0)
+{
+    func_800D4910_t* var_s0 = arg0->unkD1C.unk34;
+
+    while (var_s0 != 0) {
+        func_800D4910_t* s1 = var_s0->next;
+        if (var_s0->renderer(var_s0, 2, 0) == 0) {
+            func_800CF70C(arg0, var_s0);
+        }
+        var_s0 = s1;
+    }
+    return 1;
+}
+
+int func_800D4984(D_800F53B8_t* arg0)
+{
+    func_800D0D08(arg0);
+    return 1;
+}
+
+int func_800D49A4(D_800F53B8_t* arg0)
+{
+    int i;
+
+    if (((u_short)(arg0->unkD1C.unk38 - 6) < 16) || (arg0->unkD1C.unk38 == 0x21)
+        || (arg0->unkD1C.unk38 == 0x24)) {
+        for (i = 0; i < D_800F569C->block9Data->unk15; ++i) {
+            arg0->unk1C[i].unk20 = -0x80;
+        }
+    } else if ((arg0->unkD1C.unk38 == 0x38) && (arg0->unk10[3] == 0x2B)) {
+        for (i = 0; i < D_800F569C->block9Data->unk15; ++i) {
+            arg0->unk1C[i].unk20 = 0x80;
+        }
+    }
+    return 1;
+}
+
+int func_800D4A94(D_800F53B8_t* arg0)
+{
+    func_800CFEF0(arg0);
+    return 1;
+}
+
+int func_800D4AB4(D_800F53B8_t* arg0)
+{
+    if (D_800F522C < 4) {
+        arg0->unk10[3] = D_800EC32C[D_800F522C];
+    }
+    return 1;
+}
+
+int func_800D4AEC(D_800F53B8_t* arg0)
+{
+    arg0->unk10[func_800D5170(arg0)] = func_800D5198(arg0);
+    return 1;
+}
+
+int func_800D4B34(D_800F53B8_t* arg0)
+{
+    func_800D46DC(arg0->unk10[func_800D5170(arg0)] == (func_800D5198(arg0)), arg0);
+    return 1;
+}
+
+int func_800D4B90(D_800F53B8_t* arg0)
+{
+    func_800D46DC(arg0->unk8 == func_800D5170(arg0), arg0);
+    return 1;
+}
+
+int func_800D4BD0(D_800F53B8_t* arg0)
+{
+    func_800D2ADC(arg0, arg0->unk10[func_800D5170(arg0)], 0, 0, NULL);
+    return 1;
+}
+
+int func_800D4C18(D_800F53B8_t* arg0);
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D4C18);
+
+int func_800D4D44(D_800F53B8_t* arg0 __attribute__((unused)))
+{
+    func_800D78F0();
+    return 1;
+}
+
+int func_800D4D64(D_800F53B8_t* arg0)
+{
+    if (arg0->unkD1C.unk0.unk0 == 4) {
+        func_8006CDB8((u_char)arg0->unkD1C.unk0.unk4.unk0);
+    }
+    return 1;
+}
+
+int func_800D4D98(D_800F53B8_t* arg0 __attribute__((unused)))
+{
+    D_800F522C = 0;
+    return 1;
+}
+
+int func_800D4DA8(D_800F53B8_t* arg0 __attribute__((unused))) { return 1; }
+
+int func_800D4DB0(D_800F53B8_t* arg0)
+{
+    u_char index = arg0->unk10[func_800D5170(arg0)];
+
+    if (arg0->previous == NULL && index < 4) {
+        int id = D_800F569C->block9Data->unk16[index];
+        if (id != 0 && D_800F569C->block3Data != NULL
+            && id < D_800F569C->block3Data->count) {
+            index = id - 1;
+        }
+    }
+    func_800D55A4(arg0, index, 0);
+    return 1;
+}
+
+int func_800D4E5C(D_800F53B8_t* arg0)
+{
+    func_800D6AEC(arg0, func_800D5198(arg0));
+    return 1;
+}
+
+int func_800D4E90(D_800F53B8_t* arg0)
+{
+    func_800D46DC(arg0->unkD1C.unk30->unk4 == 0, arg0);
+    return 1;
+}
+
+int func_800D4EC0(D_800F53B8_t* arg0)
+{
+    if (arg0->unkD1C.unk30 != NULL) {
+        vs_main_freeHeapR(arg0->unkD1C.unk30);
+        arg0->unkD1C.unk30 = NULL;
+    }
+    return 1;
+}
+
+int func_800D4F00(D_800F53B8_t* arg0)
+{
+    u_char first = func_800D5170(arg0);
+    u_char second = func_800D5170(arg0);
+    u_char third = func_800D5170(arg0);
+    func_800FA098_arg0* dst = &D_800F569C->block5Data->unk4[first & 0x3F];
+
+    dst->rCurve = (first >> 6) + ((second & 0xF) << 2);
+    dst->gCurve = (second >> 4) + ((third & 3) << 4);
+    dst->bCurve = third >> 2;
+    return 1;
+}
+
+int func_800D4FB4(D_800F53B8_t* arg0)
+{
+    int i;
+
+    for (i = 0; i < 2; ++i) {
+        func_800FA098_arg0* dst = &D_800F569C->block5Data->unk4[i];
+        dst->rCurve = D_800EC330[arg0->unkD1C.unk18.unk2][i][0];
+        dst->gCurve = D_800EC330[arg0->unkD1C.unk18.unk2][i][1];
+        dst->bCurve = D_800EC330[arg0->unkD1C.unk18.unk2][i][2];
+    }
+
+    return 1;
+}
+
+int func_800D5048(D_800F53B8_t* arg0)
+{
+    if (arg0->previous != 0) {
+        --arg0->previous->unk14_11;
+    }
+    return 1;
+}
+
+int func_800D5088(D_800F53B8_t* arg0);
+int func_800D5088(D_800F53B8_t* arg0)
+{
+    int i;
+
+    for (i = 0; i < 5; i++) {
+        func_800FA098_arg0* dst =
+            &D_800F569C->block5Data->unk4[D_800EC368[arg0->unkD1C.unk18.unk2][i][3]];
+        dst->rCurve = D_800EC368[arg0->unkD1C.unk18.unk2][i][0];
+        dst->gCurve = D_800EC368[arg0->unkD1C.unk18.unk2][i][1];
+        dst->bCurve = D_800EC368[arg0->unkD1C.unk18.unk2][i][2];
+    }
+    return 1;
+}
+
+int func_800D5150(D_800F53B8_t* arg0 __attribute__((unused)))
+{
+    return func_800CE644(0x1E);
+}
+
+u_char func_800D5170(D_800F53B8_t* arg0) { return arg0->unkC[arg0->unkA++]; }
+
+u_short func_800D5198(D_800F53B8_t* arg0)
+{
+    u_char lo = func_800D5170(arg0);
+    u_char hi = func_800D5170(arg0);
+    return lo | (hi << 8);
+}
+
+int func_800D51D8(D_800F53B8_t* arg0)
+{
+    int miscIndex;
+
+    do {
+        miscIndex = D_800EC3F4[func_800D5170(arg0)](arg0);
+        if (miscIndex == 2) {
+            return 0;
+        }
+    } while (miscIndex == 1);
+    return 1;
+}
+
+void func_800D5260(D_800F5620_t* arg0) { D_800F5620 = *arg0; }
+
+void func_800D5294(int* arg0) { D_800F5618 = *arg0; }
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D52A4);
+
+void* _getPFileBlock3section(pFileBlock3* arg0, int arg1)
+{
+    return (char*)arg0 + arg0->offsets[arg1];
+}
+
+void* func_800D5564(pFileBlock3* arg0, int arg1, int arg2)
+{
+    func_800D55A4_t* entry = _getPFileBlock3section(arg0, arg1);
+    return (char*)arg0 + entry->unk4[arg2].unk2;
+}
+
+void func_800D55A4(D_800F53B8_t* arg0, int arg1, int arg2)
+{
+    func_800D55A4_t* entry = _getPFileBlock3section(D_800F569C->block3Data, arg1);
+    D_800F53B8_t4* p;
+    int count = 0;
+    int i;
+
+    if (arg0->unkD1C.unk30 != NULL) {
+        vs_main_freeHeapR(arg0->unkD1C.unk30);
+    }
+
+    arg0->unkD1C.unk30 = vs_main_allocHeapR(entry->count * 16 + 8);
+    p = arg0->unkD1C.unk30;
+    p->unk0 = entry->count;
+    p->unk2 = 0;
+    p->unk4 = 0;
+
+    for (i = 0; i < p->unk0; ++i) {
+        p->unk8[i].unk0 = func_800D5564(D_800F569C->block3Data, arg1, i);
+        p->unk8[i].unk4 = entry->unk4[i].unk0;
+
+        if (p->unk8[i].unk4.unk0_0 == 3) {
+            ++count;
+        }
+
+        p->unk8[i].unk6 = -1;
+        *(int*)&p->unk8[i].unk8 = 0;
+        p->unk8[i].unkC = 0;
+        func_800D5780(&p->unk8[i]);
+        p->unk4 |= 1 << i;
+    }
+
+    p->unk1 = count ? 2 : 0;
+}
+
+void func_800D5700(func_800D5780_t* arg0)
+{
+    func_800D57FC_t* base = (func_800D57FC_t*)arg0->unk0;
+    arg0->unkC = base[arg0->unk6].unk0_20;
+    arg0->unkA = base[arg0->unk6].unk0_8;
+}
+
+void func_800D5738(func_800D5780_t* arg0)
+{
+    arg0->unkA =
+        func_800D12D8((((func_800D57FC_t2*)&arg0->unk0[arg0->unk6 * 2 + 1])->unk0_4));
+}
+
+int func_800D5780(func_800D5780_t* arg0)
+{
+    if (arg0->unk6 + 1 >= arg0->unk4.unk0_8) {
+        return 0;
+    }
+    arg0->unk6++;
+    switch (arg0->unk4.unk0_0) {
+    case 1:
+        func_800D5700(arg0);
+        break;
+    case 0xD:
+        func_800D5738(arg0);
+        break;
+    }
+    return 1;
+}
+
+int func_800D57FC(D_800F53B8_t* arg0, func_800D5780_t* arg1)
+{
+    func_800D57FC_t* e = (func_800D57FC_t*)arg1->unk0;
+    int ret = 1;
+    int key = e[arg1->unk6].unk0_0;
+    int cur = arg0->unkD1C.unk30->unk2;
+
+    if (cur < key) {
+        return ret;
+    }
+    func_800D1104(arg1->unk8);
+    func_800D2ADC(
+        arg0, e[arg1->unk6].unk0_20, e[arg1->unk6].unk0_26, e[arg1->unk6].unk0_16, NULL);
+    ++arg1->unk8;
+    if (!(arg0->unkD1C.unk30->unk1 & 1)) {
+        --arg1->unkA;
+    }
+    if (arg1->unkA == 0) {
+        ret = func_800D5780(arg1);
+        arg1->unk8 = 0;
+    }
+    return ret;
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D5904);
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D5A98);
+
+int func_800D5D74(D_800F53B8_t* arg0, func_800D5780_t* arg1)
+{
+    func_800D5D74_t* temp_a3 = (func_800D5D74_t*)(arg1->unk6 * 8 + (u_int)arg1->unk0);
+
+    if (temp_a3->unk0_0 == arg0->unkD1C.unk30->unk2) {
+        func_800CF694(arg0, vs_battle_effectRenderers[temp_a3->effectRenderer],
+            (temp_a3->unk0_9 + temp_a3->unk0_21 * 256) | (temp_a3->unk4 << 0x10));
+        return func_800D5780(arg1);
+    }
+    return 1;
+}
+
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800D5E00);
+
+int func_800D5F8C(D_800F53B8_t* arg0, func_800D5780_t* arg1)
+{
+    func_800D6310_t* temp_s0 = (func_800D6310_t*)arg1->unk0 + arg1->unk6;
+
+    if (temp_s0->unk0 == arg0->unkD1C.unk30->unk2) {
+        if ((arg0->unkD1C.unkC.unk0 == 4)
+            && (func_800A0BE0((char)arg0->unkD1C.unkC.unk4.unk0) & 2)) {
+            func_8007B29C(temp_s0->unk7, temp_s0->unk2, (char)arg0->unkD1C.unkC.unk4.unk0,
+                temp_s0->unk4 - 0x80, temp_s0->unk5 - 0x80, temp_s0->unk6 - 0x80);
+        }
+        return func_800D5780(arg1);
+    }
+    return 1;
+}
+
+int func_800D6048(D_800F53B8_t* arg0, func_800D5780_t* arg1, int arg2)
+{
+    int i;
+    func_800D6310_t* entry = (func_800D6310_t*)arg1->unk0 + arg1->unk6;
+
+    if (entry->unk0 != arg0->unkD1C.unk30->unk2) {
+        return 1;
+    }
+
+    if (arg2 != 0) {
+        func_800D6048_t* effect = (func_800D6048_t*)&D_800F5230;
+        for (i = 0; i < D_800F5230.unk2; ++i) {
+            if ((effect->unk10[i].unk0 == 4)
+                && (func_800A0BE0(effect->unk10[i].unk4.unk0 & 0xFF) & 2)) {
+                func_8007B29C(entry->unk7, entry->unk2, effect->unk10[i].unk4.unk0 & 0xFF,
+                    entry->unk4 - 128, entry->unk5 - 128, entry->unk6 - 128);
+            }
+        }
+    } else if ((arg0->unkD1C.unk24.unk0 == 4)
+               && (func_800A0BE0(arg0->unkD1C.unk24.unk4.unk0 & 0xFF) & 2)) {
+        func_8007B29C(entry->unk7, entry->unk2, arg0->unkD1C.unk24.unk4.unk0 & 0xFF,
+            entry->unk4 - 128, entry->unk5 - 128, entry->unk6 - 128);
+    }
+    return func_800D5780(arg1);
+}
+
+int func_800D61AC(D_800F53B8_t* arg0, func_800D5780_t* arg1)
+{
+    int i;
+    func_800D6310_t* temp_s2 = (func_800D6310_t*)(arg1->unk0 + (arg1->unk6 * 2));
+
+    if (temp_s2->unk0 == arg0->unkD1C.unk30->unk2) {
+        for (i = 0; i < D_800F5230.unk3; ++i) {
+            if (func_800A0BE0(D_800F5230.unkD0[i]) & 2) {
+                func_8007B29C(temp_s2->unk7, temp_s2->unk2, D_800F5230.unkD0[i],
+                    temp_s2->unk4 - 0x80, (temp_s2->unk5 - 0x80), (temp_s2->unk6 - 0x80));
+            }
+        }
+        return func_800D5780(arg1);
+    }
+    return 1;
+}
+
+int func_800D6298(D_800F53B8_t* arg0, func_800D5780_t* arg1)
+{
+    func_800D6310_t* temp_a3 = (func_800D6310_t*)arg1->unk0 + (arg1->unk6);
+
+    if (temp_a3->unk0 == arg0->unkD1C.unk30->unk2) {
+        func_8007B1B8(temp_a3->unk7, temp_a3->unk2, temp_a3->unk4 - 0x80,
+            temp_a3->unk5 - 0x80, (temp_a3->unk6 - 0x80));
+        return func_800D5780(arg1);
+    }
+    return 1;
+}
+
+int func_800D6310(D_800F53B8_t* arg0, func_800D5780_t* arg1)
+{
+    func_800D6310_t* temp_a3 = (func_800D6310_t*)(arg1->unk0 + arg1->unk6 * 2);
+
+    if (temp_a3->unk0 == arg0->unkD1C.unk30->unk2) {
+        func_8007B344(temp_a3->unk7, temp_a3->unk2, temp_a3->unk4 - 0x80,
+            temp_a3->unk5 - 0x80, temp_a3->unk6 - 0x80);
+        return func_800D5780(arg1);
+    }
+    return 1;
+}
+
+void func_800D6388(D_800F53B8_t* arg0)
+{
+    if (arg0->unkD1C.unk18.unk0 == 4) {
+        func_8006CB04((u_char)arg0->unkD1C.unk18.unk4.unk0, NULL);
+    } else {
+        func_8006CB04(arg0->unkD1C.unk18.unk4.unk6, &arg0->unkD1C.unk18.unk4);
+    }
+}
+
+void func_800D63D0(D_800F53B8_t* arg0)
+{
+    if (arg0->unkD1C.unk0.unk0 == 4) {
+        func_8006CA20((u_char)arg0->unkD1C.unk0.unk4.unk0, NULL);
+    } else {
+        func_8006CA20(arg0->unkD1C.unk0.unk4.unk6, &arg0->unkD1C.unk0.unk4);
+    }
+}
+
+void func_800D6418(D_800F53B8_t* arg0)
+{
+    if (arg0->unkD1C.unk18.unk0 == 5) {
+        func_8006CDD8(&arg0->unkD1C.unk18.unk4);
+    }
+}
+
+void func_800D6448(D_800F53B8_t* arg0, u_char arg1, u_char arg2)
+{
+    func_800D78B8();
+    func_800CF7A8(arg0->unk1C[arg1].unk34, arg0->unk1C[arg1].unk35, arg2 % 10, arg2 / 10);
+    func_800D78CC();
+}
+
+void func_800D64E4(void) { func_800CF830(0, 0); }
+
+void func_800D6508(func_800D6508_t* arg0, char arg1)
+{
+    arg0 += arg1;
+    arg0->unk22_2 = 1;
+}
+
+void func_800D6538(D_800F53B8_t* arg0) { arg0->unkD1C.unk30->unk1 |= 1; }
+
+void func_800D6554(void) { func_8006CE50(); }
+
+void func_800D6574(D_800F53B8_t* arg0)
+{
+    if (arg0->unkD1C.unk0.unk0 == 4) {
+        func_8006CDB8((u_char)arg0->unkD1C.unk0.unk4.unk0);
+    }
+}
+
+void func_800D65A8(func_800D6508_t* arg0, char arg1)
+{
+    arg0 += arg1;
+    arg0->unk22_0 = 0;
+}
+
+void func_800D65D8(D_800F53B8_t* arg0, u_char arg1)
+{
+
+    if (arg0->unkD1C.unkC.unk0 == 4) {
+        if (arg1 != 0) {
+            func_8009F898((u_char)arg0->unkD1C.unkC.unk4.unk0, 1, arg1);
+
+        } else {
+            func_8009F898((u_char)arg0->unkD1C.unkC.unk4.unk0, 0, 0);
+        }
+    }
+}
+
+void func_800D6628(D_800F53B8_t* arg0, u_char arg1)
+{
+    int var;
+
+    if (arg0->unkD1C.unkC.unk0 == 4) {
+        if (arg1 < 4) {
+            func_800AE68C((u_char)arg0->unkD1C.unkC.unk4.unk0, arg1);
+        } else {
+            do {
+                var = rand() % 3;
+            } while (var == D_800EC4B8);
+            func_800AE68C((u_char)arg0->unkD1C.unkC.unk4.unk0, D_800EC4B8 = var);
+        }
+    }
+}
+
+void func_800D66CC(D_800F53B8_t* arg0)
+{
+    if (arg0->unkD1C.unk18.unk0 == 5) {
+        func_8006CE70(&arg0->unkD1C.unk18.unk4);
+    }
+}
+
+void func_800D66FC(D_800F53B8_t* arg0, u_char arg1, u_char arg2)
+{
+    func_800D1B18(D_800F5520);
+    func_800D1B18(&D_800F5520[1]);
+    D_800F5520[1].lookAt.vx = arg0->unk1C[arg1].unk38.t[0] * ONE;
+    D_800F5520[1].lookAt.vy = arg0->unk1C[arg1].unk38.t[1] * ONE;
+    D_800F5520[1].lookAt.vz = arg0->unk1C[arg1].unk38.t[2] * ONE;
+    D_800F54D0 = 0;
+    if (arg2 == 0) {
+        arg2 = 1;
+    }
+    D_800F55A0 = arg2;
+    func_800D1E20(2);
+}
+
+void func_800D67C4(D_800F53B8_t* arg0, u_char arg1)
+{
+    func_800D1B18(D_800F5520);
+    D_800F5520[1] = D_800F55A8;
+    D_800F54D0 = 0;
+    if (arg1 == 0) {
+        arg1 = 1;
+    }
+    D_800F55A0 = arg1;
+    func_800D1E20(2);
+}
+
+void func_800D6860(D_800F53B8_t* arg0)
+{
+    if (arg0->unkD1C.unk24.unk0 == 4) {
+        func_80069C6C((u_char)arg0->unkD1C.unk24.unk4.unk0);
+    }
+}
+
+int func_800D6894(D_800F53B8_t* arg0, func_800D5780_t* arg1)
+{
+    func_800D6894_t* temp_a2 = (func_800D6894_t*)(arg1->unk0 - (-arg1->unk6));
+
+    if ((temp_a2->unk0 & 0x1FF) == arg0->unkD1C.unk30->unk2) {
+        u_char temp_a1_2 = temp_a2->unk2;
+        u_char temp_a2_2 = temp_a2->unk3;
+
+        switch (temp_a2->unk0 >> 9) {
+        case 0:
+            func_800D6388(arg0);
+            break;
+
+        case 1:
+            func_800D63D0(arg0);
+            break;
+
+        case 2:
+            func_800D6418(arg0);
+            break;
+
+        case 3:
+            func_800D6448(arg0, temp_a1_2, temp_a2_2);
+            break;
+
+        case 4:
+            func_800D64E4();
+            break;
+
+        case 5:
+            func_800D6508((func_800D6508_t*)arg0, temp_a1_2);
+            break;
+
+        case 6:
+            func_800D6538(arg0);
+            break;
+
+        case 7:
+            func_800D6554();
+            break;
+
+        case 8:
+            func_800D6574(arg0);
+            break;
+
+        case 9:
+            func_800D65A8((func_800D6508_t*)arg0, temp_a1_2);
+            break;
+
+        case 10:
+            func_800D65D8(arg0, temp_a1_2);
+            break;
+
+        case 11:
+            func_800D6628(arg0, temp_a1_2);
+            break;
+
+        case 12:
+            func_800D66CC(arg0);
+            break;
+
+        case 13:
+            func_800D66FC(arg0, temp_a1_2, temp_a2_2);
+            break;
+
+        case 14:
+            func_800D67C4(arg0, temp_a1_2);
+            break;
+
+        case 15:
+            func_800D6860(arg0);
+            break;
+        }
+
+        return func_800D5780(arg1);
+    }
+
+    return 1;
+}
+
+int func_800D6A18(D_800F53B8_t* arg0, func_800D5780_t* arg1)
+{
+    func_800D6A18_t* e = (func_800D6A18_t*)arg1->unk0;
+    int ret = 1;
+    int key = e[arg1->unk6].unk0_0;
+    int cur = arg0->unkD1C.unk30->unk2;
+
+    if (cur < key) {
+        return ret;
+    }
+    if (key == cur) {
+        func_800D1EF0(e->unk4_0, e->unk4_4, e->unk4_9, e->unk4_16, e->unk4_17, e->unk4_24,
+            e->unk4_25);
+    }
+    if (--arg1->unkA == 0) {
+        ret = func_800D5780(arg1);
+    }
+    return ret;
+}
+
+void func_800D6AEC(D_800F53B8_t* arg0, int arg1)
+{
+    D_800F53B8_t4* temp_a0;
+    func_800D5780_t* temp_a1;
+    int var_s1;
+
+    for (var_s1 = 0; var_s1 < arg0->unkD1C.unk30->unk0; var_s1++) {
+        if ((arg0->unkD1C.unk30->unk4 >> var_s1) & 1) {
+            int temp;
+            func_800D5780_t* temp_a1 =
+                (func_800D5780_t*)&arg0->unkD1C.unk30[var_s1 * 2 + 1];
+            switch (temp_a1->unk4.unk0_0) {
+            case 1:
+                temp = func_800D57FC(arg0, temp_a1);
+                break;
+            case 2:
+                temp = func_800D5904(arg0, temp_a1);
+                break;
+            case 3:
+                temp = func_800D5A98(arg0, temp_a1, arg1);
+                break;
+            case 4:
+                temp = func_800D5D74(arg0, temp_a1);
+                break;
+            case 5:
+                temp = func_800D5E00(arg0, temp_a1);
+                break;
+            case 6:
+                temp = func_800D5F8C(arg0, temp_a1);
+                break;
+            case 7:
+                temp = func_800D6048(arg0, temp_a1, arg0->unkD1C.unk30->unk1 & 2);
+                break;
+            case 8:
+                temp = func_800D61AC(arg0, temp_a1);
+                break;
+            case 9:
+                temp = func_800D6298(arg0, temp_a1);
+                break;
+            case 10:
+                temp = func_800D6310(arg0, temp_a1);
+                break;
+            case 12:
+                temp = func_800D6894(arg0, temp_a1);
+                break;
+            case 13:
+                temp = func_800D6A18(arg0, temp_a1);
+                break;
+            }
+            if (temp == 0) {
+                arg0->unkD1C.unk30->unk4 &= ~(1 << var_s1);
+            }
+        }
+    }
+    if (!(arg0->unkD1C.unk30->unk1 & 1)) {
+        arg0->unkD1C.unk30->unk2++;
+    }
+}
+
+void func_800D6CCC(int* arg0)
+{
+    arg0[0] = 0;
+    arg0[1] = 0;
+    arg0[2] = 0;
+    arg0[3] = 0;
+    arg0[4] = 0;
+    arg0[5] = 0;
+    arg0[6] = 0;
+    arg0[7] = 0;
+}
+
+void func_800D6CF0(func_800D6CF_t* arg0, int arg1, int arg2)
+{
+    arg0->unk16 = arg1;
+    arg0->unk18 = (u_char*)D_800F569C->block2Data + D_800F569C->block2Data[arg2 + 2];
+    arg0->unkE = 0;
+    arg0->unk6 = 0;
+}
+
+void func_800D6D24(func_800D6CF_t* arg0)
+{
+    if (arg0->unk6 != 0) {
+        arg0->unk6 -= 2;
+        if (arg0->unk6 != 0) {
+            return;
+        }
+    }
+
+    while (1) {
+        int w = *(int*)(arg0->unk18 + arg0->unkE);
+
+        switch (w & 0xF0000000) {
+        case 0:
+            arg0->unk1C = D_800F569C->block1Tables[arg0->unk16] + (w & 0xFFFF);
+            *(short*)&arg0->unk6 = (w >> 16) & 0x3FFF;
+            arg0->unkE += 4;
+            return;
+        case 0x10000000:
+            arg0->unk8 = (w << 18) >> 18;
+            arg0->unkA = (w << 4) >> 18;
+            arg0->unkE += 4;
+            break;
+        case 0x20000000:
+            arg0->unkE = 0;
+            break;
+        case 0x30000000:
+            return;
+        }
+    }
+}
+
+void func_800D6E24(void) { func_800D6E44(); }

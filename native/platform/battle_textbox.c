@@ -32,7 +32,7 @@ typedef unsigned short u_short;
 extern u_char  vs_battle_textBoxes[];
 extern int     vs_gametime_tickspeed;
 extern u_char  D_800F4E80;            /* current box index (read by _printVariableWidthFont) */
-extern u_long* D_1F800000[];
+#define D_1F800000 ((u_long**)0x1F800000UL)
 extern u_long* D_800F51B8;            /* current frame's text-box OT base */
 extern u_char  D_800EB9CE;            /* text-box OT triple-buffer frame index */
 extern u_char  D_800F4CD0[];          /* triple-buffered text-box OT storage */

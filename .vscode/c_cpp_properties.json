@@ -1,22 +1,19 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "Windows",
+            "configurationProvider": "ms-vscode.cmake-tools",
             "includePath": [
-                "${workspaceFolder}/include/psx/**",
-                "${workspaceFolder}/src/include/**",
+                "${workspaceFolder}/resources/rood-reverseWin/include/psx/**",
+                "${workspaceFolder}/resources/rood-reverseWin/src/include/**",
                 "${workspaceFolder}/**"
             ],
             "defines": [
                 "_LANGUAGE_C"
             ],
-            "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17",
-            "cppStandard": "gnu++17",
-            "intelliSenseMode": "linux-gcc-x64",
-            "compilerArgs": [
-                "-nostdinc "
-            ]
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-clang-x86"
         }
     ],
     "version": 4

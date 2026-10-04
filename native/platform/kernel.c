@@ -57,7 +57,7 @@ void _bu_init(void) { }
  * uses them for timing, so rather than returning a constant (which stalls any
  * loop waiting for the count to advance) these are driven from the host
  * monotonic clock at the counters' real rates. */
-#include <time.h>
+#include <psx_host.h>
 
 #define RCNT_MASK 0xFFFF
 
@@ -66,9 +66,7 @@ static int rcnt_running[4];
 
 static unsigned long long now_ns(void)
 {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (unsigned long long)ts.tv_sec * 1000000000ull + (unsigned long long)ts.tv_nsec;
+    return psx_host_now_ns();
 }
 
 /* spec encodes the counter in its low bits (RCntCNT0..3). */

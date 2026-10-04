@@ -41,7 +41,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <psx_host.h>
 
 /* native/platform/cdxa.c: decodes the interleaved XA audio track. */
 extern int psx_cdxa_sector(const unsigned char* raw);
@@ -427,9 +427,7 @@ static unsigned long long cd_ns_accum;   /* time owed to the drive, nanoseconds 
 
 static unsigned long long cd_now_ns(void)
 {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (unsigned long long)ts.tv_sec * 1000000000ull + (unsigned long long)ts.tv_nsec;
+    return psx_host_now_ns();
 }
 
 #define FRAME_NS 16683333ull

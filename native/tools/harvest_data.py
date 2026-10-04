@@ -20,8 +20,11 @@ The emitted .syms file lists what was actually harvested, so gen_stubs.py can
 exclude those names from the zero-blob stub layer.
 """
 import os, sys, glob, re
+from pathlib import Path
 
-REPO = os.getcwd()
+REPO = Path(__file__).resolve().parents[2]
+SOURCE = Path(os.environ.get("VS_DECOMP_SOURCE", REPO / "resources" / "rood-reverseWin"))
+DATA = Path(os.environ.get("VS_DATA_DIR", REPO / "data"))
 
 # Cap a single symbol's harvested span, in case the next symbol is far away
 # (e.g. the last symbol before a big gap). Menu tables are all well under this.
@@ -39,7 +42,7 @@ def overlays():
     much later as (for instance) a semitone table whose first entry is 0 and
     therefore every note playing at zero pitch."""
     out = []
-    for y in sorted(glob.glob("config/**/splat.yaml", recursive=True)):
+    for y in sorted(glob.glob(str(SOURCE / "config" / "**" / "splat.yaml"), recursive=True)):
         txt = open(y).read()
         # The code segment carries both the file offset and the vram it maps to.
         seg = re.search(r"start:\s*(0x[0-9A-Fa-f]+)\s*\n\s*type:\s*code\s*\n"
@@ -52,7 +55,7 @@ def overlays():
             vram = int(seg.group(2), 16) - int(seg.group(1), 16)
         else:
             vram = int(vram.group(1), 16)
-        binpath = target.group(1)
+        binpath = str(DATA / Path(target.group(1)).relative_to("data"))
         # Primary symbol map for this overlay: config/<same dirs>/symbol_addrs.txt
         symfile = os.path.join(os.path.dirname(y), "symbol_addrs.txt")
         syms = {}

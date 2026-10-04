@@ -1,0 +1,58 @@
+.PRECIOUS: $(BUILD)/assets/%/help_data.yaml $(BUILD)/assets/SMALL/%.obj
+
+$(BUILD)/data/%.HF0 $(BUILD)/data/%.HF1 &: $(BUILD)/assets/%/help_data.yaml | $$(@D)/
+	$(ECHO) Converting $<
+	$(VPYTHON) -m tools.data.SMALL.HELP $< $|
+
+$(BUILD)/assets/%/help_data.yaml: | $$(@D)/
+	$(ECHO) Converting data/$*.HF0 data/$*.HF1
+	$(VPYTHON) -m tools.data.SMALL.HELP data/$*.HF0 $|
+
+$(patsubst %,$(BUILD)/data/SMALL/%.ARM,DUMMY SCEN018): JPFONT := --jp-font
+
+$(BUILD)/data/SMALL/%.ARM: $(BUILD)/assets/SMALL/%.obj | $$(@D)/
+	$(ECHO) Converting $<
+	$(VPYTHON) -m tools.data.SMALL.ARM $< $@ $(JPFONT)
+
+$(BUILD)/assets/SMALL/%.obj: | $$(@D)/
+	$(ECHO) Converting data/SMALL/$*.ARM
+	$(VPYTHON) -m tools.data.SMALL.ARM data/SMALL/$*.ARM $@ $(JPFONT)
+
+$(BUILD)/assets/SMALL/%.DIS.png: | $$(@D)/
+	$(ECHO) Converting data/SMALL/$*.DIS
+	$(VPYTHON) -m tools.data.SMALL.DIS data/SMALL/$*.DIS $@
+
+$(BUILD)/assets/SMALL/%.DIS/:
+	$(ECHO) Converting data/SMALL/$*.DIS
+	$(MKDIR) $(MKDIRFLAGS) $@
+	$(VPYTHON) -m tools.data.SMALL.DIS data/SMALL/$*.DIS $@
+
+$(BUILD)/data/SMALL/%.DIS: | $$(@D)/
+	$(ECHO) Converting $<
+	$(VPYTHON) -m tools.data.SMALL.DIS $< $@
+
+$(BUILD)/assets/SMALL/MON.BIN.yaml:
+	$(ECHO) Converting data/SMALL/MON.BIN
+	$(VPYTHON) -m tools.data.SMALL.MON_BIN data/SMALL/MON.BIN $@
+
+$(BUILD)/data/SMALL/MON.BIN: $(BUILD)/assets/SMALL/MON.BIN.yaml
+	$(ECHO) Converting $<
+	$(VPYTHON) -m tools.data.SMALL.MON_BIN $< $@
+
+helpfiles := 01 02 03 04 05 06 07 08 09 10 11 12 13 14
+helpfiles := $(helpfiles:%=$(BUILD)/data/SMALL/HELP%.HF)
+
+scenefiles := 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 \
+              16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+scenefiles := DUMMY $(scenefiles:%=SCEN0%)
+
+dis_single_image   := 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
+dis_single_image   := $(patsubst %,$(BUILD)/data/SMALL/%.DIS,ESC TIME $(patsubst %,ENDSCR%,$(dis_single_image)))
+dis_multiple_image := $(patsubst %,$(BUILD)/data/SMALL/%.DIS,ATTACK END IQ RANK)
+
+$(dis_single_image): $(BUILD)/data/SMALL/%.DIS: $(BUILD)/assets/SMALL/%.DIS.png
+$(dis_multiple_image): $(BUILD)/data/SMALL/%.DIS: $(BUILD)/assets/SMALL/%.DIS/
+
+TARGETS += $(helpfiles:%=%0) $(helpfiles:%=%1) $(scenefiles:%=$(BUILD)/data/SMALL/%.ARM)
+TARGETS += $(dis_single_image) $(dis_multiple_image)
+TARGETS += $(BUILD)/data/SMALL/MON.BIN

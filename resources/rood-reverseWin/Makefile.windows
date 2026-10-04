@@ -1,0 +1,44 @@
+PYTHON ?= python
+WINDOWS_TOOLS ?= ../../build/tools
+MIPS_BIN ?= $(WINDOWS_TOOLS)/mips/bin
+WIN = "$(PYTHON)" ../../tools/windows.py
+VPYTHON = "$(PYTHON)"
+BUILD := build
+DISKCODE := SLUS-01040
+DISKIMAGE := ../../disks/$(DISKCODE).bin
+DISKCONFIG := ../../disks/$(DISKCODE).xml
+DISKLBA := $(BUILD)/config/$(DISKCODE)_LBA.txt
+ARCH := $(MIPS_BIN)/mipsel-none-elf-
+CPP := "$(ARCH)cpp.exe"
+AS := "$(ARCH)as.exe"
+LD := "$(ARCH)ld.exe"
+OBJCOPY := "$(ARCH)objcopy.exe"
+SIZE := "$(PYTHON)" ../../tools/windows.py title-bg-size config/TITLE/TITLE.PRG/splat.yaml
+CC1VER := 2.7.2-psx
+CC1FLAGS := -G0 -O2 -Wall -quiet -fno-builtin -funsigned-char -Wno-unused
+CPPFLAGS := -nostdinc -I include/psx -I src/include -I ./ -D__attribute__(x)= -D_LANGUAGE_C
+ASFLAGS := -I include -G0
+MASFLAGS := --aspsx-version=2.77 --macro-inc
+OBJCOPYFLAGS := -I binary -O elf32-tradlittlemips
+LDSCRIPT := link.ld undefined_funcs_auto.txt undefined_syms_auto.txt
+BCONFIG = $(patsubst $(BUILD)/data/%,$(BUILD)/config/%,$(@:.elf=))
+LDFLAGS = -nostdlib --build-id=none -L $(BCONFIG) $(LDSCRIPT:%=-T %)
+OUTPUT_OPTION = -o $@
+ECHO := echo
+TOUCH := $(WIN) touch
+XDELTA := "$(WINDOWS_TOOLS)/xdelta3.exe"
+SKIPSPLAT := clean clean-all
+
+SHELL := cmd.exe
+.SHELLFLAGS := /D /C
+.DELETE_ON_ERROR:
+.SECONDEXPANSION:
+.DEFAULT_GOAL := check
+
+BINARIES := SLUS_010.40 $(addsuffix .PRG,TITLE/TITLE BATTLE/BATTLE BATTLE/INITBTL GIM/SCREFF2 ENDING/ENDING)
+include $(patsubst %,config/%/Makefile,EFFECT MENU SMALL)
+BINTARGETS := $(BINARIES:%=$(BUILD)/data/%)
+TARGETS += $(BINTARGETS)
+include $(wildcard $(BINARIES:%=config/%/Makefile))
+$(BUILD)/src/TITLE/TITLE.PRG/22C.o: CPPFLAGS = -nostdinc -I include/psx -I src/include -I ./ -D__attribute__(x)= -D_LANGUAGE_C -DMENUBGSZ=$(shell $(WIN) title-bg-size config/TITLE/TITLE.PRG/splat.yaml)
+include tools/make/windows.mk

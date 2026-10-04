@@ -10,6 +10,7 @@
  * so the game's wait-for-SPU loops terminate instead of spinning forever. */
 #include <string.h>
 #include <psx_spu.h>
+#include <psx_host.h>
 
 /* Where the next SpuWrite lands in SPU RAM. */
 static unsigned spu_transfer_addr;
@@ -206,9 +207,7 @@ extern void psx_audio_sink_push(const short* frames, int nframes);
 
 static unsigned long long spu_now_ns(void)
 {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (unsigned long long)ts.tv_sec * 1000000000ull + (unsigned long long)ts.tv_nsec;
+    return psx_host_now_ns();
 }
 
 /* Called from VSync().

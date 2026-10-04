@@ -5,9 +5,9 @@
  * is sampled -- on hardware this is exactly when the framebuffer flips and the
  * pad DMA has landed, so PS1 code that already calls VSync() gets a live window
  * and a live controller with no changes at the call site. */
-#include <time.h>
 #include <stdint.h>
 #include <psx_present.h>
+#include <psx_host.h>
 
 /* Publishes host input into the game's pad buffer (native/platform/libpad.c). */
 void psx_pad_update(void);
@@ -28,9 +28,7 @@ static void (*vsync_cb)(void);
 
 static uint64_t now_ns(void)
 {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
+    return psx_host_now_ns();
 }
 
 /* NTSC vertical blank period. */
@@ -82,13 +80,7 @@ static void wait_one_vblank(void)
             if (t - next_vblank_ns > FRAME_NS) next_vblank_ns = t;
             break;
         }
-        {
-            struct timespec rq;
-            uint64_t d = next_vblank_ns - t;
-            rq.tv_sec = (time_t)(d / 1000000000ull);
-            rq.tv_nsec = (long)(d % 1000000000ull);
-            nanosleep(&rq, 0);
-        }
+        psx_host_sleep_ns(next_vblank_ns - t);
     }
     if (vsync_cb) vsync_cb();
 }

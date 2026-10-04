@@ -1,0 +1,63 @@
+#pragma once
+#include <stddef.h>
+
+typedef struct {
+    u_int unk0_0 : 8;
+    u_int unk0_8 : 8;
+    u_int unk0_16 : 8;
+    u_int unk0_24 : 8;
+} vs_battle_objectData_flags;
+
+typedef struct {
+    u_char dataType;
+    signed char index;
+    short modelId;
+    void* unk4;
+    u_long dataAddr;
+    vs_battle_objectData_flags unkC;
+    u_char actorId;
+    char unk11;
+    char material;
+    char variant;
+} vs_battle_objectData;
+
+int vs_battle_clamp(short arg0, int arg1, int arg2);
+void func_80091314(int);
+void func_80091320(int);
+void func_8009134C(int, int);
+int func_800913BC(int);
+void func_80091468(int, int);
+void func_800918E8(int);
+int func_80091998(int);
+int func_800919D8(int);
+int func_80091A1C(int, int);
+int func_80091A78(int, int);
+void func_80092548(void);
+int func_8009291C(int);
+int func_800936F8(int);
+int func_80093764(int);
+void func_80093788(int);
+void func_800938AC(int);
+void func_80093A70(void);
+void func_80093AB4(void);
+void func_80095B70(int);
+void func_8009722C(void);
+void func_80098160(int);
+void func_80098194(int);
+int vs_battle_getEmptyObjectDataSlot(void);
+void func_80098B38(int, int);
+int vs_battle_populateDataSlot(vs_battle_objectData*);
+int vs_battle_processObjectDataQueue(void);
+int func_8009CC20(int, int);
+int func_8009CE9C(u_int arg0);
+int func_8009CFA0(void);
+int func_8009CFB0(int);
+void func_8009D468(int, int);
+void func_8009D854(int);
+void func_8009E5C4(int);
+void func_8009F314(int, void*, int);
+int func_8009FD5C(int, int, int);
+void func_800A0A1C(int, int);
+void func_800941FC(void);
+
+extern vs_battle_objectData vs_battle_objectDataSlots[16];

@@ -12,9 +12,9 @@ underneath it are reimplemented.
 This repository builds **two targets from one source tree**:
 
 | Target | Command | Output |
-|---|---|---|
-| Matching PSX build | `make` | The retail overlays, verified **byte-identical** to the original disc |
-| Native x86 build | `make -f Makefile.native` | `native/build/vagrant-native`, a Linux binary |
+| --- | --- | --- |
+| Matching PSX build | Visual Studio `Decomp` project | Retail overlays, verified against the original disc when Windows historical compilers are supplied |
+| Native x86 build | Visual Studio `NativePort` project | `build/windows/Debug/vagrant-native.exe`, a Win32 Windows binary |
 
 The matching build is the correctness oracle. Every change to `src/` has to keep
 it byte-identical, which is what stops the port drifting away from the real game.
@@ -27,9 +27,12 @@ the splat configuration, the build system and the toolchain setup come from
 there, and upstream remains the source of decompilation progress. This fork
 pulls from it regularly.
 
-What this fork adds is everything under `native/`, plus the `docs/NATIVE_*`
-files: the host hardware layer that turns the decompilation into a running
-program. Please direct decompilation credit upstream.
+The unmodified reference is under `resources/rood-reverse`. The maintained
+Windows snapshot is under `resources/rood-reverseWin`; ser-pounce's source,
+headers, assets and decompilation configuration always take precedence there.
+Windows orchestration and generated native adapters are kept separately.
+The root owns `native/`, Windows build tooling and the port documentation.
+Please direct decompilation credit upstream.
 
 ## What you need
 
@@ -40,103 +43,63 @@ This repository contains only source code and build tooling. Everything the game
 needs is extracted at build time from a disc image you supply yourself, dumped
 from your own copy:
 
-```
+```text
 disks/SLUS-01040.bin
 ```
 
-The first `make` extracts the disc contents into `data/`, which is gitignored.
+The Windows native build extracts the disc contents into `data/`, which is gitignored.
 Both builds read from there. The native port does not need the disc image at
 runtime, because it serves data out of the extracted `data/` tree by LBA. Once
 you have built once, the `.bin` can go back on the shelf.
 
 ## Development environment
 
-The project is developed and tested on **Linux**, and on **Windows via WSL2**
-(Ubuntu 24.04). The matching build needs a MIPS cross-compiler and a 1997-era
-GCC, so a Unix environment is required.
+The maintained build targets **Windows directly**, with a Visual Studio 2022
+Win32 solution and the installed Clang compiler. WSL, Linux, Nix and Docker
+are not build dependencies. The upstream reference remains unmodified.
 
-### Packages
+### Requirements
 
-| Package | Minimum version |
-|---|---|
-| clang-format | 18.1.3 |
-| cmake | 3.28.3 |
-| docker-buildx | 29.1.3 |
-| g++ | 13.3.0 |
-| gcc-mipsel-linux-gnu | 12.4.0 |
-| make | 4.3 |
-| python3 / python3-venv | 3.12.3 |
-| rustup | 1.26.0 |
+- Visual Studio 2022 Desktop development with C++ and its Clang compiler component
+- CMake 3.28 or newer and Python 3.10 or newer
+- Your legally obtained NTSC-U disc image
+- A 32-bit `SDL2.dll` beside the executable for a window, audio and controller input
 
-Then:
+Run `tools/Setup-Windows.ps1` from PowerShell. It creates an isolated Python
+environment, fetches Windows tools and generates `build/windows/VagrantStory.sln`.
+Open the solution and select Debug/Win32.
 
-- `sudo usermod -aG docker $USER`, and log out and back in
-- `rustup default stable` if you have no Rust toolchain yet
-- Put your disc image at `disks/SLUS-01040.bin`
-- `make -j` to configure the remaining tooling under `tools/`, extract the disc,
-  and perform the first build
+### SDL2 Runtime
 
-The native build additionally wants a 32-bit host toolchain, and SDL2 at runtime
-if you want a window. SDL2 is loaded dynamically, so it is not needed to build.
+Download the official [SDL2 2.32.10 Windows x86 runtime](https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-2.32.10-win32-x86.zip)
+and extract it into `resources/SDL2-2.32.10-win32-x86/` so that
+`resources/SDL2-2.32.10-win32-x86/SDL2.dll` exists. Use x86, not x64 or SDL3.
 
-A **Nix flake** is provided as an alternative to installing the packages above.
-Run `nix develop` for a pinned shell, then `make -j`.
+Build `NativePort` again. Its `SDL2Runtime` dependency automatically copies the
+DLL beside the executable for the selected configuration, including incremental
+builds that do not relink. The Debug copy is `build/windows/Debug/SDL2.dll`.
+Restart an already-running instance after installing it. Both the downloaded
+runtime folder and build output are Git-ignored; do not install the DLL in System32.
 
-### WSL specifics
-
-Three things will bite you on WSL, all learned the hard way:
-
-- **Keep the working tree inside the WSL filesystem** (`~/rood-reverse-work`,
-  not `/mnt/c/...`). Copying a Windows git checkout into WSL rewrites line
-  endings, and the matching build then fails in ways that look like code
-  problems.
-- **Be careful with `gcc-multilib`.** On Ubuntu, installing it can silently
-  remove `gcc-mipsel-linux-gnu` and break the matching build. Verify the
-  cross-compiler survived any multilib install.
-- **WSL2 exposes no `/dev/input` at all.** Neither USB nor Bluetooth gamepads
-  are passed through to the VM, so a controller plugged into Windows is
-  invisible to a Linux binary. See [Controller](#controller) for the bridge that
-  solves this.
+See [Windows Migration](docs/WINDOWS_MIGRATION.md) for ownership, removed
+dependencies, synchronization, verified behavior and outstanding prerequisites.
 
 ## Building
 
 ### Matching PSX build
 
-```sh
-make -j              # incremental build + verify
-make remake -j       # full re-split and rebuild, then verify
-make format          # format sources and symbol addresses
-make clean           # drop build/ and nonmatchings/
-make clean-all       # full reset, including extracted data (keeps the disc image)
-```
-
-A successful run ends with **`✔ All files match`**, meaning all 21 target
-binaries reproduce the retail disc byte for byte. If it prints `✘` for a file,
-the change under test does not match.
-
-Decompilation helpers:
-
-```sh
-make decompme TARGET=path/to/nonmatchings/source.s   # upload to decomp.me
-make permute  TARGET=path/to/nonmatchings/source.s   # run the permuter
-```
-
-While matching a function, a full build is a slow feedback loop, because it only
-tells you which `.PRG` differs. Read the object directly instead:
-
-```sh
-mipsel-linux-gnu-objdump -d --no-show-raw-insn build/src/<unit>.o
-```
-
-and compare against `build/src/.../nonmatchings/<unit>/<func>.s`.
+Build the solution's `Decomp` project. It uses native Windows GNU Make and
+Windows MIPS tools, and compares generated files against retail data.
+It requires genuine Windows historical `cc1.exe` builds for 2.7.2-psx,
+2.7.2-cdk and 2.8.1-psx. The old-gcc 0.17 release does not supply these.
+Missing compilers cause an explicit error; Linux executables and WSL/Docker
+fallbacks are rejected. Current Windows byte-matching verification is pending.
 
 ### Native build
 
-```sh
-make -f Makefile.native -j       # build native/build/vagrant-native
-make -f Makefile.native stubs    # regenerate the abort-stub layer
-make -f Makefile.native run      # build and run
-```
+Build `NativePort` in the generated solution. Native source/data/stub inputs
+are generated under ignored `build/` from the authoritative source snapshot
+and your retail data; they do not modify matching source files.
 
 The stub layer is how the port finds its next task. Any game function not yet
 reached becomes a stub that aborts with its own name, so bring-up is
@@ -144,21 +107,33 @@ demand-driven.
 
 ## Running the native port
 
-```sh
-./native/build/vagrant-native
+Run this command from the repository root so relative `data/` and
+`native/saves/` paths resolve correctly. Visual Studio uses that same working
+directory when launching the `NativePort` project.
+
+```powershell
+build/windows/Debug/vagrant-native.exe
 ```
 
-It boots the real retail sequence: publisher and developer screens, the intro
-FMV, then the title menu. Be patient. The two logo screens run 364 frames each
-and the movie is about 38 seconds, so roughly a minute passes before the title
-settles.
+The Windows executable builds and links. Bounded SDL-window runs verify the
+loading image and publisher logo with real, nonblack framebuffer pixels.
+Full title/menu/movie and game-world execution have not yet been certified on
+Windows. Historical Linux bring-up results below are not a claim of Windows
+gameplay parity.
+
+An initial Windows migration bug left image-header and palette symbols as
+zero-filled stubs, producing a black screen despite successful SDL startup.
+Native asset generation now preserves upstream's header/palette/pixel offsets,
+and the build rescans object symbols before generating stubs. Rebuild `NativePort`
+after updating these files; an older executable still contains the broken assets.
+The splash sequence is not instantaneous, so allow time for the logos and movie.
 
 ### Environment variables
 
 | Variable | Effect |
-|---|---|
+| --- | --- |
 | `VS_HEADLESS=1` | Run with no window. Needed over plain SSH, and for regression runs |
-| `VS_WATCHDOG=N` | Bail out after N seconds with a backtrace and a VRAM dump. WSL blocks ptrace-attach, so the binary traps for itself |
+| `VS_WATCHDOG=N` | Stop after N seconds and capture a Windows minidump |
 | `VS_DATA_DIR=path` | Where the extracted game data lives (default `data`) |
 | `VS_DISC=path` | Optional raw disc image, consulted only for sectors outside the extracted data |
 | `VS_CD_SPEED=N` | Sectors per frame. The default is an authentic 2x (150/sec); raise it to skip load times |
@@ -174,47 +149,40 @@ settles.
 
 ### Controller
 
-A DualSense or DualShock over SDL works directly on native Linux, and the
-keyboard always works.
-
-On WSL, run the bridge **on the Windows side**, because WSL cannot see the
-device at all:
-
-```powershell
-python native/tools/pad_bridge.py
-```
-
-It reads the pad over raw HID using pure `ctypes`, with no pip installs, and
-streams state packets to the game's TCP listener. `VS_PAD_PORT` changes the
-port; `VS_NO_PAD_BRIDGE=1` disables it.
+Windows SDL reads the keyboard and compatible controllers directly. The WSL
+TCP controller bridge has been removed. Controller behavior still requires
+interactive Windows verification.
 
 ### Memory card
 
 The port reads and writes a real PS1 memory card image at
 `native/saves/test_card.mcd`. Point it at a copy of your own card to load your
 own saves. **Keep a pristine copy**, because save tests mutate it.
+The Windows copy does not automatically import a card image from your WSL checkout.
 
 ## Tools and scripts
 
-Generated sources under `native/platform/` are never committed. They are rebuilt
-from your own disc dump, so a fresh clone just works.
+Generated native sources now live under ignored `build/native-data/` and
+`build/native-inputs/`. The source tree contains their generators only.
 
 | Script | Purpose |
-|---|---|
-| `native/tools/gen_disc_index.py` | LBA to extracted-file map, so the port needs no disc at runtime (`make -f Makefile.native discindex`) |
-| `native/tools/gen_assets.py` | Embeds the per-overlay assets splat extracts separately (`make -f Makefile.native assets`) |
-| `native/tools/gen_stubs.py` | Generates the abort-stub layer from unresolved symbols |
-| `native/tools/harvest_data.py` | Copies read-only tables out of the retail overlays (`make -f Makefile.native harvest`) |
-| `native/tools/pad_bridge.py` | Windows-side controller bridge for WSL |
-| `tools/dev/` | Upstream helpers: struct dumping, string tables, tpage/UV maths, objdiff config |
+| --- | --- |
+| `native/tools/prepare_data.py` | Generates retail assets, string includes and the Windows LBA map |
+| `native/tools/prepare_native.py` | Applies host-only compatibility to generated native inputs |
+| `native/tools/coff_stubs.py` | Generates named aborts and data blocks from Win32 COFF symbols |
+| `native/tools/harvest_data.py` | Copies read-only retail tables using the authoritative symbol maps |
+| `tools/windows.py` | Windows bootstrap, upstream synchronization and matching-build operations |
+| `tools/Probe-Native.ps1` | Hard-bounded startup check; add `-Windowed` to exercise SDL |
+| `resources/rood-reverseWin/tools/legacy/` | Preserved root-only struct/image helpers |
 
 ### Tests
 
-```sh
-make -f Makefile.native test       # software GTE against golden data, plus a GPU test
-make -f Makefile.native mdectest   # decode every frame of the intro movie
-make -f Makefile.native menu       # headless 130-frame menu render, dumps a PPM
-make -f Makefile.native window     # the same, in a real window
+The solution contains `test_host`, `test_gte`, `test_gpu` and `test_inline_gte`.
+Windows verification has passed the host test, 891 GTE checks, 18 GPU checks
+and the inline-GTE adapter test. Python build regressions run with:
+
+```powershell
+build/python/Scripts/python.exe -m unittest discover -s native/tests -p 'test_*.py'
 ```
 
 `mdectest` is the video regression. It demuxes `TITLE.STR` and checks that every
@@ -224,12 +192,13 @@ result.
 
 ## Status
 
-**Matching build:** ✔ all 21 targets byte-identical.
+**Historical matching build:** all 21 former targets byte-identical on Linux.
+**Current Windows matching build:** historical Windows compilers not yet supplied.
 
 **Decompilation:** about 72% of functions matched. Menus and the title sequence
 are at 100%. `BATTLE.PRG` is the long pole.
 
-**Native port**, what runs today:
+**Historical native bring-up**, prior Linux results retained for reference:
 
 - Boots the real retail sequence to the title menu, all game code, unmodified
 - Plays the intro FMV using a software MDEC (VLC, dequantise, IDCT, YCbCr)
@@ -254,7 +223,7 @@ approximated.
 ## Documentation
 
 | Document | Contents |
-|---|---|
+| --- | --- |
 | [`docs/NATIVE_PORT_PLAN.md`](docs/NATIVE_PORT_PLAN.md) | The working plan, phase by phase, with a "start here" status section and the traps each phase cost |
 | [`docs/NATIVE_DEVIATIONS.md`](docs/NATIVE_DEVIATIONS.md) | Every deviation from faithful behaviour, and what would retire it |
 | [`docs/PSX_NOTES.md`](docs/PSX_NOTES.md) | Hardware notes, including the GTE differential-validation method |

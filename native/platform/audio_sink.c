@@ -1,6 +1,6 @@
 /* Host audio output. Takes the software SPU's stereo mix and plays it.
  *
- * SDL2 is dlopen'd rather than linked, for the same reason present.c does it:
+ * SDL2.dll is loaded at runtime, for the same reason present.c does it:
  * the port has to build and run on a machine with no SDL at all, and a missing
  * sound card is not a reason to fail. Everything here degrades to "no sound"
  * without affecting anything else.
@@ -8,8 +8,8 @@
  * This deliberately does NOT share present.c's SDL handle or its
  * initialisation. Audio and video are independent: a headless run
  * (`VS_HEADLESS=1`) should still be able to make noise, which is exactly the
- * configuration a WSL session without a window wants. dlopen is refcounted, so
- * opening libSDL2 a second time costs nothing, and SDL_Init is additive across
+ * configuration a headless Windows session wants. DLL loading is refcounted, so
+ * opening SDL2 a second time costs nothing, and SDL_Init is additive across
  * subsystems.
  *
  * Queue rather than callback. SDL's callback runs on its own thread, and
@@ -19,12 +19,8 @@
  * instead, once per vblank, which is 735 frames at 44100Hz -- exactly one
  * vblank's worth, because the frame loop is paced to real time.
  *
- * WSL note: WSLg exports a PulseAudio socket at /mnt/wslg/PulseServer and sets
- * PULSE_SERVER, so SDL's pulse backend finds the Windows audio device with no
- * configuration. The 32-bit libpulse and libSDL2 packages have to be installed,
- * because the native build is -m32.
  */
-#include <dlfcn.h>
+#include <psx_host.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -110,15 +106,14 @@ int psx_audio_sink_open(void)
         return 0;
     }
 
-    snd.lib = dlopen("libSDL2-2.0.so.0", RTLD_NOW | RTLD_LOCAL);
-    if (!snd.lib) snd.lib = dlopen("libSDL2.so", RTLD_NOW | RTLD_LOCAL);
+    snd.lib = psx_host_load_library("SDL2.dll");
     if (!snd.lib) {
-        printf("[audio] SDL2 not available (%s) -- no sound output\n", dlerror());
+        printf("[audio] SDL2.dll not available -- no sound output\n");
         return 0;
     }
 
 #define SYM(v, t, n)                                                                     \
-    v = (t)dlsym(snd.lib, n);                                                            \
+    v = (t)psx_host_library_symbol(snd.lib, n);                                          \
     if (!v) {                                                                            \
         printf("[audio] missing %s -- no sound output\n", n);                            \
         return 0;                                                                        \

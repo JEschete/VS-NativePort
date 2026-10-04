@@ -1,0 +1,10 @@
+---
+BasedOnStyle:  WebKit
+ColumnLimit: 90
+SortIncludes: Never
+AlignOperands: AlignAfterOperator
+BreakBeforeBinaryOperators: NonAssignment
+BreakStringLiterals: false
+SkipMacroDefinitionBody: true
+WhitespaceSensitiveMacros: [INCLUDE_ASM, INCLUDE_RODATA]
+...
