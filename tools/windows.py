@@ -20,6 +20,8 @@ DECOMP = ROOT / "resources" / "rood-reverseWin"
 UPSTREAM = "https://github.com/ser-pounce/rood-reverse.git"
 SOURCE_FOLDERS = ("src", "include", "assets", "config")
 SOURCE_TOOL_FOLDERS = ("etc", "libdata", "kaitai", "splat_ext", "data", "dev")
+SOURCE_PATHS = tuple(Path(folder) for folder in SOURCE_FOLDERS) + tuple(
+    Path("tools") / folder for folder in SOURCE_TOOL_FOLDERS)
 
 
 def run(arguments, *, cwd=None, input_data=None):
@@ -63,9 +65,7 @@ def require_windows_binary(path: Path) -> Path:
 
 def replace_upstream_sources(snapshot: Path, destination: Path) -> dict[str, str]:
     files = {}
-    paths = [Path(folder) for folder in SOURCE_FOLDERS]
-    paths.extend(Path("tools") / folder for folder in SOURCE_TOOL_FOLDERS)
-    for relative in paths:
+    for relative in SOURCE_PATHS:
         original = snapshot / relative
         target = destination / relative
         if not original.is_dir():
@@ -79,7 +79,32 @@ def replace_upstream_sources(snapshot: Path, destination: Path) -> dict[str, str
     return files
 
 
+def source_digests() -> dict[str, str]:
+    return {
+        path.relative_to(DECOMP).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+        for relative in SOURCE_PATHS for path in (DECOMP / relative).rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix not in (".pyc", ".pyo")
+    }
+
+
+def check_sync_destination() -> None:
+    current = source_digests()
+    manifest_path = DECOMP / "upstream.json"
+    if not manifest_path.is_file():
+        if current:
+            raise RuntimeError("Cannot synchronize populated source without an upstream manifest. "
+                               "Preserve and review existing work first. No files were changed.")
+        return
+    expected = json.loads(manifest_path.read_text(encoding="utf-8"))["files"]
+    changes = sorted(name for name in current.keys() | expected.keys()
+                     if current.get(name) != expected.get(name))
+    if changes:
+        raise RuntimeError("Synchronization refused: local source changes must be preserved and reviewed first: "
+                           + ", ".join(changes[:10]) + ". No files were changed.")
+
+
 def sync_upstream(fetch: bool = False) -> None:
+    check_sync_destination()
     reference = ROOT / "resources" / "rood-reverse"
     if fetch:
         run(["git", "-C", reference, "fetch", UPSTREAM, "main"])
@@ -101,22 +126,27 @@ def sync_upstream(fetch: bool = False) -> None:
 
 
 def verify_upstream() -> None:
+    """Report provenance only; local decompilation work is used as-is and never replaced."""
     manifest_path = DECOMP / "upstream.json"
     if not manifest_path.exists():
-        sync_upstream()
+        print("WARNING: Missing upstream manifest; source provenance is unrecorded. No files were changed.")
         return
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     reference = ROOT / "resources" / "rood-reverse"
     commit = run(["git", "-C", reference, "rev-parse", "refs/remotes/upstream/main"]).decode("ascii").strip()
     if commit != manifest["commit"]:
-        sync_upstream()
-        return
-    for relative, expected in manifest["files"].items():
-        path = DECOMP / relative
-        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
-            sync_upstream()
-            return
-    print(f"Authoritative upstream source verified at {commit}")
+        print(f"WARNING: Upstream reference is {commit}, but the Windows snapshot records "
+              f"{manifest['commit']}. Review the update and synchronize explicitly. No files were changed.")
+    current = source_digests()
+    changes = sorted(name for name in current.keys() | manifest["files"].keys()
+                     if current.get(name) != manifest["files"].get(name))
+    if changes:
+        print(f"Local decompilation changes: {len(changes)} files differ from upstream {manifest['commit']} "
+              f"({', '.join(changes[:5])}). Using local source; no files were changed.")
+    elif commit == manifest["commit"]:
+        print(f"Authoritative upstream source verified at {commit}")
+    else:
+        print(f"Windows snapshot matches its recorded upstream {manifest['commit']}.")
 
 
 def bootstrap() -> dict:

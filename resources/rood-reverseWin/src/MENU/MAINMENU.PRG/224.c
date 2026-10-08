@@ -12,9 +12,9 @@ void func_800F9A24(int arg0)
     func_800F9A78(arg0);
     func_800F9CB0();
 
-    D_800F4538[1]->unk0.weaponDrawn = 1;
+    vs_battle_actorModels[1]->unk0.weaponDrawn = 1;
 
-    func_800A0204(1, 1, 0, 0);
+    vs_battle_animateCharacter(1, 1, 0, 0);
 }
 
 void func_800F9A78(int arg0)
@@ -26,7 +26,7 @@ void func_800F9A78(int arg0)
     D_800F4538_t* temp_s3;
     void* temp_v0;
 
-    temp_s2 = D_800F4538[arg0];
+    temp_s2 = vs_battle_actorModels[arg0];
     temp_s3 = vs_main_allocHeap(0x1900);
     sp10.dataType = 2;
     sp10.index = 1;
@@ -40,7 +40,7 @@ void func_800F9A78(int arg0)
     vs_battle_populateDataSlot(&sp10);
 
     if (temp_s2->unk17FD >= 2) {
-        temp_s0 = D_800F4538[temp_s2->unk17FD];
+        temp_s0 = vs_battle_actorModels[temp_s2->unk17FD];
         temp_v0 = vs_main_allocHeap(0x1900);
         sp10.dataType = 2;
         sp10.index = 16;
@@ -57,7 +57,7 @@ void func_800F9A78(int arg0)
 
     for (i = 0; i < 2; ++i) {
         vs_battle_wepModels_t* temp_s0 =
-            vs_battle_wepModels[(temp_s2->unk0.unkF * 2) + i];
+            vs_battle_wepModels[(temp_s2->unk0.index * 2) + i];
         if (temp_s0 != 0) {
             temp_v0 = vs_main_allocHeap(sizeof *temp_s0);
             sp10.dataType = 4;
@@ -77,7 +77,7 @@ void func_800F9A78(int arg0)
 
     temp_s3->unk5D4 = temp_s2->unk5D4;
 
-    if (temp_s2->unk0.unkF == 0) {
+    if (temp_s2->unk0.index == 0) {
         temp_s3->unk5D8 = vs_main_allocHeap(0x7800);
 
         func_8009C378(temp_s3->unk5D8, temp_s2->unk5D8);
@@ -105,7 +105,7 @@ void func_800F9CB0(void)
     D_800F4538_t* temp_s0;
     int i;
 
-    temp_s0 = D_800F4538[1];
+    temp_s0 = vs_battle_actorModels[1];
 
     for (i = 0; i < 2; ++i) {
         if (D_800F4590[i] != NULL) {
@@ -130,10 +130,10 @@ void func_800F9CB0(void)
     sp18.unk0_16 = 2;
     sp18.unk0_24 = 16;
 
-    if (D_800F4538[16] == NULL) {
+    if (vs_battle_actorModels[16] == NULL) {
         func_8009F940(1, 1, (D_800F4538_unk58_2*)&sp18, &sp10);
     } else {
-        D_800F4538[16]->unk0.skip = 0;
+        vs_battle_actorModels[16]->unk0.skip = 0;
     }
 
     sp10.unk0 = 0;
@@ -151,14 +151,14 @@ void func_800F9E0C(void)
     void* sp10[2];
     void* temp_s1;
 
-    temp_s1 = D_800F4538[1];
+    temp_s1 = vs_battle_actorModels[1];
     sp10[0] = vs_battle_wepModels[2];
     sp10[1] = vs_battle_wepModels[3];
 
     func_8009CFB0(1);
     vs_main_freeHeap(temp_s1);
 
-    temp_s1 = D_800F4538[16];
+    temp_s1 = vs_battle_actorModels[16];
 
     if (temp_s1 != NULL) {
         func_8009CFB0(0x10);
@@ -181,7 +181,7 @@ int func_800F9EB8(MATRIX* arg0)
     D_800F4538_t* temp_s1;
     int new_var2;
     int new_var3;
-    temp_s1 = D_800F4538[1];
+    temp_s1 = vs_battle_actorModels[1];
 
     if (temp_s1 == NULL) {
         return -1;
@@ -210,7 +210,7 @@ int func_800F9EB8(MATRIX* arg0)
     func_800B28A8(temp_s1, arg0, 0);
 
     if (temp_s1->unk17FD > 1) {
-        func_800AB4F0(D_800F4538[16]);
+        func_800AB4F0(vs_battle_actorModels[16]);
     }
 
     if (temp_s1->unk17FD != 0) {
@@ -310,7 +310,7 @@ void func_800FA2CC(void)
     int i_2;
     D_800F4538_t* temp_s1;
 
-    temp_s1 = D_800F4538[0];
+    temp_s1 = vs_battle_actorModels[0];
 
     for (i = 0; i < 2; ++i) {
         vs_battle_wepModels_t* var_a0 = vs_battle_wepModels[i];
@@ -339,7 +339,7 @@ void func_800FA2CC(void)
     temp_s1->unk6E3 = D_800F49DC;
     temp_s1->unk5BC = *sp10;
 
-    func_800AD008(temp_s1, &temp_s1->unkC54);
+    vs_battle_loadAnimation(temp_s1, &temp_s1->unkC54);
     func_800AFA28(temp_s1, &temp_s1->unkC54, 1);
     vs_main_memcpy(&temp_s1->unk704, &temp_s1->unkC54, sizeof temp_s1->unk704);
 

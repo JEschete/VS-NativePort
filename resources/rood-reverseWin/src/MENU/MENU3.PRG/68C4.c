@@ -13,7 +13,7 @@ int _loadObjectData(int category, int wepId, int material)
 {
     int _[6] __attribute__((unused));
     int i;
-    D_800F4538_t* temp_s1 = D_800F4538[1];
+    D_800F4538_t* temp_s1 = vs_battle_actorModels[1];
 
     switch (vs_battle_loadObjectDataState) {
     case 0:
@@ -58,7 +58,7 @@ int _loadObjectData(int category, int wepId, int material)
 
         temp_s1->unk0.weaponDrawn = 0;
 
-        func_800A0204(1, 1, 0, 0);
+        vs_battle_animateCharacter(1, 1, 0, 0);
         func_800AFA28(temp_s1, &temp_s1->unkC54, 1);
         vs_main_memcpy(&temp_s1->unk704, &temp_s1->unkC54, sizeof temp_s1->unk704);
 

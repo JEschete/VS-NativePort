@@ -75,11 +75,12 @@ decompilation progress and completion claims, including work described as
 ### Enforcement Status
 
 These instructions require the workflow but do not implement a technical CI
-gate. The current checker has not demonstrated a successful canonical match and
-must pass the positive/negative controls above before it is trusted. Actual
-automated enforcement requires a validated fail-closed command and CI that
-rejects missing, stale, or unsuccessful reports. Do not claim that this Markdown
-alone guarantees matching or that those automation gates already exist.
+gate. On 2026-10-05 the function checker passed positive, candidate, negative
+and fail-closed controls (see the tracker); controls must be rerun after any
+checker change. It verifies function scope only. Actual automated enforcement
+still requires CI that rejects missing, stale, or unsuccessful reports, plus
+source-unit and overlay comparison. Do not claim that this Markdown alone
+guarantees matching or that those automation gates already exist.
 
 ## Non-Negotiable Rules
 
@@ -139,17 +140,24 @@ instead of copying installations into tracked source.
 
 ## Safety And Current Status
 
-- Root `tools/windows.py verify-upstream` can silently replace edited source
-  trees. Do not invoke it, or guarded root preparation/build paths, on local
-  decompilation changes without an explicitly approved preservation strategy.
-- The rejected local changes to `38C1C.c` were rolled back. Accepted local
-  assembly-based work was not retained. The new source reconstruction of this
-  unit now has no assembly, compiles as Win32 C++, and passes 63 focused behavior
-  groups; see the tracker for dependency, integration, and matching limits.
-- WSL historical compiler installation is complete, but the newly written
-  function checker has not established a successful match. The current
-  `38C1C.c` WSL build attempt failed before byte comparison; see the tracker.
-  Do not report matching from setup smoke tests, Ghidra evidence, or Windows tests.
+- Root `tools/windows.py verify-upstream` is read-only: manifest, revision, or
+  source differences are reported as warnings and local work is used as-is; it
+  never synchronizes. Explicit sync refuses local additions, edits, deletions,
+  or populated unmanifested source. Preserve and review work before updating
+  the reference snapshot.
+- Windows decompilation has two accepted function-level matches beyond the
+  reference (func_800A2790 and func_800A25EC in `38C1C.c`); no unit or overlay
+  match. The Linux checkout is reference only. The native port has not started
+  as an accepted implementation. Legacy native experiments are not features.
+- The rejected `38C1C.c` candidate is absent. Current source keeps three
+  assembly inclusions and two projection inline-assembly blocks; the GTE
+  routines are `BLOCKED` under the no-inline-assembly rule. The old 63-group
+  result is stale and does not validate current source.
+- Matching runs through [matching.py](tools/verification/matching.py) in WSL
+  with splat macros from [splat_artifacts.py](tools/verification/splat_artifacts.py).
+  Use `--candidate` for noncanonical iteration; only a fresh canonical `MATCH`
+  is acceptance. Do not report matching from setup smoke tests, Ghidra
+  evidence, candidate results, or Windows tests.
 
 ## Installed Tool Inventory
 

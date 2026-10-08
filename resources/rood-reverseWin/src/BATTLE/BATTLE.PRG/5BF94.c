@@ -7,17 +7,18 @@
 #include "3A1A0.h"
 #include "40564.h"
 #include "573B8.h"
-#include "vs_string.h"
-#include "gpu.h"
-#include "../../SLUS_010.40/main.h"
-#include "../../SLUS_010.40/overlay.h"
-#include "../../SLUS_010.40/31724.h"
-#include "../../SLUS_010.40/32154.h"
-#include "../../MENU/MAINMENU.PRG/C48.h"
-#include "../../MENU/MAINMENU.PRG/58EC.h"
-#include "../../GIM/SCREFF2.PRG/0.h"
+#include "src/SLUS_010.40/main.h"
+#include "src/SLUS_010.40/overlay.h"
+#include "src/SLUS_010.40/31724.h"
+#include "src/SLUS_010.40/32154.h"
+#include "src/MENU/MAINMENU.PRG/C48.h"
+#include "src/MENU/MAINMENU.PRG/58EC.h"
+#include "src/GIM/SCREFF2.PRG/0.h"
 #include "build/src/include/lbas.h"
 #include "build/assets/BATTLE/BATTLE.PRG/menuStrings.h"
+#include "build/assets/BATTLE/BATTLE.PRG/statusStrings.h"
+#include "vs_string.h"
+#include "gpu.h"
 #include <memory.h>
 #include <libetc.h>
 #include <rand.h>
@@ -244,7 +245,17 @@ typedef struct {
     int unk0;
     int unk4;
     u_char unk8;
-    char unk9[0xF];
+    u_char unk9;
+    u_char unkA;
+    u_char unkB;
+    u_char unkC;
+    u_char unkD;
+    short unkE;
+    int unk10;
+    u_char unk14;
+    u_char unk15;
+    u_char unk16;
+    u_char unk17;
 } func_800C5798_t;
 
 typedef struct {
@@ -259,11 +270,21 @@ typedef struct {
 } func_800C56C0_t2;
 
 typedef struct {
-    char unk0[0x40];
+    char unk0[0x34];
+    int unk34;
+    int unk38;
+    int unk3C;
     func_800C5798_t* unk40;
     char unk44[0x94C];
     func_800C56C0_t2 unk990[24];
 } func_800C56C0_t;
+
+typedef struct {
+    int unk0_0 : 12;
+    int unk0_12 : 12;
+    u_int unk0_24 : 2;
+    u_int unk0_26 : 4;
+} func_800CCE10_t;
 
 void _renderDigit(int, int, int, u_long*);
 void func_800C51B4(int);
@@ -376,6 +397,7 @@ extern u_int _keystreamState;
 extern char D_800EBF58[][12];
 extern char* D_800EC258;
 extern void (*D_800EC25C[])(gim_t*, int, u_long*);
+extern func_800CCE10_t D_800EC284[][2];
 extern int D_800EC2CC[];
 extern int D_800EC2D8[];
 extern u_char D_800EC2E4;
@@ -504,16 +526,17 @@ func_800C56C0_t2* func_800C5798(int arg0, int arg1, int arg2)
     return item;
 }
 
-char* func_800C58A4(uint arg0)
+char* _getStatusString(uint arg0)
 {
     int i;
     arg0 >>= 5;
-    for (i = 0; i < 0x18; i++) {
+    for (i = 0; i < 24; i++) {
         if ((arg0 >> i) & 1) {
-            return (char*)&vs_battle_statusStrings[vs_battle_statusStrings[0x39 + i]];
+            return (char*)&vs_battle_statusStrings
+                [vs_battle_statusStrings[VS_statusStrings_INDEX_strDown + i]];
         }
     }
-    return (char*)&vs_battle_statusStrings[0xF6];
+    return (char*)&vs_battle_statusStrings[VS_statusStrings_OFFSET_empty];
 }
 
 INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800C58F8);
@@ -1755,7 +1778,7 @@ void vs_battle_renderMenuItem(vs_battle_menuItem_t* menuItem)
 
 INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800C930C);
 
-void func_800C97BC(void)
+void vs_battle_execMenu(void)
 {
     vs_battle_menuItem_t* var_s2;
     int temp_s1;
@@ -2096,7 +2119,7 @@ void func_800C9FE8(void)
 }
 
 // https://decomp.me/scratch/NSW3O
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CA2DC);
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", vs_battle_renderHeadsUpDisplay);
 
 void func_800CA97C(void)
 {
@@ -2557,7 +2580,7 @@ void func_800CB7DC(void)
     }
 }
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CB83C);
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", vs_battle_renderTextBoxes);
 
 INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CBBCC);
 
@@ -2722,7 +2745,26 @@ void vs_battle_renderImage(int xy, void* buffer, int wh)
 
 vs_battle_textBox* vs_battle_getTextBox(int id) { return &vs_battle_textBoxes[id]; }
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CCE10);
+func_800CCE10_t func_800CCE10(int arg0, int arg1, int arg2, int arg3)
+{
+    func_800CCE10_t ret;
+    func_800CCE10_t* p =
+        &D_800EC284[arg0][((arg1 >> 2) & 3) == 1 || ((arg1 >> 2) & 3) == 2];
+    int offsetX = p->unk0_0;
+    int offsetY = p->unk0_12;
+    int unk24 = p->unk0_24;
+
+    if ((arg1 >> 2) & 1) {
+        offsetX = -offsetX;
+        unk24 ^= 2;
+    }
+
+    ret.unk0_0 = offsetX - ((arg2 * 12 + 10) >> 1);
+    ret.unk0_12 = offsetY - ((arg3 * 13 + 4) >> 1);
+    ret.unk0_24 = unk24;
+    ret.unk0_26 = p->unk0_26;
+    return ret;
+}
 
 void vs_battle_initTextBox(
     int id, int flags, int x, int y, int charsPerLine, int h, int centerX, int centerY)
@@ -2816,7 +2858,7 @@ int func_800CD3A0(int arg0, int arg1)
     return var_v1;
 }
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CD3E4);
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", vs_battle_renderDialogBalloon);
 
 INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94", func_800CDCBC);
 
@@ -3696,7 +3738,7 @@ void func_800D0B30(func_800D0B30_t* arg0, SVECTOR* arg1, func_800D0B30_t2* arg2)
         vs_battle_lerpVector(arg0->unk20, D_800F5330[arg0->unk4], &arg2->unk10);
         TransMatrix(&arg2->unk48, &arg2->unk10);
         vs_battle_lerpVector(arg0->unk2C, D_800F5330[arg0->unk7], &arg2->unk20);
-        func_8004140C(&arg2->unk48, &arg2->unk20);
+        ScaleMatrix(&arg2->unk48, &arg2->unk20);
         return;
     }
     func_800CFE7C((func_800CFE98_t*)&arg2->unk48);

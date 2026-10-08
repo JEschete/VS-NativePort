@@ -1,12 +1,20 @@
 # Windows Build Migration
 
+## Current Stage
+
+The decompilation is unfinished. The Linux checkout is reference only; Windows
+decompilation has two accepted function-level matches beyond its imported
+baseline (see the [tracker](../resources/rood-reverseWin/DECOMP_PROGRESS.md)).
+The native port has not started as an accepted implementation. Existing native
+code and old executables are legacy experiments, not completed port milestones.
+
 ## Ownership
 
 - `resources/rood-reverse` is the upstream reference. Its `upstream` remote points
   to `ser-pounce/rood-reverse`. Do not change that reference to accommodate this port.
 - `resources/rood-reverseWin` owns the maintained matching-project snapshot.
-  Source, headers, asset definitions and decompilation configuration from
-  ser-pounce always replace local versions during synchronization.
+  Source, headers, assets and configuration retain upstream provenance. Build
+  checks never replace them; explicit sync refuses local changes.
 - Windows recipes and native compatibility transformations live outside that
   replacement set. `upstream.json` records the authoritative commit and file hashes.
 - The root owns the Windows native runtime, tests, Windows orchestration and docs.
@@ -41,9 +49,11 @@ Run `tools/Setup-Windows.ps1` from PowerShell. It creates an isolated environmen
 installs Python dependencies, fetches Windows tools and generates
 `build/windows/VagrantStory.sln`.
 
-Open that solution, select Debug/Win32 and build `NativePort`. The executable is
-`build/windows/Debug/vagrant-native.exe`. `Decomp` invokes the matching pipeline.
-`WindowsTools` bootstraps its native Windows tool dependencies.
+Open that solution and select Debug/Win32 for infrastructure work. `Decomp`
+invokes the matching pipeline, subject to its prerequisites. The legacy
+`NativePort` target is incomplete and now stops on unresolved game symbols.
+It no longer fabricates missing data or enables abort stubs implicitly.
+`WindowsTools` bootstraps native Windows tool dependencies.
 
 Place your own NTSC-U disc image at `disks/SLUS-01040.bin`. Existing `data/` is
 preserved; extraction only runs if it is absent. Native inputs and retail-derived
@@ -62,16 +72,24 @@ The sync command uses the upstream ref, not local commits on the JEschete fork,
 replaces authoritative trees and records their hashes. Windows build files remain.
 New upstream C implementations supersede assembly-specific native adapters.
 Unsupported source-shape changes fail preparation instead of silently replacing
-upstream behavior. Direct edits to authoritative files are overwritten on sync.
+upstream behavior. Explicit sync first requires a pristine recorded snapshot:
+added, modified, deleted or unmanifested populated source stops the command
+before fetching or replacing anything. Preserve and review local work first;
+there is no force-overwrite option.
 
-## Verification And Gaps
+`verify-upstream` is strictly read-only. Missing manifests, changed reference
+revisions and local source differences are reported as warnings; build
+preparation then uses local decompilation work as-is. Verification never calls
+sync, reset, or cleanup.
 
-Verified Windows Win32 executables: host timing/DLL/memory tests, 891 GTE checks,
+## Historical Experiments And Gaps
+
+Earlier experiments reported Windows host timing/DLL/memory tests, 891 GTE checks,
 18 GPU checks and inline-GTE translation tests. Python tests cover native input
 isolation, upstream precedence, COFF parsing, file utilities, atomic downloads,
 disc LBA sectors and Form-2 media.
 
-The native executable compiles and links through Visual Studio. A bounded
+An earlier experimental executable compiled and linked through Visual Studio. A bounded
 headless startup enters the game and initializes the disc and audio layers.
 Its eight-second watchdog exits normally. The startup regression in MSVC
 `setvbuf` is fixed by checked unbuffered output; zero-sized line buffering was
@@ -82,14 +100,17 @@ the upstream indexed-image encoders export palette and pixel offsets, and sized
 RGB images export header and data offsets. Emitting only a base asset name left
 `publisher_clut`, `_saveMenuBg_clut` and `_nowLoading_header` as zero-filled stubs.
 Native generation now preserves those offsets into the unchanged retail bytes.
-`NativeStubs` rescans the current object definitions on each build and avoids
-rewriting an unchanged result. Bounded runs now render the loading text and
-publisher logo; both publisher display buffers contain 3,090 nonblack pixels.
+The earlier generator rescanned object definitions, but also invented unsafe
+generic data arrays. Those arrays are now forbidden. Old bounded runs reported
+the loading text and publisher logo; both display buffers contained 3,090
+nonblack pixels.
 The watchdog also saves VRAM for pixel-based validation.
 
-Full title/menu/movie and game-world execution have not been certified on
-Windows. The existing named-abort bring-up behavior remains for missing game
-functions; successful linking is not proof of complete gameplay.
+These are historical infrastructure observations, not current decompilation
+or port acceptance. Missing game functions/data fail the normal symbol gate.
+Explicit diagnostic function stubs are not gameplay implementations. Card and
+hardware prerequisites remain in the deviations ledger; no completed native
+feature is claimed from linking or watchdog startup.
 
 **Matching build prerequisite:** old-gcc release 0.17 provides Linux/macOS
 compilers, not Windows executables. Supply compatible Windows `cc1.exe` builds

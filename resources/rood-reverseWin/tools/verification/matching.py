@@ -2,6 +2,7 @@
 """Isolated WSL-only PSX matching verification; never runs the root build."""
 
 import argparse
+from datetime import datetime, timezone
 import hashlib
 import json
 import os
@@ -25,6 +26,7 @@ COMPILERS = {
 }
 BINUTILS = ("make", "mipsel-linux-gnu-cpp", "mipsel-linux-gnu-as", "mipsel-linux-gnu-ld")
 SYMBOL = re.compile(r"^\s*([A-Za-z_]\w*)\s*=\s*(0x[0-9A-Fa-f]+)\s*;", re.MULTILINE)
+R_MIPS_26 = 4
 
 
 def run(arguments, *, cwd=None, input_data=b"", timeout=60):
@@ -113,28 +115,66 @@ def source_inventory():
 
 def configured_flags(snapshot, source):
     overlay = source.relative_to("src").parent
-    object_path = Path("build") / source.with_suffix(".o")
+    object_path = Path("build") / source.with_suffix(".c.o")
     makefile = snapshot / "verify-flags.mk"
     makefile.write_text(
         "BUILD := build\n"
         "CC1VER := 2.7.2-psx\n"
         "CC1FLAGS := -G0 -O2 -Wall -quiet -fno-builtin -funsigned-char -Wno-unused\n"
         "ASFLAGS := -I include -G0\n"
+        "MASFLAGS := --aspsx-version=2.77 --macro-inc\n"
         f"include config/{overlay.as_posix()}/Makefile\n"
         f"{object_path.as_posix()}:\n"
-        "\t@echo $(CC1VER)\n\t@echo $(CC1FLAGS)\n\t@echo $(ASFLAGS)\n",
+        "\t@echo $(CC1VER)\n\t@echo $(CC1FLAGS)\n\t@echo $(ASFLAGS)\n\t@echo $(MASFLAGS)\n",
         encoding="utf-8",
     )
     output = run(["make", "--no-print-directory", "-f", makefile.name, object_path], cwd=snapshot)
+    makefile.unlink()
     lines = output.decode("utf-8").splitlines()
-    if len(lines) != 3 or lines[0] not in COMPILERS:
+    if len(lines) != 4 or lines[0] not in COMPILERS:
         raise RuntimeError("Could not determine this unit's historical compiler settings.")
-    return lines[0], lines[1].split(), lines[2].split()
+    return lines[0], lines[1].split(), lines[2].split(), lines[3].split()
 
 
-def check_function(cache, source, function):
+def tree_digests(root):
+    return {path.relative_to(root).as_posix(): digest(path) for path in sorted(root.rglob("*")) if path.is_file()}
+
+
+def aggregate_digest(files):
+    return hashlib.sha256("".join(f"{name} {value}\n" for name, value in sorted(files.items())).encode()).hexdigest()
+
+
+def load_splat_artifacts(configuration, configuration_path):
+    """Use Windows-generated splat macros only while their recorded inputs are current."""
+    overlay = configuration["options"]["basename"]
+    directory = DECOMP / "build" / "splat-artifacts" / overlay
+    manifest_path = directory / "manifest.json"
+    if not manifest_path.is_file():
+        raise RuntimeError(f"Missing splat artifacts for {overlay}; run tools/verification/splat_artifacts.py on Windows.")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    required = {"config/splat.config.yaml", configuration_path.as_posix(), *configuration["options"]["symbol_addrs_path"]}
+    stale = sorted(required - manifest["inputs"].keys())
+    stale += [name for name, value in manifest["inputs"].items()
+              if not (DECOMP / name).is_file() or digest(DECOMP / name) != value]
+    stale += [name for name, value in manifest["outputs"].items()
+              if not (directory / name).is_file() or digest(directory / name) != value]
+    if manifest["retail"]["sha1"] != configuration["sha1"]:
+        stale.append(manifest["retail"]["path"])
+    if stale:
+        raise RuntimeError("Stale splat artifacts (" + ", ".join(stale) + "); regenerate them on Windows.")
+    return directory, manifest, digest(manifest_path)
+
+
+def dependency_digests(snapshot, cpp_flags, source):
+    rule = run(["mipsel-linux-gnu-cpp", *cpp_flags, "-M", source], cwd=snapshot).decode("utf-8")
+    names = rule.replace("\\\n", " ").split()[1:]
+    return {name: digest(Path(name) if Path(name).is_absolute() else snapshot / name) for name in names}
+
+
+def check_function(cache, source, function, candidate=None):
     from elftools.elf.elffile import ELFFile
     from elftools.elf.relocation import RelocationSection
+    from elftools.elf.sections import SymbolTableSection
     import yaml
 
     source = Path(source)
@@ -142,11 +182,24 @@ def check_function(cache, source, function):
     if source.is_absolute() or ".." in source.parts or source.suffix != ".c" or source.parts[0] != "src":
         raise RuntimeError("--source must be a relative src/.../*.c path; modern C++ is not a historical C input.")
     canonical = DECOMP / source
-    content = canonical.read_text(encoding="utf-8")
+    if candidate is not None:
+        candidate = candidate.expanduser().resolve()
+        if native_header_probe:
+            raise RuntimeError("Native-header probes cannot be combined with candidates.")
+        if any(candidate.is_relative_to(DECOMP / folder) for folder in ("src", "include", "config")):
+            raise RuntimeError("Keep candidates outside canonical src/include/config folders.")
+    mode = "probe" if native_header_probe else "candidate" if candidate else "canonical"
+    report_path = (cache / "reports" / {"canonical": "", "candidate": "candidates", "probe": "probes"}[mode]
+                   / f"{source.stem}-{function}.json")
+    report_path.unlink(missing_ok=True)
+    report_path.with_suffix(".s").unlink(missing_ok=True)
+    report_path.with_suffix(".dis").unlink(missing_ok=True)
+    content = (candidate or canonical).read_text(encoding="utf-8")
     if function in re.findall(r'INCLUDE_ASM\(\s*"[^"]+"\s*,\s*(\w+)\s*\)', content):
         raise RuntimeError(f"{function} is still INCLUDE_ASM; assembling original code is not a decompilation match.")
-    configuration_path = DECOMP / "config" / source.relative_to("src").parent / "splat.yaml"
-    configuration = yaml.safe_load(configuration_path.read_text(encoding="utf-8"))
+    configuration_path = Path("config") / source.relative_to("src").parent / "splat.yaml"
+    configuration = yaml.safe_load((DECOMP / configuration_path).read_text(encoding="utf-8"))
+    artifacts, manifest, manifest_digest = load_splat_artifacts(configuration, configuration_path)
     retail = ROOT / configuration["options"]["target_path"]
     retail_bytes = retail.read_bytes()
     retail_sha1 = hashlib.sha1(retail_bytes).hexdigest()
@@ -190,9 +243,14 @@ def check_function(cache, source, function):
             snapshot = Path(directory)
             for folder in ("src", "include", "config", "tools/etc", "tools/libdata", "tools/maspsx"):
                 shutil.copytree(DECOMP / folder, snapshot / folder, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+            for name in manifest["outputs"]:
+                shutil.copy2(artifacts / name, snapshot / name)
+            if candidate:
+                (snapshot / source).write_bytes(candidate.read_bytes())
             if native_header_probe:
                 shutil.copytree(ROOT / "native/include", snapshot / "native/include")
-            version, compiler_flags, assembler_flags = configured_flags(snapshot, source)
+            inputs = tree_digests(snapshot)
+            version, compiler_flags, assembler_flags, maspsx_flags = configured_flags(snapshot, source)
             compiler = cache / "old-gcc" / version / "cc1"
             state = json.loads((cache / "toolchain.json").read_text(encoding="utf-8"))
             if digest(compiler) != state["compiler_sha256"][version]:
@@ -211,90 +269,139 @@ def check_function(cache, source, function):
                 cpp_flags.extend(["-I", "native/include"])
                 print("Native-header compatibility probe: using copied native declarations "
                       "and MIPS system headers; not a canonical matching build.", flush=True)
+            dependencies = dependency_digests(snapshot, cpp_flags, source)
             preprocessed = run(["mipsel-linux-gnu-cpp", *cpp_flags, source], cwd=snapshot)
             preprocessed = run([sys.executable, "-m", "tools.etc.vsStringTransformer"], cwd=snapshot, input_data=preprocessed)
             assembly = run([compiler, *compiler_flags], cwd=snapshot, input_data=preprocessed)
-            assembly = run([sys.executable, "tools/maspsx/maspsx.py", "--aspsx-version=2.77"], cwd=snapshot, input_data=assembly)
+            assembly = run([sys.executable, "tools/maspsx/maspsx.py", *maspsx_flags], cwd=snapshot, input_data=assembly)
             object_path = snapshot / "unit.o"
             run(["mipsel-linux-gnu-as", *assembler_flags, "-o", object_path], cwd=snapshot, input_data=assembly)
             with object_path.open("rb") as stream:
                 elf = ELFFile(stream)
                 table = elf.get_section_by_name(".symtab")
-                candidates = table.get_symbol_by_name(function)
-                if not candidates or len(candidates) != 1:
+                if not isinstance(table, SymbolTableSection):
+                    raise RuntimeError("Compiled object has no symbol table.")
+                compiled_symbols = table.get_symbol_by_name(function)
+                if not compiled_symbols or len(compiled_symbols) != 1:
                     raise RuntimeError(f"Expected exactly one compiled symbol for {function}.")
-                candidate = candidates[0]
-                section_index = candidate["st_shndx"]
+                compiled = compiled_symbols[0]
+                section_index = compiled["st_shndx"]
                 if not isinstance(section_index, int):
                     raise RuntimeError("Target is not a defined compiled symbol.")
                 section = elf.get_section(section_index)
                 if not section["sh_flags"] & 4:
                     raise RuntimeError("Target is not in an executable section.")
-                start = candidate["st_value"]
+                section_name = section.name
+                start = compiled["st_value"]
                 ends = [symbol["st_value"] for symbol in table.iter_symbols()
                         if symbol["st_shndx"] == section_index
                         and symbol["st_info"]["bind"] == "STB_GLOBAL"
                         and symbol["st_value"] > start]
-                size = candidate["st_size"] or (min(ends) if ends else section["sh_size"]) - start
+                size = compiled["st_size"] or (min(ends) if ends else section["sh_size"]) - start
+                section_data = section.data()
+                target_relocations = []
                 for relocation_section in elf.iter_sections():
-                    if not isinstance(relocation_section, RelocationSection):
+                    if not isinstance(relocation_section, RelocationSection) or relocation_section["sh_info"] != section_index:
                         continue
                     relocation_symbols = elf.get_section(relocation_section["sh_link"])
+                    if not isinstance(relocation_symbols, SymbolTableSection):
+                        raise RuntimeError("Relocation section does not reference a symbol table.")
                     for relocation in relocation_section.iter_relocations():
+                        if not start <= relocation["r_offset"] < start + size:
+                            continue
                         symbol = relocation_symbols.get_symbol(relocation["r_info_sym"])
-                        if symbol.name in ambiguous_symbols:
-                            addresses = ", ".join(hex(value) for value in sorted(ambiguous_symbols[symbol.name]))
-                            raise RuntimeError(f"Ambiguous compiled relocation {symbol.name}: {addresses}")
-                        if symbol.name not in symbols:
-                            if symbol["st_shndx"] == "SHN_UNDEF":
-                                raise RuntimeError(f"Missing retail relocation address: {symbol.name}")
-                            if relocation_section["sh_info"] == section_index and start <= relocation["r_offset"] < start + size:
-                                raise RuntimeError(f"Target has an unresolved local section relocation: {symbol.name}")
+                        name = symbol.name
+                        if (not name and symbol["st_info"]["type"] == "STT_SECTION"
+                                and symbol["st_shndx"] == section_index and relocation["r_info_type"] == R_MIPS_26):
+                            # A jump inside the target resolves exactly because the target is linked at its retail address.
+                            word = int.from_bytes(section_data[relocation["r_offset"]:relocation["r_offset"] + 4], "little")
+                            destination = (word & 0x3FFFFFF) << 2
+                            if not start <= destination < start + size:
+                                raise RuntimeError(f"Target jumps outside itself to section offset {destination:#x}.")
+                            target_relocations.append({"offset": hex(relocation["r_offset"] - start),
+                                                       "type": R_MIPS_26, "symbol": section_name,
+                                                       "internal_target": hex(destination - start)})
+                            continue
+                        if name in ambiguous_symbols:
+                            addresses = ", ".join(hex(value) for value in sorted(ambiguous_symbols[name]))
+                            raise RuntimeError(f"Ambiguous target relocation {name}: {addresses}")
+                        if name not in symbols:
+                            raise RuntimeError(f"Target relocation has no verified retail address: {name or 'section-relative'}")
+                        target_relocations.append({"offset": hex(relocation["r_offset"] - start),
+                                                   "type": relocation["r_info_type"], "symbol": name,
+                                                   "address": hex(symbols[name])})
+            text_base = address - start
             linker_symbols = snapshot / "retail-symbols.ld"
+            # SUBALIGN prevents input-section alignment padding from shifting compiled offsets.
             linker_symbols.write_text(
-                "\n".join(f"{name} = 0x{value:X};" for name, value in sorted(symbols.items())) + "\n",
+                "\n".join(f"{name} = 0x{value:X};" for name, value in sorted(symbols.items()))
+                + f"\nSECTIONS {{ {section_name} 0x{text_base:X} : SUBALIGN(4) {{ *({section_name}) }} }}\n",
                 encoding="ascii",
             )
             linked_path = snapshot / "unit.elf"
-            run([
-                "mipsel-linux-gnu-ld", "-G0", "-nostdlib", "--build-id=none",
-                "-e", "0", "-Ttext", "0x100000", "-T", linker_symbols,
-                "-o", linked_path, object_path,
-            ], cwd=snapshot)
+            # Unresolved symbols outside the target cannot affect compared bytes; target relocations are verified above.
+            linker_arguments = ["-G0", "-nostdlib", "--build-id=none", "--unresolved-symbols=ignore-all",
+                                "-e", "0", "-T", linker_symbols.name,
+                                "-o", linked_path.name, object_path.name]
+            run(["mipsel-linux-gnu-ld", *linker_arguments], cwd=snapshot)
             with linked_path.open("rb") as stream:
                 linked = ELFFile(stream)
-                actual = linked.get_section_by_name(section.name).data()[start:start + size]
+                text = linked.get_section_by_name(section_name)
+                if text is None or text["sh_addr"] != text_base:
+                    raise RuntimeError("Linked target section is not at its retail-relative address.")
+                actual = text.data()[start:start + size]
             differences = [
                 {"offset": index, "expected": expected[index:index + 4].hex(), "actual": actual[index:index + 4].hex()}
                 for index in range(0, max(len(expected), len(actual)), 4)
                 if expected[index:index + 4] != actual[index:index + 4]
             ]
+            status = {"canonical": "", "candidate": "CANDIDATE_", "probe": "PROBE_"}[mode] + ("DIFF" if differences else "MATCH")
+            tool_versions = {name: run([name, "--version"], timeout=10).decode("utf-8", errors="replace").splitlines()[0]
+                             for name in ("make", "mipsel-linux-gnu-cpp", "mipsel-linux-gnu-as", "mipsel-linux-gnu-ld")}
             report = {
-                "status": (("PROBE_MATCH" if not differences else "PROBE_DIFF") if native_header_probe
-                           else ("MATCH" if not differences else "DIFF")),
-                "scope": "function-instructions-retail-relocations",
-                "source": source.as_posix(), "source_sha256": digest(canonical), "function": function,
-                "cpu_address": hex(address), "file_offset": hex(offset), "retail_sha1": retail_sha1,
+                "status": status, "mode": mode, "scope": "function-instructions-retail-relocations",
+                "generated_utc": datetime.now(timezone.utc).isoformat(),
+                "command": [sys.executable, *sys.argv], "report_path": str(report_path),
+                "source": source.as_posix(), "source_sha256": digest(canonical),
+                "candidate": str(candidate) if candidate else None,
+                "candidate_sha256": digest(candidate) if candidate else None,
+                "function": function, "cpu_address": hex(address), "file_offset": hex(offset),
+                "comparison_bytes": expected_size,
+                "retail": {"path": configuration["options"]["target_path"], "sha1": retail_sha1,
+                           "sha256": hashlib.sha256(retail_bytes).hexdigest()},
                 "compiler": version, "compiler_sha256": digest(compiler), "cc1_flags": compiler_flags,
-                "cpp_flags": cpp_flags, "assembler_flags": assembler_flags, "aspsx_version": "2.77",
+                "cpp_flags": cpp_flags, "maspsx_flags": maspsx_flags, "assembler_flags": assembler_flags,
+                "linker_arguments": linker_arguments, "tool_versions": tool_versions,
+                "verifier_sha256": digest(Path(__file__).resolve()),
+                "splat_artifacts": {"manifest_sha256": manifest_digest, "splat64": manifest["splat64"],
+                                    "generated_utc": manifest["generated_utc"]},
+                "snapshot_files": len(inputs), "snapshot_sha256": aggregate_digest(inputs),
+                "dependencies": dependencies, "target_relocations": target_relocations,
                 "expected_bytes": len(expected), "actual_bytes": len(actual), "differences": differences,
                 "canonical_sources_unchanged": before == source_inventory(),
                 "native_header_probe": native_header_probe,
-                "limitations": ["Not a linked-overlay match or behavioral proof.", "Other INCLUDE_ASM bodies omitted via OBJDIFF."]
+                "limitations": ["Function-only comparison: not a source-unit or linked-overlay match or behavioral proof.",
+                                "Other INCLUDE_ASM/INCLUDE_RODATA bodies are omitted via OBJDIFF.",
+                                "Relocations outside the target function are not validated."]
+                    + (["Noncanonical candidate outside canonical source: never acceptance evidence."] if candidate else [])
                     + (["Noncanonical native/MIPS standard headers: compatibility probe only."]
                        if native_header_probe else []),
             }
             if not report["canonical_sources_unchanged"]:
                 raise RuntimeError("Canonical source hash or timestamp changed during verification.")
-            reports = cache / "reports"
-            reports.mkdir(exist_ok=True)
-            report_path = reports / f"{source.stem}-{function}.json"
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            report_path.with_suffix(".s").write_bytes(assembly)
+            report_path.with_suffix(".dis").write_bytes(run([
+                "mipsel-linux-gnu-objdump", "-d", "-z", f"--start-address=0x{address:X}",
+                f"--stop-address=0x{address + size:X}", linked_path.name], cwd=snapshot))
             report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-            print(f"{report['status']} {function}: {len(actual)} compiled / {len(expected)} retail bytes; GCC {version}")
+            print(f"{status} {function}: {len(actual)} compiled / {len(expected)} retail bytes; GCC {version}")
             print(f"Canonical source hashes/timestamps unchanged. Report: {report_path}")
             for difference in differences[:12]:
                 print(f"  +0x{difference['offset']:X}: retail {difference['expected']} compiled {difference['actual']}")
-            return 0 if not differences else 1
+            if differences:
+                return 1
+            return 0 if mode == "canonical" else 3
     finally:
         if before != source_inventory():
             raise RuntimeError("Canonical sources changed while the verifier ran; do not trust this check.")
@@ -306,6 +413,7 @@ def main():
     parser.add_argument("--cache", type=Path, default=Path.home() / ".cache" / "vagrant-matching")
     parser.add_argument("--source")
     parser.add_argument("--function")
+    parser.add_argument("--candidate", type=Path, help="Noncanonical candidate unit outside canonical source folders")
     arguments = parser.parse_args()
     try:
         require_wsl()
@@ -319,12 +427,12 @@ def main():
                 raise RuntimeError("check requires --source and --function.")
             if not (cache / "toolchain.json").is_file():
                 raise RuntimeError("Verifier is not initialized; run init first.")
-            return check_function(cache, arguments.source, arguments.function)
+            return check_function(cache, arguments.source, arguments.function, arguments.candidate)
         else:
             state = cache / "toolchain.json"
             print(state.read_text(encoding="utf-8") if state.is_file() else "Not initialized; run init.")
         return 0
-    except (OSError, RuntimeError, ValueError, ImportError, subprocess.TimeoutExpired) as error:
+    except (OSError, RuntimeError, ValueError, KeyError, ImportError, subprocess.TimeoutExpired) as error:
         print(f"Verifier error: {error}", file=sys.stderr)
         return 2
 

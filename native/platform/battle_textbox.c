@@ -7,11 +7,11 @@
  * shows as "Choose items to equip."
  *
  * Translated from:
- *   build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94/func_800CB83C.s  (driver)
+ *   build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94/vs_battle_renderTextBoxes.s  (driver)
  *   build/src/BATTLE/BATTLE.PRG/nonmatchings/5BF94/func_800CD158.s  (box frame)
  * Native-functional (PSX build keeps the assembly).
  *
- * func_800CD3E4 (the 566-instr dialogue/menu-box frame, box states 2/7) is NOT
+ * vs_battle_renderDialogBalloon (the 566-instr dialogue/menu-box frame, box states 2/7) is NOT
  * needed for the info box (state 4 -> func_800CD158) and is left as a safe
  * no-op; see docs/NATIVE_DEVIATIONS.md.
  */
@@ -46,7 +46,7 @@ extern void    _printVariableWidthFont(void* box);
 extern void    _printFixedWidthFont(void* box, int arg1);
 extern void    _renderTextImmediate(void* box, int arg1);
 extern void    func_800CD158(int boxIdx);
-extern void    func_800CD3E4(int boxIdx);
+extern void    vs_battle_renderDialogBalloon(int boxIdx);
 extern void    _renderTimer(void* arg);
 extern void    func_800CB708(void);
 extern int     vs_battle_keystreamBits(int a);
@@ -56,7 +56,7 @@ extern int     vs_battle_keystreamBits(int a);
 #define SB(p)      (*(u_char*)(p))
 #define IW(p)      (*(int*)(p))
 
-void func_800CB83C(void)
+void vs_battle_renderTextBoxes(void)
 {
     int boxIdx;
     int off = 0x150;   /* byte offset of box 7 (7 * 0x30) */
@@ -136,7 +136,7 @@ void func_800CB83C(void)
                 break;
             case 2:                       /* L800CBAC4 -> dialogue/menu box frame */
             case 7:
-                func_800CD3E4(boxIdx);
+                vs_battle_renderDialogBalloon(boxIdx);
                 drewFrame_fallthrough = 1;   /* falls into L800CBACC/D0 */
                 break;
             case 1:                       /* L800CBACC */
@@ -172,10 +172,10 @@ void func_800CB83C(void)
     vs_battle_keystreamBits(0);
 }
 
-/* func_800CD3E4: dialogue/menu-box frame (box states 2 & 7). Not used by the
+/* vs_battle_renderDialogBalloon: dialogue/menu-box frame (box states 2 & 7). Not used by the
  * info box (state 4). Safe no-op until a dialogue/menu box screen is brought
  * up and can be diffed against DuckStation. See docs/NATIVE_DEVIATIONS.md. */
-void func_800CD3E4(int boxIdx) { (void)boxIdx; }
+void vs_battle_renderDialogBalloon(int boxIdx) { (void)boxIdx; }
 
 /* func_800CD158: draws the info box's background frame (render state 4) -- the
  * shaded bar behind the info text. It emits `count` pairs of edge sprites with a

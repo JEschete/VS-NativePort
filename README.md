@@ -1,23 +1,28 @@
 # Vagrant Story: Native Port
 
-A native PC port of **Vagrant Story** (PlayStation, 2000), built on top of a
-matching decompilation of the original game.
+A project to finish a Windows decompilation of **Vagrant Story** (PlayStation,
+2000), with a native PC port as a later goal.
+
+**Current status:** the decompilation is unfinished. The Linux/upstream checkout
+is reference only, and Windows decompilation has two accepted function-level
+matches beyond that reference; no source unit or overlay is matched. The native
+port has not started as an accepted implementation. Existing native code and
+executables are legacy experiments, not a playable port or completed milestones.
 
 The approach is the one Ship of Harkinian popularised: decompile the game to C,
 replace the console's hardware layer with a host implementation, and compile the
-*same source* for x86. The game's own decompiled code runs natively, with no
-emulation and no binary translation. Only the PlayStation-specific libraries
-underneath it are reimplemented.
+*same source* for x86. This is the intended architecture, not a claim that the
+decompilation or the native hardware replacements are complete.
 
-This repository builds **two targets from one source tree**:
+The repository contains build entry points for two intended targets:
 
 | Target | Command | Output |
 | --- | --- | --- |
-| Matching PSX build | Visual Studio `Decomp` project | Retail overlays, verified against the original disc when Windows historical compilers are supplied |
-| Native x86 build | Visual Studio `NativePort` project | `build/windows/Debug/vagrant-native.exe`, a Win32 Windows binary |
+| Matching PSX build | Visual Studio `Decomp` project | Requires historical Windows compilers and fresh byte-exact verification; not an accepted local result |
+| Experimental native scaffold | Visual Studio `NativePort` project | Blocked by unresolved game symbols; no generic data buffers or implicit abort stubs |
 
-The matching build is the correctness oracle. Every change to `src/` has to keep
-it byte-identical, which is what stops the port drifting away from the real game.
+Fresh byte-exact matching is the acceptance gate for reconstructed game source.
+Historical reference matches and host test passes do not satisfy that gate.
 
 ## Relationship to rood-reverse
 
@@ -29,7 +34,9 @@ pulls from it regularly.
 
 The unmodified reference is under `resources/rood-reverse`. The maintained
 Windows snapshot is under `resources/rood-reverseWin`; ser-pounce's source,
-headers, assets and decompilation configuration always take precedence there.
+headers, assets and configuration establish its imported baseline. Build
+verification never synchronizes or replaces source. Explicit synchronization
+refuses local additions, edits, deletions, or populated unmanifested source.
 Windows orchestration and generated native adapters are kept separately.
 The root owns `native/`, Windows build tooling and the port documentation.
 Please direct decompilation credit upstream.
@@ -56,7 +63,9 @@ you have built once, the `.bin` can go back on the shelf.
 
 The maintained build targets **Windows directly**, with a Visual Studio 2022
 Win32 solution and the installed Clang compiler. WSL, Linux, Nix and Docker
-are not build dependencies. The upstream reference remains unmodified.
+are not native-build dependencies. Current decompilation rules allow isolated
+WSL historical-compiler verification only; the Linux checkout remains read-only
+reference material, not Windows progress.
 
 ### Requirements
 
@@ -95,17 +104,24 @@ It requires genuine Windows historical `cc1.exe` builds for 2.7.2-psx,
 Missing compilers cause an explicit error; Linux executables and WSL/Docker
 fallbacks are rejected. Current Windows byte-matching verification is pending.
 
-### Native build
+### Experimental Native Scaffold
 
-Build `NativePort` in the generated solution. Native source/data/stub inputs
+The legacy `NativePort` target retains experimental source/data inputs. They
 are generated under ignored `build/` from the authoritative source snapshot
 and your retail data; they do not modify matching source files.
 
-The stub layer is how the port finds its next task. Any game function not yet
-reached becomes a stub that aborts with its own name, so bring-up is
-demand-driven.
+The symbol check now fails on missing game functions and data instead of
+manufacturing a successful link. Generic 4 KB data arrays are forbidden.
+The generator's explicit `--allow-function-stubs` option is diagnostic only;
+it permits named aborts for known functions, never unknown data. Normal builds
+do not enable it. Correct symbol resolution still does not prove game behavior.
 
-## Running the native port
+## Legacy Probe Execution
+
+Old executables are experimental artifacts and may contain unsafe historical
+data buffers or stale source. They are not accepted builds and should not be
+used to infer progress or test real saves. Native implementation must follow
+accepted decompilation; this is not the project's current development stage.
 
 Run this command from the repository root so relative `data/` and
 `native/saves/` paths resolve correctly. Visual Studio uses that same working
@@ -115,18 +131,16 @@ directory when launching the `NativePort` project.
 build/windows/Debug/vagrant-native.exe
 ```
 
-The Windows executable builds and links. Bounded SDL-window runs verify the
-loading image and publisher logo with real, nonblack framebuffer pixels.
-Full title/menu/movie and game-world execution have not yet been certified on
-Windows. Historical Linux bring-up results below are not a claim of Windows
-gameplay parity.
+Earlier Windows experiments reported loading-image and publisher-logo pixels.
+Those observations certify neither current source nor complete gameplay,
+decompilation, or native-port progress. The stricter symbol gate intentionally
+blocks the incomplete scaffold; an older executable is not a workaround.
 
 An initial Windows migration bug left image-header and palette symbols as
 zero-filled stubs, producing a black screen despite successful SDL startup.
-Native asset generation now preserves upstream's header/palette/pixel offsets,
-and the build rescans object symbols before generating stubs. Rebuild `NativePort`
-after updating these files; an older executable still contains the broken assets.
-The splash sequence is not instantaneous, so allow time for the logos and movie.
+Legacy asset generation preserves upstream's header/palette/pixel offsets.
+This infrastructure correction did not implement the missing game or hardware
+contracts. A startup watchdog or nonblack screenshot is not gameplay acceptance.
 
 ### Environment variables
 
@@ -155,10 +169,10 @@ interactive Windows verification.
 
 ### Memory card
 
-The port reads and writes a real PS1 memory card image at
-`native/saves/test_card.mcd`. Point it at a copy of your own card to load your
-own saves. **Keep a pristine copy**, because save tests mutate it.
-The Windows copy does not automatically import a card image from your WSL checkout.
+The experimental card backend uses `native/saves/test_card.mcd`, but creation,
+BIOS rename, formatting, cache coherence and durable writes are incomplete.
+Do not use real saves for validation. Future tests must use disposable fixtures
+and prove the complete save/load transaction before any support claim.
 
 ## Tools and scripts
 
@@ -169,7 +183,7 @@ Generated native sources now live under ignored `build/native-data/` and
 | --- | --- |
 | `native/tools/prepare_data.py` | Generates retail assets, string includes and the Windows LBA map |
 | `native/tools/prepare_native.py` | Applies host-only compatibility to generated native inputs |
-| `native/tools/coff_stubs.py` | Generates named aborts and data blocks from Win32 COFF symbols |
+| `native/tools/coff_stubs.py` | Rejects unresolved game symbols; explicit diagnostic aborts only, never guessed data |
 | `native/tools/harvest_data.py` | Copies read-only retail tables using the authoritative symbol maps |
 | `tools/windows.py` | Windows bootstrap, upstream synchronization and matching-build operations |
 | `tools/Probe-Native.ps1` | Hard-bounded startup check; add `-Windowed` to exercise SDL |
@@ -178,32 +192,38 @@ Generated native sources now live under ignored `build/native-data/` and
 ### Tests
 
 The solution contains `test_host`, `test_gte`, `test_gpu` and `test_inline_gte`.
-Windows verification has passed the host test, 891 GTE checks, 18 GPU checks
-and the inline-GTE adapter test. Python build regressions run with:
+These are infrastructure experiments, not decompilation or native-port
+acceptance. Earlier reports of host/GTE/GPU passes are separate from fresh
+byte-exact reports. Python build regressions run with:
 
 ```powershell
 build/python/Scripts/python.exe -m unittest discover -s native/tests -p 'test_*.py'
 ```
 
-`mdectest` is the video regression. It demuxes `TITLE.STR` and checks that every
-frame codes exactly the macroblocks its dimensions call for. A desynchronised
-bitstream cannot land on the right count by accident, so **593/593** is a sharp
-result.
+The legacy MDEC harness checks VLC macroblock counts, not pixel equivalence,
+full-frame coverage enforcement, or working Windows movie playback. Its
+historical 593-frame report is reference research, not a completed feature.
 
 ## Status
 
-**Historical matching build:** all 21 former targets byte-identical on Linux.
-**Current Windows matching build:** historical Windows compilers not yet supplied.
+**Linux decompilation:** reference only; inherited percentages and 21-target
+matching reports are not results of this Windows project.
 
-**Decompilation:** about 72% of functions matched. Menus and the title sequence
-are at 100%. `BATTLE.PRG` is the long pole.
+**Windows decompilation:** two accepted function-level matches beyond the
+imported reference (func_800A2790 and func_800A25EC in BATTLE `38C1C.c`); no
+source-unit or overlay match. The removed candidate and its 63-group report are not current
+validation. See [Local Progress](resources/rood-reverseWin/DECOMP_PROGRESS.md).
 
-**Historical native bring-up**, prior Linux results retained for reference:
+**Native port:** not started as an accepted implementation. Legacy experimental
+code remains for research; missing game code, data contracts, card operations,
+and hardware behavior must not be hidden by a successful link.
+
+**Historical Linux prototype reports**, retained only as reference:
 
 - Boots the real retail sequence to the title menu, all game code, unmodified
 - Plays the intro FMV using a software MDEC (VLC, dequantise, IDCT, YCbCr)
   decoding all 593 frames of `TITLE.STR`
-- Software GTE, verified bit-exact against real COP2 hardware
+- Selected GTE comparisons against captured emulator outputs, not proof of every operation or physical hardware fidelity
 - Virtual CD drive serving the extracted data by LBA at authentic 2x timing
 - Memory card reads and writes a real `.mcd`, and the in-game LOAD screens
   enumerate genuine saves
@@ -212,20 +232,16 @@ are at 100%. `BATTLE.PRG` is the long pole.
   console: a software SPU (24 ADPCM voices, ADSR, stereo) driven by the game's
   own Akao sound driver, and the CD-XA soundtrack interleaved into the movie
 
-**Not yet:** music (nothing on the boot path asks for any yet), reverb, the 3D
-scene, and the game world itself. The last of those is gated on `BATTLE.PRG`,
-which is the bulk of the remaining decompilation.
-
-Every native-only shortcut, no-op and stub is tracked in
-[`docs/NATIVE_DEVIATIONS.md`](docs/NATIVE_DEVIATIONS.md). Nothing is quietly
-approximated.
+These reports do not establish any current Windows feature. The prerequisite
+and risk list is in [Native Deviations](docs/NATIVE_DEVIATIONS.md); historical
+"DONE" labels there describe experiments, not current acceptance.
 
 ## Documentation
 
 | Document | Contents |
 | --- | --- |
-| [`docs/NATIVE_PORT_PLAN.md`](docs/NATIVE_PORT_PLAN.md) | The working plan, phase by phase, with a "start here" status section and the traps each phase cost |
-| [`docs/NATIVE_DEVIATIONS.md`](docs/NATIVE_DEVIATIONS.md) | Every deviation from faithful behaviour, and what would retire it |
+| [`docs/NATIVE_PORT_PLAN.md`](docs/NATIVE_PORT_PLAN.md) | Preserved design/backlog and historical prototype notes; not current progress |
+| [`docs/NATIVE_DEVIATIONS.md`](docs/NATIVE_DEVIATIONS.md) | Current native prerequisites plus the historical experiment ledger |
 | [`docs/PSX_NOTES.md`](docs/PSX_NOTES.md) | Hardware notes, including the GTE differential-validation method |
 | [`docs/RAInfo.md`](docs/RAInfo.md) | RetroAchievements code notes: the persistent game-state layout |
 

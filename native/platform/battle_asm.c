@@ -131,7 +131,7 @@ void vs_overlay_getSp(int* sp) { int local; *sp = (int)(long)&local; }
 
 /* func_8007ACB0: sets up the GTE camera matrix for the ITEMS submenu 3D
  * background scene (rotating character/weapon model). The synthetic harness
- * loads no 3D models (D_800F4538 slots null), so the scene has nothing to
+ * loads no 3D models (vs_battle_actorModels slots null), so the scene has nothing to
  * draw -- no-op it and let the 2D item list render. Phase-3+ work will load
  * real models and reinstate the full decomp. */
 void func_8007ACB0(void) { (void)0; }

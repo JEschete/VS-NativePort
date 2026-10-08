@@ -17,8 +17,16 @@ typedef struct {
     u_short unk8[0];
 } func_800AD494_t;
 
+typedef struct {
+    short unk0;
+    short unk2;
+    short unk4;
+    short unk6;
+} func_8008D2C0_t;
+
 void func_8007A824(DR_MOVE*);
-void func_800A0204(int, int, int, int);
+int func_8008D2C0(func_8008D2C0_t*);
+void vs_battle_animateCharacter(int, int, int, int);
 void func_800A1280(int, int, SVECTOR*, int);
 void func_800A1720(int, int, void*, int*);
 int func_800A6EE8(SVECTOR*, int, int, int);
@@ -36,7 +44,9 @@ extern u_char D_800F2450[];
 extern void* D_800F4768;
 extern char D_800F49DC;
 extern u_char D_800F49E4;
+extern int D_800F49F4;
 extern u_char D_800F49F8;
+extern short D_800F4B00;
 
 _mpdRoomSection3* func_800A8D64(SVECTOR* arg0, int arg1)
 {
@@ -150,7 +160,60 @@ int func_800A92B8(int arg0, int arg1)
     return var_t0;
 }
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/40564", func_800A9378);
+int func_800A9378(int arg0, int arg1, int arg2, int arg3)
+{
+    func_8008D2C0_t sp10[4];
+    int count;
+    int i;
+
+    D_800F49F4 = 0;
+    count = func_8008D2C0(sp10);
+
+    if (count == 0) {
+        return 0;
+    }
+
+    for (i = 0; i < count; ++i) {
+        if ((arg0 >= sp10[i].unk0 + 64) || (arg0 < sp10[i].unk0 - 64)) {
+            continue;
+        }
+
+        if ((arg2 >= sp10[i].unk4 + 64) || (arg2 < sp10[i].unk4 - 64)) {
+            continue;
+        }
+
+        switch (arg3) {
+        case 0:
+            if (sp10[i].unk2 < arg1 - 256) {
+                continue;
+            }
+            break;
+
+        case 1:
+            if (sp10[i].unk2 < arg1 - 256) {
+                return sp10[i].unk2 + 96;
+            }
+            continue;
+
+        case 2:
+            if ((sp10[i].unk2 >= arg1) || (sp10[i].unk2 < arg1 - 128)) {
+                continue;
+            }
+            break;
+
+        case 3:
+            if ((sp10[i].unk2 >= arg1) || (sp10[i].unk2 < arg1 - D_800F4B00)) {
+                continue;
+            }
+            return sp10[i].unk2 + 96;
+        }
+
+        D_800F49F4 = sp10[i].unk6 + 2;
+        return sp10[i].unk2;
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/40564", func_800A9530);
 
@@ -158,7 +221,7 @@ void func_800A97EC(int arg0, func_8006EBF8_t_fields* arg1, int arg2, int arg3)
 {
     int angle;
 
-    D_800F4538_t* actor = D_800F4538[arg0];
+    D_800F4538_t* actor = vs_battle_actorModels[arg0];
 
     if (arg2 == 0 && arg3 == 0) {
 
@@ -210,7 +273,7 @@ INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/40564", func_800A9988);
 
 void func_800A9C54(int arg0, func_8006EBF8_t_fields* arg1, int arg2)
 {
-    D_800F4538_t* temp_s0 = D_800F4538[arg0];
+    D_800F4538_t* temp_s0 = vs_battle_actorModels[arg0];
 
     if (arg2 == -1) {
         func_800AA290(arg0, arg1, -1, temp_s0->unk5C2);
@@ -225,7 +288,7 @@ void func_800A9C54(int arg0, func_8006EBF8_t_fields* arg1, int arg2)
 
 void func_800A9CDC(int arg0, func_8006EBF8_t_fields* arg1, int arg2)
 {
-    D_800F4538_t* new_var = D_800F4538[arg0];
+    D_800F4538_t* new_var = vs_battle_actorModels[arg0];
 
     if (arg2 == -1) {
         func_800AA490(arg0, arg1, -1, new_var->unk5C0);
@@ -237,7 +300,7 @@ void func_800A9CDC(int arg0, func_8006EBF8_t_fields* arg1, int arg2)
 void func_800A9D24(int arg0, SVECTOR* arg1, int arg2)
 {
     u_short temp_s0;
-    D_800F4538_t* temp_s1 = D_800F4538[arg0];
+    D_800F4538_t* temp_s1 = vs_battle_actorModels[arg0];
 
     if (arg2 == -1) {
         func_800AA698(arg0, arg1, -1);
@@ -256,7 +319,7 @@ void func_800A9D90(int arg0, SVECTOR* arg1, int arg2)
 {
     SVECTOR sp10;
     u_short temp_s0;
-    D_800F4538_t* temp_s1 = D_800F4538[arg0];
+    D_800F4538_t* temp_s1 = vs_battle_actorModels[arg0];
 
     sp10.vx = arg1->vx - temp_s1->unk0.position.vx;
     sp10.vy = arg1->vy - temp_s1->unk0.position.vy;
@@ -278,7 +341,7 @@ void func_800A9D90(int arg0, SVECTOR* arg1, int arg2)
 void func_800A9E38(int arg0, short arg1, int arg2)
 {
     u_short temp_s0;
-    D_800F4538_t* temp_s1 = D_800F4538[arg0];
+    D_800F4538_t* temp_s1 = vs_battle_actorModels[arg0];
 
     if (arg2 == -1) {
         func_800AA984(arg0, arg1, -1);
@@ -296,7 +359,7 @@ void func_800A9E38(int arg0, short arg1, int arg2)
 void func_800A9EB4(int arg0, short arg1, int arg2)
 {
     u_short temp_s0;
-    D_800F4538_t* temp_s1 = D_800F4538[arg0];
+    D_800F4538_t* temp_s1 = vs_battle_actorModels[arg0];
 
     arg1 -= temp_s1->unk0.facing;
 
@@ -325,7 +388,7 @@ void func_800A9F64(int arg0, SVECTOR* arg1, int arg2)
 {
     u_short temp_s0;
 
-    D_800F4538_t* temp_s1 = D_800F4538[arg0];
+    D_800F4538_t* temp_s1 = vs_battle_actorModels[arg0];
 
     if (arg2 == -1) {
         func_800AAA88(arg0, arg1, -1);
@@ -344,7 +407,7 @@ void func_800A9FD0(int arg0, SVECTOR* arg1, int arg2)
 {
     SVECTOR sp10;
     int temp_s0;
-    D_800F4538_t* temp_s1 = D_800F4538[arg0];
+    D_800F4538_t* temp_s1 = vs_battle_actorModels[arg0];
 
     sp10.vx = arg1->vx - temp_s1->unk0.unk24;
 
@@ -391,7 +454,7 @@ void func_800A9FD0(int arg0, SVECTOR* arg1, int arg2)
 
 void func_800AA108(int arg0, func_8006EBF8_t_fields* arg1, int arg2, int arg3)
 {
-    D_800F4538_t* temp_s0 = D_800F4538[arg0];
+    D_800F4538_t* temp_s0 = vs_battle_actorModels[arg0];
 
     if (temp_s0 != NULL) {
 
@@ -423,7 +486,7 @@ void func_800AA108(int arg0, func_8006EBF8_t_fields* arg1, int arg2, int arg3)
 
 void func_800AA218(int arg0, func_8006EBF8_t_fields* arg1, int arg2)
 {
-    D_800F4538_t* temp_s0 = D_800F4538[arg0];
+    D_800F4538_t* temp_s0 = vs_battle_actorModels[arg0];
 
     if (temp_s0 != NULL) {
         func_800AA290(arg0, arg1, arg2, temp_s0->unk5C2);
@@ -438,7 +501,7 @@ void func_800AA290(int arg0, func_8006EBF8_t_fields* arg1, int arg2, int arg3)
     SVECTOR target;
     int dist;
     int temp;
-    D_800F4538_t* actor = D_800F4538[arg0];
+    D_800F4538_t* actor = vs_battle_actorModels[arg0];
 
     if (actor == NULL) {
         return;
@@ -497,14 +560,14 @@ void func_800AA290(int arg0, func_8006EBF8_t_fields* arg1, int arg2, int arg3)
 
 void func_800AA454(int arg0, func_8006EBF8_t_fields* arg1, int arg2)
 {
-    func_800AA490(arg0, arg1, arg2, D_800F4538[arg0]->unk5C0);
+    func_800AA490(arg0, arg1, arg2, vs_battle_actorModels[arg0]->unk5C0);
 }
 
 void func_800AA490(int arg0, func_8006EBF8_t_fields* arg1, int arg2, int arg3)
 {
     int angle;
     int dz;
-    D_800F4538_t* actor = D_800F4538[arg0];
+    D_800F4538_t* actor = vs_battle_actorModels[arg0];
 
     if (actor == NULL) {
         return;
@@ -568,7 +631,7 @@ void func_800AA600(int arg0, SVECTOR* arg1, int arg2) { func_800AA698(arg0, arg1
 void func_800AA620(int arg0, SVECTOR* arg1, int arg2)
 {
     SVECTOR sp10;
-    D_800F4538_t* temp_a3 = D_800F4538[arg0];
+    D_800F4538_t* temp_a3 = vs_battle_actorModels[arg0];
 
     if (temp_a3 != NULL) {
         sp10.vx = arg1->vx - temp_a3->unk0.position.vx;
@@ -583,7 +646,7 @@ void func_800AA698(int arg0, SVECTOR* arg1, int arg2)
 {
     int dist;
     int temp;
-    D_800F4538_t* actor = D_800F4538[arg0];
+    D_800F4538_t* actor = vs_battle_actorModels[arg0];
 
     if (actor == NULL) {
         return;
@@ -642,7 +705,7 @@ void func_800AA850(int arg0, u_short arg1, int arg2)
 {
     short temp_a1;
     short var_v1;
-    D_800F4538_t* temp_v0 = D_800F4538[arg0];
+    D_800F4538_t* temp_v0 = vs_battle_actorModels[arg0];
 
     if (temp_v0 == NULL) {
         return;
@@ -666,7 +729,7 @@ void func_800AA8D0(int arg0, short arg1, int arg2)
 {
     int arg2_2;
     int var_v0;
-    D_800F4538_t* temp_v0 = D_800F4538[arg0];
+    D_800F4538_t* temp_v0 = vs_battle_actorModels[arg0];
 
     if (temp_v0 == NULL) {
         return;
@@ -699,7 +762,7 @@ void func_800AA8D0(int arg0, short arg1, int arg2)
 void func_800AA984(int arg0, short arg1, int arg2)
 {
     int m;
-    D_800F4538_t* a = D_800F4538[arg0];
+    D_800F4538_t* a = vs_battle_actorModels[arg0];
 
     if (a == NULL) {
         return;
@@ -746,7 +809,7 @@ void func_800AAA68(int arg0, SVECTOR* arg1, int arg2) { func_800AAA88(arg0, arg1
 
 void func_800AAA88(int arg0, SVECTOR* arg1, int arg2)
 {
-    D_800F4538_t* a = D_800F4538[arg0];
+    D_800F4538_t* a = vs_battle_actorModels[arg0];
     int m;
 
     a->unk0.unk3C = arg1->vx;
@@ -793,7 +856,7 @@ void func_800AAA88(int arg0, SVECTOR* arg1, int arg2)
 
 void func_800AABD0(int arg0, SVECTOR* arg1, int arg2)
 {
-    D_800F4538_t* temp_a3 = D_800F4538[arg0];
+    D_800F4538_t* temp_a3 = vs_battle_actorModels[arg0];
 
     if (temp_a3 != NULL) {
 
@@ -920,7 +983,7 @@ void func_800AB2AC(int arg0)
         int i;
 
         for (i = 0; i < 17; ++i) {
-            D_800F4538_t* temp_s0 = D_800F4538[i];
+            D_800F4538_t* temp_s0 = vs_battle_actorModels[i];
             if ((temp_s0 != NULL) && (temp_s0->unk183E[arg0] != 0xFF)) {
                 func_800AB098(temp_s0, 0, 0);
                 func_800AB098(temp_s0, 1, 0);
@@ -971,7 +1034,7 @@ INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/40564", func_800AC168);
 
 void func_800AC37C(int arg0, int arg1)
 {
-    D_800F4538_t* temp_a0 = D_800F4538[arg0];
+    D_800F4538_t* temp_a0 = vs_battle_actorModels[arg0];
 
     switch (arg1) {
     case 0:
@@ -993,7 +1056,7 @@ void func_800AC440(D_800F4538_t* arg0, int arg1, int arg2)
 {
     int sp10;
     int i;
-    _armature_t* temp_s2 = &arg0->unk0.unk68->armatures[arg1];
+    _armature_t* temp_s2 = &arg0->unk0.model->armatures[arg1];
 
     for (i = 0; i < 2; ++i) {
         if (arg2 == 0) {
@@ -1003,7 +1066,7 @@ void func_800AC440(D_800F4538_t* arg0, int arg1, int arg2)
                 return;
             }
         } else if (arg0->unk18D0[i] == 0) {
-            func_800A1720(arg0->unk0.unkF, arg1, arg0->unk1890[i], &sp10);
+            func_800A1720(arg0->unk0.index, arg1, arg0->unk1890[i], &sp10);
             temp_s2->unkC = i + 1;
             arg0->unk18D0[i] = arg1;
             return;
@@ -1019,7 +1082,7 @@ void func_800AC500(D_800F4538_t* arg0)
     arg0->unk18D0[1] = 0;
 
     for (i = 0; i < arg0->unk0.nBones; ++i) {
-        arg0->unk0.unk68->armatures[i].unkC = 0;
+        arg0->unk0.model->armatures[i].unkC = 0;
     }
 }
 
@@ -1031,9 +1094,9 @@ void func_800AC540(int arg0, D_800F4538_t* arg1)
         if (arg1->unk0.unk18 == 0) {
 
             if (arg1->unk0.unkA_5) {
-                func_800A0204(arg0, 0x1F, 0, 8);
+                vs_battle_animateCharacter(arg0, 0x1F, 0, 8);
             } else {
-                func_800A0204(arg0, arg1->unk6E5, 0, 8);
+                vs_battle_animateCharacter(arg0, arg1->unk6E5, 0, 8);
             }
 
             if (!(arg1->unk5AC_2 << 2)) {
@@ -1050,7 +1113,7 @@ void func_800AC540(int arg0, D_800F4538_t* arg1)
         if (arg1->unk0.unk1A == 0) {
             int temp_a1;
 
-            func_800A0204(arg0, 1, 0, 8);
+            vs_battle_animateCharacter(arg0, 1, 0, 8);
 
             temp_a1 = (u_short)arg1->unk5EC.pad;
 
@@ -1119,7 +1182,7 @@ void func_800ACFA0(short* arg0, u_char* arg1, int arg2)
     arg0[339] = 0;
 }
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/40564", func_800AD008);
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/40564", vs_battle_loadAnimation);
 
 int func_800AD494(void* arg0, int arg1, u_short** arg2)
 {
@@ -1134,7 +1197,7 @@ int func_800AD494(void* arg0, int arg1, u_short** arg2)
         idx = 0;
     } else if (arg1 == 0xFF) {
         p = actor->unk5DC[3];
-        if ((actor->unk0.unkF == 0) || (actor->unk6E6 == 2)) {
+        if ((actor->unk0.index == 0) || (actor->unk6E6 == 2)) {
             idx = D_800F49E4;
         } else {
             if (actor->unk5B1 == 0) {
@@ -1194,7 +1257,7 @@ int func_800AD494(void* arg0, int arg1, u_short** arg2)
 void func_800AD62C(int arg0, int* arg1, int* arg2)
 {
     int temp_v0;
-    D_800F4538_t* temp_s0 = D_800F4538[arg0];
+    D_800F4538_t* temp_s0 = vs_battle_actorModels[arg0];
 
     if (temp_s0->unk17E4.unk0 == 2) {
         *arg1 = 0x80;

@@ -3,8 +3,29 @@
 This is an editable source snapshot for Windows-specific development. It is a
 regular directory in the parent repository, not another Git submodule.
 The reference checkout at `../rood-reverse` remains unchanged and pulls from
-`ser-pounce/rood-reverse`. Its upstream source always takes precedence over
-local edits to the authoritative Windows decompilation snapshot.
+`ser-pounce/rood-reverse`. It is reference material only. The Windows snapshot
+has two accepted function-level matches beyond that reference; native-port
+implementation has not started as an accepted deliverable.
+
+Upstream provenance does not authorize overwriting local work. Build verification
+is read-only and reports differences as warnings. Only explicit synchronization
+may replace a pristine recorded snapshot; local additions, edits, and deletions
+are refused.
+
+## Reviewed Update: 2026-10-07
+
+The explicitly requested update imported 85 maintained changes from the
+read-only reference HEAD `ef3f027a64bf861bbf5ad3efa30851788d499ce4` using the
+previously recorded ancestor. Three overlapping BATTLE files were merged to
+preserve local verified names alongside incoming code. The reference remained
+clean and unchanged; no fetch or pull was run there. Retired Linux make recipes
+were not restored, and their new object naming was carried into the maintained
+Windows adapter instead.
+
+`upstream.json` records hashes of the committed reference files, not the locally
+merged source. The source replacement guard was not bypassed or weakened.
+See [Local Progress](DECOMP_PROGRESS.md) for preservation checks, fresh matching
+controls, and the still-unaccepted trajectory candidate in the current unit.
 
 ## Source Revisions
 

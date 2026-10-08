@@ -6,6 +6,14 @@ Linux quickstart below. See [Windows Migration](../../docs/WINDOWS_MIGRATION.md)
 for required Windows historical compilers and verification limits.
 The upstream source/configuration is authoritative; `upstream.json` records it.
 
+Windows decompilation has two accepted function-level matches beyond the
+imported reference; no unit or overlay is matched. The decompilation is
+unfinished and native-port implementation has not started as an accepted
+deliverable. See [Local Progress](DECOMP_PROGRESS.md).
+All upstream badges and the Linux instructions below describe reference work,
+not Windows achievements or current acceptance evidence. Build verification
+does not synchronize source; explicit sync refuses local changes.
+
 A decompilation project for Vagrant Story for PlayStation 1, with a goal of enabling interoperability with modern hardware and fixing bugs in the original game.
 
 This project does not contain any of the original files from the game disk, you must own a copy of the game.
@@ -43,8 +51,8 @@ Thanks also to the following amazing projects (and their dependencies):
 
 
 ![EFFPURGE.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.EFFPURGE.BIN&color=%2332a934)
-![PLG005.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG005.BIN)
-![PLG044.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG044.BIN)
+![PLG005.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG005.BIN&color=%2332a934)
+![PLG044.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG044.BIN&color=%2332a934)
 ![PLG045.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG045.BIN)
 ![PLG047.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG047.BIN)
 ![PLG049.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG049.BIN)

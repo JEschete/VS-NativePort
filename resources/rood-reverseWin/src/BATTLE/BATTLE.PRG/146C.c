@@ -473,7 +473,7 @@ void func_80086754(int, vs_battle_actor2*);
 void _applyBattleAbilityEffect(_hitEntity_t*);
 void func_80087EF4(vs_battle_actor2*);
 int func_800882F4(void);
-int func_80088554(void);
+int _tickStats(void);
 void func_80088CA0(void);
 void func_80089114(void);
 void func_80089CE4(void);
@@ -2724,7 +2724,7 @@ int func_8006E7F0(void)
                     temp_s0->unk31 * ONE);
             } else if (vs_main_buttonsPreviousState & PADR2) {
                 if (vs_main_buttonsPressed.all & PADRleft) {
-                    func_800A48CC(0,
+                    vs_battle_animateCharacterJump(0,
                         (ratan2(D_800F1A50[1], D_800F1A50[3])
                             + vs_battle_cameraCurrentSpherical.values.yaw + ONE / 2)
                             & 0xFFF,
@@ -2737,7 +2737,7 @@ int func_8006E7F0(void)
                         temp_s0->unk31 * ONE);
                 }
             } else if (vs_main_buttonsPressed.all & PADRleft) {
-                func_800A48CC(0,
+                vs_battle_animateCharacterJump(0,
                     (ratan2(D_800F1A50[1], D_800F1A50[3])
                         + vs_battle_cameraCurrentSpherical.values.yaw + ONE / 2)
                         & 0xFFF,
@@ -2750,7 +2750,7 @@ int func_8006E7F0(void)
                     temp_s0->unk33 * ONE);
             }
         } else if (!(temp_s1 & 0x80000) && (vs_main_buttonsPressed.all & PADRleft)) {
-            func_800A48CC(0,
+            vs_battle_animateCharacterJump(0,
                 (ratan2(0, 0) + vs_battle_cameraCurrentSpherical.values.yaw + ONE / 2)
                     & 0xFFF,
                 0);
@@ -4190,7 +4190,7 @@ int func_800744B8(void)
         func_8006C40C();
         return 0;
     }
-    func_800C97BC();
+    vs_battle_execMenu();
     temp_v0 = func_800CB66C();
     if (temp_v0->unk0 == 1) {
         return 1;
@@ -4693,7 +4693,7 @@ vs_battle_actor* func_800765B0(
     return NULL;
 }
 
-void func_80076784(
+void _applyCharInitData(
     int arg0, vs_battle_actor2* actor, vs_battle_charInitData* init, int arg3)
 {
     int j;
@@ -4985,7 +4985,7 @@ void func_80076F24(
     temp_s0->unk2C.u8[2] = 0;
     temp_s0->unk2C.u8[1] = 0;
     temp_s0->unk2C.u8[0] = 0;
-    func_80076784(id, temp_s4, arg1, arg5);
+    _applyCharInitData(id, temp_s4, arg1, arg5);
 }
 
 int func_80077078(vs_battle_actor* arg0, int index, int wepId,
@@ -5104,7 +5104,7 @@ vs_battle_actor_dat* func_80077240(int arg0, int arg1, int bladeWepId, int blade
 void func_800773BC(
     vs_battle_actor* arg0, int arg1, int arg2, int arg3, int arg4, int arg5)
 {
-    func_800A0204(arg1, 0, 0, 0);
+    vs_battle_animateCharacter(arg1, 0, 0, 0);
     func_800A087C(arg1, 0x1847);
     vs_battle_actors[arg1] = arg0;
     func_80076D50(arg1, arg2, arg3, arg4, arg5);
@@ -5796,7 +5796,7 @@ INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/146C", func_800793C0);
 
 void func_800797BC(void)
 {
-    func_800C97BC();
+    vs_battle_execMenu();
     if (func_800CB66C()->unk0 != 1) {
         func_8006C40C();
         func_800CB114();
@@ -5813,7 +5813,7 @@ void func_8007980C(void)
 
 void func_8007983C(void)
 {
-    func_800C97BC();
+    vs_battle_execMenu();
     if ((func_800CB66C()->unk0 != 1) && (func_800CB45C() == 0)) {
         func_8006C40C();
         func_800CB114();
@@ -5823,7 +5823,7 @@ void func_8007983C(void)
 }
 
 void _finishLoadZnd(int id);
-void func_80089DC0(int arg0);
+void _finishLoadMpd(int arg0);
 void func_8008C8A8(void);
 int func_80088B6C(void);
 void func_80088B8C(void);
@@ -6128,7 +6128,7 @@ void func_8007B7DC()
 
 void func_8007B834(void)
 {
-    func_800C97BC();
+    vs_battle_execMenu();
     if (func_800CB66C()->unk0 != 1) {
         func_8007B470();
         func_800CB114();
@@ -6138,7 +6138,7 @@ void func_8007B834(void)
 
 void func_8007B884(void)
 {
-    func_800C97BC();
+    vs_battle_execMenu();
     if (func_800CB66C()->unk0 != 1) {
         if (D_800F1864 != 0) {
             func_8007B470();
@@ -6161,7 +6161,7 @@ void func_8007B908(void)
 
 void func_8007B938(void)
 {
-    func_800C97BC();
+    vs_battle_execMenu();
     if ((func_800CB66C()->unk0 != 1) && (func_800CB45C() == 0)) {
         func_8007B470();
         func_800CB114();
@@ -11965,7 +11965,7 @@ int func_800882F4(void)
     return var_s1;
 }
 
-int func_80088554(void)
+int _tickStats(void)
 {
     int var_s1;
     int i;
@@ -12148,7 +12148,7 @@ int func_80088554(void)
     return var_s5;
 }
 
-int func_80088B6C(void) { return func_80088554(); }
+int func_80088B6C(void) { return _tickStats(); }
 
 void func_80088B8C(void)
 {
@@ -12438,7 +12438,7 @@ void _loadMpd(int id)
     vs_main_cdEnqueuePriority(_zoneContext.mpdCdFile, _zoneContext.mpdData);
 }
 
-void func_80089DC0(int arg0)
+void _finishLoadMpd(int arg0)
 {
     VECTOR sp20;
     VECTOR lookAt;

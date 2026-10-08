@@ -1,5 +1,13 @@
 # Vagrant Story — Native Port Battle Plan
 
+> Current-status correction (2026-10-05): the decompilation is unfinished.
+> Linux/upstream work is reference only; Windows has two accepted function-level
+> matches beyond the imported reference and no unit or overlay match. The native port has not started
+> as an accepted implementation. The design/backlog below is preserved, but its
+> historical "COMPLETE", "DONE", "resume point", matching and playback labels
+> are not current milestones. Use the root README and local decompilation
+> tracker for current status. Existing scaffold tests do not satisfy the design.
+
 Working plan for turning the `rood-reverse` matching decompilation into a native
 PC executable (the Ship of Harkinian model: decomp first, then replace the
 hardware layer).

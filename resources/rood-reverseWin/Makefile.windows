@@ -40,5 +40,5 @@ include $(patsubst %,config/%/Makefile,EFFECT MENU SMALL)
 BINTARGETS := $(BINARIES:%=$(BUILD)/data/%)
 TARGETS += $(BINTARGETS)
 include $(wildcard $(BINARIES:%=config/%/Makefile))
-$(BUILD)/src/TITLE/TITLE.PRG/22C.o: CPPFLAGS = -nostdinc -I include/psx -I src/include -I ./ -D__attribute__(x)= -D_LANGUAGE_C -DMENUBGSZ=$(shell $(WIN) title-bg-size config/TITLE/TITLE.PRG/splat.yaml)
+$(BUILD)/src/TITLE/TITLE.PRG/22C.c.o: CPPFLAGS = -nostdinc -I include/psx -I src/include -I ./ -D__attribute__(x)= -D_LANGUAGE_C -DMENUBGSZ=$(shell $(WIN) title-bg-size config/TITLE/TITLE.PRG/splat.yaml)
 include tools/make/windows.mk

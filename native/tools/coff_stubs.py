@@ -1,4 +1,4 @@
-"""Generate named abort stubs from bounded Win32 COFF object metadata."""
+"""Reject unresolved native symbols; optional function aborts are diagnostic only."""
 
 import argparse
 from pathlib import Path
@@ -48,7 +48,7 @@ def symbols(path: Path):
             raise ValueError(f"Invalid COFF auxiliary count: {path}")
 
 
-def generate(objects: Path, source: Path, output: Path):
+def generate(objects: Path, source: Path, output: Path, *, allow_function_stubs: bool = False):
     undefined, defined, functions = set(), set(), set()
     object_files = sorted(objects.rglob("*.obj"))
     if not object_files:
@@ -68,24 +68,34 @@ def generate(objects: Path, source: Path, output: Path):
             functions.add("_" + name)
     missing = sorted(undefined - defined)
     lines = ['extern void _native_unimplemented(const char* name);']
-    count_functions = count_data = 0
+    unresolved = []
+    count_functions = 0
     for decorated in missing:
         if not decorated.startswith("_") or decorated.startswith("__imp_") or "@" in decorated:
             continue
         name = decorated[1:]
         if name in CRT_SYMBOLS:
             continue
-        if decorated in functions:
+        if decorated in functions and allow_function_stubs:
             lines.append(f'void {name}(void) {{ _native_unimplemented("{name}"); }}')
             count_functions += 1
         else:
-            lines.append(f'unsigned char {name}[4096] __attribute__((aligned(16)));')
-            count_data += 1
+            kind = "function" if decorated in functions else "data or unclassified symbol"
+            unresolved.append(f"{name} ({kind})")
+    if unresolved:
+        raise ValueError("Native implementation is incomplete; unresolved symbols: "
+                         + ", ".join(unresolved)
+                         + ". Implement real functions and correctly sized/aliased data. "
+                         "Generic data buffers are forbidden. --allow-function-stubs permits only "
+                         "known diagnostic aborts, not a completed native port. Output was not updated.")
     output.parent.mkdir(parents=True, exist_ok=True)
     generated = "\n".join(lines) + "\n"
     if not output.exists() or output.read_text(encoding="ascii") != generated:
         output.write_text(generated, encoding="ascii")
-    print(f"Generated {count_functions} named function stubs and {count_data} data blocks")
+    if count_functions:
+        print(f"DIAGNOSTIC ONLY: generated {count_functions} function aborts; no gameplay completeness claim")
+    else:
+        print("No unresolved non-CRT symbols in inspected objects; this is not behavior or matching proof")
 
 
 if __name__ == "__main__":
@@ -93,5 +103,8 @@ if __name__ == "__main__":
     parser.add_argument("objects", type=Path)
     parser.add_argument("source", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--allow-function-stubs", action="store_true",
+                        help="Diagnostic only: allow named aborts for known functions; never fabricate data")
     arguments = parser.parse_args()
-    generate(arguments.objects, arguments.source, arguments.output)
+    generate(arguments.objects, arguments.source, arguments.output,
+             allow_function_stubs=arguments.allow_function_stubs)

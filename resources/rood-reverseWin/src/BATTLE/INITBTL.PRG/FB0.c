@@ -47,7 +47,7 @@ void func_800FA7B0(void)
     }
 
     for (i = 0; i < 17; ++i) {
-        D_800F4538[i] = NULL;
+        vs_battle_actorModels[i] = NULL;
     }
 
     D_800F4930 = vs_main_allocHeap(0x7800);

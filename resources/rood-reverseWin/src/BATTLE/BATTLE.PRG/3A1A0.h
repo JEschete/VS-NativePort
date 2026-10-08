@@ -70,7 +70,7 @@ typedef struct {
 } D_800F4538_unkC54;
 
 typedef struct {
-    int unk0;
+    int length;
     u_char unk4;
     u_char unk5;
     u_char unk6;
@@ -102,12 +102,12 @@ typedef struct {
 } D_800F4538_unk64;
 
 typedef struct {
-    u_char unk0;
+    u_char mode;
     u_char unk1;
     u_char unk2;
     u_char unk3;
     u_short unk4;
-    short unk6;
+    short facing;
     u_int unk8;
     int unkC;
     SVECTOR unk10;
@@ -151,7 +151,7 @@ typedef struct {
     u_char unkC_4 : 4;
     u_char unkD;
     u_char unkE;
-    u_char unkF;
+    u_char index;
     u_char unk10;
     u_char unk11;
     u_char unk12;
@@ -189,7 +189,7 @@ typedef struct {
     u_char lastTouchedTileZ;
     u_char unk63;
     D_800F4538_unk64 unk64;
-    D_800F4538_unk68* unk68;
+    D_800F4538_unk68* model;
 } D_800F4538_unk0;
 
 typedef struct {
@@ -285,7 +285,7 @@ typedef struct {
     u_short unk654;
     u_short menuCameraDistance;
     u_short unk658;
-    short unk65A;
+    short targetSphereOffsetY;
     int unk65C;
     int unk660;
     u_int btSeqLbas[12];
@@ -339,7 +339,7 @@ typedef struct {
     short unk1844;
     u_char unk1846;
     u_char unk1847;
-    D_800F4538_unk1848 unk1848;
+    D_800F4538_unk1848 movement;
     u_char unk1860;
     u_char unk1861;
     u_char unk1862;
@@ -449,7 +449,7 @@ typedef struct {
     u_char unkC_4 : 4;
     u_char unkD;
     u_char unkE;
-    u_char unkF;
+    u_char index;
     u_char unk10;
     u_char unk11;
     u_char unk12;
@@ -486,7 +486,7 @@ typedef struct {
     char unk5F;
     int unk60;
     D_800F4538_unk64 unk64;
-    D_800F45E0_unk68* unk68;
+    D_800F45E0_unk68* model;
     D_800F4538_t2 unk6C[42];
     u_int unk5AC_0 : 4;
     u_int unk5AC_4 : 2;
@@ -596,7 +596,7 @@ typedef struct {
 
 int func_800A1108(int, void*);
 void func_800A36E0(int, int, func_8006EBF8_t*);
-void func_800A48CC(int, int, int);
+void vs_battle_animateCharacterJump(int, int, int);
 void func_800A4D8C(void);
 void func_800A30A0(int, func_80089888_t*, int, int);
 void func_800A35A8(void);
@@ -609,6 +609,6 @@ void func_800A3E6C(int);
 int func_800A47C4(void);
 void func_800A4E68(int);
 
-extern D_800F4538_t* D_800F4538[17];
+extern D_800F4538_t* vs_battle_actorModels[17];
 extern vs_battle_wepModels_t* vs_battle_wepModels[20];
 extern D_800F45E0_t* D_800F45E0[16];

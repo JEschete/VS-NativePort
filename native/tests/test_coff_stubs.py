@@ -20,11 +20,42 @@ class CoffSymbolTests(unittest.TestCase):
             root = Path(directory)
             (root / "test.obj").write_bytes(header + symbol + struct.pack("<I", 4))
             output = root / "stubs.c"
-            generate(root, root, output)
-            self.assertIn("unsigned char _state[4096]", output.read_text())
+            output.write_text("previous output")
             timestamp = output.stat().st_mtime_ns
-            generate(root, root, output)
+            for allow_function_stubs in (False, True):
+                with self.subTest(allow_function_stubs=allow_function_stubs):
+                    with self.assertRaisesRegex(ValueError, "_state.*Generic data buffers are forbidden"):
+                        generate(root, root, output, allow_function_stubs=allow_function_stubs)
+            self.assertEqual(output.read_text(), "previous output")
             self.assertEqual(output.stat().st_mtime_ns, timestamp)
+
+    def test_missing_function_requires_explicit_diagnostic_opt_in(self):
+        header = struct.pack("<HHIIIHH", 0x14C, 0, 0, 20, 1, 0, 0)
+        symbol = struct.pack("<8sIhHBB", b"_hello\0\0", 0, 0, 0x20, 2, 0)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "test.obj").write_bytes(header + symbol + struct.pack("<I", 4))
+            output = root / "stubs.c"
+            with self.assertRaisesRegex(ValueError, "hello \\(function\\)"):
+                generate(root, root, output)
+            self.assertFalse(output.exists())
+            generate(root, root, output, allow_function_stubs=True)
+            self.assertIn('_native_unimplemented("hello")', output.read_text())
+            self.assertNotIn("unsigned char", output.read_text())
+            timestamp = output.stat().st_mtime_ns
+            generate(root, root, output, allow_function_stubs=True)
+            self.assertEqual(output.stat().st_mtime_ns, timestamp)
+
+    def test_crt_only_object_needs_no_replacement_definitions(self):
+        header = struct.pack("<HHIIIHH", 0x14C, 0, 0, 20, 1, 0, 0)
+        symbol = struct.pack("<8sIhHBB", b"_malloc\0", 0, 0, 0, 2, 0)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "test.obj").write_bytes(header + symbol + struct.pack("<I", 4))
+            output = root / "stubs.c"
+            generate(root, root, output)
+            self.assertNotIn("void malloc", output.read_text())
+            self.assertNotIn("[4096]", output.read_text())
 
     def test_external_function_symbol(self):
         header = struct.pack("<HHIIIHH", 0x14C, 0, 0, 20, 1, 0, 0)

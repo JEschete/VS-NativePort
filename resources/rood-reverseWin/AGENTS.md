@@ -65,6 +65,7 @@
 - WSL byte-exact verification must be performed after every routine implementation.
 - Keep original game assets and binaries local and ignored. DataCrystal, data,
   discs, and SLUS-01040 are references, not files to overwrite or commit.
-- Do not run automatic upstream-sync commands on local edits: the current root
-  verifier can replace source trees. Preserve user work and require explicit
-  direction before synchronization or changes outside this working directory.
+- Build preparation must never synchronize or replace source. The root verifier
+  is read-only and explicit sync refuses local changes. Preserve user work and
+  require explicit direction before synchronization or changes outside this
+  working directory; never bypass these safeguards to make a build pass.

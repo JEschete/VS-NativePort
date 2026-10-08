@@ -17,5 +17,5 @@ void func_800AABD0(int, SVECTOR*, int);
 int func_800AAD4C(int, int, int, int);
 void func_800AB4F0(void*);
 void func_800AC37C(int, int);
-void func_800AD008(void*, void*);
+void vs_battle_loadAnimation(void*, void*);
 int func_800AD494(void*, int, u_short**);

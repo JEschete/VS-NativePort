@@ -1,5 +1,39 @@
 # Native-build deviations ledger
 
+## Current Status And Prerequisites
+
+Status updated on 2026-10-05: decompilation is unfinished, Linux is reference
+only, Windows has two accepted function-level matches beyond that reference
+(no unit or overlay match), and native-port implementation has not started as
+an accepted deliverable.
+The sections below record legacy experiments. Their "DONE", "Complete",
+"21/21", and runtime claims are historical, not current Windows acceptance.
+This ledger is not an exhaustive fidelity certificate.
+
+The following work remains explicit; it has not been implemented by the status
+cleanup or by making the symbol generator stricter:
+
+| Prerequisite | Current Gap | Evidence Required Before Acceptance |
+| --- | --- | --- |
+| Matching decompilation | Two accepted function-level matches; checker controls pass at function scope; no unit or overlay match | Continued per-function canonical matches, then source-unit and overlay comparisons under the decomp rules |
+| Game entrypoints and overlays | Battle entry, excluded menu controllers, music routines and overlay return/jump paths are incomplete | Real verified implementations with end-to-end control-flow tests; no callable data arrays or implicit function aborts |
+| Data storage and aliases | The old generator invented 4 KB blocks without type, bounds, initialization or alias provenance | Correctly sized typed data, verified symbol ownership/offsets, initialization and consumer boundary tests |
+| Cards and persistence | Creation flags, BIOS rename semantics, formatting, coherent raw/filesystem writes and durable error reporting are incomplete; native packaging removes live-state capture | Disposable-card tests for create/load/save/overwrite/rename/format, full-image readback, failure paths, cache coherence and current-state capture |
+| GTE/GPU | Only selected GTE modes and GPU commands work; other modes/state, blending and draw paths are unsupported or approximated | Unsupported paths fail loudly; supported operations and render workflows pass appropriate differential checks before a fidelity claim |
+| Audio/video | Music/IRQ paths, noise, reverb, modulation, interpolation and pixel-exact decode are incomplete or approximate | Complete sequencing/transfer tests and source-bound audio/video comparisons, not merely linked symbols or macroblock counts |
+| Native integration | Legacy screenshots, watchdog exits and isolated host tests do not demonstrate a game | Accepted source first, then complete tested vertical slices with explicit behavior and data contracts |
+
+Normal symbol generation now rejects unresolved functions and data. It never
+emits generic data buffers. Explicit `--allow-function-stubs` permits known
+function aborts for diagnostics only; unknown data still fails. Old generated
+sources/executables containing guessed buffers are stale research artifacts,
+not accepted builds and not safe substitutes for the new gate.
+
+No game, card, or hardware implementation is being silently substituted for
+these requirements. Keep original assets and saves untouched during bring-up.
+
+## Historical Experiment Ledger
+
 Every place the **native x86 build** deviates from faithful game behaviour —
 no-ops, no-draw stubs, synthetic-state shortcuts, and skipped subsystems.
 This is the "come back and finish it" list. The **PSX matching build is never
@@ -18,12 +52,12 @@ These make the native menu render *incompletely* vs. the real game. Compare
 
 | # | Symbol / site | File | Native behaviour | Real behaviour | Restore when |
 |---|---|---|---|---|---|
-| A1 | `_renderAshley` | `src/MENU/_renderAshley.h:29` (`#ifdef NATIVE_BUILD` early return) | Skips the 3D character portrait entirely | Draws Ashley + equipped weapons as a rotating 3D model (GTE-transformed, lit) | 3D model data slots (`D_800F4538`) are populated — needs the model loader + a real save/inventory |
+| A1 | `_renderAshley` | `src/MENU/_renderAshley.h:29` (`#ifdef NATIVE_BUILD` early return) | Skips the 3D character portrait entirely | Draws Ashley + equipped weapons as a rotating 3D model (GTE-transformed, lit) | 3D model data slots (`D_800F4538`, now `vs_battle_actorModels`) are populated — needs the model loader + a real save/inventory |
 | A2 | `func_8007ACB0` | `native/platform/battle_asm.c` | No-op | Builds the GTE camera matrix for the submenu's 3D scene (rotating rune/cross backdrop + model) | Same as A1 — 3D scene is stood up |
 | A3 | `_printFixedWidthFontChar` | `native/platform/battle_asm.c` | Draws nothing; returns a plausible pen x-advance so layout still flows | Emits a textured fixed-width glyph sprite | A screen that uses fixed-width text is brought up and can be diffed |
-| A4 | INFORMATION box TEXT | **DONE** — `func_800CB83C` decompiled (`battle_textbox.c`) + text-box OT wired | Renders "Choose items to equip." (matches retail) | — | Complete |
+| A4 | INFORMATION box TEXT | **DONE** — `func_800CB83C` (now `vs_battle_renderTextBoxes`) decompiled (`battle_textbox.c`) + text-box OT wired | Renders "Choose items to equip." (matches retail) | — | Complete |
 | A4b | INFORMATION box FRAME | **DONE** — `func_800CD158` decompiled (`battle_textbox.c`) | Renders the shaded backing bar (semi-transparent, visible over a non-black background) | — | Complete |
-| A4c | Dialogue/menu box frame | `func_800CD3E4` no-op (`battle_textbox.c`) | Box states 2 & 7 draw no frame | Full dialogue/menu box border+gradient | A dialogue/menu-box screen is brought up (566-instr renderer) |
+| A4c | Dialogue/menu box frame | `func_800CD3E4` (now `vs_battle_renderDialogBalloon`) no-op (`battle_textbox.c`) | Box states 2 & 7 draw no frame | Full dialogue/menu box border+gradient | A dialogue/menu-box screen is brought up (566-instr renderer) |
 | A5 | Per-category item list | **DONE** | Renders the real loaded inventory (e.g. WEAPONS 3/8: Fandango, Tovarisch, Seventh Heaven) | — | Complete — needed the save load (`.mcd`) + item-name text (`load_item_text` reads ITEMNAME/ITEMHELP/MENU12.BIN) |
 | A6 | Intro FMV | **DONE** — software MDEC (`native/platform/mdec.c`, `libpress.c`, `libstream.c`) plus CD-XA audio (`cdxa.c`) | Plays the opening MDEC video stream (`TITLE.STR`), all 593 frames, **with its soundtrack** | — | Complete. **The `src/` tree now has no `NATIVE_BUILD` edits at all** — the two early returns in `22C.c` are gone |
 | A7 | Title background / menu items | **NOT A DEFECT** — renders correctly | Full title art, logo, rune backdrop, and the SOUND / NEW GAME / CONTINUE items | — | Was a false alarm: every VRAM snapshot had been taken during the ~12s publisher/developer sequence that precedes the title. `_copyTitleBgData` uploads real data (`LoadImage (480,0 544x512)` checksum `2C23F9CD`). **Boot takes ~17s of wall time before the title appears** — two 364-frame screens, plus loading |
@@ -149,7 +183,7 @@ Correct *for the synthetic harness state*, but not general reimplementations.
 
 | Symbol | File | Native behaviour | Note |
 |---|---|---|---|
-| `func_800AAD4C` | `native/platform/battle_menu.c` | Returns -1 when the queried `D_800F4538` slot is null (always, synthetically) | This IS the real behaviour for a null slot; becomes a partial reimpl once slots are populated |
+| `func_800AAD4C` | `native/platform/battle_menu.c` | Returns -1 when the queried `D_800F4538` (now `vs_battle_actorModels`) slot is null (always, synthetically) | This IS the real behaviour for a null slot; becomes a partial reimpl once slots are populated |
 | CD queue completion | `native/tests/menu_harness.c` | Marks every queued `_cdQueue` slot `Loaded` each frame | Overlays are statically linked natively, so "loads" just need to signal complete |
 | `vs_overlay_wait` / `vs_overlay_getSp` | `native/platform/battle_asm.c` | No-op / returns a stack address | Overlay system is moot when everything is statically linked |
 | Heap base | `native/tests/menu_harness.c` | `vs_main_initHeap` fed a native `heap_buf[0xF2000]` instead of PS1 addr `0x8010C000` | Correct; the literal PS1 address just isn't mapped natively |

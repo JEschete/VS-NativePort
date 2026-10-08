@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
+message(FATAL_ERROR
+    "Retired battle candidate harness: source was restored to the reference, but these tests were not. "
+    "The old 63-group executable is stale. Repair and validate the source/test contract before re-enabling this project.")
 get_filename_component(WORKSPACE "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE)
 include("${WORKSPACE}/cmake/WindowsClang.cmake")
 set(CMAKE_C_FLAGS "--target=i686-pc-windows-msvc")

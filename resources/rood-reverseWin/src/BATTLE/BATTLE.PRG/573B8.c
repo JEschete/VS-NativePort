@@ -6,7 +6,7 @@
 #include "build/src/include/lbas.h"
 #include <libetc.h>
 
-extern u_char D_800E9C30[];
+extern u_char _opcodeLengths[];
 extern int (*_opcodeFunctionTable[])(u_char*, short);
 extern unsigned char D_800F4B70[17];
 extern vs_main_CdQueueSlot* D_800F4BBC;
@@ -46,12 +46,12 @@ extern D_800EB9B8_t* D_800EB9B8;
 extern u_char D_800EB9AC;
 
 extern void func_8007D260(int);
-void func_800A0204(int, int, int, int);
+void vs_battle_animateCharacter(int, int, int, int);
 extern void func_800BBDDC(void);
-int func_800BFE34(u_char*);
+int vs_battle_getOpcodeLength(u_char*);
 void func_800C0150(void);
 
-short func_800BFBB8(u_char** arg0, short arg1)
+short vs_battle_runScript(u_char** arg0, short arg1)
 {
     int ret;
     u_char* script = *arg0;
@@ -90,7 +90,7 @@ short func_800BFBB8(u_char** arg0, short arg1)
 
         switch (ret) {
         case 0:
-            script += func_800BFE34(script);
+            script += vs_battle_getOpcodeLength(script);
             continue;
 
         case 1:
@@ -104,7 +104,7 @@ short func_800BFBB8(u_char** arg0, short arg1)
             return 1;
 
         case 4:
-            script += func_800BFE34(script);
+            script += vs_battle_getOpcodeLength(script);
             break;
 
         default:
@@ -138,7 +138,7 @@ short vs_battle_getShort(u_char* arg0)
     return arg0[0] | (arg0[1] << 8);
 }
 
-int func_800BFE34(u_char* arg0) { return D_800E9C30[arg0[0]]; }
+int vs_battle_getOpcodeLength(u_char* arg0) { return _opcodeLengths[arg0[0]]; }
 
 int func_800BFE50(u_short arg0)
 {
@@ -168,7 +168,7 @@ void func_800C0150(void)
 
     for (i = 0; i < 17; ++i) {
         if (func_8007CF64(i) != NULL) {
-            func_800A0204(i, 1, 0, 0);
+            vs_battle_animateCharacter(i, 1, 0, 0);
         }
     }
 }

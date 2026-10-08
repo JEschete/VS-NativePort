@@ -9,22 +9,22 @@ clean-all:
 %/:
 	$(WIN) mkdir $(@D)
 
-$(BUILD)/%.o: %.c | $$(@D)/
+$(BUILD)/%.c.o: %.c | $$(@D)/
 	$(WIN) compile --source "$<" --output "$@" --compiler "$(WINDOWS_TOOLS)/old-gcc/$(CC1VER)/cc1.exe" --cppflags="$(CPPFLAGS)" --cc1flags="$(CC1FLAGS)" --masflags="$(MASFLAGS)" --asflags="$(ASFLAGS)"
 
-$(BUILD)/%.d: %.c | $$(@D)/
+$(BUILD)/%.c.d: %.c | $$(@D)/
 	$(CPP) $(CPPFLAGS) -M -MF $@ -MT $(@:.d=.o) -MG $<
 
-$(BUILD)/%.o: %.s | $$(@D)/
+$(BUILD)/%.s.o: %.s | $$(@D)/
 	$(AS) $(ASFLAGS) --MD $(@:.o=.d) -o $@ $<
 
-%.o: %.s | $$(@D)/
+%.s.o: %.s | $$(@D)/
 	$(AS) $(ASFLAGS) -no-pad-sections --MD $(@:.o=.d) -o $@ $<
 
 %.img.bin %.img.sym &: %.img.png | $$(@D)/
 	$(VPYTHON) -m tools.splat_ext.$(word 2,$(subst ., ,$(@F))) $< $(@D)/$(*F).img.bin
 
-%.img.o: %.img.bin %.img.sym | $$(@D)/
+%.img.png.o: %.img.bin %.img.sym | $$(@D)/
 	$(WIN) image-object $< $*.img.sym $@
 
 $(BUILD)/assets/%.BIN.vsString.yaml: assets/%.BIN.yaml | $$(@D)/
@@ -33,7 +33,7 @@ $(BUILD)/assets/%.BIN.vsString.yaml: assets/%.BIN.yaml | $$(@D)/
 $(BUILD)/%.vsString $(BUILD)/%.h $(BUILD)/%.vsString.bin &: $(BUILD)/%.vsString.yaml | $$(@D)/
 	$(VPYTHON) -m tools.etc.vsString_yamlToData $< $(BUILD)/$*.vsString $(BUILD)/$*.h
 
-%.vsString.o: %.vsString.bin
+%.vsString.yaml.o: %.vsString.bin
 	$(OBJCOPY) $(OBJCOPYFLAGS) $< $@
 
 $(BUILD)/data/%: $(BUILD)/assets/%.vsString.bin | $$(@D)/

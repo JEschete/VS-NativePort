@@ -1,5 +1,11 @@
 # Session handoff
 
+> Historical reference only. This July 2026 handoff does not describe the current
+> Windows project. As of 2026-10-05, Windows has two accepted function-level matches
+> beyond the imported reference, decompilation is unfinished, and native-port
+> implementation has not started as an accepted deliverable. Linux matching,
+> playback and save results below are not Windows progress or current evidence.
+
 Written 2026-07-26. Rewrite this file at the end of a session rather than
 appending to it.
 

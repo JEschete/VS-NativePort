@@ -23,7 +23,7 @@
  * D_1F800000[i], *(void**)0x1F80000{0,4,8} and _camera.unk{0,4,8} are all the
  * same memory -- which is what lets the render-init actually take.
  *
- * NOTE ON DRIVING THE REAL MENU: func_800C97BC now runs far enough to generate
+ * NOTE ON DRIVING THE REAL MENU: vs_battle_execMenu now runs far enough to generate
  * real primitives, but vs_mainMenu_exec's init points each menuItem->text at
  * still-unharvested (zeroed) string data with no 0xFF terminator, so the glyph
  * loop in vs_battle_renderMenuItem runs away. Rendering the actual menu is
@@ -35,7 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern void func_800C97BC(void);
+extern void vs_battle_execMenu(void);
 extern char vs_battle_menuState;               /* [0] = currentState (char) */
 extern void* vs_battle_menuItems;              /* pointer game allocs at init */
 extern void* vs_battle_characterState;
@@ -197,8 +197,8 @@ static int nonzero_pixels(void)
     return n;
 }
 
-/* text-box render subsystem (func_800CB83C) + its triple-buffered OT */
-extern void func_800CB83C(void);
+/* text-box render subsystem (vs_battle_renderTextBoxes) + its triple-buffered OT */
+extern void vs_battle_renderTextBoxes(void);
 extern unsigned char vs_battle_textBoxes[];
 extern int VSync(int mode);
 
@@ -226,13 +226,13 @@ static void menu_frame(void)
     psx_gpu_reset_stats();
     render_init();
     ot = D_1F800000[1];
-    func_800C97BC();
+    vs_battle_execMenu();
     /* The synthetic submenu re-sets the info message every frame, which resets
      * the info box's type-out counter (box->speed) to 1. Reveal it fully so the
      * whole message shows instead of one character. (Real gameplay sets the
      * message once per change.) vs_battle_textBoxes[7].speed is at 0x150+0x0C. */
     *(unsigned short*)(vs_battle_textBoxes + 0x150 + 0x0C) = 0xFFFF;
-    func_800CB83C();   /* text-box render pass (info box etc.) */
+    vs_battle_renderTextBoxes();   /* text-box render pass (info box etc.) */
     DrawOTag(ot + 0x7FF);
     DrawSync(0);
 }

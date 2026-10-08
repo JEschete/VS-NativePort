@@ -7,7 +7,7 @@
 int _loadObject(int arg0)
 {
     int _[6] __attribute__((unused));
-    D_800F4538_t* new_var = D_800F4538[0];
+    D_800F4538_t* new_var = vs_battle_actorModels[0];
 
     if (arg0 == 1) {
         func_8009AA84(1);

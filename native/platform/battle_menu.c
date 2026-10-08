@@ -161,13 +161,13 @@ int func_800C930C(int arg0)
     }
 }
 
-/* func_800AAD4C: queries a character/text data slot (D_800F4538[a0]).
+/* func_800AAD4C: queries a character/text data slot (vs_battle_actorModels[a0]).
  * Returns -1 when the slot is null -- which is always true in the synthetic
  * menu harness (no character data loaded), so this matches the real behaviour
  * for our state. Replace with the full decomp once data slots are populated. */
 int func_800AAD4C(int a0, int a1, int a2, int a3)
 {
-    extern void* D_800F4538[];
+    extern void* vs_battle_actorModels[];
     (void)a1; (void)a2; (void)a3;
-    return D_800F4538[a0] ? 0 : -1;
+    return vs_battle_actorModels[a0] ? 0 : -1;
 }

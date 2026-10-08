@@ -62,7 +62,7 @@ int func_8009FE74(int arg0, int arg1);
 void func_8009FF08(int, int, int, int);
 int func_8009FFA8(int arg0, int arg1);
 int func_800A01C8(int, int, int, int);
-int func_800A0204(int, int, int, int);
+int vs_battle_animateCharacter(int, int, int, int);
 int func_800A0618(int, int, int, int);
 int func_800A0768(int, D_800F4538_unk58_2*);
 int func_800A07FC(int, D_800F4538_unk58_2*);

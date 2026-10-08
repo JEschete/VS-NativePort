@@ -443,7 +443,7 @@ enum vs_battle_limbStatus {
 };
 
 int func_800C4794(SVECTOR*);
-int func_800C58F8(void*);
+int func_800C58F8(u_char*);
 int vs_battle_setTextBox(int, char*);
 int vs_battle_selectTextBox(u_char);
 char* vs_battle_printf(char*, char*);
@@ -504,7 +504,7 @@ vs_battle_menuItem_t* vs_battle_setMenuItem(
     int row, int x, int y, int w, int backgroundWidth, char* text);
 void vs_battle_renderMenuItem(vs_battle_menuItem_t*);
 int func_800C930C(int);
-void func_800C97BC(void);
+void vs_battle_execMenu(void);
 
 /**
  * Renders a digit or symbol from the battle digits.
@@ -589,9 +589,9 @@ int vs_battle_getTextLineLength(char* str);
 int vs_battle_validateShortcutSelection(int shortcut);
 void func_800C8778(void);
 void func_800C9F88(void);
-void func_800CA2DC(void);
+void vs_battle_renderHeadsUpDisplay(void);
 int func_800CACD0(int menuState, int arg1);
-void func_800CB83C(void);
+void vs_battle_renderTextBoxes(void);
 int func_800CF060(void);
 void vs_battle_addVecToSvec(VECTOR* arg0, SVECTOR* arg1, VECTOR* arg2);
 void vs_battle_lerp2DVector(short* src, int t, int* vec);

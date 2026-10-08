@@ -62,12 +62,12 @@ INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/3A1A0", func_800A29A0);
 
 void func_800A2C48(D_800F4538_t* arg0)
 {
-    func_800A9C54(arg0->unk0.unkF, &arg0->unk5DC[4], 0);
+    func_800A9C54(arg0->unk0.index, &arg0->unk5DC[4], 0);
     arg0->unk6E0 = 0;
     arg0->unk0.unkB_0 = 4;
     func_800A29A0(arg0);
     if (arg0->unk17FD >= 2) {
-        func_800A2C48(D_800F4538[arg0->unk17FD]);
+        func_800A2C48(vs_battle_actorModels[arg0->unk17FD]);
     }
 }
 
@@ -115,7 +115,7 @@ inline int func_800A3310(int arg0, SVECTOR* arg1)
     int i;
 
     for (i = 2; i < arg0; ++i) {
-        D_800F4538_t* temp_a2 = D_800F4538[i];
+        D_800F4538_t* temp_a2 = vs_battle_actorModels[i];
         if (temp_a2 != NULL && temp_a2->unk0.unkA_5
             && *(int*)&temp_a2->unk0.position == *(int*)arg1
             && temp_a2->unk0.position.vz == arg1->vz) {
@@ -130,7 +130,7 @@ void func_800A3394(int arg0, SVECTOR* arg1)
     SVECTOR pos;
     int floor;
     int retried;
-    D_800F4538_t* actor = D_800F4538[arg0];
+    D_800F4538_t* actor = vs_battle_actorModels[arg0];
 
     pos.vx = arg1->vx;
     pos.vz = arg1->vz;
@@ -185,7 +185,7 @@ void func_800A35A8(void)
     D_800F45E0_t* obj;
 
     for (i = 2; i < 17; ++i) {
-        actor = D_800F4538[i];
+        actor = vs_battle_actorModels[i];
 
         if (actor != NULL && !actor->unk0.unkA_5 && actor->unk0.unk5D < 2
             && !actor->unk0.unkA_0) {
@@ -210,7 +210,7 @@ void func_800A35A8(void)
 
 void func_800A36E0(int arg0, int arg1, func_8006EBF8_t* arg2)
 {
-    D_800F4538_t* temp_a0 = D_800F4538[arg0];
+    D_800F4538_t* temp_a0 = vs_battle_actorModels[arg0];
     if (temp_a0 != NULL) {
         arg2->unk0.unk0.value = temp_a0->unk1868;
         if (temp_a0->unk0.unkA_5 && ((arg1 == 0x10) || (arg1 == 0x20))) {
@@ -226,7 +226,7 @@ int func_800A3760(int arg0, int arg1, int arg2)
     int maxDist;
     int bestDist;
     int best = -1;
-    D_800F4538_t* self = D_800F4538[arg0];
+    D_800F4538_t* self = vs_battle_actorModels[arg0];
 
     if (self == NULL) {
         return -1;
@@ -245,7 +245,7 @@ int func_800A3760(int arg0, int arg1, int arg2)
         if (i == arg0) {
             continue;
         }
-        actor = D_800F4538[i];
+        actor = vs_battle_actorModels[i];
         if (actor == NULL || actor->unk0.skip) {
             continue;
         }
@@ -311,7 +311,7 @@ D_800F4538_t* func_800A3C34(int arg0, int arg1, int arg2, int arg3)
     }
 
     for (; i < 17; ++i) {
-        D_800F4538_t* actor = D_800F4538[i];
+        D_800F4538_t* actor = vs_battle_actorModels[i];
         if ((actor == NULL) || actor->unk0.skip || (actor->unk6E6 == 0x7F)) {
             continue;
         }
@@ -366,7 +366,7 @@ int func_800A47C4(void)
 
 void func_800A4828(int arg0, MATRIX* arg1)
 {
-    D_800F4538_t* temp_s1 = D_800F4538[arg0];
+    D_800F4538_t* temp_s1 = vs_battle_actorModels[arg0];
     int visible = temp_s1->unk0.visible;
     temp_s1->unk0.visible = 0;
     temp_s1->unk5B2 = 1;
@@ -376,7 +376,7 @@ void func_800A4828(int arg0, MATRIX* arg1)
     temp_s1->unk0.visible = visible;
 }
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/3A1A0", func_800A48CC);
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/3A1A0", vs_battle_animateCharacterJump);
 
 func_8008D2C0_t* func_800A4A24(int arg0)
 {
@@ -408,7 +408,8 @@ void func_800A4D8C(void)
         }
     }
     for (i = 0; i < 17; ++i) {
-        if ((D_800F4538[i] != NULL) && (D_800F4538[i]->unk0.skip == 0)) {
+        if ((vs_battle_actorModels[i] != NULL)
+            && (vs_battle_actorModels[i]->unk0.skip == 0)) {
             func_800A4E68(i);
         }
     }
@@ -448,13 +449,13 @@ found:
 
 void func_800A525C(D_800F4538_t* arg0)
 {
-    arg0->unk1848.unk0 = 1;
-    if (arg0->unk0.unkF == 0) {
-        arg0->unk1848.unk0 = 0;
+    arg0->movement.mode = 1;
+    if (arg0->unk0.index == 0) {
+        arg0->movement.mode = 0;
     }
-    arg0->unk1848.unk4 = 0;
-    arg0->unk1848.unk8 = 0;
-    arg0->unk1848.unk6 = 0;
+    arg0->movement.unk4 = 0;
+    arg0->movement.unk8 = 0;
+    arg0->movement.facing = 0;
 }
 
 INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/3A1A0", func_800A5280);
@@ -486,7 +487,7 @@ void func_800A6660(D_800F4538_t* arg0, int arg1, func_800A6660_t* arg2)
             arg0->unk0.unk18 = 12;
         }
     } else {
-        func_800AA850(arg0->unk0.unkF, arg1, 12);
+        func_800AA850(arg0->unk0.index, arg1, 12);
     }
     if (arg0->unk63C > 0x80) {
         delta = arg0->unk0.unk3E / 32;

@@ -2191,8 +2191,8 @@ static void _drawScreen(void)
 {
     int temp_lo_5;
     int xOffset = (128 - _animationStep);
-    int z = D_800F4538[1]->menuCameraDistance;
-    int x = D_800F4538[1]->menuCameraHeightOffset;
+    int z = vs_battle_actorModels[1]->menuCameraDistance;
+    int x = vs_battle_actorModels[1]->menuCameraHeightOffset;
     vs_camera_t* camera = &vs_scratch.camera;
 
     camera->lookAt.vx = ((-rsin(_xPos) * xOffset) >> 8) * z;
