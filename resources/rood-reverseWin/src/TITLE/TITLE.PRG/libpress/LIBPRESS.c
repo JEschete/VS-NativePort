@@ -1,4 +1,5 @@
 #include "common.h"
+#include "src/SLUS_010.40/libetc/INTR.h"
 #include <libpress.h>
 #include <libetc.h>
 #include <stdio.h>
@@ -116,8 +117,6 @@ int DecDCToutSync(int mode)
     }
     return MDEC_out_sync();
 }
-
-int DMACallback(int, void (*)(void));
 
 int DecDCTinCallback(void (*func)(void)) { return DMACallback(0, func); }
 

@@ -42,6 +42,10 @@ def generate(config: Path, timeout: int) -> Path:
         work = Path(directory)
         for folder in COPIED_FOLDERS:
             shutil.copytree(DECOMP / folder, work / folder, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+        base_config = work / "config/splat.config.yaml"
+        exported_config = yaml.safe_load(base_config.read_text(encoding="utf-8"))
+        exported_config["options"]["dump_symbols"] = True
+        base_config.write_text(yaml.safe_dump(exported_config, sort_keys=False), encoding="utf-8")
         target = work / options["target_path"]
         target.parent.mkdir(parents=True)
         target.write_bytes(retail_bytes)
@@ -49,6 +53,12 @@ def generate(config: Path, timeout: int) -> Path:
         (work / "splat.log").write_bytes(result.stdout)
         if result.returncode:
             raise RuntimeError("splat failed:\n" + result.stdout.decode("utf-8", errors="replace")[-4000:])
+        for strings in sorted((work / "build/assets").rglob("*.vsString.yaml")):
+            stem = strings.name.removesuffix(".vsString.yaml")
+            subprocess.run([sys.executable, "-m", "tools.etc.vsString_yamlToData",
+                str(strings), str(strings.with_name(stem + ".vsString")),
+                str(strings.with_name(stem + ".h"))], cwd=work, check=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
         missing = [name for name in MACRO_FILES if not (work / name).is_file()]
         if missing:
             raise RuntimeError("splat did not generate: " + ", ".join(missing))
@@ -59,6 +69,7 @@ def generate(config: Path, timeout: int) -> Path:
             (destination / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(work / name, destination / name)
         shutil.copytree(work / "build", destination / "build")
+        shutil.copy2(work / ".splat/splat_symbols.csv", destination / "splat_symbols.csv")
         shutil.copy2(work / "splat.log", destination / "splat.log")
     manifest = {
         "overlay": options["basename"],
@@ -69,7 +80,11 @@ def generate(config: Path, timeout: int) -> Path:
         "retail": {"path": options["target_path"], "sha1": configuration["sha1"],
                    "sha256": hashlib.sha256(retail_bytes).hexdigest()},
         "inputs": {name: digest(DECOMP / name) for name in inputs},
-        "outputs": {name: digest(destination / name) for name in MACRO_FILES},
+        "outputs": {name: digest(destination / name) for name in (
+            *MACRO_FILES, "splat_symbols.csv", *sorted(path.relative_to(destination).as_posix()
+                for path in (destination / "build/config").rglob("undefined_*_auto.txt")),
+            *sorted(path.relative_to(destination).as_posix()
+                for path in (destination / "build/src").rglob("*.s")))},
     }
     (destination / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     return destination

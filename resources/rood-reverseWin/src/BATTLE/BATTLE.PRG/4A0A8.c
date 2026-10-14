@@ -233,7 +233,7 @@ typedef struct {
 } scriptBytePair;
 
 void func_8007DE88(int*);
-void func_8007DEA8(P_CODE*);
+void func_8007DEA8(CVECTOR*);
 void func_8007DECC(D_800F1A68_t*);
 short func_8008DC7C(int, int);
 int func_80090C2C(int);
@@ -241,7 +241,7 @@ void func_800A190C(int, int, SVECTOR*, int);
 void func_800AACDC(void);
 int func_800B6B98(
     SVECTOR* origin, u_char* script, textPlacement* result, u_char direction);
-int vs_battle_script_modelColor(u_char*, short);
+int func_800B9C58(u_char*, short);
 void func_800BB68C(u_short, func_800BB68C_t*);
 u_short func_800BB788(func_800BB68C_t* arg0);
 int func_800BB7C4(int arg0, SVECTOR* arg1);
@@ -288,6 +288,7 @@ extern char D_800E9B58[];
 extern char D_800E9BE0[];
 extern char D_800E9BE8[];
 extern u_char D_800E9BEC[];
+extern u_char D_800E9BF0[];
 extern short D_800E9BF4[];
 extern short D_800E9BF8[];
 extern void D_800E9B5C;
@@ -296,7 +297,7 @@ extern u_char D_800E9C1C[];
 extern short D_800E9C24[];
 extern u_char D_800E9C28;
 extern u_char D_800E9C2C;
-extern u_char _opcodeLengths[];
+extern u_char D_800E9C30[];
 extern u_char* D_800EB588[];
 extern D_800EB9BC_t* D_800EB9BC;
 extern int D_800F19C8;
@@ -334,93 +335,10 @@ extern int D_800F4C64;
 extern char D_800F4C69;
 extern char D_800F4C6A;
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800B28A8);
-
-__asm__(".set push;"
-        ".set noreorder;"
-        "glabel func_800B396C;"
-        "lw         $t0, 0x0($a0);"
-        "lw         $t1, 0x4($a0);"
-        "lw         $t2, 0x8($a0);"
-        "lw         $t3, 0xC($a0);"
-        "lw         $t4, 0x0($a1);"
-        "sll        $t7, $t0, 16;"
-        "sra        $t7, 16;"
-        "sra        $t8, $t1, 16;"
-        "sll        $t9, $t3, 16;"
-        "sra        $t9, 16;"
-        "mtc2       $t4, $8;"
-        "mtc2       $t7, $9;"
-        "mtc2       $t8, $10;"
-        "mtc2       $t9, $11;"
-        "sra        $t7, $t0, 16;"
-        "sra        $t9, $t3, 16;"
-        "gpf        1;"
-        "lw         $t5, 0x4($a1);"
-        "sll        $t8, $t2, 16;"
-        "sra        $t8, 16;"
-        "addu       $v0, $zero, $a0;"
-        "mfc2       $v1, $9;"
-        "mfc2       $a2, $10;"
-        "mfc2       $a3, $11;"
-        "mtc2       $t5, $8;"
-        "mtc2       $t7, $9;"
-        "mtc2       $t8, $10;"
-        "mtc2       $t9, $11;"
-        "sll        $t7, $t1, 16;"
-        "sra        $t7, 16;"
-        "gpf        1;"
-        "lh         $t4, 0x10($a0);"
-        "lw         $t6, 0x8($a1);"
-        "sra        $t8, $t2, 16;"
-        "and        $v1, 0xFFFF;"
-        "and        $a3, 0xFFFF;"
-        "mfc2       $t1, $9;"
-        "mfc2       $t2, $10;"
-        "mfc2       $t3, $11;"
-        "mtc2       $t6, $8;"
-        "mtc2       $t7, $9;"
-        "mtc2       $t8, $10;"
-        "mtc2       $t4, $11;"
-        "sll        $a2, 16;"
-        "sll        $t1, 16;"
-        "gpf        1;"
-        "and        $t2, 0xFFFF;"
-        "sll        $t3, 16;"
-        "or         $t1, $v1;"
-        "sw         $t1, 0x0($v0);"
-        "or         $t3, $a3;"
-        "mfc2       $t4, $9;"
-        "mfc2       $t5, $10;"
-        "mfc2       $t6, $11;"
-        "and        $t4, 0xFFFF;"
-        "or         $t4, $a2;"
-        "sll        $t5, 16;"
-        "or         $t5, $t2;"
-        "sw         $t4, 0x4($v0);"
-        "sw         $t5, 0x8($v0);"
-        "sw         $t3, 0xC($v0);"
-        "j          $ra;"
-        "sh         $t6, 0x10($v0);"
-        "endlabel func_800B396C;"
-        ".set pop;");
-
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800B3A68);
-
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800B3CF0);
-
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800B4594);
-
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800B4B14);
-
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800B516C);
-
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800B5C30);
-
 __asm__(".set push;"
         ".set noreorder;"
         "glabel func_800B63AC;"
-        "la         $v0, vs_battle_actorModels;"
+        "la         $v0, D_800F4538;"
         "sll        $v1, $a0, 2;"
         "addu       $v0, $v1;"
         "lw         $v0, 0x0($v0);"
@@ -448,7 +366,7 @@ __asm__(".set push;"
 __asm__(".set push;"
         ".set reorder;"
         "glabel func_800B6404;"
-        "la         $v0, vs_battle_actorModels;"
+        "la         $v0, D_800F4538;"
         "sll        $v1, $a0, 2;"
         "addu       $v0, $v1;"
         "lw         $v0, 0x0($v0);"
@@ -464,7 +382,7 @@ __asm__(".set push;"
 
 void func_800B6438(int arg0, int* arg1, int arg2, int arg3)
 {
-    __asm__("la         $v0, vs_battle_actorModels;"
+    __asm__("la         $v0, D_800F4538;"
             "sll        $v1, $a0, 2;"
             "addu       $v0, $v1;"
             "lw         $v0, 0x0($v0);"
@@ -481,7 +399,7 @@ void func_800B6438(int arg0, int* arg1, int arg2, int arg3)
             "sb         $v1, 0xA($v0);"
             "or         $a1, $zero, 0x1F;"
             "addu       $a2, $zero, $zero;"
-            "jal        vs_battle_animateCharacter;"
+            "jal        func_800A0204;"
             "or         $a3, $zero, 0x8;"
             "lw         $a0, 0x0($sp);"
             "lw         $a1, 0x4($sp);"
@@ -509,7 +427,7 @@ __asm__(".set push;"
 
 void func_800B64CC(int arg0, int arg1, int arg2, int arg3)
 {
-    __asm__("la         $v0, vs_battle_actorModels;"
+    __asm__("la         $v0, D_800F4538;"
             "sll        $v1, %0, 2;"
             "addu       $v0, $v1;"
             "lw         $v0, 0x0($v0);"
@@ -525,7 +443,7 @@ void func_800B64CC(int arg0, int arg1, int arg2, int arg3)
 }
 
 __asm__("glabel func_800B6500;"
-        "la         $v0, vs_battle_actorModels;"
+        "la         $v0, D_800F4538;"
         "sll        $v1, $a0, 2;"
         "addu       $v0, $v1;"
         "lw         $v0, 0x0($v0);"
@@ -549,7 +467,7 @@ __asm__(".set push;"
         "glabel func_800B653C;"
         "ori        $t4, $zero, 0x3;"
         ".L800B6540:"
-        "la         $v0, vs_battle_actorModels;"
+        "la         $v0, D_800F4538;"
         "sll        $v1, $a0, 2;"
         "addu       $v0, $v1;"
         "lw         $v0, 0x0($v0);"
@@ -570,7 +488,7 @@ __asm__(".set push;"
 __asm__(".set push;"
         ".set noreorder;"
         "glabel func_800B6580;"
-        "la         $v0, vs_battle_actorModels;"
+        "la         $v0, D_800F4538;"
         "sll        $v1, $a0, 2;"
         "addu       $v0, $v1;"
         "lw         $v0, 0x0($v0);"
@@ -613,7 +531,7 @@ __asm__(".set push;"
         "glabel func_800B65F4;"
         "ori        $t1, $zero, 0x40;"
         ".L800B65F8:"
-        "la         $v0, vs_battle_actorModels;"
+        "la         $v0, D_800F4538;"
         "sll        $v1, $a0, 2;"
         "addu       $v0, $v0, $v1;"
         "lw         $v0, 0x0($v0);"
@@ -632,7 +550,7 @@ __asm__(".set push;"
 
 void func_800B6634(int arg0, int arg1)
 {
-    __asm__("la         $v0, vs_battle_actorModels;"
+    __asm__("la         $v0, D_800F4538;"
             "sll        $v1, $a0, 2;"
             "addu       $v0, $v1;"
             "lw         $v0, 0x0($v0);"
@@ -676,11 +594,11 @@ int vs_battle_invalidOpcode(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_nop(u_char* arg0, short arg1) { return 0; }
+int func_800B66E4(u_char* arg0, short arg1) { return 0; }
 
-int vs_battle_script_nopYield(u_char* arg0, short arg1) { return 4; }
+int func_800B66EC(u_char* arg0, short arg1) { return 4; }
 
-int vs_battle_script_op0A(u_char* arg0, short arg1)
+int func_800B66F4(u_char* arg0, short arg1)
 {
     if ((D_800F4BBC != 0) && (*D_800F4BBC != 4)) {
         return 1;
@@ -688,9 +606,9 @@ int vs_battle_script_op0A(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op0C(u_char* arg0, short arg1) { return D_800EB9BC->unk0_1; }
+int func_800B6724(u_char* arg0, short arg1) { return D_800EB9BC->unk0_1; }
 
-int vs_battle_script_op0D(u_char* arg0, short arg1)
+int func_800B6744(u_char* arg0, short arg1)
 {
     D_800F4C2C = 1;
     D_800F4C20 = !(arg0[1] & 1);
@@ -703,7 +621,7 @@ void func_800B6778(u_char* arg0)
 
     for (i = 0; i < 3; ++i) {
         D_800E9BE0[1] = (i << 4) | 8;
-        vs_battle_script_modelColor(D_800E9BE0, 0);
+        func_800B9C58(D_800E9BE0, 0);
     }
 
     func_800AACDC();
@@ -714,14 +632,14 @@ void func_800B6778(u_char* arg0)
             vs_battle_setStateFlag(0xA8, 0);
             return;
         }
-        arg0 = &arg0[_opcodeLengths[*arg0]];
+        arg0 = &arg0[D_800E9C30[*arg0]];
     }
 
     func_80093A70();
     vs_battle_setStateFlag(0xA8, 0);
 }
 
-int vs_battle_script_op0E(u_char* arg0, short arg1)
+int func_800B6868(u_char* arg0, short arg1)
 {
     char temp_v1 = D_800F4C2C;
     D_800F4C2C = 0;
@@ -732,7 +650,7 @@ int vs_battle_script_op0E(u_char* arg0, short arg1)
     return (int)&arg0[vs_battle_getShort(arg0 + 1)];
 }
 
-int vs_battle_script_op0F(u_char* arg0, short arg1)
+int func_800B68C4(u_char* arg0, short arg1)
 {
     char temp_v1 = D_800F4C2C;
     D_800F4C2C = 0;
@@ -818,8 +736,54 @@ int vs_battle_script_dismissTextBox(u_char* arg0, short arg1)
     return 0;
 }
 
-// https://decomp.me/scratch/0ihTK
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800B6B98);
+textOffset func_800CCE10(int, int, int, int);
+
+int func_800B6B98(
+    SVECTOR* origin, u_char* script, textPlacement* result, u_char direction)
+{
+    short dx;
+    short dy;
+    short width;
+    short height;
+    int delta;
+    short x;
+    short y;
+
+    dx = 0;
+    dy = 0;
+    result->offset = func_800CCE10(
+        script[5] & 0xF, (origin->vz ^ direction) * 4, script[6], script[7]);
+    result->x = x = origin->vx + result->offset.x;
+    result->y = y = origin->vy + result->offset.y;
+    height = script[7] * 13 + 4;
+    width = script[6] * 12 + 8;
+
+    if (x < 4) {
+        result->x = 4;
+        delta = 4 - x;
+        dx = delta;
+    } else if (x + width > 320) {
+        width = 320 - width;
+        result->x = width;
+        dx = width - x;
+    }
+
+    if (y < 4) {
+        result->y = 4;
+        delta = 4 - y;
+        dy = delta;
+    } else if (height + y > 216) {
+        height = 216 - height;
+        result->y = height;
+        dy = height - y;
+    }
+
+    if (dx == 0 && dy == 0) {
+        return 1;
+    }
+    result->distance = vs_gte_rsqrt(dx * dx + dy * dy);
+    return 0;
+}
 
 // script[1]   = boxId
 // script[2-3] = anchor id (resolved by func_800BFE50)
@@ -827,7 +791,7 @@ INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800B6B98);
 // script[6]   = width in characters
 // script[7]   = height in lines
 // script[8]   = ?
-int vs_battle_script_op13(u_char* script, short arg1 __attribute__((unused)))
+int func_800B6D48(u_char* script, short arg1 __attribute__((unused)))
 {
     textPlacement placements[4];
     SVECTOR origin;
@@ -871,7 +835,7 @@ int vs_battle_script_op13(u_char* script, short arg1 __attribute__((unused)))
     return 0;
 }
 
-int vs_battle_script_op14(u_char* arg0, short arg1)
+int func_800B6F8C(u_char* arg0, short arg1)
 {
     return vs_battle_dismissTextBox(arg0[1]) != 0;
 }
@@ -890,7 +854,7 @@ int vs_battle_script_loadGim(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_splashScreenLoad(u_char* arg0, short arg1)
+int func_800B7014(u_char* arg0, short arg1)
 {
     D_800F4B30_t* new_var;
 
@@ -912,7 +876,7 @@ int vs_battle_script_splashScreenLoad(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_splashScreenShow(u_char* arg0, short arg1)
+int func_800B70E8(u_char* arg0, short arg1)
 {
     D_800EB9BC_t* temp_a3 = D_800EB9BC;
     int temp_a2 = arg0[5] >> 6;
@@ -938,13 +902,13 @@ int vs_battle_script_splashScreenShow(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_splashScreenHide(u_char* arg0, short arg1)
+int func_800B71C4(u_char* arg0, short arg1)
 {
     func_800C86AC();
     return (D_800F4C2C == 2) * 4;
 }
 
-int vs_battle_script_op1A(u_char* arg0, short arg1)
+int func_800B71F4(u_char* arg0, short arg1)
 {
     return (D_800F4B30[2].unk3 | (D_800F4B30[0].unk3 | D_800F4B30[1].unk3)) != 0;
 }
@@ -974,7 +938,7 @@ int vs_battle_script_setStringContextInt(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op1D(u_char* arg0, short arg1)
+int func_800B7358(u_char* arg0, short arg1)
 {
     vs_battle_getTextBox(arg0[1] >> 5)->unk22 = arg0[1] & 0x1F;
     return 0;
@@ -1000,7 +964,7 @@ int vs_battle_script_selectTextBox(u_char* script, short arg1 __attribute__((unu
     return 1;
 }
 
-int vs_battle_script_op1E(u_char* arg0, short arg1)
+int func_800B7428(u_char* arg0, short arg1)
 {
     func_800BB68C_t sp10;
 
@@ -1016,7 +980,7 @@ int vs_battle_script_op1E(u_char* arg0, short arg1)
 }
 
 // https://decomp.me/scratch/hkP4X
-int vs_battle_script_op1F(u_char* arg0, short arg1)
+int func_800B7490(u_char* arg0, short arg1)
 {
     u_char position[12];
     u_short actor = vs_battle_getShort(arg0 + 1);
@@ -1042,7 +1006,7 @@ int vs_battle_script_op1F(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_modelLoad(u_char* arg0, short arg1)
+int func_800B7574(u_char* arg0, short arg1)
 {
     u_char sp10[12];
 
@@ -1055,7 +1019,7 @@ int vs_battle_script_modelLoad(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op21(u_char* arg0, short arg1)
+int func_800B75F4(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
     u_short temp_v0 = func_800BFE50(vs_battle_getShort(arg0 + 1));
@@ -1073,14 +1037,14 @@ int vs_battle_script_op21(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_modelAnimate(u_char* arg0)
+int func_800B76A8(u_char* arg0)
 {
-    vs_battle_animateCharacter(func_800BFE50(vs_battle_getShort(arg0 + 1)),
+    func_800A0204(func_800BFE50(vs_battle_getShort(arg0 + 1)),
         D_800E9B58[arg0[5] >> 6] + arg0[3], arg0[4], arg0[5] & 0x3F);
     return 0;
 }
 
-int vs_battle_script_op23(u_char* arg0, short arg1)
+int func_800B770C(u_char* arg0, short arg1)
 {
     func_800BB68C_t sp10;
     int temp_s0;
@@ -1113,7 +1077,7 @@ int vs_battle_script_op23(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op24(u_char* arg0, short arg1)
+int func_800B77DC(u_char* arg0, short arg1)
 {
     D_800F4538_unk64 sp10;
     int var_a0;
@@ -1130,7 +1094,7 @@ int vs_battle_script_op24(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op25(u_char* arg0, short arg1)
+int func_800B784C(u_char* arg0, short arg1)
 {
     u_char sp10[10];
     u_short temp_v0 = func_800BFE50(vs_battle_getShort(arg0 + 1));
@@ -1149,9 +1113,7 @@ int vs_battle_script_op25(u_char* arg0, short arg1)
     return 0;
 }
 
-void func_800A9988(int, SVECTOR*, int, int);
-
-int vs_battle_script_modelPosition(u_char* arg0, short arg1)
+int func_800B792C(u_char* arg0, short arg1)
 {
     func_8006EBF8_t sp10;
 
@@ -1183,7 +1145,7 @@ int vs_battle_script_modelPosition(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op27(u_char* arg0, short arg1)
+int func_800B7A98(u_char* arg0, short arg1)
 {
     u_char sp10[16];
     u_short temp_s0 = func_800BFE50(vs_battle_getShort(arg0 + 1));
@@ -1202,7 +1164,7 @@ int vs_battle_script_op27(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_modelMoveTo(u_char* arg0, short arg1)
+int func_800B7B58(u_char* arg0, short arg1)
 {
     func_8006EBF8_t sp10;
     short temp_s3;
@@ -1235,7 +1197,7 @@ int vs_battle_script_modelMoveTo(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op29(u_char* arg0, short arg1)
+int func_800B7C90(u_char* arg0, short arg1)
 {
     u_short temp_s1 = func_800BFE50(vs_battle_getShort(arg0 + 1));
     u_int temp_a1 = func_800BFE50(vs_battle_getShort(arg0 + 3)) & 0xFFFF;
@@ -1247,7 +1209,7 @@ int vs_battle_script_op29(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op2A(u_char* arg0, short arg1)
+int func_800B7D10(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
     u_short temp_s1 = func_800BFE50(vs_battle_getShort(arg0 + 1) & 0xFFFF);
@@ -1265,7 +1227,7 @@ int vs_battle_script_op2A(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op2B(u_char* arg0, short arg1)
+int func_800B7DC4(u_char* arg0, short arg1)
 {
     func_8006EBF8_t sp10;
     u_short temp_s1 = func_800BFE50(vs_battle_getShort(arg0 + 1));
@@ -1301,7 +1263,7 @@ int vs_battle_script_op2B(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op2C(u_char* arg0, short arg1)
+int func_800B7EF0(u_char* arg0, short arg1)
 {
     func_8006EBF8_t sp10;
     int temp_s0;
@@ -1320,7 +1282,7 @@ int vs_battle_script_op2C(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op2D(u_char* arg0, short arg1)
+int func_800B7F84(u_char* arg0, short arg1)
 {
     func_8006EBF8_t_fields sp10;
     int temp_s0 = func_800BFE50(vs_battle_getShort(arg0 + 1)) & 0xFFFF;
@@ -1334,7 +1296,7 @@ int vs_battle_script_op2D(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op2E(u_char* arg0, short arg1)
+int func_800B804C(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
 
@@ -1344,7 +1306,7 @@ int vs_battle_script_op2E(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_modelFree(u_char* arg0, short arg1)
+int func_800B80B4(u_char* arg0, short arg1)
 {
     func_800BB68C_t sp10;
 
@@ -1359,7 +1321,7 @@ int vs_battle_script_modelFree(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op30(u_char* arg0)
+int func_800B810C(u_char* arg0)
 {
     short temp_v0;
     u_short temp_s3;
@@ -1379,7 +1341,7 @@ int vs_battle_script_op30(u_char* arg0)
     return var_v0 != 0;
 }
 
-int vs_battle_script_op31(u_char* arg0, short arg1)
+int func_800B81A0(u_char* arg0, short arg1)
 {
     D_800F4538_unk58_2 sp10;
 
@@ -1395,14 +1357,14 @@ int vs_battle_script_op31(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op32(u_char* arg0)
+int func_800B822C(u_char* arg0)
 {
     func_800A01C8(func_800BFE50(vs_battle_getShort(arg0 + 1)),
         D_800E9B58[arg0[5] >> 6] + arg0[3], arg0[5] & 0x3F, 0);
     return 0;
 }
 
-int vs_battle_script_modelRotate(u_char* arg0, short arg1)
+int func_800B8290(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
     u_short temp_s2;
@@ -1425,7 +1387,7 @@ int vs_battle_script_modelRotate(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op34(u_char* arg0, short arg1)
+int func_800B8360(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
     int temp_v0;
@@ -1443,21 +1405,21 @@ int vs_battle_script_op34(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op35(u_char* arg0)
+int func_800B83D4(u_char* arg0)
 {
     func_800A0618(func_800BFE50(vs_battle_getShort(arg0 + 1)),
         D_800E9B58[arg0[6] >> 6] + arg0[3], arg0[6] & 0x3F, arg0[4]);
     return 0;
 }
 
-int vs_battle_script_op36(u_char* arg0)
+int func_800B8438(u_char* arg0)
 {
     func_800A01C8(func_800BFE50(vs_battle_getShort(arg0 + 1)),
         D_800E9B58[arg0[6] >> 6] + arg0[3], arg0[6] & 0x3F, arg0[4]);
     return 0;
 }
 
-int vs_battle_script_op37(u_char* arg0, short arg1)
+int func_800B849C(u_char* arg0, short arg1)
 {
     int temp_a0 = func_800BFE50(vs_battle_getShort(arg0 + 1));
 
@@ -1469,7 +1431,7 @@ int vs_battle_script_op37(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_modelLookAt(u_char* arg0, short arg1)
+int func_800B8510(u_char* arg0, short arg1)
 {
     int var_a3;
 
@@ -1489,7 +1451,7 @@ int vs_battle_script_modelLookAt(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op39(u_char* arg0, short arg1)
+int func_800B8590(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
     int temp_v0;
@@ -1506,7 +1468,7 @@ int vs_battle_script_op39(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op3A(u_char* arg0, short arg1)
+int func_800B860C(u_char* arg0, short arg1)
 {
     switch ((arg0[3] >> 2) & 3) {
     case 0:
@@ -1523,9 +1485,9 @@ int vs_battle_script_op3A(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_waitForFile(u_char* arg0, short arg1) { return func_8007CCAC() > 0; }
+int func_800B86E8(u_char* arg0, short arg1) { return func_8007CCAC() > 0; }
 
-int vs_battle_script_op3C(u_char* arg0, short arg1)
+int func_800B8708(u_char* arg0, short arg1)
 {
     if (arg0[1] & 4) {
         func_8007CC4C(arg0[1] & 3);
@@ -1535,13 +1497,13 @@ int vs_battle_script_op3C(u_char* arg0, short arg1)
     return (D_800F4C2C == 2) * 4;
 }
 
-int vs_battle_script_op3D(u_char* arg0, short arg1)
+int func_800B8764(u_char* arg0, short arg1)
 {
     func_8007CC6C(arg0[1]);
     return 0;
 }
 
-int vs_battle_script_modelIlluminate(u_char* arg0, short arg1)
+int func_800B8788(u_char* arg0, short arg1)
 {
     D_800F4538_unk58_2 sp10[6];
 
@@ -1561,7 +1523,7 @@ int vs_battle_script_modelIlluminate(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op3F(u_char* arg0, short arg1)
+int func_800B884C(u_char* arg0, short arg1)
 {
     func_800BB68C_t sp10;
     int temp_a0;
@@ -1689,9 +1651,9 @@ int vs_battle_script_jumpFwdIfFlagContext(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op48(u_char* arg0, short arg1) { return D_800F4C64; }
+int func_800B8C44(u_char* arg0, short arg1) { return D_800F4C64; }
 
-int vs_battle_script_op49(u_char* arg0, short arg1)
+int func_800B8C54(u_char* arg0, short arg1)
 {
     if (arg0[1] != 0xFF) {
         D_800F4C10[arg0[1]] = arg0[2];
@@ -1815,19 +1777,19 @@ int vs_battle_script_setFlagIfItemInInventory(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op53(u_char* arg0, short arg1)
+int func_800B91C4(u_char* arg0, short arg1)
 {
     func_8007BBB8(arg0[2], arg0[1]);
     return 0;
 }
 
-int vs_battle_script_op54(u_char* arg0, short arg1)
+int func_800B91F0(u_char* arg0, short arg1)
 {
     func_8009DBDC(func_800BFE50(vs_battle_getShort(arg0 + 1)), arg0[3]);
     return 0;
 }
 
-int vs_battle_script_op55(u_char* arg0, short arg1)
+int func_800B9230(u_char* arg0, short arg1)
 {
     func_8007D15C(arg0[1]);
     return 0;
@@ -1842,21 +1804,86 @@ int vs_battle_script_setFlagIfButton(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op57(u_char* arg0, short arg1)
+int func_800B92A0(u_char* arg0, short arg1)
 {
     func_8007C28C(func_800BFE50(vs_battle_getShort(arg0 + 1)));
     return 0;
 }
 
-int vs_battle_script_setHeadsUpDisplayMode(u_char* arg0, short arg1)
+int func_800B92D0(u_char* arg0, short arg1)
 {
     func_8007BD8C(arg0[1] ^ 1);
     return 0;
 }
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", vs_battle_script_op59);
+int func_800B92F4(u_char* script, short arg1)
+{
+    switch (script[1]) {
+    case 10:
+    case 11:
+    case 12:
+        if (D_800F4BF8 == 0) {
+            vs_battle_setStateFlag(0xB6, D_800E9BF0[script[1] - 10]);
+            func_8007B9A0();
+            D_800F4BF8 = 1;
+            return 1;
+        }
+        goto finishState;
+    case 14:
+        if (D_800F4BF8 == 0) {
+            if (vs_battle_getStateFlag(0xB6) == 1) {
+                vs_battle_setStateFlag(0xB6, 2);
+            }
+            func_8007B9A0();
+            D_800F4C69 = 2;
+            D_800F4BF8 = 1;
+            return 1;
+        }
+    finishState:
+        if (func_8007B9FC() != 0) {
+            return 1;
+        }
+        vs_battle_setStateFlag(0xB6, 0);
+        D_800F4BF8 = 0;
+        return 4;
+    case 13:
+        if (D_800F4BF8 == 0) {
+            vs_battle_setStateFlag(0xB6, 1);
+            func_8007B9A0();
+            D_800F4BF8 = 1;
+            return 1;
+        }
+        goto finishTransition;
+    case 15:
+        if (D_800F4BF8 == 0) {
+            func_8007B9CC();
+            D_800F4BF8 = 1;
+            return 1;
+        }
+    finishTransition:
+        if (func_8007B9FC() == 0) {
+            D_800F4BF8 = 0;
+            return 4;
+        }
+        return 1;
+    default:
+        if (D_800F4BF8 == 0) {
+            func_800CACD0(script[1], 2);
+            D_800F4BF8 = 1;
+            return 1;
+        }
+        func_800C97BC();
+        if (func_800CB66C()->unk0 == 2) {
+            func_800CB114();
+            D_800F4BF8 = 0;
+            break;
+        }
+        return 1;
+    }
+    return 4;
+}
 
-int vs_battle_script_op5A(u_char* arg0, short arg1)
+int func_800B94D8(u_char* arg0, short arg1)
 {
     if (arg0[1] != 0) {
         func_8007BBD8(D_800E9BF4[arg0[3]], D_800E9BF8[arg0[2]],
@@ -1867,7 +1894,7 @@ int vs_battle_script_op5A(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op5B(u_char* arg0, short arg1)
+int func_800B9564(u_char* arg0, short arg1)
 {
     vs_battle_textBox* temp_s1;
     u_short temp_s0;
@@ -1886,7 +1913,7 @@ int vs_battle_script_op5B(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op5C(u_char* arg0, short arg1)
+int func_800B9608(u_char* arg0, short arg1)
 {
     u_short temp_a0 = func_800BFE50(vs_battle_getShort(arg0 + 1));
 
@@ -1898,13 +1925,13 @@ int vs_battle_script_op5C(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op5D(u_char* arg0, short arg1)
+int func_800B9670(u_char* arg0, short arg1)
 {
     func_8009D7E8(func_800BFE50(vs_battle_getShort(arg0 + 1)), arg0[3]);
     return 0;
 }
 
-int vs_battle_script_op5E(u_char* arg0, short arg1)
+int func_800B96B0(u_char* arg0, short arg1)
 {
     if (D_800F4C58[arg1] == 0) {
         D_800F4C58[arg1] = arg0[2];
@@ -1918,7 +1945,7 @@ int vs_battle_script_op5E(u_char* arg0, short arg1)
     return 1;
 }
 
-int vs_battle_script_op5F(u_char* arg0, short arg1)
+int func_800B9724(u_char* arg0, short arg1)
 {
     int var_v1;
     u_char* temp_a1;
@@ -1936,13 +1963,13 @@ int vs_battle_script_op5F(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op60(u_char* arg0, short arg1)
+int func_800B9770(u_char* arg0, short arg1)
 {
     func_8008E224(arg0[1], arg0[2]);
     return 0;
 }
 
-int vs_battle_script_op61(u_char* arg0, short arg1)
+int func_800B979C(u_char* arg0, short arg1)
 {
     short temp_v0 = vs_battle_getShort(arg0 + 1);
     D_800F4C6A = (temp_v0 << 0x10) >> 0x1F;
@@ -1952,43 +1979,43 @@ int vs_battle_script_op61(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op62(u_char* arg0, short arg1)
+int func_800B97E4(u_char* arg0, short arg1)
 {
     D_800F19C8 = arg0[1];
     return 0;
 }
 
-int vs_battle_script_op63(u_char* arg0, short arg1)
+int func_800B97F8(u_char* arg0, short arg1)
 {
     func_8007C31C();
     return 0;
 }
 
-int vs_battle_script_op64(u_char* arg0, short arg1)
+int func_800B9818(u_char* arg0, short arg1)
 {
     func_80091998(arg0[1]);
     return 0;
 }
 
-int vs_battle_script_op65(u_char* arg0, short arg1)
+int func_800B983C(u_char* arg0, short arg1)
 {
     func_800919D8(arg0[1]);
     return 0;
 }
 
-int vs_battle_script_op66(u_char* arg0, short arg1)
+int func_800B9860(u_char* arg0, short arg1)
 {
     func_80091A1C(arg0[1], arg0[2]);
     return 0;
 }
 
-int vs_battle_script_op67(u_char* arg0, short arg1)
+int func_800B988C(u_char* arg0, short arg1)
 {
     func_8008B808(arg0[1], arg0[3], arg0[2], arg0[4]);
     return 0;
 }
 
-int vs_battle_script_loadRoom(u_char* arg0, short arg1)
+int func_800B98C0(u_char* arg0, short arg1)
 {
     _mpdRoomDoorSection_t sp10;
 
@@ -2019,7 +2046,7 @@ int vs_battle_script_loadRoom(u_char* arg0, short arg1)
     return 1;
 }
 
-int vs_battle_script_op69(u_char* arg0, short arg1)
+int func_800B9A40(u_char* arg0, short arg1)
 {
     int temp_v0 = func_8007C398();
     if (temp_v0 != 5) {
@@ -2031,25 +2058,25 @@ int vs_battle_script_op69(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op6A(u_char* arg0)
+int func_800B9A94(u_char* arg0)
 {
     func_8007C4AC(arg0[1], arg0[2], arg0[3] * 0x10);
     return 0;
 }
 
-int vs_battle_script_op6B(u_char* arg0, short arg1)
+int func_800B9AC4(u_char* arg0, short arg1)
 {
     func_8007C460(arg0[1] * 0x10);
     return 0;
 }
 
-int vs_battle_script_op6C(u_char* arg0, short arg1)
+int func_800B9AE8(u_char* arg0, short arg1)
 {
     func_8007C444(arg0[1], arg0[2], arg0[3] * 0x10);
     return 0;
 }
 
-int vs_battle_script_displayRoom(u_char* arg0, short arg1)
+int func_800B9B18(u_char* arg0, short arg1)
 {
     switch (arg0[1] & 3) {
     case 0:
@@ -2080,9 +2107,9 @@ int vs_battle_script_displayRoom(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op6E(void) { return func_8007C398() != 0; }
+int func_800B9BF8(void) { return func_8007C398() != 0; }
 
-int vs_battle_script_op6F(u_char* arg0, short arg1)
+int func_800B9C18(u_char* arg0, short arg1)
 {
     if (arg0[1] != 0) {
         func_8007B104();
@@ -2092,7 +2119,7 @@ int vs_battle_script_op6F(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_modelColor(u_char* arg0, short arg1)
+int func_800B9C58(u_char* arg0, short arg1)
 {
     func_800BB68C_t sp18;
     int temp_a2;
@@ -2121,36 +2148,36 @@ int vs_battle_script_modelColor(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op71(u_char* arg0, short arg1)
+int func_800B9D74(u_char* arg0, short arg1)
 {
     func_800AC37C(func_800BFE50(vs_battle_getShort(arg0 + 1)), arg0[3]);
     return 0;
 }
 
 // https://decomp.me/scratch/cNU0W
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", vs_battle_script_op72);
+INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800B9DB4);
 
-int vs_battle_script_op73(u_char* arg0, short arg1)
+int func_800B9F28(u_char* arg0, short arg1)
 {
     func_8008EAF8(arg0[1]);
     return 0;
 }
 
-int vs_battle_script_op74(u_char* arg0, short arg1)
+int func_800B9F4C(u_char* arg0, short arg1)
 {
     func_8008EFCC(arg0[1]);
     return 0;
 }
 
-int vs_battle_script_op75(u_char* arg0, short arg1) { return func_8008F0FC() == 0; }
+int func_800B9F70(u_char* arg0, short arg1) { return func_8008F0FC() == 0; }
 
-int vs_battle_script_op76(u_char* arg0, short arg1)
+int func_800B9F90(u_char* arg0, short arg1)
 {
     func_8008F234();
     return (D_800F4C2C == 2) * 4;
 }
 
-int vs_battle_script_op77(u_char* arg0, short arg1)
+int func_800B9FC0(u_char* arg0, short arg1)
 {
     func_80090C2C(arg0[1] >> 4);
     if (arg0[4] == 0) {
@@ -2181,13 +2208,13 @@ int vs_battle_script_op77(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op78(u_char* arg0, short arg1)
+int func_800BA0E4(u_char* arg0, short arg1)
 {
     func_80091314(arg0[1] ^ 1);
     return 0;
 }
 
-int vs_battle_script_op7A(u_char* arg0, short arg1)
+int func_800BA108(u_char* arg0, short arg1)
 {
     if (arg0[1] != 0) {
         if (D_800F4C08 != 0) {
@@ -2208,7 +2235,7 @@ int vs_battle_script_op7A(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op79(u_char* arg0, short arg1)
+int func_800BA194(u_char* arg0, short arg1)
 {
     int temp_s0 = arg0[2];
 
@@ -2226,31 +2253,31 @@ int vs_battle_script_op79(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op7B(u_char* arg0, short arg1)
+int func_800BA218(u_char* arg0, short arg1)
 {
     func_80091468(vs_battle_getShort(arg0 + 1), vs_battle_getShort(arg0 + 3));
     return 0;
 }
 
-int vs_battle_script_op7C(u_char* arg0, short arg1)
+int func_800BA264(u_char* arg0, short arg1)
 {
     func_8007BDD8(arg0[1] != 0);
     return 0;
 }
 
-int vs_battle_script_op7D(u_char* arg0, short arg1)
+int func_800BA288(u_char* arg0, short arg1)
 {
     func_80091A78(arg0[1], (signed char)arg0[2]);
     return 0;
 }
 
-int vs_battle_script_op7E(u_char* arg0, short arg1)
+int func_800BA2B4(u_char* arg0, short arg1)
 {
     func_8008EAE4((signed char)arg0[1] << 7, (signed char)arg0[2] << 7);
     return 0;
 }
 
-int vs_battle_script_playSfx(u_char* arg0)
+int func_800BA2E0(u_char* arg0)
 {
     if (arg0[1] == 2 && D_800F4C08 == 0) {
         return 0;
@@ -2262,25 +2289,25 @@ int vs_battle_script_playSfx(u_char* arg0)
     return 0;
 }
 
-int vs_battle_script_op81(u_char* arg0, short arg1)
+int func_800BA35C(u_char* arg0, short arg1)
 {
     func_8007C8A4(func_800BFE50(vs_battle_getShort(arg0 + 1)), arg0[3]);
     return 0;
 }
 
-int vs_battle_script_op82(u_char* arg0, short arg1)
+int func_800BA39C(u_char* arg0, short arg1)
 {
     func_80045BFC(D_800E9B34[arg0[1]], arg0[2], arg0[3], arg0[4]);
     return 0;
 }
 
-int vs_battle_script_op83(u_char* arg0, short arg1)
+int func_800BA3E4(u_char* arg0, short arg1)
 {
     func_80045DC0();
     return 0;
 }
 
-int vs_battle_script_op84(u_char* arg0, short arg1)
+int func_800BA404(u_char* arg0, short arg1)
 {
     func_80045D64(D_800E9B34[arg0[1]], arg0[2]);
     return 0;
@@ -2317,7 +2344,7 @@ int vs_battle_script_loadSoundFile(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op8F(u_char* arg0)
+int func_800BA52C(u_char* arg0)
 {
     func_8004552C(D_800F4C69, 0, arg0[4]);
     func_80044F60(D_800F4C69 = arg0[1], arg0[2], arg0[3]);
@@ -2336,37 +2363,37 @@ int vs_battle_script_freeMusic(u_char* arg0, short arg1)
     return (D_800F4C2C == 2) * 4;
 }
 
-int vs_battle_script_playMusic(u_char* arg0, short arg1)
+int func_800BA5E8(u_char* arg0, short arg1)
 {
     func_80045000(D_800F4C69 = arg0[1], arg0[2], arg0[3]);
     return 0;
 }
 
-int vs_battle_script_op93(u_char* arg0, short arg1)
+int func_800BA61C(u_char* arg0, short arg1)
 {
     func_8004552C(D_800F4C69, arg0[1], arg0[2]);
     return 0;
 }
 
-int vs_battle_script_op94(u_char* arg0, short arg1)
+int func_800BA650(u_char* arg0, short arg1)
 {
     func_80045574(D_800F4C69, (signed char)arg0[1], arg0[2]);
     return 0;
 }
 
-int vs_battle_script_op95(u_char* arg0, short arg1)
+int func_800BA684(u_char* arg0, short arg1)
 {
     func_800455AC(D_800F4C69, (signed char)arg0[1], arg0[2]);
     return 0;
 }
 
-int vs_battle_script_op96(u_char* arg0, short arg1)
+int func_800BA6B8(u_char* arg0, short arg1)
 {
     func_80044DF4(D_800F4C69);
     return 0;
 }
 
-int vs_battle_script_op97(u_char* arg0, short arg1)
+int func_800BA6E0(u_char* arg0, short arg1)
 {
     int temp_s0 = arg0[1];
     if (func_8004550C(temp_s0) != 0) {
@@ -2378,7 +2405,7 @@ int vs_battle_script_op97(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_op98(u_char* arg0, short arg1)
+int func_800BA72C(u_char* arg0, short arg1)
 {
     func_80044DB4();
     return 0;
@@ -2400,38 +2427,38 @@ int vs_battle_script_processSoundQueue(u_char* arg0, short arg1)
     return vs_main_processSoundQueue() == 1;
 }
 
-int vs_battle_script_op9A(u_char* arg0, short arg1)
+int func_800BA7BC(u_char* arg0, short arg1)
 {
     int temp_s1 = func_80044D94() >> 0x10;
     return temp_s1 < vs_battle_getShort(arg0 + 1);
 }
 
-int vs_battle_script_op9B(u_char* arg0, short arg1)
+int func_800BA800(u_char* arg0, short arg1)
 {
     func_80045C74(D_800E9B34[arg0[1]], arg0[2], (signed char)arg0[3], arg0[4]);
     return 0;
 }
 
-int vs_battle_script_op9C(u_char* arg0, short arg1)
+int func_800BA848(u_char* arg0, short arg1)
 {
     func_80045CEC(D_800E9B34[arg0[1]], arg0[2], arg0[3], arg0[4]);
     return 0;
 }
 
-int vs_battle_script_op9F(u_char* arg0, short arg1)
+int func_800BA890(u_char* arg0, short arg1)
 {
     func_80044EC8(D_800F4C69 = arg0[1]);
     return 0;
 }
 
-int vs_battle_script_opA0(u_char* arg0, short arg1)
+int func_800BA8BC(u_char* arg0, short arg1)
 {
     func_8007BE20(
         vs_battle_getShort(arg0 + 1), func_800BFE50(vs_battle_getShort(arg0 + 3)));
     return 0;
 }
 
-int vs_battle_script_opA1(u_char* arg0, short arg1)
+int func_800BA90C(u_char* arg0, short arg1)
 {
     func_8007BEC4(arg0[1]);
     if (D_800F4C2C == 2) {
@@ -2440,7 +2467,7 @@ int vs_battle_script_opA1(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_opA2(u_char* arg0, short arg1)
+int func_800BA94C(u_char* arg0, short arg1)
 {
     if ((D_800F4C2C == 2) && ((arg0[1] == 0) || (arg0[1] == 5))) {
         if (D_800F4BB9 != 0) {
@@ -2457,15 +2484,15 @@ int vs_battle_script_opA2(u_char* arg0, short arg1)
     return func_8007BEE4() != arg0[1];
 }
 
-int vs_battle_script_opA3(u_char* arg0, short arg1)
+int func_800BAA04(u_char* arg0, short arg1)
 {
     func_8007BF04();
     return (D_800F4C2C == 2) * 4;
 }
 
-int vs_battle_script_opA4(u_char* arg0, short arg1) { return func_8007BF0C() != 1; }
+int func_800BAA34(u_char* arg0, short arg1) { return func_8007BF0C() != 1; }
 
-int vs_battle_script_opA5(u_char* arg0, short arg1)
+int func_800BAA58(u_char* arg0, short arg1)
 {
     if (D_800F4BB9 == 0) {
         func_800CF1A8();
@@ -2477,19 +2504,19 @@ int vs_battle_script_opA5(u_char* arg0, short arg1)
     return 1;
 }
 
-int vs_battle_script_opA6(u_char* arg0, short arg1)
+int func_800BAACC(u_char* arg0, short arg1)
 {
     func_800CEF38(arg0[1]);
     return 0;
 }
 
-int vs_battle_script_opA8(u_char* arg0, short arg1)
+int func_800BAAF0(u_char* arg0, short arg1)
 {
     func_80044DD4(arg0[1]);
     return 0;
 }
 
-int vs_battle_script_opA9(u_char* arg0)
+int func_800BAB14(u_char* arg0)
 {
     short a0 = arg0[1];
     if (a0 == 0xFF) {
@@ -2507,7 +2534,7 @@ int vs_battle_script_opA9(u_char* arg0)
     return 0;
 }
 
-int vs_battle_script_opAA(u_char* arg0, short arg1)
+int func_800BABCC(u_char* arg0, short arg1)
 {
     short temp_v0 = func_800BFE50(vs_battle_getShort(arg0 + 2));
 
@@ -2519,13 +2546,13 @@ int vs_battle_script_opAA(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_opB1(u_char* arg0, short arg1)
+int func_800BAC38(u_char* arg0, short arg1)
 {
     vs_battle_setDoorEntered2(arg0[1]);
     return 0;
 }
 
-int vs_battle_script_opB2(u_char* arg0, short arg1)
+int func_800BAC5C(u_char* arg0, short arg1)
 {
     func_8006EBF8_t sp10;
     func_8006EBF8_t sp20;
@@ -2545,7 +2572,7 @@ int vs_battle_script_opB2(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_opB3(u_char* arg0, short arg1)
+int func_800BAD78(u_char* arg0, short arg1)
 {
     func_800BB68C_t sp10;
 
@@ -2560,7 +2587,7 @@ int vs_battle_script_opB3(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_opB4(u_char* arg0)
+int func_800BADE0(u_char* arg0)
 {
     if (D_800F4BF8 == 0) {
         func_8007BA98(
@@ -2576,13 +2603,13 @@ int vs_battle_script_opB4(u_char* arg0)
     return 1;
 }
 
-int vs_battle_script_opB5(u_char* arg0, short arg1)
+int func_800BAE74(u_char* arg0, short arg1)
 {
     vs_battle_decreaseMiscCount(vs_battle_getShort(arg0 + 1));
     return 0;
 }
 
-int vs_battle_script_opB6(u_char* arg0, short arg1)
+int func_800BAEA0(u_char* arg0, short arg1)
 {
     func_8006EBF8_t sp10;
     func_8006EBF8_t sp20;
@@ -2703,7 +2730,7 @@ int vs_battle_script_specialOp(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_opB8(u_char* arg0, short arg1)
+int func_800BB288(u_char* arg0, short arg1)
 {
     if ((D_800EB9B4 != NULL) && (D_800EB9B4->unk0 != 0)) {
         return 1;
@@ -2711,46 +2738,46 @@ int vs_battle_script_opB8(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_opBB(u_char* arg0, short arg1)
+int func_800BB2B8(u_char* arg0, short arg1)
 {
     func_800F9800(vs_battle_getShort(arg0 + 1));
     return 0;
 }
 
-int vs_battle_script_opBC(u_char* arg0, short arg1)
+int func_800BB2E4(u_char* arg0, short arg1)
 {
     func_800CB79C();
     return 0;
 }
 
-int vs_battle_script_opBD(u_char* arg0, short arg1) { return 0; }
+int func_800BB304(u_char* arg0, short arg1) { return 0; }
 
-int vs_battle_script_opBE(u_char* arg0, short arg1)
+int func_800BB30C(u_char* arg0, short arg1)
 {
     func_800CB7DC();
     return (D_800F4C2C == 2) * 4;
 }
 
-int vs_battle_script_opDE(u_char* arg0, short arg1)
+int func_800BB33C(u_char* arg0, short arg1)
 {
     func_800BE3A0();
     return 0;
 }
 
-int vs_battle_script_opDF(u_char* arg0, short arg1)
+int func_800BB35C(u_char* arg0, short arg1)
 {
     int new_var = arg0[1] & 2;
     func_800BE36C(arg0[1] & 1, new_var != 0);
     return 0;
 }
 
-int vs_battle_script_opE8(u_char* arg0, short arg1)
+int func_800BB38C(u_char* arg0, short arg1)
 {
     func_800BBE10(func_800BFE50(vs_battle_getShort(arg0 + 1)));
     return 0;
 }
 
-int vs_battle_script_opE9(u_char* arg0, short arg1)
+int func_800BB3BC(u_char* arg0, short arg1)
 {
     func_800BC1CC(
         arg0[1] != 0xFF ? ((arg0[1] + 4) & 7) : -1, arg0[2] != 0 ? arg0[2] : -1);
@@ -2758,18 +2785,18 @@ int vs_battle_script_opE9(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_cameraWait(u_char* arg0, short arg1)
+int func_800BB41C(u_char* arg0, short arg1)
 {
     return arg0[1] != (arg0[1] & func_800BD610());
 }
 
-int vs_battle_script_opE1(u_char* arg0, short arg1)
+int func_800BB450(u_char* arg0, short arg1)
 {
     func_8007DD50(arg0[1]);
     return 0;
 }
 
-int vs_battle_script_wait(u_char* arg0, short arg1)
+int func_800BB474(u_char* arg0, short arg1)
 {
     if (D_800F4C58[arg1] == 0) {
         D_800F4C58[arg1] = arg0[1];
@@ -2785,19 +2812,19 @@ int vs_battle_script_wait(u_char* arg0, short arg1)
     return 1;
 }
 
-int vs_battle_script_opF1(u_char* arg0, short arg1)
+int func_800BB4CC(u_char* arg0, short arg1)
 {
     func_8007C36C(arg0[1]);
     return 0;
 }
 
-int vs_battle_script_opF3(u_char* arg0, short arg1)
+int func_800BB4F0(u_char* arg0, short arg1)
 {
     D_800F4BE4 = arg0[1];
     return 0;
 }
 
-int vs_battle_script_opF4(u_char* arg0, short arg1)
+int func_800BB504(u_char* arg0, short arg1)
 {
     u_short temp_a0 = arg0[1] & 3;
     if ((arg0[1] & 0x80)) {
@@ -2807,15 +2834,15 @@ int vs_battle_script_opF4(u_char* arg0, short arg1)
     return D_800F4C38[temp_a0] != 0;
 }
 
-int vs_battle_script_opF5(u_char* arg0, short arg1)
+int func_800BB554(u_char* arg0, short arg1)
 {
     D_800F4C38[arg0[1]] = arg0 + 4;
     return (int)&arg0[vs_battle_getShort(arg0 + 2)];
 }
 
-int vs_battle_script_opF6(u_char* arg0, short arg1) { return 3; }
+int func_800BB5A4(u_char* arg0, short arg1) { return 3; }
 
-int vs_battle_script_opF7(u_char* arg0, short arg1)
+int func_800BB5AC(u_char* arg0, short arg1)
 {
     _evtFile = vs_battle_getShort(arg0 + 1);
     D_800F4C24 = vs_main_allocHeapR(0x1800);
@@ -2824,7 +2851,7 @@ int vs_battle_script_opF7(u_char* arg0, short arg1)
     return 0;
 }
 
-int vs_battle_script_return(u_char* arg0, short arg1)
+int func_800BB604(u_char* arg0, short arg1)
 {
     int i;
     int var_s1;
@@ -2981,7 +3008,7 @@ void func_800BBAFC(void)
     }
 }
 
-extern P_CODE D_800E9C08;
+extern CVECTOR D_800E9C08;
 extern D_800F1A68_t D_800E9C0C;
 
 void func_800BBBE8(void)
@@ -3165,12 +3192,12 @@ void func_800BC1CC(short arg0, int arg1)
             / 0x28000;
     if ((temp_v0 << 0x10) != 0) {
         D_800E9C1C[2] = D_800E9C1C[6] = temp_v0;
-        vs_battle_script_setCamera(D_800E9C1C, 0);
-        vs_battle_script_setCamera(D_800E9C1C + 3, 0);
+        func_800BC2E8(D_800E9C1C, 0);
+        func_800BC2E8(D_800E9C1C + 3, 0);
     }
 }
 
-int vs_battle_script_setCamera(u_char* script, short unused)
+int func_800BC2E8(u_char* script, short unused)
 {
     D_800F4BA4_t2* c;
     D_800F4BA4_t2* other;
@@ -3664,7 +3691,7 @@ int func_800BD610(void)
 int func_800BD6C4(u_char* script, short arg1)
 {
     D_800F1A68_t values;
-    P_CODE color;
+    CVECTOR color;
     short mode;
     short effectValue;
     switch (script[0]) {
@@ -3696,16 +3723,16 @@ int func_800BD6C4(u_char* script, short arg1)
     case 229:
         D_800F4BA4->unk21C.unk1E = script[5];
         if (D_800F4BA4->unk21C.unk1E == 0) {
-            color.r0 = script[1];
-            color.g0 = script[2];
-            color.b0 = script[3];
+            color.r = script[1];
+            color.g = script[2];
+            color.b = script[3];
             func_8007DDD4(&color);
         } else {
             D_800F4BA4->unk21C.unk1C = 0;
             func_8007DEA8(&color);
-            D_800F4BA4->unk21C.unk12 = script[1] - (D_800F4BA4->unk21C.unkA = color.r0);
-            D_800F4BA4->unk21C.unk14 = script[2] - (D_800F4BA4->unk21C.unkC = color.g0);
-            D_800F4BA4->unk21C.unk16 = script[3] - (D_800F4BA4->unk21C.unkE = color.b0);
+            D_800F4BA4->unk21C.unk12 = script[1] - (D_800F4BA4->unk21C.unkA = color.r);
+            D_800F4BA4->unk21C.unk14 = script[2] - (D_800F4BA4->unk21C.unkC = color.g);
+            D_800F4BA4->unk21C.unk16 = script[3] - (D_800F4BA4->unk21C.unkE = color.b);
             D_800F4BA4->unk21C.unk1 = script[4];
         }
         return 0;
@@ -3760,7 +3787,7 @@ int func_800BD6C4(u_char* script, short arg1)
             func_8007DDF8(&values);
             values.unk0 = values.unk4 = ONE;
             func_8007DDB8(&values);
-            color.r0 = color.g0 = color.b0 = 128;
+            color.r = color.g = color.b = 128;
             func_8007DDD4(&color);
             func_8007DE44(0);
             func_8007DE5C(0);
@@ -3773,7 +3800,7 @@ int func_800BD6C4(u_char* script, short arg1)
             func_8007DDF8(&values);
             values.unk0 = values.unk4 = ONE;
             func_8007DDB8(&values);
-            color.r0 = color.g0 = color.b0 = 144;
+            color.r = color.g = color.b = 144;
             func_8007DE5C(1);
             func_8007DDD4(&color);
             func_8007DE44(mode);
@@ -3785,7 +3812,7 @@ int func_800BD6C4(u_char* script, short arg1)
 void func_800BDAB4(void)
 {
     D_800F1A68_t sp10;
-    P_CODE sp20;
+    CVECTOR sp20;
 
     if (func_800BDBB4(&D_800F4BA4->unk1FC) != 0) {
         sp10.unk0 = D_800F4BA4->unk1FC.unk2;
@@ -3793,9 +3820,9 @@ void func_800BDAB4(void)
         func_8007DDB8(&sp10);
     }
     if (func_800BDBB4(&D_800F4BA4->unk21C) != 0) {
-        sp20.r0 = D_800F4BA4->unk21C.unk2;
-        sp20.g0 = D_800F4BA4->unk21C.unk4;
-        sp20.b0 = D_800F4BA4->unk21C.unk6;
+        sp20.r = D_800F4BA4->unk21C.unk2;
+        sp20.g = D_800F4BA4->unk21C.unk4;
+        sp20.b = D_800F4BA4->unk21C.unk6;
         func_8007DDD4(&sp20);
     }
     if (func_800BDBB4(&D_800F4BA4->unk23C) != 0) {
@@ -3832,7 +3859,7 @@ int func_800BDBB4(func_800BDBB4_t* arg0)
     return 1;
 }
 
-int vs_battle_script_cameraZoom(u_char* script, short arg1)
+int func_800BDC9C(u_char* script, short arg1)
 {
     func_800BDF6C_t* entry;
     short i;
@@ -4040,8 +4067,8 @@ void func_800BE3D0(char arg0)
     _copyVector(&D_800F4BA4->eye.position, &sp40);
     _copyVector(&D_800F4BA4->lookAt.position, &sp20);
 
-    vs_battle_script_setCamera(&D_800E9C28, 0);
-    vs_battle_script_setCamera(&D_800E9C2C, 0);
+    func_800BC2E8(&D_800E9C28, 0);
+    func_800BC2E8(&D_800E9C2C, 0);
 }
 
 void func_800BE53C(D_800F4BA4_t2* arg0)
@@ -4266,7 +4293,297 @@ int func_800BEC30(void)
     return 1;
 }
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800BEC58);
+extern char D_800F4BA8;
+int func_8007C218(int);
+int func_800A0024(int, void*);
+int func_800A92B8(int, int);
+int func_8007CFCC(int);
+
+short func_800BEC58(int arg0, int arg1, u_char* arg2, int arg3)
+{
+    char buf[64];
+    func_8006EBF8_t position;
+    short type;
+    short mode;
+    short i;
+    short otherActorId;
+    short flagId;
+    short actorId;
+    short flagValue;
+    int result;
+    short negate;
+    short eventId;
+    u_char* p;
+    short left;
+    int right;
+
+    type = arg0;
+    mode = arg3;
+
+    if (type == 0xFF) {
+        if (D_800F4C34 == 0) {
+            return 0;
+        }
+        return 2;
+    }
+    if (type == 1) {
+        int scriptSection = _mpdScriptSection;
+        if (scriptSection & 1) {
+            _mpdScriptSection = 0;
+            D_800F4C34 = 1;
+            D_800F4BE0 = 1;
+            D_800F4BA8 = 1;
+            return 1;
+        }
+    }
+    if (type == 0x40) {
+        _evtFile = arg1;
+        D_800F4BE0 = 0;
+        D_800F4C34 = 1;
+        D_800F4BA8 = 1;
+        return 1;
+    }
+    if (D_800F4C34 != 0 && D_800F4BA8 != 0) {
+        return 2;
+    }
+
+    for (i = 0; i < 16; ++i) {
+        u_short offset = ((u_short*)_mpdClearedSection)[i];
+        if (offset == 0xFFFF) {
+            return 0;
+        }
+        p = (u_char*)_mpdClearedSection + offset;
+        if (!(*p & type)) {
+            continue;
+        }
+        p++;
+        eventId = vs_battle_getShort(p);
+        p += 2;
+        negate = 0;
+        while (1) {
+            result = 0;
+            switch (*p) {
+            case 0xFF:
+                if (eventId & 0x8000) {
+                    _evtFile = eventId & 0xF;
+                    D_800F4BE0 = 2;
+                } else {
+                    _evtFile = eventId;
+                    D_800F4BE0 = 0;
+                }
+                D_800F4C34 = 1;
+                D_800F4BA8 = 0;
+                return 1;
+            case 1:
+                func_800A1108(0, &position);
+                if (position.unk0.unk0.fields.unk0_0 == p[1]
+                    && position.unk0.unk0.fields.unk0_16 == p[2]) {
+                    result = 1;
+                }
+                p += 3;
+                break;
+            case 2:
+                func_800A1108(0, &position);
+                if (position.unk0.unk0.fields.unk0_0 >= p[1]
+                    && position.unk0.unk0.fields.unk0_0 < p[1] + p[3]
+                    && position.unk0.unk0.fields.unk0_16 >= p[2]
+                    && position.unk0.unk0.fields.unk0_16 < p[2] + p[4]) {
+                    result = 1;
+                }
+                p += 5;
+                break;
+            case 3:
+                left = vs_battle_getStateFlag(((p[1] & 0xF) << 6) | (p[2] >> 2));
+                right = p[3];
+                goto compare;
+            case 15:
+                left = vs_battle_getStateFlag(((p[1] & 0xF) << 6) | (p[2] >> 2));
+                right = vs_battle_getStateFlag(((p[2] & 3) << 8) | p[3]);
+            compare:
+                switch (p[1] & 0xF0) {
+                case 0x00:
+                    if (left <= right) {
+                        result = 1;
+                    }
+                    break;
+                case 0x10:
+                    if (left >= right) {
+                        result = 1;
+                    }
+                    break;
+                case 0x20:
+                    if (left == right) {
+                        result = 1;
+                    }
+                    break;
+                case 0x30:
+                    if (left != right) {
+                        result = 1;
+                    }
+                    break;
+                case 0x40:
+                    if (left < right) {
+                        result = 1;
+                    }
+                    break;
+                case 0x50:
+                    if (left > right) {
+                        result = 1;
+                    }
+                    break;
+                }
+                p += 4;
+                break;
+            case 4:
+                left = vs_battle_getShort(p + 1);
+                if (left & 0x1000) {
+                    if (func_8007CF64(left & 0x1F) != NULL) {
+                        result = 1;
+                    }
+                } else if (func_8007CF18(left) != 1) {
+                    result = 1;
+                }
+                p += 3;
+                break;
+            case 5:
+                left = flagValue = func_8007CF80(p[1]);
+                flagId = vs_battle_getShort(p + 2);
+                if (flagId != 0) {
+                    vs_battle_setStateFlag(flagId, flagValue);
+                    result = 1;
+                } else if (left != 0) {
+                    result = 1;
+                }
+                p += 4;
+                break;
+            case 6:
+                if (mode == 0) {
+                    actorId = func_800BFE50(vs_battle_getShort(p + 1));
+                    otherActorId = func_800BFE50(vs_battle_getShort(p + 3));
+                    if (actorId != 1 && otherActorId != 1 && arg1 == actorId
+                        && arg2 == otherActorId) {
+                        result = 1;
+                    }
+                }
+                p += 5;
+                break;
+            case 7:
+                actorId = func_800BFE50(vs_battle_getShort(p + 1));
+                if (actorId == 1) {
+                    negate = 0;
+                    break;
+                }
+                left = flagValue = func_8007C218(actorId);
+                flagId = vs_battle_getShort(p + 3);
+                if (flagId != 0) {
+                    vs_battle_setStateFlag(flagId, flagValue);
+                    result = 1;
+                } else if (left != 0) {
+                    result = 1;
+                }
+                p += 5;
+                break;
+            case 8:
+                if (mode == 1 && ((u_char*)arg2)[0] == p[1]
+                    && ((u_char*)arg2)[2] == p[2]) {
+                    result = 1;
+                }
+                p += 3;
+                break;
+            case 9:
+                if (!(func_800A0BE0(0) & 0x104000)) {
+                    result = 1;
+                }
+                p += 1;
+                break;
+            case 10:
+                left = flagValue =
+                    vs_battle_itemIdIsInInventory(vs_battle_getShort(p + 1));
+                flagId = vs_battle_getShort(p + 3);
+                if (flagId != 0) {
+                    vs_battle_setStateFlag(flagId, flagValue);
+                    result = 1;
+                } else if (left != 0) {
+                    result = 1;
+                }
+                p += 5;
+                break;
+            case 11:
+                if ((short)func_800A0024(p[1], &position) >= 0
+                    && position.unk0.unk0.fields.unk0_0 == p[2]
+                    && position.unk0.unk0.fields.unk0_16 == p[3]
+                    && (p[4] == 0 || -(position.unk0.unk4.vy / 128) + 1 == p[4])
+                    && (p[5] == 0
+                        || (position.unk0.unk0.fields.unk0_24 >> 2) + 1 == p[5])) {
+                    result = 1;
+                }
+                p += 6;
+                break;
+            case 12:
+                left = flagValue = -func_800A92B8(p[1], p[2]) / 128;
+                flagId = vs_battle_getShort(p + 3);
+                if (flagId != 0) {
+                    vs_battle_setStateFlag(flagId, flagValue);
+                    result = 1;
+                } else if (left != 0) {
+                    result = 1;
+                }
+                p += 5;
+                break;
+            case 13:
+                actorId = func_800BFE50(vs_battle_getShort(p + 1));
+                if (actorId == 1) {
+                    negate = 0;
+                    break;
+                }
+                func_800A1108(actorId, &position);
+                if (position.unk0.unk0.fields.unk0_0 == p[3]
+                    && position.unk0.unk0.fields.unk0_16 == p[4]) {
+                    result = 1;
+                }
+                p += 5;
+                break;
+            case 14:
+                actorId = func_800BFE50(vs_battle_getShort(p + 1));
+                if (actorId == 1) {
+                    negate = 0;
+                    break;
+                }
+                func_800A1108(actorId, &position);
+                if (position.unk0.unk0.fields.unk0_0 >= p[3]
+                    && position.unk0.unk0.fields.unk0_0 < p[3] + p[5]
+                    && position.unk0.unk0.fields.unk0_16 >= p[4]
+                    && position.unk0.unk0.fields.unk0_16 < p[4] + p[6]) {
+                    result = 1;
+                }
+                p += 7;
+                break;
+            case 16:
+                actorId = func_800BFE50(vs_battle_getShort(p + 1));
+                if (actorId == 1) {
+                    negate = 0;
+                    break;
+                }
+                if (func_8007CFCC(actorId) != 0) {
+                    result = 1;
+                }
+                p += 3;
+                break;
+            case 0xFE:
+                negate = 1;
+                p += 1;
+                continue;
+            default:
+                sprintf(buf, "UNKNOWN TRIGGER DETECTED:%02x", *p);
+                break;
+            }
+            if (result == negate) {
+                break;
+            }
+            negate = 0;
+        }
+    }
+}
 
 void func_800BF5F0(u_char* data)
 {
@@ -4311,4 +4628,93 @@ void func_800BF5F0(u_char* data)
     }
 }
 
-INCLUDE_ASM("build/src/BATTLE/BATTLE.PRG/nonmatchings/4A0A8", func_800BF850);
+short func_800BFBB8(u_char** arg0, short arg1);
+
+int func_800BF850(void)
+{
+    short i;
+    int _[2] __attribute__((unused));
+
+    if (D_800F4C34 == 0) {
+        return 0;
+    }
+    if (D_800F4C34 == 1) {
+        if (D_800F4BB8 != 0) {
+            D_800F4C34 = 2;
+            D_800F4BB8 = 0;
+            func_800BBBE8();
+            func_8007CEC0();
+            for (i = 0; i < 17; ++i) {
+                D_800F4B70[i] = 0;
+            }
+            return 2;
+        }
+        return 0;
+    }
+    if (D_800F4C34 == 2) {
+        D_800F4C6A = 0;
+        D_800F4C54 = 0;
+        switch ((short)D_800F4BE0) {
+        case 1:
+            func_800BF5F0(D_800F4C30);
+            D_800F4C34 = 4;
+            break;
+        case 2:
+            func_800BF5F0(
+                (u_char*)_mpdRoomDoorSection + ((short*)_mpdRoomDoorSection)[_evtFile]);
+            D_800F4C34 = 4;
+            break;
+        case 0:
+            func_800C00E8(_evtFile, D_800F4C30);
+            D_800F4C34 = 3;
+            break;
+        }
+        return 2;
+    }
+    if (D_800F4C34 == 3) {
+        if (*D_800F4BBC == 4) {
+            vs_main_freeCdQueueSlot((vs_main_CdQueueSlot*)D_800F4BBC);
+            if (D_800F4C54 != 0) {
+                vs_main_memcpy(D_800F4C30, D_800F4C24, 0x1800);
+                vs_main_freeHeapR(D_800F4C24);
+                D_800F4C54 = 0;
+            }
+            func_800BF5F0(D_800F4C30);
+            D_800F4C34 = 4;
+        }
+        return 2;
+    }
+    func_800BBE94();
+    if (D_800F4C22 == 0) {
+        if (func_800BFBB8(D_800F4C38, 0) != 0) {
+            if (D_800F4BB6 == 0 && D_800F4C54 == 0 && D_800F4BE2 == 0) {
+                func_800BC1CC(-1, -1);
+            }
+            D_800F4C22 = 1;
+        }
+        for (i = 1; i < 4; ++i) {
+            if (D_800F4C38[i] != NULL) {
+                func_800BFBB8(&D_800F4C38[i], i);
+            }
+        }
+    }
+    func_800BC9E0();
+    func_800BDAB4();
+    vs_battle_applyCameraState();
+    func_800BB9B0();
+    func_800BBAFC();
+    if (D_800F4BE4 != 0) {
+        func_800BB874();
+    }
+    if (D_800F4C22 != 0 && (u_char)func_800BD610() == 0xFF) {
+        if (D_800F4C54 != 0) {
+            D_800F4C34 = 3;
+            D_800F4BE0 = 0;
+        } else {
+            func_800BFD9C();
+            D_800F4C34 = 0;
+        }
+        D_800F4C22 = 0;
+    }
+    return 2;
+}

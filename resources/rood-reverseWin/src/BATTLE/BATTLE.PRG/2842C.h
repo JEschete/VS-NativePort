@@ -1,5 +1,19 @@
 #pragma once
 #include <stddef.h>
+#include <libgte.h>
+#include <libgpu.h>
+
+typedef struct {
+    RECT uv;
+    CVECTOR colors[4];
+} vs_battle_backgroundTile;
+
+typedef struct {
+    int width;
+    int height;
+    int unk8;
+    vs_battle_backgroundTile tiles[0];
+} vs_battle_backgroundLayout;
 
 typedef struct {
     u_int unk0_0 : 8;
@@ -21,12 +35,13 @@ typedef struct {
     char variant;
 } vs_battle_objectData;
 
-int vs_battle_clamp(short arg0, int arg1, int arg2);
+short vs_battle_clamp(short arg0, int arg1, int arg2);
 void func_80091314(int);
 void func_80091320(int);
 void func_8009134C(int, int);
 int func_800913BC(int);
 void func_80091468(int, int);
+void func_8009147C(vs_battle_backgroundLayout*, int, int, int);
 void func_800918E8(int);
 int func_80091998(int);
 int func_800919D8(int);
@@ -40,6 +55,7 @@ void func_80093788(int);
 void func_800938AC(int);
 void func_80093A70(void);
 void func_80093AB4(void);
+int func_80093F24(int arg0);
 void func_80095B70(int);
 void func_8009722C(void);
 void func_80098160(int);
@@ -52,7 +68,9 @@ int func_8009CC20(int, int);
 int func_8009CE9C(u_int arg0);
 int func_8009CFA0(void);
 int func_8009CFB0(int);
-void func_8009D468(int, int);
+// Unprototyped: _parseShp calls it with only the actor index (the original passes one
+// argument).
+void func_8009D468();
 void func_8009D854(int);
 void func_8009E5C4(int);
 void func_8009F314(int, void*, int);

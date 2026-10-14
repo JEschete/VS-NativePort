@@ -4,13 +4,29 @@ This is an editable source snapshot for Windows-specific development. It is a
 regular directory in the parent repository, not another Git submodule.
 The reference checkout at `../rood-reverse` remains unchanged and pulls from
 `ser-pounce/rood-reverse`. It is reference material only. The Windows snapshot
-has two accepted function-level matches beyond that reference; native-port
+now integrates `noprompt/rood-reverse`'s `decomp/verified-functions` branch,
+with incoming source taking precedence over local overlaps by explicit user
+direction. Earlier local match reports remain historical; native-port
 implementation has not started as an accepted deliverable.
 
 Upstream provenance does not authorize overwriting local work. Build verification
 is read-only and reports differences as warnings. Only explicit synchronization
 may replace a pristine recorded snapshot; local additions, edits, and deletions
 are refused.
+
+## Authoritative Fork Import: 2026-10-12
+
+Integrated commit `3b3f35fb318178a5778a46db4dc93777e534c042` from the separate
+reference at `../rood-reverse-noprompt`. Applied 333 changed source/configuration
+files and restored nine namespace-coupled files to the fork versions. Their
+implementation won every overlap; previous maintained source is backed up under
+`build/fork-import-xxz7nexe/backup`. The original reference remained untouched.
+
+Windows compatibility changes are confined to its adapter/verification layer
+and independently verified symbol/size metadata. All 289 C units pass the
+isolated historical compiler sweep; selected canonical function and read-only
+table checks pass. This does not certify a complete overlay or native runtime.
+See [Local Progress](DECOMP_PROGRESS.md) for exact scope and evidence.
 
 ## Reviewed Update: 2026-10-07
 
@@ -25,13 +41,15 @@ Windows adapter instead.
 `upstream.json` records hashes of the committed reference files, not the locally
 merged source. The source replacement guard was not bypassed or weakened.
 See [Local Progress](DECOMP_PROGRESS.md) for preservation checks, fresh matching
-controls, and the still-unaccepted trajectory candidate in the current unit.
+controls, the historical trajectory candidates, and the subsequent accepted
+trajectory reconstruction in the current unit.
 
 ## Source Revisions
 
 | Source | Revision |
 | --- | --- |
-| [rood-reverse](https://github.com/ser-pounce/rood-reverse) | See `upstream.json` for the active authoritative commit |
+| [noprompt/rood-reverse](https://github.com/noprompt/rood-reverse/tree/decomp/verified-functions) | `3b3f35fb318178a5778a46db4dc93777e534c042`, also recorded in `upstream.json` |
+| [ser-pounce/rood-reverse](https://github.com/ser-pounce/rood-reverse) | Read-only original reference and source ancestry |
 | [maspsx](https://github.com/mkst/maspsx) | `746b895f02929ecd148af7b1f4ff05b69f973878` |
 | [decomp-permuter](https://github.com/simonlindholm/decomp-permuter) | `059609d4aec73eb0650726772954e1ad575825f8` |
 

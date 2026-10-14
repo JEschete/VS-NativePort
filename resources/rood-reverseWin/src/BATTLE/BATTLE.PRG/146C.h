@@ -65,7 +65,9 @@ typedef struct {
 
 typedef struct {
     u_int unk0_0 : 5;
-    u_int unk0_5 : 3;
+    u_int unk0_5 : 1;
+    u_int unk0_6 : 1;
+    u_int unk0_7 : 1;
     u_int unk0_8 : 1;
     u_int unk0_9 : 1;
     u_int unk0_10 : 3;
@@ -105,10 +107,7 @@ typedef struct {
 
 typedef struct {
     int unk0[5];
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
+    VECTOR unk14;
     int unk24;
     int unk28;
     int unk2C;
@@ -185,7 +184,8 @@ typedef struct {
     u_int unk4_8 : 2;
     u_int unk4_10 : 6;
     u_int unk4_16 : 16;
-    VECTOR unk8[10];
+    VECTOR unk8[4];
+    VECTOR unk48[6];
     int unkA8;
     int unkAC;
     int unkB0;
@@ -254,8 +254,8 @@ typedef struct {
     _mpdRoomSection9* section9;
     _mpdRoomSectionA* sectionA;
     _mpdRoomSectionB* sectionB;
-    int textureEffectsSection;
-    int sectionD;
+    void* textureEffectsSection;
+    void* sectionD;
     _mpdRoomSectionE* sectionE;
     vs_battle_scene* sectionF;
     u_short* section10;
@@ -553,7 +553,7 @@ typedef struct {
     /* 0x956 */ u_char unk956_2 : 6;
     /* 0x957 */ u_char unk957;
     /* 0x958 */ vs_battle_uiMisc miscItem;
-    /* 0x95C */ int unk95C;
+    /* 0x95C */ vs_battle_uiMisc unk95C;
     /* 0x960 */ vs_battle_uiMiscRand unk960;
     /* 0x964 */
 } vs_battle_actor2;
@@ -568,6 +568,7 @@ typedef struct vs_battle_actor {
     /* 0x0C */ int unkC;
     union {
         u_char u8[4];
+        u_short u16[2];
         int s32;
     /* 0x10 */ } unk10;
     int unk14;
@@ -654,23 +655,37 @@ typedef struct {
 } vs_battle_manualDisplayState_t;
 
 typedef struct {
-    char unk0[0x464];
+    u_char unk0[0x464];
 } _zndEnemy;
 
 typedef struct {
-    u_char unk0;
-    u_char unk1;
-    u_char unk2;
+    u_char type;
+    u_char index;
+    u_char hidden;
     u_char unk3;
-    int unk4;
-    int unk8;
-    int unkC;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
+    u_char id;
+    u_char slot;
+    u_char flagTest;
+    u_char statTest;
+    u_short flagValue;
+    u_short statValue;
+    u_char x;
+    u_char direction;
+    u_char z;
+    u_char height;
+    u_char settings[8];
+    u_char unk18[2];
+    u_short itemId;
+    u_short item2Id;
+    u_short item3Id;
+    u_char itemCount;
+    u_char item2Count;
+    u_char item3Count;
+    u_char facing;
+    u_char unk24;
+    u_char variant;
+    u_char unk26;
+    u_char sceneTest;
 } _mpdEnemy;
 
 typedef struct {
@@ -731,22 +746,19 @@ typedef struct {
 } _sphericalCamera;
 
 typedef struct {
-    short unk0;
-    short unk2;
-    short unk4;
-    short unk6;
+    SVECTOR unk0;
     union {
         char u8[2];
         u_short u16;
     } unk8;
-    char unkA;
-    char unkB;
+    u_char unkA;
+    u_char unkB;
     u_short unkC;
-    char unkE;
-    char displayTextLen;
+    u_char unkE;
+    u_char displayTextLen;
     short unk10;
     short unk12;
-    char displayText[4];
+    signed char displayText[4];
 } D_800F1BAC_t;
 
 typedef struct {
@@ -879,6 +891,21 @@ typedef struct {
     short unk6;
 } func_8006CE70_t;
 
+typedef struct {
+    SVECTOR unk0;
+    u_char unk8;
+    u_char unk9;
+    signed char unkA;
+    char effect;
+    short unkC;
+    short unkE;
+    int unk10;
+    char unk14;
+    char unk15;
+    char unk16;
+    char enemyClass;
+} D_800F19CC_t5;
+
 void func_80069C6C(int);
 void func_8006CDB8(int);
 void func_8006CA20(int, func_8006CE70_t*);
@@ -939,6 +966,7 @@ void func_8007B1B8(int, int, short, short, short);
 void func_8007B29C(int, int, int, short, short, short);
 void func_8007B344(int, int, short, short, short);
 void func_8007B9A0(void);
+void func_8007B9CC(void);
 int func_8007B9FC(void);
 void func_8007BA98(int, int, int, int);
 void func_8007BBB8(int, int);
@@ -1008,7 +1036,7 @@ void vs_battle_setNearClip(int arg0);
 void func_8007DD50(int);
 void func_8007DDAC(int arg0);
 void func_8007DDB8(D_800F1A68_t* arg0);
-void func_8007DDD4(P_CODE* arg0);
+void func_8007DDD4(CVECTOR* arg0);
 void func_8007DDF8(D_800F1A68_t* arg0);
 void func_8007DE2C(int arg0);
 void func_8007DE44(u_int arg0);
@@ -1078,12 +1106,12 @@ extern void* vs_battle_sceneBuffer;
 extern vs_battle_manualDisplayState_t vs_battle_manualDisplayState;
 extern vs_battle_menu9CursorMemory_t vs_battle_menu9CursorMemory;
 extern _mpdRoomSection vs_battle_roomData;
-extern void* D_800F1CBC;
+extern DVECTOR* D_800F1CBC;
 extern _mpdRoomDoorSection_t D_800F1CC8;
 extern short D_800F1CD4;
 extern char D_800F1CD6;
 extern int vs_battle_submenuState;
-extern int D_800F1CE0[8];
+extern VECTOR D_800F1CE0[2];
 extern DR_MODE vs_battle_screenTransitionDrMode[];
 extern int vs_battle_screenTransitionAlpha;
 extern vs_battle_screenTransitionWipePoly vs_battle_screenTransitionWipePolyF4[];

@@ -1,5 +1,24 @@
 # Decompilation Rules
 
+## Approved PSX GTE Exception: 2026-10-13
+
+- The user explicitly approved existing SDK GTE primitives in the PSX-only
+  matching backend. This is the sole exception to the no-inline-assembly rule
+  below: readable C may invoke those existing primitives, whose SDK-owned
+  implementation expands to hardware instructions during historical matching.
+- Do not introduce handwritten `asm`/`__asm__`, new assembly wrappers, opcode
+  payloads, copies of retail assembly bodies, or assembly inclusions as a new
+  implementation. Do not modify SDK primitive bodies to manufacture a match.
+- Higher-level game algorithms must remain readable C/C++. Windows-native
+  generated inputs must bind the approved primitive operations to C/C++
+  software-GTE services, not expand their PSX assembly implementations.
+- Preserve the exact configured historical compiler/settings and every
+  byte-exact acceptance requirement below. Primitive invocation, compiler
+  success, or native behavior alone does not establish a matching function.
+- Original rule text remains intact below. Where it prohibits SDK primitive
+  expansion solely in the PSX matching path, this explicit exception governs;
+  all other prohibitions and source boundaries remain unchanged.
+
 ## Mandatory Byte-Exact Acceptance Gate
 
 - Byte-exact matching is required before accepting decompilation progress.

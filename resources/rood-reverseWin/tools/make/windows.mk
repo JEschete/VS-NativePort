@@ -10,7 +10,7 @@ clean-all:
 	$(WIN) mkdir $(@D)
 
 $(BUILD)/%.c.o: %.c | $$(@D)/
-	$(WIN) compile --source "$<" --output "$@" --compiler "$(WINDOWS_TOOLS)/old-gcc/$(CC1VER)/cc1.exe" --cppflags="$(CPPFLAGS)" --cc1flags="$(CC1FLAGS)" --masflags="$(MASFLAGS)" --asflags="$(ASFLAGS)"
+	$(VPYTHON) tools/verification/compile_windows.py --source "$<" --output "$@" --compiler "$(WINDOWS_TOOLS)/old-gcc/$(CC1VER)/cc1.exe" --cppflags="$(CPPFLAGS)" --cc1flags="$(CC1FLAGS)" --masflags="$(MASFLAGS)" --asflags="$(ASFLAGS)" --preprocess="$(if $(filter psyq-reorder,$(PREPROCESS.s)),psyq-reorder,maspsx)"
 
 $(BUILD)/%.c.d: %.c | $$(@D)/
 	$(CPP) $(CPPFLAGS) -M -MF $@ -MT $(@:.d=.o) -MG $<

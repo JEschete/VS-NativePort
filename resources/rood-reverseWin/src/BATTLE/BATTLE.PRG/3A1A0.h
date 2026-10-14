@@ -58,11 +58,14 @@ typedef struct {
 
 typedef struct {
     SVECTOR unk0[42];
-    SVECTOR unk150[0x7E];
+    SVECTOR unk150[42];
+    SVECTOR unk2A0[42];
+    SVECTOR unk3F0[42];
     u_short unk540;
     u_short unk542;
     u_char* unk544;
-    int unk548_0 : 16;
+    u_char animationId;
+    u_char unk549;
     int unk548_16 : 1;
     int unk548_17 : 1;
     int unk548_18 : 14;
@@ -70,15 +73,14 @@ typedef struct {
 } D_800F4538_unkC54;
 
 typedef struct {
-    int length;
+    int unk0;
     u_char unk4;
     u_char unk5;
     u_char unk6;
     u_char unk7;
     u_char unk8;
     u_char unk9;
-    u_char unkA;
-    u_char unkB;
+    u_short unkA;
     u_char unkC;
     u_char unkD;
     u_char unkE;
@@ -102,12 +104,12 @@ typedef struct {
 } D_800F4538_unk64;
 
 typedef struct {
-    u_char mode;
+    u_char unk0;
     u_char unk1;
     u_char unk2;
     u_char unk3;
     u_short unk4;
-    short facing;
+    short unk6;
     u_int unk8;
     int unkC;
     SVECTOR unk10;
@@ -151,7 +153,7 @@ typedef struct {
     u_char unkC_4 : 4;
     u_char unkD;
     u_char unkE;
-    u_char index;
+    u_char unkF;
     u_char unk10;
     u_char unk11;
     u_char unk12;
@@ -189,7 +191,7 @@ typedef struct {
     u_char lastTouchedTileZ;
     u_char unk63;
     D_800F4538_unk64 unk64;
-    D_800F4538_unk68* model;
+    D_800F4538_unk68* unk68;
 } D_800F4538_unk0;
 
 typedef struct {
@@ -208,6 +210,43 @@ typedef struct {
 } texMapOverlay_t;
 
 typedef struct {
+    u_char x;
+    u_char y;
+    u_char columns;
+    u_char unk3;
+} D_800F4538_unk614;
+
+typedef struct {
+    u_char overlay;
+    u_char x;
+    u_char y;
+    u_char columns;
+} texMapAnimation_t;
+
+typedef struct {
+    u_char x;
+    u_char y;
+    u_char w;
+    u_char h;
+    u_char unk4;
+    u_char unk5;
+    u_char unk6_0 : 1;
+    u_char unk6_1 : 7;
+    u_char unk7;
+} D_800F4538_unk61C;
+
+typedef struct {
+    u_char x;
+    u_char y;
+    signed char dx;
+    signed char dy;
+    u_char interval;
+    u_char timer;
+    u_char unk6;
+    u_char unk7;
+} D_800F4538_unk181C;
+
+typedef struct {
     D_800F4538_unk0 unk0;
     MATRIX bones[42];
     u_char unk5AC_0 : 2;
@@ -216,28 +255,32 @@ typedef struct {
     u_char unk5AC_4 : 2;
     u_char unk5AC_6 : 1;
     u_char momentumStop : 1;
-    u_int unk5AC_8 : 1;
-    u_int unk5AC_9 : 1;
-    u_int unk5AC_10 : 1;
-    u_int unk5AC_11 : 1;
-    u_int unk5AC_12 : 1;
-    u_int unk5AC_13 : 1;
-    u_int unk5AC_14 : 1;
-    u_int unk5AC_15 : 1;
-    u_int unk5AC_16 : 1;
-    u_int unk5AC_17 : 1;
-    u_int unk5AC_18 : 1;
-    u_int unk5AC_19 : 1;
-    u_int unk5AC_20 : 1;
-    u_int unk5AC_21 : 1;
-    u_int unk5AC_22 : 1;
-    u_int unk5AC_23 : 1;
-    u_int unk5AC_24 : 1;
-    u_int unk5AC_25 : 2;
-    u_int unk5AC_27 : 1;
-    u_int unk5AC_28 : 4;
-    u_char unk5B0_0 : 3;
+    u_char unk5AC_8 : 1;
+    u_char unk5AC_9 : 1;
+    u_char unk5AC_10 : 1;
+    u_char unk5AC_11 : 1;
+    u_char unk5AC_12 : 1;
+    u_char unk5AC_13 : 1;
+    u_char unk5AC_14 : 1;
+    u_char unk5AC_15 : 1;
+    u_char unk5AC_16 : 1;
+    u_char unk5AC_17 : 1;
+    u_char unk5AC_18 : 1;
+    u_char unk5AC_19 : 1;
+    u_char unk5AC_20 : 1;
+    u_char unk5AC_21 : 1;
+    u_char unk5AC_22 : 1;
+    u_char unk5AC_23 : 1;
+    u_char unk5AC_24 : 1;
+    u_char unk5AC_25 : 1;
+    u_char unk5AC_26 : 1;
+    u_char unk5AC_27 : 1;
+
+    u_char unk5AC_28 : 4;
+    u_char unk5B0_0 : 2;
+    u_char unk5B0_2 : 1;
     u_char unk5B0_3 : 1;
+
     u_char unk5B0_4 : 1;
     u_char unk5B0_5 : 1;
     u_char unk5B0_6 : 2;
@@ -269,11 +312,13 @@ typedef struct {
     void* unk5DC[4];
     SVECTOR unk5EC;
     texMapOverlay_t texMapOverlays[8];
-    u_char unk614[0x24];
-    int unk638;
+    D_800F4538_unk614 unk614[2];
+    D_800F4538_unk61C unk61C[4];
     u_short unk63C;
     u_short menuCameraHeightOffset;
-    u_char unk640[6];
+    u_short unk640;
+    u_short unk642;
+    u_short unk644;
     u_short unk646;
     u_int unk648_0 : 16;
     u_int unk648_16 : 1;
@@ -285,13 +330,15 @@ typedef struct {
     u_short unk654;
     u_short menuCameraDistance;
     u_short unk658;
-    short targetSphereOffsetY;
+    short unk65A;
     int unk65C;
     int unk660;
     u_int btSeqLbas[12];
     u_short chainAttackAnimationIds[12];
     u_int spSeqLbas[4];
-    int unk6BC[8];
+    int unk6BC[4];
+    u_short spSeqSizes[4];
+    int unk6D4[2];
     int unk6DC;
     u_char unk6E0;
     u_char unk6E1;
@@ -315,23 +362,25 @@ typedef struct {
     D_800F4538_unkC54 unk704;
     D_800F4538_unkC54 unkC54;
     u_char unk11A4[0x280];
-    u_char unk1424[0x3C0];
+    u_short unk1424[0x140];
+    u_short unk16A4[0xA0];
     D_800F4538_unk64 unk17E4;
     D_800F4538_unk64 unk17E8;
-    u_char unk17EC[8];
+    SVECTOR unk17EC;
     SVECTOR unk17F4;
     signed char unk17FC;
     u_char unk17FD;
     u_char unk17FE;
     u_char unk17FF;
     short unk1800;
-    u_char unk1802[0xA];
+    u_char unk1802[2];
+    texMapAnimation_t unk1804[2];
     D_800F4538_unk180C unk180C[2];
     short unk1814;
     short unk1816;
     short unk1818;
     short unk181A;
-    u_char unk181C[0x20];
+    D_800F4538_unk181C unk181C[4];
     short unk183C;
     u_char unk183E[2];
     short unk1840;
@@ -339,7 +388,7 @@ typedef struct {
     short unk1844;
     u_char unk1846;
     u_char unk1847;
-    D_800F4538_unk1848 movement;
+    D_800F4538_unk1848 unk1848;
     u_char unk1860;
     u_char unk1861;
     u_char unk1862;
@@ -347,9 +396,13 @@ typedef struct {
     D_800F4538_unk1864 unk1864;
     int unk1868;
     int unk187C;
-    u_char unk1880[0x10];
+    u_short unk1880[4][2];
     u_char unk1890[2][0x20];
     u_char unk18D0[2];
+    u_short unk18D2;
+    u_short unk18D4;
+    u_short unk18D6;
+    u_short unk18D8;
 } D_800F4538_t;
 
 typedef struct {
@@ -380,23 +433,7 @@ typedef struct {
     short unk18;
     short unk1A;
     _wepModelOffsets* offsets;
-    short unk20;
-    short unk22;
-    short unk24;
-    short unk26;
-    int unk28[12];
-    D_800F4538_unk58_2 unk58;
-    char unk5C;
-    char unk5D;
-    char unk5E;
-    char unk5F;
-    int unk60;
-    u_char unk64;
-    u_char unk65;
-    u_char unk66;
-    u_char unk67;
-    int unk68;
-    u_char unk6C[0x34];
+    MATRIX unk20[4];
     u_char unkBoneInfo[4][8];
     u_short palettes[7][64];
     u_short unk440[96];
@@ -420,6 +457,8 @@ typedef struct {
 typedef struct {
     u_char unk0[0x3C];
     void* unk3C;
+    u_char unk40[0x10];
+    int unk50;
 } D_800F45E0_unk68;
 
 typedef struct {
@@ -449,7 +488,7 @@ typedef struct {
     u_char unkC_4 : 4;
     u_char unkD;
     u_char unkE;
-    u_char index;
+    u_char unkF;
     u_char unk10;
     u_char unk11;
     u_char unk12;
@@ -470,7 +509,8 @@ typedef struct {
     short unk32;
     short unk34;
     short unk36;
-    int unk38;
+    short unk38;
+    short unk3A;
     int unk3C;
     int unk40;
     int unk44;
@@ -486,9 +526,10 @@ typedef struct {
     char unk5F;
     int unk60;
     D_800F4538_unk64 unk64;
-    D_800F45E0_unk68* model;
+    D_800F45E0_unk68* unk68;
     D_800F4538_t2 unk6C[42];
-    u_int unk5AC_0 : 4;
+    u_int unk5AC_0 : 3;
+    u_int unk5AC_3 : 1;
     u_int unk5AC_4 : 2;
     u_int unk5AC_6 : 2;
     u_int unk5AC_8 : 1;
@@ -536,7 +577,8 @@ typedef struct {
     int unk5E0;
     int unk5E4;
     int unk5E8;
-    u_char unk5EC[0x52];
+    u_char unk5EC[0x50];
+    u_short unk63C;
     u_short unk63E;
     u_char unk640[8];
     int unk648;
@@ -568,7 +610,10 @@ typedef struct {
     int unk700;
     D_800F4538_unkC54 unk704;
     D_800F4538_unkC54 unkC54;
-    u_char unk11A4[0x658];
+    u_char unk11A4[0x280];
+    u_short unk1424[0xA0];
+    u_short unk1564[0xA0];
+    u_char unk16A4[0x158];
     u_char unk17FC;
     u_char unk17FD;
     u_char unk17FE;
@@ -594,9 +639,19 @@ typedef struct {
     int unk187C;
 } D_800F45E0_t;
 
+typedef struct {
+    int unk0;
+    u_char excluded[17];
+    u_char pad15[3];
+    D_800F45E0_t* unk18;
+    short unk1C[18];
+    int unk40;
+} D_1F8003BC_t;
+
 int func_800A1108(int, void*);
 void func_800A36E0(int, int, func_8006EBF8_t*);
-void vs_battle_animateCharacterJump(int, int, int);
+int func_800A4494(int, SVECTOR*);
+void func_800A48CC(int, int, int);
 void func_800A4D8C(void);
 void func_800A30A0(int, func_80089888_t*, int, int);
 void func_800A35A8(void);
@@ -605,10 +660,10 @@ void func_800A4828(int, MATRIX*);
 void func_800A9D24(int, SVECTOR*, int);
 int func_800A3760(int, int, int);
 int func_800A38E0(int);
-void func_800A3E6C(int);
+int func_800A3E6C(int);
 int func_800A47C4(void);
 void func_800A4E68(int);
 
-extern D_800F4538_t* vs_battle_actorModels[17];
+extern D_800F4538_t* D_800F4538[17];
 extern vs_battle_wepModels_t* vs_battle_wepModels[20];
 extern D_800F45E0_t* D_800F45E0[16];

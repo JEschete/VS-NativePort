@@ -90,10 +90,10 @@ static void _renderAshley(int mode)
             int scaledDistance;
             int offsetX;
             int offsetZ;
-            int cameraDistance = vs_battle_actorModels[1]->menuCameraDistance;
+            int cameraDistance = D_800F4538[1]->menuCameraDistance;
 
             setVector(&camera->lookAt, ((-rsin(0xB00) * yOffset) >> 8) * cameraDistance,
-                -(vs_battle_actorModels[1]->menuCameraHeightOffset << 0xB),
+                -(D_800F4538[1]->menuCameraHeightOffset << 0xB),
                 ((rcos(0xB00) * yOffset) >> 8) * cameraDistance);
 
             scaledDistance = cameraDistance * 4;

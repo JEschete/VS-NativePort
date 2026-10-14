@@ -1,3 +1,5 @@
 #include "common.h"
+#include "src/SLUS_010.40/libetc/INTR.h"
+#include <libetc.h>
 
-INCLUDE_ASM("build/src/SLUS_010.40/nonmatchings/libspu/S_CB", _SpuCallback);
+void _SpuCallback(void (*func)(void)) { InterruptCallback(9, func); }

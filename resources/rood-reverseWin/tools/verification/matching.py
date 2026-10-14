@@ -2,6 +2,7 @@
 """Isolated WSL-only PSX matching verification; never runs the root build."""
 
 import argparse
+import csv
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -14,6 +15,8 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+
+from psyq_assembly import preprocess_psyq
 
 
 DECOMP = Path(__file__).resolve().parents[2]
@@ -113,8 +116,15 @@ def source_inventory():
     }
 
 
-def configured_flags(snapshot, source):
+def source_overlay(snapshot, source):
     overlay = source.relative_to("src").parent
+    while not (snapshot / "config" / overlay / "splat.yaml").is_file() and len(overlay.parts) > 1:
+        overlay = overlay.parent
+    return overlay
+
+
+def configured_flags(snapshot, source):
+    overlay = source_overlay(snapshot, source)
     object_path = Path("build") / source.with_suffix(".c.o")
     makefile = snapshot / "verify-flags.mk"
     makefile.write_text(
@@ -123,17 +133,27 @@ def configured_flags(snapshot, source):
         "CC1FLAGS := -G0 -O2 -Wall -quiet -fno-builtin -funsigned-char -Wno-unused\n"
         "ASFLAGS := -I include -G0\n"
         "MASFLAGS := --aspsx-version=2.77 --macro-inc\n"
-        f"include config/{overlay.as_posix()}/Makefile\n"
+          "MAS := maspsx\n"
+          "PSQ_PATCH := psyq-reorder\n"
+          "PREPROCESS.s = $(MAS) $(MASFLAGS)\n"
+          + (f"include config/{overlay.parts[0]}/Makefile\n"
+              if len(overlay.parts) > 1 and (snapshot / "config" / overlay.parts[0] / "Makefile").is_file() else "")
+          +
+        f"-include config/{overlay.as_posix()}/Makefile\n"
         f"{object_path.as_posix()}:\n"
-        "\t@echo $(CC1VER)\n\t@echo $(CC1FLAGS)\n\t@echo $(ASFLAGS)\n\t@echo $(MASFLAGS)\n",
+          "\t@echo $(CC1VER)\n\t@echo $(CC1FLAGS)\n\t@echo $(ASFLAGS)\n\t@echo $(MASFLAGS)\n"
+          "\t@echo $(PREPROCESS.s)\n",
         encoding="utf-8",
     )
-    output = run(["make", "--no-print-directory", "-f", makefile.name, object_path], cwd=snapshot)
+    make_arguments = ["make", "--no-print-directory", "-f", makefile.name]
+    if source.as_posix() == "src/TITLE/TITLE.PRG/22C.c":
+        make_arguments.append("--old-file=build/assets/TITLE/TITLE.PRG/_titleScreenBg.rleRgb555.img.png.o")
+    output = run([*make_arguments, object_path], cwd=snapshot)
     makefile.unlink()
     lines = output.decode("utf-8").splitlines()
-    if len(lines) != 4 or lines[0] not in COMPILERS:
+    if len(lines) != 5 or lines[0] not in COMPILERS:
         raise RuntimeError("Could not determine this unit's historical compiler settings.")
-    return lines[0], lines[1].split(), lines[2].split(), lines[3].split()
+    return lines[0], lines[1].split(), lines[2].split(), lines[3].split(), lines[4].startswith("psyq-reorder")
 
 
 def tree_digests(root):
@@ -171,7 +191,32 @@ def dependency_digests(snapshot, cpp_flags, source):
     return {name: digest(Path(name) if Path(name).is_absolute() else snapshot / name) for name in names}
 
 
-def check_function(cache, source, function, candidate=None):
+def retail_code_segment(configuration):
+    for segment in configuration["segments"]:
+        if isinstance(segment, dict) and "vram" in segment and segment.get("type") == "code":
+            return segment
+    raise RuntimeError("No configured retail code segment.")
+
+
+def retail_readonly_section(configuration, source):
+    for segment in configuration["segments"]:
+        if not isinstance(segment, dict) or "vram" not in segment:
+            continue
+        subsections = segment.get("subsegments", [])
+        for index, subsection in enumerate(subsections[:-1]):
+            if not isinstance(subsection, list) or len(subsection) < 3:
+                continue
+            if subsection[1] != ".rodata" or str(subsection[2]) != source.stem:
+                continue
+            following = subsections[index + 1]
+            end = following[0] if isinstance(following, list) else following["start"]
+            return {"section": ".rodata", "file_offset": subsection[0],
+                "address": segment["vram"] + subsection[0] - segment["start"],
+                "size": end - subsection[0]}
+    return None
+
+
+def check_function(cache, source, function, candidate=None, reference_assembly=False):
     from elftools.elf.elffile import ELFFile
     from elftools.elf.relocation import RelocationSection
     from elftools.elf.sections import SymbolTableSection
@@ -179,6 +224,8 @@ def check_function(cache, source, function, candidate=None):
 
     source = Path(source)
     native_header_probe = os.environ.get("VAGRANT_MATCH_NATIVE_HEADERS") == "1"
+    if reference_assembly and native_header_probe:
+        raise RuntimeError("Reference-layout checks cannot use native-header probes.")
     if source.is_absolute() or ".." in source.parts or source.suffix != ".c" or source.parts[0] != "src":
         raise RuntimeError("--source must be a relative src/.../*.c path; modern C++ is not a historical C input.")
     canonical = DECOMP / source
@@ -197,8 +244,10 @@ def check_function(cache, source, function, candidate=None):
     content = (candidate or canonical).read_text(encoding="utf-8")
     if function in re.findall(r'INCLUDE_ASM\(\s*"[^"]+"\s*,\s*(\w+)\s*\)', content):
         raise RuntimeError(f"{function} is still INCLUDE_ASM; assembling original code is not a decompilation match.")
-    configuration_path = Path("config") / source.relative_to("src").parent / "splat.yaml"
+    configuration_path = Path("config") / source_overlay(DECOMP, source) / "splat.yaml"
     configuration = yaml.safe_load((DECOMP / configuration_path).read_text(encoding="utf-8"))
+    segment = retail_code_segment(configuration)
+    segment_name = str(segment.get("name") or f"{segment['start']:X}")
     artifacts, manifest, manifest_digest = load_splat_artifacts(configuration, configuration_path)
     retail = ROOT / configuration["options"]["target_path"]
     retail_bytes = retail.read_bytes()
@@ -208,6 +257,7 @@ def check_function(cache, source, function, candidate=None):
     symbols = {}
     ambiguous_symbols = {}
     function_addresses = []
+    function_sizes = {}
     symbol_paths = configuration["options"]["symbol_addrs_path"]
     for index, relative in enumerate(symbol_paths):
         for line in (DECOMP / relative).read_text(encoding="utf-8").splitlines():
@@ -221,6 +271,34 @@ def check_function(cache, source, function, candidate=None):
                 symbols[name] = address
             if index == 0 and ("type:func" in line or name.startswith("func_")):
                 function_addresses.append(address)
+                declared_size = re.search(r"\bsize:(0x[0-9A-Fa-f]+|[0-9]+)\b", line)
+                if declared_size:
+                    function_sizes[name] = int(declared_size[1], 0)
+    for relative in manifest["outputs"]:
+        if not relative.startswith("build/config/") or not relative.endswith("_auto.txt"):
+            continue
+        for line in (artifacts / relative).read_text(encoding="utf-8").splitlines():
+            match = SYMBOL.match(line)
+            if match is None:
+                continue
+            name, address = match[1], int(match[2], 16)
+            if name in symbols and symbols[name] != address:
+                ambiguous_symbols.setdefault(name, {symbols[name]}).add(address)
+            else:
+                symbols[name] = address
+    if "splat_symbols.csv" in manifest["outputs"]:
+        with (artifacts / "splat_symbols.csv").open(encoding="utf-8", newline="") as export:
+            for symbol in csv.DictReader(export):
+                name = symbol["name"]
+                address = int(symbol["vram_start"], 16)
+                if not name or name == "None":
+                    continue
+                if name in symbols and symbols[name] != address:
+                    ambiguous_symbols.setdefault(name, {symbols[name]}).add(address)
+                else:
+                    symbols[name] = address
+                if symbol["type"] == "func" and symbol["segment"] == segment_name:
+                    function_addresses.append(address)
     if function in ambiguous_symbols:
         raise RuntimeError(f"Conflicting retail address for target {function}.")
     symbols = {name: address for name, address in symbols.items() if name not in ambiguous_symbols}
@@ -230,9 +308,10 @@ def check_function(cache, source, function, candidate=None):
     later = sorted(set(value for value in function_addresses if value > address))
     if not later:
         raise RuntimeError("No known next function boundary; cannot establish a complete target range.")
-    segment = next(segment for segment in configuration["segments"] if isinstance(segment, dict) and "vram" in segment)
     offset = segment["start"] + address - segment["vram"]
-    expected_size = later[0] - address
+    expected_size = function_sizes.get(function, later[0] - address)
+    if expected_size <= 0 or expected_size > later[0] - address:
+        raise RuntimeError("Declared retail function size overlaps the next verified function boundary.")
     expected = retail_bytes[offset:offset + expected_size]
     if offset < 0 or len(expected) != expected_size:
         raise RuntimeError("Function range is outside the verified retail binary.")
@@ -243,14 +322,24 @@ def check_function(cache, source, function, candidate=None):
             snapshot = Path(directory)
             for folder in ("src", "include", "config", "tools/etc", "tools/libdata", "tools/maspsx"):
                 shutil.copytree(DECOMP / folder, snapshot / folder, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+            (snapshot / "tools/verification").mkdir(parents=True, exist_ok=True)
+            shutil.copy2(Path(__file__).with_name("psyq_assembly.py"), snapshot / "tools/verification/psyq_assembly.py")
             for name in manifest["outputs"]:
+                (snapshot / name).parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(artifacts / name, snapshot / name)
+            if b'"build/src/include/lbas.h"' in content.encode("utf-8"):
+                generated_lbas = DECOMP / "build/matching-lbas.h"
+                if not generated_lbas.is_file():
+                    raise RuntimeError("Missing generated LBA header from a verified full matching build.")
+                lba_output = snapshot / "build/src/include/lbas.h"
+                lba_output.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(generated_lbas, lba_output)
             if candidate:
                 (snapshot / source).write_bytes(candidate.read_bytes())
             if native_header_probe:
                 shutil.copytree(ROOT / "native/include", snapshot / "native/include")
             inputs = tree_digests(snapshot)
-            version, compiler_flags, assembler_flags, maspsx_flags = configured_flags(snapshot, source)
+            version, compiler_flags, assembler_flags, maspsx_flags, psyq_reorder = configured_flags(snapshot, source)
             compiler = cache / "old-gcc" / version / "cc1"
             state = json.loads((cache / "toolchain.json").read_text(encoding="utf-8"))
             if digest(compiler) != state["compiler_sha256"][version]:
@@ -264,6 +353,13 @@ def check_function(cache, source, function, candidate=None):
                 "-nostdinc", "-I", "include/psx", "-I", "src/include", "-I", ".",
                 "-D__attribute__(x)=", "-D_LANGUAGE_C", "-DOBJDIFF",
             ]
+            if reference_assembly:
+                included = re.findall(r'INCLUDE_(?:ASM|RODATA)\(\s*"([^"]+)"\s*,\s*(\w+)\s*\)', content)
+                for folder, name in included:
+                    relative = f"{folder}/{name}.s"
+                    if relative not in manifest["outputs"]:
+                        raise RuntimeError(f"Unrecorded reference-layout assembly input: {relative}")
+                cpp_flags.remove("-DOBJDIFF")
             if native_header_probe:
                 cpp_flags.remove("-nostdinc")
                 cpp_flags.extend(["-I", "native/include"])
@@ -273,7 +369,10 @@ def check_function(cache, source, function, candidate=None):
             preprocessed = run(["mipsel-linux-gnu-cpp", *cpp_flags, source], cwd=snapshot)
             preprocessed = run([sys.executable, "-m", "tools.etc.vsStringTransformer"], cwd=snapshot, input_data=preprocessed)
             assembly = run([compiler, *compiler_flags], cwd=snapshot, input_data=preprocessed)
-            assembly = run([sys.executable, "tools/maspsx/maspsx.py", *maspsx_flags], cwd=snapshot, input_data=assembly)
+            if psyq_reorder:
+                assembly = preprocess_psyq(assembly)
+            else:
+                assembly = run([sys.executable, "tools/maspsx/maspsx.py", *maspsx_flags], cwd=snapshot, input_data=assembly)
             object_path = snapshot / "unit.o"
             run(["mipsel-linux-gnu-as", *assembler_flags, "-o", object_path], cwd=snapshot, input_data=assembly)
             with object_path.open("rb") as stream:
@@ -300,6 +399,7 @@ def check_function(cache, source, function, candidate=None):
                 size = compiled["st_size"] or (min(ends) if ends else section["sh_size"]) - start
                 section_data = section.data()
                 target_relocations = []
+                readonly = None
                 for relocation_section in elf.iter_sections():
                     if not isinstance(relocation_section, RelocationSection) or relocation_section["sh_info"] != section_index:
                         continue
@@ -311,6 +411,16 @@ def check_function(cache, source, function, candidate=None):
                             continue
                         symbol = relocation_symbols.get_symbol(relocation["r_info_sym"])
                         name = symbol.name
+                        if (not name and symbol["st_info"]["type"] == "STT_SECTION"
+                                and isinstance(symbol["st_shndx"], int)
+                                and elf.get_section(symbol["st_shndx"]).name == ".rodata"):
+                            readonly = retail_readonly_section(configuration, source)
+                            if readonly is None or elf.get_section(symbol["st_shndx"])["sh_size"] != readonly["size"]:
+                                raise RuntimeError("Read-only table layout has no complete verified retail range.")
+                            target_relocations.append({"offset": hex(relocation["r_offset"] - start),
+                                "type": relocation["r_info_type"], "symbol": ".rodata",
+                                "address": hex(readonly["address"])})
+                            continue
                         if (not name and symbol["st_info"]["type"] == "STT_SECTION"
                                 and symbol["st_shndx"] == section_index and relocation["r_info_type"] == R_MIPS_26):
                             # A jump inside the target resolves exactly because the target is linked at its retail address.
@@ -335,7 +445,9 @@ def check_function(cache, source, function, candidate=None):
             # SUBALIGN prevents input-section alignment padding from shifting compiled offsets.
             linker_symbols.write_text(
                 "\n".join(f"{name} = 0x{value:X};" for name, value in sorted(symbols.items()))
-                + f"\nSECTIONS {{ {section_name} 0x{text_base:X} : SUBALIGN(4) {{ *({section_name}) }} }}\n",
+                + f"\nSECTIONS {{ {section_name} 0x{text_base:X} : SUBALIGN(4) {{ *({section_name}) }}"
+                + (f" .rodata 0x{readonly['address']:X} : SUBALIGN(4) {{ *(.rodata) }}" if readonly else "")
+                + " }\n",
                 encoding="ascii",
             )
             linked_path = snapshot / "unit.elf"
@@ -350,12 +462,24 @@ def check_function(cache, source, function, candidate=None):
                 if text is None or text["sh_addr"] != text_base:
                     raise RuntimeError("Linked target section is not at its retail-relative address.")
                 actual = text.data()[start:start + size]
+                readonly_differences = []
+                if readonly:
+                    linked_readonly = linked.get_section_by_name(".rodata")
+                    if linked_readonly is None or linked_readonly["sh_addr"] != readonly["address"]:
+                        raise RuntimeError("Linked read-only table is not at its verified retail address.")
+                    readonly_actual = linked_readonly.data()
+                    readonly_expected = retail_bytes[readonly["file_offset"]:readonly["file_offset"] + readonly["size"]]
+                    readonly_differences = [{"offset": index,
+                        "expected": readonly_expected[index:index + 4].hex(),
+                        "actual": readonly_actual[index:index + 4].hex()}
+                        for index in range(0, max(len(readonly_expected), len(readonly_actual)), 4)
+                        if readonly_expected[index:index + 4] != readonly_actual[index:index + 4]]
             differences = [
                 {"offset": index, "expected": expected[index:index + 4].hex(), "actual": actual[index:index + 4].hex()}
                 for index in range(0, max(len(expected), len(actual)), 4)
                 if expected[index:index + 4] != actual[index:index + 4]
             ]
-            status = {"canonical": "", "candidate": "CANDIDATE_", "probe": "PROBE_"}[mode] + ("DIFF" if differences else "MATCH")
+            status = {"canonical": "", "candidate": "CANDIDATE_", "probe": "PROBE_"}[mode] + ("DIFF" if differences or readonly_differences else "MATCH")
             tool_versions = {name: run([name, "--version"], timeout=10).decode("utf-8", errors="replace").splitlines()[0]
                              for name in ("make", "mipsel-linux-gnu-cpp", "mipsel-linux-gnu-as", "mipsel-linux-gnu-ld")}
             report = {
@@ -371,17 +495,21 @@ def check_function(cache, source, function, candidate=None):
                            "sha256": hashlib.sha256(retail_bytes).hexdigest()},
                 "compiler": version, "compiler_sha256": digest(compiler), "cc1_flags": compiler_flags,
                 "cpp_flags": cpp_flags, "maspsx_flags": maspsx_flags, "assembler_flags": assembler_flags,
+                "assembly_preprocess": "psyq-reorder" if psyq_reorder else "maspsx",
                 "linker_arguments": linker_arguments, "tool_versions": tool_versions,
                 "verifier_sha256": digest(Path(__file__).resolve()),
                 "splat_artifacts": {"manifest_sha256": manifest_digest, "splat64": manifest["splat64"],
                                     "generated_utc": manifest["generated_utc"]},
                 "snapshot_files": len(inputs), "snapshot_sha256": aggregate_digest(inputs),
                 "dependencies": dependencies, "target_relocations": target_relocations,
+                "readonly_section": readonly, "readonly_differences": readonly_differences,
                 "expected_bytes": len(expected), "actual_bytes": len(actual), "differences": differences,
                 "canonical_sources_unchanged": before == source_inventory(),
                 "native_header_probe": native_header_probe,
+                "reference_assembly": reference_assembly,
                 "limitations": ["Function-only comparison: not a source-unit or linked-overlay match or behavioral proof.",
-                                "Other INCLUDE_ASM/INCLUDE_RODATA bodies are omitted via OBJDIFF.",
+                                ("Other unchanged assembly inclusions retain retail layout only; they are not reconstructed progress."
+                                 if reference_assembly else "Other INCLUDE_ASM/INCLUDE_RODATA bodies are omitted via OBJDIFF."),
                                 "Relocations outside the target function are not validated."]
                     + (["Noncanonical candidate outside canonical source: never acceptance evidence."] if candidate else [])
                     + (["Noncanonical native/MIPS standard headers: compatibility probe only."]
@@ -392,14 +520,17 @@ def check_function(cache, source, function, candidate=None):
             report_path.parent.mkdir(parents=True, exist_ok=True)
             report_path.with_suffix(".s").write_bytes(assembly)
             report_path.with_suffix(".dis").write_bytes(run([
-                "mipsel-linux-gnu-objdump", "-d", "-z", f"--start-address=0x{address:X}",
+                "mipsel-linux-gnu-objdump", "-D", "-z", f"--section={section_name}",
+                f"--start-address=0x{address:X}",
                 f"--stop-address=0x{address + size:X}", linked_path.name], cwd=snapshot))
             report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
             print(f"{status} {function}: {len(actual)} compiled / {len(expected)} retail bytes; GCC {version}")
             print(f"Canonical source hashes/timestamps unchanged. Report: {report_path}")
             for difference in differences[:12]:
                 print(f"  +0x{difference['offset']:X}: retail {difference['expected']} compiled {difference['actual']}")
-            if differences:
+            if readonly:
+                print(f"Read-only table: {readonly['size']} bytes; {len(readonly_differences)} differing words")
+            if differences or readonly_differences:
                 return 1
             return 0 if mode == "canonical" else 3
     finally:
@@ -414,6 +545,8 @@ def main():
     parser.add_argument("--source")
     parser.add_argument("--function")
     parser.add_argument("--candidate", type=Path, help="Noncanonical candidate unit outside canonical source folders")
+    parser.add_argument("--reference-assembly", action="store_true",
+                        help="Retain hashed unchanged reference inclusions for full read-only layout; target must still be C")
     arguments = parser.parse_args()
     try:
         require_wsl()
@@ -427,7 +560,8 @@ def main():
                 raise RuntimeError("check requires --source and --function.")
             if not (cache / "toolchain.json").is_file():
                 raise RuntimeError("Verifier is not initialized; run init first.")
-            return check_function(cache, arguments.source, arguments.function, arguments.candidate)
+            return check_function(cache, arguments.source, arguments.function, arguments.candidate,
+                                  arguments.reference_assembly)
         else:
             state = cache / "toolchain.json"
             print(state.read_text(encoding="utf-8") if state.is_file() else "Not initialized; run init.")

@@ -6,10 +6,11 @@ Linux quickstart below. See [Windows Migration](../../docs/WINDOWS_MIGRATION.md)
 for required Windows historical compilers and verification limits.
 The upstream source/configuration is authoritative; `upstream.json` records it.
 
-Windows decompilation has two accepted function-level matches beyond the
-imported reference; no unit or overlay is matched. The decompilation is
-unfinished and native-port implementation has not started as an accepted
-deliverable. See [Local Progress](DECOMP_PROGRESS.md).
+The source now integrates `noprompt/rood-reverse`'s `decomp/verified-functions`
+branch, with their work taking precedence over overlapping local source.
+All 289 C units pass the isolated historical compiler sweep; selected byte
+checks pass, but no full overlay or native runtime is certified. Earlier local
+match counts describe superseded source. See [Local Progress](DECOMP_PROGRESS.md).
 All upstream badges and the Linux instructions below describe reference work,
 not Windows achievements or current acceptance evidence. Build verification
 does not synchronize source; explicit sync refuses local changes.

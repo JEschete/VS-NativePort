@@ -43,7 +43,7 @@ typedef struct {
     u_char state;
     u_char w;
     u_char backgroundWidth;
-    u_char _ __attribute__((unused));
+    u_char animationStep;
     u_char gradientState;
     u_char isScrollable;
     u_char selected;
@@ -190,7 +190,7 @@ typedef struct {
 typedef struct {
     u_short unk0;
     u_short dataIndex;
-} pFileBlock1Indices;
+} pFileTextureInfo;
 
 typedef struct {
     int unk0;
@@ -203,10 +203,10 @@ typedef struct {
     u_short unkE;
     int unk10;
     short unk14;
-    u_char unk16;
+    u_char textureIndex;
     u_char unk17;
     u_char* unk18;
-    pFileBlock1Indices* unk1C;
+    pFileTextureInfo* textureInfo;
 } func_800D6CF_t;
 
 typedef struct {
@@ -237,7 +237,7 @@ typedef struct {
     short unk30[2];
     short unk34[8][6];
     short unk94[5][4];
-    int unkBC;
+    short unkBC[2];
     short unkC0[2];
     u_char rCurve;
     u_char gCurve;
@@ -249,12 +249,23 @@ typedef struct {
     u_char unkCB;
 } func_800FA098_arg0;
 
+typedef union {
+    int packed;
+    struct {
+        u_char rCurve;
+        u_char gCurve;
+        u_char bCurve;
+        u_char age;
+    } fields;
+} func_800D2904_curves;
+
 typedef struct {
     VECTOR unk0;
     VECTOR unk10;
     int unk20;
     u_int flags;
-    int unk28;
+    u_short unk28;
+    u_short unk2A;
     SVECTOR unk2C;
     VECTOR unk34;
     VECTOR unk44;
@@ -278,14 +289,16 @@ typedef struct {
     int unk134[2];
     SVECTOR unk13C;
     SVECTOR unk144;
-    u_char unk14C[0x1C];
+    int unk14C[2];
+    func_800D2904_curves unk154;
+    u_char unk158[0x10];
     int unk168;
     int unk16C;
     int unk170;
     int unk174;
     int unk178;
     int unk17C;
-    int unk180;
+    u_char unk180;
     int unk184;
     int unk188;
 } func_800FA098_arg1;
@@ -303,12 +316,19 @@ typedef struct {
 typedef struct {
     short clut;
     short tpage;
-    u_char u0;
-    u_char v0;
-    u_char u1;
-    u_char v1;
-    u_char unk8[0x10];
-} pFileBlock1Data;
+    u_char u;
+    u_char v;
+    u_char w;
+    u_char h;
+    short x0;
+    short y0;
+    short x1;
+    short y1;
+    short x2;
+    short y2;
+    short x3;
+    short y3;
+} pFileTexture;
 
 typedef struct {
     int unk0;
@@ -318,8 +338,8 @@ typedef struct {
     pFileCurveBlock* curveBlock;
     char* block8Data;
     int block1TableCount;
-    pFileBlock1Indices* block1Tables[4];
-    pFileBlock1Data* block1Data;
+    pFileTextureInfo* textureInfoTable[4];
+    pFileTexture* textures;
     int block2Count;
     u_short* block2Data;
     pFileBlock9* block9Data;
@@ -332,17 +352,44 @@ typedef struct {
     void* unkD0;
 } D_800F569C_t;
 
+typedef struct {
+    VECTOR position;
+    VECTOR lookAt;
+    int unk20;
+    int unk24;
+    int unk28;
+    int unk2C;
+    int roll;
+    int nearClip;
+    int projectionDistance;
+    int farClip;
+} D_800F54D8_t;
+
 typedef struct func_800D2904_t {
     struct func_800D2904_t* previous;
     struct func_800D2904_t* next;
-    char unk8[4];
+    short unk8;
+    short unkA;
     int unkC;
     int unk10;
     int unk14;
-    VECTOR unk18;
-    u_char unk28[0x14];
-    int unk3C[8];
-    char unk5C[0x1B];
+    int unk18[3];
+    int unk24[3];
+    int unk30[3];
+    func_800D6CF_t unk3C;
+    int unk5C;
+    u_int unk60_0 : 8;
+    u_int unk60_8 : 4;
+    u_int unk60_12 : 4;
+    short unk62[3];
+    short lifetime;
+    u_char unk6A;
+    u_char unk6B;
+    u_char endEvent;
+    u_char tickEvent;
+    char unk6E[2];
+    int unk70;
+    u_char unk74[3];
     u_char unk77;
 } func_800D2904_t;
 
@@ -366,7 +413,9 @@ typedef struct {
     u_char unk37;
     MATRIX unk38;
     MATRIX unk58;
-    u_char unk78[0x58];
+    u_char unk78[0x46];
+    short unkBE;
+    u_char unkC0[0x10];
 } func_800CE714_t2_2;
 
 typedef struct {
@@ -430,8 +479,10 @@ typedef struct {
     u_char unk0[0xC];
     VECTOR unkC;
     u_char unk1C[0x44];
-    u_char unk60;
-    u_char unk61[23];
+    u_int unk60 : 8;
+    u_int unk60_8 : 4;
+    u_int unk60_12 : 20;
+    u_char unk64[20];
 } func_800FB4C0_t;
 
 enum vs_battle_limbStatus {
@@ -451,7 +502,7 @@ char* vs_battle_printf(char*, char*);
 /**
  * Renders ASCII text and chains it to the provided OT.
  */
-void vs_battle_renderTextRawColor(char const* text, int xy, int color, void* nextPrim);
+void vs_battle_renderTextRawColor(char const* text, int xy, int color, u_long* nextPrim);
 
 /**
  * Same as vs_battle_renderTextRawColor, except color is predefined as gray midpoint
@@ -504,7 +555,7 @@ vs_battle_menuItem_t* vs_battle_setMenuItem(
     int row, int x, int y, int w, int backgroundWidth, char* text);
 void vs_battle_renderMenuItem(vs_battle_menuItem_t*);
 int func_800C930C(int);
-void vs_battle_execMenu(void);
+void func_800C97BC(void);
 
 /**
  * Renders a digit or symbol from the battle digits.
@@ -589,9 +640,9 @@ int vs_battle_getTextLineLength(char* str);
 int vs_battle_validateShortcutSelection(int shortcut);
 void func_800C8778(void);
 void func_800C9F88(void);
-void vs_battle_renderHeadsUpDisplay(void);
+void func_800CA2DC(void);
 int func_800CACD0(int menuState, int arg1);
-void vs_battle_renderTextBoxes(void);
+void func_800CB83C(void);
 int func_800CF060(void);
 void vs_battle_addVecToSvec(VECTOR* arg0, SVECTOR* arg1, VECTOR* arg2);
 void vs_battle_lerp2DVector(short* src, int t, int* vec);
@@ -629,7 +680,7 @@ void vs_battle_svecToVec(SVECTOR* arg0, VECTOR* arg1);
 void vs_battle_vecToSvec(VECTOR* arg0, SVECTOR* arg1);
 void func_800D2ADC(D_800F53B8_t*, int, int, int, func_800FB4C0_t*);
 void func_800D6CCC(int* arg0);
-void func_800D6CF0(func_800D6CF_t* arg0, int arg1, int arg2);
+void func_800D6CF0(func_800D6CF_t* arg0, int textureIndex, int arg2);
 
 extern u_short vs_battle_menuStrings[];
 extern char* vs_battle_limbNames[];

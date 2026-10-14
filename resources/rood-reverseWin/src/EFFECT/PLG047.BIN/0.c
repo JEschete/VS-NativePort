@@ -1,3 +1,12 @@
-#include "common.h"
+#include "0.h"
+#include <stddef.h>
+#include <libgte.h>
 
-INCLUDE_ASM("build/src/EFFECT/PLG047.BIN/nonmatchings/0", func_800F9800);
+#define VS_CLOSED_RING_FUNCTION vs_effect_vulcanLance
+#define VS_CLOSED_RING_COLORS D_800FA76C
+
+static CVECTOR VS_CLOSED_RING_COLORS[] = { { 0xFF, 0xFF, 0xFF }, { 0x80, 0x80, 0x80 },
+    { 0xFF, 0x80, 0x00 }, { 0x00, 0x80, 0xFF }, { 0x00, 0xFF, 0x00 },
+    { 0xFF, 0x00, 0xFF }, { 0x00, 0x80, 0x00 }, { 0x80, 0x00, 0x80 } };
+
+#include "src/EFFECT/closedRings.h"

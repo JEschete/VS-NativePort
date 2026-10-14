@@ -3,6 +3,20 @@
 Inventory date: 2026-10-04. Workspace root:
 `D:\Dev\NativePort\VS-NativePort`.
 
+## Approved PSX GTE Exception: 2026-10-13
+
+The user explicitly approved invoking existing SDK GTE primitives in the
+PSX-only matching backend. Their SDK-owned hardware expansion is permitted
+only there; higher-level algorithms remain readable C/C++, and Windows-native
+generated inputs must use C/C++ software-GTE services for those operations.
+
+This narrow exception does not permit new handwritten assembly, assembly
+wrappers, opcode payloads, retail-body copies, new assembly inclusions, or
+modified SDK primitives. All configured-toolchain, complete-range, fresh-report,
+function/unit/overlay, and fail-closed acceptance gates remain unchanged.
+Existing requirements are preserved below; this exception supersedes only
+their prohibition of existing SDK GTE expansion in the PSX matching path.
+
 ## Required Deliverable
 
 Meaningful, human-readable C++ for the Windows native port, not assembly
@@ -145,14 +159,14 @@ instead of copying installations into tracked source.
   never synchronizes. Explicit sync refuses local additions, edits, deletions,
   or populated unmanifested source. Preserve and review work before updating
   the reference snapshot.
-- Windows decompilation has two accepted function-level matches beyond the
-  reference (func_800A2790 and func_800A25EC in `38C1C.c`); no unit or overlay
-  match. The Linux checkout is reference only. The native port has not started
-  as an accepted implementation. Legacy native experiments are not features.
-- The rejected `38C1C.c` candidate is absent. Current source keeps three
-  assembly inclusions and two projection inline-assembly blocks; the GTE
-  routines are `BLOCKED` under the no-inline-assembly rule. The old 63-group
-  result is stale and does not validate current source.
+- The 2026-10-12 import makes the noprompt fork authoritative over overlapping
+  local source, as explicitly requested. All 289 C units compile in the isolated
+  historical sweep; selected canonical byte checks pass. Earlier local match
+  counts are historical, not acceptance of replaced implementations. No full
+  unit, overlay, native runtime, or gameplay completion is claimed.
+- Imported source still includes assembly and GTE assembly macros. They remain
+  reference material, not assembly-free reconstructed progress. The acceptance
+  requirements above are unchanged; the old 63-group result remains stale.
 - Matching runs through [matching.py](tools/verification/matching.py) in WSL
   with splat macros from [splat_artifacts.py](tools/verification/splat_artifacts.py).
   Use `--candidate` for noncanonical iteration; only a fresh canonical `MATCH`

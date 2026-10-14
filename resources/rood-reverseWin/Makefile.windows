@@ -19,6 +19,9 @@ CC1FLAGS := -G0 -O2 -Wall -quiet -fno-builtin -funsigned-char -Wno-unused
 CPPFLAGS := -nostdinc -I include/psx -I src/include -I ./ -D__attribute__(x)= -D_LANGUAGE_C
 ASFLAGS := -I include -G0
 MASFLAGS := --aspsx-version=2.77 --macro-inc
+MAS := maspsx
+PSQ_PATCH := psyq-reorder
+PREPROCESS.s = $(MAS) $(MASFLAGS)
 OBJCOPYFLAGS := -I binary -O elf32-tradlittlemips
 LDSCRIPT := link.ld undefined_funcs_auto.txt undefined_syms_auto.txt
 BCONFIG = $(patsubst $(BUILD)/data/%,$(BUILD)/config/%,$(@:.elf=))

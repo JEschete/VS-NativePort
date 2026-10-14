@@ -1,3 +1,12 @@
-#include "common.h"
+#include <stddef.h>
+#include <libgte.h>
 
-INCLUDE_ASM("build/src/EFFECT/PLG051.BIN/nonmatchings/0", func_800F9800);
+#define VS_CLOSED_RING_FUNCTION vs_effect_exorcism
+#define VS_CLOSED_RING_COLORS D_800FA770
+#define VS_CLOSED_RING_TEXTURE_COLUMNS 4
+
+static CVECTOR VS_CLOSED_RING_COLORS[] = { { 0xFF, 0xFF, 0xFF }, { 0x80, 0x80, 0x80 },
+    { 0xFF, 0x80, 0x00 }, { 0x00, 0x80, 0xFF }, { 0x00, 0xFF, 0x00 },
+    { 0xFF, 0x00, 0xFF }, { 0x00, 0x80, 0x00 }, { 0x80, 0x00, 0x80 } };
+
+#include "src/EFFECT/closedRings.h"
