@@ -44,6 +44,8 @@
 /resources/rood-reverseWin/data/
 /resources/rood-reverseWin/disks/
 /resources/rood-reverseWin/tools/old-gcc/
+/resources/rood-reverse-noprompt/
+/resources/rood-reverse/
 
 # Local tool/SDK/emulator installations and vendor checkouts
 /tools/Base/
