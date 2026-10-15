@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "vagrant-story-native",
+  "version-string": "0.1.0",
+  "builtin-baseline": "b3ae22aef2b857af6e80d756c13f15db12be4e8a",
+  "dependencies": [
+    "sdl3",
+    "catch2",
+    "nlohmann-json"
+  ]
+}

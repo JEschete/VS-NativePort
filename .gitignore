@@ -15,18 +15,6 @@
 /nonmatchings/
 /tools/.sysdeps
 /tools/python
-/native/build/
-/native/platform/stubs.c
-/native/tests/psx/*.exe
-/native/build/*.ppm
-/native/build/test_gpu
-/native/build/menu_harness
-/native/build/menu.ppm
-/native/platform/harvested_data.c
-/native/platform/harvested.syms
-
-# Personal PS1 memory-card saves (user data, never commit)
-/native/saves/
 
 # Upstream build log, committed by accident upstream. Not ours to keep.
 /make.log
@@ -38,8 +26,6 @@
 *.dmp
 /CMakeUserPresets.json
 /SLUS-01040/
-/native/platform/assets.c
-/native/platform/disc_index.c
 /resources/rood-reverseWin/build/
 /resources/rood-reverseWin/data/
 /resources/rood-reverseWin/disks/
@@ -51,12 +37,10 @@
 /tools/Base/
 /tools/PSX/
 /resources/DataCrystal/
-
-# Optional 32-bit SDL runtime copies and download archives
-/SDL2.dll
-/native/SDL2.dll
-/SDL2-*.zip
-/native/SDL2-*.zip
 /resources/SDL2-*-win32-x86/
 /resources/SDL2-*-win32-x86.zip
 
+# Native port build products (vcpkg manifest install, generated content, runtime log)
+/vcpkg_installed/
+/Native/Content/generated/
+vs-native.log
