@@ -60,9 +60,9 @@ All are shallow clones. `tools\PSX\` is git-ignored, so re-create them with `too
 
 | Path | Upstream | Revision | License | Class | Use |
 |---|---|---|---|---|---|
-| `Reference\psx-spx` | https://github.com/psx-spx/psx-spx.github.io | `6d7d1bc106a7` | none (docs) | REFERENCE | Hardware specification: GPU commands, GTE math, SPU, MDEC, CD-ROM, XA. |
-| `Reference\beetle-psx-libretro` | https://github.com/libretro/beetle-psx-libretro | `e57860d82faa` | GPL-2.0 | REFERENCE | Accuracy reference for GTE, SPU and MDEC behavior. |
 | `Reference\duckstation-src` | https://github.com/stenzek/duckstation | `66888ba0d448` | CC BY-NC-ND 4.0 | REFERENCE (strict) | Read-only behavior reference. **Never** copy or adapt its code. |
+
+Removed by decision (2026-10-15): `psx-spx` and `beetle-psx-libretro`. The port does not model PS1 hardware, so hardware specifications and emulator cores are out of scope. Format math (XA ADPCM, MDEC/IDCT, fixed-point transforms) comes from the decomp itself and the VENDOR code in rood-boi and PsyCross.
 
 ---
 
@@ -79,8 +79,8 @@ All are shallow clones. `tools\PSX\` is git-ignored, so re-create them with `too
 | `DuckStation` (binary) | TOOL | Golden runs: screenshots, VRAM dumps, GPU dumps, save states for side-by-side comparison. |
 | `PCSX-Redux` (source + binary) | TOOL | Lua-scriptable debugger: break on `vs_*` entry points, trace CD reads, dump the SPU state. |
 | `MemcardRex` | TOOL | Inspect and convert `.mcd` saves created by the port. |
-| `PSn00bSDK` | REFERENCE | Open-source PS1 SDK headers; API semantics for libgpu, libgte and libcd. |
-| `ps1-tests` | TOOL/oracle | Hardware test ROM results; GTE and GPU expected values feed `VS.Tests`. |
+| `PSn00bSDK` | REFERENCE | Open-source PS1 SDK; documents what each SDK call the game makes is *supposed* to do, so the modern replacement covers the same behavior. Never reimplemented as an API. |
+| `ps1-tests` | TOOL/oracle | Expected results for fixed-point transform math; used only to check `VS.Core` math against the original numbers. |
 
 Mirrors in `tools\PSX\Asset-Tools\jpsxdec`, `tools\PSX\Emulators\{DuckStation,PCSX-Redux}` and `tools\PSX\Toolchains\PSn00bSDK`.
 
@@ -122,7 +122,6 @@ Mirrors in `tools\PSX\Asset-Tools\jpsxdec`, `tools\PSX\Emulators\{DuckStation,PC
 
 | Source | Use |
 |---|---|
-| https://psx-spx.consoledev.net | Online psx-spx (same content as `Reference\psx-spx`). |
 | ffmpeg `libavcodec/mdec.c`, `adpcm.c` (`adpcm_xa`), `libavformat/psxstr.c` | LGPL, **REFERENCE**. A second implementation of MDEC and XA for golden comparisons. |
 | SDL3 (https://github.com/libsdl-org/SDL) | zlib, **VENDOR**. Desktop host (window, gamepad, audio). Fetched as a pinned release in M0. |
 
