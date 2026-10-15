@@ -8,12 +8,16 @@ The upstream source/configuration is authoritative; `upstream.json` records it.
 
 The source now integrates `noprompt/rood-reverse`'s `decomp/verified-functions`
 branch, with their work taking precedence over overlapping local source.
-All 289 C units pass the isolated historical compiler sweep; selected byte
-checks pass, but no full overlay or native runtime is certified. Earlier local
-match counts describe superseded source. See [Local Progress](DECOMP_PROGRESS.md).
-All upstream badges and the Linux instructions below describe reference work,
-not Windows achievements or current acceptance evidence. Build verification
-does not synchronize source; explicit sync refuses local changes.
+All 289 C units pass the isolated historical compiler sweep, and the latest
+WSL build reproduces the retail outputs byte-for-byte. That build includes
+inherited assembly and does not certify assembly-free source completion or a
+native runtime. Earlier local match counts describe superseded source. See
+[Local Progress](DECOMP_PROGRESS.md).
+The progress badges below use this Windows snapshot's local objdiff report.
+They measure byte matches, include inherited assembly, and are not a measure of
+readable C completion. The Linux quickstart remains upstream reference material,
+not a Windows build workflow. Build verification does not synchronize source;
+explicit sync refuses local changes.
 
 A decompilation project for Vagrant Story for PlayStation 1, with a goal of enabling interoperability with modern hardware and fixing bugs in the original game.
 
@@ -37,111 +41,129 @@ Thanks also to the following amazing projects (and their dependencies):
 
 ## Status
 
-![Overall progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&label=Overall+progress)
+### Windows Snapshot Progress: 2026-10-14
+
+The latest local objdiff report measures **97.81017% matched code overall**
+(1,894,184 / 1,936,592 bytes), **98.695786% for BATTLE.PRG**
+(510,652 / 517,400), and **98.71365% for the broader BATTLE category**
+(517,840 / 524,588). Overall, 4,084 / 4,156 functions are byte-matched.
+The two readable C functions temporarily replaced by upstream assembly have
+now been restored and freshly matched. Together with `func_8008AC78`, current
+BATTLE.PRG progress is 1,412 bytes above the pre-import accepted total. The WSL
+build still reproduces all retail outputs; assembly-backed bytes are not
+counted as reconstructed C progress.
+
+The badge board below uses local objdiff code-match percentages, not decomp.dev's
+source-progress metric. `INCLUDE_ASM` output may still reproduce retail bytes in
+the full build, but is not counted as reconstructed C progress. A 100% badge is
+therefore not a claim that every function is readable C.
+
+![Overall matched code: 97.81% local byte match](https://img.shields.io/badge/Overall%20matched%20code-97.81%25-blue)
 
 ### Core libraries
-![SLUS_010.40 progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=lib.SLUS_010.40)
+![Entry point and libraries: 77.39% local byte match](https://img.shields.io/badge/Entry%20point%20and%20libraries-77.39%25-blue)
 
 ### Main game engine
-![BATTLE.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=battle.BATTLE.PRG)
-![INITBTL.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=battle.INITBTL.PRG&color=%2332a934)
-![SCREFF2.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=battle.SCREFF2.PRG)
+![Main game engine: 98.71% local byte match](https://img.shields.io/badge/Main%20game%20engine-98.71%25-blue)
+![BATTLE.PRG: 98.70% local byte match](https://img.shields.io/badge/BATTLE.PRG-98.70%25-blue)
+![Main engine bootstrapper: 100.00% local byte match](https://img.shields.io/badge/Main%20engine%20bootstrapper-100.00%25-blue)
+![Fullscreen effects: 100.00% local byte match](https://img.shields.io/badge/Fullscreen%20effects-100.00%25-blue)
 
 ### Effects
-![Total effects progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects)
+![Ability effects: 100.00% local byte match](https://img.shields.io/badge/Ability%20effects-100.00%25-blue)
 
 
-![EFFPURGE.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.EFFPURGE.BIN&color=%2332a934)
-![PLG005.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG005.BIN&color=%2332a934)
-![PLG044.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG044.BIN&color=%2332a934)
-![PLG045.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG045.BIN)
-![PLG047.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG047.BIN)
-![PLG049.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG049.BIN)
-![PLG050.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG050.BIN)
-![PLG051.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG051.BIN)
-![PLG053.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG053.BIN)
-![PLG057.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG057.BIN)
-![PLG061.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG061.BIN)
-![PLG065.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG065.BIN)
-![PLG065.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG069.BIN)
-![PLG073.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG073.BIN)
-![PLG077.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG077.BIN)
-![PLG081.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG081.BIN)
-![PLG082.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG082.BIN)
-![PLG085.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG085.BIN)
-![PLG086.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG086.BIN)
-![PLG087.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG087.BIN)
-![PLG114.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG114.BIN)
-![PLG128.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG128.BIN)
-![PLG129.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG129.BIN)
-![PLG134.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG134.BIN)
-![PLG135.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG135.BIN)
-![PLG137.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG137.BIN)
-![PLG138.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG138.BIN)
-![PLG139.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG139.BIN)
-![PLG141.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG141.BIN)
-![PLG142.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG142.BIN)
-![PLG143.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG143.BIN)
-![PLG146.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG146.BIN)
-![PLG147.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG147.BIN)
-![PLG148.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG148.BIN)
-![PLG149.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG149.BIN)
-![PLG150.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG150.BIN)
-![PLG152.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG152.BIN)
-![PLG153.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG153.BIN)
-![PLG154.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG154.BIN)
-![PLG156.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG156.BIN)
-![PLG158.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG158.BIN)
-![PLG160.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG160.BIN)
-![PLG161.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG161.BIN)
-![PLG162.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG162.BIN)
-![PLG165.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG165.BIN)
-![PLG166.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG166.BIN)
-![PLG167.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG167.BIN)
-![PLG168.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG168.BIN)
-![PLG169.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG169.BIN)
-![PLG198.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG198.BIN)
-![PLG224.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG224.BIN)
-![PLG232.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG232.BIN)
-![PLG232.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG236.BIN)
-![PLG242.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG242.BIN)
-![PLG246.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG246.BIN)
-![PLG250.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG250.BIN)
-![PLG255.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG255.BIN)
-![PLG260.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG260.BIN)
-![PLG263.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG263.BIN)
-![PLG265.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG265.BIN)
-![PLG265.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG266.BIN)
-![PLG272.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG272.BIN)
-![PLG273.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG273.BIN)
-![PLG291.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG291.BIN)
-![PLG297.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG297.BIN)
-![PLG300.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG300.BIN)
-![PLG300.BIN progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=effects.PLG301.BIN)
+![Ability effect dispatcher: 100.00% local byte match](https://img.shields.io/badge/Ability%20effect%20dispatcher-100.00%25-blue)
+![Analyze: 100.00% local byte match](https://img.shields.io/badge/Analyze-100.00%25-blue)
+![Solid Shock: 100.00% local byte match](https://img.shields.io/badge/Solid%20Shock-100.00%25-blue)
+![Lightning Bolt: 100.00% local byte match](https://img.shields.io/badge/Lightning%20Bolt-100.00%25-blue)
+![Vulcan Lance: 100.00% local byte match](https://img.shields.io/badge/Vulcan%20Lance-100.00%25-blue)
+![Spirit Surge: 100.00% local byte match](https://img.shields.io/badge/Spirit%20Surge-100.00%25-blue)
+![Dark Chant: 100.00% local byte match](https://img.shields.io/badge/Dark%20Chant-100.00%25-blue)
+![Exorcism: 100.00% local byte match](https://img.shields.io/badge/Exorcism-100.00%25-blue)
+![Explosion: 100.00% local byte match](https://img.shields.io/badge/Explosion-100.00%25-blue)
+![Thunderburst: 100.00% local byte match](https://img.shields.io/badge/Thunderburst-100.00%25-blue)
+![Flame Sphere: 100.00% local byte match](https://img.shields.io/badge/Flame%20Sphere-100.00%25-blue)
+![Gaea Strike: 100.00% local byte match](https://img.shields.io/badge/Gaea%20Strike-100.00%25-blue)
+![Avalanche: 100.00% local byte match](https://img.shields.io/badge/Avalanche-100.00%25-blue)
+![Radial Surge: 100.00% local byte match](https://img.shields.io/badge/Radial%20Surge-100.00%25-blue)
+![Meteor: 100.00% local byte match](https://img.shields.io/badge/Meteor-100.00%25-blue)
+![Tornado: 100.00% local byte match](https://img.shields.io/badge/Tornado-100.00%25-blue)
+![Thunderbolt: 100.00% local byte match](https://img.shields.io/badge/Thunderbolt-100.00%25-blue)
+![Acid Flow: 100.00% local byte match](https://img.shields.io/badge/Acid%20Flow-100.00%25-blue)
+![Judgment: 100.00% local byte match](https://img.shields.io/badge/Judgment-100.00%25-blue)
+![Apocalypse: 100.00% local byte match](https://img.shields.io/badge/Apocalypse-100.00%25-blue)
+![Numbing Needle: 100.00% local byte match](https://img.shields.io/badge/Numbing%20Needle-100.00%25-blue)
+![Bloody Sin: 100.00% local byte match](https://img.shields.io/badge/Bloody%20Sin-100.00%25-blue)
+![Last Ascension: 100.00% local byte match](https://img.shields.io/badge/Last%20Ascension-100.00%25-blue)
+![Wyrm Scorn: 100.00% local byte match](https://img.shields.io/badge/Wyrm%20Scorn-100.00%25-blue)
+![Rending Gale: 100.00% local byte match](https://img.shields.io/badge/Rending%20Gale-100.00%25-blue)
+![Cherry Ronde: 100.00% local byte match](https://img.shields.io/badge/Cherry%20Ronde-100.00%25-blue)
+![Papillon Reel: 100.00% local byte match](https://img.shields.io/badge/Papillon%20Reel-100.00%25-blue)
+![Sunder: 100.00% local byte match](https://img.shields.io/badge/Sunder-100.00%25-blue)
+![Swallow Slash: 100.00% local byte match](https://img.shields.io/badge/Swallow%20Slash-100.00%25-blue)
+![Advent Sign: 100.00% local byte match](https://img.shields.io/badge/Advent%20Sign-100.00%25-blue)
+![Mistral Edge: 100.00% local byte match](https://img.shields.io/badge/Mistral%20Edge-100.00%25-blue)
+![Black Nebula: 100.00% local byte match](https://img.shields.io/badge/Black%20Nebula-100.00%25-blue)
+![Bear Claw: 100.00% local byte match](https://img.shields.io/badge/Bear%20Claw-100.00%25-blue)
+![Accursed Umbra: 100.00% local byte match](https://img.shields.io/badge/Accursed%20Umbra-100.00%25-blue)
+![Iron Ripper: 100.00% local byte match](https://img.shields.io/badge/Iron%20Ripper-100.00%25-blue)
+![Emetic Bomb: 100.00% local byte match](https://img.shields.io/badge/Emetic%20Bomb-100.00%25-blue)
+![Riskbreak: 100.00% local byte match](https://img.shields.io/badge/Riskbreak-100.00%25-blue)
+![Gravis Aether: 100.00% local byte match](https://img.shields.io/badge/Gravis%20Aether-100.00%25-blue)
+![Trinity Pulse: 100.00% local byte match](https://img.shields.io/badge/Trinity%20Pulse-100.00%25-blue)
+![Quickshock: 100.00% local byte match](https://img.shields.io/badge/Quickshock-100.00%25-blue)
+![Hex Flux: 100.00% local byte match](https://img.shields.io/badge/Hex%20Flux-100.00%25-blue)
+![Scythe Wind: 100.00% local byte match](https://img.shields.io/badge/Scythe%20Wind-100.00%25-blue)
+![Giga Tempest: 100.00% local byte match](https://img.shields.io/badge/Giga%20Tempest-100.00%25-blue)
+![Spiral Scourge: 100.00% local byte match](https://img.shields.io/badge/Spiral%20Scourge-100.00%25-blue)
+![Death Wail: 100.00% local byte match](https://img.shields.io/badge/Death%20Wail-100.00%25-blue)
+![Sanctus Flare: 100.00% local byte match](https://img.shields.io/badge/Sanctus%20Flare-100.00%25-blue)
+![Lotus Palm: 100.00% local byte match](https://img.shields.io/badge/Lotus%20Palm-100.00%25-blue)
+![Vertigo: 100.00% local byte match](https://img.shields.io/badge/Vertigo-100.00%25-blue)
+![Vermillion Aura: 100.00% local byte match](https://img.shields.io/badge/Vermillion%20Aura-100.00%25-blue)
+![HP-up: 100.00% local byte match](https://img.shields.io/badge/HP-up-100.00%25-blue)
+![PLG224: 100.00% local byte match](https://img.shields.io/badge/PLG224-100.00%25-blue)
+![PLG232: 100.00% local byte match](https://img.shields.io/badge/PLG232-100.00%25-blue)
+![PLG236: 100.00% local byte match](https://img.shields.io/badge/PLG236-100.00%25-blue)
+![PLG242: 100.00% local byte match](https://img.shields.io/badge/PLG242-100.00%25-blue)
+![PLG246: 100.00% local byte match](https://img.shields.io/badge/PLG246-100.00%25-blue)
+![PLG250: 100.00% local byte match](https://img.shields.io/badge/PLG250-100.00%25-blue)
+![PLG255: 100.00% local byte match](https://img.shields.io/badge/PLG255-100.00%25-blue)
+![PLG260: 100.00% local byte match](https://img.shields.io/badge/PLG260-100.00%25-blue)
+![PLG263: 100.00% local byte match](https://img.shields.io/badge/PLG263-100.00%25-blue)
+![PLG265: 100.00% local byte match](https://img.shields.io/badge/PLG265-100.00%25-blue)
+![PLG266: 100.00% local byte match](https://img.shields.io/badge/PLG266-100.00%25-blue)
+![PLG272: 100.00% local byte match](https://img.shields.io/badge/PLG272-100.00%25-blue)
+![PLG273: 100.00% local byte match](https://img.shields.io/badge/PLG273-100.00%25-blue)
+![PLG291: 100.00% local byte match](https://img.shields.io/badge/PLG291-100.00%25-blue)
+![PLG297: 100.00% local byte match](https://img.shields.io/badge/PLG297-100.00%25-blue)
+![PLG300: 100.00% local byte match](https://img.shields.io/badge/PLG300-100.00%25-blue)
+![PLG301: 100.00% local byte match](https://img.shields.io/badge/PLG301-100.00%25-blue)
 
 ### Menus
-![Total menu progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus&color=%2332a934)
+![Menus: 100.00% local byte match](https://img.shields.io/badge/Menus-100.00%25-blue)
 
 
-![MAINMENU.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MAINMENU.PRG&color=%2332a934)
-![MENU0.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENU0.PRG&color=%2332a934)
-![MENU1.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENU1.PRG&color=%2332a934)
-![MENU2.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENU2.PRG&color=%2332a934)
-![MENU3.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENU3.PRG&color=%2332a934)
-![MENU4.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENU4.PRG&color=%2332a934)
-![MENU5.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENU5.PRG&color=%2332a934)
-![MENU7.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENU7.PRG&color=%2332a934)
-![MENU8.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENU8.PRG&color=%2332a934)
-![MENU9.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENU9.PRG&color=%2332a934)
-![MENUB.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENUB.PRG&color=%2332a934)
-![MENUC.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENUC.PRG&color=%2332a934)
-![MENUD.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENUD.PRG&color=%2332a934)
-![MENUE.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENUE.PRG&color=%2332a934)
-![MENUF.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=menus.MENUF.PRG&color=%2332a934)
+![Top level menu and shared menu functionality: 100.00% local byte match](https://img.shields.io/badge/Top%20level%20menu%20and%20shared%20menu%20functionality-100.00%25-blue)
+![Magic menu: 100.00% local byte match](https://img.shields.io/badge/Magic%20menu-100.00%25-blue)
+![Break Arts menu: 100.00% local byte match](https://img.shields.io/badge/Break%20Arts%20menu-100.00%25-blue)
+![Battle Abilities menu: 100.00% local byte match](https://img.shields.io/badge/Battle%20Abilities%20menu-100.00%25-blue)
+![Items menu: 100.00% local byte match](https://img.shields.io/badge/Items%20menu-100.00%25-blue)
+![Status menu: 100.00% local byte match](https://img.shields.io/badge/Status%20menu-100.00%25-blue)
+![Map menu: 100.00% local byte match](https://img.shields.io/badge/Map%20menu-100.00%25-blue)
+![Data menu: 100.00% local byte match](https://img.shields.io/badge/Data%20menu-100.00%25-blue)
+![Options menu: 100.00% local byte match](https://img.shields.io/badge/Options%20menu-100.00%25-blue)
+![Score menu: 100.00% local byte match](https://img.shields.io/badge/Score%20menu-100.00%25-blue)
+![Loot menu: 100.00% local byte match](https://img.shields.io/badge/Loot%20menu-100.00%25-blue)
+![Item setup menu: 100.00% local byte match](https://img.shields.io/badge/Item%20setup%20menu-100.00%25-blue)
+![Container menu: 100.00% local byte match](https://img.shields.io/badge/Container%20menu-100.00%25-blue)
+![Quick Manual menu: 100.00% local byte match](https://img.shields.io/badge/Quick%20Manual%20menu-100.00%25-blue)
+![Misc menus: 100.00% local byte match](https://img.shields.io/badge/Misc%20menus-100.00%25-blue)
 
 ### Title and Ending Sequence
-![TITLE.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=title.TITLE.PRG&color=%2332a934)
-![ENDING.PRG progress](https://decomp.dev/ser-pounce/rood-reverse.svg?mode=shield&category=ending.ENDING.PRG)
+![Title sequence and menu: 100.00% local byte match](https://img.shields.io/badge/Title%20sequence%20and%20menu-100.00%25-blue)
+![Credits: 100.00% local byte match](https://img.shields.io/badge/Credits-100.00%25-blue)
 
 ## Editable content
 The entirety of the game's menu code and data is decompiled, including all files in `MENU` and `SMALL`, with the exceptions of `MENU/MCDATA.BIN`, `MENU/OPMCIMG1.BIN` and `MENU/OPMCIMG2.BIN`.

@@ -28,6 +28,22 @@ isolated historical compiler sweep; selected canonical function and read-only
 table checks pass. This does not certify a complete overlay or native runtime.
 See [Local Progress](DECOMP_PROGRESS.md) for exact scope and evidence.
 
+## Fork Update: 2026-10-14
+
+Imported all 36 modified `src/` and `config/` files from the clean
+`decomp/verified-functions` reference at
+`062096da30508e96fcb343cd7a4ce255632e1b9a`, relative to the previously
+imported `3b3f35fb318178a5778a46db4dc93777e534c042`. Each copied file was
+hash-checked against the reference; `upstream.json` now records the new revision
+and incoming hashes. Both reference directories remained read-only.
+
+The imported `func_8008AC78` now matches its complete 1,412-byte retail range.
+An isolated WSL build of the updated source/config trees completed with
+`All files match`; the BATTLE overlay is 577,828 bytes with SHA-256
+`ad6914c81be92a008af8dece6ad394ce39c5aa42360542b5531716ebd00bba12`.
+The build emitted 185 nonfatal compiler warnings and zero errors. This verifies
+the historical PSX build and retail outputs, not the Windows native runtime.
+
 ## Reviewed Update: 2026-10-07
 
 The explicitly requested update imported 85 maintained changes from the
@@ -48,7 +64,7 @@ trajectory reconstruction in the current unit.
 
 | Source | Revision |
 | --- | --- |
-| [noprompt/rood-reverse](https://github.com/noprompt/rood-reverse/tree/decomp/verified-functions) | `3b3f35fb318178a5778a46db4dc93777e534c042`, also recorded in `upstream.json` |
+| [noprompt/rood-reverse](https://github.com/noprompt/rood-reverse/tree/decomp/verified-functions) | `062096da30508e96fcb343cd7a4ce255632e1b9a`, also recorded in `upstream.json` |
 | [ser-pounce/rood-reverse](https://github.com/ser-pounce/rood-reverse) | Read-only original reference and source ancestry |
 | [maspsx](https://github.com/mkst/maspsx) | `746b895f02929ecd148af7b1f4ff05b69f973878` |
 | [decomp-permuter](https://github.com/simonlindholm/decomp-permuter) | `059609d4aec73eb0650726772954e1ad575825f8` |

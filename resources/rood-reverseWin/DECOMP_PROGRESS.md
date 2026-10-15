@@ -1,5 +1,536 @@
 # Local Decompilation Tracking
 
+## SLUS Completion-Gain Attempts: 2026-10-15
+
+- **BLOCKED / NOT ACCEPTED. No verified percentage increase.** No candidate
+  from these attempts has replaced a canonical assembly inclusion. The last
+  accepted overall total remains **1,894,184 / 1,936,592 bytes (97.81017%)**;
+  this section does not claim a fresh whole-project progress measurement.
+- Retained complete original-root candidate reports, linked disassemblies,
+  and candidate source units under ignored `build/completion-gain/`.
+  Native read-only Ghidra analysis established the full function bodies
+  before reconstruction. Compiler versions/settings, retail binaries, and
+  verifier acceptance logic were not changed.
+- Closest retained streaming candidate: `StGetNext`, CPU
+  `[0x80022484, 0x8002253C)`, file `[0x12C84, 0x12D3C)`.
+  `stream-next-retained.*` verifies **184 / 184 bytes with one differing
+  instruction word** at `+0x24`: the compiler skips the second status load
+  on the non-rewind branch. The pointer-cursor and packed-identifier
+  alternatives did not fix this. Restored the ordinary halfword-pointer
+  implementation and freshly rechecked it; it remains a candidate only.
+- Additional full-range attempts did not match:
+
+  | Target | Evidence / result |
+  | --- | --- |
+  | `DS_cw` | Best 124 / 124 bytes; four instruction-word differences in global addressing. |
+  | `DS_stop` | 124 compiled / 120 retail bytes. |
+  | `DsReady` | Closest 152 compiled / 148 retail bytes. |
+  | `_spu_FsetRXXa` | 156 compiled / 164 retail bytes. |
+  | GPU draw-area clamp helpers | Correct-size variants still differ; no promotion. |
+  | `_padSetVsyncParam` | Ordinary initializer 52 compiled / 44 retail bytes. |
+  | `_padSetMainMode` | Closest 148 compiled / 152 retail bytes; saved mode conversion differs. |
+  | `_padStartCom` | `pad-start-retained.*`: 204 / 204 bytes, five instruction-word differences around the two counter stores. |
+  | `_padLoadActInfo` | 216 compiled / 212 retail bytes; branch structure, callback argument move, and allocation scheduling differ. |
+  | `func_80015BAC` | Correct-size 240 / 240-byte voice-release candidates still differ in register allocation and mask evaluation. |
+
+- Fresh positive/negative controls passed for the relevant configurations:
+  GPU `func_80029A54` matched all 28 bytes and an opcode mutation was rejected;
+  pad `_padStopCom` matched all 68 bytes and a counter-mode mutation was
+  rejected at `+0x18`; music `Sound_MapInstrumentToBaseSampleBank` matched
+  all 88 bytes and a sample-bank displacement mutation was rejected at
+  `+0x24`. Earlier DSSYS controls are also retained in the scratch directory.
+- Fixed missing function-boundary metadata only where independently
+  established by Ghidra and generated assembly. The symbol map now explicitly
+  marks `StGetNext` (184 bytes), `DsReady` (148 bytes), `_padStartCom`
+  (204 bytes), `_padStopCom` (68 bytes), and the two SPU address helpers.
+  An initial `_padStopCom` control incorrectly inferred 888 bytes because
+  intervening named functions lacked function annotations; the subsequent
+  68-byte control used its independently proven complete body, not a partial
+  comparison. Authenticated splat artifacts were regenerated after the map
+  changes.
+- Rejected experiments remain diagnostic only. In particular, no missing
+  callback argument, altered compiler option, volatile workaround, aggregate
+  storage experiment, or unresolved builtin was promoted. No source-unit,
+  linked-overlay, whole-project, or native-runtime completion is claimed.
+
+## BATTLE B9DB4 Compiler-Lifetime Follow-Up: 2026-10-15
+
+- Continued only `func_800B9DB4`. **Still CANDIDATE_DIFF / NOT ACCEPTED;
+  no accepted percentage gain.** The canonical inclusion, headers, retail
+  bytes, compiler flags, and verifier implementation remain unchanged.
+- Removed repeated Windows-filesystem snapshot overhead from diagnostic
+  iterations by preparing an isolated WSL-local source copy at
+  `/home/judee/.cache/vagrant-matching/diagnostics-B9DB4-fast/root`.
+  `build/resume-B9DB4/check.ps1 -LocalSnapshot` invokes the unchanged verifier
+  there; it still snapshots its inputs, compiles the complete unit, resolves
+  target relocations, and compares all 372 target bytes. This is diagnostic
+  acceleration only, not canonical Windows-source acceptance.
+  The identical `order-02` candidate produced identical differences,
+  dependency digests, configured flags, relocations, retail identity, and
+  candidate hash in the original-root and local-root checks. Local controls:
+  `local-positive.*` is MATCH for the 36-byte B9F28 function;
+  `local-negative.*` has the expected single script-index difference at +8.
+  The verifier SHA-256 remains
+  `ea111e20e1cdaa3ad5034a5545b203453e97270ba4d5e2f256d62bc63eb77782`.
+  The scratch wrapper now also preserves reports on exit 3, which means
+  CANDIDATE_MATCH, not canonical MATCH.
+- Completed three full-range diagnostic matrices, retained under
+  `build/resume-B9DB4/`: 40 expression interleavings
+  (`action-order-results.json`), 128 operand-type/cast combinations
+  (`action-type-results.json`), and 216 scalar-role/lifetime combinations
+  (`scalar-lifetime-results.json`). None matched. The expression-grouping
+  batch was interrupted; its individual `group-*` reports survive, but no
+  complete aggregate or completed-batch claim is made. Some separate
+  alternatives have six differences, but change the mismatch arrangement
+  rather than producing an accepted implementation.
+- Captured exact historical RTL/CSE/combine/scheduling/allocation evidence in
+  `/home/judee/.cache/vagrant-matching/diagnostics-B9DB4-rtl`.
+  Normal and diagnostic assembly for the retained candidate are identical,
+  SHA-256
+  `a3a353a5e97d7970c2b64905421f834652cc6054dd11a0d4c2533277ab18d15f`.
+  Narrow input retains an independent old-flag value but emits the unwanted
+  zero-extension; widening it lets CSE merge the value into the actor
+  argument, shortening the block. Public GCC 2.8.1 `gcc/cse.c`, retained as
+  `build/resume-B9DB4/gcc-2.8.1-cse.c`, explains equivalent-register selection
+  in `make_regs_eqv`: outside-block first/last-use lifetimes and the later
+  last-use UID matter, not simply declaration order. This explains a compiler
+  mechanism; it does not establish a matching original source form.
+- Follow-up full comparisons also rejected declaring the wide flags first,
+  an ordinary unbound `register` storage hint, separate flag-setting calls in
+  the two branches, and unsigned/signed narrow aliases assigned after first
+  capturing the wide getter result. Each of those final candidates compiled
+  to 368 rather than 372 bytes. No storage hint or duplicate-call experiment
+  was promoted. Existing callers test flags above bit 15, so narrowing the
+  getter declaration would contradict observed consumers; no prototype was
+  changed to remove the mask.
+- Restored the mutable `build/resume-B9DB4/candidate-body.c` to the retained
+  seven-difference body, SHA-256
+  `0a77b3ad918543c40dca398324dfbc0bf5b54d4b65622aa5964fbd1bf3fa5ca3`.
+  Fresh **original-root**, full-range verification:
+
+  ```powershell
+  & .\resources\rood-reverseWin\build\resume-B9DB4\check.ps1 -Probe retained-baseline-recheck
+  ```
+
+  At `2026-10-15T08:00:42.977613+00:00`, this produced
+  **372 / 372 bytes, seven instruction-word differences, zero read-only-word
+  differences**. The offsets are still `0x94`, `0xC8`, `0xCC`, `0xD0`,
+  `0xD4`, `0xD8`, and `0xDC`. Complete source/report/disassembly:
+  `build/resume-B9DB4/retained-baseline-recheck.c`, `.json`, and `.dis`;
+  full candidate-unit SHA-256:
+  `3b109ec1e376e638e255a581a64e9ab1b25d005c2b9b5e00b808a8a431432ba8`.
+  The report records exact compiler, preprocessing, assembler/linker settings,
+  tool hashes, retail identity, range, and relocations. Its canonical source
+  SHA-256 remains
+  `ec5c8e5df5c46ca6777170cd8b8d6d4096130f00ca5409ac22865e0c39f60d2e`;
+  the independently checked `146C.c` hash also remains unchanged.
+- **BLOCKED, not finished.** No matching candidate was promoted and no
+  source-unit, linked-overlay, or native-runtime completion is claimed.
+  A further attempt needs a concrete source/control-flow explanation for
+  retaining the retail flag copy without its zero-extension, together with
+  the retail action-operand allocation; repeating the completed matrices is
+  not evidence of progress.
+
+## BATTLE B9DB4 Reconstruction: 2026-10-15
+
+- The user explicitly approved parking blocked 6CB04 and selecting the
+  372-byte `func_800B9DB4`. Work is now confined to that function in
+  `src/BATTLE/BATTLE.PRG/4A0A8.c`; its canonical assembly inclusion has not
+  been replaced. The parked 6CB04 canonical source and retained best
+  candidate remain unchanged.
+- Completed fresh read-only Ghidra 12.1.2 analysis of the complete target,
+  entry references, instructions, and seven callees. CPU range:
+  `0x800B9DB4..0x800B9F28`; file range: `0x515B4..0x51728`
+  (exclusive ends). The observed function-table reference is at
+  `0x800E9EF8`. Retail BATTLE SHA-256:
+  `ad6914c81be92a008af8dece6ad394ce39c5aa42360542b5531716ebd00bba12`.
+  Evidence is retained in ignored `build/resume-B9DB4/ProbeB9DB4.java`,
+  `ghidra-evidence.txt`, and `ghidra-output.log`. The last file is UTF-16.
+- Reconstructed the initialization, pending-action, cancellation, and
+  immediate-completion paths in readable C. The second parameter is unused.
+  The actor flag update sets or clears `0x1800` and passes only the low
+  16 bits. The animated path computes
+  `(script[2] - 1) * 2 + (script[1] ^ 1) + 0x6D`, starts the action,
+  and sets the pending latch. Pending completion is gated by actor flag
+  `0x80`; cancellation clears the latch and uses the shared flag-update path.
+  These are static reconstruction findings, not runtime behavioral proof.
+- The first candidate compiled to **352 / 372 bytes**. Investigation of
+  result lifetimes and flag/action operand types produced a complete
+  **372 / 372-byte candidate with seven instruction-word differences and
+  zero read-only-word differences**. All other 86 instruction words match,
+  including call targets, state stores, branch targets, and the epilogue.
+  This is **CANDIDATE_DIFF / NOT ACCEPTED**, not a function match or a
+  percentage gain.
+- The remaining differences in the retained candidate are precisely:
+
+  | Relative offset | Retail CPU address | Remaining difference |
+  | --- | --- | --- |
+  | `0x94` | `0x800B9E48` | Retail copies the old flags into `$a1`; the candidate redundantly masks them with `0xFFFF` first. Both subsequent branches already discard the upper bits. |
+  | `0xC8`, `0xCC`, `0xD0`, `0xD4`, `0xD8`, `0xDC` | `0x800B9E7C` onward | The action offset and action base use `$a1`/`$v0` in the opposite allocation. The final addition itself matches. |
+
+  The byte-sized completion result removes the extra word-sized
+  store/return copy; keeping the inactive-state early return distinct
+  reproduces retail's initial conditional-branch/jump sequence. A 16-bit
+  intermediate reproduces retail's old-flag temporary, but also introduces
+  the redundant mask above. Widening it removes that mask but changes the
+  flag block's register allocation and length. Making the actor argument
+  itself 16-bit enables a shorter conditional layout absent from retail.
+  Separate duplicated completion paths and a common block at the function
+  tail also fail the complete byte comparison. None was promoted.
+- Retained readable body: `build/resume-B9DB4/candidate-body.c`, SHA-256
+  `0a77b3ad918543c40dca398324dfbc0bf5b54d4b65622aa5964fbd1bf3fa5ca3`.
+  Complete source snapshot, exact report, and disassembly:
+  `build/resume-B9DB4/word-temporary-allocation.c`, `.json`, and `.dis`.
+  That report was generated at `2026-10-15T06:31:12.924412+00:00`;
+  all canonical hashes/timestamps were unchanged during verification.
+  The earlier `word-flags-action-base.*` independently records the same
+  seven instruction differences. Per-probe snapshots remain available for
+  the rejected type/control-flow variants; do not restart those searches
+  without a specific compiler-level reason.
+- Refreshed checker controls after the investigation:
+  canonical `func_800B9F28` is **MATCH, 36 / 36 bytes**; deliberately
+  changing its script index from one to two yields exactly one difference,
+  at `+0x8`. Reports/disassemblies are
+  `build/resume-B9DB4/completion-positive-control.*` and
+  `completion-negative-control.*`. The checker continues using the
+  configured GCC 2.8.1-psx, original flags, full retail range, and resolved
+  relocations; no expected inputs or toolchain settings were changed.
+- **Blocked on the seven remaining exact code-generation differences.**
+  Canonical `4A0A8.c` remains SHA-256
+  `ec5c8e5df5c46ca6777170cd8b8d6d4096130f00ca5409ac22865e0c39f60d2e`.
+  Canonical `146C.c` remains
+  `8773a91ce1586217590c4f1dc70f920d8b2c9128bfc2dd6f7aab0089d2cd25e3`;
+  parked best `build/m2c-6CB04/candidate.c` remains
+  `e160ec18bdbae209a8ee00197d8f850f6ebce8f6b2d75046e71a1f9955ef5157`.
+  No source-unit, linked-overlay, native runtime, or new canonical function
+  match is claimed. The next focused investigation is historical compiler
+  RTL/value-mode evidence for these seven words, not another target switch.
+
+## BATTLE 6CB04 Late-Pass Follow-Up: 2026-10-15
+
+- Continued only 6CB04. An isolated, fully initialized compiler fixture now
+  reproduces the previously unexplained *kind* of dead flag retention without
+  changing the configured GCC 2.8.1-psx flags. In `duplicate_tail`, a flag selects
+  between two identical calls. Its consumer is jump instruction 55, present
+  through `flow`, `combine`, `lreg`, and `greg`. **`jump2` removes that
+  conditional branch after register allocation but leaves the zero/one flag
+  assignments.** This is a concrete late cross-jumping explanation for how
+  unused flag writes can survive, not proof of 6CB04's original source.
+- The diagnostic flag is allocated to `$v1`, not retail `$s5`; duplicate calls
+  were deliberately confined to the compiler fixture, not introduced into game
+  source to manufacture a match. The full fixture source and pass dumps are
+  retained in ignored `build/resume-6CB04/late-flag.c` and `late-flag.*`.
+  Normal and `-da -dumpbase late-flag` output both SHA-256:
+  `addf41a7d0768c08f3d8d2368283ccd4112a339d8b80521d309f52153be5c0c4`.
+  These are compiler diagnostics, not function-match or behavioral evidence.
+- Additional fixtures exclude several direct explanations: marking the flag
+  only once retains a conditional branch absent from retail; conditional
+  normalization also retains branches; an OR-with-one update, conditional
+  continue, empty debug-style block, and shared switch-default return do not
+  preserve the needed assignments. Pairing the index/flag or response/flag in a
+  local struct produces stack traffic absent from retail
+  (`aggregate-flag.c` / `.s`), so no aggregate wrapper was adopted.
+- Tested only complete readable 6CB04 candidates suggested by the control-flow
+  evidence, with unchanged compiler flags, reference bytes, and relocations:
+
+  | Candidate | Compiled / retail bytes | Instruction-word differences | Read-only-word differences |
+  | --- | --- | --- | --- |
+  | Conditional return after actor response dispatch | 592 / 604 | 133 | 205 |
+  | Common fallback gated by flag, then target type | 612 / 604 | 130 | 205 |
+  | Common fallback gated by target type, then flag | 616 / 604 | 131 | 205 |
+  | Branch-local `else if (!effectApplied)` fallback | 592 / 604 | 133 | 205 |
+  | Early actor return, then flag-gated fallback | 592 / 604 | 133 | 205 |
+
+  All are **CANDIDATE_DIFF / NOT ACCEPTED**. The first common-fallback form
+  reproduces the retail `$s5` flag and the initial prologue/register assignments,
+  but retains extra fallback tests and spills `context` to the stack; neither
+  exists in retail. Reordering the tests does not remove that discrepancy.
+  Branch-local and early-return forms eliminate the flag before it can explain
+  the retail code. Full per-probe snapshots, JSON reports, and disassemblies
+  are retained as `late-return.*`, `fallback-gate.*`,
+  `fallback-target-first.*`, `fallback-else-guard.*`, and
+  `fallback-after-return.*` under `build/resume-6CB04/`.
+- **Still blocked on byte-exact 6CB04 matching.** Late branch merging is now
+  demonstrated with the exact compiler, but no supported readable source form
+  reproduces retail's flag without extra control flow or stack operations.
+  Canonical game source and the previous best candidate remain unchanged.
+  No accepted function, percentage gain, or overlay/behavioral match is claimed.
+
+## BATTLE 6CB04 Flag-Provenance Investigation: 2026-10-15
+
+- Investigated the retained `$s5` value instead of continuing loop-layout
+  permutations. Read-only Ghidra 12.1.2 analysis of the retail target and its
+  caller is retained in ignored `build/resume-6CB04/flag-provenance.txt` and
+  `flag-ghidra.log`; the latter includes complete multiline decompilations.
+  The target remains CPU `0x8006CB04..0x8006CD60`, file `0x4304..0x4560`
+  (exclusive ends), 604 bytes. Retail BATTLE SHA-256:
+  `ad6914c81be92a008af8dece6ad394ce39c5aa42360542b5531716ebd00bba12`.
+- The post-effect flag is not an omitted return value in the observed code.
+  Caller `func_800D6388` calls at `0x800D63B8`, then restores its return address
+  and returns without consuming a result. In the target, `$s5` is cleared at
+  `0x8006CB14`, compared with the initial count at `0x8006CB84`, copied to
+  the index at `0x8006CB8C`, and set to one at `0x8006CC60`. Its next reference
+  is restoration of the caller's saved value at `0x8006CD40`. No observed
+  return-register copy or memory store exports the post-effect flag.
+- Captured all 15 historical GCC pass dumps from the verifier's exact
+  precompile snapshot for the applied-seed candidate. Pseudo-register 82 is
+  `effectApplied`; instruction 196 assigns one after call instruction 193.
+  That assignment survives RTL, CSE, loop optimization, and CSE2, but becomes
+  `NOTE_INSN_DELETED` in **flow**, before register allocation. This identifies
+  the deletion stage for this candidate, not the original source construct.
+  Normal and diagnostic compiler output are identical (SHA-256
+  `06ebe78927cb115307a1a9a708ad553d8ac670c88b1d67a8592c78e9b0e8aaa7`).
+  Snapshot SHA-256:
+  `51fdec8f6c52b849fc1bbd17421223f167968337b8254ed654e03e4c053f1a78`.
+  Receipt: `build/resume-6CB04/gcc-dump-capture.json`; target-only dumps:
+  `build/resume-6CB04/applied-flag.*.txt`. Full diagnostics remain in the
+  local WSL cache at `diagnostics-6CB04-20261015T043320Z`.
+- Isolated compiler fixtures ruled out plain/register declarations, short/byte
+  flag types, a redundant return guard, and conditional flag-update forms as
+  explanations: unused assignments still disappear. A volatile register local
+  produces stack traffic absent from retail; it was not adopted. These fixtures
+  are compiler diagnostics only, not game-code acceptance or behavioral tests.
+- Refreshed positive/negative historical-check controls before this
+  investigation: canonical `func_8006CDB8` matches all 32 bytes; the deliberate
+  argument mutation differs at exactly `+0xC`. Checked two additional readable
+  full-function candidates with unchanged compiler flags and relocation rules:
+
+  | Candidate | Compiled / retail bytes | Instruction-word differences | Read-only-word differences |
+  | --- | --- | --- | --- |
+  | Fully initialized target-ID alias | 596 / 604 | 119 | 205 |
+  | Applied-flag guard around final response dispatch | 608 / 604 | 91 | 199 |
+
+  Both are **CANDIDATE_DIFF / NOT ACCEPTED**. The alias candidate does not use
+  an uninitialized local. The response guard retains the flag but also emits
+  an extra branch at compiled `0x8006CC7C` and uses `$a2`, not retail `$s5`;
+  it therefore does not explain a late optimization removing only the guard.
+  Exact snapshots, reports, and disassemblies are
+  `build/resume-6CB04/initialized-target-alias.*` and `response-guard.*`.
+- Finally rechecked the unchanged retained typed-cursor body through the full
+  checker: **604 / 604 bytes, 91 instruction-word and six read-only-word
+  differences**. Receipt and disassembly:
+  `build/resume-6CB04/provenance-retained-baseline.json` and `.dis`.
+  Canonical `146C.c` SHA-256 remains
+  `8773a91ce1586217590c4f1dc70f920d8b2c9128bfc2dd6f7aab0089d2cd25e3`;
+  previous best candidate remains untouched. No canonical implementation,
+  header, reference binary, toolchain setting, or acceptance criterion changed.
+- **BLOCKED: original source/compiler reason for retaining the unconsumed flag
+  remains unresolved.** The caller/ABI hypothesis and tested response-guard
+  explanation are now excluded, but readable exact matching is not proved
+  impossible. No accepted function, percentage gain, behavioral validation,
+  source-unit match, or linked-overlay match is claimed; no full overlay build
+  was needed for rejected scratch-only candidates.
+
+## BATTLE 6CB04 Continuation: 2026-10-14
+
+- Continued only `func_8006CB04`, BATTLE CPU `0x8006CB04..0x8006CD60`
+  (exclusive end), retail file `0x4304..0x4560`. Existing canonical source,
+  headers, reference binaries, and the earlier best candidate were preserved.
+- The Ghidra MCP backend was unavailable. The existing native headless probe
+  completed with Ghidra 12.1.2 from `C:\Tools\Base\Analysis\Ghidra\12.1.2`;
+  fresh instruction/reference evidence is retained in ignored
+  `build/ghidra/20261014-233932-453/evidence.txt`. Retail instructions confirm
+  the `$s5` initialization at `0x8006CB14`, initial signed count comparison at
+  `0x8006CB84`, index copy at `0x8006CB8C`, and post-effect assignment at
+  `0x8006CC60`. The indexed traversal uses field offsets `0x4C/0x4F/0x8C`
+  from its advancing base, with a separate `0x44`-byte effect-call offset.
+- Refreshed the isolated historical GCC 2.8.1-psx controls before editing
+  scratch candidates: canonical `func_8006CDB8` is `MATCH`, 32 / 32 bytes;
+  its deliberate argument mutation is `CANDIDATE_DIFF` at exactly `+0xC`.
+  Compiler flags, relocation handling, and complete comparison ranges were
+  unchanged.
+- Checked three scratch-only indexed traversal variants independently:
+
+  | Variant | Compiled / retail bytes | Instruction-word differences | Read-only-word differences |
+  | --- | --- | --- | --- |
+  | Applied-seed guard followed by indexed `do/while` | 600 / 604 | 118 | 199 |
+  | Indexed `for` with direct response returns | 592 / 604 | 133 | 205 |
+  | Branch-local index increment using the applied flag | 596 / 604 | 133 | 205 |
+
+  All three are **CANDIDATE_DIFF / NOT ACCEPTED**. The first variant reproduces
+  the retail case-block addresses, but still differs in register allocation,
+  flag retention, surrounding layout, and the complete read-only section.
+  None was promoted or substituted for the previous best candidate.
+- Finally reran the retained typed-cursor candidate through its existing
+  `build/m2c-6CB04/check.ps1`: **604 / 604 bytes, 91 instruction-word and six
+  read-only-word differences**. Its SHA-256 remains
+  `e160ec18bdbae209a8ee00197d8f850f6ebce8f6b2d75046e71a1f9955ef5157`;
+  canonical `146C.c` remains
+  `8773a91ce1586217590c4f1dc70f920d8b2c9128bfc2dd6f7aab0089d2cd25e3`.
+  Full candidate snapshots, commands, disassemblies, and fresh control/baseline
+  reports are retained in ignored `build/resume-6CB04/`. The final baseline
+  report was generated at `2026-10-15T03:53:54.607075+00:00`.
+- **BLOCKED on byte-exact function matching.** No new reconstructed function,
+  source-unit match, linked-overlay match, behavioral validation, or percentage
+  gain is claimed. The prior 97.81017% overall snapshot figure is unchanged;
+  a full overlay build was not rerun for these rejected scratch-only probes.
+
+## Native Windows M2c Trial: 2026-10-14
+
+- With user authorization, cloned upstream `matt-kempster/m2c` to
+  `C:\Tools\Base\Decompilation\m2c`, revision
+  `708d2d2cb2698f091a92492b328f73b24209f72d`. Installed it in its own
+  `.venv` using Windows Python 3.10.11; the game toolchain and dependency
+  manifests were not changed. The tool checkout remains clean.
+- Native `mipsel-gcc-c` translation ran locally with a 30-second child-process
+  limit, hashed assembly/context inputs, and canonical-source preservation checks.
+  It correctly recovered the matched `func_8006CDB8` single-call control.
+  Fresh historical verification also passed the canonical 32-byte control and
+  rejected its deliberate argument mutation at exactly `+0xC`.
+- Translated `func_8006CB04`, BATTLE CPU `0x8006CB04..0x8006CD60`, file
+  `0x4304..0x4560`. Raw output drops the apparently unused `$s5` flag and
+  contains invalid aggregate/pointer expressions; it was not adopted verbatim.
+  A reviewed scratch candidate uses typed effect traversal, an explicit byte
+  offset for the effect call, and a guarded `do/while`, preserving the actual
+  action-word extraction at retail CPU `0x8006CC28..0x8006CC34`.
+- The retained candidate is **604 compiled / 604 retail bytes**, but remains
+  **CANDIDATE_DIFF: 91 instruction-word differences and six read-only-table-word
+  differences** across the complete 1,716-byte table section. Equal code size
+  is not a matching-byte count. The response-call tail and epilogue align;
+  loop addressing, register allocation, and the absent flag assignments still
+  differ. This does not prove that a readable matching implementation is impossible.
+- A byte-cursor refinement regressed to 596 bytes and 205 table-word differences
+  and was reverted. The retained typed-cursor candidate reproduced its result
+  on a fresh full check. Candidate SHA-256:
+  `e160ec18bdbae209a8ee00197d8f850f6ebce8f6b2d75046e71a1f9955ef5157`.
+  Trial scripts, translations, manifests, candidate, disassembly, and full report
+  are retained in ignored `build/m2c-6CB04/`. The earlier 592-byte candidate is
+  unchanged. No canonical implementation, header, compiler setting, comparison
+  range, reference checkout, or completion percentage changed in this trial.
+- Follow-up decoded the six `.rodata` mismatches as little-endian switch-table
+  addresses, not independent bad constants. Candidate targets are exactly four
+  bytes before retail at offsets `0x78/0x7C` (`0x8006CBF4` vs. `0x8006CBF8`),
+  `0x80` (`0x8006CC54` vs. `0x8006CC58`), `0x84/0x88`
+  (`0x8006CC04` vs. `0x8006CC08`), and `0x8C`
+  (`0x8006CBFC` vs. `0x8006CC00`). They point into 6CB04's case code, so this
+  table difference tracks code-label layout.
+- Captured GCC 2.8.1-psx `-da -dumpbase func_8006CB04` diagnostics from a copy
+  made at the checker's exact pre-compile snapshot boundary. Snapshot hash
+  `d407532251629d6200f02a6f456a6b8fa876fb191d32a4bf37d32b8c34a9caea`, compiler
+  hash, and original flags were verified. Normal and diagnostic `cc1` assembly
+  both hash to
+  `01fb262ec48d9442ad089971992697ce8290e7cf34e699e285eac527ad4810fd`; the
+  diagnostic added no dumpbase line. Fifteen pass dumps are retained in the
+  local WSL cache under `diagnostics-6CB04-20261015T024339Z/` and summarized in
+  `build/m2c-6CB04/gcc-dump-capture.json`.
+- The target's jump2 RTL has the six case labels `[79, 79, 157, 94, 94, 86]`;
+  delayed-branch output preserves those destinations. The register allocator
+  reports 13 pseudos to allocate and twice reports spilling register 7. The
+  m2c candidate has no separate post-effect flag assignment; adding the
+  retail-inferred `effectApplied = 0/1` local in scratch compiled identically,
+  with the same 604-byte size and six table differences, then was reverted.
+  Thus the dumps locate the case-table mismatch as code layout, but this flag
+  probe did not recover the missing instruction or reduce the 91 instruction-word
+  differences. No match or progress gain is claimed.
+- Continued scratch-only loop/layout probes, each checked over the full retail
+  range and reverted unless noted: changing the guarded `do/while` to a
+  pretested `for` loop produced 596 / 604 bytes and 205 table-word differences;
+  moving the actual index initialization before the target guard, or testing a
+  separate applied seed before copying it to the index, each produced 612 / 604
+  and 205; guarding response dispatch with a meaningful applied flag produced
+  620 / 604 and 205; indexing records from the ability base produced
+  592 / 604 and 205. Reordering response/ability declarations emitted the same
+  604-byte candidate with six table-word differences. Testing the separate
+  applied seed before copying it to the index also produced 612 / 604 and 205.
+  Passing the typed effect pointer directly to `_applyBattleAbilityEffect`
+  instead of retaining the parallel byte offset regressed to 596 / 604 and 205.
+  Both probes were reverted. The typed effect-pointer, byte-offset, guarded
+  `do/while` candidate was restored and freshly verified at
+  604 / 604, still `CANDIDATE_DIFF` with 91 instruction-word and six table-word
+  differences. No canonical source or percentage changed.
+
+## BATTLE Completion Push: 2026-10-14
+
+- Restored the readable C bodies for `func_80074BAC` and `func_80075554` after
+  the user prioritized the upstream/no-prompt work. Both were AST-extracted
+  from saved candidates into the current imported `146C.c` context, then passed
+  fresh canonical WSL checks: 1,548 / 1,548 bytes and 2,936 / 2,936 bytes.
+  `func_80075554` uses the retail-confirmed two-argument ABI for
+  `func_8006D028`; that helper remains a fresh 60 / 60-byte match. The C body
+  for `func_80074BAC` uses the current imported headers and matches unchanged.
+- Refreshed same-unit controls after promotion: `func_8006CDB8` matches 32 / 32;
+  its deliberate argument mutation fails at `+0xC`. The current-context
+  75554 candidate also matched all code and 1,716 read-only bytes before
+  promotion.
+- Rebuilt the isolated WSL project from current `src/` and `config/` trees.
+  GNU Make completed `all` with `All files match`; the 577,828-byte BATTLE
+  overlay retains SHA-256
+  `ad6914c81be92a008af8dece6ad394ce39c5aa42360542b5531716ebd00bba12`.
+- Fresh objdiff: overall **1,894,184 / 1,936,592 bytes, 97.81017%**;
+  BATTLE.PRG **510,652 / 517,400, 98.695786%**; broader BATTLE aggregate
+  **517,840 / 524,588, 98.71365%**. Matched functions: 4,084 / 4,156 overall,
+  1,851 / 1,855 in BATTLE.PRG, and 1,870 / 1,874 in the broader BATTLE group.
+- Four BATTLE functions remain unmatched: `func_8006CB04` (604 bytes),
+  `func_800B28A8` (4,292), `func_800B9DB4` (372), and `func_800E3600` (1,480),
+  totaling 6,748 bytes. The 6CB04 current-context C candidate remains
+  `CANDIDATE_DIFF`, 592 / 604 bytes with 205 differing read-only words; it was
+  not promoted. B9DB4 layout probes were reverted to its saved 368 / 372
+  candidate. No 100% completion is claimed.
+- Additional current-source probes after the two restorations: 6CB04 was
+  rebased against the imported `SVECTOR*` signature and the reordered response
+  initialization; both remain 592 / 604, so the scratch baseline was restored.
+  B9DB4's active-state-first layout produced 356 / 372 bytes, and an explicit
+  command branch layout produced 360 / 372; both were reverted. A negated early
+  guard retained 368 / 372 with no byte improvement. E3600's three branch-scoped
+  probe locals produced the same 1,292 / 1,480 result and were reverted. No
+  candidate from these probes was promoted.
+- Bounded, function-scoped permuter searches also ran in isolated scratch
+  directories using the configured historical compiler. For 6CB04, a
+  single-worker 90-second run reached 1,332 iterations and improved the
+  heuristic score from 1,030 to 570; review rejected the best outputs because
+  they read uninitialized aliases on valid case paths. No permuter output was
+  tested as accepted progress or promoted. For E3600, a single-worker
+  90-second run reached 1,216 iterations and improved the score from 20,040
+  to 14,555, but the best source used uninitialized action, cooldown-pointer,
+  and route-state aliases on valid branches. Both best candidates were rejected
+  before canonical checks. Inputs and outputs are retained under ignored
+  `build/permuter-func_8006CB04` and `build/permuter-func_800E3600`.
+
+## No-Prompt Fork Update And WSL Validation: 2026-10-14
+
+- Imported the 36 modified `src/` and `config/` paths between no-prompt
+  `3b3f35fb318178a5778a46db4dc93777e534c042` and clean branch head
+  `062096da30508e96fcb343cd7a4ce255632e1b9a`. Files were copied verbatim and
+  individually hash-checked. The original reference and no-prompt checkout were
+  not edited.
+- Regenerated the local BATTLE and SLUS Splat artifacts after their imported
+  symbol maps changed. Fresh canonical WSL verification reports
+  `MATCH func_8008AC78`: 1,412 / 1,412 bytes, GCC 2.8.1-psx, CPU
+  `0x8008AC78..0x8008B1FC`, file `0x22478..0x229FC`. Report:
+  `~/.cache/vagrant-matching/reports/146C-func_8008AC78.json`.
+- Refreshed the isolated WSL stage from the current `src/` and `config/` trees;
+  GNU Make completed `all` with `All files match`. The BATTLE overlay is
+  577,828 bytes, SHA-256
+  `ad6914c81be92a008af8dece6ad394ce39c5aa42360542b5531716ebd00bba12`.
+  The build log contains zero errors and 185 nonfatal warnings. No Windows
+  native build or gameplay validation is claimed.
+- The standalone upstream #235 commit expresses the shared-return counter
+  fragment through inline assembly in `6E644.c`; the merged no-prompt branch
+  retains the cross-function assembly in `6FA6C.s`. The Windows snapshot keeps
+  the no-prompt representation. It remains inherited assembly, not a new
+  reconstructed C function, and was not counted as decompilation progress.
+- Current `_padLoadActInfo` canonical source remains original assembly. Its
+  isolated candidate was restored to the four-word checkpoint; no new loader
+  match or percentage increase is claimed.
+- The first post-import re-tally was an intermediate drop: the fork had replaced
+  locally matched C for `func_80074BAC` (1,548 bytes) and `func_80075554`
+  (2,936 bytes) with assembly. Those two bodies have since been restored as
+  current-context C and passed fresh canonical checks. Along with the new
+  `func_8008AC78` match (1,412 bytes), current `BATTLE.PRG` is **1,412 bytes
+  above** the pre-import accepted total, not below it. The full retail build
+  remains byte-identical.
+- Current objdiff totals after those restorations are recorded above: overall
+  1,894,184 / 1,936,592 (97.81017%), BATTLE.PRG 510,652 / 517,400 (98.695786%),
+  and broader `battle` 517,840 / 524,588 (98.71365%). These are local matched
+  code figures, not the reference site's decomp.dev source-progress metric.
+
+Exact validation commands:
+
+```powershell
+wsl.exe -d Ubuntu --exec /usr/bin/timeout 240 /home/judee/.cache/vagrant-matching/venv/bin/python /mnt/d/Dev/NativePort/VS-NativePort/resources/rood-reverseWin/tools/verification/matching.py check --source src/BATTLE/BATTLE.PRG/146C.c --function func_8008AC78
+wsl.exe -d Ubuntu --exec /usr/bin/make -C /home/judee/.cache/vagrant-matching/progress-kl_egopc -j2 BUILDDEPS= PYTHONDEPS= SYSDEPS= all
+```
+
 ## Combined Loader Search: 2026-10-14
 
 The user requested combinations of partial fixes for the four remaining loader

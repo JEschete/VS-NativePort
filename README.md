@@ -3,11 +3,18 @@
 A project to finish a Windows decompilation of **Vagrant Story** (PlayStation,
 2000), with a native PC port as a later goal.
 
-**Current status:** the decompilation is unfinished. The Linux/upstream checkout
-is reference only, and Windows decompilation has two accepted function-level
-matches beyond that reference; no source unit or overlay is matched. The native
-port has not started as an accepted implementation. Existing native code and
-executables are legacy experiments, not a playable port or completed milestones.
+**Current status:** the decompilation is unfinished. The latest local objdiff
+report (2026-10-14) measures **97.81017% matched code overall**
+(1,894,184 / 1,936,592 bytes), **98.695786% for BATTLE.PRG**
+(510,652 / 517,400), and **98.71365% for the broader BATTLE category**
+(517,840 / 524,588), with 4,084 / 4,156 functions byte-matched. The two C
+functions temporarily replaced by upstream assembly have now been restored and
+freshly verified. Together with `func_8008AC78`, the BATTLE.PRG total is 1,412
+bytes above the pre-import accepted baseline. The exact WSL build still
+reproduces retail outputs; assembly-backed bytes are not counted as reconstructed
+C progress. The native port has not started as an accepted implementation.
+Existing native code and executables are legacy experiments, not a playable
+port or completed milestones.
 
 The approach is the one Ship of Harkinian popularised: decompile the game to C,
 replace the console's hardware layer with a host implementation, and compile the
@@ -19,10 +26,13 @@ The repository contains build entry points for two intended targets:
 | Target | Command | Output |
 | --- | --- | --- |
 | Matching PSX build | Visual Studio `Decomp` project | Requires historical Windows compilers and fresh byte-exact verification; not an accepted local result |
-| Experimental native scaffold | Visual Studio `NativePort` project | Blocked by unresolved game symbols; no generic data buffers or implicit abort stubs |
+| Experimental native scaffold | Visual Studio `NativePort` project | Current build fails game compilation before linking; further native integration remains incomplete |
 
 Fresh byte-exact matching is the acceptance gate for reconstructed game source.
 Historical reference matches and host test passes do not satisfy that gate.
+
+For the current native blockers and boot-to-combat acceptance gates, see the
+[Native Port Blocker Audit](NATIVE_PORT_BLOCKER_AUDIT.md) (2026-10-15).
 
 ## Relationship to rood-reverse
 
@@ -244,6 +254,7 @@ and risk list is in [Native Deviations](docs/NATIVE_DEVIATIONS.md); historical
 | [`docs/NATIVE_DEVIATIONS.md`](docs/NATIVE_DEVIATIONS.md) | Current native prerequisites plus the historical experiment ledger |
 | [`docs/PSX_NOTES.md`](docs/PSX_NOTES.md) | Hardware notes, including the GTE differential-validation method |
 | [`docs/RAInfo.md`](docs/RAInfo.md) | RetroAchievements code notes: the persistent game-state layout |
+| [`resources/RE_Docs/README.md`](resources/RE_Docs/README.md) | Source-linked reverse-engineering tools, REA host support, and cross-system disassembly/decompilation/porting research |
 
 ## Credits
 
