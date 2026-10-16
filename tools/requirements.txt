@@ -1,0 +1,4 @@
+# Python packages for the port tooling (tools\ledger, tools\naming, tools\port, tools\scaffold).
+# Not needed to build or play; see Docs\BUILDING.md.
+libclang==18.1.1
+PyYAML>=6.0
