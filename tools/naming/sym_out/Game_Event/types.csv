@@ -1,17 +1,17 @@
 id,role,final_name,final_location,purpose,confidence,notes
 T00256,Value,Event::InterpolationCurve,Native\Game\src\Event\Interpolation.h,Selects an interpolation curve family and signed repeated-power shaping.,high,source:573B8.c:168
 T00257,State,Event::SplashTween,Native\Game\src\Event\Splash.h,Interpolates splash-layer screen position scale and brightness.,high,source:4A0A8.c:879
-T00219,Misc,Event::SplashLayerView,Native\Game\src\Event\Splash.h,Partially decodes the splash-image layer record used by event scripts.,med,same-as-layout:gim_t at 5BF94.c:59 with merged bitfields;resolve to one native SplashLayer type before copying
+T00219,Misc,Event::SplashLayerView,Native\Game\src\Event\Splash.h,Partially decodes the splash-image layer record used by event scripts.,med,same-as-layout:gim_t at 5BF94.c:59 with merged bitfields;resolve to one native SplashLayer type before copying;source:4A0A8.c:129
 T00258,State,Event::WeatherTween,Native\Game\src\Event\Weather.h,Interpolates scripted wind direction wind strength and weather intensity.,high,source:4A0A8.c:2181;source:4A0A8.c:2995
 T00259,State,Event::CameraState,Native\Game\src\Event\Camera.h,Stores scripted camera tracks lens tweens shake screen transforms and origin actor offset.,high,source:4A0A8.c:3014;shake oscillators are read at +0x1A6 not the declared +0x1A4;rebuild layout natively
 T00260,State,Event::CameraTrack,Native\Game\src\Event\Camera.h,Animates one scripted camera endpoint toward a destination using a selected motion mode.,high,source:4A0A8.c:3200
-T00402,Misc,Event::CameraMotionScratch,Native\Game\src\Event\Camera.h,Overlays PS1 scratchpad storage while advancing terrain-following camera tracks.,high,replaced-by:function local variables;scratchpad 0x1F800088
-T00403,Misc,Event::CameraTrackScratch,Native\Game\src\Event\Camera.h,Overlays PS1 scratchpad storage while configuring and updating camera tracks.,high,replaced-by:function local variables;scratchpad 0x1F800088
-T00404,Misc,Event::CameraShakeScratch,Native\Game\src\Event\Camera.h,Overlays PS1 scratchpad storage while summing camera shake offsets.,high,replaced-by:function local variables;scratchpad 0x1F800088
+T00402,Misc,Event::CameraMotionScratch,Native\Game\src\Event\Camera.h,Overlays PS1 scratchpad storage while advancing terrain-following camera tracks.,high,replaced-by:function local variables;scratchpad 0x1F800088;source:4A0A8.c:212
+T00403,Misc,Event::CameraTrackScratch,Native\Game\src\Event\Camera.h,Overlays PS1 scratchpad storage while configuring and updating camera tracks.,high,replaced-by:function local variables;scratchpad 0x1F800088;source:4A0A8.c:198
+T00404,Misc,Event::CameraShakeScratch,Native\Game\src\Event\Camera.h,Overlays PS1 scratchpad storage while summing camera shake offsets.,high,replaced-by:function local variables;scratchpad 0x1F800088;source:4A0A8.c:223
 T00475,State,Event::ActorSelection,Native\Game\src\Event\Actors.h,Iterates the actors selected by an event-script actor-group operand.,high,source:4A0A8.c:2880
 T00476,State,Event::AngleTween,Native\Game\src\Event\Camera.h,Interpolates a wrapped camera or captured-screen roll angle.,high,source:4A0A8.c:3601;source:4A0A8.c:3647
 T00477,State,Event::TripleTween,Native\Game\src\Event\Screen.h,Interpolates up to three screen-transform values such as scale tint or translation.,high,source:4A0A8.c:3691;source:4A0A8.c:3838
-T00478,Misc,Event::EasedFractionScratch,Native\Game\src\Event\Screen.h,Overlays one PS1 scratchpad word holding an eased interpolation fraction.,high,replaced-by:function local variable;scratchpad 0x1F800088
+T00478,Misc,Event::EasedFractionScratch,Native\Game\src\Event\Screen.h,Overlays one PS1 scratchpad word holding an eased interpolation fraction.,high,replaced-by:function local variable;scratchpad 0x1F800088;source:4A0A8.c:174
 T00479,State,Event::ShakeOscillator,Native\Game\src\Event\Camera.h,Generates one enveloped sinusoidal camera shake along selected axes.,high,source:4A0A8.c:3862;source:4A0A8.c:3945
 T00480,State,Event::LensTween,Native\Game\src\Event\Camera.h,Interpolates projection distance near clip or far clip.,high,source:4A0A8.c:3927
 T00602,Value,Event::ScriptBytePair,Native\Game\src\Event\Script.h,Holds a little-endian byte pair decoded from event-script data.,med,source:4A0A8.c:4588

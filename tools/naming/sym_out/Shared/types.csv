@@ -17,7 +17,7 @@ T00174,Value,State::WeaponKillCounts,Native\Game\include\State\Progress.h,Counts
 T00178,Value,State::WeaponKillCounts,Native\Game\include\State\Progress.h,Counts kills per weapon category plus ability-unlock and total kill tallies.,med,same-as:T00123;identical layout indexed through a different include path;source:SLUS_010.40/main.h
 T00186,Value,State::WeaponKillCounts,Native\Game\include\State\Progress.h,Counts kills per weapon category plus ability-unlock and total kill tallies.,med,same-as:T00123;identical layout indexed through a different include path;source:SLUS_010.40/main.h
 T00191,Value,State::WeaponKillCounts,Native\Game\include\State\Progress.h,Counts kills per weapon category plus ability-unlock and total kill tallies.,med,same-as:T00123;identical layout indexed through a different include path;source:SLUS_010.40/main.h
-T00123,Value,State::WeaponKillCounts,Native\Game\include\State\Progress.h,Counts kills per weapon category plus ability-unlock and total kill tallies.,med,source:SLUS_010.40/main.h
+T00123,Value,State::WeaponKillCounts,Native\Game\include\State\Progress.h,Counts kills per weapon category plus ability-unlock and total kill tallies.,med,source:SLUS_010.40/main.h;source:main.h:370
 T00153,Value,Battle::ActionHitParams,Native\Game\include\Battle\Action.h,Packs the effect formula and affinity parameters of one action hit.,high,same-as:T00125;identical layout indexed through a different include path;source:SLUS_010.40/main.h
 T00161,Value,Battle::ActionHitParams,Native\Game\include\Battle\Action.h,Packs the effect formula and affinity parameters of one action hit.,high,same-as:T00125;identical layout indexed through a different include path;source:SLUS_010.40/main.h
 T00165,Value,Battle::ActionHitParams,Native\Game\include\Battle\Action.h,Packs the effect formula and affinity parameters of one action hit.,high,same-as:T00125;identical layout indexed through a different include path;source:SLUS_010.40/main.h
@@ -34,25 +34,25 @@ T00793,Packet,Input::PressedButtonsView,Native\Input\src\Buttons.h,Views newly p
 T00795,Packet,Input::PressedButtonsView,Native\Input\src\Buttons.h,Views newly pressed buttons for both ports as a word or byte pairs.,high,same-as:T00746;identical layout indexed through a different include path;replaced-by:Input typed button flags
 T00796,Value,Audio::StreamWordBytes,Native\Audio\src\Stream.h,Views one cutscene-stream word as an integer or four bytes.,high,source:include/sound.h:589
 T00195,OnDisc,Audio::AkaoTimestamp,Native\Audio\src\Akao.h,Stores the BCD creation timestamp in an AKAO sequence header.,high,decoder-only;source:SLUS_010.40/25AC.c:26
-T00274,OnDisc,Audio::AkaoProgramFile,Native\Audio\src\Akao.h,Describes an AKAO program file with offset and metadata tables.,med,decoder-only;no function references;include/sound.h:188
-T00275,OnDisc,Audio::AkaoStreamHeader,Native\Audio\src\Stream.h,Describes the paged audio stream header embedded in cutscene stream data.,med,decoder-only;include/sound.h
-T00277,State,Audio::LegacyVoiceChannelState,Native\Audio\src\Voices.h,Describes a Ghidra-derived voice channel record with no current function references.,low,no function references;include/sound.h:304;verify against audio driver before native use
-T00281,OnDisc,Audio::CutsceneStreamData,Native\Audio\src\Stream.h,Describes cutscene audio stream data with an embedded paged stream header.,med,decoder-only;include/sound.h:561
-T00296,Packet,Render::GouraudQuadPacket,Native\Graphics\src\LegacyPackets.h,Packs a PS1 untextured Gouraud quadrilateral command as eight words.,high,replaced-by:Render draw commands;include/gpu.h:81
-T00297,Packet,Render::PagedGouraudQuadPacket,Native\Graphics\src\LegacyPackets.h,Packs a PS1 Gouraud quadrilateral preceded by a texture-page command.,high,replaced-by:Render draw commands;include/gpu.h:70
-T00299,Packet,Render::TilePacket,Native\Graphics\src\LegacyPackets.h,Packs a PS1 filled rectangle command.,high,replaced-by:Render draw commands;include/gpu.h:50
+T00274,OnDisc,Audio::AkaoProgramFile,Native\Audio\src\Akao.h,Describes an AKAO program file with offset and metadata tables.,med,decoder-only;no function references;include/sound.h:188;source:sound.h:188
+T00275,OnDisc,Audio::AkaoStreamHeader,Native\Audio\src\Stream.h,Describes the paged audio stream header embedded in cutscene stream data.,med,decoder-only;include/sound.h;source:sound.h:548
+T00277,State,Audio::LegacyVoiceChannelState,Native\Audio\src\Voices.h,Describes a Ghidra-derived voice channel record with no current function references.,low,no function references;include/sound.h:304;verify against audio driver before native use;source:sound.h:276
+T00281,OnDisc,Audio::CutsceneStreamData,Native\Audio\src\Stream.h,Describes cutscene audio stream data with an embedded paged stream header.,med,decoder-only;include/sound.h:561;source:sound.h:561
+T00296,Packet,Render::GouraudQuadPacket,Native\Graphics\src\LegacyPackets.h,Packs a PS1 untextured Gouraud quadrilateral command as eight words.,high,replaced-by:Render draw commands;include/gpu.h:81;source:gpu.h:72
+T00297,Packet,Render::PagedGouraudQuadPacket,Native\Graphics\src\LegacyPackets.h,Packs a PS1 Gouraud quadrilateral preceded by a texture-page command.,high,replaced-by:Render draw commands;include/gpu.h:70;source:gpu.h:60
+T00299,Packet,Render::TilePacket,Native\Graphics\src\LegacyPackets.h,Packs a PS1 filled rectangle command.,high,replaced-by:Render draw commands;include/gpu.h:50;source:gpu.h:46
 T00327,OnDisc,Field::DoorTileLocation,Native\Game\src\Field\Doors.h,Packs a door tile position floor layer and entry bits in an MPD door record.,high,decoder-only;source:146C.c:16151
-T00008,Enum,Battle::ActionType,Native\Game\include\Battle\Action.h,Classifies an action as spell ability break art item base attack or trap.,high,
-T00010,Enum,Battle::ActionId,Native\Game\include\Battle\Action.h,Names action identifiers referenced directly by code.,high,
-T00016,Enum,Content::DiscDriveState,Native\Content\src\DiscQueue.h,Tracks the original disc drive command state.,high,replaced-by:Content native asset requests
-T00019,Enum,Battle::EnemyClass,Native\Game\include\Battle\Enemy.h,Names enemy classes referenced directly by code.,high,
-T00021,Enum,Items::KeyItemId,Native\Game\include\Items\KeyItems.h,Names key item identifiers referenced directly by code.,high,
-T00099,Enum,Render::Dithering,Native\Graphics\src\Render.h,Enables or disables output dithering.,high,
-T00116,Enum,Content::DiscRequestState,Native\Content\src\DiscQueue.h,Tracks the lifecycle of a queued disc read request.,high,replaced-by:Content native asset request status
-T00117,Enum,Render::LegacyPrimitiveAddress,Native\Graphics\src\LegacyPackets.h,Marks null and terminating PS1 ordering-table links.,high,replaced-by:Render draw queues
-T00118,Enum,Render::LegacyPrimitiveCode,Native\Graphics\src\LegacyPackets.h,Names PS1 GPU primitive command codes and modifier bits.,high,replaced-by:Render draw commands
-T00119,Enum,Render::BlendMode,Native\Graphics\src\Render.h,Selects PS1 semi-transparency blending equations.,high,Average=0.5B+0.5F;Add=B+F;Subtract=B-F;AddQuarter=B+0.25F
-T00120,Enum,Core::TextCode,Native\Core\include\Text\TextCode.h,Names glyph and control codes in the game text encoding.,high,
-T00121,Enum,Render::TextureFormat,Native\Graphics\src\Render.h,Selects 4-bit 8-bit palettized or 16-bit direct textures.,high,
+T00008,Enum,Battle::ActionType,Native\Game\include\Battle\Action.h,Classifies an action as spell ability break art item base attack or trap.,high,source:main.h:51
+T00010,Enum,Battle::ActionId,Native\Game\include\Battle\Action.h,Names action identifiers referenced directly by code.,high,source:main.h:44
+T00016,Enum,Content::DiscDriveState,Native\Content\src\DiscQueue.h,Tracks the original disc drive command state.,high,replaced-by:Content native asset requests;source:main.c:77
+T00019,Enum,Battle::EnemyClass,Native\Game\include\Battle\Enemy.h,Names enemy classes referenced directly by code.,high,source:main.h:60
+T00021,Enum,Items::KeyItemId,Native\Game\include\Items\KeyItems.h,Names key item identifiers referenced directly by code.,high,source:main.h:238
+T00099,Enum,Render::Dithering,Native\Graphics\src\Render.h,Enables or disables output dithering.,high,source:gpu.h:15
+T00116,Enum,Content::DiscRequestState,Native\Content\src\DiscQueue.h,Tracks the lifecycle of a queued disc read request.,high,replaced-by:Content native asset request status;source:main.h:26
+T00117,Enum,Render::LegacyPrimitiveAddress,Native\Graphics\src\LegacyPackets.h,Marks null and terminating PS1 ordering-table links.,high,replaced-by:Render draw queues;source:gpu.h:17
+T00118,Enum,Render::LegacyPrimitiveCode,Native\Graphics\src\LegacyPackets.h,Names PS1 GPU primitive command codes and modifier bits.,high,replaced-by:Render draw commands;source:gpu.h:19
+T00119,Enum,Render::BlendMode,Native\Graphics\src\Render.h,Selects PS1 semi-transparency blending equations.,high,Average=0.5B+0.5F;Add=B+F;Subtract=B-F;AddQuarter=B+0.25F;source:gpu.h:8
+T00120,Enum,Core::TextCode,Native\Core\include\Text\TextCode.h,Names glyph and control codes in the game text encoding.,high,source:vs_string.h:3
+T00121,Enum,Render::TextureFormat,Native\Graphics\src\Render.h,Selects 4-bit 8-bit palettized or 16-bit direct textures.,high,source:gpu.h:6
 T00428,State,Audio::SfxSlotRequest,Native\Audio\src\Sfx.h,Describes a declared sound-effect slot request whose fields other than index are unidentified.,low,no function references;source:SLUS_010.40/25AC.c:50
 T00819,Value,Battle::ActionHitParamsWord,Native\Game\include\Battle\Action.h,Views packed action hit parameters as two halves or one word.,high,source:SLUS_010.40/main.h:46

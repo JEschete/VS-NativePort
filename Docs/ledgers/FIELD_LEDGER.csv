@@ -25,18 +25,18 @@ T00006.002,T00006,abilityState_e,2,abilitiesDefenseOnly,0,,,2,,,,,
 T00006.003,T00006,abilityState_e,3,abilitiesBoth,0,,,3,,,,,
 T00007.000,T00007,abilityType,0,abilityTypeChain,0,,,24,,,,,
 T00007.001,T00007,abilityType,1,abilityTypeDefense,0,,,25,,,,,
-T00008.000,T00008,actionTypes,0,actionTypeSpell,0,,,1,,Spell,ActionType Spell,high,
-T00008.001,T00008,actionTypes,1,actionTypeAbility,0,,,2,,Ability,ActionType Ability,high,
-T00008.002,T00008,actionTypes,2,actionTypeBreakArt,0,,,3,,BreakArt,ActionType BreakArt,high,
-T00008.003,T00008,actionTypes,3,actionTypeItem,0,,,5,,Item,ActionType Item,high,
-T00008.004,T00008,actionTypes,4,actionTypeBaseAttack,0,,,6,,BaseAttack,ActionType BaseAttack,high,
-T00008.005,T00008,actionTypes,5,actionTypeTrap,0,,,7,,Trap,ActionType Trap,high,
+T00008.000,T00008,actionTypes,0,actionTypeSpell,0,,,1,,Spell,ActionType Spell,med,declaration-only;source:main.h:52
+T00008.001,T00008,actionTypes,1,actionTypeAbility,0,,,2,,Ability,ActionType Ability,med,declaration-only;source:main.h:53
+T00008.002,T00008,actionTypes,2,actionTypeBreakArt,0,,,3,,BreakArt,ActionType BreakArt,med,declaration-only;source:main.h:54
+T00008.003,T00008,actionTypes,3,actionTypeItem,0,,,5,,Item,ActionType Item,med,declaration-only;source:main.h:55
+T00008.004,T00008,actionTypes,4,actionTypeBaseAttack,0,,,6,,BaseAttack,ActionType BaseAttack,med,declaration-only;source:main.h:56
+T00008.005,T00008,actionTypes,5,actionTypeTrap,0,,,7,,Trap,ActionType Trap,med,declaration-only;source:main.h:57
 T00009.000,T00009,actions,0,useItem,0,,,1,,,,,
 T00009.001,T00009,actions,1,searchItem,0,,,2,,,,,
 T00009.002,T00009,actions,2,discardItem,0,,,3,,,,,
 T00009.003,T00009,actions,3,discardAllItems,0,,,4,,,,,
 T00009.004,T00009,actions,4,sortItems,0,,,5,,,,,
-T00010.000,T00010,actions_e,0,vs_main_actions_daggerArt1,0,,,184,,DaggerArtOne,ActionId DaggerArtOne,high,
+T00010.000,T00010,actions_e,0,vs_main_actions_daggerArt1,0,,,184,,DaggerArtOne,ActionId DaggerArtOne,med,declaration-only;source:main.h:44
 T00011.000,T00011,arrowType_e,0,arrowTypeUp,0,,,0,,,,,
 T00011.001,T00011,arrowType_e,1,arrowTypeDown,0,,,1,,,,,
 T00012.000,T00012,ashleyRenderMode,0,ashleyRenderModeRender,0,,,0,,,,,
@@ -113,28 +113,28 @@ T00015.063,T00015,disIndices,63,disIndexIq0Foodchain,0,,,105,,,,,
 T00015.064,T00015,disIndices,64,disIndexIq1GameDesigner,0,,,107,,,,,
 T00015.065,T00015,disIndices,65,disIndexEsc0GivingUp,0,,,123,,,,,
 T00015.066,T00015,disIndices,66,disIndexEsc0Chicken,0,,,125,,,,,
-T00016.000,T00016,diskState_e,0,diskIdle,0,,,0,,Idle,DiscDriveState Idle,high,
-T00016.001,T00016,diskState_e,1,diskSeekReady,0,,,1,,SeekReady,DiscDriveState SeekReady,high,
-T00016.002,T00016,diskState_e,2,diskReadReady,0,,,2,,ReadReady,DiscDriveState ReadReady,high,
-T00016.003,T00016,diskState_e,3,diskReadError,0,,,4,,ReadError,DiscDriveState ReadError,high,
-T00016.004,T00016,diskState_e,4,diskReadInit,0,,,5,,ReadInit,DiscDriveState ReadInit,high,
-T00016.005,T00016,diskState_e,5,diskReadXaInit,0,,,6,,ReadXaInit,DiscDriveState ReadXaInit,high,
-T00016.006,T00016,diskState_e,6,diskStreamXa,0,,,7,,StreamXa,DiscDriveState StreamXa,high,
-T00016.007,T00016,diskState_e,7,diskCommandFailed,0,,,8,,CommandFailed,DiscDriveState CommandFailed,high,
-T00016.008,T00016,diskState_e,8,diskStreamXaEnd,0,,,9,,StreamXaEnd,DiscDriveState StreamXaEnd,high,
+T00016.000,T00016,diskState_e,0,diskIdle,0,,,0,,Idle,DiscDriveState Idle,med,declaration-only;source:main.c:78
+T00016.001,T00016,diskState_e,1,diskSeekReady,0,,,1,,SeekReady,DiscDriveState SeekReady,med,declaration-only;source:main.c:79
+T00016.002,T00016,diskState_e,2,diskReadReady,0,,,2,,ReadReady,DiscDriveState ReadReady,med,declaration-only;source:main.c:80
+T00016.003,T00016,diskState_e,3,diskReadError,0,,,4,,ReadError,DiscDriveState ReadError,med,declaration-only;source:main.c:81
+T00016.004,T00016,diskState_e,4,diskReadInit,0,,,5,,ReadInit,DiscDriveState ReadInit,med,declaration-only;source:main.c:82
+T00016.005,T00016,diskState_e,5,diskReadXaInit,0,,,6,,ReadXaInit,DiscDriveState ReadXaInit,med,declaration-only;source:main.c:83
+T00016.006,T00016,diskState_e,6,diskStreamXa,0,,,7,,StreamXa,DiscDriveState StreamXa,med,declaration-only;source:main.c:84
+T00016.007,T00016,diskState_e,7,diskCommandFailed,0,,,8,,CommandFailed,DiscDriveState CommandFailed,med,declaration-only;source:main.c:85
+T00016.008,T00016,diskState_e,8,diskStreamXaEnd,0,,,9,,StreamXaEnd,DiscDriveState StreamXaEnd,med,declaration-only;source:main.c:86
 T00017.000,T00017,drawArtsListOpt,0,opt_forceCursorMemory,0,,,16,,,,,
 T00018.000,T00018,easeMode,0,easeModeLinear,0,,,0,,Linear,Linear interpolation,high,source:D4.c:1289
 T00018.001,T00018,easeMode,1,easeModeEaseOut,0,,,1,,EaseOut,Quarter-sine ease-out interpolation,high,source:D4.c:1289
 T00018.002,T00018,easeMode,2,easeModeEaseInOut,0,,,2,,EaseInOut,Half-cosine ease-in-out interpolation,high,source:D4.c:1289
 T00018.003,T00018,easeMode,3,easeModeEaseIn,0,,,3,,EaseIn,Shifted quarter-sine ease-in interpolation,high,source:D4.c:1289
-T00019.000,T00019,enemyClasses,0,enemyClassUndead,0,,,2,,Undead,EnemyClass Undead,high,
+T00019.000,T00019,enemyClasses,0,enemyClassUndead,0,,,2,,Undead,EnemyClass Undead,med,declaration-only;source:main.h:60
 T00020.000,T00020,fileMenuElementState_e,0,fileMenuElementStateInactive,0,,,0,,,,,
 T00020.001,T00020,fileMenuElementState_e,1,fileMenuElementStateStatic,0,,,1,,,,,
 T00020.002,T00020,fileMenuElementState_e,2,fileMenuElementStateAnimateX,0,,,2,,,,,
 T00020.003,T00020,fileMenuElementState_e,3,fileMenuElementStateAnimateY,0,,,3,,,,,
 T00020.004,T00020,fileMenuElementState_e,4,fileMenuElementStateAnimateNegX,0,,,4,,,,,
-T00021.000,T00021,itemIdentifiers,0,bronzeKey,0,,,458,,BronzeKey,KeyItemId BronzeKey,high,
-T00021.001,T00021,itemIdentifiers,1,chamomileSigil,0,,,466,,ChamomileSigil,KeyItemId ChamomileSigil,high,
+T00021.000,T00021,itemIdentifiers,0,bronzeKey,0,,,458,,BronzeKey,KeyItemId BronzeKey,med,declaration-only;source:main.h:238
+T00021.001,T00021,itemIdentifiers,1,chamomileSigil,0,,,466,,ChamomileSigil,KeyItemId ChamomileSigil,med,declaration-only;source:main.h:238
 T00022.000,T00022,lootItemState,0,lootStateNone,0,,,0,,,,,
 T00022.001,T00022,lootItemState,1,lootStateCopied,0,,,1,,,,,
 T00022.002,T00022,lootItemState,2,lootStateNoIndent,0,,,2,,,,,
@@ -580,8 +580,8 @@ T00098.014,T00098,vs_battle_warlockSpellIds_e,14,vs_battle_spell_radialSurge,0,,
 T00098.015,T00098,vs_battle_warlockSpellIds_e,15,vs_battle_spell_meteor,0,,,130,,,,,
 T00098.016,T00098,vs_battle_warlockSpellIds_e,16,vs_battle_spell_drainHeart,0,,,94,,,,,
 T00098.017,T00098,vs_battle_warlockSpellIds_e,17,vs_battle_spell_drainMind,0,,,95,,,,,
-T00099.000,T00099,vs_dithering,0,ditheringOff,0,,,0,,Off,Dithering Off,high,
-T00099.001,T00099,vs_dithering,1,ditheringOn,0,,,1,,On,Dithering On,high,
+T00099.000,T00099,vs_dithering,0,ditheringOff,0,,,0,,Off,Dithering Off,med,declaration-only;source:gpu.h:15
+T00099.001,T00099,vs_dithering,1,ditheringOn,0,,,1,,On,Dithering On,med,declaration-only;source:gpu.h:15
 T00100.000,T00100,vs_fileMenuUiIds_e,0,vs_uiids_colon,0,,,0,,,,,
 T00100.001,T00100,vs_fileMenuUiIds_e,1,vs_uiids_number,0,,,1,,,,,
 T00100.002,T00100,vs_fileMenuUiIds_e,2,vs_uiids_map,0,,,2,,,,,
@@ -650,67 +650,67 @@ T00115.006,T00115,vs_mainMenu_statusUiIds,6,statusUiRisk,0,,,17,,,,,
 T00115.007,T00115,vs_mainMenu_statusUiIds,7,statusUiStr,0,,,18,,,,,
 T00115.008,T00115,vs_mainMenu_statusUiIds,8,statusUiInt,0,,,19,,,,,
 T00115.009,T00115,vs_mainMenu_statusUiIds,9,statusUiAgi,0,,,20,,,,,
-T00116.000,T00116,vs_main_CdQueueState,0,vs_main_CdQueueStateFree,0,,,0,,Free,DiscRequestState Free,high,
-T00116.001,T00116,vs_main_CdQueueState,1,vs_main_CdQueueStateAllocated,0,,,1,,Allocated,DiscRequestState Allocated,high,
-T00116.002,T00116,vs_main_CdQueueState,2,vs_main_CdQueueStateReading,0,,,2,,Reading,DiscRequestState Reading,high,
-T00116.003,T00116,vs_main_CdQueueState,3,vs_main_CdQueueStateEnqueued,0,,,3,,Enqueued,DiscRequestState Enqueued,high,
-T00116.004,T00116,vs_main_CdQueueState,4,vs_main_CdQueueStateLoaded,0,,,4,,Loaded,DiscRequestState Loaded,high,
-T00116.005,T00116,vs_main_CdQueueState,5,vs_main_CdQueueStateError,0,,,6,,Error,DiscRequestState Error,high,
-T00116.006,T00116,vs_main_CdQueueState,6,vs_main_CdQueueStateDispatched,0,,,7,,Dispatched,DiscRequestState Dispatched,high,
-T00117.000,T00117,vs_primAddr,0,primAddrNull,0,,,0,,Null,LegacyPrimitiveAddress Null,high,
-T00117.001,T00117,vs_primAddr,1,primAddrEnd,0,,,16777215,,End,LegacyPrimitiveAddress End,high,
-T00118.000,T00118,vs_primType,0,primShadeTex,0,,,1,,ShadeTex,LegacyPrimitiveCode ShadeTex,high,
-T00118.001,T00118,vs_primType,1,primSemiTrans,0,,,2,,SemiTrans,LegacyPrimitiveCode SemiTrans,high,
-T00118.002,T00118,vs_primType,2,primPolyFT3,0,,,36,,PolyFt3,LegacyPrimitiveCode PolyFt3,high,
-T00118.003,T00118,vs_primType,3,primPolyFT4,0,,,44,,PolyFt4,LegacyPrimitiveCode PolyFt4,high,
-T00118.004,T00118,vs_primType,4,primPolyFT4ShadeTex,0,,,45,,PolyFt4ShadeTex,LegacyPrimitiveCode PolyFt4ShadeTex,high,
-T00118.005,T00118,vs_primType,5,primPolyG4,0,,,56,,PolyG4,LegacyPrimitiveCode PolyG4,high,
-T00118.006,T00118,vs_primType,6,primPolyG4SemiTrans,0,,,58,,PolyG4SemiTrans,LegacyPrimitiveCode PolyG4SemiTrans,high,
-T00118.007,T00118,vs_primType,7,primPolyGT4,0,,,60,,PolyGt4,LegacyPrimitiveCode PolyGt4,high,
-T00118.008,T00118,vs_primType,8,primPolyGT4SemiTrans,0,,,62,,PolyGt4SemiTrans,LegacyPrimitiveCode PolyGt4SemiTrans,high,
-T00118.009,T00118,vs_primType,9,primLineF2,0,,,64,,LineF2,LegacyPrimitiveCode LineF2,high,
-T00118.010,T00118,vs_primType,10,primLineF2SemiTrans,0,,,66,,LineF2SemiTrans,LegacyPrimitiveCode LineF2SemiTrans,high,
-T00118.011,T00118,vs_primType,11,primLineG2,0,,,80,,LineG2,LegacyPrimitiveCode LineG2,high,
-T00118.012,T00118,vs_primType,12,primLineG2SemiTrans,0,,,82,,LineG2SemiTrans,LegacyPrimitiveCode LineG2SemiTrans,high,
-T00118.013,T00118,vs_primType,13,primTile,0,,,96,,Tile,LegacyPrimitiveCode Tile,high,
-T00118.014,T00118,vs_primType,14,primTileSemiTrans,0,,,98,,TileSemiTrans,LegacyPrimitiveCode TileSemiTrans,high,
-T00118.015,T00118,vs_primType,15,primSprt,0,,,100,,Sprite,LegacyPrimitiveCode Sprite,high,
-T00118.016,T00118,vs_primType,16,primSprtSemtTrans,0,,,102,,SpriteSemiTrans,LegacyPrimitiveCode SpriteSemiTrans,high,
-T00119.000,T00119,vs_semiTransparencyRate,0,semiTransparencyHalf,0,,,0,,Average,BlendMode Average,high,
-T00119.001,T00119,vs_semiTransparencyRate,1,semiTransparencyFull,0,,,1,,Add,BlendMode Add,high,
-T00119.002,T00119,vs_semiTransparencyRate,2,semiTransparencySubtract,0,,,2,,Subtract,BlendMode Subtract,high,
-T00119.003,T00119,vs_semiTransparencyRate,3,semiTransparencyQuarterFront,0,,,3,,AddQuarter,BlendMode AddQuarter,high,
-T00120.000,T00120,vs_string_chars,0,vs_char_noChunking,0,,,0,,NoChunking,TextCode NoChunking,high,
-T00120.001,T00120,vs_string_chars,1,vs_char_zero,0,,,0,,Zero,TextCode Zero,high,
-T00120.002,T00120,vs_string_chars,2,vs_char_fontTable0,0,,,6,,FontTableZero,TextCode FontTableZero,high,
-T00120.003,T00120,vs_string_chars,3,vs_char_R,0,,,27,,UpperR,TextCode UpperR,high,
-T00120.004,T00120,vs_string_chars,4,vs_char_j,0,,,45,,LowerJ,TextCode LowerJ,high,
-T00120.005,T00120,vs_string_chars,5,vs_char_space,0,,,143,,Space,TextCode Space,high,
-T00120.006,T00120,vs_string_chars,6,vs_char_colon,0,,,158,,Colon,TextCode Colon,high,
-T00120.007,T00120,vs_string_chars,7,vs_char_forwardSlash,0,,,161,,ForwardSlash,TextCode ForwardSlash,high,
-T00120.008,T00120,vs_string_chars,8,vs_char_hyphen,0,,,167,,Hyphen,TextCode Hyphen,high,
-T00120.009,T00120,vs_string_chars,9,vs_char_arrow,0,,,188,,Arrow,TextCode Arrow,high,
-T00120.010,T00120,vs_string_chars,10,vs_char_nonPrinting,0,,,229,,NonPrinting,TextCode NonPrinting,high,
-T00120.011,T00120,vs_string_chars,11,vs_char_confirm,0,,,230,,Confirm,TextCode Confirm,high,
-T00120.012,T00120,vs_string_chars,12,vs_char_terminator,0,,,231,,Terminator,TextCode Terminator,high,
-T00120.013,T00120,vs_string_chars,13,vs_char_newline,0,,,232,,Newline,TextCode Newline,high,
-T00120.014,T00120,vs_string_chars,14,vs_char_control,0,,,236,,Control,TextCode Control,high,
-T00120.015,T00120,vs_string_chars,15,vs_char_chunkSize,0,,,248,,ChunkSize,TextCode ChunkSize,high,
-T00120.016,T00120,vs_string_chars,16,vs_char_spacing,0,,,250,,Spacing,TextCode Spacing,high,
-T00120.017,T00120,vs_string_chars,17,vs_char_fontTable,0,,,251,,FontTable,TextCode FontTable,high,
-T00120.018,T00120,vs_string_chars,18,vs_char_printHex,0,,,253,,PrintHex,TextCode PrintHex,high,
-T00120.019,T00120,vs_string_chars,19,vs_char_printDecimal,0,,,254,,PrintDecimal,TextCode PrintDecimal,high,
-T00120.020,T00120,vs_string_chars,20,vs_char_printString,0,,,255,,PrintString,TextCode PrintString,high,
-T00121.000,T00121,vs_texMode,0,clut4Bit,0,,,0,,Palette4Bit,TextureFormat Palette4Bit,high,
-T00121.001,T00121,vs_texMode,1,clut8Bit,0,,,1,,Palette8Bit,TextureFormat Palette8Bit,high,
-T00121.002,T00121,vs_texMode,2,direct16Bit,0,,,2,,Direct16Bit,TextureFormat Direct16Bit,high,
+T00116.000,T00116,vs_main_CdQueueState,0,vs_main_CdQueueStateFree,0,,,0,,Free,DiscRequestState Free,med,declaration-only;source:main.h:27
+T00116.001,T00116,vs_main_CdQueueState,1,vs_main_CdQueueStateAllocated,0,,,1,,Allocated,DiscRequestState Allocated,med,declaration-only;source:main.h:28
+T00116.002,T00116,vs_main_CdQueueState,2,vs_main_CdQueueStateReading,0,,,2,,Reading,DiscRequestState Reading,med,declaration-only;source:main.h:29
+T00116.003,T00116,vs_main_CdQueueState,3,vs_main_CdQueueStateEnqueued,0,,,3,,Enqueued,DiscRequestState Enqueued,med,declaration-only;source:main.h:30
+T00116.004,T00116,vs_main_CdQueueState,4,vs_main_CdQueueStateLoaded,0,,,4,,Loaded,DiscRequestState Loaded,med,declaration-only;source:main.h:31
+T00116.005,T00116,vs_main_CdQueueState,5,vs_main_CdQueueStateError,0,,,6,,Error,DiscRequestState Error,med,declaration-only;source:main.h:32
+T00116.006,T00116,vs_main_CdQueueState,6,vs_main_CdQueueStateDispatched,0,,,7,,Dispatched,DiscRequestState Dispatched,med,declaration-only;source:main.h:33
+T00117.000,T00117,vs_primAddr,0,primAddrNull,0,,,0,,Null,LegacyPrimitiveAddress Null,med,declaration-only;source:gpu.h:17
+T00117.001,T00117,vs_primAddr,1,primAddrEnd,0,,,16777215,,End,LegacyPrimitiveAddress End,med,declaration-only;source:gpu.h:17
+T00118.000,T00118,vs_primType,0,primShadeTex,0,,,1,,ShadeTex,LegacyPrimitiveCode ShadeTex,med,declaration-only;source:gpu.h:20
+T00118.001,T00118,vs_primType,1,primSemiTrans,0,,,2,,SemiTrans,LegacyPrimitiveCode SemiTrans,med,declaration-only;source:gpu.h:21
+T00118.002,T00118,vs_primType,2,primPolyFT3,0,,,36,,PolyFt3,LegacyPrimitiveCode PolyFt3,med,declaration-only;source:gpu.h:22
+T00118.003,T00118,vs_primType,3,primPolyFT4,0,,,44,,PolyFt4,LegacyPrimitiveCode PolyFt4,med,declaration-only;source:gpu.h:23
+T00118.004,T00118,vs_primType,4,primPolyFT4ShadeTex,0,,,45,,PolyFt4ShadeTex,LegacyPrimitiveCode PolyFt4ShadeTex,med,declaration-only;source:gpu.h:24
+T00118.005,T00118,vs_primType,5,primPolyG4,0,,,56,,PolyG4,LegacyPrimitiveCode PolyG4,med,declaration-only;source:gpu.h:25
+T00118.006,T00118,vs_primType,6,primPolyG4SemiTrans,0,,,58,,PolyG4SemiTrans,LegacyPrimitiveCode PolyG4SemiTrans,med,declaration-only;source:gpu.h:26
+T00118.007,T00118,vs_primType,7,primPolyGT4,0,,,60,,PolyGt4,LegacyPrimitiveCode PolyGt4,med,declaration-only;source:gpu.h:27
+T00118.008,T00118,vs_primType,8,primPolyGT4SemiTrans,0,,,62,,PolyGt4SemiTrans,LegacyPrimitiveCode PolyGt4SemiTrans,med,declaration-only;source:gpu.h:28
+T00118.009,T00118,vs_primType,9,primLineF2,0,,,64,,LineF2,LegacyPrimitiveCode LineF2,med,declaration-only;source:gpu.h:29
+T00118.010,T00118,vs_primType,10,primLineF2SemiTrans,0,,,66,,LineF2SemiTrans,LegacyPrimitiveCode LineF2SemiTrans,med,declaration-only;source:gpu.h:30
+T00118.011,T00118,vs_primType,11,primLineG2,0,,,80,,LineG2,LegacyPrimitiveCode LineG2,med,declaration-only;source:gpu.h:31
+T00118.012,T00118,vs_primType,12,primLineG2SemiTrans,0,,,82,,LineG2SemiTrans,LegacyPrimitiveCode LineG2SemiTrans,med,declaration-only;source:gpu.h:32
+T00118.013,T00118,vs_primType,13,primTile,0,,,96,,Tile,LegacyPrimitiveCode Tile,med,declaration-only;source:gpu.h:33
+T00118.014,T00118,vs_primType,14,primTileSemiTrans,0,,,98,,TileSemiTrans,LegacyPrimitiveCode TileSemiTrans,med,declaration-only;source:gpu.h:34
+T00118.015,T00118,vs_primType,15,primSprt,0,,,100,,Sprite,LegacyPrimitiveCode Sprite,med,declaration-only;source:gpu.h:35
+T00118.016,T00118,vs_primType,16,primSprtSemtTrans,0,,,102,,SpriteSemiTrans,LegacyPrimitiveCode SpriteSemiTrans,med,declaration-only;source:gpu.h:36
+T00119.000,T00119,vs_semiTransparencyRate,0,semiTransparencyHalf,0,,,0,,Average,BlendMode Average,med,declaration-only;source:gpu.h:9
+T00119.001,T00119,vs_semiTransparencyRate,1,semiTransparencyFull,0,,,1,,Add,BlendMode Add,med,declaration-only;source:gpu.h:10
+T00119.002,T00119,vs_semiTransparencyRate,2,semiTransparencySubtract,0,,,2,,Subtract,BlendMode Subtract,med,declaration-only;source:gpu.h:11
+T00119.003,T00119,vs_semiTransparencyRate,3,semiTransparencyQuarterFront,0,,,3,,AddQuarter,BlendMode AddQuarter,med,declaration-only;source:gpu.h:12
+T00120.000,T00120,vs_string_chars,0,vs_char_noChunking,0,,,0,,NoChunking,TextCode NoChunking,med,declaration-only;source:vs_string.h:4
+T00120.001,T00120,vs_string_chars,1,vs_char_zero,0,,,0,,Zero,TextCode Zero,med,declaration-only;source:vs_string.h:5
+T00120.002,T00120,vs_string_chars,2,vs_char_fontTable0,0,,,6,,FontTableZero,TextCode FontTableZero,med,declaration-only;source:vs_string.h:6
+T00120.003,T00120,vs_string_chars,3,vs_char_R,0,,,27,,UpperR,TextCode UpperR,med,declaration-only;source:vs_string.h:7
+T00120.004,T00120,vs_string_chars,4,vs_char_j,0,,,45,,LowerJ,TextCode LowerJ,med,declaration-only;source:vs_string.h:8
+T00120.005,T00120,vs_string_chars,5,vs_char_space,0,,,143,,Space,TextCode Space,med,declaration-only;source:vs_string.h:9
+T00120.006,T00120,vs_string_chars,6,vs_char_colon,0,,,158,,Colon,TextCode Colon,med,declaration-only;source:vs_string.h:10
+T00120.007,T00120,vs_string_chars,7,vs_char_forwardSlash,0,,,161,,ForwardSlash,TextCode ForwardSlash,med,declaration-only;source:vs_string.h:11
+T00120.008,T00120,vs_string_chars,8,vs_char_hyphen,0,,,167,,Hyphen,TextCode Hyphen,med,declaration-only;source:vs_string.h:12
+T00120.009,T00120,vs_string_chars,9,vs_char_arrow,0,,,188,,Arrow,TextCode Arrow,med,declaration-only;source:vs_string.h:13
+T00120.010,T00120,vs_string_chars,10,vs_char_nonPrinting,0,,,229,,NonPrinting,TextCode NonPrinting,med,declaration-only;source:vs_string.h:14
+T00120.011,T00120,vs_string_chars,11,vs_char_confirm,0,,,230,,Confirm,TextCode Confirm,med,declaration-only;source:vs_string.h:15
+T00120.012,T00120,vs_string_chars,12,vs_char_terminator,0,,,231,,Terminator,TextCode Terminator,med,declaration-only;source:vs_string.h:16
+T00120.013,T00120,vs_string_chars,13,vs_char_newline,0,,,232,,Newline,TextCode Newline,med,declaration-only;source:vs_string.h:17
+T00120.014,T00120,vs_string_chars,14,vs_char_control,0,,,236,,Control,TextCode Control,med,declaration-only;source:vs_string.h:18
+T00120.015,T00120,vs_string_chars,15,vs_char_chunkSize,0,,,248,,ChunkSize,TextCode ChunkSize,med,declaration-only;source:vs_string.h:19
+T00120.016,T00120,vs_string_chars,16,vs_char_spacing,0,,,250,,Spacing,TextCode Spacing,med,declaration-only;source:vs_string.h:20
+T00120.017,T00120,vs_string_chars,17,vs_char_fontTable,0,,,251,,FontTable,TextCode FontTable,med,declaration-only;source:vs_string.h:21
+T00120.018,T00120,vs_string_chars,18,vs_char_printHex,0,,,253,,PrintHex,TextCode PrintHex,med,declaration-only;source:vs_string.h:22
+T00120.019,T00120,vs_string_chars,19,vs_char_printDecimal,0,,,254,,PrintDecimal,TextCode PrintDecimal,med,declaration-only;source:vs_string.h:23
+T00120.020,T00120,vs_string_chars,20,vs_char_printString,0,,,255,,PrintString,TextCode PrintString,med,declaration-only;source:vs_string.h:24
+T00121.000,T00121,vs_texMode,0,clut4Bit,0,,,0,,Palette4Bit,TextureFormat Palette4Bit,med,declaration-only;source:gpu.h:6
+T00121.001,T00121,vs_texMode,1,clut8Bit,0,,,1,,Palette8Bit,TextureFormat Palette8Bit,med,declaration-only;source:gpu.h:6
+T00121.002,T00121,vs_texMode,2,direct16Bit,0,,,2,,Direct16Bit,TextureFormat Direct16Bit,med,declaration-only;source:gpu.h:6
 T00122.000,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,,,,
 T00122.001,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,,,,
 T00122.002,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,,,,
 T00122.003,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,,,,
-T00123.000,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,high,
-T00123.001,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00123.002,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,high,
+T00123.000,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00123.001,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00123.002,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
 T00124.000,T00124,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,,,,
 T00124.001,T00124,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,,,,
 T00125.000,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,,,,
@@ -844,22 +844,22 @@ T00149.000,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00149.001,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),1,y,0,unsigned int,8,,,,,,
 T00149.002,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),2,z,0,unsigned int,8,,,,,,
 T00149.003,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),3,status,0,unsigned int,8,,,,,,
-T00150.000,T00150,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,high,
-T00150.001,T00150,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,high,
-T00150.002,T00150,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,high,
-T00150.003,T00150,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,high,
-T00151.000,T00151,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,high,
-T00151.001,T00151,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00151.002,T00151,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,high,
-T00152.000,T00152,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,high,
-T00152.001,T00152,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,high,
-T00153.000,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,
-T00153.001,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,high,
-T00153.002,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,high,
-T00153.003,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,high,
-T00153.004,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,high,
-T00153.005,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,
-T00153.006,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,high,
+T00150.000,T00150,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00150.001,T00150,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00150.002,T00150,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00150.003,T00150,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00151.000,T00151,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00151.001,T00151,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00151.002,T00151,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00152.000,T00152,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,med,declaration-only;source:main.h:485
+T00152.001,T00152,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,med,declaration-only;source:main.h:486
+T00153.000,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00153.001,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00153.002,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00153.003,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00153.004,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00153.005,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
+T00153.006,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
 T00154.000,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,,,,
 T00154.001,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,,,,
 T00154.002,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,,,,
@@ -893,38 +893,38 @@ T00157.000,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00157.001,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),1,gCurve,0,u_char,,,,,,,
 T00157.002,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),2,bCurve,0,u_char,,,,,,,
 T00157.003,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),3,age,0,u_char,,,,,,,
-T00158.000,T00158,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,high,
-T00158.001,T00158,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,high,
-T00158.002,T00158,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,high,
-T00158.003,T00158,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,high,
-T00159.000,T00159,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,high,
-T00159.001,T00159,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00159.002,T00159,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,high,
-T00160.000,T00160,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,high,
-T00160.001,T00160,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,high,
-T00161.000,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,
-T00161.001,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,high,
-T00161.002,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,high,
-T00161.003,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,high,
-T00161.004,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,high,
-T00161.005,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,
-T00161.006,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,high,
-T00162.000,T00162,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,high,
-T00162.001,T00162,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,high,
-T00162.002,T00162,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,high,
-T00162.003,T00162,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,high,
-T00163.000,T00163,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,high,
-T00163.001,T00163,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00163.002,T00163,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,high,
-T00164.000,T00164,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,high,
-T00164.001,T00164,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,high,
-T00165.000,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,
-T00165.001,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,high,
-T00165.002,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,high,
-T00165.003,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,high,
-T00165.004,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,high,
-T00165.005,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,
-T00165.006,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,high,
+T00158.000,T00158,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00158.001,T00158,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00158.002,T00158,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00158.003,T00158,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00159.000,T00159,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00159.001,T00159,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00159.002,T00159,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00160.000,T00160,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,med,declaration-only;source:main.h:485
+T00160.001,T00160,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,med,declaration-only;source:main.h:486
+T00161.000,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00161.001,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00161.002,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00161.003,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00161.004,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00161.005,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
+T00161.006,T00161,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
+T00162.000,T00162,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00162.001,T00162,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00162.002,T00162,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00162.003,T00162,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00163.000,T00163,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00163.001,T00163,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00163.002,T00163,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00164.000,T00164,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,med,declaration-only;source:main.h:485
+T00164.001,T00164,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,med,declaration-only;source:main.h:486
+T00165.000,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00165.001,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00165.002,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00165.003,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00165.004,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00165.005,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
+T00165.006,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
 T00166.000,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,,,,
 T00166.001,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,,,,
 T00166.002,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,,,,
@@ -977,38 +977,38 @@ T00172.009,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00172.010,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),10,agility,0,char,,,,,,,
 T00172.011,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),11,_,0,char,,,,,,,
 T00172.012,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),12,range,0,vs_battle_range_t,,,,,,,
-T00173.000,T00173,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,high,
-T00173.001,T00173,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,high,
-T00173.002,T00173,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,high,
-T00173.003,T00173,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,high,
-T00174.000,T00174,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,high,
-T00174.001,T00174,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00174.002,T00174,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,high,
-T00175.000,T00175,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,high,
-T00175.001,T00175,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,high,
-T00176.000,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,
-T00176.001,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,high,
-T00176.002,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,high,
-T00176.003,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,high,
-T00176.004,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,high,
-T00176.005,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,
-T00176.006,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,high,
-T00177.000,T00177,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,high,
-T00177.001,T00177,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,high,
-T00177.002,T00177,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,high,
-T00177.003,T00177,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,high,
-T00178.000,T00178,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,high,
-T00178.001,T00178,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00178.002,T00178,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,high,
-T00179.000,T00179,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,high,
-T00179.001,T00179,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,high,
-T00180.000,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,
-T00180.001,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,high,
-T00180.002,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,high,
-T00180.003,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,high,
-T00180.004,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,high,
-T00180.005,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,
-T00180.006,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,high,
+T00173.000,T00173,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00173.001,T00173,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00173.002,T00173,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00173.003,T00173,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00174.000,T00174,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00174.001,T00174,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00174.002,T00174,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00175.000,T00175,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,med,declaration-only;source:main.h:485
+T00175.001,T00175,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,med,declaration-only;source:main.h:486
+T00176.000,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00176.001,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00176.002,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00176.003,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00176.004,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00176.005,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
+T00176.006,T00176,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
+T00177.000,T00177,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00177.001,T00177,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00177.002,T00177,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00177.003,T00177,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00178.000,T00178,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00178.001,T00178,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00178.002,T00178,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00179.000,T00179,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,med,declaration-only;source:main.h:485
+T00179.001,T00179,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,med,declaration-only;source:main.h:486
+T00180.000,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00180.001,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00180.002,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00180.003,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00180.004,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00180.005,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
+T00180.006,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
 T00181.000,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),0,zoneId,0,short,,,,,,,
 T00181.001,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),1,mapId,0,short,,,,,,,
 T00181.002,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),2,par,0,short,,,,,,,
@@ -1041,22 +1041,22 @@ T00183.000,T00183,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00183.001,T00183,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,,,,
 T00184.000,T00184,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),0,processing,0,short,,,,,,,
 T00184.001,T00184,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),1,queued,0,short,,,,,,,
-T00185.000,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,high,
-T00185.001,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,high,
-T00185.002,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,high,
-T00185.003,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,high,
-T00186.000,T00186,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,high,
-T00186.001,T00186,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00186.002,T00186,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,high,
+T00185.000,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00185.001,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00185.002,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00185.003,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00186.000,T00186,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00186.001,T00186,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00186.002,T00186,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
 T00187.000,T00187,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),0,low,0,char,,,,,,,
 T00187.001,T00187,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,,,,
-T00188.000,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,
-T00188.001,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,high,
-T00188.002,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,high,
-T00188.003,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,high,
-T00188.004,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,high,
-T00188.005,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,
-T00188.006,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,high,
+T00188.000,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00188.001,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00188.002,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00188.003,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00188.004,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00188.005,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
+T00188.006,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
 T00189.000,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),0,tag,0,u_long,,,,dmaTag,PS1 DMA packet tag,med,replaced-by:Render draw commands;declaration-only;source:22C.c:4494
 T00189.001,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),1,tile,0,VS_TILE_TPAGE,,,,tile,Tile and texture-page packet,med,replaced-by:Render rectangle commands;declaration-only;source:22C.c:4495
 T00189.002,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),2,_,0,char[44],,,,reserved14,Unresolved bytes following the tile packet,low,Do not discard until title-loop workspace uses are resolved;declaration-only;source:22C.c:4496
@@ -1064,29 +1064,29 @@ T00190.000,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00190.001,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,high,source:main.h:166
 T00190.002,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,high,source:main.h:166
 T00190.003,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,high,source:main.h:166
-T00191.000,T00191,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,high,
-T00191.001,T00191,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00191.002,T00191,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,high,
+T00191.000,T00191,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00191.001,T00191,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00191.002,T00191,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
 T00192.000,T00192,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,med,replaced-by:Input typed button flags;declaration-only;source:main.h:485
 T00192.001,T00192,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,med,replaced-by:Input typed button flags;declaration-only;source:main.h:486
-T00193.000,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,
-T00193.001,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,high,
-T00193.002,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,high,
-T00193.003,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,high,
-T00193.004,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,high,
-T00193.005,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,
-T00193.006,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,high,
+T00193.000,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00193.001,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00193.002,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00193.003,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00193.004,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00193.005,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
+T00193.006,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
 T00194.000,T00194,AkaoSeqHeader,0,magic,0,char[4],,,,,,,
 T00194.001,T00194,AkaoSeqHeader,1,id,0,u_short,,,,,,,
 T00194.002,T00194,AkaoSeqHeader,2,length,0,u_short,,,,,,,
 T00194.003,T00194,AkaoSeqHeader,3,reverb_type,0,u_short,,,,,,,
 T00194.004,T00194,AkaoSeqHeader,4,timestamp,0,AkaoTimeStamp,,,,,,,
-T00195.000,T00195,AkaoTimeStamp,0,year_bcd,0,char,,,,yearBcd,BCD year of the timestamp,high,
-T00195.001,T00195,AkaoTimeStamp,1,month_bcd,0,char,,,,monthBcd,BCD month of the timestamp,high,
-T00195.002,T00195,AkaoTimeStamp,2,day_bcd,0,char,,,,dayBcd,BCD day of the timestamp,high,
-T00195.003,T00195,AkaoTimeStamp,3,hours_bcd,0,char,,,,hoursBcd,BCD hours of the timestamp,high,
-T00195.004,T00195,AkaoTimeStamp,4,minutes_bcd,0,char,,,,minutesBcd,BCD minutes of the timestamp,high,
-T00195.005,T00195,AkaoTimeStamp,5,seconds_bcd,0,char,,,,secondsBcd,BCD seconds of the timestamp,high,
+T00195.000,T00195,AkaoTimeStamp,0,year_bcd,0,char,,,,yearBcd,BCD year of the timestamp,med,declaration-only;source:25AC.c:27
+T00195.001,T00195,AkaoTimeStamp,1,month_bcd,0,char,,,,monthBcd,BCD month of the timestamp,med,declaration-only;source:25AC.c:28
+T00195.002,T00195,AkaoTimeStamp,2,day_bcd,0,char,,,,dayBcd,BCD day of the timestamp,med,declaration-only;source:25AC.c:29
+T00195.003,T00195,AkaoTimeStamp,3,hours_bcd,0,char,,,,hoursBcd,BCD hours of the timestamp,med,declaration-only;source:25AC.c:30
+T00195.004,T00195,AkaoTimeStamp,4,minutes_bcd,0,char,,,,minutesBcd,BCD minutes of the timestamp,med,declaration-only;source:25AC.c:31
+T00195.005,T00195,AkaoTimeStamp,5,seconds_bcd,0,char,,,,secondsBcd,BCD seconds of the timestamp,med,declaration-only;source:25AC.c:32
 T00196.000,T00196,AnimationState_t,0,enabled,0,short,,,,,,,
 T00196.001,T00196,AnimationState_t,1,frameMask,0,u_short,,,per-frame-visible-bits,,,,
 T00196.002,T00196,AnimationState_t,2,frameDuration,0,short,,,,,,,
@@ -1301,13 +1301,13 @@ T00219.000,T00219,D_800EB9BC_t,0,unk0_0,1,u_int,1,,,isVisible,Layer configured f
 T00219.001,T00219,D_800EB9BC_t,1,unk0_1,1,u_int,1,,,isLoadPending,Image data still loading,high,source:5BF94.c:2560
 T00219.002,T00219,D_800EB9BC_t,2,unk0_2,1,u_int,1,,,usesSharedPalette,Draw with a shared 256-color palette instead of a per-layer palette,high,source:5BF94.c:4438
 T00219.003,T00219,D_800EB9BC_t,3,unk0_3,1,u_int,3,,,renderMode,Index of the layer draw routine,high,source:4A0A8.c:868
-T00219.004,T00219,D_800EB9BC_t,4,unk0_6,1,u_int,18,,,loaderAndPageBits,Merged view of load phase VRAM page count palette flag and page base,med,view merges gim_t bitfields and byte 2;split natively
+T00219.004,T00219,D_800EB9BC_t,4,unk0_6,1,u_int,18,,,loaderAndPageBits,Merged view of load phase VRAM page count palette flag and page base,med,view merges gim_t bitfields and byte 2;split natively;declaration-only;source:4A0A8.c:134
 T00219.005,T00219,D_800EB9BC_t,5,unk0_24,1,u_int,8,,,brightness,Layer brightness; zero hides the layer,high,source:5BF94.c:4434;initialized to 0x80
-T00219.006,T00219,D_800EB9BC_t,6,unk4,1,int,,,,gridAndImageId,Merged view of tile columns rows and image ID,med,view merges gim_t columns rows and id
+T00219.006,T00219,D_800EB9BC_t,6,unk4,1,int,,,,gridAndImageId,Merged view of tile columns rows and image ID,med,view merges gim_t columns rows and id;declaration-only;source:4A0A8.c:136
 T00219.007,T00219,D_800EB9BC_t,7,unk8,1,short,,,horizontal offset,offsetX,Horizontal screen offset in pixels,high,source:4A0A8.c:869
 T00219.008,T00219,D_800EB9BC_t,8,unkA,1,short,,,vertical offset,offsetY,Vertical screen offset in pixels,high,source:4A0A8.c:870
-T00219.009,T00219,D_800EB9BC_t,9,unkC,1,short,,,depth,scaleFixed12,Layer scale in 4.12 fixed point,high,initialized to 0x1000 at 5BF94.c:2367
-T00219.010,T00219,D_800EB9BC_t,10,unk10,1,int[250],,,,loaderAndImageData,Opaque view of palette selector buffers disc request ripple table and tile table,med,view spans gim_t +0x10 to +0x3F8;replace with typed native fields
+T00219.009,T00219,D_800EB9BC_t,9,unkC,1,short,,,depth,scaleFixed12,Layer scale in 4.12 fixed point,med,initialized to 0x1000 at 5BF94.c:2367;declaration-only;source:4A0A8.c:139
+T00219.010,T00219,D_800EB9BC_t,10,unk10,1,int[250],,,,loaderAndImageData,Opaque view of palette selector buffers disc request ripple table and tile table,med,view spans gim_t +0x10 to +0x3F8;replace with typed native fields;declaration-only;source:4A0A8.c:140
 T00220.000,T00220,D_800F16EC_t,0,dx,0,signed char,2,,,,,,
 T00220.001,T00220,D_800F16EC_t,1,unk0_2,1,signed char,2,,,,,,
 T00220.002,T00220,D_800F16EC_t,2,dz,0,signed char,2,,,,,,
@@ -1967,66 +1967,66 @@ T00257.008,T00257,D_800F4B30_t,8,unkC,1,short,,,,startScaleFixed12,Initial layer
 T00257.009,T00257,D_800F4B30_t,9,unkE,1,short,,,,deltaScaleFixed12,Target minus initial layer scale,high,source:4A0A8.c:897
 T00257.010,T00257,D_800F4B30_t,10,unk10,1,short,,,,startBrightness,Initial layer brightness,high,source:4A0A8.c:898;byte 3 of the layer record
 T00257.011,T00257,D_800F4B30_t,11,unk12,1,short,,,,deltaBrightness,Target minus initial layer brightness,high,source:4A0A8.c:898
-T00258.000,T00258,D_800F4B88_t,0,unk0,1,char,,,,reserved00,Unreferenced leading byte,low,
-T00258.001,T00258,D_800F4B88_t,1,unk1,1,char,,,,reserved01,Unreferenced byte,low,
+T00258.000,T00258,D_800F4B88_t,0,unk0,1,char,,,,reserved00,Unreferenced leading byte,low,declaration-only;source:4A0A8.c:159
+T00258.001,T00258,D_800F4B88_t,1,unk1,1,char,,,,reserved01,Unreferenced byte,low,declaration-only;source:4A0A8.c:160
 T00258.002,T00258,D_800F4B88_t,2,unk2,1,char,,,,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:2998
-T00258.003,T00258,D_800F4B88_t,3,unk3,1,char,,,tween duration,durationFrames,Tween duration or zero when inactive,high,G00442 aliases this byte
+T00258.003,T00258,D_800F4B88_t,3,unk3,1,char,,,tween duration,durationFrames,Tween duration or zero when inactive,med,G00442 aliases this byte;declaration-only;source:4A0A8.c:162
 T00258.004,T00258,D_800F4B88_t,4,unk4,1,short,,,direction angle,windDirection,Current wind direction angle in 4096 units,high,source:4A0A8.c:2999
-T00258.005,T00258,D_800F4B88_t,5,unk6,1,short,,,,startWindDirection,Initial wind direction angle,high,
-T00258.006,T00258,D_800F4B88_t,6,unk8,1,short,,,,deltaWindDirection,Shortest wrapped change in wind direction,high,
+T00258.005,T00258,D_800F4B88_t,5,unk6,1,short,,,,startWindDirection,Initial wind direction angle,med,declaration-only;source:4A0A8.c:164
+T00258.006,T00258,D_800F4B88_t,6,unk8,1,short,,,,deltaWindDirection,Shortest wrapped change in wind direction,med,declaration-only;source:4A0A8.c:165
 T00258.007,T00258,D_800F4B88_t,7,unkA,1,short,,,,windStrength,Current wind strength passed with direction to weather,med,source:4A0A8.c:3001
-T00258.008,T00258,D_800F4B88_t,8,unkC,1,short,,,,startWindStrength,Initial wind strength,med,
-T00258.009,T00258,D_800F4B88_t,9,unkE,1,short,,,,deltaWindStrength,Target minus initial wind strength,med,
+T00258.008,T00258,D_800F4B88_t,8,unkC,1,short,,,,startWindStrength,Initial wind strength,med,declaration-only;source:4A0A8.c:167
+T00258.009,T00258,D_800F4B88_t,9,unkE,1,short,,,,deltaWindStrength,Target minus initial wind strength,med,declaration-only;source:4A0A8.c:168
 T00258.010,T00258,D_800F4B88_t,10,unk10,1,short,,,intensity,intensity,Current weather intensity,high,source:4A0A8.c:3002
-T00258.011,T00258,D_800F4B88_t,11,unk12,1,short,,,,startIntensity,Initial weather intensity,high,
-T00258.012,T00258,D_800F4B88_t,12,unk14,1,short,,,,deltaIntensity,Target minus initial weather intensity,high,
-T00259.000,T00259,D_800F4BA4_t,0,lookAt,0,D_800F4BA4_t2,,,,lookAt,Look-at endpoint camera track,high,
-T00259.001,T00259,D_800F4BA4_t,1,eye,0,D_800F4BA4_t2,,,,eye,Eye endpoint camera track,high,
+T00258.011,T00258,D_800F4B88_t,11,unk12,1,short,,,,startIntensity,Initial weather intensity,med,declaration-only;source:4A0A8.c:170
+T00258.012,T00258,D_800F4B88_t,12,unk14,1,short,,,,deltaIntensity,Target minus initial weather intensity,med,declaration-only;source:4A0A8.c:171
+T00259.000,T00259,D_800F4BA4_t,0,lookAt,0,D_800F4BA4_t2,,,,lookAt,Look-at endpoint camera track,med,declaration-only;source:4A0A8.c:101
+T00259.001,T00259,D_800F4BA4_t,1,eye,0,D_800F4BA4_t2,,,,eye,Eye endpoint camera track,med,declaration-only;source:4A0A8.c:102
 T00259.002,T00259,D_800F4BA4_t,2,unk168,1,func_800BD57C_t,,,camera roll tween,cameraRoll,Camera roll angle tween,high,source:4A0A8.c:3605
 T00259.003,T00259,D_800F4BA4_t,3,unk174,1,func_800BD57C_t,,,captured-screen roll tween,capturedScreenRoll,Captured-screen roll angle tween,high,source:4A0A8.c:3608
-T00259.004,T00259,D_800F4BA4_t,4,projectionDistance,0,func_800BDF6C_unk180_t,,,,projectionDistance,Projection distance tween,high,
-T00259.005,T00259,D_800F4BA4_t,5,nearClip,0,func_800BDF6C_unk180_t,,,,nearClip,Near-clip tween,high,
-T00259.006,T00259,D_800F4BA4_t,6,farClip,0,func_800BDF6C_unk180_t,,,,farClip,Far-clip tween,high,
-T00259.007,T00259,D_800F4BA4_t,7,unk1A4,1,func_800BDF6C_t,,,first shake oscillator,shakeOscillatorA,Active shake count followed by the first oscillator,med,oscillators actually start at +0x1A6;first short is active count
-T00259.008,T00259,D_800F4BA4_t,8,unk1B0,1,func_800BDF6C_t,,,second shake oscillator,shakeOscillatorB,Second shake oscillator view,med,declared offset is two bytes before actual oscillator data
-T00259.009,T00259,D_800F4BA4_t,9,unk1BC,1,short,,,,reserved1BC,Tail bytes of the second oscillator view,low,covered by oscillator read at +0x1A6
+T00259.004,T00259,D_800F4BA4_t,4,projectionDistance,0,func_800BDF6C_unk180_t,,,,projectionDistance,Projection distance tween,med,declaration-only;source:4A0A8.c:105
+T00259.005,T00259,D_800F4BA4_t,5,nearClip,0,func_800BDF6C_unk180_t,,,,nearClip,Near-clip tween,med,declaration-only;source:4A0A8.c:106
+T00259.006,T00259,D_800F4BA4_t,6,farClip,0,func_800BDF6C_unk180_t,,,,farClip,Far-clip tween,med,declaration-only;source:4A0A8.c:107
+T00259.007,T00259,D_800F4BA4_t,7,unk1A4,1,func_800BDF6C_t,,,first shake oscillator,shakeOscillatorA,Active shake count followed by the first oscillator,med,oscillators actually start at +0x1A6;first short is active count;declaration-only;source:4A0A8.c:108
+T00259.008,T00259,D_800F4BA4_t,8,unk1B0,1,func_800BDF6C_t,,,second shake oscillator,shakeOscillatorB,Second shake oscillator view,med,declared offset is two bytes before actual oscillator data;declaration-only;source:4A0A8.c:109
+T00259.009,T00259,D_800F4BA4_t,9,unk1BC,1,short,,,,reserved1BC,Tail bytes of the second oscillator view,low,covered by oscillator read at +0x1A6;declaration-only;source:4A0A8.c:110
 T00259.010,T00259,D_800F4BA4_t,10,unk1BE,1,short,,,,shakeEyeOffsetX,Summed eye shake X offset,high,source:4A0A8.c:4006
-T00259.011,T00259,D_800F4BA4_t,11,unk1C0,1,short,,,,shakeEyeOffsetY,Summed eye shake Y offset,high,
-T00259.012,T00259,D_800F4BA4_t,12,unk1C2,1,short,,,,shakeEyeOffsetZ,Summed eye shake Z offset,high,
-T00259.013,T00259,D_800F4BA4_t,13,unk1C4,1,short,,,,reserved1C4,Unreferenced short between shake offsets,low,
+T00259.011,T00259,D_800F4BA4_t,11,unk1C0,1,short,,,,shakeEyeOffsetY,Summed eye shake Y offset,med,declaration-only;source:4A0A8.c:112
+T00259.012,T00259,D_800F4BA4_t,12,unk1C2,1,short,,,,shakeEyeOffsetZ,Summed eye shake Z offset,med,declaration-only;source:4A0A8.c:113
+T00259.013,T00259,D_800F4BA4_t,13,unk1C4,1,short,,,,reserved1C4,Unreferenced short between shake offsets,low,declaration-only;source:4A0A8.c:114
 T00259.014,T00259,D_800F4BA4_t,14,unk1C6,1,short,,,,shakeLookAtOffsetX,Summed look-at shake X offset,high,source:4A0A8.c:4009
-T00259.015,T00259,D_800F4BA4_t,15,unk1C8,1,short,,,,shakeLookAtOffsetY,Summed look-at shake Y offset,high,
-T00259.016,T00259,D_800F4BA4_t,16,unk1CA,1,short,,,,shakeLookAtOffsetZ,Summed look-at shake Z offset,high,
+T00259.015,T00259,D_800F4BA4_t,15,unk1C8,1,short,,,,shakeLookAtOffsetY,Summed look-at shake Y offset,med,declaration-only;source:4A0A8.c:116
+T00259.016,T00259,D_800F4BA4_t,16,unk1CA,1,short,,,,shakeLookAtOffsetZ,Summed look-at shake Z offset,med,declaration-only;source:4A0A8.c:117
 T00259.017,T00259,D_800F4BA4_t,17,unk1CC,1,int[7],,,,actorQueryScratch,Buffer receiving actor position and rotation queries,med,source:4A0A8.c:3331;rotation read at +0x1DA
 T00259.018,T00259,D_800F4BA4_t,18,unk1E8,1,u_short,,,origin actor,originActorId,Actor whose position offsets the camera or 0x2000 for none,high,source:4A0A8.c:3079
-T00259.019,T00259,D_800F4BA4_t,19,unk1EA,1,u_short,,,,reserved1EA,Unreferenced short after origin actor ID,low,
+T00259.019,T00259,D_800F4BA4_t,19,unk1EA,1,u_short,,,,reserved1EA,Unreferenced short after origin actor ID,low,declaration-only;source:4A0A8.c:120
 T00259.020,T00259,D_800F4BA4_t,20,unk1EC,1,VECTOR,,,fixed-point origin offset,originOffset,Origin actor position in 20.12 fixed point,high,source:4A0A8.c:3112
 T00259.021,T00259,D_800F4BA4_t,21,unk1FC,1,func_800BDBB4_t,,,screen scale tween,screenScale,Screen scale tween,high,source:4A0A8.c:3700
 T00259.022,T00259,D_800F4BA4_t,22,unk21C,1,func_800BDBB4_t,,,screen tint tween,screenTint,Screen tint color tween,high,source:4A0A8.c:3716
 T00259.023,T00259,D_800F4BA4_t,23,unk23C,1,func_800BDBB4_t,,,screen translation tween,screenTranslation,Screen translation tween,high,source:4A0A8.c:3732
-T00259.024,T00259,D_800F4BA4_t,24,unk25C,1,func_800BDBB4_t,,,,screenEffectTween,Scripted screen effect value and parameter tween,med,opcode 237 at 4A0A8.c:3749
+T00259.024,T00259,D_800F4BA4_t,24,unk25C,1,func_800BDBB4_t,,,,screenEffectTween,Scripted screen effect value and parameter tween,med,opcode 237 at 4A0A8.c:3749;declaration-only;source:4A0A8.c:125
 T00259.025,T00259,D_800F4BA4_t,25,unk27C,1,VECTOR,,,previous terrain-motion position,lastTerrainPosition,Last terrain-following candidate position,high,source:4A0A8.c:3551
 T00260.000,T00260,D_800F4BA4_t2,0,mode,0,u_char,,,,motionMode,Track motion mode; 15 is idle,high,source:4A0A8.c:3212
 T00260.001,T00260,D_800F4BA4_t2,1,ease1,0,u_char,,,,easingPrimary,First easing selector for the active motion mode,med,source:4A0A8.c:3224
 T00260.002,T00260,D_800F4BA4_t2,2,ease2,0,u_char,,,,easingSecondary,Second easing selector for orbit or spiral modes,med,source:4A0A8.c:3248
 T00260.003,T00260,D_800F4BA4_t2,3,ease3,0,u_char,,,,easingTertiary,Third easing selector for orbit or spiral modes,med,source:4A0A8.c:3249
-T00260.004,T00260,D_800F4BA4_t2,4,time,0,u_char,,,,elapsedFrames,Elapsed motion frames,high,
-T00260.005,T00260,D_800F4BA4_t2,5,duration,0,u_char,,,,durationFrames,Motion duration in frames,high,
+T00260.004,T00260,D_800F4BA4_t2,4,time,0,u_char,,,,elapsedFrames,Elapsed motion frames,med,declaration-only;source:4A0A8.c:24
+T00260.005,T00260,D_800F4BA4_t2,5,duration,0,u_char,,,,durationFrames,Motion duration in frames,med,declaration-only;source:4A0A8.c:25
 T00260.006,T00260,D_800F4BA4_t2,6,follow,0,u_char,,,,followRequest,Requested follow mode,med,source:4A0A8.c:4073
-T00260.007,T00260,D_800F4BA4_t2,7,following,0,u_char,,,,isFollowing,Follow currently engaged,med,
-T00260.008,T00260,D_800F4BA4_t2,8,value,0,int,,,,motionScalar,Mode-specific radius actor ID or step length,med,varies by motion mode
-T00260.009,T00260,D_800F4BA4_t2,9,delta,0,int,,,,motionScalarDelta,Mode-specific change in radius or parameter,med,
+T00260.007,T00260,D_800F4BA4_t2,7,following,0,u_char,,,,isFollowing,Follow currently engaged,med,declaration-only;source:4A0A8.c:27
+T00260.008,T00260,D_800F4BA4_t2,8,value,0,int,,,,motionScalar,Mode-specific radius actor ID or step length,med,varies by motion mode;declaration-only;source:4A0A8.c:28
+T00260.009,T00260,D_800F4BA4_t2,9,delta,0,int,,,,motionScalarDelta,Mode-specific change in radius or parameter,med,declaration-only;source:4A0A8.c:29
 T00260.010,T00260,D_800F4BA4_t2,10,angle,0,short,,,,orbitAngle,Starting orbit angle around the partner endpoint,high,source:4A0A8.c:3256
 T00260.011,T00260,D_800F4BA4_t2,11,angleDelta,0,short,,,,orbitAngleDelta,Orbit angle change,high,source:4A0A8.c:3283
-T00260.012,T00260,D_800F4BA4_t2,12,start,0,VECTOR,,,,startPosition,Position at motion start,high,
+T00260.012,T00260,D_800F4BA4_t2,12,start,0,VECTOR,,,,startPosition,Position at motion start,med,declaration-only;source:4A0A8.c:32
 T00260.013,T00260,D_800F4BA4_t2,13,position,0,VECTOR,,,,destination,Scripted destination position,high,source:4A0A8.c:3214
 T00260.014,T00260,D_800F4BA4_t2,14,velocity,0,VECTOR,,,,displacement,Destination minus start or height delta,high,source:4A0A8.c:3227
 T00260.015,T00260,D_800F4BA4_t2,15,aux,0,VECTOR,,,,heightOffset,Orbit height offset from partner endpoint,med,source:4A0A8.c:3284
-T00260.016,T00260,D_800F4BA4_t2,16,followDelta,0,VECTOR,,,,followDelta,Offset applied while following,med,
-T00260.017,T00260,D_800F4BA4_t2,17,followPosition,0,VECTOR,,,,followPosition,Followed position,med,
-T00260.018,T00260,D_800F4BA4_t2,18,previousCamera,0,VECTOR,,,,previousCameraPosition,Camera position from the previous update,med,
-T00260.019,T00260,D_800F4BA4_t2,19,computed,0,VECTOR,,,,computedPosition,Position computed by the active motion,high,
-T00260.020,T00260,D_800F4BA4_t2,20,current,0,VECTOR,,,,currentPosition,Current endpoint position,high,
+T00260.016,T00260,D_800F4BA4_t2,16,followDelta,0,VECTOR,,,,followDelta,Offset applied while following,med,declaration-only;source:4A0A8.c:36
+T00260.017,T00260,D_800F4BA4_t2,17,followPosition,0,VECTOR,,,,followPosition,Followed position,med,declaration-only;source:4A0A8.c:37
+T00260.018,T00260,D_800F4BA4_t2,18,previousCamera,0,VECTOR,,,,previousCameraPosition,Camera position from the previous update,med,declaration-only;source:4A0A8.c:38
+T00260.019,T00260,D_800F4BA4_t2,19,computed,0,VECTOR,,,,computedPosition,Position computed by the active motion,med,declaration-only;source:4A0A8.c:39
+T00260.020,T00260,D_800F4BA4_t2,20,current,0,VECTOR,,,,currentPosition,Current endpoint position,med,declaration-only;source:4A0A8.c:40
 T00260.021,T00260,D_800F4BA4_t2,21,target,0,VECTOR,,,,partnerPosition,Current position of the paired endpoint,high,source:4A0A8.c:3417
 T00261.000,T00261,D_800F4EE8_t,0,cursorMemories,0,char[52],,,,,,,
 T00261.001,T00261,D_800F4EE8_t,1,unk34,1,char[6],,,,,,,
@@ -2155,22 +2155,22 @@ T00273.008,T00273,D_800F5920_t,8,unk16,1,u_char,,,,,,,
 T00273.009,T00273,D_800F5920_t,9,unk17,1,u_char,,,,,,,
 T00273.010,T00273,D_800F5920_t,10,unk18,1,char[4],,,,,,,
 T00273.011,T00273,D_800F5920_t,11,unk1C,1,u_char,,,,,,,
-T00274.000,T00274,FAkaoFileBlob,0,Magic,0,int,,,,magic,File signature,high,
-T00274.001,T00274,FAkaoFileBlob,1,unk_0x4,1,char[12],,,,reserved04,Unidentified header bytes,low,
-T00274.002,T00274,FAkaoFileBlob,2,ProgramOffsets,0,u_short[256][2],,,,programOffsets,Program offset pairs,med,
-T00274.003,T00274,FAkaoFileBlob,3,MetadataTableA,0,u_short[256],,,,metadataTableA,First per-program metadata table,low,
-T00274.004,T00274,FAkaoFileBlob,4,MetadataTableB,0,u_short[256],,,,metadataTableB,Second per-program metadata table,low,
-T00274.005,T00274,FAkaoFileBlob,5,ProgramData,0,char[1],,,,programData,Variable-length program data,med,
-T00275.000,T00275,FAkaoHeader,0,Magic,0,u_int,,,,magic,Stream signature,high,
-T00275.001,T00275,FAkaoHeader,1,unk_0x04,1,int,,,,reserved04,Unidentified header word,low,
-T00275.002,T00275,FAkaoHeader,2,unk_0x08,1,char[8],,,,reserved08,Unidentified header bytes,low,
-T00275.003,T00275,FAkaoHeader,3,TotalPages,0,u_int,,,,totalPages,Total stream pages,med,
-T00275.004,T00275,FAkaoHeader,4,unk_0x14,1,int,,,,reserved14,Unidentified header word,low,
-T00275.005,T00275,FAkaoHeader,5,unk_0x18,1,int,,,,reserved18,Unidentified header word,low,
-T00275.006,T00275,FAkaoHeader,6,SampleRate,0,int,,,,sampleRate,Stream sample rate,med,
-T00275.007,T00275,FAkaoHeader,7,CurrentPage,0,u_int,,,,currentPage,Current stream page,med,
-T00275.008,T00275,FAkaoHeader,8,unk_0x24,1,char[4],,,,reserved24,Unidentified header bytes,low,
-T00275.009,T00275,FAkaoHeader,9,unk_0x28,1,int,,,,reserved28,Unidentified header word,low,
+T00274.000,T00274,FAkaoFileBlob,0,Magic,0,int,,,,magic,File signature,med,declaration-only;source:sound.h:189
+T00274.001,T00274,FAkaoFileBlob,1,unk_0x4,1,char[12],,,,reserved04,Unidentified header bytes,low,declaration-only;source:sound.h:190
+T00274.002,T00274,FAkaoFileBlob,2,ProgramOffsets,0,u_short[256][2],,,,programOffsets,Program offset pairs,med,declaration-only;source:sound.h:192
+T00274.003,T00274,FAkaoFileBlob,3,MetadataTableA,0,u_short[256],,,,metadataTableA,First per-program metadata table,low,declaration-only;source:sound.h:194
+T00274.004,T00274,FAkaoFileBlob,4,MetadataTableB,0,u_short[256],,,,metadataTableB,Second per-program metadata table,low,declaration-only;source:sound.h:195
+T00274.005,T00274,FAkaoFileBlob,5,ProgramData,0,char[1],,,,programData,Variable-length program data,med,declaration-only;source:sound.h:196
+T00275.000,T00275,FAkaoHeader,0,Magic,0,u_int,,,,magic,Stream signature,med,declaration-only;source:sound.h:549
+T00275.001,T00275,FAkaoHeader,1,unk_0x04,1,int,,,,reserved04,Unidentified header word,low,declaration-only;source:sound.h:550
+T00275.002,T00275,FAkaoHeader,2,unk_0x08,1,char[8],,,,reserved08,Unidentified header bytes,low,declaration-only;source:sound.h:551
+T00275.003,T00275,FAkaoHeader,3,TotalPages,0,u_int,,,,totalPages,Total stream pages,med,declaration-only;source:sound.h:552
+T00275.004,T00275,FAkaoHeader,4,unk_0x14,1,int,,,,reserved14,Unidentified header word,low,declaration-only;source:sound.h:553
+T00275.005,T00275,FAkaoHeader,5,unk_0x18,1,int,,,,reserved18,Unidentified header word,low,declaration-only;source:sound.h:554
+T00275.006,T00275,FAkaoHeader,6,SampleRate,0,int,,,,sampleRate,Stream sample rate,med,declaration-only;source:sound.h:555
+T00275.007,T00275,FAkaoHeader,7,CurrentPage,0,u_int,,,,currentPage,Current stream page,med,declaration-only;source:sound.h:556
+T00275.008,T00275,FAkaoHeader,8,unk_0x24,1,char[4],,,,reserved24,Unidentified header bytes,low,declaration-only;source:sound.h:557
+T00275.009,T00275,FAkaoHeader,9,unk_0x28,1,int,,,,reserved28,Unidentified header word,low,declaration-only;source:sound.h:558
 T00276.000,T00276,FAkaoSequence,0,unk00,1,u_int,,,,,,,
 T00276.001,T00276,FAkaoSequence,1,unk04,1,u_int,,,,,,,
 T00276.002,T00276,FAkaoSequence,2,unk08,1,u_int,,,,,,,
@@ -2188,33 +2188,33 @@ T00276.013,T00276,FAkaoSequence,13,KeymapRegionOffset,0,int,,,,,,,
 T00276.014,T00276,FAkaoSequence,14,unk38,1,u_int,,,,,,,
 T00276.015,T00276,FAkaoSequence,15,unk3C,1,u_int,,,,,,,
 T00276.016,T00276,FAkaoSequence,16,Payload,0,char[1],,,,,,,
-T00277.000,T00277,FSound80094FA0,0,field0_0x0,0,int,,,,reserved00,Unidentified channel data,low,
-T00277.001,T00277,FSound80094FA0,1,unk_Mask_0x4,0,int,,,,reserved04,Unidentified channel data,low,
-T00277.002,T00277,FSound80094FA0,2,field2_0x8,0,int,,,,reserved08,Unidentified channel data,low,
-T00277.003,T00277,FSound80094FA0,3,VoicesInUseFlags,0,int,,,,voicesInUseMask,Named in original declaration,med,
-T00277.004,T00277,FSound80094FA0,4,VoiceIndex,0,int,,,,voiceIndex,Named in original declaration,med,
-T00277.005,T00277,FSound80094FA0,5,ChannelFlags,0,u_int,,,,channelFlags,Named in original declaration,med,
-T00277.006,T00277,FSound80094FA0,6,field6_0x18,0,int,,,,reserved18,Unidentified channel data,low,
-T00277.007,T00277,FSound80094FA0,7,field7_0x1c,0,int,,,,reserved1C,Unidentified channel data,low,
-T00277.008,T00277,FSound80094FA0,8,field8_0x20,0,int,,,,reserved20,Unidentified channel data,low,
-T00277.009,T00277,FSound80094FA0,9,field9_0x24,0,int,,,,reserved24,Unidentified channel data,low,
-T00277.010,T00277,FSound80094FA0,10,field10_0x28,0,int,,,,reserved28,Unidentified channel data,low,
-T00277.011,T00277,FSound80094FA0,11,field11_0x2c,0,int,,,,reserved2C,Unidentified channel data,low,
-T00277.012,T00277,FSound80094FA0,12,field12_0x30,0,int,,,,reserved30,Unidentified channel data,low,
-T00277.013,T00277,FSound80094FA0,13,field13_0x34,0,int,,,,reserved34,Unidentified channel data,low,
-T00277.014,T00277,FSound80094FA0,14,field14_0x38,0,int,,,,reserved38,Unidentified channel data,low,
-T00277.015,T00277,FSound80094FA0,15,field15_0x3c,0,int,,,,reserved3C,Unidentified channel data,low,
-T00277.016,T00277,FSound80094FA0,16,Volume,0,int,,,,volume,Named in original declaration,med,
-T00277.017,T00277,FSound80094FA0,17,field17_0x44,0,int,,,,reserved44,Unidentified channel data,low,
-T00277.018,T00277,FSound80094FA0,18,field18_0x48,0,int,,,,reserved48,Unidentified channel data,low,
-T00277.019,T00277,FSound80094FA0,19,field19_0x4c,0,char,,,,reserved4C,Unidentified channel data,low,
-T00277.020,T00277,FSound80094FA0,20,field20_0x4d,0,char,,,,reserved4D,Unidentified channel data,low,
-T00277.021,T00277,FSound80094FA0,21,field21_0x4e,0,char,,,,reserved4E,Unidentified channel data,low,
-T00277.022,T00277,FSound80094FA0,22,field22_0x4f,0,char,,,,reserved4F,Unidentified channel data,low,
-T00277.023,T00277,FSound80094FA0,23,field23_0x50,0,int,,,,reserved50,Unidentified channel data,low,
-T00277.024,T00277,FSound80094FA0,24,field24_0x54,0,int,,,,reserved54,Unidentified channel data,low,
-T00277.025,T00277,FSound80094FA0,25,VoiceSampleRate,0,int,,,,voiceSampleRate,Named in original declaration,med,
-T00277.026,T00277,FSound80094FA0,26,ControlFlags,0,int,,,,controlFlags,Named in original declaration,med,
+T00277.000,T00277,FSound80094FA0,0,field0_0x0,0,int,,,,reserved00,Unidentified channel data,low,declaration-only;source:sound.h:277
+T00277.001,T00277,FSound80094FA0,1,unk_Mask_0x4,0,int,,,,reserved04,Unidentified channel data,low,declaration-only;source:sound.h:278
+T00277.002,T00277,FSound80094FA0,2,field2_0x8,0,int,,,,reserved08,Unidentified channel data,low,declaration-only;source:sound.h:279
+T00277.003,T00277,FSound80094FA0,3,VoicesInUseFlags,0,int,,,,voicesInUseMask,Named in original declaration,med,declaration-only;source:sound.h:280
+T00277.004,T00277,FSound80094FA0,4,VoiceIndex,0,int,,,,voiceIndex,Named in original declaration,med,declaration-only;source:sound.h:281
+T00277.005,T00277,FSound80094FA0,5,ChannelFlags,0,u_int,,,,channelFlags,Named in original declaration,med,declaration-only;source:sound.h:282
+T00277.006,T00277,FSound80094FA0,6,field6_0x18,0,int,,,,reserved18,Unidentified channel data,low,declaration-only;source:sound.h:283
+T00277.007,T00277,FSound80094FA0,7,field7_0x1c,0,int,,,,reserved1C,Unidentified channel data,low,declaration-only;source:sound.h:284
+T00277.008,T00277,FSound80094FA0,8,field8_0x20,0,int,,,,reserved20,Unidentified channel data,low,declaration-only;source:sound.h:285
+T00277.009,T00277,FSound80094FA0,9,field9_0x24,0,int,,,,reserved24,Unidentified channel data,low,declaration-only;source:sound.h:286
+T00277.010,T00277,FSound80094FA0,10,field10_0x28,0,int,,,,reserved28,Unidentified channel data,low,declaration-only;source:sound.h:287
+T00277.011,T00277,FSound80094FA0,11,field11_0x2c,0,int,,,,reserved2C,Unidentified channel data,low,declaration-only;source:sound.h:288
+T00277.012,T00277,FSound80094FA0,12,field12_0x30,0,int,,,,reserved30,Unidentified channel data,low,declaration-only;source:sound.h:289
+T00277.013,T00277,FSound80094FA0,13,field13_0x34,0,int,,,,reserved34,Unidentified channel data,low,declaration-only;source:sound.h:290
+T00277.014,T00277,FSound80094FA0,14,field14_0x38,0,int,,,,reserved38,Unidentified channel data,low,declaration-only;source:sound.h:291
+T00277.015,T00277,FSound80094FA0,15,field15_0x3c,0,int,,,,reserved3C,Unidentified channel data,low,declaration-only;source:sound.h:292
+T00277.016,T00277,FSound80094FA0,16,Volume,0,int,,,,volume,Named in original declaration,med,declaration-only;source:sound.h:293
+T00277.017,T00277,FSound80094FA0,17,field17_0x44,0,int,,,,reserved44,Unidentified channel data,low,declaration-only;source:sound.h:294
+T00277.018,T00277,FSound80094FA0,18,field18_0x48,0,int,,,,reserved48,Unidentified channel data,low,declaration-only;source:sound.h:295
+T00277.019,T00277,FSound80094FA0,19,field19_0x4c,0,char,,,,reserved4C,Unidentified channel data,low,declaration-only;source:sound.h:296
+T00277.020,T00277,FSound80094FA0,20,field20_0x4d,0,char,,,,reserved4D,Unidentified channel data,low,declaration-only;source:sound.h:297
+T00277.021,T00277,FSound80094FA0,21,field21_0x4e,0,char,,,,reserved4E,Unidentified channel data,low,declaration-only;source:sound.h:298
+T00277.022,T00277,FSound80094FA0,22,field22_0x4f,0,char,,,,reserved4F,Unidentified channel data,low,declaration-only;source:sound.h:299
+T00277.023,T00277,FSound80094FA0,23,field23_0x50,0,int,,,,reserved50,Unidentified channel data,low,declaration-only;source:sound.h:300
+T00277.024,T00277,FSound80094FA0,24,field24_0x54,0,int,,,,reserved54,Unidentified channel data,low,declaration-only;source:sound.h:301
+T00277.025,T00277,FSound80094FA0,25,VoiceSampleRate,0,int,,,,voiceSampleRate,Named in original declaration,med,declaration-only;source:sound.h:302
+T00277.026,T00277,FSound80094FA0,26,ControlFlags,0,int,,,,controlFlags,Named in original declaration,med,declaration-only;source:sound.h:303
 T00278.000,T00278,FSoundChannel,0,ProgramCounter,0,char *,,,,,,,
 T00278.001,T00278,FSoundChannel,1,LoopStartPc,0,char *[4],,,,,,,
 T00278.002,T00278,FSoundChannel,2,ReturnProgramCounter,0,char *,,,,,,,
@@ -2354,10 +2354,10 @@ T00280.002,T00280,FSoundCommandParams,2,Param3,0,u_int,,,,,,,
 T00280.003,T00280,FSoundCommandParams,3,Param4,0,u_int,,,,,,,
 T00280.004,T00280,FSoundCommandParams,4,ExtParam1,0,u_int,,,,,,,
 T00280.005,T00280,FSoundCommandParams,5,ExtParam2,0,u_int,,,,,,,
-T00281.000,T00281,FSoundCutsceneStreamData,0,unk_0x00,1,char[128],,,,reserved00,Unidentified leading bytes,low,
-T00281.001,T00281,FSoundCutsceneStreamData,1,AkaoHeader,0,FAkaoHeader,,,,streamHeader,Embedded paged stream header,high,
-T00281.002,T00281,FSoundCutsceneStreamData,2,unk_0xAC,1,char[36],,,,reservedAC,Unidentified bytes after the header,low,
-T00281.003,T00281,FSoundCutsceneStreamData,3,AudioData,0,char[1],,,,audioData,Variable-length audio data,high,
+T00281.000,T00281,FSoundCutsceneStreamData,0,unk_0x00,1,char[128],,,,reserved00,Unidentified leading bytes,low,declaration-only;source:sound.h:562
+T00281.001,T00281,FSoundCutsceneStreamData,1,AkaoHeader,0,FAkaoHeader,,,,streamHeader,Embedded paged stream header,med,declaration-only;source:sound.h:563
+T00281.002,T00281,FSoundCutsceneStreamData,2,unk_0xAC,1,char[36],,,,reservedAC,Unidentified bytes after the header,low,declaration-only;source:sound.h:564
+T00281.003,T00281,FSoundCutsceneStreamData,3,AudioData,0,char[1],,,,audioData,Variable-length audio data,med,declaration-only;source:sound.h:565
 T00282.000,T00282,FSoundCutsceneStreamState,0,pCurrentChunk,0,void *,,,,,,,
 T00282.001,T00282,FSoundCutsceneStreamState,1,unk_Mask_0x4,0,void *,,,loopSampleStart,,,,
 T00282.002,T00282,FSoundCutsceneStreamState,2,field2_0x8,0,int,,,streamFormatFlags,,,,
@@ -2503,31 +2503,31 @@ T00295.005,T00295,VS_POLY_FT4,5,x2y2,0,u_long,,,,,,,
 T00295.006,T00295,VS_POLY_FT4,6,u2v2,0,u_long,,,,,,,
 T00295.007,T00295,VS_POLY_FT4,7,x3y3,0,u_long,,,,,,,
 T00295.008,T00295,VS_POLY_FT4,8,u3v3,0,u_long,,,,,,,
-T00296.000,T00296,VS_POLY_G4,0,r0g0b0code,0,u_long,,,,colorZeroAndCode,First vertex color and command code,high,
-T00296.001,T00296,VS_POLY_G4,1,x0y0,0,u_long,,,,positionZero,First vertex position,high,
-T00296.002,T00296,VS_POLY_G4,2,r1g1b1,0,u_long,,,,colorOne,Second vertex color,high,
-T00296.003,T00296,VS_POLY_G4,3,x1y1,0,u_long,,,,positionOne,Second vertex position,high,
-T00296.004,T00296,VS_POLY_G4,4,r2g2b2,0,u_long,,,,colorTwo,Third vertex color,high,
-T00296.005,T00296,VS_POLY_G4,5,x2y2,0,u_long,,,,positionTwo,Third vertex position,high,
-T00296.006,T00296,VS_POLY_G4,6,r3g3b3,0,u_long,,,,colorThree,Fourth vertex color,high,
-T00296.007,T00296,VS_POLY_G4,7,x3y3,0,u_long,,,,positionThree,Fourth vertex position,high,
-T00297.000,T00297,VS_POLY_G4_TPAGE,0,tpage,0,u_long,,,,texturePage,Texture page command word,high,
-T00297.001,T00297,VS_POLY_G4_TPAGE,1,r0g0b0code,0,u_long,,,,colorZeroAndCode,First vertex color and command code,high,
-T00297.002,T00297,VS_POLY_G4_TPAGE,2,x0y0,0,u_long,,,,positionZero,First vertex position,high,
-T00297.003,T00297,VS_POLY_G4_TPAGE,3,r1g1b1,0,u_long,,,,colorOne,Second vertex color,high,
-T00297.004,T00297,VS_POLY_G4_TPAGE,4,x1y1,0,u_long,,,,positionOne,Second vertex position,high,
-T00297.005,T00297,VS_POLY_G4_TPAGE,5,r2g2b2,0,u_long,,,,colorTwo,Third vertex color,high,
-T00297.006,T00297,VS_POLY_G4_TPAGE,6,x2y2,0,u_long,,,,positionTwo,Third vertex position,high,
-T00297.007,T00297,VS_POLY_G4_TPAGE,7,r3g3b3,0,u_long,,,,colorThree,Fourth vertex color,high,
-T00297.008,T00297,VS_POLY_G4_TPAGE,8,x3y3,0,u_long,,,,positionThree,Fourth vertex position,high,
+T00296.000,T00296,VS_POLY_G4,0,r0g0b0code,0,u_long,,,,colorZeroAndCode,First vertex color and command code,med,declaration-only;source:gpu.h:73
+T00296.001,T00296,VS_POLY_G4,1,x0y0,0,u_long,,,,positionZero,First vertex position,med,declaration-only;source:gpu.h:74
+T00296.002,T00296,VS_POLY_G4,2,r1g1b1,0,u_long,,,,colorOne,Second vertex color,med,declaration-only;source:gpu.h:75
+T00296.003,T00296,VS_POLY_G4,3,x1y1,0,u_long,,,,positionOne,Second vertex position,med,declaration-only;source:gpu.h:76
+T00296.004,T00296,VS_POLY_G4,4,r2g2b2,0,u_long,,,,colorTwo,Third vertex color,med,declaration-only;source:gpu.h:77
+T00296.005,T00296,VS_POLY_G4,5,x2y2,0,u_long,,,,positionTwo,Third vertex position,med,declaration-only;source:gpu.h:78
+T00296.006,T00296,VS_POLY_G4,6,r3g3b3,0,u_long,,,,colorThree,Fourth vertex color,med,declaration-only;source:gpu.h:79
+T00296.007,T00296,VS_POLY_G4,7,x3y3,0,u_long,,,,positionThree,Fourth vertex position,med,declaration-only;source:gpu.h:80
+T00297.000,T00297,VS_POLY_G4_TPAGE,0,tpage,0,u_long,,,,texturePage,Texture page command word,med,declaration-only;source:gpu.h:61
+T00297.001,T00297,VS_POLY_G4_TPAGE,1,r0g0b0code,0,u_long,,,,colorZeroAndCode,First vertex color and command code,med,declaration-only;source:gpu.h:62
+T00297.002,T00297,VS_POLY_G4_TPAGE,2,x0y0,0,u_long,,,,positionZero,First vertex position,med,declaration-only;source:gpu.h:63
+T00297.003,T00297,VS_POLY_G4_TPAGE,3,r1g1b1,0,u_long,,,,colorOne,Second vertex color,med,declaration-only;source:gpu.h:64
+T00297.004,T00297,VS_POLY_G4_TPAGE,4,x1y1,0,u_long,,,,positionOne,Second vertex position,med,declaration-only;source:gpu.h:65
+T00297.005,T00297,VS_POLY_G4_TPAGE,5,r2g2b2,0,u_long,,,,colorTwo,Third vertex color,med,declaration-only;source:gpu.h:66
+T00297.006,T00297,VS_POLY_G4_TPAGE,6,x2y2,0,u_long,,,,positionTwo,Third vertex position,med,declaration-only;source:gpu.h:67
+T00297.007,T00297,VS_POLY_G4_TPAGE,7,r3g3b3,0,u_long,,,,colorThree,Fourth vertex color,med,declaration-only;source:gpu.h:68
+T00297.008,T00297,VS_POLY_G4_TPAGE,8,x3y3,0,u_long,,,,positionThree,Fourth vertex position,med,declaration-only;source:gpu.h:69
 T00298.000,T00298,VS_SPRT,0,tpage,0,u_long,,,,texturePageCommand,Packed PS1 texture-page command word,med,replaced-by:Render texture handle;declaration-only;source:gpu.h:53
 T00298.001,T00298,VS_SPRT,1,r0g0b0code,0,u_long,,,,colorCommand,Packed RGB color and sprite command,med,replaced-by:Render sprite color;declaration-only;source:gpu.h:54
 T00298.002,T00298,VS_SPRT,2,x0y0,0,u_long,,,,position,Packed signed screen X and Y coordinates,med,replaced-by:Render sprite position;declaration-only;source:gpu.h:55
 T00298.003,T00298,VS_SPRT,3,u0v0clut,0,u_long,,,,uvPalette,Packed texture UV and CLUT selector,med,replaced-by:Render atlas region;declaration-only;source:gpu.h:56
 T00298.004,T00298,VS_SPRT,4,wh,0,u_long,,,,size,Packed width and height in pixels,med,replaced-by:Render sprite size;declaration-only;source:gpu.h:57
-T00299.000,T00299,VS_TILE,0,r0g0b0code,0,u_long,,,,colorAndCode,Fill color and command code,high,
-T00299.001,T00299,VS_TILE,1,x0y0,0,u_long,,,,position,Top-left position,high,
-T00299.002,T00299,VS_TILE,2,wh,0,u_long,,,,size,Width and height,high,
+T00299.000,T00299,VS_TILE,0,r0g0b0code,0,u_long,,,,colorAndCode,Fill color and command code,med,declaration-only;source:gpu.h:47
+T00299.001,T00299,VS_TILE,1,x0y0,0,u_long,,,,position,Top-left position,med,declaration-only;source:gpu.h:48
+T00299.002,T00299,VS_TILE,2,wh,0,u_long,,,,size,Width and height,med,declaration-only;source:gpu.h:49
 T00300.000,T00300,VS_TILE_TPAGE,0,tpage,0,u_long,,,,texturePageCommand,Packed PS1 texture-page command word,med,replaced-by:Render draw state;declaration-only;source:gpu.h:40
 T00300.001,T00300,VS_TILE_TPAGE,1,r0g0b0code,0,u_long,,,,colorCommand,Packed RGB color and tile command,med,replaced-by:Render rectangle color;declaration-only;source:gpu.h:41
 T00300.002,T00300,VS_TILE_TPAGE,2,x0y0,0,u_long,,,,position,Packed signed screen X and Y coordinates,med,replaced-by:Render rectangle position;declaration-only;source:gpu.h:42
@@ -2821,10 +2821,10 @@ T00326.000,T00326,_mpdRoomCollisionMapSection,0,width,0,short,,,,,,,
 T00326.001,T00326,_mpdRoomCollisionMapSection,1,height,0,short,,,,,,,
 T00326.002,T00326,_mpdRoomCollisionMapSection,2,unk4,1,short,,,height origin in eight-world-unit steps,,,,
 T00326.003,T00326,_mpdRoomCollisionMapSection,3,unk6,1,short,,,,,,,
-T00327.000,T00327,_mpdRoomDoorSection2,0,unk0_0,1,u_short,5,,,tileX,Door tile X,high,
-T00327.001,T00327,_mpdRoomDoorSection2,1,unk0_5,1,u_short,5,,,tileZ,Door tile Z,high,
-T00327.002,T00327,_mpdRoomDoorSection2,2,unk0_10,1,u_short,3,,,floorLayer,Floor layer; two or more selects a moving platform,high,
-T00327.003,T00327,_mpdRoomDoorSection2,3,unk0_13,1,u_short,3,,,entryBits,Unidentified entry bits copied from Ashley placement,low,
+T00327.000,T00327,_mpdRoomDoorSection2,0,unk0_0,1,u_short,5,,,tileX,Door tile X,med,declaration-only;source:main.h:425
+T00327.001,T00327,_mpdRoomDoorSection2,1,unk0_5,1,u_short,5,,,tileZ,Door tile Z,med,declaration-only;source:main.h:426
+T00327.002,T00327,_mpdRoomDoorSection2,2,unk0_10,1,u_short,3,,,floorLayer,Floor layer; two or more selects a moving platform,med,declaration-only;source:main.h:427
+T00327.003,T00327,_mpdRoomDoorSection2,3,unk0_13,1,u_short,3,,,entryBits,Unidentified entry bits copied from Ashley placement,low,declaration-only;source:main.h:428
 T00328.000,T00328,_mpdRoomDoorSection_t,0,zndId,0,u_char,,,,,,,
 T00328.001,T00328,_mpdRoomDoorSection_t,1,mpdId,0,u_char,,,,,,,
 T00328.002,T00328,_mpdRoomDoorSection_t,2,unk2,1,_mpdRoomDoorSection2,,,,,,,
@@ -3620,29 +3620,29 @@ T00401.000,T00401,animationFrameScratch,0,prefix,0,char[8],,,,,,,
 T00401.001,T00401,animationFrameScratch,1,first,0,int,,,,,,,
 T00401.002,T00401,animationFrameScratch,2,last,0,int,,,,,,,
 T00401.003,T00401,animationFrameScratch,3,data,0,u_char **,,,,,,,
-T00402.000,T00402,cameraMotionScratch,0,distance,0,int,,,,distance,Remaining distance to the candidate,high,scratchpad overlay
-T00402.001,T00402,cameraMotionScratch,1,steps,0,int,,,,steps,Number of terrain motion steps,high,scratchpad overlay
-T00402.002,T00402,cameraMotionScratch,2,unk8,1,char[8],,,,pad08,Unused scratch bytes,low,scratchpad overlay
-T00402.003,T00402,cameraMotionScratch,3,delta,0,VECTOR,,,,delta,Step delta vector,high,scratchpad overlay
-T00402.004,T00402,cameraMotionScratch,4,candidate,0,VECTOR,,,,candidate,Candidate camera position,high,scratchpad overlay
-T00402.005,T00402,cameraMotionScratch,5,direction,0,VECTOR,,,,direction,Normalized motion direction,high,scratchpad overlay
-T00402.006,T00402,cameraMotionScratch,6,unk40,1,char[48],,,,pad40,Unused scratch bytes,low,scratchpad overlay
-T00402.007,T00402,cameraMotionScratch,7,matrix,0,MATRIX,,,,matrix,Working rotation matrix,high,scratchpad overlay
-T00403.000,T00403,cameraScratch,0,value,0,int,,,,value,Working eased fraction or angle,high,scratchpad overlay
-T00403.001,T00403,cameraScratch,1,distance,0,int,,,,distance,Working distance,high,scratchpad overlay
-T00403.002,T00403,cameraScratch,2,unk8,1,char[8],,,,pad08,Unused scratch bytes,low,scratchpad overlay
-T00403.003,T00403,cameraScratch,3,v1,0,VECTOR,,,,currentOffset,Current horizontal offset from partner,high,scratchpad overlay
-T00403.004,T00403,cameraScratch,4,v2,0,VECTOR,,,,destinationOffset,Destination horizontal offset from partner,high,scratchpad overlay
-T00403.005,T00403,cameraScratch,5,v3,0,VECTOR,,,,workVector,Temporary vector,med,scratchpad overlay
-T00403.006,T00403,cameraScratch,6,unk40,1,char[16],,,,pad40,Unused scratch bytes,low,scratchpad overlay
-T00403.007,T00403,cameraScratch,7,rotation,0,SVECTOR,,,,rotation,Working rotation,med,scratchpad overlay
-T00403.008,T00403,cameraScratch,8,rotation2,0,SVECTOR,,,,actorRotation,Queried actor rotation,med,scratchpad overlay
-T00403.009,T00403,cameraScratch,9,unk60,1,char[16],,,,pad60,Unused scratch bytes,low,scratchpad overlay
-T00403.010,T00403,cameraScratch,10,matrix,0,MATRIX,,,,matrix,Working rotation matrix,high,scratchpad overlay
-T00404.000,T00404,cameraShakeScratch,0,unk0,1,char[80],,,,pad00,Leading scratch bytes before the shake vectors,low,scratchpad overlay
-T00404.001,T00404,cameraShakeScratch,1,a,0,SVECTOR,,,,eyeShake,Summed eye shake offset,high,scratchpad overlay
-T00404.002,T00404,cameraShakeScratch,2,b,0,SVECTOR,,,,lookAtShake,Summed look-at shake offset,high,scratchpad overlay
-T00404.003,T00404,cameraShakeScratch,3,c,0,SVECTOR,,,,axisShake,Current oscillator offset by axis,high,scratchpad overlay
+T00402.000,T00402,cameraMotionScratch,0,distance,0,int,,,,distance,Remaining distance to the candidate,med,scratchpad overlay;declaration-only;source:4A0A8.c:213
+T00402.001,T00402,cameraMotionScratch,1,steps,0,int,,,,steps,Number of terrain motion steps,med,scratchpad overlay;declaration-only;source:4A0A8.c:214
+T00402.002,T00402,cameraMotionScratch,2,unk8,1,char[8],,,,pad08,Unused scratch bytes,low,scratchpad overlay;declaration-only;source:4A0A8.c:215
+T00402.003,T00402,cameraMotionScratch,3,delta,0,VECTOR,,,,delta,Step delta vector,med,scratchpad overlay;declaration-only;source:4A0A8.c:216
+T00402.004,T00402,cameraMotionScratch,4,candidate,0,VECTOR,,,,candidate,Candidate camera position,med,scratchpad overlay;declaration-only;source:4A0A8.c:217
+T00402.005,T00402,cameraMotionScratch,5,direction,0,VECTOR,,,,direction,Normalized motion direction,med,scratchpad overlay;declaration-only;source:4A0A8.c:218
+T00402.006,T00402,cameraMotionScratch,6,unk40,1,char[48],,,,pad40,Unused scratch bytes,low,scratchpad overlay;declaration-only;source:4A0A8.c:219
+T00402.007,T00402,cameraMotionScratch,7,matrix,0,MATRIX,,,,matrix,Working rotation matrix,med,scratchpad overlay;declaration-only;source:4A0A8.c:220
+T00403.000,T00403,cameraScratch,0,value,0,int,,,,value,Working eased fraction or angle,med,scratchpad overlay;declaration-only;source:4A0A8.c:199
+T00403.001,T00403,cameraScratch,1,distance,0,int,,,,distance,Working distance,med,scratchpad overlay;declaration-only;source:4A0A8.c:200
+T00403.002,T00403,cameraScratch,2,unk8,1,char[8],,,,pad08,Unused scratch bytes,low,scratchpad overlay;declaration-only;source:4A0A8.c:201
+T00403.003,T00403,cameraScratch,3,v1,0,VECTOR,,,,currentOffset,Current horizontal offset from partner,med,scratchpad overlay;declaration-only;source:4A0A8.c:202
+T00403.004,T00403,cameraScratch,4,v2,0,VECTOR,,,,destinationOffset,Destination horizontal offset from partner,med,scratchpad overlay;declaration-only;source:4A0A8.c:203
+T00403.005,T00403,cameraScratch,5,v3,0,VECTOR,,,,workVector,Temporary vector,med,scratchpad overlay;declaration-only;source:4A0A8.c:204
+T00403.006,T00403,cameraScratch,6,unk40,1,char[16],,,,pad40,Unused scratch bytes,low,scratchpad overlay;declaration-only;source:4A0A8.c:205
+T00403.007,T00403,cameraScratch,7,rotation,0,SVECTOR,,,,rotation,Working rotation,med,scratchpad overlay;declaration-only;source:4A0A8.c:206
+T00403.008,T00403,cameraScratch,8,rotation2,0,SVECTOR,,,,actorRotation,Queried actor rotation,med,scratchpad overlay;declaration-only;source:4A0A8.c:207
+T00403.009,T00403,cameraScratch,9,unk60,1,char[16],,,,pad60,Unused scratch bytes,low,scratchpad overlay;declaration-only;source:4A0A8.c:208
+T00403.010,T00403,cameraScratch,10,matrix,0,MATRIX,,,,matrix,Working rotation matrix,med,scratchpad overlay;declaration-only;source:4A0A8.c:209
+T00404.000,T00404,cameraShakeScratch,0,unk0,1,char[80],,,,pad00,Leading scratch bytes before the shake vectors,low,scratchpad overlay;declaration-only;source:4A0A8.c:224
+T00404.001,T00404,cameraShakeScratch,1,a,0,SVECTOR,,,,eyeShake,Summed eye shake offset,med,scratchpad overlay;declaration-only;source:4A0A8.c:225
+T00404.002,T00404,cameraShakeScratch,2,b,0,SVECTOR,,,,lookAtShake,Summed look-at shake offset,med,scratchpad overlay;declaration-only;source:4A0A8.c:226
+T00404.003,T00404,cameraShakeScratch,3,c,0,SVECTOR,,,,axisShake,Current oscillator offset by axis,med,scratchpad overlay;declaration-only;source:4A0A8.c:227
 T00405.000,T00405,cameraTransformScratch,0,prefix,0,char[100],,,,,,,
 T00405.001,T00405,cameraTransformScratch,1,matrix,0,MATRIX,,,,,,,
 T00405.002,T00405,cameraTransformScratch,2,gap,0,char[8],,,,,,,
@@ -3835,11 +3835,11 @@ T00426.000,T00426,fontTable_t,0,data,0,char[220][128],,,,indexedPixels,Four-bit 
 T00426.001,T00426,fontTable_t,1,clut,0,u_short[16][16],,,,palettes,Sixteen palettes of sixteen RGB555 colors,high,source:22C.c:3109
 T00427.000,T00427,frameScratch,0,unused,0,int,,,,,,,
 T00427.001,T00427,frameScratch,1,depth,0,int,,,,,,,
-T00428.000,T00428,func_800172D4_t,0,index,0,int,,,,index,Sound-effect slot index,med,
-T00428.001,T00428,func_800172D4_t,1,unk4,1,int,,,,reserved04,Unidentified word,low,
-T00428.002,T00428,func_800172D4_t,2,unk8,1,int,,,,reserved08,Unidentified word,low,
-T00428.003,T00428,func_800172D4_t,3,unkC,1,int,,,,reserved0C,Unidentified word,low,
-T00428.004,T00428,func_800172D4_t,4,unk10,1,int,,,,reserved10,Unidentified word,low,
+T00428.000,T00428,func_800172D4_t,0,index,0,int,,,,index,Sound-effect slot index,med,declaration-only;source:25AC.c:51
+T00428.001,T00428,func_800172D4_t,1,unk4,1,int,,,,reserved04,Unidentified word,low,declaration-only;source:25AC.c:52
+T00428.002,T00428,func_800172D4_t,2,unk8,1,int,,,,reserved08,Unidentified word,low,declaration-only;source:25AC.c:53
+T00428.003,T00428,func_800172D4_t,3,unkC,1,int,,,,reserved0C,Unidentified word,low,declaration-only;source:25AC.c:54
+T00428.004,T00428,func_800172D4_t,4,unk10,1,int,,,,reserved10,Unidentified word,low,declaration-only;source:25AC.c:55
 T00429.000,T00429,func_8004644C_t,0,unk0,1,u_char[48],,,,,,,
 T00429.001,T00429,func_8004644C_t,1,unk30,1,int *,,,,,,,
 T00430.000,T00430,func_80069388_t,0,unk0,1,int,,,,dmaTag,PS1 DMA packet tag,med,replaced-by:Render draw commands;declaration-only;source:D4.c:33
@@ -4125,9 +4125,9 @@ T00473.001,T00473,func_800ACF54_t,1,unk4,1,int,,,,,,,
 T00474.000,T00474,func_800AD494_t,0,unk0,1,int,,,,,,,
 T00474.001,T00474,func_800AD494_t,1,unk4,1,u_char *,,,,,,,
 T00474.002,T00474,func_800AD494_t,2,unk8,1,u_short[0],,,,,,,
-T00475.000,T00475,func_800BB68C_t,0,unk0,1,char,,,remaining count,remainingCount,Selected actors not yet returned,high,
-T00475.001,T00475,func_800BB68C_t,1,unk1,1,char,,,cursor,cursor,Next selection index,high,
-T00475.002,T00475,func_800BB68C_t,2,unk2,1,char[22],,,actor IDs,actorIds,Selected actor IDs,high,
+T00475.000,T00475,func_800BB68C_t,0,unk0,1,char,,,remaining count,remainingCount,Selected actors not yet returned,med,declaration-only;source:4A0A8.c:179
+T00475.001,T00475,func_800BB68C_t,1,unk1,1,char,,,cursor,cursor,Next selection index,med,declaration-only;source:4A0A8.c:180
+T00475.002,T00475,func_800BB68C_t,2,unk2,1,char[22],,,actor IDs,actorIds,Selected actor IDs,med,declaration-only;source:4A0A8.c:181
 T00476.000,T00476,func_800BD57C_t,0,unk0,1,char,,,,hasChanged,Value updated since last application,high,source:4A0A8.c:3647
 T00476.001,T00476,func_800BD57C_t,1,unk1,1,char,,,,easingMode,Interpolation curve selector,high,source:4A0A8.c:3647
 T00476.002,T00476,func_800BD57C_t,2,unk2,1,short,,,value,angle,Current angle in 4096 units,high,source:4A0A8.c:3647
@@ -4152,15 +4152,15 @@ T00477.013,T00477,func_800BDBB4_t,13,unk18,1,short,,,,reserved18,Unreferenced sh
 T00477.014,T00477,func_800BDBB4_t,14,unk1A,1,short,,,,reserved1A,Unreferenced short,low,source:4A0A8.c:3838
 T00477.015,T00477,func_800BDBB4_t,15,unk1C,1,short,,,elapsed ticks,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:3838
 T00477.016,T00477,func_800BDBB4_t,16,unk1E,1,short,,,duration,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:3838
-T00478.000,T00478,func_800BDBB4_t2,0,unk0,1,int,,,,easedFraction,Eased fraction in 4.12 fixed point,high,scratchpad overlay
+T00478.000,T00478,func_800BDBB4_t2,0,unk0,1,int,,,,easedFraction,Eased fraction in 4.12 fixed point,med,scratchpad overlay;declaration-only;source:4A0A8.c:175
 T00479.000,T00479,func_800BDF6C_t,0,unk0,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\4A0A8.c:55:5),,,,envelopeShape,Envelope selector in byte one; byte zero overlaps camera shake count,med,source:4A0A8.c:3962
 T00479.001,T00479,func_800BDF6C_t,1,unk2,1,short,,,,displacement,Current oscillator displacement,high,source:4A0A8.c:3974
-T00479.002,T00479,func_800BDF6C_t,2,unk4,1,short,,,oscillation cycles,cycles,Oscillation cycles over the duration,high,
-T00479.003,T00479,func_800BDF6C_t,3,unk6,1,short,,,amplitude,amplitude,Peak displacement,high,
-T00479.004,T00479,func_800BDF6C_t,4,unk8,1,char,,,,elapsedFrames,Elapsed oscillation frames,high,
-T00479.005,T00479,func_800BDF6C_t,5,unk9,1,char,,,duration,durationFrames,Oscillation duration or zero when inactive,high,
+T00479.002,T00479,func_800BDF6C_t,2,unk4,1,short,,,oscillation cycles,cycles,Oscillation cycles over the duration,med,declaration-only;source:4A0A8.c:60
+T00479.003,T00479,func_800BDF6C_t,3,unk6,1,short,,,amplitude,amplitude,Peak displacement,med,declaration-only;source:4A0A8.c:61
+T00479.004,T00479,func_800BDF6C_t,4,unk8,1,char,,,,elapsedFrames,Elapsed oscillation frames,med,declaration-only;source:4A0A8.c:62
+T00479.005,T00479,func_800BDF6C_t,5,unk9,1,char,,,duration,durationFrames,Oscillation duration or zero when inactive,med,declaration-only;source:4A0A8.c:63
 T00479.006,T00479,func_800BDF6C_t,6,unkA,1,char,,,,axisMask,Endpoint and per-axis sign selection bits,high,source:4A0A8.c:3995
-T00479.007,T00479,func_800BDF6C_t,7,unkB,1,char,,,,reserved0B,Byte cleared at camera initialization,low,
+T00479.007,T00479,func_800BDF6C_t,7,unkB,1,char,,,,reserved0B,Byte cleared at camera initialization,low,declaration-only;source:4A0A8.c:65
 T00480.000,T00480,func_800BDF6C_unk180_t,0,unk0,1,char,,,,hasChanged,Value updated since last application,high,source:4A0A8.c:3927
 T00480.001,T00480,func_800BDF6C_unk180_t,1,unk1,1,char,,,,easingMode,Interpolation curve selector,high,source:4A0A8.c:3927
 T00480.002,T00480,func_800BDF6C_unk180_t,2,unk2,1,short,,,,value,Current lens value,high,source:4A0A8.c:3927
@@ -5289,8 +5289,8 @@ T00600.001,T00600,savedata_unk180_2_t,1,base,0,saveBase_t,,,,,,,
 T00601.000,T00601,savedata_unk180_t,0,unk180,1,savedata_unk180_2_t,,,,,,,
 T00601.001,T00601,savedata_unk180_t,1,stats,0,stats_t,,,,,,,
 T00601.002,T00601,savedata_unk180_t,2,checksums,0,char[92],,,,,,,
-T00602.000,T00602,scriptBytePair,0,low,0,u_char,,,,lowByte,Low byte of a little-endian script value,med,
-T00602.001,T00602,scriptBytePair,1,high,0,u_char,,,,highByte,High byte of a little-endian script value,med,
+T00602.000,T00602,scriptBytePair,0,low,0,u_char,,,,lowByte,Low byte of a little-endian script value,med,declaration-only;source:4A0A8.c:231
+T00602.001,T00602,scriptBytePair,1,high,0,u_char,,,,highByte,High byte of a little-endian script value,med,declaration-only;source:4A0A8.c:232
 T00603.000,T00603,soundData_t,0,currentMusicSlot,0,int,,,,,,,
 T00603.001,T00603,soundData_t,1,unk4,1,u_int,,,currentMusicHandle,,,,
 T00603.002,T00603,soundData_t,2,unk8,1,u_int,,,currentMusicFileId,,,,
@@ -5464,10 +5464,10 @@ T00619.000,T00619,textOffset,0,x,0,int,12,,,,,,
 T00619.001,T00619,textOffset,1,y,0,int,12,,,,,,
 T00619.002,T00619,textOffset,2,alignment,0,u_int,2,,,,,,
 T00619.003,T00619,textOffset,3,flags,0,u_int,4,,,,,,
-T00620.000,T00620,textPlacement,0,offset,0,textOffset,,,,anchorOffset,Packed anchor offset alignment and flags,high,
-T00620.001,T00620,textPlacement,1,x,0,short,,,,screenX,Dialog anchor screen X,high,
-T00620.002,T00620,textPlacement,2,y,0,short,,,,screenY,Dialog anchor screen Y,high,
-T00620.003,T00620,textPlacement,3,distance,0,int,,,screen-clamp displacement magnitude,clampDistance,Displacement applied when clamping the dialog on screen,high,
+T00620.000,T00620,textPlacement,0,offset,0,textOffset,,,,anchorOffset,Packed anchor offset alignment and flags,med,declaration-only;source:4A0A8.c:192
+T00620.001,T00620,textPlacement,1,x,0,short,,,,screenX,Dialog anchor screen X,med,declaration-only;source:4A0A8.c:193
+T00620.002,T00620,textPlacement,2,y,0,short,,,,screenY,Dialog anchor screen Y,med,declaration-only;source:4A0A8.c:194
+T00620.003,T00620,textPlacement,3,distance,0,int,,,screen-clamp displacement magnitude,clampDistance,Displacement applied when clamping the dialog on screen,med,declaration-only;source:4A0A8.c:195
 T00621.000,T00621,trackingMotion,0,facing,0,unsigned short,,,,,,,
 T00621.001,T00621,trackingMotion,1,state,0,unsigned char,,,,,,,
 T00621.002,T00621,trackingMotion,2,flag3,0,unsigned char,,,,,,,
@@ -6637,8 +6637,8 @@ T00763.000,T00763,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00763.001,T00763,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:610:5),1,bits,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:612:9),,,,,,,
 T00764.000,T00764,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,,,,
 T00764.001,T00764,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,,,,
-T00765.000,T00765,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,high,
-T00765.001,T00765,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,high,
+T00765.000,T00765,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00765.001,T00765,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00766.000,T00766,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,,,,
 T00766.001,T00766,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,,,,
 T00767.000,T00767,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,,,,
@@ -6657,10 +6657,10 @@ T00772.000,T00772,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00772.001,T00772,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\6E644.h:12:5),1,position,0,SVECTOR,,,,,,,
 T00773.000,T00773,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,,,,
 T00773.001,T00773,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,,,,
-T00774.000,T00774,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,high,
-T00774.001,T00774,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,high,
-T00775.000,T00775,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,high,
-T00775.001,T00775,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,high,
+T00774.000,T00774,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00774.001,T00774,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
+T00775.000,T00775,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00775.001,T00775,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00776.000,T00776,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,,,,
 T00776.001,T00776,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,,,,
 T00777.000,T00777,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,,,,
@@ -6686,10 +6686,10 @@ T00784.003,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00784.004,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),4,polyG4,0,VS_POLY_G4,,,,,,,
 T00784.005,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),5,tilePoly,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:144:9),,,,,,,
 T00784.006,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),6,raw,0,u_long[15],,,,,,,
-T00785.000,T00785,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,high,
-T00785.001,T00785,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,high,
-T00786.000,T00786,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,high,
-T00786.001,T00786,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,high,
+T00785.000,T00785,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00785.001,T00785,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
+T00786.000,T00786,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00786.001,T00786,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00787.000,T00787,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,,,,
 T00787.001,T00787,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,,,,
 T00788.000,T00788,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,,,,
@@ -6703,8 +6703,8 @@ T00791.000,T00791,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00791.001,T00791,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:90:9),,,,,,,
 T00792.000,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,,,,
 T00792.001,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,,,,
-T00793.000,T00793,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,high,
-T00793.001,T00793,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,high,
+T00793.000,T00793,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00793.001,T00793,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00794.000,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),0,sprt,0,VS_SPRT,,,,sprite,Sprite and texture-page packet,med,replaced-by:Render sprite commands;declaration-only;source:22C.c:1065
 T00794.001,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),1,tile_tpage,0,VS_TILE_TPAGE,,,,texturedTile,Tile and texture-page packet,med,replaced-by:Render rectangle commands;declaration-only;source:22C.c:1066
 T00794.002,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),2,tile,0,VS_TILE,,,,tile,Untextured tile packet,med,replaced-by:Render rectangle commands;declaration-only;source:22C.c:1067
@@ -6712,10 +6712,10 @@ T00794.003,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00794.004,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),4,polyG4,0,VS_POLY_G4,,,,gradientQuad,Gouraud quad packet,med,replaced-by:Render quad commands;declaration-only;source:22C.c:1069
 T00794.005,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),5,tilePoly,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1070:9),,,,tileAndGradientQuad,Combined tile and Gouraud quad packets,med,replaced-by:Render draw commands;declaration-only;source:22C.c:1073
 T00794.006,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),6,raw,0,u_long[15],,,,packetWords,Raw storage for fifteen GPU packet words,med,replaced-by:Render draw commands;declaration-only;source:22C.c:1074
-T00795.000,T00795,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,high,
-T00795.001,T00795,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,high,
-T00796.000,T00796,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\sound.h:589:16),0,s32,0,int,,,,word,Value as a 32-bit integer,high,
-T00796.001,T00796,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\sound.h:589:16),1,u8,0,u_char[4],,,,bytes,Value as four bytes,high,
+T00795.000,T00795,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00795.001,T00795,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
+T00796.000,T00796,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\sound.h:589:16),0,s32,0,int,,,,word,Value as a 32-bit integer,med,declaration-only;source:sound.h:590
+T00796.001,T00796,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\sound.h:589:16),1,u8,0,u_char[4],,,,bytes,Value as four bytes,med,declaration-only;source:sound.h:591
 T00797.000,T00797,actionMetadataWord,0,raw,0,unsigned int,,,,,,,
 T00797.001,T00797,actionMetadataWord,1,bytes,0,unsigned char[4],,,,,,,
 T00798.000,T00798,actionReactionTarget,0,raw,0,unsigned int,,,,,,,
@@ -6763,5 +6763,5 @@ T00817.000,T00817,vs_battle_movementPosition,0,raw,0,unsigned int,,,,,,,
 T00817.001,T00817,vs_battle_movementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:441:5),,,,,,,
 T00818.000,T00818,vs_battle_movementPosition,0,raw,0,unsigned int,,,,,,,
 T00818.001,T00818,vs_battle_movementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),,,,,,,
-T00819.000,T00819,vs_hitParams_t,0,u16,0,u_short[2],,,,halves,Parameters as two 16-bit halves,high,
-T00819.001,T00819,vs_hitParams_t,1,s32,0,u_int,,,,word,Parameters as one 32-bit word,high,
+T00819.000,T00819,vs_hitParams_t,0,u16,0,u_short[2],,,,halves,Parameters as two 16-bit halves,med,declaration-only;source:main.h:47
+T00819.001,T00819,vs_hitParams_t,1,s32,0,u_int,,,,word,Parameters as one 32-bit word,med,declaration-only;source:main.h:48

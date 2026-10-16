@@ -1,283 +1,283 @@
 id,final_name,meaning,confidence,notes
-T00123.000,weaponCategoryKills,Kills per weapon category,high,
-T00123.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00123.002,totalKills,Total kills,high,
-T00150.000,frames,Frame component of elapsed game time,high,
-T00150.001,seconds,Second component of elapsed game time,high,
-T00150.002,minutes,Minute component of elapsed game time,high,
-T00150.003,hours,Hour component of elapsed game time,high,
-T00151.000,weaponCategoryKills,Kills per weapon category,high,
-T00151.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00151.002,totalKills,Total kills,high,
-T00765.000,allButtons,Pressed buttons for both ports,high,
-T00765.001,ports,Pressed button byte pairs per port,high,
-T00152.000,lowByte,Low eight bits of controller buttons,high,
-T00152.001,highByte,High eight bits of controller buttons,high,
-T00153.000,effectId,Hit effect identifier,med,
-T00153.001,prerequisiteFunctionId,Prerequisite check function index,high,
-T00153.002,hitFunctionId,Hit resolution function index,high,
-T00153.003,statCalculatorId,Stat calculator function index,high,
-T00153.004,statFactor,Stat scaling factor,high,
-T00153.005,damageType,Damage type,med,
-T00153.006,affinity,Elemental affinity,high,
-T00158.000,frames,Frame component of elapsed game time,high,
-T00158.001,seconds,Second component of elapsed game time,high,
-T00158.002,minutes,Minute component of elapsed game time,high,
-T00158.003,hours,Hour component of elapsed game time,high,
-T00159.000,weaponCategoryKills,Kills per weapon category,high,
-T00159.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00159.002,totalKills,Total kills,high,
-T00774.000,allButtons,Pressed buttons for both ports,high,
-T00774.001,ports,Pressed button byte pairs per port,high,
-T00160.000,lowByte,Low eight bits of controller buttons,high,
-T00160.001,highByte,High eight bits of controller buttons,high,
-T00161.000,effectId,Hit effect identifier,med,
-T00161.001,prerequisiteFunctionId,Prerequisite check function index,high,
-T00161.002,hitFunctionId,Hit resolution function index,high,
-T00161.003,statCalculatorId,Stat calculator function index,high,
-T00161.004,statFactor,Stat scaling factor,high,
-T00161.005,damageType,Damage type,med,
-T00161.006,affinity,Elemental affinity,high,
-T00162.000,frames,Frame component of elapsed game time,high,
-T00162.001,seconds,Second component of elapsed game time,high,
-T00162.002,minutes,Minute component of elapsed game time,high,
-T00162.003,hours,Hour component of elapsed game time,high,
-T00163.000,weaponCategoryKills,Kills per weapon category,high,
-T00163.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00163.002,totalKills,Total kills,high,
-T00775.000,allButtons,Pressed buttons for both ports,high,
-T00775.001,ports,Pressed button byte pairs per port,high,
-T00164.000,lowByte,Low eight bits of controller buttons,high,
-T00164.001,highByte,High eight bits of controller buttons,high,
-T00165.000,effectId,Hit effect identifier,med,
-T00165.001,prerequisiteFunctionId,Prerequisite check function index,high,
-T00165.002,hitFunctionId,Hit resolution function index,high,
-T00165.003,statCalculatorId,Stat calculator function index,high,
-T00165.004,statFactor,Stat scaling factor,high,
-T00165.005,damageType,Damage type,med,
-T00165.006,affinity,Elemental affinity,high,
-T00173.000,frames,Frame component of elapsed game time,high,
-T00173.001,seconds,Second component of elapsed game time,high,
-T00173.002,minutes,Minute component of elapsed game time,high,
-T00173.003,hours,Hour component of elapsed game time,high,
-T00174.000,weaponCategoryKills,Kills per weapon category,high,
-T00174.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00174.002,totalKills,Total kills,high,
-T00785.000,allButtons,Pressed buttons for both ports,high,
-T00785.001,ports,Pressed button byte pairs per port,high,
-T00175.000,lowByte,Low eight bits of controller buttons,high,
-T00175.001,highByte,High eight bits of controller buttons,high,
-T00176.000,effectId,Hit effect identifier,med,
-T00176.001,prerequisiteFunctionId,Prerequisite check function index,high,
-T00176.002,hitFunctionId,Hit resolution function index,high,
-T00176.003,statCalculatorId,Stat calculator function index,high,
-T00176.004,statFactor,Stat scaling factor,high,
-T00176.005,damageType,Damage type,med,
-T00176.006,affinity,Elemental affinity,high,
-T00177.000,frames,Frame component of elapsed game time,high,
-T00177.001,seconds,Second component of elapsed game time,high,
-T00177.002,minutes,Minute component of elapsed game time,high,
-T00177.003,hours,Hour component of elapsed game time,high,
-T00178.000,weaponCategoryKills,Kills per weapon category,high,
-T00178.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00178.002,totalKills,Total kills,high,
-T00786.000,allButtons,Pressed buttons for both ports,high,
-T00786.001,ports,Pressed button byte pairs per port,high,
-T00179.000,lowByte,Low eight bits of controller buttons,high,
-T00179.001,highByte,High eight bits of controller buttons,high,
-T00180.000,effectId,Hit effect identifier,med,
-T00180.001,prerequisiteFunctionId,Prerequisite check function index,high,
-T00180.002,hitFunctionId,Hit resolution function index,high,
-T00180.003,statCalculatorId,Stat calculator function index,high,
-T00180.004,statFactor,Stat scaling factor,high,
-T00180.005,damageType,Damage type,med,
-T00180.006,affinity,Elemental affinity,high,
-T00185.000,frames,Frame component of elapsed game time,high,
-T00185.001,seconds,Second component of elapsed game time,high,
-T00185.002,minutes,Minute component of elapsed game time,high,
-T00185.003,hours,Hour component of elapsed game time,high,
-T00186.000,weaponCategoryKills,Kills per weapon category,high,
-T00186.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00186.002,totalKills,Total kills,high,
-T00793.000,allButtons,Pressed buttons for both ports,high,
-T00793.001,ports,Pressed button byte pairs per port,high,
-T00188.000,effectId,Hit effect identifier,med,
-T00188.001,prerequisiteFunctionId,Prerequisite check function index,high,
-T00188.002,hitFunctionId,Hit resolution function index,high,
-T00188.003,statCalculatorId,Stat calculator function index,high,
-T00188.004,statFactor,Stat scaling factor,high,
-T00188.005,damageType,Damage type,med,
-T00188.006,affinity,Elemental affinity,high,
-T00191.000,weaponCategoryKills,Kills per weapon category,high,
-T00191.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,high,
-T00191.002,totalKills,Total kills,high,
-T00795.000,allButtons,Pressed buttons for both ports,high,
-T00795.001,ports,Pressed button byte pairs per port,high,
-T00193.000,effectId,Hit effect identifier,med,
-T00193.001,prerequisiteFunctionId,Prerequisite check function index,high,
-T00193.002,hitFunctionId,Hit resolution function index,high,
-T00193.003,statCalculatorId,Stat calculator function index,high,
-T00193.004,statFactor,Stat scaling factor,high,
-T00193.005,damageType,Damage type,med,
-T00193.006,affinity,Elemental affinity,high,
-T00796.000,word,Value as a 32-bit integer,high,
-T00796.001,bytes,Value as four bytes,high,
-T00195.000,yearBcd,BCD year of the timestamp,high,
-T00195.001,monthBcd,BCD month of the timestamp,high,
-T00195.002,dayBcd,BCD day of the timestamp,high,
-T00195.003,hoursBcd,BCD hours of the timestamp,high,
-T00195.004,minutesBcd,BCD minutes of the timestamp,high,
-T00195.005,secondsBcd,BCD seconds of the timestamp,high,
-T00274.000,magic,File signature,high,
-T00274.001,reserved04,Unidentified header bytes,low,
-T00274.002,programOffsets,Program offset pairs,med,
-T00274.003,metadataTableA,First per-program metadata table,low,
-T00274.004,metadataTableB,Second per-program metadata table,low,
-T00274.005,programData,Variable-length program data,med,
-T00275.000,magic,Stream signature,high,
-T00275.001,reserved04,Unidentified header word,low,
-T00275.002,reserved08,Unidentified header bytes,low,
-T00275.003,totalPages,Total stream pages,med,
-T00275.004,reserved14,Unidentified header word,low,
-T00275.005,reserved18,Unidentified header word,low,
-T00275.006,sampleRate,Stream sample rate,med,
-T00275.007,currentPage,Current stream page,med,
-T00275.008,reserved24,Unidentified header bytes,low,
-T00275.009,reserved28,Unidentified header word,low,
-T00277.000,reserved00,Unidentified channel data,low,
-T00277.001,reserved04,Unidentified channel data,low,
-T00277.002,reserved08,Unidentified channel data,low,
-T00277.003,voicesInUseMask,Named in original declaration,med,
-T00277.004,voiceIndex,Named in original declaration,med,
-T00277.005,channelFlags,Named in original declaration,med,
-T00277.006,reserved18,Unidentified channel data,low,
-T00277.007,reserved1C,Unidentified channel data,low,
-T00277.008,reserved20,Unidentified channel data,low,
-T00277.009,reserved24,Unidentified channel data,low,
-T00277.010,reserved28,Unidentified channel data,low,
-T00277.011,reserved2C,Unidentified channel data,low,
-T00277.012,reserved30,Unidentified channel data,low,
-T00277.013,reserved34,Unidentified channel data,low,
-T00277.014,reserved38,Unidentified channel data,low,
-T00277.015,reserved3C,Unidentified channel data,low,
-T00277.016,volume,Named in original declaration,med,
-T00277.017,reserved44,Unidentified channel data,low,
-T00277.018,reserved48,Unidentified channel data,low,
-T00277.019,reserved4C,Unidentified channel data,low,
-T00277.020,reserved4D,Unidentified channel data,low,
-T00277.021,reserved4E,Unidentified channel data,low,
-T00277.022,reserved4F,Unidentified channel data,low,
-T00277.023,reserved50,Unidentified channel data,low,
-T00277.024,reserved54,Unidentified channel data,low,
-T00277.025,voiceSampleRate,Named in original declaration,med,
-T00277.026,controlFlags,Named in original declaration,med,
-T00281.000,reserved00,Unidentified leading bytes,low,
-T00281.001,streamHeader,Embedded paged stream header,high,
-T00281.002,reservedAC,Unidentified bytes after the header,low,
-T00281.003,audioData,Variable-length audio data,high,
-T00296.000,colorZeroAndCode,First vertex color and command code,high,
-T00296.001,positionZero,First vertex position,high,
-T00296.002,colorOne,Second vertex color,high,
-T00296.003,positionOne,Second vertex position,high,
-T00296.004,colorTwo,Third vertex color,high,
-T00296.005,positionTwo,Third vertex position,high,
-T00296.006,colorThree,Fourth vertex color,high,
-T00296.007,positionThree,Fourth vertex position,high,
-T00297.000,texturePage,Texture page command word,high,
-T00297.001,colorZeroAndCode,First vertex color and command code,high,
-T00297.002,positionZero,First vertex position,high,
-T00297.003,colorOne,Second vertex color,high,
-T00297.004,positionOne,Second vertex position,high,
-T00297.005,colorTwo,Third vertex color,high,
-T00297.006,positionTwo,Third vertex position,high,
-T00297.007,colorThree,Fourth vertex color,high,
-T00297.008,positionThree,Fourth vertex position,high,
-T00299.000,colorAndCode,Fill color and command code,high,
-T00299.001,position,Top-left position,high,
-T00299.002,size,Width and height,high,
-T00327.000,tileX,Door tile X,high,
-T00327.001,tileZ,Door tile Z,high,
-T00327.002,floorLayer,Floor layer; two or more selects a moving platform,high,
-T00327.003,entryBits,Unidentified entry bits copied from Ashley placement,low,
-T00008.000,Spell,ActionType Spell,high,
-T00008.001,Ability,ActionType Ability,high,
-T00008.002,BreakArt,ActionType BreakArt,high,
-T00008.003,Item,ActionType Item,high,
-T00008.004,BaseAttack,ActionType BaseAttack,high,
-T00008.005,Trap,ActionType Trap,high,
-T00010.000,DaggerArtOne,ActionId DaggerArtOne,high,
-T00016.000,Idle,DiscDriveState Idle,high,
-T00016.001,SeekReady,DiscDriveState SeekReady,high,
-T00016.002,ReadReady,DiscDriveState ReadReady,high,
-T00016.003,ReadError,DiscDriveState ReadError,high,
-T00016.004,ReadInit,DiscDriveState ReadInit,high,
-T00016.005,ReadXaInit,DiscDriveState ReadXaInit,high,
-T00016.006,StreamXa,DiscDriveState StreamXa,high,
-T00016.007,CommandFailed,DiscDriveState CommandFailed,high,
-T00016.008,StreamXaEnd,DiscDriveState StreamXaEnd,high,
-T00019.000,Undead,EnemyClass Undead,high,
-T00428.000,index,Sound-effect slot index,med,
-T00428.001,reserved04,Unidentified word,low,
-T00428.002,reserved08,Unidentified word,low,
-T00428.003,reserved0C,Unidentified word,low,
-T00428.004,reserved10,Unidentified word,low,
-T00021.000,BronzeKey,KeyItemId BronzeKey,high,
-T00021.001,ChamomileSigil,KeyItemId ChamomileSigil,high,
-T00099.000,Off,Dithering Off,high,
-T00099.001,On,Dithering On,high,
-T00819.000,halves,Parameters as two 16-bit halves,high,
-T00819.001,word,Parameters as one 32-bit word,high,
-T00116.000,Free,DiscRequestState Free,high,
-T00116.001,Allocated,DiscRequestState Allocated,high,
-T00116.002,Reading,DiscRequestState Reading,high,
-T00116.003,Enqueued,DiscRequestState Enqueued,high,
-T00116.004,Loaded,DiscRequestState Loaded,high,
-T00116.005,Error,DiscRequestState Error,high,
-T00116.006,Dispatched,DiscRequestState Dispatched,high,
-T00117.000,Null,LegacyPrimitiveAddress Null,high,
-T00117.001,End,LegacyPrimitiveAddress End,high,
-T00118.000,ShadeTex,LegacyPrimitiveCode ShadeTex,high,
-T00118.001,SemiTrans,LegacyPrimitiveCode SemiTrans,high,
-T00118.002,PolyFt3,LegacyPrimitiveCode PolyFt3,high,
-T00118.003,PolyFt4,LegacyPrimitiveCode PolyFt4,high,
-T00118.004,PolyFt4ShadeTex,LegacyPrimitiveCode PolyFt4ShadeTex,high,
-T00118.005,PolyG4,LegacyPrimitiveCode PolyG4,high,
-T00118.006,PolyG4SemiTrans,LegacyPrimitiveCode PolyG4SemiTrans,high,
-T00118.007,PolyGt4,LegacyPrimitiveCode PolyGt4,high,
-T00118.008,PolyGt4SemiTrans,LegacyPrimitiveCode PolyGt4SemiTrans,high,
-T00118.009,LineF2,LegacyPrimitiveCode LineF2,high,
-T00118.010,LineF2SemiTrans,LegacyPrimitiveCode LineF2SemiTrans,high,
-T00118.011,LineG2,LegacyPrimitiveCode LineG2,high,
-T00118.012,LineG2SemiTrans,LegacyPrimitiveCode LineG2SemiTrans,high,
-T00118.013,Tile,LegacyPrimitiveCode Tile,high,
-T00118.014,TileSemiTrans,LegacyPrimitiveCode TileSemiTrans,high,
-T00118.015,Sprite,LegacyPrimitiveCode Sprite,high,
-T00118.016,SpriteSemiTrans,LegacyPrimitiveCode SpriteSemiTrans,high,
-T00119.000,Average,BlendMode Average,high,
-T00119.001,Add,BlendMode Add,high,
-T00119.002,Subtract,BlendMode Subtract,high,
-T00119.003,AddQuarter,BlendMode AddQuarter,high,
-T00120.000,NoChunking,TextCode NoChunking,high,
-T00120.001,Zero,TextCode Zero,high,
-T00120.002,FontTableZero,TextCode FontTableZero,high,
-T00120.003,UpperR,TextCode UpperR,high,
-T00120.004,LowerJ,TextCode LowerJ,high,
-T00120.005,Space,TextCode Space,high,
-T00120.006,Colon,TextCode Colon,high,
-T00120.007,ForwardSlash,TextCode ForwardSlash,high,
-T00120.008,Hyphen,TextCode Hyphen,high,
-T00120.009,Arrow,TextCode Arrow,high,
-T00120.010,NonPrinting,TextCode NonPrinting,high,
-T00120.011,Confirm,TextCode Confirm,high,
-T00120.012,Terminator,TextCode Terminator,high,
-T00120.013,Newline,TextCode Newline,high,
-T00120.014,Control,TextCode Control,high,
-T00120.015,ChunkSize,TextCode ChunkSize,high,
-T00120.016,Spacing,TextCode Spacing,high,
-T00120.017,FontTable,TextCode FontTable,high,
-T00120.018,PrintHex,TextCode PrintHex,high,
-T00120.019,PrintDecimal,TextCode PrintDecimal,high,
-T00120.020,PrintString,TextCode PrintString,high,
-T00121.000,Palette4Bit,TextureFormat Palette4Bit,high,
-T00121.001,Palette8Bit,TextureFormat Palette8Bit,high,
-T00121.002,Direct16Bit,TextureFormat Direct16Bit,high,
+T00123.000,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00123.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00123.002,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00150.000,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00150.001,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00150.002,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00150.003,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00151.000,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00151.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00151.002,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00765.000,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00765.001,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
+T00152.000,lowByte,Low eight bits of controller buttons,med,declaration-only;source:main.h:485
+T00152.001,highByte,High eight bits of controller buttons,med,declaration-only;source:main.h:486
+T00153.000,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00153.001,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00153.002,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00153.003,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00153.004,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00153.005,damageType,Damage type,med,declaration-only;source:main.h:103
+T00153.006,affinity,Elemental affinity,med,declaration-only;source:main.h:104
+T00158.000,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00158.001,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00158.002,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00158.003,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00159.000,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00159.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00159.002,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00774.000,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00774.001,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
+T00160.000,lowByte,Low eight bits of controller buttons,med,declaration-only;source:main.h:485
+T00160.001,highByte,High eight bits of controller buttons,med,declaration-only;source:main.h:486
+T00161.000,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00161.001,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00161.002,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00161.003,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00161.004,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00161.005,damageType,Damage type,med,declaration-only;source:main.h:103
+T00161.006,affinity,Elemental affinity,med,declaration-only;source:main.h:104
+T00162.000,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00162.001,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00162.002,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00162.003,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00163.000,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00163.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00163.002,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00775.000,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00775.001,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
+T00164.000,lowByte,Low eight bits of controller buttons,med,declaration-only;source:main.h:485
+T00164.001,highByte,High eight bits of controller buttons,med,declaration-only;source:main.h:486
+T00165.000,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00165.001,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00165.002,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00165.003,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00165.004,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00165.005,damageType,Damage type,med,declaration-only;source:main.h:103
+T00165.006,affinity,Elemental affinity,med,declaration-only;source:main.h:104
+T00173.000,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00173.001,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00173.002,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00173.003,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00174.000,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00174.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00174.002,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00785.000,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00785.001,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
+T00175.000,lowByte,Low eight bits of controller buttons,med,declaration-only;source:main.h:485
+T00175.001,highByte,High eight bits of controller buttons,med,declaration-only;source:main.h:486
+T00176.000,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00176.001,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00176.002,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00176.003,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00176.004,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00176.005,damageType,Damage type,med,declaration-only;source:main.h:103
+T00176.006,affinity,Elemental affinity,med,declaration-only;source:main.h:104
+T00177.000,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00177.001,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00177.002,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00177.003,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00178.000,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00178.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00178.002,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00786.000,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00786.001,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
+T00179.000,lowByte,Low eight bits of controller buttons,med,declaration-only;source:main.h:485
+T00179.001,highByte,High eight bits of controller buttons,med,declaration-only;source:main.h:486
+T00180.000,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00180.001,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00180.002,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00180.003,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00180.004,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00180.005,damageType,Damage type,med,declaration-only;source:main.h:103
+T00180.006,affinity,Elemental affinity,med,declaration-only;source:main.h:104
+T00185.000,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
+T00185.001,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
+T00185.002,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
+T00185.003,hours,Hour component of elapsed game time,med,declaration-only;source:main.h:170
+T00186.000,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00186.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00186.002,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00793.000,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00793.001,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
+T00188.000,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00188.001,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00188.002,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00188.003,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00188.004,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00188.005,damageType,Damage type,med,declaration-only;source:main.h:103
+T00188.006,affinity,Elemental affinity,med,declaration-only;source:main.h:104
+T00191.000,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
+T00191.001,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
+T00191.002,totalKills,Total kills,med,declaration-only;source:main.h:373
+T00795.000,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
+T00795.001,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
+T00193.000,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
+T00193.001,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
+T00193.002,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
+T00193.003,statCalculatorId,Stat calculator function index,med,declaration-only;source:main.h:101
+T00193.004,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
+T00193.005,damageType,Damage type,med,declaration-only;source:main.h:103
+T00193.006,affinity,Elemental affinity,med,declaration-only;source:main.h:104
+T00796.000,word,Value as a 32-bit integer,med,declaration-only;source:sound.h:590
+T00796.001,bytes,Value as four bytes,med,declaration-only;source:sound.h:591
+T00195.000,yearBcd,BCD year of the timestamp,med,declaration-only;source:25AC.c:27
+T00195.001,monthBcd,BCD month of the timestamp,med,declaration-only;source:25AC.c:28
+T00195.002,dayBcd,BCD day of the timestamp,med,declaration-only;source:25AC.c:29
+T00195.003,hoursBcd,BCD hours of the timestamp,med,declaration-only;source:25AC.c:30
+T00195.004,minutesBcd,BCD minutes of the timestamp,med,declaration-only;source:25AC.c:31
+T00195.005,secondsBcd,BCD seconds of the timestamp,med,declaration-only;source:25AC.c:32
+T00274.000,magic,File signature,med,declaration-only;source:sound.h:189
+T00274.001,reserved04,Unidentified header bytes,low,declaration-only;source:sound.h:190
+T00274.002,programOffsets,Program offset pairs,med,declaration-only;source:sound.h:192
+T00274.003,metadataTableA,First per-program metadata table,low,declaration-only;source:sound.h:194
+T00274.004,metadataTableB,Second per-program metadata table,low,declaration-only;source:sound.h:195
+T00274.005,programData,Variable-length program data,med,declaration-only;source:sound.h:196
+T00275.000,magic,Stream signature,med,declaration-only;source:sound.h:549
+T00275.001,reserved04,Unidentified header word,low,declaration-only;source:sound.h:550
+T00275.002,reserved08,Unidentified header bytes,low,declaration-only;source:sound.h:551
+T00275.003,totalPages,Total stream pages,med,declaration-only;source:sound.h:552
+T00275.004,reserved14,Unidentified header word,low,declaration-only;source:sound.h:553
+T00275.005,reserved18,Unidentified header word,low,declaration-only;source:sound.h:554
+T00275.006,sampleRate,Stream sample rate,med,declaration-only;source:sound.h:555
+T00275.007,currentPage,Current stream page,med,declaration-only;source:sound.h:556
+T00275.008,reserved24,Unidentified header bytes,low,declaration-only;source:sound.h:557
+T00275.009,reserved28,Unidentified header word,low,declaration-only;source:sound.h:558
+T00277.000,reserved00,Unidentified channel data,low,declaration-only;source:sound.h:277
+T00277.001,reserved04,Unidentified channel data,low,declaration-only;source:sound.h:278
+T00277.002,reserved08,Unidentified channel data,low,declaration-only;source:sound.h:279
+T00277.003,voicesInUseMask,Named in original declaration,med,declaration-only;source:sound.h:280
+T00277.004,voiceIndex,Named in original declaration,med,declaration-only;source:sound.h:281
+T00277.005,channelFlags,Named in original declaration,med,declaration-only;source:sound.h:282
+T00277.006,reserved18,Unidentified channel data,low,declaration-only;source:sound.h:283
+T00277.007,reserved1C,Unidentified channel data,low,declaration-only;source:sound.h:284
+T00277.008,reserved20,Unidentified channel data,low,declaration-only;source:sound.h:285
+T00277.009,reserved24,Unidentified channel data,low,declaration-only;source:sound.h:286
+T00277.010,reserved28,Unidentified channel data,low,declaration-only;source:sound.h:287
+T00277.011,reserved2C,Unidentified channel data,low,declaration-only;source:sound.h:288
+T00277.012,reserved30,Unidentified channel data,low,declaration-only;source:sound.h:289
+T00277.013,reserved34,Unidentified channel data,low,declaration-only;source:sound.h:290
+T00277.014,reserved38,Unidentified channel data,low,declaration-only;source:sound.h:291
+T00277.015,reserved3C,Unidentified channel data,low,declaration-only;source:sound.h:292
+T00277.016,volume,Named in original declaration,med,declaration-only;source:sound.h:293
+T00277.017,reserved44,Unidentified channel data,low,declaration-only;source:sound.h:294
+T00277.018,reserved48,Unidentified channel data,low,declaration-only;source:sound.h:295
+T00277.019,reserved4C,Unidentified channel data,low,declaration-only;source:sound.h:296
+T00277.020,reserved4D,Unidentified channel data,low,declaration-only;source:sound.h:297
+T00277.021,reserved4E,Unidentified channel data,low,declaration-only;source:sound.h:298
+T00277.022,reserved4F,Unidentified channel data,low,declaration-only;source:sound.h:299
+T00277.023,reserved50,Unidentified channel data,low,declaration-only;source:sound.h:300
+T00277.024,reserved54,Unidentified channel data,low,declaration-only;source:sound.h:301
+T00277.025,voiceSampleRate,Named in original declaration,med,declaration-only;source:sound.h:302
+T00277.026,controlFlags,Named in original declaration,med,declaration-only;source:sound.h:303
+T00281.000,reserved00,Unidentified leading bytes,low,declaration-only;source:sound.h:562
+T00281.001,streamHeader,Embedded paged stream header,med,declaration-only;source:sound.h:563
+T00281.002,reservedAC,Unidentified bytes after the header,low,declaration-only;source:sound.h:564
+T00281.003,audioData,Variable-length audio data,med,declaration-only;source:sound.h:565
+T00296.000,colorZeroAndCode,First vertex color and command code,med,declaration-only;source:gpu.h:73
+T00296.001,positionZero,First vertex position,med,declaration-only;source:gpu.h:74
+T00296.002,colorOne,Second vertex color,med,declaration-only;source:gpu.h:75
+T00296.003,positionOne,Second vertex position,med,declaration-only;source:gpu.h:76
+T00296.004,colorTwo,Third vertex color,med,declaration-only;source:gpu.h:77
+T00296.005,positionTwo,Third vertex position,med,declaration-only;source:gpu.h:78
+T00296.006,colorThree,Fourth vertex color,med,declaration-only;source:gpu.h:79
+T00296.007,positionThree,Fourth vertex position,med,declaration-only;source:gpu.h:80
+T00297.000,texturePage,Texture page command word,med,declaration-only;source:gpu.h:61
+T00297.001,colorZeroAndCode,First vertex color and command code,med,declaration-only;source:gpu.h:62
+T00297.002,positionZero,First vertex position,med,declaration-only;source:gpu.h:63
+T00297.003,colorOne,Second vertex color,med,declaration-only;source:gpu.h:64
+T00297.004,positionOne,Second vertex position,med,declaration-only;source:gpu.h:65
+T00297.005,colorTwo,Third vertex color,med,declaration-only;source:gpu.h:66
+T00297.006,positionTwo,Third vertex position,med,declaration-only;source:gpu.h:67
+T00297.007,colorThree,Fourth vertex color,med,declaration-only;source:gpu.h:68
+T00297.008,positionThree,Fourth vertex position,med,declaration-only;source:gpu.h:69
+T00299.000,colorAndCode,Fill color and command code,med,declaration-only;source:gpu.h:47
+T00299.001,position,Top-left position,med,declaration-only;source:gpu.h:48
+T00299.002,size,Width and height,med,declaration-only;source:gpu.h:49
+T00327.000,tileX,Door tile X,med,declaration-only;source:main.h:425
+T00327.001,tileZ,Door tile Z,med,declaration-only;source:main.h:426
+T00327.002,floorLayer,Floor layer; two or more selects a moving platform,med,declaration-only;source:main.h:427
+T00327.003,entryBits,Unidentified entry bits copied from Ashley placement,low,declaration-only;source:main.h:428
+T00008.000,Spell,ActionType Spell,med,declaration-only;source:main.h:52
+T00008.001,Ability,ActionType Ability,med,declaration-only;source:main.h:53
+T00008.002,BreakArt,ActionType BreakArt,med,declaration-only;source:main.h:54
+T00008.003,Item,ActionType Item,med,declaration-only;source:main.h:55
+T00008.004,BaseAttack,ActionType BaseAttack,med,declaration-only;source:main.h:56
+T00008.005,Trap,ActionType Trap,med,declaration-only;source:main.h:57
+T00010.000,DaggerArtOne,ActionId DaggerArtOne,med,declaration-only;source:main.h:44
+T00016.000,Idle,DiscDriveState Idle,med,declaration-only;source:main.c:78
+T00016.001,SeekReady,DiscDriveState SeekReady,med,declaration-only;source:main.c:79
+T00016.002,ReadReady,DiscDriveState ReadReady,med,declaration-only;source:main.c:80
+T00016.003,ReadError,DiscDriveState ReadError,med,declaration-only;source:main.c:81
+T00016.004,ReadInit,DiscDriveState ReadInit,med,declaration-only;source:main.c:82
+T00016.005,ReadXaInit,DiscDriveState ReadXaInit,med,declaration-only;source:main.c:83
+T00016.006,StreamXa,DiscDriveState StreamXa,med,declaration-only;source:main.c:84
+T00016.007,CommandFailed,DiscDriveState CommandFailed,med,declaration-only;source:main.c:85
+T00016.008,StreamXaEnd,DiscDriveState StreamXaEnd,med,declaration-only;source:main.c:86
+T00019.000,Undead,EnemyClass Undead,med,declaration-only;source:main.h:60
+T00428.000,index,Sound-effect slot index,med,declaration-only;source:25AC.c:51
+T00428.001,reserved04,Unidentified word,low,declaration-only;source:25AC.c:52
+T00428.002,reserved08,Unidentified word,low,declaration-only;source:25AC.c:53
+T00428.003,reserved0C,Unidentified word,low,declaration-only;source:25AC.c:54
+T00428.004,reserved10,Unidentified word,low,declaration-only;source:25AC.c:55
+T00021.000,BronzeKey,KeyItemId BronzeKey,med,declaration-only;source:main.h:238
+T00021.001,ChamomileSigil,KeyItemId ChamomileSigil,med,declaration-only;source:main.h:238
+T00099.000,Off,Dithering Off,med,declaration-only;source:gpu.h:15
+T00099.001,On,Dithering On,med,declaration-only;source:gpu.h:15
+T00819.000,halves,Parameters as two 16-bit halves,med,declaration-only;source:main.h:47
+T00819.001,word,Parameters as one 32-bit word,med,declaration-only;source:main.h:48
+T00116.000,Free,DiscRequestState Free,med,declaration-only;source:main.h:27
+T00116.001,Allocated,DiscRequestState Allocated,med,declaration-only;source:main.h:28
+T00116.002,Reading,DiscRequestState Reading,med,declaration-only;source:main.h:29
+T00116.003,Enqueued,DiscRequestState Enqueued,med,declaration-only;source:main.h:30
+T00116.004,Loaded,DiscRequestState Loaded,med,declaration-only;source:main.h:31
+T00116.005,Error,DiscRequestState Error,med,declaration-only;source:main.h:32
+T00116.006,Dispatched,DiscRequestState Dispatched,med,declaration-only;source:main.h:33
+T00117.000,Null,LegacyPrimitiveAddress Null,med,declaration-only;source:gpu.h:17
+T00117.001,End,LegacyPrimitiveAddress End,med,declaration-only;source:gpu.h:17
+T00118.000,ShadeTex,LegacyPrimitiveCode ShadeTex,med,declaration-only;source:gpu.h:20
+T00118.001,SemiTrans,LegacyPrimitiveCode SemiTrans,med,declaration-only;source:gpu.h:21
+T00118.002,PolyFt3,LegacyPrimitiveCode PolyFt3,med,declaration-only;source:gpu.h:22
+T00118.003,PolyFt4,LegacyPrimitiveCode PolyFt4,med,declaration-only;source:gpu.h:23
+T00118.004,PolyFt4ShadeTex,LegacyPrimitiveCode PolyFt4ShadeTex,med,declaration-only;source:gpu.h:24
+T00118.005,PolyG4,LegacyPrimitiveCode PolyG4,med,declaration-only;source:gpu.h:25
+T00118.006,PolyG4SemiTrans,LegacyPrimitiveCode PolyG4SemiTrans,med,declaration-only;source:gpu.h:26
+T00118.007,PolyGt4,LegacyPrimitiveCode PolyGt4,med,declaration-only;source:gpu.h:27
+T00118.008,PolyGt4SemiTrans,LegacyPrimitiveCode PolyGt4SemiTrans,med,declaration-only;source:gpu.h:28
+T00118.009,LineF2,LegacyPrimitiveCode LineF2,med,declaration-only;source:gpu.h:29
+T00118.010,LineF2SemiTrans,LegacyPrimitiveCode LineF2SemiTrans,med,declaration-only;source:gpu.h:30
+T00118.011,LineG2,LegacyPrimitiveCode LineG2,med,declaration-only;source:gpu.h:31
+T00118.012,LineG2SemiTrans,LegacyPrimitiveCode LineG2SemiTrans,med,declaration-only;source:gpu.h:32
+T00118.013,Tile,LegacyPrimitiveCode Tile,med,declaration-only;source:gpu.h:33
+T00118.014,TileSemiTrans,LegacyPrimitiveCode TileSemiTrans,med,declaration-only;source:gpu.h:34
+T00118.015,Sprite,LegacyPrimitiveCode Sprite,med,declaration-only;source:gpu.h:35
+T00118.016,SpriteSemiTrans,LegacyPrimitiveCode SpriteSemiTrans,med,declaration-only;source:gpu.h:36
+T00119.000,Average,BlendMode Average,med,declaration-only;source:gpu.h:9
+T00119.001,Add,BlendMode Add,med,declaration-only;source:gpu.h:10
+T00119.002,Subtract,BlendMode Subtract,med,declaration-only;source:gpu.h:11
+T00119.003,AddQuarter,BlendMode AddQuarter,med,declaration-only;source:gpu.h:12
+T00120.000,NoChunking,TextCode NoChunking,med,declaration-only;source:vs_string.h:4
+T00120.001,Zero,TextCode Zero,med,declaration-only;source:vs_string.h:5
+T00120.002,FontTableZero,TextCode FontTableZero,med,declaration-only;source:vs_string.h:6
+T00120.003,UpperR,TextCode UpperR,med,declaration-only;source:vs_string.h:7
+T00120.004,LowerJ,TextCode LowerJ,med,declaration-only;source:vs_string.h:8
+T00120.005,Space,TextCode Space,med,declaration-only;source:vs_string.h:9
+T00120.006,Colon,TextCode Colon,med,declaration-only;source:vs_string.h:10
+T00120.007,ForwardSlash,TextCode ForwardSlash,med,declaration-only;source:vs_string.h:11
+T00120.008,Hyphen,TextCode Hyphen,med,declaration-only;source:vs_string.h:12
+T00120.009,Arrow,TextCode Arrow,med,declaration-only;source:vs_string.h:13
+T00120.010,NonPrinting,TextCode NonPrinting,med,declaration-only;source:vs_string.h:14
+T00120.011,Confirm,TextCode Confirm,med,declaration-only;source:vs_string.h:15
+T00120.012,Terminator,TextCode Terminator,med,declaration-only;source:vs_string.h:16
+T00120.013,Newline,TextCode Newline,med,declaration-only;source:vs_string.h:17
+T00120.014,Control,TextCode Control,med,declaration-only;source:vs_string.h:18
+T00120.015,ChunkSize,TextCode ChunkSize,med,declaration-only;source:vs_string.h:19
+T00120.016,Spacing,TextCode Spacing,med,declaration-only;source:vs_string.h:20
+T00120.017,FontTable,TextCode FontTable,med,declaration-only;source:vs_string.h:21
+T00120.018,PrintHex,TextCode PrintHex,med,declaration-only;source:vs_string.h:22
+T00120.019,PrintDecimal,TextCode PrintDecimal,med,declaration-only;source:vs_string.h:23
+T00120.020,PrintString,TextCode PrintString,med,declaration-only;source:vs_string.h:24
+T00121.000,Palette4Bit,TextureFormat Palette4Bit,med,declaration-only;source:gpu.h:6
+T00121.001,Palette8Bit,TextureFormat Palette8Bit,med,declaration-only;source:gpu.h:6
+T00121.002,Direct16Bit,TextureFormat Direct16Bit,med,declaration-only;source:gpu.h:6

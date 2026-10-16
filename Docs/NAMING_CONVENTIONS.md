@@ -295,11 +295,14 @@ The table below records validated outputs applied to the ledgers, **not native s
 The function-name pass is separate. Naming globals/types/fields is still in progress; source copying and the
 Phase 1a gate must not be marked complete from these results.
 
-**Evidence backfill required (2026-10-16).** The evidence rule above was added after six batches were applied.
-Rows applied before it that lack a citation are *unverified* and must be re-checked against the source and cited
-before any of them is used in `Native\` code. At the time of the audit, 236 of 386 applied globals, 38 of 101 types
-and 412 of 583 fields lacked a citation; `merge_symbols.py --check <batch>` lists them. The copy tool must refuse
-names whose rows do not pass the evidence check.
+**Evidence backfill (2026-10-16).** The evidence rule above was added after six batches were applied. At the
+audit, 236 of 386 applied globals, 38 of 101 types and 412 of 583 fields lacked a citation. Each was then
+reviewed against the exact source lines it cites (`tools\naming\cite_globals.py` resolves every storage identity's
+own definition through the decomp index and its first use inside an actual referencing function;
+`tools\naming\cite_declarations.py` cites type and member declarations). **All applied rows now carry evidence.**
+412 fields are tagged `declaration-only`: their recorded evidence is the member declaration (layout and the original
+authors' name), not a cited use, so their confidence is capped at `med`; cite a use before raising it. The copy tool
+must refuse names whose rows do not pass the evidence check.
 
 | Batch | Globals | Types | Fields/enumerators | Output status |
 |---|---:|---:|---:|---|
