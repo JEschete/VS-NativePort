@@ -169,3 +169,136 @@ T00655.002,scrollPositions,Scroll position per manual,med,declaration-only;sourc
 T00655.003,reserved20,Unreferenced short,low,declaration-only;source:146C.h:652
 T00655.004,reserved22,Unreferenced byte,low,declaration-only;source:146C.h:653
 T00655.005,reserved23,Unreferenced byte,low,declaration-only;source:146C.h:654
+T00326.000,width,Tile columns,high,DataCrystal
+T00326.001,height,Tile rows,high,DataCrystal
+T00326.002,heightOrigin,Height origin subtracted from floor samples,low,source:146C.c:17032
+T00326.003,cellCount,Cached columns times rows,high,source:146C.c:15717
+T00328.000,destinationZoneId,Destination zone,high,source:146C.c:5452
+T00328.001,destinationRoomId,Destination room,high,DataCrystal destRoom
+T00328.002,tileLocation,Door tile position floor and entry direction,high,source:146C.c:16151
+T00328.003,requiredFlagValue,Minimum state-flag value to pass,med,source:146C.c:5451
+T00328.004,entryTileX,Tile X where the player appears,high,source:146C.c:15149
+T00328.005,entryElevation,Entry height in units of 64 and step direction,med,source:146C.c:15152;source:146C.c:15156
+T00328.006,hasEntryStep,Entry plays a step-in motion,med,source:146C.c:15155
+T00328.007,requiredFlagId,State flag checked before passing,med,source:146C.c:5451
+T00328.008,entryTileZ,Tile Z where the player appears,high,source:146C.c:15150
+T00328.009,reserved06Bit15,Bit set by the event room-change command,low,source:4A0A8.c:2027
+T00328.010,doorId,Door identifier used to record the entered door,high,source:146C.c:16131
+T00328.011,reserved09,Remaining door identifier bytes,low,DataCrystal idCurrentDoor
+T00328.012,reserved0A,Remaining door identifier bytes,low,DataCrystal idCurrentDoor
+T00328.013,reserved0B,Remaining door identifier bytes,low,DataCrystal idCurrentDoor
+T00330.000,tileX,Tile X,high,source:146C.c:16429
+T00330.001,tileZ,Tile Z,high,source:146C.c:16430
+T00330.002,floorLayer,Floor layer,high,source:146C.c:16430
+T00330.003,viewDirection,Required camera facing octant,high,source:146C.c:16432
+T00330.004,mode,Matched against the caller mode,med,source:146C.c:16431
+T00330.005,reserved00Bit15,Unreferenced bit,low,declaration-only;source:146C.h:165
+T00330.006,effectCount,Number of room effects to start,high,source:146C.c:16435
+T00330.007,effectIds,Room effect identifiers,high,source:146C.c:16436
+T00331.000,sceneObjectId,Scene object the platform moves,high,source:146C.c:16509
+T00331.001,isLooping,Motion continues when not paused,low,source:146C.c:16602
+T00331.002,isHidden,Platform disabled,high,source:146C.c:16511
+T00331.003,endWaypoint,Waypoint that reverses direction,high,source:146C.c:16551
+T00331.004,reserved00Bits12,Unreferenced bits,low,declaration-only;source:146C.h:175
+T00331.005,startWaypoint,Waypoint the platform starts from,high,source:146C.c:16542
+T00331.006,reserved00Bits16,Unreferenced bits,low,declaration-only;source:146C.h:177
+T00331.007,reserved00Bits23,Unreferenced bits,low,declaration-only;source:146C.h:178
+T00331.008,isMovingForward,Travel direction,high,source:146C.c:16552
+T00331.009,currentWaypoint,Current waypoint index,high,source:146C.c:16547
+T00331.010,currentSegment,Current motion segment,high,source:146C.c:16614
+T00331.011,isWaiting,Paused at a waypoint,high,source:146C.c:16613
+T00331.012,controlState,Externally set control state,med,source:146C.c:16478
+T00331.013,terminalWaypoint,Waypoint where the platform docks,high,source:146C.c:16536;source:146C.c:16635
+T00331.014,reserved04Bits10,Unreferenced bits,low,declaration-only;source:146C.h:185
+T00331.015,motionTicks,Ticks into the current segment or wait,high,source:146C.c:16626
+T00331.016,waypoints,Waypoint positions,high,source:146C.c:16547
+T00331.017,segmentVelocities,Per-segment velocity and duration,high,source:146C.c:16614
+T00331.018,positionX,Current X in 20.12 fixed point,high,source:146C.c:16515
+T00331.019,positionY,Current Y in 20.12 fixed point,high,source:146C.c:16516
+T00331.020,positionZ,Current Z in 20.12 fixed point,high,source:146C.c:16517
+T00331.021,tileCell,Tile cell carried with the platform,high,source:146C.c:16636
+T00333.000,surfaceKind,Surface kind for footsteps and impacts,high,source:44F14.c:765;source:3A1A0.c:2222
+T00333.001,reserved00Bit5,Unreferenced bit,low,declaration-only;source:146C.h:68
+T00333.002,reserved00Bit6,Unreferenced bit,low,declaration-only;source:146C.h:69
+T00333.003,reserved00Bit7,Unreferenced bit,low,declaration-only;source:146C.h:70
+T00333.004,reserved00Bit8,Unreferenced bit,low,declaration-only;source:146C.h:71
+T00333.005,reserved00Bit9,Unreferenced bit,low,declaration-only;source:146C.h:72
+T00333.006,doorPassability,Door blocking bits toggled when a door opens,med,source:146C.c:16268;source:146C.c:16899
+T00333.007,reserved00Bit13,Unreferenced bit,low,declaration-only;source:146C.h:74
+T00333.008,isPlatformDocked,Set while a platform rests at its terminal waypoint,med,source:146C.c:16636;source:146C.c:16648
+T00333.009,reserved00Bit15,Unreferenced bit,low,declaration-only;source:146C.h:76
+T00333.010,reserved00Bit16,Unreferenced bit,low,declaration-only;source:146C.h:77
+T00333.011,isPit,Falling onto this tile kills or moves the player,high,source:146C.c:5472;source:146C.c:5562;source:3A1A0.c:3058
+T00333.012,reserved00Bits18,Unreferenced bits,low,declaration-only;source:146C.h:79
+T00333.013,reserved00Bits19,Unreferenced bits,low,declaration-only;source:146C.h:80
+T00334.000,tileX,Tile X,high,source:146C.c:16818
+T00334.001,tileZ,Tile Z,high,source:146C.c:16818
+T00334.002,floorLayer,Floor layer,high,source:146C.c:16819
+T00334.003,kind,Trigger kind; below 16 disabled during events and doubles as an effect id for locks,low,source:146C.c:16821;source:146C.c:16894
+T00334.004,lockState,Lock open state and lock effect id,med,source:146C.c:16896;source:146C.c:16327
+T00334.005,activation,Nonzero while the trigger is active,med,source:146C.c:17180;source:146C.c:16401
+T00334.006,markerFade,Trigger marker fade level,med,source:146C.c:17183;source:146C.c:17189
+T00335.000,trigger,Floor trigger part,high,source:146C.c:16226
+T00335.001,keyOrSigil,Required key or sigil item,high,source:146C.c:16293
+T00335.002,isOpen,Lock opened state,med,source:146C.c:16398
+T00335.003,linkedLockIndex,Paired lock record or minus one,high,source:146C.c:16324
+T00335.004,isTriggered,Trigger handled this activation,med,source:146C.c:16294;source:146C.c:16397
+T00335.005,delayFrames,Frames before the lock change applies,high,source:146C.c:16299;source:146C.c:16379
+T00336.000,backgroundColors,Five background gradient colors,high,source:146C.c:17468
+T00336.001,backgroundRotation,Background dome rotation angles,high,source:146C.c:17613
+T00336.002,reserved24,Unreferenced word,low,declaration-only;source:146C.h:111
+T00336.003,reserved28,Unreferenced word,low,declaration-only;source:146C.h:112
+T00336.004,freezeEffectId,Room effect toggled when platforms freeze or minus one,med,source:146C.c:17359
+T00336.005,isWorkshop,Room is a workshop,med,declaration-only;source:146C.h:114
+T00336.006,reserved31,Unreferenced byte,low,declaration-only;source:146C.h:115
+T00336.007,trapLevel,Trap level,med,declaration-only;source:146C.h:116
+T00336.008,reserved33,Unreferenced byte,low,declaration-only;source:146C.h:117
+T00336.009,weatherKind,Weather kind,high,source:146C.c:17508
+T00336.010,windDirection,Initial wind direction,high,source:2842C.c:277
+T00336.011,windDirectionLimit,Wind direction clamp limit,high,source:2842C.c:348
+T00336.012,windDirectionInterval,Mask index for wind direction variation,high,source:2842C.c:341
+T00336.013,weatherIntensity,Initial weather intensity,high,source:2842C.c:279
+T00336.014,weatherIntensityLimit,Weather intensity clamp limit,high,source:2842C.c:366
+T00336.015,weatherIntensityInterval,Mask index for intensity variation,high,source:2842C.c:360
+T00336.016,windStrength,Initial wind strength,high,source:2842C.c:276
+T00336.017,windStrengthLimit,Wind strength clamp limit,high,source:2842C.c:357
+T00336.018,windStrengthInterval,Mask index for wind strength variation,high,source:2842C.c:351
+T00336.019,weatherArea,Weather area origin and size in tiles,high,source:146C.c:17478;source:2842C.c:287
+T00336.020,sceneId,Scene identifier,med,declaration-only;source:146C.h:132
+T00336.021,reserved52,Unreferenced short,low,declaration-only;source:146C.h:133
+T00336.022,reserved54,Unreferenced short,low,declaration-only;source:146C.h:134
+T00336.023,reserved56,Unreferenced short,low,declaration-only;source:146C.h:135
+T00337.000,reserved00,Unreferenced word,low,declaration-only;source:146C.h:139
+T00337.001,secondArrayOffset,Byte offset of the second array,med,source:146C.c:15710
+T00337.002,hasSecondArray,Second array present when positive,med,source:146C.c:15708
+T00337.003,firstArray,First array after the header,med,source:146C.c:15707
+T00337.004,secondArray,Optional second array,med,source:146C.c:15709
+T00337.005,payload,Section payload,med,declaration-only;source:146C.h:144
+T00329.000,isLoaded,Room record loaded,med,source:146C.c:15697
+T00329.001,displayFlag,Flag set by a room setter,low,source:146C.c:15698
+T00329.002,roomIndex,Room index passed when loading,med,source:146C.c:15699
+T00329.003,header,Room section length header,high,source:146C.c:15681
+T00329.004,geometry,Polygon groups,high,source:146C.c:15701
+T00329.005,collisionMap,Collision map,high,source:146C.c:15716
+T00329.006,tileCells,Collision tile cells,high,source:146C.c:16080
+T00329.007,doors,Door records,high,source:146C.c:16147
+T00329.008,lighting,Lighting section,low,DataCrystal LightingSection
+T00329.009,section6,Unidentified section,low,source:146C.c:16061
+T00329.010,section7,Unidentified section of eight-byte entries,low,source:146C.c:16469
+T00329.011,section8,Unidentified section,low,declaration-only;source:146C.h:253
+T00329.012,floorTriggers,Floor trigger records,high,source:146C.c:16812
+T00329.013,lockTriggers,Lock trigger records,high,source:146C.c:16224
+T00329.014,environment,Background and weather settings,high,source:146C.c:17463
+T00329.015,textureEffects,Texture effect records,high,source:2842C.c:871
+T00329.016,effectScripts,Room-effect scripts,high,source:2842C.c:903
+T00329.017,sectionE,Unidentified two-array section,low,source:146C.c:15705
+T00329.018,minimapScene,Minimap scene and room list,high,source:146C.c:15722
+T00329.019,tiledBackground,Tiled background file descriptors,high,source:146C.c:17647
+T00329.020,viewTriggers,View trigger records,high,source:146C.c:16412
+T00329.021,movingPlatforms,Moving platform records,high,source:146C.c:16477
+T00329.022,containers,Container records located by tile,med,source:146C.c:16838
+T00329.023,soundData,Room sound data,high,source:146C.c:17321
+T00329.024,section15,Unidentified section,low,declaration-only;source:146C.h:266
+T00329.025,section16,Unidentified section,low,declaration-only;source:146C.h:267
+T00329.026,section17,Unidentified section,low,declaration-only;source:146C.h:268
+T00329.027,zoneBounds,Tile bounds of the map,high,source:146C.c:16074

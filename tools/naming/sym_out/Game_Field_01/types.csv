@@ -31,3 +31,13 @@ T00453,Misc,Field::RoomEffectObjectView,Native\Game\src\Field\RoomEffects.h,View
 T00454,OnDisc,Field::RoomEffectCommandHeader,Native\Game\src\Field\RoomEffects.h,Gives the byte size and opcode of one room-effect command.,high,decoder-only;source:2842C.c:1047;source:2842C.c:1056
 T00637,OnDisc,Field::BackgroundLayout,Native\Game\src\Field\Background.h,Gives the tile grid size and tiles of a room background.,med,decoder-only;source:146C.c:17582
 T00655,State,Field::ManualDisplayState,Native\Game\src\Field\Manual.h,Remembers the selected manual and each manual scroll position.,high,source:494.c:304;source:494.c:330
+T00326,OnDisc,Field::MpdCollisionHeader,Native\Game\src\Field\Mpd.h,Heads the MPD collision map with its tile grid size.,high,decoder-only;DataCrystal MPD CollisionSection;source:146C.c:15717
+T00328,OnDisc,Field::MpdDoorRecord,Native\Game\src\Field\Mpd.h,Describes a door destination its tile location entry placement and unlock flag requirement.,high,decoder-only;DataCrystal MPD DoorSection;source:146C.c:5451;source:146C.c:15149
+T00329,State,Field::RoomRecord,Native\Game\src\Field\Room.h,Holds the loaded room header and pointers to each decoded MPD room section.,high,source:146C.c:15697;source:146C.c:15681
+T00330,OnDisc,Field::MpdViewTrigger,Native\Game\src\Field\Mpd.h,Starts listed room effects when the player views a tile from a matching direction.,high,decoder-only;source:146C.c:16429;source:146C.c:16436
+T00331,OnDisc,Field::MpdMovingPlatform,Native\Game\src\Field\Mpd.h,Describes a moving platform with waypoints segment vectors and runtime motion state.,high,decoded and mutated in place;source:146C.c:16509;source:146C.c:16614
+T00333,OnDisc,Field::MpdTileCell,Native\Game\src\Field\Mpd.h,Packs one collision tile cell surface kind door passability and pit flag.,med,decoder-only;source:44F14.c:765;source:146C.c:16268;source:146C.c:5562
+T00334,OnDisc,Field::MpdFloorTrigger,Native\Game\src\Field\Mpd.h,Places a floor trigger with its kind lock state activation and marker fade.,med,decoded and mutated in place;source:146C.c:16818;source:146C.c:17180
+T00335,OnDisc,Field::MpdLockTrigger,Native\Game\src\Field\Mpd.h,Extends a floor trigger with the required key or sigil and linked lock state.,high,decoded and mutated in place;source:146C.c:16293;source:146C.c:16324
+T00336,OnDisc,Field::MpdEnvironment,Native\Game\src\Field\Mpd.h,Describes room background colors and rotation weather ranges and room flags.,high,decoder-only;source:146C.c:17468;source:2842C.c:276;source:2842C.c:348
+T00337,OnDisc,Field::MpdSectionE,Native\Game\src\Field\Mpd.h,Heads an MPD section holding one or two integer arrays whose purpose is unidentified.,low,meaning-unresolved;source:146C.c:15707;source:146C.c:15710
