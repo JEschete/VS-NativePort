@@ -149,6 +149,14 @@ Abbreviations allowed in names: `Hp`, `Mp`, `Dp`, `Pp`, `Ui`, `Hud`, `Fx`, `Rgb`
 - DataCrystal pages: `resources\DataCrystal\` (formats, lists, mechanics, executables).
 - GodHands: `tools\PSX\VagrantStory\GodHands`, plus the other VS tools under `tools\PSX\VagrantStory\`.
 - Callers and callees as listed in the batch file.
+- Upstream pull-request history of `ser-pounce/rood-reverse` (read-only; never post). `tools\naming\upstream_prs.py`
+  caches PR titles and bodies in `build\port\upstream_prs.json`, and `tools\naming\evidence.py --upstream N` prints
+  PR sentences that mention a symbol, type or referencing function by exact name. PR text is a **hint about where
+  to look**, never evidence by itself: a row still needs a cited source line. PRs whose text says they were
+  written with an AI model are tagged `[AI-declared]` (all of noprompt's PRs say so) and deserve the same scrutiny
+  as our own agents' output; e.g. PR#206 calls `func_8007D734` a map/compass overlay, but its five 64-pixel
+  sprite strips cover the full 320-pixel screen (`146C.c:9385`). Maintainer review threads are fetched on demand
+  through the GitHub MCP server when a symbol is ambiguous.
 
 ---
 
@@ -282,6 +290,12 @@ fields.csv   id,final_name,meaning,confidence,notes
   rejects rows without a citation in `--check`, `--check-partial`, `--apply-batch` and `--apply`.
 - Subagents gather read-only evidence (uses, writes, values) and return it; names are written and validated only
   after that evidence is read. Agent-written rows are reviewed against the source before being kept.
+- Research starts from `python tools\naming\evidence.py <batch> --globals|--types [--max N] [--upstream N]`, which
+  prints exact definition and use lines without any model involved. Its member search matches `.member`/`->member`
+  by name inside referencing functions, so a hit can belong to another struct with the same member name (e.g.
+  `actor->unkC` for `vs_battle_objectData.unkC`); confirm the receiver's type before citing a hit.
+- Write citations by searching for exact source text rather than typing line numbers, and check that each field
+  row cites at least one line naming the original member (Engine_01's generator does both).
 
 After a complete batch passes `python tools\naming\merge_symbols.py --check <batch>`, merge it immediately with
 `python tools\naming\merge_symbols.py --apply-batch <batch>`. This validates the batch against names already applied
@@ -307,7 +321,7 @@ must refuse names whose rows do not pass the evidence check.
 | Batch | Globals | Types | Fields/enumerators | Output status |
 |---|---:|---:|---:|---|
 | Audio | 92 | 20 | 270 | Pending |
-| Engine_01 | 151 | 38 | 252 | Pending |
+| Engine_01 | 151 | 38 | 252 | Validated and applied |
 | Engine_02 | 60 | 0 | 0 | Validated and applied |
 | Game_Actors_01 | 0 | 55 | 768 | Pending |
 | Game_Actors_02 | 48 | 8 | 108 | Validated and applied |
@@ -330,9 +344,9 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **497 / 2,174** | **168 / 820** | **1,191 / 6,766** | **8 / 24 batches applied** |
+| **Applied / inventoried** | **648 / 2,174** | **206 / 820** | **1,443 / 6,766** | **9 / 24 batches applied** |
 
-Applied rows still include 19 low-confidence globals, 5 low-confidence types and 197 low-confidence fields. Validation checks coverage,
+Applied rows still include 32 low-confidence globals, 5 low-confidence types and 220 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -350,8 +364,19 @@ names, locations and collisions; it does not prove semantics or close migration 
   identical final name and field names; the validator rejects a `same-as` target that does not exist, a final name
   that differs from a named target, and a field name that differs from the target's field at the same index.
   Do not manufacture different native types from include-path spelling.
-- Event: T00219 is a merged-bitfield view of `gim_t` (5BF94.c); resolve both to one native splash-layer type.
-  T00259's shake code reads its two oscillators from +0x1A6, two bytes after the declared field, and uses the first
+- T00581 `Input::VibrationPatternSlot`: the pattern interpreter uses `channels` as `int[2][6]` (48 bytes) but only
+  40 bytes remain in the 56-byte element, and only slot 0's `motorLevels` is used as the summed output. The real
+  element most likely starts 8 bytes later with the motor levels stored once before the array. Lay out the native
+  type from the interpreter, not the declaration.
+- Final locations of data rows and the function catalog disagree in places (`Input\src\Controllers.c` vs
+  `Controller.c`, `Graphics\src\ScreenTransition.c` vs `FramebufferEffects.c`, `Core\src\Memory.c` vs
+  `Memory\Heap.c`, `Content\src\DiscQueue.c` vs `CdDrive.c`, `Video\src\Intro.c` vs `Intro\Playback.c`).
+  Reconcile file placement once, before copying, instead of per batch.
+- T00595.003 (`iconHeaderBytes`) receives `CardUiResources.fileIconPalettes`; the save header written at
+  `260.c:753` (icon flag 0x11) matches the standard PS1 card layout with the icon palette at 0x60, so it can be
+  renamed `iconPalette` when Shared/Title rows are next revised.
+- Event: T00219 is a merged-bitfield view of `gim_t` (5BF94.c, now `Render::GimLayer`); resolve both to one native
+  type. T00259's shake code reads its two oscillators from +0x1A6, two bytes after the declared field, and uses the first
   short as the active-shake count. G00442 is byte 3 of G00441. G00128/G00119 are command templates patched at
   runtime, so they are state, not constants.
 - G02005/G02006 identify loading-image pixels/header through consumers, but their source definitions and extraction

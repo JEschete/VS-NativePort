@@ -9,6 +9,11 @@ functions that reference the type.
 
 Every line printed is `file:line: text` copied from resources\\rood-reverseWin\\src, so names can be derived and
 cited from it directly.
+
+--upstream N adds up to N sentences per identifier from the cached upstream pull requests
+(build\\port\\upstream_prs.json, see upstream_prs.py) that mention the original symbol, type or referencing
+function by exact name. They are labelled `PR#n author:` (`[AI-declared]` when the PR says it was written with an
+AI model) and are hints only: a name still needs a source line.
 """
 from __future__ import annotations
 
@@ -41,6 +46,43 @@ class Source:
         return f"{Path(rel).name}:{n}: {text[n - 1].strip()[:140]}" if 0 < n <= len(text) else f"{rel}:{n}: ?"
 
 
+class Upstream:
+    """Exact-identifier sentence lookup over cached upstream PR titles, bodies and comments."""
+
+    def __init__(self, limit: int) -> None:
+        self.limit = limit
+        self.seen: set[tuple[int, str]] = set()
+        self.units: list[tuple[int, str, str]] = []
+        path = ROOT / "build" / "port" / "upstream_prs.json"
+        if limit and not path.exists():
+            sys.exit(f"{path} missing: run tools\\naming\\upstream_prs.py first")
+        if not limit:
+            return
+        for p in json.loads(path.read_text(encoding="utf-8")):
+            ai = bool(re.search(r"\b(Claude|Copilot|GPT|ChatGPT|LLM|Codex|Gemini)\b", p["title"] + " " + p["body"]))
+            texts = [(p["author"], p["title"]), (p["author"], p["body"])]
+            texts += [(c["author"], c["body"]) for c in p.get("comments", [])]
+            for author, text in texts:
+                label = f"{author or '?'}{' [AI-declared]' if ai and author == p['author'] else ''}"
+                for line in (text or "").splitlines():
+                    for sent in re.split(r"(?<=[.;])\s+(?=[A-Z`])", line.strip(" -*#>")):
+                        if sent:
+                            self.units.append((p["number"], label, sent))
+
+    def lines(self, ident: str) -> list[str]:
+        if not self.limit or not ident or ident.startswith("("):
+            return []
+        pat = re.compile(r"(?<![\w])" + re.escape(ident) + r"(?![\w])")
+        hits: list[str] = []
+        for number, author, sent in self.units:
+            if pat.search(sent) and (number, sent) not in self.seen:
+                self.seen.add((number, sent))
+                hits.append(f"PR#{number} {author}: {sent[:260]}")
+                if len(hits) >= self.limit:
+                    break
+        return hits
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("batch")
@@ -50,7 +92,9 @@ def main() -> int:
     ap.add_argument("--ids", default="")
     ap.add_argument("--max", type=int, default=3)
     ap.add_argument("--out")
+    ap.add_argument("--upstream", type=int, default=0)
     a = ap.parse_args()
+    up = Upstream(a.upstream)
 
     index = json.loads((ROOT / "build" / "port" / "index.json").read_text(encoding="utf-8"))
     context = json.loads((ROOT / "build" / "port" / "symbol_context.json").read_text(encoding="utf-8"))
@@ -85,6 +129,7 @@ def main() -> int:
             out.append(f"## {gid} {name} : {d['type']} ({d['linkage']}, {d['segment']}, size {d['size']})")
             for c in defs[:2]:
                 out.append(f"   DEF {src.show(c['file'], c['line'])}")
+            out.extend(f"   {h}" for h in up.lines(name))
             pat = re.compile(r"\b" + re.escape(name) + r"\b")
             labels = context["globals"].get(gid, [])
             if not labels and defs:
@@ -97,6 +142,7 @@ def main() -> int:
                 if hits:
                     out.append(f"   in {final} [{orig}]")
                     out.extend(f"      {src.show(rel, h)}" for h in hits[: a.max])
+                    out.extend(f"      {h}" for h in up.lines(orig))
             out.append("")
 
     if not a.globals:
@@ -127,7 +173,10 @@ def main() -> int:
                         break
             if decl:
                 out.append(f"   DECL {src.show(*decl)}")
+            out.extend(f"   {h}" for h in up.lines(t["name"]))
             labels = context["types"].get(tid, [])
+            for final, orig, rel, lo, hi in ref_functions(labels):
+                out.extend(f"   [{orig}] {h}" for h in up.lines(orig))
             for f in members.get(tid, []):
                 mpat = re.compile(r"(->|\.)" + re.escape(f["name"]) + r"\b")
                 hits: list[str] = []

@@ -1,0 +1,253 @@
+id,final_name,meaning,confidence,notes
+T00122.000,frames,Frames within the current second,med,declaration-only;source:main.h:167
+T00122.001,seconds,Seconds within the current minute,high,source:260.c:767
+T00122.002,minutes,Minutes within the current hour,high,source:260.c:765
+T00122.003,hours,Elapsed hours,high,source:260.c:760
+T00184.000,reading,Requests handed to the drive and not yet marked loaded,high,source:main.c:9476;source:main.c:9482
+T00184.001,waiting,Requests enqueued and not yet started,high,source:main.c:9439;source:main.c:9475
+T00197.000,red,Current 5-bit red,high,source:main.c:10535
+T00197.001,green,Current 5-bit green,high,source:main.c:10536
+T00197.002,blue,Current 5-bit blue,high,source:main.c:10537
+T00197.003,maskBit,Semi-transparency bit written to bit 15,high,source:main.c:10538
+T00197.004,redStepRow,Target minus current red plus 31; selects the fade step table row,high,source:main.c:10531;source:main.c:11373
+T00197.005,greenStepRow,Target minus current green plus 31; selects the fade step table row,high,source:main.c:10532;source:main.c:11374
+T00197.006,blueStepRow,Target minus current blue plus 31; selects the fade step table row,high,source:main.c:10533;source:main.c:11375
+T00204.000,mode,0 stopped 1 counts up any other value counts down,high,source:146C.c:14508;source:146C.c:8513
+T00204.001,pausedMode,Mode saved while the timer is paused and restored on resume,high,source:146C.c:8553;source:146C.c:8557
+T00204.002,resetScope,Resets on room load (0) zone load (1) or scene transition (2),high,source:146C.c:15313;source:146C.c:14844;source:146C.c:14768
+T00204.003,frames,Frames part of the timer,high,source:146C.c:14510
+T00204.004,seconds,Seconds part of the timer,high,source:146C.c:14513
+T00204.005,minutes,Minutes part of the timer,high,source:146C.c:14515
+T00204.006,hours,Hours part of the timer,high,source:146C.c:14532
+T00205.000,red,Red component,high,source:main.c:10791
+T00205.001,green,Green component,high,source:main.c:10792
+T00205.002,blue,Blue component,high,source:main.c:10793
+T00205.003,pad3,Padding byte cleared by whole-word stores,med,source:main.c:11654;no member access;source:main.h:381
+T00206.000,progress,Bytes: [0] active [1] frame [2] tick [3] half duration [4] transition mode,high,source:main.c:11027;source:main.c:11324;source:main.c:11326
+T00206.001,blendParams,Shorts: [0..2] pulse target [3] tint strength [4] strength step per frame,high,source:main.c:11189;source:main.c:11174
+T00206.002,colorFixed,Current red green blue in 16.16 then the per-frame step of each,high,source:main.c:11012;source:main.c:11297
+T00206.003,baseColor,Base color that relative transitions are computed from,high,source:main.c:11051;source:main.c:11089
+T00207.000,stats,Ashley's statistics status and limb records,high,source:260.c:811
+T00207.001,reservedDC,Unread words completing the 256-byte snapshot,low,declaration-only;source:main.h:235
+T00222.000,requiredFlagId,State flag id copied to the saved door's requiredFlagId,med,source:main.c:8399
+T00222.001,reservedBits10,Upper six bits; no access found,low,declaration-only;source:146C.h:730
+T00228.000,x,Horizontal offset added to the screen center,high,source:146C.c:9324;source:146C.c:9385
+T00228.001,y,Vertical offset added to the screen center,high,source:146C.c:9325;source:146C.c:9386
+T00228.002,reserved8,Cleared with the effect and never read,low,source:146C.c:9273
+T00228.003,reservedC,No access found,low,declaration-only;source:146C.h:725
+T00229.000,rotatedStrips,Textured quads used when the screen is rotated or scaled,high,source:146C.c:9289
+T00229.001,flatStrips,Sprites used when the screen is drawn unrotated,high,source:146C.c:9301
+T00229.002,drawModes,Texture page draw modes for each strip,high,source:146C.c:9392
+T00243.000,x,Current horizontal source position,high,source:30DB0.c:1392;source:40564.c:1598
+T00243.001,y,Current vertical source position,high,source:30DB0.c:1393;source:40564.c:1600
+T00243.002,stepX,Horizontal step; negated when bouncing,high,source:40564.c:1599;source:40564.c:1612
+T00243.003,stepY,Vertical step; negated when bouncing,high,source:40564.c:1601;source:40564.c:1621
+T00243.004,interval,Ticks between steps,high,source:40564.c:1585
+T00243.005,timer,Ticks since the last step,high,source:40564.c:1583
+T00243.006,pad6,No access found,low,declaration-only;source:3A1A0.h:240
+T00243.007,pad7,No access found,low,declaration-only;source:3A1A0.h:241
+T00250.000,x,Window left edge,high,source:40564.c:1602
+T00250.001,y,Window top edge,high,source:40564.c:1607
+T00250.002,width,Window width; zero disables the scroll,high,source:40564.c:1578;source:40564.c:1606
+T00250.003,height,Window height,high,source:40564.c:1607
+T00250.004,initialStepX,Horizontal step copied into the scroll state,high,source:30DB0.c:1394
+T00250.005,initialStepY,Vertical step copied into the scroll state,high,source:30DB0.c:1395
+T00250.006,bounces,Reverses direction at an edge instead of wrapping to the start,high,source:40564.c:1610
+T00250.007,reservedBits1,No access found,low,declaration-only;source:3A1A0.h:229
+T00250.008,interval,Ticks between steps copied into the scroll state,high,source:30DB0.c:1396
+T00291.000,encodedBuffers,Two buffers holding compressed frames,high,source:22C.c:3445
+T00291.001,encodedBufferIndex,Encoded buffer being decoded,high,source:22C.c:3507
+T00291.002,decodedBuffers,Two buffers receiving decoded slices,high,source:22C.c:3447
+T00291.003,decodedBufferIndex,Decoded slice buffer in use,high,source:22C.c:3440
+T00291.004,frameRects,Destination rectangles of the two frame buffers,high,source:22C.c:3534
+T00291.005,frameRectIndex,Frame buffer rectangle being filled,high,source:22C.c:3552
+T00291.006,sliceRect,Rectangle of the slice currently uploaded,med,source:22C.c:3436;source:22C.c:3538
+T00291.007,frameComplete,Set when the current frame has been fully uploaded,high,source:22C.c:3444;source:22C.c:3546
+T00293.000,image0Offset,First rectangle-headed image,high,source:18.c:267
+T00293.001,image1Offset,Second rectangle-headed image,high,source:18.c:272
+T00293.002,paletteOffset,Palette block loaded with vs_main_loadClut,high,source:18.c:277
+T00293.003,image2Offset,Third rectangle-headed image,high,source:18.c:280
+T00293.004,image3Offset,Fourth rectangle-headed image,high,source:18.c:285
+T00293.005,image4Offset,Fifth rectangle-headed image,high,source:18.c:290
+T00293.006,fixedImageOffset,Size-headed image loaded at VRAM 768 240,high,source:18.c:295;source:18.c:296
+T00293.007,interfaceDataOffset,Data passed to Menu::Framework::InitGameInterface,high,source:18.c:300
+T00307.000,reserved0,First byte; no access found,low,declaration-only;source:main.c:35
+T00307.001,locked,Prevents vs_main_loadClut from replacing the slot,high,source:main.c:11483
+T00307.002,transition,Fade timer of the slot,high,source:main.c:10543
+T00307.003,entries,Per-entry fade data for 256 colors,high,source:main.c:10528
+T00307.004,baseColors,Saved 15-bit colors that relative transforms start from,high,source:main.c:10573;source:main.c:10608
+T00308.000,uploadPending,Set when changed palette colors must be uploaded,high,source:main.c:10558
+T00308.001,enabled,Gates every palette and tint transition request,high,source:main.c:10556
+T00308.002,slots,Fourteen CLUT slots,high,source:main.c:11642
+T00308.003,backgroundFadeActive,Background color fade in progress,high,source:main.c:10806
+T00308.004,backgroundFadeFrame,Frames elapsed in the background fade,high,source:main.c:11269
+T00308.005,backgroundFadeTick,Cleared when a background fade starts; never read,med,source:main.c:10808
+T00308.006,backgroundFadeSpeed,Half the background fade length in frames,high,source:main.c:11270
+T00308.007,backgroundFadeMode,Transition mode; 9 and 10 alternate to pulse,high,source:main.c:11271
+T00308.008,pad7E95,No access found,low,declaration-only;source:main.c:68
+T00308.009,backgroundPulseRed,Red offset of the background pulse,high,source:main.c:10957
+T00308.010,backgroundPulseGreen,Green offset of the background pulse,high,source:main.c:10958
+T00308.011,backgroundPulseBlue,Blue offset of the background pulse,high,source:main.c:10959
+T00308.012,backgroundColorsFixed,Five background colors in 16.16 with per-frame steps,high,source:main.c:10786;source:main.c:11246;source:main.c:11268
+T00308.013,backgroundBaseColors,Base background colors that relative transitions start from,high,source:main.c:10829
+T00308.014,modelColorFades,Room tint fade then sixteen actor tint fades,high,source:main.c:11292
+T00013.000,Direct,Sectors are read straight into the destination,high,source:main.c:9039
+T00013.001,Buffered,Sectors go to the ring and are copied out each frame,high,source:main.c:9305
+T00013.002,Manual,Sectors go to the ring and the caller consumes them,med,source:main.c:9058
+T00407.000,active,Fade in progress,high,source:main.c:10544
+T00407.001,frame,Frames elapsed,high,source:main.c:10545
+T00407.002,tick,Sub-step counter,high,source:main.c:10546
+T00407.003,speed,Fade duration parameter,high,source:main.c:10547
+T00407.004,mode,Color transform mode,high,source:main.c:10756
+T00407.005,pulseRed,Red offset of the transform,high,source:main.c:10758
+T00407.006,pulseGreen,Green offset of the transform,high,source:main.c:10759
+T00407.007,pulseBlue,Blue offset of the transform,high,source:main.c:10760
+T00460.000,firstSectionPointer,First self-relative offset rebased to an address on load,med,source:30DB0.c:1721
+T00460.001,secondSectionPointer,Second self-relative offset rebased to an address on load,med,source:30DB0.c:1722
+T00460.002,body,Remaining sequence bytes,med,declaration-only;source:30DB0.h:8
+T00499.000,trackCount,Number of track entries,high,source:5BF94.c:7896
+T00499.001,tracks,Track entries,high,source:5BF94.c:7882
+T00500.000,header,Packed track kind header copied into the playback state,high,source:5BF94.c:7904
+T00500.001,dataOffset,Byte offset of the track data from the block start,high,source:5BF94.c:7882
+T00542.000,drawEnabled,Layer is drawn each frame,high,source:5BF94.c:2384;source:5BF94.c:2567
+T00542.001,loading,Set while the image file is loading,high,source:5BF94.c:2360;source:5BF94.c:2560
+T00542.002,textureMode,Texture depth passed to getTPage,high,source:5BF94.c:4157
+T00542.003,drawRoutine,Index of the transition draw routine,high,source:5BF94.c:4449
+T00542.004,loadPhase,Load phase: waiting for disc unpacking freeing data ready,high,source:5BF94.c:2456
+T00542.005,texturePageCount,VRAM texture pages reserved for the tiles,high,source:5BF94.c:2539
+T00542.006,ownsPalette,Layer uses the 256-color palette loaded with it,high,source:5BF94.c:2526;source:5BF94.c:4439
+T00542.007,reservedBits13,No access found,low,declaration-only;source:5BF94.c:67
+T00542.008,vramPage,Base VRAM page used for tiles and palettes,med,source:5BF94.c:2508;source:5BF94.c:4432
+T00542.009,brightness,Draw brightness; 128 draws without blending,high,source:5BF94.c:4058;source:5BF94.c:4199
+T00542.010,columns,Tile columns,high,source:5BF94.c:2470
+T00542.011,rows,Tile rows,high,source:5BF94.c:2471
+T00542.012,imageId,GIM file index,high,source:5BF94.c:2364
+T00542.013,offsetX,Horizontal offset from the screen center,high,source:5BF94.c:4069
+T00542.014,offsetY,Vertical offset from the screen center,high,source:5BF94.c:4075
+T00542.015,scaleAndOrder,Scale in 1/4096 in bits 0-13; bit 14 selects the alternate ordering table,high,source:5BF94.c:4062;source:5BF94.c:4450
+T00542.016,backdropColor,15-bit color filling the screen around the image,high,source:5BF94.c:4081
+T00542.017,fileData,Loaded GIM file,high,source:5BF94.c:2466
+T00542.018,discRequest,Disc request loading the file,high,source:5BF94.c:2460
+T00542.019,scanlineWipeWidths,Per-scanline wipe edge for the scanline-wipe routine,high,source:5BF94.c:2387;source:5BF94.c:4226
+T00542.020,tileTable,Header words then tile ids from the file,high,source:5BF94.c:2474;source:5BF94.c:4061
+T00542.021,reserved3F4,No access found,low,declaration-only;source:5BF94.c:81
+T00543.000,widthLow,Low byte of the width,high,source:main.c:8078
+T00543.001,widthHigh,High byte of the width,high,source:main.c:8078
+T00543.002,heightLow,Low byte of the height,high,source:main.c:8079
+T00543.003,heightHigh,High byte of the height,high,source:main.c:8079
+T00547.000,locationPalettes,Two palettes for the save-location artwork,high,source:260.c:1849
+T00547.001,fileIconPalettes,Per-file 32-byte card icon palette copied into the save header,med,source:260.c:771;PS1 card header icon palette at 0x60
+T00547.002,fileIconBitmaps,Per-file 128-byte card icon bitmap copied after the header,med,source:260.c:773;PS1 card icon frame at 0x80
+T00547.003,reserved860,No access found,low,declaration-only;source:260.c:156
+T00547.004,reservedBE0,No access found,low,declaration-only;source:260.c:157
+T00547.005,reservedFE0,No access found,low,declaration-only;source:260.c:158
+T00547.006,textTable,Menu text table,high,source:260.c:1101
+T00547.007,fileHeaders,Card header of each of the five save files,high,source:260.c:1102
+T00547.008,directoryEntry,Card directory entry buffer,high,source:260.c:1103
+T00025.000,Pending,Still working,high,source:260.c:586
+T00025.001,Ready,Card responded and is usable,med,declaration-only;source:260.c:40
+T00025.002,Timeout,Card did not respond,high,source:260.c:591
+T00025.003,Unformatted,Card is not formatted,med,declaration-only;source:260.c:42
+T00091.000,IoEnd,Operation completed,high,declaration-only;source:260.c:29
+T00091.001,Error,Operation failed,high,declaration-only;source:260.c:30
+T00091.002,Timeout,Card did not respond,high,declaration-only;source:260.c:31
+T00091.003,Unformatted,New or unformatted card,high,declaration-only;source:260.c:32
+T00091.004,None,No event signalled,high,source:260.c:178;source:260.c:33
+T00581.000,motorLevels,Summed motor levels; only slot 0's copy is used,med,source:main.c:8747;layout-conflict: channels are used as int[2][6] (48 bytes) but only 40 remain; an element likely starts at +8 with motor levels stored separately
+T00581.001,active,Pattern is playing,high,source:main.c:8571
+T00581.002,ownerTag,Tag used to stop patterns started by one owner,high,source:main.c:8618
+T00581.003,pattern,Pattern bytecode,high,source:main.c:8716
+T00581.004,channels,Per motor: running level step target cursor frames-left,med,source:main.c:8720;layout-conflict: channels are used as int[2][6] (48 bytes) but only 40 remain; an element likely starts at +8 with motor levels stored separately
+T00583.000,text,Encoded percent sign and terminator,high,source:238.c:2376;source:238.c:2373
+T00584.000,controllerType,Controller type from PadInfoMode; 5 and 7 report sticks,high,source:main.c:8515;source:main.c:8516
+T00584.001,extendedType,Extended controller id; nonzero supports mode lock,high,source:main.c:8471
+T00584.002,buttonBits,Low byte of the last inverted button state,med,source:main.c:8527
+T00584.003,rightStickX,Right stick X,high,source:main.c:8517
+T00584.004,rightStickY,Right stick Y,high,source:main.c:8518
+T00584.005,leftStickX,Left stick X,high,source:main.c:8519
+T00584.006,leftStickY,Left stick Y,high,source:main.c:8520
+T00584.007,modeLock,Mode lock passed to PadSetMainMode,high,source:main.c:8476
+T00584.008,actuatorLevels,Motor levels sent with PadSetAct,high,source:main.c:8482
+T00584.009,connected,Port finished connection setup,high,source:main.c:8546
+T00598.000,cardHeader,Card file header with title and icon palette,high,source:260.c:753
+T00598.001,iconBitmap,Card icon bitmap,high,source:260.c:773
+T00598.002,reserved100,Zero block included in checksum block 1,low,source:260.c:376
+T00598.003,protectedHeader,Cipher key slot header summary and block checksums,high,source:260.c:749
+T00598.004,stateFlags,Game state flags,high,source:260.c:820
+T00598.005,learnedActions,Learned action flags,high,source:260.c:821
+T00598.006,mapStatus,Visited room and area flags,high,source:260.c:823
+T00598.007,settings,Player settings,high,source:260.c:824
+T00598.008,ashleySnapshot,Ashley's statistics snapshot,high,source:260.c:825
+T00598.009,inventory,Inventory,high,source:260.c:826
+T00598.010,inventoryIndices,Inventory ordering indices,high,source:260.c:827
+T00598.011,entryDoor,Door the player entered the current room through,high,source:260.c:828
+T00598.012,scoreData,Score and record statistics,high,source:260.c:829
+T00598.013,roomStateSlot,Current room state slot,high,source:260.c:832
+T00598.014,recentRoomEnemyStates,Recent room enemy states,high,source:260.c:833
+T00598.015,artsStatus,Break art progress,high,source:260.c:834
+T00598.016,containerData,Container contents,high,source:260.c:830
+T00598.017,reserved59E0,Zero padding to the end of the 23 blocks,low,source:260.c:752;no member access;source:260.c:107
+T00599.000,cardHeader,Card file header with title and icon palette,med,declaration-only;source:22C.c:264;same layout as T00598
+T00599.001,iconBitmap,Card icon bitmap,med,declaration-only;source:22C.c:265;same layout as T00598
+T00599.002,reserved100,Zero block included in checksum block 1,low,declaration-only;source:22C.c:266;same layout as T00598
+T00599.003,protectedHeader,Cipher key slot header summary and block checksums,med,declaration-only;source:22C.c:267;same layout as T00598
+T00599.004,stateFlags,Game state flags,med,declaration-only;source:22C.c:268;same layout as T00598
+T00599.005,learnedActions,Learned action flags,med,declaration-only;source:22C.c:269;same layout as T00598
+T00599.006,mapStatus,Visited room and area flags,med,declaration-only;source:22C.c:270;same layout as T00598
+T00599.007,settings,Player settings,med,declaration-only;source:22C.c:271;same layout as T00598
+T00599.008,ashleySnapshot,Ashley's statistics snapshot,med,declaration-only;source:22C.c:272;same layout as T00598
+T00599.009,inventory,Inventory,med,declaration-only;source:22C.c:273;same layout as T00598
+T00599.010,inventoryIndices,Inventory ordering indices,med,declaration-only;source:22C.c:274;same layout as T00598
+T00599.011,entryDoor,Door the player entered the current room through,med,declaration-only;source:22C.c:275;same layout as T00598
+T00599.012,scoreData,Score and record statistics,med,declaration-only;source:22C.c:276;same layout as T00598
+T00599.013,roomStateSlot,Current room state slot,med,declaration-only;source:22C.c:277;same layout as T00598
+T00599.014,recentRoomEnemyStates,Recent room enemy states,med,declaration-only;source:22C.c:278;same layout as T00598
+T00599.015,artsStatus,Break art progress,med,declaration-only;source:22C.c:279;same layout as T00598
+T00599.016,containerData,Container contents,med,declaration-only;source:22C.c:280;same layout as T00598
+T00599.017,reserved59E0,Zero padding to the end of the 23 blocks,low,declaration-only;source:22C.c:281;same layout as T00598
+T00600.000,cipherKey,Key for the save byte stream cipher,high,source:260.c:786
+T00600.001,slotHeader,Slot state generation and format version,high,source:260.c:787
+T00601.000,cipherHeader,Cipher key and slot header,high,source:260.c:786
+T00601.001,summary,Summary statistics shown in the file menu,high,source:260.c:810
+T00601.002,blockChecksums,XOR checksum of each 256-byte block,high,source:260.c:842
+T00659.000,assetKind,Kind of asset being requested,high,source:146C.c:6096
+T00659.001,targetSlot,Actor or weapon slot receiving the asset,high,source:30DB0.c:1085
+T00659.002,modelId,Model identifier,high,source:30DB0.c:1095
+T00659.003,destination,Storage that receives the asset,high,source:30DB0.c:1085;source:30DB0.c:621
+T00659.004,dataAddress,Address of the asset data or a small table index,high,source:146C.c:6648
+T00659.005,placement,Placement word copied into the new actor,high,source:30DB0.c:1116
+T00659.006,subKind,Per-kind selector such as the sequence kind; 0xFF for none,med,source:30DB0.c:1724;source:30DB0.c:1413
+T00659.007,textureSlot,Palette or texture slot used by the asset,med,source:30DB0.c:669;source:30DB0.c:2057
+T00659.008,material,Weapon or armor material,high,source:146C.c:4071
+T00659.009,variant,Asset variant,high,source:146C.c:6108
+T00667.000,coveredQuad,Quad over the covered part of the screen,high,source:146C.c:2290
+T00667.001,edgeQuad,Quad drawing the wipe edge,high,source:146C.c:2307
+T00670.000,texturePage,Texture page word,high,source:30DB0.c:1266
+T00670.001,palette,Default palette,high,source:30DB0.c:1338
+T00670.002,alternatePalette,Alternate palette,high,source:30DB0.c:1333
+T00670.003,referenceCount,Number of users; zero frees the slot,high,source:30DB0.c:1214
+T00692.000,prev,Previous block,high,source:main.c:8988
+T00692.001,next,Next block,high,source:main.c:8987
+T00692.002,blockSize,Block size,high,source:main.c:8956
+T00692.003,reservedC,No access found,low,declaration-only;source:main.h:141
+T00694.000,state,Drive state,high,source:main.c:9037
+T00694.001,xaModeMarker,Set to 0 when XA streaming starts and 128 when it stops; never read,low,source:main.c:9176;source:main.c:9292
+T00694.002,reserved2,Cleared on reset; never read,low,source:main.c:9392
+T00694.003,failureCount,Failed command count,high,source:main.c:9151;source:main.c:9200
+T00694.004,sectorsReceived,Sectors delivered by the drive; ends the read at sectorCount,high,source:main.c:9068
+T00694.005,sectorCount,Sectors to read,high,source:main.c:9153
+T00694.006,startSector,First sector of the read,high,source:main.c:9143
+T00694.007,byteCount,Bytes to read,high,source:main.c:9144
+T00694.008,destination,Destination buffer,high,source:main.c:9145
+T00694.009,xaFilter,XA file and channel filter,high,source:main.c:9188
+T00694.010,position,Drive position,high,source:main.c:9157
+T00694.011,commandId,Id of the last issued command,high,source:main.c:9197
+T00694.012,reserved24,No access found,low,declaration-only;source:main.c:108
+T00694.013,reserved28,No access found,low,declaration-only;source:main.c:109
+T00694.014,bufferMode,Direct or ring-buffered transfer,high,source:main.c:9048
+T00694.015,destinationSector,Next destination sector to fill,high,source:main.c:9040
+T00694.016,bufferedSectors,Sectors in the ring not yet copied out,high,source:main.c:9056;source:main.c:9314
+T00694.017,ringSectorsWritten,Sectors written to the ring; bounds the copy loop,high,source:main.c:9302
+T00694.018,ringWriteIndex,Ring entry receiving the next sector,high,source:main.c:9042
+T00694.019,ringReadIndex,Ring entry copied out next,high,source:main.c:9308
+T00694.020,framesSinceLastRead,Frames since the queue last started a read,high,source:main.c:9463

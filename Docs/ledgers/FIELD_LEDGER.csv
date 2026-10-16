@@ -42,9 +42,9 @@ T00011.001,T00011,arrowType_e,1,arrowTypeDown,0,,,1,,,,,
 T00012.000,T00012,ashleyRenderMode,0,ashleyRenderModeRender,0,,,0,,,,,
 T00012.001,T00012,ashleyRenderMode,1,ashleyRenderModeInit,0,,,1,,,,,
 T00012.002,T00012,ashleyRenderMode,2,ashleyRenderModeRestore,0,,,2,,,,,
-T00013.000,T00013,cdBufferModes_e,0,cdBufferModeNone,0,,,0,,,,,
-T00013.001,T00013,cdBufferModes_e,1,cdBufferModeBuffered,0,,,1,,,,,
-T00013.002,T00013,cdBufferModes_e,2,cdBufferModeManual,0,,,2,,,,,
+T00013.000,T00013,cdBufferModes_e,0,cdBufferModeNone,0,,,0,,Direct,Sectors are read straight into the destination,high,source:main.c:9039
+T00013.001,T00013,cdBufferModes_e,1,cdBufferModeBuffered,0,,,1,,Buffered,Sectors go to the ring and are copied out each frame,high,source:main.c:9305
+T00013.002,T00013,cdBufferModes_e,2,cdBufferModeManual,0,,,2,,Manual,Sectors go to the ring and the caller consumes them,med,source:main.c:9058
 T00014.000,T00014,copyContainerFlags,0,copyContainerFlagsCopy,0,,,16,,,,,
 T00015.000,T00015,disIndices,0,disIndexCommonZero,0,,,0,,,,,
 T00015.001,T00015,disIndices,1,disIndexRank0Comma,0,,,10,,,,,
@@ -149,10 +149,10 @@ T00023.004,T00023,magicSubMenu,4,teleport,0,,,4,,,,,
 T00024.000,T00024,maskedHandler_e,0,memcardMaskedHandlerError,0,,,-1,,,,,
 T00024.001,T00024,maskedHandler_e,1,memcardMaskedHandlerPending,0,,,0,,,,,
 T00024.002,T00024,maskedHandler_e,2,memcardMaskedHandlerComplete,0,,,1,,,,,
-T00025.000,T00025,memcardEventHandler_e,0,memcardEventPending,0,,,0,,,,,
-T00025.001,T00025,memcardEventHandler_e,1,memcardEventIoEnd,0,,,1,,,,,
-T00025.002,T00025,memcardEventHandler_e,2,memcardEventTimeout,0,,,2,,,,,
-T00025.003,T00025,memcardEventHandler_e,3,memcardEventUnformatted,0,,,3,,,,,
+T00025.000,T00025,memcardEventHandler_e,0,memcardEventPending,0,,,0,,Pending,Still working,high,source:260.c:586
+T00025.001,T00025,memcardEventHandler_e,1,memcardEventIoEnd,0,,,1,,Ready,Card responded and is usable,med,declaration-only;source:260.c:40
+T00025.002,T00025,memcardEventHandler_e,2,memcardEventTimeout,0,,,2,,Timeout,Card did not respond,high,source:260.c:591
+T00025.003,T00025,memcardEventHandler_e,3,memcardEventUnformatted,0,,,3,,Unformatted,Card is not formatted,med,declaration-only;source:260.c:42
 T00026.000,T00026,memcardEvents_e,0,memcardEventsSw,0,,,0,,Software,Software memory-card event group at offset zero,med,replaced-by:Save asynchronous completion;declaration-only;source:260.c:36
 T00026.001,T00026,memcardEvents_e,1,memcardEventsHw,0,,,4,,Hardware,Hardware memory-card event group at offset four,med,replaced-by:Save asynchronous completion;declaration-only;source:260.c:36
 T00027.000,T00027,menuItemState_e,0,menuItemStateStatic,0,,,0,,Stationary,Menu item holds its current position,high,source:22C.c:3741
@@ -511,11 +511,11 @@ T00090.001,T00090,state,1,loading,0,,,1,,Loading,Load the clear-save UI resource
 T00090.002,T00090,state,2,loaded,0,,,2,,Ready,Run the loaded clear-save menu,high,source:22C.c:3315
 T00090.003,T00090,state,3,confirmation,0,,,3,,Confirmation,Run clear-save confirmation,high,source:22C.c:3315
 T00090.004,T00090,state,4,exit,0,,,4,,Exit,Leave the clear-save screen,high,source:22C.c:3315
-T00091.000,T00091,testMemcardEvents_e,0,memcardInternalEventIoEnd,0,,,0,,,,,
-T00091.001,T00091,testMemcardEvents_e,1,memcardInternalEventError,0,,,1,,,,,
-T00091.002,T00091,testMemcardEvents_e,2,memcardInternalEventTimeout,0,,,2,,,,,
-T00091.003,T00091,testMemcardEvents_e,3,memcardInternalEventUnformatted,0,,,3,,,,,
-T00091.004,T00091,testMemcardEvents_e,4,memcardInternalEventNone,0,,,4,,,,,
+T00091.000,T00091,testMemcardEvents_e,0,memcardInternalEventIoEnd,0,,,0,,IoEnd,Operation completed,high,declaration-only;source:260.c:29
+T00091.001,T00091,testMemcardEvents_e,1,memcardInternalEventError,0,,,1,,Error,Operation failed,high,declaration-only;source:260.c:30
+T00091.002,T00091,testMemcardEvents_e,2,memcardInternalEventTimeout,0,,,2,,Timeout,Card did not respond,high,declaration-only;source:260.c:31
+T00091.003,T00091,testMemcardEvents_e,3,memcardInternalEventUnformatted,0,,,3,,Unformatted,New or unformatted card,high,declaration-only;source:260.c:32
+T00091.004,T00091,testMemcardEvents_e,4,memcardInternalEventNone,0,,,4,,None,No event signalled,high,source:260.c:178;source:260.c:33
 T00092.000,T00092,vs_battle_informationTextBoxHeader,0,informationTextBoxHeaderNone,0,,,0,,,,,
 T00092.001,T00092,vs_battle_informationTextBoxHeader,1,informationTextBoxHeaderCaution,0,,,1,,,,,
 T00092.002,T00092,vs_battle_informationTextBoxHeader,2,informationTextBoxHeaderInformation,0,,,2,,,,,
@@ -704,10 +704,10 @@ T00120.020,T00120,vs_string_chars,20,vs_char_printString,0,,,255,,PrintString,Te
 T00121.000,T00121,vs_texMode,0,clut4Bit,0,,,0,,Palette4Bit,TextureFormat Palette4Bit,med,declaration-only;source:gpu.h:6
 T00121.001,T00121,vs_texMode,1,clut8Bit,0,,,1,,Palette8Bit,TextureFormat Palette8Bit,med,declaration-only;source:gpu.h:6
 T00121.002,T00121,vs_texMode,2,direct16Bit,0,,,2,,Direct16Bit,TextureFormat Direct16Bit,med,declaration-only;source:gpu.h:6
-T00122.000,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,,,,
-T00122.001,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,,,,
-T00122.002,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,,,,
-T00122.003,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,,,,
+T00122.000,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frames within the current second,med,declaration-only;source:main.h:167
+T00122.001,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Seconds within the current minute,high,source:260.c:767
+T00122.002,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minutes within the current hour,high,source:260.c:765
+T00122.003,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Elapsed hours,high,source:260.c:760
 T00123.000,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
 T00123.001,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
 T00123.002,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
@@ -1039,8 +1039,8 @@ T00182.022,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00182.023,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),23,section18Len,0,u_int,,,,,,,
 T00183.000,T00183,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:606:5),0,unk0,1,vs_battle_actor,,,,,,,
 T00183.001,T00183,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,,,,
-T00184.000,T00184,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),0,processing,0,short,,,,,,,
-T00184.001,T00184,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),1,queued,0,short,,,,,,,
+T00184.000,T00184,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),0,processing,0,short,,,,reading,Requests handed to the drive and not yet marked loaded,high,source:main.c:9476;source:main.c:9482
+T00184.001,T00184,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),1,queued,0,short,,,,waiting,Requests enqueued and not yet started,high,source:main.c:9439;source:main.c:9475
 T00185.000,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
 T00185.001,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
 T00185.002,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
@@ -1094,13 +1094,13 @@ T00196.003,T00196,AnimationState_t,3,repeat,0,short,,,,,,,
 T00196.004,T00196,AnimationState_t,4,currentFrame,0,short,,,,,,,
 T00196.005,T00196,AnimationState_t,5,timer,0,short,,,,,,,
 T00196.006,T00196,AnimationState_t,6,isActive,0,short,,,hidden-when-one,,,,
-T00197.000,T00197,ColorInfo,0,r,0,char,,,,,,,
-T00197.001,T00197,ColorInfo,1,g,0,char,,,,,,,
-T00197.002,T00197,ColorInfo,2,b,0,char,,,,,,,
-T00197.003,T00197,ColorInfo,3,a,0,char,,,,,,,
-T00197.004,T00197,ColorInfo,4,rindex,0,u_char,,,,,,,
-T00197.005,T00197,ColorInfo,5,gindex,0,u_char,,,,,,,
-T00197.006,T00197,ColorInfo,6,bindex,0,u_char,,,,,,,
+T00197.000,T00197,ColorInfo,0,r,0,char,,,,red,Current 5-bit red,high,source:main.c:10535
+T00197.001,T00197,ColorInfo,1,g,0,char,,,,green,Current 5-bit green,high,source:main.c:10536
+T00197.002,T00197,ColorInfo,2,b,0,char,,,,blue,Current 5-bit blue,high,source:main.c:10537
+T00197.003,T00197,ColorInfo,3,a,0,char,,,,maskBit,Semi-transparency bit written to bit 15,high,source:main.c:10538
+T00197.004,T00197,ColorInfo,4,rindex,0,u_char,,,,redStepRow,Target minus current red plus 31; selects the fade step table row,high,source:main.c:10531;source:main.c:11373
+T00197.005,T00197,ColorInfo,5,gindex,0,u_char,,,,greenStepRow,Target minus current green plus 31; selects the fade step table row,high,source:main.c:10532;source:main.c:11374
+T00197.006,T00197,ColorInfo,6,bindex,0,u_char,,,,blueStepRow,Target minus current blue plus 31; selects the fade step table row,high,source:main.c:10533;source:main.c:11375
 T00198.000,T00198,D_1F80035C_t,0,unk0,1,u_char[52],,,,,,,
 T00198.001,T00198,D_1F80035C_t,1,tpage,0,u_short,,,,,,,
 T00198.002,T00198,D_1F80035C_t,2,clut,0,u_short,,,,,,,
@@ -1144,23 +1144,23 @@ T00203.000,T00203,D_80039BC8_t,0,pInstrumentDst,0,int *,,,,,,,
 T00203.001,T00203,D_80039BC8_t,1,SpuAddr,0,int,,,,,,,
 T00203.002,T00203,D_80039BC8_t,2,SpuBytesRemaining,0,u_int,,,,,,,
 T00203.003,T00203,D_80039BC8_t,3,InstrumentBytesRemaining,0,u_int,,,remainingInstrumentHeaderBytes,,,,
-T00204.000,T00204,D_80050468_t,0,unk0,1,char,,,timerMode,,,,
-T00204.001,T00204,D_80050468_t,1,unk1,1,char,,,suspendedTimerMode,,,,
-T00204.002,T00204,D_80050468_t,2,unk2,1,u_short,,,resetScope,,,,
-T00204.003,T00204,D_80050468_t,3,frames,0,signed char,,,,,,,
-T00204.004,T00204,D_80050468_t,4,seconds,0,signed char,,,,,,,
-T00204.005,T00204,D_80050468_t,5,minutes,0,signed char,,,,,,,
-T00204.006,T00204,D_80050468_t,6,hours,0,signed char,,,,,,,
-T00205.000,T00205,D_8005DC6C_t,0,r,0,char,,,,,,,
-T00205.001,T00205,D_8005DC6C_t,1,g,0,char,,,,,,,
-T00205.002,T00205,D_8005DC6C_t,2,b,0,char,,,,,,,
-T00205.003,T00205,D_8005DC6C_t,3,unk3,1,char,,,,,,,
-T00206.000,T00206,D_8005DC80_t,0,unk0,1,char[6],,,,,,,
-T00206.001,T00206,D_8005DC80_t,1,unk6,1,short[5],,,,,,,
-T00206.002,T00206,D_8005DC80_t,2,unk10,1,int[6],,,colorValuesAndSteps,,,,
-T00206.003,T00206,D_8005DC80_t,3,unk28,1,D_8005DC6C_t,,,,,,,
-T00207.000,T00207,D_80060068_t,0,unk0,1,D_80060068_t3,,,,,,,
-T00207.001,T00207,D_80060068_t,1,unkDC,1,int[9],,,,,,,
+T00204.000,T00204,D_80050468_t,0,unk0,1,char,,,timerMode,mode,0 stopped 1 counts up any other value counts down,high,source:146C.c:14508;source:146C.c:8513
+T00204.001,T00204,D_80050468_t,1,unk1,1,char,,,suspendedTimerMode,pausedMode,Mode saved while the timer is paused and restored on resume,high,source:146C.c:8553;source:146C.c:8557
+T00204.002,T00204,D_80050468_t,2,unk2,1,u_short,,,resetScope,resetScope,Resets on room load (0) zone load (1) or scene transition (2),high,source:146C.c:15313;source:146C.c:14844;source:146C.c:14768
+T00204.003,T00204,D_80050468_t,3,frames,0,signed char,,,,frames,Frames part of the timer,high,source:146C.c:14510
+T00204.004,T00204,D_80050468_t,4,seconds,0,signed char,,,,seconds,Seconds part of the timer,high,source:146C.c:14513
+T00204.005,T00204,D_80050468_t,5,minutes,0,signed char,,,,minutes,Minutes part of the timer,high,source:146C.c:14515
+T00204.006,T00204,D_80050468_t,6,hours,0,signed char,,,,hours,Hours part of the timer,high,source:146C.c:14532
+T00205.000,T00205,D_8005DC6C_t,0,r,0,char,,,,red,Red component,high,source:main.c:10791
+T00205.001,T00205,D_8005DC6C_t,1,g,0,char,,,,green,Green component,high,source:main.c:10792
+T00205.002,T00205,D_8005DC6C_t,2,b,0,char,,,,blue,Blue component,high,source:main.c:10793
+T00205.003,T00205,D_8005DC6C_t,3,unk3,1,char,,,,pad3,Padding byte cleared by whole-word stores,med,source:main.c:11654;no member access;source:main.h:381
+T00206.000,T00206,D_8005DC80_t,0,unk0,1,char[6],,,,progress,Bytes: [0] active [1] frame [2] tick [3] half duration [4] transition mode,high,source:main.c:11027;source:main.c:11324;source:main.c:11326
+T00206.001,T00206,D_8005DC80_t,1,unk6,1,short[5],,,,blendParams,Shorts: [0..2] pulse target [3] tint strength [4] strength step per frame,high,source:main.c:11189;source:main.c:11174
+T00206.002,T00206,D_8005DC80_t,2,unk10,1,int[6],,,colorValuesAndSteps,colorFixed,Current red green blue in 16.16 then the per-frame step of each,high,source:main.c:11012;source:main.c:11297
+T00206.003,T00206,D_8005DC80_t,3,unk28,1,D_8005DC6C_t,,,,baseColor,Base color that relative transitions are computed from,high,source:main.c:11051;source:main.c:11089
+T00207.000,T00207,D_80060068_t,0,unk0,1,D_80060068_t3,,,,stats,Ashley's statistics status and limb records,high,source:260.c:811
+T00207.001,T00207,D_80060068_t,1,unkDC,1,int[9],,,,reservedDC,Unread words completing the 256-byte snapshot,low,declaration-only;source:main.h:235
 T00208.000,T00208,D_80060068_t2,0,hp,0,u_short,,,,,,,
 T00208.001,T00208,D_80060068_t2,1,maxHp,0,u_short,,,,,,,
 T00208.002,T00208,D_80060068_t2,2,types,0,u_short[4],,,,,,,
@@ -1321,8 +1321,8 @@ T00221.005,T00221,D_800F18C8_t,5,unkA,1,short,,,,reserved0A,Cleared on room load
 T00221.006,T00221,D_800F18C8_t,6,unkC,1,int,,,,reserved0C,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:310
 T00221.007,T00221,D_800F18C8_t,7,unk10,1,int,,,,reserved10,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:311
 T00221.008,T00221,D_800F18C8_t,8,unk14,1,int,,,,reserved14,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:312
-T00222.000,T00222,D_800F18E8_t,0,unk0_0,1,u_short,10,,,,,,
-T00222.001,T00222,D_800F18E8_t,1,unk0_10,1,u_short,6,,,,,,
+T00222.000,T00222,D_800F18E8_t,0,unk0_0,1,u_short,10,,,requiredFlagId,State flag id copied to the saved door's requiredFlagId,med,source:main.c:8399
+T00222.001,T00222,D_800F18E8_t,1,unk0_10,1,u_short,6,,,reservedBits10,Upper six bits; no access found,low,declaration-only;source:146C.h:730
 T00223.000,T00223,D_800F18EC_t,0,unk0,1,short,,,,reserved00,Unidentified short,low,declaration-only;source:5BF94.h:148
 T00223.001,T00223,D_800F18EC_t,1,unk2,1,short,,,,reserved02,Unidentified short,low,declaration-only;source:5BF94.h:149
 T00223.002,T00223,D_800F18EC_t,2,executeAbility,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),,,,executeAbility,Packed execute-ability parameters,med,declaration-only;source:5BF94.h:159
@@ -1394,13 +1394,13 @@ T00227.008,T00227,D_800F19CC_t5,8,unk14,1,char,,,,,,,
 T00227.009,T00227,D_800F19CC_t5,9,unk15,1,char,,,,,,,
 T00227.010,T00227,D_800F19CC_t5,10,unk16,1,char,,,,,,,
 T00227.011,T00227,D_800F19CC_t5,11,enemyClass,0,char,,,,,,,
-T00228.000,T00228,D_800F1A68_t,0,unk0,1,int,,,x,,,,
-T00228.001,T00228,D_800F1A68_t,1,unk4,1,int,,,y,,,,
-T00228.002,T00228,D_800F1A68_t,2,unk8,1,int,,,,,,,
-T00228.003,T00228,D_800F1A68_t,3,unkC,1,int,,,,,,,
-T00229.000,T00229,D_800F1ABC_t,0,poly,0,POLY_FT4[10],,,,,,,
-T00229.001,T00229,D_800F1ABC_t,1,sprite,0,SPRT[10],,,,,,,
-T00229.002,T00229,D_800F1ABC_t,2,drawModes,0,DR_MODE[10],,,,,,,
+T00228.000,T00228,D_800F1A68_t,0,unk0,1,int,,,x,x,Horizontal offset added to the screen center,high,source:146C.c:9324;source:146C.c:9385
+T00228.001,T00228,D_800F1A68_t,1,unk4,1,int,,,y,y,Vertical offset added to the screen center,high,source:146C.c:9325;source:146C.c:9386
+T00228.002,T00228,D_800F1A68_t,2,unk8,1,int,,,,reserved8,Cleared with the effect and never read,low,source:146C.c:9273
+T00228.003,T00228,D_800F1A68_t,3,unkC,1,int,,,,reservedC,No access found,low,declaration-only;source:146C.h:725
+T00229.000,T00229,D_800F1ABC_t,0,poly,0,POLY_FT4[10],,,,rotatedStrips,Textured quads used when the screen is rotated or scaled,high,source:146C.c:9289
+T00229.001,T00229,D_800F1ABC_t,1,sprite,0,SPRT[10],,,,flatStrips,Sprites used when the screen is drawn unrotated,high,source:146C.c:9301
+T00229.002,T00229,D_800F1ABC_t,2,drawModes,0,DR_MODE[10],,,,drawModes,Texture page draw modes for each strip,high,source:146C.c:9392
 T00230.000,T00230,D_800F1BAC_t,0,unk0,1,SVECTOR,,,,,,,
 T00230.001,T00230,D_800F1BAC_t,1,unk8,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),,,label kind and actor index,,,,
 T00230.002,T00230,D_800F1BAC_t,2,unkA,1,u_char,,,,,,,
@@ -1690,14 +1690,14 @@ T00242.001,T00242,D_800F4538_unk180C,1,unk0_4,1,u_char,4,,track mode,,,,
 T00242.002,T00242,D_800F4538_unk180C,2,unk1,1,u_char,,,,,,,
 T00242.003,T00242,D_800F4538_unk180C,3,unk2,1,u_char,,,timeline entry,,,,
 T00242.004,T00242,D_800F4538_unk180C,4,unk3,1,u_char,,,frame timer,,,,
-T00243.000,T00243,D_800F4538_unk181C,0,x,0,u_char,,,,,,,
-T00243.001,T00243,D_800F4538_unk181C,1,y,0,u_char,,,,,,,
-T00243.002,T00243,D_800F4538_unk181C,2,dx,0,signed char,,,,,,,
-T00243.003,T00243,D_800F4538_unk181C,3,dy,0,signed char,,,,,,,
-T00243.004,T00243,D_800F4538_unk181C,4,interval,0,u_char,,,,,,,
-T00243.005,T00243,D_800F4538_unk181C,5,timer,0,u_char,,,,,,,
-T00243.006,T00243,D_800F4538_unk181C,6,unk6,1,u_char,,,,,,,
-T00243.007,T00243,D_800F4538_unk181C,7,unk7,1,u_char,,,,,,,
+T00243.000,T00243,D_800F4538_unk181C,0,x,0,u_char,,,,x,Current horizontal source position,high,source:30DB0.c:1392;source:40564.c:1598
+T00243.001,T00243,D_800F4538_unk181C,1,y,0,u_char,,,,y,Current vertical source position,high,source:30DB0.c:1393;source:40564.c:1600
+T00243.002,T00243,D_800F4538_unk181C,2,dx,0,signed char,,,,stepX,Horizontal step; negated when bouncing,high,source:40564.c:1599;source:40564.c:1612
+T00243.003,T00243,D_800F4538_unk181C,3,dy,0,signed char,,,,stepY,Vertical step; negated when bouncing,high,source:40564.c:1601;source:40564.c:1621
+T00243.004,T00243,D_800F4538_unk181C,4,interval,0,u_char,,,,interval,Ticks between steps,high,source:40564.c:1585
+T00243.005,T00243,D_800F4538_unk181C,5,timer,0,u_char,,,,timer,Ticks since the last step,high,source:40564.c:1583
+T00243.006,T00243,D_800F4538_unk181C,6,unk6,1,u_char,,,,pad6,No access found,low,declaration-only;source:3A1A0.h:240
+T00243.007,T00243,D_800F4538_unk181C,7,unk7,1,u_char,,,,pad7,No access found,low,declaration-only;source:3A1A0.h:241
 T00244.000,T00244,D_800F4538_unk1848,0,unk0,1,u_char,,,,,,,
 T00244.001,T00244,D_800F4538_unk1848,1,unk1,1,u_char,,,,,,,
 T00244.002,T00244,D_800F4538_unk1848,2,unk2,1,u_char,,,,,,,
@@ -1734,15 +1734,15 @@ T00249.000,T00249,D_800F4538_unk614,0,x,0,u_char,,,,,,,
 T00249.001,T00249,D_800F4538_unk614,1,y,0,u_char,,,,,,,
 T00249.002,T00249,D_800F4538_unk614,2,columns,0,u_char,,,,,,,
 T00249.003,T00249,D_800F4538_unk614,3,unk3,1,u_char,,,,,,,
-T00250.000,T00250,D_800F4538_unk61C,0,x,0,u_char,,,,,,,
-T00250.001,T00250,D_800F4538_unk61C,1,y,0,u_char,,,,,,,
-T00250.002,T00250,D_800F4538_unk61C,2,w,0,u_char,,,,,,,
-T00250.003,T00250,D_800F4538_unk61C,3,h,0,u_char,,,,,,,
-T00250.004,T00250,D_800F4538_unk61C,4,unk4,1,u_char,,,,,,,
-T00250.005,T00250,D_800F4538_unk61C,5,unk5,1,u_char,,,,,,,
-T00250.006,T00250,D_800F4538_unk61C,6,unk6_0,1,u_char,1,,ping-pong scrolling,,,,
-T00250.007,T00250,D_800F4538_unk61C,7,unk6_1,1,u_char,7,,,,,,
-T00250.008,T00250,D_800F4538_unk61C,8,unk7,1,u_char,,,,,,,
+T00250.000,T00250,D_800F4538_unk61C,0,x,0,u_char,,,,x,Window left edge,high,source:40564.c:1602
+T00250.001,T00250,D_800F4538_unk61C,1,y,0,u_char,,,,y,Window top edge,high,source:40564.c:1607
+T00250.002,T00250,D_800F4538_unk61C,2,w,0,u_char,,,,width,Window width; zero disables the scroll,high,source:40564.c:1578;source:40564.c:1606
+T00250.003,T00250,D_800F4538_unk61C,3,h,0,u_char,,,,height,Window height,high,source:40564.c:1607
+T00250.004,T00250,D_800F4538_unk61C,4,unk4,1,u_char,,,,initialStepX,Horizontal step copied into the scroll state,high,source:30DB0.c:1394
+T00250.005,T00250,D_800F4538_unk61C,5,unk5,1,u_char,,,,initialStepY,Vertical step copied into the scroll state,high,source:30DB0.c:1395
+T00250.006,T00250,D_800F4538_unk61C,6,unk6_0,1,u_char,1,,ping-pong scrolling,bounces,Reverses direction at an edge instead of wrapping to the start,high,source:40564.c:1610
+T00250.007,T00250,D_800F4538_unk61C,7,unk6_1,1,u_char,7,,,reservedBits1,No access found,low,declaration-only;source:3A1A0.h:229
+T00250.008,T00250,D_800F4538_unk61C,8,unk7,1,u_char,,,,interval,Ticks between steps copied into the scroll state,high,source:30DB0.c:1396
 T00251.000,T00251,D_800F4538_unk64,0,unk0,1,u_char,,,highlighted polygon-group bitmask,,,,
 T00251.001,T00251,D_800F4538_unk64,1,unk1,1,u_char,,,palette pulse intensity,,,,
 T00251.002,T00251,D_800F4538_unk64,2,unk2,1,u_char,,,palette pulse direction flags,,,,
@@ -2432,14 +2432,14 @@ T00289.013,T00289,FSoundVoiceSchedulerState,13,field13_0x2c,0,u_int,,,,,,,
 T00290.000,T00290,FSpuVoiceInfo,0,unk0,1,int,,,,,,,
 T00290.001,T00290,FSpuVoiceInfo,1,pEnvx,0,short,,,,,,,
 T00290.002,T00290,FSpuVoiceInfo,2,unk6,1,short,,,,,,,
-T00291.000,T00291,MovieData_t,0,encodedData,0,u_long *[2],,,,,,,
-T00291.001,T00291,MovieData_t,1,encodedDataIndex,0,int,,,,,,,
-T00291.002,T00291,MovieData_t,2,decodedData,0,void *[2],,,,,,,
-T00291.003,T00291,MovieData_t,3,decodedDataIndex,0,int,,,,,,,
-T00291.004,T00291,MovieData_t,4,frameBufs,0,RECT[2],,,,,,,
-T00291.005,T00291,MovieData_t,5,frameBufIndex,0,u_int,,,,,,,
-T00291.006,T00291,MovieData_t,6,renderTarget,0,RECT,,,,,,,
-T00291.007,T00291,MovieData_t,7,frameComplete,0,int,,,,,,,
+T00291.000,T00291,MovieData_t,0,encodedData,0,u_long *[2],,,,encodedBuffers,Two buffers holding compressed frames,high,source:22C.c:3445
+T00291.001,T00291,MovieData_t,1,encodedDataIndex,0,int,,,,encodedBufferIndex,Encoded buffer being decoded,high,source:22C.c:3507
+T00291.002,T00291,MovieData_t,2,decodedData,0,void *[2],,,,decodedBuffers,Two buffers receiving decoded slices,high,source:22C.c:3447
+T00291.003,T00291,MovieData_t,3,decodedDataIndex,0,int,,,,decodedBufferIndex,Decoded slice buffer in use,high,source:22C.c:3440
+T00291.004,T00291,MovieData_t,4,frameBufs,0,RECT[2],,,,frameRects,Destination rectangles of the two frame buffers,high,source:22C.c:3534
+T00291.005,T00291,MovieData_t,5,frameBufIndex,0,u_int,,,,frameRectIndex,Frame buffer rectangle being filled,high,source:22C.c:3552
+T00291.006,T00291,MovieData_t,6,renderTarget,0,RECT,,,,sliceRect,Rectangle of the slice currently uploaded,med,source:22C.c:3436;source:22C.c:3538
+T00291.007,T00291,MovieData_t,7,frameComplete,0,int,,,,frameComplete,Set when the current frame has been fully uploaded,high,source:22C.c:3444;source:22C.c:3546
 T00292.000,T00292,PLG005_data_t,0,unk0,1,u_char,,,,,,,
 T00292.001,T00292,PLG005_data_t,1,unk1,1,u_char,,,,,,,
 T00292.002,T00292,PLG005_data_t,2,uBase,0,u_char,,,,,,,
@@ -2455,14 +2455,14 @@ T00292.011,T00292,PLG005_data_t,11,unk10,1,short,,,zSpacingSpeed,,,,
 T00292.012,T00292,PLG005_data_t,12,unk12,1,short,,,xWavePhase,,,,
 T00292.013,T00292,PLG005_data_t,13,unk14,1,short,,,zWavePhase,,,,
 T00292.014,T00292,PLG005_data_t,14,curveSampleDistance,0,int,,,,,,,
-T00293.000,T00293,System_dat_h,0,unk0,1,size_t,,,,,,,
-T00293.001,T00293,System_dat_h,1,unk4,1,size_t,,,,,,,
-T00293.002,T00293,System_dat_h,2,unk8,1,size_t,,,,,,,
-T00293.003,T00293,System_dat_h,3,unkC,1,size_t,,,,,,,
-T00293.004,T00293,System_dat_h,4,unk10,1,size_t,,,,,,,
-T00293.005,T00293,System_dat_h,5,unk14,1,size_t,,,,,,,
-T00293.006,T00293,System_dat_h,6,unk18,1,size_t,,,,,,,
-T00293.007,T00293,System_dat_h,7,unk1C,1,size_t,,,,,,,
+T00293.000,T00293,System_dat_h,0,unk0,1,size_t,,,,image0Offset,First rectangle-headed image,high,source:18.c:267
+T00293.001,T00293,System_dat_h,1,unk4,1,size_t,,,,image1Offset,Second rectangle-headed image,high,source:18.c:272
+T00293.002,T00293,System_dat_h,2,unk8,1,size_t,,,,paletteOffset,Palette block loaded with vs_main_loadClut,high,source:18.c:277
+T00293.003,T00293,System_dat_h,3,unkC,1,size_t,,,,image2Offset,Third rectangle-headed image,high,source:18.c:280
+T00293.004,T00293,System_dat_h,4,unk10,1,size_t,,,,image3Offset,Fourth rectangle-headed image,high,source:18.c:285
+T00293.005,T00293,System_dat_h,5,unk14,1,size_t,,,,image4Offset,Fifth rectangle-headed image,high,source:18.c:290
+T00293.006,T00293,System_dat_h,6,unk18,1,size_t,,,,fixedImageOffset,Size-headed image loaded at VRAM 768 240,high,source:18.c:295;source:18.c:296
+T00293.007,T00293,System_dat_h,7,unk1C,1,size_t,,,,interfaceDataOffset,Data passed to Menu::Framework::InitGameInterface,high,source:18.c:300
 T00294.000,T00294,TrailPacket,0,tag,0,u_long,,,,,,,
 T00294.001,T00294,TrailPacket,1,mode,0,u_long,,,,,,,
 T00294.002,T00294,TrailPacket,2,r0,0,u_char,,,,,,,
@@ -2567,26 +2567,26 @@ T00305.003,T00305,_armorIntermediate,3,unk32,1,char,,,,,,,
 T00305.004,T00305,_armorIntermediate,4,index,0,char,,,,,,,
 T00306.000,T00306,_buffReels_t,0,stat,0,short,,,,,,,
 T00306.001,T00306,_buffReels_t,1,amount,0,short,,,,,,,
-T00307.000,T00307,_clutSlot,0,unk4,1,char,,,,,,,
-T00307.001,T00307,_clutSlot,1,locked,0,char,,,,,,,
-T00307.002,T00307,_clutSlot,2,animState,0,struct clutAnimState_t,,,,,,,
-T00307.003,T00307,_clutSlot,3,colorInfo,0,struct ColorInfo[256],,,,,,,
-T00307.004,T00307,_clutSlot,4,clutBase,0,u_short[256],,,,,,,
-T00308.000,T00308,_clutState_t,0,uploadPending,0,u_short,,,,,,,
-T00308.001,T00308,_clutState_t,1,active,0,u_short,,,,,,,
-T00308.002,T00308,_clutState_t,2,slots,0,_clutSlot[14],,,,,,,
-T00308.003,T00308,_clutState_t,3,bgAnimActive,0,u_char,,,,,,,
-T00308.004,T00308,_clutState_t,4,bgAnimFrame,0,u_char,,,,,,,
-T00308.005,T00308,_clutState_t,5,bgAnimTick,0,u_char,,,,,,,
-T00308.006,T00308,_clutState_t,6,bgAnimSpeed,0,u_char,,,,,,,
-T00308.007,T00308,_clutState_t,7,bgTransitionMode,0,u_char,,,,,,,
-T00308.008,T00308,_clutState_t,8,unk7E95,1,u_char,,,,,,,
-T00308.009,T00308,_clutState_t,9,bgTransitionTargetR,0,short,,,,,,,
-T00308.010,T00308,_clutState_t,10,bgTransitionTargetG,0,short,,,,,,,
-T00308.011,T00308,_clutState_t,11,bgTransitionTargetB,0,short,,,,,,,
-T00308.012,T00308,_clutState_t,12,bgColors,0,int[5][6],,,,,,,
-T00308.013,T00308,_clutState_t,13,unk7F14,1,D_8005DC6C_t[5],,,baseBackgroundColors,,,,
-T00308.014,T00308,_clutState_t,14,unk7F28,1,D_8005DC80_t[17],,,,,,,
+T00307.000,T00307,_clutSlot,0,unk4,1,char,,,,reserved0,First byte; no access found,low,declaration-only;source:main.c:35
+T00307.001,T00307,_clutSlot,1,locked,0,char,,,,locked,Prevents vs_main_loadClut from replacing the slot,high,source:main.c:11483
+T00307.002,T00307,_clutSlot,2,animState,0,struct clutAnimState_t,,,,transition,Fade timer of the slot,high,source:main.c:10543
+T00307.003,T00307,_clutSlot,3,colorInfo,0,struct ColorInfo[256],,,,entries,Per-entry fade data for 256 colors,high,source:main.c:10528
+T00307.004,T00307,_clutSlot,4,clutBase,0,u_short[256],,,,baseColors,Saved 15-bit colors that relative transforms start from,high,source:main.c:10573;source:main.c:10608
+T00308.000,T00308,_clutState_t,0,uploadPending,0,u_short,,,,uploadPending,Set when changed palette colors must be uploaded,high,source:main.c:10558
+T00308.001,T00308,_clutState_t,1,active,0,u_short,,,,enabled,Gates every palette and tint transition request,high,source:main.c:10556
+T00308.002,T00308,_clutState_t,2,slots,0,_clutSlot[14],,,,slots,Fourteen CLUT slots,high,source:main.c:11642
+T00308.003,T00308,_clutState_t,3,bgAnimActive,0,u_char,,,,backgroundFadeActive,Background color fade in progress,high,source:main.c:10806
+T00308.004,T00308,_clutState_t,4,bgAnimFrame,0,u_char,,,,backgroundFadeFrame,Frames elapsed in the background fade,high,source:main.c:11269
+T00308.005,T00308,_clutState_t,5,bgAnimTick,0,u_char,,,,backgroundFadeTick,Cleared when a background fade starts; never read,med,source:main.c:10808
+T00308.006,T00308,_clutState_t,6,bgAnimSpeed,0,u_char,,,,backgroundFadeSpeed,Half the background fade length in frames,high,source:main.c:11270
+T00308.007,T00308,_clutState_t,7,bgTransitionMode,0,u_char,,,,backgroundFadeMode,Transition mode; 9 and 10 alternate to pulse,high,source:main.c:11271
+T00308.008,T00308,_clutState_t,8,unk7E95,1,u_char,,,,pad7E95,No access found,low,declaration-only;source:main.c:68
+T00308.009,T00308,_clutState_t,9,bgTransitionTargetR,0,short,,,,backgroundPulseRed,Red offset of the background pulse,high,source:main.c:10957
+T00308.010,T00308,_clutState_t,10,bgTransitionTargetG,0,short,,,,backgroundPulseGreen,Green offset of the background pulse,high,source:main.c:10958
+T00308.011,T00308,_clutState_t,11,bgTransitionTargetB,0,short,,,,backgroundPulseBlue,Blue offset of the background pulse,high,source:main.c:10959
+T00308.012,T00308,_clutState_t,12,bgColors,0,int[5][6],,,,backgroundColorsFixed,Five background colors in 16.16 with per-frame steps,high,source:main.c:10786;source:main.c:11246;source:main.c:11268
+T00308.013,T00308,_clutState_t,13,unk7F14,1,D_8005DC6C_t[5],,,baseBackgroundColors,backgroundBaseColors,Base background colors that relative transitions start from,high,source:main.c:10829
+T00308.014,T00308,_clutState_t,14,unk7F28,1,D_8005DC80_t[17],,,,modelColorFades,Room tint fade then sixteen actor tint fades,high,source:main.c:11292
 T00309.000,T00309,_creditsElement,0,renderer,0,void (*)(struct _creditsElement *),,,,render,Renderer callback for this credits element,high,source:D4.c:1146
 T00309.001,T00309,_creditsElement,1,data,0,u_char *,,,,textBytes,Encoded text stream owned by this element,high,source:D4.c:1222
 T00309.002,T00309,_creditsElement,2,state,0,short,,,,phase,Renderer lifecycle phase with minus one meaning finished,high,source:D4.c:218
@@ -3670,14 +3670,14 @@ T00406.019,T00406,candidateMovementState,19,targets,0,candidateMovementWord[16],
 T00406.020,T00406,candidateMovementState,20,distances,0,unsigned int[16],,,,,,,
 T00406.021,T00406,candidateMovementState,21,pad224,1,char[588],,,,,,,
 T00406.022,T00406,candidateMovementState,22,count,0,int,,,,,,,
-T00407.000,T00407,clutAnimState_t,0,active,0,u_char,,,,,,,
-T00407.001,T00407,clutAnimState_t,1,frame,0,u_char,,,,,,,
-T00407.002,T00407,clutAnimState_t,2,tick,0,u_char,,,,,,,
-T00407.003,T00407,clutAnimState_t,3,speed,0,u_char,,,,,,,
-T00407.004,T00407,clutAnimState_t,4,transitionMode,0,u_char,,,,,,,
-T00407.005,T00407,clutAnimState_t,5,transitionTargetR,0,signed char,,,,,,,
-T00407.006,T00407,clutAnimState_t,6,transitionTargetG,0,signed char,,,,,,,
-T00407.007,T00407,clutAnimState_t,7,transitionTargetB,0,signed char,,,,,,,
+T00407.000,T00407,clutAnimState_t,0,active,0,u_char,,,,active,Fade in progress,high,source:main.c:10544
+T00407.001,T00407,clutAnimState_t,1,frame,0,u_char,,,,frame,Frames elapsed,high,source:main.c:10545
+T00407.002,T00407,clutAnimState_t,2,tick,0,u_char,,,,tick,Sub-step counter,high,source:main.c:10546
+T00407.003,T00407,clutAnimState_t,3,speed,0,u_char,,,,speed,Fade duration parameter,high,source:main.c:10547
+T00407.004,T00407,clutAnimState_t,4,transitionMode,0,u_char,,,,mode,Color transform mode,high,source:main.c:10756
+T00407.005,T00407,clutAnimState_t,5,transitionTargetR,0,signed char,,,,pulseRed,Red offset of the transform,high,source:main.c:10758
+T00407.006,T00407,clutAnimState_t,6,transitionTargetG,0,signed char,,,,pulseGreen,Green offset of the transform,high,source:main.c:10759
+T00407.007,T00407,clutAnimState_t,7,transitionTargetB,0,signed char,,,,pulseBlue,Blue offset of the transform,high,source:main.c:10760
 T00408.000,T00408,da4bcActor,0,next,0,struct da4bcActor *,,,,,,,
 T00408.001,T00408,da4bcActor,1,id,0,int,,,,,,,
 T00409.000,T00409,da4bcEntry,0,unk0,1,unsigned int,,,,,,,
@@ -4071,9 +4071,9 @@ T00459.007,T00459,func_800962E4_t,7,unkB,1,char,,,,,,,
 T00459.008,T00459,func_800962E4_t,8,unkC,1,short,,,,,,,
 T00459.009,T00459,func_800962E4_t,9,unkE,1,char,,,,,,,
 T00459.010,T00459,func_800962E4_t,10,unkF,1,char,,,,,,,
-T00460.000,T00460,func_8009C378_t,0,unk0,1,void *,,,,,,,
-T00460.001,T00460,func_8009C378_t,1,unk4,1,void *,,,,,,,
-T00460.002,T00460,func_8009C378_t,2,unk8,1,char[30968],,,,,,,
+T00460.000,T00460,func_8009C378_t,0,unk0,1,void *,,,,firstSectionPointer,First self-relative offset rebased to an address on load,med,source:30DB0.c:1721
+T00460.001,T00460,func_8009C378_t,1,unk4,1,void *,,,,secondSectionPointer,Second self-relative offset rebased to an address on load,med,source:30DB0.c:1722
+T00460.002,T00460,func_8009C378_t,2,unk8,1,char[30968],,,,body,Remaining sequence bytes,med,declaration-only;source:30DB0.h:8
 T00461.000,T00461,func_800A0024_t,0,unk0,1,u_char,,,,placementByte0,First copied placement byte,low,source:30DB0.c:3678
 T00461.001,T00461,func_800A0024_t,1,unk1,1,u_char,,,,heightAboveGround,Height above ground in units of 128,med,source:30DB0.c:3684
 T00461.002,T00461,func_800A0024_t,2,unk2,1,u_char,,,,placementByte2,Third copied placement byte,low,source:30DB0.c:3678
@@ -4357,10 +4357,10 @@ T00497.024,T00497,func_800D2904_t,24,unk77,1,u_char,,,age,,,,
 T00498.000,T00498,func_800D4910_t,0,next,0,struct func_800D4910_t *,,,,,,,
 T00498.001,T00498,func_800D4910_t,1,renderer,0,effectExec,,,,,,,
 T00498.002,T00498,func_800D4910_t,2,unk8,1,void *,,,effectState | renderer-owned state,,,,
-T00499.000,T00499,func_800D55A4_t,0,count,0,int,,,,,,,
-T00499.001,T00499,func_800D55A4_t,1,unk4,1,func_800D55A4_t2[0],,,,,,,
-T00500.000,T00500,func_800D55A4_t2,0,unk0,1,func_800D5780_t2,,,,,,,
-T00500.001,T00500,func_800D55A4_t2,1,unk2,1,u_short,,,,,,,
+T00499.000,T00499,func_800D55A4_t,0,count,0,int,,,,trackCount,Number of track entries,high,source:5BF94.c:7896
+T00499.001,T00499,func_800D55A4_t,1,unk4,1,func_800D55A4_t2[0],,,,tracks,Track entries,high,source:5BF94.c:7882
+T00500.000,T00500,func_800D55A4_t2,0,unk0,1,func_800D5780_t2,,,,header,Packed track kind header copied into the playback state,high,source:5BF94.c:7904
+T00500.001,T00500,func_800D55A4_t2,1,unk2,1,u_short,,,,dataOffset,Byte offset of the track data from the block start,high,source:5BF94.c:7882
 T00501.000,T00501,func_800D5780_t,0,unk0,1,u_long *,,,,,,,
 T00501.001,T00501,func_800D5780_t,1,unk4,1,func_800D5780_t2,,,,,,,
 T00501.002,T00501,func_800D5780_t,2,unk6,1,short,,,keyIndex,,,,
@@ -4767,47 +4767,47 @@ T00541.002,T00541,func_80103080_t,2,unk4,1,char,,,,,,,
 T00541.003,T00541,func_80103080_t,3,unk5,1,char,,,,,,,
 T00541.004,T00541,func_80103080_t,4,unk6,1,char,,,,,,,
 T00541.005,T00541,func_80103080_t,5,unk7,1,char,,,,,,,
-T00542.000,T00542,gim_t,0,unk0_0,1,u_int,1,,,,,,
-T00542.001,T00542,gim_t,1,unk0_1,1,u_int,1,,,,,,
-T00542.002,T00542,gim_t,2,unk0_2,1,u_int,1,,,,,,
-T00542.003,T00542,gim_t,3,unk0_3,1,u_int,3,,transition renderer,,,,
-T00542.004,T00542,gim_t,4,unk0_6,1,u_int,3,,loading phase,,,,
-T00542.005,T00542,gim_t,5,unk0_9,1,u_int,3,,reserved texture-page count,,,,
-T00542.006,T00542,gim_t,6,unk0_12,1,u_int,1,,,,,,
-T00542.007,T00542,gim_t,7,unk0_13,1,u_int,3,,,,,,
-T00542.008,T00542,gim_t,8,unk2,1,char,,,,,,,
-T00542.009,T00542,gim_t,9,unk3,1,char,,,brightness or transition parameter,,,,
-T00542.010,T00542,gim_t,10,columns,0,u_char,,,,,,,
-T00542.011,T00542,gim_t,11,rows,0,u_char,,,,,,,
-T00542.012,T00542,gim_t,12,id,0,short,,,,,,,
-T00542.013,T00542,gim_t,13,unk8,1,short,,,,,,,
-T00542.014,T00542,gim_t,14,unkA,1,short,,,,,,,
-T00542.015,T00542,gim_t,15,unkC,1,short,,,scale and ordering flags,,,,
-T00542.016,T00542,gim_t,16,unkE,1,u_short,,,background color,,,,
-T00542.017,T00542,gim_t,17,data,0,u_short *,,,,,,,
-T00542.018,T00542,gim_t,18,cdQueueSlot,0,vs_main_CdQueueSlot *,,,,,,,
-T00542.019,T00542,gim_t,19,unk18,1,u_short[240],,,scanline wipe widths,,,,
-T00542.020,T00542,gim_t,20,imageTable,0,u_short[254],,,,,,,
-T00542.021,T00542,gim_t,21,unk3F4,1,int,,,,,,,
-T00543.000,T00543,imgHeader_t,0,wLo,0,char,,,,,,,
-T00543.001,T00543,imgHeader_t,1,wHi,0,char,,,,,,,
-T00543.002,T00543,imgHeader_t,2,hLo,0,char,,,,,,,
-T00543.003,T00543,imgHeader_t,3,hHi,0,char,,,,,,,
+T00542.000,T00542,gim_t,0,unk0_0,1,u_int,1,,,drawEnabled,Layer is drawn each frame,high,source:5BF94.c:2384;source:5BF94.c:2567
+T00542.001,T00542,gim_t,1,unk0_1,1,u_int,1,,,loading,Set while the image file is loading,high,source:5BF94.c:2360;source:5BF94.c:2560
+T00542.002,T00542,gim_t,2,unk0_2,1,u_int,1,,,textureMode,Texture depth passed to getTPage,high,source:5BF94.c:4157
+T00542.003,T00542,gim_t,3,unk0_3,1,u_int,3,,transition renderer,drawRoutine,Index of the transition draw routine,high,source:5BF94.c:4449
+T00542.004,T00542,gim_t,4,unk0_6,1,u_int,3,,loading phase,loadPhase,Load phase: waiting for disc unpacking freeing data ready,high,source:5BF94.c:2456
+T00542.005,T00542,gim_t,5,unk0_9,1,u_int,3,,reserved texture-page count,texturePageCount,VRAM texture pages reserved for the tiles,high,source:5BF94.c:2539
+T00542.006,T00542,gim_t,6,unk0_12,1,u_int,1,,,ownsPalette,Layer uses the 256-color palette loaded with it,high,source:5BF94.c:2526;source:5BF94.c:4439
+T00542.007,T00542,gim_t,7,unk0_13,1,u_int,3,,,reservedBits13,No access found,low,declaration-only;source:5BF94.c:67
+T00542.008,T00542,gim_t,8,unk2,1,char,,,,vramPage,Base VRAM page used for tiles and palettes,med,source:5BF94.c:2508;source:5BF94.c:4432
+T00542.009,T00542,gim_t,9,unk3,1,char,,,brightness or transition parameter,brightness,Draw brightness; 128 draws without blending,high,source:5BF94.c:4058;source:5BF94.c:4199
+T00542.010,T00542,gim_t,10,columns,0,u_char,,,,columns,Tile columns,high,source:5BF94.c:2470
+T00542.011,T00542,gim_t,11,rows,0,u_char,,,,rows,Tile rows,high,source:5BF94.c:2471
+T00542.012,T00542,gim_t,12,id,0,short,,,,imageId,GIM file index,high,source:5BF94.c:2364
+T00542.013,T00542,gim_t,13,unk8,1,short,,,,offsetX,Horizontal offset from the screen center,high,source:5BF94.c:4069
+T00542.014,T00542,gim_t,14,unkA,1,short,,,,offsetY,Vertical offset from the screen center,high,source:5BF94.c:4075
+T00542.015,T00542,gim_t,15,unkC,1,short,,,scale and ordering flags,scaleAndOrder,Scale in 1/4096 in bits 0-13; bit 14 selects the alternate ordering table,high,source:5BF94.c:4062;source:5BF94.c:4450
+T00542.016,T00542,gim_t,16,unkE,1,u_short,,,background color,backdropColor,15-bit color filling the screen around the image,high,source:5BF94.c:4081
+T00542.017,T00542,gim_t,17,data,0,u_short *,,,,fileData,Loaded GIM file,high,source:5BF94.c:2466
+T00542.018,T00542,gim_t,18,cdQueueSlot,0,vs_main_CdQueueSlot *,,,,discRequest,Disc request loading the file,high,source:5BF94.c:2460
+T00542.019,T00542,gim_t,19,unk18,1,u_short[240],,,scanline wipe widths,scanlineWipeWidths,Per-scanline wipe edge for the scanline-wipe routine,high,source:5BF94.c:2387;source:5BF94.c:4226
+T00542.020,T00542,gim_t,20,imageTable,0,u_short[254],,,,tileTable,Header words then tile ids from the file,high,source:5BF94.c:2474;source:5BF94.c:4061
+T00542.021,T00542,gim_t,21,unk3F4,1,int,,,,reserved3F4,No access found,low,declaration-only;source:5BF94.c:81
+T00543.000,T00543,imgHeader_t,0,wLo,0,char,,,,widthLow,Low byte of the width,high,source:main.c:8078
+T00543.001,T00543,imgHeader_t,1,wHi,0,char,,,,widthHigh,High byte of the width,high,source:main.c:8078
+T00543.002,T00543,imgHeader_t,2,hLo,0,char,,,,heightLow,Low byte of the height,high,source:main.c:8079
+T00543.003,T00543,imgHeader_t,3,hHi,0,char,,,,heightHigh,High byte of the height,high,source:main.c:8079
 T00544.000,T00544,intPair,0,unk0,1,int,,,,,,,
 T00544.001,T00544,intPair,1,unk4,1,int,,,,,,,
 T00545.000,T00545,labelBoxPrim_t,0,tag,0,u_long,,,,,,,
 T00545.001,T00545,labelBoxPrim_t,1,box,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),,,,,,,
 T00546.000,T00546,limbEffects_t,0,value0,0,short,,,,,,,
 T00546.001,T00546,limbEffects_t,1,value1,0,short,,,,,,,
-T00547.000,T00547,mcdata_t,0,locationCluts,0,u_short[2][256],,,,,,,
-T00547.001,T00547,mcdata_t,1,unk400,1,char[7][32],,,,,,,
-T00547.002,T00547,mcdata_t,2,unk4E0,1,char[7][128],,,,,,,
-T00547.003,T00547,mcdata_t,3,unk860,1,char[7][128],,,,,,,
-T00547.004,T00547,mcdata_t,4,unkBE0,1,char[8][128],,,,,,,
-T00547.005,T00547,mcdata_t,5,unkFE0,1,char[32],,,,,,,
-T00547.006,T00547,mcdata_t,6,textTable,0,u_short[2048],,,,,,,
-T00547.007,T00547,mcdata_t,7,saveFileInfo,0,saveFileInfo_t[5],,,,,,,
-T00547.008,T00547,mcdata_t,8,_dirEntBuf,0,struct DIRENTRY,,,,,,,
+T00547.000,T00547,mcdata_t,0,locationCluts,0,u_short[2][256],,,,locationPalettes,Two palettes for the save-location artwork,high,source:260.c:1849
+T00547.001,T00547,mcdata_t,1,unk400,1,char[7][32],,,,fileIconPalettes,Per-file 32-byte card icon palette copied into the save header,med,source:260.c:771;PS1 card header icon palette at 0x60
+T00547.002,T00547,mcdata_t,2,unk4E0,1,char[7][128],,,,fileIconBitmaps,Per-file 128-byte card icon bitmap copied after the header,med,source:260.c:773;PS1 card icon frame at 0x80
+T00547.003,T00547,mcdata_t,3,unk860,1,char[7][128],,,,reserved860,No access found,low,declaration-only;source:260.c:156
+T00547.004,T00547,mcdata_t,4,unkBE0,1,char[8][128],,,,reservedBE0,No access found,low,declaration-only;source:260.c:157
+T00547.005,T00547,mcdata_t,5,unkFE0,1,char[32],,,,reservedFE0,No access found,low,declaration-only;source:260.c:158
+T00547.006,T00547,mcdata_t,6,textTable,0,u_short[2048],,,,textTable,Menu text table,high,source:260.c:1101
+T00547.007,T00547,mcdata_t,7,saveFileInfo,0,saveFileInfo_t[5],,,,fileHeaders,Card header of each of the five save files,high,source:260.c:1102
+T00547.008,T00547,mcdata_t,8,_dirEntBuf,0,struct DIRENTRY,,,,directoryEntry,Card directory entry buffer,high,source:260.c:1103
 T00548.000,T00548,menuBg_t,0,clut,0,u_short[256],,,,palette,256 RGB555 colors for the background,high,source:22C.c:3119
 T00548.001,T00548,menuBg_t,1,data,0,char[240][192],,,,indexedPixels,240 rows of 192 eight-bit palette indices,high,source:22C.c:3119
 T00549.000,T00549,menuItemPrim_t,0,tag,0,u_long,,,,dmaTag,PS1 DMA packet tag,med,replaced-by:Render sprite commands;declaration-only;source:22C.c:4076
@@ -5128,11 +5128,11 @@ T00579.000,T00579,pFileTextureInfo,0,unk0,1,u_short,,,,,,,
 T00579.001,T00579,pFileTextureInfo,1,dataIndex,0,u_short,,,,,,,
 T00580.000,T00580,p_file_t,0,meta,0,int,,,,,,,
 T00580.001,T00580,p_file_t,1,data,0,u_char[0],,,,,,,
-T00581.000,T00581,padAct_t,0,unk0,1,int[2],,,mixedMotorIntensities,,,,
-T00581.001,T00581,padAct_t,1,unk8,1,u_short,,,active,,,,
-T00581.002,T00581,padAct_t,2,unkA,1,u_short,,,ownerTag,,,,
-T00581.003,T00581,padAct_t,3,unkC,1,char *,,,pattern,,,,
-T00581.004,T00581,padAct_t,4,unk10,1,int[10],,,motorEnvelopeStates,,,,
+T00581.000,T00581,padAct_t,0,unk0,1,int[2],,,mixedMotorIntensities,motorLevels,Summed motor levels; only slot 0's copy is used,med,source:main.c:8747;layout-conflict: channels are used as int[2][6] (48 bytes) but only 40 remain; an element likely starts at +8 with motor levels stored separately
+T00581.001,T00581,padAct_t,1,unk8,1,u_short,,,active,active,Pattern is playing,high,source:main.c:8571
+T00581.002,T00581,padAct_t,2,unkA,1,u_short,,,ownerTag,ownerTag,Tag used to stop patterns started by one owner,high,source:main.c:8618
+T00581.003,T00581,padAct_t,3,unkC,1,char *,,,pattern,pattern,Pattern bytecode,high,source:main.c:8716
+T00581.004,T00581,padAct_t,4,unk10,1,int[10],,,motorEnvelopeStates,channels,Per motor: running level step target cursor frames-left,med,source:main.c:8720;layout-conflict: channels are used as int[2][6] (48 bytes) but only 40 remain; an element likely starts at +8 with motor levels stored separately
 T00582.000,T00582,patrolWaypointState,0,pad0,1,char[52],,,,,,,
 T00582.001,T00582,patrolWaypointState,1,tile,0,vs_battle_movementPosition,,,,,,,
 T00582.002,T00582,patrolWaypointState,2,pad38,1,char[200],,,,,,,
@@ -5143,17 +5143,17 @@ T00582.006,T00582,patrolWaypointState,6,direction,0,unsigned char,,,,,,,
 T00582.007,T00582,patrolWaypointState,7,timer,0,unsigned char,,,,,,,
 T00582.008,T00582,patrolWaypointState,8,pad105,1,char[99],,,,,,,
 T00582.009,T00582,patrolWaypointState,9,dest,0,vs_battle_movementPosition,,,,,,,
-T00583.000,T00583,percent_t,0,data,0,char[4],,,,,,,
-T00584.000,T00584,portInfo_t,0,mode,0,char,,,,,,,
-T00584.001,T00584,portInfo_t,1,exId,0,char,,,,,,,
-T00584.002,T00584,portInfo_t,2,states,0,char,,,,,,,
-T00584.003,T00584,portInfo_t,3,rStickX,0,char,,,,,,,
-T00584.004,T00584,portInfo_t,4,rStickY,0,char,,,,,,,
-T00584.005,T00584,portInfo_t,5,lStickX,0,char,,,,,,,
-T00584.006,T00584,portInfo_t,6,lStickY,0,char,,,,,,,
-T00584.007,T00584,portInfo_t,7,lock,0,char,,,,,,,
-T00584.008,T00584,portInfo_t,8,actData,0,char[2],,,,,,,
-T00584.009,T00584,portInfo_t,9,connected,0,char,,,,,,,
+T00583.000,T00583,percent_t,0,data,0,char[4],,,,text,Encoded percent sign and terminator,high,source:238.c:2376;source:238.c:2373
+T00584.000,T00584,portInfo_t,0,mode,0,char,,,,controllerType,Controller type from PadInfoMode; 5 and 7 report sticks,high,source:main.c:8515;source:main.c:8516
+T00584.001,T00584,portInfo_t,1,exId,0,char,,,,extendedType,Extended controller id; nonzero supports mode lock,high,source:main.c:8471
+T00584.002,T00584,portInfo_t,2,states,0,char,,,,buttonBits,Low byte of the last inverted button state,med,source:main.c:8527
+T00584.003,T00584,portInfo_t,3,rStickX,0,char,,,,rightStickX,Right stick X,high,source:main.c:8517
+T00584.004,T00584,portInfo_t,4,rStickY,0,char,,,,rightStickY,Right stick Y,high,source:main.c:8518
+T00584.005,T00584,portInfo_t,5,lStickX,0,char,,,,leftStickX,Left stick X,high,source:main.c:8519
+T00584.006,T00584,portInfo_t,6,lStickY,0,char,,,,leftStickY,Left stick Y,high,source:main.c:8520
+T00584.007,T00584,portInfo_t,7,lock,0,char,,,,modeLock,Mode lock passed to PadSetMainMode,high,source:main.c:8476
+T00584.008,T00584,portInfo_t,8,actData,0,char[2],,,,actuatorLevels,Motor levels sent with PadSetAct,high,source:main.c:8482
+T00584.009,T00584,portInfo_t,9,connected,0,char,,,,connected,Port finished connection setup,high,source:main.c:8546
 T00585.000,T00585,primBuf_t,0,tag,0,u_long,,,,,,,
 T00585.001,T00585,primBuf_t,1,prim,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),,,,,,,
 T00586.000,T00586,primBuf_t,0,tag,0,u_long,,,,,,,
@@ -5248,47 +5248,47 @@ T00597.013,T00597,savedEnemyState,13,x,0,u_char,,,,,,,
 T00597.014,T00597,savedEnemyState,14,direction,0,u_char,,,,,,,
 T00597.015,T00597,savedEnemyState,15,z,0,u_char,,,,,,,
 T00597.016,T00597,savedEnemyState,16,height,0,u_char,,,,,,,
-T00598.000,T00598,savedata_t,0,fileInfo,0,saveFileInfo_t,,,,,,,
-T00598.001,T00598,savedata_t,1,unk80,1,char[128],,,,,,,
-T00598.002,T00598,savedata_t,2,unk100,1,char[128],,,,,,,
-T00598.003,T00598,savedata_t,3,unk180,1,savedata_unk180_t,,,,,,,
-T00598.004,T00598,savedata_t,4,stateFlags,0,char[1088],,,,,,,
-T00598.005,T00598,savedata_t,5,actionsLearned,0,char[32],,,,,,,
-T00598.006,T00598,savedata_t,6,mapStatus,0,char[72],,,,,,,
-T00598.007,T00598,savedata_t,7,settings,0,vs_main_settings_t,,,,,,,
-T00598.008,T00598,savedata_t,8,unk6C8,1,D_80060068_t,,,,,,,
-T00598.009,T00598,savedata_t,9,inventory,0,vs_main_inventory_t,,,,,,,
-T00598.010,T00598,savedata_t,10,unk16C8,1,vs_main_inventoryIndices_t,,,,,,,
-T00598.011,T00598,savedata_t,11,unk1778,1,_mpdRoomDoorSection_t,,,,,,,
-T00598.012,T00598,savedata_t,12,scoreData,0,vs_main_scoredata_t,,,,,,,
-T00598.013,T00598,savedata_t,13,unk1898,1,int,,,,,,,
-T00598.014,T00598,savedata_t,14,unk189C,1,char[1312],,,,,,,
-T00598.015,T00598,savedata_t,15,artsStatus,0,vs_main_artsStatus_t,,,,,,,
-T00598.016,T00598,savedata_t,16,containerData,0,vs_menu_containerData,,,,,,,
-T00598.017,T00598,savedata_t,17,unk59E0,1,char[544],,,,,,,
-T00599.000,T00599,savedata_t,0,fileInfo,0,saveFileInfo_t,,,,,,,
-T00599.001,T00599,savedata_t,1,unk80,1,char[128],,,,,,,
-T00599.002,T00599,savedata_t,2,unk100,1,char[128],,,,,,,
-T00599.003,T00599,savedata_t,3,unk180,1,savedata_unk180_t,,,,,,,
-T00599.004,T00599,savedata_t,4,unk200,1,char[1088],,,,,,,
-T00599.005,T00599,savedata_t,5,unk640,1,char[32],,,,,,,
-T00599.006,T00599,savedata_t,6,mapStatus,0,char[72],,,,,,,
-T00599.007,T00599,savedata_t,7,unk6A8,1,vs_main_settings_t,,,settings,,,,
-T00599.008,T00599,savedata_t,8,unk6C8,1,D_80060068_t,,,,,,,
-T00599.009,T00599,savedata_t,9,unk7C8,1,char[15][256],,,,,,,
-T00599.010,T00599,savedata_t,10,unk16C8,1,char[176],,,,,,,
-T00599.011,T00599,savedata_t,11,unk1778,1,_mpdRoomDoorSection_t,,,,,,,
-T00599.012,T00599,savedata_t,12,unk1784,1,vs_main_scoredata_t,,,scoreData,,,,
-T00599.013,T00599,savedata_t,13,unk1898,1,int,,,,,,,
-T00599.014,T00599,savedata_t,14,unk189C,1,char[1312],,,,,,,
-T00599.015,T00599,savedata_t,15,artsStatus,0,vs_main_artsStatus_t,,,,,,,
-T00599.016,T00599,savedata_t,16,containerData,0,vs_menu_containerData,,,,,,,
-T00599.017,T00599,savedata_t,17,unk59E0,1,char[544],,,,,,,
-T00600.000,T00600,savedata_unk180_2_t,0,key,0,int,,,,,,,
-T00600.001,T00600,savedata_unk180_2_t,1,base,0,saveBase_t,,,,,,,
-T00601.000,T00601,savedata_unk180_t,0,unk180,1,savedata_unk180_2_t,,,,,,,
-T00601.001,T00601,savedata_unk180_t,1,stats,0,stats_t,,,,,,,
-T00601.002,T00601,savedata_unk180_t,2,checksums,0,char[92],,,,,,,
+T00598.000,T00598,savedata_t,0,fileInfo,0,saveFileInfo_t,,,,cardHeader,Card file header with title and icon palette,high,source:260.c:753
+T00598.001,T00598,savedata_t,1,unk80,1,char[128],,,,iconBitmap,Card icon bitmap,high,source:260.c:773
+T00598.002,T00598,savedata_t,2,unk100,1,char[128],,,,reserved100,Zero block included in checksum block 1,low,source:260.c:376
+T00598.003,T00598,savedata_t,3,unk180,1,savedata_unk180_t,,,,protectedHeader,Cipher key slot header summary and block checksums,high,source:260.c:749
+T00598.004,T00598,savedata_t,4,stateFlags,0,char[1088],,,,stateFlags,Game state flags,high,source:260.c:820
+T00598.005,T00598,savedata_t,5,actionsLearned,0,char[32],,,,learnedActions,Learned action flags,high,source:260.c:821
+T00598.006,T00598,savedata_t,6,mapStatus,0,char[72],,,,mapStatus,Visited room and area flags,high,source:260.c:823
+T00598.007,T00598,savedata_t,7,settings,0,vs_main_settings_t,,,,settings,Player settings,high,source:260.c:824
+T00598.008,T00598,savedata_t,8,unk6C8,1,D_80060068_t,,,,ashleySnapshot,Ashley's statistics snapshot,high,source:260.c:825
+T00598.009,T00598,savedata_t,9,inventory,0,vs_main_inventory_t,,,,inventory,Inventory,high,source:260.c:826
+T00598.010,T00598,savedata_t,10,unk16C8,1,vs_main_inventoryIndices_t,,,,inventoryIndices,Inventory ordering indices,high,source:260.c:827
+T00598.011,T00598,savedata_t,11,unk1778,1,_mpdRoomDoorSection_t,,,,entryDoor,Door the player entered the current room through,high,source:260.c:828
+T00598.012,T00598,savedata_t,12,scoreData,0,vs_main_scoredata_t,,,,scoreData,Score and record statistics,high,source:260.c:829
+T00598.013,T00598,savedata_t,13,unk1898,1,int,,,,roomStateSlot,Current room state slot,high,source:260.c:832
+T00598.014,T00598,savedata_t,14,unk189C,1,char[1312],,,,recentRoomEnemyStates,Recent room enemy states,high,source:260.c:833
+T00598.015,T00598,savedata_t,15,artsStatus,0,vs_main_artsStatus_t,,,,artsStatus,Break art progress,high,source:260.c:834
+T00598.016,T00598,savedata_t,16,containerData,0,vs_menu_containerData,,,,containerData,Container contents,high,source:260.c:830
+T00598.017,T00598,savedata_t,17,unk59E0,1,char[544],,,,reserved59E0,Zero padding to the end of the 23 blocks,low,source:260.c:752;no member access;source:260.c:107
+T00599.000,T00599,savedata_t,0,fileInfo,0,saveFileInfo_t,,,,cardHeader,Card file header with title and icon palette,med,declaration-only;source:22C.c:264;same layout as T00598
+T00599.001,T00599,savedata_t,1,unk80,1,char[128],,,,iconBitmap,Card icon bitmap,med,declaration-only;source:22C.c:265;same layout as T00598
+T00599.002,T00599,savedata_t,2,unk100,1,char[128],,,,reserved100,Zero block included in checksum block 1,low,declaration-only;source:22C.c:266;same layout as T00598
+T00599.003,T00599,savedata_t,3,unk180,1,savedata_unk180_t,,,,protectedHeader,Cipher key slot header summary and block checksums,med,declaration-only;source:22C.c:267;same layout as T00598
+T00599.004,T00599,savedata_t,4,unk200,1,char[1088],,,,stateFlags,Game state flags,med,declaration-only;source:22C.c:268;same layout as T00598
+T00599.005,T00599,savedata_t,5,unk640,1,char[32],,,,learnedActions,Learned action flags,med,declaration-only;source:22C.c:269;same layout as T00598
+T00599.006,T00599,savedata_t,6,mapStatus,0,char[72],,,,mapStatus,Visited room and area flags,med,declaration-only;source:22C.c:270;same layout as T00598
+T00599.007,T00599,savedata_t,7,unk6A8,1,vs_main_settings_t,,,settings,settings,Player settings,med,declaration-only;source:22C.c:271;same layout as T00598
+T00599.008,T00599,savedata_t,8,unk6C8,1,D_80060068_t,,,,ashleySnapshot,Ashley's statistics snapshot,med,declaration-only;source:22C.c:272;same layout as T00598
+T00599.009,T00599,savedata_t,9,unk7C8,1,char[15][256],,,,inventory,Inventory,med,declaration-only;source:22C.c:273;same layout as T00598
+T00599.010,T00599,savedata_t,10,unk16C8,1,char[176],,,,inventoryIndices,Inventory ordering indices,med,declaration-only;source:22C.c:274;same layout as T00598
+T00599.011,T00599,savedata_t,11,unk1778,1,_mpdRoomDoorSection_t,,,,entryDoor,Door the player entered the current room through,med,declaration-only;source:22C.c:275;same layout as T00598
+T00599.012,T00599,savedata_t,12,unk1784,1,vs_main_scoredata_t,,,scoreData,scoreData,Score and record statistics,med,declaration-only;source:22C.c:276;same layout as T00598
+T00599.013,T00599,savedata_t,13,unk1898,1,int,,,,roomStateSlot,Current room state slot,med,declaration-only;source:22C.c:277;same layout as T00598
+T00599.014,T00599,savedata_t,14,unk189C,1,char[1312],,,,recentRoomEnemyStates,Recent room enemy states,med,declaration-only;source:22C.c:278;same layout as T00598
+T00599.015,T00599,savedata_t,15,artsStatus,0,vs_main_artsStatus_t,,,,artsStatus,Break art progress,med,declaration-only;source:22C.c:279;same layout as T00598
+T00599.016,T00599,savedata_t,16,containerData,0,vs_menu_containerData,,,,containerData,Container contents,med,declaration-only;source:22C.c:280;same layout as T00598
+T00599.017,T00599,savedata_t,17,unk59E0,1,char[544],,,,reserved59E0,Zero padding to the end of the 23 blocks,low,declaration-only;source:22C.c:281;same layout as T00598
+T00600.000,T00600,savedata_unk180_2_t,0,key,0,int,,,,cipherKey,Key for the save byte stream cipher,high,source:260.c:786
+T00600.001,T00600,savedata_unk180_2_t,1,base,0,saveBase_t,,,,slotHeader,Slot state generation and format version,high,source:260.c:787
+T00601.000,T00601,savedata_unk180_t,0,unk180,1,savedata_unk180_2_t,,,,cipherHeader,Cipher key and slot header,high,source:260.c:786
+T00601.001,T00601,savedata_unk180_t,1,stats,0,stats_t,,,,summary,Summary statistics shown in the file menu,high,source:260.c:810
+T00601.002,T00601,savedata_unk180_t,2,checksums,0,char[92],,,,blockChecksums,XOR checksum of each 256-byte block,high,source:260.c:842
 T00602.000,T00602,scriptBytePair,0,low,0,u_char,,,,lowByte,Low byte of a little-endian script value,med,declaration-only;source:4A0A8.c:231
 T00602.001,T00602,scriptBytePair,1,high,0,u_char,,,,highByte,High byte of a little-endian script value,med,declaration-only;source:4A0A8.c:232
 T00603.000,T00603,soundData_t,0,currentMusicSlot,0,int,,,,,,,
@@ -5798,16 +5798,16 @@ T00658.001,T00658,vs_battle_menuState_t,1,returnState,0,char,,,,,,,
 T00658.002,T00658,vs_battle_menuState_t,2,executeAbilityType,0,char,,,,,,,
 T00658.003,T00658,vs_battle_menuState_t,3,loading,0,char,,,,,,,
 T00658.004,T00658,vs_battle_menuState_t,4,cdQueue,0,vs_main_CdQueueSlot *,,,,,,,
-T00659.000,T00659,vs_battle_objectData,0,dataType,0,u_char,,,,,,,
-T00659.001,T00659,vs_battle_objectData,1,index,0,signed char,,,,,,,
-T00659.002,T00659,vs_battle_objectData,2,modelId,0,short,,,,,,,
-T00659.003,T00659,vs_battle_objectData,3,unk4,1,void *,,,decodedModelBuffer,,,,
-T00659.004,T00659,vs_battle_objectData,4,dataAddr,0,u_long,,,,,,,
-T00659.005,T00659,vs_battle_objectData,5,unkC,1,vs_battle_objectData_flags,,,,,,,
-T00659.006,T00659,vs_battle_objectData,6,actorId,0,u_char,,,,,,,
-T00659.007,T00659,vs_battle_objectData,7,unk11,1,char,,,,,,,
-T00659.008,T00659,vs_battle_objectData,8,material,0,char,,,,,,,
-T00659.009,T00659,vs_battle_objectData,9,variant,0,char,,,,,,,
+T00659.000,T00659,vs_battle_objectData,0,dataType,0,u_char,,,,assetKind,Kind of asset being requested,high,source:146C.c:6096
+T00659.001,T00659,vs_battle_objectData,1,index,0,signed char,,,,targetSlot,Actor or weapon slot receiving the asset,high,source:30DB0.c:1085
+T00659.002,T00659,vs_battle_objectData,2,modelId,0,short,,,,modelId,Model identifier,high,source:30DB0.c:1095
+T00659.003,T00659,vs_battle_objectData,3,unk4,1,void *,,,decodedModelBuffer,destination,Storage that receives the asset,high,source:30DB0.c:1085;source:30DB0.c:621
+T00659.004,T00659,vs_battle_objectData,4,dataAddr,0,u_long,,,,dataAddress,Address of the asset data or a small table index,high,source:146C.c:6648
+T00659.005,T00659,vs_battle_objectData,5,unkC,1,vs_battle_objectData_flags,,,,placement,Placement word copied into the new actor,high,source:30DB0.c:1116
+T00659.006,T00659,vs_battle_objectData,6,actorId,0,u_char,,,,subKind,Per-kind selector such as the sequence kind; 0xFF for none,med,source:30DB0.c:1724;source:30DB0.c:1413
+T00659.007,T00659,vs_battle_objectData,7,unk11,1,char,,,,textureSlot,Palette or texture slot used by the asset,med,source:30DB0.c:669;source:30DB0.c:2057
+T00659.008,T00659,vs_battle_objectData,8,material,0,char,,,,material,Weapon or armor material,high,source:146C.c:4071
+T00659.009,T00659,vs_battle_objectData,9,variant,0,char,,,,variant,Asset variant,high,source:146C.c:6108
 T00660.000,T00660,vs_battle_objectData_flags,0,unk0_0,1,u_int,8,,,,,,
 T00660.001,T00660,vs_battle_objectData_flags,1,unk0_8,1,u_int,8,,,,,,
 T00660.002,T00660,vs_battle_objectData_flags,2,unk0_16,1,u_int,8,,,,,,
@@ -5832,8 +5832,8 @@ T00665.000,T00665,vs_battle_roomVertices,0,vertexCount,0,int,,,,,,,
 T00665.001,T00665,vs_battle_roomVertices,1,vertices,0,SVECTOR[0],,,,,,,
 T00666.000,T00666,vs_battle_scene,0,roomCount,0,int,,,,,,,
 T00666.001,T00666,vs_battle_scene,1,rooms,0,vs_battle_room[0],,,,,,,
-T00667.000,T00667,vs_battle_screenTransitionWipePoly,0,covered,0,POLY_F4,,,,,,,
-T00667.001,T00667,vs_battle_screenTransitionWipePoly,1,edge,0,POLY_F4,,,,,,,
+T00667.000,T00667,vs_battle_screenTransitionWipePoly,0,covered,0,POLY_F4,,,,coveredQuad,Quad over the covered part of the screen,high,source:146C.c:2290
+T00667.001,T00667,vs_battle_screenTransitionWipePoly,1,edge,0,POLY_F4,,,,edgeQuad,Quad drawing the wipe edge,high,source:146C.c:2307
 T00668.000,T00668,vs_battle_shieldIntermediate,0,base,0,vs_battle_uiEquipment,,,,base,Shield part stats,med,declaration-only;source:146C.h:775
 T00668.001,T00668,vs_battle_shieldIntermediate,1,gems,0,vs_battle_uiEquipment[3],,,,gems,Socketed gem stats,med,declaration-only;source:146C.h:776
 T00668.002,T00668,vs_battle_shieldIntermediate,2,material,0,char,,,,material,Shield material,med,declaration-only;source:146C.h:777
@@ -5841,10 +5841,10 @@ T00668.003,T00668,vs_battle_shieldIntermediate,3,dropRate,0,char,,,,dropRate,Dro
 T00668.004,T00668,vs_battle_shieldIntermediate,4,index,0,short,,,,index,Inventory index,med,declaration-only;source:146C.h:779
 T00669.000,T00669,vs_battle_stringContext_t,0,integers,0,int[10],,,,,,,
 T00669.001,T00669,vs_battle_stringContext_t,1,strings,0,char *[10],,,,,,,
-T00670.000,T00670,vs_battle_texInfo_t,0,tpage,0,short,,,,,,,
-T00670.001,T00670,vs_battle_texInfo_t,1,clut0,0,short,,,,,,,
-T00670.002,T00670,vs_battle_texInfo_t,2,clut1,0,short,,,,,,,
-T00670.003,T00670,vs_battle_texInfo_t,3,refCount,0,u_char,,,,,,,
+T00670.000,T00670,vs_battle_texInfo_t,0,tpage,0,short,,,,texturePage,Texture page word,high,source:30DB0.c:1266
+T00670.001,T00670,vs_battle_texInfo_t,1,clut0,0,short,,,,palette,Default palette,high,source:30DB0.c:1338
+T00670.002,T00670,vs_battle_texInfo_t,2,clut1,0,short,,,,alternatePalette,Alternate palette,high,source:30DB0.c:1333
+T00670.003,T00670,vs_battle_texInfo_t,3,refCount,0,u_char,,,,referenceCount,Number of users; zero frees the slot,high,source:30DB0.c:1214
 T00671.000,T00671,vs_battle_textBox,0,unk0,1,vs_battle_textBox_fields,,,,,,,
 T00671.001,T00671,vs_battle_textBox,1,unk4,1,short,,,,,,,
 T00671.002,T00671,vs_battle_textBox,2,unk6,1,short,,,,,,,
@@ -6089,33 +6089,33 @@ T00691.001,T00691,vs_main_CdQueueSlot,1,priority,0,short,,,,,,,
 T00691.002,T00691,vs_main_CdQueueSlot,2,cdFile,0,vs_main_CdFile,,,,,,,
 T00691.003,T00691,vs_main_CdQueueSlot,3,unkC,1,int,,,,,,,
 T00691.004,T00691,vs_main_CdQueueSlot,4,vram,0,void *,,,,,,,
-T00692.000,T00692,vs_main_HeapHeader,0,prev,0,struct vs_main_HeapHeader *,,,,,,,
-T00692.001,T00692,vs_main_HeapHeader,1,next,0,struct vs_main_HeapHeader *,,,,,,,
-T00692.002,T00692,vs_main_HeapHeader,2,blockSz,0,u_int,,,sizeInSixteenByteUnits,,,,
-T00692.003,T00692,vs_main_HeapHeader,3,unkC,1,int,,,,,,,
+T00692.000,T00692,vs_main_HeapHeader,0,prev,0,struct vs_main_HeapHeader *,,,,prev,Previous block,high,source:main.c:8988
+T00692.001,T00692,vs_main_HeapHeader,1,next,0,struct vs_main_HeapHeader *,,,,next,Next block,high,source:main.c:8987
+T00692.002,T00692,vs_main_HeapHeader,2,blockSz,0,u_int,,,sizeInSixteenByteUnits,blockSize,Block size,high,source:main.c:8956
+T00692.003,T00692,vs_main_HeapHeader,3,unkC,1,int,,,,reservedC,No access found,low,declaration-only;source:main.h:141
 T00693.000,T00693,vs_main_artsStatus_t,0,artsLearned,0,u_char[12],,,,,,,
 T00693.001,T00693,vs_main_artsStatus_t,1,kills,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),,,,,,,
-T00694.000,T00694,vs_main_disk_t,0,state,0,char,,,,,,,
-T00694.001,T00694,vs_main_disk_t,1,unk1,1,char,,,,,,,
-T00694.002,T00694,vs_main_disk_t,2,unk2,1,char,,,,,,,
-T00694.003,T00694,vs_main_disk_t,3,unk3,1,char,,,retryCount,,,,
-T00694.004,T00694,vs_main_disk_t,4,unk4,1,u_int,,,sectorsReceived,,,,
-T00694.005,T00694,vs_main_disk_t,5,sectorCount,0,u_int,,,,,,,
-T00694.006,T00694,vs_main_disk_t,6,cdSector,0,int,,,,,,,
-T00694.007,T00694,vs_main_disk_t,7,byteCount,0,int,,,,,,,
-T00694.008,T00694,vs_main_disk_t,8,vram,0,void *,,,,,,,
-T00694.009,T00694,vs_main_disk_t,9,pcm,0,DslFILTER,,,,,,,
-T00694.010,T00694,vs_main_disk_t,10,cdLoc,0,DslLOC,,,,,,,
-T00694.011,T00694,vs_main_disk_t,11,commandId,0,int,,,,,,,
-T00694.012,T00694,vs_main_disk_t,12,unk24,1,int,,,,,,,
-T00694.013,T00694,vs_main_disk_t,13,unk28,1,int,,,,,,,
-T00694.014,T00694,vs_main_disk_t,14,bufferMode,0,enum cdBufferModes_e,,,,,,,
-T00694.015,T00694,vs_main_disk_t,15,sectorBufIndex,0,u_int,,,,,,,
-T00694.016,T00694,vs_main_disk_t,16,unk34,1,int,,,unconsumedSectorCount,,,,
-T00694.017,T00694,vs_main_disk_t,17,unk38,1,u_int,,,bufferedSectorsReceived,,,,
-T00694.018,T00694,vs_main_disk_t,18,unk3C,1,u_int,,,ringWriteIndex,,,,
-T00694.019,T00694,vs_main_disk_t,19,ringBufIndex,0,u_int,,,,,,,
-T00694.020,T00694,vs_main_disk_t,20,framesSinceLastRead,0,int,,,,,,,
+T00694.000,T00694,vs_main_disk_t,0,state,0,char,,,,state,Drive state,high,source:main.c:9037
+T00694.001,T00694,vs_main_disk_t,1,unk1,1,char,,,,xaModeMarker,Set to 0 when XA streaming starts and 128 when it stops; never read,low,source:main.c:9176;source:main.c:9292
+T00694.002,T00694,vs_main_disk_t,2,unk2,1,char,,,,reserved2,Cleared on reset; never read,low,source:main.c:9392
+T00694.003,T00694,vs_main_disk_t,3,unk3,1,char,,,retryCount,failureCount,Failed command count,high,source:main.c:9151;source:main.c:9200
+T00694.004,T00694,vs_main_disk_t,4,unk4,1,u_int,,,sectorsReceived,sectorsReceived,Sectors delivered by the drive; ends the read at sectorCount,high,source:main.c:9068
+T00694.005,T00694,vs_main_disk_t,5,sectorCount,0,u_int,,,,sectorCount,Sectors to read,high,source:main.c:9153
+T00694.006,T00694,vs_main_disk_t,6,cdSector,0,int,,,,startSector,First sector of the read,high,source:main.c:9143
+T00694.007,T00694,vs_main_disk_t,7,byteCount,0,int,,,,byteCount,Bytes to read,high,source:main.c:9144
+T00694.008,T00694,vs_main_disk_t,8,vram,0,void *,,,,destination,Destination buffer,high,source:main.c:9145
+T00694.009,T00694,vs_main_disk_t,9,pcm,0,DslFILTER,,,,xaFilter,XA file and channel filter,high,source:main.c:9188
+T00694.010,T00694,vs_main_disk_t,10,cdLoc,0,DslLOC,,,,position,Drive position,high,source:main.c:9157
+T00694.011,T00694,vs_main_disk_t,11,commandId,0,int,,,,commandId,Id of the last issued command,high,source:main.c:9197
+T00694.012,T00694,vs_main_disk_t,12,unk24,1,int,,,,reserved24,No access found,low,declaration-only;source:main.c:108
+T00694.013,T00694,vs_main_disk_t,13,unk28,1,int,,,,reserved28,No access found,low,declaration-only;source:main.c:109
+T00694.014,T00694,vs_main_disk_t,14,bufferMode,0,enum cdBufferModes_e,,,,bufferMode,Direct or ring-buffered transfer,high,source:main.c:9048
+T00694.015,T00694,vs_main_disk_t,15,sectorBufIndex,0,u_int,,,,destinationSector,Next destination sector to fill,high,source:main.c:9040
+T00694.016,T00694,vs_main_disk_t,16,unk34,1,int,,,unconsumedSectorCount,bufferedSectors,Sectors in the ring not yet copied out,high,source:main.c:9056;source:main.c:9314
+T00694.017,T00694,vs_main_disk_t,17,unk38,1,u_int,,,bufferedSectorsReceived,ringSectorsWritten,Sectors written to the ring; bounds the copy loop,high,source:main.c:9302
+T00694.018,T00694,vs_main_disk_t,18,unk3C,1,u_int,,,ringWriteIndex,ringWriteIndex,Ring entry receiving the next sector,high,source:main.c:9042
+T00694.019,T00694,vs_main_disk_t,19,ringBufIndex,0,u_int,,,,ringReadIndex,Ring entry copied out next,high,source:main.c:9308
+T00694.020,T00694,vs_main_disk_t,20,framesSinceLastRead,0,int,,,,framesSinceLastRead,Frames since the queue last started a read,high,source:main.c:9463
 T00695.000,T00695,vs_main_flags_t,0,clearCount,0,char,,,,,,,
 T00695.001,T00695,vs_main_flags_t,1,difficulty,0,char,,,,,,,
 T00695.002,T00695,vs_main_flags_t,2,normalModeCleared,0,char,,,,,,,

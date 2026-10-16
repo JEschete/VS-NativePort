@@ -12,7 +12,7 @@ T00009,enum:actions,enum,actions,0,,4,5,0,1,1,MENU/items2.h,0,0,Game.Menu,,,,,,,
 T00010,enum:actions_e,enum,actions_e,0,,4,1,0,1,1,SLUS_010.40/main.h,0,0,,Enum,Battle::ActionId,Native\Game\include\Battle\Action.h,Names action identifiers referenced directly by code.,high,,,x,,,,,source:main.h:44
 T00011,enum:arrowType_e,enum,arrowType_e,0,,4,2,0,1,1,MENU/MENUE.PRG/494.c,3,0,Game.Menu,,,,,,,,,,,,,
 T00012,enum:ashleyRenderMode,enum,ashleyRenderMode,0,,4,3,0,1,1,MENU/_renderAshley.h,0,0,Game.Menu,,,,,,,,,,,,,
-T00013,enum:cdBufferModes_e,enum,cdBufferModes_e,0,,4,3,0,1,1,SLUS_010.40/main.c,3,0,Content,,,,,,,,,,,,,
+T00013,enum:cdBufferModes_e,enum,cdBufferModes_e,0,,4,3,0,1,1,SLUS_010.40/main.c,3,0,Content,Enum,Content::DiscBufferMode,Native\Content\src\DiscQueue.h,Selects whether disc sectors go straight to the destination or through the sector ring buffer.,high,,,x,,,,,source:main.c:9048
 T00014,enum:copyContainerFlags,enum,copyContainerFlags,0,,4,1,0,1,1,MENU/MENUD.PRG/234.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00015,enum:disIndices,enum,disIndices,0,,4,67,0,1,1,MENU/MENUF.PRG/3B8.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00016,enum:diskState_e,enum,diskState_e,0,,4,9,0,1,1,SLUS_010.40/main.c,0,0,,Enum,Content::DiscDriveState,Native\Content\src\DiscQueue.h,Tracks the original disc drive command state.,high,,,x,,,,,replaced-by:Content native asset requests;source:main.c:77
@@ -24,7 +24,7 @@ T00021,enum:itemIdentifiers,enum,itemIdentifiers,0,,4,2,0,1,1,SLUS_010.40/main.h
 T00022,enum:lootItemState,enum,lootItemState,0,,4,6,0,1,1,MENU/MENUB.PRG/260.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00023,enum:magicSubMenu,enum,magicSubMenu,0,,4,5,0,1,1,MENU/MENU0.PRG/15AC.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00024,enum:maskedHandler_e,enum,maskedHandler_e,0,,4,3,0,1,1,MENU/MENU7.PRG/260.c,1,0,Game.Menu,,,,,,,,,,,,,
-T00025,enum:memcardEventHandler_e,enum,memcardEventHandler_e,0,,4,4,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,,,,,,,,,,,,,
+T00025,enum:memcardEventHandler_e,enum,memcardEventHandler_e,0,,4,4,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,Enum,Save::CardReadinessResult,Native\Save\src\MemoryCard\GameFiles.h,Reports the progress of bringing a memory card to a usable state.,high,,,x,,,,,source:260.c:586;replaced-by:Save asynchronous completion
 T00026,enum:memcardEvents_e,enum,memcardEvents_e,0,,4,2,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,9,0,Game.Title,Enum,Save::CardEventGroup,Native\Save\src\MemoryCard\GameFiles.h,Selects software versus hardware event descriptors in the PS1 memory-card API.,high,,,x,,,,,replaced-by:Save asynchronous completion;source:260.c:36
 T00027,enum:menuItemState_e,enum,menuItemState_e,0,,4,4,0,1,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Enum,Title::MenuItemMotion,Native\Game\src\Title\TitleScreen.h,Selects stationary upward downward or submenu title-item animation.,high,,,x,,,,,source:22C.c:3741
 T00028,enum:menuItems,enum,menuItems,0,,4,9,0,1,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Enum,Title::MenuItemId,Native\Game\src\Title\TitleScreen.h,Identifies title-menu commands and sound or vibration option labels.,high,,,x,,,,,source:22C.c:4234
@@ -90,7 +90,7 @@ T00087,enum:state#6a5f9837,enum,state,0,,4,2,0,58,1,MENU/MENUE.PRG/494.c,0,0,Gam
 T00088,enum:state#2155f452,enum,state,0,,4,3,0,58,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Enum,Title::LoadScreenPhase,Native\Game\src\Title\SaveFiles.h,Selects initialization memory-card resource loading or load-file menu execution.,high,,,x,,,,,source:22C.c:3131
 T00089,enum:state#a5da1519,enum,state,0,,4,5,0,58,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Enum,Title::CardSelectionPhase,Native\Game\src\Title\SaveFiles.h,Selects two-card initialization animation waiting input or selection return.,high,,,x,,,,,source:22C.c:2215
 T00090,enum:state#724171f6,enum,state,0,,4,5,0,58,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Enum,Title::ClearSaveScreenPhase,Native\Game\src\Title\SaveFiles.h,Selects initialization loading ready confirmation or exit for clear-game saving.,high,,,x,,,,,source:22C.c:3315
-T00091,enum:testMemcardEvents_e,enum,testMemcardEvents_e,0,,4,5,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,,,,,,,,,,,,,
+T00091,enum:testMemcardEvents_e,enum,testMemcardEvents_e,0,,4,5,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,Enum,Save::CardEventSignal,Native\Save\src\MemoryCard\GameFiles.h,Identifies the first signalled memory-card event in a group.,high,,,x,,,,,source:260.c:177;replaced-by:Save asynchronous completion
 T00092,enum:vs_battle_informationTextBoxHeader,enum,vs_battle_informationTextBoxHeader,0,,4,4,0,1,1,BATTLE/BATTLE.PRG/5BF94.h,25,0,Game.Menu,,,,,,,,,,,,,
 T00093,enum:vs_battle_limbStatus,enum,vs_battle_limbStatus,0,,4,5,0,1,1,BATTLE/BATTLE.PRG/5BF94.h,0,0,Game.Battle,,,,,,,,,,,,,
 T00094,enum:vs_battle_menuItemScrollable,enum,vs_battle_menuItemScrollable,0,,4,3,0,1,1,BATTLE/BATTLE.PRG/5BF94.h,0,0,Game.Battle,,,,,,,,,,,,,
@@ -121,7 +121,7 @@ T00118,enum:vs_primType,enum,vs_primType,0,,4,17,0,1,1,include/gpu.h,0,0,,Enum,R
 T00119,enum:vs_semiTransparencyRate,enum,vs_semiTransparencyRate,0,,4,4,0,1,1,include/gpu.h,0,0,,Enum,Render::BlendMode,Native\Graphics\src\Render.h,Selects PS1 semi-transparency blending equations.,high,,,x,,,,,Average=0.5B+0.5F;Add=B+F;Subtract=B-F;AddQuarter=B+0.25F;source:gpu.h:8
 T00120,enum:vs_string_chars,enum,vs_string_chars,0,,4,21,0,1,1,include/vs_string.h,0,0,,Enum,Core::TextCode,Native\Core\include\Text\TextCode.h,Names glyph and control codes in the game text encoding.,high,,,x,,,,,source:vs_string.h:3
 T00121,enum:vs_texMode,enum,vs_texMode,0,,4,3,0,1,1,include/gpu.h,0,0,,Enum,Render::TextureFormat,Native\Graphics\src\Render.h,Selects 4-bit 8-bit palettized or 16-bit direct textures.,high,,,x,,,,,source:gpu.h:6
-T00122,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),0,,4,4,0,1,1,SLUS_010.40/main.h,4,0,Save.MemoryCard,,,,,,,,,,,,,
+T00122,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),0,,4,4,0,1,1,SLUS_010.40/main.h,4,0,Save.MemoryCard,Value,State::GameTimeComponents,Native\Game\include\State\GameTime.h,Splits elapsed game time into frame second minute and hour bytes.,high,,,x,,,,,same-as:T00190;identical layout indexed through a different include path;source:main.h:166
 T00123,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),0,,24,3,0,1,1,SLUS_010.40/main.h,0,0,,Value,State::WeaponKillCounts,Native\Game\include\State\Progress.h,Counts kills per weapon category plus ability-unlock and total kill tallies.,med,,,x,,,,,source:SLUS_010.40/main.h;source:main.h:370
 T00124,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),0,,2,2,0,1,1,SLUS_010.40/main.h,11,0,Game.Menu,,,,,,,,,,,,,
 T00125,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),0,,4,7,0,1,1,SLUS_010.40/main.h,29,0,Game.Battle,,,,,,,,,,,,,
@@ -183,7 +183,7 @@ T00180,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverse
 T00181,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),0,,8,4,0,1,1,MENU/MENUF.PRG/3B8.c,1,0,Game.Menu,,,,,,,,,,,,,
 T00182,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),0,,96,24,0,1,1,BATTLE/BATTLE.PRG/146C.h,0,0,Game.Battle,,,,,,,,,,,,,
 T00183,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:606:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:606:5),0,,2484,2,2,1,1,BATTLE/BATTLE.PRG/146C.h,0,0,Game.Battle,,,,,,,,,,,,,
-T00184,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),0,,4,2,0,1,1,SLUS_010.40/main.c,0,1,Content,,,,,,,,,,,,,
+T00184,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),0,,4,2,0,1,1,SLUS_010.40/main.c,0,1,Content,State,Content::DiscRequestCounts,Native\Content\src\DiscQueue.h,Counts disc requests being read and requests still waiting in the queue.,high,,,x,,,,,source:main.c:9465;both counters are tested together as one word
 T00185,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),0,,4,4,0,1,1,SLUS_010.40/main.h,0,0,,Value,State::GameTimeComponents,Native\Game\include\State\GameTime.h,Splits elapsed game time into frame second minute and hour bytes.,high,,,x,,,,,same-as:T00190;identical layout indexed through a different include path;source:SLUS_010.40/main.h
 T00186,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),0,,24,3,0,1,1,SLUS_010.40/main.h,0,0,,Value,State::WeaponKillCounts,Native\Game\include\State\Progress.h,Counts kills per weapon category plus ability-unlock and total kill tallies.,med,,,x,,,,,same-as:T00123;identical layout indexed through a different include path;source:SLUS_010.40/main.h
 T00187,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),0,,2,2,0,1,1,SLUS_010.40/main.h,2,0,Game.Menu,,,,,,,,,,,,,
@@ -196,17 +196,17 @@ T00193,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverse
 T00194,struct:AkaoSeqHeader,struct,AkaoSeqHeader,0,AkaoSeqHeader,16,5,0,1,1,SLUS_010.40/25AC.c,2,0,Audio.Playback,,,,,,,,,,,,,
 T00195,struct:AkaoTimeStamp,struct,AkaoTimeStamp,0,AkaoTimeStamp,6,6,0,1,1,SLUS_010.40/25AC.c,0,0,,OnDisc,Audio::AkaoTimestamp,Native\Audio\src\Akao.h,Stores the BCD creation timestamp in an AKAO sequence header.,high,,,x,,,,,decoder-only;source:SLUS_010.40/25AC.c:26
 T00196,struct:AnimationState_t,struct,AnimationState_t,1,AnimationState_t,14,7,0,1,1,MENU/MENUE.PRG/494.c,3,0,Game.Menu,,,,,,,,,,,,,
-T00197,struct:ColorInfo,struct,ColorInfo,0,,7,7,0,1,1,SLUS_010.40/main.c,5,0,Graphics,,,,,,,,,,,,,
+T00197,struct:ColorInfo,struct,ColorInfo,0,,7,7,0,1,1,SLUS_010.40/main.c,5,0,Graphics,State,Render::PaletteEntryFade,Native\Graphics\src\Palette.h,"Holds one palette entry's current 5-bit color, mask bit and per-channel fade table rows.",high,,,x,,,,,source:main.c:10531
 T00198,struct:D_1F80035C_t,struct,D_1F80035C_t,1,D_1F80035C_t,160,15,6,1,1,BATTLE/BATTLE.PRG/30DB0.h,7,0,Game.Actors,,,,,,,,,,,,,
 T00199,struct:D_1F8003BC_t,struct,D_1F8003BC_t,1,D_1F8003BC_t,68,10,6,1,1,BATTLE/BATTLE.PRG/3A1A0.h,8,0,Game.Field,Misc,Field::CollisionSampleScratch,Native\Game\src\Field\Collision.h,Overlays PS1 scratchpad storage for sampling floor heights around a moving actor.,med,,,x,,,,,replaced-by:function local variables;source:3A1A0.c:2271;source:3A1A0.c:2471
 T00200,struct:D_1F8003EC_t,struct,D_1F8003EC_t,1,D_1F8003EC_t,20,4,1,1,2,BATTLE/BATTLE.PRG/44F14.c BATTLE/BATTLE.PRG/49268.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00201,struct:D_80036770_t,struct,D_80036770_t,1,D_80036770_t,16,4,4,1,1,SLUS_010.40/25AC.c,0,1,Audio.Samples,,,,,,,,,,,,,
 T00202,struct:D_800378C0_t,struct,D_800378C0_t,1,D_800378C0_t,24,6,6,1,1,SLUS_010.40/25AC.c,0,1,Audio.Control,,,,,,,,,,,,,
 T00203,struct:D_80039BC8_t,struct,D_80039BC8_t,1,D_80039BC8_t,16,4,0,1,1,SLUS_010.40/25AC.c,0,1,Audio.Samples,,,,,,,,,,,,,
-T00204,struct:D_80050468_t,struct,D_80050468_t,1,D_80050468_t,8,7,3,1,1,SLUS_010.40/main.h,0,1,Game.State,,,,,,,,,,,,,
-T00205,struct:D_8005DC6C_t,struct,D_8005DC6C_t,1,D_8005DC6C_t,4,4,1,1,1,SLUS_010.40/main.h,7,0,Graphics,,,,,,,,,,,,,
-T00206,struct:D_8005DC80_t,struct,D_8005DC80_t,1,D_8005DC80_t,44,4,4,1,1,SLUS_010.40/main.c,5,0,Graphics,,,,,,,,,,,,,
-T00207,struct:D_80060068_t,struct,D_80060068_t,1,D_80060068_t,256,2,2,1,1,SLUS_010.40/main.h,1,1,Save,,,,,,,,,,,,,
+T00204,struct:D_80050468_t,struct,D_80050468_t,1,D_80050468_t,8,7,3,1,1,SLUS_010.40/main.h,0,1,Game.State,State,State::SceneTimer,Native\Game\src\State\SceneTimer.h,Runs the script timer that counts up or down and mirrors its time into state flags 0xA0 to 0xA3.,high,,,x,,,,,source:146C.c:8527
+T00205,struct:D_8005DC6C_t,struct,D_8005DC6C_t,1,D_8005DC6C_t,4,4,1,1,1,SLUS_010.40/main.h,7,0,Graphics,Value,Render::ColorRgb8,Native\Graphics\src\Palette.h,Stores an 8-bit red green blue color with one padding byte.,high,,,x,,,,,source:main.c:11654
+T00206,struct:D_8005DC80_t,struct,D_8005DC80_t,1,D_8005DC80_t,44,4,4,1,1,SLUS_010.40/main.c,5,0,Graphics,State,Render::ModelColorFade,Native\Graphics\src\Palette.h,Fades the room tint (slot 0) or one actor tint (slots 1-16) toward a target color with optional pulsing.,high,,,x,,,,,source:main.c:11319;source:main.c:11322
+T00207,struct:D_80060068_t,struct,D_80060068_t,1,D_80060068_t,256,2,2,1,1,SLUS_010.40/main.h,1,1,Save,State,State::AshleySnapshot,Native\Game\src\State\Ashley.h,Captures Ashley's statistics and limbs for saves and room transitions.,high,,,x,,,,,source:260.c:825
 T00208,struct:D_80060068_t2,struct,D_80060068_t2,1,D_80060068_t2,28,4,0,1,1,SLUS_010.40/main.h,2,0,Game.Actors,,,,,,,,,,,,,
 T00209,struct:D_80060068_t3,struct,D_80060068_t3,1,D_80060068_t3,220,19,3,1,1,SLUS_010.40/main.h,1,0,Game.Actors,,,,,,,,,,,,,
 T00210,struct:D_80061078_t,struct,D_80061078_t,1,D_80061078_t,328,5,3,1,1,SLUS_010.40/main.h,11,1,Game.Actors,,,,,,,,,,,,,
@@ -221,14 +221,14 @@ T00218,struct:D_800EB9B8_unk990,struct,D_800EB9B8_unk990,1,D_800EB9B8_unk990,20,
 T00219,struct:D_800EB9BC_t,struct,D_800EB9BC_t,1,D_800EB9BC_t,1016,11,11,1,1,BATTLE/BATTLE.PRG/4A0A8.c,4,1,Game.Event,Misc,Event::SplashLayerView,Native\Game\src\Event\Splash.h,Partially decodes the splash-image layer record used by event scripts.,med,,,x,,,,,same-as-layout:gim_t at 5BF94.c:59 with merged bitfields;resolve to one native SplashLayer type before copying;source:4A0A8.c:129
 T00220,struct:D_800F16EC_t,struct,D_800F16EC_t,1,D_800F16EC_t,1,4,2,1,10,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,15,1,Game.Battle,,,,,,,,,,,,,
 T00221,struct:D_800F18C8_t,struct,D_800F18C8_t,1,D_800F18C8_t,24,9,9,1,1,BATTLE/BATTLE.PRG/146C.c,0,1,Game.Field,State,Field::RoomLoadResetBlock,Native\Game\src\Field\Zone.h,Holds a block of values cleared when a room finishes loading.,low,,,x,,,,,meaning-unresolved;source:146C.c:15337
-T00222,struct:D_800F18E8_t,struct,D_800F18E8_t,1,D_800F18E8_t,2,2,2,1,1,BATTLE/BATTLE.PRG/146C.h,0,1,Save,,,,,,,,,,,,,
+T00222,struct:D_800F18E8_t,struct,D_800F18E8_t,1,D_800F18E8_t,2,2,2,1,1,BATTLE/BATTLE.PRG/146C.h,0,1,Save,Value,Field::DoorFlagIdWord,Native\Game\src\Field\Doors.h,Packs the door state-flag id copied into the saved entry door.,med,,,x,,,,,source:main.c:8399
 T00223,struct:D_800F18EC_t,struct,D_800F18EC_t,1,D_800F18EC_t,8,3,2,1,1,BATTLE/BATTLE.PRG/5BF94.h,6,2,Game.Field,State,Battle::PendingAbilityState,Native\Game\include\Battle\Ability.h,Holds two unidentified shorts and packed execute-ability parameters.,low,,,x,,,,,meaning-unresolved;source:5BF94.h:147
 T00224,struct:D_800F1910_t,struct,D_800F1910_t,1,D_800F1910_t,20,2,2,1,1,BATTLE/BATTLE.PRG/146C.c,0,1,Game.Field,State,Field::InteractionFocus,Native\Game\src\Field\Interaction.h,Holds the trigger record and actor query of the interaction being shown.,med,,,x,,,,,source:146C.c:4980;source:146C.c:5003
 T00225,struct:D_800F19CC_t,struct,D_800F19CC_t,1,D_800F19CC_t,11280,46,41,1,1,BATTLE/BATTLE.PRG/146C.c,73,1,Game.Battle,,,,,,,,,,,,,
 T00226,struct:D_800F19CC_t2,struct,D_800F19CC_t2,1,D_800F19CC_t2,2124,8,7,1,1,BATTLE/BATTLE.PRG/146C.c,28,0,Game.Battle,,,,,,,,,,,,,
 T00227,struct:D_800F19CC_t5,struct,D_800F19CC_t5,1,D_800F19CC_t5,24,12,10,1,1,BATTLE/BATTLE.PRG/146C.h,11,0,Game.Battle,,,,,,,,,,,,,
-T00228,struct:D_800F1A68_t,struct,D_800F1A68_t,1,D_800F1A68_t,16,4,4,1,1,BATTLE/BATTLE.PRG/146C.h,6,3,Graphics,,,,,,,,,,,,,
-T00229,struct:D_800F1ABC_t,struct,D_800F1ABC_t,1,D_800F1ABC_t,720,3,0,1,1,BATTLE/BATTLE.PRG/146C.c,4,1,Graphics,,,,,,,,,,,,,
+T00228,struct:D_800F1A68_t,struct,D_800F1A68_t,1,D_800F1A68_t,16,4,4,1,1,BATTLE/BATTLE.PRG/146C.h,6,3,Graphics,Value,Render::FramebufferEffectTranslation,Native\Graphics\src\FramebufferEffects.h,Holds the screen translation applied to the captured framebuffer.,high,,,x,,,,,source:146C.c:9324
+T00229,struct:D_800F1ABC_t,struct,D_800F1ABC_t,1,D_800F1ABC_t,720,3,0,1,1,BATTLE/BATTLE.PRG/146C.c,4,1,Graphics,Packet,Render::LegacyFramebufferEffectPackets,Native\Graphics\src\FramebufferEffects.h,Holds the PS1 packets that redraw the captured screen as five 64-pixel strips per frame buffer.,high,,,x,,,,,source:146C.c:9395;replaced-by:native framebuffer effect pass
 T00230,struct:D_800F1BAC_t,struct,D_800F1BAC_t,1,D_800F1BAC_t,24,10,8,1,1,BATTLE/BATTLE.PRG/146C.h,21,1,Game.Battle,,,,,,,,,,,,,
 T00231,struct:D_800F1BB0_t,struct,D_800F1BB0_t,1,D_800F1BB0_t,8,6,6,1,1,BATTLE/BATTLE.PRG/146C.c,0,1,Game.Field,State,Field::RoomTint,Native\Game\src\Field\Room.h,Holds an RGB offset strength and active flag applied to room drawing.,high,,,x,,,,,source:146C.c:16001;source:146C.c:17594
 T00232,struct:D_800F1D08_t,struct,D_800F1D08_t,1,D_800F1D08_t,4,2,0,1,1,BATTLE/BATTLE.PRG/146C.c,2,1,Game.Field,State,Field::DoorMatchList,Native\Game\src\Field\Doors.h,Lists door records matching a tile or platform query.,high,,,x,,,,,source:146C.c:16196
@@ -242,14 +242,14 @@ T00239,struct:D_800F4538_t,struct,D_800F4538_t,1,D_800F4538_t,6364,154,141,1,1,B
 T00240,struct:D_800F4538_t2,struct,D_800F4538_t2,1,D_800F4538_t2,12,12,11,1,1,BATTLE/BATTLE.PRG/3A1A0.h,0,0,Game.Battle,,,,,,,,,,,,,
 T00241,struct:D_800F4538_unk0,struct,D_800F4538_unk0,1,D_800F4538_unk0,108,67,52,1,1,BATTLE/BATTLE.PRG/3A1A0.h,8,0,Game.Actors,,,,,,,,,,,,,
 T00242,struct:D_800F4538_unk180C,struct,D_800F4538_unk180C,1,D_800F4538_unk180C,4,5,5,1,1,BATTLE/BATTLE.PRG/3A1A0.h,4,0,Game.Actors,,,,,,,,,,,,,
-T00243,struct:D_800F4538_unk181C,struct,D_800F4538_unk181C,1,D_800F4538_unk181C,8,8,2,1,1,BATTLE/BATTLE.PRG/3A1A0.h,2,0,Content,,,,,,,,,,,,,
+T00243,struct:D_800F4538_unk181C,struct,D_800F4538_unk181C,1,D_800F4538_unk181C,8,8,2,1,1,BATTLE/BATTLE.PRG/3A1A0.h,2,0,Content,State,Actors::TextureScrollState,Native\Game\src\Actors\TextureAnimation.h,Tracks one scrolling texture window of an actor model.,high,,,x,,,,,source:40564.c:1582
 T00244,struct:D_800F4538_unk1848,struct,D_800F4538_unk1848,1,D_800F4538_unk1848,24,9,9,1,1,BATTLE/BATTLE.PRG/3A1A0.h,0,0,Game.Battle,,,,,,,,,,,,,
 T00245,struct:D_800F4538_unk1864,struct,D_800F4538_unk1864,1,D_800F4538_unk1864,20,11,11,1,1,BATTLE/BATTLE.PRG/3A1A0.h,5,0,Game.Actors,,,,,,,,,,,,,
 T00246,struct:D_800F4538_unk58,struct,D_800F4538_unk58,1,D_800F4538_unk58,4,4,4,1,1,BATTLE/BATTLE.PRG/3A1A0.h,0,0,Game.Battle,,,,,,,,,,,,,
 T00247,struct:D_800F4538_unk58_2,struct,D_800F4538_unk58_2,1,D_800F4538_unk58_2,4,4,4,1,1,BATTLE/BATTLE.PRG/3A1A0.h,16,0,Game.Actors,,,,,,,,,,,,,
 T00248,struct:D_800F4538_unk58_3,struct,D_800F4538_unk58_3,1,D_800F4538_unk58_3,4,4,4,1,1,MENU/MAINMENU.PRG/224.c,1,0,Game.Menu,,,,,,,,,,,,,
 T00249,struct:D_800F4538_unk614,struct,D_800F4538_unk614,1,D_800F4538_unk614,4,4,1,1,1,BATTLE/BATTLE.PRG/3A1A0.h,1,0,Game.Actors,,,,,,,,,,,,,
-T00250,struct:D_800F4538_unk61C,struct,D_800F4538_unk61C,1,D_800F4538_unk61C,8,9,5,1,1,BATTLE/BATTLE.PRG/3A1A0.h,2,0,Content,,,,,,,,,,,,,
+T00250,struct:D_800F4538_unk61C,struct,D_800F4538_unk61C,1,D_800F4538_unk61C,8,9,5,1,1,BATTLE/BATTLE.PRG/3A1A0.h,2,0,Content,Def,Actors::TextureScrollBounds,Native\Game\src\Actors\TextureAnimation.h,"Defines the window, initial step, interval and edge behavior of one actor texture scroll.",high,,,x,,,,,source:30DB0.c:1391
 T00251,struct:D_800F4538_unk64,struct,D_800F4538_unk64,1,D_800F4538_unk64,4,4,4,1,1,BATTLE/BATTLE.PRG/3A1A0.h,7,0,Game.Actors,,,,,,,,,,,,,
 T00252,struct:D_800F4538_unk68,struct,D_800F4538_unk68,1,D_800F4538_unk68,64,6,1,1,1,BATTLE/BATTLE.PRG/3A1A0.h,17,0,Game.Actors,,,,,,,,,,,,,
 T00253,struct:D_800F4538_unkC54,struct,D_800F4538_unkC54,1,D_800F4538_unkC54,1360,13,12,1,1,BATTLE/BATTLE.PRG/3A1A0.h,5,0,Game.Actors,,,,,,,,,,,,,
@@ -290,9 +290,9 @@ T00287,struct:FSoundVoiceModeFlags,struct,FSoundVoiceModeFlags,0,FSoundVoiceMode
 T00288,struct:FSoundVoiceParams,struct,FSoundVoiceParams,0,FSoundVoiceParams,28,9,0,1,1,include/sound.h,2,0,Audio.Driver,,,,,,,,,,,,,
 T00289,struct:FSoundVoiceSchedulerState,struct,FSoundVoiceSchedulerState,0,FSoundVoiceSchedulerState,48,14,1,1,1,include/sound.h,0,1,Audio.Seq,,,,,,,,,,,,,
 T00290,struct:FSpuVoiceInfo,struct,FSpuVoiceInfo,0,FSpuVoiceInfo,8,3,2,1,1,include/sound.h,4,1,Audio.Mixer,,,,,,,,,,,,,
-T00291,struct:MovieData_t,struct,MovieData_t,1,MovieData_t,56,8,0,1,1,TITLE/TITLE.PRG/22C.c,4,1,Video.Intro,,,,,,,,,,,,,
+T00291,struct:MovieData_t,struct,MovieData_t,1,MovieData_t,56,8,0,1,1,TITLE/TITLE.PRG/22C.c,4,1,Video.Intro,State,Movie::Intro::MdecState,Native\Video\src\Intro\Playback.h,"Double-buffers encoded frames, decoded slices and frame rectangles for intro movie decoding.",high,,,x,,,,,source:22C.c:3445;replaced-by:native movie decoder
 T00292,struct:PLG005_data_t,struct,PLG005_data_t,1,PLG005_data_t,28,15,8,1,1,EFFECT/PLG005.BIN/18.c,1,0,Game.Effects,,,,,,,,,,,,,
-T00293,struct:System_dat_h,struct,System_dat_h,0,System_dat_h,32,8,8,1,1,BATTLE/INITBTL.PRG/18.c,1,0,Content,,,,,,,,,,,,,
+T00293,struct:System_dat_h,struct,System_dat_h,0,System_dat_h,32,8,8,1,1,BATTLE/INITBTL.PRG/18.c,1,0,Content,OnDisc,Content::SystemDatHeader,Native\Content\src\SystemResources.h,"Lists the byte offsets of the images, palette and interface data inside SYSTEM.DAT.",high,,,x,,,,,source:18.c:265
 T00294,struct:TrailPacket,struct,TrailPacket,0,TrailPacket,60,31,5,1,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Game.Effects,,,,,,,,,,,,,
 T00295,struct:VS_POLY_FT4,struct,VS_POLY_FT4,0,VS_POLY_FT4,36,9,0,1,1,include/gpu.h,2,0,Game.Battle,,,,,,,,,,,,,
 T00296,struct:VS_POLY_G4,struct,VS_POLY_G4,0,VS_POLY_G4,32,8,0,1,1,include/gpu.h,0,0,,Packet,Render::GouraudQuadPacket,Native\Graphics\src\LegacyPackets.h,Packs a PS1 untextured Gouraud quadrilateral command as eight words.,high,,,x,,,,,replaced-by:Render draw commands;include/gpu.h:81;source:gpu.h:72
@@ -306,8 +306,8 @@ T00303,struct:_armature_t,struct,_armature_t,1,_armature_t,16,12,12,1,1,BATTLE/B
 T00304,struct:_armorInfo,struct,_armorInfo,0,_armorInfo,8,8,0,1,1,MENU/MENUC.PRG/168.c,2,2,Game.Menu,,,,,,,,,,,,,
 T00305,struct:_armorIntermediate,struct,_armorIntermediate,0,_armorIntermediate,52,5,1,1,1,BATTLE/BATTLE.PRG/146C.h,2,0,Game.Items,,,,,,,,,,,,,
 T00306,struct:_buffReels_t,struct,_buffReels_t,1,_buffReels_t,4,2,0,1,1,MENU/MENUF.PRG/3B8.c,2,1,Game.Menu,,,,,,,,,,,,,
-T00307,struct:_clutSlot,struct,_clutSlot,0,_clutSlot,2314,5,1,1,1,SLUS_010.40/main.c,9,0,Graphics,,,,,,,,,,,,,
-T00308,struct:_clutState_t,struct,_clutState_t,1,_clutState_t,33300,15,3,1,1,SLUS_010.40/main.c,0,1,Graphics,,,,,,,,,,,,,
+T00307,struct:_clutSlot,struct,_clutSlot,0,_clutSlot,2314,5,1,1,1,SLUS_010.40/main.c,9,0,Graphics,State,Render::PaletteSlot,Native\Graphics\src\Palette.h,"Holds one CLUT slot's lock, fade timer, per-entry fade data and base colors.",high,,,x,,,,,source:main.c:10528
+T00308,struct:_clutState_t,struct,_clutState_t,1,_clutState_t,33300,15,3,1,1,SLUS_010.40/main.c,0,1,Graphics,State,Render::PaletteTransitionState,Native\Graphics\src\Palette.h,Holds every CLUT slot fade plus the room background and model tint fades.,high,,,x,,,,,source:main.c:10556
 T00309,struct:_creditsElement,struct,_creditsElement,0,_creditsElement,48,14,6,1,1,ENDING/ENDING.PRG/D4.c,14,1,Game.Ending,Instance,Ending::Credits::Element,Native\Game\src\Ending\Credits.h,Stores a credits renderer callback and its text illustration or animation state.,high,,,x,,,,,source:D4.c:15;unused trailing members remain reserved
 T00310,struct:_gazetteRow,struct,_gazetteRow,0,_gazetteRow,16,8,1,1,1,MENU/MENU9.PRG/238.c,8,1,Game.Menu,,,,,,,,,,,,,
 T00311,struct:_hitEntity_t,struct,_hitEntity_t,1,_hitEntity_t,68,30,5,1,1,BATTLE/BATTLE.PRG/146C.c,139,0,Game.Battle,,,,,,,,,,,,,
@@ -406,7 +406,7 @@ T00403,struct:cameraScratch,struct,cameraScratch,0,cameraScratch,144,11,3,1,1,BA
 T00404,struct:cameraShakeScratch,struct,cameraShakeScratch,0,cameraShakeScratch,104,4,1,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,Misc,Event::CameraShakeScratch,Native\Game\src\Event\Camera.h,Overlays PS1 scratchpad storage while summing camera shake offsets.,high,,,x,,,,,replaced-by:function local variables;scratchpad 0x1F800088;source:4A0A8.c:223
 T00405,struct:cameraTransformScratch,struct,cameraTransformScratch,0,cameraTransformScratch,156,4,0,1,1,BATTLE/BATTLE.PRG/44F14.c,0,0,Game.Battle,,,,,,,,,,,,,
 T00406,struct:candidateMovementState,struct,candidateMovementState,0,candidateMovementState,1140,23,11,1,1,BATTLE/BATTLE.PRG/71618.c,6,0,Game.Battle,,,,,,,,,,,,,
-T00407,struct:clutAnimState_t,struct,clutAnimState_t,1,,8,8,0,1,1,SLUS_010.40/main.c,2,0,Graphics,,,,,,,,,,,,,
+T00407,struct:clutAnimState_t,struct,clutAnimState_t,1,,8,8,0,1,1,SLUS_010.40/main.c,2,0,Graphics,State,Render::PaletteTransitionTimer,Native\Graphics\src\Palette.h,Times one CLUT slot fade and stores its transition mode and pulse offsets.,high,,,x,,,,,source:main.c:10543
 T00408,struct:da4bcActor,struct,da4bcActor,0,da4bcActor,8,2,0,1,1,BATTLE/BATTLE.PRG/71618.c,2,0,Game.Battle,,,,,,,,,,,,,
 T00409,struct:da4bcEntry,struct,da4bcEntry,0,da4bcEntry,16,4,2,1,1,BATTLE/BATTLE.PRG/71618.c,2,0,Game.Battle,,,,,,,,,,,,,
 T00410,struct:da4bcEntryTarget,struct,da4bcEntryTarget,0,da4bcEntryTarget,4,2,1,1,1,BATTLE/BATTLE.PRG/71618.c,2,0,Game.Battle,,,,,,,,,,,,,
@@ -459,7 +459,7 @@ T00456,struct:func_80092F74_t2,struct,func_80092F74_t2,1,func_80092F74_t2,28,4,4
 T00457,struct:func_80093914_t,struct,func_80093914_t,1,func_80093914_t,32,12,12,1,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Field,Misc,Field::MpdTriangleColorView,Native\Game\src\Field\Mpd.h,Views the vertex colors of an MPD triangle to swap red and green.,high,,,x,,,,,DataCrystal MPD polygon layout;source:2842C.c:1421
 T00458,struct:func_80093914_t2,struct,func_80093914_t2,1,func_80093914_t2,40,16,16,1,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Field,Misc,Field::MpdQuadColorView,Native\Game\src\Field\Mpd.h,Views the vertex colors of an MPD quad to swap red and green.,high,,,x,,,,,DataCrystal MPD polygon layout;source:2842C.c:1433
 T00459,struct:func_800962E4_t,struct,func_800962E4_t,1,func_800962E4_t,16,11,11,1,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Battle,,,,,,,,,,,,,
-T00460,struct:func_8009C378_t,struct,func_8009C378_t,1,func_8009C378_t,30976,3,3,1,1,BATTLE/BATTLE.PRG/30DB0.h,3,0,Content,,,,,,,,,,,,,
+T00460,struct:func_8009C378_t,struct,func_8009C378_t,1,func_8009C378_t,30976,3,3,1,1,BATTLE/BATTLE.PRG/30DB0.h,3,0,Content,OnDisc,Content::SequenceBuffer,Native\Content\src\ActorAssets.h,Views a loaded SEQ animation file whose first two words are offsets rebased to addresses.,med,,,x,,,,,source:30DB0.c:1610
 T00461,struct:func_800A0024_t,struct,func_800A0024_t,1,func_800A0024_t,12,6,6,1,1,BATTLE/BATTLE.PRG/30DB0.c,1,0,Game.Field,Value,Field::GimmickSnapshot,Native\Game\src\Field\Gimmicks.h,Captures a gimmick placement orientation height above ground and position.,med,,,x,,,,,source function reads an uninitialized pointer first at 30DB0.c:3660;source:30DB0.c:3678
 T00462,struct:func_800A1108_t,struct,func_800A1108_t,1,func_800A1108_t,36,9,9,1,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Actors,,,,,,,,,,,,,
 T00463,struct:func_800A1DE8_t,struct,func_800A1DE8_t,1,func_800A1DE8_t,132,5,2,1,1,BATTLE/BATTLE.PRG/38C1C.c,1,0,Game.Actors,,,,,,,,,,,,,
@@ -498,8 +498,8 @@ T00495,struct:func_800D0B30_t2,struct,func_800D0B30_t2,1,func_800D0B30_t2,116,11
 T00496,struct:func_800D0C60_t,struct,func_800D0C60_t,1,func_800D0C60_t,192,7,7,1,1,BATTLE/BATTLE.PRG/5BF94.c,0,0,Game.Battle,,,,,,,,,,,,,
 T00497,struct:func_800D2904_t,struct,func_800D2904_t,1,func_800D2904_t,120,25,20,1,1,BATTLE/BATTLE.PRG/5BF94.h,17,2,Game.Effects,,,,,,,,,,,,,
 T00498,struct:func_800D4910_t,struct,func_800D4910_t,1,func_800D4910_t,12,3,1,1,1,BATTLE/BATTLE.PRG/6E644.h,184,0,Game.Effects,,,,,,,,,,,,,
-T00499,struct:func_800D55A4_t,struct,func_800D55A4_t,1,func_800D55A4_t,4,2,1,1,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Content,,,,,,,,,,,,,
-T00500,struct:func_800D55A4_t2,struct,func_800D55A4_t2,1,func_800D55A4_t2,4,2,2,1,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Content,,,,,,,,,,,,,
+T00499,struct:func_800D55A4_t,struct,func_800D55A4_t,1,func_800D55A4_t,4,2,1,1,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Content,OnDisc,Content::PFileTimelineTable,Native\Content\src\PFile.h,Lists the tracks of one P-file timeline section.,high,,,x,,,,,source:5BF94.c:7881
+T00500,struct:func_800D55A4_t2,struct,func_800D55A4_t2,1,func_800D55A4_t2,4,2,2,1,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Content,OnDisc,Content::PFileTimelineTrackEntry,Native\Content\src\PFile.h,Describes one P-file timeline track by packed header and data offset.,high,,,x,,,,,source:5BF94.c:7904
 T00501,struct:func_800D5780_t,struct,func_800D5780_t,1,func_800D5780_t,16,6,6,1,1,BATTLE/BATTLE.PRG/5BF94.h,16,0,Game.Effects,,,,,,,,,,,,,
 T00502,struct:func_800D5780_t2,struct,func_800D5780_t2,1,func_800D5780_t2,2,2,2,1,1,BATTLE/BATTLE.PRG/5BF94.h,1,0,Game.Effects,,,,,,,,,,,,,
 T00503,struct:func_800D57FC_t,struct,func_800D57FC_t,1,func_800D57FC_t,4,5,5,1,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Game.Effects,,,,,,,,,,,,,
@@ -541,12 +541,12 @@ T00538,struct:func_800FA76C_arg3,struct,func_800FA76C_arg3,1,func_800FA76C_arg3,
 T00539,struct:func_800FB4C0_t,struct,func_800FB4C0_t,1,func_800FB4C0_t,120,7,7,1,1,BATTLE/BATTLE.PRG/5BF94.h,100,0,Game.Effects,,,,,,,,,,,,,
 T00540,struct:func_800FD9A4_t,struct,func_800FD9A4_t,1,func_800FD9A4_t,208,11,4,1,1,EFFECT/PLG128.BIN/F8.c,5,0,Game.Effects,,,,,,,,,,,,,
 T00541,struct:func_80103080_t,struct,func_80103080_t,1,func_80103080_t,8,6,6,1,1,BATTLE/BATTLE.PRG/146C.h,0,0,Game.Battle,,,,,,,,,,,,,
-T00542,struct:gim_t,struct,gim_t,1,gim_t,1016,22,16,1,1,BATTLE/BATTLE.PRG/5BF94.c,10,0,Graphics,,,,,,,,,,,,,
-T00543,struct:imgHeader_t,struct,imgHeader_t,1,imgHeader_t,4,4,0,1,1,SLUS_010.40/main.c,0,1,Graphics,,,,,,,,,,,,,
+T00542,struct:gim_t,struct,gim_t,1,gim_t,1016,22,16,1,1,BATTLE/BATTLE.PRG/5BF94.c,10,0,Graphics,State,Render::GimLayer,Native\Graphics\src\Images.h,"Holds one of three GIM image layers: load phase, tile table, palette, placement and transition.",high,,,x,,,,,source:5BF94.c:2354
+T00543,struct:imgHeader_t,struct,imgHeader_t,1,imgHeader_t,4,4,0,1,1,SLUS_010.40/main.c,0,1,Graphics,OnDisc,Render::LegacyImageSize,Native\Graphics\src\Loading.h,Stores the little-endian width and height that precede the NOW LOADING image pixels.,high,,,x,,,,,source:main.c:8078
 T00544,struct:intPair,struct,intPair,0,intPair,8,2,2,1,1,BATTLE/BATTLE.PRG/44F14.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00545,struct:labelBoxPrim_t,struct,labelBoxPrim_t,1,labelBoxPrim_t,56,2,0,1,1,BATTLE/BATTLE.PRG/58578.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00546,struct:limbEffects_t,struct,limbEffects_t,1,limbEffects_t,4,2,0,1,1,BATTLE/BATTLE.PRG/146C.c,0,0,Game.Battle,,,,,,,,,,,,,
-T00547,struct:mcdata_t,struct,mcdata_t,1,mcdata_t,8872,9,5,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,6,2,Save.MemoryCard,,,,,,,,,,,,,
+T00547,struct:mcdata_t,struct,mcdata_t,1,mcdata_t,8872,9,5,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,6,2,Save.MemoryCard,OnDisc,Save::CardUiResources,Native\Save\src\MemoryCard\Resources.h,Holds the memory-card menu resources loaded from SPMCIMG.BIN after three save images.,high,,,x,,,,,source:260.c:1100
 T00548,struct:menuBg_t,struct,menuBg_t,1,menuBg_t,46592,2,0,1,1,TITLE/TITLE.PRG/22C.c,0,1,Game.Title,OnDisc,Title::SaveMenuBackgroundRecord,Native\Game\src\Title\SaveFiles.h,Describes the embedded save-menu background palette followed by indexed pixels.,high,,,x,,,,,decoder-only;asset:textures/title/save-menu-background.png;source:22C.c:3119
 T00549,struct:menuItemPrim_t,struct,menuItemPrim_t,1,menuItemPrim_t,24,2,0,1,1,TITLE/TITLE.PRG/22C.c,1,1,Game.Title,Packet,Title::MenuItemSpritePacket,Native\Game\src\Title\TitleScreen.h,Stores a tagged PS1 sprite packet for one title-menu item strip.,high,,,x,,,,,replaced-by:Render sprite commands;source:22C.c:4075
 T00550,struct:menuItemState_t,struct,menuItemState_t,1,menuItemState_t,8,8,0,1,1,TITLE/TITLE.PRG/22C.c,7,1,Game.Title,State,Title::MenuItemAnimationState,Native\Game\src\Title\TitleScreen.h,Stores visibility motion positions and color blending for one title-menu item.,high,,,x,,,,,source:22C.c:3748
@@ -580,10 +580,10 @@ T00577,struct:pFileCurveBlock,struct,pFileCurveBlock,0,pFileCurveBlock,4,3,0,1,1
 T00578,struct:pFileTexture,struct,pFileTexture,0,pFileTexture,24,14,0,1,1,BATTLE/BATTLE.PRG/5BF94.h,138,0,Game.Effects,,,,,,,,,,,,,
 T00579,struct:pFileTextureInfo,struct,pFileTextureInfo,0,pFileTextureInfo,4,2,1,1,1,BATTLE/BATTLE.PRG/5BF94.h,139,0,Game.Effects,,,,,,,,,,,,,
 T00580,struct:p_file_t,struct,p_file_t,1,p_file_t,4,2,0,1,10,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,1,1,Game.Effects,,,,,,,,,,,,,
-T00581,struct:padAct_t,struct,padAct_t,1,padAct_t,56,5,5,1,1,SLUS_010.40/main.c,7,1,Input,,,,,,,,,,,,,
+T00581,struct:padAct_t,struct,padAct_t,1,padAct_t,56,5,5,1,1,SLUS_010.40/main.c,7,1,Input,State,Input::VibrationPatternSlot,Native\Input\src\Vibration.h,Plays one bytecoded vibration pattern on the two controller motors.,med,,,x,,,,,source:main.c:8720;layout-conflict: channels are used as int[2][6] (48 bytes) but only 40 remain; an element likely starts at +8 with motor levels stored separately
 T00582,struct:patrolWaypointState,struct,patrolWaypointState,0,patrolWaypointState,364,10,3,1,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle,,,,,,,,,,,,,
-T00583,struct:percent_t,struct,percent_t,1,percent_t,4,1,0,1,1,MENU/MENU9.PRG/238.c,1,1,Core.String,,,,,,,,,,,,,
-T00584,struct:portInfo_t,struct,portInfo_t,1,portInfo_t,11,10,0,1,1,SLUS_010.40/main.h,9,1,Input,,,,,,,,,,,,,
+T00583,struct:percent_t,struct,percent_t,1,percent_t,4,1,0,1,1,MENU/MENU9.PRG/238.c,1,1,Core.String,Value,Core::PercentSuffixText,Native\Core\src\Text\Format.h,Holds the encoded percent sign appended to percentages.,high,,,x,,,,,source:238.c:2376
+T00584,struct:portInfo_t,struct,portInfo_t,1,portInfo_t,11,10,0,1,1,SLUS_010.40/main.h,9,1,Input,State,Input::ControllerPortState,Native\Input\src\Controllers.h,"Holds one controller port's type, stick positions, actuator levels and connection state.",high,,,x,,,,,source:main.c:8470
 T00585,struct:primBuf_t#e1847cec,struct,primBuf_t,1,primBuf_t,64,2,0,2,1,MENU/MENU7.PRG/260.c,0,2,Game.Menu,,,,,,,,,,,,,
 T00586,struct:primBuf_t#e2d158f6,struct,primBuf_t,1,primBuf_t,64,2,0,2,1,TITLE/TITLE.PRG/22C.c,0,2,Game.Menu,,,,,,,,,,,,,
 T00587,struct:radialMotion,struct,radialMotion,0,radialMotion,28,11,3,1,1,BATTLE/BATTLE.PRG/7EE98.c,1,0,Game.Battle,,,,,,,,,,,,,
@@ -597,10 +597,10 @@ T00594,struct:saveBase_t,struct,saveBase_t,1,saveBase_t,12,3,1,1,2,MENU/MENU7.PR
 T00595,struct:saveFileInfo_t,struct,saveFileInfo_t,1,saveFileInfo_t,128,4,3,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,22,2,Game.Title,OnDisc,Save::CardFileInfoRecord,Native\Save\src\MemoryCard\GameFiles.h,Describes the original save-file key summary and embedded card-icon header bytes.,med,,,x,,,,,source:22C.c:165;unknown byte ranges remain explicitly reserved
 T00596,struct:saveFileSubInfo_t,struct,saveFileSubInfo_t,1,saveFileSubInfo_t,64,3,1,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00597,struct:savedEnemyState,struct,savedEnemyState,0,savedEnemyState,40,17,3,1,1,BATTLE/BATTLE.PRG/146C.c,2,0,Game.Actors,,,,,,,,,,,,,
-T00598,struct:savedata_t#a2a812c4,struct,savedata_t,1,savedata_t,23552,18,9,2,1,MENU/MENU7.PRG/260.c,19,1,Save.MemoryCard,,,,,,,,,,,,,
-T00599,struct:savedata_t#2e91ca86,struct,savedata_t,1,savedata_t,23552,18,14,2,1,TITLE/TITLE.PRG/22C.c,19,1,Save.MemoryCard,,,,,,,,,,,,,
-T00600,struct:savedata_unk180_2_t,struct,savedata_unk180_2_t,1,savedata_unk180_2_t,16,2,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,,,,,,,,,,,,,
-T00601,struct:savedata_unk180_t,struct,savedata_unk180_t,1,savedata_unk180_t,128,3,1,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,,,,,,,,,,,,,
+T00598,struct:savedata_t#a2a812c4,struct,savedata_t,1,savedata_t,23552,18,9,2,1,MENU/MENU7.PRG/260.c,19,1,Save.MemoryCard,OnDisc,Save::GameSaveImage,Native\Save\src\MemoryCard\GameFiles.h,"Lays out the 23-block save file: card header, protected header and game state.",high,,,x,,,,,source:260.c:735
+T00599,struct:savedata_t#2e91ca86,struct,savedata_t,1,savedata_t,23552,18,14,2,1,TITLE/TITLE.PRG/22C.c,19,1,Save.MemoryCard,OnDisc,Save::GameSaveImage,Native\Save\src\MemoryCard\GameFiles.h,"Lays out the 23-block save file: card header, protected header and game state.",high,,,x,,,,,same-as:T00598;identical offsets in the Title overlay copy;source:22C.c:282
+T00600,struct:savedata_unk180_2_t,struct,savedata_unk180_2_t,1,savedata_unk180_2_t,16,2,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,OnDisc,Save::SaveCipherHeader,Native\Save\src\MemoryCard\GameFiles.h,Stores the key that encodes the protected save region and the slot header that starts it.,high,,,x,,,,,source:260.c:689
+T00601,struct:savedata_unk180_t,struct,savedata_unk180_t,1,savedata_unk180_t,128,3,1,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,OnDisc,Save::SaveProtectedHeader,Native\Save\src\MemoryCard\GameFiles.h,"Holds the cipher header, summary statistics and per-block checksums of a save.",high,,,x,,,,,source:260.c:749
 T00602,struct:scriptBytePair,struct,scriptBytePair,0,scriptBytePair,2,2,0,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,Value,Event::ScriptBytePair,Native\Game\src\Event\Script.h,Holds a little-endian byte pair decoded from event-script data.,med,,,x,,,,,source:4A0A8.c:4588
 T00603,struct:soundData_t,struct,soundData_t,1,soundData_t,136,17,5,1,1,SLUS_010.40/main.h,0,1,Audio,,,,,,,,,,,,,
 T00604,struct:soundEventTargets,struct,soundEventTargets,0,soundEventTargets,16,5,2,1,1,BATTLE/BATTLE.PRG/5BF94.c,0,0,Game.Battle,,,,,,,,,,,,,
@@ -658,7 +658,7 @@ T00655,struct:vs_battle_manualDisplayState_t,struct,vs_battle_manualDisplayState
 T00656,struct:vs_battle_menu9CursorMemory_t,struct,vs_battle_menu9CursorMemory_t,1,vs_battle_menu9CursorMemory_t,8,8,0,1,1,BATTLE/BATTLE.PRG/146C.h,2,1,Game.Menu,,,,,,,,,,,,,
 T00657,struct:vs_battle_menuItem_t,struct,vs_battle_menuItem_t,1,vs_battle_menuItem_t,64,23,0,1,1,BATTLE/BATTLE.PRG/5BF94.h,100,1,Game.Menu,,,,,,,,,,,,,
 T00658,struct:vs_battle_menuState_t,struct,vs_battle_menuState_t,1,vs_battle_menuState_t,8,5,0,1,1,BATTLE/BATTLE.PRG/5BF94.h,2,1,Game.Menu,,,,,,,,,,,,,
-T00659,struct:vs_battle_objectData,struct,vs_battle_objectData,0,vs_battle_objectData,20,10,3,1,1,BATTLE/BATTLE.PRG/2842C.h,37,1,Content,,,,,,,,,,,,,
+T00659,struct:vs_battle_objectData,struct,vs_battle_objectData,0,vs_battle_objectData,20,10,3,1,1,BATTLE/BATTLE.PRG/2842C.h,37,1,Content,State,Content::ActorAssetRequest,Native\Content\src\ActorAssets.h,"Requests loading of one actor asset: model, weapon, sequence or effect data.",high,,,x,,,,,source:30DB0.c:1085
 T00660,struct:vs_battle_objectData_flags,struct,vs_battle_objectData_flags,0,vs_battle_objectData_flags,4,4,4,1,1,BATTLE/BATTLE.PRG/2842C.h,9,0,Game.Actors,,,,,,,,,,,,,
 T00661,struct:vs_battle_prim,struct,vs_battle_prim,0,vs_battle_prim,4,4,0,1,1,BATTLE/BATTLE.PRG/146C.h,0,0,Game.Battle,,,,,,,,,,,,,
 T00662,struct:vs_battle_range_t,struct,vs_battle_range_t,1,vs_battle_range_t,4,5,2,1,1,BATTLE/BATTLE.PRG/func_8006B57C_t.h,4,0,Game.Items,,,,,,,,,,,,,
@@ -666,10 +666,10 @@ T00663,struct:vs_battle_room,struct,vs_battle_room,0,vs_battle_room,12,4,0,1,1,B
 T00664,struct:vs_battle_roomName,struct,vs_battle_roomName,0,vs_battle_roomName,36,3,0,1,1,BATTLE/BATTLE.PRG/146C.h,2,1,Game.Menu,,,,,,,,,,,,,
 T00665,struct:vs_battle_roomVertices,struct,vs_battle_roomVertices,0,vs_battle_roomVertices,4,2,0,1,1,BATTLE/BATTLE.PRG/146C.h,4,0,Game.Menu,,,,,,,,,,,,,
 T00666,struct:vs_battle_scene,struct,vs_battle_scene,0,vs_battle_scene,4,2,0,1,1,BATTLE/BATTLE.PRG/146C.h,17,0,Game.Menu,,,,,,,,,,,,,
-T00667,struct:vs_battle_screenTransitionWipePoly,struct,vs_battle_screenTransitionWipePoly,0,vs_battle_screenTransitionWipePoly,48,2,0,1,1,BATTLE/BATTLE.PRG/146C.h,2,1,Graphics,,,,,,,,,,,,,
+T00667,struct:vs_battle_screenTransitionWipePoly,struct,vs_battle_screenTransitionWipePoly,0,vs_battle_screenTransitionWipePoly,48,2,0,1,1,BATTLE/BATTLE.PRG/146C.h,2,1,Graphics,Packet,Render::LegacyTransitionWipePacket,Native\Graphics\src\ScreenTransition.h,Holds the PS1 quads covering the wiped screen area and drawing the wipe edge.,high,,,x,,,,,source:146C.c:2290;replaced-by:native transition pass
 T00668,struct:vs_battle_shieldIntermediate,struct,vs_battle_shieldIntermediate,0,vs_battle_shieldIntermediate,196,5,0,1,1,BATTLE/BATTLE.PRG/146C.h,3,0,Game.Items,Def,Items::ShieldSpawnLoadout,Native\Game\include\Items\Loadout.h,Describes the shield and gems equipped by a spawned actor.,high,,,x,,,,,source:146C.h:774
 T00669,struct:vs_battle_stringContext_t,struct,vs_battle_stringContext_t,1,vs_battle_stringContext_t,80,2,0,1,1,BATTLE/BATTLE.PRG/5BF94.h,0,1,Game.Menu,,,,,,,,,,,,,
-T00670,struct:vs_battle_texInfo_t,struct,vs_battle_texInfo_t,1,vs_battle_texInfo_t,8,4,0,1,1,BATTLE/BATTLE.PRG/30DB0.h,6,2,Content,,,,,,,,,,,,,
+T00670,struct:vs_battle_texInfo_t,struct,vs_battle_texInfo_t,1,vs_battle_texInfo_t,8,4,0,1,1,BATTLE/BATTLE.PRG/30DB0.h,6,2,Content,State,Render::TextureSlot,Native\Graphics\src\Textures.h,"Tracks one actor or weapon texture slot's page, palettes and user count.",high,,,x,,,,,source:30DB0.c:1113
 T00671,struct:vs_battle_textBox,struct,vs_battle_textBox,0,vs_battle_textBox,48,25,12,1,1,BATTLE/BATTLE.PRG/5BF94.h,32,1,Game.Menu,,,,,,,,,,,,,
 T00672,struct:vs_battle_textBox_fields,struct,vs_battle_textBox_fields,0,vs_battle_textBox_fields,4,9,7,1,1,BATTLE/BATTLE.PRG/5BF94.h,0,0,Game.Battle,,,,,,,,,,,,,
 T00673,struct:vs_battle_uiAccessory,struct,vs_battle_uiAccessory,0,vs_battle_uiAccessory,96,9,0,1,1,BATTLE/BATTLE.PRG/146C.h,8,0,Game.Items,Def,Items::AccessorySpawnLoadout,Native\Game\include\Items\Loadout.h,Describes an accessory and its stat and resistance contributions for a spawned actor.,high,,,x,,,,,source:146C.h:413
@@ -691,9 +691,9 @@ T00688,struct:vs_gridPrim,struct,vs_gridPrim,0,vs_gridPrim,60,4,0,1,1,EFFECT/gri
 T00689,struct:vs_gridState,struct,vs_gridState,0,vs_gridState,28,15,0,1,1,EFFECT/grids.h,19,0,Game.Effects,,,,,,,,,,,,,
 T00690,struct:vs_main_CdFile,struct,vs_main_CdFile,0,vs_main_CdFile,8,2,0,1,1,SLUS_010.40/main.h,42,11,Game.Menu,,,,,,,,,,,,,
 T00691,struct:vs_main_CdQueueSlot,struct,vs_main_CdQueueSlot,0,vs_main_CdQueueSlot,20,5,1,1,1,SLUS_010.40/main.h,59,28,Game.Menu,,,,,,,,,,,,,
-T00692,struct:vs_main_HeapHeader,struct,vs_main_HeapHeader,0,vs_main_HeapHeader,16,4,1,1,1,SLUS_010.40/main.h,15,3,Core.Memory,,,,,,,,,,,,,
+T00692,struct:vs_main_HeapHeader,struct,vs_main_HeapHeader,0,vs_main_HeapHeader,16,4,1,1,1,SLUS_010.40/main.h,15,3,Core.Memory,State,Core::HeapBlockHeader,Native\Core\src\Memory\Heap.h,Links one free or allocated heap block and records its size.,high,,,x,,,,,source:main.c:8955;replaced-by:native allocator
 T00693,struct:vs_main_artsStatus_t,struct,vs_main_artsStatus_t,1,vs_main_artsStatus_t,36,2,0,1,1,SLUS_010.40/main.h,0,1,Game.Menu,,,,,,,,,,,,,
-T00694,struct:vs_main_disk_t,struct,vs_main_disk_t,1,vs_main_disk_t,72,21,9,1,1,SLUS_010.40/main.c,0,1,Content,,,,,,,,,,,,,
+T00694,struct:vs_main_disk_t,struct,vs_main_disk_t,1,vs_main_disk_t,72,21,9,1,1,SLUS_010.40/main.c,0,1,Content,State,Content::DiscDrive,Native\Content\src\DiscQueue.h,"Holds the disc drive read state: target, progress counters, ring buffer indices and XA settings.",high,,,x,,,,,source:main.c:9140
 T00695,struct:vs_main_flags_t,struct,vs_main_flags_t,1,vs_main_flags_t,1088,125,63,1,1,SLUS_010.40/main.h,1,1,Game.Menu,,,,,,,,,,,,,
 T00696,struct:vs_main_inventoryArmor,struct,vs_main_inventoryArmor,0,vs_main_inventoryArmor,40,18,0,1,1,BATTLE/BATTLE.PRG/func_8006B57C_t.h,52,2,Game.Menu,,,,,,,,,,,,,
 T00697,struct:vs_main_inventoryBlade,struct,vs_main_inventoryBlade,0,vs_main_inventoryBlade,44,23,3,1,1,BATTLE/BATTLE.PRG/func_8006B57C_t.h,51,2,Game.Menu,,,,,,,,,,,,,
