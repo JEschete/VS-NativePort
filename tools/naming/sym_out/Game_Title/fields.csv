@@ -1,46 +1,46 @@
 id,final_name,meaning,confidence,notes
-T00794.000,sprite,Sprite and texture-page packet,high,replaced-by:Render sprite commands
-T00794.001,texturedTile,Tile and texture-page packet,high,replaced-by:Render rectangle commands
-T00794.002,tile,Untextured tile packet,high,replaced-by:Render rectangle commands
-T00794.003,texturedGradientQuad,Gouraud quad and texture-page packet,high,replaced-by:Render quad commands
-T00794.004,gradientQuad,Gouraud quad packet,high,replaced-by:Render quad commands
-T00794.005,tileAndGradientQuad,Combined tile and Gouraud quad packets,high,replaced-by:Render draw commands
-T00794.006,packetWords,Raw storage for fifteen GPU packet words,high,replaced-by:Render draw commands
-T00189.000,dmaTag,PS1 DMA packet tag,high,replaced-by:Render draw commands
-T00189.001,tile,Tile and texture-page packet,high,replaced-by:Render rectangle commands
-T00189.002,reserved14,Unresolved bytes following the tile packet,low,Do not discard until title-loop workspace uses are resolved
+T00794.000,sprite,Sprite and texture-page packet,med,replaced-by:Render sprite commands;declaration-only;source:22C.c:1065
+T00794.001,texturedTile,Tile and texture-page packet,med,replaced-by:Render rectangle commands;declaration-only;source:22C.c:1066
+T00794.002,tile,Untextured tile packet,med,replaced-by:Render rectangle commands;declaration-only;source:22C.c:1067
+T00794.003,texturedGradientQuad,Gouraud quad and texture-page packet,med,replaced-by:Render quad commands;declaration-only;source:22C.c:1068
+T00794.004,gradientQuad,Gouraud quad packet,med,replaced-by:Render quad commands;declaration-only;source:22C.c:1069
+T00794.005,tileAndGradientQuad,Combined tile and Gouraud quad packets,med,replaced-by:Render draw commands;declaration-only;source:22C.c:1073
+T00794.006,packetWords,Raw storage for fifteen GPU packet words,med,replaced-by:Render draw commands;declaration-only;source:22C.c:1074
+T00189.000,dmaTag,PS1 DMA packet tag,med,replaced-by:Render draw commands;declaration-only;source:22C.c:4494
+T00189.001,tile,Tile and texture-page packet,med,replaced-by:Render rectangle commands;declaration-only;source:22C.c:4495
+T00189.002,reserved14,Unresolved bytes following the tile packet,low,Do not discard until title-loop workspace uses are resolved;declaration-only;source:22C.c:4496
 T00190.000,frames,Frame component of elapsed game time,high,source:main.h:166
 T00190.001,seconds,Second component of elapsed game time,high,source:main.h:166
 T00190.002,minutes,Minute component of elapsed game time,high,source:main.h:166
 T00190.003,hours,Hour component of elapsed game time,high,source:main.h:166
-T00192.000,lowByte,Low eight bits of controller buttons,high,replaced-by:Input typed button flags
-T00192.001,highByte,High eight bits of controller buttons,high,replaced-by:Input typed button flags
-T00298.000,texturePageCommand,Packed PS1 texture-page command word,high,replaced-by:Render texture handle
-T00298.001,colorCommand,Packed RGB color and sprite command,high,replaced-by:Render sprite color
-T00298.002,position,Packed signed screen X and Y coordinates,high,replaced-by:Render sprite position
-T00298.003,uvPalette,Packed texture UV and CLUT selector,high,replaced-by:Render atlas region
-T00298.004,size,Packed width and height in pixels,high,replaced-by:Render sprite size
-T00300.000,texturePageCommand,Packed PS1 texture-page command word,high,replaced-by:Render draw state
-T00300.001,colorCommand,Packed RGB color and tile command,high,replaced-by:Render rectangle color
-T00300.002,position,Packed signed screen X and Y coordinates,high,replaced-by:Render rectangle position
-T00300.003,size,Packed width and height in pixels,high,replaced-by:Render rectangle size
-T00004.000,Error,Masked card operation failed,high,replaced-by:Save asynchronous completion
-T00004.001,Pending,Masked card operation is pending,high,replaced-by:Save asynchronous completion
-T00004.002,Complete,Masked card operation completed,high,replaced-by:Save asynchronous completion
+T00192.000,lowByte,Low eight bits of controller buttons,med,replaced-by:Input typed button flags;declaration-only;source:main.h:485
+T00192.001,highByte,High eight bits of controller buttons,med,replaced-by:Input typed button flags;declaration-only;source:main.h:486
+T00298.000,texturePageCommand,Packed PS1 texture-page command word,med,replaced-by:Render texture handle;declaration-only;source:gpu.h:53
+T00298.001,colorCommand,Packed RGB color and sprite command,med,replaced-by:Render sprite color;declaration-only;source:gpu.h:54
+T00298.002,position,Packed signed screen X and Y coordinates,med,replaced-by:Render sprite position;declaration-only;source:gpu.h:55
+T00298.003,uvPalette,Packed texture UV and CLUT selector,med,replaced-by:Render atlas region;declaration-only;source:gpu.h:56
+T00298.004,size,Packed width and height in pixels,med,replaced-by:Render sprite size;declaration-only;source:gpu.h:57
+T00300.000,texturePageCommand,Packed PS1 texture-page command word,med,replaced-by:Render draw state;declaration-only;source:gpu.h:40
+T00300.001,colorCommand,Packed RGB color and tile command,med,replaced-by:Render rectangle color;declaration-only;source:gpu.h:41
+T00300.002,position,Packed signed screen X and Y coordinates,med,replaced-by:Render rectangle position;declaration-only;source:gpu.h:42
+T00300.003,size,Packed width and height in pixels,med,replaced-by:Render rectangle size;declaration-only;source:gpu.h:43
+T00004.000,Error,Masked card operation failed,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1483
+T00004.001,Pending,Masked card operation is pending,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1484
+T00004.002,Complete,Masked card operation completed,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1485
 T00426.000,indexedPixels,Four-bit indexed font pixels in 128-byte rows,high,source:22C.c:3109
 T00426.001,palettes,Sixteen palettes of sixteen RGB555 colors,high,source:22C.c:3109
-T00026.000,Software,Software memory-card event group at offset zero,high,replaced-by:Save asynchronous completion
-T00026.001,Hardware,Hardware memory-card event group at offset four,high,replaced-by:Save asynchronous completion
+T00026.000,Software,Software memory-card event group at offset zero,med,replaced-by:Save asynchronous completion;declaration-only;source:260.c:36
+T00026.001,Hardware,Hardware memory-card event group at offset four,med,replaced-by:Save asynchronous completion;declaration-only;source:260.c:36
 T00548.000,palette,256 RGB555 colors for the background,high,source:22C.c:3119
 T00548.001,indexedPixels,240 rows of 192 eight-bit palette indices,high,source:22C.c:3119
-T00549.000,dmaTag,PS1 DMA packet tag,high,replaced-by:Render sprite commands
-T00549.001,sprite,Sprite and texture-page packet,high,replaced-by:Render sprite commands
+T00549.000,dmaTag,PS1 DMA packet tag,med,replaced-by:Render sprite commands;declaration-only;source:22C.c:4076
+T00549.001,sprite,Sprite and texture-page packet,med,replaced-by:Render sprite commands;declaration-only;source:22C.c:4077
 T00027.000,Stationary,Menu item holds its current position,high,source:22C.c:3741
 T00027.001,MovingUp,Menu item moves toward a smaller vertical position,high,source:22C.c:4034
 T00027.002,MovingDown,Menu item moves toward a larger vertical position,high,source:22C.c:4040
 T00027.003,Submenu,Menu item uses submenu color blending behavior,high,source:22C.c:4050
 T00550.000,isEnabled,Whether the menu item is animated and rendered,high,source:22C.c:4006
-T00550.001,motion,Current title-item animation mode,high,enum:Title::MenuItemMotion
+T00550.001,motion,Current title-item animation mode,med,enum:Title::MenuItemMotion;declaration-only;source:22C.c:3750
 T00550.002,textSaturation,Text brightness from zero to 128,high,source:22C.c:4009
 T00550.003,outlineSaturation,Outline brightness during selection animation,high,source:22C.c:4024
 T00550.004,textPosition,Current vertical text animation position,high,source:22C.c:4035
@@ -58,7 +58,7 @@ T00028.007,VibrationOn,Enable controller vibration,high,source:22C.c:4234
 T00028.008,Stereo,Select stereo sound,high,source:22C.c:4234
 T00595.000,key,Original save-file key word,high,source:22C.c:165
 T00595.001,summary,Save slot metadata statistics and formatted card title,high,source:22C.c:640
-T00595.002,reserved44,Unresolved 28-byte range in the original save header,low,No direct field accesses found;preserve in legacy decoder
+T00595.002,reserved44,Unresolved 28-byte range in the original save header,low,No direct field accesses found;preserve in legacy decoder;declaration-only;source:260.c:74
 T00595.003,iconHeaderBytes,32 bytes copied from the selected card image header,med,source:22C.c:654;exact subformat still needs confirmation
 T00031.000,Unavailable,Save slot cannot be used,high,source:22C.c:132
 T00031.001,Available,Save slot is available,high,source:22C.c:132
@@ -77,7 +77,7 @@ T00090.001,Loading,Load the clear-save UI resources,high,source:22C.c:3315
 T00090.002,Ready,Run the loaded clear-save menu,high,source:22C.c:3315
 T00090.003,Confirmation,Run clear-save confirmation,high,source:22C.c:3315
 T00090.004,Exit,Leave the clear-save screen,high,source:22C.c:3315
-T00609.000,dmaTag,PS1 DMA packet tag,high,replaced-by:Render sprite commands
-T00609.001,sprite,Sprite and texture-page packet,high,replaced-by:Render sprite commands
+T00609.000,dmaTag,PS1 DMA packet tag,med,replaced-by:Render sprite commands;declaration-only;source:22C.c:4186
+T00609.001,sprite,Sprite and texture-page packet,med,replaced-by:Render sprite commands;declaration-only;source:22C.c:4187
 T00625.000,pageZeroPixels,224 rows of 128 packed indexed texture bytes,high,source:22C.c:3114
 T00625.001,pageOnePixels,256 rows of 128 packed indexed texture bytes,high,source:22C.c:3114

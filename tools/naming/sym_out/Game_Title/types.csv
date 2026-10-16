@@ -1,15 +1,15 @@
 id,role,final_name,final_location,purpose,confidence,notes
-T00794,Packet,Title::FileMenuPrimitivePayload,Native\Game\src\Title\SaveFiles.h,Overlays PS1 sprite and polygon packet formats for immediate file-menu drawing.,high,replaced-by:Render draw commands
-T00189,Packet,Title::TransitionPacketBuffer,Native\Game\src\Title\TitleScreen.h,Combines a tagged PS1 tile packet with title transition workspace.,high,replaced-by:Render draw commands
+T00794,Packet,Title::FileMenuPrimitivePayload,Native\Game\src\Title\SaveFiles.h,Overlays PS1 sprite and polygon packet formats for immediate file-menu drawing.,high,replaced-by:Render draw commands;source:22C.c:1064
+T00189,Packet,Title::TransitionPacketBuffer,Native\Game\src\Title\TitleScreen.h,Combines a tagged PS1 tile packet with title transition workspace.,high,replaced-by:Render draw commands;source:22C.c:4493
 T00190,Value,State::GameTimeComponents,Native\Game\include\State\GameTime.h,Stores the frame second minute and hour components of the game clock.,high,source:main.h:166
-T00192,Packet,Input::ButtonBytePair,Native\Input\src\Buttons.h,Exposes the low and high bytes of one packed PS1 controller button word.,high,replaced-by:Input typed button flags
-T00298,Packet,Render::SpriteTexturePagePacket,Native\Graphics\src\LegacyPackets.h,Stores PS1 texture-page color position UV palette and size words for a sprite.,high,replaced-by:Render sprite commands
-T00300,Packet,Render::TileTexturePagePacket,Native\Graphics\src\LegacyPackets.h,Stores PS1 texture-page color position and size words for a tile.,high,replaced-by:Render rectangle commands
-T00004,Enum,Title::CardPollResult,Native\Game\src\Title\SaveCard.h,Distinguishes failed pending and completed masked memory-card event polls.,high,replaced-by:Save asynchronous completion
-T00426,OnDisc,Title::SaveMenuFontRecord,Native\Game\src\Title\SaveFiles.h,Describes the embedded indexed font pixels followed by sixteen palettes.,high,decoder-only;asset:textures/title/save-menu-font.png
-T00026,Enum,Save::CardEventGroup,Native\Save\src\MemoryCard\GameFiles.h,Selects software versus hardware event descriptors in the PS1 memory-card API.,high,replaced-by:Save asynchronous completion
-T00548,OnDisc,Title::SaveMenuBackgroundRecord,Native\Game\src\Title\SaveFiles.h,Describes the embedded save-menu background palette followed by indexed pixels.,high,decoder-only;asset:textures/title/save-menu-background.png
-T00549,Packet,Title::MenuItemSpritePacket,Native\Game\src\Title\TitleScreen.h,Stores a tagged PS1 sprite packet for one title-menu item strip.,high,replaced-by:Render sprite commands
+T00192,Packet,Input::ButtonBytePair,Native\Input\src\Buttons.h,Exposes the low and high bytes of one packed PS1 controller button word.,high,replaced-by:Input typed button flags;source:main.h:484
+T00298,Packet,Render::SpriteTexturePagePacket,Native\Graphics\src\LegacyPackets.h,Stores PS1 texture-page color position UV palette and size words for a sprite.,high,replaced-by:Render sprite commands;source:gpu.h:52
+T00300,Packet,Render::TileTexturePagePacket,Native\Graphics\src\LegacyPackets.h,Stores PS1 texture-page color position and size words for a tile.,high,replaced-by:Render rectangle commands;source:gpu.h:39
+T00004,Enum,Title::CardPollResult,Native\Game\src\Title\SaveCard.h,Distinguishes failed pending and completed masked memory-card event polls.,high,replaced-by:Save asynchronous completion;source:22C.c:1482
+T00426,OnDisc,Title::SaveMenuFontRecord,Native\Game\src\Title\SaveFiles.h,Describes the embedded indexed font pixels followed by sixteen palettes.,high,decoder-only;asset:textures/title/save-menu-font.png;source:22C.c:3109
+T00026,Enum,Save::CardEventGroup,Native\Save\src\MemoryCard\GameFiles.h,Selects software versus hardware event descriptors in the PS1 memory-card API.,high,replaced-by:Save asynchronous completion;source:260.c:36
+T00548,OnDisc,Title::SaveMenuBackgroundRecord,Native\Game\src\Title\SaveFiles.h,Describes the embedded save-menu background palette followed by indexed pixels.,high,decoder-only;asset:textures/title/save-menu-background.png;source:22C.c:3119
+T00549,Packet,Title::MenuItemSpritePacket,Native\Game\src\Title\TitleScreen.h,Stores a tagged PS1 sprite packet for one title-menu item strip.,high,replaced-by:Render sprite commands;source:22C.c:4075
 T00027,Enum,Title::MenuItemMotion,Native\Game\src\Title\TitleScreen.h,Selects stationary upward downward or submenu title-item animation.,high,source:22C.c:3741
 T00550,State,Title::MenuItemAnimationState,Native\Game\src\Title\TitleScreen.h,Stores visibility motion positions and color blending for one title-menu item.,high,source:22C.c:3748
 T00028,Enum,Title::MenuItemId,Native\Game\src\Title\TitleScreen.h,Identifies title-menu commands and sound or vibration option labels.,high,source:22C.c:4234
@@ -18,5 +18,5 @@ T00031,Enum,Save::CardFileSlotStatus,Native\Save\src\MemoryCard\GameFiles.h,Dist
 T00088,Enum,Title::LoadScreenPhase,Native\Game\src\Title\SaveFiles.h,Selects initialization memory-card resource loading or load-file menu execution.,high,source:22C.c:3131
 T00089,Enum,Title::CardSelectionPhase,Native\Game\src\Title\SaveFiles.h,Selects two-card initialization animation waiting input or selection return.,high,source:22C.c:2215
 T00090,Enum,Title::ClearSaveScreenPhase,Native\Game\src\Title\SaveFiles.h,Selects initialization loading ready confirmation or exit for clear-game saving.,high,source:22C.c:3315
-T00609,Packet,Title::MenuSpritePacket,Native\Game\src\Title\TitleScreen.h,Stores the tagged PS1 sprite packet used by the title-menu draw list.,high,replaced-by:Render sprite commands
-T00625,OnDisc,Title::SaveMenuUiRecord,Native\Game\src\Title\SaveFiles.h,Describes the two embedded indexed texture pages used by save-menu UI drawing.,high,decoder-only;asset:textures/title/save-menu-ui.png
+T00609,Packet,Title::MenuSpritePacket,Native\Game\src\Title\TitleScreen.h,Stores the tagged PS1 sprite packet used by the title-menu draw list.,high,replaced-by:Render sprite commands;source:22C.c:4185
+T00625,OnDisc,Title::SaveMenuUiRecord,Native\Game\src\Title\SaveFiles.h,Describes the two embedded indexed texture pages used by save-menu UI drawing.,high,decoder-only;asset:textures/title/save-menu-ui.png;source:22C.c:3114

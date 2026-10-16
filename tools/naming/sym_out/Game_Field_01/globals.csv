@@ -23,3 +23,15 @@ G00096,constexpr,Field::kGimmickBounceHeightSteps,Native\Game\src\Field\GimmickM
 G00097,constexpr,Field::kGimmickTiltDepthSteps,Native\Game\src\Field\GimmickMotion.c,Gives per-frame depth steps of the nine-frame gimmick motion mode 0xFB.,med,source:44F14.c:1939
 G00098,constexpr,Field::kGimmickTiltAngleSteps,Native\Game\src\Field\GimmickMotion.c,Gives per-frame tilt steps of gimmick motion mode 0xFB signed by orientation.,med,source:44F14.c:1940
 G00099,constexpr,Field::kGimmickRollHeightSteps,Native\Game\src\Field\GimmickMotion.c,Gives per-frame height steps of gimmick motion mode 0xF9.,med,companion tables D_800E9218 and D_800E9228;source:44F14.c:1962
+G00100,constexpr,Field::kGimmickRollDisplacementSteps,Native\Game\src\Field\GimmickMotion.c,Gives per-frame horizontal displacement of the fifteen-frame gimmick motion mode 0xF9 signed by orientation.,med,source:44F14.c:1963;completes at 44F14.c:1979
+G00101,constexpr,Field::kGimmickRollAngleSteps,Native\Game\src\Field\GimmickMotion.c,Gives per-frame rotation steps of gimmick motion mode 0xF9 signed by orientation.,med,source:44F14.c:1965
+G00102,constexpr,Field::kGimmickSquashHeightSteps,Native\Game\src\Field\GimmickMotion.c,Gives per-frame height steps of the fifteen-frame gimmick motion mode 0xF7.,med,source:44F14.c:2000
+G00103,constexpr,Field::kGimmickSquashScaleX,Native\Game\src\Field\GimmickMotion.c,Gives per-frame X scale of gimmick motion mode 0xF7.,med,source:44F14.c:2001
+G00104,constexpr,Field::kGimmickSquashScaleY,Native\Game\src\Field\GimmickMotion.c,Gives per-frame Y scale of gimmick motion mode 0xF7.,med,source:44F14.c:2002
+G00105,constexpr,Field::kGimmickSquashScaleZ,Native\Game\src\Field\GimmickMotion.c,Gives per-frame Z scale of gimmick motion mode 0xF7.,med,source:44F14.c:2003
+G00106,constexpr,Field::kTileSurfaceIds,Native\Game\src\Field\Collision.c,Maps a collision tile's five-bit surface kind to the surface identifier used for footsteps and ground-plane impacts.,med,surface 20 triggers ground-plane impact effects;source:44F14.c:765;source:3A1A0.c:2222;source:40564.c:2460
+G00243,state,Field::isFirstPersonViewEnabled,Native\Game\src\Field\Camera.c,Enables the first-person look view.,high,state:Field::CameraState;source:146C.c:780;source:146C.c:5173;source:146C.c:5188
+G00246,state,Field::zoneContext,Native\Game\src\Field\Zone.c,Holds the active zone and room identifiers bounds loaded zone data and enemy tables.,high,state:Field::ZoneState;replace disc pointers with native resource handles;source:146C.c:2435;source:146C.c:6649;source:18.c:537
+G00248,state,Field::zoneSoundFileId,Native\Game\src\Field\Zone.c,Identifies the zone sound file loaded by the event sound-file command.,med,no writer found in C;source:146C.c:14899;source:4A0A8.c:2341
+G00251,state,Field::roomLoadResetBlock,Native\Game\src\Field\Zone.c,Holds a twenty-byte block cleared when a room finishes loading; no reader is identified.,low,meaning-unresolved;source:146C.c:15337;source:146C.c:15382
+G00252,state,Field::isRoomActorSpawnEnabled,Native\Game\src\Field\Zone.c,Enables spawning of room enemies and objects.,med,no writer found in C;source:146C.c:14916
