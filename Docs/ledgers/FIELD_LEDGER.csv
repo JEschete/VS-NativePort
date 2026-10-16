@@ -749,10 +749,10 @@ T00127.001,T00127,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00128.000,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),0,count,0,u_char,,,,,,,
 T00128.001,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),1,labels,0,u_char[2],,,,,,,
 T00128.002,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),2,color,0,u_char,,,,,,,
-T00129.000,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),0,x,0,u_char,,,,,,,
-T00129.001,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),1,y,0,u_char,,,,,,,
-T00129.002,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),2,z,0,u_char,,,,,,,
-T00129.003,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),3,direction,0,u_char,,,,,,,
+T00129.000,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),0,x,0,u_char,,,,tileX,Tile x of the gimmick tile target,med,declaration-only;source:3A1A0.c:732
+T00129.001,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),1,y,0,u_char,,,,tileY,Tile y of the gimmick tile target,med,declaration-only;source:3A1A0.c:733
+T00129.002,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),2,z,0,u_char,,,,tileZ,Tile z of the gimmick tile target,med,declaration-only;source:3A1A0.c:734
+T00129.003,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),3,direction,0,u_char,,,,direction,Direction of the gimmick tile target,med,declaration-only;source:3A1A0.c:735
 T00130.000,T00130,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:350:5),0,corners,0,int[5],,,,,,,
 T00130.001,T00130,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:350:5),1,clip,0,int,,,,,,,
 T00131.000,T00131,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:354:5),0,local,0,short[4],,,,,,,
@@ -1116,16 +1116,16 @@ T00198.011,T00198,D_1F80035C_t,11,matrix,0,MATRIX,,,,,,,
 T00198.012,T00198,D_1F80035C_t,12,rotation,0,SVECTOR,,,,,,,
 T00198.013,T00198,D_1F80035C_t,13,scale,0,VECTOR,,,,,,,
 T00198.014,T00198,D_1F80035C_t,14,model,0,D_800F4538_unk68 *,,,,,,,
-T00199.000,T00199,D_1F8003BC_t,0,unk0,1,int,,,,,,,
-T00199.001,T00199,D_1F8003BC_t,1,excluded,0,u_char[17],,,,,,,
-T00199.002,T00199,D_1F8003BC_t,2,pad15,1,u_char[3],,,,,,,
-T00199.003,T00199,D_1F8003BC_t,3,unk18,1,D_800F45E0_t *,,,,,,,
-T00199.004,T00199,D_1F8003BC_t,4,unk1C,1,short[8],,,perimeterHeights,,,,
-T00199.005,T00199,D_1F8003BC_t,5,blocked,0,u_char[8],,,,,,,
-T00199.006,T00199,D_1F8003BC_t,6,attributes,0,u_char[8],,,,,,,
-T00199.007,T00199,D_1F8003BC_t,7,centerAttribute,0,u_char,,,,,,,
-T00199.008,T00199,D_1F8003BC_t,8,pad3D,1,u_char[3],,,,,,,
-T00199.009,T00199,D_1F8003BC_t,9,unk40,1,int,,,,,,,
+T00199.000,T00199,D_1F8003BC_t,0,unk0,1,int,,,,searchFloor,Lowest search offset for floor samples,med,source:3A1A0.c:2476
+T00199.001,T00199,D_1F8003BC_t,1,excluded,0,u_char[17],,,,excluded,Excluded sample directions,med,declaration-only;source:3A1A0.h:637
+T00199.002,T00199,D_1F8003BC_t,2,pad15,1,u_char[3],,,,pad15,Alignment padding,low,declaration-only;source:3A1A0.h:638
+T00199.003,T00199,D_1F8003BC_t,3,unk18,1,D_800F45E0_t *,,,,movingActor,Actor whose surroundings are sampled,high,source:3A1A0.c:2471
+T00199.004,T00199,D_1F8003BC_t,4,unk1C,1,short[8],,,perimeterHeights,sampleHeights,Floor heights sampled around the actor,high,source:3A1A0.c:2271
+T00199.005,T00199,D_1F8003BC_t,5,blocked,0,u_char[8],,,,blocked,Blocked sample flags,med,declaration-only;source:3A1A0.h:641
+T00199.006,T00199,D_1F8003BC_t,6,attributes,0,u_char[8],,,,attributes,Sampled tile attributes,med,declaration-only;source:3A1A0.h:642
+T00199.007,T00199,D_1F8003BC_t,7,centerAttribute,0,u_char,,,,centerAttribute,Tile attribute under the actor,med,declaration-only;source:3A1A0.h:643
+T00199.008,T00199,D_1F8003BC_t,8,pad3D,1,u_char[3],,,,pad3D,Alignment padding,low,declaration-only;source:3A1A0.h:644
+T00199.009,T00199,D_1F8003BC_t,9,unk40,1,int,,,,searchCeiling,Upper search offset,low,source:3A1A0.c:2478
 T00200.000,T00200,D_1F8003EC_t,0,unk0,1,u_char[8],,,,,,,
 T00200.001,T00200,D_1F8003EC_t,1,first,0,int,,,,,,,
 T00200.002,T00200,D_1F8003EC_t,2,last,0,int,,,,,,,
@@ -1189,20 +1189,20 @@ T00210.001,T00210,D_80061078_t,1,zndId,0,char,,,,,,,
 T00210.002,T00210,D_80061078_t,2,mapId,0,u_short,,,,,,,
 T00210.003,T00210,D_80061078_t,3,unk4,1,u_int,,,next replacement slot,,,,
 T00210.004,T00210,D_80061078_t,4,unk8,1,char[8][40],,,saved actor states,,,,
-T00211.000,T00211,D_800E8594_t,0,unk0,1,short,,,,,,,
-T00211.001,T00211,D_800E8594_t,1,unk2,1,short,,,,,,,
-T00211.002,T00211,D_800E8594_t,2,unk4,1,short,,,,,,,
-T00211.003,T00211,D_800E8594_t,3,unk6,1,short,,,,,,,
-T00211.004,T00211,D_800E8594_t,4,unk8,1,int,,,,,,,
-T00211.005,T00211,D_800E8594_t,5,unkC,1,char[3][4],,,,,,,
-T00211.006,T00211,D_800E8594_t,6,unk18,1,int,,,,,,,
-T00211.007,T00211,D_800E8594_t,7,unk1C,1,int,,,,,,,
-T00211.008,T00211,D_800E8594_t,8,unk20,1,int,,,,,,,
-T00211.009,T00211,D_800E8594_t,9,unk24,1,char[4],,,,,,,
-T00212.000,T00212,D_800E8FB4_t,0,unk0,1,int,,,,,,,
-T00212.001,T00212,D_800E8FB4_t,1,unk4,1,int,,,,,,,
-T00212.002,T00212,D_800E8FB4_t,2,unk8,1,int,,,,,,,
-T00212.003,T00212,D_800E8FB4_t,3,unkC,1,int,,,,,,,
+T00211.000,T00211,D_800E8594_t,0,unk0,1,short,,,,positionX,Horizontal position plus 128,med,declaration-only;source:146C.c:187
+T00211.001,T00211,D_800E8594_t,1,unk2,1,short,,,,height,Ground height at the marker,med,declaration-only;source:146C.c:188
+T00211.002,T00211,D_800E8594_t,2,unk4,1,short,,,,positionZ,Depth position plus 128,med,declaration-only;source:146C.c:189
+T00211.003,T00211,D_800E8594_t,3,unk6,1,short,,,,reserved06,Not written by the marker code,low,declaration-only;source:146C.c:190
+T00211.004,T00211,D_800E8594_t,4,unk8,1,int,,,,reserved08,Not written by the marker code,low,declaration-only;source:146C.c:191
+T00211.005,T00211,D_800E8594_t,5,unkC,1,char[3][4],,,,vertexShades,Three vertex shade triples,med,declaration-only;source:146C.c:192
+T00211.006,T00211,D_800E8594_t,6,unk18,1,int,,,,reserved18,Not written by the marker code,low,declaration-only;source:146C.c:193
+T00211.007,T00211,D_800E8594_t,7,unk1C,1,int,,,,reserved1C,Not written by the marker code,low,declaration-only;source:146C.c:194
+T00211.008,T00211,D_800E8594_t,8,unk20,1,int,,,,reserved20,Not written by the marker code,low,declaration-only;source:146C.c:195
+T00211.009,T00211,D_800E8594_t,9,unk24,1,char[4],,,,lastVertexShade,Shade of the final vertex,med,declaration-only;source:146C.c:196
+T00212.000,T00212,D_800E8FB4_t,0,unk0,1,int,,,,instanceFlags,Flags copied into the new instance,med,declaration-only;source:30DB0.c:32
+T00212.001,T00212,D_800E8FB4_t,1,unk4,1,int,,,,instanceWord4,Word copied into the new instance,low,declaration-only;source:30DB0.c:33
+T00212.002,T00212,D_800E8FB4_t,2,unk8,1,int,,,,recolorCount,Count passed to the palette recolor routine,low,declaration-only;source:30DB0.c:34
+T00212.003,T00212,D_800E8FB4_t,3,unkC,1,int,,,,modelDataSize,Size passed to the model parser,med,declaration-only;source:30DB0.c:35
 T00213.000,T00213,D_800EB9B4_t,0,unk0,1,u_char,,,,,,,
 T00213.001,T00213,D_800EB9B4_t,1,unk1,1,u_char,,,feedbackCallbacksEnabled,,,,
 T00213.002,T00213,D_800EB9B4_t,2,unk2,1,u_short,,,feedbackOtLayer,,,,
@@ -1312,22 +1312,22 @@ T00220.000,T00220,D_800F16EC_t,0,dx,0,signed char,2,,,,,,
 T00220.001,T00220,D_800F16EC_t,1,unk0_2,1,signed char,2,,,,,,
 T00220.002,T00220,D_800F16EC_t,2,dz,0,signed char,2,,,,,,
 T00220.003,T00220,D_800F16EC_t,3,unk0_6,1,signed char,2,,,,,,
-T00221.000,T00221,D_800F18C8_t,0,unk0,1,short,,,,,,,
-T00221.001,T00221,D_800F18C8_t,1,unk2,1,short,,,,,,,
-T00221.002,T00221,D_800F18C8_t,2,unk4,1,short,,,,,,,
-T00221.003,T00221,D_800F18C8_t,3,unk6,1,short,,,,,,,
-T00221.004,T00221,D_800F18C8_t,4,unk8,1,short,,,,,,,
-T00221.005,T00221,D_800F18C8_t,5,unkA,1,short,,,,,,,
-T00221.006,T00221,D_800F18C8_t,6,unkC,1,int,,,,,,,
-T00221.007,T00221,D_800F18C8_t,7,unk10,1,int,,,,,,,
-T00221.008,T00221,D_800F18C8_t,8,unk14,1,int,,,,,,,
+T00221.000,T00221,D_800F18C8_t,0,unk0,1,short,,,,reserved00,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:304
+T00221.001,T00221,D_800F18C8_t,1,unk2,1,short,,,,reserved02,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:305
+T00221.002,T00221,D_800F18C8_t,2,unk4,1,short,,,,reserved04,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:306
+T00221.003,T00221,D_800F18C8_t,3,unk6,1,short,,,,reserved06,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:307
+T00221.004,T00221,D_800F18C8_t,4,unk8,1,short,,,,reserved08,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:308
+T00221.005,T00221,D_800F18C8_t,5,unkA,1,short,,,,reserved0A,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:309
+T00221.006,T00221,D_800F18C8_t,6,unkC,1,int,,,,reserved0C,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:310
+T00221.007,T00221,D_800F18C8_t,7,unk10,1,int,,,,reserved10,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:311
+T00221.008,T00221,D_800F18C8_t,8,unk14,1,int,,,,reserved14,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:312
 T00222.000,T00222,D_800F18E8_t,0,unk0_0,1,u_short,10,,,,,,
 T00222.001,T00222,D_800F18E8_t,1,unk0_10,1,u_short,6,,,,,,
-T00223.000,T00223,D_800F18EC_t,0,unk0,1,short,,,,,,,
-T00223.001,T00223,D_800F18EC_t,1,unk2,1,short,,,,,,,
-T00223.002,T00223,D_800F18EC_t,2,executeAbility,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),,,,,,,
-T00224.000,T00224,D_800F1910_t,0,unk0,1,_mpdRoomSectionA *,,,,,,,
-T00224.001,T00224,D_800F1910_t,1,unk4,1,func_8006EBF8_t,,,,,,,
+T00223.000,T00223,D_800F18EC_t,0,unk0,1,short,,,,reserved00,Unidentified short,low,declaration-only;source:5BF94.h:148
+T00223.001,T00223,D_800F18EC_t,1,unk2,1,short,,,,reserved02,Unidentified short,low,declaration-only;source:5BF94.h:149
+T00223.002,T00223,D_800F18EC_t,2,executeAbility,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),,,,executeAbility,Packed execute-ability parameters,med,declaration-only;source:5BF94.h:159
+T00224.000,T00224,D_800F1910_t,0,unk0,1,_mpdRoomSectionA *,,,,triggerRecord,Trigger record being shown,med,declaration-only;source:146C.c:157
+T00224.001,T00224,D_800F1910_t,1,unk4,1,func_8006EBF8_t,,,,actorQuery,Actor position query and parameter,med,declaration-only;source:146C.c:158
 T00225.000,T00225,D_800F19CC_t,0,unk0,1,u_int,,,Chain count or action sequence offset | chain action index,,,,
 T00225.001,T00225,D_800F19CC_t,1,unk4,1,u_int,,,retained action count,,,,
 T00225.002,T00225,D_800F19CC_t,2,unk8,1,D_800F19CC_t2,,,,,,,
@@ -1411,16 +1411,16 @@ T00230.006,T00230,D_800F1BAC_t,6,displayTextLen,0,u_char,,,,,,,
 T00230.007,T00230,D_800F1BAC_t,7,unk10,1,short,,,horizontal separation,,,,
 T00230.008,T00230,D_800F1BAC_t,8,unk12,1,short,,,vertical separation,,,,
 T00230.009,T00230,D_800F1BAC_t,9,displayText,0,signed char[4],,,,,,,
-T00231.000,T00231,D_800F1BB0_t,0,unk0,1,signed char,,,red tint,,,,
-T00231.001,T00231,D_800F1BB0_t,1,unk1,1,signed char,,,green tint,,,,
-T00231.002,T00231,D_800F1BB0_t,2,unk2,1,signed char,,,blue tint,,,,
-T00231.003,T00231,D_800F1BB0_t,3,unk3,1,char,,,,,,,
-T00231.004,T00231,D_800F1BB0_t,4,unk4,1,short,,,tint strength,,,,
-T00231.005,T00231,D_800F1BB0_t,5,unk6,1,short,,,tint enabled,,,,
-T00232.000,T00232,D_800F1D08_t,0,count,0,int,,,,,,,
-T00232.001,T00232,D_800F1D08_t,1,values,0,_mpdRoomDoorSection_t *[0],,,,,,,
-T00233.000,T00233,D_800F1D28_t,0,unk0,1,int,,,,,,,
-T00233.001,T00233,D_800F1D28_t,1,unk4,1,_mpdRoomSectionA *,,,,,,,
+T00231.000,T00231,D_800F1BB0_t,0,unk0,1,signed char,,,red tint,red,Red offset,med,declaration-only;source:146C.c:162
+T00231.001,T00231,D_800F1BB0_t,1,unk1,1,signed char,,,green tint,green,Green offset,med,declaration-only;source:146C.c:163
+T00231.002,T00231,D_800F1BB0_t,2,unk2,1,signed char,,,blue tint,blue,Blue offset,med,declaration-only;source:146C.c:164
+T00231.003,T00231,D_800F1BB0_t,3,unk3,1,char,,,,reserved03,Unreferenced byte,low,declaration-only;source:146C.c:165
+T00231.004,T00231,D_800F1BB0_t,4,unk4,1,short,,,tint strength,strength,Tint strength,med,declaration-only;source:146C.c:166
+T00231.005,T00231,D_800F1BB0_t,5,unk6,1,short,,,tint enabled,isActive,Tint applied when nonzero,med,declaration-only;source:146C.c:167
+T00232.000,T00232,D_800F1D08_t,0,count,0,int,,,,count,Number of matches,med,declaration-only;source:146C.c:278
+T00232.001,T00232,D_800F1D08_t,1,values,0,_mpdRoomDoorSection_t *[0],,,,records,Matching door records,med,declaration-only;source:146C.c:279
+T00233.000,T00233,D_800F1D28_t,0,unk0,1,int,,,,jobKind,0 free 1 transition 2 countdown-then-apply 3 countdown-then-finish,med,declaration-only;source:146C.c:247
+T00233.001,T00233,D_800F1D28_t,1,unk4,1,_mpdRoomSectionA *,,,,trigger,Trigger record the job acts on,med,declaration-only;source:146C.c:248
 T00234.000,T00234,D_800F1DD4_t,0,position,0,SVECTOR,,,,,,,
 T00234.001,T00234,D_800F1DD4_t,1,unk8,1,short,,,,,,,
 T00234.002,T00234,D_800F1DD4_t,2,unkA,1,short,,,,,,,
@@ -1428,24 +1428,24 @@ T00234.003,T00234,D_800F1DD4_t,3,unkC,1,char,,,particle phase,,,,
 T00234.004,T00234,D_800F1DD4_t,4,unkD,1,char,,,phase animation tick,,,,
 T00234.005,T00234,D_800F1DD4_t,5,unkE,1,char,,,offscreen speed shift,,,,
 T00234.006,T00234,D_800F1DD4_t,6,unkF,1,char,,,rising speed for weather type 4,,,,
-T00235.000,T00235,D_800F1DD8_t,0,unk0,1,char,,,active,,,,
-T00235.001,T00235,D_800F1DD8_t,1,unk1,1,u_char,,,effect type or script object count,,,,
-T00235.002,T00235,D_800F1DD8_t,2,unk2,1,char,,,update enabled,,,,
-T00235.003,T00235,D_800F1DD8_t,3,unk3,1,char,,,,,,,
-T00235.004,T00235,D_800F1DD8_t,4,unk4,1,D_800F1DD8_t2 *,,,,,,,
-T00235.005,T00235,D_800F1DD8_t,5,unk8,1,D_800F1DD8_t2 *,,,,,,,
-T00236.000,T00236,D_800F1DD8_t2,0,unk0,1,int,,,,,,,
-T00236.001,T00236,D_800F1DD8_t2,1,unk4,1,char,,,,,,,
-T00236.002,T00236,D_800F1DD8_t2,2,unk5,1,char,,,,,,,
-T00236.003,T00236,D_800F1DD8_t2,3,unk6,1,u_char,,,,,,,
-T00236.004,T00236,D_800F1DD8_t2,4,unk7,1,char,,,rotation axis,,,,
-T00236.005,T00236,D_800F1DD8_t2,5,unk8,1,int,,,,,,,
-T00236.006,T00236,D_800F1DD8_t2,6,unkC,1,int,,,,,,,
-T00236.007,T00236,D_800F1DD8_t2,7,unk10,1,int,,,,,,,
-T00236.008,T00236,D_800F1DD8_t2,8,unk14,1,int,,,current angle,,,,
-T00236.009,T00236,D_800F1DD8_t2,9,unk18,1,int,,,target angle,,,,
-T00236.010,T00236,D_800F1DD8_t2,10,unk1C,1,int,,,,,,,
-T00236.011,T00236,D_800F1DD8_t2,11,unk20,1,int,,,,,,,
+T00235.000,T00235,D_800F1DD8_t,0,unk0,1,char,,,active,isActive,Effect is running,med,declaration-only;source:2842C.c:52
+T00235.001,T00235,D_800F1DD8_t,1,unk1,1,u_char,,,effect type or script object count,kindOrObjectCount,Texture-effect kind or script object count,med,declaration-only;source:2842C.c:53
+T00235.002,T00235,D_800F1DD8_t,2,unk2,1,char,,,update enabled,isUpdateEnabled,Updates enabled,med,declaration-only;source:2842C.c:54
+T00235.003,T00235,D_800F1DD8_t,3,unk3,1,char,,,,reserved03,Cleared at setup; no reader identified,low,declaration-only;source:2842C.c:55
+T00235.004,T00235,D_800F1DD8_t,4,unk4,1,D_800F1DD8_t2 *,,,,currentData,Current effect data or script cursor,med,declaration-only;source:2842C.c:56
+T00235.005,T00235,D_800F1DD8_t,5,unk8,1,D_800F1DD8_t2 *,,,,originalData,Script start restored on restart,med,declaration-only;source:2842C.c:57
+T00236.000,T00236,D_800F1DD8_t2,0,unk0,1,int,,,,geometryOffset,Offset of the animated geometry entry,high,source:2842C.c:831
+T00236.001,T00236,D_800F1DD8_t2,1,unk4,1,char,,,,needsReset,Reset angle and velocity on the next update,high,source:2842C.c:808
+T00236.002,T00236,D_800F1DD8_t2,2,unk5,1,char,,,,startsInactive,Effect starts inactive when nonzero,high,source:2842C.c:881
+T00236.003,T00236,D_800F1DD8_t2,3,unk6,1,u_char,,,,kind,Effect kind selecting the record size,high,source:2842C.c:879;source:2842C.c:884
+T00236.004,T00236,D_800F1DD8_t2,4,unk7,1,char,,,rotation axis,axis,Rotation axis selector,high,source:2842C.c:833
+T00236.005,T00236,D_800F1DD8_t2,5,unk8,1,int,,,,angularVelocity,Current angular velocity,high,source:2842C.c:814
+T00236.006,T00236,D_800F1DD8_t2,6,unkC,1,int,,,,acceleration,Angular acceleration,high,source:2842C.c:815
+T00236.007,T00236,D_800F1DD8_t2,7,unk10,1,int,,,,dampingShift,Shift applied to velocity on bounce,high,source:2842C.c:823
+T00236.008,T00236,D_800F1DD8_t2,8,unk14,1,int,,,current angle,angle,Current angle,high,source:2842C.c:814
+T00236.009,T00236,D_800F1DD8_t2,9,unk18,1,int,,,target angle,restAngle,Angle the swing settles toward,high,source:2842C.c:816;source:2842C.c:826
+T00236.010,T00236,D_800F1DD8_t2,10,unk1C,1,int,,,,startAngle,Angle restored on reset,high,source:2842C.c:810
+T00236.011,T00236,D_800F1DD8_t2,11,unk20,1,int,,,,initialVelocity,Velocity restored on reset,high,source:2842C.c:811
 T00237.000,T00237,D_800F2458_t,0,unk0,1,u_char[8144],,,projected coordinates at 0x000 and depths at 0xC00,,,,
 T00237.001,T00237,D_800F2458_t,1,unk1FD0,1,int[3],,,,,,,
 T00237.002,T00237,D_800F2458_t,2,unk1FDC,1,int,,,,,,,
@@ -2698,33 +2698,33 @@ T00319.007,T00319,_monBinData_t,7,prev,0,u_char,,,,,,,
 T00319.008,T00319,_monBinData_t,8,next,0,u_char,,,,,,,
 T00319.009,T00319,_monBinData_t,9,_,0,u_char,,,,,,,
 T00319.010,T00319,_monBinData_t,10,name,0,char[28],,,,,,,
-T00320.000,T00320,_mpdEnemy,0,type,0,u_char,,,,,,,
-T00320.001,T00320,_mpdEnemy,1,index,0,u_char,,,,,,,
-T00320.002,T00320,_mpdEnemy,2,hidden,0,u_char,,,,,,,
-T00320.003,T00320,_mpdEnemy,3,unk3,1,u_char,,,,,,,
-T00320.004,T00320,_mpdEnemy,4,id,0,u_char,,,,,,,
-T00320.005,T00320,_mpdEnemy,5,slot,0,u_char,,,,,,,
-T00320.006,T00320,_mpdEnemy,6,flagTest,0,u_char,,,,,,,
-T00320.007,T00320,_mpdEnemy,7,statTest,0,u_char,,,,,,,
-T00320.008,T00320,_mpdEnemy,8,flagValue,0,u_short,,,,,,,
-T00320.009,T00320,_mpdEnemy,9,statValue,0,u_short,,,,,,,
-T00320.010,T00320,_mpdEnemy,10,x,0,u_char,,,,,,,
-T00320.011,T00320,_mpdEnemy,11,direction,0,u_char,,,,,,,
-T00320.012,T00320,_mpdEnemy,12,z,0,u_char,,,,,,,
-T00320.013,T00320,_mpdEnemy,13,height,0,u_char,,,,,,,
-T00320.014,T00320,_mpdEnemy,14,settings,0,u_char[8],,,,,,,
-T00320.015,T00320,_mpdEnemy,15,unk18,1,u_char[2],,,,,,,
-T00320.016,T00320,_mpdEnemy,16,itemId,0,u_short,,,,,,,
-T00320.017,T00320,_mpdEnemy,17,item2Id,0,u_short,,,,,,,
-T00320.018,T00320,_mpdEnemy,18,item3Id,0,u_short,,,,,,,
-T00320.019,T00320,_mpdEnemy,19,itemCount,0,u_char,,,,,,,
-T00320.020,T00320,_mpdEnemy,20,item2Count,0,u_char,,,,,,,
-T00320.021,T00320,_mpdEnemy,21,item3Count,0,u_char,,,,,,,
-T00320.022,T00320,_mpdEnemy,22,facing,0,u_char,,,,,,,
-T00320.023,T00320,_mpdEnemy,23,unk24,1,u_char,,,,,,,
-T00320.024,T00320,_mpdEnemy,24,variant,0,u_char,,,,,,,
-T00320.025,T00320,_mpdEnemy,25,unk26,1,u_char,,,,,,,
-T00320.026,T00320,_mpdEnemy,26,sceneTest,0,u_char,,,,,,,
+T00320.000,T00320,_mpdEnemy,0,type,0,u_char,,,,kind,Enemy kind,med,declaration-only;source:146C.h:662
+T00320.001,T00320,_mpdEnemy,1,index,0,u_char,,,,index,Enemy table index,med,declaration-only;source:146C.h:663
+T00320.002,T00320,_mpdEnemy,2,hidden,0,u_char,,,,isHidden,Hidden until revealed,med,declaration-only;source:146C.h:664
+T00320.003,T00320,_mpdEnemy,3,unk3,1,u_char,,,,reserved03,Unidentified byte,low,declaration-only;source:146C.h:665
+T00320.004,T00320,_mpdEnemy,4,id,0,u_char,,,,enemyId,Enemy identifier,med,declaration-only;source:146C.h:666
+T00320.005,T00320,_mpdEnemy,5,slot,0,u_char,,,,slot,Actor slot,med,declaration-only;source:146C.h:667
+T00320.006,T00320,_mpdEnemy,6,flagTest,0,u_char,,,,flagTest,Flag condition kind,med,declaration-only;source:146C.h:668
+T00320.007,T00320,_mpdEnemy,7,statTest,0,u_char,,,,statTest,Stat condition kind,med,declaration-only;source:146C.h:669
+T00320.008,T00320,_mpdEnemy,8,flagValue,0,u_short,,,,flagValue,Flag condition value,med,declaration-only;source:146C.h:670
+T00320.009,T00320,_mpdEnemy,9,statValue,0,u_short,,,,statValue,Stat condition value,med,declaration-only;source:146C.h:671
+T00320.010,T00320,_mpdEnemy,10,x,0,u_char,,,,tileX,Tile X,med,declaration-only;source:146C.h:672
+T00320.011,T00320,_mpdEnemy,11,direction,0,u_char,,,,direction,Facing direction,med,declaration-only;source:146C.h:673
+T00320.012,T00320,_mpdEnemy,12,z,0,u_char,,,,tileZ,Tile Z,med,declaration-only;source:146C.h:674
+T00320.013,T00320,_mpdEnemy,13,height,0,u_char,,,,height,Spawn height,med,declaration-only;source:146C.h:675
+T00320.014,T00320,_mpdEnemy,14,settings,0,u_char[8],,,,settings,Spawn settings bytes,med,declaration-only;source:146C.h:676
+T00320.015,T00320,_mpdEnemy,15,unk18,1,u_char[2],,,,reserved18,Unidentified bytes,low,declaration-only;source:146C.h:677
+T00320.016,T00320,_mpdEnemy,16,itemId,0,u_short,,,,itemId,First carried item,med,declaration-only;source:146C.h:678
+T00320.017,T00320,_mpdEnemy,17,item2Id,0,u_short,,,,item2Id,Second carried item,med,declaration-only;source:146C.h:679
+T00320.018,T00320,_mpdEnemy,18,item3Id,0,u_short,,,,item3Id,Third carried item,med,declaration-only;source:146C.h:680
+T00320.019,T00320,_mpdEnemy,19,itemCount,0,u_char,,,,itemCount,First item count,med,declaration-only;source:146C.h:681
+T00320.020,T00320,_mpdEnemy,20,item2Count,0,u_char,,,,item2Count,Second item count,med,declaration-only;source:146C.h:682
+T00320.021,T00320,_mpdEnemy,21,item3Count,0,u_char,,,,item3Count,Third item count,med,declaration-only;source:146C.h:683
+T00320.022,T00320,_mpdEnemy,22,facing,0,u_char,,,,facing,Initial facing,med,declaration-only;source:146C.h:684
+T00320.023,T00320,_mpdEnemy,23,unk24,1,u_char,,,,actorStateByte,Byte copied into the actor at spawn,low,source:146C.c:881
+T00320.024,T00320,_mpdEnemy,24,variant,0,u_char,,,,variant,Enemy variant,med,declaration-only;source:146C.h:686
+T00320.025,T00320,_mpdEnemy,25,unk26,1,u_char,,,,reserved26,Unidentified byte,low,declaration-only;source:146C.h:687
+T00320.026,T00320,_mpdEnemy,26,sceneTest,0,u_char,,,,sceneTest,Scene condition,med,declaration-only;source:146C.h:688
 T00321.000,T00321,_mpdGeometryHeader,0,unk0,1,int,,,group flags including hidden bit 0x1000,,,,
 T00321.001,T00321,_mpdGeometryHeader,1,unk4,1,int,,,,,,,
 T00321.002,T00321,_mpdGeometryHeader,2,unk8,1,int,,,,,,,
@@ -2743,18 +2743,18 @@ T00321.014,T00321,_mpdGeometryHeader,14,unk38,1,int,,,,,,,
 T00321.015,T00321,_mpdGeometryHeader,15,unk3C,1,int,,,,,,,
 T00322.000,T00322,_mpdGeometrySection,0,numGroups,0,int,,,,,,,
 T00322.001,T00322,_mpdGeometrySection,1,groups,0,_mpdGeometryHeader[0],,,,,,,
-T00323.000,T00323,_mpdHeader,0,roomSectionOffset,0,int,,,,,,,
-T00323.001,T00323,_mpdHeader,1,roomSectionLen,0,u_short,,,,,,,
-T00323.002,T00323,_mpdHeader,2,clearedSectionOffset,0,int,,,,,,,
-T00323.003,T00323,_mpdHeader,3,clearedSectionLen,0,u_short,,,,,,,
-T00323.004,T00323,_mpdHeader,4,scriptSectionOffset,0,int,,,,,,,
-T00323.005,T00323,_mpdHeader,5,scriptSectionLen,0,u_short,,,,,,,
-T00323.006,T00323,_mpdHeader,6,doorSectionOffset,0,int,,,,,,,
-T00323.007,T00323,_mpdHeader,7,doorSectionLen,0,u_short,,,,,,,
-T00323.008,T00323,_mpdHeader,8,enemySectionOffset,0,int,,,,,,,
-T00323.009,T00323,_mpdHeader,9,enemySectionLen,0,int,,,,,,,
-T00323.010,T00323,_mpdHeader,10,lootSectionOffset,0,int,,,,,,,
-T00323.011,T00323,_mpdHeader,11,lootSectionLen,0,int,,,,,,,
+T00323.000,T00323,_mpdHeader,0,roomSectionOffset,0,int,,,,roomSectionOffset,Room section offset of the MPD header,med,declaration-only;source:146C.c:316
+T00323.001,T00323,_mpdHeader,1,roomSectionLen,0,u_short,,,,roomSectionSize,Room section size of the MPD header,med,declaration-only;source:146C.c:317
+T00323.002,T00323,_mpdHeader,2,clearedSectionOffset,0,int,,,,clearedSectionOffset,Cleared section offset of the MPD header,med,declaration-only;source:146C.c:318
+T00323.003,T00323,_mpdHeader,3,clearedSectionLen,0,u_short,,,,clearedSectionSize,Cleared section size of the MPD header,med,declaration-only;source:146C.c:319
+T00323.004,T00323,_mpdHeader,4,scriptSectionOffset,0,int,,,,scriptSectionOffset,Script section offset of the MPD header,med,declaration-only;source:146C.c:320
+T00323.005,T00323,_mpdHeader,5,scriptSectionLen,0,u_short,,,,scriptSectionSize,Script section size of the MPD header,med,declaration-only;source:146C.c:321
+T00323.006,T00323,_mpdHeader,6,doorSectionOffset,0,int,,,,doorSectionOffset,Door section offset of the MPD header,med,declaration-only;source:146C.c:322
+T00323.007,T00323,_mpdHeader,7,doorSectionLen,0,u_short,,,,doorSectionSize,Door section size of the MPD header,med,declaration-only;source:146C.c:323
+T00323.008,T00323,_mpdHeader,8,enemySectionOffset,0,int,,,,enemySectionOffset,Enemy section offset of the MPD header,med,declaration-only;source:146C.c:324
+T00323.009,T00323,_mpdHeader,9,enemySectionLen,0,int,,,,enemySectionSize,Enemy section size of the MPD header,med,declaration-only;source:146C.c:325
+T00323.010,T00323,_mpdHeader,10,lootSectionOffset,0,int,,,,lootSectionOffset,Loot section offset of the MPD header,med,declaration-only;source:146C.c:326
+T00323.011,T00323,_mpdHeader,11,lootSectionLen,0,int,,,,lootSectionSize,Loot section size of the MPD header,med,declaration-only;source:146C.c:327
 T00324.000,T00324,_mpdPolygt3,0,p1x,0,short,,,,,,,
 T00324.001,T00324,_mpdPolygt3,1,p1y,0,short,,,,,,,
 T00324.002,T00324,_mpdPolygt3,2,p1z,0,short,,,,,,,
@@ -2817,86 +2817,86 @@ T00325.031,T00325,_mpdPolygt4,31,r4,0,char,,,,,,,
 T00325.032,T00325,_mpdPolygt4,32,g4,0,char,,,,,,,
 T00325.033,T00325,_mpdPolygt4,33,b4,0,char,,,,,,,
 T00325.034,T00325,_mpdPolygt4,34,v4,0,char,,,,,,,
-T00326.000,T00326,_mpdRoomCollisionMapSection,0,width,0,short,,,,,,,
-T00326.001,T00326,_mpdRoomCollisionMapSection,1,height,0,short,,,,,,,
-T00326.002,T00326,_mpdRoomCollisionMapSection,2,unk4,1,short,,,height origin in eight-world-unit steps,,,,
-T00326.003,T00326,_mpdRoomCollisionMapSection,3,unk6,1,short,,,,,,,
+T00326.000,T00326,_mpdRoomCollisionMapSection,0,width,0,short,,,,width,Tile columns,high,DataCrystal
+T00326.001,T00326,_mpdRoomCollisionMapSection,1,height,0,short,,,,height,Tile rows,high,DataCrystal
+T00326.002,T00326,_mpdRoomCollisionMapSection,2,unk4,1,short,,,height origin in eight-world-unit steps,heightOrigin,Height origin subtracted from floor samples,low,source:146C.c:17032
+T00326.003,T00326,_mpdRoomCollisionMapSection,3,unk6,1,short,,,,cellCount,Cached columns times rows,high,source:146C.c:15717
 T00327.000,T00327,_mpdRoomDoorSection2,0,unk0_0,1,u_short,5,,,tileX,Door tile X,med,declaration-only;source:main.h:425
 T00327.001,T00327,_mpdRoomDoorSection2,1,unk0_5,1,u_short,5,,,tileZ,Door tile Z,med,declaration-only;source:main.h:426
 T00327.002,T00327,_mpdRoomDoorSection2,2,unk0_10,1,u_short,3,,,floorLayer,Floor layer; two or more selects a moving platform,med,declaration-only;source:main.h:427
 T00327.003,T00327,_mpdRoomDoorSection2,3,unk0_13,1,u_short,3,,,entryDirection,Facing direction on entry copied into actor placement,med,source:146C.c:15151;source:3A1A0.c:286
-T00328.000,T00328,_mpdRoomDoorSection_t,0,zndId,0,u_char,,,,,,,
-T00328.001,T00328,_mpdRoomDoorSection_t,1,mpdId,0,u_char,,,,,,,
-T00328.002,T00328,_mpdRoomDoorSection_t,2,unk2,1,_mpdRoomDoorSection2,,,,,,,
-T00328.003,T00328,_mpdRoomDoorSection_t,3,unk4_0,1,u_short,8,,,,,,
-T00328.004,T00328,_mpdRoomDoorSection_t,4,unk4_8,1,u_short,5,,,,,,
-T00328.005,T00328,_mpdRoomDoorSection_t,5,unk4_13,1,u_short,2,,,,,,
-T00328.006,T00328,_mpdRoomDoorSection_t,6,unk4_15,1,u_short,1,,,,,,
-T00328.007,T00328,_mpdRoomDoorSection_t,7,unk6_0,1,u_short,10,,,,,,
-T00328.008,T00328,_mpdRoomDoorSection_t,8,unk6_10,1,u_short,5,,,,,,
-T00328.009,T00328,_mpdRoomDoorSection_t,9,unk6_15,1,u_short,1,,,,,,
-T00328.010,T00328,_mpdRoomDoorSection_t,10,unk8,1,u_char,,,,,,,
-T00328.011,T00328,_mpdRoomDoorSection_t,11,unk9,1,u_char,,,,,,,
-T00328.012,T00328,_mpdRoomDoorSection_t,12,unkA,1,u_char,,,,,,,
-T00328.013,T00328,_mpdRoomDoorSection_t,13,unkB,1,u_char,,,,,,,
-T00329.000,T00329,_mpdRoomSection,0,unk0,1,char,,,loaded,,,,
-T00329.001,T00329,_mpdRoomSection,1,unk1,1,char,,,rendering enabled,,,,
-T00329.002,T00329,_mpdRoomSection,2,unk2,1,short,,,room resource owner,,,,
-T00329.003,T00329,_mpdRoomSection,3,header,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),,,,,,,
-T00329.004,T00329,_mpdRoomSection,4,geometrySection,0,int *,,,,,,,
-T00329.005,T00329,_mpdRoomSection,5,collisionMapSection,0,_mpdRoomCollisionMapSection *,,,,,,,
-T00329.006,T00329,_mpdRoomSection,6,section3,0,_mpdRoomSection3 *,,,,,,,
-T00329.007,T00329,_mpdRoomSection,7,doorSection,0,_mpdRoomDoorSection_t *,,,,,,,
-T00329.008,T00329,_mpdRoomSection,8,lightingSection,0,int,,,,,,,
-T00329.009,T00329,_mpdRoomSection,9,section6,0,int,,,,,,,
-T00329.010,T00329,_mpdRoomSection,10,section7,0,int,,,,,,,
-T00329.011,T00329,_mpdRoomSection,11,section8,0,int,,,,,,,
-T00329.012,T00329,_mpdRoomSection,12,section9,0,_mpdRoomSection9 *,,,,,,,
-T00329.013,T00329,_mpdRoomSection,13,sectionA,0,_mpdRoomSectionA *,,,,,,,
-T00329.014,T00329,_mpdRoomSection,14,sectionB,0,_mpdRoomSectionB *,,,,,,,
-T00329.015,T00329,_mpdRoomSection,15,textureEffectsSection,0,void *,,,,,,,
-T00329.016,T00329,_mpdRoomSection,16,sectionD,0,void *,,,,,,,
-T00329.017,T00329,_mpdRoomSection,17,sectionE,0,_mpdRoomSectionE *,,,,,,,
-T00329.018,T00329,_mpdRoomSection,18,sectionF,0,vs_battle_scene *,,,,,,,
-T00329.019,T00329,_mpdRoomSection,19,section10,0,u_short *,,,,,,,
-T00329.020,T00329,_mpdRoomSection,20,section11,0,_mpdRoomSection11 *,,,,,,,
-T00329.021,T00329,_mpdRoomSection,21,section12,0,_mpdRoomSection12 *,,,,,,,
-T00329.022,T00329,_mpdRoomSection,22,section13,0,_mpdRoomSection13 *,,,,,,,
-T00329.023,T00329,_mpdRoomSection,23,section14,0,u_int *,,,,,,,
-T00329.024,T00329,_mpdRoomSection,24,section15,0,int,,,,,,,
-T00329.025,T00329,_mpdRoomSection,25,section16,0,int,,,,,,,
-T00329.026,T00329,_mpdRoomSection,26,section17,0,int,,,,,,,
-T00329.027,T00329,_mpdRoomSection,27,section18,0,_zoneContextBounds *,,,,,,,
-T00330.000,T00330,_mpdRoomSection11,0,unk0_0,1,u_short,5,,,,,,
-T00330.001,T00330,_mpdRoomSection11,1,unk0_5,1,u_short,5,,,,,,
-T00330.002,T00330,_mpdRoomSection11,2,unk0_10,1,u_short,1,,,,,,
-T00330.003,T00330,_mpdRoomSection11,3,unk0_11,1,u_short,3,,,,,,
-T00330.004,T00330,_mpdRoomSection11,4,unk0_14,1,u_short,1,,,,,,
-T00330.005,T00330,_mpdRoomSection11,5,unk0_15,1,u_short,1,,,,,,
-T00330.006,T00330,_mpdRoomSection11,6,unk2,1,u_short,,,,,,,
-T00330.007,T00330,_mpdRoomSection11,7,unk4,1,char[0],,,,,,,
-T00331.000,T00331,_mpdRoomSection12,0,unk0_0,1,u_int,8,,geometry group id,,,,
-T00331.001,T00331,_mpdRoomSection12,1,unk0_8,1,u_int,1,,,,,,
-T00331.002,T00331,_mpdRoomSection12,2,unk0_9,1,u_int,1,,hidden,,,,
-T00331.003,T00331,_mpdRoomSection12,3,unk0_10,1,u_int,2,,,,,,
-T00331.004,T00331,_mpdRoomSection12,4,unk0_12,1,u_int,2,,,,,,
-T00331.005,T00331,_mpdRoomSection12,5,unk0_14,1,u_int,2,,,,,,
-T00331.006,T00331,_mpdRoomSection12,6,unk0_16,1,u_int,7,,,,,,
-T00331.007,T00331,_mpdRoomSection12,7,unk0_23,1,u_int,3,,,,,,
-T00331.008,T00331,_mpdRoomSection12,8,unk0_26,1,u_int,1,,,,,,
-T00331.009,T00331,_mpdRoomSection12,9,unk0_27,1,u_int,2,,target waypoint index,,,,
-T00331.010,T00331,_mpdRoomSection12,10,unk0_29,1,u_int,3,,,,,,
-T00331.011,T00331,_mpdRoomSection12,11,unk4_0,1,u_int,1,,dwelling at waypoint,,,,
-T00331.012,T00331,_mpdRoomSection12,12,unk4_1,1,u_int,7,,platform actor association,,,,
-T00331.013,T00331,_mpdRoomSection12,13,unk4_8,1,u_int,2,,,,,,
-T00331.014,T00331,_mpdRoomSection12,14,unk4_10,1,u_int,6,,,,,,
-T00331.015,T00331,_mpdRoomSection12,15,unk4_16,1,u_int,16,,segment or dwell elapsed ticks,,,,
-T00331.016,T00331,_mpdRoomSection12,16,unk8,1,VECTOR[4],,,waypoint positions and dwell durations,,,,
-T00331.017,T00331,_mpdRoomSection12,17,unk48,1,VECTOR[6],,,segment velocities and durations,,,,
-T00331.018,T00331,_mpdRoomSection12,18,unkA8,1,int,,,fixed-point x,,,,
-T00331.019,T00331,_mpdRoomSection12,19,unkAC,1,int,,,fixed-point y,,,,
-T00331.020,T00331,_mpdRoomSection12,20,unkB0,1,int,,,fixed-point z,,,,
-T00331.021,T00331,_mpdRoomSection12,21,unkB4,1,_mpdRoomSection3,,,,,,,
+T00328.000,T00328,_mpdRoomDoorSection_t,0,zndId,0,u_char,,,,destinationZoneId,Destination zone,high,source:146C.c:5452
+T00328.001,T00328,_mpdRoomDoorSection_t,1,mpdId,0,u_char,,,,destinationRoomId,Destination room,high,DataCrystal destRoom
+T00328.002,T00328,_mpdRoomDoorSection_t,2,unk2,1,_mpdRoomDoorSection2,,,,tileLocation,Door tile position floor and entry direction,high,source:146C.c:16151
+T00328.003,T00328,_mpdRoomDoorSection_t,3,unk4_0,1,u_short,8,,,requiredFlagValue,Minimum state-flag value to pass,med,source:146C.c:5451
+T00328.004,T00328,_mpdRoomDoorSection_t,4,unk4_8,1,u_short,5,,,entryTileX,Tile X where the player appears,high,source:146C.c:15149
+T00328.005,T00328,_mpdRoomDoorSection_t,5,unk4_13,1,u_short,2,,,entryElevation,Entry height in units of 64 and step direction,med,source:146C.c:15152;source:146C.c:15156
+T00328.006,T00328,_mpdRoomDoorSection_t,6,unk4_15,1,u_short,1,,,hasEntryStep,Entry plays a step-in motion,med,source:146C.c:15155
+T00328.007,T00328,_mpdRoomDoorSection_t,7,unk6_0,1,u_short,10,,,requiredFlagId,State flag checked before passing,med,source:146C.c:5451
+T00328.008,T00328,_mpdRoomDoorSection_t,8,unk6_10,1,u_short,5,,,entryTileZ,Tile Z where the player appears,high,source:146C.c:15150
+T00328.009,T00328,_mpdRoomDoorSection_t,9,unk6_15,1,u_short,1,,,reserved06Bit15,Bit set by the event room-change command,low,source:4A0A8.c:2027
+T00328.010,T00328,_mpdRoomDoorSection_t,10,unk8,1,u_char,,,,doorId,Door identifier used to record the entered door,high,source:146C.c:16131
+T00328.011,T00328,_mpdRoomDoorSection_t,11,unk9,1,u_char,,,,reserved09,Remaining door identifier bytes,low,DataCrystal idCurrentDoor
+T00328.012,T00328,_mpdRoomDoorSection_t,12,unkA,1,u_char,,,,reserved0A,Remaining door identifier bytes,low,DataCrystal idCurrentDoor
+T00328.013,T00328,_mpdRoomDoorSection_t,13,unkB,1,u_char,,,,reserved0B,Remaining door identifier bytes,low,DataCrystal idCurrentDoor
+T00329.000,T00329,_mpdRoomSection,0,unk0,1,char,,,loaded,isLoaded,Room record loaded,med,source:146C.c:15697
+T00329.001,T00329,_mpdRoomSection,1,unk1,1,char,,,rendering enabled,displayFlag,Flag set by a room setter,low,source:146C.c:15698
+T00329.002,T00329,_mpdRoomSection,2,unk2,1,short,,,room resource owner,roomIndex,Room index passed when loading,med,source:146C.c:15699
+T00329.003,T00329,_mpdRoomSection,3,header,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),,,,header,Room section length header,high,source:146C.c:15681
+T00329.004,T00329,_mpdRoomSection,4,geometrySection,0,int *,,,,geometry,Polygon groups,high,source:146C.c:15701
+T00329.005,T00329,_mpdRoomSection,5,collisionMapSection,0,_mpdRoomCollisionMapSection *,,,,collisionMap,Collision map,high,source:146C.c:15716
+T00329.006,T00329,_mpdRoomSection,6,section3,0,_mpdRoomSection3 *,,,,tileCells,Collision tile cells,high,source:146C.c:16080
+T00329.007,T00329,_mpdRoomSection,7,doorSection,0,_mpdRoomDoorSection_t *,,,,doors,Door records,high,source:146C.c:16147
+T00329.008,T00329,_mpdRoomSection,8,lightingSection,0,int,,,,lighting,Lighting section,low,DataCrystal LightingSection
+T00329.009,T00329,_mpdRoomSection,9,section6,0,int,,,,section6,Unidentified section,low,source:146C.c:16061
+T00329.010,T00329,_mpdRoomSection,10,section7,0,int,,,,section7,Unidentified section of eight-byte entries,low,source:146C.c:16469
+T00329.011,T00329,_mpdRoomSection,11,section8,0,int,,,,section8,Unidentified section,low,declaration-only;source:146C.h:253
+T00329.012,T00329,_mpdRoomSection,12,section9,0,_mpdRoomSection9 *,,,,floorTriggers,Floor trigger records,high,source:146C.c:16812
+T00329.013,T00329,_mpdRoomSection,13,sectionA,0,_mpdRoomSectionA *,,,,lockTriggers,Lock trigger records,high,source:146C.c:16224
+T00329.014,T00329,_mpdRoomSection,14,sectionB,0,_mpdRoomSectionB *,,,,environment,Background and weather settings,high,source:146C.c:17463
+T00329.015,T00329,_mpdRoomSection,15,textureEffectsSection,0,void *,,,,textureEffects,Texture effect records,high,source:2842C.c:871
+T00329.016,T00329,_mpdRoomSection,16,sectionD,0,void *,,,,effectScripts,Room-effect scripts,high,source:2842C.c:903
+T00329.017,T00329,_mpdRoomSection,17,sectionE,0,_mpdRoomSectionE *,,,,sectionE,Unidentified two-array section,low,source:146C.c:15705
+T00329.018,T00329,_mpdRoomSection,18,sectionF,0,vs_battle_scene *,,,,minimapScene,Minimap scene and room list,high,source:146C.c:15722
+T00329.019,T00329,_mpdRoomSection,19,section10,0,u_short *,,,,tiledBackground,Tiled background file descriptors,high,source:146C.c:17647
+T00329.020,T00329,_mpdRoomSection,20,section11,0,_mpdRoomSection11 *,,,,viewTriggers,View trigger records,high,source:146C.c:16412
+T00329.021,T00329,_mpdRoomSection,21,section12,0,_mpdRoomSection12 *,,,,movingPlatforms,Moving platform records,high,source:146C.c:16477
+T00329.022,T00329,_mpdRoomSection,22,section13,0,_mpdRoomSection13 *,,,,containers,Container records located by tile,med,source:146C.c:16838
+T00329.023,T00329,_mpdRoomSection,23,section14,0,u_int *,,,,soundData,Room sound data,high,source:146C.c:17321
+T00329.024,T00329,_mpdRoomSection,24,section15,0,int,,,,section15,Unidentified section,low,declaration-only;source:146C.h:266
+T00329.025,T00329,_mpdRoomSection,25,section16,0,int,,,,section16,Unidentified section,low,declaration-only;source:146C.h:267
+T00329.026,T00329,_mpdRoomSection,26,section17,0,int,,,,section17,Unidentified section,low,declaration-only;source:146C.h:268
+T00329.027,T00329,_mpdRoomSection,27,section18,0,_zoneContextBounds *,,,,zoneBounds,Tile bounds of the map,high,source:146C.c:16074
+T00330.000,T00330,_mpdRoomSection11,0,unk0_0,1,u_short,5,,,tileX,Tile X,high,source:146C.c:16429
+T00330.001,T00330,_mpdRoomSection11,1,unk0_5,1,u_short,5,,,tileZ,Tile Z,high,source:146C.c:16430
+T00330.002,T00330,_mpdRoomSection11,2,unk0_10,1,u_short,1,,,floorLayer,Floor layer,high,source:146C.c:16430
+T00330.003,T00330,_mpdRoomSection11,3,unk0_11,1,u_short,3,,,viewDirection,Required camera facing octant,high,source:146C.c:16432
+T00330.004,T00330,_mpdRoomSection11,4,unk0_14,1,u_short,1,,,mode,Matched against the caller mode,med,source:146C.c:16431
+T00330.005,T00330,_mpdRoomSection11,5,unk0_15,1,u_short,1,,,reserved00Bit15,Unreferenced bit,low,declaration-only;source:146C.h:165
+T00330.006,T00330,_mpdRoomSection11,6,unk2,1,u_short,,,,effectCount,Number of room effects to start,high,source:146C.c:16435
+T00330.007,T00330,_mpdRoomSection11,7,unk4,1,char[0],,,,effectIds,Room effect identifiers,high,source:146C.c:16436
+T00331.000,T00331,_mpdRoomSection12,0,unk0_0,1,u_int,8,,geometry group id,sceneObjectId,Scene object the platform moves,high,source:146C.c:16509
+T00331.001,T00331,_mpdRoomSection12,1,unk0_8,1,u_int,1,,,isLooping,Motion continues when not paused,low,source:146C.c:16602
+T00331.002,T00331,_mpdRoomSection12,2,unk0_9,1,u_int,1,,hidden,isHidden,Platform disabled,high,source:146C.c:16511
+T00331.003,T00331,_mpdRoomSection12,3,unk0_10,1,u_int,2,,,endWaypoint,Waypoint that reverses direction,high,source:146C.c:16551
+T00331.004,T00331,_mpdRoomSection12,4,unk0_12,1,u_int,2,,,swapsColorsWhenFrozen,Swap red and green vertex colors while platforms are frozen,high,source:146C.c:17353
+T00331.005,T00331,_mpdRoomSection12,5,unk0_14,1,u_int,2,,,startWaypoint,Waypoint the platform starts from,high,source:146C.c:16542
+T00331.006,T00331,_mpdRoomSection12,6,unk0_16,1,u_int,7,,,reserved00Bits16,Unreferenced bits,low,declaration-only;source:146C.h:177
+T00331.007,T00331,_mpdRoomSection12,7,unk0_23,1,u_int,3,,,reserved00Bits23,Unreferenced bits,low,declaration-only;source:146C.h:178
+T00331.008,T00331,_mpdRoomSection12,8,unk0_26,1,u_int,1,,,isMovingForward,Travel direction,high,source:146C.c:16552
+T00331.009,T00331,_mpdRoomSection12,9,unk0_27,1,u_int,2,,target waypoint index,currentWaypoint,Current waypoint index,high,source:146C.c:16547
+T00331.010,T00331,_mpdRoomSection12,10,unk0_29,1,u_int,3,,,currentSegment,Current motion segment,high,source:146C.c:16614
+T00331.011,T00331,_mpdRoomSection12,11,unk4_0,1,u_int,1,,dwelling at waypoint,isWaiting,Paused at a waypoint,high,source:146C.c:16613
+T00331.012,T00331,_mpdRoomSection12,12,unk4_1,1,u_int,7,,platform actor association,controlState,Externally set control state,med,source:146C.c:16478
+T00331.013,T00331,_mpdRoomSection12,13,unk4_8,1,u_int,2,,,terminalWaypoint,Waypoint where the platform docks,high,source:146C.c:16536;source:146C.c:16635
+T00331.014,T00331,_mpdRoomSection12,14,unk4_10,1,u_int,6,,,reserved04Bits10,Unreferenced bits,low,declaration-only;source:146C.h:185
+T00331.015,T00331,_mpdRoomSection12,15,unk4_16,1,u_int,16,,segment or dwell elapsed ticks,motionTicks,Ticks into the current segment or wait,high,source:146C.c:16626
+T00331.016,T00331,_mpdRoomSection12,16,unk8,1,VECTOR[4],,,waypoint positions and dwell durations,waypoints,Waypoint positions,high,source:146C.c:16547
+T00331.017,T00331,_mpdRoomSection12,17,unk48,1,VECTOR[6],,,segment velocities and durations,segmentVelocities,Per-segment velocity and duration,high,source:146C.c:16614
+T00331.018,T00331,_mpdRoomSection12,18,unkA8,1,int,,,fixed-point x,positionX,Current X in 20.12 fixed point,high,source:146C.c:16515
+T00331.019,T00331,_mpdRoomSection12,19,unkAC,1,int,,,fixed-point y,positionY,Current Y in 20.12 fixed point,high,source:146C.c:16516
+T00331.020,T00331,_mpdRoomSection12,20,unkB0,1,int,,,fixed-point z,positionZ,Current Z in 20.12 fixed point,high,source:146C.c:16517
+T00331.021,T00331,_mpdRoomSection12,21,unkB4,1,_mpdRoomSection3,,,,tileCell,Tile cell carried with the platform,high,source:146C.c:16636
 T00332.000,T00332,_mpdRoomSection13,0,unk0,1,short,,,,,,,
 T00332.001,T00332,_mpdRoomSection13,1,unk2,1,short,,,,,,,
 T00332.002,T00332,_mpdRoomSection13,2,unk4,1,short,,,,,,,
@@ -2908,72 +2908,72 @@ T00332.007,T00332,_mpdRoomSection13,7,unkE,1,short,,,,,,,
 T00332.008,T00332,_mpdRoomSection13,8,unk10,1,short,,,chest state flag index,,,,
 T00332.009,T00332,_mpdRoomSection13,9,unk12,1,short,,,,,,,
 T00332.010,T00332,_mpdRoomSection13,10,unk14,1,vs_battle_loot,,,,,,,
-T00333.000,T00333,_mpdRoomSection3,0,unk0_0,1,u_int,5,,,,,,
-T00333.001,T00333,_mpdRoomSection3,1,unk0_5,1,u_int,1,,,,,,
-T00333.002,T00333,_mpdRoomSection3,2,unk0_6,1,u_int,1,,,,,,
-T00333.003,T00333,_mpdRoomSection3,3,unk0_7,1,u_int,1,,,,,,
-T00333.004,T00333,_mpdRoomSection3,4,unk0_8,1,u_int,1,,,,,,
-T00333.005,T00333,_mpdRoomSection3,5,unk0_9,1,u_int,1,,,,,,
-T00333.006,T00333,_mpdRoomSection3,6,unk0_10,1,u_int,3,,collision blocking mode | tile footprint shape,,,,
-T00333.007,T00333,_mpdRoomSection3,7,unk0_13,1,u_int,1,,,,,,
-T00333.008,T00333,_mpdRoomSection3,8,unk0_14,1,u_int,1,,,,,,
-T00333.009,T00333,_mpdRoomSection3,9,unk0_15,1,u_int,1,,,,,,
-T00333.010,T00333,_mpdRoomSection3,10,unk0_16,1,u_int,1,,,,,,
-T00333.011,T00333,_mpdRoomSection3,11,unk0_17,1,u_int,1,,,,,,
-T00333.012,T00333,_mpdRoomSection3,12,unk0_18,1,u_int,2,,,,,,
-T00333.013,T00333,_mpdRoomSection3,13,unk0_19,1,u_int,12,,,,,,
-T00334.000,T00334,_mpdRoomSection9,0,unk0,1,short,,,tile x,,,,
-T00334.001,T00334,_mpdRoomSection9,1,unk2,1,short,,,tile z,,,,
-T00334.002,T00334,_mpdRoomSection9,2,unk4,1,short,,,surface index,,,,
-T00334.003,T00334,_mpdRoomSection9,3,unk6,1,short,,,trigger type,,,,
-T00334.004,T00334,_mpdRoomSection9,4,unk8,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:88:5),,,,,,,
-T00334.005,T00334,_mpdRoomSection9,5,unkA,1,char,,,enabled,,,,
-T00334.006,T00334,_mpdRoomSection9,6,unkB,1,char,,,,,,,
-T00335.000,T00335,_mpdRoomSectionA,0,unk0,1,_mpdRoomSection9,,,,,,,
-T00335.001,T00335,_mpdRoomSectionA,1,keyOrSigil,0,short,,,,,,,
-T00335.002,T00335,_mpdRoomSectionA,2,unkE,1,short,,,open state,,,,
-T00335.003,T00335,_mpdRoomSectionA,3,unk10,1,short,,,linked door index,,,,
-T00335.004,T00335,_mpdRoomSectionA,4,unk12,1,char,,,animation pending,,,,
-T00335.005,T00335,_mpdRoomSectionA,5,unk13,1,char,,,opening delay,,,,
-T00336.000,T00336,_mpdRoomSectionB,0,unk0,1,int[5],,,background gradient colors,,,,
-T00336.001,T00336,_mpdRoomSectionB,1,unk14,1,VECTOR,,,,,,,
-T00336.002,T00336,_mpdRoomSectionB,2,unk24,1,int,,,,,,,
-T00336.003,T00336,_mpdRoomSectionB,3,unk28,1,int,,,,,,,
-T00336.004,T00336,_mpdRoomSectionB,4,unk2C,1,int,,,,,,,
-T00336.005,T00336,_mpdRoomSectionB,5,isWorkshop,0,char,,,,,,,
-T00336.006,T00336,_mpdRoomSectionB,6,unk31,1,char,,,,,,,
-T00336.007,T00336,_mpdRoomSectionB,7,trapLevel,0,char,,,,,,,
-T00336.008,T00336,_mpdRoomSectionB,8,unk33,1,char,,,,,,,
-T00336.009,T00336,_mpdRoomSectionB,9,unk34,1,short,,,weather type,,,,
-T00336.010,T00336,_mpdRoomSectionB,10,unk36,1,short,,,minimum wind azimuth,,,,
-T00336.011,T00336,_mpdRoomSectionB,11,unk38,1,short,,,maximum wind azimuth,,,,
-T00336.012,T00336,_mpdRoomSectionB,12,unk3A,1,short,,,,,,,
-T00336.013,T00336,_mpdRoomSectionB,13,unk3C,1,short,,,minimum weather intensity,,,,
-T00336.014,T00336,_mpdRoomSectionB,14,unk3E,1,short,,,maximum weather intensity,,,,
-T00336.015,T00336,_mpdRoomSectionB,15,unk40,1,short,,,,,,,
-T00336.016,T00336,_mpdRoomSectionB,16,unk42,1,short,,,,,,,
-T00336.017,T00336,_mpdRoomSectionB,17,unk44,1,short,,,,,,,
-T00336.018,T00336,_mpdRoomSectionB,18,unk46,1,short,,,,,,,
-T00336.019,T00336,_mpdRoomSectionB,19,unk48,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5)[2],,,weather emission bounds | weather rectangle origin and extent,,,,
-T00336.020,T00336,_mpdRoomSectionB,20,sceneId,0,short,,,,,,,
-T00336.021,T00336,_mpdRoomSectionB,21,unk52,1,short,,,fall destination zone,,,,
-T00336.022,T00336,_mpdRoomSectionB,22,unk54,1,short,,,fall destination room,,,,
-T00336.023,T00336,_mpdRoomSectionB,23,unk56,1,short,,,,,,,
-T00337.000,T00337,_mpdRoomSectionE,0,unk0,1,int,,,,,,,
-T00337.001,T00337,_mpdRoomSectionE,1,unk4,1,int,,,,,,,
-T00337.002,T00337,_mpdRoomSectionE,2,unk8,1,int,,,,,,,
-T00337.003,T00337,_mpdRoomSectionE,3,unkC,1,int *,,,,,,,
-T00337.004,T00337,_mpdRoomSectionE,4,unk10,1,int *,,,,,,,
-T00337.005,T00337,_mpdRoomSectionE,5,unk14,1,int[0],,,,,,,
-T00338.000,T00338,_sphericalCamera,0,values,0,_sphericalValues,,,,,,,
-T00338.001,T00338,_sphericalCamera,1,delta,0,_sphericalValues,,,,,,,
-T00338.002,T00338,_sphericalCamera,2,initialDistance,0,int,,,,,,,
-T00338.003,T00338,_sphericalCamera,3,unk24,1,int,,,zoom velocity,,,,
-T00338.004,T00338,_sphericalCamera,4,speed,0,int,,,,,,,
-T00339.000,T00339,_sphericalValues,0,yaw,0,int,,,,,,,
-T00339.001,T00339,_sphericalValues,1,pitch,0,int,,,,,,,
-T00339.002,T00339,_sphericalValues,2,distance,0,int,,,,,,,
-T00339.003,T00339,_sphericalValues,3,mode,0,int,,,,,,,
+T00333.000,T00333,_mpdRoomSection3,0,unk0_0,1,u_int,5,,,surfaceKind,Surface kind for footsteps and impacts,high,source:44F14.c:765;source:3A1A0.c:2222
+T00333.001,T00333,_mpdRoomSection3,1,unk0_5,1,u_int,1,,,reserved00Bit5,Unreferenced bit,low,declaration-only;source:146C.h:68
+T00333.002,T00333,_mpdRoomSection3,2,unk0_6,1,u_int,1,,,reserved00Bit6,Unreferenced bit,low,declaration-only;source:146C.h:69
+T00333.003,T00333,_mpdRoomSection3,3,unk0_7,1,u_int,1,,,reserved00Bit7,Unreferenced bit,low,declaration-only;source:146C.h:70
+T00333.004,T00333,_mpdRoomSection3,4,unk0_8,1,u_int,1,,,reserved00Bit8,Unreferenced bit,low,declaration-only;source:146C.h:71
+T00333.005,T00333,_mpdRoomSection3,5,unk0_9,1,u_int,1,,,reserved00Bit9,Unreferenced bit,low,declaration-only;source:146C.h:72
+T00333.006,T00333,_mpdRoomSection3,6,unk0_10,1,u_int,3,,collision blocking mode | tile footprint shape,doorPassability,Door blocking bits toggled when a door opens,med,source:146C.c:16268;source:146C.c:16899
+T00333.007,T00333,_mpdRoomSection3,7,unk0_13,1,u_int,1,,,reserved00Bit13,Unreferenced bit,low,declaration-only;source:146C.h:74
+T00333.008,T00333,_mpdRoomSection3,8,unk0_14,1,u_int,1,,,isPlatformDocked,Set while a platform rests at its terminal waypoint,med,source:146C.c:16636;source:146C.c:16648
+T00333.009,T00333,_mpdRoomSection3,9,unk0_15,1,u_int,1,,,reserved00Bit15,Unreferenced bit,low,declaration-only;source:146C.h:76
+T00333.010,T00333,_mpdRoomSection3,10,unk0_16,1,u_int,1,,,reserved00Bit16,Unreferenced bit,low,declaration-only;source:146C.h:77
+T00333.011,T00333,_mpdRoomSection3,11,unk0_17,1,u_int,1,,,isPit,Falling onto this tile kills or moves the player,high,source:146C.c:5472;source:146C.c:5562;source:3A1A0.c:3058
+T00333.012,T00333,_mpdRoomSection3,12,unk0_18,1,u_int,2,,,reserved00Bits18,Unreferenced bits,low,declaration-only;source:146C.h:79
+T00333.013,T00333,_mpdRoomSection3,13,unk0_19,1,u_int,12,,,reserved00Bits19,Unreferenced bits,low,declaration-only;source:146C.h:80
+T00334.000,T00334,_mpdRoomSection9,0,unk0,1,short,,,tile x,tileX,Tile X,high,source:146C.c:16818
+T00334.001,T00334,_mpdRoomSection9,1,unk2,1,short,,,tile z,tileZ,Tile Z,high,source:146C.c:16818
+T00334.002,T00334,_mpdRoomSection9,2,unk4,1,short,,,surface index,floorLayer,Floor layer,high,source:146C.c:16819
+T00334.003,T00334,_mpdRoomSection9,3,unk6,1,short,,,trigger type,kind,Trigger kind; below 16 disabled during events and doubles as an effect id for locks,low,source:146C.c:16821;source:146C.c:16894
+T00334.004,T00334,_mpdRoomSection9,4,unk8,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:88:5),,,,lockState,Lock open state and lock effect id,med,source:146C.c:16896;source:146C.c:16327
+T00334.005,T00334,_mpdRoomSection9,5,unkA,1,char,,,enabled,activation,Nonzero while the trigger is active,med,source:146C.c:17180;source:146C.c:16401
+T00334.006,T00334,_mpdRoomSection9,6,unkB,1,char,,,,markerFade,Trigger marker fade level,med,source:146C.c:17183;source:146C.c:17189
+T00335.000,T00335,_mpdRoomSectionA,0,unk0,1,_mpdRoomSection9,,,,trigger,Floor trigger part,high,source:146C.c:16226
+T00335.001,T00335,_mpdRoomSectionA,1,keyOrSigil,0,short,,,,keyOrSigil,Required key or sigil item,high,source:146C.c:16293
+T00335.002,T00335,_mpdRoomSectionA,2,unkE,1,short,,,open state,isOpen,Lock opened state,med,source:146C.c:16398
+T00335.003,T00335,_mpdRoomSectionA,3,unk10,1,short,,,linked door index,linkedLockIndex,Paired lock record or minus one,high,source:146C.c:16324
+T00335.004,T00335,_mpdRoomSectionA,4,unk12,1,char,,,animation pending,isTriggered,Trigger handled this activation,med,source:146C.c:16294;source:146C.c:16397
+T00335.005,T00335,_mpdRoomSectionA,5,unk13,1,char,,,opening delay,delayFrames,Frames before the lock change applies,high,source:146C.c:16299;source:146C.c:16379
+T00336.000,T00336,_mpdRoomSectionB,0,unk0,1,int[5],,,background gradient colors,backgroundColors,Five background gradient colors,high,source:146C.c:17468
+T00336.001,T00336,_mpdRoomSectionB,1,unk14,1,VECTOR,,,,backgroundRotation,Background dome rotation angles,high,source:146C.c:17613
+T00336.002,T00336,_mpdRoomSectionB,2,unk24,1,int,,,,reserved24,Unreferenced word,low,declaration-only;source:146C.h:111
+T00336.003,T00336,_mpdRoomSectionB,3,unk28,1,int,,,,reserved28,Unreferenced word,low,declaration-only;source:146C.h:112
+T00336.004,T00336,_mpdRoomSectionB,4,unk2C,1,int,,,,freezeEffectId,Room effect toggled when platforms freeze or minus one,med,source:146C.c:17359
+T00336.005,T00336,_mpdRoomSectionB,5,isWorkshop,0,char,,,,isWorkshop,Room is a workshop,med,declaration-only;source:146C.h:114
+T00336.006,T00336,_mpdRoomSectionB,6,unk31,1,char,,,,reserved31,Unreferenced byte,low,declaration-only;source:146C.h:115
+T00336.007,T00336,_mpdRoomSectionB,7,trapLevel,0,char,,,,trapLevel,Trap level,med,declaration-only;source:146C.h:116
+T00336.008,T00336,_mpdRoomSectionB,8,unk33,1,char,,,,reserved33,Unreferenced byte,low,declaration-only;source:146C.h:117
+T00336.009,T00336,_mpdRoomSectionB,9,unk34,1,short,,,weather type,weatherKind,Weather kind,high,source:146C.c:17508
+T00336.010,T00336,_mpdRoomSectionB,10,unk36,1,short,,,minimum wind azimuth,windDirection,Initial wind direction,high,source:2842C.c:277
+T00336.011,T00336,_mpdRoomSectionB,11,unk38,1,short,,,maximum wind azimuth,windDirectionLimit,Wind direction clamp limit,high,source:2842C.c:348
+T00336.012,T00336,_mpdRoomSectionB,12,unk3A,1,short,,,,windDirectionInterval,Mask index for wind direction variation,high,source:2842C.c:341
+T00336.013,T00336,_mpdRoomSectionB,13,unk3C,1,short,,,minimum weather intensity,weatherIntensity,Initial weather intensity,high,source:2842C.c:279
+T00336.014,T00336,_mpdRoomSectionB,14,unk3E,1,short,,,maximum weather intensity,weatherIntensityLimit,Weather intensity clamp limit,high,source:2842C.c:366
+T00336.015,T00336,_mpdRoomSectionB,15,unk40,1,short,,,,weatherIntensityInterval,Mask index for intensity variation,high,source:2842C.c:360
+T00336.016,T00336,_mpdRoomSectionB,16,unk42,1,short,,,,windStrength,Initial wind strength,high,source:2842C.c:276
+T00336.017,T00336,_mpdRoomSectionB,17,unk44,1,short,,,,windStrengthLimit,Wind strength clamp limit,high,source:2842C.c:357
+T00336.018,T00336,_mpdRoomSectionB,18,unk46,1,short,,,,windStrengthInterval,Mask index for wind strength variation,high,source:2842C.c:351
+T00336.019,T00336,_mpdRoomSectionB,19,unk48,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5)[2],,,weather emission bounds | weather rectangle origin and extent,weatherArea,Weather area origin and size in tiles,high,source:146C.c:17478;source:2842C.c:287
+T00336.020,T00336,_mpdRoomSectionB,20,sceneId,0,short,,,,sceneId,Scene identifier,med,declaration-only;source:146C.h:132
+T00336.021,T00336,_mpdRoomSectionB,21,unk52,1,short,,,fall destination zone,reserved52,Unreferenced short,low,declaration-only;source:146C.h:133
+T00336.022,T00336,_mpdRoomSectionB,22,unk54,1,short,,,fall destination room,reserved54,Unreferenced short,low,declaration-only;source:146C.h:134
+T00336.023,T00336,_mpdRoomSectionB,23,unk56,1,short,,,,reserved56,Unreferenced short,low,declaration-only;source:146C.h:135
+T00337.000,T00337,_mpdRoomSectionE,0,unk0,1,int,,,,reserved00,Unreferenced word,low,declaration-only;source:146C.h:139
+T00337.001,T00337,_mpdRoomSectionE,1,unk4,1,int,,,,secondArrayOffset,Byte offset of the second array,med,source:146C.c:15710
+T00337.002,T00337,_mpdRoomSectionE,2,unk8,1,int,,,,hasSecondArray,Second array present when positive,med,source:146C.c:15708
+T00337.003,T00337,_mpdRoomSectionE,3,unkC,1,int *,,,,firstArray,First array after the header,med,source:146C.c:15707
+T00337.004,T00337,_mpdRoomSectionE,4,unk10,1,int *,,,,secondArray,Optional second array,med,source:146C.c:15709
+T00337.005,T00337,_mpdRoomSectionE,5,unk14,1,int[0],,,,payload,Section payload,med,declaration-only;source:146C.h:144
+T00338.000,T00338,_sphericalCamera,0,values,0,_sphericalValues,,,,values,Current yaw pitch distance and mode,med,declaration-only;source:146C.h:741
+T00338.001,T00338,_sphericalCamera,1,delta,0,_sphericalValues,,,,delta,Pending rotation phase target pitch and zoom step,med,declaration-only;source:146C.h:742
+T00338.002,T00338,_sphericalCamera,2,initialDistance,0,int,,,,initialDistance,Default camera distance,med,declaration-only;source:146C.h:743
+T00338.003,T00338,_sphericalCamera,3,unk24,1,int,,,zoom velocity,zoomVelocity,Distance change per frame,med,declaration-only;source:146C.h:744
+T00338.004,T00338,_sphericalCamera,4,speed,0,int,,,,speed,Camera step speed,med,declaration-only;source:146C.h:745
+T00339.000,T00339,_sphericalValues,0,yaw,0,int,,,,yaw,Yaw of the spherical camera,low,used as a rotation phase 0 1 2 when this is the delta member at 146C.c:2643;declaration-only;source:146C.h:734
+T00339.001,T00339,_sphericalValues,1,pitch,0,int,,,,pitch,Pitch of the spherical camera,med,declaration-only;source:146C.h:735
+T00339.002,T00339,_sphericalValues,2,distance,0,int,,,,distance,Distance of the spherical camera,med,declaration-only;source:146C.h:736
+T00339.003,T00339,_sphericalValues,3,mode,0,int,,,,mode,Mode of the spherical camera,med,declaration-only;source:146C.h:737
 T00340.000,T00340,_syd,0,combinationsOffset,0,u_long,,,typeRecipeTableOffset,,,,
 T00340.001,T00340,_syd,1,materialsOffset,0,u_long,,,materialRecipeTableOffset,,,,
 T00340.002,T00340,_syd,2,initDataOffset,0,u_long,,,baseStatTableOffset,,,,
@@ -3005,45 +3005,45 @@ T00344.002,T00344,_wepModelOffsets,2,vertexGroupsOffset,0,int,,,,,,,
 T00344.003,T00344,_wepModelOffsets,3,verticesOffset,0,int,,,,,,,
 T00344.004,T00344,_wepModelOffsets,4,polygonsOffset,0,int,,,,,,,
 T00344.005,T00344,_wepModelOffsets,5,unk40,1,u_char[1984],,,,,,,
-T00345.000,T00345,_zndEnemy,0,unk0,1,u_char[1124],,,,,,,
-T00346.000,T00346,_zndHeader,0,mpdOffset,0,long,,,,,,,
-T00346.001,T00346,_zndHeader,1,mpdLen,0,int,,,,,,,
-T00346.002,T00346,_zndHeader,2,enemiesOffset,0,long,,,,,,,
-T00346.003,T00346,_zndHeader,3,enemiesLen,0,int,,,,,,,
-T00346.004,T00346,_zndHeader,4,timOffset,0,long,,,,,,,
-T00346.005,T00346,_zndHeader,5,timLen,0,int,,,,,,,
-T00346.006,T00346,_zndHeader,6,musicId,0,int,,,,,,,
-T00347.000,T00347,_zoneContextBounds,0,minX,0,short,,,,,,,
-T00347.001,T00347,_zoneContextBounds,1,minZ,0,short,,,,,,,
-T00347.002,T00347,_zoneContextBounds,2,maxX,0,short,,,,,,,
-T00347.003,T00347,_zoneContextBounds,3,maxZ,0,short,,,,,,,
-T00348.000,T00348,_zoneContext_t,0,zndId,0,int,,,,,,,
-T00348.001,T00348,_zoneContext_t,1,mpdLbas,0,vs_main_CdFile *,,,,,,,
-T00348.002,T00348,_zoneContext_t,2,zndEnemyCount,0,int,,,,,,,
-T00348.003,T00348,_zoneContext_t,3,zndEnemies,0,_zndEnemy *,,,,,,,
-T00348.004,T00348,_zoneContext_t,4,zudFiles,0,vs_main_CdFile *,,,,,,,
-T00348.005,T00348,_zoneContext_t,5,unk14,1,int,,,cachedZudIndexPlusOne,,,,
-T00348.006,T00348,_zoneContext_t,6,unk18,1,vs_main_CdQueueSlot *,,,zudReadRequest,,,,
-T00348.007,T00348,_zoneContext_t,7,unk1C,1,void *,,,cachedZudData,,,,
-T00348.008,T00348,_zoneContext_t,8,zndCdFile,0,vs_main_CdQueueSlot *,,,,,,,
-T00348.009,T00348,_zoneContext_t,9,zndData,0,void *,,,,,,,
-T00348.010,T00348,_zoneContext_t,10,musicId,0,int,,,,,,,
-T00348.011,T00348,_zoneContext_t,11,musicSlot,0,int,,,,,,,
-T00348.012,T00348,_zoneContext_t,12,unk30,1,int,,,,,,,
-T00348.013,T00348,_zoneContext_t,13,mapId,0,int,,,,,,,
-T00348.014,T00348,_zoneContext_t,14,unk38,1,int,,,,,,,
-T00348.015,T00348,_zoneContext_t,15,unk3C,1,short,,,,,,,
-T00348.016,T00348,_zoneContext_t,16,unk3E,1,short,,,,,,,
-T00348.017,T00348,_zoneContext_t,17,bounds,0,_zoneContextBounds,,,,,,,
-T00348.018,T00348,_zoneContext_t,18,unk48,1,int,,,,,,,
-T00348.019,T00348,_zoneContext_t,19,unk4C,1,int,,,,,,,
-T00348.020,T00348,_zoneContext_t,20,unk50,1,int,,,,,,,
-T00348.021,T00348,_zoneContext_t,21,unk54,1,int,,,,,,,
-T00348.022,T00348,_zoneContext_t,22,mpdCdFile,0,vs_main_CdQueueSlot *,,,,,,,
-T00348.023,T00348,_zoneContext_t,23,mpdData,0,void *,,,,,,,
-T00348.024,T00348,_zoneContext_t,24,mpdEnemyCount,0,u_int,,,,,,,
-T00348.025,T00348,_zoneContext_t,25,mpdEnemies,0,_mpdEnemy *,,,,,,,
-T00348.026,T00348,_zoneContext_t,26,unk68,1,int,,,,,,,
+T00345.000,T00345,_zndEnemy,0,unk0,1,u_char[1124],,,,recordBytes,Raw enemy record bytes,med,declaration-only;source:146C.h:658
+T00346.000,T00346,_zndHeader,0,mpdOffset,0,long,,,,mpdListOffset,Mpd list offset of the ZND header,med,declaration-only;source:146C.c:283
+T00346.001,T00346,_zndHeader,1,mpdLen,0,int,,,,mpdListSize,Mpd list size of the ZND header,med,declaration-only;source:146C.c:284
+T00346.002,T00346,_zndHeader,2,enemiesOffset,0,long,,,,enemiesOffset,Enemies offset of the ZND header,med,declaration-only;source:146C.c:285
+T00346.003,T00346,_zndHeader,3,enemiesLen,0,int,,,,enemiesSize,Enemies size of the ZND header,med,declaration-only;source:146C.c:286
+T00346.004,T00346,_zndHeader,4,timOffset,0,long,,,,texturesOffset,Textures offset of the ZND header,med,declaration-only;source:146C.c:287
+T00346.005,T00346,_zndHeader,5,timLen,0,int,,,,texturesSize,Textures size of the ZND header,med,declaration-only;source:146C.c:288
+T00346.006,T00346,_zndHeader,6,musicId,0,int,,,,musicId,Music id of the ZND header,med,declaration-only;source:146C.c:289
+T00347.000,T00347,_zoneContextBounds,0,minX,0,short,,,,minX,Min x of the zone bounds,med,declaration-only;source:146C.h:210
+T00347.001,T00347,_zoneContextBounds,1,minZ,0,short,,,,minZ,Min z of the zone bounds,med,declaration-only;source:146C.h:211
+T00347.002,T00347,_zoneContextBounds,2,maxX,0,short,,,,maxX,Max x of the zone bounds,med,declaration-only;source:146C.h:212
+T00347.003,T00347,_zoneContextBounds,3,maxZ,0,short,,,,maxZ,Max z of the zone bounds,med,declaration-only;source:146C.h:213
+T00348.000,T00348,_zoneContext_t,0,zndId,0,int,,,,zndId,Loaded zone identifier,med,declaration-only;source:146C.h:692
+T00348.001,T00348,_zoneContext_t,1,mpdLbas,0,vs_main_CdFile *,,,,mpdFiles,Room file descriptors of the zone,med,declaration-only;source:146C.h:693
+T00348.002,T00348,_zoneContext_t,2,zndEnemyCount,0,int,,,,zndEnemyCount,Number of zone enemy records,med,declaration-only;source:146C.h:694
+T00348.003,T00348,_zoneContext_t,3,zndEnemies,0,_zndEnemy *,,,,zndEnemies,Zone enemy records,med,declaration-only;source:146C.h:695
+T00348.004,T00348,_zoneContext_t,4,zudFiles,0,vs_main_CdFile *,,,,zudFiles,Unit file descriptors of the zone,med,declaration-only;source:146C.h:696
+T00348.005,T00348,_zoneContext_t,5,unk14,1,int,,,cachedZudIndexPlusOne,loadedZudIndexPlusOne,Index plus one of the loaded unit file,high,source:146C.c:6642
+T00348.006,T00348,_zoneContext_t,6,unk18,1,vs_main_CdQueueSlot *,,,zudReadRequest,zudDiscRequest,Disc request loading a unit file,high,source:146C.c:6634
+T00348.007,T00348,_zoneContext_t,7,unk1C,1,void *,,,cachedZudData,zudData,Loaded unit file data,high,source:146C.c:6635
+T00348.008,T00348,_zoneContext_t,8,zndCdFile,0,vs_main_CdQueueSlot *,,,,zndDiscRequest,Disc request loading the zone file,med,declaration-only;source:146C.h:700
+T00348.009,T00348,_zoneContext_t,9,zndData,0,void *,,,,zndData,Loaded zone file data,med,declaration-only;source:146C.h:701
+T00348.010,T00348,_zoneContext_t,10,musicId,0,int,,,,musicId,Zone music,med,declaration-only;source:146C.h:702
+T00348.011,T00348,_zoneContext_t,11,musicSlot,0,int,,,,musicSlot,Music slot,med,declaration-only;source:146C.h:703
+T00348.012,T00348,_zoneContext_t,12,unk30,1,int,,,,isMusicFadeEnabled,Fade music when the next zone uses another track,med,source:146C.c:14818;source:146C.c:14882
+T00348.013,T00348,_zoneContext_t,13,mapId,0,int,,,,mapId,Loaded room identifier,med,declaration-only;source:146C.h:705
+T00348.014,T00348,_zoneContext_t,14,unk38,1,int,,,,reserved38,Cleared on zone load; no reader identified,low,source:146C.c:14883
+T00348.015,T00348,_zoneContext_t,15,unk3C,1,short,,,,tileColumns,Collision map columns,high,source:146C.c:15331
+T00348.016,T00348,_zoneContext_t,16,unk3E,1,short,,,,tileRows,Collision map rows,high,source:146C.c:15332
+T00348.017,T00348,_zoneContext_t,17,bounds,0,_zoneContextBounds,,,,bounds,Map tile bounds,med,declaration-only;source:146C.h:709
+T00348.018,T00348,_zoneContext_t,18,unk48,1,int,,,,reserved48,Unreferenced word,low,declaration-only;source:146C.h:710
+T00348.019,T00348,_zoneContext_t,19,unk4C,1,int,,,,reserved4C,Unreferenced word,low,declaration-only;source:146C.h:711
+T00348.020,T00348,_zoneContext_t,20,unk50,1,int,,,,reserved50,Unreferenced word,low,declaration-only;source:146C.h:712
+T00348.021,T00348,_zoneContext_t,21,unk54,1,int,,,,reserved54,Unreferenced word,low,declaration-only;source:146C.h:713
+T00348.022,T00348,_zoneContext_t,22,mpdCdFile,0,vs_main_CdQueueSlot *,,,,mpdDiscRequest,Disc request loading the room file,med,declaration-only;source:146C.h:714
+T00348.023,T00348,_zoneContext_t,23,mpdData,0,void *,,,,mpdData,Loaded room file data,med,declaration-only;source:146C.h:715
+T00348.024,T00348,_zoneContext_t,24,mpdEnemyCount,0,u_int,,,,mpdEnemyCount,Number of room enemy placements,med,declaration-only;source:146C.h:716
+T00348.025,T00348,_zoneContext_t,25,mpdEnemies,0,_mpdEnemy *,,,,mpdEnemies,Room enemy placements,med,declaration-only;source:146C.h:717
+T00348.026,T00348,_zoneContext_t,26,unk68,1,int,,,,currentSceneId,Scene identifier used to detect scene changes,high,source:146C.c:15308
 T00349.000,T00349,_zudData_t,0,characterId,0,u_char,,,,,,,
 T00349.001,T00349,_zudData_t,1,weapon,0,u_char,,,,,,,
 T00349.002,T00349,_zudData_t,2,unk2,1,u_char,,,battleSequenceModelSelector,,,,
@@ -3909,19 +3909,19 @@ T00434.010,T00434,func_8006C4C4_t,10,unk10,1,short,,,,,,,
 T00434.011,T00434,func_8006C4C4_t,11,unk12,1,short,,,,,,,
 T00434.012,T00434,func_8006C4C4_t,12,unk14,1,func_8008631C_t2,,,,,,,
 T00434.013,T00434,func_8006C4C4_t,13,unk18,1,int[50],,,,,,,
-T00435.000,T00435,func_8006EBF8_t,0,unk0,1,func_8006EBF8_t3,,,,,,,
-T00435.001,T00435,func_8006EBF8_t,1,unkC,1,int,,,,,,,
+T00435.000,T00435,func_8006EBF8_t,0,unk0,1,func_8006EBF8_t3,,,,location,Actor tile and position,high,source:146C.c:1969
+T00435.001,T00435,func_8006EBF8_t,1,unkC,1,int,,,,reserved0C,Unreferenced word,low,declaration-only;source:func_8006EBF8_t.h:21
 T00436.000,T00436,func_8006EBF8_t2,0,unk0,1,int,,,,,,,
 T00436.001,T00436,func_8006EBF8_t2,1,unk4,1,int,,,,,,,
 T00436.002,T00436,func_8006EBF8_t2,2,unk8,1,int,,,,,,,
-T00437.000,T00437,func_8006EBF8_t3,0,unk0,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),,,,,,,
-T00437.001,T00437,func_8006EBF8_t3,1,unk4,1,SVECTOR,,,,,,,
+T00437.000,T00437,func_8006EBF8_t3,0,unk0,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),,,,packedTile,Packed tile coordinates,high,source:146C.c:3197
+T00437.001,T00437,func_8006EBF8_t3,1,unk4,1,SVECTOR,,,,position,World position,high,source:146C.c:1969
 T00438.000,T00438,func_8006EBF8_t_fields,0,unk0_0,1,u_int,8,,,,,,
 T00438.001,T00438,func_8006EBF8_t_fields,1,unk0_8,1,u_int,8,,,,,,
 T00438.002,T00438,func_8006EBF8_t_fields,2,unk0_16,1,u_int,8,,,,,,
 T00438.003,T00438,func_8006EBF8_t_fields,3,unk0_24,1,u_int,8,,,,,,
-T00439.000,T00439,func_80077DF0_t,0,position,0,VECTOR,,,,,,,
-T00439.001,T00439,func_80077DF0_t,1,lookAt,0,VECTOR,,,,,,,
+T00439.000,T00439,func_80077DF0_t,0,position,0,VECTOR,,,,position,Position of the camera pair,med,declaration-only;source:146C.c:209
+T00439.001,T00439,func_80077DF0_t,1,lookAt,0,VECTOR,,,,lookAt,Look at of the camera pair,med,declaration-only;source:146C.c:210
 T00440.000,T00440,func_80077DF0_t2,0,unk0,1,int[4],,,,,,,
 T00441.000,T00441,func_80077DF0_t3,0,unk0,1,int[17],,,,,,,
 T00441.001,T00441,func_80077DF0_t3,1,unk44,1,func_80077DF0_t2,,,,,,,
@@ -3944,122 +3944,122 @@ T00443.002,T00443,func_8008631C_t2,2,hitThreshold,0,u_char,,,,,,,
 T00443.003,T00443,func_8008631C_t2,3,unk3,1,u_char,,,,,,,
 T00443.004,T00443,func_8008631C_t2,4,hp,0,short,,,,,,,
 T00443.005,T00443,func_8008631C_t2,5,mp,0,short,,,,,,,
-T00444.000,T00444,func_80089888_t,0,unk0_0,1,char,,,,,,,
-T00444.001,T00444,func_80089888_t,1,unk0_8,1,char,,,,,,,
-T00444.002,T00444,func_80089888_t,2,unk0_16,1,char,,,,,,,
-T00444.003,T00444,func_80089888_t,3,unk0_24,1,u_int,8,,,,,,
-T00445.000,T00445,func_8008D2C0_t,0,unk0,1,short,,,,,,,
-T00445.001,T00445,func_8008D2C0_t,1,unk1,1,short,,,,,,,
-T00445.002,T00445,func_8008D2C0_t,2,unk2,1,short,,,,,,,
-T00445.003,T00445,func_8008D2C0_t,3,unk3,1,short,,,,,,,
-T00446.000,T00446,func_8008D2C0_t,0,unk0,1,short,,,,,,,
-T00446.001,T00446,func_8008D2C0_t,1,unk2,1,short,,,,,,,
-T00446.002,T00446,func_8008D2C0_t,2,unk4,1,short,,,,,,,
-T00446.003,T00446,func_8008D2C0_t,3,unk6,1,short,,,platform index,,,,
-T00447.000,T00447,func_80091C6C_t,0,geometryOffset,0,int,,,,,,,
-T00447.001,T00447,func_80091C6C_t,1,unk4,1,char[3],,,,,,,
-T00447.002,T00447,func_80091C6C_t,2,delay,0,u_char,,,,,,,
-T00447.003,T00447,func_80091C6C_t,3,baseU,0,u_char,,,,,,,
-T00447.004,T00447,func_80091C6C_t,4,baseV,0,u_char,,,,,,,
-T00447.005,T00447,func_80091C6C_t,5,frameCount,0,u_char,,,,,,,
-T00447.006,T00447,func_80091C6C_t,6,columns,0,u_char,,,,,,,
-T00447.007,T00447,func_80091C6C_t,7,frameWidth,0,u_char,,,,,,,
-T00447.008,T00447,func_80091C6C_t,8,frameHeight,0,u_char,,,,,,,
-T00447.009,T00447,func_80091C6C_t,9,tick,0,u_char,,,,,,,
-T00447.010,T00447,func_80091C6C_t,10,frame,0,u_char,,,,,,,
-T00447.011,T00447,func_80091C6C_t,11,u,0,u_char[4],,,,,,,
-T00447.012,T00447,func_80091C6C_t,12,v,0,u_char[4],,,,,,,
-T00448.000,T00448,func_80091C6C_t2,0,unk0,1,char[15],,,,,,,
-T00448.001,T00448,func_80091C6C_t2,1,type,0,u_char,,,,,,,
-T00448.002,T00448,func_80091C6C_t2,2,unk10,1,char[3],,,,,,,
-T00448.003,T00448,func_80091C6C_t2,3,u2,0,u_char,,,,,,,
-T00448.004,T00448,func_80091C6C_t2,4,unk14,1,char[3],,,,,,,
-T00448.005,T00448,func_80091C6C_t2,5,v2,0,u_char,,,,,,,
-T00448.006,T00448,func_80091C6C_t2,6,u0,0,u_char,,,,,,,
-T00448.007,T00448,func_80091C6C_t2,7,v0,0,u_char,,,,,,,
-T00448.008,T00448,func_80091C6C_t2,8,unk1A,1,char[2],,,,,,,
-T00448.009,T00448,func_80091C6C_t2,9,u1,0,u_char,,,,,,,
-T00448.010,T00448,func_80091C6C_t2,10,v1,0,u_char,,,,,,,
-T00448.011,T00448,func_80091C6C_t2,11,unk1E,1,char[5],,,,,,,
-T00448.012,T00448,func_80091C6C_t2,12,u3,0,u_char,,,,,,,
-T00448.013,T00448,func_80091C6C_t2,13,unk24,1,char[3],,,,,,,
-T00448.014,T00448,func_80091C6C_t2,14,v3,0,u_char,,,,,,,
-T00449.000,T00449,func_80091E10_t,0,geometryOffset,0,int,,,,,,,
-T00449.001,T00449,func_80091E10_t,1,unk4,1,char[3],,,,,,,
-T00449.002,T00449,func_80091E10_t,2,delay,0,u_char,,,,,,,
-T00449.003,T00449,func_80091E10_t,3,baseU,0,u_char,,,,,,,
-T00449.004,T00449,func_80091E10_t,4,baseV,0,u_char,,,,,,,
-T00449.005,T00449,func_80091E10_t,5,width,0,u_char,,,,,,,
-T00449.006,T00449,func_80091E10_t,6,height,0,u_char,,,,,,,
-T00449.007,T00449,func_80091E10_t,7,currentU,0,u_char,,,,,,,
-T00449.008,T00449,func_80091E10_t,8,currentV,0,u_char,,,,,,,
-T00449.009,T00449,func_80091E10_t,9,windowWidth,0,u_char,,,,,,,
-T00449.010,T00449,func_80091E10_t,10,windowHeight,0,u_char,,,,,,,
-T00449.011,T00449,func_80091E10_t,11,stepU,0,signed char,,,,,,,
-T00449.012,T00449,func_80091E10_t,12,stepV,0,signed char,,,,,,,
-T00449.013,T00449,func_80091E10_t,13,tick,0,u_char,,,,,,,
-T00449.014,T00449,func_80091E10_t,14,unk13,1,char,,,,,,,
-T00449.015,T00449,func_80091E10_t,15,u,0,u_char[4],,,,,,,
-T00449.016,T00449,func_80091E10_t,16,v,0,u_char[4],,,,,,,
-T00450.000,T00450,func_80091FE8_t,0,tick,0,u_char,,,,,,,
-T00450.001,T00450,func_80091FE8_t,1,frame,0,u_char,,,,,,,
-T00450.002,T00450,func_80091FE8_t,2,frameCount,0,u_char,,,,,,,
-T00450.003,T00450,func_80091FE8_t,3,columns,0,u_char,,,,,,,
-T00450.004,T00450,func_80091FE8_t,4,unk4,1,char[3],,,,,,,
-T00450.005,T00450,func_80091FE8_t,5,delay,0,u_char,,,,,,,
-T00450.006,T00450,func_80091FE8_t,6,scrollStep,0,int,,,,,,,
-T00450.007,T00450,func_80091FE8_t,7,rect,0,RECT,,,,,,,
-T00451.000,T00451,func_80092548_t,0,count,0,u_char,,,,,,,
-T00451.001,T00451,func_80092548_t,1,unk1,1,u_char,,,,,,,
-T00451.002,T00451,func_80092548_t,2,active,0,u_char,,,,,,,
-T00451.003,T00451,func_80092548_t,3,unk3,1,u_char,,,,,,,
-T00452.000,T00452,func_80092548_t2,0,size,0,short,,,,,,,
-T00452.001,T00452,func_80092548_t2,1,type,0,short,,,,,,,
-T00453.000,T00453,func_80092B04_t,0,unk0,1,int,,,,,,,
-T00453.001,T00453,func_80092B04_t,1,unk4,1,void *,,,,,,,
-T00453.002,T00453,func_80092B04_t,2,unk8,1,char[44],,,,,,,
-T00454.000,T00454,func_80092B04_t2,0,unk0,1,short,,,,,,,
-T00454.001,T00454,func_80092B04_t2,1,unk2,1,short,,,,,,,
-T00455.000,T00455,func_80092F74_t,0,unk0,1,int *,,,,,,,
-T00455.001,T00455,func_80092F74_t,1,unk4,1,void *,,,command pointer,,,,
-T00455.002,T00455,func_80092F74_t,2,unk8,1,short,,,geometry group index,,,,
-T00455.003,T00455,func_80092F74_t,3,unkA,1,short,,,,,,,
-T00455.004,T00455,func_80092F74_t,4,unkC,1,VECTOR,,,position in sixteenths,,,,
-T00455.005,T00455,func_80092F74_t,5,unk1C,1,SVECTOR,,,rotation,,,,
-T00455.006,T00455,func_80092F74_t,6,unk24,1,SVECTOR,,,linear velocity,,,,
-T00455.007,T00455,func_80092F74_t,7,unk2C,1,SVECTOR,,,angular velocity,,,,
-T00456.000,T00456,func_80092F74_t2,0,unk0,1,int *,,,,,,,
-T00456.001,T00456,func_80092F74_t2,1,unk4,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5)[4],,,,,,,
-T00456.002,T00456,func_80092F74_t2,2,unk14,1,int,,,,,,,
-T00456.003,T00456,func_80092F74_t2,3,unk18,1,int,,,,,,,
-T00457.000,T00457,func_80093914_t,0,unk0,1,u_char[12],,,,,,,
-T00457.001,T00457,func_80093914_t,1,unkC,1,u_char,,,first vertex red,,,,
-T00457.002,T00457,func_80093914_t,2,unkD,1,u_char,,,first vertex green,,,,
-T00457.003,T00457,func_80093914_t,3,unkE,1,u_char,,,,,,,
-T00457.004,T00457,func_80093914_t,4,unkF,1,u_char,,,,,,,
-T00457.005,T00457,func_80093914_t,5,unk10,1,u_char,,,,,,,
-T00457.006,T00457,func_80093914_t,6,unk11,1,u_char,,,,,,,
-T00457.007,T00457,func_80093914_t,7,unk12,1,u_char,,,,,,,
-T00457.008,T00457,func_80093914_t,8,unk13,1,u_char,,,,,,,
-T00457.009,T00457,func_80093914_t,9,unk14,1,u_char,,,,,,,
-T00457.010,T00457,func_80093914_t,10,unk15,1,u_char,,,,,,,
-T00457.011,T00457,func_80093914_t,11,unk16,1,u_char[10],,,,,,,
-T00458.000,T00458,func_80093914_t2,0,unk0,1,u_char[12],,,,,,,
-T00458.001,T00458,func_80093914_t2,1,unkC,1,u_char,,,,,,,
-T00458.002,T00458,func_80093914_t2,2,unkD,1,u_char,,,,,,,
-T00458.003,T00458,func_80093914_t2,3,unkE,1,u_char,,,,,,,
-T00458.004,T00458,func_80093914_t2,4,unkF,1,u_char,,,,,,,
-T00458.005,T00458,func_80093914_t2,5,unk10,1,u_char,,,,,,,
-T00458.006,T00458,func_80093914_t2,6,unk11,1,u_char,,,,,,,
-T00458.007,T00458,func_80093914_t2,7,unk12,1,u_char,,,,,,,
-T00458.008,T00458,func_80093914_t2,8,unk13,1,u_char,,,,,,,
-T00458.009,T00458,func_80093914_t2,9,unk14,1,u_char,,,,,,,
-T00458.010,T00458,func_80093914_t2,10,unk15,1,u_char,,,,,,,
-T00458.011,T00458,func_80093914_t2,11,unk16,1,u_char[14],,,,,,,
-T00458.012,T00458,func_80093914_t2,12,unk24,1,u_char,,,,,,,
-T00458.013,T00458,func_80093914_t2,13,unk25,1,u_char,,,,,,,
-T00458.014,T00458,func_80093914_t2,14,unk26,1,u_char,,,,,,,
-T00458.015,T00458,func_80093914_t2,15,unk27,1,u_char,,,,,,,
+T00444.000,T00444,func_80089888_t,0,unk0_0,1,char,,,,tileX,Tile X,med,declaration-only;source:3A1A0.h:5
+T00444.001,T00444,func_80089888_t,1,unk0_8,1,char,,,,direction,Facing direction,med,declaration-only;source:3A1A0.h:6
+T00444.002,T00444,func_80089888_t,2,unk0_16,1,char,,,,tileZ,Tile Z,med,declaration-only;source:3A1A0.h:7
+T00444.003,T00444,func_80089888_t,3,unk0_24,1,u_int,8,,,height,Height in units of 64,med,declaration-only;source:3A1A0.h:8
+T00445.000,T00445,func_8008D2C0_t,0,unk0,1,short,,,,x,Contact X,med,declaration-only;source:146C.c:252
+T00445.001,T00445,func_8008D2C0_t,1,unk1,1,short,,,,height,Contact height,med,declaration-only;source:146C.c:253
+T00445.002,T00445,func_8008D2C0_t,2,unk2,1,short,,,,z,Contact Z,med,declaration-only;source:146C.c:254
+T00445.003,T00445,func_8008D2C0_t,3,unk3,1,short,,,,platformIndex,Moving platform index,med,declaration-only;source:146C.c:255
+T00446.000,T00446,func_8008D2C0_t,0,unk0,1,short,,,,x,Contact X,med,declaration-only;source:3A1A0.c:16
+T00446.001,T00446,func_8008D2C0_t,1,unk2,1,short,,,,height,Contact height,med,declaration-only;source:3A1A0.c:17
+T00446.002,T00446,func_8008D2C0_t,2,unk4,1,short,,,,z,Contact Z,med,declaration-only;source:3A1A0.c:18
+T00446.003,T00446,func_8008D2C0_t,3,unk6,1,short,,,platform index,platformIndex,Moving platform index,med,declaration-only;source:3A1A0.c:19
+T00447.000,T00447,func_80091C6C_t,0,geometryOffset,0,int,,,,geometryOffset,Offset of the animated polygon,med,declaration-only;source:2842C.c:120
+T00447.001,T00447,func_80091C6C_t,1,unk4,1,char[3],,,,reserved04,Unreferenced bytes,low,declaration-only;source:2842C.c:121
+T00447.002,T00447,func_80091C6C_t,2,delay,0,u_char,,,,delay,Ticks per frame,med,declaration-only;source:2842C.c:122
+T00447.003,T00447,func_80091C6C_t,3,baseU,0,u_char,,,,baseU,Strip origin U,med,declaration-only;source:2842C.c:123
+T00447.004,T00447,func_80091C6C_t,4,baseV,0,u_char,,,,baseV,Strip origin V,med,declaration-only;source:2842C.c:124
+T00447.005,T00447,func_80091C6C_t,5,frameCount,0,u_char,,,,frameCount,Number of frames,med,declaration-only;source:2842C.c:125
+T00447.006,T00447,func_80091C6C_t,6,columns,0,u_char,,,,columns,Frames per row,med,declaration-only;source:2842C.c:126
+T00447.007,T00447,func_80091C6C_t,7,frameWidth,0,u_char,,,,frameWidth,Frame width,med,declaration-only;source:2842C.c:127
+T00447.008,T00447,func_80091C6C_t,8,frameHeight,0,u_char,,,,frameHeight,Frame height,med,declaration-only;source:2842C.c:128
+T00447.009,T00447,func_80091C6C_t,9,tick,0,u_char,,,,tick,Ticks into the current frame,med,declaration-only;source:2842C.c:129
+T00447.010,T00447,func_80091C6C_t,10,frame,0,u_char,,,,frame,Current frame,med,declaration-only;source:2842C.c:130
+T00447.011,T00447,func_80091C6C_t,11,u,0,u_char[4],,,,u,Per-vertex U offsets,med,declaration-only;source:2842C.c:131
+T00447.012,T00447,func_80091C6C_t,12,v,0,u_char[4],,,,v,Per-vertex V offsets,med,declaration-only;source:2842C.c:132
+T00448.000,T00448,func_80091C6C_t2,0,unk0,1,char[15],,,,positionAndFirstColor,Vertex positions and first color,med,DataCrystal
+T00448.001,T00448,func_80091C6C_t2,1,type,0,u_char,,,,type,Polygon type,high,DataCrystal
+T00448.002,T00448,func_80091C6C_t2,2,unk10,1,char[3],,,,secondColor,Second vertex color,med,DataCrystal
+T00448.003,T00448,func_80091C6C_t2,3,u2,0,u_char,,,,u2,Third vertex U,high,DataCrystal
+T00448.004,T00448,func_80091C6C_t2,4,unk14,1,char[3],,,,thirdColor,Third vertex color,med,DataCrystal
+T00448.005,T00448,func_80091C6C_t2,5,v2,0,u_char,,,,v2,Third vertex V,high,DataCrystal
+T00448.006,T00448,func_80091C6C_t2,6,u0,0,u_char,,,,u0,First vertex U,high,DataCrystal
+T00448.007,T00448,func_80091C6C_t2,7,v0,0,u_char,,,,v0,First vertex V,high,DataCrystal
+T00448.008,T00448,func_80091C6C_t2,8,unk1A,1,char[2],,,,texelMask,Texel transparency mask,med,DataCrystal
+T00448.009,T00448,func_80091C6C_t2,9,u1,0,u_char,,,,u1,Second vertex U,high,DataCrystal
+T00448.010,T00448,func_80091C6C_t2,10,v1,0,u_char,,,,v1,Second vertex V,high,DataCrystal
+T00448.011,T00448,func_80091C6C_t2,11,unk1E,1,char[5],,,,textureIdAndFourthPosition,Texture identifier and fourth vertex position,med,DataCrystal
+T00448.012,T00448,func_80091C6C_t2,12,u3,0,u_char,,,,u3,Fourth vertex U,high,DataCrystal
+T00448.013,T00448,func_80091C6C_t2,13,unk24,1,char[3],,,,fourthColor,Fourth vertex color,med,DataCrystal
+T00448.014,T00448,func_80091C6C_t2,14,v3,0,u_char,,,,v3,Fourth vertex V,high,DataCrystal
+T00449.000,T00449,func_80091E10_t,0,geometryOffset,0,int,,,,geometryOffset,Offset of the scrolled polygon,med,declaration-only;source:2842C.c:154
+T00449.001,T00449,func_80091E10_t,1,unk4,1,char[3],,,,reserved04,Unreferenced bytes,low,declaration-only;source:2842C.c:155
+T00449.002,T00449,func_80091E10_t,2,delay,0,u_char,,,,delay,Ticks per step,med,declaration-only;source:2842C.c:156
+T00449.003,T00449,func_80091E10_t,3,baseU,0,u_char,,,,baseU,Window origin U,med,declaration-only;source:2842C.c:157
+T00449.004,T00449,func_80091E10_t,4,baseV,0,u_char,,,,baseV,Window origin V,med,declaration-only;source:2842C.c:158
+T00449.005,T00449,func_80091E10_t,5,width,0,u_char,,,,width,Texture width,med,declaration-only;source:2842C.c:159
+T00449.006,T00449,func_80091E10_t,6,height,0,u_char,,,,height,Texture height,med,declaration-only;source:2842C.c:160
+T00449.007,T00449,func_80091E10_t,7,currentU,0,u_char,,,,currentU,Current U,med,declaration-only;source:2842C.c:161
+T00449.008,T00449,func_80091E10_t,8,currentV,0,u_char,,,,currentV,Current V,med,declaration-only;source:2842C.c:162
+T00449.009,T00449,func_80091E10_t,9,windowWidth,0,u_char,,,,windowWidth,Window width,med,declaration-only;source:2842C.c:163
+T00449.010,T00449,func_80091E10_t,10,windowHeight,0,u_char,,,,windowHeight,Window height,med,declaration-only;source:2842C.c:164
+T00449.011,T00449,func_80091E10_t,11,stepU,0,signed char,,,,stepU,U step,med,declaration-only;source:2842C.c:165
+T00449.012,T00449,func_80091E10_t,12,stepV,0,signed char,,,,stepV,V step,med,declaration-only;source:2842C.c:166
+T00449.013,T00449,func_80091E10_t,13,tick,0,u_char,,,,tick,Ticks into the current step,med,declaration-only;source:2842C.c:167
+T00449.014,T00449,func_80091E10_t,14,unk13,1,char,,,,reserved13,Unreferenced byte,low,declaration-only;source:2842C.c:168
+T00449.015,T00449,func_80091E10_t,15,u,0,u_char[4],,,,u,Per-vertex U offsets,med,declaration-only;source:2842C.c:169
+T00449.016,T00449,func_80091E10_t,16,v,0,u_char[4],,,,v,Per-vertex V offsets,med,declaration-only;source:2842C.c:170
+T00450.000,T00450,func_80091FE8_t,0,tick,0,u_char,,,,tick,Ticks into the current step,med,declaration-only;source:2842C.c:174
+T00450.001,T00450,func_80091FE8_t,1,frame,0,u_char,,,,frame,Current step,med,declaration-only;source:2842C.c:175
+T00450.002,T00450,func_80091FE8_t,2,frameCount,0,u_char,,,,frameCount,Number of steps,med,declaration-only;source:2842C.c:176
+T00450.003,T00450,func_80091FE8_t,3,columns,0,u_char,,,,columns,Steps per row,med,declaration-only;source:2842C.c:177
+T00450.004,T00450,func_80091FE8_t,4,unk4,1,char[3],,,,reserved04,Unreferenced bytes,low,declaration-only;source:2842C.c:178
+T00450.005,T00450,func_80091FE8_t,5,delay,0,u_char,,,,delay,Ticks per step,med,declaration-only;source:2842C.c:179
+T00450.006,T00450,func_80091FE8_t,6,scrollStep,0,int,,,,scrollStep,Scroll distance per step,med,declaration-only;source:2842C.c:180
+T00450.007,T00450,func_80091FE8_t,7,rect,0,RECT,,,,rect,Scrolled texture rectangle,med,declaration-only;source:2842C.c:181
+T00451.000,T00451,func_80092548_t,0,count,0,u_char,,,,objectCount,Number of scripted objects,med,declaration-only;source:2842C.c:185
+T00451.001,T00451,func_80092548_t,1,unk1,1,u_char,,,,reserved01,Unreferenced byte,low,declaration-only;source:2842C.c:186
+T00451.002,T00451,func_80092548_t,2,active,0,u_char,,,,isActive,Sequence starts active,med,declaration-only;source:2842C.c:187
+T00451.003,T00451,func_80092548_t,3,unk3,1,u_char,,,,reserved03,Unreferenced byte,low,declaration-only;source:2842C.c:188
+T00452.000,T00452,func_80092548_t2,0,size,0,short,,,,size,Size of the effect chunk,med,declaration-only;source:2842C.c:192
+T00452.001,T00452,func_80092548_t2,1,type,0,short,,,,type,Type of the effect chunk,med,declaration-only;source:2842C.c:193
+T00453.000,T00453,func_80092B04_t,0,unk0,1,int,,,,sceneEntry,Scene object the effect drives,med,declaration-only;source:2842C.c:66
+T00453.001,T00453,func_80092B04_t,1,unk4,1,void *,,,,scriptCursor,Current command position,med,declaration-only;source:2842C.c:67
+T00453.002,T00453,func_80092B04_t,2,unk8,1,char[44],,,,reserved08,Remaining object state,low,declaration-only;source:2842C.c:68
+T00454.000,T00454,func_80092B04_t2,0,unk0,1,short,,,,size,Command size in bytes,med,declaration-only;source:2842C.c:61
+T00454.001,T00454,func_80092B04_t2,1,unk2,1,short,,,,opcode,Command opcode,med,declaration-only;source:2842C.c:62
+T00455.000,T00455,func_80092F74_t,0,unk0,1,int *,,,,sceneEntry,Scene object entry,high,source:2842C.c:972
+T00455.001,T00455,func_80092F74_t,1,unk4,1,void *,,,command pointer,scriptCursor,Current command position,high,source:2842C.c:959
+T00455.002,T00455,func_80092F74_t,2,unk8,1,short,,,geometry group index,objectId,Scene object identifier or minus one,high,source:2842C.c:968
+T00455.003,T00455,func_80092F74_t,3,unkA,1,short,,,,reserved0A,Unreferenced short,low,declaration-only;source:2842C.c:18
+T00455.004,T00455,func_80092F74_t,4,unkC,1,VECTOR,,,position in sixteenths,position,Object position,high,source:2842C.c:974
+T00455.005,T00455,func_80092F74_t,5,unk1C,1,SVECTOR,,,rotation,rotation,Object rotation,high,source:2842C.c:975
+T00455.006,T00455,func_80092F74_t,6,unk24,1,SVECTOR,,,linear velocity,velocity,Position change per update,high,source:2842C.c:1205
+T00455.007,T00455,func_80092F74_t,7,unk2C,1,SVECTOR,,,angular velocity,angularVelocity,Rotation change per update,high,source:2842C.c:1206
+T00456.000,T00456,func_80092F74_t2,0,unk0,1,int *,,,,reserved00,Unidentified pointer,low,declaration-only;source:2842C.c:26
+T00456.001,T00456,func_80092F74_t2,1,unk4,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5)[4],,,,operands,Command operand words,high,source:2842C.c:1072
+T00456.002,T00456,func_80092F74_t2,2,unk14,1,int,,,,extraOperandOne,Additional operand,med,source:2842C.c:1137
+T00456.003,T00456,func_80092F74_t2,3,unk18,1,int,,,,extraOperandTwo,Additional operand,med,source:2842C.c:1137
+T00457.000,T00457,func_80093914_t,0,unk0,1,u_char[12],,,,positions,Vertex positions,med,DataCrystal
+T00457.001,T00457,func_80093914_t,1,unkC,1,u_char,,,first vertex red,red1,First vertex red,high,source:2842C.c:1421
+T00457.002,T00457,func_80093914_t,2,unkD,1,u_char,,,first vertex green,green1,First vertex green,high,source:2842C.c:1422
+T00457.003,T00457,func_80093914_t,3,unkE,1,u_char,,,,blue1,First vertex blue,med,DataCrystal
+T00457.004,T00457,func_80093914_t,4,unkF,1,u_char,,,,type,Polygon type,med,DataCrystal
+T00457.005,T00457,func_80093914_t,5,unk10,1,u_char,,,,red2,Second vertex red,high,source:2842C.c:1424
+T00457.006,T00457,func_80093914_t,6,unk11,1,u_char,,,,green2,Second vertex green,high,source:2842C.c:1425
+T00457.007,T00457,func_80093914_t,7,unk12,1,u_char,,,,blue2,Second vertex blue,med,DataCrystal
+T00457.008,T00457,func_80093914_t,8,unk13,1,u_char,,,,u3,Third vertex U,med,DataCrystal
+T00457.009,T00457,func_80093914_t,9,unk14,1,u_char,,,,red3,Third vertex red,high,source:2842C.c:1427
+T00457.010,T00457,func_80093914_t,10,unk15,1,u_char,,,,green3,Third vertex green,high,source:2842C.c:1428
+T00457.011,T00457,func_80093914_t,11,unk16,1,u_char[10],,,,remainder,Remaining polygon bytes,med,DataCrystal
+T00458.000,T00458,func_80093914_t2,0,unk0,1,u_char[12],,,,positions,Vertex positions,med,DataCrystal
+T00458.001,T00458,func_80093914_t2,1,unkC,1,u_char,,,,red1,First vertex red,high,source:2842C.c:1433
+T00458.002,T00458,func_80093914_t2,2,unkD,1,u_char,,,,green1,First vertex green,high,source:2842C.c:1434
+T00458.003,T00458,func_80093914_t2,3,unkE,1,u_char,,,,blue1,First vertex blue,med,DataCrystal
+T00458.004,T00458,func_80093914_t2,4,unkF,1,u_char,,,,type,Polygon type,med,DataCrystal
+T00458.005,T00458,func_80093914_t2,5,unk10,1,u_char,,,,red2,Second vertex red,high,source:2842C.c:1436
+T00458.006,T00458,func_80093914_t2,6,unk11,1,u_char,,,,green2,Second vertex green,high,source:2842C.c:1437
+T00458.007,T00458,func_80093914_t2,7,unk12,1,u_char,,,,blue2,Second vertex blue,med,DataCrystal
+T00458.008,T00458,func_80093914_t2,8,unk13,1,u_char,,,,u3,Third vertex U,med,DataCrystal
+T00458.009,T00458,func_80093914_t2,9,unk14,1,u_char,,,,red3,Third vertex red,high,source:2842C.c:1439
+T00458.010,T00458,func_80093914_t2,10,unk15,1,u_char,,,,green3,Third vertex green,high,source:2842C.c:1440
+T00458.011,T00458,func_80093914_t2,11,unk16,1,u_char[14],,,,middle,Bytes between the third and fourth colors,med,DataCrystal
+T00458.012,T00458,func_80093914_t2,12,unk24,1,u_char,,,,red4,Fourth vertex red,high,source:2842C.c:1442
+T00458.013,T00458,func_80093914_t2,13,unk25,1,u_char,,,,green4,Fourth vertex green,high,source:2842C.c:1443
+T00458.014,T00458,func_80093914_t2,14,unk26,1,u_char,,,,blue4,Fourth vertex blue,med,DataCrystal
+T00458.015,T00458,func_80093914_t2,15,unk27,1,u_char,,,,v4,Fourth vertex V,med,DataCrystal
 T00459.000,T00459,func_800962E4_t,0,unk0,1,u_short,,,,,,,
 T00459.001,T00459,func_800962E4_t,1,unk2,1,u_short,,,,,,,
 T00459.002,T00459,func_800962E4_t,2,unk4,1,u_short,,,,,,,
@@ -4074,12 +4074,12 @@ T00459.010,T00459,func_800962E4_t,10,unkF,1,char,,,,,,,
 T00460.000,T00460,func_8009C378_t,0,unk0,1,void *,,,,,,,
 T00460.001,T00460,func_8009C378_t,1,unk4,1,void *,,,,,,,
 T00460.002,T00460,func_8009C378_t,2,unk8,1,char[30968],,,,,,,
-T00461.000,T00461,func_800A0024_t,0,unk0,1,u_char,,,,,,,
-T00461.001,T00461,func_800A0024_t,1,unk1,1,u_char,,,,,,,
-T00461.002,T00461,func_800A0024_t,2,unk2,1,u_char,,,,,,,
-T00461.003,T00461,func_800A0024_t,3,unk3,1,u_char,,,,,,,
-T00461.004,T00461,func_800A0024_t,4,unk4,1,int,,,,,,,
-T00461.005,T00461,func_800A0024_t,5,unk8,1,int,,,,,,,
+T00461.000,T00461,func_800A0024_t,0,unk0,1,u_char,,,,placementByte0,First copied placement byte,low,source:30DB0.c:3678
+T00461.001,T00461,func_800A0024_t,1,unk1,1,u_char,,,,heightAboveGround,Height above ground in units of 128,med,source:30DB0.c:3684
+T00461.002,T00461,func_800A0024_t,2,unk2,1,u_char,,,,placementByte2,Third copied placement byte,low,source:30DB0.c:3678
+T00461.003,T00461,func_800A0024_t,3,unk3,1,u_char,,,,orientation,Gimmick orientation,high,source:30DB0.c:3679
+T00461.004,T00461,func_800A0024_t,4,unk4,1,int,,,,positionXY,Position X and Y words,med,source:30DB0.c:3685
+T00461.005,T00461,func_800A0024_t,5,unk8,1,int,,,,positionZ,Position Z word,med,source:30DB0.c:3686
 T00462.000,T00462,func_800A1108_t,0,unk0,1,int,,,,,,,
 T00462.001,T00462,func_800A1108_t,1,unk4,1,int,,,,,,,
 T00462.002,T00462,func_800A1108_t,2,unk8,1,int,,,,,,,
@@ -4099,7 +4099,7 @@ T00464.001,T00464,func_800A3054_t,1,unk2,1,short,,,,,,,
 T00464.002,T00464,func_800A3054_t,2,unk4,1,short,,,,,,,
 T00465.000,T00465,func_800A6660_t,0,unk0,1,char[6],,,,,,,
 T00465.001,T00465,func_800A6660_t,1,unk6,1,short,,,,,,,
-T00466.000,T00466,func_800A6798_t,0,words,0,int[2],,,,,,,
+T00466.000,T00466,func_800A6798_t,0,words,0,int[2],,,,words,Words of the saved position,med,declaration-only;source:3A1A0.c:28
 T00467.000,T00467,func_800AAE9C_t,0,unk0,1,u_char,,,,,,,
 T00467.001,T00467,func_800AAE9C_t,1,unk1,1,u_char,,,,,,,
 T00468.000,T00468,func_800AB358_t,0,unk0,1,u_char,,,,,,,
@@ -4974,21 +4974,21 @@ T00561.020,T00561,movementStepState,20,moveY,0,int,,,,,,,
 T00561.021,T00561,movementStepState,21,angle,0,short,,,,,,,
 T00561.022,T00561,movementStepState,22,pad18A,1,char[158],,,,,,,
 T00561.023,T00561,movementStepState,23,unk228,1,int,,,,,,,
-T00562.000,T00562,mpdObjectSpawn,0,type,0,u_char,,,,,,,
-T00562.001,T00562,mpdObjectSpawn,1,unk1,1,u_char,,,,,,,
-T00562.002,T00562,mpdObjectSpawn,2,unk2,1,u_char,,,,,,,
-T00562.003,T00562,mpdObjectSpawn,3,unk3,1,u_char,,,,,,,
-T00562.004,T00562,mpdObjectSpawn,4,flag,0,u_short,,,,,,,
-T00562.005,T00562,mpdObjectSpawn,5,flagMin,0,u_char,,,,,,,
-T00562.006,T00562,mpdObjectSpawn,6,flagMax,0,u_char,,,,,,,
-T00562.007,T00562,mpdObjectSpawn,7,slot,0,u_char,,,,,,,
-T00562.008,T00562,mpdObjectSpawn,8,unk9,1,u_char,,,,,,,
-T00562.009,T00562,mpdObjectSpawn,9,x,0,u_char,,,,,,,
-T00562.010,T00562,mpdObjectSpawn,10,z,0,u_char,,,,,,,
-T00562.011,T00562,mpdObjectSpawn,11,y,0,u_char,,,,,,,
-T00562.012,T00562,mpdObjectSpawn,12,direction,0,u_char,,,,,,,
-T00562.013,T00562,mpdObjectSpawn,13,model,0,u_short,,,,,,,
-T00562.014,T00562,mpdObjectSpawn,14,unk10,1,u_char[24],,,,,,,
+T00562.000,T00562,mpdObjectSpawn,0,type,0,u_char,,,,kind,Object kind,med,declaration-only;source:146C.c:379
+T00562.001,T00562,mpdObjectSpawn,1,unk1,1,u_char,,,,reserved01,Unidentified byte,low,declaration-only;source:146C.c:380
+T00562.002,T00562,mpdObjectSpawn,2,unk2,1,u_char,,,,reserved02,Unidentified byte,low,declaration-only;source:146C.c:381
+T00562.003,T00562,mpdObjectSpawn,3,unk3,1,u_char,,,,reserved03,Unidentified byte,low,declaration-only;source:146C.c:382
+T00562.004,T00562,mpdObjectSpawn,4,flag,0,u_short,,,,flag,Condition flag,med,declaration-only;source:146C.c:383
+T00562.005,T00562,mpdObjectSpawn,5,flagMin,0,u_char,,,,flagMin,Minimum flag value,med,declaration-only;source:146C.c:384
+T00562.006,T00562,mpdObjectSpawn,6,flagMax,0,u_char,,,,flagMax,Maximum flag value,med,declaration-only;source:146C.c:385
+T00562.007,T00562,mpdObjectSpawn,7,slot,0,u_char,,,,slot,Object slot,med,declaration-only;source:146C.c:386
+T00562.008,T00562,mpdObjectSpawn,8,unk9,1,u_char,,,,reserved09,Unidentified byte,low,declaration-only;source:146C.c:387
+T00562.009,T00562,mpdObjectSpawn,9,x,0,u_char,,,,tileX,Tile X,med,declaration-only;source:146C.c:388
+T00562.010,T00562,mpdObjectSpawn,10,z,0,u_char,,,,tileZ,Tile Z,med,declaration-only;source:146C.c:389
+T00562.011,T00562,mpdObjectSpawn,11,y,0,u_char,,,,height,Height,med,declaration-only;source:146C.c:390
+T00562.012,T00562,mpdObjectSpawn,12,direction,0,u_char,,,,direction,Facing direction,med,declaration-only;source:146C.c:391
+T00562.013,T00562,mpdObjectSpawn,13,model,0,u_short,,,,model,Model identifier,med,declaration-only;source:146C.c:392
+T00562.014,T00562,mpdObjectSpawn,14,unk10,1,u_char[24],,,,reserved10,Unidentified bytes,low,declaration-only;source:146C.c:393
 T00563.000,T00563,nearestWaypointDestination,0,x,0,unsigned char,,,,,,,
 T00563.001,T00563,nearestWaypointDestination,1,y,0,unsigned char,,,,,,,
 T00563.002,T00563,nearestWaypointDestination,2,z,0,unsigned char,,,,,,,
@@ -5035,35 +5035,35 @@ T00565.034,T00565,objectAnimationState,34,durability,0,u_char,,,,,,,
 T00565.035,T00565,objectAnimationState,35,pad16E,1,u_char,,,,,,,
 T00565.036,T00565,objectAnimationState,36,parentObject,0,u_char,,,,,,,
 T00565.037,T00565,objectAnimationState,37,frame,0,u_char,,,,,,,
-T00566.000,T00566,objectMotionContext,0,prefix,0,char[8],,,,,,,
-T00566.001,T00566,objectMotionContext,1,flags,0,u_int,,,,,,,
-T00566.002,T00566,objectMotionContext,2,paddingC,0,char[3],,,,,,,
-T00566.003,T00566,objectMotionContext,3,objectId,0,u_char,,,,,,,
-T00566.004,T00566,objectMotionContext,4,padding10,0,char[10],,,,,,,
-T00566.005,T00566,objectMotionContext,5,mode,0,short,,,,,,,
-T00566.006,T00566,objectMotionContext,6,x,0,short,,,,,,,
-T00566.007,T00566,objectMotionContext,7,y,0,short,,,,,,,
-T00566.008,T00566,objectMotionContext,8,z,0,short,,,,,,,
-T00566.009,T00566,objectMotionContext,9,padding22,0,short,,,,,,,
-T00566.010,T00566,objectMotionContext,10,rotationX,0,short,,,,,,,
-T00566.011,T00566,objectMotionContext,11,rotationY,0,short,,,,,,,
-T00566.012,T00566,objectMotionContext,12,rotationZ,0,short,,,,,,,
-T00566.013,T00566,objectMotionContext,13,padding2A,0,short,,,,,,,
-T00566.014,T00566,objectMotionContext,14,scaleX,0,short,,,,,,,
-T00566.015,T00566,objectMotionContext,15,scaleY,0,short,,,,,,,
-T00566.016,T00566,objectMotionContext,16,scaleZ,0,short,,,,,,,
-T00566.017,T00566,objectMotionContext,17,padding32,0,short,,,,,,,
-T00566.018,T00566,objectMotionContext,18,padding34,0,short,,,,,,,
-T00566.019,T00566,objectMotionContext,19,deltaY,0,short,,,,,,,
-T00566.020,T00566,objectMotionContext,20,padding38,0,short,,,,,,,
-T00566.021,T00566,objectMotionContext,21,orientation,0,short,,,,,,,
-T00566.022,T00566,objectMotionContext,22,padding3C,0,char[240],,,,,,,
-T00566.023,T00566,objectMotionContext,23,savedState,0,char[32],,,,,,,
-T00566.024,T00566,objectMotionContext,24,state,0,char[32],,,,,,,
-T00566.025,T00566,objectMotionContext,25,padding16C,0,char[2],,,,,,,
-T00566.026,T00566,objectMotionContext,26,material,0,u_char,,,,,,,
-T00566.027,T00566,objectMotionContext,27,padding16F,0,u_char,,,,,,,
-T00566.028,T00566,objectMotionContext,28,frame,0,u_char,,,,,,,
+T00566.000,T00566,objectMotionContext,0,prefix,0,char[8],,,,reserved00,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:91
+T00566.001,T00566,objectMotionContext,1,flags,0,u_int,,,,flags,Flags of the gimmick motion,med,declaration-only;source:44F14.c:92
+T00566.002,T00566,objectMotionContext,2,paddingC,0,char[3],,,,reserved0C,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:93
+T00566.003,T00566,objectMotionContext,3,objectId,0,u_char,,,,objectId,Object id of the gimmick motion,med,declaration-only;source:44F14.c:94
+T00566.004,T00566,objectMotionContext,4,padding10,0,char[10],,,,reserved10,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:95
+T00566.005,T00566,objectMotionContext,5,mode,0,short,,,,mode,Mode of the gimmick motion,med,declaration-only;source:44F14.c:96
+T00566.006,T00566,objectMotionContext,6,x,0,short,,,,x,X of the gimmick motion,med,declaration-only;source:44F14.c:97
+T00566.007,T00566,objectMotionContext,7,y,0,short,,,,y,Y of the gimmick motion,med,declaration-only;source:44F14.c:97
+T00566.008,T00566,objectMotionContext,8,z,0,short,,,,z,Z of the gimmick motion,med,declaration-only;source:44F14.c:97
+T00566.009,T00566,objectMotionContext,9,padding22,0,short,,,,pad22,Alignment padding,low,declaration-only;source:44F14.c:97
+T00566.010,T00566,objectMotionContext,10,rotationX,0,short,,,,rotationX,Rotation x of the gimmick motion,med,declaration-only;source:44F14.c:98
+T00566.011,T00566,objectMotionContext,11,rotationY,0,short,,,,rotationY,Rotation y of the gimmick motion,med,declaration-only;source:44F14.c:98
+T00566.012,T00566,objectMotionContext,12,rotationZ,0,short,,,,rotationZ,Rotation z of the gimmick motion,med,declaration-only;source:44F14.c:98
+T00566.013,T00566,objectMotionContext,13,padding2A,0,short,,,,pad2A,Alignment padding,low,declaration-only;source:44F14.c:98
+T00566.014,T00566,objectMotionContext,14,scaleX,0,short,,,,scaleX,Scale x of the gimmick motion,med,declaration-only;source:44F14.c:99
+T00566.015,T00566,objectMotionContext,15,scaleY,0,short,,,,scaleY,Scale y of the gimmick motion,med,declaration-only;source:44F14.c:99
+T00566.016,T00566,objectMotionContext,16,scaleZ,0,short,,,,scaleZ,Scale z of the gimmick motion,med,declaration-only;source:44F14.c:99
+T00566.017,T00566,objectMotionContext,17,padding32,0,short,,,,pad32,Alignment padding,low,declaration-only;source:44F14.c:99
+T00566.018,T00566,objectMotionContext,18,padding34,0,short,,,,reserved34,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:99
+T00566.019,T00566,objectMotionContext,19,deltaY,0,short,,,,deltaY,Delta y of the gimmick motion,med,declaration-only;source:44F14.c:100
+T00566.020,T00566,objectMotionContext,20,padding38,0,short,,,,reserved38,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:100
+T00566.021,T00566,objectMotionContext,21,orientation,0,short,,,,orientation,Orientation of the gimmick motion,med,declaration-only;source:44F14.c:100
+T00566.022,T00566,objectMotionContext,22,padding3C,0,char[240],,,,reserved3C,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:101
+T00566.023,T00566,objectMotionContext,23,savedState,0,char[32],,,,savedState,Saved state of the gimmick motion,med,declaration-only;source:44F14.c:102
+T00566.024,T00566,objectMotionContext,24,state,0,char[32],,,,state,State of the gimmick motion,med,declaration-only;source:44F14.c:103
+T00566.025,T00566,objectMotionContext,25,padding16C,0,char[2],,,,reserved16C,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:104
+T00566.026,T00566,objectMotionContext,26,material,0,u_char,,,,material,Material of the gimmick motion,med,declaration-only;source:44F14.c:105
+T00566.027,T00566,objectMotionContext,27,padding16F,0,u_char,,,,reserved16F,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:105
+T00566.028,T00566,objectMotionContext,28,frame,0,u_char,,,,frame,Frame of the gimmick motion,med,declaration-only;source:44F14.c:105
 T00567.000,T00567,obstructionCache,0,p0,0,unsigned char,,,,,,,
 T00567.001,T00567,obstructionCache,1,p1,0,unsigned char,,,,,,,
 T00567.002,T00567,obstructionCache,2,tested,0,unsigned char,,,,,,,
@@ -5643,30 +5643,30 @@ T00636.000,T00636,vs_battle_actor_unk8C0,0,id,0,u_short,,,,,,,
 T00636.001,T00636,vs_battle_actor_unk8C0,1,index,0,char,4,,,,,,
 T00636.002,T00636,vs_battle_actor_unk8C0,2,unk2_4,1,char,4,,,,,,
 T00636.003,T00636,vs_battle_actor_unk8C0,3,unk3,1,char,,,,,,,
-T00637.000,T00637,vs_battle_backgroundLayout,0,width,0,int,,,,,,,
-T00637.001,T00637,vs_battle_backgroundLayout,1,height,0,int,,,,,,,
-T00637.002,T00637,vs_battle_backgroundLayout,2,unk8,1,int,,,,,,,
-T00637.003,T00637,vs_battle_backgroundLayout,3,tiles,0,vs_battle_backgroundTile[0],,,,,,,
-T00638.000,T00638,vs_battle_backgroundTile,0,uv,0,RECT,,,,,,,
-T00638.001,T00638,vs_battle_backgroundTile,1,colors,0,CVECTOR[4],,,,,,,
-T00639.000,T00639,vs_battle_cameraTransition_t,0,fromCameraState,0,vs_camera_t,,,,,,,
-T00639.001,T00639,vs_battle_cameraTransition_t,1,fromSpherical,0,_sphericalCamera,,,,,,,
-T00639.002,T00639,vs_battle_cameraTransition_t,2,fromNearClip,0,int,,,,,,,
-T00639.003,T00639,vs_battle_cameraTransition_t,3,fromProjectionDistance,0,int,,,,,,,
-T00639.004,T00639,vs_battle_cameraTransition_t,4,fromFarClip,0,int,,,,,,,
-T00639.005,T00639,vs_battle_cameraTransition_t,5,toSpherical,0,_sphericalCamera,,,,,,,
-T00639.006,T00639,vs_battle_cameraTransition_t,6,toNearClip,0,int,,,,,,,
-T00639.007,T00639,vs_battle_cameraTransition_t,7,toProjectionDistance,0,int,,,,,,,
-T00639.008,T00639,vs_battle_cameraTransition_t,8,toFarClip,0,int,,,,,,,
-T00639.009,T00639,vs_battle_cameraTransition_t,9,targetPosition,0,VECTOR,,,,,,,
-T00639.010,T00639,vs_battle_cameraTransition_t,10,targetLookAt,0,VECTOR,,,,,,,
-T00639.011,T00639,vs_battle_cameraTransition_t,11,direction,0,VECTOR,,,,,,,
-T00639.012,T00639,vs_battle_cameraTransition_t,12,lookAtStep,0,VECTOR,,,,,,,
-T00639.013,T00639,vs_battle_cameraTransition_t,13,farClipStep,0,int,,,,,,,
-T00639.014,T00639,vs_battle_cameraTransition_t,14,nearClipStep,0,int,,,,,,,
-T00639.015,T00639,vs_battle_cameraTransition_t,15,projectionDistanceStep,0,int,,,,,,,
-T00639.016,T00639,vs_battle_cameraTransition_t,16,transitionSpeed,0,int,,,,,,,
-T00639.017,T00639,vs_battle_cameraTransition_t,17,transitionFrames,0,int,,,,,,,
+T00637.000,T00637,vs_battle_backgroundLayout,0,width,0,int,,,,width,Tile columns,med,declaration-only;source:2842C.h:12
+T00637.001,T00637,vs_battle_backgroundLayout,1,height,0,int,,,,height,Tile rows,med,declaration-only;source:2842C.h:13
+T00637.002,T00637,vs_battle_backgroundLayout,2,unk8,1,int,,,,reserved08,Unreferenced word,low,declaration-only;source:2842C.h:14
+T00637.003,T00637,vs_battle_backgroundLayout,3,tiles,0,vs_battle_backgroundTile[0],,,,tiles,Background tiles,med,declaration-only;source:2842C.h:15
+T00638.000,T00638,vs_battle_backgroundTile,0,uv,0,RECT,,,,textureRect,Texture rect of the background tile,med,declaration-only;source:2842C.h:7
+T00638.001,T00638,vs_battle_backgroundTile,1,colors,0,CVECTOR[4],,,,cornerColors,Corner colors of the background tile,med,declaration-only;source:2842C.h:8
+T00639.000,T00639,vs_battle_cameraTransition_t,0,fromCameraState,0,vs_camera_t,,,,fromCameraState,From camera state of the camera transition,med,declaration-only;source:146C.h:805
+T00639.001,T00639,vs_battle_cameraTransition_t,1,fromSpherical,0,_sphericalCamera,,,,fromSpherical,From spherical of the camera transition,med,declaration-only;source:146C.h:806
+T00639.002,T00639,vs_battle_cameraTransition_t,2,fromNearClip,0,int,,,,fromNearClip,From near clip of the camera transition,med,declaration-only;source:146C.h:807
+T00639.003,T00639,vs_battle_cameraTransition_t,3,fromProjectionDistance,0,int,,,,fromProjectionDistance,From projection distance of the camera transition,med,declaration-only;source:146C.h:808
+T00639.004,T00639,vs_battle_cameraTransition_t,4,fromFarClip,0,int,,,,fromFarClip,From far clip of the camera transition,med,declaration-only;source:146C.h:809
+T00639.005,T00639,vs_battle_cameraTransition_t,5,toSpherical,0,_sphericalCamera,,,,toSpherical,To spherical of the camera transition,med,declaration-only;source:146C.h:810
+T00639.006,T00639,vs_battle_cameraTransition_t,6,toNearClip,0,int,,,,toNearClip,To near clip of the camera transition,med,declaration-only;source:146C.h:811
+T00639.007,T00639,vs_battle_cameraTransition_t,7,toProjectionDistance,0,int,,,,toProjectionDistance,To projection distance of the camera transition,med,declaration-only;source:146C.h:812
+T00639.008,T00639,vs_battle_cameraTransition_t,8,toFarClip,0,int,,,,toFarClip,To far clip of the camera transition,med,declaration-only;source:146C.h:813
+T00639.009,T00639,vs_battle_cameraTransition_t,9,targetPosition,0,VECTOR,,,,targetPosition,Target position of the camera transition,med,declaration-only;source:146C.h:814
+T00639.010,T00639,vs_battle_cameraTransition_t,10,targetLookAt,0,VECTOR,,,,targetLookAt,Target look at of the camera transition,med,declaration-only;source:146C.h:815
+T00639.011,T00639,vs_battle_cameraTransition_t,11,direction,0,VECTOR,,,,direction,Direction of the camera transition,med,declaration-only;source:146C.h:816
+T00639.012,T00639,vs_battle_cameraTransition_t,12,lookAtStep,0,VECTOR,,,,lookAtStep,Look at step of the camera transition,med,declaration-only;source:146C.h:817
+T00639.013,T00639,vs_battle_cameraTransition_t,13,farClipStep,0,int,,,,farClipStep,Far clip step of the camera transition,med,declaration-only;source:146C.h:818
+T00639.014,T00639,vs_battle_cameraTransition_t,14,nearClipStep,0,int,,,,nearClipStep,Near clip step of the camera transition,med,declaration-only;source:146C.h:819
+T00639.015,T00639,vs_battle_cameraTransition_t,15,projectionDistanceStep,0,int,,,,projectionDistanceStep,Projection distance step of the camera transition,med,declaration-only;source:146C.h:820
+T00639.016,T00639,vs_battle_cameraTransition_t,16,transitionSpeed,0,int,,,,transitionSpeed,Transition speed of the camera transition,med,declaration-only;source:146C.h:821
+T00639.017,T00639,vs_battle_cameraTransition_t,17,transitionFrames,0,int,,,,transitionFrames,Transition frames of the camera transition,med,declaration-only;source:146C.h:822
 T00640.000,T00640,vs_battle_charInitData,0,subType,0,u_short,,,,,,,
 T00640.001,T00640,vs_battle_charInitData,1,unk2,1,char,,,,,,,
 T00640.002,T00640,vs_battle_charInitData,2,reach,0,u_int,5,,,,,,
@@ -5756,12 +5756,12 @@ T00654.004,T00654,vs_battle_lootedWeapon,4,blade,0,vs_main_inventoryBlade,,,,,,,
 T00654.005,T00654,vs_battle_lootedWeapon,5,grip,0,vs_main_inventoryGrip,,,,,,,
 T00654.006,T00654,vs_battle_lootedWeapon,6,gems,0,vs_main_inventoryGem[3],,,,,,,
 T00654.007,T00654,vs_battle_lootedWeapon,7,name,0,char[24],,,,,,,
-T00655.000,T00655,vs_battle_manualDisplayState_t,0,currentManual,0,u_short,,,,,,,
-T00655.001,T00655,vs_battle_manualDisplayState_t,1,unk2,1,u_short,,,,,,,
-T00655.002,T00655,vs_battle_manualDisplayState_t,2,scrollPositions,0,u_short[14],,,,,,,
-T00655.003,T00655,vs_battle_manualDisplayState_t,3,unk20,1,u_short,,,,,,,
-T00655.004,T00655,vs_battle_manualDisplayState_t,4,unk22,1,char,,,,,,,
-T00655.005,T00655,vs_battle_manualDisplayState_t,5,unk23,1,char,,,,,,,
+T00655.000,T00655,vs_battle_manualDisplayState_t,0,currentManual,0,u_short,,,,currentManual,Selected manual,med,declaration-only;source:146C.h:649
+T00655.001,T00655,vs_battle_manualDisplayState_t,1,unk2,1,u_short,,,,reserved02,Unreferenced short,low,declaration-only;source:146C.h:650
+T00655.002,T00655,vs_battle_manualDisplayState_t,2,scrollPositions,0,u_short[14],,,,scrollPositions,Scroll position per manual,med,declaration-only;source:146C.h:651
+T00655.003,T00655,vs_battle_manualDisplayState_t,3,unk20,1,u_short,,,,reserved20,Unreferenced short,low,declaration-only;source:146C.h:652
+T00655.004,T00655,vs_battle_manualDisplayState_t,4,unk22,1,char,,,,reserved22,Unreferenced byte,low,declaration-only;source:146C.h:653
+T00655.005,T00655,vs_battle_manualDisplayState_t,5,unk23,1,char,,,,reserved23,Unreferenced byte,low,declaration-only;source:146C.h:654
 T00656.000,T00656,vs_battle_menu9CursorMemory_t,0,titlePage,0,u_char,,,,,,,
 T00656.001,T00656,vs_battle_menu9CursorMemory_t,1,titleRow,0,u_char,,,,,,,
 T00656.002,T00656,vs_battle_menu9CursorMemory_t,2,encyclopaediaPage,0,u_char,,,,,,,
@@ -6331,8 +6331,8 @@ T00704.003,T00704,vs_main_inventory_t,3,grips,0,vs_main_inventoryGrip[16],,,,,,,
 T00704.004,T00704,vs_main_inventory_t,4,armor,0,vs_main_inventoryArmor[16],,,,,,,
 T00704.005,T00704,vs_main_inventory_t,5,gems,0,vs_main_inventoryGem[48],,,,,,,
 T00704.006,T00704,vs_main_inventory_t,6,misc,0,vs_main_inventoryMisc[64],,,,,,,
-T00705.000,T00705,vs_main_mapStatus_t,0,roomFlags,0,int[16],,,,,,,
-T00705.001,T00705,vs_main_mapStatus_t,1,areaFlags,0,int[2],,,,,,,
+T00705.000,T00705,vs_main_mapStatus_t,0,roomFlags,0,int[16],,,,roomFlags,Room flags of the room visit flags,med,declaration-only;source:main.h:392
+T00705.001,T00705,vs_main_mapStatus_t,1,areaFlags,0,int[2],,,,areaFlags,Area flags of the room visit flags,med,declaration-only;source:main.h:393
 T00706.000,T00706,vs_main_scoredata_t,0,titles,0,int,,,,,,,
 T00706.001,T00706,vs_main_scoredata_t,1,enemyKills,0,u_short[6],,,,,,,
 T00706.002,T00706,vs_main_scoredata_t,2,unk10,1,int,,,,,,,
@@ -6600,8 +6600,8 @@ T00746.000,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00746.001,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,,,,
 T00747.000,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),0,effects,0,limbEffects_t,,,,,,,
 T00747.001,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),1,hp,0,u_int,,,,,,,
-T00748.000,T00748,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,,,,
-T00748.001,T00748,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,,,,
+T00748.000,T00748,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,halves,Halves of the packed pair,med,declaration-only;source:146C.h:129
+T00748.001,T00748,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,word,Word of the packed pair,med,declaration-only;source:146C.h:130
 T00749.000,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,,,,
 T00749.001,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),1,u16,0,u_short[2],,,,,,,
 T00749.002,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,,,,
@@ -6611,9 +6611,9 @@ T00751.000,T00751,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00751.001,T00751,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,,,,
 T00752.000,T00752,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,,,,
 T00752.001,T00752,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:90:9),,,,,,,
-T00753.000,T00753,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),0,u16,0,u_short[2],,,,,,,
-T00753.001,T00753,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),1,s16,0,short[2],,,,,,,
-T00753.002,T00753,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),2,s32,0,int,,,,,,,
+T00753.000,T00753,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),0,u16,0,u_short[2],,,,unsignedHalves,Unsigned halves of the effect operand,med,declaration-only;source:2842C.c:28
+T00753.001,T00753,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),1,s16,0,short[2],,,,signedHalves,Signed halves of the effect operand,med,declaration-only;source:2842C.c:29
+T00753.002,T00753,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),2,s32,0,int,,,,word,Word of the effect operand,med,declaration-only;source:2842C.c:30
 T00754.000,T00754,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\4A0A8.c:55:5),0,u8,0,u_char[2],,,,,,,
 T00754.001,T00754,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\4A0A8.c:55:5),1,s16,0,short,,,,,,,
 T00755.000,T00755,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.h:16:5),0,flags,0,func_800C1564_flags,,,,,,,

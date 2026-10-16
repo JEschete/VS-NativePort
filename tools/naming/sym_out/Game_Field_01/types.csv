@@ -41,3 +41,20 @@ T00334,OnDisc,Field::MpdFloorTrigger,Native\Game\src\Field\Mpd.h,Places a floor 
 T00335,OnDisc,Field::MpdLockTrigger,Native\Game\src\Field\Mpd.h,Extends a floor trigger with the required key or sigil and linked lock state.,high,decoded and mutated in place;source:146C.c:16293;source:146C.c:16324
 T00336,OnDisc,Field::MpdEnvironment,Native\Game\src\Field\Mpd.h,Describes room background colors and rotation weather ranges and room flags.,high,decoder-only;source:146C.c:17468;source:2842C.c:276;source:2842C.c:348
 T00337,OnDisc,Field::MpdSectionE,Native\Game\src\Field\Mpd.h,Heads an MPD section holding one or two integer arrays whose purpose is unidentified.,low,meaning-unresolved;source:146C.c:15707;source:146C.c:15710
+T00199,Misc,Field::CollisionSampleScratch,Native\Game\src\Field\Collision.h,Overlays PS1 scratchpad storage for sampling floor heights around a moving actor.,med,replaced-by:function local variables;source:3A1A0.c:2271;source:3A1A0.c:2471
+T00223,State,Battle::PendingAbilityState,Native\Game\include\Battle\Ability.h,Holds two unidentified shorts and packed execute-ability parameters.,low,meaning-unresolved;source:5BF94.h:147
+T00236,OnDisc,Field::SwingEffectRecord,Native\Game\src\Field\RoomEffects.h,Drives a damped swinging rotation of a room geometry part.,high,decoded and mutated in place;source:2842C.c:808;source:2842C.c:851
+T00320,OnDisc,Field::MpdEnemySpawn,Native\Game\src\Field\Mpd.h,Places an enemy with spawn conditions position facing and carried items.,high,decoder-only;source:146C.h:661;source:146C.c:881
+T00348,State,Field::ZoneContext,Native\Game\src\Field\Zone.h,Holds the loaded zone files enemy tables music bounds and current scene.,high,replace disc requests and buffers with native resource handles;source:146C.c:6642;source:146C.c:14818;source:146C.c:15308
+T00435,Value,Actors::ActorLocationQuery,Native\Game\src\Actors\Location.h,Receives an actor location from the actor position query.,med,source:146C.c:1969
+T00437,Value,Actors::ActorLocation,Native\Game\src\Actors\Location.h,Holds an actor packed tile coordinates and world position.,high,source:146C.c:3197;source:146C.c:1969
+T00447,OnDisc,Field::TextureFrameEffect,Native\Game\src\Field\RoomEffects.h,Cycles a room polygon through frames of a texture strip.,high,decoder-only;source:2842C.h:119
+T00448,Misc,Field::MpdPolygonUvView,Native\Game\src\Field\Mpd.h,Views the type and texture coordinates of an MPD polygon.,high,DataCrystal MPD GeometrySection polygon layout;source:2842C.c:135
+T00449,OnDisc,Field::TextureScrollEffect,Native\Game\src\Field\RoomEffects.h,Scrolls a texture window across a room polygon.,high,decoder-only;source:2842C.c:153
+T00450,OnDisc,Field::TextureRegionScrollEffect,Native\Game\src\Field\RoomEffects.h,Scrolls a texture-page rectangle in steps.,med,decoder-only;source:2842C.c:173
+T00455,State,Field::RoomEffectObject,Native\Game\src\Field\RoomEffects.h,Moves and rotates one scene object under a room-effect script.,high,source:2842C.c:968;source:2842C.c:1205
+T00456,OnDisc,Field::RoomEffectCommand,Native\Game\src\Field\RoomEffects.h,Carries the operands of one room-effect script command.,high,decoder-only;source:2842C.c:1072;source:2842C.c:1137
+T00457,Misc,Field::MpdTriangleColorView,Native\Game\src\Field\Mpd.h,Views the vertex colors of an MPD triangle to swap red and green.,high,DataCrystal MPD polygon layout;source:2842C.c:1421
+T00458,Misc,Field::MpdQuadColorView,Native\Game\src\Field\Mpd.h,Views the vertex colors of an MPD quad to swap red and green.,high,DataCrystal MPD polygon layout;source:2842C.c:1433
+T00461,Value,Field::GimmickSnapshot,Native\Game\src\Field\Gimmicks.h,Captures a gimmick placement orientation height above ground and position.,med,source function reads an uninitialized pointer first at 30DB0.c:3660;source:30DB0.c:3678
+T00562,OnDisc,Field::MpdObjectSpawn,Native\Game\src\Field\Mpd.h,Places a room object with flag conditions position direction and model.,high,decoder-only;source:146C.c:379

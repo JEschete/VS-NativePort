@@ -199,7 +199,7 @@ T00331.000,sceneObjectId,Scene object the platform moves,high,source:146C.c:1650
 T00331.001,isLooping,Motion continues when not paused,low,source:146C.c:16602
 T00331.002,isHidden,Platform disabled,high,source:146C.c:16511
 T00331.003,endWaypoint,Waypoint that reverses direction,high,source:146C.c:16551
-T00331.004,reserved00Bits12,Unreferenced bits,low,declaration-only;source:146C.h:175
+T00331.004,swapsColorsWhenFrozen,Swap red and green vertex colors while platforms are frozen,high,source:146C.c:17353
 T00331.005,startWaypoint,Waypoint the platform starts from,high,source:146C.c:16542
 T00331.006,reserved00Bits16,Unreferenced bits,low,declaration-only;source:146C.h:177
 T00331.007,reserved00Bits23,Unreferenced bits,low,declaration-only;source:146C.h:178
@@ -302,3 +302,200 @@ T00329.024,section15,Unidentified section,low,declaration-only;source:146C.h:266
 T00329.025,section16,Unidentified section,low,declaration-only;source:146C.h:267
 T00329.026,section17,Unidentified section,low,declaration-only;source:146C.h:268
 T00329.027,zoneBounds,Tile bounds of the map,high,source:146C.c:16074
+T00199.000,searchFloor,Lowest search offset for floor samples,med,source:3A1A0.c:2476
+T00199.001,excluded,Excluded sample directions,med,declaration-only;source:3A1A0.h:637
+T00199.002,pad15,Alignment padding,low,declaration-only;source:3A1A0.h:638
+T00199.003,movingActor,Actor whose surroundings are sampled,high,source:3A1A0.c:2471
+T00199.004,sampleHeights,Floor heights sampled around the actor,high,source:3A1A0.c:2271
+T00199.005,blocked,Blocked sample flags,med,declaration-only;source:3A1A0.h:641
+T00199.006,attributes,Sampled tile attributes,med,declaration-only;source:3A1A0.h:642
+T00199.007,centerAttribute,Tile attribute under the actor,med,declaration-only;source:3A1A0.h:643
+T00199.008,pad3D,Alignment padding,low,declaration-only;source:3A1A0.h:644
+T00199.009,searchCeiling,Upper search offset,low,source:3A1A0.c:2478
+T00223.000,reserved00,Unidentified short,low,declaration-only;source:5BF94.h:148
+T00223.001,reserved02,Unidentified short,low,declaration-only;source:5BF94.h:149
+T00223.002,executeAbility,Packed execute-ability parameters,med,declaration-only;source:5BF94.h:159
+T00236.000,geometryOffset,Offset of the animated geometry entry,high,source:2842C.c:831
+T00236.001,needsReset,Reset angle and velocity on the next update,high,source:2842C.c:808
+T00236.002,startsInactive,Effect starts inactive when nonzero,high,source:2842C.c:881
+T00236.003,kind,Effect kind selecting the record size,high,source:2842C.c:879;source:2842C.c:884
+T00236.004,axis,Rotation axis selector,high,source:2842C.c:833
+T00236.005,angularVelocity,Current angular velocity,high,source:2842C.c:814
+T00236.006,acceleration,Angular acceleration,high,source:2842C.c:815
+T00236.007,dampingShift,Shift applied to velocity on bounce,high,source:2842C.c:823
+T00236.008,angle,Current angle,high,source:2842C.c:814
+T00236.009,restAngle,Angle the swing settles toward,high,source:2842C.c:816;source:2842C.c:826
+T00236.010,startAngle,Angle restored on reset,high,source:2842C.c:810
+T00236.011,initialVelocity,Velocity restored on reset,high,source:2842C.c:811
+T00320.000,kind,Enemy kind,med,declaration-only;source:146C.h:662
+T00320.001,index,Enemy table index,med,declaration-only;source:146C.h:663
+T00320.002,isHidden,Hidden until revealed,med,declaration-only;source:146C.h:664
+T00320.003,reserved03,Unidentified byte,low,declaration-only;source:146C.h:665
+T00320.004,enemyId,Enemy identifier,med,declaration-only;source:146C.h:666
+T00320.005,slot,Actor slot,med,declaration-only;source:146C.h:667
+T00320.006,flagTest,Flag condition kind,med,declaration-only;source:146C.h:668
+T00320.007,statTest,Stat condition kind,med,declaration-only;source:146C.h:669
+T00320.008,flagValue,Flag condition value,med,declaration-only;source:146C.h:670
+T00320.009,statValue,Stat condition value,med,declaration-only;source:146C.h:671
+T00320.010,tileX,Tile X,med,declaration-only;source:146C.h:672
+T00320.011,direction,Facing direction,med,declaration-only;source:146C.h:673
+T00320.012,tileZ,Tile Z,med,declaration-only;source:146C.h:674
+T00320.013,height,Spawn height,med,declaration-only;source:146C.h:675
+T00320.014,settings,Spawn settings bytes,med,declaration-only;source:146C.h:676
+T00320.015,reserved18,Unidentified bytes,low,declaration-only;source:146C.h:677
+T00320.016,itemId,First carried item,med,declaration-only;source:146C.h:678
+T00320.017,item2Id,Second carried item,med,declaration-only;source:146C.h:679
+T00320.018,item3Id,Third carried item,med,declaration-only;source:146C.h:680
+T00320.019,itemCount,First item count,med,declaration-only;source:146C.h:681
+T00320.020,item2Count,Second item count,med,declaration-only;source:146C.h:682
+T00320.021,item3Count,Third item count,med,declaration-only;source:146C.h:683
+T00320.022,facing,Initial facing,med,declaration-only;source:146C.h:684
+T00320.023,actorStateByte,Byte copied into the actor at spawn,low,source:146C.c:881
+T00320.024,variant,Enemy variant,med,declaration-only;source:146C.h:686
+T00320.025,reserved26,Unidentified byte,low,declaration-only;source:146C.h:687
+T00320.026,sceneTest,Scene condition,med,declaration-only;source:146C.h:688
+T00348.000,zndId,Loaded zone identifier,med,declaration-only;source:146C.h:692
+T00348.001,mpdFiles,Room file descriptors of the zone,med,declaration-only;source:146C.h:693
+T00348.002,zndEnemyCount,Number of zone enemy records,med,declaration-only;source:146C.h:694
+T00348.003,zndEnemies,Zone enemy records,med,declaration-only;source:146C.h:695
+T00348.004,zudFiles,Unit file descriptors of the zone,med,declaration-only;source:146C.h:696
+T00348.005,loadedZudIndexPlusOne,Index plus one of the loaded unit file,high,source:146C.c:6642
+T00348.006,zudDiscRequest,Disc request loading a unit file,high,source:146C.c:6634
+T00348.007,zudData,Loaded unit file data,high,source:146C.c:6635
+T00348.008,zndDiscRequest,Disc request loading the zone file,med,declaration-only;source:146C.h:700
+T00348.009,zndData,Loaded zone file data,med,declaration-only;source:146C.h:701
+T00348.010,musicId,Zone music,med,declaration-only;source:146C.h:702
+T00348.011,musicSlot,Music slot,med,declaration-only;source:146C.h:703
+T00348.012,isMusicFadeEnabled,Fade music when the next zone uses another track,med,source:146C.c:14818;source:146C.c:14882
+T00348.013,mapId,Loaded room identifier,med,declaration-only;source:146C.h:705
+T00348.014,reserved38,Cleared on zone load; no reader identified,low,source:146C.c:14883
+T00348.015,tileColumns,Collision map columns,high,source:146C.c:15331
+T00348.016,tileRows,Collision map rows,high,source:146C.c:15332
+T00348.017,bounds,Map tile bounds,med,declaration-only;source:146C.h:709
+T00348.018,reserved48,Unreferenced word,low,declaration-only;source:146C.h:710
+T00348.019,reserved4C,Unreferenced word,low,declaration-only;source:146C.h:711
+T00348.020,reserved50,Unreferenced word,low,declaration-only;source:146C.h:712
+T00348.021,reserved54,Unreferenced word,low,declaration-only;source:146C.h:713
+T00348.022,mpdDiscRequest,Disc request loading the room file,med,declaration-only;source:146C.h:714
+T00348.023,mpdData,Loaded room file data,med,declaration-only;source:146C.h:715
+T00348.024,mpdEnemyCount,Number of room enemy placements,med,declaration-only;source:146C.h:716
+T00348.025,mpdEnemies,Room enemy placements,med,declaration-only;source:146C.h:717
+T00348.026,currentSceneId,Scene identifier used to detect scene changes,high,source:146C.c:15308
+T00435.000,location,Actor tile and position,high,source:146C.c:1969
+T00435.001,reserved0C,Unreferenced word,low,declaration-only;source:func_8006EBF8_t.h:21
+T00437.000,packedTile,Packed tile coordinates,high,source:146C.c:3197
+T00437.001,position,World position,high,source:146C.c:1969
+T00447.000,geometryOffset,Offset of the animated polygon,med,declaration-only;source:2842C.c:120
+T00447.001,reserved04,Unreferenced bytes,low,declaration-only;source:2842C.c:121
+T00447.002,delay,Ticks per frame,med,declaration-only;source:2842C.c:122
+T00447.003,baseU,Strip origin U,med,declaration-only;source:2842C.c:123
+T00447.004,baseV,Strip origin V,med,declaration-only;source:2842C.c:124
+T00447.005,frameCount,Number of frames,med,declaration-only;source:2842C.c:125
+T00447.006,columns,Frames per row,med,declaration-only;source:2842C.c:126
+T00447.007,frameWidth,Frame width,med,declaration-only;source:2842C.c:127
+T00447.008,frameHeight,Frame height,med,declaration-only;source:2842C.c:128
+T00447.009,tick,Ticks into the current frame,med,declaration-only;source:2842C.c:129
+T00447.010,frame,Current frame,med,declaration-only;source:2842C.c:130
+T00447.011,u,Per-vertex U offsets,med,declaration-only;source:2842C.c:131
+T00447.012,v,Per-vertex V offsets,med,declaration-only;source:2842C.c:132
+T00448.000,positionAndFirstColor,Vertex positions and first color,med,DataCrystal
+T00448.001,type,Polygon type,high,DataCrystal
+T00448.002,secondColor,Second vertex color,med,DataCrystal
+T00448.003,u2,Third vertex U,high,DataCrystal
+T00448.004,thirdColor,Third vertex color,med,DataCrystal
+T00448.005,v2,Third vertex V,high,DataCrystal
+T00448.006,u0,First vertex U,high,DataCrystal
+T00448.007,v0,First vertex V,high,DataCrystal
+T00448.008,texelMask,Texel transparency mask,med,DataCrystal
+T00448.009,u1,Second vertex U,high,DataCrystal
+T00448.010,v1,Second vertex V,high,DataCrystal
+T00448.011,textureIdAndFourthPosition,Texture identifier and fourth vertex position,med,DataCrystal
+T00448.012,u3,Fourth vertex U,high,DataCrystal
+T00448.013,fourthColor,Fourth vertex color,med,DataCrystal
+T00448.014,v3,Fourth vertex V,high,DataCrystal
+T00449.000,geometryOffset,Offset of the scrolled polygon,med,declaration-only;source:2842C.c:154
+T00449.001,reserved04,Unreferenced bytes,low,declaration-only;source:2842C.c:155
+T00449.002,delay,Ticks per step,med,declaration-only;source:2842C.c:156
+T00449.003,baseU,Window origin U,med,declaration-only;source:2842C.c:157
+T00449.004,baseV,Window origin V,med,declaration-only;source:2842C.c:158
+T00449.005,width,Texture width,med,declaration-only;source:2842C.c:159
+T00449.006,height,Texture height,med,declaration-only;source:2842C.c:160
+T00449.007,currentU,Current U,med,declaration-only;source:2842C.c:161
+T00449.008,currentV,Current V,med,declaration-only;source:2842C.c:162
+T00449.009,windowWidth,Window width,med,declaration-only;source:2842C.c:163
+T00449.010,windowHeight,Window height,med,declaration-only;source:2842C.c:164
+T00449.011,stepU,U step,med,declaration-only;source:2842C.c:165
+T00449.012,stepV,V step,med,declaration-only;source:2842C.c:166
+T00449.013,tick,Ticks into the current step,med,declaration-only;source:2842C.c:167
+T00449.014,reserved13,Unreferenced byte,low,declaration-only;source:2842C.c:168
+T00449.015,u,Per-vertex U offsets,med,declaration-only;source:2842C.c:169
+T00449.016,v,Per-vertex V offsets,med,declaration-only;source:2842C.c:170
+T00450.000,tick,Ticks into the current step,med,declaration-only;source:2842C.c:174
+T00450.001,frame,Current step,med,declaration-only;source:2842C.c:175
+T00450.002,frameCount,Number of steps,med,declaration-only;source:2842C.c:176
+T00450.003,columns,Steps per row,med,declaration-only;source:2842C.c:177
+T00450.004,reserved04,Unreferenced bytes,low,declaration-only;source:2842C.c:178
+T00450.005,delay,Ticks per step,med,declaration-only;source:2842C.c:179
+T00450.006,scrollStep,Scroll distance per step,med,declaration-only;source:2842C.c:180
+T00450.007,rect,Scrolled texture rectangle,med,declaration-only;source:2842C.c:181
+T00455.000,sceneEntry,Scene object entry,high,source:2842C.c:972
+T00455.001,scriptCursor,Current command position,high,source:2842C.c:959
+T00455.002,objectId,Scene object identifier or minus one,high,source:2842C.c:968
+T00455.003,reserved0A,Unreferenced short,low,declaration-only;source:2842C.c:18
+T00455.004,position,Object position,high,source:2842C.c:974
+T00455.005,rotation,Object rotation,high,source:2842C.c:975
+T00455.006,velocity,Position change per update,high,source:2842C.c:1205
+T00455.007,angularVelocity,Rotation change per update,high,source:2842C.c:1206
+T00456.000,reserved00,Unidentified pointer,low,declaration-only;source:2842C.c:26
+T00456.001,operands,Command operand words,high,source:2842C.c:1072
+T00456.002,extraOperandOne,Additional operand,med,source:2842C.c:1137
+T00456.003,extraOperandTwo,Additional operand,med,source:2842C.c:1137
+T00457.000,positions,Vertex positions,med,DataCrystal
+T00457.001,red1,First vertex red,high,source:2842C.c:1421
+T00457.002,green1,First vertex green,high,source:2842C.c:1422
+T00457.003,blue1,First vertex blue,med,DataCrystal
+T00457.004,type,Polygon type,med,DataCrystal
+T00457.005,red2,Second vertex red,high,source:2842C.c:1424
+T00457.006,green2,Second vertex green,high,source:2842C.c:1425
+T00457.007,blue2,Second vertex blue,med,DataCrystal
+T00457.008,u3,Third vertex U,med,DataCrystal
+T00457.009,red3,Third vertex red,high,source:2842C.c:1427
+T00457.010,green3,Third vertex green,high,source:2842C.c:1428
+T00457.011,remainder,Remaining polygon bytes,med,DataCrystal
+T00458.000,positions,Vertex positions,med,DataCrystal
+T00458.001,red1,First vertex red,high,source:2842C.c:1433
+T00458.002,green1,First vertex green,high,source:2842C.c:1434
+T00458.003,blue1,First vertex blue,med,DataCrystal
+T00458.004,type,Polygon type,med,DataCrystal
+T00458.005,red2,Second vertex red,high,source:2842C.c:1436
+T00458.006,green2,Second vertex green,high,source:2842C.c:1437
+T00458.007,blue2,Second vertex blue,med,DataCrystal
+T00458.008,u3,Third vertex U,med,DataCrystal
+T00458.009,red3,Third vertex red,high,source:2842C.c:1439
+T00458.010,green3,Third vertex green,high,source:2842C.c:1440
+T00458.011,middle,Bytes between the third and fourth colors,med,DataCrystal
+T00458.012,red4,Fourth vertex red,high,source:2842C.c:1442
+T00458.013,green4,Fourth vertex green,high,source:2842C.c:1443
+T00458.014,blue4,Fourth vertex blue,med,DataCrystal
+T00458.015,v4,Fourth vertex V,med,DataCrystal
+T00461.000,placementByte0,First copied placement byte,low,source:30DB0.c:3678
+T00461.001,heightAboveGround,Height above ground in units of 128,med,source:30DB0.c:3684
+T00461.002,placementByte2,Third copied placement byte,low,source:30DB0.c:3678
+T00461.003,orientation,Gimmick orientation,high,source:30DB0.c:3679
+T00461.004,positionXY,Position X and Y words,med,source:30DB0.c:3685
+T00461.005,positionZ,Position Z word,med,source:30DB0.c:3686
+T00562.000,kind,Object kind,med,declaration-only;source:146C.c:379
+T00562.001,reserved01,Unidentified byte,low,declaration-only;source:146C.c:380
+T00562.002,reserved02,Unidentified byte,low,declaration-only;source:146C.c:381
+T00562.003,reserved03,Unidentified byte,low,declaration-only;source:146C.c:382
+T00562.004,flag,Condition flag,med,declaration-only;source:146C.c:383
+T00562.005,flagMin,Minimum flag value,med,declaration-only;source:146C.c:384
+T00562.006,flagMax,Maximum flag value,med,declaration-only;source:146C.c:385
+T00562.007,slot,Object slot,med,declaration-only;source:146C.c:386
+T00562.008,reserved09,Unidentified byte,low,declaration-only;source:146C.c:387
+T00562.009,tileX,Tile X,med,declaration-only;source:146C.c:388
+T00562.010,tileZ,Tile Z,med,declaration-only;source:146C.c:389
+T00562.011,height,Height,med,declaration-only;source:146C.c:390
+T00562.012,direction,Facing direction,med,declaration-only;source:146C.c:391
+T00562.013,model,Model identifier,med,declaration-only;source:146C.c:392
+T00562.014,reserved10,Unidentified bytes,low,declaration-only;source:146C.c:393
