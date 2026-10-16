@@ -1,0 +1,181 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F03397,SLUS_010.40/31724.s,0,RotMatrixYXZ_gte,asm-file,0,Core.Math,,BATTLE.PRG:func_800A0104 BATTLE.PRG:func_800B07DC BATTLE.PRG:func_800B1A68 BATTLE.PRG:func_800C085C,
+F03398,SLUS_010.40/31724.s,0,RotMatrix_gte,asm-file,0,Core.Math,,BATTLE.PRG:_drawScreenTransition BATTLE.PRG:_vecToRotMatrix BATTLE.PRG:func_8007D734 BATTLE.PRG:func_800BC2E8 BATTLE.PRG:func_800BCA8C BATTLE.PRG:func_800C0FA8 BATTLE.PRG:func_800C1384 BATTLE.PRG:func_800D0B30 BATTLE.PRG:func_800D2ADC BATTLE.PRG:vs_battle_applyCameraState (+2),
+F03399,SLUS_010.40/31724.s,0,func_80041104,asm-file,0,Triage,,,
+F03400,SLUS_010.40/31724.s,0,rcos,asm-file,0,Core.Math,,BATTLE.PRG:_computeCameraTransition BATTLE.PRG:_computeSphericalOffset BATTLE.PRG:_setCameraLookAtFromAngles BATTLE.PRG:func_8007087C BATTLE.PRG:func_8007ACB0 BATTLE.PRG:func_8008B590 BATTLE.PRG:func_8008FDC4 BATTLE.PRG:func_80090434 BATTLE.PRG:func_80090B28 BATTLE.PRG:func_8009147C (+59),
+F03401,SLUS_010.40/31724.s,0,rsin,asm-file,0,Core.Math,,BATTLE.PRG:_computeCameraTransition BATTLE.PRG:_computeSphericalOffset BATTLE.PRG:_setCameraLookAtFromAngles BATTLE.PRG:func_8007087C BATTLE.PRG:func_8007ACB0 BATTLE.PRG:func_8008AC78 BATTLE.PRG:func_8008B590 BATTLE.PRG:func_8008FDC4 BATTLE.PRG:func_80090434 BATTLE.PRG:func_80090B28 (+72),
+F03402,SLUS_010.40/31B7C.c,6,ratan2,C,30,Core.Math,,BATTLE.PRG:_atan2FixedPoint BATTLE.PRG:_vecToRotMatrix BATTLE.PRG:func_8006E7F0 BATTLE.PRG:func_800719FC BATTLE.PRG:func_80075554 BATTLE.PRG:func_800863A4 BATTLE.PRG:func_8009E180 BATTLE.PRG:func_8009E228 BATTLE.PRG:func_8009E2E0 BATTLE.PRG:func_8009EA14 (+26),
+F03403,SLUS_010.40/31C0C.s,0,ScaleMatrix,asm-file,0,Core.Math,,BATTLE.PRG:func_8007ACB0 BATTLE.PRG:func_8007D734 BATTLE.PRG:func_800AECA0 BATTLE.PRG:func_800D0B30,
+F03404,SLUS_010.40/32154.s,0,DpqColor,asm-file,0,Graphics,,,
+F03405,SLUS_010.40/32154.s,0,InvSquareRoot,asm-file,0,Graphics,,,
+F03406,SLUS_010.40/32154.s,0,MulMatrix,asm-file,0,Core.Math,,BATTLE.PRG:func_800B1A68,
+F03407,SLUS_010.40/32154.s,0,OuterProduct0,asm-file,0,Triage,,BATTLE.PRG:func_8007ACB0 BATTLE.PRG:func_800D197C BATTLE.PRG:vs_battle_lookAt,
+F03408,SLUS_010.40/32154.s,0,SetFogNear,asm-file,0,Triage,,,
+F03409,SLUS_010.40/32154.s,0,Square0,asm-file,0,Triage,,,
+F03410,SLUS_010.40/32154.s,0,SquareRoot12,asm-file,0,Triage,,BATTLE.PRG:func_800C4794 BATTLE.PRG:func_800D2ADC BATTLE.PRG:vs_battle_syncCameraAnglesFromPosition,
+F03411,SLUS_010.40/32154.s,0,VectorNormal,asm-file,0,Core.Math,,BATTLE.PRG:_computeCameraTransition BATTLE.PRG:_computeSphericalOffset BATTLE.PRG:_computeStepAndDisplacement BATTLE.PRG:_setCameraLookAtFromAngles BATTLE.PRG:_toNormalIntegerVector BATTLE.PRG:func_8007ACB0 BATTLE.PRG:func_800D197C BATTLE.PRG:func_800D2ADC BATTLE.PRG:func_800D52A4 BATTLE.PRG:vs_battle_lookAt (+1),
+F03412,SLUS_010.40/32154.s,0,VectorNormalS,asm-file,0,Core.Math,,,
+F03413,SLUS_010.40/32154.s,0,VectorNormalSS,asm-file,0,Core.Math,,BATTLE.PRG:func_80075554,
+F03414,SLUS_010.40/32154.s,0,func_80041AF4,asm-file,0,Triage,,,
+F03415,SLUS_010.40/32154.s,0,func_80041C68,asm-file,0,Triage,,BATTLE.PRG:func_8007ACB0 BATTLE.PRG:func_800A1DE8 BATTLE.PRG:func_800AECA0 MENU5.PRG:_setCamera MENU9.PRG:_buildCameraMatrix,
+F03416,SLUS_010.40/32154.s,0,vs_gte_rsqrt,asm-file,0,Core.Math,,BATTLE.PRG:_vecToRotMatrix BATTLE.PRG:_vectorMagnitude BATTLE.PRG:func_800719FC BATTLE.PRG:func_80077F70 BATTLE.PRG:func_800863A4 BATTLE.PRG:func_8009E228 BATTLE.PRG:func_8009EA14 BATTLE.PRG:func_8009EC9C BATTLE.PRG:func_8009EFEC BATTLE.PRG:func_800AA290 (+24),
+F03417,SLUS_010.40/main.c,8002,_loadBattlePrg,C,27,Game.Battle,,vs_main_execTitle vs_main_jumpToBattle,vs_main_allocateCdQueueSlot vs_main_cdEnqueuePriority vs_main_freeCdQueueSlot vs_main_gametimeUpdate vs_main_wait
+F03418,SLUS_010.40/main.c,8031,_loadTitlePrg,C,17,Triage,,vs_main_execTitle,vs_main_allocateCdQueueSlot vs_main_cdEnqueuePriority vs_main_freeCdQueueSlot vs_main_gametimeUpdate vs_main_wait
+F03419,SLUS_010.40/main.c,8050,_loadEndingPrg,C,17,Triage,,vs_main_showEndingAndReturnToTitle,vs_main_allocateCdQueueSlot vs_main_cdEnqueuePriority vs_main_freeCdQueueSlot vs_main_gametimeUpdate vs_main_wait
+F03420,SLUS_010.40/main.c,8069,_initScreen,C,5,Graphics,PutDispEnv SetDefDispEnv setRECT,_displayLoadingScreen TITLE.PRG:_initGameData,
+F03421,SLUS_010.40/main.c,8081,_displayLoadingScreen,C,19,Graphics,ClearImage2 DrawSync LoadImage SetDispMask VSync setRECT,_sysReinit vs_main_execTitle vs_main_jumpToBattle,_initScreen
+F03422,SLUS_010.40/main.c,8102,_bufferLoadingScreen,C,15,Graphics,DrawSync LoadImage setRECT,,
+F03423,SLUS_010.40/main.c,8119,vs_main_resetGame,C,17,Graphics,DrawSync DsControlB DsFlush ResetGraph SetDispMask SpuQuit VSync,vs_main_processPadState BATTLE.PRG:vs_battle_exec MENU7.PRG:vs_menu7_gameOver,TeardownSound _padSetActData vs_main_padConnect
+F03424,SLUS_010.40/main.c,8138,vs_main_jumpToBattle,C,18,Game.Battle,DrawSync ResetGraph SetDispMask,MENU7.PRG:vs_menu7_dataMenu MENU7.PRG:vs_menu7_gameOver,_displayLoadingScreen _loadBattlePrg _padSetActData func_80012024 func_80012B78 func_80012B98 func_80012EBC vs_main_padConnect
+F03425,SLUS_010.40/main.c,8158,vs_main_showEndingAndReturnToTitle,C,28,Graphics,DrawSync ResetGraph SetDispMask SpuQuit,BATTLE.PRG:vs_battle_script_specialOp,TeardownSound _loadEndingPrg _padSetActData func_80012B78 func_80012B98 func_80042CB0 vs_ending_exec vs_main_padConnect
+F03426,SLUS_010.40/main.c,8188,vs_main_gametimeUpdate,C,37,Platform,VSync,_loadAndFreeSfx _loadBattlePrg _loadEndingPrg _loadMusicIntoFreeSlotAndClearQueue _loadTitlePrg vs_main_diskLoadFile vs_main_loadAndWaitMusicSlot vs_main_loadAndWaitSoundSlot BATTLE.PRG:_finishLoadZnd BATTLE.PRG:func_8007629C (+12),_asmNop _processCdQueue
+F03427,SLUS_010.40/main.c,8227,_gpuSyncVoidCallback,C,1,Content,,,
+F03428,SLUS_010.40/main.c,8229,_vSyncVoidCallback,C,1,Content,,,
+F03429,SLUS_010.40/main.c,8231,_nop0,C,1,Triage,,MENUF.PRG:_initCubePuzzleStart,
+F03430,SLUS_010.40/main.c,8233,_nop1,C,1,Triage,,MENUF.PRG:_renderCubePuzzleEnd MENUF.PRG:_renderCubePuzzleQuit,
+F03431,SLUS_010.40/main.c,8235,_mainNop2,C,1,Triage,,,
+F03432,SLUS_010.40/main.c,8237,_nop3,C,1,Triage,,,
+F03433,SLUS_010.40/main.c,8239,_initRand,C,10,Core.Math,rand srand,_sysInit,
+F03434,SLUS_010.40/main.c,8251,vs_main_getRand,C,24,Core.Math,rand,vs_main_getRandSmoothed BATTLE.PRG:_decreaseAglityRand BATTLE.PRG:_decreaseIntelligenceRand BATTLE.PRG:_decreaseStrengthRand BATTLE.PRG:_doesAttackHit BATTLE.PRG:_dropAccessoryRand BATTLE.PRG:_dropArmorRand BATTLE.PRG:_dropMiscRand BATTLE.PRG:_dropShieldRand BATTLE.PRG:_dropWeaponRand (+16),
+F03435,SLUS_010.40/main.c,8277,vs_main_getRandSmoothed,C,7,Core.Math,,BATTLE.PRG:_damageFromTrapPanel BATTLE.PRG:_getAgilityDifference BATTLE.PRG:_getAgilityDifference2 BATTLE.PRG:_getIntelligenceDifference BATTLE.PRG:_hpHealed BATTLE.PRG:_hpHealedFromHealPanel BATTLE.PRG:_itemRecovery BATTLE.PRG:func_80076784 BATTLE.PRG:func_80087EF4,vs_main_getRand
+F03436,SLUS_010.40/main.c,8286,_sysInit,C,21,Core.Math,DsInit InitCARD PadInitDirect PadStartCom ResetCallback ResetGraph SetDispMask SetGraphDebug SetVideoMode SsUtReverbOff StartCARD _bu_init,vs_main_exec,_initRand _padResetDefaults _unlockPadModeSwitch vs_main_resetPadAct
+F03437,SLUS_010.40/main.c,8309,_sysReinit,C,33,Graphics,ClearImage DrawSync DrawSyncCallback InitGeom ResetCallback ResetGraph SetGraphDebug SsUtReverbOn VSyncCallback,vs_main_execTitle,_diskReset _displayLoadingScreen _initCdQueue _loadMenuSound _unlockPadModeSwitch vs_main_initHeap vs_main_resetPadAct
+F03438,SLUS_010.40/main.c,8344,vs_main_execTitle,C,15,Platform,SetDispMask,vs_main_exec,_displayLoadingScreen _loadBattlePrg _loadTitlePrg _sysReinit vs_battle_exec vs_main_stopMusic vs_overlay_getSp vs_title_exec
+F03439,SLUS_010.40/main.c,8361,vs_main_exec,C,6,Platform,__main,,_sysInit vs_main_execTitle vs_overlay_getSp
+F03440,SLUS_010.40/main.c,8369,vs_main_wait,C,1,Triage,,_loadBattlePrg _loadEndingPrg _loadTitlePrg BATTLE.PRG:_loadMpdRoomSection BATTLE.PRG:_loadScreff2 BATTLE.PRG:func_800CE9B0 BATTLE.PRG:vs_battle_loadMenuPrg,vs_overlay_wait
+F03441,SLUS_010.40/main.c,8371,vs_main_enableReset,C,1,Triage,,MENU7.PRG:_initMemcard MENU7.PRG:_shutdownMemcard TITLE.PRG:_initMemcard TITLE.PRG:_shutdownMemcard,
+F03442,SLUS_010.40/main.c,8373,func_80042CA0,C,1,Triage,,MENU7.PRG:_applyLoadedSaveFile TITLE.PRG:_applyLoadedSaveFile,
+F03443,SLUS_010.40/main.c,8375,func_80042CB0,C,77,Triage,,vs_main_showEndingAndReturnToTitle MENU7.PRG:_packageGameSaveData,func_80069FC4 func_800A1108 vs_battle_setDoorEntered
+F03444,SLUS_010.40/main.c,8454,vs_main_padDisconnectAll,C,4,Input,,_unlockPadModeSwitch vs_main_resetPadAct BATTLE.PRG:func_80089DC0 TITLE.PRG:vs_title_exec,
+F03445,SLUS_010.40/main.c,8460,_unlockPadModeSwitch,C,6,Input,PadInfoMode PadSetMainMode,_sysInit _sysReinit,vs_main_padDisconnectAll
+F03446,SLUS_010.40/main.c,8468,_padResetDefaults,C,16,Input,PadInfoMode PadSetAct PadSetActAlign PadSetMainMode,_sysInit vs_main_padConnect,
+F03447,SLUS_010.40/main.c,8486,vs_main_updatePadState,C,43,Input,PadInfoMode,vs_main_processPadState BATTLE.PRG:func_8007629C,
+F03448,SLUS_010.40/main.c,8531,vs_main_padConnect,C,18,Input,PadGetState PadSetAct PadSetActAlign,vs_main_jumpToBattle vs_main_processPadState vs_main_resetGame vs_main_showEndingAndReturnToTitle BATTLE.PRG:func_8007629C,_padResetDefaults
+F03449,SLUS_010.40/main.c,8551,_padSetActData,C,9,Input,,vs_main_jumpToBattle vs_main_resetGame vs_main_setVibrateParams vs_main_showEndingAndReturnToTitle,
+F03450,SLUS_010.40/main.c,8562,_padGetActData,C,1,Input,,,
+F03451,SLUS_010.40/main.c,8564,func_800433B4,C,30,Triage,,func_800438C8 BATTLE.PRG:func_800BAB14 BATTLE.PRG:func_800D5E00,
+F03452,SLUS_010.40/main.c,8596,func_80043470,C,9,Triage,,func_800434A4,
+F03453,SLUS_010.40/main.c,8607,func_800434A4,C,21,Triage,,BATTLE.PRG:func_800BAB14 BATTLE.PRG:func_800BFBB8 BATTLE.PRG:func_800CE9B0 BATTLE.PRG:func_800CF1A8,func_80043470
+F03454,SLUS_010.40/main.c,8630,func_80043554,C,5,Triage,,func_8004357C,
+F03455,SLUS_010.40/main.c,8637,func_8004357C,C,17,Triage,,,func_80043554
+F03456,SLUS_010.40/main.c,8656,func_800435DC,C,5,Triage,,func_80043608,
+F03457,SLUS_010.40/main.c,8663,func_80043608,C,17,Triage,,,func_800435DC
+F03458,SLUS_010.40/main.c,8682,vs_main_resetPadAct,C,12,Input,,_sysInit _sysReinit INITBTL.PRG:func_800FA35C,vs_main_padDisconnectAll
+F03459,SLUS_010.40/main.c,8696,_abs2,C,1,Triage,,vs_main_setVibrateParams,
+F03460,SLUS_010.40/main.c,8698,vs_main_setVibrateParams,C,69,Input,,BATTLE.PRG:vs_battle_exec TITLE.PRG:_drawTitleMenu TITLE.PRG:vs_title_exec,_abs2 _padSetActData
+F03461,SLUS_010.40/main.c,8769,func_800438C8,C,18,Triage,,MENU8.PRG:_vibrationOptionMenu TITLE.PRG:_menuVibrationSettings,func_800433B4
+F03462,SLUS_010.40/main.c,8789,vs_main_processPadState,C,93,Input,,BATTLE.PRG:vs_battle_exec ENDING.PRG:func_8006B930 TITLE.PRG:_displayPublisherAndDeveloper TITLE.PRG:_drawAndSyncTitleMenu TITLE.PRG:_fadeInMenu TITLE.PRG:_fadeInMenuCopyright TITLE.PRG:_gameLoadScreen TITLE.PRG:_gameSaveScreen TITLE.PRG:_playIntroMovie TITLE.PRG:vs_title_exec,vs_main_padConnect vs_main_resetGame vs_main_updatePadState
+F03463,SLUS_010.40/main.c,8884,vs_main_freeHeapR,C,28,Platform,,_loadMenuSound func_800443CC func_8004659C vs_main_freeMusic vs_main_freeSfx vs_main_processSoundQueue BATTLE.PRG:_dropLoot BATTLE.PRG:_endBattleCameraTransition BATTLE.PRG:_finishLoadZnd BATTLE.PRG:_loadEtm (+74),
+F03464,SLUS_010.40/main.c,8914,vs_main_freeHeap,C,28,Platform,,BATTLE.PRG:_removeActorAtIndex BATTLE.PRG:func_80089098 BATTLE.PRG:func_8008A3A0 BATTLE.PRG:func_8008ABF0 BATTLE.PRG:func_8008E8F8 BATTLE.PRG:func_80091378 BATTLE.PRG:func_80091B04 BATTLE.PRG:func_8009291C BATTLE.PRG:func_80092A18 BATTLE.PRG:func_80093640 (+12),
+F03465,SLUS_010.40/main.c,8944,vs_main_allocHeapR,C,28,Platform,,_loadMenuSound _loadSoundFile vs_main_loadMusicSlot vs_main_loadSfxSlot BATTLE.PRG:_dropLoot BATTLE.PRG:_initBattleCameraTransition BATTLE.PRG:_loadEtm BATTLE.PRG:_loadMpd BATTLE.PRG:_loadShp BATTLE.PRG:_loadWep (+81),
+F03466,SLUS_010.40/main.c,8974,vs_main_allocHeap,C,32,Platform,,BATTLE.PRG:_loadMpdClearedScriptDoorSections BATTLE.PRG:_loadMpdEnemySection BATTLE.PRG:_loadMpdLbas BATTLE.PRG:_loadMpdRoomSection BATTLE.PRG:_loadSeq BATTLE.PRG:_loadZndEnemies BATTLE.PRG:_parseShp BATTLE.PRG:_parseWep BATTLE.PRG:func_800765B0 BATTLE.PRG:func_80077240 (+21),
+F03467,SLUS_010.40/main.c,9008,vs_main_initHeap,C,11,Platform,,_sysReinit ENDING.PRG:func_8006B884 INITBTL.PRG:func_800FA35C,
+F03468,SLUS_010.40/main.c,9021,_diskReadCallback,C,49,Content,DsEndReadySystem DsGetSector DsReadyCallback,,
+F03469,SLUS_010.40/main.c,9073,_diskReadCommandCallback,C,15,Content,DsStartReadySystem,,
+F03470,SLUS_010.40/main.c,9090,_diskSeekCommandCallback,C,17,Content,,,
+F03471,SLUS_010.40/main.c,9109,_diskPcmReadReady,C,20,Content,DsReadyCallback,,
+F03472,SLUS_010.40/main.c,9131,_diskGetState,C,1,Triage,,_processCdQueue vs_main_diskLoadFile,
+F03473,SLUS_010.40/main.c,9133,_diskClearError,C,5,Triage,,,
+F03474,SLUS_010.40/main.c,9140,_diskInitRead,C,22,Content,DsIntToPos,_processCdQueue vs_main_diskLoadFile,
+F03475,SLUS_010.40/main.c,9164,func_800443CC,C,168,Content,DsCommand DsControl DsControlB DsIntToPos DsMix DsPacket DsReadyCallback DsSystemStatus VSync,_processCdQueue,func_80012918 func_80012940 vs_main_freeHeapR vs_main_memcpy vs_sound_setCdVol vs_sound_spuTransferring
+F03476,SLUS_010.40/main.c,9334,vs_main_diskLoadFile,C,22,Content,,_loadMenuSound INITBTL.PRG:_loadSystemDat,_diskGetState _diskInitRead vs_main_gametimeUpdate
+F03477,SLUS_010.40/main.c,9358,vs_main_streamXa,C,16,Video,,ENDING.PRG:func_8006B9B4,
+F03478,SLUS_010.40/main.c,9376,vs_main_checkStreamXaEnd,C,7,Triage,,ENDING.PRG:_checkStreamXaEnd ENDING.PRG:vs_ending_exec,
+F03479,SLUS_010.40/main.c,9385,_diskReset,C,14,Content,DsControlB DsFlush VSync,_sysReinit,
+F03480,SLUS_010.40/main.c,9401,_initCdQueue,C,8,Content,,_sysReinit,
+F03481,SLUS_010.40/main.c,9411,vs_main_allocateCdQueueSlot,C,12,Save,,_loadBattlePrg _loadEndingPrg _loadSoundFile _loadTitlePrg vs_main_loadMusicSlot vs_main_loadSfxSlot BATTLE.PRG:_loadEtm BATTLE.PRG:_loadMpd BATTLE.PRG:_loadScreff2 BATTLE.PRG:_loadShp (+25),vs_main_nop9
+F03482,SLUS_010.40/main.c,9425,vs_main_freeCdQueueSlot,C,7,Save,,_loadBattlePrg _loadEndingPrg _loadTitlePrg vs_main_clearMusicLoadSlot vs_main_freeSfxQueueSlot vs_main_processSoundQueue BATTLE.PRG:_finishLoadZnd BATTLE.PRG:_loadEtm BATTLE.PRG:_loadScreff2 BATTLE.PRG:_loadShp (+25),vs_main_nop9
+F03483,SLUS_010.40/main.c,9434,vs_main_cdEnqueue,C,6,Content,,_loadSoundFile vs_main_loadMusicSlot vs_main_loadSfxSlot BATTLE.PRG:_loadEtm BATTLE.PRG:_loadScreff2 BATTLE.PRG:_loadShp BATTLE.PRG:_loadWep BATTLE.PRG:_loadfile BATTLE.PRG:func_8008EFCC BATTLE.PRG:func_8009BE5C (+17),
+F03484,SLUS_010.40/main.c,9442,vs_main_cdEnqueuePriority,C,15,Content,,_loadBattlePrg _loadEndingPrg _loadTitlePrg BATTLE.PRG:_loadMpd BATTLE.PRG:_loadZnd BATTLE.PRG:func_800775C0 ENDING.PRG:vs_ending_exec MENU9.PRG:vs_menu9_loadZudFile,
+F03485,SLUS_010.40/main.c,9459,_nop4,C,1,Triage,,,
+F03486,SLUS_010.40/main.c,9461,_processCdQueue,C,27,Content,,vs_main_gametimeUpdate,_diskGetState _diskInitRead func_800443CC
+F03487,SLUS_010.40/main.c,9490,func_80044D94,C,1,Triage,,BATTLE.PRG:func_800BA7BC,func_80011F90
+F03488,SLUS_010.40/main.c,9492,func_80044DB4,C,1,Triage,,BATTLE.PRG:func_800BA72C,func_80012004
+F03489,SLUS_010.40/main.c,9494,func_80044DD4,C,1,Triage,,BATTLE.PRG:func_800BAAF0,func_80012468
+F03490,SLUS_010.40/main.c,9496,func_80044DF4,C,27,Triage,,vs_main_freeMusic vs_main_stopMusic BATTLE.PRG:func_800BA6B8 BATTLE.PRG:func_800BA6E0 BATTLE.PRG:func_800BFBB8,func_80011FDC func_80012B78
+F03491,SLUS_010.40/main.c,9525,func_80044EC8,C,18,Triage,,BATTLE.PRG:func_800BA890,func_800120E8
+F03492,SLUS_010.40/main.c,9545,func_80044F60,C,18,Triage,,BATTLE.PRG:func_800BA52C,func_80012080
+F03493,SLUS_010.40/main.c,9565,func_80045000,C,20,Triage,,BATTLE.PRG:func_800738E4 BATTLE.PRG:func_80089DC0 BATTLE.PRG:func_800BA5E8 MENUF.PRG:_initCongratulationsScreen MENUF.PRG:_initTimeAttackEnd,func_80011FB4 func_800128A0
+F03494,SLUS_010.40/main.c,9587,vs_main_getcurrentMusicSlot,C,3,Audio,,BATTLE.PRG:func_800BF5F0,
+F03495,SLUS_010.40/main.c,9592,vs_main_getCurrentMusicId,C,6,Audio,,BATTLE.PRG:_finishLoadZnd BATTLE.PRG:_loadZnd,
+F03496,SLUS_010.40/main.c,9600,vs_main_loadMusicSlot,C,41,Audio,,_loadMusicIntoFreeSlot vs_main_loadAndWaitMusicSlot BATTLE.PRG:vs_battle_script_loadMusicSlot BATTLE.PRG:vs_battle_script_loadSoundFile MENUF.PRG:func_80103748,vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_freeMusic vs_main_nop10 vs_main_nop9
+F03497,SLUS_010.40/main.c,9643,_loadMusicIntoFreeSlot,C,10,Audio,,_loadMusicIntoFreeSlotAndClearQueue,vs_main_loadMusicSlot
+F03498,SLUS_010.40/main.c,9655,vs_main_clearMusicLoadSlot,C,20,Audio,,vs_main_clearMusicLoadQueue vs_main_loadAndWaitMusicSlot BATTLE.PRG:vs_battle_script_clearMusicLoadSlot,vs_main_freeCdQueueSlot
+F03499,SLUS_010.40/main.c,9677,vs_main_clearMusicLoadQueue,C,12,Audio,,_loadMusicIntoFreeSlotAndClearQueue MENUF.PRG:_initCongratulationsScreen MENUF.PRG:_initTimeAttackEnd,vs_main_clearMusicLoadSlot
+F03500,SLUS_010.40/main.c,9691,vs_main_loadAndWaitMusicSlot,C,11,Audio,,BATTLE.PRG:_finishLoadZnd,vs_main_clearMusicLoadSlot vs_main_gametimeUpdate vs_main_loadMusicSlot
+F03501,SLUS_010.40/main.c,9704,_loadMusicIntoFreeSlotAndClearQueue,C,11,Audio,,,_loadMusicIntoFreeSlot vs_main_clearMusicLoadQueue vs_main_gametimeUpdate
+F03502,SLUS_010.40/main.c,9717,vs_main_freeMusic,C,12,Audio,,vs_main_loadMusicSlot vs_main_stopMusic BATTLE.PRG:_finishLoadZnd BATTLE.PRG:vs_battle_script_freeMusic MENU7.PRG:vs_menu7_gameOver,func_80044DF4 vs_main_freeHeapR
+F03503,SLUS_010.40/main.c,9731,nop5,C,1,Triage,,,
+F03504,SLUS_010.40/main.c,9733,func_800454B8,C,8,Triage,,func_8004550C BATTLE.PRG:func_800BA6E0,func_80011EBC
+F03505,SLUS_010.40/main.c,9743,func_8004550C,C,1,Triage,,BATTLE.PRG:func_800BA6E0,func_800454B8
+F03506,SLUS_010.40/main.c,9745,func_8004552C,C,7,Triage,,BATTLE.PRG:_loadZnd BATTLE.PRG:func_800738E4 BATTLE.PRG:func_800BA52C BATTLE.PRG:func_800BA61C MENU7.PRG:_displayGameOverScreen,func_800128A0
+F03507,SLUS_010.40/main.c,9754,func_80045574,C,7,Triage,,BATTLE.PRG:func_800BA650,func_800129D0
+F03508,SLUS_010.40/main.c,9763,func_800455AC,C,7,Triage,,BATTLE.PRG:func_800BA684,func_80012A6C
+F03509,SLUS_010.40/main.c,9772,nop6,C,1,Triage,,,
+F03510,SLUS_010.40/main.c,9774,nop7,C,1,Triage,,,
+F03511,SLUS_010.40/main.c,9776,vs_main_stopMusic,C,7,Audio,,vs_main_execTitle BATTLE.PRG:_finishLoadZnd,func_80044DF4 vs_main_freeMusic
+F03512,SLUS_010.40/main.c,9785,func_80045630,C,7,Triage,,,func_8001217C
+F03513,SLUS_010.40/main.c,9794,func_80045684,C,9,Triage,,vs_main_playSfx,func_8001217C func_80012358
+F03514,SLUS_010.40/main.c,9805,func_800456EC,C,9,Triage,,func_800461CC vs_main_playSfx,func_800121F0 func_80012358
+F03515,SLUS_010.40/main.c,9816,vs_main_playSfx,C,59,Audio,,_do_panSfx vs_main_playSfxDefault BATTLE.PRG:func_800AE6C0 BATTLE.PRG:func_800BA2E0,func_800123C8 func_80045684 func_800456EC vs_main_nop10
+F03516,SLUS_010.40/main.c,9877,vs_main_playSfxDefault,C,1,Audio,,BATTLE.PRG:_printVariableWidthFont BATTLE.PRG:func_8006CE70 BATTLE.PRG:func_80073AFC BATTLE.PRG:func_8008BF48 BATTLE.PRG:func_8008D658 BATTLE.PRG:func_80090C2C BATTLE.PRG:func_8009121C BATTLE.PRG:func_800913BC BATTLE.PRG:func_800D5904 BATTLE.PRG:vs_battle_exec (+52),vs_main_playSfx
+F03517,SLUS_010.40/main.c,9879,vs_main_computeSfxPan,C,46,Audio,,_do_panSfx BATTLE.PRG:func_800AD62C BATTLE.PRG:func_800AE4FC BATTLE.PRG:func_800AE6C0,
+F03518,SLUS_010.40/main.c,9927,_do_panSfx,C,8,Audio,,vs_main_panSfx,vs_main_computeSfxPan vs_main_playSfx
+F03519,SLUS_010.40/main.c,9937,vs_main_panSfx,C,11,Audio,RotTransPers SetRotMatrix SetTransMatrix,BATTLE.PRG:func_8006C5AC BATTLE.PRG:func_8007138C BATTLE.PRG:func_800AE7D8 BATTLE.PRG:func_800B0908 BATTLE.PRG:func_800D5904,_do_panSfx
+F03520,SLUS_010.40/main.c,9950,func_80045B28,C,23,Triage,,func_80045BFC func_80045C74 func_80045CEC func_80045D64,vs_main_nop10
+F03521,SLUS_010.40/main.c,9975,func_80045BFC,C,17,Triage,,BATTLE.PRG:func_8009121C BATTLE.PRG:func_800913BC BATTLE.PRG:func_800918E8 BATTLE.PRG:func_800BA39C MENUF.PRG:_renderCongratulationsScreen,func_8001264C func_80045B28
+F03522,SLUS_010.40/main.c,9994,func_80045C74,C,16,Triage,,BATTLE.PRG:func_800BA800 MENUF.PRG:_renderCongratulationsScreen,func_80012824 func_80045B28
+F03523,SLUS_010.40/main.c,10012,func_80045CEC,C,14,Triage,,BATTLE.PRG:func_800BA848,func_80012738 func_80045B28
+F03524,SLUS_010.40/main.c,10028,func_80045D64,C,13,Triage,,BATTLE.PRG:func_80070278 BATTLE.PRG:func_80090C2C BATTLE.PRG:func_8009121C BATTLE.PRG:func_800913BC BATTLE.PRG:func_800BA404 ENDING.PRG:_renderIncrementalMapCompletion ENDING.PRG:_renderIncrementalScore MENUF.PRG:_renderCongratulationsScreen MENUF.PRG:_renderCubePuzzleEnd MENUF.PRG:_renderCubePuzzleQuit (+4),func_80012288 func_80045B28
+F03525,SLUS_010.40/main.c,10043,func_80045DC0,C,1,Triage,,BATTLE.PRG:func_800BA3E4 BATTLE.PRG:func_800BFBB8,func_80012B98
+F03526,SLUS_010.40/main.c,10045,vs_main_loadSfxSlot,C,30,Audio,,_loadSfx BATTLE.PRG:vs_battle_script_loadSfxSlot,vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_nop9
+F03527,SLUS_010.40/main.c,10077,_loadSfx,C,10,Audio,,_loadAndFreeSfx,vs_main_loadSfxSlot
+F03528,SLUS_010.40/main.c,10089,vs_main_freeSfxQueueSlot,C,20,Audio,,_freeSfxSlots BATTLE.PRG:vs_battle_script_freeSfxSlot,vs_main_freeCdQueueSlot
+F03529,SLUS_010.40/main.c,10111,_freeSfxSlots,C,8,Audio,,_loadAndFreeSfx,vs_main_freeSfxQueueSlot
+F03530,SLUS_010.40/main.c,10121,_loadAndFreeSfx,C,11,Audio,,,_freeSfxSlots _loadSfx vs_main_gametimeUpdate
+F03531,SLUS_010.40/main.c,10134,vs_main_setCurrentSfx,C,7,Audio,,BATTLE.PRG:vs_battle_script_setCurrentSfx,
+F03532,SLUS_010.40/main.c,10143,vs_main_freeSfx,C,16,Audio,,BATTLE.PRG:vs_battle_script_freeSfx,func_80012288 vs_main_freeHeapR
+F03533,SLUS_010.40/main.c,10161,func_80046168,C,7,Triage,,BATTLE.PRG:_parsePfileBlock12,
+F03534,SLUS_010.40/main.c,10170,func_80046194,C,6,Triage,,BATTLE.PRG:func_800CE9B0,func_80012288
+F03535,SLUS_010.40/main.c,10178,func_800461CC,C,35,Triage,,func_800462E8 func_80046310 BATTLE.PRG:func_8006CD60 BATTLE.PRG:func_8009352C BATTLE.PRG:func_800AE4FC,func_800456EC vs_main_nop10
+F03536,SLUS_010.40/main.c,10215,func_800462E8,C,3,Triage,,BATTLE.PRG:func_8009352C BATTLE.PRG:func_80093A70,func_800461CC
+F03537,SLUS_010.40/main.c,10220,func_80046310,C,50,Triage,,func_800463BC,func_800461CC
+F03538,SLUS_010.40/main.c,10272,func_800463BC,C,11,Core.Math,RotTransPers SetRotMatrix SetTransMatrix,,func_80046310
+F03539,SLUS_010.40/main.c,10285,func_8004644C,C,12,Triage,,BATTLE.PRG:func_80092A18 BATTLE.PRG:func_800935B8 BATTLE.PRG:func_8009CFB0,func_80012288
+F03540,SLUS_010.40/main.c,10299,func_80046494,C,9,Triage,,BATTLE.PRG:func_800938AC BATTLE.PRG:func_80093A14,func_8001264C
+F03541,SLUS_010.40/main.c,10310,func_800464DC,C,1,Triage,,,func_80013328
+F03542,SLUS_010.40/main.c,10312,func_800464FC,C,10,Triage,,func_80046578,func_800132C4 func_80013378
+F03543,SLUS_010.40/main.c,10324,func_80046578,C,1,Triage,,BATTLE.PRG:func_800D5904,func_800464FC
+F03544,SLUS_010.40/main.c,10326,func_8004659C,C,11,Triage,,,func_80013328 vs_main_freeHeapR
+F03545,SLUS_010.40/main.c,10339,func_80046608,C,7,Triage,,BATTLE.PRG:_parsePfileBlock13,
+F03546,SLUS_010.40/main.c,10348,func_80046634,C,9,Triage,,BATTLE.PRG:func_800CE9B0,func_80013328
+F03547,SLUS_010.40/main.c,10359,_loadSoundFile,C,33,Audio,,vs_main_loadSoundFile,func_80011F08 vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_nop9
+F03548,SLUS_010.40/main.c,10394,vs_main_loadSoundFile,C,1,Audio,,vs_main_loadAndWaitSoundSlot BATTLE.PRG:vs_battle_script_loadSoundFile BATTLE.PRG:vs_battle_script_loadSoundFile2,_loadSoundFile
+F03549,SLUS_010.40/main.c,10396,vs_main_processSoundQueue,C,41,Audio,,vs_main_loadAndWaitSoundSlot BATTLE.PRG:vs_battle_script_processSoundQueue,func_80013188 vs_main_freeCdQueueSlot vs_main_freeHeapR vs_sound_spuTransferring
+F03550,SLUS_010.40/main.c,10439,vs_main_loadAndWaitSoundSlot,C,7,Audio,,BATTLE.PRG:_finishLoadZnd,vs_main_gametimeUpdate vs_main_loadSoundFile vs_main_processSoundQueue
+F03551,SLUS_010.40/main.c,10448,vs_main_setMonoSound,C,1,Audio,,MENU7.PRG:_applyLoadedSaveFile MENU7.PRG:vs_menu7_gameOver MENU8.PRG:vs_menu8_exec TITLE.PRG:_applyLoadedSaveFile TITLE.PRG:_initEnvironment TITLE.PRG:_menuSoundSettings,vs_sound_setMonoSound
+F03552,SLUS_010.40/main.c,10450,func_800468DC,C,1,Triage,,,func_80012918
+F03553,SLUS_010.40/main.c,10452,_loadMenuSound,C,26,Audio,,_sysReinit,InitSound Sound_BindAkaoSfxBlob func_80012BB8 func_800131DC vs_main_allocHeapR vs_main_diskLoadFile vs_main_freeHeapR vs_sound_setCdVol
+F03554,SLUS_010.40/main.c,10480,vs_main_resetSound,C,37,Audio,,INITBTL.PRG:func_800FA35C,
+F03555,SLUS_010.40/main.c,10519,_loadClutTransition,C,32,Graphics,,vs_main_loadClutTransition,
+F03556,SLUS_010.40/main.c,10553,vs_main_loadClutTransition,C,6,Graphics,,,_loadClutTransition
+F03557,SLUS_010.40/main.c,10562,_loadClutTransitionWithBase,C,15,Graphics,,,
+F03558,SLUS_010.40/main.c,11287,func_800481C0,C,56,Triage,,BATTLE.PRG:vs_battle_exec,func_8008B430 func_800A0768
+F03559,SLUS_010.40/main.c,11345,func_800483FC,C,121,Triage,,BATTLE.PRG:vs_battle_exec,
+F03560,SLUS_010.40/main.c,11468,func_80048A3C,C,1,Triage,,,
+F03561,SLUS_010.40/main.c,11470,vs_main_loadClut,C,27,Graphics,LoadImage setRECT,BATTLE.PRG:_loadMaterialPalette BATTLE.PRG:_parseShp BATTLE.PRG:func_8008B320 BATTLE.PRG:func_8008E4DC BATTLE.PRG:func_8008F0FC BATTLE.PRG:func_8009998C BATTLE.PRG:func_8009FD5C BATTLE.PRG:func_800AB788 BATTLE.PRG:func_800AB9A4 BATTLE.PRG:func_800C8778 (+3),
+F03562,SLUS_010.40/main.c,11499,func_80048B8C,C,96,Triage,,func_80048E68,
+F03563,SLUS_010.40/main.c,11598,func_80048E68,C,3,Triage,,,func_80048B8C
+F03564,SLUS_010.40/main.c,11604,func_80048EC4,C,15,Triage,,BATTLE.PRG:func_80089DC0,func_8008EB24
+F03565,SLUS_010.40/main.c,11621,vs_main_commitClut,C,9,Graphics,LoadImage setRECT,BATTLE.PRG:func_8007629C BATTLE.PRG:func_80089DC0,
+F03566,SLUS_010.40/main.c,11632,vs_main_setClutState,C,1,Graphics,,BATTLE.PRG:func_8006C39C BATTLE.PRG:func_8006C40C BATTLE.PRG:func_8006FBCC BATTLE.PRG:func_80070F28 BATTLE.PRG:func_80072EC4,
+F03567,SLUS_010.40/main.c,11634,vs_main_clutInit,C,25,Graphics,,BATTLE.PRG:func_80089DC0 INITBTL.PRG:func_800FA35C,
+F03568,SLUS_010.40/main.c,11661,_asmNop,C,1,Triage,,vs_main_gametimeUpdate,
+F03569,SLUS_010.40/main.c,11663,vs_main_nop9,C,1,Triage,,_loadSoundFile vs_main_allocateCdQueueSlot vs_main_freeCdQueueSlot vs_main_loadMusicSlot vs_main_loadSfxSlot BATTLE.PRG:_loadMpd BATTLE.PRG:_loadMpdLbas BATTLE.PRG:_loadZnd BATTLE.PRG:func_80075554 BATTLE.PRG:func_800775C0 (+4),
+F03570,SLUS_010.40/main.c,11665,vs_main_nop10,C,1,Triage,,func_80045B28 func_800461CC vs_main_loadMusicSlot vs_main_playSfx BATTLE.PRG:func_800765B0 BATTLE.PRG:func_80089114,
+F03571,SLUS_010.40/main.c,11667,nop11,C,1,Triage,,,
+F03572,SLUS_010.40/main.c,11669,vs_main_memcpy,C,28,Platform,,func_800443CC BATTLE.PRG:_applyAccessoryStats BATTLE.PRG:_applyArmorStats BATTLE.PRG:_dropWeaponRand BATTLE.PRG:_loadMaterialPalette BATTLE.PRG:_loadMpdEnemySection BATTLE.PRG:_loadMpdLbas BATTLE.PRG:_loadMpdLootSection BATTLE.PRG:_loadMpdRoomSection BATTLE.PRG:_loadSeq (+33),
+F03573,SLUS_010.40/main.c,11699,vs_main_bzero,C,11,Triage,,BATTLE.PRG:_dropLoot BATTLE.PRG:func_80069DBC BATTLE.PRG:func_80069DEC BATTLE.PRG:func_80072EC4 BATTLE.PRG:func_8007647C BATTLE.PRG:func_800765B0 BATTLE.PRG:func_80077240 BATTLE.PRG:func_8007BA98 BATTLE.PRG:func_800856F8 BATTLE.PRG:func_80085718 (+18),
+F03574,SLUS_010.40/main.c,11712,nop12,C,1,Triage,,,
+F03575,SLUS_010.40/overlay.c,6,vs_overlay_getSp,C,4,Platform,,vs_main_exec vs_main_execTitle,
+F03576,SLUS_010.40/overlay.c,23,vs_overlay_wait,C,1,Platform,,vs_main_wait,

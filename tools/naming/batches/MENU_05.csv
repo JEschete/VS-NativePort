@@ -1,0 +1,6 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F02593,MENU/items2.h,11,_getParentWeaponIndex,C-header,20,Game.Items,,_itemNavigation _populateItemRows,
+F02594,MENU/items2.h,38,_getParentShieldIndex,C-header,14,Game.Items,,_itemNavigation _populateItemRows,
+F02595,MENU/items2.h,60,_populateItemRows,C-header,108,Game.Items,,_itemNavigation,_getParentShieldIndex _getParentWeaponIndex vs_mainMenu_setArmorRowFromInventory vs_mainMenu_setBladeRow vs_mainMenu_setGemRow vs_mainMenu_setGripRow vs_mainMenu_setMiscRow vs_mainMenu_setShieldRowFromInventory vs_mainMenu_setWeaponRowFromInventory
+F02596,MENU/items2.h,175,_restoreItemMenu,C-header,19,Game.Items,,_itemNavigation,vs_battle_getMenuItem vs_mainMenu_renderItemsList
+F02597,MENU/items2.h,201,_itemNavigation,C-header,765,Game.Items,memset,MENU3.PRG:vs_menu3_exec MENUB.PRG:_topLevelMenuTransition,_discardMenu _getParentShieldIndex _getParentWeaponIndex _itemStatusDispatcher _populateItemRows _restoreItemMenu _sortItems _toggleMenuUi vs_battle_getActionFlags vs_battle_getMenuItem vs_battle_rMemzero vs_mainMenu_actionInputProcessed vs_mainMenu_addMenuActions vs_mainMenu_findItem (+12)

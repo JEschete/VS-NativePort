@@ -1,0 +1,159 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F02640,MENU/MENU4.PRG/120.c,26,_drawWeaponInfo,C,37,Game.Items,,_equipmentDetailScreen,vs_mainMenu_resetStats vs_mainMenu_setDpPp vs_mainMenu_setRangeRisk vs_mainMenu_setStrIntAgi vs_mainMenu_updateStatPage
+F02641,MENU/MENU4.PRG/120.c,68,_drawShieldInfo,C,31,Game.Items,,_equipmentDetailScreen,vs_mainMenu_resetStats vs_mainMenu_setDpPp vs_mainMenu_setStrIntAgi vs_mainMenu_updateStatPage
+F02642,MENU/MENU4.PRG/120.c,104,_drawArmorInfo,C,35,Game.Items,,_equipmentDetailScreen,vs_mainMenu_resetStats vs_mainMenu_setDpPp vs_mainMenu_setStrIntAgi vs_mainMenu_updateStatPage
+F02643,MENU/MENU4.PRG/120.c,144,_drawAccessoryInfo,C,20,Game.Items,,_equipmentDetailScreen,vs_mainMenu_resetStats vs_mainMenu_setStrIntAgi vs_mainMenu_updateStatPage
+F02644,MENU/MENU4.PRG/120.c,169,_drawBladeInfo,C,17,Game.Items,,_drawWeaponInfoRow,vs_mainMenu_renderDpPpBars vs_mainMenu_setDpPp vs_mainMenu_setRangeRisk vs_mainMenu_setStrIntAgi vs_mainMenu_updateStatPage
+F02645,MENU/MENU4.PRG/120.c,191,_drawGripInfo,C,13,Game.Items,,_drawWeaponInfoRow,vs_mainMenu_renderDpPpBars vs_mainMenu_setStrIntAgi vs_mainMenu_updateStatPage
+F02646,MENU/MENU4.PRG/120.c,209,_drawGemInfo,C,14,Game.Items,,_drawShieldInfoRow _drawWeaponInfoRow,vs_mainMenu_renderDpPpBars vs_mainMenu_setStrIntAgi vs_mainMenu_updateStatPage
+F02647,MENU/MENU4.PRG/120.c,228,_initBladeDescription,C,20,Game.Event,,_drawWeaponInfoRow,vs_battle_printf
+F02648,MENU/MENU4.PRG/120.c,254,_initGripInfo,C,15,Game.Items,,_drawWeaponInfoRow,vs_battle_printf
+F02649,MENU/MENU4.PRG/120.c,275,_initGemInfo,C,8,Game.Items,,_drawShieldInfoRow _drawWeaponInfoRow,
+F02650,MENU/MENU4.PRG/120.c,293,_drawWeaponInfoRow,C,39,Game.Items,,_equipmentDetailScreen,_drawBladeInfo _drawGemInfo _drawGripInfo _initBladeDescription _initGemInfo _initGripInfo vs_battle_getMenuItem vs_mainMenu_renderDpPpBars vs_mainMenu_resetStats vs_mainMenu_setWeaponRow
+F02651,MENU/MENU4.PRG/120.c,339,_drawShieldInfoRow,C,22,Game.Items,,_equipmentDetailScreen,_drawGemInfo _initGemInfo vs_battle_getMenuItem vs_mainMenu_renderDpPpBars vs_mainMenu_resetStats vs_mainMenu_setShieldRow
+F02652,MENU/MENU4.PRG/120.c,368,_drawArmorInfoRow,C,8,Game.Items,,_equipmentDetailScreen,vs_mainMenu_setArmorRow
+F02653,MENU/MENU4.PRG/120.c,383,_drawAccessoryInfoRow,C,10,Game.Items,,_equipmentDetailScreen,vs_battle_copyUiAccessoryStats vs_mainMenu_setArmorRowFromInventory
+F02654,MENU/MENU4.PRG/120.c,401,_equipmentDetailElementSelectable,C,53,Game.Items,,_updateEquipmentDetailSelection,
+F02655,MENU/MENU4.PRG/120.c,462,_updateEquipmentDetailSelection,C,47,Game.Items,,_equipmentDetailScreen,_equipmentDetailElementSelectable
+F02656,MENU/MENU4.PRG/120.c,528,_initEquipmentScreen,C,15,Game.Items,,_equipmentDetailScreen _equipmentScreen vs_menu4_exec,func_800CB654
+F02657,MENU/MENU4.PRG/120.c,548,_getNextValidActor,C,17,Game.Actors,,_equipmentScreen vs_menu4_exec,func_800A0BE0
+F02658,MENU/MENU4.PRG/120.c,579,_switchCurrentActor,C,106,Game.Actors,,_equipmentScreen vs_menu4_exec,func_800F9A24 func_800F9E0C vs_battle_setMenuItem
+F02659,MENU/MENU4.PRG/120.c,692,_renderUnknownValue,C,21,Graphics,,_renderBasicStats,vs_battle_renderValue
+F02660,MENU/MENU4.PRG/120.c,721,_renderStatBar,C,15,Graphics,,_renderBasicStats BATTLE.PRG:func_800CA2DC,vs_battle_renderStatBar
+F02661,MENU/MENU4.PRG/120.c,741,_renderBasicStats,C,99,Graphics,,_drawScreen vs_menu4_exec,_renderStatBar _renderUnknownValue func_800CB654 vs_battle_renderValue
+F02662,MENU/MENU4.PRG/120.c,847,_drawStatusIndicator,C,18,Game.Battle,,_renderLimbUi,
+F02663,MENU/MENU4.PRG/120.c,870,_drawLimbLeaderLine,C,36,Graphics,,_renderLimbUi,
+F02664,MENU/MENU4.PRG/120.c,913,_renderStatusIcons,C,40,Game.Battle,getClut,_renderLimbUi,vs_battle_getStatusFlags
+F02665,MENU/MENU4.PRG/120.c,961,_navigateStatusModifiers,C,148,Game.Battle,,vs_menu4_exec,vs_battle_getStatusFlags vs_battle_mapStickDeadZone vs_mainMenu_renderCursor vs_mainmenu_setInformationMessage
+F02666,MENU/MENU4.PRG/120.c,1114,_getLimbCount,C,11,Game.Menu,,_equipmentDetailScreen _equipmentScreen _getEquipmentListRowCount _renderLimbUi vs_menu4_exec,
+F02667,MENU/MENU4.PRG/120.c,1132,_getEquipmentListRowCount,C,4,Game.Items,,_equipmentDetailScreen _equipmentScreen,_getLimbCount
+F02668,MENU/MENU4.PRG/120.c,1146,_renderLimbUi,C,148,Graphics,,_drawScreen _renderSelectedLimbCondition _renderSelectedLimbStats vs_menu4_exec,_drawLimbLeaderLine _drawStatusIndicator _getLimbCount _renderStatusIcons func_800A13EC vs_battle_getLimbStatus vs_battle_renderTextRaw vs_battle_renderTextRawColor vs_mainMenu_populateBaseStats
+F02669,MENU/MENU4.PRG/120.c,1299,_setActiveRow,C,11,Game.Menu,,_equipmentDetailScreen,vs_battle_getMenuItem
+F02670,MENU/MENU4.PRG/120.c,1318,_animateEquipmentDetailTransition,C,25,Game.Items,,_initUi,vs_battle_getMenuItem vs_battle_setMenuItem
+F02671,MENU/MENU4.PRG/120.c,1348,_initUi,C,5,Game.Menu,,_equipmentDetailScreen,_animateEquipmentDetailTransition vs_mainMenu_drawClassAffinityType vs_mainMenu_renderEquipStats
+F02672,MENU/MENU4.PRG/120.c,1358,_setWeaponRow,C,55,Game.Items,,_equipmentDetailScreen,vs_battle_copyUiBladeStats vs_battle_copyUiGemStats vs_battle_copyUiGripStats vs_battle_setMenuItem vs_mainMenu_deactivateMenuItem vs_mainMenu_setBladeRow vs_mainMenu_setGemRow vs_mainMenu_setGripRow
+F02673,MENU/MENU4.PRG/120.c,1418,_setShieldRow,C,38,Game.Items,,_equipmentDetailScreen,vs_battle_copyUiGemStats vs_battle_setMenuItem vs_mainMenu_deactivateMenuItem vs_mainMenu_setGemRow
+F02674,MENU/MENU4.PRG/120.c,1463,_exitEquipmentDetail,C,11,Game.Items,,_equipmentDetailScreen,vs_mainMenu_drawClassAffinityType vs_mainMenu_renderDpPpBars vs_mainMenu_renderEquipStats
+F02675,MENU/MENU4.PRG/120.c,1482,_equipmentDetailScreen,C,386,Game.Items,,_equipmentScreen,_drawAccessoryInfo _drawAccessoryInfoRow _drawArmorInfo _drawArmorInfoRow _drawShieldInfo _drawShieldInfoRow _drawWeaponInfo _drawWeaponInfoRow _exitEquipmentDetail _getEquipmentListRowCount _getLimbCount _initEquipmentScreen _initUi _setActiveRow (+17)
+F02676,MENU/MENU4.PRG/120.c,1875,_equipmentScreen,C,201,Game.Items,,vs_menu4_exec,_equipmentDetailScreen _getEquipmentListRowCount _getLimbCount _getNextValidActor _initEquipmentScreen _switchCurrentActor vs_battle_copyUiAccessoryStats vs_battle_getMenuItem vs_mainMenu_populateBaseStats vs_mainMenu_setArmorRow vs_mainMenu_setArmorRowFromInventory vs_mainMenu_setShieldRow vs_mainMenu_setWeaponRow vs_mainMenu_storeCursor (+2)
+F02677,MENU/MENU4.PRG/120.c,2081,_fadeScreenLeft,C,35,Graphics,,_drawScreen,
+F02678,MENU/MENU4.PRG/120.c,2121,_drawMenuBackground,C,64,Game.Menu,,_drawScreen,
+F02679,MENU/MENU4.PRG/120.c,2190,_drawScreen,C,33,Graphics,,vs_menu4_exec ENDING.PRG:func_8006A888 ENDING.PRG:func_8006BD78,_drawMenuBackground _fadeScreenLeft _renderBasicStats _renderLimbUi func_8007ACB0 func_800F9EB8 rcos rsin
+F02680,MENU/MENU4.PRG/120.c,2228,_renderSelectedLimbCondition,C,13,Graphics,,vs_menu4_exec,_renderLimbUi vs_battle_getLimbStatus vs_battle_printf vs_mainmenu_setInformationMessage
+F02681,MENU/MENU4.PRG/120.c,2246,_renderSelectedLimbStats,C,14,Graphics,,vs_menu4_exec,_renderLimbUi
+F02682,MENU/MENU4.PRG/120.c,2270,vs_menu4_exec,C,586,Game.Menu,,,_drawScreen _equipmentScreen _getLimbCount _getNextValidActor _initEquipmentScreen _navigateStatusModifiers _renderBasicStats _renderLimbUi _renderSelectedLimbCondition _renderSelectedLimbStats _switchCurrentActor func_8008A4DC func_800F9E0C vs_battle_getStatusFlags (+16)
+F02683,MENU/MENU5.PRG/4D8.c,90,_setNextAction,C,10,Game.Menu,,,vs_mainMenu_setMenuCommand
+F02684,MENU/MENU5.PRG/4D8.c,106,_renderDefaultIcon,C,10,Graphics,getClut,,
+F02685,MENU/MENU5.PRG/4D8.c,129,_configureMapMenu,C,39,Game.Menu,,_mapSelectionMenu,vs_mainmenu_setMenuRows
+F02686,MENU/MENU5.PRG/4D8.c,175,_mapSelection,C,11,Game.Field,,_mapSelectionMenu,vs_mainmenu_getSelectedRow
+F02687,MENU/MENU5.PRG/4D8.c,188,_setMenuItemMapName,C,8,Game.Items,,,vs_battle_setMenuItem
+F02688,MENU/MENU5.PRG/4D8.c,201,_clearMenu,C,13,Game.Menu,,,vs_battle_dismissTextBox vs_main_playSfxDefault
+F02689,MENU/MENU5.PRG/4D8.c,905,_renderScreen,C,38,Graphics,AddPrim SetDrawStp getScratchAddr,,_applyPalingScreenEffect _darkenBackground _drawUIControls _setCamera vs_battle_setTextBox
+F02690,MENU/MENU5.PRG/4D8.c,948,_setCamera,C,23,Game.Field,ApplyMatrix SetRotMatrix SetTransMatrix applyVector,_renderScreen,_buildPitchMatrix _buildYawMatrix func_80041C68 rcos rsin
+F02691,MENU/MENU5.PRG/4D8.c,979,_mapSelectionMenu,C,64,Game.Menu,,,_configureMapMenu _mapSelection
+F02692,MENU/MENU5.PRG/4D8.c,1048,func_8010467C,C,7,Game.Menu,getScratchAddr,,func_80107630
+F02693,MENU/MENU5.PRG/4D8.c,1511,_snapMapToRoom,C,65,Game.Field,,,
+F02694,MENU/MENU5.PRG/4D8.c,1578,_setCenterpoint,C,49,Game.Menu,,,
+F02695,MENU/MENU5.PRG/4D8.c,1629,_smoothMapToCenterpoint,C,97,Game.Field,ABS,,
+F02696,MENU/MENU5.PRG/4D8.c,1728,_scaleRoomVertices,C,26,Game.Field,,,
+F02697,MENU/MENU5.PRG/4D8.c,1756,_buildYawMatrix,C,14,Game.Menu,,_setCamera MENU9.PRG:_buildCameraMatrix,rcos rsin
+F02698,MENU/MENU5.PRG/4D8.c,1772,_buildPitchMatrix,C,14,Game.Menu,,_setCamera MENU9.PRG:_buildCameraMatrix,rcos rsin
+F02699,MENU/MENU5.PRG/4D8.c,1788,_darkenBackground,C,44,Game.Menu,AddPrim getScratchAddr getTPage setClut setSemiTrans setShadeTex setSprt setUV0 setWH setXY0,_renderScreen,
+F02700,MENU/MENU5.PRG/4D8.c,1834,_getCurrentRoomIndex,C,26,Game.Field,,,
+F02701,MENU/MENU5.PRG/4D8.c,1862,_updateRoomIndex,C,16,Game.Field,,,vs_main_playSfxDefault
+F02702,MENU/MENU5.PRG/4D8.c,1880,_applyPalingScreenEffect,C,83,Game.Effects,AddPrim getScratchAddr getTPage setClut setRGB0 setSemiTrans setSprt setUV0 setWH setXY0,_renderScreen,rsin
+F02703,MENU/MENU5.PRG/4D8.c,1965,_drawUIControlsBackground,C,24,Game.Menu,AddPrim getScratchAddr setLineG2 setPolyF4 setRGB0 setRGB1 setXY2 setXY4,_drawUIControls,
+F02704,MENU/MENU5.PRG/4D8.c,1991,_drawUIControls,C,160,Game.Menu,getTPage,_renderScreen,_drawUIControlsBackground _renderCompass vs_battle_getTextBox vs_battle_renderTextRawColor vs_mainmenu_renderButton
+F02705,MENU/MENU5.PRG/4D8.c,2158,_renderIcon,C,20,Graphics,AddPrim getScratchAddr setClut setPolyFT4 setShadeTex setTPage setUV4 setXY4,,
+F02706,MENU/MENU5.PRG/4D8.c,2180,func_80107630,C,42,Game.Menu,AddPrim getScratchAddr setClut setPolyFT4 setShadeTex setTPage setUV4 setXY4,func_8010467C,_addMapLabel
+F02707,MENU/MENU5.PRG/4D8.c,2227,_renderDoorName,C,29,Game.Field,,renderMapLabels,_insertLine vs_battle_getMenuItem vs_battle_renderMenuItem vs_battle_setMenuItem
+F02708,MENU/MENU5.PRG/4D8.c,2258,_insertLine,C,12,Game.Menu,AddPrim getScratchAddr setLineF2 setRGB0 setXY2,_renderConnectingMapName _renderDoorName,
+F02709,MENU/MENU5.PRG/4D8.c,2272,_renderCompass,C,103,Game.Battle,AddPrim setClut setPolyFT4 setSemiTrans setShadeTex setTPage setUV4 setXY4,_drawUIControls,_computeRotatedRect
+F02710,MENU/MENU5.PRG/4D8.c,2377,_computeRotatedRect,C,21,Game.Battle,,_renderCompass,rcos rsin
+F02711,MENU/MENU5.PRG/4D8.c,2403,_renderConnectingMapName,C,36,Game.Field,,renderMapLabels,_insertLine vs_battle_getMenuItem vs_battle_renderMenuItem vs_battle_setMenuItem
+F02712,MENU/MENU5.PRG/4D8.c,2441,_addMapLabel,C,7,Game.Field,,func_80107630,
+F02713,MENU/MENU5.PRG/4D8.c,2450,renderMapLabels,C,19,Game.Field,,,_renderConnectingMapName _renderDoorName
+F02714,MENU/MENU5.PRG/4D8.c,2471,func_8010839C,C,8,Game.Menu,,,func_8008E7BC
+F02715,MENU/MENU7.PRG/260.c,172,_testMemcardEvents,C,10,Save,TestEvent,_loadSaveData _memcardEventHandler _saveFile TITLE.PRG:_loadSaveData TITLE.PRG:_memcardEventHandler TITLE.PRG:_saveFile,
+F02716,MENU/MENU7.PRG/260.c,187,_resetMemcardEvents,C,7,Save,TestEvent,_loadSaveData _memcardEventHandler _saveFile TITLE.PRG:_loadSaveData TITLE.PRG:_memcardEventHandler TITLE.PRG:_saveFile,
+F02717,MENU/MENU7.PRG/260.c,199,_renderImage,C,8,Graphics,DrawSync LoadImage,_drawFileMenuElement _initMemcard,
+F02718,MENU/MENU7.PRG/260.c,212,_readImage,C,8,Graphics,DrawSync StoreImage,_drawFileMenuElement TITLE.PRG:_drawFileMenuElement,
+F02719,MENU/MENU7.PRG/260.c,225,_rMemcpy,C,6,Platform,,_applyLoadedSaveFile _packageGameSaveData _readSaveFileInfo _showSaveFilesMenu TITLE.PRG:_applyLoadedSaveFile TITLE.PRG:_packageGameSaveData TITLE.PRG:_readSaveFileInfo TITLE.PRG:_saveFileExists TITLE.PRG:_showSaveFilesMenu,
+F02720,MENU/MENU7.PRG/260.c,238,_memcardMakeFilename,C,9,Save,memset strcpy,_createSaveFile _loadSaveData _readSaveFileInfo _saveFile TITLE.PRG:_createSaveFile TITLE.PRG:_loadSaveData TITLE.PRG:_readSaveFileInfo TITLE.PRG:_saveFile,
+F02721,MENU/MENU7.PRG/260.c,254,_memcardMakeTempFilename,C,9,Save,memset strcpy,_deleteRedundantTempFiles _loadSaveData _saveFile TITLE.PRG:_deleteRedundantTempFiles TITLE.PRG:_loadSaveData TITLE.PRG:_saveFile,
+F02722,MENU/MENU7.PRG/260.c,278,_getNewestSaveFile,C,15,Save,,_showLoadFilesMenu TITLE.PRG:_showLoadFilesMenu,
+F02723,MENU/MENU7.PRG/260.c,300,_findCurrentSaveOnActiveMemcard,C,15,Save,,_findCurrentSave _showSaveFilesMenu TITLE.PRG:_findCurrentSave TITLE.PRG:_showSaveFilesMenu,
+F02724,MENU/MENU7.PRG/260.c,323,_memcardFileNumberFromFilename,C,24,Save,,_initSaveFileInfo _memcardSaveIdExists TITLE.PRG:_initSaveFileInfo TITLE.PRG:_memcardSaveIdExists,
+F02725,MENU/MENU7.PRG/260.c,355,_verifySaveChecksums,C,28,Save,,_applyLoadedSaveFile _readSaveFileInfo TITLE.PRG:_applyLoadedSaveFile TITLE.PRG:_readSaveFileInfo,
+F02726,MENU/MENU7.PRG/260.c,388,_decode,C,6,Game.Menu,,_applyLoadedSaveFile _readSaveFileInfo _showSaveFilesMenu TITLE.PRG:_applyLoadedSaveFile TITLE.PRG:_readSaveFileInfo TITLE.PRG:_showSaveFilesMenu,
+F02727,MENU/MENU7.PRG/260.c,404,_readSaveFileInfo,C,30,Save,close memset open read,_initSaveFileInfo TITLE.PRG:_initSaveFileInfo,_decode _memcardMakeFilename _rMemcpy _verifySaveChecksums
+F02728,MENU/MENU7.PRG/260.c,439,_memcardSaveIdExists,C,12,Save,,_deleteRedundantTempFiles _saveFile TITLE.PRG:_deleteRedundantTempFiles TITLE.PRG:_saveFile,_memcardFileNumberFromFilename
+F02729,MENU/MENU7.PRG/260.c,458,_deleteRedundantTempFiles,C,15,Content,erase,_initSaveFileInfo TITLE.PRG:_initSaveFileInfo,_memcardMakeTempFilename _memcardSaveIdExists
+F02730,MENU/MENU7.PRG/260.c,480,_initSaveFileInfo,C,56,Save,firstfile memset nextfile,_findCurrentSave _selectLoadMemoryCard _selectSaveMemoryCard TITLE.PRG:_findCurrentSave TITLE.PRG:_selectLoadMemoryCard TITLE.PRG:_selectSaveMemoryCard,_deleteRedundantTempFiles _memcardFileNumberFromFilename _readSaveFileInfo
+F02731,MENU/MENU7.PRG/260.c,543,_createSaveFile,C,12,Save,close erase open,_showSaveFilesMenu TITLE.PRG:_showSaveFilesMenu,_memcardMakeFilename
+F02732,MENU/MENU7.PRG/260.c,563,_memcardEventHandler,C,110,Save,_card_clear _card_info _card_load,_findCurrentSave _promptFormat _selectSaveMemoryCard maskedHandler TITLE.PRG:_findCurrentSave TITLE.PRG:_memcardMaskedHandler TITLE.PRG:_promptFormat TITLE.PRG:_saveFileExists TITLE.PRG:_selectSaveMemoryCard,_resetMemcardEvents _testMemcardEvents
+F02733,MENU/MENU7.PRG/260.c,681,_applyLoadedSaveFile,C,46,Save,,_loadIntroSaveFile _showLoadFilesMenu _showSaveMenu vs_menu7_saveContainerMenu TITLE.PRG:_showLoadFilesMenu TITLE.PRG:_showSaveMenu,_decode _rMemcpy _verifySaveChecksums func_80042CA0 vs_main_setMonoSound
+F02734,MENU/MENU7.PRG/260.c,735,_packageGameSaveData,C,119,Save,memset,_showSaveFilesMenu TITLE.PRG:_showSaveFilesMenu,_rMemcpy func_80042CB0 vs_battle_getMapCompletion vs_battle_keystreamBits
+F02735,MENU/MENU7.PRG/260.c,871,_loadSaveData,C,79,Save,close memset open read,_saveFile _showLoadFilesMenu _showSaveMenu vs_menu7_saveContainerMenu TITLE.PRG:_saveFile TITLE.PRG:_showLoadFilesMenu TITLE.PRG:_showSaveMenu,_memcardMakeFilename _memcardMakeTempFilename _resetMemcardEvents _testMemcardEvents
+F02736,MENU/MENU7.PRG/260.c,960,_saveFile,C,112,Save,close open rename write,_showSaveFilesMenu TITLE.PRG:_showSaveFilesMenu,_loadSaveData _memcardMakeFilename _memcardMakeTempFilename _memcardSaveIdExists _resetMemcardEvents _testMemcardEvents
+F02737,MENU/MENU7.PRG/260.c,1080,_initMemcard,C,76,Save,EnableEvent EnterCriticalSection ExitCriticalSection OpenEvent,vs_menu7_dataMenu vs_menu7_gameOver vs_menu7_saveContainerMenu TITLE.PRG:_gameLoadScreen TITLE.PRG:_gameSaveScreen TITLE.PRG:_saveFileExists,_renderImage func_8007DFF0 vs_main_allocHeap vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_enableReset vs_main_freeCdQueueSlot
+F02738,MENU/MENU7.PRG/260.c,1161,_shutdownMemcard,C,18,Save,CloseEvent DisableEvent EnterCriticalSection ExitCriticalSection,vs_menu7_dataMenu vs_menu7_gameOver vs_menu7_saveContainerMenu TITLE.PRG:_gameLoadScreen TITLE.PRG:_gameSaveScreen TITLE.PRG:_saveFileExists,func_8007E0A8 vs_main_enableReset vs_main_freeHeap
+F02739,MENU/MENU7.PRG/260.c,1188,_drawSprt,C,11,Graphics,DrawPrim DrawSync,_drawFileMenu _drawFileMenuBg _drawFileMenuElement _drawHPMP _drawSaveInfoUI _renderInteger TITLE.PRG:_displayPublisherAndDeveloper TITLE.PRG:_drawFileMenu TITLE.PRG:_drawFileMenuBg TITLE.PRG:_drawFileMenuElement (+4),
+F02740,MENU/MENU7.PRG/260.c,1222,_drawSaveInfoUI,C,12,Save,,_drawFileMenuElement _drawHPMP TITLE.PRG:_drawFileMenuElement TITLE.PRG:_drawHPMP,_drawSprt
+F02741,MENU/MENU7.PRG/260.c,1239,_renderInteger,C,9,Graphics,getTPage,_drawFileMenuElement _drawHPMP,_drawSprt
+F02742,MENU/MENU7.PRG/260.c,1253,_countDigits,C,10,Game.Menu,,_drawHPMP TITLE.PRG:_drawHPMP,
+F02743,MENU/MENU7.PRG/260.c,1270,_drawHPMP,C,74,Game.Battle,DrawPrim DrawSync getClut getTPage,_drawFileMenuElement TITLE.PRG:_drawFileMenuElement,_countDigits _drawSaveInfoUI _drawSprt _renderInteger
+F02744,MENU/MENU7.PRG/260.c,1353,_fileProcessingAnim,C,42,Content,DrawPrim DrawSync,_drawFileMenuElement TITLE.PRG:_drawFileMenuElement,
+F02745,MENU/MENU7.PRG/260.c,1400,_fileProcessingCompleteAnim,C,39,Content,DrawPrim DrawSync,_drawFileMenuElement TITLE.PRG:_drawFileMenuElement,
+F02746,MENU/MENU7.PRG/260.c,1447,_initFileMenu,C,9,Content,memset,_showSaveMenu vs_menu7_dataMenu vs_menu7_gameOver vs_menu7_saveContainerMenu TITLE.PRG:_gameLoadScreen TITLE.PRG:_gameSaveScreen TITLE.PRG:_showSaveMenu,
+F02747,MENU/MENU7.PRG/260.c,1463,_initFileMenuElement,C,36,Content,memset,_loadFileMenu _promptConfirm _showLoadFilesMenu _showSaveFilesMenu _showSaveMenu TITLE.PRG:_loadFileMenu TITLE.PRG:_promptConfirm TITLE.PRG:_saveScreenConfirmation TITLE.PRG:_showLoadFilesMenu TITLE.PRG:_showSaveFilesMenu (+1),
+F02748,MENU/MENU7.PRG/260.c,1504,_clearFileMenuElement,C,3,Content,memset,_showLoadFilesMenu _showSaveFilesMenu TITLE.PRG:_showLoadFilesMenu TITLE.PRG:_showSaveFilesMenu,
+F02749,MENU/MENU7.PRG/260.c,1512,_fileMenuElementsActive,C,7,Content,,_loadFileMenu _promptConfirm _promptFormat _promptOverwrite _selectLoadMemoryCard _selectSaveMemoryCard _showSaveMenu TITLE.PRG:_loadFileMenu TITLE.PRG:_promptConfirm TITLE.PRG:_promptFormat (+5),
+F02750,MENU/MENU7.PRG/260.c,1524,_printCharacter,C,35,Game.Actors,DrawPrim DrawSync,_drawFileMenuElement _printString TITLE.PRG:_drawFileMenuElement TITLE.PRG:_printString,
+F02751,MENU/MENU7.PRG/260.c,1572,_findCurrentSave,C,50,Game.Menu,,_showSaveMenu vs_menu7_saveContainerMenu TITLE.PRG:_showSaveMenu,_findCurrentSaveOnActiveMemcard _initSaveFileInfo _memcardEventHandler vs_mainmenu_setInformationMessage
+F02752,MENU/MENU7.PRG/260.c,1640,maskedHandler,C,30,Game.Menu,,_selectLoadMemoryCard _showLoadFilesMenu _showSaveFilesMenu,_memcardEventHandler
+F02753,MENU/MENU7.PRG/260.c,1675,_printString,C,38,Game.Menu,,_drawFileMenu _drawFileMenuElement TITLE.PRG:_drawFileMenu TITLE.PRG:_drawFileMenuElement,_printCharacter
+F02754,MENU/MENU7.PRG/260.c,1718,_interpolateRGB,C,15,Core.Math,,_intepolateMenuItemBgColour TITLE.PRG:_intepolateMenuItemBgColour,
+F02755,MENU/MENU7.PRG/260.c,1738,_intepolateMenuItemBgColour,C,22,Game.Items,,_drawFileMenuElement TITLE.PRG:_drawFileMenuElement,_interpolateRGB
+F02756,MENU/MENU7.PRG/260.c,1765,_drawFileMenuElement,C,181,Content,DrawPrim DrawSync getTPage,_drawFileMenu TITLE.PRG:_drawFileMenu,_drawHPMP _drawSaveInfoUI _drawSprt _fileProcessingAnim _fileProcessingCompleteAnim _intepolateMenuItemBgColour _printCharacter _printString _readImage _renderImage _renderInteger
+F02757,MENU/MENU7.PRG/260.c,1951,_drawFileMenu,C,122,Content,DrawPrim DrawSync getTPage,vs_menu7_dataMenu vs_menu7_gameOver vs_menu7_saveContainerMenu TITLE.PRG:_gameLoadScreen TITLE.PRG:_gameSaveScreen,_drawFileMenuElement _drawSprt _printString vs_main_playSfxDefault
+F02758,MENU/MENU7.PRG/260.c,2078,_drawFileMenuBg,C,6,Content,getTPage,vs_menu7_gameOver TITLE.PRG:_gameLoadScreen TITLE.PRG:_gameSaveScreen,_drawSprt
+F02759,MENU/MENU7.PRG/260.c,2092,_promptConfirm,C,61,Game.Battle,,_promptFormat _promptOverwrite _showSaveMenu TITLE.PRG:_promptFormat TITLE.PRG:_promptOverwrite TITLE.PRG:_showSaveMenu,_fileMenuElementsActive _initFileMenuElement vs_main_playSfxDefault
+F02760,MENU/MENU7.PRG/260.c,2161,_promptOverwrite,C,30,Game.Battle,,_showSaveFilesMenu TITLE.PRG:_showSaveFilesMenu,_fileMenuElementsActive _promptConfirm
+F02761,MENU/MENU7.PRG/260.c,2199,_promptFormat,C,66,Game.Battle,_card_format,_showSaveFilesMenu TITLE.PRG:_showSaveFilesMenu,_fileMenuElementsActive _memcardEventHandler _promptConfirm
+F02762,MENU/MENU7.PRG/260.c,2277,_showSaveFilesMenu,C,252,Save,memset,_selectSaveMemoryCard TITLE.PRG:_selectSaveMemoryCard,_clearFileMenuElement _createSaveFile _decode _findCurrentSaveOnActiveMemcard _initFileMenuElement _packageGameSaveData _promptFormat _promptOverwrite _rMemcpy _saveFile maskedHandler vs_main_playSfxDefault
+F02763,MENU/MENU7.PRG/260.c,2537,_selectSaveMemoryCard,C,128,Save,memset,_showSaveMenu TITLE.PRG:_showSaveMenu,_fileMenuElementsActive _initSaveFileInfo _memcardEventHandler _showSaveFilesMenu vs_main_playSfxDefault
+F02764,MENU/MENU7.PRG/260.c,2673,_showSaveMenu,C,197,Save,memset,vs_menu7_dataMenu vs_menu7_saveContainerMenu TITLE.PRG:_gameSaveScreen,_applyLoadedSaveFile _fileMenuElementsActive _findCurrentSave _initFileMenu _initFileMenuElement _loadSaveData _promptConfirm _selectSaveMemoryCard vs_main_playSfxDefault vs_mainmenu_setInformationMessage
+F02765,MENU/MENU7.PRG/260.c,2878,_showLoadFilesMenu,C,177,Content,,_selectLoadMemoryCard TITLE.PRG:_selectLoadMemoryCard,_applyLoadedSaveFile _clearFileMenuElement _getNewestSaveFile _initFileMenuElement _loadSaveData maskedHandler vs_main_playSfxDefault
+F02766,MENU/MENU7.PRG/260.c,3063,_selectLoadMemoryCard,C,115,Save,,_loadFileMenu TITLE.PRG:_loadFileMenu,_fileMenuElementsActive _initSaveFileInfo _showLoadFilesMenu maskedHandler vs_main_playSfxDefault
+F02767,MENU/MENU7.PRG/260.c,3187,_loadFileMenu,C,120,Content,,vs_menu7_dataMenu vs_menu7_gameOver TITLE.PRG:_gameLoadScreen,_fileMenuElementsActive _initFileMenuElement _selectLoadMemoryCard vs_main_playSfxDefault
+F02768,MENU/MENU7.PRG/260.c,3315,_loadIntroSaveFile,C,42,Save,,vs_menu7_gameOver,_applyLoadedSaveFile vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_freeCdQueueSlot vs_main_freeHeapR
+F02769,MENU/MENU7.PRG/260.c,3395,_initGameOver,C,34,Game.Menu,,vs_menu7_gameOver,vs_battle_renderImage vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_freeCdQueueSlot vs_main_freeHeapR
+F02770,MENU/MENU7.PRG/260.c,3434,_setMenuItemClut,C,32,Game.Items,,_displayGameOverScreen TITLE.PRG:_menuSoundSettings TITLE.PRG:_menuVibrationSettings TITLE.PRG:_setTitleMenuState,
+F02771,MENU/MENU7.PRG/260.c,3475,_displayGameOverScreen,C,122,Graphics,SetDispMask,vs_menu7_gameOver,_setMenuItemClut func_8004552C vs_battle_renderImage
+F02772,MENU/MENU7.PRG/260.c,3603,vs_menu7_gameOver,C,112,Game.Menu,DrawSync SetDispMask StoreImage setRECT,,_displayGameOverScreen _drawFileMenu _drawFileMenuBg _initFileMenu _initGameOver _initMemcard _loadFileMenu _loadIntroSaveFile _shutdownMemcard func_8007E0A8 func_8008A4DC vs_main_freeMusic vs_main_jumpToBattle vs_main_loadClut (+2)
+F02773,MENU/MENU7.PRG/260.c,3727,_promptYesNo,C,70,Game.Battle,,vs_menu7_saveContainerMenu,vs_battle_drawCursor vs_battle_getMenuItem vs_battle_setMenuItem
+F02774,MENU/MENU7.PRG/260.c,3804,_getContainerIndexOffset,C,11,Game.Items,,_copyContainer,
+F02775,MENU/MENU7.PRG/260.c,3821,_copyContainer,C,117,Game.Items,,vs_menu7_saveContainerMenu,_getContainerIndexOffset vs_battle_rMemcpy vs_battle_rMemzero vs_main_allocHeapR vs_main_freeHeapR
+F02776,MENU/MENU7.PRG/260.c,3944,vs_menu7_saveContainerMenu,C,208,Save,,MAINMENU.PRG:_nop,_applyLoadedSaveFile _copyContainer _drawFileMenu _findCurrentSave _initFileMenu _initMemcard _loadSaveData _promptYesNo _showSaveMenu _shutdownMemcard func_8008A4DC func_800CB654 vs_battle_dismissTextBox vs_battle_initInformationTextBox (+10)
+F02777,MENU/MENU7.PRG/260.c,4157,_drawPlayTime,C,24,Graphics,,vs_menu7_dataMenu,vs_battle_keystreamBits vs_battle_renderTextRaw vs_battle_toBCD
+F02778,MENU/MENU7.PRG/260.c,4187,vs_menu7_dataMenu,C,159,Game.Menu,ClearImage DrawSync setRECT,,_drawFileMenu _drawPlayTime _initFileMenu _initMemcard _loadFileMenu _showSaveMenu _shutdownMemcard func_8008A4DC func_8008A4FC vs_battle_initInformationTextBox vs_mainMenu_dismissInformationBox vs_mainMenu_getConfirmedRow vs_mainMenu_setMenuCommand vs_mainMenu_toggleBackgroundFade (+3)
+F02779,MENU/MENU8.PRG/21A0.c,29,_insertDeleteHandler,C,56,Game.Menu,,_renameMenuInput,
+F02780,MENU/MENU8.PRG/21A0.c,92,_copyNormalizedString,C,28,Game.Menu,,_renameMenuInput,
+F02781,MENU/MENU8.PRG/21A0.c,133,_renderRenameMenu,C,180,Game.Menu,,vs_menu8_execRename,vs_battle_printVariableWidthFontChar vs_battle_renderTextRawColor vs_battle_setFontStyle vs_battle_setMenuItem vs_battle_uiGradientStop vs_mainmenu_renderButton
+F02782,MENU/MENU8.PRG/21A0.c,318,_highlightSelection,C,21,Graphics,,_highlightCharSelection _renameMenuInput,
+F02783,MENU/MENU8.PRG/21A0.c,346,_highlightCharSelection,C,11,Graphics,,_renameMenuInput,_highlightSelection vs_mainMenu_renderCursor
+F02784,MENU/MENU8.PRG/21A0.c,364,_confirmationScreen,C,75,Graphics,,_renameMenuInput,vs_battle_drawCursor vs_battle_getMenuItem vs_battle_setMenuItem
+F02785,MENU/MENU8.PRG/21A0.c,445,_updateMenuSelection,C,11,Game.Menu,,_renameMenuInput,vs_battle_getMenuItem
+F02786,MENU/MENU8.PRG/21A0.c,463,_renameMenuInput,C,350,Game.Menu,,vs_menu8_execRename,_confirmationScreen _copyNormalizedString _highlightCharSelection _highlightSelection _insertDeleteHandler _updateMenuSelection vs_battle_dismissTextBox vs_battle_equipWeapon vs_battle_initInformationTextBox vs_battle_printf vs_battle_rMemcpy vs_mainMenu_renderCursor vs_main_playSfxDefault vs_mainmenu_setInformationMessage
+F02787,MENU/MENU8.PRG/21A0.c,820,vs_menu8_execRename,C,83,Game.Menu,,,_renameMenuInput _renderRenameMenu vs_mainMenu_dismissInformationBox vs_mainMenu_initInformationBox
+F02788,MENU/MENU8.PRG/88.c,20,_simpleMapOptionMenu,C,52,Game.Menu,,vs_menu8_exec,vs_mainMenu_dismissInformationBox vs_mainMenu_setMenuCommand vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02789,MENU/MENU8.PRG/88.c,80,_abilityTimingOptionMenu,C,50,Game.Menu,,vs_menu8_exec,vs_mainMenu_dismissInformationBox vs_mainMenu_setMenuCommand vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02790,MENU/MENU8.PRG/88.c,138,_weaponStatusOptionMenu,C,50,Game.Items,,vs_menu8_exec,vs_mainMenu_dismissInformationBox vs_mainMenu_setMenuCommand vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02791,MENU/MENU8.PRG/88.c,196,_armorStatusOptionMenu,C,51,Game.Items,,vs_menu8_exec,vs_mainMenu_dismissInformationBox vs_mainMenu_setMenuCommand vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02792,MENU/MENU8.PRG/88.c,255,_cursorMemoryOptionMenu,C,50,Game.Menu,,vs_menu8_exec,vs_mainMenu_dismissInformationBox vs_mainMenu_setMenuCommand vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02793,MENU/MENU8.PRG/88.c,313,_informationOptionMenu,C,49,Game.Menu,,vs_menu8_exec,vs_mainMenu_dismissInformationBox vs_mainMenu_setMenuCommand vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02794,MENU/MENU8.PRG/88.c,370,_puzzleModeOptionMenu,C,51,Game.Menu,,vs_menu8_exec,vs_mainMenu_dismissInformationBox vs_mainMenu_setMenuCommand vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02795,MENU/MENU8.PRG/88.c,429,_soundOptionMenu,C,49,Audio,,vs_menu8_exec,vs_mainMenu_dismissInformationBox vs_mainMenu_setMenuCommand vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02796,MENU/MENU8.PRG/88.c,486,_vibrationOptionMenu,C,55,Input,,vs_menu8_exec,func_800438C8 vs_mainMenu_dismissInformationBox vs_mainMenu_setMenuCommand vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02797,MENU/MENU8.PRG/88.c,551,vs_menu8_exec,C,275,Game.Menu,,,_abilityTimingOptionMenu _armorStatusOptionMenu _cursorMemoryOptionMenu _informationOptionMenu _puzzleModeOptionMenu _simpleMapOptionMenu _soundOptionMenu _vibrationOptionMenu _weaponStatusOptionMenu vs_battle_initInformationTextBox vs_mainMenu_dismissInformationBox vs_mainMenu_getConfirmedRow vs_mainMenu_initInformationBox vs_mainMenu_setMenuCommand (+3)

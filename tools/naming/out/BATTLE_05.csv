@@ -1,0 +1,119 @@
+id,final_name,final_location,purpose,confidence,notes
+F00658,Field::SetRoomWeather,Native\Game\src\Field\Environment.c,"Selects room weather, sizes its particle population from room bounds, and switches the ambient weather sound.",high,fields:_mpdRoomSectionB.unk48=weather emission bounds
+F00659,Field::UpdateRoomWeather,Native\Game\src\Field\Environment.c,"Varies room wind angles and weather intensity, then updates the selected weather particles.",high,fields:_mpdRoomSectionB.unk36=minimum wind azimuth;fields:_mpdRoomSectionB.unk38=maximum wind azimuth
+F00660,Core::Math::ClampSignedShort,Native\Core\src\Math\FixedPoint.c,Clamps a signed short between two bounds regardless of their order.,high,
+F00661,Field::ApplyWeatherIntensity,Native\Game\src\Field\Environment.c,"Derives active particle count, weather sound volume, and streak scale from the current weather intensity.",high,fields:_mpdRoomSectionB.unk3C=minimum weather intensity;fields:_mpdRoomSectionB.unk3E=maximum weather intensity
+F00662,Field::SetWeatherVariationEnabled,Native\Game\src\Field\Environment.c,Enables or disables automatic variation of room wind and weather intensity.,high,
+F00663,Field::SetWeatherIntensity,Native\Game\src\Field\Environment.c,"Sets weather intensity and refreshes particle limits, ambient sound volume, and wind velocity.",high,
+F00664,Field::SetWeatherWindAngles,Native\Game\src\Field\Environment.c,Sets wind azimuth and elevation and rebuilds the room weather velocity vector.,high,
+F00665,Field::ReleaseWeatherParticles,Native\Game\src\Field\Environment.c,Clears weather particle counts and releases the room weather particle buffer.,high,
+F00666,Field::SetWeatherAmbientSound,Native\Game\src\Field\Environment.c,"Replaces the ambient weather sound, applies intensity-dependent volume, and returns the previous sound identifier.",high,
+F00667,Field::SetRoomBackgroundOffset,Native\Game\src\Field\Environment.c,Sets the horizontal and vertical scroll offsets used by the room background tile layer.,high,
+F00668,Field::DrawRoomBackgroundTiles,Native\Game\src\Field\Environment.c,Draws the scrolling room background tile layer with camera roll and a black backing rectangle.,high,
+F00669,Field::DuckWeatherAmbientSound,Native\Game\src\Field\Environment.c,Reduces ambient weather volume to one quarter while ducking is enabled and restores it otherwise.,high,
+F00670,Field::FindRoomGeometryGroup,Native\Game\src\Field\RoomEffects.c,Returns a room geometry group by index or null when the room or group is unavailable.,high,
+F00671,Field::ShowRoomGeometryGroup,Native\Game\src\Field\RoomEffects.c,Clears the hidden flag on a room geometry group and reports whether the group exists.,high,
+F00672,Field::HideRoomGeometryGroup,Native\Game\src\Field\RoomEffects.c,Sets the hidden flag on a room geometry group and reports whether the group exists.,high,
+F00673,Field::SwapRoomGeometryGroupFlags,Native\Game\src\Field\RoomEffects.c,Swaps the complete flag words of two room geometry groups when both indices are valid.,high,
+F00674,Field::AddRoomGeometryDepthBias,Native\Game\src\Field\RoomEffects.c,Adds a signed depth-sort bias to the upper half of a room geometry group's flag word.,high,Upper half is applied to ordering-table depth by the mesh renderer
+F00675,Field::DisableRoomGeometryGroup,Native\Game\src\Field\RoomEffects.c,Sets the persistent render-disable flag on a room geometry group.,med,Sets flag 0x1000; distinct from the ordinary hidden flag 0x100
+F00676,Field::UpdateRoomEffects,Native\Game\src\Field\RoomEffects.c,Advances active room texture effects and geometry scripts and releases completed script instances.,high,fields:D_800F1DD8_t.unk0=active;fields:D_800F1DD8_t.unk1=effect type or script object count;fields:D_800F1DD8_t.unk2=update enabled
+F00677,Field::AdvanceRoomTextureFrames,Native\Game\src\Field\RoomEffects.c,Advances an animated room polygon's texture frame and updates its triangle or quad texture coordinates.,high,
+F00678,Field::ScrollRoomTextureCoordinates,Native\Game\src\Field\RoomEffects.c,Scrolls a room polygon's texture window and wraps it within its configured texture region.,high,
+F00679,Field::AnimateRoomTextureImages,Native\Game\src\Field\RoomEffects.c,Copies animated or vertically scrolling room texture images and their half-resolution versions into Vram.,high,
+F00680,Field::UpdateRoomRotationEffect,Native\Game\src\Field\RoomEffects.c,"Accelerates a room geometry rotation toward its endpoint, damps overshoot, and reverses the motion at completion.",high,fields:D_800F1DD8_t2.unk7=rotation axis;fields:D_800F1DD8_t2.unk14=current angle;fields:D_800F1DD8_t2.unk18=target angle
+F00681,Field::SkipRoomEffectCommand,Native\Game\src\Field\RoomEffects.c,Completes an empty room-effect callback without changing state.,high,Unused callback parameters differ between equivalent return-zero stubs
+F00682,Field::InitializeRoomEffects,Native\Game\src\Field\RoomEffects.c,Indexes MPD texture effects and geometry scripts and allocates instances for scripts initially marked active.,high,
+F00683,Field::CreateRoomEffectObjects,Native\Game\src\Field\RoomEffects.c,"Allocates geometry-script objects and initializes their positions, rotations, and command pointers from the room.",high,fields:func_80092F74_t.unk8=geometry group index;fields:func_80092F74_t.unk4=command pointer
+F00684,Field::FinishRoomEffectSetup,Native\Game\src\Field\RoomEffects.c,Returns without modifying room-effect state at the reserved setup hook.,low,Empty function with no callers in the batch metadata
+F00685,Field::StartRoomEffect,Native\Game\src\Field\RoomEffects.c,Activates a texture effect or recreates a geometry-script instance from its original MPD definition.,high,
+F00686,Field::ReleaseRoomEffects,Native\Game\src\Field\RoomEffects.c,Releases room geometry-script instances and stops their active room sound sequence.,high,
+F00687,Field::ExecuteRoomEffectCommands,Native\Game\src\Field\RoomEffects.c,Runs each room geometry-script object's commands until they yield or reach the script terminator.,high,
+F00688,Field::SetRoomEffectRadialVelocity,Native\Game\src\Field\RoomEffects.c,Derives outward object velocity and rotation increments from a scripted origin and radius.,med,Velocity uses per-axis absolute distance rather than a normalized radial vector
+F00689,Field::SetRoomEffectVelocity,Native\Game\src\Field\RoomEffects.c,"Loads translational velocity, angular velocity, and their damping parameters for a room-script object.",high,fields:func_80092F74_t.unk24=linear velocity;fields:func_80092F74_t.unk2C=angular velocity
+F00690,Field::SetRoomEffectTransform,Native\Game\src\Field\RoomEffects.c,Sets a room-script object's position and rotation and writes them to its geometry group.,high,fields:func_80092F74_t.unkC=position in sixteenths;fields:func_80092F74_t.unk1C=rotation
+F00691,Field::WriteRoomEffectTransform,Native\Game\src\Field\RoomEffects.c,Copies a room-script object's scaled position and rotation into its bound room geometry group.,high,
+F00692,Field::SkipRoomEffectCommand,Native\Game\src\Field\RoomEffects.c,Completes an empty room-effect callback without changing state.,high,dup-of:F00681
+F00693,Field::HideRoomEffectObject,Native\Game\src\Field\RoomEffects.c,Replaces a room-script object's geometry flags with the hidden flag.,high,
+F00694,Field::ExecuteRoomEffectShowGroup,Native\Game\src\Field\RoomEffects.c,Executes the room geometry-script command that reveals a geometry group by index.,high,
+F00695,Field::AdvanceRoomEffectMotion,Native\Game\src\Field\RoomEffects.c,Advances the selected room-object motion model until its duration expires or the motion reports completion.,high,fields:func_80092F74_t.unkC.pad=elapsed command ticks
+F00696,Field::StepRoomEffectGravity,Native\Game\src\Field\RoomEffects.c,"Moves and spins a scripted room object with gravity, damping, and limited floor bounces.",high,fields:func_80092F74_t.unk1C.pad=floor contact count
+F00697,Field::StepRoomEffectDampedMotion,Native\Game\src\Field\RoomEffects.c,Moves and spins a scripted room object while damping both velocity vectors.,high,
+F00698,Field::ExecuteRoomEffectPlaySound,Native\Game\src\Field\RoomEffects.c,Starts the room sound sequence selected by a geometry-script command.,high,
+F00699,Field::ExecuteRoomEffectStopSound,Native\Game\src\Field\RoomEffects.c,Stops the room sound sequence selected by a geometry-script command and clears the tracked sound identifier.,high,
+F00700,Field::ExecuteRoomEffectStartEffect,Native\Game\src\Field\RoomEffects.c,Executes the geometry-script command that activates another room effect.,high,
+F00701,Field::ExecuteRoomEffectHideGroup,Native\Game\src\Field\RoomEffects.c,Executes the room geometry-script command that hides a geometry group by index.,high,
+F00702,Field::ExecuteRoomEffectStopScript,Native\Game\src\Field\RoomEffects.c,Stops a selected room geometry script and releases its allocated object states.,high,
+F00703,Field::SkipRoomEffectCommand,Native\Game\src\Field\RoomEffects.c,Completes an empty room-effect callback without changing state.,high,dup-of:F00681
+F00704,Field::ToggleRoomEffectUpdates,Native\Game\src\Field\RoomEffects.c,Toggles update permission for a valid room texture effect or geometry script.,high,
+F00705,Field::IsRoomEffectActive,Native\Game\src\Field\RoomEffects.c,Returns the active flag for the selected room effect or geometry script.,high,
+F00706,Field::FinishRoomDoorRotation,Native\Game\src\Field\RoomEffects.c,"Snaps an active door rotation effect to its endpoint, reverses its stored motion, and deactivates it.",high,Caller handles interactive room doors; requires rotation effect type 6
+F00707,Field::FinishRoomTiltRotation,Native\Game\src\Field\RoomEffects.c,Snaps an X- or Z-axis room rotation to its endpoint and reverses its stored motion for the next activation.,high,
+F00708,Field::DuckRoomEffectSound,Native\Game\src\Field\RoomEffects.c,Reduces the active room-script sound volume while ducking is enabled and restores it otherwise.,high,
+F00709,Field::SwapRoomGeometryRedGreen,Native\Game\src\Field\RoomEffects.c,Swaps red and green vertex color channels throughout a room geometry group's triangles and quads.,high,fields:func_80093914_t.unkC=first vertex red;fields:func_80093914_t.unkD=first vertex green
+F00710,Field::RestoreRoomEffectSoundVolume,Native\Game\src\Field\RoomEffects.c,Enables immediate room sound playback and restores the active room-script sound to full volume.,high,
+F00711,Field::RestartRoomEffectSound,Native\Game\src\Field\RoomEffects.c,Restarts the currently tracked sound sequence from the room sound bank.,high,
+F00712,Battle::ResetFloatingLabels,Native\Game\src\Battle\Feedback.c,"Resets floating-label counters, timing indicators, and the room's battle feedback storage.",high,
+F00713,Battle::QueueWorldLockedLabel,Native\Game\src\Battle\Feedback.c,Queues a locked-interaction label at a world position when a door or container cannot be unlocked.,high,Type 3 is rendered by the same label renderer used for blocked results
+F00714,Battle::QueueActorValueLabel,Native\Game\src\Battle\Feedback.c,Queues a signed numeric value at an actor or body part and staggers it behind existing labels.,high,fields:D_800F1BAC_t.unkC=signed magnitude or message value;fields:D_800F1BAC_t.unkE=label presentation style
+F00715,Battle::QueueAbilityTimingResult,Native\Game\src\Battle\Feedback.c,Replaces the current BattleAbility timing result with a newly queued result and a randomized success phrase.,high,Original name says render but this function only queues a label
+F00716,Battle::QueueChainCount,Native\Game\src\Battle\Feedback.c,"Replaces the displayed Chain count, removing it when zero and clamping positive counts to 999.",high,
+F00717,Battle::QueueActorStatusLabels,Native\Game\src\Battle\Feedback.c,Queues one actor status-change label for every set bit in the supplied status mask.,high,
+F00718,Battle::QueueActorStatusLabel,Native\Game\src\Battle\Feedback.c,"Queues an actor status label with staggered timing, vertical stacking, and optional offscreen rejection.",high,
+F00719,Battle::UpdateAndDrawFloatingLabels,Native\Game\src\Battle\Feedback.c,"Projects and draws battle feedback labels, advances their lifetimes, and removes expired entries.",high,fields:D_800F1BAC_t.unk8=label kind and actor index;fields:D_800F1BAC_t.unkB=animation tick
+F00720,Battle::PlaceActorValueLabel,Native\Game\src\Battle\Feedback.c,Offsets an actor's numeric label to avoid earlier labels and clamps its screen position.,high,fields:D_800F1BAC_t.unk10=horizontal separation;fields:D_800F1BAC_t.unk12=vertical separation
+F00721,Battle::AdvanceFloatingLabelQueue,Native\Game\src\Battle\Feedback.c,Resets a feedback label's animation tick and advances its delayed display position.,high,fields:D_800F1BAC_t.unk0.pad=queue delay
+F00722,Battle::DrawActorValueLabel,Native\Game\src\Battle\Feedback.c,Draws floating numeric feedback with bounce or drift and optional stat-change captions.,high,
+F00723,Battle::DrawValueLabelCaption,Native\Game\src\Battle\Feedback.c,Draws the stat caption and increase or decrease sign preceding a floating numeric value.,high,
+F00724,Battle::DrawLockedFloatingLabel,Native\Game\src\Battle\Feedback.c,Draws the four-part locked or blocked feedback graphic with an opening and closing stretch animation.,med,Locked meaning follows the failed door and container unlock caller; texture words are not decoded
+F00725,Battle::DrawActorStatusLabel,Native\Game\src\Battle\Feedback.c,"Draws a status-change caption with timed sliding, flashing, fading, and an optional removal marker.",high,
+F00726,Battle::DrawStatusRemovalMarker,Native\Game\src\Battle\Feedback.c,Draws the animated marker used by a status-change caption's alternate presentation.,med,Exact marker glyph is not decoded from the texture atlas
+F00727,Battle::DrawAbilityTimingResult,Native\Game\src\Battle\Feedback.c,Draws the queued BattleAbility timing judgement or success phrase with its slide animation.,high,
+F00728,Battle::DrawChainCount,Native\Game\src\Battle\Feedback.c,Draws the queued Chain count with singular or plural wording and a slide animation.,high,
+F00729,Battle::SetActorMarkersHidden,Native\Game\src\Battle\Feedback.c,Sets the global suppression flag for overhead actor markers.,high,
+F00730,Battle::SetActorMarker,Native\Game\src\Battle\Feedback.c,"Sets or masks an overhead actor marker, or initializes all marker slots when the actor index is zero.",high,
+F00731,Battle::DrawActorMarker,Native\Game\src\Battle\Feedback.c,"Draws an actor's overhead marker or nearby-object interaction icon, including offscreen direction arrows.",med,Marker glyph meanings remain partly inferred; low three bits select the marker kind
+F00732,Core::Math::AddPackedScreenCoordinates,Native\Core\src\Math\Vector.c,Adds two packed signed screen-coordinate pairs without carrying the low coordinate into the high coordinate.,high,
+F00733,Battle::DrawActorMarkers,Native\Game\src\Battle\Feedback.c,Draws enabled actor markers unless the global marker suppression flag is set.,high,
+F00734,Battle::ReserveFloatingLabel,Native\Game\src\Battle\Feedback.c,Returns the next feedback-label slot or evicts the oldest label when all 32 slots are occupied.,high,
+F00735,Battle::CompactFloatingLabels,Native\Game\src\Battle\Feedback.c,Removes the requested number of inactive feedback-label entries from the queue.,high,
+F00736,Battle::RemoveFloatingLabel,Native\Game\src\Battle\Feedback.c,"Removes one feedback label, shifts later entries down, and clears the vacated slot.",high,
+F00737,Battle::DrawOffscreenActorArrow,Native\Game\src\Battle\Feedback.c,Draws the overhead marker's directional arrow at the screen edge for an offscreen actor.,high,
+F00738,Battle::QueueEquipmentStatChange,Native\Game\src\Battle\Feedback.c,Queues an equipment Class or Affinity change notification when the corresponding display setting is enabled.,high,Type 7 remains pending until the notification commit call
+F00739,Battle::DrawEquipmentStatChange,Native\Game\src\Battle\Feedback.c,"Draws the equipment type, changed stat, signed amount, and scrolling offset of an equipment notification.",high,
+F00740,Battle::ShowAbilityTimingCue,Native\Game\src\Battle\Feedback.c,Positions the BattleAbility timing cue near Ashley and extends its visible duration when timing display is enabled.,high,
+F00741,Battle::DrawAbilityTimingCue,Native\Game\src\Battle\Feedback.c,Draws the red BattleAbility timing cue above its stored screen position.,high,
+F00742,Battle::CommitEquipmentStatChanges,Native\Game\src\Battle\Feedback.c,Activates pending equipment stat-change labels so they enter the visible notification queue.,high,
+F00743,Battle::SuppressAshleyStatusLabels,Native\Game\src\Battle\Feedback.c,Suppresses Ashley's floating status captions while leaving other actors' captions visible.,high,
+F00744,Render::DrawRoomGeometry,Native\Graphics\src\RoomGeometry.c,"Draws visible MPD geometry groups with their prepared transforms, facing masks, and subdivision settings.",high,asm
+F00745,Render::DrawRoomGeometryPolygons,Native\Graphics\src\RoomGeometry.c,Projects and emits an MPD group's textured triangles and quads with culling and optional subdivision.,high,asm
+F00746,Render::DecodeRoomPolygonVertices,Native\Graphics\src\RoomGeometry.c,Expands the first packed room polygon's base position and signed vertex offsets into triangle vertices.,high,asm
+F00747,Render::ProjectAndDecodeRoomPolygon,Native\Graphics\src\RoomGeometry.c,"Projects one packed room triangle, calculates winding and depth, and decodes the following polygon's vertices.",high,asm
+F00748,Render::SubdivideRoomTriangle,Native\Graphics\src\RoomGeometry.c,Recursively subdivides a textured room triangle and emits its visible leaf primitives.,high,asm
+F00749,Render::SubdivideRoomQuad,Native\Graphics\src\RoomGeometry.c,Recursively subdivides a textured room quad and emits its visible leaf primitives.,high,asm
+F00750,Render::InterpolateRoomVertexMidpoint,Native\Graphics\src\RoomGeometry.c,"Averages two room subdivision vertices' positions, colors, and texture coordinates into a midpoint.",high,asm
+F00751,Render::IsRoomPolygonOnScreen,Native\Graphics\src\RoomGeometry.c,Tests whether a projected room triangle or quad intersects the configured screen bounds.,high,asm
+F00752,Render::LinkRoomPolygonByDepth,Native\Graphics\src\RoomGeometry.c,Rejects clipped room polygons and links accepted primitives into the depth-biased ordering table.,high,asm
+F00753,Render::SetRoomPolygonNearClip,Native\Graphics\src\RoomGeometry.c,Sets the near-depth limit used when linking room geometry polygons.,high,asm;Original patches two depth-comparison instruction immediates
+F00754,Render::SetRoomPolygonFarClip,Native\Graphics\src\RoomGeometry.c,Sets the far-depth limit used when linking room geometry polygons.,high,asm;Original patches the far-depth comparison instruction
+F00755,Render::SetRoomTextureLodDepth,Native\Graphics\src\RoomGeometry.c,Sets the depth threshold at which room polygons switch to half-resolution texture coordinates.,high,asm;Not a far clip despite callers from the far-clip setter
+F00756,Render::SetRoomPolygonScreenBounds,Native\Graphics\src\RoomGeometry.c,Sets the screen rectangle used by room polygon visibility tests.,high,asm;Original patches comparison immediates
+F00757,Render::DrawSkyDome,Native\Graphics\src\RoomGeometry.c,Transforms the fixed 34-vertex sky mesh and emits its visible colored triangles behind the room.,high,asm
+F00758,Render::UpdateRoomGroupTransforms,Native\Graphics\src\RoomGeometry.c,Builds view transforms for visible room geometry groups and applies camera-facing transforms to billboard groups.,high,asm;Geometry flag 0x400 selects camera-facing behavior
+F00759,Render::BuildRoomGeometryViewMatrix,Native\Graphics\src\RoomGeometry.c,Combines room-object Euler rotation and translation with the current camera view matrix.,high,asm
+F00760,Render::BuildScaleCompensatedRoomView,Native\Graphics\src\RoomGeometry.c,Builds a room view transform with inverse far-clip scaling for background geometry.,high,asm;Used for the sky when camera farClip differs from one
+F00761,Core::Math::BuildEulerRotationMatrix,Native\Core\src\Math\Matrix.c,Builds a fixed-point rotation matrix from three Euler angles using the shared trigonometric table.,high,asm
+F00762,Core::Math::LookupRotationSineCosine,Native\Core\src\Math\Trig.c,Resolves angle octants into sine and cosine values for the Euler rotation-matrix builder.,high,asm;Table-dispatch blocks share a custom continuation-register convention
+F00763,Core::Math::MultiplyRotationMatrixInPlace,Native\Core\src\Math\Matrix.c,Premultiplies a rotation matrix by another matrix and writes the result back to the second matrix.,high,asm
+F00764,Core::Math::CosineFixedPoint,Native\Core\src\Math\Trig.c,Returns the fixed-point cosine by shifting the input angle and entering the sine lookup routine.,high,asm;Falls through into the sine implementation
+F00765,Core::Math::SineFixedPoint,Native\Core\src\Math\Trig.c,Returns a signed fixed-point sine using quadrant folding and the shared trigonometric table.,high,asm
+F00766,Field::CallRoomEntryPoint,Native\Game\src\Field\RoomEffects.c,Transfers control to the entry point embedded after the MPD room's section E header.,med,asm;Room section E pointer plus 0x14 is treated as executable code
+F00767,Render::SampleRoomLighting,Native\Graphics\src\RoomGeometry.c,Finds a room lighting triangle containing a point and samples its color or returns the layer's default color.,high,asm;Assembly consumes an output-color pointer in a2 despite the incomplete C prototype
+F00768,Render::InterpolateRoomLightTriangle,Native\Graphics\src\RoomGeometry.c,Tests a point against a lighting triangle and interpolates its vertex colors using signed triangle areas.,high,asm
+F00769,Render::TintRoomGeometryPrimitives,Native\Graphics\src\RoomGeometry.c,Applies room color offsets and optional desaturation to the emitted textured triangle and quad primitives.,high,asm
+F00770,Render::TintRoomPrimitiveColor,Native\Graphics\src\RoomGeometry.c,"Desaturates a primitive vertex color when requested, adds signed color offsets, and clamps the channels.",high,asm
+F00771,Field::DrawMinimapScene,Native\Game\src\Field\Minimap.c,"Draws visited scene rooms, connections, and gated door markers into the simple minimap.",high,asm
+F00772,Field::SampleCollisionHeightCode,Native\Game\src\Field\Collision.c,Decodes a collision layer's tiled height sample and preserves its high-bit surface flag.,high,asm;Samples 4-by-4 patterns indexed by collision-map tiles
+F00773,Render::GetProjectionScreenOffset,Native\Graphics\src\RoomGeometry.c,Reads the geometry projection center coordinates from the rendering registers.,high,asm
+F00774,Field::ResolveSceneRoomData,Native\Game\src\Field\Minimap.c,Replaces scene room-data lengths with pointers and returns the room-name table following the room payloads.,high,asm;fields:vs_battle_room.dataAddress=resolved room payload pointer
+F00775,Render::SetProjectionScreenOffset,Native\Graphics\src\RoomGeometry.c,Sets the geometry projection center coordinates in the rendering registers.,high,asm

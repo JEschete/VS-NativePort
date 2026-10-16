@@ -1,0 +1,128 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F02798,MENU/MENU9.PRG/238.c,40,_toggleMenuAction,C,9,Game.Menu,,_menuInput,vs_mainMenu_setMenuCommand
+F02799,MENU/MENU9.PRG/238.c,54,_renderScrollableMenuItem,C,136,Game.Items,,_renderBossRushDetails _renderEnemyMenu _renderTitleMenu,vs_battle_addTile vs_battle_uiGradientStop vs_mainMenu_renderRowLabel
+F02800,MENU/MENU9.PRG/238.c,196,_setRows,C,27,Game.Menu,,_topMenu,vs_mainmenu_setMenuRows
+F02801,MENU/MENU9.PRG/238.c,228,_getSelectedRow,C,11,Game.Menu,,_topMenu MENUC.PRG:_assembleBladeMenu MENUC.PRG:_assembleGripMenu MENUC.PRG:_attachGem MENUC.PRG:_initUiArmor MENUC.PRG:_selectBlade MENUC.PRG:_selectShields MENUE.PRG:_topMenu,vs_mainmenu_getSelectedRow
+F02802,MENU/MENU9.PRG/238.c,244,_setMenuRow10,C,3,Game.Menu,,,
+F02803,MENU/MENU9.PRG/238.c,548,_menuInput,C,849,Game.Menu,ABS,,_initEnemyList _leaveBossRushMenu _printBossRushMenuRow _renderBossRushDetails _renderBossRushRecords _renderEnemyDetailScreen _renderEnemyMenu _renderEnemyNavigation _renderTitleMenu _renderTopMenu _restoreCamera _setEnemyDescription _setStatText _setTitleRows (+22)
+F02804,MENU/MENU9.PRG/238.c,1402,_restoreCamera,C,6,Game.Field,getScratchAddr,_menuInput,vs_main_memcpy
+F02805,MENU/MENU9.PRG/238.c,1414,_setEnemyDescription,C,9,Game.Event,,_menuInput,vs_mainmenu_setInformationMessage
+F02806,MENU/MENU9.PRG/238.c,1430,_topMenu,C,36,Game.Menu,,_menuInput,_getSelectedRow _setRows
+F02807,MENU/MENU9.PRG/238.c,1474,_buildCameraMatrix,C,35,Game.Menu,ApplyMatrix applyVector getScratchAddr setVector,_renderEnemyDetailScreen _renderTopMenu,_buildPitchMatrix _buildYawMatrix func_80041C68 rcos rsin
+F02808,MENU/MENU9.PRG/238.c,1514,_buildYawMatrix,C,14,Game.Menu,,_buildCameraMatrix MENU5.PRG:_setCamera,rcos rsin
+F02809,MENU/MENU9.PRG/238.c,1533,_buildPitchMatrix,C,14,Game.Menu,,_buildCameraMatrix MENU5.PRG:_setCamera,rcos rsin
+F02810,MENU/MENU9.PRG/238.c,1552,_renderEnemyInfoBg,C,37,Game.Actors,AddPrim getScratchAddr getTPage setLineG2 setPolyF4 setRGB0 setRGB1 setXY2 setXY4,_renderEnemyDetailScreen,
+F02811,MENU/MENU9.PRG/238.c,1594,_renderGradientQuad,C,45,Graphics,AddPrim getTPage setPolyF4 setPolyG4 setRGB0 setRGB1 setRGB2 setRGB3 setXY4,_renderBossRushRecords _renderEnemyDetailScreen _renderTopMenu,
+F02812,MENU/MENU9.PRG/238.c,1645,_renderFooterBg,C,27,Graphics,AddPrim getScratchAddr getTPage setPolyF4 setPolyG4 setRGB0 setRGB1 setRGB2 setRGB3 setSemiTrans setXY4,_renderTopMenu,
+F02813,MENU/MENU9.PRG/238.c,1679,_renderTopMenu,C,38,Game.Menu,getScratchAddr sprintf,_menuInput,_buildCameraMatrix _renderFooterBg _renderGradientQuad _renderScreenEdgeFade func_800F9EB8 vs_battle_getGeomOffset vs_battle_renderTextRawColor vs_battle_setGeomOffset
+F02814,MENU/MENU9.PRG/238.c,1722,_setTitleRows,C,25,Game.Menu,,_menuInput,
+F02815,MENU/MENU9.PRG/238.c,1756,_renderTitleMenu,C,70,Game.Menu,,_menuInput,_renderScrollableMenuItem _renderTitleNo vs_battle_getMenuItem vs_battle_renderMenuItem vs_battle_setMenuItem vs_mainMenu_renderCursor vs_mainmenu_setInformationMessage
+F02816,MENU/MENU9.PRG/238.c,1835,_renderTitleNo,C,34,Graphics,AddPrim getcode setClut setPolyFT4 setRGB0 setTPage setUV4 setXY4 setcode sprintf,_renderTitleMenu,
+F02817,MENU/MENU9.PRG/238.c,1878,_renderEnemyNo,C,33,Game.Actors,AddPrim getScratchAddr getcode setClut setPolyFT4 setRGB0 setTPage setUV4 setXY4 setcode sprintf,_renderEnemyMenu,
+F02818,MENU/MENU9.PRG/238.c,1916,_initEnemyList,C,49,Game.Actors,,_menuInput,
+F02819,MENU/MENU9.PRG/238.c,1972,_renderEnemyMenu,C,92,Game.Menu,,_menuInput,_renderEnemyNo _renderScrollableMenuItem vs_battle_getMenuItem vs_battle_renderMenuItem vs_battle_setMenuItem vs_mainMenu_renderCursor vs_mainmenu_setInformationMessage
+F02820,MENU/MENU9.PRG/238.c,2069,_renderEnemyDetailScreen,C,72,Game.Actors,getScratchAddr sprintf,_menuInput,_buildCameraMatrix _renderEnemyInfoBg _renderGradientQuad _renderScreenEdgeFade func_800F9EB8 vs_battle_getGeomOffset vs_battle_getMenuItem vs_battle_renderMenuItem vs_battle_renderTextRawColor vs_battle_setGeomOffset vs_battle_setMenuItem vs_mainmenu_renderButton
+F02821,MENU/MENU9.PRG/238.c,2146,_renderScreenEdgeFade,C,28,Graphics,AddPrim getTPage setPolyG4 setRGB0 setRGB1 setRGB2 setRGB3 setSemiTrans setXY4,_renderEnemyDetailScreen _renderTopMenu,
+F02822,MENU/MENU9.PRG/238.c,2176,_strcpy,C,7,Video,,_printFastestClearTime,
+F02823,MENU/MENU9.PRG/238.c,2185,_strcat,C,11,Video,,,
+F02824,MENU/MENU9.PRG/238.c,2201,_setStatText,C,15,Graphics,,_menuInput,
+F02825,MENU/MENU9.PRG/238.c,2226,_renderBossRushDetails,C,117,Graphics,,_menuInput,_printFastestClearTime _renderScrollableMenuItem _toVsStringInt _toVsStringPercent vs_battle_getMenuItem vs_battle_getTextLineLength vs_battle_renderMenuItem vs_battle_setMenuItem vs_mainMenu_renderCursor vs_mainmenu_setInformationMessage
+F02826,MENU/MENU9.PRG/238.c,2348,_toVsStringInt,C,17,Core,sprintf strlen,_renderBossRushDetails,
+F02827,MENU/MENU9.PRG/238.c,2370,_toVsStringPercent,C,25,Core,sprintf strlen,_renderBossRushDetails,
+F02828,MENU/MENU9.PRG/238.c,2400,_printFastestClearTime,C,56,Core,sprintf strlen,_renderBossRushDetails,_strcpy
+F02829,MENU/MENU9.PRG/238.c,2461,_printBossRushMenuRow,C,22,Game.Menu,,_menuInput,
+F02830,MENU/MENU9.PRG/238.c,2488,_leaveBossRushMenu,C,14,Game.Menu,,_menuInput,vs_battle_getMenuItem
+F02831,MENU/MENU9.PRG/238.c,2507,_renderBossRushRecords,C,121,Graphics,sprintf,_menuInput,_renderGradientQuad vs_battle_getMenuItem vs_battle_renderTextRawColor vs_battle_setMenuItem vs_mainMenu_renderCursor vs_mainmenu_setInformationMessage
+F02832,MENU/MENU9.PRG/238.c,2633,_determineCharacterRank,C,24,Game.Actors,,,
+F02833,MENU/MENU9.PRG/238.c,2662,_setTitleFlags,C,112,Game.Menu,,,
+F02834,MENU/MENU9.PRG/238.c,2782,_renderEnemyNavigation,C,54,Game.Actors,AddPrim getClut getScratchAddr setPolyFT4 setShadeTex setTPage setUV4 setXY4,_menuInput,vs_battle_renderTextRawColor
+F02835,MENU/MENU9.PRG/238.c,2842,_calculateScore,C,57,Game.Menu,,MENUF.PRG:_initCongratulationsScreen,
+F02836,MENU/MENU9.PRG/57BC.c,10,vs_menu9_loadZud,C,30,Game.Menu,,_menuInput,func_800A0204 func_800F9CB0 vs_menu9_loadZudFile vs_menu9_parseZudFile
+F02837,MENU/MENU9.PRG/57BC.c,42,vs_menu9_freeZud,C,5,Game.Menu,,_menuInput,func_8009CFB0 vs_menu9_freeZudFile
+F02838,MENU/MENU9.PRG/57BC.c,49,func_801080C8,C,10,Game.Menu,,_menuInput,func_8009F940 func_800A087C func_800AD008
+F02839,MENU/MENU9.PRG/592C.c,171,vs_menu9_loadZudFile,C,30,Game.Menu,,vs_menu9_loadZud,vs_main_allocHeap vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueuePriority
+F02840,MENU/MENU9.PRG/592C.c,203,vs_menu9_parseZudFile,C,90,Game.Menu,,vs_menu9_loadZud,vs_battle_getEmptyObjectDataSlot vs_battle_populateDataSlot vs_battle_processObjectDataQueue vs_main_freeCdQueueSlot vs_main_freeHeapR
+F02841,MENU/MENU9.PRG/592C.c,295,vs_menu9_freeZudFile,C,4,Game.Menu,,vs_menu9_freeZud,vs_main_freeHeapR
+F02842,MENU/MENU9.PRG/592C.c,302,_nop,C,1,Game.Menu,,TITLE.PRG:vs_title_exec,
+F02843,MENU/MENUB.PRG/260.c,61,_topLevelMenuTransition,C,159,Game.Menu,,_processLootMenu,_itemNavigation _renderAshley _renderItemCategory _toggleMenuUi func_8008A4DC func_800CB654 vs_battle_renderTextRawColor vs_battle_setMenuItem vs_mainMenu_dismissInformationBox vs_mainMenu_getItemCount vs_mainMenu_setMenuCommand vs_mainMenu_toggleBackgroundFade vs_mainmenu_renderButton vs_mainmenu_renderButtonBackground
+F02844,MENU/MENUB.PRG/260.c,232,_disassembleItem,C,215,Game.Items,,_processLootMenu,_updateLootList vs_battle_drawCursor vs_battle_getMenuItem vs_battle_initInformationTextBox vs_battle_rMemcpy vs_battle_rMemzero vs_battle_setMenuItem vs_mainMenu_dismissInformationBox vs_main_playSfxDefault vs_mainmenu_setInformationMessage
+F02845,MENU/MENUB.PRG/260.c,458,_consolidateMiscItems,C,246,Game.Items,,_processLootMenu,vs_battle_drawCursor vs_battle_getMenuItem vs_battle_initInformationTextBox vs_battle_rMemzero vs_battle_setMenuItem vs_mainMenu_dismissInformationBox vs_mainmenu_setInformationMessage
+F02846,MENU/MENUB.PRG/260.c,712,_copyBladeToInventory,C,18,Game.Items,,_applyLootList _copyWeaponToInventory,
+F02847,MENU/MENUB.PRG/260.c,739,_copyGripToInventory,C,18,Game.Items,,_applyLootList _copyWeaponToInventory,
+F02848,MENU/MENUB.PRG/260.c,766,_copyGemToInventory,C,18,Game.Items,,_applyLootList _copyShieldToInventory _copyWeaponToInventory,
+F02849,MENU/MENUB.PRG/260.c,792,_copyWeaponToInventory,C,28,Game.Items,,_applyLootList,_copyBladeToInventory _copyGemToInventory _copyGripToInventory vs_battle_rMemcpy vs_battle_rMemzero
+F02850,MENU/MENUB.PRG/260.c,827,_copyArmorToInventory,C,17,Game.Items,,_applyLootList,
+F02851,MENU/MENUB.PRG/260.c,852,_copyShieldToInventory,C,27,Game.Items,,_applyLootList,_copyGemToInventory vs_battle_rMemzero
+F02852,MENU/MENUB.PRG/260.c,886,_copyMiscToInventory,C,16,Game.Items,,_applyLootList,
+F02853,MENU/MENUB.PRG/260.c,907,_updateLootList,C,36,Game.Items,,_applyLootList _disassembleItem _processLootMenu,vs_mainMenu_copyItem
+F02854,MENU/MENUB.PRG/260.c,950,_addLootToList,C,6,Game.Items,,_applyLootList,
+F02855,MENU/MENUB.PRG/260.c,968,_itemIncludesItemsInCategory,C,42,Game.Items,,_displayInventoryCapacities,
+F02856,MENU/MENUB.PRG/260.c,1015,_displayInventoryCapacities,C,90,Game.Items,,vs_menuB_exec,_itemIncludesItemsInCategory vs_battle_renderTextRaw vs_battle_renderTextRawColor vs_mainMenu_getItemCount vs_mainMenu_renderIntColor vs_mainmenu_renderButton vs_mainmenu_renderButtonBackground
+F02857,MENU/MENUB.PRG/260.c,1113,_droppableUnderCurrentDifficulty,C,3,Game.Menu,,_applyLootList,
+F02858,MENU/MENUB.PRG/260.c,1124,_applyLootList,C,44,Game.Items,,_applyAllLootLists,_addLootToList _copyArmorToInventory _copyBladeToInventory _copyGemToInventory _copyGripToInventory _copyMiscToInventory _copyShieldToInventory _copyWeaponToInventory _droppableUnderCurrentDifficulty _updateLootList
+F02859,MENU/MENUB.PRG/260.c,1174,_applyAllLootLists,C,12,Game.Items,,vs_menuB_exec,_applyLootList vs_battle_rMemzero
+F02860,MENU/MENUB.PRG/260.c,1192,_displayCurrentLoot,C,121,Game.Items,,vs_menuB_exec,vs_battle_getMenuItem vs_battle_rMemzero vs_battle_setMenuItem
+F02861,MENU/MENUB.PRG/260.c,1319,_populateLootItem,C,48,Game.Items,,_processLootMenu,vs_mainMenu_setArmorRowFromInventory vs_mainMenu_setBladeRow vs_mainMenu_setGemRow vs_mainMenu_setGripRow vs_mainMenu_setMiscRow vs_mainMenu_setShieldRowFromInventory vs_mainMenu_setWeaponRowFromInventory vs_mainmenu_setInformationMessage
+F02862,MENU/MENUB.PRG/260.c,1377,_discardItems,C,123,Save,,_processLootMenu,vs_battle_drawCursor vs_battle_getMenuItem vs_battle_initInformationTextBox vs_battle_setMenuItem vs_mainMenu_dismissInformationBox vs_main_playSfxDefault vs_mainmenu_setInformationMessage
+F02863,MENU/MENUB.PRG/260.c,1510,_organizeInventory,C,98,Game.Items,,_processLootMenu,vs_battle_drawCursor vs_battle_getMenuItem vs_battle_setMenuItem vs_mainMenu_initInformationBox vs_mainmenu_setInformationMessage
+F02864,MENU/MENUB.PRG/260.c,1622,_processLootMenu,C,321,Game.Items,,vs_menuB_exec,_consolidateMiscItems _disassembleItem _discardItems _organizeInventory _populateLootItem _setKeyFlag _topLevelMenuTransition _updateLootList vs_mainMenu_copyItem vs_mainMenu_initInformationBox vs_mainMenu_renderCursor vs_main_playSfxDefault
+F02865,MENU/MENUB.PRG/260.c,1951,vs_menuB_exec,C,150,Game.Menu,,,_applyAllLootLists _displayCurrentLoot _displayInventoryCapacities _processLootMenu func_8008A6FC vs_battle_dismissTextBox vs_battle_getMenuItem vs_battle_initInformationTextBox vs_mainMenu_ensureItemTextUnloaded vs_mainMenu_initInformationBox vs_mainMenu_loadItemText vs_mainMenu_populateBaseStats vs_mainMenu_rebuildInventory vs_main_allocHeapR (+2)
+F02866,MENU/MENUB.PRG/260.c,2108,_setKeyFlag,C,5,Game.Menu,,_processLootMenu,vs_battle_setStateFlag
+F02867,MENU/MENUC.PRG/168.c,19,_drawOk,C,5,Graphics,,_assembleMenu _attachGemsMenu _combineArmorMenu _combineBladeMenu _combineShieldMenu,rsin vs_battle_renderTextRawColor
+F02868,MENU/MENUC.PRG/168.c,29,_setMenuTitle,C,15,Game.Menu,,_attachGemsMenu _attachGemsTopMenu _combineTopMenu _disassembleMenu _disassembleTopMenu _renameWeaponMenu vs_menuC_exec,vs_battle_setMenuItem
+F02869,MENU/MENUC.PRG/168.c,56,_pushSelectionHistory,C,19,Game.Menu,,_assembleMenu _combineArmorMenu _combineBladeMenu _combineShieldMenu,vs_battle_rMemzero
+F02870,MENU/MENUC.PRG/168.c,83,_popSelectionHistory,C,22,Game.Menu,,_assembleMenu _combineArmorMenu _combineBladeMenu _combineShieldMenu,
+F02871,MENU/MENUC.PRG/168.c,110,_initMenuItem,C,26,Game.Items,,_assembleMenu _combineArmorMenu _combineBladeMenu _combineShieldMenu,vs_battle_setMenuItem vs_mainMenu_drawClassAffinityType vs_mainMenu_renderDpPpBars vs_mainMenu_renderEquipStats vs_mainMenu_resetStats vs_mainMenu_setRangeRisk
+F02872,MENU/MENUC.PRG/168.c,141,_copyMenuItem,C,7,Game.Items,,_attachGemsMenu _disassembleMenu _renameWeaponMenu,vs_mainMenu_deactivateMenuItem
+F02873,MENU/MENUC.PRG/168.c,155,_confirmationPrompt,C,62,Game.Battle,,_disassembleMenu _renameWeaponMenu _repairMenu,vs_battle_drawCursor vs_battle_getMenuItem vs_battle_initInformationTextBox vs_battle_setMenuItem
+F02874,MENU/MENUC.PRG/168.c,225,_confirmCombine,C,79,Game.Menu,,_assembleMenu _attachGemsMenu _combineArmorMenu _combineBladeMenu _combineShieldMenu,vs_battle_drawCursor vs_battle_getMenuItem vs_battle_initInformationTextBox vs_battle_setMenuItem
+F02875,MENU/MENUC.PRG/168.c,310,_disassembleWeapon,C,26,Game.Items,,_assembleMenu _assembleWeapon _combineBladeMenu _disassembleMenu _leaveAssembleMenu,vs_battle_rMemzero vs_mainMenu_rebuildInventory
+F02876,MENU/MENUC.PRG/168.c,345,_assembleWeapon,C,33,Game.Items,memset,_assembleMenu,_disassembleWeapon vs_mainMenu_rebuildInventory
+F02877,MENU/MENUC.PRG/168.c,384,_disassembleShield,C,13,Game.Items,,_combineShieldMenu _disassembleMenu,
+F02878,MENU/MENUC.PRG/168.c,403,_isValidGrip,C,8,Game.Items,,_assembleBladeMenu _assembleGripMenu,
+F02879,MENU/MENUC.PRG/168.c,419,_leaveItemSlotSelection,C,16,Save,,_attachGems _combineArmorMenu _combineBladeMenu _combineShieldMenu _disassembleMenu _leaveAssembleMenu _renameWeaponMenu,vs_mainMenu_drawClassAffinityType vs_mainMenu_renderDpPpBars vs_mainMenu_renderEquipStats vs_mainMenu_setMenuCommand
+F02880,MENU/MENUC.PRG/168.c,450,_populateItemsList,C,55,Game.Items,,_assembleBladeMenu _assembleGripMenu _attachGem _initUiArmor _selectBlade _selectShields,vs_battle_setMenuItem vs_main_allocHeapR
+F02881,MENU/MENUC.PRG/168.c,511,_getSelectedRow,C,1,Game.Menu,,_assembleBladeMenu _assembleGripMenu _attachGem _initUiArmor _selectBlade _selectShields MENU9.PRG:_topMenu MENUE.PRG:_topMenu,
+F02882,MENU/MENUC.PRG/168.c,518,_navigateItemsList,C,206,Game.Items,,_assembleBladeMenu _assembleGripMenu _attachGem _initUiArmor _selectBlade _selectShields,vs_battle_getMenuItem vs_battle_setMenuItem vs_mainMenu_renderCursor vs_main_freeHeapR vs_main_playSfxDefault vs_mainmenu_setInformationMessage
+F02883,MENU/MENUC.PRG/168.c,730,_setUiStats,C,27,Game.Menu,,_assembleBladeMenuHeader _assembleMenu,vs_mainMenu_renderDpPpBars vs_mainMenu_resetStats vs_mainMenu_setRangeRisk vs_mainMenu_setStatsFromBlade vs_mainMenu_setStatsFromGrip vs_mainMenu_setStatsFromWeapon vs_mainMenu_updateStatPage
+F02884,MENU/MENUC.PRG/168.c,764,_assembleBladeMenuHeader,C,15,Game.Items,,_assembleMenu,_setUiStats vs_battle_setMenuItem
+F02885,MENU/MENUC.PRG/168.c,784,_initMenuHeader,C,6,Game.Menu,,_assembleBladeMenu _assembleGripMenu _attachGem _initUiArmor _selectBlade _selectShields,vs_battle_getMenuItem
+F02886,MENU/MENUC.PRG/168.c,802,_assembleBladeMenu,C,111,Game.Items,,_assembleMenu,_getSelectedRow _initMenuHeader _isValidGrip _navigateItemsList _populateItemsList vs_mainMenu_printInformation vs_mainMenu_resetStats vs_mainMenu_setBladeRow vs_mainMenu_setRangeRisk vs_mainMenu_setStatsFromBlade vs_mainMenu_updateStatPage vs_main_allocHeapR vs_main_freeHeapR
+F02887,MENU/MENUC.PRG/168.c,923,_assembleGripMenu,C,113,Game.Items,,_assembleMenu,_getSelectedRow _initMenuHeader _isValidGrip _navigateItemsList _populateItemsList vs_mainMenu_printInformation vs_mainMenu_renderDpPpBars vs_mainMenu_resetStats vs_mainMenu_setGripRow vs_mainMenu_setStatsFromGrip vs_mainMenu_updateStatPage vs_main_allocHeapR vs_main_freeHeapR
+F02888,MENU/MENUC.PRG/168.c,1045,_attachGem,C,100,Game.Items,,_assembleMenu _attachGemsMenu,_getSelectedRow _initMenuHeader _navigateItemsList _populateItemsList vs_mainMenu_printInformation vs_mainMenu_renderDpPpBars vs_mainMenu_resetStats vs_mainMenu_setGemRow vs_mainMenu_setStatsFromGem vs_mainMenu_updateStatPage vs_main_allocHeapR vs_main_freeHeapR
+F02889,MENU/MENUC.PRG/168.c,1150,_leaveAssembleMenu,C,4,Game.Menu,,_assembleMenu,_disassembleWeapon _leaveItemSlotSelection
+F02890,MENU/MENUC.PRG/168.c,1164,_assembleMenu,C,430,Game.Menu,,vs_menuC_exec,_assembleBladeMenu _assembleBladeMenuHeader _assembleGripMenu _assembleWeapon _attachGem _confirmCombine _disassembleWeapon _drawOk _initMenuItem _leaveAssembleMenu _popSelectionHistory _pushSelectionHistory _setUiStats vs_battle_getMenuItem (+13)
+F02891,MENU/MENUC.PRG/168.c,1599,_addGemSelector,C,8,Game.Items,,_attachGemsMenu,vs_battle_setMenuItem
+F02892,MENU/MENUC.PRG/168.c,1616,_attachGems,C,41,Game.Items,,_attachGemsMenu,_leaveItemSlotSelection vs_battle_equipShield vs_battle_equipWeapon
+F02893,MENU/MENUC.PRG/168.c,1666,_attachGemsMenu,C,343,Game.Items,,_attachGemsTopMenu,_addGemSelector _attachGem _attachGems _confirmCombine _copyMenuItem _drawOk _setMenuTitle vs_battle_equipShield vs_battle_equipWeapon vs_battle_getMenuItem vs_battle_initInformationTextBox vs_battle_printf vs_battle_setMenuItem vs_mainMenu_drawClassAffinityType (+17)
+F02894,MENU/MENUC.PRG/168.c,2016,_attachGemsTopMenu,C,75,Game.Items,,vs_menuC_exec,_attachGemsMenu _setMenuTitle vs_mainMenu_getItemCount vs_mainMenu_initInformationBox vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02895,MENU/MENUC.PRG/168.c,2100,_disassembleMenu,C,178,Game.Menu,,_disassembleTopMenu,_confirmationPrompt _copyMenuItem _disassembleShield _disassembleWeapon _leaveItemSlotSelection _loadObject _setMenuTitle vs_battle_getMenuItem vs_battle_initInformationTextBox vs_mainMenu_drawClassAffinityType vs_mainMenu_initShieldDetailsRow vs_mainMenu_initWeaponDetailsRow vs_mainMenu_renderDpPpBars vs_mainMenu_setShieldRowFromInventory (+9)
+F02896,MENU/MENUC.PRG/168.c,2285,_disassembleTopMenu,C,81,Game.Menu,,vs_menuC_exec,_disassembleMenu _setMenuTitle vs_mainMenu_getItemCount vs_mainMenu_initInformationBox vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02897,MENU/MENUC.PRG/168.c,2374,_renameWeaponMenu,C,127,Game.Items,,vs_menuC_exec,_confirmationPrompt _copyMenuItem _leaveItemSlotSelection _setMenuTitle vs_battle_getMenuItem vs_battle_initInformationTextBox vs_mainMenu_drawClassAffinityType vs_mainMenu_initWeaponDetailsRow vs_mainMenu_renderDpPpBars vs_mainMenu_setMenuCommand vs_mainMenu_setStatsFromWeapon vs_mainMenu_setWeaponRowFromInventory vs_mainmenu_getSelectedRow vs_mainmenu_setInformationMessage (+1)
+F02898,MENU/MENUC.PRG/168.c,2509,_repairMenu,C,139,Game.Menu,,vs_menuC_exec,_confirmationPrompt vs_battle_equipArmor vs_battle_equipShield vs_battle_equipWeapon vs_battle_initInformationTextBox vs_mainMenu_initInformationBox vs_main_playSfxDefault vs_mainmenu_setInformationMessage
+F02899,MENU/MENUC.PRG/168.c,2658,_loadSyd,C,31,Game.Menu,,_combineTopMenu,vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_freeCdQueueSlot
+F02900,MENU/MENUC.PRG/168.c,2696,_setItemRow,C,9,Game.Items,,_combineArmorMenu _combineBladeMenu _combineShieldMenu _initItemRow,vs_battle_setMenuItem
+F02901,MENU/MENUC.PRG/168.c,2710,_initItemRow,C,10,Game.Items,,_combineArmorMenu _combineBladeMenu _combineShieldMenu MAINMENU.PRG:vs_mainMenu_renderItemsList,_setItemRow
+F02902,MENU/MENUC.PRG/168.c,2735,_setCombineBladeUi,C,58,Game.Items,,_combineBladeMenu,_combineBlades vs_battle_rMemzero vs_mainMenu_resetStats vs_mainMenu_setDpPp vs_mainMenu_setRangeRisk vs_mainMenu_setStatsFromBlade vs_mainMenu_setStrIntAgi
+F02903,MENU/MENUC.PRG/168.c,2801,_selectBlade,C,113,Game.Items,,_combineBladeMenu,_getSelectedRow _initMenuHeader _navigateItemsList _populateItemsList vs_mainMenu_printInformation vs_mainMenu_resetStats vs_mainMenu_setBladeRow vs_mainMenu_setRangeRisk vs_mainMenu_setStatsFromBlade vs_main_allocHeapR vs_main_freeHeapR
+F02904,MENU/MENUC.PRG/168.c,2919,_setBladeMenuItem,C,11,Game.Items,,_combineBladeMenu,
+F02905,MENU/MENUC.PRG/168.c,2939,_combineBladeMenu,C,373,Game.Items,,,_confirmCombine _disassembleWeapon _drawOk _initItemRow _initMenuItem _leaveItemSlotSelection _loadObject _popSelectionHistory _pushSelectionHistory _selectBlade _setBladeMenuItem _setCombineBladeUi _setItemRow vs_battle_getMenuItem (+13)
+F02906,MENU/MENUC.PRG/168.c,3317,_setShieldUi,C,22,Game.Items,,_initCombineShields _selectShields MENUD.PRG:_shieldNavigation MENUD.PRG:func_80106C64,vs_mainMenu_resetStats vs_mainMenu_setDpPp vs_mainMenu_setStrIntAgi
+F02907,MENU/MENUC.PRG/168.c,3353,_initCombineShields,C,46,Game.Items,,_combineShieldMenu,_combineShields _setShieldUi vs_battle_rMemzero vs_mainMenu_resetStats
+F02908,MENU/MENUC.PRG/168.c,3404,_initUiShield,C,8,Game.Items,,_combineShieldMenu _selectShields,vs_mainMenu_setShieldRowFromInventory
+F02909,MENU/MENUC.PRG/168.c,3421,_selectShields,C,122,Game.Items,,_combineShieldMenu,_getSelectedRow _initMenuHeader _initUiShield _navigateItemsList _populateItemsList _setShieldUi vs_mainMenu_printInformation vs_mainMenu_resetStats vs_main_allocHeapR vs_main_freeHeapR
+F02910,MENU/MENUC.PRG/168.c,3548,_setShieldMenuItem,C,5,Game.Items,,_combineShieldMenu,
+F02911,MENU/MENUC.PRG/168.c,3562,_combineShieldMenu,C,370,Game.Items,,,_confirmCombine _disassembleShield _drawOk _initCombineShields _initItemRow _initMenuItem _initUiShield _leaveItemSlotSelection _loadObject _popSelectionHistory _pushSelectionHistory _selectShields _setItemRow _setShieldMenuItem (+13)
+F02912,MENU/MENUC.PRG/168.c,3947,_initCombineArmor,C,64,Game.Items,,_combineArmorMenu,_combineArmor vs_battle_rMemzero vs_mainMenu_resetStats vs_mainMenu_setDpPp vs_mainMenu_setStatsFromArmor vs_mainMenu_setStrIntAgi
+F02913,MENU/MENUC.PRG/168.c,4019,_initUiArmor,C,102,Game.Items,,_combineArmorMenu,_getSelectedRow _initMenuHeader _navigateItemsList _populateItemsList vs_mainMenu_printInformation vs_mainMenu_resetStats vs_mainMenu_setArmorRowFromInventory vs_mainMenu_setStatsFromArmor vs_main_allocHeapR vs_main_freeHeapR
+F02914,MENU/MENUC.PRG/168.c,4126,_setArmorMenuItem,C,5,Game.Items,,_combineArmorMenu,
+F02915,MENU/MENUC.PRG/168.c,4140,_combineArmorMenu,C,282,Game.Items,,,_confirmCombine _drawOk _initCombineArmor _initItemRow _initMenuItem _initUiArmor _leaveItemSlotSelection _popSelectionHistory _pushSelectionHistory _setArmorMenuItem _setItemRow vs_battle_equipArmor vs_battle_getMenuItem vs_battle_setMenuItem (+11)
+F02916,MENU/MENUC.PRG/168.c,4428,_countItems,C,19,Game.Items,,_combineTopMenu,vs_mainMenu_getItemCount
+F02917,MENU/MENUC.PRG/168.c,4455,_combineTopMenu,C,87,Game.Menu,,vs_menuC_exec,_countItems _loadSyd _setMenuTitle vs_mainMenu_getConfirmedRow vs_mainMenu_initInformationBox vs_mainMenu_printInformation vs_main_freeHeapR vs_mainmenu_getSelectedRow vs_mainmenu_setMenuRows
+F02918,MENU/MENUC.PRG/168.c,4550,vs_menuC_exec,C,198,Game.Menu,,,_assembleMenu _attachGemsTopMenu _combineTopMenu _disassembleTopMenu _renameWeaponMenu _repairMenu _setMenuTitle vs_battle_getMenuItem vs_battle_inWorkshop vs_mainMenu_dismissInformationBox vs_mainMenu_getConfirmedRow vs_mainMenu_getItemCount vs_mainMenu_initInformationBox vs_mainMenu_printInformation (+4)
+F02919,MENU/MENUC.PRG/168.c,4759,_setClassAffinities,C,95,Game.Menu,,_combineArmor _combineBlades _combineShields,
+F02920,MENU/MENUC.PRG/168.c,4864,_setTypeValues,C,48,Game.Menu,,_combineArmor _combineShields,
+F02921,MENU/MENUC.PRG/168.c,4934,_combineBlades,C,54,Game.Items,,_setCombineBladeUi,_setClassAffinities vs_main_memcpy
+F02922,MENU/MENUC.PRG/168.c,5012,_combineShields,C,36,Game.Items,,_initCombineShields,_setClassAffinities _setTypeValues vs_main_memcpy
+F02923,MENU/MENUC.PRG/168.c,5061,_combineArmor,C,33,Game.Items,,_initCombineArmor,_setClassAffinities _setTypeValues vs_main_memcpy
+F02924,MENU/MENUC.PRG/9258.c,7,_loadObject,C,36,Game.Menu,,_combineBladeMenu _combineShieldMenu _disassembleMenu,func_8009AA84 func_800FA2CC func_800FA3FC vs_battle_processObjectDataQueue

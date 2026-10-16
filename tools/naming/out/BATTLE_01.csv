@@ -1,0 +1,166 @@
+id,final_name,final_location,purpose,confidence,notes
+F00000,Battle::ArmDefenseAbilityTimingWindow,Native\Game\src\Battle\Abilities.c,Starts the DefenseAbility timing window when Ashley is targeted by an eligible attack.,high,fields:D_800F19CC_t.unk854=recent action ring
+F00001,Battle::ReleaseQueuedActorAttacks,Native\Game\src\Battle\ActionFlow.c,Releases queued actor attack commands after the current hit effects resolve.,med,fields:vs_battle_actor.unk8=command state;fields:vs_battle_actor.unk9=command opcode
+F00002,Field::UpdateCameraFacingState,Native\Game\src\Field\Camera.c,Synchronizes camera angles and publishes the first-person facing flag for the field engine.,high,
+F00003,Actors::ClearRoomActorStateCache,Native\Game\src\Actors\RoomState.c,Clears the four-room actor persistence cache and resets its current room index.,high,fields:D_80061078_t.unk8=saved actor states
+F00004,Actors::ClearCachedRoomActorStates,Native\Game\src\Actors\RoomState.c,Clears saved actor states for cache entries matching the specified Room and Zone.,high,
+F00005,Actors::FindCachedRoomActorState,Native\Game\src\Actors\RoomState.c,Finds a saved actor state in the current Room cache by spawn index.,high,fields:vs_battle_actor.unk27=room spawn index with 128 sentinel
+F00006,Actors::AcquireCachedRoomActorState,Native\Game\src\Actors\RoomState.c,Finds an actor state slot or reuses the next slot in the current Room cache.,high,fields:D_80061078_t.unk4=next replacement slot
+F00007,Actors::StoreRoomActorState,Native\Game\src\Actors\RoomState.c,"Saves an actor's health, limb health, statuses and position before removal or a room transition.",high,fields:func_80069EF0_t.unk20=statuses;fields:func_80069EF0_t.unk24=packed position
+F00008,Actors::LinkActorAfterAshley,Native\Game\src\Actors\Lifecycle.c,Links an eligible non-Ashley actor into Ashley's actor list unless it is already linked.,high,
+F00009,Actors::UnlinkActorFromRoomList,Native\Game\src\Actors\Lifecycle.c,Unlinks a non-Ashley actor from the room actor list without freeing it.,high,
+F00010,Actors::RemoveActorAtSlot,Native\Game\src\Actors\Lifecycle.c,"Caches an actor's room state and releases its models, associated state and actor allocation.",high,
+F00011,Items::BuildWeaponStatsFromParts,Native\Game\src\Items\EquipmentStats.c,"Combines blade, grip and gem statistics into the weapon's runtime statistics and affinity baselines.",high,
+F00012,Items::BuildShieldStatsFromParts,Native\Game\src\Items\EquipmentStats.c,Combines shield and gem statistics into the shield's runtime statistics and affinity baselines.,high,
+F00013,Items::BuildAccessoryStatsFromPart,Native\Game\src\Items\EquipmentStats.c,Copies an accessory's component statistics into its runtime equipment state.,high,
+F00014,Items::BuildArmorStatsFromPart,Native\Game\src\Items\EquipmentStats.c,"Initializes armor statistics, durability and affinity baselines from its component data.",high,
+F00015,Items::ReadInventoryBladeStats,Native\Game\src\Items\EquipmentStats.c,Expands an inventory blade into the runtime equipment component representation.,high,
+F00016,Items::ReadInventoryGripStats,Native\Game\src\Items\EquipmentStats.c,Expands an inventory grip into the runtime equipment component representation.,high,
+F00017,Items::ReadInventoryArmorStats,Native\Game\src\Items\EquipmentStats.c,"Expands inventory armor, shields or accessories into the runtime component representation.",high,
+F00018,Items::ReadInventoryGemStats,Native\Game\src\Items\EquipmentStats.c,Expands an inventory gem into the runtime equipment component representation.,high,
+F00019,Items::LoadInventoryWeaponStats,Native\Game\src\Items\EquipmentStats.c,"Builds runtime weapon statistics from inventory parts and gems, or clears them when unequipped.",high,
+F00020,Items::LoadInventoryShieldStats,Native\Game\src\Items\EquipmentStats.c,"Builds runtime shield statistics from inventory armor and gems, or clears them when unequipped.",high,
+F00021,Items::LoadInventoryArmorStats,Native\Game\src\Items\EquipmentStats.c,"Builds runtime armor statistics from an inventory entry, or clears them when unequipped.",high,
+F00022,Items::LoadInventoryAccessoryStats,Native\Game\src\Items\EquipmentStats.c,"Builds runtime accessory statistics from an inventory entry, or clears them when unequipped.",high,
+F00023,Core::IgnoreCallback,Native\Core\src\Callbacks.c,Returns without changing state for optional callbacks retained by the original game.,high,Original equipment callback has an unused actor parameter
+F00024,Items::RemoveEquipmentBoostOnEquip,Native\Game\src\Items\EquipmentStats.c,Removes Ashley's equipment-stat boost when equipment is changed.,high,Mask 0x100000; header enum is shifted relative to status-mask comments
+F00025,Items::RemoveWeaponEnchantmentOnEquip,Native\Game\src\Items\EquipmentStats.c,Removes Ashley's elemental attack enchantments after changing weapons.,high,Mask 0x01E00000 matches status-mask comments rather than header enum
+F00026,Items::RemoveArmorEnchantmentOnEquip,Native\Game\src\Items\EquipmentStats.c,Removes Ashley's elemental defense enchantments after changing non-weapon equipment.,high,Mask 0x1E000000 matches status-mask comments rather than header enum
+F00027,Items::EquipAshleyWeapon,Native\Game\src\Items\EquipmentStats.c,"Loads Ashley's weapon statistics, updates attack reach and removes incompatible equipment enchantments.",high,
+F00028,Items::EquipAshleyShield,Native\Game\src\Items\EquipmentStats.c,Loads Ashley's shield statistics and removes incompatible equipment enchantments.,high,
+F00029,Items::EquipAshleyArmor,Native\Game\src\Items\EquipmentStats.c,Loads armor statistics for an Ashley body part and removes incompatible equipment enchantments.,high,
+F00030,Items::EquipAshleyAccessory,Native\Game\src\Items\EquipmentStats.c,Loads Ashley's accessory statistics and removes incompatible equipment enchantments.,high,
+F00031,Items::WriteInventoryBladeStats,Native\Game\src\Items\EquipmentStats.c,Packs runtime blade component statistics into an inventory blade entry.,high,
+F00032,Items::WriteInventoryGripStats,Native\Game\src\Items\EquipmentStats.c,Packs runtime grip component statistics into an inventory grip entry.,high,
+F00033,Items::WriteInventoryGemStats,Native\Game\src\Items\EquipmentStats.c,Packs runtime gem component statistics into an inventory gem entry.,high,
+F00034,Items::WriteInventoryArmorStats,Native\Game\src\Items\EquipmentStats.c,"Packs runtime armor, shield or accessory component statistics into an inventory armor entry.",high,
+F00035,Items::StoreInventoryWeaponStats,Native\Game\src\Items\EquipmentStats.c,"Stores a runtime weapon's durability, components, gems and name back into inventory.",high,
+F00036,Items::StoreInventoryShieldStats,Native\Game\src\Items\EquipmentStats.c,"Stores a runtime shield's durability, base component and gems back into inventory.",high,
+F00037,Items::StoreInventoryArmorStats,Native\Game\src\Items\EquipmentStats.c,Stores a runtime armor piece's durability and component statistics back into inventory.,high,
+F00038,Items::StoreInventoryAccessoryStats,Native\Game\src\Items\EquipmentStats.c,Stores a runtime accessory's component statistics back into inventory.,high,
+F00039,Items::RollEnemyWeaponDrop,Native\Game\src\Items\Loot.c,"Rolls an enemy weapon's drop rate and copies its parts, gems and name into a loot entry.",high,
+F00040,Items::RollEnemyShieldDrop,Native\Game\src\Items\Loot.c,Rolls an enemy shield's drop rate and copies its base and gems into a loot entry.,high,
+F00041,Items::RollEnemyAccessoryDrop,Native\Game\src\Items\Loot.c,Rolls an enemy accessory's drop rate and copies it into a loot entry.,high,
+F00042,Items::RollEnemyArmorDrop,Native\Game\src\Items\Loot.c,Rolls an enemy armor piece's drop rate and stores it in the first free armor loot slot.,high,
+F00043,Items::CopyGuaranteedEnemyItemDrops,Native\Game\src\Items\Loot.c,Copies an enemy's two guaranteed miscellaneous item stacks into its loot record.,high,
+F00044,Items::RollEnemyItemDrop,Native\Game\src\Items\Loot.c,Rolls an enemy's optional miscellaneous item drop and adds one item to its loot record.,high,
+F00045,Items::QueueEnemyLoot,Native\Game\src\Items\Loot.c,Builds an enemy's loot record and adds it to the pending loot list unless that enemy already has one.,high,
+F00046,State::RecordEnemyKillScore,Native\Game\src\State\Score.c,"Updates enemy-class kill totals, streak score and defeated-enemy flags for a kill.",high,
+F00047,State::UpdateWeaponKillStreak,Native\Game\src\State\Score.c,Updates the weapon-category kill streak when the killing action is a weapon attack or BattleAbility.,high,Actions below 40 qualify; input parameter is unused
+F00048,Battle::ResolveEnemyDefeat,Native\Game\src\Battle\ActionFlow.c,Records eligible kill statistics and queues loot once for each defeated room actor.,high,
+F00049,Actors::FreezeAllActorAnimations,Native\Game\src\Actors\Lifecycle.c,Sets the animation freeze flag on every loaded actor.,high,Model flag bit 2 maps to D_800F4538_t.unk0.freeze
+F00050,Actors::UnfreezeAllActorAnimations,Native\Game\src\Actors\Lifecycle.c,Clears the animation freeze flag on every loaded actor.,high,
+F00051,Field::PauseFieldForInteractionDialog,Native\Game\src\Field\GameMode.c,Stops other actors and disables player control while an interaction dialog is displayed.,med,
+F00052,Field::PauseFieldForObjectInteraction,Native\Game\src\Field\GameMode.c,Stops other actors and pauses field simulation during an object interaction.,med,
+F00053,Field::PauseFieldForMenu,Native\Game\src\Field\GameMode.c,Dims the field and suspends field updates while a gameplay menu is active.,high,
+F00054,Field::ResumeFieldAfterMenu,Native\Game\src\Field\GameMode.c,"Restores field colors, actor animation freezing and gameplay updates after closing a menu.",high,
+F00055,Core::IgnoreCallback,Native\Core\src\Callbacks.c,Returns without changing state for optional callbacks retained by the original game.,high,dup-of:F00023
+F00056,Effects::StartWeaponTrail,Native\Game\src\Effects\ActionEffects.c,Starts a persistent motion trail on an actor bone for an attack effect.,high,Effect 54; callee packs actor and bone into trail configuration
+F00057,Effects::FadeWeaponTrails,Native\Game\src\Effects\ActionEffects.c,Requests an eight-frame fade for all active weapon motion trails.,high,Arguments ignored by callee; affects all trail renderer nodes
+F00058,Effects::QueueActionHitEffect,Native\Game\src\Effects\ActionEffects.c,Queues an action's hit effect with actor-part or world-position targets.,high,
+F00059,Battle::PlayWeaponHitSounds,Native\Game\src\Battle\ActionFlow.c,Plays positional hit or block sounds for each actor struck by the current action.,high,
+F00060,Effects::QueueActionImpactEffects,Native\Game\src\Effects\ActionEffects.c,"Chooses hit, miss or block effects for the current action targets and plays weapon impact sounds.",high,
+F00061,Battle::ApplyActionSourceEffects,Native\Game\src\Battle\ActionFlow.c,Applies the current action's source-side stat effects and reaction animation.,high,The source record reuses the targetActor field
+F00062,Battle::ApplyActionTargetEffects,Native\Game\src\Battle\ActionFlow.c,"Applies current-action effects to a matching actor and selects its reaction, or dispatches an environment hit.",high,asm;switches hit outcomes then calls _applyBattleAbilityEffect per matching target
+F00063,Audio::PlayRandomActorImpactSound,Native\Audio\src\ActorSound.c,Plays one of four actor sound-bank entries starting at entry eight with the supplied pan and volume.,med,Called for actor animation sound type 8
+F00064,Effects::SignalActorEffectAnimation,Native\Game\src\Effects\ActionEffects.c,Sets the actor animation flag used to advance an effect-synchronized animation script.,med,Sets model flag unk5AC_18; animation opcode 13 consumes and clears it
+F00065,Field::DisableTrapAtPosition,Native\Game\src\Field\Gimmicks.c,Disables a trap at a world position and updates its persistent room state.,high,
+F00066,Field::FreezeRoomGimmicksTemporarily,Native\Game\src\Field\Gimmicks.c,Freezes animated room gimmicks for 180 update ticks through the room gimmick timer.,med,Timer pauses section12 updates; visual state toggles near expiry
+F00067,Field::ApplyUnlockEffectToRoomObject,Native\Game\src\Field\Interactions.c,Removes eligible magical locks from a door or chest when the unlock effect succeeds.,high,
+F00068,Effects::TintActionActorRed,Native\Game\src\Effects\ActionEffects.c,Applies a red palette tint to the selected actor and remembers it for restoration.,high,
+F00069,Effects::RestoreActionActorTint,Native\Game\src\Effects\ActionEffects.c,Restores the remembered actor palette after its action tint ends.,high,
+F00070,Render::DrawScreenTransition,Native\Graphics\src\FramebufferEffects.c,"Draws and advances black fades, white fades and rotated screen wipes.",high,
+F00071,Field::AddCameraStepWithFallback,Native\Game\src\Field\Camera.c,"Adds a signed camera step capped by remaining displacement, using displacement when the step is zero.",high,
+F00072,Field::AddClampedCameraStep,Native\Game\src\Field\Camera.c,Adds a signed camera step capped at the remaining displacement on one axis.,high,
+F00073,Field::ClampCameraLookAtToZone,Native\Game\src\Field\Camera.c,Clamps camera focus within Zone bounds using the current zoom and a vertical dead zone.,high,Bounds apply to camera focus rather than actor collision
+F00074,Field::ComputeCameraTrackingStep,Native\Game\src\Field\Camera.c,Computes focus displacement and accelerates or decelerates camera tracking according to screen framing.,high,
+F00075,Field::StepCameraLookAtTowardTarget,Native\Game\src\Field\Camera.c,Moves the camera focus toward a target with optional Zone clamping and a speed limit.,high,
+F00076,Field::TrackCameraLookAtWithinDeadZone,Native\Game\src\Field\Camera.c,Tracks a Zone-clamped camera focus with capped horizontal steps and a vertical dead zone.,high,Original snap name is misleading; movement is incremental
+F00077,Field::UpdateCameraOrbitInput,Native\Game\src\Field\Camera.c,Handles shoulder-button orbit steps and Select-button zoom changes for the field camera.,high,fields:_sphericalCamera.unk24=zoom velocity
+F00078,Field::TrackActionCameraTarget,Native\Game\src\Field\Camera.c,"Updates camera orbit and tracks the acting actor, selected body part or targeting position.",high,
+F00079,Actors::UpdateAshleyMovementInput,Native\Game\src\Actors\Movement.c,Converts analog or directional input into camera-relative Ashley movement and jump requests.,high,fields:vs_battle_actor2.unk31=walk speed;fields:vs_battle_actor2.unk33=run speed
+F00080,Field::UpdateAshleyFollowCamera,Native\Game\src\Field\Camera.c,Updates actors and tracks Ashley with a bounded look-at offset before setting the orbit camera position.,high,Original return value is uninitialized and unused by caller
+F00081,Field::UpdateFirstPersonCamera,Native\Game\src\Field\Camera.c,"Updates first-person look input, clamps pitch and places the camera at Ashley's eye position.",high,
+F00082,Field::StorePreferredActionCameraDistance,Native\Game\src\Field\Camera.c,Stores the selected near or far field-camera zoom as the preferred action camera distance.,high,fields:D_800F19CC_t.unk2C0C=preferred camera distance
+F00083,Field::ComputeFirstPersonCameraTransition,Native\Game\src\Field\Camera.c,"Computes camera, focus, clipping and projection steps for a first-person view transition.",high,
+F00084,Field::StepFirstPersonCameraTransition,Native\Game\src\Field\Camera.c,"Interpolates the camera, focus and projection settings and snaps to their transition endpoints.",high,
+F00085,Effects::SpawnGroundPlaneImpactEffect,Native\Game\src\Effects\ActionEffects.c,Queues a positional impact effect at ground-plane height when an actor crosses that plane.,med,Effect 36; exact visual identity not established
+F00086,Effects::SpawnTrapTileEffect,Native\Game\src\Effects\ActionEffects.c,Queues the tile-centered visual effect used for trap and transition triggers unless effects are busy.,med,Effect 33
+F00087,Field::MarkCurrentRoomVisited,Native\Game\src\Field\RoomState.c,Marks the current area and Room visited when the pending discovery flag is set.,high,
+F00088,Field::EnterFieldExplorationMode,Native\Game\src\Field\GameMode.c,Returns the field state machine to exploration and commits pending Room discovery flags.,high,
+F00089,Battle::WaitForPostActionMovement,Native\Game\src\Battle\ActionFlow.c,Stops Ashley and enters the post-action state that waits for remaining object movement.,med,
+F00090,Battle::PopulateActionTargetPreview,Native\Game\src\Battle\Targeting.c,"Copies action effect type, value, hit chance, status changes and target class into a targeting preview.",high,fields:D_800F19CC_t5.unkC=effect value;fields:D_800F19CC_t5.unkE=hit chance
+F00091,Battle::PendingBattleAbilityUnlocks,Native\Game\src\Battle\Abilities.c,Reports whether weapon kills unlock a BreakArt or total points unlock a BattleAbility.,high,Packed result places BreakArt eligibility in upper half
+F00092,Effects::SpawnAbilityLearnedEffect,Native\Game\src\Effects\ActionEffects.c,Queues the learned-ability celebration effect on Ashley.,med,Effect 20; actor part 253
+F00093,Battle::BeginPendingAbilityReward,Native\Game\src\Battle\Abilities.c,Starts Ashley's ability-learning celebration when action or kill progress grants a new ability.,high,
+F00094,Battle::GrantPendingAbilityUnlock,Native\Game\src\Battle\Abilities.c,Unlocks and announces a newly learned action or grants a pending BreakArt or BattleAbility.,high,
+F00095,Items::OpenPendingEnemyLoot,Native\Game\src\Items\Loot.c,"Opens the pending enemy loot menu when progression permits, otherwise advances to post-action rewards.",high,
+F00096,Battle::BeginPostActionRecovery,Native\Game\src\Battle\ActionFlow.c,"Stops uninvolved actors, restores field palettes and begins post-action camera recovery.",high,
+F00097,Battle::BeginActionTrailFade,Native\Game\src\Battle\ActionFlow.c,Enters the action trail-fade phase and requests fading of all weapon trails.,high,
+F00098,Battle::FinishBattleAbilitySequence,Native\Game\src\Battle\ActionFlow.c,Advances the action state machine to the completed Chain or DefenseAbility sequence phase.,high,
+F00099,Battle::AdvanceBattleAbilitySequence,Native\Game\src\Battle\Abilities.c,Builds a successful ChainAbility or DefenseAbility follow-up and updates chain and learning progress.,high,fields:D_800F19CC_t.unk0=chain action index;fields:D_800F19CC_t.unk4=retained action count
+F00100,Battle::StartActionAnimation,Native\Game\src\Battle\ActionFlow.c,Starts the attack or follow-up animation and initializes its BattleAbility timing window.,high,
+F00101,Battle::AdvanceActionEffectPhase,Native\Game\src\Battle\ActionFlow.c,Enters the next action-effect phase and queues its visual transition.,med,
+F00102,Battle::ReturnToBattleActionMenu,Native\Game\src\Battle\Targeting.c,Resets the selected action and restores Ashley's action menu after targeting is canceled.,high,
+F00103,Battle::FilterAreaActionTargets,Native\Game\src\Battle\Targeting.c,Filters target previews by the selected area of effect and returns to target confirmation.,high,
+F00104,Battle::AimActionBehindSource,Native\Game\src\Battle\Targeting.c,Sets an action's aim point one orientation vector behind its source actor.,high,
+F00105,Battle::SetSingleActionTarget,Native\Game\src\Battle\Targeting.c,"Copies the selected actor, body part or environment position into the action's single hit target.",high,
+F00106,Battle::SetAllActionTargets,Native\Game\src\Battle\Targeting.c,Copies all target previews into the action hit list and sets its shared aim position.,high,
+F00107,Battle::CollectEnvironmentActionTargets,Native\Game\src\Battle\Targeting.c,Builds environment hit targets from room objects or special positions for environment-wide actions.,high,"Action IDs 79, 93 and 241"
+F00108,Battle::CommitSelectedAction,Native\Game\src\Battle\ActionFlow.c,"Commits selected targets, computes action results, records attack statistics and enters action execution.",high,
+F00109,Battle::StartActionPresentation,Native\Game\src\Battle\ActionFlow.c,"Starts action animations, positional sounds, visual effects, equipment visuals and optional action-name display.",high,
+F00110,Battle::CommitEnvironmentAction,Native\Game\src\Battle\ActionFlow.c,Commits an action using environment targets instead of an actor target selection.,high,
+F00111,Battle::CollectSourceAreaActionTargets,Native\Game\src\Battle\Targeting.c,Collects valid actors or body parts inside the action volume centered on its source actor.,high,
+F00112,Battle::CollectDirectActionTargets,Native\Game\src\Battle\Targeting.c,"Builds in-range actor, limb and chest previews for direct target selection.",high,fields:D_800F19CC_t5.unk9=actor or environment target id;fields:D_800F19CC_t5.unkA=limb index
+F00113,Battle::CollectGroundAreaActionTargets,Native\Game\src\Battle\Targeting.c,Builds candidate targets and targeting volumes for an action aimed at a selectable ground position.,high,
+F00114,Battle::ResetActionPhase,Native\Game\src\Battle\ActionFlow.c,Resets the current action phase to its initial state.,high,No callers listed
+F00115,Battle::InitializeActionTargeting,Native\Game\src\Battle\Targeting.c,"Selects direct, ground-area, source-area or environment targeting from the action's target category.",high,fields:D_800F19CC_t.unk2C00=target preview count;fields:D_800F19CC_t.unk298C=selected target index
+F00116,Battle::BeginActorActionSelection,Native\Game\src\Battle\Targeting.c,"Initializes an actor's action state, pauses unrelated actors and opens the appropriate targeting interface.",high,fields:D_800F19CC_t.unk2984=player targeting interface enabled
+F00117,Field::BeginFirstPersonView,Native\Game\src\Field\Camera.c,Saves the field camera and starts the transition to Ashley's eye-level first-person view.,high,Original battle-camera name is misleading
+F00118,Field::EndFirstPersonView,Native\Game\src\Field\Camera.c,Restores the saved field camera and projection settings after leaving first-person view.,high,
+F00119,Effects::BeginAshleyStandaloneEffect,Native\Game\src\Effects\ActionEffects.c,Starts an Ashley-only visual effect and enters the field mode that waits for it to finish.,high,
+F00120,Effects::EndAshleyStandaloneEffect,Native\Game\src\Effects\ActionEffects.c,"Restores field control, simulation speed and interface visibility after an Ashley-only effect.",high,
+F00121,Battle::BeginAshleyWeaponToggle,Native\Game\src\Battle\ActionFlow.c,Stops actors and requests Ashley's draw or sheathe animation before returning to exploration.,high,
+F00122,Battle::EndAshleyWeaponToggle,Native\Game\src\Battle\ActionFlow.c,Returns to field exploration after Ashley's weapon draw or sheathe animation finishes.,high,
+F00123,Field::BeginShortcutMenu,Native\Game\src\Field\GameMode.c,Pauses the field and enters the held-button shortcut selection mode.,high,
+F00124,Field::EndShortcutMenu,Native\Game\src\Field\GameMode.c,Restores exploration and field simulation when the shortcut selection button is released.,high,
+F00125,Field::BeginBattleActionMenu,Native\Game\src\Field\GameMode.c,Pauses the field and opens the battle action menu for Ashley's current weapon mode.,high,
+F00126,Field::CloseBattleActionMenu,Native\Game\src\Field\GameMode.c,"Closes the battle action interface, clears its request and restores field simulation.",high,
+F00127,Field::DispatchBattleActionMenuResult,Native\Game\src\Field\GameMode.c,"Starts targeting, requests a special transition or resumes exploration from a battle menu selection.",high,
+F00128,Event::PrepareCutsceneActors,Native\Game\src\Event\Cutscene.c,Saves player camera preferences and resets actor command states before running a cutscene.,high,fields:vs_battle_actor.unk8=command execution state
+F00129,Event::StartPreparedCutscene,Native\Game\src\Event\Cutscene.c,Starts the queued event script and prepares actors for cutscene execution.,high,
+F00130,Event::BeginQueuedCutscene,Native\Game\src\Event\Cutscene.c,"Waits for cutscene camera alignment when needed, otherwise starts the queued script immediately.",med,
+F00131,Event::EndFieldCutscene,Native\Game\src\Event\Cutscene.c,"Restores actor states, camera settings, sound and field control when a cutscene ends.",high,
+F00132,Field::BeginObjectInteractionWait,Native\Game\src\Field\Interactions.c,Pauses field simulation while an object interaction's message or animation completes.,high,
+F00133,Field::EndObjectInteractionWait,Native\Game\src\Field\Interactions.c,Clears the interaction message and restores exploration and field simulation.,high,
+F00134,Field::InteractWithLockedRoomObject,Native\Game\src\Field\Interactions.c,"Checks key or sigil requirements, unlocks a room object and starts its interaction or displays a lock message.",high,Door and interactive-object section A; not the section13 chest lock layout
+F00135,Field::TriggerActorTrap,Native\Game\src\Field\Interactions.c,Builds trap damage results for an actor and queues the trap's visual effect.,high,
+F00136,Field::TryOpenChest,Native\Game\src\Field\Interactions.c,"Checks chest locks and key or sigil ownership, then starts its opening or rejection animation.",high,Section13 is cast to sectionA here; keyOrSigil aliases chest lock state
+F00137,Field::BeginTrapInteraction,Native\Game\src\Field\Interactions.c,"Captures a triggered trap and actor position, stops actors and starts the trap camera sequence.",high,
+F00138,Field::BeginChestInteraction,Native\Game\src\Field\Interactions.c,"Captures a chest and actor position, stops actors and starts Ashley's chest interaction animation.",high,
+F00139,Field::WaitForChestCameraFocus,Native\Game\src\Field\Interactions.c,Tracks the chest interaction position until the camera and Ashley's interaction animation are ready.,high,
+F00140,Field::StepTrapCameraFocus,Native\Game\src\Field\Interactions.c,Tracks the stored trap interaction position and returns the remaining camera tracking speed.,high,
+F00141,Field::DispatchTrapOrChestInteraction,Native\Game\src\Field\Interactions.c,Applies trap effects or checks a chest lock once the interaction camera reaches its focus.,high,
+F00142,Field::IsChestAnimationReady,Native\Game\src\Field\Interactions.c,Reports whether Ashley's interaction animation has reached its wait state and the scene message has finished.,med,
+F00143,Effects::ActionEffectBusyFlags,Native\Game\src\Effects\ActionEffects.c,Returns the active effect flags used to wait for trap and standalone action effects.,high,
+F00144,Field::FinishChestInteraction,Native\Game\src\Field\Interactions.c,Restores simulation speed and starts Ashley's chest-closing or recovery animation.,med,Animation selector 4
+F00145,Field::FinishTrapInteraction,Native\Game\src\Field\Interactions.c,"Restores simulation speed, disables the triggered trap and records its persistent room state.",high,
+F00146,Field::TrackInteractionCameraToAshley,Native\Game\src\Field\Interactions.c,Tracks the camera toward Ashley and returns tracking speed unless his interaction animation is still active.,high,
+F00147,Field::OpenChestContents,Native\Game\src\Field\Interactions.c,Displays the chest's remaining lock requirement or opens its loot or special-content interface.,high,
+F00148,Field::UpdateChestContentsSelection,Native\Game\src\Field\Interactions.c,"Waits for chest selection, marks accepted contents collected or resets the chest when canceled.",high,Section13 field unk10 selects loot below 64 or special content above it
+F00149,Field::UpdateFirstPersonViewEntry,Native\Game\src\Field\Camera.c,Advances first-person camera entry and hides Ashley when the projection reaches eye-level framing.,high,
+F00150,Field::CheckFirstPersonViewExit,Native\Game\src\Field\Camera.c,Starts a return transition from first-person view when the player presses an exit button.,high,
+F00151,Field::UpdateFirstPersonViewExit,Native\Game\src\Field\Camera.c,"Advances first-person exit, reveals Ashley and restores the saved field camera when complete.",high,
+F00152,Field::TileInFrontOfActor,Native\Game\src\Field\Interactions.c,Computes the adjacent tile and cardinal facing direction from an actor's position and heading.,high,
+F00153,Field::TryTriggerFacingTileEvent,Native\Game\src\Field\Interactions.c,Requests an interaction event for the tile directly in front of an actor.,high,
+F00154,Field::FindFacingRoomObject,Native\Game\src\Field\Interactions.c,Finds the interactable room object in front of an actor within the allowed height difference.,high,
+F00155,Field::FindFacingUnlootedChest,Native\Game\src\Field\Interactions.c,"Finds a facing chest with matching direction, height and an unset collection flag.",high,
+F00156,Battle::BeginActorDefeatAnimation,Native\Game\src\Battle\ActionFlow.c,Clears an actor's pending commands and starts its defeat animation when its health is zero.,high,
+F00157,Field::UpdateCameraTileConstraint,Native\Game\src\Field\Camera.c,Applies the current tile's camera restrictions or clears them when the tile has none.,high,
+F00158,Field::CheckAshleyTileTriggers,Native\Game\src\Field\Interactions.c,"Checks tile events, traps, doors and falling hazards and performs resulting room transitions or damage.",high,fields:vs_battle_actor.unk2C=last trigger tile and movement mode
+F00159,Field::CheckActorTrapAndFallTriggers,Native\Game\src\Field\Interactions.c,Checks a non-player actor's new tile for traps and fatal falls and requests the resulting event or defeat.,high,
+F00160,Actors::ConsumeActorMovementOffset,Native\Game\src\Actors\Movement.c,Consumes at most eight units per axis from an actor's pending fixed-point movement offset.,high,"Command 13 uses unkC, unk10 and unk14 as remaining x, z and y offsets"
+F00161,Actors::ExecuteQueuedActorCommands,Native\Game\src\Actors\Movement.c,"Executes actor movement, animation and attack commands and checks their trap and fall consequences.",high,fields:vs_battle_actor.unkA=command target actor or immediate marker;command states 128 queued and 64 waiting
+F00162,Render::ConfigureFieldDisplay,Native\Graphics\src\Display.c,"Initializes double-buffered field display surfaces, projection and background colors.",high,
+F00163,Render::PresentFieldFrame,Native\Graphics\src\Display.c,"Submits the field ordering table, swaps buffers and updates timing while supporting debug frame stepping.",high,
+F00164,Actors::InitializePlaceholderActorStats,Native\Game\src\Actors\Lifecycle.c,"Clears a placeholder actor's statistics, assigns one health and initializes its actor and spawn sentinels.",med,Default name data is ambiguous; not normal character stat initialization

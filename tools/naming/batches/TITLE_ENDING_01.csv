@@ -1,0 +1,161 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F02405,ENDING/ENDING.PRG/D4.c,187,func_800688D4,C,29,Game.Ending,,_renderPhantomPain,
+F02406,ENDING/ENDING.PRG/D4.c,218,_renderPhantomPain,C,105,Game.Battle,ABS AddPrim RotTransPers4 SetPolyFT4 SetRotMatrix SetTransMatrix getClut memset setSemiTrans,,RotMatrix_gte _ease func_800688D4 vs_gte_rsqrt
+F02407,ENDING/ENDING.PRG/D4.c,325,_renderFin,C,63,Graphics,SetSprt getTPage setClut setUV0 setWH setXY0 setaddr,,_insertTpage
+F02408,ENDING/ENDING.PRG/D4.c,390,_renderVagrantStory,C,76,Graphics,SetSprt getaddr setClut setSemiTrans setUV0 setWH setXY0 setaddr,,_insertTpage
+F02409,ENDING/ENDING.PRG/D4.c,468,_inverseDistanceFromScreencenter,C,5,Graphics,,,vs_gte_rsqrt
+F02410,ENDING/ENDING.PRG/D4.c,475,func_80069388,C,3,Game.Ending,,,func_8006AF44
+F02411,ENDING/ENDING.PRG/D4.c,672,_creditsStrWidth,C,36,Game.Ending,,_renderText,
+F02412,ENDING/ENDING.PRG/D4.c,711,_renderText,C,118,Graphics,AddPrim SetPolyFT4 SetSprt addPrim getClut setClut setSprt setUV0 setWH setXY0,,_creditsStrWidth _insertTpage
+F02413,ENDING/ENDING.PRG/D4.c,831,_renderCopyright,C,32,Graphics,SetSprt getTPage setClut setUV0 setWH setXY0 setaddr,,_insertTpage
+F02414,ENDING/ENDING.PRG/D4.c,865,_renderBackground,C,72,Graphics,AddPrim SetPolyG4 SetSprt SetTile getTPage setClut setSemiTrans setUV0 setWH setXY0,MAINMENU.PRG:vs_mainMenu_renderScreen,_insertTpage
+F02415,ENDING/ENDING.PRG/D4.c,939,_backgroundFadeIn,C,13,Graphics,,,_ease
+F02416,ENDING/ENDING.PRG/D4.c,954,_backgroundFadeOut,C,16,Graphics,,,_ease
+F02417,ENDING/ENDING.PRG/D4.c,972,func_8006A4D8,C,25,Game.Ending,AddPrim SetTile getTPage setSemiTrans setWH setXY0,,_ease _insertTpage
+F02418,ENDING/ENDING.PRG/D4.c,999,vs_ending_exec,C,69,Platform,DrawSync SetDispMask SetGeomOffset SetGeomScreen,SLUS_010.40:vs_main_showEndingAndReturnToTitle,_addRenderer _checkStreamXaEnd _resetElements _setDrawEnv _updateClearGameStats func_8006A888 func_8006A9C0 func_8006B884 func_8006B9B4 func_8006BD78 vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueuePriority vs_main_checkStreamXaEnd (+3)
+F02419,ENDING/ENDING.PRG/D4.c,1070,_setDrawEnv,C,9,Graphics,,vs_ending_exec,
+F02420,ENDING/ENDING.PRG/D4.c,1081,func_8006A888,C,20,Game.Ending,VSync,vs_ending_exec,_addRenderer _drawScreen _parseCreditsScript _renderElements func_8006AF64 func_8006B930
+F02421,ENDING/ENDING.PRG/D4.c,1103,_insertTpage,C,10,Graphics,AddPrim SetDrawTPage,_renderBackground _renderCopyright _renderFin _renderText _renderVagrantStory func_8006A4D8 func_8006B324,
+F02422,ENDING/ENDING.PRG/D4.c,1115,func_8006A9C0,C,20,Game.Ending,LoadImage,vs_ending_exec,
+F02423,ENDING/ENDING.PRG/D4.c,1137,_resetElements,C,7,Game.Ending,,vs_ending_exec,
+F02424,ENDING/ENDING.PRG/D4.c,1146,_renderElements,C,16,Graphics,,func_8006A888,
+F02425,ENDING/ENDING.PRG/D4.c,1164,_addRenderer,C,15,Graphics,SystemError,_parseCreditsScript func_8006A888 vs_ending_exec,
+F02426,ENDING/ENDING.PRG/D4.c,1181,_replaceMainRenderer,C,10,Graphics,,_parseCreditsScript,
+F02427,ENDING/ENDING.PRG/D4.c,1193,_parseCreditsScript,C,98,Game.Event,,func_8006A888,_addRenderer _replaceMainRenderer
+F02428,ENDING/ENDING.PRG/D4.c,1293,_ease,C,12,Game.Ending,,_backgroundFadeIn _backgroundFadeOut _renderPhantomPain func_8006A4D8,rcos rsin
+F02429,ENDING/ENDING.PRG/D4.c,1307,func_8006AF44,C,5,Game.Ending,,func_80069388,
+F02430,ENDING/ENDING.PRG/D4.c,1317,func_8006AF64,C,71,Game.Ending,VSync,func_8006A888,
+F02431,ENDING/ENDING.PRG/D4.c,1390,func_8006B324,C,46,Game.Ending,setClut setShadeTex setSprt8 setUV0 setXY0 setaddr,,_insertTpage
+F02432,ENDING/ENDING.PRG/D4.c,1438,func_8006B450,C,40,Game.Ending,ClearImage DrawSync FntLoad FntOpen PutDispEnv PutDrawEnv SetDefDispEnv SetDefDrawEnv SetDispMask SetDumpFnt SetGeomOffset SetGeomScreen setRECT setRGB0,func_8006B884,
+F02433,ENDING/ENDING.PRG/D4.c,1480,_drawScreen,C,18,Graphics,DrawOTag DrawSync PutDispEnv PutDrawEnv,func_8006A888 func_8006BD78 MENU4.PRG:vs_menu4_exec,vs_main_gametimeUpdate
+F02434,ENDING/ENDING.PRG/D4.c,1502,_do_updateClearGameStats,C,35,Game.Ending,,_updateClearGameStats,_updateTitles vs_main_bzero
+F02435,ENDING/ENDING.PRG/D4.c,1539,func_8006B884,C,8,Game.Ending,,vs_ending_exec,func_8006B450 vs_main_allocHeap vs_main_initHeap
+F02436,ENDING/ENDING.PRG/D4.c,1549,_updateClearGameStats,C,1,Game.Ending,,vs_ending_exec,_do_updateClearGameStats
+F02437,ENDING/ENDING.PRG/D4.c,1551,func_8006B930,C,10,Game.Ending,ClearOTagR,func_8006A888 func_8006BD78,vs_main_processPadState
+F02438,ENDING/ENDING.PRG/D4.c,1563,func_8006B9B4,C,3,Game.Ending,,vs_ending_exec,vs_main_streamXa
+F02439,ENDING/ENDING.PRG/D4.c,1568,_checkStreamXaEnd,C,1,Game.Ending,,vs_ending_exec,vs_main_checkStreamXaEnd
+F02440,ENDING/ENDING.PRG/D4.c,1570,_updateTitles,C,105,Game.Ending,,_do_updateClearGameStats,
+F02441,ENDING/ENDING.PRG/D4.c,1677,func_8006BD78,C,19,Game.Ending,SetDispMask VSync,vs_ending_exec,_drawScreen _renderCongratulationsScreen func_8006B930 func_8006BE04
+F02442,ENDING/ENDING.PRG/D4.c,1698,func_8006BE04,C,144,Game.Ending,LoadImage,func_8006BD78,_determineRank _parseTim _updateScore vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_freeCdQueueSlot vs_main_freeHeapR
+F02443,ENDING/ENDING.PRG/D4.c,1844,_renderCongratulationsScreen,C,41,Graphics,,func_8006BD78 MENUF.PRG:_execMenu,_renderCongratulations _renderIncrementalMapCompletion _renderIncrementalScore _renderMapCompletion _renderRiskbreakerRank _renderRiskbreakerRankHeader _renderScore func_8006C3CC vs_main_playSfxDefault
+F02444,ENDING/ENDING.PRG/D4.c,1887,func_8006C3CC,C,36,Game.Ending,AddPrim getTPage setClut setPolyFT4 setRGB0 setUV4 setXY4,_renderCongratulationsScreen,
+F02445,ENDING/ENDING.PRG/D4.c,1925,_renderCongratulations,C,19,Graphics,,_renderCongratulationsScreen MENUF.PRG:_renderCongratulationsScreen,_renderTexturePopIn
+F02446,ENDING/ENDING.PRG/D4.c,1946,_renderScore,C,48,Graphics,sprintf,_renderCongratulationsScreen MENUF.PRG:_renderCongratulationsScreen,_renderTextureFadeInTint
+F02447,ENDING/ENDING.PRG/D4.c,1996,_renderIncrementalScore,C,71,Graphics,sprintf,_renderCongratulationsScreen MENUF.PRG:_renderCongratulationsScreen,_renderTextureWipe func_80045D64 vs_main_playSfxDefault
+F02448,ENDING/ENDING.PRG/D4.c,2070,_renderMapCompletion,C,40,Game.Field,sprintf,_renderCongratulationsScreen MENUF.PRG:_renderCongratulationsScreen,_renderTextureFadeInTint
+F02449,ENDING/ENDING.PRG/D4.c,2113,_renderIncrementalMapCompletion,C,65,Game.Field,sprintf,_renderCongratulationsScreen MENUF.PRG:_renderCongratulationsScreen,_renderTextureWipe func_80045D64 vs_main_playSfxDefault
+F02450,ENDING/ENDING.PRG/D4.c,2181,_renderRiskbreakerRankHeader,C,14,Game.Battle,,_renderCongratulationsScreen MENUF.PRG:_renderCongratulationsScreen,_renderTextureFadeInTint
+F02451,ENDING/ENDING.PRG/D4.c,2197,_renderRiskbreakerRank,C,34,Game.Battle,,_renderCongratulationsScreen MENUF.PRG:_renderCongratulationsScreen,_renderTexturePopIn
+F02452,ENDING/ENDING.PRG/D4.c,2235,_parseTim,C,18,Game.Ending,,func_8006BE04,
+F02453,ENDING/ENDING.PRG/D4.c,2255,_determineRank,C,20,Game.Ending,,func_8006BE04 MENUF.PRG:_initCongratulationsScreen,
+F02454,ENDING/ENDING.PRG/D4.c,2277,_updateScore,C,58,Game.Ending,,func_8006BE04,
+F02455,GIM/SCREFF2.PRG/0.c,8,func_800F9800,C,12,Game.Effects,,BATTLE.PRG:func_800BB2B8,func_8007DFF0 func_8007E0A8
+F02456,GIM/SCREFF2.PRG/0.c,22,func_800F986C,C,90,Game.Effects,,BATTLE.PRG:func_800CB708,
+F02457,GIM/SCREFF2.PRG/0.c,114,func_800F9BC0,C,4,Game.Effects,,BATTLE.PRG:func_800BD6C4 BATTLE.PRG:func_800BDAB4,
+F02458,GIM/SCREFF2.PRG/3D8.s,0,func_800F9BD8,asm-file,0,Game.Effects,,BATTLE.PRG:func_800CB708,
+F02459,GIM/SCREFF2.PRG/5E8.c,8,func_800F9DE8,C,1,Game.Effects,,BATTLE.PRG:vs_battle_script_specialOp,
+F02460,GIM/SCREFF2.PRG/5E8.c,10,func_800F9DF8,C,11,Game.Effects,,func_800F9EBC func_800F9FB8,rcos rsin
+F02461,GIM/SCREFF2.PRG/5E8.c,23,func_800F9EBC,C,16,Game.Effects,,func_800F9FB8,func_800F9DF8
+F02462,GIM/SCREFF2.PRG/5E8.c,41,func_800F9FB8,C,27,Game.Effects,,BATTLE.PRG:func_800CB708,func_800F9DF8 func_800F9EBC
+F03577,TITLE/TITLE.PRG/22C.c,18,_playNewGameSfx,C,5,Audio,,vs_title_exec,vs_main_playSfxDefault
+F03578,TITLE/TITLE.PRG/22C.c,25,_playMenuChangeSfx,C,1,Audio,,_menuSoundSettings _menuVibrationSettings _saveScreenConfirmation vs_title_exec,vs_main_playSfxDefault
+F03579,TITLE/TITLE.PRG/22C.c,27,_playMenuSelectSfx,C,1,Audio,,_menuSoundSettings _menuVibrationSettings _saveScreenConfirmation vs_title_exec,vs_main_playSfxDefault
+F03580,TITLE/TITLE.PRG/22C.c,29,_playMenuLeaveSfx,C,1,Audio,,_menuSoundSettings _menuVibrationSettings _saveScreenConfirmation,vs_main_playSfxDefault
+F03581,TITLE/TITLE.PRG/22C.c,50,_keystreamBits,C,7,Game.Title,,_gameSaveScreen _packageGameSaveData,
+F03582,TITLE/TITLE.PRG/22C.c,61,_testMemcardEvents,C,10,Save,TestEvent,_loadSaveData _memcardEventHandler _saveFile MENU7.PRG:_loadSaveData MENU7.PRG:_memcardEventHandler MENU7.PRG:_saveFile,
+F03583,TITLE/TITLE.PRG/22C.c,73,_resetMemcardEvents,C,7,Save,TestEvent,_loadSaveData _memcardEventHandler _saveFile MENU7.PRG:_loadSaveData MENU7.PRG:_memcardEventHandler MENU7.PRG:_saveFile,
+F03584,TITLE/TITLE.PRG/22C.c,82,_drawImage,C,8,Game.Title,DrawSync LoadImage,_displayPublisherAndDeveloper _drawFileMenuElement _gameLoadScreen _gameSaveScreen _initMemcard,
+F03585,TITLE/TITLE.PRG/22C.c,92,_readImage,C,8,Game.Title,DrawSync StoreImage,_drawFileMenuElement MENU7.PRG:_drawFileMenuElement,
+F03586,TITLE/TITLE.PRG/22C.c,102,_rMemcpy,C,6,Game.Title,,_applyLoadedSaveFile _packageGameSaveData _readSaveFileInfo _saveFileExists _showSaveFilesMenu MENU7.PRG:_applyLoadedSaveFile MENU7.PRG:_packageGameSaveData MENU7.PRG:_readSaveFileInfo MENU7.PRG:_showSaveFilesMenu,
+F03587,TITLE/TITLE.PRG/22C.c,110,_memcardMakeFilename,C,9,Save,memset strcpy,_createSaveFile _loadSaveData _readSaveFileInfo _saveFile MENU7.PRG:_createSaveFile MENU7.PRG:_loadSaveData MENU7.PRG:_readSaveFileInfo MENU7.PRG:_saveFile,
+F03588,TITLE/TITLE.PRG/22C.c,121,_memcardMakeTempFilename,C,9,Save,memset strcpy,_deleteRedundantTempFiles _loadSaveData _saveFile MENU7.PRG:_deleteRedundantTempFiles MENU7.PRG:_loadSaveData MENU7.PRG:_saveFile,
+F03589,TITLE/TITLE.PRG/22C.c,192,_getNewestSaveFile,C,15,Save,,_showLoadFilesMenu MENU7.PRG:_showLoadFilesMenu,
+F03590,TITLE/TITLE.PRG/22C.c,209,_findCurrentSaveOnActiveMemcard,C,15,Save,,_findCurrentSave _showSaveFilesMenu MENU7.PRG:_findCurrentSave MENU7.PRG:_showSaveFilesMenu,
+F03591,TITLE/TITLE.PRG/22C.c,226,_memcardFileNumberFromFilename,C,24,Save,,_initSaveFileInfo _memcardSaveIdExists MENU7.PRG:_initSaveFileInfo MENU7.PRG:_memcardSaveIdExists,
+F03592,TITLE/TITLE.PRG/22C.c,284,_verifySaveChecksums,C,28,Save,,_applyLoadedSaveFile _readSaveFileInfo MENU7.PRG:_applyLoadedSaveFile MENU7.PRG:_readSaveFileInfo,
+F03593,TITLE/TITLE.PRG/22C.c,314,_decode,C,6,Game.Title,,_applyLoadedSaveFile _readSaveFileInfo _showSaveFilesMenu MENU7.PRG:_applyLoadedSaveFile MENU7.PRG:_readSaveFileInfo MENU7.PRG:_showSaveFilesMenu,
+F03594,TITLE/TITLE.PRG/22C.c,322,_readSaveFileInfo,C,30,Save,close memset open read,_initSaveFileInfo MENU7.PRG:_initSaveFileInfo,_decode _memcardMakeFilename _rMemcpy _verifySaveChecksums
+F03595,TITLE/TITLE.PRG/22C.c,354,_memcardSaveIdExists,C,12,Save,,_deleteRedundantTempFiles _saveFile MENU7.PRG:_deleteRedundantTempFiles MENU7.PRG:_saveFile,_memcardFileNumberFromFilename
+F03596,TITLE/TITLE.PRG/22C.c,368,_deleteRedundantTempFiles,C,15,Content,erase,_initSaveFileInfo MENU7.PRG:_initSaveFileInfo,_memcardMakeTempFilename _memcardSaveIdExists
+F03597,TITLE/TITLE.PRG/22C.c,385,_initSaveFileInfo,C,56,Save,firstfile memset nextfile,_findCurrentSave _selectLoadMemoryCard _selectSaveMemoryCard MENU7.PRG:_findCurrentSave MENU7.PRG:_selectLoadMemoryCard MENU7.PRG:_selectSaveMemoryCard,_deleteRedundantTempFiles _memcardFileNumberFromFilename _readSaveFileInfo
+F03598,TITLE/TITLE.PRG/22C.c,443,_createSaveFile,C,12,Save,close erase open,_showSaveFilesMenu MENU7.PRG:_showSaveFilesMenu,_memcardMakeFilename
+F03599,TITLE/TITLE.PRG/22C.c,457,_memcardEventHandler,C,110,Save,_card_clear _card_info _card_load,_findCurrentSave _memcardMaskedHandler _promptFormat _saveFileExists _selectSaveMemoryCard MENU7.PRG:_findCurrentSave MENU7.PRG:_promptFormat MENU7.PRG:_selectSaveMemoryCard MENU7.PRG:maskedHandler,_resetMemcardEvents _testMemcardEvents
+F03600,TITLE/TITLE.PRG/22C.c,569,_applyLoadedSaveFile,C,45,Save,,_showLoadFilesMenu _showSaveMenu MENU7.PRG:_loadIntroSaveFile MENU7.PRG:_showLoadFilesMenu MENU7.PRG:_showSaveMenu MENU7.PRG:vs_menu7_saveContainerMenu,_decode _rMemcpy _verifySaveChecksums func_80042CA0 vs_main_setMonoSound
+F03601,TITLE/TITLE.PRG/22C.c,616,_packageGameSaveData,C,120,Save,memset,_showSaveFilesMenu MENU7.PRG:_showSaveFilesMenu,_keystreamBits _rMemcpy
+F03602,TITLE/TITLE.PRG/22C.c,745,_loadSaveData,C,79,Save,close memset open read,_saveFile _showLoadFilesMenu _showSaveMenu MENU7.PRG:_saveFile MENU7.PRG:_showLoadFilesMenu MENU7.PRG:_showSaveMenu MENU7.PRG:vs_menu7_saveContainerMenu,_memcardMakeFilename _memcardMakeTempFilename _resetMemcardEvents _testMemcardEvents
+F03603,TITLE/TITLE.PRG/22C.c,826,_saveFile,C,112,Save,close open rename write,_showSaveFilesMenu MENU7.PRG:_showSaveFilesMenu,_loadSaveData _memcardMakeFilename _memcardMakeTempFilename _memcardSaveIdExists _resetMemcardEvents _testMemcardEvents
+F03604,TITLE/TITLE.PRG/22C.c,940,_initMemcard,C,75,Save,EnableEvent EnterCriticalSection ExitCriticalSection OpenEvent,_gameLoadScreen _gameSaveScreen _saveFileExists MENU7.PRG:vs_menu7_dataMenu MENU7.PRG:vs_menu7_gameOver MENU7.PRG:vs_menu7_saveContainerMenu,_drawImage vs_main_allocHeap vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_enableReset vs_main_freeCdQueueSlot
+F03605,TITLE/TITLE.PRG/22C.c,1017,_shutdownMemcard,C,17,Save,CloseEvent DisableEvent EnterCriticalSection ExitCriticalSection,_gameLoadScreen _gameSaveScreen _saveFileExists MENU7.PRG:vs_menu7_dataMenu MENU7.PRG:vs_menu7_gameOver MENU7.PRG:vs_menu7_saveContainerMenu,vs_main_enableReset vs_main_freeHeap
+F03606,TITLE/TITLE.PRG/22C.c,1082,_drawSprt,C,11,Game.Title,DrawPrim DrawSync,_displayPublisherAndDeveloper _drawFileMenu _drawFileMenuBg _drawFileMenuElement _drawHPMP _drawInteger _drawSaveInfoUI _saveScreenExitScreen MENU7.PRG:_drawFileMenu MENU7.PRG:_drawFileMenuBg (+4),
+F03607,TITLE/TITLE.PRG/22C.c,1113,_drawSaveInfoUI,C,14,Save,getTPage,_drawFileMenuElement _drawHPMP MENU7.PRG:_drawFileMenuElement MENU7.PRG:_drawHPMP,_drawSprt
+F03608,TITLE/TITLE.PRG/22C.c,1129,_drawInteger,C,9,Game.Title,getTPage,_drawFileMenuElement _drawHPMP,_drawSprt
+F03609,TITLE/TITLE.PRG/22C.c,1140,_countDigits,C,10,Game.Title,,_drawHPMP MENU7.PRG:_drawHPMP,
+F03610,TITLE/TITLE.PRG/22C.c,1154,_drawHPMP,C,73,Game.Battle,DrawPrim DrawSync getClut getTPage,_drawFileMenuElement MENU7.PRG:_drawFileMenuElement,_countDigits _drawInteger _drawSaveInfoUI _drawSprt
+F03611,TITLE/TITLE.PRG/22C.c,1233,_fileProcessingAnim,C,42,Content,DrawPrim DrawSync,_drawFileMenuElement MENU7.PRG:_drawFileMenuElement,
+F03612,TITLE/TITLE.PRG/22C.c,1277,_fileProcessingCompleteAnim,C,39,Content,DrawPrim DrawSync,_drawFileMenuElement MENU7.PRG:_drawFileMenuElement,
+F03613,TITLE/TITLE.PRG/22C.c,1321,_initFileMenu,C,9,Content,memset,_gameLoadScreen _gameSaveScreen _showSaveMenu MENU7.PRG:_showSaveMenu MENU7.PRG:vs_menu7_dataMenu MENU7.PRG:vs_menu7_gameOver MENU7.PRG:vs_menu7_saveContainerMenu,
+F03614,TITLE/TITLE.PRG/22C.c,1332,_initFileMenuElement,C,36,Content,memset,_loadFileMenu _promptConfirm _saveScreenConfirmation _showLoadFilesMenu _showSaveFilesMenu _showSaveMenu MENU7.PRG:_loadFileMenu MENU7.PRG:_promptConfirm MENU7.PRG:_showLoadFilesMenu MENU7.PRG:_showSaveFilesMenu (+1),
+F03615,TITLE/TITLE.PRG/22C.c,1370,_clearFileMenuElement,C,3,Content,memset,_showLoadFilesMenu _showSaveFilesMenu MENU7.PRG:_showLoadFilesMenu MENU7.PRG:_showSaveFilesMenu,
+F03616,TITLE/TITLE.PRG/22C.c,1375,_fileMenuElementsActive,C,7,Content,,_loadFileMenu _promptConfirm _promptFormat _promptOverwrite _saveScreenConfirmation _selectLoadMemoryCard _selectSaveMemoryCard _showSaveMenu MENU7.PRG:_loadFileMenu MENU7.PRG:_promptConfirm (+5),
+F03617,TITLE/TITLE.PRG/22C.c,1384,_printCharacter,C,35,Game.Actors,DrawPrim DrawSync,_drawFileMenuElement _printString MENU7.PRG:_drawFileMenuElement MENU7.PRG:_printString,
+F03618,TITLE/TITLE.PRG/22C.c,1427,_findCurrentSave,C,48,Game.Title,,_showSaveMenu MENU7.PRG:_showSaveMenu MENU7.PRG:vs_menu7_saveContainerMenu,_findCurrentSaveOnActiveMemcard _initSaveFileInfo _memcardEventHandler
+F03619,TITLE/TITLE.PRG/22C.c,1488,_memcardMaskedHandler,C,30,Save,,_selectLoadMemoryCard _showLoadFilesMenu _showSaveFilesMenu,_memcardEventHandler
+F03620,TITLE/TITLE.PRG/22C.c,1520,_printString,C,38,Game.Title,,_drawFileMenu _drawFileMenuElement MENU7.PRG:_drawFileMenu MENU7.PRG:_drawFileMenuElement,_printCharacter
+F03621,TITLE/TITLE.PRG/22C.c,1560,_interpolateRGB,C,15,Core.Math,,_intepolateMenuItemBgColour MENU7.PRG:_intepolateMenuItemBgColour,
+F03622,TITLE/TITLE.PRG/22C.c,1577,_intepolateMenuItemBgColour,C,22,Game.Items,,_drawFileMenuElement MENU7.PRG:_drawFileMenuElement,_interpolateRGB
+F03623,TITLE/TITLE.PRG/22C.c,1601,_drawFileMenuElement,C,181,Content,DrawPrim DrawSync getTPage,_drawFileMenu MENU7.PRG:_drawFileMenu,_drawHPMP _drawImage _drawInteger _drawSaveInfoUI _drawSprt _fileProcessingAnim _fileProcessingCompleteAnim _intepolateMenuItemBgColour _printCharacter _printString _readImage
+F03624,TITLE/TITLE.PRG/22C.c,1784,_drawFileMenu,C,122,Content,DrawPrim DrawSync getTPage,_gameLoadScreen _gameSaveScreen MENU7.PRG:vs_menu7_dataMenu MENU7.PRG:vs_menu7_gameOver MENU7.PRG:vs_menu7_saveContainerMenu,_drawFileMenuElement _drawSprt _printString vs_main_playSfxDefault
+F03625,TITLE/TITLE.PRG/22C.c,1908,_drawFileMenuBg,C,6,Content,getTPage,_gameLoadScreen _gameSaveScreen MENU7.PRG:vs_menu7_gameOver,_drawSprt
+F03626,TITLE/TITLE.PRG/22C.c,1916,_showLoadFilesMenu,C,178,Content,,_selectLoadMemoryCard MENU7.PRG:_selectLoadMemoryCard,_applyLoadedSaveFile _clearFileMenuElement _getNewestSaveFile _initFileMenuElement _loadSaveData _memcardMaskedHandler vs_main_playSfxDefault
+F03627,TITLE/TITLE.PRG/22C.c,2096,_selectLoadMemoryCard,C,115,Save,,_loadFileMenu MENU7.PRG:_loadFileMenu,_fileMenuElementsActive _initSaveFileInfo _memcardMaskedHandler _showLoadFilesMenu vs_main_playSfxDefault
+F03628,TITLE/TITLE.PRG/22C.c,2213,_loadFileMenu,C,115,Content,,_gameLoadScreen MENU7.PRG:vs_menu7_dataMenu MENU7.PRG:vs_menu7_gameOver,_fileMenuElementsActive _initFileMenuElement _selectLoadMemoryCard vs_main_playSfxDefault
+F03629,TITLE/TITLE.PRG/22C.c,2330,_promptConfirm,C,61,Game.Battle,,_promptFormat _promptOverwrite _showSaveMenu MENU7.PRG:_promptFormat MENU7.PRG:_promptOverwrite MENU7.PRG:_showSaveMenu,_fileMenuElementsActive _initFileMenuElement vs_main_playSfxDefault
+F03630,TITLE/TITLE.PRG/22C.c,2393,_promptOverwrite,C,28,Game.Battle,,_showSaveFilesMenu MENU7.PRG:_showSaveFilesMenu,_fileMenuElementsActive _promptConfirm
+F03631,TITLE/TITLE.PRG/22C.c,2423,_promptFormat,C,66,Game.Battle,_card_format,_showSaveFilesMenu MENU7.PRG:_showSaveFilesMenu,_fileMenuElementsActive _memcardEventHandler _promptConfirm
+F03632,TITLE/TITLE.PRG/22C.c,2495,_showSaveFilesMenu,C,253,Save,memset,_selectSaveMemoryCard MENU7.PRG:_selectSaveMemoryCard,_clearFileMenuElement _createSaveFile _decode _findCurrentSaveOnActiveMemcard _initFileMenuElement _memcardMaskedHandler _packageGameSaveData _promptFormat _promptOverwrite _rMemcpy _saveFile vs_main_playSfxDefault
+F03633,TITLE/TITLE.PRG/22C.c,2750,_selectSaveMemoryCard,C,128,Save,memset,_showSaveMenu MENU7.PRG:_showSaveMenu,_fileMenuElementsActive _initSaveFileInfo _memcardEventHandler _showSaveFilesMenu vs_main_playSfxDefault
+F03634,TITLE/TITLE.PRG/22C.c,2880,_showSaveMenu,C,189,Save,memset,_gameSaveScreen MENU7.PRG:vs_menu7_dataMenu MENU7.PRG:vs_menu7_saveContainerMenu,_applyLoadedSaveFile _fileMenuElementsActive _findCurrentSave _initFileMenu _initFileMenuElement _loadSaveData _promptConfirm _selectSaveMemoryCard vs_main_playSfxDefault
+F03635,TITLE/TITLE.PRG/22C.c,3074,_initSaveScreen,C,17,Save,ClearImage DrawSync PutDispEnv PutDrawEnv SetDefDispEnv SetDefDrawEnv SetDispMask setRECT,_gameLoadScreen _gameSaveScreen,
+F03636,TITLE/TITLE.PRG/22C.c,3093,_saveScreenSwapBuf,C,14,Save,PutDispEnv PutDrawEnv SetDefDispEnv SetDefDrawEnv,_gameLoadScreen _gameSaveScreen,
+F03637,TITLE/TITLE.PRG/22C.c,3129,_gameLoadScreen,C,58,Game.Title,ClearImage DrawSync SetDispMask setRECT,vs_title_exec,_drawFileMenu _drawFileMenuBg _drawImage _initFileMenu _initMemcard _initSaveScreen _loadFileMenu _saveScreenSwapBuf _shutdownMemcard vs_main_gametimeUpdate vs_main_processPadState
+F03638,TITLE/TITLE.PRG/22C.c,3189,_saveFileExists,C,35,Save,VSync firstfile,vs_title_exec,_initMemcard _memcardEventHandler _rMemcpy _shutdownMemcard vs_main_gametimeUpdate
+F03639,TITLE/TITLE.PRG/22C.c,3226,_saveScreenConfirmation,C,71,Save,,_gameSaveScreen,_fileMenuElementsActive _initFileMenuElement _playMenuChangeSfx _playMenuLeaveSfx _playMenuSelectSfx vs_main_playSfxDefault
+F03640,TITLE/TITLE.PRG/22C.c,3299,_saveScreenExitScreen,C,12,Save,DrawPrim DrawSync getTPage,_gameSaveScreen,_drawSprt
+F03641,TITLE/TITLE.PRG/22C.c,3313,_gameSaveScreen,C,89,Save,ClearImage DrawSync SetDispMask setRECT,vs_title_exec,_drawFileMenu _drawFileMenuBg _drawImage _initFileMenu _initMemcard _initSaveScreen _keystreamBits _saveScreenConfirmation _saveScreenExitScreen _saveScreenSwapBuf _showSaveMenu _shutdownMemcard vs_main_gametimeUpdate vs_main_processPadState
+F03642,TITLE/TITLE.PRG/22C.c,3433,_initMovieData,C,17,Video,,_initIntroMovie,
+F03643,TITLE/TITLE.PRG/22C.c,3452,_initMoviePlayback,C,7,Video,DecDCTReset DecDCToutCallback StSetRing StSetStream,_initIntroMovie,_playMovie
+F03644,TITLE/TITLE.PRG/22C.c,3461,_decDCToutCallback,C,31,Video,DecDCTout LoadImage StCdInterrupt,,
+F03645,TITLE/TITLE.PRG/22C.c,3494,_decodeNextMovieFrame,C,17,Video,DecDCTvlc2 StFreeRing,_initIntroMovie _playIntroMovie,_getNextMovieFrame
+F03646,TITLE/TITLE.PRG/22C.c,3513,_getNextMovieFrame,C,27,Video,ClearImage StGetNext setRECT,_decodeNextMovieFrame,
+F03647,TITLE/TITLE.PRG/22C.c,3542,_waitForFrame,C,18,Game.Title,,_playIntroMovie,
+F03648,TITLE/TITLE.PRG/22C.c,3562,_playMovie,C,15,Video,DsControl DsRead2 VSync,_initIntroMovie _initMoviePlayback _playIntroMovie,
+F03649,TITLE/TITLE.PRG/22C.c,3579,_displayPublisherAndDeveloper,C,68,Game.Title,ClearImage DrawSync PutDispEnv PutDrawEnv SetDefDispEnv SetDefDrawEnv SetDispMask VSync setRECT,_initEnvironment,_drawImage _drawSprt vs_main_processPadState
+F03650,TITLE/TITLE.PRG/22C.c,3649,_initIntroMovie,C,19,Video,DecDCTvlcBuild DsIntToPos VSync,vs_title_exec,_decodeNextMovieFrame _initMovieData _initMoviePlayback _playMovie vs_main_allocHeap
+F03651,TITLE/TITLE.PRG/22C.c,3670,_stopIntroMovie,C,14,Video,DecDCToutCallback DsControlB SpuSetCommonMasterVolume StUnSetRing,_stopMovieIfComplete vs_title_exec,vs_main_freeHeap
+F03652,TITLE/TITLE.PRG/22C.c,3686,_stopMovieIfComplete,C,5,Video,VSync,_drawTitleMenu,_stopIntroMovie
+F03653,TITLE/TITLE.PRG/22C.c,3693,_playIntroMovie,C,46,Video,DecDCTin DecDCTout PutDispEnv SetDefDispEnv SetDispMask StGetBackloc VSync,vs_title_exec,_decodeNextMovieFrame _playMovie _waitForFrame vs_main_processPadState
+F03654,TITLE/TITLE.PRG/22C.c,3761,_setMenuItemFadeIn,C,10,Game.Items,,_initMenu _menuSoundSettings _menuVibrationSettings vs_title_exec,
+F03655,TITLE/TITLE.PRG/22C.c,3773,_copyTitleBgData,C,46,Game.Title,DrawSync LoadImage setRECT,vs_title_exec,vs_main_allocHeap vs_main_freeHeap
+F03656,TITLE/TITLE.PRG/22C.c,3821,_initTitleScreen,C,15,Game.Title,PutDispEnv PutDrawEnv SetDefDispEnv SetDefDrawEnv VSync,vs_title_exec,
+F03657,TITLE/TITLE.PRG/22C.c,3838,_initMenu,C,27,Game.Title,DrawSync StoreImage setRECT,vs_title_exec MENUF.PRG:vs_menuF_exec,_setMenuItemFadeIn vs_main_allocHeap
+F03658,TITLE/TITLE.PRG/22C.c,3867,_freeHeap,C,1,Game.Title,,vs_title_exec,vs_main_freeHeap
+F03659,TITLE/TITLE.PRG/22C.c,3869,_fadeInMenu,C,43,Game.Title,DrawSync LoadImage VSync setRECT,vs_title_exec,vs_main_processPadState
+F03660,TITLE/TITLE.PRG/22C.c,3914,_fadeInMenuCopyright,C,41,Game.Title,DrawSync LoadImage VSync setRECT,vs_title_exec,vs_main_processPadState
+F03661,TITLE/TITLE.PRG/22C.c,3957,_setMenuItemClut,C,38,Game.Items,DrawSync LoadImage setRECT,_menuSoundSettings _menuVibrationSettings _setTitleMenuState MENU7.PRG:_displayGameOverScreen,
+F03662,TITLE/TITLE.PRG/22C.c,3997,_setTitleMenuState,C,74,Game.Title,,_drawTitleMenu,_setMenuItemClut
+F03663,TITLE/TITLE.PRG/22C.c,4073,_drawTitleMenuItems,C,108,Game.Items,DrawPrim,_drawTitleMenu,
+F03664,TITLE/TITLE.PRG/22C.c,4183,_drawTitleMenu,C,42,Game.Title,DrawPrim DrawSync VSync,_drawAndSyncTitleMenu _menuSoundSettings _menuVibrationSettings vs_title_exec,_drawTitleMenuItems _setTitleMenuState _stopMovieIfComplete vs_main_setVibrateParams
+F03665,TITLE/TITLE.PRG/22C.c,4227,_drawAndSyncTitleMenu,C,5,Game.Title,VSync,_menuSoundSettings _menuVibrationSettings vs_title_exec,_drawTitleMenu vs_main_processPadState
+F03666,TITLE/TITLE.PRG/22C.c,4246,_menuVibrationSettings,C,105,Input,,vs_title_exec,_drawAndSyncTitleMenu _drawTitleMenu _playMenuChangeSfx _playMenuLeaveSfx _playMenuSelectSfx _setMenuItemClut _setMenuItemFadeIn func_800438C8
+F03667,TITLE/TITLE.PRG/22C.c,4353,_menuSoundSettings,C,103,Audio,,vs_title_exec,_drawAndSyncTitleMenu _drawTitleMenu _playMenuChangeSfx _playMenuLeaveSfx _playMenuSelectSfx _setMenuItemClut _setMenuItemFadeIn vs_main_setMonoSound vs_sound_setCdVol
+F03668,TITLE/TITLE.PRG/22C.c,4461,_nop,C,1,Game.Title,,vs_title_exec,
+F03669,TITLE/TITLE.PRG/22C.c,4463,_initEnvironment,C,26,Core,memset,vs_title_exec,_displayPublisherAndDeveloper vs_main_setMonoSound vs_sound_setCdVol
+F03670,TITLE/TITLE.PRG/22C.c,4491,vs_title_exec,C,165,Game.Title,DrawPrim DrawSync SetDispMask StoreImage VSync setRECT,SLUS_010.40:vs_main_execTitle,_copyTitleBgData _drawAndSyncTitleMenu _drawTitleMenu _fadeInMenu _fadeInMenuCopyright _freeHeap _gameLoadScreen _gameSaveScreen _initEnvironment _initGameData _initIntroMovie _initMenu _initTitleScreen _menuSoundSettings (+13)
+F03671,TITLE/TITLE.PRG/22C.c,4658,_initScreen,C,24,Game.Title,ClearImage DrawSync FntLoad FntOpen PutDispEnv PutDrawEnv SetDefDispEnv SetDefDrawEnv SetDispMask SetDumpFnt SetGeomOffset SetGeomScreen setRECT setRGB0,_initGameData SLUS_010.40:_displayLoadingScreen,
+F03672,TITLE/TITLE.PRG/22C.c,4684,_renderScreen,C,12,Game.Title,DrawOTag DrawSync PutDispEnv PutDrawEnv,,vs_main_gametimeUpdate
+F03673,TITLE/TITLE.PRG/22C.c,4698,_initGameData,C,41,Game.Title,,vs_title_exec,_initScreen vs_main_bzero vs_main_memcpy
+F03674,TITLE/TITLE.PRG/22C.c,4741,_setTitleExitFlags,C,32,Game.Title,,vs_title_exec,
+F03675,renderTextures.h,3,_renderTextureFadeInTint,C-header,49,Graphics,AddPrim setPolyGT4 setRGB0 setRGB1 setRGB2 setRGB3 setSemiTrans setUV4 setXY4,ENDING.PRG:_renderMapCompletion ENDING.PRG:_renderRiskbreakerRankHeader ENDING.PRG:_renderScore MENUF.PRG:_renderMapCompletion MENUF.PRG:_renderRiskbreakerRankHeader MENUF.PRG:_renderScore MENUF.PRG:_renderStatWheel,
+F03676,renderTextures.h,54,_adjust,C-header,4,Triage,,_renderTexturePopIn,
+F03677,renderTextures.h,60,_renderTexturePopIn,C-header,68,Graphics,AddPrim getClut getTPage setPolyGT4 setRGB0 setRGB1 setRGB2 setRGB3 setSemiTrans setUV4 setXY4,ENDING.PRG:_renderCongratulations ENDING.PRG:_renderRiskbreakerRank MENUF.PRG:_renderCongratulations MENUF.PRG:_renderCubePuzzleRank MENUF.PRG:_renderEvolveOrDie MENUF.PRG:_renderFoodchain MENUF.PRG:_renderRiskbreakerRank MENUF.PRG:_renderTimeAttackHeader MENUF.PRG:_renderTimeAttackResultsHeader,_adjust
+F03678,renderTextures.h,130,_renderTextureWipe,C-header,103,Graphics,AddPrim setPolyGT4 setRGB0 setRGB1 setRGB2 setRGB3 setSemiTrans setUV4 setXY4,ENDING.PRG:_renderIncrementalMapCompletion ENDING.PRG:_renderIncrementalScore MENUF.PRG:_renderIncrementalMapCompletion MENUF.PRG:_renderIncrementalScore MENUF.PRG:_renderTimeAttackRatingWipe,

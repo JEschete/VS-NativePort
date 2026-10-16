@@ -1,0 +1,6 @@
+id,final_name,final_location,purpose,confidence,notes
+F02593,Menu::Inventory::ParentWeaponIndex,Native\Game\src\Menu\Inventory\ItemList.c,"Returns the assembled weapon owning an inventory blade, grip or gem, excluding shield gems.",high,
+F02594,Menu::Inventory::ParentShieldIndex,Native\Game\src\Menu\Inventory\ItemList.c,"Returns the shield owning an inventory gem, or zero when the gem is unattached or belongs to a weapon.",high,
+F02595,Menu::Inventory::BuildItemRows,Native\Game\src\Menu\Inventory\ItemList.c,"Builds inventory rows, marks equipped or attached items, and maps miscellaneous items to their usable actions.",high,
+F02596,Menu::Inventory::RestoreItemRows,Native\Game\src\Menu\Inventory\ItemList.c,Finishes inventory row animations and restores the selected row from category cursor memory.,high,
+F02597,Menu::Inventory::UpdateItemList,Native\Game\src\Menu\Inventory\ItemList.c,"Handles inventory category navigation, rearrangement, details, use, parent search, discard and sorting.",high,Shared MENU3 and MENUB source has distinct _ITEMMENU use-item and workshop restriction branches;fields:D_800F4EE8_t.unk3A=inventory-category-and-cursor-memory

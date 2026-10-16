@@ -1,0 +1,166 @@
+id,final_name,final_location,purpose,confidence,notes
+F00330,Render::AdvanceTexturePageRetirements,Native\Graphics\src\Textures.c,Advances released texture pages through the two-frame retirement delay before allowing reuse.,high,
+F00331,Render::ReserveTexturePageRange,Native\Graphics\src\Textures.c,Reserves a free texture-page range for the requesting owner and rejects overlapping allocations.,high,
+F00332,Render::RetireTexturePageRange,Native\Graphics\src\Textures.c,Checks ownership and queues a texture-page range for deferred reuse.,high,
+F00333,Content::AcquireOverlayWorkspace,Native\Content\src\OverlayWorkspace.c,Claims the shared overlay workspace for a loader or menu owner.,med,Owner token shared by effect loading and menu setup.
+F00334,Content::ReleaseOverlayWorkspace,Native\Content\src\OverlayWorkspace.c,Releases the shared overlay workspace only when the caller owns it.,med,
+F00335,Items::RebuildArmorClassAffinity,Native\Game\src\Items\EquipmentAffinity.c,Rebuilds current and baseline Class and Affinity totals for actor armor equipment.,high,fields:vs_battle_uiArmor.unk88=temporary affinity bonuses;classAffinityCurrent[0]=effective totals;classAffinityCurrent[1]=unmodified totals
+F00336,Items::RebuildShieldClassAffinity,Native\Game\src\Items\EquipmentAffinity.c,Rebuilds current and baseline Class and Affinity totals for actor shield equipment.,high,fields:vs_battle_uiShield.unk134=temporary affinity bonuses
+F00337,Items::RebuildWeaponClassAffinity,Native\Game\src\Items\EquipmentAffinity.c,Rebuilds current and baseline Class and Affinity totals for actor weapon equipment.,high,fields:vs_battle_uiWeapon.unk168=temporary affinity bonuses
+F00338,Items::InventoryItemCount,Native\Game\src\Items\Inventory.c,"Returns item presence or consumable quantity in the inventory, treating item Id zero as satisfied.",high,
+F00339,Battle::AttackGemHitBonus,Native\Game\src\Battle\HitChance.c,Returns the drawn weapon gem hit bonus for physical attacks or spells.,high,
+F00340,Battle::DefenseGemHitBonus,Native\Game\src\Battle\HitChance.c,Totals shield gem evasion bonuses for the incoming attack and its status effect.,high,
+F00341,Battle::IgnoreHitCallback,Native\Game\src\Battle\HitChance.c,Leaves the hit callback result unspecified for an unused dispatch entry.,high,Empty non-void callback has no return value.
+F00342,Battle::PreviousHitSuccessThreshold,Native\Game\src\Battle\HitChance.c,Returns a guaranteed-hit threshold after a successful prior hit or the disabled-hit sentinel otherwise.,high,
+F00343,Battle::GemHitChance,Native\Game\src\Battle\HitChance.c,Combines source weapon and target shield gem modifiers into an attack hit percentage.,high,
+F00344,Battle::AgilityHitChance,Native\Game\src\Battle\HitChance.c,"Calculates physical hit chance from equipment-adjusted agility, Risk, limb defense and gem modifiers.",high,
+F00345,Battle::IntelligenceHitChance,Native\Game\src\Battle\HitChance.c,"Calculates spell hit chance from intelligence, target Hp fraction, Risk and gem modifiers.",high,
+F00346,Battle::CostAdjustedAgilityHitChance,Native\Game\src\Battle\HitChance.c,Calculates agility-based hit chance with the action cost subtracted from its base percentage.,high,
+F00347,Battle::RiskHitChance,Native\Game\src\Battle\HitChance.c,Converts source Risk into the action hit percentage.,high,
+F00348,Battle::ChainHitChance,Native\Game\src\Battle\HitChance.c,Converts the target limb Chain evasion rating into the action hit percentage.,high,
+F00349,Battle::RollActionHit,Native\Game\src\Battle\HitChance.c,"Rolls an action hit after applying spell wards, target statuses and the Ashley accuracy bonus.",high,
+F00350,Field::RollRiskLockBreak,Native\Game\src\Field\Traps.c,Rolls a Risk-based chance to break a locked door or chest.,high,
+F00351,Battle::IsStatusEffectBlocked,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether a target immunity mask or an active status blocks the requested status effect.,high,fields:vs_battle_actor2.unk944=status immunity mask
+F00352,Battle::TargetEnemyClass,Native\Game\src\Battle\AttackPrerequisites.c,Returns the enemy Class of the target selected by an action prerequisite.,high,
+F00353,Battle::RejectAttackPrerequisite,Native\Game\src\Battle\AttackPrerequisites.c,Rejects an action whose prerequisite dispatch entry is disabled.,high,
+F00354,Battle::AcceptAttackPrerequisite,Native\Game\src\Battle\AttackPrerequisites.c,Accepts an action whose prerequisite dispatch entry is unconditional.,high,
+F00355,Battle::AcceptAttackPrerequisite,Native\Game\src\Battle\AttackPrerequisites.c,Accepts an action whose prerequisite dispatch entry is unconditional.,high,dup-of:F00354
+F00356,Battle::AcceptAttackPrerequisite,Native\Game\src\Battle\AttackPrerequisites.c,Accepts an action whose prerequisite dispatch entry is unconditional.,high,dup-of:F00354
+F00357,Battle::IsAttackTargetUndead,Native\Game\src\Battle\AttackPrerequisites.c,Accepts an action prerequisite only when its target belongs to the Undead Class.,high,
+F00358,Battle::IsAttackTargetLiving,Native\Game\src\Battle\AttackPrerequisites.c,Accepts an action prerequisite only when its target is not of the Undead Class.,high,
+F00359,Battle::RejectAttackPrerequisite,Native\Game\src\Battle\AttackPrerequisites.c,Rejects an action whose prerequisite dispatch entry is disabled.,high,dup-of:F00353
+F00360,Battle::RejectAttackPrerequisite,Native\Game\src\Battle\AttackPrerequisites.c,Rejects an action whose prerequisite dispatch entry is disabled.,high,dup-of:F00353
+F00361,Battle::RejectAttackPrerequisite,Native\Game\src\Battle\AttackPrerequisites.c,Rejects an action whose prerequisite dispatch entry is disabled.,high,dup-of:F00353
+F00362,Battle::CanApplyStrengthDown,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether StrengthDown can affect the action target.,high,
+F00363,Battle::CanApplyIntelligenceDown,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether IntelligenceDown can affect the action target.,high,
+F00364,Battle::CanApplyAgilityDown,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether AgilityDown can affect the action target.,high,
+F00365,Battle::CanApplyEquipmentDown,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether EquipmentDown can affect the action target and requires suitable equipped gear.,high,
+F00366,Battle::CanApplyHalfMovement,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether HalfMovement can affect the action target.,high,
+F00367,Battle::CanApplyStrengthUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether StrengthUp can affect the action target.,high,
+F00368,Battle::CanApplyIntelligenceUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether IntelligenceUp can affect the action target.,high,
+F00369,Battle::CanApplyAgilityUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether AgilityUp can affect the action target.,high,
+F00370,Battle::CanApplyEquipmentUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether EquipmentUp can affect the action target and requires suitable equipped gear.,high,
+F00371,Battle::CanApplyQuicken,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether Quicken can affect the action target.,high,
+F00372,Battle::CanApplySilence,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether Silence can affect the action target.,high,
+F00373,Battle::CanApplyMagicWard,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether MagicWard can affect the action target.,high,
+F00374,Battle::CanApplyRegeneration,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether Regeneration can affect the action target.,high,
+F00375,Battle::CanApplyParalysis,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether Paralysis can affect the action target.,high,
+F00376,Battle::CanApplyPoison,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether Poison can affect the action target.,high,
+F00377,Battle::CanApplyNumbness,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether Numbness can affect the action target.,high,
+F00378,Battle::CanApplyCurse,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether Curse can affect the action target.,high,
+F00379,Battle::CanApplyAirAttackUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether AirAttackUp can affect the action target and requires suitable equipped gear.,high,
+F00380,Battle::CanApplyFireAttackUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether FireAttackUp can affect the action target and requires suitable equipped gear.,high,
+F00381,Battle::CanApplyEarthAttackUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether EarthAttackUp can affect the action target and requires suitable equipped gear.,high,
+F00382,Battle::CanApplyWaterAttackUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether WaterAttackUp can affect the action target and requires suitable equipped gear.,high,
+F00383,Battle::CanApplyAirDefenseUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether AirDefenseUp can affect the action target and requires suitable equipped gear.,high,
+F00384,Battle::CanApplyFireDefenseUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether FireDefenseUp can affect the action target and requires suitable equipped gear.,high,
+F00385,Battle::CanApplyEarthDefenseUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether EarthDefenseUp can affect the action target and requires suitable equipped gear.,high,
+F00386,Battle::CanApplyWaterDefenseUp,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether WaterDefenseUp can affect the action target and requires suitable equipped gear.,high,
+F00387,Battle::CanApplyBanish,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether Banish can affect the action target.,high,
+F00388,Battle::CanApplyExorcise,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether Exorcise can affect the action target and requires an Undead target.,high,
+F00389,Battle::CanApplyDrain,Native\Game\src\Battle\AttackPrerequisites.c,Tests whether Drain can affect the action target and rejects Undead targets.,high,
+F00390,Battle::IgnoreAttackPrerequisite,Native\Game\src\Battle\AttackPrerequisites.c,Leaves an unused action-prerequisite callback result unspecified.,high,Empty non-void callback has no return value.
+F00391,Battle::IgnoreAttackPrerequisite,Native\Game\src\Battle\AttackPrerequisites.c,Leaves an unused action-prerequisite callback result unspecified.,high,dup-of:F00390
+F00392,Battle::IgnoreAttackPrerequisite,Native\Game\src\Battle\AttackPrerequisites.c,Leaves an unused action-prerequisite callback result unspecified.,high,dup-of:F00390
+F00393,Battle::CheckActionHitPrerequisite,Native\Game\src\Battle\AttackPrerequisites.c,Dispatches the hit prerequisite and skips unconditional follow-up hits on an unaffected target.,high,
+F00394,Battle::ApplyDamageGemMultiplier,Native\Game\src\Battle\Damage.c,Scales physical or spell damage by offensive and defensive gem damage bonuses.,high,
+F00395,Items::ApplyPpGemMultiplier,Native\Game\src\Items\EquipmentWear.c,Scales a value by the five-percent Pp gem bonus when equipped.,med,Raw gem offsets identify effect 9; caller and equipment pointer type remain unresolved.
+F00396,Battle::DistributeHitLimbDamage,Native\Game\src\Battle\Damage.c,Distributes action damage across target limbs using the action shape and Dp splash weights.,high,
+F00397,Battle::DistributeLimbRecovery,Native\Game\src\Battle\Damage.c,Distributes recovery among injured limbs in proportion to their missing Hp.,high,
+F00398,Items::ConsumeHitEquipmentDp,Native\Game\src\Items\EquipmentWear.c,"Consumes attacker weapon, drawn defender shield and affected armor Dp after an actual hit.",high,Original name mentions Pp but this function only reduces Dp.
+F00399,Items::AccumulateHitEquipmentPp,Native\Game\src\Items\EquipmentWear.c,"Adds hit-based Pp to the attacker weapon and drawn defender shield, including gem modifiers.",high,
+F00400,Items::GrowOpposingEquipmentAffinity,Native\Game\src\Items\EquipmentAffinity.c,Raises the Affinity opposed to the encountered element and rolls reductions to competing Affinities.,high,Used for attacking weapon growth despite the original armor-oriented name.
+F00401,Items::GrowMatchingEquipmentAffinity,Native\Game\src\Items\EquipmentAffinity.c,Raises the encountered element Affinity and rolls reductions to competing equipment Affinities.,high,Used for defending armor and shields despite the original weapon-oriented name.
+F00402,Items::GrowEquipmentClass,Native\Game\src\Items\EquipmentAffinity.c,Raises the encountered enemy Class rating and rolls decreases to its two competing Class ratings.,high,
+F00403,Items::GrowDefenderEquipmentRatings,Native\Game\src\Items\EquipmentAffinity.c,"Selects affected armor or shield equipment, rolls Class and Affinity growth and rebuilds its totals.",high,
+F00404,Items::GrowAttackerWeaponRatings,Native\Game\src\Items\EquipmentAffinity.c,Rolls non-spell attacker weapon Class and Affinity growth and rebuilds current weapon totals.,high,
+F00405,Battle::QueueApplicableStatusChanges,Native\Game\src\Battle\StatusEffects.c,Queues allowed status additions and opposing-status removals for an action target.,high,fields:_hitEntity_t.removeStatuses=status additions;_hitEntity_t.inflictStatuses=status removals;original field labels are reversed
+F00406,Battle::QueueStatusRemovalMask,Native\Game\src\Battle\StatusEffects.c,Queues removal of currently active statuses selected by the status-effect parameter record.,high,
+F00407,Battle::IgnoreStatCalculator,Native\Game\src\Battle\Damage.c,Leaves an unused stat-calculation callback without changing the action result.,high,
+F00408,Battle::LastActionStatValue,Native\Game\src\Battle\Damage.c,Returns the most recently calculated action stat value.,high,
+F00409,Battle::CalculatePhysicalHitDamage,Native\Game\src\Battle\Damage.c,"Calculates physical damage using Strength, equipment, Class, Affinity, Dp, Pp, Risk and critical-hit rolls.",high,
+F00410,Battle::PhysicalDamageWithoutDebuffs,Native\Game\src\Battle\Damage.c,Calculates physical damage without the source damage-halving status modifier.,high,
+F00411,Battle::CalculateSpellHitDamage,Native\Game\src\Battle\Damage.c,"Calculates spell damage from Intelligence, elemental equipment ratings, Dp, Pp and target defenses.",high,
+F00412,Battle::ScalePreviousTargetHit,Native\Game\src\Battle\Damage.c,Scales previous target Hp and Mp hit amounts by the action factor and adds the current Chain offset.,high,fields:D_800F19CC_t.unk0=Chain count or action sequence offset
+F00413,Battle::ScaleSourceMissingHp,Native\Game\src\Battle\Damage.c,Scales source missing Hp by the action factor and adds the current Chain offset.,high,
+F00414,Battle::ScalePreviousTargetHit,Native\Game\src\Battle\Damage.c,Scales previous target Hp and Mp hit amounts by the action factor and adds the current Chain offset.,high,dup-of:F00412
+F00415,Battle::ScaleTargetCurrentHp,Native\Game\src\Battle\Damage.c,Scales target current Hp by the action percentage and adds the current Chain offset.,high,
+F00416,Battle::WeaponPpWithChainOffset,Native\Game\src\Battle\Damage.c,Returns source weapon Pp plus the current Chain offset for an action stat calculation.,high,
+F00417,Battle::ScaleIncomingSpellDamage,Native\Game\src\Battle\Damage.c,Scales incoming Hp and Mp damage only when the triggering action is a spell.,high,
+F00418,Battle::ScaleIncomingPhysicalDamage,Native\Game\src\Battle\Damage.c,Scales incoming Hp and Mp damage only when the triggering action is not a spell.,high,
+F00419,Battle::ScaleSourceMissingMp,Native\Game\src\Battle\Damage.c,Scales source missing Mp by the action factor and adds the current Chain offset.,high,
+F00420,Field::CalculateTrapPanelDamage,Native\Game\src\Field\Traps.c,Calculates room trap-panel damage from trap level and target defenses without allowing a lethal hit.,high,
+F00421,Battle::CalculateSpellHealing,Native\Game\src\Battle\Damage.c,"Calculates spell healing using Intelligence, elemental ratings, equipment condition and target defenses.",high,
+F00422,Field::CalculateHealingPanelRecovery,Native\Game\src\Field\Traps.c,"Calculates room healing-panel recovery using trap level, target maximum Hp and equipment defenses.",high,
+F00423,Items::CalculateItemRecovery,Native\Game\src\Items\Recovery.c,Calculates an item recovery amount from its action factor with optional smoothed random variance.,high,
+F00424,Battle::TargetMissingHp,Native\Game\src\Battle\Damage.c,Returns the target Hp deficit available for recovery.,high,
+F00425,Battle::TargetMissingMp,Native\Game\src\Battle\Damage.c,Returns the target Mp deficit available for recovery.,high,
+F00426,Battle::ScalePreviousTargetHit,Native\Game\src\Battle\Damage.c,Scales previous target Hp and Mp hit amounts by the action factor and adds the current Chain offset.,high,dup-of:F00412
+F00427,Battle::ScaleIncomingSpellEffect,Native\Game\src\Battle\Damage.c,Scales incoming spell Hp and Mp amounts when the recorded effect is normal or critical damage.,med,Compares hpEffect to action type; distinct code from ScaleIncomingSpellDamage.
+F00428,Battle::ScaleIncomingPhysicalDamage,Native\Game\src\Battle\Damage.c,Scales incoming Hp and Mp damage only when the triggering action is not a spell.,high,dup-of:F00418
+F00429,Battle::ScaleIncomingSpellCost,Native\Game\src\Battle\Damage.c,"Scales the triggering spell Mp cost by the action factor, or returns zero for non-spell actions.",high,
+F00430,Battle::ScaleIncomingDamage,Native\Game\src\Battle\Damage.c,Scales recorded incoming Hp and Mp damage for a reactive action.,high,
+F00431,Battle::SourceShieldPp,Native\Game\src\Battle\Damage.c,Returns source shield Pp for the action stat calculator.,high,Original name says Dp but the body reads shield.currentPp.
+F00432,Battle::ScaleLastActionStatValue,Native\Game\src\Battle\Damage.c,Scales the previous action stat value by the current hit factor.,high,
+F00433,Battle::PhysicalDamageWithDebuffs,Native\Game\src\Battle\Damage.c,Calculates physical damage with the source damage-halving status modifier enabled.,high,
+F00434,Battle::TargetRisk,Native\Game\src\Battle\Damage.c,Returns target Risk for the action stat calculator.,high,
+F00435,Battle::CalculateActionStatChange,Native\Game\src\Battle\Damage.c,"Dispatches the action stat calculator and caches its result, using a fixed value for the special actor.",high,
+F00436,Battle::IgnoreHitCallback,Native\Game\src\Battle\HitChance.c,Leaves the hit callback result unspecified for an unused dispatch entry.,high,dup-of:F00341
+F00437,Battle::QueueStrengthDown,Native\Game\src\Battle\StatusEffects.c,Queues applicable StrengthDown status changes for the action target.,high,fields:_hitEntity_t.unk1C_16=status feedback direction (1 harmful;2 beneficial)
+F00438,Battle::QueueIntelligenceDown,Native\Game\src\Battle\StatusEffects.c,Queues applicable IntelligenceDown status changes for the action target.,high,
+F00439,Battle::QueueAgilityDown,Native\Game\src\Battle\StatusEffects.c,Queues applicable AgilityDown status changes for the action target.,high,
+F00440,Battle::QueueEquipmentDown,Native\Game\src\Battle\StatusEffects.c,Queues applicable EquipmentDown status changes for the action target.,high,
+F00441,Battle::QueueHalfMovement,Native\Game\src\Battle\StatusEffects.c,Queues applicable HalfMovement status changes for the action target.,high,
+F00442,Battle::QueueStrengthUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable StrengthUp status changes for the action target.,high,
+F00443,Battle::QueueIntelligenceUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable IntelligenceUp status changes for the action target.,high,
+F00444,Battle::QueueAgilityUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable AgilityUp status changes for the action target.,high,
+F00445,Battle::QueueEquipmentUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable EquipmentUp status changes for the action target.,high,
+F00446,Battle::QueueQuicken,Native\Game\src\Battle\StatusEffects.c,Queues applicable Quicken status changes for the action target.,high,
+F00447,Battle::QueueSilence,Native\Game\src\Battle\StatusEffects.c,Queues applicable Silence status changes for the action target.,high,
+F00448,Battle::QueueMagicWard,Native\Game\src\Battle\StatusEffects.c,Queues applicable MagicWard status changes for the action target.,high,
+F00449,Battle::QueueRegeneration,Native\Game\src\Battle\StatusEffects.c,Queues applicable Regeneration status changes for the action target.,high,
+F00450,Battle::QueueBanish,Native\Game\src\Battle\StatusEffects.c,Queues applicable Banish status changes for the action target and records Analyze on a committed action.,high,Banish record also sets actor.isAnalyzed when effects are committed.
+F00451,Battle::QueueParalysis,Native\Game\src\Battle\StatusEffects.c,Queues applicable Paralysis status changes for the action target.,high,
+F00452,Battle::QueuePoison,Native\Game\src\Battle\StatusEffects.c,Queues applicable Poison status changes for the action target.,high,
+F00453,Battle::QueueNumbness,Native\Game\src\Battle\StatusEffects.c,Queues applicable Numbness status changes for the action target.,high,
+F00454,Battle::QueueCurse,Native\Game\src\Battle\StatusEffects.c,Queues applicable Curse status changes for the action target.,high,
+F00455,Battle::QueueAirAttackUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable AirAttackUp status changes for the action target.,high,
+F00456,Battle::QueueFireAttackUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable FireAttackUp status changes for the action target.,high,
+F00457,Battle::QueueEarthAttackUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable EarthAttackUp status changes for the action target.,high,
+F00458,Battle::QueueWaterAttackUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable WaterAttackUp status changes for the action target.,high,
+F00459,Battle::QueueAirDefenseUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable AirDefenseUp status changes for the action target.,high,
+F00460,Battle::QueueFireDefenseUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable FireDefenseUp status changes for the action target.,high,
+F00461,Battle::QueueEarthDefenseUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable EarthDefenseUp status changes for the action target.,high,
+F00462,Battle::QueueWaterDefenseUp,Native\Game\src\Battle\StatusEffects.c,Queues applicable WaterDefenseUp status changes for the action target.,high,
+F00463,Battle::QueueParalysisCure,Native\Game\src\Battle\StatusEffects.c,Queues removal of active Paralysis and beneficial status feedback on the action target.,high,
+F00464,Battle::QueuePoisonCure,Native\Game\src\Battle\StatusEffects.c,Queues removal of active Poison and beneficial status feedback on the action target.,high,
+F00465,Battle::QueueCurseCure,Native\Game\src\Battle\StatusEffects.c,Queues removal of active Curse and beneficial status feedback on the action target.,high,
+F00466,Battle::QueueNumbnessCure,Native\Game\src\Battle\StatusEffects.c,Queues removal of active Numbness and beneficial status feedback on the action target.,high,
+F00467,Battle::QueueDispel,Native\Game\src\Battle\StatusEffects.c,Queues removal of active stat and equipment enchantments selected by the Dispel mask.,high,
+F00468,Battle::QueueNegativeStatusCure,Native\Game\src\Battle\StatusEffects.c,"Queues removal of Paralysis, Poison and Numbness and records beneficial status feedback.",high,
+F00469,Battle::MarkSourceActionSuccess,Native\Game\src\Battle\ActionEffects.c,Marks the source-side action result as successful for special non-damage effects.,med,fields:_hitEntity_t.unk1C_26=special source effect result;precise UI interpretation unresolved
+F00470,Battle::QueueInstantDeath,Native\Game\src\Battle\ActionEffects.c,Queues removal of selected statuses and damage equal to the target current Hp.,high,
+F00471,Battle::QueueDamageBasedArmorWear,Native\Game\src\Battle\ActionEffects.c,Queues armor Dp loss and targeted limb wear equal to twice the recorded Hp damage.,high,
+F00472,Battle::MarkSourceActionSuccess,Native\Game\src\Battle\ActionEffects.c,Marks the source-side action result as successful for special non-damage effects.,med,dup-of:F00469
+F00473,Battle::SetActionFlag64,Native\Game\src\Battle\ActionEffects.c,Sets event-state flag Id 64 when the action is committed rather than previewed.,low,"Flag Id 0x40, not a bit mask; associated game event remains unresolved."
+F00474,Battle::SetActionFlag32,Native\Game\src\Battle\ActionEffects.c,Sets event-state flag Id 32 when the action is committed rather than previewed.,low,"Flag Id 0x20, not a bit mask; associated game event remains unresolved."
+F00475,Battle::MarkSourceActionSuccess,Native\Game\src\Battle\ActionEffects.c,Marks the source-side action result as successful for special non-damage effects.,med,dup-of:F00469
+F00476,Battle::QueueSpellTriggeredRecovery,Native\Game\src\Battle\ActionEffects.c,Queues target Hp and limb recovery only when the triggering action is a spell.,high,
+F00477,Battle::QueuePhysicalTriggeredRecovery,Native\Game\src\Battle\ActionEffects.c,Queues target Hp and limb recovery only when the triggering action is not a spell.,high,
+F00478,Battle::QueuePhysicalAffinityRecovery,Native\Game\src\Battle\ActionEffects.c,Queues target Hp and limb recovery only when the triggering action has Physical Affinity.,high,fields:D_800F19CC_t2.unk2=resolved action affinity
+F00479,Battle::QueueAirAffinityRecovery,Native\Game\src\Battle\ActionEffects.c,Queues target Hp and limb recovery only when the triggering action has Air Affinity.,high,
+F00480,Battle::QueueFireAffinityRecovery,Native\Game\src\Battle\ActionEffects.c,Queues target Hp and limb recovery only when the triggering action has Fire Affinity.,high,
+F00481,Battle::QueueEarthAffinityRecovery,Native\Game\src\Battle\ActionEffects.c,Queues target Hp and limb recovery only when the triggering action has Earth Affinity.,high,
+F00482,Battle::QueueWaterAffinityRecovery,Native\Game\src\Battle\ActionEffects.c,Queues target Hp and limb recovery only when the triggering action has Water Affinity.,high,
+F00483,Battle::QueueLightAffinityRecovery,Native\Game\src\Battle\ActionEffects.c,Queues target Hp and limb recovery only when the triggering action has Light Affinity.,high,
+F00484,Battle::QueueDarkAffinityRecovery,Native\Game\src\Battle\ActionEffects.c,Queues target Hp and limb recovery only when the triggering action has Dark Affinity.,high,
+F00485,Battle::QueueDamageTriggeredRecovery,Native\Game\src\Battle\ActionEffects.c,Queues target Hp and injured-limb recovery when the triggering result inflicted damage.,high,
+F00486,Battle::QueueRandomStrengthIncrease,Native\Game\src\Battle\ActionEffects.c,Queues a random one-to-four point Strength increase for the action target.,high,
+F00487,Battle::QueueRandomIntelligenceIncrease,Native\Game\src\Battle\ActionEffects.c,Queues a random one-to-four point Intelligence increase for the action target.,high,
+F00488,Battle::QueueRandomAgilityIncrease,Native\Game\src\Battle\ActionEffects.c,Queues a random one-to-four point Agility increase for the action target.,high,
+F00489,Battle::QueueRandomMaximumHpIncrease,Native\Game\src\Battle\ActionEffects.c,Queues a random one-to-four point maximum Hp increase for the action target.,high,
+F00490,Battle::QueueRandomMaximumMpIncrease,Native\Game\src\Battle\ActionEffects.c,Queues a random one-to-four point maximum Mp increase for the action target.,high,
+F00491,Battle::QueueRandomStrengthDecrease,Native\Game\src\Battle\ActionEffects.c,Queues a random one-to-four point Strength decrease for the action target.,high,
+F00492,Battle::QueueRandomIntelligenceDecrease,Native\Game\src\Battle\ActionEffects.c,Queues a random one-to-four point Intelligence decrease for the action target.,high,
+F00493,Battle::QueueRandomAgilityDecrease,Native\Game\src\Battle\ActionEffects.c,Queues a random one-to-four point Agility decrease for the action target.,high,
+F00494,Battle::QueueHitDamageAndEquipmentWear,Native\Game\src\Battle\ActionEffects.c,"Queues normal or critical hit damage and limb injury, removes Numbness and commits equipment Dp and Pp changes.",high,

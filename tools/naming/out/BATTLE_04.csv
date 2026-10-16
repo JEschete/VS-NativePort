@@ -1,0 +1,164 @@
+id,final_name,final_location,purpose,confidence,notes
+F00495,Battle::AccumulateMpDamage,Native\Game\src\Battle\ActionResolution.c,"Accumulates MP damage for an action hit, capped at the target's current MP.",high,
+F00496,Battle::AccumulateWeaponPpDrain,Native\Game\src\Battle\ActionResolution.c,Marks all current weapon PP for removal from the action target.,high,
+F00497,Battle::AccumulateShieldPpDrain,Native\Game\src\Battle\ActionResolution.c,Marks all current shield PP for removal when the initiating action damages HP.,high,
+F00498,Battle::AccumulateHpRestoration,Native\Game\src\Battle\ActionResolution.c,Accumulates HP restoration and distributes healing to the target's limbs.,high,
+F00499,Battle::AccumulateMpRestoration,Native\Game\src\Battle\ActionResolution.c,Accumulates calculated MP restoration in the target's pending action result.,high,
+F00500,Battle::AccumulateWeaponPpRestoration,Native\Game\src\Battle\ActionResolution.c,Accumulates calculated weapon PP restoration in the target's pending action result.,high,
+F00501,Battle::AccumulateWeaponDpRestoration,Native\Game\src\Battle\ActionResolution.c,Accumulates calculated weapon DP restoration in the target's pending action result.,high,limbs[6] aliases the weaponDp field immediately after the six limb entries
+F00502,Battle::AccumulateRiskReduction,Native\Game\src\Battle\ActionResolution.c,Accumulates calculated Risk reduction when an action produces a nonzero amount.,high,
+F00503,Battle::IgnoreActionEffect,Native\Game\src\Battle\ActionResolution.c,Leaves the action result unchanged for an inert effect-table entry.,high,Empty effect callback; nonvoid decomp signature has no return
+F00504,Battle::IgnoreActionEffect,Native\Game\src\Battle\ActionResolution.c,Leaves the action result unchanged for an inert effect-table entry.,high,dup-of:F00503
+F00505,Battle::IgnoreActionEffect,Native\Game\src\Battle\ActionResolution.c,Leaves the action result unchanged for an inert effect-table entry.,high,dup-of:F00503
+F00506,Battle::DeriveLimbInjuryStatuses,Native\Game\src\Battle\ActionResolution.c,Derives limb-injury status additions and removals from the pending HP changes.,high,
+F00507,Battle::ApplyActionHitEffect,Native\Game\src\Battle\ActionResolution.c,Dispatches one action hit's effect and credits qualifying enemy kills toward Break Art learning.,high,
+F00508,Battle::ClearActionResult,Native\Game\src\Battle\ActionResolution.c,Clears the complete action result before resolving its user and targets.,high,
+F00509,Battle::InitializeHitResult,Native\Game\src\Battle\ActionResolution.c,Clears a hit result and initializes its outcome to the unresolved state.,high,fields:_hitEntity_t.unk0.unk3=hit outcome
+F00510,Battle::ActionCostAndAvailability,Native\Game\src\Battle\ActionResolution.c,"Computes an action's packed cost and affordability, optionally charging the actor's HP, MP, Risk, or PP.",high,updateStat commits the cost; not a generic math utility
+F00511,Battle::PreviewActorActionCost,Native\Game\src\Battle\ActionResolution.c,Evaluates an action's cost for an actor without charging its resources.,high,Decomp discards the packed return value
+F00512,Battle::AddActionRecoveryDelay,Native\Game\src\Battle\ActionResolution.c,Adds the action or weapon recovery delay to the actor after an executed action.,high,fields:vs_battle_actor2.unk954=action recovery timer;fields:vs_battle_uiWeapon.unk10B=weapon recovery cost
+F00513,Battle::FinalizeHitOutcome,Native\Game\src\Battle\ActionResolution.c,Chooses a hit outcome from the accumulated stat effects and status changes.,high,fields:func_80085A34_t.unk3=hit outcome;fields:func_80085A34_t.unk1C=packed stat effect modes
+F00514,Battle::ResolveActionTargets,Native\Game\src\Battle\ActionResolution.c,"Resolves action hits, projectile interception, target effects, and execution costs or previews.",high,fields:D_800F19CC_t2.unk4A=target count;fields:D_800F19CC_t2.unk2=element affinity index;fields:D_800F19CC_t2.unk3=damage type
+F00515,Battle::PreviewActionAgainstLimb,Native\Game\src\Battle\ActionResolution.c,Builds a single-limb action preview and returns whether the user can pay its cost.,high,
+F00516,Battle::PreviewActionAgainstActor,Native\Game\src\Battle\ActionResolution.c,Selects an actor's affected limbs from the action shape and computes their preview results.,high,
+F00517,Battle::RemoveActorStatuses,Native\Game\src\Battle\StatusEffects.c,"Removes actor statuses, restores affected stats, and settles elemental equipment affinity changes.",high,fields:vs_battle_uiWeapon.unk168=temporary elemental affinity offsets;fields:vs_battle_uiShield.unk134=temporary elemental affinity offsets;fields:vs_battle_uiArmor.unk88=temporary elemental affinity offsets
+F00518,Battle::ApplyWeaponElementEnchantment,Native\Game\src\Battle\StatusEffects.c,Applies opposing elemental affinity offsets to an actor's equipped weapon.,high,
+F00519,Battle::ApplyArmorElementEnchantment,Native\Game\src\Battle\StatusEffects.c,Applies opposing elemental affinity offsets to an actor's shield and equipped armor.,high,
+F00520,Battle::InflictActorStatuses,Native\Game\src\Battle\StatusEffects.c,"Inflicts actor statuses and initializes their timers, stat modifiers, movement speeds, and enchantments.",high,fields:vs_battle_actor2.unk31=current walk speed;fields:vs_battle_actor2.unk33=current run speed
+F00521,Battle::QueueActorStatChangeNumber,Native\Game\src\Battle\StatusEffects.c,Queues a floating stat-change number for Ashley or an active actor.,high,Suppresses non-Ashley actors whose unk27 is 0x80
+F00522,Battle::ApplyActorActionResult,Native\Game\src\Battle\StatusEffects.c,"Commits pending HP, MP, Risk, equipment, permanent-stat, and status changes to an actor.",high,Existing name is too narrow; handles all action results; inflictStatuses removes statuses while removeStatuses adds them
+F00523,Battle::UpdateActorStatusTimers,Native\Game\src\Battle\StatusEffects.c,"Expires timed statuses and applies periodic Poison damage, Regeneration healing, and limb recovery.",high,
+F00524,State::UpdateEventTimer,Native\Game\src\State\Timers.c,"Advances or counts down the event timer, publishes time state flags, and tests the timer event.",high,fields:D_80050468.unk0=timer mode; mode 1 counts up and other nonzero modes count down
+F00525,Battle::UpdateActorVitals,Native\Game\src\Battle\StatusEffects.c,"Updates actor recovery, passive regeneration, Risk decay, status timers, death handling, and the event timer.",high,
+F00526,Battle::UpdateRoomActorVitals,Native\Game\src\Battle\StatusEffects.c,Runs the room's periodic actor-vitals update and returns its resulting event state.,high,Wrapper around UpdateActorVitals
+F00527,Battle::UpdateTargetingRiskPenalty,Native\Game\src\Battle\StatusEffects.c,Raises Ashley's Risk periodically during targeting when the acting character has the relevant limb-injury status.,med,"Checks status bit 0x8; this is a low-bit injury flag, not Paralysis (0x2000)"
+F00528,Battle::ResetTargetingRiskPenaltyTimer,Native\Game\src\Battle\StatusEffects.c,Resets the periodic injury-related Risk timer used during targeting.,med,
+F00529,Field::BeginSceneActorTransition,Native\Game\src\Field\RoomLoading.c,Refreshes scene-level state and starts actor setup when the room's scene changes.,med,Calls scene-state cleanup when D_80050468.unk2 equals 2
+F00530,Field::LoadZoneRoomFileTable,Native\Game\src\Field\RoomLoading.c,Copies the ZND room file locations into persistent zone memory.,high,
+F00531,Field::LoadZoneEnemyTemplates,Native\Game\src\Field\RoomLoading.c,Copies the ZND enemy templates and ZUD file locations into persistent zone memory.,high,
+F00532,Field::QueueZoneLoad,Native\Game\src\Field\RoomLoading.c,Queues a ZND read and fades the current music when the destination zone uses a different track.,high,
+F00533,Field::FinishZoneLoad,Native\Game\src\Field\RoomLoading.c,"Waits for the ZND read, installs enemy and texture data, and loads the destination zone's music.",high,
+F00534,Field::ReleaseZoneData,Native\Game\src\Field\RoomLoading.c,"Releases zone script resources, enemy templates, ZUD file locations, and the room file table.",high,
+F00535,Field::ZoneSoundFileId,Native\Game\src\Field\RoomLoading.c,Returns the zone-associated sound file selected by the event sound-loading command.,med,D_800F18A8 is consumed by both music-slot and sound-file loading
+F00536,Field::SpawnRoomActors,Native\Game\src\Field\RoomLoading.c,"Spawns enemies and room objects after checking placement flags, saved visibility, and available actor slots.",high,
+F00537,Field::PlaceAshleyAtRoomEntrance,Native\Game\src\Field\RoomLoading.c,"Places Ashley at the transition destination and initializes his movement, animation, and camera attachment.",high,
+F00538,Field::RestoreRoomEnemyCache,Native\Game\src\Field\RoomLoading.c,Restores enemy visibility from the four-room cache or replaces its least-recently-used entry.,high,fields:D_80061078.unk0=room cache recency rank
+F00539,Field::LoadRoomEnemyPlacements,Native\Game\src\Field\RoomLoading.c,Copies MPD enemy placements and records their count for subsequent room spawning.,high,
+F00540,Render::ShowDisplay,Native\Graphics\src\Display.c,Enables display output after a room transition.,high,replaced-by:native presentation visibility
+F00541,Render::HideDisplay,Native\Graphics\src\Display.c,Disables display output during a room transition.,high,replaced-by:native presentation visibility
+F00542,Field::QueueRoomLoad,Native\Game\src\Field\RoomLoading.c,Queues a priority MPD read using the current zone's room file table.,high,
+F00543,Field::FinishRoomLoad,Native\Game\src\Field\RoomLoading.c,"Installs MPD sections, restores room actors, initializes the camera, and starts entry scripts or field control.",high,fields:_zoneContext.unk3C=room width in collision units;fields:_zoneContext.unk3E=room depth in collision units
+F00544,Field::RemoveRoomActors,Native\Game\src\Field\RoomLoading.c,Removes room-owned actors in slots two through fifteen while preserving Ashley and the reserved companion slot.,high,
+F00545,Field::UnloadCurrentRoom,Native\Game\src\Field\RoomLoading.c,"Flushes transition drawing and releases room geometry, actors, effects, loot, and rendering buffers.",high,
+F00546,Field::SetFieldRenderingEnabled,Native\Game\src\Field\RoomRendering.c,"Enables or disables field background, room, actor, and effect drawing after menu transitions.",high,
+F00547,Field::CurrentSavePointId,Native\Game\src\Field\Gimmicks.c,"Returns the save-point identifier at Ashley's eligible current room tile, or zero when none is available.",med,Room trigger type 16 is accessed by the save and magic menus
+F00548,Battle::ActorActionRestrictionFlags,Native\Game\src\Battle\ActionResolution.c,"Returns action restrictions for recovery delay, resource cost, learned state, Silence, and weapon readiness.",high,
+F00549,Items::ClearRoomLootList,Native\Game\src\Items\Loot.c,Releases every queued loot-list node when leaving the room or closing the loot interface.,high,
+F00550,Field::UploadZoneTextures,Native\Game\src\Field\RoomLoading.c,Uploads ZND texture images and preserves the zone palette rows used by room rendering.,high,
+F00551,Field::LoadRoomSections,Native\Game\src\Field\RoomLoading.c,"Copies and relocates MPD room subsections, then initializes geometry, collision, scene, and environment state.",high,fields:_mpdRoomSection.unk0=loaded;fields:_mpdRoomSection.unk1=rendering enabled;fields:_mpdRoomSection.unk2=room resource owner
+F00552,Field::StoreEntranceDoorForReload,Native\Game\src\Field\Doors.c,Stores the entered door plus one in persistent state for the next room reload.,high,
+F00553,Field::EnableOwnedRoomRendering,Native\Game\src\Field\RoomRendering.c,Enables room rendering when the supplied resource owner matches the loaded room.,high,
+F00554,Field::DisableOwnedRoomRendering,Native\Game\src\Field\RoomRendering.c,Disables room rendering when the supplied resource owner matches the loaded room.,high,
+F00555,Field::ReleaseOwnedRoomSections,Native\Game\src\Field\RoomLoading.c,"Releases background, geometry effects, and room section memory for the matching resource owner.",high,
+F00556,Field::DrawRoomScene,Native\Game\src\Field\RoomRendering.c,Updates room visual effects and draws room geometry and the animated minimap with its mode-colored border.,high,
+F00557,Field::DrawRoomGeometry,Native\Game\src\Field\RoomRendering.c,"Draws room geometry, records its primitive range, and applies an optional scene tint.",high,
+F00558,Field::AdvanceRoomAnimationClock,Native\Game\src\Field\RoomRendering.c,Advances the shared room-animation clock while field animations are not paused.,high,
+F00559,Field::SetRoomRenderingEnabled,Native\Game\src\Field\RoomRendering.c,Sets the loaded room's render-enabled flag.,high,
+F00560,Field::CopyZonePaletteRow,Native\Game\src\Field\RoomRendering.c,Copies a range of colors into one of the four cached zone palette rows.,high,
+F00561,Field::UploadRoomPalettes,Native\Game\src\Field\RoomRendering.c,Uploads three cached zone palette rows and installs the fourth row's lighting colors.,high,
+F00562,Field::OffsetRoomTextureIds,Native\Game\src\Field\RoomRendering.c,Adds a texture identifier offset to every triangle and quad in the room geometry.,high,
+F00563,Field::SetRoomTint,Native\Game\src\Field\RoomRendering.c,"Sets room mesh tint components and blend strength, or disables tint when all inputs are zero.",high,fields:D_800F1BB0_t.unk0=red tint;fields:D_800F1BB0_t.unk1=green tint;fields:D_800F1BB0_t.unk2=blue tint;fields:D_800F1BB0_t.unk4=tint strength;fields:D_800F1BB0_t.unk6=tint enabled
+F00564,Field::ClearRoomTint,Native\Game\src\Field\RoomRendering.c,Disables the room geometry and background tint.,high,D_800F1BB6 aliases the tint-enabled field
+F00565,Field::SetRoomAnimationsPaused,Native\Game\src\Field\RoomRendering.c,"Sets the pause flag shared by room animation, moving platforms, and weather updates.",high,
+F00566,Field::SetMinimapVisible,Native\Game\src\Field\Map.c,Sets the target visibility used by the minimap's slide-in animation.,high,
+F00567,Field::RestoreSceneRoomVisits,Native\Game\src\Field\Map.c,Restores visited flags for every scene room from persistent map progress.,high,
+F00568,Field::ZoneCleanupHook,Native\Game\src\Field\RoomLoading.c,Provides an inert cleanup hook invoked while zone resources are released.,high,Empty callback with one unused integer argument
+F00569,Field::BuildMinimapRotation,Native\Game\src\Field\Map.c,Builds the minimap rotation matrix from room-camera yaw and a fixed map pitch.,high,
+F00570,Field::ResetGimmickAnimationQueue,Native\Game\src\Field\Gimmicks.c,Clears pending door and switch animations and their shared texture-animation counter.,high,
+F00571,Field::RoomCollisionCells,Native\Game\src\Field\Collision.c,Returns the room's packed collision-cell property array.,high,
+F00572,Field::RoomAuxiliaryData,Native\Game\src\Field\RoomLoading.c,Returns the sixth room subsection's data pointer.,low,section6 format and consumers are not identified; returns the pointer without decoding
+F00573,Field::CollisionMapDimensions,Native\Game\src\Field\Collision.c,Returns collision-map width and height packed in sixteenth-tile units.,high,
+F00574,Field::RoomCameraBounds,Native\Game\src\Field\Collision.c,Returns optional room bounds used to clamp the field camera.,high,
+F00575,Field::CollisionCellAt,Native\Game\src\Field\Collision.c,Returns collision properties for a map tile or the selected moving-platform surface.,high,For surface indices >=2 returns section12[index-2].unkB4
+F00576,Field::SetCollisionCellBlocked,Native\Game\src\Field\Collision.c,Sets the blocked collision mode on a room tile or moving-platform surface.,med,fields:_mpdRoomSection3.unk0_10=collision blocking mode; uses 5 for blocked and 0 for open
+F00577,Field::SetEntranceDoorRecord,Native\Game\src\Field\Doors.c,Copies the room-transition door record and resolves its scene-map door identifier.,high,
+F00578,Field::FindEntranceDoorNearTile,Native\Game\src\Field\Doors.c,Finds a transition door on the selected surface or neighboring tiles and records it as the entrance.,high,
+F00579,Field::TransitionDoorsAtTile,Native\Game\src\Field\Doors.c,Collects every eligible transition door at a tile or on a moving-platform surface.,high,Also refreshes persistent random state before collecting doors
+F00580,Field::InteractiveDoorAtTile,Native\Game\src\Field\Doors.c,Finds an enabled interactive door at a tile or the adjacent tile covered by its orientation.,high,
+F00581,Field::ToggleDoorCollision,Native\Game\src\Field\Doors.c,Toggles collision blocking on an interactive door tile and its orientation-dependent neighboring tile.,high,
+F00582,Field::BeginDoorToggle,Native\Game\src\Field\Doors.c,Starts an interactive door toggle and records a matching key or sigil door as unlocked.,high,fields:_mpdRoomSectionA.unk12=animation pending;fields:_mpdRoomSectionA.unk13=opening delay
+F00583,Field::StartDoorAnimation,Native\Game\src\Field\Doors.c,"Plays door sounds, triggers linked geometry animations, and updates collision before queueing completion.",high,fields:_mpdRoomSectionA.unk10=linked door index;fields:_mpdRoomSectionA.unkE=open state
+F00584,Field::QueueGimmickAnimation,Native\Game\src\Field\Gimmicks.c,Queues a door or switch animation task in the room's eight-entry task array.,high,
+F00585,Field::UpdateGimmickAnimationQueue,Native\Game\src\Field\Gimmicks.c,"Advances queued door animations, delayed door openings, and timed switch toggles.",high,
+F00586,Field::FinishDoorAnimation,Native\Game\src\Field\Doors.c,"Waits for door geometry animation to finish, then commits collision and linked-door open states.",high,
+F00587,Field::ApplyCameraGeometryOcclusion,Native\Game\src\Field\RoomRendering.c,"Marks room geometry hidden for a matching tile, surface, stance, and camera-facing entry.",med,"section11 records encode tile coordinates, surface, facing, and a list of geometry indices"
+F00588,Field::ClearGeometryOcclusion,Native\Game\src\Field\RoomRendering.c,Clears the camera-occlusion flag from every room geometry group.,high,fields:_mpdGeometryHeader.unk0=group flags including hidden bit 0x1000
+F00589,Field::SampleRoomGroundColor,Native\Game\src\Field\RoomRendering.c,Invokes the room lighting sampler for the ground-layer color at packed horizontal coordinates.,med,C wrapper omits a callee output parameter; callee assembly samples bounded color triangles
+F00590,Field::RoomSupplementalRecord,Native\Game\src\Field\RoomLoading.c,Returns an indexed eight-byte record from the seventh room subsection.,low,section7 element semantics remain unverified
+F00591,Field::SetMovingPlatformActor,Native\Game\src\Field\Gimmicks.c,Assigns an actor to a moving platform and resets its boarding animation when the platform is not frozen.,med,fields:_mpdRoomSection12.unk4_1=platform actor association
+F00592,Field::ClearMovingPlatformActor,Native\Game\src\Field\Gimmicks.c,Clears a moving platform's associated actor using the sentinel association value.,med,
+F00593,Field::InitializeMovingPlatforms,Native\Game\src\Field\Gimmicks.c,"Initializes platform scene positions, hidden flags, boarding states, and the platform used by the entrance door.",high,fields:_mpdRoomSection12.unk0_0=geometry group id;fields:_mpdRoomSection12.unk0_9=hidden
+F00594,Field::ResetMovingPlatformWaypoint,Native\Game\src\Field\Gimmicks.c,Moves a platform to a selected waypoint and resets its path traversal state.,high,fields:_mpdRoomSection12.unk8=waypoint positions and dwell durations;fields:_mpdRoomSection12.unk48=segment velocities and durations
+F00595,Field::UpdateMovingPlatforms,Native\Game\src\Field\Gimmicks.c,"Moves room platforms along waypoint paths, handles obstruction and dwell times, and updates their geometry positions.",high,fields:_mpdRoomSection12.unkA8=fixed-point x;fields:_mpdRoomSection12.unkAC=fixed-point y;fields:_mpdRoomSection12.unkB0=fixed-point z;fields:_mpdRoomSection12.unk4_0=dwelling at waypoint;fields:_mpdRoomSection12.unk4_16=segment or dwell elapsed ticks
+F00596,Field::DrawMovingPlatformShadows,Native\Game\src\Field\Gimmicks.c,Draws height-dependent translucent shadows beneath visible moving platforms.,high,
+F00597,Field::CollectMovingPlatformPositions,Native\Game\src\Field\Gimmicks.c,Collects visible platform positions and indices with the current boarding-height offset.,high,
+F00598,Field::IsCurrentRoomWorkshop,Native\Game\src\Field\RoomLoading.c,Returns whether the current room is marked as a Workshop.,high,
+F00599,Field::RoomEnvironmentFlags,Native\Game\src\Field\RoomLoading.c,Returns the room environment byte adjacent to the Workshop and trap-level fields.,low,sectionB.unk31 has no callers in the available source; exact meaning remains unverified
+F00600,Field::CurrentSceneId,Native\Game\src\Field\RoomLoading.c,Returns the current room's scene identifier.,high,
+F00601,Field::RoomFallDestination,Native\Game\src\Field\RoomLoading.c,Returns the packed zone and room destination used when Ashley falls through a room boundary.,high,fields:_mpdRoomSectionB.unk52=fall destination zone;fields:_mpdRoomSectionB.unk54=fall destination room
+F00602,Field::RoomTriggerAtTile,Native\Game\src\Field\Gimmicks.c,Finds a room trigger at the selected tile and suppresses ordinary triggers while interaction state is locked.,high,fields:_mpdRoomSection9.unk0=tile x;fields:_mpdRoomSection9.unk2=tile z;fields:_mpdRoomSection9.unk4=surface index;fields:_mpdRoomSection9.unk6=trigger type
+F00603,Items::TreasureChestAtTile,Native\Game\src\Items\Loot.c,Finds the room treasure-chest record at a tile and surface.,high,
+F00604,Field::SetMovingPlatformsPaused,Native\Game\src\Field\Gimmicks.c,Pauses or resumes moving-platform motion independently of other field animation.,high,
+F00605,Field::FreezeMovingPlatforms,Native\Game\src\Field\Gimmicks.c,Sets a moving-platform freeze duration and enables its palette and geometry feedback.,high,
+F00606,Field::BeginSwitchToggle,Native\Game\src\Field\Gimmicks.c,Starts a room switch toggle immediately or queues its initial activation delay.,med,Reuses the leading room-trigger layout within the door record type
+F00607,Field::ToggleRoomSwitch,Native\Game\src\Field\Gimmicks.c,"Plays switch sounds, triggers its geometry animation, toggles its state, and updates collision blocking.",high,
+F00608,Items::RestoreRoomChestStates,Native\Game\src\Items\Loot.c,Restores chest geometry and collision from persistent treasure-opened flags.,high,fields:_mpdRoomSection13.unk8=opened;fields:_mpdRoomSection13.unk10=chest state flag index
+F00609,Render::ParseTextureImage,Native\Graphics\src\Textures.c,Decodes TIM image and optional CLUT block pointers for texture uploading.,high,Parses the PS1 TIM block format without copying image bytes
+F00610,Field::SceneDoorId,Native\Game\src\Field\Doors.c,Resolves a room door index to its scene-map door identifier.,high,
+F00611,Field::MarkEntranceDoorOnSceneMap,Native\Game\src\Field\Doors.c,Records the entered door and marks its entry flag in the scene-map door table.,high,
+F00612,Field::InterpolatedFloorHeight,Native\Game\src\Field\Collision.c,Interpolates neighboring floor samples while preserving the collision surface flag.,high,fields:_mpdRoomCollisionMapSection.unk4=height origin in eight-world-unit steps
+F00613,Field::FloorHeightAt,Native\Game\src\Field\Collision.c,Returns the floor height and surface flag at a horizontal world position.,high,
+F00614,Field::CeilingHeightAt,Native\Game\src\Field\Collision.c,"Returns the ceiling height and surface flag, clamping absent upper geometry to the sentinel ceiling.",high,
+F00615,Field::FloorAndCeilingHeightsAt,Native\Game\src\Field\Collision.c,Returns packed floor and ceiling heights with their surface flags for a world position.,high,
+F00616,Field::SetRoomTriggerEnabled,Native\Game\src\Field\Gimmicks.c,Enables one room trigger or every room trigger when the supplied pointer is null.,high,fields:_mpdRoomSection9.unkA=enabled; trigger behavior shares this storage with type-specific state
+F00617,Field::DrawRoomTriggerMarkers,Native\Game\src\Field\Gimmicks.c,Fades and draws active room-trigger markers while cycling their texture frames.,med,Draws trigger types below 16; exact marker artwork remains unverified
+F00618,Field::DrawRoomTriggerMarker,Native\Game\src\Field\Gimmicks.c,Positions and shades the shared ground marker mesh for one room trigger.,high,
+F00619,Field::SetMovingPlatformVisibility,Native\Game\src\Field\Gimmicks.c,Changes a platform's hidden flag and immediately updates its geometry-group visibility.,high,
+F00620,Field::MovingPlatformTargetWaypoint,Native\Game\src\Field\Gimmicks.c,Returns the current destination waypoint record for a moving platform.,high,fields:_mpdRoomSection12.unk0_27=target waypoint index
+F00621,Field::MovingPlatformDwellTicks,Native\Game\src\Field\Gimmicks.c,"Returns elapsed dwell ticks when a platform is stopped at a waypoint, or the sentinel when moving.",high,
+F00622,Items::RoomTreasureChests,Native\Game\src\Items\Loot.c,Returns the room treasure-chest array and its entry count.,high,
+F00623,Field::RoomInteractiveDoors,Native\Game\src\Field\Doors.c,Returns the room interactive-door array and its entry count.,high,
+F00624,Field::ActiveRoomTriggers,Native\Game\src\Field\Gimmicks.c,Returns room trigger records and their count unless field interaction is locked.,high,
+F00625,Field::IsRoomAudioSequenceAbsent,Native\Game\src\Field\RoomLoading.c,Reports whether the MPD room has no embedded AKAO audio-sequence section.,high,section14 corresponds to header.akaoSectionLen
+F00626,Audio::SetRoomAmbienceDucked,Native\Audio\src\Ambience.c,Ducks or restores both the room audio sequence and the active weather sound over eight ticks.,high,Callees adjust AKAO sequence volume to 0x20 or 0x7F and weather sound volume to quarter or full
+F00627,Field::RoomEnvironmentParameter,Native\Game\src\Field\RoomLoading.c,Returns the final short parameter in the room environment block.,low,sectionB.unk56 has no callers in the available source; exact meaning remains unverified
+F00628,Field::RoomTrapLevel,Native\Game\src\Field\RoomLoading.c,Returns the current room's trap level for damage and healing panel calculations.,high,
+F00629,Field::SetPlatformFreezeAppearance,Native\Game\src\Field\Gimmicks.c,Switches platform freeze palettes and refreshes affected geometry animation state.,high,
+F00630,Field::MapCompletionPercent,Native\Game\src\Field\Map.c,Counts eligible visited rooms and returns map completion as a percentage of 361 rooms.,high,Also mirrors the special visited-room bit before counting
+F00631,Items::LoadRoomChestLoot,Native\Game\src\Items\Loot.c,Copies MPD loot data into the room's treasure-chest loot record.,high,
+F00632,Field::SigilDoorEndpointCoordinate,Native\Game\src\Field\Doors.c,Returns one zone or room coordinate from the persistent sigil-door endpoint table.,high,
+F00633,Field::MarkSigilDoorUnlocked,Native\Game\src\Field\Doors.c,Marks the sigil door touching the current room as unlocked within the selected sigil group.,high,fields:vs_main_stateFlags.unk186=persistent sigil door unlock flags
+F00634,Field::IsRoomSigilDoorUnlocked,Native\Game\src\Field\Doors.c,Returns the persistent unlock flag for a sigil door touching the supplied zone and room.,high,
+F00635,Field::InitializeRoomBackground,Native\Game\src\Field\Background.c,"Clears background-loading and weather state, then initializes the current room background.",high,
+F00636,Effects::AllocateWeatherParticles,Native\Game\src\Effects\Weather.c,Replaces the room's weather-particle buffer with space for 128 particle records.,high,
+F00637,Field::InitializeRoomBackgroundColors,Native\Game\src\Field\Background.c,Initializes solid or gradient background colors and converts weather bounds into world coordinates.,high,fields:_mpdRoomSectionB.unk0=background gradient colors;fields:_mpdRoomSectionB.unk48=weather rectangle origin and extent
+F00638,Effects::InitializeRoomWeather,Native\Game\src\Effects\Weather.c,"Initializes the room's configured weather, optionally suppressing rain during room-entry events.",high,fields:_mpdRoomSectionB.unk34=weather type; type 1 is rain
+F00639,Field::SetBackgroundParallaxScale,Native\Game\src\Field\Background.c,Sets horizontal and vertical camera-angle scaling for the room's tiled background.,high,
+F00640,Field::SetTiledBackgroundEnabled,Native\Game\src\Field\Background.c,Enables or disables the room's loaded tiled background.,high,
+F00641,Effects::RoomWeatherState,Native\Game\src\Effects\Weather.c,Returns the current weather type and intensity state.,high,
+F00642,Field::RoomBackgroundColors,Native\Game\src\Field\Background.c,Returns the five cached room-background gradient colors.,high,
+F00643,Field::SetRoomBackgroundColors,Native\Game\src\Field\Background.c,Caches five background colors and expands them into the gradient background mesh.,high,
+F00644,Field::DrawRoomBackground,Native\Game\src\Field\Background.c,"Draws a tiled backdrop, a solid textured fill, or the room's camera-relative gradient background.",high,
+F00645,Field::QueueTiledBackgroundLoad,Native\Game\src\Field\Background.c,Reserves a background texture slot and queues its image and tile-map files.,high,
+F00646,Field::FinishTiledBackgroundLoad,Native\Game\src\Field\Background.c,"Uploads a loaded background TIM, releases its image buffer, and completes the tile-map read.",high,
+F00647,Field::ReleaseTiledBackground,Native\Game\src\Field\Background.c,Releases the room's tiled background map and its texture-slot reservation.,high,
+F00648,Effects::InitializeFallingWeatherParticles,Native\Game\src\Effects\Weather.c,Initializes the particle count and resets particles for rain or snow weather.,high,
+F00649,Effects::InitializeScreenWeatherParticles,Native\Game\src\Effects\Weather.c,"Initializes screen-space weather particles with random positions, depth, and absent trail endpoints.",high,
+F00650,Effects::DrawRainParticles,Native\Game\src\Effects\Weather.c,"Updates falling raindrops, draws streaks, and animates ground splashes before recycling particles.",high,
+F00651,Effects::InitializeRisingEmberParticles,Native\Game\src\Effects\Weather.c,Initializes rising weather particles across the room's weather bounds.,med,Weather type 4; warm-colored upward particles resemble embers
+F00652,Effects::ResetRisingEmberParticle,Native\Game\src\Effects\Weather.c,"Randomizes a rising particle's horizontal position, starting height, and upward speed.",med,fields:D_800F1DD4_t.unkF=rising speed for weather type 4
+F00653,Effects::DrawRisingEmberParticles,Native\Game\src\Effects\Weather.c,Updates and draws elongated warm-colored rising weather particles.,med,Weather type 4 visual identification is inferred from upward motion and RGB values
+F00654,Effects::DrawSnowParticles,Native\Game\src\Effects\Weather.c,Updates drifting snowflakes and draws their fading accumulation on the room floor.,high,
+F00655,Effects::DrawScreenWeatherParticles,Native\Game\src\Effects\Weather.c,Updates screen-space drifting weather motes and draws depth-shaded dots with two trail samples.,med,Weather type 3; ash or dust artwork is not conclusively identified
+F00656,Effects::ResetFallingWeatherParticle,Native\Game\src\Effects\Weather.c,"Randomizes a falling particle's spawn position, phase, and accelerated offscreen state.",high,fields:D_800F1DD4_t.unkC=particle phase;fields:D_800F1DD4_t.unkD=phase animation tick;fields:D_800F1DD4_t.unkE=offscreen speed shift
+F00657,Effects::RecalculateWeatherVelocity,Native\Game\src\Effects\Weather.c,"Converts weather yaw, pitch, and speed into the shared particle velocity vector.",high,D_800F1D98[0..2] stores velocity and [4..6] stores pitch yaw and speed

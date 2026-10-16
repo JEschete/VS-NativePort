@@ -1,0 +1,40 @@
+id,action,final_name,final_location,note
+F03616,rename,Title::SaveFiles::AreAnimationsComplete,Native\Game\src\Title\SaveFiles.c,variant-of:F02749; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03619,rename,Title::SaveFiles::CheckCardStep,Native\Game\src\Title\SaveFiles.c,variant-of:F02752; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03615,rename,Title::SaveFiles::ClearElement,Native\Game\src\Title\SaveFiles.c,variant-of:F02748; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03623,rename,Title::SaveFiles::DrawElement,Native\Game\src\Title\SaveFiles.c,variant-of:F02756; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03624,rename,Title::SaveFiles::DrawFrame,Native\Game\src\Title\SaveFiles.c,variant-of:F02757; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03617,rename,Title::SaveFiles::DrawGlyph,Native\Game\src\Title\SaveFiles.c,variant-of:F02750; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03610,rename,Title::SaveFiles::DrawHpMpSummary,Native\Game\src\Title\SaveFiles.c,variant-of:F02743; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03607,rename,Title::SaveFiles::DrawSummaryLabel,Native\Game\src\Title\SaveFiles.c,variant-of:F02740; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03612,rename,Title::SaveFiles::DrawTransferComplete,Native\Game\src\Title\SaveFiles.c,variant-of:F02745; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03611,rename,Title::SaveFiles::DrawTransferProgress,Native\Game\src\Title\SaveFiles.c,variant-of:F02744; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03614,rename,Title::SaveFiles::InitializeElement,Native\Game\src\Title\SaveFiles.c,variant-of:F02747; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03613,rename,Title::SaveFiles::ResetElements,Native\Game\src\Title\SaveFiles.c,variant-of:F02746; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03629,rename,Title::SaveFiles::UpdateConfirmation,Native\Game\src\Title\SaveFiles.c,variant-of:F02759; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03631,rename,Title::SaveFiles::UpdateFormatPrompt,Native\Game\src\Title\SaveFiles.c,variant-of:F02761; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03627,rename,Title::SaveFiles::UpdateLoadCard,Native\Game\src\Title\SaveFiles.c,variant-of:F02766; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03626,rename,Title::SaveFiles::UpdateLoadFiles,Native\Game\src\Title\SaveFiles.c,variant-of:F02765; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03630,rename,Title::SaveFiles::UpdateOverwritePrompt,Native\Game\src\Title\SaveFiles.c,variant-of:F02760; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03633,rename,Title::SaveFiles::UpdateSaveCard,Native\Game\src\Title\SaveFiles.c,variant-of:F02763; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03632,rename,Title::SaveFiles::UpdateSaveFiles,Native\Game\src\Title\SaveFiles.c,variant-of:F02762; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03606,rename,Title::SaveFiles::DrawImmediateSprite,Native\Game\src\Title\SaveFiles.c,variant-of:F02739; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03599,rename,Title::SaveCard::AdvanceCardReadiness,Native\Game\src\Title\SaveCard.c,variant-of:F02732; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03583,rename,Title::SaveCard::ClearEvents,Native\Game\src\Title\SaveCard.c,variant-of:F02716; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03590,rename,Title::SaveCard::FindMatchingSaveSlot,Native\Game\src\Title\SaveCard.c,variant-of:F02723; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03595,rename,Title::SaveCard::HasSaveSuffix,Native\Game\src\Title\SaveCard.c,variant-of:F02728; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03589,rename,Title::SaveCard::NewestSaveSlot,Native\Game\src\Title\SaveCard.c,variant-of:F02722; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03582,rename,Title::SaveCard::PollEvents,Native\Game\src\Title\SaveCard.c,variant-of:F02715; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03602,rename,Title::SaveCard::ReadSaveStep,Native\Game\src\Title\SaveCard.c,variant-of:F02735; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03594,rename,Title::SaveCard::ReadSaveSummary,Native\Game\src\Title\SaveCard.c,variant-of:F02727; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03597,rename,Title::SaveCard::ScanSaveDirectory,Native\Game\src\Title\SaveCard.c,variant-of:F02730; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03600,rename,Title::SaveCard::ValidateAndApplyLoadedSave,Native\Game\src\Title\SaveCard.c,variant-of:F02733; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F03603,rename,Title::SaveCard::WriteSaveStep,Native\Game\src\Title\SaveCard.c,variant-of:F02736; title-screen copy of the MENU7 file menu with its own state; consolidate in Phase 2
+F02809,dup,,,dup-of:F02698; differs only in 0x1000 vs ONE
+F02808,dup,,,dup-of:F02697; differs only in 0x1000 vs ONE
+F02798,dup,,,"dup-of:F02683; if/else vs early return, same behavior"
+F02990,dup,,,"dup-of:F02802; 140 vs 0x8C and menuItemStateSlideX vs 2, same behavior"
+F00283,rename,Actors::SetSharedSequenceBank,Native\Game\src\Actors\Animation.c,void wrapper around Actors::SelectSharedSequenceBank (F00801) that discards the status result
+F01018,rename,Core::BuildEulerRotationMatrixQuadrant,Native\Core\src\Matrix.c,asm; separate implementation from F00761 using the quadrant-dispatched trig table
+F01522,rename,Effects::ScriptAttachRenderer,Native\Game\src\Effects\ScriptVm.c,effect-script opcode that decodes operands and calls Effects::AttachEffectRenderer (F01445)
+F01264,dup,,,"dup-of:F03403; same 64-instruction asm as SLUS ScaleMatrix (assembler operand shorthand only)"

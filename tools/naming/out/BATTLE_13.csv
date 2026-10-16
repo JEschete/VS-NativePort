@@ -1,0 +1,177 @@
+id,final_name,final_location,purpose,confidence,notes
+F01594,Effects::DrawAnimatedSpriteParticles,Native\Game\src\Effects\Particles.c,Draws animated effect particles as textured quads with attachment transforms and sampled color curves.,high,asm
+F01595,Effects::InitializeEffectResources,Native\Game\src\Effects\EffectResources.c,Resets effect loading buffers and binds the embedded default effect package.,high,
+F01596,Effects::SelectEffectResourceContext,Native\Game\src\Effects\EffectResources.c,Selects the primary or secondary effect package context.,high,
+F01597,Effects::SaveEffectResourceContext,Native\Game\src\Effects\EffectResources.c,Saves the current effect package context before a temporary context switch.,high,
+F01598,Effects::RestoreEffectResourceContext,Native\Game\src\Effects\EffectResources.c,Restores the previously saved effect package context.,high,
+F01599,Effects::BindParticleDefinitions,Native\Game\src\Effects\EffectResources.c,Binds the particle definition block to the selected effect package.,high,package-block:5
+F01600,Effects::UpdateParticleGravityAndDrag,Native\Game\src\Effects\EffectResources.c,Samples the effect package channels to update global particle gravity and drag.,high,fields:pFileBlock9.unk12=gravityChannel;fields:pFileBlock9.unk13=dragChannel
+F01601,Effects::BindEffectTimelines,Native\Game\src\Effects\EffectResources.c,Binds the indexed timeline block to the selected effect package.,high,package-block:3
+F01602,Effects::BindEffectCurves,Native\Game\src\Effects\EffectResources.c,Resolves the variable-length curve pointers in the selected effect package.,high,fields:pFileCurveBlock.dataOffset=curveBytesOffset
+F01603,Effects::BindEffectPrograms,Native\Game\src\Effects\EffectResources.c,Binds the effect program block used to spawn effect instances.,high,package-block:8
+F01604,Effects::BindEffectPackageParameters,Native\Game\src\Effects\EffectResources.c,Binds the effect package parameters containing channels and instance counts.,high,package-block:9
+F01605,Effects::BindEffectTransformDefinitions,Native\Game\src\Effects\EffectResources.c,Binds the transform definitions used by effect instances.,high,package-block:10
+F01606,Effects::BindEffectTextureTables,Native\Game\src\Effects\EffectResources.c,Resolves texture descriptors and indexed texture information tables in the effect package.,high,package-block:1
+F01607,Effects::BindParticleAnimationTable,Native\Game\src\Effects\EffectResources.c,Binds the indexed particle sprite animation table and its entry count.,high,package-block:2
+F01608,Effects::ParticleAnimationData,Native\Game\src\Effects\EffectResources.c,Returns a particle sprite animation record from the selected effect package.,high,
+F01609,Effects::BindEffectSoundSequences,Native\Game\src\Effects\EffectResources.c,Binds the indexed sound sequence block used by effect timelines.,high,package-block:11
+F01610,Effects::BindEffectSoundBank,Native\Game\src\Effects\EffectResources.c,Binds effect package sound data and registers it with the sound loader.,med,package-block:12;audio data registered through func_80046168
+F01611,Effects::BindEffectAuxiliarySoundBank,Native\Game\src\Effects\EffectResources.c,Binds auxiliary effect sound data and records its sound-loader registration result.,med,package-block:13;fields:D_800F569C_t.unkCC=soundRegistrationResult
+F01612,Effects::PollEffectResourceRead,Native\Game\src\Effects\EffectResources.c,Enqueues or polls the shared effect resource CD read and releases its completed queue slot.,high,
+F01613,Effects::LoadEffectPurgeOverlay,Native\Game\src\Effects\EffectResources.c,Reserves the effect overlay slot and polls loading of EFFPURGE.BIN.,high,
+F01614,Effects::LoadEffectPackage,Native\Game\src\Effects\EffectResources.c,Allocates the effect package buffer and polls its configured CD read.,high,
+F01615,Effects::ReleaseEffectPackageResources,Native\Game\src\Effects\EffectResources.c,Releases occupied effect texture slots and frees the effect package buffer.,high,
+F01616,Effects::UpdateEffectTextureLoading,Native\Game\src\Effects\EffectResources.c,Loads effect framebuffer assets in stages and uploads their texture pages or color palettes.,high,
+F01617,Effects::UpdateEffectPluginLoading,Native\Game\src\Effects\EffectResources.c,Loads the configured effect Plugin into the reserved overlay slot and advances its load state.,high,
+F01618,Effects::ConfigureEffectPackageLoad,Native\Game\src\Effects\EffectResources.c,Stores the effect package disc location and byte size for the next load.,high,
+F01619,Effects::ConfigureEffectPluginLoad,Native\Game\src\Effects\EffectResources.c,"Stores the Plugin disc location, size, and renderer entry-point count.",high,
+F01620,Effects::SetEffectRenderer,Native\Game\src\Effects\EffectResources.c,Registers an indexed Plugin effect renderer callback.,high,
+F01621,Effects::SetEffectTextureAssetCount,Native\Game\src\Effects\EffectResources.c,Sets the number of framebuffer texture assets required by the effect Plugin.,high,
+F01622,Effects::ConfigureEffectTextureAsset,Native\Game\src\Effects\EffectResources.c,"Stores an effect texture asset's disc location, size, texture slot, and palette flag.",high,
+F01623,Effects::SetEffectTextureLoadState,Native\Game\src\Effects\EffectResources.c,Sets the effect framebuffer asset loading state.,high,
+F01624,Effects::EffectTextureLoadState,Native\Game\src\Effects\EffectResources.c,Returns the current effect framebuffer asset loading state.,high,
+F01625,Effects::SetEffectPluginLoadState,Native\Game\src\Effects\EffectResources.c,Sets the effect Plugin loading state.,high,
+F01626,Effects::BindEffectPackageBlocks,Native\Game\src\Effects\EffectResources.c,Walks tagged effect package blocks and binds their data to the selected resource context.,high,
+F01627,Content::MainMenuOverlayDiscSector,Native\Content\src\OverlayFiles.c,Returns the disc sector containing the main menu overlay.,high,
+F01628,Battle::Ai::SetActorAwarenessIndicator,Native\Game\src\Battle\Ai\Perception.c,Updates the awareness indicator for a non-Ashley actor.,high,asm
+F01629,Battle::Ai::ResetActorAwarenessIndicator,Native\Game\src\Battle\Ai\Perception.c,Clears an actor's awareness indicator and its alliance display flag.,high,asm;includes alternate clear-indicator entry func_800D8254
+F01630,Battle::Ai::SetTemporaryAwarenessIndicator,Native\Game\src\Battle\Ai\Perception.c,Stores an actor's temporary awareness indicator and display duration.,high,fields:func_800E78F4_t.unk138=temporaryIndicator;fields:func_800E78F4_t.unk12A=indicatorTimer
+F01631,Battle::Ai::IsEngagementReady,Native\Game\src\Battle\Ai\Perception.c,Tests whether an actor's engagement buildup has reached the action-ready threshold.,high,asm;fields:func_800E78F4_t.unk8E=engagementTimer
+F01632,Battle::Ai::UpdateTemporaryAwarenessIndicator,Native\Game\src\Battle\Ai\Perception.c,Reapplies a temporary awareness indicator or clears it when its timer expires.,high,asm
+F01633,Battle::Ai::DisengageActorById,Native\Game\src\Battle\Ai\Perception.c,Looks up a non-Ashley actor and removes it from the engaged actor set.,high,asm
+F01634,Battle::Ai::DisengageActor,Native\Game\src\Battle\Ai\Perception.c,"Removes an actor from engagement and resets its cooldown, alert timer, and indicator.",high,asm;fields:func_800E78F4_t.unk98=engagementCooldown;fields:func_800E78F4_t.unk9A=alertTimer
+F01635,Battle::Ai::TryEngageActor,Native\Game\src\Battle\Ai\Perception.c,"Adds an actor to engagement when capacity, cooldown, and action scheduling permit.",high,asm
+F01636,Battle::Ai::FindAdjacentMovementDestination,Native\Game\src\Battle\Ai\Navigation.c,Probes neighboring directions for a clear destination or a usable gap crossing.,high,
+F01637,Battle::Ai::RefreshActionCandidateReadiness,Native\Game\src\Battle\Ai\ActionPlanning.c,Revalidates planned actions and promotes a usable candidate while updating readiness state.,high,fields:func_800E78F4_t.unk131=candidateReadiness
+F01638,Battle::Ai::IsTargetOccludedAtExtent,Native\Game\src\Battle\Ai\Perception.c,Tests terrain occlusion between actors using their configured vertical extents.,high,
+F01639,Battle::Ai::IsTargetOccludedAtHeight,Native\Game\src\Battle\Ai\Perception.c,Tests terrain occlusion between actors using their absolute height offsets.,high,
+F01640,Battle::Ai::UpdateTargetPerception,Native\Game\src\Battle\Ai\Perception.c,"Updates target distance, visibility, field of view, obstruction, and awareness timers.",high,fields:func_800E78F4_t.unk1A4=targetRelations;fields:func_800E78F4_t.unk1E4=targetDistanceSquared
+F01641,Battle::Ai::HasRepeatingMovementHistory,Native\Game\src\Battle\Ai\Movement.c,Tests whether the two halves of the actor's recorded movement history repeat.,high,
+F01642,Battle::Ai::IsMovementHistoryStalled,Native\Game\src\Battle\Ai\Movement.c,Reports a stall when the full movement history contains a repeating position pattern.,high,
+F01643,Battle::Ai::UpdateActorPerception,Native\Game\src\Battle\Ai\Perception.c,"Updates actor awareness, engagement, timers, and stalled-movement handling within the frame budget.",high,
+F01644,Battle::Ai::SaveMovementRandomState,Native\Game\src\Battle\Ai\Movement.c,Persists the movement random generator state from scratch memory.,high,scratch 0x1F8003F8 is advanced by func_800E45D4
+F01645,Battle::Ai::DestinationOccupancy,Native\Game\src\Battle\Ai\Navigation.c,"Classifies a destination as invalid terrain, occupied by an actor, or clear.",high,"asm;returns:0=invalid,-1=actorBlocked,1=clear"
+F01646,Battle::Ai::CanTraverseTileEdge,Native\Game\src\Battle\Ai\Navigation.c,"Tests a tile transition against terrain flags, step limits, actor obstruction, and pursuit constraints.",high,asm
+F01647,Battle::Ai::DirectionalBlockingActor,Native\Game\src\Battle\Ai\Navigation.c,Finds and caches the actor blocking a movement direction.,high,asm;returns actor ID plus one;includes separate terrain-clearance entry D_800D9B6C
+F01648,Battle::Ai::SelectActionMovementMode,Native\Game\src\Battle\Ai\Behavior.c,Selects approach or waypoint-retreat movement for the chosen action candidate.,high,asm;fields:func_800E78F4_t.unk12E=actionMovementMode
+F01649,Battle::Ai::MoveForActionCandidate,Native\Game\src\Battle\Ai\Behavior.c,"Chooses approach, retreat, flee, or direct pursuit movement for an action candidate.",high,
+F01650,Battle::Ai::UpdateCombatPursuit,Native\Game\src\Battle\Ai\Behavior.c,Pursues a planned target or falls back to a perceived enemy or Ashley.,high,
+F01651,Battle::Ai::TryApproachPlannedTarget,Native\Game\src\Battle\Ai\Behavior.c,Approaches a ready action's target when engagement capacity permits.,high,
+F01652,Battle::Ai::UpdateCloseFollowBehavior,Native\Game\src\Battle\Ai\Behavior.c,Attempts a planned action approach or follows the configured actor at close range.,med,configured follow distance is 288
+F01653,Battle::Ai::UpdateEnemyPursuitBehavior,Native\Game\src\Battle\Ai\Behavior.c,Flees when required or pursues an enemy before falling back to the planned movement.,med,
+F01654,Battle::Ai::UpdateGuardMovementBehavior,Native\Game\src\Battle\Ai\Behavior.c,Maintains position relative to a designated actor while reacting to enemies and retreat conditions.,med,guard role inferred from paired actor relations and positioning
+F01655,Battle::Ai::UpdatePatrolCombatBehavior,Native\Game\src\Battle\Ai\Behavior.c,Flees or pursues a combat target before falling back to wandering or waypoint patrol.,high,
+F01656,Battle::Ai::UpdateEscortCombatBehavior,Native\Game\src\Battle\Ai\Behavior.c,Approaches a planned target or follows an assigned actor while adjusting retreat hostility.,med,configured follow distance is 384
+F01657,Battle::Ai::TryExecuteActionCandidate,Native\Game\src\Battle\Ai\Behavior.c,Engages an actor and issues a usable candidate action once its engagement buildup is ready.,high,
+F01658,Battle::Ai::TryExecutePlannedActions,Native\Game\src\Battle\Ai\Behavior.c,Tries planned action candidates and then fallback actions against registered targets.,high,
+F01659,Battle::Ai::UpdateActorDecisions,Native\Game\src\Battle\Ai\Behavior.c,Dispatches eligible actors' action and movement decisions within the frame time budget.,high,
+F01660,Battle::Ai::TryRecoverBlockedMovement,Native\Game\src\Battle\Ai\Movement.c,Tries lateral or opposite detours and abandons the movement target when no destination is clear.,high,
+F01661,Battle::Ai::ApproachActor,Native\Game\src\Battle\Ai\Movement.c,Sets pursuit distance and target state before updating movement toward an actor.,high,asm
+F01662,Battle::Ai::SetMovementBehavior,Native\Game\src\Battle\Ai\Movement.c,Changes an actor's movement behavior and resets its behavior-specific state and timers.,high,asm;fields:func_800E78F4_t.unk12D=movementBehavior
+F01663,Battle::Ai::WanderAroundSavedCenter,Native\Game\src\Battle\Ai\Movement.c,Restores the configured wander center and radius before updating wandering movement.,high,asm
+F01664,Battle::Ai::WanderAroundTile,Native\Game\src\Battle\Ai\Movement.c,Selects wandering behavior around the supplied center tile and radius.,high,asm
+F01665,Battle::Ai::MoveToTile,Native\Game\src\Battle\Ai\Movement.c,Sets a destination tile and selects destination-driven movement.,high,asm
+F01666,Battle::Ai::PatrolWaypoints,Native\Game\src\Battle\Ai\Movement.c,Selects waypoint patrol behavior when patrol movement is enabled.,high,asm
+F01667,Battle::Ai::FleeVisibleEnemies,Native\Game\src\Battle\Ai\Movement.c,Finds the center of visible enemies and selects movement away from the remembered threat position.,high,asm
+F01668,Battle::Ai::TrackActorPosition,Native\Game\src\Battle\Ai\Movement.c,Copies a target actor's position and selects target-facing behavior.,high,asm
+F01669,Battle::Ai::UpdateActorLocomotionMode,Native\Game\src\Battle\Ai\Behavior.c,Updates actor idle or battle locomotion commands to match the selected movement behavior.,med,asm
+F01670,Battle::Ai::DispatchMovementBehavior,Native\Game\src\Battle\Ai\Behavior.c,Runs stuck recovery or the actor's movement behavior and otherwise falls back to wandering.,high,asm
+F01671,Battle::Ai::CanApproachEngagedTarget,Native\Game\src\Battle\Ai\Behavior.c,Checks target validity and engagement capacity before allowing another actor to approach.,high,asm
+F01672,Battle::Ai::FindGapLandingTile,Native\Game\src\Battle\Ai\Navigation.c,Scans a short terrain gap and validates a traversable landing tile.,high,asm
+F01673,Battle::Ai::FindActorByRelationship,Native\Game\src\Battle\Ai\Perception.c,Finds the first other actor with the requested relationship class and optionally returns its tile.,high,asm
+F01674,Battle::Ai::DoesActionRequireCooldown,Native\Game\src\Battle\Ai\ActionPlanning.c,Tests whether an action requires a cooldown for the acting actor and target.,high,asm
+F01675,Battle::Ai::IsActionCooldownReady,Native\Game\src\Battle\Ai\ActionPlanning.c,Tests actor delay and action cooldown constraints before an action can execute.,high,asm;fields:func_800E78F4_t.unk13F=actionCooldown
+F01676,Battle::Ai::HasNearbyEnemy,Native\Game\src\Battle\Ai\Perception.c,Tests whether an enemy lies within a short tile distance of the specified actor.,high,asm
+F01677,Battle::Ai::CanExecuteActionCandidate,Native\Game\src\Battle\Ai\ActionPlanning.c,"Validates candidate timing, cooldown, range, visibility, obstruction, and target motion.",high,asm
+F01678,Battle::Ai::UnlinkEngagedActor,Native\Game\src\Battle\Ai\Perception.c,Removes an actor from the engagement linked list and clears its engagement phase flags.,high,fields:func_800E78F4_t.unk1A0=nextEngagedActor
+F01679,Battle::Ai::UpdateEngagementBuildup,Native\Game\src\Battle\Ai\Perception.c,Advances engagement indicators and cancels engagement after its timeout.,high,
+F01680,Battle::Ai::AnimateEngagementPhase,Native\Game\src\Battle\Ai\Perception.c,Animates the phase of one engaged actor and updates its actor display flags.,high,
+F01681,Battle::Ai::EndAshleyAlliance,Native\Game\src\Battle\Ai\Perception.c,Clears temporary allegiance to Ashley and restores the actor's original behavior.,high,asm;fields:func_800E78F4_t.unk13=temporaryAshleyAlliance
+F01682,Battle::Ai::TryBeginAshleyAlliance,Native\Game\src\Battle\Ai\Perception.c,Accumulates favorable reactions and switches the actor to temporary allegiance with Ashley.,high,asm;beneficial actions from Ashley can trigger the alliance
+F01683,Battle::Ai::ScoreActorCondition,Native\Game\src\Battle\Ai\ActionPlanning.c,"Combines status, Hp, Mp, and equipment Dp scores into the weighted actor condition value.",high,asm
+F01684,Battle::Ai::CopyActionCandidate,Native\Game\src\Battle\Ai\ActionPlanning.c,Copies one complete action candidate record.,high,asm
+F01685,Battle::Ai::ApplySimulatedStatDelta,Native\Game\src\Battle\Ai\ActionPlanning.c,Applies a projected damage or recovery amount and clamps the simulated stat to its valid range.,high,asm
+F01686,Battle::Ai::AppendActionCandidate,Native\Game\src\Battle\Ai\ActionPlanning.c,Appends a weighted action candidate and marks its action-target combination as considered.,high,asm
+F01687,Battle::Ai::SortActionCandidates,Native\Game\src\Battle\Ai\ActionPlanning.c,Sorts the planned action candidate pointers by their priority.,high,asm
+F01688,Battle::Ai::CopyPlanningActorStats,Native\Game\src\Battle\Ai\ActionPlanning.c,Copies the combat stat fields needed to snapshot and restore planning simulations.,high,asm
+F01689,Battle::Ai::CaptureActorConditionTable,Native\Game\src\Battle\Ai\ActionPlanning.c,"Captures compact Hp, Mp, status, and weapon and shield Dp values for candidate scoring.",high,asm;fields:func_800DC888_t.unk10=currentWeaponDp;fields:func_800DC888_t.unk12=maxWeaponDp;fields:func_800DC888_t.unk14=currentShieldDp;fields:func_800DC888_t.unk16=maxShieldDp
+F01690,Battle::Ai::IsActionHarmfulToActor,Native\Game\src\Battle\Ai\ActionPlanning.c,"Tests whether an action is harmful to the target, including its target-class inversion.",high,asm
+F01691,Battle::Ai::IsActionBeneficialToActor,Native\Game\src\Battle\Ai\ActionPlanning.c,"Tests whether an action is beneficial to the target, including its target-class inversion.",high,asm
+F01692,Battle::Ai::CacheFallbackActionCandidate,Native\Game\src\Battle\Ai\ActionPlanning.c,Caches the first eligible fallback candidate for each configured action slot.,high,asm
+F01693,Battle::Ai::PromoteRandomizedActionCandidate,Native\Game\src\Battle\Ai\ActionPlanning.c,Randomly promotes a candidate according to its hit weight and sorts the remaining choices.,high,asm
+F01694,Battle::Ai::UpdateRouteGateAvailability,Native\Game\src\Battle\Ai\Navigation.c,Updates route gate availability from moving room objects and their current endpoints.,high,asm
+F01695,Battle::Ai::MakeTargetHostile,Native\Game\src\Battle\Ai\Perception.c,Changes an actor's relationship with a target to hostile and starts its reaction state.,high,asm
+F01696,Battle::Ai::ApplyActionRelationshipChanges,Native\Game\src\Battle\Ai\Perception.c,Applies action reactions to every actor and then propagates their changed relationships.,high,asm
+F01697,Battle::Ai::ApplySimulatedActionResults,Native\Game\src\Battle\Ai\ActionPlanning.c,"Applies projected action costs, stat changes, and status changes to the compact condition table.",high,
+F01698,Battle::Ai::SimulateActionCandidate,Native\Game\src\Battle\Ai\ActionPlanning.c,Simulates a normal or aimed action and applies its results to the candidate scoring table.,high,
+F01699,Battle::Ai::UpdateCandidateHitWeight,Native\Game\src\Battle\Ai\ActionPlanning.c,Extracts the candidate target's projected hit threshold and scales it into a selection weight.,high,
+F01700,Battle::Ai::ActorStatusConditionScore,Native\Game\src\Battle\Ai\ActionPlanning.c,Scores beneficial and harmful statuses with additional penalties for death and low Hp.,high,
+F01701,Battle::Ai::ActorHpRatio,Native\Game\src\Battle\Ai\ActionPlanning.c,Returns the actor's simulated Hp as a fraction of its maximum scaled to 128.,high,
+F01702,Battle::Ai::ActorMpRatio,Native\Game\src\Battle\Ai\ActionPlanning.c,Returns the actor's simulated Mp as a fraction of its maximum scaled to 128.,high,
+F01703,Battle::Ai::ActorEquipmentDpRatio,Native\Game\src\Battle\Ai\ActionPlanning.c,Returns the sum of the actor's weapon and shield Dp ratios scaled to 128.,high,actor stat offsets 0x150 and 0x2B4 are weapon and shield current/max Dp pairs
+F01704,Battle::Ai::EvaluateActionCandidate,Native\Game\src\Battle\Ai\ActionPlanning.c,Scores an action from simulated changes to allied and enemy condition with configured random rejection.,high,
+F01705,Battle::Ai::ApplyActorActionReaction,Native\Game\src\Battle\Ai\Perception.c,Updates an actor's allegiance and hostility in response to beneficial or harmful actions.,high,
+F01706,Battle::Ai::PropagateActorRelationships,Native\Game\src\Battle\Ai\Perception.c,Updates Ashley-allied relationships or adopts enemies known by mutually allied actors.,high,
+F01707,Battle::Ai::SelectFallbackAction,Native\Game\src\Battle\Ai\ActionPlanning.c,Chooses the highest-value usable fallback action from the actor's configured action slots.,high,
+F01708,Battle::Ai::WaypointValue,Native\Game\src\Battle\Ai\Navigation.c,Returns the packed value at an indexed waypoint table entry.,high,
+F01709,Battle::Ai::WaypointAddress,Native\Game\src\Battle\Ai\Navigation.c,Returns the address of an indexed waypoint table entry.,high,
+F01710,Battle::Ai::FindNearestActiveWaypoint,Native\Game\src\Battle\Ai\Navigation.c,Selects the nearest enabled waypoint by squared world-space distance.,high,
+F01711,Actors::CombatLimbAt,Native\Game\src\Actors\Stats.c,Returns an indexed limb from an actor's combat equipment statistics.,high,
+F01712,Battle::Ai::EnumerateActionCandidates,Native\Game\src\Battle\Ai\ActionPlanning.c,"Enumerates usable actions, targets, body parts, and aimed heights before scoring and storing candidates.",high,
+F01713,Battle::Ai::AdvancePlanningSimulation,Native\Game\src\Battle\Ai\ActionPlanning.c,"Advances projected recovery, damage, limb condition, and status timers before evaluating later actions.",high,
+F01714,Battle::Ai::SnapshotPlanningActorStats,Native\Game\src\Battle\Ai\ActionPlanning.c,Allocates snapshots of the active actors' simulation-relevant combat statistics.,high,
+F01715,Battle::Ai::RestorePlanningActorStats,Native\Game\src\Battle\Ai\ActionPlanning.c,Restores actor statistics after planning simulation and releases their snapshot storage.,high,
+F01716,Battle::Ai::BuildActorActionPlan,Native\Game\src\Battle\Ai\ActionPlanning.c,Evaluates actions at multiple future delays and merges the best candidates into the actor's plan.,high,"planning delays are 0,455,2900 with candidate quotas 10,3,3"
+F01717,Battle::Ai::ReconcileCompletedActionPlan,Native\Game\src\Battle\Ai\ActionPlanning.c,Reconciles queued candidates with a completed action's actual targets and results.,high,
+F01718,Battle::Ai::RebuildActorActionPlans,Native\Game\src\Battle\Ai\ActionPlanning.c,"Allocates planning workspace and refreshes reactions, fallback actions, and plans for all active actors.",high,
+F01719,Battle::Ai::NotifyActionRelationshipChanges,Native\Game\src\Battle\Ai\Perception.c,Clears the acting actor's alert timer and applies the completed action's relationship changes.,high,
+F01720,Battle::Ai::IssueActorCommand,Native\Game\src\Battle\Ai\Behavior.c,"Builds and queues an actor command for movement, turning, jumping, or action execution.",high,asm
+F01721,Battle::Ai::ResolveRouteGateExit,Native\Game\src\Battle\Ai\Navigation.c,Resolves the paired exit tile and gate index for a route gate endpoint.,high,
+F01722,Battle::Ai::FindNearestRouteGateEntry,Native\Game\src\Battle\Ai\Navigation.c,Selects the route gate entry nearest the supplied world position.,high,
+F01723,Battle::Ai::FindRouteGateAtTile,Native\Game\src\Battle\Ai\Navigation.c,Finds a route gate endpoint matching the tile and its moving object's current position.,high,
+F01724,Battle::Ai::RouteEndpointPair,Native\Game\src\Battle\Ai\Navigation.c,Returns both packed route endpoints as one word.,high,
+F01725,Battle::Ai::RouteEndpointValue,Native\Game\src\Battle\Ai\Navigation.c,Returns one packed endpoint from a route endpoint pair.,high,
+F01726,Battle::Ai::NavigationTileFlags,Native\Game\src\Battle\Ai\Navigation.c,Returns the cached navigation flags for a room tile.,high,
+F01727,Battle::Ai::SetNavigationAreaFromTile,Native\Game\src\Battle\Ai\Navigation.c,Sets the actor's navigation area from the destination tile and returns the area-change movement result.,high,
+F01728,Battle::Ai::ResolveNavigationAreaRoute,Native\Game\src\Battle\Ai\Navigation.c,"Resolves a route across navigation areas through gate endpoints, terrain boundaries, or gap crossings.",high,
+F01729,Battle::Ai::IsFlightDirectionObstructed,Native\Game\src\Battle\Ai\Movement.c,Caches directional obstruction by actors or moving room objects for airborne movement.,high,
+F01730,Battle::Ai::CanFlyInDirection,Native\Game\src\Battle\Ai\Movement.c,"Tests airborne movement clearance against actors, room bounds, terrain flags, and floor height.",high,
+F01731,Battle::Ai::LowestReachableGroundHeight,Native\Game\src\Battle\Ai\Movement.c,Finds the lowest reachable neighboring ground height around the requested movement direction.,high,
+F01732,Battle::Ai::UpdateFlightGroundTransition,Native\Game\src\Battle\Ai\Movement.c,"Switches between airborne and grounded movement according to altitude, target distance, and terrain.",med,
+F01733,Battle::Ai::UpdateFlightMovement,Native\Game\src\Battle\Ai\Movement.c,"Updates airborne pursuit altitude and trajectory while handling obstacles, falling, and movement commands.",med,
+F01734,Battle::Ai::UpdateFlightDirectionalMovement,Native\Game\src\Battle\Ai\Movement.c,Handles directional airborne movement and falls back to grounded movement or recovery when required.,med,
+F01735,Battle::Ai::ProjectClearRadialDestination,Native\Game\src\Battle\Ai\Movement.c,Projects a destination along a heading and shortens its radius until a clear room tile is found.,high,
+F01736,Battle::Ai::MoveToRadialDestination,Native\Game\src\Battle\Ai\Movement.c,Attempts movement toward a projected destination and tries nearby alternatives or recovery when blocked.,med,
+F01737,Battle::Ai::MoveAwayFromReference,Native\Game\src\Battle\Ai\Movement.c,Chooses a radial destination farther from a reference position and moves toward it.,high,
+F01738,Battle::Ai::FilterDirectionsByGroundHeight,Native\Game\src\Battle\Ai\Movement.c,Removes movement directions whose neighboring floor height exceeds the supplied threshold.,high,
+F01739,Battle::Ai::MoveWithHeightFilteredDirections,Native\Game\src\Battle\Ai\Movement.c,Temporarily filters navigation directions by ground height before resolving movement.,high,
+F01740,Battle::Ai::UpdateNavigationAreaMovement,Native\Game\src\Battle\Ai\Navigation.c,Follows inter-area routes and resolves movement or recovery toward the destination tile.,high,
+F01741,Battle::Ai::WanderDirectionOffset,Native\Game\src\Battle\Ai\Movement.c,Returns the tile offset for an indexed wander direction.,high,
+F01742,Battle::Ai::ChooseNextWanderTile,Native\Game\src\Battle\Ai\Movement.c,Chooses a valid random wander step while avoiding immediate reversal and invalid terrain transitions.,high,
+F01743,Battle::Ai::RandomWanderHeading,Native\Game\src\Battle\Ai\Movement.c,Returns a direction's heading with a small random angular offset.,high,
+F01744,Battle::Ai::StartWanderWalk,Native\Game\src\Battle\Ai\Movement.c,Resets wander heading and cooldown state before beginning a new walking phase.,high,
+F01745,Battle::Ai::UpdateWanderMovement,Native\Game\src\Battle\Ai\Movement.c,Alternates random walking and resting while keeping wandering within its configured region.,high,
+F01746,Battle::Ai::WaypointValue,Native\Game\src\Battle\Ai\Navigation.c,Returns the packed value at an indexed waypoint table entry.,high,dup-of:F01708
+F01747,Battle::Ai::UpdateWaypointPatrol,Native\Game\src\Battle\Ai\Movement.c,Advances the patrol waypoint and movement direction before moving toward the selected tile.,high,
+F01748,Battle::Ai::UpdateTargetApproachMovement,Native\Game\src\Battle\Ai\Movement.c,Maintains pursuit distance and follows a visible target or its remembered position.,high,
+F01749,Battle::Ai::UpdateTargetFacing,Native\Game\src\Battle\Ai\Movement.c,Tracks a target's changing position and issues turning commands while its tracking timer remains active.,high,
+F01750,Battle::Ai::UpdateMovementRecovery,Native\Game\src\Battle\Ai\Movement.c,Faces the target or selects a neighboring recovery heading when ordinary movement stalls.,high,
+F01751,Battle::Ai::FollowObstacleDetour,Native\Game\src\Battle\Ai\Navigation.c,Follows a bounded left- or right-hand obstacle detour and selects the next movement direction.,high,fields:movementPath.bits.clockwise=detourHandedness;fields:movementPath.bits.visited=visitedDirectionMask
+F01752,Battle::Ai::ResolveDirectionalMovement,Native\Game\src\Battle\Ai\Navigation.c,"Chooses a clear movement direction, gap crossing, or obstacle detour and issues the corresponding actor command.",high,asm
+F01753,Battle::Ai::SetDetourBoundary,Native\Game\src\Battle\Ai\Navigation.c,Records the tile boundary coordinates used to terminate an obstacle detour.,high,asm
+F01754,Battle::Ai::RefreshDetourProgress,Native\Game\src\Battle\Ai\Navigation.c,Detects unchanged movement tiles and refreshes the detour countdown or recovery delay.,high,asm
+F01755,Battle::Ai::CardinalPassabilityMask,Native\Game\src\Battle\Ai\Navigation.c,Tests the four cardinal directions and packs their passability results into a bit mask.,high,asm
+F01756,Battle::Ai::InitializeObstacleDetour,Native\Game\src\Battle\Ai\Navigation.c,"Initializes detour direction, turning handedness, countdown, and local passability state.",high,asm
+F01757,Battle::Ai::UpdateHesitationTurn,Native\Game\src\Battle\Ai\Behavior.c,Runs a timed hesitation and turning sequence selected by movement behavior and a probability threshold.,med,asm
+F01758,Core::Memory::ClearAlignedWords,Native\Core\src\Memory\Copy.c,Clears aligned memory in sixteen-byte blocks followed by remaining whole words.,high,asm;size must be word aligned
+F01759,Field::GroundHeightAtWorldPosition,Native\Game\src\Field\Collision.c,Returns collision ground height at world-space horizontal coordinates.,high,asm
+F01760,Field::GroundHeightAtPackedTile,Native\Game\src\Field\Collision.c,Returns collision ground height for a packed tile coordinate.,high,asm
+F01761,Field::GroundHeightAtTile,Native\Game\src\Field\Collision.c,Returns the signed ground height at the supplied tile coordinates.,high,asm
+F01762,Field::GroundHeightFlagsAtPackedTile,Native\Game\src\Field\Collision.c,Returns the decoded ground height and retained collision flag for a packed tile.,high,asm
+F01763,Field::GroundHeightFlagsAtWorldPosition,Native\Game\src\Field\Collision.c,Returns decoded ground height and the retained collision flag at world-space horizontal coordinates.,high,asm
+F01764,Field::GroundHeightFlagsAtTile,Native\Game\src\Field\Collision.c,Decodes a tile's signed height and slope adjustment while retaining its high collision flag.,high,asm
+F01765,Battle::Ai::TickActorDecisionTimers,Native\Game\src\Battle\Ai\Perception.c,Decrements the actor's decision delay and action cooldown timers.,high,asm
+F01766,Battle::Ai::TargetFacingCosine,Native\Game\src\Battle\Ai\Perception.c,Returns the normalized horizontal dot product between the actor's facing and its target direction.,high,asm
+F01767,Field::IsPositionAboveGround,Native\Game\src\Field\Collision.c,Tests whether a world position lies above the decoded collision ground surface.,high,asm
+F01768,Field::IsTerrainSegmentBlocked,Native\Game\src\Field\Collision.c,Samples an extent-adjusted segment and reports whether terrain blocks any of its sixteen steps.,high,asm
+F01769,Core::ElapsedFrameCounterTicks,Native\Core\src\Timing.c,Returns the elapsed hardware root-counter ticks since the frame timing baseline.,high,asm;uses root counter 1 with 16-bit wraparound

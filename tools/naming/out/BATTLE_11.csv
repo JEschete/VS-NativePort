@@ -1,0 +1,142 @@
+id,final_name,final_location,purpose,confidence,notes
+F01313,Battle::UpdateSphereTargetPosition,Native\Game\src\Battle\Targeting.c,Updates the targeting Sphere position from pad input and clamps it to the room collision map.,high,fields:func_800C56C0_t.unk38=targeting offset and confirmation state
+F01314,Battle::ClearTargetActorHighlight,Native\Game\src\Battle\Targeting.c,Clears a target actor part highlight while ignoring non-actor target identifiers.,med,Actor-part mask semantics inferred from model palette setup
+F01315,Battle::SetTargetActorHighlight,Native\Game\src\Battle\Targeting.c,Enables a target actor part highlight while ignoring non-actor target identifiers.,med,Actor-part mask semantics inferred from model palette setup
+F01316,Battle::SetTargetActorColorOverride,Native\Game\src\Battle\Targeting.c,Sets or clears a target actor color override while ignoring non-actor target identifiers.,high,
+F01317,Battle::UpdateTargetSelectionHighlight,Native\Game\src\Battle\Targeting.c,Restores the previous target highlight and applies highlighting to the selected target or all target parts.,high,fields:func_800C56C0_t.unk2D=selected target index;fields:func_800C56C0_t.unk34=selection highlight color
+F01318,Battle::AppendTargetGroupToColumn,Native\Game\src\Battle\Targeting.c,Appends all entries for one target group to the shorter target-list column.,high,
+F01319,Battle::BuildTargetSelectionColumns,Native\Game\src\Battle\Targeting.c,Balances target groups across two selection columns and computes their vertical spacing.,high,
+F01320,Battle::DismissTargetSelectionRows,Native\Game\src\Battle\Targeting.c,Clears actor highlighting and starts the dismissal animation for both target-list columns.,high,
+F01321,Battle::InitTargetSelectionRow,Native\Game\src\Battle\Targeting.c,Initializes a sliding target-list row with its limb label and target data.,high,fields:func_800C56C0_t2.unk4=row x;fields:func_800C56C0_t2.unk6=row y
+F01322,Battle::FirstTargetStatusText,Native\Game\src\Battle\Targeting.c,Returns the first active target status description or the empty status string.,high,
+F01323,Battle::UpdateTargetSelectionMenu,Native\Game\src\Battle\Targeting.c,Animates and navigates the target-part list and formats the selected target information box.,high,fields:func_800C5798_t.unk9=target group;fields:func_800C5798_t.unkA=actor part;fields:func_800C5798_t.unk10=status flags
+F01324,Render::SplicePrimitiveList,Native\Graphics\src\UiPrimitives.c,Splices a primitive list into another ordering-table chain by replacing its terminating link.,high,
+F01325,Render::DrawCompactTextColor,Native\Graphics\src\Font.c,"Draws compact ASCII text with the chosen color, kerning and inline alignment markers.",high,
+F01326,Render::DrawCompactText,Native\Graphics\src\Font.c,Draws compact ASCII text with the default neutral font color.,high,
+F01327,Render::TerminateEncodedString,Native\Graphics\src\Font.c,Writes the terminator for a game-encoded string.,high,Source literal is transformed by pragma vsstring
+F01328,Render::FormatEncodedText,Native\Graphics\src\Font.c,"Expands decimal, hexadecimal and string substitutions from the shared game-text context.",high,
+F01329,Menu::SetTextBoxText,Native\Game\src\Menu\TextBox.c,Starts printing a string in a text box or reports whether its existing text has finished.,high,
+F01330,Menu::SelectTextBoxChoice,Native\Game\src\Menu\TextBox.c,Navigates vertically ordered text-box choices and returns the confirmed one-based choice index.,high,
+F01331,Render::MeasureEncodedTextLine,Native\Graphics\src\Font.c,Measures the next game-text line in six-pixel units while accounting for supported control codes.,high,
+F01332,Render::DrawVariableWidthGlyph,Native\Graphics\src\Font.c,Draws one game-font glyph using the current font style and returns the next pen position.,high,
+F01333,Render::SetMenuFontStyle,Native\Graphics\src\Font.c,"Selects the menu font table, brightness and palette index for subsequent glyph drawing.",high,
+F01334,Render::DrawProgressiveTextBoxText,Native\Graphics\src\Font.c,"Draws variable-width text with progressive reveal, substitutions, continuation prompts and text sound effects.",high,
+F01335,Render::DrawScaledTextBoxText,Native\Graphics\src\Font.c,Draws fixed-width game text at the text box animation scale with font and alignment controls.,high,
+F01336,Render::BlendGlyphIntoPixels,Native\Graphics\src\Font.c,Reads a font glyph and alpha-blends its nontransparent pixels into a sixteen-bit image buffer.,high,
+F01337,Render::BlendTextBoxIntoFramebuffer,Native\Graphics\src\Font.c,Composites text directly into a captured framebuffer region during text-box transitions.,high,
+F01338,Render::QueueGimImage,Native\Graphics\src\Images.c,Allocates three GIM image layers and queues their shared image data for loading.,high,
+F01339,Render::ActivateGimLayer,Native\Graphics\src\Images.c,Activates a GIM layer and initializes its scanline wipe or reserves its blend workspace.,high,fields:gim_t.unk0_3=transition renderer;fields:gim_t.unk18=scanline wipe widths
+F01340,Render::ReleaseGimImages,Native\Graphics\src\Images.c,Releases GIM texture reservations and image-layer state after image loading has completed.,high,
+F01341,Render::UpdateGimImages,Native\Graphics\src\Images.c,"Completes GIM loading, uploads tile textures and palettes, and draws active image layers.",high,fields:gim_t.unk0_6=loading phase;fields:gim_t.unk0_9=reserved texture-page count
+F01342,Menu::Framework::LoadMenuOverlay,Native\Game\src\Menu\Framework\Framework.c,Loads the requested menu overlay and prepares the main-menu background or miscellaneous-item shortcut.,high,
+F01343,Menu::InitInformationTextBox,Native\Game\src\Menu\TextBox.c,Initializes text box seven with the requested information-box header style.,high,
+F01344,Menu::Framework::MenuItem,Native\Game\src\Menu\Framework\Framework.c,Returns the menu-row state for the requested row index.,high,
+F01345,Menu::Framework::SetMenuItem,Native\Game\src\Menu\Framework\Framework.c,Initializes a menu row and copies its printable text and spacing codes into the row buffer.,high,
+F01346,Render::BlendRgbWithBrightness,Native\Graphics\src\UiPrimitives.c,Interpolates two RGB colors and scales the result by the requested brightness.,high,
+F01347,Menu::Framework::GradientStopColor,Native\Game\src\Menu\Framework\Framework.c,"Returns a menu gradient color for the requested palette, blend step and brightness.",high,
+F01348,Menu::Framework::DrawMenuItem,Native\Game\src\Menu\Framework\Framework.c,"Draws a menu row with variable-width text, selection gradient, shadow and optional subtext.",high,
+F01349,Menu::Framework::UpdateMainMenuSelection,Native\Game\src\Menu\Framework\Framework.c,Initializes or navigates the enabled main-menu entries and displays reasons for unavailable actions.,high,
+F01350,Menu::Framework::UpdateMenuOverlay,Native\Game\src\Menu\Framework\Framework.c,Dispatches the active menu overlay and draws main-menu rows while loading or changing screens.,high,
+F01351,Render::DrawNumericGlyph,Native\Graphics\src\UiPrimitives.c,Draws a digit or numeric separator using one of the interface number fonts.,high,
+F01352,Render::DrawIntegerRightAligned,Native\Graphics\src\UiPrimitives.c,Draws a decimal integer right-to-left and returns the position preceding its first digit.,high,
+F01353,Render::DrawStatGauge,Native\Graphics\src\UiPrimitives.c,Draws a bordered sixty-four-pixel stat gauge with a brightness gradient.,high,
+F01354,Battle::DrawHudStatGauge,Native\Game\src\Battle\Hud.c,"Draws an Hp, Mp or Risk gauge with its numeric value and identifying label.",high,
+F01355,Battle::DrawSlidingStatusIcon,Native\Game\src\Battle\Hud.c,Draws a clipped status icon as it slides through the battle HUD status carousel.,high,
+F01356,Battle::StatusIconFlags,Native\Game\src\Battle\Hud.c,Maps actor status bits to the status-icon flags used by the HUD and status menu.,high,
+F01357,Battle::LimbCondition,Native\Game\src\Battle\Hud.c,"Classifies a limb as critical, damaged, wounded, good or excellent from its remaining Hp.",high,
+F01358,Battle::ShortcutIconBrightness,Native\Game\src\Battle\Hud.c,Returns the shortcut icon brightness from ability unlocks and current action restrictions.,high,
+F01359,Battle::ShowShortcutHud,Native\Game\src\Battle\Hud.c,Requests the shortcut HUD opening animation for the current frame.,high,
+F01360,Battle::DrawShortcutButtonMarker,Native\Game\src\Battle\Hud.c,Draws the small button marker used beside a battle shortcut icon.,med,Exact sprite artwork not identified
+F01361,Battle::DrawShortcutHud,Native\Game\src\Battle\Hud.c,"Animates the shortcut HUD and draws available spell, item, ability and Break Art icons.",high,
+F01362,Battle::DrawBattleHud,Native\Game\src\Battle\Hud.c,"Draws Ashley's Hp, Mp, Risk, limb conditions and rotating status icons with HUD transitions.",high,
+F01363,Effects::ResetScreenEffectState,Native\Game\src\Effects\ScreenEffects.c,Clears the screen-effect controller and restores its default scale.,high,
+F01364,Menu::Framework::InitGameInterface,Native\Game\src\Menu\Framework\Framework.c,Resets game-interface state and uploads the shared fonts and interface textures from system data.,high,
+F01365,Menu::Framework::ResumeAfterActionSelection,Native\Game\src\Menu\Framework\Framework.c,Restores the menu and submenu selection after an action or miscellaneous-item shortcut finishes.,high,
+F01366,Menu::Framework::ActionRestrictionFlags,Native\Game\src\Menu\Framework\Framework.c,"Builds action-menu restriction flags from Ashley's actor state, drawn weapon, Hp, Mp and statuses.",high,
+F01367,Menu::Framework::OpenGameMenu,Native\Game\src\Menu\Framework\Framework.c,"Opens a game menu, allocates shared row buffers and enables categories with unlocked content.",high,
+F01368,Battle::HasUnlockedSpellClass,Native\Game\src\Battle\Abilities.c,Reports whether at least one spell in the requested spell class is unlocked.,high,
+F01369,Battle::HasUnlockedWeaponBreakArt,Native\Game\src\Battle\Abilities.c,Reports whether Ashley has unlocked a Break Art for the currently equipped weapon category.,high,
+F01370,Battle::HasUnlockedBattleAbility,Native\Game\src\Battle\Abilities.c,Reports whether at least one ChainAbility or DefenseAbility is unlocked for the requested category.,high,
+F01371,Menu::Framework::OpenShortcutMenu,Native\Game\src\Menu\Framework\Framework.c,Validates a battle shortcut category and opens its menu or plays the unavailable-action sound.,high,
+F01372,Menu::Framework::ReleaseMenuRows,Native\Game\src\Menu\Framework\Framework.c,Frees the shared menu-row allocation and releases its associated texture reservations.,high,
+F01373,Menu::Framework::OpenLootListMenu,Native\Game\src\Menu\Framework\Framework.c,Opens the loot menu for a linked list of dropped items.,high,
+F01374,Menu::Framework::OpenLootEntryMenu,Native\Game\src\Menu\Framework\Framework.c,Opens the loot menu for a single loot entry such as a chest reward.,high,
+F01375,Menu::Framework::OpenChestStorageMenu,Native\Game\src\Menu\Framework\Framework.c,Opens the save-container menu for a storage chest and selects its container identifier.,high,MAINMENU dispatches category seven with flag 0x400 to the save-container menu
+F01376,Menu::Framework::OpenAbilityUnlockMenu,Native\Game\src\Menu\Framework\Framework.c,Stores newly unlocked Break Art and BattleAbility identifiers and opens their notification menu.,high,
+F01377,Menu::Framework::OpenChallengeMenu,Native\Game\src\Menu\Framework\Framework.c,"Opens the configured congratulations, Time Attack, cube-puzzle or healing-bonus menu.",high,MENUF dispatches vs_main_stateFlags.menuFSubmenu; caller does not choose its submode
+F01378,Menu::DismissAllTextBoxes,Native\Game\src\Menu\TextBox.c,Requests dismissal of all eight text boxes and reports when every box has closed.,high,
+F01379,Menu::ShowSceneNotification,Native\Game\src\Menu\TextBox.c,Formats a scene or ability-learning notification in the shared information text box.,high,
+F01380,Menu::IsSceneNotificationPending,Native\Game\src\Menu\TextBox.c,"Reports whether a scene notification is still printing, awaiting confirmation or inside its timed display period.",high,
+F01381,Menu::ReleaseSceneNotification,Native\Game\src\Menu\TextBox.c,Dismisses the scene notification and frees its formatted text buffer.,high,
+F01382,Battle::ShowPuzzleTimer,Native\Game\src\Battle\Hud.c,Enables the puzzle timer in the lower-screen HUD.,high,
+F01383,Battle::HidePuzzleTimer,Native\Game\src\Battle\Hud.c,Disables the puzzle timer in the lower-screen HUD.,high,
+F01384,Battle::DrawPuzzleTimer,Native\Game\src\Battle\Hud.c,"Formats minutes, seconds and hundredths and draws the puzzle timer at the bottom of the screen.",high,
+F01385,Battle::SetHudHidden,Native\Game\src\Battle\Hud.c,Sets whether the main battle HUD slides offscreen.,high,
+F01386,Battle::SetHudBattleMode,Native\Game\src\Battle\Hud.c,Selects the battle-mode limb display and weapon-state indicator for the HUD.,high,
+F01387,Menu::Framework::ActionSelectionState,Native\Game\src\Menu\Framework\Framework.c,Returns the shared menu action-selection state and encoded ability request.,high,
+F01388,Effects::LoadScreenEffectOverlay,Native\Game\src\Effects\ScreenEffects.c,Queues the secondary screen-effect overlay or polls its load completion.,high,
+F01389,Effects::DrawScreenEffectOverlay,Native\Game\src\Effects\ScreenEffects.c,"Draws enabled scaling, distortion and other screen effects after their overlay has loaded.",med,Individual secondary effects inferred from controller fields and dispatch
+F01390,Effects::AcquireScreenEffectOverlay,Native\Game\src\Effects\ScreenEffects.c,Acquires screen-effect texture space and starts loading the secondary screen-effect overlay.,high,
+F01391,Effects::ReleaseScreenEffectOverlay,Native\Game\src\Effects\ScreenEffects.c,Releases screen-effect texture reservations and resets the overlay controller.,high,
+F01392,Menu::UpdateTextBoxes,Native\Game\src\Menu\TextBox.c,"Animates and renders active text boxes, rotates their primitive lists and draws shared interface overlays.",high,fields:vs_battle_textBox.unk22=animation duration;fields:vs_battle_textBox.unk24=animated x;fields:vs_battle_textBox.unk26=animated y;fields:vs_battle_textBox.unk28=animated width;fields:vs_battle_textBox.unk2A=animated height
+F01393,Render::DrawGimTiles,Native\Graphics\src\Images.c,Draws scaled GIM image tiles and fills exposed background regions using the layer color.,high,fields:gim_t.unk3=brightness or transition parameter;fields:gim_t.unkC=scale and ordering flags;fields:gim_t.unkE=background color
+F01394,Render::DrawGimFramebufferFade,Native\Graphics\src\Images.c,Draws a GIM layer blended with the previous framebuffer according to its fade brightness.,high,
+F01395,Render::DrawGimScanlineWipe,Native\Graphics\src\Images.c,Draws a GIM layer through irregular horizontal scanline wipe boundaries.,high,
+F01396,Render::SetGimWorkspaceDrawArea,Native\Graphics\src\Images.c,Queues drawing-area and offset commands for the offscreen GIM blend workspace.,high,
+F01397,Render::SetGimFramebufferDrawArea,Native\Graphics\src\Images.c,Queues drawing-area and offset commands for the GIM destination framebuffer.,high,
+F01398,Render::DrawGimCrossfade,Native\Graphics\src\Images.c,Composites GIM tiles and the previous framebuffer through a column-sized blend workspace.,high,
+F01399,Render::DrawGimLayer,Native\Graphics\src\Images.c,Selects a GIM layer palette and dispatches its transition renderer at the requested draw depth.,high,
+F01400,Items::ConsumeMiscItem,Native\Game\src\Items\Inventory.c,Consumes one matching miscellaneous item and clears its inventory slot when the count reaches zero.,high,
+F01401,Core::Memory::ZeroWordsBackward,Native\Core\src\Memory\Copy.c,Clears an aligned memory region one word at a time from its end toward its start.,high,Requires positive word-multiple size
+F01402,Core::Memory::CopyBytesBackward,Native\Core\src\Memory\Copy.c,Copies a positive-sized byte region from its last byte to its first byte.,high,Backward copy preserves overlap only when destination is not below source
+F01403,Core::Math::SplitDecimalDigit,Native\Core\src\Math\FixedPoint.c,Packs the decimal ones digit into the low nibble and the remaining decimal quotient into the higher bits.,high,Not a full binary-to-packed-decimal conversion
+F01404,Core::Random::NextInterfaceRandomBits,Native\Core\src\Random.c,Advances the interface multiplicative random stream and returns high bits from its previous state.,high,Zero-bit requests still advance the stream
+F01405,Render::InsertThreeWordPrimitive,Native\Graphics\src\UiPrimitives.c,Allocates a three-word primitive payload and inserts it before the supplied ordering-table link.,high,Also carries lines and draw-area commands; not limited to tiles
+F01406,Render::InsertDrawModeCommand,Native\Graphics\src\UiPrimitives.c,Inserts a one-word drawing-state command before the supplied ordering-table link.,high,Accepts texture-window commands as well as texture-page commands
+F01407,Menu::Framework::DrawMainMenuCursor,Native\Game\src\Menu\Framework\Framework.c,Draws the pulsing main-menu cursor at the requested row and advances its brightness animation.,high,
+F01408,Render::UploadImageRectangle,Native\Graphics\src\UiPrimitives.c,Uploads an image rectangle using a rotating pool of persistent rectangle descriptors.,high,
+F01409,Menu::TextBox,Native\Game\src\Menu\TextBox.c,Returns the text-box state for the requested box identifier.,high,
+F01410,Menu::TextBoxAnchor,Native\Game\src\Menu\TextBox.c,"Computes a text-box origin and attachment flags from an anchor preset, facing and text dimensions.",high,fields:func_800CCE10_t.unk0_0=x;fields:func_800CCE10_t.unk0_12=y;fields:func_800CCE10_t.unk0_24=orientation flags
+F01411,Menu::InitTextBox,Native\Game\src\Menu\TextBox.c,"Initializes a text box layout, animation style, font brightness and opening state.",high,
+F01412,Menu::DismissTextBox,Native\Game\src\Menu\TextBox.c,Starts a text box closing animation and clears its associated actor text attachment.,high,
+F01413,Menu::DrawInformationBoxHeader,Native\Game\src\Menu\TextBox.c,Draws the selected header icon along the edge of an information text box.,med,Exact header artwork not identified
+F01414,Menu::DrawInformationBoxBackdrop,Native\Game\src\Menu\TextBox.c,Draws the animated information-box backdrop with a dimmed framebuffer edge and optional header.,high,
+F01415,Menu::FlipTextBoxShapePoint,Native\Game\src\Menu\TextBox.c,Reflects normalized text-box shape coordinates horizontally or vertically.,high,
+F01416,Menu::DrawTextBoxFrame,Native\Game\src\Menu\TextBox.c,"Draws a shaped text-box frame, optional pointer, textured fill and offset shadow.",high,
+F01417,Effects::DrawTrailSegment,Native\Game\src\Effects\Trails.c,Projects a bone trail segment and draws its textured or framebuffer-distortion quad with endpoint fading.,high,
+F01418,Effects::UpdateBoneTrail,Native\Game\src\Effects\Trails.c,"Initializes, updates, fades or releases a spline-smoothed trail attached to an actor bone.",high,
+F01419,Effects::IgnoreRuntimeDiagnostic,Native\Game\src\Effects\Runtime.c,Leaves the effect runtime unchanged when an internal diagnostic hook is called.,med,Empty original callback with no defined return value
+F01420,Effects::InitEffectRuntime,Native\Game\src\Effects\Runtime.c,"Initializes effect instances, resource state and effect animation controllers.",high,
+F01421,Effects::ResetEffectInstances,Native\Game\src\Effects\Runtime.c,"Clears active effect lists, phase counters, resource references and allocated instance tokens.",high,
+F01422,Effects::InitEffectInstance,Native\Game\src\Effects\Runtime.c,"Initializes an effect script instance, its sixteen working slots and its source and target descriptors.",high,fields:D_800F53B8_t.unkA=script cursor;fields:D_800F53B8_t.unkC=script data;fields:D_800F53B8_t.unk14_0=instance token
+F01423,Effects::CreatePrimaryEffectInstance,Native\Game\src\Effects\Runtime.c,Allocates and inserts a primary effect-script instance in priority order.,high,fields:D_800F53B8_t.unk9=sort priority
+F01424,Effects::DestroyPrimaryEffectInstance,Native\Game\src\Effects\Runtime.c,"Unlinks a primary effect instance, releases its resources and destroys all attached render callbacks.",high,
+F01425,Effects::UpdatePrimaryEffects,Native\Game\src\Effects\Runtime.c,"Advances the primary action-effect loading, script execution and cleanup phases.",high,
+F01426,Effects::UpdateSecondaryEffects,Native\Game\src\Effects\Runtime.c,Updates secondary effect scripts and renderer callbacks and combines their active-state flags.,high,fields:D_800F53B8_t3.unk3A=secondary phase;fields:D_800F53B8_t.unk14_16=elapsed script frame
+F01427,Effects::CanStartEffectTrack,Native\Game\src\Effects\Runtime.c,Reports whether the primary effect is ready to start another pending script track.,high,
+F01428,Effects::PrimaryEffectTrackCount,Native\Game\src\Effects\Runtime.c,Returns the primary effect track count while its playback phase is active.,high,
+F01429,Effects::RequeueEffectTrack,Native\Game\src\Effects\Runtime.c,Decrements the started-track count and marks a primary effect track available again.,high,
+F01430,Effects::IsPrimaryEffectLoaded,Native\Game\src\Effects\Runtime.c,Reports whether the primary effect resource set is active.,high,
+F01431,Effects::StartEffectTrack,Native\Game\src\Effects\Runtime.c,Creates a pending primary effect-script track and marks its track identifier as started.,high,
+F01432,Effects::UpdateEffectRuntime,Native\Game\src\Effects\Runtime.c,"Updates primary and secondary effects, alternates their render buffer and advances active effect camera work.",high,
+F01433,Effects::BeginActionEffect,Native\Game\src\Effects\Runtime.c,"Copies an action-effect request, allocates its token and starts the primary effect-loading sequence.",high,
+F01434,Effects::ClearPrimaryEffects,Native\Game\src\Effects\Runtime.c,Releases primary effect scripts and their per-instance resources during cancellation.,high,
+F01435,Effects::SpawnSecondaryEffects,Native\Game\src\Effects\Runtime.c,Creates one secondary effect-script instance per target and initializes its phase and rendering parameters.,high,
+F01436,Effects::BeginSecondaryEffects,Native\Game\src\Effects\Runtime.c,Resets secondary animation controllers and spawns target effect instances for an action request.,high,
+F01437,Effects::SpawnSecondaryEffectRequest,Native\Game\src\Effects\Runtime.c,Forwards an action request and its rendering parameters to the secondary effect-instance spawner.,high,
+F01438,Effects::SetPrimaryEffectPhase,Native\Game\src\Effects\Runtime.c,Sets the primary action-effect lifecycle phase.,high,
+F01439,Effects::SetSecondaryEffectPhase,Native\Game\src\Effects\Runtime.c,Sets the lifecycle phase stored in a secondary effect instance.,high,
+F01440,Effects::PrimaryEffectPhase,Native\Game\src\Effects\Runtime.c,Returns the current primary action-effect lifecycle phase.,high,
+F01441,Effects::AllocateEffectToken,Native\Game\src\Effects\Runtime.c,Reserves a free nonzero effect token from the four token bitmaps.,high,
+F01442,Effects::ReleaseEffectToken,Native\Game\src\Effects\Runtime.c,Clears the allocation bit for an effect-instance token.,high,
+F01443,Effects::CreateSecondaryEffectInstance,Native\Game\src\Effects\Runtime.c,Allocates and inserts a secondary effect-script instance in priority order.,high,
+F01444,Effects::DestroySecondaryEffectInstance,Native\Game\src\Effects\Runtime.c,"Unlinks a secondary effect instance, releases its resources and returns its token.",high,
+F01445,Effects::AttachEffectRenderer,Native\Game\src\Effects\Runtime.c,"Allocates a renderer callback node, links it to an effect instance and invokes its initialization mode.",high,fields:func_800D4910_t.unk8=renderer-owned state;fields:D_800F53B8_t3.unk34=renderer list
+F01446,Effects::DetachEffectRenderer,Native\Game\src\Effects\Runtime.c,Unlinks an effect renderer callback and frees its private state and list node.,high,
+F01447,Effects::SpawnBoneTrail,Native\Game\src\Effects\Trails.c,"Builds a persistent bone-trail effect request from actor, bone, color and texture identifiers.",high,"Trail configuration packs actor, bone, color, texture and lifetime"
+F01448,Effects::FadeBoneTrails,Native\Game\src\Effects\Trails.c,Requests an eight-frame fade for every active bone-trail renderer.,high,Original parameters are unused
+F01449,Effects::SpawnSourceActorEffect,Native\Game\src\Effects\Runtime.c,Spawns the secondary effect associated with the current action's source actor.,med,Effect identifier 56; specific visual appearance not established
+F01450,Effects::ClearActionEffectMode,Native\Game\src\Effects\Runtime.c,Clears the action-effect mode used by effect-script branch and control commands.,med,Exact mode enumeration not established
+F01451,Effects::ClampTrailTexturePoint,Native\Game\src\Effects\Trails.c,Offsets a projected trail point and clamps its framebuffer texture coordinates to the interior pixel range.,high,
+F01452,Effects::MapTrailFramebufferTexture,Native\Game\src\Effects\Trails.c,Selects the previous framebuffer texture page and maps all four trail vertices into its texture coordinates.,high,
+F01453,Effects::StepParticleEndpointTowardStart,Native\Game\src\Effects\Particles.c,Moves a projected particle segment endpoint one pixel toward its starting point along its dominant axis.,high,fields:func_800CFAAC_t.unkC=starting x;fields:func_800CFAAC_t.unkE=starting y;fields:func_800CFAAC_t.unk10=endpoint x;fields:func_800CFAAC_t.unk12=endpoint y

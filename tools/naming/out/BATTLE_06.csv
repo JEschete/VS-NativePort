@@ -1,0 +1,161 @@
+id,final_name,final_location,purpose,confidence,notes
+F00776,Content::FindFreeActorAssetRequest,Native\Content\src\ActorAssets.c,Finds an unused slot in the actor and weapon asset request queue.,high,
+F00777,Content::QueueActorAssetRequest,Native\Content\src\ActorAssets.c,Copies an actor or weapon asset request into the first free queue slot.,high,
+F00778,Content::UpdateActorAssetQueue,Native\Content\src\ActorAssets.c,Advances the leading model or sequence request and removes it when loading completes.,high,
+F00779,Content::QueueAshleyWeaponSequence,Native\Content\src\ActorAssets.c,Queues Ashley's weapon-specific auxiliary SEQ when the weapon sequence set changes.,high,actorId=3 selects the auxiliary sequence buffer
+F00780,Field::FindSharedGimmickModel,Native\Game\src\Field\Gimmicks.c,Finds another loaded Gimmick of the requested type whose geometry can be shared.,high,
+F00781,Field::SetGimmickPaletteTable,Native\Game\src\Field\Gimmicks.c,Copies the seven Gimmick type palettes into the room's palette lookup table.,high,
+F00782,Field::CreateGimmickInstance,Native\Game\src\Field\Gimmicks.c,"Initializes a room Gimmick with shared geometry, palette, tile placement and stack relationships.",high,fields:D_800F45E0_t.unk16C.actorId=gimmickType
+F00783,Field::ReleaseGimmickInstance,Native\Game\src\Field\Gimmicks.c,Releases a Gimmick's geometry when unshared and removes its room collision registration.,high,
+F00784,Content::OffsetModelTextureCoordinates,Native\Content\src\ActorAssets.c,Offsets polygon texture coordinates for flat or Gouraud model primitives.,high,
+F00785,Content::FindSharedWeaponModel,Native\Content\src\ActorAssets.c,Finds a loaded WEP model that can supply geometry for a weapon asset request.,high,
+F00786,Content::CopyRelocatedModelGeometry,Native\Content\src\ActorAssets.c,Copies model geometry into a buffer and rebases its four section pointers.,high,
+F00787,Content::UpdateWeaponModelLoad,Native\Content\src\ActorAssets.c,Loads a WEP from disc or a shared model slot and advances its staged parser.,high,
+F00788,Content::ParseWeaponModel,Native\Content\src\ActorAssets.c,"Builds a WEP instance, uploads its textures and palettes, and binds its attachment bone.",high,
+F00789,Content::LoadWeaponMaterialPalette,Native\Content\src\ActorAssets.c,Selects the weapon material palette and uploads the WEP instance's combined Clut.,high,
+F00790,Content::ReleaseWeaponModel,Native\Content\src\ActorAssets.c,Releases unshared WEP geometry and texture references for a weapon model slot.,high,
+F00791,Content::FindSharedActorModel,Native\Content\src\ActorAssets.c,Finds another actor with the requested SHP model and returns its asset slot.,high,
+F00792,Content::UpdateActorModelLoad,Native\Content\src\ActorAssets.c,Loads a SHP from disc or reuses a loaded actor model before advancing its staged parser.,high,
+F00793,Content::ParseActorModel,Native\Content\src\ActorAssets.c,"Builds an actor from SHP geometry, textures and embedded SEQ data, then applies its initial placement.",high,
+F00794,Content::FindSharedActorSequence,Native\Content\src\ActorAssets.c,Finds an actor with the same SHP and a compatible base or weapon SEQ allocation.,high,
+F00795,Content::FindSharedActorSequence,Native\Content\src\ActorAssets.c,Finds an actor with the same SHP and a compatible base or weapon SEQ allocation.,high,dup-of:F00794
+F00796,Content::UpdateActorSequenceLoad,Native\Content\src\ActorAssets.c,"Loads actor, weapon, shared or special SEQ data and passes it to the sequence parser.",high,
+F00797,Content::CopyRelocatedWeaponSequence,Native\Content\src\ActorAssets.c,Clones the fixed-size weapon SEQ buffer and rebases its two internal pointers.,high,
+F00798,Content::ParseActorSequence,Native\Content\src\ActorAssets.c,Installs and relocates actor or shared SEQ data and loads associated ETM textures when required.,high,
+F00799,Content::BindSharedActorSequence,Native\Content\src\ActorAssets.c,Binds a shared sequence bank and its model-specific animation count to an actor.,high,
+F00800,Content::ReleaseActorSequence,Native\Content\src\ActorAssets.c,"Releases an actor's weapon or special SEQ, or detaches and frees a shared sequence bank.",high,
+F00801,Actors::SelectSharedSequenceBank,Native\Game\src\Actors\Animation.c,Switches the active shared sequence bank and clears incompatible actor texture animations.,high,
+F00802,Actors::SharedSequenceBankId,Native\Game\src\Actors\Animation.c,Returns the one-based identifier of the active shared sequence bank.,high,
+F00803,Content::ReleaseActorModel,Native\Content\src\ActorAssets.c,"Releases an actor's SHP, SEQ, WEP and texture resources while preserving shared allocations.",high,
+F00804,Content::ReleaseSequenceEffectTexture,Native\Content\src\ActorAssets.c,Stops texture animations and releases the texture page owned by a shared sequence bank.,high,
+F00805,Content::UpdateSequenceEffectTextureLoad,Native\Content\src\ActorAssets.c,Loads an ETM image and uploads it into the texture page reserved for its sequence bank.,high,
+F00806,Actors::FinishActorPlacement,Native\Game\src\Actors\ActorState.c,Retains the empty callback invoked after actor placement commands.,low,empty callback; semantics unavailable
+F00807,Actors::FinishActorPlacement,Native\Game\src\Actors\ActorState.c,Retains the empty callback invoked after actor placement commands.,low,dup-of:F00806; empty callback
+F00808,Actors::ResetActorMotionState,Native\Game\src\Actors\ActorState.c,"Restores actor transforms, animation, shadow interpolation and movement controls to their initial state.",high,
+F00809,Actors::ResetAllActorMovement,Native\Game\src\Actors\ActorState.c,"Clears temporary movement, jump and climb states for every loaded actor.",high,
+F00810,Actors::SetActorPaletteFade,Native\Game\src\Actors\Appearance.c,Enables an actor palette fade with a doubled duration or disables its fade flag.,med,fade interpretation tentative; state in unk1802 and flag unk5AC_21
+F00811,Actors::RequestActorAnimationAdvance,Native\Game\src\Actors\Animation.c,Marks the actor's sequence control flag until an animation script clears it.,med,fields:D_800F4538_t.unk5AC_18=animationControlFlag; exact request semantics uncertain
+F00812,Actors::ResetActorWeaponVisibilityBlend,Native\Game\src\Actors\Appearance.c,Snaps equipped weapon visibility blend values to their current visible or hidden endpoints.,high,
+F00813,Actors::SetActorWeaponDrawn,Native\Game\src\Actors\Animation.c,Draws or sheathes an actor's weapons with optional transition animation and weapon sounds.,high,
+F00814,Actors::PlayActorWeaponDrawSound,Native\Game\src\Actors\Animation.c,Plays the weapon-sequence-specific draw or sheath sound for an actor.,high,
+F00815,Actors::StopActorMotion,Native\Game\src\Actors\Movement.c,"Clears an actor's movement modes, translation timer and turn timer.",high,
+F00816,Actors::ClearActorMovementModes,Native\Game\src\Actors\Movement.c,"Clears actor locomotion, jump, climb and special movement mode flags.",high,
+F00817,Battle::PlayMeleeAttackAnimation,Native\Game\src\Battle\ActionAnimation.c,Selects a melee attack animation by target elevation and turns the attacking actor toward its target.,high,
+F00818,Battle::PlayDefenseAnimation,Native\Game\src\Battle\ActionAnimation.c,Selects a weapon-drawn defensive animation by target elevation and clears Ashley's locomotion state.,med,
+F00819,Battle::SetEnemyCombatPose,Native\Game\src\Battle\ActionAnimation.c,Selects an enemy combat pose or its exit animation and preserves the previous animation pose for blending.,med,
+F00820,Actors::PlayActorActionPose,Native\Game\src\Actors\Animation.c,"Selects a requested action pose, turns toward a point and clears queued movement animation.",med,
+F00821,Actors::ActorFacingDeltaToPoint,Native\Game\src\Actors\Movement.c,Returns the signed horizontal turn needed for an actor to face a world-space point.,high,
+F00822,Actors::ActorPitchToPoint,Native\Game\src\Actors\Skeleton.c,Returns the vertical angle from an actor's root bone to a world-space point.,high,
+F00823,Battle::PlaySpellCastAnimation,Native\Game\src\Battle\ActionAnimation.c,Selects a spell casting stage with armed and missing-animation fallbacks and optionally faces the target.,med,
+F00824,Actors::IsAshleyTransitionPose,Native\Game\src\Actors\Animation.c,Tests whether Ashley is playing the common transition pose in its armed or unarmed variant.,med,animationId=99 or 199; exact pose identity uncertain
+F00825,Actors::IsActorActionAnimationBusy,Native\Game\src\Actors\Animation.c,Tests actor action state and animation completion to determine whether an action animation is still busy.,high,
+F00826,Actors::RestoreActorIdlePose,Native\Game\src\Actors\Animation.c,Restores an actor's idle pose unless its current animation is the protected transition pose.,high,
+F00827,Actors::RestoreActorNeutralPose,Native\Game\src\Actors\Animation.c,Restores an actor's neutral transition pose through the common animation reset routine.,high,
+F00828,Field::RefreshAshleyInteractionTile,Native\Game\src\Field\Gimmicks.c,Refreshes the adjacent tile affected by Ashley's lifting or pushing animation.,high,
+F00829,Actors::RestoreActorBasePose,Native\Game\src\Actors\Animation.c,Resolves interrupted movement and Gimmick interactions before restoring the requested actor pose.,high,
+F00830,Battle::PlayActorDamageReaction,Native\Game\src\Battle\ActionAnimation.c,"Chooses a directional hit reaction, interrupts movement and resets the actor's head tracking speed.",high,
+F00831,Battle::PlayChainAbilityAnimation,Native\Game\src\Battle\ActionAnimation.c,"Selects a ChainAbility animation by ability type, target elevation and alternating attack side.",high,
+F00832,Battle::PlayDefenseAbilityAnimation,Native\Game\src\Battle\ActionAnimation.c,Starts the defensive reaction animation and advances the actor's battle action state.,high,
+F00833,Battle::PlaySpecialActionAnimation,Native\Game\src\Battle\ActionAnimation.c,Selects a special action's preparation or execution animation with elevation and missing-animation fallbacks.,med,shared by special action ranges; preparation and execution stages
+F00834,Battle::PlayBreakArtAnimation,Native\Game\src\Battle\ActionAnimation.c,Starts a Break Art preparation or execution animation and queues its optional follow-up animation.,med,
+F00835,Actors::BeginActorDeath,Native\Game\src\Actors\ActorState.c,"Starts actor or Gimmick death state, interrupts airborne motion and propagates death to attached actors.",high,
+F00836,Field::DropUnsupportedGimmickStack,Native\Game\src\Field\Gimmicks.c,"Removes a Gimmick's support, updates stacked objects and makes actors above the stack fall.",high,
+F00837,Field::FindGimmickBelow,Native\Game\src\Field\Gimmicks.c,Finds the nearest eligible stationary Gimmick below another Gimmick on the same tile.,high,
+F00838,Field::GimmickSubtype,Native\Game\src\Field\Gimmicks.c,Returns the subtype byte for a type-one Gimmick or rejects other types.,med,fields:D_800F45E0_t.unk16C.unk1=typeOneSubtype
+F00839,Actors::SetWeaponBrightnessOverride,Native\Game\src\Actors\Appearance.c,Sets the equipped weapon's brightness override flag and grayscale intensity.,high,
+F00840,Actors::AnimationBattleWindowFrame,Native\Game\src\Actors\Animation.c,Scans the current animation commands for the battle timing marker without advancing animation state.,high,
+F00841,Actors::SetActorCompanion,Native\Game\src\Actors\ActorState.c,Assigns an attached companion actor and copies its blend and color parameters.,med,fields:D_800F4538_t.unk17FD=companionActorId
+F00842,Actors::SetActorSoundOverrides,Native\Game\src\Actors\Animation.c,Applies actor sound overrides to one actor or every loaded actor.,high,
+F00843,Actors::ApplyActorSoundOverrides,Native\Game\src\Actors\Animation.c,Updates an actor's sound override mode and optionally blends from its current animation sounds.,high,fields:D_800F4538_t.unk17E4=soundOverrides
+F00844,Actors::SetRoomActorScale,Native\Game\src\Actors\Appearance.c,Stores the room model scale and updates the scale factor of every loaded actor.,high,fields:D_800F4538_t.unk183C=modelScale
+F00845,Actors::SetActorTravelAnimation,Native\Game\src\Actors\Animation.c,Sets the actor's scripted travel animation or restores the default walking animation.,high,fields:D_800F4538_t.unk6E5=travelAnimationId
+F00846,Actors::ActorTravelAnimation,Native\Game\src\Actors\Animation.c,Returns the animation used while the actor follows a scripted movement command.,high,
+F00847,Actors::SetActorHeadTracking,Native\Game\src\Actors\Skeleton.c,Sets an actor's head tracking target or angles and optional angular speed limit.,high,fields:D_800F4538_t.unk17FC=headTrackingTarget
+F00848,Actors::ResetActorHeadTrackingSpeed,Native\Game\src\Actors\Skeleton.c,Restores the head tracking angular speed limit according to actor collision size.,high,fields:D_800F4538_t.unk17F4.pad=headTrackingStepLimit
+F00849,Actors::EnableModelPalettePulse,Native\Game\src\Actors\Appearance.c,Enables palette pulse channels for an actor or Gimmick and initializes its alternate Clut.,high,
+F00850,Actors::DisableModelPalettePulse,Native\Game\src\Actors\Appearance.c,Clears one or all active palette pulse channels on an actor or Gimmick.,high,
+F00851,Actors::AttachActorToParentBone,Native\Game\src\Actors\ActorState.c,"Assigns an actor's parent and attachment bone, resets its local transform and enables attachment.",high,
+F00852,Actors::ReleaseActorAttachmentLock,Native\Game\src\Actors\ActorState.c,Validates an attached actor's parent and clears its attachment lock flag.,med,fields:D_800F4538_unk0.unk9_5=attachmentLock
+F00853,Field::GimmickPlacement,Native\Game\src\Field\Gimmicks.c,"Exports a stationary Gimmick's tile, orientation and height offset for room state storage.",high,source has an uninitialized-pointer check
+F00854,Field::SetGimmickOrientation,Native\Game\src\Field\Gimmicks.c,Sets a crate-like Gimmick's discrete orientation and rebuilds its rotation matrix.,high,fields:D_800F45E0_t.unk16C.unk2=orientationVariant
+F00855,Actors::QueueActorAnimation,Native\Game\src\Actors\Animation.c,Stores the next actor animation and its blend parameters for deferred playback.,high,fields:D_800F4538_t.unk6E0=queuedAnimationId
+F00856,Actors::PlayActorAnimation,Native\Game\src\Actors\Animation.c,"Selects an actor animation with locomotion and weapon variants, resets its sequence and configures blending.",high,
+F00857,Actors::PlayActorAnimationAtFrame,Native\Game\src\Actors\Animation.c,Starts an actor animation and advances it to the requested initial frame.,high,
+F00858,Actors::BeginActorShadowBlend,Native\Game\src\Actors\Appearance.c,Initializes interpolation of shadow expansion and shrink rates for an animation transition.,high,
+F00859,Actors::ActorFadeParameters,Native\Game\src\Actors\Appearance.c,"Copies an actor's current fade intensity, target and mode into the caller's parameter block.",high,
+F00860,Actors::SetActorFadeParameters,Native\Game\src\Actors\Appearance.c,"Restores the actor's fade intensity, target and mode from a parameter block.",high,
+F00861,Actors::ActorTint,Native\Game\src\Actors\Appearance.c,Copies the actor's four-byte tint parameters into the caller's buffer.,high,
+F00862,Actors::SetActorTint,Native\Game\src\Actors\Appearance.c,Enables an actor tint override or clears it when no color is supplied.,high,
+F00863,Actors::SetActorTransitionMode,Native\Game\src\Actors\Animation.c,Stores the global actor transition mode used by battle camera transition setup and teardown.,low,global has no observed readers in recovered C
+F00864,Actors::SetActorDisplayFlags,Native\Game\src\Actors\ActorState.c,Sets actor or Gimmick update and visibility flags and propagates weapon visibility to attached companions.,high,
+F00865,Actors::SetActorAnimationLocked,Native\Game\src\Actors\Animation.c,Enables or disables the actor flag that prevents animation changes.,high,fields:D_800F4538_t.unk5AC_24=animationLocked
+F00866,Field::SetActorCollisionBypass,Native\Game\src\Field\Collision.c,Sets the actor's terrain and actor collision bypass flags.,high,
+F00867,Field::ActorCollisionBypass,Native\Game\src\Field\Collision.c,Returns the actor's terrain and actor collision bypass flags.,high,
+F00868,Actors::ResetActorRunMomentum,Native\Game\src\Actors\Movement.c,"Clears the actor's stored movement speed, run-duration counter and coasting flag.",high,
+F00869,Actors::SetActorWalkRunSpeeds,Native\Game\src\Actors\Movement.c,Sets actor walking and running speed thresholds and disables running when their ordering is invalid.,high,fields:D_800F4538_t.unk5BA=walkSpeed; fields:D_800F4538_t.unk5B9=runSpeedThreshold
+F00870,Actors::SetActorTravelStepCounts,Native\Game\src\Actors\Movement.c,Sets default translation and rotation step counts for scripted movement commands.,high,fields:D_800F4538_t.unk5C2=translationStepCount; fields:D_800F4538_t.unk5C0=rotationStepCount
+F00871,Actors::ActorTravelStepCounts,Native\Game\src\Actors\Movement.c,Returns the actor's default translation and rotation step counts.,high,
+F00872,Actors::ActorStateFlags,Native\Game\src\Actors\ActorState.c,"Builds the public state bitmask for actor visibility, movement, animation, attachment and action states.",high,
+F00873,Actors::ActorPlacement,Native\Game\src\Actors\ActorState.c,"Exports actor or Gimmick tile coordinates, world position and facing into a placement record.",high,
+F00874,Actors::ActorTaggedBoneMatrix,Native\Game\src\Actors\Skeleton.c,Finds a semantic bone tag and copies its current matrix and bone length.,high,
+F00875,Actors::ActorBoneMatrix,Native\Game\src\Actors\Skeleton.c,Copies the current actor or Gimmick bone matrix and its armature length.,high,
+F00876,Actors::ProjectActorTaggedBone,Native\Game\src\Actors\Skeleton.c,Projects a tagged bone endpoint or an actor's overhead anchor into screen coordinates.,high,
+F00877,Actors::ProjectActorBone,Native\Game\src\Actors\Skeleton.c,Projects a numbered bone endpoint into screen coordinates and propagates lookup errors.,high,
+F00878,Actors::ProjectActorBoneEndpoint,Native\Game\src\Actors\Skeleton.c,"Transforms a bone origin, midpoint or tip through its matrix into screen coordinates.",high,
+F00879,Actors::FindActorBoneTag,Native\Game\src\Actors\Skeleton.c,"Finds a bone by semantic tag, either packed limb group, or its auxiliary armature tag.",high,fields:_armature_t.unk0=boneLength; fields:_armature_t.unk6=semanticBoneTag
+F00880,Actors::ActorBoneTag,Native\Game\src\Actors\Skeleton.c,Returns a bone's semantic tag or one of its packed limb-group identifiers.,high,
+F00881,Actors::ActorAnchorMatrix,Native\Game\src\Actors\Skeleton.c,"Returns a bone transform and length, replacing vertical translation for the actor-origin anchor.",high,
+F00882,Actors::ActorBoneWorldMatrix,Native\Game\src\Actors\Skeleton.c,Copies a world-space actor or weapon bone transform and returns its armature length.,high,
+F00883,Actors::ActorTaggedBonePosition,Native\Game\src\Actors\Skeleton.c,Returns a tagged bone endpoint or a special actor anchor in world coordinates.,high,
+F00884,Actors::ActorBonePosition,Native\Game\src\Actors\Skeleton.c,Returns a numbered actor or weapon bone endpoint in world coordinates.,high,
+F00885,Actors::ActorHighGroupBonePosition,Native\Game\src\Actors\Skeleton.c,Returns the endpoint of the bone selected by the armature's high-nibble limb-group tag.,med,fields:_armature_t.unk7.highNibble=limbGroupA; anatomical meaning unconfirmed
+F00886,Actors::ActorLowGroupBonePosition,Native\Game\src\Actors\Skeleton.c,Returns the endpoint of the bone selected by the armature's low-nibble limb-group tag.,med,fields:_armature_t.unk7.lowNibble=limbGroupB; anatomical meaning unconfirmed
+F00887,Actors::ActorBoneEndpointPosition,Native\Game\src\Actors\Skeleton.c,"Transforms a bone origin, midpoint or tip into world coordinates using its armature length.",high,
+F00888,Actors::ActorBoneWorldTransform,Native\Game\src\Actors\Skeleton.c,Converts actor or weapon bone matrices to world space and supports the actor root-motion anchor.,high,
+F00889,Actors::BeginActorJumpToTile,Native\Game\src\Actors\Movement.c,Computes a jump arc to a tile or moving platform and starts the actor's jump animation.,high,
+F00890,Actors::PlayActorTurnAnimation,Native\Game\src\Actors\Animation.c,"Selects the actor's left, right or flying turn animation when its desired facing differs.",high,
+F00891,Battle::FinishEnemyCombatPose,Native\Game\src\Battle\ActionAnimation.c,"Turns an enemy, starts its combat-pose exit animation and marks the pose transition active.",med,
+F00892,Actors::ApplyActorGroundOffset,Native\Game\src\Actors\Movement.c,Applies an actor's direct movement offset and starts falling when its new support is too low.,high,
+F00893,Actors::ApplyActorFlightMovement,Native\Game\src\Actors\Movement.c,"Moves a flying actor along its queued vector and selects ascent, descent or level-flight animation.",high,
+F00894,Actors::ApplyActorMovementVector,Native\Game\src\Actors\Movement.c,Adds a queued movement vector to the actor position and updates its tile and facing.,high,
+F00895,Field::RelativeCollisionSampleHeight,Native\Game\src\Field\Collision.c,Returns a wrapped perimeter collision sample height relative to the actor's vertical position.,high,
+F00896,Actors::UpdateActorTeleportTransition,Native\Game\src\Actors\Movement.c,"Advances an actor's staged fade and relocation transition, then restores its movement state.",med,fade-and-relocate state machine; exact locomotion presentation inferred
+F00897,Actors::CancelActorTeleportTransition,Native\Game\src\Actors\Movement.c,Cancels a staged actor relocation transition and propagates cancellation to its attached companion.,med,
+F00898,Actors::UpdateActorTravelTransition,Native\Game\src\Actors\Movement.c,"Advances actor takeoff, landing and combat-pose exit movement through its queued transition states.",med,unk0.unkB_4 stages; takeoff/landing interpretation inferred
+F00899,Actors::StepActorTransitionDisplacement,Native\Game\src\Actors\Movement.c,Applies one remaining step of a staged actor displacement and decrements its step count.,high,
+F00900,Actors::SetActorFallDestination,Native\Game\src\Actors\Movement.c,Sets an actor's fall destination just beyond its position in the requested horizontal direction.,high,
+F00901,Actors::PlaceActorInRoom,Native\Game\src\Actors\ActorState.c,"Places an actor on terrain, Gimmick or moving-platform support and applies its initial movement mode.",high,
+F00902,Actors::FindActorAtFlightPosition,Native\Game\src\Actors\ActorState.c,Finds an earlier flying actor occupying the requested exact world position.,high,
+F00903,Actors::SeparateActorFlightPlacement,Native\Game\src\Actors\ActorState.c,Offsets a flying actor vertically to avoid overlapping earlier actors while respecting the room ceiling.,high,
+F00904,Field::ActorSupportHeight,Native\Game\src\Field\Collision.c,Returns terrain height adjusted for the top of any Gimmick centered at the same point.,high,
+F00905,Field::SnapRoomActorsToSupport,Native\Game\src\Field\Collision.c,Snaps eligible grounded room actors to terrain or the top of a Gimmick.,high,
+F00906,Actors::ActorSavedPlacement,Native\Game\src\Actors\ActorState.c,Exports the actor's saved tile or current flying placement with its current facing.,high,
+F00907,Actors::FindNearestActorAhead,Native\Game\src\Actors\ActorState.c,"Finds the nearest active actor within horizontal range, height tolerance and the forward half-plane.",high,
+F00908,Field::FindInteractableGimmickAhead,Native\Game\src\Field\Gimmicks.c,"Finds a Gimmick Ashley can push, lift or place after checking height, occupancy and ceiling clearance.",high,
+F00909,Field::RoomCeilingHeight,Native\Game\src\Field\Collision.c,Returns the signed ceiling height at a world-space point.,high,
+F00910,Field::FindActorAboveGimmick,Native\Game\src\Field\Gimmicks.c,Finds an actor occupying the Gimmick's tile above its support threshold.,high,
+F00911,Field::FindActorOccupyingTile,Native\Game\src\Field\Collision.c,Finds an actor occupying or moving toward a tile at the requested support height.,high,
+F00912,Field::CanPlaceGimmickAtPoint,Native\Game\src\Field\Gimmicks.c,"Checks support height, tile restrictions and actor occupancy before a Gimmick is placed.",high,
+F00913,Field::BeginGimmickInteraction,Native\Game\src\Field\Gimmicks.c,"Starts pushing, lifting or placing the Gimmick ahead and reserves the affected tiles.",high,
+F00914,Field::ApplyGimmickInteractionCommand,Native\Game\src\Field\Gimmicks.c,"Applies animation commands that lift, release or begin moving the active Gimmick.",high,
+F00915,Field::CheckPlatformActorObstruction,Native\Game\src\Field\Collision.c,Tests a moving platform against actors and detaches hanging actors forced into blocked space.,high,
+F00916,Field::IsHangingActorObstructed,Native\Game\src\Field\Collision.c,Probes terrain around a hanging actor while excluding the three sectors facing its ledge.,high,
+F00917,Field::AreGimmicksMoving,Native\Game\src\Field\Gimmicks.c,Reports whether any active room Gimmick still has a movement or animation state.,high,
+F00918,Actors::BuildActorPoseAtMatrix,Native\Game\src\Actors\Skeleton.c,Updates an actor's pose and bone matrices against a supplied transform without changing its visibility.,med,
+F00919,Actors::BeginActorJumpMovement,Native\Game\src\Actors\Movement.c,Starts actor jump preparation from a direction and speed or adjusts an existing airborne command.,high,
+F00920,Field::FindMovingPlatformById,Native\Game\src\Field\Collision.c,Finds the current world-space position of a moving-platform contact identifier.,high,source returns a pointer to a local array; matching duplicate F00938 in BATTLE_07
+F00921,Actors::UpdateActorPlatformContact,Native\Game\src\Actors\Movement.c,"Applies platform displacement, updates contact ownership and fires Ashley's platform enter or exit events.",high,fields:D_800F4538_unk0.unkC_0=platformContactId
+F00922,Actors::UpdateRoomActorMovement,Native\Game\src\Actors\Movement.c,Updates active Gimmick motion and actor movement for the current room frame.,high,
+F00923,Actors::UpdateActorMovement,Native\Game\src\Actors\Movement.c,"Dispatches actor movement modes, integrates platform contact and updates tile coordinates.",high,
+F00924,Field::IsPointOnMovingPlatform,Native\Game\src\Field\Collision.c,Checks whether a world point lies inside the square bounds of a selected moving platform.,high,
+F00925,Actors::ClearActorMovementRequest,Native\Game\src\Actors\Movement.c,"Resets the actor's queued movement mode, direction, facing and speed after a movement update.",high,
+F00926,Actors::MoveActorWithCollision,Native\Game\src\Actors\Movement.c,"Integrates actor steering, terrain collision, climbing, falling and locomotion animation for a movement request.",high,
+F00927,Actors::UpdateActorSteering,Native\Game\src\Actors\Movement.c,Updates the actor's pending turn toward its movement facing with collision-size-dependent smoothing.,high,
+F00928,Field::CanActorHangFromLedge,Native\Game\src\Field\Collision.c,Temporarily probes an actor at ledge height to validate hanging clearance and nearby support.,high,
+F00929,Field::HasActorLedgeSideSupport,Native\Game\src\Field\Collision.c,Tests support on both sides of a prospective ledge using the actor collision radius.,high,
+F00930,Actors::UpdateActorLocomotionAnimation,Native\Game\src\Actors\Animation.c,"Selects idle, walking, running, flight or carrying animations from movement speed and direction.",high,
+F00931,Field::SampleActorSupportHeight,Native\Game\src\Field\Collision.c,"Samples nearby terrain, Gimmicks and moving platforms for actor support while recording contact metadata.",high,
+F00932,Field::SampleActorCollisionPerimeter,Native\Game\src\Field\Collision.c,Samples eight terrain sectors around an actor and marks nearby height barriers.,high,fields:D_800F4538_t.unk63C=collisionRadius; fields:D_1F8003BC_t.unk1C=perimeterHeights
+F00933,Field::ApplyActorWallRepulsion,Native\Game\src\Field\Collision.c,Clamps movement into blocked perimeter sectors and adds a bounded push away from nearby walls.,high,
+F00934,Field::ResolveActorTerrainMotion,Native\Game\src\Field\Collision.c,"Probes actor movement against terrain and ledges, resolving blocked axes and sliding around corners.",high,fields:D_800F4538_t.unk5AC_13=wallSliding; fields:D_800F4538_t.unk17FE=wallSlideDirection
+F00935,Field::ClassifyActorTerrainProbe,Native\Game\src\Field\Collision.c,"Classifies a terrain probe by support height, ceiling clearance, platform contact and actor overlap.",high,

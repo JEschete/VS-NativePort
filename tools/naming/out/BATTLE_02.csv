@@ -1,0 +1,166 @@
+id,final_name,final_location,purpose,confidence,notes
+F00165,Actors::CreateAuxiliaryActor,Native\Game\src\Actors\ActorLoading.c,Loads and initializes an auxiliary actor in an available room slot.,high,fields:vs_battle_actor.unk3C=combatStats;fields:vs_battle_actor.unk44=modelState
+F00166,Actors::ApplyActorInitialStats,Native\Game\src\Actors\ActorLoading.c,"Copies initial stats, equipment, limbs and actions into an actor with optional randomized stat variation.",high,fields:vs_battle_actor2.unk31=walkSpeed;fields:vs_battle_actor2.unk33=runSpeed
+F00167,Actors::InitializeActorDefaults,Native\Game\src\Actors\ActorLoading.c,"Sets an actor's identity, disposition and baseline combat and movement values.",high,fields:vs_battle_actor.unk18=modelId;fields:vs_battle_actor.unk1C=dispositionFlags;fields:vs_battle_actor.unk2A=bladeModelId;fields:vs_battle_actor.unk2B=shieldModelId
+F00168,Actors::InitializeActorFromTemplate,Native\Game\src\Actors\ActorLoading.c,Sets an actor's identity and disposition before applying its character template and equipment stats.,high,fields:vs_battle_actor.unk26=retainAfterDefeat
+F00169,Actors::QueueActorModelLoad,Native\Game\src\Actors\ActorLoading.c,Queues an actor model load with placement flags and an optional parent actor attachment.,high,
+F00170,Actors::QueueActorBaseSequenceLoad,Native\Game\src\Actors\Animation.c,Queues the base animation sequence for an actor slot.,high,dataType 7 and modelId 0 select the base sequence
+F00171,Actors::QueueEquipmentModelLoad,Native\Game\src\Actors\ActorLoading.c,Releases an actor's blade or shield model and queues its replacement with the requested material.,high,
+F00172,Actors::QueueActorWeaponSequenceLoad,Native\Game\src\Actors\Animation.c,"Queues a weapon-category animation sequence for Ashley, a companion or an active enemy.",high,
+F00173,Actors::AllocateActorWithEquipment,Native\Game\src\Actors\ActorLoading.c,Allocates an actor and its equipment state and queues its model and animation assets.,high,fields:vs_battle_actor.unk48=equipmentModels;fields:vs_battle_actor.unk40=modelLayoutKind
+F00174,Actors::RegisterLoadedActor,Native\Game\src\Actors\ActorLoading.c,"Registers a loaded actor, initializes its default state and links it into the active actor list.",high,
+F00175,Actors::CreateActorWithEquipment,Native\Game\src\Actors\ActorLoading.c,"Allocates an actor with blade and shield models, waits for asset loads and registers it.",high,
+F00176,Actors::SpawnRoomEnemy,Native\Game\src\Actors\ActorLoading.c,"Loads a room enemy's ZUD assets and initializes its equipment, loot and persisted combat state.",high,fields:_zoneContext_t.unk14=cachedZudIndexPlusOne;fields:_zoneContext_t.unk18=zudReadRequest;fields:_zoneContext_t.unk1C=cachedZudData
+F00177,Field::IsCameraLookAtOnAshley,Native\Game\src\Field\Camera.c,"Tests whether the camera focus has reached Ashley's height-adjusted, zone-clamped position.",high,
+F00178,Field::ResetCameraToAshley,Native\Game\src\Field\Camera.c,Repositions the camera around Ashley and resets its clip scale and orientation angles.,high,
+F00179,Battle::ActionTargetLimbPosition,Native\Game\src\Battle\ActionExecution.c,Resolves an action target limb to a model bone and returns its world position.,high,
+F00180,Battle::ActionTargetDistance,Native\Game\src\Battle\ActionExecution.c,Measures the current action's distance from its source actor to its first target.,high,
+F00181,Battle::ActionCameraMidpoint,Native\Game\src\Battle\ActionExecution.c,Calculates the midpoint between the current action source and its first target or fallback position.,high,
+F00182,Battle::StepCameraTowardActionMidpoint,Native\Game\src\Battle\ActionExecution.c,Moves the combat camera focus toward the midpoint of the current action when requested.,high,
+F00183,Battle::UpdateInitialTargetSelection,Native\Game\src\Battle\ActionExecution.c,Waits for the initial target selection or an enemy selection delay before preparing an action.,med,
+F00184,Battle::UpdateActionAreaSelection,Native\Game\src\Battle\ActionExecution.c,Waits for an area selection or an enemy selection delay before resolving the selected action area.,med,
+F00185,Battle::UpdateFinalTargetSelection,Native\Game\src\Battle\ActionExecution.c,Accepts a final target selection or returns a canceled action to the appropriate battle menu.,med,
+F00186,Battle::UpdateActionCameraZoom,Native\Game\src\Battle\ActionExecution.c,"Adjusts combat camera focus, distance and projection for the current action before starting its effects.",high,fields:D_800F19CC_t.unk2C0E=actionCameraZoomMode
+F00187,Battle::WaitForActionEffectReady,Native\Game\src\Battle\ActionExecution.c,"Advances action playback when its source model, asset queue, dialog and effect trigger are ready.",med,
+F00188,Battle::StartReadyActionAnimation,Native\Game\src\Battle\ActionExecution.c,Starts the action animation and releases its first effect trigger when effect playback permits it.,high,
+F00189,Battle::CanTriggerBattleAbility,Native\Game\src\Battle\Abilities.c,"Checks Chain or Defense Ability mappings, targets, costs and repeated inputs for the current action.",high,
+F00190,Battle::UpdateBattleAbilityTiming,Native\Game\src\Battle\Abilities.c,Evaluates Chain and Defense Ability button timing and advances the action when its animation finishes.,high,
+F00191,Battle::StartFollowupActionEffects,Native\Game\src\Battle\ActionExecution.c,Starts effect playback for the next Chain or Defense Ability action.,high,
+F00192,Battle::WaitForActionResolution,Native\Game\src\Battle\ActionExecution.c,Waits for action results to resolve before advancing to target recovery.,med,
+F00193,Battle::WaitForTargetRecovery,Native\Game\src\Battle\ActionExecution.c,"Waits for target animations, handles pending actor reactions and begins action cleanup.",med,
+F00194,Battle::ResolveActorDefeat,Native\Game\src\Battle\Damage.c,"Resolves a defeated actor, removes expendable enemies and triggers Ashley's defeat event.",high,fields:vs_battle_actor.unk26=retainAfterDefeat
+F00195,Battle::FinishActionSequence,Native\Game\src\Battle\ActionExecution.c,"Restores the field camera, resolves participant defeats and dispatches post-action events and rewards.",high,
+F00196,Battle::UpdateLootResults,Native\Game\src\Battle\Rewards.c,Updates the loot dialog and continues post-action rewards after it closes.,high,
+F00197,Battle::UpdateAbilityUnlockDelay,Native\Game\src\Battle\Rewards.c,Waits for effect playback before displaying the newly unlocked action or Battle Ability.,high,
+F00198,Battle::UpdateAbilityUnlockResults,Native\Game\src\Battle\Rewards.c,Closes an unlock message after dialog and effect playback finish and continues post-action rewards.,high,
+F00199,Boot::RunGameLoop,Native\Game\src\Boot\GameLoop.c,"Runs room and zone loading, field input, combat, events, actor updates and rendering during gameplay.",high,
+F00200,Render::AppendOverlayPrimitive,Native\Graphics\src\UiPrimitives.c,Appends a model overlay primitive to the gameplay overlay ordering-table chain.,high,
+F00201,Field::SyncCameraAnglesFromPosition,Native\Game\src\Field\Camera.c,Derives camera yaw and pitch from its position and focus and optionally updates spherical camera values.,high,
+F00202,Field::ComputeSphericalCameraPosition,Native\Game\src\Field\Camera.c,"Computes a camera position from a focus point, spherical angles and distance.",high,
+F00203,Field::SetCameraPositionFromAngles,Native\Game\src\Field\Camera.c,Repositions the field camera around its current focus using spherical camera values.,high,
+F00204,Field::SetCameraLookAtFromAngles,Native\Game\src\Field\Camera.c,Sets the field camera focus along its yaw and pitch direction at the requested distance.,high,
+F00205,Field::CameraPosition,Native\Game\src\Field\Camera.c,Copies the current field camera position to the caller.,high,
+F00206,Field::SetCameraPosition,Native\Game\src\Field\Camera.c,Replaces the current field camera position without changing its focus.,high,
+F00207,Field::CameraLookAt,Native\Game\src\Field\Camera.c,Copies the current field camera focus position to the caller.,high,
+F00208,Field::SetCameraLookAt,Native\Game\src\Field\Camera.c,Replaces the current field camera focus position.,high,
+F00209,Field::SetCameraRoll,Native\Game\src\Field\Camera.c,Sets the field camera roll angle.,high,
+F00210,Field::CameraRoll,Native\Game\src\Field\Camera.c,Returns the field camera roll wrapped to one revolution.,high,
+F00211,Render::BuildCameraViewMatrix,Native\Graphics\src\Camera.c,"Builds the view matrix from camera position, focus, roll, aspect correction and clip scale.",high,
+F00212,Core::Math::BuildLookAtOrientation,Native\Core\src\Math\Matrix.c,Builds an orientation matrix facing from one point toward another using a fixed vertical reference.,high,Orientation only; no translation is written
+F00213,Core::NoOperation,Native\Core\src\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,
+F00214,Core::NoOperation,Native\Core\src\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,dup-of:F00213
+F00215,Render::TransformRoomPalettes,Native\Graphics\src\Palette.c,Applies the same palette color transform to all three room palette banks.,high,
+F00216,Render::TransformSceneColors,Native\Graphics\src\Palette.c,Transforms room and shared palettes together with background lighting colors.,high,
+F00217,Render::TransformActorColors,Native\Graphics\src\Palette.c,Transforms an actor palette bank and its matching model lighting colors.,high,
+F00218,Render::TransformBackgroundColors,Native\Graphics\src\Palette.c,Starts a background lighting color transform through the active palette controller.,high,
+F00219,Render::LoadRoomPaletteTransition,Native\Graphics\src\Palette.c,Loads three consecutive room palette banks as a palette transition.,high,Original omits the duration argument on the second and third bank calls
+F00220,Battle::ShowPendingRewardUnlock,Native\Game\src\Battle\Rewards.c,Displays and records the pending action unlock or the next earned Break Art or Battle Ability.,high,
+F00221,Battle::OpenPendingLootRewards,Native\Game\src\Battle\Rewards.c,Opens accumulated enemy loot when progression permits it or continues to ability unlocks.,high,
+F00222,Battle::OpenRewardResults,Native\Game\src\Battle\Rewards.c,Opens the initial reward result dialog when progression permits it or continues to loot.,med,
+F00223,Battle::UpdateRewardResultsDialog,Native\Game\src\Battle\Rewards.c,Closes the initial reward dialog and advances to pending loot rewards.,high,
+F00224,Battle::UpdatePendingLootDialog,Native\Game\src\Battle\Rewards.c,Closes a loot dialog and either resumes the event or continues checking for ability unlocks.,high,
+F00225,Battle::WaitForRewardUnlockEffects,Native\Game\src\Battle\Rewards.c,Waits for active effects before opening a pending reward unlock message.,high,
+F00226,Battle::UpdateRewardUnlockDialog,Native\Game\src\Battle\Rewards.c,Closes a reward unlock message and continues checking for additional unlocks.,high,
+F00227,Battle::BeginEventRewardResults,Native\Game\src\Battle\Rewards.c,Starts scripted reward results without forcing a battle recovery animation.,high,
+F00228,Battle::BeginPostActionRewards,Native\Game\src\Battle\Rewards.c,Starts post-action loot and unlock handling with battle recovery enabled.,high,
+F00229,Battle::UpdateRewardSequence,Native\Game\src\Battle\Rewards.c,"Dispatches the current reward dialog, loot or ability unlock phase and reports whether it is active.",high,
+F00230,Items::PresentScriptedLoot,Native\Game\src\Items\Loot.c,Builds a two-item scripted loot entry and opens its loot dialog when either item is present.,high,
+F00231,Field::ClearSavedRoomEnemies,Native\Game\src\Field\RoomState.c,Clears persisted enemy state for the specified room and zone in the room-state cache.,high,
+F00232,State::StartSceneTimer,Native\Game\src\State\Timers.c,"Initializes a scene timer from packed time, mirrors it to event flags and enables its display.",high,fields:D_80050468_t.unk0=timerMode;fields:D_80050468_t.unk2=resetScope
+F00233,State::ResetSceneTimer,Native\Game\src\State\Timers.c,Clears the scene timer and its event flags and disables the timer display.,high,
+F00234,State::SetSceneTimerPaused,Native\Game\src\State\Timers.c,Suspends or restores the scene timer mode and hides or shows its display.,high,fields:D_80050468_t.unk1=suspendedTimerMode
+F00235,Battle::SetGameplayHudHidden,Native\Game\src\Battle\Hud.c,Hides or shows the gameplay HUD and its associated field overlay.,med,
+F00236,Field::SetFirstPersonViewDisabled,Native\Game\src\Field\Camera.c,Resets first-person camera state and enables first-person view when the disable argument is clear.,high,
+F00237,Audio::SetZoneMusicSwitchEnabled,Native\Audio\src\Music.c,Controls whether a zone load replaces the current music with the zone's music.,high,D_800F18B0 controls music replacement in _finishLoadZnd
+F00238,Effects::StartScriptedActorEffect,Native\Game\src\Effects\ActionEffects.c,Starts a scripted effect on one actor and includes other loaded actors as background participants.,high,
+F00239,Effects::ReleaseScriptedEffectTrigger,Native\Game\src\Effects\ActionEffects.c,Releases the requested pending action-effect trigger for scripted playback.,high,
+F00240,Effects::ScriptedEffectPlaybackState,Native\Game\src\Effects\ActionEffects.c,Returns the current action-effect playback state for event wait commands.,high,
+F00241,Core::NoOperation,Native\Core\src\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,dup-of:F00213
+F00242,Effects::IsScriptedEffectTriggerReady,Native\Game\src\Effects\ActionEffects.c,Reports whether action-effect playback has a pending trigger ready for release.,high,
+F00243,Field::ShowPrimaryRoomGeometry,Native\Game\src\Field\RoomState.c,Enables display of the loaded primary room geometry when it is available.,med,sets vs_battle_roomData.unk1 from its loaded marker
+F00244,Field::HidePrimaryRoomGeometry,Native\Game\src\Field\RoomState.c,Disables display of the loaded primary room geometry without unloading it.,med,
+F00245,Actors::EnableActorModel,Native\Game\src\Actors\ActorState.c,Clears the model skip flag for an existing actor while preserving its other model flags.,high,
+F00246,Actors::EnableAllActorModels,Native\Game\src\Actors\ActorState.c,Enables model simulation and drawing for every loaded actor.,high,
+F00247,Actors::DisableActorModel,Native\Game\src\Actors\ActorState.c,Sets the model skip flag for an existing actor while preserving its other model flags.,high,
+F00248,Actors::DisableAllActorModels,Native\Game\src\Actors\ActorState.c,Disables model simulation and drawing for every loaded actor.,high,
+F00249,Battle::IsActorWeaponDrawn,Native\Game\src\Battle\BattleMode.c,Reports whether an actor currently has its weapon drawn.,high,
+F00250,Battle::SetActorBattleMode,Native\Game\src\Battle\BattleMode.c,Changes Ashley's weapon stance or another actor's combat disposition and updates the battle HUD.,high,Mode 2 toggles weaponDrawn directly; other modes set disposition for non-Ashley actors
+F00251,Actors::SetActorHostile,Native\Game\src\Actors\ActorState.c,Switches a loaded actor between active hostile and inactive enemy disposition.,med,Writes disposition 4 or 8 without changing weaponDrawn
+F00252,Actors::ActorHpPercentage,Native\Game\src\Actors\ActorState.c,"Returns an actor's remaining HP percentage, rounding a living actor up to at least one percent.",high,
+F00253,Actors::RestoreActorVitals,Native\Game\src\Actors\ActorState.c,"Restores HP, MP and limb HP, clears Risk and removable statuses and resets recovery state.",high,Preserves status bit 31; resets unk954 and D_800F5160
+F00254,Battle::PreserveAshleyStatuses,Native\Game\src\Battle\StatusEffects.c,"Invokes status removal with an empty mask, leaving Ashley's statuses and derived stats unchanged.",high,Zero removal mask makes the callee a no-op apart from rewriting the unchanged status word
+F00255,Actors::InterruptActorAction,Native\Game\src\Actors\Animation.c,Interrupts an actor's current action and optionally plays its interruption animation.,med,
+F00256,State::SetTickSpeed,Native\Game\src\State\Timers.c,Sets gameplay tick speed to two or four when valid and returns the current speed.,high,
+F00257,Field::ScreenTransitionPhase,Native\Game\src\Field\Transitions.c,Returns a normalized phase code for the current gameplay screen transition.,high,
+F00258,Render::EnableDisplay,Native\Graphics\src\Display.c,Enables the display output for gameplay and scripted transitions.,high,
+F00259,Render::DisableDisplay,Native\Graphics\src\Display.c,Disables the display output for gameplay and scripted transitions.,high,
+F00260,Field::ConfigureScreenTransition,Native\Game\src\Field\Transitions.c,"Sets the effect, speed and wipe angle for subsequent gameplay screen transitions.",high,
+F00261,Field::SetTransitionWipeAngle,Native\Game\src\Field\Transitions.c,Sets the wipe angle used by gameplay screen transitions.,high,
+F00262,Field::BeginScreenFadeOut,Native\Game\src\Field\Transitions.c,Starts a scripted fade-out unless a room or zone transition is already in progress.,high,Sets transition step 5; phase 5 is the completed fade-out wait result
+F00263,Field::BeginScreenFadeIn,Native\Game\src\Field\Transitions.c,"Starts a scripted fade-in with the selected effect, speed and wipe angle.",high,Sets transition step 7
+F00264,Field::CancelPendingRoomVisit,Native\Game\src\Field\RoomState.c,Prevents the current room from being marked visited when field control resumes.,high,D_800F19A0 gates _setRoomSeen
+F00265,Field::BeginRoomTransition,Native\Game\src\Field\Transitions.c,Queues a destination MPD and starts a room transition while stopping Ashley and saving room state.,high,
+F00266,Field::BeginScriptedRoomTransition,Native\Game\src\Field\Transitions.c,Starts a room transition and records Ashley's current grid position for the scripted transfer.,high,
+F00267,Field::BeginZoneTransition,Native\Game\src\Field\Transitions.c,Queues a destination ZND and starts a zone transition while stopping Ashley and saving room state.,high,
+F00268,Field::BeginScriptedZoneTransition,Native\Game\src\Field\Transitions.c,Starts a zone transition and records Ashley's current grid position for the scripted transfer.,high,
+F00269,Field::TeleportToLocation,Native\Game\src\Field\Transitions.c,Queues the zone or room for a location and prepares Ashley's destination position and facing.,high,
+F00270,Field::FindLocationId,Native\Game\src\Field\RoomState.c,Looks up the global location identifier for a zone and MPD pair.,high,Returns zero if no pair matches
+F00271,Field::CurrentRoomId,Native\Game\src\Field\RoomState.c,Returns the global location identifier of the current room.,high,
+F00272,Audio::PlayActorScriptSound,Native\Audio\src\Music.c,Plays an actor model sound with spatial pan and volume for a script command.,high,
+F00273,Actors::ActorLoadProbeResult,Native\Game\src\Actors\ActorLoading.c,Returns zero from an unused actor-loading probe.,low,Constant-zero stub without callers; original intent is not recoverable from this body
+F00274,Actors::QueueAshleyModelLoad,Native\Game\src\Actors\ActorLoading.c,Queues a model load in Ashley's model slot and returns a one-based load request result.,med,"Only modelId, dataType and index are initialized by this wrapper"
+F00275,Actors::QueueScriptedActorSpawn,Native\Game\src\Actors\ActorLoading.c,"Allocates a scripted actor, queues its model and initializes its default state without waiting for loading.",high,
+F00276,Actors::LoadActorEquipmentModels,Native\Game\src\Actors\ActorLoading.c,Queues blade and shield model replacements for a loaded actor using default materials.,high,
+F00277,Actors::RefreshActorEquipmentModels,Native\Game\src\Actors\ActorLoading.c,Reloads an actor's blade and shield visuals from its current equipment and materials.,high,
+F00278,Actors::QueueSharedSequenceLoad,Native\Game\src\Actors\Animation.c,Queues a shared animation sequence bank without its associated effect texture data.,high,actorId 1 selects the shared sequence-only loader
+F00279,Actors::UnloadSharedSequence,Native\Game\src\Actors\Animation.c,Unloads a shared animation sequence bank and detaches it from all actor models.,high,
+F00280,Actors::QueueSharedSequenceWithTextures,Native\Game\src\Actors\Animation.c,Queues a shared animation sequence bank together with its associated effect texture data.,high,actorId 2 selects shared sequence and effect texture loading
+F00281,Actors::QueueSequenceEffectTextures,Native\Game\src\Actors\Animation.c,Queues effect texture data for an animation sequence in the requested shared bank.,high,Original ETM format name is retained in this note rather than abbreviated in the function name
+F00282,Actors::ReleaseSequenceEffectTextures,Native\Game\src\Actors\Animation.c,Releases a shared animation bank's effect textures and its reserved texture slot.,high,
+F00283,Actors::SetSharedSequenceBank,Native\Game\src\Actors\Animation.c,Selects the shared animation bank and stops incompatible active model animations.,high,void wrapper around Actors::SelectSharedSequenceBank (F00801) that discards the status result
+F00284,Actors::SharedSequenceBank,Native\Game\src\Actors\Animation.c,Returns the one-based identifier of the selected shared animation bank.,high,
+F00285,Actors::FirstFreeAssetLoadSlot,Native\Game\src\Actors\ActorLoading.c,"Returns the first free object asset queue slot, or minus one when every slot is occupied.",high,"The original name is accurate; zero means the compact queue is drained, not a general pending-count query"
+F00286,Render::SetCameraNearClip,Native\Graphics\src\Camera.c,Sets the projection near clip and updates the renderer's near-plane clipping thresholds.,high,
+F00287,Render::SetCameraProjectionDistance,Native\Graphics\src\Camera.c,Sets the camera projection distance and updates the geometry projection state.,high,
+F00288,Render::SetCameraFarClip,Native\Graphics\src\Camera.c,Sets the camera clip scale and optionally derives the renderer's far-plane threshold.,high,
+F00289,Field::InitializeSphericalCamera,Native\Game\src\Field\Camera.c,Centers the camera on Ashley with an optional facing and battle or field orbit distance.,high,
+F00290,Field::SetCameraPitchPreset,Native\Game\src\Field\Camera.c,Selects a supported field camera pitch or falls back to the default pitch.,high,
+F00291,Actors::ReturnActorToIdle,Native\Game\src\Actors\Animation.c,Requests an actor's idle animation unless it is already in a protected recovery pose.,high,
+F00292,Actors::ReturnAllActorsToIdle,Native\Game\src\Actors\Animation.c,Requests the idle animation for every loaded actor.,high,
+F00293,Actors::FindActorByModelId,Native\Game\src\Actors\ActorState.c,Finds a loaded actor with the requested model identifier or returns the companion slot as fallback.,high,
+F00294,Actors::ActorAtSlot,Native\Game\src\Actors\ActorState.c,Returns the actor pointer stored in the requested room actor slot.,high,
+F00295,Actors::CountActorsByDisposition,Native\Game\src\Actors\ActorState.c,Counts loaded actors whose disposition flags exactly match the requested value.,high,
+F00296,Actors::IsActorRetainedAfterDefeat,Native\Game\src\Actors\ActorState.c,Reports whether an actor is retained after defeat and returns zero for an empty slot.,high,fields:vs_battle_actor.unk26=retainAfterDefeat
+F00297,Actors::BeginScriptedActorPath,Native\Game\src\Actors\Movement.c,Marks an actor as script-controlled and starts movement toward the requested horizontal destination.,med,
+F00298,Actors::IsScriptedActorPathFinished,Native\Game\src\Actors\Movement.c,Checks scripted path completion and clears script movement control when the path ends normally.,med,
+F00299,Actors::SetActorLogicEnabled,Native\Game\src\Actors\ActorState.c,Enables an actor's suspended logic or disables its logic and resets its model action channels.,high,fields:vs_battle_actor.unk8=logicState;disabled state is 0x20 and disposition bit 0x8000
+F00300,Actors::SetOtherActorLogicEnabled,Native\Game\src\Actors\ActorState.c,Enables or suspends logic for every loaded actor except Ashley.,high,
+F00301,Actors::SetActorDetached,Native\Game\src\Actors\ActorState.c,Detaches or reinserts an actor in the active list and rebuilds related movement and combat state.,high,
+F00302,Actors::ResetActorMovement,Native\Game\src\Actors\Movement.c,Clears an actor's active logic state and resets its model movement controls and velocity.,med,Preserves suspended logic state 0x20
+F00303,Battle::IsActionUnlocked,Native\Game\src\Battle\Abilities.c,Checks whether a valid action identifier has been unlocked.,high,
+F00304,Battle::UnlockAction,Native\Game\src\Battle\Abilities.c,Marks a valid action identifier as unlocked.,high,
+F00305,Actors::RemoveScriptedActor,Native\Game\src\Actors\ActorLoading.c,Removes a scripted actor from its room slot without the defeat-removal option.,high,
+F00306,Render::ResetFramebufferEffect,Native\Graphics\src\FramebufferEffects.c,"Resets framebuffer feedback state, transform, tint, blend mode and ordering depth.",high,
+F00307,Render::InitializeFramebufferEffect,Native\Graphics\src\FramebufferEffects.c,Clears the framebuffer effect allocation pointer and initializes its default state.,high,
+F00308,Render::BuildFramebufferEffectPrimitives,Native\Graphics\src\FramebufferEffects.c,Builds double-buffered textured strips and sprites for drawing a framebuffer feedback effect.,high,
+F00309,Render::DrawFramebufferEffect,Native\Graphics\src\FramebufferEffects.c,Draws tinted and transformed framebuffer strips and advances feedback allocation teardown.,high,
+F00310,Render::SetFramebufferEffectEnabled,Native\Graphics\src\FramebufferEffects.c,Starts framebuffer feedback drawing or schedules its primitive buffers for delayed release.,high,
+F00311,Render::SetFramebufferEffectRotation,Native\Graphics\src\FramebufferEffects.c,Sets the framebuffer feedback rotation angle around the screen center.,high,D_800F1A2C aliases D_800F1A28.vz
+F00312,Render::SetFramebufferEffectScale,Native\Graphics\src\FramebufferEffects.c,Sets the horizontal and vertical scale of the framebuffer feedback image.,high,fields:D_800F1A68_t.unk0=x;fields:D_800F1A68_t.unk4=y
+F00313,Render::SetFramebufferEffectTint,Native\Graphics\src\FramebufferEffects.c,Sets the RGB tint applied to framebuffer feedback strips.,high,
+F00314,Render::SetFramebufferEffectOffset,Native\Graphics\src\FramebufferEffects.c,Sets the framebuffer feedback image's screen offset.,high,
+F00315,Render::SetFramebufferEffectBlendMode,Native\Graphics\src\FramebufferEffects.c,Sets the blend mode used when sampling framebuffer feedback texture pages.,high,
+F00316,Render::SetFramebufferEffectParameter,Native\Graphics\src\FramebufferEffects.c,Stores an auxiliary framebuffer effect parameter that has no visible rendering consumer.,low,"D_800F1A20 is only reset, written and read; its intended effect is unresolved"
+F00317,Render::SetFramebufferEffectDepth,Native\Graphics\src\FramebufferEffects.c,Sets a valid ordering-table depth for framebuffer feedback drawing.,high,
+F00318,Render::SetFramebufferPreviousFrame,Native\Graphics\src\FramebufferEffects.c,Selects whether framebuffer feedback samples the previous buffer or the current buffer.,high,
+F00319,Render::FramebufferEffectState,Native\Graphics\src\FramebufferEffects.c,Returns the framebuffer feedback activation or teardown state.,high,
+F00320,Render::FramebufferEffectRotation,Native\Graphics\src\FramebufferEffects.c,Returns the stored framebuffer feedback rotation angle.,high,
+F00321,Render::FramebufferEffectScale,Native\Graphics\src\FramebufferEffects.c,Copies framebuffer feedback scale values to the caller using the original duplicated horizontal scale.,high,Original writes vx to both outputs rather than returning vy in the second output
+F00322,Render::FramebufferEffectTint,Native\Graphics\src\FramebufferEffects.c,Copies the current framebuffer feedback tint to the caller.,high,
+F00323,Render::FramebufferEffectOffset,Native\Graphics\src\FramebufferEffects.c,Copies the framebuffer feedback image offset to the caller.,high,
+F00324,Render::FramebufferEffectBlendMode,Native\Graphics\src\FramebufferEffects.c,Returns the blend mode selected for framebuffer feedback drawing.,high,
+F00325,Render::FramebufferEffectParameter,Native\Graphics\src\FramebufferEffects.c,Returns the auxiliary framebuffer effect parameter with no visible rendering consumer.,low,D_800F1A20 has no observed semantic consumer
+F00326,Render::FramebufferEffectDepth,Native\Graphics\src\FramebufferEffects.c,Returns the ordering-table depth selected for framebuffer feedback drawing.,high,
+F00327,Render::UsesFramebufferPreviousFrame,Native\Graphics\src\FramebufferEffects.c,Reports whether framebuffer feedback samples the previous frame buffer.,high,
+F00328,Core::NoOperation,Native\Core\src\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,dup-of:F00213
+F00329,Render::InitializeTextureSlotReservations,Native\Graphics\src\Textures.c,Reserves the first twenty-five texture slots and clears the remaining slots and allocation lock.,med,D_800F19A8 is a 32-slot reservation table; D_800F18F8 tracks an exclusive allocation owner

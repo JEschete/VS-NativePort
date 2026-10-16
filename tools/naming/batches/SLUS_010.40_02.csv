@@ -1,0 +1,162 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F03236,SLUS_010.40/25AC.c,3427,Sound_Cmd_A4_unk,C,24,Audio,,,
+F03237,SLUS_010.40/25AC.c,3453,Sound_Cmd_A5_unk,C,26,Audio,,,
+F03238,SLUS_010.40/25AC.c,3481,Sound_Cmd_AC_unk,C,11,Audio,,,
+F03239,SLUS_010.40/25AC.c,3494,Sound_Cmd_AD_unk,C,19,Audio,,,
+F03240,SLUS_010.40/25AC.c,3515,func_8001833C,C,4,Triage,,,
+F03241,SLUS_010.40/25AC.c,3521,func_80018358,C,9,Triage,,,
+F03242,SLUS_010.40/25AC.c,3532,func_800183C0,C,12,Triage,,,
+F03243,SLUS_010.40/25AC.c,3546,func_80018434,C,4,Triage,,,
+F03244,SLUS_010.40/25AC.c,3552,func_80018450,C,14,Triage,,,
+F03245,SLUS_010.40/25AC.c,3568,func_800184B8,C,12,Triage,,,
+F03246,SLUS_010.40/25AC.c,3582,func_8001852C,C,10,Triage,,,Sound_KillMusicConfig
+F03247,SLUS_010.40/25AC.c,3594,Sound_Cmd_11_StopAllMusic,C,9,Audio,,,Sound_KillMusicConfig
+F03248,SLUS_010.40/25AC.c,3607,func_80018608,C,17,Triage,,,Sound_ClearVoiceFromSchedulerState
+F03249,SLUS_010.40/25AC.c,3626,Sound_Cmd_80_unk,C,9,Audio,,,Sound_MarkActiveChannelsVolumeDirty Sound_MarkScheduledSfxChannelsVolumeDirty
+F03250,SLUS_010.40/25AC.c,3637,Sound_Cmd_81_unk,C,9,Audio,,,Sound_MarkActiveChannelsVolumeDirty Sound_MarkScheduledSfxChannelsVolumeDirty
+F03251,SLUS_010.40/25AC.c,3648,Sound_Cmd_90_unk,C,10,Audio,,,
+F03252,SLUS_010.40/25AC.c,3660,Sound_Cmd_92_unk,C,3,Audio,,,
+F03253,SLUS_010.40/25AC.c,3665,Sound_Cmd_9B_unk,C,31,Audio,,,SetVoiceAdsrAttackRateAndMode SetVoiceAdsrSustainRateAndDirection SetVoiceSampleRate SetVoiceVolume
+F03254,SLUS_010.40/25AC.c,3698,Sound_Cmd_9A_unk,C,22,Audio,,,
+F03255,SLUS_010.40/25AC.c,3722,Sound_Cmd_9D_unk,C,37,Audio,,,SetVoiceAdsrAttackRateAndMode SetVoiceAdsrSustainRateAndDirection SetVoiceSampleRate SetVoiceVolume
+F03256,SLUS_010.40/25AC.c,3761,Sound_Cmd_9C_unk,C,23,Audio,,,
+F03257,SLUS_010.40/25AC.c,3786,Sound_Cmd_9F_unk,C,6,Audio,,,SetVoiceSampleRate
+F03258,SLUS_010.40/25AC.c,3794,Sound_Cmd_9E_unk,C,8,Audio,,,SetVoiceSampleRate
+F03259,SLUS_010.40/25AC.c,3804,Sound_Cmd_11_Nop,C,1,Audio,,,
+F03260,SLUS_010.40/25AC.c,3806,Sound_SetReverbMode,C,10,Audio,SpuGetReverbModeType SpuSetReverb SpuSetReverbModeType,func_80018C30,
+F03261,SLUS_010.40/25AC.c,3818,func_80018C30,C,138,Platform,DisableEvent EnableEvent,func_80011FB4 func_80011FDC func_80012004 func_80012034 func_80012080 func_800120B8 func_800120E8 func_80012110 func_8001215C func_8001217C (+42),Sound_IsNotAkaoFile Sound_LoadAkaoSequence Sound_SetReverbMode Sound_memcpy32
+F03262,SLUS_010.40/25AC.c,3958,UpdateCdVolume,C,5,Audio,,Sound_Cmd_C8_unk func_8001924C,
+F03263,SLUS_010.40/25AC.c,3965,Sound_memcpy32,C,26,Audio,,Sound_Cmd_19_Unk Sound_Cmd_1A_Unk Sound_Cmd_40_PushMusicState Sound_SetMusicSequence func_80012F10 func_80018C30 func_80019A58,
+F03264,SLUS_010.40/25AC.c,3993,Sound_memswp32,C,29,Audio,,Sound_SetMusicSequence,
+F03265,SLUS_010.40/25AC.c,4024,func_8001924C,C,112,Triage,,func_80019A58,SetVoiceVolume Sound_MarkActiveChannelsVolumeDirty UpdateCdVolume
+F03266,SLUS_010.40/25AC.c,4138,func_80019614,C,34,Triage,,func_80019704,
+F03267,SLUS_010.40/25AC.c,4174,func_80019704,C,88,Triage,,func_80019A58,Sound_UpdateSlidesAndDelays func_80019614 func_8001A8D8
+F03268,SLUS_010.40/25AC.c,4264,func_800199C4,C,21,Triage,,func_80019A58,Sound_MarkActiveChannelsVolumeDirty
+F03269,SLUS_010.40/25AC.c,4287,func_80019A58,C,139,Platform,GetRCnt,,Sound_Cmd_10_StartFieldMusic Sound_ProcessKeyOffRequests Sound_UpdateSlidesAndDelays Sound_memcpy32 func_80015220 func_8001924C func_80019704 func_800199C4 func_8001A8D8
+F03270,SLUS_010.40/25AC.c,4430,func_80019FC4,C,118,Triage,,func_8001A8D8,
+F03271,SLUS_010.40/25AC.c,4550,func_8001A1F4,C,11,Triage,,SoundVM_A1_LoadInstrument,
+F03272,SLUS_010.40/25AC.c,4563,func_8001A22C,C,6,Triage,,SoundVM_A1_LoadInstrument func_8001A258 func_8001A64C,
+F03273,SLUS_010.40/25AC.c,4571,func_8001A258,C,64,Triage,,func_8001A8D8,func_8001A22C
+F03274,SLUS_010.40/25AC.c,4637,func_8001A4BC,C,47,Triage,,func_8001A64C func_8001A8D8,
+F03275,SLUS_010.40/25AC.c,4686,func_8001A64C,C,67,Triage,,func_8001A8D8,func_8001A22C func_8001A4BC
+F03276,SLUS_010.40/25AC.c,4760,func_8001A8D8,C,191,Triage,,func_80019704 func_80019A58,func_80019FC4 func_8001A258 func_8001A4BC func_8001A64C
+F03277,SLUS_010.40/25AC.c,4953,Sound_CopyInstrumentInfoToChannel,C,7,Audio,,SoundVM_A1_LoadInstrument SoundVM_FE0A_ClearInstrument func_8001B094,
+F03278,SLUS_010.40/25AC.c,4963,func_8001B094,C,5,Triage,,Sound_LoadAkaoSequence func_80015C9C,Sound_CopyInstrumentInfoToChannel
+F03279,SLUS_010.40/25AC.c,4970,Sound_ClearVoiceFromSchedulerState,C,12,Audio,,SoundVM_A0_FinishChannel Sound_EvictSfxVoice func_80018608,
+F03280,SLUS_010.40/25AC.c,4989,SoundVM_A0_FinishChannel,C,20,Audio,,SoundVM_FE1F_unk SoundVM_XX_Unimplemented,Sound_ClearVoiceFromSchedulerState
+F03281,SLUS_010.40/25AC.c,5011,SoundVM_FE1F_unk,C,5,Audio,,,SoundVM_A0_FinishChannel
+F03282,SLUS_010.40/25AC.c,5018,SoundVM_FE00_SetTempo,C,6,Audio,,,
+F03283,SLUS_010.40/25AC.c,5027,SoundVM_FE01_SetTempoSlide,C,18,Audio,,,
+F03284,SLUS_010.40/25AC.c,5048,SoundVM_FE02_SetMasterReverbDepth,C,12,Audio,,,
+F03285,SLUS_010.40/25AC.c,5063,SoundVM_FE03_SetMasterReverbSlide,C,19,Audio,,,
+F03286,SLUS_010.40/25AC.c,5085,SoundVM_FE06_JumpRelativeOffset,C,4,Audio,,,
+F03287,SLUS_010.40/25AC.c,5092,SoundVM_FE07_JumpRelativeWithThreshold,C,16,Audio,,,
+F03288,SLUS_010.40/25AC.c,5111,SoundVM_FE0E_CallRelativeOffset,C,5,Audio,,,
+F03289,SLUS_010.40/25AC.c,5119,SoundVM_FE0F_Return,C,3,Audio,,,
+F03290,SLUS_010.40/25AC.c,5125,SoundVM_A3_ChannelMasterVolume,C,4,Audio,,,
+F03291,SLUS_010.40/25AC.c,5132,SoundVM_FE12_VolumeBalanceSlide,C,19,Audio,,,
+F03292,SLUS_010.40/25AC.c,5154,SoundVM_A8_ChannelVolume,C,6,Audio,,,
+F03293,SLUS_010.40/25AC.c,5163,SoundVM_A9_ChannelVolumeSlide,C,21,Audio,,,
+F03294,SLUS_010.40/25AC.c,5187,SoundVM_FE19_unk,C,19,Audio,,,
+F03295,SLUS_010.40/25AC.c,5209,SoundVM_FE1A_unk,C,3,Audio,,,
+F03296,SLUS_010.40/25AC.c,5215,SoundVM_FE1B_unk,C,3,Audio,,,
+F03297,SLUS_010.40/25AC.c,5221,SoundVM_FE0C_unk,C,3,Audio,,,
+F03298,SLUS_010.40/25AC.c,5227,SoundVM_nop,C,2,Audio,,,
+F03299,SLUS_010.40/25AC.c,5234,SoundVM_unused1,C,7,Audio,,,
+F03300,SLUS_010.40/25AC.c,5246,SoundVM_unused2,C,13,Audio,,,
+F03301,SLUS_010.40/25AC.c,5264,SoundVM_AA_ChannelPan,C,7,Audio,,,
+F03302,SLUS_010.40/25AC.c,5274,SoundVM_AB_ChannelPanSlide,C,19,Audio,,,
+F03303,SLUS_010.40/25AC.c,5296,SoundVM_A5_SetOctave,C,3,Audio,,,
+F03304,SLUS_010.40/25AC.c,5302,SoundVM_A6_IncreaseOctave,C,3,Audio,,,
+F03305,SLUS_010.40/25AC.c,5308,SoundVM_A7_DecreaseOctave,C,3,Audio,,,
+F03306,SLUS_010.40/25AC.c,5314,SoundVM_A1_LoadInstrument,C,12,Audio,,,Sound_CopyInstrumentInfoToChannel func_8001A1F4 func_8001A22C
+F03307,SLUS_010.40/25AC.c,5329,SoundVM_FE0A_ClearInstrument,C,11,Audio,,,Sound_CopyInstrumentInfoToChannel
+F03308,SLUS_010.40/25AC.c,5343,SoundVM_FE14_ChangePatch,C,20,Audio,,,
+F03309,SLUS_010.40/25AC.c,5366,SoundVM_B3_ResetAdsr,C,9,Audio,,,
+F03310,SLUS_010.40/25AC.c,5378,SoundVM_C0_ChannelTranspose_Absolute,C,3,Audio,,,
+F03311,SLUS_010.40/25AC.c,5384,SoundVM_C1_ChannelTranspose_Relative,C,3,Audio,,,
+F03312,SLUS_010.40/25AC.c,5390,SoundVM_A4_PitchBendSlide,C,9,Audio,,,
+F03313,SLUS_010.40/25AC.c,5402,SoundVM_DA_EnablePortamento,C,12,Audio,,,
+F03314,SLUS_010.40/25AC.c,5417,SoundVM_DB_DisablePortamento,C,3,Audio,,,
+F03315,SLUS_010.40/25AC.c,5423,SoundVM_D8_ChannelFineTune_Absolute,C,16,Audio,,,
+F03316,SLUS_010.40/25AC.c,5442,SoundVM_D9_ChannelFineTune_Relative,C,17,Audio,,,
+F03317,SLUS_010.40/25AC.c,5462,SoundVM_B4_Vibrato,C,42,Audio,,,
+F03318,SLUS_010.40/25AC.c,5507,SoundVM_B5_VibratoDepth,C,30,Audio,,,
+F03319,SLUS_010.40/25AC.c,5540,SoundVM_DD_VibratoDepthSlide,C,17,Audio,,,
+F03320,SLUS_010.40/25AC.c,5560,SoundVM_B6_DisableVibrato,C,5,Audio,,,
+F03321,SLUS_010.40/25AC.c,5568,SoundVM_B8_Tremelo,C,27,Audio,,,
+F03322,SLUS_010.40/25AC.c,5598,SoundVM_B9_TremeloDepth,C,3,Audio,,,
+F03323,SLUS_010.40/25AC.c,5604,SoundVM_DE_TremeloDepthSlide,C,16,Audio,,,
+F03324,SLUS_010.40/25AC.c,5623,SoundVM_BA_DisableTremelo,C,5,Audio,,,
+F03325,SLUS_010.40/25AC.c,5631,SoundVM_BC_AutoPan,C,15,Audio,,,
+F03326,SLUS_010.40/25AC.c,5649,SoundVM_BD_AutoPanDepth,C,3,Audio,,,
+F03327,SLUS_010.40/25AC.c,5655,SoundVM_DF_AutoPanDepthSlide,C,18,Audio,,,
+F03328,SLUS_010.40/25AC.c,5676,SoundVM_BE_DisableAutoPan,C,5,Audio,,,
+F03329,SLUS_010.40/25AC.c,5684,SoundVM_C4_EnableNoiseVoices,C,8,Audio,,SoundVM_CE_EnableNoiseAndDelayToggle,
+F03330,SLUS_010.40/25AC.c,5695,SoundVM_C5_DisableNoiseVoices,C,9,Audio,,SoundVM_CB_DisableVoiceModes,
+F03331,SLUS_010.40/25AC.c,5707,SoundVM_C6_EnableFmVoices,C,8,Video,,SoundVM_D2_EnableFmAndDelayToggle,
+F03332,SLUS_010.40/25AC.c,5718,SoundVM_C7_DisableFmVoices,C,9,Video,,SoundVM_CB_DisableVoiceModes,
+F03333,SLUS_010.40/25AC.c,5730,SoundVM_C2_EnableReverbVoices,C,8,Audio,,,
+F03334,SLUS_010.40/25AC.c,5741,SoundVM_C3_DisableReverbVoices,C,8,Audio,,SoundVM_CB_DisableVoiceModes,
+F03335,SLUS_010.40/25AC.c,5752,SoundVM_CC_EnableLegato,C,3,Audio,,,
+F03336,SLUS_010.40/25AC.c,5758,SoundVM_CD_DEBUG,C,2,Audio,,,
+F03337,SLUS_010.40/25AC.c,5763,SoundVM_D0_EnableSustainedNote,C,5,Audio,,,
+F03338,SLUS_010.40/25AC.c,5771,SoundVM_D1_DEBUG,C,2,Audio,,,
+F03339,SLUS_010.40/25AC.c,5776,SoundVM_AC_NoiseClockFrequency,C,17,Audio,,,
+F03340,SLUS_010.40/25AC.c,5796,SoundVM_AD_AttackRate,C,8,Audio,,,
+F03341,SLUS_010.40/25AC.c,5807,SoundVM_AE_DecayRate,C,6,Audio,,SoundVM_B0_DecayRateAndSustainLevel,
+F03342,SLUS_010.40/25AC.c,5816,SoundVM_AF_SustainLevel,C,6,Audio,,SoundVM_B0_DecayRateAndSustainLevel,
+F03343,SLUS_010.40/25AC.c,5825,SoundVM_B1_SustainRate,C,8,Audio,,,
+F03344,SLUS_010.40/25AC.c,5836,SoundVM_B2_ReleaseRate,C,8,Audio,,,
+F03345,SLUS_010.40/25AC.c,5847,SoundVM_B7_AttackMode,C,10,Audio,,,
+F03346,SLUS_010.40/25AC.c,5860,SoundVM_BB_SustainMode,C,17,Audio,,,
+F03347,SLUS_010.40/25AC.c,5880,SoundVM_BF_ReleaseMode,C,9,Audio,,,
+F03348,SLUS_010.40/25AC.c,5892,SoundVM_FE10_unk,C,3,Audio,,,
+F03349,SLUS_010.40/25AC.c,5898,SoundVM_FE11_unk,C,3,Audio,,,
+F03350,SLUS_010.40/25AC.c,5904,SoundVM_C8_LoopPoint,C,7,Audio,,,
+F03351,SLUS_010.40/25AC.c,5914,SoundVM_C9_LoopN,C,24,Audio,,,
+F03352,SLUS_010.40/25AC.c,5941,SoundVM_FE08_JumpOnNthLoopPass,C,25,Audio,,,
+F03353,SLUS_010.40/25AC.c,5969,SoundVM_FE09_JumpAndPopStackOnNthLoopPass,C,20,Audio,,,
+F03354,SLUS_010.40/25AC.c,5992,SoundVM_CA_LoopInf,C,6,Audio,,,
+F03355,SLUS_010.40/25AC.c,6001,SoundVM_A2_OverwriteNextNoteLength,C,9,Audio,,,
+F03356,SLUS_010.40/25AC.c,6015,SoundVM_DC_FixNoteLength,C,14,Audio,,,
+F03357,SLUS_010.40/25AC.c,6032,SoundVM_FE04_ClearKeymapTable,C,8,Audio,,,
+F03358,SLUS_010.40/25AC.c,6043,SoundVM_FE05_MuteVoice,C,4,Audio,,,
+F03359,SLUS_010.40/25AC.c,6050,SoundVM_FE15_unk,C,6,Audio,,,
+F03360,SLUS_010.40/25AC.c,6059,SoundVM_FE16_unk,C,4,Audio,,,
+F03361,SLUS_010.40/25AC.c,6066,SoundVM_B0_DecayRateAndSustainLevel,C,4,Audio,,,SoundVM_AE_DecayRate SoundVM_AF_SustainLevel
+F03362,SLUS_010.40/25AC.c,6072,SoundVM_CE_EnableNoiseAndDelayToggle,C,15,Audio,,,SoundVM_C4_EnableNoiseVoices
+F03363,SLUS_010.40/25AC.c,6089,SoundVM_CF_ToggleNoiseOnDelay,C,8,Audio,,,
+F03364,SLUS_010.40/25AC.c,6100,SoundVM_D2_EnableFmAndDelayToggle,C,14,Audio,,,SoundVM_C6_EnableFmVoices
+F03365,SLUS_010.40/25AC.c,6116,SoundVM_D3_ToggleFmDelay,C,8,Audio,,,
+F03366,SLUS_010.40/25AC.c,6127,SoundVM_CB_DisableVoiceModes,C,9,Audio,,,SoundVM_C3_DisableReverbVoices SoundVM_C5_DisableNoiseVoices SoundVM_C7_DisableFmVoices
+F03367,SLUS_010.40/25AC.c,6138,SoundVM_D4_EnablePlaybackRateSidechain,C,3,Audio,,,
+F03368,SLUS_010.40/25AC.c,6144,SoundVM_D5_DisablePlaybackRateSidechain,C,3,Audio,,,
+F03369,SLUS_010.40/25AC.c,6150,SoundVM_D6_EnablePitchVolumeSidechain,C,3,Audio,,,
+F03370,SLUS_010.40/25AC.c,6156,SoundVM_D7_DisablePitchVolumeSidechain,C,3,Audio,,,
+F03371,SLUS_010.40/25AC.c,6162,SoundVM_FE0B_unk,C,31,Audio,,,Sound_PlaySfxProgram
+F03372,SLUS_010.40/25AC.c,6196,SoundVM_E0_unk,C,3,Audio,,,
+F03373,SLUS_010.40/25AC.c,6202,SoundVM_FE1C_unk,C,4,Audio,,,
+F03374,SLUS_010.40/25AC.c,6209,SoundVM_FE1D_MarkVoicesKeyed,C,3,Audio,,,
+F03375,SLUS_010.40/25AC.c,6215,SoundVM_FE1E_ClearVoicesKeyed,C,3,Audio,,,
+F03376,SLUS_010.40/25AC.c,6221,SoundVM_E1_SetRandomPitchDepth,C,3,Audio,,,
+F03377,SLUS_010.40/25AC.c,6227,SoundVM_E2_ResetRandomPitchDepth,C,3,Audio,,,
+F03378,SLUS_010.40/25AC.c,6233,SoundVM_XX_Unimplemented,C,3,Audio,,,SoundVM_A0_FinishChannel
+F03379,SLUS_010.40/25AC.c,6238,IRQCallbackProc,C,13,Content,SpuSetIRQ SpuSetIRQCallback,func_8001D644 func_8001D698,SetVoiceKeyOff
+F03380,SLUS_010.40/25AC.c,6254,Sound_Cutscene_FindFreeVoicePair,C,28,Audio,,Sound_Cutscene_StartStream,Sound_EvictSfxVoice
+F03381,SLUS_010.40/25AC.c,6284,func_8001CE60,C,6,Audio,SpuSetTransferCallback SpuSetTransferStartAddr SpuWrite,,
+F03382,SLUS_010.40/25AC.c,6294,Sound_Cutscene_StartStream,C,62,Audio,SpuSetIRQ SpuSetIRQCallback SpuSetTransferCallback SpuSetTransferMode SpuSetTransferStartAddr SpuWrite,func_8001D644,SetVoiceKeyOff Sound_Cutscene_FindFreeVoicePair
+F03383,SLUS_010.40/25AC.c,6358,Sound_Cutscene_InitVoice,C,43,Audio,,Sound_Cutscene_OnInitialTransferComplete func_8001D3D4,SetVoiceAdsrAttackRateAndMode SetVoiceAdsrDecayRate SetVoiceAdsrReleaseRateAndMode SetVoiceAdsrSustainLevel SetVoiceAdsrSustainRateAndDirection SetVoiceRepeatAddr SetVoiceSampleRate SetVoiceStartAddr SetVoiceVolume
+F03384,SLUS_010.40/25AC.c,6404,Sound_Cutscene_BeginPlayback,C,19,Audio,SpuSetIRQ SpuSetIRQAddr SpuSetIRQCallback SpuSetTransferCallback,Sound_Cutscene_OnInitialTransferComplete func_8001D3D4,SetVoiceKeyOn
+F03385,SLUS_010.40/25AC.c,6426,Sound_Cutscene_OnInitialTransferComplete,C,6,Audio,,,Sound_Cutscene_BeginPlayback Sound_Cutscene_InitVoice
+F03386,SLUS_010.40/25AC.c,6436,func_8001D3D4,C,6,Triage,,,Sound_Cutscene_BeginPlayback Sound_Cutscene_InitVoice
+F03387,SLUS_010.40/25AC.c,6444,Sound_Cutscene_LoadNextBuffer,C,30,Audio,SpuSetIRQ SpuSetIRQAddr SpuSetIRQCallback SpuSetTransferStartAddr SpuWrite,Sound_Cutscene_OnBufferAComplete Sound_Cutscene_OnBufferBComplete func_8001D5E4 func_8001D614,SetVoiceRepeatAddr spuSetTransferCallback
+F03388,SLUS_010.40/25AC.c,6477,Sound_Cutscene_OnBufferAComplete,C,4,Audio,,,Sound_Cutscene_LoadNextBuffer
+F03389,SLUS_010.40/25AC.c,6483,Sound_Cutscene_OnBufferBComplete,C,4,Audio,,,Sound_Cutscene_LoadNextBuffer
+F03390,SLUS_010.40/25AC.c,6491,func_8001D5E4,C,3,Triage,,,Sound_Cutscene_LoadNextBuffer
+F03391,SLUS_010.40/25AC.c,6496,func_8001D614,C,3,Triage,,,Sound_Cutscene_LoadNextBuffer
+F03392,SLUS_010.40/25AC.c,6503,func_8001D644,C,6,Triage,,,IRQCallbackProc Sound_Cutscene_StartStream
+F03393,SLUS_010.40/25AC.c,6511,func_8001D698,C,1,Triage,,,IRQCallbackProc
+F03394,SLUS_010.40/25AC.c,6513,Sound_Cmd_E4_SetCutsceneVolume,C,10,Audio,,,SetVoiceVolume
+F03395,SLUS_010.40/25AC.c,6525,Sound_Cmd_E5_FadeOutCutscene,C,10,Audio,,,
+F03396,SLUS_010.40/25AC.c,6537,func_8001D7A8,C,32,Triage,,,SetVoiceVolume

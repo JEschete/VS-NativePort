@@ -1,0 +1,166 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F00330,BATTLE/BATTLE.PRG/146C.c,9495,func_8007DF98,C,12,Game.Battle,,vs_battle_exec,
+F00331,BATTLE/BATTLE.PRG/146C.c,9509,func_8007DFF0,C,21,Game.Battle,,_loadEtm _parseShp func_8008EFCC func_800C8550 func_800C8778 func_800CAB40 func_800D7CFC MAINMENU.PRG:vs_mainMenu_unpackMenubg MENU7.PRG:_initMemcard MENUF.PRG:_initCongratulationsScreen (+5),vs_main_nop9
+F00332,BATTLE/BATTLE.PRG/146C.c,9532,func_8007E0A8,C,28,Game.Battle,,_loadEtm func_8008F234 func_8009CFB0 func_8009D208 func_800C86AC func_800CB7DC func_800D7C5C MENU7.PRG:_shutdownMemcard MENU7.PRG:vs_menu7_gameOver MENUF.PRG:_renderCongratulationsScreen (+6),vs_main_nop9
+F00333,BATTLE/BATTLE.PRG/146C.c,9562,func_8007E180,C,8,Game.Battle,,func_800CACD0 func_800CB79C func_800D7EF4 vs_battle_loadEffPurge,vs_main_nop9
+F00334,BATTLE/BATTLE.PRG/146C.c,9572,func_8007E1C0,C,8,Game.Battle,,func_800CB114 func_800CB7DC func_800CE9B0,vs_main_nop9
+F00335,BATTLE/BATTLE.PRG/146C.c,9582,_calculateArmorClassAffinity,C,16,Game.Items,,func_80080C9C func_80086754,
+F00336,BATTLE/BATTLE.PRG/146C.c,9600,_calculateShieldClassAffinity,C,20,Game.Items,,func_80080C9C func_80086754,
+F00337,BATTLE/BATTLE.PRG/146C.c,9622,_calculateWeaponClassAffinity,C,20,Game.Items,,func_80080F78 func_80086754,
+F00338,BATTLE/BATTLE.PRG/146C.c,9646,vs_battle_itemIdIsInInventory,C,64,Game.Items,,func_80073AFC func_80073E30 func_800BEC58 vs_battle_script_setFlagIfItemInInventory,
+F00339,BATTLE/BATTLE.PRG/146C.c,9712,_getAttackGemBuff,C,27,Game.Items,,_getAgilityDifference _getAgilityDifference2 _getHitGemModifier _getIntelligenceDifference,
+F00340,BATTLE/BATTLE.PRG/146C.c,9741,_getDefenseGemBuff,C,117,Game.Items,,_getAgilityDifference _getAgilityDifference2 _getHitGemModifier _getIntelligenceDifference,
+F00341,BATTLE/BATTLE.PRG/146C.c,9860,_invalidHitFunction,C,2,Game.Battle,,,
+F00342,BATTLE/BATTLE.PRG/146C.c,9867,func_8007E97C,C,3,Game.Battle,,,
+F00343,BATTLE/BATTLE.PRG/146C.c,9875,_getHitGemModifier,C,12,Game.Items,,,_getAttackGemBuff _getDefenseGemBuff
+F00344,BATTLE/BATTLE.PRG/146C.c,9890,_getAgilityDifference,C,48,Game.Battle,,,_getAttackGemBuff _getDefenseGemBuff vs_main_getRandSmoothed
+F00345,BATTLE/BATTLE.PRG/146C.c,9941,_getIntelligenceDifference,C,48,Game.Battle,,,_getAttackGemBuff _getDefenseGemBuff vs_main_getRandSmoothed
+F00346,BATTLE/BATTLE.PRG/146C.c,9992,_getAgilityDifference2,C,50,Game.Battle,,,_getAttackGemBuff _getDefenseGemBuff vs_main_getRandSmoothed
+F00347,BATTLE/BATTLE.PRG/146C.c,10045,_getRiskModifier,C,8,Game.Battle,,,
+F00348,BATTLE/BATTLE.PRG/146C.c,10057,_getChainEvasionModifier,C,14,Game.Battle,,,
+F00349,BATTLE/BATTLE.PRG/146C.c,10075,_doesAttackHit,C,46,Game.Battle,,func_80085B10,vs_main_getRand
+F00350,BATTLE/BATTLE.PRG/146C.c,10124,func_8007F434,C,7,Game.Battle,,func_8006CE70,vs_main_getRand
+F00351,BATTLE/BATTLE.PRG/146C.c,10133,_hitPrerequisiteCanApplyEffect,C,9,Game.Menu,,_hitPrerequisiteCanApplyAglDown _hitPrerequisiteCanApplyAglUp _hitPrerequisiteCanApplyAirAttackUp _hitPrerequisiteCanApplyAirDefenseUp _hitPrerequisiteCanApplyBanish _hitPrerequisiteCanApplyCurse _hitPrerequisiteCanApplyDrain _hitPrerequisiteCanApplyEarthAttackUp _hitPrerequisiteCanApplyEarthDefenseUp _hitPrerequisiteCanApplyEquipDown (+18),
+F00352,BATTLE/BATTLE.PRG/146C.c,10144,_getEnemyClass,C,1,Game.Actors,,_hitPrerequisiteCanApplyDrain _hitPrerequisiteCanApplyExorcise _hitPrerequisiteNotUndead _hitPrerequisiteUndead,
+F00353,BATTLE/BATTLE.PRG/146C.c,10146,_hitPrerequisiteNever0,C,3,Game.Menu,,,
+F00354,BATTLE/BATTLE.PRG/146C.c,10152,_hitPrerequisiteAlways0,C,3,Game.Menu,,,
+F00355,BATTLE/BATTLE.PRG/146C.c,10158,_hitPrerequisiteAlways1,C,3,Game.Menu,,,
+F00356,BATTLE/BATTLE.PRG/146C.c,10164,_hitPrerequisiteAlways2,C,3,Game.Menu,,,
+F00357,BATTLE/BATTLE.PRG/146C.c,10170,_hitPrerequisiteUndead,C,3,Game.Menu,,,_getEnemyClass
+F00358,BATTLE/BATTLE.PRG/146C.c,10175,_hitPrerequisiteNotUndead,C,3,Game.Menu,,,_getEnemyClass
+F00359,BATTLE/BATTLE.PRG/146C.c,10180,_hitPrerequisiteNever1,C,3,Game.Menu,,,
+F00360,BATTLE/BATTLE.PRG/146C.c,10186,_hitPrerequisiteNever2,C,3,Game.Menu,,,
+F00361,BATTLE/BATTLE.PRG/146C.c,10192,_hitPrerequisiteNever3,C,3,Game.Menu,,,
+F00362,BATTLE/BATTLE.PRG/146C.c,10198,_hitPrerequisiteCanApplyStrDown,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00363,BATTLE/BATTLE.PRG/146C.c,10204,_hitPrerequisiteCanApplyIntDown,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00364,BATTLE/BATTLE.PRG/146C.c,10210,_hitPrerequisiteCanApplyAglDown,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00365,BATTLE/BATTLE.PRG/146C.c,10216,_hitPrerequisiteCanApplyEquipDown,C,32,Game.Items,,,_hitPrerequisiteCanApplyEffect
+F00366,BATTLE/BATTLE.PRG/146C.c,10250,_hitPrerequisiteCanApplyHalfMove,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00367,BATTLE/BATTLE.PRG/146C.c,10256,_hitPrerequisiteCanApplyStrUp,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00368,BATTLE/BATTLE.PRG/146C.c,10261,_hitPrerequisiteCanApplyIntUp,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00369,BATTLE/BATTLE.PRG/146C.c,10266,_hitPrerequisiteCanApplyAglUp,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00370,BATTLE/BATTLE.PRG/146C.c,10271,_hitPrerequisiteCanApplyEquipUp,C,32,Game.Items,,,_hitPrerequisiteCanApplyEffect
+F00371,BATTLE/BATTLE.PRG/146C.c,10305,_hitPrerequisiteCanApplyQuicken,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00372,BATTLE/BATTLE.PRG/146C.c,10311,_hitPrerequisiteCanApplySilence,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00373,BATTLE/BATTLE.PRG/146C.c,10317,_hitPrerequisiteCanApplyMagicWard,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00374,BATTLE/BATTLE.PRG/146C.c,10323,_hitPrerequisiteCanApplyRegen,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00375,BATTLE/BATTLE.PRG/146C.c,10329,_hitPrerequisiteCanApplyParalysis,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00376,BATTLE/BATTLE.PRG/146C.c,10335,_hitPrerequisiteCanApplyPoison,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00377,BATTLE/BATTLE.PRG/146C.c,10341,_hitPrerequisiteCanApplyNumbness,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00378,BATTLE/BATTLE.PRG/146C.c,10347,_hitPrerequisiteCanApplyCurse,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00379,BATTLE/BATTLE.PRG/146C.c,10353,_hitPrerequisiteCanApplyAirAttackUp,C,7,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00380,BATTLE/BATTLE.PRG/146C.c,10363,_hitPrerequisiteCanApplyFireAttackUp,C,7,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00381,BATTLE/BATTLE.PRG/146C.c,10373,_hitPrerequisiteCanApplyEarthAttackUp,C,7,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00382,BATTLE/BATTLE.PRG/146C.c,10383,_hitPrerequisiteCanApplyWaterAttackUp,C,7,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00383,BATTLE/BATTLE.PRG/146C.c,10393,_hitPrerequisiteCanApplyAirDefenseUp,C,22,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00384,BATTLE/BATTLE.PRG/146C.c,10418,_hitPrerequisiteCanApplyFireDefenseUp,C,21,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00385,BATTLE/BATTLE.PRG/146C.c,10442,_hitPrerequisiteCanApplyEarthDefenseUp,C,21,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00386,BATTLE/BATTLE.PRG/146C.c,10466,_hitPrerequisiteCanApplyWaterDefenseUp,C,22,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00387,BATTLE/BATTLE.PRG/146C.c,10491,_hitPrerequisiteCanApplyBanish,C,3,Game.Menu,,,_hitPrerequisiteCanApplyEffect
+F00388,BATTLE/BATTLE.PRG/146C.c,10497,_hitPrerequisiteCanApplyExorcise,C,7,Game.Menu,,,_getEnemyClass _hitPrerequisiteCanApplyEffect
+F00389,BATTLE/BATTLE.PRG/146C.c,10507,_hitPrerequisiteCanApplyDrain,C,7,Game.Menu,,,_getEnemyClass _hitPrerequisiteCanApplyEffect
+F00390,BATTLE/BATTLE.PRG/146C.c,10517,_hitPrerequisiteUnused0,C,1,Game.Menu,,,
+F00391,BATTLE/BATTLE.PRG/146C.c,10519,_hitPrerequisiteUnused1,C,1,Game.Menu,,,
+F00392,BATTLE/BATTLE.PRG/146C.c,10521,_hitPrerequisiteUnused2,C,1,Game.Menu,,,
+F00393,BATTLE/BATTLE.PRG/146C.c,10523,_canPerformAttack,C,9,Game.Battle,,func_80085B10,
+F00394,BATTLE/BATTLE.PRG/146C.c,10534,func_8007FE5C,C,57,Game.Battle,,_getMagicAttackDamage _getPhysicalAttackDamage _hpHealed,
+F00395,BATTLE/BATTLE.PRG/146C.c,10594,func_8007FF8C,C,16,Game.Battle,,,
+F00396,BATTLE/BATTLE.PRG/146C.c,10612,func_80080000,C,50,Game.Battle,,func_80084B70,
+F00397,BATTLE/BATTLE.PRG/146C.c,10664,func_800801E0,C,23,Game.Battle,,func_80084390 func_80084440 func_800844F0 func_80084570 func_800845F0 func_80084670 func_800846F0 func_80084770 func_800847F0 func_80084870 (+1),
+F00398,BATTLE/BATTLE.PRG/146C.c,10689,_adjustDpPp,C,29,Game.Battle,,func_80084B70,
+F00399,BATTLE/BATTLE.PRG/146C.c,10721,func_800803A4,C,49,Game.Battle,,func_80084B70,
+F00400,BATTLE/BATTLE.PRG/146C.c,10773,_triggerArmorAffinityChange,C,116,Game.Items,,func_80080F78,func_80096768 vs_main_getRand
+F00401,BATTLE/BATTLE.PRG/146C.c,10892,_triggerWeaponAffinityChange,C,116,Game.Items,,func_80080C9C,func_80096768 vs_main_getRand
+F00402,BATTLE/BATTLE.PRG/146C.c,11011,_triggerClassChange,C,76,Game.Battle,,func_80080C9C func_80080F78,func_80096768 vs_main_getRand
+F00403,BATTLE/BATTLE.PRG/146C.c,11090,func_80080C9C,C,85,Game.Battle,,_getMagicAttackDamage _getPhysicalAttackDamage _hpHealed,_calculateArmorClassAffinity _calculateShieldClassAffinity _triggerClassChange _triggerWeaponAffinityChange vs_main_getRand
+F00404,BATTLE/BATTLE.PRG/146C.c,11178,func_80080F78,C,15,Game.Battle,,_getPhysicalAttackDamage,_calculateWeaponClassAffinity _triggerArmorAffinityChange _triggerClassChange
+F00405,BATTLE/BATTLE.PRG/146C.c,11195,_setApplicableStatuses,C,20,Game.Battle,,func_80083998 func_800839E8 func_80083A38 func_80083A88 func_80083AD8 func_80083B28 func_80083B78 func_80083BC8 func_80083C18 func_80083C68 (+17),
+F00406,BATTLE/BATTLE.PRG/146C.c,11217,_setInflictedStatuses,C,11,Game.Battle,,func_8008404C func_8008409C func_800840EC func_8008413C func_80084248 func_80085008,
+F00407,BATTLE/BATTLE.PRG/146C.c,11230,_statCalculatorNop,C,2,Game.Battle,,,
+F00408,BATTLE/BATTLE.PRG/146C.c,11237,_getLastValue,C,3,Game.Battle,,,
+F00409,BATTLE/BATTLE.PRG/146C.c,11271,_getPhysicalAttackDamage,C,193,Game.Battle,,_getPhysicalAttackDamageWithStatusModifiers _getPhysicalAttackDamageWithoutStatusModifiers,func_8007FE5C func_80080C9C func_80080F78 vs_main_getRand
+F00410,BATTLE/BATTLE.PRG/146C.c,11467,_getPhysicalAttackDamageWithoutStatusModifiers,C,3,Game.Battle,,,_getPhysicalAttackDamage
+F00411,BATTLE/BATTLE.PRG/146C.c,11473,_getMagicAttackDamage,C,164,Game.Battle,,,func_8007FE5C func_80080C9C vs_main_getRand
+F00412,BATTLE/BATTLE.PRG/146C.c,11640,_previousHitFactor0,C,6,Game.Actors,,,
+F00413,BATTLE/BATTLE.PRG/146C.c,11650,_hpLostFactor,C,5,Game.Actors,,,
+F00414,BATTLE/BATTLE.PRG/146C.c,11659,_previousHitFactor1,C,6,Game.Actors,,,
+F00415,BATTLE/BATTLE.PRG/146C.c,11669,_factorCurrentHp,C,5,Game.Actors,,,
+F00416,BATTLE/BATTLE.PRG/146C.c,11678,_getWeaponPp,C,4,Game.Items,,,
+F00417,BATTLE/BATTLE.PRG/146C.c,11686,_factorMagicDamageReceived,C,12,Content,,,
+F00418,BATTLE/BATTLE.PRG/146C.c,11703,_factorPhysicalDamageReceived0,C,12,Game.Actors,,,
+F00419,BATTLE/BATTLE.PRG/146C.c,11720,_mpLostFactor,C,5,Game.Actors,,,
+F00420,BATTLE/BATTLE.PRG/146C.c,11730,_damageFromTrapPanel,C,116,Game.Field,,,_getRoomTrapLevel vs_main_getRandSmoothed
+F00421,BATTLE/BATTLE.PRG/146C.c,11850,_hpHealed,C,139,Game.Battle,,,func_8007FE5C func_80080C9C vs_main_getRandSmoothed
+F00422,BATTLE/BATTLE.PRG/146C.c,11992,_hpHealedFromHealPanel,C,113,Game.Battle,,,_getRoomTrapLevel vs_main_getRandSmoothed
+F00423,BATTLE/BATTLE.PRG/146C.c,12109,_itemRecovery,C,18,Game.Items,,,vs_main_getRandSmoothed
+F00424,BATTLE/BATTLE.PRG/146C.c,12130,_getRecoverableHp,C,4,Game.Battle,,,
+F00425,BATTLE/BATTLE.PRG/146C.c,12138,_getRecoverableMp,C,4,Game.Battle,,,
+F00426,BATTLE/BATTLE.PRG/146C.c,12146,_previousHitFactor2,C,6,Game.Actors,,,
+F00427,BATTLE/BATTLE.PRG/146C.c,12156,_factorMagicDamageReceivedOfType,C,13,Content,,,
+F00428,BATTLE/BATTLE.PRG/146C.c,12174,_factorPhysicalDamageReceived1,C,12,Game.Actors,,,
+F00429,BATTLE/BATTLE.PRG/146C.c,12191,_factorSpellCost,C,13,Game.Actors,,,
+F00430,BATTLE/BATTLE.PRG/146C.c,12208,_factorDamageReceived,C,9,Game.Actors,,,
+F00431,BATTLE/BATTLE.PRG/146C.c,12221,_getEquippedShieldDp,C,3,Game.Items,,,
+F00432,BATTLE/BATTLE.PRG/146C.c,12228,_factorLastValue,C,3,Game.Actors,,,
+F00433,BATTLE/BATTLE.PRG/146C.c,12235,_getPhysicalAttackDamageWithStatusModifiers,C,3,Game.Battle,,,_getPhysicalAttackDamage
+F00434,BATTLE/BATTLE.PRG/146C.c,12241,_getRisk,C,3,Game.Battle,,,
+F00435,BATTLE/BATTLE.PRG/146C.c,12248,_calculateStatChange,C,14,Game.Battle,,func_80084390 func_80084440 func_800844F0 func_80084570 func_800845F0 func_80084670 func_800846F0 func_80084770 func_800847F0 func_80084870 (+7),
+F00436,BATTLE/BATTLE.PRG/146C.c,12265,func_80083990,C,2,Game.Battle,,,
+F00437,BATTLE/BATTLE.PRG/146C.c,12273,func_80083998,C,5,Game.Battle,,,_setApplicableStatuses
+F00438,BATTLE/BATTLE.PRG/146C.c,12282,func_800839E8,C,5,Game.Battle,,,_setApplicableStatuses
+F00439,BATTLE/BATTLE.PRG/146C.c,12291,func_80083A38,C,5,Game.Battle,,,_setApplicableStatuses
+F00440,BATTLE/BATTLE.PRG/146C.c,12300,func_80083A88,C,5,Game.Battle,,,_setApplicableStatuses
+F00441,BATTLE/BATTLE.PRG/146C.c,12309,func_80083AD8,C,5,Game.Battle,,,_setApplicableStatuses
+F00442,BATTLE/BATTLE.PRG/146C.c,12318,func_80083B28,C,5,Game.Battle,,,_setApplicableStatuses
+F00443,BATTLE/BATTLE.PRG/146C.c,12327,func_80083B78,C,5,Game.Battle,,,_setApplicableStatuses
+F00444,BATTLE/BATTLE.PRG/146C.c,12336,func_80083BC8,C,5,Game.Battle,,,_setApplicableStatuses
+F00445,BATTLE/BATTLE.PRG/146C.c,12345,func_80083C18,C,5,Game.Battle,,,_setApplicableStatuses
+F00446,BATTLE/BATTLE.PRG/146C.c,12354,func_80083C68,C,5,Game.Battle,,,_setApplicableStatuses
+F00447,BATTLE/BATTLE.PRG/146C.c,12363,func_80083CB8,C,5,Game.Battle,,,_setApplicableStatuses
+F00448,BATTLE/BATTLE.PRG/146C.c,12372,func_80083D08,C,3,Game.Battle,,,_setApplicableStatuses
+F00449,BATTLE/BATTLE.PRG/146C.c,12380,func_80083D2C,C,5,Game.Battle,,,_setApplicableStatuses
+F00450,BATTLE/BATTLE.PRG/146C.c,12389,func_80083D7C,C,6,Game.Battle,,,_setApplicableStatuses
+F00451,BATTLE/BATTLE.PRG/146C.c,12399,func_80083DEC,C,5,Game.Battle,,,_setApplicableStatuses
+F00452,BATTLE/BATTLE.PRG/146C.c,12408,func_80083E3C,C,5,Game.Battle,,,_setApplicableStatuses
+F00453,BATTLE/BATTLE.PRG/146C.c,12417,func_80083E8C,C,5,Game.Battle,,,_setApplicableStatuses
+F00454,BATTLE/BATTLE.PRG/146C.c,12426,func_80083EDC,C,5,Game.Battle,,,_setApplicableStatuses
+F00455,BATTLE/BATTLE.PRG/146C.c,12435,func_80083F2C,C,3,Game.Battle,,,_setApplicableStatuses
+F00456,BATTLE/BATTLE.PRG/146C.c,12442,func_80083F50,C,3,Game.Battle,,,_setApplicableStatuses
+F00457,BATTLE/BATTLE.PRG/146C.c,12449,func_80083F74,C,3,Game.Battle,,,_setApplicableStatuses
+F00458,BATTLE/BATTLE.PRG/146C.c,12456,func_80083F98,C,3,Game.Battle,,,_setApplicableStatuses
+F00459,BATTLE/BATTLE.PRG/146C.c,12463,func_80083FBC,C,3,Game.Battle,,,_setApplicableStatuses
+F00460,BATTLE/BATTLE.PRG/146C.c,12470,func_80083FE0,C,3,Game.Battle,,,_setApplicableStatuses
+F00461,BATTLE/BATTLE.PRG/146C.c,12477,func_80084004,C,3,Game.Battle,,,_setApplicableStatuses
+F00462,BATTLE/BATTLE.PRG/146C.c,12484,func_80084028,C,3,Game.Battle,,,_setApplicableStatuses
+F00463,BATTLE/BATTLE.PRG/146C.c,12491,func_8008404C,C,5,Game.Battle,,,_setInflictedStatuses
+F00464,BATTLE/BATTLE.PRG/146C.c,12500,func_8008409C,C,5,Game.Battle,,,_setInflictedStatuses
+F00465,BATTLE/BATTLE.PRG/146C.c,12509,func_800840EC,C,5,Game.Battle,,,_setInflictedStatuses
+F00466,BATTLE/BATTLE.PRG/146C.c,12518,func_8008413C,C,5,Game.Battle,,,_setInflictedStatuses
+F00467,BATTLE/BATTLE.PRG/146C.c,12527,func_8008418C,C,4,Game.Battle,,,
+F00468,BATTLE/BATTLE.PRG/146C.c,12535,func_800841C8,C,8,Game.Battle,,,
+F00469,BATTLE/BATTLE.PRG/146C.c,12547,func_80084228,C,3,Game.Battle,,,
+F00470,BATTLE/BATTLE.PRG/146C.c,12554,func_80084248,C,5,Game.Battle,,,_setInflictedStatuses
+F00471,BATTLE/BATTLE.PRG/146C.c,12563,func_800842AC,C,5,Game.Battle,,,
+F00472,BATTLE/BATTLE.PRG/146C.c,12572,func_800842F0,C,3,Game.Battle,,,
+F00473,BATTLE/BATTLE.PRG/146C.c,12579,func_80084310,C,5,Game.Battle,,,vs_battle_setStateFlag
+F00474,BATTLE/BATTLE.PRG/146C.c,12589,func_80084340,C,5,Game.Battle,,,vs_battle_setStateFlag
+F00475,BATTLE/BATTLE.PRG/146C.c,12599,func_80084370,C,3,Game.Battle,,,
+F00476,BATTLE/BATTLE.PRG/146C.c,12606,func_80084390,C,8,Game.Battle,,,_calculateStatChange func_800801E0
+F00477,BATTLE/BATTLE.PRG/146C.c,12617,func_80084440,C,8,Game.Battle,,,_calculateStatChange func_800801E0
+F00478,BATTLE/BATTLE.PRG/146C.c,12628,func_800844F0,C,8,Game.Battle,,,_calculateStatChange func_800801E0
+F00479,BATTLE/BATTLE.PRG/146C.c,12639,func_80084570,C,8,Game.Battle,,,_calculateStatChange func_800801E0
+F00480,BATTLE/BATTLE.PRG/146C.c,12650,func_800845F0,C,8,Game.Battle,,,_calculateStatChange func_800801E0
+F00481,BATTLE/BATTLE.PRG/146C.c,12661,func_80084670,C,8,Game.Battle,,,_calculateStatChange func_800801E0
+F00482,BATTLE/BATTLE.PRG/146C.c,12672,func_800846F0,C,8,Game.Battle,,,_calculateStatChange func_800801E0
+F00483,BATTLE/BATTLE.PRG/146C.c,12683,func_80084770,C,8,Game.Battle,,,_calculateStatChange func_800801E0
+F00484,BATTLE/BATTLE.PRG/146C.c,12694,func_800847F0,C,8,Game.Battle,,,_calculateStatChange func_800801E0
+F00485,BATTLE/BATTLE.PRG/146C.c,12705,func_80084870,C,9,Game.Battle,,,_calculateStatChange func_800801E0
+F00486,BATTLE/BATTLE.PRG/146C.c,12717,_increaseStrengthRand,C,5,Core.Math,,,vs_main_getRand
+F00487,BATTLE/BATTLE.PRG/146C.c,12726,_increaseIntelligenceRand,C,5,Core.Math,,,vs_main_getRand
+F00488,BATTLE/BATTLE.PRG/146C.c,12735,_increaseAgilityRand,C,5,Core.Math,,,vs_main_getRand
+F00489,BATTLE/BATTLE.PRG/146C.c,12744,_increaseMaxHpRand,C,5,Game.Battle,,,vs_main_getRand
+F00490,BATTLE/BATTLE.PRG/146C.c,12753,_increaseMaxMpRand,C,5,Game.Battle,,,vs_main_getRand
+F00491,BATTLE/BATTLE.PRG/146C.c,12762,_decreaseStrengthRand,C,5,Core.Math,,,vs_main_getRand
+F00492,BATTLE/BATTLE.PRG/146C.c,12771,_decreaseIntelligenceRand,C,5,Core.Math,,,vs_main_getRand
+F00493,BATTLE/BATTLE.PRG/146C.c,12780,_decreaseAglityRand,C,5,Core.Math,,,vs_main_getRand
+F00494,BATTLE/BATTLE.PRG/146C.c,12789,func_80084B70,C,28,Game.Battle,,,_adjustDpPp _calculateStatChange func_80080000 func_800803A4

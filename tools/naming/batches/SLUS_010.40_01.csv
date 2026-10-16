@@ -1,0 +1,163 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F03074,SLUS_010.40/25AC.c,195,InitSound,C,4,Audio,,_loadMenuSound,StartSound
+F03075,SLUS_010.40/25AC.c,201,TeardownSound,C,4,Audio,,vs_main_resetGame vs_main_showEndingAndReturnToTitle,StopSound
+F03076,SLUS_010.40/25AC.c,207,Sound_BindAkaoSfxBlob,C,14,Audio,,_loadMenuSound,Sound_IsNotAkaoFile
+F03077,SLUS_010.40/25AC.c,223,func_80011E40,C,18,Triage,,,
+F03078,SLUS_010.40/25AC.c,243,func_80011EBC,C,11,Triage,,func_800454B8,
+F03079,SLUS_010.40/25AC.c,256,func_80011F08,C,3,Triage,,_loadSoundFile,
+F03080,SLUS_010.40/25AC.c,261,func_80011F24,C,15,Triage,,,
+F03081,SLUS_010.40/25AC.c,278,func_80011F90,C,6,Triage,,func_80044D94,
+F03082,SLUS_010.40/25AC.c,286,func_80011FB4,C,4,Triage,,func_80045000,func_80018C30
+F03083,SLUS_010.40/25AC.c,292,func_80011FDC,C,4,Triage,,func_80044DF4,func_80018C30
+F03084,SLUS_010.40/25AC.c,298,func_80012004,C,1,Triage,,func_80044DB4,func_80018C30
+F03085,SLUS_010.40/25AC.c,300,func_80012024,C,4,Triage,,vs_main_jumpToBattle,
+F03086,SLUS_010.40/25AC.c,308,func_80012034,C,8,Triage,,,func_8001286C func_80018C30
+F03087,SLUS_010.40/25AC.c,318,func_80012080,C,6,Triage,,func_80044F60,func_80018C30
+F03088,SLUS_010.40/25AC.c,326,func_800120B8,C,5,Triage,,,func_80018C30
+F03089,SLUS_010.40/25AC.c,333,func_800120E8,C,4,Triage,,func_80044EC8,func_80018C30
+F03090,SLUS_010.40/25AC.c,339,func_80012110,C,9,Triage,,,func_80018C30
+F03091,SLUS_010.40/25AC.c,350,func_8001215C,C,1,Triage,,,func_80018C30
+F03092,SLUS_010.40/25AC.c,352,func_8001217C,C,11,Triage,,func_80045630 func_80045684,func_80018C30
+F03093,SLUS_010.40/25AC.c,365,func_800121F0,C,14,Triage,,func_800456EC,Sound_IsNotAkaoFile func_80018C30
+F03094,SLUS_010.40/25AC.c,381,func_80012288,C,5,Triage,,func_80045D64 func_80046194 func_8004644C vs_main_freeSfx,func_80018C30
+F03095,SLUS_010.40/25AC.c,388,func_800122C4,C,4,Triage,,,func_80018C30
+F03096,SLUS_010.40/25AC.c,394,func_800122F0,C,25,Triage,,,
+F03097,SLUS_010.40/25AC.c,421,func_80012358,C,16,Triage,,func_80045684 func_800456EC,
+F03098,SLUS_010.40/25AC.c,439,func_800123C8,C,9,Triage,,vs_main_playSfx,
+F03099,SLUS_010.40/25AC.c,450,vs_sound_setMonoSound,C,7,Audio,,vs_main_setMonoSound,func_80018C30
+F03100,SLUS_010.40/25AC.c,459,func_80012440,C,4,Triage,,,func_80018C30
+F03101,SLUS_010.40/25AC.c,465,func_80012468,C,4,Triage,,func_80044DD4,func_80018C30
+F03102,SLUS_010.40/25AC.c,471,func_80012490,C,16,Triage,,,func_80018C30
+F03103,SLUS_010.40/25AC.c,489,func_800124FC,C,16,Triage,,,func_80018C30
+F03104,SLUS_010.40/25AC.c,507,func_80012568,C,8,Triage,,,
+F03105,SLUS_010.40/25AC.c,517,func_800125A8,C,4,Triage,,,func_80018C30
+F03106,SLUS_010.40/25AC.c,523,func_800125D4,C,5,Triage,,,func_80018C30
+F03107,SLUS_010.40/25AC.c,530,func_80012608,C,6,Triage,,,func_80018C30
+F03108,SLUS_010.40/25AC.c,538,func_8001264C,C,7,Triage,,func_80045BFC func_80046494,func_80018C30
+F03109,SLUS_010.40/25AC.c,547,func_80012694,C,4,Triage,,,func_80018C30
+F03110,SLUS_010.40/25AC.c,553,func_800126C0,C,5,Triage,,,func_80018C30
+F03111,SLUS_010.40/25AC.c,560,func_800126F4,C,6,Triage,,,func_80018C30
+F03112,SLUS_010.40/25AC.c,568,func_80012738,C,7,Triage,,func_80045CEC,func_80018C30
+F03113,SLUS_010.40/25AC.c,577,func_80012780,C,4,Triage,,,func_80018C30
+F03114,SLUS_010.40/25AC.c,583,func_800127AC,C,5,Triage,,,func_80018C30
+F03115,SLUS_010.40/25AC.c,590,func_800127E0,C,6,Triage,,,func_80018C30
+F03116,SLUS_010.40/25AC.c,598,func_80012824,C,7,Triage,,func_80045C74,func_80018C30
+F03117,SLUS_010.40/25AC.c,607,func_8001286C,C,5,Triage,,func_80012034,func_80018C30
+F03118,SLUS_010.40/25AC.c,614,func_800128A0,C,6,Triage,,func_80045000 func_8004552C,func_80018C30
+F03119,SLUS_010.40/25AC.c,622,func_800128D8,C,7,Triage,,,func_80018C30
+F03120,SLUS_010.40/25AC.c,631,func_80012918,C,4,Triage,,func_800443CC func_800468DC,func_80018C30
+F03121,SLUS_010.40/25AC.c,637,func_80012940,C,5,Triage,,func_800443CC,func_80018C30
+F03122,SLUS_010.40/25AC.c,644,func_80012970,C,6,Triage,,,func_80018C30
+F03123,SLUS_010.40/25AC.c,652,func_800129A4,C,4,Triage,,,func_80018C30
+F03124,SLUS_010.40/25AC.c,658,func_800129D0,C,5,Triage,,func_80045574,func_80018C30
+F03125,SLUS_010.40/25AC.c,665,func_80012A04,C,6,Triage,,,func_80018C30
+F03126,SLUS_010.40/25AC.c,673,func_80012A40,C,4,Triage,,,func_80018C30
+F03127,SLUS_010.40/25AC.c,679,func_80012A6C,C,5,Triage,,func_800455AC,func_80018C30
+F03128,SLUS_010.40/25AC.c,686,func_80012AA0,C,6,Triage,,,func_80018C30
+F03129,SLUS_010.40/25AC.c,694,func_80012ADC,C,4,Triage,,,func_80018C30
+F03130,SLUS_010.40/25AC.c,700,func_80012B08,C,5,Triage,,,func_80018C30
+F03131,SLUS_010.40/25AC.c,707,func_80012B3C,C,6,Triage,,,func_80018C30
+F03132,SLUS_010.40/25AC.c,715,func_80012B78,C,1,Triage,,func_80044DF4 vs_main_jumpToBattle vs_main_showEndingAndReturnToTitle,func_80018C30
+F03133,SLUS_010.40/25AC.c,717,func_80012B98,C,1,Triage,,func_80045DC0 vs_main_jumpToBattle vs_main_showEndingAndReturnToTitle,func_80018C30
+F03134,SLUS_010.40/25AC.c,719,func_80012BB8,C,4,Triage,,_loadMenuSound,func_80013588
+F03135,SLUS_010.40/25AC.c,725,vs_sound_spuTransferring,C,1,Audio,,func_800443CC vs_main_processSoundQueue,
+F03136,SLUS_010.40/25AC.c,727,func_80012C14,C,39,Triage,,func_80012F10 func_80013188,
+F03137,SLUS_010.40/25AC.c,768,func_80012D9C,C,27,Triage,,func_80012F10 func_800131DC,
+F03138,SLUS_010.40/25AC.c,797,func_80012E50,C,8,Triage,,,
+F03139,SLUS_010.40/25AC.c,807,func_80012EBC,C,6,Triage,,vs_main_jumpToBattle,
+F03140,SLUS_010.40/25AC.c,815,func_80012EF0,C,5,Triage,,,
+F03141,SLUS_010.40/25AC.c,822,func_80012F10,C,70,Audio,SpuSetTransferStartAddr,,Sound_CopyAndRelocateInstruments Sound_IsNotAkaoFile Sound_memcpy32 _waitTransferAvailable _writeSpu func_80012C14 func_80012D9C
+F03142,SLUS_010.40/25AC.c,894,func_80013188,C,7,Triage,,vs_main_processSoundQueue,func_80012C14 func_800135D8
+F03143,SLUS_010.40/25AC.c,903,func_800131DC,C,8,Triage,,_loadMenuSound,func_80012D9C func_800135D8
+F03144,SLUS_010.40/25AC.c,913,vs_sound_setCdVol,C,13,Audio,CdMix,_loadMenuSound func_800443CC TITLE.PRG:_initEnvironment TITLE.PRG:_menuSoundSettings,
+F03145,SLUS_010.40/25AC.c,928,func_800132C4,C,8,Triage,,func_800464FC,Sound_IsNotAkaoFile func_80018C30
+F03146,SLUS_010.40/25AC.c,938,func_80013328,C,1,Triage,,func_800464DC func_8004659C func_80046634,func_80018C30
+F03147,SLUS_010.40/25AC.c,940,func_80013348,C,4,Triage,,,func_80018C30
+F03148,SLUS_010.40/25AC.c,946,func_80013378,C,5,Triage,,func_800464FC,func_80018C30
+F03149,SLUS_010.40/25AC.c,953,func_800133B0,C,4,Triage,,,func_80018C30
+F03150,SLUS_010.40/25AC.c,959,func_800133E0,C,9,Triage,,,
+F03151,SLUS_010.40/25AC.c,970,Sound_CopyAndRelocateInstruments,C,11,Audio,,func_80012F10 func_800135D8,
+F03152,SLUS_010.40/25AC.c,984,Sound_IsNotAkaoFile,C,3,Audio,,Sound_BindAkaoSfxBlob func_800121F0 func_80012F10 func_800132C4 func_80013588 func_800135D8 func_80018C30,
+F03153,SLUS_010.40/25AC.c,989,_spuWriteComplete,C,4,Audio,SpuSetTransferCallback,,
+F03154,SLUS_010.40/25AC.c,995,spuSetTransferCallback,C,4,Audio,SpuSetTransferCallback,Sound_Cutscene_LoadNextBuffer _readSpu,
+F03155,SLUS_010.40/25AC.c,1001,_writeSpu,C,5,Audio,SpuSetTransferCallback SpuWrite,StartSound StopSound func_80012F10 func_800135D8,
+F03156,SLUS_010.40/25AC.c,1008,_readSpu,C,4,Audio,SpuRead,,spuSetTransferCallback
+F03157,SLUS_010.40/25AC.c,1014,_waitTransferAvailable,C,7,Triage,,StartSound StopSound func_80012F10 func_800135D8,
+F03158,SLUS_010.40/25AC.c,1023,func_80013588,C,7,Triage,,func_80012BB8,Sound_IsNotAkaoFile func_800135D8
+F03159,SLUS_010.40/25AC.c,1033,func_800135D8,C,22,Audio,SpuSetTransferStartAddr,func_80013188 func_800131DC func_80013588,Sound_CopyAndRelocateInstruments Sound_IsNotAkaoFile _waitTransferAvailable _writeSpu
+F03160,SLUS_010.40/25AC.c,1058,func_8001369C,INCLUDE_ASM,0,Triage,,StartSound,
+F03161,SLUS_010.40/25AC.c,1060,StartSound,C,23,Audio,EnableEvent OpenEvent SetRCnt SpuInitMalloc SpuSetIRQ SpuSetIRQCallback SpuSetTransferMode SpuSetTransferStartAddr SpuStart StartRCnt,InitSound,_waitTransferAvailable _writeSpu func_8001369C
+F03162,SLUS_010.40/25AC.c,1085,StopSound,C,15,Audio,CloseEvent DisableEvent SpuQuit StopRCnt UnDeliverEvent,TeardownSound,SetVoiceKeyOff _waitTransferAvailable _writeSpu
+F03163,SLUS_010.40/25AC.c,1102,SetVoiceKeyOn,C,4,Audio,,Sound_Cutscene_BeginPlayback func_80015220,
+F03164,SLUS_010.40/25AC.c,1108,SetVoiceKeyOff,C,4,Audio,,IRQCallbackProc Sound_Cutscene_StartStream Sound_ProcessKeyOffRequests StopSound,
+F03165,SLUS_010.40/25AC.c,1114,SetVoiceReverbMode,C,4,Audio,,func_80015220,
+F03166,SLUS_010.40/25AC.c,1120,SetVoiceNoiseMode,C,4,Audio,,func_80015220,
+F03167,SLUS_010.40/25AC.c,1126,SetVoiceFmMode,C,4,Audio,,func_80015220,
+F03168,SLUS_010.40/25AC.c,1132,SetVoiceVolume,C,14,Audio,,SetVoiceParamsByFlags Sound_Cmd_9B_unk Sound_Cmd_9D_unk Sound_Cmd_E4_SetCutsceneVolume Sound_Cutscene_InitVoice func_8001924C func_8001D7A8,
+F03169,SLUS_010.40/25AC.c,1148,SetVoiceSampleRate,C,3,Audio,,SetVoiceParamsByFlags Sound_Cmd_9B_unk Sound_Cmd_9D_unk Sound_Cmd_9E_unk Sound_Cmd_9F_unk Sound_Cutscene_InitVoice,
+F03170,SLUS_010.40/25AC.c,1153,SetVoiceStartAddr,C,3,Audio,,SetVoiceParamsByFlags Sound_Cutscene_InitVoice,
+F03171,SLUS_010.40/25AC.c,1158,SetVoiceRepeatAddr,C,3,Audio,,SetVoiceParamsByFlags Sound_Cutscene_InitVoice Sound_Cutscene_LoadNextBuffer,
+F03172,SLUS_010.40/25AC.c,1163,SetVoiceAdsrLower,C,3,Audio,,SetVoiceParamsByFlags,
+F03173,SLUS_010.40/25AC.c,1168,SetVoiceAdsrUpper,C,3,Audio,,SetVoiceParamsByFlags,
+F03174,SLUS_010.40/25AC.c,1262,SetVoiceAdsrAttackRateAndMode,C,9,Audio,,Sound_Cmd_9B_unk Sound_Cmd_9D_unk Sound_Cutscene_InitVoice,
+F03175,SLUS_010.40/25AC.c,1274,SetVoiceAdsrDecayRate,C,7,Audio,,Sound_Cutscene_InitVoice,
+F03176,SLUS_010.40/25AC.c,1283,SetVoiceAdsrSustainLevel,C,5,Audio,,Sound_Cutscene_InitVoice,
+F03177,SLUS_010.40/25AC.c,1290,SetVoiceAdsrSustainRateAndDirection,C,8,Audio,,Sound_Cmd_9B_unk Sound_Cmd_9D_unk Sound_Cutscene_InitVoice,
+F03178,SLUS_010.40/25AC.c,1301,SetVoiceAdsrReleaseRateAndMode,C,8,Audio,,Sound_Cutscene_InitVoice Sound_KillMusicConfig func_8001653C,
+F03179,SLUS_010.40/25AC.c,1312,SetVoiceParams,C,27,Audio,,func_80014D70,
+F03180,SLUS_010.40/25AC.c,1342,SetVoiceParamsByFlags,C,55,Audio,,func_80014D70 func_80015220,SetVoiceAdsrLower SetVoiceAdsrUpper SetVoiceRepeatAddr SetVoiceSampleRate SetVoiceStartAddr SetVoiceVolume
+F03181,SLUS_010.40/25AC.c,1400,Sound_UpdateSlidesAndDelays,C,163,Audio,,func_80019704 func_80019A58,
+F03182,SLUS_010.40/25AC.c,1566,func_8001436C,C,110,Triage,,func_80014D70,
+F03183,SLUS_010.40/25AC.c,1678,func_800147CC,C,117,Triage,,func_80015220,
+F03184,SLUS_010.40/25AC.c,1799,Sound_StealQuietestVoice,C,31,Audio,,func_80014D70,UnassignVoicesFromChannels
+F03185,SLUS_010.40/25AC.c,1832,Sound_FindFreeVoice,C,27,Audio,,func_80014D70,
+F03186,SLUS_010.40/25AC.c,1863,func_80014D70,C,60,Triage,,func_80015220,SetVoiceParams SetVoiceParamsByFlags Sound_FindFreeVoice Sound_StealQuietestVoice func_8001436C
+F03187,SLUS_010.40/25AC.c,1926,UnassignVoicesFromChannels,C,28,Audio,,Sound_StealQuietestVoice func_80015080,
+F03188,SLUS_010.40/25AC.c,1956,func_8001503C,C,12,Triage,,func_80015080,
+F03189,SLUS_010.40/25AC.c,1971,func_80015080,C,33,Audio,SpuGetVoiceEnvelope,func_80015220,UnassignVoicesFromChannels func_8001503C
+F03190,SLUS_010.40/25AC.c,2006,Sound_ApplyMasterFadeToChannelVolume,C,11,Audio,,func_80015220,
+F03191,SLUS_010.40/25AC.c,2020,Sound_RestoreChannelVolumeFromMasterFade,C,3,Audio,,func_80015220,
+F03192,SLUS_010.40/25AC.c,2027,func_80015220,C,139,Audio,SpuSetNoiseClock SpuSetReverbModeDepth,func_80019A58,SetVoiceFmMode SetVoiceKeyOn SetVoiceNoiseMode SetVoiceParamsByFlags SetVoiceReverbMode Sound_ApplyMasterFadeToChannelVolume Sound_RestoreChannelVolumeFromMasterFade func_800147CC func_80014D70 func_80015080 func_80015970
+F03193,SLUS_010.40/25AC.c,2168,ChannelMaskToVoiceMaskFiltered,C,16,Audio,,Sound_ProcessKeyOffRequests func_80015970,
+F03194,SLUS_010.40/25AC.c,2187,Sound_ProcessKeyOffRequests,C,55,Audio,,func_80019A58,ChannelMaskToVoiceMaskFiltered SetVoiceKeyOff
+F03195,SLUS_010.40/25AC.c,2244,func_80015970,C,43,Triage,,func_80015220,ChannelMaskToVoiceMaskFiltered
+F03196,SLUS_010.40/25AC.c,2303,Sound_MapInstrumentToAltSampleBank,C,10,Audio,,Sound_SetMusicSequence,
+F03197,SLUS_010.40/25AC.c,2315,Sound_MapInstrumentToBaseSampleBank,C,9,Audio,,Sound_Cmd_40_PushMusicState,
+F03198,SLUS_010.40/25AC.c,2326,func_80015BAC,INCLUDE_ASM,0,Triage,,Sound_Cmd_19_Unk Sound_Cmd_1A_Unk,
+F03199,SLUS_010.40/25AC.c,2330,func_80015C9C,C,31,Triage,,func_8001653C,func_8001B094
+F03200,SLUS_010.40/25AC.c,2363,func_80015D38,C,14,Triage,,Sound_LoadAkaoSequence Sound_SetMusicSequence,
+F03201,SLUS_010.40/25AC.c,2380,Sound_LoadAkaoSequence,C,124,Audio,,Sound_Cmd_10_StartFieldMusic Sound_Cmd_19_Unk Sound_Cmd_1A_Unk func_80018C30,func_80015D38 func_8001B094
+F03202,SLUS_010.40/25AC.c,2506,Sound_KillMusicConfig,C,30,Audio,,Sound_Cmd_11_StopAllMusic func_8001852C,SetVoiceAdsrReleaseRateAndMode
+F03203,SLUS_010.40/25AC.c,2539,Sound_EvictSfxVoice,C,97,Audio,,Sound_Cmd_21_unk Sound_Cutscene_FindFreeVoicePair Sound_PlaySfxProgram,Sound_ClearVoiceFromSchedulerState
+F03204,SLUS_010.40/25AC.c,2638,func_8001653C,C,49,Triage,,Sound_PlaySfxProgram,SetVoiceAdsrReleaseRateAndMode func_80015C9C
+F03205,SLUS_010.40/25AC.c,2690,FreeVoiceChannels,C,15,Audio,,Sound_PlaySfxProgram,
+F03206,SLUS_010.40/25AC.c,2709,Sound_PlaySfxProgram,C,65,Audio,,SoundVM_FE0B_unk Sound_Cmd_20_unk Sound_Cmd_30_unk Sound_Cmd_34_unk func_8001733C,FreeVoiceChannels Sound_EvictSfxVoice func_8001653C
+F03207,SLUS_010.40/25AC.c,2777,Sound_GetProgramCounters,C,17,Audio,,Sound_Cmd_20_unk Sound_Cmd_30_unk,
+F03208,SLUS_010.40/25AC.c,2797,Sound_MarkActiveChannelsVolumeDirty,C,22,Audio,,Sound_Cmd_80_unk Sound_Cmd_81_unk Sound_Cmd_C0_unk Sound_Cmd_C1_unk Sound_Cmd_C2_unk func_8001924C func_800199C4,
+F03209,SLUS_010.40/25AC.c,2822,Sound_MarkScheduledSfxChannelsVolumeDirty,C,21,Audio,,Sound_Cmd_80_unk Sound_Cmd_81_unk,
+F03210,SLUS_010.40/25AC.c,2847,Sound_SetMusicSequence,C,92,Audio,,Sound_Cmd_10_StartFieldMusic Sound_Cmd_1A_Unk,Sound_MapInstrumentToAltSampleBank Sound_memcpy32 Sound_memswp32 func_80015D38
+F03211,SLUS_010.40/25AC.c,2941,func_80016DA8,C,15,Triage,,Sound_Cmd_20_unk Sound_Cmd_30_unk func_8001733C,
+F03212,SLUS_010.40/25AC.c,2958,Sound_Cmd_10_StartFieldMusic,C,9,Audio,,Sound_Cmd_12_unk func_80019A58,Sound_LoadAkaoSequence Sound_SetMusicSequence
+F03213,SLUS_010.40/25AC.c,2969,Sound_Cmd_40_PushMusicState,C,12,Audio,,,Sound_MapInstrumentToBaseSampleBank Sound_memcpy32
+F03214,SLUS_010.40/25AC.c,2983,Sound_Cmd_19_Unk,C,16,Audio,,,Sound_LoadAkaoSequence Sound_memcpy32 func_80015BAC
+F03215,SLUS_010.40/25AC.c,3001,Sound_Cmd_1A_Unk,C,31,Audio,,,Sound_LoadAkaoSequence Sound_SetMusicSequence Sound_memcpy32 func_80015BAC
+F03216,SLUS_010.40/25AC.c,3034,Sound_Cmd_12_unk,C,10,Audio,,,Sound_Cmd_10_StartFieldMusic
+F03217,SLUS_010.40/25AC.c,3046,Sound_Cmd_34_unk,C,13,Audio,,,Sound_PlaySfxProgram
+F03218,SLUS_010.40/25AC.c,3061,Sound_Cmd_30_unk,C,11,Audio,,,Sound_GetProgramCounters Sound_PlaySfxProgram func_80016DA8
+F03219,SLUS_010.40/25AC.c,3074,Sound_Cmd_20_unk,C,8,Audio,,,Sound_GetProgramCounters Sound_PlaySfxProgram func_80016DA8
+F03220,SLUS_010.40/25AC.c,3085,func_8001733C,C,31,Triage,,,Sound_PlaySfxProgram func_80016DA8
+F03221,SLUS_010.40/25AC.c,3118,Sound_Cmd_21_unk,C,3,Audio,,,Sound_EvictSfxVoice
+F03222,SLUS_010.40/25AC.c,3123,Sound_Cmd_C0_unk,C,22,Audio,,,Sound_MarkActiveChannelsVolumeDirty
+F03223,SLUS_010.40/25AC.c,3147,Sound_Cmd_C1_unk,C,35,Audio,,,Sound_MarkActiveChannelsVolumeDirty
+F03224,SLUS_010.40/25AC.c,3184,Sound_Cmd_C2_unk,C,30,Audio,,,Sound_MarkActiveChannelsVolumeDirty
+F03225,SLUS_010.40/25AC.c,3216,Sound_Cmd_C8_unk,C,5,Audio,,,UpdateCdVolume
+F03226,SLUS_010.40/25AC.c,3223,Sound_Cmd_C9_unk,C,12,Audio,,,
+F03227,SLUS_010.40/25AC.c,3237,Sound_Cmd_CA_unk,C,11,Audio,,,
+F03228,SLUS_010.40/25AC.c,3250,Sound_Cmd_A0_unk,C,24,Audio,,,
+F03229,SLUS_010.40/25AC.c,3276,Sound_Cmd_A1_unk,C,24,Audio,,,
+F03230,SLUS_010.40/25AC.c,3302,Sound_Cmd_A8_unk,C,14,Audio,,,
+F03231,SLUS_010.40/25AC.c,3318,Sound_Cmd_A9_unk,C,19,Audio,,,
+F03232,SLUS_010.40/25AC.c,3339,Sound_Cmd_A2_unk,C,24,Audio,,,
+F03233,SLUS_010.40/25AC.c,3365,Sound_Cmd_A3_unk,C,24,Audio,,,
+F03234,SLUS_010.40/25AC.c,3391,Sound_Cmd_AA_unk,C,14,Audio,,,
+F03235,SLUS_010.40/25AC.c,3407,Sound_Cmd_AB_unk,C,18,Audio,,,

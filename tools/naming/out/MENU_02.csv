@@ -1,0 +1,159 @@
+id,final_name,final_location,purpose,confidence,notes
+F02640,Menu::Status::PopulateWeaponStats,Native\Game\src\Menu\Status\EquipmentDetails.c,"Copies the selected actor's weapon stats, DP, PP, range, and Risk into the status detail panel.",high,
+F02641,Menu::Status::PopulateShieldStats,Native\Game\src\Menu\Status\EquipmentDetails.c,"Copies the selected actor's shield stats, DP, and PP into the status detail panel.",high,
+F02642,Menu::Status::PopulateArmorStats,Native\Game\src\Menu\Status\EquipmentDetails.c,Copies a limb's armor stats and DP into the status detail panel and marks Ashley's equipped armor.,high,Checks five Ashley armor slots when setting the equipped indicator.
+F02643,Menu::Status::PopulateAccessoryStats,Native\Game\src\Menu\Status\EquipmentDetails.c,"Copies accessory class, Affinity, damage-type, and attribute modifiers into the status detail panel.",high,Original accessory copy reads types past its four-element array; name describes intended stat population.
+F02644,Menu::Status::PopulateBladeStats,Native\Game\src\Menu\Status\EquipmentDetails.c,"Shows the weapon blade's class, Affinity, attributes, DP, PP, range, and Risk in the detail panel.",high,
+F02645,Menu::Status::PopulateGripStats,Native\Game\src\Menu\Status\EquipmentDetails.c,Shows the grip's damage-type modifiers and attributes in the equipment detail panel.,high,
+F02646,Menu::Status::PopulateGemStats,Native\Game\src\Menu\Status\EquipmentDetails.c,"Shows the gem's class, Affinity, and attribute modifiers in the equipment detail panel.",high,
+F02647,Menu::Status::FormatBladeDescription,Native\Game\src\Menu\Status\EquipmentDetails.c,"Builds the blade description with its material, weapon category, damage type, and required hands.",high,
+F02648,Menu::Status::FormatGripDescription,Native\Game\src\Menu\Status\EquipmentDetails.c,Builds a grip description with its grip category for the equipment detail information box.,high,
+F02649,Menu::Status::CopyGemDescription,Native\Game\src\Menu\Status\EquipmentDetails.c,Copies the selected gem's help text for the equipment detail information box.,high,
+F02650,Menu::Status::SelectWeaponComponent,Native\Game\src\Menu\Status\EquipmentDetails.c,Highlights a weapon component and returns its description while populating its detail stats.,high,
+F02651,Menu::Status::SelectShieldComponent,Native\Game\src\Menu\Status\EquipmentDetails.c,Highlights the shield or a socketed gem and returns its description while updating gem stats.,high,
+F02652,Menu::Status::ArmorDescription,Native\Game\src\Menu\Status\EquipmentDetails.c,Returns the selected limb armor's formatted description for the equipment detail information box.,high,
+F02653,Menu::Status::AccessoryDescription,Native\Game\src\Menu\Status\EquipmentDetails.c,Converts accessory stats to an inventory row and returns its formatted description.,high,
+F02654,Menu::Status::IsDetailElementSelectable,Native\Game\src\Menu\Status\EquipmentDetails.c,Tests whether a detail-panel element is available for the current stat page and equipment sockets.,high,
+F02655,Menu::Status::NavigateDetailElements,Native\Game\src\Menu\Status\EquipmentDetails.c,Follows directional links to the next selectable stat or component in the equipment detail panel.,high,
+F02656,Menu::Status::BeginVitalsTransition,Native\Game\src\Menu\Status\ActorStatus.c,"Starts the HP, MP, and Risk panel transition when switching actors or leaving the status screen.",high,
+F02657,Menu::Status::FindNextInspectableActor,Native\Game\src\Menu\Status\ActorStatus.c,Cycles through room actors until it finds a present actor eligible for status inspection.,high,
+F02658,Menu::Status::AnimateActorSwitch,Native\Game\src\Menu\Status\ActorStatus.c,Slides the inspected actor model out and loads the next actor model before sliding it into view.,high,
+F02659,Menu::Status::DrawUnanalyzedValue,Native\Game\src\Menu\Status\ActorStatus.c,Draws question marks instead of an unanalyzed enemy's current or maximum stat value.,high,
+F02660,Menu::Status::DrawVitalBar,Native\Game\src\Menu\Status\ActorStatus.c,"Draws an HP, MP, or Risk bar and conceals an unanalyzed actor's actual proportion.",high,
+F02661,Menu::Status::DrawVitals,Native\Game\src\Menu\Status\ActorStatus.c,"Animates and draws the inspected actor's HP, MP, and Risk values and bars.",high,
+F02662,Menu::Status::DrawLimbConditionIndicator,Native\Game\src\Menu\Status\ActorStatus.c,Draws a colored inset square representing a limb's condition and selection brightness.,high,
+F02663,Menu::Status::DrawLimbLeaderLine,Native\Game\src\Menu\Status\ActorStatus.c,Draws a two-segment line from the actor model's limb anchor to its condition label.,med,fields:vs_battle_uiEquipment_limb.unk5=modelLimbAnchorIndex
+F02664,Menu::Status::DrawStatusEffectIcons,Native\Game\src\Menu\Status\ActorStatus.c,Draws active status-effect icons and elemental markers with the limb panel's slide offset.,high,
+F02665,Menu::Status::NavigateStatusEffects,Native\Game\src\Menu\Status\ActorStatus.c,"Navigates the active status-effect grid, updates its help text, and supports actor-model rotation.",high,
+F02666,Menu::Status::LimbCount,Native\Game\src\Menu\Status\ActorStatus.c,Counts the actor's named limbs up to the six-limb limit for the status screen.,high,
+F02667,Menu::Status::EquipmentRowCount,Native\Game\src\Menu\Status\EquipmentDetails.c,"Returns weapon, shield, limb armor, and optional accessory row count for the inspected actor.",high,
+F02668,Menu::Status::UpdateLimbPanel,Native\Game\src\Menu\Status\ActorStatus.c,"Animates limb labels, condition indicators, status icons, and leader lines for the inspected actor.",high,fields:D_800F4EE8.unk51[49]=limbSelectionAndDimmingBits
+F02669,Menu::Status::HoistEquipmentRow,Native\Game\src\Menu\Status\EquipmentDetails.c,Slides other equipment rows away and moves the selected equipment row into the detail heading.,high,
+F02670,Menu::Status::BeginDetailTransition,Native\Game\src\Menu\Status\EquipmentDetails.c,Creates the equipment-category title and starts the selected row's detail-screen transition.,high,
+F02671,Menu::Status::InitializeDetailPanel,Native\Game\src\Menu\Status\EquipmentDetails.c,"Starts the equipment detail transition and enables its class, Affinity, and stat displays.",high,
+F02672,Menu::Status::SetWeaponComponentRow,Native\Game\src\Menu\Status\EquipmentDetails.c,"Builds and optionally slides in a blade, grip, or gem row for the weapon detail screen.",high,
+F02673,Menu::Status::SetShieldGemRow,Native\Game\src\Menu\Status\EquipmentDetails.c,Builds and optionally slides in an available gem socket row for the shield detail screen.,high,
+F02674,Menu::Status::ExitEquipmentDetails,Native\Game\src\Menu\Status\EquipmentDetails.c,"Dismisses equipment detail rows, stat headings, and optional DP and PP bars.",high,
+F02675,Menu::Status::UpdateEquipmentDetails,Native\Game\src\Menu\Status\EquipmentDetails.c,"Runs equipment detail navigation, component inspection, stat-page help, and exit transitions.",high,
+F02676,Menu::Status::UpdateEquipmentList,Native\Game\src\Menu\Status\EquipmentDetails.c,Builds the actor's equipment list and handles actor switching and entry into equipment details.,high,
+F02677,Menu::Status::DrawModelSlideFade,Native\Game\src\Menu\Status\ActorStatus.c,Draws the framebuffer gradient that fades an inspected actor model as it slides in from the left.,high,
+F02678,Menu::Status::DrawBackground,Native\Game\src\Menu\Status\ActorStatus.c,Draws the status background and framebuffer gradients in the order required by actor transitions.,high,
+F02679,Menu::Status::DrawFrame,Native\Game\src\Menu\Status\ActorStatus.c,"Positions the inspection camera and draws the actor model, background, limb panel, and vital stats.",high,
+F02680,Menu::Status::ShowSelectedLimbCondition,Native\Game\src\Menu\Status\ActorStatus.c,Formats the selected limb's condition message and highlights that limb in the model panel.,high,
+F02681,Menu::Status::PopulateSelectedLimbDefense,Native\Game\src\Menu\Status\ActorStatus.c,Copies the selected limb's Affinity and damage-type defenses into the status stat panel.,high,
+F02682,Menu::Status::Update,Native\Game\src\Menu\Status\ActorStatus.c,"Runs actor inspection, limb and status navigation, equipment views, and status-screen exit transitions.",high,
+F02683,Menu::Framework::SetMenuVisible,Native\Game\src\Menu\Framework\Framework.c,Shows or hides the menu command indicator and updates the menu visibility flag.,high,cross-batch-identical:MENU_03:F02798;cross-batch-identical:MENU_04:SetMenuVisible
+F02684,Menu::Map::DrawAshleyMarker,Native\Game\src\Menu\Map.c,Draws the map's default 16-pixel Ashley-position marker with the requested brightness and OT insertion point.,high,
+F02685,Menu::Map::ConfigureAreaList,Native\Game\src\Menu\Map.c,Builds the visited-area chooser with current-area highlighting and scroll-aware cursor memory.,high,
+F02686,Menu::Map::PollAreaSelection,Native\Game\src\Menu\Map.c,Returns the area chooser result and starts cancellation or selected-row flyout animations.,high,
+F02687,Menu::Map::ShowAreaName,Native\Game\src\Menu\Map.c,Creates the sliding area-name title row with the requested font color for the map screen.,high,
+F02688,Menu::Framework::ClearMenuExceptTitle,Native\Game\src\Menu\Framework\Framework.c,Clears menu rows while preserving title row five.,high,"Unused wrapper; title is menu-item id 5, not a bitmask."
+F02689,Menu::Map::DrawFrame,Native\Game\src\Menu\Map.c,Draws map controls and either the area geometry or the Paling jamming effect and message.,high,
+F02690,Menu::Map::ApplyCamera,Native\Game\src\Menu\Map.c,"Computes the area-map camera position and installs its yaw, pitch, and translation matrices.",high,
+F02691,Menu::Map::UpdateAreaSelection,Native\Game\src\Menu\Map.c,Lists visited areas and polls the area chooser until selection or cancellation.,high,
+F02692,Menu::Map::MarkAllRoomsVisited,Native\Game\src\Menu\Map.c,Sets every room's visited flag in a counted array of three-word room records.,med,Unused; counted triplets match vs_battle_scene room records.
+F02693,Menu::Map::CenterOnRoom,Native\Game\src\Menu\Map.c,Moves every area's room vertex so the selected room's horizontal center and lowest extent lie at the origin.,high,
+F02694,Menu::Map::SetRoomCenterTarget,Native\Game\src\Menu\Map.c,Computes the selected room's bounding-box horizontal center and lowest extent as the map pan target.,high,
+F02695,Menu::Map::AnimateCentering,Native\Game\src\Menu\Map.c,Moves all room vertices toward the current map-centering target with bounded per-axis steps.,high,
+F02696,Menu::Map::ScaleRoomVertices,Native\Game\src\Menu\Map.c,Multiplies every room vertex by the supplied scale factor for the area-map display.,high,
+F02697,Menu::Framework::BuildYawMatrix,Native\Game\src\Menu\Framework\Framework.c,Builds the fixed-point yaw rotation matrix used by menu cameras.,high,cross-batch-identical:MENU_03:F02808
+F02698,Menu::Framework::BuildPitchMatrix,Native\Game\src\Menu\Framework\Framework.c,Builds the fixed-point pitch rotation matrix used by menu cameras.,high,cross-batch-identical:MENU_03:F02809
+F02699,Menu::Map::DarkenBackground,Native\Game\src\Menu\Map.c,Draws semitransparent framebuffer strips to darken the map screen background.,high,
+F02700,Menu::Map::InitialRoomIndex,Native\Game\src\Menu\Map.c,Finds Ashley's current room in the area map or falls back to its first visited room.,high,Also caches the actual current-room index separately from the fallback selected room.
+F02701,Menu::Map::SelectAdjacentVisitedRoom,Native\Game\src\Menu\Map.c,Follows the room-name links forward or backward until a visited room is selected.,high,
+F02702,Menu::Map::DrawPalingDistortion,Native\Game\src\Menu\Map.c,Draws alternating sine-displaced framebuffer scanlines while a Paling jams the area map.,high,
+F02703,Menu::Map::DrawControlBackdrop,Native\Game\src\Menu\Map.c,Draws the tapered gradient backdrop and shadow behind a map control label.,high,
+F02704,Menu::Map::DrawControls,Native\Game\src\Menu\Map.c,Animates map control hints and the compass or displays the Paling jamming label.,high,
+F02705,Menu::Map::DrawFeatureMarker,Native\Game\src\Menu\Map.c,Draws a centered map feature icon using its atlas width and a fixed eight-pixel height.,high,
+F02706,Menu::Map::DrawDoorStateMarker,Native\Game\src\Menu\Map.c,Draws the door's state icon and caption and queues its named map label.,med,fields:vs_main_flags_t.unk33F=doorMapMarkerStates;state bit 0 selects icon and caption.
+F02707,Menu::Map::DrawDoorLabel,Native\Game\src\Menu\Map.c,Draws a named door label and its leader line from the door's projected map position.,high,
+F02708,Menu::Map::AppendLabelLine,Native\Game\src\Menu\Map.c,Appends a gray line to the map-label OT bucket from the shared primitive buffer.,high,
+F02709,Menu::Map::DrawCompass,Native\Game\src\Menu\Map.c,"Draws the rotated compass spokes, cardinal directions, and Ashley-facing arrow.",high,
+F02710,Menu::Map::ComputeCompassCorners,Native\Game\src\Menu\Map.c,Rotates rectangle corners around a screen position for compass elements.,high,
+F02711,Menu::Map::DrawConnectingAreaLabel,Native\Game\src\Menu\Map.c,Draws an exit's destination area label or an unvisited-area placeholder with its leader line.,high,
+F02712,Menu::Map::QueueLabel,Native\Game\src\Menu\Map.c,Records a projected map position and its door or connecting-area label identifier.,high,
+F02713,Menu::Map::DrawLabels,Native\Game\src\Menu\Map.c,Draws queued door labels before connecting-area labels unless map annotations are hidden.,high,
+F02714,Menu::Map::ShouldDrawDoorStateMarker,Native\Game\src\Menu\Map.c,Checks door-state and room-specific flags to decide whether the map shows a door-state marker.,med,Door markers 65 through 71 additionally consult room-specific state through func_8008E7BC.
+F02715,Save::MemoryCard::PollEvents,Native\Save\src\MemoryCard\GameFiles.c,"Returns the first signaled software or hardware memory-card event, or the no-event sentinel.",high,shared-title-counterpart:F03582
+F02716,Save::MemoryCard::ClearEvents,Native\Save\src\MemoryCard\GameFiles.c,Consumes all four pending events in the selected memory-card event group.,high,shared-title-counterpart:F03583
+F02717,Render::UploadPackedRectangle,Native\Graphics\src\TextureAnimation.c,"Uploads pixels to a Vram rectangle specified by packed position and size, then waits for completion.",high,shared-title-counterpart:F03584
+F02718,Render::ReadPackedRectangle,Native\Graphics\src\TextureAnimation.c,"Reads pixels from a Vram rectangle specified by packed position and size, then waits for completion.",high,shared-title-counterpart:F03585
+F02719,Core::Memory::CopyBytesBackward,Native\Core\src\Memory\Copy.c,Copies the requested byte count from the highest offset down to zero.,high,shared-title-counterpart:F03586;cross-batch-identical:F01402; dup-of:F01402
+F02720,Save::MemoryCard::BuildSaveFilename,Native\Save\src\MemoryCard\GameFiles.c,Builds the memory-card path for one of the five numbered Vagrant Story save files.,high,shared-title-counterpart:F03587
+F02721,Save::MemoryCard::BuildTemporaryFilename,Native\Save\src\MemoryCard\GameFiles.c,Builds the memory-card path for a letter-suffixed temporary Vagrant Story save file.,high,shared-title-counterpart:F03588
+F02722,Save::MemoryCard::NewestSaveSlot,Native\Save\src\MemoryCard\GameFiles.c,Returns the zero-based occupied save slot with the greatest generation counter.,high,shared-title-counterpart:F03589
+F02723,Save::MemoryCard::FindMatchingSaveSlot,Native\Save\src\MemoryCard\GameFiles.c,"Finds the active card slot matching the current save identity, cipher key, save count, and generation.",high,fields:vs_main_settings_t.slotState=saveIdentity;save summary slotState also encodes unavailable or temporary slots.
+F02724,Save::MemoryCard::ParseSaveFileNumber,Native\Save\src\MemoryCard\GameFiles.c,Recognizes Vagrant Story filenames and returns a positive final-file number or negative temporary-file number.,high,shared-title-counterpart:F03591
+F02725,Save::MemoryCard::HasChecksumError,Native\Save\src\MemoryCard\GameFiles.c,"Checks per-sector XOR bytes and the checksum sector, returning nonzero on corruption.",high,Zero means valid; validates XOR checksums rather than returning a validity boolean.
+F02726,Save::MemoryCard::DecodeSaveBytes,Native\Save\src\MemoryCard\GameFiles.c,Subtracts the multiplicative cipher keystream from the requested save-data byte range.,high,shared-title-counterpart:F03593
+F02727,Save::MemoryCard::ReadSaveSummary,Native\Save\src\MemoryCard\GameFiles.c,"Retries reading and decoding a save header, validates its checksums, and stores the slot summary.",high,shared-title-counterpart:F03594
+F02728,Save::MemoryCard::HasSaveSuffix,Native\Save\src\MemoryCard\GameFiles.c,Checks whether the card directory contains a recognized save filename with the requested final character.,high,shared-title-counterpart:F03595
+F02729,Save::MemoryCard::DeleteRedundantTemporaryFiles,Native\Save\src\MemoryCard\GameFiles.c,Deletes temporary save files when the corresponding finalized files also exist.,high,shared-title-counterpart:F03596
+F02730,Save::MemoryCard::ScanSaveDirectory,Native\Save\src\MemoryCard\GameFiles.c,"Enumerates card files, loads save summaries, removes redundant temporary files, and marks available three-block slots.",high,shared-title-counterpart:F03597
+F02731,Save::MemoryCard::CreateSaveFile,Native\Save\src\MemoryCard\GameFiles.c,Recreates a numbered save file with three memory-card blocks.,high,shared-title-counterpart:F03598
+F02732,Save::MemoryCard::AdvanceCardReadiness,Native\Save\src\MemoryCard\GameFiles.c,"Advances memory-card information, clear, and directory-load requests with retry and timeout handling.",high,shared-title-counterpart:F03599
+F02733,Save::MemoryCard::ValidateAndApplyLoadedSave,Native\Save\src\MemoryCard\GameFiles.c,"Decodes and validates a loaded save and optionally restores its game state, play time, and sound mode.",high,fields:saveBase_t.unk8=formatSignature;signature 0x20000107;nonzero argument applies validated game data.
+F02734,Save::MemoryCard::PackageGameSave,Native\Save\src\MemoryCard\GameFiles.c,"Packages the current game and retained container contents with save metadata, sector checksums, and byte-stream encoding.",high,fields:saveBase_t.unk8=formatSignature;differs from TITLE clear-save packaging.
+F02735,Save::MemoryCard::ReadSaveStep,Native\Save\src\MemoryCard\GameFiles.c,Starts or advances an asynchronous permanent or temporary save-file read with retries and transfer progress.,high,MENU uses char static isTempSave; TITLE counterpart uses short; operation and bit packing are the same.
+F02736,Save::MemoryCard::WriteSaveStep,Native\Save\src\MemoryCard\GameFiles.c,"Writes through a temporary filename, reads back for byte verification, and renames the verified save into place.",high,shared-title-counterpart:F03603
+F02737,Save::MemoryCard::InitializeMenuResourcesStep,Native\Save\src\MemoryCard\GameFiles.c,"Loads memory-card menu assets, reserves save buffers, installs card events, and suppresses reset during access.",high,MENU-specific audio reservation makes this distinct from TITLE InitializeResourcesStep.
+F02738,Save::MemoryCard::ReleaseMenuResources,Native\Save\src\MemoryCard\GameFiles.c,"Closes card events, releases menu save buffers, restores reset, and releases the menu's audio reservation.",high,MENU-specific audio release makes this distinct from TITLE ReleaseResources.
+F02739,Render::DrawImmediateSprite,Native\Graphics\src\TextureAnimation.c,"Draws a synchronized textured sprite using packed coordinates, dimensions, palette, and brightness settings.",high,shared-title-counterpart:F03606
+F02740,Menu::Files::DrawSummaryLabel,Native\Game\src\Menu\Files.c,Draws a save-summary label or punctuation sprite from the memory-card screen atlas.,high,shared-title-counterpart:F03607
+F02741,Menu::Files::DrawInteger,Native\Game\src\Menu\Files.c,Draws an unsigned decimal value from the requested leading divisor in the file-menu number font.,high,shared-title-counterpart:F03608
+F02742,Menu::Files::DecimalDigitCount,Native\Game\src\Menu\Files.c,Returns the decimal digit count used to align current and maximum save-summary values.,high,shared-title-counterpart:F03609
+F02743,Menu::Files::DrawHpMpSummary,Native\Game\src\Menu\Files.c,"Draws the save slot's Hp or Mp label, current and maximum values, and colored fill bar.",high,shared-title-counterpart:F03610
+F02744,Menu::Files::DrawTransferProgress,Native\Game\src\Menu\Files.c,Draws the moving colored highlight for a memory-card load or save operation.,high,shared-title-counterpart:F03611
+F02745,Menu::Files::DrawTransferComplete,Native\Game\src\Menu\Files.c,Draws the fading completion highlight for a memory-card load or save operation.,high,shared-title-counterpart:F03612
+F02746,Menu::Files::ResetElements,Native\Game\src\Menu\Files.c,"Clears the file-menu elements, cursor, messages, fades, and transfer progress.",high,shared-title-counterpart:F03613
+F02747,Menu::Files::InitializeElement,Native\Game\src\Menu\Files.c,Initializes one file-menu rectangle and copies its encoded text while preserving spacing controls.,high,shared-title-counterpart:F03614
+F02748,Menu::Files::ClearElement,Native\Game\src\Menu\Files.c,Clears a single file-menu element slot.,high,shared-title-counterpart:F03615
+F02749,Menu::Files::AreAnimationsComplete,Native\Game\src\Menu\Files.c,Returns true when no file-menu element remains in a moving state.,high,Original Active name is inverted: returns true only when every element has finished animating.
+F02750,Menu::Files::DrawGlyph,Native\Game\src\Menu\Files.c,Draws a file-menu font glyph or applies encoded spacing and returns the next horizontal position.,high,shared-title-counterpart:F03617
+F02751,Menu::Files::FindCurrentDataSaveStep,Native\Game\src\Menu\Files.c,Searches both cards for the active save while updating the data menu's access messages.,high,"Unlike TITLE counterpart, also updates the shared information box."
+F02752,Menu::Files::CheckCardStep,Native\Game\src\Menu\Files.c,"Advances a masked memory-card check and selects the appropriate insertion, removal, or missing-data message.",high,shared-title-counterpart:F03619
+F02753,Menu::Files::DrawText,Native\Game\src\Menu\Files.c,"Draws encoded file-menu text with newlines, signed spacing controls, and animated confirmation arrows.",high,shared-title-counterpart:F03620
+F02754,Render::BlendRgb,Native\Graphics\src\TextureAnimation.c,Interpolates each packed color component with an eighth-step blend weight.,high,shared-title-counterpart:F03621
+F02755,Menu::Files::ElementBackgroundColor,Native\Game\src\Menu\Files.c,Computes the selected or unselected file-menu background color from inner and outer blend states.,high,shared-title-counterpart:F03622
+F02756,Menu::Files::DrawElement,Native\Game\src\Menu\Files.c,"Draws one file-menu element with its text, location thumbnail, save summary, selection gradient, and transfer highlight.",high,shared-title-counterpart:F03623
+F02757,Menu::Files::DrawFrame,Native\Game\src\Menu\Files.c,"Animates file-menu elements and draws the save summaries, caution message, cursor, and optional screen fade.",high,shared-title-counterpart:F03624
+F02758,Menu::Files::DrawBackground,Native\Game\src\Menu\Files.c,Draws the upper background panels of the memory-card file screen.,high,shared-title-counterpart:F03625
+F02759,Menu::Files::UpdateConfirmation,Native\Game\src\Menu\Files.c,Animates a Yes or No prompt and returns the confirmed or canceled choice.,high,shared-title-counterpart:F03629
+F02760,Menu::Files::UpdateOverwritePrompt,Native\Game\src\Menu\Files.c,Runs an overwrite confirmation and waits for its menu elements to finish leaving.,high,shared-title-counterpart:F03630
+F02761,Menu::Files::UpdateFormatPrompt,Native\Game\src\Menu\Files.c,"Confirms formatting, rechecks the selected card, formats it, and displays failure messages.",high,shared-title-counterpart:F03631
+F02762,Menu::Files::UpdateSaveFiles,Native\Game\src\Menu\Files.c,"Handles save-slot selection, overwrite and format prompts, clear-save packaging, write verification, and completion feedback.",high,shared-title-counterpart:F03632
+F02763,Menu::Files::UpdateSaveCard,Native\Game\src\Menu\Files.c,"Animates the selected save card, checks free space or formatting, and opens its save-slot list.",high,shared-title-counterpart:F03633
+F02764,Menu::Files::UpdateDataSaveMenu,Native\Game\src\Menu\Files.c,Runs the data-menu save chooser with remembered card selection and container-loss warnings.,high,Differs from TITLE UpdateSaveMenu through cursor memory and shared information-box updates.
+F02765,Menu::Files::UpdateLoadFiles,Native\Game\src\Menu\Files.c,"Handles load-slot selection, asynchronous reading, save application, completion feedback, and cancellation.",high,shared-title-counterpart:F03626
+F02766,Menu::Files::UpdateLoadCard,Native\Game\src\Menu\Files.c,"Animates the chosen load card, checks its directory, and opens its save-slot list.",high,shared-title-counterpart:F03627
+F02767,Menu::Files::UpdateDataLoadMenu,Native\Game\src\Menu\Files.c,Runs the data-menu load chooser with remembered card selection and optional exit fade.,high,Differs from TITLE UpdateLoadMenu through cursor memory and initial-state selection.
+F02768,Save::MemoryCard::LoadIntroSnapshotStep,Native\Save\src\MemoryCard\GameFiles.c,Loads a bundled courtyard or D'tok save snapshot and applies it without replacing the current play time.,high,
+F02769,Menu::Files::LoadGameOverAssetsStep,Native\Game\src\Menu\Files.c,Loads the game-over artwork and uploads its texture and menu palettes.,high,
+F02770,Menu::Files::BlendGameOverTextClut,Native\Game\src\Menu\Files.c,Interpolates a 16-entry text palette between two source palettes for the game-over choices.,high,
+F02771,Menu::Files::UpdateGameOverChoices,Native\Game\src\Menu\Files.c,Animates Continue and Return to Title choices and returns the selection after the screen fades out.,high,
+F02772,Menu::Files::UpdateGameOver,Native\Game\src\Menu\Files.c,"Runs game-over choices, save loading, intro checkpoint restart, and return to the title screen.",high,
+F02773,Menu::Files::UpdateContainerConfirmation,Native\Game\src\Menu\Files.c,Runs the container's animated Yes or No prompt with an optional menu-button cancellation rule.,high,
+F02774,Menu::Files::ContainerIndexSection,Native\Game\src\Menu\Files.c,Returns the selected item category's index-array segment using container category capacities.,high,"Sections: weapons32, blades64, grips64, shields32, armor64, gems192, misc256."
+F02775,Menu::Files::CopySelectedContainerItems,Native\Game\src\Menu\Files.c,"Copies selected container items into compact slots and remaps weapon components, socketed gems, and ownership indices.",high,Remaps one-based indices; gem owner bit 7 distinguishes shields from weapons.
+F02776,Menu::Files::UpdateContainerSave,Native\Game\src\Menu\Files.c,"Loads container contents, runs the transfer screen, and saves or restores inventory changes on return.",high,fields:vs_menu_inventoryStorage_t.unk0=inventoryBackup;fields:vs_menu_inventoryStorage_t.unkF00=inventoryIndexBackup;fields:vs_menu_inventoryStorage_t.unkFB0=loadedContainer
+F02777,Menu::Files::DrawPlayTime,Native\Game\src\Menu\Files.c,Draws the data menu's play-time readout with animated fractional seconds and a 100-hour overflow display.,high,
+F02778,Menu::Files::UpdateDataMenu,Native\Game\src\Menu\Files.c,Runs the in-game Data screen's Save and Load choices and transitions back to gameplay.,high,
+F02779,Menu::Rename::EditNameAtCursor,Native\Game\src\Menu\Rename.c,"Handles name insertion, deletion, and shoulder-button movement of the 20-character weapon-name cursor.",high,
+F02780,Menu::Rename::CopyTrimmedName,Native\Game\src\Menu\Rename.c,"Copies the weapon-name buffer, trims trailing spaces, and reports an empty name for default-name fallback.",high,
+F02781,Menu::Rename::DrawFrame,Native\Game\src\Menu\Rename.c,"Draws weapon-name editing commands, the name buffer, character grid, and sliding gradient backdrops.",high,D_80105DB0 records name-cursor movement for navigation-icon animation.
+F02782,Menu::Rename::DrawSelectionBox,Native\Game\src\Menu\Rename.c,Draws the gradient highlight rectangle behind a selected name character or character-grid cell.,high,
+F02783,Menu::Rename::HighlightGridCharacter,Native\Game\src\Menu\Rename.c,Highlights the selected character-grid cell and updates the rename screen's animated cursor.,high,
+F02784,Menu::Rename::UpdateConfirmation,Native\Game\src\Menu\Rename.c,Runs the renamed weapon's three-choice confirmation and returns the selected action.,high,
+F02785,Menu::Rename::SetCommandHighlight,Native\Game\src\Menu\Rename.c,Highlights the active rename command and updates selection flags on auxiliary menu rows.,high,
+F02786,Menu::Rename::UpdateNameEditor,Native\Game\src\Menu\Rename.c,"Handles weapon-name entry, grid navigation, confirmation, cancellation, and equipped-weapon name refresh.",high,
+F02787,Menu::Rename::Update,Native\Game\src\Menu\Rename.c,Initializes the weapon-name buffer and drives the animated rename screen before returning to inventory.,high,
+F02788,Menu::Options::UpdateSimpleMapChoice,Native\Game\src\Menu\Options.c,"Runs the simple-map display chooser and highlights the current frame, map, or hidden setting.",high,
+F02789,Menu::Options::UpdateAbilityTimingChoice,Native\Game\src\Menu\Options.c,Runs the ability-timing indicator chooser and highlights the current display setting.,high,
+F02790,Menu::Options::UpdateWeaponStatusChoice,Native\Game\src\Menu\Options.c,Runs the weapon stat-change notification chooser and highlights the current setting.,high,
+F02791,Menu::Options::UpdateArmorStatusChoice,Native\Game\src\Menu\Options.c,Runs the armor stat-change notification chooser and highlights the current setting.,high,
+F02792,Menu::Options::UpdateCursorMemoryChoice,Native\Game\src\Menu\Options.c,Runs the cursor-memory chooser and highlights whether menu selections are remembered.,high,
+F02793,Menu::Options::UpdateInformationChoice,Native\Game\src\Menu\Options.c,Runs the information-display chooser and highlights the current help-text setting.,high,
+F02794,Menu::Options::UpdatePuzzleModeChoice,Native\Game\src\Menu\Options.c,Runs the puzzle-mode chooser and highlights the current puzzle-assistance setting.,high,Settings bit 3 stores the inverse puzzle-mode-enabled flag.
+F02795,Menu::Options::UpdateSoundChoice,Native\Game\src\Menu\Options.c,Runs the stereo or mono sound chooser and highlights the current audio mode.,high,
+F02796,Menu::Options::UpdateVibrationChoice,Native\Game\src\Menu\Options.c,Runs the vibration chooser and triggers vibration feedback when On is selected.,high,
+F02797,Menu::Options::Update,Native\Game\src\Menu\Options.c,"Runs the nine settings submenus, applies confirmed choices, and handles main-menu or gameplay exits.",high,fields:vs_main_settings_t.unk0_0=puzzleModeDisabledAtBit3;settings bit 5 controls ability timing.

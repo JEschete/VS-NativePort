@@ -1,0 +1,121 @@
+id,final_name,final_location,purpose,confidence,notes
+F01144,Event::CommandPlayActorSfx,Native\Game\src\Event\ScriptAudio.c,Plays the specified model sound for the script-selected actor with positional pan and volume.,high,
+F01145,Event::CommandSlideSfxVolume,Native\Game\src\Event\ScriptAudio.c,Slides the volume of a selected sound or sound group over the scripted duration.,high,
+F01146,Event::CommandStopAllSfx,Native\Game\src\Event\ScriptAudio.c,Stops all active sound effects for the event script.,high,
+F01147,Event::CommandStopSfx,Native\Game\src\Event\ScriptAudio.c,Stops the sound or sound group selected by the event script.,high,
+F01148,Event::CommandLoadSfxSlot,Native\Game\src\Event\ScriptAudio.c,Queues a sound-effect bank into the script-specified sound slot.,high,
+F01149,Event::CommandWaitSfxSlotRelease,Native\Game\src\Event\ScriptAudio.c,Polls release of a sound queue slot and keeps the script waiting while it remains busy.,high,
+F01150,Event::CommandFreeSfx,Native\Game\src\Event\ScriptAudio.c,Frees the selected sound-effect bank and yields for one frame when skipping the event.,high,
+F01151,Event::CommandSelectSfxBank,Native\Game\src\Event\ScriptAudio.c,Selects the sound-effect bank used by subsequent event commands.,high,
+F01152,Event::CommandLoadEventMusic,Native\Game\src\Event\ScriptAudio.c,Loads the event music into music slot three and queues its associated sound file.,high,Music ID comes from func_80089104
+F01153,Event::CommandCrossfadeMusic,Native\Game\src\Event\ScriptAudio.c,Fades the current music volume out and starts another slot with the scripted fade parameters.,high,
+F01154,Event::CommandLoadMusicSlot,Native\Game\src\Event\ScriptAudio.c,Queues the specified music track into the script-selected music slot.,high,
+F01155,Event::CommandFreeMusic,Native\Game\src\Event\ScriptAudio.c,Frees the selected music slot and yields for one frame when skipping the event.,high,
+F01156,Event::CommandPlayMusic,Native\Game\src\Event\ScriptAudio.c,Starts the selected music slot with the scripted volume transition.,high,
+F01157,Event::CommandSlideMusicVolume,Native\Game\src\Event\ScriptAudio.c,Slides the current event music volume to the specified level over a duration.,high,
+F01158,Event::CommandSlideMusicTempo,Native\Game\src\Event\ScriptAudio.c,Slides the music tempo multiplier to a signed scripted value.,high,
+F01159,Event::CommandSlideMusicPitch,Native\Game\src\Event\ScriptAudio.c,Slides the music pitch multiplier to a signed scripted value.,high,
+F01160,Event::CommandStopMusic,Native\Game\src\Event\ScriptAudio.c,Stops the current event music slot and clears its playback handle.,high,
+F01161,Event::CommandWaitMusicSlot,Native\Game\src\Event\ScriptAudio.c,Waits while the selected music slot reports activity and otherwise releases its playback handle.,med,Queries slot activity twice before stopping
+F01162,Event::CommandPushMusicState,Native\Game\src\Event\ScriptAudio.c,Pushes the active music playback state so another sequence can temporarily replace it.,high,
+F01163,Event::CommandWaitMusicSlotLoad,Native\Game\src\Event\ScriptAudio.c,Waits for the specified music slot load to finish and clears its loading queue entry.,high,
+F01164,Event::CommandLoadSoundFile,Native\Game\src\Event\ScriptAudio.c,Queues the script-specified sound file for loading.,high,
+F01165,Event::CommandWaitSoundQueue,Native\Game\src\Event\ScriptAudio.c,Waits until the pending sound-file queue finishes loading.,high,
+F01166,Event::CommandWaitMusicTimer,Native\Game\src\Event\ScriptAudio.c,Waits until the current music timer reaches the script-specified count.,high,Compares upper half of packed music timer
+F01167,Event::CommandSlideSfxPitch,Native\Game\src\Event\ScriptAudio.c,Slides the pitch of a selected sound or sound group over the scripted duration.,med,Driver A5 command adjusts signed pitch accumulator
+F01168,Event::CommandSlideSfxPan,Native\Game\src\Event\ScriptAudio.c,Slides the pan of a selected sound or sound group over the scripted duration.,med,Driver A3 command adjusts signed stereo accumulator
+F01169,Event::CommandResumeMusicSlot,Native\Game\src\Event\ScriptAudio.c,Selects a music slot and resumes its saved playback state.,med,Uses sound command 17 through func_800120E8
+F01170,Event::CommandPlayActorEffect,Native\Game\src\Event\ScriptEffects.c,Starts the scripted visual effect with one actor target and lists the other room actors.,high,
+F01171,Event::CommandAdvanceEffectStage,Native\Game\src\Event\ScriptEffects.c,Advances the selected stage of an active action effect and releases effects when skipping the event.,med,Stage selected by bit in effect continuation mask
+F01172,Event::CommandWaitEffectState,Native\Game\src\Event\ScriptEffects.c,Waits for the requested action-effect state and releases effects when waiting for terminal states.,high,States zero and five use deferred release handshake
+F01173,Event::CommandYieldEffectRelease,Native\Game\src\Event\ScriptEffects.c,Calls the empty effect-release hook and yields for one frame when skipping the event.,high,Underlying func_8007BF04 is empty
+F01174,Event::CommandWaitEffectContinuation,Native\Game\src\Event\ScriptEffects.c,Waits until the action-effect controller allows a continuation stage.,high,
+F01175,Event::CommandWaitEffectRelease,Native\Game\src\Event\ScriptEffects.c,Releases active action effects once and waits until their controller reaches state zero or five.,high,
+F01176,Event::CommandMarkEffectStageReady,Native\Game\src\Event\ScriptEffects.c,Marks the selected action-effect continuation stage ready and decrements its active-stage count.,high,
+F01177,Event::CommandSetMusicJumpThreshold,Native\Game\src\Event\ScriptAudio.c,Sets the active music sequence branch threshold from the script operand.,high,fields:FSoundChannelConfig.JumpThresholdValue=sequence branch threshold
+F01178,Event::CommandPlayVibrationPattern,Native\Game\src\Event\ScriptEffects.c,Starts a scripted controller vibration pattern or stops event-owned vibration patterns.,high,Bit three selects a copied mutable pattern
+F01179,Event::CommandSetActorTrail,Native\Game\src\Event\ScriptEffects.c,Starts an actor bone trail or requests existing action-effect trails to stop.,high,Stop callee ignores actor and bone operands
+F01180,Event::CommandSetEnteredDoor,Native\Game\src\Event\ScriptActors.c,Sets the entered-door index used for scripted room entry behavior.,high,
+F01181,Event::CommandStoreActorRangeBearing,Native\Game\src\Event\ScriptActors.c,Stores scaled horizontal actor separation and bearing in two adjacent state flags.,high,
+F01182,Event::CommandSetActorActivity,Native\Game\src\Event\ScriptActors.c,Enables or disables the actors selected by the script actor selector.,med,Activity setter toggles actor mode 0x20 and high bit of unk1C
+F01183,Event::CommandAwardMiscLoot,Native\Game\src\Event\ScriptActors.c,Offers up to two scripted miscellaneous item rewards and waits for the reward interface to close.,high,
+F01184,Event::CommandConsumeMiscItem,Native\Game\src\Event\ScriptActors.c,Decrements the inventory count of the script-selected miscellaneous item.,high,
+F01185,Event::CommandStoreActorDistance,Native\Game\src\Event\ScriptActors.c,Stores horizontal actor separation in map-cell units in the specified state flag.,high,
+F01186,Event::SetEventActorActivity,Native\Game\src\Event\ScriptActors.c,Sets flag bit zero and enables or disables activity for all non-player room actors during an event.,med,Flag bit zero follows the requested activity state; actor slot sixteen is also visited
+F01187,Event::CommandSpecialOperation,Native\Game\src\Event\ScriptVm.c,"Dispatches special event operations for progression, ending playback, actor control, and camera setup.",high,
+F01188,Event::CommandWaitScreenEffectLoad,Native\Game\src\Event\ScriptEffects.c,Waits while the screen-effect context reports a pending overlay load.,high,
+F01189,Event::CommandSetScreenDistortion,Native\Game\src\Event\ScriptEffects.c,Selects the scripted screen-distortion mode and loads or unloads its supporting image data.,med,SCREFF2 uses mode to build tiled feedback rendering
+F01190,Event::CommandLoadScreenEffects,Native\Game\src\Event\ScriptEffects.c,Initializes the screen-effect context and queues the SCREFF2 overlay.,high,
+F01191,Event::CommandReservedScreenEffect,Native\Game\src\Event\ScriptEffects.c,Accepts the reserved screen-effect instruction without changing state.,high,No-op opcode BD
+F01192,Event::CommandFreeScreenEffects,Native\Game\src\Event\ScriptEffects.c,Releases the screen-effect context and yields for one frame when skipping the event.,high,
+F01193,Event::CommandStopCameraMotion,Native\Game\src\Event\ScriptCamera.c,Stops both event camera tracks and clears their follow state.,high,
+F01194,Event::CommandSetCameraFollowing,Native\Game\src\Event\ScriptCamera.c,Enables motion continuation independently for the camera look-at and eye tracks.,high,
+F01195,Event::CommandSetCameraOriginActor,Native\Game\src\Event\ScriptCamera.c,Selects the actor whose position offsets both event camera tracks.,high,
+F01196,Event::CommandRestoreFieldCamera,Native\Game\src\Event\ScriptCamera.c,Starts a transition back to the field camera with optional direction and zoom overrides.,high,
+F01197,Event::CommandWaitCameraTracks,Native\Game\src\Event\ScriptCamera.c,Waits until all event camera tracks selected by the completion mask finish.,high,
+F01198,Event::CommandSetScreenCapture,Native\Game\src\Event\ScriptCamera.c,Enables or disables captured-screen rendering for the event.,high,
+F01199,Event::CommandWaitFrames,Native\Game\src\Event\ScriptVm.c,Counts down the current script context delay and resumes once its frame counter expires.,high,fields:D_800F4C58=per-script delay counters
+F01200,Event::CommandSetTickSpeed,Native\Game\src\Event\ScriptVm.c,Sets event game-time tick speed to the supported normal or accelerated value.,high,
+F01201,Event::CommandSetScanlineOverlay,Native\Game\src\Event\ScriptEffects.c,Enables or disables the animated horizontal scanline overlay during the event.,high,
+F01202,Event::CommandWaitScriptContext,Native\Game\src\Event\ScriptVm.c,Waits for a selected script context to stop or clears it when the operand requests cancellation.,high,
+F01203,Event::CommandStartScriptContext,Native\Game\src\Event\ScriptVm.c,Starts a secondary script context at an embedded block and skips that block in the caller.,high,fields:D_800F4C38=script instruction pointers
+F01204,Event::CommandStopScriptContext,Native\Game\src\Event\ScriptVm.c,Clears the current script instruction pointer and stops that context without ending the whole event.,high,Interpreter status three clears the context pointer
+F01205,Event::CommandLoadNextEvent,Native\Game\src\Event\ScriptVm.c,Allocates a staging buffer and queues the next event file requested by the script.,high,
+F01206,Event::CommandFinishEvent,Native\Game\src\Event\ScriptVm.c,"Dismisses all event text boxes and ends the script once they close, restoring normal tick speed.",high,
+F01207,Event::CommandPlayMenuSelectSfx,Native\Game\src\Event\ScriptAudio.c,Plays the standard menu-selection sound for an event instruction.,high,
+F01208,Event::BuildScriptActorSelection,Native\Game\src\Event\ScriptActors.c,"Builds an actor iterator from an individual, all-actor, or category-filtered script selector.",high,fields:func_800BB68C_t.unk0=remaining count;fields:func_800BB68C_t.unk1=cursor;fields:func_800BB68C_t.unk2=actor IDs
+F01209,Event::NextScriptSelectedActor,Native\Game\src\Event\ScriptActors.c,Returns the next actor in a script selection or the sentinel when the selection is exhausted.,high,Sentinel actor ID is one
+F01210,Event::ActorDialogAnchor,Native\Game\src\Event\ScriptActors.c,Projects the actor head anchor and its upward direction for positioning an event text box.,high,Returns projected orientation in output vz
+F01211,Event::DrawEventScanlineOverlay,Native\Game\src\Event\ScriptEffects.c,Draws alternating semitransparent horizontal lines across the event viewport.,high,
+F01212,Event::UpdateEventImageTweens,Native\Game\src\Event\ScriptEffects.c,"Interpolates event image position, depth, and brightness for up to three loaded images.",med,fields:D_800F4B30_t.unk2=elapsed ticks;fields:D_800F4B30_t.unk3=duration
+F01213,Event::UpdateEventWeatherTween,Native\Game\src\Event\ScriptEffects.c,Interpolates room weather direction and intensity and applies them each event frame.,med,Direction drives particle velocity and intensity also adjusts ambient sound volume
+F01214,Event::InitializeEventCamera,Native\Game\src\Event\ScriptCamera.c,Allocates event camera state and captures the current field camera with default projection and screen effects.,high,fields:D_800F4BA4_t.unk168=camera roll tween;fields:D_800F4BA4_t.unk174=captured-screen roll tween
+F01215,Event::FreeEventCamera,Native\Game\src\Event\ScriptCamera.c,Frees the camera state allocated for the active event.,high,
+F01216,Event::SetEventFieldCameraOverride,Native\Game\src\Event\ScriptCamera.c,Selects whether event playback continuously uses the standard field camera.,high,fields:D_800F4BA0=field camera override enabled
+F01217,Event::SetEventCameraOriginActor,Native\Game\src\Event\ScriptCamera.c,Changes the camera origin actor and preserves world positions when switching back to an absolute origin.,high,fields:D_800F4BA4_t.unk1E8=origin actor;fields:D_800F4BA4_t.unk1EC=fixed-point origin offset
+F01218,Event::UpdateEventCameraOrigin,Native\Game\src\Event\ScriptCamera.c,Refreshes the camera origin offset from the selected actor or clears it for an absolute camera.,high,
+F01219,Event::ApplyEventCameraState,Native\Game\src\Event\ScriptCamera.c,"Applies event camera positions, actor-relative offsets, shake, roll, and projection settings to the field renderer.",high,
+F01220,Event::RestoreEventFieldCamera,Native\Game\src\Event\ScriptCamera.c,Builds return-to-field camera destinations and starts distance-scaled transitions for both camera tracks.,high,
+F01221,Event::CommandCameraMotion,Native\Game\src\Event\ScriptCamera.c,"Configures eye or look-at destinations, tweens, actor-bone tracking, and terrain-aware event camera movement.",high,
+F01222,Event::UpdateEventCameraTracks,Native\Game\src\Event\ScriptCamera.c,"Advances event camera eye, look-at, angle, projection, and shake tracks.",high,
+F01223,Event::UpdateEventCameraTrack,Native\Game\src\Event\ScriptCamera.c,"Advances one camera track through linear, orbital, actor-following, or terrain-aware movement.",high,
+F01224,Event::AdvanceTerrainCameraTrack,Native\Game\src\Event\ScriptCamera.c,Steps a camera track toward its destination while checking ground clearance along the viewing direction.,high,fields:D_800F4BA4_t.unk27C=previous terrain-motion position
+F01225,Event::EventCameraGroundClearance,Native\Game\src\Event\ScriptCamera.c,Samples four transformed view-space offsets and returns the strictest terrain height minus camera clearance.,high,
+F01226,Event::CommandTweenCameraRoll,Native\Game\src\Event\ScriptCamera.c,Sets or animates camera roll or captured-screen roll with a requested rotation direction.,high,
+F01227,Event::UpdateEventAngleTween,Native\Game\src\Event\ScriptCamera.c,Advances an event camera angle tween and marks its value ready to apply.,high,fields:func_800BD57C_t.unk2=value;fields:func_800BD57C_t.unk8=elapsed ticks;fields:func_800BD57C_t.unkA=duration
+F01228,Event::EventCameraCompletionMask,Native\Game\src\Event\ScriptCamera.c,"Returns completion bits for camera motion, roll, projection, clip distances, screen fade, and shake.",high,
+F01229,Event::CommandScreenTransform,Native\Game\src\Event\ScriptCamera.c,"Configures captured-screen scaling, tint, translation, render mode, and event screen fading.",high,fields:D_800F4BA4_t.unk1FC=screen scale tween;fields:D_800F4BA4_t.unk21C=screen tint tween;fields:D_800F4BA4_t.unk23C=screen translation tween
+F01230,Event::UpdateEventScreenTransforms,Native\Game\src\Event\ScriptCamera.c,"Updates captured-screen scale, tint, translation, and fade from their event tween tracks.",high,
+F01231,Event::UpdateEventTripleTween,Native\Game\src\Event\ScriptCamera.c,Interpolates up to three scalar values in a screen-transform track and reports whether it changed.,high,fields:func_800BDBB4_t.unk1C=elapsed ticks;fields:func_800BDBB4_t.unk1E=duration
+F01232,Event::CommandCameraLensOrShake,Native\Game\src\Event\ScriptCamera.c,"Sets or animates projection and clip distances, or configures one of two camera shake oscillators.",high,
+F01233,Event::UpdateEventLensTween,Native\Game\src\Event\ScriptCamera.c,Advances a projection or clipping-distance tween and marks its scalar value ready to apply.,high,
+F01234,Event::UpdateEventShakeOscillator,Native\Game\src\Event\ScriptCamera.c,"Computes a camera shake oscillator using its frequency, amplitude, duration, and envelope shape.",high,fields:func_800BDF6C_t.unk4=oscillation cycles;fields:func_800BDF6C_t.unk6=amplitude;fields:func_800BDF6C_t.unk9=duration
+F01235,Event::UpdateEventCameraShake,Native\Game\src\Event\ScriptCamera.c,Combines two shake oscillators into signed eye and look-at offsets along the requested camera axes.,high,fields:D_800F4BA4_t.unk1A4=first shake oscillator;fields:D_800F4BA4_t.unk1B0=second shake oscillator
+F01236,Event::SetEventCameraFollowing,Native\Game\src\Event\ScriptCamera.c,Enables velocity continuation separately for eye and look-at tracks and resets their continuation latches.,high,
+F01237,Event::StopEventCameraMotion,Native\Game\src\Event\ScriptCamera.c,Stops both event camera tracks and disables their velocity continuation.,high,
+F01238,Event::StartEventCameraOrbitReturn,Native\Game\src\Event\ScriptCamera.c,Places the camera beside its saved field orientation and starts an orbital return transition.,high,State flags AF and B0 select saved field camera direction and zoom
+F01239,Event::ScaleEventCameraTrackDuration,Native\Game\src\Event\ScriptCamera.c,Scales a camera track duration by its remaining world-space distance.,high,
+F01240,Event::ScaleEventCameraDuration,Native\Game\src\Event\ScriptCamera.c,Distance-scales one camera track duration or synchronizes the distance-scaled durations of both tracks.,high,
+F01241,Core::Math::AddVectors,Native\Core\src\Math\Vector.c,Adds the three components of two vectors into a destination vector.,high,
+F01242,Core::Math::SubtractVectors,Native\Core\src\Math\Vector.c,Subtracts the second vector from the first into a destination vector.,high,
+F01243,Core::Math::ScaleFixedVector,Native\Core\src\Math\FixedPoint.c,Multiplies each vector component by a 12-bit fixed-point scalar.,high,
+F01244,Core::Math::CopyVector,Native\Core\src\Math\Vector.c,Copies the three components of a vector and returns the destination.,high,
+F01245,Core::Math::FixedVectorMagnitude,Native\Core\src\Math\FixedPoint.c,Returns a fixed-point vector length after truncating its components to integer coordinates.,high,
+F01246,Event::ReadScriptFixedVector,Native\Game\src\Event\ScriptCamera.c,Reads three signed little-endian script operands into a 12-bit fixed-point vector.,high,
+F01247,Core::Math::ShortVectorToFixed,Native\Core\src\Math\FixedPoint.c,Converts a short integer vector into a 12-bit fixed-point vector.,high,
+F01248,Core::Math::MultiplyFixed,Native\Core\src\Math\FixedPoint.c,Returns the low 32 bits of a signed product shifted right by twelve fractional bits.,high,asm;Inline MIPS multiply combines high and low product words
+F01249,Core::Math::FixedAtan2,Native\Core\src\Math\Trig.c,Computes a fixed-point heading after downscaling both arguments to protect the angle calculation.,high,
+F01250,Core::Math::DirectionRotationMatrix,Native\Core\src\Math\Matrix.c,Builds a zero-roll rotation matrix from the yaw and pitch of a fixed-point direction vector.,high,
+F01251,Core::Math::NormalizeFixedVector,Native\Core\src\Math\FixedPoint.c,Normalizes an integer-downscaled fixed-point vector into a fixed-point unit vector.,high,
+F01252,Event::LoadRoomEventSections,Native\Game\src\Event\Triggers.c,"Copies MPD trigger, script, and door-event sections and clears room-local script flags on fresh entry.",high,
+F01253,Event::EventPlaybackState,Native\Game\src\Event\ScriptVm.c,Returns the current event playback state for gameplay and room-transition checks.,high,fields:D_800F4C34=event playback state
+F01254,Event::PendingEventSelector,Native\Game\src\Event\ScriptVm.c,"Returns the pending event identifier packed with its external, room-script, or door-script source kind.",high,fields:D_800F4BE0=event source kind
+F01255,Event::FreeRoomEventSections,Native\Game\src\Event\Triggers.c,Releases MPD trigger and door-event buffers and finalizes interrupted event playback when required.,high,
+F01256,State::ResetZoneScriptFlags,Native\Game\src\State\Flags.c,Clears zone-local state flags from 64 through 127 when entering a fresh zone.,high,
+F01257,Event::ReleaseZoneEventResources,Native\Game\src\Event\Triggers.c,Provides the empty event cleanup hook called while releasing zone resources.,med,No-op hook retained from original zone teardown
+F01258,State::ScriptFlag,Native\Game\src\State\Flags.c,Returns the signed byte stored at the specified global script-state flag index.,high,
+F01259,State::SetScriptFlag,Native\Game\src\State\Flags.c,Writes a byte value to the specified global script-state flag index.,high,
+F01260,Event::RequestEventStart,Native\Game\src\Event\ScriptVm.c,Latches a pending event for startup by the event playback state machine.,high,Always returns one;fields:D_800F4BB8=event start requested
+F01261,Event::EvaluateRoomEventTriggers,Native\Game\src\Event\Triggers.c,"Tests MPD event-trigger predicates and queues the first matching room, door, or external event.",high,fields:D_800F4BA8=exclusive event trigger latch
+F01262,Event::InitializeEventScriptData,Native\Game\src\Event\ScriptVm.c,"Resolves event data tables and initializes four script contexts, flags, timing, images, and music state.",high,Script code begins at data plus sixteen
+F01263,Event::UpdateEventPlayback,Native\Game\src\Event\ScriptVm.c,Loads and runs event script contexts while updating camera and screen effects until playback completes.,high,"Playback states zero idle, one queued, two preparing, three loading, four running"

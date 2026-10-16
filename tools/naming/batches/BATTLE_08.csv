@@ -1,0 +1,121 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F01024,BATTLE/BATTLE.PRG/4A0A8.c,383,func_800B6438,C,28,Game.Battle,,func_80075554,
+F01025,BATTLE/BATTLE.PRG/4A0A8.c,428,func_800B64CC,C,15,Game.Battle,,func_80075554,
+F01026,BATTLE/BATTLE.PRG/4A0A8.c,551,func_800B6634,C,23,Game.Battle,,func_80075554,
+F01027,BATTLE/BATTLE.PRG/4A0A8.c,588,vs_battle_invalidOpcode,C,7,Game.Event,sprintf,,
+F01028,BATTLE/BATTLE.PRG/4A0A8.c,597,func_800B66E4,C,1,Game.Battle,,,
+F01029,BATTLE/BATTLE.PRG/4A0A8.c,599,func_800B66EC,C,1,Game.Battle,,,
+F01030,BATTLE/BATTLE.PRG/4A0A8.c,601,func_800B66F4,C,6,Game.Battle,,,
+F01031,BATTLE/BATTLE.PRG/4A0A8.c,609,func_800B6724,C,1,Game.Battle,,,
+F01032,BATTLE/BATTLE.PRG/4A0A8.c,611,func_800B6744,C,5,Game.Battle,,,
+F01033,BATTLE/BATTLE.PRG/4A0A8.c,618,func_800B6778,C,22,Core,memcmp,func_800B6868 func_800B68C4,func_80093A70 func_800AACDC func_800B9C58 vs_battle_setStateFlag
+F01034,BATTLE/BATTLE.PRG/4A0A8.c,642,func_800B6868,C,9,Game.Battle,,,func_800B6778 vs_battle_getShort
+F01035,BATTLE/BATTLE.PRG/4A0A8.c,653,func_800B68C4,C,9,Game.Battle,,,func_800B6778
+F01036,BATTLE/BATTLE.PRG/4A0A8.c,672,vs_battle_script_initTextBox,C,30,Game.Event,,,func_800BFE50 vs_battle_getShort vs_battle_getTextBox vs_battle_initTextBox
+F01037,BATTLE/BATTLE.PRG/4A0A8.c,707,vs_battle_script_showTextBox,C,23,Game.Event,,,vs_battle_setTextBox
+F01038,BATTLE/BATTLE.PRG/4A0A8.c,733,vs_battle_script_dismissTextBox,C,4,Game.Event,,,vs_battle_dismissTextBox
+F01039,BATTLE/BATTLE.PRG/4A0A8.c,741,func_800B6B98,C,44,Game.Battle,,func_800B6D48,func_800CCE10 vs_gte_rsqrt
+F01040,BATTLE/BATTLE.PRG/4A0A8.c,794,func_800B6D48,C,42,Game.Battle,,,func_800B6B98 func_800BB7C4 func_800BFE50 vs_battle_getShort vs_battle_getTextBox vs_battle_initTextBox
+F01041,BATTLE/BATTLE.PRG/4A0A8.c,838,func_800B6F8C,C,3,Game.Battle,,,vs_battle_dismissTextBox
+F01042,BATTLE/BATTLE.PRG/4A0A8.c,843,vs_battle_script_buttonPressed,C,6,Input,,,
+F01043,BATTLE/BATTLE.PRG/4A0A8.c,851,vs_battle_script_loadGim,C,4,Game.Event,,,vs_battle_getShort vs_battle_loadGim
+F01044,BATTLE/BATTLE.PRG/4A0A8.c,857,func_800B7014,C,20,Game.Battle,,,func_800C8550
+F01045,BATTLE/BATTLE.PRG/4A0A8.c,879,func_800B70E8,C,24,Game.Battle,,,
+F01046,BATTLE/BATTLE.PRG/4A0A8.c,905,func_800B71C4,C,4,Game.Battle,,,func_800C86AC
+F01047,BATTLE/BATTLE.PRG/4A0A8.c,911,func_800B71F4,C,3,Game.Battle,,,
+F01048,BATTLE/BATTLE.PRG/4A0A8.c,916,vs_battle_script_setStringContextInt,C,23,Game.Event,,,vs_battle_getShort vs_battle_getStateFlag
+F01049,BATTLE/BATTLE.PRG/4A0A8.c,941,func_800B7358,C,4,Game.Battle,,,vs_battle_getTextBox
+F01050,BATTLE/BATTLE.PRG/4A0A8.c,947,vs_battle_script_selectTextBox,C,18,Game.Event,,,vs_battle_selectTextBox vs_battle_setStateFlag
+F01051,BATTLE/BATTLE.PRG/4A0A8.c,967,func_800B7428,C,13,Game.Battle,,,func_8007C348 func_800BB68C func_800BB788 vs_battle_getShort
+F01052,BATTLE/BATTLE.PRG/4A0A8.c,983,func_800B7490,C,24,Game.Battle,,,func_8007CF18 func_8007CF64 func_800A1108 vs_battle_getShort vs_battle_setStateFlag
+F01053,BATTLE/BATTLE.PRG/4A0A8.c,1009,func_800B7574,C,11,Game.Battle,,,func_8007C928 func_800BFE50 vs_battle_getShort
+F01054,BATTLE/BATTLE.PRG/4A0A8.c,1022,func_800B75F4,C,16,Game.Battle,,,func_8007CFF8 func_8009DC8C func_800A9D90 func_800BFE50 vs_battle_getShort
+F01055,BATTLE/BATTLE.PRG/4A0A8.c,1040,func_800B76A8,C,5,Game.Battle,,,func_800A0204 func_800BFE50 vs_battle_getShort
+F01056,BATTLE/BATTLE.PRG/4A0A8.c,1047,func_800B770C,C,31,Game.Battle,,,func_8007D1A8 func_8009D88C func_800A087C func_800A0BE0 func_800BB68C func_800BB788 vs_battle_getShort
+F01057,BATTLE/BATTLE.PRG/4A0A8.c,1080,func_800B77DC,C,15,Game.Battle,,,func_8009F990 func_800BFE50 vs_battle_getShort
+F01058,BATTLE/BATTLE.PRG/4A0A8.c,1097,func_800B784C,C,17,Game.Battle,,,func_8009DC8C func_800A97EC func_800BFE50 vs_battle_getShort
+F01059,BATTLE/BATTLE.PRG/4A0A8.c,1116,func_800B792C,C,30,Game.Battle,applyVector setVector,,func_8009DC8C func_800A1108 func_800A9988 func_800BFE50 vs_battle_getShort
+F01060,BATTLE/BATTLE.PRG/4A0A8.c,1148,func_800B7A98,C,17,Game.Battle,,,func_8009DC8C func_800A9C54 func_800BFE50 vs_battle_getShort
+F01061,BATTLE/BATTLE.PRG/4A0A8.c,1167,func_800B7B58,C,31,Game.Battle,applyVector setVector,,func_8009DC8C func_800A1108 func_800A9D90 func_800BFE50 vs_battle_getShort
+F01062,BATTLE/BATTLE.PRG/4A0A8.c,1200,func_800B7C90,C,10,Game.Battle,,,func_8009FF08 func_8009FFA8 func_800BFE50 vs_battle_getShort
+F01063,BATTLE/BATTLE.PRG/4A0A8.c,1212,func_800B7D10,C,16,Game.Battle,,,func_8007CFF8 func_8009DC8C func_800A9D90 func_800BFE50 vs_battle_getShort
+F01064,BATTLE/BATTLE.PRG/4A0A8.c,1230,func_800B7DC4,C,34,Game.Battle,,,func_800A1108 func_800A9E38 func_800A9EB4 func_800BFE50 vs_battle_getShort
+F01065,BATTLE/BATTLE.PRG/4A0A8.c,1266,func_800B7EF0,C,17,Game.Battle,,,func_800A1108 func_800A9CDC func_800BFE50 vs_battle_getShort
+F01066,BATTLE/BATTLE.PRG/4A0A8.c,1285,func_800B7F84,C,12,Game.Battle,,,func_800A9CDC func_800BFE50 vs_battle_getShort
+F01067,BATTLE/BATTLE.PRG/4A0A8.c,1299,func_800B804C,C,8,Game.Battle,setVector,,func_800AABD0 func_800BFE50 vs_battle_getShort
+F01068,BATTLE/BATTLE.PRG/4A0A8.c,1309,func_800B80B4,C,13,Game.Battle,,,func_8007D340 func_800BB68C func_800BB788 vs_battle_getShort
+F01069,BATTLE/BATTLE.PRG/4A0A8.c,1324,func_800B810C,C,18,Game.Battle,,,func_8007D03C func_800A0BE0 func_800BFE50 vs_battle_getShort
+F01070,BATTLE/BATTLE.PRG/4A0A8.c,1344,func_800B81A0,C,14,Game.Battle,,,func_800A07FC func_800BFE50 vs_battle_getShort
+F01071,BATTLE/BATTLE.PRG/4A0A8.c,1360,func_800B822C,C,5,Game.Battle,,,func_800A01C8 func_800BFE50 vs_battle_getShort
+F01072,BATTLE/BATTLE.PRG/4A0A8.c,1367,func_800B8290,C,21,Game.Battle,,,func_800A9F64 func_800A9FD0 func_800BFE50 vs_battle_getShort
+F01073,BATTLE/BATTLE.PRG/4A0A8.c,1390,func_800B8360,C,16,Game.Battle,,,func_8009FC60 func_800BFE50 vs_battle_getShort
+F01074,BATTLE/BATTLE.PRG/4A0A8.c,1408,func_800B83D4,C,5,Game.Battle,,,func_800A0618 func_800BFE50 vs_battle_getShort
+F01075,BATTLE/BATTLE.PRG/4A0A8.c,1415,func_800B8438,C,5,Game.Battle,,,func_800A01C8 func_800BFE50 vs_battle_getShort
+F01076,BATTLE/BATTLE.PRG/4A0A8.c,1422,func_800B849C,C,10,Game.Battle,,,func_8009FBD8 func_800BFE50 vs_battle_getShort
+F01077,BATTLE/BATTLE.PRG/4A0A8.c,1434,func_800B8510,C,18,Game.Battle,,,func_8009FC60 func_800BFE50 vs_battle_getShort
+F01078,BATTLE/BATTLE.PRG/4A0A8.c,1454,func_800B8590,C,15,Game.Battle,setVector,,func_8009FC60 func_800BFE50 vs_battle_getShort
+F01079,BATTLE/BATTLE.PRG/4A0A8.c,1471,func_800B860C,C,15,Game.Battle,,,func_8007CB84 func_8007CBDC vs_battle_getShort vs_battle_loadEtm
+F01080,BATTLE/BATTLE.PRG/4A0A8.c,1488,func_800B86E8,C,1,Game.Battle,,,func_8007CCAC
+F01081,BATTLE/BATTLE.PRG/4A0A8.c,1490,func_800B8708,C,8,Game.Battle,,,func_8007CBBC func_8007CC4C
+F01082,BATTLE/BATTLE.PRG/4A0A8.c,1500,func_800B8764,C,4,Game.Battle,,,func_8007CC6C
+F01083,BATTLE/BATTLE.PRG/4A0A8.c,1506,func_800B8788,C,18,Game.Battle,,,func_8009F940 func_800BFE50 vs_battle_getShort
+F01084,BATTLE/BATTLE.PRG/4A0A8.c,1526,func_800B884C,C,15,Game.Battle,,,func_8007C0AC func_800BB68C func_800BB788 vs_battle_getShort
+F01085,BATTLE/BATTLE.PRG/4A0A8.c,1543,vs_battle_script_jumpFwdIfFlag,C,44,Game.Event,,,vs_battle_getShort vs_battle_getStateFlag
+F01086,BATTLE/BATTLE.PRG/4A0A8.c,1589,vs_battle_script_jumpFwdIfFlags,C,39,Game.Event,,,vs_battle_getShort vs_battle_getStateFlag
+F01087,BATTLE/BATTLE.PRG/4A0A8.c,1630,vs_battle_script_jumpFwd,C,3,Game.Event,,,vs_battle_getShort
+F01088,BATTLE/BATTLE.PRG/4A0A8.c,1635,vs_battle_script_jumpFwd2,C,3,Game.Event,,,vs_battle_getShort
+F01089,BATTLE/BATTLE.PRG/4A0A8.c,1640,vs_battle_script_setFlagImmContext,C,4,Game.Event,,,vs_battle_getShort vs_battle_getStateFlag
+F01090,BATTLE/BATTLE.PRG/4A0A8.c,1646,vs_battle_script_jumpFwdIfFlagContext,C,6,Game.Event,,,vs_battle_getShort
+F01091,BATTLE/BATTLE.PRG/4A0A8.c,1654,func_800B8C44,C,1,Game.Battle,,,
+F01092,BATTLE/BATTLE.PRG/4A0A8.c,1656,func_800B8C54,C,6,Game.Battle,,,
+F01093,BATTLE/BATTLE.PRG/4A0A8.c,1664,vs_battle_script_jumpBackIf,C,9,Game.Event,,,vs_battle_getShort
+F01094,BATTLE/BATTLE.PRG/4A0A8.c,1675,vs_battle_script_jumpFwd3,C,3,Game.Event,,,vs_battle_getShort
+F01095,BATTLE/BATTLE.PRG/4A0A8.c,1680,vs_battle_script_jumpFwd4,C,3,Game.Event,,,vs_battle_getShort
+F01096,BATTLE/BATTLE.PRG/4A0A8.c,1685,vs_battle_script_setFlagImm,C,33,Game.Event,,,vs_battle_getStateFlag vs_battle_setStateFlag
+F01097,BATTLE/BATTLE.PRG/4A0A8.c,1720,vs_battle_script_setFlag,C,51,Game.Event,ABS,,vs_battle_getStateFlag vs_battle_setStateFlag
+F01098,BATTLE/BATTLE.PRG/4A0A8.c,1773,vs_battle_script_setFlagIfItemInInventory,C,5,Game.Event,,,vs_battle_getShort vs_battle_itemIdIsInInventory vs_battle_setStateFlag
+F01099,BATTLE/BATTLE.PRG/4A0A8.c,1780,func_800B91C4,C,4,Game.Battle,,,func_8007BBB8
+F01100,BATTLE/BATTLE.PRG/4A0A8.c,1786,func_800B91F0,C,4,Game.Battle,,,func_8009DBDC func_800BFE50 vs_battle_getShort
+F01101,BATTLE/BATTLE.PRG/4A0A8.c,1792,func_800B9230,C,4,Game.Battle,,,func_8007D15C
+F01102,BATTLE/BATTLE.PRG/4A0A8.c,1798,vs_battle_script_setFlagIfButton,C,7,Input,,,vs_battle_getShort vs_battle_setStateFlag
+F01103,BATTLE/BATTLE.PRG/4A0A8.c,1807,func_800B92A0,C,4,Game.Battle,,,func_8007C28C func_800BFE50 vs_battle_getShort
+F01104,BATTLE/BATTLE.PRG/4A0A8.c,1813,func_800B92D0,C,4,Game.Battle,,,func_8007BD8C
+F01105,BATTLE/BATTLE.PRG/4A0A8.c,1819,func_800B92F4,C,65,Game.Battle,,,func_8007B9A0 func_8007B9CC func_8007B9FC func_800C97BC func_800CACD0 func_800CB114 func_800CB66C vs_battle_getStateFlag vs_battle_setStateFlag
+F01106,BATTLE/BATTLE.PRG/4A0A8.c,1886,func_800B94D8,C,9,Game.Battle,,,func_8007BBD8 func_8007BCCC
+F01107,BATTLE/BATTLE.PRG/4A0A8.c,1897,func_800B9564,C,17,Game.Battle,,,func_800BFE50 vs_battle_getShort vs_battle_getTextBox
+F01108,BATTLE/BATTLE.PRG/4A0A8.c,1916,func_800B9608,C,10,Game.Battle,,,func_8007CA20 func_8007CAA4 func_800BFE50 vs_battle_getShort
+F01109,BATTLE/BATTLE.PRG/4A0A8.c,1928,func_800B9670,C,4,Game.Battle,,,func_8009D7E8 func_800BFE50 vs_battle_getShort
+F01110,BATTLE/BATTLE.PRG/4A0A8.c,1934,func_800B96B0,C,12,Game.Battle,,,
+F01111,BATTLE/BATTLE.PRG/4A0A8.c,1948,func_800B9724,C,16,Game.Battle,,,
+F01112,BATTLE/BATTLE.PRG/4A0A8.c,1966,func_800B9770,C,4,Game.Battle,,,func_8008E224
+F01113,BATTLE/BATTLE.PRG/4A0A8.c,1972,func_800B979C,C,8,Game.Battle,,,func_80098194 vs_battle_getShort
+F01114,BATTLE/BATTLE.PRG/4A0A8.c,1982,func_800B97E4,C,4,Game.Battle,,,
+F01115,BATTLE/BATTLE.PRG/4A0A8.c,1988,func_800B97F8,C,4,Game.Battle,,,func_8007C31C
+F01116,BATTLE/BATTLE.PRG/4A0A8.c,1994,func_800B9818,C,4,Game.Battle,,,func_80091998
+F01117,BATTLE/BATTLE.PRG/4A0A8.c,2000,func_800B983C,C,4,Game.Battle,,,func_800919D8
+F01118,BATTLE/BATTLE.PRG/4A0A8.c,2006,func_800B9860,C,4,Game.Battle,,,func_80091A1C
+F01119,BATTLE/BATTLE.PRG/4A0A8.c,2012,func_800B988C,C,4,Game.Battle,,,func_8008B808
+F01120,BATTLE/BATTLE.PRG/4A0A8.c,2018,func_800B98C0,C,29,Game.Battle,,,func_8007BE10 func_8007C580 func_8007C654
+F01121,BATTLE/BATTLE.PRG/4A0A8.c,2049,func_800B9A40,C,10,Game.Battle,,,func_8007C398 func_8007C46C
+F01122,BATTLE/BATTLE.PRG/4A0A8.c,2061,func_800B9A94,C,4,Game.Battle,,,func_8007C4AC
+F01123,BATTLE/BATTLE.PRG/4A0A8.c,2067,func_800B9AC4,C,4,Game.Battle,,,func_8007C460
+F01124,BATTLE/BATTLE.PRG/4A0A8.c,2073,func_800B9AE8,C,4,Game.Battle,,,func_8007C444
+F01125,BATTLE/BATTLE.PRG/4A0A8.c,2079,func_800B9B18,C,29,Game.Battle,,,func_8007BF2C func_8007BF4C func_8007BFC0 func_8007C050 func_8007C404 func_8007C424
+F01126,BATTLE/BATTLE.PRG/4A0A8.c,2110,func_800B9BF8,C,1,Game.Battle,,,func_8007C398
+F01127,BATTLE/BATTLE.PRG/4A0A8.c,2112,func_800B9C18,C,8,Game.Battle,,,func_8007B0FC func_8007B104
+F01128,BATTLE/BATTLE.PRG/4A0A8.c,2122,func_800B9C58,C,27,Game.Battle,,func_800B6778,func_8007B1B8 func_8007B29C func_8007B344 func_800BB68C func_800BB788 vs_battle_getShort
+F01129,BATTLE/BATTLE.PRG/4A0A8.c,2151,func_800B9D74,C,4,Game.Battle,,,func_800AC37C func_800BFE50 vs_battle_getShort
+F01130,BATTLE/BATTLE.PRG/4A0A8.c,2158,func_800B9DB4,INCLUDE_ASM,0,Game.Battle,,,
+F01131,BATTLE/BATTLE.PRG/4A0A8.c,2160,func_800B9F28,C,4,Game.Battle,,,func_8008EAF8
+F01132,BATTLE/BATTLE.PRG/4A0A8.c,2166,func_800B9F4C,C,4,Game.Battle,,,func_8008EFCC
+F01133,BATTLE/BATTLE.PRG/4A0A8.c,2172,func_800B9F70,C,1,Game.Battle,,,func_8008F0FC
+F01134,BATTLE/BATTLE.PRG/4A0A8.c,2174,func_800B9F90,C,4,Game.Battle,,,func_8008F234
+F01135,BATTLE/BATTLE.PRG/4A0A8.c,2180,func_800B9FC0,C,29,Game.Battle,,,func_80090C2C func_80091320 func_8009134C
+F01136,BATTLE/BATTLE.PRG/4A0A8.c,2211,func_800BA0E4,C,4,Game.Battle,,,func_80091314
+F01137,BATTLE/BATTLE.PRG/4A0A8.c,2217,func_800BA108,C,19,Game.Battle,,,func_8008E470 func_800913BC
+F01138,BATTLE/BATTLE.PRG/4A0A8.c,2238,func_800BA194,C,16,Game.Battle,,,func_8009291C func_800936F8 func_80093764 func_80093788
+F01139,BATTLE/BATTLE.PRG/4A0A8.c,2256,func_800BA218,C,4,Game.Battle,,,func_80091468 vs_battle_getShort
+F01140,BATTLE/BATTLE.PRG/4A0A8.c,2262,func_800BA264,C,4,Game.Battle,,,func_8007BDD8
+F01141,BATTLE/BATTLE.PRG/4A0A8.c,2268,func_800BA288,C,4,Game.Battle,,,func_80091A78
+F01142,BATTLE/BATTLE.PRG/4A0A8.c,2274,func_800BA2B4,C,4,Game.Battle,,,func_8008EAE4
+F01143,BATTLE/BATTLE.PRG/4A0A8.c,2280,func_800BA2E0,C,10,Game.Battle,,,vs_main_playSfx

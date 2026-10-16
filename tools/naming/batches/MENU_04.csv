@@ -1,0 +1,178 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F02925,MENU/MENUD.PRG/234.c,21,vs_menuD_initUiWeapon,C,33,Game.Items,,_setWeaponUi _sortWeaponsByStat MAINMENU.PRG:vs_mainMenu_setStatsFromWeapon MAINMENU.PRG:vs_mainMenu_setWeaponRowFromInventory,vs_battle_applyWeaponStats vs_battle_copyInventoryBladeStats vs_battle_copyInventoryGemStats vs_battle_copyInventoryGripStats vs_main_allocHeapR vs_main_bzero vs_main_freeHeapR
+F02926,MENU/MENUD.PRG/234.c,57,vs_menuD_initUiShield,C,20,Game.Items,,_setShieldUi _sortShieldsByStat MAINMENU.PRG:vs_mainMenu_setShieldRowFromInventory MAINMENU.PRG:vs_mainMenu_setStatsFromShield,vs_battle_applyShieldStats vs_battle_copyInventoryArmorStats vs_battle_copyInventoryGemStats vs_main_allocHeapR vs_main_bzero vs_main_freeHeapR
+F02927,MENU/MENUD.PRG/234.c,85,_getContainerIndicesOffset,C,10,Game.Items,,_copyContainerToInventory _copyEquipmentByStat _copyInventoryToContainer _defragmentContainerItems _sortItemsByStat _sortShieldsByStat _sortWeaponsByStat func_80104114 func_80106C64 func_80107490,
+F02928,MENU/MENUD.PRG/234.c,97,_getContainerItemIndex,C,10,Game.Items,,_defragmentContainerItems func_80107490,
+F02929,MENU/MENUD.PRG/234.c,109,_setContainerItemIndex,C,10,Game.Items,,_defragmentContainerItems,
+F02930,MENU/MENUD.PRG/234.c,121,_initContainerObject,C,67,Game.Items,,_discardMenu func_801068BC func_80106948 func_80107490,vs_battle_rMemzero
+F02931,MENU/MENUD.PRG/234.c,191,_getContainerItemId,C,28,Game.Items,,_countContainerItems _defragmentContainerItems _getEmptyContainerSlot func_80106A50,
+F02932,MENU/MENUD.PRG/234.c,221,_countContainerItems,C,11,Game.Items,,_copyContainerItem _pollItemNavigation func_80103270 func_80106504 func_801066DC func_80107490 vs_menuD_exec,_getContainerItemId
+F02933,MENU/MENUD.PRG/234.c,234,_getEmptyContainerSlot,C,10,Save,,_copyContainerItem,_getContainerItemId
+F02934,MENU/MENUD.PRG/234.c,259,func_801031A0,C,15,Game.Menu,,func_80103270 func_80107490,_copyContainerItem
+F02935,MENU/MENUD.PRG/234.c,276,func_80103270,C,5,Game.Menu,,func_80107490 vs_menuD_exec,_countContainerItems func_801031A0
+F02936,MENU/MENUD.PRG/234.c,283,_copyContainerItem,C,212,Game.Items,,func_801031A0 func_801068BC func_80106948 func_80107490,_countContainerItems _getEmptyContainerSlot vs_battle_rMemcpy vs_battle_rMemzero
+F02937,MENU/MENUD.PRG/234.c,498,_defragmentContainerItems,C,55,Game.Items,,_copyContainerToInventory func_80107490 vs_menuD_exec,_getContainerIndicesOffset _getContainerItemId _getContainerItemIndex _setContainerItemIndex
+F02938,MENU/MENUD.PRG/234.c,555,_copyInventoryToContainer,C,35,Game.Items,,vs_menuD_exec,_getContainerIndicesOffset vs_battle_rMemzero
+F02939,MENU/MENUD.PRG/234.c,592,_copyContainerToInventory,C,31,Game.Items,,vs_menuD_exec,_defragmentContainerItems _getContainerIndicesOffset
+F02940,MENU/MENUD.PRG/234.c,625,_getParentItemIndex,C,17,Game.Items,,func_80106C64 func_80107490,
+F02941,MENU/MENUD.PRG/234.c,645,_getSetShieldIndex,C,11,Game.Items,,func_80106C64 func_80107490,
+F02942,MENU/MENUD.PRG/234.c,659,func_80103D50,C,5,Game.Menu,,func_801072B0 func_80107490 vs_menuD_exec,
+F02943,MENU/MENUD.PRG/234.c,666,_pollItemNavigation,C,32,Game.Items,,_armorNavigation _bladeNavigation _gemNavigation _gripNavigation _shieldNavigation _weaponNavigation,_countContainerItems
+F02944,MENU/MENUD.PRG/234.c,700,func_80103E24,C,33,Game.Menu,,vs_menuD_exec,vs_battle_getMenuItem vs_mainMenu_renderTabNavigation
+F02945,MENU/MENUD.PRG/234.c,735,func_80103F64,C,16,Game.Menu,,_armorNavigation _bladeNavigation _gemNavigation _gripNavigation _shieldNavigation _weaponNavigation,vs_battle_getMenuItem
+F02946,MENU/MENUD.PRG/234.c,753,func_80103FD4,C,12,Game.Menu,,func_80104034,vs_battle_getMenuItem
+F02947,MENU/MENUD.PRG/234.c,767,func_80104034,C,7,Game.Menu,,_armorNavigation _bladeNavigation _gemNavigation _gripNavigation _shieldNavigation _weaponNavigation,func_80103FD4 vs_mainMenu_drawClassAffinityType vs_mainMenu_renderEquipStats
+F02948,MENU/MENUD.PRG/234.c,776,func_80104078,C,11,Game.Menu,,_armorNavigation _bladeNavigation _gemNavigation _gripNavigation _shieldNavigation _weaponNavigation,vs_battle_getMenuItem vs_battle_setMenuItem vs_mainmenu_setInformationMessage
+F02949,MENU/MENUD.PRG/234.c,789,func_80104114,C,5,Game.Menu,,_armorNavigation _bladeNavigation _gemNavigation _gripNavigation _shieldNavigation _weaponNavigation,_getContainerIndicesOffset
+F02950,MENU/MENUD.PRG/234.c,796,func_80104170,C,12,Game.Menu,,_armorNavigation _bladeNavigation _gemNavigation _gripNavigation _shieldNavigation _weaponNavigation,vs_mainMenu_drawClassAffinityType vs_mainMenu_renderDpPpBars vs_mainMenu_renderEquipStats
+F02951,MENU/MENUD.PRG/234.c,810,_setWeaponUi,C,7,Game.Items,,_weaponNavigation func_80106C64,vs_mainMenu_setWeaponRow vs_menuD_initUiWeapon
+F02952,MENU/MENUD.PRG/234.c,820,_setShieldUi,C,6,Game.Items,,_shieldNavigation func_80106C64 MENUC.PRG:_initCombineShields MENUC.PRG:_selectShields,vs_mainMenu_setShieldRow vs_menuD_initUiShield
+F02953,MENU/MENUD.PRG/234.c,829,_weaponNavigation,C,71,Game.Items,,,_pollItemNavigation _setWeaponUi func_80103F64 func_80104034 func_80104078 func_80104114 func_80104170 vs_mainMenu_initWeaponDetailsRow vs_mainMenu_renderDpPpBars vs_mainMenu_setStatsFromWeapon
+F02954,MENU/MENUD.PRG/234.c,902,_bladeNavigation,C,61,Game.Items,,,_pollItemNavigation func_80103F64 func_80104034 func_80104078 func_80104114 func_80104170 vs_mainMenu_renderDpPpBars vs_mainMenu_setBladeRow vs_mainMenu_setStatsFromBlade
+F02955,MENU/MENUD.PRG/234.c,965,_gripNavigation,C,70,Game.Items,,,_pollItemNavigation func_80103F64 func_80104034 func_80104078 func_80104114 func_80104170 vs_battle_renderTextRaw vs_mainMenu_renderMenuRowIcon vs_mainMenu_setGripRow vs_mainMenu_setStatsFromGrip
+F02956,MENU/MENUD.PRG/234.c,1037,_shieldNavigation,C,71,Game.Items,,,_pollItemNavigation _setShieldUi func_80103F64 func_80104034 func_80104078 func_80104114 func_80104170 vs_mainMenu_initShieldDetailsRow vs_mainMenu_renderDpPpBars vs_mainMenu_setStatsFromShield
+F02957,MENU/MENUD.PRG/234.c,1110,_armorNavigation,C,64,Game.Items,,,_pollItemNavigation func_80103F64 func_80104034 func_80104078 func_80104114 func_80104170 vs_mainMenu_renderDpPpBars vs_mainMenu_setArmorRowFromInventory vs_mainMenu_setStatsFromArmor
+F02958,MENU/MENUD.PRG/234.c,1176,_gemNavigation,C,57,Game.Items,,,_pollItemNavigation func_80103F64 func_80104034 func_80104078 func_80104114 func_80104170 vs_mainMenu_setGemRow vs_mainMenu_setStatsFromGem
+F02959,MENU/MENUD.PRG/234.c,1235,func_80105008,C,36,Game.Menu,,func_80107490,vs_battle_getMenuItem vs_mainMenu_renderStatusView vs_mainMenu_renderTabNavigation vs_mainMenu_resetStatusViewCursor vs_mainMenu_setMenuCommand
+F02960,MENU/MENUD.PRG/234.c,1273,_getWeaponStat,C,31,Game.Items,,_sortWeaponsByStat,
+F02961,MENU/MENUD.PRG/234.c,1306,_sortWeaponsByStat,C,50,Game.Items,,_displaySortMenu,_getContainerIndicesOffset _getWeaponStat vs_battle_rMemzero vs_menuD_initUiWeapon
+F02962,MENU/MENUD.PRG/234.c,1358,_getShieldStatValue,C,28,Game.Items,,_sortShieldsByStat MENU:_sortShields,
+F02963,MENU/MENUD.PRG/234.c,1388,_sortShieldsByStat,C,47,Game.Items,,_displaySortMenu,_getContainerIndicesOffset _getShieldStatValue vs_battle_rMemzero vs_menuD_initUiShield
+F02964,MENU/MENUD.PRG/234.c,1437,_getItemStat,C,6,Game.Items,,_sortItemsByStat,
+F02965,MENU/MENUD.PRG/234.c,1445,_sortItemsByStat,C,42,Game.Items,,_displaySortMenu,_getContainerIndicesOffset _getItemStat vs_battle_rMemzero
+F02966,MENU/MENUD.PRG/234.c,1489,_getEquipmentStat,C,37,Game.Items,,_copyEquipmentByStat,
+F02967,MENU/MENUD.PRG/234.c,1528,_sortEquipment,C,19,Game.Items,,_copyEquipmentByStat MENU:_sortItems,vs_battle_copyInventoryArmorStats vs_battle_copyInventoryBladeStats vs_battle_copyInventoryGemStats vs_battle_copyInventoryGripStats
+F02968,MENU/MENUD.PRG/234.c,1549,_copyEquipmentByStat,C,50,Game.Items,,_displaySortMenu,_getContainerIndicesOffset _getEquipmentStat _sortEquipment vs_battle_rMemzero
+F02969,MENU/MENUD.PRG/234.c,1601,_displaySortMenu,C,77,Game.Menu,,func_80107490,_copyEquipmentByStat _sortItemsByStat _sortShieldsByStat _sortWeaponsByStat vs_mainMenu_actionInputProcessed vs_mainMenu_addMenuActions vs_mainMenu_renderItemActionMenu
+F02970,MENU/MENUD.PRG/234.c,1680,_discardMenu,C,239,Save,,func_80107490 MENU:_itemNavigation,_initContainerObject vs_battle_initInformationTextBox vs_battle_printVariableWidthFontChar vs_battle_setFontStyle vs_battle_setMenuItem vs_battle_toBCD vs_mainMenu_actionInputProcessed vs_mainMenu_addMenuActions vs_mainMenu_renderCursor vs_mainMenu_renderItemActionMenu vs_main_playSfxDefault vs_mainmenu_setInformationMessage
+F02971,MENU/MENUD.PRG/234.c,1925,func_80106464,C,13,Game.Menu,,func_80106504 vs_menuD_exec,vs_battle_renderTextRawColor vs_mainMenu_renderIntColor
+F02972,MENU/MENUD.PRG/234.c,1940,func_80106504,C,17,Game.Menu,,func_801089BC,_countContainerItems func_80106464 vs_battle_renderTextRaw
+F02973,MENU/MENUD.PRG/234.c,1959,_getWeaponsubItemCount,C,10,Game.Items,,func_80106784,
+F02974,MENU/MENUD.PRG/234.c,1971,_getShieldsubItemCount,C,10,Game.Items,,func_80106784,
+F02975,MENU/MENUD.PRG/234.c,1983,func_801066DC,C,10,Game.Menu,,func_80106784,_countContainerItems
+F02976,MENU/MENUD.PRG/234.c,1995,func_80106784,C,43,Game.Menu,,func_80107490,_getShieldsubItemCount _getWeaponsubItemCount func_801066DC
+F02977,MENU/MENUD.PRG/234.c,2040,func_801068BC,C,12,Game.Menu,,func_80107490,_copyContainerItem _initContainerObject
+F02978,MENU/MENUD.PRG/234.c,2054,func_80106948,C,5,Game.Menu,,func_80107490,_copyContainerItem _initContainerObject
+F02979,MENU/MENUD.PRG/234.c,2061,func_801069B0,C,10,Game.Menu,,func_80106A50,
+F02980,MENU/MENUD.PRG/234.c,2073,func_80106A04,C,13,Game.Menu,,func_80106A50,
+F02981,MENU/MENUD.PRG/234.c,2088,func_80106A50,C,55,Game.Menu,,func_80107490,_getContainerItemId func_801069B0 func_80106A04
+F02982,MENU/MENUD.PRG/234.c,2145,func_80106C64,C,162,Game.Menu,,func_80107490,_getContainerIndicesOffset _getParentItemIndex _getSetShieldIndex _setShieldUi _setWeaponUi vs_mainMenu_setArmorRowFromInventory vs_mainMenu_setBladeRow vs_mainMenu_setGemRow vs_mainMenu_setGripRow vs_mainMenu_setMiscRow
+F02983,MENU/MENUD.PRG/234.c,2309,func_801071D8,C,21,Game.Menu,,func_80107490,vs_battle_getMenuItem vs_mainMenu_renderItemsList
+F02984,MENU/MENUD.PRG/234.c,2332,func_801072B0,C,59,Game.Menu,,func_80107490,func_80103D50 vs_battle_initInformationTextBox vs_mainMenu_actionInputProcessed vs_mainMenu_addMenuActions vs_mainMenu_renderItemActionMenu
+F02985,MENU/MENUD.PRG/234.c,2393,func_80107490,C,642,Core,memset,vs_menuD_exec,_copyContainerItem _countContainerItems _defragmentContainerItems _discardMenu _displaySortMenu _getContainerIndicesOffset _getContainerItemIndex _getParentItemIndex _getSetShieldIndex _initContainerObject func_801031A0 func_80103270 func_80103D50 func_80105008 (+22)
+F02986,MENU/MENUD.PRG/234.c,3037,func_801089BC,C,89,Game.Menu,,vs_menuD_exec,func_80106504 rsin vs_battle_getMenuItem vs_battle_renderTextRawColor vs_battle_setMenuItem vs_mainMenu_renderCursor vs_mainmenu_setInformationMessage
+F02987,MENU/MENUD.PRG/234.c,3130,vs_menuD_exec,C,222,Game.Menu,,,_copyContainerToInventory _copyInventoryToContainer _countContainerItems _defragmentContainerItems func_80103270 func_80103D50 func_80103E24 func_80106464 func_80107490 func_801089BC vs_battle_renderTextRaw vs_battle_renderTextRawColor vs_battle_setMenuItem vs_mainMenu_ensureItemTextUnloaded (+4)
+F02988,MENU/MENUE.PRG/494.c,64,func_80102C94,C,4,Game.Menu,,,
+F02989,MENU/MENUE.PRG/494.c,104,_getSelectedRow,C,13,Game.Menu,,_topMenu MENU9.PRG:_topMenu MENUC.PRG:_assembleBladeMenu MENUC.PRG:_assembleGripMenu MENUC.PRG:_attachGem MENUC.PRG:_initUiArmor MENUC.PRG:_selectBlade MENUC.PRG:_selectShields,vs_mainmenu_getSelectedRow
+F02990,MENU/MENUE.PRG/494.c,119,func_80102E48,C,3,Game.Menu,,,
+F02991,MENU/MENUE.PRG/494.c,450,_topMenu,C,29,Game.Menu,,MENU9.PRG:_menuInput,_getSelectedRow
+F02992,MENU/MENUE.PRG/494.c,481,_copySprites,C,15,Graphics,LoadImage2,,
+F02993,MENU/MENUE.PRG/494.c,498,_copyCluts,C,14,Graphics,LoadImage2,,
+F02994,MENU/MENUE.PRG/494.c,514,_getRoundedLineCount,C,15,Game.Menu,,,
+F02995,MENU/MENUE.PRG/494.c,531,_copyNextPageText,C,28,Graphics,,,_vsStrcpy vs_battle_setTextBox
+F02996,MENU/MENUE.PRG/494.c,561,_vsStrcpy,C,14,Game.Menu,,_copyNextPageText,
+F02997,MENU/MENUE.PRG/494.c,577,_drawContent,C,40,Graphics,AddPrim SetDrawArea getScratchAddr,,_drawContentLines _drawSprite
+F02998,MENU/MENUE.PRG/494.c,619,_min,C,6,Game.Menu,,_drawSprite,
+F02999,MENU/MENUE.PRG/494.c,627,_add_int,C,1,Game.Menu,,_drawSprite,
+F03000,MENU/MENUE.PRG/494.c,629,_drawSprite,C,85,Graphics,AddPrim getScratchAddr setShadeTex setSprt setWH setXY0,_drawContent,_add_int _getAnimationState _min
+F03001,MENU/MENUE.PRG/494.c,716,_setPageBg,C,17,Graphics,AddPrim getScratchAddr getTPage setPolyG4 setRGB0 setRGB1 setRGB2 setRGB3 setXY4,,
+F03002,MENU/MENUE.PRG/494.c,740,_fadeMenuUpper,C,49,Game.Menu,AddPrim getScratchAddr getTPage setClut setPolyFT4 setRGB0 setSemiTrans setTile setUV4 setWH setXY0 setXY4,,_drawPaginationArrow
+F03003,MENU/MENUE.PRG/494.c,791,_fadeMenuLower,C,51,Game.Menu,AddPrim getScratchAddr getTPage setClut setPolyFT4 setRGB0 setSemiTrans setTile setUV4 setWH setXY0 setXY4,,_drawPaginationArrow
+F03004,MENU/MENUE.PRG/494.c,844,_drawPaginationArrow,C,37,Graphics,AddPrim getScratchAddr setClut setPolyFT4 setShadeTex setTPage setUV4 setXY4,_fadeMenuLower _fadeMenuUpper,
+F03005,MENU/MENUE.PRG/494.c,883,_drawContentLines,C,55,Graphics,AddPrim getScratchAddr setLineF2 setRGB0,_drawContent,_getAnimationState
+F03006,MENU/MENUE.PRG/494.c,940,_getAnimationState,C,20,Game.Actors,,_drawContentLines _drawSprite,
+F03007,MENU/MENUE.PRG/494.c,962,_drawControlsBg,C,26,Graphics,AddPrim getScratchAddr setLineG2 setPolyF4 setRGB0 setRGB1 setXY2 setXY4,,
+F03008,MENU/MENUF.PRG/3B8.c,23,vs_menuF_exec,C,17,Game.Menu,,,_execMenu _initMenu
+F03009,MENU/MENUF.PRG/3B8.c,59,_initMenu,C,38,Game.Menu,,vs_menuF_exec TITLE.PRG:vs_title_exec,_addHealBonus _initCongratulationsScreen _initCubePuzzleEnd _initCubePuzzleQuit _initCubePuzzleStart _initTimeAttackEnd _initTimeAttackStart _nop2
+F03010,MENU/MENUF.PRG/3B8.c,118,_initCongratulationsScreen,C,132,Graphics,LoadImage rand,_initMenu,_addHealBonus _calculateScore _determineRank _getTotalAgility _getTotalIntelligence _getTotalStrength func_80045000 func_8007DFF0 func_80103748 vs_battle_parseTim vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_clearMusicLoadQueue (+2)
+F03011,MENU/MENUF.PRG/3B8.c,256,_initTimeAttackEnd,C,114,Game.Battle,LoadImage,_initMenu,func_80045000 func_8007DFF0 func_80103748 vs_battle_parseTim vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_clearMusicLoadQueue vs_main_freeCdQueueSlot vs_main_freeHeapR vs_main_memcpy
+F03012,MENU/MENUF.PRG/3B8.c,372,_initTimeAttackStart,C,62,Game.Battle,LoadImage,_initMenu,func_8007DFF0 vs_battle_parseTim vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_freeCdQueueSlot vs_main_freeHeapR
+F03013,MENU/MENUF.PRG/3B8.c,436,func_80103748,C,8,Game.Menu,,_initCongratulationsScreen _initTimeAttackEnd,vs_main_loadMusicSlot
+F03014,MENU/MENUF.PRG/3B8.c,453,_execMenu,C,36,Game.Menu,,vs_menuF_exec,_renderCongratulationsScreen _renderCubePuzzleEnd _renderCubePuzzleQuit _renderCubePuzzleStart _renderTimeAttackEnd _renderTimeAttackStart
+F03015,MENU/MENUF.PRG/3B8.c,755,_renderCongratulationsScreen,C,138,Graphics,,_execMenu ENDING.PRG:func_8006BD78,_nop2 _raiseMaxAgility _raiseMaxHP _raiseMaxIntelligence _raiseMaxMP _raiseMaxStrength _renderCongratulations _renderIncrementalMapCompletion _renderIncrementalScore _renderMapCompletion _renderPressButtonPrompt _renderRiskbreakerRank _renderRiskbreakerRankHeader _renderScore (+6)
+F03016,MENU/MENUF.PRG/3B8.c,905,_renderTimeAttackEnd,C,101,Game.Battle,ABS,_execMenu,_pulseTimeAttackEnd _renderAllStoredTimes _renderHeaderAndIncrementalTime _renderHeaderAndTime _renderNewRecord _renderStoredTime _renderTimeAttackRating _renderTimeAttackRatingWipe _renderTimeAttackResultsHeader func_80045D64 func_8007E0A8 rsin vs_main_playSfxDefault
+F03017,MENU/MENUF.PRG/3B8.c,1014,_renderTimeAttackStart,C,130,Game.Battle,,_execMenu,_renderBestTimeHeader _renderBossName _renderCourse _renderStartCountdown _renderTimeAttackHeader func_8007C36C func_8007DD50 func_8007DDAC func_8007DDB8 func_8007DDD4 func_8007DDF8 func_8007DE2C func_8007DE44 func_8007DE5C (+2)
+F03018,MENU/MENUF.PRG/3B8.c,1146,_renderTimeAttackHeader,C,24,Game.Battle,,_renderTimeAttackStart,_renderTexturePopIn
+F03019,MENU/MENUF.PRG/3B8.c,1175,_renderCourse,C,18,Graphics,,_renderTimeAttackStart,_renderTextureFadeIn _renderTextureFadeInClut
+F03020,MENU/MENUF.PRG/3B8.c,1195,_renderBossName,C,27,Graphics,,_renderTimeAttackStart,_renderTextureFadeIn
+F03021,MENU/MENUF.PRG/3B8.c,1226,_renderBestTimeHeader,C,20,Graphics,,_renderTimeAttackStart,_renderTextureFadeIn _renderTime
+F03022,MENU/MENUF.PRG/3B8.c,1248,_renderStartCountdown,C,6,Graphics,,_renderTimeAttackStart,_renderTextureFadeIn
+F03023,MENU/MENUF.PRG/3B8.c,1256,_pulseTimeAttackEnd,C,36,Game.Battle,LoadImage setRECT,_renderTimeAttackEnd,
+F03024,MENU/MENUF.PRG/3B8.c,1294,_pulseCubePuzzleEnd,C,36,Game.Menu,LoadImage setRECT,_renderCubePuzzleEnd _renderCubePuzzleQuit,
+F03025,MENU/MENUF.PRG/3B8.c,1332,_renderCongratulations,C,23,Graphics,,_renderCongratulationsScreen ENDING.PRG:_renderCongratulationsScreen,_renderTexturePopIn
+F03026,MENU/MENUF.PRG/3B8.c,1357,_renderScore,C,50,Graphics,sprintf,_renderCongratulationsScreen ENDING.PRG:_renderCongratulationsScreen,_renderTextureFadeInTint
+F03027,MENU/MENUF.PRG/3B8.c,1409,_renderIncrementalScore,C,75,Graphics,sprintf,_renderCongratulationsScreen ENDING.PRG:_renderCongratulationsScreen,_renderTextureWipe func_80045D64 vs_main_playSfxDefault
+F03028,MENU/MENUF.PRG/3B8.c,1486,_renderMapCompletion,C,39,Game.Field,sprintf,_renderCongratulationsScreen ENDING.PRG:_renderCongratulationsScreen,_renderTextureFadeInTint
+F03029,MENU/MENUF.PRG/3B8.c,1527,_renderIncrementalMapCompletion,C,68,Game.Field,sprintf,_renderCongratulationsScreen ENDING.PRG:_renderCongratulationsScreen,_renderTextureWipe func_80045D64 vs_main_playSfxDefault
+F03030,MENU/MENUF.PRG/3B8.c,1598,_renderRiskbreakerRankHeader,C,18,Game.Battle,,_renderCongratulationsScreen ENDING.PRG:_renderCongratulationsScreen,_renderTextureFadeInTint
+F03031,MENU/MENUF.PRG/3B8.c,1618,_renderRiskbreakerRank,C,34,Game.Battle,,_renderCongratulationsScreen ENDING.PRG:_renderCongratulationsScreen,_renderTexturePopIn
+F03032,MENU/MENUF.PRG/3B8.c,1654,_renderTimeAttackResultsHeader,C,22,Game.Battle,,_renderTimeAttackEnd,_renderTexturePopIn
+F03033,MENU/MENUF.PRG/3B8.c,1678,_renderTimeAttackRating,C,28,Game.Battle,,_renderTimeAttackEnd,_renderTextureFadeIn
+F03034,MENU/MENUF.PRG/3B8.c,1708,_renderTimeAttackRatingWipe,C,33,Game.Battle,,_renderTimeAttackEnd,_renderTextureWipe
+F03035,MENU/MENUF.PRG/3B8.c,1743,_renderHeaderAndTime,C,17,Graphics,,_renderTimeAttackEnd,_renderTextureFadeIn _renderTime
+F03036,MENU/MENUF.PRG/3B8.c,1762,_renderHeaderAndIncrementalTime,C,37,Graphics,,_renderTimeAttackEnd,_renderTextureFadeIn _renderTime
+F03037,MENU/MENUF.PRG/3B8.c,1801,_renderNewRecord,C,13,Graphics,,_renderTimeAttackEnd,_renderTextureFadeIn
+F03038,MENU/MENUF.PRG/3B8.c,1816,_renderAllStoredTimes,C,31,Graphics,getClut,_renderTimeAttackEnd,_renderTextureFadeInClut _renderTime
+F03039,MENU/MENUF.PRG/3B8.c,1849,_renderStoredTime,C,26,Graphics,getClut,_renderTimeAttackEnd,_renderTextureFadeInClut _renderTime
+F03040,MENU/MENUF.PRG/3B8.c,1877,_renderTextureFadeIn,C,35,Graphics,AddPrim getScratchAddr getTPage setPolyFT4 setRGB0 setSemiTrans setUV4 setXY4,_renderAverageTimeHeader _renderBestTimeHeader _renderBossName _renderChicken _renderCourse _renderCubePuzzleIncrementalTime _renderGivingUp _renderHeaderAndIncrementalTime _renderHeaderAndTime _renderNewRecord (+2),
+F03041,MENU/MENUF.PRG/3B8.c,1914,_renderTextureFadeInClut,C,35,Graphics,AddPrim getScratchAddr getTPage setPolyFT4 setRGB0 setSemiTrans setUV4 setXY4,_renderAllStoredTimes _renderCourse _renderStatWheel _renderStoredTime _renderTime,
+F03042,MENU/MENUF.PRG/3B8.c,1951,_renderTime,C,41,Graphics,getClut sprintf,_renderAllStoredTimes _renderBestTimeHeader _renderCubePuzzleIncrementalTime _renderCubePuzzleTime _renderHeaderAndIncrementalTime _renderHeaderAndTime _renderStoredTime,_renderTextureFadeInClut
+F03043,MENU/MENUF.PRG/3B8.c,1996,_renderStatWheel,C,119,Graphics,AddPrim SetDrawArea getClut sprintf strlen,_renderCongratulationsScreen,_renderAnimatedStatWheel _renderTextureFadeInClut _renderTextureFadeInTint
+F03044,MENU/MENUF.PRG/3B8.c,2117,_renderPressButtonPrompt,C,47,Input,AddPrim setClut setPolyFT4 setShadeTex setTPage setUV4 setXY4,_renderCongratulationsScreen _renderCubePuzzleEnd _renderCubePuzzleQuit _renderCubePuzzleStart,vs_battle_renderTextRawColor
+F03045,MENU/MENUF.PRG/3B8.c,2168,_renderAnimatedStatWheel,C,85,Game.Actors,AddPrim getTPage setClut setPolyFT4 setRGB0 setSemiTrans setUV4 setXY4,_renderStatWheel,
+F03046,MENU/MENUF.PRG/3B8.c,2260,_initCubePuzzleStart,C,89,Game.Menu,LoadImage,_initCubePuzzleEnd _initMenu,_nop0 func_8007DFF0 vs_battle_parseTim vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_freeCdQueueSlot vs_main_freeHeapR vs_main_memcpy
+F03047,MENU/MENUF.PRG/3B8.c,2351,_initCubePuzzleEnd,C,10,Game.Menu,,_initMenu,_initCubePuzzleStart
+F03048,MENU/MENUF.PRG/3B8.c,2363,_initCubePuzzleQuit,C,63,Game.Menu,LoadImage,_initMenu,func_8007DFF0 vs_battle_parseTim vs_main_allocHeapR vs_main_allocateCdQueueSlot vs_main_cdEnqueue vs_main_freeCdQueueSlot vs_main_freeHeapR vs_main_memcpy
+F03049,MENU/MENUF.PRG/3B8.c,2432,_renderCubePuzzleStart,C,38,Graphics,,_execMenu,_renderAverageTimeHeader _renderCubePuzzleTime _renderEvolveOrDie _renderPressButtonPrompt func_80045D64 func_8007E0A8 vs_main_playSfxDefault
+F03050,MENU/MENUF.PRG/3B8.c,2477,_renderCubePuzzleEnd,C,84,Graphics,,_execMenu,_nop1 _pulseCubePuzzleEnd _renderCubePuzzleIncrementalTime _renderCubePuzzleRank _renderFoodchain _renderPressButtonPrompt func_80045D64 func_8007E0A8 rsin vs_main_playSfxDefault
+F03051,MENU/MENUF.PRG/3B8.c,2566,_renderCubePuzzleQuit,C,42,Game.Menu,,_execMenu,_nop1 _pulseCubePuzzleEnd _renderChicken _renderGivingUp _renderPressButtonPrompt func_80045D64 func_8007E0A8 rsin vs_main_playSfxDefault
+F03052,MENU/MENUF.PRG/3B8.c,2610,_renderGivingUp,C,12,Graphics,,_renderCubePuzzleQuit,_renderTextureFadeIn
+F03053,MENU/MENUF.PRG/3B8.c,2624,_renderChicken,C,14,Graphics,,_renderCubePuzzleQuit,_renderTextureFadeIn
+F03054,MENU/MENUF.PRG/3B8.c,2640,_renderEvolveOrDie,C,22,Graphics,,_renderCubePuzzleStart,_renderTexturePopIn
+F03055,MENU/MENUF.PRG/3B8.c,2664,_renderFoodchain,C,21,Game.Battle,,_renderCubePuzzleEnd,_renderTexturePopIn
+F03056,MENU/MENUF.PRG/3B8.c,2687,_renderAverageTimeHeader,C,10,Graphics,,_renderCubePuzzleStart,_renderTextureFadeIn
+F03057,MENU/MENUF.PRG/3B8.c,2699,_renderCubePuzzleTime,C,11,Graphics,,_renderCubePuzzleStart,_renderTime
+F03058,MENU/MENUF.PRG/3B8.c,2712,_renderCubePuzzleRank,C,18,Graphics,,_renderCubePuzzleEnd,_renderTexturePopIn
+F03059,MENU/MENUF.PRG/3B8.c,2732,_renderCubePuzzleIncrementalTime,C,40,Graphics,,_renderCubePuzzleEnd,_renderTextureFadeIn _renderTime
+F03060,MENU/MENUF.PRG/3B8.c,2774,_determineRank,C,25,Game.Menu,,_initCongratulationsScreen ENDING.PRG:func_8006BE04,
+F03061,MENU/MENUF.PRG/3B8.c,2801,_calculateScore,C,58,Game.Menu,,_initCongratulationsScreen,
+F03062,MENU/MENUF.PRG/3B8.c,2861,_nop0,C,1,Game.Menu,,_initCubePuzzleStart,
+F03063,MENU/MENUF.PRG/3B8.c,2863,_nop1,C,1,Game.Menu,,_renderCubePuzzleEnd _renderCubePuzzleQuit,
+F03064,MENU/MENUF.PRG/3B8.c,2865,_addHealBonus,C,11,Game.Menu,,_initCongratulationsScreen _initMenu,
+F03065,MENU/MENUF.PRG/3B8.c,2878,_nop2,C,1,Game.Menu,,_initMenu _renderCongratulationsScreen,
+F03066,MENU/MENUF.PRG/3B8.c,2880,_getTotalStrength,C,1,Game.Menu,,_initCongratulationsScreen,
+F03067,MENU/MENUF.PRG/3B8.c,2882,_getTotalIntelligence,C,3,Game.Menu,,_initCongratulationsScreen,
+F03068,MENU/MENUF.PRG/3B8.c,2887,_getTotalAgility,C,1,Game.Menu,,_initCongratulationsScreen,
+F03069,MENU/MENUF.PRG/3B8.c,2889,_raiseMaxStrength,C,13,Game.Menu,,_renderCongratulationsScreen,
+F03070,MENU/MENUF.PRG/3B8.c,2904,_raiseMaxIntelligence,C,13,Game.Menu,,_renderCongratulationsScreen,
+F03071,MENU/MENUF.PRG/3B8.c,2919,_raiseMaxAgility,C,13,Game.Menu,,_renderCongratulationsScreen,
+F03072,MENU/MENUF.PRG/3B8.c,2934,_raiseMaxHP,C,13,Game.Battle,,_renderCongratulationsScreen,
+F03073,MENU/MENUF.PRG/3B8.c,2949,_raiseMaxMP,C,13,Game.Battle,,_renderCongratulationsScreen,
+F02565,MENU/_renderAshley.h,27,_renderAshley,C-header,124,Graphics,setVector,MENU3.PRG:vs_menu3_exec MENUB.PRG:_topLevelMenuTransition,func_8007ACB0 func_800F9A24 func_800F9E0C func_800F9EB8 rcos rsin vs_battle_setProjectionDistance vs_mainMenu_setBackgroundRenderPriority
+F02566,MENU/_toggleUi.h,9,_toggleMenuUi,C-header,5,Game.Menu,,_itemNavigation MENU3.PRG:vs_menu3_exec MENUB.PRG:_topLevelMenuTransition,
+F02567,MENU/items0.h,15,_itemPaging,C-header,26,Game.Items,,_armorStatusView _bladeStatusView _gemStatusView _gripStatusView _shieldStatusView _weaponStatusView,vs_mainMenu_getItemCount
+F02568,MENU/items0.h,46,_renderItemCategory,C-header,35,Game.Items,,MENU3.PRG:vs_menu3_exec MENUB.PRG:_topLevelMenuTransition,vs_battle_getMenuItem vs_mainMenu_renderTabNavigation
+F02569,MENU/items0.h,87,_startMenuTransition,C-header,15,Game.Menu,,_armorStatusView _bladeStatusView _gemStatusView _gripStatusView _shieldStatusView _weaponStatusView MENU3.PRG:_equipMenu,vs_battle_getMenuItem
+F02570,MENU/items0.h,107,_continueMenuTransition,C-header,10,Game.Menu,,_initMenuLayout MENU3.PRG:_equipMenu,vs_battle_getMenuItem
+F02571,MENU/items1.h,21,_initMenuLayout,C-header,9,Game.Menu,,_armorStatusView _bladeStatusView _gemStatusView _gripStatusView _shieldStatusView _weaponStatusView,_continueMenuTransition vs_mainMenu_drawClassAffinityType vs_mainMenu_renderEquipStats
+F02572,MENU/items1.h,35,_switchItemStatusPage,C-header,13,Game.Items,,_armorStatusView _bladeStatusView _gemStatusView _gripStatusView _shieldStatusView _weaponStatusView,vs_battle_getMenuItem vs_battle_setMenuItem vs_mainmenu_setInformationMessage
+F02573,MENU/items1.h,54,_getItemIndex,C-header,7,Game.Items,,_armorStatusView _bladeStatusView _gemStatusView _gripStatusView _shieldStatusView _weaponStatusView,
+F02574,MENU/items1.h,74,_exitStatusView,C-header,14,Game.Battle,,_armorStatusView _bladeStatusView _gemStatusView _gripStatusView _shieldStatusView _weaponStatusView,vs_mainMenu_drawClassAffinityType vs_mainMenu_renderDpPpBars vs_mainMenu_renderEquipStats
+F02575,MENU/items1.h,98,_weaponStatusView,C-header,87,Game.Items,,,_exitStatusView _getItemIndex _initMenuLayout _itemPaging _startMenuTransition _switchItemStatusPage vs_mainMenu_initWeaponDetailsRow vs_mainMenu_renderDpPpBars vs_mainMenu_setStatsFromWeapon vs_mainMenu_setWeaponRowFromInventory
+F02576,MENU/items1.h,195,_bladeStatusView,C-header,70,Game.Items,,,_exitStatusView _getItemIndex _initMenuLayout _itemPaging _startMenuTransition _switchItemStatusPage vs_mainMenu_renderDpPpBars vs_mainMenu_setBladeRow vs_mainMenu_setStatsFromBlade
+F02577,MENU/items1.h,275,_gripStatusView,C-header,80,Game.Items,,,_exitStatusView _getItemIndex _initMenuLayout _itemPaging _startMenuTransition _switchItemStatusPage vs_battle_renderTextRaw vs_mainMenu_renderMenuRowIcon vs_mainMenu_setGripRow vs_mainMenu_setStatsFromGrip
+F02578,MENU/items1.h,365,_shieldStatusView,C-header,89,Game.Items,,,_exitStatusView _getItemIndex _initMenuLayout _itemPaging _startMenuTransition _switchItemStatusPage vs_mainMenu_initShieldDetailsRow vs_mainMenu_renderDpPpBars vs_mainMenu_setShieldRowFromInventory vs_mainMenu_setStatsFromShield
+F02579,MENU/items1.h,464,_armorStatusView,C-header,80,Game.Items,,,_exitStatusView _getItemIndex _initMenuLayout _itemPaging _startMenuTransition _switchItemStatusPage vs_mainMenu_renderDpPpBars vs_mainMenu_setArmorRowFromInventory vs_mainMenu_setStatsFromArmor
+F02580,MENU/items1.h,554,_gemStatusView,C-header,76,Game.Items,,,_exitStatusView _getItemIndex _initMenuLayout _itemPaging _startMenuTransition _switchItemStatusPage vs_mainMenu_setGemRow vs_mainMenu_setStatsFromGem
+F02581,MENU/items1.h,640,_itemStatusDispatcher,C-header,48,Game.Items,,_itemNavigation,vs_battle_getMenuItem vs_mainMenu_renderStatusView vs_mainMenu_renderTabNavigation vs_mainMenu_resetStatusViewCursor vs_mainMenu_setMenuCommand
+F02582,MENU/items1.h,695,_getWeaponStatValue,C-header,31,Game.Items,,_sortWeapons,
+F02583,MENU/items1.h,731,_sortWeapons,C-header,54,Game.Items,,_sortItems,_getWeaponStatValue vs_battle_applyWeapon vs_battle_rMemzero
+F02584,MENU/items1.h,792,_getShieldStatValue,C-header,30,Game.Items,,_sortShields MENUD.PRG:_sortShieldsByStat,
+F02585,MENU/items1.h,827,_sortShields,C-header,54,Game.Items,,_sortItems,_getShieldStatValue vs_battle_applyShield vs_battle_rMemzero
+F02586,MENU/items1.h,888,_getMiscStatValue,C-header,6,Game.Menu,,_sortMisc,
+F02587,MENU/items1.h,899,_sortMisc,C-header,43,Game.Menu,,_sortItems,_getMiscStatValue vs_battle_rMemzero
+F02588,MENU/items1.h,949,_getEquipmentStatValue,C-header,40,Game.Items,,_sortEquipment,
+F02589,MENU/items1.h,994,_copyEquipment,C-header,17,Game.Items,,_sortEquipment,vs_battle_copyInventoryArmorStats vs_battle_copyInventoryBladeStats vs_battle_copyInventoryGemStats vs_battle_copyInventoryGripStats
+F02590,MENU/items1.h,1017,_sortEquipment,C-header,53,Game.Items,,_sortItems MENUD.PRG:_copyEquipmentByStat,_copyEquipment _getEquipmentStatValue vs_battle_rMemzero
+F02591,MENU/items1.h,1077,_sortItems,C-header,93,Game.Items,,_itemNavigation,_sortEquipment _sortMisc _sortShields _sortWeapons vs_mainMenu_actionInputProcessed vs_mainMenu_addMenuActions vs_mainMenu_renderItemActionMenu
+F02592,MENU/items1.h,1185,_discardMenu,C-header,281,Save,,_itemNavigation MENUD.PRG:func_80107490,vs_battle_initInformationTextBox vs_battle_printVariableWidthFontChar vs_battle_setFontStyle vs_battle_setMenuItem vs_battle_toBCD vs_mainMenu_actionInputProcessed vs_mainMenu_addMenuActions vs_mainMenu_initItem vs_mainMenu_renderCursor vs_mainMenu_renderItemActionMenu vs_main_playSfxDefault vs_mainmenu_setInformationMessage
