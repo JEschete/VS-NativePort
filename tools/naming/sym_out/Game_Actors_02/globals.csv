@@ -1,0 +1,13 @@
+id,disposition,final_name,final_location,purpose,confidence,notes
+G00024,catalog,Items::weaponCategoryUpperIds,Native\Game\src\Items\Categories.c,Gives the highest weapon identifier in each weapon category.,high,catalog:weapon-categories;source:146C.c:6515
+G00027,catalog,Items::itemCategoryUpperIds,Native\Game\src\Items\Categories.c,Gives the exclusive upper item identifier of each inventory category.,high,catalog:item-categories;source:146C.c:9653
+G00067,state,Actors::sharedSequenceBankIndex,Native\Game\src\Actors\Animation.c,Selects which of three shared animation-sequence banks is active.,high,state:Actors::AnimationState;source:30DB0.c:1914;source:30DB0.c:1918
+G00069,catalog,Actors::textureSlotOrigins,Native\Game\src\Actors\Textures.c,Gives the VRAM texture-page origin of each of the 24 actor texture slots.,high,catalog:actor-texture-slots;replace VRAM placement with native texture handles;source:FB0.c:34;source:30DB0.c:1071
+G00070,catalog,Actors::textureSlotRowOffsets,Native\Game\src\Actors\Textures.c,Gives the vertical offset within its texture page for each actor texture slot.,high,catalog:actor-texture-slots;source:30DB0.c:1074
+G00073,state,Actors::reservedControlByte,Native\Game\src\Actors\Actors.c,Retains a byte set by an exported setter and cleared at battle initialization; no reader is identified.,low,meaning-unresolved;source:30DB0.c:3948;source:FB0.c:25
+G00078,catalog,Actors::drawnWeaponAnimationBases,Native\Game\src\Actors\Animation.c,Gives per-actor-kind animation bases used when the weapon is drawn.,med,catalog:actor-animations;source:30DB0.c:2255
+G00079,catalog,Actors::sheathedWeaponAnimationBases,Native\Game\src\Actors\Animation.c,Gives per-actor-kind animation bases used when the weapon is sheathed.,med,catalog:actor-animations;source:30DB0.c:2257
+G00081,constexpr,Actors::kJumpHangFrames,Native\Game\src\Actors\Jump.c,Gives the extra airborne frames for each jump case.,high,cases are drop-near drop-far climb plus three for the alternate actor flag;source:38C1C.c:528;source:38C1C.c:549
+G00082,constexpr,Actors::kJumpHeightAdjustments,Native\Game\src\Actors\Jump.c,Gives the height adjustment applied for each jump case.,high,source:38C1C.c:529;source:38C1C.c:550
+G00083,state,Actors::motionResultResetWord,Native\Game\src\Actors\Movement.c,Retains a word cleared before terrain motion is evaluated; no reader is identified.,low,meaning-unresolved;source:3A1A0.c:1597
+G00084,constexpr,Actors::kMotionResultAnimations,Native\Game\src\Actors\Movement.c,Maps a blocked terrain-motion result to the animation the actor plays.,med,odd start address suggests a field of a larger table;source:3A1A0.c:1845
