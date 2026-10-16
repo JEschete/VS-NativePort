@@ -1,0 +1,15 @@
+id,role,final_name,final_location,purpose,confidence,notes
+T00748,Value,Field::PackedShortPair,Native\Game\src\Field\Room.h,Views a weather-area bounds word as two shorts or one integer.,high,source:146C.h:128;used for MPD section B weather area at 146C.c:17478
+T00753,Value,Field::RoomEffectOperand,Native\Game\src\Field\RoomEffects.h,Views a room-effect script operand as unsigned shorts signed shorts or one word.,high,source:2842C.c:27;source:2842C.c:1272
+T00129,Value,Field::GimmickTileTarget,Native\Game\src\Field\Interaction.h,Holds the tile position and direction a gimmick is pushed toward.,med,source:3A1A0.c:731
+T00323,OnDisc,Field::MpdHeader,Native\Game\src\Field\Mpd.h,Locates the room cleared-trigger script door enemy and loot sections of an MPD file.,high,decoder-only;source:146C.c:15296
+T00339,Value,Field::SphericalCameraValues,Native\Game\src\Field\Camera.h,Holds yaw pitch distance and mode of a spherical camera pose or its pending step.,med,as the delta member yaw is used as a rotation phase at 146C.c:2643;source:146C.h:300
+T00346,OnDisc,Field::ZndHeader,Native\Game\src\Field\Znd.h,Locates the MPD list enemy records and textures of a ZND zone file and names its music.,high,decoder-only;source:146C.c:14840
+T00347,Value,Field::ZoneBounds,Native\Game\src\Field\Zone.h,Holds the minimum and maximum tile coordinates of the current zone.,high,source:146C.c:2435
+T00439,Value,Field::CameraPositionPair,Native\Game\src\Field\Camera.h,Holds a camera position and look-at point.,med,source:146C.c:2599
+T00452,OnDisc,Field::RoomEffectChunkHeader,Native\Game\src\Field\RoomEffects.h,Gives the size and type of one room-effect script chunk.,high,decoder-only;type 11 is a four-byte terminator;source:2842C.c:927
+T00466,Misc,Field::SavedPositionWords,Native\Game\src\Field\Collision.h,Copies an actor position as two raw words while probing ledge support.,high,replace with a native position copy;source:3A1A0.c:1963
+T00566,Misc,Field::GimmickMotionView,Native\Game\src\Field\GimmickMotion.h,Views the motion fields of a gimmick instance during keyed motion modes.,med,partial view of the gimmick instance;merge with the native gimmick type;source:44F14.c:1915
+T00638,Value,Field::BackgroundTile,Native\Game\src\Field\Background.h,Gives the texture rectangle and four corner colors of one background tile.,med,source:2842C.h:1
+T00639,State,Field::CameraTransition,Native\Game\src\Field\Camera.h,Stores camera state saved and targeted while entering or leaving first-person view.,high,source:146C.c:4556
+T00705,State,State::RoomVisitFlags,Native\Game\include\State\Progress.h,Stores visited-room and visited-area bit flags.,high,source:main.h:384;source:146C.c:3215

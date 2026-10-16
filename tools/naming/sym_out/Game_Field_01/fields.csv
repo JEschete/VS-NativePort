@@ -1,0 +1,93 @@
+id,final_name,meaning,confidence,notes
+T00748.000,halves,Halves of the packed pair,med,declaration-only;source:146C.h:129
+T00748.001,word,Word of the packed pair,med,declaration-only;source:146C.h:130
+T00753.000,unsignedHalves,Unsigned halves of the effect operand,med,declaration-only;source:2842C.c:28
+T00753.001,signedHalves,Signed halves of the effect operand,med,declaration-only;source:2842C.c:29
+T00753.002,word,Word of the effect operand,med,declaration-only;source:2842C.c:30
+T00129.000,tileX,Tile x of the gimmick tile target,med,declaration-only;source:3A1A0.c:732
+T00129.001,tileY,Tile y of the gimmick tile target,med,declaration-only;source:3A1A0.c:733
+T00129.002,tileZ,Tile z of the gimmick tile target,med,declaration-only;source:3A1A0.c:734
+T00129.003,direction,Direction of the gimmick tile target,med,declaration-only;source:3A1A0.c:735
+T00323.000,roomSectionOffset,Room section offset of the MPD header,med,declaration-only;source:146C.c:316
+T00323.001,roomSectionSize,Room section size of the MPD header,med,declaration-only;source:146C.c:317
+T00323.002,clearedSectionOffset,Cleared section offset of the MPD header,med,declaration-only;source:146C.c:318
+T00323.003,clearedSectionSize,Cleared section size of the MPD header,med,declaration-only;source:146C.c:319
+T00323.004,scriptSectionOffset,Script section offset of the MPD header,med,declaration-only;source:146C.c:320
+T00323.005,scriptSectionSize,Script section size of the MPD header,med,declaration-only;source:146C.c:321
+T00323.006,doorSectionOffset,Door section offset of the MPD header,med,declaration-only;source:146C.c:322
+T00323.007,doorSectionSize,Door section size of the MPD header,med,declaration-only;source:146C.c:323
+T00323.008,enemySectionOffset,Enemy section offset of the MPD header,med,declaration-only;source:146C.c:324
+T00323.009,enemySectionSize,Enemy section size of the MPD header,med,declaration-only;source:146C.c:325
+T00323.010,lootSectionOffset,Loot section offset of the MPD header,med,declaration-only;source:146C.c:326
+T00323.011,lootSectionSize,Loot section size of the MPD header,med,declaration-only;source:146C.c:327
+T00339.000,yaw,Yaw of the spherical camera,low,used as a rotation phase 0 1 2 when this is the delta member at 146C.c:2643;declaration-only;source:146C.h:734
+T00339.001,pitch,Pitch of the spherical camera,med,declaration-only;source:146C.h:735
+T00339.002,distance,Distance of the spherical camera,med,declaration-only;source:146C.h:736
+T00339.003,mode,Mode of the spherical camera,med,declaration-only;source:146C.h:737
+T00346.000,mpdListOffset,Mpd list offset of the ZND header,med,declaration-only;source:146C.c:283
+T00346.001,mpdListSize,Mpd list size of the ZND header,med,declaration-only;source:146C.c:284
+T00346.002,enemiesOffset,Enemies offset of the ZND header,med,declaration-only;source:146C.c:285
+T00346.003,enemiesSize,Enemies size of the ZND header,med,declaration-only;source:146C.c:286
+T00346.004,texturesOffset,Textures offset of the ZND header,med,declaration-only;source:146C.c:287
+T00346.005,texturesSize,Textures size of the ZND header,med,declaration-only;source:146C.c:288
+T00346.006,musicId,Music id of the ZND header,med,declaration-only;source:146C.c:289
+T00347.000,minX,Min x of the zone bounds,med,declaration-only;source:146C.h:210
+T00347.001,minZ,Min z of the zone bounds,med,declaration-only;source:146C.h:211
+T00347.002,maxX,Max x of the zone bounds,med,declaration-only;source:146C.h:212
+T00347.003,maxZ,Max z of the zone bounds,med,declaration-only;source:146C.h:213
+T00439.000,position,Position of the camera pair,med,declaration-only;source:146C.c:209
+T00439.001,lookAt,Look at of the camera pair,med,declaration-only;source:146C.c:210
+T00452.000,size,Size of the effect chunk,med,declaration-only;source:2842C.c:192
+T00452.001,type,Type of the effect chunk,med,declaration-only;source:2842C.c:193
+T00466.000,words,Words of the saved position,med,declaration-only;source:3A1A0.c:28
+T00566.000,reserved00,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:91
+T00566.001,flags,Flags of the gimmick motion,med,declaration-only;source:44F14.c:92
+T00566.002,reserved0C,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:93
+T00566.003,objectId,Object id of the gimmick motion,med,declaration-only;source:44F14.c:94
+T00566.004,reserved10,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:95
+T00566.005,mode,Mode of the gimmick motion,med,declaration-only;source:44F14.c:96
+T00566.006,x,X of the gimmick motion,med,declaration-only;source:44F14.c:97
+T00566.007,y,Y of the gimmick motion,med,declaration-only;source:44F14.c:97
+T00566.008,z,Z of the gimmick motion,med,declaration-only;source:44F14.c:97
+T00566.009,pad22,Alignment padding,low,declaration-only;source:44F14.c:97
+T00566.010,rotationX,Rotation x of the gimmick motion,med,declaration-only;source:44F14.c:98
+T00566.011,rotationY,Rotation y of the gimmick motion,med,declaration-only;source:44F14.c:98
+T00566.012,rotationZ,Rotation z of the gimmick motion,med,declaration-only;source:44F14.c:98
+T00566.013,pad2A,Alignment padding,low,declaration-only;source:44F14.c:98
+T00566.014,scaleX,Scale x of the gimmick motion,med,declaration-only;source:44F14.c:99
+T00566.015,scaleY,Scale y of the gimmick motion,med,declaration-only;source:44F14.c:99
+T00566.016,scaleZ,Scale z of the gimmick motion,med,declaration-only;source:44F14.c:99
+T00566.017,pad32,Alignment padding,low,declaration-only;source:44F14.c:99
+T00566.018,reserved34,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:99
+T00566.019,deltaY,Delta y of the gimmick motion,med,declaration-only;source:44F14.c:100
+T00566.020,reserved38,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:100
+T00566.021,orientation,Orientation of the gimmick motion,med,declaration-only;source:44F14.c:100
+T00566.022,reserved3C,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:101
+T00566.023,savedState,Saved state of the gimmick motion,med,declaration-only;source:44F14.c:102
+T00566.024,state,State of the gimmick motion,med,declaration-only;source:44F14.c:103
+T00566.025,reserved16C,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:104
+T00566.026,material,Material of the gimmick motion,med,declaration-only;source:44F14.c:105
+T00566.027,reserved16F,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:105
+T00566.028,frame,Frame of the gimmick motion,med,declaration-only;source:44F14.c:105
+T00638.000,textureRect,Texture rect of the background tile,med,declaration-only;source:2842C.h:7
+T00638.001,cornerColors,Corner colors of the background tile,med,declaration-only;source:2842C.h:8
+T00639.000,fromCameraState,From camera state of the camera transition,med,declaration-only;source:146C.h:805
+T00639.001,fromSpherical,From spherical of the camera transition,med,declaration-only;source:146C.h:806
+T00639.002,fromNearClip,From near clip of the camera transition,med,declaration-only;source:146C.h:807
+T00639.003,fromProjectionDistance,From projection distance of the camera transition,med,declaration-only;source:146C.h:808
+T00639.004,fromFarClip,From far clip of the camera transition,med,declaration-only;source:146C.h:809
+T00639.005,toSpherical,To spherical of the camera transition,med,declaration-only;source:146C.h:810
+T00639.006,toNearClip,To near clip of the camera transition,med,declaration-only;source:146C.h:811
+T00639.007,toProjectionDistance,To projection distance of the camera transition,med,declaration-only;source:146C.h:812
+T00639.008,toFarClip,To far clip of the camera transition,med,declaration-only;source:146C.h:813
+T00639.009,targetPosition,Target position of the camera transition,med,declaration-only;source:146C.h:814
+T00639.010,targetLookAt,Target look at of the camera transition,med,declaration-only;source:146C.h:815
+T00639.011,direction,Direction of the camera transition,med,declaration-only;source:146C.h:816
+T00639.012,lookAtStep,Look at step of the camera transition,med,declaration-only;source:146C.h:817
+T00639.013,farClipStep,Far clip step of the camera transition,med,declaration-only;source:146C.h:818
+T00639.014,nearClipStep,Near clip step of the camera transition,med,declaration-only;source:146C.h:819
+T00639.015,projectionDistanceStep,Projection distance step of the camera transition,med,declaration-only;source:146C.h:820
+T00639.016,transitionSpeed,Transition speed of the camera transition,med,declaration-only;source:146C.h:821
+T00639.017,transitionFrames,Transition frames of the camera transition,med,declaration-only;source:146C.h:822
+T00705.000,roomFlags,Room flags of the room visit flags,med,declaration-only;source:main.h:392
+T00705.001,areaFlags,Area flags of the room visit flags,med,declaration-only;source:main.h:393

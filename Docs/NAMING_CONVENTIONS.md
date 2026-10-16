@@ -310,7 +310,7 @@ must refuse names whose rows do not pass the evidence check.
 | Engine_01 | 151 | 38 | 252 | Pending |
 | Engine_02 | 60 | 0 | 0 | Validated and applied |
 | Game_Actors_01 | 0 | 55 | 768 | Pending |
-| Game_Actors_02 | 48 | 8 | 108 | Pending |
+| Game_Actors_02 | 48 | 8 | 108 | Validated and applied |
 | Game_Battle_01 | 0 | 92 | 575 | Pending |
 | Game_Battle_02 | 0 | 66 | 689 | Pending |
 | Game_Battle_03 | 0 | 78 | 648 | Pending |
@@ -330,9 +330,9 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **386 / 2,174** | **101 / 820** | **583 / 6,766** | **6 / 24 batches applied** |
+| **Applied / inventoried** | **434 / 2,174** | **109 / 820** | **691 / 6,766** | **7 / 24 batches applied** |
 
-Applied rows still include seven low-confidence globals, two low-confidence types and 65 low-confidence fields. Validation checks coverage,
+Applied rows still include 14 low-confidence globals, 2 low-confidence types and 94 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their

@@ -667,22 +667,22 @@ T00664,struct:vs_battle_roomName,struct,vs_battle_roomName,0,vs_battle_roomName,
 T00665,struct:vs_battle_roomVertices,struct,vs_battle_roomVertices,0,vs_battle_roomVertices,4,2,0,1,1,BATTLE/BATTLE.PRG/146C.h,4,0,Game.Menu,,,,,,,,,,,,,
 T00666,struct:vs_battle_scene,struct,vs_battle_scene,0,vs_battle_scene,4,2,0,1,1,BATTLE/BATTLE.PRG/146C.h,17,0,Game.Menu,,,,,,,,,,,,,
 T00667,struct:vs_battle_screenTransitionWipePoly,struct,vs_battle_screenTransitionWipePoly,0,vs_battle_screenTransitionWipePoly,48,2,0,1,1,BATTLE/BATTLE.PRG/146C.h,2,1,Graphics,,,,,,,,,,,,,
-T00668,struct:vs_battle_shieldIntermediate,struct,vs_battle_shieldIntermediate,0,vs_battle_shieldIntermediate,196,5,0,1,1,BATTLE/BATTLE.PRG/146C.h,3,0,Game.Items,,,,,,,,,,,,,
+T00668,struct:vs_battle_shieldIntermediate,struct,vs_battle_shieldIntermediate,0,vs_battle_shieldIntermediate,196,5,0,1,1,BATTLE/BATTLE.PRG/146C.h,3,0,Game.Items,Def,Items::ShieldSpawnLoadout,Native\Game\include\Items\Loadout.h,Describes the shield and gems equipped by a spawned actor.,high,,,x,,,,,source:146C.h:774
 T00669,struct:vs_battle_stringContext_t,struct,vs_battle_stringContext_t,1,vs_battle_stringContext_t,80,2,0,1,1,BATTLE/BATTLE.PRG/5BF94.h,0,1,Game.Menu,,,,,,,,,,,,,
 T00670,struct:vs_battle_texInfo_t,struct,vs_battle_texInfo_t,1,vs_battle_texInfo_t,8,4,0,1,1,BATTLE/BATTLE.PRG/30DB0.h,6,2,Content,,,,,,,,,,,,,
 T00671,struct:vs_battle_textBox,struct,vs_battle_textBox,0,vs_battle_textBox,48,25,12,1,1,BATTLE/BATTLE.PRG/5BF94.h,32,1,Game.Menu,,,,,,,,,,,,,
 T00672,struct:vs_battle_textBox_fields,struct,vs_battle_textBox_fields,0,vs_battle_textBox_fields,4,9,7,1,1,BATTLE/BATTLE.PRG/5BF94.h,0,0,Game.Battle,,,,,,,,,,,,,
-T00673,struct:vs_battle_uiAccessory,struct,vs_battle_uiAccessory,0,vs_battle_uiAccessory,96,9,0,1,1,BATTLE/BATTLE.PRG/146C.h,8,0,Game.Items,,,,,,,,,,,,,
+T00673,struct:vs_battle_uiAccessory,struct,vs_battle_uiAccessory,0,vs_battle_uiAccessory,96,9,0,1,1,BATTLE/BATTLE.PRG/146C.h,8,0,Game.Items,Def,Items::AccessorySpawnLoadout,Native\Game\include\Items\Loadout.h,Describes an accessory and its stat and resistance contributions for a spawned actor.,high,,,x,,,,,source:146C.h:413
 T00674,struct:vs_battle_uiArmor,struct,vs_battle_uiArmor,0,vs_battle_uiArmor,188,17,3,1,1,BATTLE/BATTLE.PRG/146C.h,10,0,Game.Menu,,,,,,,,,,,,,
-T00675,struct:vs_battle_uiEquipment,struct,vs_battle_uiEquipment,0,vs_battle_uiEquipment,48,23,1,1,1,BATTLE/BATTLE.PRG/146C.h,48,0,Game.Items,,,,,,,,,,,,,
+T00675,struct:vs_battle_uiEquipment,struct,vs_battle_uiEquipment,0,vs_battle_uiEquipment,48,23,1,1,1,BATTLE/BATTLE.PRG/146C.h,48,0,Game.Items,Value,Items::EquipmentPartStats,Native\Game\include\Items\Equipment.h,Describes one blade grip gem armor or accessory part with stats and resistances.,high,,,x,,,,,source:146C.h:297
 T00676,struct:vs_battle_uiEquipment_limb,struct,vs_battle_uiEquipment_limb,0,vs_battle_uiEquipment_limb,220,9,1,1,1,BATTLE/BATTLE.PRG/146C.h,51,0,Game.Battle,,,,,,,,,,,,,
-T00677,struct:vs_battle_uiMisc,struct,vs_battle_uiMisc,0,vs_battle_uiMisc,4,3,1,1,1,BATTLE/BATTLE.PRG/146C.h,1,0,Game.Items,,,,,,,,,,,,,
-T00678,struct:vs_battle_uiMiscRand,struct,vs_battle_uiMiscRand,0,vs_battle_uiMiscRand,4,3,1,1,1,BATTLE/BATTLE.PRG/146C.h,1,0,Game.Items,,,,,,,,,,,,,
+T00677,struct:vs_battle_uiMisc,struct,vs_battle_uiMisc,0,vs_battle_uiMisc,4,3,1,1,1,BATTLE/BATTLE.PRG/146C.h,1,0,Game.Items,Value,Items::MiscItemStack,Native\Game\include\Items\Inventory.h,Pairs a consumable item identifier with its count.,high,,,x,,,,,source:146C.h:426
+T00678,struct:vs_battle_uiMiscRand,struct,vs_battle_uiMiscRand,0,vs_battle_uiMiscRand,4,3,1,1,1,BATTLE/BATTLE.PRG/146C.h,1,0,Game.Items,Value,Items::MiscItemDrop,Native\Game\include\Items\Loadout.h,Pairs a consumable item identifier with its drop chance.,high,,,x,,,,,source:146C.h:432
 T00679,struct:vs_battle_uiShield,struct,vs_battle_uiShield,0,vs_battle_uiShield,356,21,3,1,1,BATTLE/BATTLE.PRG/146C.h,17,0,Game.Menu,,,,,,,,,,,,,
 T00680,struct:vs_battle_uiWeapon,struct,vs_battle_uiWeapon,0,vs_battle_uiWeapon,408,26,2,1,1,BATTLE/BATTLE.PRG/146C.h,18,0,Game.Menu,,,,,,,,,,,,,
 T00681,struct:vs_battle_uiWeapon_unk,struct,vs_battle_uiWeapon_unk,0,vs_battle_uiWeapon_unk,48,1,1,1,1,BATTLE/BATTLE.PRG/146C.h,0,0,Game.Battle,,,,,,,,,,,,,
-T00682,struct:vs_battle_weaponIntermediate,struct,vs_battle_weaponIntermediate,0,vs_battle_weaponIntermediate,268,7,0,1,1,BATTLE/BATTLE.PRG/146C.h,3,0,Game.Items,,,,,,,,,,,,,
-T00683,struct:vs_battle_wepModels_t,struct,vs_battle_wepModels_t,1,vs_battle_wepModels_t,1512,46,30,1,1,BATTLE/BATTLE.PRG/3A1A0.h,22,1,Game.Actors,,,,,,,,,,,,,
+T00682,struct:vs_battle_weaponIntermediate,struct,vs_battle_weaponIntermediate,0,vs_battle_weaponIntermediate,268,7,0,1,1,BATTLE/BATTLE.PRG/146C.h,3,0,Game.Items,Def,Items::WeaponSpawnLoadout,Native\Game\include\Items\Loadout.h,Describes the blade grip gems material and name of a spawned actor weapon.,high,,,x,,,,,source:146C.h:762
+T00683,struct:vs_battle_wepModels_t,struct,vs_battle_wepModels_t,1,vs_battle_wepModels_t,1512,46,30,1,1,BATTLE/BATTLE.PRG/3A1A0.h,22,1,Game.Actors,Instance,Actors::WeaponModel,Native\Game\src\Actors\WeaponModel.h,Stores a loaded weapon or shield mesh with attachment palettes and bone data.,med,,,x,,,,,source:3A1A0.h:402;many trailing members unresolved
 T00684,struct:vs_camera_t,struct,vs_camera_t,1,vs_camera_t,52,4,0,1,1,include/scratch.h,5,2,Game.Menu,,,,,,,,,,,,,
 T00685,struct:vs_closedRingPrim,struct,vs_closedRingPrim,0,vs_closedRingPrim,60,3,0,1,3,EFFECT/PLG077.BIN/18.c EFFECT/PLG300.BIN/110.c EFFECT/closedRings.h,29,0,Game.Effects,,,,,,,,,,,,,
 T00686,struct:vs_closedRingState,struct,vs_closedRingState,0,vs_closedRingState,60,10,1,1,3,EFFECT/PLG077.BIN/18.c EFFECT/PLG300.BIN/110.c EFFECT/closedRings.h,29,0,Game.Effects,,,,,,,,,,,,,
@@ -740,7 +740,7 @@ T00737,struct:vs_transposedRingUV,struct,vs_transposedRingUV,0,vs_transposedRing
 T00738,struct:vs_trialScore_t,struct,vs_trialScore_t,1,vs_trialScore_t,4,3,0,1,1,SLUS_010.40/main.h,11,0,Game.Menu,,,,,,,,,,,,,
 T00739,struct:wanderObject,struct,wanderObject,0,wanderObject,12,2,1,1,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00740,struct:wanderState,struct,wanderState,0,wanderState,364,35,12,1,1,BATTLE/BATTLE.PRG/771A8.c,3,0,Game.Battle,,,,,,,,,,,,,
-T00741,struct:zudHeader,struct,zudHeader,0,zudHeader,48,12,5,1,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Actors,,,,,,,,,,,,,
+T00741,struct:zudHeader,struct,zudHeader,0,zudHeader,48,12,5,1,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Actors,OnDisc,Actors::ZudHeader,Native\Game\src\Actors\Zud.h,Locates the character shape weapon shield and animation sections of a ZUD unit file.,high,,,x,,,,,decoder-only;layout confirmed by DataCrystal ZUD files and 146C.c:6646
 T00742,typedef:FSoundCommandHandler,typedef,FSoundCommandHandler,0,,4,0,0,1,1,SLUS_010.40/25AC.c,1,1,Audio.Mixer,,,,,,,,,,,,,
 T00743,typedef:effectExec,typedef,effectExec,0,,4,0,0,1,1,BATTLE/BATTLE.PRG/6E644.h,9,4,Game.Effects,,,,,,,,,,,,,
 T00744,typedef:movementPathTest,typedef,movementPathTest,0,,4,0,0,1,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle,,,,,,,,,,,,,

@@ -5834,11 +5834,11 @@ T00666.000,T00666,vs_battle_scene,0,roomCount,0,int,,,,,,,
 T00666.001,T00666,vs_battle_scene,1,rooms,0,vs_battle_room[0],,,,,,,
 T00667.000,T00667,vs_battle_screenTransitionWipePoly,0,covered,0,POLY_F4,,,,,,,
 T00667.001,T00667,vs_battle_screenTransitionWipePoly,1,edge,0,POLY_F4,,,,,,,
-T00668.000,T00668,vs_battle_shieldIntermediate,0,base,0,vs_battle_uiEquipment,,,,,,,
-T00668.001,T00668,vs_battle_shieldIntermediate,1,gems,0,vs_battle_uiEquipment[3],,,,,,,
-T00668.002,T00668,vs_battle_shieldIntermediate,2,material,0,char,,,,,,,
-T00668.003,T00668,vs_battle_shieldIntermediate,3,dropRate,0,char,,,,,,,
-T00668.004,T00668,vs_battle_shieldIntermediate,4,index,0,short,,,,,,,
+T00668.000,T00668,vs_battle_shieldIntermediate,0,base,0,vs_battle_uiEquipment,,,,base,Shield part stats,med,declaration-only;source:146C.h:775
+T00668.001,T00668,vs_battle_shieldIntermediate,1,gems,0,vs_battle_uiEquipment[3],,,,gems,Socketed gem stats,med,declaration-only;source:146C.h:776
+T00668.002,T00668,vs_battle_shieldIntermediate,2,material,0,char,,,,material,Shield material,med,declaration-only;source:146C.h:777
+T00668.003,T00668,vs_battle_shieldIntermediate,3,dropRate,0,char,,,,dropRate,Drop chance,med,declaration-only;source:146C.h:778
+T00668.004,T00668,vs_battle_shieldIntermediate,4,index,0,short,,,,index,Inventory index,med,declaration-only;source:146C.h:779
 T00669.000,T00669,vs_battle_stringContext_t,0,integers,0,int[10],,,,,,,
 T00669.001,T00669,vs_battle_stringContext_t,1,strings,0,char *[10],,,,,,,
 T00670.000,T00670,vs_battle_texInfo_t,0,tpage,0,short,,,,,,,
@@ -5879,15 +5879,15 @@ T00672.005,T00672,vs_battle_textBox_fields,5,arrowAnimFrame,0,u_int,8,,,,,,
 T00672.006,T00672,vs_battle_textBox_fields,6,unk0_24,1,u_int,6,,,,,,
 T00672.007,T00672,vs_battle_textBox_fields,7,done,0,u_int,1,,,,,,
 T00672.008,T00672,vs_battle_textBox_fields,8,unk0_31,1,u_int,1,,,,,,
-T00673.000,T00673,vs_battle_uiAccessory,0,accessory,0,vs_battle_uiEquipment,,,,,,,
-T00673.001,T00673,vs_battle_uiAccessory,1,currentStr,0,short,,,,,,,
-T00673.002,T00673,vs_battle_uiAccessory,2,currentInt,0,short,,,,,,,
-T00673.003,T00673,vs_battle_uiAccessory,3,currentAgility,0,short,,,,,,,
-T00673.004,T00673,vs_battle_uiAccessory,4,dropRate,0,char,,,,,,,
-T00673.005,T00673,vs_battle_uiAccessory,5,index,0,u_char,,,,,,,
-T00673.006,T00673,vs_battle_uiAccessory,6,types,0,u_short[4],,,,,,,
-T00673.007,T00673,vs_battle_uiAccessory,7,classes,0,u_short[8],,,,,,,
-T00673.008,T00673,vs_battle_uiAccessory,8,affinities,0,u_short[8],,,,,,,
+T00673.000,T00673,vs_battle_uiAccessory,0,accessory,0,vs_battle_uiEquipment,,,,accessory,Accessory part stats,med,declaration-only;source:146C.h:414
+T00673.001,T00673,vs_battle_uiAccessory,1,currentStr,0,short,,,,currentStr,Strength contribution,med,declaration-only;source:146C.h:415
+T00673.002,T00673,vs_battle_uiAccessory,2,currentInt,0,short,,,,currentInt,Intelligence contribution,med,declaration-only;source:146C.h:416
+T00673.003,T00673,vs_battle_uiAccessory,3,currentAgility,0,short,,,,currentAgility,Agility contribution,med,declaration-only;source:146C.h:417
+T00673.004,T00673,vs_battle_uiAccessory,4,dropRate,0,char,,,,dropRate,Drop chance,med,declaration-only;source:146C.h:418
+T00673.005,T00673,vs_battle_uiAccessory,5,index,0,u_char,,,,index,Inventory index,med,declaration-only;source:146C.h:419
+T00673.006,T00673,vs_battle_uiAccessory,6,types,0,u_short[4],,,,types,Damage-type resistances,med,declaration-only;source:146C.h:420
+T00673.007,T00673,vs_battle_uiAccessory,7,classes,0,u_short[8],,,,classes,Enemy-class resistances,med,declaration-only;source:146C.h:421
+T00673.008,T00673,vs_battle_uiAccessory,8,affinities,0,u_short[8],,,,affinities,Elemental affinities,med,declaration-only;source:146C.h:422
 T00674.000,T00674,vs_battle_uiArmor,0,armor,0,vs_battle_uiEquipment,,,,,,,
 T00674.001,T00674,vs_battle_uiArmor,1,currentDp,0,u_short,,,,,,,
 T00674.002,T00674,vs_battle_uiArmor,2,maxDp,0,u_short,,,,,,,
@@ -5905,29 +5905,29 @@ T00674.013,T00674,vs_battle_uiArmor,13,unk99,1,char,,,,,,,
 T00674.014,T00674,vs_battle_uiArmor,14,index,0,u_char,,,,,,,
 T00674.015,T00674,vs_battle_uiArmor,15,unk9B,1,u_char,,,,,,,
 T00674.016,T00674,vs_battle_uiArmor,16,classAffinityBaseline,0,vs_battle_classAffinityBaseline,,,,,,,
-T00675.000,T00675,vs_battle_uiEquipment,0,id,0,u_short,,,,,,,
-T00675.001,T00675,vs_battle_uiEquipment,1,subId,0,signed char,,,,,,,
-T00675.002,T00675,vs_battle_uiEquipment,2,wepId,0,signed char,,,,,,,
-T00675.003,T00675,vs_battle_uiEquipment,3,category,0,char,,,,,,,
-T00675.004,T00675,vs_battle_uiEquipment,4,strength,0,signed char,,,,,,,
-T00675.005,T00675,vs_battle_uiEquipment,5,intelligence,0,signed char,,,,,,,
-T00675.006,T00675,vs_battle_uiEquipment,6,agility,0,signed char,,,,,,,
-T00675.007,T00675,vs_battle_uiEquipment,7,currentDp,0,u_short,,,,,,,
-T00675.008,T00675,vs_battle_uiEquipment,8,maxDp,0,u_short,,,,,,,
-T00675.009,T00675,vs_battle_uiEquipment,9,currentPp,0,u_short,,,,,,,
-T00675.010,T00675,vs_battle_uiEquipment,10,maxPp,0,u_short,,,,,,,
-T00675.011,T00675,vs_battle_uiEquipment,11,damageType,0,char,,,,,,,
-T00675.012,T00675,vs_battle_uiEquipment,12,costType,0,char,,,,,,,
-T00675.013,T00675,vs_battle_uiEquipment,13,cost,0,char,,,,,,,
-T00675.014,T00675,vs_battle_uiEquipment,14,material,0,char,,,,,,,
-T00675.015,T00675,vs_battle_uiEquipment,15,unk14,1,char,,,,,,,
-T00675.016,T00675,vs_battle_uiEquipment,16,gemSlots,0,char,,,,,,,
-T00675.017,T00675,vs_battle_uiEquipment,17,gemEffects,0,char,,,,,,,
-T00675.018,T00675,vs_battle_uiEquipment,18,index,0,char,,,,,,,
-T00675.019,T00675,vs_battle_uiEquipment,19,range,0,vs_battle_range_t,,,,,,,
-T00675.020,T00675,vs_battle_uiEquipment,20,types,0,signed char[4],,,,,,,
-T00675.021,T00675,vs_battle_uiEquipment,21,classes,0,signed char[8],,,,,,,
-T00675.022,T00675,vs_battle_uiEquipment,22,affinities,0,signed char[8],,,,,,,
+T00675.000,T00675,vs_battle_uiEquipment,0,id,0,u_short,,,,id,Item identifier,med,declaration-only;source:146C.h:298
+T00675.001,T00675,vs_battle_uiEquipment,1,subId,0,signed char,,,,subId,Variant identifier,med,declaration-only;source:146C.h:299
+T00675.002,T00675,vs_battle_uiEquipment,2,wepId,0,signed char,,,,weaponModelId,Weapon model identifier,med,declaration-only;source:146C.h:300
+T00675.003,T00675,vs_battle_uiEquipment,3,category,0,char,,,,category,Item category,med,declaration-only;source:146C.h:301
+T00675.004,T00675,vs_battle_uiEquipment,4,strength,0,signed char,,,,strength,Strength modifier,med,declaration-only;source:146C.h:302
+T00675.005,T00675,vs_battle_uiEquipment,5,intelligence,0,signed char,,,,intelligence,Intelligence modifier,med,declaration-only;source:146C.h:303
+T00675.006,T00675,vs_battle_uiEquipment,6,agility,0,signed char,,,,agility,Agility modifier,med,declaration-only;source:146C.h:304
+T00675.007,T00675,vs_battle_uiEquipment,7,currentDp,0,u_short,,,,currentDp,Current durability points,med,declaration-only;source:146C.h:305
+T00675.008,T00675,vs_battle_uiEquipment,8,maxDp,0,u_short,,,,maxDp,Maximum durability points,med,declaration-only;source:146C.h:306
+T00675.009,T00675,vs_battle_uiEquipment,9,currentPp,0,u_short,,,,currentPp,Current phantom points,med,declaration-only;source:146C.h:307
+T00675.010,T00675,vs_battle_uiEquipment,10,maxPp,0,u_short,,,,maxPp,Maximum phantom points,med,declaration-only;source:146C.h:308
+T00675.011,T00675,vs_battle_uiEquipment,11,damageType,0,char,,,,damageType,Damage type,med,declaration-only;source:146C.h:309
+T00675.012,T00675,vs_battle_uiEquipment,12,costType,0,char,,,,costType,Risk or MP cost type,med,declaration-only;source:146C.h:310
+T00675.013,T00675,vs_battle_uiEquipment,13,cost,0,char,,,,cost,Cost amount,med,declaration-only;source:146C.h:311
+T00675.014,T00675,vs_battle_uiEquipment,14,material,0,char,,,,material,Material,med,declaration-only;source:146C.h:312
+T00675.015,T00675,vs_battle_uiEquipment,15,unk14,1,char,,,,reserved14,Unreferenced byte,low,declaration-only;source:146C.h:313
+T00675.016,T00675,vs_battle_uiEquipment,16,gemSlots,0,char,,,,gemSlots,Gem slot count,med,declaration-only;source:146C.h:314
+T00675.017,T00675,vs_battle_uiEquipment,17,gemEffects,0,char,,,,gemEffects,Gem special effect identifier,med,declaration-only;source:146C.h:315
+T00675.018,T00675,vs_battle_uiEquipment,18,index,0,char,,,,index,Inventory index,med,declaration-only;source:146C.h:316
+T00675.019,T00675,vs_battle_uiEquipment,19,range,0,vs_battle_range_t,,,,range,Attack range,med,declaration-only;source:146C.h:317
+T00675.020,T00675,vs_battle_uiEquipment,20,types,0,signed char[4],,,,types,Damage-type values,med,declaration-only;source:146C.h:318
+T00675.021,T00675,vs_battle_uiEquipment,21,classes,0,signed char[8],,,,classes,Enemy-class values,med,declaration-only;source:146C.h:319
+T00675.022,T00675,vs_battle_uiEquipment,22,affinities,0,signed char[8],,,,affinities,Elemental affinity values,med,declaration-only;source:146C.h:320
 T00676.000,T00676,vs_battle_uiEquipment_limb,0,hp,0,short,,,,,,,
 T00676.001,T00676,vs_battle_uiEquipment_limb,1,maxHp,0,short,,,,,,,
 T00676.002,T00676,vs_battle_uiEquipment_limb,2,agilityDefenseBonus,0,signed char,,,,,,,
@@ -5937,12 +5937,12 @@ T00676.005,T00676,vs_battle_uiEquipment_limb,5,chainEvasion,0,char,,,,,,,
 T00676.006,T00676,vs_battle_uiEquipment_limb,6,types,0,short[4],,,,,,,
 T00676.007,T00676,vs_battle_uiEquipment_limb,7,affinities,0,short[8],,,,,,,
 T00676.008,T00676,vs_battle_uiEquipment_limb,8,armor,0,vs_battle_uiArmor,,,,,,,
-T00677.000,T00677,vs_battle_uiMisc,0,id,0,u_short,,,,,,,
-T00677.001,T00677,vs_battle_uiMisc,1,count,0,char,,,,,,,
-T00677.002,T00677,vs_battle_uiMisc,2,unk3,1,char,,,,,,,
-T00678.000,T00678,vs_battle_uiMiscRand,0,id,0,u_short,,,,,,,
-T00678.001,T00678,vs_battle_uiMiscRand,1,dropRate,0,char,,,,,,,
-T00678.002,T00678,vs_battle_uiMiscRand,2,unk3,1,char,,,,,,,
+T00677.000,T00677,vs_battle_uiMisc,0,id,0,u_short,,,,id,Consumable item identifier,med,declaration-only;source:146C.h:427
+T00677.001,T00677,vs_battle_uiMisc,1,count,0,char,,,,count,Item count,med,declaration-only;source:146C.h:428
+T00677.002,T00677,vs_battle_uiMisc,2,unk3,1,char,,,,reserved03,Unreferenced byte,low,declaration-only;source:146C.h:429
+T00678.000,T00678,vs_battle_uiMiscRand,0,id,0,u_short,,,,id,Consumable item identifier,med,declaration-only;source:146C.h:433
+T00678.001,T00678,vs_battle_uiMiscRand,1,dropRate,0,char,,,,dropRate,Drop chance,med,declaration-only;source:146C.h:434
+T00678.002,T00678,vs_battle_uiMiscRand,2,unk3,1,char,,,,reserved03,Unreferenced byte,low,declaration-only;source:146C.h:435
 T00679.000,T00679,vs_battle_uiShield,0,unk0,1,int[6],,,,,,,
 T00679.001,T00679,vs_battle_uiShield,1,base,0,vs_battle_uiEquipment,,,,,,,
 T00679.002,T00679,vs_battle_uiShield,2,gems,0,vs_battle_uiEquipment[3],,,,,,,
@@ -5991,59 +5991,59 @@ T00680.023,T00680,vs_battle_uiWeapon,23,classAffinityCurrent,0,vs_battle_classAf
 T00680.024,T00680,vs_battle_uiWeapon,24,unk168,1,short[8],,,temporary affinity bonuses | temporary elemental affinity offsets,,,,
 T00680.025,T00680,vs_battle_uiWeapon,25,classAffinityBaseline,0,vs_battle_classAffinityBaseline,,,,,,,
 T00681.000,T00681,vs_battle_uiWeapon_unk,0,unk0,1,u_short[24],,,,,,,
-T00682.000,T00682,vs_battle_weaponIntermediate,0,blade,0,vs_battle_uiEquipment,,,,,,,
-T00682.001,T00682,vs_battle_weaponIntermediate,1,grip,0,vs_battle_uiEquipment,,,,,,,
-T00682.002,T00682,vs_battle_weaponIntermediate,2,gems,0,vs_battle_uiEquipment[3],,,,,,,
-T00682.003,T00682,vs_battle_weaponIntermediate,3,material,0,char,,,,,,,
-T00682.004,T00682,vs_battle_weaponIntermediate,4,dropRate,0,char,,,,,,,
-T00682.005,T00682,vs_battle_weaponIntermediate,5,index,0,short,,,,,,,
-T00682.006,T00682,vs_battle_weaponIntermediate,6,name,0,char[24],,,,,,,
-T00683.000,T00683,vs_battle_wepModels_t,0,nBones,0,u_char,,,,,,,
-T00683.001,T00683,vs_battle_wepModels_t,1,nVertexGroups,0,u_char,,,,,,,
-T00683.002,T00683,vs_battle_wepModels_t,2,nTriangles,0,u_short,,,,,,,
-T00683.003,T00683,vs_battle_wepModels_t,3,nQuads,0,u_short,,,,,,,
-T00683.004,T00683,vs_battle_wepModels_t,4,nOther,0,u_short,,,,,,,
-T00683.005,T00683,vs_battle_wepModels_t,5,actorId,0,u_char,4,,,,,,
-T00683.006,T00683,vs_battle_wepModels_t,6,unk8_4,1,u_char,1,,,,,,
-T00683.007,T00683,vs_battle_wepModels_t,7,isWideTexture,0,u_char,1,,,,,,
-T00683.008,T00683,vs_battle_wepModels_t,8,unk8_6,1,u_char,1,,,,,,
-T00683.009,T00683,vs_battle_wepModels_t,9,isDoubleClut,0,u_char,1,,,,,,
-T00683.010,T00683,vs_battle_wepModels_t,10,unk9_0,1,u_char,4,,,,,,
-T00683.011,T00683,vs_battle_wepModels_t,11,material,0,u_char,4,,,,,,
-T00683.012,T00683,vs_battle_wepModels_t,12,unkA_0,1,u_char,7,,,,,,
-T00683.013,T00683,vs_battle_wepModels_t,13,unkA_7,1,u_char,1,,,,,,
-T00683.014,T00683,vs_battle_wepModels_t,14,nClutColors,0,u_char,,,,,,,
-T00683.015,T00683,vs_battle_wepModels_t,15,unkC,1,u_char,,,,,,,
-T00683.016,T00683,vs_battle_wepModels_t,16,unkD,1,u_char,,,,,,,
-T00683.017,T00683,vs_battle_wepModels_t,17,modelId,0,u_char,,,,,,,
-T00683.018,T00683,vs_battle_wepModels_t,18,texSlot,0,u_char,,,,,,,
-T00683.019,T00683,vs_battle_wepModels_t,19,clutSlotOffset,0,u_char,,,,,,,
-T00683.020,T00683,vs_battle_wepModels_t,20,unk11,1,u_char,,,,,,,
-T00683.021,T00683,vs_battle_wepModels_t,21,unk12,1,u_char,,,,,,,
-T00683.022,T00683,vs_battle_wepModels_t,22,unk13,1,u_char,,,,,,,
-T00683.023,T00683,vs_battle_wepModels_t,23,unk14,1,int,,,,,,,
-T00683.024,T00683,vs_battle_wepModels_t,24,unk18,1,short,,,,,,,
-T00683.025,T00683,vs_battle_wepModels_t,25,unk1A,1,short,,,,,,,
-T00683.026,T00683,vs_battle_wepModels_t,26,offsets,0,_wepModelOffsets *,,,,,,,
-T00683.027,T00683,vs_battle_wepModels_t,27,unk20,1,MATRIX[4],,,,,,,
-T00683.028,T00683,vs_battle_wepModels_t,28,unkBoneInfo,0,SVECTOR[4],,,,,,,
-T00683.029,T00683,vs_battle_wepModels_t,29,palettes,0,u_short[7][64],,,,,,,
-T00683.030,T00683,vs_battle_wepModels_t,30,unk440,1,u_short[96],,,,,,,
-T00683.031,T00683,vs_battle_wepModels_t,31,unk500,1,u_short[96],,,,,,,
-T00683.032,T00683,vs_battle_wepModels_t,32,unk5C0,1,u_char,,,,,,,
-T00683.033,T00683,vs_battle_wepModels_t,33,unk5C1,1,u_char,,,,,,,
-T00683.034,T00683,vs_battle_wepModels_t,34,unk5C2,1,u_short,,,,,,,
-T00683.035,T00683,vs_battle_wepModels_t,35,unk5C4,1,int,,,,,,,
-T00683.036,T00683,vs_battle_wepModels_t,36,unk5C8,1,int,,,,,,,
-T00683.037,T00683,vs_battle_wepModels_t,37,unk5CC,1,char,,,,,,,
-T00683.038,T00683,vs_battle_wepModels_t,38,unk5CD,1,char,,,,,,,
-T00683.039,T00683,vs_battle_wepModels_t,39,unk5CE,1,short,,,,,,,
-T00683.040,T00683,vs_battle_wepModels_t,40,unk5D0,1,int,,,,,,,
-T00683.041,T00683,vs_battle_wepModels_t,41,unk5D4,1,int,,,,,,,
-T00683.042,T00683,vs_battle_wepModels_t,42,unk5D8,1,void *,,,,,,,
-T00683.043,T00683,vs_battle_wepModels_t,43,unk5DC,1,int,,,,,,,
-T00683.044,T00683,vs_battle_wepModels_t,44,unk5E0,1,int,,,,,,,
-T00683.045,T00683,vs_battle_wepModels_t,45,unk5E4,1,int,,,,,,,
+T00682.000,T00682,vs_battle_weaponIntermediate,0,blade,0,vs_battle_uiEquipment,,,,blade,Blade part stats,med,declaration-only;source:146C.h:765
+T00682.001,T00682,vs_battle_weaponIntermediate,1,grip,0,vs_battle_uiEquipment,,,,grip,Grip part stats,med,declaration-only;source:146C.h:766
+T00682.002,T00682,vs_battle_weaponIntermediate,2,gems,0,vs_battle_uiEquipment[3],,,,gems,Socketed gem stats,med,declaration-only;source:146C.h:767
+T00682.003,T00682,vs_battle_weaponIntermediate,3,material,0,char,,,,material,Blade material,med,declaration-only;source:146C.h:768
+T00682.004,T00682,vs_battle_weaponIntermediate,4,dropRate,0,char,,,,dropRate,Drop chance,med,declaration-only;source:146C.h:769
+T00682.005,T00682,vs_battle_weaponIntermediate,5,index,0,short,,,,index,Inventory index,med,declaration-only;source:146C.h:770
+T00682.006,T00682,vs_battle_weaponIntermediate,6,name,0,char[24],,,,name,Weapon name in game text encoding,med,declaration-only;source:146C.h:771
+T00683.000,T00683,vs_battle_wepModels_t,0,nBones,0,u_char,,,,boneCount,Number of bones,med,declaration-only;source:3A1A0.h:403
+T00683.001,T00683,vs_battle_wepModels_t,1,nVertexGroups,0,u_char,,,,vertexGroupCount,Number of vertex groups,med,declaration-only;source:3A1A0.h:404
+T00683.002,T00683,vs_battle_wepModels_t,2,nTriangles,0,u_short,,,,triangleCount,Number of triangles,med,declaration-only;source:3A1A0.h:405
+T00683.003,T00683,vs_battle_wepModels_t,3,nQuads,0,u_short,,,,quadCount,Number of quads,med,declaration-only;source:3A1A0.h:406
+T00683.004,T00683,vs_battle_wepModels_t,4,nOther,0,u_short,,,,otherPrimitiveCount,Number of other primitives,med,declaration-only;source:3A1A0.h:407
+T00683.005,T00683,vs_battle_wepModels_t,5,actorId,0,u_char,4,,,actorId,Owning actor slot,med,declaration-only;source:3A1A0.h:408
+T00683.006,T00683,vs_battle_wepModels_t,6,unk8_4,1,u_char,1,,,reserved08Bit4,Flag that toggles bytes 0x11 and 0x12 between 0 and 0x40,low,source:30DB0.c:2207
+T00683.007,T00683,vs_battle_wepModels_t,7,isWideTexture,0,u_char,1,,,isWideTexture,Texture uses the wide layout,med,declaration-only;source:3A1A0.h:410
+T00683.008,T00683,vs_battle_wepModels_t,8,unk8_6,1,u_char,1,,,reserved08Bit6,Flag set together with byte 0x5C0,low,source:30DB0.c:3369
+T00683.009,T00683,vs_battle_wepModels_t,9,isDoubleClut,0,u_char,1,,,isDoubleClut,Uses two palettes,med,declaration-only;source:3A1A0.h:412
+T00683.010,T00683,vs_battle_wepModels_t,10,unk9_0,1,u_char,4,,,reserved09Bits0,Unreferenced bits,low,declaration-only;source:3A1A0.h:413
+T00683.011,T00683,vs_battle_wepModels_t,11,material,0,u_char,4,,,material,Weapon material,med,declaration-only;source:3A1A0.h:414
+T00683.012,T00683,vs_battle_wepModels_t,12,unkA_0,1,u_char,7,,,reserved0ABits0,Unreferenced bits,low,declaration-only;source:3A1A0.h:415
+T00683.013,T00683,vs_battle_wepModels_t,13,unkA_7,1,u_char,1,,,reserved0ABit7,Unreferenced bit,low,declaration-only;source:3A1A0.h:416
+T00683.014,T00683,vs_battle_wepModels_t,14,nClutColors,0,u_char,,,,paletteColorCount,Colors per palette,med,declaration-only;source:3A1A0.h:417
+T00683.015,T00683,vs_battle_wepModels_t,15,unkC,1,u_char,,,,attachmentSlot,Attachment slot code such as blade or shield,med,source:30DB0.c:678
+T00683.016,T00683,vs_battle_wepModels_t,16,unkD,1,u_char,,,,attachmentBone,Actor bone the model attaches to,med,source:30DB0.c:679
+T00683.017,T00683,vs_battle_wepModels_t,17,modelId,0,u_char,,,,modelId,Weapon model identifier,med,declaration-only;source:3A1A0.h:420
+T00683.018,T00683,vs_battle_wepModels_t,18,texSlot,0,u_char,,,,textureSlot,Texture slot,med,declaration-only;source:3A1A0.h:421
+T00683.019,T00683,vs_battle_wepModels_t,19,clutSlotOffset,0,u_char,,,,paletteSlotOffset,Palette slot offset,med,declaration-only;source:3A1A0.h:422
+T00683.020,T00683,vs_battle_wepModels_t,20,unk11,1,u_char,,,,reserved11,Byte set to 0 or 0x40,low,source:30DB0.c:2208
+T00683.021,T00683,vs_battle_wepModels_t,21,unk12,1,u_char,,,,reserved12,Byte set to 0 or 0x40 and tested with 0x1A,low,source:71618.c:1119
+T00683.022,T00683,vs_battle_wepModels_t,22,unk13,1,u_char,,,,reserved13,Byte cleared on load,low,declaration-only;source:3A1A0.h:425
+T00683.023,T00683,vs_battle_wepModels_t,23,unk14,1,int,,,,reserved14,Unreferenced word,low,declaration-only;source:3A1A0.h:426
+T00683.024,T00683,vs_battle_wepModels_t,24,unk18,1,short,,,,reserved18,Unreferenced short,low,declaration-only;source:3A1A0.h:427
+T00683.025,T00683,vs_battle_wepModels_t,25,unk1A,1,short,,,,reserved1A,Short tested with byte 0x12,low,source:71618.c:1119
+T00683.026,T00683,vs_battle_wepModels_t,26,offsets,0,_wepModelOffsets *,,,,sectionOffsets,Offsets of model data sections,med,declaration-only;source:3A1A0.h:429
+T00683.027,T00683,vs_battle_wepModels_t,27,unk20,1,MATRIX[4],,,,reserved20,Unreferenced matrices,low,declaration-only;source:3A1A0.h:430
+T00683.028,T00683,vs_battle_wepModels_t,28,unkBoneInfo,0,SVECTOR[4],,,,bones,Bone records copied from model data,high,source:30DB0.c:840
+T00683.029,T00683,vs_battle_wepModels_t,29,palettes,0,u_short[7][64],,,,palettes,Source palettes,med,declaration-only;source:3A1A0.h:432
+T00683.030,T00683,vs_battle_wepModels_t,30,unk440,1,u_short[96],,,,workingPalette,Palette assembled from source palette ranges,high,source:30DB0.c:876
+T00683.031,T00683,vs_battle_wepModels_t,31,unk500,1,u_short[96],,,,uploadPalette,Palette copy uploaded to the CLUT,high,source:30DB0.c:877
+T00683.032,T00683,vs_battle_wepModels_t,32,unk5C0,1,u_char,,,,reserved5C0,Byte set with bit 0x08.6,low,source:30DB0.c:3368
+T00683.033,T00683,vs_battle_wepModels_t,33,unk5C1,1,u_char,,,,reserved5C1,Unreferenced member,low,declaration-only;source:3A1A0.h:436
+T00683.034,T00683,vs_battle_wepModels_t,34,unk5C2,1,u_short,,,,reserved5C2,Unreferenced member,low,declaration-only;source:3A1A0.h:437
+T00683.035,T00683,vs_battle_wepModels_t,35,unk5C4,1,int,,,,reserved5C4,Unreferenced member,low,declaration-only;source:3A1A0.h:438
+T00683.036,T00683,vs_battle_wepModels_t,36,unk5C8,1,int,,,,reserved5C8,Unreferenced member,low,declaration-only;source:3A1A0.h:439
+T00683.037,T00683,vs_battle_wepModels_t,37,unk5CC,1,char,,,,reserved5CC,Unreferenced member,low,declaration-only;source:3A1A0.h:440
+T00683.038,T00683,vs_battle_wepModels_t,38,unk5CD,1,char,,,,reserved5CD,Unreferenced member,low,declaration-only;source:3A1A0.h:441
+T00683.039,T00683,vs_battle_wepModels_t,39,unk5CE,1,short,,,,reserved5CE,Unreferenced member,low,declaration-only;source:3A1A0.h:442
+T00683.040,T00683,vs_battle_wepModels_t,40,unk5D0,1,int,,,,reserved5D0,Unreferenced member,low,declaration-only;source:3A1A0.h:443
+T00683.041,T00683,vs_battle_wepModels_t,41,unk5D4,1,int,,,,reserved5D4,Unreferenced member,low,declaration-only;source:3A1A0.h:444
+T00683.042,T00683,vs_battle_wepModels_t,42,unk5D8,1,void *,,,,reserved5D8,Unreferenced member,low,declaration-only;source:3A1A0.h:445
+T00683.043,T00683,vs_battle_wepModels_t,43,unk5DC,1,int,,,,reserved5DC,Unreferenced member,low,declaration-only;source:3A1A0.h:446
+T00683.044,T00683,vs_battle_wepModels_t,44,unk5E0,1,int,,,,reserved5E0,Unreferenced member,low,declaration-only;source:3A1A0.h:447
+T00683.045,T00683,vs_battle_wepModels_t,45,unk5E4,1,int,,,,reserved5E4,Unreferenced member,low,declaration-only;source:3A1A0.h:448
 T00684.000,T00684,vs_camera_t,0,position,0,VECTOR,,,,,,,
 T00684.001,T00684,vs_camera_t,1,lookAt,0,VECTOR,,,,,,,
 T00684.002,T00684,vs_camera_t,2,angles,0,VECTOR,,,,,,,
@@ -6584,18 +6584,18 @@ T00740.031,T00740,wanderState,31,count,0,unsigned char,,,,,,,
 T00740.032,T00740,wanderState,32,flags,0,unsigned short,,,,,,,
 T00740.033,T00740,wanderState,33,pad160,1,char[8],,,,,,,
 T00740.034,T00740,wanderState,34,dest,0,vs_battle_movementPosition,,,,,,,
-T00741.000,T00741,zudHeader,0,unk0,1,int,,,,,,,
-T00741.001,T00741,zudHeader,1,unk4,1,int,,,,,,,
-T00741.002,T00741,zudHeader,2,model,0,int,,,,,,,
-T00741.003,T00741,zudHeader,3,unkC,1,int,,,,,,,
-T00741.004,T00741,zudHeader,4,blade,0,int,,,,,,,
-T00741.005,T00741,zudHeader,5,unk14,1,int,,,,,,,
-T00741.006,T00741,zudHeader,6,shield,0,int,,,,,,,
-T00741.007,T00741,zudHeader,7,unk1C,1,int,,,,,,,
-T00741.008,T00741,zudHeader,8,effect,0,int,,,,,,,
-T00741.009,T00741,zudHeader,9,effectSize,0,int,,,,,,,
-T00741.010,T00741,zudHeader,10,weaponEffect,0,int,,,,,,,
-T00741.011,T00741,zudHeader,11,weaponEffectSize,0,int,,,,,,,
+T00741.000,T00741,zudHeader,0,unk0,1,int,,,,characterIds,Character weapon category and material identifiers,high,DataCrystal $00-$03
+T00741.001,T00741,zudHeader,1,unk4,1,int,,,,shieldIds,Shield and shield-material identifiers then padding,high,DataCrystal $04-$07
+T00741.002,T00741,zudHeader,2,model,0,int,,,,characterShapeOffset,Character SHP section offset,med,declaration-only;source:146C.c:265
+T00741.003,T00741,zudHeader,3,unkC,1,int,,,,characterShapeSize,Character SHP section length,med,declaration-only;source:146C.c:266
+T00741.004,T00741,zudHeader,4,blade,0,int,,,,weaponOffset,Weapon WEP section offset,med,declaration-only;source:146C.c:267
+T00741.005,T00741,zudHeader,5,unk14,1,int,,,,weaponSize,Weapon WEP section length,med,declaration-only;source:146C.c:268
+T00741.006,T00741,zudHeader,6,shield,0,int,,,,shieldOffset,Shield WEP section offset,med,declaration-only;source:146C.c:269
+T00741.007,T00741,zudHeader,7,unk1C,1,int,,,,shieldSize,Shield WEP section length,med,declaration-only;source:146C.c:270
+T00741.008,T00741,zudHeader,8,effect,0,int,,,,commonAnimationOffset,Common unarmed SEQ offset,med,loaded as animation data at 146C.c:6714;declaration-only;source:146C.c:271
+T00741.009,T00741,zudHeader,9,effectSize,0,int,,,,commonAnimationSize,Common unarmed SEQ length,med,declaration-only;source:146C.c:272
+T00741.010,T00741,zudHeader,10,weaponEffect,0,int,,,,battleAnimationOffset,Weapon-category battle SEQ offset,med,loaded with weapon category at 146C.c:6706;declaration-only;source:146C.c:273
+T00741.011,T00741,zudHeader,11,weaponEffectSize,0,int,,,,battleAnimationSize,Weapon-category battle SEQ length,med,declaration-only;source:146C.c:274
 T00746.000,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,,,,
 T00746.001,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,,,,
 T00747.000,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),0,effects,0,limbEffects_t,,,,,,,
