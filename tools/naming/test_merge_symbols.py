@@ -44,7 +44,7 @@ class BatchMergeTests(unittest.TestCase):
         self.output = {
             "id": "G00001", "disposition": "state", "final_name": "Title::visitCount",
             "final_location": r"Native\Game\src\Title\TitleScreen.c",
-            "purpose": "Counts title visits.", "confidence": "high", "notes": "state:Title::TitleState",
+            "purpose": "Counts title visits.", "confidence": "high", "notes": "state:Title::TitleState;source:22C.c:10",
         }
         self.write(
             self.outs / "Title" / "globals.csv",
@@ -151,11 +151,11 @@ class BatchMergeTests(unittest.TestCase):
     def type_row(tid, name, notes=""):
         return {"id": tid, "role": "Value", "final_name": name,
                 "final_location": r"Native\Game\include\State\Time.h",
-                "purpose": "Stores time.", "confidence": "high", "notes": notes}
+                "purpose": "Stores time.", "confidence": "high", "notes": notes or "source:main.h:166"}
 
     @staticmethod
     def field_row(fid, name):
-        return {"id": fid, "final_name": name, "meaning": "Frames.", "confidence": "high", "notes": ""}
+        return {"id": fid, "final_name": name, "meaning": "Frames.", "confidence": "high", "notes": "source:main.h:167"}
 
     def test_same_as_types_share_one_name(self):
         self.make_type_batch(
@@ -182,6 +182,33 @@ class BatchMergeTests(unittest.TestCase):
         result, output = self.run_merge("--check", "Types")
         self.assertEqual(result, 1)
         self.assertIn("differs from same-as T00001.000", output)
+
+    def test_partial_check_reports_progress_without_writing(self):
+        self.make_batch("Two", "G00001")
+        self.write(self.batches / "Two" / "globals.csv", ["id"],
+                   [{"id": "G00001"}, {"id": "G00002"}])
+        self.write(self.outs / "Two" / "globals.csv", merge.HEADERS["globals"], [self.output])
+        before = self.snapshots()
+        result, output = self.run_merge("--check-partial", "Two")
+        self.assertEqual(result, 0, output)
+        self.assertIn("1/2 rows saved", output)
+        self.assertEqual(self.snapshots(), before)
+
+    def test_partial_check_still_rejects_bad_saved_rows(self):
+        self.write(self.outs / "Title" / "globals.csv", merge.HEADERS["globals"],
+                   [dict(self.output, final_name="Title::D_80001234")])
+        result, output = self.run_merge("--check-partial", "Title")
+        self.assertEqual(result, 1)
+        self.assertIn("forbidden token", output)
+
+    def test_row_without_evidence_is_rejected(self):
+        self.write(self.outs / "Title" / "globals.csv", merge.HEADERS["globals"],
+                   [dict(self.output, notes="state:Title::TitleState;decomp-name")])
+        before = self.snapshots()
+        result, output = self.run_merge("--apply-batch", "Title")
+        self.assertEqual(result, 1)
+        self.assertIn("no evidence", output)
+        self.assertEqual(self.snapshots(), before)
 
     def test_same_as_unknown_target_is_rejected(self):
         self.make_type_batch(

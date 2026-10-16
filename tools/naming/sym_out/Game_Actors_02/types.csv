@@ -1,0 +1,9 @@
+id,role,final_name,final_location,purpose,confidence,notes
+T00668,Def,Items::ShieldSpawnLoadout,Native\Game\include\Items\Loadout.h,Describes the shield and gems equipped by a spawned actor.,high,source:146C.h:774
+T00673,Def,Items::AccessorySpawnLoadout,Native\Game\include\Items\Loadout.h,Describes an accessory and its stat and resistance contributions for a spawned actor.,high,source:146C.h:413
+T00675,Value,Items::EquipmentPartStats,Native\Game\include\Items\Equipment.h,Describes one blade grip gem armor or accessory part with stats and resistances.,high,source:146C.h:297
+T00677,Value,Items::MiscItemStack,Native\Game\include\Items\Inventory.h,Pairs a consumable item identifier with its count.,high,source:146C.h:426
+T00678,Value,Items::MiscItemDrop,Native\Game\include\Items\Loadout.h,Pairs a consumable item identifier with its drop chance.,high,source:146C.h:432
+T00682,Def,Items::WeaponSpawnLoadout,Native\Game\include\Items\Loadout.h,Describes the blade grip gems material and name of a spawned actor weapon.,high,source:146C.h:762
+T00683,Instance,Actors::WeaponModel,Native\Game\src\Actors\WeaponModel.h,Stores a loaded weapon or shield mesh with attachment palettes and bone data.,med,source:3A1A0.h:402;many trailing members unresolved
+T00741,OnDisc,Actors::ZudHeader,Native\Game\src\Actors\Zud.h,Locates the character shape weapon shield and animation sections of a ZUD unit file.,high,decoder-only;layout confirmed by DataCrystal ZUD files and 146C.c:6646

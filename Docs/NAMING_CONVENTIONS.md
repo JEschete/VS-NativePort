@@ -276,6 +276,12 @@ fields.csv   id,final_name,meaning,confidence,notes
 - Judge progress by files and validation results, not an agent's `running` status. A cancelled agent with zero
   completed turns may still have executed tools; inspect the session evidence before claiming it did no work.
 - Never mark the naming pass complete until every input ID has a validated output and cross-batch checks pass.
+- **Evidence is mandatory.** Every saved row's `notes` must cite the code actually read: `source:<file>:<line>`
+  (or `DataCrystal` for documented file formats, `same-as:T#####` for duplicate type rows, `view-of:G#####+off` for
+  aliased storage). A name copied from the decomp spelling without reading its uses is not evidence. The validator
+  rejects rows without a citation in `--check`, `--check-partial`, `--apply-batch` and `--apply`.
+- Subagents gather read-only evidence (uses, writes, values) and return it; names are written and validated only
+  after that evidence is read. Agent-written rows are reviewed against the source before being kept.
 
 After a complete batch passes `python tools\naming\merge_symbols.py --check <batch>`, merge it immediately with
 `python tools\naming\merge_symbols.py --apply-batch <batch>`. This validates the batch against names already applied
@@ -288,6 +294,12 @@ Regression tests: `python -m unittest discover -s tools\naming -p test_merge_sym
 The table below records validated outputs applied to the ledgers, **not native source migration**.
 The function-name pass is separate. Naming globals/types/fields is still in progress; source copying and the
 Phase 1a gate must not be marked complete from these results.
+
+**Evidence backfill required (2026-10-16).** The evidence rule above was added after six batches were applied.
+Rows applied before it that lack a citation are *unverified* and must be re-checked against the source and cited
+before any of them is used in `Native\` code. At the time of the audit, 236 of 386 applied globals, 38 of 101 types
+and 412 of 583 fields lacked a citation; `merge_symbols.py --check <batch>` lists them. The copy tool must refuse
+names whose rows do not pass the evidence check.
 
 | Batch | Globals | Types | Fields/enumerators | Output status |
 |---|---:|---:|---:|---|

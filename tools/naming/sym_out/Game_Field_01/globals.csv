@@ -1,0 +1,4 @@
+id,disposition,final_name,final_location,purpose,confidence,notes
+G00012,drop,Field::legacyBackgroundGradientPackets,Native\Game\src\Field\Background.c,Holds the PS1 gouraud packets patched with the five room gradient colors and drawn as the background dome.,high,replaced-by:Render background gradient mesh;source:146C.c:17537;source:146C.c:17636;mutable despite rodata placement
+G00036,catalog,Field::lockedDoorIndexRanges,Native\Game\src\Field\Doors.c,Gives per-key start indices into the locked-door room-pair table.,high,catalog:locked-doors;source:146C.c:17412
+G00038,catalog,Field::countableRoomMask,Native\Game\src\Field\MapProgress.c,Marks the 361 rooms counted toward map completion.,high,catalog:map-completion-rooms;source:146C.c:17380

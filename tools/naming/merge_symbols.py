@@ -35,6 +35,8 @@ GAME_MODULES = {"Boot", "Title", "Field", "Battle", "Actors", "Items", "Menu", "
 DISPOSITIONS = {"catalog", "constexpr", "state", "asset", "drop"}
 ROLES = {"Def", "Instance", "State", "OnDisc", "Packet", "Enum", "Value", "Misc"}
 CONF = {"high", "med", "low"}
+# A name is accepted only with a pointer to the code (or format documentation) it was derived from.
+EVIDENCE = re.compile(r"source:[^;]*\.(c|h):\d+|DataCrystal|same-as:T\d+|view-of:G\d+")
 
 NS = r"[A-Z][A-Za-z0-9]*(?:::[A-Z][A-Za-z0-9]*){0,2}"
 GLOBAL_RX = re.compile(rf"^{NS}::(?:[a-z][A-Za-z0-9]*|k[A-Z][A-Za-z0-9]*)$")
@@ -86,7 +88,7 @@ def check_common(kind: str, r: dict, errs: list[str]) -> None:
             errs.append(f"{rid}: purpose longer than 200 characters")
 
 
-def check_batch(batch: str) -> tuple[list[str], dict[str, list[dict]]]:
+def check_batch(batch: str, partial: bool = False) -> tuple[list[str], dict[str, list[dict]]]:
     errs: list[str] = []
     outs: dict[str, list[dict]] = {}
     if batch not in {p.name for p in BATCHES.iterdir() if p.is_dir()}:
@@ -102,6 +104,10 @@ def check_batch(batch: str) -> tuple[list[str], dict[str, list[dict]]]:
             outs[kind] = []
             continue
         if not dst.exists():
+            if partial:
+                print(f"{batch}/{kind}.csv: 0/{len(inp)} rows saved")
+                outs[kind] = []
+                continue
             errs.append(f"{batch}/{kind}.csv: output missing")
             continue
         if read_header(dst) != header:
@@ -139,9 +145,14 @@ def check_batch(batch: str) -> tuple[list[str], dict[str, list[dict]]]:
                     errs.append(f"{rid}: meaning is empty")
             if name and FORBIDDEN.search(name):
                 errs.append(f"{rid}: '{name}' contains a forbidden token (unk/temp/address/vs_/D_/g_/...)")
+            if not EVIDENCE.search(r.get("notes", "")):
+                errs.append(f"{rid}: no evidence; notes need source:<file>:<line> of the code read "
+                            "(or DataCrystal / same-as:T##### / view-of:G#####)")
             check_common(kind, r, errs)
         missing = set(ids_in) - seen
-        if missing:
+        if partial:
+            print(f"{batch}/{kind}.csv: {len(seen & set(ids_in))}/{len(ids_in)} rows saved")
+        elif missing:
             errs.append(f"{batch}/{kind}.csv: {len(missing)} ids missing, e.g. {sorted(missing)[:5]}")
         outs[kind] = rows
     return errs, outs
@@ -234,14 +245,16 @@ def main() -> int:
     g.add_argument("--check-all", action="store_true")
     g.add_argument("--apply", action="store_true")
     g.add_argument("--apply-batch", metavar="BATCH")
+    g.add_argument("--check-partial", metavar="BATCH",
+                   help="validate saved rows of an in-progress batch and report progress; never writes")
     a = ap.parse_args()
 
-    selected = a.check or a.apply_batch
+    selected = a.check or a.apply_batch or a.check_partial
     batches = [selected] if selected else sorted(p.name for p in BATCHES.iterdir() if p.is_dir())
     errs: list[str] = []
     all_outs = {}
     for b in batches:
-        e, outs = check_batch(b)
+        e, outs = check_batch(b, partial=bool(a.check_partial))
         errs += e
         all_outs[b] = outs
     errs += cross_checks(all_outs)
