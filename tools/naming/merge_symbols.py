@@ -114,6 +114,10 @@ def check_batch(batch: str, partial: bool = False) -> tuple[list[str], dict[str,
             errs.append(f"{batch}/{kind}.csv: header must be {','.join(header)}")
             continue
         rows = read(dst)
+        for r in rows:
+            if None in r or any(v is None for v in r.values()):
+                errs.append(f"{batch}/{kind}.csv: row {r.get('id')} has a column count that does not match the header "
+                            "(rows merged onto one line or a stray comma)")
         ids_in = {r["id"]: r for r in inp}
         seen = set()
         for r in rows:

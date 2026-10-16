@@ -210,6 +210,14 @@ class BatchMergeTests(unittest.TestCase):
         self.assertIn("no evidence", output)
         self.assertEqual(self.snapshots(), before)
 
+    def test_merged_rows_are_rejected(self):
+        path = self.outs / "Title" / "globals.csv"
+        text = path.read_text(encoding="utf-8").rstrip("\n")
+        path.write_text(text + "G00002,state,Title::other,x,y,high,source:a.c:1\n", encoding="utf-8")
+        result, output = self.run_merge("--check-partial", "Title")
+        self.assertEqual(result, 1)
+        self.assertIn("column count", output)
+
     def test_same_as_unknown_target_is_rejected(self):
         self.make_type_batch(
             [self.type_row("T00001", "State::Time"),
