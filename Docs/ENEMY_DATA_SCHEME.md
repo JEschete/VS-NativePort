@@ -184,7 +184,7 @@ In the original, a ZND's enemy list exists to tell the game what to load. In the
 3. **Group** by `subType` → `species`. Use MON.BIN to name and class species; split a `subType` across species if the models differ.
 4. **Dedupe:** byte-identical records become one `EnemyDef`. Within a species, pick the most common record as the base and emit the others as `extends` variants with minimal diffs.
 5. **Lift** the per-slot drop rates into `loot` tables. Identical tables are shared.
-6. **Emit** the catalogs (`species`, `modelsets`, `enemies`, `loot`, room `spawns`, `bestiary`) into `Native\Content\generated\`. This output is git-ignored.
+6. **Emit** the catalogs (`species`, `modelsets`, `enemies`, `loot`, room `spawns`, `bestiary`) into `Native\data\catalogs\enemies\` (see [ASSET_PIPELINE.md](ASSET_PIPELINE.md)). This output is git-ignored.
 7. **Round-trip test:** rebuild every original 0x464 record from catalog + `extends` + loot and compare it field-by-field with the disc. Rebuild every MPD spawn the same way. This is the Phase 1 gate for enemy data (plan §9.8).
 
 Generated IDs are derived from names (`enemy.minotaur.zone009_2`). A hand-maintained `Native\Content\patches\enemy-names.json` can rename them to readable IDs without touching the extractor.

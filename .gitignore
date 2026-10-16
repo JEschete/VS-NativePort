@@ -42,5 +42,6 @@
 
 # Native port build products (vcpkg manifest install, generated content, runtime log)
 /vcpkg_installed/
-/Native/Content/generated/
+/Native/data/
+/mods/
 vs-native.log
