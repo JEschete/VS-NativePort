@@ -175,6 +175,24 @@ def cross_checks(all_outs: dict[str, dict[str, list[dict]]]) -> list[str]:
         if "same-as:" in r.get("notes", ""):
             continue
         by_c[r["final_name"].replace("::", "_")].append(gid)
+    all_types = {r["id"] for r in read(LEDGERS / "TYPE_LEDGER.csv")}
+    for tid, r in t_rows.items():
+        for target in re.findall(r"same-as:(T\d+)", r.get("notes", "")):
+            if target not in all_types:
+                errs.append(f"{tid}: same-as target {target} is not in TYPE_LEDGER")
+            elif target in t_rows and t_rows[target]["final_name"].strip() != r["final_name"].strip():
+                errs.append(f"{tid}: '{r['final_name']}' differs from same-as {target} "
+                            f"'{t_rows[target]['final_name']}'")
+    by_index = {(f["type_id"], f.get("index", "")): fid for fid, f in fields.items()}
+    for tid, r in t_rows.items():
+        for target in re.findall(r"same-as:(T\d+)", r.get("notes", "")):
+            for fid, f in f_rows.items():
+                if fields[fid]["type_id"] != tid:
+                    continue
+                twin = by_index.get((target, fields[fid].get("index", "")))
+                if twin in f_rows and f_rows[twin]["final_name"] != f["final_name"]:
+                    errs.append(f"{fid}: field '{f['final_name']}' differs from same-as {twin} "
+                                f"'{f_rows[twin]['final_name']}'")
     for c, ids in by_c.items():
         if len(ids) > 1:
             errs.append(f"C name '{c}' used by {len(ids)} rows: {ids[:6]}")

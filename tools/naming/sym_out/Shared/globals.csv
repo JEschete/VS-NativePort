@@ -1,0 +1,8 @@
+id,disposition,final_name,final_location,purpose,confidence,notes
+G01945,drop,Core::legacyUnreferencedBlock,Native\Core\src\Legacy.c,Reserves an unreferenced 120-byte block in the original executable.,low,replaced-by:nothing;no function references
+G01955,drop,Core::legacyUnreferencedWord,Native\Core\src\Legacy.c,Reserves an unreferenced word in the original executable.,low,replaced-by:nothing;no function references
+G02002,drop,Core::legacyBuildTimestamp,Native\Core\src\Legacy.c,Stores the original SDK linker object build timestamp.,high,replaced-by:native build information
+G02007,drop,Core::legacyRamSize,Native\Core\src\Legacy.c,Configures the original console RAM size for the SDK runtime.,high,replaced-by:native process memory
+G02013,drop,Core::legacyStackSize,Native\Core\src\Legacy.c,Configures the original stack size for the SDK runtime.,high,replaced-by:native process stack
+G02014,drop,Audio::legacySpuAllocationTable,Native\Audio\src\Legacy.c,Provides SDK sound-RAM allocation records.,high,replaced-by:Audio native sample memory
+G02015,drop,Audio::legacySpuTransferBusy,Native\Audio\src\Legacy.c,Flags an in-progress SDK sound-RAM transfer.,high,replaced-by:Audio native sample loading;source definition not located

@@ -314,10 +314,10 @@ Phase 1a gate must not be marked complete from these results.
 | Game_Menu_05 | 262 | 0 | 0 | Pending |
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
-| Shared | 7 | 57 | 282 | Pending |
-| **Applied / inventoried** | **379 / 2,174** | **44 / 820** | **301 / 6,766** | **5 / 24 batches applied** |
+| Shared | 7 | 57 | 282 | Validated and applied |
+| **Applied / inventoried** | **386 / 2,174** | **101 / 820** | **583 / 6,766** | **6 / 24 batches applied** |
 
-Applied rows still include five low-confidence globals and 28 low-confidence fields. Validation checks coverage,
+Applied rows still include seven low-confidence globals, two low-confidence types and 65 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -331,8 +331,10 @@ names, locations and collisions; it does not prove semantics or close migration 
 - G01961/G01963/G01970 have only room-load reset writes in the indexed C references. Their names describe that
   observed behavior, not established gameplay meanings; assembly/cross-reference review remains required.
 - Lexical normalization of anonymous-type declaration paths reveals 17 exact duplicate layout groups
-  (67 redundant type rows). Preserve current IDs and outputs while reconciling these declarations before copying;
-  the inventory totals above include them. Do not manufacture different native types from include-path spelling.
+  (67 redundant type rows). Each duplicate row carries `same-as:T#####` naming its canonical row and uses the
+  identical final name and field names; the validator rejects a `same-as` target that does not exist, a final name
+  that differs from a named target, and a field name that differs from the target's field at the same index.
+  Do not manufacture different native types from include-path spelling.
 - Event: T00219 is a merged-bitfield view of `gim_t` (5BF94.c); resolve both to one native splash-layer type.
   T00259's shake code reads its two oscillators from +0x1A6, two bytes after the declared field, and uses the first
   short as the active-shake count. G00442 is byte 3 of G00441. G00128/G00119 are command templates patched at

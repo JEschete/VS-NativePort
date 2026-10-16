@@ -130,6 +130,68 @@ class BatchMergeTests(unittest.TestCase):
         self.assertIn("output missing", output)
         self.assertEqual(self.snapshots(), before)
 
+    def make_type_batch(self, type_rows, field_rows):
+        type_cols = merge.HEADERS["types"] + ["named"]
+        field_cols = merge.HEADERS["fields"] + ["named", "type_id", "index"]
+        self.write(self.ledgers / "TYPE_LEDGER.csv", type_cols,
+                   [{"id": t} for t in ("T00001", "T00002")])
+        self.write(self.ledgers / "FIELD_LEDGER.csv", field_cols, [
+            {"id": "T00001.000", "type_id": "T00001", "index": "0"},
+            {"id": "T00002.000", "type_id": "T00002", "index": "0"},
+        ])
+        self.write(self.batches / "Types" / "globals.csv", ["id"], [])
+        self.write(self.batches / "Types" / "types.csv", ["id"],
+                   [{"id": r["id"]} for r in type_rows])
+        self.write(self.batches / "Types" / "fields.csv", ["id", "value"],
+                   [{"id": r["id"], "value": ""} for r in field_rows])
+        self.write(self.outs / "Types" / "types.csv", merge.HEADERS["types"], type_rows)
+        self.write(self.outs / "Types" / "fields.csv", merge.HEADERS["fields"], field_rows)
+
+    @staticmethod
+    def type_row(tid, name, notes=""):
+        return {"id": tid, "role": "Value", "final_name": name,
+                "final_location": r"Native\Game\include\State\Time.h",
+                "purpose": "Stores time.", "confidence": "high", "notes": notes}
+
+    @staticmethod
+    def field_row(fid, name):
+        return {"id": fid, "final_name": name, "meaning": "Frames.", "confidence": "high", "notes": ""}
+
+    def test_same_as_types_share_one_name(self):
+        self.make_type_batch(
+            [self.type_row("T00001", "State::Time"),
+             self.type_row("T00002", "State::Time", "same-as:T00001")],
+            [self.field_row("T00001.000", "frames"), self.field_row("T00002.000", "frames")])
+        result, output = self.run_merge("--check", "Types")
+        self.assertEqual(result, 0, output)
+
+    def test_same_as_type_name_mismatch_is_rejected(self):
+        self.make_type_batch(
+            [self.type_row("T00001", "State::Time"),
+             self.type_row("T00002", "State::Clock", "same-as:T00001")],
+            [self.field_row("T00001.000", "frames"), self.field_row("T00002.000", "frames")])
+        result, output = self.run_merge("--check", "Types")
+        self.assertEqual(result, 1)
+        self.assertIn("differs from same-as T00001", output)
+
+    def test_same_as_field_name_mismatch_is_rejected(self):
+        self.make_type_batch(
+            [self.type_row("T00001", "State::Time"),
+             self.type_row("T00002", "State::Time", "same-as:T00001")],
+            [self.field_row("T00001.000", "frames"), self.field_row("T00002.000", "ticks")])
+        result, output = self.run_merge("--check", "Types")
+        self.assertEqual(result, 1)
+        self.assertIn("differs from same-as T00001.000", output)
+
+    def test_same_as_unknown_target_is_rejected(self):
+        self.make_type_batch(
+            [self.type_row("T00001", "State::Time"),
+             self.type_row("T00002", "State::Time", "same-as:T09999")],
+            [self.field_row("T00001.000", "frames"), self.field_row("T00002.000", "frames")])
+        result, output = self.run_merge("--check", "Types")
+        self.assertEqual(result, 1)
+        self.assertIn("T09999 is not in TYPE_LEDGER", output)
+
 
 if __name__ == "__main__":
     unittest.main()
