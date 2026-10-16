@@ -260,3 +260,85 @@ fields.csv   id,final_name,meaning,confidence,notes
 
 `confidence` is `high` / `med` / `low` as in §5. `notes` uses the tokens above (`catalog:`, `state:`, `asset:`,
 `replaced-by:`, `dup-of:`, `same-as:`, `handle:`, `index:`) plus free text, `;`-separated.
+
+### 11.1 Execution and recovery
+
+- Default to direct work. Do not dispatch all generated batches at once. If delegation is needed, start with one
+  bounded assignment and verify saved, validated output before adding another; use at most two concurrent agents.
+- The generated batches are inventories, not an instruction to research hundreds of symbols before writing.
+  Work in checkpoints of at most ten globals, or one type and its fields. Save evidence-backed rows immediately.
+  An incomplete output is a checkpoint, not a completed batch; the validator must still reject missing rows.
+- Use the existing Python interpreter for CSV tooling. Do not configure Python, invoke Pylance, or install packages
+  merely to read and write CSV files. These naming tasks concern C source, not Python environment setup.
+- A delegated assignment must stop after ten tool calls or ten minutes, whichever comes first, saving completed
+  rows and reporting unresolved IDs. Do not invent names to meet the limit. If no output is saved by that boundary,
+  stop expanding the work and diagnose the blocked assignment.
+- Judge progress by files and validation results, not an agent's `running` status. A cancelled agent with zero
+  completed turns may still have executed tools; inspect the session evidence before claiming it did no work.
+- Never mark the naming pass complete until every input ID has a validated output and cross-batch checks pass.
+
+After a complete batch passes `python tools\naming\merge_symbols.py --check <batch>`, merge it immediately with
+`python tools\naming\merge_symbols.py --apply-batch <batch>`. This validates the batch against names already applied
+in all three ledgers, rejects incomplete batches without writing, and leaves other rows unchanged.
+The final gate remains `--check-all` followed by `--apply`; an individual batch does not satisfy that gate.
+Regression tests: `python -m unittest discover -s tools\naming -p test_merge_symbols.py`.
+
+### 11.2 Saved naming progress
+
+The table below records validated outputs applied to the ledgers, **not native source migration**.
+The function-name pass is separate. Naming globals/types/fields is still in progress; source copying and the
+Phase 1a gate must not be marked complete from these results.
+
+| Batch | Globals | Types | Fields/enumerators | Output status |
+|---|---:|---:|---:|---|
+| Audio | 92 | 20 | 270 | Pending |
+| Engine_01 | 151 | 38 | 252 | Pending |
+| Engine_02 | 60 | 0 | 0 | Validated and applied |
+| Game_Actors_01 | 0 | 55 | 768 | Pending |
+| Game_Actors_02 | 48 | 8 | 108 | Pending |
+| Game_Battle_01 | 0 | 92 | 575 | Pending |
+| Game_Battle_02 | 0 | 66 | 689 | Pending |
+| Game_Battle_03 | 0 | 78 | 648 | Pending |
+| Game_Battle_04 | 58 | 58 | 526 | Pending |
+| Game_Battle_05 | 114 | 0 | 0 | Pending |
+| Game_Effects_01 | 0 | 78 | 655 | Pending |
+| Game_Effects_02 | 239 | 9 | 53 | Pending |
+| Game_Ending | 75 | 6 | 59 | Validated and applied |
+| Game_Event | 69 | 17 | 160 | Validated and applied |
+| Game_Field_01 | 63 | 59 | 500 | Pending |
+| Game_Field_02 | 54 | 0 | 0 | Validated and applied |
+| Game_Menu_01 | 0 | 95 | 557 | Pending |
+| Game_Menu_02 | 38 | 63 | 582 | Pending |
+| Game_Menu_03 | 262 | 0 | 0 | Pending |
+| Game_Menu_04 | 262 | 0 | 0 | Pending |
+| Game_Menu_05 | 262 | 0 | 0 | Pending |
+| Game_Menu_06 | 199 | 0 | 0 | Pending |
+| Game_Title | 121 | 21 | 82 | Validated and applied |
+| Shared | 7 | 57 | 282 | Pending |
+| **Applied / inventoried** | **379 / 2,174** | **44 / 820** | **301 / 6,766** | **5 / 24 batches applied** |
+
+Applied rows still include five low-confidence globals and 28 low-confidence fields. Validation checks coverage,
+names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
+
+- G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
+  ENDING identity without collapsing the separate MENUF instance.
+- G00323 is a view into G00322 at byte offset two. G00335 has a scalar pause-flag declaration and an array
+  declaration whose platform indices reach G00337. Replace these with explicit native fields, not independent
+  copies or out-of-bounds indexing.
+- G00603 has seven declared bounce offsets but is indexed at seven. G00820's declared ripple grid also needs
+  boundary/extent verification. Resolve the original values before copying; do not carry these assumptions into
+  native arrays. Unsized-array inventory gap sizes are not validated capacities.
+- G01961/G01963/G01970 have only room-load reset writes in the indexed C references. Their names describe that
+  observed behavior, not established gameplay meanings; assembly/cross-reference review remains required.
+- Lexical normalization of anonymous-type declaration paths reveals 17 exact duplicate layout groups
+  (67 redundant type rows). Preserve current IDs and outputs while reconciling these declarations before copying;
+  the inventory totals above include them. Do not manufacture different native types from include-path spelling.
+- Event: T00219 is a merged-bitfield view of `gim_t` (5BF94.c); resolve both to one native splash-layer type.
+  T00259's shake code reads its two oscillators from +0x1A6, two bytes after the declared field, and uses the first
+  short as the active-shake count. G00442 is byte 3 of G00441. G00128/G00119 are command templates patched at
+  runtime, so they are state, not constants.
+- G02005/G02006 identify loading-image pixels/header through consumers, but their source definitions and extraction
+  bindings are not located by the inventory. Converted asset paths in output notes remain proposed destinations.
+
+The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
+The native audio player must own playback position rather than reading another module's timing globals.

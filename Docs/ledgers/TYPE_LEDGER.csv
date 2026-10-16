@@ -3,7 +3,7 @@ T00000,enum:BuffReelStats,enum,BuffReelStats,0,,4,5,0,1,1,MENU/MENUF.PRG/3B8.c,0
 T00001,enum:_disFileIndices,enum,_disFileIndices,0,,4,5,0,1,1,MENU/MENUF.PRG/3B8.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00002,enum:_findCurrentSave_e,enum,_findCurrentSave_e,0,,4,3,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00003,enum:_memcardEventMask_e,enum,_memcardEventMask_e,0,,4,2,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu,,,,,,,,,,,,,
-T00004,enum:_memcardMaskedHandler_e,enum,_memcardMaskedHandler_e,0,,4,3,0,1,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,,,,,,,,,,,,,
+T00004,enum:_memcardMaskedHandler_e,enum,_memcardMaskedHandler_e,0,,4,3,0,1,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Enum,Title::CardPollResult,Native\Game\src\Title\SaveCard.h,Distinguishes failed pending and completed masked memory-card event polls.,high,,,x,,,,,replaced-by:Save asynchronous completion
 T00005,enum:_renderLimbUiState,enum,_renderLimbUiState,0,,4,2,0,1,1,MENU/MENU4.PRG/120.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00006,enum:abilityState_e,enum,abilityState_e,0,,4,4,0,1,1,MENU/MENU2.PRG/143C.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00007,enum:abilityType,enum,abilityType,0,,4,2,0,1,1,MENU/MENU2.PRG/64.c,0,0,Game.Menu,,,,,,,,,,,,,
@@ -17,7 +17,7 @@ T00014,enum:copyContainerFlags,enum,copyContainerFlags,0,,4,1,0,1,1,MENU/MENUD.P
 T00015,enum:disIndices,enum,disIndices,0,,4,67,0,1,1,MENU/MENUF.PRG/3B8.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00016,enum:diskState_e,enum,diskState_e,0,,4,9,0,1,1,SLUS_010.40/main.c,0,0,,,,,,,,,,,,,,
 T00017,enum:drawArtsListOpt,enum,drawArtsListOpt,0,,4,1,0,1,1,MENU/MENU1.PRG/30.c,0,0,Game.Menu,,,,,,,,,,,,,
-T00018,enum:easeMode,enum,easeMode,0,,4,4,0,1,1,ENDING/ENDING.PRG/D4.c,0,0,Game.Ending,,,,,,,,,,,,,
+T00018,enum:easeMode,enum,easeMode,0,,4,4,0,1,1,ENDING/ENDING.PRG/D4.c,0,0,Game.Ending,Enum,Ending::Credits::EasingMode,Native\Game\src\Ending\Credits.h,Selects linear ease-out ease-in-out or ease-in interpolation.,high,,,x,,,,,source:D4.c:1289
 T00019,enum:enemyClasses,enum,enemyClasses,0,,4,1,0,1,1,SLUS_010.40/main.h,0,0,,,,,,,,,,,,,,
 T00020,enum:fileMenuElementState_e,enum,fileMenuElementState_e,0,,4,5,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00021,enum:itemIdentifiers,enum,itemIdentifiers,0,,4,2,0,1,1,SLUS_010.40/main.h,0,0,,,,,,,,,,,,,,
@@ -25,12 +25,12 @@ T00022,enum:lootItemState,enum,lootItemState,0,,4,6,0,1,1,MENU/MENUB.PRG/260.c,0
 T00023,enum:magicSubMenu,enum,magicSubMenu,0,,4,5,0,1,1,MENU/MENU0.PRG/15AC.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00024,enum:maskedHandler_e,enum,maskedHandler_e,0,,4,3,0,1,1,MENU/MENU7.PRG/260.c,1,0,Game.Menu,,,,,,,,,,,,,
 T00025,enum:memcardEventHandler_e,enum,memcardEventHandler_e,0,,4,4,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,,,,,,,,,,,,,
-T00026,enum:memcardEvents_e,enum,memcardEvents_e,0,,4,2,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,9,0,Game.Title,,,,,,,,,,,,,
-T00027,enum:menuItemState_e,enum,menuItemState_e,0,,4,4,0,1,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,,,,,,,,,,,,,
-T00028,enum:menuItems,enum,menuItems,0,,4,9,0,1,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,,,,,,,,,,,,,
-T00029,enum:opcodes,enum,opcodes,0,,4,1,0,1,1,ENDING/ENDING.PRG/D4.c,0,0,Game.Ending,,,,,,,,,,,,,
+T00026,enum:memcardEvents_e,enum,memcardEvents_e,0,,4,2,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,9,0,Game.Title,Enum,Save::CardEventGroup,Native\Save\src\MemoryCard\GameFiles.h,Selects software versus hardware event descriptors in the PS1 memory-card API.,high,,,x,,,,,replaced-by:Save asynchronous completion
+T00027,enum:menuItemState_e,enum,menuItemState_e,0,,4,4,0,1,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Enum,Title::MenuItemMotion,Native\Game\src\Title\TitleScreen.h,Selects stationary upward downward or submenu title-item animation.,high,,,x,,,,,source:22C.c:3741
+T00028,enum:menuItems,enum,menuItems,0,,4,9,0,1,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Enum,Title::MenuItemId,Native\Game\src\Title\TitleScreen.h,Identifies title-menu commands and sound or vibration option labels.,high,,,x,,,,,source:22C.c:4234
+T00029,enum:opcodes,enum,opcodes,0,,4,1,0,1,1,ENDING/ENDING.PRG/D4.c,0,0,Game.Ending,Enum,Ending::Credits::ScriptOpcode,Native\Game\src\Ending\Credits.h,Names the explicitly declared wait opcode in the credits bytecode stream.,high,,,x,,,,,source:D4.c:1195;remaining switch opcodes are not declared in this enum
 T00030,enum:shortcutMagicMenu,enum,shortcutMagicMenu,0,,4,4,0,1,1,MENU/MENU0.PRG/15AC.c,0,0,Game.Menu,,,,,,,,,,,,,
-T00031,enum:slotState_e,enum,slotState_e,0,,4,4,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,18,0,Game.Title,,,,,,,,,,,,,
+T00031,enum:slotState_e,enum,slotState_e,0,,4,4,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,18,0,Game.Title,Enum,Save::CardFileSlotStatus,Native\Save\src\MemoryCard\GameFiles.h,Distinguishes unavailable empty temporary and occupied card save slots.,high,,,x,,,,,source:22C.c:132
 T00032,enum:statType_e,enum,statType_e,0,,4,2,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,4,0,Game.Menu,,,,,,,,,,,,,
 T00033,enum:state#a0b14e7a,enum,state,0,,4,4,0,58,4,MENU/items1.h,0,0,Game.Menu,,,,,,,,,,,,,
 T00034,enum:state#9b4695c8,enum,state,0,,4,4,0,58,4,MENU/MENU3.PRG/16C.c,0,0,Game.Menu,,,,,,,,,,,,,
@@ -87,9 +87,9 @@ T00084,enum:state#6be2b132,enum,state,0,,4,2,0,58,1,MENU/MENUD.PRG/234.c,0,0,Gam
 T00085,enum:state#af520809,enum,state,0,,4,7,0,58,1,MENU/MENUE.PRG/494.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00086,enum:state#a6718976,enum,state,0,,4,8,0,58,1,MENU/MENUE.PRG/494.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00087,enum:state#6a5f9837,enum,state,0,,4,2,0,58,1,MENU/MENUE.PRG/494.c,0,0,Game.Menu,,,,,,,,,,,,,
-T00088,enum:state#2155f452,enum,state,0,,4,3,0,58,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,,,,,,,,,,,,,
-T00089,enum:state#a5da1519,enum,state,0,,4,5,0,58,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,,,,,,,,,,,,,
-T00090,enum:state#724171f6,enum,state,0,,4,5,0,58,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,,,,,,,,,,,,,
+T00088,enum:state#2155f452,enum,state,0,,4,3,0,58,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Enum,Title::LoadScreenPhase,Native\Game\src\Title\SaveFiles.h,Selects initialization memory-card resource loading or load-file menu execution.,high,,,x,,,,,source:22C.c:3131
+T00089,enum:state#a5da1519,enum,state,0,,4,5,0,58,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Enum,Title::CardSelectionPhase,Native\Game\src\Title\SaveFiles.h,Selects two-card initialization animation waiting input or selection return.,high,,,x,,,,,source:22C.c:2215
+T00090,enum:state#724171f6,enum,state,0,,4,5,0,58,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Enum,Title::ClearSaveScreenPhase,Native\Game\src\Title\SaveFiles.h,Selects initialization loading ready confirmation or exit for clear-game saving.,high,,,x,,,,,source:22C.c:3315
 T00091,enum:testMemcardEvents_e,enum,testMemcardEvents_e,0,,4,5,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,,,,,,,,,,,,,
 T00092,enum:vs_battle_informationTextBoxHeader,enum,vs_battle_informationTextBoxHeader,0,,4,4,0,1,1,BATTLE/BATTLE.PRG/5BF94.h,25,0,Game.Menu,,,,,,,,,,,,,
 T00093,enum:vs_battle_limbStatus,enum,vs_battle_limbStatus,0,,4,5,0,1,1,BATTLE/BATTLE.PRG/5BF94.h,0,0,Game.Battle,,,,,,,,,,,,,
@@ -188,10 +188,10 @@ T00185,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverse
 T00186,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),0,,24,3,0,1,1,SLUS_010.40/main.h,0,0,,,,,,,,,,,,,,
 T00187,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),0,,2,2,0,1,1,SLUS_010.40/main.h,2,0,Game.Menu,,,,,,,,,,,,,
 T00188,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),0,,4,7,0,1,1,SLUS_010.40/main.h,0,0,,,,,,,,,,,,,,
-T00189,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),0,,64,3,0,1,1,TITLE/TITLE.PRG/22C.c,1,1,Game.Title,,,,,,,,,,,,,
-T00190,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),0,,4,4,0,1,1,SLUS_010.40/main.h,3,0,Game.Title,,,,,,,,,,,,,
+T00189,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),0,,64,3,0,1,1,TITLE/TITLE.PRG/22C.c,1,1,Game.Title,Packet,Title::TransitionPacketBuffer,Native\Game\src\Title\TitleScreen.h,Combines a tagged PS1 tile packet with title transition workspace.,high,,,x,,,,,replaced-by:Render draw commands
+T00190,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),0,,4,4,0,1,1,SLUS_010.40/main.h,3,0,Game.Title,Value,State::GameTimeComponents,Native\Game\include\State\GameTime.h,Stores the frame second minute and hour components of the game clock.,high,,,x,,,,,source:main.h:166
 T00191,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:370:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:370:5),0,,24,3,0,1,1,SLUS_010.40/main.h,0,0,,,,,,,,,,,,,,
-T00192,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),0,,2,2,0,1,1,SLUS_010.40/main.h,5,0,Game.Title,,,,,,,,,,,,,
+T00192,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),0,,2,2,0,1,1,SLUS_010.40/main.h,5,0,Game.Title,Packet,Input::ButtonBytePair,Native\Input\src\Buttons.h,Exposes the low and high bytes of one packed PS1 controller button word.,high,,,x,,,,,replaced-by:Input typed button flags
 T00193,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),0,,4,7,0,1,1,SLUS_010.40/main.h,0,0,,,,,,,,,,,,,,
 T00194,struct:AkaoSeqHeader,struct,AkaoSeqHeader,0,AkaoSeqHeader,16,5,0,1,1,SLUS_010.40/25AC.c,2,0,Audio.Playback,,,,,,,,,,,,,
 T00195,struct:AkaoTimeStamp,struct,AkaoTimeStamp,0,AkaoTimeStamp,6,6,0,1,1,SLUS_010.40/25AC.c,0,0,,,,,,,,,,,,,,
@@ -218,7 +218,7 @@ T00215,struct:D_800EB9B8_t#3074fa96,struct,D_800EB9B8_t,1,D_800EB9B8_t,19212,25,
 T00216,struct:D_800EB9B8_t#b0bf53f0,struct,D_800EB9B8_t,1,D_800EB9B8_t,19212,25,25,3,1,BATTLE/BATTLE.PRG/5BE50.c,19,1,Game.Battle,,,,,,,,,,,,,
 T00217,struct:D_800EB9B8_t2,struct,D_800EB9B8_t2,1,D_800EB9B8_t2,16,7,7,1,1,BATTLE/BATTLE.PRG/573B8.c,2,0,Game.Battle,,,,,,,,,,,,,
 T00218,struct:D_800EB9B8_unk990,struct,D_800EB9B8_unk990,1,D_800EB9B8_unk990,20,9,9,1,2,BATTLE/BATTLE.PRG/58578.c BATTLE/BATTLE.PRG/5BE50.c,3,0,Game.Battle,,,,,,,,,,,,,
-T00219,struct:D_800EB9BC_t,struct,D_800EB9BC_t,1,D_800EB9BC_t,1016,11,11,1,1,BATTLE/BATTLE.PRG/4A0A8.c,4,1,Game.Event,,,,,,,,,,,,,
+T00219,struct:D_800EB9BC_t,struct,D_800EB9BC_t,1,D_800EB9BC_t,1016,11,11,1,1,BATTLE/BATTLE.PRG/4A0A8.c,4,1,Game.Event,Misc,Event::SplashLayerView,Native\Game\src\Event\Splash.h,Partially decodes the splash-image layer record used by event scripts.,med,,,x,,,,,same-as-layout:gim_t at 5BF94.c:59 with merged bitfields;resolve to one native SplashLayer type before copying
 T00220,struct:D_800F16EC_t,struct,D_800F16EC_t,1,D_800F16EC_t,1,4,2,1,10,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,15,1,Game.Battle,,,,,,,,,,,,,
 T00221,struct:D_800F18C8_t,struct,D_800F18C8_t,1,D_800F18C8_t,24,9,9,1,1,BATTLE/BATTLE.PRG/146C.c,0,1,Game.Field,,,,,,,,,,,,,
 T00222,struct:D_800F18E8_t,struct,D_800F18E8_t,1,D_800F18E8_t,2,2,2,1,1,BATTLE/BATTLE.PRG/146C.h,0,1,Save,,,,,,,,,,,,,
@@ -255,11 +255,11 @@ T00252,struct:D_800F4538_unk68,struct,D_800F4538_unk68,1,D_800F4538_unk68,64,6,1
 T00253,struct:D_800F4538_unkC54,struct,D_800F4538_unkC54,1,D_800F4538_unkC54,1360,13,12,1,1,BATTLE/BATTLE.PRG/3A1A0.h,5,0,Game.Actors,,,,,,,,,,,,,
 T00254,struct:D_800F4590_t,struct,D_800F4590_t,1,D_800F4590_t,20,6,6,1,1,BATTLE/BATTLE.PRG/30DB0.h,2,1,Game.Menu,,,,,,,,,,,,,
 T00255,struct:D_800F45E0_t,struct,D_800F45E0_t,1,D_800F45E0_t,6272,181,181,1,1,BATTLE/BATTLE.PRG/3A1A0.h,56,1,Game.Actors,,,,,,,,,,,,,
-T00256,struct:D_800F4B28_t,struct,D_800F4B28_t,1,D_800F4B28_t,2,2,0,1,1,BATTLE/BATTLE.PRG/573B8.c,1,0,Game.Event,,,,,,,,,,,,,
-T00257,struct:D_800F4B30_t,struct,D_800F4B30_t,1,D_800F4B30_t,20,12,12,1,1,BATTLE/BATTLE.PRG/4A0A8.c,5,1,Game.Event,,,,,,,,,,,,,
-T00258,struct:D_800F4B88_t,struct,D_800F4B88_t,1,D_800F4B88_t,22,13,13,1,1,BATTLE/BATTLE.PRG/4A0A8.c,0,1,Game.Event,,,,,,,,,,,,,
-T00259,struct:D_800F4BA4_t,struct,D_800F4BA4_t,1,D_800F4BA4_t,652,26,21,1,1,BATTLE/BATTLE.PRG/4A0A8.c,19,1,Game.Event,,,,,,,,,,,,,
-T00260,struct:D_800F4BA4_t2,struct,D_800F4BA4_t2,1,D_800F4BA4_t2,180,22,0,1,1,BATTLE/BATTLE.PRG/4A0A8.c,5,0,Game.Event,,,,,,,,,,,,,
+T00256,struct:D_800F4B28_t,struct,D_800F4B28_t,1,D_800F4B28_t,2,2,0,1,1,BATTLE/BATTLE.PRG/573B8.c,1,0,Game.Event,Value,Event::InterpolationCurve,Native\Game\src\Event\Interpolation.h,Selects an interpolation curve family and signed repeated-power shaping.,high,,,x,,,,,source:573B8.c:168
+T00257,struct:D_800F4B30_t,struct,D_800F4B30_t,1,D_800F4B30_t,20,12,12,1,1,BATTLE/BATTLE.PRG/4A0A8.c,5,1,Game.Event,State,Event::SplashTween,Native\Game\src\Event\Splash.h,Interpolates splash-layer screen position scale and brightness.,high,,,x,,,,,source:4A0A8.c:879
+T00258,struct:D_800F4B88_t,struct,D_800F4B88_t,1,D_800F4B88_t,22,13,13,1,1,BATTLE/BATTLE.PRG/4A0A8.c,0,1,Game.Event,State,Event::WeatherTween,Native\Game\src\Event\Weather.h,Interpolates scripted wind direction wind strength and weather intensity.,high,,,x,,,,,source:4A0A8.c:2181;source:4A0A8.c:2995
+T00259,struct:D_800F4BA4_t,struct,D_800F4BA4_t,1,D_800F4BA4_t,652,26,21,1,1,BATTLE/BATTLE.PRG/4A0A8.c,19,1,Game.Event,State,Event::CameraState,Native\Game\src\Event\Camera.h,Stores scripted camera tracks lens tweens shake screen transforms and origin actor offset.,high,,,x,,,,,source:4A0A8.c:3014;shake oscillators are read at +0x1A6 not the declared +0x1A4;rebuild layout natively
+T00260,struct:D_800F4BA4_t2,struct,D_800F4BA4_t2,1,D_800F4BA4_t2,180,22,0,1,1,BATTLE/BATTLE.PRG/4A0A8.c,5,0,Game.Event,State,Event::CameraTrack,Native\Game\src\Event\Camera.h,Animates one scripted camera endpoint toward a destination using a selected motion mode.,high,,,x,,,,,source:4A0A8.c:3200
 T00261,struct:D_800F4EE8_t,struct,D_800F4EE8_t,1,D_800F4EE8_t,242,11,9,1,1,BATTLE/BATTLE.PRG/5BF94.h,1,1,Game.Menu,,,,,,,,,,,,,
 T00262,struct:D_800F53B8_t,struct,D_800F53B8_t,1,D_800F53B8_t,3420,14,12,1,1,BATTLE/BATTLE.PRG/5BF94.h,478,3,Game.Effects,,,,,,,,,,,,,
 T00263,struct:D_800F53B8_t2,struct,D_800F53B8_t2,1,D_800F53B8_t2,40,13,13,1,1,BATTLE/BATTLE.PRG/5BF94.c,7,0,Game.Effects,,,,,,,,,,,,,
@@ -297,9 +297,9 @@ T00294,struct:TrailPacket,struct,TrailPacket,0,TrailPacket,60,31,5,1,1,BATTLE/BA
 T00295,struct:VS_POLY_FT4,struct,VS_POLY_FT4,0,VS_POLY_FT4,36,9,0,1,1,include/gpu.h,2,0,Game.Battle,,,,,,,,,,,,,
 T00296,struct:VS_POLY_G4,struct,VS_POLY_G4,0,VS_POLY_G4,32,8,0,1,1,include/gpu.h,0,0,,,,,,,,,,,,,,
 T00297,struct:VS_POLY_G4_TPAGE,struct,VS_POLY_G4_TPAGE,0,VS_POLY_G4_TPAGE,36,9,0,1,1,include/gpu.h,0,0,,,,,,,,,,,,,,
-T00298,struct:VS_SPRT,struct,VS_SPRT,0,VS_SPRT,20,5,0,1,1,include/gpu.h,2,0,Game.Title,,,,,,,,,,,,,
+T00298,struct:VS_SPRT,struct,VS_SPRT,0,VS_SPRT,20,5,0,1,1,include/gpu.h,2,0,Game.Title,Packet,Render::SpriteTexturePagePacket,Native\Graphics\src\LegacyPackets.h,Stores PS1 texture-page color position UV palette and size words for a sprite.,high,,,x,,,,,replaced-by:Render sprite commands
 T00299,struct:VS_TILE,struct,VS_TILE,0,VS_TILE,12,3,0,1,1,include/gpu.h,0,0,,,,,,,,,,,,,,
-T00300,struct:VS_TILE_TPAGE,struct,VS_TILE_TPAGE,0,VS_TILE_TPAGE,16,4,0,1,1,include/gpu.h,1,0,Game.Title,,,,,,,,,,,,,
+T00300,struct:VS_TILE_TPAGE,struct,VS_TILE_TPAGE,0,VS_TILE_TPAGE,16,4,0,1,1,include/gpu.h,1,0,Game.Title,Packet,Render::TileTexturePagePacket,Native\Graphics\src\LegacyPackets.h,Stores PS1 texture-page color position and size words for a tile.,high,,,x,,,,,replaced-by:Render rectangle commands
 T00301,struct:_accessoryIntermediate,struct,_accessoryIntermediate,0,_accessoryIntermediate,52,5,2,1,1,BATTLE/BATTLE.PRG/146C.h,2,0,Game.Items,,,,,,,,,,,,,
 T00302,struct:_actions,struct,_actions,0,_actions,4,3,1,1,1,BATTLE/BATTLE.PRG/146C.h,1,0,Game.Actors,,,,,,,,,,,,,
 T00303,struct:_armature_t,struct,_armature_t,1,_armature_t,16,12,12,1,1,BATTLE/BATTLE.PRG/3A1A0.h,10,0,Game.Actors,,,,,,,,,,,,,
@@ -308,7 +308,7 @@ T00305,struct:_armorIntermediate,struct,_armorIntermediate,0,_armorIntermediate,
 T00306,struct:_buffReels_t,struct,_buffReels_t,1,_buffReels_t,4,2,0,1,1,MENU/MENUF.PRG/3B8.c,2,1,Game.Menu,,,,,,,,,,,,,
 T00307,struct:_clutSlot,struct,_clutSlot,0,_clutSlot,2314,5,1,1,1,SLUS_010.40/main.c,9,0,Graphics,,,,,,,,,,,,,
 T00308,struct:_clutState_t,struct,_clutState_t,1,_clutState_t,33300,15,3,1,1,SLUS_010.40/main.c,0,1,Graphics,,,,,,,,,,,,,
-T00309,struct:_creditsElement,struct,_creditsElement,0,_creditsElement,48,14,6,1,1,ENDING/ENDING.PRG/D4.c,14,1,Game.Ending,,,,,,,,,,,,,
+T00309,struct:_creditsElement,struct,_creditsElement,0,_creditsElement,48,14,6,1,1,ENDING/ENDING.PRG/D4.c,14,1,Game.Ending,Instance,Ending::Credits::Element,Native\Game\src\Ending\Credits.h,Stores a credits renderer callback and its text illustration or animation state.,high,,,x,,,,,source:D4.c:15;unused trailing members remain reserved
 T00310,struct:_gazetteRow,struct,_gazetteRow,0,_gazetteRow,16,8,1,1,1,MENU/MENU9.PRG/238.c,8,1,Game.Menu,,,,,,,,,,,,,
 T00311,struct:_hitEntity_t,struct,_hitEntity_t,1,_hitEntity_t,68,30,5,1,1,BATTLE/BATTLE.PRG/146C.c,139,0,Game.Battle,,,,,,,,,,,,,
 T00312,struct:_hitIntermediate,struct,_hitIntermediate,0,_hitIntermediate,38,23,6,1,1,BATTLE/BATTLE.PRG/146C.c,5,0,Game.Battle,,,,,,,,,,,,,
@@ -401,9 +401,9 @@ T00398,struct:actorUpdatePoint,struct,actorUpdatePoint,0,actorUpdatePoint,8,2,1,
 T00399,struct:actorUpdateState,struct,actorUpdateState,0,actorUpdateState,484,61,54,1,1,BATTLE/BATTLE.PRG/6FC00.c,3,0,Game.Battle,,,,,,,,,,,,,
 T00400,struct:actorUpdateStats,struct,actorUpdateStats,0,actorUpdateStats,36,4,1,1,1,BATTLE/BATTLE.PRG/6FC00.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00401,struct:animationFrameScratch,struct,animationFrameScratch,0,,20,4,0,1,1,BATTLE/BATTLE.PRG/44F14.c,1,0,Game.Battle,,,,,,,,,,,,,
-T00402,struct:cameraMotionScratch,struct,cameraMotionScratch,0,cameraMotionScratch,144,8,2,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,,,,,,,,,,,,,
-T00403,struct:cameraScratch,struct,cameraScratch,0,cameraScratch,144,11,3,1,1,BATTLE/BATTLE.PRG/4A0A8.c,2,0,Game.Event,,,,,,,,,,,,,
-T00404,struct:cameraShakeScratch,struct,cameraShakeScratch,0,cameraShakeScratch,104,4,1,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,,,,,,,,,,,,,
+T00402,struct:cameraMotionScratch,struct,cameraMotionScratch,0,cameraMotionScratch,144,8,2,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,Misc,Event::CameraMotionScratch,Native\Game\src\Event\Camera.h,Overlays PS1 scratchpad storage while advancing terrain-following camera tracks.,high,,,x,,,,,replaced-by:function local variables;scratchpad 0x1F800088
+T00403,struct:cameraScratch,struct,cameraScratch,0,cameraScratch,144,11,3,1,1,BATTLE/BATTLE.PRG/4A0A8.c,2,0,Game.Event,Misc,Event::CameraTrackScratch,Native\Game\src\Event\Camera.h,Overlays PS1 scratchpad storage while configuring and updating camera tracks.,high,,,x,,,,,replaced-by:function local variables;scratchpad 0x1F800088
+T00404,struct:cameraShakeScratch,struct,cameraShakeScratch,0,cameraShakeScratch,104,4,1,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,Misc,Event::CameraShakeScratch,Native\Game\src\Event\Camera.h,Overlays PS1 scratchpad storage while summing camera shake offsets.,high,,,x,,,,,replaced-by:function local variables;scratchpad 0x1F800088
 T00405,struct:cameraTransformScratch,struct,cameraTransformScratch,0,cameraTransformScratch,156,4,0,1,1,BATTLE/BATTLE.PRG/44F14.c,0,0,Game.Battle,,,,,,,,,,,,,
 T00406,struct:candidateMovementState,struct,candidateMovementState,0,candidateMovementState,1140,23,11,1,1,BATTLE/BATTLE.PRG/71618.c,6,0,Game.Battle,,,,,,,,,,,,,
 T00407,struct:clutAnimState_t,struct,clutAnimState_t,1,,8,8,0,1,1,SLUS_010.40/main.c,2,0,Graphics,,,,,,,,,,,,,
@@ -425,14 +425,14 @@ T00422,struct:effectTransformState,struct,effectTransformState,0,effectTransform
 T00423,struct:environmentTarget,struct,environmentTarget,0,environmentTarget,68,6,0,1,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00424,struct:environmentTargetList,struct,environmentTargetList,0,environmentTargetList,2116,4,0,1,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00425,struct:fileMenuElements_t,struct,fileMenuElements_t,1,fileMenuElements_t,52,15,2,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,26,2,Game.Menu,,,,,,,,,,,,,
-T00426,struct:fontTable_t,struct,fontTable_t,1,fontTable_t,28672,2,0,1,1,TITLE/TITLE.PRG/22C.c,2,1,Game.Title,,,,,,,,,,,,,
+T00426,struct:fontTable_t,struct,fontTable_t,1,fontTable_t,28672,2,0,1,1,TITLE/TITLE.PRG/22C.c,2,1,Game.Title,OnDisc,Title::SaveMenuFontRecord,Native\Game\src\Title\SaveFiles.h,Describes the embedded indexed font pixels followed by sixteen palettes.,high,,,x,,,,,decoder-only;asset:textures/title/save-menu-font.png
 T00427,struct:frameScratch,struct,frameScratch,0,,8,2,0,1,1,BATTLE/BATTLE.PRG/44F14.c,1,0,Game.Actors,,,,,,,,,,,,,
 T00428,struct:func_800172D4_t,struct,func_800172D4_t,1,func_800172D4_t,20,5,4,1,1,SLUS_010.40/25AC.c,0,0,,,,,,,,,,,,,,
 T00429,struct:func_8004644C_t,struct,func_8004644C_t,1,func_8004644C_t,52,2,2,1,1,BATTLE/BATTLE.PRG/30DB0.c,0,0,Game.Battle,,,,,,,,,,,,,
-T00430,struct:func_80069388_t,struct,func_80069388_t,1,func_80069388_t,48,31,31,1,1,ENDING/ENDING.PRG/D4.c,1,0,Game.Ending,,,,,,,,,,,,,
+T00430,struct:func_80069388_t,struct,func_80069388_t,1,func_80069388_t,48,31,31,1,1,ENDING/ENDING.PRG/D4.c,1,0,Game.Ending,Packet,Ending::Credits::TexturedGradientQuadView,Native\Game\src\Ending\Credits.h,Provides a partial view of a PS1 textured Gouraud quad used by the radial fade.,high,,,x,,,,,replaced-by:Render quad commands;partial packet ends before vertex three UV
 T00431,struct:func_80069EF0_t,struct,func_80069EF0_t,1,func_80069EF0_t,40,13,5,1,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Actors,,,,,,,,,,,,,
-T00432,struct:func_8006A9C0_t,struct,func_8006A9C0_t,1,func_8006A9C0_t,12,3,0,1,1,ENDING/ENDING.PRG/D4.c,1,0,Game.Ending,,,,,,,,,,,,,
-T00433,struct:func_8006A9C0_t2,struct,func_8006A9C0_t2,1,func_8006A9C0_t2,20,6,6,1,1,ENDING/ENDING.PRG/D4.c,4,14,Game.Ending,,,,,,,,,,,,,
+T00432,struct:func_8006A9C0_t,struct,func_8006A9C0_t,1,func_8006A9C0_t,12,3,0,1,1,ENDING/ENDING.PRG/D4.c,1,0,Game.Ending,OnDisc,Ending::Credits::TimImageBlockHeader,Native\Game\src\Ending\Credits.h,Describes the size upload rectangle and following bytes of a TIM image block.,high,,,x,,,,,decoder-only;source:D4.c:1115
+T00433,struct:func_8006A9C0_t2,struct,func_8006A9C0_t2,1,func_8006A9C0_t2,20,6,6,1,1,ENDING/ENDING.PRG/D4.c,4,14,Game.Ending,OnDisc,Ending::Credits::TimHeader,Native\Game\src\Ending\Credits.h,Describes the TIM identifier mode and first image or palette block.,high,,,x,,,,,decoder-only;source:D4.c:1115
 T00434,struct:func_8006C4C4_t,struct,func_8006C4C4_t,1,func_8006C4C4_t,228,14,13,1,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Effects,,,,,,,,,,,,,
 T00435,struct:func_8006EBF8_t,struct,func_8006EBF8_t,1,func_8006EBF8_t,16,2,2,1,1,BATTLE/BATTLE.PRG/func_8006EBF8_t.h,40,0,Game.Field,,,,,,,,,,,,,
 T00436,struct:func_8006EBF8_t2,struct,func_8006EBF8_t2,1,func_8006EBF8_t2,12,3,3,1,1,BATTLE/BATTLE.PRG/146C.c,0,0,Game.Battle,,,,,,,,,,,,,
@@ -474,12 +474,12 @@ T00471,struct:func_800AC690_flags_t,struct,func_800AC690_flags_t,1,func_800AC690
 T00472,struct:func_800AC690_timer_t,struct,func_800AC690_timer_t,1,func_800AC690_timer_t,4,2,1,1,1,BATTLE/BATTLE.PRG/40564.c,1,0,Game.Actors,,,,,,,,,,,,,
 T00473,struct:func_800ACF54_t,struct,func_800ACF54_t,1,func_800ACF54_t,8,2,2,1,1,BATTLE/BATTLE.PRG/40564.c,1,0,Game.Actors,,,,,,,,,,,,,
 T00474,struct:func_800AD494_t,struct,func_800AD494_t,1,func_800AD494_t,8,3,3,1,1,BATTLE/BATTLE.PRG/40564.c,2,0,Game.Actors,,,,,,,,,,,,,
-T00475,struct:func_800BB68C_t,struct,func_800BB68C_t,1,func_800BB68C_t,24,3,3,1,1,BATTLE/BATTLE.PRG/4A0A8.c,8,0,Game.Event,,,,,,,,,,,,,
-T00476,struct:func_800BD57C_t,struct,func_800BD57C_t,1,func_800BD57C_t,12,7,7,1,1,BATTLE/BATTLE.PRG/4A0A8.c,2,0,Game.Event,,,,,,,,,,,,,
-T00477,struct:func_800BDBB4_t,struct,func_800BDBB4_t,1,func_800BDBB4_t,32,17,17,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,,,,,,,,,,,,,
-T00478,struct:func_800BDBB4_t2,struct,func_800BDBB4_t2,1,func_800BDBB4_t2,4,1,1,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,,,,,,,,,,,,,
-T00479,struct:func_800BDF6C_t,struct,func_800BDF6C_t,1,func_800BDF6C_t,12,8,8,1,1,BATTLE/BATTLE.PRG/4A0A8.c,3,0,Game.Event,,,,,,,,,,,,,
-T00480,struct:func_800BDF6C_unk180_t,struct,func_800BDF6C_unk180_t,1,func_800BDF6C_unk180_t,12,9,9,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,,,,,,,,,,,,,
+T00475,struct:func_800BB68C_t,struct,func_800BB68C_t,1,func_800BB68C_t,24,3,3,1,1,BATTLE/BATTLE.PRG/4A0A8.c,8,0,Game.Event,State,Event::ActorSelection,Native\Game\src\Event\Actors.h,Iterates the actors selected by an event-script actor-group operand.,high,,,x,,,,,source:4A0A8.c:2880
+T00476,struct:func_800BD57C_t,struct,func_800BD57C_t,1,func_800BD57C_t,12,7,7,1,1,BATTLE/BATTLE.PRG/4A0A8.c,2,0,Game.Event,State,Event::AngleTween,Native\Game\src\Event\Camera.h,Interpolates a wrapped camera or captured-screen roll angle.,high,,,x,,,,,source:4A0A8.c:3601;source:4A0A8.c:3647
+T00477,struct:func_800BDBB4_t,struct,func_800BDBB4_t,1,func_800BDBB4_t,32,17,17,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,State,Event::TripleTween,Native\Game\src\Event\Screen.h,Interpolates up to three screen-transform values such as scale tint or translation.,high,,,x,,,,,source:4A0A8.c:3691;source:4A0A8.c:3838
+T00478,struct:func_800BDBB4_t2,struct,func_800BDBB4_t2,1,func_800BDBB4_t2,4,1,1,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,Misc,Event::EasedFractionScratch,Native\Game\src\Event\Screen.h,Overlays one PS1 scratchpad word holding an eased interpolation fraction.,high,,,x,,,,,replaced-by:function local variable;scratchpad 0x1F800088
+T00479,struct:func_800BDF6C_t,struct,func_800BDF6C_t,1,func_800BDF6C_t,12,8,8,1,1,BATTLE/BATTLE.PRG/4A0A8.c,3,0,Game.Event,State,Event::ShakeOscillator,Native\Game\src\Event\Camera.h,Generates one enveloped sinusoidal camera shake along selected axes.,high,,,x,,,,,source:4A0A8.c:3862;source:4A0A8.c:3945
+T00480,struct:func_800BDF6C_unk180_t,struct,func_800BDF6C_unk180_t,1,func_800BDF6C_unk180_t,12,9,9,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,State,Event::LensTween,Native\Game\src\Event\Camera.h,Interpolates projection distance near clip or far clip.,high,,,x,,,,,source:4A0A8.c:3927
 T00481,struct:func_800C0FA8_t2,struct,func_800C0FA8_t2,1,func_800C0FA8_t2,32,4,4,1,1,BATTLE/BATTLE.PRG/58578.c,4,0,Game.Battle,,,,,,,,,,,,,
 T00482,struct:func_800C1564_flags,struct,func_800C1564_flags,1,func_800C1564_flags,4,4,4,1,1,BATTLE/BATTLE.PRG/58578.h,2,0,Game.Battle,,,,,,,,,,,,,
 T00483,struct:func_800C1564_t,struct,func_800C1564_t,1,func_800C1564_t,16,5,5,1,1,BATTLE/BATTLE.PRG/58578.h,14,0,Game.Battle,,,,,,,,,,,,,
@@ -547,9 +547,9 @@ T00544,struct:intPair,struct,intPair,0,intPair,8,2,2,1,1,BATTLE/BATTLE.PRG/44F14
 T00545,struct:labelBoxPrim_t,struct,labelBoxPrim_t,1,labelBoxPrim_t,56,2,0,1,1,BATTLE/BATTLE.PRG/58578.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00546,struct:limbEffects_t,struct,limbEffects_t,1,limbEffects_t,4,2,0,1,1,BATTLE/BATTLE.PRG/146C.c,0,0,Game.Battle,,,,,,,,,,,,,
 T00547,struct:mcdata_t,struct,mcdata_t,1,mcdata_t,8872,9,5,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,6,2,Save.MemoryCard,,,,,,,,,,,,,
-T00548,struct:menuBg_t,struct,menuBg_t,1,menuBg_t,46592,2,0,1,1,TITLE/TITLE.PRG/22C.c,0,1,Game.Title,,,,,,,,,,,,,
-T00549,struct:menuItemPrim_t,struct,menuItemPrim_t,1,menuItemPrim_t,24,2,0,1,1,TITLE/TITLE.PRG/22C.c,1,1,Game.Title,,,,,,,,,,,,,
-T00550,struct:menuItemState_t,struct,menuItemState_t,1,menuItemState_t,8,8,0,1,1,TITLE/TITLE.PRG/22C.c,7,1,Game.Title,,,,,,,,,,,,,
+T00548,struct:menuBg_t,struct,menuBg_t,1,menuBg_t,46592,2,0,1,1,TITLE/TITLE.PRG/22C.c,0,1,Game.Title,OnDisc,Title::SaveMenuBackgroundRecord,Native\Game\src\Title\SaveFiles.h,Describes the embedded save-menu background palette followed by indexed pixels.,high,,,x,,,,,decoder-only;asset:textures/title/save-menu-background.png
+T00549,struct:menuItemPrim_t,struct,menuItemPrim_t,1,menuItemPrim_t,24,2,0,1,1,TITLE/TITLE.PRG/22C.c,1,1,Game.Title,Packet,Title::MenuItemSpritePacket,Native\Game\src\Title\TitleScreen.h,Stores a tagged PS1 sprite packet for one title-menu item strip.,high,,,x,,,,,replaced-by:Render sprite commands
+T00550,struct:menuItemState_t,struct,menuItemState_t,1,menuItemState_t,8,8,0,1,1,TITLE/TITLE.PRG/22C.c,7,1,Game.Title,State,Title::MenuItemAnimationState,Native\Game\src\Title\TitleScreen.h,Stores visibility motion positions and color blending for one title-menu item.,high,,,x,,,,,source:22C.c:3748
 T00551,struct:menuShapeVertex,struct,menuShapeVertex,0,menuShapeVertex,8,2,0,1,1,BATTLE/BATTLE.PRG/573B8.h,4,0,Game.Battle,,,,,,,,,,,,,
 T00552,struct:movementActorPosition,struct,movementActorPosition,0,movementActorPosition,34,4,1,1,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00553,struct:movementCheckObject,struct,movementCheckObject,0,movementCheckObject,12,2,1,1,1,BATTLE/BATTLE.PRG/771A8.c,2,0,Game.Battle,,,,,,,,,,,,,
@@ -594,21 +594,21 @@ T00591,struct:routeEdgeActor,struct,routeEdgeActor,0,routeEdgeActor,100,2,1,1,1,
 T00592,struct:routeEdgeGlobals,struct,routeEdgeGlobals,0,routeEdgeGlobals,15,2,1,1,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00593,struct:routeEdgeState,struct,routeEdgeState,0,routeEdgeState,416,30,13,1,1,BATTLE/BATTLE.PRG/771A8.c,3,0,Game.Battle,,,,,,,,,,,,,
 T00594,struct:saveBase_t,struct,saveBase_t,1,saveBase_t,12,3,1,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu,,,,,,,,,,,,,
-T00595,struct:saveFileInfo_t,struct,saveFileInfo_t,1,saveFileInfo_t,128,4,3,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,22,2,Game.Title,,,,,,,,,,,,,
+T00595,struct:saveFileInfo_t,struct,saveFileInfo_t,1,saveFileInfo_t,128,4,3,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,22,2,Game.Title,OnDisc,Save::CardFileInfoRecord,Native\Save\src\MemoryCard\GameFiles.h,Describes the original save-file key summary and embedded card-icon header bytes.,med,,,x,,,,,source:22C.c:165;unknown byte ranges remain explicitly reserved
 T00596,struct:saveFileSubInfo_t,struct,saveFileSubInfo_t,1,saveFileSubInfo_t,64,3,1,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00597,struct:savedEnemyState,struct,savedEnemyState,0,savedEnemyState,40,17,3,1,1,BATTLE/BATTLE.PRG/146C.c,2,0,Game.Actors,,,,,,,,,,,,,
 T00598,struct:savedata_t#a2a812c4,struct,savedata_t,1,savedata_t,23552,18,9,2,1,MENU/MENU7.PRG/260.c,19,1,Save.MemoryCard,,,,,,,,,,,,,
 T00599,struct:savedata_t#2e91ca86,struct,savedata_t,1,savedata_t,23552,18,14,2,1,TITLE/TITLE.PRG/22C.c,19,1,Save.MemoryCard,,,,,,,,,,,,,
 T00600,struct:savedata_unk180_2_t,struct,savedata_unk180_2_t,1,savedata_unk180_2_t,16,2,0,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,,,,,,,,,,,,,
 T00601,struct:savedata_unk180_t,struct,savedata_unk180_t,1,savedata_unk180_t,128,3,1,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard,,,,,,,,,,,,,
-T00602,struct:scriptBytePair,struct,scriptBytePair,0,scriptBytePair,2,2,0,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,,,,,,,,,,,,,
+T00602,struct:scriptBytePair,struct,scriptBytePair,0,scriptBytePair,2,2,0,1,1,BATTLE/BATTLE.PRG/4A0A8.c,1,0,Game.Event,Value,Event::ScriptBytePair,Native\Game\src\Event\Script.h,Holds a little-endian byte pair decoded from event-script data.,med,,,x,,,,,source:4A0A8.c:4588
 T00603,struct:soundData_t,struct,soundData_t,1,soundData_t,136,17,5,1,1,SLUS_010.40/main.h,0,1,Audio,,,,,,,,,,,,,
 T00604,struct:soundEventTargets,struct,soundEventTargets,0,soundEventTargets,16,5,2,1,1,BATTLE/BATTLE.PRG/5BF94.c,0,0,Game.Battle,,,,,,,,,,,,,
 T00605,struct:stats_t,struct,stats_t,1,stats_t,20,11,1,1,2,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu,,,,,,,,,,,,,
 T00606,struct:statusEffectTable,struct,statusEffectTable,0,statusEffectTable,16,1,0,1,1,BATTLE/BATTLE.PRG/74088.c,0,0,Game.Battle,,,,,,,,,,,,,
 T00607,struct:statusEffectTick,struct,statusEffectTick,0,statusEffectTick,16,5,3,1,1,BATTLE/BATTLE.PRG/74088.c,0,0,Game.Battle,,,,,,,,,,,,,
 T00608,struct:stuckMovementState,struct,stuckMovementState,0,stuckMovementState,364,20,12,1,1,BATTLE/BATTLE.PRG/71618.c,1,0,Game.Battle,,,,,,,,,,,,,
-T00609,struct:tagsprt_t,struct,tagsprt_t,1,tagsprt_t,24,2,0,1,1,TITLE/TITLE.PRG/22C.c,1,1,Game.Title,,,,,,,,,,,,,
+T00609,struct:tagsprt_t,struct,tagsprt_t,1,tagsprt_t,24,2,0,1,1,TITLE/TITLE.PRG/22C.c,1,1,Game.Title,Packet,Title::MenuSpritePacket,Native\Game\src\Title\TitleScreen.h,Stores the tagged PS1 sprite packet used by the title-menu draw list.,high,,,x,,,,,replaced-by:Render sprite commands
 T00610,struct:targetMovementActor,struct,targetMovementActor,0,targetMovementActor,10,2,1,1,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00611,struct:targetMovementFlags,struct,targetMovementFlags,0,targetMovementFlags,4,6,2,1,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00612,struct:targetMovementModel,struct,targetMovementModel,0,targetMovementModel,36,6,3,1,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle,,,,,,,,,,,,,
@@ -619,12 +619,12 @@ T00616,struct:texMapAnimation_t,struct,texMapAnimation_t,1,texMapAnimation_t,4,4
 T00617,struct:texMapOverlay_t,struct,texMapOverlay_t,1,texMapOverlay_t,4,4,0,1,1,BATTLE/BATTLE.PRG/3A1A0.h,4,0,Game.Actors,,,,,,,,,,,,,
 T00618,struct:textHeader_t,struct,textHeader_t,1,textHeader_t,16,3,0,1,1,MENU/MAINMENU.PRG/58EC.c,2,1,Game.Menu,,,,,,,,,,,,,
 T00619,struct:textOffset,struct,textOffset,0,textOffset,4,4,0,1,1,BATTLE/BATTLE.PRG/4A0A8.c,0,0,Game.Battle,,,,,,,,,,,,,
-T00620,struct:textPlacement,struct,textPlacement,0,textPlacement,12,4,0,1,1,BATTLE/BATTLE.PRG/4A0A8.c,2,0,Game.Event,,,,,,,,,,,,,
+T00620,struct:textPlacement,struct,textPlacement,0,textPlacement,12,4,0,1,1,BATTLE/BATTLE.PRG/4A0A8.c,2,0,Game.Event,Value,Event::DialogPlacement,Native\Game\src\Event\Dialog.h,Positions an actor dialog box and records its screen-clamp displacement.,high,,,x,,,,,source:4A0A8.c:741
 T00621,struct:trackingMotion,struct,trackingMotion,0,trackingMotion,32,12,2,1,1,BATTLE/BATTLE.PRG/7EE98.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00622,struct:trackingMotionActor,struct,trackingMotionActor,0,trackingMotionActor,34,4,1,1,1,BATTLE/BATTLE.PRG/7EE98.c,1,0,Game.Battle,,,,,,,,,,,,,
 T00623,struct:trackingMotionState,struct,trackingMotionState,0,trackingMotionState,392,13,4,1,1,BATTLE/BATTLE.PRG/7EE98.c,2,0,Game.Battle,,,,,,,,,,,,,
 T00624,struct:trackingMotionStats,struct,trackingMotionStats,0,trackingMotionStats,28,3,1,1,1,BATTLE/BATTLE.PRG/7EE98.c,1,0,Game.Battle,,,,,,,,,,,,,
-T00625,struct:uiTable_t,struct,uiTable_t,1,uiTable_t,61440,2,0,1,1,TITLE/TITLE.PRG/22C.c,0,1,Game.Title,,,,,,,,,,,,,
+T00625,struct:uiTable_t,struct,uiTable_t,1,uiTable_t,61440,2,0,1,1,TITLE/TITLE.PRG/22C.c,0,1,Game.Title,OnDisc,Title::SaveMenuUiRecord,Native\Game\src\Title\SaveFiles.h,Describes the two embedded indexed texture pages used by save-menu UI drawing.,high,,,x,,,,,decoder-only;asset:textures/title/save-menu-ui.png
 T00626,struct:unkPrim#50618d3f,struct,unkPrim,1,unkPrim,60,4,4,2,1,EFFECT/PLG005.BIN/18.c,14,0,Game.Effects,,,,,,,,,,,,,
 T00627,struct:unkPrim#e377f2a0,struct,unkPrim,1,unkPrim,60,6,6,2,1,EFFECT/trails5.h,14,0,Game.Effects,,,,,,,,,,,,,
 T00628,struct:vs_actionFlags_t,struct,vs_actionFlags_t,1,vs_actionFlags_t,2,9,9,1,1,SLUS_010.40/main.h,1,0,Game.Battle,,,,,,,,,,,,,
@@ -793,7 +793,7 @@ T00790,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseW
 T00791,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:88:5),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:88:5),0,,2,2,0,1,1,BATTLE/BATTLE.PRG/146C.h,0,0,Game.Battle,,,,,,,,,,,,,
 T00792,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,,4,2,0,1,1,BATTLE/BATTLE.PRG/func_8006EBF8_t.h,0,0,Game.Battle,,,,,,,,,,,,,
 T00793,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),0,,4,2,1,1,1,SLUS_010.40/main.h,0,0,,,,,,,,,,,,,,
-T00794,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),0,,60,7,0,1,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,,,,,,,,,,,,,
+T00794,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),0,,60,7,0,1,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title,Packet,Title::FileMenuPrimitivePayload,Native\Game\src\Title\SaveFiles.h,Overlays PS1 sprite and polygon packet formats for immediate file-menu drawing.,high,,,x,,,,,replaced-by:Render draw commands
 T00795,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:482:8),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:482:8),0,,4,2,1,1,1,SLUS_010.40/main.h,0,0,,,,,,,,,,,,,,
 T00796,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\sound.h:589:16),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\sound.h:589:16),0,,4,2,0,1,1,include/sound.h,0,0,,,,,,,,,,,,,,
 T00797,union:actionMetadataWord,union,actionMetadataWord,0,actionMetadataWord,4,2,0,1,1,BATTLE/BATTLE.PRG/7CD68.c,0,0,Game.Battle,,,,,,,,,,,,,

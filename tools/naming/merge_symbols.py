@@ -3,6 +3,8 @@
   python tools\\naming\\merge_symbols.py --check Game_Title   validate one batch output (agents run this)
   python tools\\naming\\merge_symbols.py --check-all          validate every output + cross-batch uniqueness
   python tools\\naming\\merge_symbols.py --apply              validate all, then write the ledgers' naming columns
+  python tools\\naming\\merge_symbols.py --apply-batch Game_Title
+                                                            validate and apply one complete batch
 Exit code 1 on any error.
 """
 from __future__ import annotations
@@ -87,10 +89,15 @@ def check_common(kind: str, r: dict, errs: list[str]) -> None:
 def check_batch(batch: str) -> tuple[list[str], dict[str, list[dict]]]:
     errs: list[str] = []
     outs: dict[str, list[dict]] = {}
+    if batch not in {p.name for p in BATCHES.iterdir() if p.is_dir()}:
+        return [f"{batch}: unknown batch"], outs
     for kind, header in HEADERS.items():
         src = BATCHES / batch / f"{kind}.csv"
         dst = OUTS / batch / f"{kind}.csv"
-        inp = read(src) if src.exists() else []
+        if not src.exists():
+            errs.append(f"{batch}/{kind}.csv: input missing")
+            continue
+        inp = read(src)
         if not inp:
             outs[kind] = []
             continue
@@ -186,7 +193,7 @@ def apply(all_outs: dict[str, dict[str, list[dict]]]) -> None:
     for kind, fname in LEDGER.items():
         path = LEDGERS / fname
         rows = read(path)
-        cols = list(rows[0].keys())
+        cols = read_header(path)
         upd = {r["id"]: r for outs in all_outs.values() for r in outs.get(kind, [])}
         for row in rows:
             u = upd.get(row["id"])
@@ -208,9 +215,11 @@ def main() -> int:
     g.add_argument("--check")
     g.add_argument("--check-all", action="store_true")
     g.add_argument("--apply", action="store_true")
+    g.add_argument("--apply-batch", metavar="BATCH")
     a = ap.parse_args()
 
-    batches = [a.check] if a.check else sorted(p.name for p in BATCHES.iterdir() if p.is_dir())
+    selected = a.check or a.apply_batch
+    batches = [selected] if selected else sorted(p.name for p in BATCHES.iterdir() if p.is_dir())
     errs: list[str] = []
     all_outs = {}
     for b in batches:
@@ -225,7 +234,7 @@ def main() -> int:
     if errs:
         print(f"FAILED: {len(errs)} errors")
         return 1
-    if a.apply:
+    if a.apply or a.apply_batch:
         apply(all_outs)
     print("OK")
     return 0

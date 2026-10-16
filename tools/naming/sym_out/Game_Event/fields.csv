@@ -1,0 +1,161 @@
+id,final_name,meaning,confidence,notes
+T00256.000,curveFamily,Linear or trigonometric interpolation curve family,high,source:573B8.c:211
+T00256.001,power,Signed repeated-squaring count for easing shape,high,source:573B8.c:190
+T00257.000,reserved00,Unreferenced leading splash-tween byte,low,source:4A0A8.c:148;no consumer identified
+T00257.001,easingMode,Interpolation curve selector,high,source:4A0A8.c:901
+T00257.002,elapsedFrames,Elapsed logical tween frames,high,source:4A0A8.c:2980
+T00257.003,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:2989
+T00257.004,startX,Initial horizontal screen offset,high,source:4A0A8.c:895
+T00257.005,startY,Initial vertical screen offset,high,source:4A0A8.c:896
+T00257.006,deltaX,Target minus initial horizontal offset,high,source:4A0A8.c:895
+T00257.007,deltaY,Target minus initial vertical offset,high,source:4A0A8.c:896
+T00257.008,startScaleFixed12,Initial layer scale in 4.12 fixed point,high,source:4A0A8.c:897
+T00257.009,deltaScaleFixed12,Target minus initial layer scale,high,source:4A0A8.c:897
+T00257.010,startBrightness,Initial layer brightness,high,source:4A0A8.c:898;byte 3 of the layer record
+T00257.011,deltaBrightness,Target minus initial layer brightness,high,source:4A0A8.c:898
+T00219.000,isVisible,Layer configured for drawing,high,source:5BF94.c:2384
+T00219.001,isLoadPending,Image data still loading,high,source:5BF94.c:2560
+T00219.002,usesSharedPalette,Draw with a shared 256-color palette instead of a per-layer palette,high,source:5BF94.c:4438
+T00219.003,renderMode,Index of the layer draw routine,high,source:4A0A8.c:868
+T00219.004,loaderAndPageBits,Merged view of load phase VRAM page count palette flag and page base,med,view merges gim_t bitfields and byte 2;split natively
+T00219.005,brightness,Layer brightness; zero hides the layer,high,source:5BF94.c:4434;initialized to 0x80
+T00219.006,gridAndImageId,Merged view of tile columns rows and image ID,med,view merges gim_t columns rows and id
+T00219.007,offsetX,Horizontal screen offset in pixels,high,source:4A0A8.c:869
+T00219.008,offsetY,Vertical screen offset in pixels,high,source:4A0A8.c:870
+T00219.009,scaleFixed12,Layer scale in 4.12 fixed point,high,initialized to 0x1000 at 5BF94.c:2367
+T00219.010,loaderAndImageData,Opaque view of palette selector buffers disc request ripple table and tile table,med,view spans gim_t +0x10 to +0x3F8;replace with typed native fields
+T00258.000,reserved00,Unreferenced leading byte,low,
+T00258.001,reserved01,Unreferenced byte,low,
+T00258.002,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:2998
+T00258.003,durationFrames,Tween duration or zero when inactive,high,G00442 aliases this byte
+T00258.004,windDirection,Current wind direction angle in 4096 units,high,source:4A0A8.c:2999
+T00258.005,startWindDirection,Initial wind direction angle,high,
+T00258.006,deltaWindDirection,Shortest wrapped change in wind direction,high,
+T00258.007,windStrength,Current wind strength passed with direction to weather,med,source:4A0A8.c:3001
+T00258.008,startWindStrength,Initial wind strength,med,
+T00258.009,deltaWindStrength,Target minus initial wind strength,med,
+T00258.010,intensity,Current weather intensity,high,source:4A0A8.c:3002
+T00258.011,startIntensity,Initial weather intensity,high,
+T00258.012,deltaIntensity,Target minus initial weather intensity,high,
+T00259.000,lookAt,Look-at endpoint camera track,high,
+T00259.001,eye,Eye endpoint camera track,high,
+T00259.002,cameraRoll,Camera roll angle tween,high,source:4A0A8.c:3605
+T00259.003,capturedScreenRoll,Captured-screen roll angle tween,high,source:4A0A8.c:3608
+T00259.004,projectionDistance,Projection distance tween,high,
+T00259.005,nearClip,Near-clip tween,high,
+T00259.006,farClip,Far-clip tween,high,
+T00259.007,shakeOscillatorA,Active shake count followed by the first oscillator,med,oscillators actually start at +0x1A6;first short is active count
+T00259.008,shakeOscillatorB,Second shake oscillator view,med,declared offset is two bytes before actual oscillator data
+T00259.009,reserved1BC,Tail bytes of the second oscillator view,low,covered by oscillator read at +0x1A6
+T00259.010,shakeEyeOffsetX,Summed eye shake X offset,high,source:4A0A8.c:4006
+T00259.011,shakeEyeOffsetY,Summed eye shake Y offset,high,
+T00259.012,shakeEyeOffsetZ,Summed eye shake Z offset,high,
+T00259.013,reserved1C4,Unreferenced short between shake offsets,low,
+T00259.014,shakeLookAtOffsetX,Summed look-at shake X offset,high,source:4A0A8.c:4009
+T00259.015,shakeLookAtOffsetY,Summed look-at shake Y offset,high,
+T00259.016,shakeLookAtOffsetZ,Summed look-at shake Z offset,high,
+T00259.017,actorQueryScratch,Buffer receiving actor position and rotation queries,med,source:4A0A8.c:3331;rotation read at +0x1DA
+T00259.018,originActorId,Actor whose position offsets the camera or 0x2000 for none,high,source:4A0A8.c:3079
+T00259.019,reserved1EA,Unreferenced short after origin actor ID,low,
+T00259.020,originOffset,Origin actor position in 20.12 fixed point,high,source:4A0A8.c:3112
+T00259.021,screenScale,Screen scale tween,high,source:4A0A8.c:3700
+T00259.022,screenTint,Screen tint color tween,high,source:4A0A8.c:3716
+T00259.023,screenTranslation,Screen translation tween,high,source:4A0A8.c:3732
+T00259.024,screenEffectTween,Scripted screen effect value and parameter tween,med,opcode 237 at 4A0A8.c:3749
+T00259.025,lastTerrainPosition,Last terrain-following candidate position,high,source:4A0A8.c:3551
+T00260.000,motionMode,Track motion mode; 15 is idle,high,source:4A0A8.c:3212
+T00260.001,easingPrimary,First easing selector for the active motion mode,med,source:4A0A8.c:3224
+T00260.002,easingSecondary,Second easing selector for orbit or spiral modes,med,source:4A0A8.c:3248
+T00260.003,easingTertiary,Third easing selector for orbit or spiral modes,med,source:4A0A8.c:3249
+T00260.004,elapsedFrames,Elapsed motion frames,high,
+T00260.005,durationFrames,Motion duration in frames,high,
+T00260.006,followRequest,Requested follow mode,med,source:4A0A8.c:4073
+T00260.007,isFollowing,Follow currently engaged,med,
+T00260.008,motionScalar,Mode-specific radius actor ID or step length,med,varies by motion mode
+T00260.009,motionScalarDelta,Mode-specific change in radius or parameter,med,
+T00260.010,orbitAngle,Starting orbit angle around the partner endpoint,high,source:4A0A8.c:3256
+T00260.011,orbitAngleDelta,Orbit angle change,high,source:4A0A8.c:3283
+T00260.012,startPosition,Position at motion start,high,
+T00260.013,destination,Scripted destination position,high,source:4A0A8.c:3214
+T00260.014,displacement,Destination minus start or height delta,high,source:4A0A8.c:3227
+T00260.015,heightOffset,Orbit height offset from partner endpoint,med,source:4A0A8.c:3284
+T00260.016,followDelta,Offset applied while following,med,
+T00260.017,followPosition,Followed position,med,
+T00260.018,previousCameraPosition,Camera position from the previous update,med,
+T00260.019,computedPosition,Position computed by the active motion,high,
+T00260.020,currentPosition,Current endpoint position,high,
+T00260.021,partnerPosition,Current position of the paired endpoint,high,source:4A0A8.c:3417
+T00402.000,distance,Remaining distance to the candidate,high,scratchpad overlay
+T00402.001,steps,Number of terrain motion steps,high,scratchpad overlay
+T00402.002,pad08,Unused scratch bytes,low,scratchpad overlay
+T00402.003,delta,Step delta vector,high,scratchpad overlay
+T00402.004,candidate,Candidate camera position,high,scratchpad overlay
+T00402.005,direction,Normalized motion direction,high,scratchpad overlay
+T00402.006,pad40,Unused scratch bytes,low,scratchpad overlay
+T00402.007,matrix,Working rotation matrix,high,scratchpad overlay
+T00403.000,value,Working eased fraction or angle,high,scratchpad overlay
+T00403.001,distance,Working distance,high,scratchpad overlay
+T00403.002,pad08,Unused scratch bytes,low,scratchpad overlay
+T00403.003,currentOffset,Current horizontal offset from partner,high,scratchpad overlay
+T00403.004,destinationOffset,Destination horizontal offset from partner,high,scratchpad overlay
+T00403.005,workVector,Temporary vector,med,scratchpad overlay
+T00403.006,pad40,Unused scratch bytes,low,scratchpad overlay
+T00403.007,rotation,Working rotation,med,scratchpad overlay
+T00403.008,actorRotation,Queried actor rotation,med,scratchpad overlay
+T00403.009,pad60,Unused scratch bytes,low,scratchpad overlay
+T00403.010,matrix,Working rotation matrix,high,scratchpad overlay
+T00404.000,pad00,Leading scratch bytes before the shake vectors,low,scratchpad overlay
+T00404.001,eyeShake,Summed eye shake offset,high,scratchpad overlay
+T00404.002,lookAtShake,Summed look-at shake offset,high,scratchpad overlay
+T00404.003,axisShake,Current oscillator offset by axis,high,scratchpad overlay
+T00475.000,remainingCount,Selected actors not yet returned,high,
+T00475.001,cursor,Next selection index,high,
+T00475.002,actorIds,Selected actor IDs,high,
+T00476.000,hasChanged,Value updated since last application,high,source:4A0A8.c:3647
+T00476.001,easingMode,Interpolation curve selector,high,source:4A0A8.c:3647
+T00476.002,angle,Current angle in 4096 units,high,source:4A0A8.c:3647
+T00476.003,startAngle,Initial angle,high,source:4A0A8.c:3647
+T00476.004,deltaAngle,Wrapped angle change,high,source:4A0A8.c:3647
+T00476.005,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:3647
+T00476.006,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:3647
+T00477.000,reserved00,Unreferenced leading byte,low,source:4A0A8.c:3838
+T00477.001,easingMode,Interpolation curve selector,high,source:4A0A8.c:3838
+T00477.002,currentValue0,Current first component,high,source:4A0A8.c:3838
+T00477.003,currentValue1,Current second component,high,source:4A0A8.c:3838
+T00477.004,currentValue2,Current third component,high,source:4A0A8.c:3838
+T00477.005,reserved08,Unreferenced short,low,source:4A0A8.c:3838
+T00477.006,startValue0,Initial first component,high,source:4A0A8.c:3838
+T00477.007,startValue1,Initial second component,high,source:4A0A8.c:3838
+T00477.008,startValue2,Initial third component,high,source:4A0A8.c:3838
+T00477.009,reserved10,Unreferenced short,low,source:4A0A8.c:3838
+T00477.010,deltaValue0,First component change,high,source:4A0A8.c:3838
+T00477.011,deltaValue1,Second component change,high,source:4A0A8.c:3838
+T00477.012,deltaValue2,Third component change,high,source:4A0A8.c:3838
+T00477.013,reserved18,Unreferenced short,low,source:4A0A8.c:3838
+T00477.014,reserved1A,Unreferenced short,low,source:4A0A8.c:3838
+T00477.015,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:3838
+T00477.016,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:3838
+T00478.000,easedFraction,Eased fraction in 4.12 fixed point,high,scratchpad overlay
+T00479.000,envelopeShape,Envelope selector in byte one; byte zero overlaps camera shake count,med,source:4A0A8.c:3962
+T00479.001,displacement,Current oscillator displacement,high,source:4A0A8.c:3974
+T00479.002,cycles,Oscillation cycles over the duration,high,
+T00479.003,amplitude,Peak displacement,high,
+T00479.004,elapsedFrames,Elapsed oscillation frames,high,
+T00479.005,durationFrames,Oscillation duration or zero when inactive,high,
+T00479.006,axisMask,Endpoint and per-axis sign selection bits,high,source:4A0A8.c:3995
+T00479.007,reserved0B,Byte cleared at camera initialization,low,
+T00480.000,hasChanged,Value updated since last application,high,source:4A0A8.c:3927
+T00480.001,easingMode,Interpolation curve selector,high,source:4A0A8.c:3927
+T00480.002,value,Current lens value,high,source:4A0A8.c:3927
+T00480.003,startValue,Initial lens value,high,source:4A0A8.c:3927
+T00480.004,deltaValue,Lens value change,high,source:4A0A8.c:3927
+T00480.005,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:3927
+T00480.006,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:3927
+T00480.007,reserved0A,Unreferenced byte,low,source:4A0A8.c:3927
+T00480.008,reserved0B,Unreferenced byte,low,source:4A0A8.c:3927
+T00602.000,lowByte,Low byte of a little-endian script value,med,
+T00602.001,highByte,High byte of a little-endian script value,med,
+T00620.000,anchorOffset,Packed anchor offset alignment and flags,high,
+T00620.001,screenX,Dialog anchor screen X,high,
+T00620.002,screenY,Dialog anchor screen Y,high,
+T00620.003,clampDistance,Displacement applied when clamping the dialog on screen,high,

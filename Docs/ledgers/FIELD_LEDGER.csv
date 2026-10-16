@@ -14,9 +14,9 @@ T00002.001,T00002,_findCurrentSave_e,1,findSaveNotFound,0,,,-1,,,,,
 T00002.002,T00002,_findCurrentSave_e,2,findSavePending,0,,,0,,,,,
 T00003.000,T00003,_memcardEventMask_e,0,memcardEventMaskIgnoreNoEvent,0,,,48,,,,,
 T00003.001,T00003,_memcardEventMask_e,1,memcardEventMaskAll,0,,,112,,,,,
-T00004.000,T00004,_memcardMaskedHandler_e,0,memcardMaskedHandlerError,0,,,-1,,,,,
-T00004.001,T00004,_memcardMaskedHandler_e,1,memcardMaskedHandlerPending,0,,,0,,,,,
-T00004.002,T00004,_memcardMaskedHandler_e,2,memcardMaskedHandlerComplete,0,,,1,,,,,
+T00004.000,T00004,_memcardMaskedHandler_e,0,memcardMaskedHandlerError,0,,,-1,,Error,Masked card operation failed,high,replaced-by:Save asynchronous completion
+T00004.001,T00004,_memcardMaskedHandler_e,1,memcardMaskedHandlerPending,0,,,0,,Pending,Masked card operation is pending,high,replaced-by:Save asynchronous completion
+T00004.002,T00004,_memcardMaskedHandler_e,2,memcardMaskedHandlerComplete,0,,,1,,Complete,Masked card operation completed,high,replaced-by:Save asynchronous completion
 T00005.000,T00005,_renderLimbUiState,0,_renderLimbUiNone,0,,,0,,,,,
 T00005.001,T00005,_renderLimbUiState,1,_renderLimbUiInit,0,,,1,,,,,
 T00006.000,T00006,abilityState_e,0,abilitiesNone,0,,,0,,,,,
@@ -123,10 +123,10 @@ T00016.006,T00016,diskState_e,6,diskStreamXa,0,,,7,,,,,
 T00016.007,T00016,diskState_e,7,diskCommandFailed,0,,,8,,,,,
 T00016.008,T00016,diskState_e,8,diskStreamXaEnd,0,,,9,,,,,
 T00017.000,T00017,drawArtsListOpt,0,opt_forceCursorMemory,0,,,16,,,,,
-T00018.000,T00018,easeMode,0,easeModeLinear,0,,,0,,,,,
-T00018.001,T00018,easeMode,1,easeModeEaseOut,0,,,1,,,,,
-T00018.002,T00018,easeMode,2,easeModeEaseInOut,0,,,2,,,,,
-T00018.003,T00018,easeMode,3,easeModeEaseIn,0,,,3,,,,,
+T00018.000,T00018,easeMode,0,easeModeLinear,0,,,0,,Linear,Linear interpolation,high,source:D4.c:1289
+T00018.001,T00018,easeMode,1,easeModeEaseOut,0,,,1,,EaseOut,Quarter-sine ease-out interpolation,high,source:D4.c:1289
+T00018.002,T00018,easeMode,2,easeModeEaseInOut,0,,,2,,EaseInOut,Half-cosine ease-in-out interpolation,high,source:D4.c:1289
+T00018.003,T00018,easeMode,3,easeModeEaseIn,0,,,3,,EaseIn,Shifted quarter-sine ease-in interpolation,high,source:D4.c:1289
 T00019.000,T00019,enemyClasses,0,enemyClassUndead,0,,,2,,,,,
 T00020.000,T00020,fileMenuElementState_e,0,fileMenuElementStateInactive,0,,,0,,,,,
 T00020.001,T00020,fileMenuElementState_e,1,fileMenuElementStateStatic,0,,,1,,,,,
@@ -153,30 +153,30 @@ T00025.000,T00025,memcardEventHandler_e,0,memcardEventPending,0,,,0,,,,,
 T00025.001,T00025,memcardEventHandler_e,1,memcardEventIoEnd,0,,,1,,,,,
 T00025.002,T00025,memcardEventHandler_e,2,memcardEventTimeout,0,,,2,,,,,
 T00025.003,T00025,memcardEventHandler_e,3,memcardEventUnformatted,0,,,3,,,,,
-T00026.000,T00026,memcardEvents_e,0,memcardEventsSw,0,,,0,,,,,
-T00026.001,T00026,memcardEvents_e,1,memcardEventsHw,0,,,4,,,,,
-T00027.000,T00027,menuItemState_e,0,menuItemStateStatic,0,,,0,,,,,
-T00027.001,T00027,menuItemState_e,1,menuItemStateUpper,0,,,1,,,,,
-T00027.002,T00027,menuItemState_e,2,menuItemStateLower,0,,,2,,,,,
-T00027.003,T00027,menuItemState_e,3,menuItemStateSubmenu,0,,,3,,,,,
-T00028.000,T00028,menuItems,0,menuItemTimeout,0,,,-1,,,,,
-T00028.001,T00028,menuItems,1,menuItemNewGame,0,,,0,,,,,
-T00028.002,T00028,menuItems,2,menuItemContinue,0,,,1,,,,,
-T00028.003,T00028,menuItems,3,menuItemVibration,0,,,2,,,,,
-T00028.004,T00028,menuItems,4,menuItemSound,0,,,3,,,,,
-T00028.005,T00028,menuItems,5,menuItemSoundMono,0,,,4,,,,,
-T00028.006,T00028,menuItems,6,menuItemVibrationOff,0,,,5,,,,,
-T00028.007,T00028,menuItems,7,menuItemVibrationOn,0,,,6,,,,,
-T00028.008,T00028,menuItems,8,menuItemSoundStereo,0,,,7,,,,,
-T00029.000,T00029,opcodes,0,wait,0,,,1,,,,,
+T00026.000,T00026,memcardEvents_e,0,memcardEventsSw,0,,,0,,Software,Software memory-card event group at offset zero,high,replaced-by:Save asynchronous completion
+T00026.001,T00026,memcardEvents_e,1,memcardEventsHw,0,,,4,,Hardware,Hardware memory-card event group at offset four,high,replaced-by:Save asynchronous completion
+T00027.000,T00027,menuItemState_e,0,menuItemStateStatic,0,,,0,,Stationary,Menu item holds its current position,high,source:22C.c:3741
+T00027.001,T00027,menuItemState_e,1,menuItemStateUpper,0,,,1,,MovingUp,Menu item moves toward a smaller vertical position,high,source:22C.c:4034
+T00027.002,T00027,menuItemState_e,2,menuItemStateLower,0,,,2,,MovingDown,Menu item moves toward a larger vertical position,high,source:22C.c:4040
+T00027.003,T00027,menuItemState_e,3,menuItemStateSubmenu,0,,,3,,Submenu,Menu item uses submenu color blending behavior,high,source:22C.c:4050
+T00028.000,T00028,menuItems,0,menuItemTimeout,0,,,-1,,Timeout,Title-menu inactivity result,high,source:22C.c:4234
+T00028.001,T00028,menuItems,1,menuItemNewGame,0,,,0,,NewGame,Start a new game,high,source:22C.c:4234
+T00028.002,T00028,menuItems,2,menuItemContinue,0,,,1,,Continue,Open the load-game screen,high,source:22C.c:4234
+T00028.003,T00028,menuItems,3,menuItemVibration,0,,,2,,Vibration,Open vibration options,high,source:22C.c:4234
+T00028.004,T00028,menuItems,4,menuItemSound,0,,,3,,Sound,Open sound output options,high,source:22C.c:4234
+T00028.005,T00028,menuItems,5,menuItemSoundMono,0,,,4,,Mono,Select monaural sound,high,source:22C.c:4234
+T00028.006,T00028,menuItems,6,menuItemVibrationOff,0,,,5,,VibrationOff,Disable controller vibration,high,source:22C.c:4234
+T00028.007,T00028,menuItems,7,menuItemVibrationOn,0,,,6,,VibrationOn,Enable controller vibration,high,source:22C.c:4234
+T00028.008,T00028,menuItems,8,menuItemSoundStereo,0,,,7,,Stereo,Select stereo sound,high,source:22C.c:4234
+T00029.000,T00029,opcodes,0,wait,0,,,1,,Wait,Wait twice the following byte value in frames,high,source:D4.c:1212
 T00030.000,T00030,shortcutMagicMenu,0,warlock,0,,,1,,,,,
 T00030.001,T00030,shortcutMagicMenu,1,shaman,0,,,2,,,,,
 T00030.002,T00030,shortcutMagicMenu,2,sorcerer,0,,,3,,,,,
 T00030.003,T00030,shortcutMagicMenu,3,enchanter,0,,,4,,,,,
-T00031.000,T00031,slotState_e,0,slotStateUnavailable,0,,,0,,,,,
-T00031.001,T00031,slotState_e,1,slotStateAvailable,0,,,1,,,,,
-T00031.002,T00031,slotState_e,2,slotStateTemporary,0,,,2,,,,,
-T00031.003,T00031,slotState_e,3,slotStateInUse,0,,,3,,,,,
+T00031.000,T00031,slotState_e,0,slotStateUnavailable,0,,,0,,Unavailable,Save slot cannot be used,high,source:22C.c:132
+T00031.001,T00031,slotState_e,1,slotStateAvailable,0,,,1,,Available,Save slot is available,high,source:22C.c:132
+T00031.002,T00031,slotState_e,2,slotStateTemporary,0,,,2,,Temporary,Slot contains a temporary save,high,source:22C.c:132
+T00031.003,T00031,slotState_e,3,slotStateInUse,0,,,3,,InUse,Slot contains an occupied save,high,source:22C.c:132
 T00032.000,T00032,statType_e,0,statTypeHP,0,,,0,,,,,
 T00032.001,T00032,statType_e,1,statTypeMP,0,,,1,,,,,
 T00033.000,T00033,state,0,init,0,,,0,,,,,
@@ -498,19 +498,19 @@ T00086.006,T00086,state,6,exitToMenu,0,,,6,,,,,
 T00086.007,T00086,state,7,exitToBattle,0,,,7,,,,,
 T00087.000,T00087,state,0,initRows,0,,,0,,,,,
 T00087.001,T00087,state,1,selectRow,0,,,1,,,,,
-T00088.000,T00088,state,0,init,0,,,0,,,,,
-T00088.001,T00088,state,1,loadMemcardMenu,0,,,1,,,,,
-T00088.002,T00088,state,2,loadFileMenu,0,,,2,,,,,
-T00089.000,T00089,state,0,initSlot1,0,,,0,,,,,
-T00089.001,T00089,state,1,initSlot2,0,,,1,,,,,
-T00089.002,T00089,state,2,waitForSlotAnimation,0,,,2,,,,,
-T00089.003,T00089,state,3,handleInput,0,,,3,,,,,
-T00089.004,T00089,state,4,returnSelectedOption,0,,,4,,,,,
-T00090.000,T00090,state,0,init,0,,,0,,,,,
-T00090.001,T00090,state,1,loading,0,,,1,,,,,
-T00090.002,T00090,state,2,loaded,0,,,2,,,,,
-T00090.003,T00090,state,3,confirmation,0,,,3,,,,,
-T00090.004,T00090,state,4,exit,0,,,4,,,,,
+T00088.000,T00088,state,0,init,0,,,0,,Initialize,Initialize the load screen,high,source:22C.c:3131
+T00088.001,T00088,state,1,loadMemcardMenu,0,,,1,,LoadCardResources,Wait for memory-card UI resources,high,source:22C.c:3131
+T00088.002,T00088,state,2,loadFileMenu,0,,,2,,RunFileMenu,Execute the load-file menu,high,source:22C.c:3131
+T00089.000,T00089,state,0,initSlot1,0,,,0,,InitializeSlotOne,Initialize the first card slot,high,source:22C.c:2215
+T00089.001,T00089,state,1,initSlot2,0,,,1,,InitializeSlotTwo,Initialize the second card slot,high,source:22C.c:2215
+T00089.002,T00089,state,2,waitForSlotAnimation,0,,,2,,WaitForSlotAnimation,Wait for card slot menu animations,high,source:22C.c:2215
+T00089.003,T00089,state,3,handleInput,0,,,3,,HandleInput,Handle card slot selection input,high,source:22C.c:2215
+T00089.004,T00089,state,4,returnSelectedOption,0,,,4,,ReturnSelection,Return the selected card option,high,source:22C.c:2215
+T00090.000,T00090,state,0,init,0,,,0,,Initialize,Initialize the clear-save screen,high,source:22C.c:3315
+T00090.001,T00090,state,1,loading,0,,,1,,Loading,Load the clear-save UI resources,high,source:22C.c:3315
+T00090.002,T00090,state,2,loaded,0,,,2,,Ready,Run the loaded clear-save menu,high,source:22C.c:3315
+T00090.003,T00090,state,3,confirmation,0,,,3,,Confirmation,Run clear-save confirmation,high,source:22C.c:3315
+T00090.004,T00090,state,4,exit,0,,,4,,Exit,Leave the clear-save screen,high,source:22C.c:3315
 T00091.000,T00091,testMemcardEvents_e,0,memcardInternalEventIoEnd,0,,,0,,,,,
 T00091.001,T00091,testMemcardEvents_e,1,memcardInternalEventError,0,,,1,,,,,
 T00091.002,T00091,testMemcardEvents_e,2,memcardInternalEventTimeout,0,,,2,,,,,
@@ -1057,18 +1057,18 @@ T00188.003,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00188.004,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,,,,
 T00188.005,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,,,,
 T00188.006,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,,,,
-T00189.000,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),0,tag,0,u_long,,,,,,,
-T00189.001,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),1,tile,0,VS_TILE_TPAGE,,,,,,,
-T00189.002,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),2,_,0,char[44],,,,,,,
-T00190.000,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,,,,
-T00190.001,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,,,,
-T00190.002,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,,,,
-T00190.003,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,,,,
+T00189.000,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),0,tag,0,u_long,,,,dmaTag,PS1 DMA packet tag,high,replaced-by:Render draw commands
+T00189.001,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),1,tile,0,VS_TILE_TPAGE,,,,tile,Tile and texture-page packet,high,replaced-by:Render rectangle commands
+T00189.002,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),2,_,0,char[44],,,,reserved14,Unresolved bytes following the tile packet,low,Do not discard until title-loop workspace uses are resolved
+T00190.000,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,high,source:main.h:166
+T00190.001,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,high,source:main.h:166
+T00190.002,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,high,source:main.h:166
+T00190.003,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),3,h,0,signed char,,,,hours,Hour component of elapsed game time,high,source:main.h:166
 T00191.000,T00191,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,,,,
 T00191.001,T00191,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,,,,
 T00191.002,T00191,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,,,,
-T00192.000,T00192,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,,,,
-T00192.001,T00192,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,,,,
+T00192.000,T00192,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,high,replaced-by:Input typed button flags
+T00192.001,T00192,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,high,replaced-by:Input typed button flags
 T00193.000,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,,,,
 T00193.001,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,,,,
 T00193.002,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,,,,
@@ -1297,17 +1297,17 @@ T00218.005,T00218,D_800EB9B8_unk990,5,unk6,1,char,,,screen y,,,,
 T00218.006,T00218,D_800EB9B8_unk990,6,unk7,1,char,,,,,,,
 T00218.007,T00218,D_800EB9B8_unk990,7,unk8,1,SVECTOR,,,world anchor,,,,
 T00218.008,T00218,D_800EB9B8_unk990,8,unk10,1,char *,,,text pointer,,,,
-T00219.000,T00219,D_800EB9BC_t,0,unk0_0,1,u_int,1,,,,,,
-T00219.001,T00219,D_800EB9BC_t,1,unk0_1,1,u_int,1,,,,,,
-T00219.002,T00219,D_800EB9BC_t,2,unk0_2,1,u_int,1,,,,,,
-T00219.003,T00219,D_800EB9BC_t,3,unk0_3,1,u_int,3,,,,,,
-T00219.004,T00219,D_800EB9BC_t,4,unk0_6,1,u_int,18,,,,,,
-T00219.005,T00219,D_800EB9BC_t,5,unk0_24,1,u_int,8,,,,,,
-T00219.006,T00219,D_800EB9BC_t,6,unk4,1,int,,,,,,,
-T00219.007,T00219,D_800EB9BC_t,7,unk8,1,short,,,horizontal offset,,,,
-T00219.008,T00219,D_800EB9BC_t,8,unkA,1,short,,,vertical offset,,,,
-T00219.009,T00219,D_800EB9BC_t,9,unkC,1,short,,,depth,,,,
-T00219.010,T00219,D_800EB9BC_t,10,unk10,1,int[250],,,,,,,
+T00219.000,T00219,D_800EB9BC_t,0,unk0_0,1,u_int,1,,,isVisible,Layer configured for drawing,high,source:5BF94.c:2384
+T00219.001,T00219,D_800EB9BC_t,1,unk0_1,1,u_int,1,,,isLoadPending,Image data still loading,high,source:5BF94.c:2560
+T00219.002,T00219,D_800EB9BC_t,2,unk0_2,1,u_int,1,,,usesSharedPalette,Draw with a shared 256-color palette instead of a per-layer palette,high,source:5BF94.c:4438
+T00219.003,T00219,D_800EB9BC_t,3,unk0_3,1,u_int,3,,,renderMode,Index of the layer draw routine,high,source:4A0A8.c:868
+T00219.004,T00219,D_800EB9BC_t,4,unk0_6,1,u_int,18,,,loaderAndPageBits,Merged view of load phase VRAM page count palette flag and page base,med,view merges gim_t bitfields and byte 2;split natively
+T00219.005,T00219,D_800EB9BC_t,5,unk0_24,1,u_int,8,,,brightness,Layer brightness; zero hides the layer,high,source:5BF94.c:4434;initialized to 0x80
+T00219.006,T00219,D_800EB9BC_t,6,unk4,1,int,,,,gridAndImageId,Merged view of tile columns rows and image ID,med,view merges gim_t columns rows and id
+T00219.007,T00219,D_800EB9BC_t,7,unk8,1,short,,,horizontal offset,offsetX,Horizontal screen offset in pixels,high,source:4A0A8.c:869
+T00219.008,T00219,D_800EB9BC_t,8,unkA,1,short,,,vertical offset,offsetY,Vertical screen offset in pixels,high,source:4A0A8.c:870
+T00219.009,T00219,D_800EB9BC_t,9,unkC,1,short,,,depth,scaleFixed12,Layer scale in 4.12 fixed point,high,initialized to 0x1000 at 5BF94.c:2367
+T00219.010,T00219,D_800EB9BC_t,10,unk10,1,int[250],,,,loaderAndImageData,Opaque view of palette selector buffers disc request ripple table and tile table,med,view spans gim_t +0x10 to +0x3F8;replace with typed native fields
 T00220.000,T00220,D_800F16EC_t,0,dx,0,signed char,2,,,,,,
 T00220.001,T00220,D_800F16EC_t,1,unk0_2,1,signed char,2,,,,,,
 T00220.002,T00220,D_800F16EC_t,2,dz,0,signed char,2,,,,,,
@@ -1953,81 +1953,81 @@ T00255.177,T00255,D_800F45E0_t,177,unk1854,1,u_char[16],,,,,,,
 T00255.178,T00255,D_800F45E0_t,178,unk1864,1,D_800F4538_unk1864,,,,,,,
 T00255.179,T00255,D_800F45E0_t,179,unk1868,1,int,,,,,,,
 T00255.180,T00255,D_800F45E0_t,180,unk187C,1,int,,,,,,,
-T00256.000,T00256,D_800F4B28_t,0,curve,0,u_char,,,curve family,,,,
-T00256.001,T00256,D_800F4B28_t,1,power,0,signed char,,,signed power shaping,,,,
-T00257.000,T00257,D_800F4B30_t,0,unk0,1,char,,,,,,,
-T00257.001,T00257,D_800F4B30_t,1,unk1,1,char,,,,,,,
-T00257.002,T00257,D_800F4B30_t,2,unk2,1,char,,,elapsed frames | elapsed ticks,,,,
-T00257.003,T00257,D_800F4B30_t,3,unk3,1,char,,,duration,,,,
-T00257.004,T00257,D_800F4B30_t,4,unk4,1,short,,,,,,,
-T00257.005,T00257,D_800F4B30_t,5,unk6,1,short,,,,,,,
-T00257.006,T00257,D_800F4B30_t,6,unk8,1,short,,,,,,,
-T00257.007,T00257,D_800F4B30_t,7,unkA,1,short,,,,,,,
-T00257.008,T00257,D_800F4B30_t,8,unkC,1,short,,,,,,,
-T00257.009,T00257,D_800F4B30_t,9,unkE,1,short,,,,,,,
-T00257.010,T00257,D_800F4B30_t,10,unk10,1,short,,,,,,,
-T00257.011,T00257,D_800F4B30_t,11,unk12,1,short,,,,,,,
-T00258.000,T00258,D_800F4B88_t,0,unk0,1,char,,,,,,,
-T00258.001,T00258,D_800F4B88_t,1,unk1,1,char,,,,,,,
-T00258.002,T00258,D_800F4B88_t,2,unk2,1,char,,,,,,,
-T00258.003,T00258,D_800F4B88_t,3,unk3,1,char,,,tween duration,,,,
-T00258.004,T00258,D_800F4B88_t,4,unk4,1,short,,,direction angle,,,,
-T00258.005,T00258,D_800F4B88_t,5,unk6,1,short,,,,,,,
-T00258.006,T00258,D_800F4B88_t,6,unk8,1,short,,,,,,,
-T00258.007,T00258,D_800F4B88_t,7,unkA,1,short,,,,,,,
-T00258.008,T00258,D_800F4B88_t,8,unkC,1,short,,,,,,,
-T00258.009,T00258,D_800F4B88_t,9,unkE,1,short,,,,,,,
-T00258.010,T00258,D_800F4B88_t,10,unk10,1,short,,,intensity,,,,
-T00258.011,T00258,D_800F4B88_t,11,unk12,1,short,,,,,,,
-T00258.012,T00258,D_800F4B88_t,12,unk14,1,short,,,,,,,
-T00259.000,T00259,D_800F4BA4_t,0,lookAt,0,D_800F4BA4_t2,,,,,,,
-T00259.001,T00259,D_800F4BA4_t,1,eye,0,D_800F4BA4_t2,,,,,,,
-T00259.002,T00259,D_800F4BA4_t,2,unk168,1,func_800BD57C_t,,,camera roll tween,,,,
-T00259.003,T00259,D_800F4BA4_t,3,unk174,1,func_800BD57C_t,,,captured-screen roll tween,,,,
-T00259.004,T00259,D_800F4BA4_t,4,projectionDistance,0,func_800BDF6C_unk180_t,,,,,,,
-T00259.005,T00259,D_800F4BA4_t,5,nearClip,0,func_800BDF6C_unk180_t,,,,,,,
-T00259.006,T00259,D_800F4BA4_t,6,farClip,0,func_800BDF6C_unk180_t,,,,,,,
-T00259.007,T00259,D_800F4BA4_t,7,unk1A4,1,func_800BDF6C_t,,,first shake oscillator,,,,
-T00259.008,T00259,D_800F4BA4_t,8,unk1B0,1,func_800BDF6C_t,,,second shake oscillator,,,,
-T00259.009,T00259,D_800F4BA4_t,9,unk1BC,1,short,,,,,,,
-T00259.010,T00259,D_800F4BA4_t,10,unk1BE,1,short,,,,,,,
-T00259.011,T00259,D_800F4BA4_t,11,unk1C0,1,short,,,,,,,
-T00259.012,T00259,D_800F4BA4_t,12,unk1C2,1,short,,,,,,,
-T00259.013,T00259,D_800F4BA4_t,13,unk1C4,1,short,,,,,,,
-T00259.014,T00259,D_800F4BA4_t,14,unk1C6,1,short,,,,,,,
-T00259.015,T00259,D_800F4BA4_t,15,unk1C8,1,short,,,,,,,
-T00259.016,T00259,D_800F4BA4_t,16,unk1CA,1,short,,,,,,,
-T00259.017,T00259,D_800F4BA4_t,17,unk1CC,1,int[7],,,,,,,
-T00259.018,T00259,D_800F4BA4_t,18,unk1E8,1,u_short,,,origin actor,,,,
-T00259.019,T00259,D_800F4BA4_t,19,unk1EA,1,u_short,,,,,,,
-T00259.020,T00259,D_800F4BA4_t,20,unk1EC,1,VECTOR,,,fixed-point origin offset,,,,
-T00259.021,T00259,D_800F4BA4_t,21,unk1FC,1,func_800BDBB4_t,,,screen scale tween,,,,
-T00259.022,T00259,D_800F4BA4_t,22,unk21C,1,func_800BDBB4_t,,,screen tint tween,,,,
-T00259.023,T00259,D_800F4BA4_t,23,unk23C,1,func_800BDBB4_t,,,screen translation tween,,,,
-T00259.024,T00259,D_800F4BA4_t,24,unk25C,1,func_800BDBB4_t,,,,,,,
-T00259.025,T00259,D_800F4BA4_t,25,unk27C,1,VECTOR,,,previous terrain-motion position,,,,
-T00260.000,T00260,D_800F4BA4_t2,0,mode,0,u_char,,,,,,,
-T00260.001,T00260,D_800F4BA4_t2,1,ease1,0,u_char,,,,,,,
-T00260.002,T00260,D_800F4BA4_t2,2,ease2,0,u_char,,,,,,,
-T00260.003,T00260,D_800F4BA4_t2,3,ease3,0,u_char,,,,,,,
-T00260.004,T00260,D_800F4BA4_t2,4,time,0,u_char,,,,,,,
-T00260.005,T00260,D_800F4BA4_t2,5,duration,0,u_char,,,,,,,
-T00260.006,T00260,D_800F4BA4_t2,6,follow,0,u_char,,,,,,,
-T00260.007,T00260,D_800F4BA4_t2,7,following,0,u_char,,,,,,,
-T00260.008,T00260,D_800F4BA4_t2,8,value,0,int,,,,,,,
-T00260.009,T00260,D_800F4BA4_t2,9,delta,0,int,,,,,,,
-T00260.010,T00260,D_800F4BA4_t2,10,angle,0,short,,,,,,,
-T00260.011,T00260,D_800F4BA4_t2,11,angleDelta,0,short,,,,,,,
-T00260.012,T00260,D_800F4BA4_t2,12,start,0,VECTOR,,,,,,,
-T00260.013,T00260,D_800F4BA4_t2,13,position,0,VECTOR,,,,,,,
-T00260.014,T00260,D_800F4BA4_t2,14,velocity,0,VECTOR,,,,,,,
-T00260.015,T00260,D_800F4BA4_t2,15,aux,0,VECTOR,,,,,,,
-T00260.016,T00260,D_800F4BA4_t2,16,followDelta,0,VECTOR,,,,,,,
-T00260.017,T00260,D_800F4BA4_t2,17,followPosition,0,VECTOR,,,,,,,
-T00260.018,T00260,D_800F4BA4_t2,18,previousCamera,0,VECTOR,,,,,,,
-T00260.019,T00260,D_800F4BA4_t2,19,computed,0,VECTOR,,,,,,,
-T00260.020,T00260,D_800F4BA4_t2,20,current,0,VECTOR,,,,,,,
-T00260.021,T00260,D_800F4BA4_t2,21,target,0,VECTOR,,,,,,,
+T00256.000,T00256,D_800F4B28_t,0,curve,0,u_char,,,curve family,curveFamily,Linear or trigonometric interpolation curve family,high,source:573B8.c:211
+T00256.001,T00256,D_800F4B28_t,1,power,0,signed char,,,signed power shaping,power,Signed repeated-squaring count for easing shape,high,source:573B8.c:190
+T00257.000,T00257,D_800F4B30_t,0,unk0,1,char,,,,reserved00,Unreferenced leading splash-tween byte,low,source:4A0A8.c:148;no consumer identified
+T00257.001,T00257,D_800F4B30_t,1,unk1,1,char,,,,easingMode,Interpolation curve selector,high,source:4A0A8.c:901
+T00257.002,T00257,D_800F4B30_t,2,unk2,1,char,,,elapsed frames | elapsed ticks,elapsedFrames,Elapsed logical tween frames,high,source:4A0A8.c:2980
+T00257.003,T00257,D_800F4B30_t,3,unk3,1,char,,,duration,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:2989
+T00257.004,T00257,D_800F4B30_t,4,unk4,1,short,,,,startX,Initial horizontal screen offset,high,source:4A0A8.c:895
+T00257.005,T00257,D_800F4B30_t,5,unk6,1,short,,,,startY,Initial vertical screen offset,high,source:4A0A8.c:896
+T00257.006,T00257,D_800F4B30_t,6,unk8,1,short,,,,deltaX,Target minus initial horizontal offset,high,source:4A0A8.c:895
+T00257.007,T00257,D_800F4B30_t,7,unkA,1,short,,,,deltaY,Target minus initial vertical offset,high,source:4A0A8.c:896
+T00257.008,T00257,D_800F4B30_t,8,unkC,1,short,,,,startScaleFixed12,Initial layer scale in 4.12 fixed point,high,source:4A0A8.c:897
+T00257.009,T00257,D_800F4B30_t,9,unkE,1,short,,,,deltaScaleFixed12,Target minus initial layer scale,high,source:4A0A8.c:897
+T00257.010,T00257,D_800F4B30_t,10,unk10,1,short,,,,startBrightness,Initial layer brightness,high,source:4A0A8.c:898;byte 3 of the layer record
+T00257.011,T00257,D_800F4B30_t,11,unk12,1,short,,,,deltaBrightness,Target minus initial layer brightness,high,source:4A0A8.c:898
+T00258.000,T00258,D_800F4B88_t,0,unk0,1,char,,,,reserved00,Unreferenced leading byte,low,
+T00258.001,T00258,D_800F4B88_t,1,unk1,1,char,,,,reserved01,Unreferenced byte,low,
+T00258.002,T00258,D_800F4B88_t,2,unk2,1,char,,,,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:2998
+T00258.003,T00258,D_800F4B88_t,3,unk3,1,char,,,tween duration,durationFrames,Tween duration or zero when inactive,high,G00442 aliases this byte
+T00258.004,T00258,D_800F4B88_t,4,unk4,1,short,,,direction angle,windDirection,Current wind direction angle in 4096 units,high,source:4A0A8.c:2999
+T00258.005,T00258,D_800F4B88_t,5,unk6,1,short,,,,startWindDirection,Initial wind direction angle,high,
+T00258.006,T00258,D_800F4B88_t,6,unk8,1,short,,,,deltaWindDirection,Shortest wrapped change in wind direction,high,
+T00258.007,T00258,D_800F4B88_t,7,unkA,1,short,,,,windStrength,Current wind strength passed with direction to weather,med,source:4A0A8.c:3001
+T00258.008,T00258,D_800F4B88_t,8,unkC,1,short,,,,startWindStrength,Initial wind strength,med,
+T00258.009,T00258,D_800F4B88_t,9,unkE,1,short,,,,deltaWindStrength,Target minus initial wind strength,med,
+T00258.010,T00258,D_800F4B88_t,10,unk10,1,short,,,intensity,intensity,Current weather intensity,high,source:4A0A8.c:3002
+T00258.011,T00258,D_800F4B88_t,11,unk12,1,short,,,,startIntensity,Initial weather intensity,high,
+T00258.012,T00258,D_800F4B88_t,12,unk14,1,short,,,,deltaIntensity,Target minus initial weather intensity,high,
+T00259.000,T00259,D_800F4BA4_t,0,lookAt,0,D_800F4BA4_t2,,,,lookAt,Look-at endpoint camera track,high,
+T00259.001,T00259,D_800F4BA4_t,1,eye,0,D_800F4BA4_t2,,,,eye,Eye endpoint camera track,high,
+T00259.002,T00259,D_800F4BA4_t,2,unk168,1,func_800BD57C_t,,,camera roll tween,cameraRoll,Camera roll angle tween,high,source:4A0A8.c:3605
+T00259.003,T00259,D_800F4BA4_t,3,unk174,1,func_800BD57C_t,,,captured-screen roll tween,capturedScreenRoll,Captured-screen roll angle tween,high,source:4A0A8.c:3608
+T00259.004,T00259,D_800F4BA4_t,4,projectionDistance,0,func_800BDF6C_unk180_t,,,,projectionDistance,Projection distance tween,high,
+T00259.005,T00259,D_800F4BA4_t,5,nearClip,0,func_800BDF6C_unk180_t,,,,nearClip,Near-clip tween,high,
+T00259.006,T00259,D_800F4BA4_t,6,farClip,0,func_800BDF6C_unk180_t,,,,farClip,Far-clip tween,high,
+T00259.007,T00259,D_800F4BA4_t,7,unk1A4,1,func_800BDF6C_t,,,first shake oscillator,shakeOscillatorA,Active shake count followed by the first oscillator,med,oscillators actually start at +0x1A6;first short is active count
+T00259.008,T00259,D_800F4BA4_t,8,unk1B0,1,func_800BDF6C_t,,,second shake oscillator,shakeOscillatorB,Second shake oscillator view,med,declared offset is two bytes before actual oscillator data
+T00259.009,T00259,D_800F4BA4_t,9,unk1BC,1,short,,,,reserved1BC,Tail bytes of the second oscillator view,low,covered by oscillator read at +0x1A6
+T00259.010,T00259,D_800F4BA4_t,10,unk1BE,1,short,,,,shakeEyeOffsetX,Summed eye shake X offset,high,source:4A0A8.c:4006
+T00259.011,T00259,D_800F4BA4_t,11,unk1C0,1,short,,,,shakeEyeOffsetY,Summed eye shake Y offset,high,
+T00259.012,T00259,D_800F4BA4_t,12,unk1C2,1,short,,,,shakeEyeOffsetZ,Summed eye shake Z offset,high,
+T00259.013,T00259,D_800F4BA4_t,13,unk1C4,1,short,,,,reserved1C4,Unreferenced short between shake offsets,low,
+T00259.014,T00259,D_800F4BA4_t,14,unk1C6,1,short,,,,shakeLookAtOffsetX,Summed look-at shake X offset,high,source:4A0A8.c:4009
+T00259.015,T00259,D_800F4BA4_t,15,unk1C8,1,short,,,,shakeLookAtOffsetY,Summed look-at shake Y offset,high,
+T00259.016,T00259,D_800F4BA4_t,16,unk1CA,1,short,,,,shakeLookAtOffsetZ,Summed look-at shake Z offset,high,
+T00259.017,T00259,D_800F4BA4_t,17,unk1CC,1,int[7],,,,actorQueryScratch,Buffer receiving actor position and rotation queries,med,source:4A0A8.c:3331;rotation read at +0x1DA
+T00259.018,T00259,D_800F4BA4_t,18,unk1E8,1,u_short,,,origin actor,originActorId,Actor whose position offsets the camera or 0x2000 for none,high,source:4A0A8.c:3079
+T00259.019,T00259,D_800F4BA4_t,19,unk1EA,1,u_short,,,,reserved1EA,Unreferenced short after origin actor ID,low,
+T00259.020,T00259,D_800F4BA4_t,20,unk1EC,1,VECTOR,,,fixed-point origin offset,originOffset,Origin actor position in 20.12 fixed point,high,source:4A0A8.c:3112
+T00259.021,T00259,D_800F4BA4_t,21,unk1FC,1,func_800BDBB4_t,,,screen scale tween,screenScale,Screen scale tween,high,source:4A0A8.c:3700
+T00259.022,T00259,D_800F4BA4_t,22,unk21C,1,func_800BDBB4_t,,,screen tint tween,screenTint,Screen tint color tween,high,source:4A0A8.c:3716
+T00259.023,T00259,D_800F4BA4_t,23,unk23C,1,func_800BDBB4_t,,,screen translation tween,screenTranslation,Screen translation tween,high,source:4A0A8.c:3732
+T00259.024,T00259,D_800F4BA4_t,24,unk25C,1,func_800BDBB4_t,,,,screenEffectTween,Scripted screen effect value and parameter tween,med,opcode 237 at 4A0A8.c:3749
+T00259.025,T00259,D_800F4BA4_t,25,unk27C,1,VECTOR,,,previous terrain-motion position,lastTerrainPosition,Last terrain-following candidate position,high,source:4A0A8.c:3551
+T00260.000,T00260,D_800F4BA4_t2,0,mode,0,u_char,,,,motionMode,Track motion mode; 15 is idle,high,source:4A0A8.c:3212
+T00260.001,T00260,D_800F4BA4_t2,1,ease1,0,u_char,,,,easingPrimary,First easing selector for the active motion mode,med,source:4A0A8.c:3224
+T00260.002,T00260,D_800F4BA4_t2,2,ease2,0,u_char,,,,easingSecondary,Second easing selector for orbit or spiral modes,med,source:4A0A8.c:3248
+T00260.003,T00260,D_800F4BA4_t2,3,ease3,0,u_char,,,,easingTertiary,Third easing selector for orbit or spiral modes,med,source:4A0A8.c:3249
+T00260.004,T00260,D_800F4BA4_t2,4,time,0,u_char,,,,elapsedFrames,Elapsed motion frames,high,
+T00260.005,T00260,D_800F4BA4_t2,5,duration,0,u_char,,,,durationFrames,Motion duration in frames,high,
+T00260.006,T00260,D_800F4BA4_t2,6,follow,0,u_char,,,,followRequest,Requested follow mode,med,source:4A0A8.c:4073
+T00260.007,T00260,D_800F4BA4_t2,7,following,0,u_char,,,,isFollowing,Follow currently engaged,med,
+T00260.008,T00260,D_800F4BA4_t2,8,value,0,int,,,,motionScalar,Mode-specific radius actor ID or step length,med,varies by motion mode
+T00260.009,T00260,D_800F4BA4_t2,9,delta,0,int,,,,motionScalarDelta,Mode-specific change in radius or parameter,med,
+T00260.010,T00260,D_800F4BA4_t2,10,angle,0,short,,,,orbitAngle,Starting orbit angle around the partner endpoint,high,source:4A0A8.c:3256
+T00260.011,T00260,D_800F4BA4_t2,11,angleDelta,0,short,,,,orbitAngleDelta,Orbit angle change,high,source:4A0A8.c:3283
+T00260.012,T00260,D_800F4BA4_t2,12,start,0,VECTOR,,,,startPosition,Position at motion start,high,
+T00260.013,T00260,D_800F4BA4_t2,13,position,0,VECTOR,,,,destination,Scripted destination position,high,source:4A0A8.c:3214
+T00260.014,T00260,D_800F4BA4_t2,14,velocity,0,VECTOR,,,,displacement,Destination minus start or height delta,high,source:4A0A8.c:3227
+T00260.015,T00260,D_800F4BA4_t2,15,aux,0,VECTOR,,,,heightOffset,Orbit height offset from partner endpoint,med,source:4A0A8.c:3284
+T00260.016,T00260,D_800F4BA4_t2,16,followDelta,0,VECTOR,,,,followDelta,Offset applied while following,med,
+T00260.017,T00260,D_800F4BA4_t2,17,followPosition,0,VECTOR,,,,followPosition,Followed position,med,
+T00260.018,T00260,D_800F4BA4_t2,18,previousCamera,0,VECTOR,,,,previousCameraPosition,Camera position from the previous update,med,
+T00260.019,T00260,D_800F4BA4_t2,19,computed,0,VECTOR,,,,computedPosition,Position computed by the active motion,high,
+T00260.020,T00260,D_800F4BA4_t2,20,current,0,VECTOR,,,,currentPosition,Current endpoint position,high,
+T00260.021,T00260,D_800F4BA4_t2,21,target,0,VECTOR,,,,partnerPosition,Current position of the paired endpoint,high,source:4A0A8.c:3417
 T00261.000,T00261,D_800F4EE8_t,0,cursorMemories,0,char[52],,,,,,,
 T00261.001,T00261,D_800F4EE8_t,1,unk34,1,char[6],,,,,,,
 T00261.002,T00261,D_800F4EE8_t,2,unk3A,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),,,inventory-category-and-cursor-memory,,,,
@@ -2520,18 +2520,18 @@ T00297.005,T00297,VS_POLY_G4_TPAGE,5,r2g2b2,0,u_long,,,,,,,
 T00297.006,T00297,VS_POLY_G4_TPAGE,6,x2y2,0,u_long,,,,,,,
 T00297.007,T00297,VS_POLY_G4_TPAGE,7,r3g3b3,0,u_long,,,,,,,
 T00297.008,T00297,VS_POLY_G4_TPAGE,8,x3y3,0,u_long,,,,,,,
-T00298.000,T00298,VS_SPRT,0,tpage,0,u_long,,,,,,,
-T00298.001,T00298,VS_SPRT,1,r0g0b0code,0,u_long,,,,,,,
-T00298.002,T00298,VS_SPRT,2,x0y0,0,u_long,,,,,,,
-T00298.003,T00298,VS_SPRT,3,u0v0clut,0,u_long,,,,,,,
-T00298.004,T00298,VS_SPRT,4,wh,0,u_long,,,,,,,
+T00298.000,T00298,VS_SPRT,0,tpage,0,u_long,,,,texturePageCommand,Packed PS1 texture-page command word,high,replaced-by:Render texture handle
+T00298.001,T00298,VS_SPRT,1,r0g0b0code,0,u_long,,,,colorCommand,Packed RGB color and sprite command,high,replaced-by:Render sprite color
+T00298.002,T00298,VS_SPRT,2,x0y0,0,u_long,,,,position,Packed signed screen X and Y coordinates,high,replaced-by:Render sprite position
+T00298.003,T00298,VS_SPRT,3,u0v0clut,0,u_long,,,,uvPalette,Packed texture UV and CLUT selector,high,replaced-by:Render atlas region
+T00298.004,T00298,VS_SPRT,4,wh,0,u_long,,,,size,Packed width and height in pixels,high,replaced-by:Render sprite size
 T00299.000,T00299,VS_TILE,0,r0g0b0code,0,u_long,,,,,,,
 T00299.001,T00299,VS_TILE,1,x0y0,0,u_long,,,,,,,
 T00299.002,T00299,VS_TILE,2,wh,0,u_long,,,,,,,
-T00300.000,T00300,VS_TILE_TPAGE,0,tpage,0,u_long,,,,,,,
-T00300.001,T00300,VS_TILE_TPAGE,1,r0g0b0code,0,u_long,,,,,,,
-T00300.002,T00300,VS_TILE_TPAGE,2,x0y0,0,u_long,,,,,,,
-T00300.003,T00300,VS_TILE_TPAGE,3,wh,0,u_long,,,,,,,
+T00300.000,T00300,VS_TILE_TPAGE,0,tpage,0,u_long,,,,texturePageCommand,Packed PS1 texture-page command word,high,replaced-by:Render draw state
+T00300.001,T00300,VS_TILE_TPAGE,1,r0g0b0code,0,u_long,,,,colorCommand,Packed RGB color and tile command,high,replaced-by:Render rectangle color
+T00300.002,T00300,VS_TILE_TPAGE,2,x0y0,0,u_long,,,,position,Packed signed screen X and Y coordinates,high,replaced-by:Render rectangle position
+T00300.003,T00300,VS_TILE_TPAGE,3,wh,0,u_long,,,,size,Packed width and height in pixels,high,replaced-by:Render rectangle size
 T00301.000,T00301,_accessoryIntermediate,0,equip,0,vs_battle_uiEquipment,,,,,,,
 T00301.001,T00301,_accessoryIntermediate,1,dropRate,0,char,,,,,,,
 T00301.002,T00301,_accessoryIntermediate,2,index,0,char,,,,,,,
@@ -2587,20 +2587,20 @@ T00308.011,T00308,_clutState_t,11,bgTransitionTargetB,0,short,,,,,,,
 T00308.012,T00308,_clutState_t,12,bgColors,0,int[5][6],,,,,,,
 T00308.013,T00308,_clutState_t,13,unk7F14,1,D_8005DC6C_t[5],,,baseBackgroundColors,,,,
 T00308.014,T00308,_clutState_t,14,unk7F28,1,D_8005DC80_t[17],,,,,,,
-T00309.000,T00309,_creditsElement,0,renderer,0,void (*)(struct _creditsElement *),,,,,,,
-T00309.001,T00309,_creditsElement,1,data,0,u_char *,,,,,,,
-T00309.002,T00309,_creditsElement,2,state,0,short,,,,,,,
-T00309.003,T00309,_creditsElement,3,currentStep,0,u_short,,,,,,,
-T00309.004,T00309,_creditsElement,4,illustId,0,u_short,,,,,,,
-T00309.005,T00309,_creditsElement,5,width,0,u_short,,,,,,,
-T00309.006,T00309,_creditsElement,6,x,0,int,,,,,,,
-T00309.007,T00309,_creditsElement,7,y,0,int,,,,,,,
-T00309.008,T00309,_creditsElement,8,unk18,1,int,,,,,,,
-T00309.009,T00309,_creditsElement,9,unk1C,1,int,,,,,,,
-T00309.010,T00309,_creditsElement,10,unk20,1,int,,,,,,,
-T00309.011,T00309,_creditsElement,11,unk24,1,int,,,,,,,
-T00309.012,T00309,_creditsElement,12,unk28,1,int,,,,,,,
-T00309.013,T00309,_creditsElement,13,unk2C,1,int,,,,,,,
+T00309.000,T00309,_creditsElement,0,renderer,0,void (*)(struct _creditsElement *),,,,render,Renderer callback for this credits element,high,source:D4.c:1146
+T00309.001,T00309,_creditsElement,1,data,0,u_char *,,,,textBytes,Encoded text stream owned by this element,high,source:D4.c:1222
+T00309.002,T00309,_creditsElement,2,state,0,short,,,,phase,Renderer lifecycle phase with minus one meaning finished,high,source:D4.c:218
+T00309.003,T00309,_creditsElement,3,currentStep,0,u_short,,,,animationFrame,Current frame of the renderer animation phase,high,source:D4.c:218
+T00309.004,T00309,_creditsElement,4,illustId,0,u_short,,,,illustrationIndex,Index of the current credits illustration,high,source:D4.c:583
+T00309.005,T00309,_creditsElement,5,width,0,u_short,,,,width,Text width or renderer-specific fade completion flag,high,source:D4.c:954;meaning depends on renderer
+T00309.006,T00309,_creditsElement,6,x,0,int,,,,xFixed8,Horizontal position in fixed-point pixels with eight fractional bits,high,source:D4.c:395
+T00309.007,T00309,_creditsElement,7,y,0,int,,,,yFixed8,Vertical position in fixed-point pixels with eight fractional bits,high,source:D4.c:395
+T00309.008,T00309,_creditsElement,8,unk18,1,int,,,,reserved18,Unused member at byte offset 0x18,low,No member accesses found;preserve until representation modernization
+T00309.009,T00309,_creditsElement,9,unk1C,1,int,,,,reserved1C,Unused member at byte offset 0x1C,low,No member accesses found;preserve until representation modernization
+T00309.010,T00309,_creditsElement,10,unk20,1,int,,,,reserved20,Unused member at byte offset 0x20,low,No member accesses found;preserve until representation modernization
+T00309.011,T00309,_creditsElement,11,unk24,1,int,,,,reserved24,Unused member at byte offset 0x24,low,No member accesses found;preserve until representation modernization
+T00309.012,T00309,_creditsElement,12,unk28,1,int,,,,reserved28,Unused member at byte offset 0x28,low,No member accesses found;preserve until representation modernization
+T00309.013,T00309,_creditsElement,13,unk2C,1,int,,,,reserved2C,Unused member at byte offset 0x2C,low,No member accesses found;preserve until representation modernization
 T00310.000,T00310,_gazetteRow,0,selected,0,char,,,,,,,
 T00310.001,T00310,_gazetteRow,1,unk1,1,char,,,unlockedHighlightEnabled,,,,
 T00310.002,T00310,_gazetteRow,2,animationState,0,char,,,,,,,
@@ -3620,29 +3620,29 @@ T00401.000,T00401,animationFrameScratch,0,prefix,0,char[8],,,,,,,
 T00401.001,T00401,animationFrameScratch,1,first,0,int,,,,,,,
 T00401.002,T00401,animationFrameScratch,2,last,0,int,,,,,,,
 T00401.003,T00401,animationFrameScratch,3,data,0,u_char **,,,,,,,
-T00402.000,T00402,cameraMotionScratch,0,distance,0,int,,,,,,,
-T00402.001,T00402,cameraMotionScratch,1,steps,0,int,,,,,,,
-T00402.002,T00402,cameraMotionScratch,2,unk8,1,char[8],,,,,,,
-T00402.003,T00402,cameraMotionScratch,3,delta,0,VECTOR,,,,,,,
-T00402.004,T00402,cameraMotionScratch,4,candidate,0,VECTOR,,,,,,,
-T00402.005,T00402,cameraMotionScratch,5,direction,0,VECTOR,,,,,,,
-T00402.006,T00402,cameraMotionScratch,6,unk40,1,char[48],,,,,,,
-T00402.007,T00402,cameraMotionScratch,7,matrix,0,MATRIX,,,,,,,
-T00403.000,T00403,cameraScratch,0,value,0,int,,,,,,,
-T00403.001,T00403,cameraScratch,1,distance,0,int,,,,,,,
-T00403.002,T00403,cameraScratch,2,unk8,1,char[8],,,,,,,
-T00403.003,T00403,cameraScratch,3,v1,0,VECTOR,,,,,,,
-T00403.004,T00403,cameraScratch,4,v2,0,VECTOR,,,,,,,
-T00403.005,T00403,cameraScratch,5,v3,0,VECTOR,,,,,,,
-T00403.006,T00403,cameraScratch,6,unk40,1,char[16],,,,,,,
-T00403.007,T00403,cameraScratch,7,rotation,0,SVECTOR,,,,,,,
-T00403.008,T00403,cameraScratch,8,rotation2,0,SVECTOR,,,,,,,
-T00403.009,T00403,cameraScratch,9,unk60,1,char[16],,,,,,,
-T00403.010,T00403,cameraScratch,10,matrix,0,MATRIX,,,,,,,
-T00404.000,T00404,cameraShakeScratch,0,unk0,1,char[80],,,,,,,
-T00404.001,T00404,cameraShakeScratch,1,a,0,SVECTOR,,,,,,,
-T00404.002,T00404,cameraShakeScratch,2,b,0,SVECTOR,,,,,,,
-T00404.003,T00404,cameraShakeScratch,3,c,0,SVECTOR,,,,,,,
+T00402.000,T00402,cameraMotionScratch,0,distance,0,int,,,,distance,Remaining distance to the candidate,high,scratchpad overlay
+T00402.001,T00402,cameraMotionScratch,1,steps,0,int,,,,steps,Number of terrain motion steps,high,scratchpad overlay
+T00402.002,T00402,cameraMotionScratch,2,unk8,1,char[8],,,,pad08,Unused scratch bytes,low,scratchpad overlay
+T00402.003,T00402,cameraMotionScratch,3,delta,0,VECTOR,,,,delta,Step delta vector,high,scratchpad overlay
+T00402.004,T00402,cameraMotionScratch,4,candidate,0,VECTOR,,,,candidate,Candidate camera position,high,scratchpad overlay
+T00402.005,T00402,cameraMotionScratch,5,direction,0,VECTOR,,,,direction,Normalized motion direction,high,scratchpad overlay
+T00402.006,T00402,cameraMotionScratch,6,unk40,1,char[48],,,,pad40,Unused scratch bytes,low,scratchpad overlay
+T00402.007,T00402,cameraMotionScratch,7,matrix,0,MATRIX,,,,matrix,Working rotation matrix,high,scratchpad overlay
+T00403.000,T00403,cameraScratch,0,value,0,int,,,,value,Working eased fraction or angle,high,scratchpad overlay
+T00403.001,T00403,cameraScratch,1,distance,0,int,,,,distance,Working distance,high,scratchpad overlay
+T00403.002,T00403,cameraScratch,2,unk8,1,char[8],,,,pad08,Unused scratch bytes,low,scratchpad overlay
+T00403.003,T00403,cameraScratch,3,v1,0,VECTOR,,,,currentOffset,Current horizontal offset from partner,high,scratchpad overlay
+T00403.004,T00403,cameraScratch,4,v2,0,VECTOR,,,,destinationOffset,Destination horizontal offset from partner,high,scratchpad overlay
+T00403.005,T00403,cameraScratch,5,v3,0,VECTOR,,,,workVector,Temporary vector,med,scratchpad overlay
+T00403.006,T00403,cameraScratch,6,unk40,1,char[16],,,,pad40,Unused scratch bytes,low,scratchpad overlay
+T00403.007,T00403,cameraScratch,7,rotation,0,SVECTOR,,,,rotation,Working rotation,med,scratchpad overlay
+T00403.008,T00403,cameraScratch,8,rotation2,0,SVECTOR,,,,actorRotation,Queried actor rotation,med,scratchpad overlay
+T00403.009,T00403,cameraScratch,9,unk60,1,char[16],,,,pad60,Unused scratch bytes,low,scratchpad overlay
+T00403.010,T00403,cameraScratch,10,matrix,0,MATRIX,,,,matrix,Working rotation matrix,high,scratchpad overlay
+T00404.000,T00404,cameraShakeScratch,0,unk0,1,char[80],,,,pad00,Leading scratch bytes before the shake vectors,low,scratchpad overlay
+T00404.001,T00404,cameraShakeScratch,1,a,0,SVECTOR,,,,eyeShake,Summed eye shake offset,high,scratchpad overlay
+T00404.002,T00404,cameraShakeScratch,2,b,0,SVECTOR,,,,lookAtShake,Summed look-at shake offset,high,scratchpad overlay
+T00404.003,T00404,cameraShakeScratch,3,c,0,SVECTOR,,,,axisShake,Current oscillator offset by axis,high,scratchpad overlay
 T00405.000,T00405,cameraTransformScratch,0,prefix,0,char[100],,,,,,,
 T00405.001,T00405,cameraTransformScratch,1,matrix,0,MATRIX,,,,,,,
 T00405.002,T00405,cameraTransformScratch,2,gap,0,char[8],,,,,,,
@@ -3831,8 +3831,8 @@ T00425.011,T00425,fileMenuElements_t,11,y,0,short,,,,,,,
 T00425.012,T00425,fileMenuElements_t,12,w,0,short,,,,,,,
 T00425.013,T00425,fileMenuElements_t,13,h,0,short,,,,,,,
 T00425.014,T00425,fileMenuElements_t,14,text,0,char[32],,,,,,,
-T00426.000,T00426,fontTable_t,0,data,0,char[220][128],,,,,,,
-T00426.001,T00426,fontTable_t,1,clut,0,u_short[16][16],,,,,,,
+T00426.000,T00426,fontTable_t,0,data,0,char[220][128],,,,indexedPixels,Four-bit indexed font pixels in 128-byte rows,high,source:22C.c:3109
+T00426.001,T00426,fontTable_t,1,clut,0,u_short[16][16],,,,palettes,Sixteen palettes of sixteen RGB555 colors,high,source:22C.c:3109
 T00427.000,T00427,frameScratch,0,unused,0,int,,,,,,,
 T00427.001,T00427,frameScratch,1,depth,0,int,,,,,,,
 T00428.000,T00428,func_800172D4_t,0,index,0,int,,,,,,,
@@ -3842,37 +3842,37 @@ T00428.003,T00428,func_800172D4_t,3,unkC,1,int,,,,,,,
 T00428.004,T00428,func_800172D4_t,4,unk10,1,int,,,,,,,
 T00429.000,T00429,func_8004644C_t,0,unk0,1,u_char[48],,,,,,,
 T00429.001,T00429,func_8004644C_t,1,unk30,1,int *,,,,,,,
-T00430.000,T00430,func_80069388_t,0,unk0,1,int,,,,,,,
-T00430.001,T00430,func_80069388_t,1,unk4,1,u_char,,,,,,,
-T00430.002,T00430,func_80069388_t,2,unk5,1,u_char,,,,,,,
-T00430.003,T00430,func_80069388_t,3,unk6,1,u_char,,,vertex0Blue,,,,
-T00430.004,T00430,func_80069388_t,4,unk7,1,u_char,,,,,,,
-T00430.005,T00430,func_80069388_t,5,unk8,1,short,,,vertex0X,,,,
-T00430.006,T00430,func_80069388_t,6,unkA,1,short,,,vertex0Y,,,,
-T00430.007,T00430,func_80069388_t,7,unkC,1,short,,,,,,,
-T00430.008,T00430,func_80069388_t,8,unkE,1,short,,,,,,,
-T00430.009,T00430,func_80069388_t,9,unk10,1,u_char,,,,,,,
-T00430.010,T00430,func_80069388_t,10,unk11,1,u_char,,,,,,,
-T00430.011,T00430,func_80069388_t,11,unk12,1,u_char,,,,,,,
-T00430.012,T00430,func_80069388_t,12,unk13,1,u_char,,,,,,,
-T00430.013,T00430,func_80069388_t,13,unk14,1,short,,,,,,,
-T00430.014,T00430,func_80069388_t,14,unk16,1,short,,,,,,,
-T00430.015,T00430,func_80069388_t,15,unk18,1,short,,,,,,,
-T00430.016,T00430,func_80069388_t,16,unk1A,1,short,,,,,,,
-T00430.017,T00430,func_80069388_t,17,unk1C,1,u_char,,,,,,,
-T00430.018,T00430,func_80069388_t,18,unk1D,1,u_char,,,,,,,
-T00430.019,T00430,func_80069388_t,19,unk1E,1,u_char,,,,,,,
-T00430.020,T00430,func_80069388_t,20,unk1F,1,u_char,,,,,,,
-T00430.021,T00430,func_80069388_t,21,unk20,1,short,,,,,,,
-T00430.022,T00430,func_80069388_t,22,unk22,1,short,,,,,,,
-T00430.023,T00430,func_80069388_t,23,unk24,1,short,,,,,,,
-T00430.024,T00430,func_80069388_t,24,unk26,1,short,,,,,,,
-T00430.025,T00430,func_80069388_t,25,unk28,1,u_char,,,,,,,
-T00430.026,T00430,func_80069388_t,26,unk29,1,u_char,,,,,,,
-T00430.027,T00430,func_80069388_t,27,unk2A,1,u_char,,,,,,,
-T00430.028,T00430,func_80069388_t,28,unk2B,1,u_char,,,,,,,
-T00430.029,T00430,func_80069388_t,29,unk2C,1,short,,,,,,,
-T00430.030,T00430,func_80069388_t,30,unk2E,1,short,,,,,,,
+T00430.000,T00430,func_80069388_t,0,unk0,1,int,,,,dmaTag,PS1 DMA packet tag,high,replaced-by:Render draw commands
+T00430.001,T00430,func_80069388_t,1,unk4,1,u_char,,,,vertexZeroRed,First vertex red channel,high,source:D4.c:494
+T00430.002,T00430,func_80069388_t,2,unk5,1,u_char,,,,vertexZeroGreen,First vertex green channel,high,source:D4.c:494
+T00430.003,T00430,func_80069388_t,3,unk6,1,u_char,,,vertex0Blue,vertexZeroBlue,First vertex blue channel,high,source:D4.c:489
+T00430.004,T00430,func_80069388_t,4,unk7,1,u_char,,,,command,PS1 textured Gouraud quad command byte,high,replaced-by:Render draw commands
+T00430.005,T00430,func_80069388_t,5,unk8,1,short,,,vertex0X,vertexZeroX,First vertex horizontal pixel coordinate,high,source:D4.c:485
+T00430.006,T00430,func_80069388_t,6,unkA,1,short,,,vertex0Y,vertexZeroY,First vertex vertical pixel coordinate,high,source:D4.c:485
+T00430.007,T00430,func_80069388_t,7,unkC,1,short,,,,vertexZeroUv,Packed first vertex texture U and V bytes,high,replaced-by:Render texture coordinates
+T00430.008,T00430,func_80069388_t,8,unkE,1,short,,,,palette,PS1 CLUT selector,high,replaced-by:Render texture resources
+T00430.009,T00430,func_80069388_t,9,unk10,1,u_char,,,,vertexOneRed,Second vertex red channel,high,source:D4.c:506
+T00430.010,T00430,func_80069388_t,10,unk11,1,u_char,,,,vertexOneGreen,Second vertex green channel,high,source:D4.c:506
+T00430.011,T00430,func_80069388_t,11,unk12,1,u_char,,,,vertexOneBlue,Second vertex blue channel,high,source:D4.c:501
+T00430.012,T00430,func_80069388_t,12,unk13,1,u_char,,,,pad13,Unused byte after the second vertex color,high,PS1 POLY_GT4 layout
+T00430.013,T00430,func_80069388_t,13,unk14,1,short,,,,vertexOneX,Second vertex horizontal pixel coordinate,high,source:D4.c:497
+T00430.014,T00430,func_80069388_t,14,unk16,1,short,,,,vertexOneY,Second vertex vertical pixel coordinate,high,source:D4.c:497
+T00430.015,T00430,func_80069388_t,15,unk18,1,short,,,,vertexOneUv,Packed second vertex texture U and V bytes,high,replaced-by:Render texture coordinates
+T00430.016,T00430,func_80069388_t,16,unk1A,1,short,,,,texturePage,PS1 texture-page selector,high,replaced-by:Render texture resources
+T00430.017,T00430,func_80069388_t,17,unk1C,1,u_char,,,,vertexTwoRed,Third vertex red channel,high,source:D4.c:518
+T00430.018,T00430,func_80069388_t,18,unk1D,1,u_char,,,,vertexTwoGreen,Third vertex green channel,high,source:D4.c:518
+T00430.019,T00430,func_80069388_t,19,unk1E,1,u_char,,,,vertexTwoBlue,Third vertex blue channel,high,source:D4.c:513
+T00430.020,T00430,func_80069388_t,20,unk1F,1,u_char,,,,pad1F,Unused byte after the third vertex color,high,PS1 POLY_GT4 layout
+T00430.021,T00430,func_80069388_t,21,unk20,1,short,,,,vertexTwoX,Third vertex horizontal pixel coordinate,high,source:D4.c:509
+T00430.022,T00430,func_80069388_t,22,unk22,1,short,,,,vertexTwoY,Third vertex vertical pixel coordinate,high,source:D4.c:509
+T00430.023,T00430,func_80069388_t,23,unk24,1,short,,,,vertexTwoUv,Packed third vertex texture U and V bytes,high,replaced-by:Render texture coordinates
+T00430.024,T00430,func_80069388_t,24,unk26,1,short,,,,pad26,Unused halfword after the third vertex texture coordinates,high,PS1 POLY_GT4 layout
+T00430.025,T00430,func_80069388_t,25,unk28,1,u_char,,,,vertexThreeRed,Fourth vertex red channel,high,source:D4.c:580
+T00430.026,T00430,func_80069388_t,26,unk29,1,u_char,,,,vertexThreeGreen,Fourth vertex green channel,high,source:D4.c:580
+T00430.027,T00430,func_80069388_t,27,unk2A,1,u_char,,,,vertexThreeBlue,Fourth vertex blue channel,high,source:D4.c:525
+T00430.028,T00430,func_80069388_t,28,unk2B,1,u_char,,,,pad2B,Unused byte after the fourth vertex color,high,PS1 POLY_GT4 layout
+T00430.029,T00430,func_80069388_t,29,unk2C,1,short,,,,vertexThreeX,Fourth vertex horizontal pixel coordinate,high,source:D4.c:521
+T00430.030,T00430,func_80069388_t,30,unk2E,1,short,,,,vertexThreeY,Fourth vertex vertical pixel coordinate,high,source:D4.c:521
 T00431.000,T00431,func_80069EF0_t,0,unk0,1,char,,,,,,,
 T00431.001,T00431,func_80069EF0_t,1,unk1,1,char,,,,,,,
 T00431.002,T00431,func_80069EF0_t,2,unk2,1,short,,,,,,,
@@ -3886,15 +3886,15 @@ T00431.009,T00431,func_80069EF0_t,9,totalAgility,0,short,,,,,,,
 T00431.010,T00431,func_80069EF0_t,10,limbHp,0,short[6],,,,,,,
 T00431.011,T00431,func_80069EF0_t,11,unk20,1,int,,,statuses,,,,
 T00431.012,T00431,func_80069EF0_t,12,unk24,1,int,,,packed position,,,,
-T00432.000,T00432,func_8006A9C0_t,0,size,0,int,,,,,,,
-T00432.001,T00432,func_8006A9C0_t,1,rect,0,RECT,,,,,,,
-T00432.002,T00432,func_8006A9C0_t,2,data,0,char[0],,,,,,,
-T00433.000,T00433,func_8006A9C0_t2,0,unk0,1,u_char,,,,,,,
-T00433.001,T00433,func_8006A9C0_t2,1,unk1,1,u_char,,,,,,,
-T00433.002,T00433,func_8006A9C0_t2,2,unk2,1,u_char,,,,,,,
-T00433.003,T00433,func_8006A9C0_t2,3,unk3,1,u_char,,,,,,,
-T00433.004,T00433,func_8006A9C0_t2,4,unk4,1,int,,,timMode,,,,
-T00433.005,T00433,func_8006A9C0_t2,5,unk8,1,func_8006A9C0_t,,,firstImageBlock,,,,
+T00432.000,T00432,func_8006A9C0_t,0,size,0,int,,,,blockSizeBytes,Total TIM block size including its header,high,source:D4.c:1126
+T00432.001,T00432,func_8006A9C0_t,1,rect,0,RECT,,,,uploadRect,PS1 VRAM upload rectangle,high,decoder-only;source:D4.c:1119
+T00432.002,T00432,func_8006A9C0_t,2,data,0,char[0],,,,pixelBytes,Variable-length palette or image payload,high,decoder-only;source:D4.c:1123
+T00433.000,T00433,func_8006A9C0_t2,0,unk0,1,u_char,,,,identifier,TIM format identifier byte,med,TIM header layout;decoder must validate against 0x10
+T00433.001,T00433,func_8006A9C0_t2,1,unk1,1,u_char,,,,reserved01,Reserved TIM header byte at offset one,med,TIM header layout
+T00433.002,T00433,func_8006A9C0_t2,2,unk2,1,u_char,,,,reserved02,Reserved TIM header byte at offset two,med,TIM header layout
+T00433.003,T00433,func_8006A9C0_t2,3,unk3,1,u_char,,,,reserved03,Reserved TIM header byte at offset three,med,TIM header layout
+T00433.004,T00433,func_8006A9C0_t2,4,unk4,1,int,,,timMode,mode,Pixel depth and optional CLUT flag,high,source:D4.c:1118
+T00433.005,T00433,func_8006A9C0_t2,5,unk8,1,func_8006A9C0_t,,,firstImageBlock,firstBlock,First palette or pixel-data block,high,source:D4.c:1116
 T00434.000,T00434,func_8006C4C4_t,0,unk0,1,short,,,,,,,
 T00434.001,T00434,func_8006C4C4_t,1,unk2,1,char,,,,,,,
 T00434.002,T00434,func_8006C4C4_t,2,unk3,1,char,,,,,,,
@@ -4125,51 +4125,51 @@ T00473.001,T00473,func_800ACF54_t,1,unk4,1,int,,,,,,,
 T00474.000,T00474,func_800AD494_t,0,unk0,1,int,,,,,,,
 T00474.001,T00474,func_800AD494_t,1,unk4,1,u_char *,,,,,,,
 T00474.002,T00474,func_800AD494_t,2,unk8,1,u_short[0],,,,,,,
-T00475.000,T00475,func_800BB68C_t,0,unk0,1,char,,,remaining count,,,,
-T00475.001,T00475,func_800BB68C_t,1,unk1,1,char,,,cursor,,,,
-T00475.002,T00475,func_800BB68C_t,2,unk2,1,char[22],,,actor IDs,,,,
-T00476.000,T00476,func_800BD57C_t,0,unk0,1,char,,,,,,,
-T00476.001,T00476,func_800BD57C_t,1,unk1,1,char,,,,,,,
-T00476.002,T00476,func_800BD57C_t,2,unk2,1,short,,,value,,,,
-T00476.003,T00476,func_800BD57C_t,3,unk4,1,short,,,,,,,
-T00476.004,T00476,func_800BD57C_t,4,unk6,1,short,,,,,,,
-T00476.005,T00476,func_800BD57C_t,5,unk8,1,short,,,elapsed ticks,,,,
-T00476.006,T00476,func_800BD57C_t,6,unkA,1,short,,,duration,,,,
-T00477.000,T00477,func_800BDBB4_t,0,unk0,1,char,,,,,,,
-T00477.001,T00477,func_800BDBB4_t,1,unk1,1,char,,,,,,,
-T00477.002,T00477,func_800BDBB4_t,2,unk2,1,short,,,,,,,
-T00477.003,T00477,func_800BDBB4_t,3,unk4,1,short,,,,,,,
-T00477.004,T00477,func_800BDBB4_t,4,unk6,1,short,,,,,,,
-T00477.005,T00477,func_800BDBB4_t,5,unk8,1,short,,,,,,,
-T00477.006,T00477,func_800BDBB4_t,6,unkA,1,short,,,,,,,
-T00477.007,T00477,func_800BDBB4_t,7,unkC,1,short,,,,,,,
-T00477.008,T00477,func_800BDBB4_t,8,unkE,1,short,,,,,,,
-T00477.009,T00477,func_800BDBB4_t,9,unk10,1,short,,,,,,,
-T00477.010,T00477,func_800BDBB4_t,10,unk12,1,short,,,,,,,
-T00477.011,T00477,func_800BDBB4_t,11,unk14,1,short,,,,,,,
-T00477.012,T00477,func_800BDBB4_t,12,unk16,1,short,,,,,,,
-T00477.013,T00477,func_800BDBB4_t,13,unk18,1,short,,,,,,,
-T00477.014,T00477,func_800BDBB4_t,14,unk1A,1,short,,,,,,,
-T00477.015,T00477,func_800BDBB4_t,15,unk1C,1,short,,,elapsed ticks,,,,
-T00477.016,T00477,func_800BDBB4_t,16,unk1E,1,short,,,duration,,,,
-T00478.000,T00478,func_800BDBB4_t2,0,unk0,1,int,,,,,,,
-T00479.000,T00479,func_800BDF6C_t,0,unk0,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\4A0A8.c:55:5),,,,,,,
-T00479.001,T00479,func_800BDF6C_t,1,unk2,1,short,,,,,,,
-T00479.002,T00479,func_800BDF6C_t,2,unk4,1,short,,,oscillation cycles,,,,
-T00479.003,T00479,func_800BDF6C_t,3,unk6,1,short,,,amplitude,,,,
-T00479.004,T00479,func_800BDF6C_t,4,unk8,1,char,,,,,,,
-T00479.005,T00479,func_800BDF6C_t,5,unk9,1,char,,,duration,,,,
-T00479.006,T00479,func_800BDF6C_t,6,unkA,1,char,,,,,,,
-T00479.007,T00479,func_800BDF6C_t,7,unkB,1,char,,,,,,,
-T00480.000,T00480,func_800BDF6C_unk180_t,0,unk0,1,char,,,,,,,
-T00480.001,T00480,func_800BDF6C_unk180_t,1,unk1,1,char,,,,,,,
-T00480.002,T00480,func_800BDF6C_unk180_t,2,unk2,1,short,,,,,,,
-T00480.003,T00480,func_800BDF6C_unk180_t,3,unk4,1,short,,,,,,,
-T00480.004,T00480,func_800BDF6C_unk180_t,4,unk6,1,short,,,,,,,
-T00480.005,T00480,func_800BDF6C_unk180_t,5,unk8,1,char,,,,,,,
-T00480.006,T00480,func_800BDF6C_unk180_t,6,unk9,1,char,,,,,,,
-T00480.007,T00480,func_800BDF6C_unk180_t,7,unkA,1,char,,,,,,,
-T00480.008,T00480,func_800BDF6C_unk180_t,8,unkB,1,char,,,,,,,
+T00475.000,T00475,func_800BB68C_t,0,unk0,1,char,,,remaining count,remainingCount,Selected actors not yet returned,high,
+T00475.001,T00475,func_800BB68C_t,1,unk1,1,char,,,cursor,cursor,Next selection index,high,
+T00475.002,T00475,func_800BB68C_t,2,unk2,1,char[22],,,actor IDs,actorIds,Selected actor IDs,high,
+T00476.000,T00476,func_800BD57C_t,0,unk0,1,char,,,,hasChanged,Value updated since last application,high,source:4A0A8.c:3647
+T00476.001,T00476,func_800BD57C_t,1,unk1,1,char,,,,easingMode,Interpolation curve selector,high,source:4A0A8.c:3647
+T00476.002,T00476,func_800BD57C_t,2,unk2,1,short,,,value,angle,Current angle in 4096 units,high,source:4A0A8.c:3647
+T00476.003,T00476,func_800BD57C_t,3,unk4,1,short,,,,startAngle,Initial angle,high,source:4A0A8.c:3647
+T00476.004,T00476,func_800BD57C_t,4,unk6,1,short,,,,deltaAngle,Wrapped angle change,high,source:4A0A8.c:3647
+T00476.005,T00476,func_800BD57C_t,5,unk8,1,short,,,elapsed ticks,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:3647
+T00476.006,T00476,func_800BD57C_t,6,unkA,1,short,,,duration,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:3647
+T00477.000,T00477,func_800BDBB4_t,0,unk0,1,char,,,,reserved00,Unreferenced leading byte,low,source:4A0A8.c:3838
+T00477.001,T00477,func_800BDBB4_t,1,unk1,1,char,,,,easingMode,Interpolation curve selector,high,source:4A0A8.c:3838
+T00477.002,T00477,func_800BDBB4_t,2,unk2,1,short,,,,currentValue0,Current first component,high,source:4A0A8.c:3838
+T00477.003,T00477,func_800BDBB4_t,3,unk4,1,short,,,,currentValue1,Current second component,high,source:4A0A8.c:3838
+T00477.004,T00477,func_800BDBB4_t,4,unk6,1,short,,,,currentValue2,Current third component,high,source:4A0A8.c:3838
+T00477.005,T00477,func_800BDBB4_t,5,unk8,1,short,,,,reserved08,Unreferenced short,low,source:4A0A8.c:3838
+T00477.006,T00477,func_800BDBB4_t,6,unkA,1,short,,,,startValue0,Initial first component,high,source:4A0A8.c:3838
+T00477.007,T00477,func_800BDBB4_t,7,unkC,1,short,,,,startValue1,Initial second component,high,source:4A0A8.c:3838
+T00477.008,T00477,func_800BDBB4_t,8,unkE,1,short,,,,startValue2,Initial third component,high,source:4A0A8.c:3838
+T00477.009,T00477,func_800BDBB4_t,9,unk10,1,short,,,,reserved10,Unreferenced short,low,source:4A0A8.c:3838
+T00477.010,T00477,func_800BDBB4_t,10,unk12,1,short,,,,deltaValue0,First component change,high,source:4A0A8.c:3838
+T00477.011,T00477,func_800BDBB4_t,11,unk14,1,short,,,,deltaValue1,Second component change,high,source:4A0A8.c:3838
+T00477.012,T00477,func_800BDBB4_t,12,unk16,1,short,,,,deltaValue2,Third component change,high,source:4A0A8.c:3838
+T00477.013,T00477,func_800BDBB4_t,13,unk18,1,short,,,,reserved18,Unreferenced short,low,source:4A0A8.c:3838
+T00477.014,T00477,func_800BDBB4_t,14,unk1A,1,short,,,,reserved1A,Unreferenced short,low,source:4A0A8.c:3838
+T00477.015,T00477,func_800BDBB4_t,15,unk1C,1,short,,,elapsed ticks,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:3838
+T00477.016,T00477,func_800BDBB4_t,16,unk1E,1,short,,,duration,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:3838
+T00478.000,T00478,func_800BDBB4_t2,0,unk0,1,int,,,,easedFraction,Eased fraction in 4.12 fixed point,high,scratchpad overlay
+T00479.000,T00479,func_800BDF6C_t,0,unk0,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\4A0A8.c:55:5),,,,envelopeShape,Envelope selector in byte one; byte zero overlaps camera shake count,med,source:4A0A8.c:3962
+T00479.001,T00479,func_800BDF6C_t,1,unk2,1,short,,,,displacement,Current oscillator displacement,high,source:4A0A8.c:3974
+T00479.002,T00479,func_800BDF6C_t,2,unk4,1,short,,,oscillation cycles,cycles,Oscillation cycles over the duration,high,
+T00479.003,T00479,func_800BDF6C_t,3,unk6,1,short,,,amplitude,amplitude,Peak displacement,high,
+T00479.004,T00479,func_800BDF6C_t,4,unk8,1,char,,,,elapsedFrames,Elapsed oscillation frames,high,
+T00479.005,T00479,func_800BDF6C_t,5,unk9,1,char,,,duration,durationFrames,Oscillation duration or zero when inactive,high,
+T00479.006,T00479,func_800BDF6C_t,6,unkA,1,char,,,,axisMask,Endpoint and per-axis sign selection bits,high,source:4A0A8.c:3995
+T00479.007,T00479,func_800BDF6C_t,7,unkB,1,char,,,,reserved0B,Byte cleared at camera initialization,low,
+T00480.000,T00480,func_800BDF6C_unk180_t,0,unk0,1,char,,,,hasChanged,Value updated since last application,high,source:4A0A8.c:3927
+T00480.001,T00480,func_800BDF6C_unk180_t,1,unk1,1,char,,,,easingMode,Interpolation curve selector,high,source:4A0A8.c:3927
+T00480.002,T00480,func_800BDF6C_unk180_t,2,unk2,1,short,,,,value,Current lens value,high,source:4A0A8.c:3927
+T00480.003,T00480,func_800BDF6C_unk180_t,3,unk4,1,short,,,,startValue,Initial lens value,high,source:4A0A8.c:3927
+T00480.004,T00480,func_800BDF6C_unk180_t,4,unk6,1,short,,,,deltaValue,Lens value change,high,source:4A0A8.c:3927
+T00480.005,T00480,func_800BDF6C_unk180_t,5,unk8,1,char,,,,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:3927
+T00480.006,T00480,func_800BDF6C_unk180_t,6,unk9,1,char,,,,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:3927
+T00480.007,T00480,func_800BDF6C_unk180_t,7,unkA,1,char,,,,reserved0A,Unreferenced byte,low,source:4A0A8.c:3927
+T00480.008,T00480,func_800BDF6C_unk180_t,8,unkB,1,char,,,,reserved0B,Unreferenced byte,low,source:4A0A8.c:3927
 T00481.000,T00481,func_800C0FA8_t2,0,unk0,1,SVECTOR,,,,,,,
 T00481.001,T00481,func_800C0FA8_t2,1,unk8,1,SVECTOR,,,,,,,
 T00481.002,T00481,func_800C0FA8_t2,2,unk10,1,short[4],,,,,,,
@@ -4808,18 +4808,18 @@ T00547.005,T00547,mcdata_t,5,unkFE0,1,char[32],,,,,,,
 T00547.006,T00547,mcdata_t,6,textTable,0,u_short[2048],,,,,,,
 T00547.007,T00547,mcdata_t,7,saveFileInfo,0,saveFileInfo_t[5],,,,,,,
 T00547.008,T00547,mcdata_t,8,_dirEntBuf,0,struct DIRENTRY,,,,,,,
-T00548.000,T00548,menuBg_t,0,clut,0,u_short[256],,,,,,,
-T00548.001,T00548,menuBg_t,1,data,0,char[240][192],,,,,,,
-T00549.000,T00549,menuItemPrim_t,0,tag,0,u_long,,,,,,,
-T00549.001,T00549,menuItemPrim_t,1,sprt,0,VS_SPRT,,,,,,,
-T00550.000,T00550,menuItemState_t,0,enabled,0,char,,,,,,,
-T00550.001,T00550,menuItemState_t,1,state,0,char,,,,,,,
-T00550.002,T00550,menuItemState_t,2,textSaturation,0,char,,,,,,,
-T00550.003,T00550,menuItemState_t,3,outlineSaturation,0,char,,,,,,,
-T00550.004,T00550,menuItemState_t,4,textPos,0,char,,,,,,,
-T00550.005,T00550,menuItemState_t,5,targetPos,0,char,,,,,,,
-T00550.006,T00550,menuItemState_t,6,outlinePos,0,char,,,,,,,
-T00550.007,T00550,menuItemState_t,7,textBlendFactor,0,char,,,,,,,
+T00548.000,T00548,menuBg_t,0,clut,0,u_short[256],,,,palette,256 RGB555 colors for the background,high,source:22C.c:3119
+T00548.001,T00548,menuBg_t,1,data,0,char[240][192],,,,indexedPixels,240 rows of 192 eight-bit palette indices,high,source:22C.c:3119
+T00549.000,T00549,menuItemPrim_t,0,tag,0,u_long,,,,dmaTag,PS1 DMA packet tag,high,replaced-by:Render sprite commands
+T00549.001,T00549,menuItemPrim_t,1,sprt,0,VS_SPRT,,,,sprite,Sprite and texture-page packet,high,replaced-by:Render sprite commands
+T00550.000,T00550,menuItemState_t,0,enabled,0,char,,,,isEnabled,Whether the menu item is animated and rendered,high,source:22C.c:4006
+T00550.001,T00550,menuItemState_t,1,state,0,char,,,,motion,Current title-item animation mode,high,enum:Title::MenuItemMotion
+T00550.002,T00550,menuItemState_t,2,textSaturation,0,char,,,,textSaturation,Text brightness from zero to 128,high,source:22C.c:4009
+T00550.003,T00550,menuItemState_t,3,outlineSaturation,0,char,,,,outlineSaturation,Outline brightness during selection animation,high,source:22C.c:4024
+T00550.004,T00550,menuItemState_t,4,textPos,0,char,,,,textPosition,Current vertical text animation position,high,source:22C.c:4035
+T00550.005,T00550,menuItemState_t,5,targetPos,0,char,,,,targetPosition,Target vertical text animation position,high,source:22C.c:4036
+T00550.006,T00550,menuItemState_t,6,outlinePos,0,char,,,,outlinePosition,Current trailing outline animation position,high,source:22C.c:4060
+T00550.007,T00550,menuItemState_t,7,textBlendFactor,0,char,,,,textBlendFactor,Text palette blend factor from zero to sixteen,high,source:22C.c:4022
 T00551.000,T00551,menuShapeVertex,0,xyz,0,short[3],,,,,,,
 T00551.001,T00551,menuShapeVertex,1,flags,0,short,,,,,,,
 T00552.000,T00552,movementActorPosition,0,pad0,1,char[28],,,,,,,
@@ -5224,10 +5224,10 @@ T00593.029,T00593,routeEdgeState,29,exit,0,func_800DFA54_t,,,,,,,
 T00594.000,T00594,saveBase_t,0,slotState,0,enum slotState_e,,,saveIdentityWhenOccupied,,,,
 T00594.001,T00594,saveBase_t,1,generation,0,u_int,,,,,,,
 T00594.002,T00594,saveBase_t,2,unk8,1,int,,,formatSignature,,,,
-T00595.000,T00595,saveFileInfo_t,0,key,0,u_int,,,,,,,
-T00595.001,T00595,saveFileInfo_t,1,unk4,1,saveFileSubInfo_t,,,,,,,
-T00595.002,T00595,saveFileInfo_t,2,unk44,1,char[28],,,,,,,
-T00595.003,T00595,saveFileInfo_t,3,unk60,1,char[32],,,,,,,
+T00595.000,T00595,saveFileInfo_t,0,key,0,u_int,,,,key,Original save-file key word,high,source:22C.c:165
+T00595.001,T00595,saveFileInfo_t,1,unk4,1,saveFileSubInfo_t,,,,summary,Save slot metadata statistics and formatted card title,high,source:22C.c:640
+T00595.002,T00595,saveFileInfo_t,2,unk44,1,char[28],,,,reserved44,Unresolved 28-byte range in the original save header,low,No direct field accesses found;preserve in legacy decoder
+T00595.003,T00595,saveFileInfo_t,3,unk60,1,char[32],,,,iconHeaderBytes,32 bytes copied from the selected card image header,med,source:22C.c:654;exact subformat still needs confirmation
 T00596.000,T00596,saveFileSubInfo_t,0,base,0,saveBase_t,,,,,,,
 T00596.001,T00596,saveFileSubInfo_t,1,stats,0,stats_t,,,,,,,
 T00596.002,T00596,saveFileSubInfo_t,2,unk20,1,u_short[16],,,,,,,
@@ -5289,8 +5289,8 @@ T00600.001,T00600,savedata_unk180_2_t,1,base,0,saveBase_t,,,,,,,
 T00601.000,T00601,savedata_unk180_t,0,unk180,1,savedata_unk180_2_t,,,,,,,
 T00601.001,T00601,savedata_unk180_t,1,stats,0,stats_t,,,,,,,
 T00601.002,T00601,savedata_unk180_t,2,checksums,0,char[92],,,,,,,
-T00602.000,T00602,scriptBytePair,0,low,0,u_char,,,,,,,
-T00602.001,T00602,scriptBytePair,1,high,0,u_char,,,,,,,
+T00602.000,T00602,scriptBytePair,0,low,0,u_char,,,,lowByte,Low byte of a little-endian script value,med,
+T00602.001,T00602,scriptBytePair,1,high,0,u_char,,,,highByte,High byte of a little-endian script value,med,
 T00603.000,T00603,soundData_t,0,currentMusicSlot,0,int,,,,,,,
 T00603.001,T00603,soundData_t,1,unk4,1,u_int,,,currentMusicHandle,,,,
 T00603.002,T00603,soundData_t,2,unk8,1,u_int,,,currentMusicFileId,,,,
@@ -5350,8 +5350,8 @@ T00608.016,T00608,stuckMovementState,16,unk11C,1,char[64],,,,,,,
 T00608.017,T00608,stuckMovementState,17,unk15C,1,u_char,,,,,,,
 T00608.018,T00608,stuckMovementState,18,unk15D,1,char[11],,,,,,,
 T00608.019,T00608,stuckMovementState,19,destination,0,stuckMovementPosition,,,,,,,
-T00609.000,T00609,tagsprt_t,0,tag,0,u_long,,,,,,,
-T00609.001,T00609,tagsprt_t,1,sprt,0,VS_SPRT,,,,,,,
+T00609.000,T00609,tagsprt_t,0,tag,0,u_long,,,,dmaTag,PS1 DMA packet tag,high,replaced-by:Render sprite commands
+T00609.001,T00609,tagsprt_t,1,sprt,0,VS_SPRT,,,,sprite,Sprite and texture-page packet,high,replaced-by:Render sprite commands
 T00610.000,T00610,targetMovementActor,0,pad,1,char[9],,,,,,,
 T00610.001,T00610,targetMovementActor,1,id,0,unsigned char,,,,,,,
 T00611.000,T00611,targetMovementFlags,0,f0,0,unsigned int,1,,,,,,
@@ -5464,10 +5464,10 @@ T00619.000,T00619,textOffset,0,x,0,int,12,,,,,,
 T00619.001,T00619,textOffset,1,y,0,int,12,,,,,,
 T00619.002,T00619,textOffset,2,alignment,0,u_int,2,,,,,,
 T00619.003,T00619,textOffset,3,flags,0,u_int,4,,,,,,
-T00620.000,T00620,textPlacement,0,offset,0,textOffset,,,,,,,
-T00620.001,T00620,textPlacement,1,x,0,short,,,,,,,
-T00620.002,T00620,textPlacement,2,y,0,short,,,,,,,
-T00620.003,T00620,textPlacement,3,distance,0,int,,,screen-clamp displacement magnitude,,,,
+T00620.000,T00620,textPlacement,0,offset,0,textOffset,,,,anchorOffset,Packed anchor offset alignment and flags,high,
+T00620.001,T00620,textPlacement,1,x,0,short,,,,screenX,Dialog anchor screen X,high,
+T00620.002,T00620,textPlacement,2,y,0,short,,,,screenY,Dialog anchor screen Y,high,
+T00620.003,T00620,textPlacement,3,distance,0,int,,,screen-clamp displacement magnitude,clampDistance,Displacement applied when clamping the dialog on screen,high,
 T00621.000,T00621,trackingMotion,0,facing,0,unsigned short,,,,,,,
 T00621.001,T00621,trackingMotion,1,state,0,unsigned char,,,,,,,
 T00621.002,T00621,trackingMotion,2,flag3,0,unsigned char,,,,,,,
@@ -5500,8 +5500,8 @@ T00623.012,T00623,trackingMotionState,12,targetY,0,int,,,,,,,
 T00624.000,T00624,trackingMotionStats,0,pad,1,char[24],,,,,,,
 T00624.001,T00624,trackingMotionStats,1,current,0,short,,,,,,,
 T00624.002,T00624,trackingMotionStats,2,maximum,0,short,,,,,,,
-T00625.000,T00625,uiTable_t,0,page0,0,char[224][128],,,,,,,
-T00625.001,T00625,uiTable_t,1,page1,0,char[256][128],,,,,,,
+T00625.000,T00625,uiTable_t,0,page0,0,char[224][128],,,,pageZeroPixels,224 rows of 128 packed indexed texture bytes,high,source:22C.c:3114
+T00625.001,T00625,uiTable_t,1,page1,0,char[256][128],,,,pageOnePixels,256 rows of 128 packed indexed texture bytes,high,source:22C.c:3114
 T00626.000,T00626,unkPrim,0,unk0,1,u_long,,,,,,,
 T00626.001,T00626,unkPrim,1,unk4,1,POLY_FT4,,,,,,,
 T00626.002,T00626,unkPrim,2,unk2C,1,int,,,,,,,
@@ -6705,13 +6705,13 @@ T00792.000,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00792.001,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,,,,
 T00793.000,T00793,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,,,,
 T00793.001,T00793,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5)[2],,,,,,,
-T00794.000,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),0,sprt,0,VS_SPRT,,,,,,,
-T00794.001,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),1,tile_tpage,0,VS_TILE_TPAGE,,,,,,,
-T00794.002,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),2,tile,0,VS_TILE,,,,,,,
-T00794.003,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),3,polyG4_tpage,0,VS_POLY_G4_TPAGE,,,,,,,
-T00794.004,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),4,polyG4,0,VS_POLY_G4,,,,,,,
-T00794.005,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),5,tilePoly,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1070:9),,,,,,,
-T00794.006,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),6,raw,0,u_long[15],,,,,,,
+T00794.000,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),0,sprt,0,VS_SPRT,,,,sprite,Sprite and texture-page packet,high,replaced-by:Render sprite commands
+T00794.001,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),1,tile_tpage,0,VS_TILE_TPAGE,,,,texturedTile,Tile and texture-page packet,high,replaced-by:Render rectangle commands
+T00794.002,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),2,tile,0,VS_TILE,,,,tile,Untextured tile packet,high,replaced-by:Render rectangle commands
+T00794.003,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),3,polyG4_tpage,0,VS_POLY_G4_TPAGE,,,,texturedGradientQuad,Gouraud quad and texture-page packet,high,replaced-by:Render quad commands
+T00794.004,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),4,polyG4,0,VS_POLY_G4,,,,gradientQuad,Gouraud quad packet,high,replaced-by:Render quad commands
+T00794.005,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),5,tilePoly,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1070:9),,,,tileAndGradientQuad,Combined tile and Gouraud quad packets,high,replaced-by:Render draw commands
+T00794.006,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),6,raw,0,u_long[15],,,,packetWords,Raw storage for fifteen GPU packet words,high,replaced-by:Render draw commands
 T00795.000,T00795,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,,,,
 T00795.001,T00795,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5)[2],,,,,,,
 T00796.000,T00796,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\sound.h:589:16),0,s32,0,int,,,,,,,
