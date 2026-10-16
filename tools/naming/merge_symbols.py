@@ -181,6 +181,12 @@ def cross_checks(all_outs: dict[str, dict[str, list[dict]]]) -> list[str]:
         m = re.search(r"dup-of:(G\d+)", r.get("notes", ""))
         return m.group(1) if m else None
 
+    for gid, r in g_rows.items():
+        target = dup_of(r)
+        if target and target in g_rows and g_rows[target]["final_name"].strip() != r["final_name"].strip():
+            errs.append(f"{gid}: '{r['final_name']}' differs from dup-of {target} '{g_rows[target]['final_name']}'")
+        if target and target not in data:
+            errs.append(f"{gid}: dup-of target {target} is not in DATA_LEDGER")
     by_c: dict[str, list[str]] = defaultdict(list)
     for gid, r in g_rows.items():
         if data.get(gid, {}).get("linkage") == "local-static" or dup_of(r):

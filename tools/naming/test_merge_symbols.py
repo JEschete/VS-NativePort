@@ -218,6 +218,19 @@ class BatchMergeTests(unittest.TestCase):
         self.assertEqual(result, 1)
         self.assertIn("column count", output)
 
+    def test_dup_of_must_share_the_target_name(self):
+        self.make_batch("Two", "G00001")
+        self.write(self.batches / "Two" / "globals.csv", ["id"], [{"id": "G00001"}, {"id": "G00002"}])
+        twin = dict(self.output, id="G00002", final_name="Title::otherCount", notes="dup-of:G00001;source:a.c:1")
+        self.write(self.outs / "Two" / "globals.csv", merge.HEADERS["globals"], [self.output, twin])
+        result, output = self.run_merge("--check", "Two")
+        self.assertEqual(result, 1)
+        self.assertIn("differs from dup-of G00001", output)
+        twin["final_name"] = self.output["final_name"]
+        self.write(self.outs / "Two" / "globals.csv", merge.HEADERS["globals"], [self.output, twin])
+        result, output = self.run_merge("--check", "Two")
+        self.assertEqual(result, 0, output)
+
     def test_same_as_unknown_target_is_rejected(self):
         self.make_type_batch(
             [self.type_row("T00001", "State::Time"),
