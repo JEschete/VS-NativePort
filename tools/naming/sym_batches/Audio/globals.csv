@@ -1,0 +1,93 @@
+id,key,name,overlay,linkage,segment,address,size,type,type_id,has_pointers,init,instances,files,used_by,proposed_system,proposed_disposition
+G00091,D_800E91A4@BATTLE/BATTLE.PRG,D_800E91A4,BATTLE/BATTLE.PRG,extern,data,0x800E91A4,2956,u_char[],,0,0,,BATTLE/BATTLE.PRG/44F14.c BATTLE/BATTLE.PRG/49268.c,1,Audio,catalog
+G00250,D_800F18B0@BATTLE/BATTLE.PRG,D_800F18B0,BATTLE/BATTLE.PRG,extern,bss,0x800F18B0,4,int,,0,0,,BATTLE/BATTLE.PRG/146C.c,2,Audio,state
+G01826,_soundEvent@SLUS_010.40,_soundEvent,SLUS_010.40,extern,data,0x8002F544,4,int,,0,0,,SLUS_010.40/25AC.c,3,Audio.Driver,state
+G01827,D_8002F548@SLUS_010.40,D_8002F548,SLUS_010.40,extern,data,0x8002F548,4,int,,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,state
+G01828,D_8002F54C@SLUS_010.40,D_8002F54C,SLUS_010.40,extern,data,0x8002F54C,2,u_short,,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,state
+G01829,D_8002F550@SLUS_010.40,D_8002F550,SLUS_010.40,extern,data,0x8002F550,16,int[],,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,state
+G01830,_soundFlush@SLUS_010.40,_soundFlush,SLUS_010.40,extern,data,0x8002F560,64,char[64],,0,0,,SLUS_010.40/25AC.c,2,Audio.Driver,catalog
+G01831,D_8002F5A0@SLUS_010.40,D_8002F5A0,SLUS_010.40,extern,data,0x8002F5A0,152,u_char[],,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,catalog
+G01832,D_8002F600@SLUS_010.40,D_8002F600,SLUS_010.40,extern,data,0x8002F600,56,u_char[],,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,catalog
+G01833,D_8002F620@SLUS_010.40,D_8002F620,SLUS_010.40,extern,data,0x8002F620,24,u_short[],,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,state
+G01834,g_Sound_ProgramCounter@SLUS_010.40,g_Sound_ProgramCounter,SLUS_010.40,extern,data,0x8002F638,4,u_int,,0,0,,SLUS_010.40/25AC.c,3,Audio.Seq,state
+G01835,D_8002F63C@SLUS_010.40,D_8002F63C,SLUS_010.40,extern,data,0x8002F63C,352,u_int[],,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,catalog
+G01836,D_8002F66C@SLUS_010.40,D_8002F66C,SLUS_010.40,extern,data,0x8002F66C,304,char[],,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,catalog
+G01837,D_8002F69C@SLUS_010.40,D_8002F69C,SLUS_010.40,extern,data,0x8002F69C,256,char[],,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,catalog
+G01838,g_Sound_StereoPanGainTableQ15@SLUS_010.40,g_Sound_StereoPanGainTableQ15,SLUS_010.40,extern,data,0x8002F79C,512,short[256],,0,0,,SLUS_010.40/25AC.c,4,Audio.Mixer,catalog
+G01839,D_8002F89C@SLUS_010.40,D_8002F89C,SLUS_010.40,extern,data,0x8002F89C,2,short,,0,0,,SLUS_010.40/25AC.c,4,Audio.Mixer,state
+G01840,g_Sound_LfoTable@SLUS_010.40,g_Sound_LfoTable,SLUS_010.40,extern,data,0x800301A0,1632,short *[],,1,0,,SLUS_010.40/25AC.c,4,Audio.Seq,catalog
+G01841,D_800301E0@SLUS_010.40,D_800301E0,SLUS_010.40,extern,data,0x800301E0,1568,FSoundCommandHandler[],T00742,0,0,,SLUS_010.40/25AC.c,1,Audio.Mixer,catalog
+G01842,D_800305E0@SLUS_010.40,D_800305E0,SLUS_010.40,extern,data,0x800305E0,544,"void (*[])(FSoundChannel *, int)",,1,0,,SLUS_010.40/25AC.c,1,Audio.Seq,catalog
+G01843,D_80030760@SLUS_010.40,D_80030760,SLUS_010.40,extern,data,0x80030760,160,"void (*[])(FSoundChannel *, int)",,1,0,,SLUS_010.40/25AC.c,1,Audio.Seq,catalog
+G01844,g_ActiveMusicChannels@SLUS_010.40,g_ActiveMusicChannels,SLUS_010.40,extern,bss,0x80033690,8704,FSoundChannel[32],T00278,1,0,,SLUS_010.40/25AC.c,23,Audio.Mixer,state
+G01845,g_PushedMusicConfig@SLUS_010.40,g_PushedMusicConfig,SLUS_010.40,extern,bss,0x80035890,160,FSoundChannelConfig,T00279,1,0,,SLUS_010.40/25AC.c,6,Audio.Seq,state
+G01846,D_800358FE@SLUS_010.40,D_800358FE,SLUS_010.40,extern,bss,0x800358FE,2,short,,0,0,,SLUS_010.40/25AC.c,1,Audio.Playback,state
+G01847,D_80035910@SLUS_010.40,D_80035910,SLUS_010.40,extern,bss,0x80035910,2720,FSoundChannel[10],T00278,1,0,,SLUS_010.40/25AC.c,22,Audio.SoundEffects,state
+G01848,SfxSoundChannels@SLUS_010.40,SfxSoundChannels,SLUS_010.40,extern,bss,0x800363B0,3264,FSoundChannel[12],T00278,1,0,,SLUS_010.40/25AC.c,3,Audio.SoundEffects,state
+G01849,_cdlAtv@SLUS_010.40,_cdlAtv,SLUS_010.40,extern,bss,0x800365D0,4,CdlATV,,0,0,,SLUS_010.40/25AC.c,1,Audio.Control,state
+G01850,g_pSecondaryMusicChannels@SLUS_010.40,g_pSecondaryMusicChannels,SLUS_010.40,extern,bss,0x800365D4,4,FSoundChannel *,T00278,1,0,,SLUS_010.40/25AC.c,19,Audio.Mixer,state
+G01851,g_pSavedMousicConfig@SLUS_010.40,g_pSavedMousicConfig,SLUS_010.40,extern,bss,0x80036628,4,FSoundChannelConfig *,T00279,1,0,,SLUS_010.40/25AC.c,22,Audio.Mixer,state
+G01852,g_SpuVoiceInfo@SLUS_010.40,g_SpuVoiceInfo,SLUS_010.40,extern,bss,0x80036630,192,FSpuVoiceInfo[24],T00290,0,0,,SLUS_010.40/25AC.c,4,Audio.Mixer,state
+G01853,D_800366F0@SLUS_010.40,D_800366F0,SLUS_010.40,extern,bss,0x800366F0,160,FSoundChannelConfig,T00279,1,0,,SLUS_010.40/25AC.c,8,Audio.Seq,state
+G01854,D_80036770@SLUS_010.40,D_80036770,SLUS_010.40,extern,bss,0x80036770,16,D_80036770_t,T00201,0,0,,SLUS_010.40/25AC.c,6,Audio.Samples,state
+G01855,D_80036778@SLUS_010.40,D_80036778,SLUS_010.40,extern,bss,0x80036778,4,int,,0,0,,SLUS_010.40/25AC.c,3,Audio.Mixer,state
+G01856,D_8003677C@SLUS_010.40,D_8003677C,SLUS_010.40,extern,bss,0x8003677C,4,int,,0,0,,SLUS_010.40/25AC.c,3,Audio.Mixer,state
+G01857,D_80036780@SLUS_010.40,D_80036780,SLUS_010.40,extern,bss,0x80036780,2,short,,0,0,,SLUS_010.40/25AC.c,5,Audio.Mixer,state
+G01858,D_80036782@SLUS_010.40,D_80036782,SLUS_010.40,extern,bss,0x80036782,2,short,,0,0,,SLUS_010.40/25AC.c,5,Audio.Mixer,state
+G01859,g_InstrumentInfo@SLUS_010.40,g_InstrumentInfo,SLUS_010.40,extern,bss,0x80036788,4096,FSoundInstrumentInfo[256],T00285,0,0,,SLUS_010.40/25AC.c,9,Audio.Seq,state
+G01860,D_80037788@SLUS_010.40,D_80037788,SLUS_010.40,extern,bss,0x80037788,24,FSoundCommandParams,T00280,0,0,,SLUS_010.40/25AC.c,4,Audio.Mixer,state
+G01861,D_80037790@SLUS_010.40,D_80037790,SLUS_010.40,extern,bss,0x80037790,24,FSoundCommandParams,T00280,0,0,,SLUS_010.40/25AC.c,1,Audio.Mixer,state
+G01862,_spuMemInfo@SLUS_010.40,_spuMemInfo,SLUS_010.40,extern,bss,0x800377B0,1,char,,0,0,,SLUS_010.40/25AC.c,1,Audio.Driver,state
+G01863,g_Music_LoopCounter@SLUS_010.40,g_Music_LoopCounter,SLUS_010.40,extern,bss,0x800377D8,4,u_int,,0,0,,SLUS_010.40/25AC.c,3,Audio.Seq,state
+G01864,D_800377E0@SLUS_010.40,D_800377E0,SLUS_010.40,extern,bss,0x800377E0,12,int[3],,0,0,,SLUS_010.40/25AC.c,2,Audio.Samples,state
+G01865,g_Sound_SfxProgramOffsets@SLUS_010.40,g_Sound_SfxProgramOffsets,SLUS_010.40,extern,bss,0x800377EC,4,u_int *,,1,0,,SLUS_010.40/25AC.c,3,Audio.Playback,state
+G01866,_isSpuTransfer@SLUS_010.40,_isSpuTransfer,SLUS_010.40,extern,bss,0x800377F0,4,volatile int,,0,0,,SLUS_010.40/25AC.c,9,Audio.Driver,state
+G01867,g_Sound_SfxMetadataTable@SLUS_010.40,g_Sound_SfxMetadataTable,SLUS_010.40,extern,bss,0x800377F4,4,u_short *,,1,0,,SLUS_010.40/25AC.c,4,Audio.Playback,state
+G01868,g_Sound_SfxProgramData@SLUS_010.40,g_Sound_SfxProgramData,SLUS_010.40,extern,bss,0x800377F8,4,char *,,1,0,,SLUS_010.40/25AC.c,2,Audio.Playback,state
+G01869,D_80037800@SLUS_010.40,D_80037800,SLUS_010.40,extern,bss,0x80037800,24,FSoundCommandParams,T00280,0,0,,SLUS_010.40/25AC.c,2,Audio.Seq,state
+G01870,g_pActiveMusicConfig@SLUS_010.40,g_pActiveMusicConfig,SLUS_010.40,extern,bss,0x80037820,4,FSoundChannelConfig *,T00279,1,0,,SLUS_010.40/25AC.c,65,Audio.Seq,state
+G01871,g_Sound_MasterFadeTimer@SLUS_010.40,g_Sound_MasterFadeTimer,SLUS_010.40,extern,bss,0x80037838,16,FSoundFadeTimer,T00283,0,0,,SLUS_010.40/25AC.c,4,Audio.Mixer,state
+G01872,g_Sound_CdVolumeFadeStep@SLUS_010.40,g_Sound_CdVolumeFadeStep,SLUS_010.40,extern,bss,0x80037848,4,int,,0,0,,SLUS_010.40/25AC.c,3,Audio.Seq,state
+G01873,g_Sound_CdVolumeFadeLength@SLUS_010.40,g_Sound_CdVolumeFadeLength,SLUS_010.40,extern,bss,0x8003784C,2,short,,0,0,,SLUS_010.40/25AC.c,4,Audio.Seq,state
+G01874,D_80037850@SLUS_010.40,D_80037850,SLUS_010.40,extern,bss,0x80037850,64,int[16],,0,0,,SLUS_010.40/25AC.c,1,Audio.Samples,state
+G01875,g_Sound_VoiceSchedulerState@SLUS_010.40,g_Sound_VoiceSchedulerState,SLUS_010.40,extern,bss,0x80037890,48,FSoundVoiceSchedulerState,T00289,0,0,,SLUS_010.40/25AC.c,44,Audio.Seq,state
+G01876,D_80037894@SLUS_010.40,D_80037894,SLUS_010.40,extern,bss,0x80037894,4,int,,0,0,,SLUS_010.40/25AC.c,1,Audio.Mixer,state
+G01877,D_80037898@SLUS_010.40,D_80037898,SLUS_010.40,extern,bss,0x80037898,4,int,,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,state
+G01878,D_8003789C@SLUS_010.40,D_8003789C,SLUS_010.40,extern,bss,0x8003789C,4,int,,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,state
+G01879,D_800378A0@SLUS_010.40,D_800378A0,SLUS_010.40,extern,bss,0x800378A0,4,int,,0,0,,SLUS_010.40/25AC.c,1,Audio.Mixer,state
+G01880,D_800378C0@SLUS_010.40,D_800378C0,SLUS_010.40,extern,bss,0x800378C0,24,D_800378C0_t,T00202,1,0,,SLUS_010.40/25AC.c,45,Audio.Control,state
+G01881,D_800378D4@SLUS_010.40,D_800378D4,SLUS_010.40,extern,bss,0x800378D4,4,int,,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,state
+G01882,g_CdVolume@SLUS_010.40,g_CdVolume,SLUS_010.40,extern,bss,0x800378E0,4,int,,0,0,,SLUS_010.40/25AC.c,4,Audio.Seq,state
+G01883,D_800378E2@SLUS_010.40,D_800378E2,SLUS_010.40,extern,bss,0x800378E2,2,short,,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,state
+G01884,D_800378E4@SLUS_010.40,D_800378E4,SLUS_010.40,extern,bss,0x800378E4,4,int,,0,0,,SLUS_010.40/25AC.c,2,Audio.Mixer,state
+G01885,D_800378E8@SLUS_010.40,D_800378E8,SLUS_010.40,extern,bss,0x800378E8,8704,FSoundChannel[],T00278,1,0,,SLUS_010.40/25AC.c,5,Audio.Seq,state
+G01886,g_Sound_LfoPhase@SLUS_010.40,g_Sound_LfoPhase,SLUS_010.40,extern,bss,0x80039AE8,4,int,,0,0,,SLUS_010.40/25AC.c,2,Audio.Seq,state
+G01887,g_Sound_MasterPitchScaleQ16_16@SLUS_010.40,g_Sound_MasterPitchScaleQ16_16,SLUS_010.40,extern,bss,0x80039AEC,4,int,,0,0,,SLUS_010.40/25AC.c,5,Audio.Mixer,state
+G01888,g_Sound_TempoMultiplier@SLUS_010.40,g_Sound_TempoMultiplier,SLUS_010.40,extern,bss,0x80039AF0,4,int,,0,0,,SLUS_010.40/25AC.c,4,Audio.Mixer,state
+G01889,D_80039AF2@SLUS_010.40,D_80039AF2,SLUS_010.40,extern,bss,0x80039AF2,1,char,,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,state
+G01890,g_Sound_GlobalFlags@SLUS_010.40,g_Sound_GlobalFlags,SLUS_010.40,extern,bss,0x80039AF8,12,FSoundGlobalFlags,T00284,0,0,,SLUS_010.40/25AC.c,35,Audio.Seq,state
+G01891,D_80039AFC@SLUS_010.40,D_80039AFC,SLUS_010.40,extern,bss,0x80039AFC,4,int,,0,0,,SLUS_010.40/25AC.c,11,Audio.Mixer,state
+G01892,D_80039B00@SLUS_010.40,D_80039B00,SLUS_010.40,extern,bss,0x80039B00,4,int,,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,state
+G01893,g_Sound_Cutscene_StreamState@SLUS_010.40,g_Sound_Cutscene_StreamState,SLUS_010.40,extern,bss,0x80039B08,96,FSoundCutsceneStreamState,T00282,1,0,,SLUS_010.40/25AC.c,17,Audio.Cutscene,state
+G01894,D_80039B14@SLUS_010.40,D_80039B14,SLUS_010.40,extern,bss,0x80039B14,4,int,,0,0,,SLUS_010.40/25AC.c,6,Audio.Mixer,state
+G01895,D_80039B48@SLUS_010.40,D_80039B48,SLUS_010.40,extern,bss,0x80039B48,4,int,,0,0,,SLUS_010.40/25AC.c,1,Audio.Seq,state
+G01896,D_80039B64@SLUS_010.40,D_80039B64,SLUS_010.40,extern,bss,0x80039B64,4,int,,0,0,,SLUS_010.40/25AC.c,9,Audio.Seq,state
+G01897,g_Sound_VoiceChannelConfigs@SLUS_010.40,g_Sound_VoiceChannelConfigs,SLUS_010.40,extern,bss,0x80039B68,96,FSoundChannelConfig *[24],T00279,1,0,,SLUS_010.40/25AC.c,3,Audio.Mixer,state
+G01898,D_80039BC8@SLUS_010.40,D_80039BC8,SLUS_010.40,extern,bss,0x80039BC8,16,D_80039BC8_t,T00203,1,0,,SLUS_010.40/25AC.c,1,Audio.Samples,state
+G01899,D_80039BCC@SLUS_010.40,D_80039BCC,SLUS_010.40,extern,bss,0x80039BCC,4,int,,0,0,,SLUS_010.40/25AC.c,1,Audio.Samples,state
+G01900,g_Sound_VoiceModeFlags@SLUS_010.40,g_Sound_VoiceModeFlags,SLUS_010.40,extern,bss,0x80039BD8,12,FSoundVoiceModeFlags,T00287,0,0,,SLUS_010.40/25AC.c,1,Audio.Mixer,state
+G01937,_sfxData@SLUS_010.40,_sfxData,SLUS_010.40,extern,bss,0x80050478,22528,u_short[],,0,0,,SLUS_010.40/main.c,1,Audio,state
+G01954,vs_main_soundData@SLUS_010.40,vs_main_soundData,SLUS_010.40,extern,bss,0x8005E038,136,soundData_t,T00603,1,0,,SLUS_010.40/main.h,34,Audio,state
+G01974,D_8005FE70@SLUS_010.40,D_8005FE70,SLUS_010.40,extern,bss,0x8005FE70,4,int,,0,0,,SLUS_010.40/main.c,3,Audio,state
+G01975,D_8005FE74@SLUS_010.40,D_8005FE74,SLUS_010.40,extern,bss,0x8005FE74,4,int,,0,0,,SLUS_010.40/main.c,3,Audio,state
+G01976,D_8005FE78@SLUS_010.40,D_8005FE78,SLUS_010.40,extern,bss,0x8005FE78,4,int,,0,0,,SLUS_010.40/main.c,3,Audio,state
+G01977,D_8005FE7C@SLUS_010.40,D_8005FE7C,SLUS_010.40,extern,bss,0x8005FE7C,4,int,,0,0,,SLUS_010.40/main.c,4,Audio,state
+G01978,D_8005FE80@SLUS_010.40,D_8005FE80,SLUS_010.40,extern,bss,0x8005FE80,4,int,,0,0,,SLUS_010.40/main.c,3,Audio,state
+G01979,D_8005FE84@SLUS_010.40,D_8005FE84,SLUS_010.40,extern,bss,0x8005FE84,4,int,,0,0,,SLUS_010.40/main.c,4,Audio,state
+G02003,_musicFileSizes@SLUS_010.40,_musicFileSizes,SLUS_010.40,extern,c-defined,,800,int[200],,0,1,,SLUS_010.40/main.c,1,Audio,catalog
+G02004,_musicLBAs@SLUS_010.40,_musicLBAs,SLUS_010.40,extern,c-defined,,800,int[200],,0,1,,SLUS_010.40/main.c,1,Audio,catalog
+G02008,_seFileSizes@SLUS_010.40,_seFileSizes,SLUS_010.40,extern,c-defined,,400,int[100],,0,1,,SLUS_010.40/main.c,1,Audio,catalog
+G02009,_seLBAs@SLUS_010.40,_seLBAs,SLUS_010.40,extern,c-defined,,400,int[100],,0,1,,SLUS_010.40/main.c,1,Audio,catalog
+G02010,_soundFileMap@SLUS_010.40,_soundFileMap,SLUS_010.40,extern,c-defined,,200,char[200],,0,1,,SLUS_010.40/main.c,1,Audio,catalog
+G02011,_soundFileSizes@SLUS_010.40,_soundFileSizes,SLUS_010.40,extern,c-defined,,400,int[100],,0,1,,SLUS_010.40/main.c,1,Audio,catalog
+G02012,_soundLBAs@SLUS_010.40,_soundLBAs,SLUS_010.40,extern,c-defined,,400,int[100],,0,1,,SLUS_010.40/main.c,1,Audio,catalog

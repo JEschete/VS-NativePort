@@ -1,0 +1,101 @@
+# Game_Menu_01: who uses what
+
+Function names are `final name (decomp file:line original name)`.
+
+## Types
+
+- **T00746** `union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8)`: *no function references*
+- **T00124** `struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5)`: Event::ScriptStoreButtonState (BATTLE/BATTLE.PRG/4A0A8.c:1798 vs_battle_script_setFlagIfButton); Render::DrawProgressiveTextBoxText (BATTLE/BATTLE.PRG/5BF94.c:1706 _printVariableWidthFont); Menu::Files::UpdateLoadCard (MENU/MENU7.PRG/260.c:3063 _selectLoadMemoryCard); Menu::Files::UpdateSaveCard (MENU/MENU7.PRG/260.c:2537 _selectSaveMemoryCard); Menu::Files::UpdateLoadFiles (MENU/MENU7.PRG/260.c:2878 _showLoadFilesMenu); Menu::Files::UpdateSaveFiles (MENU/MENU7.PRG/260.c:2277 _showSaveFilesMenu); Menu::Files::UpdateDataSaveMenu (MENU/MENU7.PRG/260.c:2673 _showSaveMenu); Menu::Files::UpdateContainerSave (MENU/MENU7.PRG/260.c:3944 vs_menu7_saveContainerMenu); Menu::Loot::UpdateLeaveConfirmation (MENU/MENUB.PRG/260.c:1377 _discardItems); Menu::Loot::Update (MENU/MENUB.PRG/260.c:1951 vs_menuB_exec); Menu::Setup::UpdateRepair (MENU/MENUC.PRG/168.c:2509 _repairMenu)
+- **T00170** `struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8)`: Menu::Map::ComputeCompassCorners (MENU/MENU5.PRG/4D8.c:2377 _computeRotatedRect); Menu::Map::DrawCompass (MENU/MENU5.PRG/4D8.c:2272 _renderCompass)
+- **T00171** `struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8)`: Menu::Map::QueueLabel (MENU/MENU5.PRG/4D8.c:2441 _addMapLabel); Menu::Map::DrawLabels (MENU/MENU5.PRG/4D8.c:2450 renderMapLabels)
+- **T00784** `union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5)`: *no function references*
+- **T00172** `struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5)`: Menu::Setup::BuildCombinedBlade (MENU/MENUC.PRG/168.c:4934 _combineBlades)
+- **T00181** `struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5)`: Menu::Results::InitializeCubePuzzleStart (MENU/MENUF.PRG/3B8.c:2260 _initCubePuzzleStart)
+- **T00187** `struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5)`: Menu::BattleAbilities::UpdateAbilityUnlock (MENU/MENU2.PRG/143C.c:125 _battleAbilityUnlocked); Menu::BattleAbilities::UpdateBreakArtUnlock (MENU/MENU2.PRG/143C.c:27 _breakArtUnlocked)
+- **T00196** `struct:AnimationState_t`: Menu::Manual::DrawDiagramLines (MENU/MENUE.PRG/494.c:883 _drawContentLines); Menu::Manual::DrawIllustration (MENU/MENUE.PRG/494.c:629 _drawSprite); Menu::Manual::AdvanceVisibilityAnimation (MENU/MENUE.PRG/494.c:940 _getAnimationState)
+- **T00000** `enum:BuffReelStats`: *no function references*
+- **T00248** `struct:D_800F4538_unk58_3`: Menu::Framework::ResetActorPreviewPose (MENU/MAINMENU.PRG/224.c:100 func_800F9CB0)
+- **T00254** `struct:D_800F4590_t`: Menu::Framework::ResetActorPreviewPose (MENU/MAINMENU.PRG/224.c:100 func_800F9CB0); Menu::Inventory::ReloadEquipmentModels (MENU/MENU3.PRG/68C4.c:12 _loadObjectData)
+- **T00261** `struct:D_800F4EE8_t`: Menu::Framework::InitGameInterface (BATTLE/BATTLE.PRG/5BF94.c:3484 func_800CA9C0)
+- **T00304** `struct:_armorInfo`: Menu::Setup::BuildCombinedArmor (MENU/MENUC.PRG/168.c:5061 _combineArmor); Menu::Setup::BuildCombinedShield (MENU/MENUC.PRG/168.c:5012 _combineShields)
+- **T00306** `struct:_buffReels_t`: Menu::Results::UpdateGameClear (MENU/MENUF.PRG/3B8.c:755 _renderCongratulationsScreen); Menu::Results::DrawBonusReel (MENU/MENUF.PRG/3B8.c:1996 _renderStatWheel)
+- **T00001** `enum:_disFileIndices`: *no function references*
+- **T00002** `enum:_findCurrentSave_e`: *no function references*
+- **T00310** `struct:_gazetteRow`: Menu::Score::LeaveTimeTrialMenu (MENU/MENU9.PRG/238.c:2488 _leaveBossRushMenu); Menu::Score::Update (MENU/MENU9.PRG/238.c:548 _menuInput); Menu::Score::CreateTimeTrialRows (MENU/MENU9.PRG/238.c:2461 _printBossRushMenuRow); Menu::Score::RenderStatistics (MENU/MENU9.PRG/238.c:2226 _renderBossRushDetails); Menu::Score::RenderTimeTrialRecords (MENU/MENU9.PRG/238.c:2507 _renderBossRushRecords); Menu::Score::RenderTitles (MENU/MENU9.PRG/238.c:1756 _renderTitleMenu); Menu::Score::CreateStatisticRows (MENU/MENU9.PRG/238.c:2201 _setStatText); Menu::Score::CreateTitleRows (MENU/MENU9.PRG/238.c:1722 _setTitleRows)
+- **T00313** `struct:_itemsText_t`: Menu::Framework::CreateListRow (MENU/MAINMENU.PRG/58EC.c:910 _initItemRow); Menu::Framework::CreateActionRow (MENU/MAINMENU.PRG/58EC.c:162 _renderActionRow); Menu::Framework::CreateActionRows (MENU/MAINMENU.PRG/58EC.c:51 vs_mainMenu_addMenuActions); Menu::Framework::CreateMenuRows (MENU/MAINMENU.PRG/58EC.c:798 vs_mainmenu_setMenuRows); Menu::Inventory::CreateEquipmentRows (MENU/MENU3.PRG/16C.c:39 _populateMenuRows); Menu::Inventory::UpdateEquipmentChoices (MENU/MENU3.PRG/16C.c:111 _processEquipSubMenu)
+- **T00316** `struct:_lootListItem`: Menu::Loot::AppendLootRow (MENU/MENUB.PRG/260.c:950 _addLootToList); Menu::Loot::UpdateStackConsolidation (MENU/MENUB.PRG/260.c:458 _consolidateMiscItems); Menu::Loot::UpdateDisassembly (MENU/MENUB.PRG/260.c:232 _disassembleItem); Menu::Loot::UpdateLeaveConfirmation (MENU/MENUB.PRG/260.c:1377 _discardItems); Menu::Loot::RenderLootRows (MENU/MENUB.PRG/260.c:1192 _displayCurrentLoot); Menu::Loot::RenderBagCapacities (MENU/MENUB.PRG/260.c:1015 _displayInventoryCapacities); Menu::Loot::CountContainedCategory (MENU/MENUB.PRG/260.c:968 _itemIncludesItemsInCategory); Menu::Loot::UpdateOrganizationMenu (MENU/MENUB.PRG/260.c:1510 _organizeInventory); Menu::Loot::ShowLootDescription (MENU/MENUB.PRG/260.c:1319 _populateLootItem); Menu::Loot::UpdateLootSelection (MENU/MENUB.PRG/260.c:1622 _processLootMenu); Menu::Loot::RefreshClaimableRows (MENU/MENUB.PRG/260.c:907 _updateLootList); Menu::Loot::Update (MENU/MENUB.PRG/260.c:1951 vs_menuB_exec)
+- **T00003** `enum:_memcardEventMask_e`: *no function references*
+- **T00317** `struct:_menuBgChunkWidths_t`: Menu::Manual::DrawLowerScrollFade (MENU/MENUE.PRG/494.c:791 _fadeMenuLower); Menu::Manual::DrawUpperScrollFade (MENU/MENUE.PRG/494.c:740 _fadeMenuUpper)
+- **T00318** `struct:_menuBgTransparencies_t`: Menu::Manual::DrawLowerScrollFade (MENU/MENUE.PRG/494.c:791 _fadeMenuLower); Menu::Manual::DrawUpperScrollFade (MENU/MENUE.PRG/494.c:740 _fadeMenuUpper)
+- **T00319** `struct:_monBinData_t`: Menu::Score::InitializeEnemyList (MENU/MENU9.PRG/238.c:1916 _initEnemyList); Menu::Score::Update (MENU/MENU9.PRG/238.c:548 _menuInput); Menu::Score::RenderEnemyViewer (MENU/MENU9.PRG/238.c:2069 _renderEnemyDetailScreen); Menu::Score::RenderEnemyList (MENU/MENU9.PRG/238.c:1972 _renderEnemyMenu); Menu::Score::ShowEnemyDescription (MENU/MENU9.PRG/238.c:1414 _setEnemyDescription)
+- **T00005** `enum:_renderLimbUiState`: *no function references*
+- **T00340** `struct:_syd`: Menu::Setup::BuildCombinedArmor (MENU/MENUC.PRG/168.c:5061 _combineArmor); Menu::Setup::BuildCombinedBlade (MENU/MENUC.PRG/168.c:4934 _combineBlades); Menu::Setup::BuildCombinedShield (MENU/MENUC.PRG/168.c:5012 _combineShields)
+- **T00341** `struct:_textBoxSelector_t`: *no function references*
+- **T00342** `struct:_texture_t`: Ending::DrawCongratulations (ENDING/ENDING.PRG/D4.c:1925 _renderCongratulations); Ending::DrawCountingMapCompletion (ENDING/ENDING.PRG/D4.c:2113 _renderIncrementalMapCompletion); Ending::DrawCountingScore (ENDING/ENDING.PRG/D4.c:1996 _renderIncrementalScore); Ending::DrawMapCompletion (ENDING/ENDING.PRG/D4.c:2070 _renderMapCompletion); Ending::DrawRiskbreakerRank (ENDING/ENDING.PRG/D4.c:2197 _renderRiskbreakerRank); Ending::DrawScore (ENDING/ENDING.PRG/D4.c:1946 _renderScore); Menu::Results::DrawLeaderboard (MENU/MENUF.PRG/3B8.c:1816 _renderAllStoredTimes); Menu::Results::DrawBonusReelTexture (MENU/MENUF.PRG/3B8.c:2168 _renderAnimatedStatWheel); Menu::Results::DrawAverageTimeHeading (MENU/MENUF.PRG/3B8.c:2687 _renderAverageTimeHeader); Menu::Results::DrawBestTime (MENU/MENUF.PRG/3B8.c:1226 _renderBestTimeHeader); Menu::Results::DrawBossName (MENU/MENUF.PRG/3B8.c:1195 _renderBossName); Menu::Results::DrawCongratulations (MENU/MENUF.PRG/3B8.c:1332 _renderCongratulations) … +23 more
+- **T00349** `struct:_zudData_t`: Menu::Score::QueueEnemyModelRead (MENU/MENU9.PRG/592C.c:171 vs_menu9_loadZudFile); Menu::Score::LoadEnemyModelParts (MENU/MENU9.PRG/592C.c:203 vs_menu9_parseZudFile)
+- **T00006** `enum:abilityState_e`: *no function references*
+- **T00007** `enum:abilityType`: *no function references*
+- **T00009** `enum:actions`: *no function references*
+- **T00011** `enum:arrowType_e`: Menu::Manual::DrawPageArrow (MENU/MENUE.PRG/494.c:844 _drawPaginationArrow); Menu::Manual::DrawLowerScrollFade (MENU/MENUE.PRG/494.c:791 _fadeMenuLower); Menu::Manual::DrawUpperScrollFade (MENU/MENUE.PRG/494.c:740 _fadeMenuUpper)
+- **T00012** `enum:ashleyRenderMode`: *no function references*
+- **T00014** `enum:copyContainerFlags`: *no function references*
+- **T00015** `enum:disIndices`: *no function references*
+- **T00017** `enum:drawArtsListOpt`: *no function references*
+- **T00020** `enum:fileMenuElementState_e`: *no function references*
+- **T00425** `struct:fileMenuElements_t`: Menu::Files::ClearElement (MENU/MENU7.PRG/260.c:1504 _clearFileMenuElement); Menu::Files::DrawFrame (MENU/MENU7.PRG/260.c:1951 _drawFileMenu); Menu::Files::DrawElement (MENU/MENU7.PRG/260.c:1765 _drawFileMenuElement); Menu::Files::AreAnimationsComplete (MENU/MENU7.PRG/260.c:1512 _fileMenuElementsActive); Menu::Files::InitializeElement (MENU/MENU7.PRG/260.c:1463 _initFileMenuElement); Menu::Files::UpdateDataLoadMenu (MENU/MENU7.PRG/260.c:3187 _loadFileMenu); Menu::Files::UpdateConfirmation (MENU/MENU7.PRG/260.c:2092 _promptConfirm); Menu::Files::UpdateLoadCard (MENU/MENU7.PRG/260.c:3063 _selectLoadMemoryCard); Menu::Files::UpdateSaveCard (MENU/MENU7.PRG/260.c:2537 _selectSaveMemoryCard); Menu::Files::UpdateLoadFiles (MENU/MENU7.PRG/260.c:2878 _showLoadFilesMenu); Menu::Files::UpdateSaveFiles (MENU/MENU7.PRG/260.c:2277 _showSaveFilesMenu); Menu::Files::UpdateDataSaveMenu (MENU/MENU7.PRG/260.c:2673 _showSaveMenu) … +14 more
+- **T00488** `struct:func_800CCE10_t`: Menu::TextBoxAnchor (BATTLE/BATTLE.PRG/5BF94.c:4546 func_800CCE10)
+- **T00022** `enum:lootItemState`: *no function references*
+- **T00023** `enum:magicSubMenu`: *no function references*
+- **T00024** `enum:maskedHandler_e`: Menu::Files::CheckCardStep (MENU/MENU7.PRG/260.c:1640 maskedHandler)
+- **T00585** `struct:primBuf_t#e1847cec`: *no function references*
+- **T00586** `struct:primBuf_t#e2d158f6`: *no function references*
+- **T00594** `struct:saveBase_t`: *no function references*
+- **T00596** `struct:saveFileSubInfo_t`: *no function references*
+- **T00030** `enum:shortcutMagicMenu`: *no function references*
+- **T00032** `enum:statType_e`: Menu::Files::DrawElement (MENU/MENU7.PRG/260.c:1765 _drawFileMenuElement); Menu::Files::DrawHpMpSummary (MENU/MENU7.PRG/260.c:1270 _drawHPMP); Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement); Title::SaveFiles::DrawHpMpSummary (TITLE/TITLE.PRG/22C.c:1154 _drawHPMP)
+- **T00033** `enum:state#a0b14e7a`: *no function references*
+- **T00034** `enum:state#9b4695c8`: *no function references*
+- **T00035** `enum:state#57c71e0e`: *no function references*
+- **T00036** `enum:state#fe43757f`: *no function references*
+- **T00037** `enum:state#571ab01e`: *no function references*
+- **T00038** `enum:state#ec41f4f5`: *no function references*
+- **T00039** `enum:state#4e8bc620`: *no function references*
+- **T00040** `enum:state#6ac02a91`: *no function references*
+- **T00041** `enum:state#1fbf787a`: *no function references*
+- **T00042** `enum:state#f6af9fe2`: *no function references*
+- **T00043** `enum:state#bb749252`: *no function references*
+- **T00044** `enum:state#da7b22a5`: *no function references*
+- **T00045** `enum:state#ef170dd1`: *no function references*
+- **T00046** `enum:state#5af73395`: *no function references*
+- **T00047** `enum:state#57ce9fc4`: *no function references*
+- **T00048** `enum:state#10a4b332`: *no function references*
+- **T00049** `enum:state#442c0772`: *no function references*
+- **T00050** `enum:state#704b2937`: *no function references*
+- **T00051** `enum:state#ffede47b`: *no function references*
+- **T00052** `enum:state#8df3b61d`: *no function references*
+- **T00053** `enum:state#95326067`: *no function references*
+- **T00054** `enum:state#3e7efe61`: *no function references*
+- **T00055** `enum:state#bfad29c2`: *no function references*
+- **T00056** `enum:state#9a80e767`: *no function references*
+- **T00057** `enum:state#7eac9559`: *no function references*
+- **T00058** `enum:state#508b3d12`: *no function references*
+- **T00059** `enum:state#aba9386a`: *no function references*
+- **T00060** `enum:state#a980f591`: *no function references*
+- **T00061** `enum:state#e6006a2b`: *no function references*
+- **T00062** `enum:state#d58c8390`: *no function references*
+- **T00063** `enum:state#90138150`: *no function references*
+- **T00064** `enum:state#f3a50b38`: *no function references*
+- **T00065** `enum:state#de8ac804`: *no function references*
+- **T00066** `enum:state#c4ba3fbc`: *no function references*
+- **T00067** `enum:state#6dc2bf75`: *no function references*
+- **T00068** `enum:state#7aadc4f5`: *no function references*
+- **T00069** `enum:state#44000bd2`: *no function references*
+- **T00070** `enum:state#87e65481`: *no function references*
+- **T00071** `enum:state#c7aecfe7`: *no function references*
+- **T00072** `enum:state#ed732f25`: *no function references*
+- **T00073** `enum:state#7bbcce8d`: *no function references*
+- **T00074** `enum:state#7f84e817`: *no function references*
+- **T00075** `enum:state#86219843`: *no function references*
+- **T00076** `enum:state#046f6790`: *no function references*
+- **T00077** `enum:state#a4726fff`: *no function references*
+- **T00078** `enum:state#1afb2e71`: *no function references*

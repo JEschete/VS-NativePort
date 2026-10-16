@@ -1,0 +1,96 @@
+id,key,kind,name,aliases,size,fields,generic_fields,layouts,files,used_by_funcs,used_by_globals,proposed_system
+T00746,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),,4,2,1,1,SLUS_010.40/main.h,0,1,Game.Menu
+T00124,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),,2,2,0,1,SLUS_010.40/main.h,11,0,Game.Menu
+T00170,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),,8,2,0,1,MENU/MENU5.PRG/4D8.c,2,1,Game.Menu
+T00171,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),,8,4,0,1,MENU/MENU5.PRG/4D8.c,2,1,Game.Menu
+T00784,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),,60,7,0,1,MENU/MENU7.PRG/260.c,0,0,Game.Menu
+T00172,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),,16,13,2,1,MENU/MENUC.PRG/168.c,1,0,Game.Menu
+T00181,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),,8,4,0,1,MENU/MENUF.PRG/3B8.c,1,0,Game.Menu
+T00187,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),,2,2,0,1,SLUS_010.40/main.h,2,0,Game.Menu
+T00196,struct:AnimationState_t,struct,AnimationState_t,AnimationState_t,14,7,0,1,MENU/MENUE.PRG/494.c,3,0,Game.Menu
+T00000,enum:BuffReelStats,enum,BuffReelStats,,4,5,0,1,MENU/MENUF.PRG/3B8.c,0,0,Game.Menu
+T00248,struct:D_800F4538_unk58_3,struct,D_800F4538_unk58_3,D_800F4538_unk58_3,4,4,4,1,MENU/MAINMENU.PRG/224.c,1,0,Game.Menu
+T00254,struct:D_800F4590_t,struct,D_800F4590_t,D_800F4590_t,20,6,6,1,BATTLE/BATTLE.PRG/30DB0.h,2,1,Game.Menu
+T00261,struct:D_800F4EE8_t,struct,D_800F4EE8_t,D_800F4EE8_t,242,11,9,1,BATTLE/BATTLE.PRG/5BF94.h,1,1,Game.Menu
+T00304,struct:_armorInfo,struct,_armorInfo,_armorInfo,8,8,0,1,MENU/MENUC.PRG/168.c,2,2,Game.Menu
+T00306,struct:_buffReels_t,struct,_buffReels_t,_buffReels_t,4,2,0,1,MENU/MENUF.PRG/3B8.c,2,1,Game.Menu
+T00001,enum:_disFileIndices,enum,_disFileIndices,,4,5,0,1,MENU/MENUF.PRG/3B8.c,0,0,Game.Menu
+T00002,enum:_findCurrentSave_e,enum,_findCurrentSave_e,,4,3,0,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00310,struct:_gazetteRow,struct,_gazetteRow,_gazetteRow,16,8,1,1,MENU/MENU9.PRG/238.c,8,1,Game.Menu
+T00313,struct:_itemsText_t,struct,_itemsText_t,_itemsText_t,128,3,0,1,MENU/MAINMENU.PRG/58EC.c MENU/MENU3.PRG/16C.c,6,0,Game.Menu
+T00316,struct:_lootListItem,struct,_lootListItem,_lootListItem,4,4,1,1,MENU/MENUB.PRG/260.c,12,2,Game.Menu
+T00003,enum:_memcardEventMask_e,enum,_memcardEventMask_e,,4,2,0,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00317,struct:_menuBgChunkWidths_t,struct,_menuBgChunkWidths_t,_menuBgChunkWidths_t,12,3,3,1,MENU/MENUE.PRG/494.c,2,1,Game.Menu
+T00318,struct:_menuBgTransparencies_t,struct,_menuBgTransparencies_t,_menuBgTransparencies_t,16,4,4,1,MENU/MENUE.PRG/494.c,2,1,Game.Menu
+T00319,struct:_monBinData_t,struct,_monBinData_t,_monBinData_t,44,11,0,1,MENU/MENU9.PRG/238.c,5,1,Game.Menu
+T00005,enum:_renderLimbUiState,enum,_renderLimbUiState,,4,2,0,1,MENU/MENU4.PRG/120.c,0,0,Game.Menu
+T00340,struct:_syd,struct,_syd,_syd,12,4,0,1,MENU/MENUC.PRG/168.c,3,0,Game.Menu
+T00341,struct:_textBoxSelector_t,struct,_textBoxSelector_t,_textBoxSelector_t,13,6,3,1,BATTLE/BATTLE.PRG/5BF94.c,0,1,Game.Menu
+T00342,struct:_texture_t,struct,_texture_t,_texture_t,8,6,0,1,include/texture_t.h,35,3,Game.Menu
+T00349,struct:_zudData_t,struct,_zudData_t,_zudData_t,48,17,1,1,MENU/MENU9.PRG/592C.c,2,1,Game.Menu
+T00006,enum:abilityState_e,enum,abilityState_e,,4,4,0,1,MENU/MENU2.PRG/143C.c,0,0,Game.Menu
+T00007,enum:abilityType,enum,abilityType,,4,2,0,1,MENU/MENU2.PRG/64.c,0,0,Game.Menu
+T00009,enum:actions,enum,actions,,4,5,0,1,MENU/items2.h,0,0,Game.Menu
+T00011,enum:arrowType_e,enum,arrowType_e,,4,2,0,1,MENU/MENUE.PRG/494.c,3,0,Game.Menu
+T00012,enum:ashleyRenderMode,enum,ashleyRenderMode,,4,3,0,1,MENU/_renderAshley.h,0,0,Game.Menu
+T00014,enum:copyContainerFlags,enum,copyContainerFlags,,4,1,0,1,MENU/MENUD.PRG/234.c,0,0,Game.Menu
+T00015,enum:disIndices,enum,disIndices,,4,67,0,1,MENU/MENUF.PRG/3B8.c,0,0,Game.Menu
+T00017,enum:drawArtsListOpt,enum,drawArtsListOpt,,4,1,0,1,MENU/MENU1.PRG/30.c,0,0,Game.Menu
+T00020,enum:fileMenuElementState_e,enum,fileMenuElementState_e,,4,5,0,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00425,struct:fileMenuElements_t,struct,fileMenuElements_t,fileMenuElements_t,52,15,2,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,26,2,Game.Menu
+T00488,struct:func_800CCE10_t,struct,func_800CCE10_t,func_800CCE10_t,4,4,4,1,BATTLE/BATTLE.PRG/5BF94.c,1,1,Game.Menu
+T00022,enum:lootItemState,enum,lootItemState,,4,6,0,1,MENU/MENUB.PRG/260.c,0,0,Game.Menu
+T00023,enum:magicSubMenu,enum,magicSubMenu,,4,5,0,1,MENU/MENU0.PRG/15AC.c,0,0,Game.Menu
+T00024,enum:maskedHandler_e,enum,maskedHandler_e,,4,3,0,1,MENU/MENU7.PRG/260.c,1,0,Game.Menu
+T00585,struct:primBuf_t#e1847cec,struct,primBuf_t,primBuf_t,64,2,0,2,MENU/MENU7.PRG/260.c,0,2,Game.Menu
+T00586,struct:primBuf_t#e2d158f6,struct,primBuf_t,primBuf_t,64,2,0,2,TITLE/TITLE.PRG/22C.c,0,2,Game.Menu
+T00594,struct:saveBase_t,struct,saveBase_t,saveBase_t,12,3,1,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00596,struct:saveFileSubInfo_t,struct,saveFileSubInfo_t,saveFileSubInfo_t,64,3,1,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00030,enum:shortcutMagicMenu,enum,shortcutMagicMenu,,4,4,0,1,MENU/MENU0.PRG/15AC.c,0,0,Game.Menu
+T00032,enum:statType_e,enum,statType_e,,4,2,0,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,4,0,Game.Menu
+T00033,enum:state#a0b14e7a,enum,state,,4,4,0,58,MENU/items1.h,0,0,Game.Menu
+T00034,enum:state#9b4695c8,enum,state,,4,4,0,58,MENU/MENU3.PRG/16C.c,0,0,Game.Menu
+T00035,enum:state#57c71e0e,enum,state,,4,1,0,58,MENU/MENU4.PRG/120.c MENU/MENU7.PRG/260.c MENU/MENUB.PRG/260.c,0,0,Game.Menu
+T00036,enum:state#fe43757f,enum,state,,4,3,0,58,MENU/MENU0.PRG/84.c,0,0,Game.Menu
+T00037,enum:state#571ab01e,enum,state,,4,3,0,58,MENU/MENU1.PRG/30.c,0,0,Game.Menu
+T00038,enum:state#ec41f4f5,enum,state,,4,2,0,58,MENU/MENU2.PRG/64.c,0,0,Game.Menu
+T00039,enum:state#4e8bc620,enum,state,,4,8,0,58,MENU/MENUD.PRG/234.c MENU/items1.h,0,0,Game.Menu
+T00040,enum:state#6ac02a91,enum,state,,4,6,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00041,enum:state#1fbf787a,enum,state,,4,2,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00042,enum:state#f6af9fe2,enum,state,,4,5,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00043,enum:state#bb749252,enum,state,,4,3,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00044,enum:state#da7b22a5,enum,state,,4,4,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00045,enum:state#ef170dd1,enum,state,,4,4,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00046,enum:state#5af73395,enum,state,,4,11,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00047,enum:state#57ce9fc4,enum,state,,4,8,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00048,enum:state#10a4b332,enum,state,,4,12,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00049,enum:state#442c0772,enum,state,,4,6,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00050,enum:state#704b2937,enum,state,,4,8,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00051,enum:state#ffede47b,enum,state,,4,9,0,58,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,0,0,Game.Menu
+T00052,enum:state#8df3b61d,enum,state,,4,4,0,58,MENU/MENUD.PRG/234.c,0,0,Game.Menu
+T00053,enum:state#95326067,enum,state,,4,5,0,58,MENU/MAINMENU.PRG/C48.c,0,0,Game.Menu
+T00054,enum:state#3e7efe61,enum,state,,4,3,0,58,MENU/MENU0.PRG/15AC.c,0,0,Game.Menu
+T00055,enum:state#bfad29c2,enum,state,,4,16,0,58,MENU/MENU0.PRG/15AC.c,0,0,Game.Menu
+T00056,enum:state#9a80e767,enum,state,,4,5,0,58,MENU/MENU0.PRG/84.c,0,0,Game.Menu
+T00057,enum:state#7eac9559,enum,state,,4,3,0,58,MENU/MENU0.PRG/84.c,0,0,Game.Menu
+T00058,enum:state#508b3d12,enum,state,,4,9,0,58,MENU/MENU1.PRG/30.c,0,0,Game.Menu
+T00059,enum:state#aba9386a,enum,state,,4,8,0,58,MENU/MENU2.PRG/143C.c,0,0,Game.Menu
+T00060,enum:state#a980f591,enum,state,,4,6,0,58,MENU/MENU2.PRG/143C.c,0,0,Game.Menu
+T00061,enum:state#e6006a2b,enum,state,,4,3,0,58,MENU/MENU2.PRG/64.c,0,0,Game.Menu
+T00062,enum:state#d58c8390,enum,state,,4,8,0,58,MENU/MENU2.PRG/64.c,0,0,Game.Menu
+T00063,enum:state#90138150,enum,state,,4,4,0,58,MENU/items1.h,0,0,Game.Menu
+T00064,enum:state#f3a50b38,enum,state,,4,4,0,58,MENU/items1.h,0,0,Game.Menu
+T00065,enum:state#de8ac804,enum,state,,4,2,0,58,MENU/items1.h,0,0,Game.Menu
+T00066,enum:state#c4ba3fbc,enum,state,,4,9,0,58,MENU/items2.h,0,0,Game.Menu
+T00067,enum:state#6dc2bf75,enum,state,,4,6,0,58,MENU/MENU3.PRG/16C.c,0,0,Game.Menu
+T00068,enum:state#7aadc4f5,enum,state,,4,7,0,58,MENU/MENU3.PRG/16C.c,0,0,Game.Menu
+T00069,enum:state#44000bd2,enum,state,,4,7,0,58,MENU/MENU4.PRG/120.c,0,0,Game.Menu
+T00070,enum:state#87e65481,enum,state,,4,6,0,58,MENU/MENU4.PRG/120.c,0,0,Game.Menu
+T00071,enum:state#c7aecfe7,enum,state,,4,8,0,58,MENU/MENU4.PRG/120.c,0,0,Game.Menu
+T00072,enum:state#ed732f25,enum,state,,4,1,0,58,MENU/MENU5.PRG/4D8.c,0,0,Game.Menu
+T00073,enum:state#7bbcce8d,enum,state,,4,6,0,58,MENU/MENU5.PRG/4D8.c,0,0,Game.Menu
+T00074,enum:state#7f84e817,enum,state,,4,2,0,58,MENU/MENU5.PRG/4D8.c,0,0,Game.Menu
+T00075,enum:state#86219843,enum,state,,4,8,0,58,MENU/MENU7.PRG/260.c,0,0,Game.Menu
+T00076,enum:state#046f6790,enum,state,,4,4,0,58,MENU/MENU7.PRG/260.c,0,0,Game.Menu
+T00077,enum:state#a4726fff,enum,state,,4,7,0,58,MENU/MENU7.PRG/260.c,0,0,Game.Menu
+T00078,enum:state#1afb2e71,enum,state,,4,7,0,58,MENU/MENU8.PRG/21A0.c,0,0,Game.Menu

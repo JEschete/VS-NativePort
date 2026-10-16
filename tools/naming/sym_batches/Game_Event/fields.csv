@@ -1,0 +1,161 @@
+id,type_id,type_name,index,name,type,bits,value,hints
+T00219.000,T00219,D_800EB9BC_t,0,unk0_0,u_int,1,,
+T00219.001,T00219,D_800EB9BC_t,1,unk0_1,u_int,1,,
+T00219.002,T00219,D_800EB9BC_t,2,unk0_2,u_int,1,,
+T00219.003,T00219,D_800EB9BC_t,3,unk0_3,u_int,3,,
+T00219.004,T00219,D_800EB9BC_t,4,unk0_6,u_int,18,,
+T00219.005,T00219,D_800EB9BC_t,5,unk0_24,u_int,8,,
+T00219.006,T00219,D_800EB9BC_t,6,unk4,int,,,
+T00219.007,T00219,D_800EB9BC_t,7,unk8,short,,,horizontal offset
+T00219.008,T00219,D_800EB9BC_t,8,unkA,short,,,vertical offset
+T00219.009,T00219,D_800EB9BC_t,9,unkC,short,,,depth
+T00219.010,T00219,D_800EB9BC_t,10,unk10,int[250],,,
+T00256.000,T00256,D_800F4B28_t,0,curve,u_char,,,curve family
+T00256.001,T00256,D_800F4B28_t,1,power,signed char,,,signed power shaping
+T00257.000,T00257,D_800F4B30_t,0,unk0,char,,,
+T00257.001,T00257,D_800F4B30_t,1,unk1,char,,,
+T00257.002,T00257,D_800F4B30_t,2,unk2,char,,,elapsed frames | elapsed ticks
+T00257.003,T00257,D_800F4B30_t,3,unk3,char,,,duration
+T00257.004,T00257,D_800F4B30_t,4,unk4,short,,,
+T00257.005,T00257,D_800F4B30_t,5,unk6,short,,,
+T00257.006,T00257,D_800F4B30_t,6,unk8,short,,,
+T00257.007,T00257,D_800F4B30_t,7,unkA,short,,,
+T00257.008,T00257,D_800F4B30_t,8,unkC,short,,,
+T00257.009,T00257,D_800F4B30_t,9,unkE,short,,,
+T00257.010,T00257,D_800F4B30_t,10,unk10,short,,,
+T00257.011,T00257,D_800F4B30_t,11,unk12,short,,,
+T00258.000,T00258,D_800F4B88_t,0,unk0,char,,,
+T00258.001,T00258,D_800F4B88_t,1,unk1,char,,,
+T00258.002,T00258,D_800F4B88_t,2,unk2,char,,,
+T00258.003,T00258,D_800F4B88_t,3,unk3,char,,,tween duration
+T00258.004,T00258,D_800F4B88_t,4,unk4,short,,,direction angle
+T00258.005,T00258,D_800F4B88_t,5,unk6,short,,,
+T00258.006,T00258,D_800F4B88_t,6,unk8,short,,,
+T00258.007,T00258,D_800F4B88_t,7,unkA,short,,,
+T00258.008,T00258,D_800F4B88_t,8,unkC,short,,,
+T00258.009,T00258,D_800F4B88_t,9,unkE,short,,,
+T00258.010,T00258,D_800F4B88_t,10,unk10,short,,,intensity
+T00258.011,T00258,D_800F4B88_t,11,unk12,short,,,
+T00258.012,T00258,D_800F4B88_t,12,unk14,short,,,
+T00259.000,T00259,D_800F4BA4_t,0,lookAt,D_800F4BA4_t2,,,
+T00259.001,T00259,D_800F4BA4_t,1,eye,D_800F4BA4_t2,,,
+T00259.002,T00259,D_800F4BA4_t,2,unk168,func_800BD57C_t,,,camera roll tween
+T00259.003,T00259,D_800F4BA4_t,3,unk174,func_800BD57C_t,,,captured-screen roll tween
+T00259.004,T00259,D_800F4BA4_t,4,projectionDistance,func_800BDF6C_unk180_t,,,
+T00259.005,T00259,D_800F4BA4_t,5,nearClip,func_800BDF6C_unk180_t,,,
+T00259.006,T00259,D_800F4BA4_t,6,farClip,func_800BDF6C_unk180_t,,,
+T00259.007,T00259,D_800F4BA4_t,7,unk1A4,func_800BDF6C_t,,,first shake oscillator
+T00259.008,T00259,D_800F4BA4_t,8,unk1B0,func_800BDF6C_t,,,second shake oscillator
+T00259.009,T00259,D_800F4BA4_t,9,unk1BC,short,,,
+T00259.010,T00259,D_800F4BA4_t,10,unk1BE,short,,,
+T00259.011,T00259,D_800F4BA4_t,11,unk1C0,short,,,
+T00259.012,T00259,D_800F4BA4_t,12,unk1C2,short,,,
+T00259.013,T00259,D_800F4BA4_t,13,unk1C4,short,,,
+T00259.014,T00259,D_800F4BA4_t,14,unk1C6,short,,,
+T00259.015,T00259,D_800F4BA4_t,15,unk1C8,short,,,
+T00259.016,T00259,D_800F4BA4_t,16,unk1CA,short,,,
+T00259.017,T00259,D_800F4BA4_t,17,unk1CC,int[7],,,
+T00259.018,T00259,D_800F4BA4_t,18,unk1E8,u_short,,,origin actor
+T00259.019,T00259,D_800F4BA4_t,19,unk1EA,u_short,,,
+T00259.020,T00259,D_800F4BA4_t,20,unk1EC,VECTOR,,,fixed-point origin offset
+T00259.021,T00259,D_800F4BA4_t,21,unk1FC,func_800BDBB4_t,,,screen scale tween
+T00259.022,T00259,D_800F4BA4_t,22,unk21C,func_800BDBB4_t,,,screen tint tween
+T00259.023,T00259,D_800F4BA4_t,23,unk23C,func_800BDBB4_t,,,screen translation tween
+T00259.024,T00259,D_800F4BA4_t,24,unk25C,func_800BDBB4_t,,,
+T00259.025,T00259,D_800F4BA4_t,25,unk27C,VECTOR,,,previous terrain-motion position
+T00260.000,T00260,D_800F4BA4_t2,0,mode,u_char,,,
+T00260.001,T00260,D_800F4BA4_t2,1,ease1,u_char,,,
+T00260.002,T00260,D_800F4BA4_t2,2,ease2,u_char,,,
+T00260.003,T00260,D_800F4BA4_t2,3,ease3,u_char,,,
+T00260.004,T00260,D_800F4BA4_t2,4,time,u_char,,,
+T00260.005,T00260,D_800F4BA4_t2,5,duration,u_char,,,
+T00260.006,T00260,D_800F4BA4_t2,6,follow,u_char,,,
+T00260.007,T00260,D_800F4BA4_t2,7,following,u_char,,,
+T00260.008,T00260,D_800F4BA4_t2,8,value,int,,,
+T00260.009,T00260,D_800F4BA4_t2,9,delta,int,,,
+T00260.010,T00260,D_800F4BA4_t2,10,angle,short,,,
+T00260.011,T00260,D_800F4BA4_t2,11,angleDelta,short,,,
+T00260.012,T00260,D_800F4BA4_t2,12,start,VECTOR,,,
+T00260.013,T00260,D_800F4BA4_t2,13,position,VECTOR,,,
+T00260.014,T00260,D_800F4BA4_t2,14,velocity,VECTOR,,,
+T00260.015,T00260,D_800F4BA4_t2,15,aux,VECTOR,,,
+T00260.016,T00260,D_800F4BA4_t2,16,followDelta,VECTOR,,,
+T00260.017,T00260,D_800F4BA4_t2,17,followPosition,VECTOR,,,
+T00260.018,T00260,D_800F4BA4_t2,18,previousCamera,VECTOR,,,
+T00260.019,T00260,D_800F4BA4_t2,19,computed,VECTOR,,,
+T00260.020,T00260,D_800F4BA4_t2,20,current,VECTOR,,,
+T00260.021,T00260,D_800F4BA4_t2,21,target,VECTOR,,,
+T00402.000,T00402,cameraMotionScratch,0,distance,int,,,
+T00402.001,T00402,cameraMotionScratch,1,steps,int,,,
+T00402.002,T00402,cameraMotionScratch,2,unk8,char[8],,,
+T00402.003,T00402,cameraMotionScratch,3,delta,VECTOR,,,
+T00402.004,T00402,cameraMotionScratch,4,candidate,VECTOR,,,
+T00402.005,T00402,cameraMotionScratch,5,direction,VECTOR,,,
+T00402.006,T00402,cameraMotionScratch,6,unk40,char[48],,,
+T00402.007,T00402,cameraMotionScratch,7,matrix,MATRIX,,,
+T00403.000,T00403,cameraScratch,0,value,int,,,
+T00403.001,T00403,cameraScratch,1,distance,int,,,
+T00403.002,T00403,cameraScratch,2,unk8,char[8],,,
+T00403.003,T00403,cameraScratch,3,v1,VECTOR,,,
+T00403.004,T00403,cameraScratch,4,v2,VECTOR,,,
+T00403.005,T00403,cameraScratch,5,v3,VECTOR,,,
+T00403.006,T00403,cameraScratch,6,unk40,char[16],,,
+T00403.007,T00403,cameraScratch,7,rotation,SVECTOR,,,
+T00403.008,T00403,cameraScratch,8,rotation2,SVECTOR,,,
+T00403.009,T00403,cameraScratch,9,unk60,char[16],,,
+T00403.010,T00403,cameraScratch,10,matrix,MATRIX,,,
+T00404.000,T00404,cameraShakeScratch,0,unk0,char[80],,,
+T00404.001,T00404,cameraShakeScratch,1,a,SVECTOR,,,
+T00404.002,T00404,cameraShakeScratch,2,b,SVECTOR,,,
+T00404.003,T00404,cameraShakeScratch,3,c,SVECTOR,,,
+T00475.000,T00475,func_800BB68C_t,0,unk0,char,,,remaining count
+T00475.001,T00475,func_800BB68C_t,1,unk1,char,,,cursor
+T00475.002,T00475,func_800BB68C_t,2,unk2,char[22],,,actor IDs
+T00476.000,T00476,func_800BD57C_t,0,unk0,char,,,
+T00476.001,T00476,func_800BD57C_t,1,unk1,char,,,
+T00476.002,T00476,func_800BD57C_t,2,unk2,short,,,value
+T00476.003,T00476,func_800BD57C_t,3,unk4,short,,,
+T00476.004,T00476,func_800BD57C_t,4,unk6,short,,,
+T00476.005,T00476,func_800BD57C_t,5,unk8,short,,,elapsed ticks
+T00476.006,T00476,func_800BD57C_t,6,unkA,short,,,duration
+T00477.000,T00477,func_800BDBB4_t,0,unk0,char,,,
+T00477.001,T00477,func_800BDBB4_t,1,unk1,char,,,
+T00477.002,T00477,func_800BDBB4_t,2,unk2,short,,,
+T00477.003,T00477,func_800BDBB4_t,3,unk4,short,,,
+T00477.004,T00477,func_800BDBB4_t,4,unk6,short,,,
+T00477.005,T00477,func_800BDBB4_t,5,unk8,short,,,
+T00477.006,T00477,func_800BDBB4_t,6,unkA,short,,,
+T00477.007,T00477,func_800BDBB4_t,7,unkC,short,,,
+T00477.008,T00477,func_800BDBB4_t,8,unkE,short,,,
+T00477.009,T00477,func_800BDBB4_t,9,unk10,short,,,
+T00477.010,T00477,func_800BDBB4_t,10,unk12,short,,,
+T00477.011,T00477,func_800BDBB4_t,11,unk14,short,,,
+T00477.012,T00477,func_800BDBB4_t,12,unk16,short,,,
+T00477.013,T00477,func_800BDBB4_t,13,unk18,short,,,
+T00477.014,T00477,func_800BDBB4_t,14,unk1A,short,,,
+T00477.015,T00477,func_800BDBB4_t,15,unk1C,short,,,elapsed ticks
+T00477.016,T00477,func_800BDBB4_t,16,unk1E,short,,,duration
+T00478.000,T00478,func_800BDBB4_t2,0,unk0,int,,,
+T00479.000,T00479,func_800BDF6C_t,0,unk0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\4A0A8.c:55:5),,,
+T00479.001,T00479,func_800BDF6C_t,1,unk2,short,,,
+T00479.002,T00479,func_800BDF6C_t,2,unk4,short,,,oscillation cycles
+T00479.003,T00479,func_800BDF6C_t,3,unk6,short,,,amplitude
+T00479.004,T00479,func_800BDF6C_t,4,unk8,char,,,
+T00479.005,T00479,func_800BDF6C_t,5,unk9,char,,,duration
+T00479.006,T00479,func_800BDF6C_t,6,unkA,char,,,
+T00479.007,T00479,func_800BDF6C_t,7,unkB,char,,,
+T00480.000,T00480,func_800BDF6C_unk180_t,0,unk0,char,,,
+T00480.001,T00480,func_800BDF6C_unk180_t,1,unk1,char,,,
+T00480.002,T00480,func_800BDF6C_unk180_t,2,unk2,short,,,
+T00480.003,T00480,func_800BDF6C_unk180_t,3,unk4,short,,,
+T00480.004,T00480,func_800BDF6C_unk180_t,4,unk6,short,,,
+T00480.005,T00480,func_800BDF6C_unk180_t,5,unk8,char,,,
+T00480.006,T00480,func_800BDF6C_unk180_t,6,unk9,char,,,
+T00480.007,T00480,func_800BDF6C_unk180_t,7,unkA,char,,,
+T00480.008,T00480,func_800BDF6C_unk180_t,8,unkB,char,,,
+T00602.000,T00602,scriptBytePair,0,low,u_char,,,
+T00602.001,T00602,scriptBytePair,1,high,u_char,,,
+T00620.000,T00620,textPlacement,0,offset,textOffset,,,
+T00620.001,T00620,textPlacement,1,x,short,,,
+T00620.002,T00620,textPlacement,2,y,short,,,
+T00620.003,T00620,textPlacement,3,distance,int,,,screen-clamp displacement magnitude

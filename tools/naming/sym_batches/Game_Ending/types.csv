@@ -1,0 +1,7 @@
+id,key,kind,name,aliases,size,fields,generic_fields,layouts,files,used_by_funcs,used_by_globals,proposed_system
+T00309,struct:_creditsElement,struct,_creditsElement,_creditsElement,48,14,6,1,ENDING/ENDING.PRG/D4.c,14,1,Game.Ending
+T00018,enum:easeMode,enum,easeMode,,4,4,0,1,ENDING/ENDING.PRG/D4.c,0,0,Game.Ending
+T00430,struct:func_80069388_t,struct,func_80069388_t,func_80069388_t,48,31,31,1,ENDING/ENDING.PRG/D4.c,1,0,Game.Ending
+T00432,struct:func_8006A9C0_t,struct,func_8006A9C0_t,func_8006A9C0_t,12,3,0,1,ENDING/ENDING.PRG/D4.c,1,0,Game.Ending
+T00433,struct:func_8006A9C0_t2,struct,func_8006A9C0_t2,func_8006A9C0_t2,20,6,6,1,ENDING/ENDING.PRG/D4.c,4,14,Game.Ending
+T00029,enum:opcodes,enum,opcodes,,4,1,0,1,ENDING/ENDING.PRG/D4.c,0,0,Game.Ending

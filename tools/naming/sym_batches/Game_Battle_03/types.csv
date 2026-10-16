@@ -1,0 +1,79 @@
+id,key,kind,name,aliases,size,fields,generic_fields,layouts,files,used_by_funcs,used_by_globals,proposed_system
+T00412,struct:da4bcState,struct,da4bcState,da4bcState,1136,32,15,1,BATTLE/BATTLE.PRG/71618.c,5,0,Game.Battle
+T00413,struct:da4bcTargetBits,struct,da4bcTargetBits,da4bcTargetBits,4,7,4,1,BATTLE/BATTLE.PRG/71618.c,1,0,Game.Battle
+T00414,struct:da4bcTargetState,struct,da4bcTargetState,da4bcTargetState,484,2,1,1,BATTLE/BATTLE.PRG/71618.c,1,0,Game.Battle
+T00415,struct:directionalCacheBits,struct,directionalCacheBits,directionalCacheBits,2,2,0,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle
+T00805,union:directionalCachePoint,union,directionalCachePoint,directionalCachePoint,4,2,0,1,BATTLE/BATTLE.PRG/771A8.c,0,0,Game.Battle
+T00416,struct:directionalCacheState,struct,directionalCacheState,directionalCacheState,192,5,2,1,BATTLE/BATTLE.PRG/771A8.c,2,0,Game.Battle
+T00418,struct:effectDefinitionView,struct,effectDefinitionView,effectDefinitionView,56,12,12,1,BATTLE/BATTLE.PRG/5BF94.c,1,0,Game.Battle
+T00420,struct:effectTrailConfig,struct,effectTrailConfig,effectTrailConfig,4,5,0,1,BATTLE/BATTLE.PRG/5BF94.c,0,0,Game.Battle
+T00422,struct:effectTransformState,struct,effectTransformState,effectTransformState,208,18,3,1,BATTLE/BATTLE.PRG/5BF94.c,1,0,Game.Battle
+T00423,struct:environmentTarget,struct,environmentTarget,environmentTarget,68,6,0,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Battle
+T00424,struct:environmentTargetList,struct,environmentTargetList,environmentTargetList,2116,4,0,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Battle
+T00429,struct:func_8004644C_t,struct,func_8004644C_t,func_8004644C_t,52,2,2,1,BATTLE/BATTLE.PRG/30DB0.c,0,0,Game.Battle
+T00436,struct:func_8006EBF8_t2,struct,func_8006EBF8_t2,func_8006EBF8_t2,12,3,3,1,BATTLE/BATTLE.PRG/146C.c,0,0,Game.Battle
+T00806,union:func_800765B0_t,union,func_800765B0_t,func_800765B0_t,4,2,0,1,BATTLE/BATTLE.PRG/146C.c,0,0,Game.Battle
+T00440,struct:func_80077DF0_t2,struct,func_80077DF0_t2,func_80077DF0_t2,16,1,1,1,BATTLE/BATTLE.PRG/146C.c,0,0,Game.Battle
+T00441,struct:func_80077DF0_t3,struct,func_80077DF0_t3,func_80077DF0_t3,84,2,2,1,BATTLE/BATTLE.PRG/146C.c,0,0,Game.Battle
+T00442,struct:func_80085A34_t,struct,func_80085A34_t,func_80085A34_t,68,13,13,1,BATTLE/BATTLE.PRG/146C.c,2,0,Game.Battle
+T00459,struct:func_800962E4_t,struct,func_800962E4_t,func_800962E4_t,16,11,11,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Battle
+T00470,struct:func_800AC690_contact_t,struct,func_800AC690_contact_t,func_800AC690_contact_t,4,2,1,1,BATTLE/BATTLE.PRG/40564.c,0,0,Game.Battle
+T00471,struct:func_800AC690_flags_t,struct,func_800AC690_flags_t,func_800AC690_flags_t,4,3,2,1,BATTLE/BATTLE.PRG/40564.c,0,0,Game.Battle
+T00481,struct:func_800C0FA8_t2,struct,func_800C0FA8_t2,func_800C0FA8_t2,32,4,4,1,BATTLE/BATTLE.PRG/58578.c,4,0,Game.Battle
+T00482,struct:func_800C1564_flags,struct,func_800C1564_flags,func_800C1564_flags,4,4,4,1,BATTLE/BATTLE.PRG/58578.h,2,0,Game.Battle
+T00483,struct:func_800C1564_t,struct,func_800C1564_t,func_800C1564_t,16,5,5,1,BATTLE/BATTLE.PRG/58578.h,14,0,Game.Battle
+T00484,struct:func_800C4650_t,struct,func_800C4650_t,func_800C4650_t,24,7,7,1,BATTLE/BATTLE.PRG/58578.c BATTLE/BATTLE.PRG/5BE50.c,1,0,Game.Battle
+T00807,union:func_800C4794_t,union,func_800C4794_t,func_800C4794_t,8,2,0,1,BATTLE/BATTLE.PRG/5BF94.c,0,0,Game.Battle
+T00485,struct:func_800C56C0_t,struct,func_800C56C0_t,func_800C56C0_t,19228,21,20,1,BATTLE/BATTLE.PRG/5BF94.c,8,0,Game.Battle
+T00486,struct:func_800C56C0_t2,struct,func_800C56C0_t2,func_800C56C0_t2,20,8,7,1,BATTLE/BATTLE.PRG/5BF94.c,3,0,Game.Battle
+T00487,struct:func_800C5798_t,struct,func_800C5798_t,func_800C5798_t,24,14,14,1,BATTLE/BATTLE.PRG/5BF94.c,6,0,Game.Battle
+T00491,struct:func_800CFE1C_t,struct,func_800CFE1C_t,func_800CFE1C_t,4,2,2,1,BATTLE/BATTLE.PRG/5BF94.h,0,0,Game.Battle
+T00492,struct:func_800D0548_arg0,struct,func_800D0548_arg0,func_800D0548_arg0,20,10,5,1,BATTLE/BATTLE.PRG/5BF94.c,0,0,Game.Battle
+T00496,struct:func_800D0C60_t,struct,func_800D0C60_t,func_800D0C60_t,192,7,7,1,BATTLE/BATTLE.PRG/5BF94.c,0,0,Game.Battle
+T00808,union:func_800D2904_curves,union,func_800D2904_curves,func_800D2904_curves,4,2,0,1,BATTLE/BATTLE.PRG/5BF94.h,0,0,Game.Battle
+T00508,struct:func_800D6048_t,struct,func_800D6048_t,func_800D6048_t,208,2,2,1,BATTLE/BATTLE.PRG/5BF94.c,0,0,Game.Battle
+T00514,struct:func_800D8400_t,struct,func_800D8400_t,func_800D8400_t,364,6,2,1,BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/771A8.c,13,0,Game.Battle
+T00515,struct:func_800DA1D4_t,struct,func_800DA1D4_t,func_800DA1D4_t,4,4,4,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,3,0,Game.Battle
+T00516,struct:func_800DC888_t,struct,func_800DC888_t,func_800DC888_t,24,11,11,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,7,0,Game.Battle
+T00517,struct:func_800DCAA0_t,struct,func_800DCAA0_t,func_800DCAA0_t,20,13,13,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,16,0,Game.Battle
+T00518,struct:func_800DCAA0_t1,struct,func_800DCAA0_t1,func_800DCAA0_t1,137,2,2,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/74088.c,0,0,Game.Battle
+T00519,struct:func_800DCAA0_t2,struct,func_800DCAA0_t2,func_800DCAA0_t2,4,8,8,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00520,struct:func_800DD604_t,struct,func_800DD604_t,func_800DD604_t,8,9,9,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,2,0,Game.Battle
+T00521,struct:func_800DEB10_t,struct,func_800DEB10_t,func_800DEB10_t,68,22,22,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,3,0,Game.Battle
+T00522,struct:func_800DEB10_t2,struct,func_800DEB10_t2,func_800DEB10_t2,64,12,12,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,3,0,Game.Battle
+T00523,struct:func_800DEEA4_t,struct,func_800DEEA4_t,func_800DEEA4_t,76,6,6,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,6,1,Game.Battle
+T00524,struct:func_800DEEA4_t2,struct,func_800DEEA4_t2,func_800DEEA4_t2,1140,17,17,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,3,0,Game.Battle
+T00525,struct:func_800DFA54_t,struct,func_800DFA54_t,func_800DFA54_t,3,3,3,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,3,0,Game.Battle
+T00526,struct:func_800E0850_t,struct,func_800E0850_t,func_800E0850_t,556,19,19,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/771A8.c BATTLE/BATTLE.PRG/7CD68.c BATTLE/BATTLE.PRG/7EE98.c,0,0,Game.Battle
+T00527,struct:func_800E1238_t,struct,func_800E1238_t,func_800E1238_t,12,5,5,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00528,struct:func_800E5568_t,struct,func_800E5568_t,func_800E5568_t,4,5,0,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,3,0,Game.Battle
+T00529,struct:func_800E5698_t,struct,func_800E5698_t,func_800E5698_t,96,2,2,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,2,0,Game.Battle
+T00530,struct:func_800E5698_t2,struct,func_800E5698_t2,func_800E5698_t2,60,2,2,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00531,struct:func_800E5A74_t,struct,func_800E5A74_t,func_800E5A74_t,8,2,2,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,2,0,Game.Battle
+T00532,struct:func_800E78F4_t,struct,func_800E78F4_t,func_800E78F4_t,1140,65,65,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,49,1,Game.Battle
+T00533,struct:func_800E78F4_t2,struct,func_800E78F4_t2,func_800E78F4_t2,8,2,2,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c BATTLE/BATTLE.PRG/771A8.c,0,0,Game.Battle
+T00541,struct:func_80103080_t,struct,func_80103080_t,func_80103080_t,8,6,6,1,BATTLE/BATTLE.PRG/146C.h,0,0,Game.Battle
+T00544,struct:intPair,struct,intPair,intPair,8,2,2,1,BATTLE/BATTLE.PRG/44F14.c,1,0,Game.Battle
+T00545,struct:labelBoxPrim_t,struct,labelBoxPrim_t,labelBoxPrim_t,56,2,0,1,BATTLE/BATTLE.PRG/58578.c,1,0,Game.Battle
+T00546,struct:limbEffects_t,struct,limbEffects_t,limbEffects_t,4,2,0,1,BATTLE/BATTLE.PRG/146C.c,0,0,Game.Battle
+T00551,struct:menuShapeVertex,struct,menuShapeVertex,menuShapeVertex,8,2,0,1,BATTLE/BATTLE.PRG/573B8.h,4,0,Game.Battle
+T00552,struct:movementActorPosition,struct,movementActorPosition,movementActorPosition,34,4,1,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle
+T00553,struct:movementCheckObject,struct,movementCheckObject,movementCheckObject,12,2,1,1,BATTLE/BATTLE.PRG/771A8.c,2,0,Game.Battle
+T00554,struct:movementCheckState,struct,movementCheckState,movementCheckState,364,10,5,1,BATTLE/BATTLE.PRG/771A8.c,3,0,Game.Battle
+T00555,struct:movementDecisionContext,struct,movementDecisionContext,movementDecisionContext,1156,27,0,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle
+T00556,struct:movementDestinationState,struct,movementDestinationState,movementDestinationState,388,22,10,1,BATTLE/BATTLE.PRG/771A8.c,2,0,Game.Battle
+T00809,union:movementPath,union,movementPath,movementPath,4,2,0,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle
+T00557,struct:movementPathState,struct,movementPathState,movementPathState,412,27,19,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle
+T00744,typedef:movementPathTest,typedef,movementPathTest,,4,0,0,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle
+T00558,struct:movementRecoveryContext,struct,movementRecoveryContext,movementRecoveryContext,40,6,3,1,BATTLE/BATTLE.PRG/771A8.c BATTLE/BATTLE.PRG/7EE98.c,1,0,Game.Battle
+T00559,struct:movementRecoveryState,struct,movementRecoveryState,movementRecoveryState,556,24,10,1,BATTLE/BATTLE.PRG/771A8.c BATTLE/BATTLE.PRG/7EE98.c,8,0,Game.Battle
+T00560,struct:movementStepActor,struct,movementStepActor,movementStepActor,1600,6,3,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle
+T00810,union:movementStepPosition,union,movementStepPosition,movementStepPosition,4,2,0,1,BATTLE/BATTLE.PRG/771A8.c,0,0,Game.Battle
+T00561,struct:movementStepState,struct,movementStepState,movementStepState,556,24,12,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle
+T00563,struct:nearestWaypointDestination,struct,nearestWaypointDestination,nearestWaypointDestination,4,4,0,1,BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00564,struct:nearestWaypointState,struct,nearestWaypointState,nearestWaypointState,82,4,1,1,BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00567,struct:obstructionCache,struct,obstructionCache,obstructionCache,12,5,0,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle
+T00568,struct:obstructionModel,struct,obstructionModel,obstructionModel,36,2,1,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle
+T00569,struct:obstructionState,struct,obstructionState,obstructionState,188,12,6,1,BATTLE/BATTLE.PRG/771A8.c,3,0,Game.Battle
+T00570,struct:obstructionVector,struct,obstructionVector,obstructionVector,8,4,1,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle
+T00582,struct:patrolWaypointState,struct,patrolWaypointState,patrolWaypointState,364,10,3,1,BATTLE/BATTLE.PRG/771A8.c,1,0,Game.Battle

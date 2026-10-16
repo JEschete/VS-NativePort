@@ -149,3 +149,114 @@ Abbreviations allowed in names: `Hp`, `Mp`, `Dp`, `Pp`, `Ui`, `Hud`, `Fx`, `Rgb`
 - DataCrystal pages: `resources\DataCrystal\` (formats, lists, mechanics, executables).
 - GodHands: `tools\PSX\VagrantStory\GodHands`, plus the other VS tools under `tools\PSX\VagrantStory\`.
 - Callers and callees as listed in the batch file.
+
+---
+
+# Part 2: Globals, types and fields
+
+The second naming pass covers the data. `tools\ledger\build_symbol_ledgers.py` generates three ledgers from the
+libclang index, and the rules below apply to them. `tools\naming\merge_symbols.py` enforces the mechanical rules.
+
+| Ledger | Row | Rows | What the pass fills |
+|---|---|---|---|
+| `DATA_LEDGER.csv` | `G#####`, one per **storage identity** (see §8.1) | 2,174 | `disposition`, `final_name`, `final_location`, `purpose`, `confidence`, `notes` |
+| `TYPE_LEDGER.csv` | `T#####`, one per distinct type layout | 820 | `role`, `final_name`, `final_location`, `purpose`, `confidence`, `notes` |
+| `FIELD_LEDGER.csv` | `T#####.NNN`, one per struct/union field or enumerator | 6,766 | `final_name`, `meaning`, `confidence`, `notes` |
+
+Every row gets a name, including ones that already look fine (`vs_main_*`, `_portInfo`): they are converted to these
+conventions the same way functions were.
+
+## 8. Globals (`DATA_LEDGER.csv`)
+
+### 8.1 Identity
+
+The ledger key is the storage, not the spelling: `name@overlay` (an overlay's extern), `name@file` (file `static`),
+`name@file:function` (function-local `static`) and `name@header` with `instances` (a table defined in a shared
+header and instantiated once per including overlay). Two rows that share a decomp name are **different storage** and
+get different final names unless they are proven identical constant data (then `dup-of:G#####`, as for functions).
+
+### 8.2 `disposition`
+
+Choose one (plan §4.4). The generator's `proposed_disposition` is a size/segment heuristic only; check it.
+
+| Disposition | Use when | Name form |
+|---|---|---|
+| `catalog` | Game content: item/weapon/enemy/spell stats, text, effect parameters, anything a modder would want to edit | lowerCamelCase plural noun: `Items::bladeDefs`, `Battle::breakArtDefs`. Add `catalog:<name>` (the JSON catalog file, e.g. `catalog:blades`) to `notes` |
+| `constexpr` | Engine constants: sin/cos tables, layout coordinates, colour tables, fixed lookup tables | `k` + PascalCase: `Core::kSinTable`, `Menu::kWindowFrameColors` |
+| `state` | Mutable runtime state | lowerCamelCase noun: `Battle::riskGauge`, `Title::cursorIndex`. Add `state:<Struct>` naming the system state struct it will fold into (e.g. `state:Battle::BattleState`) |
+| `asset` | Images, CLUTs, fonts, sound or model data embedded in the executable/overlays | lowerCamelCase: `Title::titleScreenBg`. Add `asset:<path under Native\data>` |
+| `drop` | PS1-only: ordering tables, primitive packet pools, DMA/GPU/SPU buffers, CD sector buffers, the scratchpad, SDK work areas | Still give a lowerCamelCase name (the copied code needs one until the shim removing it lands) and add `replaced-by:<native API>` |
+
+### 8.3 `final_name`
+
+- Same `Namespace::name` form and namespace roots as §1/§3. Variables are **lowerCamelCase** (constants `kPascalCase`),
+  so they can never collide with PascalCase functions.
+- C spelling: `::` → `_` (`Battle::riskGauge` → `Battle_riskGauge`). It must be unique across the port for every
+  `extern`, `file-static` and `per-instance` row. A `local-static` only has to be unique within its function, and its
+  namespace is that function's namespace.
+- `per-instance` rows name the template once. Natively each including plugin owns its copy; if the data is mutable,
+  the copy tool prefixes the instance namespace (`Effects::Plg149::ringVertices`).
+- Forbidden: `D_`, `B_`, address digits, `unk`, `temp`, `data`/`buf`/`table` on their own, Hungarian `g_`/`s_`
+  prefixes, `vs_`.
+- Units belong in the name when they are not obvious: `fadeTimerFrames`, `cameraDistanceFixed12`.
+
+### 8.4 `final_location`
+
+The `.c` file (same rules as §2) where the definition lives: normally the file that holds most of its referencing
+functions (the batch lists them). `state` rows go to the file of the system that owns the state; shared engine state
+used by several systems goes to that system's `State.c` (e.g. `Native\Game\src\Battle\State.c`).
+
+## 9. Types (`TYPE_LEDGER.csv`)
+
+### 9.1 `role`
+
+| Role | Meaning | Name form |
+|---|---|---|
+| `Def` | Immutable content definition (one per item/enemy/spell kind) | `BladeDef`, `EnemyDef`, `SpellDef` |
+| `Instance` | Mutable per-object data that refers to a Def | `BladeInstance`, `Actor`, `InventorySlot` |
+| `State` | A system's runtime state block | `BattleState`, `TitleMenuState` |
+| `OnDisc` | Exact layout of bytes on the disc / in a file (decoder input only) | `ZndEnemyRecord`, `MpdHeader`, `SeqHeader` (`Record`/`Header` suffix) |
+| `Packet` | PS1 GPU/SPU/CD packet or primitive layout | `PolyFt4Packet`. These are replaced by the backend, so add `replaced-by:` |
+| `Enum` | Enumeration | Singular PascalCase: `ItemCategory`, `Element` |
+| `Value` | Small value types: vectors, colours, rects, fixed-point, ids | `Vec3s`, `Rgb8`, `RectS16` |
+| `Misc` | Anything else (callbacks tables, script contexts) | Descriptive PascalCase noun |
+
+### 9.2 `final_name` and `final_location`
+
+- `Namespace::PascalCase` (`Battle::ActionState`, `Items::BladeDef`). C spelling `Battle_ActionState`, unique across
+  the port. `Value` types normally live in `Core` (`Core::Vec3s`).
+- `final_location` is the **header** that will declare it: `Native\<ProjectDir>\include\<Area>\<File>.h` for types
+  used across projects, or `Native\<ProjectDir>\src\<Area>\<File>.h` for types private to one module.
+- Rows with `layouts > 1` share a decomp name but have different layouts. Give each its own name, unless one is a
+  partial view of the other (then `same-as:T#####` in `notes`, and the merged layout is resolved when copying).
+- The generic decomp names (`D_800F19CC_t`, `func_8006B57C_t`, `unk_t`) must all go. The `aliases` column lists the
+  folded typedef spellings, which all map to the one final name.
+
+## 10. Fields and enumerators (`FIELD_LEDGER.csv`)
+
+- Struct/union fields: **lowerCamelCase** nouns (`currentHp`, `riskLevel`, `animationId`). Booleans read as
+  predicates (`isVisible`, `hasShield`). Counts and indexes say so (`itemCount`, `slotIndex`).
+- Enumerators: **PascalCase** without the enum prefix (`ItemCategory::Blade`); the C spelling is generated
+  (`ItemCategory_Blade`).
+- `unk*` is forbidden. If the code never reads a field and nothing explains it, name it `reserved<OffsetHex>`
+  (`reserved1C`) with confidence `low`; padding the compiler would insert is `pad<OffsetHex>`.
+- `hints` holds what the function-naming agents worked out (`fields:` notes in `FUNCTION_CATALOG.csv`). Use them, and
+  resolve any disagreement between hints.
+- `meaning`: one short phrase (≤ 100 characters), units included (`HP lost this frame`, `fixed 4.12 angle`).
+- Fields that are on-disc offsets or raw pointers in the original become typed natively: note `handle:<Type>` (a
+  pointer that becomes a `Handle<T>`) or `index:<Type>` where it applies.
+
+## 11. Output format (symbol batches)
+
+`tools\naming\make_symbol_batches.py` writes `tools\naming\sym_batches\<batch>\{globals,types,fields}.csv` plus
+`context.md` (referencing functions). Agents write `tools\naming\sym_out\<batch>\` with exactly these headers, one row
+per input row:
+
+```
+globals.csv  id,disposition,final_name,final_location,purpose,confidence,notes
+types.csv    id,role,final_name,final_location,purpose,confidence,notes
+fields.csv   id,final_name,meaning,confidence,notes
+```
+
+`confidence` is `high` / `med` / `low` as in §5. `notes` uses the tokens above (`catalog:`, `state:`, `asset:`,
+`replaced-by:`, `dup-of:`, `same-as:`, `handle:`, `index:`) plus free text, `;`-separated.

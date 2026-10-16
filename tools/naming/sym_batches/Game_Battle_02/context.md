@@ -1,0 +1,72 @@
+# Game_Battle_02: who uses what
+
+Function names are `final name (decomp file:line original name)`.
+
+## Types
+
+- **T00312** `struct:_hitIntermediate`: Field::CalculateTrapPanelDamage (BATTLE/BATTLE.PRG/146C.c:11730 _damageFromTrapPanel); Battle::CalculateSpellHitDamage (BATTLE/BATTLE.PRG/146C.c:11473 _getMagicAttackDamage); Battle::CalculatePhysicalHitDamage (BATTLE/BATTLE.PRG/146C.c:11271 _getPhysicalAttackDamage); Battle::CalculateSpellHealing (BATTLE/BATTLE.PRG/146C.c:11850 _hpHealed); Field::CalculateHealingPanelRecovery (BATTLE/BATTLE.PRG/146C.c:11992 _hpHealedFromHealPanel)
+- **T00321** `struct:_mpdGeometryHeader`: *no function references*
+- **T00322** `struct:_mpdGeometrySection`: *no function references*
+- **T00324** `struct:_mpdPolygt3`: *no function references*
+- **T00325** `struct:_mpdPolygt4`: *no function references*
+- **T00350** `struct:actionCandidateEntry`: Battle::Ai::RefreshActionCandidateReadiness (BATTLE/BATTLE.PRG/6FC00.c:515 func_800D85D8); Battle::Ai::MoveForActionCandidate (BATTLE/BATTLE.PRG/71618.c:511 func_800D9E18); Battle::Ai::UpdateCombatPursuit (BATTLE/BATTLE.PRG/71618.c:610 func_800DA1D4); Battle::Ai::BuildActorActionPlan (BATTLE/BATTLE.PRG/74088.c:1319 func_800DE3E4); Battle::Ai::RebuildActorActionPlans (BATTLE/BATTLE.PRG/74088.c:1547 func_800DEC88)
+- **T00351** `struct:actionCandidateState`: Battle::Ai::RefreshActionCandidateReadiness (BATTLE/BATTLE.PRG/6FC00.c:515 func_800D85D8); Battle::Ai::UpdateActorPerception (BATTLE/BATTLE.PRG/6FC00.c:983 func_800D8EF4); Battle::Ai::BuildActorActionPlan (BATTLE/BATTLE.PRG/74088.c:1319 func_800DE3E4)
+- **T00352** `struct:actionCandidateTarget`: Battle::Ai::RefreshActionCandidateReadiness (BATTLE/BATTLE.PRG/6FC00.c:515 func_800D85D8)
+- **T00353** `struct:actionChoice`: *no function references*
+- **T00354** `struct:actionChoiceFlags`: *no function references*
+- **T00355** `struct:actionChoiceInfo`: *no function references*
+- **T00356** `struct:actionChoiceState`: Battle::Ai::BuildActorActionPlan (BATTLE/BATTLE.PRG/74088.c:1319 func_800DE3E4); Battle::Ai::RebuildActorActionPlans (BATTLE/BATTLE.PRG/74088.c:1547 func_800DEC88)
+- **T00357** `struct:actionCostView`: *no function references*
+- **T00358** `struct:actionDispatchActor`: Battle::Ai::UpdateActorDecisions (BATTLE/BATTLE.PRG/71618.c:1128 func_800DAED0)
+- **T00359** `struct:actionDispatchEntry`: *no function references*
+- **T00360** `struct:actionDispatchModel`: Battle::Ai::UpdateActorDecisions (BATTLE/BATTLE.PRG/71618.c:1128 func_800DAED0)
+- **T00361** `struct:actionDispatchRegistry`: *no function references*
+- **T00362** `struct:actionDispatchState`: Battle::Ai::UpdateActorDecisions (BATTLE/BATTLE.PRG/71618.c:1128 func_800DAED0)
+- **T00365** `struct:actionMetadataAction`: Battle::Ai::BuildAiActionMetadata (BATTLE/BATTLE.PRG/7CD68.c:526 func_800E5710)
+- **T00366** `struct:actionMetadataEntry`: Battle::Ai::BuildAiActionMetadata (BATTLE/BATTLE.PRG/7CD68.c:526 func_800E5710)
+- **T00367** `struct:actionMetadataSlot`: Battle::Ai::BuildAiActionMetadata (BATTLE/BATTLE.PRG/7CD68.c:526 func_800E5710)
+- **T00368** `struct:actionMetadataState`: Battle::Ai::BuildAiActionMetadata (BATTLE/BATTLE.PRG/7CD68.c:526 func_800E5710); Battle::Ai::ApplyActorAiSettings (BATTLE/BATTLE.PRG/7CD68.c:689 func_800E5A9C)
+- **T00369** `struct:actionMetadataStats`: Battle::Ai::BuildAiActionMetadata (BATTLE/BATTLE.PRG/7CD68.c:526 func_800E5710)
+- **T00797** `union:actionMetadataWord`: *no function references*
+- **T00370** `struct:actionPlanState`: Battle::Ai::BuildActorActionPlan (BATTLE/BATTLE.PRG/74088.c:1319 func_800DE3E4); Battle::Ai::RebuildActorActionPlans (BATTLE/BATTLE.PRG/74088.c:1547 func_800DEC88)
+- **T00371** `struct:actionReactionAction`: Battle::Ai::ApplyActorActionReaction (BATTLE/BATTLE.PRG/74088.c:716 func_800DD000)
+- **T00372** `struct:actionReactionMotion`: Battle::Ai::ApplyActorActionReaction (BATTLE/BATTLE.PRG/74088.c:716 func_800DD000)
+- **T00373** `struct:actionReactionState`: Battle::Ai::ApplyActorActionReaction (BATTLE/BATTLE.PRG/74088.c:716 func_800DD000); Battle::Ai::PropagateActorRelationships (BATTLE/BATTLE.PRG/74088.c:782 func_800DD344)
+- **T00798** `union:actionReactionTarget`: Battle::Ai::ApplyActorActionReaction (BATTLE/BATTLE.PRG/74088.c:716 func_800DD000); Battle::Ai::PropagateActorRelationships (BATTLE/BATTLE.PRG/74088.c:782 func_800DD344)
+- **T00374** `struct:actionScoreActor`: Battle::Ai::PropagateActorRelationships (BATTLE/BATTLE.PRG/74088.c:782 func_800DD344)
+- **T00375** `struct:actionSetupContext`: *no function references*
+- **T00376** `struct:actionSlotConfig`: *no function references*
+- **T00377** `struct:actionStatApplication`: Battle::Ai::ApplyActorActionReaction (BATTLE/BATTLE.PRG/74088.c:716 func_800DD000)
+- **T00378** `struct:actionStatDelta`: Battle::Ai::ApplyActorActionReaction (BATTLE/BATTLE.PRG/74088.c:716 func_800DD000)
+- **T00379** `struct:actorEvaluationActor`: Battle::Ai::RebuildActorActionPlans (BATTLE/BATTLE.PRG/74088.c:1547 func_800DEC88)
+- **T00380** `struct:actorEvaluationContext`: Battle::Ai::RebuildActorActionPlans (BATTLE/BATTLE.PRG/74088.c:1547 func_800DEC88)
+- **T00381** `struct:actorEvaluationState`: Battle::Ai::UpdateActorPerception (BATTLE/BATTLE.PRG/6FC00.c:983 func_800D8EF4); Battle::Ai::RebuildActorActionPlans (BATTLE/BATTLE.PRG/74088.c:1547 func_800DEC88)
+- **T00382** `struct:actorEvaluationStats`: Battle::Ai::RebuildActorActionPlans (BATTLE/BATTLE.PRG/74088.c:1547 func_800DEC88)
+- **T00799** `union:actorInitializationFlags`: *no function references*
+- **T00384** `struct:actorInitializationModel`: Battle::Ai::CreateActorAiState (BATTLE/BATTLE.PRG/7CD68.c:934 func_800E6178)
+- **T00800** `union:actorInitializationPoint`: *no function references*
+- **T00385** `struct:actorInitializationState`: Battle::Ai::CreateActorAiState (BATTLE/BATTLE.PRG/7CD68.c:934 func_800E6178)
+- **T00386** `struct:actorInitializationStats`: Battle::Ai::CreateActorAiState (BATTLE/BATTLE.PRG/7CD68.c:934 func_800E6178)
+- **T00387** `struct:actorObject`: Battle::Ai::UpdateTargetPerception (BATTLE/BATTLE.PRG/6FC00.c:679 func_800D87E8); Battle::Ai::UpdateActorPerception (BATTLE/BATTLE.PRG/6FC00.c:983 func_800D8EF4)
+- **T00388** `struct:actorPhaseFlags`: Battle::Ai::AnimateEngagementPhase (BATTLE/BATTLE.PRG/73700.c:499 func_800DC0D0)
+- **T00801** `union:actorRelation`: Battle::Ai::UpdateTargetPerception (BATTLE/BATTLE.PRG/6FC00.c:679 func_800D87E8)
+- **T00389** `struct:actorRelationState`: Battle::Ai::IsTargetOccludedAtExtent (BATTLE/BATTLE.PRG/6FC00.c:646 checkExtent); Battle::Ai::IsTargetOccludedAtHeight (BATTLE/BATTLE.PRG/6FC00.c:660 checkHeight); Battle::Ai::UpdateTargetPerception (BATTLE/BATTLE.PRG/6FC00.c:679 func_800D87E8); Battle::Ai::UpdateActorPerception (BATTLE/BATTLE.PRG/6FC00.c:983 func_800D8EF4)
+- **T00390** `struct:actorSettingsActor`: Battle::Ai::ApplyActorAiSettings (BATTLE/BATTLE.PRG/7CD68.c:689 func_800E5A9C)
+- **T00391** `struct:actorSettingsEntry`: Battle::Ai::ApplyActorAiSettings (BATTLE/BATTLE.PRG/7CD68.c:689 func_800E5A9C)
+- **T00392** `struct:actorSettingsState`: Battle::Ai::ApplyActorAiSettings (BATTLE/BATTLE.PRG/7CD68.c:689 func_800E5A9C); Battle::Ai::CreateActorAiState (BATTLE/BATTLE.PRG/7CD68.c:934 func_800E6178)
+- **T00802** `union:actorSettingsWord`: Battle::Ai::ApplyActorAiSettings (BATTLE/BATTLE.PRG/7CD68.c:689 func_800E5A9C); Battle::Ai::CreateActorAiState (BATTLE/BATTLE.PRG/7CD68.c:934 func_800E6178)
+- **T00394** `struct:actorTimerState`: Battle::Ai::UpdateActorPerception (BATTLE/BATTLE.PRG/6FC00.c:983 func_800D8EF4); Battle::Ai::AnimateEngagementPhase (BATTLE/BATTLE.PRG/73700.c:499 func_800DC0D0)
+- **T00396** `struct:actorUpdateActor`: Battle::Ai::UpdateActorPerception (BATTLE/BATTLE.PRG/6FC00.c:983 func_800D8EF4)
+- **T00397** `struct:actorUpdateHp`: Battle::Ai::UpdateActorPerception (BATTLE/BATTLE.PRG/6FC00.c:983 func_800D8EF4)
+- **T00398** `struct:actorUpdatePoint`: Battle::Ai::UpdateActorPerception (BATTLE/BATTLE.PRG/6FC00.c:983 func_800D8EF4)
+- **T00399** `struct:actorUpdateState`: Battle::Ai::UpdateActorPerception (BATTLE/BATTLE.PRG/6FC00.c:983 func_800D8EF4); Battle::Ai::HasRepeatingMovementHistory (BATTLE/BATTLE.PRG/6FC00.c:960 historyRepeats); Battle::Ai::IsMovementHistoryStalled (BATTLE/BATTLE.PRG/6FC00.c:966 historyStalled)
+- **T00400** `struct:actorUpdateStats`: Battle::Ai::UpdateActorPerception (BATTLE/BATTLE.PRG/6FC00.c:983 func_800D8EF4)
+- **T00401** `struct:animationFrameScratch`: func_800AFA28 (BATTLE/BATTLE.PRG/44F14.c:1252 func_800AFA28)
+- **T00405** `struct:cameraTransformScratch`: *no function references*
+- **T00406** `struct:candidateMovementState`: Battle::Ai::MoveForActionCandidate (BATTLE/BATTLE.PRG/71618.c:511 func_800D9E18); Battle::Ai::UpdateCombatPursuit (BATTLE/BATTLE.PRG/71618.c:610 func_800DA1D4); Battle::Ai::UpdateEnemyPursuitBehavior (BATTLE/BATTLE.PRG/71618.c:839 func_800DA6A4); Battle::Ai::UpdateGuardMovementBehavior (BATTLE/BATTLE.PRG/71618.c:854 func_800DA738); Battle::Ai::UpdatePatrolCombatBehavior (BATTLE/BATTLE.PRG/71618.c:944 func_800DAA6C); Battle::Ai::UpdateEscortCombatBehavior (BATTLE/BATTLE.PRG/71618.c:958 func_800DAAD8)
+- **T00803** `union:candidateMovementWord`: Battle::Ai::MoveForActionCandidate (BATTLE/BATTLE.PRG/71618.c:511 func_800D9E18)
+- **T00408** `struct:da4bcActor`: Battle::Ai::UpdateEscortCombatBehavior (BATTLE/BATTLE.PRG/71618.c:958 func_800DAAD8)
+- **T00409** `struct:da4bcEntry`: Battle::Ai::UpdateCloseFollowBehavior (BATTLE/BATTLE.PRG/71618.c:814 func_800DA5CC); Battle::Ai::UpdateEscortCombatBehavior (BATTLE/BATTLE.PRG/71618.c:958 func_800DAAD8)
+- **T00410** `struct:da4bcEntryTarget`: Battle::Ai::UpdateCloseFollowBehavior (BATTLE/BATTLE.PRG/71618.c:814 func_800DA5CC); Battle::Ai::UpdateEscortCombatBehavior (BATTLE/BATTLE.PRG/71618.c:958 func_800DAAD8)
+- **T00411** `struct:da4bcModel`: Battle::Ai::UpdateGuardMovementBehavior (BATTLE/BATTLE.PRG/71618.c:854 func_800DA738)
+- **T00804** `union:da4bcPoint`: Battle::Ai::UpdateGuardMovementBehavior (BATTLE/BATTLE.PRG/71618.c:854 func_800DA738)

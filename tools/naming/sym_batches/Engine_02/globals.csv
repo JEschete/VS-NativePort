@@ -1,0 +1,61 @@
+id,key,name,overlay,linkage,segment,address,size,type,type_id,has_pointers,init,instances,files,used_by,proposed_system,proposed_disposition
+G01930,D_800501D8@SLUS_010.40,D_800501D8,SLUS_010.40,extern,bss,0x800501D8,4,int,,0,0,,SLUS_010.40/main.c,1,Content,state
+G01931,_cdQueue@SLUS_010.40,_cdQueue,SLUS_010.40,extern,bss,0x800501E0,640,vs_main_CdQueueSlot[32],T00691,1,0,,SLUS_010.40/main.c,4,Content,state
+G01932,_cdQueueCount@SLUS_010.40,_cdQueueCount,SLUS_010.40,extern,bss,0x80050460,4,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),T00184,1,0,,SLUS_010.40/main.c,4,Content,state
+G01933,D_80050468@SLUS_010.40,D_80050468,SLUS_010.40,extern,bss,0x80050468,8,D_80050468_t,T00204,0,0,,SLUS_010.40/main.h,9,Game.State,state
+G01935,vs_main_startState@SLUS_010.40,vs_main_startState,SLUS_010.40,extern,bss,0x80050470,4,int,,0,0,,SLUS_010.40/main.h,5,Game.Boot,state
+G01936,sp2@SLUS_010.40,sp2,SLUS_010.40,extern,bss,0x80050474,4,int,,0,0,,SLUS_010.40/main.c,3,Game.Boot,state
+G01938,vs_main_buttonsReleased@SLUS_010.40,vs_main_buttonsReleased,SLUS_010.40,extern,bss,0x80055C78,4,int,,0,0,,SLUS_010.40/main.c SLUS_010.40/main.h,4,Graphics,state
+G01939,D_80055C80@SLUS_010.40,D_80055C80,SLUS_010.40,extern,bss,0x80055C80,8,void *[],,1,0,,SLUS_010.40/main.h,5,Game.Boot,state
+G01940,_resetEnabled@SLUS_010.40,_resetEnabled,SLUS_010.40,extern,bss,0x80055C88,4,int,,0,0,,SLUS_010.40/main.c,3,Game.Boot,state
+G01941,_buttonHeldFrameCount@SLUS_010.40,_buttonHeldFrameCount,SLUS_010.40,extern,bss,0x80055C90,128,u_int[],,0,0,,SLUS_010.40/main.c,2,Game.Boot,state
+G01942,vs_main_disk@SLUS_010.40,vs_main_disk,SLUS_010.40,extern,bss,0x80055D10,72,vs_main_disk_t,T00694,1,0,,SLUS_010.40/main.c,12,Content,state
+G01943,_dsControlBuf@SLUS_010.40,_dsControlBuf,SLUS_010.40,extern,bss,0x80055D2C,11,char[11],,0,0,,SLUS_010.40/main.c,2,Content,state
+G01944,_clutState@SLUS_010.40,_clutState,SLUS_010.40,extern,bss,0x80055D58,33384,_clutState_t,T00308,0,0,,SLUS_010.40/main.c,24,Graphics,state
+G01947,sp@SLUS_010.40,sp,SLUS_010.40,extern,bss,0x8005DFD0,4,int,,0,0,,SLUS_010.40/main.c,2,Game.Boot,state
+G01948,D_8005DFD4@SLUS_010.40,D_8005DFD4,SLUS_010.40,extern,bss,0x8005DFD4,2,short,,0,0,,SLUS_010.40/main.h,2,Graphics,state
+G01949,D_8005DFD6@SLUS_010.40,D_8005DFD6,SLUS_010.40,extern,bss,0x8005DFD6,2,short,,0,0,,SLUS_010.40/main.h,3,Graphics,state
+G01950,D_8005DFD8@SLUS_010.40,D_8005DFD8,SLUS_010.40,extern,bss,0x8005DFD8,2,short,,0,0,,SLUS_010.40/main.h,2,Graphics,state
+G01951,D_8005DFDA@SLUS_010.40,D_8005DFDA,SLUS_010.40,extern,bss,0x8005DFDA,2,u_short,,0,0,,SLUS_010.40/main.h,3,Graphics,state
+G01953,vs_main_padBuffer@SLUS_010.40,vs_main_padBuffer,SLUS_010.40,extern,bss,0x8005DFF0,68,char[2][34],,0,0,,SLUS_010.40/main.h,6,Game.Boot,state
+G01956,D_8005E0C0@SLUS_010.40,D_8005E0C0,SLUS_010.40,extern,bss,0x8005E0C0,8,void *[],,1,0,,SLUS_010.40/main.h,6,Game.Boot,state
+G01959,vs_main_dispEnv@SLUS_010.40,vs_main_dispEnv,SLUS_010.40,extern,bss,0x8005E188,40,DISPENV[2],,0,0,,SLUS_010.40/main.h,8,Graphics,state
+G01966,vs_main_saveGameClearData@SLUS_010.40,vs_main_saveGameClearData,SLUS_010.40,extern,bss,0x8005E214,4,int,,0,0,,SLUS_010.40/main.c SLUS_010.40/main.h,4,Game.Boot,state
+G01967,D_8005E218@SLUS_010.40,D_8005E218,SLUS_010.40,extern,bss,0x8005E218,32,MATRIX,,0,0,,BATTLE/BATTLE.PRG/146C.c BATTLE/BATTLE.PRG/44F14.c BATTLE/BATTLE.PRG/49268.c,2,Graphics,state
+G01969,_inGame@SLUS_010.40,_inGame,SLUS_010.40,extern,bss,0x8005E240,4,int,,0,0,,SLUS_010.40/main.c,3,Game.Boot,state
+G01973,_clutBuffer@SLUS_010.40,_clutBuffer,SLUS_010.40,extern,bss,0x8005E250,7168,u_short[14][256],,0,0,,SLUS_010.40/main.c,7,Graphics,state
+G01983,vs_main_actionsLearned@SLUS_010.40,vs_main_actionsLearned,SLUS_010.40,extern,bss,0x8005FFB8,32,char[32],,0,0,,SLUS_010.40/main.h,7,Save.MemoryCard,state
+G01988,D_80060068@SLUS_010.40,D_80060068,SLUS_010.40,extern,bss,0x80060068,256,D_80060068_t,T00207,0,0,,SLUS_010.40/main.h,10,Save.MemoryCard,state
+G01990,D_80061068@SLUS_010.40,D_80061068,SLUS_010.40,extern,bss,0x80061068,12,_mpdRoomDoorSection_t,T00328,0,0,,SLUS_010.40/main.h,9,Save.MemoryCard,state
+G01991,vs_main_gametime@SLUS_010.40,vs_main_gametime,SLUS_010.40,extern,bss,0x80061074,4,vs_Gametime_t,T00814,1,0,,SLUS_010.40/main.h,12,Save.MemoryCard,state
+G01995,D_8004A504@SLUS_010.40,D_8004A504,SLUS_010.40,extern,c-defined,,24,char[24],,0,1,,SLUS_010.40/main.c,1,Input,state
+G01996,D_8004A52C@SLUS_010.40,D_8004A52C,SLUS_010.40,extern,c-defined,,4,int,,0,1,,SLUS_010.40/main.c SLUS_010.40/main.h,1,Graphics,state
+G01997,_actParams@SLUS_010.40,_actParams,SLUS_010.40,extern,c-defined,,12,char[12],,0,1,,SLUS_010.40/main.c,2,Input,state
+G01998,_animOffset16@SLUS_010.40,_animOffset16,SLUS_010.40,extern,c-defined,,1008,signed char[63][16],,0,1,,SLUS_010.40/main.c,1,Graphics,catalog
+G01999,_animOffset2@SLUS_010.40,_animOffset2,SLUS_010.40,extern,c-defined,,126,signed char[63][2],,0,1,,SLUS_010.40/main.c,1,Graphics,catalog
+G02000,_animOffset4@SLUS_010.40,_animOffset4,SLUS_010.40,extern,c-defined,,252,signed char[63][4],,0,1,,SLUS_010.40/main.c,1,Graphics,catalog
+G02001,_animOffset8@SLUS_010.40,_animOffset8,SLUS_010.40,extern,c-defined,,504,signed char[63][8],,0,1,,SLUS_010.40/main.c,1,Graphics,catalog
+G02005,_nowLoading_data@SLUS_010.40,_nowLoading_data,SLUS_010.40,extern,unknown,,-1,u_long[],,0,0,,SLUS_010.40/main.c,1,Graphics,?
+G02006,_nowLoading_header@SLUS_010.40,_nowLoading_header,SLUS_010.40,extern,unknown,,4,imgHeader_t,T00543,0,0,,SLUS_010.40/main.c,2,Graphics,?
+G02025,D_8006886C@src/TITLE/TITLE.PRG/22C.c:_packageGameSaveData,D_8006886C,TITLE/TITLE.PRG,local-static,c-defined,,64,const u_short[32],,0,1,,TITLE/TITLE.PRG/22C.c,1,Save.MemoryCard,constexpr
+G02051,_decodedDataBuf0@src/TITLE/TITLE.PRG/22C.c,_decodedDataBuf0,TITLE/TITLE.PRG,file-static,c-defined,,4,void *,,1,0,,TITLE/TITLE.PRG/22C.c,3,Video.Intro,state
+G02052,_decodedDataBuf1@src/TITLE/TITLE.PRG/22C.c,_decodedDataBuf1,TITLE/TITLE.PRG,file-static,c-defined,,4,void *,,1,0,,TITLE/TITLE.PRG/22C.c,3,Video.Intro,state
+G02055,_dslMode@src/TITLE/TITLE.PRG/22C.c,_dslMode,TITLE/TITLE.PRG,file-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,2,Video.Intro,state
+G02056,_encodedDataBuf0@src/TITLE/TITLE.PRG/22C.c,_encodedDataBuf0,TITLE/TITLE.PRG,file-static,c-defined,,4,void *,,1,0,,TITLE/TITLE.PRG/22C.c,3,Video.Intro,state
+G02057,_encodedDataBuf1@src/TITLE/TITLE.PRG/22C.c,_encodedDataBuf1,TITLE/TITLE.PRG,file-static,c-defined,,4,void *,,1,0,,TITLE/TITLE.PRG/22C.c,3,Video.Intro,state
+G02058,_eventSpecs@src/TITLE/TITLE.PRG/22C.c:_initMemcard,_eventSpecs,TITLE/TITLE.PRG,local-static,c-defined,,8,u_short[4],,0,1,,TITLE/TITLE.PRG/22C.c,1,Save.MemoryCard,state
+G02066,_introMovieDisplayedAt@src/TITLE/TITLE.PRG/22C.c,_introMovieDisplayedAt,TITLE/TITLE.PRG,file-static,c-defined,,4,u_int,,0,0,,TITLE/TITLE.PRG/22C.c,3,Video.Intro,state
+G02067,_introMovieLoc@src/TITLE/TITLE.PRG/22C.c,_introMovieLoc,TITLE/TITLE.PRG,file-static,c-defined,,4,DslLOC,,0,0,,TITLE/TITLE.PRG/22C.c,2,Video.Intro,state
+G02068,_introMoviePlaying@src/TITLE/TITLE.PRG/22C.c,_introMoviePlaying,TITLE/TITLE.PRG,file-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,4,Video.Intro,state
+G02070,_keystreamState@src/TITLE/TITLE.PRG/22C.c:_keystreamBits,_keystreamState,TITLE/TITLE.PRG,local-static,c-defined,,4,u_int,,0,1,,TITLE/TITLE.PRG/22C.c,1,Save.MemoryCard,state
+G02072,_mcData@src/TITLE/TITLE.PRG/22C.c,_mcData,TITLE/TITLE.PRG,file-static,c-defined,,4,mcdata_t *,T00547,1,0,,TITLE/TITLE.PRG/22C.c,3,Save.MemoryCard,state
+G02074,_memcardFilenameTemplate@src/TITLE/TITLE.PRG/22C.c,_memcardFilenameTemplate,TITLE/TITLE.PRG,file-static,c-defined,,4,const char *,,1,1,,TITLE/TITLE.PRG/22C.c,4,Save.MemoryCard,constexpr
+G02081,_movieData@src/TITLE/TITLE.PRG/22C.c,_movieData,TITLE/TITLE.PRG,file-static,c-defined,,56,MovieData_t,T00291,1,0,,TITLE/TITLE.PRG/22C.c,3,Video.Intro,state
+G02082,_movieHeight@TITLE/TITLE.PRG,_movieHeight,TITLE/TITLE.PRG,extern,c-defined,,4,int,,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,1,Video.Intro,state
+G02083,_movieRingBuf@src/TITLE/TITLE.PRG/22C.c,_movieRingBuf,TITLE/TITLE.PRG,file-static,c-defined,,4,u_long *,,1,0,,TITLE/TITLE.PRG/22C.c,3,Video.Intro,state
+G02084,_movieWidth@TITLE/TITLE.PRG,_movieWidth,TITLE/TITLE.PRG,extern,c-defined,,4,int,,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,1,Video.Intro,state
+G02094,_vlcTable@src/TITLE/TITLE.PRG/22C.c,_vlcTable,TITLE/TITLE.PRG,file-static,c-defined,,69632,DECDCTTAB,,0,0,,TITLE/TITLE.PRG/22C.c,2,Video.Intro,state
+G02100,cdQueueSlot@src/TITLE/TITLE.PRG/22C.c:_initMemcard,cdQueueSlot,TITLE/TITLE.PRG,local-static,c-defined,,4,vs_main_CdQueueSlot *,T00691,1,0,,TITLE/TITLE.PRG/22C.c,1,Save.MemoryCard,state
+G02118,filename@src/TITLE/TITLE.PRG/22C.c:_memcardMakeFilename,filename,TITLE/TITLE.PRG,local-static,c-defined,,32,char[32],,0,1,,TITLE/TITLE.PRG/22C.c,1,Save.MemoryCard,catalog
+G02119,filename@src/TITLE/TITLE.PRG/22C.c:_memcardMakeTempFilename,filename,TITLE/TITLE.PRG,local-static,c-defined,,32,char[32],,0,1,,TITLE/TITLE.PRG/22C.c,1,Save.MemoryCard,catalog
+G02156,state@src/TITLE/TITLE.PRG/22C.c:_initMemcard,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Save.MemoryCard,state

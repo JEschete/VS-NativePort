@@ -90,6 +90,13 @@ def decl_of_type(t: ci.Type) -> tuple[ci.Cursor | None, bool]:
     return d, by_value
 
 
+def is_static_storage(v: ci.Cursor) -> bool:
+    """File-scope variable, block-scope `extern`, or function-local `static`."""
+    if v.semantic_parent is not None and v.semantic_parent.kind == K.TRANSLATION_UNIT:
+        return True
+    return v.storage_class in (ci.StorageClass.EXTERN, ci.StorageClass.STATIC)
+
+
 def type_key(d: ci.Cursor) -> str:
     kind = TYPE_DECLS.get(d.kind, d.kind.name)
     name = d.spelling or f"<anon@{loc(d)[0]}:{loc(d)[1]}>"
@@ -107,6 +114,7 @@ class Index:
         self.enum_consts: dict[str, dict] = {}
         self.sdk_types = collections.Counter()
         self.tu_errors: dict[str, list[str]] = {}
+        self.cur_tu = ""
 
     # ------------------------------------------------------------------ declarations
     def add_type(self, c: ci.Cursor) -> None:
@@ -142,8 +150,10 @@ class Index:
         self.types[uid] = {"key": key, "file": f, "line": line, "end_line": e.end.line, "anon": not c.spelling,
                            "fields": fields, "deps": deps, "size": c.type.get_size() if c.kind != K.ENUM_DECL else 4}
 
-    def add_var(self, c: ci.Cursor) -> None:
-        if c.semantic_parent is None or c.semantic_parent.kind != K.TRANSLATION_UNIT:
+    def add_var(self, c: ci.Cursor, scope: str | None = None) -> None:
+        """File-scope variables, plus (with `scope` = the enclosing function) block-scope `extern` declarations and
+        function-local statics: both name static storage that the port must define."""
+        if scope is None and (c.semantic_parent is None or c.semantic_parent.kind != K.TRANSLATION_UNIT):
             return
         f, line = loc(c)
         if origin(f) != "game":
@@ -155,14 +165,20 @@ class Index:
         has_init = any(ch.kind.is_expression() or ch.kind == K.INIT_LIST_EXPR for ch in c.get_children())
         rec = {"file": f, "line": line, "end_line": c.extent.end.line, "type": c.type.spelling,
                "static": c.storage_class == ci.StorageClass.STATIC, "size": c.type.get_size()}
+        if scope is not None:
+            rec["scope"] = scope
         d, _ = decl_of_type(c.type)
         if d is not None and d.kind in TYPE_DECLS:
             rec["type_key"] = type_key(d)
         target = g["defs"] if is_def else g["decls"]
         if is_def:
             rec["init"] = has_init
-        if not any(x["file"] == f and x["line"] == line for x in target):
+        prev = next((x for x in target if x["file"] == f and x["line"] == line), None)
+        if prev is None:
+            rec["tus"] = [self.cur_tu]
             target.append(rec)
+        elif self.cur_tu not in prev["tus"]:
+            prev["tus"].append(self.cur_tu)
 
     def add_function(self, c: ci.Cursor, src_bytes: bytes, tu_file: str) -> None:
         f, line = loc(c)
@@ -182,7 +198,7 @@ class Index:
                 rk = r.kind
                 if rk == K.FUNCTION_DECL:
                     refs["func"][r.spelling] += k == K.DECL_REF_EXPR
-                elif rk == K.VAR_DECL and r.semantic_parent is not None and r.semantic_parent.kind == K.TRANSLATION_UNIT:
+                elif rk == K.VAR_DECL and is_static_storage(r):
                     refs["var"][r.spelling] += 1
                 elif rk == K.ENUM_CONSTANT_DECL:
                     refs["enum"][r.spelling] += 1
@@ -194,12 +210,16 @@ class Index:
                 elif rk == K.FIELD_DECL:
                     refs["field"][f"{r.semantic_parent.spelling}.{r.spelling}"] += 1
             elif k in (K.VAR_DECL, K.PARM_DECL, K.CSTYLE_CAST_EXPR, K.UNEXPOSED_EXPR) and n is not c:
+                if k == K.VAR_DECL and is_static_storage(n):
+                    self.add_var(n, scope=c.spelling)
                 d, _ = decl_of_type(n.type)
                 if d is not None and d.kind in TYPE_DECLS:
                     rf, _ = loc(d)
                     if origin(rf) == "sdk":
                         self.sdk_types[d.spelling] += 1
                     refs["type"][type_key(d)] += 1
+            elif k in TYPE_DECLS:
+                self.add_type(n)
         ret_d, _ = decl_of_type(c.result_type)
         if ret_d is not None and ret_d.kind in TYPE_DECLS:
             refs["type"][type_key(ret_d)] += 1
@@ -221,6 +241,7 @@ class Index:
 
     # ------------------------------------------------------------------ driver
     def parse(self, path: Path, idx: ci.Index) -> None:
+        self.cur_tu = rel(str(path))
         tu = idx.parse(str(path), args=ARGS, options=ci.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
         errs = [f"{d.location.line}: {d.spelling}" for d in tu.diagnostics if d.severity >= 3]
         if errs:

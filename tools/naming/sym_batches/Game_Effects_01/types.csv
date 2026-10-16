@@ -1,0 +1,79 @@
+id,key,kind,name,aliases,size,fields,generic_fields,layouts,files,used_by_funcs,used_by_globals,proposed_system
+T00213,struct:D_800EB9B4_t,struct,D_800EB9B4_t,D_800EB9B4_t,16,7,6,1,GIM/SCREFF2.PRG/0.h,11,1,Game.Effects
+T00234,struct:D_800F1DD4_t,struct,D_800F1DD4_t,D_800F1DD4_t,16,7,6,1,BATTLE/BATTLE.PRG/146C.c,11,1,Game.Effects
+T00262,struct:D_800F53B8_t,struct,D_800F53B8_t,D_800F53B8_t,3420,14,12,1,BATTLE/BATTLE.PRG/5BF94.h,478,3,Game.Effects
+T00263,struct:D_800F53B8_t2,struct,D_800F53B8_t2,D_800F53B8_t2,40,13,13,1,BATTLE/BATTLE.PRG/5BF94.c,7,0,Game.Effects
+T00265,struct:D_800F53B8_t4,struct,D_800F53B8_t4,D_800F53B8_t4,8,5,5,1,BATTLE/BATTLE.PRG/5BF94.h,19,0,Game.Effects
+T00266,struct:D_800F54B8_t,struct,D_800F54B8_t,D_800F54B8_t,6,9,9,1,BATTLE/BATTLE.PRG/5BF94.c,6,1,Game.Effects
+T00267,struct:D_800F54D8_t,struct,D_800F54D8_t,D_800F54D8_t,64,10,4,1,BATTLE/BATTLE.PRG/5BF94.h,8,3,Game.Effects
+T00268,struct:D_800F5620_t,struct,D_800F5620_t,D_800F5620_t,16,4,4,1,BATTLE/BATTLE.PRG/5BF94.c,1,1,Game.Effects
+T00269,struct:D_800F5638_t,struct,D_800F5638_t,D_800F5638_t,68,4,1,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,0,1,Game.Effects
+T00270,struct:D_800F569C_t,struct,D_800F569C_t,D_800F569C_t,212,19,4,1,BATTLE/BATTLE.PRG/5BF94.h,239,4,Game.Effects
+T00292,struct:PLG005_data_t,struct,PLG005_data_t,PLG005_data_t,28,15,8,1,EFFECT/PLG005.BIN/18.c,1,0,Game.Effects
+T00294,struct:TrailPacket,struct,TrailPacket,TrailPacket,60,31,5,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Game.Effects
+T00315,struct:_loadFileContext,struct,_loadFileContext,_loadFileContext,4,2,0,1,BATTLE/BATTLE.PRG/6E644.h,5,6,Game.Effects
+T00343,struct:_trail,struct,_trail,_trail,88,9,1,1,EFFECT/trails.h,91,0,Game.Effects
+T00363,struct:actionEffectRequest,struct,actionEffectRequest,actionEffectRequest,232,7,0,1,BATTLE/BATTLE.PRG/6E644.h,17,3,Game.Effects
+T00364,struct:actionEffectTarget,struct,actionEffectTarget,actionEffectTarget,12,3,1,1,BATTLE/BATTLE.PRG/6E644.h,15,0,Game.Effects
+T00417,struct:effectAttractionView,struct,effectAttractionView,effectAttractionView,116,6,0,1,BATTLE/BATTLE.PRG/5BF94.c,1,0,Game.Effects
+T00743,typedef:effectExec,typedef,effectExec,,4,0,0,1,BATTLE/BATTLE.PRG/6E644.h,9,4,Game.Effects
+T00419,struct:effectMotionState,struct,effectMotionState,effectMotionState,52,14,0,1,BATTLE/BATTLE.PRG/5BF94.c,1,0,Game.Effects
+T00421,struct:effectTrailState,struct,effectTrailState,effectTrailState,180,11,0,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Game.Effects
+T00434,struct:func_8006C4C4_t,struct,func_8006C4C4_t,func_8006C4C4_t,228,14,13,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Effects
+T00443,struct:func_8008631C_t2,struct,func_8008631C_t2,func_8008631C_t2,8,6,1,1,BATTLE/BATTLE.PRG/146C.c,2,0,Game.Effects
+T00489,struct:func_800CE714_t2_2,struct,func_800CE714_t2_2,func_800CE714_t2_2,208,22,22,1,BATTLE/BATTLE.PRG/5BF94.h,284,0,Game.Effects
+T00490,struct:func_800CFAAC_t,struct,func_800CFAAC_t,func_800CFAAC_t,20,5,5,1,BATTLE/BATTLE.PRG/5BF94.c,1,0,Game.Effects
+T00493,struct:func_800D0548_arg1,struct,func_800D0548_arg1,func_800D0548_arg1,208,18,3,1,BATTLE/BATTLE.PRG/5BF94.c,7,0,Game.Effects
+T00494,struct:func_800D0B30_t,struct,func_800D0B30_t,func_800D0B30_t,56,17,10,1,BATTLE/BATTLE.PRG/5BF94.h,8,0,Game.Effects
+T00495,struct:func_800D0B30_t2,struct,func_800D0B30_t2,func_800D0B30_t2,116,11,10,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Game.Effects
+T00497,struct:func_800D2904_t,struct,func_800D2904_t,func_800D2904_t,120,25,20,1,BATTLE/BATTLE.PRG/5BF94.h,17,2,Game.Effects
+T00498,struct:func_800D4910_t,struct,func_800D4910_t,func_800D4910_t,12,3,1,1,BATTLE/BATTLE.PRG/6E644.h,184,0,Game.Effects
+T00501,struct:func_800D5780_t,struct,func_800D5780_t,func_800D5780_t,16,6,6,1,BATTLE/BATTLE.PRG/5BF94.h,16,0,Game.Effects
+T00502,struct:func_800D5780_t2,struct,func_800D5780_t2,func_800D5780_t2,2,2,2,1,BATTLE/BATTLE.PRG/5BF94.h,1,0,Game.Effects
+T00503,struct:func_800D57FC_t,struct,func_800D57FC_t,func_800D57FC_t,4,5,5,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Game.Effects
+T00504,struct:func_800D57FC_t2,struct,func_800D57FC_t2,func_800D57FC_t2,4,2,2,1,BATTLE/BATTLE.PRG/5BF94.c,1,0,Game.Effects
+T00505,struct:func_800D5A98_t,struct,func_800D5A98_t,func_800D5A98_t,9,4,0,1,BATTLE/BATTLE.PRG/5BF94.c,1,0,Game.Effects
+T00506,struct:func_800D5A98_t2,struct,func_800D5A98_t2,func_800D5A98_t2,16,7,4,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Game.Effects
+T00507,struct:func_800D5D74_t,struct,func_800D5D74_t,func_800D5D74_t,8,6,5,1,BATTLE/BATTLE.PRG/5BF94.c,1,0,Game.Effects
+T00509,struct:func_800D6310_t,struct,func_800D6310_t,func_800D6310_t,8,6,6,1,BATTLE/BATTLE.PRG/5BF94.c,5,0,Game.Effects
+T00510,struct:func_800D6508_t,struct,func_800D6508_t,func_800D6508_t,208,5,5,1,BATTLE/BATTLE.PRG/5BF94.c,3,0,Game.Effects
+T00511,struct:func_800D6894_t,struct,func_800D6894_t,func_800D6894_t,4,3,3,1,BATTLE/BATTLE.PRG/5BF94.c,1,0,Game.Effects
+T00512,struct:func_800D6A18_t,struct,func_800D6A18_t,func_800D6A18_t,8,10,10,1,BATTLE/BATTLE.PRG/5BF94.c,1,0,Game.Effects
+T00513,struct:func_800D6CF_t,struct,func_800D6CF_t,func_800D6CF_t,32,14,12,1,BATTLE/BATTLE.PRG/5BF94.h,2,0,Game.Effects
+T00534,struct:func_800FA098_arg0,struct,func_800FA098_arg0,func_800FA098_arg0,204,37,32,1,BATTLE/BATTLE.PRG/5BF94.h,387,0,Game.Effects
+T00535,struct:func_800FA098_arg1,struct,func_800FA098_arg1,func_800FA098_arg1,396,41,40,1,BATTLE/BATTLE.PRG/5BF94.h,386,0,Game.Effects
+T00536,struct:func_800FA098_arg3,struct,func_800FA098_arg3,func_800FA098_arg3,48,7,7,1,EFFECT/particleSetup.h,100,0,Game.Effects
+T00537,struct:func_800FA098_arg3_2,struct,func_800FA098_arg3_2,func_800FA098_arg3_2,4,2,2,1,EFFECT/particleSetup.h,0,0,Game.Effects
+T00538,struct:func_800FA76C_arg3,struct,func_800FA76C_arg3,func_800FA76C_arg3,44,8,4,1,EFFECT/trails.h,91,0,Game.Effects
+T00539,struct:func_800FB4C0_t,struct,func_800FB4C0_t,func_800FB4C0_t,120,7,7,1,BATTLE/BATTLE.PRG/5BF94.h,100,0,Game.Effects
+T00540,struct:func_800FD9A4_t,struct,func_800FD9A4_t,func_800FD9A4_t,208,11,4,1,EFFECT/PLG128.BIN/F8.c,5,0,Game.Effects
+T00571,struct:pFileBlock1,struct,pFileBlock1,pFileBlock1,4,3,0,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,2,0,Game.Effects
+T00572,struct:pFileBlock11,struct,pFileBlock11,pFileBlock11,4,2,0,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Game.Effects
+T00573,struct:pFileBlock2,struct,pFileBlock2,pFileBlock2,4,2,1,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,2,0,Game.Effects
+T00574,struct:pFileBlock3,struct,pFileBlock3,pFileBlock3,4,2,0,1,BATTLE/BATTLE.PRG/5BF94.h,5,0,Game.Effects
+T00575,struct:pFileBlock5,struct,pFileBlock5,pFileBlock5,4,2,1,1,BATTLE/BATTLE.PRG/5BF94.h,175,0,Game.Effects
+T00576,struct:pFileBlock9,struct,pFileBlock9,pFileBlock9,26,9,9,1,BATTLE/BATTLE.PRG/5BF94.h,9,0,Game.Effects
+T00577,struct:pFileCurveBlock,struct,pFileCurveBlock,pFileCurveBlock,4,3,0,1,BATTLE/BATTLE.PRG/5BF94.h,63,0,Game.Effects
+T00578,struct:pFileTexture,struct,pFileTexture,pFileTexture,24,14,0,1,BATTLE/BATTLE.PRG/5BF94.h,138,0,Game.Effects
+T00579,struct:pFileTextureInfo,struct,pFileTextureInfo,pFileTextureInfo,4,2,1,1,BATTLE/BATTLE.PRG/5BF94.h,139,0,Game.Effects
+T00580,struct:p_file_t,struct,p_file_t,p_file_t,4,2,0,1,BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c BATTLE/BATTLE.PRG/74088.c,1,1,Game.Effects
+T00626,struct:unkPrim#50618d3f,struct,unkPrim,unkPrim,60,4,4,2,EFFECT/PLG005.BIN/18.c,14,0,Game.Effects
+T00627,struct:unkPrim#e377f2a0,struct,unkPrim,unkPrim,60,6,6,2,EFFECT/trails5.h,14,0,Game.Effects
+T00685,struct:vs_closedRingPrim,struct,vs_closedRingPrim,vs_closedRingPrim,60,3,0,1,EFFECT/PLG077.BIN/18.c EFFECT/PLG300.BIN/110.c EFFECT/closedRings.h,29,0,Game.Effects
+T00686,struct:vs_closedRingState,struct,vs_closedRingState,vs_closedRingState,60,10,1,1,EFFECT/PLG077.BIN/18.c EFFECT/PLG300.BIN/110.c EFFECT/closedRings.h,29,0,Game.Effects
+T00687,struct:vs_closedRingUV,struct,vs_closedRingUV,vs_closedRingUV,2,2,0,1,EFFECT/PLG077.BIN/18.c EFFECT/PLG300.BIN/110.c,0,0,Game.Effects
+T00688,struct:vs_gridPrim,struct,vs_gridPrim,vs_gridPrim,60,4,0,1,EFFECT/grids.h,19,0,Game.Effects
+T00689,struct:vs_gridState,struct,vs_gridState,vs_gridState,28,15,0,1,EFFECT/grids.h,19,0,Game.Effects
+T00715,struct:vs_mesh10Prim,struct,vs_mesh10Prim,vs_mesh10Prim,48,3,0,1,EFFECT/meshes10.h,6,0,Game.Effects
+T00716,struct:vs_mesh10State,struct,vs_mesh10State,vs_mesh10State,48,6,1,1,EFFECT/meshes10.h,6,0,Game.Effects
+T00717,struct:vs_mesh10UV,struct,vs_mesh10UV,vs_mesh10UV,2,2,0,1,EFFECT/meshes10.h,6,0,Game.Effects
+T00718,struct:vs_mirrorSurfacePrim,struct,vs_mirrorSurfacePrim,vs_mirrorSurfacePrim,60,3,0,1,EFFECT/mirroredSurfaces.h,6,0,Game.Effects
+T00719,struct:vs_mirrorSurfaceState,struct,vs_mirrorSurfaceState,vs_mirrorSurfaceState,92,10,1,1,EFFECT/mirroredSurfaces.h,6,0,Game.Effects
+T00720,struct:vs_particleLine,struct,vs_particleLine,vs_particleLine,24,6,4,1,EFFECT/particleLineRender.h,10,0,Game.Effects
+T00721,struct:vs_particlePrim,struct,vs_particlePrim,vs_particlePrim,60,6,6,1,EFFECT/particleRender.h,10,0,Game.Effects
+T00722,struct:vs_ringPrim,struct,vs_ringPrim,vs_ringPrim,60,3,0,1,EFFECT/rings.h,23,0,Game.Effects
+T00723,struct:vs_ringState,struct,vs_ringState,vs_ringState,60,10,1,1,EFFECT/rings.h,23,0,Game.Effects
+T00724,struct:vs_rotatingSurfacePrim,struct,vs_rotatingSurfacePrim,vs_rotatingSurfacePrim,60,3,0,1,EFFECT/rotatingSurfaces.h,15,0,Game.Effects
+T00725,struct:vs_rotatingSurfaceState,struct,vs_rotatingSurfaceState,vs_rotatingSurfaceState,80,11,1,1,EFFECT/rotatingSurfaces.h,15,0,Game.Effects
+T00727,struct:vs_surfacePrim,struct,vs_surfacePrim,vs_surfacePrim,60,3,0,1,EFFECT/surfaces.h,11,0,Game.Effects
+T00728,struct:vs_surfaceState,struct,vs_surfaceState,vs_surfaceState,76,10,1,1,EFFECT/surfaces.h,11,0,Game.Effects

@@ -1,0 +1,122 @@
+id,key,name,overlay,linkage,segment,address,size,type,type_id,has_pointers,init,instances,files,used_by,proposed_system,proposed_disposition
+G02016,vs_main_titleScreenCount@SLUS_010.40,vs_main_titleScreenCount,SLUS_010.40,extern,c-defined,,4,int,,0,1,,SLUS_010.40/main.c SLUS_010.40/main.h,2,Game.Title,state
+G02019,developer@TITLE/TITLE.PRG,developer,TITLE/TITLE.PRG,extern,asset,0x8007472C,9128,char[],,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,asset
+G02020,_titleScreenBg@TITLE/TITLE.PRG,_titleScreenBg,TITLE/TITLE.PRG,extern,asset,0x80076AD4,222932,u_int[],,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,asset
+G02021,_menuCopyright@TITLE/TITLE.PRG,_menuCopyright,TITLE/TITLE.PRG,extern,asset,0x800AD1A8,8640,u_short[],,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,asset
+G02022,_fontTable@TITLE/TITLE.PRG,_fontTable,TITLE/TITLE.PRG,extern,asset,0x800AF368,28672,fontTable_t[],T00426,0,0,,TITLE/TITLE.PRG/22C.c,2,Game.Title,asset
+G02023,_debugFont@TITLE/TITLE.PRG,_debugFont,TITLE/TITLE.PRG,extern,asset,0x800BD368,19712,u_long[],,0,0,,TITLE/TITLE.PRG/22C.c,2,Game.Title,asset
+G02024,_uiTable@TITLE/TITLE.PRG,_uiTable,TITLE/TITLE.PRG,extern,asset,0x800C2068,61440,uiTable_t,T00625,0,0,,TITLE/TITLE.PRG/22C.c,2,Game.Title,asset
+G02026,D_80074C24@TITLE/TITLE.PRG,D_80074C24,TITLE/TITLE.PRG,extern,c-defined,,3840,int[15][64],,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,1,Game.Title,catalog
+G02027,_0@src/TITLE/TITLE.PRG/22C.c,_0,TITLE/TITLE.PRG,file-static,c-defined,,4,char[4],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02028,_1@src/TITLE/TITLE.PRG/22C.c,_1,TITLE/TITLE.PRG,file-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02029,_2@src/TITLE/TITLE.PRG/22C.c,_2,TITLE/TITLE.PRG,file-static,c-defined,,8,char[8],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02030,_3@src/TITLE/TITLE.PRG/22C.c,_3,TITLE/TITLE.PRG,file-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02031,_4@src/TITLE/TITLE.PRG/22C.c,_4,TITLE/TITLE.PRG,file-static,c-defined,,4,char[4],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02032,_5@src/TITLE/TITLE.PRG/22C.c,_5,TITLE/TITLE.PRG,file-static,c-defined,,28,char[28],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02033,_6@src/TITLE/TITLE.PRG/22C.c,_6,TITLE/TITLE.PRG,file-static,c-defined,,4,char[4],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02034,_@src/TITLE/TITLE.PRG/22C.c:_drawTitleMenu,_,TITLE/TITLE.PRG,local-static,c-defined,,16,char[16],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02035,_@src/TITLE/TITLE.PRG/22C.c:_drawTitleMenuItems,_,TITLE/TITLE.PRG,local-static,c-defined,,8,char[8],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02036,_@src/TITLE/TITLE.PRG/22C.c:_gameSaveScreen,_,TITLE/TITLE.PRG,local-static,c-defined,,6,char[6],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02037,_@src/TITLE/TITLE.PRG/22C.c:_initMemcard,_,TITLE/TITLE.PRG,local-static,c-defined,,3,char[3],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02038,_@src/TITLE/TITLE.PRG/22C.c:_loadFileMenu,_,TITLE/TITLE.PRG,local-static,c-defined,,5,char[5],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02039,_@src/TITLE/TITLE.PRG/22C.c:_loadSaveData,_,TITLE/TITLE.PRG,local-static,c-defined,,2,short,,0,0,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02040,_@src/TITLE/TITLE.PRG/22C.c:_memcardMaskedHandler,_,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02041,_@src/TITLE/TITLE.PRG/22C.c:_promptConfirm,_,TITLE/TITLE.PRG,local-static,c-defined,,2,char[2],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02042,_@src/TITLE/TITLE.PRG/22C.c:_promptFormat,_,TITLE/TITLE.PRG,local-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02043,_@src/TITLE/TITLE.PRG/22C.c:_saveFile,_,TITLE/TITLE.PRG,local-static,c-defined,,3,char[3],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02044,_@src/TITLE/TITLE.PRG/22C.c:_saveScreenConfirmation,_,TITLE/TITLE.PRG,local-static,c-defined,,5,char[5],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02045,_@src/TITLE/TITLE.PRG/22C.c:_showSaveMenu,_,TITLE/TITLE.PRG,local-static,c-defined,,3,char[3],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02046,_@src/TITLE/TITLE.PRG/22C.c:vs_title_exec,_,TITLE/TITLE.PRG,local-static,c-defined,,8,char[8],,0,1,,TITLE/TITLE.PRG/22C.c,0,Game.Title,state
+G02047,_backupMainSetting@src/TITLE/TITLE.PRG/22C.c,_backupMainSetting,TITLE/TITLE.PRG,file-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02048,_containerDataEmpty@src/TITLE/TITLE.PRG/22C.c,_containerDataEmpty,TITLE/TITLE.PRG,file-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,2,Game.Title,state
+G02049,_cursorFileOpSaturation@src/TITLE/TITLE.PRG/22C.c,_cursorFileOpSaturation,TITLE/TITLE.PRG,file-static,c-defined,,16,signed char[16],,0,1,,TITLE/TITLE.PRG/22C.c,2,Game.Title,state
+G02050,_dataNotSaved@src/TITLE/TITLE.PRG/22C.c,_dataNotSaved,TITLE/TITLE.PRG,file-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,2,Game.Title,state
+G02053,_digitDivisors@src/TITLE/TITLE.PRG/22C.c:_drawHPMP,_digitDivisors,TITLE/TITLE.PRG,local-static,c-defined,,4,char[4],,0,1,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02054,_dirEntBuf@src/TITLE/TITLE.PRG/22C.c,_dirEntBuf,TITLE/TITLE.PRG,file-static,c-defined,,4,struct DIRENTRY *,,1,0,,TITLE/TITLE.PRG/22C.c,2,Game.Title,state
+G02059,_fileMenuElements@src/TITLE/TITLE.PRG/22C.c,_fileMenuElements,TITLE/TITLE.PRG,file-static,c-defined,,520,fileMenuElements_t[10],T00425,0,1,,TITLE/TITLE.PRG/22C.c,13,Game.Title,catalog
+G02060,_fileMenuScreenFade@src/TITLE/TITLE.PRG/22C.c,_fileMenuScreenFade,TITLE/TITLE.PRG,file-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,3,Game.Title,state
+G02061,_filePreviousProgressCounter@src/TITLE/TITLE.PRG/22C.c,_filePreviousProgressCounter,TITLE/TITLE.PRG,file-static,c-defined,,2,u_short,,0,0,,TITLE/TITLE.PRG/22C.c,3,Game.Title,state
+G02062,_fileProgressCounter@src/TITLE/TITLE.PRG/22C.c,_fileProgressCounter,TITLE/TITLE.PRG,file-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,6,Game.Title,state
+G02063,_fileProgressPosition@src/TITLE/TITLE.PRG/22C.c,_fileProgressPosition,TITLE/TITLE.PRG,file-static,c-defined,,2,u_short,,0,0,,TITLE/TITLE.PRG/22C.c,3,Game.Title,state
+G02064,_fileProgressTarget@src/TITLE/TITLE.PRG/22C.c,_fileProgressTarget,TITLE/TITLE.PRG,file-static,c-defined,,2,u_short,,0,0,,TITLE/TITLE.PRG/22C.c,4,Game.Title,state
+G02069,_isSaving@src/TITLE/TITLE.PRG/22C.c,_isSaving,TITLE/TITLE.PRG,file-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,5,Game.Title,state
+G02071,_loadSaveDataErrorOffset@src/TITLE/TITLE.PRG/22C.c,_loadSaveDataErrorOffset,TITLE/TITLE.PRG,file-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,3,Game.Title,state
+G02073,_memcardEventDescriptors@src/TITLE/TITLE.PRG/22C.c,_memcardEventDescriptors,TITLE/TITLE.PRG,file-static,c-defined,,32,long[8],,0,1,,TITLE/TITLE.PRG/22C.c,4,Game.Title,catalog
+G02075,_memcardFiles@src/TITLE/TITLE.PRG/22C.c,_memcardFiles,TITLE/TITLE.PRG,file-static,c-defined,,60,struct DIRENTRY *[15],,1,1,,TITLE/TITLE.PRG/22C.c,3,Game.Title,catalog
+G02076,_memoryCardMessage@src/TITLE/TITLE.PRG/22C.c,_memoryCardMessage,TITLE/TITLE.PRG,file-static,c-defined,,4,char *,,1,0,,TITLE/TITLE.PRG/22C.c,13,Game.Title,state
+G02077,_menuElementStops@src/TITLE/TITLE.PRG/22C.c,_menuElementStops,TITLE/TITLE.PRG,file-static,c-defined,,20,char[20],,0,1,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02078,_menuItemOutlineClut@TITLE/TITLE.PRG,_menuItemOutlineClut,TITLE/TITLE.PRG,extern,c-defined,,64,u_short[2][16],,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,1,Game.Title,catalog
+G02079,_menuItemStates@src/TITLE/TITLE.PRG/22C.c,_menuItemStates,TITLE/TITLE.PRG,file-static,c-defined,,80,menuItemState_t[10],T00550,0,1,,TITLE/TITLE.PRG/22C.c,7,Game.Title,catalog
+G02080,_menuItemTextClut@TITLE/TITLE.PRG,_menuItemTextClut,TITLE/TITLE.PRG,extern,c-defined,,64,u_short[2][16],,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,2,Game.Title,catalog
+G02085,_primBuf@src/TITLE/TITLE.PRG/22C.c,_primBuf,TITLE/TITLE.PRG,file-static,c-defined,,64,primBuf_t,T00585,1,0,,TITLE/TITLE.PRG/22C.c,8,Game.Title,state
+G02086,_saveFileInfo@src/TITLE/TITLE.PRG/22C.c,_saveFileInfo,TITLE/TITLE.PRG,file-static,c-defined,,4,saveFileInfo_t *,T00595,1,0,,TITLE/TITLE.PRG/22C.c,11,Game.Title,state
+G02087,_saveInfoUVClut@src/TITLE/TITLE.PRG/22C.c:_drawSaveInfoUI,_saveInfoUVClut,TITLE/TITLE.PRG,local-static,c-defined,,40,int[10],,0,1,,TITLE/TITLE.PRG/22C.c,1,Game.Title,catalog
+G02088,_saveInfoWh@src/TITLE/TITLE.PRG/22C.c:_drawSaveInfoUI,_saveInfoWh,TITLE/TITLE.PRG,local-static,c-defined,,40,int[10],,0,1,,TITLE/TITLE.PRG/22C.c,1,Game.Title,catalog
+G02089,_saveMenuBg_clut@TITLE/TITLE.PRG,_saveMenuBg_clut,TITLE/TITLE.PRG,extern,unknown,,46592,menuBg_t,T00548,0,0,,TITLE/TITLE.PRG/22C.c,2,Game.Title,?
+G02090,_selectCursorColor@src/TITLE/TITLE.PRG/22C.c,_selectCursorColor,TITLE/TITLE.PRG,file-static,c-defined,,1,u_char,,0,0,,TITLE/TITLE.PRG/22C.c,2,Game.Title,state
+G02091,_selectCursorXy@src/TITLE/TITLE.PRG/22C.c,_selectCursorXy,TITLE/TITLE.PRG,file-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,8,Game.Title,state
+G02092,_spmcimg@src/TITLE/TITLE.PRG/22C.c,_spmcimg,TITLE/TITLE.PRG,file-static,c-defined,,4,char *,,1,0,,TITLE/TITLE.PRG/22C.c,8,Game.Title,state
+G02093,_textTable@src/TITLE/TITLE.PRG/22C.c,_textTable,TITLE/TITLE.PRG,file-static,c-defined,,4,u_short *,,1,0,,TITLE/TITLE.PRG/22C.c,15,Game.Title,state
+G02095,actionsLearned@TITLE/TITLE.PRG,actionsLearned,TITLE/TITLE.PRG,extern,c-defined,,32,int[8],,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,1,Game.Title,catalog
+G02097,backupTime@src/TITLE/TITLE.PRG/22C.c:_showLoadFilesMenu,backupTime,TITLE/TITLE.PRG,local-static,c-defined,,4,vs_Gametime_t,T00814,1,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02098,buttonsLastPressed@src/TITLE/TITLE.PRG/22C.c:vs_title_exec,buttonsLastPressed,TITLE/TITLE.PRG,local-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02099,cancelled@src/TITLE/TITLE.PRG/22C.c:_promptConfirm,cancelled,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02103,completeTimer@src/TITLE/TITLE.PRG/22C.c:_showLoadFilesMenu,completeTimer,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02105,confirmed@src/TITLE/TITLE.PRG/22C.c:_promptOverwrite,confirmed,TITLE/TITLE.PRG,local-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02106,errors@src/TITLE/TITLE.PRG/22C.c:_loadSaveData,errors,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02107,errors@src/TITLE/TITLE.PRG/22C.c:_saveFile,errors,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02108,eventType@src/TITLE/TITLE.PRG/22C.c:_memcardEventHandler,eventType,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02109,fadeTimer@src/TITLE/TITLE.PRG/22C.c:_gameSaveScreen,fadeTimer,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02111,fd@src/TITLE/TITLE.PRG/22C.c:_loadSaveData,fd,TITLE/TITLE.PRG,local-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02112,fd@src/TITLE/TITLE.PRG/22C.c:_saveFile,fd,TITLE/TITLE.PRG,local-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02113,file@src/TITLE/TITLE.PRG/22C.c:_loadSaveData,file,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02114,file@src/TITLE/TITLE.PRG/22C.c:_saveFile,file,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02115,fileBuf@src/TITLE/TITLE.PRG/22C.c:vs_title_exec,fileBuf,TITLE/TITLE.PRG,local-static,c-defined,,64,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),T00189,1,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02116,fileLoaded@src/TITLE/TITLE.PRG/22C.c:_showLoadFilesMenu,fileLoaded,TITLE/TITLE.PRG,local-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02117,fileSlot@src/TITLE/TITLE.PRG/22C.c:_showSaveFilesMenu,fileSlot,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02120,glyphWidths@src/TITLE/TITLE.PRG/22C.c:_printCharacter,glyphWidths,TITLE/TITLE.PRG,local-static,c-defined,,1508,int[377],,0,1,,TITLE/TITLE.PRG/22C.c,1,Game.Title,catalog
+G02121,initTimeout@src/TITLE/TITLE.PRG/22C.c:_memcardEventHandler,initTimeout,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02122,initialized@src/TITLE/TITLE.PRG/22C.c:_promptOverwrite,initialized,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02123,introMovieLastPlayed@src/TITLE/TITLE.PRG/22C.c:vs_title_exec,introMovieLastPlayed,TITLE/TITLE.PRG,local-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02124,isTempSave@src/TITLE/TITLE.PRG/22C.c:_loadSaveData,isTempSave,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02125,leaveTimer@src/TITLE/TITLE.PRG/22C.c:_showLoadFilesMenu,leaveTimer,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02126,leaveTimer@src/TITLE/TITLE.PRG/22C.c:_showSaveFilesMenu,leaveTimer,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02127,mask@src/TITLE/TITLE.PRG/22C.c:_memcardMaskedHandler,mask,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02128,outlineTpages@TITLE/TITLE.PRG,outlineTpages,TITLE/TITLE.PRG,extern,c-defined,,40,int[10],,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,1,Game.Title,catalog
+G02129,outlineUvs@TITLE/TITLE.PRG,outlineUvs,TITLE/TITLE.PRG,extern,c-defined,,40,int[10],,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,1,Game.Title,catalog
+G02130,outlineWhs@TITLE/TITLE.PRG,outlineWhs,TITLE/TITLE.PRG,extern,c-defined,,40,int[10],,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,1,Game.Title,catalog
+G02131,outlineXys@TITLE/TITLE.PRG,outlineXys,TITLE/TITLE.PRG,extern,c-defined,,40,int[10],,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,1,Game.Title,catalog
+G02132,page@src/TITLE/TITLE.PRG/22C.c:_showLoadFilesMenu,page,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02133,page@src/TITLE/TITLE.PRG/22C.c:_showSaveFilesMenu,page,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02134,port@src/TITLE/TITLE.PRG/22C.c:_loadSaveData,port,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02135,port@src/TITLE/TITLE.PRG/22C.c:_memcardEventHandler,port,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02136,port@src/TITLE/TITLE.PRG/22C.c:_promptFormat,port,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02137,port@src/TITLE/TITLE.PRG/22C.c:_saveFile,port,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02138,port@src/TITLE/TITLE.PRG/22C.c:_selectLoadMemoryCard,port,TITLE/TITLE.PRG,local-static,c-defined,,1,u_char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02139,port@src/TITLE/TITLE.PRG/22C.c:_selectSaveMemoryCard,port,TITLE/TITLE.PRG,local-static,c-defined,,1,u_char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02140,port@src/TITLE/TITLE.PRG/22C.c:_showLoadFilesMenu,port,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02141,port@src/TITLE/TITLE.PRG/22C.c:_showSaveFilesMenu,port,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02142,primBuf@src/TITLE/TITLE.PRG/22C.c:_drawTitleMenuItems,primBuf,TITLE/TITLE.PRG,local-static,c-defined,,8184,menuItemPrim_t[341],T00549,0,1,,TITLE/TITLE.PRG/22C.c,1,Game.Title,catalog
+G02143,publisher_clut@TITLE/TITLE.PRG,publisher_clut,TITLE/TITLE.PRG,extern,unknown,,-1,char[],,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,?
+G02144,rect@src/TITLE/TITLE.PRG/22C.c:_gameLoadScreen,rect,TITLE/TITLE.PRG,local-static,c-defined,,8,RECT,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02145,rect@src/TITLE/TITLE.PRG/22C.c:_gameSaveScreen,rect,TITLE/TITLE.PRG,local-static,c-defined,,8,RECT,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02146,renameErrors@src/TITLE/TITLE.PRG/22C.c:_saveFile,renameErrors,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02147,saveSuccessful@src/TITLE/TITLE.PRG/22C.c:_showSaveFilesMenu,saveSuccessful,TITLE/TITLE.PRG,local-static,c-defined,,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02150,selectedSlot@src/TITLE/TITLE.PRG/22C.c:_showLoadFilesMenu,selectedSlot,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02151,settingsBackup@src/TITLE/TITLE.PRG/22C.c:_showSaveFilesMenu,settingsBackup,TITLE/TITLE.PRG,local-static,c-defined,,32,vs_main_settings_t,T00707,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02152,sprtBuf@src/TITLE/TITLE.PRG/22C.c:_drawTitleMenu,sprtBuf,TITLE/TITLE.PRG,local-static,c-defined,,240,tagsprt_t[10],T00609,0,1,,TITLE/TITLE.PRG/22C.c,1,Game.Title,catalog
+G02154,state@src/TITLE/TITLE.PRG/22C.c:_gameLoadScreen,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02155,state@src/TITLE/TITLE.PRG/22C.c:_gameSaveScreen,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02158,state@src/TITLE/TITLE.PRG/22C.c:_loadSaveData,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02159,state@src/TITLE/TITLE.PRG/22C.c:_memcardEventHandler,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02160,state@src/TITLE/TITLE.PRG/22C.c:_promptConfirm,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02161,state@src/TITLE/TITLE.PRG/22C.c:_promptFormat,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02162,state@src/TITLE/TITLE.PRG/22C.c:_promptOverwrite,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02163,state@src/TITLE/TITLE.PRG/22C.c:_saveFile,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02165,state@src/TITLE/TITLE.PRG/22C.c:_selectLoadMemoryCard,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02166,state@src/TITLE/TITLE.PRG/22C.c:_selectSaveMemoryCard,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02167,state@src/TITLE/TITLE.PRG/22C.c:_showLoadFilesMenu,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02168,state@src/TITLE/TITLE.PRG/22C.c:_showSaveFilesMenu,state,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state
+G02171,textTpages@TITLE/TITLE.PRG,textTpages,TITLE/TITLE.PRG,extern,c-defined,,40,int[10],,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,1,Game.Title,catalog
+G02172,textUvs@TITLE/TITLE.PRG,textUvs,TITLE/TITLE.PRG,extern,c-defined,,40,int[10],,0,1,,TITLE/TITLE.PRG/titleData.c TITLE/TITLE.PRG/titleData.h,1,Game.Title,catalog
+G02173,timeout@src/TITLE/TITLE.PRG/22C.c:_memcardEventHandler,timeout,TITLE/TITLE.PRG,local-static,c-defined,,1,char,,0,0,,TITLE/TITLE.PRG/22C.c,1,Game.Title,state

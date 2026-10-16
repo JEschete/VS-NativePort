@@ -1,0 +1,263 @@
+id,key,name,overlay,linkage,segment,address,size,type,type_id,has_pointers,init,instances,files,used_by,proposed_system,proposed_disposition
+G00218,D_800EC2D8@BATTLE/BATTLE.PRG,D_800EC2D8,BATTLE/BATTLE.PRG,extern,data,0x800EC2D8,21908,int[],,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Game.Menu,catalog
+G00278,vs_battle_characterState@BATTLE/BATTLE.PRG,vs_battle_characterState,BATTLE/BATTLE.PRG,extern,bss,0x800F19FC,4,vs_battle_actor *,T00630,1,0,,BATTLE/BATTLE.PRG/146C.h,56,Game.Menu,state
+G00316,vs_battle_sceneBuffer@BATTLE/BATTLE.PRG,vs_battle_sceneBuffer,BATTLE/BATTLE.PRG,extern,bss,0x800F1BC0,4,void *,,1,0,,BATTLE/BATTLE.PRG/146C.h,5,Game.Menu,state
+G00318,vs_battle_menu9CursorMemory@BATTLE/BATTLE.PRG,vs_battle_menu9CursorMemory,BATTLE/BATTLE.PRG,extern,bss,0x800F1BF0,8,vs_battle_menu9CursorMemory_t,T00656,0,0,,BATTLE/BATTLE.PRG/146C.h,8,Game.Menu,state
+G00326,vs_battle_submenuState@BATTLE/BATTLE.PRG,vs_battle_submenuState,BATTLE/BATTLE.PRG,extern,bss,0x800F1CD8,4,int,,0,0,,BATTLE/BATTLE.PRG/146C.h,6,Game.Menu,state
+G00409,D_800F4590@BATTLE/BATTLE.PRG,D_800F4590,BATTLE/BATTLE.PRG,extern,bss,0x800F4590,4,D_800F4590_t *[],T00254,1,0,,BATTLE/BATTLE.PRG/30DB0.h,2,Game.Menu,state
+G00410,D_800F4594@BATTLE/BATTLE.PRG,D_800F4594,BATTLE/BATTLE.PRG,extern,bss,0x800F4594,4,int,,0,0,,BATTLE/BATTLE.PRG/30DB0.h,1,Game.Menu,state
+G00496,D_800F4CC0@BATTLE/BATTLE.PRG,D_800F4CC0,BATTLE/BATTLE.PRG,extern,bss,0x800F4CC0,4,int,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Game.Menu,state
+G00497,D_800F4CD0@BATTLE/BATTLE.PRG,D_800F4CD0,BATTLE/BATTLE.PRG,extern,bss,0x800F4CD0,4,u_long,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,2,Game.Menu,state
+G00498,D_800F4E68@BATTLE/BATTLE.PRG,D_800F4E68,BATTLE/BATTLE.PRG,extern,bss,0x800F4E68,1,char,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,2,Game.Menu,state
+G00499,D_800F4E69@BATTLE/BATTLE.PRG,D_800F4E69,BATTLE/BATTLE.PRG,extern,bss,0x800F4E69,1,char,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,2,Game.Menu,state
+G00500,vs_battle_shortcutInvoked@BATTLE/BATTLE.PRG,vs_battle_shortcutInvoked,BATTLE/BATTLE.PRG,extern,bss,0x800F4E6A,1,char,,0,0,,BATTLE/BATTLE.PRG/5BF94.c BATTLE/BATTLE.PRG/5BF94.h,15,Game.Menu,state
+G00501,D_800F4E6B@BATTLE/BATTLE.PRG,D_800F4E6B,BATTLE/BATTLE.PRG,extern,bss,0x800F4E6B,1,char,,0,0,,BATTLE/BATTLE.PRG/5BF94.h,3,Game.Menu,state
+G00502,vs_battle_submenuStates@BATTLE/BATTLE.PRG,vs_battle_submenuStates,BATTLE/BATTLE.PRG,extern,bss,0x800F4E70,16,char[16],,0,0,,BATTLE/BATTLE.PRG/5BF94.h,4,Game.Menu,state
+G00504,vs_battle_rowTypeBuf@BATTLE/BATTLE.PRG,vs_battle_rowTypeBuf,BATTLE/BATTLE.PRG,extern,bss,0x800F4E84,4,int *,,1,0,,BATTLE/BATTLE.PRG/5BF94.h,17,Game.Menu,state
+G00505,vs_battle_unlockedBreakArt@BATTLE/BATTLE.PRG,vs_battle_unlockedBreakArt,BATTLE/BATTLE.PRG,extern,bss,0x800F4E88,1,char,,0,0,,BATTLE/BATTLE.PRG/5BF94.h,2,Game.Menu,state
+G00506,vs_battle_stringBuf@BATTLE/BATTLE.PRG,vs_battle_stringBuf,BATTLE/BATTLE.PRG,extern,bss,0x800F4E8C,4,char *,,1,0,,BATTLE/BATTLE.PRG/5BF94.h,41,Game.Menu,state
+G00508,D_800F4E98@BATTLE/BATTLE.PRG,D_800F4E98,BATTLE/BATTLE.PRG,extern,bss,0x800F4E98,8,D_800F18EC_t,T00223,1,0,,BATTLE/BATTLE.PRG/5BF94.h,12,Game.Menu,state
+G00509,D_800F4EA0@BATTLE/BATTLE.PRG,D_800F4EA0,BATTLE/BATTLE.PRG,extern,bss,0x800F4EA0,4,int,,0,0,,BATTLE/BATTLE.PRG/5BF94.h,16,Game.Menu,state
+G00510,textBoxSelector@BATTLE/BATTLE.PRG,textBoxSelector,BATTLE/BATTLE.PRG,extern,bss,0x800F4EA8,13,_textBoxSelector_t,T00341,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Game.Menu,state
+G00511,D_800F4ED4@BATTLE/BATTLE.PRG,D_800F4ED4,BATTLE/BATTLE.PRG,extern,bss,0x800F4ED4,4,int,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Game.Menu,state
+G00513,D_800F4EE8@BATTLE/BATTLE.PRG,D_800F4EE8,BATTLE/BATTLE.PRG,extern,bss,0x800F4EE8,242,D_800F4EE8_t,T00261,1,0,,BATTLE/BATTLE.PRG/5BF94.h,36,Game.Menu,state
+G00514,vs_battle_unlockedBattleAbility@BATTLE/BATTLE.PRG,vs_battle_unlockedBattleAbility,BATTLE/BATTLE.PRG,extern,bss,0x800F4FDA,1,char,,0,0,,BATTLE/BATTLE.PRG/5BF94.h,2,Game.Menu,state
+G00515,D_800F4FDB@BATTLE/BATTLE.PRG,D_800F4FDB,BATTLE/BATTLE.PRG,extern,bss,0x800F4FDB,1,char,,0,0,,BATTLE/BATTLE.PRG/5BF94.h,6,Game.Menu,state
+G00516,vs_battle_textBoxes@BATTLE/BATTLE.PRG,vs_battle_textBoxes,BATTLE/BATTLE.PRG,extern,bss,0x800F4FE0,384,vs_battle_textBox[],T00671,1,0,,BATTLE/BATTLE.PRG/5BF94.h,24,Game.Menu,state
+G00518,vs_battle_stringContext@BATTLE/BATTLE.PRG,vs_battle_stringContext,BATTLE/BATTLE.PRG,extern,bss,0x800F5168,56,vs_battle_stringContext_t,T00669,1,0,,BATTLE/BATTLE.PRG/5BF94.h,21,Game.Menu,state
+G00519,D_800F51B8@BATTLE/BATTLE.PRG,D_800F51B8,BATTLE/BATTLE.PRG,extern,bss,0x800F51B8,4,u_long *,,1,0,,BATTLE/BATTLE.PRG/5BF94.c,5,Game.Menu,state
+G00520,vs_battle_menuState@BATTLE/BATTLE.PRG,vs_battle_menuState,BATTLE/BATTLE.PRG,extern,bss,0x800F51C0,8,vs_battle_menuState_t,T00658,1,0,,BATTLE/BATTLE.PRG/5BF94.h,23,Game.Menu,state
+G00523,vs_battle_miscItemInvoked@BATTLE/BATTLE.PRG,vs_battle_miscItemInvoked,BATTLE/BATTLE.PRG,extern,bss,0x800F5210,1,u_char,,0,0,,BATTLE/BATTLE.PRG/5BF94.h,3,Game.Menu,state
+G00617,_menuLbas@BATTLE/BATTLE.PRG,_menuLbas,BATTLE/BATTLE.PRG,extern,c-defined,,64,int[16],,0,1,,BATTLE/BATTLE.PRG/5BF94.c BATTLE/BATTLE.PRG/menuLbas.c,1,Game.Menu,catalog
+G00860,D_801020F4@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_drawClassAffinityType,D_801020F4,MENU/MAINMENU.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00861,D_801020F8@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_drawClassAffinityType,D_801020F8,MENU/MAINMENU.PRG,local-static,c-defined,,1,u_char,,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00862,D_80102131@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_renderEquipStats,D_80102131,MENU/MAINMENU.PRG,local-static,c-defined,,1,u_char,,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00863,D_80102488@MENU/MAINMENU.PRG,D_80102488,MENU/MAINMENU.PRG,extern,c-defined,,8,short[4],,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,2,Game.Menu,state
+G00864,D_80102490@MENU/MAINMENU.PRG,D_80102490,MENU/MAINMENU.PRG,extern,c-defined,,8,char[8],,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,1,Game.Menu,state
+G00865,D_80102498@MENU/MAINMENU.PRG,D_80102498,MENU/MAINMENU.PRG,extern,c-defined,,8,short[4],,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,2,Game.Menu,state
+G00866,_0@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_miscItemsShortcutMenu,_0,MENU/MAINMENU.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MAINMENU.PRG/C48.c,0,Game.Menu,state
+G00867,_1@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_miscItemsShortcutMenu,_1,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MAINMENU.PRG/C48.c,0,Game.Menu,state
+G00868,_actionsSubMenuId@src/MENU/MAINMENU.PRG/58EC.c,_actionsSubMenuId,MENU/MAINMENU.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,2,Game.Menu,state
+G00869,_backgroundBrightness@src/MENU/MAINMENU.PRG/58EC.c,_backgroundBrightness,MENU/MAINMENU.PRG,file-static,c-defined,,2,short,,0,1,,MENU/MAINMENU.PRG/58EC.c,3,Game.Menu,state
+G00870,_backgroundFadeState@MENU/MAINMENU.PRG,_backgroundFadeState,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,2,Game.Menu,state
+G00871,_backgroundOtOffset@src/MENU/MAINMENU.PRG/58EC.c,_backgroundOtOffset,MENU/MAINMENU.PRG,file-static,c-defined,,2,short,,0,1,,MENU/MAINMENU.PRG/58EC.c,3,Game.Menu,state
+G00872,_currentDp@src/MENU/MAINMENU.PRG/C48.c,_currentDp,MENU/MAINMENU.PRG,file-static,c-defined,,2,u_short,,0,1,,MENU/MAINMENU.PRG/C48.c,2,Game.Menu,state
+G00873,_currentPp@src/MENU/MAINMENU.PRG/C48.c,_currentPp,MENU/MAINMENU.PRG,file-static,c-defined,,2,u_short,,0,1,,MENU/MAINMENU.PRG/C48.c,2,Game.Menu,state
+G00874,_itemActionCount@src/MENU/MAINMENU.PRG/58EC.c,_itemActionCount,MENU/MAINMENU.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,2,Game.Menu,state
+G00875,_itemActionListOffset@src/MENU/MAINMENU.PRG/58EC.c,_itemActionListOffset,MENU/MAINMENU.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,4,Game.Menu,state
+G00876,_itemNamesCdQueueSlot@src/MENU/MAINMENU.PRG/2D10.c:vs_mainMenu_loadItemText,_itemNamesCdQueueSlot,MENU/MAINMENU.PRG,local-static,c-defined,,4,vs_main_CdQueueSlot *,T00691,1,0,,MENU/MAINMENU.PRG/2D10.c,1,Game.Menu,state
+G00877,_itemNamesLoading@src/MENU/MAINMENU.PRG/2D10.c:vs_mainMenu_loadItemText,_itemNamesLoading,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MAINMENU.PRG/2D10.c,1,Game.Menu,state
+G00878,_itemsText@src/MENU/MAINMENU.PRG/58EC.c,_itemsText,MENU/MAINMENU.PRG,file-static,c-defined,,4,u_short *,,1,1,,MENU/MAINMENU.PRG/58EC.c,6,Game.Menu,state
+G00879,_maxDp@src/MENU/MAINMENU.PRG/C48.c,_maxDp,MENU/MAINMENU.PRG,file-static,c-defined,,2,u_short,,0,1,,MENU/MAINMENU.PRG/C48.c,2,Game.Menu,state
+G00880,_maxPp@src/MENU/MAINMENU.PRG/C48.c,_maxPp,MENU/MAINMENU.PRG,file-static,c-defined,,2,u_short,,0,1,,MENU/MAINMENU.PRG/C48.c,2,Game.Menu,state
+G00881,_menuActionCurrent@src/MENU/MAINMENU.PRG/58EC.c,_menuActionCurrent,MENU/MAINMENU.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,state
+G00882,_menuActionNext@src/MENU/MAINMENU.PRG/58EC.c,_menuActionNext,MENU/MAINMENU.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,2,Game.Menu,state
+G00883,_menuActionsPageOffset@MENU/MAINMENU.PRG,_menuActionsPageOffset,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,0,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,2,Game.Menu,state
+G00884,_menuRowYOffset@src/MENU/MAINMENU.PRG/58EC.c,_menuRowYOffset,MENU/MAINMENU.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,3,Game.Menu,state
+G00885,_rangeRiskData@MENU/MAINMENU.PRG,_rangeRiskData,MENU/MAINMENU.PRG,extern,c-defined,,8,char[8],,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,2,Game.Menu,state
+G00886,_selectedItemAction@src/MENU/MAINMENU.PRG/58EC.c,_selectedItemAction,MENU/MAINMENU.PRG,file-static,c-defined,,4,int,,0,1,,MENU/MAINMENU.PRG/58EC.c,4,Game.Menu,state
+G00887,_selectedRow@src/MENU/MAINMENU.PRG/58EC.c,_selectedRow,MENU/MAINMENU.PRG,file-static,c-defined,,4,int,,0,1,,MENU/MAINMENU.PRG/58EC.c,5,Game.Menu,state
+G00888,_sortItemsTextBuf@src/MENU/MAINMENU.PRG/58EC.c,_sortItemsTextBuf,MENU/MAINMENU.PRG,file-static,c-defined,,4,u_short *,,1,1,,MENU/MAINMENU.PRG/58EC.c,4,Game.Menu,state
+G00889,_subMenuId@src/MENU/MAINMENU.PRG/58EC.c,_subMenuId,MENU/MAINMENU.PRG,file-static,c-defined,,1,u_char,,0,1,,MENU/MAINMENU.PRG/58EC.c,3,Game.Menu,state
+G00890,_subMenuPage@src/MENU/MAINMENU.PRG/58EC.c,_subMenuPage,MENU/MAINMENU.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,5,Game.Menu,state
+G00891,_subMenuRowCount@src/MENU/MAINMENU.PRG/58EC.c,_subMenuRowCount,MENU/MAINMENU.PRG,file-static,c-defined,,2,u_short,,0,1,,MENU/MAINMENU.PRG/58EC.c,2,Game.Menu,state
+G00892,_subMenuRowInfo@src/MENU/MAINMENU.PRG/58EC.c,_subMenuRowInfo,MENU/MAINMENU.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,4,Game.Menu,state
+G00893,_textHeaders@MENU/MAINMENU.PRG,_textHeaders,MENU/MAINMENU.PRG,extern,c-defined,,32,textHeader_t[2],T00618,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,2,Game.Menu,catalog
+G00894,_uIElement15Enabled@src/MENU/MAINMENU.PRG/2D10.c,_uIElement15Enabled,MENU/MAINMENU.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/2D10.c,2,Game.Menu,state
+G00895,_weaponTitleMaxThresholds@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_getEquipmentMaxStats,_weaponTitleMaxThresholds,MENU/MAINMENU.PRG,local-static,c-defined,,8,short[4],,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00896,_weaponTitleSubmaxThresholds@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_getEquipmentMaxStats,_weaponTitleSubmaxThresholds,MENU/MAINMENU.PRG,local-static,c-defined,,22,short[11],,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00897,actionYPos@src/MENU/MAINMENU.PRG/58EC.c:_renderMenuCommand,actionYPos,MENU/MAINMENU.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,state
+G00898,actions@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_miscItemsShortcutMenu,actions,MENU/MAINMENU.PRG,local-static,c-defined,,64,char[64],,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,catalog
+G00899,animState@src/MENU/MAINMENU.PRG/58EC.c:_renderAbilityCost,animState,MENU/MAINMENU.PRG,local-static,c-defined,,1,u_char,,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,state
+G00900,animState@src/MENU/MAINMENU.PRG/58EC.c:_renderScrollableRow,animState,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,state
+G00901,arrowAnimState@src/MENU/MAINMENU.PRG/58EC.c:vs_mainMenu_renderTabNavigation,arrowAnimState,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,state
+G00902,bss_2@src/MENU/MAINMENU.PRG/2D10.c:vs_mainMenu_loadItemText,bss_2,MENU/MAINMENU.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MAINMENU.PRG/2D10.c,0,Game.Menu,state
+G00903,bss_3@MENU/MAINMENU.PRG,bss_3,MENU/MAINMENU.PRG,extern,c-defined,,6,char[6],,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,0,Game.Menu,state
+G00904,bss_4@MENU/MAINMENU.PRG,bss_4,MENU/MAINMENU.PRG,extern,c-defined,,18,char[18],,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,0,Game.Menu,state
+G00905,bss_7@MENU/MAINMENU.PRG,bss_7,MENU/MAINMENU.PRG,extern,c-defined,,2,char[2],,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,0,Game.Menu,state
+G00906,controlPositions@src/MENU/MAINMENU.PRG/58EC.c:vs_mainMenu_renderTabNavigation,controlPositions,MENU/MAINMENU.PRG,local-static,c-defined,,16,int[4],,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,state
+G00907,controls@src/MENU/MAINMENU.PRG/58EC.c:vs_mainMenu_renderTabNavigation,controls,MENU/MAINMENU.PRG,local-static,c-defined,,16,const char *[4],,1,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,constexpr
+G00908,cursorAnimStep@src/MENU/MAINMENU.PRG/2D10.c:vs_mainMenu_renderStatusView,cursorAnimStep,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/2D10.c,1,Game.Menu,state
+G00909,cursorAnimStep@src/MENU/MAINMENU.PRG/58EC.c:vs_mainMenu_renderItemActionMenu,cursorAnimStep,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,state
+G00910,cursorAnimStep@src/MENU/MAINMENU.PRG/58EC.c:vs_mainMenu_renderItemsList,cursorAnimStep,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,state
+G00911,delay@src/MENU/MAINMENU.PRG/C48.c:_quitDelay,delay,MENU/MAINMENU.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00912,dpPpBarAnimState@src/MENU/MAINMENU.PRG/C48.c,dpPpBarAnimState,MENU/MAINMENU.PRG,file-static,c-defined,,2,u_short,,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00913,iconUvs@src/MENU/MAINMENU.PRG/58EC.c:vs_mainMenu_renderMenuRowIcon,iconUvs,MENU/MAINMENU.PRG,local-static,c-defined,,66,u_short[33],,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,catalog
+G00914,infoMessage@src/MENU/MAINMENU.PRG/58EC.c:vs_mainmenu_setInformationMessage,infoMessage,MENU/MAINMENU.PRG,local-static,c-defined,,103,char[103],,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,catalog
+G00915,menuActionRenderPostitions@src/MENU/MAINMENU.PRG/58EC.c:_renderMenuCommand,menuActionRenderPostitions,MENU/MAINMENU.PRG,local-static,c-defined,,32,int[8],,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,catalog
+G00916,menuActionUvs@src/MENU/MAINMENU.PRG/58EC.c:_renderMenuCommand,menuActionUvs,MENU/MAINMENU.PRG,local-static,c-defined,,14,u_short[7],,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,state
+G00917,misc@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_miscItemsShortcutMenu,misc,MENU/MAINMENU.PRG,local-static,c-defined,,14,char[14],,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00918,negativeStatColors@src/MENU/MAINMENU.PRG/C48.c:_renderStatPage,negativeStatColors,MENU/MAINMENU.PRG,local-static,c-defined,,16,int[4],,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00919,noForceCursorMemory@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_miscItemsShortcutMenu,noForceCursorMemory,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00920,noItems@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_miscItemsShortcutMenu,noItems,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00921,pageHeader@src/MENU/MAINMENU.PRG/C48.c:_renderStatPage,pageHeader,MENU/MAINMENU.PRG,local-static,c-defined,,40,char[40],,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,catalog
+G00922,positiveStatColors@src/MENU/MAINMENU.PRG/C48.c:_renderStatPage,positiveStatColors,MENU/MAINMENU.PRG,local-static,c-defined,,16,int[4],,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00923,previousFrameBuf@src/MENU/MAINMENU.PRG/58EC.c:_renderScrollableRow,previousFrameBuf,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,state
+G00924,previousItem@src/MENU/MAINMENU.PRG/2D10.c:vs_mainMenu_renderStatusView,previousItem,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/2D10.c,1,Game.Menu,state
+G00925,rangeRiskStr@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_renderEquipStats,rangeRiskStr,MENU/MAINMENU.PRG,local-static,c-defined,,8,const char *[2],,1,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,constexpr
+G00926,rects@src/MENU/MAINMENU.PRG/58EC.c:vs_mainMenu_unpackMenubg,rects,MENU/MAINMENU.PRG,local-static,c-defined,,16,RECT[2],,0,1,,MENU/MAINMENU.PRG/58EC.c,1,Game.Menu,state
+G00927,selectedRow@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_miscItemsShortcutMenu,selectedRow,MENU/MAINMENU.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00928,statHeaders@src/MENU/MAINMENU.PRG/C48.c:_renderStatPage,statHeaders,MENU/MAINMENU.PRG,local-static,c-defined,,76,const char *[19],,1,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,constexpr
+G00929,statStr@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_renderEquipStats,statStr,MENU/MAINMENU.PRG,local-static,c-defined,,44,const char *[11],,1,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,constexpr
+G00930,state@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_miscItemsShortcutMenu,state,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00931,state@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_renderDpPpBars,state,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00932,statsAnimation@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_renderEquipStats,statsAnimation,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00933,statusViewDispatch@src/MENU/MAINMENU.PRG/2D10.c:vs_mainMenu_renderStatusView,statusViewDispatch,MENU/MAINMENU.PRG,local-static,c-defined,,28,char *(*[7])(int),,1,1,,MENU/MAINMENU.PRG/2D10.c,1,Game.Menu,state
+G00934,submenuEntrypoints@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_exec,submenuEntrypoints,MENU/MAINMENU.PRG,local-static,c-defined,,40,int (*[10])(u_char *),,1,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,catalog
+G00935,target@src/MENU/MAINMENU.PRG/C48.c:vs_mainMenu_renderDpPpBars,target,MENU/MAINMENU.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/C48.c,1,Game.Menu,state
+G00936,vs_mainMenu_actionMenuState@MENU/MAINMENU.PRG,vs_mainMenu_actionMenuState,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,4,Game.Menu,state
+G00937,vs_mainMenu_armor@MENU/MAINMENU.PRG,vs_mainMenu_armor,MENU/MAINMENU.PRG,extern,c-defined,,4,vs_main_inventoryArmor *,T00696,1,0,,MENU/MAINMENU.PRG/C48.c MENU/MAINMENU.PRG/C48.h,5,Game.Menu,state
+G00938,vs_mainMenu_backgroundFadeStep@MENU/MAINMENU.PRG,vs_mainMenu_backgroundFadeStep,MENU/MAINMENU.PRG,extern,c-defined,,4,int,,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,7,Game.Menu,state
+G00939,vs_mainMenu_blades@MENU/MAINMENU.PRG,vs_mainMenu_blades,MENU/MAINMENU.PRG,extern,c-defined,,4,vs_main_inventoryBlade *,T00697,1,0,,MENU/MAINMENU.PRG/C48.c MENU/MAINMENU.PRG/C48.h,6,Game.Menu,state
+G00940,vs_mainMenu_containerEmptyBackup@MENU/MAINMENU.PRG,vs_mainMenu_containerEmptyBackup,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,0,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,1,Game.Menu,state
+G00941,vs_mainMenu_currentStatusViewItem@MENU/MAINMENU.PRG,vs_mainMenu_currentStatusViewItem,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,0,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,15,Game.Menu,state
+G00942,vs_mainMenu_cursorColor@MENU/MAINMENU.PRG,vs_mainMenu_cursorColor,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,8,Game.Menu,state
+G00943,vs_mainMenu_displayActionCost@MENU/MAINMENU.PRG,vs_mainMenu_displayActionCost,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,9,Game.Menu,state
+G00944,vs_mainMenu_enabledStatPages@MENU/MAINMENU.PRG,vs_mainMenu_enabledStatPages,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,0,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,4,Game.Menu,state
+G00945,vs_mainMenu_equipmentStats@MENU/MAINMENU.PRG,vs_mainMenu_equipmentStats,MENU/MAINMENU.PRG,extern,c-defined,,128,short[64],,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,20,Game.Menu,catalog
+G00946,vs_mainMenu_equipmentSubtype@MENU/MAINMENU.PRG,vs_mainMenu_equipmentSubtype,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,0,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,26,Game.Menu,state
+G00947,vs_mainMenu_freezeTabArrows@MENU/MAINMENU.PRG,vs_mainMenu_freezeTabArrows,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,6,Game.Menu,state
+G00948,vs_mainMenu_gems@MENU/MAINMENU.PRG,vs_mainMenu_gems,MENU/MAINMENU.PRG,extern,c-defined,,4,vs_main_inventoryGem *,T00698,1,0,,MENU/MAINMENU.PRG/C48.c MENU/MAINMENU.PRG/C48.h,8,Game.Menu,state
+G00949,vs_mainMenu_grips@MENU/MAINMENU.PRG,vs_mainMenu_grips,MENU/MAINMENU.PRG,extern,c-defined,,4,vs_main_inventoryGrip *,T00699,1,0,,MENU/MAINMENU.PRG/C48.c MENU/MAINMENU.PRG/C48.h,7,Game.Menu,state
+G00950,vs_mainMenu_hideMenu@MENU/MAINMENU.PRG,vs_mainMenu_hideMenu,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,7,Game.Menu,state
+G00951,vs_mainMenu_inventoryIndices@MENU/MAINMENU.PRG,vs_mainMenu_inventoryIndices,MENU/MAINMENU.PRG,extern,c-defined,,28,u_char *[7],,1,1,,MENU/MAINMENU.PRG/2D10.c MENU/MAINMENU.PRG/2D10.h,9,Game.Menu,state
+G00952,vs_mainMenu_inventoryItemCapacities@MENU/MAINMENU.PRG,vs_mainMenu_inventoryItemCapacities,MENU/MAINMENU.PRG,extern,c-defined,,8,u_char[8],,0,1,,MENU/MAINMENU.PRG/2D10.c MENU/MAINMENU.PRG/2D10.h,15,Game.Menu,state
+G00953,vs_mainMenu_itemHelp@MENU/MAINMENU.PRG,vs_mainMenu_itemHelp,MENU/MAINMENU.PRG,extern,c-defined,,4,u_short *,,1,0,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,28,Game.Menu,state
+G00954,vs_mainMenu_itemNames@MENU/MAINMENU.PRG,vs_mainMenu_itemNames,MENU/MAINMENU.PRG,extern,c-defined,,4,char (*)[24],,1,1,,MENU/MAINMENU.PRG/2D10.c MENU/MAINMENU.PRG/2D10.h,22,Game.Menu,state
+G00955,vs_mainMenu_itemStatPage@MENU/MAINMENU.PRG,vs_mainMenu_itemStatPage,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,0,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,8,Game.Menu,state
+G00956,vs_mainMenu_itemsListRow@MENU/MAINMENU.PRG,vs_mainMenu_itemsListRow,MENU/MAINMENU.PRG,extern,c-defined,,1,char,,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,6,Game.Menu,state
+G00957,vs_mainMenu_menu12Text@MENU/MAINMENU.PRG,vs_mainMenu_menu12Text,MENU/MAINMENU.PRG,extern,c-defined,,4,u_short *,,1,0,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,26,Game.Menu,state
+G00958,vs_mainMenu_miscItemToActionMap@MENU/MAINMENU.PRG,vs_mainMenu_miscItemToActionMap,MENU/MAINMENU.PRG,extern,c-defined,,134,u_char[134],,0,1,,MENU/MAINMENU.PRG/2D10.c MENU/MAINMENU.PRG/2D10.h,2,Game.Menu,catalog
+G00959,vs_mainMenu_selectedStatusViewElement@MENU/MAINMENU.PRG,vs_mainMenu_selectedStatusViewElement,MENU/MAINMENU.PRG,extern,c-defined,,1,u_char,,0,0,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,4,Game.Menu,state
+G00960,vs_mainMenu_shields@MENU/MAINMENU.PRG,vs_mainMenu_shields,MENU/MAINMENU.PRG,extern,c-defined,,4,vs_main_inventoryShield *,T00702,1,0,,MENU/MAINMENU.PRG/C48.c MENU/MAINMENU.PRG/C48.h,7,Game.Menu,state
+G00961,vs_mainMenu_statusViewCursorPositions@MENU/MAINMENU.PRG,vs_mainMenu_statusViewCursorPositions,MENU/MAINMENU.PRG,extern,c-defined,,84,int[21],,0,1,,MENU/MAINMENU.PRG/2D10.c MENU/MAINMENU.PRG/2D10.h,2,Game.Menu,catalog
+G00962,vs_mainMenu_statusViewNavigationMap@MENU/MAINMENU.PRG,vs_mainMenu_statusViewNavigationMap,MENU/MAINMENU.PRG,extern,c-defined,,84,u_char[21][4],,0,1,,MENU/MAINMENU.PRG/2D10.c MENU/MAINMENU.PRG/2D10.h,2,Game.Menu,catalog
+G00963,vs_mainMenu_strIntAgi@MENU/MAINMENU.PRG,vs_mainMenu_strIntAgi,MENU/MAINMENU.PRG,extern,c-defined,,16,short[8],,0,1,,MENU/MAINMENU.PRG/58EC.c MENU/MAINMENU.PRG/58EC.h,10,Game.Menu,state
+G00964,vs_mainMenu_weaponHands@MENU/MAINMENU.PRG,vs_mainMenu_weaponHands,MENU/MAINMENU.PRG,extern,c-defined,,10,u_char[10],,0,1,,MENU/MAINMENU.PRG/2D10.c MENU/MAINMENU.PRG/2D10.h,5,Game.Menu,state
+G00965,vs_mainMenu_weapons@MENU/MAINMENU.PRG,vs_mainMenu_weapons,MENU/MAINMENU.PRG,extern,c-defined,,4,vs_main_inventoryWeapon *,T00703,1,0,,MENU/MAINMENU.PRG/C48.c MENU/MAINMENU.PRG/C48.h,7,Game.Menu,state
+G00966,vs_menu_inventoryStorage@MENU/MAINMENU.PRG,vs_menu_inventoryStorage,MENU/MAINMENU.PRG,extern,c-defined,,4,vs_menu_inventoryStorage_t *,T00714,1,0,,MENU/MAINMENU.PRG/C48.c MENU/MAINMENU.PRG/C48.h,16,Game.Menu,state
+G00967,D_8010694A@src/MENU/MENU0.PRG/84.c,D_8010694A,MENU/MENU0.PRG,file-static,c-defined,,1,u_char,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00968,_0@src/MENU/MENU0.PRG/84.c,_0,MENU/MENU0.PRG,file-static,c-defined,,5,char[5],,0,1,,MENU/MENU0.PRG/84.c,0,Game.Menu,state
+G00969,_1@src/MENU/MENU0.PRG/84.c,_1,MENU/MENU0.PRG,file-static,c-defined,,2,char[2],,0,1,,MENU/MENU0.PRG/84.c,0,Game.Menu,state
+G00970,_3@src/MENU/MENU0.PRG/84.c,_3,MENU/MENU0.PRG,file-static,c-defined,,6,char[6],,0,1,,MENU/MENU0.PRG/84.c,0,Game.Menu,state
+G00971,_@src/MENU/MENU0.PRG/84.c,_,MENU/MENU0.PRG,file-static,c-defined,,4,const int,,0,1,,MENU/MENU0.PRG/84.c,0,Game.Menu,constexpr
+G00972,_MPCostDirectTextBuffer@src/MENU/MENU0.PRG/84.c,_MPCostDirectTextBuffer,MENU/MENU0.PRG,file-static,c-defined,,16,char[16],,0,1,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00973,_MPCostTextBuffer@src/MENU/MENU0.PRG/84.c,_MPCostTextBuffer,MENU/MENU0.PRG,file-static,c-defined,,16,signed char[16],,0,1,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00974,_availableEnchanterSpells@src/MENU/MENU0.PRG/84.c,_availableEnchanterSpells,MENU/MENU0.PRG,file-static,c-defined,,8,char[8],,0,1,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00975,_availableShamanSpells@src/MENU/MENU0.PRG/84.c,_availableShamanSpells,MENU/MENU0.PRG,file-static,c-defined,,6,char[6],,0,1,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00976,_availableSorcererSpells@src/MENU/MENU0.PRG/84.c,_availableSorcererSpells,MENU/MENU0.PRG,file-static,c-defined,,18,char[18],,0,1,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00977,_availableWarlockSpells@src/MENU/MENU0.PRG/84.c,_availableWarlockSpells,MENU/MENU0.PRG,file-static,c-defined,,18,char[18],,0,1,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00978,_magicStrings@MENU/MENU0.PRG,_magicStrings,MENU/MENU0.PRG,extern,c-defined,,2,u_short[1],,0,1,,MENU/MENU0.PRG/84.c MENU/MENU0.PRG/84.h,5,Game.Menu,state
+G00979,_savePointData@MENU/MENU0.PRG,_savePointData,MENU/MENU0.PRG,extern,c-defined,,192,int[48],,0,1,,MENU/MENU0.PRG/84.c MENU/MENU0.PRG/84.h,2,Game.Menu,catalog
+G00980,_teleportationStrings@MENU/MENU0.PRG,_teleportationStrings,MENU/MENU0.PRG,extern,c-defined,,2,u_short[1],,0,1,,MENU/MENU0.PRG/84.c MENU/MENU0.PRG/84.h,2,Game.Menu,state
+G00981,availableSavePoints@src/MENU/MENU0.PRG/15AC.c:_teleportMenu,availableSavePoints,MENU/MENU0.PRG,local-static,c-defined,,48,u_char[48],,0,1,,MENU/MENU0.PRG/15AC.c,1,Game.Menu,catalog
+G00982,currentMp@src/MENU/MENU0.PRG/15AC.c:_teleportMenu,currentMp,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/15AC.c,1,Game.Menu,state
+G00983,levelledSpells@src/MENU/MENU0.PRG/84.c:_warlockMagicMenu,levelledSpells,MENU/MENU0.PRG,local-static,c-defined,,7,char[7],,0,1,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00984,savePointCosts@src/MENU/MENU0.PRG/84.c:_getTeleportCost,savePointCosts,MENU/MENU0.PRG,local-static,c-defined,,48,char[48],,0,1,,MENU/MENU0.PRG/84.c,1,Game.Menu,catalog
+G00985,selectedRow@src/MENU/MENU0.PRG/15AC.c:_teleportMenu,selectedRow,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/15AC.c,1,Game.Menu,state
+G00986,selectedRow@src/MENU/MENU0.PRG/84.c:_enchanterMagicMenu,selectedRow,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00987,selectedRow@src/MENU/MENU0.PRG/84.c:_shamanMagicMenu,selectedRow,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00988,selectedRow@src/MENU/MENU0.PRG/84.c:_sorcererMagicMenu,selectedRow,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00989,selectedRow@src/MENU/MENU0.PRG/84.c:_warlockMagicMenu,selectedRow,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00990,shortcutInvoked@src/MENU/MENU0.PRG/84.c:_enchanterMagicMenu,shortcutInvoked,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00991,shortcutInvoked@src/MENU/MENU0.PRG/84.c:_shamanMagicMenu,shortcutInvoked,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00992,shortcutInvoked@src/MENU/MENU0.PRG/84.c:_sorcererMagicMenu,shortcutInvoked,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00993,shortcutInvoked@src/MENU/MENU0.PRG/84.c:_warlockMagicMenu,shortcutInvoked,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00994,spellLevels@src/MENU/MENU0.PRG/84.c:_warlockMagicMenu,spellLevels,MENU/MENU0.PRG,local-static,c-defined,,20,char *[5],,1,1,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00995,state@src/MENU/MENU0.PRG/15AC.c:_teleportMenu,state,MENU/MENU0.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU0.PRG/15AC.c,1,Game.Menu,state
+G00996,state@src/MENU/MENU0.PRG/84.c:_enchanterMagicMenu,state,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00997,state@src/MENU/MENU0.PRG/84.c:_shamanMagicMenu,state,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00998,state@src/MENU/MENU0.PRG/84.c:_sorcererMagicMenu,state,MENU/MENU0.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G00999,state@src/MENU/MENU0.PRG/84.c:_warlockMagicMenu,state,MENU/MENU0.PRG,local-static,c-defined,,4,u_int,,0,0,,MENU/MENU0.PRG/84.c,1,Game.Menu,state
+G01000,teleportCosts@src/MENU/MENU0.PRG/15AC.c:_teleportMenu,teleportCosts,MENU/MENU0.PRG,local-static,c-defined,,96,u_short[48],,0,1,,MENU/MENU0.PRG/15AC.c,1,Game.Menu,catalog
+G01001,_@src/MENU/MENU1.PRG/30.c,_,MENU/MENU1.PRG,file-static,c-defined,,1,char,,0,0,,MENU/MENU1.PRG/30.c,0,Game.Menu,state
+G01002,_@src/MENU/MENU1.PRG/30.c:_weaponArtsMenu,_,MENU/MENU1.PRG,local-static,c-defined,,12,char[12],,0,1,,MENU/MENU1.PRG/30.c,0,Game.Menu,state
+G01003,_digitBuffer@src/MENU/MENU1.PRG/30.c:_setHPCost,_digitBuffer,MENU/MENU1.PRG,local-static,c-defined,,16,char[16],,0,1,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01004,_strings@src/MENU/MENU1.PRG/30.c,_strings,MENU/MENU1.PRG,file-static,c-defined,,2,u_short[1],,0,1,,MENU/MENU1.PRG/30.c,2,Game.Menu,state
+G01005,actionIds@src/MENU/MENU1.PRG/30.c:_weaponArtsMenu,actionIds,MENU/MENU1.PRG,local-static,c-defined,,8,u_short[4],,0,1,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01006,animationIndex@src/MENU/MENU1.PRG/30.c:_weaponArtsMenu,animationIndex,MENU/MENU1.PRG,local-static,c-defined,,1,u_char,,0,0,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01007,artsLearned@src/MENU/MENU1.PRG/30.c:_weaponArtsMenu,artsLearned,MENU/MENU1.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01008,forceCursorMemory@src/MENU/MENU1.PRG/30.c:_weaponArtsMenu,forceCursorMemory,MENU/MENU1.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01009,isLastRow@src/MENU/MENU1.PRG/30.c:_weaponArtsMenu,isLastRow,MENU/MENU1.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01010,remainingRows@src/MENU/MENU1.PRG/30.c:_weaponArtsMenu,remainingRows,MENU/MENU1.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01011,selectedRow@src/MENU/MENU1.PRG/30.c:_weaponArtsMenu,selectedRow,MENU/MENU1.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01012,selectedRow@src/MENU/MENU1.PRG/30.c:_weaponCategoriesMenu,selectedRow,MENU/MENU1.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01013,state@src/MENU/MENU1.PRG/30.c:_weaponArtsMenu,state,MENU/MENU1.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01014,state@src/MENU/MENU1.PRG/30.c:_weaponCategoriesMenu,state,MENU/MENU1.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01015,weaponType@src/MENU/MENU1.PRG/30.c:_weaponArtsMenu,weaponType,MENU/MENU1.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01016,weaponType@src/MENU/MENU1.PRG/30.c:vs_menu1_exec,weaponType,MENU/MENU1.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MENU1.PRG/30.c,1,Game.Menu,state
+G01017,_@src/MENU/MENU2.PRG/143C.c:_breakArtUnlocked,_,MENU/MENU2.PRG,local-static,c-defined,,15,char[15],,0,1,,MENU/MENU2.PRG/143C.c,0,Game.Menu,state
+G01018,_@src/MENU/MENU2.PRG/64.c:_chainAbilityMenu,_,MENU/MENU2.PRG,local-static,c-defined,,4,char[4],,0,1,,MENU/MENU2.PRG/64.c,0,Game.Menu,state
+G01019,_@src/MENU/MENU2.PRG/64.c:_defenseAbilityMenu,_,MENU/MENU2.PRG,local-static,c-defined,,4,char[4],,0,1,,MENU/MENU2.PRG/64.c,0,Game.Menu,state
+G01020,_@src/MENU/MENU2.PRG/64.c:vs_menu2_exec,_,MENU/MENU2.PRG,local-static,c-defined,,14,char[14],,0,1,,MENU/MENU2.PRG/64.c,0,Game.Menu,state
+G01021,_abilityCount@src/MENU/MENU2.PRG/64.c,_abilityCount,MENU/MENU2.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MENU2.PRG/64.c,2,Game.Menu,state
+G01022,_abilityMenuState@src/MENU/MENU2.PRG/64.c,_abilityMenuState,MENU/MENU2.PRG,file-static,c-defined,,4,u_int,,0,1,,MENU/MENU2.PRG/64.c,2,Game.Menu,state
+G01023,_abilityText@src/MENU/MENU2.PRG/64.c,_abilityText,MENU/MENU2.PRG,file-static,c-defined,,4,u_short *,,1,1,,MENU/MENU2.PRG/64.c,2,Game.Menu,state
+G01024,_battleAbilityMenuStrings@src/MENU/MENU2.PRG/143C.c,_battleAbilityMenuStrings,MENU/MENU2.PRG,file-static,c-defined,,2,u_short[1],,0,1,,MENU/MENU2.PRG/143C.c,3,Game.Menu,state
+G01025,_battleAbilityStrings@MENU/MENU2.PRG,_battleAbilityStrings,MENU/MENU2.PRG,extern,c-defined,,2,u_short[1],,0,1,,MENU/MENU2.PRG/64.c MENU/MENU2.PRG/64.h,4,Game.Menu,state
+G01026,_firstAbility@src/MENU/MENU2.PRG/64.c,_firstAbility,MENU/MENU2.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MENU2.PRG/64.c,2,Game.Menu,state
+G01027,_highlightedAbility@src/MENU/MENU2.PRG/64.c,_highlightedAbility,MENU/MENU2.PRG,file-static,c-defined,,4,int,,0,1,,MENU/MENU2.PRG/64.c,2,Game.Menu,state
+G01028,_selectedAbilityType@src/MENU/MENU2.PRG/64.c,_selectedAbilityType,MENU/MENU2.PRG,file-static,c-defined,,1,char,,0,1,,MENU/MENU2.PRG/64.c,2,Game.Menu,state
+G01029,_unlockableChainAbilities@src/MENU/MENU2.PRG/143C.c,_unlockableChainAbilities,MENU/MENU2.PRG,file-static,c-defined,,11,char[11],,0,1,,MENU/MENU2.PRG/143C.c,1,Game.Menu,state
+G01030,_unlockableDefenseAbilities@src/MENU/MENU2.PRG/143C.c,_unlockableDefenseAbilities,MENU/MENU2.PRG,file-static,c-defined,,11,char[11],,0,1,,MENU/MENU2.PRG/143C.c,1,Game.Menu,state
+G01031,_unlockedChainAbilities@src/MENU/MENU2.PRG/64.c,_unlockedChainAbilities,MENU/MENU2.PRG,file-static,c-defined,,16,char[16],,0,1,,MENU/MENU2.PRG/64.c,4,Game.Menu,state
+G01032,_unlockedDefenseAbilities@src/MENU/MENU2.PRG/64.c,_unlockedDefenseAbilities,MENU/MENU2.PRG,file-static,c-defined,,16,char[16],,0,1,,MENU/MENU2.PRG/64.c,4,Game.Menu,state
+G01033,abilityDescLookup@src/MENU/MENU2.PRG/143C.c:_getAbilityDescription,abilityDescLookup,MENU/MENU2.PRG,local-static,c-defined,,54,char[54],,0,1,,MENU/MENU2.PRG/143C.c,1,Game.Menu,catalog
+G01034,cursorAnimStep@src/MENU/MENU2.PRG/64.c:_abilityMenu,cursorAnimStep,MENU/MENU2.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MENU2.PRG/64.c,1,Game.Menu,state
+G01035,menuAnimating@src/MENU/MENU2.PRG/64.c:vs_menu2_exec,menuAnimating,MENU/MENU2.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU2.PRG/64.c,1,Game.Menu,state
+G01036,menuNotEntered@src/MENU/MENU2.PRG/143C.c:_battleAbilityUnlocked,menuNotEntered,MENU/MENU2.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU2.PRG/143C.c,1,Game.Menu,state
+G01037,messageTimeout@src/MENU/MENU2.PRG/143C.c:_breakArtUnlocked,messageTimeout,MENU/MENU2.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU2.PRG/143C.c,1,Game.Menu,state
+G01038,pointsAnimStep@src/MENU/MENU2.PRG/64.c:vs_menu2_exec,pointsAnimStep,MENU/MENU2.PRG,local-static,c-defined,,1,u_char,,0,0,,MENU/MENU2.PRG/64.c,1,Game.Menu,state
+G01039,remainingChainAbilities@src/MENU/MENU2.PRG/143C.c:_battleAbilityUnlocked,remainingChainAbilities,MENU/MENU2.PRG,local-static,c-defined,,16,u_char[16],,0,1,,MENU/MENU2.PRG/143C.c,1,Game.Menu,state
+G01040,remainingChainAbilityCount@src/MENU/MENU2.PRG/143C.c:_battleAbilityUnlocked,remainingChainAbilityCount,MENU/MENU2.PRG,local-static,c-defined,,1,u_char,,0,0,,MENU/MENU2.PRG/143C.c,1,Game.Menu,state
+G01041,remainingDefenseAbilities@src/MENU/MENU2.PRG/143C.c:_battleAbilityUnlocked,remainingDefenseAbilities,MENU/MENU2.PRG,local-static,c-defined,,11,u_char[11],,0,1,,MENU/MENU2.PRG/143C.c,1,Game.Menu,state
+G01042,remainingDefenseAbilityCount@src/MENU/MENU2.PRG/143C.c:_battleAbilityUnlocked,remainingDefenseAbilityCount,MENU/MENU2.PRG,local-static,c-defined,,1,u_char,,0,0,,MENU/MENU2.PRG/143C.c,1,Game.Menu,state
+G01043,state@src/MENU/MENU2.PRG/143C.c:_battleAbilityUnlocked,state,MENU/MENU2.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU2.PRG/143C.c,1,Game.Menu,state
+G01044,state@src/MENU/MENU2.PRG/64.c:_chainAbilityMenu,state,MENU/MENU2.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MENU2.PRG/64.c,1,Game.Menu,state
+G01045,state@src/MENU/MENU2.PRG/64.c:_defenseAbilityMenu,state,MENU/MENU2.PRG,local-static,c-defined,,4,int,,0,1,,MENU/MENU2.PRG/64.c,1,Game.Menu,state
+G01046,stringBuffer@src/MENU/MENU2.PRG/64.c:_setRiskCost,stringBuffer,MENU/MENU2.PRG,local-static,c-defined,,16,char[16],,0,1,,MENU/MENU2.PRG/64.c,1,Game.Menu,state
+G01047,timeout@src/MENU/MENU2.PRG/143C.c:_battleAbilityUnlocked,timeout,MENU/MENU2.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU2.PRG/143C.c,1,Game.Menu,state
+G01048,D_80109620@src/MENU/MENU3.PRG/16C.c:_processEquipSubMenu,D_80109620,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MENU3.PRG/16C.c,1,Game.Menu,state
+G01049,D_80109649@src/MENU/MENU3.PRG/16C.c:vs_menu3_exec,D_80109649,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,1,,MENU/MENU3.PRG/16C.c,1,Game.Menu,state
+G01050,D_80109710@src/MENU/MENU3.PRG/16C.c:vs_menu3_exec,D_80109710,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU3.PRG/16C.c,1,Game.Menu,state
+G01051,_@src/MENU/MENU3.PRG/16C.c:_equipAccessoryMenu,_,MENU/MENU3.PRG,local-static,c-defined,,2,char[2],,0,1,,MENU/MENU3.PRG/16C.c,0,Game.Menu,state
+G01052,_@src/MENU/MENU3.PRG/16C.c:_equipMenu,_,MENU/MENU3.PRG,local-static,c-defined,,3,char[3],,0,1,,MENU/MENU3.PRG/16C.c,0,Game.Menu,state
+G01053,_@src/MENU/MENU3.PRG/16C.c:_equipShieldMenu,_,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU3.PRG/16C.c,0,Game.Menu,state
+G01054,_@src/MENU/_renderAshley.h:_renderAshley,_,MENU/MENU3.PRG,local-static,c-defined,,12,int[3],,0,1,,MENU/_renderAshley.h,0,Game.Menu,state
+G01055,_@src/MENU/items1.h:_discardMenu,_,MENU/MENU3.PRG,local-static,c-defined,,3,char[3],,0,1,,MENU/items1.h,0,Game.Menu,state
+G01056,_@src/MENU/items1.h:_gripStatusView,_,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/items1.h,1,Game.Menu,state
+G01057,_@src/MENU/items1.h:_shieldStatusView,_,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/items1.h,1,Game.Menu,state
+G01058,_@src/MENU/items1.h:_weaponStatusView,_,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/items1.h,1,Game.Menu,state
+G01059,_@src/MENU/items2.h:_itemNavigation,_,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/items2.h,0,Game.Menu,state
+G01060,_ashleyRenderState@src/MENU/_renderAshley.h,_ashleyRenderState,MENU/MENU3.PRG,per-instance,unknown,,4,int,,0,0,MENU/MENU3.PRG MENU/MENUB.PRG,MENU/_renderAshley.h,2,Game.Menu,?
+G01061,_ashleyYOffset@src/MENU/_renderAshley.h,_ashleyYOffset,MENU/MENU3.PRG,per-instance,unknown,,4,int,,0,0,MENU/MENU3.PRG MENU/MENUB.PRG,MENU/_renderAshley.h,0,Game.Menu,?
+G01062,_equippedItem@src/MENU/MENU3.PRG/16C.c,_equippedItem,MENU/MENU3.PRG,file-static,c-defined,,1,char,,0,0,,MENU/MENU3.PRG/16C.c,6,Game.Menu,state
+G01063,_ignoreCursorMemory@src/MENU/items2.h:_itemNavigation,_ignoreCursorMemory,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/items2.h,1,Game.Menu,state
+G01064,_itemCategoryIconsEnabled@src/MENU/items1.h,_itemCategoryIconsEnabled,MENU/MENU3.PRG,per-instance,unknown,,1,char,,0,0,MENU/MENU3.PRG MENU/MENUB.PRG,MENU/items1.h,0,Game.Menu,?
+G01065,_itemsFirstRow@src/MENU/MENU3.PRG/16C.c,_itemsFirstRow,MENU/MENU3.PRG,file-static,c-defined,,1,char,,0,0,,MENU/MENU3.PRG/16C.c,2,Game.Menu,state
+G01066,_itemsText@src/MENU/MENU3.PRG/16C.c,_itemsText,MENU/MENU3.PRG,file-static,c-defined,,4,char *,,1,0,,MENU/MENU3.PRG/16C.c,3,Game.Menu,state
+G01067,_menuRowCount@src/MENU/MENU3.PRG/16C.c,_menuRowCount,MENU/MENU3.PRG,file-static,c-defined,,1,char,,0,0,,MENU/MENU3.PRG/16C.c,2,Game.Menu,state
+G01068,_menuText@src/MENU/items0.h,_menuText,MENU/MENU3.PRG,file-static,c-defined,,2,u_short[1],,0,1,,MENU/items0.h,0,Game.Menu,state
+G01069,_miscActions@src/MENU/MENU3.PRG/16C.c,_miscActions,MENU/MENU3.PRG,file-static,c-defined,,64,char[64],,0,1,,MENU/MENU3.PRG/16C.c,2,Game.Menu,catalog
+G01070,_secondaryTitleEnabled@src/MENU/items1.h,_secondaryTitleEnabled,MENU/MENU3.PRG,per-instance,unknown,,1,char,,0,0,MENU/MENU3.PRG MENU/MENUB.PRG,MENU/items1.h,0,Game.Menu,?
+G01071,_selectedItemRow@src/MENU/MENU3.PRG/16C.c,_selectedItemRow,MENU/MENU3.PRG,file-static,c-defined,,4,int,,0,0,,MENU/MENU3.PRG/16C.c,3,Game.Menu,state
+G01072,_statusCommandState@src/MENU/items1.h,_statusCommandState,MENU/MENU3.PRG,per-instance,unknown,,1,char,,0,0,MENU/MENU3.PRG MENU/MENUB.PRG,MENU/items1.h,0,Game.Menu,?
+G01073,_statusViewDispatch@src/MENU/items1.h:_itemStatusDispatcher,_statusViewDispatch,MENU/MENU3.PRG,local-static,c-defined,,24,int (*[6])(int),,1,1,,MENU/items1.h,1,Game.Menu,state
+G01074,animationTimer@src/MENU/items1.h:_armorStatusView,animationTimer,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/items1.h,1,Game.Menu,state
+G01075,animationTimer@src/MENU/items1.h:_bladeStatusView,animationTimer,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/items1.h,1,Game.Menu,state
+G01076,animationTimer@src/MENU/items1.h:_gemStatusView,animationTimer,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/items1.h,1,Game.Menu,state
+G01077,animationTimer@src/MENU/items1.h:_gripStatusView,animationTimer,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/items1.h,1,Game.Menu,state
+G01078,armorIndex@src/MENU/MENU3.PRG/16C.c:_equipArmorMenu,armorIndex,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU3.PRG/16C.c,1,Game.Menu,state
+G01079,availableActions@src/MENU/items2.h:_itemNavigation,availableActions,MENU/MENU3.PRG,local-static,c-defined,,8,char[8],,0,1,,MENU/items2.h,1,Game.Menu,state
+G01080,bladeSortStats@src/MENU/items1.h:_sortItems,bladeSortStats,MENU/MENU3.PRG,local-static,c-defined,,7,u_char[7],,0,1,,MENU/items1.h,1,Game.Menu,state
+G01081,bodyPart@src/MENU/MENU3.PRG/16C.c:_equipArmorMenu,bodyPart,MENU/MENU3.PRG,local-static,c-defined,,1,u_char,,0,0,,MENU/MENU3.PRG/16C.c,1,Game.Menu,state
+G01082,bodyPartCategories@src/MENU/MENU3.PRG/16C.c:_equipArmorMenu,bodyPartCategories,MENU/MENU3.PRG,local-static,c-defined,,8,char[8],,0,1,,MENU/MENU3.PRG/16C.c,1,Game.Menu,state
+G01083,cameraBackup@src/MENU/_renderAshley.h:_renderAshley,cameraBackup,MENU/MENU3.PRG,local-static,c-defined,,52,vs_camera_t,T00684,0,0,,MENU/_renderAshley.h,1,Game.Menu,state
+G01084,category@src/MENU/MENU3.PRG/16C.c:_equipWeaponMenu,category,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU3.PRG/16C.c,1,Game.Menu,state
+G01085,currentEquipMenu@src/MENU/MENU3.PRG/16C.c:_dispatchEquipMenu,currentEquipMenu,MENU/MENU3.PRG,local-static,c-defined,,1,u_char,,0,0,,MENU/MENU3.PRG/16C.c,1,Game.Menu,state
+G01086,cursorBrightness@src/MENU/items1.h:_discardMenu,cursorBrightness,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,1,,MENU/items1.h,1,Game.Menu,state
+G01087,discardCount@src/MENU/items1.h:_discardMenu,discardCount,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/items1.h,1,Game.Menu,state
+G01088,discardStep@src/MENU/items1.h:_discardMenu,discardStep,MENU/MENU3.PRG,local-static,c-defined,,1,u_char,,0,0,,MENU/items1.h,1,Game.Menu,state
+G01089,discardSteps@src/MENU/items1.h:_discardMenu,discardSteps,MENU/MENU3.PRG,local-static,c-defined,,3,char[3],,0,1,,MENU/items1.h,1,Game.Menu,state
+G01090,discardTemplate@src/MENU/items1.h:_discardMenu,discardTemplate,MENU/MENU3.PRG,local-static,c-defined,,14,char[14],,0,1,,MENU/items1.h,1,Game.Menu,state
+G01091,discardType@src/MENU/items1.h:_discardMenu,discardType,MENU/MENU3.PRG,local-static,c-defined,,1,char,,0,0,,MENU/items1.h,1,Game.Menu,state

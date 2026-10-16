@@ -1,0 +1,67 @@
+id,key,kind,name,aliases,size,fields,generic_fields,layouts,files,used_by_funcs,used_by_globals,proposed_system
+T00312,struct:_hitIntermediate,struct,_hitIntermediate,_hitIntermediate,38,23,6,1,BATTLE/BATTLE.PRG/146C.c,5,0,Game.Battle
+T00321,struct:_mpdGeometryHeader,struct,_mpdGeometryHeader,_mpdGeometryHeader,64,16,15,1,BATTLE/BATTLE.PRG/146C.h,0,0,Game.Battle
+T00322,struct:_mpdGeometrySection,struct,_mpdGeometrySection,_mpdGeometrySection,4,2,0,1,BATTLE/BATTLE.PRG/146C.h,0,0,Game.Battle
+T00324,struct:_mpdPolygt3,struct,_mpdPolygt3,_mpdPolygt3,32,27,0,1,BATTLE/BATTLE.PRG/146C.h,0,0,Game.Battle
+T00325,struct:_mpdPolygt4,struct,_mpdPolygt4,_mpdPolygt4,40,35,0,1,BATTLE/BATTLE.PRG/146C.h,0,0,Game.Battle
+T00350,struct:actionCandidateEntry,struct,actionCandidateEntry,actionCandidateEntry,20,20,2,1,BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/74088.c,5,2,Game.Battle
+T00351,struct:actionCandidateState,struct,actionCandidateState,actionCandidateState,1140,8,3,1,BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/74088.c,3,0,Game.Battle
+T00352,struct:actionCandidateTarget,struct,actionCandidateTarget,actionCandidateTarget,4,2,1,1,BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00353,struct:actionChoice,struct,actionChoice,actionChoice,20,10,4,1,BATTLE/BATTLE.PRG/74088.c,0,0,Game.Battle
+T00354,struct:actionChoiceFlags,struct,actionChoiceFlags,actionChoiceFlags,4,5,1,1,BATTLE/BATTLE.PRG/74088.c,0,0,Game.Battle
+T00355,struct:actionChoiceInfo,struct,actionChoiceInfo,actionChoiceInfo,52,8,5,1,BATTLE/BATTLE.PRG/74088.c,0,0,Game.Battle
+T00356,struct:actionChoiceState,struct,actionChoiceState,actionChoiceState,752,10,5,1,BATTLE/BATTLE.PRG/74088.c,2,0,Game.Battle
+T00357,struct:actionCostView,struct,actionCostView,actionCostView,52,2,1,1,BATTLE/BATTLE.PRG/74088.c,0,0,Game.Battle
+T00358,struct:actionDispatchActor,struct,actionDispatchActor,actionDispatchActor,72,4,1,1,BATTLE/BATTLE.PRG/71618.c,2,0,Game.Battle
+T00359,struct:actionDispatchEntry,struct,actionDispatchEntry,actionDispatchEntry,16,4,1,1,BATTLE/BATTLE.PRG/71618.c,0,0,Game.Battle
+T00360,struct:actionDispatchModel,struct,actionDispatchModel,actionDispatchModel,36,7,3,1,BATTLE/BATTLE.PRG/71618.c,1,0,Game.Battle
+T00361,struct:actionDispatchRegistry,struct,actionDispatchRegistry,actionDispatchRegistry,56,2,1,1,BATTLE/BATTLE.PRG/71618.c,0,0,Game.Battle
+T00362,struct:actionDispatchState,struct,actionDispatchState,actionDispatchState,1140,33,14,1,BATTLE/BATTLE.PRG/71618.c,1,0,Game.Battle
+T00365,struct:actionMetadataAction,struct,actionMetadataAction,actionMetadataAction,52,4,1,1,BATTLE/BATTLE.PRG/7CD68.c,1,0,Game.Battle
+T00366,struct:actionMetadataEntry,struct,actionMetadataEntry,actionMetadataEntry,8,10,0,1,BATTLE/BATTLE.PRG/7CD68.c,1,0,Game.Battle
+T00367,struct:actionMetadataSlot,struct,actionMetadataSlot,actionMetadataSlot,4,2,1,1,BATTLE/BATTLE.PRG/7CD68.c,1,0,Game.Battle
+T00368,struct:actionMetadataState,struct,actionMetadataState,actionMetadataState,752,8,4,1,BATTLE/BATTLE.PRG/7CD68.c,2,0,Game.Battle
+T00369,struct:actionMetadataStats,struct,actionMetadataStats,actionMetadataStats,2336,2,1,1,BATTLE/BATTLE.PRG/7CD68.c,1,0,Game.Battle
+T00797,union:actionMetadataWord,union,actionMetadataWord,actionMetadataWord,4,2,0,1,BATTLE/BATTLE.PRG/7CD68.c,0,0,Game.Battle
+T00370,struct:actionPlanState,struct,actionPlanState,actionPlanState,1140,16,7,1,BATTLE/BATTLE.PRG/74088.c,2,0,Game.Battle
+T00371,struct:actionReactionAction,struct,actionReactionAction,actionReactionAction,52,4,2,1,BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00372,struct:actionReactionMotion,struct,actionReactionMotion,actionReactionMotion,11,2,1,1,BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00373,struct:actionReactionState,struct,actionReactionState,actionReactionState,484,17,8,1,BATTLE/BATTLE.PRG/74088.c,2,0,Game.Battle
+T00798,union:actionReactionTarget,union,actionReactionTarget,actionReactionTarget,4,3,0,1,BATTLE/BATTLE.PRG/74088.c,2,0,Game.Battle
+T00374,struct:actionScoreActor,struct,actionScoreActor,actionScoreActor,8,2,0,1,BATTLE/BATTLE.PRG/74088.c,2,0,Game.Battle
+T00375,struct:actionSetupContext,struct,actionSetupContext,actionSetupContext,560,6,0,1,BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/7EE98.c,0,0,Game.Battle
+T00376,struct:actionSlotConfig,struct,actionSlotConfig,actionSlotConfig,8,9,2,1,BATTLE/BATTLE.PRG/74088.c,0,0,Game.Battle
+T00377,struct:actionStatApplication,struct,actionStatApplication,actionStatApplication,144,6,2,1,BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00378,struct:actionStatDelta,struct,actionStatDelta,actionStatDelta,68,16,6,1,BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00379,struct:actorEvaluationActor,struct,actorEvaluationActor,actorEvaluationActor,64,5,1,1,BATTLE/BATTLE.PRG/74088.c,2,0,Game.Battle
+T00380,struct:actorEvaluationContext,struct,actorEvaluationContext,actorEvaluationContext,72,4,2,1,BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00381,struct:actorEvaluationState,struct,actorEvaluationState,actorEvaluationState,412,13,6,1,BATTLE/BATTLE.PRG/74088.c,2,0,Game.Battle
+T00382,struct:actorEvaluationStats,struct,actorEvaluationStats,actorEvaluationStats,52,6,3,1,BATTLE/BATTLE.PRG/74088.c,1,0,Game.Battle
+T00799,union:actorInitializationFlags,union,actorInitializationFlags,actorInitializationFlags,4,3,0,1,BATTLE/BATTLE.PRG/7CD68.c,0,0,Game.Battle
+T00384,struct:actorInitializationModel,struct,actorInitializationModel,actorInitializationModel,1600,11,6,1,BATTLE/BATTLE.PRG/7CD68.c,1,0,Game.Battle
+T00800,union:actorInitializationPoint,union,actorInitializationPoint,actorInitializationPoint,4,2,0,1,BATTLE/BATTLE.PRG/7CD68.c,0,0,Game.Battle
+T00385,struct:actorInitializationState,struct,actorInitializationState,actorInitializationState,552,56,38,1,BATTLE/BATTLE.PRG/7CD68.c,1,0,Game.Battle
+T00386,struct:actorInitializationStats,struct,actorInitializationStats,actorInitializationStats,52,5,5,1,BATTLE/BATTLE.PRG/7CD68.c,1,0,Game.Battle
+T00387,struct:actorObject,struct,actorObject,actorObject,1456,15,10,1,BATTLE/BATTLE.PRG/6FC00.c,2,0,Game.Battle
+T00388,struct:actorPhaseFlags,struct,actorPhaseFlags,actorPhaseFlags,12,4,1,1,BATTLE/BATTLE.PRG/73700.c,1,0,Game.Battle
+T00801,union:actorRelation,union,actorRelation,actorRelation,4,2,0,1,BATTLE/BATTLE.PRG/6FC00.c,1,0,Game.Battle
+T00389,struct:actorRelationState,struct,actorRelationState,actorRelationState,548,27,14,1,BATTLE/BATTLE.PRG/6FC00.c,4,0,Game.Battle
+T00390,struct:actorSettingsActor,struct,actorSettingsActor,actorSettingsActor,56,5,2,1,BATTLE/BATTLE.PRG/7CD68.c,1,0,Game.Battle
+T00391,struct:actorSettingsEntry,struct,actorSettingsEntry,actorSettingsEntry,6,4,1,1,BATTLE/BATTLE.PRG/7CD68.c BATTLE/BATTLE.PRG/7EE98.c,1,1,Game.Battle
+T00392,struct:actorSettingsState,struct,actorSettingsState,actorSettingsState,352,55,14,1,BATTLE/BATTLE.PRG/7CD68.c,2,0,Game.Battle
+T00802,union:actorSettingsWord,union,actorSettingsWord,actorSettingsWord,4,3,0,1,BATTLE/BATTLE.PRG/7CD68.c,2,0,Game.Battle
+T00394,struct:actorTimerState,struct,actorTimerState,actorTimerState,424,15,6,1,BATTLE/BATTLE.PRG/73700.c,3,0,Game.Battle
+T00396,struct:actorUpdateActor,struct,actorUpdateActor,actorUpdateActor,64,9,5,1,BATTLE/BATTLE.PRG/6FC00.c,2,0,Game.Battle
+T00397,struct:actorUpdateHp,struct,actorUpdateHp,actorUpdateHp,4,2,0,1,BATTLE/BATTLE.PRG/6FC00.c,1,0,Game.Battle
+T00398,struct:actorUpdatePoint,struct,actorUpdatePoint,actorUpdatePoint,8,2,1,1,BATTLE/BATTLE.PRG/6FC00.c,1,0,Game.Battle
+T00399,struct:actorUpdateState,struct,actorUpdateState,actorUpdateState,484,61,54,1,BATTLE/BATTLE.PRG/6FC00.c,3,0,Game.Battle
+T00400,struct:actorUpdateStats,struct,actorUpdateStats,actorUpdateStats,36,4,1,1,BATTLE/BATTLE.PRG/6FC00.c,1,0,Game.Battle
+T00401,struct:animationFrameScratch,struct,animationFrameScratch,,20,4,0,1,BATTLE/BATTLE.PRG/44F14.c,1,0,Game.Battle
+T00405,struct:cameraTransformScratch,struct,cameraTransformScratch,cameraTransformScratch,156,4,0,1,BATTLE/BATTLE.PRG/44F14.c,0,0,Game.Battle
+T00406,struct:candidateMovementState,struct,candidateMovementState,candidateMovementState,1140,23,11,1,BATTLE/BATTLE.PRG/71618.c,6,0,Game.Battle
+T00803,union:candidateMovementWord,union,candidateMovementWord,candidateMovementWord,4,2,0,1,BATTLE/BATTLE.PRG/71618.c,1,0,Game.Battle
+T00408,struct:da4bcActor,struct,da4bcActor,da4bcActor,8,2,0,1,BATTLE/BATTLE.PRG/71618.c,2,0,Game.Battle
+T00409,struct:da4bcEntry,struct,da4bcEntry,da4bcEntry,16,4,2,1,BATTLE/BATTLE.PRG/71618.c,2,0,Game.Battle
+T00410,struct:da4bcEntryTarget,struct,da4bcEntryTarget,da4bcEntryTarget,4,2,1,1,BATTLE/BATTLE.PRG/71618.c,2,0,Game.Battle
+T00411,struct:da4bcModel,struct,da4bcModel,da4bcModel,96,6,3,1,BATTLE/BATTLE.PRG/71618.c,1,0,Game.Battle
+T00804,union:da4bcPoint,union,da4bcPoint,da4bcPoint,4,2,0,1,BATTLE/BATTLE.PRG/71618.c,1,0,Game.Battle

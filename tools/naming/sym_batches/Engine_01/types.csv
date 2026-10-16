@@ -1,0 +1,39 @@
+id,key,kind,name,aliases,size,fields,generic_fields,layouts,files,used_by_funcs,used_by_globals,proposed_system
+T00122,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),,4,4,0,1,SLUS_010.40/main.h,4,0,Save.MemoryCard
+T00184,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),,4,2,0,1,SLUS_010.40/main.c,0,1,Content
+T00197,struct:ColorInfo,struct,ColorInfo,,7,7,0,1,SLUS_010.40/main.c,5,0,Graphics
+T00204,struct:D_80050468_t,struct,D_80050468_t,D_80050468_t,8,7,3,1,SLUS_010.40/main.h,0,1,Game.State
+T00205,struct:D_8005DC6C_t,struct,D_8005DC6C_t,D_8005DC6C_t,4,4,1,1,SLUS_010.40/main.h,7,0,Graphics
+T00206,struct:D_8005DC80_t,struct,D_8005DC80_t,D_8005DC80_t,44,4,4,1,SLUS_010.40/main.c,5,0,Graphics
+T00207,struct:D_80060068_t,struct,D_80060068_t,D_80060068_t,256,2,2,1,SLUS_010.40/main.h,1,1,Save
+T00222,struct:D_800F18E8_t,struct,D_800F18E8_t,D_800F18E8_t,2,2,2,1,BATTLE/BATTLE.PRG/146C.h,0,1,Save
+T00228,struct:D_800F1A68_t,struct,D_800F1A68_t,D_800F1A68_t,16,4,4,1,BATTLE/BATTLE.PRG/146C.h,6,3,Graphics
+T00229,struct:D_800F1ABC_t,struct,D_800F1ABC_t,D_800F1ABC_t,720,3,0,1,BATTLE/BATTLE.PRG/146C.c,4,1,Graphics
+T00243,struct:D_800F4538_unk181C,struct,D_800F4538_unk181C,D_800F4538_unk181C,8,8,2,1,BATTLE/BATTLE.PRG/3A1A0.h,2,0,Content
+T00250,struct:D_800F4538_unk61C,struct,D_800F4538_unk61C,D_800F4538_unk61C,8,9,5,1,BATTLE/BATTLE.PRG/3A1A0.h,2,0,Content
+T00291,struct:MovieData_t,struct,MovieData_t,MovieData_t,56,8,0,1,TITLE/TITLE.PRG/22C.c,4,1,Video.Intro
+T00293,struct:System_dat_h,struct,System_dat_h,System_dat_h,32,8,8,1,BATTLE/INITBTL.PRG/18.c,1,0,Content
+T00307,struct:_clutSlot,struct,_clutSlot,_clutSlot,2314,5,1,1,SLUS_010.40/main.c,9,0,Graphics
+T00308,struct:_clutState_t,struct,_clutState_t,_clutState_t,33300,15,3,1,SLUS_010.40/main.c,0,1,Graphics
+T00013,enum:cdBufferModes_e,enum,cdBufferModes_e,,4,3,0,1,SLUS_010.40/main.c,3,0,Content
+T00407,struct:clutAnimState_t,struct,clutAnimState_t,,8,8,0,1,SLUS_010.40/main.c,2,0,Graphics
+T00460,struct:func_8009C378_t,struct,func_8009C378_t,func_8009C378_t,30976,3,3,1,BATTLE/BATTLE.PRG/30DB0.h,3,0,Content
+T00499,struct:func_800D55A4_t,struct,func_800D55A4_t,func_800D55A4_t,4,2,1,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Content
+T00500,struct:func_800D55A4_t2,struct,func_800D55A4_t2,func_800D55A4_t2,4,2,2,1,BATTLE/BATTLE.PRG/5BF94.c,2,0,Content
+T00542,struct:gim_t,struct,gim_t,gim_t,1016,22,16,1,BATTLE/BATTLE.PRG/5BF94.c,10,0,Graphics
+T00543,struct:imgHeader_t,struct,imgHeader_t,imgHeader_t,4,4,0,1,SLUS_010.40/main.c,0,1,Graphics
+T00547,struct:mcdata_t,struct,mcdata_t,mcdata_t,8872,9,5,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,6,2,Save.MemoryCard
+T00025,enum:memcardEventHandler_e,enum,memcardEventHandler_e,,4,4,0,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard
+T00581,struct:padAct_t,struct,padAct_t,padAct_t,56,5,5,1,SLUS_010.40/main.c,7,1,Input
+T00583,struct:percent_t,struct,percent_t,percent_t,4,1,0,1,MENU/MENU9.PRG/238.c,1,1,Core.String
+T00584,struct:portInfo_t,struct,portInfo_t,portInfo_t,11,10,0,1,SLUS_010.40/main.h,9,1,Input
+T00598,struct:savedata_t#a2a812c4,struct,savedata_t,savedata_t,23552,18,9,2,MENU/MENU7.PRG/260.c,19,1,Save.MemoryCard
+T00599,struct:savedata_t#2e91ca86,struct,savedata_t,savedata_t,23552,18,14,2,TITLE/TITLE.PRG/22C.c,19,1,Save.MemoryCard
+T00600,struct:savedata_unk180_2_t,struct,savedata_unk180_2_t,savedata_unk180_2_t,16,2,0,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard
+T00601,struct:savedata_unk180_t,struct,savedata_unk180_t,savedata_unk180_t,128,3,1,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard
+T00091,enum:testMemcardEvents_e,enum,testMemcardEvents_e,,4,5,0,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,2,0,Save.MemoryCard
+T00659,struct:vs_battle_objectData,struct,vs_battle_objectData,vs_battle_objectData,20,10,3,1,BATTLE/BATTLE.PRG/2842C.h,37,1,Content
+T00667,struct:vs_battle_screenTransitionWipePoly,struct,vs_battle_screenTransitionWipePoly,vs_battle_screenTransitionWipePoly,48,2,0,1,BATTLE/BATTLE.PRG/146C.h,2,1,Graphics
+T00670,struct:vs_battle_texInfo_t,struct,vs_battle_texInfo_t,vs_battle_texInfo_t,8,4,0,1,BATTLE/BATTLE.PRG/30DB0.h,6,2,Content
+T00692,struct:vs_main_HeapHeader,struct,vs_main_HeapHeader,vs_main_HeapHeader,16,4,1,1,SLUS_010.40/main.h,15,3,Core.Memory
+T00694,struct:vs_main_disk_t,struct,vs_main_disk_t,vs_main_disk_t,72,21,9,1,SLUS_010.40/main.c,0,1,Content

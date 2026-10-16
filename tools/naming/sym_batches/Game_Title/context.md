@@ -1,0 +1,151 @@
+# Game_Title: who uses what
+
+Function names are `final name (decomp file:line original name)`.
+
+## Globals
+
+- **G02016** `vs_main_titleScreenCount` `int` (extern, c-defined): Title::InitializeSettings (TITLE/TITLE.PRG/22C.c:4463 _initEnvironment); Title::Run (TITLE/TITLE.PRG/22C.c:4491 vs_title_exec)
+- **G02019** `developer` `char[]` (extern, asset): Title::ShowPublisherAndDeveloper (TITLE/TITLE.PRG/22C.c:3579 _displayPublisherAndDeveloper)
+- **G02020** `_titleScreenBg` `u_int[]` (extern, asset): Title::LoadBackgroundTextures (TITLE/TITLE.PRG/22C.c:3773 _copyTitleBgData)
+- **G02021** `_menuCopyright` `u_short[]` (extern, asset): Title::BlendCopyright (TITLE/TITLE.PRG/22C.c:3914 _fadeInMenuCopyright)
+- **G02022** `_fontTable` `fontTable_t[]` (extern, asset): Title::ShowContinueScreen (TITLE/TITLE.PRG/22C.c:3129 _gameLoadScreen); Title::ShowClearSaveScreen (TITLE/TITLE.PRG/22C.c:3313 _gameSaveScreen)
+- **G02023** `_debugFont` `u_long[]` (extern, asset): Title::ShowContinueScreen (TITLE/TITLE.PRG/22C.c:3129 _gameLoadScreen); Title::ShowClearSaveScreen (TITLE/TITLE.PRG/22C.c:3313 _gameSaveScreen)
+- **G02024** `_uiTable` `uiTable_t` (extern, asset): Title::ShowContinueScreen (TITLE/TITLE.PRG/22C.c:3129 _gameLoadScreen); Title::ShowClearSaveScreen (TITLE/TITLE.PRG/22C.c:3313 _gameSaveScreen)
+- **G02026** `D_80074C24` `int[15][64]` (extern, c-defined): Title::InitializeNewGameData (TITLE/TITLE.PRG/22C.c:4698 _initGameData)
+- **G02027** `_0` `char[4]` (file-static, c-defined): *no function references*
+- **G02028** `_1` `char` (file-static, c-defined): *no function references*
+- **G02029** `_2` `char[8]` (file-static, c-defined): *no function references*
+- **G02030** `_3` `char` (file-static, c-defined): *no function references*
+- **G02031** `_4` `char[4]` (file-static, c-defined): *no function references*
+- **G02032** `_5` `char[28]` (file-static, c-defined): *no function references*
+- **G02033** `_6` `char[4]` (file-static, c-defined): *no function references*
+- **G02034** `_` `char[16]` (local-static, c-defined): *no function references*
+- **G02035** `_` `char[8]` (local-static, c-defined): *no function references*
+- **G02036** `_` `char[6]` (local-static, c-defined): *no function references*
+- **G02037** `_` `char[3]` (local-static, c-defined): *no function references*
+- **G02038** `_` `char[5]` (local-static, c-defined): *no function references*
+- **G02039** `_` `short` (local-static, c-defined): *no function references*
+- **G02040** `_` `char` (local-static, c-defined): *no function references*
+- **G02041** `_` `char[2]` (local-static, c-defined): *no function references*
+- **G02042** `_` `int` (local-static, c-defined): *no function references*
+- **G02043** `_` `char[3]` (local-static, c-defined): *no function references*
+- **G02044** `_` `char[5]` (local-static, c-defined): *no function references*
+- **G02045** `_` `char[3]` (local-static, c-defined): *no function references*
+- **G02046** `_` `char[8]` (local-static, c-defined): *no function references*
+- **G02047** `_backupMainSetting` `char` (file-static, c-defined): Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu)
+- **G02048** `_containerDataEmpty` `char` (file-static, c-defined): Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu); Menu::Files::UpdateSaveMenu (TITLE/TITLE.PRG/22C.c:2880 _showSaveMenu)
+- **G02049** `_cursorFileOpSaturation` `signed char[16]` (file-static, c-defined): Title::SaveFiles::DrawFrame (TITLE/TITLE.PRG/22C.c:1784 _drawFileMenu); Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement)
+- **G02050** `_dataNotSaved` `char` (file-static, c-defined): Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu); Menu::Files::UpdateSaveMenu (TITLE/TITLE.PRG/22C.c:2880 _showSaveMenu)
+- **G02053** `_digitDivisors` `char[4]` (local-static, c-defined): Title::SaveFiles::DrawHpMpSummary (TITLE/TITLE.PRG/22C.c:1154 _drawHPMP)
+- **G02054** `_dirEntBuf` `struct DIRENTRY *` (file-static, c-defined): Save::MemoryCard::InitializeResourcesStep (TITLE/TITLE.PRG/22C.c:940 _initMemcard); Title::SaveCard::ScanSaveDirectory (TITLE/TITLE.PRG/22C.c:385 _initSaveFileInfo)
+- **G02059** `_fileMenuElements` `fileMenuElements_t[10]` (file-static, c-defined): Title::SaveFiles::ClearElement (TITLE/TITLE.PRG/22C.c:1370 _clearFileMenuElement); Title::SaveFiles::DrawFrame (TITLE/TITLE.PRG/22C.c:1784 _drawFileMenu); Title::SaveFiles::AreAnimationsComplete (TITLE/TITLE.PRG/22C.c:1375 _fileMenuElementsActive); Title::SaveFiles::ResetElements (TITLE/TITLE.PRG/22C.c:1321 _initFileMenu); Title::SaveFiles::InitializeElement (TITLE/TITLE.PRG/22C.c:1332 _initFileMenuElement); Menu::Files::UpdateLoadMenu (TITLE/TITLE.PRG/22C.c:2213 _loadFileMenu); Title::SaveFiles::UpdateConfirmation (TITLE/TITLE.PRG/22C.c:2330 _promptConfirm); Menu::Files::UpdateClearSaveReminder (TITLE/TITLE.PRG/22C.c:3226 _saveScreenConfirmation); Title::SaveFiles::UpdateLoadCard (TITLE/TITLE.PRG/22C.c:2096 _selectLoadMemoryCard); Title::SaveFiles::UpdateSaveCard (TITLE/TITLE.PRG/22C.c:2750 _selectSaveMemoryCard); Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu); Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu) … +1 more
+- **G02060** `_fileMenuScreenFade` `char` (file-static, c-defined): Title::SaveFiles::DrawFrame (TITLE/TITLE.PRG/22C.c:1784 _drawFileMenu); Title::SaveFiles::ResetElements (TITLE/TITLE.PRG/22C.c:1321 _initFileMenu); Menu::Files::UpdateLoadMenu (TITLE/TITLE.PRG/22C.c:2213 _loadFileMenu)
+- **G02061** `_filePreviousProgressCounter` `u_short` (file-static, c-defined): Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement); Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData); Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile)
+- **G02062** `_fileProgressCounter` `int` (file-static, c-defined): Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement); Title::SaveFiles::ResetElements (TITLE/TITLE.PRG/22C.c:1321 _initFileMenu); Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData); Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile); Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu); Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu)
+- **G02063** `_fileProgressPosition` `u_short` (file-static, c-defined): Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement); Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData); Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile)
+- **G02064** `_fileProgressTarget` `u_short` (file-static, c-defined): Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement); Title::SaveFiles::ResetElements (TITLE/TITLE.PRG/22C.c:1321 _initFileMenu); Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData); Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile)
+- **G02069** `_isSaving` `char` (file-static, c-defined): Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement); Title::SaveFiles::DrawTransferProgress (TITLE/TITLE.PRG/22C.c:1233 _fileProcessingAnim); Title::SaveFiles::DrawTransferComplete (TITLE/TITLE.PRG/22C.c:1277 _fileProcessingCompleteAnim); Menu::Files::UpdateLoadMenu (TITLE/TITLE.PRG/22C.c:2213 _loadFileMenu); Menu::Files::UpdateSaveMenu (TITLE/TITLE.PRG/22C.c:2880 _showSaveMenu)
+- **G02071** `_loadSaveDataErrorOffset` `char` (file-static, c-defined): Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement); Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData); Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile)
+- **G02073** `_memcardEventDescriptors` `long[8]` (file-static, c-defined): Save::MemoryCard::InitializeResourcesStep (TITLE/TITLE.PRG/22C.c:940 _initMemcard); Title::SaveCard::ClearEvents (TITLE/TITLE.PRG/22C.c:73 _resetMemcardEvents); Save::MemoryCard::ReleaseResources (TITLE/TITLE.PRG/22C.c:1017 _shutdownMemcard); Title::SaveCard::PollEvents (TITLE/TITLE.PRG/22C.c:61 _testMemcardEvents)
+- **G02075** `_memcardFiles` `struct DIRENTRY *[15]` (file-static, c-defined): Title::SaveCard::ScanSaveDirectory (TITLE/TITLE.PRG/22C.c:385 _initSaveFileInfo); Title::SaveCard::HasSaveSuffix (TITLE/TITLE.PRG/22C.c:354 _memcardSaveIdExists); Title::SaveFiles::UpdateSaveCard (TITLE/TITLE.PRG/22C.c:2750 _selectSaveMemoryCard)
+- **G02076** `_memoryCardMessage` `char *` (file-static, c-defined): Title::SaveFiles::DrawFrame (TITLE/TITLE.PRG/22C.c:1784 _drawFileMenu); Menu::Files::FindCurrentSaveStep (TITLE/TITLE.PRG/22C.c:1427 _findCurrentSave); Title::ShowClearSaveScreen (TITLE/TITLE.PRG/22C.c:3313 _gameSaveScreen); Title::SaveFiles::ResetElements (TITLE/TITLE.PRG/22C.c:1321 _initFileMenu); Menu::Files::UpdateLoadMenu (TITLE/TITLE.PRG/22C.c:2213 _loadFileMenu); Title::SaveFiles::CheckCardStep (TITLE/TITLE.PRG/22C.c:1488 _memcardMaskedHandler); Title::SaveFiles::UpdateFormatPrompt (TITLE/TITLE.PRG/22C.c:2423 _promptFormat); Title::SaveFiles::UpdateOverwritePrompt (TITLE/TITLE.PRG/22C.c:2393 _promptOverwrite); Title::SaveFiles::UpdateLoadCard (TITLE/TITLE.PRG/22C.c:2096 _selectLoadMemoryCard); Title::SaveFiles::UpdateSaveCard (TITLE/TITLE.PRG/22C.c:2750 _selectSaveMemoryCard); Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu); Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu) … +1 more
+- **G02077** `_menuElementStops` `char[20]` (file-static, c-defined): Title::SaveFiles::DrawFrame (TITLE/TITLE.PRG/22C.c:1784 _drawFileMenu)
+- **G02078** `_menuItemOutlineClut` `u_short[2][16]` (extern, c-defined): Title::LoadBackgroundTextures (TITLE/TITLE.PRG/22C.c:3773 _copyTitleBgData)
+- **G02079** `_menuItemStates` `menuItemState_t[10]` (file-static, c-defined): Title::DrawMenuItems (TITLE/TITLE.PRG/22C.c:4073 _drawTitleMenuItems); Title::InitializeMenu (TITLE/TITLE.PRG/22C.c:3838 _initMenu); Title::ShowSoundSettings (TITLE/TITLE.PRG/22C.c:4353 _menuSoundSettings); Title::ShowVibrationSettings (TITLE/TITLE.PRG/22C.c:4246 _menuVibrationSettings); Title::InitializeMenuItem (TITLE/TITLE.PRG/22C.c:3761 _setMenuItemFadeIn); Title::UpdateMenuAnimation (TITLE/TITLE.PRG/22C.c:3997 _setTitleMenuState); Title::Run (TITLE/TITLE.PRG/22C.c:4491 vs_title_exec)
+- **G02080** `_menuItemTextClut` `u_short[2][16]` (extern, c-defined): Title::LoadBackgroundTextures (TITLE/TITLE.PRG/22C.c:3773 _copyTitleBgData); Title::BlendMenuItemClut (TITLE/TITLE.PRG/22C.c:3957 _setMenuItemClut)
+- **G02085** `_primBuf` `primBuf_t` (file-static, c-defined): Title::SaveFiles::DrawFrame (TITLE/TITLE.PRG/22C.c:1784 _drawFileMenu); Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement); Title::SaveFiles::DrawHpMpSummary (TITLE/TITLE.PRG/22C.c:1154 _drawHPMP); Title::SaveFiles::DrawImmediateSprite (TITLE/TITLE.PRG/22C.c:1082 _drawSprt); Title::SaveFiles::DrawTransferProgress (TITLE/TITLE.PRG/22C.c:1233 _fileProcessingAnim); Title::SaveFiles::DrawTransferComplete (TITLE/TITLE.PRG/22C.c:1277 _fileProcessingCompleteAnim); Title::SaveFiles::DrawGlyph (TITLE/TITLE.PRG/22C.c:1384 _printCharacter); Menu::Files::DrawExitFade (TITLE/TITLE.PRG/22C.c:3299 _saveScreenExitScreen)
+- **G02086** `_saveFileInfo` `saveFileInfo_t *` (file-static, c-defined): Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement); Title::SaveCard::FindMatchingSaveSlot (TITLE/TITLE.PRG/22C.c:209 _findCurrentSaveOnActiveMemcard); Title::SaveCard::NewestSaveSlot (TITLE/TITLE.PRG/22C.c:192 _getNewestSaveFile); Save::MemoryCard::InitializeResourcesStep (TITLE/TITLE.PRG/22C.c:940 _initMemcard); Title::SaveCard::ScanSaveDirectory (TITLE/TITLE.PRG/22C.c:385 _initSaveFileInfo); Save::MemoryCard::PackageClearSave (TITLE/TITLE.PRG/22C.c:616 _packageGameSaveData); Title::SaveCard::ReadSaveSummary (TITLE/TITLE.PRG/22C.c:322 _readSaveFileInfo); Title::SaveFiles::UpdateLoadCard (TITLE/TITLE.PRG/22C.c:2096 _selectLoadMemoryCard); Title::SaveFiles::UpdateSaveCard (TITLE/TITLE.PRG/22C.c:2750 _selectSaveMemoryCard); Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu); Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu)
+- **G02087** `_saveInfoUVClut` `int[10]` (local-static, c-defined): Title::SaveFiles::DrawSummaryLabel (TITLE/TITLE.PRG/22C.c:1113 _drawSaveInfoUI)
+- **G02088** `_saveInfoWh` `int[10]` (local-static, c-defined): Title::SaveFiles::DrawSummaryLabel (TITLE/TITLE.PRG/22C.c:1113 _drawSaveInfoUI)
+- **G02089** `_saveMenuBg_clut` `menuBg_t` (extern, unknown): Title::ShowContinueScreen (TITLE/TITLE.PRG/22C.c:3129 _gameLoadScreen); Title::ShowClearSaveScreen (TITLE/TITLE.PRG/22C.c:3313 _gameSaveScreen)
+- **G02090** `_selectCursorColor` `u_char` (file-static, c-defined): Title::SaveFiles::DrawFrame (TITLE/TITLE.PRG/22C.c:1784 _drawFileMenu); Title::SaveFiles::ResetElements (TITLE/TITLE.PRG/22C.c:1321 _initFileMenu)
+- **G02091** `_selectCursorXy` `int` (file-static, c-defined): Title::SaveFiles::DrawFrame (TITLE/TITLE.PRG/22C.c:1784 _drawFileMenu); Title::SaveFiles::ResetElements (TITLE/TITLE.PRG/22C.c:1321 _initFileMenu); Menu::Files::UpdateLoadMenu (TITLE/TITLE.PRG/22C.c:2213 _loadFileMenu); Title::SaveFiles::UpdateConfirmation (TITLE/TITLE.PRG/22C.c:2330 _promptConfirm); Menu::Files::UpdateClearSaveReminder (TITLE/TITLE.PRG/22C.c:3226 _saveScreenConfirmation); Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu); Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu); Menu::Files::UpdateSaveMenu (TITLE/TITLE.PRG/22C.c:2880 _showSaveMenu)
+- **G02092** `_spmcimg` `char *` (file-static, c-defined): Title::SaveCard::ValidateAndApplyLoadedSave (TITLE/TITLE.PRG/22C.c:569 _applyLoadedSaveFile); Save::MemoryCard::InitializeResourcesStep (TITLE/TITLE.PRG/22C.c:940 _initMemcard); Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData); Save::MemoryCard::PackageClearSave (TITLE/TITLE.PRG/22C.c:616 _packageGameSaveData); Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile); Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu); Menu::Files::UpdateSaveMenu (TITLE/TITLE.PRG/22C.c:2880 _showSaveMenu); Save::MemoryCard::ReleaseResources (TITLE/TITLE.PRG/22C.c:1017 _shutdownMemcard)
+- **G02093** `_textTable` `u_short *` (file-static, c-defined): Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement); Menu::Files::FindCurrentSaveStep (TITLE/TITLE.PRG/22C.c:1427 _findCurrentSave); Title::ShowClearSaveScreen (TITLE/TITLE.PRG/22C.c:3313 _gameSaveScreen); Save::MemoryCard::InitializeResourcesStep (TITLE/TITLE.PRG/22C.c:940 _initMemcard); Menu::Files::UpdateLoadMenu (TITLE/TITLE.PRG/22C.c:2213 _loadFileMenu); Title::SaveFiles::CheckCardStep (TITLE/TITLE.PRG/22C.c:1488 _memcardMaskedHandler); Title::SaveFiles::UpdateConfirmation (TITLE/TITLE.PRG/22C.c:2330 _promptConfirm); Title::SaveFiles::UpdateFormatPrompt (TITLE/TITLE.PRG/22C.c:2423 _promptFormat); Title::SaveFiles::UpdateOverwritePrompt (TITLE/TITLE.PRG/22C.c:2393 _promptOverwrite); Menu::Files::UpdateClearSaveReminder (TITLE/TITLE.PRG/22C.c:3226 _saveScreenConfirmation); Title::SaveFiles::UpdateLoadCard (TITLE/TITLE.PRG/22C.c:2096 _selectLoadMemoryCard); Title::SaveFiles::UpdateSaveCard (TITLE/TITLE.PRG/22C.c:2750 _selectSaveMemoryCard) … +3 more
+- **G02095** `actionsLearned` `int[8]` (extern, c-defined): Title::InitializeNewGameData (TITLE/TITLE.PRG/22C.c:4698 _initGameData)
+- **G02097** `backupTime` `vs_Gametime_t` (local-static, c-defined): Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu)
+- **G02098** `buttonsLastPressed` `int` (local-static, c-defined): Title::Run (TITLE/TITLE.PRG/22C.c:4491 vs_title_exec)
+- **G02099** `cancelled` `char` (local-static, c-defined): Title::SaveFiles::UpdateConfirmation (TITLE/TITLE.PRG/22C.c:2330 _promptConfirm)
+- **G02103** `completeTimer` `char` (local-static, c-defined): Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu)
+- **G02105** `confirmed` `int` (local-static, c-defined): Title::SaveFiles::UpdateOverwritePrompt (TITLE/TITLE.PRG/22C.c:2393 _promptOverwrite)
+- **G02106** `errors` `char` (local-static, c-defined): Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData)
+- **G02107** `errors` `char` (local-static, c-defined): Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile)
+- **G02108** `eventType` `char` (local-static, c-defined): Title::SaveCard::AdvanceCardReadiness (TITLE/TITLE.PRG/22C.c:457 _memcardEventHandler)
+- **G02109** `fadeTimer` `char` (local-static, c-defined): Title::ShowClearSaveScreen (TITLE/TITLE.PRG/22C.c:3313 _gameSaveScreen)
+- **G02111** `fd` `int` (local-static, c-defined): Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData)
+- **G02112** `fd` `int` (local-static, c-defined): Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile)
+- **G02113** `file` `char` (local-static, c-defined): Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData)
+- **G02114** `file` `char` (local-static, c-defined): Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile)
+- **G02115** `fileBuf` `struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12)` (local-static, c-defined): Title::Run (TITLE/TITLE.PRG/22C.c:4491 vs_title_exec)
+- **G02116** `fileLoaded` `int` (local-static, c-defined): Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu)
+- **G02117** `fileSlot` `char` (local-static, c-defined): Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu)
+- **G02120** `glyphWidths` `int[377]` (local-static, c-defined): Title::SaveFiles::DrawGlyph (TITLE/TITLE.PRG/22C.c:1384 _printCharacter)
+- **G02121** `initTimeout` `char` (local-static, c-defined): Title::SaveCard::AdvanceCardReadiness (TITLE/TITLE.PRG/22C.c:457 _memcardEventHandler)
+- **G02122** `initialized` `char` (local-static, c-defined): Title::SaveFiles::UpdateOverwritePrompt (TITLE/TITLE.PRG/22C.c:2393 _promptOverwrite)
+- **G02123** `introMovieLastPlayed` `int` (local-static, c-defined): Title::Run (TITLE/TITLE.PRG/22C.c:4491 vs_title_exec)
+- **G02124** `isTempSave` `char` (local-static, c-defined): Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData)
+- **G02125** `leaveTimer` `char` (local-static, c-defined): Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu)
+- **G02126** `leaveTimer` `char` (local-static, c-defined): Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu)
+- **G02127** `mask` `char` (local-static, c-defined): Title::SaveFiles::CheckCardStep (TITLE/TITLE.PRG/22C.c:1488 _memcardMaskedHandler)
+- **G02128** `outlineTpages` `int[10]` (extern, c-defined): Title::DrawMenuItems (TITLE/TITLE.PRG/22C.c:4073 _drawTitleMenuItems)
+- **G02129** `outlineUvs` `int[10]` (extern, c-defined): Title::DrawMenuItems (TITLE/TITLE.PRG/22C.c:4073 _drawTitleMenuItems)
+- **G02130** `outlineWhs` `int[10]` (extern, c-defined): Title::DrawMenuItems (TITLE/TITLE.PRG/22C.c:4073 _drawTitleMenuItems)
+- **G02131** `outlineXys` `int[10]` (extern, c-defined): Title::DrawMenuItems (TITLE/TITLE.PRG/22C.c:4073 _drawTitleMenuItems)
+- **G02132** `page` `char` (local-static, c-defined): Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu)
+- **G02133** `page` `char` (local-static, c-defined): Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu)
+- **G02134** `port` `char` (local-static, c-defined): Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData)
+- **G02135** `port` `char` (local-static, c-defined): Title::SaveCard::AdvanceCardReadiness (TITLE/TITLE.PRG/22C.c:457 _memcardEventHandler)
+- **G02136** `port` `char` (local-static, c-defined): Title::SaveFiles::UpdateFormatPrompt (TITLE/TITLE.PRG/22C.c:2423 _promptFormat)
+- **G02137** `port` `char` (local-static, c-defined): Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile)
+- **G02138** `port` `u_char` (local-static, c-defined): Title::SaveFiles::UpdateLoadCard (TITLE/TITLE.PRG/22C.c:2096 _selectLoadMemoryCard)
+- **G02139** `port` `u_char` (local-static, c-defined): Title::SaveFiles::UpdateSaveCard (TITLE/TITLE.PRG/22C.c:2750 _selectSaveMemoryCard)
+- **G02140** `port` `char` (local-static, c-defined): Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu)
+- **G02141** `port` `char` (local-static, c-defined): Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu)
+- **G02142** `primBuf` `menuItemPrim_t[341]` (local-static, c-defined): Title::DrawMenuItems (TITLE/TITLE.PRG/22C.c:4073 _drawTitleMenuItems)
+- **G02143** `publisher_clut` `char[]` (extern, unknown): Title::ShowPublisherAndDeveloper (TITLE/TITLE.PRG/22C.c:3579 _displayPublisherAndDeveloper)
+- **G02144** `rect` `RECT` (local-static, c-defined): Title::ShowContinueScreen (TITLE/TITLE.PRG/22C.c:3129 _gameLoadScreen)
+- **G02145** `rect` `RECT` (local-static, c-defined): Title::ShowClearSaveScreen (TITLE/TITLE.PRG/22C.c:3313 _gameSaveScreen)
+- **G02146** `renameErrors` `char` (local-static, c-defined): Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile)
+- **G02147** `saveSuccessful` `int` (local-static, c-defined): Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu)
+- **G02150** `selectedSlot` `char` (local-static, c-defined): Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu)
+- **G02151** `settingsBackup` `vs_main_settings_t` (local-static, c-defined): Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu)
+- **G02152** `sprtBuf` `tagsprt_t[10]` (local-static, c-defined): Title::DrawMenu (TITLE/TITLE.PRG/22C.c:4183 _drawTitleMenu)
+- **G02154** `state` `char` (local-static, c-defined): Title::ShowContinueScreen (TITLE/TITLE.PRG/22C.c:3129 _gameLoadScreen)
+- **G02155** `state` `char` (local-static, c-defined): Title::ShowClearSaveScreen (TITLE/TITLE.PRG/22C.c:3313 _gameSaveScreen)
+- **G02158** `state` `char` (local-static, c-defined): Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData)
+- **G02159** `state` `char` (local-static, c-defined): Title::SaveCard::AdvanceCardReadiness (TITLE/TITLE.PRG/22C.c:457 _memcardEventHandler)
+- **G02160** `state` `char` (local-static, c-defined): Title::SaveFiles::UpdateConfirmation (TITLE/TITLE.PRG/22C.c:2330 _promptConfirm)
+- **G02161** `state` `char` (local-static, c-defined): Title::SaveFiles::UpdateFormatPrompt (TITLE/TITLE.PRG/22C.c:2423 _promptFormat)
+- **G02162** `state` `char` (local-static, c-defined): Title::SaveFiles::UpdateOverwritePrompt (TITLE/TITLE.PRG/22C.c:2393 _promptOverwrite)
+- **G02163** `state` `char` (local-static, c-defined): Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile)
+- **G02165** `state` `char` (local-static, c-defined): Title::SaveFiles::UpdateLoadCard (TITLE/TITLE.PRG/22C.c:2096 _selectLoadMemoryCard)
+- **G02166** `state` `char` (local-static, c-defined): Title::SaveFiles::UpdateSaveCard (TITLE/TITLE.PRG/22C.c:2750 _selectSaveMemoryCard)
+- **G02167** `state` `char` (local-static, c-defined): Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu)
+- **G02168** `state` `char` (local-static, c-defined): Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu)
+- **G02171** `textTpages` `int[10]` (extern, c-defined): Title::DrawMenuItems (TITLE/TITLE.PRG/22C.c:4073 _drawTitleMenuItems)
+- **G02172** `textUvs` `int[10]` (extern, c-defined): Title::DrawMenuItems (TITLE/TITLE.PRG/22C.c:4073 _drawTitleMenuItems)
+- **G02173** `timeout` `char` (local-static, c-defined): Title::SaveCard::AdvanceCardReadiness (TITLE/TITLE.PRG/22C.c:457 _memcardEventHandler)
+
+## Types
+
+- **T00794** `union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5)`: *no function references*
+- **T00189** `struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12)`: Title::Run (TITLE/TITLE.PRG/22C.c:4491 vs_title_exec)
+- **T00190** `struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5)`: Title::SaveCard::ValidateAndApplyLoadedSave (TITLE/TITLE.PRG/22C.c:569 _applyLoadedSaveFile); Save::MemoryCard::PackageClearSave (TITLE/TITLE.PRG/22C.c:616 _packageGameSaveData); Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu)
+- **T00192** `struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5)`: Title::SaveFiles::UpdateLoadCard (TITLE/TITLE.PRG/22C.c:2096 _selectLoadMemoryCard); Title::SaveFiles::UpdateSaveCard (TITLE/TITLE.PRG/22C.c:2750 _selectSaveMemoryCard); Title::SaveFiles::UpdateLoadFiles (TITLE/TITLE.PRG/22C.c:1916 _showLoadFilesMenu); Title::SaveFiles::UpdateSaveFiles (TITLE/TITLE.PRG/22C.c:2495 _showSaveFilesMenu); Menu::Files::UpdateSaveMenu (TITLE/TITLE.PRG/22C.c:2880 _showSaveMenu)
+- **T00298** `struct:VS_SPRT`: Title::DrawMenu (TITLE/TITLE.PRG/22C.c:4183 _drawTitleMenu); Title::DrawMenuItems (TITLE/TITLE.PRG/22C.c:4073 _drawTitleMenuItems)
+- **T00300** `struct:VS_TILE_TPAGE`: Title::Run (TITLE/TITLE.PRG/22C.c:4491 vs_title_exec)
+- **T00004** `enum:_memcardMaskedHandler_e`: *no function references*
+- **T00426** `struct:fontTable_t`: Title::ShowContinueScreen (TITLE/TITLE.PRG/22C.c:3129 _gameLoadScreen); Title::ShowClearSaveScreen (TITLE/TITLE.PRG/22C.c:3313 _gameSaveScreen)
+- **T00026** `enum:memcardEvents_e`: Save::MemoryCard::ReadSaveStep (MENU/MENU7.PRG/260.c:871 _loadSaveData); Save::MemoryCard::AdvanceCardReadiness (MENU/MENU7.PRG/260.c:563 _memcardEventHandler); Save::MemoryCard::WriteSaveStep (MENU/MENU7.PRG/260.c:960 _saveFile); Save::MemoryCard::PollEvents (MENU/MENU7.PRG/260.c:172 _testMemcardEvents); Title::SaveCard::ReadSaveStep (TITLE/TITLE.PRG/22C.c:745 _loadSaveData); Title::SaveCard::AdvanceCardReadiness (TITLE/TITLE.PRG/22C.c:457 _memcardEventHandler); Title::SaveCard::ClearEvents (TITLE/TITLE.PRG/22C.c:73 _resetMemcardEvents); Title::SaveCard::WriteSaveStep (TITLE/TITLE.PRG/22C.c:826 _saveFile); Title::SaveCard::PollEvents (TITLE/TITLE.PRG/22C.c:61 _testMemcardEvents)
+- **T00548** `struct:menuBg_t`: *no function references*
+- **T00549** `struct:menuItemPrim_t`: Title::DrawMenuItems (TITLE/TITLE.PRG/22C.c:4073 _drawTitleMenuItems)
+- **T00027** `enum:menuItemState_e`: *no function references*
+- **T00550** `struct:menuItemState_t`: Title::DrawMenuItems (TITLE/TITLE.PRG/22C.c:4073 _drawTitleMenuItems); Title::InitializeMenu (TITLE/TITLE.PRG/22C.c:3838 _initMenu); Title::ShowSoundSettings (TITLE/TITLE.PRG/22C.c:4353 _menuSoundSettings); Title::ShowVibrationSettings (TITLE/TITLE.PRG/22C.c:4246 _menuVibrationSettings); Title::InitializeMenuItem (TITLE/TITLE.PRG/22C.c:3761 _setMenuItemFadeIn); Title::UpdateMenuAnimation (TITLE/TITLE.PRG/22C.c:3997 _setTitleMenuState); Title::Run (TITLE/TITLE.PRG/22C.c:4491 vs_title_exec)
+- **T00028** `enum:menuItems`: *no function references*
+- **T00595** `struct:saveFileInfo_t`: Menu::Files::DrawElement (MENU/MENU7.PRG/260.c:1765 _drawFileMenuElement); Save::MemoryCard::FindMatchingSaveSlot (MENU/MENU7.PRG/260.c:300 _findCurrentSaveOnActiveMemcard); Save::MemoryCard::NewestSaveSlot (MENU/MENU7.PRG/260.c:278 _getNewestSaveFile); Save::MemoryCard::InitializeMenuResourcesStep (MENU/MENU7.PRG/260.c:1080 _initMemcard); Save::MemoryCard::ScanSaveDirectory (MENU/MENU7.PRG/260.c:480 _initSaveFileInfo); Save::MemoryCard::PackageGameSave (MENU/MENU7.PRG/260.c:735 _packageGameSaveData); Save::MemoryCard::ReadSaveSummary (MENU/MENU7.PRG/260.c:404 _readSaveFileInfo); Menu::Files::UpdateLoadCard (MENU/MENU7.PRG/260.c:3063 _selectLoadMemoryCard); Menu::Files::UpdateSaveCard (MENU/MENU7.PRG/260.c:2537 _selectSaveMemoryCard); Menu::Files::UpdateLoadFiles (MENU/MENU7.PRG/260.c:2878 _showLoadFilesMenu); Menu::Files::UpdateSaveFiles (MENU/MENU7.PRG/260.c:2277 _showSaveFilesMenu); Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement) … +10 more
+- **T00031** `enum:slotState_e`: Menu::Files::DrawElement (MENU/MENU7.PRG/260.c:1765 _drawFileMenuElement); Save::MemoryCard::FindMatchingSaveSlot (MENU/MENU7.PRG/260.c:300 _findCurrentSaveOnActiveMemcard); Save::MemoryCard::NewestSaveSlot (MENU/MENU7.PRG/260.c:278 _getNewestSaveFile); Save::MemoryCard::ScanSaveDirectory (MENU/MENU7.PRG/260.c:480 _initSaveFileInfo); Save::MemoryCard::PackageGameSave (MENU/MENU7.PRG/260.c:735 _packageGameSaveData); Menu::Files::UpdateLoadCard (MENU/MENU7.PRG/260.c:3063 _selectLoadMemoryCard); Menu::Files::UpdateSaveCard (MENU/MENU7.PRG/260.c:2537 _selectSaveMemoryCard); Menu::Files::UpdateLoadFiles (MENU/MENU7.PRG/260.c:2878 _showLoadFilesMenu); Menu::Files::UpdateSaveFiles (MENU/MENU7.PRG/260.c:2277 _showSaveFilesMenu); Title::SaveFiles::DrawElement (TITLE/TITLE.PRG/22C.c:1601 _drawFileMenuElement); Title::SaveCard::FindMatchingSaveSlot (TITLE/TITLE.PRG/22C.c:209 _findCurrentSaveOnActiveMemcard); Title::SaveCard::NewestSaveSlot (TITLE/TITLE.PRG/22C.c:192 _getNewestSaveFile) … +6 more
+- **T00088** `enum:state#2155f452`: *no function references*
+- **T00089** `enum:state#a5da1519`: *no function references*
+- **T00090** `enum:state#724171f6`: *no function references*
+- **T00609** `struct:tagsprt_t`: Title::DrawMenu (TITLE/TITLE.PRG/22C.c:4183 _drawTitleMenu)
+- **T00625** `struct:uiTable_t`: *no function references*

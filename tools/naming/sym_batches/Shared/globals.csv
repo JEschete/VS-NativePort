@@ -1,0 +1,8 @@
+id,key,name,overlay,linkage,segment,address,size,type,type_id,has_pointers,init,instances,files,used_by,proposed_system,proposed_disposition
+G01945,D_8005DBF4@SLUS_010.40,D_8005DBF4,SLUS_010.40,extern,bss,0x8005DBF4,120,int[5][6],,0,0,,SLUS_010.40/main.c,0,,state
+G01955,D_8005E040@SLUS_010.40,D_8005E040,SLUS_010.40,extern,bss,0x8005E040,4,u_int,,0,0,,SLUS_010.40/main.h,0,,state
+G02002,_buildTimestamp@SLUS_010.40,_buildTimestamp,SLUS_010.40,extern,c-defined,,15,char[15],,0,1,,SLUS_010.40/2MBYTE.OBJ.c,0,,state
+G02007,_ramsize@SLUS_010.40,_ramsize,SLUS_010.40,extern,c-defined,,4,u_int,,0,1,,SLUS_010.40/2MBYTE.OBJ.c,0,,state
+G02013,_stacksize@SLUS_010.40,_stacksize,SLUS_010.40,extern,c-defined,,4,u_int,,0,1,,SLUS_010.40/2MBYTE.OBJ.c,0,,state
+G02014,g_SpuMallocRecTable@SLUS_010.40,g_SpuMallocRecTable,SLUS_010.40,extern,c-defined,,40,char[40],,0,1,,include/sound.h,0,,catalog
+G02015,g_bSpuTransferring@SLUS_010.40,g_bSpuTransferring,SLUS_010.40,extern,unknown,,4,volatile int,,0,0,,SLUS_010.40/25AC.c,0,,?

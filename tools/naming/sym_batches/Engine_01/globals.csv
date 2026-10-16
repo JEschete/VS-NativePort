@@ -1,0 +1,152 @@
+id,key,name,overlay,linkage,segment,address,size,type,type_id,has_pointers,init,instances,files,used_by,proposed_system,proposed_disposition
+G00049,_shpLbaOffsets@BATTLE/BATTLE.PRG,_shpLbaOffsets,BATTLE/BATTLE.PRG,extern,data,0x800E8660,512,u_short[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00050,_shpFileSectorSizes@BATTLE/BATTLE.PRG,_shpFileSectorSizes,BATTLE/BATTLE.PRG,extern,data,0x800E8860,848,u_char[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00051,D_800E8960@BATTLE/BATTLE.PRG,D_800E8960,BATTLE/BATTLE.PRG,extern,data,0x800E8960,592,u_char[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00052,D_800E8A60@BATTLE/BATTLE.PRG,D_800E8A60,BATTLE/BATTLE.PRG,extern,data,0x800E8A60,336,u_short[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00053,D_800E8B40@BATTLE/BATTLE.PRG,D_800E8B40,BATTLE/BATTLE.PRG,extern,data,0x800E8B40,112,u_char[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00054,_etmLbaOffsets@BATTLE/BATTLE.PRG,_etmLbaOffsets,BATTLE/BATTLE.PRG,extern,data,0x800E8BB0,224,u_short[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00055,_etmFileSectorSizes@BATTLE/BATTLE.PRG,_etmFileSectorSizes,BATTLE/BATTLE.PRG,extern,data,0x800E8C90,368,u_char[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00056,D_800E8D00@BATTLE/BATTLE.PRG,D_800E8D00,BATTLE/BATTLE.PRG,extern,data,0x800E8D00,256,u_short[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00057,_wepFileSectorOffsets@BATTLE/BATTLE.PRG,_wepFileSectorOffsets,BATTLE/BATTLE.PRG,extern,data,0x800E8E00,296,u_char[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00059,D_800E8E8E@BATTLE/BATTLE.PRG,D_800E8E8E,BATTLE/BATTLE.PRG,extern,data,0x800E8E8E,154,u_short[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00060,D_800E8EA3@BATTLE/BATTLE.PRG,D_800E8EA3,BATTLE/BATTLE.PRG,extern,data,0x800E8EA3,133,u_char[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00061,D_800E8EA8@BATTLE/BATTLE.PRG,D_800E8EA8,BATTLE/BATTLE.PRG,extern,data,0x800E8EA8,128,u_short[][4],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00062,D_800E8EFC@BATTLE/BATTLE.PRG,D_800E8EFC,BATTLE/BATTLE.PRG,extern,data,0x800E8EFC,44,u_char[][4],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00064,D_800E8F29@BATTLE/BATTLE.PRG,D_800E8F29,BATTLE/BATTLE.PRG,extern,data,0x800E8F29,1,u_char,,0,0,,BATTLE/BATTLE.PRG/30DB0.c BATTLE/INITBTL.PRG/FB0.c,3,Content,state
+G00065,_loadShpState@BATTLE/BATTLE.PRG,_loadShpState,BATTLE/BATTLE.PRG,extern,data,0x800E8F2A,1,u_char,,0,0,,BATTLE/BATTLE.PRG/30DB0.c BATTLE/INITBTL.PRG/FB0.c,5,Content,state
+G00066,D_800E8F2B@BATTLE/BATTLE.PRG,D_800E8F2B,BATTLE/BATTLE.PRG,extern,data,0x800E8F2B,1,u_char,,0,0,,BATTLE/BATTLE.PRG/30DB0.c BATTLE/INITBTL.PRG/FB0.c,2,Content,state
+G00068,_loadEtmState@BATTLE/BATTLE.PRG,_loadEtmState,BATTLE/BATTLE.PRG,extern,data,0x800E8F2D,1,u_char,,0,0,,BATTLE/BATTLE.PRG/30DB0.c BATTLE/INITBTL.PRG/FB0.c,2,Content,state
+G00074,D_800E8FC4@BATTLE/BATTLE.PRG,D_800E8FC4,BATTLE/BATTLE.PRG,extern,data,0x800E8FC4,4,int,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00075,_weaponMaterialPaletteMap@BATTLE/BATTLE.PRG,_weaponMaterialPaletteMap,BATTLE/BATTLE.PRG,extern,data,0x800E8FC8,3432,u_char[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,catalog
+G00149,D_800EB708@BATTLE/BATTLE.PRG,D_800EB708,BATTLE/BATTLE.PRG,extern,data,0x800EB708,264,u_char[],,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Graphics,catalog
+G00150,D_800EB7B4@BATTLE/BATTLE.PRG,D_800EB7B4,BATTLE/BATTLE.PRG,extern,data,0x800EB7B4,92,u_char[],,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Graphics,catalog
+G00151,D_800EB7D4@BATTLE/BATTLE.PRG,D_800EB7D4,BATTLE/BATTLE.PRG,extern,data,0x800EB7D4,60,u_char[],,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Graphics,catalog
+G00152,vs_battle_characterWidths@BATTLE/BATTLE.PRG,vs_battle_characterWidths,BATTLE/BATTLE.PRG,extern,data,0x800EB810,413,char[],,0,0,,BATTLE/BATTLE.PRG/5BF94.h,4,Graphics,catalog
+G00153,D_800EB98C@BATTLE/BATTLE.PRG,D_800EB98C,BATTLE/BATTLE.PRG,extern,data,0x800EB98C,32,u_short[16],,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Graphics,catalog
+G00161,D_800EB9BC@BATTLE/BATTLE.PRG,D_800EB9BC,BATTLE/BATTLE.PRG,extern,data,0x800EB9BC,4,D_800EB9BC_t *,T00219,1,0,,BATTLE/BATTLE.PRG/4A0A8.c BATTLE/BATTLE.PRG/5BF94.c,10,Graphics,state
+G00180,D_800EBC04@BATTLE/BATTLE.PRG,D_800EBC04,BATTLE/BATTLE.PRG,extern,data,0x800EBC04,16,int[],,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Graphics,state
+G00212,D_800EC25C@BATTLE/BATTLE.PRG,D_800EC25C,BATTLE/BATTLE.PRG,extern,data,0x800EC25C,16,"void (*[])(gim_t *, int, u_long *)",,1,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Graphics,state
+G00213,_keystreamState@BATTLE/BATTLE.PRG,_keystreamState,BATTLE/BATTLE.PRG,extern,data,0x800EC26C,4,u_int,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Core,state
+G00215,D_800EC280@BATTLE/BATTLE.PRG,D_800EC280,BATTLE/BATTLE.PRG,extern,data,0x800EC280,4,int,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Graphics,state
+G00244,D_800F1870@BATTLE/BATTLE.PRG,D_800F1870,BATTLE/BATTLE.PRG,extern,bss,0x800F1870,4,void *,,1,0,,BATTLE/BATTLE.PRG/146C.c,2,Game.Boot,state
+G00245,D_800F1874@BATTLE/BATTLE.PRG,D_800F1874,BATTLE/BATTLE.PRG,extern,bss,0x800F1874,4,int,,0,0,,BATTLE/INITBTL.PRG/18.c,1,Game.Boot,state
+G00254,D_800F18E8@BATTLE/BATTLE.PRG,D_800F18E8,BATTLE/BATTLE.PRG,extern,bss,0x800F18E8,2,D_800F18E8_t,T00222,0,0,,BATTLE/BATTLE.PRG/146C.h,1,Save,state
+G00257,D_800F18F4@BATTLE/BATTLE.PRG,D_800F18F4,BATTLE/BATTLE.PRG,extern,bss,0x800F18F4,4,int,,0,0,,BATTLE/INITBTL.PRG/18.c,1,Game.Boot,state
+G00258,D_800F18F8@BATTLE/BATTLE.PRG,D_800F18F8,BATTLE/BATTLE.PRG,extern,bss,0x800F18F8,1,char,,0,0,,BATTLE/BATTLE.PRG/146C.c,3,Content,state
+G00263,D_800F190C@BATTLE/BATTLE.PRG,D_800F190C,BATTLE/BATTLE.PRG,extern,bss,0x800F190C,4,int,,0,0,,BATTLE/BATTLE.PRG/146C.c BATTLE/INITBTL.PRG/18.c,3,Game.Boot,state
+G00269,D_800F1970@BATTLE/BATTLE.PRG,D_800F1970,BATTLE/BATTLE.PRG,extern,bss,0x800F1970,96,DR_STP[],,0,0,,BATTLE/BATTLE.PRG/146C.h,2,Game.Boot,state
+G00270,D_800F1988@BATTLE/BATTLE.PRG,D_800F1988,BATTLE/BATTLE.PRG,extern,bss,0x800F1988,72,DR_STP[],,0,0,,BATTLE/BATTLE.PRG/146C.h,2,Game.Boot,state
+G00272,D_800F19A8@BATTLE/BATTLE.PRG,D_800F19A8,BATTLE/BATTLE.PRG,extern,bss,0x800F19A8,40,u_char[],,0,0,,BATTLE/BATTLE.PRG/146C.c,4,Graphics,state
+G00284,D_800F1A20@BATTLE/BATTLE.PRG,D_800F1A20,BATTLE/BATTLE.PRG,extern,bss,0x800F1A20,4,int,,0,0,,BATTLE/BATTLE.PRG/146C.c,3,Graphics,state
+G00285,D_800F1A28@BATTLE/BATTLE.PRG,D_800F1A28,BATTLE/BATTLE.PRG,extern,bss,0x800F1A28,8,SVECTOR,,0,0,,BATTLE/BATTLE.PRG/146C.c,2,Graphics,state
+G00286,D_800F1A2C@BATTLE/BATTLE.PRG,D_800F1A2C,BATTLE/BATTLE.PRG,extern,bss,0x800F1A2C,2,short,,0,0,,BATTLE/BATTLE.PRG/146C.c,3,Graphics,state
+G00287,D_800F1A30@BATTLE/BATTLE.PRG,D_800F1A30,BATTLE/BATTLE.PRG,extern,bss,0x800F1A30,16,VECTOR,,0,0,,BATTLE/BATTLE.PRG/146C.c,4,Graphics,state
+G00288,D_800F1A40@BATTLE/BATTLE.PRG,D_800F1A40,BATTLE/BATTLE.PRG,extern,bss,0x800F1A40,4,int,,0,0,,BATTLE/BATTLE.PRG/146C.c,4,Graphics,state
+G00289,D_800F1A44@BATTLE/BATTLE.PRG,D_800F1A44,BATTLE/BATTLE.PRG,extern,bss,0x800F1A44,4,u_int,,0,0,,BATTLE/BATTLE.PRG/146C.c,4,Graphics,state
+G00292,D_800F1A68@BATTLE/BATTLE.PRG,D_800F1A68,BATTLE/BATTLE.PRG,extern,bss,0x800F1A68,16,D_800F1A68_t,T00228,0,0,,BATTLE/BATTLE.PRG/146C.c,4,Graphics,state
+G00293,D_800F1A78@BATTLE/BATTLE.PRG,D_800F1A78,BATTLE/BATTLE.PRG,extern,bss,0x800F1A78,4,CVECTOR,,0,0,,BATTLE/BATTLE.PRG/146C.c,5,Graphics,state
+G00294,vs_battle_screenTransitionDrMode@BATTLE/BATTLE.PRG,vs_battle_screenTransitionDrMode,BATTLE/BATTLE.PRG,extern,bss,0x800F1A80,24,DR_MODE[],,0,0,,BATTLE/BATTLE.PRG/146C.h,2,Graphics,state
+G00296,D_800F1A9C@BATTLE/BATTLE.PRG,D_800F1A9C,BATTLE/BATTLE.PRG,extern,bss,0x800F1A9C,4,char[],,0,0,,BATTLE/BATTLE.PRG/146C.c,1,Graphics,state
+G00301,D_800F1ABC@BATTLE/BATTLE.PRG,D_800F1ABC,BATTLE/BATTLE.PRG,extern,bss,0x800F1ABC,4,D_800F1ABC_t *,T00229,1,0,,BATTLE/BATTLE.PRG/146C.c,4,Graphics,state
+G00302,vs_battle_screenTransitionWipePolyF4@BATTLE/BATTLE.PRG,vs_battle_screenTransitionWipePolyF4,BATTLE/BATTLE.PRG,extern,bss,0x800F1AC0,96,vs_battle_screenTransitionWipePoly[],T00667,0,0,,BATTLE/BATTLE.PRG/146C.h,2,Graphics,state
+G00303,vs_battle_screenTransitionEdgePolyG4@BATTLE/BATTLE.PRG,vs_battle_screenTransitionEdgePolyG4,BATTLE/BATTLE.PRG,extern,bss,0x800F1B20,72,POLY_G4[],,0,0,,BATTLE/BATTLE.PRG/146C.h,2,Graphics,state
+G00304,vs_battle_screenTransitionPolyF4@BATTLE/BATTLE.PRG,vs_battle_screenTransitionPolyF4,BATTLE/BATTLE.PRG,extern,bss,0x800F1B68,86,POLY_F4[],,0,0,,BATTLE/BATTLE.PRG/146C.h,2,Graphics,state
+G00305,D_800F1B98@BATTLE/BATTLE.PRG,D_800F1B98,BATTLE/BATTLE.PRG,extern,bss,0x800F1B98,4,int,,0,0,,BATTLE/BATTLE.PRG/146C.c,5,Graphics,state
+G00306,D_800F1B9C@BATTLE/BATTLE.PRG,D_800F1B9C,BATTLE/BATTLE.PRG,extern,bss,0x800F1B9C,4,int,,0,0,,BATTLE/BATTLE.PRG/146C.c,4,Graphics,state
+G00374,_wepFileData@BATTLE/BATTLE.PRG,_wepFileData,BATTLE/BATTLE.PRG,extern,bss,0x800F2288,4,void *,,1,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00375,_wepFileLoaded@BATTLE/BATTLE.PRG,_wepFileLoaded,BATTLE/BATTLE.PRG,extern,bss,0x800F228C,4,int,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00376,_wepFile@BATTLE/BATTLE.PRG,_wepFile,BATTLE/BATTLE.PRG,extern,bss,0x800F2290,8,vs_main_CdFile,T00690,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00377,_wepCdSlot@BATTLE/BATTLE.PRG,_wepCdSlot,BATTLE/BATTLE.PRG,extern,bss,0x800F2298,4,vs_main_CdQueueSlot *,T00691,1,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00378,_wepFileEpilog@BATTLE/BATTLE.PRG,_wepFileEpilog,BATTLE/BATTLE.PRG,extern,bss,0x800F229C,4,void *,,1,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00379,_shpData@BATTLE/BATTLE.PRG,_shpData,BATTLE/BATTLE.PRG,extern,bss,0x800F22A0,4,void *,,1,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00380,_shpAllocated@BATTLE/BATTLE.PRG,_shpAllocated,BATTLE/BATTLE.PRG,extern,bss,0x800F22A4,4,int,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00381,_shpFile@BATTLE/BATTLE.PRG,_shpFile,BATTLE/BATTLE.PRG,extern,bss,0x800F22A8,8,vs_main_CdFile,T00690,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00382,_shpCdSlot@BATTLE/BATTLE.PRG,_shpCdSlot,BATTLE/BATTLE.PRG,extern,bss,0x800F22B0,4,vs_main_CdQueueSlot *,T00691,1,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00383,D_800F22B4@BATTLE/BATTLE.PRG,D_800F22B4,BATTLE/BATTLE.PRG,extern,bss,0x800F22B4,4,u_char *,,1,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00384,D_800F22B8@BATTLE/BATTLE.PRG,D_800F22B8,BATTLE/BATTLE.PRG,extern,bss,0x800F22B8,1,u_char,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00385,D_800F22BC@BATTLE/BATTLE.PRG,D_800F22BC,BATTLE/BATTLE.PRG,extern,bss,0x800F22BC,4,int,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00386,D_800F22C0@BATTLE/BATTLE.PRG,D_800F22C0,BATTLE/BATTLE.PRG,extern,bss,0x800F22C0,4,int,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00387,D_800F22C4@BATTLE/BATTLE.PRG,D_800F22C4,BATTLE/BATTLE.PRG,extern,bss,0x800F22C4,4,int,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00388,D_800F22C8@BATTLE/BATTLE.PRG,D_800F22C8,BATTLE/BATTLE.PRG,extern,bss,0x800F22C8,4,void *,,1,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00389,D_800F22D0@BATTLE/BATTLE.PRG,D_800F22D0,BATTLE/BATTLE.PRG,extern,bss,0x800F22D0,4,int,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00390,D_800F22D8@BATTLE/BATTLE.PRG,D_800F22D8,BATTLE/BATTLE.PRG,extern,bss,0x800F22D8,8,vs_main_CdFile,T00690,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00391,D_800F22E0@BATTLE/BATTLE.PRG,D_800F22E0,BATTLE/BATTLE.PRG,extern,bss,0x800F22E0,4,vs_main_CdQueueSlot *,T00691,1,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00392,D_800F22E4@BATTLE/BATTLE.PRG,D_800F22E4,BATTLE/BATTLE.PRG,extern,bss,0x800F22E4,4,u_char *,,1,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00393,_etmData@BATTLE/BATTLE.PRG,_etmData,BATTLE/BATTLE.PRG,extern,bss,0x800F22FC,4,u_short *,,1,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00394,_etmFile@BATTLE/BATTLE.PRG,_etmFile,BATTLE/BATTLE.PRG,extern,bss,0x800F2300,8,vs_main_CdFile,T00690,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00395,_etmFileCdSlot@BATTLE/BATTLE.PRG,_etmFileCdSlot,BATTLE/BATTLE.PRG,extern,bss,0x800F2308,4,vs_main_CdQueueSlot *,T00691,1,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00396,vs_battle_objectDataSlots@BATTLE/BATTLE.PRG,vs_battle_objectDataSlots,BATTLE/BATTLE.PRG,extern,bss,0x800F2310,320,vs_battle_objectData[16],T00659,1,0,,BATTLE/BATTLE.PRG/2842C.h,5,Content,state
+G00397,D_800F244F@BATTLE/BATTLE.PRG,D_800F244F,BATTLE/BATTLE.PRG,extern,bss,0x800F244F,8425,u_char[],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,2,Content,state
+G00402,D_800F4438@BATTLE/BATTLE.PRG,D_800F4438,BATTLE/BATTLE.PRG,extern,bss,0x800F4438,16,VECTOR,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,2,Content,state
+G00404,D_800F4528@BATTLE/BATTLE.PRG,D_800F4528,BATTLE/BATTLE.PRG,extern,bss,0x800F4528,16,void *[],,1,0,,BATTLE/BATTLE.PRG/30DB0.c BATTLE/INITBTL.PRG/FB0.c,4,Content,state
+G00406,D_800F457C@BATTLE/BATTLE.PRG,D_800F457C,BATTLE/BATTLE.PRG,extern,bss,0x800F457C,4,int,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00407,D_800F4580@BATTLE/BATTLE.PRG,D_800F4580,BATTLE/BATTLE.PRG,extern,bss,0x800F4580,4,int,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00411,D_800F45D8@BATTLE/BATTLE.PRG,D_800F45D8,BATTLE/BATTLE.PRG,extern,bss,0x800F45D8,4,int,,0,0,,BATTLE/BATTLE.PRG/30DB0.c,1,Content,state
+G00413,vs_battle_commonWepBuffs@BATTLE/BATTLE.PRG,vs_battle_commonWepBuffs,BATTLE/BATTLE.PRG,extern,bss,0x800F4620,336,_wepModelOffsets *[],T00344,1,0,,BATTLE/BATTLE.PRG/30DB0.h,2,Content,state
+G00414,D_800F4628@BATTLE/BATTLE.PRG,D_800F4628,BATTLE/BATTLE.PRG,extern,bss,0x800F4628,128,short[4][16],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,2,Content,state
+G00415,D_800F46A8@BATTLE/BATTLE.PRG,D_800F46A8,BATTLE/BATTLE.PRG,extern,bss,0x800F46A8,200,vs_battle_texInfo_t[],T00670,0,0,,BATTLE/BATTLE.PRG/30DB0.h,3,Content,state
+G00417,vs_battle_wepTextures@BATTLE/BATTLE.PRG,vs_battle_wepTextures,BATTLE/BATTLE.PRG,extern,bss,0x800F4770,160,vs_battle_texInfo_t[20],T00670,0,0,,BATTLE/BATTLE.PRG/30DB0.h,4,Content,state
+G00418,D_800F4810@BATTLE/BATTLE.PRG,D_800F4810,BATTLE/BATTLE.PRG,extern,bss,0x800F4810,256,char *[4][16],,1,0,,BATTLE/BATTLE.PRG/30DB0.c,2,Content,state
+G00419,D_800F4910@BATTLE/BATTLE.PRG,D_800F4910,BATTLE/BATTLE.PRG,extern,bss,0x800F4910,32,MATRIX,,0,0,,BATTLE/BATTLE.PRG/44F14.c BATTLE/BATTLE.PRG/49268.c,1,Graphics,state
+G00420,D_800F4930@BATTLE/BATTLE.PRG,D_800F4930,BATTLE/BATTLE.PRG,extern,bss,0x800F4930,4,void *,,1,0,,BATTLE/BATTLE.PRG/146C.h,2,Content,state
+G00421,D_800F4938@BATTLE/BATTLE.PRG,D_800F4938,BATTLE/BATTLE.PRG,extern,bss,0x800F4938,128,short[4][16],,0,0,,BATTLE/BATTLE.PRG/30DB0.c,2,Content,state
+G00493,D_800F4CB8@BATTLE/BATTLE.PRG,D_800F4CB8,BATTLE/BATTLE.PRG,extern,bss,0x800F4CB8,1,char,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,4,Graphics,state
+G00494,_fontTable@BATTLE/BATTLE.PRG,_fontTable,BATTLE/BATTLE.PRG,extern,bss,0x800F4CB9,1,char,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,5,Graphics,state
+G00495,_fontBrightness@BATTLE/BATTLE.PRG,_fontBrightness,BATTLE/BATTLE.PRG,extern,bss,0x800F4CBC,4,int,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,4,Graphics,state
+G00503,D_800F4E80@BATTLE/BATTLE.PRG,D_800F4E80,BATTLE/BATTLE.PRG,extern,bss,0x800F4E80,1,u_char,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,2,Graphics,state
+G00521,D_800F51C8@BATTLE/BATTLE.PRG,D_800F51C8,BATTLE/BATTLE.PRG,extern,bss,0x800F51C8,1,char,,0,0,,BATTLE/BATTLE.PRG/5BF94.c,3,Graphics,state
+G00522,D_800F51D0@BATTLE/BATTLE.PRG,D_800F51D0,BATTLE/BATTLE.PRG,extern,bss,0x800F51D0,64,RECT[],,0,0,,BATTLE/BATTLE.PRG/5BF94.c,1,Graphics,state
+G00601,D_800689E8@src/BATTLE/BATTLE.PRG/146C.c:func_8007ACB0,D_800689E8,BATTLE/BATTLE.PRG,local-static,c-defined,,16,const VECTOR,,0,1,,BATTLE/BATTLE.PRG/146C.c,1,Graphics,constexpr
+G00602,D_800689F8@src/BATTLE/BATTLE.PRG/146C.c:vs_battle_lookAt,D_800689F8,BATTLE/BATTLE.PRG,local-static,c-defined,,16,const VECTOR,,0,1,,BATTLE/BATTLE.PRG/146C.c,1,Core.Math,constexpr
+G00616,_gimLbas@BATTLE/BATTLE.PRG,_gimLbas,BATTLE/BATTLE.PRG,extern,c-defined,,256,int[64],,0,1,,BATTLE/BATTLE.PRG/5BF94.c BATTLE/BATTLE.PRG/gimLbas.c,1,Graphics,catalog
+G00618,initialUp@src/BATTLE/BATTLE.PRG/5BF94.c:func_800D197C,initialUp,BATTLE/BATTLE.PRG,local-static,c-defined,,16,const VECTOR,,0,1,,BATTLE/BATTLE.PRG/5BF94.c,1,Graphics,constexpr
+G01251,D_8010286C@src/MENU/MENU7.PRG/260.c:_packageGameSaveData,D_8010286C,MENU/MENU7.PRG,local-static,c-defined,,64,const u_short[32],,0,1,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,constexpr
+G01274,_dirEntBuf@src/MENU/MENU7.PRG/260.c,_dirEntBuf,MENU/MENU7.PRG,file-static,c-defined,,4,struct DIRENTRY *,,1,0,,MENU/MENU7.PRG/260.c,2,Save.MemoryCard,state
+G01275,_eventSpecs@src/MENU/MENU7.PRG/260.c:_initMemcard,_eventSpecs,MENU/MENU7.PRG,local-static,c-defined,,8,u_short[4],,0,1,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01278,_filePreviousProgressCounter@src/MENU/MENU7.PRG/260.c,_filePreviousProgressCounter,MENU/MENU7.PRG,file-static,c-defined,,2,u_short,,0,0,,MENU/MENU7.PRG/260.c,3,Save.MemoryCard,state
+G01280,_fileProgressPosition@src/MENU/MENU7.PRG/260.c,_fileProgressPosition,MENU/MENU7.PRG,file-static,c-defined,,2,u_short,,0,0,,MENU/MENU7.PRG/260.c,3,Save.MemoryCard,state
+G01281,_fileProgressTarget@src/MENU/MENU7.PRG/260.c,_fileProgressTarget,MENU/MENU7.PRG,file-static,c-defined,,2,u_short,,0,0,,MENU/MENU7.PRG/260.c,4,Save.MemoryCard,state
+G01282,_filename@src/MENU/MENU7.PRG/260.c:_memcardMakeFilename,_filename,MENU/MENU7.PRG,local-static,c-defined,,32,char[32],,0,1,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,catalog
+G01283,_filename@src/MENU/MENU7.PRG/260.c:_memcardMakeTempFilename,_filename,MENU/MENU7.PRG,local-static,c-defined,,32,char[32],,0,1,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,catalog
+G01284,_initMemcardCdQueueSlot@src/MENU/MENU7.PRG/260.c:_initMemcard,_initMemcardCdQueueSlot,MENU/MENU7.PRG,local-static,c-defined,,4,vs_main_CdQueueSlot *,T00691,1,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01285,_initMemcardState@src/MENU/MENU7.PRG/260.c:_initMemcard,_initMemcardState,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01287,_loadSaveDataErrorOffset@src/MENU/MENU7.PRG/260.c,_loadSaveDataErrorOffset,MENU/MENU7.PRG,file-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,3,Save.MemoryCard,state
+G01288,_mcData@src/MENU/MENU7.PRG/260.c,_mcData,MENU/MENU7.PRG,file-static,c-defined,,4,mcdata_t *,T00547,1,0,,MENU/MENU7.PRG/260.c,3,Save.MemoryCard,state
+G01289,_memcardEventDescriptors@src/MENU/MENU7.PRG/260.c,_memcardEventDescriptors,MENU/MENU7.PRG,file-static,c-defined,,32,long[8],,0,1,,MENU/MENU7.PRG/260.c,4,Save.MemoryCard,catalog
+G01290,_memcardFilenameTemplate@MENU/MENU7.PRG,_memcardFilenameTemplate,MENU/MENU7.PRG,extern,c-defined,,4,const char *,,1,1,,MENU/MENU7.PRG/260.c,3,Save.MemoryCard,constexpr
+G01291,_memcardFiles@src/MENU/MENU7.PRG/260.c,_memcardFiles,MENU/MENU7.PRG,file-static,c-defined,,60,struct DIRENTRY *[15],,1,1,,MENU/MENU7.PRG/260.c,3,Save.MemoryCard,catalog
+G01295,_opMcImg@src/MENU/MENU7.PRG/260.c:_loadIntroSaveFile,_opMcImg,MENU/MENU7.PRG,local-static,c-defined,,4,savedata_t *,T00598,1,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01296,_opmcimgSlot@src/MENU/MENU7.PRG/260.c:_loadIntroSaveFile,_opmcimgSlot,MENU/MENU7.PRG,local-static,c-defined,,4,vs_main_CdQueueSlot *,T00691,1,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01299,_saveFileInfo@src/MENU/MENU7.PRG/260.c,_saveFileInfo,MENU/MENU7.PRG,file-static,c-defined,,4,saveFileInfo_t *,T00595,1,0,,MENU/MENU7.PRG/260.c,11,Save.MemoryCard,state
+G01304,_spmcimg@src/MENU/MENU7.PRG/260.c,_spmcimg,MENU/MENU7.PRG,file-static,c-defined,,4,char *,,1,0,,MENU/MENU7.PRG/260.c,10,Save.MemoryCard,state
+G01322,errors@src/MENU/MENU7.PRG/260.c:_loadSaveData,errors,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01323,errors@src/MENU/MENU7.PRG/260.c:_saveFile,errors,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01324,eventType@src/MENU/MENU7.PRG/260.c:_memcardEventHandler,eventType,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01326,fd@src/MENU/MENU7.PRG/260.c:_loadSaveData,fd,MENU/MENU7.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01327,fd@src/MENU/MENU7.PRG/260.c:_saveFile,fd,MENU/MENU7.PRG,local-static,c-defined,,4,int,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01328,file@src/MENU/MENU7.PRG/260.c:_loadSaveData,file,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01329,file@src/MENU/MENU7.PRG/260.c:_saveFile,file,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01333,initTimeout@src/MENU/MENU7.PRG/260.c:_memcardEventHandler,initTimeout,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01335,isTempSave@src/MENU/MENU7.PRG/260.c:_loadSaveData,isTempSave,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01341,port@src/MENU/MENU7.PRG/260.c:_loadSaveData,port,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01342,port@src/MENU/MENU7.PRG/260.c:_memcardEventHandler,port,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01344,port@src/MENU/MENU7.PRG/260.c:_saveFile,port,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01350,renameErrors@src/MENU/MENU7.PRG/260.c:_saveFile,renameErrors,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01364,state@src/MENU/MENU7.PRG/260.c:_loadSaveData,state,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01365,state@src/MENU/MENU7.PRG/260.c:_memcardEventHandler,state,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01370,state@src/MENU/MENU7.PRG/260.c:_saveFile,state,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01377,timeout@src/MENU/MENU7.PRG/260.c:_memcardEventHandler,timeout,MENU/MENU7.PRG,local-static,c-defined,,1,char,,0,0,,MENU/MENU7.PRG/260.c,1,Save.MemoryCard,state
+G01489,percent@src/MENU/MENU9.PRG/238.c:_toVsStringPercent,percent,MENU/MENU9.PRG,local-static,c-defined,,4,percent_t,T00583,0,1,,MENU/MENU9.PRG/238.c,1,Core.String,state
+G01901,StCdIntrFlag@SLUS_010.40,StCdIntrFlag,SLUS_010.40,extern,bss,0x80039C14,4,int,,0,0,,TITLE/TITLE.PRG/22C.c,1,Video.Intro,state
+G01902,_trig_table@SLUS_010.40,_trig_table,SLUS_010.40,extern,rodata,0x80040210,3348,const u_short[],,0,0,,SLUS_010.40/31724.h,1,Core.Math,constexpr
+G01919,randArr@SLUS_010.40,randArr,SLUS_010.40,extern,bss,0x8004FF88,388,int[97],,0,0,,SLUS_010.40/main.c,2,Core,state
+G01920,randIndex@SLUS_010.40,randIndex,SLUS_010.40,extern,bss,0x8005010C,4,int,,0,0,,SLUS_010.40/main.c,2,Core,state
+G01921,_cdReadBuffer@SLUS_010.40,_cdReadBuffer,SLUS_010.40,extern,bss,0x80050110,4,vs_main_HeapHeader *,T00692,1,0,,SLUS_010.40/main.c,3,Content,state
+G01922,_padAct@SLUS_010.40,_padAct,SLUS_010.40,extern,bss,0x80050118,112,padAct_t[2],T00581,1,0,,SLUS_010.40/main.c,7,Input,state
+G01923,_portInfo@SLUS_010.40,_portInfo,SLUS_010.40,extern,bss,0x80050190,22,portInfo_t[2],T00584,0,0,,SLUS_010.40/main.h,9,Input,state
+G01924,heapA@SLUS_010.40,heapA,SLUS_010.40,extern,bss,0x800501A8,16,vs_main_HeapHeader,T00692,1,0,,SLUS_010.40/main.c,5,Core.Memory,state
+G01925,heapB@SLUS_010.40,heapB,SLUS_010.40,extern,bss,0x800501B8,16,vs_main_HeapHeader,T00692,1,0,,SLUS_010.40/main.c,1,Core.Memory,state
+G01926,cdReadLoc@SLUS_010.40,cdReadLoc,SLUS_010.40,extern,bss,0x800501C8,4,DslLOC,,0,0,,SLUS_010.40/main.c,1,Content,state
+G01927,D_800501CC@SLUS_010.40,D_800501CC,SLUS_010.40,extern,bss,0x800501CC,4,int,,0,0,,SLUS_010.40/main.c,1,Content,state
+G01928,D_800501D0@SLUS_010.40,D_800501D0,SLUS_010.40,extern,bss,0x800501D0,4,int,,0,0,,SLUS_010.40/main.c,1,Content,state
+G01929,D_800501D4@SLUS_010.40,D_800501D4,SLUS_010.40,extern,bss,0x800501D4,4,int,,0,0,,SLUS_010.40/main.c,1,Content,state

@@ -1,0 +1,60 @@
+id,key,kind,name,aliases,size,fields,generic_fields,layouts,files,used_by_funcs,used_by_globals,proposed_system
+T00748,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5),,4,2,0,1,BATTLE/BATTLE.PRG/146C.h,4,0,Game.Field
+T00753,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),,4,3,0,1,BATTLE/BATTLE.PRG/2842C.c,10,0,Game.Field
+T00129,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),,4,4,0,1,BATTLE/BATTLE.PRG/3A1A0.c,1,0,Game.Field
+T00199,struct:D_1F8003BC_t,struct,D_1F8003BC_t,D_1F8003BC_t,68,10,6,1,BATTLE/BATTLE.PRG/3A1A0.h,8,0,Game.Field
+T00211,struct:D_800E8594_t,struct,D_800E8594_t,D_800E8594_t,40,10,10,1,BATTLE/BATTLE.PRG/146C.c,0,1,Game.Field
+T00212,struct:D_800E8FB4_t,struct,D_800E8FB4_t,D_800E8FB4_t,16,4,4,1,BATTLE/BATTLE.PRG/30DB0.c,1,0,Game.Field
+T00221,struct:D_800F18C8_t,struct,D_800F18C8_t,D_800F18C8_t,24,9,9,1,BATTLE/BATTLE.PRG/146C.c,0,1,Game.Field
+T00223,struct:D_800F18EC_t,struct,D_800F18EC_t,D_800F18EC_t,8,3,2,1,BATTLE/BATTLE.PRG/5BF94.h,6,2,Game.Field
+T00224,struct:D_800F1910_t,struct,D_800F1910_t,D_800F1910_t,20,2,2,1,BATTLE/BATTLE.PRG/146C.c,0,1,Game.Field
+T00231,struct:D_800F1BB0_t,struct,D_800F1BB0_t,D_800F1BB0_t,8,6,6,1,BATTLE/BATTLE.PRG/146C.c,0,1,Game.Field
+T00232,struct:D_800F1D08_t,struct,D_800F1D08_t,D_800F1D08_t,4,2,0,1,BATTLE/BATTLE.PRG/146C.c,2,1,Game.Field
+T00233,struct:D_800F1D28_t,struct,D_800F1D28_t,D_800F1D28_t,8,2,2,1,BATTLE/BATTLE.PRG/146C.c,3,1,Game.Field
+T00235,struct:D_800F1DD8_t,struct,D_800F1DD8_t,D_800F1DD8_t,12,6,6,1,BATTLE/BATTLE.PRG/2842C.c,11,1,Game.Field
+T00236,struct:D_800F1DD8_t2,struct,D_800F1DD8_t2,D_800F1DD8_t2,36,12,12,1,BATTLE/BATTLE.PRG/2842C.c,9,0,Game.Field
+T00320,struct:_mpdEnemy,struct,_mpdEnemy,_mpdEnemy,40,27,4,1,BATTLE/BATTLE.PRG/146C.h,4,0,Game.Field
+T00323,struct:_mpdHeader,struct,_mpdHeader,_mpdHeader,48,12,0,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Field
+T00326,struct:_mpdRoomCollisionMapSection,struct,_mpdRoomCollisionMapSection,_mpdRoomCollisionMapSection,8,4,2,1,BATTLE/BATTLE.PRG/146C.h,9,0,Game.Field
+T00328,struct:_mpdRoomDoorSection_t,struct,_mpdRoomDoorSection_t,_mpdRoomDoorSection_t,12,14,12,1,SLUS_010.40/main.h,10,3,Game.Field
+T00329,struct:_mpdRoomSection,struct,_mpdRoomSection,_mpdRoomSection,196,28,3,1,BATTLE/BATTLE.PRG/146C.h,1,1,Game.Field
+T00330,struct:_mpdRoomSection11,struct,_mpdRoomSection11,_mpdRoomSection11,4,8,8,1,BATTLE/BATTLE.PRG/146C.h,1,0,Game.Field
+T00331,struct:_mpdRoomSection12,struct,_mpdRoomSection12,_mpdRoomSection12,184,22,22,1,BATTLE/BATTLE.PRG/146C.h,12,0,Game.Field
+T00333,struct:_mpdRoomSection3,struct,_mpdRoomSection3,_mpdRoomSection3,4,14,14,1,BATTLE/BATTLE.PRG/146C.h,14,0,Game.Field
+T00334,struct:_mpdRoomSection9,struct,_mpdRoomSection9,_mpdRoomSection9,12,7,7,1,BATTLE/BATTLE.PRG/146C.h,9,0,Game.Field
+T00335,struct:_mpdRoomSectionA,struct,_mpdRoomSectionA,_mpdRoomSectionA,20,6,5,1,BATTLE/BATTLE.PRG/146C.h,25,0,Game.Field
+T00336,struct:_mpdRoomSectionB,struct,_mpdRoomSectionB,_mpdRoomSectionB,88,24,21,1,BATTLE/BATTLE.PRG/146C.h,14,0,Game.Field
+T00337,struct:_mpdRoomSectionE,struct,_mpdRoomSectionE,_mpdRoomSectionE,20,6,6,1,BATTLE/BATTLE.PRG/146C.h,1,0,Game.Field
+T00338,struct:_sphericalCamera,struct,_sphericalCamera,_sphericalCamera,44,5,1,1,BATTLE/BATTLE.PRG/146C.h,7,1,Game.Field
+T00339,struct:_sphericalValues,struct,_sphericalValues,_sphericalValues,16,4,0,1,BATTLE/BATTLE.PRG/146C.h,3,0,Game.Field
+T00345,struct:_zndEnemy,struct,_zndEnemy,_zndEnemy,1124,1,1,1,BATTLE/BATTLE.PRG/146C.h,4,0,Game.Field
+T00346,struct:_zndHeader,struct,_zndHeader,_zndHeader,28,7,0,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Field
+T00347,struct:_zoneContextBounds,struct,_zoneContextBounds,_zoneContextBounds,8,4,0,1,BATTLE/BATTLE.PRG/146C.h,2,0,Game.Field
+T00348,struct:_zoneContext_t,struct,_zoneContext_t,_zoneContext_t,108,27,12,1,BATTLE/BATTLE.PRG/146C.h,0,1,Game.Field
+T00435,struct:func_8006EBF8_t,struct,func_8006EBF8_t,func_8006EBF8_t,16,2,2,1,BATTLE/BATTLE.PRG/func_8006EBF8_t.h,40,0,Game.Field
+T00437,struct:func_8006EBF8_t3,struct,func_8006EBF8_t3,func_8006EBF8_t3,12,2,2,1,BATTLE/BATTLE.PRG/func_8006EBF8_t.h,5,0,Game.Field
+T00439,struct:func_80077DF0_t,struct,func_80077DF0_t,func_80077DF0_t,32,2,0,1,BATTLE/BATTLE.PRG/146C.c,2,0,Game.Field
+T00444,struct:func_80089888_t,struct,func_80089888_t,func_80089888_t,4,4,4,1,BATTLE/BATTLE.PRG/3A1A0.h,3,0,Game.Field
+T00445,struct:func_8008D2C0_t#7be962eb,struct,func_8008D2C0_t,func_8008D2C0_t,8,4,4,2,BATTLE/BATTLE.PRG/146C.c BATTLE/BATTLE.PRG/6F014.c BATTLE/BATTLE.PRG/6FA60.c BATTLE/BATTLE.PRG/6FC00.c BATTLE/BATTLE.PRG/71618.c BATTLE/BATTLE.PRG/73700.c,10,0,Game.Field
+T00446,struct:func_8008D2C0_t#ed08bed4,struct,func_8008D2C0_t,func_8008D2C0_t,8,4,4,2,BATTLE/BATTLE.PRG/3A1A0.c BATTLE/BATTLE.PRG/40564.c,10,0,Game.Field
+T00447,struct:func_80091C6C_t,struct,func_80091C6C_t,func_80091C6C_t,24,13,1,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Field
+T00448,struct:func_80091C6C_t2,struct,func_80091C6C_t2,func_80091C6C_t2,40,15,6,1,BATTLE/BATTLE.PRG/2842C.c,2,0,Game.Field
+T00449,struct:func_80091E10_t,struct,func_80091E10_t,func_80091E10_t,28,17,2,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Field
+T00450,struct:func_80091FE8_t,struct,func_80091FE8_t,func_80091FE8_t,20,8,1,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Field
+T00451,struct:func_80092548_t,struct,func_80092548_t,func_80092548_t,4,4,2,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Field
+T00452,struct:func_80092548_t2,struct,func_80092548_t2,func_80092548_t2,4,2,0,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Field
+T00453,struct:func_80092B04_t,struct,func_80092B04_t,func_80092B04_t,52,3,3,1,BATTLE/BATTLE.PRG/2842C.c,2,0,Game.Field
+T00454,struct:func_80092B04_t2,struct,func_80092B04_t2,func_80092B04_t2,4,2,2,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Field
+T00455,struct:func_80092F74_t,struct,func_80092F74_t,func_80092F74_t,52,8,8,1,BATTLE/BATTLE.PRG/2842C.c,17,0,Game.Field
+T00456,struct:func_80092F74_t2,struct,func_80092F74_t2,func_80092F74_t2,28,4,4,1,BATTLE/BATTLE.PRG/2842C.c,13,0,Game.Field
+T00457,struct:func_80093914_t,struct,func_80093914_t,func_80093914_t,32,12,12,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Field
+T00458,struct:func_80093914_t2,struct,func_80093914_t2,func_80093914_t2,40,16,16,1,BATTLE/BATTLE.PRG/2842C.c,1,0,Game.Field
+T00461,struct:func_800A0024_t,struct,func_800A0024_t,func_800A0024_t,12,6,6,1,BATTLE/BATTLE.PRG/30DB0.c,1,0,Game.Field
+T00466,struct:func_800A6798_t,struct,func_800A6798_t,func_800A6798_t,8,1,0,1,BATTLE/BATTLE.PRG/3A1A0.c,3,0,Game.Field
+T00562,struct:mpdObjectSpawn,struct,mpdObjectSpawn,mpdObjectSpawn,40,15,5,1,BATTLE/BATTLE.PRG/146C.c,1,0,Game.Field
+T00566,struct:objectMotionContext,struct,objectMotionContext,objectMotionContext,372,29,0,1,BATTLE/BATTLE.PRG/44F14.c,1,0,Game.Field
+T00637,struct:vs_battle_backgroundLayout,struct,vs_battle_backgroundLayout,vs_battle_backgroundLayout,12,4,1,1,BATTLE/BATTLE.PRG/2842C.h,5,1,Game.Field
+T00638,struct:vs_battle_backgroundTile,struct,vs_battle_backgroundTile,vs_battle_backgroundTile,24,2,0,1,BATTLE/BATTLE.PRG/2842C.h,1,0,Game.Field
+T00639,struct:vs_battle_cameraTransition_t,struct,vs_battle_cameraTransition_t,vs_battle_cameraTransition_t,248,18,0,1,BATTLE/BATTLE.PRG/146C.h,6,1,Game.Field
+T00655,struct:vs_battle_manualDisplayState_t,struct,vs_battle_manualDisplayState_t,vs_battle_manualDisplayState_t,36,6,4,1,BATTLE/BATTLE.PRG/146C.h,0,1,Game.Field
+T00705,struct:vs_main_mapStatus_t,struct,vs_main_mapStatus_t,vs_main_mapStatus_t,72,2,0,1,SLUS_010.40/main.h,0,1,Game.Field

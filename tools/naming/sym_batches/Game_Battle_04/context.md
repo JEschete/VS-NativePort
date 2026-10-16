@@ -1,0 +1,125 @@
+# Game_Battle_04: who uses what
+
+Function names are `final name (decomp file:line original name)`.
+
+## Globals
+
+- **G00013** `D_80069BBC` `u_int[]` (extern, rodata): Battle::Ai::AdvancePlanningSimulation (BATTLE/BATTLE.PRG/74088.c:1167 func_800DE030)
+- **G00014** `D_80069C18` `unsigned char[]` (extern, rodata): Battle::Ai::ApplyActorAiSettings (BATTLE/BATTLE.PRG/7CD68.c:689 func_800E5A9C)
+- **G00015** `D_80069C1C` `unsigned int[]` (extern, rodata): Battle::Ai::ApplyActorAiSettings (BATTLE/BATTLE.PRG/7CD68.c:689 func_800E5A9C)
+- **G00016** `D_80069C3C` `actorSettingsEntry[]` (extern, rodata): Battle::Ai::ApplyActorAiSettings (BATTLE/BATTLE.PRG/7CD68.c:689 func_800E5A9C)
+- **G00017** `D_80094FAC` `int[]` (extern, unit-data): *no function references*
+- **G00018** `D_80094FFC` `int` (extern, unit-data): *no function references*
+- **G00019** `D_800E8184` `char[]` (extern, data): Battle::InitializeActionTargeting (BATTLE/BATTLE.PRG/146C.c:4416 func_80072BA8); Battle::UpdateFinalTargetSelection (BATTLE/BATTLE.PRG/146C.c:6927 func_80078364)
+- **G00020** `D_800E8194` `u_char[]` (extern, data): Battle::InitializeActionTargeting (BATTLE/BATTLE.PRG/146C.c:4416 func_80072BA8)
+- **G00021** `D_800E81B4` `u_char[]` (extern, data): Battle::CollectSourceAreaActionTargets (BATTLE/BATTLE.PRG/146C.c:4086 func_800719FC); Battle::CollectDirectActionTargets (BATTLE/BATTLE.PRG/146C.c:4176 func_80071F68); Battle::CollectGroundAreaActionTargets (BATTLE/BATTLE.PRG/146C.c:4329 func_80072734)
+- **G00022** `D_800E81C4` `u_char[]` (extern, data): Battle::FilterAreaActionTargets (BATTLE/BATTLE.PRG/146C.c:3588 func_8007053C); Battle::CollectSourceAreaActionTargets (BATTLE/BATTLE.PRG/146C.c:4086 func_800719FC); Battle::CollectDirectActionTargets (BATTLE/BATTLE.PRG/146C.c:4176 func_80071F68); Battle::CollectGroundAreaActionTargets (BATTLE/BATTLE.PRG/146C.c:4329 func_80072734); Battle::InitializeActionTargeting (BATTLE/BATTLE.PRG/146C.c:4416 func_80072BA8)
+- **G00023** `D_800E81D4` `u_char[]` (extern, data): Battle::CollectSourceAreaActionTargets (BATTLE/BATTLE.PRG/146C.c:4086 func_800719FC); Battle::CollectDirectActionTargets (BATTLE/BATTLE.PRG/146C.c:4176 func_80071F68); Battle::CollectGroundAreaActionTargets (BATTLE/BATTLE.PRG/146C.c:4329 func_80072734)
+- **G00025** `D_800E8200` `u_char[]` (extern, data): Battle::DeriveLimbInjuryStatuses (BATTLE/BATTLE.PRG/146C.c:12930 func_80085008)
+- **G00026** `D_800E8204` `int[]` (extern, data): Battle::UpdateActorStatusTimers (BATTLE/BATTLE.PRG/146C.c:14376 func_80087EF4)
+- **G00028** `_hitFunctions` `int (*[])(vs_action_t *, _hitEntity_t *, _hitEntity_t *, int, int)` (extern, data): Battle::RollActionHit (BATTLE/BATTLE.PRG/146C.c:10075 _doesAttackHit)
+- **G00029** `_attackPrerequisiteFunctions` `int (*[])(vs_action_t *, u_char *)` (extern, data): Battle::CheckActionHitPrerequisite (BATTLE/BATTLE.PRG/146C.c:10523 _canPerformAttack)
+- **G00030** `D_800E82F4` `u_short[]` (extern, data): Battle::CalculatePhysicalHitDamage (BATTLE/BATTLE.PRG/146C.c:11271 _getPhysicalAttackDamage)
+- **G00031** `_statCalculators` `short (*[])(vs_action_t *, _hitEntity_t *, _hitEntity_t *, int, int)` (extern, data): Battle::CalculateActionStatChange (BATTLE/BATTLE.PRG/146C.c:12248 _calculateStatChange)
+- **G00032** `_actionEffectMediators` `void (*[])(vs_action_t *, _hitEntity_t *, _hitEntity_t *, int, int)` (extern, data): Battle::ApplyActionHitEffect (BATTLE/BATTLE.PRG/146C.c:13012 func_80085390)
+- **G00033** `D_800E8490` `int` (extern, data): Battle::UpdateActorVitals (BATTLE/BATTLE.PRG/146C.c:14560 func_80088554)
+- **G00034** `D_800E8494` `int` (extern, data): Battle::UpdateActorVitals (BATTLE/BATTLE.PRG/146C.c:14560 func_80088554)
+- **G00035** `D_800E8498` `int` (extern, data): Battle::UpdateTargetingRiskPenalty (BATTLE/BATTLE.PRG/146C.c:14745 func_80088B8C); Battle::ResetTargetingRiskPenaltyTimer (BATTLE/BATTLE.PRG/146C.c:14764 func_80088CA0)
+- **G00046** `D_800E861C` `int[]` (extern, data): Battle::DrawValueLabelCaption (BATTLE/BATTLE.PRG/2842C.c:2138 func_80094E18)
+- **G00047** `D_800E8634` `short[]` (extern, data): Battle::DrawLockedFloatingLabel (BATTLE/BATTLE.PRG/2842C.c:2167 func_8009506C)
+- **G00048** `D_800E8640` `RECT[]` (extern, data): Battle::DrawLockedFloatingLabel (BATTLE/BATTLE.PRG/2842C.c:2167 func_8009506C)
+- **G00058** `D_800E8E80` `u_char[]` (extern, data): Battle::PlayChainAbilityAnimation (BATTLE/BATTLE.PRG/30DB0.c:2956 func_8009EC9C)
+- **G00107** `D_800E9298` `u_char[]` (extern, data): func_800AD714 (BATTLE/BATTLE.PRG/44F14.c:168 func_800AD714)
+- **G00108** `D_800E92DC` `u_char[]` (extern, data): func_800AD714 (BATTLE/BATTLE.PRG/44F14.c:168 func_800AD714)
+- **G00114** `D_800E9A28` `u_short[][4]` (extern, data): func_800AD714 (BATTLE/BATTLE.PRG/44F14.c:168 func_800AD714)
+- **G00134** `D_800EA234` `short[]` (extern, data): Battle::BuildSphereWireframe (BATTLE/BATTLE.PRG/58578.c:887 func_800C253C)
+- **G00135** `D_800EA2C4` `short[]` (extern, data): Battle::BuildSphereWireframe (BATTLE/BATTLE.PRG/58578.c:887 func_800C253C)
+- **G00136** `D_800EA438` `u_char[]` (extern, data): Battle::BuildSphereWireframe (BATTLE/BATTLE.PRG/58578.c:887 func_800C253C)
+- **G00137** `D_800EA46C` `u_short[]` (extern, data): Battle::BuildSphereWireframe (BATTLE/BATTLE.PRG/58578.c:887 func_800C253C)
+- **G00139** `D_800EA670` `int[]` (extern, data): Battle::DrawSpherePositionCursor (BATTLE/BATTLE.PRG/58578.c:984 func_800C28AC)
+- **G00140** `D_800EA684` `int[]` (extern, data): Battle::DrawSpherePositionCursor (BATTLE/BATTLE.PRG/58578.c:984 func_800C28AC)
+- **G00141** `D_800EA698` `int[]` (extern, data): Battle::DrawSpherePositionCursor (BATTLE/BATTLE.PRG/58578.c:984 func_800C28AC)
+- **G00142** `D_800EA6AC` `u_char` (extern, data): Battle::DrawSpherePositionCursor (BATTLE/BATTLE.PRG/58578.c:984 func_800C28AC)
+- **G00143** `vs_battle_statusStrings` `u_short[]` (extern, rodata): Battle::FirstTargetStatusText (BATTLE/BATTLE.PRG/5BF94.c:1045 _getStatusString); Battle::UpdateTargetSelectionMenu (BATTLE/BATTLE.PRG/5BF94.c:1058 func_800C58F8); Menu::Status::ShowSelectedLimbCondition (MENU/MENU4.PRG/120.c:2228 _renderSelectedLimbCondition)
+- **G00144** `D_800EA984` `char[]` (extern, rodata): Battle::UpdateTargetSelectionMenu (BATTLE/BATTLE.PRG/5BF94.c:1058 func_800C58F8)
+- **G00145** `D_800EA9B6` `char[]` (extern, rodata): Battle::UpdateTargetSelectionMenu (BATTLE/BATTLE.PRG/5BF94.c:1058 func_800C58F8)
+- **G00146** `D_800EAA54` `char[]` (extern, rodata): Battle::UpdateTargetSelectionMenu (BATTLE/BATTLE.PRG/5BF94.c:1058 func_800C58F8)
+- **G00147** `D_800EABAA` `u_char` (extern, rodata): Battle::UpdateTargetSelectionMenu (BATTLE/BATTLE.PRG/5BF94.c:1058 func_800C58F8)
+- **G00154** `D_800EB9AC` `u_char` (extern, data): Battle::SetSphereVolumes (BATTLE/BATTLE.PRG/573B8.c:444 func_800C05EC); Battle::UpdateTargetSelectionMenu (BATTLE/BATTLE.PRG/5BF94.c:1058 func_800C58F8); Menu::Framework::InitGameInterface (BATTLE/BATTLE.PRG/5BF94.c:3484 func_800CA9C0)
+- **G00157** `D_800EB9AF` `char` (extern, data): Battle::DrawBattleHud (BATTLE/BATTLE.PRG/5BF94.c:3307 func_800CA2DC); Menu::Framework::InitGameInterface (BATTLE/BATTLE.PRG/5BF94.c:3484 func_800CA9C0); Battle::SetHudHidden (BATTLE/BATTLE.PRG/5BF94.c:3867 func_800CB654); Menu::Loot::UpdateInventoryTransition (MENU/MENUB.PRG/260.c:61 _topLevelMenuTransition)
+- **G00160** `D_800EB9B8` `D_800EB9B8_t *` (extern, data): Battle::InitSphere (BATTLE/BATTLE.PRG/573B8.c:363 func_800C031C); Battle::FreeSphere (BATTLE/BATTLE.PRG/573B8.c:436 func_800C05B4); Battle::SetSphereVolumes (BATTLE/BATTLE.PRG/573B8.c:444 func_800C05EC); Battle::ClearPrimarySphereVolume (BATTLE/BATTLE.PRG/573B8.c:475 func_800C06E0); Battle::SetSecondarySphereVolume (BATTLE/BATTLE.PRG/573B8.c:482 func_800C0700); Battle::ClearSecondarySphereVolume (BATTLE/BATTLE.PRG/573B8.c:488 func_800C0738); Battle::AppendSphereArcVertices (BATTLE/BATTLE.PRG/573B8.c:495 func_800C0758); Battle::DrawSphere (BATTLE/BATTLE.PRG/58578.c:104 func_800C0D78); Battle::SetSphereTargets (BATTLE/BATTLE.PRG/58578.c:446 func_800C1664); Battle::ClearSphereTargets (BATTLE/BATTLE.PRG/58578.c:470 func_800C16DC); Battle::AreTargetLabelsSettled (BATTLE/BATTLE.PRG/58578.c:645 func_800C1D84); Battle::UpdateSphereTargetLabels (BATTLE/BATTLE.PRG/58578.c:750 func_800C20B4) … +15 more
+- **G00165** `D_800EB9CC` `char` (extern, data): Battle::DrawBattleHud (BATTLE/BATTLE.PRG/5BF94.c:3307 func_800CA2DC); Menu::Framework::InitGameInterface (BATTLE/BATTLE.PRG/5BF94.c:3484 func_800CA9C0); Battle::SetHudBattleMode (BATTLE/BATTLE.PRG/5BF94.c:3869 func_800CB660)
+- **G00166** `D_800EB9CD` `char` (extern, data): Battle::DrawBattleHud (BATTLE/BATTLE.PRG/5BF94.c:3307 func_800CA2DC); Menu::Framework::InitGameInterface (BATTLE/BATTLE.PRG/5BF94.c:3484 func_800CA9C0)
+- **G00168** `D_800EB9D0` `union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.c:451:8)` (extern, data): Battle::DrawBattleHud (BATTLE/BATTLE.PRG/5BF94.c:3307 func_800CA2DC); Menu::Framework::InitGameInterface (BATTLE/BATTLE.PRG/5BF94.c:3484 func_800CA9C0)
+- **G00176** `D_800EBBDC` `int[]` (extern, data): Battle::DrawHudStatGauge (BATTLE/BATTLE.PRG/5BF94.c:3088 _renderStatBar)
+- **G00177** `D_800EBBEC` `int[]` (extern, data): Battle::DrawHudStatGauge (BATTLE/BATTLE.PRG/5BF94.c:3088 _renderStatBar); Menu::Status::DrawVitals (MENU/MENU4.PRG/120.c:741 _renderBasicStats)
+- **G00178** `D_800EBBFC` `char[]` (extern, data): Battle::DrawHudStatGauge (BATTLE/BATTLE.PRG/5BF94.c:3088 _renderStatBar); Menu::Status::DrawVitals (MENU/MENU4.PRG/120.c:741 _renderBasicStats)
+- **G00179** `D_800EBC00` `char[]` (extern, data): Battle::DrawHudStatGauge (BATTLE/BATTLE.PRG/5BF94.c:3088 _renderStatBar); Menu::Status::DrawVitals (MENU/MENU4.PRG/120.c:741 _renderBasicStats)
+- **G00181** `vs_battle_statusIconTexOffsets` `u_short[]` (extern, data): Battle::DrawSlidingStatusIcon (BATTLE/BATTLE.PRG/5BF94.c:3112 func_800C9CB4); Menu::Status::DrawStatusEffectIcons (MENU/MENU4.PRG/120.c:913 _renderStatusIcons)
+- **G00182** `D_800EBC54` `u_int[]` (extern, data): Battle::DrawBattleHud (BATTLE/BATTLE.PRG/5BF94.c:3307 func_800CA2DC); Menu::Status::DrawLimbConditionIndicator (MENU/MENU4.PRG/120.c:847 _drawStatusIndicator)
+- **G00183** `D_800EBC68` `u_short[]` (extern, data): Battle::StatusIconFlags (BATTLE/BATTLE.PRG/5BF94.c:3158 vs_battle_getStatusFlags)
+- **G00184** `D_800EBC78` `char` (extern, data): Battle::ShowShortcutHud (BATTLE/BATTLE.PRG/5BF94.c:3239 func_800C9F88); Battle::DrawShortcutHud (BATTLE/BATTLE.PRG/5BF94.c:3249 func_800C9FE8)
+- **G00186** `D_800EBC88` `int[]` (extern, data): Battle::DrawShortcutHud (BATTLE/BATTLE.PRG/5BF94.c:3249 func_800C9FE8)
+- **G00187** `D_800EBC98` `u_char[]` (extern, data): Battle::DrawShortcutHud (BATTLE/BATTLE.PRG/5BF94.c:3249 func_800C9FE8)
+- **G00188** `D_800EBCA0` `u_char[]` (extern, data): Battle::DrawShortcutHud (BATTLE/BATTLE.PRG/5BF94.c:3249 func_800C9FE8)
+
+## Types
+
+- **T00587** `struct:radialMotion`: Battle::Ai::UpdateBossRadialRetreat (BATTLE/BATTLE.PRG/7EE98.c:506 func_800E7698)
+- **T00588** `struct:radialMotionActor`: Battle::Ai::UpdateBossRadialRetreat (BATTLE/BATTLE.PRG/7EE98.c:506 func_800E7698)
+- **T00589** `struct:radialMotionContext`: Battle::Ai::UpdateBossRadialRetreat (BATTLE/BATTLE.PRG/7EE98.c:506 func_800E7698); Battle::Ai::UpdateBossOrbitTracking (BATTLE/BATTLE.PRG/7EE98.c:599 func_800E7960)
+- **T00590** `struct:radialMotionState`: Battle::Ai::UpdateBossRadialRetreat (BATTLE/BATTLE.PRG/7EE98.c:506 func_800E7698); Battle::Ai::UpdateOrbitingBossBehavior (BATTLE/BATTLE.PRG/7EE98.c:753 func_800E7F8C)
+- **T00591** `struct:routeEdgeActor`: Battle::Ai::ResolveNavigationAreaRoute (BATTLE/BATTLE.PRG/771A8.c:587 func_800DFBCC)
+- **T00592** `struct:routeEdgeGlobals`: Battle::Ai::ResolveNavigationAreaRoute (BATTLE/BATTLE.PRG/771A8.c:587 func_800DFBCC)
+- **T00745** `typedef:routeEdgePair`: Battle::Ai::ResolveNavigationAreaRoute (BATTLE/BATTLE.PRG/771A8.c:587 func_800DFBCC); Battle::Ai::RouteEndpointValue (BATTLE/BATTLE.PRG/771A8.c:574 routeHalf); Battle::Ai::RouteEndpointPair (BATTLE/BATTLE.PRG/771A8.c:572 routeWord)
+- **T00593** `struct:routeEdgeState`: Battle::Ai::ResolveNavigationAreaRoute (BATTLE/BATTLE.PRG/771A8.c:587 func_800DFBCC); Battle::Ai::UpdateNavigationAreaMovement (BATTLE/BATTLE.PRG/771A8.c:1540 func_800E19FC); Battle::Ai::SetNavigationAreaFromTile (BATTLE/BATTLE.PRG/771A8.c:581 routeSetArea)
+- **T00604** `struct:soundEventTargets`: *no function references*
+- **T00606** `struct:statusEffectTable`: *no function references*
+- **T00607** `struct:statusEffectTick`: *no function references*
+- **T00811** `union:stuckMovementPosition`: *no function references*
+- **T00608** `struct:stuckMovementState`: Battle::Ai::TryRecoverBlockedMovement (BATTLE/BATTLE.PRG/71618.c:1212 func_800DB0BC)
+- **T00610** `struct:targetMovementActor`: Battle::Ai::UpdateTargetApproachMovement (BATTLE/BATTLE.PRG/771A8.c:1973 func_800E24EC)
+- **T00611** `struct:targetMovementFlags`: Battle::Ai::UpdateTargetApproachMovement (BATTLE/BATTLE.PRG/771A8.c:1973 func_800E24EC)
+- **T00612** `struct:targetMovementModel`: Battle::Ai::UpdateTargetApproachMovement (BATTLE/BATTLE.PRG/771A8.c:1973 func_800E24EC)
+- **T00812** `union:targetMovementPoint`: *no function references*
+- **T00613** `struct:targetMovementState`: Battle::Ai::UpdateTargetApproachMovement (BATTLE/BATTLE.PRG/771A8.c:1973 func_800E24EC)
+- **T00614** `struct:terrainMovementActor`: Battle::Ai::MoveWithHeightFilteredDirections (BATTLE/BATTLE.PRG/771A8.c:1517 func_800E1908)
+- **T00813** `union:terrainMovementPoint`: *no function references*
+- **T00615** `struct:terrainMovementState`: Battle::Ai::MoveWithHeightFilteredDirections (BATTLE/BATTLE.PRG/771A8.c:1517 func_800E1908); Battle::Ai::UpdateNavigationAreaMovement (BATTLE/BATTLE.PRG/771A8.c:1540 func_800E19FC)
+- **T00619** `struct:textOffset`: *no function references*
+- **T00621** `struct:trackingMotion`: Battle::Ai::UpdateBossOrbitTracking (BATTLE/BATTLE.PRG/7EE98.c:599 func_800E7960)
+- **T00622** `struct:trackingMotionActor`: Battle::Ai::UpdateBossOrbitTracking (BATTLE/BATTLE.PRG/7EE98.c:599 func_800E7960)
+- **T00623** `struct:trackingMotionState`: Battle::Ai::UpdateBossOrbitTracking (BATTLE/BATTLE.PRG/7EE98.c:599 func_800E7960); Battle::Ai::UpdateOrbitingBossBehavior (BATTLE/BATTLE.PRG/7EE98.c:753 func_800E7F8C)
+- **T00624** `struct:trackingMotionStats`: Battle::Ai::UpdateBossOrbitTracking (BATTLE/BATTLE.PRG/7EE98.c:599 func_800E7960)
+- **T00628** `struct:vs_actionFlags_t`: Battle::Ai::EvaluateActionCandidate (BATTLE/BATTLE.PRG/74088.c:620 func_800DCC94)
+- **T00629** `struct:vs_action_t`: Items::ConsumeHitEquipmentDp (BATTLE/BATTLE.PRG/146C.c:10689 _adjustDpPp); Battle::CalculateActionStatChange (BATTLE/BATTLE.PRG/146C.c:12248 _calculateStatChange); Battle::CheckActionHitPrerequisite (BATTLE/BATTLE.PRG/146C.c:10523 _canPerformAttack); Field::CalculateTrapPanelDamage (BATTLE/BATTLE.PRG/146C.c:11730 _damageFromTrapPanel); Battle::QueueRandomAgilityDecrease (BATTLE/BATTLE.PRG/146C.c:12780 _decreaseAglityRand); Battle::QueueRandomIntelligenceDecrease (BATTLE/BATTLE.PRG/146C.c:12771 _decreaseIntelligenceRand); Battle::QueueRandomStrengthDecrease (BATTLE/BATTLE.PRG/146C.c:12762 _decreaseStrengthRand); Battle::RollActionHit (BATTLE/BATTLE.PRG/146C.c:10075 _doesAttackHit); Battle::ScaleTargetCurrentHp (BATTLE/BATTLE.PRG/146C.c:11669 _factorCurrentHp); Battle::ScaleIncomingDamage (BATTLE/BATTLE.PRG/146C.c:12208 _factorDamageReceived); Battle::ScaleLastActionStatValue (BATTLE/BATTLE.PRG/146C.c:12228 _factorLastValue); Battle::ScaleIncomingSpellDamage (BATTLE/BATTLE.PRG/146C.c:11686 _factorMagicDamageReceived) … +204 more
+- **T00630** `struct:vs_battle_actor`: Items::ConsumeHitEquipmentDp (BATTLE/BATTLE.PRG/146C.c:10689 _adjustDpPp); Battle::ApplyActorActionResult (BATTLE/BATTLE.PRG/146C.c:14018 _applyBattleAbilityEffect); Battle::CalculateActionStatChange (BATTLE/BATTLE.PRG/146C.c:12248 _calculateStatChange); Field::CalculateTrapPanelDamage (BATTLE/BATTLE.PRG/146C.c:11730 _damageFromTrapPanel); Battle::RollActionHit (BATTLE/BATTLE.PRG/146C.c:10075 _doesAttackHit); Items::QueueEnemyLoot (BATTLE/BATTLE.PRG/146C.c:1720 _dropLoot); Battle::ResolveEnemyDefeat (BATTLE/BATTLE.PRG/146C.c:1824 _enemyDefeated); Battle::ScaleTargetCurrentHp (BATTLE/BATTLE.PRG/146C.c:11669 _factorCurrentHp); Battle::AgilityHitChance (BATTLE/BATTLE.PRG/146C.c:9890 _getAgilityDifference); Battle::CostAdjustedAgilityHitChance (BATTLE/BATTLE.PRG/146C.c:9992 _getAgilityDifference2); Battle::AttackGemHitBonus (BATTLE/BATTLE.PRG/146C.c:9712 _getAttackGemBuff); Battle::ChainHitChance (BATTLE/BATTLE.PRG/146C.c:10057 _getChainEvasionModifier) … +198 more
+- **T00631** `struct:vs_battle_actor2`: Items::ConsumeHitEquipmentDp (BATTLE/BATTLE.PRG/146C.c:10689 _adjustDpPp); Battle::ApplyActorActionResult (BATTLE/BATTLE.PRG/146C.c:14018 _applyBattleAbilityEffect); Items::RebuildArmorClassAffinity (BATTLE/BATTLE.PRG/146C.c:9582 _calculateArmorClassAffinity); Items::RebuildShieldClassAffinity (BATTLE/BATTLE.PRG/146C.c:9600 _calculateShieldClassAffinity); Battle::CalculateActionStatChange (BATTLE/BATTLE.PRG/146C.c:12248 _calculateStatChange); Items::RebuildWeaponClassAffinity (BATTLE/BATTLE.PRG/146C.c:9622 _calculateWeaponClassAffinity); Field::CalculateTrapPanelDamage (BATTLE/BATTLE.PRG/146C.c:11730 _damageFromTrapPanel); Battle::RollActionHit (BATTLE/BATTLE.PRG/146C.c:10075 _doesAttackHit); Items::QueueEnemyLoot (BATTLE/BATTLE.PRG/146C.c:1720 _dropLoot); Battle::ScaleTargetCurrentHp (BATTLE/BATTLE.PRG/146C.c:11669 _factorCurrentHp); Battle::ActionCostAndAvailability (BATTLE/BATTLE.PRG/146C.c:13075 _getActionCost); Battle::AgilityHitChance (BATTLE/BATTLE.PRG/146C.c:9890 _getAgilityDifference) … +153 more
+- **T00632** `struct:vs_battle_actor2_flags`: *no function references*
+- **T00636** `struct:vs_battle_actor_unk8C0`: Battle::StartActionPresentation (BATTLE/BATTLE.PRG/146C.c:3906 func_8007138C); Actors::ExecuteQueuedActorCommands (BATTLE/BATTLE.PRG/146C.c:5629 func_80075554); Actors::ApplyActorInitialStats (BATTLE/BATTLE.PRG/146C.c:6128 func_80076784); Battle::Ai::SelectFallbackAction (BATTLE/BATTLE.PRG/74088.c:899 func_800DD604); Battle::Ai::EnumerateActionCandidates (BATTLE/BATTLE.PRG/74088.c:1007 func_800DD918); Battle::Ai::BuildActorActionPlan (BATTLE/BATTLE.PRG/74088.c:1319 func_800DE3E4)
+- **T00641** `struct:vs_battle_classAffinityBaseline`: *no function references*
+- **T00642** `struct:vs_battle_classAffinityCurrent`: *no function references*
+- **T00643** `struct:vs_battle_door`: *no function references*
+- **T00093** `enum:vs_battle_limbStatus`: *no function references*
+- **T00649** `struct:vs_battle_lootedBlade`: *no function references*
+- **T00650** `struct:vs_battle_lootedGem`: *no function references*
+- **T00651** `struct:vs_battle_lootedGrip`: *no function references*
+- **T00094** `enum:vs_battle_menuItemScrollable`: *no function references*
+- **T00095** `enum:vs_battle_menuItemState`: *no function references*
+- **T00096** `enum:vs_battle_menuStates`: *no function references*
+- **T00815** `union:vs_battle_movementPosition#37dd4acf`: Battle::Ai::FindAdjacentMovementDestination (BATTLE/BATTLE.PRG/6FC00.c:430 func_800D8400); Battle::Ai::UpdateGuardMovementBehavior (BATTLE/BATTLE.PRG/71618.c:854 func_800DA738); Battle::Ai::ResolveNavigationAreaRoute (BATTLE/BATTLE.PRG/771A8.c:587 func_800DFBCC); Battle::Ai::ProjectClearRadialDestination (BATTLE/BATTLE.PRG/771A8.c:1330 func_800E1388); Battle::Ai::MoveToRadialDestination (BATTLE/BATTLE.PRG/771A8.c:1389 func_800E153C); Battle::Ai::MoveAwayFromReference (BATTLE/BATTLE.PRG/771A8.c:1437 func_800E1764); Battle::Ai::ChooseNextWanderTile (BATTLE/BATTLE.PRG/771A8.c:1638 func_800E1BB8); Battle::Ai::UpdateWanderMovement (BATTLE/BATTLE.PRG/771A8.c:1717 func_800E1EAC); Battle::Ai::UpdateTargetApproachMovement (BATTLE/BATTLE.PRG/771A8.c:1973 func_800E24EC); Battle::Ai::UpdateMovementRecovery (BATTLE/BATTLE.PRG/771A8.c:2272 func_800E2CCC); Battle::Ai::FollowObstacleDetour (BATTLE/BATTLE.PRG/771A8.c:2388 func_800E2F5C); Battle::Ai::SetNavigationAreaFromTile (BATTLE/BATTLE.PRG/771A8.c:581 routeSetArea)
+- **T00816** `union:vs_battle_movementPosition#c0b6cb09`: *no function references*
+- **T00817** `union:vs_battle_movementPosition#96e817f5`: *no function references*
+- **T00818** `union:vs_battle_movementPosition#5d9b9dc2`: *no function references*
+- **T00661** `struct:vs_battle_prim`: *no function references*
+- **T00097** `enum:vs_battle_statuses`: *no function references*
+- **T00672** `struct:vs_battle_textBox_fields`: *no function references*
+- **T00676** `struct:vs_battle_uiEquipment_limb`: Items::ConsumeHitEquipmentDp (BATTLE/BATTLE.PRG/146C.c:10689 _adjustDpPp); Battle::ApplyActorActionResult (BATTLE/BATTLE.PRG/146C.c:14018 _applyBattleAbilityEffect); Items::RebuildArmorClassAffinity (BATTLE/BATTLE.PRG/146C.c:9582 _calculateArmorClassAffinity); Field::CalculateTrapPanelDamage (BATTLE/BATTLE.PRG/146C.c:11730 _damageFromTrapPanel); Items::QueueEnemyLoot (BATTLE/BATTLE.PRG/146C.c:1720 _dropLoot); Battle::AgilityHitChance (BATTLE/BATTLE.PRG/146C.c:9890 _getAgilityDifference); Battle::CostAdjustedAgilityHitChance (BATTLE/BATTLE.PRG/146C.c:9992 _getAgilityDifference2); Battle::ChainHitChance (BATTLE/BATTLE.PRG/146C.c:10057 _getChainEvasionModifier); Battle::IntelligenceHitChance (BATTLE/BATTLE.PRG/146C.c:9941 _getIntelligenceDifference); Battle::CalculateSpellHitDamage (BATTLE/BATTLE.PRG/146C.c:11473 _getMagicAttackDamage); Battle::CalculatePhysicalHitDamage (BATTLE/BATTLE.PRG/146C.c:11271 _getPhysicalAttackDamage); Battle::CanApplyAirDefenseUp (BATTLE/BATTLE.PRG/146C.c:10393 _hitPrerequisiteCanApplyAirDefenseUp) … +39 more
+- **T00681** `struct:vs_battle_uiWeapon_unk`: *no function references*
+- **T00098** `enum:vs_battle_warlockSpellIds_e`: *no function references*
+- **T00101** `enum:vs_gemTargets`: *no function references*
+- **T00102** `enum:vs_itemCategories`: *no function references*
+- **T00709** `struct:vs_main_statusEffectParams_t`: Battle::IsStatusEffectBlocked (BATTLE/BATTLE.PRG/146C.c:10133 _hitPrerequisiteCanApplyEffect); Battle::QueueApplicableStatusChanges (BATTLE/BATTLE.PRG/146C.c:11195 _setApplicableStatuses); Battle::QueueStatusRemovalMask (BATTLE/BATTLE.PRG/146C.c:11217 _setInflictedStatuses); Battle::DeriveLimbInjuryStatuses (BATTLE/BATTLE.PRG/146C.c:12930 func_80085008); Battle::Ai::AdvancePlanningSimulation (BATTLE/BATTLE.PRG/74088.c:1167 func_800DE030)
+- **T00726** `struct:vs_scratch_t`: Render::BuildCameraViewMatrix (BATTLE/BATTLE.PRG/146C.c:8157 func_8007ACB0); Field::DrawRoomScene (BATTLE/BATTLE.PRG/146C.c:15791 func_8008AC78); Field::DrawMovingPlatformShadows (BATTLE/BATTLE.PRG/146C.c:16688 func_8008CEB0); Field::DrawRoomBackground (BATTLE/BATTLE.PRG/146C.c:17571 func_8008EC48); Effects::DrawRainParticles (BATTLE/BATTLE.PRG/146C.c:17758 func_8008F440); Effects::DrawRisingEmberParticles (BATTLE/BATTLE.PRG/146C.c:17889 func_8008FAC8); Effects::DrawSnowParticles (BATTLE/BATTLE.PRG/146C.c:17938 func_8008FDC4); Effects::DrawScreenWeatherParticles (BATTLE/BATTLE.PRG/146C.c:18072 func_80090434); Field::DrawRoomBackgroundTiles (BATTLE/BATTLE.PRG/2842C.c:478 func_8009147C); Battle::DrawActorValueLabel (BATTLE/BATTLE.PRG/2842C.c:2073 func_80094B0C); Battle::DrawValueLabelCaption (BATTLE/BATTLE.PRG/2842C.c:2138 func_80094E18); Battle::DrawLockedFloatingLabel (BATTLE/BATTLE.PRG/2842C.c:2167 func_8009506C) … +14 more
+- **T00739** `struct:wanderObject`: Battle::Ai::UpdateWanderMovement (BATTLE/BATTLE.PRG/771A8.c:1717 func_800E1EAC)
+- **T00740** `struct:wanderState`: Battle::Ai::ChooseNextWanderTile (BATTLE/BATTLE.PRG/771A8.c:1638 func_800E1BB8); Battle::Ai::UpdateWanderMovement (BATTLE/BATTLE.PRG/771A8.c:1717 func_800E1EAC); Battle::Ai::StartWanderWalk (BATTLE/BATTLE.PRG/771A8.c:1708 wanderStartWalk)

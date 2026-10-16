@@ -1,0 +1,22 @@
+id,key,kind,name,aliases,size,fields,generic_fields,layouts,files,used_by_funcs,used_by_globals,proposed_system
+T00794,union:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),union,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),,60,7,0,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title
+T00189,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),,64,3,0,1,TITLE/TITLE.PRG/22C.c,1,1,Game.Title
+T00190,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),,4,4,0,1,SLUS_010.40/main.h,3,0,Game.Title
+T00192,struct:(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),struct,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:484:5),,2,2,0,1,SLUS_010.40/main.h,5,0,Game.Title
+T00298,struct:VS_SPRT,struct,VS_SPRT,VS_SPRT,20,5,0,1,include/gpu.h,2,0,Game.Title
+T00300,struct:VS_TILE_TPAGE,struct,VS_TILE_TPAGE,VS_TILE_TPAGE,16,4,0,1,include/gpu.h,1,0,Game.Title
+T00004,enum:_memcardMaskedHandler_e,enum,_memcardMaskedHandler_e,,4,3,0,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title
+T00426,struct:fontTable_t,struct,fontTable_t,fontTable_t,28672,2,0,1,TITLE/TITLE.PRG/22C.c,2,1,Game.Title
+T00026,enum:memcardEvents_e,enum,memcardEvents_e,,4,2,0,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,9,0,Game.Title
+T00548,struct:menuBg_t,struct,menuBg_t,menuBg_t,46592,2,0,1,TITLE/TITLE.PRG/22C.c,0,1,Game.Title
+T00549,struct:menuItemPrim_t,struct,menuItemPrim_t,menuItemPrim_t,24,2,0,1,TITLE/TITLE.PRG/22C.c,1,1,Game.Title
+T00027,enum:menuItemState_e,enum,menuItemState_e,,4,4,0,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title
+T00550,struct:menuItemState_t,struct,menuItemState_t,menuItemState_t,8,8,0,1,TITLE/TITLE.PRG/22C.c,7,1,Game.Title
+T00028,enum:menuItems,enum,menuItems,,4,9,0,1,TITLE/TITLE.PRG/22C.c,0,0,Game.Title
+T00595,struct:saveFileInfo_t,struct,saveFileInfo_t,saveFileInfo_t,128,4,3,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,22,2,Game.Title
+T00031,enum:slotState_e,enum,slotState_e,,4,4,0,1,MENU/MENU7.PRG/260.c TITLE/TITLE.PRG/22C.c,18,0,Game.Title
+T00088,enum:state#2155f452,enum,state,,4,3,0,58,TITLE/TITLE.PRG/22C.c,0,0,Game.Title
+T00089,enum:state#a5da1519,enum,state,,4,5,0,58,TITLE/TITLE.PRG/22C.c,0,0,Game.Title
+T00090,enum:state#724171f6,enum,state,,4,5,0,58,TITLE/TITLE.PRG/22C.c,0,0,Game.Title
+T00609,struct:tagsprt_t,struct,tagsprt_t,tagsprt_t,24,2,0,1,TITLE/TITLE.PRG/22C.c,1,1,Game.Title
+T00625,struct:uiTable_t,struct,uiTable_t,uiTable_t,61440,2,0,1,TITLE/TITLE.PRG/22C.c,0,1,Game.Title

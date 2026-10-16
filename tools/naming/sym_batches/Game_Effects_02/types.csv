@@ -1,0 +1,10 @@
+id,key,kind,name,aliases,size,fields,generic_fields,layouts,files,used_by_funcs,used_by_globals,proposed_system
+T00729,struct:vs_tiledRingPrim,struct,vs_tiledRingPrim,vs_tiledRingPrim,60,3,0,1,EFFECT/tiledRings.h,12,0,Game.Effects
+T00730,struct:vs_tiledRingState,struct,vs_tiledRingState,vs_tiledRingState,60,10,1,1,EFFECT/tiledRings.h,12,0,Game.Effects
+T00731,struct:vs_tiledRingUV,struct,vs_tiledRingUV,vs_tiledRingUV,2,2,0,1,EFFECT/tiledRings.h,12,0,Game.Effects
+T00732,struct:vs_trail9,struct,vs_trail9,vs_trail9,120,9,1,1,EFFECT/trails9Types.h,64,0,Game.Effects
+T00733,struct:vs_trail9Prim,struct,vs_trail9Prim,vs_trail9Prim,60,6,6,1,EFFECT/trails9.h,9,0,Game.Effects
+T00734,struct:vs_trail9State,struct,vs_trail9State,vs_trail9State,44,8,4,1,EFFECT/trails9Types.h,64,0,Game.Effects
+T00735,struct:vs_transposedRingPrim,struct,vs_transposedRingPrim,vs_transposedRingPrim,60,3,0,1,EFFECT/PLG162.BIN/0.c EFFECT/PLG236.BIN/0.c EFFECT/PLG263.BIN/110.c,3,0,Game.Effects
+T00736,struct:vs_transposedRingState,struct,vs_transposedRingState,vs_transposedRingState,60,10,1,1,EFFECT/PLG162.BIN/0.c EFFECT/PLG236.BIN/0.c EFFECT/PLG263.BIN/110.c,3,0,Game.Effects
+T00737,struct:vs_transposedRingUV,struct,vs_transposedRingUV,vs_transposedRingUV,2,2,0,1,EFFECT/PLG162.BIN/0.c EFFECT/PLG236.BIN/0.c EFFECT/PLG263.BIN/110.c,0,0,Game.Effects
