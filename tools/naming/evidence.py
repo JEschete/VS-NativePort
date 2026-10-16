@@ -93,6 +93,7 @@ def main() -> int:
     ap.add_argument("--max", type=int, default=3)
     ap.add_argument("--out")
     ap.add_argument("--upstream", type=int, default=0)
+    ap.add_argument("--funcs", type=int, default=0, help="limit referencing functions shown per global (0 = all)")
     a = ap.parse_args()
     up = Upstream(a.upstream)
 
@@ -134,12 +135,17 @@ def main() -> int:
             labels = context["globals"].get(gid, [])
             if not labels and defs:
                 labels = [f"? ({defs[0]['file'].removeprefix('src/')}:1 ?)"]
+            shown = 0
             for final, orig, rel, lo, hi in ref_functions(labels):
+                if a.funcs and shown >= a.funcs:
+                    out.append(f"   ... {len(labels) - shown} more referencing functions")
+                    break
                 if orig == "?":
                     lo, hi = 1, len(src.lines(rel))
                 hits = [i + 1 for i in range(lo - 1, min(hi, len(src.lines(rel))))
                         if pat.search(src.lines(rel)[i]) and not src.lines(rel)[i].lstrip().startswith("extern")]
                 if hits:
+                    shown += 1
                     out.append(f"   in {final} [{orig}]")
                     out.extend(f"      {src.show(rel, h)}" for h in hits[: a.max])
                     out.extend(f"      {h}" for h in up.lines(orig))

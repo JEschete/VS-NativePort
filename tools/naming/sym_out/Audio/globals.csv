@@ -1,0 +1,93 @@
+id,disposition,final_name,final_location,purpose,confidence,notes
+G00091,catalog,Audio::objectSurfaceSoundIds,Native\Audio\src\ActorSound.c,Gives the contact sound played when an actor stands on a room object of each kind.,med,"source:44F14.c:754;indexed by the object's kind;inventory size is a gap, not a capacity"
+G00250,state,Audio::zoneMusicSwitchEnabled,Native\Audio\src\Music.c,Stops and frees the current music on zone load when the new zone uses a different track.,high,source:146C.c:14866;source:146C.c:8579
+G01826,drop,Audio::Driver::legacySpuEvent,Native\Audio\src\Driver\SoundDriver.c,Holds the root-counter event that runs the driver tick.,high,replaced-by:native audio thread;source:25AC.c:1079;source:25AC.c:1081
+G01827,drop,Audio::Driver::recentTickCostTotal,Native\Audio\src\Driver\SoundDriver.c,Sums the root-counter cost of the last four driver ticks.,high,replaced-by:native profiler;source:25AC.c:4424
+G01828,state,Audio::Seq::tickCounter,Native\Audio\src\Seq\Sequencer.c,Counts driver ticks; every fourth tick advances the secondary music fade.,high,source:25AC.c:4298;source:25AC.c:4374
+G01829,drop,Audio::Driver::recentTickCosts,Native\Audio\src\Driver\SoundDriver.c,Keeps the root-counter cost of the last four driver ticks.,high,replaced-by:native profiler;source:25AC.c:4423
+G01830,drop,Audio::Driver::legacySpuFlushBytes,Native\Audio\src\Driver\SoundDriver.c,Supplies the bytes written to SPU memory when the driver starts or stops.,high,replaced-by:native mixer reset;source:25AC.c:1068
+G01831,constexpr,Audio::Seq::kOpcodeLengths,Native\Audio\src\Seq\Sequencer.c,Gives the byte length of AKAO opcodes 0xA0 to 0xFF; zero marks opcodes that need special handling.,high,source:25AC.c:4448;96 entries by address gap
+G01832,constexpr,Audio::Seq::kExtendedOpcodeLengths,Native\Audio\src\Seq\Sequencer.c,Gives the byte length of 0xFE-prefixed AKAO opcodes; zero marks opcodes that need special handling.,high,source:25AC.c:4473;32 entries by address gap
+G01833,constexpr,Audio::Seq::kNoteLengths,Native\Audio\src\Seq\Sequencer.c,Gives the note length selected by a note opcode's remainder modulo 11 when no fixed length is set.,high,source:25AC.c:4817
+G01834,constexpr,Audio::Seq::kIdleProgram,Native\Audio\src\Seq\Sequencer.c,Is the program word a released or idle channel points at instead of real bytecode.,med,source:25AC.c:2475;value comes from the binary data at 0x8002F638
+G01835,constexpr,Audio::Seq::kSemitonePitches,Native\Audio\src\Seq\Sequencer.c,Gives the pitch of each of the twelve semitones before octave shifting and fine tuning.,high,source:25AC.c:4651;12 entries by address gap;inventory size 352 overlaps later tables
+G01836,constexpr,Audio::Seq::kNoteRemapTables,Native\Audio\src\Seq\Sequencer.c,Holds key remap tables that opcode 0xFE1C selects for the active music by byte offset.,med,source:25AC.c:6206;48 bytes by address gap
+G01837,constexpr,Audio::Seq::kRandomPitchOffsets,Native\Audio\src\Seq\Sequencer.c,Gives signed random pitch offsets indexed by the global phase; bit 7 selects a downward shift.,high,source:25AC.c:4896;source:25AC.c:4897
+G01838,constexpr,Audio::Mixer::kPanGains,Native\Audio\src\Mixer\VoiceMixer.c,Gives the Q15 left or right gain for each of 256 pan positions.,high,source:25AC.c:1640;source:25AC.c:1642
+G01839,constexpr,Audio::Mixer::kCenterPanGain,Native\Audio\src\Mixer\VoiceMixer.c,Is the pan table's center entry used for mono output.,high,view-of:G01838+0x100;source:25AC.c:1636
+G01840,constexpr,Audio::Seq::kLfoWaveforms,Native\Audio\src\Seq\Sequencer.c,"Points to the waveform used by each vibrato, tremolo or auto-pan shape.",high,source:25AC.c:5502;16 pointers by address gap
+G01841,constexpr,Audio::Mixer::kCommandHandlers,Native\Audio\src\Mixer\VoiceMixer.c,Maps each sound command id to its handler.,high,source:25AC.c:3918;256 entries by address gap
+G01842,constexpr,Audio::Seq::kOpcodeHandlers,Native\Audio\src\Seq\Sequencer.c,Maps AKAO opcodes 0xA0 to 0xFF to their handlers.,high,source:25AC.c:4796
+G01843,constexpr,Audio::Seq::kExtendedOpcodeHandlers,Native\Audio\src\Seq\Sequencer.c,Maps 0xFE-prefixed AKAO opcodes to their handlers.,high,source:25AC.c:4758
+G01844,state,Audio::Seq::musicChannels,Native\Audio\src\Seq\Channel.c,Holds the 32 channels of the music being played.,high,source:25AC.c:2431;source:25AC.c:3655
+G01845,state,Audio::Seq::savedMusicConfig,Native\Audio\src\Seq\Channel.c,"Holds the configuration of music saved by the push command, also played as the secondary layer.",high,source:25AC.c:2975;source:25AC.c:2987;only 0x80 bytes are copied
+G01846,state,Audio::Seq::savedMusicId,Native\Audio\src\Seq\Channel.c,Is the id of the saved music; cleared to forget it.,high,view-of:G01845+0x6E;source:25AC.c:302;MusicId read at +0x6E in Sound_Cmd_10_StartFieldMusic
+G01847,state,Audio::SoundEffects::channels,Native\Audio\src\SoundEffects\SoundEffects.c,Holds the twelve sound-effect channels.,high,source:25AC.c:3309;declared [10] but loops reach 12 channels ending at _cdlAtv
+G01848,state,Audio::SoundEffects::programPairChannels,Native\Audio\src\SoundEffects\SoundEffects.c,Aliases sound-effect channels 10 and 11 used by two-voice programs.,med,view-of:G01847+0xAA0;source:25AC.c:2726;source:25AC.c:2826;declared [12] overstates the 2 channels before _cdlAtv
+G01849,drop,Audio::Control::legacyDiscMixAttenuation,Native\Audio\src\Control\SoundControl.c,Holds the CD audio mix attenuation sent to the drive.,high,replaced-by:native stream mixer;source:25AC.c:919
+G01850,state,Audio::Seq::secondaryMusicChannels,Native\Audio\src\Seq\Channel.c,Points to the channels of the secondary music layer.,high,source:25AC.c:2988
+G01851,state,Audio::Seq::secondaryMusicConfig,Native\Audio\src\Seq\Channel.c,Points to the secondary layer's configuration or is null when none plays.,high,source:25AC.c:226;source:25AC.c:2987
+G01852,state,Audio::Mixer::voiceEnvelopes,Native\Audio\src\Mixer\VoiceMixer.c,Tracks each voice's envelope level for allocation and stealing.,high,source:25AC.c:1814;source:25AC.c:1894
+G01853,state,Audio::Seq::primaryMusicConfig,Native\Audio\src\Seq\Channel.c,Holds the configuration of the primary music.,high,source:25AC.c:2065;source:25AC.c:2975;declared 160 bytes but only 0x80 are used
+G01854,state,Audio::Samples::musicSampleBankIds,Native\Audio\src\Samples\SampleBanks.c,Records the sample bank ids loaded for the current music.,med,source:25AC.c:258;source:25AC.c:2418
+G01855,state,Audio::Mixer::musicPitchScaleStep,Native\Audio\src\Mixer\VoiceMixer.c,Is the per-tick step of the music pitch scale slide.,high,source:25AC.c:4065
+G01856,state,Audio::Mixer::tempoScaleStep,Native\Audio\src\Mixer\VoiceMixer.c,Is the per-tick step of the tempo scale slide.,high,source:25AC.c:4061
+G01857,state,Audio::Mixer::musicPitchScaleSlideLength,Native\Audio\src\Mixer\VoiceMixer.c,Counts the ticks left in the music pitch scale slide.,high,source:25AC.c:3565;source:25AC.c:272
+G01858,state,Audio::Mixer::tempoScaleSlideLength,Native\Audio\src\Mixer\VoiceMixer.c,Counts the ticks left in the tempo scale slide.,high,source:25AC.c:3529;source:25AC.c:268
+G01859,state,Audio::Samples::instruments,Native\Audio\src\Samples\SampleBanks.c,Holds the 256 instrument definitions used to play notes.,high,source:25AC.c:4892
+G01860,state,Audio::Seq::pendingMusicData,Native\Audio\src\Seq\Channel.c,Holds the next music's data while a transition waits; nonzero means pending.,med,"source:25AC.c:3880;source:25AC.c:231;only Param1 is used, so the declared 24-byte record does not overlap G01861 in practice"
+G01861,state,Audio::Mixer::commandParams,Native\Audio\src\Mixer\VoiceMixer.c,Is the parameter record the command dispatcher passes to handlers.,med,source:25AC.c:3828;starts 8 bytes after G01860
+G01862,drop,Audio::Driver::legacySpuAllocatorTable,Native\Audio\src\Driver\SoundDriver.c,Gives SpuInitMalloc its allocation table.,high,replaced-by:native sample bank storage;source:25AC.c:1065
+G01863,state,Audio::Seq::musicLoopsRemaining,Native\Audio\src\Seq\Channel.c,Counts the loops left before the music may end.,med,source:25AC.c:3043;source:25AC.c:4251
+G01864,state,Audio::Samples::soundEffectBankIds,Native\Audio\src\Samples\SampleBanks.c,Records the id resident in each of the three sound-effect bank slots.,med,source:25AC.c:773;source:25AC.c:2950
+G01865,state,Audio::Playback::soundEffectProgramOffsets,Native\Audio\src\Playback\SoundPlayback.c,Points to the per-effect program offset pairs of the bound effect file.,high,source:25AC.c:214;source:25AC.c:2786
+G01866,drop,Audio::Cutscene::legacySpuTransferBusy,Native\Audio\src\Cutscene\Stream.c,Is set while a stream page is being transferred to SPU memory.,high,replaced-by:native stream buffer;source:25AC.c:997;source:25AC.c:992
+G01867,state,Audio::Playback::soundEffectBankSelectors,Native\Audio\src\Playback\SoundPlayback.c,Points to the per-effect value that selects its sample bank slot.,med,source:25AC.c:216;source:25AC.c:3070
+G01868,state,Audio::Playback::soundEffectProgramData,Native\Audio\src\Playback\SoundPlayback.c,Points to the bytecode of the bound effect file.,high,source:25AC.c:218;source:25AC.c:2785
+G01869,state,Audio::Seq::embeddedSoundEffectParams,Native\Audio\src\Seq\Sequencer.c,Is the command record used to start sound effects embedded in music.,med,source:25AC.c:4346;source:25AC.c:6188
+G01870,state,Audio::Seq::activeMusicConfig,Native\Audio\src\Seq\Channel.c,Points to the configuration of the music the sequencer is advancing.,high,source:25AC.c:4992
+G01871,state,Audio::Seq::masterFade,Native\Audio\src\Seq\Sequencer.c,Fades the music master volume over a number of ticks.,high,source:25AC.c:3023;source:25AC.c:2014
+G01872,state,Audio::Seq::discVolumeFadeStep,Native\Audio\src\Control\SoundControl.c,Is the per-tick step of the disc audio volume fade.,high,source:25AC.c:3234
+G01873,state,Audio::Seq::discVolumeFadeLength,Native\Audio\src\Control\SoundControl.c,Counts the ticks left in the disc audio volume fade.,high,source:25AC.c:3233
+G01874,state,Audio::Samples::bankChunkHeader,Native\Audio\src\Samples\SampleBanks.c,Keeps the 64-byte header of the instrument bank being streamed.,med,source:25AC.c:840;source:25AC.c:843
+G01875,state,Audio::Mixer::voiceScheduler,Native\Audio\src\Mixer\VoiceMixer.c,"Holds voice key-on, key-off and mode masks and the noise clock.",high,source:25AC.c:6248
+G01876,state,Audio::Mixer::pendingKeyOnVoices,Native\Audio\src\Mixer\VoiceMixer.c,Aliases the scheduler's key-on mask.,med,view-of:G01875+4;source:25AC.c:2129;source:sound.h:261
+G01877,state,Audio::Mixer::keyedVoices,Native\Audio\src\Mixer\VoiceMixer.c,Aliases the scheduler's keyed voice mask.,med,view-of:G01875+8;source:25AC.c:4359;source:sound.h:262
+G01878,state,Audio::Mixer::pendingKeyOffVoices,Native\Audio\src\Mixer\VoiceMixer.c,Aliases the scheduler's key-off mask.,med,view-of:G01875+0xC;source:25AC.c:4324;source:sound.h:263
+G01879,state,Audio::Mixer::pausedSoundEffectVoices,Native\Audio\src\Mixer\VoiceMixer.c,Aliases the scheduler word that keeps the voices of paused world effects.,med,view-of:G01875+0x10;source:25AC.c:3763;source:25AC.c:3766
+G01880,state,Audio::Driver::commandArguments,Native\Audio\src\Driver\SoundDriver.c,Holds the arguments the game writes before dispatching a sound command.,high,source:25AC.c:288;source:25AC.c:321
+G01881,state,Audio::Seq::musicTransitionTimer,Native\Audio\src\Seq\Sequencer.c,Holds the combined timer value checked while a music transition waits.,med,view-of:G01880+0x14;source:25AC.c:4144;source:25AC.c:4145
+G01882,state,Audio::Seq::discVolume,Native\Audio\src\Control\SoundControl.c,Holds the disc audio volume in 16.16 fixed point.,high,source:25AC.c:3219
+G01883,state,Audio::Seq::discVolumeLevel,Native\Audio\src\Control\SoundControl.c,Aliases the integer part of the disc volume written to the CD volume registers.,high,view-of:G01882+2;source:25AC.c:3960
+G01884,state,Audio::Mixer::mutedMusicChannels,Native\Audio\src\Mixer\VoiceMixer.c,Masks the music channels that are muted.,high,source:25AC.c:3653;source:25AC.c:1874
+G01885,state,Audio::Seq::savedMusicChannels,Native\Audio\src\Seq\Channel.c,"Holds the channels of saved music, also played as the secondary layer.",high,source:25AC.c:2858;source:25AC.c:2988
+G01886,state,Audio::Seq::randomPitchPhase,Native\Audio\src\Seq\Sequencer.c,Advances each tick to index the random pitch table.,high,source:25AC.c:4032;source:25AC.c:4896
+G01887,state,Audio::Mixer::musicPitchScale,Native\Audio\src\Mixer\VoiceMixer.c,Scales music pitch in 16.16 fixed point.,high,source:25AC.c:3548
+G01888,state,Audio::Mixer::tempoScale,Native\Audio\src\Mixer\VoiceMixer.c,Scales music tempo in 16.16 fixed point.,high,source:25AC.c:3517
+G01889,state,Audio::Mixer::tempoScaleLevel,Native\Audio\src\Mixer\VoiceMixer.c,Aliases the integer byte of the tempo scale applied each tick.,med,view-of:G01888+2;source:25AC.c:4181
+G01890,state,Audio::Driver::controlLatches,Native\Audio\src\Driver\SoundDriver.c,Holds one-shot driver control flags such as pending music transitions.,high,source:25AC.c:4141;binary label is 4 bytes;the C struct's next two words are G01891 and G01892
+G01891,state,Audio::Driver::mixBehavior,Native\Audio\src\Driver\SoundDriver.c,Holds the stereo or mono output mode and music stack flags.,med,view-of:G01890+4;source:25AC.c:3628;source:25AC.c:3639;source:25AC.c:2046;stereo and mono commands overwrite the whole word
+G01892,state,Audio::Driver::pendingUpdates,Native\Audio\src\Driver\SoundDriver.c,Holds deferred voice and mode update flags.,med,view-of:G01890+8;source:25AC.c:4359;source:25AC.c:1908
+G01893,state,Audio::Cutscene::streamState,Native\Audio\src\Cutscene\Stream.c,"Holds the cutscene audio stream's voices, pages, volume and flags.",high,source:25AC.c:3788
+G01894,state,Audio::Cutscene::streamVoices,Native\Audio\src\Cutscene\Stream.c,Aliases the stream's voice mask.,high,view-of:G01893+0xC;source:25AC.c:2403
+G01895,state,Audio::Cutscene::streamVolume,Native\Audio\src\Cutscene\Stream.c,Aliases the stream volume.,med,view-of:G01893+0x40;source:25AC.c:4057
+G01896,state,Audio::Cutscene::streamControlFlags,Native\Audio\src\Cutscene\Stream.c,Aliases the stream control flags; bit 0 pauses it with the music.,med,view-of:G01893+0x5C;source:25AC.c:3695;source:25AC.c:3719
+G01897,state,Audio::Mixer::voiceOwners,Native\Audio\src\Mixer\VoiceMixer.c,Records the music configuration that owns each voice.,high,source:25AC.c:2524
+G01898,state,Audio::Samples::bankStream,Native\Audio\src\Samples\SampleBanks.c,Tracks an instrument bank streamed to SPU memory in chunks.,high,source:25AC.c:830;source:25AC.c:844
+G01899,state,Audio::Samples::bankStreamDestination,Native\Audio\src\Samples\SampleBanks.c,Aliases the bank stream's next destination; zero starts a new stream.,high,view-of:G01898+4;source:25AC.c:817
+G01900,state,Audio::Mixer::voiceModes,Native\Audio\src\Mixer\VoiceMixer.c,"Holds the reverb, noise and FM voice masks.",high,source:25AC.c:2147
+G01937,asset,Audio::menuSoundEffects,Native\Audio\src\SoundBanks.c,"Holds EFFECT00.DAT, the always-loaded sound effect programs.",high,asset:audio/sfx/effect00.json;source:main.c:10470;converted path is a proposed destination
+G01954,state,Audio::soundState,Native\Audio\src\SoundBanks.c,"Tracks loaded music slots, sound-effect banks and the wave bank with their disc requests.",high,source:146C.c:14821;source:main.h:135
+G01974,state,Audio::nextSfxChannelGroup1,Native\Audio\src\Sfx.c,Is the next channel bit used within sound-effect channel group 0x1.,high,source:main.c:9790;source:main.c:9789
+G01975,state,Audio::nextSfxChannelGroup7E,Native\Audio\src\Sfx.c,Is the next channel bit used within sound-effect channel group 0x7E.,high,source:main.c:9827;source:main.c:9825
+G01976,state,Audio::nextSfxChannelGroup180,Native\Audio\src\Sfx.c,Is the next channel bit used within sound-effect channel group 0x180.,high,source:main.c:10193;source:main.c:10191
+G01977,state,Audio::nextSfxChannelGroup200,Native\Audio\src\Sfx.c,Is the next channel bit used within sound-effect channel group 0x200.,high,source:main.c:10475;source:main.c:10197
+G01978,state,Audio::nextSfxChannelGroupFF000,Native\Audio\src\Sfx.c,Is the next channel bit used within sound-effect channel group 0xFF000.,high,source:main.c:9850;source:main.c:9848
+G01979,state,Audio::nextSfxChannelGroupF00000,Native\Audio\src\Sfx.c,Is the next channel bit used within sound-effect channel group 0xF00000.,high,source:main.c:9864;source:main.c:9862
+G02003,drop,Audio::legacyMusicFileSizes,Native\Audio\src\LegacyFiles.c,Gives each MUSIC file's size.,high,replaced-by:Content music AssetId manifest;source:main.c:9617
+G02004,drop,Audio::legacyMusicDiscOffsets,Native\Audio\src\LegacyFiles.c,Gives each MUSIC file's disc sector.,high,replaced-by:Content music AssetId manifest;source:main.c:9616
+G02008,drop,Audio::legacySfxBankFileSizes,Native\Audio\src\LegacyFiles.c,Gives each SEP sound-effect bank file's size.,high,replaced-by:Content sound AssetId manifest;source:main.c:10053
+G02009,drop,Audio::legacySfxBankDiscOffsets,Native\Audio\src\LegacyFiles.c,Gives each SEP sound-effect bank file's disc sector.,high,replaced-by:Content sound AssetId manifest;source:main.c:10052
+G02010,catalog,Audio::waveBankFileMap,Native\Audio\src\SoundBanks.c,Maps a sound-set id to the WAVE bank file it loads.,med,source:main.c:10394
+G02011,drop,Audio::legacyWaveBankFileSizes,Native\Audio\src\LegacyFiles.c,Gives each WAVE bank file's size.,high,replaced-by:Content sound AssetId manifest;source:main.c:10377
+G02012,drop,Audio::legacyWaveBankDiscOffsets,Native\Audio\src\LegacyFiles.c,Gives each WAVE bank file's disc sector.,high,replaced-by:Content sound AssetId manifest;source:main.c:10376
