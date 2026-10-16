@@ -1,7 +1,7 @@
 id,role,final_name,final_location,purpose,confidence,notes
 T00309,Instance,Ending::Credits::Element,Native\Game\src\Ending\Credits.h,Stores a credits renderer callback and its text illustration or animation state.,high,source:D4.c:15;unused trailing members remain reserved
 T00018,Enum,Ending::Credits::EasingMode,Native\Game\src\Ending\Credits.h,Selects linear ease-out ease-in-out or ease-in interpolation.,high,source:D4.c:1289
-T00430,Packet,Ending::Credits::TexturedGradientQuadView,Native\Game\src\Ending\Credits.h,Provides a partial view of a PS1 textured Gouraud quad used by the radial fade.,high,replaced-by:Render quad commands;partial packet ends before vertex three UV
+T00430,Packet,Ending::Credits::TexturedGradientQuadView,Native\Game\src\Ending\Credits.h,Provides a partial view of a PS1 textured Gouraud quad used by the radial fade.,high,replaced-by:Render quad commands;partial packet ends before vertex three UV;source:D4.c:32
 T00432,OnDisc,Ending::Credits::TimImageBlockHeader,Native\Game\src\Ending\Credits.h,Describes the size upload rectangle and following bytes of a TIM image block.,high,decoder-only;source:D4.c:1115
 T00433,OnDisc,Ending::Credits::TimHeader,Native\Game\src\Ending\Credits.h,Describes the TIM identifier mode and first image or palette block.,high,decoder-only;source:D4.c:1115
 T00029,Enum,Ending::Credits::ScriptOpcode,Native\Game\src\Ending\Credits.h,Names the explicitly declared wait opcode in the credits bytecode stream.,high,source:D4.c:1195;remaining switch opcodes are not declared in this enum

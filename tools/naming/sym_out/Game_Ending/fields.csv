@@ -7,54 +7,54 @@ T00309.004,illustrationIndex,Index of the current credits illustration,high,sour
 T00309.005,width,Text width or renderer-specific fade completion flag,high,source:D4.c:954;meaning depends on renderer
 T00309.006,xFixed8,Horizontal position in fixed-point pixels with eight fractional bits,high,source:D4.c:395
 T00309.007,yFixed8,Vertical position in fixed-point pixels with eight fractional bits,high,source:D4.c:395
-T00309.008,reserved18,Unused member at byte offset 0x18,low,No member accesses found;preserve until representation modernization
-T00309.009,reserved1C,Unused member at byte offset 0x1C,low,No member accesses found;preserve until representation modernization
-T00309.010,reserved20,Unused member at byte offset 0x20,low,No member accesses found;preserve until representation modernization
-T00309.011,reserved24,Unused member at byte offset 0x24,low,No member accesses found;preserve until representation modernization
-T00309.012,reserved28,Unused member at byte offset 0x28,low,No member accesses found;preserve until representation modernization
-T00309.013,reserved2C,Unused member at byte offset 0x2C,low,No member accesses found;preserve until representation modernization
+T00309.008,reserved18,Unused member at byte offset 0x18,low,No member accesses found;preserve until representation modernization;declaration-only;source:D4.c:24
+T00309.009,reserved1C,Unused member at byte offset 0x1C,low,No member accesses found;preserve until representation modernization;declaration-only;source:D4.c:25
+T00309.010,reserved20,Unused member at byte offset 0x20,low,No member accesses found;preserve until representation modernization;declaration-only;source:D4.c:26
+T00309.011,reserved24,Unused member at byte offset 0x24,low,No member accesses found;preserve until representation modernization;declaration-only;source:D4.c:27
+T00309.012,reserved28,Unused member at byte offset 0x28,low,No member accesses found;preserve until representation modernization;declaration-only;source:D4.c:28
+T00309.013,reserved2C,Unused member at byte offset 0x2C,low,No member accesses found;preserve until representation modernization;declaration-only;source:D4.c:29
 T00018.000,Linear,Linear interpolation,high,source:D4.c:1289
 T00018.001,EaseOut,Quarter-sine ease-out interpolation,high,source:D4.c:1289
 T00018.002,EaseInOut,Half-cosine ease-in-out interpolation,high,source:D4.c:1289
 T00018.003,EaseIn,Shifted quarter-sine ease-in interpolation,high,source:D4.c:1289
-T00430.000,dmaTag,PS1 DMA packet tag,high,replaced-by:Render draw commands
+T00430.000,dmaTag,PS1 DMA packet tag,med,replaced-by:Render draw commands;declaration-only;source:D4.c:33
 T00430.001,vertexZeroRed,First vertex red channel,high,source:D4.c:494
 T00430.002,vertexZeroGreen,First vertex green channel,high,source:D4.c:494
 T00430.003,vertexZeroBlue,First vertex blue channel,high,source:D4.c:489
-T00430.004,command,PS1 textured Gouraud quad command byte,high,replaced-by:Render draw commands
+T00430.004,command,PS1 textured Gouraud quad command byte,med,replaced-by:Render draw commands;declaration-only;source:D4.c:37
 T00430.005,vertexZeroX,First vertex horizontal pixel coordinate,high,source:D4.c:485
 T00430.006,vertexZeroY,First vertex vertical pixel coordinate,high,source:D4.c:485
-T00430.007,vertexZeroUv,Packed first vertex texture U and V bytes,high,replaced-by:Render texture coordinates
-T00430.008,palette,PS1 CLUT selector,high,replaced-by:Render texture resources
+T00430.007,vertexZeroUv,Packed first vertex texture U and V bytes,med,replaced-by:Render texture coordinates;declaration-only;source:D4.c:40
+T00430.008,palette,PS1 CLUT selector,med,replaced-by:Render texture resources;declaration-only;source:D4.c:41
 T00430.009,vertexOneRed,Second vertex red channel,high,source:D4.c:506
 T00430.010,vertexOneGreen,Second vertex green channel,high,source:D4.c:506
 T00430.011,vertexOneBlue,Second vertex blue channel,high,source:D4.c:501
-T00430.012,pad13,Unused byte after the second vertex color,high,PS1 POLY_GT4 layout
+T00430.012,pad13,Unused byte after the second vertex color,med,PS1 POLY_GT4 layout;declaration-only;source:D4.c:45
 T00430.013,vertexOneX,Second vertex horizontal pixel coordinate,high,source:D4.c:497
 T00430.014,vertexOneY,Second vertex vertical pixel coordinate,high,source:D4.c:497
-T00430.015,vertexOneUv,Packed second vertex texture U and V bytes,high,replaced-by:Render texture coordinates
-T00430.016,texturePage,PS1 texture-page selector,high,replaced-by:Render texture resources
+T00430.015,vertexOneUv,Packed second vertex texture U and V bytes,med,replaced-by:Render texture coordinates;declaration-only;source:D4.c:48
+T00430.016,texturePage,PS1 texture-page selector,med,replaced-by:Render texture resources;declaration-only;source:D4.c:49
 T00430.017,vertexTwoRed,Third vertex red channel,high,source:D4.c:518
 T00430.018,vertexTwoGreen,Third vertex green channel,high,source:D4.c:518
 T00430.019,vertexTwoBlue,Third vertex blue channel,high,source:D4.c:513
-T00430.020,pad1F,Unused byte after the third vertex color,high,PS1 POLY_GT4 layout
+T00430.020,pad1F,Unused byte after the third vertex color,med,PS1 POLY_GT4 layout;declaration-only;source:D4.c:53
 T00430.021,vertexTwoX,Third vertex horizontal pixel coordinate,high,source:D4.c:509
 T00430.022,vertexTwoY,Third vertex vertical pixel coordinate,high,source:D4.c:509
-T00430.023,vertexTwoUv,Packed third vertex texture U and V bytes,high,replaced-by:Render texture coordinates
-T00430.024,pad26,Unused halfword after the third vertex texture coordinates,high,PS1 POLY_GT4 layout
+T00430.023,vertexTwoUv,Packed third vertex texture U and V bytes,med,replaced-by:Render texture coordinates;declaration-only;source:D4.c:56
+T00430.024,pad26,Unused halfword after the third vertex texture coordinates,med,PS1 POLY_GT4 layout;declaration-only;source:D4.c:57
 T00430.025,vertexThreeRed,Fourth vertex red channel,high,source:D4.c:580
 T00430.026,vertexThreeGreen,Fourth vertex green channel,high,source:D4.c:580
 T00430.027,vertexThreeBlue,Fourth vertex blue channel,high,source:D4.c:525
-T00430.028,pad2B,Unused byte after the fourth vertex color,high,PS1 POLY_GT4 layout
+T00430.028,pad2B,Unused byte after the fourth vertex color,med,PS1 POLY_GT4 layout;declaration-only;source:D4.c:61
 T00430.029,vertexThreeX,Fourth vertex horizontal pixel coordinate,high,source:D4.c:521
 T00430.030,vertexThreeY,Fourth vertex vertical pixel coordinate,high,source:D4.c:521
 T00432.000,blockSizeBytes,Total TIM block size including its header,high,source:D4.c:1126
 T00432.001,uploadRect,PS1 VRAM upload rectangle,high,decoder-only;source:D4.c:1119
 T00432.002,pixelBytes,Variable-length palette or image payload,high,decoder-only;source:D4.c:1123
-T00433.000,identifier,TIM format identifier byte,med,TIM header layout;decoder must validate against 0x10
-T00433.001,reserved01,Reserved TIM header byte at offset one,med,TIM header layout
-T00433.002,reserved02,Reserved TIM header byte at offset two,med,TIM header layout
-T00433.003,reserved03,Reserved TIM header byte at offset three,med,TIM header layout
+T00433.000,identifier,TIM format identifier byte,med,TIM header layout;decoder must validate against 0x10;declaration-only;source:D4.c:73
+T00433.001,reserved01,Reserved TIM header byte at offset one,med,TIM header layout;declaration-only;source:D4.c:74
+T00433.002,reserved02,Reserved TIM header byte at offset two,med,TIM header layout;declaration-only;source:D4.c:75
+T00433.003,reserved03,Reserved TIM header byte at offset three,med,TIM header layout;declaration-only;source:D4.c:76
 T00433.004,mode,Pixel depth and optional CLUT flag,high,source:D4.c:1118
 T00433.005,firstBlock,First palette or pixel-data block,high,source:D4.c:1116
 T00029.000,Wait,Wait twice the following byte value in frames,high,source:D4.c:1212
