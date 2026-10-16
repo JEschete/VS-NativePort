@@ -2824,7 +2824,7 @@ T00326.003,T00326,_mpdRoomCollisionMapSection,3,unk6,1,short,,,,,,,
 T00327.000,T00327,_mpdRoomDoorSection2,0,unk0_0,1,u_short,5,,,tileX,Door tile X,med,declaration-only;source:main.h:425
 T00327.001,T00327,_mpdRoomDoorSection2,1,unk0_5,1,u_short,5,,,tileZ,Door tile Z,med,declaration-only;source:main.h:426
 T00327.002,T00327,_mpdRoomDoorSection2,2,unk0_10,1,u_short,3,,,floorLayer,Floor layer; two or more selects a moving platform,med,declaration-only;source:main.h:427
-T00327.003,T00327,_mpdRoomDoorSection2,3,unk0_13,1,u_short,3,,,entryBits,Unidentified entry bits copied from Ashley placement,low,declaration-only;source:main.h:428
+T00327.003,T00327,_mpdRoomDoorSection2,3,unk0_13,1,u_short,3,,,entryDirection,Facing direction on entry copied into actor placement,med,source:146C.c:15151;source:3A1A0.c:286
 T00328.000,T00328,_mpdRoomDoorSection_t,0,zndId,0,u_char,,,,,,,
 T00328.001,T00328,_mpdRoomDoorSection_t,1,mpdId,0,u_char,,,,,,,
 T00328.002,T00328,_mpdRoomDoorSection_t,2,unk2,1,_mpdRoomDoorSection2,,,,,,,

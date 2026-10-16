@@ -198,7 +198,7 @@ T00299.002,size,Width and height,med,declaration-only;source:gpu.h:49
 T00327.000,tileX,Door tile X,med,declaration-only;source:main.h:425
 T00327.001,tileZ,Door tile Z,med,declaration-only;source:main.h:426
 T00327.002,floorLayer,Floor layer; two or more selects a moving platform,med,declaration-only;source:main.h:427
-T00327.003,entryBits,Unidentified entry bits copied from Ashley placement,low,declaration-only;source:main.h:428
+T00327.003,entryDirection,Facing direction on entry copied into actor placement,med,source:146C.c:15151;source:3A1A0.c:286
 T00008.000,Spell,ActionType Spell,med,declaration-only;source:main.h:52
 T00008.001,Ability,ActionType Ability,med,declaration-only;source:main.h:53
 T00008.002,BreakArt,ActionType BreakArt,med,declaration-only;source:main.h:54

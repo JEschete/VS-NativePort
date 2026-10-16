@@ -13,3 +13,21 @@ T00566,Misc,Field::GimmickMotionView,Native\Game\src\Field\GimmickMotion.h,Views
 T00638,Value,Field::BackgroundTile,Native\Game\src\Field\Background.h,Gives the texture rectangle and four corner colors of one background tile.,med,source:2842C.h:1
 T00639,State,Field::CameraTransition,Native\Game\src\Field\Camera.h,Stores camera state saved and targeted while entering or leaving first-person view.,high,source:146C.c:4556
 T00705,State,State::RoomVisitFlags,Native\Game\include\State\Progress.h,Stores visited-room and visited-area bit flags.,high,source:main.h:384;source:146C.c:3215
+T00211,Value,Field::TriggerMarkerVertex,Native\Game\src\Field\TriggerMarkers.h,Holds the position height and vertex shades of the animated trigger-marker polygon.,med,source:146C.c:17221;source:146C.c:17237
+T00212,OnDisc,Field::GimmickTemplate,Native\Game\src\Field\Gimmicks.h,Heads a gimmick model template with instance words a recolor count and the model data size.,med,decoder-only;source:30DB0.c:327;source:30DB0.c:330
+T00221,State,Field::RoomLoadResetBlock,Native\Game\src\Field\Zone.h,Holds a block of values cleared when a room finishes loading.,low,meaning-unresolved;source:146C.c:15337
+T00224,State,Field::InteractionFocus,Native\Game\src\Field\Interaction.h,Holds the trigger record and actor query of the interaction being shown.,med,source:146C.c:4980;source:146C.c:5003
+T00231,State,Field::RoomTint,Native\Game\src\Field\Room.h,Holds an RGB offset strength and active flag applied to room drawing.,high,source:146C.c:16001;source:146C.c:17594
+T00232,State,Field::DoorMatchList,Native\Game\src\Field\Doors.h,Lists door records matching a tile or platform query.,high,source:146C.c:16196
+T00233,State,Field::GimmickAnimationJob,Native\Game\src\Field\Gimmicks.h,Queues a delayed gimmick transition or countdown for a trigger record.,high,source:146C.c:16338;source:146C.c:16359
+T00235,State,Field::RoomEffectInstance,Native\Game\src\Field\RoomEffects.h,Tracks one room texture effect or scripted room-effect sequence.,high,source:2842C.c:616;source:2842C.c:880
+T00338,State,Field::SphericalCamera,Native\Game\src\Field\Camera.h,Holds the orbit camera pose its pending step its default distance and zoom velocity.,high,source:146C.c:2643;source:146C.c:2759
+T00345,OnDisc,Field::ZndEnemyRecord,Native\Game\src\Field\Znd.h,Holds one complete 0x464-byte enemy record from a ZND zone file.,high,decoder-only;DataCrystal ZND files list enemy records;source:146C.c:6649
+T00444,Value,Field::ActorPlacement,Native\Game\src\Field\Actors.h,Places an actor by tile X facing tile Z and height.,high,source:3A1A0.c:286;source:146C.c:15149
+T00445,Value,Field::PlatformContactPoint,Native\Game\src\Field\Platforms.h,Gives a moving-platform contact position and platform index.,high,source:146C.c:16782
+T00446,Value,Field::PlatformContactPoint,Native\Game\src\Field\Platforms.h,Gives a moving-platform contact position and platform index.,high,same-as:T00445;identical layout with different member spellings;source:40564.c:395
+T00451,OnDisc,Field::RoomEffectScriptHeader,Native\Game\src\Field\RoomEffects.h,Heads a scripted room-effect sequence with its object count and active flag.,med,decoder-only;source:2842C.c:904
+T00453,Misc,Field::RoomEffectObjectView,Native\Game\src\Field\RoomEffects.h,Views a room-effect object as its scene entry and script cursor.,med,partial view of T00455;merge with the native room-effect object;source:2842C.c:1038
+T00454,OnDisc,Field::RoomEffectCommandHeader,Native\Game\src\Field\RoomEffects.h,Gives the byte size and opcode of one room-effect command.,high,decoder-only;source:2842C.c:1047;source:2842C.c:1056
+T00637,OnDisc,Field::BackgroundLayout,Native\Game\src\Field\Background.h,Gives the tile grid size and tiles of a room background.,med,decoder-only;source:146C.c:17582
+T00655,State,Field::ManualDisplayState,Native\Game\src\Field\Manual.h,Remembers the selected manual and each manual scroll position.,high,source:494.c:304;source:494.c:330

@@ -91,3 +91,81 @@ T00639.016,transitionSpeed,Transition speed of the camera transition,med,declara
 T00639.017,transitionFrames,Transition frames of the camera transition,med,declaration-only;source:146C.h:822
 T00705.000,roomFlags,Room flags of the room visit flags,med,declaration-only;source:main.h:392
 T00705.001,areaFlags,Area flags of the room visit flags,med,declaration-only;source:main.h:393
+T00211.000,positionX,Horizontal position plus 128,med,declaration-only;source:146C.c:187
+T00211.001,height,Ground height at the marker,med,declaration-only;source:146C.c:188
+T00211.002,positionZ,Depth position plus 128,med,declaration-only;source:146C.c:189
+T00211.003,reserved06,Not written by the marker code,low,declaration-only;source:146C.c:190
+T00211.004,reserved08,Not written by the marker code,low,declaration-only;source:146C.c:191
+T00211.005,vertexShades,Three vertex shade triples,med,declaration-only;source:146C.c:192
+T00211.006,reserved18,Not written by the marker code,low,declaration-only;source:146C.c:193
+T00211.007,reserved1C,Not written by the marker code,low,declaration-only;source:146C.c:194
+T00211.008,reserved20,Not written by the marker code,low,declaration-only;source:146C.c:195
+T00211.009,lastVertexShade,Shade of the final vertex,med,declaration-only;source:146C.c:196
+T00212.000,instanceFlags,Flags copied into the new instance,med,declaration-only;source:30DB0.c:32
+T00212.001,instanceWord4,Word copied into the new instance,low,declaration-only;source:30DB0.c:33
+T00212.002,recolorCount,Count passed to the palette recolor routine,low,declaration-only;source:30DB0.c:34
+T00212.003,modelDataSize,Size passed to the model parser,med,declaration-only;source:30DB0.c:35
+T00221.000,reserved00,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:304
+T00221.001,reserved02,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:305
+T00221.002,reserved04,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:306
+T00221.003,reserved06,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:307
+T00221.004,reserved08,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:308
+T00221.005,reserved0A,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:309
+T00221.006,reserved0C,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:310
+T00221.007,reserved10,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:311
+T00221.008,reserved14,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:312
+T00224.000,triggerRecord,Trigger record being shown,med,declaration-only;source:146C.c:157
+T00224.001,actorQuery,Actor position query and parameter,med,declaration-only;source:146C.c:158
+T00231.000,red,Red offset,med,declaration-only;source:146C.c:162
+T00231.001,green,Green offset,med,declaration-only;source:146C.c:163
+T00231.002,blue,Blue offset,med,declaration-only;source:146C.c:164
+T00231.003,reserved03,Unreferenced byte,low,declaration-only;source:146C.c:165
+T00231.004,strength,Tint strength,med,declaration-only;source:146C.c:166
+T00231.005,isActive,Tint applied when nonzero,med,declaration-only;source:146C.c:167
+T00232.000,count,Number of matches,med,declaration-only;source:146C.c:278
+T00232.001,records,Matching door records,med,declaration-only;source:146C.c:279
+T00233.000,jobKind,0 free 1 transition 2 countdown-then-apply 3 countdown-then-finish,med,declaration-only;source:146C.c:247
+T00233.001,trigger,Trigger record the job acts on,med,declaration-only;source:146C.c:248
+T00235.000,isActive,Effect is running,med,declaration-only;source:2842C.c:52
+T00235.001,kindOrObjectCount,Texture-effect kind or script object count,med,declaration-only;source:2842C.c:53
+T00235.002,isUpdateEnabled,Updates enabled,med,declaration-only;source:2842C.c:54
+T00235.003,reserved03,Cleared at setup; no reader identified,low,declaration-only;source:2842C.c:55
+T00235.004,currentData,Current effect data or script cursor,med,declaration-only;source:2842C.c:56
+T00235.005,originalData,Script start restored on restart,med,declaration-only;source:2842C.c:57
+T00338.000,values,Current yaw pitch distance and mode,med,declaration-only;source:146C.h:741
+T00338.001,delta,Pending rotation phase target pitch and zoom step,med,declaration-only;source:146C.h:742
+T00338.002,initialDistance,Default camera distance,med,declaration-only;source:146C.h:743
+T00338.003,zoomVelocity,Distance change per frame,med,declaration-only;source:146C.h:744
+T00338.004,speed,Camera step speed,med,declaration-only;source:146C.h:745
+T00345.000,recordBytes,Raw enemy record bytes,med,declaration-only;source:146C.h:658
+T00444.000,tileX,Tile X,med,declaration-only;source:3A1A0.h:5
+T00444.001,direction,Facing direction,med,declaration-only;source:3A1A0.h:6
+T00444.002,tileZ,Tile Z,med,declaration-only;source:3A1A0.h:7
+T00444.003,height,Height in units of 64,med,declaration-only;source:3A1A0.h:8
+T00445.000,x,Contact X,med,declaration-only;source:146C.c:252
+T00445.001,height,Contact height,med,declaration-only;source:146C.c:253
+T00445.002,z,Contact Z,med,declaration-only;source:146C.c:254
+T00445.003,platformIndex,Moving platform index,med,declaration-only;source:146C.c:255
+T00446.000,x,Contact X,med,declaration-only;source:3A1A0.c:16
+T00446.001,height,Contact height,med,declaration-only;source:3A1A0.c:17
+T00446.002,z,Contact Z,med,declaration-only;source:3A1A0.c:18
+T00446.003,platformIndex,Moving platform index,med,declaration-only;source:3A1A0.c:19
+T00451.000,objectCount,Number of scripted objects,med,declaration-only;source:2842C.c:185
+T00451.001,reserved01,Unreferenced byte,low,declaration-only;source:2842C.c:186
+T00451.002,isActive,Sequence starts active,med,declaration-only;source:2842C.c:187
+T00451.003,reserved03,Unreferenced byte,low,declaration-only;source:2842C.c:188
+T00453.000,sceneEntry,Scene object the effect drives,med,declaration-only;source:2842C.c:66
+T00453.001,scriptCursor,Current command position,med,declaration-only;source:2842C.c:67
+T00453.002,reserved08,Remaining object state,low,declaration-only;source:2842C.c:68
+T00454.000,size,Command size in bytes,med,declaration-only;source:2842C.c:61
+T00454.001,opcode,Command opcode,med,declaration-only;source:2842C.c:62
+T00637.000,width,Tile columns,med,declaration-only;source:2842C.h:12
+T00637.001,height,Tile rows,med,declaration-only;source:2842C.h:13
+T00637.002,reserved08,Unreferenced word,low,declaration-only;source:2842C.h:14
+T00637.003,tiles,Background tiles,med,declaration-only;source:2842C.h:15
+T00655.000,currentManual,Selected manual,med,declaration-only;source:146C.h:649
+T00655.001,reserved02,Unreferenced short,low,declaration-only;source:146C.h:650
+T00655.002,scrollPositions,Scroll position per manual,med,declaration-only;source:146C.h:651
+T00655.003,reserved20,Unreferenced short,low,declaration-only;source:146C.h:652
+T00655.004,reserved22,Unreferenced byte,low,declaration-only;source:146C.h:653
+T00655.005,reserved23,Unreferenced byte,low,declaration-only;source:146C.h:654
