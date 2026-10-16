@@ -320,7 +320,7 @@ must refuse names whose rows do not pass the evidence check.
 
 | Batch | Globals | Types | Fields/enumerators | Output status |
 |---|---:|---:|---:|---|
-| Audio | 92 | 20 | 270 | Pending |
+| Audio | 92 | 20 | 270 | Validated and applied |
 | Engine_01 | 151 | 38 | 252 | Validated and applied |
 | Engine_02 | 60 | 0 | 0 | Validated and applied |
 | Game_Actors_01 | 0 | 55 | 768 | Pending |
@@ -344,9 +344,9 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **648 / 2,174** | **206 / 820** | **1,443 / 6,766** | **9 / 24 batches applied** |
+| **Applied / inventoried** | **740 / 2,174** | **226 / 820** | **1,713 / 6,766** | **10 / 24 batches applied** |
 
-Applied rows still include 32 low-confidence globals, 5 low-confidence types and 220 low-confidence fields. Validation checks coverage,
+Applied rows still include 32 low-confidence globals, 5 low-confidence types and 257 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -368,6 +368,13 @@ names, locations and collisions; it does not prove semantics or close migration 
   40 bytes remain in the 56-byte element, and only slot 0's `motorLevels` is used as the summed output. The real
   element most likely starts 8 bytes later with the motor levels stored once before the array. Lay out the native
   type from the interpreter, not the declaration.
+- Audio layouts come from the binary, not the decomp declarations: `Audio::MusicConfig` is 0x80 bytes (configs are
+  copied with `Sound_memcpy32(..., 0x80)`; `MusicId` is read at +0x6E in the matched asm; the Chrono Cross AKAO
+  driver's `FSoundMusicContext` is also 0x80), so its `reserved80`-`reserved9C` members do not exist.
+  The sound-effect channels are one 12-entry array starting at G01847 (declared `[10]`), and G01848 aliases
+  entries 10-11. The binary labels `g_Sound_GlobalFlags` as one word; its C struct's second and third words are
+  the separate globals G01891/G01892, and the stereo/mono commands overwrite G01891 whole. Several unsized Audio
+  tables have inventory sizes that overlap the next symbol; their capacities come from address gaps (noted per row).
 - Final locations of data rows and the function catalog disagree in places (`Input\src\Controllers.c` vs
   `Controller.c`, `Graphics\src\ScreenTransition.c` vs `FramebufferEffects.c`, `Core\src\Memory.c` vs
   `Memory\Heap.c`, `Content\src\DiscQueue.c` vs `CdDrive.c`, `Video\src\Intro.c` vs `Intro\Playback.c`).

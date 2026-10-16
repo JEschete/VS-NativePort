@@ -1076,11 +1076,11 @@ T00193.003,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00193.004,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
 T00193.005,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
 T00193.006,T00193,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
-T00194.000,T00194,AkaoSeqHeader,0,magic,0,char[4],,,,,,,
-T00194.001,T00194,AkaoSeqHeader,1,id,0,u_short,,,,,,,
-T00194.002,T00194,AkaoSeqHeader,2,length,0,u_short,,,,,,,
-T00194.003,T00194,AkaoSeqHeader,3,reverb_type,0,u_short,,,,,,,
-T00194.004,T00194,AkaoSeqHeader,4,timestamp,0,AkaoTimeStamp,,,,,,,
+T00194.000,T00194,AkaoSeqHeader,0,magic,0,char[4],,,,magic,File signature AKAO,high,source:25AC.c:3836
+T00194.001,T00194,AkaoSeqHeader,1,id,0,u_short,,,,sequenceId,Music id compared with the playing music,high,source:25AC.c:3838
+T00194.002,T00194,AkaoSeqHeader,2,length,0,u_short,,,,length,File length,med,declaration-only;source:25AC.c:38
+T00194.003,T00194,AkaoSeqHeader,3,reverb_type,0,u_short,,,,reverbMode,Reverb mode applied when the music starts,high,source:25AC.c:3842
+T00194.004,T00194,AkaoSeqHeader,4,timestamp,0,AkaoTimeStamp,,,,timestamp,Authoring timestamp,med,declaration-only;source:25AC.c:40
 T00195.000,T00195,AkaoTimeStamp,0,year_bcd,0,char,,,,yearBcd,BCD year of the timestamp,med,declaration-only;source:25AC.c:27
 T00195.001,T00195,AkaoTimeStamp,1,month_bcd,0,char,,,,monthBcd,BCD month of the timestamp,med,declaration-only;source:25AC.c:28
 T00195.002,T00195,AkaoTimeStamp,2,day_bcd,0,char,,,,dayBcd,BCD day of the timestamp,med,declaration-only;source:25AC.c:29
@@ -1130,20 +1130,20 @@ T00200.000,T00200,D_1F8003EC_t,0,unk0,1,u_char[8],,,,,,,
 T00200.001,T00200,D_1F8003EC_t,1,first,0,int,,,,,,,
 T00200.002,T00200,D_1F8003EC_t,2,last,0,int,,,,,,,
 T00200.003,T00200,D_1F8003EC_t,3,data,0,u_char **,,,,,,,
-T00201.000,T00201,D_80036770_t,0,unk0,1,int,,,baseMusicBankId,,,,
-T00201.001,T00201,D_80036770_t,1,unk4,1,int,,,alternateMusicBankId,,,,
-T00201.002,T00201,D_80036770_t,2,unk8,1,int,,,,,,,
-T00201.003,T00201,D_80036770_t,3,unkC,1,int,,,,,,,
-T00202.000,T00202,D_800378C0_t,0,unk0,1,void *,,,,,,,
-T00202.001,T00202,D_800378C0_t,1,unk4,1,int,,,,,,,
-T00202.002,T00202,D_800378C0_t,2,unk8,1,int,,,,,,,
-T00202.003,T00202,D_800378C0_t,3,unkC,1,int,,,,,,,
-T00202.004,T00202,D_800378C0_t,4,unk10,1,int,,,,,,,
-T00202.005,T00202,D_800378C0_t,5,unk14,1,int,,,,,,,
-T00203.000,T00203,D_80039BC8_t,0,pInstrumentDst,0,int *,,,,,,,
-T00203.001,T00203,D_80039BC8_t,1,SpuAddr,0,int,,,,,,,
-T00203.002,T00203,D_80039BC8_t,2,SpuBytesRemaining,0,u_int,,,,,,,
-T00203.003,T00203,D_80039BC8_t,3,InstrumentBytesRemaining,0,u_int,,,remainingInstrumentHeaderBytes,,,,
+T00201.000,T00201,D_80036770_t,0,unk0,1,int,,,baseMusicBankId,bankId,Sample bank loaded for music,med,source:25AC.c:258
+T00201.001,T00201,D_80036770_t,1,unk4,1,int,,,alternateMusicBankId,alternateBankId,Alternate sample bank; a matching sequence selects it,med,source:25AC.c:2418
+T00201.002,T00201,D_80036770_t,2,unk8,1,int,,,,reserved8,No access found,low,declaration-only;source:25AC.c:20
+T00201.003,T00201,D_80036770_t,3,unkC,1,int,,,,reservedC,No access found,low,declaration-only;source:25AC.c:21
+T00202.000,T00202,D_800378C0_t,0,unk0,1,void *,,,,param1,"First argument, often a data pointer",high,source:25AC.c:288
+T00202.001,T00202,D_800378C0_t,1,unk4,1,int,,,,param2,Second argument,med,source:25AC.c:321
+T00202.002,T00202,D_800378C0_t,2,unk8,1,int,,,,param3,Third argument,med,source:25AC.c:322
+T00202.003,T00202,D_800378C0_t,3,unkC,1,int,,,,param4,Fourth argument,med,source:25AC.c:359
+T00202.004,T00202,D_800378C0_t,4,unk10,1,int,,,,extParam1,Copied to the command's first extended parameter,high,source:25AC.c:3949
+T00202.005,T00202,D_800378C0_t,5,unk14,1,int,,,,extParam2,Copied to the command's second extended parameter,high,source:25AC.c:3950
+T00203.000,T00203,D_80039BC8_t,0,pInstrumentDst,0,int *,,,,instrumentDestination,Next instrument word to fill,high,source:25AC.c:847
+T00203.001,T00203,D_80039BC8_t,1,SpuAddr,0,int,,,,spuAddress,Next SPU transfer address; zero starts a new stream,high,source:25AC.c:830
+T00203.002,T00203,D_80039BC8_t,2,SpuBytesRemaining,0,u_int,,,,spuBytesRemaining,Sample bytes still to transfer,high,source:25AC.c:846
+T00203.003,T00203,D_80039BC8_t,3,InstrumentBytesRemaining,0,u_int,,,remainingInstrumentHeaderBytes,instrumentBytesRemaining,Instrument bytes still to copy,high,source:25AC.c:848
 T00204.000,T00204,D_80050468_t,0,unk0,1,char,,,timerMode,mode,0 stopped 1 counts up any other value counts down,high,source:146C.c:14508;source:146C.c:8513
 T00204.001,T00204,D_80050468_t,1,unk1,1,char,,,suspendedTimerMode,pausedMode,Mode saved while the timer is paused and restored on resume,high,source:146C.c:8553;source:146C.c:8557
 T00204.002,T00204,D_80050468_t,2,unk2,1,u_short,,,resetScope,resetScope,Resets on room load (0) zone load (1) or scene transition (2),high,source:146C.c:15313;source:146C.c:14844;source:146C.c:14768
@@ -2171,23 +2171,23 @@ T00275.006,T00275,FAkaoHeader,6,SampleRate,0,int,,,,sampleRate,Stream sample rat
 T00275.007,T00275,FAkaoHeader,7,CurrentPage,0,u_int,,,,currentPage,Current stream page,med,declaration-only;source:sound.h:556
 T00275.008,T00275,FAkaoHeader,8,unk_0x24,1,char[4],,,,reserved24,Unidentified header bytes,low,declaration-only;source:sound.h:557
 T00275.009,T00275,FAkaoHeader,9,unk_0x28,1,int,,,,reserved28,Unidentified header word,low,declaration-only;source:sound.h:558
-T00276.000,T00276,FAkaoSequence,0,unk00,1,u_int,,,,,,,
-T00276.001,T00276,FAkaoSequence,1,unk04,1,u_int,,,,,,,
-T00276.002,T00276,FAkaoSequence,2,unk08,1,u_int,,,,,,,
-T00276.003,T00276,FAkaoSequence,3,unk0C,1,u_int,,,,,,,
-T00276.004,T00276,FAkaoSequence,4,unk10,1,u_int,,,,,,,
-T00276.005,T00276,FAkaoSequence,5,unk14,1,u_int,,,sampleByteCountInBankHeader,,,,
-T00276.006,T00276,FAkaoSequence,6,unk18,1,u_int,,,,,,,
-T00276.007,T00276,FAkaoSequence,7,unk1C,1,u_int,,,instrumentCountInBankHeader,,,,
-T00276.008,T00276,FAkaoSequence,8,ChannelEnableMask,0,u_int,,,,,,,
-T00276.009,T00276,FAkaoSequence,9,KeyedMask,0,u_int,,,,,,,
-T00276.010,T00276,FAkaoSequence,10,AllocatedVoiceMask,0,u_int,,,,,,,
-T00276.011,T00276,FAkaoSequence,11,unk2C,1,u_int,,,,,,,
-T00276.012,T00276,FAkaoSequence,12,PatchRegionOffset,0,int,,,,,,,
-T00276.013,T00276,FAkaoSequence,13,KeymapRegionOffset,0,int,,,,,,,
-T00276.014,T00276,FAkaoSequence,14,unk38,1,u_int,,,,,,,
-T00276.015,T00276,FAkaoSequence,15,unk3C,1,u_int,,,,,,,
-T00276.016,T00276,FAkaoSequence,16,Payload,0,char[1],,,,,,,
+T00276.000,T00276,FAkaoSequence,0,unk00,1,u_int,,,,reserved00,No access found,low,declaration-only;source:sound.h:424
+T00276.001,T00276,FAkaoSequence,1,unk04,1,u_int,,,,reserved04,No access found,low,declaration-only;source:sound.h:425
+T00276.002,T00276,FAkaoSequence,2,unk08,1,u_int,,,,reserved08,No access found,low,declaration-only;source:sound.h:426
+T00276.003,T00276,FAkaoSequence,3,unk0C,1,u_int,,,,reserved0C,No access found,low,declaration-only;source:sound.h:427
+T00276.004,T00276,FAkaoSequence,4,unk10,1,u_int,,,,reserved10,No access found,low,declaration-only;source:sound.h:429
+T00276.005,T00276,FAkaoSequence,5,unk14,1,u_int,,,sampleByteCountInBankHeader,sampleBankId,Sample bank the music expects; selects the alternate bank when it matches,med,source:25AC.c:2418
+T00276.006,T00276,FAkaoSequence,6,unk18,1,u_int,,,,reserved18,No access found,low,declaration-only;source:sound.h:431
+T00276.007,T00276,FAkaoSequence,7,unk1C,1,u_int,,,instrumentCountInBankHeader,instrumentDataOffset,Offset of the instrument data in an instrument file,med,source:25AC.c:1044
+T00276.008,T00276,FAkaoSequence,8,ChannelEnableMask,0,u_int,,,,channelEnableMask,Channels the music uses,high,source:25AC.c:2395
+T00276.009,T00276,FAkaoSequence,9,KeyedMask,0,u_int,,,,keyedMask,Initial keyed voice mask,high,source:25AC.c:2414
+T00276.010,T00276,FAkaoSequence,10,AllocatedVoiceMask,0,u_int,,,,allocatedVoiceMask,Initial allocated voice mask,high,source:25AC.c:2415
+T00276.011,T00276,FAkaoSequence,11,unk2C,1,u_int,,,,reserved2C,No access found,low,declaration-only;source:sound.h:437
+T00276.012,T00276,FAkaoSequence,12,PatchRegionOffset,0,int,,,,patchRegionOffset,Offset of the patch table from field 0x30,high,source:25AC.c:2419
+T00276.013,T00276,FAkaoSequence,13,KeymapRegionOffset,0,int,,,,keymapRegionOffset,Offset of the keymap table from field 0x34,high,source:25AC.c:2422
+T00276.014,T00276,FAkaoSequence,14,unk38,1,u_int,,,,resumeKeyOnMask,Copied to the configuration's mask of channels that may key on when resumed,med,source:25AC.c:2426
+T00276.015,T00276,FAkaoSequence,15,unk3C,1,u_int,,,,pushReleaseMask,Copied to the configuration's mask of channels released when pushed,med,source:25AC.c:2427
+T00276.016,T00276,FAkaoSequence,16,Payload,0,char[1],,,,payload,Bytecode or instrument data,high,source:25AC.c:1042
 T00277.000,T00277,FSound80094FA0,0,field0_0x0,0,int,,,,reserved00,Unidentified channel data,low,declaration-only;source:sound.h:277
 T00277.001,T00277,FSound80094FA0,1,unk_Mask_0x4,0,int,,,,reserved04,Unidentified channel data,low,declaration-only;source:sound.h:278
 T00277.002,T00277,FSound80094FA0,2,field2_0x8,0,int,,,,reserved08,Unidentified channel data,low,declaration-only;source:sound.h:279
@@ -2215,223 +2215,223 @@ T00277.023,T00277,FSound80094FA0,23,field23_0x50,0,int,,,,reserved50,Unidentifie
 T00277.024,T00277,FSound80094FA0,24,field24_0x54,0,int,,,,reserved54,Unidentified channel data,low,declaration-only;source:sound.h:301
 T00277.025,T00277,FSound80094FA0,25,VoiceSampleRate,0,int,,,,voiceSampleRate,Named in original declaration,med,declaration-only;source:sound.h:302
 T00277.026,T00277,FSound80094FA0,26,ControlFlags,0,int,,,,controlFlags,Named in original declaration,med,declaration-only;source:sound.h:303
-T00278.000,T00278,FSoundChannel,0,ProgramCounter,0,char *,,,,,,,
-T00278.001,T00278,FSoundChannel,1,LoopStartPc,0,char *[4],,,,,,,
-T00278.002,T00278,FSoundChannel,2,ReturnProgramCounter,0,char *,,,,,,,
-T00278.003,T00278,FSoundChannel,3,Keymap,0,char *,,,,,,,
-T00278.004,T00278,FSoundChannel,4,VibratoWave,0,short *,,,,,,,
-T00278.005,T00278,FSoundChannel,5,TremeloWave,0,short *,,,,,,,
-T00278.006,T00278,FSoundChannel,6,AutoPanWave,0,short *,,,,,,,
-T00278.007,T00278,FSoundChannel,7,unk28,1,int,,,effectGroupFlags | soundEffectTagsAndFlags,,,,
-T00278.008,T00278,FSoundChannel,8,PitchBase,0,int,,,,,,,
-T00278.009,T00278,FSoundChannel,9,PitchSlide,0,int,,,,,,,
-T00278.010,T00278,FSoundChannel,10,UpdateFlags,0,u_int,,,,,,,
-T00278.011,T00278,FSoundChannel,11,unk38,1,int,,,sampleBankSlotMask,,,,
-T00278.012,T00278,FSoundChannel,12,unk3C,1,int,,,soundEffectId | soundEffectIdOrBlobPointer,,,,
-T00278.013,T00278,FSoundChannel,13,unk40,1,int,,,externalPitchScale | pitchScale,,,,
-T00278.014,T00278,FSoundChannel,14,unk44,1,u_int,,,pitchScaleSlideStep,,,,
-T00278.015,T00278,FSoundChannel,15,Volume,0,int,,,,,,,
-T00278.016,T00278,FSoundChannel,16,VolumeSlideStep,0,int,,,,,,,
-T00278.017,T00278,FSoundChannel,17,PitchSlideStep,0,int,,,,,,,
-T00278.018,T00278,FSoundChannel,18,FinePitchDelta,0,int,,,,,,,
-T00278.019,T00278,FSoundChannel,19,unk58,1,int,,,voiceEvictionPriority,,,,
-T00278.020,T00278,FSoundChannel,20,unk5C,1,int,,,keyOnVolumeStart,,,,
-T00278.021,T00278,FSoundChannel,21,unk60,1,int,,,keyOnVolumeSlideStep,,,,
-T00278.022,T00278,FSoundChannel,22,Type,0,u_short,,,,,,,
-T00278.023,T00278,FSoundChannel,23,Length1,0,u_short,,,,,,,
-T00278.024,T00278,FSoundChannel,24,Length2,0,u_short,,,,,,,
-T00278.025,T00278,FSoundChannel,25,InstrumentIndex,0,u_short,,,,,,,
-T00278.026,T00278,FSoundChannel,26,unk6C,1,u_short,,,externalPanOffset | panOffset,,,,
-T00278.027,T00278,FSoundChannel,27,unk6E,1,u_short,,,externalPanFadeTicks | panOffsetSlideLength,,,,
-T00278.028,T00278,FSoundChannel,28,OpcodeStepCounter,0,u_short,,,,,,,
-T00278.029,T00278,FSoundChannel,29,LoopIterationCount,0,u_short[4],,,,,,,
-T00278.030,T00278,FSoundChannel,30,LoopStepCounterSnapshot,0,short[4],,,,,,,
-T00278.031,T00278,FSoundChannel,31,VolumeBalance,0,u_short,,,,,,,
-T00278.032,T00278,FSoundChannel,32,VolumeBalanceSlideLength,0,u_short,,,,,,,
-T00278.033,T00278,FSoundChannel,33,unk86,1,u_short,,,pitchScaleSlideLength,,,,
-T00278.034,T00278,FSoundChannel,34,ChannelVolumeSlideLength,0,u_short,,,,,,,
-T00278.035,T00278,FSoundChannel,35,KeyOnVolumeSlideLength,0,u_short,,,,,,,
-T00278.036,T00278,FSoundChannel,36,unk8C,1,u_short,,,effectVolumeSlideLength | externalVolumeFadeTicks,,,,
-T00278.037,T00278,FSoundChannel,37,ChannelPan,0,u_short,,,,,,,
-T00278.038,T00278,FSoundChannel,38,ChannelPanSlideLength,0,u_short,,,,,,,
-T00278.039,T00278,FSoundChannel,39,PitchSlideStepsCurrent,0,u_short,,,,,,,
-T00278.040,T00278,FSoundChannel,40,Octave,0,u_short,,,,,,,
-T00278.041,T00278,FSoundChannel,41,PitchBendSlideLength,0,u_short,,,,,,,
-T00278.042,T00278,FSoundChannel,42,KeyStored,0,u_short,,,,,,,
-T00278.043,T00278,FSoundChannel,43,PortamentoSteps,0,u_short,,,,,,,
-T00278.044,T00278,FSoundChannel,44,SfxMask,0,u_short,,,,,,,
-T00278.045,T00278,FSoundChannel,45,VibratoDelay,0,short,,,,,,,
-T00278.046,T00278,FSoundChannel,46,VibratoDelayCurrent,0,u_short,,,,,,,
-T00278.047,T00278,FSoundChannel,47,VibratoRatePhase,0,u_short,,,,,,,
-T00278.048,T00278,FSoundChannel,48,unkA4,1,u_short,,,vibratoPhaseCountdown | vibratoRateCountdown,,,,
-T00278.049,T00278,FSoundChannel,49,VibratoType,0,u_short,,,,,,,
-T00278.050,T00278,FSoundChannel,50,VibratoBase,0,u_short,,,,,,,
-T00278.051,T00278,FSoundChannel,51,VibratoDepth,0,u_short,,,,,,,
-T00278.052,T00278,FSoundChannel,52,VibratoDepthSlideLength,0,u_short,,,,,,,
-T00278.053,T00278,FSoundChannel,53,VibratoDepthSlideStep,0,u_short,,,,,,,
-T00278.054,T00278,FSoundChannel,54,TremeloDelay,0,short,,,,,,,
-T00278.055,T00278,FSoundChannel,55,TremeloDelayCurrent,0,u_short,,,,,,,
-T00278.056,T00278,FSoundChannel,56,TremeloRatePhase,0,u_short,,,,,,,
-T00278.057,T00278,FSoundChannel,57,unkB6,1,short,,,tremoloPhaseCountdown | tremoloRateCountdown,,,,
-T00278.058,T00278,FSoundChannel,58,TremeloType,0,u_short,,,,,,,
-T00278.059,T00278,FSoundChannel,59,TremeloDepth,0,u_short,,,,,,,
-T00278.060,T00278,FSoundChannel,60,TremeloDepthSlideLength,0,u_short,,,,,,,
-T00278.061,T00278,FSoundChannel,61,TremeloDepthSlideStep,0,short,,,,,,,
-T00278.062,T00278,FSoundChannel,62,AutoPanRatePhase,0,u_short,,,,,,,
-T00278.063,T00278,FSoundChannel,63,AutoPanRateCurrent,0,u_short,,,,,,,
-T00278.064,T00278,FSoundChannel,64,AutoPanType,0,u_short,,,,,,,
-T00278.065,T00278,FSoundChannel,65,AutoPanDepth,0,u_short,,,,,,,
-T00278.066,T00278,FSoundChannel,66,AutoPanDepthSlideLength,0,u_short,,,,,,,
-T00278.067,T00278,FSoundChannel,67,AutoPanDepthSlideStep,0,short,,,,,,,
-T00278.068,T00278,FSoundChannel,68,NoiseTimer,0,u_short,,,,,,,
-T00278.069,T00278,FSoundChannel,69,FmTimer,0,u_short,,,,,,,
-T00278.070,T00278,FSoundChannel,70,LoopStackTop,0,u_short,,,,,,,
-T00278.071,T00278,FSoundChannel,71,RandomPitchDepth,0,u_short,,,,,,,
-T00278.072,T00278,FSoundChannel,72,LengthStored,0,short,,,,,,,
-T00278.073,T00278,FSoundChannel,73,LengthFixed,0,short,,,,,,,
-T00278.074,T00278,FSoundChannel,74,VolumeBalanceSlideStep,0,short,,,,,,,
-T00278.075,T00278,FSoundChannel,75,unkDA,1,short,,,externalPanFadeStep | panOffsetSlideStep,,,,
-T00278.076,T00278,FSoundChannel,76,unkDC,1,short,,,effectVolumeScale | externalVolume,,,,
-T00278.077,T00278,FSoundChannel,77,unkDE,1,short,,,effectVolumeSlideStep | externalVolumeFadeStep,,,,
-T00278.078,T00278,FSoundChannel,78,PanSlideStep,0,short,,,,,,,
-T00278.079,T00278,FSoundChannel,79,Transpose,0,short,,,,,,,
-T00278.080,T00278,FSoundChannel,80,FineTune,0,short,,,,,,,
-T00278.081,T00278,FSoundChannel,81,Key,0,short,,,,,,,
-T00278.082,T00278,FSoundChannel,82,PitchBendSlideTranspose,0,short,,,,,,,
-T00278.083,T00278,FSoundChannel,83,TransposeStored,0,short,,,,,,,
-T00278.084,T00278,FSoundChannel,84,VibratoPitch,0,short,,,,,,,
-T00278.085,T00278,FSoundChannel,85,TremeloVolume,0,short,,,,,,,
-T00278.086,T00278,FSoundChannel,86,AutoPanVolume,0,short,,,,,,,
-T00278.087,T00278,FSoundChannel,87,VoiceParams,0,FSoundVoiceParams,,,,,,,
-T00279.000,T00279,FSoundChannelConfig,0,StatusFlags,0,int,,,,,,,
-T00279.001,T00279,FSoundChannelConfig,1,ActiveChannelMask,0,int,,,,,,,
-T00279.002,T00279,FSoundChannelConfig,2,KeyedMask,0,u_int,,,,,,,
-T00279.003,T00279,FSoundChannelConfig,3,AllocatedVoiceMask,0,int,,,,,,,
-T00279.004,T00279,FSoundChannelConfig,4,PendingKeyOnMask,0,int,,,,,,,
-T00279.005,T00279,FSoundChannelConfig,5,ActiveNoteMask,0,u_int,,,,,,,
-T00279.006,T00279,FSoundChannelConfig,6,PendingKeyOffMask,0,int,,,,,,,
-T00279.007,T00279,FSoundChannelConfig,7,unk1C,1,u_int,,,pausedChannelMask | suspendedChannelMask,,,,
-T00279.008,T00279,FSoundChannelConfig,8,Tempo,0,int,,,,,,,
-T00279.009,T00279,FSoundChannelConfig,9,TempoSlideStep,0,int,,,,,,,
-T00279.010,T00279,FSoundChannelConfig,10,unk28,1,u_int,,,tempoAccumulator,,,,
-T00279.011,T00279,FSoundChannelConfig,11,unk2C,1,u_int,,,,,,,
-T00279.012,T00279,FSoundChannelConfig,12,unk30,1,int,,,,,,,
-T00279.013,T00279,FSoundChannelConfig,13,unk34,1,int,,,auxiliaryControlValue,,,,
-T00279.014,T00279,FSoundChannelConfig,14,unk38,1,int,,,sequenceBaseAddress,,,,
-T00279.015,T00279,FSoundChannelConfig,15,SequencePatchTable,0,FAkaoSequence *,,,,,,,
-T00279.016,T00279,FSoundChannelConfig,16,KeymapTable,0,u_short *,,,,,,,
-T00279.017,T00279,FSoundChannelConfig,17,unk44,1,FSoundKeymapEntry8 *,,,noteRemapTable,,,,
-T00279.018,T00279,FSoundChannelConfig,18,SomeIndexRelatedToSpuVoiceInfo,0,int,,,voiceAllocationStart,,,,
-T00279.019,T00279,FSoundChannelConfig,19,NoiseChannelFlags,0,u_int,,,,,,,
-T00279.020,T00279,FSoundChannelConfig,20,ReverbChannelFlags,0,u_int,,,,,,,
-T00279.021,T00279,FSoundChannelConfig,21,FmChannelFlags,0,u_int,,,,,,,
-T00279.022,T00279,FSoundChannelConfig,22,RevDepth,0,int,,,,,,,
-T00279.023,T00279,FSoundChannelConfig,23,unk5C,1,int,,,reverbDepthSlideStep,,,,
-T00279.024,T00279,FSoundChannelConfig,24,A_Volume,0,int,,,,,,,
-T00279.025,T00279,FSoundChannelConfig,25,unk64,1,int,,,volumeFadeStep,,,,
-T00279.026,T00279,FSoundChannelConfig,26,unk68,1,short,,,volumeFadeTicksRemaining,,,,
-T00279.027,T00279,FSoundChannelConfig,27,ReverbDepthSlideLength,0,short,,,,,,,
-T00279.028,T00279,FSoundChannelConfig,28,TempoSlideLength,0,u_short,,,,,,,
-T00279.029,T00279,FSoundChannelConfig,29,MusicId,0,u_short,,,,,,,
-T00279.030,T00279,FSoundChannelConfig,30,JumpThresholdValue,0,u_short,,,sequence branch threshold,,,,
-T00279.031,T00279,FSoundChannelConfig,31,NoiseClock,0,u_short,,,,,,,
-T00279.032,T00279,FSoundChannelConfig,32,TimerUpper,0,u_short,,,,,,,
-T00279.033,T00279,FSoundChannelConfig,33,TimerUpperCurrent,0,u_short,,,,,,,
-T00279.034,T00279,FSoundChannelConfig,34,TimerLower,0,u_short,,,,,,,
-T00279.035,T00279,FSoundChannelConfig,35,TimerLowerCurrent,0,u_short,,,,,,,
-T00279.036,T00279,FSoundChannelConfig,36,TimerTopCurrent,0,u_short,,,,,,,
-T00279.037,T00279,FSoundChannelConfig,37,unk80,1,int,,,,,,,
-T00279.038,T00279,FSoundChannelConfig,38,unk84,1,int,,,,,,,
-T00279.039,T00279,FSoundChannelConfig,39,unk88,1,int,,,,,,,
-T00279.040,T00279,FSoundChannelConfig,40,unk8C,1,int,,,,,,,
-T00279.041,T00279,FSoundChannelConfig,41,unk90,1,int,,,,,,,
-T00279.042,T00279,FSoundChannelConfig,42,unk94,1,int,,,,,,,
-T00279.043,T00279,FSoundChannelConfig,43,unk98,1,int,,,,,,,
-T00279.044,T00279,FSoundChannelConfig,44,unk9C,1,int,,,,,,,
-T00280.000,T00280,FSoundCommandParams,0,Param1,0,u_int,,,,,,,
-T00280.001,T00280,FSoundCommandParams,1,Param2,0,u_int,,,,,,,
-T00280.002,T00280,FSoundCommandParams,2,Param3,0,u_int,,,,,,,
-T00280.003,T00280,FSoundCommandParams,3,Param4,0,u_int,,,,,,,
-T00280.004,T00280,FSoundCommandParams,4,ExtParam1,0,u_int,,,,,,,
-T00280.005,T00280,FSoundCommandParams,5,ExtParam2,0,u_int,,,,,,,
+T00278.000,T00278,FSoundChannel,0,ProgramCounter,0,char *,,,,programCounter,Next bytecode byte,high,source:25AC.c:2435
+T00278.001,T00278,FSoundChannel,1,LoopStartPc,0,char *[4],,,,loopStarts,Loop start addresses of the four-deep loop stack,high,source:25AC.c:2885
+T00278.002,T00278,FSoundChannel,2,ReturnProgramCounter,0,char *,,,,returnAddress,Address resumed after a relative call,high,source:25AC.c:5115
+T00278.003,T00278,FSoundChannel,3,Keymap,0,char *,,,,keymap,Keymap of the current patch,high,source:25AC.c:2884
+T00278.004,T00278,FSoundChannel,4,VibratoWave,0,short *,,,,vibratoWave,Vibrato waveform,high,source:25AC.c:1491
+T00278.005,T00278,FSoundChannel,5,TremeloWave,0,short *,,,,tremoloWave,Tremolo waveform,high,source:25AC.c:1518
+T00278.006,T00278,FSoundChannel,6,AutoPanWave,0,short *,,,,autoPanWave,Auto-pan waveform,high,source:25AC.c:1540
+T00278.007,T00278,FSoundChannel,7,unk28,1,int,,,effectGroupFlags | soundEffectTagsAndFlags,effectTags,Sound-effect tag flags matched by stop and scene commands; bit 25 exempts scene volume,high,source:25AC.c:2647;source:25AC.c:2550
+T00278.008,T00278,FSoundChannel,8,PitchBase,0,int,,,,pitchBase,Pitch before modulation,high,source:25AC.c:1483
+T00278.009,T00278,FSoundChannel,9,PitchSlide,0,int,,,,pitchSlide,Current pitch slide offset,high,source:25AC.c:1557
+T00278.010,T00278,FSoundChannel,10,UpdateFlags,0,u_int,,,,updateFlags,Voice parameters that need writing,high,source:25AC.c:1572
+T00278.011,T00278,FSoundChannel,11,unk38,1,int,,,sampleBankSlotMask,effectVoiceMask,Voices assigned to the sound-effect program,high,source:25AC.c:2658
+T00278.012,T00278,FSoundChannel,12,unk3C,1,int,,,soundEffectId | soundEffectIdOrBlobPointer,effectId,Sound-effect id the channel plays,high,source:25AC.c:2646;source:25AC.c:2624
+T00278.013,T00278,FSoundChannel,13,unk40,1,int,,,externalPitchScale | pitchScale,effectPitchScale,Per-effect pitch scale set by command 0xA4,high,source:25AC.c:3437
+T00278.014,T00278,FSoundChannel,14,unk44,1,u_int,,,pitchScaleSlideStep,reserved44,No channel access found,low,declaration-only;source:sound.h:336
+T00278.015,T00278,FSoundChannel,15,Volume,0,int,,,,volume,Channel volume,high,source:25AC.c:1421
+T00278.016,T00278,FSoundChannel,16,VolumeSlideStep,0,int,,,,volumeSlideStep,Per-tick volume slide step,high,source:25AC.c:1422
+T00278.017,T00278,FSoundChannel,17,PitchSlideStep,0,int,,,,pitchSlideStep,Per-tick pitch slide step,high,source:25AC.c:1558
+T00278.018,T00278,FSoundChannel,18,FinePitchDelta,0,int,,,,finePitchDelta,Pitch offset from fine tuning,high,source:25AC.c:1659
+T00278.019,T00278,FSoundChannel,19,unk58,1,int,,,voiceEvictionPriority,priority,Eviction priority of a sound effect,high,source:25AC.c:2582
+T00278.020,T00278,FSoundChannel,20,unk5C,1,int,,,keyOnVolumeStart,reserved5C,No channel access found,low,source:25AC.c:5195
+T00278.021,T00278,FSoundChannel,21,unk60,1,int,,,keyOnVolumeSlideStep,keyOnVolumeSlideStep,Per-tick key-on volume slide step,high,source:25AC.c:5206
+T00278.022,T00278,FSoundChannel,22,Type,0,u_short,,,,type,Music or sound-effect channel,high,source:25AC.c:2660
+T00278.023,T00278,FSoundChannel,23,Length1,0,u_short,,,,noteLength,Ticks until the next note,high,source:25AC.c:2436
+T00278.024,T00278,FSoundChannel,24,Length2,0,u_short,,,,gateLength,Ticks until the note is released,high,source:25AC.c:2437
+T00278.025,T00278,FSoundChannel,25,InstrumentIndex,0,u_short,,,,instrumentIndex,Current instrument,high,source:25AC.c:2305
+T00278.026,T00278,FSoundChannel,26,unk6C,1,u_short,,,externalPanOffset | panOffset,effectPan,Program pan set by command 0xA2,high,source:25AC.c:3349
+T00278.027,T00278,FSoundChannel,27,unk6E,1,u_short,,,externalPanFadeTicks | panOffsetSlideLength,effectPanSlideLength,Ticks left in the program pan slide,med,source:25AC.c:3350
+T00278.028,T00278,FSoundChannel,28,OpcodeStepCounter,0,u_short,,,,opcodeStepCounter,"Steps executed, recorded by loop points",high,source:25AC.c:5911
+T00278.029,T00278,FSoundChannel,29,LoopIterationCount,0,u_short[4],,,,loopIterations,Iterations done at each loop level,high,source:25AC.c:5909
+T00278.030,T00278,FSoundChannel,30,LoopStepCounterSnapshot,0,short[4],,,,loopStepSnapshots,Step counter saved at each loop point,high,source:25AC.c:5910
+T00278.031,T00278,FSoundChannel,31,VolumeBalance,0,u_short,,,,volumeBalance,Master volume balance,high,source:25AC.c:1410
+T00278.032,T00278,FSoundChannel,32,VolumeBalanceSlideLength,0,u_short,,,,volumeBalanceSlideLength,Ticks left in the balance slide,high,source:25AC.c:1408
+T00278.033,T00278,FSoundChannel,33,unk86,1,u_short,,,pitchScaleSlideLength,effectPitchScaleSlideLength,Ticks left in the effect pitch scale slide,med,source:25AC.c:3438
+T00278.034,T00278,FSoundChannel,34,ChannelVolumeSlideLength,0,u_short,,,,volumeSlideLength,Ticks left in the volume slide,high,source:25AC.c:1418
+T00278.035,T00278,FSoundChannel,35,KeyOnVolumeSlideLength,0,u_short,,,,keyOnVolumeSlideLength,Ticks left in the key-on volume slide,high,source:25AC.c:2456
+T00278.036,T00278,FSoundChannel,36,unk8C,1,u_short,,,effectVolumeSlideLength | externalVolumeFadeTicks,effectVolumeSlideLength,Ticks left in the program volume slide,high,source:25AC.c:4107;source:25AC.c:3288
+T00278.037,T00278,FSoundChannel,37,ChannelPan,0,u_short,,,,pan,Channel pan,high,source:25AC.c:1432
+T00278.038,T00278,FSoundChannel,38,ChannelPanSlideLength,0,u_short,,,,panSlideLength,Ticks left in the pan slide,high,source:25AC.c:1429
+T00278.039,T00278,FSoundChannel,39,PitchSlideStepsCurrent,0,u_short,,,,pitchSlideTicksLeft,Ticks left in the pitch slide,high,source:25AC.c:1553
+T00278.040,T00278,FSoundChannel,40,Octave,0,u_short,,,,octave,Current octave,high,source:25AC.c:5299
+T00278.041,T00278,FSoundChannel,41,PitchBendSlideLength,0,u_short,,,,pitchBendSlideLength,Length of a pitch bend,high,source:25AC.c:5394
+T00278.042,T00278,FSoundChannel,42,KeyStored,0,u_short,,,,portamentoKey,Key saved for portamento,high,source:25AC.c:5413
+T00278.043,T00278,FSoundChannel,43,PortamentoSteps,0,u_short,,,,portamentoSteps,Portamento length,high,source:25AC.c:2443
+T00278.044,T00278,FSoundChannel,44,SfxMask,0,u_short,,,,playModes,Legato and full-length flags,high,source:25AC.c:2457
+T00278.045,T00278,FSoundChannel,45,VibratoDelay,0,short,,,,vibratoDelay,Ticks before vibrato starts,high,source:25AC.c:5475
+T00278.046,T00278,FSoundChannel,46,VibratoDelayCurrent,0,u_short,,,,vibratoDelayLeft,Ticks left before vibrato starts,high,source:25AC.c:1440
+T00278.047,T00278,FSoundChannel,47,VibratoRatePhase,0,u_short,,,,vibratoRate,Vibrato rate,high,source:25AC.c:1576
+T00278.048,T00278,FSoundChannel,48,unkA4,1,u_short,,,vibratoPhaseCountdown | vibratoRateCountdown,vibratoRateCounter,Countdown to the next vibrato step,med,source:25AC.c:5504
+T00278.049,T00278,FSoundChannel,49,VibratoType,0,u_short,,,,vibratoShape,Vibrato waveform index,high,source:25AC.c:5491
+T00278.050,T00278,FSoundChannel,50,VibratoBase,0,u_short,,,,vibratoBase,Vibrato amplitude base,high,source:25AC.c:1488
+T00278.051,T00278,FSoundChannel,51,VibratoDepth,0,u_short,,,,vibratoDepth,Vibrato depth,high,source:25AC.c:1479
+T00278.052,T00278,FSoundChannel,52,VibratoDepthSlideLength,0,u_short,,,,vibratoDepthSlideLength,Ticks left in the vibrato depth slide,high,source:25AC.c:1473
+T00278.053,T00278,FSoundChannel,53,VibratoDepthSlideStep,0,u_short,,,,vibratoDepthSlideStep,Per-tick vibrato depth step,high,source:25AC.c:1479
+T00278.054,T00278,FSoundChannel,54,TremeloDelay,0,short,,,,tremoloDelay,Ticks before tremolo starts,high,source:25AC.c:5577
+T00278.055,T00278,FSoundChannel,55,TremeloDelayCurrent,0,u_short,,,,tremoloDelayLeft,Ticks left before tremolo starts,high,source:25AC.c:1444
+T00278.056,T00278,FSoundChannel,56,TremeloRatePhase,0,u_short,,,,tremoloRate,Tremolo rate,high,source:25AC.c:1594
+T00278.057,T00278,FSoundChannel,57,unkB6,1,short,,,tremoloPhaseCountdown | tremoloRateCountdown,tremoloRateCounter,Countdown to the next tremolo step,med,source:25AC.c:5595
+T00278.058,T00278,FSoundChannel,58,TremeloType,0,u_short,,,,tremoloShape,Tremolo waveform index,high,source:25AC.c:5592
+T00278.059,T00278,FSoundChannel,59,TremeloDepth,0,u_short,,,,tremoloDepth,Tremolo depth,high,source:25AC.c:1510
+T00278.060,T00278,FSoundChannel,60,TremeloDepthSlideLength,0,u_short,,,,tremoloDepthSlideLength,Ticks left in the tremolo depth slide,high,source:25AC.c:1507
+T00278.061,T00278,FSoundChannel,61,TremeloDepthSlideStep,0,short,,,,tremoloDepthSlideStep,Per-tick tremolo depth step,high,source:25AC.c:1510
+T00278.062,T00278,FSoundChannel,62,AutoPanRatePhase,0,u_short,,,,autoPanRate,Auto-pan rate,high,source:25AC.c:1610
+T00278.063,T00278,FSoundChannel,63,AutoPanRateCurrent,0,u_short,,,,autoPanRateCounter,Countdown to the next auto-pan step,high,source:25AC.c:1539
+T00278.064,T00278,FSoundChannel,64,AutoPanType,0,u_short,,,,autoPanShape,Auto-pan waveform index,high,source:25AC.c:5644
+T00278.065,T00278,FSoundChannel,65,AutoPanDepth,0,u_short,,,,autoPanDepth,Auto-pan depth,high,source:25AC.c:1538
+T00278.066,T00278,FSoundChannel,66,AutoPanDepthSlideLength,0,u_short,,,,autoPanDepthSlideLength,Ticks left in the auto-pan depth slide,high,source:25AC.c:1536
+T00278.067,T00278,FSoundChannel,67,AutoPanDepthSlideStep,0,short,,,,autoPanDepthSlideStep,Per-tick auto-pan depth step,high,source:25AC.c:1538
+T00278.068,T00278,FSoundChannel,68,NoiseTimer,0,u_short,,,,noiseTimer,Ticks until noise mode toggles,high,source:25AC.c:1448
+T00278.069,T00278,FSoundChannel,69,FmTimer,0,u_short,,,,fmTimer,Ticks until FM mode toggles,high,source:25AC.c:1461
+T00278.070,T00278,FSoundChannel,70,LoopStackTop,0,u_short,,,,loopDepth,Current loop stack level,high,source:25AC.c:2459
+T00278.071,T00278,FSoundChannel,71,RandomPitchDepth,0,u_short,,,,randomPitchDepth,Depth of random pitch variation,high,source:25AC.c:2455
+T00278.072,T00278,FSoundChannel,72,LengthStored,0,short,,,,storedNoteLength,Note length restored after an override,high,source:25AC.c:2448
+T00278.073,T00278,FSoundChannel,73,LengthFixed,0,short,,,,fixedNoteLength,Fixed note length; zero uses the opcode's length,high,source:25AC.c:2447
+T00278.074,T00278,FSoundChannel,74,VolumeBalanceSlideStep,0,short,,,,volumeBalanceSlideStep,Per-tick balance slide step,high,source:25AC.c:1410
+T00278.075,T00278,FSoundChannel,75,unkDA,1,short,,,externalPanFadeStep | panOffsetSlideStep,effectPanSlideStep,Per-tick program pan slide step,high,source:25AC.c:3376
+T00278.076,T00278,FSoundChannel,76,unkDC,1,short,,,effectVolumeScale | externalVolume,effectVolume,Program volume scale applied to the channel,high,source:25AC.c:1743
+T00278.077,T00278,FSoundChannel,77,unkDE,1,short,,,effectVolumeSlideStep | externalVolumeFadeStep,effectVolumeSlideStep,Per-tick program volume slide step,high,source:25AC.c:4109
+T00278.078,T00278,FSoundChannel,78,PanSlideStep,0,short,,,,panSlideStep,Per-tick pan slide step,high,source:25AC.c:1433
+T00278.079,T00278,FSoundChannel,79,Transpose,0,short,,,,transpose,Semitone transpose,high,source:25AC.c:2442
+T00278.080,T00278,FSoundChannel,80,FineTune,0,short,,,,fineTune,Fine tuning,high,source:25AC.c:2441
+T00278.081,T00278,FSoundChannel,81,Key,0,short,,,,key,Last key played,high,source:25AC.c:5362
+T00278.082,T00278,FSoundChannel,82,PitchBendSlideTranspose,0,short,,,,pitchBendTarget,Semitones a pitch bend moves,high,source:25AC.c:2445
+T00278.083,T00278,FSoundChannel,83,TransposeStored,0,short,,,,portamentoTranspose,Transpose saved for portamento,high,source:25AC.c:5412
+T00278.084,T00278,FSoundChannel,84,VibratoPitch,0,short,,,,vibratoPitch,Current vibrato pitch offset,high,source:25AC.c:1497
+T00278.085,T00278,FSoundChannel,85,TremeloVolume,0,short,,,,tremoloVolume,Current tremolo volume offset,high,source:25AC.c:1529
+T00278.086,T00278,FSoundChannel,86,AutoPanVolume,0,short,,,,autoPanOffset,Current auto-pan offset,high,source:25AC.c:1546
+T00278.087,T00278,FSoundChannel,87,VoiceParams,0,FSoundVoiceParams,,,,voice,Hardware voice parameters,high,source:25AC.c:1412
+T00279.000,T00279,FSoundChannelConfig,0,StatusFlags,0,int,,,,statusFlags,Load and voice allocation status,high,source:25AC.c:732
+T00279.001,T00279,FSoundChannelConfig,1,ActiveChannelMask,0,int,,,,activeChannels,Channels still playing,high,source:25AC.c:225
+T00279.002,T00279,FSoundChannelConfig,2,KeyedMask,0,u_int,,,,keyedVoices,Voices currently keyed on,high,source:25AC.c:1883
+T00279.003,T00279,FSoundChannelConfig,3,AllocatedVoiceMask,0,int,,,,allocatedVoices,Channels with voices allocated,high,source:25AC.c:1975
+T00279.004,T00279,FSoundChannelConfig,4,PendingKeyOnMask,0,int,,,,pendingKeyOn,Pending key-ons,high,source:25AC.c:1868
+T00279.005,T00279,FSoundChannelConfig,5,ActiveNoteMask,0,u_int,,,,activeNotes,Channels playing a note rather than a rest,high,source:25AC.c:2053
+T00279.006,T00279,FSoundChannelConfig,6,PendingKeyOffMask,0,int,,,,pendingKeyOff,Pending key-offs,high,source:25AC.c:2203
+T00279.007,T00279,FSoundChannelConfig,7,unk1C,1,u_int,,,pausedChannelMask | suspendedChannelMask,pausedChannels,Channels paused when the music was pushed,med,source:25AC.c:2408;source:25AC.c:3700
+T00279.008,T00279,FSoundChannelConfig,8,Tempo,0,int,,,,tempo,Tempo in 16.16,high,source:25AC.c:2487
+T00279.009,T00279,FSoundChannelConfig,9,TempoSlideStep,0,int,,,,tempoSlideStep,Per-tick tempo step,high,source:25AC.c:4219
+T00279.010,T00279,FSoundChannelConfig,10,unk28,1,u_int,,,tempoAccumulator,tickAccumulator,Accumulates tempo to decide when channels advance,med,source:25AC.c:4191
+T00279.011,T00279,FSoundChannelConfig,11,unk2C,1,u_int,,,,resumeKeyOnMask,Channels allowed to key on again when resumed,med,source:25AC.c:4302
+T00279.012,T00279,FSoundChannelConfig,12,unk30,1,int,,,,pushReleaseMask,Channels released when the music is pushed,med,source:25AC.c:3901
+T00279.013,T00279,FSoundChannelConfig,13,unk34,1,int,,,auxiliaryControlValue,reserved34,Written by opcode 0xFE0C; never read,low,source:25AC.c:5224
+T00279.014,T00279,FSoundChannelConfig,14,unk38,1,int,,,sequenceBaseAddress,sequenceBase,Start of the sequence file,high,source:25AC.c:2394
+T00279.015,T00279,FSoundChannelConfig,15,SequencePatchTable,0,FAkaoSequence *,,,,patchTable,Patch table of the sequence,high,source:25AC.c:2420
+T00279.016,T00279,FSoundChannelConfig,16,KeymapTable,0,u_short *,,,,keymapTable,Keymap table of the sequence,high,source:25AC.c:2423
+T00279.017,T00279,FSoundChannelConfig,17,unk44,1,FSoundKeymapEntry8 *,,,noteRemapTable,noteRemapTable,Key remap table selected by opcode 0xFE1C,high,source:25AC.c:6206
+T00279.018,T00279,FSoundChannelConfig,18,SomeIndexRelatedToSpuVoiceInfo,0,int,,,voiceAllocationStart,voiceSearchStart,Voice index where free-voice searches start,med,source:25AC.c:1809
+T00279.019,T00279,FSoundChannelConfig,19,NoiseChannelFlags,0,u_int,,,,noiseChannels,Channels in noise mode,high,source:25AC.c:1452
+T00279.020,T00279,FSoundChannelConfig,20,ReverbChannelFlags,0,u_int,,,,reverbChannels,Channels with reverb,high,source:25AC.c:2152
+T00279.021,T00279,FSoundChannelConfig,21,FmChannelFlags,0,u_int,,,,fmChannels,Channels in FM mode,high,source:25AC.c:1465
+T00279.022,T00279,FSoundChannelConfig,22,RevDepth,0,int,,,,reverbDepth,Reverb depth,high,source:25AC.c:2135
+T00279.023,T00279,FSoundChannelConfig,23,unk5C,1,int,,,reverbDepthSlideStep,reverbDepthSlideStep,Per-tick reverb depth step,high,source:25AC.c:2916
+T00279.024,T00279,FSoundChannelConfig,24,A_Volume,0,int,,,,masterVolume,Master volume in 16.16,high,source:25AC.c:2011
+T00279.025,T00279,FSoundChannelConfig,25,unk64,1,int,,,volumeFadeStep,masterVolumeStep,Per-tick master volume step,high,source:25AC.c:4078
+T00279.026,T00279,FSoundChannelConfig,26,unk68,1,short,,,volumeFadeTicksRemaining,masterVolumeSlideLength,Ticks left in the master volume slide,med,source:25AC.c:265
+T00279.027,T00279,FSoundChannelConfig,27,ReverbDepthSlideLength,0,short,,,,reverbDepthSlideLength,Ticks left in the reverb slide,high,source:25AC.c:2491
+T00279.028,T00279,FSoundChannelConfig,28,TempoSlideLength,0,u_short,,,,tempoSlideLength,Ticks left in the tempo slide,high,source:25AC.c:2489
+T00279.029,T00279,FSoundChannelConfig,29,MusicId,0,u_short,,,,musicId,Id of the music,high,source:25AC.c:2515
+T00279.030,T00279,FSoundChannelConfig,30,JumpThresholdValue,0,u_short,,,sequence branch threshold,jumpThreshold,Value compared by conditional jumps,high,source:25AC.c:2500
+T00279.031,T00279,FSoundChannelConfig,31,NoiseClock,0,u_short,,,,noiseClock,Noise clock,high,source:25AC.c:2142
+T00279.032,T00279,FSoundChannelConfig,32,TimerUpper,0,u_short,,,,timerUpper,Upper timer reload,high,source:25AC.c:4243
+T00279.033,T00279,FSoundChannelConfig,33,TimerUpperCurrent,0,u_short,,,,timerUpperCount,Upper timer count,high,source:25AC.c:280
+T00279.034,T00279,FSoundChannelConfig,34,TimerLower,0,u_short,,,,timerLower,Lower timer reload,high,source:25AC.c:2494
+T00279.035,T00279,FSoundChannelConfig,35,TimerLowerCurrent,0,u_short,,,,timerLowerCount,Lower timer count,high,source:25AC.c:2493
+T00279.036,T00279,FSoundChannelConfig,36,TimerTopCurrent,0,u_short,,,,timerTop,Timer top value,high,source:25AC.c:281
+T00279.037,T00279,FSoundChannelConfig,37,unk80,1,int,,,,reserved80,Past the real 0x80-byte extent; no access,low,declaration-only;source:sound.h:484
+T00279.038,T00279,FSoundChannelConfig,38,unk84,1,int,,,,reserved84,Past the real 0x80-byte extent; no access,low,declaration-only;source:sound.h:485
+T00279.039,T00279,FSoundChannelConfig,39,unk88,1,int,,,,reserved88,Past the real 0x80-byte extent; no access,low,declaration-only;source:sound.h:486
+T00279.040,T00279,FSoundChannelConfig,40,unk8C,1,int,,,,reserved8C,Past the real 0x80-byte extent; no access,low,declaration-only;source:sound.h:487
+T00279.041,T00279,FSoundChannelConfig,41,unk90,1,int,,,,reserved90,Past the real 0x80-byte extent; no access,low,declaration-only;source:sound.h:488
+T00279.042,T00279,FSoundChannelConfig,42,unk94,1,int,,,,reserved94,Past the real 0x80-byte extent; no access,low,declaration-only;source:sound.h:489
+T00279.043,T00279,FSoundChannelConfig,43,unk98,1,int,,,,reserved98,Past the real 0x80-byte extent; no access,low,declaration-only;source:sound.h:490
+T00279.044,T00279,FSoundChannelConfig,44,unk9C,1,int,,,,reserved9C,Past the real 0x80-byte extent; no access,low,declaration-only;source:sound.h:491
+T00280.000,T00280,FSoundCommandParams,0,Param1,0,u_int,,,,param1,First parameter,high,source:25AC.c:2646
+T00280.001,T00280,FSoundCommandParams,1,Param2,0,u_int,,,,param2,Second parameter,high,source:25AC.c:2647
+T00280.002,T00280,FSoundCommandParams,2,Param3,0,u_int,,,,param3,"Third parameter, usually flags",high,source:25AC.c:2648
+T00280.003,T00280,FSoundCommandParams,3,Param4,0,u_int,,,,param4,Fourth parameter,high,source:25AC.c:2653
+T00280.004,T00280,FSoundCommandParams,4,ExtParam1,0,u_int,,,,extParam1,First extended parameter,high,source:25AC.c:2656
+T00280.005,T00280,FSoundCommandParams,5,ExtParam2,0,u_int,,,,extParam2,Second extended parameter,high,source:25AC.c:3030
 T00281.000,T00281,FSoundCutsceneStreamData,0,unk_0x00,1,char[128],,,,reserved00,Unidentified leading bytes,low,declaration-only;source:sound.h:562
 T00281.001,T00281,FSoundCutsceneStreamData,1,AkaoHeader,0,FAkaoHeader,,,,streamHeader,Embedded paged stream header,med,declaration-only;source:sound.h:563
 T00281.002,T00281,FSoundCutsceneStreamData,2,unk_0xAC,1,char[36],,,,reservedAC,Unidentified bytes after the header,low,declaration-only;source:sound.h:564
 T00281.003,T00281,FSoundCutsceneStreamData,3,AudioData,0,char[1],,,,audioData,Variable-length audio data,med,declaration-only;source:sound.h:565
-T00282.000,T00282,FSoundCutsceneStreamState,0,pCurrentChunk,0,void *,,,,,,,
-T00282.001,T00282,FSoundCutsceneStreamState,1,unk_Mask_0x4,0,void *,,,loopSampleStart,,,,
-T00282.002,T00282,FSoundCutsceneStreamState,2,field2_0x8,0,int,,,streamFormatFlags,,,,
-T00282.003,T00282,FSoundCutsceneStreamState,3,VoicesInUseFlags,0,int,,,,,,,
-T00282.004,T00282,FSoundCutsceneStreamState,4,VoiceIndex,0,int,,,,,,,
-T00282.005,T00282,FSoundCutsceneStreamState,5,TotalPages,0,u_int,,,remainingSampleBytes,,,,
-T00282.006,T00282,FSoundCutsceneStreamState,6,CurrentPage,0,int,,,,,,,
-T00282.007,T00282,FSoundCutsceneStreamState,7,field7_0x1c,0,int,,,loopSampleBytes,,,,
-T00282.008,T00282,FSoundCutsceneStreamState,8,field8_0x20,0,int,,,,,,,
-T00282.009,T00282,FSoundCutsceneStreamState,9,field9_0x24,0,int,,,,,,,
-T00282.010,T00282,FSoundCutsceneStreamState,10,PageIndex,0,int,,,,,,,
-T00282.011,T00282,FSoundCutsceneStreamState,11,pStreamBase,0,FSoundCutsceneStreamData *,,,,,,,
-T00282.012,T00282,FSoundCutsceneStreamState,12,field12_0x30,0,int,,,,,,,
-T00282.013,T00282,FSoundCutsceneStreamState,13,StreamPageIndex,0,u_int,,,,,,,
-T00282.014,T00282,FSoundCutsceneStreamState,14,field14_0x38,0,int,,,,,,,
-T00282.015,T00282,FSoundCutsceneStreamState,15,PageRingBufferSize,0,u_int,,,,,,,
-T00282.016,T00282,FSoundCutsceneStreamState,16,Volume,0,int,,,,,,,
-T00282.017,T00282,FSoundCutsceneStreamState,17,VolFadeStepSize,0,int,,,,,,,
-T00282.018,T00282,FSoundCutsceneStreamState,18,VolFadeStepsRemaining,0,int,,,,,,,
-T00282.019,T00282,FSoundCutsceneStreamState,19,field19_0x4c,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\sound.h:589:16),,,,,,,
-T00282.020,T00282,FSoundCutsceneStreamState,20,field23_0x50,0,int,,,,,,,
-T00282.021,T00282,FSoundCutsceneStreamState,21,field24_0x54,0,int,,,,,,,
-T00282.022,T00282,FSoundCutsceneStreamState,22,VoiceSampleRate,0,int,,,,,,,
-T00282.023,T00282,FSoundCutsceneStreamState,23,ControlFlags,0,int,,,,,,,
-T00283.000,T00283,FSoundFadeTimer,0,Value,0,int,,,,,,,
-T00283.001,T00283,FSoundFadeTimer,1,Step,0,int,,,,,,,
-T00283.002,T00283,FSoundFadeTimer,2,TicksRemaining,0,int,,,,,,,
-T00283.003,T00283,FSoundFadeTimer,3,SavedValue,0,int,,,,,,,
-T00284.000,T00284,FSoundGlobalFlags,0,ControlLatches,0,u_int,,,,,,,
-T00284.001,T00284,FSoundGlobalFlags,1,MixBehavior,0,u_int,,,,,,,
-T00284.002,T00284,FSoundGlobalFlags,2,UpdateFlags,0,u_int,,,,,,,
-T00285.000,T00285,FSoundInstrumentInfo,0,StartAddr,0,u_int,,,,,,,
-T00285.001,T00285,FSoundInstrumentInfo,1,LoopAddr,0,u_int,,,,,,,
-T00285.002,T00285,FSoundInstrumentInfo,2,FineTune,0,short,,,,,,,
-T00285.003,T00285,FSoundInstrumentInfo,3,SampleNote,0,short,,,,,,,
-T00285.004,T00285,FSoundInstrumentInfo,4,AdsrLower,0,u_short,,,,,,,
-T00285.005,T00285,FSoundInstrumentInfo,5,AdsrUpper,0,u_short,,,,,,,
-T00286.000,T00286,FSoundKeymapEntry8,0,InstrumentIndex,0,signed char,,,,,,,
-T00286.001,T00286,FSoundKeymapEntry8,1,Note,0,char,,,,,,,
-T00286.002,T00286,FSoundKeymapEntry8,2,AdsrAttackRate,0,char,,,,,,,
-T00286.003,T00286,FSoundKeymapEntry8,3,AdsrSustainRate,0,char,,,,,,,
-T00286.004,T00286,FSoundKeymapEntry8,4,SustainModeCode,0,char,,,,,,,
-T00286.005,T00286,FSoundKeymapEntry8,5,ReleaseRate,0,char,,,,,,,
-T00286.006,T00286,FSoundKeymapEntry8,6,VolumeScale,0,char,,,,,,,
-T00286.007,T00286,FSoundKeymapEntry8,7,PanAndReverb,0,char,,,,,,,
-T00287.000,T00287,FSoundVoiceModeFlags,0,Reverb,0,int,,,,,,,
-T00287.001,T00287,FSoundVoiceModeFlags,1,Noise,0,int,,,,,,,
-T00287.002,T00287,FSoundVoiceModeFlags,2,Fm,0,int,,,,,,,
-T00288.000,T00288,FSoundVoiceParams,0,AssignedVoiceNumber,0,u_int,,,,,,,
-T00288.001,T00288,FSoundVoiceParams,1,VoiceParamFlags,0,u_int,,,,,,,
-T00288.002,T00288,FSoundVoiceParams,2,StartAddress,0,u_int,,,,,,,
-T00288.003,T00288,FSoundVoiceParams,3,LoopAddress,0,u_int,,,,,,,
-T00288.004,T00288,FSoundVoiceParams,4,SampleRate,0,u_short,,,,,,,
-T00288.005,T00288,FSoundVoiceParams,5,AdsrLower,0,u_short,,,,,,,
-T00288.006,T00288,FSoundVoiceParams,6,AdsrUpper,0,u_short,,,,,,,
-T00288.007,T00288,FSoundVoiceParams,7,VolumeScale,0,u_short,,,,,,,
-T00288.008,T00288,FSoundVoiceParams,8,Volume,0,SpuVolume,,,,,,,
-T00289.000,T00289,FSoundVoiceSchedulerState,0,ActiveChannelMask,0,u_int,,,,,,,
-T00289.001,T00289,FSoundVoiceSchedulerState,1,KeyOnFlags,0,u_int,,,,,,,
-T00289.002,T00289,FSoundVoiceSchedulerState,2,KeyedFlags,0,u_int,,,,,,,
-T00289.003,T00289,FSoundVoiceSchedulerState,3,KeyOffFlags,0,u_int,,,,,,,
-T00289.004,T00289,FSoundVoiceSchedulerState,4,unk_Flags_0x10,0,u_int,,,pausedVoiceMask,,,,
-T00289.005,T00289,FSoundVoiceSchedulerState,5,unk14,1,u_int,,,,,,,
-T00289.006,T00289,FSoundVoiceSchedulerState,6,TempoAccumumulator,0,u_int,,,,,,,
-T00289.007,T00289,FSoundVoiceSchedulerState,7,NoiseVoiceFlags,0,u_int,,,,,,,
-T00289.008,T00289,FSoundVoiceSchedulerState,8,ReverbVoiceFlags,0,u_int,,,,,,,
-T00289.009,T00289,FSoundVoiceSchedulerState,9,FmVoiceFlags,0,u_int,,,,,,,
-T00289.010,T00289,FSoundVoiceSchedulerState,10,NoiseClock,0,u_short,,,,,,,
-T00289.011,T00289,FSoundVoiceSchedulerState,11,field11_0x2a,0,char,,,,,,,
-T00289.012,T00289,FSoundVoiceSchedulerState,12,field12_0x2b,0,char,,,,,,,
-T00289.013,T00289,FSoundVoiceSchedulerState,13,field13_0x2c,0,u_int,,,,,,,
-T00290.000,T00290,FSpuVoiceInfo,0,unk0,1,int,,,,,,,
-T00290.001,T00290,FSpuVoiceInfo,1,pEnvx,0,short,,,,,,,
-T00290.002,T00290,FSpuVoiceInfo,2,unk6,1,short,,,,,,,
+T00282.000,T00282,FSoundCutsceneStreamState,0,pCurrentChunk,0,void *,,,,currentChunk,Stream chunk being consumed,high,source:25AC.c:6286
+T00282.001,T00282,FSoundCutsceneStreamState,1,unk_Mask_0x4,0,void *,,,loopSampleStart,auxiliaryMask,Set when the stream starts and tested at page refills; meaning unresolved,low,source:25AC.c:6323
+T00282.002,T00282,FSoundCutsceneStreamState,2,field2_0x8,0,int,,,streamFormatFlags,formatFlags,Stream format flags from the header; bit 1 tested at start,med,source:25AC.c:6313
+T00282.003,T00282,FSoundCutsceneStreamState,3,VoicesInUseFlags,0,int,,,,voiceMask,Voices the stream plays on,high,source:25AC.c:2198
+T00282.004,T00282,FSoundCutsceneStreamState,4,VoiceIndex,0,int,,,,voiceIndex,First stream voice,high,source:25AC.c:3789
+T00282.005,T00282,FSoundCutsceneStreamState,5,TotalPages,0,u_int,,,remainingSampleBytes,totalPages,Pages in the stream,high,source:25AC.c:6307
+T00282.006,T00282,FSoundCutsceneStreamState,6,CurrentPage,0,int,,,,currentPage,Page being played,high,source:25AC.c:6308
+T00282.007,T00282,FSoundCutsceneStreamState,7,field7_0x1c,0,int,,,loopSampleBytes,reserved1C,Written at stream start; meaning unresolved,low,source:25AC.c:6328
+T00282.008,T00282,FSoundCutsceneStreamState,8,field8_0x20,0,int,,,,reserved20,No access found,low,declaration-only;source:sound.h:578
+T00282.009,T00282,FSoundCutsceneStreamState,9,field9_0x24,0,int,,,,reserved24,No access found,low,declaration-only;source:sound.h:579
+T00282.010,T00282,FSoundCutsceneStreamState,10,PageIndex,0,int,,,,pageIndex,Index of the page within the ring,med,declaration-only;source:sound.h:580
+T00282.011,T00282,FSoundCutsceneStreamState,11,pStreamBase,0,FSoundCutsceneStreamData *,,,,streamBase,Start of the stream data,med,declaration-only;source:sound.h:581
+T00282.012,T00282,FSoundCutsceneStreamState,12,field12_0x30,0,int,,,,reserved30,No access found,low,declaration-only;source:sound.h:582
+T00282.013,T00282,FSoundCutsceneStreamState,13,StreamPageIndex,0,u_int,,,,streamPageIndex,Next stream page to upload,med,declaration-only;source:sound.h:583
+T00282.014,T00282,FSoundCutsceneStreamState,14,field14_0x38,0,int,,,,reserved38,No access found,low,declaration-only;source:sound.h:584
+T00282.015,T00282,FSoundCutsceneStreamState,15,PageRingBufferSize,0,u_int,,,,pageRingSize,Pages in the upload ring,med,declaration-only;source:sound.h:585
+T00282.016,T00282,FSoundCutsceneStreamState,16,Volume,0,int,,,,volume,Stream volume,high,source:25AC.c:4041
+T00282.017,T00282,FSoundCutsceneStreamState,17,VolFadeStepSize,0,int,,,,volumeFadeStep,Per-tick volume step,high,source:25AC.c:4042
+T00282.018,T00282,FSoundCutsceneStreamState,18,VolFadeStepsRemaining,0,int,,,,volumeFadeTicksLeft,Ticks left in the volume fade,high,source:25AC.c:4039
+T00282.019,T00282,FSoundCutsceneStreamState,19,field19_0x4c,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\sound.h:589:16),,,,pan,Stream pan; its second byte indexes the pan gain table,med,source:25AC.c:6389
+T00282.020,T00282,FSoundCutsceneStreamState,20,field23_0x50,0,int,,,,reserved50,No access found,low,declaration-only;source:sound.h:593
+T00282.021,T00282,FSoundCutsceneStreamState,21,field24_0x54,0,int,,,,reserved54,No access found,low,declaration-only;source:sound.h:594
+T00282.022,T00282,FSoundCutsceneStreamState,22,VoiceSampleRate,0,int,,,,sampleRate,Voice sample rate,high,source:25AC.c:3798
+T00282.023,T00282,FSoundCutsceneStreamState,23,ControlFlags,0,int,,,,controlFlags,Stream control flags; bit 0 pauses with the music,med,declaration-only;source:sound.h:596
+T00283.000,T00283,FSoundFadeTimer,0,Value,0,int,,,,value,Current value,high,source:25AC.c:2014
+T00283.001,T00283,FSoundFadeTimer,1,Step,0,int,,,,step,Per-tick step,high,source:25AC.c:3026
+T00283.002,T00283,FSoundFadeTimer,2,TicksRemaining,0,int,,,,ticksRemaining,Ticks left,high,source:25AC.c:3025
+T00283.003,T00283,FSoundFadeTimer,3,SavedValue,0,int,,,,savedValue,Value saved before the fade,high,source:25AC.c:2012
+T00284.000,T00284,FSoundGlobalFlags,0,ControlLatches,0,u_int,,,,controlLatches,One-shot control flags,high,source:25AC.c:818
+T00284.001,T00284,FSoundGlobalFlags,1,MixBehavior,0,u_int,,,,mixBehavior,Output mode and music stack flags,high,source:25AC.c:510
+T00284.002,T00284,FSoundGlobalFlags,2,UpdateFlags,0,u_int,,,,updateFlags,Deferred voice update flags,high,source:25AC.c:1456
+T00285.000,T00285,FSoundInstrumentInfo,0,StartAddr,0,u_int,,,,sampleStart,Sample start address,high,source:25AC.c:974
+T00285.001,T00285,FSoundInstrumentInfo,1,LoopAddr,0,u_int,,,,loopStart,Sample loop address,high,source:25AC.c:975
+T00285.002,T00285,FSoundInstrumentInfo,2,FineTune,0,short,,,,fineTune,Fine tuning,high,source:25AC.c:976
+T00285.003,T00285,FSoundInstrumentInfo,3,SampleNote,0,short,,,,rootNote,Note at which the sample plays unshifted,high,source:25AC.c:4642
+T00285.004,T00285,FSoundInstrumentInfo,4,AdsrLower,0,u_short,,,,adsrLower,Lower envelope word,high,source:25AC.c:977
+T00285.005,T00285,FSoundInstrumentInfo,5,AdsrUpper,0,u_short,,,,adsrUpper,Upper envelope word,high,source:25AC.c:5372
+T00286.000,T00286,FSoundKeymapEntry8,0,InstrumentIndex,0,signed char,,,,instrumentIndex,Instrument played,med,declaration-only;source:sound.h:413
+T00286.001,T00286,FSoundKeymapEntry8,1,Note,0,char,,,,note,Note played,med,declaration-only;source:sound.h:414
+T00286.002,T00286,FSoundKeymapEntry8,2,AdsrAttackRate,0,char,,,,attackRate,Envelope attack rate,med,declaration-only;source:sound.h:415
+T00286.003,T00286,FSoundKeymapEntry8,3,AdsrSustainRate,0,char,,,,sustainRate,Envelope sustain rate,med,declaration-only;source:sound.h:416
+T00286.004,T00286,FSoundKeymapEntry8,4,SustainModeCode,0,char,,,,sustainMode,Envelope sustain mode,med,declaration-only;source:sound.h:417
+T00286.005,T00286,FSoundKeymapEntry8,5,ReleaseRate,0,char,,,,releaseRate,Envelope release rate,med,declaration-only;source:sound.h:418
+T00286.006,T00286,FSoundKeymapEntry8,6,VolumeScale,0,char,,,,volumeScale,Volume scale,med,declaration-only;source:sound.h:419
+T00286.007,T00286,FSoundKeymapEntry8,7,PanAndReverb,0,char,,,,panAndReverb,Pan and reverb flag,med,declaration-only;source:sound.h:420
+T00287.000,T00287,FSoundVoiceModeFlags,0,Reverb,0,int,,,,reverb,Voices with reverb,high,source:25AC.c:2151
+T00287.001,T00287,FSoundVoiceModeFlags,1,Noise,0,int,,,,noise,Voices in noise mode,high,source:25AC.c:2147
+T00287.002,T00287,FSoundVoiceModeFlags,2,Fm,0,int,,,,fm,Voices in FM mode,high,source:25AC.c:2155
+T00288.000,T00288,FSoundVoiceParams,0,AssignedVoiceNumber,0,u_int,,,,assignedVoice,Voice assigned to the channel,high,source:25AC.c:1881
+T00288.001,T00288,FSoundVoiceParams,1,VoiceParamFlags,0,u_int,,,,dirtyFlags,Parameters that need writing,high,source:25AC.c:1319
+T00288.002,T00288,FSoundVoiceParams,2,StartAddress,0,u_int,,,,sampleStart,Sample start address,high,source:25AC.c:1335
+T00288.003,T00288,FSoundVoiceParams,3,LoopAddress,0,u_int,,,,loopStart,Sample loop address,high,source:25AC.c:1339
+T00288.004,T00288,FSoundVoiceParams,4,SampleRate,0,u_short,,,,sampleRate,Pitch as sample rate,high,source:25AC.c:1334
+T00288.005,T00288,FSoundVoiceParams,5,AdsrLower,0,u_short,,,,adsrLower,Lower envelope word,high,source:25AC.c:1336
+T00288.006,T00288,FSoundVoiceParams,6,AdsrUpper,0,u_short,,,,adsrUpper,Upper envelope word,high,source:25AC.c:1337
+T00288.007,T00288,FSoundVoiceParams,7,VolumeScale,0,u_short,,,,volumeScale,Volume scale,high,source:25AC.c:1365
+T00288.008,T00288,FSoundVoiceParams,8,Volume,0,SpuVolume,,,,volume,Left and right volume,high,source:25AC.c:1322
+T00289.000,T00289,FSoundVoiceSchedulerState,0,ActiveChannelMask,0,u_int,,,,activeVoices,Voices playing sound effects,high,source:25AC.c:234
+T00289.001,T00289,FSoundVoiceSchedulerState,1,KeyOnFlags,0,u_int,,,,pendingKeyOn,Voices to key on,high,source:25AC.c:2117
+T00289.002,T00289,FSoundVoiceSchedulerState,2,KeyedFlags,0,u_int,,,,keyedVoices,Voices keyed on,high,source:25AC.c:2115
+T00289.003,T00289,FSoundVoiceSchedulerState,3,KeyOffFlags,0,u_int,,,,pendingKeyOff,Voices to key off,high,source:25AC.c:2236
+T00289.004,T00289,FSoundVoiceSchedulerState,4,unk_Flags_0x10,0,u_int,,,pausedVoiceMask,pausedEffectVoices,"Voices of paused world effects, protected from reuse",med,source:25AC.c:2031
+T00289.005,T00289,FSoundVoiceSchedulerState,5,unk14,1,u_int,,,,effectTempo,Tempo whose upper half is added to the accumulator each tick,med,source:25AC.c:4385
+T00289.006,T00289,FSoundVoiceSchedulerState,6,TempoAccumumulator,0,u_int,,,,tempoAccumulator,Accumulates tempo to decide when effect channels advance,high,source:25AC.c:4384
+T00289.007,T00289,FSoundVoiceSchedulerState,7,NoiseVoiceFlags,0,u_int,,,,noiseVoices,Voices in noise mode,high,source:25AC.c:1454
+T00289.008,T00289,FSoundVoiceSchedulerState,8,ReverbVoiceFlags,0,u_int,,,,reverbVoices,Voices with reverb,high,source:25AC.c:2154
+T00289.009,T00289,FSoundVoiceSchedulerState,9,FmVoiceFlags,0,u_int,,,,fmVoices,Voices in FM mode,high,source:25AC.c:1467
+T00289.010,T00289,FSoundVoiceSchedulerState,10,NoiseClock,0,u_short,,,,noiseClock,Noise clock,high,source:25AC.c:2140
+T00289.011,T00289,FSoundVoiceSchedulerState,11,field11_0x2a,0,char,,,,pad2A,No access found,low,declaration-only;source:sound.h:271
+T00289.012,T00289,FSoundVoiceSchedulerState,12,field12_0x2b,0,char,,,,pad2B,No access found,low,declaration-only;source:sound.h:272
+T00289.013,T00289,FSoundVoiceSchedulerState,13,field13_0x2c,0,u_int,,,,reserved2C,No access found,low,declaration-only;source:sound.h:273
+T00290.000,T00290,FSpuVoiceInfo,0,unk0,1,int,,,,reserved0,Unused per the original comment; no access found,low,declaration-only;source:sound.h:504
+T00290.001,T00290,FSpuVoiceInfo,1,pEnvx,0,short,,,,envelopeLevel,Envelope level; zero means free,high,source:25AC.c:1844
+T00290.002,T00290,FSpuVoiceInfo,2,unk6,1,short,,,,reserved6,No access found,low,declaration-only;source:sound.h:506
 T00291.000,T00291,MovieData_t,0,encodedData,0,u_long *[2],,,,encodedBuffers,Two buffers holding compressed frames,high,source:22C.c:3445
 T00291.001,T00291,MovieData_t,1,encodedDataIndex,0,int,,,,encodedBufferIndex,Encoded buffer being decoded,high,source:22C.c:3507
 T00291.002,T00291,MovieData_t,2,decodedData,0,void *[2],,,,decodedBuffers,Two buffers receiving decoded slices,high,source:22C.c:3447
@@ -5291,23 +5291,23 @@ T00601.001,T00601,savedata_unk180_t,1,stats,0,stats_t,,,,summary,Summary statist
 T00601.002,T00601,savedata_unk180_t,2,checksums,0,char[92],,,,blockChecksums,XOR checksum of each 256-byte block,high,source:260.c:842
 T00602.000,T00602,scriptBytePair,0,low,0,u_char,,,,lowByte,Low byte of a little-endian script value,med,declaration-only;source:4A0A8.c:231
 T00602.001,T00602,scriptBytePair,1,high,0,u_char,,,,highByte,High byte of a little-endian script value,med,declaration-only;source:4A0A8.c:232
-T00603.000,T00603,soundData_t,0,currentMusicSlot,0,int,,,,,,,
-T00603.001,T00603,soundData_t,1,unk4,1,u_int,,,currentMusicHandle,,,,
-T00603.002,T00603,soundData_t,2,unk8,1,u_int,,,currentMusicFileId,,,,
-T00603.003,T00603,soundData_t,3,currentMusicData,0,void *,,,,,,,
-T00603.004,T00603,soundData_t,4,musicIds,0,char[4],,,,,,,
-T00603.005,T00603,soundData_t,5,unk14,1,u_int[4],,,musicHandles,,,,
-T00603.006,T00603,soundData_t,6,musicData,0,void *[4],,,,,,,
-T00603.007,T00603,soundData_t,7,musicQueueSlot,0,vs_main_CdQueueSlot *[4],,,,,,,
-T00603.008,T00603,soundData_t,8,currentSfxId,0,u_int,,,,,,,
-T00603.009,T00603,soundData_t,9,sfxIds,0,char[4],,,,,,,
-T00603.010,T00603,soundData_t,10,sfxData,0,void *[3],,,,,,,
-T00603.011,T00603,soundData_t,11,sfxQueueSlot,0,vs_main_CdQueueSlot *[3],,,,,,,
-T00603.012,T00603,soundData_t,12,unk64,1,void *[3],,,cutsceneStreamData,,,,
-T00603.013,T00603,soundData_t,13,unk70,1,int *[3],,,,,,,
-T00603.014,T00603,soundData_t,14,soundFileId,0,int,,,,,,,
-T00603.015,T00603,soundData_t,15,soundData,0,void *,,,,,,,
-T00603.016,T00603,soundData_t,16,soundQueueSlot,0,vs_main_CdQueueSlot *,,,,,,,
+T00603.000,T00603,soundData_t,0,currentMusicSlot,0,int,,,,currentMusicSlot,Music slot playing,high,source:main.c:9506
+T00603.001,T00603,soundData_t,1,unk4,1,u_int,,,currentMusicHandle,playingMusicHandle,Handle of the music playing; 0xFFFF when none,med,source:main.c:9509
+T00603.002,T00603,soundData_t,2,unk8,1,u_int,,,currentMusicFileId,currentMusicId,Id of the music in the current slot,med,source:main.c:9538
+T00603.003,T00603,soundData_t,3,currentMusicData,0,void *,,,,currentMusicData,Data of the music playing,high,source:main.c:9508
+T00603.004,T00603,soundData_t,4,musicIds,0,char[4],,,,musicIds,Music id in each slot,high,source:main.c:9538
+T00603.005,T00603,soundData_t,5,unk14,1,u_int[4],,,musicHandles,musicHandles,Handle used to stop each slot's music; 0xFFFF when none,med,source:main.c:9503
+T00603.006,T00603,soundData_t,6,musicData,0,void *[4],,,,musicData,Loaded music data of each slot,high,source:main.c:9530
+T00603.007,T00603,soundData_t,7,musicQueueSlot,0,vs_main_CdQueueSlot *[4],,,,musicRequests,Disc request of each music slot,high,source:main.c:9619
+T00603.008,T00603,soundData_t,8,currentSfxId,0,u_int,,,,currentSfxBank,Sound-effect bank in use,high,source:main.c:9844
+T00603.009,T00603,soundData_t,9,sfxIds,0,char[4],,,,sfxBankIds,Id in each sound-effect bank slot,high,source:main.c:10066
+T00603.010,T00603,soundData_t,10,sfxData,0,void *[3],,,,sfxBankData,Loaded data of each sound-effect bank,high,source:main.c:9844
+T00603.011,T00603,soundData_t,11,sfxQueueSlot,0,vs_main_CdQueueSlot *[3],,,,sfxBankRequests,Disc request of each sound-effect bank,high,source:main.c:10055
+T00603.012,T00603,soundData_t,12,unk64,1,void *[3],,,cutsceneStreamData,sfxStreamData,Cutscene stream data started from a bank,med,source:main.c:10317
+T00603.013,T00603,soundData_t,13,unk70,1,int *[3],,,,reserved70,Cleared at bank release; never read,low,source:main.c:10505
+T00603.014,T00603,soundData_t,14,soundFileId,0,int,,,,waveBankId,Loaded WAVE bank,high,source:main.c:10390
+T00603.015,T00603,soundData_t,15,soundData,0,void *,,,,waveBankData,Loaded WAVE bank data,high,source:main.c:10385
+T00603.016,T00603,soundData_t,16,soundQueueSlot,0,vs_main_CdQueueSlot *,,,,waveBankRequest,Disc request of the WAVE bank,high,source:main.c:10379
 T00604.000,T00604,soundEventTargets,0,unk0,1,u_short,,,,,,,
 T00604.001,T00604,soundEventTargets,1,count,0,u_char,,,,,,,
 T00604.002,T00604,soundEventTargets,2,unk3,1,u_char,,,,,,,
@@ -6371,10 +6371,10 @@ T00707.014,T00707,vs_main_settings_t,14,key,0,u_int,,,,,,,
 T00707.015,T00707,vs_main_settings_t,15,cumulativeSaveCount,0,u_short,,,,,,,
 T00707.016,T00707,vs_main_settings_t,16,currentGameSaveCount,0,u_short,,,,,,,
 T00707.017,T00707,vs_main_settings_t,17,saveFileGeneration,0,u_int,,,,,,,
-T00708.000,T00708,vs_main_sfxContext,0,unk0,1,int,,,,,,,
-T00708.001,T00708,vs_main_sfxContext,1,unk4,1,int,,,,,,,
-T00708.002,T00708,vs_main_sfxContext,2,unk8,1,char,,,,,,,
-T00708.003,T00708,vs_main_sfxContext,3,unk9,1,char,,,metadataFlagByte,,,,
+T00708.000,T00708,vs_main_sfxContext,0,unk0,1,int,,,,reserved0,No access found,low,declaration-only;source:25AC.h:5
+T00708.001,T00708,vs_main_sfxContext,1,unk4,1,int,,,,reserved4,No access found,low,declaration-only;source:25AC.h:6
+T00708.002,T00708,vs_main_sfxContext,2,unk8,1,char,,,,reserved8,No access found,low,declaration-only;source:25AC.h:7
+T00708.003,T00708,vs_main_sfxContext,3,unk9,1,char,,,metadataFlagByte,flags,Bit 7 requests playback tags,high,source:25AC.c:443
 T00709.000,T00709,vs_main_statusEffectParams_t,0,unk0,1,int,,,,,,,
 T00709.001,T00709,vs_main_statusEffectParams_t,1,unk4,1,u_short,,,,,,,
 T00709.002,T00709,vs_main_statusEffectParams_t,2,unk6,1,u_short,,,,,,,
