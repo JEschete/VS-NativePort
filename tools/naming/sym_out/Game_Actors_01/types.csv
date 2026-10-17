@@ -5,6 +5,7 @@ T00209,State,State::AshleyStatsSnapshot,Native\Game\src\State\Ashley.h,"Saves As
 T00210,State,State::RoomEnemyStates,Native\Game\src\State\RoomCache.h,"Remembers up to eight actor states for one recently visited room, with the room's visit recency.",high,source:146C.c:15233;source:146C.c:832
 T00237,State,Actors::ModelRenderContext,Native\Game\src\Actors\ModelDraw.h,"Holds shared rendering state passed to every actor, weapon and gimmick model draw.",med,source:44F14.c:830;source:30DB0.c:3475
 T00238,State,Actors::SkeletonPose,Native\Game\src\Actors\ModelDraw.h,Holds the per-bone world matrices and scale of the skeleton being drawn.,high,source:49268.c:208
+T00241,State,Actors::ModelInstance,Native\Game\src\Actors\ModelInstance.h,"Is the header shared by actor and gimmick records: SHP counts, display and motion flags, transform, tiles, tint and model pointer.",high,source:30DB0.c:1137;source:30DB0.c:1150
 T00301,OnDisc,Items::AccessoryInit,Native\Game\src\Items\EquipmentInit.h,"Gives an accessory's statistics, drop rate and index.",high,source:146C.c:1086
 T00302,OnDisc,Actors::LimbActionInit,Native\Game\src\Actors\CharacterInit.h,Gives one action a limb can perform.,high,source:146C.c:6260
 T00303,OnDisc,Actors::ShpBone,Native\Game\src\Actors\Skeleton.h,"Describes one SHP skeleton bone: length, parent, lookup tags and the joint slot it initializes.",high,"source:30DB0.c:1381;DataCrystal SHP files (joint: length, parent)"

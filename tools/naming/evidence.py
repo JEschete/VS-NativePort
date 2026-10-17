@@ -4,8 +4,9 @@
 
 Globals: the storage identity's own definition (resolved through the decomp index, honouring file/local-static
 scope) and up to N uses inside each function that references it (from build\\port\\symbol_context.json).
-Types: the declaration body, then for each member up to N accesses `->member` / `.member` found inside the
-functions that reference the type.
+Types: the declaration body, then for each member up to N accesses `->member` / `.member`, first inside functions
+whose libclang field references include that exact `Type.member` (so the member is known to belong to this type),
+then inside the other functions that reference the type.
 
 Every line printed is `file:line: text` copied from resources\\rood-reverseWin\\src, so names can be derived and
 cited from it directly.
@@ -155,6 +156,10 @@ def main() -> int:
     only = {i.strip() for i in a.ids.split(",") if i.strip()}
     src = Source()
     upsrc = UpstreamSource()
+    field_users: dict[str, list[tuple[str, str, int, int]]] = {}
+    for fn in index["functions"].values():
+        for key in (fn.get("refs") or {}).get("field", {}):
+            field_users.setdefault(key, []).append((fn["name"], fn["file"], fn["line"], fn["end_line"]))
     out: list[str] = []
 
     def ref_functions(labels: list[str]):
@@ -241,7 +246,11 @@ def main() -> int:
                 mpat = re.compile(r"(->|\.)" + re.escape(f["name"]) + r"\b")
                 hits: list[str] = []
                 from_upstream = "layout:upstream" in f.get("hints", "") or t["files"].startswith("upstream:")
-                for final, orig, rel, lo, hi in ([] if from_upstream else ref_functions(labels)):
+                names = {t["name"], *t.get("aliases", "").split()}
+                typed = [(orig, rel, lo, hi) for n in names for orig, rel, lo, hi in field_users.get(f"{n}.{f['name']}", [])]
+                seen_fns = {(rel, orig) for orig, rel, lo, hi in typed}
+                fallback = [(orig, rel, lo, hi) for _, orig, rel, lo, hi in ref_functions(labels) if (rel, orig) not in seen_fns]
+                for orig, rel, lo, hi in ([] if from_upstream else typed + fallback):
                     text = src.lines(rel)
                     for i in range(lo - 1, min(hi, len(text))):
                         if mpat.search(text[i]):

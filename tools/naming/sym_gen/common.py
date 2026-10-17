@@ -104,15 +104,21 @@ class Gen:
 
     # ------------------------------------------------------------------ automatic citations
     def ref_functions(self, tid: str, tree: Tree, type_name: str, member: str):
+        """Functions whose libclang field references include type.member (any alias of the type), then the
+        functions recorded as referencing the type."""
+        names = {type_name, *self.types[tid].get("aliases", "").split()} if tid in self.types else {type_name}
+        seen = set()
+        for fn in tree.ix["functions"].values():
+            fields = (fn.get("refs") or {}).get("field", {})
+            if any(f"{n}.{member}" in fields for n in names):
+                seen.add((fn["file"], fn["name"]))
+                yield fn["file"].removeprefix("src/"), fn["line"], fn["end_line"]
         if tree.prefix:
-            for fn in tree.ix["functions"].values():
-                if f"{type_name}.{member}" in (fn.get("refs") or {}).get("field", {}):
-                    yield fn["file"].removeprefix("src/"), fn["line"], fn["end_line"]
             return
         funcs = {(f["file"], f["name"]): (f["line"], f["end_line"]) for f in tree.ix["functions"].values()}
         for label in self.context["types"].get(tid, []):
             m = LABEL.search(label)
-            if m:
+            if m and (f"src/{m.group(1)}", m.group(3)) not in seen:
                 lo, hi = funcs.get((f"src/{m.group(1)}", m.group(3)), (int(m.group(2)), int(m.group(2))))
                 yield m.group(1), lo, hi
 

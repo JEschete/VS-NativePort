@@ -48,6 +48,73 @@ T00237.002,reserved1FDC,Not read by the decompiled users,low,declaration-only;so
 T00237.003,actorScale,Scale copied into every actor record,med,source:30DB0.c:3475
 T00238.000,boneMatrices,World matrix of each bone,high,source:49268.c:208
 T00238.001,scale,Scale of the skeleton,high,source:49268.c:113
+T00241.000,boneCount,SHP bone count,high,source:30DB0.c:1137
+T00241.001,vertexGroupCount,SHP vertex group count,med,declaration-only;source:3A1A0.h:124
+T00241.002,triangleCount,SHP triangle count,high,source:30DB0.c:1287
+T00241.003,quadCount,SHP quad count,high,source:30DB0.c:1138
+T00241.004,otherPolygonCount,SHP count of remaining polygons,high,source:30DB0.c:1287
+T00241.005,isSkipped,Set when display flag bit 0 is clear,med,source:30DB0.c:3964
+T00241.006,isVisible,Drawn when set (display flag bit 1),high,source:30DB0.c:3965
+T00241.007,isFrozen,Animation and update are held when set (display flag bit 2),high,source:30DB0.c:3966
+T00241.008,uvLayout,Texture header high nibble; selects how polygon UVs are rebased,med,source:30DB0.c:1190;source:30DB0.c:1291
+T00241.009,textureSlotCountMinusOne,"Texture VRAM slots used, minus one",med,source:30DB0.c:1200
+T00241.010,isParsed,Set when the SHP is parsed; not read,low,source:30DB0.c:1348
+T00241.011,actionAnimationState,"Action animation state; 0 idle, 5 finishing",med,source:30DB0.c:2638
+T00241.012,isPreviewModel,Set for menu preview models; suppresses actor sounds,low,source:40564.c:2800
+T00241.013,isAttached,Set while attached to a parent actor's bone,high,source:30DB0.c:3632
+T00241.014,movementPending,Cleared by every movement reset,low,source:30DB0.c:2121
+T00241.015,soundEnabled,Actor sounds play only when set (display flag bit 6),med,source:30DB0.c:3967;source:40564.c:2800
+T00241.016,movementMode,Movement mode cleared by movement resets,med,source:30DB0.c:2093
+T00241.017,locomotionState,Locomotion state; 2 blocks death and action poses,low,source:30DB0.c:2120
+T00241.018,motionLocked,"Blocks defense, death and support snapping",low,source:30DB0.c:2372
+T00241.019,isJumping,Set while jumping; selects the airborne tick path,med,source:40564.c:2352
+T00241.020,weaponDrawn,Weapon is drawn,high,source:30DB0.c:1361
+T00241.021,reactionState,Damage reaction state; 3 keeps the base pose,low,source:30DB0.c:2761
+T00241.022,poseState,Pose state cleared by movement resets,low,source:30DB0.c:2096
+T00241.023,wasDrawn,Set after the actor is drawn this frame,low,source:44F14.c:1084
+T00241.024,supportLayer,Tile layer under the actor; becomes currentTileLayer on contact,low,source:3A1A0.c:1174
+T00241.025,placementLayer,Layer byte of the placement word,med,source:3A1A0.c:330
+T00241.026,reservedD,Not read,low,declaration-only;source:3A1A0.h:149
+T00241.027,copiedWordCount,Fourth SHP texture header byte,med,source:30DB0.c:1065
+T00241.028,slot,Actor or gimmick slot,high,source:30DB0.c:1098
+T00241.029,variant,Asset variant,high,source:30DB0.c:1347
+T00241.030,jumpCountdown,Signed half-tick countdown before the landing animation,med,source:40564.c:2324
+T00241.031,attachParent,Actor this one is attached to; 0xFF when none,high,source:30DB0.c:3618
+T00241.032,attachBone,Bone of the parent; 0xFC for scripted attachment,med,source:30DB0.c:3624
+T00241.033,lookYaw,Yaw offset applied to the root and head tracking,med,source:30DB0.c:3528
+T00241.034,lookPitch,Pitch offset applied to the root and head tracking,med,source:30DB0.c:3527
+T00241.035,turnFrames,Frames left in the current turn or rotation,med,source:44F14.c:1524
+T00241.036,currentAnimation,Animation being played; 0xF9 and 0xFF are idle markers,low,source:30DB0.c:2751
+T00241.037,position,World position,high,source:30DB0.c:2502
+T00241.038,rotationX,X rotation,high,source:40564.c:1209
+T00241.039,facing,Facing (Y rotation),high,source:30DB0.c:2506
+T00241.040,rotationZ,Z rotation,high,source:40564.c:1211
+T00241.041,reserved2A,Not read,low,declaration-only;source:3A1A0.h:164
+T00241.042,scaleX,X scale (ONE = 1.0),high,source:40564.c:1252
+T00241.043,scaleY,Y scale (ONE = 1.0),high,source:40564.c:1253
+T00241.044,scaleZ,Z scale (ONE = 1.0),high,source:40564.c:1254
+T00241.045,reserved32,Not read,low,declaration-only;source:3A1A0.h:168
+T00241.046,rootMotion,Root translation added to the position,med,source:30DB0.c:2771
+T00241.047,rotationStepX,X rotation added per turn frame,high,source:40564.c:1209
+T00241.048,facingDelta,Facing change spread over the turn frames,high,source:30DB0.c:2340
+T00241.049,rotationStepZ,Z rotation added per turn frame,high,source:40564.c:1211
+T00241.050,reserved42,Not read,low,declaration-only;source:3A1A0.h:173
+T00241.051,scaleDelta,Scale change spread over the scale frames,high,source:40564.c:1258
+T00241.052,supportOffset,Offset whose Y gives the height above the support,low,source:40564.c:2492
+T00241.053,reserved50,Not read,low,declaration-only;source:3A1A0.h:176
+T00241.054,previousFacing,Facing saved before a move,med,source:44F14.c:1571
+T00241.055,baseColor,Base light color; 0x808080 neutral,med,source:30DB0.c:1376
+T00241.056,tint,Model tint; 0x404040 default,high,source:30DB0.c:3942
+T00241.057,currentTileX,Tile X,high,source:30DB0.c:1116
+T00241.058,currentTileLayer,Tile layer,med,source:3A1A0.c:1174;source:40564.c:541
+T00241.059,currentTileZ,Tile Z,high,source:30DB0.c:2729
+T00241.060,reserved5F,Height byte of the placement word; not read,low,declaration-only;source:3A1A0.h:183
+T00241.061,previousTileX,Tile X before the last move,high,source:3A1A0.c:1786
+T00241.062,previousTileLayer,Tile layer before the last move,med,source:3A1A0.c:1789
+T00241.063,previousTileZ,Tile Z before the last move,high,source:3A1A0.c:1787
+T00241.064,reserved63,Not read,low,declaration-only;source:3A1A0.h:187
+T00241.065,palettePulse,Palette pulse state,high,source:44F14.c:953
+T00241.066,model,SHP model,high,source:30DB0.c:1150
 T00301.000,equipment,Accessory statistics,high,source:146C.c:1084
 T00301.001,dropRate,Drop rate,high,source:146C.c:1089
 T00301.002,index,Index,high,source:146C.c:1090
