@@ -486,6 +486,11 @@ names, locations and collisions; it does not prove semantics or close migration 
   target-menu step counter; G00017/G00018 are unreferenced. Corrections: T00273 offset 0x14 (Battle_01) is
   `healthPhase` (upstream 6E644.c:4112 reads it). Gap found: `func_800AD714` (44F14.c:168, the animation event
   interpreter) is missing from FUNCTION_CATALOG.csv. 195 of 526 fields are `low` (137 reserved, 30 opaque).
+- Function catalog gap (2026-10-17): 56 functions defined in `.c` files of the pinned index are not in
+  FUNCTION_CATALOG.csv (14 in SLUS main.c, CLUT transforms; 10 MAINMENU C48.c; 7 MENU5 4D8.c; 6 MENUE 494.c; 4 MENU9
+  238.c; 6 BATTLE 146C.c at lines 8280-8317; 4 in 44F14.c including the animation event interpreter; 4 in 5BF94.c;
+  1 ENDING D4.c). The other 372 indexed functions missing by file live in shared EFFECT headers and are catalogued
+  under the overlays that include them. The 56 need catalog rows named from read code before copying starts.
 
 The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
 The native audio player must own playback position rather than reading another module's timing globals.
