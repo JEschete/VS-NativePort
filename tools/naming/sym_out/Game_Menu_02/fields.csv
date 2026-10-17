@@ -1,0 +1,583 @@
+id,final_name,meaning,confidence,notes
+T00079.000,None,OptionsMenuState None,med,declaration-only;source:15AC.c:169
+T00079.001,WaitReady,OptionsMenuState WaitReady,med,declaration-only;source:64.c:219
+T00079.002,Init,OptionsMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00079.003,HandleInput,OptionsMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00079.004,SimpleMap,OptionsMenuState SimpleMap,med,declaration-only;source:88.c:558
+T00079.005,AbilityTiming,OptionsMenuState AbilityTiming,med,declaration-only;source:88.c:559
+T00079.006,WeaponStatus,OptionsMenuState WeaponStatus,med,declaration-only;source:88.c:560
+T00079.007,ArmorStatus,OptionsMenuState ArmorStatus,med,declaration-only;source:88.c:561
+T00079.008,CursorMemory,OptionsMenuState CursorMemory,med,declaration-only;source:88.c:562
+T00079.009,Information,OptionsMenuState Information,med,declaration-only;source:88.c:563
+T00079.010,PuzzleMode,OptionsMenuState PuzzleMode,med,declaration-only;source:88.c:564
+T00079.011,Sound,OptionsMenuState Sound,med,declaration-only;source:88.c:565
+T00079.012,Vibration,OptionsMenuState Vibration,med,declaration-only;source:88.c:566
+T00079.013,ExitToMenu,OptionsMenuState ExitToMenu,med,declaration-only;source:88.c:567
+T00079.014,ExitToBattle,OptionsMenuState ExitToBattle,med,declaration-only;source:64.c:666
+T00080.000,Init,ScoreOverlayState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00080.001,InitData,ScoreOverlayState InitData,med,declaration-only;source:238.c:277
+T00080.002,WaitMenuReady,ScoreOverlayState WaitMenuReady,med,declaration-only;source:16C.c:345
+T00081.000,Init,ScoreMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00081.001,InitData,ScoreMenuState InitData,med,declaration-only;source:238.c:277
+T00081.002,TopMenu,ScoreMenuState TopMenu,med,declaration-only;source:16C.c:1056
+T00082.000,Init,DisassemblyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00082.001,InitOptionYes,DisassemblyState InitOptionYes,med,declaration-only;source:MENU/MENUB.PRG/260.c:236
+T00082.002,InitOptionNo,DisassemblyState InitOptionNo,med,declaration-only;source:MENU/MENUB.PRG/260.c:237
+T00082.003,WaitInit,DisassemblyState WaitInit,med,declaration-only;source:items2.h:206
+T00082.004,ProcessCommand,DisassemblyState ProcessCommand,med,declaration-only;source:MENU/MENUB.PRG/260.c:239
+T00082.005,Disassemble,DisassemblyState Disassemble,med,declaration-only;source:MENU/MENUB.PRG/260.c:240
+T00082.006,Finalize,DisassemblyState Finalize,med,declaration-only;source:MENU/MENUB.PRG/260.c:241
+T00082.007,Leave,DisassemblyState Leave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2288
+T00083.000,Init,LootSelectionState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00083.001,ProcessInput,LootSelectionState ProcessInput,med,declaration-only;source:4D8.c:527
+T00083.002,Discard,LootSelectionState Discard,med,declaration-only;source:items2.h:211
+T00083.003,Organize,LootSelectionState Organize,med,declaration-only;source:MENU/MENUB.PRG/260.c:1628
+T00083.004,TopMenu,LootSelectionState TopMenu,med,declaration-only;source:16C.c:1056
+T00083.005,Dissasemble,LootSelectionState Dissasemble,med,declaration-only;source:MENU/MENUB.PRG/260.c:1630
+T00083.006,ConsolidateItems,LootSelectionState ConsolidateItems,med,declaration-only;source:MENU/MENUB.PRG/260.c:1631
+T00083.007,WaitForInput,LootSelectionState WaitForInput,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00083.008,WaitForTopMenu,LootSelectionState WaitForTopMenu,med,declaration-only;source:MENU/MENUB.PRG/260.c:1633
+T00083.009,UpdateLoot,LootSelectionState UpdateLoot,med,declaration-only;source:MENU/MENUB.PRG/260.c:1634
+T00084.000,Init,SortMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00084.001,Display,SortMenuState Display,med,declaration-only;source:234.c:1621
+T00085.000,None,ManualOverlayState None,med,declaration-only;source:15AC.c:169
+T00085.001,Init,ManualOverlayState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00085.002,InitMenu,ManualOverlayState InitMenu,med,declaration-only;source:16C.c:1056
+T00085.003,WaitReady,ManualOverlayState WaitReady,med,declaration-only;source:64.c:219
+T00085.004,ShowMenu,ManualOverlayState ShowMenu,med,declaration-only;source:494.c:144
+T00085.005,ShutDown,ManualOverlayState ShutDown,med,declaration-only;source:494.c:144
+T00085.006,Exit,ManualOverlayState Exit,med,declaration-only;source:15AC.c:184
+T00086.000,Init,ManualMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00086.001,InitMenu,ManualMenuState InitMenu,med,declaration-only;source:16C.c:1056
+T00086.002,GetSelection,ManualMenuState GetSelection,med,declaration-only;source:4D8.c:981
+T00086.003,LoadSubMenu,ManualMenuState LoadSubMenu,med,declaration-only;source:494.c:251
+T00086.004,InitSubMenu,ManualMenuState InitSubMenu,med,declaration-only;source:494.c:252
+T00086.005,ShowSubMenu,ManualMenuState ShowSubMenu,med,declaration-only;source:494.c:253
+T00086.006,ExitToMenu,ManualMenuState ExitToMenu,med,declaration-only;source:88.c:567
+T00086.007,ExitToBattle,ManualMenuState ExitToBattle,med,declaration-only;source:64.c:666
+T00087.000,InitRows,TopicMenuState InitRows,med,declaration-only;source:494.c:452
+T00087.001,SelectRow,TopicMenuState SelectRow,med,declaration-only;source:494.c:452
+T00605.000,gameTime,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:723
+T00605.001,cumulativeSaveCount,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:307
+T00605.002,currentGameSaveCount,Named in the fork; see cited use,med,declaration-only;source:MENU/MENU7.PRG/260.c:54
+T00605.003,currentHP,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:811
+T00605.004,maxHP,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:812
+T00605.005,saveLocation,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:815
+T00605.006,clearCount,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:817
+T00605.007,mapCompletion,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:816
+T00605.008,reservedF,Not read by decompiled code,low,declaration-only;source:MENU/MENU7.PRG/260.c:60
+T00605.009,currentMP,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:818
+T00605.010,maxMP,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:819
+T00618.000,text,Named in the fork; see cited use,med,source:58EC.c:690
+T00618.001,disabled,Named in the fork; see cited use,med,source:58EC.c:658
+T00618.002,x,Named in the fork; see cited use,med,source:58EC.c:659
+T00814.000,t,Named in the fork; see cited use,med,source:D4.c:1509
+T00814.001,all,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:4165
+T00644.000,x,Named in the fork; see cited use,med,source:146C.c:15863
+T00644.001,y,Named in the fork; see cited use,med,declaration-only;source:2EA3C.h:6
+T00092.000,None,InformationBoxHeader None,med,declaration-only;source:5BF94.h:539
+T00092.001,Caution,InformationBoxHeader Caution,med,declaration-only;source:5BF94.h:540
+T00092.002,Information,InformationBoxHeader Information,med,declaration-only;source:5BF94.h:541
+T00092.003,Check,InformationBoxHeader Check,med,declaration-only;source:5BF94.h:542
+T00645.000,weapon,Named in the fork; see cited use,med,source:146C.c:1732
+T00645.001,blade,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:1132
+T00645.002,grip,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:1136
+T00645.003,shield,Named in the fork; see cited use,med,source:146C.c:1733
+T00645.004,armor,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:239
+T00645.005,accessory,Named in the fork; see cited use,med,source:146C.c:1735
+T00645.006,gem,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:1156
+T00645.007,misc,Named in the fork; see cited use,med,source:146C.c:1693
+T00656.000,titlePage,Named in the fork; see cited use,med,source:238.c:667
+T00656.001,titleRow,Named in the fork; see cited use,med,source:238.c:666
+T00656.002,encyclopaediaPage,Named in the fork; see cited use,med,source:238.c:958
+T00656.003,encyclopaediaRow,Named in the fork; see cited use,med,source:238.c:957
+T00656.004,recordTimePage,Named in the fork; see cited use,med,source:238.c:772
+T00656.005,recordTimeRow,Named in the fork; see cited use,med,source:238.c:771
+T00656.006,gazettePage,Named in the fork; see cited use,med,source:238.c:882
+T00656.007,gazetteRow,Named in the fork; see cited use,med,source:238.c:622
+T00657.000,state,Named in the fork; see cited use,med,source:5BF94.c:2669
+T00657.001,w,Named in the fork; see cited use,med,source:5BF94.c:2670
+T00657.002,backgroundWidth,Named in the fork; see cited use,med,source:5BF94.c:2671
+T00657.003,animationStep,Named in the fork; see cited use,med,source:5BF94.c:2851
+T00657.004,gradientState,Named in the fork; see cited use,med,source:5BF94.c:2673
+T00657.005,isScrollable,Named in the fork; see cited use,med,source:58EC.c:174
+T00657.006,selected,Named in the fork; see cited use,med,source:5BF94.c:2756
+T00657.007,unselectable,Named in the fork; see cited use,med,source:5BF94.c:2756
+T00657.008,buttonId,Named in the fork; see cited use,med,source:58EC.c:1687
+T00657.009,rowIcon,Named in the fork; see cited use,med,source:5BF94.c:2771
+T00657.010,fontColor,Named in the fork; see cited use,med,source:5BF94.c:2760
+T00657.011,invertGradient,Named in the fork; see cited use,med,source:5BF94.c:2756
+T00657.012,material,Named in the fork; see cited use,med,source:2D10.c:74
+T00657.013,outsetIcon,Named in the fork; see cited use,med,source:58EC.c:937
+T00657.014,itemPage,Named in the fork; see cited use,med,source:58EC.c:1656
+T00657.015,count,Named in the fork; see cited use,med,source:58EC.c:935
+T00657.016,max,Named in the fork; see cited use,med,source:58EC.c:943
+T00657.017,x,Named in the fork; see cited use,med,source:5BF94.c:2676
+T00657.018,y,Named in the fork; see cited use,med,source:5BF94.c:2677
+T00657.019,targetPosition0,Named in the fork; see cited use,med,source:2D10.c:70
+T00657.020,targetPosition1,Named in the fork; see cited use,med,source:58EC.c:1571
+T00657.021,text,Named in the fork; see cited use,med,source:5BF94.c:2683
+T00657.022,subText,Named in the fork; see cited use,med,source:5BF94.c:2822
+T00658.000,currentMenu,Named in the fork; see cited use,med,source:5BF94.c:2975
+T00658.001,returnState,Named in the fork; see cited use,med,source:5BF94.c:3526
+T00658.002,executeAbilityType,Named in the fork; see cited use,med,source:5BF94.c:3528
+T00658.003,loading,Named in the fork; see cited use,med,source:5BF94.c:2595
+T00658.004,cdQueue,Named in the fork; see cited use,med,source:5BF94.c:2605
+T00663.000,visited,Named in the fork; see cited use,med,source:146C.c:15725
+T00663.001,dataAddress,Named in the fork; see cited use,med,source:4D8.c:1104
+T00663.002,zoneId,Named in the fork; see cited use,med,source:146C.c:16021
+T00663.003,mapId,Named in the fork; see cited use,med,source:146C.c:16021
+T00664.000,name,Named in the fork; see cited use,med,source:4D8.c:564
+T00664.001,prev,Named in the fork; see cited use,med,source:4D8.c:1871
+T00664.002,next,Named in the fork; see cited use,med,source:4D8.c:1869
+T00665.000,vertexCount,Named in the fork; see cited use,med,source:4D8.c:1533
+T00665.001,vertices,Named in the fork; see cited use,med,source:4D8.c:1534
+T00666.000,roomCount,Named in the fork; see cited use,med,source:146C.c:16018
+T00666.001,rooms,Named in the fork; see cited use,med,source:146C.c:15725
+T00669.000,integers,Named in the fork; see cited use,med,source:4A0A8.c:921
+T00669.001,strings,Named in the fork; see cited use,med,source:5BF94.c:1265
+T00671.000,flags,"Kind, open style, alignment, frame and speaker bits (Battle::TextBoxFlags)",high,source:5BF94.c:4007
+T00671.001,opaque4,"Used, but its meaning is not established",low,source:5BF94.c:1543
+T00671.002,opaque6,"Used, but its meaning is not established",low,source:5BF94.c:4577
+T00671.003,string,Named in the fork; see cited use,med,source:5BF94.c:1541
+T00671.004,speed,Named in the fork; see cited use,med,source:5BF94.c:1542
+T00671.005,prevChunksPrinted,Named in the fork; see cited use,med,source:5BF94.c:1544
+T00671.006,xIndent,Named in the fork; see cited use,med,source:5BF94.c:1744
+T00671.007,yIndent,Named in the fork; see cited use,med,source:5BF94.c:1745
+T00671.008,x,Named in the fork; see cited use,med,source:4A0A8.c:685
+T00671.009,y,Named in the fork; see cited use,med,source:4A0A8.c:687
+T00671.010,centerX,Named in the fork; see cited use,med,source:5BF94.c:4002
+T00671.011,centerY,Named in the fork; see cited use,med,source:5BF94.c:4003
+T00671.012,state,Named in the fork; see cited use,med,source:5BF94.c:3942
+T00671.013,brightness,Named in the fork; see cited use,med,source:5BF94.c:1736
+T00671.014,reserved1F,Not read by decompiled code,low,declaration-only;source:5BF94.h:110
+T00671.015,charsPerLine,Named in the fork; see cited use,med,source:4A0A8.c:686
+T00671.016,lineCount,Named in the fork; see cited use,med,source:4A0A8.c:687
+T00671.017,openDuration,Frames the box takes to open or close,med,source:4A0A8.c:943
+T00671.018,reserved23,Not read by decompiled code,low,declaration-only;source:5BF94.h:114
+T00671.019,frameX,Scaled frame x while opening,med,source:5BF94.c:4002
+T00671.020,frameY,Scaled frame y while opening,med,source:5BF94.c:4003
+T00671.021,frameWidth,Scaled frame width,med,source:5BF94.c:4004
+T00671.022,frameHeight,Scaled frame height,med,source:5BF94.c:4005
+T00671.023,opaque2C,"Used, but its meaning is not established",low,source:5BF94.c:1547
+T00671.024,opaque2E,"Used, but its meaning is not established",low,source:4A0A8.c:694
+T00674.000,armor,Named in the fork; see cited use,med,source:146C.c:1109
+T00674.001,currentDp,Named in the fork; see cited use,med,source:146C.c:1112
+T00674.002,maxDp,Named in the fork; see cited use,med,source:146C.c:1113
+T00674.003,currentStr,Named in the fork; see cited use,med,source:146C.c:1114
+T00674.004,baseStr,Named in the fork; see cited use,med,source:146C.c:1114
+T00674.005,currentInt,Named in the fork; see cited use,med,source:146C.c:1115
+T00674.006,baseInt,Named in the fork; see cited use,med,source:146C.c:1115
+T00674.007,currentAgility,Named in the fork; see cited use,med,source:146C.c:1116
+T00674.008,baseAgility,Named in the fork; see cited use,med,source:146C.c:1116
+T00674.009,types,Named in the fork; see cited use,med,source:146C.c:1120
+T00674.010,classAffinityCurrent,Named in the fork; see cited use,med,source:146C.c:1125
+T00674.011,affinityModifiers,Temporary class/affinity modifiers added when the affinities are rebuilt; cleared by status removal,med,source:146C.c:9596
+T00674.012,dropRate,Named in the fork; see cited use,med,source:146C.c:1138
+T00674.013,opaque99,"Used, but its meaning is not established",low,source:146C.c:1139
+T00674.014,index,Named in the fork; see cited use,med,source:146C.c:1117
+T00674.015,reserved9B,Not read by decompiled code,low,declaration-only;source:146C.h:395
+T00674.016,classAffinityBaseline,Named in the fork; see cited use,med,source:146C.c:1127
+T00679.000,reserved0,Not read by decompiled code,low,declaration-only;source:146C.h:355
+T00679.001,base,Named in the fork; see cited use,med,source:146C.c:1033
+T00679.002,gems,Named in the fork; see cited use,med,source:146C.c:1036
+T00679.003,wepId,Named in the fork; see cited use,med,source:146C.c:1039
+T00679.004,dropRate,Named in the fork; see cited use,med,source:146C.c:1040
+T00679.005,index,Named in the fork; see cited use,med,source:146C.c:1041
+T00679.006,reservedDB,Not read by decompiled code,low,declaration-only;source:146C.h:361
+T00679.007,currentPp,Named in the fork; see cited use,med,source:146C.c:1050
+T00679.008,maxPp,Named in the fork; see cited use,med,source:146C.c:1051
+T00679.009,currentDp,Named in the fork; see cited use,med,source:146C.c:1048
+T00679.010,maxDp,Named in the fork; see cited use,med,source:146C.c:1049
+T00679.011,currentStr,Named in the fork; see cited use,med,source:146C.c:1052
+T00679.012,baseStr,Named in the fork; see cited use,med,source:146C.c:1052
+T00679.013,currentInt,Named in the fork; see cited use,med,source:146C.c:1055
+T00679.014,baseInt,Named in the fork; see cited use,med,source:146C.c:1055
+T00679.015,currentAgility,Named in the fork; see cited use,med,source:146C.c:1058
+T00679.016,baseAgility,Named in the fork; see cited use,med,source:146C.c:1058
+T00679.017,types,Named in the fork; see cited use,med,source:146C.c:1045
+T00679.018,classAffinityCurrent,Named in the fork; see cited use,med,source:146C.c:1064
+T00679.019,affinityModifiers,Temporary class/affinity modifiers added when the affinities are rebuilt; cleared by status removal,med,source:146C.c:9618
+T00679.020,classAffinityBaseline,Named in the fork; see cited use,med,source:146C.c:1063
+T00680.000,name,Named in the fork; see cited use,med,source:146C.c:1024
+T00680.001,blade,Named in the fork; see cited use,med,source:146C.c:973
+T00680.002,grip,Named in the fork; see cited use,med,source:146C.c:974
+T00680.003,gems,Named in the fork; see cited use,med,source:146C.c:977
+T00680.004,wepId,Named in the fork; see cited use,med,source:146C.c:980
+T00680.005,damageTypeValue,Named in the fork; see cited use,med,source:146C.c:986
+T00680.006,risk,Named in the fork; see cited use,med,source:146C.c:987
+T00680.007,recoveryDelay,Recovery delay after the weapon's attacks (20 for placeholders),med,source:146C.c:13178
+T00680.008,dropRate,Named in the fork; see cited use,med,source:146C.c:981
+T00680.009,index,Named in the fork; see cited use,med,source:146C.c:982
+T00680.010,damageType,Named in the fork; see cited use,med,source:146C.c:984
+T00680.011,actionType,Named in the fork; see cited use,med,source:146C.c:985
+T00680.012,currentPp,Named in the fork; see cited use,med,source:146C.c:993
+T00680.013,maxPp,Named in the fork; see cited use,med,source:146C.c:994
+T00680.014,currentDp,Named in the fork; see cited use,med,source:146C.c:990
+T00680.015,maxDp,Named in the fork; see cited use,med,source:146C.c:991
+T00680.016,currentStr,Named in the fork; see cited use,med,source:146C.c:995
+T00680.017,baseStr,Named in the fork; see cited use,med,source:146C.c:995
+T00680.018,currentInt,Named in the fork; see cited use,med,source:146C.c:998
+T00680.019,baseInt,Named in the fork; see cited use,med,source:146C.c:998
+T00680.020,currentAgility,Named in the fork; see cited use,med,source:146C.c:1002
+T00680.021,baseAgility,Named in the fork; see cited use,med,source:146C.c:1002
+T00680.022,range,Named in the fork; see cited use,med,source:146C.c:989
+T00680.023,classAffinityCurrent,Named in the fork; see cited use,med,source:146C.c:1008
+T00680.024,affinityModifiers,Temporary class/affinity modifiers added when the affinities are rebuilt; cleared by status removal,med,source:146C.c:9640
+T00680.025,classAffinityBaseline,Named in the fork; see cited use,med,source:146C.c:1007
+T00684.000,position,Named in the fork; see cited use,med,source:146C.c:3038
+T00684.001,lookAt,Named in the fork; see cited use,med,source:146C.c:2468
+T00684.002,angles,Named in the fork; see cited use,med,source:146C.c:6816
+T00684.003,farClip,Named in the fork; see cited use,med,source:146C.c:3111
+T00100.000,Colon,FileMenuUiId Colon,med,declaration-only;source:MENU/MENU7.PRG/260.c:1207
+T00100.001,Number,FileMenuUiId Number,med,declaration-only;source:MENU/MENU7.PRG/260.c:1208
+T00100.002,Map,FileMenuUiId Map,med,declaration-only;source:MENU/MENU7.PRG/260.c:1209
+T00100.003,Save,FileMenuUiId Save,med,declaration-only;source:MENU/MENU7.PRG/260.c:1210
+T00100.004,Clear,FileMenuUiId Clear,med,declaration-only;source:MENU/MENU7.PRG/260.c:1211
+T00100.005,Time,FileMenuUiId Time,med,declaration-only;source:MENU/MENU7.PRG/260.c:1212
+T00100.006,Percent,FileMenuUiId Percent,med,declaration-only;source:MENU/MENU7.PRG/260.c:1213
+T00100.007,Hp,FileMenuUiId Hp,med,declaration-only;source:MENU/MENU7.PRG/260.c:1214
+T00100.008,Mp,FileMenuUiId Mp,med,declaration-only;source:MENU/MENU7.PRG/260.c:1215
+T00100.009,Dot,FileMenuUiId Dot,med,declaration-only;source:MENU/MENU7.PRG/260.c:1216
+T00103.000,Discard,ActionsMenuAction Discard,med,declaration-only;source:58EC.h:7
+T00103.001,Sort,ActionsMenuAction Sort,med,declaration-only;source:58EC.h:7
+T00104.000,Triangle,ButtonId Triangle,med,declaration-only;source:58EC.h:90
+T00104.001,Square,ButtonId Square,med,declaration-only;source:58EC.h:91
+T00104.002,Circle,ButtonId Circle,med,declaration-only;source:58EC.h:92
+T00104.003,Cross,ButtonId Cross,med,declaration-only;source:58EC.h:93
+T00104.004,L1,ButtonId L1,med,declaration-only;source:58EC.h:94
+T00104.005,R1,ButtonId R1,med,declaration-only;source:58EC.h:95
+T00104.006,L2,ButtonId L2,med,declaration-only;source:58EC.h:96
+T00104.007,R2,ButtonId R2,med,declaration-only;source:58EC.h:97
+T00105.000,Write,CopyItemFlag Write,med,declaration-only;source:2D10.h:200
+T00106.000,Gem,MainMenuIcon Gem,med,declaration-only;source:58EC.h:134
+T00107.000,None,MenuCommand None,med,declaration-only;source:58EC.h:46
+T00107.001,Command,MenuCommand Command,med,declaration-only;source:58EC.h:47
+T00107.002,Menu,MenuCommand Menu,med,declaration-only;source:58EC.h:48
+T00107.003,Num,MenuCommand Num,med,declaration-only;source:58EC.h:49
+T00107.004,Warning,MenuCommand Warning,med,declaration-only;source:58EC.h:50
+T00107.005,Help,MenuCommand Help,med,declaration-only;source:58EC.h:51
+T00107.006,Info,MenuCommand Info,med,declaration-only;source:58EC.h:52
+T00108.000,None,MenuItemId None,med,declaration-only;source:C48.h:6
+T00109.000,Confirm,MenuSelection Confirm,med,declaration-only;source:58EC.h:212
+T00109.001,Back,MenuSelection Back,med,declaration-only;source:58EC.h:213
+T00109.002,Quit,MenuSelection Quit,med,declaration-only;source:58EC.h:214
+T00110.000,SlideIn,DpPpBarsState SlideIn,med,declaration-only;source:C48.h:105
+T00110.001,SlideOut,DpPpBarsState SlideOut,med,declaration-only;source:C48.h:106
+T00110.002,Static,DpPpBarsState Static,med,declaration-only;source:C48.h:107
+T00111.000,None,DpPpBarsTarget None,med,declaration-only;source:C48.h:98
+T00111.001,Dp,DpPpBarsTarget Dp,med,declaration-only;source:C48.h:99
+T00111.002,Pp,DpPpBarsTarget Pp,med,declaration-only;source:C48.h:100
+T00111.003,Both,DpPpBarsTarget Both,med,declaration-only;source:C48.h:101
+T00112.000,Disabled,RowTypeFlag Disabled,med,declaration-only;source:58EC.h:179
+T00113.000,Class,StatPage Class,med,declaration-only;source:58EC.h:338
+T00113.001,Affinity,StatPage Affinity,med,declaration-only;source:58EC.h:339
+T00113.002,Type,StatPage Type,med,declaration-only;source:58EC.h:340
+T00113.003,None,StatPage None,med,declaration-only;source:58EC.h:341
+T00114.000,Class,StatPageEnabled Class,med,declaration-only;source:C48.h:78
+T00114.001,Affinity,StatPageEnabled Affinity,med,declaration-only;source:C48.h:79
+T00114.002,Type,StatPageEnabled Type,med,declaration-only;source:C48.h:80
+T00114.003,All,StatPageEnabled All,med,declaration-only;source:C48.h:81
+T00115.000,UiPp,StatusUiId UiPp,med,declaration-only;source:58EC.h:320
+T00115.001,UiDp,StatusUiId UiDp,med,declaration-only;source:58EC.h:321
+T00115.002,UistatPageFirstElement,StatusUiId UistatPageFirstElement,med,declaration-only;source:58EC.h:322
+T00115.003,UistatPageLastElement,StatusUiId UistatPageLastElement,med,declaration-only;source:58EC.h:323
+T00115.004,UiPrincipleItem,StatusUiId UiPrincipleItem,med,declaration-only;source:58EC.h:324
+T00115.005,UiRange,StatusUiId UiRange,med,declaration-only;source:58EC.h:325
+T00115.006,UiRisk,StatusUiId UiRisk,med,declaration-only;source:58EC.h:326
+T00115.007,UiStr,StatusUiId UiStr,med,declaration-only;source:58EC.h:327
+T00115.008,UiInt,StatusUiId UiInt,med,declaration-only;source:58EC.h:328
+T00115.009,UiAgi,StatusUiId UiAgi,med,declaration-only;source:58EC.h:329
+T00690.000,lba,Named in the fork; see cited use,med,source:146C.c:6629
+T00690.001,size,Named in the fork; see cited use,med,source:146C.c:6630
+T00691.000,state,Named in the fork; see cited use,med,source:146C.c:6637
+T00691.001,priority,Named in the fork; see cited use,med,source:main.c:9439
+T00691.002,cdFile,Named in the fork; see cited use,med,source:main.c:9418
+T00691.003,opaqueC,"Used, but its meaning is not established",low,source:main.c:9438
+T00691.004,vram,Named in the fork; see cited use,med,source:main.c:9437
+T00693.000,artsLearned,Named in the fork; see cited use,med,source:146C.c:3279
+T00693.001,kills,Named in the fork; see cited use,med,source:146C.c:3283
+T00695.000,clearCount,Named in the fork; see cited use,med,source:D4.c:1507
+T00695.001,difficulty,Named in the fork; see cited use,med,source:D4.c:1525
+T00695.002,normalModeCleared,Named in the fork; see cited use,med,source:D4.c:1526
+T00695.003,reserved3,Not read by decompiled code,low,declaration-only;source:main.h:244
+T00695.004,reserved4,Not read by decompiled code,low,declaration-only;source:main.h:245
+T00695.005,reserved5,Not read by decompiled code,low,declaration-only;source:main.h:246
+T00695.006,reserved6,Not read by decompiled code,low,declaration-only;source:main.h:247
+T00695.007,reserved7,Not read by decompiled code,low,declaration-only;source:main.h:248
+T00695.008,reserved8,Not read by decompiled code,low,declaration-only;source:main.h:249
+T00695.009,reserved9,Not read by decompiled code,low,declaration-only;source:main.h:250
+T00695.010,reservedA,Not read by decompiled code,low,declaration-only;source:main.h:251
+T00695.011,reservedB,Not read by decompiled code,low,declaration-only;source:main.h:252
+T00695.012,opaqueC,"Used, but its meaning is not established",low,source:22C.c:4745
+T00695.013,opaqueD,"Used, but its meaning is not established",low,source:22C.c:4746
+T00695.014,opaqueE,"Used, but its meaning is not established",low,source:22C.c:4753
+T00695.015,reservedF,Not read by decompiled code,low,declaration-only;source:main.h:256
+T00695.016,textBoxSelection,Named in the fork; see cited use,med,source:4A0A8.c:724
+T00695.017,opaque11,"Used, but its meaning is not established",low,source:5BF94.c:1590
+T00695.018,reserved12,Not read by decompiled code,low,declaration-only;source:main.h:259
+T00695.019,reserved13,Not read by decompiled code,low,declaration-only;source:main.h:260
+T00695.020,reserved14,Not read by decompiled code,low,declaration-only;source:main.h:261
+T00695.021,reserved15,Not read by decompiled code,low,declaration-only;source:main.h:262
+T00695.022,reserved16,Not read by decompiled code,low,declaration-only;source:main.h:263
+T00695.023,reserved17,Not read by decompiled code,low,declaration-only;source:main.h:264
+T00695.024,reserved18,Not read by decompiled code,low,declaration-only;source:main.h:265
+T00695.025,reserved19,Not read by decompiled code,low,declaration-only;source:main.h:266
+T00695.026,reserved1A,Not read by decompiled code,low,declaration-only;source:main.h:267
+T00695.027,reserved1B,Not read by decompiled code,low,declaration-only;source:main.h:268
+T00695.028,reserved1C,Not read by decompiled code,low,declaration-only;source:main.h:269
+T00695.029,reserved1D,Not read by decompiled code,low,declaration-only;source:main.h:270
+T00695.030,reserved1E,Not read by decompiled code,low,declaration-only;source:main.h:271
+T00695.031,reserved1F,Not read by decompiled code,low,declaration-only;source:main.h:272
+T00695.032,opaque20,"Used, but its meaning is not established",low,source:146C.c:16820
+T00695.033,reserved21,Not read by decompiled code,low,declaration-only;source:main.h:274
+T00695.034,opaque40,"Used, but its meaning is not established",low,source:146C.c:16820
+T00695.035,reserved41,Not read by decompiled code,low,declaration-only;source:main.h:276
+T00695.036,puzzleTimerHundredths,Named in the fork; see cited use,med,source:5BF94.c:3850
+T00695.037,puzzleTimerSeconds,Named in the fork; see cited use,med,source:3B8.c:2355
+T00695.038,puzzleTimerMins,Named in the fork; see cited use,med,source:3B8.c:2354
+T00695.039,puzzleSetMaxTimer,Named in the fork; see cited use,med,source:3B8.c:2353
+T00695.040,gameOver,Named in the fork; see cited use,med,source:58EC.c:779
+T00695.041,reservedA5,Not read by decompiled code,low,declaration-only;source:main.h:282
+T00695.042,reservedA6,Not read by decompiled code,low,declaration-only;source:main.h:283
+T00695.043,opaqueA7,"Used, but its meaning is not established",low,source:MENU/MENU7.PRG/260.c:4228
+T00695.044,opaqueA8,"Used, but its meaning is not established",low,source:2842C.c:1049
+T00695.045,reservedA9,Not read by decompiled code,low,declaration-only;source:main.h:286
+T00695.046,reservedAA,Not read by decompiled code,low,declaration-only;source:main.h:287
+T00695.047,introState,Named in the fork; see cited use,med,source:5BF94.c:3618
+T00695.048,opaqueAC,"Used, but its meaning is not established",low,source:146C.c:16197
+T00695.049,opaqueB5,"Used, but its meaning is not established",low,source:5BF94.c:3615
+T00695.050,menuFSubmenu,Named in the fork; see cited use,med,source:3B8.c:63
+T00695.051,magicUsed,Named in the fork; see cited use,med,source:D4.c:1605
+T00695.052,battleAbilitiesUsed,Named in the fork; see cited use,med,source:D4.c:1609
+T00695.053,breakArtsUsed,Named in the fork; see cited use,med,source:D4.c:1613
+T00695.054,reservedBA,Not read by decompiled code,low,declaration-only;source:main.h:295
+T00695.055,reservedBB,Not read by decompiled code,low,declaration-only;source:main.h:296
+T00695.056,reservedBC,Not read by decompiled code,low,declaration-only;source:main.h:297
+T00695.057,reservedBD,Not read by decompiled code,low,declaration-only;source:main.h:298
+T00695.058,reservedBE,Not read by decompiled code,low,declaration-only;source:main.h:299
+T00695.059,reservedBF,Not read by decompiled code,low,declaration-only;source:main.h:300
+T00695.060,reservedC0,Not read by decompiled code,low,declaration-only;source:main.h:301
+T00695.061,reservedC1,Not read by decompiled code,low,declaration-only;source:main.h:302
+T00695.062,reservedC2,Not read by decompiled code,low,declaration-only;source:main.h:303
+T00695.063,reservedC3,Not read by decompiled code,low,declaration-only;source:main.h:304
+T00695.064,timeAttackBoss,Named in the fork; see cited use,med,source:3B8.c:321
+T00695.065,timeAttackMins,Named in the fork; see cited use,med,source:3B8.c:309
+T00695.066,timeAttackSecs,Named in the fork; see cited use,med,source:3B8.c:310
+T00695.067,timeAttackHundredths,Named in the fork; see cited use,med,source:3B8.c:311
+T00695.068,reservedC8,Not read by decompiled code,low,declaration-only;source:main.h:309
+T00695.069,reservedC9,Not read by decompiled code,low,declaration-only;source:main.h:310
+T00695.070,reservedCA,Not read by decompiled code,low,declaration-only;source:main.h:311
+T00695.071,reservedCB,Not read by decompiled code,low,declaration-only;source:main.h:312
+T00695.072,damascusGolemDefeated,Named in the fork; see cited use,med,source:D4.c:1644
+T00695.073,damascusCrabDefeated,Named in the fork; see cited use,med,source:D4.c:1648
+T00695.074,ravanaDefeated,Named in the fork; see cited use,med,source:D4.c:1652
+T00695.075,dragonZombieDefeated,Named in the fork; see cited use,med,source:D4.c:1656
+T00695.076,deathAndOgreZombieDefeated,Named in the fork; see cited use,med,source:D4.c:1660
+T00695.077,asuraDefeated,Named in the fork; see cited use,med,source:D4.c:1664
+T00695.078,reservedD2,Not read by decompiled code,low,declaration-only;source:main.h:319
+T00695.079,doorEntered,Named in the fork; see cited use,med,source:146C.c:15726
+T00695.080,reserved106,Not read by decompiled code,low,declaration-only;source:main.h:321
+T00695.081,puzzleMode,Named in the fork; see cited use,med,source:88.c:774
+T00695.082,puzzleModeDisabled,Named in the fork; see cited use,med,source:88.c:592
+T00695.083,reserved11E,Not read by decompiled code,low,declaration-only;source:main.h:324
+T00695.084,mapPaling,Named in the fork; see cited use,med,source:4D8.c:451
+T00695.085,reserved155,Not read by decompiled code,low,declaration-only;source:main.h:326
+T00695.086,savePointStates,Named in the fork; see cited use,med,source:15AC.c:53
+T00695.087,opaque186,"Used, but its meaning is not established",low,source:146C.c:17413
+T00695.088,reserved1B6,Not read by decompiled code,low,declaration-only;source:main.h:329
+T00695.089,opaque33F,"Used, but its meaning is not established",low,source:4D8.c:2189
+T00695.090,reserved380,Not read by decompiled code,low,declaration-only;source:main.h:331
+T00695.091,reserved381,Not read by decompiled code,low,declaration-only;source:main.h:332
+T00695.092,reserved382,Not read by decompiled code,low,declaration-only;source:main.h:333
+T00695.093,goldKeyObtained,Named in the fork; see cited use,med,source:D4.c:1668
+T00695.094,reserved384,Not read by decompiled code,low,declaration-only;source:main.h:335
+T00695.095,reserved385,Not read by decompiled code,low,declaration-only;source:main.h:336
+T00695.096,reserved386,Not read by decompiled code,low,declaration-only;source:main.h:337
+T00695.097,chestKeyObtained,Named in the fork; see cited use,med,source:D4.c:1672
+T00695.098,reserved388,Not read by decompiled code,low,declaration-only;source:main.h:339
+T00695.099,reserved389,Not read by decompiled code,low,declaration-only;source:main.h:340
+T00695.100,reserved38A,Not read by decompiled code,low,declaration-only;source:main.h:341
+T00695.101,reserved38B,Not read by decompiled code,low,declaration-only;source:main.h:342
+T00695.102,reserved38C,Not read by decompiled code,low,declaration-only;source:main.h:343
+T00695.103,reserved38D,Not read by decompiled code,low,declaration-only;source:main.h:344
+T00695.104,reserved38E,Not read by decompiled code,low,declaration-only;source:main.h:345
+T00695.105,reserved38F,Not read by decompiled code,low,declaration-only;source:main.h:346
+T00695.106,reserved390,Not read by decompiled code,low,declaration-only;source:main.h:347
+T00695.107,reserved391,Not read by decompiled code,low,declaration-only;source:main.h:348
+T00695.108,reserved392,Not read by decompiled code,low,declaration-only;source:main.h:349
+T00695.109,reserved393,Not read by decompiled code,low,declaration-only;source:main.h:350
+T00695.110,reserved394,Not read by decompiled code,low,declaration-only;source:main.h:351
+T00695.111,reserved395,Not read by decompiled code,low,declaration-only;source:main.h:352
+T00695.112,reserved396,Not read by decompiled code,low,declaration-only;source:main.h:353
+T00695.113,reserved397,Not read by decompiled code,low,declaration-only;source:main.h:354
+T00695.114,reserved398,Not read by decompiled code,low,declaration-only;source:main.h:355
+T00695.115,reserved399,Not read by decompiled code,low,declaration-only;source:main.h:356
+T00695.116,reserved39A,Not read by decompiled code,low,declaration-only;source:main.h:357
+T00695.117,reserved39B,Not read by decompiled code,low,declaration-only;source:main.h:358
+T00695.118,reserved39C,Not read by decompiled code,low,declaration-only;source:main.h:359
+T00695.119,reserved39D,Not read by decompiled code,low,declaration-only;source:main.h:360
+T00695.120,reserved39E,Not read by decompiled code,low,declaration-only;source:main.h:361
+T00695.121,reserved39F,Not read by decompiled code,low,declaration-only;source:main.h:362
+T00695.122,reserved3A0,Not read by decompiled code,low,declaration-only;source:main.h:363
+T00695.123,chestsOpened,Named in the fork; see cited use,med,source:D4.c:1635
+T00695.124,reserved400,Not read by decompiled code,low,declaration-only;source:main.h:365
+T00696.000,id,Named in the fork; see cited use,med,source:146C.c:1204
+T00696.001,subId,Named in the fork; see cited use,med,source:146C.c:1205
+T00696.002,wepId,Named in the fork; see cited use,med,source:146C.c:1206
+T00696.003,category,Named in the fork; see cited use,med,source:146C.c:1207
+T00696.004,maxDp,Named in the fork; see cited use,med,source:146C.c:1209
+T00696.005,maxPp,Named in the fork; see cited use,med,source:146C.c:1211
+T00696.006,currentDp,Named in the fork; see cited use,med,source:146C.c:1208
+T00696.007,currentPp,Named in the fork; see cited use,med,source:146C.c:1210
+T00696.008,gemSlots,Named in the fork; see cited use,med,source:146C.c:1212
+T00696.009,strength,Named in the fork; see cited use,med,source:146C.c:1213
+T00696.010,intelligence,Named in the fork; see cited use,med,source:146C.c:1214
+T00696.011,agility,Named in the fork; see cited use,med,source:146C.c:1215
+T00696.012,types,Named in the fork; see cited use,med,source:146C.c:1221
+T00696.013,classes,Named in the fork; see cited use,med,source:146C.c:1225
+T00696.014,affinities,Named in the fork; see cited use,med,source:146C.c:1229
+T00696.015,material,Named in the fork; see cited use,med,source:146C.c:1232
+T00696.016,limb,Named in the fork; see cited use,med,source:BATTLE/INITBTL.PRG/18.c:438
+T00696.017,index,Named in the fork; see cited use,med,source:146C.c:1216
+T00697.000,id,Named in the fork; see cited use,med,source:146C.c:1148
+T00697.001,subId,Named in the fork; see cited use,med,source:146C.c:1149
+T00697.002,wepId,Named in the fork; see cited use,med,source:146C.c:1150
+T00697.003,category,Named in the fork; see cited use,med,source:146C.c:1151
+T00697.004,maxDp,Named in the fork; see cited use,med,source:146C.c:1153
+T00697.005,maxPp,Named in the fork; see cited use,med,source:146C.c:1155
+T00697.006,currentDp,Named in the fork; see cited use,med,source:146C.c:1152
+T00697.007,currentPp,Named in the fork; see cited use,med,source:146C.c:1154
+T00697.008,strength,Named in the fork; see cited use,med,source:146C.c:1156
+T00697.009,intelligence,Named in the fork; see cited use,med,source:146C.c:1157
+T00697.010,agility,Named in the fork; see cited use,med,source:146C.c:1158
+T00697.011,cost,Named in the fork; see cited use,med,source:146C.c:1159
+T00697.012,damageType,Named in the fork; see cited use,med,source:146C.c:1160
+T00697.013,costType,Named in the fork; see cited use,med,source:146C.c:1161
+T00697.014,reserved10Bit5,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:26
+T00697.015,reserved11,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:27
+T00697.016,opaque12,"Used, but its meaning is not established",low,source:146C.c:1162
+T00697.017,range,Named in the fork; see cited use,med,source:146C.c:1163
+T00697.018,classes,Named in the fork; see cited use,med,source:146C.c:1169
+T00697.019,affinities,Named in the fork; see cited use,med,source:146C.c:1173
+T00697.020,material,Named in the fork; see cited use,med,source:146C.c:1176
+T00697.021,assembledWeaponIndex,Named in the fork; see cited use,med,source:2D10.c:1415
+T00697.022,index,Named in the fork; see cited use,med,source:146C.c:1164
+T00698.000,id,Named in the fork; see cited use,med,source:146C.c:1240
+T00698.001,subId,Named in the fork; see cited use,med,source:146C.c:1241
+T00698.002,reserved3,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:53
+T00698.003,gemEffects,Named in the fork; see cited use,med,source:146C.c:1242
+T00698.004,strength,Named in the fork; see cited use,med,source:146C.c:1243
+T00698.005,intelligence,Named in the fork; see cited use,med,source:146C.c:1244
+T00698.006,agility,Named in the fork; see cited use,med,source:146C.c:1245
+T00698.007,classes,Named in the fork; see cited use,med,source:146C.c:1249
+T00698.008,affinities,Named in the fork; see cited use,med,source:146C.c:1253
+T00698.009,setItemIndex,Named in the fork; see cited use,med,source:2D10.c:1503
+T00698.010,index,Named in the fork; see cited use,med,source:146C.c:1246
+T00699.000,id,Named in the fork; see cited use,med,source:146C.c:1184
+T00699.001,subId,Named in the fork; see cited use,med,source:146C.c:1185
+T00699.002,category,Named in the fork; see cited use,med,source:146C.c:1186
+T00699.003,gemSlots,Named in the fork; see cited use,med,source:146C.c:1187
+T00699.004,strength,Named in the fork; see cited use,med,source:146C.c:1188
+T00699.005,intelligence,Named in the fork; see cited use,med,source:146C.c:1189
+T00699.006,agility,Named in the fork; see cited use,med,source:146C.c:1190
+T00699.007,types,Named in the fork; see cited use,med,source:146C.c:1194
+T00699.008,assembledWeaponIndex,Named in the fork; see cited use,med,source:2D10.c:1415
+T00699.009,index,Named in the fork; see cited use,med,source:146C.c:1191
+T00700.000,weapons,Named in the fork; see cited use,med,source:items1.h:130
+T00700.001,blades,Named in the fork; see cited use,med,source:items1.h:224
+T00700.002,grips,Named in the fork; see cited use,med,source:items1.h:307
+T00700.003,shields,Named in the fork; see cited use,med,source:items1.h:397
+T00700.004,armor,Named in the fork; see cited use,med,source:items1.h:493
+T00700.005,gems,Named in the fork; see cited use,med,source:items1.h:583
+T00700.006,misc,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:141
+T00701.000,id,Named in the fork; see cited use,med,source:146C.c:9664
+T00701.001,count,Named in the fork; see cited use,med,source:146C.c:9699
+T00701.002,index,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:105
+T00702.000,index,Named in the fork; see cited use,med,source:146C.c:1303
+T00702.001,isEquipped,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:96
+T00702.002,reserved2,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:97
+T00702.003,base,Named in the fork; see cited use,med,source:146C.c:1305
+T00702.004,gems,Named in the fork; see cited use,med,source:146C.c:1310
+T00703.000,index,Named in the fork; see cited use,med,source:146C.c:1266
+T00703.001,blade,Named in the fork; see cited use,med,source:146C.c:1268
+T00703.002,grip,Named in the fork; see cited use,med,source:146C.c:1274
+T00703.003,isEquipped,Named in the fork; see cited use,med,source:BATTLE/INITBTL.PRG/18.c:383
+T00703.004,gems,Named in the fork; see cited use,med,source:146C.c:1280
+T00703.005,name,Named in the fork; see cited use,med,source:146C.c:1287
+T00704.000,weapons,Named in the fork; see cited use,med,source:BATTLE/INITBTL.PRG/18.c:383
+T00704.001,shields,Named in the fork; see cited use,med,source:BATTLE/INITBTL.PRG/18.c:396
+T00704.002,blades,Named in the fork; see cited use,med,source:146C.c:1270
+T00704.003,grips,Named in the fork; see cited use,med,source:146C.c:1276
+T00704.004,armor,Named in the fork; see cited use,med,source:146C.c:9680
+T00704.005,gems,Named in the fork; see cited use,med,declaration-only;source:main.h:402
+T00704.006,misc,Named in the fork; see cited use,med,source:146C.c:9698
+T00706.000,titles,Named in the fork; see cited use,med,source:D4.c:1577
+T00706.001,enemyKills,Named in the fork; see cited use,med,source:146C.c:1780
+T00706.002,reserved10,Not read by decompiled code,low,declaration-only;source:main.h:184
+T00706.003,weaponAttacks,Named in the fork; see cited use,med,source:146C.c:3842
+T00706.004,bossTimeTrialScores,Named in the fork; see cited use,med,source:D4.c:2294
+T00706.005,maxChain,Named in the fork; see cited use,med,source:146C.c:3450
+T00706.006,reserved8A,Not read by decompiled code,low,declaration-only;source:main.h:188
+T00706.007,clearCount,Named in the fork; see cited use,med,source:D4.c:1507
+T00706.008,completionTimeMinutes,Named in the fork; see cited use,med,source:D4.c:1506
+T00706.009,mapCompletion,Named in the fork; see cited use,med,source:D4.c:1628
+T00706.010,openedChestCount,Named in the fork; see cited use,med,source:D4.c:1640
+T00706.011,enemyKillFlags,Named in the fork; see cited use,med,source:146C.c:1802
+T00706.012,streakScore,Named in the fork; see cited use,med,source:146C.c:1791
+T00706.013,miscScore,Named in the fork; see cited use,med,source:D4.c:2330
+T00706.014,killStreakEnemyClass,Named in the fork; see cited use,med,source:146C.c:1784
+T00706.015,killStreakEnemyCount,Named in the fork; see cited use,med,source:146C.c:1786
+T00706.016,weaponKillStreakBladeCategory,Named in the fork; see cited use,med,source:146C.c:1814
+T00706.017,weaponKillStreak,Named in the fork; see cited use,med,source:146C.c:1793
+T00706.018,chainStreak,Named in the fork; see cited use,med,source:146C.c:1794
+T00706.019,healCount,Named in the fork; see cited use,med,source:146C.c:3884
+T00707.000,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:main.h:145
+T00707.001,containerEmpty,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3957
+T00707.002,abilityTimingDisplay,Named in the fork; see cited use,med,source:2842C.c:2842
+T00707.003,weaponStatChange,Named in the fork; see cited use,med,source:2842C.c:2701
+T00707.004,armorStatChange,Named in the fork; see cited use,med,source:2842C.c:2702
+T00707.005,cursorMemory,Named in the fork; see cited use,med,source:5BF94.c:2837
+T00707.006,menuFlags,Named in the fork; see cited use,med,source:5BF94.c:2833
+T00707.007,slotState,Named in the fork; see cited use,med,declaration-only;source:main.h:152
+T00707.008,information,Named in the fork; see cited use,med,source:146C.c:4077
+T00707.009,simpleMap,Named in the fork; see cited use,med,source:146C.c:15834
+T00707.010,monoSound,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:725
+T00707.011,vibrationOn,Named in the fork; see cited use,med,source:88.c:512
+T00707.012,mappedChainAbilities,Named in the fork; see cited use,med,source:146C.c:3447
+T00707.013,mappedDefenseAbilities,Named in the fork; see cited use,med,source:146C.c:3497
+T00707.014,key,Named in the fork; see cited use,med,declaration-only;source:main.h:159
+T00707.015,cumulativeSaveCount,Named in the fork; see cited use,med,declaration-only;source:main.h:160
+T00707.016,currentGameSaveCount,Named in the fork; see cited use,med,source:D4.c:1601
+T00707.017,saveFileGeneration,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:310
+T00710.000,lStickX,Named in the fork; see cited use,med,source:4D8.c:611
+T00710.001,lStickY,Named in the fork; see cited use,med,source:4D8.c:612
+T00710.002,rStickX,Named in the fork; see cited use,med,source:5BF94.c:667
+T00710.003,rStickY,Named in the fork; see cited use,med,source:5BF94.c:668
+T00711.000,items,Items by category,med,declaration-only;source:func_8006B57C_t.h:130
+T00711.001,indices,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:4090
+T00712.000,weapons,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3844
+T00712.001,shields,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3888
+T00712.002,blades,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:111
+T00712.003,grips,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:112
+T00712.004,armor,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3903
+T00712.005,gems,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:114
+T00712.006,misc,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3930
+T00713.000,weapons,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3844
+T00713.001,blades,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3850
+T00713.002,grips,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3851
+T00713.003,shields,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3888
+T00713.004,armor,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3903
+T00713.005,gems,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:125
+T00713.006,misc,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3930
+T00714.000,savedInventory,Copy of the inventory,med,source:MENU/MENU7.PRG/260.c:4052
+T00714.001,savedInventoryIndices,Copy of the inventory order,med,source:MENU/MENU7.PRG/260.c:4054
+T00714.002,opaqueFB0,"Used, but its meaning is not established",low,source:MENU/MENU7.PRG/260.c:4056
+T00714.003,opaque4BB0,"Used, but its meaning is not established",low,source:234.c:263
+T00714.004,opaque87B0,"Used, but its meaning is not established",low,source:234.c:271
+T00714.005,itemsToTransfer,Named in the fork; see cited use,med,source:234.c:267
+T00714.006,container,The container,med,source:234.c:2440
+T00714.007,gadgetBag,The bag's working copy,low,source:234.c:560
+T00738.000,time,Named in the fork; see cited use,med,source:D4.c:2294
+T00738.001,round,Named in the fork; see cited use,med,source:238.c:2600
+T00738.002,difficulty,Named in the fork; see cited use,med,declaration-only;source:main.h:178

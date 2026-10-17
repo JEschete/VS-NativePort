@@ -1,0 +1,64 @@
+id,role,final_name,final_location,purpose,confidence,notes
+T00079,Enum,Menu::Options::OptionsMenuState,Native\Game\src\Menu\Options.h,Steps the Options menu (declared in Menu::Options::Update),med,declaration-only;source:15AC.c:169
+T00080,Enum,Menu::Score::ScoreOverlayState,Native\Game\src\Menu\Score\ScoreScreen.h,Steps the Score overlay entry (declared in vs_menu9_exec),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00081,Enum,Menu::Score::ScoreMenuState,Native\Game\src\Menu\Score\ScoreScreen.h,Steps the Score menu (declared in Menu::Score::Update),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00082,Enum,Menu::Loot::DisassemblyState,Native\Game\src\Menu\Loot\LootScreen.h,Steps item disassembly (declared in Menu::Loot::UpdateDisassembly),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00083,Enum,Menu::Loot::LootSelectionState,Native\Game\src\Menu\Loot\LootScreen.h,Steps the loot screen (declared in Menu::Loot::UpdateLootSelection),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00084,Enum,Menu::Container::SortMenuState,Native\Game\src\Menu\Container\Storage.h,Steps the container sort menu (declared in Menu::Container::UpdateSortMenu),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00085,Enum,Menu::Manual::ManualOverlayState,Native\Game\src\Menu\Manual.h,Steps the Manual overlay entry (declared in vs_menuE_exec),med,declaration-only;source:15AC.c:169
+T00086,Enum,Menu::Manual::ManualMenuState,Native\Game\src\Menu\Manual.h,Steps the Manual menu (declared in _showMenu),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00087,Enum,Menu::Manual::TopicMenuState,Native\Game\src\Menu\Manual.h,Steps the Manual topic list (declared in Menu::Manual::UpdateTopicMenu),med,declaration-only;source:494.c:452
+T00605,OnDisc,Save::SaveFileStats,Native\Save\src\MemoryCard\GameFiles.h,"Gives a save file's summary: play time, save counts, HP, MP, location, clears and map completion.",med,declaration-only;source:MENU/MENU7.PRG/260.c:52
+T00618,Value,Menu::Framework::TextHeader,Native\Game\src\Menu\Framework\Framework.h,"Gives a menu header's text, disabled flag and x.",med,declaration-only;source:58EC.c:18
+T00814,Value,State::PlayTime,Native\Game\src\State\GameTime.h,Holds the play time as fields or as one word.,med,declaration-only;source:main.h:171
+T00644,Value,Render::ScreenOffset,Native\Graphics\src\Render.h,Gives a screen geometry offset.,med,declaration-only;source:2EA3C.h:5
+T00092,Enum,Menu::InformationBoxHeader,Native\Game\src\Menu\Framework\TextBoxes.h,Names the information box headers.,med,declaration-only;source:5BF94.h:539
+T00645,State,Items::BattleLoot,Native\Game\src\Items\Loot.h,"Holds one battle's loot: weapon, blade, grip, shield, armor, accessory, gem and items.",med,declaration-only;source:func_8006B57C_t.h:235
+T00656,State,Menu::Score::CursorMemory,Native\Game\src\Menu\Score\ScoreScreen.h,Remembers the Score menu's pages and rows.,med,declaration-only;source:146C.h:783
+T00657,State,Menu::Framework::MenuRow,Native\Game\src\Menu\Framework\Framework.h,"Holds one menu row: state, size, animation, selection, icons, colors and text.",med,declaration-only;source:5BF94.h:43
+T00658,State,Menu::Framework::MenuControlState,Native\Game\src\Menu\Framework\Framework.h,"Holds the menu state: current menu, return state, ability request, loading and read.",med,declaration-only;source:5BF94.h:76
+T00663,State,Field::MapRoom,Native\Game\src\Field\Map.h,"Gives one map room: visited flag, data and zone and map ids.",med,declaration-only;source:146C.h:148
+T00664,OnDisc,Field::MapRoomName,Native\Game\src\Field\Map.h,Gives a map room's name and the previous and next rooms.,med,declaration-only;source:146C.h:643
+T00665,OnDisc,Field::MapRoomVertices,Native\Game\src\Field\Map.h,Gives a map room outline's vertex count and vertices.,med,declaration-only;source:146C.h:638
+T00666,OnDisc,Field::MapScene,Native\Game\src\Field\Map.h,Gives a map's room count and rooms.,med,declaration-only;source:146C.h:155
+T00669,State,Menu::StringContext,Native\Game\src\Menu\Framework\TextBoxes.h,Holds the integers and strings substituted into formatted text.,med,declaration-only;source:5BF94.h:163
+T00671,State,Menu::TextBoxState,Native\Game\src\Menu\Framework\TextBoxes.h,"Holds one text box: flags, text, speed, layout, scaled frame, state and speaker.",med,declaration-only;source:5BF94.h:96
+T00674,State,Items::ArmorLoadout,Native\Game\include\Items\Loadout.h,Holds an equipped armor's statistics.,med,declaration-only;source:146C.h:380
+T00679,State,Items::ShieldLoadout,Native\Game\include\Items\Loadout.h,Holds an equipped shield's statistics.,med,declaration-only;source:146C.h:355
+T00680,State,Items::WeaponLoadout,Native\Game\include\Items\Loadout.h,Holds an equipped weapon's statistics.,med,declaration-only;source:146C.h:325
+T00684,State,Render::Camera,Native\Graphics\src\Render.h,"Holds the camera position, look-at, angles and far clip.",med,declaration-only;source:scratch.h:6
+T00100,Enum,Menu::Files::FileMenuUiId,Native\Game\src\Menu\Files.h,Names the file menu interface sprites.,med,declaration-only;source:MENU/MENU7.PRG/260.c:1207
+T00103,Enum,Menu::Framework::ActionsMenuAction,Native\Game\src\Menu\Framework\Framework.h,Names the actions menu entries.,med,declaration-only;source:58EC.h:7
+T00104,Enum,Menu::Framework::ButtonId,Native\Game\src\Menu\Framework\Framework.h,Names the controller button icons.,med,declaration-only;source:58EC.h:90
+T00105,Enum,Menu::Framework::CopyItemFlag,Native\Game\src\Menu\Framework\Framework.h,Names the copy-item flag.,med,declaration-only;source:2D10.h:200
+T00106,Enum,Menu::Framework::MainMenuIcon,Native\Game\src\Menu\Framework\Framework.h,Names the main menu icon.,med,declaration-only;source:58EC.h:134
+T00107,Enum,Menu::Framework::MenuCommand,Native\Game\src\Menu\Framework\Framework.h,Names what a menu row does when chosen.,med,declaration-only;source:58EC.h:46
+T00108,Enum,Menu::Framework::MenuItemId,Native\Game\src\Menu\Framework\Framework.h,Names the menu item id sentinel.,med,declaration-only;source:C48.h:6
+T00109,Enum,Menu::Framework::MenuSelection,Native\Game\src\Menu\Framework\Framework.h,Names how a menu was left.,med,declaration-only;source:58EC.h:212
+T00110,Enum,Menu::Framework::DpPpBarsState,Native\Game\src\Menu\Framework\Framework.h,Names the DP/PP bar animation states.,med,declaration-only;source:C48.h:105
+T00111,Enum,Menu::Framework::DpPpBarsTarget,Native\Game\src\Menu\Framework\Framework.h,Names which DP/PP bars are drawn.,med,declaration-only;source:C48.h:98
+T00112,Enum,Menu::Framework::RowTypeFlag,Native\Game\src\Menu\Framework\Framework.h,Names the disabled row flag.,med,declaration-only;source:58EC.h:179
+T00113,Enum,Menu::Framework::StatPage,Native\Game\src\Menu\Framework\Framework.h,Names the equipment stat pages.,med,declaration-only;source:58EC.h:338
+T00114,Enum,Menu::Framework::StatPageEnabled,Native\Game\src\Menu\Framework\Framework.h,Names which stat pages are enabled.,med,declaration-only;source:C48.h:78
+T00115,Enum,Menu::Framework::StatusUiId,Native\Game\src\Menu\Framework\Framework.h,Names the equipment status interface elements.,med,declaration-only;source:58EC.h:320
+T00690,Value,Content::DiscFile,Native\Content\src\DiscQueue.h,Gives a disc file's sector and size.,high,declaration-only;source:main.h:22
+T00691,State,Content::DiscQueueSlot,Native\Content\src\DiscQueue.h,"Holds one queued disc read: state, priority, file and destination.",med,declaration-only;source:main.h:37
+T00693,State,State::ArtsStatus,Native\Game\src\State\Progress.h,Holds Break Arts learned and kills per weapon category.,med,declaration-only;source:main.h:369
+T00695,State,State::StateFlags,Native\Game\src\State\StateFlags.h,"Holds the game state flags: clears, difficulty, puzzle timer, boss records, keys, sigils, save points and chests.",med,declaration-only;source:main.h:241
+T00696,State,Items::InventoryArmor,Native\Game\include\Items\Inventory.h,Holds one inventory armor or shield base record.,med,declaration-only;source:func_8006B57C_t.h:74
+T00697,State,Items::InventoryBlade,Native\Game\include\Items\Inventory.h,Holds one inventory blade.,med,declaration-only;source:func_8006B57C_t.h:12
+T00698,State,Items::InventoryGem,Native\Game\include\Items\Inventory.h,Holds one inventory gem.,med,declaration-only;source:func_8006B57C_t.h:51
+T00699,State,Items::InventoryGrip,Native\Game\include\Items\Inventory.h,Holds one inventory grip.,med,declaration-only;source:func_8006B57C_t.h:38
+T00700,State,Items::InventoryIndices,Native\Game\include\Items\Inventory.h,Holds the display order of each inventory category.,med,declaration-only;source:func_8006B57C_t.h:135
+T00701,State,Items::InventoryMisc,Native\Game\include\Items\Inventory.h,Holds one inventory item stack.,med,declaration-only;source:func_8006B57C_t.h:103
+T00702,State,Items::InventoryShield,Native\Game\include\Items\Inventory.h,Holds one inventory shield: base record and gems.,med,declaration-only;source:func_8006B57C_t.h:95
+T00703,State,Items::InventoryWeapon,Native\Game\include\Items\Inventory.h,"Holds one inventory weapon: blade, grip, gems and name.",med,declaration-only;source:func_8006B57C_t.h:65
+T00704,State,Items::Inventory,Native\Game\include\Items\Inventory.h,Holds the inventory by category.,high,declaration-only;source:main.h:397
+T00706,State,State::ScoreData,Native\Game\src\State\Progress.h,"Holds titles, kills, attacks, time trial scores, chains, clears and completion.",med,declaration-only;source:main.h:182
+T00707,State,State::Settings,Native\Game\src\State\Settings.h,Holds the option settings.,med,declaration-only;source:main.h:145
+T00710,Value,Input::StickPosition,Native\Input\src\Buttons.h,Gives the analog stick positions.,med,declaration-only;source:main.h:385
+T00711,State,Items::Container,Native\Game\include\Items\Inventory.h,Holds the container's items and display order.,med,declaration-only;source:func_8006B57C_t.h:130
+T00712,State,Items::ContainerData,Native\Game\include\Items\Inventory.h,Holds the container's items by category.,med,declaration-only;source:func_8006B57C_t.h:109
+T00713,State,Items::ContainerIndices,Native\Game\include\Items\Inventory.h,Holds the container's display order by category.,med,declaration-only;source:func_8006B57C_t.h:120
+T00714,State,Menu::Container::InventoryStorage,Native\Game\src\Menu\Container\Storage.h,"Holds the container menu's working copies: saved inventory, transfer previews, the container and the gadget bag.",med,declaration-only;source:func_8006B57C_t.h:145
+T00738,OnDisc,State::TrialScore,Native\Game\src\State\Progress.h,"Gives one time trial record: time, round and difficulty.",med,declaration-only;source:main.h:176
