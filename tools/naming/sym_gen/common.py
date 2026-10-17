@@ -198,6 +198,16 @@ class Gen:
             for x in self.trees[p].ix["types"].values():
                 if x["key"] == key and len(x["fields"]) == len(want):
                     return x
+        # merged layout (UPSTREAM_LAYOUTS): each member's offset from the pinned layout by name, else upstream's
+        sources = [x for p in ("", "upstream:") for x in self.trees[p].ix["types"].values() if x["key"] == key]
+        fields = []
+        for n in want:
+            f = next((f for x in sources for f in x["fields"] if f["name"] == n), None)
+            if f is None:
+                raise KeyError(f"{tid}: no index layout with {len(want)} members and no member {n!r} in any layout")
+            fields.append(f)
+        if sources:
+            return {"key": key, "size": sources[0]["size"], "fields": fields}
         raise KeyError(f"{tid}: no index layout with {len(want)} members")
 
     def member_offsets(self, tid: str) -> list[int]:

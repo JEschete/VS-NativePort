@@ -49,15 +49,15 @@ T00416.001,tile,Current tile word,high,source:771A8.c:913
 T00416.002,previousTile,Previous tile word; -1 to forget,high,source:771A8.c:922
 T00416.003,reserved3C,Not read through this view,low,declaration-only;source:771A8.c:894
 T00416.004,flightHeight,Flight height above the ground,med,source:771A8.c:926
-T00418.000,opaque0,"Used, but its meaning is not established",low,source:5BF94.c:5957
-T00418.001,opaque2,"Used, but its meaning is not established",low,source:5BF94.c:5980
+T00418.000,flags,"Bit 1 attaches to an actor (bits 3-4 pick the source), bit 7 targets an actor (bits 10-11 pick the source)",med,source:5BF94.c:5958
+T00418.001,attachment,Attached actor in byte 0 and bone in byte 1,med,source:5BF94.c:5980
 T00418.002,reserved4,Not read by decompiled code,low,declaration-only;source:5BF94.c:607
 T00418.003,reserved5,Not read by decompiled code,low,declaration-only;source:5BF94.c:608
 T00418.004,reserved6,Not read by decompiled code,low,declaration-only;source:5BF94.c:609
 T00418.005,reserved7,Not read by decompiled code,low,declaration-only;source:5BF94.c:610
-T00418.006,opaque8,"Used, but its meaning is not established",low,source:5BF94.c:5947
-T00418.007,opaqueC,"Used, but its meaning is not established",low,source:5BF94.c:5948
-T00418.008,opaque10,"Used, but its meaning is not established",low,source:5BF94.c:5949
+T00418.006,rotationXAndTarget,Initial rotation x in the low half; target actor (low 5 bits) and bone in bytes 2-3,med,source:5BF94.c:6009
+T00418.007,rotationY,Initial rotation y,med,source:5BF94.c:5948
+T00418.008,rotationZ,Initial rotation z,med,source:5BF94.c:5949
 T00418.009,reserved14,Not read by decompiled code,low,declaration-only;source:5BF94.c:614
 T00418.010,reserved20,Not read by decompiled code,low,declaration-only;source:5BF94.c:615
 T00418.011,reserved2C,Not read by decompiled code,low,declaration-only;source:5BF94.c:616

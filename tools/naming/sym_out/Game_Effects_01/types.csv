@@ -1,0 +1,81 @@
+id,role,final_name,final_location,purpose,confidence,notes
+T00213,State,Effects::ScreenEffectOverlay,Native\Game\src\Effects\ScreenEffects.h,"Holds the screen effect overlay: loading state, feedback layer, radial warp and vignette.",med,source:5BF94.c:3880
+T00234,State,Field::WeatherParticle,Native\Game\src\Field\Weather.h,"Holds one weather particle (rain, snow, embers): position, screen position and per-kind state bytes.",med,source:146C.c:18165
+T00262,State,Effects::EffectInstance,Native\Game\src\Effects\Runtime.h,"Runs one effect script: priority list links, parent, script cursor and registers, token, child count, frame, particles, 16 transforms and the effect context.",high,source:5BF94.c:5080;source:5BF94.c:7804
+T00263,Value,Effects::EffectSpawnRequest,Native\Game\src\Effects\Runtime.h,"Describes an effect instance to create: its four target slots, priority, script and start offset, parent and token.",high,source:5BF94.c:5487;source:5BF94.c:5104
+T00265,State,Effects::EffectTimeline,Native\Game\src\Effects\Runtime.h,"Holds a loaded effect timeline: track count, flags, current frame, active-track bits and the tracks.",high,source:5BF94.c:7898;source:5BF94.c:8449
+T00266,State,Effects::CameraShakeChannel,Native\Game\src\Effects\Camera.h,"Holds one camera shake channel: phase, shape curve, phase-step modes and curves, amplitude and angle.",med,source:5BF94.c:6652
+T00267,State,Effects::EffectCamera,Native\Game\src\Effects\Camera.h,"Holds the effect camera: pose, shake offsets and clip.",med,source:5BF94.c:6535
+T00268,State,Effects::ParticleGravity,Native\Game\src\Effects\Particles.h,Holds the gravity applied to particles.,high,source:5BF94.c:7836
+T00269,State,Effects::EffectLoadState,Native\Game\src\Effects\Loading.h,Holds effect package loading state; not read by decompiled functions.,low,declaration-only;source:6F014.c:52
+T00270,State,Effects::EffectPackage,Native\Game\src\Effects\Runtime.h,"Points to the loaded effect package blocks: particle definitions, curves, programs, textures, timelines, sounds and the current action request.",high,source:5BF94.c:5487
+T00292,State,Effects::Plg005::AnalyzeGridQuad,Native\Game\src\Effects\Plugins\Plg005.h,Holds one Analyze grid quad of plugin 005.,low,declaration-only;source:EFFECT/PLG005.BIN/18.c:11
+T00294,Packet,Render::TrailPacket,Native\Graphics\src\LegacyPackets.h,Is one trail segment's gouraud quad packet.,med,declaration-only;source:5BF94.c:138
+T00315,State,Effects::FileLoadContext,Native\Game\src\Effects\Loading.h,Holds one effect file load in progress.,med,declaration-only;source:6E644.h:5
+T00343,State,Effects::Trail,Native\Game\src\Effects\Trails.h,Holds one trail effect's state.,med,declaration-only;source:trails.h:7
+T00363,Value,Effects::ActionEffectRequest,Native\Game\src\Effects\Runtime.h,"Requests an action's effects: effect id, targets, others and position.",high,declaration-only;source:6E644.h:24
+T00364,Value,Effects::ActionEffectTarget,Native\Game\src\Effects\Runtime.h,Gives one effect target: kind and an actor/part or a position.,high,declaration-only;source:6E644.h:10
+T00417,State,Effects::ParticleAttractionView,Native\Game\src\Effects\Particles.h,Views a particle's attraction target and strength while it is integrated.,med,declaration-only;source:5BF94.c:628;view of Effects::Particle; fold into it when copying
+T00743,Value,Effects::EffectRenderer,Native\Game\src\Effects\Runtime.h,Is the function type of an effect renderer called each frame with its renderer state.,high,source:6E644.h:35
+T00419,State,Effects::ParticleMotionView,Native\Game\src\Effects\Particles.h,Views a particle's motion while it is integrated.,med,declaration-only;source:5BF94.c:619;view of Effects::ParticleMotion; fold into it when copying
+T00421,State,Effects::BoneTrail,Native\Game\src\Effects\Trails.h,"Holds a bone trail: configuration, age and the two edge histories.",med,declaration-only;source:5BF94.c:124
+T00434,Value,Effects::HitEffectRequest,Native\Game\src\Effects\Runtime.h,Holds a hit effect request built when an action hit is presented.,low,declaration-only;source:146C.c:230
+T00443,Value,Battle::HitTargetWord,Native\Game\src\Battle\ActionResolution.h,"Gives a hit entry's target actor, limb and impact kind.",med,declaration-only;source:146C.c:31
+T00489,State,Effects::TransformSlot,Native\Game\src\Effects\Transforms.h,"Holds one effect transform slot: motion, attachment, world and view matrices; named by offset from the fork view func_800D0548_arg1 (T00493).",med,declaration-only;source:5BF94.h:434
+T00490,State,Effects::ParticleEndpointView,Native\Game\src\Effects\Particles.h,Views a particle's two screen endpoints while one steps toward the other.,low,source:5BF94.c:5783
+T00493,State,Effects::TransformMotionView,Native\Game\src\Effects\Transforms.h,Views a transform slot while its motion and attachment are resolved.,med,declaration-only;source:5BF94.c:310
+T00494,OnDisc,Effects::TransformDefinition,Native\Game\src\Effects\Transforms.h,"Defines how a transform animates: flags, rotation, translation and scale ranges with their curves, and motion limits.",med,source:5BF94.c:6192
+T00495,State,Effects::AnimatedLocalTransform,Native\Game\src\Effects\Transforms.h,"Holds a transform's sampled rotation offset, translation, scale and local matrix.",med,source:5BF94.c:6191
+T00497,State,Effects::Particle,Native\Game\src\Effects\Particles.h,"Holds one particle: links, motion, texture animation, emission flags, transparency, attraction, lifetime, events, color curves and age.",high,source:5BF94.c:6992
+T00498,State,Effects::RendererSlot,Native\Game\src\Effects\Runtime.h,"Holds one attached renderer: next slot, function and its trail or state.",med,declaration-only;source:6E644.h:38
+T00501,State,Effects::TimelineTrack,Native\Game\src\Effects\Runtime.h,"Holds one timeline track: its keys, kind and key count, current key, timer and parameter.",med,source:5BF94.c:7935
+T00502,Value,Effects::TimelineTrackHeader,Native\Game\src\Effects\Runtime.h,Gives a timeline track's kind and key count.,med,source:5BF94.c:7939
+T00503,Value,Effects::ParticleTrackKey,Native\Game\src\Effects\Runtime.h,"Gives one particle emission key: frame, duration and the event arguments.",med,source:5BF94.c:7954
+T00504,Value,Effects::ShakeTrackKey,Native\Game\src\Effects\Runtime.h,Gives one camera shake key word.,low,declaration-only;source:5BF94.c:40
+T00505,Value,Effects::ChildTrackKey,Native\Game\src\Effects\Runtime.h,Gives one child-effect key.,low,declaration-only;source:5BF94.c:331
+T00506,State,Effects::ChildTrackView,Native\Game\src\Effects\Runtime.h,Views a timeline track while child effects are spawned.,low,declaration-only;source:5BF94.c:338
+T00507,Value,Effects::RendererTrackKey,Native\Game\src\Effects\Runtime.h,"Gives one renderer key: frame, renderer selection and argument.",med,source:5BF94.c:8073
+T00509,Value,Effects::ColorTrackKey,Native\Game\src\Effects\Runtime.h,"Gives one actor or scene color key: frame, duration, color and mode.",med,source:5BF94.c:8132
+T00510,State,Effects::TransformControlView,Native\Game\src\Effects\Runtime.h,Views a transform slot's attachment and motion bits.,low,declaration-only;source:5BF94.c:102
+T00511,Value,Effects::ActionControlKey,Native\Game\src\Effects\Runtime.h,Gives one action-control key: frame word and command.,low,source:5BF94.c:8346
+T00512,Value,Effects::ShakeChannelKey,Native\Game\src\Effects\Runtime.h,Gives one camera shake key: frame and the shake channel parameters.,med,source:5BF94.c:7954
+T00513,State,Effects::ParticleTextureAnimation,Native\Game\src\Effects\Particles.h,"Steps a particle's texture animation program: frame timer, frame offsets, program cursor and texture.",med,source:5BF94.c:8531
+T00534,OnDisc,Effects::ParticleDefinition,Native\Game\src\Effects\Particles.h,"Defines a particle event: texture animation, end and tick events, emission flags, the curve that samples each range, the ranges themselves, color curves, transform and ring layout.",high,source:5BF94.c:6955
+T00535,State,Effects::ParticleEmitterScratch,Native\Game\src\Effects\Particles.h,Holds one emission's sampled parameters in the scratchpad while EmitParticleEvent spawns particles.,high,source:5BF94.c:6954
+T00536,State,Effects::ParticleQuadSet,Native\Game\src\Effects\Particles.h,"Holds a plugin's particle quads: definition, count, control points, age and animation.",med,declaration-only;source:particleSetup.h:22
+T00537,State,Effects::ParticleQuadWord,Native\Game\src\Effects\Particles.h,Declares a two-field word of a particle quad set; not read.,low,declaration-only;source:particleSetup.h:15
+T00538,State,Effects::TrailQuadSet,Native\Game\src\Effects\Particles.h,Holds a trail plugin's quads: definition and texture animation.,med,declaration-only;source:trails.h:20
+T00539,State,Effects::PluginEffectState,Native\Game\src\Effects\Particles.h,"Views a plugin effect's position, transparency and variant when it emits particles.",med,source:5BF94.c:7015
+T00540,State,Effects::Plg128::CameraEffectState,Native\Game\src\Effects\Plugins\Plg128.h,Holds the camera plugin's endpoints and look-at matrix.,med,source:EFFECT/PLG128.BIN/F8.c:68
+T00571,OnDisc,Effects::PackageBlock1,Native\Game\src\Effects\Package.h,Heads package block 1 (texture tables).,med,declaration-only;source:6F014.c:290
+T00572,OnDisc,Effects::PackageBlock11,Native\Game\src\Effects\Package.h,Heads package block 11 (segmented curves and vibration).,med,declaration-only;source:5BF94.c:246
+T00573,OnDisc,Effects::PackageBlock2,Native\Game\src\Effects\Package.h,Heads package block 2 (particle texture animations).,med,declaration-only;source:6F014.c:296
+T00574,OnDisc,Effects::PackageBlock3,Native\Game\src\Effects\Package.h,Heads package block 3 (timelines).,med,declaration-only;source:5BF94.h:332
+T00575,OnDisc,Effects::PackageBlock5,Native\Game\src\Effects\Package.h,Heads package block 5 (particle definitions).,med,declaration-only;source:5BF94.h:327
+T00576,OnDisc,Effects::PackageBlock9,Native\Game\src\Effects\Package.h,"Gives package block 9: gravity range and drag range with their curves, frame count, transform count and timeline ids.",med,source:6F014.c:483
+T00577,OnDisc,Effects::CurveBlock,Native\Game\src\Effects\Package.h,Heads the curve block: curve count and sizes.,med,declaration-only;source:5BF94.h:200
+T00578,OnDisc,Effects::PackageTexture,Native\Game\src\Effects\Package.h,Describes one package texture.,med,declaration-only;source:5BF94.h:337
+T00579,OnDisc,Effects::PackageTextureInfo,Native\Game\src\Effects\Package.h,Selects one package texture.,med,declaration-only;source:5BF94.h:211
+T00580,OnDisc,Effects::PackageFile,Native\Game\src\Effects\Package.h,Heads an effect package file.,med,declaration-only;source:6F014.c:301
+T00626,Packet,Render::EffectFlatQuadPacket,Native\Graphics\src\LegacyPackets.h,Is one flat textured effect packet with its draw mode word.,med,declaration-only;source:EFFECT/PLG005.BIN/18.c:29
+T00627,Packet,Render::EffectGouraudQuadPacket,Native\Graphics\src\LegacyPackets.h,Is one gouraud textured effect packet with its draw mode word.,med,declaration-only;source:EFFECT/PLG005.BIN/18.c:29
+T00685,Packet,Render::ClosedRingPacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (ClosedRingPacket).,med,declaration-only;source:closedRings.h:34
+T00686,State,Effects::ClosedRingState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one ClosedRing effect template's state.,med,declaration-only;source:closedRings.h:22
+T00687,Packet,Render::ClosedRingTexCoord,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (ClosedRingTexCoord).,med,declaration-only;source:EFFECT/PLG077.BIN/18.c:32
+T00688,Packet,Render::GridPacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (GridPacket).,med,declaration-only;source:grids.h:16
+T00689,State,Effects::GridState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one Grid effect template's state.,med,declaration-only;source:grids.h:10
+T00715,Packet,Render::Mesh10Packet,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (Mesh10Packet).,med,declaration-only;source:meshes10.h:18
+T00716,State,Effects::Mesh10State,Native\Game\src\Effects\Templates\TemplateState.h,Holds one Mesh10 effect template's state.,med,declaration-only;source:meshes10.h:11
+T00717,Packet,Render::Mesh10TexCoord,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (Mesh10TexCoord).,med,declaration-only;source:meshes10.h:23
+T00718,Packet,Render::MirrorSurfacePacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (MirrorSurfacePacket).,med,declaration-only;source:mirroredSurfaces.h:19
+T00719,State,Effects::MirrorSurfaceState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one MirrorSurface effect template's state.,med,declaration-only;source:mirroredSurfaces.h:12
+T00720,Packet,Render::ParticleLinePacket,Native\Graphics\src\LegacyPackets.h,Is one line effect packet with its draw mode word.,med,declaration-only;source:particleLineRender.h:6
+T00721,Packet,Render::ParticleQuadPacket,Native\Graphics\src\LegacyPackets.h,Is one gouraud textured effect packet with its draw mode word.,med,declaration-only;source:particleRender.h:7
+T00722,Packet,Render::RingPacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (RingPacket).,med,declaration-only;source:rings.h:19
+T00723,State,Effects::RingState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one Ring effect template's state.,med,declaration-only;source:rings.h:13
+T00724,Packet,Render::RotatingSurfacePacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (RotatingSurfacePacket).,med,declaration-only;source:rotatingSurfaces.h:20
+T00725,State,Effects::RotatingSurfaceState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one RotatingSurface effect template's state.,med,declaration-only;source:rotatingSurfaces.h:13
+T00727,Packet,Render::SurfacePacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (SurfacePacket).,med,declaration-only;source:surfaces.h:19
+T00728,State,Effects::SurfaceState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one Surface effect template's state.,med,declaration-only;source:surfaces.h:12
+T00820,State,Effects::ParticleMotion,Native\Game\src\Effects\Particles.h,"Holds a particle's mass, gravity scale, position, velocity, force and acceleration.",high,declaration-only;source:upstream:5BF94.h:370;upstream layout adopted for the particle node
+T00821,Value,Effects::FixedVector,Native\Game\src\Effects\Particles.h,Holds a 20.12 fixed-point vector.,med,declaration-only;source:upstream:5BF94.h:364

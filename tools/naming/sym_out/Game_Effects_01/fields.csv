@@ -1,0 +1,660 @@
+id,final_name,meaning,confidence,notes
+T00213.000,loading,Set while the overlay loads; scripts wait for it,med,source:4A0A8.c:2735
+T00213.001,opaque1,Tested as 0 or 1 when the overlay is released or its feedback layer set,low,source:5BF94.c:3929
+T00213.002,feedbackLayer,Feedback layer; tiles are drawn from layer 3 up,med,source:GIM/SCREFF2.PRG/0.c:10
+T00213.003,radialWarpArg0,First SetRadialWarp argument; 0x1000 in both halves disables the warp,low,source:GIM/SCREFF2.PRG/0.c:116
+T00213.004,radialWarpArg1,Second SetRadialWarp argument,low,source:GIM/SCREFF2.PRG/0.c:117
+T00213.005,vignetteEnabled,Draws the vignette while set,high,source:5E8.c:8
+T00213.006,slot,Named in the fork; see cited use,med,source:5BF94.c:3883
+T00234.000,position,Named in the fork; see cited use,med,source:146C.c:17750
+T00234.001,screenX,Screen x of a screen-space particle; -1 when unused,med,source:146C.c:18165
+T00234.002,screenY,Screen y of a screen-space particle,med,source:146C.c:18165
+T00234.003,opaqueC,"Used, but its meaning is not established",low,source:146C.c:17775
+T00234.004,swayPhase,Phase of the sideways sway; also the splash frame of rain,low,source:146C.c:17968
+T00234.005,fallShift,Shift applied to the fall speed of rain,low,source:146C.c:17778
+T00234.006,speed,Rise speed of embers; random phase of screen particles,low,source:146C.c:17906
+T00262.000,next,Named in the fork; see cited use,med,source:5BF94.c:5124
+T00262.001,parent,Parent instance that spawned this one (fork name previous),high,source:5BF94.c:7779
+T00262.002,particleCount,Particles the instance owns,high,source:5BF94.c:6839
+T00262.003,priority,Priority; instances are kept in ascending order,high,source:5BF94.c:5123
+T00262.004,scriptOffset,Offset of the next script byte,high,source:5BF94.c:7804
+T00262.005,script,Effect script bytecode,high,source:5BF94.c:7804
+T00262.006,registers,Four script registers,high,source:5BF94.c:7635
+T00262.007,token,Effect token released when the instance is destroyed,med,source:5BF94.c:5632
+T00262.008,busyBits,"Bits OR'ed into the busy result of the secondary effect update (2, or 4 for effect 54)",med,source:5BF94.c:5367
+T00262.009,childCount,Child instances still running,high,source:5BF94.c:8028
+T00262.010,frame,"Frame of the effect, used to sample its curves",high,source:5BF94.c:5363
+T00262.011,particles,First particle the instance owns,high,source:5BF94.c:6870
+T00262.012,transforms,Sixteen transform slots,high,source:5BF94.c:6984
+T00262.013,context,"Targets, timeline, renderer, effect id and phase",high,source:5BF94.c:5104
+T00263.000,source,Copied to the context source,high,source:5BF94.c:5104
+T00263.001,emitFrom,Copied to the context emitFrom slot,high,source:5BF94.c:5105
+T00263.002,target,Copied to the context target,high,source:5BF94.c:5106
+T00263.003,emitTo,Copied to the context emitTo slot,high,source:5BF94.c:5107
+T00263.004,priority,Instance priority,high,source:5BF94.c:5080
+T00263.005,script,Script bytecode,high,source:5BF94.c:5082
+T00263.006,scriptOffset,Start offset in the script,high,source:5BF94.c:5081
+T00263.007,parent,"Parent instance, or null",high,source:5BF94.c:5078
+T00263.008,token,Effect token,high,source:5BF94.c:5084
+T00263.009,reserved21,Not read by decompiled code,low,declaration-only;source:5BF94.c:94
+T00263.010,reserved22,Not read by decompiled code,low,declaration-only;source:5BF94.c:95
+T00263.011,reserved23,Not read by decompiled code,low,declaration-only;source:5BF94.c:96
+T00263.012,reserved24,Not read by decompiled code,low,declaration-only;source:5BF94.c:97
+T00265.000,trackCount,Number of tracks,high,source:5BF94.c:7898
+T00265.001,flags,Bit 0 holds the frame; bit 1 is set when the timeline has tracks,med,source:5BF94.c:8255
+T00265.002,frame,Current timeline frame,high,source:5BF94.c:7955
+T00265.003,activeTracks,One bit per track still running; zero when the timeline is finished,high,source:5BF94.c:8449
+T00265.004,tracks,Timeline tracks,high,source:5BF94.c:7903
+T00266.000,phase,Curve phase; 0xFF when idle,med,source:5BF94.c:6483
+T00266.001,shapeCurve,Segmented curve sampled at the phase,med,source:5BF94.c:6613
+T00266.002,curveStep,Steps the phase by stepCurve,low,source:5BF94.c:6581
+T00266.003,randomStep,Steps the phase randomly within randomStepCurve,low,source:5BF94.c:6593
+T00266.004,reserved1Bit7,Not read by decompiled code,low,declaration-only;source:5BF94.c:238
+T00266.005,stepCurve,Curve giving the phase step,low,source:5BF94.c:6616
+T00266.006,randomStepCurve,Curve giving the random phase step,low,source:5BF94.c:6618
+T00266.007,amplitude,Amplitude,med,source:5BF94.c:6614
+T00266.008,angle,Angle (times 32) of the shake direction,med,source:5BF94.c:6620
+T00267.000,position,Named in the fork; see cited use,med,source:5BF94.c:6518
+T00267.001,lookAt,Named in the fork; see cited use,med,source:5BF94.c:6519
+T00267.002,shakeLateral,Shake offset along the camera's horizontal axis,med,source:5BF94.c:6535
+T00267.003,shakeVertical,Shake offset along the camera's vertical axis,med,source:5BF94.c:6541
+T00267.004,shakeDepth,Shake offset along the camera's view axis,med,source:5BF94.c:6539
+T00267.005,shakeRoll,Shake roll offset (biased by 0x8000),med,source:5BF94.c:6554
+T00267.006,roll,Named in the fork; see cited use,med,source:5BF94.c:6520
+T00267.007,nearClip,Named in the fork; see cited use,med,source:5BF94.c:6521
+T00267.008,projectionDistance,Named in the fork; see cited use,med,source:5BF94.c:6522
+T00267.009,farClip,Named in the fork; see cited use,med,source:5BF94.c:6523
+T00268.000,x,Gravity x,high,source:5BF94.c:7836
+T00268.001,y,Gravity y,high,source:5BF94.c:7837
+T00268.002,z,Gravity z,high,source:5BF94.c:7838
+T00268.003,reservedC,Not read by decompiled code,low,declaration-only;source:5BF94.c:112
+T00269.000,opaque0,"Used, but its meaning is not established",low,declaration-only;source:6F014.c:52
+T00269.001,loadContexts,Named in the fork; see cited use,med,declaration-only;source:6F014.c:53
+T00269.002,slots,Named in the fork; see cited use,med,declaration-only;source:6F014.c:54
+T00269.003,isClut,Named in the fork; see cited use,med,declaration-only;source:6F014.c:55
+T00270.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.h:354
+T00270.001,reserved4,Not read by decompiled code,low,declaration-only;source:5BF94.h:355
+T00270.002,block5Data,Named in the fork; see cited use,med,source:5BF94.c:6955
+T00270.003,curves,Named in the fork; see cited use,med,source:5BF94.c:6320
+T00270.004,curveBlock,Named in the fork; see cited use,med,source:5BF94.c:5244
+T00270.005,block8Data,Named in the fork; see cited use,med,source:5BF94.c:5408
+T00270.006,block1TableCount,Named in the fork; see cited use,med,source:6F014.c:516
+T00270.007,textureInfoTable,Named in the fork; see cited use,med,source:5BF94.c:8536
+T00270.008,textures,Named in the fork; see cited use,med,source:6F014.c:517
+T00270.009,block2Count,Named in the fork; see cited use,med,source:6F014.c:526
+T00270.010,block2Data,Named in the fork; see cited use,med,source:5BF94.c:8516
+T00270.011,block9Data,Named in the fork; see cited use,med,source:5BF94.c:5223
+T00270.012,block10Data,Named in the fork; see cited use,med,source:5BF94.c:5945
+T00270.013,block3Data,Named in the fork; see cited use,med,source:5BF94.c:7719
+T00270.014,block11Data,Named in the fork; see cited use,med,source:5BF94.c:6337
+T00270.015,block12Data,Named in the fork; see cited use,med,source:5BF94.c:5265
+T00270.016,block13Data,Named in the fork; see cited use,med,source:5BF94.c:5270
+T00270.017,auxiliarySoundHandle,Handle returned when the auxiliary sound bank is bound; sound keys play only while set,low,source:6F014.c:546
+T00270.018,request,The action effect request being presented,high,source:5BF94.c:8016
+T00292.000,opaque0,"Used, but its meaning is not established",low,source:EFFECT/PLG005.BIN/18.c:71
+T00292.001,opaque1,"Used, but its meaning is not established",low,source:EFFECT/PLG005.BIN/18.c:70
+T00292.002,uBase,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:82
+T00292.003,vBase,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:83
+T00292.004,uScroll,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:85
+T00292.005,vScroll,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:84
+T00292.006,tpage,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:80
+T00292.007,clut,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:81
+T00292.008,opaqueA,"Used, but its meaning is not established",low,source:EFFECT/PLG005.BIN/18.c:74
+T00292.009,opaqueC,"Used, but its meaning is not established",low,source:EFFECT/PLG005.BIN/18.c:73
+T00292.010,opaqueE,"Used, but its meaning is not established",low,source:EFFECT/PLG005.BIN/18.c:76
+T00292.011,opaque10,"Used, but its meaning is not established",low,source:EFFECT/PLG005.BIN/18.c:75
+T00292.012,opaque12,"Used, but its meaning is not established",low,source:EFFECT/PLG005.BIN/18.c:78
+T00292.013,opaque14,"Used, but its meaning is not established",low,source:EFFECT/PLG005.BIN/18.c:77
+T00292.014,curveSampleDistance,Named in the fork; see cited use,med,source:EFFECT/PLG005.BIN/18.c:72
+T00294.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.c:138
+T00294.001,mode,Named in the fork; see cited use,med,source:5BF94.c:4915
+T00294.002,r0,Named in the fork; see cited use,med,source:5BF94.c:4923
+T00294.003,g0,Named in the fork; see cited use,med,source:5BF94.c:4924
+T00294.004,blue0,Blue of the first head vertex,med,source:5BF94.c:4925
+T00294.005,code,Named in the fork; see cited use,med,source:5BF94.c:4914
+T00294.006,xy0,Named in the fork; see cited use,med,source:5BF94.c:4917
+T00294.007,uv0,Named in the fork; see cited use,med,source:5BF94.c:4944
+T00294.008,clut,Named in the fork; see cited use,med,source:5BF94.c:4940
+T00294.009,r1,Named in the fork; see cited use,med,source:5BF94.c:4923
+T00294.010,g1,Named in the fork; see cited use,med,source:5BF94.c:4924
+T00294.011,blue1,Blue of the second head vertex,med,source:5BF94.c:4925
+T00294.012,reserved17,Not read by decompiled code,low,declaration-only;source:5BF94.c:150
+T00294.013,xy1,Named in the fork; see cited use,med,source:5BF94.c:4918
+T00294.014,uv1,Named in the fork; see cited use,med,source:5BF94.c:4946
+T00294.015,tpage,Named in the fork; see cited use,med,source:5BF94.c:4937
+T00294.016,r2,Named in the fork; see cited use,med,source:5BF94.c:4926
+T00294.017,g2,Named in the fork; see cited use,med,source:5BF94.c:4927
+T00294.018,blue2,Blue of the first tail vertex,med,source:5BF94.c:4928
+T00294.019,reserved23,Not read by decompiled code,low,declaration-only;source:5BF94.c:157
+T00294.020,xy2,Named in the fork; see cited use,med,source:5BF94.c:4919
+T00294.021,uv2,Named in the fork; see cited use,med,source:5BF94.c:4945
+T00294.022,reserved2A,Not read by decompiled code,low,declaration-only;source:5BF94.c:160
+T00294.023,r3,Named in the fork; see cited use,med,source:5BF94.c:4926
+T00294.024,g3,Named in the fork; see cited use,med,source:5BF94.c:4927
+T00294.025,blue3,Blue of the second tail vertex,med,source:5BF94.c:4928
+T00294.026,reserved2F,Not read by decompiled code,low,declaration-only;source:5BF94.c:164
+T00294.027,xy3,Named in the fork; see cited use,med,source:5BF94.c:4920
+T00294.028,uv3,Named in the fork; see cited use,med,source:5BF94.c:4947
+T00294.029,reserved36,Not read by decompiled code,low,declaration-only;source:5BF94.c:167
+T00294.030,endMode,Named in the fork; see cited use,med,source:5BF94.c:4916
+T00315.000,lba,Named in the fork; see cited use,med,source:5BF94.c:5191
+T00315.001,size,Named in the fork; see cited use,med,source:6F014.c:585
+T00343.000,splinePoints,Named in the fork; see cited use,med,source:trails5.h:73
+T00343.001,stepCount,Named in the fork; see cited use,med,source:trails5.h:395
+T00343.002,splineSampleCount,Named in the fork; see cited use,med,source:trails5.h:396
+T00343.003,trailCollapseCounter,Named in the fork; see cited use,med,source:trails5.h:397
+T00343.004,currentSplineSample,Named in the fork; see cited use,med,source:trails5.h:398
+T00343.005,splineSamples,Named in the fork; see cited use,med,source:trails5.h:399
+T00343.006,splineProgress,Named in the fork; see cited use,med,source:trails5.h:400
+T00343.007,speed,Named in the fork; see cited use,med,source:trails5.h:401
+T00343.008,opaque54,"Used, but its meaning is not established",low,source:trails5.h:402
+T00363.000,effectId,Named in the fork; see cited use,med,source:146C.c:3175
+T00363.001,count,Named in the fork; see cited use,med,source:146C.c:3176
+T00363.002,otherCount,Named in the fork; see cited use,med,source:146C.c:3178
+T00363.003,source,Named in the fork; see cited use,med,source:146C.c:3177
+T00363.004,targets,Named in the fork; see cited use,med,source:146C.c:3180
+T00363.005,others,Named in the fork; see cited use,med,source:146C.c:4035
+T00363.006,position,Named in the fork; see cited use,med,source:146C.c:4041
+T00364.000,type,Named in the fork; see cited use,med,source:146C.c:3177
+T00364.001,colorPreset,Byte 2; selects the particle color preset of the target slot,low,source:5BF94.c:7768
+T00364.002,value,"Actor and part, or position, by kind",med,source:5BF94.c:7321
+T00417.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.c:627
+T00417.001,targetX,Named in the fork; see cited use,med,declaration-only;source:5BF94.c:628
+T00417.002,targetY,Named in the fork; see cited use,med,declaration-only;source:5BF94.c:628
+T00417.003,targetZ,Named in the fork; see cited use,med,declaration-only;source:5BF94.c:628
+T00417.004,reserved68,Not read by decompiled code,low,declaration-only;source:5BF94.c:629
+T00417.005,attraction,Named in the fork; see cited use,med,declaration-only;source:5BF94.c:630
+T00419.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.c:619
+T00419.001,gravityScale,Named in the fork; see cited use,med,source:5BF94.c:7844
+T00419.002,x,Named in the fork; see cited use,med,source:5BF94.c:7845
+T00419.003,y,Named in the fork; see cited use,med,source:5BF94.c:7848
+T00419.004,z,Named in the fork; see cited use,med,source:5BF94.c:7851
+T00419.005,vx,Named in the fork; see cited use,med,source:5BF94.c:7843
+T00419.006,vy,Named in the fork; see cited use,med,source:5BF94.c:7846
+T00419.007,vz,Named in the fork; see cited use,med,source:5BF94.c:7849
+T00419.008,fx,Named in the fork; see cited use,med,source:5BF94.c:7843
+T00419.009,fy,Named in the fork; see cited use,med,source:5BF94.c:7846
+T00419.010,fz,Named in the fork; see cited use,med,source:5BF94.c:7849
+T00419.011,ax,Named in the fork; see cited use,med,source:5BF94.c:7863
+T00419.012,ay,Named in the fork; see cited use,med,source:5BF94.c:7864
+T00419.013,az,Named in the fork; see cited use,med,source:5BF94.c:7865
+T00421.000,config,Named in the fork; see cited use,med,source:5BF94.c:4922
+T00421.001,index,Named in the fork; see cited use,med,source:5BF94.c:4967
+T00421.002,age,Named in the fork; see cited use,med,source:5BF94.c:4968
+T00421.003,first,Named in the fork; see cited use,med,source:5BF94.c:4973
+T00421.004,second,Named in the fork; see cited use,med,source:5BF94.c:4974
+T00421.005,previousFirst,Named in the fork; see cited use,med,source:5BF94.c:4902
+T00421.006,currentFirst,Named in the fork; see cited use,med,source:5BF94.c:4902
+T00421.007,previousSecond,Named in the fork; see cited use,med,source:5BF94.c:4902
+T00421.008,currentSecond,Named in the fork; see cited use,med,source:5BF94.c:4903
+T00421.009,projectionDepth,Named in the fork; see cited use,med,source:5BF94.c:4903
+T00421.010,projectionFlags,Named in the fork; see cited use,med,source:5BF94.c:4904
+T00434.000,opaque0,"Used, but its meaning is not established",low,source:146C.c:1932
+T00434.001,opaque2,"Used, but its meaning is not established",low,source:146C.c:1933
+T00434.002,opaque3,"Used, but its meaning is not established",low,source:146C.c:1934
+T00434.003,opaque4,"Used, but its meaning is not established",low,source:146C.c:1935
+T00434.004,reserved6,Not read by decompiled code,low,declaration-only;source:146C.c:234
+T00434.005,targetActor,Named in the fork; see cited use,med,source:146C.c:1936
+T00434.006,reserved9,Not read by decompiled code,low,declaration-only;source:146C.c:236
+T00434.007,opaqueA,"Used, but its meaning is not established",low,source:146C.c:1937
+T00434.008,reservedB,Not read by decompiled code,low,declaration-only;source:146C.c:238
+T00434.009,reservedC,Not read by decompiled code,low,declaration-only;source:146C.c:239
+T00434.010,opaque10,"Used, but its meaning is not established",low,source:146C.c:1940
+T00434.011,opaque12,"Used, but its meaning is not established",low,source:146C.c:1950
+T00434.012,opaque14,"Used, but its meaning is not established",low,source:146C.c:1941
+T00434.013,reserved1C,Not read by decompiled code,low,declaration-only;source:146C.c:243
+T00443.000,targetActor,Named in the fork; see cited use,med,source:146C.c:745
+T00443.001,targetLimb,Named in the fork; see cited use,med,source:146C.c:1944
+T00443.002,hitThreshold,Named in the fork; see cited use,med,source:146C.c:3262
+T00443.003,impactKind,Selects the hit sounds and impact effects,med,source:146C.c:1973
+T00443.004,hp,Named in the fork; see cited use,med,source:146C.c:3243
+T00443.005,mp,Named in the fork; see cited use,med,source:146C.c:3248
+T00489.000,reserved0,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5092
+T00489.001,reserved4,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5090
+T00489.002,reserved8,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5094
+T00489.003,reservedC,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5093
+T00489.004,reserved10,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5097
+T00489.005,reserved14,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5096
+T00489.006,reserved18,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5095
+T00489.007,positionX,Position x (same offset as TransformMotionView.position),low,declaration-only;source:5BF94.h:424
+T00489.008,positionY,Position y; set to -0x80 to raise an action effect,med,source:5BF94.c:7609
+T00489.009,positionZ,Position z (same offset as TransformMotionView.position),low,declaration-only;source:5BF94.h:426
+T00489.010,reserved28,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5100
+T00489.011,reserved2C,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5099
+T00489.012,reserved30,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5098
+T00489.013,actor,Named in the fork; see cited use (same bits as T00493 actor),med,source:5BF94.c:5101
+T00489.014,bone,Named in the fork; see cited use (same bits as T00493 bone),med,source:5BF94.c:8243
+T00489.015,targetActor,Named in the fork; see cited use (same bits as T00493 targetActor),med,declaration-only;source:5BF94.h:432
+T00489.016,targetBone,Named in the fork; see cited use (same bits as T00493 targetBone),med,declaration-only;source:5BF94.h:433
+T00489.017,world,Named in the fork; see cited use (same bits as T00493 world),med,source:5BF94.c:6984
+T00489.018,view,Named in the fork; see cited use (same bits as T00493 view),med,source:EFFECT/PLG005.BIN/18.c:209
+T00489.019,reserved78,Not read by decompiled code,low,declaration-only;source:5BF94.h:436
+T00489.020,opaqueBE,"Used, but its meaning is not established",low,source:EFFECT/PLG128.BIN/F8.c:130
+T00489.021,reservedC0,Not read by decompiled code,low,declaration-only;source:5BF94.h:438
+T00490.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.c:172
+T00490.001,endX,Moving endpoint x,low,source:5BF94.c:5777
+T00490.002,endY,Moving endpoint y,low,source:5BF94.c:5783
+T00490.003,startX,Fixed endpoint x,low,source:5BF94.c:5777
+T00490.004,startY,Fixed endpoint y,low,source:5BF94.c:5783
+T00493.000,rotation,Named in the fork; see cited use,med,source:5BF94.c:6236
+T00493.001,flags,"Bit 0 attached to an actor bone, bit 1 target bone resolved, bit 2 motion limited by the definition",med,source:5BF94.c:6247
+T00493.002,reserved8,Cleared when the instance is initialised; not otherwise read,low,source:upstream:5BF94.c:4553
+T00493.003,reservedC,Cleared when the instance is initialised; not otherwise read,low,source:upstream:5BF94.c:4552
+T00493.004,frame,Named in the fork; see cited use,med,source:5BF94.c:6034
+T00493.005,reserved10,Cleared when the instance is initialised; not otherwise read,low,source:upstream:5BF94.c:4554
+T00493.006,position,Named in the fork; see cited use,med,source:5BF94.c:6044
+T00493.007,reserved2C,Cleared when the instance is initialised; not otherwise read,low,source:upstream:5BF94.c:4557
+T00493.008,actor,Named in the fork; see cited use,med,source:5BF94.c:6209
+T00493.009,bone,Named in the fork; see cited use,med,source:5BF94.c:6210
+T00493.010,targetActor,Named in the fork; see cited use,med,source:5BF94.c:6238
+T00493.011,targetBone,Named in the fork; see cited use,med,source:5BF94.c:6244
+T00493.012,world,Named in the fork; see cited use,med,source:5BF94.c:6027
+T00493.013,view,Named in the fork; see cited use,med,source:5BF94.c:6310
+T00493.014,attachment,Named in the fork; see cited use,med,source:5BF94.c:6163
+T00493.015,facing,Named in the fork; see cited use,med,source:5BF94.c:6301
+T00493.016,saved,Named in the fork; see cited use,med,source:5BF94.c:6026
+T00493.017,control0,Named in the fork; see cited use,med,source:5BF94.c:6072
+T00493.018,control1,Named in the fork; see cited use,med,source:5BF94.c:6072
+T00494.000,flags,"Bit 0 animated local transform, bit 1 attach (bits 3-4 source), bit 7 target (bits 10-11 source), bits 12-13 motion kind",med,source:5BF94.c:6078;source:5BF94.c:5958
+T00494.001,attachActor,Actor the transform attaches to when the attach source is fixed,med,source:5BF94.c:5980;read through effectDefinitionView (T00418) at the same offset
+T00494.002,attachBone,Bone the transform attaches to unless flag bit 2 is set,med,declaration-only;source:upstream:5BF94.h:182;source:5BF94.c:5985;read through effectDefinitionView (T00418) at the same offset
+T00494.003,translationCurve,Curve selecting the translation,med,source:5BF94.c:6192
+T00494.004,curve,Named in the fork; see cited use,med,source:5BF94.c:6041
+T00494.005,rotationCurve,Curve selecting the rotation offset,med,source:5BF94.c:6187
+T00494.006,scaleCurve,Curve selecting the scale,med,source:5BF94.c:6194
+T00494.007,rotationX,Initial rotation x,med,source:5BF94.c:5947;read through effectDefinitionView (T00418) at the same offset
+T00494.008,mode,Named in the fork; see cited use,med,source:5BF94.c:6025
+T00494.009,rotationY,Initial rotation y,med,source:5BF94.c:5948;read through effectDefinitionView (T00418) at the same offset
+T00494.010,limit,Named in the fork; see cited use,med,source:5BF94.c:6034
+T00494.011,radius,Named in the fork; see cited use,med,source:5BF94.c:6120
+T00494.012,radiusJitter,Named in the fork; see cited use,med,source:5BF94.c:6123
+T00494.013,rotationZ,Initial rotation z,med,source:5BF94.c:5949;read through effectDefinitionView (T00418) at the same offset
+T00494.014,shape12,Named in the fork; see cited use,med,source:5BF94.c:6118
+T00494.015,rotationRange,Rotation offset range,med,source:5BF94.c:6187
+T00494.016,translationRange,Translation range,med,source:5BF94.c:6192
+T00494.017,scaleRange,Scale range,med,source:5BF94.c:6194
+T00495.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.c:189
+T00495.001,reserved4,Not read by decompiled code,low,declaration-only;source:5BF94.c:190
+T00495.002,rotationOffset,Sampled rotation offset,med,source:5BF94.c:6188
+T00495.003,translation,Sampled translation,med,source:5BF94.c:6193
+T00495.004,scale,Sampled scale,med,source:5BF94.c:6195
+T00495.005,reserved30,Not read by decompiled code,low,declaration-only;source:5BF94.c:194
+T00495.006,target,Named in the fork; see cited use,med,declaration-only;source:5BF94.c:195
+T00495.007,local,Local matrix,med,source:5BF94.c:6191
+T00495.008,reserved68,Not read by decompiled code,low,declaration-only;source:5BF94.c:197
+T00495.009,reserved6C,Not read by decompiled code,low,declaration-only;source:5BF94.c:198
+T00495.010,reserved70,Not read by decompiled code,low,declaration-only;source:5BF94.c:199
+T00497.000,previous,Named in the fork; see cited use,med,source:5BF94.c:6829
+T00497.001,next,Named in the fork; see cited use,med,source:5BF94.c:6831
+T00497.002,motion,Named in the fork; see cited use,med,source:upstream:5BF94.c:6387
+T00497.003,textureAnimation,Texture animation state,high,source:5BF94.c:6995
+T00497.004,emitFlags,Emission flags of the event that spawned it,high,source:5BF94.c:7495
+T00497.005,transparency,"Transparency mode (from the definition, the event or the parent)",med,declaration-only;source:upstream:5BF94.h:384;written as unk60_0 in the pinned layout;source:5BF94.c:7500
+T00497.006,opaque61Bit0,"Used, but its meaning is not established",low,source:5BF94.c:6973
+T00497.007,reserved61Bit4,Not read by decompiled code,low,declaration-only;source:5BF94.h:403
+T00497.008,attractionTarget,Point the particle is attracted to (effectAttractionView targetX),med,source:5BF94.c:7458
+T00497.009,lifetime,Named in the fork; see cited use,med,source:5BF94.c:7444
+T00497.010,transformIndex,Transform it spawned from,high,source:5BF94.c:6993
+T00497.011,attractionTransform,Transform it is attracted to,high,source:5BF94.c:6994
+T00497.012,endEvent,Named in the fork; see cited use,med,source:5BF94.c:7499
+T00497.013,tickEvent,Named in the fork; see cited use,med,source:5BF94.c:7670
+T00497.014,reserved6E,Not read by decompiled code,low,declaration-only;source:5BF94.h:410
+T00497.015,attraction,Attraction strength (effectAttractionView attraction),med,source:5BF94.c:7498
+T00497.016,colorCurves,"Red, green and blue curves",high,source:5BF94.c:7497
+T00497.017,age,Ticks since it spawned; 0xFF when allocated,high,source:5BF94.c:7669
+T00498.000,next,Next attached renderer,med,declaration-only;source:6E644.h:38
+T00498.001,renderer,Named in the fork; see cited use,med,source:5BF94.c:5162
+T00498.002,rendererState,State the renderer owns (the bone trail for trail renderers),med,source:5BF94.c:4960
+T00501.000,keys,Key data of the track,high,source:5BF94.c:7922
+T00501.001,header,Track kind and key count,high,source:5BF94.c:7935
+T00501.002,keyIndex,Current key; -1 before the first,high,source:5BF94.c:7923
+T00501.003,curveFrame,Frame passed to the curve sampler while particles are emitted,low,source:5BF94.c:7960
+T00501.004,keyTimer,Frames left in the current key,med,source:5BF94.c:7965
+T00501.005,keyParameter,Parameter of the current key,low,source:5BF94.c:7923
+T00502.000,kind,"Track kind (3 particle emission, ...)",med,source:5BF94.c:7939
+T00502.001,keyCount,Number of keys,med,source:5BF94.c:7935
+T00503.000,frame,Frame at which the key starts,med,source:5BF94.c:7954
+T00503.001,duration,Frames the key lasts,med,source:5BF94.c:7924
+T00503.002,opaque2Bit0,"Used, but its meaning is not established",low,source:5BF94.c:7962
+T00503.003,opaque2Bit4,"Used, but its meaning is not established",low,source:5BF94.c:7923
+T00503.004,opaque3Bit2,"Used, but its meaning is not established",low,source:5BF94.c:7962
+T00504.000,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:5BF94.c:39
+T00504.001,curve,Curve passed to the shake start,low,source:5BF94.c:7930
+T00505.000,actors,Named in the fork; see cited use,med,source:5BF94.c:8031
+T00505.001,final,Named in the fork; see cited use,med,source:5BF94.c:8059
+T00505.002,frame,Named in the fork; see cited use,med,source:5BF94.c:8012
+T00505.003,delay,Named in the fork; see cited use,med,source:5BF94.c:8017
+T00506.000,event,Named in the fork; see cited use,med,source:5BF94.c:8008
+T00506.001,reserved4,Not read by decompiled code,low,source:5BF94.c:8022
+T00506.002,reserved6,Not read by decompiled code,low,declaration-only;source:5BF94.c:340
+T00506.003,reserved8,Not read by decompiled code,low,source:5BF94.c:8023
+T00506.004,reservedA,Not read by decompiled code,low,declaration-only;source:5BF94.c:342
+T00506.005,delay,Named in the fork; see cited use,med,source:5BF94.c:8017
+T00506.006,index,Named in the fork; see cited use,med,source:5BF94.c:8016
+T00507.000,frame,Frame at which the key applies,med,source:5BF94.c:8073
+T00507.001,opaque1Bit1,"Used, but its meaning is not established",low,source:5BF94.c:8075
+T00507.002,effectRenderer,Named in the fork; see cited use,med,source:5BF94.c:8074
+T00507.003,opaque2Bit5,"Used, but its meaning is not established",low,source:5BF94.c:8075
+T00507.004,reserved3Bit3,Not read by decompiled code,low,declaration-only;source:5BF94.c:216
+T00507.005,opaque4,"Used, but its meaning is not established",low,source:5BF94.c:8075
+T00509.000,frame,Frame at which the key applies,med,source:5BF94.c:8132
+T00509.001,duration,Duration passed to the color fade,low,source:5BF94.c:8135
+T00509.002,red,"Red, biased by 0x80",med,source:5BF94.c:8136
+T00509.003,green,"Green, biased by 0x80",med,source:5BF94.c:8137
+T00509.004,blue,"Blue, biased by 0x80",med,source:5BF94.c:8137
+T00509.005,mode,Fade mode passed to the color fade,low,source:5BF94.c:8135
+T00510.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.c:101
+T00510.001,attachmentMode,Attachment bits cleared to invalidate attachments,low,source:5BF94.c:8269
+T00510.002,motionResumed,Set to resume the transform's motion,low,source:5BF94.c:8252
+T00510.003,reserved22Bit3,Not read by decompiled code,low,declaration-only;source:5BF94.c:104
+T00510.004,reserved24,Not read by decompiled code,low,declaration-only;source:5BF94.c:105
+T00511.000,frame,Frame in the low nine bits,med,source:5BF94.c:8346
+T00511.001,opaque2,"Used, but its meaning is not established",low,source:5BF94.c:8347
+T00511.002,opaque3,"Used, but its meaning is not established",low,source:5BF94.c:8348
+T00512.000,frame,Frame at which the key applies,med,source:5BF94.c:7954
+T00512.001,reserved1Bit1,Not read by decompiled code,low,declaration-only;source:5BF94.c:222
+T00512.002,reserved2,Not read by decompiled code,low,declaration-only;source:5BF94.c:223
+T00512.003,opaque4Bit0,"Used, but its meaning is not established",low,source:5BF94.c:8433
+T00512.004,opaque4Bit4,"Used, but its meaning is not established",low,source:5BF94.c:8433
+T00512.005,opaque5Bit1,"Used, but its meaning is not established",low,source:5BF94.c:8433
+T00512.006,opaque6Bit0,"Used, but its meaning is not established",low,source:5BF94.c:8433
+T00512.007,opaque6Bit1,"Used, but its meaning is not established",low,source:5BF94.c:8433
+T00512.008,opaque7Bit0,"Used, but its meaning is not established",low,source:5BF94.c:8433
+T00512.009,opaque7Bit1,"Used, but its meaning is not established",low,source:5BF94.c:8434
+T00513.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.h:216
+T00513.001,reserved4,Not read by decompiled code,low,declaration-only;source:5BF94.h:217
+T00513.002,frameTimer,Ticks left on the current frame; zero when the program has ended,med,source:5BF94.c:8524
+T00513.003,reserved7,Not read by decompiled code,low,declaration-only;source:5BF94.h:219
+T00513.004,frameOffsetX,First 14-bit offset of a 0x1 program word,low,source:5BF94.c:8541
+T00513.005,frameOffsetY,Second 14-bit offset of a 0x1 program word,low,source:5BF94.c:8542
+T00513.006,reservedC,Not read by decompiled code,low,declaration-only;source:5BF94.h:222
+T00513.007,cursor,Byte offset of the next program word,high,source:5BF94.c:8531
+T00513.008,reserved10,Not read by decompiled code,low,declaration-only;source:5BF94.h:224
+T00513.009,reserved14,Not read by decompiled code,low,declaration-only;source:5BF94.h:225
+T00513.010,textureIndex,Named in the fork; see cited use,med,source:5BF94.c:8515
+T00513.011,reserved17,Not read by decompiled code,low,declaration-only;source:5BF94.h:227
+T00513.012,program,Animation program in package block 2,high,source:5BF94.c:8516
+T00513.013,textureInfo,Named in the fork; see cited use,med,source:5BF94.c:8535
+T00534.000,animationId,Texture animation in package block 2,med,source:5BF94.c:6995
+T00534.001,textureIndex,Texture table of the animation,med,source:5BF94.c:6995
+T00534.002,endEvent,Event emitted when a particle ends (1-based),med,source:5BF94.c:7499
+T00534.003,tickEvent,Event emitted every tick (1-based); copied with endEvent as one halfword,med,declaration-only;source:5BF94.h:236;source:5BF94.c:7499
+T00534.004,flags,"Emission flags: bits 0-2 spawn origin, 0x38 volume shape, 0x1800 distribution, 0xE000 direction mode, 0x1C0 attraction mode",high,source:5BF94.c:6957
+T00534.005,transparencyCurve,Named in the fork; see cited use,med,source:5BF94.c:6964
+T00534.006,positionCurve,Curve sampling positionRange,high,source:5BF94.c:6998
+T00534.007,extentCurve,Curve sampling extentRange,high,source:5BF94.c:7026
+T00534.008,directionCurve,Curve sampling the direction range,high,source:5BF94.c:7311
+T00534.009,directionJitterCurve,Curve sampling the direction jitter range,high,source:5BF94.c:7309
+T00534.010,speedCurve,Curve sampling the speed range,high,source:5BF94.c:7305
+T00534.011,forceCurve,Curve sampling the force ranges,high,source:5BF94.c:7417
+T00534.012,accelerationCurve,Curve sampling the acceleration ranges,high,source:5BF94.c:7420
+T00534.013,attractionOffsetCurve,Curve sampling the attraction target offset,high,source:5BF94.c:7448
+T00534.014,attractionJitterCurve,Curve sampling the attraction target jitter,high,source:5BF94.c:7450
+T00534.015,attractionCurve,Curve sampling the attraction strength range,high,source:5BF94.c:7489
+T00534.016,massCurve,Curve sampling the mass range,high,source:5BF94.c:7434
+T00534.017,gravityScaleCurve,Curve sampling the gravity scale range,high,source:5BF94.c:7436
+T00534.018,lifetimeCurve,Curve sampling the lifetime range,high,source:5BF94.c:7438
+T00534.019,countCurve,Curve sampling the particle count range,high,source:5BF94.c:6985
+T00534.020,intervalCurve,Curve sampling the emission interval,high,source:5BF94.c:6977
+T00534.021,innerExtentCurve,Curve sampling innerExtentRange,high,source:5BF94.c:7029
+T00534.022,positionRange,Spawn position range,high,source:5BF94.c:6999
+T00534.023,extentRange,Emission volume extent range,high,source:5BF94.c:7027
+T00534.024,innerExtentRange,Inner extent ratio range,med,source:5BF94.c:7030
+T00534.025,vectorRanges,"Direction, direction jitter, force min/max, acceleration min/max, attraction offset and jitter ranges",high,source:5BF94.c:7312
+T00534.026,pairRanges,"Mass, gravity scale, speed, attraction and lifetime min/max ranges",high,source:5BF94.c:7306
+T00534.027,countRange,Particle count range,high,source:5BF94.c:6986
+T00534.028,intervalRange,Frames between emissions,high,source:5BF94.c:6978
+T00534.029,rCurve,Named in the fork; see cited use,med,source:5BF94.c:7492
+T00534.030,gCurve,Named in the fork; see cited use,med,source:5BF94.c:7757
+T00534.031,bCurve,Named in the fork; see cited use,med,source:5BF94.c:7758
+T00534.032,reservedC7,Not read by decompiled code,low,declaration-only;source:5BF94.h:265
+T00534.033,transformIndex,Transform the particles spawn from,high,source:5BF94.c:6959
+T00534.034,attractionTransform,Transform the particles are attracted to,high,source:5BF94.c:6960
+T00534.035,ringSegments,Ring emission segments,med,source:5BF94.c:7258
+T00534.036,ringPositions,Ring emission positions; defaults to ringSegments,med,source:5BF94.c:7262
+T00535.000,opaque0,"Used, but its meaning is not established",low,declaration-only;source:5BF94.h:283
+T00535.001,reserved10,Not read by decompiled code,low,source:5BF94.c:6925
+T00535.002,reserved20,Not read by decompiled code,low,declaration-only;source:5BF94.h:285
+T00535.003,flags,Emission flags copied from the definition,high,source:5BF94.c:6957
+T00535.004,savedFlags,Copy of the emission flags,low,source:5BF94.c:6958
+T00535.005,reserved2A,Not read by decompiled code,low,declaration-only;source:5BF94.h:288
+T00535.006,vector,Working vector,med,source:5BF94.c:7349
+T00535.007,aimPoint,Point the particles aim at,med,source:5BF94.c:7332
+T00535.008,spawnPoint,Spawn point in world units,med,source:5BF94.c:7333
+T00535.009,reserved54,Not read by decompiled code,low,declaration-only;source:5BF94.h:292
+T00535.010,aimMatrix,Look-at matrix from spawnPoint to aimPoint,med,source:5BF94.c:7336
+T00535.011,reserved84,Not read by decompiled code,low,declaration-only;source:5BF94.h:294
+T00535.012,position,Sampled spawn position,high,source:5BF94.c:6999
+T00535.013,extent,Sampled emission extent,high,source:5BF94.c:7027
+T00535.014,direction,Unit direction of one particle,med,source:5BF94.c:7353
+T00535.015,directionJitter,Sampled direction jitter,high,source:5BF94.c:7310
+T00535.016,innerExtent,Extent scaled by the inner extent ratio,med,source:5BF94.c:7036
+T00535.017,baseDirection,Sampled direction,high,source:5BF94.c:7312
+T00535.018,forceMin,Sampled minimum force,high,source:5BF94.c:7418
+T00535.019,forceMax,Sampled maximum force,high,source:5BF94.c:7419
+T00535.020,accelerationMin,Sampled minimum acceleration,high,source:5BF94.c:7421
+T00535.021,accelerationMax,Sampled maximum acceleration,high,source:5BF94.c:7422
+T00535.022,speedRange,Sampled speed min and max,high,source:5BF94.c:7306
+T00535.023,speed,Speed of one particle,high,source:5BF94.c:7359
+T00535.024,massRange,Sampled mass min and max,high,source:5BF94.c:7435
+T00535.025,gravityScaleRange,Sampled gravity scale min and max,high,source:5BF94.c:7437
+T00535.026,lifetimeRange,Sampled lifetime min and max,high,source:5BF94.c:7439
+T00535.027,attractionOffset,Sampled attraction target offset,high,source:5BF94.c:7449
+T00535.028,attractionJitter,Sampled attraction target jitter,high,source:5BF94.c:7451
+T00535.029,attractionRange,Sampled attraction strength min and max,high,source:5BF94.c:7490
+T00535.030,colorCurves,"Red, green and blue curves and the particle age",high,source:5BF94.c:7492
+T00535.031,reserved158,Not read by decompiled code,low,declaration-only;source:5BF94.h:314
+T00535.032,transformIndex,Transform the particles spawn from,high,source:5BF94.c:6959
+T00535.033,attractionTransform,Transform the particles are attracted to,high,source:5BF94.c:6960
+T00535.034,sinAngle0,Sine of the first random emission angle,med,source:5BF94.c:7041
+T00535.035,sinAngle1,Sine of the second random emission angle,med,source:5BF94.c:7044
+T00535.036,cosAngle0,Cosine of the first random emission angle,med,source:5BF94.c:7042
+T00535.037,cosAngle1,Cosine of the second random emission angle,med,source:5BF94.c:7045
+T00535.038,transparency,Transparency mode given to the particles,high,source:5BF94.c:6965
+T00535.039,ringSegments,Ring emission segments,high,source:5BF94.c:7267
+T00535.040,ringPositions,Ring emission positions,high,source:5BF94.c:7269
+T00536.000,opaque0,"Used, but its meaning is not established",low,source:particleDispatch.h:23
+T00536.001,definitionIndex,Particle definition in package block 5,med,source:particleDispatch.h:26
+T00536.002,count,Number of particles,med,source:particleSetup.h:78
+T00536.003,controlPoints,Four control points per particle,med,source:particleSetup.h:80
+T00536.004,opaque8,"Used, but its meaning is not established",low,source:particleDispatch.h:25
+T00536.005,age,Age used to sample the curves,med,source:particleSetup.h:55
+T00536.006,textureAnimation,Texture animation state,med,source:particleRender.h:79
+T00537.000,reserved0,Not read by decompiled code,low,declaration-only;source:particleSetup.h:15
+T00537.001,reserved2,Not read by decompiled code,low,declaration-only;source:particleSetup.h:16
+T00538.000,opaque0,"Used, but its meaning is not established",low,source:trails5.h:695
+T00538.001,definitionIndex,Particle definition in package block 5,med,source:trails5.h:697
+T00538.002,trailcount,Named in the fork; see cited use,med,source:trails5.h:71
+T00538.003,opaque3,"Used, but its meaning is not established",low,source:trails5.h:706
+T00538.004,trails,Named in the fork; see cited use,med,source:trails5.h:73
+T00538.005,curveSampleDistance,Named in the fork; see cited use,med,source:trails5.h:46
+T00538.006,textureAnimation,Texture animation state,med,source:trails5.h:507
+T00538.007,sampledTransparencyCurve,Named in the fork; see cited use,med,source:trails5.h:548
+T00539.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.h:493
+T00539.001,position,Position (20.12) added to the spawn position for emission flag 4,med,source:5BF94.c:7015
+T00539.002,reserved1C,Not read by decompiled code,low,declaration-only;source:5BF94.h:495
+T00539.003,transparency,Transparency given to emitted particles,med,source:5BF94.c:6967
+T00539.004,variant,Variant passed to emitted events,low,source:5BF94.c:6973
+T00539.005,reserved61Bit4,Not read by decompiled code,low,declaration-only;source:5BF94.h:498
+T00539.006,reserved64,Not read by decompiled code,low,declaration-only;source:5BF94.h:499
+T00540.000,lifetime,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG128.BIN/F8.c:14
+T00540.001,effect,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG128.BIN/F8.c:14
+T00540.002,mode,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG128.BIN/F8.c:15
+T00540.003,age,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG128.BIN/F8.c:16
+T00540.004,startCamera,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG128.BIN/F8.c:17
+T00540.005,endCamera,Named in the fork; see cited use,med,source:EFFECT/PLG128.BIN/F8.c:138
+T00540.006,lookAt,Point looked at,med,source:EFFECT/PLG128.BIN/F8.c:68
+T00540.007,eye,Camera position,med,source:EFFECT/PLG128.BIN/F8.c:68
+T00540.008,view,Look-at matrix,med,source:EFFECT/PLG128.BIN/F8.c:68
+T00540.009,nearClip,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG128.BIN/F8.c:22
+T00540.010,reservedCC,Not read by decompiled code,low,declaration-only;source:EFFECT/PLG128.BIN/F8.c:23
+T00571.000,tableCount,Named in the fork; see cited use,med,source:6F014.c:516
+T00571.001,dataOffset,Named in the fork; see cited use,med,source:6F014.c:517
+T00571.002,tableOffsets,Named in the fork; see cited use,med,source:6F014.c:520
+T00572.000,count,Named in the fork; see cited use,med,source:5BF94.c:6342
+T00572.001,offsets,Named in the fork; see cited use,med,source:5BF94.c:6343
+T00573.000,animationCount,Number of texture animations,high,source:6F014.c:526
+T00573.001,reserved4,Not read by decompiled code,low,source:6F014.c:756
+T00574.000,count,Named in the fork; see cited use,med,source:5BF94.c:7720
+T00574.001,offsets,Named in the fork; see cited use,med,source:5BF94.c:7876
+T00575.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.h:327
+T00575.001,definitions,Particle definitions,high,source:5BF94.c:6955
+T00576.000,gravityRange,Gravity range sampled by gravityCurve,med,source:6F014.c:483
+T00576.001,dragRange,Drag range sampled by dragCurve,med,source:6F014.c:485
+T00576.002,reserved10,Not read by decompiled code,low,declaration-only;source:5BF94.h:170
+T00576.003,reserved11,Not read by decompiled code,low,declaration-only;source:5BF94.h:171
+T00576.004,gravityCurve,Curve selecting the gravity,med,source:6F014.c:483
+T00576.005,dragCurve,Curve selecting the drag,med,source:6F014.c:485
+T00576.006,frameCount,Copied to the effect frame limit when primary effects update,low,source:5BF94.c:5223
+T00576.007,transformCount,Number of transforms the package animates,med,source:5BF94.c:5943
+T00576.008,timelineIds,Timeline ids loaded by script register,med,source:5BF94.c:7718
+T00577.000,count,Named in the fork; see cited use,med,source:5BF94.c:6319
+T00577.001,dataOffset,Named in the fork; see cited use,med,source:6F014.c:498
+T00577.002,curveSizes,Named in the fork; see cited use,med,source:5BF94.c:6320
+T00578.000,clut,Named in the fork; see cited use,med,source:tiledRings.h:252
+T00578.001,tpage,Named in the fork; see cited use,med,source:tiledRings.h:251
+T00578.002,u,Named in the fork; see cited use,med,source:tiledRings.h:222
+T00578.003,v,Named in the fork; see cited use,med,source:tiledRings.h:224
+T00578.004,w,Named in the fork; see cited use,med,source:tiledRings.h:223
+T00578.005,h,Named in the fork; see cited use,med,source:tiledRings.h:226
+T00578.006,reserved8,Not read by decompiled code,low,source:EFFECT/PLG077.BIN/18.c:247
+T00578.007,reservedA,Not read by decompiled code,low,source:particleRender.h:121
+T00578.008,reservedC,Not read by decompiled code,low,source:EFFECT/PLG077.BIN/18.c:248
+T00578.009,reservedE,Not read by decompiled code,low,source:particleRender.h:140
+T00578.010,reserved10,Not read by decompiled code,low,source:EFFECT/PLG077.BIN/18.c:249
+T00578.011,reserved12,Not read by decompiled code,low,source:particleRender.h:123
+T00578.012,reserved14,Not read by decompiled code,low,source:EFFECT/PLG077.BIN/18.c:250
+T00578.013,reserved16,Not read by decompiled code,low,source:particleRender.h:142
+T00579.000,reserved0,Not read by decompiled code,low,source:EFFECT/PLG077.BIN/18.c:243
+T00579.001,dataIndex,Named in the fork; see cited use,med,source:tiledRings.h:221
+T00580.000,meta,Named in the fork; see cited use,med,source:6F014.c:749
+T00580.001,blocks,Package blocks following the header,high,source:6F014.c:756
+T00626.000,tag0,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:EFFECT/PLG005.BIN/18.c:29
+T00626.001,opaque4,"Used, but its meaning is not established",low,declaration-only;source:EFFECT/PLG005.BIN/18.c:30
+T00626.002,drawMode,Draw mode command word (0xE1),med,declaration-only;source:EFFECT/PLG005.BIN/18.c:31
+T00626.003,reserved30,Not read by decompiled code,low,declaration-only;source:EFFECT/PLG005.BIN/18.c:32
+T00627.000,tag0,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:EFFECT/PLG005.BIN/18.c:29
+T00627.001,tag1,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:trails5.h:18
+T00627.002,tag2,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:trails5.h:19
+T00627.003,wordCount,Packet length in words,med,declaration-only;source:trails5.h:20
+T00627.004,opaque4,"Used, but its meaning is not established",low,declaration-only;source:EFFECT/PLG005.BIN/18.c:30
+T00627.005,drawMode,Draw mode command word (0xE1),med,declaration-only;source:trails5.h:22
+T00685.000,tag,Named in the fork; see cited use,med,declaration-only;source:closedRings.h:34
+T00685.001,poly,Named in the fork; see cited use,med,declaration-only;source:closedRings.h:35
+T00685.002,drawMode,Named in the fork; see cited use,med,declaration-only;source:closedRings.h:36
+T00686.000,lifetime,Named in the fork; see cited use,med,source:closedRings.h:77
+T00686.001,effect,Named in the fork; see cited use,med,source:closedRings.h:78
+T00686.002,reserved2,Not read by decompiled code,low,declaration-only;source:closedRings.h:24
+T00686.003,radius,Named in the fork; see cited use,med,source:closedRings.h:80
+T00686.004,radiusSpeed,Named in the fork; see cited use,med,source:closedRings.h:79
+T00686.005,height,Named in the fork; see cited use,med,source:closedRings.h:82
+T00686.006,heightSpeed,Named in the fork; see cited use,med,source:closedRings.h:81
+T00686.007,angle,Named in the fork; see cited use,med,source:closedRings.h:83
+T00686.008,age,Named in the fork; see cited use,med,source:closedRings.h:84
+T00686.009,texture,Named in the fork; see cited use,med,source:closedRings.h:86
+T00687.000,reserved0,Not read by decompiled code,low,declaration-only;source:EFFECT/PLG077.BIN/18.c:32
+T00687.001,reserved1,Not read by decompiled code,low,declaration-only;source:EFFECT/PLG077.BIN/18.c:33
+T00688.000,tag,Named in the fork; see cited use,med,declaration-only;source:grids.h:16
+T00688.001,poly,Named in the fork; see cited use,med,declaration-only;source:grids.h:17
+T00688.002,drawMode,Named in the fork; see cited use,med,declaration-only;source:grids.h:18
+T00688.003,reserved30,Not read by decompiled code,low,declaration-only;source:upstream:grids.h:31
+T00689.000,lifetime,Named in the fork; see cited use,med,source:grids.h:62
+T00689.001,effect,Named in the fork; see cited use,med,source:grids.h:61
+T00689.002,u,Named in the fork; see cited use,med,source:grids.h:71
+T00689.003,v,Named in the fork; see cited use,med,source:grids.h:72
+T00689.004,uScroll,Named in the fork; see cited use,med,source:grids.h:73
+T00689.005,vScroll,Named in the fork; see cited use,med,source:grids.h:73
+T00689.006,tpage,Named in the fork; see cited use,med,source:grids.h:68
+T00689.007,clut,Named in the fork; see cited use,med,source:grids.h:70
+T00689.008,xSpacing,Named in the fork; see cited use,med,source:grids.h:64
+T00689.009,xSpeed,Named in the fork; see cited use,med,source:grids.h:64
+T00689.010,zSpacing,Named in the fork; see cited use,med,source:grids.h:65
+T00689.011,zSpeed,Named in the fork; see cited use,med,source:grids.h:65
+T00689.012,xPhase,Named in the fork; see cited use,med,source:grids.h:66
+T00689.013,zPhase,Named in the fork; see cited use,med,source:grids.h:66
+T00689.014,age,Named in the fork; see cited use,med,source:grids.h:63
+T00715.000,tag,Named in the fork; see cited use,med,declaration-only;source:meshes10.h:18
+T00715.001,poly,Named in the fork; see cited use,med,declaration-only;source:meshes10.h:19
+T00715.002,drawMode,Named in the fork; see cited use,med,declaration-only;source:meshes10.h:20
+T00716.000,lifetime,Named in the fork; see cited use,med,source:meshes10.h:55
+T00716.001,effect,Named in the fork; see cited use,med,source:meshes10.h:54
+T00716.002,reserved2,Not read by decompiled code,low,declaration-only;source:meshes10.h:12
+T00716.003,age,Named in the fork; see cited use,med,source:meshes10.h:58
+T00716.004,texture,Named in the fork; see cited use,med,source:meshes10.h:60
+T00716.005,rotation,Named in the fork; see cited use,med,source:meshes10.h:56
+T00717.000,u,Named in the fork; see cited use,med,declaration-only;source:meshes10.h:23
+T00717.001,v,Named in the fork; see cited use,med,declaration-only;source:meshes10.h:23
+T00718.000,tag,Named in the fork; see cited use,med,declaration-only;source:mirroredSurfaces.h:19
+T00718.001,poly,Named in the fork; see cited use,med,declaration-only;source:mirroredSurfaces.h:20
+T00718.002,drawMode,Named in the fork; see cited use,med,declaration-only;source:mirroredSurfaces.h:21
+T00719.000,lifetime,Named in the fork; see cited use,med,source:mirroredSurfaces.h:68
+T00719.001,effect,Named in the fork; see cited use,med,source:mirroredSurfaces.h:67
+T00719.002,reserved2,Not read by decompiled code,low,declaration-only;source:mirroredSurfaces.h:13
+T00719.003,radius,Named in the fork; see cited use,med,source:mirroredSurfaces.h:70
+T00719.004,radiusSpeed,Named in the fork; see cited use,med,source:mirroredSurfaces.h:69
+T00719.005,height,Named in the fork; see cited use,med,source:mirroredSurfaces.h:72
+T00719.006,heightSpeed,Named in the fork; see cited use,med,source:mirroredSurfaces.h:71
+T00719.007,age,Named in the fork; see cited use,med,source:mirroredSurfaces.h:73
+T00719.008,factors,Named in the fork; see cited use,med,source:mirroredSurfaces.h:82
+T00719.009,texture,Named in the fork; see cited use,med,source:mirroredSurfaces.h:95
+T00720.000,tag0,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:particleLineRender.h:6
+T00720.001,tag1,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:particleLineRender.h:6
+T00720.002,tag2,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:particleLineRender.h:6
+T00720.003,wordCount,Packet length in words,med,declaration-only;source:particleLineRender.h:6
+T00720.004,line,Named in the fork; see cited use,med,declaration-only;source:particleLineRender.h:7
+T00720.005,drawMode,Named in the fork; see cited use,med,declaration-only;source:particleLineRender.h:8
+T00721.000,tag0,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:particleRender.h:7
+T00721.001,tag1,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:particleRender.h:8
+T00721.002,tag2,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:particleRender.h:9
+T00721.003,wordCount,Packet length in words,med,declaration-only;source:particleRender.h:10
+T00721.004,opaque4,"Used, but its meaning is not established",low,declaration-only;source:particleRender.h:11
+T00721.005,drawMode,Draw mode command word (0xE1),med,declaration-only;source:particleRender.h:12
+T00722.000,tag,Named in the fork; see cited use,med,declaration-only;source:rings.h:19
+T00722.001,poly,Named in the fork; see cited use,med,declaration-only;source:rings.h:20
+T00722.002,drawMode,Named in the fork; see cited use,med,declaration-only;source:rings.h:21
+T00723.000,lifetime,Named in the fork; see cited use,med,source:rings.h:74
+T00723.001,effect,Named in the fork; see cited use,med,source:rings.h:73
+T00723.002,reserved2,Not read by decompiled code,low,declaration-only;source:rings.h:14
+T00723.003,radius,Named in the fork; see cited use,med,source:rings.h:76
+T00723.004,radiusSpeed,Named in the fork; see cited use,med,source:rings.h:75
+T00723.005,height,Named in the fork; see cited use,med,source:rings.h:78
+T00723.006,heightSpeed,Named in the fork; see cited use,med,source:rings.h:77
+T00723.007,angle,Named in the fork; see cited use,med,source:rings.h:79
+T00723.008,age,Named in the fork; see cited use,med,source:rings.h:80
+T00723.009,texture,Named in the fork; see cited use,med,source:rings.h:82
+T00724.000,tag,Named in the fork; see cited use,med,declaration-only;source:rotatingSurfaces.h:20
+T00724.001,poly,Named in the fork; see cited use,med,declaration-only;source:rotatingSurfaces.h:21
+T00724.002,drawMode,Named in the fork; see cited use,med,declaration-only;source:rotatingSurfaces.h:22
+T00725.000,lifetime,Named in the fork; see cited use,med,source:rotatingSurfaces.h:75
+T00725.001,effect,Named in the fork; see cited use,med,source:rotatingSurfaces.h:74
+T00725.002,reserved2,Not read by decompiled code,low,declaration-only;source:rotatingSurfaces.h:14
+T00725.003,radius,Named in the fork; see cited use,med,source:rotatingSurfaces.h:77
+T00725.004,radiusSpeed,Named in the fork; see cited use,med,source:rotatingSurfaces.h:76
+T00725.005,height,Named in the fork; see cited use,med,source:rotatingSurfaces.h:79
+T00725.006,heightSpeed,Named in the fork; see cited use,med,source:rotatingSurfaces.h:78
+T00725.007,angle,Named in the fork; see cited use,med,source:rotatingSurfaces.h:80
+T00725.008,age,Named in the fork; see cited use,med,source:rotatingSurfaces.h:81
+T00725.009,factors,Named in the fork; see cited use,med,source:rotatingSurfaces.h:90
+T00725.010,texture,Named in the fork; see cited use,med,source:rotatingSurfaces.h:103
+T00727.000,tag,Named in the fork; see cited use,med,declaration-only;source:surfaces.h:19
+T00727.001,poly,Named in the fork; see cited use,med,declaration-only;source:surfaces.h:20
+T00727.002,drawMode,Named in the fork; see cited use,med,declaration-only;source:surfaces.h:21
+T00728.000,lifetime,Named in the fork; see cited use,med,source:surfaces.h:68
+T00728.001,effect,Named in the fork; see cited use,med,source:surfaces.h:67
+T00728.002,reserved2,Not read by decompiled code,low,declaration-only;source:surfaces.h:13
+T00728.003,radius,Named in the fork; see cited use,med,source:surfaces.h:70
+T00728.004,radiusSpeed,Named in the fork; see cited use,med,source:surfaces.h:69
+T00728.005,height,Named in the fork; see cited use,med,source:surfaces.h:72
+T00728.006,heightSpeed,Named in the fork; see cited use,med,source:surfaces.h:71
+T00728.007,age,Named in the fork; see cited use,med,source:surfaces.h:73
+T00728.008,factors,Named in the fork; see cited use,med,source:surfaces.h:82
+T00728.009,texture,Named in the fork; see cited use,med,source:surfaces.h:95
+T00820.000,mass,Named in the fork; see cited use,med,declaration-only;source:upstream:5BF94.h:370
+T00820.001,gravityScale,Named in the fork; see cited use,med,declaration-only;source:upstream:5BF94.h:371
+T00820.002,position,Named in the fork; see cited use,med,declaration-only;source:upstream:5BF94.h:372
+T00820.003,velocity,Named in the fork; see cited use,med,declaration-only;source:upstream:5BF94.h:373
+T00820.004,force,Named in the fork; see cited use,med,declaration-only;source:upstream:5BF94.h:374
+T00820.005,acceleration,Named in the fork; see cited use,med,declaration-only;source:upstream:5BF94.h:375
+T00821.000,vx,Named in the fork; see cited use,med,declaration-only;source:upstream:5BF94.h:364
+T00821.001,vy,Named in the fork; see cited use,med,declaration-only;source:upstream:5BF94.h:365
+T00821.002,vz,Named in the fork; see cited use,med,declaration-only;source:upstream:5BF94.h:366
