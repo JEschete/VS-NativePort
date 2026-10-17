@@ -367,7 +367,7 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Battle_04 | 58 | 58 | 526 | Validated and applied |
 | Game_Battle_05 | 114 | 0 | 0 | Validated and applied |
 | Game_Effects_01 | 0 | 80 | 659 | Validated and applied |
-| Game_Effects_02 | 239 | 9 | 53 | Pending |
+| Game_Effects_02 | 239 | 9 | 53 | Validated and applied |
 | Game_Ending | 75 | 6 | 59 | Validated and applied |
 | Game_Event | 69 | 17 | 160 | Validated and applied |
 | Game_Field_01 | 63 | 59 | 500 | Validated and applied |
@@ -380,14 +380,14 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **912 / 2,174** | **655 / 822** | **5,678 / 6,870** | **17 / 24 batches applied** |
+| **Applied / inventoried** | **1,151 / 2,174** | **664 / 822** | **5,731 / 6,870** | **18 / 24 batches applied** |
 
 Inventory changed on 2026-10-17 when 25 upstream layouts were adopted (15 merged layouts, 10 type-only retypes; two
 new upstream-only types, `func_800D52A4_t`/`_t2`, the effect node's motion block). Applied rows kept their names;
 four applied fields changed C type only (`AkaoSeqHeader.magic` `char[4]`→`int`, `_mpdEnemy.settings`
 `u_char[8]`→`actorSpawnSettings`, `vs_battle_objectData.material`/`variant` `char`→`u_char`).
 
-Applied rows still include 46 low-confidence globals, 72 low-confidence types and 2,099 low-confidence fields. Validation checks coverage,
+Applied rows still include 51 low-confidence globals, 72 low-confidence types and 2,108 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -505,6 +505,13 @@ names, locations and collisions; it does not prove semantics or close migration 
   (Game_Battle_03): T00418 `EffectDefinitionView` members are now `flags`, `attachment`, `rotationXAndTarget`,
   `rotationY`, `rotationZ` (5BF94.c:5947-6014), which also names T00494. 186 of 659 fields are `low`
   (102 reserved, 45 opaque).
+- Game_Effects_02 (2026-10-17): 155 plugin globals are named by `sym_gen/Game_Effects_02.py` from each plugin's
+  template binding (`#define VS_<MEMBER> D_...` followed by the template include, or an inline `rings.h`-style index)
+  found in the global's own overlay directory: plugin overlays share an address range, so one `D_` name can be a
+  different object in several plugins. Names are `Effects::PlgNNN::<templateMember>`, numbered when a plugin binds
+  the same template twice; three template `extern` rows are views of the plugin's own definition. The BATTLE effect
+  runtime globals (primary/secondary instance lists, phase, tracks, tokens, particle pool, camera motion, package
+  loading) and the EFFPURGE load tables are named from their read uses. 5 globals are `low`.
 - Correction (Game_Field_01): T00223 was `Battle::PendingAbilityState` with "unidentified" shorts, but it is the menu
   result returned by `Menu::Framework::ActionSelectionState` (D_800F4E98): `menuStatus` (146C.c:7771) and
   `selectionKind` (146C.c:4693); renamed `Menu::Framework::ActionSelection`.

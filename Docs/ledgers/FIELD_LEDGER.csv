@@ -6595,59 +6595,59 @@ T00728.006,T00728,vs_surfaceState,6,heightSpeed,0,int,,,,heightSpeed,Named in th
 T00728.007,T00728,vs_surfaceState,7,age,0,int,,,,age,Named in the fork; see cited use,med,source:surfaces.h:73
 T00728.008,T00728,vs_surfaceState,8,factors,0,int[5],,,,factors,Named in the fork; see cited use,med,source:surfaces.h:82
 T00728.009,T00728,vs_surfaceState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:surfaces.h:95
-T00729.000,T00729,vs_tiledRingPrim,0,tag,0,int,,,,,,,
-T00729.001,T00729,vs_tiledRingPrim,1,poly,0,POLY_GT4,,,,,,,
-T00729.002,T00729,vs_tiledRingPrim,2,drawMode,0,int,,,,,,,
-T00730.000,T00730,vs_tiledRingState,0,lifetime,0,u_char,,,,,,,
-T00730.001,T00730,vs_tiledRingState,1,effect,0,u_char,,,,,,,
-T00730.002,T00730,vs_tiledRingState,2,pad,1,short,,,,,,,
-T00730.003,T00730,vs_tiledRingState,3,radius,0,int,,,,,,,
-T00730.004,T00730,vs_tiledRingState,4,radiusSpeed,0,int,,,,,,,
-T00730.005,T00730,vs_tiledRingState,5,height,0,int,,,,,,,
-T00730.006,T00730,vs_tiledRingState,6,heightSpeed,0,int,,,,,,,
-T00730.007,T00730,vs_tiledRingState,7,angle,0,int,,,,,,,
-T00730.008,T00730,vs_tiledRingState,8,age,0,int,,,,,,,
-T00730.009,T00730,vs_tiledRingState,9,texture,0,func_800D6CF_t,,,,,,,
-T00731.000,T00731,vs_tiledRingUV,0,u,0,u_char,,,,,,,
-T00731.001,T00731,vs_tiledRingUV,1,v,0,u_char,,,,,,,
-T00732.000,T00732,vs_trail9,0,splinePoints,0,SVECTOR[4],,,,,,,
-T00732.001,T00732,vs_trail9,1,stepCount,0,u_char,,,,,,,
-T00732.002,T00732,vs_trail9,2,splineSampleCount,0,u_char,,,,,,,
-T00732.003,T00732,vs_trail9,3,trailCollapseCounter,0,u_char,,,,,,,
-T00732.004,T00732,vs_trail9,4,currentSplineSample,0,u_char,,,,,,,
-T00732.005,T00732,vs_trail9,5,splineSamples,0,SVECTOR[9],,,,,,,
-T00732.006,T00732,vs_trail9,6,splineProgress,0,int,,,,,,,
-T00732.007,T00732,vs_trail9,7,speed,0,int,,,,,,,
-T00732.008,T00732,vs_trail9,8,unk,1,int,,,,,,,
-T00733.000,T00733,vs_trail9Prim,0,unk0,1,u_char,,,,,,,
-T00733.001,T00733,vs_trail9Prim,1,unk1,1,u_char,,,,,,,
-T00733.002,T00733,vs_trail9Prim,2,unk2,1,u_char,,,,,,,
-T00733.003,T00733,vs_trail9Prim,3,unk3,1,u_char,,,,,,,
-T00733.004,T00733,vs_trail9Prim,4,unk4,1,POLY_GT4,,,,,,,
-T00733.005,T00733,vs_trail9Prim,5,unk38,1,int,,,,,,,
-T00734.000,T00734,vs_trail9State,0,unk0,1,u_char,,,lifetime,,,,
-T00734.001,T00734,vs_trail9State,1,unk1,1,u_char,,,effectDefinitionIndex,,,,
-T00734.002,T00734,vs_trail9State,2,trailcount,0,u_char,,,,,,,
-T00734.003,T00734,vs_trail9State,3,unk3,1,u_char,,,splineInitialized,,,,
-T00734.004,T00734,vs_trail9State,4,trails,0,vs_trail9 *,,,,,,,
-T00734.005,T00734,vs_trail9State,5,curveSampleDistance,0,int,,,,,,,
-T00734.006,T00734,vs_trail9State,6,unkC,1,func_800D6CF_t,,,textureAnimation,,,,
-T00734.007,T00734,vs_trail9State,7,sampledTransparencyCurve,0,u_char[0],,,,,,,
-T00735.000,T00735,vs_transposedRingPrim,0,tag,0,int,,,,,,,
-T00735.001,T00735,vs_transposedRingPrim,1,poly,0,POLY_GT4,,,,,,,
-T00735.002,T00735,vs_transposedRingPrim,2,drawMode,0,int,,,,,,,
-T00736.000,T00736,vs_transposedRingState,0,lifetime,0,u_char,,,,,,,
-T00736.001,T00736,vs_transposedRingState,1,effect,0,u_char,,,,,,,
-T00736.002,T00736,vs_transposedRingState,2,pad,1,short,,,,,,,
-T00736.003,T00736,vs_transposedRingState,3,radius,0,int,,,,,,,
-T00736.004,T00736,vs_transposedRingState,4,radiusSpeed,0,int,,,,,,,
-T00736.005,T00736,vs_transposedRingState,5,height,0,int,,,,,,,
-T00736.006,T00736,vs_transposedRingState,6,heightSpeed,0,int,,,,,,,
-T00736.007,T00736,vs_transposedRingState,7,angle,0,int,,,,,,,
-T00736.008,T00736,vs_transposedRingState,8,age,0,int,,,,,,,
-T00736.009,T00736,vs_transposedRingState,9,texture,0,func_800D6CF_t,,,,,,,
-T00737.000,T00737,vs_transposedRingUV,0,u,0,u_char,,,,,,,
-T00737.001,T00737,vs_transposedRingUV,1,v,0,u_char,,,,,,,
+T00729.000,T00729,vs_tiledRingPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:24
+T00729.001,T00729,vs_tiledRingPrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:25
+T00729.002,T00729,vs_tiledRingPrim,2,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:26
+T00730.000,T00730,vs_tiledRingState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:tiledRings.h:73
+T00730.001,T00730,vs_tiledRingState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:tiledRings.h:74
+T00730.002,T00730,vs_tiledRingState,2,pad,1,short,,,,reserved2,Not read by decompiled code,low,declaration-only;source:tiledRings.h:14
+T00730.003,T00730,vs_tiledRingState,3,radius,0,int,,,,radius,Named in the fork; see cited use,med,source:tiledRings.h:76
+T00730.004,T00730,vs_tiledRingState,4,radiusSpeed,0,int,,,,radiusSpeed,Named in the fork; see cited use,med,source:tiledRings.h:75
+T00730.005,T00730,vs_tiledRingState,5,height,0,int,,,,height,Named in the fork; see cited use,med,source:tiledRings.h:78
+T00730.006,T00730,vs_tiledRingState,6,heightSpeed,0,int,,,,heightSpeed,Named in the fork; see cited use,med,source:tiledRings.h:77
+T00730.007,T00730,vs_tiledRingState,7,angle,0,int,,,,angle,Named in the fork; see cited use,med,source:tiledRings.h:79
+T00730.008,T00730,vs_tiledRingState,8,age,0,int,,,,age,Named in the fork; see cited use,med,source:tiledRings.h:80
+T00730.009,T00730,vs_tiledRingState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:tiledRings.h:82
+T00731.000,T00731,vs_tiledRingUV,0,u,0,u_char,,,,u,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:29
+T00731.001,T00731,vs_tiledRingUV,1,v,0,u_char,,,,v,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:30
+T00732.000,T00732,vs_trail9,0,splinePoints,0,SVECTOR[4],,,,splinePoints,Named in the fork; see cited use,med,source:trails9.h:73
+T00732.001,T00732,vs_trail9,1,stepCount,0,u_char,,,,stepCount,Named in the fork; see cited use,med,source:trails9.h:402
+T00732.002,T00732,vs_trail9,2,splineSampleCount,0,u_char,,,,splineSampleCount,Named in the fork; see cited use,med,source:trails9.h:403
+T00732.003,T00732,vs_trail9,3,trailCollapseCounter,0,u_char,,,,trailCollapseCounter,Named in the fork; see cited use,med,source:trails9.h:404
+T00732.004,T00732,vs_trail9,4,currentSplineSample,0,u_char,,,,currentSplineSample,Named in the fork; see cited use,med,source:trails9.h:405
+T00732.005,T00732,vs_trail9,5,splineSamples,0,SVECTOR[9],,,,splineSamples,Named in the fork; see cited use,med,source:trails9.h:406
+T00732.006,T00732,vs_trail9,6,splineProgress,0,int,,,,splineProgress,Named in the fork; see cited use,med,source:trails9.h:407
+T00732.007,T00732,vs_trail9,7,speed,0,int,,,,speed,Named in the fork; see cited use,med,source:trails9.h:408
+T00732.008,T00732,vs_trail9,8,unk,1,int,,,,opaque74,"Used, but its meaning is not established",low,source:trails9.h:409
+T00733.000,T00733,vs_trail9Prim,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:trails9.h:17
+T00733.001,T00733,vs_trail9Prim,1,unk1,1,u_char,,,,tag1,Byte of the ordering-table tag,low,declaration-only;source:trails9.h:18
+T00733.002,T00733,vs_trail9Prim,2,unk2,1,u_char,,,,tag2,Byte of the ordering-table tag,low,declaration-only;source:trails9.h:19
+T00733.003,T00733,vs_trail9Prim,3,unk3,1,u_char,,,,wordCount,Packet length in words,med,source:trails9.h:607
+T00733.004,T00733,vs_trail9Prim,4,unk4,1,POLY_GT4,,,,poly,Gouraud textured quad,med,source:trails9.h:543
+T00733.005,T00733,vs_trail9Prim,5,unk38,1,int,,,,drawMode,Draw mode command word (0xE1),med,source:trails9.h:610
+T00734.000,T00734,vs_trail9State,0,unk0,1,u_char,,,lifetime,lifetime,"Lifetime (low byte of the spawn argument), as in the other template states",med,source:trails9.h:703
+T00734.001,T00734,vs_trail9State,1,unk1,1,u_char,,,effectDefinitionIndex,effect,Particle definition (high byte of the spawn argument),med,source:trails9.h:705
+T00734.002,T00734,vs_trail9State,2,trailcount,0,u_char,,,,trailCount,Number of trails,med,source:trails9.h:71
+T00734.003,T00734,vs_trail9State,3,unk3,1,u_char,,,splineInitialized,opaque3,"Used, but its meaning is not established",low,source:trails9.h:714
+T00734.004,T00734,vs_trail9State,4,trails,0,vs_trail9 *,,,,trails,Named in the fork; see cited use,med,source:trails9.h:73
+T00734.005,T00734,vs_trail9State,5,curveSampleDistance,0,int,,,,curveSampleDistance,Named in the fork; see cited use,med,source:trails9.h:46
+T00734.006,T00734,vs_trail9State,6,unkC,1,func_800D6CF_t,,,textureAnimation,texture,Texture animation state,med,source:trails9.h:514
+T00734.007,T00734,vs_trail9State,7,sampledTransparencyCurve,0,u_char[0],,,,sampledTransparencyCurve,Named in the fork; see cited use,med,source:trails9.h:555
+T00735.000,T00735,vs_transposedRingPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:22
+T00735.001,T00735,vs_transposedRingPrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:23
+T00735.002,T00735,vs_transposedRingPrim,2,drawMode,0,int,,,,drawMode,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:24
+T00736.000,T00736,vs_transposedRingState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:74
+T00736.001,T00736,vs_transposedRingState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:75
+T00736.002,T00736,vs_transposedRingState,2,pad,1,short,,,,reserved2,Not read by decompiled code,low,declaration-only;source:EFFECT/PLG162.BIN/0.c:12
+T00736.003,T00736,vs_transposedRingState,3,radius,0,int,,,,radius,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:77
+T00736.004,T00736,vs_transposedRingState,4,radiusSpeed,0,int,,,,radiusSpeed,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:76
+T00736.005,T00736,vs_transposedRingState,5,height,0,int,,,,height,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:79
+T00736.006,T00736,vs_transposedRingState,6,heightSpeed,0,int,,,,heightSpeed,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:78
+T00736.007,T00736,vs_transposedRingState,7,angle,0,int,,,,angle,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:80
+T00736.008,T00736,vs_transposedRingState,8,age,0,int,,,,age,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:81
+T00736.009,T00736,vs_transposedRingState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:83
+T00737.000,T00737,vs_transposedRingUV,0,u,0,u_char,,,,reserved0,Not read by decompiled code,low,declaration-only;source:EFFECT/PLG162.BIN/0.c:27
+T00737.001,T00737,vs_transposedRingUV,1,v,0,u_char,,,,reserved1,Not read by decompiled code,low,declaration-only;source:EFFECT/PLG162.BIN/0.c:28
 T00738.000,T00738,vs_trialScore_t,0,time,0,u_int,24,,,,,,
 T00738.001,T00738,vs_trialScore_t,1,round,0,u_int,7,,,,,,
 T00738.002,T00738,vs_trialScore_t,2,difficulty,0,u_int,1,,,,,,

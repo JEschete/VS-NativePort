@@ -1,4 +1,86 @@
 id,disposition,final_name,final_location,purpose,confidence,notes
+G00159,state,Effects::screenEffectOverlay,Native\Game\src\Effects\ScreenEffects.c,"Points to the screen effect overlay state, or the defaults while none is loaded.",high,source:5BF94.c:3919;source:5BF94.c:3876;points to Effects::ScreenEffectOverlay
+G00219,state,Effects::effectBufferIndex,Native\Game\src\Effects\Runtime.c,Alternates each frame between the two effect render buffers.,med,source:5BF94.c:5432
+G00220,catalog,Effects::trailAdditiveColors,Native\Game\src\Effects\Trails.c,Gives each bone trail color for additive trails (scaled by eighths).,med,"source:5BF94.c:4948;inventory size is an address gap, not a capacity"
+G00221,catalog,Effects::trailColors,Native\Game\src\Effects\Trails.c,"Gives each bone trail color, scaled by head and tail fade.",med,"source:5BF94.c:4923;inventory size is an address gap, not a capacity"
+G00222,catalog,Effects::scriptRenderers,Native\Game\src\Effects\Runtime.c,Gives the renderer an effect script attaches by index.,med,"source:5BF94.c:7559;inventory size is an address gap, not a capacity"
+G00223,state,Effects::emissionCounter,Native\Game\src\Effects\Particles.c,Steps the box corner (0-7) or ring position the next particle is emitted from.,high,source:5BF94.c:7141;source:5BF94.c:7269
+G00224,catalog,Effects::actionVariantValues,Native\Game\src\Effects\Runtime.c,Gives the script register value for each action variant below 4.,med,"source:5BF94.c:7628;inventory size is an address gap, not a capacity"
+G00225,catalog,Effects::pairedParticleColorPresets,Native\Game\src\Effects\Particles.c,"Gives two particles' red, green and blue curves for each target color preset.",med,"source:5BF94.c:7768;inventory size is an address gap, not a capacity"
+G00226,catalog,Effects::particleColorPresetTable,Native\Game\src\Effects\Particles.c,"Gives five particles' definition index and red, green and blue curves for each target color preset.",med,"source:5BF94.c:7791;inventory size is an address gap, not a capacity"
+G00227,catalog,Effects::scriptOpcodeHandlers,Native\Game\src\Effects\Runtime.c,Dispatches effect script opcodes.,high,"source:5BF94.c:7818;inventory size is an address gap, not a capacity"
+G00228,state,Effects::lastReactionSoundVariant,Native\Game\src\Effects\Runtime.c,Keeps the last random reaction sound so the next one differs.,high,source:5BF94.c:8295
+G00229,state,Effects::emptyPackage,Native\Game\src\Effects\Runtime.c,Is the empty effect package bound when effect resources are initialised.,low,source:6F014.c:457
+G00239,state,Effects::tintedActor,Native\Game\src\Effects\Runtime.c,"Remembers the actor tinted red during an action, to restore its color.",high,source:146C.c:2213;source:146C.c:2219
+G00339,state,Field::weatherParameters,Native\Game\src\Field\Weather.c,Holds the weather parameters: the drift vector in entries 0-2 and room values from 4 up.,med,source:146C.c:17780;source:2842C.c:276
+G00349,state,Field::weatherParticleCount,Native\Game\src\Field\Weather.c,"Counts the weather particles drawn, set from the weather intensity.",high,source:2842C.c:415;source:146C.c:17774
+G00350,state,Field::weatherParticleCapacity,Native\Game\src\Field\Weather.c,Gives the most weather particles allocated.,high,source:2842C.c:415
+G00353,state,Field::screenWeatherFade,Native\Game\src\Field\Weather.c,Fades screen-space weather in and out by 8 per frame up to 96.,med,source:146C.c:18097;source:146C.c:18147
+G00356,state,Field::roomWeatherKind,Native\Game\src\Field\Weather.c,Gives the current room's weather kind; 0 for none.,high,source:2842C.c:374;source:2842C.c:278
+G00360,state,Field::weatherParticles,Native\Game\src\Field\Weather.c,Points to the 0x800-byte weather particle buffer.,high,source:146C.c:17450;points to Field::WeatherParticle
+G00512,state,Effects::screenEffectDefaults,Native\Game\src\Effects\ScreenEffects.c,Holds the screen effect state used when no overlay is loaded (warp 0x1000).,med,source:5BF94.c:3481;source:5BF94.c:3919
+G00524,state,Effects::menuReloadSlot,Native\Game\src\Effects\Runtime.c,Holds the read that reloads the main menu after a primary effect.,med,source:5BF94.c:5233;source:5BF94.c:5300
+G00525,state,Effects::pendingTracks,Native\Game\src\Effects\Runtime.c,Holds one bit per primary effect track not yet started.,high,source:5BF94.c:5227;source:5BF94.c:5421
+G00526,state,Effects::trackCount,Native\Game\src\Effects\Runtime.c,Gives the number of primary effect tracks in the package.,high,source:5BF94.c:5223
+G00527,state,Effects::startedTrackCount,Native\Game\src\Effects\Runtime.c,Counts the primary effect tracks started; the effect ends once all have.,high,source:5BF94.c:5420;source:5BF94.c:5263
+G00528,state,Effects::actionVariant,Native\Game\src\Effects\Runtime.c,Gives the action variant of the current effect; 0 for none.,med,source:5BF94.c:5449;source:5BF94.c:7628
+G00529,state,Effects::actionRequest,Native\Game\src\Effects\Runtime.c,Holds the action effect request being presented.,high,source:5BF94.c:5191;type Effects::ActionEffectRequest
+G00532,state,Effects::effectOrigin,Native\Game\src\Effects\Runtime.c,Gives the effect origin added to spawn positions for emission origin 1.,med,source:5BF94.c:7006
+G00533,state,Effects::primaryToken,Native\Game\src\Effects\Runtime.c,Holds the token of the current primary effect.,high,source:5BF94.c:5453;source:5BF94.c:5279
+G00534,state,Effects::primaryPhase,Native\Game\src\Effects\Runtime.c,"Steps the primary effect: 6 load the purge overlay, 2/8/3 load package, 4/5 run tracks, 9 reload the menu, 0 idle.",high,source:5BF94.c:5182;source:5BF94.c:5546
+G00535,state,Effects::tokenBitmaps,Native\Game\src\Effects\Runtime.c,Holds four 32-bit maps of allocated effect tokens.,high,source:5BF94.c:5572;source:5BF94.c:5590
+G00536,state,Effects::curveSamples,Native\Game\src\Effects\Runtime.c,Holds the current sample of each package curve; entry 0 is zero.,high,source:5BF94.c:5066;source:5BF94.c:6192
+G00537,state,Effects::unusedPrimaryWord,Native\Game\src\Effects\Runtime.c,Cleared with the primary effect state; not otherwise used.,low,source:5BF94.c:5064
+G00538,state,Effects::primaryInstances,Native\Game\src\Effects\Runtime.c,"Points to the first primary effect instance, in priority order.",high,source:5BF94.c:5125;points to Effects::EffectInstance
+G00539,state,Effects::currentInstance,Native\Game\src\Effects\Runtime.c,Points to the effect instance being updated.,high,source:5BF94.c:5242;source:closedRings.h:57
+G00540,state,Effects::secondaryRequest,Native\Game\src\Effects\Runtime.c,Holds the request of the secondary effects being spawned.,high,source:5BF94.c:5491
+G00541,state,Effects::primaryLoaded,Native\Game\src\Effects\Runtime.c,Set while a primary effect package is loaded and running.,high,source:5BF94.c:5230;source:5BF94.c:5397
+G00542,state,Effects::actionVariantArgument,Native\Game\src\Effects\Runtime.c,Keeps the second action variant argument; not read by decompiled code.,low,source:5BF94.c:5450
+G00543,state,Effects::secondaryInstances,Native\Game\src\Effects\Runtime.c,"Points to the first secondary effect instance, in priority order.",high,source:5BF94.c:5602;points to Effects::EffectInstance
+G00544,state,Effects::cameraShakeChannels,Native\Game\src\Effects\Camera.c,Holds the camera shake channels.,high,source:5BF94.c:6612;element type Effects::CameraShakeChannel
+G00545,state,Effects::cameraMotionFrame,Native\Game\src\Effects\Camera.c,Counts frames of the effect camera motion.,med,source:5BF94.c:6690;source:5BF94.c:6479
+G00546,state,Effects::effectCamera,Native\Game\src\Effects\Camera.c,Holds the camera the effects drive.,high,source:5BF94.c:5456;source:5BF94.c:6656;type Effects::EffectCamera
+G00547,state,Effects::enabledShakeChannels,Native\Game\src\Effects\Camera.c,Holds one bit per camera shake channel that is enabled.,high,source:5BF94.c:6564;source:5BF94.c:6645
+G00548,state,Effects::cameraMotionEnds,Native\Game\src\Effects\Camera.c,Holds the start and end poses of the effect camera motion.,high,source:5BF94.c:6686
+G00549,state,Effects::cameraMotionDuration,Native\Game\src\Effects\Camera.c,Gives the length of the effect camera motion.,med,source:5BF94.c:8319;source:5BF94.c:6690
+G00550,state,Effects::savedActionCamera,Native\Game\src\Effects\Camera.c,"Keeps the camera captured when an action effect begins, to restore it.",high,source:5BF94.c:5455;source:5BF94.c:8326
+G00551,state,Effects::cameraTransitionMode,Native\Game\src\Effects\Camera.c,"Selects how the effect camera moves (linear, cosine, hold...).",med,source:5BF94.c:6575;source:5BF94.c:6742
+G00552,state,Effects::particleCapacity,Native\Game\src\Effects\Particles.c,Gives the number of particles in the pool.,high,source:5BF94.c:6798;source:5BF94.c:6988
+G00553,state,Effects::freeParticles,Native\Game\src\Effects\Particles.c,Points to the first free particle.,high,source:5BF94.c:6831;points to Effects::Particle
+G00554,state,Effects::usedParticleCount,Native\Game\src\Effects\Particles.c,Counts the particles in use.,high,source:5BF94.c:6830;source:5BF94.c:6861
+G00555,state,Effects::particlePool,Native\Game\src\Effects\Particles.c,Points to the particle pool.,high,source:5BF94.c:6788
+G00556,state,Effects::particlePoolReferences,Native\Game\src\Effects\Particles.c,Counts the users of the particle pool; the pool is freed at zero.,high,source:5BF94.c:6784;source:5BF94.c:6815
+G00557,state,Effects::scriptSelector,Native\Game\src\Effects\Runtime.c,Keeps the selector byte read by the effect script; not otherwise read.,low,source:5BF94.c:7542
+G00558,state,Effects::particleDrag,Native\Game\src\Effects\Particles.c,Gives the drag applied to particles.,high,source:5BF94.c:7828;source:5BF94.c:7835
+G00559,state,Effects::particleGravity,Native\Game\src\Effects\Particles.c,Gives the gravity applied to particles.,high,source:5BF94.c:7826;type Effects::ParticleGravity
+G00560,state,Effects::textureLoadIndex,Native\Game\src\Effects\Loading.c,Indexes the effect texture being loaded.,high,source:6F014.c:657;source:6F014.c:638
+G00561,state,Effects::textureLoads,Native\Game\src\Effects\Loading.c,"Lists the effect textures to load: count, files, slots and CLUT flags.",high,source:6F014.c:619;type Effects::EffectLoadState
+G00562,state,Effects::packageBuffer,Native\Game\src\Effects\Loading.c,Points to the loaded effect package file.,high,source:6F014.c:585;fork name pfileBuf
+G00563,state,Effects::textureLoadState,Native\Game\src\Effects\Loading.c,Holds the effect texture loading state; loading starts while zero.,med,source:6F014.c:740;source:6F014.c:619
+G00564,state,Effects::purgeOverlayLoaded,Native\Game\src\Effects\Loading.c,Set while the effect purge overlay is loaded.,med,source:6F014.c:574;source:5BF94.c:5198
+G00565,state,Effects::packageFile,Native\Game\src\Effects\Loading.c,Gives the effect package file to load.,high,source:6F014.c:588;fork name pFileLoadContext
+G00566,state,Effects::resourceReadSlot,Native\Game\src\Effects\Loading.c,Holds the read of an effect resource.,high,source:6F014.c:556
+G00567,state,Effects::pluginLoadState,Native\Game\src\Effects\Loading.c,Holds the effect plugin loading state.,high,source:6F014.c:744;fork name kept
+G00568,state,Effects::pluginFile,Native\Game\src\Effects\Loading.c,Gives the effect plugin file to load.,high,source:6F014.c:720;fork name kept
+G00569,state,Effects::savedPackage,Native\Game\src\Effects\Runtime.c,Keeps the selected effect package while another is used.,high,source:6F014.c:471
+G00570,state,Effects::package,Native\Game\src\Effects\Runtime.c,Points to the selected effect package.,high,source:6F014.c:465;points to Effects::EffectPackage
+G00571,state,Effects::textureLoadBuffer,Native\Game\src\Effects\Loading.c,Points to the buffer effect textures are read into.,high,source:6F014.c:630
+G00572,state,Effects::pluginEntryPointCount,Native\Game\src\Effects\Loading.c,Gives the number of renderer entry points of the loaded plugin.,med,source:6F014.c:722;fork name kept
+G00574,state,Effects::effectRenderers,Native\Game\src\Effects\Runtime.c,Gives the renderer bound to each renderer index by the plugin.,high,source:6F014.c:727;fork name kept
+G00575,state,Effects::actionPackage,Native\Game\src\Effects\Runtime.c,Holds the action effect package.,med,source:6F014.c:465;source:EFFECT/EFFPURGE.BIN/0.c:919
+G00576,state,Effects::actionRequestPointer,Native\Game\src\Effects\Runtime.c,Points to the action request; not read by decompiled code.,low,source:6F014.c:455
+G00577,state,Effects::secondaryPackage,Native\Game\src\Effects\Runtime.c,"Holds the secondary effect package, whose request is the secondary request.",med,source:6F014.c:454;source:6F014.c:463
+G00578,state,Effects::loadedTextureSlots,Native\Game\src\Effects\Loading.c,"Holds one bit per texture slot (24-31) holding an effect texture, released with the package.",med,source:6F014.c:643;source:6F014.c:603
+G00622,catalog,Effects::effectUsesTextures,Native\Game\src\Effects\PurgeTables.c,Marks the effects that load texture files.,med,source:EFFECT/EFFPURGE.BIN/0.c:931
+G00623,catalog,Effects::effectEntryPointIndices,Native\Game\src\Effects\PurgeTables.c,Gives each effect's first renderer entry point; the next entry ends it.,high,source:EFFECT/EFFPURGE.BIN/0.c:956;fork name kept
+G00624,catalog,Effects::effectEntryPoints,Native\Game\src\Effects\PurgeTables.c,Lists every effect renderer entry point.,high,source:EFFECT/EFFPURGE.BIN/0.c:963;fork name kept
+G00625,catalog,Effects::fbcFiles,Native\Game\src\Effects\PurgeTables.c,Gives each effect's CLUT file.,high,source:EFFECT/EFFPURGE.BIN/0.c:944;fork name kept
+G00626,catalog,Effects::fbcSlots,Native\Game\src\Effects\PurgeTables.c,Gives the texture slot of each effect's CLUT file.,high,source:EFFECT/EFFPURGE.BIN/0.c:942;fork name kept
+G00627,catalog,Effects::fbtCounts,Native\Game\src\Effects\PurgeTables.c,Gives the number of texture files of each effect.,high,source:EFFECT/EFFPURGE.BIN/0.c:938;fork name kept
+G00628,catalog,Effects::fbtFiles,Native\Game\src\Effects\PurgeTables.c,Lists the texture files of all effects in effect order.,high,source:EFFECT/EFFPURGE.BIN/0.c:948;fork name kept
+G00629,catalog,Effects::fbtSlots,Native\Game\src\Effects\PurgeTables.c,Gives the texture slot of each texture file.,high,source:EFFECT/EFFPURGE.BIN/0.c:949;fork name kept
+G00630,catalog,Effects::packageFiles,Native\Game\src\Effects\PurgeTables.c,Gives each effect's package file.,high,source:EFFECT/EFFPURGE.BIN/0.c:916;fork name pFiles
+G00631,catalog,Effects::pluginFiles,Native\Game\src\Effects\PurgeTables.c,Gives each effect's plugin file.,high,source:EFFECT/EFFPURGE.BIN/0.c:960;fork name plgFiles
 G00632,drop,Effects::Plg044::tiledRingColorFactorsExtern,Native\Game\src\Effects\Plugins\Plg044.c,Is the template's extern declaration of G00633.,high,view-of:G00633;replaced-by:G00633;source:EFFECT/PLG044.BIN/0.c:6
 G00633,catalog,Effects::Plg044::tiledRingColorFactors,Native\Game\src\Effects\Plugins\Plg044.c,Gives the tiled ring template's color factors for each transparency mode.,high,source:EFFECT/PLG044.BIN/0.c:6;source:tiledRings.h:94;bound by the plugin source
 G00634,state,Effects::Plg045::particleEmissionCounter,Native\Game\src\Effects\Plugins\Plg045.c,Steps the box corner (0-7) or ring position the particle template emits from next.,high,source:EFFECT/PLG045.BIN/110.c:6;source:particleSetup.h:161;bound by the plugin source
@@ -154,3 +236,5 @@ G00783,catalog,Effects::Plg300::ringColorFactors,Native\Game\src\Effects\Plugins
 G00784,catalog,Effects::Plg300::ringColorFactors2,Native\Game\src\Effects\Plugins\Plg300.c,Gives the ring template's color factors for each transparency mode.,high,source:EFFECT/PLG300.BIN/110.c:418;source:rings.h:93;indexed inline like the rings.h template
 G00785,state,Effects::Plg301::particleEmissionCounter,Native\Game\src\Effects\Plugins\Plg301.c,Steps the box corner (0-7) or ring position the particle template emits from next.,high,source:EFFECT/PLG301.BIN/110.c:14;source:particleSetup.h:161;bound by the plugin source
 G00786,catalog,Effects::Plg301::closedRingColorFactors,Native\Game\src\Effects\Plugins\Plg301.c,Gives the closed ring template's color factors for each transparency mode.,high,source:EFFECT/PLG301.BIN/110.c:22;source:closedRings.h:98;bound by the plugin source
+G01957,state,Render::nearClip,Native\Graphics\src\Render.c,Gives the camera near clip distance.,high,source:146C.c:9043;source:5BF94.c:6521;fork name kept
+G02018,state,Core::overlaySlots,Native\Core\src\Overlays.c,"Gives the addresses overlays are loaded at, by slot.",high,source:6F014.c:577;replaced by native module loading

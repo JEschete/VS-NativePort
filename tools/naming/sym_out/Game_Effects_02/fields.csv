@@ -1,1 +1,54 @@
 id,final_name,meaning,confidence,notes
+T00729.000,tag,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:24
+T00729.001,poly,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:25
+T00729.002,drawMode,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:26
+T00730.000,lifetime,Named in the fork; see cited use,med,source:tiledRings.h:73
+T00730.001,effect,Named in the fork; see cited use,med,source:tiledRings.h:74
+T00730.002,reserved2,Not read by decompiled code,low,declaration-only;source:tiledRings.h:14
+T00730.003,radius,Named in the fork; see cited use,med,source:tiledRings.h:76
+T00730.004,radiusSpeed,Named in the fork; see cited use,med,source:tiledRings.h:75
+T00730.005,height,Named in the fork; see cited use,med,source:tiledRings.h:78
+T00730.006,heightSpeed,Named in the fork; see cited use,med,source:tiledRings.h:77
+T00730.007,angle,Named in the fork; see cited use,med,source:tiledRings.h:79
+T00730.008,age,Named in the fork; see cited use,med,source:tiledRings.h:80
+T00730.009,texture,Named in the fork; see cited use,med,source:tiledRings.h:82
+T00731.000,u,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:29
+T00731.001,v,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:30
+T00732.000,splinePoints,Named in the fork; see cited use,med,source:trails9.h:73
+T00732.001,stepCount,Named in the fork; see cited use,med,source:trails9.h:402
+T00732.002,splineSampleCount,Named in the fork; see cited use,med,source:trails9.h:403
+T00732.003,trailCollapseCounter,Named in the fork; see cited use,med,source:trails9.h:404
+T00732.004,currentSplineSample,Named in the fork; see cited use,med,source:trails9.h:405
+T00732.005,splineSamples,Named in the fork; see cited use,med,source:trails9.h:406
+T00732.006,splineProgress,Named in the fork; see cited use,med,source:trails9.h:407
+T00732.007,speed,Named in the fork; see cited use,med,source:trails9.h:408
+T00732.008,opaque74,"Used, but its meaning is not established",low,source:trails9.h:409
+T00733.000,tag0,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:trails9.h:17
+T00733.001,tag1,Byte of the ordering-table tag,low,declaration-only;source:trails9.h:18
+T00733.002,tag2,Byte of the ordering-table tag,low,declaration-only;source:trails9.h:19
+T00733.003,wordCount,Packet length in words,med,source:trails9.h:607
+T00733.004,poly,Gouraud textured quad,med,source:trails9.h:543
+T00733.005,drawMode,Draw mode command word (0xE1),med,source:trails9.h:610
+T00734.000,lifetime,"Lifetime (low byte of the spawn argument), as in the other template states",med,source:trails9.h:703
+T00734.001,effect,Particle definition (high byte of the spawn argument),med,source:trails9.h:705
+T00734.002,trailCount,Number of trails,med,source:trails9.h:71
+T00734.003,opaque3,"Used, but its meaning is not established",low,source:trails9.h:714
+T00734.004,trails,Named in the fork; see cited use,med,source:trails9.h:73
+T00734.005,curveSampleDistance,Named in the fork; see cited use,med,source:trails9.h:46
+T00734.006,texture,Texture animation state,med,source:trails9.h:514
+T00734.007,sampledTransparencyCurve,Named in the fork; see cited use,med,source:trails9.h:555
+T00735.000,tag,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:22
+T00735.001,poly,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:23
+T00735.002,drawMode,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:24
+T00736.000,lifetime,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:74
+T00736.001,effect,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:75
+T00736.002,reserved2,Not read by decompiled code,low,declaration-only;source:EFFECT/PLG162.BIN/0.c:12
+T00736.003,radius,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:77
+T00736.004,radiusSpeed,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:76
+T00736.005,height,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:79
+T00736.006,heightSpeed,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:78
+T00736.007,angle,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:80
+T00736.008,age,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:81
+T00736.009,texture,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:83
+T00737.000,reserved0,Not read by decompiled code,low,declaration-only;source:EFFECT/PLG162.BIN/0.c:27
+T00737.001,reserved1,Not read by decompiled code,low,declaration-only;source:EFFECT/PLG162.BIN/0.c:28
