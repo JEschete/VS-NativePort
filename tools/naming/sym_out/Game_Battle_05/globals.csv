@@ -1,0 +1,49 @@
+id,disposition,final_name,final_location,purpose,confidence,notes
+G00189,catalog,Battle::secondShortcutIconSizes,Native\Game\src\Battle\Hud.c,Gives the packed width and height of the icons of shortcuts 4-7.,med,"source:5BF94.c:3276;inventory size is an address gap, not a capacity"
+G00190,catalog,Battle::secondShortcutIconTexCoords,Native\Game\src\Battle\Hud.c,Gives the texture coordinates of the icons of shortcuts 4-7.,med,"source:5BF94.c:3278;inventory size is an address gap, not a capacity"
+G00191,catalog,Battle::firstShortcutMarkerPositions,Native\Game\src\Battle\Hud.c,Gives the x then y positions of the button markers of shortcuts 0-3.,med,"source:5BF94.c:3290;inventory size is an address gap, not a capacity"
+G00192,catalog,Battle::firstShortcutIconPositions,Native\Game\src\Battle\Hud.c,Gives the x then y positions of the icons of shortcuts 0-3.,med,"source:5BF94.c:3293;inventory size is an address gap, not a capacity"
+G00193,catalog,Battle::firstShortcutIconSizes,Native\Game\src\Battle\Hud.c,Gives the packed width and height of the icons of shortcuts 0-3.,med,"source:5BF94.c:3295;inventory size is an address gap, not a capacity"
+G00194,catalog,Battle::firstShortcutIconTexCoords,Native\Game\src\Battle\Hud.c,Gives the texture coordinates of the icons of shortcuts 0-3.,med,"source:5BF94.c:3297;inventory size is an address gap, not a capacity"
+G00195,state,Battle::shortcutHudAnimationStep,Native\Game\src\Battle\Hud.c,"Steps the shortcut HUD slide: counts down to 0 while requested, else follows the closing sequence to 10 (hidden).",high,source:5BF94.c:3261;source:5BF94.c:3264
+G00196,catalog,Battle::limbDisplaySpriteOffsets,Native\Game\src\Battle\Hud.c,Gives the screen offset of each limb sprite of the HUD limb display; five per battle mode.,med,"source:5BF94.c:3357;indexed by limb + mode * 5;inventory size is an address gap, not a capacity"
+G00197,catalog,Battle::limbDisplaySpriteSizes,Native\Game\src\Battle\Hud.c,Gives the packed width and height of each limb sprite of the HUD limb display.,med,"source:5BF94.c:3357;inventory size is an address gap, not a capacity"
+G00198,catalog,Battle::limbDisplaySpriteTexCoords,Native\Game\src\Battle\Hud.c,Gives the texture coordinates and CLUT of each limb sprite of the HUD limb display.,med,"source:5BF94.c:3361;inventory size is an address gap, not a capacity"
+G00199,state,Battle::battleModeIndicatorWobble,Native\Game\src\Battle\Hud.c,Advances the sine phase that bobs the weapon-state indicator.,high,source:5BF94.c:3338;source:5BF94.c:3341
+G00205,catalog,Battle::spellClassCounts,Native\Game\src\Battle\ActionMenu.c,Gives the number of spells in each spell class.,high,"source:5BF94.c:3635;fork name kept;inventory size is an address gap, not a capacity"
+G00206,catalog,Battle::spellClassSpellIds,Native\Game\src\Battle\ActionMenu.c,Lists the spell action ids of each spell class.,high,"source:5BF94.c:3636;inventory size is an address gap, not a capacity"
+G00207,catalog,Battle::chainAbilityActionIds,Native\Game\src\Battle\ActionMenu.c,Lists the action ids of the 14 Chain Abilities.,high,"source:5BF94.c:3664;source:64.c:520;inventory size is an address gap, not a capacity"
+G00208,catalog,Battle::defenseAbilityActionIds,Native\Game\src\Battle\ActionMenu.c,Lists the action ids of the 14 Defense Abilities.,high,"source:5BF94.c:3665;source:64.c:580;inventory size is an address gap, not a capacity"
+G00209,asset,Battle::doorStrings,Native\Game\src\Battle\TextBoxes.c,Holds the door and chest messages and the no-target message: a u16 offset table followed by the encoded strings.,high,asset:text/battle/door-strings;source:5BF94.c:3796;source:5BF94.c:1118;splat offset 0x835DC is assets/BATTLE/BATTLE.PRG/doorStrings.yaml; entry 0 is noTarget
+G00211,drop,Battle::puzzleTimerTextPointer,Native\Game\src\Battle\Hud.c,Points to the puzzle timer text that the timer rewrites each frame.,high,replaced-by:Battle::puzzleTimerText;source:5BF94.c:3860;its initial value in BATTLE.PRG is 0x80069998 (G00614)
+G00310,state,Battle::floatingLabels,Native\Game\src\Battle\Feedback.c,"Points to the 32 floating labels (values, statuses, chain counts).",high,source:2842C.c:1472;source:2842C.c:1570;points to Battle::FloatingLabel[32]
+G00320,state,Battle::placedLabelPositions,Native\Game\src\Battle\Feedback.c,"Holds the screen positions of labels already placed this frame, to push new labels clear of them.",high,source:2842C.c:1984;source:2842C.c:1985
+G00365,state,Battle::actorMarkers,Native\Game\src\Battle\Feedback.c,Gives each actor's marker kind in the low seven bits; bit 7 is set and cleared separately.,med,source:2842C.c:2393;source:2842C.c:2589
+G00366,state,Battle::actorMarkersHidden,Native\Game\src\Battle\Feedback.c,Hides every actor marker while set.,high,source:2842C.c:2379;source:2842C.c:2586
+G00367,state,Battle::abilityTimingCueFrames,Native\Game\src\Battle\Feedback.c,Counts the frames the ability timing cue stays on screen.,high,source:2842C.c:2861;source:2842C.c:1765
+G00368,state,Battle::actorMarkerSides,Native\Game\src\Battle\Feedback.c,"Holds one bit per actor choosing the side its marker is drawn on, switched when it passes another actor by 32.",med,source:2842C.c:2436;source:2842C.c:2445
+G00369,state,Battle::statusLabelStepTimer,Native\Game\src\Battle\Feedback.c,Accumulates half ticks; past 20 each status label's lifetime steps down and older status labels move up.,med,source:2842C.c:1770;source:2842C.c:1773
+G00370,state,Battle::ashleyStatusLabelsSuppressed,Native\Game\src\Battle\Feedback.c,Suppresses status labels on Ashley while set.,med,source:2842C.c:2893;source:2842C.c:1888
+G00371,state,Battle::placedLabelCount,Native\Game\src\Battle\Feedback.c,Counts the labels placed this frame.,high,source:2842C.c:1790;source:2842C.c:1983
+G00372,state,Battle::floatingLabelCount,Native\Game\src\Battle\Feedback.c,Counts the floating labels in use.,high,source:2842C.c:1485;source:2842C.c:1570
+G00373,state,Battle::abilityTimingCuePosition,Native\Game\src\Battle\Feedback.c,Holds the screen position of the ability timing cue above Ashley.,high,source:2842C.c:2846;source:2842C.c:2870
+G00483,state,Battle::targetColumnEntries,Native\Game\src\Battle\Targeting.c,Lists the Sphere target indices shown in each of the two target selection columns.,high,source:5BF94.c:951;source:5BF94.c:964
+G00484,state,Battle::secondColumnGroups,Native\Game\src\Battle\Targeting.c,Lists the target groups (actors) placed in the second column.,high,source:5BF94.c:954
+G00485,state,Battle::firstColumnGroups,Native\Game\src\Battle\Targeting.c,Lists the target groups (actors) placed in the first column.,high,source:5BF94.c:967
+G00486,state,Battle::secondColumnGroupFirstTargets,Native\Game\src\Battle\Targeting.c,Gives the first target of each group in the second column.,high,source:5BF94.c:953;source:5BF94.c:1176
+G00487,state,Battle::firstColumnGroupFirstTargets,Native\Game\src\Battle\Targeting.c,Gives the first target of each group in the first column.,high,source:5BF94.c:966;source:5BF94.c:1165
+G00488,state,Battle::secondColumnEntryCount,Native\Game\src\Battle\Targeting.c,Counts the targets in the second target selection column.,high,source:5BF94.c:951
+G00489,state,Battle::firstColumnEntryCount,Native\Game\src\Battle\Targeting.c,Counts the targets in the first target selection column.,high,source:5BF94.c:964
+G00490,state,Battle::secondColumnGroupCount,Native\Game\src\Battle\Targeting.c,Counts the target groups placed in the second column.,high,source:5BF94.c:954
+G00491,state,Battle::firstColumnGroupCount,Native\Game\src\Battle\Targeting.c,Counts the target groups placed in the first column.,high,source:5BF94.c:967
+G00492,state,Battle::targetColumnTopOffset,Native\Game\src\Battle\Targeting.c,Centres the target columns vertically: half of 11 pixels per unused row of 16.,high,source:5BF94.c:1003;source:58578.c:684
+G00507,state,Battle::lowerScreenUiState,Native\Game\src\Battle\Hud.c,Selects the lower-screen UI: 1 while the puzzle timer is shown; bit 1 hides the HUD limb display.,med,source:5BF94.c:3838;source:5BF94.c:3351;fork name kept
+G00606,constexpr,Battle::kMarkerFrameCorners,Native\Game\src\Battle\Feedback.c,Gives the four corner offsets of the marker frame for each side.,med,source:2842C.c:2507
+G00607,constexpr,Battle::kMarkerFrameTexCoords,Native\Game\src\Battle\Feedback.c,Gives the four texture coordinates of the marker frame for each side.,med,source:2842C.c:2508
+G00608,constexpr,Battle::kMarkerIconOffsets,Native\Game\src\Battle\Feedback.c,Gives the offset of the marker icon for each side.,med,source:2842C.c:2489
+G00609,constexpr,Battle::kLabelCaptionRects,Native\Game\src\Battle\Feedback.c,Gives the texture rectangles of the floating label captions.,high,source:2842C.c:2140;source:2842C.c:2257
+G00610,constexpr,Battle::kStatusLabelLayouts,Native\Game\src\Battle\Feedback.c,"Gives each status label's caption count, caption rectangles and color.",high,source:2842C.c:2256;source:2842C.c:2266
+G00611,constexpr,Battle::kStatusLabelColors,Native\Game\src\Battle\Feedback.c,Gives the four status label colors.,high,source:2842C.c:2282
+G00612,constexpr,Battle::kStatChangeFirstWordRects,Native\Game\src\Battle\Feedback.c,Gives the texture rectangle of the first word of an equipment stat change label.,med,source:2842C.c:2790
+G00613,constexpr,Battle::kStatChangeSecondWordRects,Native\Game\src\Battle\Feedback.c,Gives the texture rectangle of the second word of an equipment stat change label.,med,source:2842C.c:2793
+G00614,state,Battle::puzzleTimerText,Native\Game\src\Battle\Hud.c,"Holds the puzzle timer text, initially ""00:00:00""; its digits are rewritten each frame through G00211.",high,source:5BF94.c:3842;source:5BF94.c:3864;declared const but written through the pointer G00211
