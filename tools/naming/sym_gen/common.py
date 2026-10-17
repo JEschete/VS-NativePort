@@ -1,4 +1,4 @@
-"""Shared machinery for the deterministic per-batch name generators (tools\\naming\\sym_gen\\<Batch>.py).
+﻿"""Shared machinery for the deterministic per-batch name generators (tools\\naming\\sym_gen\\<Batch>.py).
 
 Names are written by hand in the batch script; this module only resolves citations from exact source text, so no
 line number is ever typed:
@@ -170,6 +170,48 @@ class Gen:
     def applied(self, tid: str) -> tuple[dict, list[dict]]:
         """An already-applied type row and its field rows (to keep a canonical consistent with a named twin)."""
         return self.types[tid], self.members[tid]
+
+    # ------------------------------------------------------------------ generic member naming
+    PLACEHOLDER = re.compile(r"^(unk|pad|field|f|flag|flags|b|bits|bytes|raw|low|high|value|rest|gap|prefix|padding)"
+                             r"[0-9A-Fa-f_]*$|^unk")
+
+    def field_refs(self) -> set[str]:
+        if not hasattr(self, "_refs"):
+            self._refs = {k for fn in self.trees[""].ix["functions"].values() for k in (fn.get("refs") or {}).get("field", {})}
+        return self._refs
+
+    def is_used(self, tid: str, member: str) -> bool:
+        names = {self.types[tid]["name"], *self.types[tid].get("aliases", "").split()}
+        names |= {f"{k} {n}" for n in list(names) if n.startswith("(unnamed") for k in ("struct", "union")}
+        return any(f"{n}.{member}" in self.field_refs() for n in names)
+
+    def member_offsets(self, tid: str) -> list[int]:
+        """Bit offset of each member."""
+        key = self.types[tid]["key"].partition("#")[0]
+        lay = next(x for x in self.trees[""].ix["types"].values()
+                   if x["key"] == key and len(x["fields"]) == len(self.members[tid]))
+        return [f["offset"] if f["offset"] is not None and f["offset"] >= 0 else 0 for f in lay["fields"]]
+
+    def generic_specs(self, tid: str, overrides: dict | None = None) -> list[tuple]:
+        """Used member: keep a meaningful fork name (med) or opaque<Off> (low); unread member: reserved<Off> (low)."""
+        overrides = overrides or {}
+        out, seen = [], set()
+        for m, bit in zip(self.members[tid], self.member_offsets(tid)):
+            n = m["name"]
+            off = f"{bit // 8:X}" + (f"Bit{bit % 8}" if m.get("bits") else "")
+            if n in overrides:
+                spec = (n, *overrides[n])
+            elif not self.is_used(tid, n):
+                spec = (n, f"reserved{off}", "Not read by decompiled code", "low")
+            elif self.PLACEHOLDER.search(n):
+                spec = (n, f"opaque{off}", "Used, but its meaning is not established", "low")
+            else:
+                spec = (n, n[0].lower() + n[1:], "Named in the fork; see cited use", "med")
+            if spec[1] in seen:
+                spec = (spec[0], f"{spec[1]}{off}", *spec[2:])
+            seen.add(spec[1])
+            out.append(spec)
+        return out
 
     def T(self, tid, role, name, loc, purpose, conf, notes, specs, recv: str | None = None) -> None:
         """specs: (orig, final, meaning, conf[, cite]); cite None -> first use through recv, else declaration-only."""

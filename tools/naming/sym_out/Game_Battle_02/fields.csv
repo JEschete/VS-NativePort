@@ -1,4 +1,127 @@
 id,final_name,meaning,confidence,notes
+T00312.000,type,Named in the fork; see cited use,med,source:146C.c:11290
+T00312.001,sourceAffinity,Named in the fork; see cited use,med,source:146C.c:11313
+T00312.002,sourceClass,Named in the fork; see cited use,med,source:146C.c:11286
+T00312.003,reserved3,Not read by decompiled code,low,declaration-only;source:146C.c:11249
+T00312.004,typeValue,Named in the fork; see cited use,med,source:146C.c:11344
+T00312.005,weaponAffinity,Named in the fork; see cited use,med,source:146C.c:11345
+T00312.006,weaponClass,Named in the fork; see cited use,med,source:146C.c:11347
+T00312.007,attackStat,"Attacker's base stat: strength for physical hits, intelligence for spells",high,source:146C.c:11339;source:146C.c:11533
+T00312.008,weaponDamage,Named in the fork; see cited use,med,source:146C.c:11349
+T00312.009,reservedE,Not read by decompiled code,low,declaration-only;source:146C.c:11255
+T00312.010,reserved10,Not read by decompiled code,low,declaration-only;source:146C.c:11256
+T00312.011,targetAffinity,Named in the fork; see cited use,med,source:146C.c:11338
+T00312.012,targetClass,Named in the fork; see cited use,med,source:146C.c:11287
+T00312.013,reserved13,Not read by decompiled code,low,declaration-only;source:146C.c:11259
+T00312.014,reserved14,Not read by decompiled code,low,declaration-only;source:146C.c:11260
+T00312.015,tempTargetAffinity,Named in the fork; see cited use,med,source:146C.c:11323
+T00312.016,reserved18,Not read by decompiled code,low,declaration-only;source:146C.c:11262
+T00312.017,mediatingStat,Named in the fork; see cited use,med,source:146C.c:11377
+T00312.018,shieldStat,Named in the fork; see cited use,med,source:146C.c:11379
+T00312.019,armorStat,Named in the fork; see cited use,med,source:146C.c:11378
+T00312.020,statFactor,Named in the fork; see cited use,med,source:146C.c:11382
+T00312.021,shieldStatFactor,Named in the fork; see cited use,med,source:146C.c:11381
+T00312.022,armorStatFactor,Named in the fork; see cited use,med,source:146C.c:11380
+T00321.000,reserved0,Not read by decompiled code,low,declaration-only;source:146C.h:15
+T00321.001,reserved4,Not read by decompiled code,low,declaration-only;source:146C.h:16
+T00321.002,reserved8,Not read by decompiled code,low,declaration-only;source:146C.h:17
+T00321.003,reservedC,Not read by decompiled code,low,declaration-only;source:146C.h:18
+T00321.004,reserved10,Not read by decompiled code,low,declaration-only;source:146C.h:19
+T00321.005,reserved14,Not read by decompiled code,low,declaration-only;source:146C.h:20
+T00321.006,reserved18,Not read by decompiled code,low,declaration-only;source:146C.h:21
+T00321.007,reserved1C,Not read by decompiled code,low,declaration-only;source:146C.h:22
+T00321.008,reserved20,Not read by decompiled code,low,declaration-only;source:146C.h:23
+T00321.009,reserved24,Not read by decompiled code,low,declaration-only;source:146C.h:24
+T00321.010,reserved28,Not read by decompiled code,low,declaration-only;source:146C.h:25
+T00321.011,reserved2C,Not read by decompiled code,low,declaration-only;source:146C.h:26
+T00321.012,reserved30,Not read by decompiled code,low,declaration-only;source:146C.h:27
+T00321.013,reserved34,Not read by decompiled code,low,declaration-only;source:146C.h:28
+T00321.014,reserved38,Not read by decompiled code,low,declaration-only;source:146C.h:29
+T00321.015,reserved3C,Not read by decompiled code,low,declaration-only;source:146C.h:30
+T00322.000,groupCount,Number of polygon groups,med,declaration-only;source:146C.h:62
+T00322.001,groupHeaders,Polygon group headers,med,declaration-only;source:146C.h:63
+T00324.000,vertex1X,Vertex 1 X,med,declaration-only;source:146C.h:34
+T00324.001,vertex1Y,Vertex 1 Y,med,declaration-only;source:146C.h:34
+T00324.002,vertex1Z,Vertex 1 Z,med,declaration-only;source:146C.h:34
+T00324.003,vertex2OffsetX,Vertex 2 X relative to vertex 1,med,declaration-only;source:146C.h:35
+T00324.004,vertex2OffsetY,Vertex 2 Y relative to vertex 1,med,declaration-only;source:146C.h:35
+T00324.005,vertex2OffsetZ,Vertex 2 Z relative to vertex 1,med,declaration-only;source:146C.h:35
+T00324.006,vertex3OffsetX,Vertex 3 X relative to vertex 1,med,declaration-only;source:146C.h:36
+T00324.007,vertex3OffsetY,Vertex 3 Y relative to vertex 1,med,declaration-only;source:146C.h:36
+T00324.008,vertex3OffsetZ,Vertex 3 Z relative to vertex 1,med,declaration-only;source:146C.h:36
+T00324.009,red1,Vertex 1 red,med,declaration-only;source:146C.h:37
+T00324.010,green1,Vertex 1 green,med,declaration-only;source:146C.h:37
+T00324.011,blue1,Vertex 1 blue,med,declaration-only;source:146C.h:37
+T00324.012,polygonType,Polygon type,med,declaration-only;source:146C.h:37
+T00324.013,red2,Vertex 2 red,med,declaration-only;source:146C.h:38
+T00324.014,green2,Vertex 2 green,med,declaration-only;source:146C.h:38
+T00324.015,blue2,Vertex 2 blue,med,declaration-only;source:146C.h:38
+T00324.016,u3,Vertex 3 texture U,med,declaration-only;source:146C.h:38
+T00324.017,red3,Vertex 3 red,med,declaration-only;source:146C.h:39
+T00324.018,green3,Vertex 3 green,med,declaration-only;source:146C.h:39
+T00324.019,blue3,Vertex 3 blue,med,declaration-only;source:146C.h:39
+T00324.020,v3,Vertex 3 texture V,med,declaration-only;source:146C.h:39
+T00324.021,u1,Vertex 1 texture U,med,declaration-only;source:146C.h:40
+T00324.022,v1,Vertex 1 texture V,med,declaration-only;source:146C.h:40
+T00324.023,texelMask,Texel transparency mask,med,declaration-only;source:146C.h:41
+T00324.024,u2,Vertex 2 texture U,med,declaration-only;source:146C.h:42
+T00324.025,v2,Vertex 2 texture V,med,declaration-only;source:146C.h:42
+T00324.026,textureId,Texture id; changes at run time,med,declaration-only;source:146C.h:43
+T00325.000,vertex1X,Vertex 1 X,med,declaration-only;source:146C.h:47
+T00325.001,vertex1Y,Vertex 1 Y,med,declaration-only;source:146C.h:47
+T00325.002,vertex1Z,Vertex 1 Z,med,declaration-only;source:146C.h:47
+T00325.003,vertex2OffsetX,Vertex 2 X relative to vertex 1,med,declaration-only;source:146C.h:48
+T00325.004,vertex2OffsetY,Vertex 2 Y relative to vertex 1,med,declaration-only;source:146C.h:48
+T00325.005,vertex2OffsetZ,Vertex 2 Z relative to vertex 1,med,declaration-only;source:146C.h:48
+T00325.006,vertex3OffsetX,Vertex 3 X relative to vertex 1,med,declaration-only;source:146C.h:49
+T00325.007,vertex3OffsetY,Vertex 3 Y relative to vertex 1,med,declaration-only;source:146C.h:49
+T00325.008,vertex3OffsetZ,Vertex 3 Z relative to vertex 1,med,declaration-only;source:146C.h:49
+T00325.009,red1,Vertex 1 red,med,declaration-only;source:146C.h:50
+T00325.010,green1,Vertex 1 green,med,declaration-only;source:146C.h:50
+T00325.011,blue1,Vertex 1 blue,med,declaration-only;source:146C.h:50
+T00325.012,polygonType,Polygon type,med,declaration-only;source:146C.h:50
+T00325.013,red2,Vertex 2 red,med,declaration-only;source:146C.h:51
+T00325.014,green2,Vertex 2 green,med,declaration-only;source:146C.h:51
+T00325.015,blue2,Vertex 2 blue,med,declaration-only;source:146C.h:51
+T00325.016,u3,Vertex 3 texture U,med,declaration-only;source:146C.h:51
+T00325.017,red3,Vertex 3 red,med,declaration-only;source:146C.h:52
+T00325.018,green3,Vertex 3 green,med,declaration-only;source:146C.h:52
+T00325.019,blue3,Vertex 3 blue,med,declaration-only;source:146C.h:52
+T00325.020,v3,Vertex 3 texture V,med,declaration-only;source:146C.h:52
+T00325.021,u1,Vertex 1 texture U,med,declaration-only;source:146C.h:53
+T00325.022,v1,Vertex 1 texture V,med,declaration-only;source:146C.h:53
+T00325.023,texelMask,Texel transparency mask,med,declaration-only;source:146C.h:54
+T00325.024,u2,Vertex 2 texture U,med,declaration-only;source:146C.h:55
+T00325.025,v2,Vertex 2 texture V,med,declaration-only;source:146C.h:55
+T00325.026,textureId,Texture id; changes at run time,med,declaration-only;source:146C.h:56
+T00325.027,vertex4OffsetX,Vertex 4 X relative to vertex 1,med,declaration-only;source:146C.h:57
+T00325.028,vertex4OffsetY,Vertex 4 Y relative to vertex 1,med,declaration-only;source:146C.h:57
+T00325.029,vertex4OffsetZ,Vertex 4 Z relative to vertex 1,med,declaration-only;source:146C.h:57
+T00325.030,u4,Vertex 4 texture U,med,declaration-only;source:146C.h:57
+T00325.031,red4,Vertex 4 red,med,declaration-only;source:146C.h:58
+T00325.032,green4,Vertex 4 green,med,declaration-only;source:146C.h:58
+T00325.033,blue4,Vertex 4 blue,med,declaration-only;source:146C.h:58
+T00325.034,v4,Vertex 4 texture V,med,declaration-only;source:146C.h:58
+T00350.000,reserved0,Not read by decompiled code,low,declaration-only;source:6FC00.c:494
+T00350.001,row,Named in the fork; see cited use,med,source:6FC00.c:526
+T00350.002,column,Named in the fork; see cited use,med,source:6FC00.c:526
+T00350.003,action,Named in the fork; see cited use,med,source:74088.c:1382
+T00350.004,threshold,Named in the fork; see cited use,med,source:6FC00.c:524
+T00350.005,reserved7Bit5,Not read by decompiled code,low,declaration-only;source:6FC00.c:495
+T00350.006,distanceSquared,Named in the fork; see cited use,med,source:71618.c:530
+T00350.007,targetId,Named in the fork; see cited use,med,source:6FC00.c:525
+T00350.008,reservedCBit4,Not read by decompiled code,low,declaration-only;source:6FC00.c:497
+T00350.009,reservedCBit7,Not read by decompiled code,low,declaration-only;source:6FC00.c:497
+T00350.010,weight,Named in the fork; see cited use,med,source:6FC00.c:524
+T00350.011,reservedFBit3,Not read by decompiled code,low,declaration-only;source:6FC00.c:497
+T00350.012,reserved10Bit0,Not read by decompiled code,low,declaration-only;source:6FC00.c:498
+T00350.013,opaque10Bit1,"Used, but its meaning is not established",low,source:71618.c:569
+T00350.014,reserved10Bit2,Not read by decompiled code,low,declaration-only;source:6FC00.c:498
+T00350.015,reserved10Bit3,Not read by decompiled code,low,declaration-only;source:6FC00.c:498
+T00350.016,reserved10Bit4,Not read by decompiled code,low,declaration-only;source:6FC00.c:498
+T00350.017,reserved10Bit5,Not read by decompiled code,low,declaration-only;source:6FC00.c:498
+T00350.018,range,Named in the fork; see cited use,med,source:71618.c:577
+T00350.019,reserved12Bit6,Not read by decompiled code,low,declaration-only;source:6FC00.c:499
 T00351.000,reserved0,Not read through this view,low,declaration-only;source:6FC00.c:505
 T00351.001,actionStatus,Status of the selected action,low,source:6FC00.c:559
 T00351.002,reserved132,Not read through this view,low,declaration-only;source:6FC00.c:507
@@ -7,6 +130,31 @@ T00351.004,distancesSquared,Squared distance to each actor,med,declaration-only;
 T00351.005,reserved224,Not read through this view,low,declaration-only;source:6FC00.c:510
 T00351.006,candidateOrder,Candidates in priority order,med,source:6FC00.c:523
 T00351.007,candidateCount,Number of candidates,high,source:6FC00.c:522
+T00352.000,opaque0,"Used, but its meaning is not established",low,source:6FC00.c:547
+T00352.001,reserved1,Not read by decompiled code,low,declaration-only;source:6FC00.c:502
+T00353.000,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:862
+T00353.001,reserved4Bit0,Not read by decompiled code,low,declaration-only;source:74088.c:863
+T00353.002,reserved4Bit3,Not read by decompiled code,low,declaration-only;source:74088.c:864
+T00353.003,reserved4Bit5,Not read by decompiled code,low,declaration-only;source:74088.c:865
+T00353.004,reserved5Bit5,Not read by decompiled code,low,declaration-only;source:74088.c:866
+T00353.005,reserved8,Not read by decompiled code,low,declaration-only;source:74088.c:867
+T00353.006,reservedCBit0,Not read by decompiled code,low,declaration-only;source:74088.c:868
+T00353.007,reservedEBit3,Not read by decompiled code,low,declaration-only;source:74088.c:869
+T00353.008,reservedFBit3,Not read by decompiled code,low,declaration-only;source:74088.c:870
+T00353.009,reserved10,Not read by decompiled code,low,declaration-only;source:74088.c:871
+T00354.000,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:74088.c:854
+T00354.001,reserved0Bit1,Not read by decompiled code,low,declaration-only;source:74088.c:855
+T00354.002,reserved0Bit2,Not read by decompiled code,low,declaration-only;source:74088.c:856
+T00354.003,reserved0Bit3,Not read by decompiled code,low,declaration-only;source:74088.c:857
+T00354.004,reserved0Bit4,Not read by decompiled code,low,declaration-only;source:74088.c:858
+T00355.000,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:889
+T00355.001,reservedCBit0,Not read by decompiled code,low,declaration-only;source:74088.c:890
+T00355.002,reservedEBit7,Not read by decompiled code,low,declaration-only;source:74088.c:891
+T00355.003,reservedFBit0,Not read by decompiled code,low,declaration-only;source:74088.c:892
+T00355.004,reservedFBit4,Not read by decompiled code,low,declaration-only;source:74088.c:893
+T00355.005,reservedFBit5,Not read by decompiled code,low,declaration-only;source:74088.c:894
+T00355.006,reservedFBit6,Not read by decompiled code,low,declaration-only;source:74088.c:895
+T00355.007,reserved10,Not read by decompiled code,low,declaration-only;source:74088.c:896
 T00356.000,reserved0,Not read through this view,low,declaration-only;source:74088.c:875
 T00356.001,isDead,Set when the actor's HP is zero,high,source:74088.c:1574
 T00356.002,reserved1C,Not read through this view,low,declaration-only;source:74088.c:877
@@ -17,6 +165,25 @@ T00356.006,reserved84,Not read through this view,low,declaration-only;source:740
 T00356.007,currentChoice,Action choice being executed,med,declaration-only;source:74088.c:882
 T00356.008,reserved154,Not read through this view,low,declaration-only;source:74088.c:883
 T00356.009,actionSlots,Action slot configuration by row and column,med,declaration-only;source:74088.c:884
+T00357.000,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:469
+T00357.001,reserved4,Not read by decompiled code,low,declaration-only;source:74088.c:470
+T00358.000,next,Named in the fork; see cited use,med,source:71618.c:1133
+T00358.001,id,Named in the fork; see cited use,med,source:71618.c:1135
+T00358.002,reserved8,Not read by decompiled code,low,declaration-only;source:71618.c:1053
+T00358.003,model,Named in the fork; see cited use,med,source:71618.c:1156
+T00359.000,reserved0,Not read by decompiled code,low,declaration-only;source:71618.c:1039
+T00359.001,reserved4,Not read by decompiled code,low,declaration-only;source:71618.c:1039
+T00359.002,reserved8,Not read by decompiled code,low,declaration-only;source:71618.c:1039
+T00359.003,reservedC,Not read by decompiled code,low,declaration-only;source:71618.c:1039
+T00360.000,reserved0,Not read by decompiled code,low,declaration-only;source:71618.c:1042
+T00360.001,opaque8,"Used, but its meaning is not established",low,source:71618.c:1144
+T00360.002,reservedC,Not read by decompiled code,low,declaration-only;source:71618.c:1044
+T00360.003,reserved12,Not read by decompiled code,low,source:71618.c:1135
+T00360.004,reserved13,Not read by decompiled code,low,declaration-only;source:71618.c:1046
+T00360.005,reserved1A,Not read by decompiled code,low,declaration-only;source:71618.c:1047
+T00360.006,position,Named in the fork; see cited use,med,source:71618.c:1146
+T00361.000,reserved0,Not read by decompiled code,low,declaration-only;source:71618.c:1087
+T00361.001,reserved28,Not read by decompiled code,low,declaration-only;source:71618.c:1088
 T00362.000,opaque0,"Used, but its meaning is not established",low,source:71618.c:1165
 T00362.001,opaque4,"Used, but its meaning is not established",low,source:71618.c:1166
 T00362.002,opaque8,"Used, but its meaning is not established",low,source:71618.c:1167
@@ -50,6 +217,22 @@ T00362.029,distance,Named in the fork view; see cited use,med,source:71618.c:115
 T00362.030,reserved1E8,Not read through this view,low,declaration-only;source:71618.c:1082
 T00362.031,candidateOrder,Candidates in priority order,med,declaration-only;source:71618.c:1083
 T00362.032,candidateCount,Number of candidates,med,declaration-only;source:71618.c:1084
+T00365.000,opaque0,"Used, but its meaning is not established",low,source:7CD68.c:540
+T00365.001,reserved4,Not read by decompiled code,low,declaration-only;source:7CD68.c:500
+T00365.002,opaqueC,"Used, but its meaning is not established",low,source:7CD68.c:545
+T00365.003,reserved10,Not read by decompiled code,low,declaration-only;source:7CD68.c:502
+T00366.000,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:7CD68.c:512
+T00366.001,opaque0Bit1,"Used, but its meaning is not established",low,source:7CD68.c:547
+T00366.002,opaque0Bit2,"Used, but its meaning is not established",low,source:7CD68.c:550
+T00366.003,kind,Named in the fork; see cited use,med,source:7CD68.c:553
+T00366.004,longRange,Named in the fork; see cited use,med,source:7CD68.c:544
+T00366.005,special,Named in the fork; see cited use,med,source:7CD68.c:559
+T00366.006,reserved0Bit7,Not read by decompiled code,low,declaration-only;source:7CD68.c:512
+T00366.007,radius,Named in the fork; see cited use,med,source:7CD68.c:542
+T00366.008,reserved3Bit0,Not read by decompiled code,low,declaration-only;source:7CD68.c:513
+T00366.009,rangeSquared,Named in the fork; see cited use,med,source:7CD68.c:541
+T00367.000,id,Named in the fork; see cited use,med,source:7CD68.c:531
+T00367.001,reserved2,Not read by decompiled code,low,declaration-only;source:7CD68.c:505
 T00368.000,reserved0,Not read through this view,low,declaration-only;source:7CD68.c:517
 T00368.001,actionCostEnabled,Zero when actions cost nothing,low,source:7CD68.c:532
 T00368.002,reserved18,Not read through this view,low,declaration-only;source:7CD68.c:519
@@ -58,6 +241,10 @@ T00368.004,reserved60,Not read through this view,low,declaration-only;source:7CD
 T00368.005,actorId,Actor id,high,source:7CD68.c:531
 T00368.006,reserved89,Not read through this view,low,declaration-only;source:7CD68.c:523
 T00368.007,actionSlots,Action slot configuration by row and column,med,source:7CD68.c:539
+T00369.000,reserved0,Not read by decompiled code,low,declaration-only;source:7CD68.c:508
+T00369.001,slots,Named in the fork; see cited use,med,source:7CD68.c:537
+T00797.000,word,Whole word,med,source:7CD68.c:540
+T00797.001,bytes,Bytes of the word,med,source:7CD68.c:564
 T00370.000,reserved0,Not read through this view,low,declaration-only;source:74088.c:1268
 T00370.001,allowFallbackAction,Plans a fallback action when no candidate exists,med,source:74088.c:1400
 T00370.002,reserved27,Not read through this view,low,declaration-only;source:74088.c:1270
@@ -74,6 +261,12 @@ T00370.012,reserved140,Not read through this view,low,declaration-only;source:74
 T00370.013,candidates,Action candidates,high,source:74088.c:1390
 T00370.014,candidateOrder,Candidates in priority order,med,source:74088.c:1378
 T00370.015,candidateCount,Number of candidates,high,source:74088.c:1351
+T00371.000,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:705
+T00371.001,effect1,Named in the fork; see cited use,med,source:74088.c:731
+T00371.002,effect2,Named in the fork; see cited use,med,source:74088.c:731
+T00371.003,reserved1C,Not read by decompiled code,low,declaration-only;source:74088.c:707
+T00372.000,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:710
+T00372.001,isOrbiting,Cleared when the actor reacts (same byte as Battle::Ai::ArenaOrbitState.isOrbiting),med,source:74088.c:758
 T00373.000,reserved0,Not read through this view,low,declaration-only;source:74088.c:687
 T00373.001,usesRoomActionDelay,"When zero the room's default action delay applies, else 50",low,source:74088.c:749
 T00373.002,reserved14,Not read through this view,low,declaration-only;source:74088.c:689
@@ -91,6 +284,57 @@ T00373.013,reserved89,Not read through this view,low,declaration-only;source:740
 T00373.014,behaviorMode,"Behavior mode (1 reacting, 2 wandering)",low,source:74088.c:745
 T00373.015,reserved12E,Not read through this view,low,declaration-only;source:74088.c:701
 T00373.016,relations,Relation word for each actor,high,source:74088.c:751
+T00798.000,word,Whole word,med,source:74088.c:819
+T00798.001,reactionBits,Bit split used by the reaction code,med,source:74088.c:755
+T00798.002,bytes,Bytes of the word,med,source:74088.c:751
+T00374.000,next,Named in the fork; see cited use,med,source:74088.c:793
+T00374.001,id,Named in the fork; see cited use,med,source:74088.c:794
+T00375.000,reserved0,Not read by decompiled code,low,declaration-only;source:71618.c:998
+T00375.001,reserved13,Not read by decompiled code,low,declaration-only;source:71618.c:999
+T00375.002,reserved14,Not read by decompiled code,low,declaration-only;source:71618.c:1000
+T00375.003,reserved13F,Not read by decompiled code,low,declaration-only;source:71618.c:1001
+T00375.004,reserved140,Not read by decompiled code,low,declaration-only;source:71618.c:1002
+T00375.005,reserved22C,Not read by decompiled code,low,declaration-only;source:71618.c:1003
+T00376.000,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:74088.c:842
+T00376.001,reserved0Bit2,Not read by decompiled code,low,declaration-only;source:74088.c:843
+T00376.002,reserved0Bit3,Not read by decompiled code,low,declaration-only;source:74088.c:844
+T00376.003,reserved0Bit5,Not read by decompiled code,low,declaration-only;source:74088.c:845
+T00376.004,reserved0Bit6,Not read by decompiled code,low,declaration-only;source:74088.c:846
+T00376.005,reserved0Bit7,Not read by decompiled code,low,declaration-only;source:74088.c:847
+T00376.006,reserved1Bit0,Not read by decompiled code,low,declaration-only;source:74088.c:848
+T00376.007,reserved3Bit0,Not read by decompiled code,low,declaration-only;source:74088.c:849
+T00376.008,reserved4,Not read by decompiled code,low,declaration-only;source:74088.c:850
+T00377.000,action,Named in the fork; see cited use,med,source:74088.c:729
+T00377.001,reserved2,Not read by decompiled code,low,declaration-only;source:74088.c:462
+T00377.002,first,Named in the fork; see cited use,med,source:74088.c:722
+T00377.003,reserved48,Not read by decompiled code,low,declaration-only;source:74088.c:464
+T00377.004,count,Named in the fork; see cited use,med,source:74088.c:740
+T00377.005,entries,Named in the fork; see cited use,med,source:74088.c:741
+T00378.000,actor,Named in the fork; see cited use,med,source:74088.c:737
+T00378.001,reserved1,Not read by decompiled code,low,declaration-only;source:74088.c:447
+T00378.002,reserved2,Not read by decompiled code,low,declaration-only;source:74088.c:448
+T00378.003,reserved3,Not read by decompiled code,low,declaration-only;source:74088.c:449
+T00378.004,hp,Named in the fork; see cited use,med,source:74088.c:757
+T00378.005,reserved6,Not read by decompiled code,low,declaration-only;source:74088.c:450
+T00378.006,reserved8,Not read by decompiled code,low,declaration-only;source:74088.c:451
+T00378.007,reserved14,Not read by decompiled code,low,declaration-only;source:74088.c:452
+T00378.008,reserved18,Not read by decompiled code,low,declaration-only;source:74088.c:452
+T00378.009,modes,Named in the fork; see cited use,med,source:74088.c:757
+T00378.010,reserved20,Not read by decompiled code,low,declaration-only;source:74088.c:453
+T00378.011,reserved38,Not read by decompiled code,low,declaration-only;source:74088.c:454
+T00378.012,reserved3A,Not read by decompiled code,low,declaration-only;source:74088.c:455
+T00378.013,reserved3C,Not read by decompiled code,low,declaration-only;source:74088.c:456
+T00378.014,reserved3E,Not read by decompiled code,low,declaration-only;source:74088.c:457
+T00378.015,skip,Named in the fork; see cited use,med,source:74088.c:722
+T00379.000,next,Named in the fork; see cited use,med,source:74088.c:1560
+T00379.001,id,Named in the fork; see cited use,med,source:74088.c:1561
+T00379.002,opaque8,"Used, but its meaning is not established",low,source:74088.c:1581
+T00379.003,reserved9,Not read by decompiled code,low,declaration-only;source:74088.c:1521
+T00379.004,stats,Named in the fork; see cited use,med,source:74088.c:1565
+T00380.000,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:1540
+T00380.001,id,Named in the fork; see cited use,med,source:74088.c:1561
+T00380.002,reserved5,Not read by decompiled code,low,declaration-only;source:74088.c:1542
+T00380.003,opaque44,"Used, but its meaning is not established",low,source:74088.c:1567
 T00381.000,reserved0,Not read through this view,low,declaration-only;source:74088.c:1525
 T00381.001,usesRoomActionDelay,"When zero the room's default action delay applies, else 50",low,source:74088.c:1580
 T00381.002,reserved14,Not read through this view,low,declaration-only;source:74088.c:1527
@@ -104,6 +348,28 @@ T00381.009,opaqueE7,"Used, but its meaning is not established",low,source:74088.
 T00381.010,opaqueE8,"Used, but its meaning is not established",low,source:74088.c:1562
 T00381.011,reservedE9,Not read through this view,low,declaration-only;source:74088.c:1536
 T00381.012,opaque19A,"Used, but its meaning is not established",low,source:74088.c:1564
+T00382.000,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:1510
+T00382.001,hp,Named in the fork; see cited use,med,source:74088.c:1574
+T00382.002,reserved1A,Not read by decompiled code,low,declaration-only;source:74088.c:1512
+T00382.003,opaque31,"Used, but its meaning is not established",low,source:74088.c:1565
+T00382.004,reserved32,Not read by decompiled code,low,declaration-only;source:74088.c:1514
+T00382.005,opaque33,"Used, but its meaning is not established",low,source:74088.c:1565
+T00799.000,word,Whole word,med,declaration-only;source:7CD68.c:820
+T00799.001,bytes,Bytes of the word,med,source:7CD68.c:1039
+T00799.002,bits,Bit fields,med,source:7CD68.c:1040
+T00384.000,reserved0,Not read by decompiled code,low,declaration-only;source:7CD68.c:842
+T00384.001,opaque8,"Used, but its meaning is not established",low,source:7CD68.c:1027
+T00384.002,reservedC,Not read by decompiled code,low,declaration-only;source:7CD68.c:844
+T00384.003,position,Named in the fork; see cited use,med,source:7CD68.c:969
+T00384.004,reserved22,Not read by decompiled code,low,declaration-only;source:7CD68.c:846
+T00384.005,tile,Named in the fork; see cited use,med,source:7CD68.c:987
+T00384.006,reserved60,Not read by decompiled code,low,declaration-only;source:7CD68.c:848
+T00384.007,kind,Named in the fork; see cited use,med,source:7CD68.c:947
+T00384.008,reserved170,Not read by decompiled code,low,declaration-only;source:7CD68.c:850
+T00384.009,radius,Named in the fork; see cited use,med,source:7CD68.c:970
+T00384.010,opaque63E,"Used, but its meaning is not established",low,source:7CD68.c:1020
+T00800.000,word,Whole word,med,source:7CD68.c:987
+T00800.001,tile,Tile fields,med,source:7CD68.c:1028
 T00385.000,reserved0,Not read through this view,low,declaration-only;source:7CD68.c:871
 T00385.001,hasTaggedBone3,Model has a bone tagged 3,med,source:7CD68.c:991
 T00385.002,reserved2B,Not read through this view,low,declaration-only;source:7CD68.c:873
@@ -160,6 +426,32 @@ T00385.052,opaque224,"Used, but its meaning is not established",low,source:7CD68
 T00385.053,opaque225,"Used, but its meaning is not established",low,source:7CD68.c:994
 T00385.054,opaque226,"Used, but its meaning is not established",low,source:7CD68.c:995
 T00385.055,opaque227,"Used, but its meaning is not established",low,source:7CD68.c:996
+T00386.000,reserved0,Not read by decompiled code,low,declaration-only;source:7CD68.c:835
+T00386.001,opaque30,"Used, but its meaning is not established",low,source:7CD68.c:993
+T00386.002,opaque31,"Used, but its meaning is not established",low,source:7CD68.c:995
+T00386.003,opaque32,"Used, but its meaning is not established",low,source:7CD68.c:994
+T00386.004,opaque33,"Used, but its meaning is not established",low,source:7CD68.c:996
+T00387.000,reserved0,Not read by decompiled code,low,declaration-only;source:6FC00.c:564
+T00387.001,opaque8,"Used, but its meaning is not established",low,source:6FC00.c:706
+T00387.002,reservedC,Not read by decompiled code,low,declaration-only;source:6FC00.c:575
+T00387.003,opaque14,"Used, but its meaning is not established",low,source:6FC00.c:744
+T00387.004,reserved16,Not read by decompiled code,low,source:6FC00.c:1034
+T00387.005,position,Named in the fork; see cited use,med,source:6FC00.c:707
+T00387.006,reserved24,Not read by decompiled code,low,source:6FC00.c:1004
+T00387.007,facing,Named in the fork; see cited use,med,source:6FC00.c:744
+T00387.008,reserved28,Not read by decompiled code,low,declaration-only;source:6FC00.c:581
+T00387.009,tile,Named in the fork; see cited use,med,source:6FC00.c:722
+T00387.010,lastTile,Named in the fork; see cited use,med,source:6FC00.c:724
+T00387.011,reserved64,Not read by decompiled code,low,source:6FC00.c:1069
+T00387.012,reserved5ACBit0,Not read by decompiled code,low,declaration-only;source:6FC00.c:585
+T00387.013,opaque5ADBit7,"Used, but its meaning is not established",low,source:6FC00.c:1034
+T00387.014,reserved5AEBit0,Not read by decompiled code,low,declaration-only;source:6FC00.c:587
+T00388.000,reserved0,Not read by decompiled code,low,declaration-only;source:73700.c:445
+T00388.001,reserved8Bit0,Not read by decompiled code,low,declaration-only;source:73700.c:446
+T00388.002,mode,Named in the fork; see cited use,med,source:73700.c:512
+T00388.003,reservedBBit4,Not read by decompiled code,low,declaration-only;source:73700.c:446
+T00801.000,word,Whole relation word,med,source:6FC00.c:725
+T00801.001,bits,Bit fields,med,source:6FC00.c:728
 T00389.000,reserved0,Not read through this view,low,declaration-only;source:6FC00.c:611
 T00389.001,settingsBit23,Bit 23 of the AI settings word,low,source:6FC00.c:843
 T00389.002,reserved23,Not read through this view,low,declaration-only;source:6FC00.c:613
@@ -187,6 +479,15 @@ T00389.023,phase,Named in the fork view; see cited use,med,source:6FC00.c:727
 T00389.024,reserved12C,Not read through this view,low,declaration-only;source:6FC00.c:635
 T00389.025,relations,Relation word for each actor,high,source:6FC00.c:725
 T00389.026,distancesSquared,Squared distance to each actor,high,source:6FC00.c:716
+T00390.000,reserved0,Not read by decompiled code,low,declaration-only;source:7CD68.c:606
+T00390.001,kind,Named in the fork; see cited use,med,source:7CD68.c:748
+T00390.002,reserved1C,Not read by decompiled code,low,declaration-only;source:7CD68.c:608
+T00390.003,opaque30,"Used, but its meaning is not established",low,source:7CD68.c:735
+T00390.004,opaque34,"Used, but its meaning is not established",low,source:7CD68.c:739
+T00391.000,movePeriod,Wander move period,med,source:7CD68.c:730
+T00391.001,restPeriod,Wander rest period,med,source:7CD68.c:731
+T00391.002,rate,Wander chance exponent,med,source:7CD68.c:732
+T00391.003,reserved5,Not read by decompiled code,low,declaration-only;source:7CD68.c:676
 T00392.000,reserved0,Not read through this view,low,declaration-only;source:7CD68.c:618
 T00392.001,linkedActor,Actor this one follows or guards; 16 for none,med,source:7CD68.c:755
 T00392.002,reserved17,Not read through this view,low,declaration-only;source:7CD68.c:620
@@ -242,6 +543,9 @@ T00392.051,reserved103,Not read through this view,low,declaration-only;source:7C
 T00392.052,angle,Named in the fork view; see cited use,med,source:7CD68.c:700
 T00392.053,reserved12A,Not read through this view,low,declaration-only;source:7CD68.c:671
 T00392.054,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:7CD68.c:735
+T00802.000,word,Whole word,med,source:7CD68.c:702
+T00802.001,halves,Halves of the word,med,source:7CD68.c:694
+T00802.002,bytes,Bytes of the word,med,source:7CD68.c:724
 T00394.000,reserved0,Not read through this view,low,declaration-only;source:73700.c:449
 T00394.001,actor,Battle actor,med,source:73700.c:508
 T00394.002,reserved58,Not read through this view,low,declaration-only;source:73700.c:451
@@ -257,6 +561,19 @@ T00394.011,direction,Named in the fork view; see cited use,med,source:73700.c:51
 T00394.012,reserved131,Not read through this view,low,declaration-only;source:73700.c:459
 T00394.013,nextEngaged,Next actor in the engagement list,med,source:73700.c:524
 T00394.014,targetFlags,Named in the fork view; see cited use,med,source:73700.c:509
+T00396.000,next,Named in the fork; see cited use,med,source:6FC00.c:1010
+T00396.001,id,Named in the fork; see cited use,med,source:6FC00.c:1013
+T00396.002,opaque8,"Used, but its meaning is not established",low,source:6FC00.c:1011
+T00396.003,opaque9,"Used, but its meaning is not established",low,source:6FC00.c:1092
+T00396.004,reservedA,Not read by decompiled code,low,declaration-only;source:6FC00.c:863
+T00396.005,opaqueBBit0,"Used, but its meaning is not established",low,source:6FC00.c:1012
+T00396.006,reservedBBit2,Not read by decompiled code,low,declaration-only;source:6FC00.c:865
+T00396.007,reservedC,Not read by decompiled code,low,declaration-only;source:6FC00.c:866
+T00396.008,stats,Named in the fork; see cited use,med,source:6FC00.c:1017
+T00397.000,current,Named in the fork; see cited use,med,source:6FC00.c:1137
+T00397.001,max,Named in the fork; see cited use,med,source:6FC00.c:1138
+T00398.000,position,Named in the fork; see cited use,med,source:6FC00.c:1069
+T00398.001,opaque4,"Used, but its meaning is not established",low,source:6FC00.c:1098
 T00399.000,reserved0,Not read through this view,low,declaration-only;source:6FC00.c:888
 T00399.001,opaque8,"Used, but its meaning is not established",low,source:6FC00.c:1082
 T00399.002,reserved9,Not read through this view,low,declaration-only;source:6FC00.c:890
@@ -318,6 +635,18 @@ T00399.057,reserved194,Not read through this view,low,declaration-only;source:6F
 T00399.058,opaque19A,"Used, but its meaning is not established",low,source:6FC00.c:1057
 T00399.059,reserved19B,Not read through this view,low,declaration-only;source:6FC00.c:956
 T00399.060,relations,Relation word for each actor,high,source:6FC00.c:1150
+T00400.000,reserved0,Not read by decompiled code,low,declaration-only;source:6FC00.c:881
+T00400.001,hp,Named in the fork; see cited use,med,source:6FC00.c:1136
+T00400.002,reserved1C,Not read by decompiled code,low,source:6FC00.c:1137
+T00400.003,reserved20,Not read by decompiled code,low,source:6FC00.c:1138
+T00401.000,reserved0,Not read,low,declaration-only;source:44F14.c:14
+T00401.001,firstFrame,First frame decoded,high,source:44F14.c:1383
+T00401.002,lastFrame,Last frame decoded,high,source:44F14.c:1383
+T00401.003,trackData,Track data being decoded,med,source:44F14.c:1381
+T00405.000,reserved0,Not read by decompiled code,low,declaration-only;source:44F14.c:78
+T00405.001,reserved64,Not read by decompiled code,low,declaration-only;source:44F14.c:79
+T00405.002,reserved84,Not read by decompiled code,low,declaration-only;source:44F14.c:80
+T00405.003,reserved8C,Not read by decompiled code,low,declaration-only;source:44F14.c:81
 T00406.000,reserved0,Not read through this view,low,declaration-only;source:71618.c:481
 T00406.001,opaque1,"Used, but its meaning is not established",low,source:71618.c:591
 T00406.002,reserved2,Not read through this view,low,declaration-only;source:71618.c:483
@@ -341,3 +670,21 @@ T00406.019,relations,Relation word for each actor,high,source:71618.c:533
 T00406.020,distancesSquared,Squared distance to each actor,high,source:71618.c:555
 T00406.021,reserved224,Not read through this view,low,declaration-only;source:71618.c:502
 T00406.022,candidateCount,Number of candidates,high,source:71618.c:518
+T00803.000,word,Whole word,med,source:71618.c:556
+T00803.001,bytes,Bytes of the word,med,source:71618.c:533
+T00408.000,next,Named in the fork; see cited use,med,source:71618.c:981
+T00408.001,id,Named in the fork; see cited use,med,source:71618.c:982
+T00409.000,reserved0,Not read by decompiled code,low,declaration-only;source:71618.c:712
+T00409.001,reserved4,Not read by decompiled code,low,declaration-only;source:71618.c:712
+T00409.002,reserved8,Not read by decompiled code,low,declaration-only;source:71618.c:712
+T00409.003,opaqueC,"Used, but its meaning is not established",low,source:71618.c:826
+T00410.000,target,Named in the fork; see cited use,med,source:71618.c:826
+T00410.001,reserved0Bit4,Not read by decompiled code,low,declaration-only;source:71618.c:779
+T00411.000,reserved0,Not read by decompiled code,low,declaration-only;source:71618.c:755
+T00411.001,x,Named in the fork; see cited use,med,source:71618.c:886
+T00411.002,reserved1E,Not read by decompiled code,low,declaration-only;source:71618.c:757
+T00411.003,z,Named in the fork; see cited use,med,source:71618.c:887
+T00411.004,reserved22,Not read by decompiled code,low,declaration-only;source:71618.c:759
+T00411.005,tile,Named in the fork; see cited use,med,source:71618.c:885
+T00804.000,word,Whole word,med,source:71618.c:900
+T00804.001,bytes,Bytes of the word,med,source:71618.c:884

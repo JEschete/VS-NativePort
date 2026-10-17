@@ -362,7 +362,7 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Actors_01 | 0 | 55 | 771 | Validated and applied |
 | Game_Actors_02 | 48 | 8 | 108 | Validated and applied |
 | Game_Battle_01 | 0 | 92 | 583 | Validated and applied |
-| Game_Battle_02 | 0 | 66 | 689 | Pending |
+| Game_Battle_02 | 0 | 66 | 689 | Validated and applied |
 | Game_Battle_03 | 0 | 78 | 737 | Pending |
 | Game_Battle_04 | 58 | 58 | 526 | Pending |
 | Game_Battle_05 | 114 | 0 | 0 | Pending |
@@ -380,14 +380,14 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **740 / 2,174** | **373 / 822** | **3,067 / 6,870** | **12 / 24 batches applied** |
+| **Applied / inventoried** | **740 / 2,174** | **439 / 822** | **3,756 / 6,870** | **13 / 24 batches applied** |
 
 Inventory changed on 2026-10-17 when 25 upstream layouts were adopted (15 merged layouts, 10 type-only retypes; two
 new upstream-only types, `func_800D52A4_t`/`_t2`, the effect node's motion block). Applied rows kept their names;
 four applied fields changed C type only (`AkaoSeqHeader.magic` `char[4]`→`int`, `_mpdEnemy.settings`
 `u_char[8]`→`actorSpawnSettings`, `vs_battle_objectData.material`/`variant` `char`→`u_char`).
 
-Applied rows still include 32 low-confidence globals, 21 low-confidence types and 801 low-confidence fields. Validation checks coverage,
+Applied rows still include 32 low-confidence globals, 32 low-confidence types and 1,222 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -457,6 +457,16 @@ names, locations and collisions; it does not prove semantics or close migration 
   `Battle::Ai::TargetRelationBits` (upstream `func_800DA1D4_t`). Merge each set into one native type when copying.
   `Battle::ActorTargetWord` (vs_battle_actor +0x10) is used both as a pending Z movement offset and as the last
   targeted actor/limb; resolve that overlap from the assembly before porting.
+- Game_Battle_02 (2026-10-17): the fork's AI files declare a separate struct per function for one object, the AI
+  actor state (upstream `func_800E78F4_t`, T00532, allocated 0x484 bytes); upstream's reviewed functions take that one
+  type. `tools\naming\sym_gen\ai_state.py` names each byte offset once, from the uses gathered across all views and
+  upstream (`tools\naming\ai_offsets.py` prints the per-offset evidence), and every view takes the
+  name at its offset when the member has the same size as upstream's member there (untyped `char[N]` fillers
+  upstream do not constrain). Settings bytes are named after the settings-word bit they are decoded from
+  (`settingsBit26`), which is what the code shows. Other views use `common.Gen.generic_specs`: a used member keeps a
+  meaningful fork name (cited by its use) or becomes `opaque<Off>`; an unread member is `reserved<Off>` (bitfields
+  `reserved<Off>Bit<n>`) even when the fork gave it a plausible name. Battle_03 must name T00532 from the same table.
+  421 of 689 fields are `low` (294 reserved, 81 opaque).
 
 The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
 The native audio player must own playback position rather than reading another module's timing globals.
