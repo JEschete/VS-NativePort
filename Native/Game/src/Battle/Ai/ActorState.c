@@ -22,25 +22,25 @@
 #include "Render/Palette.h"
 
 // decomp: D_80069C18 (D_80069C18@BATTLE/BATTLE.PRG)
-unsigned char Battle_Ai_kSettingsBits30Values[1284]; /* rodata: contents loaded in Step 5 */
+unsigned char Battle_Ai_kSettingsBits30Values[1284]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_80069C1C (D_80069C1C@BATTLE/BATTLE.PRG)
-unsigned int Battle_Ai_kPerceptionRangesSquared[320]; /* rodata: contents loaded in Step 5 */
+unsigned int Battle_Ai_kPerceptionRangesSquared[320]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_80069C3C (D_80069C3C@BATTLE/BATTLE.PRG)
-Battle_Ai_WanderTiming Battle_Ai_kWanderTimingPresets[208]; /* rodata: contents loaded in Step 5 */
+Battle_Ai_WanderTiming Battle_Ai_kWanderTimingPresets[208]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F1790 (D_800F1790@BATTLE/BATTLE.PRG)
 int (*Battle_Ai_decisionCallbacks[55])(Battle_Ai_ActorAiState*); /* data: contents loaded in Step 5 */
 
 // decomp: D_800F17B8 (D_800F17B8@BATTLE/BATTLE.PRG)
-unsigned short Battle_Ai_viewAngles[45][2]; /* data: contents loaded in Step 5 */
+unsigned short Battle_Ai_viewAngles[45][2]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F17C8 (D_800F17C8@BATTLE/BATTLE.PRG)
-unsigned short Battle_Ai_settingsBits8Values[41][2]; /* data: contents loaded in Step 5 */
+unsigned short Battle_Ai_settingsBits8Values[41][2]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F17D8 (D_800F17D8@BATTLE/BATTLE.PRG)
-unsigned char Battle_Ai_facingDelayScales[148]; /* data: contents loaded in Step 5 */
+unsigned char Battle_Ai_facingDelayScales[148]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F5878 (D_800F5878@BATTLE/BATTLE.PRG)
 Battle_Ai_ActorAiState* Battle_Ai_actorAiStates[];

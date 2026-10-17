@@ -3,11 +3,11 @@
 #include "Effects/Plugins/Plg297.h"
 
 // decomp: D_800FCB70 (D_800FCB70@EFFECT/PLG297.BIN)
-SVECTOR Effects_Plg297_mirrorSurfaceVertices[5][16]; /* data: contents loaded in Step 5 */
+SVECTOR Effects_Plg297_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FCDF0 (D_800FCDF0@EFFECT/PLG297.BIN)
-CVECTOR Effects_Plg297_closedRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg297_closedRingColorFactors[]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FCE10 (D_800FCE10@EFFECT/PLG297.BIN)
-u_char Effects_Plg297_ringColorFactors[][4]; /* data: contents loaded in Step 5 */
+u_char Effects_Plg297_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */
 

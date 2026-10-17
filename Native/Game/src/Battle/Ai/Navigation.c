@@ -23,10 +23,10 @@
 #include "Render/Palette.h"
 
 // decomp: D_800F16EC (D_800F16EC@BATTLE/BATTLE.PRG)
-Battle_Ai_DirectionDelta Battle_Ai_directionDeltas[8]; /* data: contents loaded in Step 5 */
+Battle_Ai_DirectionDelta Battle_Ai_directionDeltas[8]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F175C (D_800F175C@BATTLE/BATTLE.PRG)
-u_char Battle_Ai_routeStepDirections[272]; /* data: contents loaded in Step 5 */
+u_char Battle_Ai_routeStepDirections[272]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F58B8 (D_800F58B8@BATTLE/BATTLE.PRG)
 u_short (*Battle_Ai_tileFlagMap)[32];

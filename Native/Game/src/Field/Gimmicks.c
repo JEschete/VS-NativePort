@@ -15,6 +15,7 @@
 #include "Audio/Sfx.h"
 #include "Battle/Ai/Navigation.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Effects/Weather.h"
 #include "Field/Actors.h"
 #include "Field/Camera.h"
@@ -42,73 +43,73 @@
 #include "State/Timers.h"
 
 // decomp: D_800E856C (D_800E856C@BATTLE/BATTLE.PRG)
-MATRIX Field_triggerMarkerMatrix; /* data: contents loaded in Step 5 */
+MATRIX Field_triggerMarkerMatrix; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8594 (D_800E8594@BATTLE/BATTLE.PRG)
-Field_TriggerMarkerVertex Field_triggerMarkerVertex; /* data: contents loaded in Step 5 */
+Field_TriggerMarkerVertex Field_triggerMarkerVertex; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E85A0 (D_800E85A0@BATTLE/BATTLE.PRG)
-char Field_triggerMarkerRecordTail[192]; /* data: contents loaded in Step 5 */
+char Field_triggerMarkerRecordTail[192]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8FA8 (D_800E8FA8@BATTLE/BATTLE.PRG)
-u_char Field_gimmickPaletteParameters[32]; /* data: contents loaded in Step 5 */
+u_char Field_gimmickPaletteParameters[32]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8FB4 (D_800E8FB4@BATTLE/BATTLE.PRG)
 void* Field_gimmickModelTemplates[5]; /* data: contents loaded in Step 5 */
 
 // decomp: D_800E8FD0 (D_800E8FD0@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickRollOrientations[3424]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickRollOrientations[3424]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9030 (D_800E9030@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickOrientationRotations[3328]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickOrientationRotations[3328]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E90A8 (D_800E90A8@BATTLE/BATTLE.PRG)
-int Field_interactingGimmickId; /* data: contents loaded in Step 5 */
+int Field_interactingGimmickId; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E919C (D_800E919C@BATTLE/BATTLE.PRG)
-u_char Field_gimmickTemplateIndices[2964]; /* data: contents loaded in Step 5 */
+u_char Field_gimmickTemplateIndices[2964]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E91AC (D_800E91AC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSpinHeightSteps[2948]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickSpinHeightSteps[2948]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E91BC (D_800E91BC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSpinPitchSteps[2932]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickSpinPitchSteps[2932]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E91CC (D_800E91CC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSpinYawSteps[2916]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickSpinYawSteps[2916]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E91DC (D_800E91DC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSpinRollSteps[2900]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickSpinRollSteps[2900]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E91EC (D_800E91EC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickBounceHeightSteps[2884]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickBounceHeightSteps[2884]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E91F0 (D_800E91F0@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickTiltDepthSteps[2880]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickTiltDepthSteps[2880]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E91FC (D_800E91FC@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickTiltAngleSteps[2868]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickTiltAngleSteps[2868]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9208 (D_800E9208@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickRollHeightSteps[2856]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickRollHeightSteps[2856]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9218 (D_800E9218@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickRollDisplacementSteps[2840]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickRollDisplacementSteps[2840]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9228 (D_800E9228@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickRollAngleSteps[2824]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickRollAngleSteps[2824]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9238 (D_800E9238@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSquashHeightSteps[2808]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickSquashHeightSteps[2808]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9248 (D_800E9248@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSquashScaleX[2792]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickSquashScaleX[2792]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9258 (D_800E9258@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSquashScaleY[2776]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickSquashScaleY[2776]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9268 (D_800E9268@BATTLE/BATTLE.PRG)
-u_char Field_kGimmickSquashScaleZ[2760]; /* data: contents loaded in Step 5 */
+u_char Field_kGimmickSquashScaleZ[2760]; /* contents: module image (ModuleData.c) */
 
 // decomp: vs_battle_roomData (vs_battle_roomData@BATTLE/BATTLE.PRG)
 Field_RoomRecord Field_roomData;

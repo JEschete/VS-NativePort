@@ -1,1 +1,6 @@
 id,kind,name,path,header,since,notes
+F03474,function,Content_BeginDiscRead,Native\Content\src\DiscReader.c,Native\Content\src\DiscReader.h,2026-10-17,from Native\Content\src\CdDrive.c
+F03475,function,Content_UpdateDiscCommands,Native\Content\src\DiscReader.c,Native\Content\src\DiscReader.h,2026-10-17,from Native\Content\src\CdDrive.c
+F03479,function,Content_ResetDiscDrive,Native\Content\src\DiscReader.c,Native\Content\src\DiscReader.h,2026-10-17,from Native\Content\src\CdDrive.c
+F03572,function,Core_Memory_CopyAlignedWords,Native\Engine\src\Core\Memory\WordCopy.c,Native\Engine\src\Core\Memory\WordCopy.h,2026-10-17,from Native\Engine\src\Core\Memory\Heap.c
+F03573,function,Core_Memory_ZeroAlignedWords,Native\Engine\src\Core\Memory\WordCopy.c,Native\Engine\src\Core\Memory\WordCopy.h,2026-10-17,from Native\Engine\src\Core\Memory\Heap.c

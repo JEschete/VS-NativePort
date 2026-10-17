@@ -15,28 +15,28 @@
 #include "Core/Memory/Copy.h"
 
 // decomp: D_8002F54C (D_8002F54C@SLUS_010.40)
-u_short Audio_Seq_tickCounter; /* data: contents loaded in Step 5 */
+u_short Audio_Seq_tickCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8002F5A0 (D_8002F5A0@SLUS_010.40)
-u_char Audio_Seq_kOpcodeLengths[152]; /* data: contents loaded in Step 5 */
+u_char Audio_Seq_kOpcodeLengths[152]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8002F600 (D_8002F600@SLUS_010.40)
-u_char Audio_Seq_kExtendedOpcodeLengths[56]; /* data: contents loaded in Step 5 */
+u_char Audio_Seq_kExtendedOpcodeLengths[56]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8002F620 (D_8002F620@SLUS_010.40)
-u_short Audio_Seq_kNoteLengths[12]; /* data: contents loaded in Step 5 */
+u_short Audio_Seq_kNoteLengths[12]; /* contents: module image (ModuleData.c) */
 
 // decomp: g_Sound_ProgramCounter (g_Sound_ProgramCounter@SLUS_010.40)
-u_int Audio_Seq_kIdleProgram; /* data: contents loaded in Step 5 */
+u_int Audio_Seq_kIdleProgram; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8002F63C (D_8002F63C@SLUS_010.40)
-u_int Audio_Seq_kSemitonePitches[88]; /* data: contents loaded in Step 5 */
+u_int Audio_Seq_kSemitonePitches[88]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8002F66C (D_8002F66C@SLUS_010.40)
-char Audio_Seq_kNoteRemapTables[304]; /* data: contents loaded in Step 5 */
+char Audio_Seq_kNoteRemapTables[304]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8002F69C (D_8002F69C@SLUS_010.40)
-char Audio_Seq_kRandomPitchOffsets[256]; /* data: contents loaded in Step 5 */
+char Audio_Seq_kRandomPitchOffsets[256]; /* contents: module image (ModuleData.c) */
 
 // decomp: g_Sound_LfoTable (g_Sound_LfoTable@SLUS_010.40)
 short* Audio_Seq_kLfoWaveforms[408]; /* data: contents loaded in Step 5 */

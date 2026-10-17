@@ -5,7 +5,7 @@
 #include "Battle/Feedback.h"
 #include "Battle/ValueLabels.h"
 #include "Core/Math/Vector.h"
-#include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRendering.h"
 #include "Input/Controller.h"
@@ -21,13 +21,13 @@
 #include "State/Timers.h"
 
 // decomp: D_800E861C (D_800E861C@BATTLE/BATTLE.PRG)
-int Battle_valueCaptionRects[17]; /* data: contents loaded in Step 5 */
+int Battle_valueCaptionRects[17]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8634 (D_800E8634@BATTLE/BATTLE.PRG)
-short Battle_lockedLabelHalfHeights[22]; /* data: contents loaded in Step 5 */
+short Battle_lockedLabelHalfHeights[22]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8640 (D_800E8640@BATTLE/BATTLE.PRG)
-RECT Battle_lockedLabelPieces[4]; /* data: contents loaded in Step 5 */
+RECT Battle_lockedLabelPieces[4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F1BAC (D_800F1BAC@BATTLE/BATTLE.PRG)
 Battle_FloatingLabel (*Battle_floatingLabels)[32];

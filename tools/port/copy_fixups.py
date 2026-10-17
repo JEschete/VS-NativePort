@@ -42,6 +42,17 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
     # Core's arena (Core/Arena.h).
     **{fid: [("(Core_HeapBlockHeader*)0x8010C000, 0xF2000", "(Core_HeapBlockHeader*)Core_GameHeapArena(), "
               "CORE_GAME_HEAP_SIZE", "game heap base and size")] for fid in ("F01858", "F02435", "F03437")},
+    # vs_overlay_slots (overlay.c) holds the PS1 load addresses of the overlay modules; natively they are offsets in
+    # Core's overlay block (Core/Arena.h), which keeps the slots that overlap overlapping.
+    "G02018": [(f"(void*)0x{a:08X}", f"Core_OverlayAddress(0x{a:08X}u)", "overlay load address")
+               for a in (0x80068800, 0x800F9800, 0x80102800)],
+    # The heap (main.c:8944-9018) counts in units of its 16-byte block header; on x64 the header holds two 8-byte
+    # links and is 24 bytes, so the unit is the header's size.
+    "F03465": [("((size + 15) >> 4) + 1", "((size + sizeof(Core_HeapBlockHeader) - 1) / sizeof(Core_HeapBlockHeader)) + 1",
+                "heap unit is the block header")],
+    "F03466": [("((size + 0xF) >> 4) + 1", "((size + sizeof(Core_HeapBlockHeader) - 1) / sizeof(Core_HeapBlockHeader)) + 1",
+                "heap unit is the block header")],
+    "F03467": [("value / 16 - 1", "value / sizeof(Core_HeapBlockHeader) - 1", "heap unit is the block header")],
 }
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [

@@ -3,11 +3,11 @@
 #include "Effects/Plugins/Plg266.h"
 
 // decomp: D_800FEEA0 (D_800FEEA0@EFFECT/PLG266.BIN)
-int Effects_Plg266_particleEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg266_particleEmissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FEEA4 (D_800FEEA4@EFFECT/PLG266.BIN)
-int Effects_Plg266_particleEmissionCounter2; /* data: contents loaded in Step 5 */
+int Effects_Plg266_particleEmissionCounter2; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FEEA8 (D_800FEEA8@EFFECT/PLG266.BIN)
-int Effects_Plg266_trailEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg266_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 

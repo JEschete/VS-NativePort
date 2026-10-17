@@ -3,11 +3,11 @@
 #include "Effects/Plugins/Plg065.h"
 
 // decomp: D_800FD934 (D_800FD934@EFFECT/PLG065.BIN)
-CVECTOR Effects_Plg065_closedRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg065_closedRingColorFactors[]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FD954 (D_800FD954@EFFECT/PLG065.BIN)
-u_char Effects_Plg065_ringColorFactors[][4]; /* data: contents loaded in Step 5 */
+u_char Effects_Plg065_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FD974 (D_800FD974@EFFECT/PLG065.BIN)
-int Effects_Plg065_particleEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg065_particleEmissionCounter; /* contents: module image (ModuleData.c) */
 

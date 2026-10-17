@@ -3,5 +3,5 @@
 #include "Effects/Plugins/Plg141.h"
 
 // decomp: D_800FBA00 (D_800FBA00@EFFECT/PLG141.BIN)
-int Effects_Plg141_trailEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg141_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 

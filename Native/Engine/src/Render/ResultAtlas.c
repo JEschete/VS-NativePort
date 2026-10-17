@@ -4,5 +4,5 @@
 #include "Render/ResultAtlas.h"
 
 // decomp: _disMap (_disMap@src/include/texture_t.h)
-Render_TextureRegion Render_resultAtlasRegionTemplates[69]; /* data: contents loaded in Step 5 */
+Render_TextureRegion Render_resultAtlasRegionTemplates[69]; /* contents: module image (ModuleData.c) */
 

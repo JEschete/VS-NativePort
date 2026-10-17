@@ -16,13 +16,13 @@
 #include "Render/UiPrimitives.h"
 
 // decomp: D_800FD18C (D_800FD18C@EFFECT/PLG162.BIN)
-u_char Effects_Plg162_ringColorFactors[][4]; /* data: contents loaded in Step 5 */
+u_char Effects_Plg162_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FD1AC (D_800FD1AC@EFFECT/PLG162.BIN)
-u_char Effects_Plg162_ringColorFactors2[][4]; /* data: contents loaded in Step 5 */
+u_char Effects_Plg162_ringColorFactors2[][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FD1CC (D_800FD1CC@EFFECT/PLG162.BIN)
-CVECTOR Effects_Plg162_closedRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg162_closedRingColorFactors[]; /* contents: module image (ModuleData.c) */
 
 // decomp: PLG162.BIN func_800F9800 (src/EFFECT/PLG162.BIN/0.c:32)
 int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* arg0, u_int arg1, int arg2)

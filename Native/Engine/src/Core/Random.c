@@ -3,7 +3,7 @@
 #include "Core/Random.h"
 
 // decomp: _keystreamState (_keystreamState@BATTLE/BATTLE.PRG)
-u_int Core_interfaceRandomState; /* data: contents loaded in Step 5 */
+u_int Core_interfaceRandomState; /* contents: module image (ModuleData.c) */
 
 // decomp: randArr (randArr@SLUS_010.40)
 int Core_randomShuffleTable[97];

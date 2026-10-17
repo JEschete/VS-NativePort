@@ -3,5 +3,5 @@
 #include "Render/Text/VariableFont.h"
 
 // decomp: vs_battle_characterWidths (vs_battle_characterWidths@BATTLE/BATTLE.PRG)
-char Render_variableFontGlyphWidths[413]; /* data: contents loaded in Step 5 */
+char Render_variableFontGlyphWidths[413]; /* contents: module image (ModuleData.c) */
 

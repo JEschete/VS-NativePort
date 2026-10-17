@@ -38,7 +38,7 @@
 #include "State/Flags.h"
 
 // decomp: D_80069BBC (D_80069BBC@BATTLE/BATTLE.PRG)
-u_int Battle_Ai_kTimedStatusFlags[344]; /* rodata: contents loaded in Step 5 */
+u_int Battle_Ai_kTimedStatusFlags[344]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F58E8 (D_800F58E8@BATTLE/BATTLE.PRG)
 Battle_ActorStats* Battle_Ai_planningStatsSnapshot;

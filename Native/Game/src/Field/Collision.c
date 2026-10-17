@@ -20,7 +20,7 @@
 #include "Render/Palette.h"
 
 // decomp: D_800E9278 (D_800E9278@BATTLE/BATTLE.PRG)
-u_char Field_kTileSurfaceIds[2744]; /* data: contents loaded in Step 5 */
+u_char Field_kTileSurfaceIds[2744]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F49F0 (D_800F49F0@BATTLE/BATTLE.PRG)
 u_int* Field_collisionProbeTile;

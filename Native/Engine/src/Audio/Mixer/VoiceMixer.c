@@ -13,14 +13,14 @@
 // decomp: src/SLUS_010.40/25AC.c:173
 #define SPU_PAN_TABLE_SIZE (0x100)
 // decomp: g_Sound_StereoPanGainTableQ15 (g_Sound_StereoPanGainTableQ15@SLUS_010.40)
-short Audio_Mixer_kPanGains[SPU_PAN_TABLE_SIZE]; /* data: contents loaded in Step 5 */
+short Audio_Mixer_kPanGains[SPU_PAN_TABLE_SIZE]; /* contents: module image (ModuleData.c) */
 #undef SPU_PAN_TABLE_SIZE
 
 // decomp: D_8002F89C (D_8002F89C@SLUS_010.40)
-short Audio_Mixer_kCenterPanGain; /* data: contents loaded in Step 5 */
+short Audio_Mixer_kCenterPanGain; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800301E0 (D_800301E0@SLUS_010.40)
-Audio_CommandHandler Audio_Mixer_kCommandHandlers[392]; /* data: contents loaded in Step 5 */
+Audio_CommandHandler Audio_Mixer_kCommandHandlers[392]; /* contents: module image (ModuleData.c) */
 
 // decomp: g_SpuVoiceInfo (g_SpuVoiceInfo@SLUS_010.40)
 Audio_VoiceEnvelope Audio_Mixer_voiceEnvelopes[VOICE_COUNT];

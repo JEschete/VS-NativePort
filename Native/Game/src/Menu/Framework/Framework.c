@@ -88,7 +88,7 @@
 #include "State/StateFlags.h"
 
 // decomp: _loadedSubMenu (_loadedSubMenu@BATTLE/BATTLE.PRG)
-signed char Menu_Framework_loadedSubMenu; /* data: contents loaded in Step 5 */
+signed char Menu_Framework_loadedSubMenu; /* contents: module image (ModuleData.c) */
 
 // decomp: vs_battle_menuItems (vs_battle_menuItems@BATTLE/BATTLE.PRG)
 Menu_Framework_MenuRow* Menu_Framework_menuItems; /* data: contents loaded in Step 5 */
@@ -100,13 +100,13 @@ Items_LootListNode* Menu_Framework_lootLists; /* data: contents loaded in Step 5
 Items_BattleLoot* Menu_Framework_lootEntry; /* data: contents loaded in Step 5 */
 
 // decomp: D_800EB9CE (D_800EB9CE@BATTLE/BATTLE.PRG)
-char Menu_textBoxBufferIndex; /* data: contents loaded in Step 5 */
+char Menu_textBoxBufferIndex; /* contents: module image (ModuleData.c) */
 
 // decomp: _menuBgUnpackedBuf (_menuBgUnpackedBuf@BATTLE/BATTLE.PRG)
 u_int* Menu_Framework_menuBackgroundBuffer; /* data: contents loaded in Step 5 */
 
 // decomp: D_800EBA78 (D_800EBA78@BATTLE/BATTLE.PRG)
-char Menu_Framework_kMainMenuHelpText[336]; /* rodata: contents loaded in Step 5 */
+char Menu_Framework_kMainMenuHelpText[336]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F4CC0 (D_800F4CC0@BATTLE/BATTLE.PRG)
 int Menu_Framework_mainMenuCursorAnimation;

@@ -3,8 +3,8 @@
 #include "Items/Categories.h"
 
 // decomp: _wepIdCategories (_wepIdCategories@BATTLE/BATTLE.PRG)
-char Items_weaponCategoryUpperIds[48]; /* data: contents loaded in Step 5 */
+char Items_weaponCategoryUpperIds[48]; /* contents: module image (ModuleData.c) */
 
 // decomp: _itemCategorySizes (_itemCategorySizes@BATTLE/BATTLE.PRG)
-u_int Items_itemCategoryUpperIds[8]; /* data: contents loaded in Step 5 */
+u_int Items_itemCategoryUpperIds[8]; /* contents: module image (ModuleData.c) */
 

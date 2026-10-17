@@ -3,8 +3,8 @@
 #include "Render/Upload.h"
 
 // decomp: D_800EC280 (D_800EC280@BATTLE/BATTLE.PRG)
-int Render_legacyUploadRectCursor; /* data: contents loaded in Step 5 */
+int Render_legacyUploadRectCursor; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F51D0 (D_800F51D0@BATTLE/BATTLE.PRG)
-RECT Render_legacyUploadRects[];
+RECT Render_legacyUploadRects[64 / sizeof(RECT)];
 

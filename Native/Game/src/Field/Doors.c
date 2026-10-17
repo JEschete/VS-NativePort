@@ -2,7 +2,7 @@
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
-#include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -16,10 +16,10 @@
 #include "State/StateFlags.h"
 
 // decomp: D_800E849C (D_800E849C@BATTLE/BATTLE.PRG)
-short Field_lockedDoorIndexRanges[54]; /* data: contents loaded in Step 5 */
+short Field_lockedDoorIndexRanges[54]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E84AC (D_800E84AC@BATTLE/BATTLE.PRG)
-char Field_lockedDoorRoomPairs[23][4]; /* data: contents loaded in Step 5 */
+char Field_lockedDoorRoomPairs[23][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F18E8 (D_800F18E8@BATTLE/BATTLE.PRG)
 Field_DoorFlagIdWord Field_snapshotDoorFlagSource;

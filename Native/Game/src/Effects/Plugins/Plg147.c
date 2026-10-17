@@ -3,8 +3,8 @@
 #include "Effects/Plugins/Plg147.h"
 
 // decomp: D_800FBB10 (D_800FBB10@EFFECT/PLG147.BIN)
-u_char Effects_Plg147_ringColorFactors[][4]; /* data: contents loaded in Step 5 */
+u_char Effects_Plg147_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FBB30 (D_800FBB30@EFFECT/PLG147.BIN)
-int Effects_Plg147_particleEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg147_particleEmissionCounter; /* contents: module image (ModuleData.c) */
 

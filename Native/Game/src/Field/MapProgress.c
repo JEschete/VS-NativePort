@@ -3,5 +3,5 @@
 #include "Field/MapProgress.h"
 
 // decomp: vs_battle_mapCompletionFlags (vs_battle_mapCompletionFlags@BATTLE/BATTLE.PRG)
-int Field_countableRoomMask[86]; /* data: contents loaded in Step 5 */
+int Field_countableRoomMask[86]; /* contents: module image (ModuleData.c) */
 

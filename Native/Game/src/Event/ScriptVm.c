@@ -17,6 +17,7 @@
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Event/Interpolation.h"
@@ -50,22 +51,22 @@
 #include "State/Timers.h"
 
 // decomp: D_800E9BE0 (D_800E9BE0@BATTLE/BATTLE.PRG)
-char Event_skipPaletteResetCommand[336]; /* data: contents loaded in Step 5 */
+char Event_skipPaletteResetCommand[336]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9BE8 (D_800E9BE8@BATTLE/BATTLE.PRG)
-char Event_kSkipSoundRestoreMarker[328]; /* data: contents loaded in Step 5 */
+char Event_kSkipSoundRestoreMarker[328]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9BF4 (D_800E9BF4@BATTLE/BATTLE.PRG)
-short Event_kSceneTimerModes[158]; /* data: contents loaded in Step 5 */
+short Event_kSceneTimerModes[158]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9BF8 (D_800E9BF8@BATTLE/BATTLE.PRG)
-short Event_kSceneTimerResetScopes[156]; /* data: contents loaded in Step 5 */
+short Event_kSceneTimerResetScopes[156]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9C00 (D_800E9C00@BATTLE/BATTLE.PRG)
-short Event_kSpecialOperationTenArguments[152]; /* data: contents loaded in Step 5 */
+short Event_kSpecialOperationTenArguments[152]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9C30 (D_800E9C30@BATTLE/BATTLE.PRG)
-u_char Event_kOpcodeSizes[256]; /* data: contents loaded in Step 5 */
+u_char Event_kOpcodeSizes[256]; /* contents: module image (ModuleData.c) */
 
 // decomp: _opcodeFunctionTable (_opcodeFunctionTable@BATTLE/BATTLE.PRG)
 int (*Event_kOpcodeHandlers[572])(u_char*, short); /* data: contents loaded in Step 5 */

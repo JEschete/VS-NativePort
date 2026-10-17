@@ -6,10 +6,10 @@
 typedef struct Audio_FadeTimer Audio_FadeTimer;
 
 // decomp: src/include/hw.h:24
-#define CD_VOL_L ((u_short*)0x1F801DB0)
+#define CD_VOL_L ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x1B0))
 
 // decomp: src/include/hw.h:25
-#define CD_VOL_R ((u_short*)0x1F801DB2)
+#define CD_VOL_R ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x1B2))
 
 // decomp: FSoundFadeTimer (src/include/sound.h:514)
 typedef struct Audio_FadeTimer {

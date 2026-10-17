@@ -44,40 +44,40 @@
 #include "State/Timers.h"
 
 // decomp: D_800E90AC (D_800E90AC@BATTLE/BATTLE.PRG)
-u_char Actors_kJumpHangFrames[3204]; /* data: contents loaded in Step 5 */
+u_char Actors_kJumpHangFrames[3204]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E90B4 (D_800E90B4@BATTLE/BATTLE.PRG)
-u_char Actors_kJumpHeightAdjustments[3196]; /* data: contents loaded in Step 5 */
+u_char Actors_kJumpHeightAdjustments[3196]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E90BC (D_800E90BC@BATTLE/BATTLE.PRG)
-int Actors_motionResultResetWord; /* data: contents loaded in Step 5 */
+int Actors_motionResultResetWord; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E90C3 (D_800E90C3@BATTLE/BATTLE.PRG)
-u_char Actors_kMotionResultAnimations[3181]; /* data: contents loaded in Step 5 */
+u_char Actors_kMotionResultAnimations[3181]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E90C4 (D_800E90C4@BATTLE/BATTLE.PRG)
-u_char Actors_kMotionResultOneAnimationId; /* data: contents loaded in Step 5 */
+u_char Actors_kMotionResultOneAnimationId; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E90C6 (D_800E90C6@BATTLE/BATTLE.PRG)
-u_char Actors_kHangMotionAnimationId; /* data: contents loaded in Step 5 */
+u_char Actors_kHangMotionAnimationId; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E90CC (D_800E90CC@BATTLE/BATTLE.PRG)
-u_char Actors_kSlowQuadrantMoveAnimations[3172]; /* data: contents loaded in Step 5 */
+u_char Actors_kSlowQuadrantMoveAnimations[3172]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E90D0 (D_800E90D0@BATTLE/BATTLE.PRG)
-u_char Actors_kFastQuadrantMoveAnimations[3168]; /* data: contents loaded in Step 5 */
+u_char Actors_kFastQuadrantMoveAnimations[3168]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E92E8 (D_800E92E8@BATTLE/BATTLE.PRG)
-u_char Actors_kAirTimerEndAnimations[2632]; /* data: contents loaded in Step 5 */
+u_char Actors_kAirTimerEndAnimations[2632]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E92F0 (D_800E92F0@BATTLE/BATTLE.PRG)
-u_char Actors_kSoftLandingAnimations[2624]; /* data: contents loaded in Step 5 */
+u_char Actors_kSoftLandingAnimations[2624]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E92F8 (D_800E92F8@BATTLE/BATTLE.PRG)
-u_char Actors_kHardLandingAnimations[2616]; /* data: contents loaded in Step 5 */
+u_char Actors_kHardLandingAnimations[2616]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9300 (D_800E9300@BATTLE/BATTLE.PRG)
-u_char Actors_kLandingRecoveryAnimations[2608]; /* data: contents loaded in Step 5 */
+u_char Actors_kLandingRecoveryAnimations[2608]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F1A50 (D_800F1A50@BATTLE/BATTLE.PRG)
 int Actors_ashleyMoveInput[12];

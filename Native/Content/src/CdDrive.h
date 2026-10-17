@@ -17,10 +17,7 @@ void Content_SeekCommandCallback(u_char intr, u_char result[] __attribute__((unu
 void Content_XaReadyCallback(u_char intr, u_char result[]);
 int Content_DiscState(void);
 void Content_ClearDiscReadError(void);
-int Content_BeginDiscRead(int sector, u_int bytes, void* vram);
-void Content_UpdateDiscCommands(void);
 int Content_ReadDiscFileBlocking(int sector, int bytes, void* vram);
-void Content_ResetDiscDrive(void);
 void Content_InitializeDiscQueue(void);
 Content_DiscQueueSlot* Content_AllocateDiscRequest(Content_DiscFile const* file);
 void Content_ReleaseDiscRequest(Content_DiscQueueSlot* slot);

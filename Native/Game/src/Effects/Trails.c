@@ -15,10 +15,10 @@
 #include "Render/UiPrimitives.h"
 
 // decomp: D_800EC2E8 (D_800EC2E8@BATTLE/BATTLE.PRG)
-CVECTOR Effects_trailAdditiveColors[5473]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_trailAdditiveColors[5473]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC308 (D_800EC308@BATTLE/BATTLE.PRG)
-CVECTOR Effects_trailColors[5465]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_trailColors[5465]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG func_800CDCBC (src/BATTLE/BATTLE.PRG/5BF94.c:4898)
 void Effects_DrawTrailSegment(Effects_BoneTrail* t, int head, int tail)

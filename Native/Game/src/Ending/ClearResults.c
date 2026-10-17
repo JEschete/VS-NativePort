@@ -7,6 +7,7 @@
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Ending/ClearResults.h"
 #include "Ending/Credits/StaffRoll.h"
@@ -25,28 +26,28 @@
 #include "State/StateFlags.h"
 
 // decomp: D_800DB876 (D_800DB876@ENDING/ENDING.PRG)
-u_char Ending_kRankHeadingWidth; /* data: contents loaded in Step 5 */
+u_char Ending_kRankHeadingWidth; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DBA7C (D_800DBA7C@ENDING/ENDING.PRG)
-CVECTOR Ending_congratulationsTint[2]; /* data: contents loaded in Step 5 */
+CVECTOR Ending_congratulationsTint[2]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DBA88 (D_800DBA88@ENDING/ENDING.PRG)
-CVECTOR Ending_scoreTint[]; /* data: contents loaded in Step 5 */
+CVECTOR Ending_scoreTint[48 / sizeof(CVECTOR)]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DBA90 (D_800DBA90@ENDING/ENDING.PRG)
-CVECTOR Ending_countingScoreTint[]; /* data: contents loaded in Step 5 */
+CVECTOR Ending_countingScoreTint[40 / sizeof(CVECTOR)]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DBA98 (D_800DBA98@ENDING/ENDING.PRG)
-CVECTOR Ending_mapCompletionTint[]; /* data: contents loaded in Step 5 */
+CVECTOR Ending_mapCompletionTint[32 / sizeof(CVECTOR)]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DBAA0 (D_800DBAA0@ENDING/ENDING.PRG)
-CVECTOR Ending_countingMapCompletionTint[]; /* data: contents loaded in Step 5 */
+CVECTOR Ending_countingMapCompletionTint[24 / sizeof(CVECTOR)]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DBAA8 (D_800DBAA8@ENDING/ENDING.PRG)
-CVECTOR Ending_rankHeadingTint[4]; /* data: contents loaded in Step 5 */
+CVECTOR Ending_rankHeadingTint[4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DBAB0 (D_800DBAB0@ENDING/ENDING.PRG)
-CVECTOR Ending_rankLabelTint[]; /* data: contents loaded in Step 5 */
+CVECTOR Ending_rankLabelTint[8 / sizeof(CVECTOR)]; /* contents: module image (ModuleData.c) */
 
 // decomp: _rank (_rank@ENDING/ENDING.PRG)
 u_int Ending_riskbreakerRankIndex;
@@ -236,6 +237,7 @@ void Ending_ShowClearResults(void)
     int temp_s0;
 
     Ending_resultsLoadPhase = 0;
+    SetDispMask(1);
 
     do {
         Ending_Credits_BeginFrame();

@@ -7,13 +7,13 @@
 #include "ModelLoading.h"
 
 // decomp: _loadShpState (_loadShpState@BATTLE/BATTLE.PRG)
-u_char Content_legacyModelLoadPhase; /* data: contents loaded in Step 5 */
+u_char Content_legacyModelLoadPhase; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8F2B (D_800E8F2B@BATTLE/BATTLE.PRG)
-u_char Content_legacySequenceParsePhase; /* data: contents loaded in Step 5 */
+u_char Content_legacySequenceParsePhase; /* contents: module image (ModuleData.c) */
 
 // decomp: _loadEtmState (_loadEtmState@BATTLE/BATTLE.PRG)
-u_char Content_legacyEtmLoadPhase; /* data: contents loaded in Step 5 */
+u_char Content_legacyEtmLoadPhase; /* contents: module image (ModuleData.c) */
 
 // decomp: _wepFileData (_wepFileData@BATTLE/BATTLE.PRG)
 void* Content_legacyWeaponFileBuffer;

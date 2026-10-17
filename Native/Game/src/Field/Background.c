@@ -3,6 +3,7 @@
 #include "CdDrive.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Field/Background.h"
 #include "Field/Doors.h"
@@ -22,7 +23,7 @@
 #include "Render/Textures.h"
 
 // decomp: D_80068C1C (D_80068C1C@BATTLE/BATTLE.PRG)
-int Field_legacyBackgroundGradientPackets[1344]; /* rodata: contents loaded in Step 5 */
+int Field_legacyBackgroundGradientPackets[1344]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F1CE0 (D_800F1CE0@BATTLE/BATTLE.PRG)
 VECTOR Field_backgroundReferenceVectors[2];

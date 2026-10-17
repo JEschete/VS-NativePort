@@ -1,11 +1,19 @@
 #include "Legacy/Render/LibGpu.h"
 #include "Core/Unported.h"
+#include "Render/PageSpace.hpp"
 
-#include <cstdio>
+#include <span>
 #include <unordered_map>
 #include <vector>
 
-// Transitional shims (plan §2.2). Each records VS_UNPORTED until it translates into the modern system.
+// Transitional libgpu shims (plan §2.2): each call acts on the page space (Render/PageSpace.hpp, owner decision
+// "page-image") with the original semantics, so the copied code draws unchanged.
+
+using VS::Render::GamePages;
+using VS::Render::PageSpace;
+using VS::u16;
+using VS::u32;
+using VS::usize;
 
 namespace {
 
@@ -23,21 +31,43 @@ LinkTable& Links()
     return t;
 }
 
-// Translation of drawing packets into Engine\Render happens here once the render queue exists; until then each
-// primitive kind reached is recorded once, which lists the work the title slice needs.
+// A packet is its tag word followed by `len` command words, possibly several GPU commands back to back.
 void SubmitPacket(const P_TAG* p)
 {
-    if (p->len == 0) {
+    const usize len = p->len;
+    if (len == 0) {
         return;  // an ordering-table entry, or an empty packet
     }
-    char site[48];
-    std::snprintf(site, sizeof site, "libgpu:packet code 0x%02X", p->code);
-    VS_UNPORTED(site);
+    const std::span<const u32> words(reinterpret_cast<const u32*>(p) + 1, len);
+    usize at = 0;
+    while (at < words.size()) {
+        const usize used = GamePages().Execute(words.subspan(at));
+        at += used ? used : 1;
+    }
+}
+
+PageSpace::Rect ToRect(const RECT* r)
+{
+    return {r->x, r->y, r->w, r->h};
+}
+
+// E2 texture window payload from a RECT (mask and offset in 8-pixel units).
+u32 TextureWindow(const RECT* tw)
+{
+    if (tw == nullptr || tw->w == 0 || tw->h == 0) {
+        return 0;
+    }
+    const u32 maskX = (static_cast<u32>(~(tw->w - 1)) & 0xFF) >> 3;
+    const u32 maskY = (static_cast<u32>(~(tw->h - 1)) & 0xFF) >> 3;
+    const u32 offX = (static_cast<u32>(tw->x) & 0xFF) >> 3;
+    const u32 offY = (static_cast<u32>(tw->y) & 0xFF) >> 3;
+    return maskX | (maskY << 5) | (offX << 10) | (offY << 15);
 }
 
 } // namespace
 
 extern "C" {
+
 u_long LegacyGpu_Handle(const void* p)
 {
     LinkTable& t = Links();
@@ -76,11 +106,17 @@ int LegacyGpu_WalkList(const void* p)
     return count;
 }
 
+// ---------------------------------------------------------------------------------------------------- display
+
 DISPENV* PutDispEnv(DISPENV* env)
 {
-    (void)env;
-    VS_UNPORTED("libgpu:PutDispEnv");
-    return {};
+    PageSpace::Display& d = GamePages().DisplayState();
+    d.area = ToRect(&env->disp);
+    d.screenY = env->screen.y;
+    d.screenH = env->screen.h ? env->screen.h : 240;
+    d.rgb24 = env->isrgb24 != 0;
+    d.interlaced = env->isinter != 0;
+    return env;
 }
 
 DISPENV* SetDefDispEnv(DISPENV* env, int x, int y, int w, int h)
@@ -90,11 +126,23 @@ DISPENV* SetDefDispEnv(DISPENV* env, int x, int y, int w, int h)
     return env;
 }
 
+void SetDispMask(int mask)
+{
+    GamePages().DisplayState().enabled = mask != 0;
+}
+
 DRAWENV* PutDrawEnv(DRAWENV* env)
 {
-    (void)env;
-    VS_UNPORTED("libgpu:PutDrawEnv");
-    return {};
+    PageSpace& pages = GamePages();
+    pages.SetDrawArea(env->clip.x, env->clip.y, env->clip.x + env->clip.w - 1, env->clip.y + env->clip.h - 1);
+    pages.SetDrawOffset(env->ofs[0], env->ofs[1]);
+    pages.SetTextureWindow(TextureWindow(&env->tw));
+    pages.SetTexturePage(env->tpage);
+    pages.SetDither(env->dtd != 0);
+    if (env->isbg) {
+        pages.Fill(ToRect(&env->clip), env->r0, env->g0, env->b0);
+    }
+    return env;
 }
 
 DRAWENV* SetDefDrawEnv(DRAWENV* env, int x, int y, int w, int h)
@@ -104,61 +152,45 @@ DRAWENV* SetDefDrawEnv(DRAWENV* env, int x, int y, int w, int h)
     env->ofs[0] = static_cast<short>(x);
     env->ofs[1] = static_cast<short>(y);
     env->tpage = static_cast<u_short>(getTPage(0, 0, 640, 0));
-    env->dfe = 1;
+    env->dtd = 1;
+    env->dfe = h < 289 ? 1 : 0;
     return env;
 }
 
+// ---------------------------------------------------------------------------------------------------- transfers
+
 int ClearImage(RECT* rect, u_char r, u_char g, u_char b)
 {
-    (void)rect;
-    (void)r;
-    (void)g;
-    (void)b;
-    VS_UNPORTED("libgpu:ClearImage");
-    return {};
+    GamePages().Fill(ToRect(rect), r, g, b);
+    return 0;
 }
 
 int ClearImage2(RECT* rect, u_char r, u_char g, u_char b)
 {
-    (void)rect;
-    (void)r;
-    (void)g;
-    (void)b;
-    VS_UNPORTED("libgpu:ClearImage2");
-    return {};
+    return ClearImage(rect, r, g, b);
 }
 
 int LoadImage(RECT* rect, u_long* p)
 {
-    (void)rect;
-    (void)p;
-    VS_UNPORTED("libgpu:LoadImage");
-    return {};
+    GamePages().Upload(ToRect(rect), reinterpret_cast<const u16*>(p));
+    return 0;
 }
 
 int LoadImage2(RECT* rect, u_long* p)
 {
-    (void)rect;
-    (void)p;
-    VS_UNPORTED("libgpu:LoadImage2");
-    return {};
+    return LoadImage(rect, p);
 }
 
 int StoreImage(RECT* rect, u_long* p)
 {
-    (void)rect;
-    (void)p;
-    VS_UNPORTED("libgpu:StoreImage");
-    return {};
+    GamePages().Download(ToRect(rect), reinterpret_cast<u16*>(p));
+    return 0;
 }
 
 int MoveImage(RECT* rect, int x, int y)
 {
-    (void)rect;
-    (void)x;
-    (void)y;
-    VS_UNPORTED("libgpu:MoveImage");
-    return {};
+    GamePages().Copy(ToRect(rect), x, y);
+    return 0;
 }
 
 u_short GetClut(int x, int y)
@@ -170,6 +202,8 @@ u_short GetTPage(int tp, int abr, int x, int y)
 {
     return static_cast<u_short>(getTPage(tp, abr, x, y));
 }
+
+// ---------------------------------------------------------------------------------------------------- lists
 
 u_long* ClearOTag(u_long* ot, int n)
 {
@@ -206,11 +240,8 @@ void DrawOTag(u_long* p)
 
 void DrawPrim(void* p)
 {
-    // one packet, not a list: submit it alone
-    const u_long saved = getaddr(p);
-    termPrim(p);
-    LegacyGpu_WalkList(p);
-    ((P_TAG*)p)->addr = saved;
+    // one packet, not a list
+    SubmitPacket(static_cast<const P_TAG*>(p));
 }
 
 void AddPrim(void* ot, void* p)
@@ -225,21 +256,21 @@ void AddPrims(void* ot, void* p0, void* p1)
     ((P_TAG*)ot)->addr = LegacyGpu_Handle(p0);
 }
 
+// ---------------------------------------------------------------------------------------------------- packets
+
 void SetDrawArea(DR_AREA* p, RECT* r)
 {
-    (void)p;
-    (void)r;
-    VS_UNPORTED("libgpu:SetDrawArea");
+    setlen(p, 2);
+    p->code[0] = 0xE3000000u | ((static_cast<u32>(r->y) & 0x3FF) << 10) | (static_cast<u32>(r->x) & 0x3FF);
+    p->code[1] = 0xE4000000u | ((static_cast<u32>(r->y + r->h - 1) & 0x3FF) << 10) |
+                 (static_cast<u32>(r->x + r->w - 1) & 0x3FF);
 }
 
 void SetDrawMode(DR_MODE* p, int dfe, int dtd, int tpage, RECT* tw)
 {
-    (void)p;
-    (void)dfe;
-    (void)dtd;
-    (void)tpage;
-    (void)tw;
-    VS_UNPORTED("libgpu:SetDrawMode");
+    setlen(p, 2);
+    p->code[0] = _get_mode(dfe, dtd, tpage);
+    p->code[1] = 0xE2000000u | TextureWindow(tw);
 }
 
 void SetDrawTPage(DR_TPAGE* p, int dfe, int dtd, int tpage)
@@ -250,46 +281,21 @@ void SetDrawTPage(DR_TPAGE* p, int dfe, int dtd, int tpage)
 
 void SetDrawMove(DR_MOVE* p, RECT* rect, int x, int y)
 {
-    (void)p;
-    (void)rect;
-    (void)x;
-    (void)y;
-    VS_UNPORTED("libgpu:SetDrawMove");
+    // a GPU cache flush followed by a VRAM-to-VRAM copy
+    setlen(p, 5);
+    p->code[0] = 0x01000000u;
+    p->code[1] = 0x80000000u;
+    p->code[2] = (static_cast<u32>(rect->y) << 16) | (static_cast<u32>(rect->x) & 0xFFFF);
+    p->code[3] = (static_cast<u32>(y) << 16) | (static_cast<u32>(x) & 0xFFFF);
+    p->code[4] = (static_cast<u32>(rect->h) << 16) | (static_cast<u32>(rect->w) & 0xFFFF);
 }
 
-void SetLineF2(LINE_F2* p)
-{
-    setLineF2(p);
-}
-
-void SetPolyF4(POLY_F4* p)
-{
-    setPolyF4(p);
-}
-
-void SetPolyFT4(POLY_FT4* p)
-{
-    setPolyFT4(p);
-}
-
-void SetPolyG4(POLY_G4* p)
-{
-    setPolyG4(p);
-}
-
-void SetSemiTrans(void* p, int abe)
-{
-    setSemiTrans(p, abe);
-}
-
-void SetSprt(SPRT* p)
-{
-    setSprt(p);
-}
-
-void SetTile(TILE* p)
-{
-    setTile(p);
-}
+void SetLineF2(LINE_F2* p) { setLineF2(p); }
+void SetPolyF4(POLY_F4* p) { setPolyF4(p); }
+void SetPolyFT4(POLY_FT4* p) { setPolyFT4(p); }
+void SetPolyG4(POLY_G4* p) { setPolyG4(p); }
+void SetSemiTrans(void* p, int abe) { setSemiTrans(p, abe); }
+void SetSprt(SPRT* p) { setSprt(p); }
+void SetTile(TILE* p) { setTile(p); }
 
 } // extern "C"

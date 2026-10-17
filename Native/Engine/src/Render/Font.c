@@ -21,7 +21,7 @@
 #include "State/Timers.h"
 
 // decomp: D_800EB98C (D_800EB98C@BATTLE/BATTLE.PRG)
-u_short Render_kGlyphPixelExpansion[16]; /* data: contents loaded in Step 5 */
+u_short Render_kGlyphPixelExpansion[16]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F4CB8 (D_800F4CB8@BATTLE/BATTLE.PRG)
 char Render_fontPaletteOffset;

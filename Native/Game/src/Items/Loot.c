@@ -8,6 +8,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Rewards.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Core/Random.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"

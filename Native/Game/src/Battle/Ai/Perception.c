@@ -31,7 +31,7 @@
 #include "Render/Palette.h"
 
 // decomp: D_800F16F4 (D_800F16F4@BATTLE/BATTLE.PRG)
-int Battle_Ai_frameTickBudget; /* data: contents loaded in Step 5 */
+int Battle_Ai_frameTickBudget; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F58D4 (D_800F58D4@BATTLE/BATTLE.PRG)
 int Battle_Ai_secondPerceptionTarget;

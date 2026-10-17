@@ -22,22 +22,22 @@
 #include "State/Timers.h"
 
 // decomp: D_800E9C08 (D_800E9C08@BATTLE/BATTLE.PRG)
-CVECTOR Event_kDefaultScreenTint; /* data: contents loaded in Step 5 */
+CVECTOR Event_kDefaultScreenTint; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9C0C (D_800E9C0C@BATTLE/BATTLE.PRG)
-Render_FramebufferEffectTranslation Event_kDefaultScreenTransform; /* data: contents loaded in Step 5 */
+Render_FramebufferEffectTranslation Event_kDefaultScreenTransform; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9C1C (D_800E9C1C@BATTLE/BATTLE.PRG)
-u_char Event_fieldCameraReturnCommands[276]; /* data: contents loaded in Step 5 */
+u_char Event_fieldCameraReturnCommands[276]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9C24 (D_800E9C24@BATTLE/BATTLE.PRG)
-short Event_kOrbitReturnHeightOffsets[134]; /* data: contents loaded in Step 5 */
+short Event_kOrbitReturnHeightOffsets[134]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9C28 (D_800E9C28@BATTLE/BATTLE.PRG)
-u_char Event_kOrbitReturnFirstCommand; /* data: contents loaded in Step 5 */
+u_char Event_kOrbitReturnFirstCommand; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9C2C (D_800E9C2C@BATTLE/BATTLE.PRG)
-u_char Event_kOrbitReturnSecondCommand; /* data: contents loaded in Step 5 */
+u_char Event_kOrbitReturnSecondCommand; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F4BA0 (D_800F4BA0@BATTLE/BATTLE.PRG)
 char Event_skipNextFieldCameraRestore;

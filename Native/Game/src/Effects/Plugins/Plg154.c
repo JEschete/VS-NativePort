@@ -3,11 +3,11 @@
 #include "Effects/Plugins/Plg154.h"
 
 // decomp: D_800FB29C (D_800FB29C@EFFECT/PLG154.BIN)
-SVECTOR Effects_Plg154_mesh10Vertices[]; /* data: contents loaded in Step 5 */
+SVECTOR Effects_Plg154_mesh10Vertices[]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FB2EC (D_800FB2EC@EFFECT/PLG154.BIN)
-u_char Effects_Plg154_mesh10Faces[][6]; /* data: contents loaded in Step 5 */
+u_char Effects_Plg154_mesh10Faces[][6]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FB34C (D_800FB34C@EFFECT/PLG154.BIN)
-CVECTOR Effects_Plg154_closedRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg154_closedRingColorFactors[]; /* contents: module image (ModuleData.c) */
 

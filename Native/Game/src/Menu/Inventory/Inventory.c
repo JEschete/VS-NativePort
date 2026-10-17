@@ -21,6 +21,7 @@
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
@@ -83,7 +84,7 @@ char Menu_Inventory_statusCommandAnimationStep;
 char Menu_Inventory_statusCommandState;
 
 // decomp: vs_battle_loadObjectDataState (vs_battle_loadObjectDataState@BATTLE/BATTLE.PRG)
-char Menu_Inventory_equipmentModelLoadStep; /* data: contents loaded in Step 5 */
+char Menu_Inventory_equipmentModelLoadStep; /* contents: module image (ModuleData.c) */
 
 // decomp: local static of vs_mainMenu_miscItemsShortcutMenu, at file scope so the module reset reaches it
 static char Menu_Inventory_miscItemShortcutMisc[] = "MISC\00000|0xF8|";

@@ -2,6 +2,8 @@
 
 #include "Core/Types.hpp"
 
+#include <memory>
+
 namespace VS::Content {
 class Disc;
 }
@@ -34,14 +36,19 @@ struct Services {
 class GameApp {
 public:
     explicit GameApp(Services services);
-    void Tick(const Input::PadState& pad);
+    ~GameApp();
+    // One logical tick: hands the pad to the game and runs it until it waits for the next frame.
+    void Tick(const Input::PadState& pad, bool padConnected);
     Mode CurrentMode() const { return m_mode; }
     u64 Ticks() const { return m_ticks; }
+    bool Finished() const;
 
 private:
     Services m_services;
     Mode m_mode = Mode::Boot;
     u64 m_ticks = 0;
+    struct Runner;
+    std::unique_ptr<Runner> m_runner;
 };
 
 } // namespace VS::Game

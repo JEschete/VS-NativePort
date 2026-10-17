@@ -3,8 +3,8 @@
 #include "Effects/Plugins/Plg255.h"
 
 // decomp: D_800FD0EC (D_800FD0EC@EFFECT/PLG255.BIN)
-int Effects_Plg255_trailEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg255_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FD0F0 (D_800FD0F0@EFFECT/PLG255.BIN)
-int Effects_Plg255_particleEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg255_particleEmissionCounter; /* contents: module image (ModuleData.c) */
 

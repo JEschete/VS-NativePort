@@ -3,5 +3,5 @@
 #include "Effects/Plugins/Plg224.h"
 
 // decomp: D_800FAEEC (D_800FAEEC@EFFECT/PLG224.BIN)
-int Effects_Plg224_particleEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg224_particleEmissionCounter; /* contents: module image (ModuleData.c) */
 

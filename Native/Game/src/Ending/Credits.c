@@ -4,49 +4,49 @@
 #include "Ending/Credits.h"
 
 // decomp: D_8006E3FC (D_8006E3FC@ENDING/ENDING.PRG)
-u_char Ending_Credits_scriptBytes[7040]; /* data: contents loaded in Step 5 */
+u_char Ending_Credits_scriptBytes[7040]; /* contents: module image (ModuleData.c) */
 
 // decomp: _glyphWidths (_glyphWidths@ENDING/ENDING.PRG)
-u_char Ending_Credits_glyphWidths[440244]; /* data: contents loaded in Step 5 */
+u_char Ending_Credits_glyphWidths[440244]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8007005C (D_8007005C@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureOne; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureOne; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8007709C (D_8007709C@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureEight; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureEight; /* contents: module image (ModuleData.c) */
 
 // decomp: D_80088ABC (D_80088ABC@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureNine; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureNine; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8009A4DC (D_8009A4DC@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureTen; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureTen; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800ABEFC (D_800ABEFC@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureEleven; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureEleven; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800BD91C (D_800BD91C@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureTwelve; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureTwelve; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800CF33C (D_800CF33C@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureTwo; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureTwo; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800D7F7C (D_800D7F7C@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureThree; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureThree; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800D837C (D_800D837C@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureFive; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureFive; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800D975C (D_800D975C@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureFour; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureFour; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DB09C (D_800DB09C@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureSix; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureSix; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DB26C (D_800DB26C@ENDING/ENDING.PRG)
-Ending_Credits_TimHeader Ending_Credits_embeddedTextureSeven; /* data: contents loaded in Step 5 */
+Ending_Credits_TimHeader Ending_Credits_embeddedTextureSeven; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DB72C (D_800DB72C@ENDING/ENDING.PRG)
-u_char Ending_Credits_illustrationDecodePhase; /* data: contents loaded in Step 5 */
+u_char Ending_Credits_illustrationDecodePhase; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DB7B0 (D_800DB7B0@ENDING/ENDING.PRG)
 Ending_Credits_TimHeader* Ending_Credits_illustrationTimWorkspace; /* data: contents loaded in Step 5 */

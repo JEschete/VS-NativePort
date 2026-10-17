@@ -3,8 +3,8 @@
 #include "Effects/Plugins/Plg148.h"
 
 // decomp: D_800FC8F8 (D_800FC8F8@EFFECT/PLG148.BIN)
-int Effects_Plg148_trailEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg148_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FC8FC (D_800FC8FC@EFFECT/PLG148.BIN)
-CVECTOR Effects_Plg148_tiledRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg148_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
 

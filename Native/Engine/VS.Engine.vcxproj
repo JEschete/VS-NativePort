@@ -242,6 +242,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Core\Memory\WordCopy.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Core\Memory.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -314,6 +320,8 @@
     </ClCompile>
     <ClCompile Include="src\Movie\Movie.cpp" />
     <ClCompile Include="src\Platform\App.cpp" />
+    <ClCompile Include="src\Platform\CrashHandler.cpp" />
+    <ClCompile Include="src\Platform\GameFiber.cpp" />
     <ClCompile Include="src\Render\Camera.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -369,6 +377,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Render\PageSpace.cpp" />
     <ClCompile Include="src\Render\Palette.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -504,6 +513,7 @@
     <ClInclude Include="src\Core\Math\Vector.h" />
     <ClInclude Include="src\Core\Memory\Copy.h" />
     <ClInclude Include="src\Core\Memory\Heap.h" />
+    <ClInclude Include="src\Core\Memory\WordCopy.h" />
     <ClInclude Include="src\Core\Memory.h" />
     <ClInclude Include="src\Core\Overlays.h" />
     <ClInclude Include="src\Core\Random.h" />
@@ -558,10 +568,14 @@
     <ClInclude Include="include\Core\Types.hpp" />
     <ClInclude Include="include\Core\Unported.h" />
     <ClInclude Include="include\Core\Unported.hpp" />
+    <ClInclude Include="include\Input\LegacyPad.hpp" />
     <ClInclude Include="include\Input\Pad.hpp" />
     <ClInclude Include="include\Movie\Movie.hpp" />
     <ClInclude Include="include\Platform\App.hpp" />
+    <ClInclude Include="include\Platform\CrashHandler.hpp" />
+    <ClInclude Include="include\Platform\GameFiber.hpp" />
     <ClInclude Include="include\Render\Device.hpp" />
+    <ClInclude Include="include\Render\PageSpace.hpp" />
     <ClInclude Include="include\Save\SaveStore.hpp" />
     <ClInclude Include="Legacy\Audio\LibSpu.h" />
     <ClInclude Include="Legacy\Core\LibEtc.h" />

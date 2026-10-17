@@ -3,5 +3,5 @@
 #include "Effects/Plugins/Plg232.h"
 
 // decomp: D_800FBA00 (D_800FBA00@EFFECT/PLG232.BIN)
-int Effects_Plg232_trailEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg232_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 

@@ -10,6 +10,6 @@
 #define VS_RENDER_UPLOAD_H_DECLS
 
 extern int Render_legacyUploadRectCursor;
-extern RECT Render_legacyUploadRects[];
+extern RECT Render_legacyUploadRects[64 / sizeof(RECT)];
 
 #endif // VS_RENDER_UPLOAD_H_DECLS

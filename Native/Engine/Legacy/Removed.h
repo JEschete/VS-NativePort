@@ -12,7 +12,6 @@ typedef void (*LegacyRemovedCallback)(void);
 static inline int DrawSync(int mode) { (void)mode; return 0; }
 static inline u_long DrawSyncCallback(void (*func)(void)) { (void)func; return 0; }
 static inline int ResetGraph(int mode) { (void)mode; return 0; }
-static inline void SetDispMask(int mask) { (void)mask; }
 static inline int SetGraphDebug(int level) { (void)level; return 0; }
 static inline void SetDrawStp(void* p, int pbw) { (void)p; (void)pbw; }
 static inline void FntLoad(int tx, int ty) { (void)tx; (void)ty; }
@@ -25,10 +24,11 @@ static inline int ResetCallback(void) { return 0; }
 static inline int EnterCriticalSection(void) { return 0; }
 static inline void ExitCriticalSection(void) { }
 static inline long OpenEvent(unsigned long desc, long spec, long mode, long (*func)(void)) { (void)desc; (void)spec; (void)mode; (void)func; return 0; }
-static inline long CloseEvent(long ev) { (void)ev; return 0; }
+// PsyQ returns 1 for success here and the copied code retries until it gets it
+static inline long CloseEvent(long ev) { (void)ev; return 1; }
 static inline long TestEvent(long ev) { (void)ev; return 0; }
-static inline long EnableEvent(long ev) { (void)ev; return 0; }
-static inline long DisableEvent(long ev) { (void)ev; return 0; }
+static inline long EnableEvent(long ev) { (void)ev; return 1; }
+static inline long DisableEvent(long ev) { (void)ev; return 1; }
 static inline void UnDeliverEvent(unsigned long desc, unsigned long spec) { (void)desc; (void)spec; }
 static inline void SystemError(char c, long n) { (void)c; (void)n; }
 static inline void _bu_init(void) { }
@@ -37,9 +37,7 @@ static inline void SpuQuit(void) { }
 static inline long SpuSetIRQ(long onOff) { (void)onOff; return 0; }
 static inline unsigned long SpuSetIRQAddr(unsigned long addr) { (void)addr; return 0; }
 static inline LegacyRemovedCallback SpuSetIRQCallback(LegacyRemovedCallback f) { (void)f; return NULL; }
-static inline LegacyRemovedCallback SpuSetTransferCallback(LegacyRemovedCallback f) { (void)f; return NULL; }
 static inline long SpuSetTransferMode(long mode) { (void)mode; return 0; }
-static inline unsigned long SpuSetTransferStartAddr(unsigned long addr) { (void)addr; return 0; }
 static inline void DecDCTReset(int mode) { (void)mode; }
 static inline void StCdInterrupt(void) { }
 static inline int CdMix(void* vol) { (void)vol; return 0; }

@@ -26,7 +26,7 @@
 #include "Render/Palette.h"
 
 // decomp: D_800E82F4 (D_800E82F4@BATTLE/BATTLE.PRG)
-u_short Battle_bladePpDamageBonuses[12]; /* data: contents loaded in Step 5 */
+u_short Battle_bladePpDamageBonuses[12]; /* contents: module image (ModuleData.c) */
 
 // decomp: _statCalculators (_statCalculators@BATTLE/BATTLE.PRG)
 short (*Battle_statCalculators[27])(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* data: contents loaded in Step 5 */

@@ -3,14 +3,14 @@
 #include "Battle/ActionMenu.h"
 
 // decomp: _spellClassCounts (_spellClassCounts@BATTLE/BATTLE.PRG)
-u_char Battle_spellClassCounts[4]; /* data: contents loaded in Step 5 */
+u_char Battle_spellClassCounts[4]; /* contents: module image (ModuleData.c) */
 
 // decomp: _spellIds (_spellIds@BATTLE/BATTLE.PRG)
 u_char* Battle_spellClassSpellIds[4]; /* data: contents loaded in Step 5 */
 
 // decomp: vs_battle_chainAbilityOffsets (vs_battle_chainAbilityOffsets@BATTLE/BATTLE.PRG)
-char Battle_chainAbilityActionIds[16]; /* data: contents loaded in Step 5 */
+char Battle_chainAbilityActionIds[16]; /* contents: module image (ModuleData.c) */
 
 // decomp: vs_battle_defenseAbilityOffsets (vs_battle_defenseAbilityOffsets@BATTLE/BATTLE.PRG)
-char Battle_defenseAbilityActionIds[16]; /* data: contents loaded in Step 5 */
+char Battle_defenseAbilityActionIds[16]; /* contents: module image (ModuleData.c) */
 

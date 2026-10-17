@@ -5,6 +5,7 @@
 #include "Battle/StatusEffects.h"
 #include "CdDrive.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"

@@ -3,7 +3,7 @@
 #include "Core/Math/Interpolation.h"
 
 // decomp: _trig_table (_trig_table@SLUS_010.40)
-u_short const Core_kSineTable[1674]; /* rodata: contents loaded in Step 5 */
+u_short Core_kSineTable[1674]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG func_800CFB68 (src/BATTLE/BATTLE.PRG/5BF94.c:5805)
 int Core_Math_InterpolateSevenBitScalar(int arg0, int arg1, int arg2)

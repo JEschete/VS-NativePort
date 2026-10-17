@@ -3,8 +3,8 @@
 #include "Effects/Plugins/Plg272.h"
 
 // decomp: D_800FBE70 (D_800FBE70@EFFECT/PLG272.BIN)
-CVECTOR Effects_Plg272_closedRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg272_closedRingColorFactors[]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FBE90 (D_800FBE90@EFFECT/PLG272.BIN)
-SVECTOR Effects_Plg272_surfaceVertices[5][16]; /* data: contents loaded in Step 5 */
+SVECTOR Effects_Plg272_surfaceVertices[5][16]; /* contents: module image (ModuleData.c) */
 

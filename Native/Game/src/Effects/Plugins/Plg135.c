@@ -3,8 +3,8 @@
 #include "Effects/Plugins/Plg135.h"
 
 // decomp: D_800FC96C (D_800FC96C@EFFECT/PLG135.BIN)
-CVECTOR Effects_Plg135_closedRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg135_closedRingColorFactors[]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FC98C (D_800FC98C@EFFECT/PLG135.BIN)
-int Effects_Plg135_trailEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg135_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 

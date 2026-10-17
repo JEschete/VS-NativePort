@@ -1,13 +1,73 @@
 #include "Legacy/Audio/LibSpu.h"
 #include "Core/Unported.h"
 
-// Transitional shims (plan §2.2). Each records VS_UNPORTED until it translates into the modern system.
+#include <cstring>
+
+// Transitional shims (plan §2.2). Transfers act on the sample memory block synchronously and then report completion
+// through the registered callback, as the DMA interrupt did; the rest record VS_UNPORTED until the audio backend.
+
+namespace {
+
+alignas(16) unsigned char g_registers[LEGACY_SPU_REGISTER_BYTES];
+unsigned char g_ram[LEGACY_SPU_RAM_BYTES];
+unsigned long g_transferAddr = 0;
+SpuTransferCallbackProc g_transferDone = nullptr;
+
+void CompleteTransfer()
+{
+    // the callback may replace itself (the sound driver's clears it)
+    if (SpuTransferCallbackProc done = g_transferDone) {
+        done();
+    }
+}
+
+} // namespace
 
 extern "C" {
-void SpuStart(void)
+void* LegacySpu_Registers(void)
 {
-    VS_UNPORTED("libspu:SpuStart");
+    return g_registers;
 }
+
+unsigned char* LegacySpu_Ram(void)
+{
+    return g_ram;
+}
+
+SpuTransferCallbackProc SpuSetTransferCallback(SpuTransferCallbackProc func)
+{
+    SpuTransferCallbackProc previous = g_transferDone;
+    g_transferDone = func;
+    return previous;
+}
+
+unsigned long SpuSetTransferStartAddr(unsigned long addr)
+{
+    // SPU addresses are in 8-byte units of the 512 KiB memory; the first 0x1010 bytes are reserved
+    if (addr < 0x1010 || addr >= LEGACY_SPU_RAM_BYTES) {
+        return 0;
+    }
+    g_transferAddr = addr & ~7ul;
+    return g_transferAddr;
+}
+
+unsigned long SpuWrite(unsigned char* addr, unsigned long size)
+{
+    const unsigned long n = size <= LEGACY_SPU_RAM_BYTES - g_transferAddr ? size : LEGACY_SPU_RAM_BYTES - g_transferAddr;
+    std::memcpy(g_ram + g_transferAddr, addr, n);
+    CompleteTransfer();
+    return n;
+}
+
+unsigned long SpuRead(unsigned char* addr, unsigned long size)
+{
+    const unsigned long n = size <= LEGACY_SPU_RAM_BYTES - g_transferAddr ? size : LEGACY_SPU_RAM_BYTES - g_transferAddr;
+    std::memcpy(addr, g_ram + g_transferAddr, n);
+    CompleteTransfer();
+    return n;
+}
+
+void SpuStart(void) {}
 
 long SpuSetNoiseClock(long nClock)
 {
@@ -20,22 +80,6 @@ long SpuSetReverb(long onOff)
 {
     (void)onOff;
     VS_UNPORTED("libspu:SpuSetReverb");
-    return {};
-}
-
-unsigned long SpuWrite(unsigned char* addr, unsigned long size)
-{
-    (void)addr;
-    (void)size;
-    VS_UNPORTED("libspu:SpuWrite");
-    return {};
-}
-
-unsigned long SpuRead(unsigned char* addr, unsigned long size)
-{
-    (void)addr;
-    (void)size;
-    VS_UNPORTED("libspu:SpuRead");
     return {};
 }
 

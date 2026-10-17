@@ -33,6 +33,7 @@
 #include "Boot/GameplayInit.h"
 #include "Boot/Lifecycle.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Core/Timing.h"
 #include "DiscQueue.h"
 #include "Effects/ActionEffects.h"

@@ -26,7 +26,7 @@
 #include "State/Flags.h"
 
 // decomp: D_800F17DC (D_800F17DC@BATTLE/BATTLE.PRG)
-short Battle_Ai_radialRetreatPath[36][2]; /* data: contents loaded in Step 5 */
+short Battle_Ai_radialRetreatPath[36][2]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F5918 (D_800F5918@BATTLE/BATTLE.PRG)
 int Battle_Ai_orbitAngularVelocity;

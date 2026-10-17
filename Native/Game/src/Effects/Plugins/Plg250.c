@@ -3,5 +3,5 @@
 #include "Effects/Plugins/Plg250.h"
 
 // decomp: D_800FB628 (D_800FB628@EFFECT/PLG250.BIN)
-CVECTOR Effects_Plg250_closedRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg250_closedRingColorFactors[]; /* contents: module image (ModuleData.c) */
 

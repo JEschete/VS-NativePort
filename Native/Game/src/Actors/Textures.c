@@ -3,8 +3,8 @@
 #include "Actors/Textures.h"
 
 // decomp: D_800E8F30 (D_800E8F30@BATTLE/BATTLE.PRG)
-u_char Actors_textureSlotOrigins[152]; /* data: contents loaded in Step 5 */
+u_char Actors_textureSlotOrigins[152]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8F90 (D_800E8F90@BATTLE/BATTLE.PRG)
-u_char Actors_textureSlotRowOffsets[56]; /* data: contents loaded in Step 5 */
+u_char Actors_textureSlotRowOffsets[56]; /* contents: module image (ModuleData.c) */
 

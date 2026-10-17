@@ -2,7 +2,7 @@
 #include "Legacy/Psx.h"
 #include "Core/Compatibility.h"
 #include "Core/Memory/Copy.h"
-#include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"

@@ -3,8 +3,8 @@
 #include "Effects/Plugins/Plg160.h"
 
 // decomp: D_800FB31C (D_800FB31C@EFFECT/PLG160.BIN)
-CVECTOR Effects_Plg160_tiledRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg160_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FB33C (D_800FB33C@EFFECT/PLG160.BIN)
-u_char Effects_Plg160_ringColorFactors[][4]; /* data: contents loaded in Step 5 */
+u_char Effects_Plg160_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */
 

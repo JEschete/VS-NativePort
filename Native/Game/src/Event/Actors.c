@@ -3,8 +3,8 @@
 #include "Event/Actors.h"
 
 // decomp: D_800E9B4C (D_800E9B4C@BATTLE/BATTLE.PRG)
-int Event_weaponDrawStates[121]; /* data: contents loaded in Step 5 */
+int Event_weaponDrawStates[121]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9B58 (D_800E9B58@BATTLE/BATTLE.PRG)
-char Event_animationBankBases[472]; /* data: contents loaded in Step 5 */
+char Event_animationBankBases[472]; /* contents: module image (ModuleData.c) */
 

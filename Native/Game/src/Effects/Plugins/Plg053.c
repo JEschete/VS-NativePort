@@ -3,5 +3,5 @@
 #include "Effects/Plugins/Plg053.h"
 
 // decomp: D_800FB2D4 (D_800FB2D4@EFFECT/PLG053.BIN)
-CVECTOR Effects_Plg053_closedRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg053_closedRingColorFactors[]; /* contents: module image (ModuleData.c) */
 

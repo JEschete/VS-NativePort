@@ -3,8 +3,8 @@
 #include "Effects/Plugins/Plg168.h"
 
 // decomp: D_800FDC54 (D_800FDC54@EFFECT/PLG168.BIN)
-int Effects_Plg168_trailEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg168_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FDC58 (D_800FDC58@EFFECT/PLG168.BIN)
-int Effects_Plg168_particleEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg168_particleEmissionCounter; /* contents: module image (ModuleData.c) */
 

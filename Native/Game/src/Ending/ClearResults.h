@@ -11,12 +11,12 @@
 
 extern u_char Ending_kRankHeadingWidth;
 extern CVECTOR Ending_congratulationsTint[2];
-extern CVECTOR Ending_scoreTint[];
-extern CVECTOR Ending_countingScoreTint[];
-extern CVECTOR Ending_mapCompletionTint[];
-extern CVECTOR Ending_countingMapCompletionTint[];
+extern CVECTOR Ending_scoreTint[48 / sizeof(CVECTOR)];
+extern CVECTOR Ending_countingScoreTint[40 / sizeof(CVECTOR)];
+extern CVECTOR Ending_mapCompletionTint[32 / sizeof(CVECTOR)];
+extern CVECTOR Ending_countingMapCompletionTint[24 / sizeof(CVECTOR)];
 extern CVECTOR Ending_rankHeadingTint[4];
-extern CVECTOR Ending_rankLabelTint[];
+extern CVECTOR Ending_rankLabelTint[8 / sizeof(CVECTOR)];
 extern u_int Ending_riskbreakerRankIndex;
 extern int Ending_clearCount;
 extern u_int Ending_finalScore;

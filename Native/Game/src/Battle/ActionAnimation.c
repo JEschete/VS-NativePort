@@ -9,13 +9,13 @@
 #include "Actors/TextureAnimation.h"
 #include "Battle/ActionAnimation.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Effects/ActionEffects.h"
 #include "Field/Gimmicks.h"
 #include "Render/Palette.h"
 
 // decomp: D_800E8E80 (D_800E8E80@BATTLE/BATTLE.PRG)
-u_char Battle_chainAbilityAnimationGroups[168]; /* data: contents loaded in Step 5 */
+u_char Battle_chainAbilityAnimationGroups[168]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F49D8 (D_800F49D8@BATTLE/BATTLE.PRG)
 int Battle_chainAbilityAnimationSide;

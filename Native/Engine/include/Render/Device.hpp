@@ -7,6 +7,8 @@
 
 struct SDL_Window;
 struct SDL_GPUDevice;
+struct SDL_GPUTexture;
+struct SDL_GPUTransferBuffer;
 
 namespace VS::Render {
 
@@ -34,11 +36,19 @@ public:
     // (e.g. minimized window).
     bool PresentClear(const ClearColor& color);
 
+    // Shows an RGBA8 image (0xAABBGGRR) letterboxed at the given display aspect (4:3 for the PS1 TV picture).
+    bool PresentImage(const u32* rgba, i32 width, i32 height, float aspect = 4.0f / 3.0f);
+
     const char* BackendName() const;
 
 private:
+    bool EnsureFrameTexture(i32 width, i32 height);
+
     SDL_Window* m_window = nullptr;
     SDL_GPUDevice* m_device = nullptr;
+    SDL_GPUTexture* m_frame = nullptr;
+    SDL_GPUTransferBuffer* m_upload = nullptr;
+    i32 m_frameW = 0, m_frameH = 0;
 };
 
 } // namespace VS::Render

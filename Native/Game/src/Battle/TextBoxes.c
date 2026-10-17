@@ -3,5 +3,5 @@
 #include "Battle/TextBoxes.h"
 
 // decomp: D_800EBDDC (D_800EBDDC@BATTLE/BATTLE.PRG)
-u_short Battle_doorStrings[190]; /* rodata: contents loaded in Step 5 */
+u_short Battle_doorStrings[190]; /* contents: module image (ModuleData.c) */
 

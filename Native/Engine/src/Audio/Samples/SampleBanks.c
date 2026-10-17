@@ -194,6 +194,7 @@ int Audio_Samples_UploadBankChunk(int* in_Data, u_int in_Size, int in_Slot, int 
                 spuChunk = in_Size;
             }
             in_Size = spuChunk;
+            SpuSetTransferStartAddr(Audio_Samples_bankStream.spuAddress);
             Audio_Driver_WriteSampleMemory((char*)in_Data, in_Size);
             Audio_Samples_bankStream.spuAddress += in_Size;
             Audio_Samples_bankStream.spuBytesRemaining -= in_Size;
@@ -269,6 +270,7 @@ int Audio_Samples_UploadBank(void* in_Data, int in_Wait, int in_FirstInstrument,
     Audio_Driver_WaitForSampleTransfer();
     if (Audio_Samples_SequenceMagicDifference(in_Data) == 0) {
         header = in_Data;
+        SpuSetTransferStartAddr(in_SpuAddr);
         in_Data = header->payload;
         instruments = in_Data;
         in_Data = instruments + header->instrumentDataOffset;

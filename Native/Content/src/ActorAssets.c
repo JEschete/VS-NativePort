@@ -16,6 +16,7 @@
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
 #include "Field/Gimmicks.h"
@@ -27,10 +28,10 @@
 #include "Render/Textures.h"
 
 // decomp: D_800E8F29 (D_800E8F29@BATTLE/BATTLE.PRG)
-u_char Content_modelParseResetFlag; /* data: contents loaded in Step 5 */
+u_char Content_modelParseResetFlag; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8FC4 (D_800E8FC4@BATTLE/BATTLE.PRG)
-int Content_assetQueuePeakUsage; /* data: contents loaded in Step 5 */
+int Content_assetQueuePeakUsage; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F457C (D_800F457C@BATTLE/BATTLE.PRG)
 int Content_lastLoadPhaseSnapshot;

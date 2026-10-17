@@ -13,6 +13,7 @@
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Field/Gimmicks.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"

@@ -7,16 +7,16 @@
 #include "Audio/Seq/Sequencer.h"
 
 // decomp: _soundEvent (_soundEvent@SLUS_010.40)
-int Audio_Driver_legacySpuEvent; /* data: contents loaded in Step 5 */
+int Audio_Driver_legacySpuEvent; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8002F548 (D_8002F548@SLUS_010.40)
-int Audio_Driver_recentTickCostTotal; /* data: contents loaded in Step 5 */
+int Audio_Driver_recentTickCostTotal; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8002F550 (D_8002F550@SLUS_010.40)
-int Audio_Driver_recentTickCosts[4]; /* data: contents loaded in Step 5 */
+int Audio_Driver_recentTickCosts[4]; /* contents: module image (ModuleData.c) */
 
 // decomp: _soundFlush (_soundFlush@SLUS_010.40)
-char Audio_Driver_legacySpuFlushBytes[64]; /* data: contents loaded in Step 5 */
+char Audio_Driver_legacySpuFlushBytes[64]; /* contents: module image (ModuleData.c) */
 
 // decomp: _spuMemInfo (_spuMemInfo@SLUS_010.40)
 char Audio_Driver_legacySpuAllocatorTable;
@@ -36,6 +36,7 @@ int Audio_Driver_pendingUpdates;
 // decomp: SLUS_010.40 _spuWriteComplete (src/SLUS_010.40/25AC.c:989)
 void Audio_Driver_CompleteSampleTransfer(void)
 {
+    SpuSetTransferCallback(NULL);
     Audio_Cutscene_legacySpuTransferBusy = 0;
 }
 
@@ -43,12 +44,14 @@ void Audio_Driver_CompleteSampleTransfer(void)
 void Audio_Driver_ArmSampleTransferCallback(void)
 {
     Audio_Cutscene_legacySpuTransferBusy = 1;
+    SpuSetTransferCallback(Audio_Driver_CompleteSampleTransfer);
 }
 
 // decomp: SLUS_010.40 _writeSpu (src/SLUS_010.40/25AC.c:1001)
 void Audio_Driver_WriteSampleMemory(char* data, u_int len)
 {
     Audio_Cutscene_legacySpuTransferBusy = 1;
+    SpuSetTransferCallback(Audio_Driver_CompleteSampleTransfer);
     SpuWrite(data, len);
 }
 
@@ -81,6 +84,7 @@ void Audio_Driver_Start(void)
     int event;
 
     SpuStart();
+    SpuSetTransferStartAddr(0x1010);
     Audio_Driver_WriteSampleMemory(Audio_Driver_legacySpuFlushBytes, 64);
     Audio_Driver_WaitForSampleTransfer();
     Audio_Driver_ResetPlaybackState();

@@ -256,6 +256,7 @@ int Movie_Intro_Play(void)
         PutDispEnv(&disp);
 
         if (++var_s2 != 1) {
+            SetDispMask(1);
         }
 
         if ((Input_buttonsPressed.allButtons & (PADRright | PADstart))) {

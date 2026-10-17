@@ -7,52 +7,52 @@ typedef struct Audio_CommandArguments Audio_CommandArguments;
 typedef struct Audio_DriverFlags Audio_DriverFlags;
 
 // decomp: src/include/hw.h:7
-#define VOICE_00_LEFT_RIGHT ((u_short*)0x1F801C00)
+#define VOICE_00_LEFT_RIGHT ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x000))
 
 // decomp: src/include/hw.h:8
-#define VOICE_00_ADPCM_SAMPLE_RATE ((u_short*)0x1F801C04)
+#define VOICE_00_ADPCM_SAMPLE_RATE ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x004))
 
 // decomp: src/include/hw.h:9
-#define VOICE_00_ADPCM_START_ADDR ((u_short*)0x1F801C06)
+#define VOICE_00_ADPCM_START_ADDR ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x006))
 
 // decomp: src/include/hw.h:10
-#define VOICE_00_ADPCM_ADSR_LOWER ((u_short*)0x1F801C08)
+#define VOICE_00_ADPCM_ADSR_LOWER ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x008))
 
 // decomp: src/include/hw.h:11
-#define VOICE_00_ADPCM_ADSR_UPPER ((u_short*)0x1F801C0A)
+#define VOICE_00_ADPCM_ADSR_UPPER ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x00A))
 
 // decomp: src/include/hw.h:12
-#define VOICE_00_ADPCM_REPEAT_ADDR ((u_short*)0x1F801C0E)
+#define VOICE_00_ADPCM_REPEAT_ADDR ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x00E))
 
 // decomp: src/include/hw.h:13
-#define SPU_VOICE_KEY_ON_LO ((u_short*)0x1F801D88)
+#define SPU_VOICE_KEY_ON_LO ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x188))
 
 // decomp: src/include/hw.h:14
-#define SPU_VOICE_KEY_ON_HI ((u_short*)0x1F801D8A)
+#define SPU_VOICE_KEY_ON_HI ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x18A))
 
 // decomp: src/include/hw.h:15
-#define SPU_VOICE_KEY_OFF_LO ((u_short*)0x1F801D8C)
+#define SPU_VOICE_KEY_OFF_LO ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x18C))
 
 // decomp: src/include/hw.h:16
-#define SPU_VOICE_KEY_OFF_HI ((u_short*)0x1F801D8E)
+#define SPU_VOICE_KEY_OFF_HI ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x18E))
 
 // decomp: src/include/hw.h:17
-#define SPU_VOICE_CHN_FM_MODE_LO ((u_short*)0x1F801D90)
+#define SPU_VOICE_CHN_FM_MODE_LO ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x190))
 
 // decomp: src/include/hw.h:18
-#define SPU_VOICE_CHN_FM_MODE_HI ((u_short*)0x1F801D92)
+#define SPU_VOICE_CHN_FM_MODE_HI ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x192))
 
 // decomp: src/include/hw.h:19
-#define SPU_VOICE_CHN_NOISE_MODE_LO ((u_short*)0x1F801D94)
+#define SPU_VOICE_CHN_NOISE_MODE_LO ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x194))
 
 // decomp: src/include/hw.h:20
-#define SPU_VOICE_CHN_NOISE_MODE_HI ((u_short*)0x1F801D96)
+#define SPU_VOICE_CHN_NOISE_MODE_HI ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x196))
 
 // decomp: src/include/hw.h:21
-#define SPU_VOICE_CHN_REVERB_MODE_LO ((u_short*)0x1F801D98)
+#define SPU_VOICE_CHN_REVERB_MODE_LO ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x198))
 
 // decomp: src/include/hw.h:22
-#define SPU_VOICE_CHN_REVERB_MODE_HI ((u_short*)0x1F801D9A)
+#define SPU_VOICE_CHN_REVERB_MODE_HI ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x19A))
 
 // decomp: src/include/sound.h:14
 #define VOICE_PARAM_VOLUME_L (1 << 0) /* volume (left) */

@@ -10,7 +10,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Damage.h"
-#include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"

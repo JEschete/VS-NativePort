@@ -14,6 +14,7 @@
 #include "Actors/WeaponModel.h"
 #include "Battle/StatusEffects.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Field/Actors.h"
 #include "Field/Gimmicks.h"
 #include "Menu/Framework/ActorPreview.h"

@@ -10,6 +10,7 @@
 #include "Battle/StatusEffects.h"
 #include "Core/Callbacks.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentInit.h"
 #include "Items/EquipmentStats.h"

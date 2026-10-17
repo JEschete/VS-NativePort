@@ -133,10 +133,13 @@ def finish_text(text: str) -> str:
     # string-table data the decomp splices in from its disc build (#include "build/assets/...vsString")
     text = re.sub(r'#\s*include\s+"build/assets/[^"]+\.vsString"', "0 /* disc text table: loaded in Step 5 */", text)
     # scratch memory addresses (0x1F800000-0x1F8003FF) are Core's scratch block (Core/Scratch.h)
-    return SCRATCH_RX.sub(lambda m: f"((uintptr_t)Core_ScratchBase() + 0x{m[1].upper()})", text)
+    text = SCRATCH_RX.sub(lambda m: f"((uintptr_t)Core_ScratchBase() + 0x{m[1].upper()})", text)
+    # SPU registers (0x1F801C00-0x1F801DFF) are the libspu shim's register block (Legacy/Audio/LibSpu.h)
+    return SPU_REGISTER_RX.sub(lambda m: f"((uintptr_t)LegacySpu_Registers() + 0x{int(m[1], 16) - 0xC00:03X})", text)
 
 
 SCRATCH_RX = re.compile(r"\b0x1[Ff]800([0-3][0-9A-Fa-f]{2})\b")
+SPU_REGISTER_RX = re.compile(r"\b0x1[Ff]801([CcDd][0-9A-Fa-f]{2})\b")
 
 
 # Macros that select code in shared headers (`#ifdef _ITEMMENU` in MENU/items2.h is set by the including .c) or
@@ -203,6 +206,40 @@ def include_spelling(path: str) -> str:
 
 def sibling_header(path: str) -> str:
     return path[:-2] + ".h" if path.endswith(".c") else path
+
+
+def splat_asset_extents() -> dict[tuple[str, str], tuple[int, int]]:
+    """(module, symbol) -> (file offset, bytes) for every named subsegment in the decomp's splat configs. Asset
+    symbols (images, palettes) have no C type, so their extent is from their start to the next subsegment's. An
+    indexed image whose palette comes first is reached as `<name>_clut`, the start of the same bytes."""
+    out: dict[tuple[str, str], tuple[int, int]] = {}
+    for cfg in sorted((dx.DECOMP / "config").rglob("splat.yaml")):
+        text = cfg.read_text(encoding="utf-8")
+        m = re.search(r"^\s*basename:\s*(\S+)", text, re.M)
+        if not m:
+            continue
+        module = m[1]
+        starts: list[tuple[int, str | None]] = []
+        for ln in text.splitlines():
+            ln = ln.strip()
+            if not ln.startswith("- "):
+                continue
+            b = re.match(r"-\s*\[\s*(0x[0-9A-Fa-f]+|\d+)\s*(?:,\s*([^,\]]+))?(?:,\s*([^,\]]+))?", ln)
+            if b:
+                kind = (b[2] or "").strip()
+                name = (b[3] or "").strip() if kind and not kind.startswith(".") and kind not in ("c", "asm", "hasm",
+                                                                                                    "bin") else None
+                starts.append((int(b[1], 0), name))
+                continue
+            d = re.match(r"-\s*\{\s*start:\s*(0x[0-9A-Fa-f]+|\d+)", ln)
+            if d:
+                n = re.search(r"\bname:\s*([\w]+)", ln)
+                starts.append((int(d[1], 0), n[1] if n else None))
+        for (start, name), (nxt, _) in zip(starts, starts[1:]):
+            if name and nxt > start:
+                out[(module, name)] = (start, nxt - start)
+                out.setdefault((module, name + "_clut"), (start, nxt - start))
+    return out
 
 
 # --------------------------------------------------------------------------------------------- source text + renames
@@ -286,6 +323,8 @@ class Copier:
         self.struct_names: set[str] = set()     # C names of struct/union types (forward-declarable)
         self.type_home: dict[str, str] = {}     # type id (canonical) -> header path
         self.report: dict[str, list] = collections.defaultdict(list)
+        self.asset_extents = splat_asset_extents()
+        self.module_data: list[tuple[dict, str, int | None]] = []   # (row, C name, bytes if unsized) filled at boot
         self.deleted_calls = 0
         self.type_edges: dict[str, set[str]] = {}
         self.macro_body: dict[str, str] = {}
@@ -823,6 +862,7 @@ class Copier:
             if d is not None:
                 text = self.name_inline_type(
                     self.drop_storage(self.own_declarator(d, self.renamed(d["file"], d["start"], d["end"], ov))).strip(), d)
+                text = self.apply_fixups(r, text)
                 decl, init = self.split_init(text)
                 if not re.search(rf"\b{re.escape(name)}\b", decl):
                     # defined under a template binding macro (`static CVECTOR VS_CLOSED_RING_COLORS[] = ...`)
@@ -850,14 +890,29 @@ class Copier:
                 if re.search(r"\[\s*\]", decl):
                     size = int(r["size"] or 0)
                     elem = e.get("elem_size") or 0
+                    ext = self.asset_extents.get((r["overlay"], r["name"]))
+                    if ext is not None:
+                        size = ext[1]  # the ledger measures assets to the next symbol, splat to the next subsegment
                     if size > 0 and elem > 0:
                         decl = re.sub(r"\[\s*\]", f"[{size // elem}]", decl, count=1)
+                    elif size > 0 and (m := re.match(rf"(.*?)\b{re.escape(name)}\s*\[\s*\](.*)$", decl)):
+                        # element size unknown to the index (template-bound declarations): let C compute it
+                        decl = f"{m[1]}{name}[{size} / sizeof({m[1].strip()}{m[2]})]{m[2]}"
                     else:
                         self.report["global-unsized"].append(r["final_name"])
                 if re.fullmatch(r"void\s+\w+", decl.strip()):
                     # an assembly label declared `extern void` (only its address is used): bytes of its size
                     decl = f"u_char {name}[{max(int(r['size'] or 0), 1)}]"
                 tag = {"bss": "", "unknown": ""}.get(r["segment"], f" /* {r['segment']}: contents loaded in Step 5 */")
+                if self.module_data_source(r) is not None:
+                    tag = " /* contents: module image (ModuleData.c) */"
+                    # filled at start-up, so it cannot live in read-only memory (pointer-free: const is top-level)
+                    decl = re.sub(r"\bconst\s+", "", decl)
+                    # an array the copy could not size: the ledger's byte count stands in for sizeof
+                    self.module_data.append((r, name, int(r["size"] or 0) if re.search(r"\[\s*\]", decl) else None))
+                elif tag:
+                    self.report["module-data-skipped"].append(
+                        f"{r['id']} {r['final_name']} ({r['overlay'] or r['instances']}, pointers={r['has_pointers']})")
                 text = f"{decl};{tag}"
                 need = e["need"]
             src = (d if d is not None else e)["file"]
@@ -1406,6 +1461,36 @@ class Copier:
 
     # ------------------------------------------------------------------------------------------------- macros
     DISC_LAYOUT = r"Native\Content\include\Content\DiscLayout.h"
+    MODULE_DATA = r"Native\Game\src\Boot\ModuleData.c"
+
+    def module_data_source(self, r: dict) -> tuple[str, int] | None:
+        """Where a global with no C initializer gets its contents: (module file on the disc, byte offset). Only
+        pointer-free data with one known home: pointers in module images are PS1 addresses and need relocating."""
+        if r["segment"] in ("bss", "") or r["has_pointers"] != "0" or not r["overlay"]:
+            return None
+        ext = self.asset_extents.get((r["overlay"], r["name"]))
+        if ext is not None:
+            return r["overlay"], ext[0]
+        if r["file_offset"].strip():
+            return r["overlay"], int(r["file_offset"], 0)
+        return None
+
+    def copy_module_data(self) -> None:
+        """The table Content_LoadModuleData fills globals from: contents of initialised data the decomp keeps in the
+        module images (data, rodata, assets) rather than in C. Positions only; the bytes come from the user's disc."""
+        rows = []
+        for r, name, bytes_ in sorted(self.module_data, key=lambda x: (x[0]["overlay"], self.module_data_source(x[0])[1])):
+            module, offset = self.module_data_source(r)
+            if bytes_ is not None and bytes_ <= 0:
+                self.report["module-data-unsized"].append(f"{r['id']} {r['final_name']}")
+                continue
+            size = f"sizeof {name}" if bytes_ is None else f"{bytes_}u"
+            rows.append(f'    {{"{module}", 0x{offset:X}, {size}, &{name}}}, // {r["id"]} {r["name"]}')
+        text = ("// Globals whose contents are in the module images (DATA_LEDGER segment data/rodata/asset, no pointers).\n"
+                '#include "Content/ModuleData.h"\n\n'
+                "const Content_ModuleDataEntry Content_moduleData[] = {\n" + "\n".join(rows) + "\n};\n"
+                "const unsigned Content_moduleDataCount = sizeof Content_moduleData / sizeof Content_moduleData[0];\n")
+        self.out(self.MODULE_DATA).items.append(Item("var", text, "Content_moduleData", "", [], (0,)))
 
     def copy_disc_layout(self) -> None:
         """Disc file positions (VS_<FILE>_LBA / _SIZE). The code does arithmetic on them (sector offset tables,
@@ -1791,6 +1876,7 @@ def main() -> int:
     cp.copy_templates()
     cp.copy_resets()
     cp.copy_disc_layout()
+    cp.copy_module_data()
     cp.copy_string_tables()
     cp.copy_macros()
     rendered = cp.finish()

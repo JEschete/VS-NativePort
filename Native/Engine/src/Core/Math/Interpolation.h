@@ -9,7 +9,7 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_CORE_MATH_INTERPOLATION_H_DECLS)
 #define VS_CORE_MATH_INTERPOLATION_H_DECLS
 
-extern u_short const Core_kSineTable[1674];
+extern u_short Core_kSineTable[1674];
 int Core_Math_InterpolateSevenBitScalar(int arg0, int arg1, int arg2);
 int Core_Math_InterpolateCosineScalar(int arg0, int arg1, int arg2, int arg3);
 void Core_Math_InterpolatePairsToWideVector(short* src, int t, VECTOR* vec);

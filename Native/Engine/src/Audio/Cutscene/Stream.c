@@ -91,6 +91,8 @@ int Audio_Cutscene_FindFreeVoicePair(void)
 void Audio_Cutscene_UploadSecondMonoBuffer(void)
 {
     u_char* temp_s0 = Audio_Cutscene_streamState.currentChunk + 0x800;
+    SpuSetTransferStartAddr(0x2100);
+    SpuSetTransferCallback(Audio_Cutscene_BeginMonoPlayback);
     SpuWrite(temp_s0, 0x800);
 }
 
@@ -118,6 +120,7 @@ void Audio_Cutscene_StartStream(u_int* arg0, int arg1, int arg2)
         Audio_Cutscene_streamState.voiceMask =
             (1 << VoiceIndex) | (1 << (VoiceIndex + 1));
         Audio_Driver_KeyOffVoices(Audio_Cutscene_streamState.voiceMask);
+        SpuSetTransferStartAddr(0x1100U);
         Audio_Cutscene_legacySpuTransferBusy = 1;
 
         Audio_Cutscene_streamState.auxiliaryMask =
@@ -129,12 +132,14 @@ void Audio_Cutscene_StartStream(u_int* arg0, int arg1, int arg2)
                 (Audio_Cutscene_streamState.formatFlags & 2)
                     ? Audio_Cutscene_streamState.totalPages - (s3[5] >> 1)
                     : 0;
+            SpuSetTransferCallback(Audio_Cutscene_BeginStereoPlayback);
             transferSize = 0x2000;
         } else {
             Audio_Cutscene_streamState.reserved1C =
                 (Audio_Cutscene_streamState.formatFlags & 2)
                     ? Audio_Cutscene_streamState.totalPages - s3[5]
                     : 0;
+            SpuSetTransferCallback(Audio_Cutscene_UploadSecondMonoBuffer);
             transferSize = 0x800;
         }
         SpuWrite((u_char*)Audio_Cutscene_streamState.currentChunk, transferSize);
@@ -212,6 +217,7 @@ void Audio_Cutscene_BeginStreamPlayback(
 {
     int var_s2 = in_SampleAddr;
     if (Audio_Cutscene_streamState.voiceMask != 0) {
+        SpuSetTransferCallback(NULL);
         Audio_Cutscene_legacySpuTransferBusy = 0;
         if (Audio_Cutscene_streamState.totalPages >= 0x1001) {
             Audio_Cutscene_streamState.totalPages -= 0x1000;
@@ -248,6 +254,7 @@ void Audio_Cutscene_RefillStreamBuffer(
 {
     if ((Audio_Cutscene_streamState.voiceMask != 0)
         && (Audio_Cutscene_streamState.totalPages != 0)) {
+        SpuSetTransferStartAddr(in_RepeatAddressL);
         Audio_Driver_ArmSampleTransferCallback();
         SpuWrite((u_char*)Audio_Cutscene_streamState.currentChunk, in_Param3);
         if (Audio_Cutscene_streamState.totalPages > 0x800) {

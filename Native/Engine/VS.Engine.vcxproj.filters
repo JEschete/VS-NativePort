@@ -342,6 +342,12 @@
     <ClInclude Include="src\Core\Memory\Heap.h">
       <Filter>src\Core\Memory</Filter>
     </ClInclude>
+    <ClCompile Include="src\Core\Memory\WordCopy.c">
+      <Filter>src\Core\Memory</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Memory\WordCopy.h">
+      <Filter>src\Core\Memory</Filter>
+    </ClInclude>
     <ClCompile Include="src\Core\Memory.c">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -429,6 +435,12 @@
     <ClCompile Include="src\Platform\App.cpp">
       <Filter>src\Platform</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\CrashHandler.cpp">
+      <Filter>src\Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\GameFiber.cpp">
+      <Filter>src\Platform</Filter>
+    </ClCompile>
     <ClCompile Include="src\Render\Camera.c">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -492,6 +504,9 @@
     <ClInclude Include="src\Render\ModelDraw.h">
       <Filter>src\Render</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\PageSpace.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClCompile Include="src\Render\Palette.c">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -627,6 +642,9 @@
     <ClInclude Include="include\Core\Unported.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
+    <ClInclude Include="include\Input\LegacyPad.hpp">
+      <Filter>include\Input</Filter>
+    </ClInclude>
     <ClInclude Include="include\Input\Pad.hpp">
       <Filter>include\Input</Filter>
     </ClInclude>
@@ -636,7 +654,16 @@
     <ClInclude Include="include\Platform\App.hpp">
       <Filter>include\Platform</Filter>
     </ClInclude>
+    <ClInclude Include="include\Platform\CrashHandler.hpp">
+      <Filter>include\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Platform\GameFiber.hpp">
+      <Filter>include\Platform</Filter>
+    </ClInclude>
     <ClInclude Include="include\Render\Device.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\PageSpace.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\SaveStore.hpp">

@@ -9,7 +9,7 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_TITLE_CREDITS_H_DECLS)
 #define VS_TITLE_CREDITS_H_DECLS
 
-extern char Title_developerLogo[];
-extern char Title_publisherLogo[];
+extern char Title_developerLogo[896 / sizeof(char)];
+extern char Title_publisherLogo[6176 / sizeof(char)];
 
 #endif // VS_TITLE_CREDITS_H_DECLS

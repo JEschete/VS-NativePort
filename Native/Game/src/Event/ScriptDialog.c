@@ -15,7 +15,7 @@
 #include "State/StateFlags.h"
 
 // decomp: D_800E9BEC (D_800E9BEC@BATTLE/BATTLE.PRG)
-u_char Event_kDialogPlacementOrder[324]; /* data: contents loaded in Step 5 */
+u_char Event_kDialogPlacementOrder[324]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG vs_battle_script_initTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:672)
 int Event_ScriptInitDialogBox(u_char* script, short arg1 __attribute__((unused)))

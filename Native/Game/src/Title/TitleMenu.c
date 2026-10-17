@@ -8,6 +8,7 @@
 #include "Boot/GameLoop.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Event/ScriptAudio.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
@@ -161,6 +162,7 @@ int Title_ShowContinueScreen(void)
             exit = Menu_Files_UpdateLoadMenu(0);
             if (exit != 0) {
                 Save_MemoryCard_ReleaseResources();
+                SetDispMask(0);
                 return exit;
             }
             Menu_Files_DrawBackground();
@@ -253,6 +255,7 @@ void Title_ShowClearSaveScreen(void)
         case Title_ClearSaveScreenPhase_Exit:
             Menu_Files_DrawExitFade();
             if (--Title_clearSaveFadeTimerFrames == 0) {
+                SetDispMask(0);
                 return;
             }
             break;
@@ -284,6 +287,7 @@ void Title_ShowPublisherAndDeveloper()
     PutDispEnv(&disp);
     PutDrawEnv(&draw);
     VSync(0);
+    SetDispMask(1);
 
     for (i = 0; i < 364; ++i) {
         var_a3 = 0;
@@ -326,6 +330,7 @@ void Title_ShowPublisherAndDeveloper()
         PutDispEnv(&disp);
         PutDrawEnv(&draw);
     }
+    SetDispMask(0);
 }
 
 // decomp: TITLE.PRG _setMenuItemFadeIn (src/TITLE/TITLE.PRG/22C.c:3761)
@@ -1082,6 +1087,7 @@ int Title_Run(void)
         Movie_Intro_Start();
         Movie_Intro_Play();
         Title_InitializeTitleDisplay();
+        SetDispMask(1);
         menuData = Title_InitializeMenu(menuItem);
         for (i = 32; i >= 0; i -= 2) {
             Title_BlendCopyright(menuData, i);
@@ -1199,6 +1205,7 @@ int Title_Run(void)
             Input_UpdateVibrationPatterns();
         }
         VSync(0);
+        SetDispMask(0);
         if (selectedOption == Title_MenuItemId_Continue) {
             selectedOption = Title_ShowContinueScreen();
             if (selectedOption == Title_MenuItemId_Continue) {
@@ -1213,6 +1220,7 @@ int Title_Run(void)
 void Title_InitializeGameDisplay(int w, int h, int distance, int r, int g, int b)
 {
     RECT rect = (RECT) { 0, 0, 1024, 512 };
+    SetDispMask(0);
     Core_Gte_SetGeomOffset(w / 2, h / 2);
     Core_Gte_SetGeomScreen(distance);
     SetDefDrawEnv(Render_legacyDrawEnvironments, 0, 0, w, h - 16);

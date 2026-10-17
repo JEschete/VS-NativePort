@@ -2217,6 +2217,7 @@ int Menu_Files_UpdateGameOverChoices(int init)
         Render_frameScratch.primitiveCursor = prim + 5;
         Menu_Files_gameOverChoicesColor1 += 8;
         if (Menu_Files_gameOverChoicesColor1 == 0) {
+            SetDispMask(0);
             return Menu_Files_gameOverChoicesSelectedOption + 1;
         }
         return 0;
@@ -2379,9 +2380,11 @@ int Menu_Files_UpdateGameOver(u_char* state)
         }
         break;
     case Menu_Files_GameOverState_SelectFile:
+        SetDispMask(1);
         option = Menu_Files_UpdateDataLoadMenu(0);
         if (option != 0) {
             Save_MemoryCard_ReleaseMenuResources();
+            SetDispMask(0);
             if (option < 0) {
                 Menu_Files_gameOverResetDelay = 1;
                 *state = Menu_Files_GameOverState_ReturnToTitle;
@@ -3399,6 +3402,7 @@ void Menu_Files_InitializeDisplay(void)
     PutDrawEnv(&draw);
     setRECT(&rect, 0, 0, 640, 240);
     ClearImage(&rect, 0, 0, 0);
+    SetDispMask(1);
 }
 
 // decomp: TITLE.PRG _saveScreenSwapBuf (src/TITLE/TITLE.PRG/22C.c:3093)

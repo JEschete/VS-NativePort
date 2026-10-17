@@ -147,6 +147,7 @@ void Render_ShowLoadingScreen(void)
         (224 - IMG_H(Render_legacyLoadingImageHeader)) / 2, IMG_W(Render_legacyLoadingImageHeader),
         IMG_H(Render_legacyLoadingImageHeader));
     LoadImage(&rect, (u_long*)&Render_legacyLoadingImageHeader + 1);
+    SetDispMask(1);
 }
 #undef IMG_H
 #undef IMG_W

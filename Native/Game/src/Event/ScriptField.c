@@ -26,7 +26,7 @@
 #include "State/Flags.h"
 
 // decomp: D_800E9BF0 (D_800E9BF0@BATTLE/BATTLE.PRG)
-u_char Event_kMenuTransitionModes[320]; /* data: contents loaded in Step 5 */
+u_char Event_kMenuTransitionModes[320]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F4B88 (D_800F4B88@BATTLE/BATTLE.PRG)
 Event_WeatherTween Event_weatherTween;

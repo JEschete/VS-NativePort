@@ -4,7 +4,7 @@
 #include "Core/Math/Vector.h"
 
 // decomp: D_80040A14 (D_80040A14@SLUS_010.40)
-u_char Core_Math_kArcTangentTable[1296]; /* rodata: contents loaded in Step 5 */
+u_char Core_Math_kArcTangentTable[1296]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG vs_battle_clamp (src/BATTLE/BATTLE.PRG/2842C.c:390)
 short Core_Math_ClampSignedShort(short arg0, int arg1, int arg2)

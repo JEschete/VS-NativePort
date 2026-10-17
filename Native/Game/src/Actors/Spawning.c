@@ -204,8 +204,8 @@ Actors_CharacterInit Actors_ashleyInitialLoadout = {
 };
 
 // decomp: D_8004FDD0 (D_8004FDD0@SLUS_010.40)
-char Actors_placeholderActorName[20]; /* data: contents loaded in Step 5 */
+char Actors_placeholderActorName[20]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8004FE88 (D_8004FE88@SLUS_010.40)
-u_char Actors_usesSecondaryBodyModel[256]; /* data: contents loaded in Step 5 */
+u_char Actors_usesSecondaryBodyModel[256]; /* contents: module image (ModuleData.c) */
 

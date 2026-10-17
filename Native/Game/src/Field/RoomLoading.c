@@ -29,6 +29,7 @@
 #include "CdDrive.h"
 #include "Core/Compatibility.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
 #include "Effects/Runtime.h"

@@ -3,5 +3,5 @@
 #include "Event/Sound.h"
 
 // decomp: D_800E9B34 (D_800E9B34@BATTLE/BATTLE.PRG)
-int Event_sfxSourceIds[127]; /* data: contents loaded in Step 5 */
+int Event_sfxSourceIds[127]; /* contents: module image (ModuleData.c) */
 

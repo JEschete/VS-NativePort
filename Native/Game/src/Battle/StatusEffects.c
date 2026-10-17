@@ -31,16 +31,16 @@
 #include "State/Timers.h"
 
 // decomp: D_800E8204 (D_800E8204@BATTLE/BATTLE.PRG)
-int Battle_limbStatusFlags[4]; /* data: contents loaded in Step 5 */
+int Battle_limbStatusFlags[4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8490 (D_800E8490@BATTLE/BATTLE.PRG)
-int Battle_vitalsTickCounter; /* data: contents loaded in Step 5 */
+int Battle_vitalsTickCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8494 (D_800E8494@BATTLE/BATTLE.PRG)
-int Battle_regeneratingLimb; /* data: contents loaded in Step 5 */
+int Battle_regeneratingLimb; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8498 (D_800E8498@BATTLE/BATTLE.PRG)
-int Battle_targetingRiskTimer; /* data: contents loaded in Step 5 */
+int Battle_targetingRiskTimer; /* contents: module image (ModuleData.c) */
 
 // decomp: vs_battle_sceneBuffer (vs_battle_sceneBuffer@BATTLE/BATTLE.PRG)
 void* Battle_unusedSceneBuffer;
@@ -58,25 +58,25 @@ Menu_Framework_PreviewPoseState* Battle_unusedGlobal1[1];
 int Battle_unusedGlobal2;
 
 // decomp: vs_main_statusEffectParams (vs_main_statusEffectParams@SLUS_010.40)
-Battle_StatusEffectParams Battle_statusEffectParams[32]; /* data: contents loaded in Step 5 */
+Battle_StatusEffectParams Battle_statusEffectParams[32]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8004EF20 (D_8004EF20@SLUS_010.40)
-u_char Battle_statusParams5Duration; /* data: contents loaded in Step 5 */
+u_char Battle_statusParams5Duration; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8004EF80 (D_8004EF80@SLUS_010.40)
-u_char Battle_statusParams11Duration; /* data: contents loaded in Step 5 */
+u_char Battle_statusParams11Duration; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8004EFA0 (D_8004EFA0@SLUS_010.40)
-u_char Battle_statusParams13Duration; /* data: contents loaded in Step 5 */
+u_char Battle_statusParams13Duration; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8004EFB2 (D_8004EFB2@SLUS_010.40)
-u_char Battle_statusParams14TickInterval; /* data: contents loaded in Step 5 */
+u_char Battle_statusParams14TickInterval; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8004EFE2 (D_8004EFE2@SLUS_010.40)
-u_char Battle_statusParams17TickInterval; /* data: contents loaded in Step 5 */
+u_char Battle_statusParams17TickInterval; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8004F000 (D_8004F000@SLUS_010.40)
-u_char Battle_statusParams19Duration; /* data: contents loaded in Step 5 */
+u_char Battle_statusParams19Duration; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8736)
 void Battle_PreserveAshleyStatuses(void) { Battle_RemoveActorStatuses(0, Battle_characterState->stats); }

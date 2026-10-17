@@ -30,7 +30,7 @@
 #include "State/Timers.h"
 
 // decomp: D_800E9308 (D_800E9308@BATTLE/BATTLE.PRG)
-int Actors_renderPassCounter; /* data: contents loaded in Step 5 */
+int Actors_renderPassCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F2458 (D_800F2458@BATTLE/BATTLE.PRG)
 Actors_ModelRenderContext Actors_modelRenderContext;

@@ -7,6 +7,7 @@
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Equipment.h"

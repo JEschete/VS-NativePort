@@ -3,10 +3,10 @@
 #include "Audio/Legacy.h"
 
 // decomp: D_80094FAC (D_80094FAC@BATTLE/BATTLE.PRG)
-int Audio_legacyUnreferencedTable[795]; /* unit-data: contents loaded in Step 5 */
+int Audio_legacyUnreferencedTable[795]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_80094FFC (D_80094FFC@BATTLE/BATTLE.PRG)
-int Audio_legacyUnreferencedWord; /* unit-data: contents loaded in Step 5 */
+int Audio_legacyUnreferencedWord; /* contents: module image (ModuleData.c) */
 
 // decomp: g_SpuMallocRecTable (g_SpuMallocRecTable@SLUS_010.40)
 char Audio_legacySpuAllocationTable[SPU_MALLOC_RECSIZ * (SPU_MALLOC_NUM_BLOCKS + 1)];

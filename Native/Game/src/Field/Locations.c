@@ -5,10 +5,10 @@
 #include "Field/Locations.h"
 
 // decomp: vs_main_locationZoneMapIds (vs_main_locationZoneMapIds@SLUS_010.40)
-char Field_locationDestinations[1024]; /* data: contents loaded in Step 5 */
+char Field_locationDestinations[1024]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8004FCCC (D_8004FCCC@SLUS_010.40)
-char Field_zoneMusicIds[280]; /* data: contents loaded in Step 5 */
+char Field_zoneMusicIds[280]; /* contents: module image (ModuleData.c) */
 
 #pragma push_macro("mkCdFile")
 #undef mkCdFile

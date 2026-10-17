@@ -13,16 +13,16 @@
 #include "Effects/Transforms.h"
 
 // decomp: D_801004F0 (D_801004F0@EFFECT/PLG128.BIN)
-SVECTOR Effects_Plg128_surfaceVertices[5][16]; /* data: contents loaded in Step 5 */
+SVECTOR Effects_Plg128_surfaceVertices[5][16]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_80100770 (D_80100770@EFFECT/PLG128.BIN)
-CVECTOR Effects_Plg128_closedRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg128_closedRingColorFactors[]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_80100790 (D_80100790@EFFECT/PLG128.BIN)
-SVECTOR Effects_Plg128_surfaceVertices2[5][16]; /* data: contents loaded in Step 5 */
+SVECTOR Effects_Plg128_surfaceVertices2[5][16]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_80100A10 (D_80100A10@EFFECT/PLG128.BIN)
-int Effects_Plg128_trailEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg128_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: PLG128.BIN func_800FD9A4 (src/EFFECT/PLG128.BIN/F8.c:66)
 void Effects_Plg128_BuildCameraOffsetTransform(Effects_Plg128_CameraEffectState* arg0, VECTOR* arg1)

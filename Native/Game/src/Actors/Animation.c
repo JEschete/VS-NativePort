@@ -23,7 +23,7 @@
 #include "Core/Core/IntPair.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Math/Matrix.h"
-#include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Event/ScriptVm.h"
@@ -37,31 +37,31 @@
 #include "State/Timers.h"
 
 // decomp: D_800E8960 (D_800E8960@BATTLE/BATTLE.PRG)
-u_char Actors_sharedSequenceIdsByKind[592]; /* data: contents loaded in Step 5 */
+u_char Actors_sharedSequenceIdsByKind[592]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8F2C (D_800E8F2C@BATTLE/BATTLE.PRG)
-u_char Actors_sharedSequenceBankIndex; /* data: contents loaded in Step 5 */
+u_char Actors_sharedSequenceBankIndex; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8FC0 (D_800E8FC0@BATTLE/BATTLE.PRG)
-char Actors_reservedControlByte; /* data: contents loaded in Step 5 */
+char Actors_reservedControlByte; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9090 (D_800E9090@BATTLE/BATTLE.PRG)
-u_char Actors_drawnWeaponAnimationBases[3232]; /* data: contents loaded in Step 5 */
+u_char Actors_drawnWeaponAnimationBases[3232]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E909C (D_800E909C@BATTLE/BATTLE.PRG)
-u_char Actors_sheathedWeaponAnimationBases[3220]; /* data: contents loaded in Step 5 */
+u_char Actors_sheathedWeaponAnimationBases[3220]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E916C (D_800E916C@BATTLE/BATTLE.PRG)
-Actors_TextureAnimationKey Actors_secondarySlotSequences[188][8]; /* data: contents loaded in Step 5 */
+Actors_TextureAnimationKey Actors_secondarySlotSequences[188][8]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9298 (D_800E9298@BATTLE/BATTLE.PRG)
-u_char Actors_animationEventLengths[2712]; /* data: contents loaded in Step 5 */
+u_char Actors_animationEventLengths[2712]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E92DC (D_800E92DC@BATTLE/BATTLE.PRG)
-u_char Actors_drawnWeaponSoundIds[2644]; /* data: contents loaded in Step 5 */
+u_char Actors_drawnWeaponSoundIds[2644]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9A28 (D_800E9A28@BATTLE/BATTLE.PRG)
-u_short Actors_animationEventPoints[97][4]; /* data: contents loaded in Step 5 */
+u_short Actors_animationEventPoints[97][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F244F (D_800F244F@BATTLE/BATTLE.PRG)
 u_char Actors_sequenceTexturePagesOneBased[8425];

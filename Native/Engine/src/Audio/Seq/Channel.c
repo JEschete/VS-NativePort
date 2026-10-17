@@ -43,7 +43,7 @@ Audio_MusicConfig* Audio_Seq_activeMusicConfig;
 Audio_SeqChannel Audio_Seq_savedMusicChannels[32];
 
 // decomp: vs_main_materialModifiers (vs_main_materialModifiers@SLUS_010.40)
-char Audio_Seq_unusedMaterialModifiers[8][30]; /* data: contents loaded in Step 5 */
+char Audio_Seq_unusedMaterialModifiers[8][30]; /* contents: module image (ModuleData.c) */
 
 // decomp: vs_main_scoredata (vs_main_scoredata@SLUS_010.40)
 State_ScoreData Audio_Seq_unusedScoredata;

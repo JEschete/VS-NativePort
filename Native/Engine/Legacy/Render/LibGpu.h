@@ -261,6 +261,7 @@ int LegacyGpu_WalkList(const void* p);
 // ---- display, drawing environment and video memory
 DISPENV* PutDispEnv(DISPENV* env);
 DISPENV* SetDefDispEnv(DISPENV* env, int x, int y, int w, int h);
+void SetDispMask(int mask);
 DRAWENV* PutDrawEnv(DRAWENV* env);
 DRAWENV* SetDefDrawEnv(DRAWENV* env, int x, int y, int w, int h);
 int ClearImage(RECT* rect, u_char r, u_char g, u_char b);

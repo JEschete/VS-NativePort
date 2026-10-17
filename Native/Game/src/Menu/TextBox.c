@@ -32,10 +32,10 @@
 int* Menu_sceneNotificationBuffer; /* data: contents loaded in Step 5 */
 
 // decomp: D_800EBF58 (D_800EBF58@BATTLE/BATTLE.PRG)
-char Menu_kNotificationItemNames[65][12]; /* rodata: contents loaded in Step 5 */
+char Menu_kNotificationItemNames[65][12]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC2D8 (D_800EC2D8@BATTLE/BATTLE.PRG)
-int Menu_kInformationHeaderSpriteWords[5477]; /* data: contents loaded in Step 5 */
+int Menu_kInformationHeaderSpriteWords[5477]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F4E68 (D_800F4E68@BATTLE/BATTLE.PRG)
 char Menu_sceneNotificationTimer;

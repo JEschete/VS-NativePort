@@ -3,5 +3,5 @@
 #include "Effects/Plugins/Plg045.h"
 
 // decomp: D_800FB5B4 (D_800FB5B4@EFFECT/PLG045.BIN)
-int Effects_Plg045_particleEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg045_particleEmissionCounter; /* contents: module image (ModuleData.c) */
 

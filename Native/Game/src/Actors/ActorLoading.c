@@ -24,6 +24,7 @@
 #include "CdDrive.h"
 #include "Core/Callbacks.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Core/Random.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"

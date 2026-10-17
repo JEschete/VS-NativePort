@@ -11,7 +11,7 @@
 #include "Save/MemoryCard/GameFiles.h"
 
 // decomp: D_800EBC04 (D_800EBC04@BATTLE/BATTLE.PRG)
-int Render_kStatGaugeColors[4]; /* data: contents loaded in Step 5 */
+int Render_kStatGaugeColors[4]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG func_8007A824 (src/BATTLE/BATTLE.PRG/146C.c:8055)
 void Render_AppendOverlayPrimitive(int* arg0) { Render_SplicePrimitiveList(Render_legacyCurrentOrderingTable + 0x2084, arg0); }

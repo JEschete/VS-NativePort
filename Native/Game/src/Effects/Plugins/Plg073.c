@@ -3,11 +3,11 @@
 #include "Effects/Plugins/Plg073.h"
 
 // decomp: D_800FEF3C (D_800FEF3C@EFFECT/PLG073.BIN)
-CVECTOR Effects_Plg073_tiledRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg073_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FEF5C (D_800FEF5C@EFFECT/PLG073.BIN)
-u_char Effects_Plg073_ringColorFactors[][4]; /* data: contents loaded in Step 5 */
+u_char Effects_Plg073_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FEF7C (D_800FEF7C@EFFECT/PLG073.BIN)
-int Effects_Plg073_trailEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg073_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 

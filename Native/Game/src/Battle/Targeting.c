@@ -28,7 +28,7 @@
 #include "Content/StringTables.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Copy.h"
-#include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Field/Camera.h"
 #include "Field/Collision.h"
 #include "Field/GameMode.h"
@@ -55,34 +55,34 @@
 #include "Render/UiPrimitives.h"
 
 // decomp: D_800E8184 (D_800E8184@BATTLE/BATTLE.PRG)
-char Battle_categoryNeedsTargetSelection[96]; /* data: contents loaded in Step 5 */
+char Battle_categoryNeedsTargetSelection[96]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8194 (D_800E8194@BATTLE/BATTLE.PRG)
-u_char Battle_categoryIsAreaTarget[80]; /* data: contents loaded in Step 5 */
+u_char Battle_categoryIsAreaTarget[80]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E81B4 (D_800E81B4@BATTLE/BATTLE.PRG)
-u_char Battle_categoryIncludesActingActor[48]; /* data: contents loaded in Step 5 */
+u_char Battle_categoryIncludesActingActor[48]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E81C4 (D_800E81C4@BATTLE/BATTLE.PRG)
-u_char Battle_categoryTargetsBodyParts[32]; /* data: contents loaded in Step 5 */
+u_char Battle_categoryTargetsBodyParts[32]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E81D4 (D_800E81D4@BATTLE/BATTLE.PRG)
-u_char Battle_categoryTargetActorMasks[16]; /* data: contents loaded in Step 5 */
+u_char Battle_categoryTargetActorMasks[16]; /* contents: module image (ModuleData.c) */
 
 // decomp: vs_battle_statusStrings (vs_battle_statusStrings@BATTLE/BATTLE.PRG)
-u_short Battle_statusStrings[1712]; /* rodata: contents loaded in Step 5 */
+u_short Battle_statusStrings[1712]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EA984 (D_800EA984@BATTLE/BATTLE.PRG)
-char Battle_targetInfoTemplate[3140]; /* rodata: contents loaded in Step 5 */
+char Battle_targetInfoTemplate[3140]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EA9B6 (D_800EA9B6@BATTLE/BATTLE.PRG)
-char Battle_targetStatusLineTemplate[3090]; /* rodata: contents loaded in Step 5 */
+char Battle_targetStatusLineTemplate[3090]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EAA54 (D_800EAA54@BATTLE/BATTLE.PRG)
-char Battle_emptyStatusString[2932]; /* rodata: contents loaded in Step 5 */
+char Battle_emptyStatusString[2932]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EABAA (D_800EABAA@BATTLE/BATTLE.PRG)
-u_char Battle_targetSelectionStep; /* rodata: contents loaded in Step 5 */
+u_char Battle_targetSelectionStep; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F4C70 (D_800F4C70@BATTLE/BATTLE.PRG)
 u_char Battle_targetColumnEntries[2][16];

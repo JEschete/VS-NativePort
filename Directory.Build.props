@@ -14,7 +14,7 @@
          (PORTING_WATCHLIST.md section 2). -->
     <VSNative>$(VSRepositoryRoot)Native\</VSNative>
     <VSCopiedCIncludes>$(VSNative)Engine;$(VSNative)Content;$(VSNative)Engine\include;$(VSNative)Engine\src;$(VSNative)Content\include;$(VSNative)Content\src;$(VSNative)Game\include;$(VSNative)Game\src</VSCopiedCIncludes>
-    <VSCopiedCOptions>/clang:-Wno-error=int-conversion /clang:-Wno-error=incompatible-pointer-types /clang:-Wno-error=incompatible-function-pointer-types /clang:-Wno-error=implicit-function-declaration /clang:-Wno-error=implicit-int /clang:-Wno-error=return-type /clang:-Wno-error=int-to-pointer-cast /clang:-Wno-c2x-extensions /clang:-Wno-unused /clang:-Wno-parentheses /clang:-Wno-missing-braces /clang:-Wno-sign-compare /clang:-Wno-pointer-sign /clang:-Wno-switch /clang:-Wno-unknown-pragmas /clang:-Wno-microsoft-anon-tag /clang:-fms-extensions</VSCopiedCOptions>
+    <VSCopiedCOptions>/J /clang:-Wno-error=int-conversion /clang:-Wno-error=incompatible-pointer-types /clang:-Wno-error=incompatible-function-pointer-types /clang:-Wno-error=implicit-function-declaration /clang:-Wno-error=implicit-int /clang:-Wno-error=return-type /clang:-Wno-error=int-to-pointer-cast /clang:-Wno-c2x-extensions /clang:-Wno-unused /clang:-Wno-parentheses /clang:-Wno-missing-braces /clang:-Wno-sign-compare /clang:-Wno-pointer-sign /clang:-Wno-switch /clang:-Wno-unknown-pragmas /clang:-Wno-microsoft-anon-tag /clang:-fms-extensions</VSCopiedCOptions>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

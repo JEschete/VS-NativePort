@@ -27,6 +27,9 @@
     <ClInclude Include="src\CdDrive.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClCompile Include="src\DataStore.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\Disc.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -34,6 +37,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\DiscQueue.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClCompile Include="src\DiscReader.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClInclude Include="src\DiscReader.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClCompile Include="src\LegacyFiles.c">
@@ -48,6 +57,9 @@
     <ClInclude Include="src\ModelLoading.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClCompile Include="src\ModuleLoader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\OverlayFiles.c">
       <Filter>src</Filter>
     </ClCompile>
@@ -72,10 +84,19 @@
     <ClInclude Include="src\SystemResources.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="include\Content\DataAccess.h">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\DataStore.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\Disc.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\DiscLayout.h">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\ModuleData.h">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\StringTables.h">

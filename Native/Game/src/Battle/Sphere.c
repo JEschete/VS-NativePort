@@ -31,31 +31,31 @@
 #include "Save/MemoryCard/GameFiles.h"
 
 // decomp: D_800EA234 (D_800EA234@BATTLE/BATTLE.PRG)
-short Battle_sphereArcBases[502]; /* data: contents loaded in Step 5 */
+short Battle_sphereArcBases[502]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EA2C4 (D_800EA2C4@BATTLE/BATTLE.PRG)
-short Battle_sphereMirroredVertices[430]; /* data: contents loaded in Step 5 */
+short Battle_sphereMirroredVertices[430]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EA438 (D_800EA438@BATTLE/BATTLE.PRG)
-u_char Battle_sphereShapeCommandStarts[488]; /* data: contents loaded in Step 5 */
+u_char Battle_sphereShapeCommandStarts[488]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EA46C (D_800EA46C@BATTLE/BATTLE.PRG)
-u_short Battle_sphereWireframeCommands[218]; /* data: contents loaded in Step 5 */
+u_short Battle_sphereWireframeCommands[218]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EA670 (D_800EA670@BATTLE/BATTLE.PRG)
-int Battle_positionCursorSpriteOffsets[126]; /* data: contents loaded in Step 5 */
+int Battle_positionCursorSpriteOffsets[126]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EA684 (D_800EA684@BATTLE/BATTLE.PRG)
-int Battle_positionCursorSpriteSizes[121]; /* data: contents loaded in Step 5 */
+int Battle_positionCursorSpriteSizes[121]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EA698 (D_800EA698@BATTLE/BATTLE.PRG)
-int Battle_positionCursorSpriteTexCoords[116]; /* data: contents loaded in Step 5 */
+int Battle_positionCursorSpriteTexCoords[116]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EA6AC (D_800EA6AC@BATTLE/BATTLE.PRG)
-u_char Battle_positionCursorBlinkFrame; /* data: contents loaded in Step 5 */
+u_char Battle_positionCursorBlinkFrame; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EB9AC (D_800EB9AC@BATTLE/BATTLE.PRG)
-u_char Battle_reuseSphereVolumes; /* data: contents loaded in Step 5 */
+u_char Battle_reuseSphereVolumes; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EB9B8 (D_800EB9B8@BATTLE/BATTLE.PRG)
 Battle_TargetSphereSetupView* Battle_targetSphere; /* data: contents loaded in Step 5 */

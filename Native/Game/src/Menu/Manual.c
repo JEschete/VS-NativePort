@@ -6,6 +6,7 @@
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Effects/Weather.h"

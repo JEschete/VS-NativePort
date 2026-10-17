@@ -6,10 +6,10 @@
 #include "Title/TitleScreen.h"
 
 // decomp: _titleScreenBg (_titleScreenBg@TITLE/TITLE.PRG)
-u_int Title_titleScreenBackground[]; /* asset: contents loaded in Step 5 */
+u_int Title_titleScreenBackground[222932 / sizeof(u_int)]; /* contents: module image (ModuleData.c) */
 
 // decomp: _menuCopyright (_menuCopyright@TITLE/TITLE.PRG)
-u_short Title_copyrightImage[]; /* asset: contents loaded in Step 5 */
+u_short Title_copyrightImage[8640 / sizeof(u_short)]; /* contents: module image (ModuleData.c) */
 
 // decomp: _4 (_4@src/TITLE/TITLE.PRG/22C.c)
 char Title_movieLocationPadding[4];

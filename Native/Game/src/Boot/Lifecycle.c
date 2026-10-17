@@ -14,6 +14,7 @@
 #include "Core/Random.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
+#include "DiscReader.h"
 #include "Ending/Credits/StaffRoll.h"
 #include "Input/Controller.h"
 #include "Input/Controllers.h"
@@ -97,6 +98,7 @@ void Boot_LoadEndingOverlay(void)
 // decomp: SLUS_010.40 vs_main_resetGame (src/SLUS_010.40/main.c:8119)
 void Boot_ResetToTitle(void)
 {
+    SetDispMask(0);
     while (DsControlB(DslPause, NULL, NULL) == 0)
         ;
     Input_SetMotorCommand(0, 0, 0);
@@ -111,6 +113,7 @@ void Boot_ResetToTitle(void)
 // decomp: SLUS_010.40 vs_main_jumpToBattle (src/SLUS_010.40/main.c:8138)
 void Boot_EnterBattle(void)
 {
+    SetDispMask(0);
     Input_SetMotorCommand(0, 0, 0);
     Input_SetMotorCommand(0, 1, 0);
     Input_UpdateControllerConnection(0, Input_legacyPadResponseBytes[0]);
@@ -129,6 +132,7 @@ void Boot_EnterBattle(void)
 void Boot_RunEndingAndReturnToTitle(void)
 {
     Boot_isGameplayActive = 0;
+    SetDispMask(0);
     Input_SetMotorCommand(0, 0, 0);
     Input_SetMotorCommand(0, 1, 0);
     Input_UpdateControllerConnection(0, Input_legacyPadResponseBytes[0]);
@@ -138,6 +142,7 @@ void Boot_RunEndingAndReturnToTitle(void)
     Save_CaptureAshleySnapshot();
     Boot_LoadEndingOverlay();
     Ending_Credits_RunStaffRoll();
+    SetDispMask(0);
     Input_SetMotorCommand(0, 0, 0);
     Input_SetMotorCommand(0, 1, 0);
     Input_UpdateControllerConnection(0, Input_legacyPadResponseBytes[0]);
@@ -151,6 +156,7 @@ void Boot_RunEndingAndReturnToTitle(void)
 void Boot_InitializePlatformServices(void)
 {
     SetVideoMode(MODE_NTSC);
+    SetDispMask(0);
     InitCARD(0);
     StartCARD();
     PadInitDirect(Input_legacyPadResponseBytes[0], Input_legacyPadResponseBytes[1]);
@@ -209,6 +215,7 @@ int Boot_RunTitleAndBattle(void)
     Boot_CaptureOverlayStack(&Boot_battleReturnStackPointer);
     Boot_isGameplayActive = 1;
     Boot_RunGameLoop();
+    SetDispMask(0);
     Audio_StopAndFreeCurrentMusic();
     return 0;
 }

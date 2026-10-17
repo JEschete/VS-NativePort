@@ -3,5 +3,5 @@
 #include "Effects/Plugins/Plg273.h"
 
 // decomp: D_800FA474 (D_800FA474@EFFECT/PLG273.BIN)
-SVECTOR Effects_Plg273_mirrorSurfaceVertices[5][16]; /* data: contents loaded in Step 5 */
+SVECTOR Effects_Plg273_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.c) */
 

@@ -1,3 +1,4 @@
+#include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
 #include "Core/Log.hpp"
 
@@ -41,7 +42,12 @@ int main(int argc, char** argv)
         return 0;
     }
     if (cmd == "extract" && argc >= 4) {
+        // <outdir>\disc\<path> for each file, and the manifest Content::DataStore reads (sector, size, form, path).
+        // Interleaved files (movies, XA audio) are listed with form "stream" until their converters write them.
         const fs::path out = argv[3];
+        fs::create_directories(out);
+        std::ofstream manifest(out / Content::DataStore::ManifestName, std::ios::binary);
+        manifest << "lba\tsize\tform\tpath\n";
         int written = 0;
         int skipped = 0;
         for (const auto& f : (*disc)->Files()) {
@@ -49,6 +55,7 @@ int main(int argc, char** argv)
                 continue;
             }
             if (f.interleaved) {
+                manifest << f.lba << '\t' << f.size << "\tstream\t" << f.path << '\n';
                 ++skipped;
                 continue;
             }
@@ -57,13 +64,15 @@ int main(int argc, char** argv)
                 VS_LOG_ERROR("extract", "{}", data.error());
                 return 1;
             }
-            const fs::path dst = out / fs::path(f.path);
+            const fs::path dst = out / "disc" / fs::path(f.path);
             fs::create_directories(dst.parent_path());
             std::ofstream(dst, std::ios::binary)
                 .write(reinterpret_cast<const char*>(data->data()), static_cast<std::streamsize>(data->size()));
+            manifest << f.lba << '\t' << f.size << "\traw\t" << f.path << '\n';
             ++written;
         }
-        VS_LOG_INFO("extract", "wrote {} files to {} ({} interleaved skipped)", written, out.string(), skipped);
+        VS_LOG_INFO("extract", "wrote {} files to {} ({} interleaved listed, not converted yet)", written,
+                    out.string(), skipped);
         return 0;
     }
     return Usage();

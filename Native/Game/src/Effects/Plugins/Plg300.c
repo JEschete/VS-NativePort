@@ -16,16 +16,16 @@
 #include "Render/UiPrimitives.h"
 
 // decomp: D_800FE0CC (D_800FE0CC@EFFECT/PLG300.BIN)
-SVECTOR Effects_Plg300_mirrorSurfaceVertices[5][16]; /* data: contents loaded in Step 5 */
+SVECTOR Effects_Plg300_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FE34C (D_800FE34C@EFFECT/PLG300.BIN)
-int Effects_Plg300_particleEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg300_particleEmissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FE350 (D_800FE350@EFFECT/PLG300.BIN)
-u_char Effects_Plg300_ringColorFactors[][4]; /* data: contents loaded in Step 5 */
+u_char Effects_Plg300_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FE370 (D_800FE370@EFFECT/PLG300.BIN)
-u_char Effects_Plg300_ringColorFactors2[][4]; /* data: contents loaded in Step 5 */
+u_char Effects_Plg300_ringColorFactors2[][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: PLG300.BIN func_800FD198 (src/EFFECT/PLG300.BIN/110.c:355)
 int Effects_Plg300_UpdateForegroundRepeatingRing(Effects_RendererSlot* arg0, u_int arg1, int arg2)

@@ -1,12 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Audio/Control/SoundControl.h"
-#include "Audio/Samples/SampleBanks.h"
 #include "CdDrive.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
-#include "Ending/Credits/StaffRoll.h"
+#include "DiscReader.h"
 #include "State/PlayTime.h"
 
 // decomp: SLUS_010.40 _diskReadCallback (src/SLUS_010.40/main.c:9021)
@@ -128,195 +126,6 @@ void Content_ClearDiscReadError(void)
     }
 }
 
-// decomp: SLUS_010.40 _diskInitRead (src/SLUS_010.40/main.c:9140)
-int Content_BeginDiscRead(int sector, u_int bytes, void* vram)
-{
-    if (Content_discDriveState.state == Content_DiscDriveState_Idle) {
-        Content_discDriveState.startSector = sector;
-        Content_discDriveState.byteCount = bytes;
-        Content_discDriveState.destination = vram;
-        Content_discDriveState.ringReadIndex = 0;
-        Content_discDriveState.ringWriteIndex = 0;
-        Content_discDriveState.destinationSector = 0;
-        Content_discDriveState.bufferedSectors = 0;
-        Content_discDriveState.sectorsReceived = 0;
-        Content_discDriveState.failureCount = 0;
-        Content_discDriveState.ringSectorsWritten = 0;
-        Content_discDriveState.sectorCount = bytes / 2048;
-        if (bytes % 2048) {
-            ++Content_discDriveState.sectorCount;
-        }
-        DsIntToPos(sector, &Content_discDriveState.position);
-        Content_discDriveState.state = Content_DiscDriveState_ReadInit;
-        return 1;
-    }
-    return 0;
-}
-
-// decomp: SLUS_010.40 func_800443CC (src/SLUS_010.40/main.c:9164)
-void Content_UpdateDiscCommands(void)
-{
-    DslATV vol;
-    int i;
-    u_int seconds;
-
-    switch (Content_discDriveState.state) {
-    case Content_DiscDriveState_Idle:
-    default:
-        break;
-    case Content_DiscDriveState_ReadXaInit:
-        if (DsSystemStatus() == DslReady) {
-            Content_discDriveState.xaModeMarker = 0;
-            Content_discDriveState.position.minute = 0;
-            while (DsControlB(DslSetmode, Content_discControlResponseBytes, NULL) == 0)
-                ;
-            VSync(3);
-            vol.val2 = 0x80;
-            vol.val0 = 0x80;
-            vol.val3 = 0;
-            vol.val1 = 0;
-            Audio_Control_SetDiscVolume(Content_discDriveState.byteCount);
-            Audio_Control_SetDiscMixVolume(0x7F);
-            Content_discDriveState.xaFilter.file = 1;
-            Content_discDriveState.xaFilter.chan = 0;
-            DsControl(DslSetfilter, (char*)&Content_discDriveState.xaFilter, NULL);
-            DsIntToPos(Content_discDriveState.startSector, &Content_discDriveState.position);
-            Content_discDriveState.commandId =
-                DsPacket(DslModeRT | DslModeSF, &Content_discDriveState.position, DslReadS, NULL, -1);
-            Content_discDriveState.state = Content_DiscDriveState_StreamXa;
-        }
-        if (Content_discDriveState.commandId == 0) {
-            Content_discDriveState.state = Content_DiscDriveState_CommandFailed;
-            ++Content_discDriveState.failureCount;
-        }
-        break;
-    case Content_DiscDriveState_ReadInit: {
-        int status = DsSystemStatus();
-        if (status == DslReady) {
-            Content_discDriveState.sectorsReceived = 0;
-            Content_discDriveState.destinationSector = 0;
-            if (Content_discDriveState.byteCount != 0) {
-                Content_discDriveState.state = Content_DiscDriveState_ReadReady;
-                Content_discDriveState.commandId = DsPacket(DslModeSpeed | DslModeSize1,
-                    &Content_discDriveState.position, DslReadN, Content_ReadCommandCallback, -1);
-            } else {
-                Content_discDriveState.state = Content_DiscDriveState_SeekReady;
-                Content_discDriveState.commandId = DsPacket(DslModeSpeed | DslModeSize1,
-                    &Content_discDriveState.position, DslSeekL, Content_SeekCommandCallback, -1);
-            }
-
-            if (Content_discDriveState.commandId == 0) {
-                Content_discDriveState.state = Content_DiscDriveState_ReadError;
-                ++Content_discDriveState.failureCount;
-            }
-        }
-        break;
-    }
-    case Content_DiscDriveState_CommandFailed: {
-        int status = DsSystemStatus();
-        if (status == DslReady) {
-            Content_discDriveState.sectorsReceived = 0;
-            ++Content_discDriveState.failureCount;
-            seconds = Ending_Credits_xaResumeFrameCount / 60;
-            if (seconds < 420) {
-                DsIntToPos(
-                    Content_discDriveState.startSector + (seconds * 75) + (Ending_Credits_xaResumeFrameCount % 60),
-                    &Content_legacyDiscReadLocation);
-                vol.val2 = 0x80;
-                vol.val0 = 0x80;
-                vol.val3 = 0;
-                vol.val1 = 0;
-                Audio_Control_SetDiscVolume(0);
-                Audio_Control_FadeDiscVolume(0x3C, Content_discDriveState.byteCount);
-                Content_discDriveState.xaFilter.file = 1;
-                Content_discDriveState.xaFilter.chan = 0;
-                DsControl(DslSetfilter, (char*)&Content_discDriveState.xaFilter, NULL);
-                Content_discDriveState.commandId =
-                    DsPacket(DslModeRT | DslModeSF, &Content_legacyDiscReadLocation, DslReadS, NULL, -1);
-                Content_discDriveState.state = Content_DiscDriveState_StreamXa;
-            } else {
-                Content_discDriveState.commandId = DsCommand(DslModeSF | DslModeDA, NULL, NULL, -1);
-                Content_discDriveState.state = Content_DiscDriveState_Idle;
-            }
-        }
-        if (Content_discDriveState.commandId == 0) {
-            Content_discDriveState.state = Content_DiscDriveState_CommandFailed;
-            ++Content_discDriveState.failureCount;
-        }
-        break;
-    }
-    case Content_DiscDriveState_ReadError: {
-        int status = DsSystemStatus();
-        if (status == DslReady) {
-            Content_discDriveState.sectorsReceived = 0;
-            Content_discDriveState.destinationSector = 0;
-            ++Content_discDriveState.failureCount;
-
-            if (Content_discDriveState.byteCount != 0) {
-                Content_discDriveState.state = Content_DiscDriveState_ReadReady;
-                Content_discDriveState.commandId = DsPacket(DslModeSpeed | DslModeSize1,
-                    &Content_discDriveState.position, DslReadN, Content_ReadCommandCallback, -1);
-            } else {
-                Content_discDriveState.state = Content_DiscDriveState_SeekReady;
-                Content_discDriveState.commandId = DsPacket(DslModeSpeed | DslModeSize1,
-                    &Content_discDriveState.position, DslSeekL, Content_SeekCommandCallback, -1);
-            }
-
-            if (Content_discDriveState.commandId == 0) {
-                Content_discDriveState.state = Content_DiscDriveState_ReadError;
-                ++Content_discDriveState.failureCount;
-            }
-        }
-        break;
-    }
-    case Content_DiscDriveState_StreamXaEnd:
-        Audio_Control_SetDiscVolume(0);
-        Content_discDriveState.commandId = DsCommand(DslPause, NULL, NULL, -1);
-        if (Content_discDriveState.commandId > 0) {
-            Content_discDriveState.state = Content_DiscDriveState_Idle;
-        }
-        Content_discDriveState.xaModeMarker = 128;
-        Content_discDriveState.position.minute = 128;
-        while (DsControlB(DslSetmode, Content_discControlResponseBytes, NULL) == 0)
-            ;
-        VSync(3);
-        break;
-    }
-
-    if (Content_discDriveState.bufferMode != Content_DiscBufferMode_Direct) {
-        for (i = 0; i < 16; ++i) {
-            if (Content_discDriveState.destinationSector >= Content_discDriveState.ringSectorsWritten) {
-                return;
-            }
-            if (Content_discDriveState.bufferMode == Content_DiscBufferMode_Buffered) {
-                Core_Memory_CopyAlignedWords(
-                    ((char*)Content_discDriveState.destination + (Content_discDriveState.destinationSector * 2048)),
-                    Content_legacyDiscReadBuffer + (Content_discDriveState.ringReadIndex * 128), 2048);
-
-                ++Content_discDriveState.ringReadIndex;
-                if (Content_discDriveState.ringReadIndex >= 16) {
-                    Content_discDriveState.ringReadIndex = 0;
-                }
-                --Content_discDriveState.bufferedSectors;
-                ++Content_discDriveState.destinationSector;
-                if (Content_discDriveState.destinationSector >= Content_discDriveState.sectorCount) {
-                    Content_discDriveState.state = Content_DiscDriveState_Idle;
-                    Core_Memory_FreeFromHighEnd(Content_legacyDiscReadBuffer);
-                    Content_legacyDiscReadBuffer = NULL;
-                }
-            } else if (Content_discDriveState.bufferMode == Content_DiscBufferMode_Manual) {
-                ++Content_discDriveState.destinationSector;
-                if ((Content_discDriveState.destinationSector >= Content_discDriveState.sectorCount)
-                    && (Audio_Samples_TransferStatus() == 0)) {
-                    Content_discDriveState.state = Content_DiscDriveState_Idle;
-                    Core_Memory_FreeFromHighEnd(Content_legacyDiscReadBuffer);
-                    Content_legacyDiscReadBuffer = NULL;
-                }
-            }
-        }
-    }
-}
-
 // decomp: SLUS_010.40 vs_main_diskLoadFile (src/SLUS_010.40/main.c:9334)
 int Content_ReadDiscFileBlocking(int sector, int bytes, void* vram)
 {
@@ -340,22 +149,6 @@ int Content_ReadDiscFileBlocking(int sector, int bytes, void* vram)
         }
     }
     return result;
-}
-
-// decomp: SLUS_010.40 _diskReset (src/SLUS_010.40/main.c:9385)
-void Content_ResetDiscDrive(void)
-{
-    while (DsControlB(DslPause, NULL, NULL) == 0)
-        ;
-    Content_discDriveState.xaModeMarker = 128;
-    Content_discDriveState.position.minute = 128;
-    Content_discDriveState.reserved2 = 0;
-    Content_discDriveState.state = Content_DiscDriveState_Idle;
-    Content_discDriveState.bufferMode = Content_DiscBufferMode_Direct;
-    Content_legacyDiscReadBuffer = NULL;
-    while (DsControlB(DslSetmode, Content_discControlResponseBytes, NULL) == 0)
-        ;
-    VSync(3);
 }
 
 // decomp: SLUS_010.40 _initCdQueue (src/SLUS_010.40/main.c:9401)

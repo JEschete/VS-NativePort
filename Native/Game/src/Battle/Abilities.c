@@ -44,10 +44,10 @@
 Battle_Actor* Battle_characterState;
 
 // decomp: vs_main_artsPointsRequirements (vs_main_artsPointsRequirements@SLUS_010.40)
-u_short Battle_breakArtPointRequirements[15][4]; /* data: contents loaded in Step 5 */
+u_short Battle_breakArtPointRequirements[15][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: vs_main_battleAbilitiesPointsRequirements (vs_main_battleAbilitiesPointsRequirements@SLUS_010.40)
-u_short Battle_battleAbilityPointRequirements[150]; /* data: contents loaded in Step 5 */
+u_short Battle_battleAbilityPointRequirements[150]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8005FFB0 (D_8005FFB0@SLUS_010.40)
 short Battle_abilityInputResult;

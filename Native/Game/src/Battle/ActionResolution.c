@@ -20,7 +20,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/Targeting.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Field/Collision.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -31,7 +31,7 @@
 #include "State/Progress.h"
 
 // decomp: D_800E8200 (D_800E8200@BATTLE/BATTLE.PRG)
-u_char Battle_limbInjuryStatusIds[20]; /* data: contents loaded in Step 5 */
+u_char Battle_limbInjuryStatusIds[20]; /* contents: module image (ModuleData.c) */
 
 // decomp: _actionEffectMediators (_actionEffectMediators@BATTLE/BATTLE.PRG)
 void (*Battle_actionEffectMediators[100])(

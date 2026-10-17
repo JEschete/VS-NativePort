@@ -3,5 +3,5 @@
 #include "Items/Materials.h"
 
 // decomp: _weaponMaterialPaletteMap (_weaponMaterialPaletteMap@BATTLE/BATTLE.PRG)
-u_char Items_weaponMaterialPaletteIndices[3432]; /* data: contents loaded in Step 5 */
+u_char Items_weaponMaterialPaletteIndices[3432]; /* contents: module image (ModuleData.c) */
 

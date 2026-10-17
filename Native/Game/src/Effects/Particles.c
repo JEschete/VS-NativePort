@@ -13,13 +13,13 @@
 #include "Effects/Transforms.h"
 
 // decomp: D_800EC328 (D_800EC328@BATTLE/BATTLE.PRG)
-int Effects_emissionCounter; /* data: contents loaded in Step 5 */
+int Effects_emissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC330 (D_800EC330@BATTLE/BATTLE.PRG)
-u_char Effects_pairedParticleColorPresets[2727][2][4]; /* data: contents loaded in Step 5 */
+u_char Effects_pairedParticleColorPresets[2727][2][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC368 (D_800EC368@BATTLE/BATTLE.PRG)
-u_char Effects_particleColorPresetTable[1088][5][4]; /* data: contents loaded in Step 5 */
+u_char Effects_particleColorPresetTable[1088][5][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F55F0 (D_800F55F0@BATTLE/BATTLE.PRG)
 int Effects_particleCapacity;

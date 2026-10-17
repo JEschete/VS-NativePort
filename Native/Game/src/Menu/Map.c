@@ -11,6 +11,7 @@
 #include "Content/StringTables.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Effects/Weather.h"
 #include "Field/Doors.h"

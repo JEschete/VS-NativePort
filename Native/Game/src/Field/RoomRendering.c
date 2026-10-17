@@ -6,7 +6,7 @@
 #include "Battle/Abilities.h"
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
-#include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Effects/Weather.h"
 #include "Field/Camera.h"
 #include "Field/Doors.h"

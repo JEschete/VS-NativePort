@@ -51,8 +51,15 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\DataStore.cpp" />
     <ClCompile Include="src\Disc.cpp" />
     <ClCompile Include="src\DiscQueue.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\DiscReader.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -70,6 +77,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\ModuleLoader.cpp" />
     <ClCompile Include="src\OverlayFiles.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -102,14 +110,18 @@
     <ClInclude Include="src\ActorAssets.h" />
     <ClInclude Include="src\CdDrive.h" />
     <ClInclude Include="src\DiscQueue.h" />
+    <ClInclude Include="src\DiscReader.h" />
     <ClInclude Include="src\LegacyFiles.h" />
     <ClInclude Include="src\ModelLoading.h" />
     <ClInclude Include="src\OverlayFiles.h" />
     <ClInclude Include="src\OverlayWorkspace.h" />
     <ClInclude Include="src\PFile.h" />
     <ClInclude Include="src\SystemResources.h" />
+    <ClInclude Include="include\Content\DataAccess.h" />
+    <ClInclude Include="include\Content\DataStore.hpp" />
     <ClInclude Include="include\Content\Disc.hpp" />
     <ClInclude Include="include\Content\DiscLayout.h" />
+    <ClInclude Include="include\Content\ModuleData.h" />
     <ClInclude Include="include\Content\StringTables.h" />
     <ClInclude Include="Legacy\LibDs.h" />
   </ItemGroup>

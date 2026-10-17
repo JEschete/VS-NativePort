@@ -3,8 +3,8 @@
 #include "Menu/Framework/TextBoxes.h"
 
 // decomp: D_800EC284 (D_800EC284@BATTLE/BATTLE.PRG)
-Menu_TextAnchorWord Menu_textBoxAnchors[2749][2]; /* data: contents loaded in Step 5 */
+Menu_TextAnchorWord Menu_textBoxAnchors[2749][2]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC2CC (D_800EC2CC@BATTLE/BATTLE.PRG)
-int Menu_informationHeaderPositions[5480]; /* data: contents loaded in Step 5 */
+int Menu_informationHeaderPositions[5480]; /* contents: module image (ModuleData.c) */
 

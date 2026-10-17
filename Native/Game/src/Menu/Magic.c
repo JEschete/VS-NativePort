@@ -37,16 +37,16 @@
 #include "State/StateFlags.h"
 
 // decomp: vs_battle_warlockSpellIds (vs_battle_warlockSpellIds@BATTLE/BATTLE.PRG)
-char Menu_Magic_warlockSpellIds[20]; /* data: contents loaded in Step 5 */
+char Menu_Magic_warlockSpellIds[20]; /* contents: module image (ModuleData.c) */
 
 // decomp: vs_battle_shamanSpellIds (vs_battle_shamanSpellIds@BATTLE/BATTLE.PRG)
-char Menu_Magic_shamanSpellIds[8]; /* data: contents loaded in Step 5 */
+char Menu_Magic_shamanSpellIds[8]; /* contents: module image (ModuleData.c) */
 
 // decomp: vs_battle_sorcererSpellIds (vs_battle_sorcererSpellIds@BATTLE/BATTLE.PRG)
-char Menu_Magic_sorcererSpellIds[20]; /* data: contents loaded in Step 5 */
+char Menu_Magic_sorcererSpellIds[20]; /* contents: module image (ModuleData.c) */
 
 // decomp: vs_battle_enchanterSpellIds (vs_battle_enchanterSpellIds@BATTLE/BATTLE.PRG)
-char Menu_Magic_enchanterSpellIds[8]; /* data: contents loaded in Step 5 */
+char Menu_Magic_enchanterSpellIds[8]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_8010694A (D_8010694A@src/MENU/MENU0.PRG/84.c)
 u_char Menu_Magic_warlockLevelCursorBlink;

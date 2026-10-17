@@ -20,22 +20,22 @@
 #include "OverlayWorkspace.h"
 
 // decomp: D_800EC2E4 (D_800EC2E4@BATTLE/BATTLE.PRG)
-u_char Effects_effectBufferIndex; /* data: contents loaded in Step 5 */
+u_char Effects_effectBufferIndex; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC324 (D_800EC324@BATTLE/BATTLE.PRG)
-Effects_EffectRenderer Effects_scriptRenderers[5458]; /* data: contents loaded in Step 5 */
+Effects_EffectRenderer Effects_scriptRenderers[5458]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC32C (D_800EC32C@BATTLE/BATTLE.PRG)
-char Effects_actionVariantValues[21824]; /* data: contents loaded in Step 5 */
+char Effects_actionVariantValues[21824]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC3F4 (D_800EC3F4@BATTLE/BATTLE.PRG)
 int (*Effects_scriptOpcodeHandlers[5406])(void*); /* data: contents loaded in Step 5 */
 
 // decomp: D_800EC4B8 (D_800EC4B8@BATTLE/BATTLE.PRG)
-u_char Effects_lastReactionSoundVariant; /* data: contents loaded in Step 5 */
+u_char Effects_lastReactionSoundVariant; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC4BC (D_800EC4BC@BATTLE/BATTLE.PRG)
-Effects_PackageFile Effects_emptyPackage; /* data: contents loaded in Step 5 */
+Effects_PackageFile Effects_emptyPackage; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F185C (D_800F185C@BATTLE/BATTLE.PRG)
 int Effects_tintedActor;

@@ -17,7 +17,7 @@
 #include "Render/Palette.h"
 
 // decomp: D_800E91A4 (D_800E91A4@BATTLE/BATTLE.PRG)
-u_char Audio_objectSurfaceSoundIds[2956]; /* data: contents loaded in Step 5 */
+u_char Audio_objectSurfaceSoundIds[2956]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG func_8006CD60 (src/BATTLE/BATTLE.PRG/146C.c:2144)
 void Audio_PlayRandomActorImpactSound(u_int* arg0, int arg1, int arg2)

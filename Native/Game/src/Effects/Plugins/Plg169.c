@@ -3,11 +3,11 @@
 #include "Effects/Plugins/Plg169.h"
 
 // decomp: D_800FD590 (D_800FD590@EFFECT/PLG169.BIN)
-int Effects_Plg169_trailEmissionCounter; /* data: contents loaded in Step 5 */
+int Effects_Plg169_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FD594 (D_800FD594@EFFECT/PLG169.BIN)
-u_char Effects_Plg169_ringColorFactors[][4]; /* data: contents loaded in Step 5 */
+u_char Effects_Plg169_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FD5B4 (D_800FD5B4@EFFECT/PLG169.BIN)
-CVECTOR Effects_Plg169_closedRingColorFactors[]; /* data: contents loaded in Step 5 */
+CVECTOR Effects_Plg169_closedRingColorFactors[]; /* contents: module image (ModuleData.c) */
 

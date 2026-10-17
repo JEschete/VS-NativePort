@@ -30,13 +30,13 @@
 #include "Title/SaveFiles.h"
 
 // decomp: _fontTable (_fontTable@TITLE/TITLE.PRG)
-Title_SaveMenuFontRecord Title_saveMenuFontAtlas[1]; /* asset: contents loaded in Step 5 */
+Title_SaveMenuFontRecord Title_saveMenuFontAtlas[1]; /* contents: module image (ModuleData.c) */
 
 // decomp: _debugFont (_debugFont@TITLE/TITLE.PRG)
-u_long Title_debugFontAtlas[4928]; /* asset: contents loaded in Step 5 */
+u_long Title_debugFontAtlas[4928]; /* contents: module image (ModuleData.c) */
 
 // decomp: _uiTable (_uiTable@TITLE/TITLE.PRG)
-Title_SaveMenuUiRecord Title_saveMenuUiAtlas; /* asset: contents loaded in Step 5 */
+Title_SaveMenuUiRecord Title_saveMenuUiAtlas; /* contents: module image (ModuleData.c) */
 
 // decomp: _2 (_2@src/TITLE/TITLE.PRG/22C.c)
 char Title_fileMenuPrimitivePadding[8];
@@ -92,7 +92,7 @@ Menu_Files_PrimitiveBuffer Title_fileMenuPrimitiveBuffer;
 Save_CardFileInfoRecord* Title_saveFileSummaries;
 
 // decomp: _saveMenuBg_clut (_saveMenuBg_clut@TITLE/TITLE.PRG)
-Title_SaveMenuBackgroundRecord Title_saveMenuBackground;
+Title_SaveMenuBackgroundRecord Title_saveMenuBackground; /* contents: module image (ModuleData.c) */
 
 // decomp: _selectCursorColor (_selectCursorColor@src/TITLE/TITLE.PRG/22C.c)
 u_char Title_selectionCursorColor;

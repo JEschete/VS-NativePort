@@ -20,7 +20,7 @@
 #include "State/PlayTime.h"
 
 // decomp: _illustrationTimers (_illustrationTimers@ENDING/ENDING.PRG)
-u_short Ending_Credits_illustrationHoldFrames[16]; /* data: contents loaded in Step 5 */
+u_short Ending_Credits_illustrationHoldFrames[16]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800DBB18 (D_800DBB18@ENDING/ENDING.PRG)
 int Ending_Credits_ripplePhaseAngle;
@@ -903,6 +903,7 @@ void Ending_Credits_RunStaffRoll(void)
 
     Ending_Credits_ResetElements();
     Ending_Credits_AddElement(Ending_Credits_DrawBackground);
+    SetDispMask(1);
 
     Ending_Credits_scriptCursor = Ending_Credits_scriptBytes;
     Ending_Credits_scrollSpeedFixed8 = -128;
@@ -914,6 +915,7 @@ void Ending_Credits_RunStaffRoll(void)
     Ending_Credits_StartMusic();
     Ending_Credits_RunFrames();
     Audio_RequestXaStreamStop();
+    SetDispMask(0);
 
     for (i = 5; i < 16; ++i) {
         Core_Memory_FreeFromHighEnd(Ending_Credits_illustrationResources[i]);
@@ -1281,6 +1283,7 @@ void Ending_Credits_InitializeDisplay(int arg0, int arg1, int arg2, int arg3, in
 
     rect = (RECT) { 0, 0, 1024, 512 };
 
+    SetDispMask(0);
     Core_Gte_SetGeomOffset(arg0 / 2, (arg1 + (int)((u_int)arg1 >> 0x1F)) >> 1);
     Core_Gte_SetGeomScreen(arg2);
 

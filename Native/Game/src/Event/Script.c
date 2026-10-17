@@ -3,7 +3,7 @@
 #include "Event/Script.h"
 
 // decomp: D_800E9B5C (D_800E9B5C@BATTLE/BATTLE.PRG)
-u_char Event_specialSubroutineScript[468]; /* data: contents loaded in Step 5 */
+u_char Event_specialSubroutineScript[468]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F4C28 (D_800F4C28@BATTLE/BATTLE.PRG)
 int (**Event_legacySkipHandlerCopy)(u_char*, short);

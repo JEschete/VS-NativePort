@@ -72,7 +72,7 @@ void* Core_Memory_AllocateFromHighEnd(u_int size)
     Core_HeapBlockHeader* var_a2;
     u_int blockSz;
 
-    blockSz = ((size + 15) >> 4) + 1;
+    blockSz = ((size + sizeof(Core_HeapBlockHeader) - 1) / sizeof(Core_HeapBlockHeader)) + 1;
     var_a2 = &Core_legacyHeapList;
     var_a1 = Core_legacyHeapList.prev;
 
@@ -105,7 +105,7 @@ void* Core_Memory_AllocateFromLowEnd(u_int size)
 
     var_v1 = &Core_legacyHeapList;
     var_a1 = Core_legacyHeapList.next;
-    blockSz = ((size + 0xF) >> 4) + 1;
+    blockSz = ((size + sizeof(Core_HeapBlockHeader) - 1) / sizeof(Core_HeapBlockHeader)) + 1;
 
     while (1) {
         if (var_a1->blockSize >= blockSz) {
@@ -139,21 +139,9 @@ void Core_Memory_InitializeHeap(Core_HeapBlockHeader* node, u_int value)
     Core_legacyHeapList.blockSize = 0;
     node->prev = &Core_legacyHeapList;
     node->next = &Core_legacyHeapList;
-    node->blockSize = value / 16 - 1;
+    node->blockSize = value / sizeof(Core_HeapBlockHeader) - 1;
     Core_legacySecondaryHeapList.prev = &Core_legacySecondaryHeapList;
     Core_legacySecondaryHeapList.next = &Core_legacySecondaryHeapList;
     Core_legacySecondaryHeapList.blockSize = 0;
-}
-
-// decomp: SLUS_010.40 vs_main_memcpy (src/SLUS_010.40/main.c:11669) [C: not yet ported]
-void Core_Memory_CopyAlignedWords(void* dest, void* src, u_int sz)
-{
-    VS_UNPORTED("Core::Memory::CopyAlignedWords");
-}
-
-// decomp: SLUS_010.40 vs_main_bzero (src/SLUS_010.40/main.c:11699) [C: not yet ported]
-void Core_Memory_ZeroAlignedWords(void*, int)
-{
-    VS_UNPORTED("Core::Memory::ZeroAlignedWords");
 }
 
