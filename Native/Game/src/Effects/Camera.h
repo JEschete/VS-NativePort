@@ -18,6 +18,7 @@ typedef struct Effects_CameraShakeChannel {
     u_char amplitude;
     u_char angle;
 } Effects_CameraShakeChannel;
+_Static_assert(sizeof(Effects_CameraShakeChannel) == 0x6, "Effects_CameraShakeChannel must keep its PS1 layout");
 
 // decomp: D_800F54D8_t (src/BATTLE/BATTLE.PRG/5BF94.h:386)
 typedef struct Effects_EffectCamera {
@@ -32,6 +33,7 @@ typedef struct Effects_EffectCamera {
     int projectionDistance;
     int farClip;
 } Effects_EffectCamera;
+_Static_assert(sizeof(Effects_EffectCamera) == 0x40, "Effects_EffectCamera must keep its PS1 layout");
 
 #endif // VS_EFFECTS_CAMERA_H_TYPES
 

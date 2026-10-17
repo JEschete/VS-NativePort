@@ -255,7 +255,7 @@ int Effects_Plg300_UpdateForegroundRepeatingRing(Effects_RendererSlot* arg0, u_i
                     prim->tag = (((u_long*)Render_frameScratch.orderingTable)[-15] & 0xFFFFFF) | 0x0E000000;
                     ((u_long*)Render_frameScratch.orderingTable)[-15] =
                         (((u_long*)Render_frameScratch.orderingTable)[-15] & 0xFF000000)
-                        | (((u_long)prim) & 0xFFFFFF);
+                        | ((LegacyGpu_Handle(prim)) & 0xFFFFFF);
                 }
             }
 
@@ -285,7 +285,7 @@ int Effects_Plg300_UpdateForegroundRepeatingRing(Effects_RendererSlot* arg0, u_i
                 prim->tag = (((u_long*)Render_frameScratch.orderingTable)[-15] & 0xFFFFFF) | 0x0E000000;
                 ((u_long*)Render_frameScratch.orderingTable)[-15] =
                     (((u_long*)Render_frameScratch.orderingTable)[-15] & 0xFF000000)
-                    | (((u_long)prim) & 0xFFFFFF);
+                    | ((LegacyGpu_Handle(prim)) & 0xFFFFFF);
             }
         }
 

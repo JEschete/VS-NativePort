@@ -22,6 +22,7 @@ typedef struct Actors_RoomActorRecordWrite {
     int statuses;
     int placement;
 } Actors_RoomActorRecordWrite;
+_Static_assert(sizeof(Actors_RoomActorRecordWrite) == 0x28, "Actors_RoomActorRecordWrite must keep its PS1 layout");
 
 // decomp: savedEnemyState (src/BATTLE/BATTLE.PRG/146C.c:376)
 typedef struct Actors_RoomActorRecord {
@@ -43,5 +44,6 @@ typedef struct Actors_RoomActorRecord {
     u_char tileZ;
     u_char height;
 } Actors_RoomActorRecord;
+_Static_assert(sizeof(Actors_RoomActorRecord) == 0x28, "Actors_RoomActorRecord must keep its PS1 layout");
 
 #endif // VS_ACTORS_ROOMACTORCACHE_H_TYPES

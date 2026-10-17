@@ -28,6 +28,7 @@ typedef struct Effects_ParticleGravity {
     int z;
     int reservedC;
 } Effects_ParticleGravity;
+_Static_assert(sizeof(Effects_ParticleGravity) == 0x10, "Effects_ParticleGravity must keep its PS1 layout");
 
 // decomp: effectAttractionView (src/BATTLE/BATTLE.PRG/5BF94.c:631)
 typedef struct Effects_ParticleAttractionView {
@@ -36,6 +37,7 @@ typedef struct Effects_ParticleAttractionView {
     char reserved68[8];
     int attraction;
 } Effects_ParticleAttractionView;
+_Static_assert(sizeof(Effects_ParticleAttractionView) == 0x74, "Effects_ParticleAttractionView must keep its PS1 layout");
 
 // decomp: effectMotionState (src/BATTLE/BATTLE.PRG/5BF94.c:625)
 typedef struct Effects_ParticleMotionView {
@@ -46,6 +48,7 @@ typedef struct Effects_ParticleMotionView {
     int fx, fy, fz;
     int ax, ay, az;
 } Effects_ParticleMotionView;
+_Static_assert(sizeof(Effects_ParticleMotionView) == 0x34, "Effects_ParticleMotionView must keep its PS1 layout");
 
 // decomp: func_800CFAAC_t (src/BATTLE/BATTLE.PRG/5BF94.c:177)
 typedef struct Effects_ParticleEndpointView {
@@ -55,6 +58,7 @@ typedef struct Effects_ParticleEndpointView {
     short startX;
     short startY;
 } Effects_ParticleEndpointView;
+_Static_assert(sizeof(Effects_ParticleEndpointView) == 0x14, "Effects_ParticleEndpointView must keep its PS1 layout");
 
 // decomp: func_800D6CF_t (src/BATTLE/BATTLE.PRG/5BF94.h:230)
 typedef struct Effects_ParticleTextureAnimation {
@@ -80,6 +84,7 @@ typedef struct Effects_FixedVector {
     /* 0x04 */ int vy;
     /* 0x08 */ int vz;
 } Effects_FixedVector;
+_Static_assert(sizeof(Effects_FixedVector) == 0xC, "Effects_FixedVector must keep its PS1 layout");
 
 // layout: ledger (upstream merge) for func_800D52A4_t
 typedef struct Effects_ParticleMotion {
@@ -90,6 +95,7 @@ typedef struct Effects_ParticleMotion {
     /* 0x1C */ Effects_FixedVector force;
     /* 0x28 */ Effects_FixedVector acceleration;
 } Effects_ParticleMotion;
+_Static_assert(sizeof(Effects_ParticleMotion) == 0x34, "Effects_ParticleMotion must keep its PS1 layout");
 
 // layout: ledger (upstream merge) for func_800D2904_t
 typedef struct Effects_Particle {
@@ -153,6 +159,7 @@ typedef struct Effects_ParticleDefinition {
     u_char ringSegments;
     u_char ringPositions;
 } Effects_ParticleDefinition;
+_Static_assert(sizeof(Effects_ParticleDefinition) == 0xCC, "Effects_ParticleDefinition must keep its PS1 layout");
 
 // decomp: func_800D2904_curves (src/BATTLE/BATTLE.PRG/5BF94.h:280)
 typedef union Effects_ParticleColorWord {
@@ -226,6 +233,7 @@ typedef struct Effects_ParticleQuadWord {
     short reserved0;
     short reserved2;
 } Effects_ParticleQuadWord;
+_Static_assert(sizeof(Effects_ParticleQuadWord) == 0x4, "Effects_ParticleQuadWord must keep its PS1 layout");
 
 // decomp: func_800FA76C_arg3 (src/EFFECT/trails.h:27)
 typedef struct Effects_TrailQuadSet {
@@ -249,6 +257,7 @@ typedef struct Effects_PluginEffectState {
     u_int reserved61Bit4 : 20;
     u_char reserved64[20];
 } Effects_PluginEffectState;
+_Static_assert(sizeof(Effects_PluginEffectState) == 0x78, "Effects_PluginEffectState must keep its PS1 layout");
 
 #endif // VS_EFFECTS_PARTICLES_H_TYPES
 

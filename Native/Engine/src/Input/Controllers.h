@@ -18,6 +18,7 @@ typedef struct Input_ControllerPortState {
     char actuatorLevels[2];
     char connected;
 } Input_ControllerPortState;
+_Static_assert(sizeof(Input_ControllerPortState) == 0xB, "Input_ControllerPortState must keep its PS1 layout");
 
 #endif // VS_INPUT_CONTROLLERS_H_TYPES
 

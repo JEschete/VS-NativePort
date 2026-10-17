@@ -17,6 +17,7 @@ typedef struct Menu_Setup_CombinedArmorRecord {
     char agility;
     char reserved7;
 } Menu_Setup_CombinedArmorRecord;
+_Static_assert(sizeof(Menu_Setup_CombinedArmorRecord) == 0x8, "Menu_Setup_CombinedArmorRecord must keep its PS1 layout");
 
 // decomp: _syd (src/MENU/MENUC.PRG/168.c:4920)
 typedef struct Menu_Setup_SydHeader {
@@ -25,6 +26,7 @@ typedef struct Menu_Setup_SydHeader {
     u_long initDataOffset;
     char reservedC[0];
 } Menu_Setup_SydHeader;
+_Static_assert(sizeof(Menu_Setup_SydHeader) == 0xC, "Menu_Setup_SydHeader must keep its PS1 layout");
 
 #endif // VS_MENU_SETUP_COMBINATION_H_TYPES
 

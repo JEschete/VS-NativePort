@@ -434,7 +434,7 @@ u_int Audio_Mixer_DispatchCommand(u_int in_Command)
                     && (Audio_Seq_secondaryMusicConfig->musicId
                         != Audio_Seq_activeMusicConfig->musicId))) {
                 Audio_Mixer_SetReverbMode(pSequence->reverbMode);
-                pParams->param1 = (u_int)pSequence;
+                pParams->param1 = (uintptr_t)pSequence;
                 pParams->param3 = pSequence->sequenceId;
                 switch (in_Command) {
                 case 0x12:
@@ -471,7 +471,7 @@ u_int Audio_Mixer_DispatchCommand(u_int in_Command)
         }
         pData = Audio_Driver_commandArguments.param1;
         Audio_Seq_activeMusicConfig->statusFlags |= 0x10000;
-        Audio_Seq_pendingMusicData.param1 = (u_int)pData;
+        Audio_Seq_pendingMusicData.param1 = (uintptr_t)pData;
         result = ((Audio_AkaoFileHeader*)Audio_Driver_commandArguments.param1)->sequenceId;
         break;
     }
@@ -508,18 +508,18 @@ u_int Audio_Mixer_DispatchCommand(u_int in_Command)
         in_Command = 0;
         break;
     case 0xD8:
-        pParams->param1 = (u_int)Audio_Driver_commandArguments.param1;
+        pParams->param1 = (uintptr_t)Audio_Driver_commandArguments.param1;
         Audio_Mixer_kCommandHandlers[0xD0](pParams);
         in_Command = 0xD4;
         break;
     case 0xD9:
-        pParams->param1 = (u_int)Audio_Driver_commandArguments.param1;
+        pParams->param1 = (uintptr_t)Audio_Driver_commandArguments.param1;
         pParams->param2 = Audio_Driver_commandArguments.param2;
         Audio_Mixer_kCommandHandlers[0xD1](pParams);
         in_Command = 0xD5;
         break;
     case 0xDA:
-        pParams->param1 = (u_int)Audio_Driver_commandArguments.param1;
+        pParams->param1 = (uintptr_t)Audio_Driver_commandArguments.param1;
         pParams->param2 = Audio_Driver_commandArguments.param2;
         pParams->param3 = Audio_Driver_commandArguments.param3;
         Audio_Mixer_kCommandHandlers[0xD2](pParams);
@@ -536,7 +536,7 @@ u_int Audio_Mixer_DispatchCommand(u_int in_Command)
         in_Command = 0x9E;
         break;
     default:
-        pParams->param1 = (u_int)Audio_Driver_commandArguments.param1;
+        pParams->param1 = (uintptr_t)Audio_Driver_commandArguments.param1;
         pParams->param2 = Audio_Driver_commandArguments.param2;
         pParams->param3 = Audio_Driver_commandArguments.param3;
         pParams->param4 = Audio_Driver_commandArguments.param4;

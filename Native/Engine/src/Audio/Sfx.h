@@ -13,6 +13,7 @@ typedef struct Audio_SfxSlotRequest {
     int reserved0C;
     int reserved10;
 } Audio_SfxSlotRequest;
+_Static_assert(sizeof(Audio_SfxSlotRequest) == 0x14, "Audio_SfxSlotRequest must keep its PS1 layout");
 
 #endif // VS_AUDIO_SFX_H_TYPES
 

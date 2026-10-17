@@ -10,6 +10,7 @@ typedef struct Render_LegacyTransitionWipePacket {
     POLY_F4 coveredQuad;
     POLY_F4 edgeQuad;
 } Render_LegacyTransitionWipePacket;
+_Static_assert(sizeof(Render_LegacyTransitionWipePacket) == 0x30, "Render_LegacyTransitionWipePacket must keep its PS1 layout");
 
 #endif // VS_RENDER_SCREENTRANSITION_H_TYPES
 

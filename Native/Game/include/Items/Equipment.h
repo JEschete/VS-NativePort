@@ -46,5 +46,6 @@ typedef struct Items_EquipmentPartStats {
     /* 0x28 */ signed char affinities[8];
     /* 0x30 */
 } Items_EquipmentPartStats;
+_Static_assert(sizeof(Items_EquipmentPartStats) == 0x30, "Items_EquipmentPartStats must keep its PS1 layout");
 
 #endif // VS_ITEMS_EQUIPMENT_H_TYPES

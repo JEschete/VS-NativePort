@@ -324,12 +324,16 @@ For each row (in file order):
 10. Module statics with an initial value are restored by generated per-module resets (as built: the statics stay named variables; folding them into the `state:` structs the data ledger names is Step 5); scratchpad uses map to Core's scratch block; asm-only functions become `VS_UNPORTED` stubs ([PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §1, §5, §6).
 11. Re-run `tools\scaffold\gen_solution.py` so the projects list the new files.
 
-**As built (2026-10-17).** `python tools\port\decl_index.py` (libclang declaration extents, about 90 s), then
-`python tools\port\copy_to_native.py` (about 1 min), then `gen_solution.py` and a build; `copy_to_native.py --mark`
-after a successful build fills `copied`/`compiles`. The copy is regenerated from the decomp until Phase 1a closes,
-so fixes go into the tool or its reviewed fix list (`tools\port\copy_fixups.py`), never into the output.
+**As built (2026-10-17).** `python tools\port\decl_index.py` (libclang declaration extents, about 90 s) and
+`python tools\port\hazard_index.py` (x64 hazards, about 5 min), then `python tools\port\copy_to_native.py` (about
+1 min), then `gen_solution.py` and a build; `copy_to_native.py --mark` after a successful build fills
+`copied`/`compiles`. The copy is regenerated from the decomp until each item is modernized, so fixes go into the
+tool or its reviewed fix list (`tools\port\copy_fixups.py`), never into the output. Hand work starts with
+`tools\port\own.py <id> --to <file>`, which moves an item to a hand-maintained file (`tools\port\owned.csv`); the
+committed `tools\port\copy_manifest.json` hashes every generated file, and the copy refuses to run over a hand edit.
 `tools\port\check_leftovers.py` lists decomp-style names left in the output (only local variable names and the
-game's `vs_get*` packet helper macros remain).
+game's `vs_get*` packet helper macros remain); `tools\port\layout_check.py` compares every generated struct with its
+PS1 layout under the x64 MSVC rules.
 
 - **Output:** 751 files (328 `.c`, 395 `.h`, 28 `.inl`). Of 3,758 functions, 3,514 are copied C and 244 are
   assembly-only `VS_UNPORTED` stubs with their real prototypes. Every global (2,174) and type (842) is written.
@@ -380,10 +384,14 @@ Fix until the solution builds. Hazards are fixed now, not later (x64):
 Mark `compiles`.
 
 **Status (2026-10-17):** the solution builds in Debug and Release x64 with 0 errors and the tests pass; every
-copied row is marked `compiles`. Copied `.c` builds with old-C leniency as warnings (about 1,700, mostly
-incompatible pointers and pointer/integer casts: the 64-bit hazards, counted, PORTING_WATCHLIST.md §2).
-`tools\lint\native_boundary.py` reports 59 remaining hazards (hardware register and KSEG addresses, 24-bit
-ordering-table links); per the owner's 2026-10-17 ruling these are fixed as each function is modernized.
+copied row is marked `compiles`. Copied `.c` builds with old-C leniency as warnings (654 unique sites).
+Before 1b the copy fixed the hazards that would break at run time regardless of modernization order (PORTING_WATCHLIST.md
+§2): ordering-table links are 24-bit handles, pointer values stored in integers land in `uintptr_t` where the
+destination is a member, global or local, the game heap is a native arena, struct-size literals of pointer structs
+are `sizeof`, and every pointer-free type is asserted and checked against its PS1 layout. The 127 pointer/integer
+warnings left mark returns, parameters, stores through casts and on-disc relocations, fixed as each function is
+modernized (owner, 2026-10-17). `tools\lint\native_boundary.py` reports 55 hits, most of them sign-bit flag
+constants rather than addresses.
 
 ### Step 7: Gate review
 Confirm that the ledger percentages match §1, that the CI lint is clean and that the tests are green.

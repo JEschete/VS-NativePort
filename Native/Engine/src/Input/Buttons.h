@@ -13,6 +13,7 @@ typedef struct Input_StickPosition {
     int rStickX;
     int rStickY;
 } Input_StickPosition;
+_Static_assert(sizeof(Input_StickPosition) == 0x10, "Input_StickPosition must keep its PS1 layout");
 
 // decomp: (unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8) (src/SLUS_010.40/main.h:482)
 union Input_PressedButtonsView {

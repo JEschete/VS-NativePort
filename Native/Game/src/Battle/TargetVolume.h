@@ -29,6 +29,7 @@ typedef struct Battle_TargetSphereSpec {
     int reserved8;
     int reservedC;
 } Battle_TargetSphereSpec;
+_Static_assert(sizeof(Battle_TargetSphereSpec) == 0x10, "Battle_TargetSphereSpec must keep its PS1 layout");
 
 // decomp: D_800EB9B8_t (src/BATTLE/BATTLE.PRG/573B8.c:55)
 typedef struct Battle_TargetSphereSetupView {
@@ -54,6 +55,7 @@ typedef struct Battle_TargetSphereSetupView {
     short wireEdges[0x302];
     u_char terrainRowFlags[0x64];
 } Battle_TargetSphereSetupView;
+_Static_assert(sizeof(Battle_TargetSphereSetupView) == 0x4B1C, "Battle_TargetSphereSetupView must keep its PS1 layout");
 
 // decomp: D_800EB9B8_unk990 (src/BATTLE/BATTLE.PRG/58578.c:24)
 typedef struct Battle_SphereTargetLabel {

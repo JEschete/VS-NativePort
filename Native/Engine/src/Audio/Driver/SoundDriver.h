@@ -98,6 +98,7 @@ typedef struct Audio_DriverFlags {
     u_int mixBehavior; // global mixing & music-stack behavior flags
     u_int updateFlags; // deferred SPU / voice-mode update flags
 } Audio_DriverFlags;
+_Static_assert(sizeof(Audio_DriverFlags) == 0xC, "Audio_DriverFlags must keep its PS1 layout");
 
 #endif // VS_AUDIO_DRIVER_SOUNDDRIVER_H_TYPES
 

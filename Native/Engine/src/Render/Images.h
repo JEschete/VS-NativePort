@@ -22,6 +22,7 @@ typedef struct Render_TextureRegion {
     u_short tpage;
     u_short clut;
 } Render_TextureRegion;
+_Static_assert(sizeof(Render_TextureRegion) == 0x8, "Render_TextureRegion must keep its PS1 layout");
 
 // decomp: gim_t (src/BATTLE/BATTLE.PRG/5BF94.c:82)
 typedef struct Render_GimLayer {

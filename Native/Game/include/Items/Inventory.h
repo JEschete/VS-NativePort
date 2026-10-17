@@ -46,6 +46,7 @@ typedef struct Items_MiscItemStack {
     char count;
     char reserved03;
 } Items_MiscItemStack;
+_Static_assert(sizeof(Items_MiscItemStack) == 0x4, "Items_MiscItemStack must keep its PS1 layout");
 
 // decomp: vs_main_inventoryArmor (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:92)
 typedef struct Items_InventoryArmor {
@@ -68,6 +69,7 @@ typedef struct Items_InventoryArmor {
     u_char limb;
     u_char index;
 } Items_InventoryArmor;
+_Static_assert(sizeof(Items_InventoryArmor) == 0x28, "Items_InventoryArmor must keep its PS1 layout");
 
 // decomp: vs_main_inventoryBlade (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:35)
 typedef struct Items_InventoryBlade {
@@ -95,6 +97,7 @@ typedef struct Items_InventoryBlade {
     char assembledWeaponIndex;
     char index;
 } Items_InventoryBlade;
+_Static_assert(sizeof(Items_InventoryBlade) == 0x2C, "Items_InventoryBlade must keep its PS1 layout");
 
 // decomp: vs_main_inventoryGem (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:62)
 typedef struct Items_InventoryGem {
@@ -110,6 +113,7 @@ typedef struct Items_InventoryGem {
     u_short setItemIndex;
     short index;
 } Items_InventoryGem;
+_Static_assert(sizeof(Items_InventoryGem) == 0x1C, "Items_InventoryGem must keep its PS1 layout");
 
 // decomp: vs_main_inventoryGrip (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:48)
 typedef struct Items_InventoryGrip {
@@ -124,6 +128,7 @@ typedef struct Items_InventoryGrip {
     u_short assembledWeaponIndex;
     u_short index;
 } Items_InventoryGrip;
+_Static_assert(sizeof(Items_InventoryGrip) == 0x10, "Items_InventoryGrip must keep its PS1 layout");
 
 // decomp: vs_main_inventoryIndices_t (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:142)
 typedef struct Items_InventoryIndices {
@@ -135,6 +140,7 @@ typedef struct Items_InventoryIndices {
     u_char gems[48];
     u_char misc[64];
 } Items_InventoryIndices;
+_Static_assert(sizeof(Items_InventoryIndices) == 0xB0, "Items_InventoryIndices must keep its PS1 layout");
 
 // decomp: vs_main_inventoryMisc (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:106)
 typedef struct Items_InventoryMisc {
@@ -142,6 +148,7 @@ typedef struct Items_InventoryMisc {
     char count;
     char index;
 } Items_InventoryMisc;
+_Static_assert(sizeof(Items_InventoryMisc) == 0x4, "Items_InventoryMisc must keep its PS1 layout");
 
 // decomp: vs_main_inventoryShield (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:100)
 typedef struct Items_InventoryShield {
@@ -151,6 +158,7 @@ typedef struct Items_InventoryShield {
     Items_InventoryArmor base;
     u_char gems[4]; // 0x2C
 } Items_InventoryShield;
+_Static_assert(sizeof(Items_InventoryShield) == 0x30, "Items_InventoryShield must keep its PS1 layout");
 
 // decomp: vs_main_inventoryWeapon (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:71)
 typedef struct Items_InventoryWeapon {
@@ -161,6 +169,7 @@ typedef struct Items_InventoryWeapon {
     u_char gems[4];
     char name[24];
 } Items_InventoryWeapon;
+_Static_assert(sizeof(Items_InventoryWeapon) == 0x20, "Items_InventoryWeapon must keep its PS1 layout");
 
 // decomp: vs_main_inventory_t (src/SLUS_010.40/main.h:404)
 typedef struct Items_Inventory {
@@ -172,6 +181,7 @@ typedef struct Items_Inventory {
     Items_InventoryGem gems[48]; // 0x8C0
     Items_InventoryMisc misc[64]; // 0xE00
 } Items_Inventory;
+_Static_assert(sizeof(Items_Inventory) == 0xF00, "Items_Inventory must keep its PS1 layout");
 
 // decomp: vs_menu_containerData (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:117)
 typedef struct Items_ContainerData {
@@ -184,6 +194,7 @@ typedef struct Items_ContainerData {
     Items_InventoryMisc misc[256];
     // 0x3C00
 } Items_ContainerData;
+_Static_assert(sizeof(Items_ContainerData) == 0x3C00, "Items_ContainerData must keep its PS1 layout");
 
 // decomp: vs_menu_containerIndices (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:127)
 typedef struct Items_ContainerIndices {
@@ -195,12 +206,14 @@ typedef struct Items_ContainerIndices {
     u_short gems[192];
     u_short misc[256];
 } Items_ContainerIndices;
+_Static_assert(sizeof(Items_ContainerIndices) == 0x580, "Items_ContainerIndices must keep its PS1 layout");
 
 // decomp: vs_menu_container (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:132)
 typedef struct Items_Container {
     Items_ContainerData items;
     Items_ContainerIndices indices;
 } Items_Container;
+_Static_assert(sizeof(Items_Container) == 0x4180, "Items_Container must keep its PS1 layout");
 
 #endif // VS_ITEMS_INVENTORY_H_TYPES
 

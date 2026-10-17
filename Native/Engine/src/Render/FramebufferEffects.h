@@ -13,6 +13,7 @@ typedef struct Render_FramebufferEffectTranslation {
     int reserved8;
     int reservedC;
 } Render_FramebufferEffectTranslation;
+_Static_assert(sizeof(Render_FramebufferEffectTranslation) == 0x10, "Render_FramebufferEffectTranslation must keep its PS1 layout");
 
 // decomp: D_800F1ABC_t (src/BATTLE/BATTLE.PRG/146C.c:301)
 typedef struct Render_LegacyFramebufferEffectPackets {
@@ -20,6 +21,7 @@ typedef struct Render_LegacyFramebufferEffectPackets {
     SPRT flatStrips[10];
     DR_MODE drawModes[10];
 } Render_LegacyFramebufferEffectPackets;
+_Static_assert(sizeof(Render_LegacyFramebufferEffectPackets) == 0x2D0, "Render_LegacyFramebufferEffectPackets must keep its PS1 layout");
 
 #endif // VS_RENDER_FRAMEBUFFEREFFECTS_H_TYPES
 

@@ -29,6 +29,7 @@ typedef struct Effects_Plg128_CameraEffectState {
     /* 0xC8 */ int nearClip;
     /* 0xCC */ int reservedCC;
 } Effects_Plg128_CameraEffectState;
+_Static_assert(sizeof(Effects_Plg128_CameraEffectState) == 0xD0, "Effects_Plg128_CameraEffectState must keep its PS1 layout");
 
 #endif // VS_EFFECTS_PLUGINS_PLG128_H_TYPES
 

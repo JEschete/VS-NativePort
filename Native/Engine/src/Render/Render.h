@@ -29,6 +29,7 @@ typedef struct Render_ScreenOffset {
     int x;
     int y;
 } Render_ScreenOffset;
+_Static_assert(sizeof(Render_ScreenOffset) == 0x8, "Render_ScreenOffset must keep its PS1 layout");
 
 // decomp: vs_camera_t (src/include/scratch.h:10)
 typedef struct Render_Camera {
@@ -37,6 +38,7 @@ typedef struct Render_Camera {
     /* 0x20 */ VECTOR angles;
     /* 0x30 */ int farClip;
 } Render_Camera;
+_Static_assert(sizeof(Render_Camera) == 0x34, "Render_Camera must keep its PS1 layout");
 
 // decomp: vs_scratch_t (src/include/scratch.h:20)
 typedef struct Render_FrameScratch {

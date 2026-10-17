@@ -33,6 +33,7 @@ typedef struct Effects_TransformSlot {
     short opaqueBE;
     u_char reservedC0[0x10];
 } Effects_TransformSlot;
+_Static_assert(sizeof(Effects_TransformSlot) == 0xD0, "Effects_TransformSlot must keep its PS1 layout");
 
 // layout: ledger (upstream merge) for func_800D0548_arg1
 typedef struct Effects_TransformMotionView {
@@ -56,6 +57,7 @@ typedef struct Effects_TransformMotionView {
     /* 0xC0 */ SVECTOR control0;
     /* 0xC8 */ SVECTOR control1;
 } Effects_TransformMotionView;
+_Static_assert(sizeof(Effects_TransformMotionView) == 0xD0, "Effects_TransformMotionView must keep its PS1 layout");
 
 // layout: ledger (upstream merge) for func_800D0B30_t
 typedef struct Effects_TransformDefinition {
@@ -78,6 +80,7 @@ typedef struct Effects_TransformDefinition {
     /* 0x20 */ short translationRange[6];
     /* 0x2C */ short scaleRange[6];
 } Effects_TransformDefinition;
+_Static_assert(sizeof(Effects_TransformDefinition) == 0x38, "Effects_TransformDefinition must keep its PS1 layout");
 
 // decomp: func_800D0B30_t2 (src/BATTLE/BATTLE.PRG/5BF94.c:200)
 typedef struct Effects_AnimatedLocalTransform {
@@ -93,6 +96,7 @@ typedef struct Effects_AnimatedLocalTransform {
     int reserved6C;
     int reserved70;
 } Effects_AnimatedLocalTransform;
+_Static_assert(sizeof(Effects_AnimatedLocalTransform) == 0x74, "Effects_AnimatedLocalTransform must keep its PS1 layout");
 
 #endif // VS_EFFECTS_TRANSFORMS_H_TYPES
 

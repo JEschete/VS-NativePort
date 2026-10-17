@@ -517,7 +517,7 @@ int Menu_Map_LoadSceneMap(void)
     Menu_Map_roomNamesTable = Field_ResolveSceneRoomData(Battle_unusedSceneBuffer);
 
     Field_RestoreSceneRoomVisits(Battle_unusedSceneBuffer);
-    Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, 4);
+    Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));
 
     Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex(Battle_unusedSceneBuffer);
 
@@ -869,7 +869,7 @@ int Menu_Map_UpdateMapMenu(void)
             Menu_Map_roomNamesTable = Field_ResolveSceneRoomData(Battle_unusedSceneBuffer);
 
             Field_RestoreSceneRoomVisits(Battle_unusedSceneBuffer);
-            Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, 4);
+            Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));
 
             Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex(Battle_unusedSceneBuffer);
 
@@ -1767,7 +1767,7 @@ void Menu_Map_DarkenBackground(void)
 
     pScratch2 = Core_ScratchAddr(0);
     AddPrim((void*)(pScratch2[1] + 0x7FE * 4), sprt++);
-    pScratch2[0] = (u_long)sprt;
+    pScratch2[0] = (uintptr_t)sprt;
 
     if (Render_frameBuf != 0) {
         _insertTPage(0x7FE, getTPage(2, 0, 512, 0));

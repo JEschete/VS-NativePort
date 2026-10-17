@@ -264,6 +264,9 @@
     <ClInclude Include="src\Audio\Voices.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
+    <ClCompile Include="src\Core\Arena.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Core\Callbacks.c">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -578,6 +581,9 @@
     </ClInclude>
     <ClInclude Include="include\Audio\AudioDevice.hpp">
       <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Arena.h">
+      <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Assert.hpp">
       <Filter>include\Core</Filter>

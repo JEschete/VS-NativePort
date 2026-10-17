@@ -12,5 +12,6 @@ typedef struct Field_ActorPlacement {
     u_int tileZ : 8;
     u_int height : 8;
 } Field_ActorPlacement;
+_Static_assert(sizeof(Field_ActorPlacement) == 0x4, "Field_ActorPlacement must keep its PS1 layout");
 
 #endif // VS_FIELD_ACTORS_H_TYPES

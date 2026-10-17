@@ -5,6 +5,7 @@
 
 #include "Legacy/Core/PsxTypes.h"
 #include "Core/Gte.h"
+#include "Core/Arena.h"
 #include "Core/BiosRand.h"
 #include "Core/Scratch.h"
 #include "Core/Unported.h"

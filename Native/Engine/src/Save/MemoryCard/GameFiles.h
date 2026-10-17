@@ -90,6 +90,7 @@ typedef struct Save_SaveSlotBase {
     u_int generation;
     int opaque8;
 } Save_SaveSlotBase;
+_Static_assert(sizeof(Save_SaveSlotBase) == 0xC, "Save_SaveSlotBase must keep its PS1 layout");
 
 // decomp: stats_t (src/MENU/MENU7.PRG/260.c:63)
 typedef struct Save_SaveFileStats {
@@ -126,6 +127,7 @@ typedef struct Save_SaveCipherHeader {
     int cipherKey;
     Save_SaveSlotBase slotHeader;
 } Save_SaveCipherHeader;
+_Static_assert(sizeof(Save_SaveCipherHeader) == 0x10, "Save_SaveCipherHeader must keep its PS1 layout");
 
 // decomp: savedata_unk180_t (src/MENU/MENU7.PRG/260.c:87)
 typedef struct Save_SaveProtectedHeader {

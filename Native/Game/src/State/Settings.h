@@ -26,5 +26,6 @@ typedef struct State_Settings {
     u_short currentGameSaveCount;
     u_int saveFileGeneration;
 } State_Settings;
+_Static_assert(sizeof(State_Settings) == 0x20, "State_Settings must keep its PS1 layout");
 
 #endif // VS_STATE_SETTINGS_H_TYPES

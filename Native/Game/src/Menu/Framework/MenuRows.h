@@ -11,5 +11,6 @@ typedef struct Menu_Framework_ItemText {
     int menuRowFlags;
     u_short description[48];
 } Menu_Framework_ItemText;
+_Static_assert(sizeof(Menu_Framework_ItemText) == 0x80, "Menu_Framework_ItemText must keep its PS1 layout");
 
 #endif // VS_MENU_FRAMEWORK_MENUROWS_H_TYPES

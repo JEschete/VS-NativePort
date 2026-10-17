@@ -12,6 +12,7 @@ typedef struct Audio_SfxProgramHeader {
     char reserved8;
     char flags;
 } Audio_SfxProgramHeader;
+_Static_assert(sizeof(Audio_SfxProgramHeader) == 0xC, "Audio_SfxProgramHeader must keep its PS1 layout");
 
 #endif // VS_AUDIO_PLAYBACK_SOUNDPLAYBACK_H_TYPES
 

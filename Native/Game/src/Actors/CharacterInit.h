@@ -25,6 +25,7 @@ typedef struct Actors_LimbActionInit {
     char opaque2;
     char index;
 } Actors_LimbActionInit;
+_Static_assert(sizeof(Actors_LimbActionInit) == 0x4, "Actors_LimbActionInit must keep its PS1 layout");
 
 // decomp: _limbInit (src/BATTLE/BATTLE.PRG/146C.h:857)
 typedef struct Actors_LimbInit {
@@ -38,18 +39,20 @@ typedef struct Actors_LimbInit {
     char dpSplash[6];
     char reserved5A[2];
 } Actors_LimbInit;
+_Static_assert(sizeof(Actors_LimbInit) == 0x5C, "Actors_LimbInit must keep its PS1 layout");
 
 // decomp: actorSpawnSettings (src/BATTLE/BATTLE.PRG/146C.c:260)
 typedef struct Actors_SpawnSettings {
     char bytes[8];
 } Actors_SpawnSettings;
+_Static_assert(sizeof(Actors_SpawnSettings) == 0x8, "Actors_SpawnSettings must keep its PS1 layout");
 
 // decomp: vs_battle_charInitData (src/BATTLE/BATTLE.PRG/146C.h:886)
 typedef struct Actors_CharacterInit {
     u_short subType;
     char characterKind;
-    u_int reach : 5;
-    u_int enemyClass : 3;
+    u_char reach : 5;
+    u_char enemyClass : 3;
     char name[24];
     short hp;
     short mp;
@@ -73,5 +76,6 @@ typedef struct Actors_CharacterInit {
     Actors_LimbInit limbs[6];
     int zudIndex;
 } Actors_CharacterInit;
+_Static_assert(sizeof(Actors_CharacterInit) == 0x464, "Actors_CharacterInit must keep its PS1 layout");
 
 #endif // VS_ACTORS_CHARACTERINIT_H_TYPES

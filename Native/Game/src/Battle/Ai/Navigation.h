@@ -15,6 +15,7 @@ typedef struct Battle_Ai_DirectionDelta {
     signed char dz : 2;
     signed char reserved6Bits : 2;
 } Battle_Ai_DirectionDelta;
+_Static_assert(sizeof(Battle_Ai_DirectionDelta) == 0x1, "Battle_Ai_DirectionDelta must keep its PS1 layout");
 
 // decomp: D_800F5910_t (src/BATTLE/BATTLE.PRG/6F014.c:43)
 typedef struct Battle_Ai_RouteGateEnd {
@@ -22,6 +23,7 @@ typedef struct Battle_Ai_RouteGateEnd {
     u_short tileZ : 5;
     u_short reservedBits10 : 6;
 } Battle_Ai_RouteGateEnd;
+_Static_assert(sizeof(Battle_Ai_RouteGateEnd) == 0x2, "Battle_Ai_RouteGateEnd must keep its PS1 layout");
 
 // decomp: movementPathTest (src/BATTLE/BATTLE.PRG/771A8.c:2383)
 typedef int (*Battle_Ai_PathTest)(Battle_Ai_MovementPathView*, int);

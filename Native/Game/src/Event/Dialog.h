@@ -22,5 +22,6 @@ typedef struct Event_DialogPlacement {
     short screenY;
     int clampDistance;
 } Event_DialogPlacement;
+_Static_assert(sizeof(Event_DialogPlacement) == 0xC, "Event_DialogPlacement must keep its PS1 layout");
 
 #endif // VS_EVENT_DIALOG_H_TYPES

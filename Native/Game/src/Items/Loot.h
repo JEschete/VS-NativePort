@@ -32,6 +32,7 @@ typedef struct Items_LootedAccessory {
     char reserved3;
     Items_InventoryArmor accessory;
 } Items_LootedAccessory;
+_Static_assert(sizeof(Items_LootedAccessory) == 0x2C, "Items_LootedAccessory must keep its PS1 layout");
 
 // decomp: vs_battle_lootedArmor (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:210)
 typedef struct Items_LootedArmor {
@@ -41,6 +42,7 @@ typedef struct Items_LootedArmor {
     char reserved3;
     Items_InventoryArmor armor;
 } Items_LootedArmor;
+_Static_assert(sizeof(Items_LootedArmor) == 0x2C, "Items_LootedArmor must keep its PS1 layout");
 
 // decomp: vs_battle_lootedBlade (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:185)
 typedef struct Items_LootedBlade {
@@ -50,6 +52,7 @@ typedef struct Items_LootedBlade {
     char reserved3;
     Items_InventoryBlade blade;
 } Items_LootedBlade;
+_Static_assert(sizeof(Items_LootedBlade) == 0x30, "Items_LootedBlade must keep its PS1 layout");
 
 // decomp: vs_battle_lootedGem (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:226)
 typedef struct Items_LootedGem {
@@ -59,6 +62,7 @@ typedef struct Items_LootedGem {
     char reserved3;
     Items_InventoryGem gem;
 } Items_LootedGem;
+_Static_assert(sizeof(Items_LootedGem) == 0x20, "Items_LootedGem must keep its PS1 layout");
 
 // decomp: vs_battle_lootedGrip (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:193)
 typedef struct Items_LootedGrip {
@@ -68,6 +72,7 @@ typedef struct Items_LootedGrip {
     char reserved3;
     Items_InventoryGrip grip;
 } Items_LootedGrip;
+_Static_assert(sizeof(Items_LootedGrip) == 0x14, "Items_LootedGrip must keep its PS1 layout");
 
 // decomp: vs_battle_lootedMisc (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:232)
 typedef struct Items_LootedItem {
@@ -75,6 +80,7 @@ typedef struct Items_LootedItem {
     char difficultyFlags;
     char count;
 } Items_LootedItem;
+_Static_assert(sizeof(Items_LootedItem) == 0x4, "Items_LootedItem must keep its PS1 layout");
 
 // decomp: vs_battle_lootedShield (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:202)
 typedef struct Items_LootedShield {
@@ -85,6 +91,7 @@ typedef struct Items_LootedShield {
     Items_InventoryArmor shield;
     Items_InventoryGem gems[3];
 } Items_LootedShield;
+_Static_assert(sizeof(Items_LootedShield) == 0x80, "Items_LootedShield must keep its PS1 layout");
 
 // decomp: vs_battle_lootedWeapon (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:177)
 typedef struct Items_LootedWeapon {
@@ -97,6 +104,7 @@ typedef struct Items_LootedWeapon {
     Items_InventoryGem gems[3];
     char name[24];
 } Items_LootedWeapon;
+_Static_assert(sizeof(Items_LootedWeapon) == 0xAC, "Items_LootedWeapon must keep its PS1 layout");
 
 // decomp: vs_battle_loot (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:243)
 typedef struct Items_BattleLoot {
@@ -109,6 +117,7 @@ typedef struct Items_BattleLoot {
     Items_LootedGem gem; // 0x1F4
     Items_LootedItem misc[3]; // 0x214
 } Items_BattleLoot;
+_Static_assert(sizeof(Items_BattleLoot) == 0x220, "Items_BattleLoot must keep its PS1 layout");
 
 // decomp: vs_battle_lootListNode (src/BATTLE/BATTLE.PRG/146C.h:797)
 typedef struct Items_LootListNode {

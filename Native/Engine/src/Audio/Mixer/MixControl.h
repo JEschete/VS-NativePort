@@ -7,7 +7,7 @@ typedef struct Audio_CommandParams Audio_CommandParams;
 
 // decomp: FSoundCommandParams (src/include/sound.h:501)
 typedef struct Audio_CommandParams {
-    u_int param1;
+    uintptr_t param1;
     u_int param2;
     u_int param3; // Seems to be usually flags
     u_int param4;

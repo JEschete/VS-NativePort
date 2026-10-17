@@ -181,7 +181,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
                     (((u_long*)Render_frameScratch.orderingTable)[angleOrDepth] & 0xFFFFFF) | 0x0E000000;
                 ((u_long*)Render_frameScratch.orderingTable)[angleOrDepth] =
                     (((u_long*)Render_frameScratch.orderingTable)[angleOrDepth] & 0xFF000000)
-                    | ((u_long)prim & 0xFFFFFF);
+                    | (LegacyGpu_Handle(prim) & 0xFFFFFF);
                 *(int*)&prim->opaque4.r0 = *(int*)&color;
                 *(int*)&prim->opaque4.r1 = *(int*)&color;
                 *(int*)&prim->opaque4.r2 = *(int*)&color;
@@ -250,7 +250,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
                 (((u_long*)Render_frameScratch.orderingTable)[angleOrDepth] & 0xFFFFFF) | 0x0E000000;
             ((u_long*)Render_frameScratch.orderingTable)[angleOrDepth] =
                 (((u_long*)Render_frameScratch.orderingTable)[angleOrDepth] & 0xFF000000)
-                | ((u_long)prim & 0xFFFFFF);
+                | (LegacyGpu_Handle(prim) & 0xFFFFFF);
             *(int*)&prim->opaque4.r0 = *(int*)&color;
             *(int*)&prim->opaque4.r1 = *(int*)&color;
             *(int*)&prim->opaque4.r2 = *(int*)&color;

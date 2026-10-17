@@ -10,5 +10,6 @@ typedef struct Core_WordPair {
     int low;
     int high;
 } Core_WordPair;
+_Static_assert(sizeof(Core_WordPair) == 0x8, "Core_WordPair must keep its PS1 layout");
 
 #endif // VS_CORE_CORE_WORDPAIR_H_TYPES

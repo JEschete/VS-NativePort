@@ -69,6 +69,7 @@ typedef struct Ending_Credits_TexturedGradientQuadView {
     short vertexThreeX;
     short vertexThreeY;
 } Ending_Credits_TexturedGradientQuadView;
+_Static_assert(sizeof(Ending_Credits_TexturedGradientQuadView) == 0x30, "Ending_Credits_TexturedGradientQuadView must keep its PS1 layout");
 
 // decomp: func_8006A9C0_t (src/ENDING/ENDING.PRG/D4.c:70)
 typedef struct Ending_Credits_TimImageBlockHeader {
@@ -76,6 +77,7 @@ typedef struct Ending_Credits_TimImageBlockHeader {
     RECT uploadRect;
     char pixelBytes[0];
 } Ending_Credits_TimImageBlockHeader;
+_Static_assert(sizeof(Ending_Credits_TimImageBlockHeader) == 0xC, "Ending_Credits_TimImageBlockHeader must keep its PS1 layout");
 
 // decomp: func_8006A9C0_t2 (src/ENDING/ENDING.PRG/D4.c:79)
 typedef struct Ending_Credits_TimHeader {
@@ -86,6 +88,7 @@ typedef struct Ending_Credits_TimHeader {
     int mode;
     Ending_Credits_TimImageBlockHeader firstBlock;
 } Ending_Credits_TimHeader;
+_Static_assert(sizeof(Ending_Credits_TimHeader) == 0x14, "Ending_Credits_TimHeader must keep its PS1 layout");
 
 #endif // VS_ENDING_CREDITS_H_TYPES
 

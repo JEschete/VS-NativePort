@@ -20,5 +20,6 @@ typedef struct Actors_ZudHeader {
     int battleAnimationOffset;
     int battleAnimationSize;
 } Actors_ZudHeader;
+_Static_assert(sizeof(Actors_ZudHeader) == 0x30, "Actors_ZudHeader must keep its PS1 layout");
 
 #endif // VS_ACTORS_ZUD_H_TYPES

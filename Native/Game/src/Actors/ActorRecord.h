@@ -28,6 +28,7 @@ typedef struct Actors_CompanionOffset {
     signed char offsetZ;
     u_char depthBias;
 } Actors_CompanionOffset;
+_Static_assert(sizeof(Actors_CompanionOffset) == 0x4, "Actors_CompanionOffset must keep its PS1 layout");
 
 // decomp: D_800F4538_t (src/BATTLE/BATTLE.PRG/3A1A0.h:400)
 typedef struct Actors_ActorRecord {

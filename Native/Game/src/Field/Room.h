@@ -27,6 +27,7 @@ typedef struct Field_RoomTint {
     short strength;
     short isActive;
 } Field_RoomTint;
+_Static_assert(sizeof(Field_RoomTint) == 0x8, "Field_RoomTint must keep its PS1 layout");
 
 // decomp: _mpdRoomSection (src/BATTLE/BATTLE.PRG/146C.h:270)
 typedef struct Field_RoomRecord {

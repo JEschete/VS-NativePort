@@ -14,6 +14,7 @@ typedef struct Battle_HitTargetWord {
     short hp;
     short mp;
 } Battle_HitTargetWord;
+_Static_assert(sizeof(Battle_HitTargetWord) == 0x8, "Battle_HitTargetWord must keep its PS1 layout");
 
 #endif // VS_BATTLE_ACTIONRESOLUTION_H_TYPES
 

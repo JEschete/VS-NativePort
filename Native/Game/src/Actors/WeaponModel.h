@@ -15,6 +15,7 @@ typedef struct Actors_WeaponModelData {
     int polygonSection;
     u_char fileBody[0x7C0];
 } Actors_WeaponModelData;
+_Static_assert(sizeof(Actors_WeaponModelData) == 0x800, "Actors_WeaponModelData must keep its PS1 layout");
 
 // decomp: vs_battle_wepModels_t (src/BATTLE/BATTLE.PRG/3A1A0.h:449)
 typedef struct Actors_WeaponModel {

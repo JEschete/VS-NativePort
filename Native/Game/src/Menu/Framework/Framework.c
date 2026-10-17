@@ -512,7 +512,7 @@ void Menu_Framework_DrawMenuItem(Menu_Framework_MenuRow* menuItem)
         prim[9] = (((x + w) & 0xFFFF) | ((y + 12) << 0x10));
         prim[10] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
 
-        *scratch = (u_int)((u_long)prim << 8) >> 8;
+        *scratch = (u_int)((uintptr_t)prim << 8) >> 8;
         *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = prim + 11;
 
         v = &menuItem->subText;
@@ -737,7 +737,7 @@ void Menu_Framework_InitGameInterface(void* arg0)
     Menu_Framework_menuBackgroundBuffer = NULL;
     Menu_sceneNotificationBuffer = 0;
     Effects_ResetScreenEffectState();
-    Core_Memory_ZeroWordsBackward(&Menu_Framework_menuState, 8);
+    Core_Memory_ZeroWordsBackward(&Menu_Framework_menuState, sizeof(Menu_Framework_MenuControlState));
     Menu_Framework_menuState.currentMenu = 0x3F;
     Core_Memory_ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);
     Core_Memory_ZeroWordsBackward(&Menu_textBoxes[0], sizeof Menu_textBoxes[0]);
@@ -1639,7 +1639,7 @@ void Menu_Framework_DrawButtonPromptBackground(int x, int y, int w, int h)
         var_t2[4] = vs_getRGB888(16, 16, 8);
         var_t2[5] = vs_getXY_2((x + w) - i, y + i);
         var_t2[6] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
-        temp_v1[0] = (((u_long)var_t2 << 8) >> 8);
+        temp_v1[0] = (((uintptr_t)var_t2 << 8) >> 8);
         var_t2 += 7;
     }
 

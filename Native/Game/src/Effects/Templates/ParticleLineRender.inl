@@ -123,7 +123,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
                 endpointStep = 1;
                 ((u_long*)Render_frameScratch.orderingTable)[depth] =
                     (((u_long*)Render_frameScratch.orderingTable)[depth] & 0xFF000000)
-                    | ((u_long)prim & 0xFFFFFF);
+                    | (LegacyGpu_Handle(prim) & 0xFFFFFF);
                 *(int*)&prim->line.r0 = *(int*)&color;
                 screenOffset = renderSegment * sizeof(screenPoints[0]);
                 *(int*)&prim->line.x0 = *(int*)((char*)screenPoints + screenOffset);

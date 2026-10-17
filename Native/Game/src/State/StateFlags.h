@@ -133,5 +133,6 @@ typedef struct State_StateFlags {
     char chestsOpened[64];
     char reserved400[64];
 } State_StateFlags;
+_Static_assert(sizeof(State_StateFlags) == 0x440, "State_StateFlags must keep its PS1 layout");
 
 #endif // VS_STATE_STATEFLAGS_H_TYPES

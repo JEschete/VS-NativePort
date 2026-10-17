@@ -1336,7 +1336,7 @@ int Ending_Credits_PresentFrame(u_long* arg0)
 void Ending_Credits_AllocateRenderBuffers(void)
 {
     Ending_Credits_InitializeDisplay(0x140, 0xF0, 0x200, 0, 0, 0);
-    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000);
+    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)Core_GameHeapArena(), CORE_GAME_HEAP_SIZE);
     Render_legacyPrimitiveBuffers[0] = Core_Memory_AllocateFromLowEnd(0x20000);
     Render_legacyPrimitiveBuffers[1] = Core_Memory_AllocateFromLowEnd(0x20000);
     Render_legacyOrderingTables[0] = Core_Memory_AllocateFromLowEnd(0x2088);

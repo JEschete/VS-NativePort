@@ -13,5 +13,6 @@ typedef struct State_RoomEnemyStates {
     u_int nextSlot;
     char actorStates[8][0x28];
 } State_RoomEnemyStates;
+_Static_assert(sizeof(State_RoomEnemyStates) == 0x148, "State_RoomEnemyStates must keep its PS1 layout");
 
 #endif // VS_STATE_ROOMCACHE_H_TYPES

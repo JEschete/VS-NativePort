@@ -253,7 +253,7 @@ int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* arg0, u_int arg1, 
                         (((u_long*)Render_frameScratch.orderingTable)[depth] & 0xFFFFFF) | 0x0E000000;
                     ((u_long*)Render_frameScratch.orderingTable)[depth] =
                         (((u_long*)Render_frameScratch.orderingTable)[depth] & 0xFF000000)
-                        | (((u_long)prim) & 0xFFFFFF);
+                        | ((LegacyGpu_Handle(prim)) & 0xFFFFFF);
                 }
             }
 
@@ -283,7 +283,7 @@ int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* arg0, u_int arg1, 
                 prim->tag = (((u_long*)Render_frameScratch.orderingTable)[depth] & 0xFFFFFF) | 0x0E000000;
                 ((u_long*)Render_frameScratch.orderingTable)[depth] =
                     (((u_long*)Render_frameScratch.orderingTable)[depth] & 0xFF000000)
-                    | (((u_long)prim) & 0xFFFFFF);
+                    | ((LegacyGpu_Handle(prim)) & 0xFFFFFF);
             }
         }
 

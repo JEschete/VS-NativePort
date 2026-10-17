@@ -13,6 +13,7 @@ struct Battle_StatusLabelLayout {
     u_char spacing;
 };
 typedef struct Battle_StatusLabelLayout Battle_StatusLabelLayout;
+_Static_assert(sizeof(Battle_StatusLabelLayout) == 0x4, "Battle_StatusLabelLayout must keep its PS1 layout");
 
 // decomp: D_800F1BAC_t (src/BATTLE/BATTLE.PRG/146C.h:762)
 typedef struct Battle_FloatingLabel {

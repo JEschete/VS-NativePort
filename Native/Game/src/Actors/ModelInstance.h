@@ -24,6 +24,7 @@ typedef struct Actors_ModelEffectSlot {
     u_char flags;
     u_char parameter;
 } Actors_ModelEffectSlot;
+_Static_assert(sizeof(Actors_ModelEffectSlot) == 0x4, "Actors_ModelEffectSlot must keep its PS1 layout");
 
 // decomp: D_800F4538_unk0 (src/BATTLE/BATTLE.PRG/3A1A0.h:190)
 typedef struct Actors_ModelInstance {

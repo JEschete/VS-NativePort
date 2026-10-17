@@ -25,5 +25,6 @@ typedef struct Actors_PalettePulseView {
     u_short basePalette[16];
     u_short pulsedPalette[16];
 } Actors_PalettePulseView;
+_Static_assert(sizeof(Actors_PalettePulseView) == 0x16C, "Actors_PalettePulseView must keep its PS1 layout");
 
 #endif // VS_ACTORS_PALETTE_H_TYPES

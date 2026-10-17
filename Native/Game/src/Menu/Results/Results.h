@@ -96,6 +96,7 @@ typedef struct Menu_Results_BuffReel {
     short stat;
     short amount;
 } Menu_Results_BuffReel;
+_Static_assert(sizeof(Menu_Results_BuffReel) == 0x4, "Menu_Results_BuffReel must keep its PS1 layout");
 
 #endif // VS_MENU_RESULTS_RESULTS_H_TYPES
 

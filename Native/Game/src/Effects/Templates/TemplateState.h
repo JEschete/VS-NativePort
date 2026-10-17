@@ -46,6 +46,7 @@ typedef struct Effects_GridState {
     short xSpacing, xSpeed, zSpacing, zSpeed, xPhase, zPhase;
     int age;
 } Effects_GridState;
+_Static_assert(sizeof(Effects_GridState) == 0x1C, "Effects_GridState must keep its PS1 layout");
 
 // decomp: vs_mesh10State (src/EFFECT/meshes10.h:16)
 typedef struct Effects_Mesh10State {
@@ -117,6 +118,7 @@ typedef struct Effects_Trail9 {
     int speed;
     int opaque74;
 } Effects_Trail9;
+_Static_assert(sizeof(Effects_Trail9) == 0x78, "Effects_Trail9 must keep its PS1 layout");
 
 // decomp: vs_trail9State (src/EFFECT/trails9Types.h:27)
 typedef struct Effects_Trail9State {

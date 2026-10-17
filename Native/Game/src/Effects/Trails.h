@@ -29,6 +29,7 @@ typedef struct Effects_Trail {
     int speed;
     int opaque54;
 } Effects_Trail;
+_Static_assert(sizeof(Effects_Trail) == 0x58, "Effects_Trail must keep its PS1 layout");
 
 // decomp: effectTrailState (src/BATTLE/BATTLE.PRG/5BF94.c:135)
 typedef struct Effects_BoneTrail {
@@ -44,6 +45,7 @@ typedef struct Effects_BoneTrail {
     long projectionDepth;
     long projectionFlags;
 } Effects_BoneTrail;
+_Static_assert(sizeof(Effects_BoneTrail) == 0xB4, "Effects_BoneTrail must keep its PS1 layout");
 
 #endif // VS_EFFECTS_TRAILS_H_TYPES
 

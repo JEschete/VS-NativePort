@@ -111,6 +111,7 @@ typedef struct Effects_TimelineTrackHeader {
     u_short kind : 8;
     u_short keyCount : 8;
 } Effects_TimelineTrackHeader;
+_Static_assert(sizeof(Effects_TimelineTrackHeader) == 0x2, "Effects_TimelineTrackHeader must keep its PS1 layout");
 
 // decomp: func_800D5780_t (src/BATTLE/BATTLE.PRG/5BF94.h:453)
 typedef struct Effects_TimelineTrack {
@@ -182,6 +183,7 @@ typedef struct Effects_HitEffectRequest {
     Battle_HitTargetWord opaque14;
     int reserved1C[50];
 } Effects_HitEffectRequest;
+_Static_assert(sizeof(Effects_HitEffectRequest) == 0xE4, "Effects_HitEffectRequest must keep its PS1 layout");
 
 // decomp: effectExec (src/BATTLE/BATTLE.PRG/6E644.h:35)
 typedef int (*Effects_EffectRenderer)(Effects_RendererSlot*, u_int, int);
@@ -202,12 +204,14 @@ typedef struct Effects_ParticleTrackKey {
     u_int opaque2Bit4 : 6;
     u_int opaque3Bit2 : 6;
 } Effects_ParticleTrackKey;
+_Static_assert(sizeof(Effects_ParticleTrackKey) == 0x4, "Effects_ParticleTrackKey must keep its PS1 layout");
 
 // decomp: func_800D57FC_t2 (src/BATTLE/BATTLE.PRG/5BF94.c:41)
 typedef struct Effects_ShakeTrackKey {
     unsigned reserved0Bit0 : 4;
     unsigned curve : 5;
 } Effects_ShakeTrackKey;
+_Static_assert(sizeof(Effects_ShakeTrackKey) == 0x4, "Effects_ShakeTrackKey must keep its PS1 layout");
 
 // decomp: func_800D5A98_t (src/BATTLE/BATTLE.PRG/5BF94.c:335)
 typedef struct Effects_ChildTrackKey {
@@ -216,6 +220,7 @@ typedef struct Effects_ChildTrackKey {
     u_char frame;
     u_char delay;
 } Effects_ChildTrackKey;
+_Static_assert(sizeof(Effects_ChildTrackKey) == 0x9, "Effects_ChildTrackKey must keep its PS1 layout");
 
 // decomp: func_800D5A98_t2 (src/BATTLE/BATTLE.PRG/5BF94.c:345)
 typedef struct Effects_ChildTrackView {
@@ -237,6 +242,7 @@ typedef struct Effects_RendererTrackKey {
     u_int reserved3Bit3 : 5;
     u_short opaque4;
 } Effects_RendererTrackKey;
+_Static_assert(sizeof(Effects_RendererTrackKey) == 0x8, "Effects_RendererTrackKey must keep its PS1 layout");
 
 // decomp: func_800D6310_t (src/BATTLE/BATTLE.PRG/5BF94.c:209)
 typedef struct Effects_ColorTrackKey {
@@ -247,6 +253,7 @@ typedef struct Effects_ColorTrackKey {
     unsigned char blue;
     unsigned char mode;
 } Effects_ColorTrackKey;
+_Static_assert(sizeof(Effects_ColorTrackKey) == 0x8, "Effects_ColorTrackKey must keep its PS1 layout");
 
 // decomp: func_800D6508_t (src/BATTLE/BATTLE.PRG/5BF94.c:106)
 typedef struct Effects_TransformControlView {
@@ -256,6 +263,7 @@ typedef struct Effects_TransformControlView {
     u_short reserved22Bit3 : 13;
     char reserved24[0xAC];
 } Effects_TransformControlView;
+_Static_assert(sizeof(Effects_TransformControlView) == 0xD0, "Effects_TransformControlView must keep its PS1 layout");
 
 // decomp: func_800D6894_t (src/BATTLE/BATTLE.PRG/5BF94.c:57)
 typedef struct Effects_ActionControlKey {
@@ -263,6 +271,7 @@ typedef struct Effects_ActionControlKey {
     u_char opaque2;
     u_char opaque3;
 } Effects_ActionControlKey;
+_Static_assert(sizeof(Effects_ActionControlKey) == 0x4, "Effects_ActionControlKey must keep its PS1 layout");
 
 // decomp: func_800D6A18_t (src/BATTLE/BATTLE.PRG/5BF94.c:231)
 typedef struct Effects_ShakeChannelKey {
@@ -277,6 +286,7 @@ typedef struct Effects_ShakeChannelKey {
     u_int opaque7Bit0 : 1;
     u_int opaque7Bit1 : 7;
 } Effects_ShakeChannelKey;
+_Static_assert(sizeof(Effects_ShakeChannelKey) == 0x8, "Effects_ShakeChannelKey must keep its PS1 layout");
 
 #endif // VS_EFFECTS_RUNTIME_H_TYPES
 

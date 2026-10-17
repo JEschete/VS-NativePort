@@ -10,5 +10,6 @@ typedef struct Core_IntPair {
     int reserved0;
     int reserved4;
 } Core_IntPair;
+_Static_assert(sizeof(Core_IntPair) == 0x8, "Core_IntPair must keep its PS1 layout");
 
 #endif // VS_CORE_CORE_INTPAIR_H_TYPES

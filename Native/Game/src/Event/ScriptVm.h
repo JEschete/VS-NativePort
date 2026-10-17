@@ -41,7 +41,7 @@ extern short Event_eventId;
 extern short Event_isChainedEventLoaded;
 extern short Event_threadWaitFrames[4];
 extern char Event_isTextSelectionActive;
-extern int Event_subroutineReturnCursor;
+extern uintptr_t Event_subroutineReturnCursor;
 extern char Event_isSkipForced;
 extern char Event_isScriptBackdropEnabled;
 extern int (*Event_kSkipOpcodeHandlers[])(u_char*, short);

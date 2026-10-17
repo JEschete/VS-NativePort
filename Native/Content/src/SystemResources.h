@@ -7,15 +7,16 @@ typedef struct Content_SystemDatHeader Content_SystemDatHeader;
 
 // decomp: System_dat_h (src/BATTLE/INITBTL.PRG/18.c:23)
 typedef struct Content_SystemDatHeader {
-    size_t image0Offset;
-    size_t image1Offset;
-    size_t paletteOffset;
-    size_t image2Offset;
-    size_t image3Offset;
-    size_t image4Offset;
-    size_t fixedImageOffset;
-    size_t interfaceDataOffset;
+    u_int image0Offset;
+    u_int image1Offset;
+    u_int paletteOffset;
+    u_int image2Offset;
+    u_int image3Offset;
+    u_int image4Offset;
+    u_int fixedImageOffset;
+    u_int interfaceDataOffset;
 } Content_SystemDatHeader;
+_Static_assert(sizeof(Content_SystemDatHeader) == 0x20, "Content_SystemDatHeader must keep its PS1 layout");
 
 #endif // VS_SYSTEMRESOURCES_H_TYPES
 

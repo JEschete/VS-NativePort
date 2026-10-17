@@ -218,7 +218,7 @@ int Effects_TickChildEffectTrack(Effects_EffectInstance* arg0, Effects_ChildTrac
 // decomp: BATTLE.PRG func_800D5D74 (src/BATTLE/BATTLE.PRG/5BF94.c:8069)
 int Effects_TickEffectRendererTrack(Effects_EffectInstance* arg0, Effects_TimelineTrack* arg1)
 {
-    Effects_RendererTrackKey* temp_a3 = (Effects_RendererTrackKey*)(arg1->keyIndex * 8 + (u_int)arg1->keys);
+    Effects_RendererTrackKey* temp_a3 = (Effects_RendererTrackKey*)(arg1->keyIndex * 8 + (uintptr_t)arg1->keys);
 
     if (temp_a3->frame == arg0->context.timeline->frame) {
         Effects_AttachEffectRenderer(arg0, Effects_effectRenderers[temp_a3->effectRenderer],

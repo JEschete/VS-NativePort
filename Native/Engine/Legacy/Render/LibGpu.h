@@ -213,15 +213,33 @@ typedef struct TIM_IMAGE {
 #define _get_mode(dfe, dtd, tpage) (0xE1000000u | ((dtd) ? 0x200 : 0) | ((dfe) ? 0x400 : 0) | ((tpage) & 0x9FF))
 
 // ---- packet header (length, command code, ordering-table link)
+// A link is 24 bits, as on the PS1, but holds a handle from LegacyGpu_Handle rather than an address, so packets
+// anywhere in 64-bit memory can be linked. 0xFFFFFF is the end of a list. Link words copied between packets
+// (`*ot & 0xFFFFFF`, vs_getTag(type, *ot)) stay valid because they are already handles.
+#define LEGACY_GPU_LINK_END 0xFFFFFFu
+u_long LegacyGpu_Handle(const void* p);
+void* LegacyGpu_Pointer(u_long link);
+static inline u_long LegacyGpu_LinkOfWord(u_long word) { return word & 0xFFFFFF; }
+static inline u_long LegacyGpu_LinkOfPointer(const void* p) { return LegacyGpu_Handle(p); }
+// setaddr takes either a packet pointer or a link word copied from another packet
+#ifdef __cplusplus
+#define LegacyGpu_Link(x) LegacyGpu_LinkOf(x)
+#else
+#define LegacyGpu_Link(x)                                                                                    \
+    _Generic((x), int: LegacyGpu_LinkOfWord, unsigned int: LegacyGpu_LinkOfWord, long: LegacyGpu_LinkOfWord,  \
+        unsigned long: LegacyGpu_LinkOfWord, long long: LegacyGpu_LinkOfWord,                                \
+        unsigned long long: LegacyGpu_LinkOfWord, default: LegacyGpu_LinkOfPointer)(x)
+#endif
 #define setlen(p, _len) (((P_TAG*)(p))->len = (u_char)(_len))
-#define setaddr(p, _addr) (((P_TAG*)(p))->addr = (u_long)(_addr))
+#define setaddr(p, _addr) (((P_TAG*)(p))->addr = LegacyGpu_Link(_addr))
 #define setcode(p, _code) (((P_TAG*)(p))->code = (u_char)(_code))
 #define getcode(p) ((u_char)(((P_TAG*)(p))->code))
 #define getaddr(p) ((u_long)(((P_TAG*)(p))->addr))
-#define nextPrim(p) LegacyGpu_NextPrim(p)
-#define addPrim(ot, p) (setaddr(p, getaddr(ot)), setaddr(ot, p))
+#define nextPrim(p) LegacyGpu_Pointer(getaddr(p))
+#define isendprim(p) (getaddr(p) == LEGACY_GPU_LINK_END)
+#define addPrim(ot, p) (((P_TAG*)(p))->addr = ((P_TAG*)(ot))->addr, ((P_TAG*)(ot))->addr = LegacyGpu_Handle(p))
 #define catPrim(p0, p1) setaddr(p0, p1)
-#define termPrim(p) setaddr(p, 0xFFFFFFFF)
+#define termPrim(p) (((P_TAG*)(p))->addr = LEGACY_GPU_LINK_END)
 #define setSemiTrans(p, abe) ((abe) ? setcode(p, getcode(p) | 0x02) : setcode(p, getcode(p) & ~0x02))
 #define setShadeTex(p, tge) ((tge) ? setcode(p, getcode(p) | 0x01) : setcode(p, getcode(p) & ~0x01))
 #define setPolyF4(p) (setlen(p, 5), setcode(p, 0x28))
@@ -236,7 +254,9 @@ typedef struct TIM_IMAGE {
 #define setLineG2(p) (setlen(p, 4), setcode(p, 0x50))
 #define setLineG4(p) (setlen(p, 9), setcode(p, 0x5C), (p)->pad = 0x55555555, (p)->p2 = 0, (p)->p3 = 0)
 
-void* LegacyGpu_NextPrim(void* p);
+// Walks one ordering table / packet list from `p` to the end marker and hands each drawing packet to the renderer.
+// Returns the number of packets visited.
+int LegacyGpu_WalkList(const void* p);
 
 // ---- display, drawing environment and video memory
 DISPENV* PutDispEnv(DISPENV* env);
@@ -272,5 +292,17 @@ void SetSprt(SPRT* p);
 void SetTile(TILE* p);
 
 #ifdef __cplusplus
+}
+
+#include <type_traits>
+
+template <class T>
+inline u_long LegacyGpu_LinkOf(T x)
+{
+    if constexpr (std::is_pointer_v<T>) {
+        return LegacyGpu_Handle(x);
+    } else {
+        return static_cast<u_long>(x) & 0xFFFFFF;
+    }
 }
 #endif

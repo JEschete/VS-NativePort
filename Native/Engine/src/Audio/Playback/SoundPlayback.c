@@ -182,12 +182,12 @@ u_int Audio_Playback_QueueMusicTransition(void* arg0)
 // decomp: SLUS_010.40 func_80012110 (src/SLUS_010.40/25AC.c:339)
 void* Audio_Playback_StartMusicPair(void* arg0, int arg1)
 {
-    u_long v0;
+    uintptr_t v0;
     Audio_Driver_commandArguments.param1 = arg0;
     Audio_Driver_commandArguments.param2 = arg1;
     Audio_Mixer_DispatchCommand(0x16);
     v0 = Audio_Driver_commandArguments.param2 << 0x10;
-    v0 += (u_long)Audio_Driver_commandArguments.param1;
+    v0 += (uintptr_t)Audio_Driver_commandArguments.param1;
     return (void*)v0;
 }
 
@@ -291,7 +291,7 @@ int Audio_Playback_SoundEffectIdForTag(int arg0)
 int Audio_Playback_UsesSoundEffectTags(Audio_SfxProgramHeader* arg0)
 {
     int ret = 0;
-    if ((long)arg0 >= 0x80000000) {
+    if ((uintptr_t)arg0 >= 0x80000000) {
         ret = arg0->flags >> 7;
     } else if (Audio_Playback_soundEffectBankSelectors[(long)arg0] & 0x8000) {
         ret = 1;

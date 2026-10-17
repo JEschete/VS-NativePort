@@ -15,6 +15,7 @@ typedef struct Field_WeatherParticle {
     char fallShift;
     char speed;
 } Field_WeatherParticle;
+_Static_assert(sizeof(Field_WeatherParticle) == 0x10, "Field_WeatherParticle must keep its PS1 layout");
 
 #endif // VS_FIELD_WEATHER_H_TYPES
 

@@ -617,7 +617,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
         zud = Field_zoneContext.zudData;
         object.assetKind = 2;
         object.targetSlot = id;
-        object.dataAddress = zud->characterShapeOffset + (u_long)zud;
+        object.dataAddress = zud->characterShapeOffset + (uintptr_t)zud;
         object.modelId = (u_char)Field_zoneContext.zndEnemies[zudIndex].recordBytes[2];
         if ((State_recentRoomEnemyStates[State_currentRoomStateSlot].zoneId == Field_zoneContext.zndId)
             && (State_recentRoomEnemyStates[State_currentRoomStateSlot].mapId == Field_zoneContext.mapId)
@@ -655,7 +655,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
                 if (bladeId) {
                     object.assetKind = 4;
                     object.targetSlot = id * 2;
-                    object.dataAddress = zud->weaponOffset + (u_long)zud;
+                    object.dataAddress = zud->weaponOffset + (uintptr_t)zud;
                     object.modelId = bladeId;
                     object.destination = actor->equipmentModels[0];
                     object.subKind = id;
@@ -666,7 +666,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
                 if (shieldId) {
                     object.assetKind = 4;
                     object.targetSlot = id * 2 + 1;
-                    object.dataAddress = zud->shieldOffset + (u_long)zud;
+                    object.dataAddress = zud->shieldOffset + (uintptr_t)zud;
                     object.modelId = shieldId;
                     object.destination = actor->equipmentModels[1];
                     object.subKind = id;
@@ -678,7 +678,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
             if (((id < 2) || ((flags & 3) == 1)) && zud->battleAnimationSize) {
                 object.assetKind = 8;
                 object.targetSlot = id;
-                object.dataAddress = zud->battleAnimationOffset + (u_long)zud;
+                object.dataAddress = zud->battleAnimationOffset + (uintptr_t)zud;
                 object.subKind = 0;
                 object.modelId = actor->equippedWeaponCategory;
                 Content_QueueActorAssetRequest(&object);
@@ -686,7 +686,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
             if (zud->commonAnimationSize) {
                 object.assetKind = 8;
                 object.targetSlot = id;
-                object.dataAddress = zud->commonAnimationOffset + (u_long)zud;
+                object.dataAddress = zud->commonAnimationOffset + (uintptr_t)zud;
                 object.subKind = 0;
                 object.modelId = 0;
                 Content_QueueActorAssetRequest(&object);

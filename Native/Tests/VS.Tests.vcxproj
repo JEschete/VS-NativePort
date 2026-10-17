@@ -35,7 +35,7 @@
   <Import Project="$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props" Condition="Exists('$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props')" />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;$(MSBuildThisFileDirectory)src;$(MSBuildThisFileDirectory)..\Engine\include;$(MSBuildThisFileDirectory)..\Content\include;$(MSBuildThisFileDirectory)..\Game\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;$(MSBuildThisFileDirectory)src;$(MSBuildThisFileDirectory)..\Engine\include;$(MSBuildThisFileDirectory)..\Content\include;$(MSBuildThisFileDirectory)..\Game\include;$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -48,6 +48,7 @@
     <ClCompile Include="src\ContentTests.cpp" />
     <ClCompile Include="src\CoreTests.cpp" />
     <ClCompile Include="src\InputTests.cpp" />
+    <ClCompile Include="src\LegacyGpuTests.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>

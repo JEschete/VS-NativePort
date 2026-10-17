@@ -123,6 +123,7 @@ typedef struct Menu_Framework_TextHeader {
     char disabled;
     char x;
 } Menu_Framework_TextHeader;
+_Static_assert(sizeof(Menu_Framework_TextHeader) == 0x10, "Menu_Framework_TextHeader must keep its PS1 layout");
 
 // decomp: vs_battle_menuItem_t (src/BATTLE/BATTLE.PRG/5BF94.h:66)
 typedef struct Menu_Framework_MenuRow {

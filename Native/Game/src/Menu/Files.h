@@ -79,6 +79,7 @@ typedef struct Menu_Files_FileMenuElement {
     short h;
     char text[32];
 } Menu_Files_FileMenuElement;
+_Static_assert(sizeof(Menu_Files_FileMenuElement) == 0x34, "Menu_Files_FileMenuElement must keep its PS1 layout");
 
 // decomp: primBuf_t (src/MENU/MENU7.PRG/260.c:150)
 typedef struct Menu_Files_PrimitiveBuffer {

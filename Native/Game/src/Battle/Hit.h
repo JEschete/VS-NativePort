@@ -80,5 +80,6 @@ typedef struct Battle_DamageCalculation {
     /* 0x22 */ short shieldStatFactor;
     /* 0x24 */ short armorStatFactor;
 } Battle_DamageCalculation;
+_Static_assert(sizeof(Battle_DamageCalculation) == 0x26, "Battle_DamageCalculation must keep its PS1 layout");
 
 #endif // VS_BATTLE_HIT_H_TYPES

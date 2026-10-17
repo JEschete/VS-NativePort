@@ -41,6 +41,7 @@ typedef struct Audio_VoiceModeMasks {
     int noise;
     int fm;
 } Audio_VoiceModeMasks;
+_Static_assert(sizeof(Audio_VoiceModeMasks) == 0xC, "Audio_VoiceModeMasks must keep its PS1 layout");
 
 // decomp: FSoundVoiceParams (src/include/sound.h:316)
 typedef struct Audio_VoiceParams {
@@ -54,6 +55,7 @@ typedef struct Audio_VoiceParams {
     /* 0x16 */ u_short volumeScale;
     /* 0x18 */ SpuVolume volume;
 } Audio_VoiceParams;
+_Static_assert(sizeof(Audio_VoiceParams) == 0x1C, "Audio_VoiceParams must keep its PS1 layout");
 
 // decomp: FSoundVoiceSchedulerState (src/include/sound.h:274)
 typedef struct Audio_VoiceScheduler {
@@ -72,6 +74,7 @@ typedef struct Audio_VoiceScheduler {
     char pad2B;
     u_int reserved2C;
 } Audio_VoiceScheduler;
+_Static_assert(sizeof(Audio_VoiceScheduler) == 0x30, "Audio_VoiceScheduler must keep its PS1 layout");
 
 // decomp: FSpuVoiceInfo (src/include/sound.h:507)
 typedef struct Audio_VoiceEnvelope {
@@ -79,6 +82,7 @@ typedef struct Audio_VoiceEnvelope {
     /* 0x4 */ short envelopeLevel;
     /* 0x6 */ short reserved6;
 } Audio_VoiceEnvelope;
+_Static_assert(sizeof(Audio_VoiceEnvelope) == 0x8, "Audio_VoiceEnvelope must keep its PS1 layout");
 
 #endif // VS_AUDIO_MIXER_VOICEMIXER_H_TYPES
 

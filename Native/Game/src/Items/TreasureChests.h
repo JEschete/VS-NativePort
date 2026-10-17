@@ -29,5 +29,6 @@ typedef struct Items_TreasureChest {
     short facing;
     Items_BattleLoot loot;
 } Items_TreasureChest;
+_Static_assert(sizeof(Items_TreasureChest) == 0x234, "Items_TreasureChest must keep its PS1 layout");
 
 #endif // VS_ITEMS_TREASURECHESTS_H_TYPES

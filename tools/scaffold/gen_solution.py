@@ -99,6 +99,8 @@ def vcxproj(p: Project, files: list[tuple[str, str]]) -> str:
     ctype = "Application" if p.kind == "exe" else "StaticLibrary"
     inc_dirs = ["$(MSBuildThisFileDirectory)include", "$(MSBuildThisFileDirectory)src"] + [
         f"$(MSBuildThisFileDirectory){rel(p.dir, BY_NAME[r].dir)}\\include" for r in p.refs + p.see]
+    if p.name == "VS.Tests":
+        inc_dirs.append("$(VSCopiedCIncludes)")  # tests exercise the Legacy layer and copied headers
     compile_items, header_items = [], []
     for kind, path in files:
         if kind == "ClInclude":

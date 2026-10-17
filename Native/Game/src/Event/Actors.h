@@ -11,6 +11,7 @@ typedef struct Event_ActorSelection {
     char cursor;
     char actorIds[22];
 } Event_ActorSelection;
+_Static_assert(sizeof(Event_ActorSelection) == 0x18, "Event_ActorSelection must keep its PS1 layout");
 
 #endif // VS_EVENT_ACTORS_H_TYPES
 

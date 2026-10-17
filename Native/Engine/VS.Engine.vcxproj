@@ -172,6 +172,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Core\Arena.cpp" />
     <ClCompile Include="src\Core\Callbacks.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -542,6 +543,7 @@
     <ClInclude Include="src\Save\MemoryCard\Resources.h" />
     <ClInclude Include="src\Save\Snapshot.h" />
     <ClInclude Include="include\Audio\AudioDevice.hpp" />
+    <ClInclude Include="include\Core\Arena.h" />
     <ClInclude Include="include\Core\Assert.hpp" />
     <ClInclude Include="include\Core\BiosRand.h" />
     <ClInclude Include="include\Core\Core\IntPair.h" />

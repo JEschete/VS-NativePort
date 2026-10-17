@@ -53,6 +53,7 @@ typedef struct Battle_EffectDefinitionView {
     short reserved20[6];
     short reserved2C[6];
 } Battle_EffectDefinitionView;
+_Static_assert(sizeof(Battle_EffectDefinitionView) == 0x38, "Battle_EffectDefinitionView must keep its PS1 layout");
 
 // decomp: effectTrailConfig (src/BATTLE/BATTLE.PRG/5BF94.c:121)
 typedef struct Battle_EffectTrailConfig {
@@ -62,6 +63,7 @@ typedef struct Battle_EffectTrailConfig {
     u_int texture : 4;
     u_int life : 8;
 } Battle_EffectTrailConfig;
+_Static_assert(sizeof(Battle_EffectTrailConfig) == 0x4, "Battle_EffectTrailConfig must keep its PS1 layout");
 
 // decomp: effectTransformState (src/BATTLE/BATTLE.PRG/5BF94.c:602)
 typedef struct Battle_EffectTransformState {
@@ -76,6 +78,7 @@ typedef struct Battle_EffectTransformState {
     MATRIX reserved38, reserved58, attachment, facing;
     SVECTOR saved, reservedC0, reservedC8;
 } Battle_EffectTransformState;
+_Static_assert(sizeof(Battle_EffectTransformState) == 0xD0, "Battle_EffectTransformState must keep its PS1 layout");
 
 // decomp: environmentTarget (src/BATTLE/BATTLE.PRG/146C.c:349)
 typedef struct Battle_EnvironmentTarget {
@@ -86,6 +89,7 @@ typedef struct Battle_EnvironmentTarget {
     char reserved8[56];
     int kind;
 } Battle_EnvironmentTarget;
+_Static_assert(sizeof(Battle_EnvironmentTarget) == 0x44, "Battle_EnvironmentTarget must keep its PS1 layout");
 
 // decomp: environmentTargetList (src/BATTLE/BATTLE.PRG/146C.c:356)
 typedef struct Battle_EnvironmentTargetList {
@@ -94,6 +98,7 @@ typedef struct Battle_EnvironmentTargetList {
     u_short count;
     Battle_EnvironmentTarget targets[30];
 } Battle_EnvironmentTargetList;
+_Static_assert(sizeof(Battle_EnvironmentTargetList) == 0x844, "Battle_EnvironmentTargetList must keep its PS1 layout");
 
 // decomp: func_80085A34_t (src/BATTLE/BATTLE.PRG/146C.c:227)
 typedef struct Battle_HitStatusView {
@@ -111,6 +116,7 @@ typedef struct Battle_HitStatusView {
     int reserved20[8];
     int opaque40;
 } Battle_HitStatusView;
+_Static_assert(sizeof(Battle_HitStatusView) == 0x44, "Battle_HitStatusView must keep its PS1 layout");
 
 // decomp: func_800962E4_t (src/BATTLE/BATTLE.PRG/2842C.c:83)
 typedef struct Battle_FloatingLabelSpec {
@@ -126,6 +132,7 @@ typedef struct Battle_FloatingLabelSpec {
     char reservedE;
     char reservedF;
 } Battle_FloatingLabelSpec;
+_Static_assert(sizeof(Battle_FloatingLabelSpec) == 0x10, "Battle_FloatingLabelSpec must keep its PS1 layout");
 
 // decomp: func_800C0FA8_t2 (src/BATTLE/BATTLE.PRG/58578.c:69)
 typedef struct Battle_TargetVolumeMatrix {
@@ -134,6 +141,7 @@ typedef struct Battle_TargetVolumeMatrix {
     short opaque10[4];
     short opaque18[4];
 } Battle_TargetVolumeMatrix;
+_Static_assert(sizeof(Battle_TargetVolumeMatrix) == 0x20, "Battle_TargetVolumeMatrix must keep its PS1 layout");
 
 // decomp: func_800C1564_flags (src/BATTLE/BATTLE.PRG/58578.h:10)
 typedef struct Battle_TargetVolumeFlags {
@@ -142,6 +150,7 @@ typedef struct Battle_TargetVolumeFlags {
     u_int reserved2Bit0 : 8;
     u_int opaque3Bit0 : 8;
 } Battle_TargetVolumeFlags;
+_Static_assert(sizeof(Battle_TargetVolumeFlags) == 0x4, "Battle_TargetVolumeFlags must keep its PS1 layout");
 
 // decomp: func_800C1564_t (src/BATTLE/BATTLE.PRG/58578.h:21)
 typedef struct Battle_TargetVolume {
@@ -165,6 +174,7 @@ typedef struct Battle_TargetLabelLine {
     signed char opaqueA;
     char reservedB[0xD];
 } Battle_TargetLabelLine;
+_Static_assert(sizeof(Battle_TargetLabelLine) == 0x18, "Battle_TargetLabelLine must keep its PS1 layout");
 
 // decomp: func_800C56C0_t2 (src/BATTLE/BATTLE.PRG/5BF94.c:276)
 typedef struct Battle_TargetSphereLabelEntry {
@@ -220,12 +230,14 @@ typedef struct Battle_TargetInfoLine {
     u_char opaque16;
     u_char opaque17;
 } Battle_TargetInfoLine;
+_Static_assert(sizeof(Battle_TargetInfoLine) == 0x18, "Battle_TargetInfoLine must keep its PS1 layout");
 
 // decomp: func_800CFE1C_t (src/BATTLE/BATTLE.PRG/5BF94.h:208)
 typedef struct Battle_EffectScriptWord {
     short reserved0;
     short reserved2;
 } Battle_EffectScriptWord;
+_Static_assert(sizeof(Battle_EffectScriptWord) == 0x4, "Battle_EffectScriptWord must keep its PS1 layout");
 
 // decomp: func_800D0548_arg0 (src/BATTLE/BATTLE.PRG/5BF94.c:578)
 typedef struct Battle_EffectTransformDefinition {
@@ -240,6 +252,7 @@ typedef struct Battle_EffectTransformDefinition {
     u_short reserved10;
     u_short reserved12;
 } Battle_EffectTransformDefinition;
+_Static_assert(sizeof(Battle_EffectTransformDefinition) == 0x14, "Battle_EffectTransformDefinition must keep its PS1 layout");
 
 // decomp: func_800D0C60_t (src/BATTLE/BATTLE.PRG/5BF94.c:558)
 typedef struct Battle_EffectRendererState {
@@ -251,6 +264,7 @@ typedef struct Battle_EffectRendererState {
     char reserved98[0x26];
     short reservedBE;
 } Battle_EffectRendererState;
+_Static_assert(sizeof(Battle_EffectRendererState) == 0xC0, "Battle_EffectRendererState must keep its PS1 layout");
 
 // decomp: func_800D6048_t (src/BATTLE/BATTLE.PRG/5BF94.c:562)
 typedef struct Battle_EffectTransformBlock {
@@ -267,6 +281,7 @@ typedef struct Battle_EffectParameterBytes {
     char reserved6;
     char reserved7;
 } Battle_EffectParameterBytes;
+_Static_assert(sizeof(Battle_EffectParameterBytes) == 0x8, "Battle_EffectParameterBytes must keep its PS1 layout");
 
 // decomp: labelBoxPrim_t (src/BATTLE/BATTLE.PRG/58578.c:78)
 typedef struct Battle_TargetLabelPrimitive {
@@ -283,17 +298,20 @@ typedef struct Battle_LimbEffects {
     short opaque0;
     short opaque2;
 } Battle_LimbEffects;
+_Static_assert(sizeof(Battle_LimbEffects) == 0x4, "Battle_LimbEffects must keep its PS1 layout");
 
 // decomp: menuShapeVertex (src/BATTLE/BATTLE.PRG/573B8.h:8)
 typedef struct Battle_ShapeVertex {
     short xyz[3];
     short opaque6;
 } Battle_ShapeVertex;
+_Static_assert(sizeof(Battle_ShapeVertex) == 0x8, "Battle_ShapeVertex must keep its PS1 layout");
 
 // decomp: func_800C4794_t (src/BATTLE/BATTLE.PRG/5BF94.c:566)
 typedef union Battle_VectorWords {
     SVECTOR vector;
     int words[2];
 } Battle_VectorWords;
+_Static_assert(sizeof(Battle_VectorWords) == 0x8, "Battle_VectorWords must keep its PS1 layout");
 
 #endif // VS_BATTLE_BATTLETYPES_H_TYPES

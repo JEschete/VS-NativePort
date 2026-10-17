@@ -16,6 +16,7 @@ typedef struct Render_ColorRgb8 {
     char blue;
     char pad3;
 } Render_ColorRgb8;
+_Static_assert(sizeof(Render_ColorRgb8) == 0x4, "Render_ColorRgb8 must keep its PS1 layout");
 
 // decomp: D_8005DC80_t (src/SLUS_010.40/main.c:32)
 typedef struct Render_ModelColorFade {
@@ -24,6 +25,7 @@ typedef struct Render_ModelColorFade {
     int colorFixed[6];
     Render_ColorRgb8 baseColor;
 } Render_ModelColorFade;
+_Static_assert(sizeof(Render_ModelColorFade) == 0x2C, "Render_ModelColorFade must keep its PS1 layout");
 
 // decomp: D_800F4538_unk58_2 (src/BATTLE/BATTLE.PRG/3A1A0.h:38)
 typedef struct Render_ColorCode {
@@ -32,6 +34,7 @@ typedef struct Render_ColorCode {
     u_char blue;
     u_char code;
 } Render_ColorCode;
+_Static_assert(sizeof(Render_ColorCode) == 0x4, "Render_ColorCode must keep its PS1 layout");
 
 // decomp: _clutSlot (src/SLUS_010.40/main.c:57)
 typedef struct Render_PaletteSlot {
@@ -58,6 +61,7 @@ typedef struct Render_PaletteSlot {
     } entries[256];
     u_short baseColors[256];
 } Render_PaletteSlot;
+_Static_assert(sizeof(Render_PaletteSlot) == 0x90A, "Render_PaletteSlot must keep its PS1 layout");
 
 // decomp: _clutState_t (src/SLUS_010.40/main.c:75)
 typedef struct Render_PaletteTransitionState {
@@ -77,6 +81,7 @@ typedef struct Render_PaletteTransitionState {
     Render_ColorRgb8 backgroundBaseColors[5];
     Render_ModelColorFade modelColorFades[17];
 } Render_PaletteTransitionState;
+_Static_assert(sizeof(Render_PaletteTransitionState) == 0x8214, "Render_PaletteTransitionState must keep its PS1 layout");
 
 #endif // VS_RENDER_PALETTE_H_TYPES
 

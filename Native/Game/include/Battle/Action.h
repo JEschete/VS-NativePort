@@ -132,6 +132,7 @@ typedef struct Battle_ActionAiFlags {
     u_short radialArea : 1;
     u_short reserved1Bit6 : 2;
 } Battle_ActionAiFlags;
+_Static_assert(sizeof(Battle_ActionAiFlags) == 0x2, "Battle_ActionAiFlags must keep its PS1 layout");
 
 // decomp: vs_action_t (src/SLUS_010.40/main.h:107)
 typedef struct Battle_ActionDefinition {
@@ -151,10 +152,10 @@ typedef struct Battle_ActionDefinition {
     u_char areaRangeZ;
     u_char areaShape;
     u_char recoveryDelay;
-    u_int reservedDBit0 : 4;
-    u_int opaqueDBit4 : 2;
-    u_int resetsHitResults : 1;
-    u_int unlocked : 1;
+    u_char reservedDBit0 : 4;
+    u_char opaqueDBit4 : 2;
+    u_char resetsHitResults : 1;
+    u_char unlocked : 1;
     Battle_ActionAiFlags aiFlags;
     int reserved10;
     struct {
@@ -174,5 +175,6 @@ typedef union Battle_ActionHitParamsWord {
     u_short halves[2];
     u_int word;
 } Battle_ActionHitParamsWord;
+_Static_assert(sizeof(Battle_ActionHitParamsWord) == 0x4, "Battle_ActionHitParamsWord must keep its PS1 layout");
 
 #endif // VS_BATTLE_ACTION_H_TYPES

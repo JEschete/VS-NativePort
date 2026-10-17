@@ -48,12 +48,14 @@ struct Content_DiscRequestCounts {
     short waiting;
 };
 typedef struct Content_DiscRequestCounts Content_DiscRequestCounts;
+_Static_assert(sizeof(Content_DiscRequestCounts) == 0x4, "Content_DiscRequestCounts must keep its PS1 layout");
 
 // decomp: vs_main_CdFile (src/SLUS_010.40/main.h:24)
 typedef struct Content_DiscFile {
     int lba;
     int size;
 } Content_DiscFile;
+_Static_assert(sizeof(Content_DiscFile) == 0x8, "Content_DiscFile must keep its PS1 layout");
 
 // decomp: vs_main_CdQueueSlot (src/SLUS_010.40/main.h:42)
 typedef struct Content_DiscQueueSlot {

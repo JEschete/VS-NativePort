@@ -20,6 +20,7 @@ typedef struct Actors_MovementRequest {
     int reservedC;
     SVECTOR step;
 } Actors_MovementRequest;
+_Static_assert(sizeof(Actors_MovementRequest) == 0x18, "Actors_MovementRequest must keep its PS1 layout");
 
 // decomp: func_800A3054_t (src/BATTLE/BATTLE.PRG/3A1A0.c:13)
 typedef struct Actors_FallDirection {
@@ -27,18 +28,21 @@ typedef struct Actors_FallDirection {
     short reserved2;
     short directionZ;
 } Actors_FallDirection;
+_Static_assert(sizeof(Actors_FallDirection) == 0x6, "Actors_FallDirection must keep its PS1 layout");
 
 // decomp: func_800A6660_t (src/BATTLE/BATTLE.PRG/3A1A0.c:25)
 typedef struct Actors_TurnRequest {
     char reserved0[6];
     short restartTurn;
 } Actors_TurnRequest;
+_Static_assert(sizeof(Actors_TurnRequest) == 0x8, "Actors_TurnRequest must keep its PS1 layout");
 
 // decomp: func_800AC690_timer_t (src/BATTLE/BATTLE.PRG/40564.c:47)
 typedef struct Actors_AirborneTickAccumulator {
     u_int reserved0 : 24;
     u_int tickRemainder : 8;
 } Actors_AirborneTickAccumulator;
+_Static_assert(sizeof(Actors_AirborneTickAccumulator) == 0x4, "Actors_AirborneTickAccumulator must keep its PS1 layout");
 
 #endif // VS_ACTORS_MOVEMENT_H_TYPES
 

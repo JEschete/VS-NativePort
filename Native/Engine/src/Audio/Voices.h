@@ -35,5 +35,6 @@ typedef struct Audio_LegacyVoiceChannelState {
     /* 0x58 */ int voiceSampleRate;
     /* 0x5C */ int controlFlags;
 } Audio_LegacyVoiceChannelState;
+_Static_assert(sizeof(Audio_LegacyVoiceChannelState) == 0x60, "Audio_LegacyVoiceChannelState must keep its PS1 layout");
 
 #endif // VS_AUDIO_VOICES_H_TYPES

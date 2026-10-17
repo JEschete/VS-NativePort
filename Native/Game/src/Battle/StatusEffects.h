@@ -44,11 +44,13 @@ typedef struct Battle_StatusEffectTick {
     int reserved8;
     int reservedC;
 } Battle_StatusEffectTick;
+_Static_assert(sizeof(Battle_StatusEffectTick) == 0x10, "Battle_StatusEffectTick must keep its PS1 layout");
 
 // decomp: statusEffectTable (src/BATTLE/BATTLE.PRG/74088.c:1165)
 typedef struct Battle_StatusEffectTickTable {
     Battle_StatusEffectTick reserved0[1];
 } Battle_StatusEffectTickTable;
+_Static_assert(sizeof(Battle_StatusEffectTickTable) == 0x10, "Battle_StatusEffectTickTable must keep its PS1 layout");
 
 // decomp: vs_main_statusEffectParams_t (src/SLUS_010.40/main.h:115)
 typedef struct Battle_StatusEffectParams {
@@ -58,6 +60,7 @@ typedef struct Battle_StatusEffectParams {
     int cancelledStatuses;
     int blockingStatuses;
 } Battle_StatusEffectParams;
+_Static_assert(sizeof(Battle_StatusEffectParams) == 0x10, "Battle_StatusEffectParams must keep its PS1 layout");
 
 #endif // VS_BATTLE_STATUSEFFECTS_H_TYPES
 

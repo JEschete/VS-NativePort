@@ -105,7 +105,7 @@ void Boot_RunGameLoop(void)
     int ready;
     int i;
     Menu_Framework_ActionSelection* menu;
-    int result;
+    uintptr_t result;
     int shortcut;
 
     Field_isMenuRequestQueued = 0;
@@ -196,14 +196,14 @@ void Boot_RunGameLoop(void)
                                         Event_BeginQueuedCutscene();
                                         break;
                                     }
-                                    result = (int)Field_FindFacingRoomObject(0);
+                                    result = (uintptr_t)Field_FindFacingRoomObject(0);
                                     if (result) {
                                         if (!Field_InteractWithLockedRoomObject((Field_MpdLockTrigger*)result)) {
                                             Field_BeginObjectInteractionWait();
                                             break;
                                         }
                                     } else {
-                                        result = (int)Field_FindFacingUnlootedChest(0);
+                                        result = (uintptr_t)Field_FindFacingUnlootedChest(0);
                                         if (result) {
                                             Field_BeginChestInteraction((Field_MpdLockTrigger*)result, 0);
                                             break;
@@ -604,7 +604,7 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     vector = (VECTOR) { 0x71C, 0x71C, 0x71C };
 
     Audio_ResetSoundSlots();
-    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000);
+    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)Core_GameHeapArena(), CORE_GAME_HEAP_SIZE);
     Render_legacyPrimitiveBuffers[1] = 0;
     Render_legacyPrimitiveBuffers[0] = NULL;
     Render_legacyOrderingTables[0] = Core_Memory_AllocateFromLowEnd(0x2088);

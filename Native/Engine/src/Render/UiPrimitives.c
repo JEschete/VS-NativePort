@@ -48,13 +48,13 @@ void Render_LoadFrameViewMatrix(void)
 void Render_SplicePrimitiveList(u_long* arg0, int* arg1)
 {
     int a3 = 0xFFFFFF;
-    int temp_t0 = ((u_long)(arg0 - 1) & a3);
+    u_long temp_t0 = LegacyGpu_Handle(arg0 - 1);
 
     while ((*arg0 & a3) != temp_t0) {
-        arg0 = (u_long*)((*arg0 & a3) | 0x80000000);
+        arg0 = (u_long*)LegacyGpu_Pointer(*arg0 & a3);
     }
 
-    *arg0 = (*arg0 & 0xFF000000) | ((u_long)arg1 & a3);
+    *arg0 = (*arg0 & 0xFF000000) | LegacyGpu_Handle(arg1);
     *arg1 = (int)((*arg1 & 0xFF000000) | temp_t0);
 }
 

@@ -11,6 +11,7 @@ union Battle_HudHighlightWord {
     u_char bytes[4];
 };
 typedef union Battle_HudHighlightWord Battle_HudHighlightWord;
+_Static_assert(sizeof(Battle_HudHighlightWord) == 0x4, "Battle_HudHighlightWord must keep its PS1 layout");
 
 #endif // VS_BATTLE_HUD_H_TYPES
 

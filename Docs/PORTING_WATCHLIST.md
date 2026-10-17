@@ -49,6 +49,33 @@ int-to-pointer casts. Ordering-table links (`addPrim`, `setaddr`, the game's `vs
 store 24-bit addresses in packet tags, which truncates x64 pointers: the first render work in 1b replaces them with
 sort keys (plan Step 6). The size-literal asserts are not generated yet.
 
+**Fixed before 1b (2026-10-17)**, by the copy tool from `tools\port\hazard_index.py` (libclang over the decomp:
+every pointer-to-4-byte-integer cast and where its value goes):
+
+- **Links:** ordering-table links are 24-bit handles (`LegacyGpu_Handle`/`LegacyGpu_Pointer`,
+  `Legacy/Render/LibGpu.h`), so packets anywhere in 64-bit memory link correctly. `addPrim`, `setaddr` (pointer or
+  copied link word), `nextPrim`, `ClearOTag(R)`, `AddPrim(s)`, `DrawOTag`/`DrawPrim` (which walk the list and hand
+  each packet to the renderer) use them; 37 `(u_long)p & 0xFFFFFF` sites become `LegacyGpu_Handle(p)`, and
+  `_insertTPage` and `Render::SplicePrimitiveList` were fixed by review. Unit-tested with packets 16 MiB apart.
+- **Pointer storage:** casts whose value lands in something made pointer-sized become `(uintptr_t)`: three runtime
+  members (`Content::ActorAssetRequest.dataAddress`, `Audio::CommandParams.param1`, `Audio::MusicConfig.sequenceBase`),
+  one global (`Event::subroutineReturnCursor`), 16 locals, plus round trips and comparisons.
+- **Left visible on purpose:** 33 stores through a dereference, 14 returns, 8 parameters and the on-disc members
+  (`Actors::WeaponModelData`, `Actors::ShpModel`, `Content::SequenceBuffer` relocations) keep their original casts,
+  so the compiler still reports them (127 pointer/integer warnings, from 315). They need signature or decoder work.
+- **Struct sizes:** 5 literal sizes of structs that hold pointers became `sizeof` (e.g. `allocHeapR(0x30)` for the
+  particle state). Every pointer-free struct/union (398) carries `_Static_assert(sizeof(T) == <PS1 size>)`, and
+  `tools\port\layout_check.py` compares every member offset with the PS1 layout under the real x64 MSVC rules.
+  That found two real bugs, now fixed in the copy: MSVC bitfield packing (7 runs given the storage type that keeps
+  their PS1 offsets, e.g. `Actors::CharacterInit`, `Field::ActorPlacement`) and `size_t` members (8 bytes on x64) in
+  the `SYSTEM.DAT` header, written as `u_int`. Result: 0 pointer-free layout differences.
+- **Game heap:** the three start-up paths that placed the game heap at PS1 address 0x8010C000 use Core's arena
+  (`Core/Arena.h`, 16 MiB). The heap's block headers hold pointers, so its 16-byte block size assumptions are a 1b
+  runtime check.
+
+Types that hold pointers (111) differ from the PS1 layout by design. Code that reaches their members by literal
+offsets, or reads them from disc, is where the remaining §2 work is.
+
 ## 3. Texture and palette references by video-memory coordinates (AI rewrite tool)
 
 The game addresses textures and palettes by PS1 video-memory coordinates (`getTPage` ×49, `setClut`, `LoadImage`
@@ -172,4 +199,12 @@ What the mechanical copy kept as it was, so that each item gets a deliberate fix
 - **Helper macros.** The game's packet macros (`vs_getXY`, `vs_getRGB0`, `vs_getTag`...) keep their decomp names
   (they are not ledger rows) until the primitive code moves to the render queue.
 - **Review list.** `tools\port\copy_fixups.py` holds the hand-reviewed text fixes (merged-layout member access, the
-  save copies, `_insertTPage` in C, two nested same-as types); the copy fails if one stops matching.
+  save copies, `_insertTPage` in C, the list splice, the game heap base, two nested same-as types); the copy fails if
+  one stops matching.
+- **Hand work.** The copy regenerates everything from the decomp, so output is never edited in place:
+  `tools\port\own.py <id> --to <new .c>` moves an item to a hand-maintained file listed in `tools\port\owned.csv`
+  (ledger `modernized` = `wip`), and the copy then includes that file's header instead of emitting the item. The
+  committed `tools\port\copy_manifest.json` hashes every generated file; a hand edit to one, or a file in the way,
+  stops the copy before it writes anything.
+- **Lint noise.** `native_boundary.py`'s `ps1-address` rule also matches sign-bit flags (`0x80000000`,
+  `0x80000001`); of its 36 hits only the overlay slot table and one KSEG pointer test in Audio are addresses.

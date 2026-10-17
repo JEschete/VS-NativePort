@@ -12,6 +12,7 @@ typedef struct Render_TextureSlot {
     short alternatePalette;
     u_char referenceCount;
 } Render_TextureSlot;
+_Static_assert(sizeof(Render_TextureSlot) == 0x8, "Render_TextureSlot must keep its PS1 layout");
 
 #endif // VS_RENDER_TEXTURES_H_TYPES
 

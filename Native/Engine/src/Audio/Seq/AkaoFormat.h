@@ -25,6 +25,7 @@ typedef struct Audio_AkaoFileHeader {
     u_short reverbMode;
     Audio_AkaoTimestamp timestamp;
 } Audio_AkaoFileHeader;
+_Static_assert(sizeof(Audio_AkaoFileHeader) == 0x10, "Audio_AkaoFileHeader must keep its PS1 layout");
 
 // decomp: FAkaoSequence (src/include/sound.h:444)
 typedef struct Audio_AkaoSequenceFile {
@@ -49,6 +50,7 @@ typedef struct Audio_AkaoSequenceFile {
     /* 0x3C */ u_int pushReleaseMask;
     /* 0x40 */ char payload[1]; // starts at 0x40 (variable length)
 } Audio_AkaoSequenceFile;
+_Static_assert(sizeof(Audio_AkaoSequenceFile) == 0x44, "Audio_AkaoSequenceFile must keep its PS1 layout");
 
 // decomp: FSoundKeymapEntry8 (src/include/sound.h:421)
 typedef struct Audio_KeymapEntry {
@@ -61,5 +63,6 @@ typedef struct Audio_KeymapEntry {
     char volumeScale;
     char panAndReverb; /* low 7 bits pan, high bit reverb-enable */
 } Audio_KeymapEntry;
+_Static_assert(sizeof(Audio_KeymapEntry) == 0x8, "Audio_KeymapEntry must keep its PS1 layout");
 
 #endif // VS_AUDIO_SEQ_AKAOFORMAT_H_TYPES

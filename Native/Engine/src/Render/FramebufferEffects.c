@@ -249,7 +249,7 @@ void Render_BuildFramebufferEffectPrimitives(void)
     setUV4(&Render_legacyFramebufferEffectPackets->rotatedStrips[0], 0, 0, 64, 0, 0, 223, 64, 223);
     for (i = 0; i < 10; ++i) {
         (i + Render_legacyFramebufferEffectPackets->rotatedStrips)[0] = Render_legacyFramebufferEffectPackets->rotatedStrips[0];
-        poly = (POLY_FT4*)(i * sizeof(POLY_FT4) + (u_long)Render_legacyFramebufferEffectPackets);
+        poly = (POLY_FT4*)(i * sizeof(POLY_FT4) + (uintptr_t)Render_legacyFramebufferEffectPackets);
         setXY4(poly, i * 64, 0, i * 64 + 64, 0, i * 64, 223, i * 64 + 64, 223);
         Render_legacyFramebufferEffectPackets->rotatedStrips[i].tpage = GetTPage(2, 0, i * 64, 0);
     }
@@ -338,7 +338,7 @@ void Render_DrawFramebufferEffect(void* arg0)
                 setRGB0(&Render_legacyFramebufferEffectPackets->flatStrips[(Render_frameBuf * 5) + i], Render_framebufferEffectTint.r,
                     Render_framebufferEffectTint.g, Render_framebufferEffectTint.b);
                 index = (Render_frameBuf * 5) + i;
-                sprite = (SPRT*)(index * sizeof(SPRT) + (u_long)Render_legacyFramebufferEffectPackets
+                sprite = (SPRT*)(index * sizeof(SPRT) + (uintptr_t)Render_legacyFramebufferEffectPackets
                                  + sizeof(Render_legacyFramebufferEffectPackets->rotatedStrips));
                 sprite->x0 = Render_framebufferEffectOffset.x + i * 64;
                 sprite->y0 = Render_framebufferEffectOffset.y;

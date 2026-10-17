@@ -19,5 +19,6 @@ typedef struct Actors_ShadowBlend {
     short radiusExpandDelta;
     short radiusShrinkDelta;
 } Actors_ShadowBlend;
+_Static_assert(sizeof(Actors_ShadowBlend) == 0x14, "Actors_ShadowBlend must keep its PS1 layout");
 
 #endif // VS_ACTORS_SHADOW_H_TYPES

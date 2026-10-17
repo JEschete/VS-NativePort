@@ -33,6 +33,7 @@ typedef struct Field_GimmickTemplate {
     int recolorCount;
     int modelDataSize;
 } Field_GimmickTemplate;
+_Static_assert(sizeof(Field_GimmickTemplate) == 0x10, "Field_GimmickTemplate must keep its PS1 layout");
 
 // decomp: D_800F1D28_t (src/BATTLE/BATTLE.PRG/146C.c:249)
 typedef struct Field_GimmickAnimationJob {
@@ -55,6 +56,7 @@ typedef struct Field_GimmickObjectInfo {
     u_char reserved7;
     int reserved8;
 } Field_GimmickObjectInfo;
+_Static_assert(sizeof(Field_GimmickObjectInfo) == 0xC, "Field_GimmickObjectInfo must keep its PS1 layout");
 
 // layout: ledger (upstream merge) for D_800F45E0_t
 typedef struct Field_GimmickInstance {
@@ -253,6 +255,7 @@ typedef struct Field_GimmickSnapshot {
     int positionXY;
     int positionZ;
 } Field_GimmickSnapshot;
+_Static_assert(sizeof(Field_GimmickSnapshot) == 0xC, "Field_GimmickSnapshot must keep its PS1 layout");
 
 // decomp: objectAnimationState (src/BATTLE/BATTLE.PRG/44F14.c:148)
 struct Field_GimmickPhysicsView {
@@ -275,6 +278,7 @@ struct Field_GimmickPhysicsView {
     u_char material, durability, reserved16E, carrier, frame;
 };
 typedef struct Field_GimmickPhysicsView Field_GimmickPhysicsView;
+_Static_assert(sizeof(Field_GimmickPhysicsView) == 0x174, "Field_GimmickPhysicsView must keep its PS1 layout");
 
 #endif // VS_FIELD_GIMMICKS_H_TYPES
 

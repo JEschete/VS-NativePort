@@ -465,7 +465,7 @@ void Menu_Status_DrawLimbLeaderLine(
     prim[6] = opaque;
     prim[7] = temp_v0;
     prim[8] = (temp_t2 << 0x10) | 216;
-    temp_t0[-1] = (((u_long)prim << 8) >> 8);
+    temp_t0[-1] = (((uintptr_t)prim << 8) >> 8);
     prim += 9;
     Render_frameScratch.primitiveCursor = prim;
 }
@@ -858,7 +858,7 @@ void Menu_Status_DrawModelSlideFade(void)
     prim[12] = vs_getXY(96, 240);
     prim[13] = vs_getUV(96, 240);
 
-    temp_t1[-1] = (((u_long)prim << 8) >> 8);
+    temp_t1[-1] = (((uintptr_t)prim << 8) >> 8);
 
     Render_frameScratch.primitiveCursor = prim + 14;
 }

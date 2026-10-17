@@ -20,6 +20,7 @@ typedef struct Actors_TextureAnimationSlot {
     u_char keyIndex;
     u_char ticks;
 } Actors_TextureAnimationSlot;
+_Static_assert(sizeof(Actors_TextureAnimationSlot) == 0x4, "Actors_TextureAnimationSlot must keep its PS1 layout");
 
 // decomp: D_800F4538_unk181C (src/BATTLE/BATTLE.PRG/3A1A0.h:242)
 typedef struct Actors_TextureScrollState {
@@ -32,6 +33,7 @@ typedef struct Actors_TextureScrollState {
     u_char pad6;
     u_char pad7;
 } Actors_TextureScrollState;
+_Static_assert(sizeof(Actors_TextureScrollState) == 0x8, "Actors_TextureScrollState must keep its PS1 layout");
 
 // decomp: D_800F4538_unk614 (src/BATTLE/BATTLE.PRG/3A1A0.h:212)
 typedef struct Actors_TextureCellOrigin {
@@ -40,6 +42,7 @@ typedef struct Actors_TextureCellOrigin {
     u_char columns;
     u_char reserved3;
 } Actors_TextureCellOrigin;
+_Static_assert(sizeof(Actors_TextureCellOrigin) == 0x4, "Actors_TextureCellOrigin must keep its PS1 layout");
 
 // decomp: D_800F4538_unk61C (src/BATTLE/BATTLE.PRG/3A1A0.h:231)
 typedef struct Actors_TextureScrollBounds {
@@ -53,12 +56,14 @@ typedef struct Actors_TextureScrollBounds {
     u_char reservedBits1 : 7;
     u_char interval;
 } Actors_TextureScrollBounds;
+_Static_assert(sizeof(Actors_TextureScrollBounds) == 0x8, "Actors_TextureScrollBounds must keep its PS1 layout");
 
 // decomp: func_800AAE9C_t (src/BATTLE/BATTLE.PRG/40564.c:12)
 typedef struct Actors_TextureAnimationKey {
     u_char frame;
     u_char duration;
 } Actors_TextureAnimationKey;
+_Static_assert(sizeof(Actors_TextureAnimationKey) == 0x2, "Actors_TextureAnimationKey must keep its PS1 layout");
 
 // decomp: func_800AB358_t (src/BATTLE/BATTLE.PRG/40564.c:32)
 typedef struct Actors_TextureOverlayUpload {
@@ -67,6 +72,7 @@ typedef struct Actors_TextureOverlayUpload {
     u_char sourceX;
     u_char sourceY;
 } Actors_TextureOverlayUpload;
+_Static_assert(sizeof(Actors_TextureOverlayUpload) == 0x4, "Actors_TextureOverlayUpload must keep its PS1 layout");
 
 // decomp: texMapAnimation_t (src/BATTLE/BATTLE.PRG/3A1A0.h:219)
 typedef struct Actors_TextureAnimationFrame {
@@ -75,6 +81,7 @@ typedef struct Actors_TextureAnimationFrame {
     u_char sourceY;
     u_char columns;
 } Actors_TextureAnimationFrame;
+_Static_assert(sizeof(Actors_TextureAnimationFrame) == 0x4, "Actors_TextureAnimationFrame must keep its PS1 layout");
 
 // decomp: texMapOverlay_t (src/BATTLE/BATTLE.PRG/3A1A0.h:205)
 typedef struct Actors_TextureOverlayRect {
@@ -83,6 +90,7 @@ typedef struct Actors_TextureOverlayRect {
     u_char width;
     u_char height;
 } Actors_TextureOverlayRect;
+_Static_assert(sizeof(Actors_TextureOverlayRect) == 0x4, "Actors_TextureOverlayRect must keep its PS1 layout");
 
 #endif // VS_ACTORS_TEXTUREANIMATION_H_TYPES
 

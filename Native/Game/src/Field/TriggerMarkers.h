@@ -18,6 +18,7 @@ typedef struct Field_TriggerMarkerVertex {
     int reserved20;
     char lastVertexShade[4];
 } Field_TriggerMarkerVertex;
+_Static_assert(sizeof(Field_TriggerMarkerVertex) == 0x28, "Field_TriggerMarkerVertex must keep its PS1 layout");
 
 #endif // VS_FIELD_TRIGGERMARKERS_H_TYPES
 

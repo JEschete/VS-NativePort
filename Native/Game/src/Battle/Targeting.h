@@ -20,6 +20,7 @@ typedef struct Battle_TargetPreview {
     char opaque16;
     char enemyClass;
 } Battle_TargetPreview;
+_Static_assert(sizeof(Battle_TargetPreview) == 0x18, "Battle_TargetPreview must keep its PS1 layout");
 
 #endif // VS_BATTLE_TARGETING_H_TYPES
 

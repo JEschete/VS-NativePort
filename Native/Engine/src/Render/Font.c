@@ -48,7 +48,7 @@ void Render_DrawCompactTextColor(char const* text, int x, int color, u_long* nex
         nextPrim = Render_frameScratch.overlayOrderingTable;
     }
 
-    prim[0] = (((u_long)(prim + 2) << 8) >> 8) | 0x01000000;
+    prim[0] = (((uintptr_t)(prim + 2) << 8) >> 8) | 0x01000000;
     prim[1] = _get_mode(0, 0, getTPage(0, 0, 768, 0));
     prim += 2;
 
@@ -95,7 +95,7 @@ void Render_DrawCompactTextColor(char const* text, int x, int color, u_long* nex
             }
 
             index = Render_compactGlyphIndices[c];
-            prim[0] = (((u_long)(prim + 5) << 8) >> 8) | 0x04000000;
+            prim[0] = (((uintptr_t)(prim + 5) << 8) >> 8) | 0x04000000;
             prim[1] = vs_getRGB0Raw(Render_LegacyPrimitiveCode_Sprite, color);
             prim[2] = vs_getXY_2(x, y);
             prim[3] = vs_getUV0Clut(index & 0xFE, (index & 1) * 10 + 76, 864, 223);

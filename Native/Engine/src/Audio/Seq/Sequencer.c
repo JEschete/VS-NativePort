@@ -394,7 +394,7 @@ long Audio_Seq_TickPlayback(void)
     p = (u_short*)Audio_Seq_pendingMusicData.param1;
     if (p != 0) {
         if (Audio_Seq_activeMusicConfig->activeChannels == 0) {
-            Audio_Seq_embeddedSoundEffectParams.param1 = (u_int)p;
+            Audio_Seq_embeddedSoundEffectParams.param1 = (uintptr_t)p;
             Audio_Seq_embeddedSoundEffectParams.param3 = p[2];
             Audio_Seq_StartOrResumeMusic(&Audio_Seq_embeddedSoundEffectParams);
 

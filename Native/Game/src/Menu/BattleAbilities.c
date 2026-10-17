@@ -1178,7 +1178,7 @@ int Menu_BattleAbilities_Update(u_char* state)
 
             if (Battle_HasUnlockedBattleAbility(0) == 0) {
                 // BUG: Should be rowTypes, but flow doesn't seem to be used anyway
-                menuStrings[0] = (char*)((long)menuStrings[0] | 1);
+                menuStrings[0] = (char*)((uintptr_t)menuStrings[0] | 1);
                 menuStrings[1] = (char*)&Menu_BattleAbilities_battleAbilityStrings
                     [Text_Menu2_battleAbilities_Offset_noChainAbilities];
             }

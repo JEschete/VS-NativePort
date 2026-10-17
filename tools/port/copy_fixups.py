@@ -29,6 +29,19 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("spmcimg[1].inventory,", "&spmcimg[1].inventory,", "array view of the inventory block (22C.c)"),
         ("spmcimg[1].inventoryIndices,", "&spmcimg[1].inventoryIndices,", "array view of the inventory indices (22C.c)"),
     ],
+    # BATTLE 5BF94.c:1332 func_800C64D0 walks and splices an ordering-table list by raw 24-bit addresses (mask kept
+    # in a variable, so the hazard index cannot see them as links): links are handles (Legacy/Render/LibGpu.h).
+    "F01324": [
+        ("uintptr_t temp_t0 = ((uintptr_t)(arg0 - 1) & a3);", "u_long temp_t0 = LegacyGpu_Handle(arg0 - 1);",
+         "link of the list's head entry"),
+        ("arg0 = (u_long*)((*arg0 & a3) | 0x80000000);", "arg0 = (u_long*)LegacyGpu_Pointer(*arg0 & a3);",
+         "follow a link"),
+        ("((u_long)arg1 & a3)", "LegacyGpu_Handle(arg1)", "link to the spliced packet"),
+    ],
+    # The game heap is a fixed PS1 RAM range (0x8010C000, 0xF2000 bytes) in three start-up paths; natively it is
+    # Core's arena (Core/Arena.h).
+    **{fid: [("(Core_HeapBlockHeader*)0x8010C000, 0xF2000", "(Core_HeapBlockHeader*)Core_GameHeapArena(), "
+              "CORE_GAME_HEAP_SIZE", "game heap base and size")] for fid in ("F01858", "F02435", "F03437")},
 }
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
@@ -45,8 +58,8 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
 MACRO_REPLACEMENTS: dict[str, str] = {
     # src/include/insertTPage.h: inline assembly that links a three-word texture-page packet into ordering-table
     # slot `after`, through the frame scratch block (primitive cursor at +0, ordering table at +4), and advances
-    # the cursor by 12 bytes. Same steps in C, through the block's fields so 8-byte pointers keep working. The
-    # 24-bit link is the ordering-table hazard of plan Step 6, as in addPrim.
+    # the cursor by 12 bytes. Same steps in C, through the block's fields so 8-byte pointers keep working, with
+    # the packet's link as a handle (Legacy/Render/LibGpu.h).
     "_insertTPage": (
         "#define _insertTPage(after, arg1)                                                              \\\n"
         "    do {                                                                                        \\\n"
@@ -55,7 +68,7 @@ MACRO_REPLACEMENTS: dict[str, str] = {
         "        p_[1] = 0xE1000200 | ((arg1) & 0x1FF);                                                 \\\n"
         "        p_[2] = 0;                                                                             \\\n"
         "        p_[0] = 0x02000000 | (*ot_ & 0xFFFFFF);                                                \\\n"
-        "        *ot_ = (*ot_ & 0xFF000000) | ((u_long)(uintptr_t)p_ & 0xFFFFFF);                      \\\n"
+        "        *ot_ = (*ot_ & 0xFF000000) | LegacyGpu_Handle(p_);                                     \\\n"
         "        Render_frameScratch.primitiveCursor = p_ + 3;                                          \\\n"
         "    } while (0)"
     ),

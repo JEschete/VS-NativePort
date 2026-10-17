@@ -23,5 +23,6 @@ typedef struct Field_GimmickMotionView {
     char reserved16C[2];
     u_char material, reserved16F, frame;
 } Field_GimmickMotionView;
+_Static_assert(sizeof(Field_GimmickMotionView) == 0x174, "Field_GimmickMotionView must keep its PS1 layout");
 
 #endif // VS_FIELD_GIMMICKMOTION_H_TYPES

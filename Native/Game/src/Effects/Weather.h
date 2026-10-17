@@ -12,7 +12,7 @@
         p_[1] = 0xE1000200 | ((arg1) & 0x1FF);                                                 \
         p_[2] = 0;                                                                             \
         p_[0] = 0x02000000 | (*ot_ & 0xFFFFFF);                                                \
-        *ot_ = (*ot_ & 0xFF000000) | ((u_long)(uintptr_t)p_ & 0xFFFFFF);                      \
+        *ot_ = (*ot_ & 0xFF000000) | LegacyGpu_Handle(p_);                                     \
         Render_frameScratch.primitiveCursor = p_ + 3;                                          \
     } while (0)
 

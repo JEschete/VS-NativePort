@@ -31,6 +31,7 @@ typedef struct Items_ClassAffinityBaseline {
     /* 0x10 */ u_short affinities[8];
     /* 0x20 */
 } Items_ClassAffinityBaseline;
+_Static_assert(sizeof(Items_ClassAffinityBaseline) == 0x20, "Items_ClassAffinityBaseline must keep its PS1 layout");
 
 // decomp: vs_battle_classAffinityCurrent (src/BATTLE/BATTLE.PRG/146C.h:276)
 typedef struct Items_ClassAffinityCurrent {
@@ -38,6 +39,7 @@ typedef struct Items_ClassAffinityCurrent {
     /* 0x20 */ short affinities[2][8];
     /* 0x40 */
 } Items_ClassAffinityCurrent;
+_Static_assert(sizeof(Items_ClassAffinityCurrent) == 0x40, "Items_ClassAffinityCurrent must keep its PS1 layout");
 
 // decomp: vs_battle_shieldIntermediate (src/BATTLE/BATTLE.PRG/146C.h:780)
 typedef struct Items_ShieldSpawnLoadout {
@@ -47,6 +49,7 @@ typedef struct Items_ShieldSpawnLoadout {
     char dropRate;
     short index;
 } Items_ShieldSpawnLoadout;
+_Static_assert(sizeof(Items_ShieldSpawnLoadout) == 0xC4, "Items_ShieldSpawnLoadout must keep its PS1 layout");
 
 // decomp: vs_battle_uiAccessory (src/BATTLE/BATTLE.PRG/146C.h:424)
 typedef struct Items_AccessorySpawnLoadout {
@@ -61,6 +64,7 @@ typedef struct Items_AccessorySpawnLoadout {
     /* 0x50 */ u_short affinities[8];
     /* 0x60 */
 } Items_AccessorySpawnLoadout;
+_Static_assert(sizeof(Items_AccessorySpawnLoadout) == 0x60, "Items_AccessorySpawnLoadout must keep its PS1 layout");
 
 // decomp: vs_battle_uiArmor (src/BATTLE/BATTLE.PRG/146C.h:398)
 typedef struct Items_ArmorLoadout {
@@ -83,6 +87,7 @@ typedef struct Items_ArmorLoadout {
     /* 0x9C */ Items_ClassAffinityBaseline classAffinityBaseline;
     /* 0xBC */
 } Items_ArmorLoadout;
+_Static_assert(sizeof(Items_ArmorLoadout) == 0xBC, "Items_ArmorLoadout must keep its PS1 layout");
 
 // decomp: vs_battle_uiMiscRand (src/BATTLE/BATTLE.PRG/146C.h:436)
 typedef struct Items_MiscItemDrop {
@@ -90,6 +95,7 @@ typedef struct Items_MiscItemDrop {
     char dropRate;
     char reserved03;
 } Items_MiscItemDrop;
+_Static_assert(sizeof(Items_MiscItemDrop) == 0x4, "Items_MiscItemDrop must keep its PS1 layout");
 
 // decomp: vs_battle_uiShield (src/BATTLE/BATTLE.PRG/146C.h:377)
 typedef struct Items_ShieldLoadout {
@@ -116,6 +122,7 @@ typedef struct Items_ShieldLoadout {
     /* 0x144 */ Items_ClassAffinityBaseline classAffinityBaseline;
     /* 0x164 */
 } Items_ShieldLoadout;
+_Static_assert(sizeof(Items_ShieldLoadout) == 0x164, "Items_ShieldLoadout must keep its PS1 layout");
 
 // decomp: vs_battle_uiWeapon (src/BATTLE/BATTLE.PRG/146C.h:352)
 typedef struct Items_WeaponLoadout {
@@ -147,11 +154,13 @@ typedef struct Items_WeaponLoadout {
     /* 0x178 */ Items_ClassAffinityBaseline classAffinityBaseline;
     /* 0x198 */
 } Items_WeaponLoadout;
+_Static_assert(sizeof(Items_WeaponLoadout) == 0x198, "Items_WeaponLoadout must keep its PS1 layout");
 
 // decomp: vs_battle_uiWeapon_unk (src/BATTLE/BATTLE.PRG/146C.h:286)
 typedef struct Items_WeaponReservedBlock {
     u_short reserved0[0x18];
 } Items_WeaponReservedBlock;
+_Static_assert(sizeof(Items_WeaponReservedBlock) == 0x30, "Items_WeaponReservedBlock must keep its PS1 layout");
 
 // decomp: vs_battle_weaponIntermediate (src/BATTLE/BATTLE.PRG/146C.h:772)
 typedef struct Items_WeaponSpawnLoadout {
@@ -163,5 +172,6 @@ typedef struct Items_WeaponSpawnLoadout {
     short index;
     char name[24]; /* vs_string */
 } Items_WeaponSpawnLoadout;
+_Static_assert(sizeof(Items_WeaponSpawnLoadout) == 0x10C, "Items_WeaponSpawnLoadout must keep its PS1 layout");
 
 #endif // VS_ITEMS_LOADOUT_H_TYPES

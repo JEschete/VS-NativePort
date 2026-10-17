@@ -12,5 +12,6 @@ typedef struct Field_PlatformContactPoint {
     short z;
     short platformIndex;
 } Field_PlatformContactPoint;
+_Static_assert(sizeof(Field_PlatformContactPoint) == 0x8, "Field_PlatformContactPoint must keep its PS1 layout");
 
 #endif // VS_FIELD_PLATFORMS_H_TYPES

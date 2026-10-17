@@ -175,7 +175,7 @@ int Core_Math_InterpolateTimedScalar(int arg0, int arg1, int arg2, int arg3)
 // decomp: ENDING.PRG func_800688D4 (src/ENDING/ENDING.PRG/D4.c:187)
 int Core_Math_SineFromTable(int angle)
 {
-    int value = (int)Core_kSineTable;
+    uintptr_t value = (uintptr_t)Core_kSineTable;
     int quadrant, test, index;
 
     quadrant = angle & 0x400;

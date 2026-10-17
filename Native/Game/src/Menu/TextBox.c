@@ -716,7 +716,7 @@ void Menu_DrawTextBoxFrame(int index)
             prim[7] = ((POINT_X(w) - x) & 0xFF) | (((POINT_Y(w) - y) << 8) & 0xFF00);
             prim[8] = points[h];
             prim[9] = ((POINT_X(h) - x) & 0xFF) | (((POINT_Y(h) - y) << 8) & 0xFF00);
-            ot[2] = ((u_long)prim << 8) >> 8;
+            ot[2] = ((uintptr_t)prim << 8) >> 8;
             prim += quad + 8;
 
             prim[0] = (ot[1] & 0xFFFFFF) | 0x0C000000;
@@ -732,7 +732,7 @@ void Menu_DrawTextBoxFrame(int index)
             prim[10] = prim[4];
             prim[11] = prim[2];
             prim[12] = 0x55555555;
-            ot[1] = ((u_long)prim << 8) >> 8;
+            ot[1] = ((uintptr_t)prim << 8) >> 8;
             prim += 13;
         }
     }

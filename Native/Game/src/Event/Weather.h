@@ -21,5 +21,6 @@ typedef struct Event_WeatherTween {
     short startIntensity;
     short deltaIntensity;
 } Event_WeatherTween;
+_Static_assert(sizeof(Event_WeatherTween) == 0x16, "Event_WeatherTween must keep its PS1 layout");
 
 #endif // VS_EVENT_WEATHER_H_TYPES

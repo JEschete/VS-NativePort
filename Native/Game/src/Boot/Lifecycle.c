@@ -178,7 +178,7 @@ void Boot_InitializeTitleSession(void)
     Render_ShowLoadingScreen();
     SsUtReverbOn();
     VSyncCallback(Core_IgnoreCall);
-    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000);
+    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)Core_GameHeapArena(), CORE_GAME_HEAP_SIZE);
     Content_InitializeDiscQueue();
     Content_ResetDiscDrive();
     Audio_InitializeMenuSoundBanks();

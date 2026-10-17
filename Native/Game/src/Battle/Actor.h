@@ -65,8 +65,8 @@ typedef struct Battle_Actor {
         u_char bytes[4];
         int word;
     } lastTriggerTile;
-    u_short aiGroup : 4;
-    u_short reserved30Bit4 : 5;
+    u_int aiGroup : 4;
+    u_int reserved30Bit4 : 5;
     u_int aiLinkedGroup : 5;
     u_int reserved31Bit6 : 18;
     int reserved34;
@@ -84,6 +84,7 @@ typedef struct Battle_ActionSlot {
     char effectModelId : 4;
     char opaque3;
 } Battle_ActionSlot;
+_Static_assert(sizeof(Battle_ActionSlot) == 0x4, "Battle_ActionSlot must keep its PS1 layout");
 
 // decomp: vs_battle_uiEquipment_limb (src/BATTLE/BATTLE.PRG/146C.h:411)
 typedef struct Battle_LimbStats {
@@ -98,6 +99,7 @@ typedef struct Battle_LimbStats {
     /* 0x20 */ Items_ArmorLoadout armor;
     /* 0xDC */
 } Battle_LimbStats;
+_Static_assert(sizeof(Battle_LimbStats) == 0xDC, "Battle_LimbStats must keep its PS1 layout");
 
 // decomp: vs_battle_actor2 (src/BATTLE/BATTLE.PRG/146C.h:559)
 typedef struct Battle_ActorStats {
@@ -148,6 +150,7 @@ typedef struct Battle_ActorStats {
     /* 0x960 */ Items_MiscItemDrop randomDropItem;
     /* 0x964 */
 } Battle_ActorStats;
+_Static_assert(sizeof(Battle_ActorStats) == 0x964, "Battle_ActorStats must keep its PS1 layout");
 
 // decomp: vs_battle_actor2_flags (src/BATTLE/BATTLE.PRG/146C.h:455)
 typedef struct Battle_ActorStatsFlags {
@@ -157,5 +160,6 @@ typedef struct Battle_ActorStatsFlags {
     char reserved2Bit2 : 6;
     u_char reserved3;
 } Battle_ActorStatsFlags;
+_Static_assert(sizeof(Battle_ActorStatsFlags) == 0x4, "Battle_ActorStatsFlags must keep its PS1 layout");
 
 #endif // VS_BATTLE_ACTOR_H_TYPES

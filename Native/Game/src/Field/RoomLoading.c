@@ -201,9 +201,9 @@ void Field_FinishZoneLoad(int id)
 
     header = Field_zoneContext.zndData;
 
-    Field_LoadZoneEnemyTemplates((long*)(header->enemiesOffset + (long)header), header->enemiesSize);
-    Field_UploadZoneTextures((long*)(header->texturesOffset + (long)header));
-    Field_LoadZoneRoomFileTable((long*)(header->mpdListOffset + (long)header), header->mpdListSize);
+    Field_LoadZoneEnemyTemplates((long*)(header->enemiesOffset + (uintptr_t)header), header->enemiesSize);
+    Field_UploadZoneTextures((long*)(header->texturesOffset + (uintptr_t)header));
+    Field_LoadZoneRoomFileTable((long*)(header->mpdListOffset + (uintptr_t)header), header->mpdListSize);
 
     musicId = header->musicId;
 
@@ -656,7 +656,7 @@ void Field_FinishRoomLoad(int arg0)
     mpdHeader = Field_zoneContext.mpdData;
     v0 = ((Field_MpdHeader*)mpdHeader)->roomSectionOffset;
 
-    Field_LoadRoomSections(0, (void*)(v0 + (int)mpdHeader));
+    Field_LoadRoomSections(0, (void*)(v0 + (uintptr_t)mpdHeader));
 
     Field_zoneContext.zndId = Field_pendingDestinationDoor.destinationZoneId;
     Field_zoneContext.mapId = Field_pendingDestinationDoor.destinationRoomId;
@@ -705,20 +705,20 @@ void Field_FinishRoomLoad(int arg0)
 
     if (((Field_MpdHeader*)mpdHeader)->lootSectionSize != 0) {
         v0 = ((Field_MpdHeader*)mpdHeader)->lootSectionOffset;
-        Items_LoadRoomChestLoot((void*)(v0 + (int)mpdHeader));
+        Items_LoadRoomChestLoot((void*)(v0 + (uintptr_t)mpdHeader));
     }
 
     {
         u_short arg5;
-        int arg2;
+        uintptr_t arg2;
         int new_var;
-        int arg4;
-        int arg0 = ((Field_MpdHeader*)mpdHeader)->clearedSectionOffset;
-        arg0 += (int)mpdHeader;
+        uintptr_t arg4;
+        uintptr_t arg0 = ((Field_MpdHeader*)mpdHeader)->clearedSectionOffset;
+        arg0 += (uintptr_t)mpdHeader;
         arg2 = ((Field_MpdHeader*)mpdHeader)->scriptSectionOffset;
-        arg2 += ((int)mpdHeader);
+        arg2 += ((uintptr_t)mpdHeader);
         arg4 = ((Field_MpdHeader*)mpdHeader)->doorSectionOffset;
-        arg4 += ((int)mpdHeader);
+        arg4 += ((uintptr_t)mpdHeader);
         arg5 = ((Field_MpdHeader*)mpdHeader)->doorSectionSize;
         new_var = 1;
         temp_s4 = Event_LoadRoomEventSections((void*)(arg0),
@@ -733,7 +733,7 @@ void Field_FinishRoomLoad(int arg0)
 
     v0 = ((Field_MpdHeader*)mpdHeader)->enemySectionOffset;
     Field_LoadRoomEnemyPlacements(
-        (void*)(v0 + (int)mpdHeader), ((Field_MpdHeader*)mpdHeader)->enemySectionSize);
+        (void*)(v0 + (uintptr_t)mpdHeader), ((Field_MpdHeader*)mpdHeader)->enemySectionSize);
 
     Core_Memory_FreeFromHighEnd(mpdHeader);
 
@@ -898,7 +898,7 @@ void Field_UploadZoneTextures(void* data)
         byteOffset += *sizePtr;
         ++sizePtr;
         ++ptrTableEntry;
-    } while ((long)sizePtr < ((long)data + 0x10));
+    } while ((uintptr_t)sizePtr < ((uintptr_t)data + 0x10));
 
     dataPtr = timPtrs[0];
     numTims = *dataPtr++;
@@ -1032,7 +1032,7 @@ int Field_ReleaseOwnedRoomSections(int arg0)
             if (Field_roomData.geometry != 0) {
                 Core_Memory_FreeFromLowEnd((void*)Field_roomData.geometry);
             }
-            Core_Memory_ZeroAlignedWords(&Field_roomData, 0xC4);
+            Core_Memory_ZeroAlignedWords(&Field_roomData, sizeof(Field_RoomRecord));
             return 1;
         }
     }
@@ -1071,7 +1071,7 @@ int Field_RoomFallDestination(void)
 }
 
 // decomp: BATTLE.PRG func_8008E470 (src/BATTLE/BATTLE.PRG/146C.c:17321)
-int Field_IsRoomAudioSequenceAbsent(void) { return (u_int)Field_roomData.soundData < 1; }
+int Field_IsRoomAudioSequenceAbsent(void) { return (uintptr_t)Field_roomData.soundData < 1; }
 
 // decomp: BATTLE.PRG func_8008E4AC (src/BATTLE/BATTLE.PRG/146C.c:17329)
 short Field_RoomEnvironmentParameter(void) { return Field_roomData.environment->opaque56; }

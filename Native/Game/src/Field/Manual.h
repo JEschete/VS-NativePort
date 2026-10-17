@@ -14,6 +14,7 @@ typedef struct Field_ManualDisplayState {
     char reserved22;
     char reserved23;
 } Field_ManualDisplayState;
+_Static_assert(sizeof(Field_ManualDisplayState) == 0x24, "Field_ManualDisplayState must keep its PS1 layout");
 
 #endif // VS_FIELD_MANUAL_H_TYPES
 

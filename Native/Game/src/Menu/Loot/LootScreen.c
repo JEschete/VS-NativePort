@@ -781,7 +781,7 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
                 color = vs_getRGB(32, 64, 128);
             }
 
-            if (((u_long)item >> 1) != 0) {
+            if (((uintptr_t)item >> 1) != 0) {
                 if (capacity < (Menu_Loot_CountContainedCategory(i, item) + itemCount)) {
                     color = vs_getRGB(128, 64, 32);
                 }

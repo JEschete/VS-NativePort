@@ -18,6 +18,7 @@ typedef struct Audio_FadeTimer {
     /* 0x08 */ int ticksRemaining;
     /* 0x0C */ int savedValue;
 } Audio_FadeTimer;
+_Static_assert(sizeof(Audio_FadeTimer) == 0x10, "Audio_FadeTimer must keep its PS1 layout");
 
 #endif // VS_AUDIO_SEQ_SEQUENCER_H_TYPES
 

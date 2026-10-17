@@ -13,6 +13,7 @@ typedef struct Battle_TextAnchorOffset {
     u_int alignment : 2;
     u_int opaque3Bit2 : 4;
 } Battle_TextAnchorOffset;
+_Static_assert(sizeof(Battle_TextAnchorOffset) == 0x4, "Battle_TextAnchorOffset must keep its PS1 layout");
 
 // decomp: vs_battle_textBox_fields (src/BATTLE/BATTLE.PRG/5BF94.h:93)
 typedef struct Battle_TextBoxFlags {
@@ -26,6 +27,7 @@ typedef struct Battle_TextBoxFlags {
     u_int done : 1;
     u_int opaque3Bit7 : 1;
 } Battle_TextBoxFlags;
+_Static_assert(sizeof(Battle_TextBoxFlags) == 0x4, "Battle_TextBoxFlags must keep its PS1 layout");
 
 #endif // VS_BATTLE_TEXTBOXES_H_TYPES
 

@@ -628,7 +628,7 @@ int Menu_Score_LoadEnemyModelParts(void)
 
         slot.assetKind = 2;
         slot.targetSlot = 1;
-        slot.dataAddress = Menu_Score_zudData->shpOffset + (u_long)Menu_Score_zudData;
+        slot.dataAddress = Menu_Score_zudData->shpOffset + (uintptr_t)Menu_Score_zudData;
         slot.modelId = Menu_Score_zudData->characterId;
         slot.destination = Menu_Score_zudBuffer;
         slot.subKind = 0xFF;
@@ -650,7 +650,7 @@ int Menu_Score_LoadEnemyModelParts(void)
             if (Menu_Score_zudData->weapon != 0) {
                 slot.assetKind = 4;
                 slot.targetSlot = 2;
-                slot.dataAddress = Menu_Score_zudData->weaponWepOffset + (u_long)Menu_Score_zudData;
+                slot.dataAddress = Menu_Score_zudData->weaponWepOffset + (uintptr_t)Menu_Score_zudData;
                 slot.modelId = Menu_Score_zudData->weapon;
                 slot.destination = Menu_Score_zudBuffer + 0x1900;
                 slot.subKind = 1;
@@ -662,7 +662,7 @@ int Menu_Score_LoadEnemyModelParts(void)
             if (Menu_Score_zudData->shield != 0) {
                 slot.assetKind = 4;
                 slot.targetSlot = 3;
-                slot.dataAddress = Menu_Score_zudData->shieldWepOffset + (u_long)Menu_Score_zudData;
+                slot.dataAddress = Menu_Score_zudData->shieldWepOffset + (uintptr_t)Menu_Score_zudData;
                 slot.modelId = Menu_Score_zudData->shield;
                 slot.destination = Menu_Score_zudBuffer + 0x1EE8;
                 slot.subKind = 1;
@@ -675,7 +675,7 @@ int Menu_Score_LoadEnemyModelParts(void)
         if (Menu_Score_zudData->battleSeqLen != 0) {
             slot.assetKind = 8;
             slot.targetSlot = 1;
-            slot.dataAddress = Menu_Score_zudData->battleSeqOffset + (u_long)Menu_Score_zudData;
+            slot.dataAddress = Menu_Score_zudData->battleSeqOffset + (uintptr_t)Menu_Score_zudData;
             slot.subKind = 0;
             slot.modelId = Menu_Score_zudData->opaque2;
             Content_QueueActorAssetRequest(&slot);
@@ -684,7 +684,7 @@ int Menu_Score_LoadEnemyModelParts(void)
         if (Menu_Score_zudData->commonSeqLen != 0) {
             slot.assetKind = 8;
             slot.targetSlot = 1;
-            slot.dataAddress = Menu_Score_zudData->commonSeqOffset + (u_long)Menu_Score_zudData;
+            slot.dataAddress = Menu_Score_zudData->commonSeqOffset + (uintptr_t)Menu_Score_zudData;
             slot.subKind = 0;
             slot.modelId = 0;
             Content_QueueActorAssetRequest(&slot);

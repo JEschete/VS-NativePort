@@ -25,7 +25,7 @@ int VS_PARTICLE_DISPATCH_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int ar
         /* This variant uses only the state prefix, without texture animation. */
         temp_s1 = Core_Memory_AllocateFromHighEnd(0x10);
 #else
-        temp_s1 = Core_Memory_AllocateFromHighEnd(0x30);
+        temp_s1 = Core_Memory_AllocateFromHighEnd(sizeof(Effects_ParticleQuadSet));
 #endif
         arg0->rendererState = temp_s1;
         temp_s1->definitionIndex = arg2 >> 8;

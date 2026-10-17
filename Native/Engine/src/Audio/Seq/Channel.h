@@ -156,7 +156,7 @@ typedef struct Audio_MusicConfig {
     u_int resumeKeyOnMask;
     int pushReleaseMask;
     int reserved34;
-    int sequenceBase;
+    uintptr_t sequenceBase;
     Audio_AkaoSequenceFile* patchTable;
     u_short* keymapTable;
     Audio_KeymapEntry* noteRemapTable;

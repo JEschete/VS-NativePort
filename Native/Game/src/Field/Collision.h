@@ -25,6 +25,7 @@ typedef struct Field_CollisionSampleScratch {
 typedef struct Field_SavedPositionWords {
     int words[2];
 } Field_SavedPositionWords;
+_Static_assert(sizeof(Field_SavedPositionWords) == 0x8, "Field_SavedPositionWords must keep its PS1 layout");
 
 #endif // VS_FIELD_COLLISION_H_TYPES
 

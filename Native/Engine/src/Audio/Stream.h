@@ -19,6 +19,7 @@ typedef struct Audio_AkaoStreamHeader {
     /* 0x24 */ char reserved24[0x4];
     /* 0x28 */ int reserved28; // outgoing voice reference for volume handoff
 } Audio_AkaoStreamHeader;
+_Static_assert(sizeof(Audio_AkaoStreamHeader) == 0x2C, "Audio_AkaoStreamHeader must keep its PS1 layout");
 
 // decomp: FSoundCutsceneStreamData (src/include/sound.h:566)
 typedef struct Audio_CutsceneStreamData {
@@ -27,6 +28,7 @@ typedef struct Audio_CutsceneStreamData {
     /* 0xAC */ char reservedAC[0x24];
     /* 0xD0 */ char audioData[1];
 } Audio_CutsceneStreamData;
+_Static_assert(sizeof(Audio_CutsceneStreamData) == 0xD4, "Audio_CutsceneStreamData must keep its PS1 layout");
 
 #endif // VS_AUDIO_STREAM_H_TYPES
 

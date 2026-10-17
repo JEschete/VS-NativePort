@@ -26,10 +26,12 @@ typedef struct Event_TripleTween {
     short elapsedFrames;
     short durationFrames;
 } Event_TripleTween;
+_Static_assert(sizeof(Event_TripleTween) == 0x20, "Event_TripleTween must keep its PS1 layout");
 
 // decomp: func_800BDBB4_t2 (src/BATTLE/BATTLE.PRG/4A0A8.c:176)
 typedef struct Event_EasedFractionScratch {
     int easedFraction;
 } Event_EasedFractionScratch;
+_Static_assert(sizeof(Event_EasedFractionScratch) == 0x4, "Event_EasedFractionScratch must keep its PS1 layout");
 
 #endif // VS_EVENT_SCREEN_H_TYPES

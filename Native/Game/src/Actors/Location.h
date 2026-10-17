@@ -15,6 +15,7 @@ typedef struct Actors_TileTarget {
     u_int tileZ : 8;
     u_int facing : 8;
 } Actors_TileTarget;
+_Static_assert(sizeof(Actors_TileTarget) == 0x4, "Actors_TileTarget must keep its PS1 layout");
 
 // decomp: func_8006EBF8_t3 (src/BATTLE/BATTLE.PRG/func_8006EBF8_t.h:17)
 typedef struct Actors_ActorLocation {
@@ -43,5 +44,6 @@ typedef struct Actors_PlacementBuffer {
     int reserved1C;
     int reserved20;
 } Actors_PlacementBuffer;
+_Static_assert(sizeof(Actors_PlacementBuffer) == 0x24, "Actors_PlacementBuffer must keep its PS1 layout");
 
 #endif // VS_ACTORS_LOCATION_H_TYPES

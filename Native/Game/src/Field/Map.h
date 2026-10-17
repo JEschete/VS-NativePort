@@ -22,12 +22,14 @@ typedef struct Field_MapRoomName {
     short prev;
     short next;
 } Field_MapRoomName;
+_Static_assert(sizeof(Field_MapRoomName) == 0x24, "Field_MapRoomName must keep its PS1 layout");
 
 // decomp: vs_battle_roomVertices (src/BATTLE/BATTLE.PRG/146C.h:640)
 typedef struct Field_MapRoomVertices {
     int vertexCount;
     SVECTOR vertices[0];
 } Field_MapRoomVertices;
+_Static_assert(sizeof(Field_MapRoomVertices) == 0x4, "Field_MapRoomVertices must keep its PS1 layout");
 
 // decomp: vs_battle_scene (src/BATTLE/BATTLE.PRG/146C.h:157)
 typedef struct Field_MapScene {

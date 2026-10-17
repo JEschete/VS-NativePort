@@ -39,6 +39,7 @@ typedef struct Title_MenuItemAnimationState {
     char outlinePosition;
     char textBlendFactor;
 } Title_MenuItemAnimationState;
+_Static_assert(sizeof(Title_MenuItemAnimationState) == 0x8, "Title_MenuItemAnimationState must keep its PS1 layout");
 
 #endif // VS_TITLE_TITLESCREEN_H_TYPES
 

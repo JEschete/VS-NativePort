@@ -10,6 +10,7 @@ typedef struct Event_ScriptBytePair {
     u_char lowByte;
     u_char highByte;
 } Event_ScriptBytePair;
+_Static_assert(sizeof(Event_ScriptBytePair) == 0x2, "Event_ScriptBytePair must keep its PS1 layout");
 
 #endif // VS_EVENT_SCRIPT_H_TYPES
 

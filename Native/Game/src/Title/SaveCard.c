@@ -149,7 +149,7 @@ int Title_SaveCard_HasSaveSuffix(int id)
 // decomp: TITLE.PRG _initSaveFileInfo (src/TITLE/TITLE.PRG/22C.c:385)
 int Title_SaveCard_ScanSaveDirectory(int port)
 {
-    long fileNo;
+    uintptr_t fileNo;
     int i;
     int tempFilesDeleted;
     int slotsAvailable = 15;
@@ -158,11 +158,11 @@ int Title_SaveCard_ScanSaveDirectory(int port)
         Title_cardDirectoryEntries[i] = NULL;
     }
 
-    fileNo = (long)LegacyApi_firstfile((port == 1) ? ("bu00:*") : ("bu10:*"), Title_cardDirectoryEntryBuffer);
+    fileNo = (uintptr_t)LegacyApi_firstfile((port == 1) ? ("bu00:*") : ("bu10:*"), Title_cardDirectoryEntryBuffer);
     Title_cardDirectoryEntries[0] = (void*)fileNo;
 
     for (i = 1; (i < 15) && fileNo; ++i) {
-        fileNo = (long)LegacyApi_nextfile(Title_cardDirectoryEntryBuffer + i);
+        fileNo = (uintptr_t)LegacyApi_nextfile(Title_cardDirectoryEntryBuffer + i);
         Title_cardDirectoryEntries[i] = (void*)fileNo;
     }
 

@@ -40,6 +40,7 @@ typedef struct Field_SwingEffectRecord {
     int startAngle;
     int initialVelocity;
 } Field_SwingEffectRecord;
+_Static_assert(sizeof(Field_SwingEffectRecord) == 0x24, "Field_SwingEffectRecord must keep its PS1 layout");
 
 // decomp: func_80091C6C_t (src/BATTLE/BATTLE.PRG/2842C.c:133)
 typedef struct Field_TextureFrameEffect {
@@ -57,6 +58,7 @@ typedef struct Field_TextureFrameEffect {
     u_char u[4];
     u_char v[4];
 } Field_TextureFrameEffect;
+_Static_assert(sizeof(Field_TextureFrameEffect) == 0x18, "Field_TextureFrameEffect must keep its PS1 layout");
 
 // decomp: func_80091E10_t (src/BATTLE/BATTLE.PRG/2842C.c:171)
 typedef struct Field_TextureScrollEffect {
@@ -78,6 +80,7 @@ typedef struct Field_TextureScrollEffect {
     u_char u[4];
     u_char v[4];
 } Field_TextureScrollEffect;
+_Static_assert(sizeof(Field_TextureScrollEffect) == 0x1C, "Field_TextureScrollEffect must keep its PS1 layout");
 
 // decomp: func_80091FE8_t (src/BATTLE/BATTLE.PRG/2842C.c:182)
 typedef struct Field_TextureRegionScrollEffect {
@@ -90,6 +93,7 @@ typedef struct Field_TextureRegionScrollEffect {
     int scrollStep;
     RECT rect;
 } Field_TextureRegionScrollEffect;
+_Static_assert(sizeof(Field_TextureRegionScrollEffect) == 0x14, "Field_TextureRegionScrollEffect must keep its PS1 layout");
 
 // decomp: func_80092548_t (src/BATTLE/BATTLE.PRG/2842C.c:189)
 typedef struct Field_RoomEffectScriptHeader {
@@ -98,12 +102,14 @@ typedef struct Field_RoomEffectScriptHeader {
     u_char isActive;
     u_char reserved03;
 } Field_RoomEffectScriptHeader;
+_Static_assert(sizeof(Field_RoomEffectScriptHeader) == 0x4, "Field_RoomEffectScriptHeader must keep its PS1 layout");
 
 // decomp: func_80092548_t2 (src/BATTLE/BATTLE.PRG/2842C.c:194)
 typedef struct Field_RoomEffectChunkHeader {
     short size;
     short type;
 } Field_RoomEffectChunkHeader;
+_Static_assert(sizeof(Field_RoomEffectChunkHeader) == 0x4, "Field_RoomEffectChunkHeader must keep its PS1 layout");
 
 // decomp: func_80092B04_t (src/BATTLE/BATTLE.PRG/2842C.c:69)
 typedef struct Field_RoomEffectObjectView {
@@ -117,6 +123,7 @@ typedef struct Field_RoomEffectCommandHeader {
     short size;
     short opcode;
 } Field_RoomEffectCommandHeader;
+_Static_assert(sizeof(Field_RoomEffectCommandHeader) == 0x4, "Field_RoomEffectCommandHeader must keep its PS1 layout");
 
 // decomp: func_80092F74_t (src/BATTLE/BATTLE.PRG/2842C.c:23)
 typedef struct Field_RoomEffectObject {

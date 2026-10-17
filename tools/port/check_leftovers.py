@@ -21,7 +21,7 @@ STANDARD = {"size_t", "uintptr_t", "intptr_t", "ptrdiff_t", "wchar_t"} | {
 
 
 def main() -> int:
-    files = json.loads((REPO / "build" / "port" / "copy_manifest.json").read_text(encoding="utf-8"))
+    files = list(json.loads((REPO / "tools" / "port" / "copy_manifest.json").read_text(encoding="utf-8")))
     count: collections.Counter = collections.Counter()
     where: dict[str, set] = collections.defaultdict(set)
     for p in files:

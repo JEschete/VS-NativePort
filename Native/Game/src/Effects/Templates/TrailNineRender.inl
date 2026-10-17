@@ -175,7 +175,7 @@ void VS_TRAIL_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Particle
                         (((u_long*)Render_frameScratch.orderingTable)[temp_s0] & 0xFFFFFF) | 0x0E000000;
                     ((u_long*)Render_frameScratch.orderingTable)[temp_s0] =
                         (((u_long*)Render_frameScratch.orderingTable)[temp_s0] & 0xFF000000)
-                        | ((u_long)temp_a3 & 0xFFFFFF);
+                        | (LegacyGpu_Handle(temp_a3) & 0xFFFFFF);
                     *(int*)&temp_a3->poly.r0 = *(int*)&sp10.poly.r0;
                     *(int*)&temp_a3->poly.r1 = *(int*)&sp10.poly.r1;
                     *(int*)&temp_a3->poly.r2 = *(int*)&sp10.poly.r0;
@@ -224,7 +224,7 @@ void VS_TRAIL_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Particle
                     (((u_long*)Render_frameScratch.orderingTable)[temp_s0] & 0xFFFFFF) | 0x0E000000;
                 ((u_long*)Render_frameScratch.orderingTable)[temp_s0] =
                     (((u_long*)Render_frameScratch.orderingTable)[temp_s0] & 0xFF000000)
-                    | ((u_long)temp_a3 & 0xFFFFFF);
+                    | (LegacyGpu_Handle(temp_a3) & 0xFFFFFF);
                 *(int*)&temp_a3->poly.r0 = *(int*)&sp10.poly.r0;
                 *(int*)&temp_a3->poly.r1 = *(int*)&sp10.poly.r1;
                 *(int*)&temp_a3->poly.r2 = *(int*)&sp10.poly.r0;

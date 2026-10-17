@@ -224,6 +224,7 @@ typedef struct Battle_Ai_PlanEvaluationView {
     char reservedE9[177];
     unsigned char opaque19A;
 } Battle_Ai_PlanEvaluationView;
+_Static_assert(sizeof(Battle_Ai_PlanEvaluationView) == 0x19C, "Battle_Ai_PlanEvaluationView must keep its PS1 layout");
 
 // decomp: actorInitializationActor (src/BATTLE/BATTLE.PRG/7CD68.c:869)
 typedef struct Battle_Ai_AiActorView {
@@ -510,13 +511,14 @@ typedef struct Battle_Ai_CandidateMovementView {
     char reserved224[588];
     int candidateCount;
 } Battle_Ai_CandidateMovementView;
+_Static_assert(sizeof(Battle_Ai_CandidateMovementView) == 0x474, "Battle_Ai_CandidateMovementView must keep its PS1 layout");
 
 // decomp: da4bcState (src/BATTLE/BATTLE.PRG/71618.c:747)
 typedef struct Battle_Ai_EscortView {
     char reserved0[14];
     unsigned char opaqueE, opaqueF;
     char reserved10[6];
-    signed int linkedActor : 8;
+    short linkedActor : 8;
     char reserved17;
     unsigned char opaque18;
     char reserved19[27];
@@ -551,6 +553,7 @@ typedef struct Battle_Ai_EscortRelationsView {
     char reserved0[0x1A4];
     Battle_Ai_EscortRelationBits relations[16];
 } Battle_Ai_EscortRelationsView;
+_Static_assert(sizeof(Battle_Ai_EscortRelationsView) == 0x1E4, "Battle_Ai_EscortRelationsView must keep its PS1 layout");
 
 // decomp: directionalCacheState (src/BATTLE/BATTLE.PRG/771A8.c:896)
 typedef struct Battle_Ai_DirectionCacheView {
@@ -586,6 +589,7 @@ typedef struct Battle_Ai_ActionCandidate {
     u_int reservedFBit3 : 5;
     Battle_Ai_CandidateFlags opaque10;
 } Battle_Ai_ActionCandidate;
+_Static_assert(sizeof(Battle_Ai_ActionCandidate) == 0x14, "Battle_Ai_ActionCandidate must keep its PS1 layout");
 
 // layout: ledger (upstream merge) for func_800DD604_t
 typedef struct Battle_Ai_ActionSlotMetadata {
@@ -600,6 +604,7 @@ typedef struct Battle_Ai_ActionSlotMetadata {
     /* 0x03 */ u_int reserved3Bit0 : 8;
     /* 0x04 */ u_int rangeSquared;
 } Battle_Ai_ActionSlotMetadata;
+_Static_assert(sizeof(Battle_Ai_ActionSlotMetadata) == 0x8, "Battle_Ai_ActionSlotMetadata must keep its PS1 layout");
 
 // decomp: func_800DEEA4_t2 (src/BATTLE/BATTLE.PRG/6F014.c:437)
 typedef struct Battle_Ai_ActionExecutionView {
@@ -945,6 +950,7 @@ typedef struct Battle_Ai_WaypointSearchView {
     char reserved0[0x4C];
     short x, y, z;
 } Battle_Ai_WaypointSearchView;
+_Static_assert(sizeof(Battle_Ai_WaypointSearchView) == 0x52, "Battle_Ai_WaypointSearchView must keep its PS1 layout");
 
 // decomp: obstructionState (src/BATTLE/BATTLE.PRG/771A8.c:790)
 typedef struct Battle_Ai_ObstructionView {

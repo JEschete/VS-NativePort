@@ -23,6 +23,7 @@ typedef struct State_RoomVisitFlags {
     int roomFlags[16];
     int areaFlags[2];
 } State_RoomVisitFlags;
+_Static_assert(sizeof(State_RoomVisitFlags) == 0x48, "State_RoomVisitFlags must keep its PS1 layout");
 
 // decomp: vs_trialScore_t (src/SLUS_010.40/main.h:179)
 typedef struct State_TrialScore {
@@ -30,6 +31,7 @@ typedef struct State_TrialScore {
     u_int round : 7;
     u_int difficulty : 1;
 } State_TrialScore;
+_Static_assert(sizeof(State_TrialScore) == 0x4, "State_TrialScore must keep its PS1 layout");
 
 // decomp: vs_main_scoredata_t (src/SLUS_010.40/main.h:202)
 typedef struct State_ScoreData {
@@ -54,6 +56,7 @@ typedef struct State_ScoreData {
     u_short chainStreak;
     u_short healCount;
 } State_ScoreData;
+_Static_assert(sizeof(State_ScoreData) == 0x114, "State_ScoreData must keep its PS1 layout");
 
 #endif // VS_STATE_PROGRESS_H_TYPES
 

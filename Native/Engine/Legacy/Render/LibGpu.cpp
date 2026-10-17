@@ -1,14 +1,79 @@
 #include "Legacy/Render/LibGpu.h"
 #include "Core/Unported.h"
 
+#include <cstdio>
+#include <unordered_map>
+#include <vector>
+
 // Transitional shims (plan §2.2). Each records VS_UNPORTED until it translates into the modern system.
 
-extern "C" {
-void* LegacyGpu_NextPrim(void* p)
+namespace {
+
+// Ordering-table link handles. A packet keeps one handle for its address for the whole run: packet pools and heap
+// blocks are reused frame after frame, so the table stays the size of the memory that ever held packets, far below
+// the 2^24 a link can address. Handle 0 is never issued (a zeroed tag is not a link); 0xFFFFFF is the end marker.
+struct LinkTable {
+    std::unordered_map<const void*, u_long> handles;
+    std::vector<const void*> pointers{nullptr};
+};
+
+LinkTable& Links()
 {
-    (void)p;
-    VS_UNPORTED("libgpu:LegacyGpu_NextPrim");
-    return {};
+    static LinkTable t;
+    return t;
+}
+
+// Translation of drawing packets into Engine\Render happens here once the render queue exists; until then each
+// primitive kind reached is recorded once, which lists the work the title slice needs.
+void SubmitPacket(const P_TAG* p)
+{
+    if (p->len == 0) {
+        return;  // an ordering-table entry, or an empty packet
+    }
+    char site[48];
+    std::snprintf(site, sizeof site, "libgpu:packet code 0x%02X", p->code);
+    VS_UNPORTED(site);
+}
+
+} // namespace
+
+extern "C" {
+u_long LegacyGpu_Handle(const void* p)
+{
+    LinkTable& t = Links();
+    auto [it, added] = t.handles.try_emplace(p, static_cast<u_long>(t.pointers.size()));
+    if (added) {
+        if (t.pointers.size() >= LEGACY_GPU_LINK_END) {
+            VS_UNPORTED("libgpu: more than 2^24 packet addresses linked");
+            t.handles.erase(it);
+            return LEGACY_GPU_LINK_END;
+        }
+        t.pointers.push_back(p);
+    }
+    return it->second;
+}
+
+void* LegacyGpu_Pointer(u_long link)
+{
+    link &= 0xFFFFFF;
+    const LinkTable& t = Links();
+    if (link == LEGACY_GPU_LINK_END || link == 0 || link >= t.pointers.size()) {
+        return nullptr;
+    }
+    return const_cast<void*>(t.pointers[link]);
+}
+
+int LegacyGpu_WalkList(const void* p)
+{
+    int count = 0;
+    // a list longer than every packet ever linked has a cycle
+    for (size_t guard = Links().pointers.size() + 1; p != nullptr && guard != 0; --guard) {
+        const P_TAG* tag = static_cast<const P_TAG*>(p);
+        SubmitPacket(tag);
+        ++count;
+        p = tag->addr == LEGACY_GPU_LINK_END ? nullptr : LegacyGpu_Pointer(tag->addr);
+    }
+    return count;
 }
 
 DISPENV* PutDispEnv(DISPENV* env)
@@ -108,47 +173,56 @@ u_short GetTPage(int tp, int abr, int x, int y)
 
 u_long* ClearOTag(u_long* ot, int n)
 {
+    // forward list: each entry links to the next, the last ends the list
     for (int i = 0; i < n; ++i) {
         ot[i] = 0;
+        if (i + 1 < n) {
+            setaddr(&ot[i], &ot[i + 1]);
+        } else {
+            termPrim(&ot[i]);
+        }
     }
-    VS_UNPORTED("libgpu:ClearOTag links");
     return ot;
 }
 
 u_long* ClearOTagR(u_long* ot, int n)
 {
+    // reverse list: each entry links to the previous, entry 0 ends the list; drawing starts at ot[n - 1]
     for (int i = 0; i < n; ++i) {
         ot[i] = 0;
+        if (i > 0) {
+            setaddr(&ot[i], &ot[i - 1]);
+        } else {
+            termPrim(&ot[i]);
+        }
     }
-    VS_UNPORTED("libgpu:ClearOTagR links");
     return ot;
 }
 
 void DrawOTag(u_long* p)
 {
-    (void)p;
-    VS_UNPORTED("libgpu:DrawOTag");
+    LegacyGpu_WalkList(p);
 }
 
 void DrawPrim(void* p)
 {
-    (void)p;
-    VS_UNPORTED("libgpu:DrawPrim");
+    // one packet, not a list: submit it alone
+    const u_long saved = getaddr(p);
+    termPrim(p);
+    LegacyGpu_WalkList(p);
+    ((P_TAG*)p)->addr = saved;
 }
 
 void AddPrim(void* ot, void* p)
 {
-    (void)ot;
-    (void)p;
-    VS_UNPORTED("libgpu:AddPrim");
+    addPrim(ot, p);
 }
 
 void AddPrims(void* ot, void* p0, void* p1)
 {
-    (void)ot;
-    (void)p0;
-    (void)p1;
-    VS_UNPORTED("libgpu:AddPrims");
+    // insert the already-linked run p0..p1 at the head of `ot`
+    ((P_TAG*)p1)->addr = ((P_TAG*)ot)->addr;
+    ((P_TAG*)ot)->addr = LegacyGpu_Handle(p0);
 }
 
 void SetDrawArea(DR_AREA* p, RECT* r)

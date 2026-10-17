@@ -23,6 +23,7 @@ typedef struct Field_RoomLoadResetBlock {
     int reserved10;
     int reserved14;
 } Field_RoomLoadResetBlock;
+_Static_assert(sizeof(Field_RoomLoadResetBlock) == 0x18, "Field_RoomLoadResetBlock must keep its PS1 layout");
 
 // decomp: _zoneContextBounds (src/BATTLE/BATTLE.PRG/146C.h:214)
 typedef struct Field_ZoneBounds {
@@ -31,6 +32,7 @@ typedef struct Field_ZoneBounds {
     short maxX;
     short maxZ;
 } Field_ZoneBounds;
+_Static_assert(sizeof(Field_ZoneBounds) == 0x8, "Field_ZoneBounds must keep its PS1 layout");
 
 // decomp: _zoneContext_t (src/BATTLE/BATTLE.PRG/146C.h:719)
 typedef struct Field_ZoneContext {

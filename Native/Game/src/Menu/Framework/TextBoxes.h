@@ -36,6 +36,7 @@ typedef struct Menu_Framework_TextBoxSelector {
     u_char count;
     u_char reservedC;
 } Menu_Framework_TextBoxSelector;
+_Static_assert(sizeof(Menu_Framework_TextBoxSelector) == 0xD, "Menu_Framework_TextBoxSelector must keep its PS1 layout");
 
 // decomp: func_800CCE10_t (src/BATTLE/BATTLE.PRG/5BF94.c:307)
 typedef struct Menu_TextAnchorWord {
@@ -44,6 +45,7 @@ typedef struct Menu_TextAnchorWord {
     u_int alignment : 2;
     u_int opaque3Bit2 : 4;
 } Menu_TextAnchorWord;
+_Static_assert(sizeof(Menu_TextAnchorWord) == 0x4, "Menu_TextAnchorWord must keep its PS1 layout");
 
 // decomp: vs_battle_stringContext_t (src/BATTLE/BATTLE.PRG/5BF94.h:165)
 typedef struct Menu_StringContext {

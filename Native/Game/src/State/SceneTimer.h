@@ -15,5 +15,6 @@ typedef struct State_SceneTimer {
     signed char minutes;
     signed char hours;
 } State_SceneTimer;
+_Static_assert(sizeof(State_SceneTimer) == 0x8, "State_SceneTimer must keep its PS1 layout");
 
 #endif // VS_STATE_SCENETIMER_H_TYPES

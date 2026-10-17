@@ -26,6 +26,7 @@ typedef struct Battle_Ai_ArenaOrbitState {
     /* 0x1A */ short startZ;
     /* 0x1C */ u_char started;
 } Battle_Ai_ArenaOrbitState;
+_Static_assert(sizeof(Battle_Ai_ArenaOrbitState) == 0x20, "Battle_Ai_ArenaOrbitState must keep its PS1 layout");
 
 #endif // VS_BATTLE_AI_MOVEMENT_H_TYPES
 

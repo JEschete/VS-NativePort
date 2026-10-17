@@ -13,6 +13,7 @@ typedef struct Battle_DoorRecord {
     char reserved2;
     char reserved3;
 } Battle_DoorRecord;
+_Static_assert(sizeof(Battle_DoorRecord) == 0x4, "Battle_DoorRecord must keep its PS1 layout");
 
 // decomp: vs_battle_prim (src/BATTLE/BATTLE.PRG/146C.h:635)
 typedef struct Battle_PrimitiveBytes {
@@ -21,5 +22,6 @@ typedef struct Battle_PrimitiveBytes {
     char reserved2;
     char reserved3;
 } Battle_PrimitiveBytes;
+_Static_assert(sizeof(Battle_PrimitiveBytes) == 0x4, "Battle_PrimitiveBytes must keep its PS1 layout");
 
 #endif // VS_BATTLE_ROOM_H_TYPES

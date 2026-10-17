@@ -29,7 +29,7 @@ typedef struct Content_ActorAssetRequest {
     signed char targetSlot;
     short modelId;
     void* destination;
-    u_long dataAddress;
+    uintptr_t dataAddress;
     Field_ActorPlacement placement;
     u_char subKind;
     char textureSlot;

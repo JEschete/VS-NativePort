@@ -23,6 +23,7 @@ typedef struct Menu_Loot_LootListItem {
     char opaque2;
     char state;
 } Menu_Loot_LootListItem;
+_Static_assert(sizeof(Menu_Loot_LootListItem) == 0x4, "Menu_Loot_LootListItem must keep its PS1 layout");
 
 #endif // VS_MENU_LOOT_LOOTINVENTORY_H_TYPES
 

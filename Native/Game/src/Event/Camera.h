@@ -47,6 +47,7 @@ typedef struct Event_CameraTrack {
     VECTOR currentPosition;
     VECTOR partnerPosition;
 } Event_CameraTrack;
+_Static_assert(sizeof(Event_CameraTrack) == 0xB4, "Event_CameraTrack must keep its PS1 layout");
 
 // decomp: func_800BD57C_t (src/BATTLE/BATTLE.PRG/4A0A8.c:52)
 typedef struct Event_AngleTween {
@@ -58,6 +59,7 @@ typedef struct Event_AngleTween {
     short elapsedFrames;
     short durationFrames;
 } Event_AngleTween;
+_Static_assert(sizeof(Event_AngleTween) == 0xC, "Event_AngleTween must keep its PS1 layout");
 
 // decomp: func_800BDF6C_t (src/BATTLE/BATTLE.PRG/4A0A8.c:66)
 typedef struct Event_ShakeOscillator {
@@ -86,6 +88,7 @@ typedef struct Event_LensTween {
     char reserved0A;
     char reserved0B;
 } Event_LensTween;
+_Static_assert(sizeof(Event_LensTween) == 0xC, "Event_LensTween must keep its PS1 layout");
 
 // decomp: D_800F4BA4_t (src/BATTLE/BATTLE.PRG/4A0A8.c:127)
 typedef struct Event_CameraState {
@@ -128,6 +131,7 @@ typedef struct Event_CameraMotionScratch {
     char pad40[0x30];
     MATRIX matrix;
 } Event_CameraMotionScratch;
+_Static_assert(sizeof(Event_CameraMotionScratch) == 0x90, "Event_CameraMotionScratch must keep its PS1 layout");
 
 // decomp: cameraScratch (src/BATTLE/BATTLE.PRG/4A0A8.c:210)
 typedef struct Event_CameraTrackScratch {
@@ -143,6 +147,7 @@ typedef struct Event_CameraTrackScratch {
     char pad60[16];
     MATRIX matrix;
 } Event_CameraTrackScratch;
+_Static_assert(sizeof(Event_CameraTrackScratch) == 0x90, "Event_CameraTrackScratch must keep its PS1 layout");
 
 // decomp: cameraShakeScratch (src/BATTLE/BATTLE.PRG/4A0A8.c:228)
 typedef struct Event_CameraShakeScratch {
@@ -151,5 +156,6 @@ typedef struct Event_CameraShakeScratch {
     SVECTOR lookAtShake;
     SVECTOR axisShake;
 } Event_CameraShakeScratch;
+_Static_assert(sizeof(Event_CameraShakeScratch) == 0x68, "Event_CameraShakeScratch must keep its PS1 layout");
 
 #endif // VS_EVENT_CAMERA_H_TYPES

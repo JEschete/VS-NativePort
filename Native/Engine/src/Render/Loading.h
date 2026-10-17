@@ -12,6 +12,7 @@ typedef struct Render_LegacyImageSize {
     char heightLow;
     char heightHigh;
 } Render_LegacyImageSize;
+_Static_assert(sizeof(Render_LegacyImageSize) == 0x4, "Render_LegacyImageSize must keep its PS1 layout");
 
 #endif // VS_RENDER_LOADING_H_TYPES
 

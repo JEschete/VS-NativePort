@@ -14,6 +14,7 @@ typedef struct Audio_MusicSampleBankIds {
     int reserved8;
     int reservedC;
 } Audio_MusicSampleBankIds;
+_Static_assert(sizeof(Audio_MusicSampleBankIds) == 0x10, "Audio_MusicSampleBankIds must keep its PS1 layout");
 
 // decomp: D_80039BC8_t (src/SLUS_010.40/25AC.c:73)
 typedef struct Audio_BankStreamState {
@@ -32,6 +33,7 @@ typedef struct Audio_Instrument {
     /* 0x0C */ u_short adsrLower;
     /* 0x0E */ u_short adsrUpper;
 } Audio_Instrument;
+_Static_assert(sizeof(Audio_Instrument) == 0x10, "Audio_Instrument must keep its PS1 layout");
 
 #endif // VS_AUDIO_SAMPLES_SAMPLEBANKS_H_TYPES
 

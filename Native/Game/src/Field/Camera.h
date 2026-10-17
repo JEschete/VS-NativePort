@@ -25,6 +25,7 @@ typedef struct Field_SphericalCameraValues {
     int distance;
     int mode;
 } Field_SphericalCameraValues;
+_Static_assert(sizeof(Field_SphericalCameraValues) == 0x10, "Field_SphericalCameraValues must keep its PS1 layout");
 
 // decomp: _sphericalCamera (src/BATTLE/BATTLE.PRG/146C.h:746)
 typedef struct Field_SphericalCamera {
@@ -34,12 +35,14 @@ typedef struct Field_SphericalCamera {
     int zoomVelocity;
     int speed;
 } Field_SphericalCamera;
+_Static_assert(sizeof(Field_SphericalCamera) == 0x2C, "Field_SphericalCamera must keep its PS1 layout");
 
 // decomp: func_80077DF0_t (src/BATTLE/BATTLE.PRG/146C.c:211)
 typedef struct Field_CameraPositionPair {
     VECTOR position;
     VECTOR lookAt;
 } Field_CameraPositionPair;
+_Static_assert(sizeof(Field_CameraPositionPair) == 0x20, "Field_CameraPositionPair must keep its PS1 layout");
 
 // decomp: vs_battle_cameraTransition_t (src/BATTLE/BATTLE.PRG/146C.h:823)
 typedef struct Field_CameraTransition {
@@ -62,6 +65,7 @@ typedef struct Field_CameraTransition {
     int transitionSpeed;
     int transitionFrames;
 } Field_CameraTransition;
+_Static_assert(sizeof(Field_CameraTransition) == 0xF8, "Field_CameraTransition must keep its PS1 layout");
 
 #endif // VS_FIELD_CAMERA_H_TYPES
 

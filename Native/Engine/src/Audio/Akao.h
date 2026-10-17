@@ -15,6 +15,7 @@ typedef struct Audio_AkaoTimestamp {
     char minutesBcd;
     char secondsBcd;
 } Audio_AkaoTimestamp;
+_Static_assert(sizeof(Audio_AkaoTimestamp) == 0x6, "Audio_AkaoTimestamp must keep its PS1 layout");
 
 // decomp: FAkaoFileBlob (src/include/sound.h:197)
 typedef struct Audio_AkaoProgramFile {
@@ -27,5 +28,6 @@ typedef struct Audio_AkaoProgramFile {
     /* 0x610 */ u_short metadataTableB[0x100]; // Some per sfx table
     /* 0x810 */ char programData[1]; // Sfx bytecode
 } Audio_AkaoProgramFile;
+_Static_assert(sizeof(Audio_AkaoProgramFile) == 0x814, "Audio_AkaoProgramFile must keep its PS1 layout");
 
 #endif // VS_AUDIO_AKAO_H_TYPES

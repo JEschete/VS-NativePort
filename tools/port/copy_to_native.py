@@ -20,10 +20,17 @@ Each `X.c` gets a sibling `X.h` with its prototypes and extern declarations. Hea
 they only point to and include the headers of everything else they use; `.c` files include every header that
 provides a name they use. Includes are spelled relative to a project's `src\\` or `include\\` folder.
 
-The output is regenerated until Phase 1a compiles; files it wrote are listed in build/port/copy_manifest.json and
-removed on the next run. Hand-written files (`.cpp`/`.hpp`) are never touched.
+The output is regenerated from the decomp until each item is modernized. Two safeguards keep hand work safe:
 
-  python tools\\port\\copy_to_native.py [--report]
+  owned items  tools\\port\\owned.csv lists functions/globals/types whose code is now hand-maintained (moved out
+               by tools\\port\\own.py into a file the copy tool never writes). They are not emitted; their names
+               are provided by the owned header listed there, and their ledger `modernized` column reads `wip`
+               (`x` once the rewrite tool approves them).
+  manifest     tools\\port\\copy_manifest.json (committed) records the hash of every generated file. If a
+               generated file was edited by hand, or a file to be written exists and is not generated, the run
+               stops without writing anything: take ownership with own.py (or revert the edit) instead.
+
+  python tools\\port\\copy_to_native.py [--report] [--mark]
 """
 from __future__ import annotations
 
@@ -45,7 +52,9 @@ from ref_index import norm_key as rx_norm  # noqa: E402
 REPO = dx.REPO
 LEDGERS = REPO / "Docs" / "ledgers"
 PORT = REPO / "build" / "port"
-MANIFEST = PORT / "copy_manifest.json"
+MANIFEST = REPO / "tools" / "port" / "copy_manifest.json"
+OLD_MANIFEST = PORT / "copy_manifest.json"
+OWNED = REPO / "tools" / "port" / "owned.csv"
 NATIVE = REPO / "Native"
 LEGACY_HEADER = "Legacy/Psx.h"
 IDENT = re.compile(r"[A-Za-z_]\w*")
@@ -200,6 +209,7 @@ def sibling_header(path: str) -> str:
 class Source:
     def __init__(self, refs: dict) -> None:
         self.refs = refs["files"]
+        self.extra: dict[str, list] = {}   # file -> [(offset, length, "edit", replacement)] (x64 hazard edits)
         self.bytes: dict[str, bytes] = {}
         self.line_starts: dict[str, list[int]] = {}
         self.ref_offsets: dict[str, list[tuple[int, int, str, str]]] = {}
@@ -218,7 +228,8 @@ class Source:
             occ = []
             for line, col, n, kind, target in self.refs.get(rel, []):
                 occ.append((starts[line - 1] + col - 1, n, kind, target))
-            occ.sort()
+            occ += self.extra.get(rel, [])
+            occ.sort(key=lambda o: (o[0], o[1]))
             self.ref_offsets[rel] = occ
         return self.bytes[rel]
 
@@ -304,6 +315,101 @@ class Copier:
         for f in self.fields.values():
             if f["type_id"] in local_enums:
                 self.function_local_names.add(self.field_name(f["id"]))
+        self.owned: dict[str, dict] = {}
+        if OWNED.exists():
+            with OWNED.open(encoding="utf-8", newline="") as fh:
+                self.owned = {r["id"]: r for r in csv.DictReader(fh)}
+        self.load_hazards()
+
+    # ------------------------------------------------------------------------------------------------- x64 hazards
+    BASE_INT = r"(?:unsigned\s+long|unsigned\s+int|signed\s+int|unsigned|long|int|u_long|u_int|uint|ulong)"
+
+    def load_hazards(self) -> None:
+        """Edits from tools/port/hazard_index.py (PORTING_WATCHLIST.md §2): pointer-to-integer casts become
+        (uintptr_t), ordering-table links become LegacyGpu_Handle(p), and the members, globals and locals those
+        values are stored into become uintptr_t, unless the member is part of an on-disc layout (decoder work).
+        Struct-size literals of structs that hold pointers become sizeof."""
+        self.ptr_fields: set[str] = set()
+        self.ptr_globals: set[str] = set()
+        path = PORT / "hazards.json"
+        if not path.exists():
+            self.report["hazards-not-indexed"].append("run tools/port/hazard_index.py")
+            return
+        h = json.loads(path.read_text(encoding="utf-8"))
+        edits: dict[str, list] = collections.defaultdict(list)
+        left = ("deref", "return", "param", "param-local", "array_subscript_expr", "unary_operator")
+        for c in h["ptr_casts"]:
+            d = c["dest"]
+            kind = d.split(":", 1)[0]
+            fixed = True  # whether the value lands somewhere pointer-sized after the edits
+            if kind == "field" and d != "field:?":
+                fid = re.sub(r"~w\d+$", "", d[6:]).split(">")[-1]
+                tid, _, idx = fid.partition(".")
+                t = self.type_by_id.get(tid)
+                f = self.fields.get(fid)
+                if t is None or f is None:
+                    fixed = False
+                elif "*" in f["type"]:
+                    pass  # already a pointer: the (uintptr_t) value converts back without truncation
+                elif t["role"] == "OnDisc":
+                    self.report["hazard-on-disc-member"].append(f"{fid} {t['final_name']}.{f['final_name']}")
+                    fixed = False
+                else:
+                    self.ptr_fields.add(f"{self.canon_type(tid)}.{idx}")
+            elif kind == "global":
+                if d == "global:?":
+                    fixed = False
+                elif "*" not in self.data_by_id.get(d[7:], {}).get("type", ""):
+                    self.ptr_globals.add(d[7:])  # (a pointer-typed global needs nothing: the value converts back)
+            elif kind == "local" and d in h["decls"]:
+                s = h["decls"][d]
+                edits[s["file"]].append((s["start"], s["end"] - s["start"], "edit", "uintptr_t"))
+            elif kind in left or d == "field:?":
+                # left as written, so the compiler keeps reporting it (signature or decoder work, §2)
+                self.report[f"hazard-left-{kind}"].append(f"{c['file']}:{c['line']} {c['text']}")
+                fixed = False
+            if d == "link":
+                edits[c["file"]].append((c["start"], c["close"] - c["start"], "edit", "LegacyGpu_Handle("))
+                edits[c["file"]].append((c["operand_end"], 0, "edit", ")"))
+            elif fixed:
+                edits[c["file"]].append((c["start"], c["close"] - c["start"], "edit", "(uintptr_t)"))
+        for s in h["size_literals"]:
+            t = self.type_by_id.get(self.canon_type(s["type"]))
+            if t is None:
+                continue
+            size = f"sizeof({c_name(t['final_name'])})"
+            text = size if s["count"] == 1 else f"{s['count']} * {size}"
+            edits[s["file"]].append((s["start"], s["end"] - s["start"], "edit", text))
+        for rel, es in edits.items():
+            self.src.extra[rel] = sorted(set(es))
+
+    def retype_members(self, tid: str, text: str) -> str:
+        for fid in sorted(f for f in self.ptr_fields if f.split(".")[0] == tid):
+            name = self.fields[fid]["final_name"]
+            text, n = re.subn(rf"(?m)^(\s*(?:/\*[^*]*\*/\s*)?(?:volatile\s+)?){self.BASE_INT}(\s+{re.escape(name)}"
+                              rf"\s*(?:\[[^\]]*\]\s*)*;)", r"\1uintptr_t\2", text)
+            self.report["hazard-member-uintptr" if n else "hazard-member-not-retyped"].append(
+                f"{fid} {c_name(self.type_by_id[tid]['final_name'])}.{name}")
+        return text
+
+    def retype_global(self, gid: str, name: str, text: str) -> str:
+        new, n = re.subn(rf"\b{self.BASE_INT}(\s+(?:const\s+)?{re.escape(name)}\b)", r"uintptr_t\1", text, count=1)
+        if gid in self.ptr_globals:
+            self.report["hazard-global-uintptr" if n else "hazard-global-not-retyped"].append(f"{gid} {name}")
+        return new if n else text
+
+    def take_owned(self, rid: str, name: str) -> bool:
+        """An owned item is not emitted; its name is provided by the owned header."""
+        o = self.owned.get(rid)
+        if o is None:
+            return False
+        hdr = o["header"].strip()
+        if not (REPO / hdr).exists():
+            raise SystemExit(f"owned.csv: {rid} {name}: header {hdr} does not exist")
+        self.provide(name, hdr)
+        self.item_row[name] = rid
+        self.report["owned"].append(f"{rid} {name} -> {o['path']}")
+        return True
 
     # ------------------------------------------------------------------------------------------------- naming
     def canon_type(self, tid: str) -> str:
@@ -374,7 +480,12 @@ class Copier:
         b = self.src.load(rel)
         out, pos = [], start
         for off, n, kind, target in self.src.ref_offsets[rel]:
-            if off < start or off + n > end:
+            if off < start or off + n > end or off < pos:
+                continue
+            if kind == "edit":
+                out.append(b[pos:off])
+                out.append(target.encode())
+                pos = off + n
                 continue
             t = self.pick(target, overlay)
             new = self.plugin_ref.get(off) if t.startswith("plugin:") and rel == self.EFFPURGE else self.target_text(t)
@@ -555,6 +666,8 @@ class Copier:
                 continue
             loc = r["final_location"].strip()
             name = c_name(r["final_name"])
+            if self.take_owned(r["id"], name):
+                continue
             src_row = c_body.get(r["id"], r)
             ov = overlay_of("src/" + src_row["file"])
             prov = f"// decomp: {r['overlay']} {r['name']} (src/{r['file']}:{r['line']})"
@@ -693,6 +806,8 @@ class Copier:
                 continue
             loc = r["final_location"].strip()
             name = c_name(r["final_name"])
+            if self.take_owned(r["id"], name):
+                continue
             if r["id"] == SCRATCH_GLOBAL:
                 tname = c_name(self.type_by_id[self.canon_type(r["type_id"])]["final_name"])
                 hdr = sibling_header(loc)
@@ -746,6 +861,9 @@ class Copier:
                 text = f"{decl};{tag}"
                 need = e["need"]
             src = (d if d is not None else e)["file"]
+            if r["id"] in self.ptr_globals:
+                text = self.retype_global(r["id"], name, text)
+                decl = self.retype_global("", name, decl) if d is None else decl
             self.out(loc).items.append(Item("var", f"{prov}\n{text}\n", name, r["id"], need, (1, r["id"]), src))
             self.emitted[r["id"]] = d if d is not None else e
             self.item_row[name] = r["id"]
@@ -796,6 +914,11 @@ class Copier:
         lines = [f"typedef {kw} {name} {{"]
         for m, f in zip(g.members[r["id"]], lay["fields"]):
             t = self.spelled_type(f["type"]).strip()
+            if m["id"] in self.ptr_fields and re.fullmatch(self.BASE_INT, t):
+                t = "uintptr_t"
+                self.report["hazard-member-uintptr"].append(m["id"])
+            elif t == "size_t":
+                t = "u_int"
             fname = self.fields[m["id"]]["final_name"]
             if "(*)" in t:
                 decl = t.replace("(*)", f"(*{fname})", 1)
@@ -808,6 +931,107 @@ class Copier:
         lines.append(f"}} {name};")
         return "\n".join(lines)
 
+    SDK_POINTER_TYPES = {"TIM_IMAGE", "DIRENTRY"}
+
+    def type_has_pointer(self, tid: str, seen: frozenset = frozenset()) -> bool:
+        """Whether a ledger type holds a pointer (directly, in a nested type or as a uintptr_t member): its x64 size
+        differs from the PS1 one by design."""
+        tid = self.canon_type(tid)
+        if tid in seen:
+            return False
+        self.spelled_type("")  # builds the decomp-name -> type id table
+        sys.path.insert(0, str(REPO / "tools" / "naming" / "sym_gen"))
+        from common import Gen
+        if not hasattr(self, "_gen"):
+            self._gen = Gen("Shared")
+        try:
+            fields = self._gen.layout(tid)["fields"]
+        except KeyError:
+            return True  # unknown layout: make no claim
+        if any(m["id"] in self.ptr_fields for m in self._gen.members.get(tid, [])):
+            return True
+        for f in fields:
+            t = f.get("type") or ""
+            if "*" in t or "(" in t or any(n in self.SDK_POINTER_TYPES for n in IDENT.findall(t)):
+                return True
+            for n in IDENT.findall(t):
+                sub = self._tid_by_name.get(n)
+                if sub and self.type_by_id[sub]["kind"] in ("struct", "union") and \
+                        self.type_has_pointer(sub, seen | {tid}):
+                    return True
+        return False
+
+    def size_assert(self, tid: str, name: str) -> str:
+        r = self.type_by_id[tid]
+        size = int(r["size"] or 0)
+        if r["kind"] not in ("struct", "union") or size <= 0 or self.type_has_pointer(tid):
+            return ""
+        self.report["size-assert"].append(name)
+        return f'\n_Static_assert(sizeof({name}) == 0x{size:X}, "{name} must keep its PS1 layout");'
+
+    def bitfield_units(self, tid: str, text: str) -> str:
+        """MSVC starts a run of bitfields on a boundary of their declared type; GCC on the PS1 packed them into the
+        next free bits. A run the PS1 placed off that boundary (Actors::CharacterInit: two u_int bitfields at bit
+        24, after a char) is given the smallest storage type that starts on its PS1 offset and holds the run, so
+        both layouts agree (tools/port/layout_check.py verifies every type)."""
+        try:
+            self.type_has_pointer(tid)  # builds self._gen
+            lay, members = self._gen.layout(tid), self._gen.members.get(tid, [])
+        except KeyError:
+            return text
+        sizes = {"char": 1, "u_char": 1, "signed char": 1, "unsigned char": 1, "short": 2, "u_short": 2,
+                 "unsigned short": 2, "signed short": 2}
+
+        def declared(fname: str) -> tuple[str, int] | None:
+            m = re.search(rf"(?m)^\s*((?:unsigned\s+|signed\s+)?\w+)\s+{re.escape(fname)}\s*:\s*(\d+)\s*;", text)
+            return (m[1], int(m[2])) if m else None
+
+        # runs of consecutive bitfields as the emitted text declares them, at the PS1 offsets of the ledger layout
+        runs, cur = [], []
+        for m, f in zip(members, lay["fields"]):
+            d = declared(self.fields[m["id"]]["final_name"]) if m["id"] in self.fields else None
+            if d and f.get("offset") is not None:
+                cur.append((self.fields[m["id"]]["final_name"], d[0], d[1], f["offset"]))
+            elif cur:
+                runs.append(cur)
+                cur = []
+        if cur:
+            runs.append(cur)
+
+        def ms_offsets(start: int, widths: list[int], unit_bits: int) -> list[int]:
+            out, unit, pos = [], start, start
+            for w in widths:
+                if pos - unit + w > unit_bits:
+                    unit += unit_bits
+                    pos = unit
+                out.append(pos)
+                pos += w
+            return out
+
+        for run in runs:
+            names = [r[0] for r in run]
+            types = [r[1] for r in run]
+            widths = [r[2] for r in run]
+            ps1 = [r[3] for r in run]
+            start = ps1[0]
+            tsizes = {sizes.get(t, 4) for t in types}
+            if len(tsizes) == 1 and start % (8 * next(iter(tsizes))) == 0 and \
+                    ms_offsets(start, widths, 8 * next(iter(tsizes))) == ps1:
+                continue  # MSVC places this run where the PS1 did
+            for nbytes in (4, 2, 1):
+                if start % (8 * nbytes) == 0 and ms_offsets(start, widths, 8 * nbytes) == ps1:
+                    break
+            else:
+                self.report["bitfield-run-unfixable"].append(f"{tid} at bit {start}")
+                continue
+            for fname, t in zip(names, types):
+                unsigned = t.startswith(("u_", "unsigned"))
+                unit = {1: ("u_char", "char"), 2: ("u_short", "short"), 4: ("u_int", "int")}[nbytes][0 if unsigned else 1]
+                text = re.sub(rf"(?m)^(\s*)(?:unsigned\s+|signed\s+)?\w+(\s+{re.escape(fname)}\s*:)", rf"\g<1>{unit}\2",
+                              text, count=1)
+            self.report["bitfield-run-unit"].append(f"{tid} bit {start}: {nbytes} byte unit")
+        return text
+
     def copy_types(self) -> None:
         merged = self.merged_layout_types()
         for r in self.types:
@@ -816,11 +1040,16 @@ class Copier:
                 continue
             loc = r["final_location"].strip()
             name = c_name(r["final_name"])
+            if self.take_owned(tid, name):
+                if r["kind"] in ("struct", "union"):
+                    self.struct_names.add(name)
+                self.type_home[tid] = self.owned[tid]["header"].strip()
+                continue
             cands = [d for t in [tid] + [x["id"] for x in self.types if self.canon_type(x["id"]) == tid and x["id"] != tid]
                      for d in self.by_target.get(t, []) if d["kind"] == "type" and d["def"]]
             bodies = [d for d in cands if d["ckind"] in ("STRUCT_DECL", "UNION_DECL", "ENUM_DECL")]
             if tid in merged or (not bodies and r["kind"] in ("struct", "union") and not self.inline_type(r)):
-                text = self.generated_type(r, name)
+                text = self.generated_type(r, name) + self.size_assert(tid, name)
                 need = sorted({self._tid_by_name[n] for f in self._gen.layout(tid)["fields"]
                                if "*" not in f["type"] for n in IDENT.findall(f["type"]) if n in self._tid_by_name})
                 self.struct_names.add(name)
@@ -844,6 +1073,13 @@ class Copier:
                 d = sorted([x for x in cands if x["ckind"] == "TYPEDEF_DECL"], key=lambda x: (x["file"], x["start"]))[0]
             ov = overlay_of(d["file"]) if d["file"].startswith("src/") else "SLUS_010.40"
             text = self.renamed(d["file"], d["start"], d["end"], ov).strip()
+            text = self.retype_members(tid, text)
+            if r["kind"] in ("struct", "union"):
+                text = self.bitfield_units(tid, text)
+                # size_t was 32 bits on the PS1; a member of a layout keeps that width (SYSTEM.DAT header offsets)
+                text, n = re.subn(r"(?m)^(\s*)size_t(\s+\w+\s*(?:\[[^\]]*\]\s*)*;)", r"\1u_int\2", text)
+                if n:
+                    self.report["size_t-member-u_int"].append(f"{name} ({n})")
             kw = {"struct": "struct", "union": "union", "enum": "enum"}.get(r["kind"])
             if kw:
                 # give anonymous definitions the tag, so pointers to them can be forward-declared
@@ -852,7 +1088,7 @@ class Copier:
                     text += f";\ntypedef {kw} {name} {name}"
                 if kw != "enum":
                     self.struct_names.add(name)
-            text += ";"
+            text += ";" + self.size_assert(tid, name)
             self.out(loc).items.append(Item("type", f"// decomp: {r['name']} ({d['file']}:{d['line']})\n{text}\n",
                                             name, tid, d["need"], (2, tid), d["file"]))
             self.provide(name, loc)
@@ -975,6 +1211,8 @@ class Copier:
         includes_by_file: dict[str, list] = {}
         for r in self.cat:
             if not r["kind"].startswith("template:") or note(r, "dup-of"):
+                continue
+            if self.take_owned(r["id"], c_name(r["final_name"])):
                 continue
             rel = "src/" + r["file"]
             if rel not in includes_by_file:
@@ -1483,6 +1721,9 @@ def mark_ledgers(cp: Copier) -> dict[str, collections.Counter]:
                 st = emitted.get(cp.canon_type(rid)) or ("x" if cp.inline_type(r) else "")
             r["copied"] = st
             r["compiles"] = "x" if st else ""
+            if rid in cp.owned and r.get("modernized") != "x":
+                r["copied"], r["compiles"], r["modernized"] = "x", "x", "wip"
+                st = "owned"
             c[st or "missing"] += 1
         with path.open("w", encoding="utf-8", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=cols)
@@ -1490,6 +1731,50 @@ def mark_ledgers(cp: Copier) -> dict[str, collections.Counter]:
             w.writerows(rows)
         counts[name] = c
     return counts
+
+
+def content_hash(data: bytes) -> str:
+    """Hash of a file's text with line endings normalised (git may check generated files out with CRLF)."""
+    import hashlib
+    return hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest()
+
+
+def write_output(cp: "Copier", rendered: dict[str, str]) -> None:
+    """Write the generated files, refusing to touch hand work (see the module docstring)."""
+    if MANIFEST.exists():
+        old = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    elif OLD_MANIFEST.exists():
+        old = {p: None for p in json.loads(OLD_MANIFEST.read_text(encoding="utf-8"))}  # pre-hash manifest
+    else:
+        old = {}
+    problems = []
+    for p, h in sorted(old.items()):
+        f = REPO / p
+        if h and f.exists() and content_hash(f.read_bytes()) != h:
+            problems.append(f"edited by hand since it was generated: {p}")
+    for p in sorted(rendered):
+        if p not in old and (REPO / p).exists():
+            problems.append(f"exists and is not generated (would be overwritten): {p}")
+    owned_paths = {o["path"].strip() for o in cp.owned.values()} | {o["header"].strip() for o in cp.owned.values()}
+    for p in sorted(owned_paths & set(rendered)):
+        problems.append(f"owned file is also a generated file: {p}")
+    if problems:
+        print("copy_to_native: nothing written. Take ownership with tools\\port\\own.py, or revert the edits:")
+        for x in problems:
+            print("  " + x)
+        raise SystemExit(1)
+    for p in old:
+        if p not in rendered and (REPO / p).exists():
+            (REPO / p).unlink()
+    manifest = {}
+    for p, text in sorted(rendered.items()):
+        dst = REPO / p
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        data = text.encode("utf-8", errors="surrogateescape")
+        if not dst.exists() or dst.read_bytes() != data:
+            dst.write_bytes(data)
+        manifest[p] = content_hash(data)
+    MANIFEST.write_text(json.dumps(manifest, indent=0, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def main() -> int:
@@ -1510,17 +1795,7 @@ def main() -> int:
     cp.copy_macros()
     rendered = cp.finish()
     cp.report_type_cycles()
-    old = json.loads(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.exists() else []
-    for p in old:
-        if p not in rendered and (REPO / p).exists():
-            (REPO / p).unlink()
-    for p, text in rendered.items():
-        dst = REPO / p
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        data = text.encode("utf-8", errors="surrogateescape")
-        if not dst.exists() or dst.read_bytes() != data:
-            dst.write_bytes(data)
-    MANIFEST.write_text(json.dumps(sorted(rendered), indent=0), encoding="utf-8")
+    write_output(cp, rendered)
     kinds = collections.Counter(i.kind for f in cp.files.values() for i in f.items)
     print(f"{len(rendered)} files ({sum(p.endswith('.c') for p in rendered)} .c), items {dict(kinds)}")
     for k, v in cp.report.items():

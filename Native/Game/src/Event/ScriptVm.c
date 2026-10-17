@@ -146,7 +146,7 @@ short Event_threadWaitFrames[4];
 char Event_isTextSelectionActive;
 
 // decomp: D_800F4C64 (D_800F4C64@BATTLE/BATTLE.PRG)
-int Event_subroutineReturnCursor;
+uintptr_t Event_subroutineReturnCursor;
 
 // decomp: D_800F4C68 (D_800F4C68@BATTLE/BATTLE.PRG)
 char Event_isSkipForced;
@@ -691,7 +691,7 @@ int Event_CommandSpecialOperation(u_char* arg0, short arg1)
         Effects_ScreenDistortion_SetVignetteEnabled(arg0[2]);
         break;
     case 16:
-        Event_subroutineReturnCursor = (long)(arg0 + 6);
+        Event_subroutineReturnCursor = (uintptr_t)(arg0 + 6);
         return (long)&Event_specialSubroutineScript;
     case 17:
         Field_CancelPendingRoomVisit();

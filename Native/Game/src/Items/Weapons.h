@@ -13,5 +13,6 @@ typedef struct Items_WeaponRange {
     char attackShape : 3;
     char attackShapeAngle : 5;
 } Items_WeaponRange;
+_Static_assert(sizeof(Items_WeaponRange) == 0x4, "Items_WeaponRange must keep its PS1 layout");
 
 #endif // VS_ITEMS_WEAPONS_H_TYPES
