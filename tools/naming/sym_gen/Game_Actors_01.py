@@ -1,0 +1,569 @@
+"""Game_Actors_01 types and fields from code read directly. Citations are resolved by exact text search (common.Gen).
+
+Group 1: snapshots, saved room actors, loot, initialization records, model scratchpad views and small helpers.
+Group 2: the actor record family (D_800F4538_t and its members) and the gimmick record (D_800F45E0_t).
+"""
+import csv
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from common import Gen, LEDGERS  # noqa: E402
+
+g = Gen("Game_Actors_01")
+c, T = g.c, g.T
+GA = "Native\\Game\\src\\Actors\\"
+ST = "Native\\Game\\src\\State\\"
+IT = "Native\\Game\\src\\Items\\"
+FD = "Native\\Game\\src\\Field\\"
+AI = "Native\\Game\\src\\Battle\\Ai\\"
+RD = "Native\\Graphics\\src\\ModelDraw.h"
+INIT = "BATTLE/INITBTL.PRG/18.c"
+SCRATCH = r"scratch|\(\(D_1F80035C_t\*\)0x1F80035C\)"
+
+# ---------------------------------------------------------------- group 1: snapshots and saved room actors
+T("T00208", "State", "State::AshleyLimbSnapshot", ST + "Ashley.h",
+  "Saves one of Ashley's limbs: hit points and per-limb type and affinity values.", "high",
+  c((INIT, "temp_s0->limbs[i].hp = s1->limbs[i].hp;")), [
+      ("hp", "hp", "Limb hit points", "high"),
+      ("maxHp", "maxHp", "Limb maximum hit points", "high"),
+      ("types", "types", "Saved limb type values", "high"),
+      ("affinities", "affinities", "Saved limb affinity values", "high"),
+  ], recv=r"s1->limbs\[i\]")
+T("T00209", "State", "State::AshleyStatsSnapshot", ST + "Ashley.h",
+  "Saves Ashley's statistics, statuses, limbs, weapon stance and camera settings for restoring after re-entry.", "high",
+  c((INIT, "temp_s0->currentHP = s1->currentHP;"), (INIT, "D_80060068.unk0.unk0 = 0;")), [
+      ("unk0", "isPending", "Nonzero while the snapshot still has to be restored; cleared by the restore", "med",
+       c((INIT, "D_80060068.unk0.unk0 = 0;"))),
+      ("currentHP", "currentHp", "Hit points", "high"),
+      ("maxHP", "maxHp", "Maximum hit points", "high"),
+      ("currentMP", "currentMp", "Magic points", "high"),
+      ("maxMP", "maxMp", "Maximum magic points", "high"),
+      ("strength", "strength", "Base strength", "high"),
+      ("totalStrength", "totalStrength", "Strength including equipment", "high"),
+      ("intelligence", "intelligence", "Base intelligence", "high"),
+      ("totalIntelligence", "totalIntelligence", "Intelligence including equipment", "high"),
+      ("agility", "agility", "Base agility", "high"),
+      ("totalAgility", "totalAgility", "Agility including equipment", "high"),
+      ("risk", "risk", "Risk", "high"),
+      ("flags", "actorFlags", "Actor flag word restored into the actor record at +0x954", "low"),
+      ("statuses", "statuses", "Status bits re-inflicted on restore", "high"),
+      ("statusTimers", "statusTimers", "Remaining duration of each status", "high"),
+      ("limbs", "limbs", "Per-limb hit points, types and affinities", "high"),
+      ("weaponDrawn", "weaponDrawn", "Bit 0 set when the weapon was drawn", "high"),
+      ("unk80", "cameraPitch", "Camera pitch delta restored on re-entry", "high"),
+      ("unk84", "cameraDistance", "Camera initial distance restored on re-entry", "high"),
+  ], recv=r"\bs1")
+T("T00210", "State", "State::RoomEnemyStates", ST + "RoomCache.h",
+  "Remembers up to eight actor states for one recently visited room, with the room's visit recency.", "high",
+  c(("146C.c", "D_80061078[D_80060064].unk0 = 4;"), ("146C.c", "if (D_80061078[D_80060064].unk4 >= 8) {")), [
+      ("unk0", "recency", "4 for the current room, lower for older rooms, 0 when unused", "high",
+       c(("146C.c", "D_80061078[D_80060064].unk0 = 4;"), ("146C.c", "--D_80061078[i].unk0;"))),
+      ("zndId", "zoneId", "Zone of the remembered room", "high"),
+      ("mapId", "mapId", "Map of the remembered room", "high"),
+      ("unk4", "nextSlot", "Slot reused when no saved state matches; wraps at 8", "high",
+       c(("146C.c", "++D_80061078[D_80060064].unk4;"))),
+      ("unk8", "actorStates", "Eight 40-byte saved actor states; byte 0 is spawn index + 1", "high",
+       c(("146C.c", "if (D_80061078[D_80060064].unk8[i][0] == (arg0 + 1)) {"))),
+  ], recv=r"D_80061078\[\w+\]")
+T("T00597", "State", "Actors::RoomActorRecord", GA + "RoomActorCache.h",
+  "Saves one room actor's health, statistics, statuses, AI flags and tile placement while the room is left.", "high",
+  c(("146C.c", "actor->unk3C->currentHP = saved->currentHP;"), ("146C.c", "object.unkC.unk0_0 = saved->x;")), [
+      ("unk0", "spawnSlot", "Spawn index + 1; 0 marks a free slot", "med"),
+      ("hidden", "isHidden", "Hidden flag saved for the spawn", "high", c(("146C.c", "saved->hidden = enemy->hidden;"))),
+      ("unk2", "aiFlags", "Packed AI relation and behavior flags handed to the AI on respawn", "high",
+       c(("146C.c", "i = func_800E6178((void*)actor, saved->unk2);"))),
+      ("currentHP", "currentHp", "Hit points", "high"),
+      ("maxHP", "maxHp", "Maximum hit points", "high"),
+      ("currentMP", "currentMp", "Magic points", "high"),
+      ("maxMP", "maxMp", "Maximum magic points", "high"),
+      ("strength", "strength", "Strength restored as base and total", "high"),
+      ("intelligence", "intelligence", "Intelligence restored as base and total", "high"),
+      ("agility", "agility", "Agility restored as base and total", "high"),
+      ("limbHP", "limbHp", "Hit points of each limb", "high"),
+      ("unk1E", "reserved1E", "Padding before the status word", "low"),
+      ("statuses", "statuses", "Status bits re-inflicted on respawn", "high"),
+      ("x", "tileX", "Tile X", "high"),
+      ("direction", "direction", "Facing direction bits; only bit 0 is kept", "high"),
+      ("z", "tileZ", "Tile Z", "high"),
+      ("height", "height", "Height", "high"),
+  ], recv=r"saved")
+T("T00431", "State", "Actors::RoomActorRecordWrite", GA + "RoomActorCache.h",
+  "Writes one room actor's saved state; the same 40-byte slot as Actors::RoomActorRecord, with the tile placement "
+  "stored as one word.", "high",
+  c(("146C.c", "temp_v0->currentHP = temp_s1->currentHP;"), ("146C.c", "temp_v0->unk24 = sp10.unk0.unk0.value;"))
+  + ";view of T00597 (same slot); fold into one native type when copying", [
+      ("unk0", "spawnSlot", "Spawn index + 1; 0 marks a free slot", "high"),
+      ("unk1", "isHidden", "Hidden flag passed by the caller", "med"),
+      ("unk2", "aiFlags", "Packed AI relation and behavior flags", "high"),
+      ("currentHP", "currentHp", "Hit points", "high"),
+      ("maxHP", "maxHp", "Maximum hit points", "high"),
+      ("currentMP", "currentMp", "Magic points", "high"),
+      ("maxMP", "maxMp", "Maximum magic points", "high"),
+      ("totalStrength", "strength", "Strength including equipment", "high"),
+      ("totalIntelligence", "intelligence", "Intelligence including equipment", "high"),
+      ("totalAgility", "agility", "Agility including equipment", "high"),
+      ("limbHp", "limbHp", "Hit points of each limb", "high"),
+      ("unk20", "statuses", "Status bits", "high"),
+      ("unk24", "placement", "Packed tile placement word", "high"),
+  ], recv=r"temp_v0")
+
+# ---------------------------------------------------------------- model scratchpad (0x1F80035C) and its views
+T("T00198", "State", "Render::ModelScratchpad", RD,
+  "Holds the scratchpad working set at 0x1F80035C used while building actor, weapon and gimmick model transforms.",
+  "high", c(("30DB0.c", "((D_1F80035C_t*)0x1F80035C)->rotation.vx")), [
+      ("unk0", "reserved0", "Bytes not read by the decompiled users", "low"),
+      ("tpage", "texturePage", "Texture page of the model being drawn", "high"),
+      ("clut", "palette", "Palette of the model being drawn", "high"),
+      ("unk38", "reserved38", "Not read by the decompiled users", "low"),
+      ("unk3A", "angleX", "Actor X angle staged for the transform", "med"),
+      ("unk3C", "angleY", "Actor Y angle staged for the transform", "med"),
+      ("unk3E", "reserved3E", "Not read by the decompiled users", "low"),
+      ("position", "position", "World position of the model", "med"),
+      ("offset", "rootOffset", "Root offset of the animated model", "high"),
+      ("parent", "parentBoneMatrix", "Matrix of the parent bone", "high"),
+      ("unk60", "reserved60", "Not read by the decompiled users", "low"),
+      ("matrix", "matrix", "Working model matrix", "high"),
+      ("rotation", "rotation", "Rotation angles", "high"),
+      ("scale", "scale", "Scale applied to the working matrix", "high"),
+      ("model", "model", "Model geometry being drawn", "high"),
+  ], recv=SCRATCH)
+T("T00395", "State", "Render::ModelScratchpadAnglesView", RD,
+  "Views Render::ModelScratchpad for the root-angle and gimmick-rotation updates.", "high",
+  c(("44F14.c", "scratch->angleX = actor->unk0.unk14 + yaw;")) + ";view of T00198 (scratchpad 0x1F80035C)", [
+      ("prefix", "reserved0", "Bytes covered by other views", "low"),
+      ("angleX", "angleX", "Actor X angle staged for the transform", "high"),
+      ("angleY", "angleY", "Actor Y angle staged for the transform", "high"),
+      ("padding", "reserved3E", "Bytes covered by other views", "low"),
+      ("offset", "rootOffset", "Root offset of the animated model", "high"),
+      ("padding2", "reserved5C", "Bytes covered by other views", "low"),
+      ("matrix", "matrix", "Working model matrix", "med"),
+      ("rotation", "rotation", "Rotation angles", "high"),
+  ], recv=r"scratch|objectScratch")
+T("T00463", "State", "Render::ModelScratchpadBoneView", RD,
+  "Views Render::ModelScratchpad while converting a bone matrix to world space.", "high",
+  c(("38C1C.c", "scratch->matrix = object->bones[bone];")) + ";view of T00198 (scratchpad 0x1F80035C)", [
+      ("unk0", "reserved0", "Bytes covered by other views", "low"),
+      ("position", "position", "Bone position relative to the camera", "high"),
+      ("offset", "rootOffset", "Root offset of the animated model", "high"),
+      ("unk5C", "reserved5C", "Bytes covered by other views", "low"),
+      ("matrix", "matrix", "Bone matrix being converted", "high"),
+  ], recv=r"scratch")
+T("T00427", "State", "Render::DrawDepthScratch", RD,
+  "Holds the ordering-table depth offset used while one actor is drawn.", "med",
+  c(("44F14.c", "frame->depth += actor->unk6F4.unk3 * 4;")), [
+      ("unused", "reserved0", "Not read", "low"),
+      ("depth", "depth", "Ordering-table depth offset", "high"),
+  ], recv=r"frame")
+T("T00237", "State", "Actors::ModelRenderContext", GA + "ModelDraw.h",
+  "Holds shared rendering state passed to every actor, weapon and gimmick model draw.", "med",
+  c(("44F14.c", "D_800F2458.unk1FD0[0] = 64;"), ("30DB0.c", "D_800F4538[i]->unk183C = D_800F2458.unk1FE0;")), [
+      ("unk0", "workArea", "Draw state used by the model renderers (not decompiled)", "low"),
+      ("unk1FD0", "modelScale", "Per-axis model scale, reset to 64", "med", c(("44F14.c", "D_800F2458.unk1FD0[0] = 64;"))),
+      ("unk1FDC", "reserved1FDC", "Not read by the decompiled users", "low"),
+      ("unk1FE0", "actorScale", "Scale copied into every actor record", "med",
+       c(("30DB0.c", "D_800F4538[i]->unk183C = D_800F2458.unk1FE0;"))),
+  ])
+T("T00238", "State", "Actors::SkeletonPose", GA + "ModelDraw.h",
+  "Holds the per-bone world matrices and scale of the skeleton being drawn.", "high",
+  c(("49268.c", "D_800F3C58.bones[i] = scratch->matrix;")), [
+      ("bones", "boneMatrices", "World matrix of each bone", "high", c(("49268.c", "D_800F3C58.bones[i] = scratch->matrix;"))),
+      ("scale", "scale", "Scale of the skeleton", "high", c(("49268.c", "func_800B396C(&scratch->matrix, &D_800F3C58.scale);"))),
+  ])
+
+# ---------------------------------------------------------------- model files
+T("T00303", "OnDisc", "Actors::ShpBone", GA + "Skeleton.h",
+  "Describes one SHP skeleton bone: length, parent, lookup tags and the joint slot it initializes.", "high",
+  c(("30DB0.c", "armature = &actor->unk0.unk68->armatures[i];")) + ";DataCrystal SHP files (joint: length, parent)", [
+      ("unk0", "length", "Bone length", "high", c(("30DB0.c", "*arg3 = var_t0->unk0.unk68->armatures[arg1].unk0;"))),
+      ("unk4", "parentIndex", "Index of the parent bone", "high",
+       c(("49268.c", "int parentBone = scratch->model->armatures[i].unk4;"))),
+      ("unk5", "reserved5", "Not read by the decompiled users", "low"),
+      ("unk6", "tag", "Bone tag searched by tag lookups", "high",
+       c(("38C1C.c", "if (var_v1->armatures[i].unk6 == (arg1 & 0xFF)) {"))),
+      ("unk7", "limbIds", "High nibble: limb group + 1; low nibble: limb index + 1", "high",
+       c(("38C1C.c", "new_var = (var_v1->armatures[i].unk7 >> 4) == ((arg1 & 0xFF) + 1);"),
+         ("38C1C.c", "if ((var_v1->armatures[i].unk7 & 0xF) == ((arg1 & 0xFF) + 1)) {"))),
+      ("unk8", "auxiliaryTag", "Second lookup tag; 3 to 6 select an actor joint slot", "high",
+       c(("38C1C.c", "if (var_v1->armatures[i].unk8 == (arg1 & 0xFF)) {"), ("30DB0.c", "if (armature->unk8 >= 3 && armature->unk8 < 7) {"))),
+      ("unk9", "reserved9", "Not read by the decompiled users", "low"),
+      ("unkA", "jointInitValue", "Initial value of the joint slot chosen by auxiliaryTag", "med",
+       c(("30DB0.c", "joint[0] = armature->unkA;"))),
+      ("unkC", "reservedC", "Not read by the decompiled users", "low"),
+      ("unkD", "reservedD", "Not read by the decompiled users", "low"),
+      ("unkE", "reservedE", "Not read by the decompiled users", "low"),
+      ("unkF", "reservedF", "Not read by the decompiled users", "low"),
+  ])
+T("T00344", "OnDisc", "Actors::WeaponModelData", GA + "WeaponModel.h",
+  "Holds a loaded WEP file: header bytes and its section offsets, relocated to addresses on load.", "high",
+  c(("30DB0.c", "buf->texturesOffset += (u_long)dst;")), [
+      ("unk0", "header", "WEP header bytes before the section offsets", "med"),
+      ("texturesOffset", "textureSection", "Texture section; file offset relocated to an address", "high"),
+      ("vertexGroupsOffset", "vertexGroupSection", "Vertex group section; relocated on load", "high"),
+      ("verticesOffset", "vertexSection", "Vertex section; relocated on load", "high"),
+      ("polygonsOffset", "polygonSection", "Polygon section; relocated on load", "high"),
+      ("unk40", "fileBody", "Remaining WEP file bytes", "low"),
+  ], recv=r"buf|dst")
+T("T00474", "State", "Actors::SeqAnimationBank", GA + "Animation.h",
+  "Locates a SEQ animation bank's data, animation-id map and per-animation frame headers.", "high",
+  c(("40564.c", "idx = p->unk4[idx];")), [
+      ("unk0", "animationData", "Base of the bank's animation data", "high", c(("40564.c", "data = (u_char*)anim->unk0;"))),
+      ("unk4", "animationMap", "Maps an animation id to its header index", "high"),
+      ("unk8", "headers", "Per-animation headers of (bones * 4 + 10) bytes", "high"),
+  ], recv=r"\bp")
+T("T00616", "Def", "Actors::TextureAnimationFrame", GA + "TextureAnimation.h",
+  "Selects the staged texture cell copied into one of an actor's texture overlays.", "high",
+  c(("40564.c", "srcX = animation->x;")), [
+      ("overlay", "overlayIndex", "Texture overlay that receives the cell", "high",
+       c(("40564.c", "fallback.overlay = index ? 7 : 5;"))),
+      ("x", "sourceX", "Source X of the cell", "high"),
+      ("y", "sourceY", "Source Y of the cell", "high"),
+      ("columns", "columns", "Cells per row; 0 falls back to the actor's default", "high"),
+  ], recv=r"animation")
+T("T00617", "OnDisc", "Actors::TextureOverlayRect", GA + "TextureAnimation.h",
+  "Gives the rectangle of one SHP texture-map overlay.", "high",
+  c(("40564.c", "dstX = overlay->x;")) + ";DataCrystal SHP files (texture map overlay rectangles)", [
+      ("x", "x", "Overlay X", "high"),
+      ("y", "y", "Overlay Y", "high"),
+      ("w", "width", "Overlay width", "high"),
+      ("h", "height", "Overlay height", "high"),
+  ], recv=r"overlay")
+T("T00467", "Def", "Actors::TextureAnimationKey", GA + "TextureAnimation.h",
+  "Gives one key of an actor texture-animation timeline: the frame to show and how long to hold it.", "high",
+  c(("40564.c", "if (p->unk1 < slot->unk3) {")), [
+      ("unk0", "frame", "Overlay frame + 1; 0 ends the timeline", "high", c(("40564.c", "if (p->unk0 == 0) {"))),
+      ("unk1", "duration", "Ticks the frame is held", "high", c(("40564.c", "if (p->unk1 < slot->unk3) {"))),
+  ])
+T("T00468", "State", "Actors::TextureOverlayUpload", GA + "TextureAnimation.h",
+  "Requests a staged texture rectangle copy into one of an actor's texture overlays.", "high",
+  c(("40564.c", "overlay = &actor->texMapOverlays[arg->overlay];")), [
+      ("unk0", "reserved0", "Not read", "low"),
+      ("overlay", "overlayIndex", "Texture overlay that receives the copy", "high"),
+      ("x", "sourceX", "Source X", "high"),
+      ("y", "sourceY", "Source Y", "high"),
+  ], recv=r"\barg")
+
+# ---------------------------------------------------------------- small actor helpers
+T("T00438", "Value", "Actors::TileTarget", GA + "Location.h",
+  "Packs a target tile and facing into one word for tile lookups and tile moves.", "med",
+  c(("146C.c", "var_a0 = arg1->unk0_0;"), ("40564.c", "angle = arg1->unk0_24;")), [
+      ("unk0_0", "tileX", "Tile X", "high"),
+      ("unk0_8", "tileLayer", "Third tile coordinate passed with X and Z to tile lookups", "low"),
+      ("unk0_16", "tileZ", "Tile Z", "high"),
+      ("unk0_24", "facing", "Target facing in 1/256 turns; 0xFF keeps the current facing", "med",
+       c(("40564.c", "if (arg1->unk0_24 == 0xFF) {"), ("40564.c", "angle = arg1->unk0_24;"))),
+  ], recv=r"arg1|\bs0")
+T("T00464", "Value", "Actors::FallDirection", GA + "Movement.h",
+  "Gives the horizontal direction of a fall; only the signs of X and Z are used.", "high",
+  c(("3A1A0.c", "if (arg1->unk0 < 0) {"), ("3A1A0.c", "if (arg1->unk4 < 0) {")), [
+      ("unk0", "directionX", "X direction; its sign picks the step", "high", c(("3A1A0.c", "if (arg1->unk0 < 0) {"))),
+      ("unk2", "reserved2", "Y component; not read", "low"),
+      ("unk4", "directionZ", "Z direction; its sign picks the step", "high", c(("3A1A0.c", "if (arg1->unk4 < 0) {"))),
+  ])
+T("T00465", "Value", "Actors::TurnRequest", GA + "Movement.h",
+  "Says whether a new facing restarts the actor's turn or adjusts the turn in progress.", "med",
+  c(("3A1A0.c", "if (arg2->unk6 == 0) {")), [
+      ("unk0", "reserved0", "Not read", "low"),
+      ("unk6", "restartTurn", "Nonzero restarts a 12-frame turn; zero adjusts the current one", "med",
+       c(("3A1A0.c", "if (arg2->unk6 == 0) {"))),
+  ])
+T("T00472", "State", "Actors::AirborneTickAccumulator", GA + "Movement.h",
+  "Views an actor word whose top byte carries fractional ticks between airborne frames.", "med",
+  c(("40564.c", "((func_800AC690_timer_t*)&actor->unk5B4)->timer += y;")), [
+      ("unk0", "reserved0", "Lower bytes owned by other members", "low"),
+      ("timer", "tickRemainder", "Fractional ticks carried between frames", "med"),
+  ], recv=r"\(\(func_800AC690_timer_t\*\)&actor->unk5B4\)")
+T("T00473", "Value", "Core::WordPair", "Native\\Core\\include\\Core\\WordPair.h",
+  "Copies eight bytes as two words; the native code assigns the members directly.", "med",
+  c(("40564.c", "*(func_800ACF54_t*)&arg0->unk4C = *(func_800ACF54_t*)&arg0->unk1C;")), [
+      ("unk0", "low", "First word", "med"),
+      ("unk4", "high", "Second word", "med"),
+  ])
+T("T00462", "State", "Actors::PlacementBuffer", GA + "Location.h",
+  "Is a stack buffer whose words are not read by the decompiled code.", "low",
+  c(("146C.c", "func_800A1108_t unksp10;")), [
+      ("unk0", "reserved0", "Not read", "low"), ("unk4", "reserved4", "Not read", "low"),
+      ("unk8", "reserved8", "Not read", "low"), ("unkC", "reservedC", "Not read", "low"),
+      ("unk10", "reserved10", "Not read", "low"), ("unk14", "reserved14", "Not read", "low"),
+      ("unk18", "reserved18", "Not read", "low"), ("unk1C", "reserved1C", "Not read", "low"),
+      ("unk20", "reserved20", "Not read", "low"),
+  ])
+
+# ---------------------------------------------------------------- treasure chests
+T("T00332", "OnDisc", "Items::TreasureChest", IT + "TreasureChests.h",
+  "Describes one MPD treasure chest: tile, facing, lock, opened flag, lid rotation and loot.", "high",
+  c(("146C.c", "if ((var_a3->unk0 == arg0) && (var_a3->unk2 == arg1)) {")), [
+      ("unk0", "tileX", "Tile X", "high", c(("146C.c", "if ((var_a3->unk0 == arg0) && (var_a3->unk2 == arg1)) {"))),
+      ("unk2", "tileZ", "Tile Z", "high", c(("146C.c", "if ((var_a3->unk0 == arg0) && (var_a3->unk2 == arg1)) {"))),
+      ("unk4", "layer", "Third tile coordinate matched with X and Z", "med", c(("146C.c", "if (var_a3->unk4 == arg2) {"))),
+      ("unk6", "lidRotationId", "Room rotation snapped open when the chest is restored as opened", "med",
+       c(("146C.c", "func_80093824(var_s3->unk6);"))),
+      ("unk8", "isOpen", "Set when the chest's opened flag is set", "high", c(("146C.c", "var_s3->unk8 = 1;"))),
+      ("unkA", "reservedA", "Not read", "low"),
+      ("unkC", "lockLevel", "Magic lock level; 2 and 3 yield to unlock spells; 0 when unlocked", "med",
+       c(("146C.c", "&& (temp_v0_2[arg0->pad & 0xF].unkC >= 2)"), ("146C.c", "temp_v0_2[arg0->pad & 0xF].unkC = 0;"))),
+      ("unkE", "reservedE", "Not read", "low"),
+      ("unk10", "openedFlag", "Index of the opened flag (state flag 0x3C0 + n)", "high",
+       c(("146C.c", "if (vs_battle_getStateFlag((short)(var_s3->unk10 + 0x3C0))) {"))),
+      ("unk12", "facing", "Direction the chest is opened from", "high",
+       c(("146C.c", "if ((temp_v0 != NULL) && (temp_v0->unk12 == temp_s2)) {"))),
+      ("unk14", "loot", "Chest contents", "high", c(("146C.c", "vs_main_memcpy(&vs_battle_roomData.section13->unk14, data,"))),
+  ])
+
+# ---------------------------------------------------------------- character initialization records
+T("T00640", "OnDisc", "Actors::CharacterInit", GA + "CharacterInit.h",
+  "Gives a character's initial identity, statistics, speeds, equipment and limbs.", "high",
+  c(("146C.c", "actor->reach = init->reach;")), [
+      ("subType", "subType", "Character sub-type", "high"),
+      ("unk2", "characterKind", "Character kind; selects a second body model in place of weapon and shield", "high",
+       c(("146C.c", "if (D_8004FE88[(u_char)init->unk2]) {"))),
+      ("reach", "reach", "Reach added to every weapon range", "high"),
+      ("unk3_5", "enemyClass", "Enemy class", "high", c(("146C.c", "actor->enemyClass = init->unk3_5;"))),
+      ("name", "name", "Name", "high"),
+      ("hp", "hp", "Hit points", "high"),
+      ("mp", "mp", "Magic points", "high"),
+      ("strength", "strength", "Strength", "high"),
+      ("intelligence", "intelligence", "Intelligence", "high"),
+      ("agility", "agility", "Agility", "high"),
+      ("unk23", "opaque23", "Copied into the actor state; meaning not established", "low",
+       c(("146C.c", "actor->unk956_2 = init->unk23;"))),
+      ("unk24", "material", "Material of the body model", "med", c(("146C.c", "object.material = init->unk24;"))),
+      ("walkSpeed", "walkSpeed", "Walking speed before the 9/10 scale", "high"),
+      ("unk26", "opaque26", "Copied into the actor state next to the walking speed", "low",
+       c(("146C.c", "actor->unk32 = init->unk26;"))),
+      ("runSpeed", "runSpeed", "Running speed before the 9/10 scale", "high"),
+      ("unk28", "opaque28", "Copied into the actor state; meaning not established", "low",
+       c(("146C.c", "actor->unk944 = init->unk28;"))),
+      ("unk2C", "opaque2C", "Copied into the actor state; meaning not established", "low",
+       c(("146C.c", "actor->unk38 = init->unk2C;"))),
+      ("unk30", "opaque30", "Copied into the actor state; meaning not established", "low",
+       c(("146C.c", "actor->unk34 = init->unk30;"))),
+      ("unk31", "opaque31", "Copied into the actor state; meaning not established", "low",
+       c(("146C.c", "actor->unk35 = init->unk31;"))),
+      ("unk32", "opaque32", "Copied into the actor state; meaning not established", "low",
+       c(("146C.c", "actor->unk36 = init->unk32;"))),
+      ("unk33", "reserved33", "Not read by the decompiled users", "low"),
+      ("weapon", "weapon", "Equipped weapon", "high"),
+      ("shield", "shield", "Equipped shield", "high"),
+      ("accessory", "accessory", "Equipped accessory", "high"),
+      ("limbs", "limbs", "Per-limb initial state", "high"),
+      ("mpdIdentifer", "zudIndex", "Index of the character's ZUD in the zone", "high",
+       c(("146C.c", "zudIndex = init->mpdIdentifer;"))),
+  ], recv=r"\binit")
+T("T00314", "OnDisc", "Actors::LimbInit", GA + "CharacterInit.h",
+  "Gives one limb's initial hit points, defense values, types, affinities, actions and armor.", "high",
+  c(("146C.c", "actor->limbs[i].hp = actor->limbs[i].maxHp = init->limbs[i].hp;")), [
+      ("hp", "hp", "Hit points (also the maximum)", "high"),
+      ("agilityDefenseBonus", "agilityDefenseBonus", "Agility defense bonus", "high"),
+      ("chainEvasion", "chainEvasion", "Chain evasion", "high"),
+      ("types", "types", "Limb type values", "high"),
+      ("affinities", "affinities", "Limb affinity values", "high"),
+      ("actions", "actions", "Actions the limb can perform", "high"),
+      ("unk20", "armor", "Armor worn on the limb", "high", c(("146C.c", "_applyArmorStats(&actor->limbs[i].armor, &init->limbs[i].unk20);"))),
+      ("dpSplash", "dpSplash", "Damage-point splash values", "high"),
+      ("unk5A", "reserved5A", "Not read", "low"),
+  ], recv=r"init->limbs\[i\]")
+T("T00302", "OnDisc", "Actors::LimbActionInit", GA + "CharacterInit.h",
+  "Gives one action a limb can perform.", "high",
+  c(("146C.c", "actor->armor[i][j].id = init->limbs[i].actions[j].id;")), [
+      ("id", "actionId", "Action", "high"),
+      ("unk2", "opaque2", "Copied into the actor action slot; meaning not established", "low",
+       c(("146C.c", "actor->armor[i][j].unk2_4 = init->limbs[i].actions[j].unk2;"))),
+      ("index", "index", "Index copied into the actor action slot", "med"),
+  ], recv=r"actions\[j\]")
+T("T00305", "OnDisc", "Items::ArmorInit", IT + "EquipmentInit.h",
+  "Gives an armor piece's statistics, material, drop rate and index.", "high",
+  c(("146C.c", "target->currentDp = source->equip.currentDp;")), [
+      ("equip", "equipment", "Armor statistics", "high"),
+      ("material", "material", "Material", "high"),
+      ("dropRate", "dropRate", "Drop rate", "high"),
+      ("unk32", "opaque32", "Copied into the armor state; meaning not established", "low"),
+      ("index", "index", "Index", "high"),
+  ], recv=r"source")
+T("T00301", "OnDisc", "Items::AccessoryInit", IT + "EquipmentInit.h",
+  "Gives an accessory's statistics, drop rate and index.", "high",
+  c(("146C.c", "target->currentStr = source->equip.strength;")), [
+      ("equip", "equipment", "Accessory statistics", "high"),
+      ("dropRate", "dropRate", "Drop rate", "high"),
+      ("index", "index", "Index", "high"),
+      ("unk32", "reserved32", "Not read", "low"),
+      ("unk33", "reserved33", "Not read", "low"),
+  ], recv=r"source")
+T("T00662", "Value", "Items::WeaponRange", IT + "Weapons.h",
+  "Gives a weapon's ranges and attack shape; the actor's reach is added to each range.", "high",
+  c(("146C.c", "actor->currentRange = actor->weapon.range.range + actor->reach;")), [
+      ("range", "range", "Primary range", "high", c(("146C.c", "actor->currentRange = actor->weapon.range.range + actor->reach;"))),
+      ("unk1", "secondRange", "Second range, extended by reach", "low", c(("146C.c", "actor->unk39 = actor->weapon.range.unk1 + actor->reach;"))),
+      ("unk2", "thirdRange", "Third range, extended by reach", "low", c(("146C.c", "actor->unk3A = actor->weapon.range.unk2 + actor->reach;"))),
+      ("attackShape", "attackShape", "Attack shape", "med"),
+      ("attackShapeAngle", "attackShapeAngle", "Attack shape angle", "high",
+       c(("146C.c", "actor->currentAttackShapeAngle = actor->weapon.range.attackShapeAngle;"))),
+  ])
+T("T00393", "OnDisc", "Actors::SpawnSettings", GA + "CharacterInit.h",
+  "Holds the eight MPD spawn setting bytes copied into the actor, where the AI reads them as saved settings.", "med",
+  c(("146C.c", "*(actorSpawnSettings*)((char*)actor + 0x30) =")), [
+      ("bytes", "bytes", "Setting bytes", "med"),
+  ])
+
+# ---------------------------------------------------------------- actor allocation blocks
+T("T00633", "State", "Actors::ActorModelSlot", GA + "ActorAllocation.h",
+  "Reserves storage for one of an actor's two extra model slots.", "med",
+  c(("146C.c", "temp_v0->unk0.unk0.unk0.unk48[0] = &temp_v0->unk22B4[0];")), [
+      ("unk0", "storage", "Slot storage", "low"),
+  ])
+T("T00634", "State", "Actors::ActorAllocation", GA + "ActorAllocation.h",
+  "Is one heap allocation holding an actor, its model record and its two extra model slots.", "high",
+  c(("146C.c", "temp_v0->unk0.unk0.unk0.unk48[1] = &temp_v0->unk22B4[1];")), [
+      ("unk0", "core", "Actor and model record", "high", c(("146C.c", "temp_v0->unk0.unk0.unk0.unk3C = &temp_v0->unk0.unk0.unk50;"))),
+      ("unkB2C", "reservedB2C", "Not read by the decompiled users", "low"),
+      ("unk22B4", "modelSlots", "The actor's two extra model slots", "high"),
+  ], recv=r"temp_v0")
+T("T00635", "State", "Actors::ActorCore", GA + "ActorAllocation.h",
+  "Holds an actor, its statistics block and its model record in one allocation.", "high",
+  c(("146C.c", "temp_v0->unk0.unk0.unk44 = &temp_v0->unk9B4;")), [
+      ("unk0", "actor", "Actor and statistics block", "high", c(("146C.c", "temp_v0->unk0.unk0.unk3C = &temp_v0->unk0.unk50;"))),
+      ("unk9B4", "model", "Model record", "high", c(("146C.c", "temp_v0->unk0.unk0.unk44 = &temp_v0->unk9B4;"))),
+      ("unk6C", "reserved6C", "Not read by the decompiled users", "low"),
+      ("unk16C", "reserved16C", "Not read by the decompiled users", "low"),
+      ("unk170", "reserved170", "Not read by the decompiled users", "low"),
+      ("unk174", "reserved174", "Not read by the decompiled users", "low"),
+  ])
+
+# ---------------------------------------------------------------- loot
+T("T00646", "State", "Items::LootListNode", IT + "Loot.h",
+  "Links one defeated actor's rolled loot into the room's loot list.", "high",
+  c(("146C.c", "lootList->actorId |= _dropWeaponRand(&lootList->loot.weapon, &temp_s2->weapon);")), [
+      ("next", "next", "Next node", "high", c(("146C.c", "node = node->next;"))),
+      ("actorId", "droppedMask", "Nonzero when a drop roll produced an item", "med"),
+      ("loot", "loot", "Rolled loot", "high"),
+  ], recv=r"lootList")
+LOOT_PAD = [("unk1", "reserved1", "Not read", "low"), ("unk2", "reserved2", "Not read", "low"),
+            ("unk3", "reserved3", "Not read", "low")]
+T("T00654", "State", "Items::LootedWeapon", IT + "Loot.h",
+  "Holds a dropped weapon: blade, grip, gems and name.", "high",
+  c(("146C.c", "looted->difficultyFlags = 3;")), [
+      ("difficultyFlags", "difficultyFlags", "Difficulties under which the drop is kept", "high"), *LOOT_PAD,
+      ("blade", "blade", "Blade", "high"), ("grip", "grip", "Grip", "high"),
+      ("gems", "gems", "Attached gems", "high", c(("146C.c", "vs_battle_copyUiGemStats(&looted->gems[i], &base->gems[i]);"))),
+      ("name", "name", "Weapon name", "high"),
+  ], recv=r"looted")
+T("T00653", "State", "Items::LootedShield", IT + "Loot.h",
+  "Holds a dropped shield and its gems.", "high",
+  c(("146C.c", "vs_battle_copyUiEquipmentStats(&looted->shield, &base->base);")), [
+      ("difficultyFlags", "difficultyFlags", "Difficulties under which the drop is kept", "high"), *LOOT_PAD,
+      ("shield", "shield", "Shield", "high"), ("gems", "gems", "Attached gems", "high"),
+  ], recv=r"looted")
+T("T00648", "State", "Items::LootedArmor", IT + "Loot.h",
+  "Holds one dropped armor piece.", "high",
+  c(("146C.c", "if (looted[i].armor.id == 0) {")), [
+      ("difficultyFlags", "difficultyFlags", "Difficulties under which the drop is kept", "high"), *LOOT_PAD,
+      ("armor", "armor", "Armor", "high"),
+  ], recv=r"looted\[i\]")
+T("T00647", "State", "Items::LootedAccessory", IT + "Loot.h",
+  "Holds a dropped accessory.", "high",
+  c(("146C.c", "vs_battle_copyUiEquipmentStats(&looted->accessory, &base->accessory);")), [
+      ("difficultyFlags", "difficultyFlags", "Difficulties under which the drop is kept", "high"), *LOOT_PAD,
+      ("accessory", "accessory", "Accessory", "high"),
+  ], recv=r"looted")
+T("T00652", "State", "Items::LootedItem", IT + "Loot.h",
+  "Holds a dropped miscellaneous item and its count.", "high",
+  c(("146C.c", "looted->misc[i].id = base[i].id;")), [
+      ("id", "itemId", "Item", "high"),
+      ("difficultyFlags", "difficultyFlags", "Difficulties under which the drop is kept", "high"),
+      ("count", "count", "Count", "high"),
+  ], recv=r"looted->misc\[\w\]")
+
+# ---------------------------------------------------------------- views over the actor and gimmick records
+T("T00383", "State", "Battle::Ai::AiActorView", AI + "AiState.h",
+  "Views an actor record while its AI state is created.", "med",
+  c(("7CD68.c", "int func_800E6178(actorInitializationActor* actor, int options)"),
+    ("upstream:146C.c", "i = func_800E6178(actor, saved->unk2);"))
+  + ";view of vs_battle_actor (T00630); fold into it when copying", [
+      ("pad0", "reserved0", "Covered by the actor record", "low"),
+      ("id", "actorId", "Actor id", "high", c(("7CD68.c", "int id = actor->id;"))),
+      ("flags", "stateFlags", "Flag bytes cleared when the AI state is created", "med",
+       c(("7CD68.c", "actor->flags.bytes.b1 = 0;"))),
+      ("padC", "reservedC", "Covered by the actor record", "low"),
+      ("attributes", "aiControlFlags", "Bits 0 and 2 give the actor an AI state; bits 0, 2, 4 mark it in the AI mask", "med",
+       c(("7CD68.c", "if (actor->attributes & 0x15) {"), ("7CD68.c", "if (!(actor->attributes & 5)) {"))),
+      ("pad1E", "reserved1E", "Covered by the actor record", "low"),
+      ("field1F", "startCommandFlag", "Issues AI command 1 when the state is created", "low",
+       c(("7CD68.c", "if (actor->field1F) {"))),
+      ("pad20", "reserved20", "Covered by the actor record", "low"),
+      ("field30", "savedAiSettings", "Saved settings merged into the AI settings", "med",
+       c(("7CD68.c", "func_800E5A74(&packed, (void*)&actor->field30);"))),
+      ("field34", "savedAiSettingsFlags", "Bit 0: savedAiSettings is merged", "med", c(("7CD68.c", "if (actor->field34 & 1) {"))),
+      ("field38", "aiSettings", "Packed AI settings", "med", c(("7CD68.c", "packed = actor->field38;"))),
+      ("stats", "stats", "Statistics block", "high", c(("7CD68.c", "state->stats = actor->stats;"))),
+      ("field40", "listExemptFlag", "When zero, models of kind 2 or 4 join the room's special-model list", "low",
+       c(("7CD68.c", "if (!actor->field40) {"))),
+      ("model", "model", "Model record", "high", c(("7CD68.c", "kind = actor->model->kind & 7;"))),
+  ])
+T("T00469", "State", "Actors::PalettePulseView", GA + "Palette.h",
+  "Views a gimmick record while its palette is pulsed toward blue.", "med",
+  c(("40564.c", "object->unk14C[i] = color | (b << 10) | (g << 5) | r;")) + ";view of D_800F45E0_t (T00255)", [
+      ("unk0", "reserved0", "Covered by the gimmick record", "low"),
+      ("unkF", "slot", "Gimmick slot; selects its palette row", "med", c(("40564.c", "vs_main_loadClut(object->unk14C, 31, object->unkF * 16, count);"))),
+      ("unk10", "reserved10", "Covered by the gimmick record", "low"),
+      ("unk64", "pulse", "Palette pulse state", "high", c(("40564.c", "state = &object->unk64;"))),
+      ("unk68", "reserved68", "Covered by the gimmick record", "low"),
+      ("unk12C", "basePalette", "Palette before the pulse", "high",
+       c(("40564.c", "int color = (actor == NULL) ? object->unk12C[i] : actor->unk1424[i];"))),
+      ("unk14C", "pulsedPalette", "Palette uploaded with the pulse applied", "high"),
+  ], recv=r"object")
+T("T00565", "State", "Field::GimmickPhysicsView", FD + "Gimmicks.h",
+  "Views a gimmick record while its rotation, sliding, falling, stacking and durability are updated.", "med",
+  c(("44F14.c", "step = object->drx / object->rotationTicks;")) + ";view of D_800F45E0_t (T00255)", [
+      ("prefix", "reserved0", "Covered by the gimmick record", "low"),
+      ("flags", "flags", "Flags; bit 0 skips carried-object updates", "med",
+       c(("44F14.c", "if (child && !(child->flags & 1) && child->parentObject == object->id) {"))),
+      ("padC", "reservedC", "Covered by the gimmick record", "low"),
+      ("id", "id", "Gimmick id", "high", c(("44F14.c", "if (child && !(child->flags & 1) && child->parentObject == object->id) {"))),
+      ("pad10", "reserved10", "Covered by the gimmick record", "low"),
+      ("delay", "delay", "Frames before the motion starts", "high"),
+      ("parent", "parent", "Parent gimmick; 0xFF when none", "med"),
+      ("pad13", "reserved13", "Covered by the gimmick record", "low"),
+      ("pad14", "reserved14", "Covered by the gimmick record", "low"),
+      ("rotationTicks", "rotationTicks", "Frames left in the current rotation", "high"),
+      ("mode", "mode", "Motion mode; 0xFC to 0xFF are landing and falling modes", "high"),
+      ("position", "position", "World position", "high"),
+      ("rx", "rotationX", "X rotation", "high"),
+      ("ry", "rotationY", "Y rotation", "high"),
+      ("rz", "rotationZ", "Z rotation", "high"),
+      ("pad2A", "reserved2A", "Covered by the gimmick record", "low"),
+      ("sx", "scaleX", "X scale", "low"),
+      ("sy", "scaleY", "Y scale", "low"),
+      ("sz", "scaleZ", "Z scale", "low"),
+      ("pad32", "reserved32", "Covered by the gimmick record", "low"),
+      ("dx", "slideX", "Remaining X slide; halved each frame", "high"),
+      ("dy", "velocityY", "Vertical speed; gravity adds 3 per frame", "high"),
+      ("dz", "slideZ", "Remaining Z slide; halved each frame", "high"),
+      ("orientation", "orientation", "Orientation applied while carried", "med"),
+      ("drx", "rotationRemainingX", "X rotation left to apply", "high"),
+      ("dry", "rotationRemainingY", "Y rotation left to apply", "high"),
+      ("drz", "rotationRemainingZ", "Z rotation left to apply", "high"),
+      ("pad42", "reserved42", "Covered by the gimmick record", "low"),
+      ("tileX", "tileX", "Tile X; 0xFF while airborne", "high"),
+      ("pad5D", "reserved5D", "Covered by the gimmick record", "low"),
+      ("tileZ", "tileZ", "Tile Z; 0xFF while airborne", "high"),
+      ("pad5F", "reserved5F", "Covered by the gimmick record", "low"),
+      ("pad60", "reserved60", "Covered by the gimmick record", "low"),
+      ("material", "material", "Material; the low three bits pick landing reactions", "high"),
+      ("durability", "durability", "Hits left before breaking", "high"),
+      ("pad16E", "reserved16E", "Covered by the gimmick record", "low"),
+      ("parentObject", "carrier", "Gimmick this one rests on; 0xFF when none", "high"),
+      ("frame", "frame", "Animation frame", "high"),
+  ], recv=r"object|child")
+
+# ---------------------------------------------------------------- placement word (same layout as Field::ActorPlacement)
+placement = next(r for r in csv.DictReader(open(LEDGERS / "TYPE_LEDGER.csv", encoding="utf-8")) if r["id"] == "T00444")
+T("T00660", "Value", placement["final_name"], placement["final_location"], placement["purpose"], "high",
+  "same-as:T00444;" + c(("146C.c", "data.unk0_0 = enemy->x;"), ("146C.c", "data.unk0_24 = enemy->height * 64;")), [
+      ("unk0_0", "tileX", "Tile X", "high"),
+      ("unk0_8", "direction", "Facing direction", "high"),
+      ("unk0_16", "tileZ", "Tile Z", "high"),
+      ("unk0_24", "height", "Height in units of 64", "high"),
+  ], recv=r"\bdata")
+
+if __name__ == "__main__":
+    g.write(partial=True)

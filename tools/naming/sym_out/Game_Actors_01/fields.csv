@@ -1,0 +1,320 @@
+id,final_name,meaning,confidence,notes
+T00198.000,reserved0,Bytes not read by the decompiled users,low,declaration-only;source:30DB0.h:28
+T00198.001,texturePage,Texture page of the model being drawn,high,source:49268.c:134
+T00198.002,palette,Palette of the model being drawn,high,source:49268.c:137
+T00198.003,reserved38,Not read by the decompiled users,low,declaration-only;source:30DB0.h:31
+T00198.004,angleX,Actor X angle staged for the transform,med,source:44F14.c:849
+T00198.005,angleY,Actor Y angle staged for the transform,med,source:44F14.c:850
+T00198.006,reserved3E,Not read by the decompiled users,low,declaration-only;source:30DB0.h:34
+T00198.007,position,World position of the model,med,source:49268.c:57
+T00198.008,rootOffset,Root offset of the animated model,high,source:44F14.c:836
+T00198.009,parentBoneMatrix,Matrix of the parent bone,high,source:49268.c:194
+T00198.010,reserved60,Not read by the decompiled users,low,declaration-only;source:30DB0.h:38
+T00198.011,matrix,Working model matrix,high,source:44F14.c:861
+T00198.012,rotation,Rotation angles,high,source:30DB0.c:3700
+T00198.013,scale,Scale applied to the working matrix,high,source:44F14.c:871
+T00198.014,model,Model geometry being drawn,high,source:49268.c:54
+T00208.000,hp,Limb hit points,high,source:BATTLE/INITBTL.PRG/18.c:337
+T00208.001,maxHp,Limb maximum hit points,high,source:BATTLE/INITBTL.PRG/18.c:338
+T00208.002,types,Saved limb type values,high,source:BATTLE/INITBTL.PRG/18.c:341
+T00208.003,affinities,Saved limb affinity values,high,source:BATTLE/INITBTL.PRG/18.c:345
+T00209.000,isPending,Nonzero while the snapshot still has to be restored; cleared by the restore,med,source:BATTLE/INITBTL.PRG/18.c:356
+T00209.001,currentHp,Hit points,high,source:BATTLE/INITBTL.PRG/18.c:317
+T00209.002,maxHp,Maximum hit points,high,source:BATTLE/INITBTL.PRG/18.c:318
+T00209.003,currentMp,Magic points,high,source:BATTLE/INITBTL.PRG/18.c:319
+T00209.004,maxMp,Maximum magic points,high,source:BATTLE/INITBTL.PRG/18.c:320
+T00209.005,strength,Base strength,high,source:BATTLE/INITBTL.PRG/18.c:321
+T00209.006,totalStrength,Strength including equipment,high,source:BATTLE/INITBTL.PRG/18.c:322
+T00209.007,intelligence,Base intelligence,high,source:BATTLE/INITBTL.PRG/18.c:323
+T00209.008,totalIntelligence,Intelligence including equipment,high,source:BATTLE/INITBTL.PRG/18.c:324
+T00209.009,agility,Base agility,high,source:BATTLE/INITBTL.PRG/18.c:325
+T00209.010,totalAgility,Agility including equipment,high,source:BATTLE/INITBTL.PRG/18.c:326
+T00209.011,risk,Risk,high,source:BATTLE/INITBTL.PRG/18.c:327
+T00209.012,actorFlags,Actor flag word restored into the actor record at +0x954,low,source:BATTLE/INITBTL.PRG/18.c:328
+T00209.013,statuses,Status bits re-inflicted on restore,high,source:BATTLE/INITBTL.PRG/18.c:330
+T00209.014,statusTimers,Remaining duration of each status,high,source:BATTLE/INITBTL.PRG/18.c:333
+T00209.015,limbs,"Per-limb hit points, types and affinities",high,source:BATTLE/INITBTL.PRG/18.c:337
+T00209.016,weaponDrawn,Bit 0 set when the weapon was drawn,high,source:BATTLE/INITBTL.PRG/18.c:349
+T00209.017,cameraPitch,Camera pitch delta restored on re-entry,high,source:BATTLE/INITBTL.PRG/18.c:357
+T00209.018,cameraDistance,Camera initial distance restored on re-entry,high,source:BATTLE/INITBTL.PRG/18.c:358
+T00210.000,recency,"4 for the current room, lower for older rooms, 0 when unused",high,source:146C.c:15233;source:146C.c:15229
+T00210.001,zoneId,Zone of the remembered room,high,source:146C.c:794
+T00210.002,mapId,Map of the remembered room,high,source:146C.c:794
+T00210.003,nextSlot,Slot reused when no saved state matches; wraps at 8,high,source:146C.c:830
+T00210.004,actorStates,Eight 40-byte saved actor states; byte 0 is spawn index + 1,high,source:146C.c:806
+T00237.000,workArea,Draw state used by the model renderers (not decompiled),low,declaration-only;source:30DB0.h:21
+T00237.001,modelScale,"Per-axis model scale, reset to 64",med,source:44F14.c:830
+T00237.002,reserved1FDC,Not read by the decompiled users,low,declaration-only;source:30DB0.h:23
+T00237.003,actorScale,Scale copied into every actor record,med,source:30DB0.c:3475
+T00238.000,boneMatrices,World matrix of each bone,high,source:49268.c:208
+T00238.001,scale,Scale of the skeleton,high,source:49268.c:113
+T00301.000,equipment,Accessory statistics,high,source:146C.c:1084
+T00301.001,dropRate,Drop rate,high,source:146C.c:1089
+T00301.002,index,Index,high,source:146C.c:1090
+T00301.003,reserved32,Not read,low,declaration-only;source:146C.h:837
+T00301.004,reserved33,Not read,low,declaration-only;source:146C.h:838
+T00302.000,actionId,Action,high,source:146C.c:6260
+T00302.001,opaque2,Copied into the actor action slot; meaning not established,low,source:146C.c:6262
+T00302.002,index,Index copied into the actor action slot,med,source:146C.c:6261
+T00303.000,length,Bone length,high,source:30DB0.c:4221
+T00303.001,parentIndex,Index of the parent bone,high,source:49268.c:192
+T00303.002,reserved5,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:73
+T00303.003,tag,Bone tag searched by tag lookups,high,source:38C1C.c:132
+T00303.004,limbIds,High nibble: limb group + 1; low nibble: limb index + 1,high,source:38C1C.c:138;source:38C1C.c:145
+T00303.005,auxiliaryTag,Second lookup tag; 3 to 6 select an actor joint slot,high,source:38C1C.c:151;source:30DB0.c:1382
+T00303.006,reserved9,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:77
+T00303.007,jointInitValue,Initial value of the joint slot chosen by auxiliaryTag,med,source:30DB0.c:1385
+T00303.008,reservedC,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:79
+T00303.009,reservedD,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:80
+T00303.010,reservedE,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:81
+T00303.011,reservedF,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:82
+T00305.000,equipment,Armor statistics,high,source:146C.c:1109
+T00305.001,material,Material,high,source:146C.c:1111
+T00305.002,dropRate,Drop rate,high,source:146C.c:1138
+T00305.003,opaque32,Copied into the armor state; meaning not established,low,source:146C.c:1139
+T00305.004,index,Index,high,source:146C.c:1117
+T00314.000,hp,Hit points (also the maximum),high,source:146C.c:6230
+T00314.001,agilityDefenseBonus,Agility defense bonus,high,source:146C.c:6231
+T00314.002,chainEvasion,Chain evasion,high,source:146C.c:6243
+T00314.003,types,Limb type values,high,source:146C.c:6246
+T00314.004,affinities,Limb affinity values,high,source:146C.c:6250
+T00314.005,actions,Actions the limb can perform,high,source:146C.c:6260
+T00314.006,armor,Armor worn on the limb,high,source:146C.c:6253
+T00314.007,dpSplash,Damage-point splash values,high,source:146C.c:6269
+T00314.008,reserved5A,Not read,low,declaration-only;source:146C.h:856
+T00332.000,tileX,Tile X,high,source:146C.c:16844
+T00332.001,tileZ,Tile Z,high,source:146C.c:16844
+T00332.002,layer,Third tile coordinate matched with X and Z,med,source:146C.c:16845
+T00332.003,lidRotationId,Room rotation snapped open when the chest is restored as opened,med,source:146C.c:16921
+T00332.004,isOpen,Set when the chest's opened flag is set,high,source:146C.c:16920
+T00332.005,reservedA,Not read,low,declaration-only;source:146C.h:201
+T00332.006,lockLevel,Magic lock level; 2 and 3 yield to unlock spells; 0 when unlocked,med,source:146C.c:2195;source:146C.c:2199
+T00332.007,reservedE,Not read,low,declaration-only;source:146C.h:203
+T00332.008,openedFlag,Index of the opened flag (state flag 0x3C0 + n),high,source:146C.c:16919
+T00332.009,facing,Direction the chest is opened from,high,source:146C.c:5302
+T00332.010,loot,Chest contents,high,source:146C.c:17392
+T00344.000,header,WEP header bytes before the section offsets,med,declaration-only;source:3A1A0.h:114
+T00344.001,textureSection,Texture section; file offset relocated to an address,high,source:30DB0.c:663
+T00344.002,vertexGroupSection,Vertex group section; relocated on load,high,source:30DB0.c:664
+T00344.003,vertexSection,Vertex section; relocated on load,high,source:30DB0.c:665
+T00344.004,polygonSection,Polygon section; relocated on load,high,source:30DB0.c:666
+T00344.005,fileBody,Remaining WEP file bytes,low,declaration-only;source:3A1A0.h:119
+T00383.000,reserved0,Covered by the actor record,low,declaration-only;source:7CD68.c:855
+T00383.001,actorId,Actor id,high,source:7CD68.c:939
+T00383.002,stateFlags,Flag bytes cleared when the AI state is created,med,source:7CD68.c:1039
+T00383.003,reservedC,Covered by the actor record,low,declaration-only;source:7CD68.c:858
+T00383.004,aiControlFlags,"Bits 0 and 2 give the actor an AI state; bits 0, 2, 4 mark it in the AI mask",med,source:7CD68.c:943;source:7CD68.c:957
+T00383.005,reserved1E,Covered by the actor record,low,declaration-only;source:7CD68.c:860
+T00383.006,startCommandFlag,Issues AI command 1 when the state is created,low,source:7CD68.c:1033
+T00383.007,reserved20,Covered by the actor record,low,declaration-only;source:7CD68.c:862
+T00383.008,savedAiSettings,Saved settings merged into the AI settings,med,source:7CD68.c:1010
+T00383.009,savedAiSettingsFlags,Bit 0: savedAiSettings is merged,med,source:7CD68.c:1009
+T00383.010,aiSettings,Packed AI settings,med,source:7CD68.c:1008
+T00383.011,stats,Statistics block,high,source:7CD68.c:967
+T00383.012,listExemptFlag,"When zero, models of kind 2 or 4 join the room's special-model list",low,source:7CD68.c:946
+T00383.013,model,Model record,high,source:7CD68.c:947
+T00393.000,bytes,Setting bytes,med,declaration-only;source:146C.c:259
+T00395.000,reserved0,Bytes covered by other views,low,declaration-only;source:44F14.c:68
+T00395.001,angleX,Actor X angle staged for the transform,high,source:44F14.c:1683
+T00395.002,angleY,Actor Y angle staged for the transform,high,source:44F14.c:1684
+T00395.003,reserved3E,Bytes covered by other views,low,declaration-only;source:44F14.c:70
+T00395.004,rootOffset,Root offset of the animated model,high,source:44F14.c:1126
+T00395.005,reserved5C,Bytes covered by other views,low,declaration-only;source:44F14.c:72
+T00395.006,matrix,Working model matrix,med,declaration-only;source:44F14.c:73
+T00395.007,rotation,Rotation angles,high,source:44F14.c:1776
+T00427.000,reserved0,Not read,low,declaration-only;source:44F14.c:138
+T00427.001,depth,Ordering-table depth offset,high,source:44F14.c:1065
+T00431.000,spawnSlot,Spawn index + 1; 0 marks a free slot,high,source:146C.c:854
+T00431.001,isHidden,Hidden flag passed by the caller,med,source:146C.c:870
+T00431.002,aiFlags,Packed AI relation and behavior flags,high,source:146C.c:876
+T00431.003,currentHp,Hit points,high,source:146C.c:855
+T00431.004,maxHp,Maximum hit points,high,source:146C.c:856
+T00431.005,currentMp,Magic points,high,source:146C.c:857
+T00431.006,maxMp,Maximum magic points,high,source:146C.c:858
+T00431.007,strength,Strength including equipment,high,source:146C.c:859
+T00431.008,intelligence,Intelligence including equipment,high,source:146C.c:860
+T00431.009,agility,Agility including equipment,high,source:146C.c:861
+T00431.010,limbHp,Hit points of each limb,high,source:146C.c:864
+T00431.011,statuses,Status bits,high,source:146C.c:867
+T00431.012,placement,Packed tile placement word,high,source:146C.c:881
+T00438.000,tileX,Tile X,high,source:146C.c:5352
+T00438.001,tileLayer,Third tile coordinate passed with X and Z to tile lookups,low,source:146C.c:5354
+T00438.002,tileZ,Tile Z,high,source:146C.c:5353
+T00438.003,facing,Target facing in 1/256 turns; 0xFF keeps the current facing,med,source:40564.c:563;source:40564.c:532
+T00462.000,reserved0,Not read,low,declaration-only;source:146C.c:331
+T00462.001,reserved4,Not read,low,declaration-only;source:146C.c:332
+T00462.002,reserved8,Not read,low,declaration-only;source:146C.c:333
+T00462.003,reservedC,Not read,low,declaration-only;source:146C.c:334
+T00462.004,reserved10,Not read,low,declaration-only;source:146C.c:335
+T00462.005,reserved14,Not read,low,declaration-only;source:146C.c:336
+T00462.006,reserved18,Not read,low,declaration-only;source:146C.c:337
+T00462.007,reserved1C,Not read,low,declaration-only;source:146C.c:338
+T00462.008,reserved20,Not read,low,declaration-only;source:146C.c:339
+T00463.000,reserved0,Bytes covered by other views,low,declaration-only;source:38C1C.c:11
+T00463.001,position,Bone position relative to the camera,high,source:38C1C.c:444
+T00463.002,rootOffset,Root offset of the animated model,high,source:38C1C.c:424
+T00463.003,reserved5C,Bytes covered by other views,low,declaration-only;source:38C1C.c:14
+T00463.004,matrix,Bone matrix being converted,high,source:38C1C.c:414
+T00464.000,directionX,X direction; its sign picks the step,high,source:3A1A0.c:263
+T00464.001,reserved2,Y component; not read,low,declaration-only;source:3A1A0.c:11
+T00464.002,directionZ,Z direction; its sign picks the step,high,source:3A1A0.c:266
+T00465.000,reserved0,Not read,low,declaration-only;source:3A1A0.c:23
+T00465.001,restartTurn,Nonzero restarts a 12-frame turn; zero adjusts the current one,med,source:3A1A0.c:1928
+T00467.000,frame,Overlay frame + 1; 0 ends the timeline,high,source:40564.c:1397
+T00467.001,duration,Ticks the frame is held,high,source:40564.c:1392
+T00468.000,reserved0,Not read,low,declaration-only;source:40564.c:28
+T00468.001,overlayIndex,Texture overlay that receives the copy,high,source:40564.c:1525
+T00468.002,sourceX,Source X,high,source:40564.c:1522
+T00468.003,sourceY,Source Y,high,source:40564.c:1523
+T00469.000,reserved0,Covered by the gimmick record,low,declaration-only;source:40564.c:35
+T00469.001,slot,Gimmick slot; selects its palette row,med,source:40564.c:1763
+T00469.002,reserved10,Covered by the gimmick record,low,declaration-only;source:40564.c:37
+T00469.003,pulse,Palette pulse state,high,source:40564.c:1661
+T00469.004,reserved68,Covered by the gimmick record,low,declaration-only;source:40564.c:39
+T00469.005,basePalette,Palette before the pulse,high,source:40564.c:1710
+T00469.006,pulsedPalette,Palette uploaded with the pulse applied,high,source:40564.c:1756
+T00472.000,reserved0,Lower bytes owned by other members,low,declaration-only;source:40564.c:45
+T00472.001,tickRemainder,Fractional ticks carried between frames,med,source:40564.c:2354
+T00473.000,low,First word,med,declaration-only;source:40564.c:2544
+T00473.001,high,Second word,med,declaration-only;source:40564.c:2545
+T00474.000,animationData,Base of the bank's animation data,high,source:40564.c:2649
+T00474.001,animationMap,Maps an animation id to its header index,high,source:40564.c:2778
+T00474.002,headers,Per-animation headers of (bones * 4 + 10) bytes,high,source:40564.c:2784
+T00565.000,reserved0,Covered by the gimmick record,low,declaration-only;source:44F14.c:149
+T00565.001,flags,Flags; bit 0 skips carried-object updates,med,source:44F14.c:1878
+T00565.002,reservedC,Covered by the gimmick record,low,declaration-only;source:44F14.c:151
+T00565.003,id,Gimmick id,high,source:44F14.c:1878
+T00565.004,reserved10,Covered by the gimmick record,low,declaration-only;source:44F14.c:152
+T00565.005,delay,Frames before the motion starts,high,source:44F14.c:1722
+T00565.006,parent,Parent gimmick; 0xFF when none,med,source:44F14.c:1914
+T00565.007,reserved13,Covered by the gimmick record,low,declaration-only;source:44F14.c:154
+T00565.008,reserved14,Covered by the gimmick record,low,declaration-only;source:44F14.c:155
+T00565.009,rotationTicks,Frames left in the current rotation,high,source:44F14.c:1726
+T00565.010,mode,Motion mode; 0xFC to 0xFF are landing and falling modes,high,source:44F14.c:1738
+T00565.011,position,World position,high,source:44F14.c:1750
+T00565.012,rotationX,X rotation,high,source:44F14.c:1729
+T00565.013,rotationY,Y rotation,high,source:44F14.c:1732
+T00565.014,rotationZ,Z rotation,high,source:44F14.c:1735
+T00565.015,reserved2A,Covered by the gimmick record,low,declaration-only;source:44F14.c:158
+T00565.016,scaleX,X scale,low,declaration-only;source:44F14.c:159
+T00565.017,scaleY,Y scale,low,declaration-only;source:44F14.c:159
+T00565.018,scaleZ,Z scale,low,declaration-only;source:44F14.c:159
+T00565.019,reserved32,Covered by the gimmick record,low,declaration-only;source:44F14.c:159
+T00565.020,slideX,Remaining X slide; halved each frame,high,source:44F14.c:1743
+T00565.021,velocityY,Vertical speed; gravity adds 3 per frame,high,source:44F14.c:1813
+T00565.022,slideZ,Remaining Z slide; halved each frame,high,source:44F14.c:1743
+T00565.023,orientation,Orientation applied while carried,med,source:44F14.c:1778
+T00565.024,rotationRemainingX,X rotation left to apply,high,source:44F14.c:1727
+T00565.025,rotationRemainingY,Y rotation left to apply,high,source:44F14.c:1730
+T00565.026,rotationRemainingZ,Z rotation left to apply,high,source:44F14.c:1733
+T00565.027,reserved42,Covered by the gimmick record,low,declaration-only;source:44F14.c:162
+T00565.028,tileX,Tile X; 0xFF while airborne,high,source:44F14.c:1791
+T00565.029,reserved5D,Covered by the gimmick record,low,declaration-only;source:44F14.c:163
+T00565.030,tileZ,Tile Z; 0xFF while airborne,high,source:44F14.c:1792
+T00565.031,reserved5F,Covered by the gimmick record,low,declaration-only;source:44F14.c:163
+T00565.032,reserved60,Covered by the gimmick record,low,declaration-only;source:44F14.c:164
+T00565.033,material,Material; the low three bits pick landing reactions,high,source:44F14.c:1825
+T00565.034,durability,Hits left before breaking,high,source:44F14.c:1855
+T00565.035,reserved16E,Covered by the gimmick record,low,declaration-only;source:44F14.c:165
+T00565.036,carrier,Gimmick this one rests on; 0xFF when none,high,source:44F14.c:1878
+T00565.037,frame,Animation frame,high,source:44F14.c:1744
+T00597.000,spawnSlot,Spawn index + 1; 0 marks a free slot,med,declaration-only;source:146C.c:359
+T00597.001,isHidden,Hidden flag saved for the spawn,high,source:146C.c:15131
+T00597.002,aiFlags,Packed AI relation and behavior flags handed to the AI on respawn,high,source:146C.c:6774
+T00597.003,currentHp,Hit points,high,source:146C.c:6762
+T00597.004,maxHp,Maximum hit points,high,source:146C.c:6763
+T00597.005,currentMp,Magic points,high,source:146C.c:6764
+T00597.006,maxMp,Maximum magic points,high,source:146C.c:6765
+T00597.007,strength,Strength restored as base and total,high,source:146C.c:6766
+T00597.008,intelligence,Intelligence restored as base and total,high,source:146C.c:6768
+T00597.009,agility,Agility restored as base and total,high,source:146C.c:6769
+T00597.010,limbHp,Hit points of each limb,high,source:146C.c:6771
+T00597.011,reserved1E,Padding before the status word,low,declaration-only;source:146C.c:370
+T00597.012,statuses,Status bits re-inflicted on respawn,high,source:146C.c:6773
+T00597.013,tileX,Tile X,high,source:146C.c:6653
+T00597.014,direction,Facing direction bits; only bit 0 is kept,high,source:146C.c:6655
+T00597.015,tileZ,Tile Z,high,source:146C.c:6654
+T00597.016,height,Height,high,source:146C.c:6656
+T00616.000,overlayIndex,Texture overlay that receives the cell,high,source:40564.c:1441
+T00616.001,sourceX,Source X of the cell,high,source:40564.c:1453
+T00616.002,sourceY,Source Y of the cell,high,source:40564.c:1454
+T00616.003,columns,Cells per row; 0 falls back to the actor's default,high,source:40564.c:1440
+T00617.000,x,Overlay X,high,source:40564.c:1456
+T00617.001,y,Overlay Y,high,source:40564.c:1477
+T00617.002,width,Overlay width,high,source:40564.c:1457
+T00617.003,height,Overlay height,high,source:40564.c:1458
+T00633.000,storage,Slot storage,low,declaration-only;source:146C.h:439
+T00634.000,core,Actor and model record,high,source:146C.c:6507
+T00634.001,reservedB2C,Not read by the decompiled users,low,declaration-only;source:146C.h:619
+T00634.002,modelSlots,The actor's two extra model slots,high,source:146C.c:6510
+T00635.000,actor,Actor and statistics block,high,source:146C.c:6088
+T00635.001,model,Model record,high,source:146C.c:6089
+T00635.002,reserved6C,Not read by the decompiled users,low,declaration-only;source:146C.h:611
+T00635.003,reserved16C,Not read by the decompiled users,low,declaration-only;source:146C.h:612
+T00635.004,reserved170,Not read by the decompiled users,low,declaration-only;source:146C.h:613
+T00635.005,reserved174,Not read by the decompiled users,low,declaration-only;source:146C.h:614
+T00640.000,subType,Character sub-type,med,declaration-only;source:146C.h:860
+T00640.001,characterKind,Character kind; selects a second body model in place of weapon and shield,high,source:146C.c:6598
+T00640.002,reach,Reach added to every weapon range,high,source:146C.c:6213
+T00640.003,enemyClass,Enemy class,high,source:146C.c:6212
+T00640.004,name,Name,high,source:146C.c:6138
+T00640.005,hp,Hit points,high,source:146C.c:6141
+T00640.006,mp,Magic points,high,source:146C.c:6155
+T00640.007,strength,Strength,high,source:146C.c:6170
+T00640.008,intelligence,Intelligence,high,source:146C.c:6183
+T00640.009,agility,Agility,high,source:146C.c:6196
+T00640.010,opaque23,Copied into the actor state; meaning not established,low,source:146C.c:6214
+T00640.011,material,Material of the body model,med,source:146C.c:6669
+T00640.012,walkSpeed,Walking speed before the 9/10 scale,high,source:146C.c:6210
+T00640.013,opaque26,Copied into the actor state next to the walking speed,low,source:146C.c:6209
+T00640.014,runSpeed,Running speed before the 9/10 scale,high,source:146C.c:6211
+T00640.015,opaque28,Copied into the actor state; meaning not established,low,source:146C.c:6273
+T00640.016,opaque2C,Copied into the actor state; meaning not established,low,source:146C.c:6757
+T00640.017,opaque30,Copied into the actor state; meaning not established,low,source:146C.c:6215
+T00640.018,opaque31,Copied into the actor state; meaning not established,low,source:146C.c:6216
+T00640.019,opaque32,Copied into the actor state; meaning not established,low,source:146C.c:6217
+T00640.020,reserved33,Not read by the decompiled users,low,declaration-only;source:146C.h:880
+T00640.021,weapon,Equipped weapon,high,source:146C.c:6220
+T00640.022,shield,Equipped shield,high,source:146C.c:6226
+T00640.023,accessory,Equipped accessory,high,source:146C.c:6227
+T00640.024,limbs,Per-limb initial state,high,source:146C.c:6230
+T00640.025,zudIndex,Index of the character's ZUD in the zone,high,source:146C.c:6595
+T00646.000,next,Next node,high,source:146C.c:1756
+T00646.001,droppedMask,Nonzero when a drop roll produced an item,med,source:146C.c:1732
+T00646.002,loot,Rolled loot,high,source:146C.c:1732
+T00647.000,difficultyFlags,Difficulties under which the drop is kept,high,source:146C.c:1658
+T00647.001,reserved1,Not read,low,declaration-only;source:func_8006B57C_t.h:214
+T00647.002,reserved2,Not read,low,declaration-only;source:func_8006B57C_t.h:215
+T00647.003,reserved3,Not read,low,declaration-only;source:func_8006B57C_t.h:216
+T00647.004,accessory,Accessory,high,source:146C.c:1656
+T00648.000,difficultyFlags,Difficulties under which the drop is kept,high,source:146C.c:1675
+T00648.001,reserved1,Not read,low,declaration-only;source:func_8006B57C_t.h:206
+T00648.002,reserved2,Not read,low,declaration-only;source:func_8006B57C_t.h:207
+T00648.003,reserved3,Not read,low,declaration-only;source:func_8006B57C_t.h:208
+T00648.004,armor,Armor,high,source:146C.c:1671
+T00652.000,itemId,Item,high,source:146C.c:1693
+T00652.001,difficultyFlags,Difficulties under which the drop is kept,high,source:146C.c:1697
+T00652.002,count,Count,high,source:146C.c:1696
+T00653.000,difficultyFlags,Difficulties under which the drop is kept,high,source:146C.c:1645
+T00653.001,reserved1,Not read,low,declaration-only;source:func_8006B57C_t.h:197
+T00653.002,reserved2,Not read,low,declaration-only;source:func_8006B57C_t.h:198
+T00653.003,reserved3,Not read,low,declaration-only;source:func_8006B57C_t.h:199
+T00653.004,shield,Shield,high,source:146C.c:1637
+T00653.005,gems,Attached gems,high,source:146C.c:1641
+T00654.000,difficultyFlags,Difficulties under which the drop is kept,high,source:146C.c:1624
+T00654.001,reserved1,Not read,low,declaration-only;source:func_8006B57C_t.h:170
+T00654.002,reserved2,Not read,low,declaration-only;source:func_8006B57C_t.h:171
+T00654.003,reserved3,Not read,low,declaration-only;source:func_8006B57C_t.h:172
+T00654.004,blade,Blade,high,source:146C.c:1613
+T00654.005,grip,Grip,high,source:146C.c:1614
+T00654.006,gems,Attached gems,high,source:146C.c:1618
+T00654.007,name,Weapon name,high,source:146C.c:1622
+T00660.000,tileX,Tile X,high,source:146C.c:15084
+T00660.001,direction,Facing direction,high,source:146C.c:15086
+T00660.002,tileZ,Tile Z,high,source:146C.c:15085
+T00660.003,height,Height in units of 64,high,source:146C.c:15087
+T00662.000,range,Primary range,high,source:146C.c:1401
+T00662.001,secondRange,"Second range, extended by reach",low,source:146C.c:1402
+T00662.002,thirdRange,"Third range, extended by reach",low,source:146C.c:1403
+T00662.003,attackShape,Attack shape,med,declaration-only;source:func_8006B57C_t.h:7
+T00662.004,attackShapeAngle,Attack shape angle,high,source:146C.c:1404
