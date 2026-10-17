@@ -48,6 +48,160 @@ T00237.002,reserved1FDC,Not read by the decompiled users,low,declaration-only;so
 T00237.003,actorScale,Scale copied into every actor record,med,source:30DB0.c:3475
 T00238.000,boneMatrices,World matrix of each bone,high,source:49268.c:208
 T00238.001,scale,Scale of the skeleton,high,source:49268.c:113
+T00239.000,instance,Model instance header,high,source:30DB0.c:1065
+T00239.001,boneMatrices,World matrix of each bone,high,source:30DB0.c:4220
+T00239.002,routePhase,Phase of the current route; nonzero while routing,low,source:30DB0.c:2094
+T00239.003,routeUsesDuration,Route moves over a fixed time instead of at a rate,med,source:40564.c:870
+T00239.004,actionPoseActive,Set while an action pose is held,low,source:30DB0.c:2122
+T00239.005,attachedChildCount,Actors attached to this one's bones,med,source:30DB0.c:3620
+T00239.006,reserved5ACBit6,Not read,low,declaration-only;source:3A1A0.h:251
+T00239.007,momentumStop,Stops run momentum (not read by decompiled code),low,declaration-only;source:3A1A0.h:252
+T00239.008,customTint,Cleared when a tint is set,low,source:30DB0.c:1363
+T00239.009,bypassActorCollision,Collision bypass flag bit 0,med,source:30DB0.c:3998
+T00239.010,bypassTerrainCollision,Skips the collision perimeter; cleared by terrain motion,low,source:3A1A0.c:2269
+T00239.011,ignoredByCollision,Other actors may overlap it (bypass flag bit 1),med,source:30DB0.c:1372
+T00239.012,wallContact,Set while touching a wall,low,source:3A1A0.c:1513
+T00239.013,onLedge,Set while on a ledge,low,source:3A1A0.c:1977
+T00239.014,wasOnLedge,onLedge of the previous frame,low,source:3A1A0.c:2472
+T00239.015,isRunning,Cleared with the run momentum,low,source:30DB0.c:2138
+T00239.016,animationEventFlag,Cleared by animation playback and events,low,source:30DB0.c:3743
+T00239.017,reserved5ACBit17,Not read,low,declaration-only;source:3A1A0.h:262
+T00239.018,advanceRequested,Set to request an animation advance,med,source:30DB0.c:2191
+T00239.019,reserved5ACBit19,Not read,low,declaration-only;source:3A1A0.h:264
+T00239.020,weaponPoseActive,Set by weapon-drawn and action poses,low,source:30DB0.c:2162
+T00239.021,paletteFadeActive,Set by animation events; cleared by palette fades,low,source:30DB0.c:2104
+T00239.022,paletteFadeReverse,Palette fade direction,low,source:30DB0.c:2106
+T00239.023,poseOverrideActive,Set by animation events; cleared when a pose loads,low,source:30DB0.c:3747
+T00239.024,animationLocked,Blocks animation changes,high,source:30DB0.c:3990
+T00239.025,locomotionAnimationState,Locomotion animation state bit,low,source:3A1A0.c:2106
+T00239.026,landingPending,Cleared by the jump and fall update,low,source:40564.c:2508
+T00239.027,textureHeaderBit,Low bit of the SHP texture header byte,low,source:30DB0.c:1184
+T00239.028,supportGimmick,Gimmick the actor stands on,med,source:3A1A0.c:693
+T00239.029,jumpProfile,Jump animation profile,med,source:40564.c:2294
+T00239.030,jumpStarted,Set once the jump begins,low,source:3A1A0.c:1066
+T00239.031,fastAnimation,Animation advances two frames per step when set,med,source:44F14.c:1004
+T00239.032,previewPose,Preview pose flag,low,source:44F14.c:1535
+T00239.033,holdsTextureSlots,Holds references to texture VRAM slots,med,source:30DB0.c:1111
+T00239.034,reserved5B0Bits6,Not read,low,declaration-only;source:3A1A0.h:280
+T00239.035,sequenceModelId,Model id of the bound sequence,med,source:30DB0.c:1694
+T00239.036,framesPerStep,Animation frames advanced per step,med,source:30DB0.c:1369
+T00239.037,locomotionCounter,Cleared by the locomotion animation,low,source:30DB0.c:1357
+T00239.038,sequenceFlags,Flags copied with a shared sequence,low,source:30DB0.c:1354
+T00239.039,commonAnimationCount,Animations in the common sequence,med,source:40564.c:2763
+T00239.040,battleAnimationCount,Animations in the battle sequence,med,source:30DB0.c:1735
+T00239.041,jumpLanding,Cleared by the jump and fall update,low,source:40564.c:2334
+T00239.042,animationId,Animation being played,high,source:30DB0.c:2431
+T00239.043,runSpeed,Run speed in whole units,med,source:30DB0.c:4030
+T00239.044,walkSpeed,Walk speed in whole units,med,source:30DB0.c:4029
+T00239.045,textureSlot,Texture VRAM slot of the model,high,source:30DB0.c:1071
+T00239.046,animationLength,Frames in the current animation,high,source:30DB0.c:3832
+T00239.047,collisionState,Collision state; 4 after a reset,low,source:3A1A0.c:1568
+T00239.048,turnRate,Default turn rate of tile moves,low,source:30DB0.c:1365
+T00239.049,moveRate,Default move rate of tile moves,low,source:30DB0.c:1364
+T00239.050,routeMoveRate,Move rate of the current route,low,source:40564.c:551
+T00239.051,routeTurnRate,Turn rate of the current route,low,source:40564.c:545
+T00239.052,scaleFrames,Frames left in a scale change,med,source:44F14.c:1512
+T00239.053,transitionFrames,Frames of the current travel transition,med,source:3A1A0.c:174
+T00239.054,blendFrame,Frame of the animation blend,med,source:44F14.c:1163
+T00239.055,blendFrames,Frames in the animation blend,high,source:30DB0.c:3840
+T00239.056,reserved5CE,Not read,low,declaration-only;source:3A1A0.h:302
+T00239.057,ownedSequence,Sequence data freed with the model,med,source:30DB0.c:1959
+T00239.058,commonSequence,Common sequence data,low,source:30DB0.c:1351
+T00239.059,battleSequence,Battle sequence data,low,source:30DB0.c:1352
+T00239.060,sharedSequences,Sequence banks bound from other actors,med,source:30DB0.c:1353
+T00239.061,routeTarget,Target tile or position of the current route,med,source:38C1C.c:492
+T00239.062,textureOverlays,SHP texture-map overlay rectangles,high,source:30DB0.c:1140
+T00239.063,textureCellOrigins,Default texture cell of each animation channel,high,source:40564.c:1442
+T00239.064,textureScrollBounds,Bounds of each texture scroll,high,source:30DB0.c:1391
+T00239.065,collisionRadius,Collision size; above 0x80 selects slower steering,med,source:3A1A0.c:1949
+T00239.066,collisionHeight,Height of the collision cylinder,med,source:3A1A0.c:381
+T00239.067,occupancyRadius,Radius used by occupancy tests; 0x40 by default,med,source:40564.c:217
+T00239.068,occupancyHeight,Height used by occupancy tests; 10000 by default,med,source:40564.c:260
+T00239.069,reserved644,Not read,low,declaration-only;source:3A1A0.h:315
+T00239.070,targetPointHeight,Height of the target point above the position,med,source:30DB0.c:4251
+T00239.071,opaque648,Set to 800 when parsed; not read,low,source:30DB0.c:1375
+T00239.072,previewFlag,Cleared when the preview pose resets,low,source:224.c:146
+T00239.073,reserved648Bits17,Not read,low,declaration-only;source:3A1A0.h:319
+T00239.074,shadowRadius,Shadow radius,med,declaration-only;source:3A1A0.h:320
+T00239.075,shadowRadiusExpandRate,Shadow radius expand rate,high,source:30DB0.c:2141
+T00239.076,shadowRadiusShrinkRate,Shadow radius shrink rate,high,source:30DB0.c:2142
+T00239.077,reserved652,Not read,low,declaration-only;source:3A1A0.h:323
+T00239.078,reserved654,Not read,low,declaration-only;source:3A1A0.h:324
+T00239.079,menuCameraDistance,Camera distance used by menu model views,high,source:_renderAshley.h:93
+T00239.080,reserved658,Not read,low,declaration-only;source:3A1A0.h:326
+T00239.081,anchorHeight,"Height of the special anchor, scaled by the actor scale",low,source:38C1C.c:280
+T00239.082,reserved65C,Not read,low,declaration-only;source:3A1A0.h:328
+T00239.083,reserved660,Not read,low,declaration-only;source:3A1A0.h:329
+T00239.084,battleSequenceLbas,Disc sectors of the battle sequences,med,declaration-only;source:3A1A0.h:330
+T00239.085,chainAttackAnimationIds,Animation of each chain attack,med,declaration-only;source:3A1A0.h:331
+T00239.086,specialSequenceLbas,Disc sectors of the special-attack sequences,high,source:30DB0.c:1576
+T00239.087,reserved6BC,Not read,low,declaration-only;source:3A1A0.h:333
+T00239.088,specialSequenceSizes,Byte sizes of the special-attack sequences,high,source:30DB0.c:1572
+T00239.089,reserved6D4,Not read,low,declaration-only;source:3A1A0.h:335
+T00239.090,opaque6DC,Cleared when parsed; not read,low,source:30DB0.c:1360
+T00239.091,queuedAnimation,Animation queued to play next; 0 when none,high,source:30DB0.c:3718
+T00239.092,queuedParameterA,First parameter of the queued animation,low,source:30DB0.c:3719
+T00239.093,queuedParameterB,Second parameter of the queued animation,low,source:30DB0.c:3720
+T00239.094,animationSet,Animation set the current animation came from; 0xFF when none,low,source:30DB0.c:2950
+T00239.095,contactKind,Kind of surface or object in contact,med,source:3A1A0.c:1277
+T00239.096,travelAnimation,Animation played while travelling,high,source:30DB0.c:1350
+T00239.097,modelId,Model id,high,source:30DB0.c:1097
+T00239.098,clutA,First palette slot,low,source:30DB0.c:1333
+T00239.099,clutB,Second palette slot,low,source:30DB0.c:1334
+T00239.100,ledgeHeight,Height compared when hanging from a ledge,low,source:3A1A0.c:1966
+T00239.101,platformOffsetX,X offset from the platform anchor,med,source:3A1A0.c:1121
+T00239.102,platformOffsetZ,Z offset from the platform anchor,med,source:3A1A0.c:1122
+T00239.103,fadeBlue,Fade color blue,med,source:30DB0.c:3901
+T00239.104,fadeGreen,Fade color green,med,source:30DB0.c:3900
+T00239.105,fadeRed,Fade color red,med,source:30DB0.c:3899
+T00239.106,reserved6F3,Not read,low,declaration-only;source:3A1A0.h:352
+T00239.107,companionState,Companion settings; byte 3 adds draw depth,low,source:30DB0.c:3395
+T00239.108,companionColor,Companion color,low,source:30DB0.c:3396
+T00239.109,soundPosition,Position sounds are played from,med,source:40564.c:2802
+T00239.110,blendPose,Pose blended toward the current pose,med,source:30DB0.c:2447
+T00239.111,pose,Current animation pose,high,source:30DB0.c:2447
+T00239.112,palettes,Palette variants copied from the SHP,high,source:30DB0.c:1070
+T00239.113,basePalette,Palette of the chosen variant,high,source:30DB0.c:1326
+T00239.114,currentPalette,Palette uploaded with effects applied,high,source:30DB0.c:1329
+T00239.115,soundEffect,Active sound override,med,source:40564.c:2794
+T00239.116,soundEffectTarget,Sound override being blended toward,med,source:30DB0.c:3436
+T00239.117,platformAnchor,Anchor point on the platform,med,source:3A1A0.c:324
+T00239.118,headTracking,Head-tracking angles and speed,med,source:30DB0.c:3527
+T00239.119,headTrackTarget,Actor tracked by the head; -2 when none,med,source:44F14.c:1574
+T00239.120,companionSlot,Slot of the linked companion actor,low,source:30DB0.c:2108
+T00239.121,terrainFacing,Facing used by terrain motion,low,source:3A1A0.c:2689
+T00239.122,opaque17FF,Cleared by movement; not read,low,source:30DB0.c:2115
+T00239.123,moveFacing,Facing after the pending turn; also the ledge direction,med,source:30DB0.c:3806
+T00239.124,paletteFadeState,Palette fade state,low,source:30DB0.c:2180
+T00239.125,textureAnimationFrames,Current frame of each texture animation channel,high,source:30DB0.c:3755
+T00239.126,textureAnimationSlots,Texture animation timelines,high,source:30DB0.c:1906
+T00239.127,destinationX,X of the jump or fall destination,high,source:30DB0.c:3303
+T00239.128,jumpFrames,Frames left in the jump,med,source:40564.c:2433
+T00239.129,destinationZ,Z of the jump or fall destination,high,source:30DB0.c:3304
+T00239.130,destinationMode,"0 none, 1 fall, 2 jump",med,source:38C1C.c:572
+T00239.131,textureScroll,Texture scroll state,high,source:30DB0.c:1390
+T00239.132,scale,Actor scale (ONE = 1.0),high,source:30DB0.c:1378
+T00239.133,textureRowOffsets,Texture row offset of each channel; 0xFF when unbound,med,source:30DB0.c:1821
+T00239.134,momentumDistance,Distance carried by run momentum,low,source:3A1A0.c:1485
+T00239.135,momentumDirection,Direction of run momentum,low,source:3A1A0.c:1486
+T00239.136,reserved1844,Not read,low,declaration-only;source:3A1A0.h:382
+T00239.137,runFrames,Frames spent running,low,source:3A1A0.c:1497
+T00239.138,runTurns,Turns made while running,low,source:3A1A0.c:1497
+T00239.139,turnState,Turn and step state,med,source:30DB0.c:2143
+T00239.140,opaque1860,Cleared by motion resets; not read,low,source:30DB0.c:2117
+T00239.141,reserved1861,Not read,low,declaration-only;source:3A1A0.h:387
+T00239.142,reserved1862,Not read,low,declaration-only;source:3A1A0.h:388
+T00239.143,reserved1863,Not read,low,declaration-only;source:3A1A0.h:389
+T00239.144,shadowBlend,Shadow blend state,high,source:30DB0.c:2139
+T00239.145,savedPlacement,Placement word saved before a move,high,source:3A1A0.c:452
+T00239.146,animationHeader,Header of the current animation,med,source:30DB0.c:3829
+T00239.147,jointSlots,Joint slots initialized from tagged bones,med,source:30DB0.c:1383
+T00239.148,lockedBoneMatrices,Matrices of bones locked to a pose,high,source:40564.c:2213
+T00239.149,lockedBones,Bones locked to a pose,med,source:40564.c:2207
+T00239.150,pendingTargetX,X of the blocked move target,low,source:3A1A0.c:340
+T00239.151,pendingTargetZ,Z of the blocked move target,low,source:3A1A0.c:341
+T00239.152,previousTargetX,X of the previous blocked move target,low,source:3A1A0.c:342
+T00239.153,previousTargetZ,Z of the previous blocked move target,low,source:3A1A0.c:343
 T00241.000,boneCount,SHP bone count,high,source:30DB0.c:1137
 T00241.001,vertexGroupCount,SHP vertex group count,med,declaration-only;source:3A1A0.h:124
 T00241.002,triangleCount,SHP triangle count,high,source:30DB0.c:1287

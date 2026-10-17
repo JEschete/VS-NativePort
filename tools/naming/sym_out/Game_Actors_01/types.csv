@@ -5,6 +5,7 @@ T00209,State,State::AshleyStatsSnapshot,Native\Game\src\State\Ashley.h,"Saves As
 T00210,State,State::RoomEnemyStates,Native\Game\src\State\RoomCache.h,"Remembers up to eight actor states for one recently visited room, with the room's visit recency.",high,source:146C.c:15233;source:146C.c:832
 T00237,State,Actors::ModelRenderContext,Native\Game\src\Actors\ModelDraw.h,"Holds shared rendering state passed to every actor, weapon and gimmick model draw.",med,source:44F14.c:830;source:30DB0.c:3475
 T00238,State,Actors::SkeletonPose,Native\Game\src\Actors\ModelDraw.h,Holds the per-bone world matrices and scale of the skeleton being drawn.,high,source:49268.c:208
+T00239,State,Actors::ActorRecord,Native\Game\src\Actors\ActorRecord.h,"Holds one loaded actor's model instance, bone matrices, motion, animation, texture, palette, sound and shadow state.",high,source:30DB0.c:4220;source:30DB0.c:3833
 T00241,State,Actors::ModelInstance,Native\Game\src\Actors\ModelInstance.h,"Is the header shared by actor and gimmick records: SHP counts, display and motion flags, transform, tiles, tint and model pointer.",high,source:30DB0.c:1137;source:30DB0.c:1150
 T00242,State,Actors::TextureAnimationSlot,Native\Game\src\Actors\TextureAnimation.h,Plays one of an actor's two texture-animation timelines.,high,source:40564.c:1385
 T00245,State,Actors::ShadowBlend,Native\Game\src\Actors\Shadow.h,Blends an actor's shadow level and radius rates toward new values over a number of frames.,med,source:30DB0.c:3882
