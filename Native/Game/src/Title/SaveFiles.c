@@ -30,7 +30,7 @@
 #include "Title/SaveFiles.h"
 
 // decomp: _fontTable (_fontTable@TITLE/TITLE.PRG)
-Title_SaveMenuFontRecord Title_saveMenuFontAtlas[1]; /* contents: module image (ModuleData.c) */
+Title_SaveMenuFontRecord Title_saveMenuFontAtlas[2]; /* contents: module image (ModuleData.c) */
 
 // decomp: _debugFont (_debugFont@TITLE/TITLE.PRG)
 u_long Title_debugFontAtlas[4928]; /* contents: module image (ModuleData.c) */

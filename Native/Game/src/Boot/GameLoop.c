@@ -106,7 +106,7 @@ void Boot_RunGameLoop(void)
     int ready;
     int i;
     Menu_Framework_ActionSelection* menu;
-    uintptr_t result;
+    intptr_t result;
     int shortcut;
 
     Field_isMenuRequestQueued = 0;
@@ -197,14 +197,14 @@ void Boot_RunGameLoop(void)
                                         Event_BeginQueuedCutscene();
                                         break;
                                     }
-                                    result = (uintptr_t)Field_FindFacingRoomObject(0);
+                                    result = (intptr_t)Field_FindFacingRoomObject(0);
                                     if (result) {
                                         if (!Field_InteractWithLockedRoomObject((Field_MpdLockTrigger*)result)) {
                                             Field_BeginObjectInteractionWait();
                                             break;
                                         }
                                     } else {
-                                        result = (uintptr_t)Field_FindFacingUnlootedChest(0);
+                                        result = (intptr_t)Field_FindFacingUnlootedChest(0);
                                         if (result) {
                                             Field_BeginChestInteraction((Field_MpdLockTrigger*)result, 0);
                                             break;

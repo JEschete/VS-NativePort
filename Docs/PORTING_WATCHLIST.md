@@ -193,9 +193,12 @@ What the mechanical copy kept as it was, so that each item gets a deliberate fix
   files disagreed about a type or an argument list; modernization picks the real type.
 - **Disc positions.** `Content/DiscLayout.h` keeps real LBAs/sizes because the code does sector arithmetic; Content
   must map a sector to its converted file. `MENUBGSZ` is the ledger size of the title background asset.
-- **String ids.** `Content/StringTables.h` holds the decomp's per-overlay string-table ids; the strings are Step 5.
-- **Disc data.** 101 arrays whose size the ledger does not know are tentative one-element definitions, and data
-  spliced in from the disc is zero; Step 5 loads both.
+- **String ids.** `Content/StringTables.h` holds the decomp's per-overlay string-table ids. Offsets are read from
+  the user's extracted tables by `gen_decomp_headers.py` (`--data`), as the decomp's build reads them from the disc;
+  the strings themselves stay in the extracted files.
+- **Disc data.** Module data and pointer tables are filled at start-up (plan "Phase 1b status"). 88 arrays whose
+  size neither the ledger nor the splat configs give stay tentative one-element definitions (84 are effect-plugin
+  arrays; reported as `module-data-unsized`).
 - **Helper macros.** The game's packet macros (`vs_getXY`, `vs_getRGB0`, `vs_getTag`...) keep their decomp names
   (they are not ledger rows) until the primitive code moves to the render queue.
 - **Review list.** `tools\port\copy_fixups.py` holds the hand-reviewed text fixes (merged-layout member access, the
@@ -208,3 +211,28 @@ What the mechanical copy kept as it was, so that each item gets a deliberate fix
   stops the copy before it writes anything.
 - **Lint noise.** `native_boundary.py`'s `ps1-address` rule also matches sign-bit flags (`0x80000000`,
   `0x80000001`); of its 36 hits only the overlay slot table and one KSEG pointer test in Audio are addresses.
+
+## 9. Found while running the title slice (1b)
+
+Each of these broke the running game silently; the fix is in the copy tool or the shims, so it holds for every
+module, not only the title.
+
+- **`char` is unsigned.** The original compiler ran with `-funsigned-char` (`tools\verification\matching.py`);
+  copied C now builds with `/J`. Signed `char` turned the pad bytes into negative numbers and lost buttons.
+- **Signed pointer-sized integers.** A pointer stored through `(long)`/`(int)` is `intptr_t`, not `uintptr_t`:
+  `(long)result < 0` is an error sentinel (`_loadFileMenu`), and unsigned made a failed card read look like a loaded
+  save.
+- **Views of globals.** `view-of` rows (34) were separate variables; they are macros over their base now. Watch for
+  new ones when the ledger changes: the copy report lists `view-macro`, `view-unresolved` and `view-negative-offset`
+  (3 left: `Field::triggerMarkerMatrix`, `Field::triggerMarkerVertex`, `Actors::sequenceTexturePagesOneBased`).
+- **Assets cut in two.** Splat may split one C array into several images (`_fontTable[]` = `_fontTable` +
+  `_fontTable1`); an asset now runs to the next subsegment the C code itself declares.
+- **Data next to its header.** `(u_long*)&header + 1` reaches pixels stored after a size header (`_nowLoading`);
+  natively they are two globals, so such uses get a reviewed fixup (F03421).
+- **Reads span files.** The game reads MCDATA.BIN and MCMAN.BIN in one request; Content reads on through
+  consecutive files as the drive did.
+- **Event no-ops.** Copied code retries `EnableEvent`/`SetRCnt`/... until they return 1, so the D no-ops return
+  success. Interrupt-completed transfers (`SpuWrite`) call their completion callback synchronously.
+- **Pad stick bytes.** `Input_ReadControllerPort` stores receive-buffer bytes 4/5 as the left stick and 6/7 as the
+  right; the controller sends the right stick first. The shim writes the hardware order, so the names in
+  `Input\Controller.c` (from the decomp) are swapped; check against analog movement in 1c before renaming.

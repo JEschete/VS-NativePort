@@ -195,7 +195,7 @@ void Audio_LoadWaveBankFile(int file)
     cdFile.size = Audio_legacyWaveBankFileSizes[file];
 
     if (Audio_soundState.waveBankRequest) {
-        if ((uintptr_t)Audio_soundState.waveBankRequest != -1) {
+        if ((intptr_t)Audio_soundState.waveBankRequest != -1) {
             Core_IgnoreDiagnostic(0x93 & 0xFFu, 0);
         }
     }

@@ -46,7 +46,7 @@ int VS_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
     int speed;
     int maxSpeed;
     int row;
-    uintptr_t column;
+    intptr_t column;
     int depth;
     int drawRow;
     int drawColumn;
@@ -195,7 +195,7 @@ int VS_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
                 color += 3;
             }
             ++factor;
-        } while ((column = (uintptr_t)color) < (uintptr_t)(colorStart + 12));
+        } while ((column = (intptr_t)color) < (intptr_t)(colorStart + 12));
         if (scratch->flags & 0x20000) {
             Core_Gte_SetRotMatrix(&battle->transforms[effect->transformIndex].view);
             Core_Gte_SetTransMatrix(&battle->transforms[effect->transformIndex].view);

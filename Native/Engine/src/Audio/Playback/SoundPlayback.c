@@ -292,7 +292,7 @@ int Audio_Playback_SoundEffectIdForTag(int arg0)
 int Audio_Playback_UsesSoundEffectTags(Audio_SfxProgramHeader* arg0)
 {
     int ret = 0;
-    if ((uintptr_t)arg0 >= 0x80000000) {
+    if ((intptr_t)arg0 >= 0x80000000) {
         ret = arg0->flags >> 7;
     } else if (Audio_Playback_soundEffectBankSelectors[(long)arg0] & 0x8000) {
         ret = 1;

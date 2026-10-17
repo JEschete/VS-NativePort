@@ -881,10 +881,10 @@ int Content_ParseActorModel(Content_ActorAssetRequest* object)
     data += 4;
     model = Core_Memory_AllocateFromLowEnd(size);
     memcpy(model, data, size);
-    model->soundSection = (char*)model->soundSection + (uintptr_t)model;
-    model->groupSection = (char*)model->groupSection + (uintptr_t)model;
-    model->vertexSection = (char*)model->vertexSection + (uintptr_t)model;
-    model->polygonSection = (char*)model->polygonSection + (uintptr_t)model;
+    model->soundSection = (char*)model->soundSection + (intptr_t)model;
+    model->groupSection = (char*)model->groupSection + (intptr_t)model;
+    model->vertexSection = (char*)model->vertexSection + (intptr_t)model;
+    model->polygonSection = (char*)model->polygonSection + (intptr_t)model;
     actor->instance.model = model;
     if (model == NULL) {
         return -2;
@@ -1328,10 +1328,10 @@ parse:
 void Content_CopyRelocatedWeaponSequence(Content_SequenceBuffer* arg0, Content_SequenceBuffer* arg1)
 {
     Core_Memory_CopyAlignedWords(arg0, arg1, 0x7800);
-    arg0->firstSectionPointer -= (uintptr_t)arg1;
-    arg0->secondSectionPointer -= (uintptr_t)arg1;
-    arg0->firstSectionPointer += (uintptr_t)arg0;
-    arg0->secondSectionPointer += (uintptr_t)arg0;
+    arg0->firstSectionPointer -= (intptr_t)arg1;
+    arg0->secondSectionPointer -= (intptr_t)arg1;
+    arg0->firstSectionPointer += (intptr_t)arg0;
+    arg0->secondSectionPointer += (intptr_t)arg0;
 }
 
 // decomp: BATTLE.PRG _loadSeq (src/BATTLE/BATTLE.PRG/30DB0.c:1617)
@@ -1439,8 +1439,8 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
         actor->sequenceModelId = object->modelId;
     copy:
         Core_Memory_CopyAlignedWords(seq, Content_legacySequenceParseData, size);
-        seq->firstSectionPointer = (char*)seq->firstSectionPointer + (uintptr_t)seq;
-        seq->secondSectionPointer = (char*)seq->secondSectionPointer + (uintptr_t)seq;
+        seq->firstSectionPointer = (char*)seq->firstSectionPointer + (intptr_t)seq;
+        seq->secondSectionPointer = (char*)seq->secondSectionPointer + (intptr_t)seq;
         return 0;
     } else if (object->subKind == 3) {
         Content_legacySequenceParseData += 4;
@@ -1489,10 +1489,10 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
             Content_legacySequenceParseData += 4;
         }
         for (i = 0; i < count; ++i) {
-            Actors_sharedSequenceAnimationData[slot][i] += (uintptr_t)Content_legacySequenceParseData;
+            Actors_sharedSequenceAnimationData[slot][i] += (intptr_t)Content_legacySequenceParseData;
             seq = (Content_SequenceBuffer*)(Actors_sharedSequenceAnimationData[slot][i] + 8);
-            seq->firstSectionPointer = (char*)seq->firstSectionPointer + (uintptr_t)(Actors_sharedSequenceAnimationData[slot][i] + 8);
-            seq->secondSectionPointer = (char*)seq->secondSectionPointer + (uintptr_t)(Actors_sharedSequenceAnimationData[slot][i] + 8);
+            seq->firstSectionPointer = (char*)seq->firstSectionPointer + (intptr_t)(Actors_sharedSequenceAnimationData[slot][i] + 8);
+            seq->secondSectionPointer = (char*)seq->secondSectionPointer + (intptr_t)(Actors_sharedSequenceAnimationData[slot][i] + 8);
         }
         Actors_sharedSequenceAnimationData[slot][i] = (char*)-1;
         for (i = 0; i < 17; ++i) {

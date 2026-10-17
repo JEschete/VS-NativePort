@@ -86,7 +86,7 @@ void Audio_Seq_LoadMusicSequence(Audio_AkaoSequenceFile* in_Sequence)
 
     pSequence = in_Sequence;
     pChannelOffsets = (u_short*)in_Sequence;
-    Audio_Seq_activeMusicConfig->sequenceBase = (uintptr_t)in_Sequence;
+    Audio_Seq_activeMusicConfig->sequenceBase = (intptr_t)in_Sequence;
     channelMask = in_Sequence->channelEnableMask;
     if (Audio_Seq_secondaryMusicConfig != NULL) {
         mask = Audio_Seq_AssignedVoiceMask(
@@ -235,7 +235,7 @@ void Audio_Seq_ReleaseMusicConfiguration(
 // decomp: SLUS_010.40 Sound_SetMusicSequence (src/SLUS_010.40/25AC.c:2847)
 void Audio_Seq_RestoreMusicSequence(Audio_AkaoSequenceFile* in_Sequence, int in_SwapWithSavedState)
 {
-    uintptr_t delta;
+    intptr_t delta;
     u_int mask;
     u_int channelBit;
     int count;
@@ -254,8 +254,8 @@ void Audio_Seq_RestoreMusicSequence(Audio_AkaoSequenceFile* in_Sequence, int in_
     Audio_Seq_activeMusicConfig->statusFlags |=
         in_Sequence->sampleBankId == Audio_Samples_musicSampleBankIds.alternateBankId ? 0x40 : 0x20;
 
-    delta = (uintptr_t)in_Sequence - Audio_Seq_primaryMusicConfig.sequenceBase;
-    Audio_Seq_activeMusicConfig->sequenceBase = (uintptr_t)in_Sequence;
+    delta = (intptr_t)in_Sequence - Audio_Seq_primaryMusicConfig.sequenceBase;
+    Audio_Seq_activeMusicConfig->sequenceBase = (intptr_t)in_Sequence;
     Audio_Seq_activeMusicConfig->pendingKeyOn = 0;
     Audio_Driver_controlLatches.updateFlags |= 0x90;
     Audio_Seq_activeMusicConfig->patchTable =

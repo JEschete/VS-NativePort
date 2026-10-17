@@ -36,7 +36,7 @@ _Static_assert(sizeof(Title_SaveMenuUiRecord) == 0xF000, "Title_SaveMenuUiRecord
 #include "Render/LegacyPackets.h"
 #include "Save/MemoryCard/GameFiles.h"
 
-extern Title_SaveMenuFontRecord Title_saveMenuFontAtlas[1];
+extern Title_SaveMenuFontRecord Title_saveMenuFontAtlas[2];
 extern u_long Title_debugFontAtlas[4928];
 extern Title_SaveMenuUiRecord Title_saveMenuUiAtlas;
 extern char Title_fileMenuPrimitivePadding[8];;

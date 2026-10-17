@@ -129,25 +129,38 @@ extern "C" int Content_ReadDiscBytes(unsigned lba, unsigned bytes, void* dest)
     using namespace VS;
     using VS::Content::DataStore;
     const DataStore* store = DataStore::Get();
-    const DataStore::Entry* e = store ? store->FindBySector(lba) : nullptr;
-    if (e == nullptr) {
-        VS_LOG_ERROR("content", "no extracted file holds sector {} ({} bytes)", lba, bytes);
+    if (store == nullptr) {
         return 0;
     }
-    const u64 offset = static_cast<u64>(lba - e->lba) * 2048;
-    // the game reads whole sectors: the last one may run past the end of the file
-    const u64 available = offset < e->size ? e->size - offset : 0;
-    const usize n = static_cast<usize>(std::min<u64>(bytes, available));
-    if (n < bytes) {
-        std::memset(static_cast<u8*>(dest) + n, 0, bytes - n);
-    }
-    if (!store->Read(*e, offset, std::span(static_cast<u8*>(dest), n))) {
-        VS_LOG_ERROR("content", "read failed: {} at {} ({} bytes)", e->path, offset, n);
-        return 0;
-    }
+    // A read runs on through consecutive files, as the drive read sectors (MCDATA.BIN is read together with the
+    // MCMAN.BIN after it). Bytes past a file's end inside its last sector, and sectors no file holds, read as 0.
     static std::unordered_set<std::string> logged;
-    if (logged.insert(e->path).second) {
-        VS_LOG_INFO("content", "disc read: {} (sector {}, {} bytes, {})", e->path, lba, bytes, e->form);
+    auto* out = static_cast<u8*>(dest);
+    u32 sector = lba;
+    usize remaining = bytes;
+    while (remaining != 0) {
+        const DataStore::Entry* e = store->FindBySector(sector);
+        if (e == nullptr) {
+            VS_LOG_ERROR("content", "no extracted file holds sector {} (read of {} bytes at sector {})", sector, bytes,
+                         lba);
+            std::memset(out, 0, remaining);
+            return 0;
+        }
+        const u64 offset = static_cast<u64>(sector - e->lba) * 2048;
+        const u32 sectors = std::max<u32>((e->size + 2047) / 2048, 1);
+        const usize span = std::min<usize>(remaining, static_cast<usize>(e->lba + sectors - sector) * 2048);
+        const usize n = static_cast<usize>(std::min<u64>(span, offset < e->size ? e->size - offset : 0));
+        if (n != 0 && !store->Read(*e, offset, std::span(out, n))) {
+            VS_LOG_ERROR("content", "read failed: {} at {} ({} bytes)", e->path, offset, n);
+            return 0;
+        }
+        std::memset(out + n, 0, span - n);
+        if (logged.insert(e->path).second) {
+            VS_LOG_INFO("content", "disc read: {} (sector {}, {} bytes, {})", e->path, sector, span, e->form);
+        }
+        out += span;
+        remaining -= span;
+        sector += static_cast<u32>(span / 2048);
     }
     return 1;
 }

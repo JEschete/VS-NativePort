@@ -32,7 +32,7 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
     # BATTLE 5BF94.c:1332 func_800C64D0 walks and splices an ordering-table list by raw 24-bit addresses (mask kept
     # in a variable, so the hazard index cannot see them as links): links are handles (Legacy/Render/LibGpu.h).
     "F01324": [
-        ("uintptr_t temp_t0 = ((uintptr_t)(arg0 - 1) & a3);", "u_long temp_t0 = LegacyGpu_Handle(arg0 - 1);",
+        ("intptr_t temp_t0 = ((uintptr_t)(arg0 - 1) & a3);", "u_long temp_t0 = LegacyGpu_Handle(arg0 - 1);",
          "link of the list's head entry"),
         ("arg0 = (u_long*)((*arg0 & a3) | 0x80000000);", "arg0 = (u_long*)LegacyGpu_Pointer(*arg0 & a3);",
          "follow a link"),

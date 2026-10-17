@@ -1983,7 +1983,7 @@ void Actors_DecodeAnimationTrack(int offset, SVECTOR* value, int rotation)
     int nextFrame = (u_short)delta->pad;
     int frame;
 
-    data += offset + (uintptr_t)*scratch->trackData;
+    data += offset + (intptr_t)*scratch->trackData;
 
     for (frame = scratch->firstFrame; frame <= scratch->lastFrame; ++frame) {
         while (1) {
@@ -2083,7 +2083,7 @@ void Actors_DecodeAnimationTrack(int offset, SVECTOR* value, int rotation)
         }
     }
 
-    data -= offset + (uintptr_t)*scratch->trackData;
+    data -= offset + (intptr_t)*scratch->trackData;
     value->pad = (int)data;
     delta->pad = nextFrame;
 }

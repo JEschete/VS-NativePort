@@ -203,7 +203,7 @@ void Audio_PlayWorldSfx(int arg0, int arg1, SVECTOR* vec)
 // decomp: SLUS_010.40 func_80045B28 (src/SLUS_010.40/main.c:9950)
 int Audio_ResolveSfxProgram(int arg0, int arg1)
 {
-    uintptr_t temp_v1;
+    intptr_t temp_v1;
 
     switch (arg0) {
     case 0x1:
@@ -215,7 +215,7 @@ int Audio_ResolveSfxProgram(int arg0, int arg1)
         break;
     case 0xFF000:
     case 0xF00000:
-        temp_v1 = (uintptr_t)Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];
+        temp_v1 = (intptr_t)Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];
         temp_v1 = (int)temp_v1 + (arg1 + (int*)temp_v1)[1];
         break;
     default:
@@ -430,7 +430,7 @@ void Audio_StopBankSfx(int arg0, int* arg1, int arg2)
 // decomp: SLUS_010.40 func_80046494 (src/SLUS_010.40/main.c:10299)
 void Audio_FadeBankSfxVolume(int arg0, int* arg1, int arg2, int arg3, int arg4)
 {
-    uintptr_t a0 = (uintptr_t)((char*)arg1 + (arg2 + arg1)[1]);
+    intptr_t a0 = (intptr_t)((char*)arg1 + (arg2 + arg1)[1]);
 
     if (arg2 == 0) {
         Audio_Control_FadeSoundEffectVolume(0, arg0, arg4 & 0xFF, arg3);

@@ -4,9 +4,11 @@ This file is the single source of truth for getting from a fresh clone to a play
 **Keep it current:** any change to prerequisites, scripts, dependencies, output layout or the extraction
 step must update this file in the same commit (plan D19).
 
-> **Current state (Phase 1a).** The solution builds and the tests pass. `VS.Desktop` opens a window, reads the
-> disc, and logs controller input. It is **not playable yet**. Each section says what works **today**
-> and what is **planned**. Planned items are marked ⏭ and turn into normal instructions when they land.
+> **Current state (Phase 1b).** The solution builds and the tests pass. After the extraction step (§5), `VS.Desktop`
+> runs the original boot and title code: NOW LOADING, the publisher and developer logos, the intro movie with the
+> opening music, the title screen and its menu (New Game / Continue / Vibration / Sound), driven by gamepad or
+> keyboard. Menu sound effects are not played yet, New Game stops at gameplay (1c), and there is no memory card.
+> Planned items are marked ⏭ and turn into normal instructions when they land.
 
 ---
 
@@ -21,9 +23,9 @@ step must update this file in the same commit (plan D19).
 | VS workload | **Desktop development with C++** | |
 | VS components | **C++ Clang Compiler for Windows**, **MSBuild support for LLVM (clang-cl) toolset**, **vcpkg package manager** | All projects use the `ClangCL` toolset. vcpkg is the copy bundled with VS (`$(VCInstallDir)vcpkg`); you do not need a separate vcpkg install or `vcpkg integrate`. |
 | Git | any recent | |
-| Internet on the first build | | vcpkg downloads and builds the dependencies (SDL3, Catch2, nlohmann-json). This takes several minutes the first time and is cached after that. |
+| Internet on the first build | | vcpkg downloads and builds the dependencies (SDL3, Catch2, nlohmann-json, dav1d, libwebm, dr_libs). This takes several minutes the first time and is cached after that. |
 | **Your own copy of the game** | Vagrant Story (USA), **SLUS-01040** | See §3. No game data is in this repository. |
-| ffmpeg ⏭ | 6.0+ with `libsvtav1` | Needed only by the asset extractor, to convert the intro movie (ASSET_PIPELINE §6.7). `winget install Gyan.FFmpeg` gives a suitable build. It is never linked or shipped. |
+| FFmpeg | 6.0+ with `libsvtav1` and the `psxstr` demuxer | Needed only by the extractor, to convert the intro movie (ASSET_PIPELINE §6.7); found on `PATH` or given with `--ffmpeg`. `winget install Gyan.FFmpeg` gives a suitable build. It is never linked or shipped. |
 
 Tested configuration: VS 2026 Community 18.10, MSVC 14.51, Windows SDK 10.0.28000, ffmpeg 8.1.1.
 
@@ -96,7 +98,7 @@ Everything goes to `build\<Config>\` (git-ignored):
 
 | File | What it is |
 |---|---|
-| `VS.Desktop.exe` + `SDL3.dll` | the game |
+| `VS.Desktop.exe` + `SDL3.dll`, `dav1d.dll`, `webm.dll` | the game |
 | `VS.Extract.exe` | the asset extractor (§5) |
 | `VS.Tests.exe` | unit tests |
 | `vs-native.log` | the log written by `VS.Desktop` at run time |
@@ -119,13 +121,21 @@ extract-native-assets.cmd --disc D:\path\to\SLUS-01040.cue --ffmpeg C:\path\to\f
 - Run it once after cloning, and again whenever the extractor changes. The game tells you when that is needed.
 - Runs are incremental. `--force` rebuilds everything.
 
-**Today:** the extractor can list the disc and copy its regular files. These are diagnostic commands only; the
-game does not need their output.
+**Today (required before running):**
 
 ```cmd
-build\Debug\VS.Extract.exe list    disks\SLUS-01040.cue
-build\Debug\VS.Extract.exe extract disks\SLUS-01040.cue build\disc
+build\Debug\VS.Extract.exe extract disks\SLUS-01040.cue Native\data
+build\Debug\VS.Extract.exe extract disks\SLUS-01040.cue Native\data --ffmpeg C:\path\to\ffmpeg.exe
+build\Debug\VS.Extract.exe list    disks\SLUS-01040.cue          :: diagnostic: the disc's files
 ```
+
+- Writes `Native\data\disc\<disc path>` for every file and `Native\data\files.tsv` (sector, size, form, path).
+  Files not converted yet are copied as they are (form `raw`); the intro movie becomes `MOV\TITLE.STR.mkv` (AV1 +
+  FLAC, form `mkv`). `ENDING\ENDING.XA` is listed (`stream`) until its converter lands.
+- Takes about a minute. Run it again after an extractor change; the converters replace one `raw` form at a time.
+
+**Planned ⏭:** `extract-native-assets.cmd` wrapping this, with every file in its modern format (JSON, glTF, PNG,
+WAV, FLAC) and `--force` / incremental runs.
 
 ---
 
@@ -138,13 +148,19 @@ build\Release\VS.Desktop.exe
 | Option | Meaning |
 |---|---|
 | `--disc <path>` | Use this disc (`.cue` or extracted folder). By default the exe looks for the `VS_DISC` environment variable, then for `disks\SLUS-01040.cue` (or `SLUS-01040\`) in its own folder or any parent folder, which finds the repo copy in a dev build. |
+| `--data <dir>` | The extracted data (§5). By default `Native\data` in the exe's folder or any parent folder. |
+| `--frames <n>` | Stop after `n` logical ticks (60 per second). |
+| `--capture <dir> --at <t1,t2,...>` | Write the picture at those ticks as `frame_<t>.bmp` (reference comparisons). |
+| `--press <t:Buttons,...>` | Scripted presses, each held 3 ticks, e.g. `3400:Down,3500:Circle` (names: Up Down Left Right Cross Circle Square Triangle L1 R1 L2 R2 L3 R3 Start Select, joined with `+`). |
+| `--scripted` | Ignore keyboard and gamepad (only `--press` input). |
 
-**Today:** it opens a window, reads the disc, clears the screen, and logs controller and keyboard presses to
-`vs-native.log`.
+**Today:** the original boot and title run (see Current state); the game reads `Native\data\` for its files, and
+the disc only to report its label. The title screen appears about 55 s after start (skip the movie with Start or
+Circle).
 
-⏭ **After extraction lands:** the game reads only `Native\data\` (plus `Native\Content\patches\` and `mods\`)
-and never reads the disc. `--disc` moves to `extract-native-assets.cmd`. If `Native\data\` is missing or out of
-date, the game stops with a message that says to run the extractor.
+The game reads only `Native\data\` (⏭ plus `Native\Content\patches\` and `mods\`). The disc is optional at run
+time; if it is found, its label is logged. If `Native\data\` is missing, the game stops with a message that says to
+run the extractor.
 
 ### Controls (today)
 
@@ -176,7 +192,9 @@ These scripts regenerate committed files. They are not part of the build.
 | `python tools\ledger\build_ledgers.py` | Rebuild `Docs\ledgers\` from the decomp (it keeps the status columns you filled in) |
 | `python tools\port\decomp_index.py` | libclang index of the decomp → `build\port\index.json` |
 | `python tools\port\data_inventory.py` | Global data inventory → `build\port\data.json` |
-| `python tools\port\gen_decomp_headers.py` | Generated headers that `decomp_index.py` needs |
+| `python tools\port\gen_decomp_headers.py [--data Native\data]` | Generated headers that `decomp_index.py` and the copy need (disc layout; string-table offsets read from the extracted data) |
+| `python tools\port\copy_to_native.py` | Regenerate the copied code in `Native\` from the decomp (never edit its output; `tools\port\own.py` takes an item over by hand) |
+| `python tools\port\understood.py vs_title_exec@TITLE.PRG [--mark]` | Check (and mark) `understood` for every function reachable from a root |
 | `python tools\naming\merge_names.py --check-all` | Validate the function catalog naming |
 | `python tools\scaffold\gen_solution.py` | Regenerate the `.sln` / `.vcxproj` files. **Run it after any project change**; do not hand-edit the project files. |
 
@@ -193,6 +211,8 @@ earlier, abandoned emulator-style port (VS 2022/CMake, `vagrant-native.exe`). Th
 | `The build tools for ClangCL cannot be found` | Add the two Clang components from §1.1 in the Visual Studio Installer. |
 | `SDL3/SDL.h` not found, or vcpkg errors | Add the **vcpkg package manager** component, check the internet connection, delete `vcpkg_installed\`, and build again. |
 | `no disc found` in `vs-native.log` | Put the files at `disks\SLUS-01040.cue/.bin`, or pass `--disc`. |
+| `no extracted data` in `vs-native.log` | Run the extractor (§5) into `Native\data`, or pass `--data`. |
+| The intro is black, `no converted movie` in the log | FFmpeg was not found during extraction; install it (§1.1) and extract again. |
 | `cue sheet has no FILE entry` / the bin cannot be opened | The `.cue` must reference the `.bin` by a name that exists next to it. |
 | The window opens and closes | Read `build\<Config>\vs-native.log`. |
 
@@ -203,5 +223,5 @@ earlier, abandoned emulator-style port (VS 2022/CMake, `vagrant-native.exe`). Th
 ```cmd
 rmdir /s /q build             :: binaries, intermediates, build\port tool output
 rmdir /s /q vcpkg_installed   :: forces the dependencies to be restored again
-rmdir /s /q Native\data       :: ⏭ converted game data (re-run the extractor)
+rmdir /s /q Native\data       :: extracted game data (re-run the extractor)
 ```

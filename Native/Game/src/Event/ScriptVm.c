@@ -690,7 +690,7 @@ int Event_CommandSpecialOperation(u_char* arg0, short arg1)
         Effects_ScreenDistortion_SetVignetteEnabled(arg0[2]);
         break;
     case 16:
-        Event_subroutineReturnCursor = (uintptr_t)(arg0 + 6);
+        Event_subroutineReturnCursor = (intptr_t)(arg0 + 6);
         return (long)&Event_specialSubroutineScript;
     case 17:
         Field_CancelPendingRoomVisit();

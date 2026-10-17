@@ -289,7 +289,7 @@ void Audio_Seq_SelectPatch(
             in_pChannel->updateFlags &= ~SOUND_UPDATE_UNKNOWN_12;
             return;
         }
-        in_pChannel->keymap = (char*)((uintptr_t)pPatchTable + pPatchTable[PatchIndex] + 0x20);
+        in_pChannel->keymap = (char*)((intptr_t)pPatchTable + pPatchTable[PatchIndex] + 0x20);
         in_pChannel->updateFlags &=
             ~(SOUND_UPDATE_DRUM_MODE | SOUND_UPDATE_UNKNOWN_12 | SOUND_UPDATE_UNKNOWN_24
                 | SOUND_UPDATE_UNKNOWN_27 | SOUND_UPDATE_UNKNOWN_28);

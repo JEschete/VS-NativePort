@@ -208,9 +208,11 @@ def sibling_header(path: str) -> str:
     return path[:-2] + ".h" if path.endswith(".c") else path
 
 
-def splat_asset_extents() -> dict[tuple[str, str], tuple[int, int]]:
+def splat_asset_extents(known: set[tuple[str, str]] | None = None) -> dict[tuple[str, str], tuple[int, int]]:
     """(module, symbol) -> (file offset, bytes) for every named subsegment in the decomp's splat configs. Asset
-    symbols (images, palettes) have no C type, so their extent is from their start to the next subsegment's. An
+    symbols (images, palettes) have no C type, so their extent is from their start to the next subsegment that is a
+    boundary: code or data, or an asset the C code declares itself (`known`, (module, name) pairs). Splat may cut one
+    C array into several images (`_fontTable[]` is `_fontTable` and `_fontTable1`); those stay one extent. An
     indexed image whose palette comes first is reached as `<name>_clut`, the start of the same bytes."""
     out: dict[tuple[str, str], tuple[int, int]] = {}
     for cfg in sorted((dx.DECOMP / "config").rglob("splat.yaml")):
@@ -238,7 +240,13 @@ def splat_asset_extents() -> dict[tuple[str, str], tuple[int, int]]:
             if d:
                 n = re.search(r"\bname:\s*([\w]+)", ln)
                 starts.append((int(d[1], 0), n[1] if n else None))
-        for (start, name), (nxt, _) in zip(starts, starts[1:]):
+        def boundary(name: str | None) -> bool:
+            if name is None or known is None:
+                return True
+            return any((module, n) in known for n in (name, name + "_clut", name + "_header", name + "_data"))
+
+        for k, (start, name) in enumerate(starts[:-1]):
+            nxt = next((s for s, n in starts[k + 1:] if boundary(n)), starts[-1][0])
             if name and nxt > start:
                 out[(module, name)] = (start, nxt - start)
                 out.setdefault((module, name + "_clut"), (start, nxt - start))
@@ -329,7 +337,7 @@ class Copier:
         self.struct_names: set[str] = set()     # C names of struct/union types (forward-declarable)
         self.type_home: dict[str, str] = {}     # type id (canonical) -> header path
         self.report: dict[str, list] = collections.defaultdict(list)
-        self.asset_extents = splat_asset_extents()
+        self.asset_extents = splat_asset_extents({(r["overlay"], r["name"]) for r in self.data})
         self.module_data: list[tuple[dict, str, int | None]] = []   # (row, C name, bytes if unsized) filled at boot
         self.module_pointers: list[tuple[dict, str, int]] = []      # (row, C name, element count) relocated at boot
         self.deleted_calls = 0
@@ -370,6 +378,13 @@ class Copier:
     # ------------------------------------------------------------------------------------------------- x64 hazards
     BASE_INT = r"(?:unsigned\s+long|unsigned\s+int|signed\s+int|unsigned|long|int|u_long|u_int|uint|ulong)"
 
+    SIGNED_INTS = re.compile(r"^\s*(signed\s+)?(int|long|short|char|s8|s16|s32|long\s+int)\s*$")
+
+    def pointer_int(self, original: str) -> str:
+        """The pointer-sized integer standing in for a cast or local that held a pointer: signed where the original
+        type was, so comparisons such as `(long)result < 0` (an error sentinel in a pointer) keep their meaning."""
+        return "intptr_t" if self.SIGNED_INTS.match(original) else "uintptr_t"
+
     def load_hazards(self) -> None:
         """Edits from tools/port/hazard_index.py (PORTING_WATCHLIST.md §2): pointer-to-integer casts become
         (uintptr_t), ordering-table links become LegacyGpu_Handle(p), and the members, globals and locals those
@@ -409,7 +424,7 @@ class Copier:
                     self.ptr_globals.add(d[7:])  # (a pointer-typed global needs nothing: the value converts back)
             elif kind == "local" and d in h["decls"]:
                 s = h["decls"][d]
-                edits[s["file"]].append((s["start"], s["end"] - s["start"], "edit", "uintptr_t"))
+                edits[s["file"]].append((s["start"], s["end"] - s["start"], "edit", self.pointer_int(s["text"])))
             elif kind in left or d == "field:?":
                 # left as written, so the compiler keeps reporting it (signature or decoder work, §2)
                 self.report[f"hazard-left-{kind}"].append(f"{c['file']}:{c['line']} {c['text']}")
@@ -418,7 +433,9 @@ class Copier:
                 edits[c["file"]].append((c["start"], c["close"] - c["start"], "edit", "LegacyGpu_Handle("))
                 edits[c["file"]].append((c["operand_end"], 0, "edit", ")"))
             elif fixed:
-                edits[c["file"]].append((c["start"], c["close"] - c["start"], "edit", "(uintptr_t)"))
+                cast = re.match(r"\(([^)]*)\)", c["text"])
+                edits[c["file"]].append((c["start"], c["close"] - c["start"], "edit",
+                                         f"({self.pointer_int(cast[1] if cast else '')})"))
         for s in h["size_literals"]:
             t = self.type_by_id.get(self.canon_type(s["type"]))
             if t is None:

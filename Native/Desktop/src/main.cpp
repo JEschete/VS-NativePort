@@ -163,18 +163,17 @@ int main(int argc, char** argv)
 {
     Core::SetLogFile((Platform::ExecutableDir() / "vs-native.log").string().c_str());
     Platform::InstallCrashHandler();
-    auto discPath = LocateDisc(argc, argv);
-    if (!discPath) {
-        VS_LOG_ERROR("boot", "no disc found; pass --disc <SLUS-01040.cue|folder> or set VS_DISC");
-        return 1;
+    // The game reads only the extracted data (plan D20); the disc, if found, is only identified in the log.
+    std::unique_ptr<Content::Disc> disc;
+    if (auto discPath = LocateDisc(argc, argv)) {
+        if (auto opened = Content::Disc::Open(*discPath)) {
+            disc = std::move(*opened);
+            VS_LOG_INFO("boot", "disc '{}' ({} entries) from {}", disc->Label(), disc->Files().size(),
+                        discPath->string());
+        } else {
+            VS_LOG_WARN("boot", "{}", opened.error());
+        }
     }
-    auto disc = Content::Disc::Open(*discPath);
-    if (!disc) {
-        VS_LOG_ERROR("boot", "{}", disc.error());
-        return 1;
-    }
-    VS_LOG_INFO("boot", "disc '{}' ({} entries) from {}", (*disc)->Label(), (*disc)->Files().size(),
-                discPath->string());
     const auto dataRoot = LocateData(argc, argv);
     if (!dataRoot) {
         VS_LOG_ERROR("boot", "no extracted data; run VS.Extract extract <disc> Native\\data, or pass --data <dir>");
@@ -213,7 +212,7 @@ int main(int argc, char** argv)
             VS_LOG_INFO("input", "--scripted: keyboard and gamepad ignored");
         }
     }
-    Game::GameApp game({disc->get()});
+    Game::GameApp game({disc.get()});
     Core::FrameClock clock;
     double last = app.NowSeconds();
     std::vector<u32> frame;

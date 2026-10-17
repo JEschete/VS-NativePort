@@ -259,7 +259,7 @@ int Save_MemoryCard_DeleteRedundantTemporaryFiles(int port)
 // decomp: MENU7.PRG _initSaveFileInfo (src/MENU/MENU7.PRG/260.c:480)
 int Save_MemoryCard_ScanSaveDirectory(int port)
 {
-    uintptr_t fileNo;
+    intptr_t fileNo;
     int i;
     int tempFilesDeleted;
     int slotsAvailable = 15;
@@ -268,11 +268,11 @@ int Save_MemoryCard_ScanSaveDirectory(int port)
         Title_cardDirectoryEntries[i] = 0;
     }
 
-    fileNo = (uintptr_t)LegacyApi_firstfile((port == 1) ? ("bu00:*") : ("bu10:*"), Title_cardDirectoryEntryBuffer);
+    fileNo = (intptr_t)LegacyApi_firstfile((port == 1) ? ("bu00:*") : ("bu10:*"), Title_cardDirectoryEntryBuffer);
     Title_cardDirectoryEntries[0] = (void*)fileNo;
 
     for (i = 1; (i < 15) && fileNo; ++i) {
-        fileNo = (uintptr_t)LegacyApi_nextfile(Title_cardDirectoryEntryBuffer + i);
+        fileNo = (intptr_t)LegacyApi_nextfile(Title_cardDirectoryEntryBuffer + i);
         Title_cardDirectoryEntries[i] = (void*)fileNo;
     }
 
@@ -500,7 +500,7 @@ void Save_MemoryCard_PackageGameSave(int targetFile)
         0x6B82, 0x6482, 0x4081, 0x5082, 0x4081, 0x4081, 0x4081, 0x4F82, 0x4F82, 0x4681,
         0x4F82, 0x4F82, 0x4681, 0x4F82, 0x4F82, 0x4081 };
 
-    uintptr_t i;
+    intptr_t i;
     int j;
     int var_a0;
     u_short const* s0 = Save_MemoryCard_saveTitleTemplate;
@@ -608,7 +608,7 @@ void Save_MemoryCard_PackageGameSave(int targetFile)
         var_a0 ^= Title_memoryCardUiResource[j + 256];
     }
     s5->blockChecksums[1] = var_a0;
-    for (i = (uintptr_t)&((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState;
+    for (i = (intptr_t)&((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState;
         i < (int)sizeof(Save_GameSaveImage); ++i) {
         Title_memoryCardUiResource[i] += Core_Random_NextInterfaceRandomBits(8);
     }
@@ -966,7 +966,7 @@ void Save_MemoryCard_PackageClearSave(int targetFile)
         0x6B82, 0x6482, 0x4081, 0x5082, 0x4081, 0x4081, 0x4081, 0x4F82, 0x4F82, 0x4681,
         0x4F82, 0x4F82, 0x4681, 0x4F82, 0x4F82, 0x4081 };
 
-    uintptr_t i;
+    intptr_t i;
     int j;
     int var_a0;
     u_short const* s0 = Save_MemoryCard_saveTitleTemplate;
@@ -1075,7 +1075,7 @@ void Save_MemoryCard_PackageClearSave(int targetFile)
         var_a0 ^= Title_memoryCardUiResource[j + 256];
     }
     s5->blockChecksums[1] = var_a0;
-    for (i = (uintptr_t)&((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState;
+    for (i = (intptr_t)&((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState;
         i < (int)sizeof(Save_GameSaveImage); ++i) {
         Title_memoryCardUiResource[i] += Save_MemoryCard_NextCipherBits(8);
     }

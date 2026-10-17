@@ -10,7 +10,7 @@
 // decomp: BATTLE.PRG actorLimb (src/BATTLE/BATTLE.PRG/74088.c:1001)
 Battle_LimbStats* Actors_CombatLimbAt(Battle_ActorStats* stats, int limb)
 {
-    return ((Battle_ActorStats*)(limb * sizeof(Battle_LimbStats) + (uintptr_t)stats))
+    return ((Battle_ActorStats*)(limb * sizeof(Battle_LimbStats) + (intptr_t)stats))
         ->limbs;
 }
 

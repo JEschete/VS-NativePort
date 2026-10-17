@@ -2080,7 +2080,7 @@ int Menu_Files_UpdateDataLoadMenu(int initFadeout)
     case Menu_Files_LoadMenuState_SlotSelected:
         element = (Menu_Files_FileMenuElement*)Menu_Files_UpdateLoadCard(0);
         if (element != 0) {
-            if ((uintptr_t)element < 0) {
+            if ((intptr_t)element < 0) {
                 Menu_Files_dataLoadMenuState = Menu_Files_LoadMenuState_DisplaySlot1;
             } else {
                 Menu_Files_dataLoadMenuState = Menu_Files_LoadMenuState_FadeAndReturnSelected;
@@ -3165,7 +3165,7 @@ int Menu_Files_UpdateLoadMenu(int initFadeout)
     case Menu_Files_LoadMenuState_SlotSelected:
         element = (Menu_Files_FileMenuElement*)Title_SaveFiles_UpdateLoadCard(0);
         if (element != 0) {
-            if ((uintptr_t)element < 0) {
+            if ((intptr_t)element < 0) {
                 Menu_Files_loadMenuState = Menu_Files_LoadMenuState_DisplaySlot1;
             } else {
                 Menu_Files_loadMenuState = Menu_Files_LoadMenuState_FadeAndReturnSelected;

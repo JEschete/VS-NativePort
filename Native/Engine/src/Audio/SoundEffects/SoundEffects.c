@@ -390,17 +390,17 @@ void Audio_SoundEffects_PlayBlobPrograms(Audio_CommandParams* in_Params)
     data += 32; // skip the header
 
     entry = (u_short*)(data + *offsets);
-    programCounter1 = *entry == 0xFFFF ? NULL : (char*)(*entry + (uintptr_t)entry + 4);
+    programCounter1 = *entry == 0xFFFF ? NULL : (char*)(*entry + (intptr_t)entry + 4);
     entry++;
-    programCounter2 = *entry == 0xFFFF ? NULL : (char*)(*entry + (uintptr_t)entry + 2);
+    programCounter2 = *entry == 0xFFFF ? NULL : (char*)(*entry + (intptr_t)entry + 2);
     Audio_SoundEffects_PlayProgramPair(in_Params, programCounter1, programCounter2, 0);
 
     while (--count != 0) {
         offsets++;
         entry = (u_short*)(data + *offsets);
-        programCounter1 = *entry == 0xFFFF ? NULL : (char*)(*entry + (uintptr_t)entry + 4);
+        programCounter1 = *entry == 0xFFFF ? NULL : (char*)(*entry + (intptr_t)entry + 4);
         entry++;
-        programCounter2 = *entry == 0xFFFF ? NULL : (char*)(*entry + (uintptr_t)entry + 2);
+        programCounter2 = *entry == 0xFFFF ? NULL : (char*)(*entry + (intptr_t)entry + 2);
         Audio_SoundEffects_PlayProgramPair(in_Params, programCounter1, programCounter2, 1);
     }
 }
