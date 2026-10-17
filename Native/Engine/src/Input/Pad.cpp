@@ -40,6 +40,22 @@ std::string DescribeButtons(u32 mask)
     return out.empty() ? "-" : out;
 }
 
+u32 ParseButtons(std::string_view names)
+{
+    u32 mask = 0;
+    while (!names.empty()) {
+        const usize plus = names.find('+');
+        const std::string_view name = names.substr(0, plus);
+        for (const auto& n : Names) {
+            if (name == n.name) {
+                mask |= n.bit;
+            }
+        }
+        names = plus == std::string_view::npos ? std::string_view{} : names.substr(plus + 1);
+    }
+    return mask;
+}
+
 InputSystem::~InputSystem()
 {
     if (m_pad) {
@@ -133,8 +149,9 @@ u32 InputSystem::SampleGamepad(Sticks& sticks) const
 const PadState& InputSystem::Update(u32 tickSpeed)
 {
     Sticks sticks;
-    u32 raw = SampleKeyboard() | SampleGamepad(sticks);
-    m_state.analog = m_pad != nullptr;
+    u32 raw = m_devices ? (SampleKeyboard() | SampleGamepad(sticks)) : 0;
+    raw |= m_injected;
+    m_state.analog = m_pad != nullptr && m_devices;
     m_state.sticks = sticks;
     if (m_state.analog) {
         // Original analog-mode behaviour: left stick acts as the d-pad.

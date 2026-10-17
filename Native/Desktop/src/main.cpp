@@ -119,6 +119,43 @@ Capture ParseCapture(int argc, char** argv)
     return c;
 }
 
+// --press <tick:Buttons,...> (e.g. "3300:Right,3400:Cross"): scripted presses, each held for a few ticks, so a
+// capture run can drive the menus.
+struct InputScript {
+    static constexpr u64 HoldTicks = 3;
+    std::vector<std::pair<u64, u32>> presses;
+
+    u32 MaskAt(u64 tick) const
+    {
+        u32 mask = 0;
+        for (const auto& [at, buttons] : presses) {
+            if (tick >= at && tick < at + HoldTicks) {
+                mask |= buttons;
+            }
+        }
+        return mask;
+    }
+};
+
+InputScript ParseInputScript(int argc, char** argv)
+{
+    InputScript s;
+    const std::string text = Option(argc, argv, "--press").value_or("");
+    std::string_view list = text;
+    while (!list.empty()) {
+        const usize comma = list.find(',');
+        const std::string_view item = list.substr(0, comma);
+        const usize colon = item.find(':');
+        u64 tick = 0;
+        if (colon != std::string_view::npos &&
+            std::from_chars(item.data(), item.data() + colon, tick).ec == std::errc{}) {
+            s.presses.emplace_back(tick, Input::ParseButtons(item.substr(colon + 1)));
+        }
+        list = comma == std::string_view::npos ? std::string_view{} : list.substr(comma + 1);
+    }
+    return s;
+}
+
 } // namespace
 
 int main(int argc, char** argv)
@@ -151,6 +188,7 @@ int main(int argc, char** argv)
         std::from_chars(frames->data(), frames->data() + frames->size(), maxTicks);
     }
     const Capture capture = ParseCapture(argc, argv);
+    const InputScript script = ParseInputScript(argc, argv);
 
     Platform::App app;
     if (auto r = app.Init({}); !r) {
@@ -168,6 +206,12 @@ int main(int argc, char** argv)
     }
 
     Input::InputSystem input;
+    for (int i = 1; i < argc; ++i) {
+        if (std::string_view(argv[i]) == "--scripted") {
+            input.SetDevicesEnabled(false);
+            VS_LOG_INFO("input", "--scripted: keyboard and gamepad ignored");
+        }
+    }
     Game::GameApp game({disc->get()});
     Core::FrameClock clock;
     double last = app.NowSeconds();
@@ -180,6 +224,7 @@ int main(int argc, char** argv)
         last = now;
         bool shown = false;
         for (u32 i = 0; i < ticks; ++i) {
+            input.Inject(script.MaskAt(game.Ticks() + 1));
             const auto& pad = input.Update();
             if (pad.pressed) {
                 VS_LOG_INFO("input", "pressed {}", Input::DescribeButtons(pad.pressed));

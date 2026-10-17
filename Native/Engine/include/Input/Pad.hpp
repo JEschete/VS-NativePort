@@ -4,6 +4,7 @@
 
 #include <array>
 #include <string>
+#include <string_view>
 
 union SDL_Event;
 struct SDL_Gamepad;
@@ -46,6 +47,8 @@ struct PadState {
 };
 
 std::string DescribeButtons(u32 mask);
+// "Cross" or "Up+Cross" (names as DescribeButtons writes them) -> mask; unknown names are ignored.
+u32 ParseButtons(std::string_view names);
 
 // Gathers keyboard + first gamepad each logical tick and derives edge/repeat state.
 class InputSystem {
@@ -65,6 +68,11 @@ public:
     // Pure edge/repeat derivation (unit tested); `raw` is the sampled held mask.
     void Step(u32 raw, u32 tickSpeed);
 
+    // Buttons held in addition to the devices from the next Update on (scripted input for tests and captures).
+    void Inject(u32 mask) { m_injected = mask; }
+    // Ignore keyboard and gamepad (scripted runs that must not be disturbed by a person at the machine).
+    void SetDevicesEnabled(bool enabled) { m_devices = enabled; }
+
 private:
     u32 SampleKeyboard() const;
     u32 SampleGamepad(Sticks& sticks) const;
@@ -72,6 +80,8 @@ private:
     SDL_Gamepad* m_pad = nullptr;
     PadState m_state;
     std::array<u32, 32> m_heldTicks{};
+    u32 m_injected = 0;
+    bool m_devices = true;
 };
 
 } // namespace VS::Input
