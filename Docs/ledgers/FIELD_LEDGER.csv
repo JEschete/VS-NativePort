@@ -713,137 +713,137 @@ T00123.001,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00123.002,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
 T00124.000,T00124,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,,,,
 T00124.001,T00124,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,,,,
-T00125.000,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,,,,
-T00125.001,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,,,,
-T00125.002,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,,,,
-T00125.003,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,,,,
-T00125.004,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,,,,
-T00125.005,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,,,,
-T00125.006,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,,,,
-T00126.000,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,,,,
-T00126.001,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,,,,
-T00126.002,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,,,,
-T00126.003,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),3,doorSectionLen,0,u_int,,,,,,,
-T00126.004,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),4,lightingSectionLen,0,u_int,,,,,,,
-T00126.005,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),5,section6Len,0,u_int,,,,,,,
-T00126.006,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),6,section7Len,0,u_int,,,,,,,
-T00126.007,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),7,section8Len,0,u_int,,,,,,,
-T00126.008,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),8,section9Len,0,u_int,,,,,,,
-T00126.009,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),9,sectionALen,0,u_int,,,,,,,
-T00126.010,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),10,sectionBLen,0,u_int,,,,,,,
-T00126.011,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),11,textureEffectsSectionLen,0,u_int,,,,,,,
-T00126.012,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),12,sectionDLen,0,u_int,,,,,,,
-T00126.013,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),13,sectionELen,0,u_int,,,,,,,
-T00126.014,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),14,sectionFLen,0,u_int,,,,,,,
-T00126.015,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),15,section10Len,0,u_int,,,,,,,
-T00126.016,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),16,section11Len,0,u_int,,,,,,,
-T00126.017,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),17,section12Len,0,u_int,,,,,,,
-T00126.018,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),18,section13Len,0,u_int,,,,,,,
-T00126.019,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),19,akaoSectionLen,0,u_int,,,,,,,
-T00126.020,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),20,section15Len,0,u_int,,,,,,,
-T00126.021,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),21,section16Len,0,u_int,,,,,,,
-T00126.022,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),22,section17Len,0,u_int,,,,,,,
-T00126.023,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),23,section18Len,0,u_int,,,,,,,
-T00127.000,T00127,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:606:5),0,unk0,1,vs_battle_actor,,,,,,,
-T00127.001,T00127,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,,,,
-T00128.000,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),0,count,0,u_char,,,,,,,
-T00128.001,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),1,labels,0,u_char[2],,,,,,,
-T00128.002,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),2,color,0,u_char,,,,,,,
+T00125.000,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect; indexes the effect mediators,high,source:146C.c:13024
+T00125.001,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check selected for the hit,high,source:146C.c:13306
+T00125.002,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit-chance function index,high,source:146C.c:10085
+T00125.003,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),3,statCalculator,0,u_int,6,,,statCalculatorId,Stat-change calculator index,high,source:146C.c:12257
+T00125.004,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Factor applied by the stat calculation,med,source:146C.c:11645
+T00125.005,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type; 0 is physical,med,source:146C.c:11289
+T00125.006,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Affinity + 1; 0 for none,high,source:146C.c:10783
+T00126.000,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,geometryLength,Geometry section length,med,declaration-only;source:146C.h:221
+T00126.001,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,collisionMapLength,Collision map section length,med,declaration-only;source:146C.h:222
+T00126.002,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,tileCellsLength,Tile cell section length,med,declaration-only;source:146C.h:223
+T00126.003,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),3,doorSectionLen,0,u_int,,,,doorsLength,Door section length; 12-byte records,high,source:146C.c:16148
+T00126.004,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),4,lightingSectionLen,0,u_int,,,,lightingLength,Lighting section length,med,declaration-only;source:146C.h:225
+T00126.005,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),5,section6Len,0,u_int,,,,section6Length,Section 6 length,low,declaration-only;source:146C.h:226
+T00126.006,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),6,section7Len,0,u_int,,,,section7Length,Section 7 length,low,declaration-only;source:146C.h:227
+T00126.007,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),7,section8Len,0,u_int,,,,section8Length,Section 8 length,low,declaration-only;source:146C.h:228
+T00126.008,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),8,section9Len,0,u_int,,,,floorTriggersLength,Floor trigger section length; 12-byte records,high,source:146C.c:16815
+T00126.009,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),9,sectionALen,0,u_int,,,,lockTriggersLength,Lock trigger section length; 20-byte records,high,source:146C.c:16222
+T00126.010,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),10,sectionBLen,0,u_int,,,,environmentLength,Environment section length,med,declaration-only;source:146C.h:231
+T00126.011,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),11,textureEffectsSectionLen,0,u_int,,,,textureEffectsLength,Texture effect section length,high,source:2842C.c:870
+T00126.012,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),12,sectionDLen,0,u_int,,,,effectScriptsLength,Effect script section length,high,source:2842C.c:899
+T00126.013,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),13,sectionELen,0,u_int,,,,sectionELength,Section E length,low,declaration-only;source:146C.h:234
+T00126.014,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),14,sectionFLen,0,u_int,,,,minimapSceneLength,Minimap scene section length,med,declaration-only;source:146C.h:235
+T00126.015,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),15,section10Len,0,u_int,,,,tiledBackgroundLength,Tiled background section length,med,declaration-only;source:146C.h:236
+T00126.016,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),16,section11Len,0,u_int,,,,viewTriggersLength,View trigger section length,high,source:146C.c:16426
+T00126.017,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),17,section12Len,0,u_int,,,,movingPlatformsLength,Moving platform section length; 184-byte records,high,source:146C.c:16506
+T00126.018,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),18,section13Len,0,u_int,,,,containersLength,Treasure chest section length,high,source:146C.c:16841
+T00126.019,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),19,akaoSectionLen,0,u_int,,,,soundDataLength,AKAO sound section length,med,declaration-only;source:146C.h:240
+T00126.020,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),20,section15Len,0,u_int,,,,section15Length,Section 15 length,low,declaration-only;source:146C.h:241
+T00126.021,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),21,section16Len,0,u_int,,,,section16Length,Section 16 length,low,declaration-only;source:146C.h:242
+T00126.022,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),22,section17Len,0,u_int,,,,section17Length,Section 17 length,low,declaration-only;source:146C.h:243
+T00126.023,T00126,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:220:5),23,section18Len,0,u_int,,,,zoneBoundsLength,Zone bounds section length,med,declaration-only;source:146C.h:244
+T00127.000,T00127,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:606:5),0,unk0,1,vs_battle_actor,,,,actor,Battle actor,high,source:146C.c:6505
+T00127.001,T00127,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,stats,Statistics block,high,source:146C.c:6088
+T00128.000,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),0,count,0,u_char,,,,count,Number of label sprites; 0 for none,high,source:2842C.c:2220
+T00128.001,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),1,labels,0,u_char[2],,,,labels,Label sprite indices,high,source:2842C.c:2257
+T00128.002,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),2,color,0,u_char,,,,spacing,Read as the width offset between sprites,low,source:2842C.c:2266
 T00129.000,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),0,x,0,u_char,,,,tileX,Tile x of the gimmick tile target,med,declaration-only;source:3A1A0.c:732
 T00129.001,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),1,y,0,u_char,,,,tileY,Tile y of the gimmick tile target,med,declaration-only;source:3A1A0.c:733
 T00129.002,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),2,z,0,u_char,,,,tileZ,Tile z of the gimmick tile target,med,declaration-only;source:3A1A0.c:734
 T00129.003,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),3,direction,0,u_char,,,,direction,Direction of the gimmick tile target,med,declaration-only;source:3A1A0.c:735
-T00130.000,T00130,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:350:5),0,corners,0,int[5],,,,,,,
-T00130.001,T00130,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:350:5),1,clip,0,int,,,,,,,
-T00131.000,T00131,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:354:5),0,local,0,short[4],,,,,,,
-T00131.001,T00131,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:354:5),1,rotated,0,SVECTOR,,,,,,,
-T00131.002,T00131,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:354:5),2,origin,0,short[4],,,,,,,
-T00132.000,T00132,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),0,tile,0,VS_TILE,,,,,,,
-T00132.001,T00132,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),1,poly,0,VS_POLY_G4_TPAGE,,,,,,,
-T00132.002,T00132,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),2,tpage,0,u_long,,,,,,,
-T00133.000,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,,,,
-T00133.001,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,,,,
-T00133.002,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:129:9)[8],,,,,,,
-T00134.000,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:274:5),0,rCurve,0,u_char,,,,,,,
-T00134.001,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:274:5),1,gCurve,0,u_char,,,,,,,
-T00134.002,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:274:5),2,bCurve,0,u_char,,,,,,,
-T00134.003,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:274:5),3,age,0,u_char,,,,,,,
-T00135.000,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),0,x,0,unsigned int,8,,,,,,
-T00135.001,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),1,y,0,unsigned int,8,,,,,,
-T00135.002,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),2,z,0,unsigned int,8,,,,,,
-T00135.003,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),3,status,0,unsigned int,8,,,,,,
-T00136.000,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),0,active,0,u_int,1,,,,,,
-T00136.001,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),1,previous,0,u_int,1,,,,,,
-T00136.002,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),2,hidden,0,u_int,1,,,,,,
-T00136.003,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),3,inView,0,u_int,1,,,,,,
-T00136.004,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),4,unk4,1,u_int,1,,,,,,
-T00136.005,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),5,visible,0,u_int,1,,,,,,
-T00136.006,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),6,kind,0,u_int,2,,,,,,
-T00136.007,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),7,counter,0,u_int,7,,,,,,
-T00136.008,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),8,timer,0,u_int,5,,,,,,
-T00136.009,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),9,kindTimer,0,u_int,7,,,,,,
-T00136.010,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),10,blocked,0,u_int,1,,,,,,
-T00136.011,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),11,previousKind,0,u_int,2,,,,,,
-T00136.012,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),12,outOfReach,0,u_int,1,,,,,,
-T00136.013,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),13,unk31,1,u_int,1,,,,,,
-T00137.000,T00137,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:1184:5),0,x,0,u_char,,,,,,,
-T00137.001,T00137,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:1184:5),1,y,0,u_char,,,,,,,
-T00137.002,T00137,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:1184:5),2,z,0,u_char,,,,,,,
-T00137.003,T00137,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:1184:5),3,status,0,u_char,,,,,,,
-T00138.000,T00138,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:437:5),0,x,0,unsigned int,8,,,,,,
-T00138.001,T00138,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:437:5),1,y,0,unsigned int,8,,,,,,
-T00138.002,T00138,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:437:5),2,z,0,unsigned int,8,,,,,,
-T00138.003,T00138,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:437:5),3,status,0,unsigned int,8,,,,,,
-T00139.000,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),0,unk0,1,unsigned int,6,,,,,,
-T00139.001,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),1,classification,0,unsigned int,2,,,,,,
-T00139.002,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),2,unk8,1,unsigned int,7,,,,,,
-T00139.003,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),3,timer,0,unsigned int,5,,,,,,
-T00139.004,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),4,counter,0,unsigned int,7,,,,,,
-T00139.005,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),5,unk27,1,unsigned int,1,,,,,,
-T00139.006,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),6,previous,0,unsigned int,2,,,,,,
-T00139.007,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),7,unk30,1,unsigned int,2,,,,,,
-T00140.000,T00140,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:682:5),0,flags,0,unsigned char,,,,,,,
-T00140.001,T00140,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:682:5),1,pad,1,unsigned char[3],,,,,,,
-T00141.000,T00141,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1021:5),0,x,0,short,,,,,,,
-T00141.001,T00141,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1021:5),1,y,0,short,,,,,,,
-T00142.000,T00142,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1475:5),0,x,0,unsigned char,,,,,,,
-T00142.001,T00142,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1475:5),1,y,0,unsigned char,,,,,,,
-T00142.002,T00142,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1475:5),2,z,0,unsigned char,,,,,,,
-T00142.003,T00142,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1475:5),3,w,0,unsigned char,,,,,,,
-T00143.000,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),0,unk0,1,u_int,1,,,,,,
-T00143.001,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),1,direction,0,u_int,3,,,,,,
-T00143.002,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),2,clockwise,0,u_int,1,,,,,,
-T00143.003,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),3,count,0,u_int,7,,,,,,
-T00143.004,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),4,visited,0,u_int,4,,,,,,
-T00143.005,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),5,stop,0,u_int,1,,,,,,
-T00143.006,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),6,changed,0,u_int,1,,,,,,
-T00143.007,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),7,cell,0,u_int,4,,,,,,
-T00143.008,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),8,boundX,0,u_int,5,,,,,,
-T00143.009,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),9,boundZ,0,u_int,5,,,,,,
-T00144.000,T00144,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:441:5),0,x,0,unsigned int,8,,,,,,
-T00144.001,T00144,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:441:5),1,y,0,unsigned int,8,,,,,,
-T00144.002,T00144,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:441:5),2,z,0,unsigned int,8,,,,,,
-T00144.003,T00144,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:441:5),3,status,0,unsigned int,8,,,,,,
-T00145.000,T00145,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:887:5),0,x,0,unsigned char,,,,,,,
-T00145.001,T00145,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:887:5),1,y,0,unsigned char,,,,,,,
-T00145.002,T00145,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:887:5),2,z,0,unsigned char,,,,,,,
-T00145.003,T00145,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:887:5),3,w,0,unsigned char,,,,,,,
-T00146.000,T00146,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:821:5),0,b0,0,unsigned char,,,,,,,
-T00146.001,T00146,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:821:5),1,b1,0,unsigned char,,,,,,,
-T00146.002,T00146,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:821:5),2,b2,0,unsigned char,,,,,,,
-T00146.003,T00146,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:821:5),3,b3,0,unsigned char,,,,,,,
-T00147.000,T00147,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:824:5),0,low,0,unsigned int,24,,,,,,
-T00147.001,T00147,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:824:5),1,f24,0,unsigned int,2,,,,,,
-T00147.002,T00147,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:824:5),2,f26,0,unsigned int,2,,,,,,
-T00147.003,T00147,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:824:5),3,high,0,unsigned int,4,,,,,,
-T00148.000,T00148,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:830:5),0,x,0,unsigned char,,,,,,,
-T00148.001,T00148,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:830:5),1,y,0,unsigned char,,,,,,,
-T00148.002,T00148,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:830:5),2,z,0,unsigned char,,,,,,,
-T00148.003,T00148,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:830:5),3,w,0,unsigned char,,,,,,,
-T00149.000,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),0,x,0,unsigned int,8,,,,,,
-T00149.001,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),1,y,0,unsigned int,8,,,,,,
-T00149.002,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),2,z,0,unsigned int,8,,,,,,
-T00149.003,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),3,status,0,unsigned int,8,,,,,,
+T00130.000,T00130,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:350:5),0,corners,0,int[5],,,,corners,Projected corners,high,source:58578.c:393
+T00130.001,T00130,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:350:5),1,clip,0,int,,,,normalClip,Normal-clip result of the corners,high,source:58578.c:402
+T00131.000,T00131,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:354:5),0,local,0,short[4],,,,localPoint,Point in shape space,high,source:58578.c:372
+T00131.001,T00131,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:354:5),1,rotated,0,SVECTOR,,,,rotatedPoint,Point rotated into world space,high,source:58578.c:380
+T00131.002,T00131,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:354:5),2,origin,0,short[4],,,,origin,Shape origin,high,source:58578.c:369
+T00132.000,T00132,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),0,tile,0,VS_TILE,,,,tile,Box tile,high,source:58578.c:705
+T00132.001,T00132,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),1,poly,0,VS_POLY_G4_TPAGE,,,,shadePoly,Shaded polygon,high,source:58578.c:708
+T00132.002,T00132,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),2,tpage,0,u_long,,,,texturePageCommand,Texture-page command word,low,declaration-only;source:58578.c:76
+T00133.000,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,currentCategory,Selected category + 1,high,source:items0.h:49
+T00133.001,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,reserved1,Not read,low,declaration-only;source:5BF94.h:128
+T00133.002,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:129:9)[8],,,,categoryCursors,List cursor of each category,high,source:items2.h:922
+T00134.000,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:274:5),0,rCurve,0,u_char,,,,redCurve,Red fade curve,med,declaration-only;source:5BF94.h:275
+T00134.001,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:274:5),1,gCurve,0,u_char,,,,greenCurve,Green fade curve,med,declaration-only;source:5BF94.h:276
+T00134.002,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:274:5),2,bCurve,0,u_char,,,,blueCurve,Blue fade curve,med,declaration-only;source:5BF94.h:277
+T00134.003,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:274:5),3,age,0,u_char,,,,age,Particle age,high,source:5BF94.c:7493
+T00135.000,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),0,x,0,unsigned int,8,,,tileX,Tile X,high,source:771A8.c:583
+T00135.001,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),1,y,0,unsigned int,8,,,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00135.002,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),2,z,0,unsigned int,8,,,tileZ,Tile Z,high,source:771A8.c:583
+T00135.003,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),3,status,0,unsigned int,8,,,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00136.000,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),0,active,0,u_int,1,,,active,Relation is live this frame,med,source:6FC00.c:751
+T00136.001,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),1,previous,0,u_int,1,,,wasActive,Value of active in the previous update,low,source:6FC00.c:753
+T00136.002,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),2,hidden,0,u_int,1,,,hidden,Target is hidden from the actor,med,source:6FC00.c:731
+T00136.003,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),3,inView,0,u_int,1,,,inView,Target is inside the view cone,med,source:6FC00.c:741
+T00136.004,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),4,unk4,1,u_int,1,,,reserved4,Not read,low,declaration-only;source:6FC00.c:597
+T00136.005,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),5,visible,0,u_int,1,,,visible,Target is visible,med,source:6FC00.c:752
+T00136.006,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),6,kind,0,u_int,2,,,classification,Relation classification,med,source:6FC00.c:840
+T00136.007,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),7,counter,0,u_int,7,,,counter,Classification counter,low,source:6FC00.c:845
+T00136.008,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),8,timer,0,u_int,5,,,timer,Relation timer,low,source:6FC00.c:762
+T00136.009,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),9,kindTimer,0,u_int,7,,,classificationTimer,Frames before the classification reverts,low,source:6FC00.c:837
+T00136.010,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),10,blocked,0,u_int,1,,,blocked,Path to the target is blocked (not read by decompiled code),low,declaration-only;source:6FC00.c:603
+T00136.011,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),11,previousKind,0,u_int,2,,,previousClassification,Classification restored when the timer ends,med,source:6FC00.c:840
+T00136.012,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),12,outOfReach,0,u_int,1,,,outOfReach,Target is beyond reach,med,source:6FC00.c:728
+T00136.013,T00136,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:592:5),13,unk31,1,u_int,1,,,onMarkedTile,Target stands on a tile flagged 0x2000,low,source:6FC00.c:784
+T00137.000,T00137,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:1184:5),0,x,0,u_char,,,,tileX,Tile X,high,source:771A8.c:583
+T00137.001,T00137,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:1184:5),1,y,0,u_char,,,,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00137.002,T00137,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:1184:5),2,z,0,u_char,,,,tileZ,Tile Z,high,source:771A8.c:583
+T00137.003,T00137,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:1184:5),3,status,0,u_char,,,,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00138.000,T00138,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:437:5),0,x,0,unsigned int,8,,,tileX,Tile X,high,source:771A8.c:583
+T00138.001,T00138,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:437:5),1,y,0,unsigned int,8,,,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00138.002,T00138,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:437:5),2,z,0,unsigned int,8,,,tileZ,Tile Z,high,source:771A8.c:583
+T00138.003,T00138,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:437:5),3,status,0,unsigned int,8,,,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00139.000,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),0,unk0,1,unsigned int,6,,,reserved0Bits,Not read here,low,declaration-only;source:74088.c:679
+T00139.001,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),1,classification,0,unsigned int,2,,,classification,Relation classification,med,source:74088.c:765
+T00139.002,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),2,unk8,1,unsigned int,7,,,reserved8Bits,Not read here,low,declaration-only;source:74088.c:679
+T00139.003,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),3,timer,0,unsigned int,5,,,timer,Relation timer; set to 28 on reaction,low,source:74088.c:755
+T00139.004,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),4,counter,0,unsigned int,7,,,counter,Classification counter,low,source:74088.c:766
+T00139.005,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),5,unk27,1,unsigned int,1,,,reserved27Bit,Not read here,low,declaration-only;source:74088.c:680
+T00139.006,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),6,previous,0,unsigned int,2,,,previousClassification,Classification restored later,low,source:74088.c:768
+T00139.007,T00139,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:678:5),7,unk30,1,unsigned int,2,,,reserved30Bits,Not read here,low,declaration-only;source:74088.c:680
+T00140.000,T00140,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:682:5),0,flags,0,unsigned char,,,,firstByte,First byte; bits 6-7 are the classification,low,source:74088.c:751
+T00140.001,T00140,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\74088.c:682:5),1,pad,1,unsigned char[3],,,,reserved1,Remaining bytes,low,declaration-only;source:74088.c:683
+T00141.000,T00141,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1021:5),0,x,0,short,,,,positionX,World X,med,source:771A8.c:1099
+T00141.001,T00141,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1021:5),1,y,0,short,,,,positionY,World Y,med,source:771A8.c:1120
+T00142.000,T00142,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1475:5),0,x,0,unsigned char,,,,tileX,Tile X,high,source:771A8.c:583
+T00142.001,T00142,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1475:5),1,y,0,unsigned char,,,,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00142.002,T00142,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1475:5),2,z,0,unsigned char,,,,tileZ,Tile Z,high,source:771A8.c:583
+T00142.003,T00142,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1475:5),3,w,0,unsigned char,,,,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00143.000,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),0,unk0,1,u_int,1,,,reserved0,Not read,low,declaration-only;source:771A8.c:2340
+T00143.001,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),1,direction,0,u_int,3,,,heading,Heading in eighth turns,high,source:771A8.c:2413
+T00143.002,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),2,clockwise,0,u_int,1,,,clockwise,Turns clockwise around the obstacle,high,source:771A8.c:2414
+T00143.003,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),3,count,0,u_int,7,,,steps,Steps left; 0 ends the detour,med,source:771A8.c:2409
+T00143.004,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),4,visited,0,u_int,4,,,visited,"Visited mask, cleared on start",low,source:771A8.c:2433
+T00143.005,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),5,stop,0,u_int,1,,,stop,Ends the detour,med,source:771A8.c:2543
+T00143.006,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),6,changed,0,u_int,1,,,changed,Heading changed this step,low,source:771A8.c:2424
+T00143.007,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),7,cell,0,u_int,4,,,cell,Cell the detour started from,low,source:771A8.c:2483
+T00143.008,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),8,boundX,0,u_int,5,,,boundX,X bound in tiles,med,source:771A8.c:2438
+T00143.009,T00143,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),9,boundZ,0,u_int,5,,,boundZ,Z bound in tiles,med,source:771A8.c:2439
+T00144.000,T00144,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:441:5),0,x,0,unsigned int,8,,,tileX,Tile X,high,source:771A8.c:583
+T00144.001,T00144,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:441:5),1,y,0,unsigned int,8,,,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00144.002,T00144,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:441:5),2,z,0,unsigned int,8,,,tileZ,Tile Z,high,source:771A8.c:583
+T00144.003,T00144,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:441:5),3,status,0,unsigned int,8,,,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00145.000,T00145,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:887:5),0,x,0,unsigned char,,,,tileX,Tile X,high,source:771A8.c:583
+T00145.001,T00145,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:887:5),1,y,0,unsigned char,,,,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00145.002,T00145,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:887:5),2,z,0,unsigned char,,,,tileZ,Tile Z,high,source:771A8.c:583
+T00145.003,T00145,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:887:5),3,w,0,unsigned char,,,,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00146.000,T00146,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:821:5),0,b0,0,unsigned char,,,,byte0,Byte 0,low,declaration-only;source:7CD68.c:822
+T00146.001,T00146,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:821:5),1,b1,0,unsigned char,,,,byte1,Byte 1; cleared when the AI state is created,low,source:7CD68.c:1039
+T00146.002,T00146,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:821:5),2,b2,0,unsigned char,,,,byte2,Byte 2,low,declaration-only;source:7CD68.c:822
+T00146.003,T00146,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:821:5),3,b3,0,unsigned char,,,,byte3,Byte 3,low,declaration-only;source:7CD68.c:822
+T00147.000,T00147,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:824:5),0,low,0,unsigned int,24,,,lowBits,Bits 0-23,low,declaration-only;source:7CD68.c:825
+T00147.001,T00147,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:824:5),1,f24,0,unsigned int,2,,,bits24,Bits 24-25,low,source:7CD68.c:1041
+T00147.002,T00147,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:824:5),2,f26,0,unsigned int,2,,,bits26,Bits 26-27,low,source:7CD68.c:1040
+T00147.003,T00147,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:824:5),3,high,0,unsigned int,4,,,highBits,Bits 28-31,low,declaration-only;source:7CD68.c:825
+T00148.000,T00148,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:830:5),0,x,0,unsigned char,,,,tileX,Tile X,high,source:771A8.c:583
+T00148.001,T00148,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:830:5),1,y,0,unsigned char,,,,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00148.002,T00148,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:830:5),2,z,0,unsigned char,,,,tileZ,Tile Z,high,source:771A8.c:583
+T00148.003,T00148,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:830:5),3,w,0,unsigned char,,,,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00149.000,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),0,x,0,unsigned int,8,,,tileX,Tile X,high,source:771A8.c:583
+T00149.001,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),1,y,0,unsigned int,8,,,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00149.002,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),2,z,0,unsigned int,8,,,tileZ,Tile Z,high,source:771A8.c:583
+T00149.003,T00149,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),3,status,0,unsigned int,8,,,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
 T00150.000,T00150,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
 T00150.001,T00150,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
 T00150.002,T00150,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
@@ -860,39 +860,39 @@ T00153.003,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00153.004,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
 T00153.005,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
 T00153.006,T00153,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
-T00154.000,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,,,,
-T00154.001,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,,,,
-T00154.002,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,,,,
-T00154.003,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),3,doorSectionLen,0,u_int,,,,,,,
-T00154.004,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),4,lightingSectionLen,0,u_int,,,,,,,
-T00154.005,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),5,section6Len,0,u_int,,,,,,,
-T00154.006,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),6,section7Len,0,u_int,,,,,,,
-T00154.007,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),7,section8Len,0,u_int,,,,,,,
-T00154.008,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),8,section9Len,0,u_int,,,,,,,
-T00154.009,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),9,sectionALen,0,u_int,,,,,,,
-T00154.010,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),10,sectionBLen,0,u_int,,,,,,,
-T00154.011,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),11,textureEffectsSectionLen,0,u_int,,,,,,,
-T00154.012,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),12,sectionDLen,0,u_int,,,,,,,
-T00154.013,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),13,sectionELen,0,u_int,,,,,,,
-T00154.014,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),14,sectionFLen,0,u_int,,,,,,,
-T00154.015,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),15,section10Len,0,u_int,,,,,,,
-T00154.016,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),16,section11Len,0,u_int,,,,,,,
-T00154.017,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),17,section12Len,0,u_int,,,,,,,
-T00154.018,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),18,section13Len,0,u_int,,,,,,,
-T00154.019,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),19,akaoSectionLen,0,u_int,,,,,,,
-T00154.020,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),20,section15Len,0,u_int,,,,,,,
-T00154.021,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),21,section16Len,0,u_int,,,,,,,
-T00154.022,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),22,section17Len,0,u_int,,,,,,,
-T00154.023,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),23,section18Len,0,u_int,,,,,,,
-T00155.000,T00155,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:606:5),0,unk0,1,vs_battle_actor,,,,,,,
-T00155.001,T00155,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,,,,
-T00156.000,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,,,,
-T00156.001,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,,,,
-T00156.002,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:129:9)[8],,,,,,,
-T00157.000,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),0,rCurve,0,u_char,,,,,,,
-T00157.001,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),1,gCurve,0,u_char,,,,,,,
-T00157.002,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),2,bCurve,0,u_char,,,,,,,
-T00157.003,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),3,age,0,u_char,,,,,,,
+T00154.000,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,geometryLength,Geometry section length,med,declaration-only;source:146C.h:221
+T00154.001,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,collisionMapLength,Collision map section length,med,declaration-only;source:146C.h:222
+T00154.002,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,tileCellsLength,Tile cell section length,med,declaration-only;source:146C.h:223
+T00154.003,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),3,doorSectionLen,0,u_int,,,,doorsLength,Door section length; 12-byte records,high,source:146C.c:16148
+T00154.004,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),4,lightingSectionLen,0,u_int,,,,lightingLength,Lighting section length,med,declaration-only;source:146C.h:225
+T00154.005,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),5,section6Len,0,u_int,,,,section6Length,Section 6 length,low,declaration-only;source:146C.h:226
+T00154.006,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),6,section7Len,0,u_int,,,,section7Length,Section 7 length,low,declaration-only;source:146C.h:227
+T00154.007,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),7,section8Len,0,u_int,,,,section8Length,Section 8 length,low,declaration-only;source:146C.h:228
+T00154.008,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),8,section9Len,0,u_int,,,,floorTriggersLength,Floor trigger section length; 12-byte records,high,source:146C.c:16815
+T00154.009,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),9,sectionALen,0,u_int,,,,lockTriggersLength,Lock trigger section length; 20-byte records,high,source:146C.c:16222
+T00154.010,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),10,sectionBLen,0,u_int,,,,environmentLength,Environment section length,med,declaration-only;source:146C.h:231
+T00154.011,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),11,textureEffectsSectionLen,0,u_int,,,,textureEffectsLength,Texture effect section length,high,source:2842C.c:870
+T00154.012,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),12,sectionDLen,0,u_int,,,,effectScriptsLength,Effect script section length,high,source:2842C.c:899
+T00154.013,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),13,sectionELen,0,u_int,,,,sectionELength,Section E length,low,declaration-only;source:146C.h:234
+T00154.014,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),14,sectionFLen,0,u_int,,,,minimapSceneLength,Minimap scene section length,med,declaration-only;source:146C.h:235
+T00154.015,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),15,section10Len,0,u_int,,,,tiledBackgroundLength,Tiled background section length,med,declaration-only;source:146C.h:236
+T00154.016,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),16,section11Len,0,u_int,,,,viewTriggersLength,View trigger section length,high,source:146C.c:16426
+T00154.017,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),17,section12Len,0,u_int,,,,movingPlatformsLength,Moving platform section length; 184-byte records,high,source:146C.c:16506
+T00154.018,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),18,section13Len,0,u_int,,,,containersLength,Treasure chest section length,high,source:146C.c:16841
+T00154.019,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),19,akaoSectionLen,0,u_int,,,,soundDataLength,AKAO sound section length,med,declaration-only;source:146C.h:240
+T00154.020,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),20,section15Len,0,u_int,,,,section15Length,Section 15 length,low,declaration-only;source:146C.h:241
+T00154.021,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),21,section16Len,0,u_int,,,,section16Length,Section 16 length,low,declaration-only;source:146C.h:242
+T00154.022,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),22,section17Len,0,u_int,,,,section17Length,Section 17 length,low,declaration-only;source:146C.h:243
+T00154.023,T00154,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:220:5),23,section18Len,0,u_int,,,,zoneBoundsLength,Zone bounds section length,med,declaration-only;source:146C.h:244
+T00155.000,T00155,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:606:5),0,unk0,1,vs_battle_actor,,,,actor,Battle actor,high,source:146C.c:6505
+T00155.001,T00155,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,stats,Statistics block,high,source:146C.c:6088
+T00156.000,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,currentCategory,Selected category + 1,high,source:items0.h:49
+T00156.001,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,reserved1,Not read,low,declaration-only;source:5BF94.h:128
+T00156.002,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:129:9)[8],,,,categoryCursors,List cursor of each category,high,source:items2.h:922
+T00157.000,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),0,rCurve,0,u_char,,,,redCurve,Red fade curve,med,declaration-only;source:5BF94.h:275
+T00157.001,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),1,gCurve,0,u_char,,,,greenCurve,Green fade curve,med,declaration-only;source:5BF94.h:276
+T00157.002,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),2,bCurve,0,u_char,,,,blueCurve,Blue fade curve,med,declaration-only;source:5BF94.h:277
+T00157.003,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),3,age,0,u_char,,,,age,Particle age,high,source:5BF94.c:7493
 T00158.000,T00158,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
 T00158.001,T00158,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
 T00158.002,T00158,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
@@ -925,39 +925,39 @@ T00165.003,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00165.004,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
 T00165.005,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
 T00165.006,T00165,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
-T00166.000,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,,,,
-T00166.001,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,,,,
-T00166.002,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,,,,
-T00166.003,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),3,doorSectionLen,0,u_int,,,,,,,
-T00166.004,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),4,lightingSectionLen,0,u_int,,,,,,,
-T00166.005,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),5,section6Len,0,u_int,,,,,,,
-T00166.006,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),6,section7Len,0,u_int,,,,,,,
-T00166.007,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),7,section8Len,0,u_int,,,,,,,
-T00166.008,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),8,section9Len,0,u_int,,,,,,,
-T00166.009,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),9,sectionALen,0,u_int,,,,,,,
-T00166.010,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),10,sectionBLen,0,u_int,,,,,,,
-T00166.011,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),11,textureEffectsSectionLen,0,u_int,,,,,,,
-T00166.012,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),12,sectionDLen,0,u_int,,,,,,,
-T00166.013,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),13,sectionELen,0,u_int,,,,,,,
-T00166.014,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),14,sectionFLen,0,u_int,,,,,,,
-T00166.015,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),15,section10Len,0,u_int,,,,,,,
-T00166.016,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),16,section11Len,0,u_int,,,,,,,
-T00166.017,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),17,section12Len,0,u_int,,,,,,,
-T00166.018,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),18,section13Len,0,u_int,,,,,,,
-T00166.019,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),19,akaoSectionLen,0,u_int,,,,,,,
-T00166.020,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),20,section15Len,0,u_int,,,,,,,
-T00166.021,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),21,section16Len,0,u_int,,,,,,,
-T00166.022,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),22,section17Len,0,u_int,,,,,,,
-T00166.023,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),23,section18Len,0,u_int,,,,,,,
-T00167.000,T00167,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:606:5),0,unk0,1,vs_battle_actor,,,,,,,
-T00167.001,T00167,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,,,,
-T00168.000,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,,,,
-T00168.001,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,,,,
-T00168.002,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:129:9)[8],,,,,,,
-T00169.000,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),0,rCurve,0,u_char,,,,,,,
-T00169.001,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),1,gCurve,0,u_char,,,,,,,
-T00169.002,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),2,bCurve,0,u_char,,,,,,,
-T00169.003,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),3,age,0,u_char,,,,,,,
+T00166.000,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,geometryLength,Geometry section length,med,declaration-only;source:146C.h:221
+T00166.001,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,collisionMapLength,Collision map section length,med,declaration-only;source:146C.h:222
+T00166.002,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,tileCellsLength,Tile cell section length,med,declaration-only;source:146C.h:223
+T00166.003,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),3,doorSectionLen,0,u_int,,,,doorsLength,Door section length; 12-byte records,high,source:146C.c:16148
+T00166.004,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),4,lightingSectionLen,0,u_int,,,,lightingLength,Lighting section length,med,declaration-only;source:146C.h:225
+T00166.005,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),5,section6Len,0,u_int,,,,section6Length,Section 6 length,low,declaration-only;source:146C.h:226
+T00166.006,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),6,section7Len,0,u_int,,,,section7Length,Section 7 length,low,declaration-only;source:146C.h:227
+T00166.007,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),7,section8Len,0,u_int,,,,section8Length,Section 8 length,low,declaration-only;source:146C.h:228
+T00166.008,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),8,section9Len,0,u_int,,,,floorTriggersLength,Floor trigger section length; 12-byte records,high,source:146C.c:16815
+T00166.009,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),9,sectionALen,0,u_int,,,,lockTriggersLength,Lock trigger section length; 20-byte records,high,source:146C.c:16222
+T00166.010,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),10,sectionBLen,0,u_int,,,,environmentLength,Environment section length,med,declaration-only;source:146C.h:231
+T00166.011,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),11,textureEffectsSectionLen,0,u_int,,,,textureEffectsLength,Texture effect section length,high,source:2842C.c:870
+T00166.012,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),12,sectionDLen,0,u_int,,,,effectScriptsLength,Effect script section length,high,source:2842C.c:899
+T00166.013,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),13,sectionELen,0,u_int,,,,sectionELength,Section E length,low,declaration-only;source:146C.h:234
+T00166.014,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),14,sectionFLen,0,u_int,,,,minimapSceneLength,Minimap scene section length,med,declaration-only;source:146C.h:235
+T00166.015,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),15,section10Len,0,u_int,,,,tiledBackgroundLength,Tiled background section length,med,declaration-only;source:146C.h:236
+T00166.016,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),16,section11Len,0,u_int,,,,viewTriggersLength,View trigger section length,high,source:146C.c:16426
+T00166.017,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),17,section12Len,0,u_int,,,,movingPlatformsLength,Moving platform section length; 184-byte records,high,source:146C.c:16506
+T00166.018,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),18,section13Len,0,u_int,,,,containersLength,Treasure chest section length,high,source:146C.c:16841
+T00166.019,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),19,akaoSectionLen,0,u_int,,,,soundDataLength,AKAO sound section length,med,declaration-only;source:146C.h:240
+T00166.020,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),20,section15Len,0,u_int,,,,section15Length,Section 15 length,low,declaration-only;source:146C.h:241
+T00166.021,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),21,section16Len,0,u_int,,,,section16Length,Section 16 length,low,declaration-only;source:146C.h:242
+T00166.022,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),22,section17Len,0,u_int,,,,section17Length,Section 17 length,low,declaration-only;source:146C.h:243
+T00166.023,T00166,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:220:5),23,section18Len,0,u_int,,,,zoneBoundsLength,Zone bounds section length,med,declaration-only;source:146C.h:244
+T00167.000,T00167,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:606:5),0,unk0,1,vs_battle_actor,,,,actor,Battle actor,high,source:146C.c:6505
+T00167.001,T00167,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,stats,Statistics block,high,source:146C.c:6088
+T00168.000,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,currentCategory,Selected category + 1,high,source:items0.h:49
+T00168.001,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,reserved1,Not read,low,declaration-only;source:5BF94.h:128
+T00168.002,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:129:9)[8],,,,categoryCursors,List cursor of each category,high,source:items2.h:922
+T00169.000,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),0,rCurve,0,u_char,,,,redCurve,Red fade curve,med,declaration-only;source:5BF94.h:275
+T00169.001,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),1,gCurve,0,u_char,,,,greenCurve,Green fade curve,med,declaration-only;source:5BF94.h:276
+T00169.002,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),2,bCurve,0,u_char,,,,blueCurve,Blue fade curve,med,declaration-only;source:5BF94.h:277
+T00169.003,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),3,age,0,u_char,,,,age,Particle age,high,source:5BF94.c:7493
 T00170.000,T00170,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),0,x,0,int,,,,,,,
 T00170.001,T00170,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),1,y,0,int,,,,,,,
 T00171.000,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),0,x,0,short,,,,,,,
@@ -1013,32 +1013,32 @@ T00181.000,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00181.001,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),1,mapId,0,short,,,,,,,
 T00181.002,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),2,par,0,short,,,,,,,
 T00181.003,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),3,rankCap,0,short,,,,,,,
-T00182.000,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,,,,
-T00182.001,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,,,,
-T00182.002,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,,,,
-T00182.003,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),3,doorSectionLen,0,u_int,,,,,,,
-T00182.004,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),4,lightingSectionLen,0,u_int,,,,,,,
-T00182.005,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),5,section6Len,0,u_int,,,,,,,
-T00182.006,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),6,section7Len,0,u_int,,,,,,,
-T00182.007,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),7,section8Len,0,u_int,,,,,,,
-T00182.008,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),8,section9Len,0,u_int,,,,,,,
-T00182.009,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),9,sectionALen,0,u_int,,,,,,,
-T00182.010,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),10,sectionBLen,0,u_int,,,,,,,
-T00182.011,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),11,textureEffectsSectionLen,0,u_int,,,,,,,
-T00182.012,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),12,sectionDLen,0,u_int,,,,,,,
-T00182.013,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),13,sectionELen,0,u_int,,,,,,,
-T00182.014,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),14,sectionFLen,0,u_int,,,,,,,
-T00182.015,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),15,section10Len,0,u_int,,,,,,,
-T00182.016,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),16,section11Len,0,u_int,,,,,,,
-T00182.017,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),17,section12Len,0,u_int,,,,,,,
-T00182.018,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),18,section13Len,0,u_int,,,,,,,
-T00182.019,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),19,akaoSectionLen,0,u_int,,,,,,,
-T00182.020,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),20,section15Len,0,u_int,,,,,,,
-T00182.021,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),21,section16Len,0,u_int,,,,,,,
-T00182.022,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),22,section17Len,0,u_int,,,,,,,
-T00182.023,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),23,section18Len,0,u_int,,,,,,,
-T00183.000,T00183,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:606:5),0,unk0,1,vs_battle_actor,,,,,,,
-T00183.001,T00183,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,,,,
+T00182.000,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,geometryLength,Geometry section length,med,declaration-only;source:146C.h:221
+T00182.001,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,collisionMapLength,Collision map section length,med,declaration-only;source:146C.h:222
+T00182.002,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,tileCellsLength,Tile cell section length,med,declaration-only;source:146C.h:223
+T00182.003,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),3,doorSectionLen,0,u_int,,,,doorsLength,Door section length; 12-byte records,high,source:146C.c:16148
+T00182.004,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),4,lightingSectionLen,0,u_int,,,,lightingLength,Lighting section length,med,declaration-only;source:146C.h:225
+T00182.005,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),5,section6Len,0,u_int,,,,section6Length,Section 6 length,low,declaration-only;source:146C.h:226
+T00182.006,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),6,section7Len,0,u_int,,,,section7Length,Section 7 length,low,declaration-only;source:146C.h:227
+T00182.007,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),7,section8Len,0,u_int,,,,section8Length,Section 8 length,low,declaration-only;source:146C.h:228
+T00182.008,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),8,section9Len,0,u_int,,,,floorTriggersLength,Floor trigger section length; 12-byte records,high,source:146C.c:16815
+T00182.009,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),9,sectionALen,0,u_int,,,,lockTriggersLength,Lock trigger section length; 20-byte records,high,source:146C.c:16222
+T00182.010,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),10,sectionBLen,0,u_int,,,,environmentLength,Environment section length,med,declaration-only;source:146C.h:231
+T00182.011,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),11,textureEffectsSectionLen,0,u_int,,,,textureEffectsLength,Texture effect section length,high,source:2842C.c:870
+T00182.012,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),12,sectionDLen,0,u_int,,,,effectScriptsLength,Effect script section length,high,source:2842C.c:899
+T00182.013,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),13,sectionELen,0,u_int,,,,sectionELength,Section E length,low,declaration-only;source:146C.h:234
+T00182.014,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),14,sectionFLen,0,u_int,,,,minimapSceneLength,Minimap scene section length,med,declaration-only;source:146C.h:235
+T00182.015,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),15,section10Len,0,u_int,,,,tiledBackgroundLength,Tiled background section length,med,declaration-only;source:146C.h:236
+T00182.016,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),16,section11Len,0,u_int,,,,viewTriggersLength,View trigger section length,high,source:146C.c:16426
+T00182.017,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),17,section12Len,0,u_int,,,,movingPlatformsLength,Moving platform section length; 184-byte records,high,source:146C.c:16506
+T00182.018,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),18,section13Len,0,u_int,,,,containersLength,Treasure chest section length,high,source:146C.c:16841
+T00182.019,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),19,akaoSectionLen,0,u_int,,,,soundDataLength,AKAO sound section length,med,declaration-only;source:146C.h:240
+T00182.020,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),20,section15Len,0,u_int,,,,section15Length,Section 15 length,low,declaration-only;source:146C.h:241
+T00182.021,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),21,section16Len,0,u_int,,,,section16Length,Section 16 length,low,declaration-only;source:146C.h:242
+T00182.022,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),22,section17Len,0,u_int,,,,section17Length,Section 17 length,low,declaration-only;source:146C.h:243
+T00182.023,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),23,section18Len,0,u_int,,,,zoneBoundsLength,Zone bounds section length,med,declaration-only;source:146C.h:244
+T00183.000,T00183,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:606:5),0,unk0,1,vs_battle_actor,,,,actor,Battle actor,high,source:146C.c:6505
+T00183.001,T00183,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,stats,Statistics block,high,source:146C.c:6088
 T00184.000,T00184,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),0,processing,0,short,,,,reading,Requests handed to the drive and not yet marked loaded,high,source:main.c:9476;source:main.c:9482
 T00184.001,T00184,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.c:7978:8),1,queued,0,short,,,,waiting,Requests enqueued and not yet started,high,source:main.c:9439;source:main.c:9475
 T00185.000,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
@@ -1126,10 +1126,10 @@ T00199.006,T00199,D_1F8003BC_t,6,attributes,0,u_char[8],,,,attributes,Sampled ti
 T00199.007,T00199,D_1F8003BC_t,7,centerAttribute,0,u_char,,,,centerAttribute,Tile attribute under the actor,med,declaration-only;source:3A1A0.h:643
 T00199.008,T00199,D_1F8003BC_t,8,pad3D,1,u_char[3],,,,pad3D,Alignment padding,low,declaration-only;source:3A1A0.h:644
 T00199.009,T00199,D_1F8003BC_t,9,unk40,1,int,,,,searchCeiling,Upper search offset,low,source:3A1A0.c:2478
-T00200.000,T00200,D_1F8003EC_t,0,unk0,1,u_char[8],,,,,,,
-T00200.001,T00200,D_1F8003EC_t,1,first,0,int,,,,,,,
-T00200.002,T00200,D_1F8003EC_t,2,last,0,int,,,,,,,
-T00200.003,T00200,D_1F8003EC_t,3,data,0,u_char **,,,,,,,
+T00200.000,T00200,D_1F8003EC_t,0,unk0,1,u_char[8],,,,reserved0,Not read,low,declaration-only;source:44F14.c:14
+T00200.001,T00200,D_1F8003EC_t,1,first,0,int,,,,firstFrame,First frame decoded,high,source:44F14.c:1383
+T00200.002,T00200,D_1F8003EC_t,2,last,0,int,,,,lastFrame,Last frame decoded,high,source:44F14.c:1383
+T00200.003,T00200,D_1F8003EC_t,3,data,0,u_char **,,,,trackData,Track data being decoded,med,source:44F14.c:1381
 T00201.000,T00201,D_80036770_t,0,unk0,1,int,,,baseMusicBankId,bankId,Sample bank loaded for music,med,source:25AC.c:258
 T00201.001,T00201,D_80036770_t,1,unk4,1,int,,,alternateMusicBankId,alternateBankId,Alternate sample bank; a matching sequence selects it,med,source:25AC.c:2418
 T00201.002,T00201,D_80036770_t,2,unk8,1,int,,,,reserved8,No access found,low,declaration-only;source:25AC.c:20
@@ -1210,93 +1210,93 @@ T00213.003,T00213,D_800EB9B4_t,3,unk4,1,short,,,radialScale,,,,
 T00213.004,T00213,D_800EB9B4_t,4,unk6,1,short,,,radialGrowth,,,,
 T00213.005,T00213,D_800EB9B4_t,5,unk8,1,int,,,vignetteEnabled,,,,
 T00213.006,T00213,D_800EB9B4_t,6,slot,0,vs_main_CdQueueSlot *,,,,,,,
-T00214.000,T00214,D_800EB9B8_t,0,unk0,1,D_800EB9B8_t2,,,primary volume,,,,
-T00214.001,T00214,D_800EB9B8_t,1,unk10,1,D_800EB9B8_t2,,,secondary volume,,,,
-T00214.002,T00214,D_800EB9B8_t,2,unk20,1,int,,,,,,,
-T00214.003,T00214,D_800EB9B8_t,3,unk24,1,short,,,,,,,
-T00214.004,T00214,D_800EB9B8_t,4,unk26,1,short,,,,,,,
-T00214.005,T00214,D_800EB9B8_t,5,unk28,1,short,,,,,,,
-T00214.006,T00214,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,,,,
-T00214.007,T00214,D_800EB9B8_t,7,unk2C,1,char,,,target count,,,,
-T00214.008,T00214,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,,,,
-T00214.009,T00214,D_800EB9B8_t,9,unk2E,1,u_char,,,,,,,
-T00214.010,T00214,D_800EB9B8_t,10,unk2F,1,char,,,,,,,
-T00214.011,T00214,D_800EB9B8_t,11,unk30,1,int,,,,,,,
-T00214.012,T00214,D_800EB9B8_t,12,unk34,1,int,,,,,,,
-T00214.013,T00214,D_800EB9B8_t,13,unk38,1,int,,,,,,,
-T00214.014,T00214,D_800EB9B8_t,14,unk3C,1,int,,,,,,,
-T00214.015,T00214,D_800EB9B8_t,15,unk40,1,int,,,target record pointer in 58578.c layout,,,,
-T00214.016,T00214,D_800EB9B8_t,16,unk44,1,int,,,,,,,
-T00214.017,T00214,D_800EB9B8_t,17,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,,,,
-T00214.018,T00214,D_800EB9B8_t,18,unk990,1,u_char[15140],,,,,,,
-T00214.019,T00214,D_800EB9B8_t,19,unk44B4,1,short[770],,,four directional grid-edge lists,,,,
-T00214.020,T00214,D_800EB9B8_t,20,unk4AB8,1,u_char[100],,,terrain slope clipping codes,,,,
-T00215.000,T00215,D_800EB9B8_t,0,unk0,1,func_800C1564_t[2],,,primary volume,,,,
-T00215.001,T00215,D_800EB9B8_t,1,unk20,1,short,,,,,,,
-T00215.002,T00215,D_800EB9B8_t,2,unk22,1,short,,,camera yaw,,,,
-T00215.003,T00215,D_800EB9B8_t,3,unk24,1,short,,,,,,,
-T00215.004,T00215,D_800EB9B8_t,4,unk26,1,short,,,,,,,
-T00215.005,T00215,D_800EB9B8_t,5,unk28,1,short,,,,,,,
-T00215.006,T00215,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,,,,
-T00215.007,T00215,D_800EB9B8_t,7,unk2C,1,char,,,target count,,,,
-T00215.008,T00215,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,,,,
-T00215.009,T00215,D_800EB9B8_t,9,unk2E,1,char,,,,,,,
-T00215.010,T00215,D_800EB9B8_t,10,unk2F,1,char,,,,,,,
-T00215.011,T00215,D_800EB9B8_t,11,unk30,1,char,,,,,,,
-T00215.012,T00215,D_800EB9B8_t,12,unk31,1,char,,,,,,,
-T00215.013,T00215,D_800EB9B8_t,13,unk32,1,short,,,wireframe vertex count,,,,
-T00215.014,T00215,D_800EB9B8_t,14,unk34,1,int,,,,,,,
-T00215.015,T00215,D_800EB9B8_t,15,unk38,1,int,,,,,,,
-T00215.016,T00215,D_800EB9B8_t,16,unk3C,1,short,,,,,,,
-T00215.017,T00215,D_800EB9B8_t,17,unk3E,1,short,,,,,,,
-T00215.018,T00215,D_800EB9B8_t,18,unk40,1,D_800F19CC_t5 *[2],,,target record pointer in 58578.c layout,,,,
-T00215.019,T00215,D_800EB9B8_t,19,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,,,,
-T00215.020,T00215,D_800EB9B8_t,20,unk990,1,D_800EB9B8_unk990[24],,,,,,,
-T00215.021,T00215,D_800EB9B8_t,21,unkB70,1,char[14336],,,screen scanline interval workspace,,,,
-T00215.022,T00215,D_800EB9B8_t,22,unk4370,1,int[81],,,packed terrain-height and occupancy cache,,,,
-T00215.023,T00215,D_800EB9B8_t,23,unk44B4,1,char[1540],,,four directional grid-edge lists,,,,
-T00215.024,T00215,D_800EB9B8_t,24,unk4AB8,1,u_char[81],,,terrain slope clipping codes,,,,
-T00216.000,T00216,D_800EB9B8_t,0,unk0,1,func_800C1564_t[2],,,primary volume,,,,
-T00216.001,T00216,D_800EB9B8_t,1,unk20,1,short,,,,,,,
-T00216.002,T00216,D_800EB9B8_t,2,unk22,1,short,,,camera yaw,,,,
-T00216.003,T00216,D_800EB9B8_t,3,unk24,1,short,,,,,,,
-T00216.004,T00216,D_800EB9B8_t,4,unk26,1,short,,,,,,,
-T00216.005,T00216,D_800EB9B8_t,5,unk28,1,short,,,,,,,
-T00216.006,T00216,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,,,,
-T00216.007,T00216,D_800EB9B8_t,7,unk2C,1,char,,,target count,,,,
-T00216.008,T00216,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,,,,
-T00216.009,T00216,D_800EB9B8_t,9,unk2E,1,char,,,,,,,
-T00216.010,T00216,D_800EB9B8_t,10,unk2F,1,char,,,,,,,
-T00216.011,T00216,D_800EB9B8_t,11,unk30,1,char,,,,,,,
-T00216.012,T00216,D_800EB9B8_t,12,unk31,1,char,,,,,,,
-T00216.013,T00216,D_800EB9B8_t,13,unk32,1,short,,,wireframe vertex count,,,,
-T00216.014,T00216,D_800EB9B8_t,14,unk34,1,int,,,,,,,
-T00216.015,T00216,D_800EB9B8_t,15,unk38,1,int,,,,,,,
-T00216.016,T00216,D_800EB9B8_t,16,unk3C,1,short,,,,,,,
-T00216.017,T00216,D_800EB9B8_t,17,unk3E,1,short,,,,,,,
-T00216.018,T00216,D_800EB9B8_t,18,unk40,1,D_800F19CC_t5 *[2],,,target record pointer in 58578.c layout,,,,
-T00216.019,T00216,D_800EB9B8_t,19,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,,,,
-T00216.020,T00216,D_800EB9B8_t,20,unk990,1,D_800EB9B8_unk990[24],,,,,,,
-T00216.021,T00216,D_800EB9B8_t,21,unkB70,1,char[14336],,,screen scanline interval workspace,,,,
-T00216.022,T00216,D_800EB9B8_t,22,unk4370,1,int[81],,,packed terrain-height and occupancy cache,,,,
-T00216.023,T00216,D_800EB9B8_t,23,unk44B4,1,char[1540],,,four directional grid-edge lists,,,,
-T00216.024,T00216,D_800EB9B8_t,24,unk4AB8,1,u_char[81],,,terrain slope clipping codes,,,,
-T00217.000,T00217,D_800EB9B8_t2,0,unk0,1,u_char,,,,,,,
-T00217.001,T00217,D_800EB9B8_t2,1,unk1,1,u_char,,,,,,,
-T00217.002,T00217,D_800EB9B8_t2,2,unk2,1,u_char,,,,,,,
-T00217.003,T00217,D_800EB9B8_t2,3,unk3,1,u_char,,,,,,,
-T00217.004,T00217,D_800EB9B8_t2,4,unk4,1,int,,,,,,,
-T00217.005,T00217,D_800EB9B8_t2,5,unk8,1,int,,,,,,,
-T00217.006,T00217,D_800EB9B8_t2,6,unkC,1,int,,,,,,,
-T00218.000,T00218,D_800EB9B8_unk990,0,unk0,1,char,,,label animation state,,,,
-T00218.001,T00218,D_800EB9B8_unk990,1,unk1,1,char,,,selected flag,,,,
-T00218.002,T00218,D_800EB9B8_unk990,2,unk2,1,char,,,,,,,
-T00218.003,T00218,D_800EB9B8_unk990,3,unk3,1,char,,,,,,,
-T00218.004,T00218,D_800EB9B8_unk990,4,unk4,1,short,,,screen x,,,,
-T00218.005,T00218,D_800EB9B8_unk990,5,unk6,1,char,,,screen y,,,,
-T00218.006,T00218,D_800EB9B8_unk990,6,unk7,1,char,,,,,,,
-T00218.007,T00218,D_800EB9B8_unk990,7,unk8,1,SVECTOR,,,world anchor,,,,
-T00218.008,T00218,D_800EB9B8_unk990,8,unk10,1,char *,,,text pointer,,,,
+T00214.000,T00214,D_800EB9B8_t,0,unk0,1,D_800EB9B8_t2,,,primary volume,primaryVolume,Primary target volume,high,source:573B8.c:446
+T00214.001,T00214,D_800EB9B8_t,1,unk10,1,D_800EB9B8_t2,,,secondary volume,secondaryVolume,Secondary target volume,high,source:573B8.c:484
+T00214.002,T00214,D_800EB9B8_t,2,unk20,1,int,,,,depthAndYaw,Depth and camera yaw as one word,low,declaration-only;source:573B8.c:36
+T00214.003,T00214,D_800EB9B8_t,3,unk24,1,short,,,,wirePhaseA,Wireframe animation phase,low,source:573B8.c:449
+T00214.004,T00214,D_800EB9B8_t,4,unk26,1,short,,,,wirePhaseB,Wireframe animation phase,low,declaration-only;source:573B8.c:38
+T00214.005,T00214,D_800EB9B8_t,5,unk28,1,short,,,,wirePhaseC,Wireframe animation phase,low,source:573B8.c:450
+T00214.006,T00214,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,wireShape,Wireframe shape index,med,source:573B8.c:462
+T00214.007,T00214,D_800EB9B8_t,7,unk2C,1,char,,,target count,targetCount,Number of selectable targets,low,declaration-only;source:573B8.c:41
+T00214.008,T00214,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,selectedTarget,Selected target; -1 after init,low,source:573B8.c:376
+T00214.009,T00214,D_800EB9B8_t,9,unk2E,1,u_char,,,,sphereMode,Mode passed when the volumes are set,low,source:573B8.c:467
+T00214.010,T00214,D_800EB9B8_t,10,unk2F,1,char,,,,reserved2F,Not read,low,declaration-only;source:573B8.c:44
+T00214.011,T00214,D_800EB9B8_t,11,unk30,1,int,,,,reserved30,Not read,low,declaration-only;source:573B8.c:45
+T00214.012,T00214,D_800EB9B8_t,12,unk34,1,int,,,,reserved34,Not read,low,declaration-only;source:573B8.c:46
+T00214.013,T00214,D_800EB9B8_t,13,unk38,1,int,,,,reserved38,Cleared on setup; not read,low,source:573B8.c:460
+T00214.014,T00214,D_800EB9B8_t,14,unk3C,1,int,,,,reserved3C,Cleared on setup; not read,low,source:573B8.c:461
+T00214.015,T00214,D_800EB9B8_t,15,unk40,1,int,,,target record pointer in 58578.c layout,targetList0,First target list,low,declaration-only;source:573B8.c:49
+T00214.016,T00214,D_800EB9B8_t,16,unk44,1,int,,,,targetList1,Second target list; set from a setup parameter,low,source:573B8.c:468
+T00214.017,T00214,D_800EB9B8_t,17,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wireVertices,Wireframe vertices,high,source:573B8.c:501
+T00214.018,T00214,D_800EB9B8_t,18,unk990,1,u_char[15140],,,,labelArea,Label and terrain storage,low,declaration-only;source:573B8.c:52
+T00214.019,T00214,D_800EB9B8_t,19,unk44B4,1,short[770],,,four directional grid-edge lists,wireEdges,Wireframe edge list,med,source:573B8.c:377
+T00214.020,T00214,D_800EB9B8_t,20,unk4AB8,1,u_char[100],,,terrain slope clipping codes,terrainRowFlags,Valid flags of the cached terrain,low,declaration-only;source:573B8.c:54
+T00215.000,T00215,D_800EB9B8_t,0,unk0,1,func_800C1564_t[2],,,primary volume,volumes,Primary and secondary target volumes,high,source:58578.c:124
+T00215.001,T00215,D_800EB9B8_t,1,unk20,1,short,,,,depth,Average screen depth of the sphere,med,source:58578.c:128
+T00215.002,T00215,D_800EB9B8_t,2,unk22,1,short,,,camera yaw,cameraYaw,Camera yaw used to orient the sphere,med,source:58578.c:980
+T00215.003,T00215,D_800EB9B8_t,3,unk24,1,short,,,,wirePhaseA,Wireframe animation phase advanced by 3 per shape step,low,source:573B8.c:449
+T00215.004,T00215,D_800EB9B8_t,4,unk26,1,short,,,,wirePhaseB,Wireframe animation phase advanced by 7 per shape step,low,source:58578.c:905
+T00215.005,T00215,D_800EB9B8_t,5,unk28,1,short,,,,wirePhaseC,Wireframe animation phase advanced by 11 per shape step,low,source:573B8.c:450
+T00215.006,T00215,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,wireShape,Wireframe shape index; 15 when set up,med,source:58578.c:891
+T00215.007,T00215,D_800EB9B8_t,7,unk2C,1,char,,,target count,targetCount,Number of selectable targets,med,source:58578.c:456
+T00215.008,T00215,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,selectedTarget,Selected target; clamped to the count,low,source:573B8.c:376
+T00215.009,T00215,D_800EB9B8_t,9,unk2E,1,char,,,,sphereMode,Mode passed when the volumes are set,low,source:573B8.c:467
+T00215.010,T00215,D_800EB9B8_t,10,unk2F,1,char,,,,reserved2F,Not read,low,declaration-only;source:573B8.c:44
+T00215.011,T00215,D_800EB9B8_t,11,unk30,1,char,,,,reserved30,Not read,low,declaration-only;source:573B8.c:45
+T00215.012,T00215,D_800EB9B8_t,12,unk31,1,char,,,,targetMode,Mode passed when the targets are set,low,source:58578.c:465
+T00215.013,T00215,D_800EB9B8_t,13,unk32,1,short,,,wireframe vertex count,vertexCount,Wireframe vertices built,low,source:58578.c:962
+T00215.014,T00215,D_800EB9B8_t,14,unk34,1,int,,,,reserved34,Not read,low,declaration-only;source:573B8.c:46
+T00215.015,T00215,D_800EB9B8_t,15,unk38,1,int,,,,reserved38,Cleared on setup; not read,low,source:573B8.c:460
+T00215.016,T00215,D_800EB9B8_t,16,unk3C,1,short,,,,reserved3C,Cleared on setup; not read,low,source:573B8.c:461
+T00215.017,T00215,D_800EB9B8_t,17,unk3E,1,short,,,,inputLocked,Nonzero blocks sphere interaction unless a button is held,low,source:5BE50.c:98
+T00215.018,T00215,D_800EB9B8_t,18,unk40,1,D_800F19CC_t5 *[2],,,target record pointer in 58578.c layout,targetLists,Target preview lists shown on the sphere,med,source:58578.c:457
+T00215.019,T00215,D_800EB9B8_t,19,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wireVertices,Wireframe vertices,high,source:573B8.c:501
+T00215.020,T00215,D_800EB9B8_t,20,unk990,1,D_800EB9B8_unk990[24],,,,labels,Floating target labels,high,source:58578.c:649
+T00215.021,T00215,D_800EB9B8_t,21,unkB70,1,char[14336],,,screen scanline interval workspace,reservedB70,Not read by decompiled code,low,declaration-only;source:58578.c:48
+T00215.022,T00215,D_800EB9B8_t,22,unk4370,1,int[81],,,packed terrain-height and occupancy cache,terrainHeights,Cached terrain heights around the sphere (9x9),med,source:58578.c:1116
+T00215.023,T00215,D_800EB9B8_t,23,unk44B4,1,char[1540],,,four directional grid-edge lists,wireEdges,Wireframe edge list,med,source:573B8.c:377
+T00215.024,T00215,D_800EB9B8_t,24,unk4AB8,1,u_char[81],,,terrain slope clipping codes,terrainRowFlags,Valid flags of the cached terrain (9x9),med,source:58578.c:1045
+T00216.000,T00216,D_800EB9B8_t,0,unk0,1,func_800C1564_t[2],,,primary volume,volumes,Primary and secondary target volumes,high,source:58578.c:124
+T00216.001,T00216,D_800EB9B8_t,1,unk20,1,short,,,,depth,Average screen depth of the sphere,med,source:58578.c:128
+T00216.002,T00216,D_800EB9B8_t,2,unk22,1,short,,,camera yaw,cameraYaw,Camera yaw used to orient the sphere,med,source:58578.c:980
+T00216.003,T00216,D_800EB9B8_t,3,unk24,1,short,,,,wirePhaseA,Wireframe animation phase advanced by 3 per shape step,low,source:573B8.c:449
+T00216.004,T00216,D_800EB9B8_t,4,unk26,1,short,,,,wirePhaseB,Wireframe animation phase advanced by 7 per shape step,low,source:58578.c:905
+T00216.005,T00216,D_800EB9B8_t,5,unk28,1,short,,,,wirePhaseC,Wireframe animation phase advanced by 11 per shape step,low,source:573B8.c:450
+T00216.006,T00216,D_800EB9B8_t,6,unk2A,1,short,,,volume transition countdown,wireShape,Wireframe shape index; 15 when set up,med,source:58578.c:891
+T00216.007,T00216,D_800EB9B8_t,7,unk2C,1,char,,,target count,targetCount,Number of selectable targets,med,source:58578.c:456
+T00216.008,T00216,D_800EB9B8_t,8,unk2D,1,char,,,selected target index,selectedTarget,Selected target; clamped to the count,low,source:573B8.c:376
+T00216.009,T00216,D_800EB9B8_t,9,unk2E,1,char,,,,sphereMode,Mode passed when the volumes are set,low,source:573B8.c:467
+T00216.010,T00216,D_800EB9B8_t,10,unk2F,1,char,,,,reserved2F,Not read,low,declaration-only;source:573B8.c:44
+T00216.011,T00216,D_800EB9B8_t,11,unk30,1,char,,,,reserved30,Not read,low,declaration-only;source:573B8.c:45
+T00216.012,T00216,D_800EB9B8_t,12,unk31,1,char,,,,targetMode,Mode passed when the targets are set,low,source:58578.c:465
+T00216.013,T00216,D_800EB9B8_t,13,unk32,1,short,,,wireframe vertex count,vertexCount,Wireframe vertices built,low,source:58578.c:962
+T00216.014,T00216,D_800EB9B8_t,14,unk34,1,int,,,,reserved34,Not read,low,declaration-only;source:573B8.c:46
+T00216.015,T00216,D_800EB9B8_t,15,unk38,1,int,,,,reserved38,Cleared on setup; not read,low,source:573B8.c:460
+T00216.016,T00216,D_800EB9B8_t,16,unk3C,1,short,,,,reserved3C,Cleared on setup; not read,low,source:573B8.c:461
+T00216.017,T00216,D_800EB9B8_t,17,unk3E,1,short,,,,inputLocked,Nonzero blocks sphere interaction unless a button is held,low,source:5BE50.c:98
+T00216.018,T00216,D_800EB9B8_t,18,unk40,1,D_800F19CC_t5 *[2],,,target record pointer in 58578.c layout,targetLists,Target preview lists shown on the sphere,med,source:58578.c:457
+T00216.019,T00216,D_800EB9B8_t,19,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wireVertices,Wireframe vertices,high,source:573B8.c:501
+T00216.020,T00216,D_800EB9B8_t,20,unk990,1,D_800EB9B8_unk990[24],,,,labels,Floating target labels,high,source:58578.c:649
+T00216.021,T00216,D_800EB9B8_t,21,unkB70,1,char[14336],,,screen scanline interval workspace,reservedB70,Not read by decompiled code,low,declaration-only;source:58578.c:48
+T00216.022,T00216,D_800EB9B8_t,22,unk4370,1,int[81],,,packed terrain-height and occupancy cache,terrainHeights,Cached terrain heights around the sphere (9x9),med,source:58578.c:1116
+T00216.023,T00216,D_800EB9B8_t,23,unk44B4,1,char[1540],,,four directional grid-edge lists,wireEdges,Wireframe edge list,med,source:573B8.c:377
+T00216.024,T00216,D_800EB9B8_t,24,unk4AB8,1,u_char[81],,,terrain slope clipping codes,terrainRowFlags,Valid flags of the cached terrain (9x9),med,source:58578.c:1045
+T00217.000,T00217,D_800EB9B8_t2,0,unk0,1,u_char,,,,kind,Volume kind; bit 7 marks it active,med,source:573B8.c:454
+T00217.001,T00217,D_800EB9B8_t2,1,unk1,1,u_char,,,,reserved1,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:25
+T00217.002,T00217,D_800EB9B8_t2,2,unk2,1,u_char,,,,reserved2,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:26
+T00217.003,T00217,D_800EB9B8_t2,3,unk3,1,u_char,,,,reserved3,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:27
+T00217.004,T00217,D_800EB9B8_t2,4,unk4,1,int,,,,reserved4,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:28
+T00217.005,T00217,D_800EB9B8_t2,5,unk8,1,int,,,,reserved8,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:29
+T00217.006,T00217,D_800EB9B8_t2,6,unkC,1,int,,,,reservedC,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:30
+T00218.000,T00218,D_800EB9B8_unk990,0,unk0,1,char,,,label animation state,state,"0 inactive, 2 sliding in; above 1 is not settled",med,source:58578.c:649
+T00218.001,T00218,D_800EB9B8_unk990,1,unk1,1,char,,,selected flag,depth,Ordering-table depth of the label,med,source:58578.c:659
+T00218.002,T00218,D_800EB9B8_unk990,2,unk2,1,char,,,,gradient,Gradient style,med,source:58578.c:658
+T00218.003,T00218,D_800EB9B8_unk990,3,unk3,1,char,,,,ringSize,Ring size passed to the ring draw,low,source:58578.c:736
+T00218.004,T00218,D_800EB9B8_unk990,4,unk4,1,short,,,screen x,screenX,Screen X; slides toward its row,med,source:58578.c:702
+T00218.005,T00218,D_800EB9B8_unk990,5,unk6,1,char,,,screen y,offsetY,Y offset added to the label row,med,source:58578.c:684
+T00218.006,T00218,D_800EB9B8_unk990,6,unk7,1,char,,,,fade,Color fade step,med,source:58578.c:674
+T00218.007,T00218,D_800EB9B8_unk990,7,unk8,1,SVECTOR,,,world anchor,worldPosition,World position projected for the label,high,source:58578.c:729
+T00218.008,T00218,D_800EB9B8_unk990,8,unk10,1,char *,,,text pointer,text,Label text,high,source:58578.c:696
 T00219.000,T00219,D_800EB9BC_t,0,unk0_0,1,u_int,1,,,isVisible,Layer configured for drawing,high,source:5BF94.c:2384
 T00219.001,T00219,D_800EB9BC_t,1,unk0_1,1,u_int,1,,,isLoadPending,Image data still loading,high,source:5BF94.c:2560
 T00219.002,T00219,D_800EB9BC_t,2,unk0_2,1,u_int,1,,,usesSharedPalette,Draw with a shared 256-color palette instead of a per-layer palette,high,source:5BF94.c:4438
@@ -1308,10 +1308,10 @@ T00219.007,T00219,D_800EB9BC_t,7,unk8,1,short,,,horizontal offset,offsetX,Horizo
 T00219.008,T00219,D_800EB9BC_t,8,unkA,1,short,,,vertical offset,offsetY,Vertical screen offset in pixels,high,source:4A0A8.c:870
 T00219.009,T00219,D_800EB9BC_t,9,unkC,1,short,,,depth,scaleFixed12,Layer scale in 4.12 fixed point,med,initialized to 0x1000 at 5BF94.c:2367;declaration-only;source:4A0A8.c:139
 T00219.010,T00219,D_800EB9BC_t,10,unk10,1,int[250],,,,loaderAndImageData,Opaque view of palette selector buffers disc request ripple table and tile table,med,view spans gim_t +0x10 to +0x3F8;replace with typed native fields;declaration-only;source:4A0A8.c:140
-T00220.000,T00220,D_800F16EC_t,0,dx,0,signed char,2,,,,,,
-T00220.001,T00220,D_800F16EC_t,1,unk0_2,1,signed char,2,,,,,,
-T00220.002,T00220,D_800F16EC_t,2,dz,0,signed char,2,,,,,,
-T00220.003,T00220,D_800F16EC_t,3,unk0_6,1,signed char,2,,,,,,
+T00220.000,T00220,D_800F16EC_t,0,dx,0,signed char,2,,,dx,"X step (-1, 0 or 1)",high,source:6FC00.c:462
+T00220.001,T00220,D_800F16EC_t,1,unk0_2,1,signed char,2,,,reserved2Bits,Not read,low,declaration-only;source:6F014.c:67
+T00220.002,T00220,D_800F16EC_t,2,dz,0,signed char,2,,,dz,"Z step (-1, 0 or 1)",high,source:6FC00.c:463
+T00220.003,T00220,D_800F16EC_t,3,unk0_6,1,signed char,2,,,reserved6Bits,Not read,low,declaration-only;source:6F014.c:69
 T00221.000,T00221,D_800F18C8_t,0,unk0,1,short,,,,reserved00,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:304
 T00221.001,T00221,D_800F18C8_t,1,unk2,1,short,,,,reserved02,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:305
 T00221.002,T00221,D_800F18C8_t,2,unk4,1,short,,,,reserved04,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:306
@@ -1328,72 +1328,72 @@ T00223.001,T00223,D_800F18EC_t,1,unk2,1,short,,,,reserved02,Unidentified short,l
 T00223.002,T00223,D_800F18EC_t,2,executeAbility,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),,,,executeAbility,Packed execute-ability parameters,med,declaration-only;source:5BF94.h:159
 T00224.000,T00224,D_800F1910_t,0,unk0,1,_mpdRoomSectionA *,,,,triggerRecord,Trigger record being shown,med,declaration-only;source:146C.c:157
 T00224.001,T00224,D_800F1910_t,1,unk4,1,func_8006EBF8_t,,,,actorQuery,Actor position query and parameter,med,declaration-only;source:146C.c:158
-T00225.000,T00225,D_800F19CC_t,0,unk0,1,u_int,,,Chain count or action sequence offset | chain action index,,,,
-T00225.001,T00225,D_800F19CC_t,1,unk4,1,u_int,,,retained action count,,,,
-T00225.002,T00225,D_800F19CC_t,2,unk8,1,D_800F19CC_t2,,,,,,,
-T00225.003,T00225,D_800F19CC_t,3,unk854,1,D_800F19CC_t2[4],,,recent action ring,,,,
-T00225.004,T00225,D_800F19CC_t,4,unk2984,1,int,,,player targeting interface enabled,,,,
-T00225.005,T00225,D_800F19CC_t,5,unk2988,1,int,,,,,,,
-T00225.006,T00225,D_800F19CC_t,6,unk298C,1,u_char,,,selected target index,,,,
-T00225.007,T00225,D_800F19CC_t,7,unk298D,1,u_char,,,,,,,
-T00225.008,T00225,D_800F19CC_t,8,unk298E,1,char,,,,,,,
-T00225.009,T00225,D_800F19CC_t,9,unk298F,1,char,,,,,,,
-T00225.010,T00225,D_800F19CC_t,10,unk2990,1,SVECTOR,,,,,,,
-T00225.011,T00225,D_800F19CC_t,11,unk2998,1,SVECTOR,,,,,,,
-T00225.012,T00225,D_800F19CC_t,12,unk29A0,1,char,,,,,,,
-T00225.013,T00225,D_800F19CC_t,13,unk29A1,1,char,,,,,,,
-T00225.014,T00225,D_800F19CC_t,14,unk29A2,1,short,,,,,,,
-T00225.015,T00225,D_800F19CC_t,15,unk29A4,1,char,,,,,,,
-T00225.016,T00225,D_800F19CC_t,16,unk29A5,1,char,,,,,,,
-T00225.017,T00225,D_800F19CC_t,17,unk29A6,1,char,,,,,,,
-T00225.018,T00225,D_800F19CC_t,18,unk29A7,1,char,,,,,,,
-T00225.019,T00225,D_800F19CC_t,19,unk29A8,1,SVECTOR,,,,,,,
-T00225.020,T00225,D_800F19CC_t,20,unk29B0,1,char,,,,,,,
-T00225.021,T00225,D_800F19CC_t,21,unk29B1,1,char,,,,,,,
-T00225.022,T00225,D_800F19CC_t,22,unk29B2,1,short,,,,,,,
-T00225.023,T00225,D_800F19CC_t,23,unk29B4,1,char,,,,,,,
-T00225.024,T00225,D_800F19CC_t,24,unk29B5,1,char,,,,,,,
-T00225.025,T00225,D_800F19CC_t,25,unk29B6,1,char,,,,,,,
-T00225.026,T00225,D_800F19CC_t,26,unk29B7,1,char,,,,,,,
-T00225.027,T00225,D_800F19CC_t,27,unk29B8,1,SVECTOR,,,,,,,
-T00225.028,T00225,D_800F19CC_t,28,unk29C0,1,D_800F19CC_t5[23],,,,,,,
-T00225.029,T00225,D_800F19CC_t,29,unk2BE8,1,int,,,,,,,
-T00225.030,T00225,D_800F19CC_t,30,unk2BEC,1,int,,,,,,,
-T00225.031,T00225,D_800F19CC_t,31,unk2BF0,1,int,,,,,,,
-T00225.032,T00225,D_800F19CC_t,32,unk2BF4,1,int,,,,,,,
-T00225.033,T00225,D_800F19CC_t,33,unk2BF8,1,int,,,,,,,
-T00225.034,T00225,D_800F19CC_t,34,unk2BFC,1,int,,,,,,,
-T00225.035,T00225,D_800F19CC_t,35,unk2C00,1,u_short,,,target preview count,,,,
-T00225.036,T00225,D_800F19CC_t,36,unk2C02,1,char,,,,,,,
-T00225.037,T00225,D_800F19CC_t,37,unk2C03,1,char,,,,,,,
-T00225.038,T00225,D_800F19CC_t,38,previousChainInput,0,char,,,,,,,
-T00225.039,T00225,D_800F19CC_t,39,battleAbilityInputSuccessful,0,char,,,,,,,
-T00225.040,T00225,D_800F19CC_t,40,battleAbilityInputAttempted,0,char,,,,,,,
-T00225.041,T00225,D_800F19CC_t,41,unk2C07,1,char,,,,,,,
-T00225.042,T00225,D_800F19CC_t,42,battleAbilityTimer,0,u_short,,,,,,,
-T00225.043,T00225,D_800F19CC_t,43,battleAbilityTargetWindow,0,u_short,,,,,,,
-T00225.044,T00225,D_800F19CC_t,44,unk2C0C,1,short,,,preferred camera distance,,,,
-T00225.045,T00225,D_800F19CC_t,45,unk2C0E,1,short,,,actionCameraZoomMode,,,,
-T00226.000,T00226,D_800F19CC_t2,0,actionIndex,0,u_short,,,,,,,
-T00226.001,T00226,D_800F19CC_t2,1,unk2,1,char,,,element affinity index | resolved action affinity,,,,
-T00226.002,T00226,D_800F19CC_t2,2,unk3,1,char,,,damage type,,,,
-T00226.003,T00226,D_800F19CC_t2,3,unk4,1,_hitEntity_t,,,,,,,
-T00226.004,T00226,D_800F19CC_t2,4,unk48,1,u_short,,,,,,,
-T00226.005,T00226,D_800F19CC_t2,5,unk4A,1,u_short,,,target count,,,,
-T00226.006,T00226,D_800F19CC_t2,6,unk4C,1,_hitEntity_t[30],,,,,,,
-T00226.007,T00226,D_800F19CC_t2,7,unk844,1,SVECTOR,,,,,,,
-T00227.000,T00227,D_800F19CC_t5,0,unk0,1,SVECTOR,,,,,,,
-T00227.001,T00227,D_800F19CC_t5,1,unk8,1,u_char,,,,,,,
-T00227.002,T00227,D_800F19CC_t5,2,unk9,1,u_char,,,actor or environment target id,,,,
-T00227.003,T00227,D_800F19CC_t5,3,unkA,1,signed char,,,limb index,,,,
-T00227.004,T00227,D_800F19CC_t5,4,effect,0,char,,,,,,,
-T00227.005,T00227,D_800F19CC_t5,5,unkC,1,short,,,effect value,,,,
-T00227.006,T00227,D_800F19CC_t5,6,unkE,1,short,,,hit chance,,,,
-T00227.007,T00227,D_800F19CC_t5,7,unk10,1,int,,,,,,,
-T00227.008,T00227,D_800F19CC_t5,8,unk14,1,char,,,,,,,
-T00227.009,T00227,D_800F19CC_t5,9,unk15,1,char,,,,,,,
-T00227.010,T00227,D_800F19CC_t5,10,unk16,1,char,,,,,,,
-T00227.011,T00227,D_800F19CC_t5,11,enemyClass,0,char,,,,,,,
+T00225.000,T00225,D_800F19CC_t,0,unk0,1,u_int,,,Chain count or action sequence offset | chain action index,queueIndex,Index of the executing entry (low two bits),high,source:146C.c:1930
+T00225.001,T00225,D_800F19CC_t,1,unk4,1,u_int,,,retained action count,chainStep,Chain ability step; 1 when an action is committed,med,source:146C.c:3445
+T00225.002,T00225,D_800F19CC_t,2,unk8,1,D_800F19CC_t2,,,,selection,Action being chosen,high,source:146C.c:4499
+T00225.003,T00225,D_800F19CC_t,3,unk854,1,D_800F19CC_t2[4],,,recent action ring,queue,Actions queued for execution,high,source:146C.c:743
+T00225.004,T00225,D_800F19CC_t,4,unk2984,1,int,,,player targeting interface enabled,isPlayerAction,"1 when Ashley chooses the action, 0 for other actors",med,source:146C.c:4505
+T00225.005,T00225,D_800F19CC_t,5,unk2988,1,int,,,,sourceActorId,Actor whose targets are collected,low,source:146C.c:4187
+T00225.006,T00225,D_800F19CC_t,6,unk298C,1,u_char,,,selected target index,selectedPreview,Selected target preview; 0xFF none,med,source:146C.c:3783
+T00225.007,T00225,D_800F19CC_t,7,unk298D,1,u_char,,,,cameraPreview,Preview the camera follows; 0xFF none,med,source:146C.c:2809
+T00225.008,T00225,D_800F19CC_t,8,unk298E,1,char,,,,selectionFrames,Frames spent selecting,med,source:146C.c:6900
+T00225.009,T00225,D_800F19CC_t,9,unk298F,1,char,,,,reserved298F,Not read,low,declaration-only;source:146C.c:101
+T00225.010,T00225,D_800F19CC_t,10,unk2990,1,SVECTOR,,,,savedAreaCenter,Area center saved before filtering,med,source:146C.c:3595
+T00225.011,T00225,D_800F19CC_t,11,unk2998,1,SVECTOR,,,,areaCenter,Area-of-effect center,med,source:146C.c:2818
+T00225.012,T00225,D_800F19CC_t,12,unk29A0,1,char,,,,rangeShape,Shape of the range volume,med,source:146C.c:4188
+T00225.013,T00225,D_800F19CC_t,13,unk29A1,1,char,,,,rangeKind,"Range volume kind: 1 direct, 2 ground, 3 default",med,source:146C.c:4342
+T00225.014,T00225,D_800F19CC_t,14,unk29A2,1,short,,,,rangeFacing,Facing of the range volume,med,source:146C.c:4192
+T00225.015,T00225,D_800F19CC_t,15,unk29A4,1,char,,,,rangeX,Range volume X size,high,source:146C.c:4201
+T00225.016,T00225,D_800F19CC_t,16,unk29A5,1,char,,,,rangeY,Range volume Y size,high,source:146C.c:4202
+T00225.017,T00225,D_800F19CC_t,17,unk29A6,1,char,,,,rangeZ,Range volume Z size,high,source:146C.c:4203
+T00225.018,T00225,D_800F19CC_t,18,unk29A7,1,char,,,,rangeAngle,Range volume shape angle (x8),high,source:146C.c:4204
+T00225.019,T00225,D_800F19CC_t,19,unk29A8,1,SVECTOR,,,,rangeOrigin,Origin of the range volume,high,source:146C.c:4439
+T00225.020,T00225,D_800F19CC_t,20,unk29B0,1,char,,,,areaShape,Shape of the area-of-effect volume,med,source:146C.c:4097
+T00225.021,T00225,D_800F19CC_t,21,unk29B1,1,char,,,,areaKind,Area volume kind,low,source:146C.c:4098
+T00225.022,T00225,D_800F19CC_t,22,unk29B2,1,short,,,,areaFacing,Facing of the area volume,med,source:146C.c:4111
+T00225.023,T00225,D_800F19CC_t,23,unk29B4,1,char,,,,areaX,Area volume X size,high,source:146C.c:4360
+T00225.024,T00225,D_800F19CC_t,24,unk29B5,1,char,,,,areaY,Area volume Y size,high,source:146C.c:4361
+T00225.025,T00225,D_800F19CC_t,25,unk29B6,1,char,,,,areaZ,Area volume Z size,high,source:146C.c:4362
+T00225.026,T00225,D_800F19CC_t,26,unk29B7,1,char,,,,areaAngle,Area volume shape angle or pitch,med,source:146C.c:4363
+T00225.027,T00225,D_800F19CC_t,27,unk29B8,1,SVECTOR,,,,areaOrigin,Origin of the area volume,high,source:146C.c:3615
+T00225.028,T00225,D_800F19CC_t,28,unk29C0,1,D_800F19CC_t5[23],,,,previews,Selectable target previews,high,source:146C.c:2810
+T00225.029,T00225,D_800F19CC_t,29,unk2BE8,1,int,,,,reserved2BE8,Not read,low,declaration-only;source:146C.c:121
+T00225.030,T00225,D_800F19CC_t,30,unk2BEC,1,int,,,,reserved2BEC,Not read,low,declaration-only;source:146C.c:122
+T00225.031,T00225,D_800F19CC_t,31,unk2BF0,1,int,,,,reserved2BF0,Not read,low,declaration-only;source:146C.c:123
+T00225.032,T00225,D_800F19CC_t,32,unk2BF4,1,int,,,,reserved2BF4,Not read,low,declaration-only;source:146C.c:124
+T00225.033,T00225,D_800F19CC_t,33,unk2BF8,1,int,,,,reserved2BF8,Not read,low,declaration-only;source:146C.c:125
+T00225.034,T00225,D_800F19CC_t,34,unk2BFC,1,int,,,,reserved2BFC,Not read,low,declaration-only;source:146C.c:126
+T00225.035,T00225,D_800F19CC_t,35,unk2C00,1,u_short,,,target preview count,previewCount,Number of target previews,high,source:146C.c:3619
+T00225.036,T00225,D_800F19CC_t,36,unk2C02,1,char,,,,previousChainButtons,Chain buttons held last frame,low,source:146C.c:3863
+T00225.037,T00225,D_800F19CC_t,37,unk2C03,1,char,,,,chainAbilitySlot,Mapped chain ability slot + 1,high,source:146C.c:3554
+T00225.038,T00225,D_800F19CC_t,38,previousChainInput,0,char,,,,previousChainInput,Chain button pressed last,high,source:146C.c:3864
+T00225.039,T00225,D_800F19CC_t,39,battleAbilityInputSuccessful,0,char,,,,abilityInputSucceeded,Timed ability input succeeded,high,source:146C.c:3441
+T00225.040,T00225,D_800F19CC_t,40,battleAbilityInputAttempted,0,char,,,,abilityInputAttempted,Timed ability input attempted,high,source:146C.c:3922
+T00225.041,T00225,D_800F19CC_t,41,unk2C07,1,char,,,,chainContinued,Set once a chain ability continues the action,low,source:146C.c:3496
+T00225.042,T00225,D_800F19CC_t,42,battleAbilityTimer,0,u_short,,,,abilityTimer,Timer of the ability input window,high,source:146C.c:757
+T00225.043,T00225,D_800F19CC_t,43,battleAbilityTargetWindow,0,u_short,,,,abilityWindow,Ability input window; 0 when closed,high,source:146C.c:755
+T00225.044,T00225,D_800F19CC_t,44,unk2C0C,1,short,,,preferred camera distance,preferredCameraDistance,Camera distance kept after the action,med,source:146C.c:3049
+T00225.045,T00225,D_800F19CC_t,45,unk2C0E,1,short,,,actionCameraZoomMode,cameraZoomState,Action camera zoom state,low,source:146C.c:6966
+T00226.000,T00226,D_800F19CC_t2,0,actionIndex,0,u_short,,,,actionId,Action,med,declaration-only;source:146C.c:81
+T00226.001,T00226,D_800F19CC_t2,1,unk2,1,char,,,element affinity index | resolved action affinity,effectVariant,Variant passed to the effect presentation,low,source:146C.c:4047
+T00226.002,T00226,D_800F19CC_t2,2,unk3,1,char,,,damage type,damageType,Damage type of the weapon used,med,source:146C.c:13290
+T00226.003,T00226,D_800F19CC_t2,3,unk4,1,_hitEntity_t,,,,primaryTarget,Primary target and its hit result,high,source:146C.c:4498
+T00226.004,T00226,D_800F19CC_t2,4,unk48,1,u_short,,,,animationParameter,Parameter passed to the action animation,low,source:146C.c:13352
+T00226.005,T00226,D_800F19CC_t2,5,unk4A,1,u_short,,,target count,targetCount,Number of targets,high,source:146C.c:3699
+T00226.006,T00226,D_800F19CC_t2,6,unk4C,1,_hitEntity_t[30],,,,targets,Targets and their hit results,high,source:146C.c:3705
+T00226.007,T00226,D_800F19CC_t2,7,unk844,1,SVECTOR,,,,focusPosition,Position the action and camera focus on,med,source:146C.c:3724
+T00227.000,T00227,D_800F19CC_t5,0,unk0,1,SVECTOR,,,,position,World position of the target,high,source:146C.c:4266
+T00227.001,T00227,D_800F19CC_t5,1,unk8,1,u_char,,,,kind,Target kind; 16 for chests,low,source:146C.c:4276
+T00227.002,T00227,D_800F19CC_t5,2,unk9,1,u_char,,,actor or environment target id,actorId,Actor id; chest index | 0x20 for chests,med,source:146C.c:3702
+T00227.003,T00227,D_800F19CC_t5,3,unkA,1,signed char,,,limb index,limb,Target limb,high,source:146C.c:3705
+T00227.004,T00227,D_800F19CC_t5,4,effect,0,char,,,,effect,Previewed hit effect,high,source:146C.c:3244
+T00227.005,T00227,D_800F19CC_t5,5,unkC,1,short,,,effect value,previewAmount,Current HP or MP shown by the preview,med,source:146C.c:3245
+T00227.006,T00227,D_800F19CC_t5,6,unkE,1,short,,,hit chance,hitChance,Hit chance; for chests a risk-based trap chance,med,source:146C.c:3262
+T00227.007,T00227,D_800F19CC_t5,7,unk10,1,int,,,,removedStatuses,Statuses the action removes,high,source:146C.c:3263
+T00227.008,T00227,D_800F19CC_t5,8,unk14,1,char,,,,actionKind,Kind byte of the action,med,source:146C.c:3264
+T00227.009,T00227,D_800F19CC_t5,9,unk15,1,char,,,,opaque15,Copied from the action request; meaning not established,low,source:146C.c:3265
+T00227.010,T00227,D_800F19CC_t5,10,unk16,1,char,,,,opaque16,Copied from the action request; meaning not established,low,source:146C.c:3266
+T00227.011,T00227,D_800F19CC_t5,11,enemyClass,0,char,,,,enemyClass,Enemy class of the target,high,source:146C.c:3267
 T00228.000,T00228,D_800F1A68_t,0,unk0,1,int,,,x,x,Horizontal offset added to the screen center,high,source:146C.c:9324;source:146C.c:9385
 T00228.001,T00228,D_800F1A68_t,1,unk4,1,int,,,y,y,Vertical offset added to the screen center,high,source:146C.c:9325;source:146C.c:9386
 T00228.002,T00228,D_800F1A68_t,2,unk8,1,int,,,,reserved8,Cleared with the effect and never read,low,source:146C.c:9273
@@ -1401,16 +1401,16 @@ T00228.003,T00228,D_800F1A68_t,3,unkC,1,int,,,,reservedC,No access found,low,dec
 T00229.000,T00229,D_800F1ABC_t,0,poly,0,POLY_FT4[10],,,,rotatedStrips,Textured quads used when the screen is rotated or scaled,high,source:146C.c:9289
 T00229.001,T00229,D_800F1ABC_t,1,sprite,0,SPRT[10],,,,flatStrips,Sprites used when the screen is drawn unrotated,high,source:146C.c:9301
 T00229.002,T00229,D_800F1ABC_t,2,drawModes,0,DR_MODE[10],,,,drawModes,Texture page draw modes for each strip,high,source:146C.c:9392
-T00230.000,T00230,D_800F1BAC_t,0,unk0,1,SVECTOR,,,,,,,
-T00230.001,T00230,D_800F1BAC_t,1,unk8,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),,,label kind and actor index,,,,
-T00230.002,T00230,D_800F1BAC_t,2,unkA,1,u_char,,,,,,,
-T00230.003,T00230,D_800F1BAC_t,3,unkB,1,u_char,,,animation tick,,,,
-T00230.004,T00230,D_800F1BAC_t,4,unkC,1,u_short,,,signed magnitude or message value,,,,
-T00230.005,T00230,D_800F1BAC_t,5,unkE,1,u_char,,,label presentation style,,,,
-T00230.006,T00230,D_800F1BAC_t,6,displayTextLen,0,u_char,,,,,,,
-T00230.007,T00230,D_800F1BAC_t,7,unk10,1,short,,,horizontal separation,,,,
-T00230.008,T00230,D_800F1BAC_t,8,unk12,1,short,,,vertical separation,,,,
-T00230.009,T00230,D_800F1BAC_t,9,displayText,0,signed char[4],,,,,,,
+T00230.000,T00230,D_800F1BAC_t,0,unk0,1,SVECTOR,,,,position,World position; pad is the remaining lifetime,med,source:2842C.c:1778
+T00230.001,T00230,D_800F1BAC_t,1,unk8,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),,,label kind and actor index,key,Label kind and actor,high,source:2842C.c:1571
+T00230.002,T00230,D_800F1BAC_t,2,unkA,1,u_char,,,,limb,Limb or sprite index,med,source:2842C.c:1750
+T00230.003,T00230,D_800F1BAC_t,3,unkB,1,u_char,,,animation tick,frame,Animation frame,med,source:2842C.c:1572
+T00230.004,T00230,D_800F1BAC_t,4,unkC,1,u_short,,,signed magnitude or message value,value,Displayed value; bit 15 marks healing,med,source:2842C.c:1632
+T00230.005,T00230,D_800F1BAC_t,5,unkE,1,u_char,,,label presentation style,colorFlags,Color and flags; bit 7 is cleared once shown,low,source:2842C.c:1628
+T00230.006,T00230,D_800F1BAC_t,6,displayTextLen,0,u_char,,,,textLength,Length of the text,high,source:2842C.c:1638
+T00230.007,T00230,D_800F1BAC_t,7,unk10,1,short,,,horizontal separation,scaleX,Horizontal scale (ONE = 1.0),med,source:2842C.c:1620
+T00230.008,T00230,D_800F1BAC_t,8,unk12,1,short,,,vertical separation,scaleY,Vertical scale; grows by 10 per frame while rising,med,source:2842C.c:1781
+T00230.009,T00230,D_800F1BAC_t,9,displayText,0,signed char[4],,,,text,Text drawn as digit sprites,high,source:2842C.c:1637
 T00231.000,T00231,D_800F1BB0_t,0,unk0,1,signed char,,,red tint,red,Red offset,med,declaration-only;source:146C.c:162
 T00231.001,T00231,D_800F1BB0_t,1,unk1,1,signed char,,,green tint,green,Green offset,med,declaration-only;source:146C.c:163
 T00231.002,T00231,D_800F1BB0_t,2,unk2,1,signed char,,,blue tint,blue,Blue offset,med,declaration-only;source:146C.c:164
@@ -1606,18 +1606,18 @@ T00239.150,T00239,D_800F4538_t,150,unk18D2,1,u_short,,,,pendingTargetX,X of the 
 T00239.151,T00239,D_800F4538_t,151,unk18D4,1,u_short,,,,pendingTargetZ,Z of the blocked move target,low,source:3A1A0.c:341
 T00239.152,T00239,D_800F4538_t,152,unk18D6,1,u_short,,,,previousTargetX,X of the previous blocked move target,low,source:3A1A0.c:342
 T00239.153,T00239,D_800F4538_t,153,unk18D8,1,u_short,,,,previousTargetZ,Z of the previous blocked move target,low,source:3A1A0.c:343
-T00240.000,T00240,D_800F4538_t2,0,actorId,0,u_char,3,,,,,,
-T00240.001,T00240,D_800F4538_t2,1,unk0_3,1,u_char,1,,,,,,
-T00240.002,T00240,D_800F4538_t2,2,unk0_4,1,u_char,2,,,,,,
-T00240.003,T00240,D_800F4538_t2,3,unk0_7,1,u_char,2,,,,,,
-T00240.004,T00240,D_800F4538_t2,4,unk1,1,u_char,,,,,,,
-T00240.005,T00240,D_800F4538_t2,5,unk2,1,u_char,,,,,,,
-T00240.006,T00240,D_800F4538_t2,6,unk3,1,u_char,,,,,,,
-T00240.007,T00240,D_800F4538_t2,7,unk4,1,u_char,,,,,,,
-T00240.008,T00240,D_800F4538_t2,8,unk5,1,u_char,,,,,,,
-T00240.009,T00240,D_800F4538_t2,9,unk6,1,u_char,,,,,,,
-T00240.010,T00240,D_800F4538_t2,10,unk7,1,u_char,,,,,,,
-T00240.011,T00240,D_800F4538_t2,11,unk8,1,int,,,,,,,
+T00240.000,T00240,D_800F4538_t2,0,actorId,0,u_char,3,,,objectId,Object id matched when models are shared,med,declaration-only;source:3A1A0.h:12
+T00240.001,T00240,D_800F4538_t2,1,unk0_3,1,u_char,1,,,isFalling,Set when the stack under it is removed,low,source:30DB0.c:3264
+T00240.002,T00240,D_800F4538_t2,2,unk0_4,1,u_char,2,,,interaction,"Interaction kind; 1 is interactable ahead, 2 drops",low,source:3A1A0.c:608
+T00240.003,T00240,D_800F4538_t2,3,unk0_7,1,u_char,2,,,reservedBits7,Not read,low,declaration-only;source:3A1A0.h:15
+T00240.004,T00240,D_800F4538_t2,4,unk1,1,u_char,,,,subtype,Gimmick subtype,high,source:30DB0.c:3360
+T00240.005,T00240,D_800F4538_t2,5,unk2,1,u_char,,,,material,Material; also the orientation table index,med,source:30DB0.c:3698
+T00240.006,T00240,D_800F4538_t2,6,unk3,1,u_char,,,,carrier,Gimmick it rests on; 0xFF when none,med,source:30DB0.c:354
+T00240.007,T00240,D_800F4538_t2,7,unk4,1,u_char,,,,supportIndex,First support slot scanned when moving,low,source:3A1A0.c:1772
+T00240.008,T00240,D_800F4538_t2,8,unk5,1,u_char,,,,reserved5,Not read,low,declaration-only;source:3A1A0.h:20
+T00240.009,T00240,D_800F4538_t2,9,unk6,1,u_char,,,,reserved6,Not read,low,declaration-only;source:3A1A0.h:21
+T00240.010,T00240,D_800F4538_t2,10,unk7,1,u_char,,,,reserved7,Not read,low,declaration-only;source:3A1A0.h:22
+T00240.011,T00240,D_800F4538_t2,11,unk8,1,int,,,,reserved8,Not read,low,declaration-only;source:3A1A0.h:23
 T00241.000,T00241,D_800F4538_unk0,0,nBones,0,u_char,,,,boneCount,SHP bone count,high,source:30DB0.c:1137
 T00241.001,T00241,D_800F4538_unk0,1,nVertexGroups,0,u_char,,,,vertexGroupCount,SHP vertex group count,med,declaration-only;source:3A1A0.h:124
 T00241.002,T00241,D_800F4538_unk0,2,nTriangles,0,u_short,,,,triangleCount,SHP triangle count,high,source:30DB0.c:1287
@@ -1698,15 +1698,15 @@ T00243.004,T00243,D_800F4538_unk181C,4,interval,0,u_char,,,,interval,Ticks betwe
 T00243.005,T00243,D_800F4538_unk181C,5,timer,0,u_char,,,,timer,Ticks since the last step,high,source:40564.c:1583
 T00243.006,T00243,D_800F4538_unk181C,6,unk6,1,u_char,,,,pad6,No access found,low,declaration-only;source:3A1A0.h:240
 T00243.007,T00243,D_800F4538_unk181C,7,unk7,1,u_char,,,,pad7,No access found,low,declaration-only;source:3A1A0.h:241
-T00244.000,T00244,D_800F4538_unk1848,0,unk0,1,u_char,,,,,,,
-T00244.001,T00244,D_800F4538_unk1848,1,unk1,1,u_char,,,,,,,
-T00244.002,T00244,D_800F4538_unk1848,2,unk2,1,u_char,,,,,,,
-T00244.003,T00244,D_800F4538_unk1848,3,unk3,1,u_char,,,,,,,
-T00244.004,T00244,D_800F4538_unk1848,4,unk4,1,short,,,,,,,
-T00244.005,T00244,D_800F4538_unk1848,5,unk6,1,short,,,,,,,
-T00244.006,T00244,D_800F4538_unk1848,6,unk8,1,u_int,,,,,,,
-T00244.007,T00244,D_800F4538_unk1848,7,unkC,1,int,,,,,,,
-T00244.008,T00244,D_800F4538_unk1848,8,unk10,1,SVECTOR,,,,,,,
+T00244.000,T00244,D_800F4538_unk1848,0,unk0,1,u_char,,,,mode,"Movement mode (0 none, 1, 2, 6 turn, 7 jump)",med,source:3A1A0.c:1084
+T00244.001,T00244,D_800F4538_unk1848,1,unk1,1,u_char,,,,reserved1,Not read,low,declaration-only;source:3A1A0.h:103
+T00244.002,T00244,D_800F4538_unk1848,2,unk2,1,u_char,,,,reserved2,Not read,low,declaration-only;source:3A1A0.h:104
+T00244.003,T00244,D_800F4538_unk1848,3,unk3,1,u_char,,,,reserved3,Not read,low,declaration-only;source:3A1A0.h:105
+T00244.004,T00244,D_800F4538_unk1848,4,unk4,1,short,,,,direction,Movement direction,med,source:3A1A0.c:1085
+T00244.005,T00244,D_800F4538_unk1848,5,unk6,1,short,,,,facing,Facing to turn to,med,source:38C1C.c:690
+T00244.006,T00244,D_800F4538_unk1848,6,unk8,1,u_int,,,,distance,Distance or speed of the move,med,source:3A1A0.c:1086
+T00244.007,T00244,D_800F4538_unk1848,7,unkC,1,int,,,,reservedC,Not read,low,declaration-only;source:3A1A0.h:109
+T00244.008,T00244,D_800F4538_unk1848,8,unk10,1,SVECTOR,,,,step,Movement vector added to the position,high,source:38C1C.c:714
 T00245.000,T00245,D_800F4538_unk1864,0,unk0,1,int,,,,reserved0,Not read,low,declaration-only;source:3A1A0.h:41
 T00245.001,T00245,D_800F4538_unk1864,1,unk4,1,u_char,,,angle interpolation ticks,levelFrames,Frames left in the level blend,med,source:44F14.c:1233
 T00245.002,T00245,D_800F4538_unk1864,2,unk5,1,u_char,,,offset interpolation ticks,radiusFrames,Frames left in the radius-rate blend,med,source:44F14.c:1242
@@ -1718,10 +1718,10 @@ T00245.007,T00245,D_800F4538_unk1864,7,unkC,1,u_short,,,shadow scale factor,radi
 T00245.008,T00245,D_800F4538_unk1864,8,unkE,1,u_short,,,shadow scale factor,radiusShrinkRate,Current shadow radius shrink rate,high,source:30DB0.c:3883
 T00245.009,T00245,D_800F4538_unk1864,9,unk10,1,short,,,,radiusExpandDelta,Expand-rate change still to apply,high,source:30DB0.c:3886
 T00245.010,T00245,D_800F4538_unk1864,10,unk12,1,short,,,,radiusShrinkDelta,Shrink-rate change still to apply,high,source:30DB0.c:3887
-T00246.000,T00246,D_800F4538_unk58,0,unk0,1,signed char,,,,,,,
-T00246.001,T00246,D_800F4538_unk58,1,unk1,1,signed char,,,,,,,
-T00246.002,T00246,D_800F4538_unk58,2,unk2,1,signed char,,,,,,,
-T00246.003,T00246,D_800F4538_unk58,3,unk3,1,u_char,,,,,,,
+T00246.000,T00246,D_800F4538_unk58,0,unk0,1,signed char,,,,offsetX,X offset added to the position,med,source:44F14.c:1067
+T00246.001,T00246,D_800F4538_unk58,1,unk1,1,signed char,,,,offsetY,Y offset added to the position,med,source:44F14.c:1069
+T00246.002,T00246,D_800F4538_unk58,2,unk2,1,signed char,,,,offsetZ,Z offset added to the position,med,source:44F14.c:1071
+T00246.003,T00246,D_800F4538_unk58,3,unk3,1,u_char,,,,depthBias,Draw depth bias in units of 4; 8 by default,med,source:44F14.c:1065
 T00247.000,T00247,D_800F4538_unk58_2,0,unk0,1,u_char,,,,red,First color byte,med,source:30DB0.c:3912
 T00247.001,T00247,D_800F4538_unk58_2,1,unk1,1,u_char,,,,green,Second color byte,med,source:30DB0.c:3913
 T00247.002,T00247,D_800F4538_unk58_2,2,unk2,1,u_char,,,,blue,Third color byte,med,source:30DB0.c:3914
@@ -2069,15 +2069,15 @@ T00263.009,T00263,D_800F53B8_t2,9,unk21,1,u_char,,,,,,,
 T00263.010,T00263,D_800F53B8_t2,10,unk22,1,u_char,,,,,,,
 T00263.011,T00263,D_800F53B8_t2,11,unk23,1,u_char,,,,,,,
 T00263.012,T00263,D_800F53B8_t2,12,unk24,1,int,,,,,,,
-T00264.000,T00264,D_800F53B8_t3,0,unk0,1,actionEffectTarget,,,,,,,
-T00264.001,T00264,D_800F53B8_t3,1,unkC,1,actionEffectTarget,,,,,,,
-T00264.002,T00264,D_800F53B8_t3,2,unk18,1,actionEffectTarget,,,,,,,
-T00264.003,T00264,D_800F53B8_t3,3,unk24,1,actionEffectTarget,,,,,,,
-T00264.004,T00264,D_800F53B8_t3,4,unk30,1,D_800F53B8_t4 *,,,,,,,
-T00264.005,T00264,D_800F53B8_t3,5,unk34,1,func_800D4910_t *,,,renderer list,,,,
-T00264.006,T00264,D_800F53B8_t3,6,unk38,1,short,,,,,,,
-T00264.007,T00264,D_800F53B8_t3,7,unk3A,1,short,,,secondary phase,,,,
-T00264.008,T00264,D_800F53B8_t3,8,unk3C,1,int,,,,,,,
+T00264.000,T00264,D_800F53B8_t3,0,unk0,1,actionEffectTarget,,,,source,Effect source,med,source:5BF94.c:5104
+T00264.001,T00264,D_800F53B8_t3,1,unkC,1,actionEffectTarget,,,,emitFrom,"Where the effect starts: the source, or the target for reversed effects",low,source:5BF94.c:5105
+T00264.002,T00264,D_800F53B8_t3,2,unk18,1,actionEffectTarget,,,,target,Effect target; byte 2 also selects a color preset,low,source:5BF94.c:5106
+T00264.003,T00264,D_800F53B8_t3,3,unk24,1,actionEffectTarget,,,,emitTo,"Where the effect ends: the target, or the source for reversed effects",low,source:5BF94.c:5107
+T00264.004,T00264,D_800F53B8_t3,4,unk30,1,D_800F53B8_t4 *,,,,timeline,Effect timeline,med,source:5BF94.c:5470
+T00264.005,T00264,D_800F53B8_t3,5,unk34,1,func_800D4910_t *,,,renderer list,renderer,Renderer attached to the effect,med,source:5BF94.c:5158
+T00264.006,T00264,D_800F53B8_t3,6,unk38,1,short,,,,effectId,Effect id,high,source:5BF94.c:5518
+T00264.007,T00264,D_800F53B8_t3,7,unk3A,1,short,,,secondary phase,phase,Secondary effect phase,med,source:5BF94.c:5336
+T00264.008,T00264,D_800F53B8_t3,8,unk3C,1,int,,,,parameter,Spawn parameter; nonzero attaches a renderer,low,source:5BF94.c:5517
 T00265.000,T00265,D_800F53B8_t4,0,unk0,1,char,,,trackCount,,,,
 T00265.001,T00265,D_800F53B8_t4,1,unk1,1,char,,,,,,,
 T00265.002,T00265,D_800F53B8_t4,2,unk2,1,short,,,frame,,,,
@@ -2129,43 +2129,43 @@ T00270.015,T00270,D_800F569C_t,15,block12Data,0,void *,,,,,,,
 T00270.016,T00270,D_800F569C_t,16,block13Data,0,void *,,,,,,,
 T00270.017,T00270,D_800F569C_t,17,unkCC,1,int,,,soundRegistrationResult,,,,
 T00270.018,T00270,D_800F569C_t,18,unkD0,1,actionEffectRequest *,,,,,,,
-T00271.000,T00271,D_800F58BC_t,0,maxX,0,u_char,,,,,,,
-T00271.001,T00271,D_800F58BC_t,1,maxZ,0,u_char,,,,,,,
-T00271.002,T00271,D_800F58BC_t,2,minX,0,u_char,,,,,,,
-T00271.003,T00271,D_800F58BC_t,3,minZ,0,u_char,,,,,,,
-T00271.004,T00271,D_800F58BC_t,4,unk4,1,char[4],,,,,,,
-T00271.005,T00271,D_800F58BC_t,5,unk8,1,u_char,,,,,,,
-T00271.006,T00271,D_800F58BC_t,6,unk9,1,char,,,,,,,
-T00271.007,T00271,D_800F58BC_t,7,unkA,1,u_char,,,layout:upstream,,,,
-T00271.008,T00271,D_800F58BC_t,8,unkB,1,char[9],,,layout:upstream,,,,
-T00271.009,T00271,D_800F58BC_t,9,unk14,1,int,,,,,,,
-T00271.010,T00271,D_800F58BC_t,10,unk18,1,u_short,,,,,,,
-T00271.011,T00271,D_800F58BC_t,11,unk1A,1,char[2],,,,,,,
-T00271.012,T00271,D_800F58BC_t,12,unk1C,1,func_800E78F4_t *,,,,,,,
-T00271.013,T00271,D_800F58BC_t,13,unk20,1,func_800E78F4_t *,,,,,,,
-T00271.014,T00271,D_800F58BC_t,14,unk24,1,int,,,,,,,
-T00271.015,T00271,D_800F58BC_t,15,unk28,1,vs_battle_actor *[4],,,,,,,
-T00272.000,T00272,D_800F5910_t,0,unk0_0,1,u_short,5,,,,,,
-T00272.001,T00272,D_800F5910_t,1,unk0_5,1,u_short,5,,,,,,
-T00272.002,T00272,D_800F5910_t,2,unk0_10,1,u_short,6,,,,,,
-T00273.000,T00273,D_800F5920_t,0,unk0,1,u_short,,,,,,,
-T00273.001,T00273,D_800F5920_t,1,unk2,1,u_char,,,layout:upstream,,,,
-T00273.002,T00273,D_800F5920_t,2,unk3,1,u_char,,,layout:upstream,,,,
-T00273.003,T00273,D_800F5920_t,3,unk4,1,int,,,layout:upstream,,,,
-T00273.004,T00273,D_800F5920_t,4,unk8,1,char[2],,,layout:upstream,,,,
-T00273.005,T00273,D_800F5920_t,5,unkA,1,u_char,,,,,,,
-T00273.006,T00273,D_800F5920_t,6,unkB,1,u_char,,,,,,,
-T00273.007,T00273,D_800F5920_t,7,unkC,1,short,,,special-action cooldown,,,,
-T00273.008,T00273,D_800F5920_t,8,unkE,1,short,,,special-action request,,,,
-T00273.009,T00273,D_800F5920_t,9,unk10,1,short,,,,,,,
-T00273.010,T00273,D_800F5920_t,10,unk12,1,short,,,,,,,
-T00273.011,T00273,D_800F5920_t,11,unk14,1,u_char,,,,,,,
-T00273.012,T00273,D_800F5920_t,12,unk15,1,char,,,layout:upstream,,,,
-T00273.013,T00273,D_800F5920_t,13,unk16,1,u_char,,,,,,,
-T00273.014,T00273,D_800F5920_t,14,unk17,1,u_char,,,,,,,
-T00273.015,T00273,D_800F5920_t,15,unk18,1,short,,,,,,,
-T00273.016,T00273,D_800F5920_t,16,unk1A,1,short,,,layout:upstream,,,,
-T00273.017,T00273,D_800F5920_t,17,unk1C,1,u_char,,,,,,,
+T00271.000,T00271,D_800F58BC_t,0,maxX,0,u_char,,,,maxTileX,Largest tile X,med,declaration-only;source:6F014.c:210
+T00271.001,T00271,D_800F58BC_t,1,maxZ,0,u_char,,,,maxTileZ,Largest tile Z,med,declaration-only;source:6F014.c:211
+T00271.002,T00271,D_800F58BC_t,2,minX,0,u_char,,,,minTileX,Smallest tile X,med,declaration-only;source:6F014.c:212
+T00271.003,T00271,D_800F58BC_t,3,minZ,0,u_char,,,,minTileZ,Smallest tile Z,med,declaration-only;source:6F014.c:213
+T00271.004,T00271,D_800F58BC_t,4,unk4,1,char[4],,,,reserved4,Not read,low,declaration-only;source:6F014.c:214
+T00271.005,T00271,D_800F58BC_t,5,unk8,1,u_char,,,,defaultActionDelay,Action delay used when an actor has none of its own,low,source:71618.c:1029
+T00271.006,T00271,D_800F58BC_t,6,unk9,1,char,,,,reserved9,Not read,low,declaration-only;source:6F014.c:216
+T00271.007,T00271,D_800F58BC_t,7,unkA,1,u_char,,,layout:upstream,allowsNonSpellActions,Marks non-spell action entries usable,low,source:upstream:6E644.c:3789
+T00271.008,T00271,D_800F58BC_t,8,unkB,1,char[9],,,layout:upstream,reservedB,Not read,low,declaration-only;source:upstream:6E644.c:316
+T00271.009,T00271,D_800F58BC_t,9,unk14,1,int,,,,flightCeiling,Height limit for flying actors; 0 when none,med,source:771A8.c:1115
+T00271.010,T00271,D_800F58BC_t,10,unk18,1,u_short,,,,readinessLevel,Threshold an action entry must not exceed to be ready,low,source:6FC00.c:524
+T00271.011,T00271,D_800F58BC_t,11,unk1A,1,char[2],,,,reserved1A,Not read,low,declaration-only;source:6F014.c:219
+T00271.012,T00271,D_800F58BC_t,12,unk1C,1,func_800E78F4_t *,,,,engagedHead,First engaged actor,med,source:73700.c:501
+T00271.013,T00271,D_800F58BC_t,13,unk20,1,func_800E78F4_t *,,,,engagedTail,Last engaged actor,low,source:73700.c:422
+T00271.014,T00271,D_800F58BC_t,14,unk24,1,int,,,,approachMoves,Approach moves made this update,low,source:71618.c:796
+T00271.015,T00271,D_800F58BC_t,15,unk28,1,vs_battle_actor *[4],,,,specialActors,Actors whose models are of kind 2 or 4,med,source:71618.c:1111
+T00272.000,T00272,D_800F5910_t,0,unk0_0,1,u_short,5,,,tileX,Tile X,med,source:771A8.c:464
+T00272.001,T00272,D_800F5910_t,1,unk0_5,1,u_short,5,,,tileZ,Tile Z,med,source:771A8.c:465
+T00272.002,T00272,D_800F5910_t,2,unk0_10,1,u_short,6,,,reservedBits10,Not read,low,declaration-only;source:6F014.c:42
+T00273.000,T00273,D_800F5920_t,0,unk0,1,u_short,,,,heading,Heading toward the arena centre,low,source:upstream:6E644.c:3969
+T00273.001,T00273,D_800F5920_t,1,unk2,1,u_char,,,layout:upstream,phase,Orbit phase,med,source:upstream:6E644.c:3950
+T00273.002,T00273,D_800F5920_t,2,unk3,1,u_char,,,layout:upstream,distanceCached,Set once the distance is measured,low,source:upstream:6E644.c:3982
+T00273.003,T00273,D_800F5920_t,3,unk4,1,int,,,layout:upstream,distanceSquared,Squared distance to the arena centre,med,source:upstream:6E644.c:4035
+T00273.004,T00273,D_800F5920_t,4,unk8,1,char[2],,,layout:upstream,reserved8,Not read,low,declaration-only;source:upstream:6E644.c:331
+T00273.005,T00273,D_800F5920_t,5,unkA,1,u_char,,,,isOrbiting,Set while orbiting,low,source:7EE98.c:776
+T00273.006,T00273,D_800F5920_t,6,unkB,1,u_char,,,,pathStep,Step in the orbit path table,med,source:upstream:6E644.c:3983
+T00273.007,T00273,D_800F5920_t,7,unkC,1,short,,,special-action cooldown,cooldown,Frames before the orbit can restart; 900 when started,med,source:7EE98.c:781
+T00273.008,T00273,D_800F5920_t,8,unkE,1,short,,,special-action request,requested,Orbit requested,low,source:7EE98.c:782
+T00273.009,T00273,D_800F5920_t,9,unk10,1,short,,,,orbitAngle,Angle around the centre,med,source:upstream:6E644.c:3954
+T00273.010,T00273,D_800F5920_t,10,unk12,1,short,,,,savedHeight,Height saved when the orbit starts,low,source:7EE98.c:809
+T00273.011,T00273,D_800F5920_t,11,unk14,1,u_char,,,,reserved14,Not read,low,declaration-only;source:6F014.c:234
+T00273.012,T00273,D_800F5920_t,12,unk15,1,char,,,layout:upstream,reserved15,Not read,low,declaration-only;source:upstream:6E644.c:339
+T00273.013,T00273,D_800F5920_t,13,unk16,1,u_char,,,,planSaved,The actor's plan count is saved,low,source:7EE98.c:786
+T00273.014,T00273,D_800F5920_t,14,unk17,1,u_char,,,,savedPlanCount,Plan count restored when the orbit ends,low,source:7EE98.c:783
+T00273.015,T00273,D_800F5920_t,15,unk18,1,short,,,,startX,X where the orbit started,med,source:upstream:6E644.c:3957
+T00273.016,T00273,D_800F5920_t,16,unk1A,1,short,,,layout:upstream,startZ,Z where the orbit started,med,source:upstream:6E644.c:3958
+T00273.017,T00273,D_800F5920_t,17,unk1C,1,u_char,,,,started,Set when the orbit begins,low,source:upstream:6E644.c:4031
 T00274.000,T00274,FAkaoFileBlob,0,Magic,0,int,,,,magic,File signature,med,declaration-only;source:sound.h:189
 T00274.001,T00274,FAkaoFileBlob,1,unk_0x4,1,char[12],,,,reserved04,Unidentified header bytes,low,declaration-only;source:sound.h:190
 T00274.002,T00274,FAkaoFileBlob,2,ProgramOffsets,0,u_short[256][2],,,,programOffsets,Program offset pairs,med,declaration-only;source:sound.h:192
@@ -2505,15 +2505,15 @@ T00294.027,T00294,TrailPacket,27,xy3,0,long,,,,,,,
 T00294.028,T00294,TrailPacket,28,uv3,0,u_short,,,,,,,
 T00294.029,T00294,TrailPacket,29,pad5,1,u_short,,,,,,,
 T00294.030,T00294,TrailPacket,30,endMode,0,u_long,,,,,,,
-T00295.000,T00295,VS_POLY_FT4,0,r0g0b0code,0,u_long,,,,,,,
-T00295.001,T00295,VS_POLY_FT4,1,x0y0,0,u_long,,,,,,,
-T00295.002,T00295,VS_POLY_FT4,2,u0v0clut,0,u_long,,,,,,,
-T00295.003,T00295,VS_POLY_FT4,3,x1y1,0,u_long,,,,,,,
-T00295.004,T00295,VS_POLY_FT4,4,u1v1tpage,0,u_long,,,,,,,
-T00295.005,T00295,VS_POLY_FT4,5,x2y2,0,u_long,,,,,,,
-T00295.006,T00295,VS_POLY_FT4,6,u2v2,0,u_long,,,,,,,
-T00295.007,T00295,VS_POLY_FT4,7,x3y3,0,u_long,,,,,,,
-T00295.008,T00295,VS_POLY_FT4,8,u3v3,0,u_long,,,,,,,
+T00295.000,T00295,VS_POLY_FT4,0,r0g0b0code,0,u_long,,,,colorCode,Color and command,med,declaration-only;source:gpu.h:84
+T00295.001,T00295,VS_POLY_FT4,1,x0y0,0,u_long,,,,xy0,Vertex 0,med,declaration-only;source:gpu.h:85
+T00295.002,T00295,VS_POLY_FT4,2,u0v0clut,0,u_long,,,,uv0Palette,UV 0 and palette,med,declaration-only;source:gpu.h:86
+T00295.003,T00295,VS_POLY_FT4,3,x1y1,0,u_long,,,,xy1,Vertex 1,med,declaration-only;source:gpu.h:87
+T00295.004,T00295,VS_POLY_FT4,4,u1v1tpage,0,u_long,,,,uv1TexturePage,UV 1 and texture page,med,declaration-only;source:gpu.h:88
+T00295.005,T00295,VS_POLY_FT4,5,x2y2,0,u_long,,,,xy2,Vertex 2,med,declaration-only;source:gpu.h:89
+T00295.006,T00295,VS_POLY_FT4,6,u2v2,0,u_long,,,,uv2,UV 2,med,declaration-only;source:gpu.h:90
+T00295.007,T00295,VS_POLY_FT4,7,x3y3,0,u_long,,,,xy3,Vertex 3,med,declaration-only;source:gpu.h:91
+T00295.008,T00295,VS_POLY_FT4,8,u3v3,0,u_long,,,,uv3,UV 3,med,declaration-only;source:gpu.h:92
 T00296.000,T00296,VS_POLY_G4,0,r0g0b0code,0,u_long,,,,colorZeroAndCode,First vertex color and command code,med,declaration-only;source:gpu.h:73
 T00296.001,T00296,VS_POLY_G4,1,x0y0,0,u_long,,,,positionZero,First vertex position,med,declaration-only;source:gpu.h:74
 T00296.002,T00296,VS_POLY_G4,2,r1g1b1,0,u_long,,,,colorOne,Second vertex color,med,declaration-only;source:gpu.h:75
@@ -2620,36 +2620,36 @@ T00310.004,T00310,_gazetteRow,4,x,0,short,,,,,,,
 T00310.005,T00310,_gazetteRow,5,rowIndex,0,short,,,,,,,
 T00310.006,T00310,_gazetteRow,6,title,0,char *,,,,,,,
 T00310.007,T00310,_gazetteRow,7,description,0,char *,,,,,,,
-T00311.000,T00311,_hitEntity_t,0,unk0,1,func_8008631C_t2,,,,,,,
-T00311.001,T00311,_hitEntity_t,1,risk,0,short,,,,,,,
-T00311.002,T00311,_hitEntity_t,2,strength,0,short,,,,,,,
-T00311.003,T00311,_hitEntity_t,3,intelligence,0,short,,,,,,,
-T00311.004,T00311,_hitEntity_t,4,agility,0,short,,,,,,,
-T00311.005,T00311,_hitEntity_t,5,maxHp,0,short,,,,,,,
-T00311.006,T00311,_hitEntity_t,6,maxMp,0,short,,,,,,,
-T00311.007,T00311,_hitEntity_t,7,removeStatuses,0,int,,,status additions,,,,
-T00311.008,T00311,_hitEntity_t,8,inflictStatuses,0,int,,,,,,,
-T00311.009,T00311,_hitEntity_t,9,hpEffect,0,u_int,2,,,,,,
-T00311.010,T00311,_hitEntity_t,10,mpEffect,0,u_int,2,,,,,,
-T00311.011,T00311,_hitEntity_t,11,riskEffect,0,u_int,2,,,,,,
-T00311.012,T00311,_hitEntity_t,12,strengthEffect,0,u_int,2,,,,,,
-T00311.013,T00311,_hitEntity_t,13,intelligenceEffect,0,u_int,2,,,,,,
-T00311.014,T00311,_hitEntity_t,14,agilityEffect,0,u_int,2,,,,,,
-T00311.015,T00311,_hitEntity_t,15,maxHpEffect,0,u_int,2,,,,,,
-T00311.016,T00311,_hitEntity_t,16,maxMpEffect,0,u_int,2,,,,,,
-T00311.017,T00311,_hitEntity_t,17,unk1C_16,1,u_int,2,,status feedback direction (1 harmful,,,,
-T00311.018,T00311,_hitEntity_t,18,weaponDpEffect,0,u_int,2,,,,,,
-T00311.019,T00311,_hitEntity_t,19,weaponPpEffect,0,u_int,2,,,,,,
-T00311.020,T00311,_hitEntity_t,20,armorDpEffect,0,u_int,2,,,,,,
-T00311.021,T00311,_hitEntity_t,21,shieldPpEffect,0,u_int,2,,,,,,
-T00311.022,T00311,_hitEntity_t,22,unk1C_26,1,u_int,2,,special source effect result,,,,
-T00311.023,T00311,_hitEntity_t,23,unk1C_28,1,u_int,4,,,,,,
-T00311.024,T00311,_hitEntity_t,24,limbs,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5)[6],,,,,,,
-T00311.025,T00311,_hitEntity_t,25,weaponDp,0,short,,,,,,,
-T00311.026,T00311,_hitEntity_t,26,weaponPp,0,short,,,,,,,
-T00311.027,T00311,_hitEntity_t,27,armorDp,0,short,,,,,,,
-T00311.028,T00311,_hitEntity_t,28,shieldPp,0,short,,,,,,,
-T00311.029,T00311,_hitEntity_t,29,unk40,1,int,,,,,,,
+T00311.000,T00311,_hitEntity_t,0,unk0,1,func_8008631C_t2,,,,target,"Target actor and limb with HP, MP and hit chance",high,source:146C.c:4498
+T00311.001,T00311,_hitEntity_t,1,risk,0,short,,,,riskChange,Risk change,high,source:146C.c:12904
+T00311.002,T00311,_hitEntity_t,2,strength,0,short,,,,strengthChange,Strength change,high,source:146C.c:12722
+T00311.003,T00311,_hitEntity_t,3,intelligence,0,short,,,,intelligenceChange,Intelligence change,high,source:146C.c:12731
+T00311.004,T00311,_hitEntity_t,4,agility,0,short,,,,agilityChange,Agility change,high,source:146C.c:12740
+T00311.005,T00311,_hitEntity_t,5,maxHp,0,short,,,,maxHpChange,Maximum HP change,high,source:146C.c:12749
+T00311.006,T00311,_hitEntity_t,6,maxMp,0,short,,,,maxMpChange,Maximum MP change,high,source:146C.c:12758
+T00311.007,T00311,_hitEntity_t,7,removeStatuses,0,int,,,status additions,removeStatuses,Statuses removed,high,source:146C.c:11208
+T00311.008,T00311,_hitEntity_t,8,inflictStatuses,0,int,,,,inflictStatuses,Statuses inflicted,high,source:146C.c:11210
+T00311.009,T00311,_hitEntity_t,9,hpEffect,0,u_int,2,,,hpEffect,"HP effect: 1 damage, 2 restore, 3 other",med,declaration-only;source:146C.c:54
+T00311.010,T00311,_hitEntity_t,10,mpEffect,0,u_int,2,,,mpEffect,"MP effect: 1 drain, 2 restore",high,source:146C.c:12832
+T00311.011,T00311,_hitEntity_t,11,riskEffect,0,u_int,2,,,riskEffect,Risk effect direction,high,source:146C.c:12905
+T00311.012,T00311,_hitEntity_t,12,strengthEffect,0,u_int,2,,,strengthEffect,"Strength effect: 1 down, 2 up",high,source:146C.c:12723
+T00311.013,T00311,_hitEntity_t,13,intelligenceEffect,0,u_int,2,,,intelligenceEffect,"Intelligence effect: 1 down, 2 up",high,source:146C.c:12732
+T00311.014,T00311,_hitEntity_t,14,agilityEffect,0,u_int,2,,,agilityEffect,"Agility effect: 1 down, 2 up",high,source:146C.c:12741
+T00311.015,T00311,_hitEntity_t,15,maxHpEffect,0,u_int,2,,,maxHpEffect,Maximum HP effect direction,high,source:146C.c:12750
+T00311.016,T00311,_hitEntity_t,16,maxMpEffect,0,u_int,2,,,maxMpEffect,Maximum MP effect direction,high,source:146C.c:12759
+T00311.017,T00311,_hitEntity_t,17,unk1C_16,1,u_int,2,,status feedback direction (1 harmful,statStatusEffect,"Stat status change: 1 down, 2 up (Strength/Intelligence/Agility down/up)",med,source:146C.c:12278
+T00311.018,T00311,_hitEntity_t,18,weaponDpEffect,0,u_int,2,,,weaponDpEffect,Weapon DP effect direction,high,source:146C.c:12895
+T00311.019,T00311,_hitEntity_t,19,weaponPpEffect,0,u_int,2,,,weaponPpEffect,"Weapon PP effect: 1 drain, 2 restore",high,source:146C.c:12843
+T00311.020,T00311,_hitEntity_t,20,armorDpEffect,0,u_int,2,,,armorDpEffect,Armor DP effect direction,high,source:146C.c:12569
+T00311.021,T00311,_hitEntity_t,21,shieldPpEffect,0,u_int,2,,,shieldPpEffect,Shield PP effect direction,high,source:146C.c:12857
+T00311.022,T00311,_hitEntity_t,22,unk1C_26,1,u_int,2,,special source effect result,sourceResult,Set to 2 when the source action succeeds,low,source:146C.c:12551
+T00311.023,T00311,_hitEntity_t,23,unk1C_28,1,u_int,4,,,reservedBits28,Not read,low,declaration-only;source:146C.c:68
+T00311.024,T00311,_hitEntity_t,24,limbs,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5)[6],,,,limbs,Per-limb results,high,source:146C.c:10641
+T00311.025,T00311,_hitEntity_t,25,weaponDp,0,short,,,,weaponDpChange,Weapon DP change,high,source:146C.c:14265
+T00311.026,T00311,_hitEntity_t,26,weaponPp,0,short,,,,weaponPpChange,Weapon PP change,high,source:146C.c:12842
+T00311.027,T00311,_hitEntity_t,27,armorDp,0,short,,,,armorDpChange,Armor DP change,high,source:146C.c:12567
+T00311.028,T00311,_hitEntity_t,28,shieldPp,0,short,,,,shieldPpChange,Shield PP change,high,source:146C.c:12856
+T00311.029,T00311,_hitEntity_t,29,unk40,1,int,,,,targetsPosition,Nonzero when the target is a position rather than an actor,med,source:146C.c:1939
 T00312.000,T00312,_hitIntermediate,0,type,0,u_char,,,,,,,
 T00312.001,T00312,_hitIntermediate,1,sourceAffinity,0,u_char,,,,,,,
 T00312.002,T00312,_hitIntermediate,2,sourceClass,0,u_char,,,,,,,
@@ -6702,87 +6702,87 @@ T00741.010,T00741,zudHeader,10,weaponEffect,0,int,,,,battleAnimationOffset,Weapo
 T00741.011,T00741,zudHeader,11,weaponEffectSize,0,int,,,,battleAnimationSize,Weapon-category battle SEQ length,med,declaration-only;source:146C.c:274
 T00746.000,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,,,,
 T00746.001,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,,,,
-T00747.000,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),0,effects,0,limbEffects_t,,,,,,,
-T00747.001,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),1,hp,0,u_int,,,,,,,
+T00747.000,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),0,effects,0,limbEffects_t,,,,effects,Effect values for the limb,high,source:146C.c:10641
+T00747.001,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),1,hp,0,u_int,,,,packed,Both effect values as one word; summed across entities,low,source:146C.c:12942
 T00748.000,T00748,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,halves,Halves of the packed pair,med,declaration-only;source:146C.h:129
 T00748.001,T00748,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,word,Word of the packed pair,med,declaration-only;source:146C.h:130
-T00749.000,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,,,,
-T00749.001,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),1,u16,0,u_short[2],,,,,,,
-T00749.002,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,,,,
-T00750.000,T00750,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,,,,
-T00750.001,T00750,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,,,,
-T00751.000,T00751,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,,,,
-T00751.001,T00751,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,,,,
-T00752.000,T00752,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,,,,
-T00752.001,T00752,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:90:9),,,,,,,
+T00749.000,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,bytes,Bytes 0 and 2 seed the target selection,med,source:146C.c:4509
+T00749.001,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),1,u16,0,u_short[2],,,,halves,Last targeted actor and limb,low,source:146C.c:4308
+T00749.002,T00749,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
+T00750.000,T00750,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
+T00750.001,T00750,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
+T00751.000,T00751,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
+T00751.001,T00751,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00752.000,T00752,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
+T00752.001,T00752,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:90:9),,,,lock,Lock state and door rotation,med,source:146C.c:2175
 T00753.000,T00753,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),0,u16,0,u_short[2],,,,unsignedHalves,Unsigned halves of the effect operand,med,declaration-only;source:2842C.c:28
 T00753.001,T00753,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),1,s16,0,short[2],,,,signedHalves,Signed halves of the effect operand,med,declaration-only;source:2842C.c:29
 T00753.002,T00753,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:27:5),2,s32,0,int,,,,word,Word of the effect operand,med,declaration-only;source:2842C.c:30
-T00754.000,T00754,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\4A0A8.c:55:5),0,u8,0,u_char[2],,,,,,,
-T00754.001,T00754,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\4A0A8.c:55:5),1,s16,0,short,,,,,,,
-T00755.000,T00755,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.h:16:5),0,flags,0,func_800C1564_flags,,,,,,,
-T00755.001,T00755,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.h:16:5),1,values,0,u_char[4],,,,,,,
-T00756.000,T00756,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.c:451:8),0,s32,0,int,,,,,,,
-T00756.001,T00756,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.c:451:8),1,u8,0,u_char[4],,,,,,,
-T00757.000,T00757,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),0,fields,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:151:9),,,,,,,
-T00757.001,T00757,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),1,u16,0,u_short[2],,,,,,,
-T00757.002,T00757,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),2,s32,0,int,,,,,,,
-T00758.000,T00758,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:12:5),0,actor,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),,,,,,,
-T00758.001,T00758,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:12:5),1,position,0,SVECTOR,,,,,,,
-T00759.000,T00759,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:565:5),0,raw,0,u_int,,,,,,,
-T00759.001,T00759,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:565:5),1,bits,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:567:9),,,,,,,
-T00760.000,T00760,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:903:5),0,value,0,int,,,,,,,
-T00760.001,T00760,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:903:5),1,b,0,u_char[4],,,,,,,
-T00761.000,T00761,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:921:5),0,b,0,u_char[8],,,,,,,
-T00761.001,T00761,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:921:5),1,w,0,int[2],,,,,,,
-T00762.000,T00762,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:925:5),0,b,0,u_char[8],,,,,,,
-T00762.001,T00762,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:925:5),1,w,0,int[2],,,,,,,
-T00763.000,T00763,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:610:5),0,raw,0,unsigned int,,,,,,,
-T00763.001,T00763,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:610:5),1,bits,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:612:9),,,,,,,
-T00764.000,T00764,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,,,,
-T00764.001,T00764,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,,,,
+T00754.000,T00754,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\4A0A8.c:55:5),0,u8,0,u_char[2],,,,bytes,Byte 1 is the envelope shape,med,source:4A0A8.c:3917
+T00754.001,T00754,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\4A0A8.c:55:5),1,s16,0,short,,,,count,Remaining shake count,med,source:4A0A8.c:4007
+T00755.000,T00755,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.h:16:5),0,flags,0,func_800C1564_flags,,,,flags,Shape flags,med,source:58578.c:413
+T00755.001,T00755,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.h:16:5),1,values,0,u_char[4],,,,extents,Size along each axis; byte 0 is the action's X range,med,source:146C.c:13460
+T00756.000,T00756,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.c:451:8),0,s32,0,int,,,,word,All bytes; 0xFFFFFF clears the highlight,med,source:5BF94.c:3500
+T00756.001,T00756,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.c:451:8),1,u8,0,u_char[4],,,,bytes,Byte 1 is the highlighted entry,low,source:5BF94.c:3388
+T00757.000,T00757,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),0,fields,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:151:9),,,,bits,Packed ability fields,med,source:146C.c:4705
+T00757.001,T00757,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),1,u16,0,u_short[2],,,,halves,Half 0 is the chosen item; half 1 the consumed item,med,source:146C.c:3816
+T00757.002,T00757,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),2,s32,0,int,,,,word,Whole command word,med,source:146C.c:4699
+T00758.000,T00758,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:12:5),0,actor,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),,,,actor,Actor and part,high,source:146C.c:3179
+T00758.001,T00758,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:12:5),1,position,0,SVECTOR,,,,position,World position,high,source:146C.c:3181
+T00759.000,T00759,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:565:5),0,raw,0,u_int,,,,word,Whole flag word,med,source:6FC00.c:706
+T00759.001,T00759,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:565:5),1,bits,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:567:9),,,,bits,Bit fields,low,source:6FC00.c:1034
+T00760.000,T00760,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:903:5),0,value,0,int,,,,word,Position word,med,source:6FC00.c:1071
+T00760.001,T00760,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:903:5),1,b,0,u_char[4],,,,bytes,Position bytes,low,declaration-only;source:6FC00.c:905
+T00761.000,T00761,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:921:5),0,b,0,u_char[8],,,,samples,Recent coordinate bytes,high,source:6FC00.c:1108
+T00761.001,T00761,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:921:5),1,w,0,int[2],,,,words,Samples compared as two words,high,source:6FC00.c:962
+T00762.000,T00762,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:925:5),0,b,0,u_char[8],,,,samples,Recent coordinate bytes,high,source:6FC00.c:1108
+T00762.001,T00762,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:925:5),1,w,0,int[2],,,,words,Samples compared as two words,high,source:6FC00.c:962
+T00763.000,T00763,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:610:5),0,raw,0,unsigned int,,,,word,Whole settings word; bit 14 selects a range table,low,source:7CD68.c:743
+T00763.001,T00763,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:610:5),1,bits,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7CD68.c:612:9),,,,bits,Settings fields,low,declaration-only;source:7CD68.c:614
+T00764.000,T00764,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,source:146C.c:2804
+T00764.001,T00764,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,source:146C.c:881
 T00765.000,T00765,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
 T00765.001,T00765,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
-T00766.000,T00766,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,,,,
-T00766.001,T00766,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,,,,
-T00767.000,T00767,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,,,,
-T00767.001,T00767,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:569:5),1,u16,0,u_short[2],,,,,,,
-T00767.002,T00767,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,,,,
-T00768.000,T00768,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,,,,
-T00768.001,T00768,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,,,,
-T00769.000,T00769,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,,,,
-T00769.001,T00769,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,,,,
-T00770.000,T00770,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,,,,
-T00770.001,T00770,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:90:9),,,,,,,
-T00771.000,T00771,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:150:5),0,fields,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:151:9),,,,,,,
-T00771.001,T00771,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:150:5),1,u16,0,u_short[2],,,,,,,
-T00771.002,T00771,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:150:5),2,s32,0,int,,,,,,,
-T00772.000,T00772,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\6E644.h:12:5),0,actor,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\6E644.h:13:9),,,,,,,
-T00772.001,T00772,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\6E644.h:12:5),1,position,0,SVECTOR,,,,,,,
-T00773.000,T00773,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,,,,
-T00773.001,T00773,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,,,,
+T00766.000,T00766,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,halves,Halves of the packed pair,med,declaration-only;source:146C.h:129
+T00766.001,T00766,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,word,Word of the packed pair,med,declaration-only;source:146C.h:130
+T00767.000,T00767,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,bytes,Bytes 0 and 2 seed the target selection,med,source:146C.c:4509
+T00767.001,T00767,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:569:5),1,u16,0,u_short[2],,,,halves,Last targeted actor and limb,low,source:146C.c:4308
+T00767.002,T00767,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
+T00768.000,T00768,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
+T00768.001,T00768,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
+T00769.000,T00769,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
+T00769.001,T00769,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00770.000,T00770,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
+T00770.001,T00770,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:90:9),,,,lock,Lock state and door rotation,med,source:146C.c:2175
+T00771.000,T00771,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:150:5),0,fields,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:151:9),,,,bits,Packed ability fields,med,source:146C.c:4705
+T00771.001,T00771,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:150:5),1,u16,0,u_short[2],,,,halves,Half 0 is the chosen item; half 1 the consumed item,med,source:146C.c:3816
+T00771.002,T00771,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:150:5),2,s32,0,int,,,,word,Whole command word,med,source:146C.c:4699
+T00772.000,T00772,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\6E644.h:12:5),0,actor,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\6E644.h:13:9),,,,actor,Actor and part,high,source:146C.c:3179
+T00772.001,T00772,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\6E644.h:12:5),1,position,0,SVECTOR,,,,position,World position,high,source:146C.c:3181
+T00773.000,T00773,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,source:146C.c:2804
+T00773.001,T00773,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,source:146C.c:881
 T00774.000,T00774,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
 T00774.001,T00774,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\GIM\SCREFF2.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00775.000,T00775,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
 T00775.001,T00775,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
-T00776.000,T00776,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,,,,
-T00776.001,T00776,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,,,,
-T00777.000,T00777,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,,,,
-T00777.001,T00777,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:569:5),1,u16,0,u_short[2],,,,,,,
-T00777.002,T00777,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,,,,
-T00778.000,T00778,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,,,,
-T00778.001,T00778,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,,,,
-T00779.000,T00779,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,,,,
-T00779.001,T00779,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,,,,
-T00780.000,T00780,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,,,,
-T00780.001,T00780,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:90:9),,,,,,,
-T00781.000,T00781,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:150:5),0,fields,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:151:9),,,,,,,
-T00781.001,T00781,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:150:5),1,u16,0,u_short[2],,,,,,,
-T00781.002,T00781,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:150:5),2,s32,0,int,,,,,,,
-T00782.000,T00782,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:12:5),0,actor,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:13:9),,,,,,,
-T00782.001,T00782,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:12:5),1,position,0,SVECTOR,,,,,,,
-T00783.000,T00783,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,,,,
-T00783.001,T00783,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,,,,
+T00776.000,T00776,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,halves,Halves of the packed pair,med,declaration-only;source:146C.h:129
+T00776.001,T00776,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,word,Word of the packed pair,med,declaration-only;source:146C.h:130
+T00777.000,T00777,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,bytes,Bytes 0 and 2 seed the target selection,med,source:146C.c:4509
+T00777.001,T00777,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:569:5),1,u16,0,u_short[2],,,,halves,Last targeted actor and limb,low,source:146C.c:4308
+T00777.002,T00777,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
+T00778.000,T00778,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
+T00778.001,T00778,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
+T00779.000,T00779,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
+T00779.001,T00779,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00780.000,T00780,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
+T00780.001,T00780,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:90:9),,,,lock,Lock state and door rotation,med,source:146C.c:2175
+T00781.000,T00781,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:150:5),0,fields,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:151:9),,,,bits,Packed ability fields,med,source:146C.c:4705
+T00781.001,T00781,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:150:5),1,u16,0,u_short[2],,,,halves,Half 0 is the chosen item; half 1 the consumed item,med,source:146C.c:3816
+T00781.002,T00781,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:150:5),2,s32,0,int,,,,word,Whole command word,med,source:146C.c:4699
+T00782.000,T00782,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:12:5),0,actor,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:13:9),,,,actor,Actor and part,high,source:146C.c:3179
+T00782.001,T00782,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:12:5),1,position,0,SVECTOR,,,,position,World position,high,source:146C.c:3181
+T00783.000,T00783,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,source:146C.c:2804
+T00783.001,T00783,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,source:146C.c:881
 T00784.000,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),0,sprt,0,VS_SPRT,,,,,,,
 T00784.001,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),1,tile_tpage,0,VS_TILE_TPAGE,,,,,,,
 T00784.002,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),2,tile,0,VS_TILE,,,,,,,
@@ -6794,19 +6794,19 @@ T00785.000,T00785,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00785.001,T00785,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00786.000,T00786,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
 T00786.001,T00786,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
-T00787.000,T00787,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,,,,
-T00787.001,T00787,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,,,,
-T00788.000,T00788,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,,,,
-T00788.001,T00788,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:569:5),1,u16,0,u_short[2],,,,,,,
-T00788.002,T00788,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,,,,
-T00789.000,T00789,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,,,,
-T00789.001,T00789,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,,,,
-T00790.000,T00790,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,,,,
-T00790.001,T00790,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,,,,
-T00791.000,T00791,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,,,,
-T00791.001,T00791,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:90:9),,,,,,,
-T00792.000,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,,,,
-T00792.001,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,,,,
+T00787.000,T00787,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,halves,Halves of the packed pair,med,declaration-only;source:146C.h:129
+T00787.001,T00787,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:128:5),1,s32,0,int,,,,word,Word of the packed pair,med,declaration-only;source:146C.h:130
+T00788.000,T00788,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:569:5),0,u8,0,u_char[4],,,,bytes,Bytes 0 and 2 seed the target selection,med,source:146C.c:4509
+T00788.001,T00788,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:569:5),1,u16,0,u_short[2],,,,halves,Last targeted actor and limb,low,source:146C.c:4308
+T00788.002,T00788,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:569:5),2,s32,0,int,,,,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
+T00789.000,T00789,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:589:5),0,u8,0,u_char[4],,,,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
+T00789.001,T00789,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:589:5),1,s32,0,int,,,,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
+T00790.000,T00790,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:750:5),0,u8,0,char[2],,,,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
+T00790.001,T00790,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:750:5),1,u16,0,u_short,,,,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00791.000,T00791,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:88:5),0,s16,0,short,,,,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
+T00791.001,T00791,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:88:5),1,lock,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:90:9),,,,lock,Lock state and door rotation,med,source:146C.c:2175
+T00792.000,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,source:146C.c:2804
+T00792.001,T00792,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,source:146C.c:881
 T00793.000,T00793,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
 T00793.001,T00793,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00794.000,T00794,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),0,sprt,0,VS_SPRT,,,,sprite,Sprite and texture-page packet,med,replaced-by:Render sprite commands;declaration-only;source:22C.c:1065

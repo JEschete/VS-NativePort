@@ -361,7 +361,7 @@ must refuse names whose rows do not pass the evidence check.
 | Engine_02 | 60 | 0 | 0 | Validated and applied |
 | Game_Actors_01 | 0 | 55 | 771 | Validated and applied |
 | Game_Actors_02 | 48 | 8 | 108 | Validated and applied |
-| Game_Battle_01 | 0 | 92 | 583 | Pending |
+| Game_Battle_01 | 0 | 92 | 583 | Validated and applied |
 | Game_Battle_02 | 0 | 66 | 689 | Pending |
 | Game_Battle_03 | 0 | 78 | 737 | Pending |
 | Game_Battle_04 | 58 | 58 | 526 | Pending |
@@ -380,14 +380,14 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **740 / 2,174** | **281 / 822** | **2,484 / 6,870** | **11 / 24 batches applied** |
+| **Applied / inventoried** | **740 / 2,174** | **373 / 822** | **3,067 / 6,870** | **12 / 24 batches applied** |
 
 Inventory changed on 2026-10-17 when 25 upstream layouts were adopted (15 merged layouts, 10 type-only retypes; two
 new upstream-only types, `func_800D52A4_t`/`_t2`, the effect node's motion block). Applied rows kept their names;
 four applied fields changed C type only (`AkaoSeqHeader.magic` `char[4]`→`int`, `_mpdEnemy.settings`
 `u_char[8]`→`actorSpawnSettings`, `vs_battle_objectData.material`/`variant` `char`→`u_char`).
 
-Applied rows still include 32 low-confidence globals, 6 low-confidence types and 603 low-confidence fields. Validation checks coverage,
+Applied rows still include 32 low-confidence globals, 21 low-confidence types and 801 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -447,6 +447,16 @@ names, locations and collisions; it does not prove semantics or close migration 
   `ModelInstance.currentTileLayer`); revisit T00444's name when Field rows are next revised.
   346 of the 771 fields are `low` (239 `reserved`, 13 `opaque`); most actor-record flag bits are only reset and
   tested, and need behavior tracing before their names can be raised.
+- Game_Battle_01 (2026-10-17): 41 of its 92 types are per-overlay copies of anonymous header types
+  (`146C.h`, `5BF94.h`, `6E644.h`, `func_8006EBF8_t.h` included from INITBTL, MENU3 and SLUS) or of the AI's
+  repeated tile word, written as `same-as` rows by `common.Gen.D()`. `Battle::Ai::TileWord` (x, tag, z, search
+  status) is declared nine times across the fork's AI files and once upstream as `vs_battle_movementPosition`; its
+  byte 1 is a gate index in routes and a layer in placements, so it is named `tag`. `Battle::TargetSphereSetupView`
+  (573B8.c) and `Battle::TargetSphere` (58578.c) are two declarations of one global (D_800EB9B8) with different
+  detail; `Battle::Ai::TargetRelationReactionView`/`Bytes` are other splits of the relation word in
+  `Battle::Ai::TargetRelationBits` (upstream `func_800DA1D4_t`). Merge each set into one native type when copying.
+  `Battle::ActorTargetWord` (vs_battle_actor +0x10) is used both as a pending Z movement offset and as the last
+  targeted actor/limb; resolve that overlap from the assembly before porting.
 
 The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
 The native audio player must own playback position rather than reading another module's timing globals.

@@ -305,6 +305,77 @@ T00200.000,reserved0,Not read,low,declaration-only;source:44F14.c:14
 T00200.001,firstFrame,First frame decoded,high,source:44F14.c:1383
 T00200.002,lastFrame,Last frame decoded,high,source:44F14.c:1383
 T00200.003,trackData,Track data being decoded,med,source:44F14.c:1381
+T00214.000,primaryVolume,Primary target volume,high,source:573B8.c:446
+T00214.001,secondaryVolume,Secondary target volume,high,source:573B8.c:484
+T00214.002,depthAndYaw,Depth and camera yaw as one word,low,declaration-only;source:573B8.c:36
+T00214.003,wirePhaseA,Wireframe animation phase,low,source:573B8.c:449
+T00214.004,wirePhaseB,Wireframe animation phase,low,declaration-only;source:573B8.c:38
+T00214.005,wirePhaseC,Wireframe animation phase,low,source:573B8.c:450
+T00214.006,wireShape,Wireframe shape index,med,source:573B8.c:462
+T00214.007,targetCount,Number of selectable targets,low,declaration-only;source:573B8.c:41
+T00214.008,selectedTarget,Selected target; -1 after init,low,source:573B8.c:376
+T00214.009,sphereMode,Mode passed when the volumes are set,low,source:573B8.c:467
+T00214.010,reserved2F,Not read,low,declaration-only;source:573B8.c:44
+T00214.011,reserved30,Not read,low,declaration-only;source:573B8.c:45
+T00214.012,reserved34,Not read,low,declaration-only;source:573B8.c:46
+T00214.013,reserved38,Cleared on setup; not read,low,source:573B8.c:460
+T00214.014,reserved3C,Cleared on setup; not read,low,source:573B8.c:461
+T00214.015,targetList0,First target list,low,declaration-only;source:573B8.c:49
+T00214.016,targetList1,Second target list; set from a setup parameter,low,source:573B8.c:468
+T00214.017,wireVertices,Wireframe vertices,high,source:573B8.c:501
+T00214.018,labelArea,Label and terrain storage,low,declaration-only;source:573B8.c:52
+T00214.019,wireEdges,Wireframe edge list,med,source:573B8.c:377
+T00214.020,terrainRowFlags,Valid flags of the cached terrain,low,declaration-only;source:573B8.c:54
+T00215.000,volumes,Primary and secondary target volumes,high,source:58578.c:124
+T00215.001,depth,Average screen depth of the sphere,med,source:58578.c:128
+T00215.002,cameraYaw,Camera yaw used to orient the sphere,med,source:58578.c:980
+T00215.003,wirePhaseA,Wireframe animation phase advanced by 3 per shape step,low,source:573B8.c:449
+T00215.004,wirePhaseB,Wireframe animation phase advanced by 7 per shape step,low,source:58578.c:905
+T00215.005,wirePhaseC,Wireframe animation phase advanced by 11 per shape step,low,source:573B8.c:450
+T00215.006,wireShape,Wireframe shape index; 15 when set up,med,source:58578.c:891
+T00215.007,targetCount,Number of selectable targets,med,source:58578.c:456
+T00215.008,selectedTarget,Selected target; clamped to the count,low,source:573B8.c:376
+T00215.009,sphereMode,Mode passed when the volumes are set,low,source:573B8.c:467
+T00215.010,reserved2F,Not read,low,declaration-only;source:573B8.c:44
+T00215.011,reserved30,Not read,low,declaration-only;source:573B8.c:45
+T00215.012,targetMode,Mode passed when the targets are set,low,source:58578.c:465
+T00215.013,vertexCount,Wireframe vertices built,low,source:58578.c:962
+T00215.014,reserved34,Not read,low,declaration-only;source:573B8.c:46
+T00215.015,reserved38,Cleared on setup; not read,low,source:573B8.c:460
+T00215.016,reserved3C,Cleared on setup; not read,low,source:573B8.c:461
+T00215.017,inputLocked,Nonzero blocks sphere interaction unless a button is held,low,source:5BE50.c:98
+T00215.018,targetLists,Target preview lists shown on the sphere,med,source:58578.c:457
+T00215.019,wireVertices,Wireframe vertices,high,source:573B8.c:501
+T00215.020,labels,Floating target labels,high,source:58578.c:649
+T00215.021,reservedB70,Not read by decompiled code,low,declaration-only;source:58578.c:48
+T00215.022,terrainHeights,Cached terrain heights around the sphere (9x9),med,source:58578.c:1116
+T00215.023,wireEdges,Wireframe edge list,med,source:573B8.c:377
+T00215.024,terrainRowFlags,Valid flags of the cached terrain (9x9),med,source:58578.c:1045
+T00216.000,volumes,Primary and secondary target volumes,high,source:58578.c:124
+T00216.001,depth,Average screen depth of the sphere,med,source:58578.c:128
+T00216.002,cameraYaw,Camera yaw used to orient the sphere,med,source:58578.c:980
+T00216.003,wirePhaseA,Wireframe animation phase advanced by 3 per shape step,low,source:573B8.c:449
+T00216.004,wirePhaseB,Wireframe animation phase advanced by 7 per shape step,low,source:58578.c:905
+T00216.005,wirePhaseC,Wireframe animation phase advanced by 11 per shape step,low,source:573B8.c:450
+T00216.006,wireShape,Wireframe shape index; 15 when set up,med,source:58578.c:891
+T00216.007,targetCount,Number of selectable targets,med,source:58578.c:456
+T00216.008,selectedTarget,Selected target; clamped to the count,low,source:573B8.c:376
+T00216.009,sphereMode,Mode passed when the volumes are set,low,source:573B8.c:467
+T00216.010,reserved2F,Not read,low,declaration-only;source:573B8.c:44
+T00216.011,reserved30,Not read,low,declaration-only;source:573B8.c:45
+T00216.012,targetMode,Mode passed when the targets are set,low,source:58578.c:465
+T00216.013,vertexCount,Wireframe vertices built,low,source:58578.c:962
+T00216.014,reserved34,Not read,low,declaration-only;source:573B8.c:46
+T00216.015,reserved38,Cleared on setup; not read,low,source:573B8.c:460
+T00216.016,reserved3C,Cleared on setup; not read,low,source:573B8.c:461
+T00216.017,inputLocked,Nonzero blocks sphere interaction unless a button is held,low,source:5BE50.c:98
+T00216.018,targetLists,Target preview lists shown on the sphere,med,source:58578.c:457
+T00216.019,wireVertices,Wireframe vertices,high,source:573B8.c:501
+T00216.020,labels,Floating target labels,high,source:58578.c:649
+T00216.021,reservedB70,Not read by decompiled code,low,declaration-only;source:58578.c:48
+T00216.022,terrainHeights,Cached terrain heights around the sphere (9x9),med,source:58578.c:1116
+T00216.023,wireEdges,Wireframe edge list,med,source:573B8.c:377
+T00216.024,terrainRowFlags,Valid flags of the cached terrain (9x9),med,source:58578.c:1045
 T00217.000,kind,Volume kind; bit 7 marks it active,med,source:573B8.c:454
 T00217.001,reserved1,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:25
 T00217.002,reserved2,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:26
@@ -325,6 +396,60 @@ T00220.000,dx,"X step (-1, 0 or 1)",high,source:6FC00.c:462
 T00220.001,reserved2Bits,Not read,low,declaration-only;source:6F014.c:67
 T00220.002,dz,"Z step (-1, 0 or 1)",high,source:6FC00.c:463
 T00220.003,reserved6Bits,Not read,low,declaration-only;source:6F014.c:69
+T00225.000,queueIndex,Index of the executing entry (low two bits),high,source:146C.c:1930
+T00225.001,chainStep,Chain ability step; 1 when an action is committed,med,source:146C.c:3445
+T00225.002,selection,Action being chosen,high,source:146C.c:4499
+T00225.003,queue,Actions queued for execution,high,source:146C.c:743
+T00225.004,isPlayerAction,"1 when Ashley chooses the action, 0 for other actors",med,source:146C.c:4505
+T00225.005,sourceActorId,Actor whose targets are collected,low,source:146C.c:4187
+T00225.006,selectedPreview,Selected target preview; 0xFF none,med,source:146C.c:3783
+T00225.007,cameraPreview,Preview the camera follows; 0xFF none,med,source:146C.c:2809
+T00225.008,selectionFrames,Frames spent selecting,med,source:146C.c:6900
+T00225.009,reserved298F,Not read,low,declaration-only;source:146C.c:101
+T00225.010,savedAreaCenter,Area center saved before filtering,med,source:146C.c:3595
+T00225.011,areaCenter,Area-of-effect center,med,source:146C.c:2818
+T00225.012,rangeShape,Shape of the range volume,med,source:146C.c:4188
+T00225.013,rangeKind,"Range volume kind: 1 direct, 2 ground, 3 default",med,source:146C.c:4342
+T00225.014,rangeFacing,Facing of the range volume,med,source:146C.c:4192
+T00225.015,rangeX,Range volume X size,high,source:146C.c:4201
+T00225.016,rangeY,Range volume Y size,high,source:146C.c:4202
+T00225.017,rangeZ,Range volume Z size,high,source:146C.c:4203
+T00225.018,rangeAngle,Range volume shape angle (x8),high,source:146C.c:4204
+T00225.019,rangeOrigin,Origin of the range volume,high,source:146C.c:4439
+T00225.020,areaShape,Shape of the area-of-effect volume,med,source:146C.c:4097
+T00225.021,areaKind,Area volume kind,low,source:146C.c:4098
+T00225.022,areaFacing,Facing of the area volume,med,source:146C.c:4111
+T00225.023,areaX,Area volume X size,high,source:146C.c:4360
+T00225.024,areaY,Area volume Y size,high,source:146C.c:4361
+T00225.025,areaZ,Area volume Z size,high,source:146C.c:4362
+T00225.026,areaAngle,Area volume shape angle or pitch,med,source:146C.c:4363
+T00225.027,areaOrigin,Origin of the area volume,high,source:146C.c:3615
+T00225.028,previews,Selectable target previews,high,source:146C.c:2810
+T00225.029,reserved2BE8,Not read,low,declaration-only;source:146C.c:121
+T00225.030,reserved2BEC,Not read,low,declaration-only;source:146C.c:122
+T00225.031,reserved2BF0,Not read,low,declaration-only;source:146C.c:123
+T00225.032,reserved2BF4,Not read,low,declaration-only;source:146C.c:124
+T00225.033,reserved2BF8,Not read,low,declaration-only;source:146C.c:125
+T00225.034,reserved2BFC,Not read,low,declaration-only;source:146C.c:126
+T00225.035,previewCount,Number of target previews,high,source:146C.c:3619
+T00225.036,previousChainButtons,Chain buttons held last frame,low,source:146C.c:3863
+T00225.037,chainAbilitySlot,Mapped chain ability slot + 1,high,source:146C.c:3554
+T00225.038,previousChainInput,Chain button pressed last,high,source:146C.c:3864
+T00225.039,abilityInputSucceeded,Timed ability input succeeded,high,source:146C.c:3441
+T00225.040,abilityInputAttempted,Timed ability input attempted,high,source:146C.c:3922
+T00225.041,chainContinued,Set once a chain ability continues the action,low,source:146C.c:3496
+T00225.042,abilityTimer,Timer of the ability input window,high,source:146C.c:757
+T00225.043,abilityWindow,Ability input window; 0 when closed,high,source:146C.c:755
+T00225.044,preferredCameraDistance,Camera distance kept after the action,med,source:146C.c:3049
+T00225.045,cameraZoomState,Action camera zoom state,low,source:146C.c:6966
+T00226.000,actionId,Action,med,declaration-only;source:146C.c:81
+T00226.001,effectVariant,Variant passed to the effect presentation,low,source:146C.c:4047
+T00226.002,damageType,Damage type of the weapon used,med,source:146C.c:13290
+T00226.003,primaryTarget,Primary target and its hit result,high,source:146C.c:4498
+T00226.004,animationParameter,Parameter passed to the action animation,low,source:146C.c:13352
+T00226.005,targetCount,Number of targets,high,source:146C.c:3699
+T00226.006,targets,Targets and their hit results,high,source:146C.c:3705
+T00226.007,focusPosition,Position the action and camera focus on,med,source:146C.c:3724
 T00227.000,position,World position of the target,high,source:146C.c:4266
 T00227.001,kind,Target kind; 16 for chests,low,source:146C.c:4276
 T00227.002,actorId,Actor id; chest index | 0x20 for chests,med,source:146C.c:3702
@@ -381,9 +506,43 @@ T00264.005,renderer,Renderer attached to the effect,med,source:5BF94.c:5158
 T00264.006,effectId,Effect id,high,source:5BF94.c:5518
 T00264.007,phase,Secondary effect phase,med,source:5BF94.c:5336
 T00264.008,parameter,Spawn parameter; nonzero attaches a renderer,low,source:5BF94.c:5517
+T00271.000,maxTileX,Largest tile X,med,declaration-only;source:6F014.c:210
+T00271.001,maxTileZ,Largest tile Z,med,declaration-only;source:6F014.c:211
+T00271.002,minTileX,Smallest tile X,med,declaration-only;source:6F014.c:212
+T00271.003,minTileZ,Smallest tile Z,med,declaration-only;source:6F014.c:213
+T00271.004,reserved4,Not read,low,declaration-only;source:6F014.c:214
+T00271.005,defaultActionDelay,Action delay used when an actor has none of its own,low,source:71618.c:1029
+T00271.006,reserved9,Not read,low,declaration-only;source:6F014.c:216
+T00271.007,allowsNonSpellActions,Marks non-spell action entries usable,low,source:upstream:6E644.c:3789
+T00271.008,reservedB,Not read,low,declaration-only;source:upstream:6E644.c:316
+T00271.009,flightCeiling,Height limit for flying actors; 0 when none,med,source:771A8.c:1115
+T00271.010,readinessLevel,Threshold an action entry must not exceed to be ready,low,source:6FC00.c:524
+T00271.011,reserved1A,Not read,low,declaration-only;source:6F014.c:219
+T00271.012,engagedHead,First engaged actor,med,source:73700.c:501
+T00271.013,engagedTail,Last engaged actor,low,source:73700.c:422
+T00271.014,approachMoves,Approach moves made this update,low,source:71618.c:796
+T00271.015,specialActors,Actors whose models are of kind 2 or 4,med,source:71618.c:1111
 T00272.000,tileX,Tile X,med,source:771A8.c:464
 T00272.001,tileZ,Tile Z,med,source:771A8.c:465
 T00272.002,reservedBits10,Not read,low,declaration-only;source:6F014.c:42
+T00273.000,heading,Heading toward the arena centre,low,source:upstream:6E644.c:3969
+T00273.001,phase,Orbit phase,med,source:upstream:6E644.c:3950
+T00273.002,distanceCached,Set once the distance is measured,low,source:upstream:6E644.c:3982
+T00273.003,distanceSquared,Squared distance to the arena centre,med,source:upstream:6E644.c:4035
+T00273.004,reserved8,Not read,low,declaration-only;source:upstream:6E644.c:331
+T00273.005,isOrbiting,Set while orbiting,low,source:7EE98.c:776
+T00273.006,pathStep,Step in the orbit path table,med,source:upstream:6E644.c:3983
+T00273.007,cooldown,Frames before the orbit can restart; 900 when started,med,source:7EE98.c:781
+T00273.008,requested,Orbit requested,low,source:7EE98.c:782
+T00273.009,orbitAngle,Angle around the centre,med,source:upstream:6E644.c:3954
+T00273.010,savedHeight,Height saved when the orbit starts,low,source:7EE98.c:809
+T00273.011,reserved14,Not read,low,declaration-only;source:6F014.c:234
+T00273.012,reserved15,Not read,low,declaration-only;source:upstream:6E644.c:339
+T00273.013,planSaved,The actor's plan count is saved,low,source:7EE98.c:786
+T00273.014,savedPlanCount,Plan count restored when the orbit ends,low,source:7EE98.c:783
+T00273.015,startX,X where the orbit started,med,source:upstream:6E644.c:3957
+T00273.016,startZ,Z where the orbit started,med,source:upstream:6E644.c:3958
+T00273.017,started,Set when the orbit begins,low,source:upstream:6E644.c:4031
 T00295.000,colorCode,Color and command,med,declaration-only;source:gpu.h:84
 T00295.001,xy0,Vertex 0,med,declaration-only;source:gpu.h:85
 T00295.002,uv0Palette,UV 0 and palette,med,declaration-only;source:gpu.h:86
@@ -393,3 +552,33 @@ T00295.005,xy2,Vertex 2,med,declaration-only;source:gpu.h:89
 T00295.006,uv2,UV 2,med,declaration-only;source:gpu.h:90
 T00295.007,xy3,Vertex 3,med,declaration-only;source:gpu.h:91
 T00295.008,uv3,UV 3,med,declaration-only;source:gpu.h:92
+T00311.000,target,"Target actor and limb with HP, MP and hit chance",high,source:146C.c:4498
+T00311.001,riskChange,Risk change,high,source:146C.c:12904
+T00311.002,strengthChange,Strength change,high,source:146C.c:12722
+T00311.003,intelligenceChange,Intelligence change,high,source:146C.c:12731
+T00311.004,agilityChange,Agility change,high,source:146C.c:12740
+T00311.005,maxHpChange,Maximum HP change,high,source:146C.c:12749
+T00311.006,maxMpChange,Maximum MP change,high,source:146C.c:12758
+T00311.007,removeStatuses,Statuses removed,high,source:146C.c:11208
+T00311.008,inflictStatuses,Statuses inflicted,high,source:146C.c:11210
+T00311.009,hpEffect,"HP effect: 1 damage, 2 restore, 3 other",med,declaration-only;source:146C.c:54
+T00311.010,mpEffect,"MP effect: 1 drain, 2 restore",high,source:146C.c:12832
+T00311.011,riskEffect,Risk effect direction,high,source:146C.c:12905
+T00311.012,strengthEffect,"Strength effect: 1 down, 2 up",high,source:146C.c:12723
+T00311.013,intelligenceEffect,"Intelligence effect: 1 down, 2 up",high,source:146C.c:12732
+T00311.014,agilityEffect,"Agility effect: 1 down, 2 up",high,source:146C.c:12741
+T00311.015,maxHpEffect,Maximum HP effect direction,high,source:146C.c:12750
+T00311.016,maxMpEffect,Maximum MP effect direction,high,source:146C.c:12759
+T00311.017,statStatusEffect,"Stat status change: 1 down, 2 up (Strength/Intelligence/Agility down/up)",med,source:146C.c:12278
+T00311.018,weaponDpEffect,Weapon DP effect direction,high,source:146C.c:12895
+T00311.019,weaponPpEffect,"Weapon PP effect: 1 drain, 2 restore",high,source:146C.c:12843
+T00311.020,armorDpEffect,Armor DP effect direction,high,source:146C.c:12569
+T00311.021,shieldPpEffect,Shield PP effect direction,high,source:146C.c:12857
+T00311.022,sourceResult,Set to 2 when the source action succeeds,low,source:146C.c:12551
+T00311.023,reservedBits28,Not read,low,declaration-only;source:146C.c:68
+T00311.024,limbs,Per-limb results,high,source:146C.c:10641
+T00311.025,weaponDpChange,Weapon DP change,high,source:146C.c:14265
+T00311.026,weaponPpChange,Weapon PP change,high,source:146C.c:12842
+T00311.027,armorDpChange,Armor DP change,high,source:146C.c:12567
+T00311.028,shieldPpChange,Shield PP change,high,source:146C.c:12856
+T00311.029,targetsPosition,Nonzero when the target is a position rather than an actor,med,source:146C.c:1939
