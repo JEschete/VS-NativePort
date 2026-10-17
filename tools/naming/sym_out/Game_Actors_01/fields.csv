@@ -320,7 +320,7 @@ T00255.000,boneCount,SHP bone count; zero for a free slot,med,source:30DB0.c:416
 T00255.001,reserved1,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:453
 T00255.002,reserved2,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:454
 T00255.003,reserved3,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:455
-T00255.004,reserved4,Not read by the decompiled users,low,source:30DB0.c:305
+T00255.004,reserved4,Copied from the model template's word 4 when the gimmick is created; not read,low,source:30DB0.c:328;sanity pass 2026-10-17
 T00255.005,isSkipped,Set when display flag bit 0 is clear,med,source:30DB0.c:3957
 T00255.006,isVisible,Drawn when set (display flag bit 1),high,source:30DB0.c:3958
 T00255.007,reserved8Bits2,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:459
@@ -348,7 +348,7 @@ T00255.028,delay,Frames before the motion starts (offset of Field::GimmickPhysic
 T00255.029,parent,Parent gimmick; 0xFF when none,med,source:30DB0.c:355
 T00255.030,linkedGimmick,Gimmick whose appearance this one follows,low,source:40564.c:1906
 T00255.031,reserved14,Not read by the decompiled users,low,source:6FC00.c:744
-T00255.032,rotationTicks,Frames left in the current rotation,low,declaration-only;source:3A1A0.h:484
+T00255.032,rotationTicks,Frames left in the current rotation tween,high,source:upstream:44F14.c:1694;source:upstream:44F14.c:1703;sanity pass 2026-10-17
 T00255.033,mode,Motion mode; 0xFC to 0xFF are landing and falling modes,med,source:30DB0.c:3271
 T00255.034,positionX,World X,high,source:30DB0.c:371
 T00255.035,positionY,World Y,high,source:30DB0.c:373
@@ -366,9 +366,9 @@ T00255.046,slideX,Remaining X slide,med,source:3A1A0.c:760
 T00255.047,velocityY,Vertical speed,low,source:30DB0.c:3270
 T00255.048,slideZ,Remaining Z slide,med,source:3A1A0.c:761
 T00255.049,orientation,Orientation applied while carried,low,source:3A1A0.c:754
-T00255.050,reserved3C,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:501
-T00255.051,reserved3E,Not read by the decompiled users,low,source:upstream:44F14.c:1697
-T00255.052,reserved40,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:502
+T00255.050,rotationDeltaX,X rotation still to apply over rotationTicks,high,source:upstream:44F14.c:1694;sanity pass 2026-10-17
+T00255.051,rotationDeltaY,Y rotation still to apply over rotationTicks,high,source:upstream:44F14.c:1697;sanity pass 2026-10-17
+T00255.052,rotationDeltaZ,Z rotation still to apply over rotationTicks,high,source:upstream:44F14.c:1700;sanity pass 2026-10-17
 T00255.053,reserved42,Not read by the decompiled users,low,declaration-only;source:upstream:3A1A0.h:523
 T00255.054,reserved44,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:503
 T00255.055,reserved48,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:504
@@ -516,7 +516,7 @@ T00303.004,limbIds,High nibble: limb group + 1; low nibble: limb index + 1,high,
 T00303.005,auxiliaryTag,Second lookup tag; 3 to 6 select an actor joint slot,high,source:38C1C.c:151;source:30DB0.c:1382
 T00303.006,reserved9,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:77
 T00303.007,jointInitValue,Initial value of the joint slot chosen by auxiliaryTag,med,source:30DB0.c:1385
-T00303.008,reservedC,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:79
+T00303.008,poseLockSlot,Locked-pose slot (1 or 2) holding this bone's saved transform; 0 when unlocked,high,source:40564.c:2214;source:40564.c:2229;sanity pass 2026-10-17
 T00303.009,reservedD,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:80
 T00303.010,reservedE,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:81
 T00303.011,reservedF,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:82

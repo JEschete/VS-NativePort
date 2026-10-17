@@ -1,0 +1,719 @@
+check,id,owner,final_name,original,candidate,confidence,evidence
+F-RESERVED-USED,T00214.013,Battle::TargetSphereSetupView,reserved38,unk38,,low,member is read now
+F-RESERVED-USED,T00214.014,Battle::TargetSphereSetupView,reserved3C,unk3C,,low,member is read now
+F-RESERVED-USED,T00215.015,Battle::TargetSphere,reserved38,unk38,,low,member is read now
+F-RESERVED-USED,T00215.016,Battle::TargetSphere,reserved3C,unk3C,,low,member is read now
+F-RESERVED-USED,T00216.015,Battle::TargetSphere,reserved38,unk38,,low,member is read now
+F-RESERVED-USED,T00216.016,Battle::TargetSphere,reserved3C,unk3C,,low,member is read now
+F-RESERVED-USED,T00221.000,Field::RoomLoadResetBlock,reserved00,unk0,,low,member is read now
+F-RESERVED-USED,T00221.001,Field::RoomLoadResetBlock,reserved02,unk2,,low,member is read now
+F-RESERVED-USED,T00221.002,Field::RoomLoadResetBlock,reserved04,unk4,,low,member is read now
+F-RESERVED-USED,T00221.004,Field::RoomLoadResetBlock,reserved08,unk8,,low,member is read now
+F-RESERVED-USED,T00221.008,Field::RoomLoadResetBlock,reserved14,unk14,,low,member is read now
+F-RESERVED-USED,T00228.002,Render::FramebufferEffectTranslation,reserved8,unk8,,low,member is read now
+F-RESERVED-USED,T00235.003,Field::RoomEffectInstance,reserved03,unk3,,low,member is read now
+F-RESERVED-USED,T00255.004,Field::GimmickInstance,reserved4,unk4,,low,member is read now
+F-RESERVED-USED,T00255.050,Field::GimmickInstance,reserved3C,unk3C,,low,member is read now
+F-RESERVED-USED,T00255.051,Field::GimmickInstance,reserved3E,unk3E,,low,member is read now
+F-RESERVED-USED,T00255.052,Field::GimmickInstance,reserved40,unk40,,low,member is read now
+F-RESERVED-USED,T00255.064,Field::GimmickInstance,reserved5F,unk5F,,low,member is read now
+F-RESERVED-USED,T00278.014,Audio::SeqChannel,reserved44,unk44,,low,member is read now
+F-RESERVED-USED,T00278.020,Audio::SeqChannel,reserved5C,unk5C,,low,member is read now
+F-RESERVED-USED,T00279.013,Audio::MusicConfig,reserved34,unk34,,low,member is read now
+F-RESERVED-USED,T00282.007,Audio::CutsceneStreamState,reserved1C,field7_0x1c,,low,member is read now
+F-RESERVED-USED,T00303.008,Actors::ShpBone,reservedC,unkC,,low,member is read now
+F-RESERVED-USED,T00320.025,Field::MpdEnemySpawn,reserved26,unk26,,low,member is read now
+F-RESERVED-USED,T00328.009,Field::MpdDoorRecord,reserved06Bit15,unk6_15,,low,member is read now
+F-RESERVED-USED,T00333.002,Field::MpdTileCell,reserved00Bit6,unk0_6,,low,member is read now
+F-RESERVED-USED,T00333.007,Field::MpdTileCell,reserved00Bit13,unk0_13,,low,member is read now
+F-RESERVED-USED,T00333.010,Field::MpdTileCell,reserved00Bit16,unk0_16,,low,member is read now
+F-RESERVED-USED,T00333.012,Field::MpdTileCell,reserved00Bits18,unk0_18,,low,member is read now
+F-RESERVED-USED,T00336.006,Field::MpdEnvironment,reserved31,unk31,,low,member is read now
+F-RESERVED-USED,T00336.021,Field::MpdEnvironment,reserved52,unk52,,low,member is read now
+F-RESERVED-USED,T00336.022,Field::MpdEnvironment,reserved54,unk54,,low,member is read now
+F-RESERVED-USED,T00336.023,Field::MpdEnvironment,reserved56,unk56,,low,member is read now
+F-RESERVED-USED,T00348.014,Field::ZoneContext,reserved38,unk38,,low,member is read now
+F-RESERVED-USED,T00435.001,Actors::ActorLocationQuery,reserved0C,unkC,,low,member is read now
+F-RESERVED-USED,T00479.007,Event::ShakeOscillator,reserved0B,unkB,,low,member is read now
+F-RESERVED-USED,T00489.000,Effects::TransformSlot,reserved0,unk0,,low,member is read now
+F-RESERVED-USED,T00489.001,Effects::TransformSlot,reserved4,unk4,,low,member is read now
+F-RESERVED-USED,T00489.002,Effects::TransformSlot,reserved8,unk8,,low,member is read now
+F-RESERVED-USED,T00489.003,Effects::TransformSlot,reservedC,unkC,,low,member is read now
+F-RESERVED-USED,T00489.004,Effects::TransformSlot,reserved10,unk10,,low,member is read now
+F-RESERVED-USED,T00489.005,Effects::TransformSlot,reserved14,unk14,,low,member is read now
+F-RESERVED-USED,T00489.006,Effects::TransformSlot,reserved18,unk18,,low,member is read now
+F-RESERVED-USED,T00489.010,Effects::TransformSlot,reserved28,unk28,,low,member is read now
+F-RESERVED-USED,T00489.011,Effects::TransformSlot,reserved2C,unk2C,,low,member is read now
+F-RESERVED-USED,T00489.012,Effects::TransformSlot,reserved30,unk30,,low,member is read now
+F-RESERVED-USED,T00493.002,Effects::TransformMotionView,reserved8,unk8,,low,member is read now
+F-RESERVED-USED,T00493.003,Effects::TransformMotionView,reservedC,unkC,,low,member is read now
+F-RESERVED-USED,T00493.005,Effects::TransformMotionView,reserved10,unk10,,low,member is read now
+F-RESERVED-USED,T00493.007,Effects::TransformMotionView,reserved2C,unk2C,,low,member is read now
+F-RESERVED-USED,T00598.002,Save::GameSaveImage,reserved100,unk100,,low,member is read now
+F-RESERVED-USED,T00599.002,Save::GameSaveImage,reserved100,unk100,,low,member is read now
+F-RESERVED-USED,T00603.013,Audio::SoundState,reserved70,unk70,,low,member is read now
+F-RESERVED-USED,T00675.015,Items::EquipmentPartStats,reserved14,unk14,,low,member is read now
+F-RESERVED-USED,T00683.006,Actors::WeaponModel,reserved08Bit4,unk8_4,,low,member is read now
+F-RESERVED-USED,T00683.008,Actors::WeaponModel,reserved08Bit6,unk8_6,,low,member is read now
+F-RESERVED-USED,T00683.010,Actors::WeaponModel,reserved09Bits0,unk9_0,,low,member is read now
+F-RESERVED-USED,T00683.020,Actors::WeaponModel,reserved11,unk11,,low,member is read now
+F-RESERVED-USED,T00683.021,Actors::WeaponModel,reserved12,unk12,,low,member is read now
+F-RESERVED-USED,T00683.022,Actors::WeaponModel,reserved13,unk13,,low,member is read now
+F-RESERVED-USED,T00683.027,Actors::WeaponModel,reserved20,unk20,,low,member is read now
+F-RESERVED-USED,T00683.032,Actors::WeaponModel,reserved5C0,unk5C0,,low,member is read now
+F-RESERVED-USED,T00694.002,Content::DiscDrive,reserved2,unk2,,low,member is read now
+F-SIBLING,T00749.001,Battle::ActorTargetWord,halves,u16,bytes,low,T00749.000 (med)
+F-MEMBER-TYPE,T00172.012,Menu::Setup::CombinedBladeRecord,range,range,weaponRange,med,vs_battle_range_t = T00662 Items::WeaponRange
+F-MEMBER-TYPE,T00189.001,Title::TransitionPacketBuffer,tile,tile,tileTexturePagePacket,med,VS_TILE_TPAGE = T00300 Render::TileTexturePagePacket
+F-MEMBER-TYPE,T00194.004,Audio::AkaoFileHeader,timestamp,timestamp,akaoTimestamp,med,AkaoTimeStamp = T00195 Audio::AkaoTimestamp
+F-MEMBER-TYPE,T00224.000,Field::InteractionFocus,triggerRecord,unk0,mpdLockTrigger,med,_mpdRoomSectionA * = T00335 Field::MpdLockTrigger
+F-MEMBER-TYPE,T00232.001,Field::DoorMatchList,records,values,mpdDoorRecords,med,_mpdRoomDoorSection_t *[0] = T00328 Field::MpdDoorRecord
+F-MEMBER-TYPE,T00233.001,Field::GimmickAnimationJob,trigger,unk4,mpdLockTrigger,med,_mpdRoomSectionA * = T00335 Field::MpdLockTrigger
+F-MEMBER-TYPE,T00235.004,Field::RoomEffectInstance,currentData,unk4,swingEffectRecord,med,D_800F1DD8_t2 * = T00236 Field::SwingEffectRecord
+F-MEMBER-TYPE,T00235.005,Field::RoomEffectInstance,originalData,unk8,swingEffectRecord,med,D_800F1DD8_t2 * = T00236 Field::SwingEffectRecord
+F-MEMBER-TYPE,T00239.110,Actors::ActorRecord,blendPose,unk704,animationPose,med,D_800F4538_unkC54 = T00253 Actors::AnimationPose
+F-MEMBER-TYPE,T00255.155,Field::GimmickInstance,reserved704,unk704,animationPose,low,D_800F4538_unkC54 = T00253 Actors::AnimationPose
+F-MEMBER-TYPE,T00255.156,Field::GimmickInstance,reservedC54,unkC54,animationPose,low,D_800F4538_unkC54 = T00253 Actors::AnimationPose
+F-MEMBER-TYPE,T00259.000,Event::CameraState,lookAt,lookAt,cameraTrack,med,D_800F4BA4_t2 = T00260 Event::CameraTrack
+F-MEMBER-TYPE,T00259.001,Event::CameraState,eye,eye,cameraTrack,med,D_800F4BA4_t2 = T00260 Event::CameraTrack
+F-MEMBER-TYPE,T00259.004,Event::CameraState,projectionDistance,projectionDistance,lensTween,med,func_800BDF6C_unk180_t = T00480 Event::LensTween
+F-MEMBER-TYPE,T00259.005,Event::CameraState,nearClip,nearClip,lensTween,med,func_800BDF6C_unk180_t = T00480 Event::LensTween
+F-MEMBER-TYPE,T00259.006,Event::CameraState,farClip,farClip,lensTween,med,func_800BDF6C_unk180_t = T00480 Event::LensTween
+F-MEMBER-TYPE,T00259.024,Event::CameraState,screenEffectTween,unk25C,tripleTween,med,func_800BDBB4_t = T00477 Event::TripleTween
+F-MEMBER-TYPE,T00264.000,Battle::EffectInstanceTargets,source,unk0,actionEffectTarget,med,actionEffectTarget = T00364 Effects::ActionEffectTarget
+F-MEMBER-TYPE,T00264.001,Battle::EffectInstanceTargets,emitFrom,unkC,actionEffectTarget,low,actionEffectTarget = T00364 Effects::ActionEffectTarget
+F-MEMBER-TYPE,T00264.002,Battle::EffectInstanceTargets,target,unk18,actionEffectTarget,low,actionEffectTarget = T00364 Effects::ActionEffectTarget
+F-MEMBER-TYPE,T00264.003,Battle::EffectInstanceTargets,emitTo,unk24,actionEffectTarget,low,actionEffectTarget = T00364 Effects::ActionEffectTarget
+F-MEMBER-TYPE,T00264.004,Battle::EffectInstanceTargets,timeline,unk30,effectTimeline,med,D_800F53B8_t4 * = T00265 Effects::EffectTimeline
+F-MEMBER-TYPE,T00271.012,Battle::Ai::RoomAiState,engagedHead,unk1C,actorAiState,med,func_800E78F4_t * = T00532 Battle::Ai::ActorAiState
+F-MEMBER-TYPE,T00271.013,Battle::Ai::RoomAiState,engagedTail,unk20,actorAiState,low,func_800E78F4_t * = T00532 Battle::Ai::ActorAiState
+F-MEMBER-TYPE,T00329.022,Field::RoomRecord,containers,section13,treasureChest,med,_mpdRoomSection13 * = T00332 Items::TreasureChest
+F-MEMBER-TYPE,T00348.001,Field::ZoneContext,mpdFiles,mpdLbas,discFile,med,vs_main_CdFile * = T00690 Content::DiscFile
+F-MEMBER-TYPE,T00348.003,Field::ZoneContext,zndEnemies,zndEnemies,zndEnemyRecord,med,_zndEnemy * = T00345 Field::ZndEnemyRecord
+F-MEMBER-TYPE,T00348.004,Field::ZoneContext,zudFiles,zudFiles,discFile,med,vs_main_CdFile * = T00690 Content::DiscFile
+F-MEMBER-TYPE,T00348.017,Field::ZoneContext,bounds,bounds,zoneBounds,med,_zoneContextBounds = T00347 Field::ZoneBounds
+F-MEMBER-TYPE,T00348.025,Field::ZoneContext,mpdEnemies,mpdEnemies,mpdEnemySpawn,med,_mpdEnemy * = T00320 Field::MpdEnemySpawn
+F-MEMBER-TYPE,T00363.003,Effects::ActionEffectRequest,source,source,actionEffectTarget,med,actionEffectTarget = T00364 Effects::ActionEffectTarget
+F-MEMBER-TYPE,T00363.004,Effects::ActionEffectRequest,targets,targets,actionEffectTargets,med,actionEffectTarget[16] = T00364 Effects::ActionEffectTarget
+F-MEMBER-TYPE,T00396.008,Battle::Ai::PerceptionActorView,stats,stats,actorStats,med,vs_battle_actor2 * = T00631 Battle::ActorStats
+F-MEMBER-TYPE,T00497.002,Effects::Particle,motion,motion,particleMotion,med,func_800D52A4_t = T00820 Effects::ParticleMotion
+F-MEMBER-TYPE,T00498.001,Effects::RendererSlot,renderer,renderer,effectRenderer,med,effectExec = T00743 Effects::EffectRenderer
+F-MEMBER-TYPE,T00508.001,Battle::EffectTransformBlock,reserved10,unk10,actionEffectTargets,low,actionEffectTarget[16] = T00364 Effects::ActionEffectTarget
+F-MEMBER-TYPE,T00522.011,Battle::Ai::EngagementData,opaque3C,unk3C,actorStats,low,vs_battle_actor2 * = T00631 Battle::ActorStats
+F-MEMBER-TYPE,T00549.001,Title::MenuItemSpritePacket,sprite,sprt,spriteTexturePagePacket,med,VS_SPRT = T00298 Render::SpriteTexturePagePacket
+F-MEMBER-TYPE,T00555.005,Battle::Ai::MovementDecisionView,model,actor,actorRecord,med,D_800F4538_t * = T00239 Actors::ActorRecord
+F-MEMBER-TYPE,T00594.000,Save::SaveSlotBase,slotState,slotState,cardFileSlotStatus,med,enum slotState_e = T00031 Save::CardFileSlotStatus
+F-MEMBER-TYPE,T00599.003,Save::GameSaveImage,protectedHeader,unk180,saveProtectedHeader,med,savedata_unk180_t = T00601 Save::SaveProtectedHeader
+F-MEMBER-TYPE,T00599.011,Save::GameSaveImage,entryDoor,unk1778,mpdDoorRecord,med,_mpdRoomDoorSection_t = T00328 Field::MpdDoorRecord
+F-MEMBER-TYPE,T00604.004,Battle::SoundEventTargets,reserved10,target,actionEffectTargets,low,actionEffectTarget[0] = T00364 Effects::ActionEffectTarget
+F-MEMBER-TYPE,T00609.001,Title::MenuSpritePacket,sprite,sprt,spriteTexturePagePacket,med,VS_SPRT = T00298 Render::SpriteTexturePagePacket
+F-MEMBER-TYPE,T00631.042,Battle::ActorStats,dropItem,miscItem,miscItemStack,med,vs_battle_uiMisc = T00677 Items::MiscItemStack
+F-MEMBER-TYPE,T00631.043,Battle::ActorStats,secondDropItem,unk95C,miscItemStack,med,vs_battle_uiMisc = T00677 Items::MiscItemStack
+F-MEMBER-TYPE,T00631.044,Battle::ActorStats,randomDropItem,unk960,miscItemDrop,med,vs_battle_uiMiscRand = T00678 Items::MiscItemDrop
+F-MEMBER-TYPE,T00639.001,Field::CameraTransition,fromSpherical,fromSpherical,sphericalCamera,med,_sphericalCamera = T00338 Field::SphericalCamera
+F-MEMBER-TYPE,T00639.005,Field::CameraTransition,toSpherical,toSpherical,sphericalCamera,med,_sphericalCamera = T00338 Field::SphericalCamera
+F-MEMBER-TYPE,T00645.000,Items::BattleLoot,weapon,weapon,lootedWeapon,med,vs_battle_lootedWeapon = T00654 Items::LootedWeapon
+F-MEMBER-TYPE,T00645.003,Items::BattleLoot,shield,shield,lootedShield,med,vs_battle_lootedShield = T00653 Items::LootedShield
+F-MEMBER-TYPE,T00645.004,Items::BattleLoot,armor,armor,lootedArmors,med,vs_battle_lootedArmor[2] = T00648 Items::LootedArmor
+F-MEMBER-TYPE,T00645.005,Items::BattleLoot,accessory,accessory,lootedAccessory,med,vs_battle_lootedAccessory = T00647 Items::LootedAccessory
+F-MEMBER-TYPE,T00645.007,Items::BattleLoot,misc,misc,lootedItems,med,vs_battle_lootedMisc[3] = T00652 Items::LootedItem
+F-MEMBER-TYPE,T00668.000,Items::ShieldSpawnLoadout,base,base,equipmentPartStats,med,vs_battle_uiEquipment = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00668.001,Items::ShieldSpawnLoadout,gems,gems,equipmentPartStats,med,vs_battle_uiEquipment[3] = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00673.000,Items::AccessorySpawnLoadout,accessory,accessory,equipmentPartStats,med,vs_battle_uiEquipment = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00674.000,Items::ArmorLoadout,armor,armor,equipmentPartStats,med,vs_battle_uiEquipment = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00675.019,Items::EquipmentPartStats,range,range,weaponRange,med,vs_battle_range_t = T00662 Items::WeaponRange
+F-MEMBER-TYPE,T00679.001,Items::ShieldLoadout,base,base,equipmentPartStats,med,vs_battle_uiEquipment = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00679.002,Items::ShieldLoadout,gems,gems,equipmentPartStats,med,vs_battle_uiEquipment[3] = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00680.001,Items::WeaponLoadout,blade,blade,equipmentPartStats,med,vs_battle_uiEquipment = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00680.002,Items::WeaponLoadout,grip,grip,equipmentPartStats,med,vs_battle_uiEquipment = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00680.003,Items::WeaponLoadout,gems,gems,equipmentPartStats,med,vs_battle_uiEquipment[3] = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00680.022,Items::WeaponLoadout,range,range,weaponRange,med,vs_battle_range_t = T00662 Items::WeaponRange
+F-MEMBER-TYPE,T00682.000,Items::WeaponSpawnLoadout,blade,blade,equipmentPartStats,med,vs_battle_uiEquipment = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00682.001,Items::WeaponSpawnLoadout,grip,grip,equipmentPartStats,med,vs_battle_uiEquipment = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00682.002,Items::WeaponSpawnLoadout,gems,gems,equipmentPartStats,med,vs_battle_uiEquipment[3] = T00675 Items::EquipmentPartStats
+F-MEMBER-TYPE,T00683.026,Actors::WeaponModel,sectionOffsets,offsets,weaponModelData,med,_wepModelOffsets * = T00344 Actors::WeaponModelData
+F-MEMBER-TYPE,T00691.002,Content::DiscQueueSlot,cdFile,cdFile,discFile,med,vs_main_CdFile = T00690 Content::DiscFile
+F-MEMBER-TYPE,T00697.017,Items::InventoryBlade,range,range,weaponRange,med,vs_battle_range_t = T00662 Items::WeaponRange
+F-MEMBER-TYPE,T00784.000,Menu::Files::FilePrimitive,sprt,sprt,spriteTexturePagePacket,med,VS_SPRT = T00298 Render::SpriteTexturePagePacket
+F-MEMBER-TYPE,T00784.001,Menu::Files::FilePrimitive,tileTpage,tile_tpage,tileTexturePagePacket,med,VS_TILE_TPAGE = T00300 Render::TileTexturePagePacket
+F-MEMBER-TYPE,T00784.002,Menu::Files::FilePrimitive,tile,tile,tilePacket,med,VS_TILE = T00299 Render::TilePacket
+F-MEMBER-TYPE,T00784.003,Menu::Files::FilePrimitive,polyG4Tpage,polyG4_tpage,pagedGouraudQuadPacket,med,VS_POLY_G4_TPAGE = T00297 Render::PagedGouraudQuadPacket
+F-MEMBER-TYPE,T00784.004,Menu::Files::FilePrimitive,polyG4,polyG4,gouraudQuadPacket,med,VS_POLY_G4 = T00296 Render::GouraudQuadPacket
+F-MEMBER-TYPE,T00794.000,Title::FileMenuPrimitivePayload,sprite,sprt,spriteTexturePagePacket,med,VS_SPRT = T00298 Render::SpriteTexturePagePacket
+F-MEMBER-TYPE,T00794.001,Title::FileMenuPrimitivePayload,texturedTile,tile_tpage,tileTexturePagePacket,med,VS_TILE_TPAGE = T00300 Render::TileTexturePagePacket
+F-MEMBER-TYPE,T00794.002,Title::FileMenuPrimitivePayload,tile,tile,tilePacket,med,VS_TILE = T00299 Render::TilePacket
+F-MEMBER-TYPE,T00794.003,Title::FileMenuPrimitivePayload,texturedGradientQuad,polyG4_tpage,pagedGouraudQuadPacket,med,VS_POLY_G4_TPAGE = T00297 Render::PagedGouraudQuadPacket
+F-MEMBER-TYPE,T00794.004,Title::FileMenuPrimitivePayload,gradientQuad,polyG4,gouraudQuadPacket,med,VS_POLY_G4 = T00296 Render::GouraudQuadPacket
+F-USE-AVAILABLE,T00123.000,State::WeaponKillCounts,weaponCategoryKills,weaponCategories,,med,field refs exist
+F-USE-AVAILABLE,T00123.001,State::WeaponKillCounts,battleAbilitiesUnlocked,battleAbilitiesUnlocked,,med,field refs exist
+F-USE-AVAILABLE,T00123.002,State::WeaponKillCounts,totalKills,total,,med,field refs exist
+F-USE-AVAILABLE,T00129.000,Field::GimmickTileTarget,tileX,x,,med,field refs exist
+F-USE-AVAILABLE,T00129.002,Field::GimmickTileTarget,tileZ,z,,med,field refs exist
+F-USE-AVAILABLE,T00132.002,Battle::TargetLabelBox,texturePageCommand,tpage,,low,field refs exist
+F-USE-AVAILABLE,T00172.002,Menu::Setup::CombinedBladeRecord,category,category,,med,field refs exist
+F-USE-AVAILABLE,T00185.000,State::GameTimeComponents,frames,f,,med,field refs exist
+F-USE-AVAILABLE,T00185.001,State::GameTimeComponents,seconds,s,,med,field refs exist
+F-USE-AVAILABLE,T00185.002,State::GameTimeComponents,minutes,m,,med,field refs exist
+F-USE-AVAILABLE,T00185.003,State::GameTimeComponents,hours,h,,med,field refs exist
+F-USE-AVAILABLE,T00186.000,State::WeaponKillCounts,weaponCategoryKills,weaponCategories,,med,field refs exist
+F-USE-AVAILABLE,T00186.001,State::WeaponKillCounts,battleAbilitiesUnlocked,battleAbilitiesUnlocked,,med,field refs exist
+F-USE-AVAILABLE,T00186.002,State::WeaponKillCounts,totalKills,total,,med,field refs exist
+F-USE-AVAILABLE,T00189.000,Title::TransitionPacketBuffer,dmaTag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00189.001,Title::TransitionPacketBuffer,tile,tile,,med,field refs exist
+F-USE-AVAILABLE,T00192.000,Input::ButtonBytePair,lowByte,low,,med,field refs exist
+F-USE-AVAILABLE,T00199.001,Field::CollisionSampleScratch,excluded,excluded,,med,field refs exist
+F-USE-AVAILABLE,T00199.005,Field::CollisionSampleScratch,blocked,blocked,,med,field refs exist
+F-USE-AVAILABLE,T00199.006,Field::CollisionSampleScratch,attributes,attributes,,med,field refs exist
+F-USE-AVAILABLE,T00199.007,Field::CollisionSampleScratch,centerAttribute,centerAttribute,,med,field refs exist
+F-USE-AVAILABLE,T00211.000,Field::TriggerMarkerVertex,positionX,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00211.001,Field::TriggerMarkerVertex,height,unk2,,med,field refs exist
+F-USE-AVAILABLE,T00211.002,Field::TriggerMarkerVertex,positionZ,unk4,,med,field refs exist
+F-USE-AVAILABLE,T00211.005,Field::TriggerMarkerVertex,vertexShades,unkC,,med,field refs exist
+F-USE-AVAILABLE,T00212.000,Field::GimmickTemplate,instanceFlags,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00212.001,Field::GimmickTemplate,instanceWord4,unk4,,low,field refs exist
+F-USE-AVAILABLE,T00212.002,Field::GimmickTemplate,recolorCount,unk8,,low,field refs exist
+F-USE-AVAILABLE,T00212.003,Field::GimmickTemplate,modelDataSize,unkC,,med,field refs exist
+F-USE-AVAILABLE,T00214.002,Battle::TargetSphereSetupView,depthAndYaw,unk20,,low,field refs exist
+F-USE-AVAILABLE,T00214.004,Battle::TargetSphereSetupView,wirePhaseB,unk26,,low,field refs exist
+F-USE-AVAILABLE,T00214.007,Battle::TargetSphereSetupView,targetCount,unk2C,,low,field refs exist
+F-USE-AVAILABLE,T00214.015,Battle::TargetSphereSetupView,targetList0,unk40,,low,field refs exist
+F-USE-AVAILABLE,T00214.018,Battle::TargetSphereSetupView,labelArea,unk990,,low,field refs exist
+F-USE-AVAILABLE,T00214.020,Battle::TargetSphereSetupView,terrainRowFlags,unk4AB8,,low,field refs exist
+F-USE-AVAILABLE,T00219.009,Event::SplashLayerView,scaleFixed12,unkC,,med,field refs exist
+F-USE-AVAILABLE,T00221.000,Field::RoomLoadResetBlock,reserved00,unk0,,low,field refs exist
+F-USE-AVAILABLE,T00221.001,Field::RoomLoadResetBlock,reserved02,unk2,,low,field refs exist
+F-USE-AVAILABLE,T00221.002,Field::RoomLoadResetBlock,reserved04,unk4,,low,field refs exist
+F-USE-AVAILABLE,T00221.004,Field::RoomLoadResetBlock,reserved08,unk8,,low,field refs exist
+F-USE-AVAILABLE,T00221.008,Field::RoomLoadResetBlock,reserved14,unk14,,low,field refs exist
+F-USE-AVAILABLE,T00223.002,Menu::Framework::ActionSelection,executeAbility,executeAbility,,med,field refs exist
+F-USE-AVAILABLE,T00224.000,Field::InteractionFocus,triggerRecord,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00224.001,Field::InteractionFocus,actorQuery,unk4,,med,field refs exist
+F-USE-AVAILABLE,T00226.000,Battle::ActionRequest,actionId,actionIndex,,med,field refs exist
+F-USE-AVAILABLE,T00231.000,Field::RoomTint,red,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00231.001,Field::RoomTint,green,unk1,,med,field refs exist
+F-USE-AVAILABLE,T00231.002,Field::RoomTint,blue,unk2,,med,field refs exist
+F-USE-AVAILABLE,T00231.004,Field::RoomTint,strength,unk4,,med,field refs exist
+F-USE-AVAILABLE,T00231.005,Field::RoomTint,isActive,unk6,,med,field refs exist
+F-USE-AVAILABLE,T00232.000,Field::DoorMatchList,count,count,,med,field refs exist
+F-USE-AVAILABLE,T00232.001,Field::DoorMatchList,records,values,,med,field refs exist
+F-USE-AVAILABLE,T00233.000,Field::GimmickAnimationJob,jobKind,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00233.001,Field::GimmickAnimationJob,trigger,unk4,,med,field refs exist
+F-USE-AVAILABLE,T00235.000,Field::RoomEffectInstance,isActive,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00235.001,Field::RoomEffectInstance,kindOrObjectCount,unk1,,med,field refs exist
+F-USE-AVAILABLE,T00235.002,Field::RoomEffectInstance,isUpdateEnabled,unk2,,med,field refs exist
+F-USE-AVAILABLE,T00235.003,Field::RoomEffectInstance,reserved03,unk3,,low,field refs exist
+F-USE-AVAILABLE,T00235.004,Field::RoomEffectInstance,currentData,unk4,,med,field refs exist
+F-USE-AVAILABLE,T00235.005,Field::RoomEffectInstance,originalData,unk8,,med,field refs exist
+F-USE-AVAILABLE,T00240.000,Field::GimmickObjectInfo,objectId,actorId,,med,field refs exist
+F-USE-AVAILABLE,T00255.028,Field::GimmickInstance,delay,unk11,,low,field refs exist
+F-USE-AVAILABLE,T00255.032,Field::GimmickInstance,rotationTicks,unk18,,low,field refs exist
+F-USE-AVAILABLE,T00255.050,Field::GimmickInstance,reserved3C,unk3C,,low,field refs exist
+F-USE-AVAILABLE,T00255.052,Field::GimmickInstance,reserved40,unk40,,low,field refs exist
+F-USE-AVAILABLE,T00255.072,Field::GimmickInstance,pulsedPalette,unk14C,,med,field refs exist
+F-USE-AVAILABLE,T00258.003,Event::WeatherTween,durationFrames,unk3,,med,field refs exist
+F-USE-AVAILABLE,T00258.005,Event::WeatherTween,startWindDirection,unk6,,med,field refs exist
+F-USE-AVAILABLE,T00258.006,Event::WeatherTween,deltaWindDirection,unk8,,med,field refs exist
+F-USE-AVAILABLE,T00258.008,Event::WeatherTween,startWindStrength,unkC,,med,field refs exist
+F-USE-AVAILABLE,T00258.009,Event::WeatherTween,deltaWindStrength,unkE,,med,field refs exist
+F-USE-AVAILABLE,T00258.011,Event::WeatherTween,startIntensity,unk12,,med,field refs exist
+F-USE-AVAILABLE,T00258.012,Event::WeatherTween,deltaIntensity,unk14,,med,field refs exist
+F-USE-AVAILABLE,T00259.000,Event::CameraState,lookAt,lookAt,,med,field refs exist
+F-USE-AVAILABLE,T00259.001,Event::CameraState,eye,eye,,med,field refs exist
+F-USE-AVAILABLE,T00259.004,Event::CameraState,projectionDistance,projectionDistance,,med,field refs exist
+F-USE-AVAILABLE,T00259.005,Event::CameraState,nearClip,nearClip,,med,field refs exist
+F-USE-AVAILABLE,T00259.006,Event::CameraState,farClip,farClip,,med,field refs exist
+F-USE-AVAILABLE,T00259.007,Event::CameraState,shakeOscillatorA,unk1A4,,med,field refs exist
+F-USE-AVAILABLE,T00259.008,Event::CameraState,shakeOscillatorB,unk1B0,,med,field refs exist
+F-USE-AVAILABLE,T00259.011,Event::CameraState,shakeEyeOffsetY,unk1C0,,med,field refs exist
+F-USE-AVAILABLE,T00259.012,Event::CameraState,shakeEyeOffsetZ,unk1C2,,med,field refs exist
+F-USE-AVAILABLE,T00259.015,Event::CameraState,shakeLookAtOffsetY,unk1C8,,med,field refs exist
+F-USE-AVAILABLE,T00259.016,Event::CameraState,shakeLookAtOffsetZ,unk1CA,,med,field refs exist
+F-USE-AVAILABLE,T00259.024,Event::CameraState,screenEffectTween,unk25C,,med,field refs exist
+F-USE-AVAILABLE,T00260.004,Event::CameraTrack,elapsedFrames,time,,med,field refs exist
+F-USE-AVAILABLE,T00260.005,Event::CameraTrack,durationFrames,duration,,med,field refs exist
+F-USE-AVAILABLE,T00260.007,Event::CameraTrack,isFollowing,following,,med,field refs exist
+F-USE-AVAILABLE,T00260.008,Event::CameraTrack,motionScalar,value,,med,field refs exist
+F-USE-AVAILABLE,T00260.009,Event::CameraTrack,motionScalarDelta,delta,,med,field refs exist
+F-USE-AVAILABLE,T00260.012,Event::CameraTrack,startPosition,start,,med,field refs exist
+F-USE-AVAILABLE,T00260.016,Event::CameraTrack,followDelta,followDelta,,med,field refs exist
+F-USE-AVAILABLE,T00260.017,Event::CameraTrack,followPosition,followPosition,,med,field refs exist
+F-USE-AVAILABLE,T00260.018,Event::CameraTrack,previousCameraPosition,previousCamera,,med,field refs exist
+F-USE-AVAILABLE,T00260.019,Event::CameraTrack,computedPosition,computed,,med,field refs exist
+F-USE-AVAILABLE,T00260.020,Event::CameraTrack,currentPosition,current,,med,field refs exist
+F-USE-AVAILABLE,T00269.000,Effects::EffectLoadState,opaque0,unk0,,low,field refs exist
+F-USE-AVAILABLE,T00269.001,Effects::EffectLoadState,loadContexts,loadContexts,,med,field refs exist
+F-USE-AVAILABLE,T00269.002,Effects::EffectLoadState,slots,slots,,med,field refs exist
+F-USE-AVAILABLE,T00269.003,Effects::EffectLoadState,isClut,isClut,,med,field refs exist
+F-USE-AVAILABLE,T00271.000,Battle::Ai::RoomAiState,maxTileX,maxX,,med,field refs exist
+F-USE-AVAILABLE,T00271.001,Battle::Ai::RoomAiState,maxTileZ,maxZ,,med,field refs exist
+F-USE-AVAILABLE,T00271.002,Battle::Ai::RoomAiState,minTileX,minX,,med,field refs exist
+F-USE-AVAILABLE,T00271.003,Battle::Ai::RoomAiState,minTileZ,minZ,,med,field refs exist
+F-USE-AVAILABLE,T00278.014,Audio::SeqChannel,reserved44,unk44,,low,field refs exist
+F-USE-AVAILABLE,T00296.000,Render::GouraudQuadPacket,colorZeroAndCode,r0g0b0code,,med,field refs exist
+F-USE-AVAILABLE,T00296.001,Render::GouraudQuadPacket,positionZero,x0y0,,med,field refs exist
+F-USE-AVAILABLE,T00296.002,Render::GouraudQuadPacket,colorOne,r1g1b1,,med,field refs exist
+F-USE-AVAILABLE,T00296.003,Render::GouraudQuadPacket,positionOne,x1y1,,med,field refs exist
+F-USE-AVAILABLE,T00296.004,Render::GouraudQuadPacket,colorTwo,r2g2b2,,med,field refs exist
+F-USE-AVAILABLE,T00296.005,Render::GouraudQuadPacket,positionTwo,x2y2,,med,field refs exist
+F-USE-AVAILABLE,T00296.006,Render::GouraudQuadPacket,colorThree,r3g3b3,,med,field refs exist
+F-USE-AVAILABLE,T00296.007,Render::GouraudQuadPacket,positionThree,x3y3,,med,field refs exist
+F-USE-AVAILABLE,T00297.000,Render::PagedGouraudQuadPacket,texturePage,tpage,,med,field refs exist
+F-USE-AVAILABLE,T00297.001,Render::PagedGouraudQuadPacket,colorZeroAndCode,r0g0b0code,,med,field refs exist
+F-USE-AVAILABLE,T00297.002,Render::PagedGouraudQuadPacket,positionZero,x0y0,,med,field refs exist
+F-USE-AVAILABLE,T00297.003,Render::PagedGouraudQuadPacket,colorOne,r1g1b1,,med,field refs exist
+F-USE-AVAILABLE,T00297.004,Render::PagedGouraudQuadPacket,positionOne,x1y1,,med,field refs exist
+F-USE-AVAILABLE,T00297.005,Render::PagedGouraudQuadPacket,colorTwo,r2g2b2,,med,field refs exist
+F-USE-AVAILABLE,T00297.006,Render::PagedGouraudQuadPacket,positionTwo,x2y2,,med,field refs exist
+F-USE-AVAILABLE,T00297.007,Render::PagedGouraudQuadPacket,colorThree,r3g3b3,,med,field refs exist
+F-USE-AVAILABLE,T00297.008,Render::PagedGouraudQuadPacket,positionThree,x3y3,,med,field refs exist
+F-USE-AVAILABLE,T00298.000,Render::SpriteTexturePagePacket,texturePageCommand,tpage,,med,field refs exist
+F-USE-AVAILABLE,T00298.001,Render::SpriteTexturePagePacket,colorCommand,r0g0b0code,,med,field refs exist
+F-USE-AVAILABLE,T00298.002,Render::SpriteTexturePagePacket,position,x0y0,,med,field refs exist
+F-USE-AVAILABLE,T00298.003,Render::SpriteTexturePagePacket,uvPalette,u0v0clut,,med,field refs exist
+F-USE-AVAILABLE,T00298.004,Render::SpriteTexturePagePacket,size,wh,,med,field refs exist
+F-USE-AVAILABLE,T00299.000,Render::TilePacket,colorAndCode,r0g0b0code,,med,field refs exist
+F-USE-AVAILABLE,T00299.001,Render::TilePacket,position,x0y0,,med,field refs exist
+F-USE-AVAILABLE,T00299.002,Render::TilePacket,size,wh,,med,field refs exist
+F-USE-AVAILABLE,T00300.000,Render::TileTexturePagePacket,texturePageCommand,tpage,,med,field refs exist
+F-USE-AVAILABLE,T00300.001,Render::TileTexturePagePacket,colorCommand,r0g0b0code,,med,field refs exist
+F-USE-AVAILABLE,T00300.002,Render::TileTexturePagePacket,position,x0y0,,med,field refs exist
+F-USE-AVAILABLE,T00300.003,Render::TileTexturePagePacket,size,wh,,med,field refs exist
+F-USE-AVAILABLE,T00303.008,Actors::ShpBone,reservedC,unkC,,low,field refs exist
+F-USE-AVAILABLE,T00311.009,Battle::HitResult,hpEffect,hpEffect,,med,field refs exist
+F-USE-AVAILABLE,T00320.000,Field::MpdEnemySpawn,kind,type,,med,field refs exist
+F-USE-AVAILABLE,T00320.001,Field::MpdEnemySpawn,index,index,,med,field refs exist
+F-USE-AVAILABLE,T00320.002,Field::MpdEnemySpawn,isHidden,hidden,,med,field refs exist
+F-USE-AVAILABLE,T00320.004,Field::MpdEnemySpawn,enemyId,id,,med,field refs exist
+F-USE-AVAILABLE,T00320.005,Field::MpdEnemySpawn,slot,slot,,med,field refs exist
+F-USE-AVAILABLE,T00320.006,Field::MpdEnemySpawn,flagTest,flagTest,,med,field refs exist
+F-USE-AVAILABLE,T00320.007,Field::MpdEnemySpawn,statTest,statTest,,med,field refs exist
+F-USE-AVAILABLE,T00320.008,Field::MpdEnemySpawn,flagValue,flagValue,,med,field refs exist
+F-USE-AVAILABLE,T00320.009,Field::MpdEnemySpawn,statValue,statValue,,med,field refs exist
+F-USE-AVAILABLE,T00320.010,Field::MpdEnemySpawn,tileX,x,,med,field refs exist
+F-USE-AVAILABLE,T00320.011,Field::MpdEnemySpawn,direction,direction,,med,field refs exist
+F-USE-AVAILABLE,T00320.012,Field::MpdEnemySpawn,tileZ,z,,med,field refs exist
+F-USE-AVAILABLE,T00320.013,Field::MpdEnemySpawn,height,height,,med,field refs exist
+F-USE-AVAILABLE,T00320.014,Field::MpdEnemySpawn,settings,settings,,med,field refs exist
+F-USE-AVAILABLE,T00320.016,Field::MpdEnemySpawn,itemId,itemId,,med,field refs exist
+F-USE-AVAILABLE,T00320.017,Field::MpdEnemySpawn,item2Id,item2Id,,med,field refs exist
+F-USE-AVAILABLE,T00320.018,Field::MpdEnemySpawn,item3Id,item3Id,,med,field refs exist
+F-USE-AVAILABLE,T00320.019,Field::MpdEnemySpawn,itemCount,itemCount,,med,field refs exist
+F-USE-AVAILABLE,T00320.020,Field::MpdEnemySpawn,item2Count,item2Count,,med,field refs exist
+F-USE-AVAILABLE,T00320.021,Field::MpdEnemySpawn,item3Count,item3Count,,med,field refs exist
+F-USE-AVAILABLE,T00320.022,Field::MpdEnemySpawn,facing,facing,,med,field refs exist
+F-USE-AVAILABLE,T00320.024,Field::MpdEnemySpawn,variant,variant,,med,field refs exist
+F-USE-AVAILABLE,T00320.025,Field::MpdEnemySpawn,reserved26,unk26,,low,field refs exist
+F-USE-AVAILABLE,T00320.026,Field::MpdEnemySpawn,sceneTest,sceneTest,,med,field refs exist
+F-USE-AVAILABLE,T00323.000,Field::MpdHeader,roomSectionOffset,roomSectionOffset,,med,field refs exist
+F-USE-AVAILABLE,T00323.002,Field::MpdHeader,clearedSectionOffset,clearedSectionOffset,,med,field refs exist
+F-USE-AVAILABLE,T00323.003,Field::MpdHeader,clearedSectionSize,clearedSectionLen,,med,field refs exist
+F-USE-AVAILABLE,T00323.004,Field::MpdHeader,scriptSectionOffset,scriptSectionOffset,,med,field refs exist
+F-USE-AVAILABLE,T00323.005,Field::MpdHeader,scriptSectionSize,scriptSectionLen,,med,field refs exist
+F-USE-AVAILABLE,T00323.006,Field::MpdHeader,doorSectionOffset,doorSectionOffset,,med,field refs exist
+F-USE-AVAILABLE,T00323.007,Field::MpdHeader,doorSectionSize,doorSectionLen,,med,field refs exist
+F-USE-AVAILABLE,T00323.008,Field::MpdHeader,enemySectionOffset,enemySectionOffset,,med,field refs exist
+F-USE-AVAILABLE,T00323.009,Field::MpdHeader,enemySectionSize,enemySectionLen,,med,field refs exist
+F-USE-AVAILABLE,T00323.010,Field::MpdHeader,lootSectionOffset,lootSectionOffset,,med,field refs exist
+F-USE-AVAILABLE,T00323.011,Field::MpdHeader,lootSectionSize,lootSectionLen,,med,field refs exist
+F-USE-AVAILABLE,T00327.000,Field::DoorTileLocation,tileX,unk0_0,,med,field refs exist
+F-USE-AVAILABLE,T00327.001,Field::DoorTileLocation,tileZ,unk0_5,,med,field refs exist
+F-USE-AVAILABLE,T00327.002,Field::DoorTileLocation,floorLayer,unk0_10,,med,field refs exist
+F-USE-AVAILABLE,T00333.002,Field::MpdTileCell,reserved00Bit6,unk0_6,,low,field refs exist
+F-USE-AVAILABLE,T00333.007,Field::MpdTileCell,reserved00Bit13,unk0_13,,low,field refs exist
+F-USE-AVAILABLE,T00333.010,Field::MpdTileCell,reserved00Bit16,unk0_16,,low,field refs exist
+F-USE-AVAILABLE,T00333.012,Field::MpdTileCell,reserved00Bits18,unk0_18,,low,field refs exist
+F-USE-AVAILABLE,T00336.005,Field::MpdEnvironment,isWorkshop,isWorkshop,,med,field refs exist
+F-USE-AVAILABLE,T00336.006,Field::MpdEnvironment,reserved31,unk31,,low,field refs exist
+F-USE-AVAILABLE,T00336.007,Field::MpdEnvironment,trapLevel,trapLevel,,med,field refs exist
+F-USE-AVAILABLE,T00336.020,Field::MpdEnvironment,sceneId,sceneId,,med,field refs exist
+F-USE-AVAILABLE,T00336.021,Field::MpdEnvironment,reserved52,unk52,,low,field refs exist
+F-USE-AVAILABLE,T00336.022,Field::MpdEnvironment,reserved54,unk54,,low,field refs exist
+F-USE-AVAILABLE,T00336.023,Field::MpdEnvironment,reserved56,unk56,,low,field refs exist
+F-USE-AVAILABLE,T00338.000,Field::SphericalCamera,values,values,,med,field refs exist
+F-USE-AVAILABLE,T00338.001,Field::SphericalCamera,delta,delta,,med,field refs exist
+F-USE-AVAILABLE,T00338.002,Field::SphericalCamera,initialDistance,initialDistance,,med,field refs exist
+F-USE-AVAILABLE,T00338.003,Field::SphericalCamera,zoomVelocity,unk24,,med,field refs exist
+F-USE-AVAILABLE,T00338.004,Field::SphericalCamera,speed,speed,,med,field refs exist
+F-USE-AVAILABLE,T00339.000,Field::SphericalCameraValues,yaw,yaw,,low,field refs exist
+F-USE-AVAILABLE,T00339.001,Field::SphericalCameraValues,pitch,pitch,,med,field refs exist
+F-USE-AVAILABLE,T00339.002,Field::SphericalCameraValues,distance,distance,,med,field refs exist
+F-USE-AVAILABLE,T00339.003,Field::SphericalCameraValues,mode,mode,,med,field refs exist
+F-USE-AVAILABLE,T00345.000,Field::ZndEnemyRecord,recordBytes,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00346.000,Field::ZndHeader,mpdListOffset,mpdOffset,,med,field refs exist
+F-USE-AVAILABLE,T00346.001,Field::ZndHeader,mpdListSize,mpdLen,,med,field refs exist
+F-USE-AVAILABLE,T00346.002,Field::ZndHeader,enemiesOffset,enemiesOffset,,med,field refs exist
+F-USE-AVAILABLE,T00346.003,Field::ZndHeader,enemiesSize,enemiesLen,,med,field refs exist
+F-USE-AVAILABLE,T00346.004,Field::ZndHeader,texturesOffset,timOffset,,med,field refs exist
+F-USE-AVAILABLE,T00346.006,Field::ZndHeader,musicId,musicId,,med,field refs exist
+F-USE-AVAILABLE,T00347.000,Field::ZoneBounds,minX,minX,,med,field refs exist
+F-USE-AVAILABLE,T00347.001,Field::ZoneBounds,minZ,minZ,,med,field refs exist
+F-USE-AVAILABLE,T00347.002,Field::ZoneBounds,maxX,maxX,,med,field refs exist
+F-USE-AVAILABLE,T00347.003,Field::ZoneBounds,maxZ,maxZ,,med,field refs exist
+F-USE-AVAILABLE,T00348.000,Field::ZoneContext,zndId,zndId,,med,field refs exist
+F-USE-AVAILABLE,T00348.001,Field::ZoneContext,mpdFiles,mpdLbas,,med,field refs exist
+F-USE-AVAILABLE,T00348.002,Field::ZoneContext,zndEnemyCount,zndEnemyCount,,med,field refs exist
+F-USE-AVAILABLE,T00348.003,Field::ZoneContext,zndEnemies,zndEnemies,,med,field refs exist
+F-USE-AVAILABLE,T00348.004,Field::ZoneContext,zudFiles,zudFiles,,med,field refs exist
+F-USE-AVAILABLE,T00348.008,Field::ZoneContext,zndDiscRequest,zndCdFile,,med,field refs exist
+F-USE-AVAILABLE,T00348.009,Field::ZoneContext,zndData,zndData,,med,field refs exist
+F-USE-AVAILABLE,T00348.010,Field::ZoneContext,musicId,musicId,,med,field refs exist
+F-USE-AVAILABLE,T00348.011,Field::ZoneContext,musicSlot,musicSlot,,med,field refs exist
+F-USE-AVAILABLE,T00348.013,Field::ZoneContext,mapId,mapId,,med,field refs exist
+F-USE-AVAILABLE,T00348.017,Field::ZoneContext,bounds,bounds,,med,field refs exist
+F-USE-AVAILABLE,T00348.022,Field::ZoneContext,mpdDiscRequest,mpdCdFile,,med,field refs exist
+F-USE-AVAILABLE,T00348.023,Field::ZoneContext,mpdData,mpdData,,med,field refs exist
+F-USE-AVAILABLE,T00348.024,Field::ZoneContext,mpdEnemyCount,mpdEnemyCount,,med,field refs exist
+F-USE-AVAILABLE,T00348.025,Field::ZoneContext,mpdEnemies,mpdEnemies,,med,field refs exist
+F-USE-AVAILABLE,T00402.000,Event::CameraMotionScratch,distance,distance,,med,field refs exist
+F-USE-AVAILABLE,T00402.001,Event::CameraMotionScratch,steps,steps,,med,field refs exist
+F-USE-AVAILABLE,T00402.003,Event::CameraMotionScratch,delta,delta,,med,field refs exist
+F-USE-AVAILABLE,T00402.004,Event::CameraMotionScratch,candidate,candidate,,med,field refs exist
+F-USE-AVAILABLE,T00402.007,Event::CameraMotionScratch,matrix,matrix,,med,field refs exist
+F-USE-AVAILABLE,T00403.000,Event::CameraTrackScratch,value,value,,med,field refs exist
+F-USE-AVAILABLE,T00403.001,Event::CameraTrackScratch,distance,distance,,med,field refs exist
+F-USE-AVAILABLE,T00403.003,Event::CameraTrackScratch,currentOffset,v1,,med,field refs exist
+F-USE-AVAILABLE,T00403.004,Event::CameraTrackScratch,destinationOffset,v2,,med,field refs exist
+F-USE-AVAILABLE,T00403.007,Event::CameraTrackScratch,rotation,rotation,,med,field refs exist
+F-USE-AVAILABLE,T00403.008,Event::CameraTrackScratch,actorRotation,rotation2,,med,field refs exist
+F-USE-AVAILABLE,T00403.010,Event::CameraTrackScratch,matrix,matrix,,med,field refs exist
+F-USE-AVAILABLE,T00404.001,Event::CameraShakeScratch,eyeShake,a,,med,field refs exist
+F-USE-AVAILABLE,T00404.002,Event::CameraShakeScratch,lookAtShake,b,,med,field refs exist
+F-USE-AVAILABLE,T00404.003,Event::CameraShakeScratch,axisShake,c,,med,field refs exist
+F-USE-AVAILABLE,T00412.029,Battle::Ai::EscortView,distancesSquared,distances,,med,field refs exist
+F-USE-AVAILABLE,T00414.001,Battle::Ai::EscortRelationsView,relations,targets,,med,field refs exist
+F-USE-AVAILABLE,T00417.001,Effects::ParticleAttractionView,targetX,targetX,,med,field refs exist
+F-USE-AVAILABLE,T00417.002,Effects::ParticleAttractionView,targetY,targetY,,med,field refs exist
+F-USE-AVAILABLE,T00417.003,Effects::ParticleAttractionView,targetZ,targetZ,,med,field refs exist
+F-USE-AVAILABLE,T00417.005,Effects::ParticleAttractionView,attraction,attraction,,med,field refs exist
+F-USE-AVAILABLE,T00435.001,Actors::ActorLocationQuery,reserved0C,unkC,,low,field refs exist
+F-USE-AVAILABLE,T00439.000,Field::CameraPositionPair,position,position,,med,field refs exist
+F-USE-AVAILABLE,T00439.001,Field::CameraPositionPair,lookAt,lookAt,,med,field refs exist
+F-USE-AVAILABLE,T00444.000,Field::ActorPlacement,tileX,unk0_0,,med,field refs exist
+F-USE-AVAILABLE,T00444.001,Field::ActorPlacement,direction,unk0_8,,med,field refs exist
+F-USE-AVAILABLE,T00444.002,Field::ActorPlacement,tileZ,unk0_16,,med,field refs exist
+F-USE-AVAILABLE,T00444.003,Field::ActorPlacement,height,unk0_24,,med,field refs exist
+F-USE-AVAILABLE,T00445.000,Field::PlatformContactPoint,x,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00445.001,Field::PlatformContactPoint,height,unk1,,med,field refs exist
+F-USE-AVAILABLE,T00445.002,Field::PlatformContactPoint,z,unk2,,med,field refs exist
+F-USE-AVAILABLE,T00445.003,Field::PlatformContactPoint,platformIndex,unk3,,med,field refs exist
+F-USE-AVAILABLE,T00446.000,Field::PlatformContactPoint,x,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00446.001,Field::PlatformContactPoint,height,unk2,,med,field refs exist
+F-USE-AVAILABLE,T00446.002,Field::PlatformContactPoint,z,unk4,,med,field refs exist
+F-USE-AVAILABLE,T00446.003,Field::PlatformContactPoint,platformIndex,unk6,,med,field refs exist
+F-USE-AVAILABLE,T00447.000,Field::TextureFrameEffect,geometryOffset,geometryOffset,,med,field refs exist
+F-USE-AVAILABLE,T00447.002,Field::TextureFrameEffect,delay,delay,,med,field refs exist
+F-USE-AVAILABLE,T00447.003,Field::TextureFrameEffect,baseU,baseU,,med,field refs exist
+F-USE-AVAILABLE,T00447.004,Field::TextureFrameEffect,baseV,baseV,,med,field refs exist
+F-USE-AVAILABLE,T00447.005,Field::TextureFrameEffect,frameCount,frameCount,,med,field refs exist
+F-USE-AVAILABLE,T00447.006,Field::TextureFrameEffect,columns,columns,,med,field refs exist
+F-USE-AVAILABLE,T00447.007,Field::TextureFrameEffect,frameWidth,frameWidth,,med,field refs exist
+F-USE-AVAILABLE,T00447.008,Field::TextureFrameEffect,frameHeight,frameHeight,,med,field refs exist
+F-USE-AVAILABLE,T00447.009,Field::TextureFrameEffect,tick,tick,,med,field refs exist
+F-USE-AVAILABLE,T00447.010,Field::TextureFrameEffect,frame,frame,,med,field refs exist
+F-USE-AVAILABLE,T00447.011,Field::TextureFrameEffect,u,u,,med,field refs exist
+F-USE-AVAILABLE,T00447.012,Field::TextureFrameEffect,v,v,,med,field refs exist
+F-USE-AVAILABLE,T00449.000,Field::TextureScrollEffect,geometryOffset,geometryOffset,,med,field refs exist
+F-USE-AVAILABLE,T00449.002,Field::TextureScrollEffect,delay,delay,,med,field refs exist
+F-USE-AVAILABLE,T00449.003,Field::TextureScrollEffect,baseU,baseU,,med,field refs exist
+F-USE-AVAILABLE,T00449.004,Field::TextureScrollEffect,baseV,baseV,,med,field refs exist
+F-USE-AVAILABLE,T00449.005,Field::TextureScrollEffect,width,width,,med,field refs exist
+F-USE-AVAILABLE,T00449.006,Field::TextureScrollEffect,height,height,,med,field refs exist
+F-USE-AVAILABLE,T00449.007,Field::TextureScrollEffect,currentU,currentU,,med,field refs exist
+F-USE-AVAILABLE,T00449.008,Field::TextureScrollEffect,currentV,currentV,,med,field refs exist
+F-USE-AVAILABLE,T00449.009,Field::TextureScrollEffect,windowWidth,windowWidth,,med,field refs exist
+F-USE-AVAILABLE,T00449.010,Field::TextureScrollEffect,windowHeight,windowHeight,,med,field refs exist
+F-USE-AVAILABLE,T00449.011,Field::TextureScrollEffect,stepU,stepU,,med,field refs exist
+F-USE-AVAILABLE,T00449.012,Field::TextureScrollEffect,stepV,stepV,,med,field refs exist
+F-USE-AVAILABLE,T00449.013,Field::TextureScrollEffect,tick,tick,,med,field refs exist
+F-USE-AVAILABLE,T00449.015,Field::TextureScrollEffect,u,u,,med,field refs exist
+F-USE-AVAILABLE,T00449.016,Field::TextureScrollEffect,v,v,,med,field refs exist
+F-USE-AVAILABLE,T00450.000,Field::TextureRegionScrollEffect,tick,tick,,med,field refs exist
+F-USE-AVAILABLE,T00450.001,Field::TextureRegionScrollEffect,frame,frame,,med,field refs exist
+F-USE-AVAILABLE,T00450.002,Field::TextureRegionScrollEffect,frameCount,frameCount,,med,field refs exist
+F-USE-AVAILABLE,T00450.003,Field::TextureRegionScrollEffect,columns,columns,,med,field refs exist
+F-USE-AVAILABLE,T00450.005,Field::TextureRegionScrollEffect,delay,delay,,med,field refs exist
+F-USE-AVAILABLE,T00450.006,Field::TextureRegionScrollEffect,scrollStep,scrollStep,,med,field refs exist
+F-USE-AVAILABLE,T00450.007,Field::TextureRegionScrollEffect,rect,rect,,med,field refs exist
+F-USE-AVAILABLE,T00451.000,Field::RoomEffectScriptHeader,objectCount,count,,med,field refs exist
+F-USE-AVAILABLE,T00451.002,Field::RoomEffectScriptHeader,isActive,active,,med,field refs exist
+F-USE-AVAILABLE,T00452.000,Field::RoomEffectChunkHeader,size,size,,med,field refs exist
+F-USE-AVAILABLE,T00452.001,Field::RoomEffectChunkHeader,type,type,,med,field refs exist
+F-USE-AVAILABLE,T00453.001,Field::RoomEffectObjectView,scriptCursor,unk4,,med,field refs exist
+F-USE-AVAILABLE,T00454.000,Field::RoomEffectCommandHeader,size,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00454.001,Field::RoomEffectCommandHeader,opcode,unk2,,med,field refs exist
+F-USE-AVAILABLE,T00475.000,Event::ActorSelection,remainingCount,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00475.001,Event::ActorSelection,cursor,unk1,,med,field refs exist
+F-USE-AVAILABLE,T00475.002,Event::ActorSelection,actorIds,unk2,,med,field refs exist
+F-USE-AVAILABLE,T00478.000,Event::EasedFractionScratch,easedFraction,unk0,,med,field refs exist
+F-USE-AVAILABLE,T00479.002,Event::ShakeOscillator,cycles,unk4,,med,field refs exist
+F-USE-AVAILABLE,T00479.003,Event::ShakeOscillator,amplitude,unk6,,med,field refs exist
+F-USE-AVAILABLE,T00479.004,Event::ShakeOscillator,elapsedFrames,unk8,,med,field refs exist
+F-USE-AVAILABLE,T00479.005,Event::ShakeOscillator,durationFrames,unk9,,med,field refs exist
+F-USE-AVAILABLE,T00479.007,Event::ShakeOscillator,reserved0B,unkB,,low,field refs exist
+F-USE-AVAILABLE,T00494.002,Effects::TransformDefinition,attachBone,unk3,,med,field refs exist
+F-USE-AVAILABLE,T00495.006,Effects::AnimatedLocalTransform,target,target,,med,field refs exist
+F-USE-AVAILABLE,T00497.005,Effects::Particle,transparency,unk60,,med,field refs exist
+F-USE-AVAILABLE,T00498.000,Effects::RendererSlot,next,next,,med,field refs exist
+F-USE-AVAILABLE,T00820.000,Effects::ParticleMotion,mass,mass,,med,field refs exist
+F-USE-AVAILABLE,T00820.001,Effects::ParticleMotion,gravityScale,gravityScale,,med,field refs exist
+F-USE-AVAILABLE,T00820.002,Effects::ParticleMotion,position,position,,med,field refs exist
+F-USE-AVAILABLE,T00820.003,Effects::ParticleMotion,velocity,velocity,,med,field refs exist
+F-USE-AVAILABLE,T00820.004,Effects::ParticleMotion,force,force,,med,field refs exist
+F-USE-AVAILABLE,T00820.005,Effects::ParticleMotion,acceleration,acceleration,,med,field refs exist
+F-USE-AVAILABLE,T00821.000,Effects::FixedVector,vx,vx,,med,field refs exist
+F-USE-AVAILABLE,T00821.001,Effects::FixedVector,vy,vy,,med,field refs exist
+F-USE-AVAILABLE,T00821.002,Effects::FixedVector,vz,vz,,med,field refs exist
+F-USE-AVAILABLE,T00532.034,Battle::Ai::ActorAiState,settingsBits21,unk2C,,low,field refs exist
+F-USE-AVAILABLE,T00532.062,Battle::Ai::ActorAiState,moveDistance,unkB4,,med,field refs exist
+F-USE-AVAILABLE,T00532.067,Battle::Ai::ActorAiState,wanderPhase,unkC0,,low,field refs exist
+F-USE-AVAILABLE,T00532.095,Battle::Ai::ActorAiState,opaque130,unk130,,low,field refs exist
+F-USE-AVAILABLE,T00532.100,Battle::Ai::ActorAiState,opaque13A,unk13A,,low,field refs exist
+F-USE-AVAILABLE,T00532.120,Battle::Ai::ActorAiState,angle,unk18A,,med,field refs exist
+F-USE-AVAILABLE,T00532.131,Battle::Ai::ActorAiState,candidates,unk2F0,,med,field refs exist
+F-USE-AVAILABLE,T00534.003,Effects::ParticleDefinition,tickEvent,unk3,,med,field refs exist
+F-USE-AVAILABLE,T00535.000,Effects::ParticleEmitterScratch,opaque0,unk0,,low,field refs exist
+F-USE-AVAILABLE,T00540.000,Effects::Plg128::CameraEffectState,lifetime,lifetime,,med,field refs exist
+F-USE-AVAILABLE,T00540.001,Effects::Plg128::CameraEffectState,effect,effect,,med,field refs exist
+F-USE-AVAILABLE,T00540.002,Effects::Plg128::CameraEffectState,mode,mode,,med,field refs exist
+F-USE-AVAILABLE,T00540.003,Effects::Plg128::CameraEffectState,age,age,,med,field refs exist
+F-USE-AVAILABLE,T00540.004,Effects::Plg128::CameraEffectState,startCamera,startCamera,,med,field refs exist
+F-USE-AVAILABLE,T00540.009,Effects::Plg128::CameraEffectState,nearClip,nearClip,,med,field refs exist
+F-USE-AVAILABLE,T00549.000,Title::MenuItemSpritePacket,dmaTag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00549.001,Title::MenuItemSpritePacket,sprite,sprt,,med,field refs exist
+F-USE-AVAILABLE,T00550.001,Title::MenuItemAnimationState,motion,state,,med,field refs exist
+F-USE-AVAILABLE,T00562.004,Field::MpdObjectSpawn,flag,flag,,med,field refs exist
+F-USE-AVAILABLE,T00562.005,Field::MpdObjectSpawn,flagMin,flagMin,,med,field refs exist
+F-USE-AVAILABLE,T00562.006,Field::MpdObjectSpawn,flagMax,flagMax,,med,field refs exist
+F-USE-AVAILABLE,T00562.007,Field::MpdObjectSpawn,slot,slot,,med,field refs exist
+F-USE-AVAILABLE,T00562.009,Field::MpdObjectSpawn,tileX,x,,med,field refs exist
+F-USE-AVAILABLE,T00562.010,Field::MpdObjectSpawn,tileZ,z,,med,field refs exist
+F-USE-AVAILABLE,T00562.011,Field::MpdObjectSpawn,height,y,,med,field refs exist
+F-USE-AVAILABLE,T00562.012,Field::MpdObjectSpawn,direction,direction,,med,field refs exist
+F-USE-AVAILABLE,T00562.013,Field::MpdObjectSpawn,model,model,,med,field refs exist
+F-USE-AVAILABLE,T00566.001,Field::GimmickMotionView,flags,flags,,med,field refs exist
+F-USE-AVAILABLE,T00566.003,Field::GimmickMotionView,objectId,objectId,,med,field refs exist
+F-USE-AVAILABLE,T00566.005,Field::GimmickMotionView,mode,mode,,med,field refs exist
+F-USE-AVAILABLE,T00566.006,Field::GimmickMotionView,x,x,,med,field refs exist
+F-USE-AVAILABLE,T00566.007,Field::GimmickMotionView,y,y,,med,field refs exist
+F-USE-AVAILABLE,T00566.008,Field::GimmickMotionView,z,z,,med,field refs exist
+F-USE-AVAILABLE,T00566.010,Field::GimmickMotionView,rotationX,rotationX,,med,field refs exist
+F-USE-AVAILABLE,T00566.011,Field::GimmickMotionView,rotationY,rotationY,,med,field refs exist
+F-USE-AVAILABLE,T00566.012,Field::GimmickMotionView,rotationZ,rotationZ,,med,field refs exist
+F-USE-AVAILABLE,T00566.014,Field::GimmickMotionView,scaleX,scaleX,,med,field refs exist
+F-USE-AVAILABLE,T00566.015,Field::GimmickMotionView,scaleY,scaleY,,med,field refs exist
+F-USE-AVAILABLE,T00566.016,Field::GimmickMotionView,scaleZ,scaleZ,,med,field refs exist
+F-USE-AVAILABLE,T00566.019,Field::GimmickMotionView,deltaY,deltaY,,med,field refs exist
+F-USE-AVAILABLE,T00566.021,Field::GimmickMotionView,orientation,orientation,,med,field refs exist
+F-USE-AVAILABLE,T00566.023,Field::GimmickMotionView,savedState,savedState,,med,field refs exist
+F-USE-AVAILABLE,T00566.024,Field::GimmickMotionView,state,state,,med,field refs exist
+F-USE-AVAILABLE,T00566.026,Field::GimmickMotionView,material,material,,med,field refs exist
+F-USE-AVAILABLE,T00566.028,Field::GimmickMotionView,frame,frame,,med,field refs exist
+F-USE-AVAILABLE,T00599.000,Save::GameSaveImage,cardHeader,fileInfo,,med,field refs exist
+F-USE-AVAILABLE,T00599.001,Save::GameSaveImage,iconBitmap,unk80,,med,field refs exist
+F-USE-AVAILABLE,T00599.002,Save::GameSaveImage,reserved100,unk100,,low,field refs exist
+F-USE-AVAILABLE,T00599.003,Save::GameSaveImage,protectedHeader,unk180,,med,field refs exist
+F-USE-AVAILABLE,T00599.004,Save::GameSaveImage,stateFlags,unk200,,med,field refs exist
+F-USE-AVAILABLE,T00599.005,Save::GameSaveImage,learnedActions,unk640,,med,field refs exist
+F-USE-AVAILABLE,T00599.006,Save::GameSaveImage,mapStatus,mapStatus,,med,field refs exist
+F-USE-AVAILABLE,T00599.007,Save::GameSaveImage,settings,unk6A8,,med,field refs exist
+F-USE-AVAILABLE,T00599.008,Save::GameSaveImage,ashleySnapshot,unk6C8,,med,field refs exist
+F-USE-AVAILABLE,T00599.009,Save::GameSaveImage,inventory,unk7C8,,med,field refs exist
+F-USE-AVAILABLE,T00599.010,Save::GameSaveImage,inventoryIndices,unk16C8,,med,field refs exist
+F-USE-AVAILABLE,T00599.011,Save::GameSaveImage,entryDoor,unk1778,,med,field refs exist
+F-USE-AVAILABLE,T00599.012,Save::GameSaveImage,scoreData,unk1784,,med,field refs exist
+F-USE-AVAILABLE,T00599.013,Save::GameSaveImage,roomStateSlot,unk1898,,med,field refs exist
+F-USE-AVAILABLE,T00599.014,Save::GameSaveImage,recentRoomEnemyStates,unk189C,,med,field refs exist
+F-USE-AVAILABLE,T00599.015,Save::GameSaveImage,artsStatus,artsStatus,,med,field refs exist
+F-USE-AVAILABLE,T00599.016,Save::GameSaveImage,containerData,containerData,,med,field refs exist
+F-USE-AVAILABLE,T00602.000,Event::ScriptBytePair,lowByte,low,,med,field refs exist
+F-USE-AVAILABLE,T00602.001,Event::ScriptBytePair,highByte,high,,med,field refs exist
+F-USE-AVAILABLE,T00605.002,Save::SaveFileStats,currentGameSaveCount,currentGameSaveCount,,med,field refs exist
+F-USE-AVAILABLE,T00609.000,Title::MenuSpritePacket,dmaTag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00609.001,Title::MenuSpritePacket,sprite,sprt,,med,field refs exist
+F-USE-AVAILABLE,T00620.000,Event::DialogPlacement,anchorOffset,offset,,med,field refs exist
+F-USE-AVAILABLE,T00620.001,Event::DialogPlacement,screenX,x,,med,field refs exist
+F-USE-AVAILABLE,T00620.002,Event::DialogPlacement,screenY,y,,med,field refs exist
+F-USE-AVAILABLE,T00620.003,Event::DialogPlacement,clampDistance,distance,,med,field refs exist
+F-USE-AVAILABLE,T00626.000,Render::EffectFlatQuadPacket,tag0,unk0,,low,field refs exist
+F-USE-AVAILABLE,T00626.001,Render::EffectFlatQuadPacket,opaque4,unk4,,low,field refs exist
+F-USE-AVAILABLE,T00626.002,Render::EffectFlatQuadPacket,drawMode,unk2C,,med,field refs exist
+F-USE-AVAILABLE,T00627.000,Render::EffectGouraudQuadPacket,tag0,unk0,,low,field refs exist
+F-USE-AVAILABLE,T00627.003,Render::EffectGouraudQuadPacket,wordCount,unk3,,med,field refs exist
+F-USE-AVAILABLE,T00627.004,Render::EffectGouraudQuadPacket,opaque4,unk4,,low,field refs exist
+F-USE-AVAILABLE,T00627.005,Render::EffectGouraudQuadPacket,drawMode,unk38,,med,field refs exist
+F-USE-AVAILABLE,T00637.000,Field::BackgroundLayout,width,width,,med,field refs exist
+F-USE-AVAILABLE,T00637.001,Field::BackgroundLayout,height,height,,med,field refs exist
+F-USE-AVAILABLE,T00637.003,Field::BackgroundLayout,tiles,tiles,,med,field refs exist
+F-USE-AVAILABLE,T00638.000,Field::BackgroundTile,textureRect,uv,,med,field refs exist
+F-USE-AVAILABLE,T00638.001,Field::BackgroundTile,cornerColors,colors,,med,field refs exist
+F-USE-AVAILABLE,T00639.000,Field::CameraTransition,fromCameraState,fromCameraState,,med,field refs exist
+F-USE-AVAILABLE,T00639.001,Field::CameraTransition,fromSpherical,fromSpherical,,med,field refs exist
+F-USE-AVAILABLE,T00639.002,Field::CameraTransition,fromNearClip,fromNearClip,,med,field refs exist
+F-USE-AVAILABLE,T00639.003,Field::CameraTransition,fromProjectionDistance,fromProjectionDistance,,med,field refs exist
+F-USE-AVAILABLE,T00639.004,Field::CameraTransition,fromFarClip,fromFarClip,,med,field refs exist
+F-USE-AVAILABLE,T00639.005,Field::CameraTransition,toSpherical,toSpherical,,med,field refs exist
+F-USE-AVAILABLE,T00639.006,Field::CameraTransition,toNearClip,toNearClip,,med,field refs exist
+F-USE-AVAILABLE,T00639.007,Field::CameraTransition,toProjectionDistance,toProjectionDistance,,med,field refs exist
+F-USE-AVAILABLE,T00639.008,Field::CameraTransition,toFarClip,toFarClip,,med,field refs exist
+F-USE-AVAILABLE,T00639.009,Field::CameraTransition,targetPosition,targetPosition,,med,field refs exist
+F-USE-AVAILABLE,T00639.010,Field::CameraTransition,targetLookAt,targetLookAt,,med,field refs exist
+F-USE-AVAILABLE,T00639.011,Field::CameraTransition,direction,direction,,med,field refs exist
+F-USE-AVAILABLE,T00639.012,Field::CameraTransition,lookAtStep,lookAtStep,,med,field refs exist
+F-USE-AVAILABLE,T00639.013,Field::CameraTransition,farClipStep,farClipStep,,med,field refs exist
+F-USE-AVAILABLE,T00639.014,Field::CameraTransition,nearClipStep,nearClipStep,,med,field refs exist
+F-USE-AVAILABLE,T00639.015,Field::CameraTransition,projectionDistanceStep,projectionDistanceStep,,med,field refs exist
+F-USE-AVAILABLE,T00639.016,Field::CameraTransition,transitionSpeed,transitionSpeed,,med,field refs exist
+F-USE-AVAILABLE,T00639.017,Field::CameraTransition,transitionFrames,transitionFrames,,med,field refs exist
+F-USE-AVAILABLE,T00640.000,Actors::CharacterInit,subType,subType,,med,field refs exist
+F-USE-AVAILABLE,T00644.001,Render::ScreenOffset,y,y,,med,field refs exist
+F-USE-AVAILABLE,T00645.004,Items::BattleLoot,armor,armor,,med,field refs exist
+F-USE-AVAILABLE,T00655.000,Field::ManualDisplayState,currentManual,currentManual,,med,field refs exist
+F-USE-AVAILABLE,T00655.002,Field::ManualDisplayState,scrollPositions,scrollPositions,,med,field refs exist
+F-USE-AVAILABLE,T00668.000,Items::ShieldSpawnLoadout,base,base,,med,field refs exist
+F-USE-AVAILABLE,T00668.001,Items::ShieldSpawnLoadout,gems,gems,,med,field refs exist
+F-USE-AVAILABLE,T00668.002,Items::ShieldSpawnLoadout,material,material,,med,field refs exist
+F-USE-AVAILABLE,T00668.003,Items::ShieldSpawnLoadout,dropRate,dropRate,,med,field refs exist
+F-USE-AVAILABLE,T00668.004,Items::ShieldSpawnLoadout,index,index,,med,field refs exist
+F-USE-AVAILABLE,T00673.000,Items::AccessorySpawnLoadout,accessory,accessory,,med,field refs exist
+F-USE-AVAILABLE,T00673.001,Items::AccessorySpawnLoadout,currentStr,currentStr,,med,field refs exist
+F-USE-AVAILABLE,T00673.002,Items::AccessorySpawnLoadout,currentInt,currentInt,,med,field refs exist
+F-USE-AVAILABLE,T00673.003,Items::AccessorySpawnLoadout,currentAgility,currentAgility,,med,field refs exist
+F-USE-AVAILABLE,T00673.004,Items::AccessorySpawnLoadout,dropRate,dropRate,,med,field refs exist
+F-USE-AVAILABLE,T00673.005,Items::AccessorySpawnLoadout,index,index,,med,field refs exist
+F-USE-AVAILABLE,T00673.006,Items::AccessorySpawnLoadout,types,types,,med,field refs exist
+F-USE-AVAILABLE,T00673.007,Items::AccessorySpawnLoadout,classes,classes,,med,field refs exist
+F-USE-AVAILABLE,T00673.008,Items::AccessorySpawnLoadout,affinities,affinities,,med,field refs exist
+F-USE-AVAILABLE,T00675.000,Items::EquipmentPartStats,id,id,,med,field refs exist
+F-USE-AVAILABLE,T00675.001,Items::EquipmentPartStats,subId,subId,,med,field refs exist
+F-USE-AVAILABLE,T00675.002,Items::EquipmentPartStats,weaponModelId,wepId,,med,field refs exist
+F-USE-AVAILABLE,T00675.003,Items::EquipmentPartStats,category,category,,med,field refs exist
+F-USE-AVAILABLE,T00675.004,Items::EquipmentPartStats,strength,strength,,med,field refs exist
+F-USE-AVAILABLE,T00675.005,Items::EquipmentPartStats,intelligence,intelligence,,med,field refs exist
+F-USE-AVAILABLE,T00675.006,Items::EquipmentPartStats,agility,agility,,med,field refs exist
+F-USE-AVAILABLE,T00675.007,Items::EquipmentPartStats,currentDp,currentDp,,med,field refs exist
+F-USE-AVAILABLE,T00675.008,Items::EquipmentPartStats,maxDp,maxDp,,med,field refs exist
+F-USE-AVAILABLE,T00675.009,Items::EquipmentPartStats,currentPp,currentPp,,med,field refs exist
+F-USE-AVAILABLE,T00675.010,Items::EquipmentPartStats,maxPp,maxPp,,med,field refs exist
+F-USE-AVAILABLE,T00675.011,Items::EquipmentPartStats,damageType,damageType,,med,field refs exist
+F-USE-AVAILABLE,T00675.012,Items::EquipmentPartStats,costType,costType,,med,field refs exist
+F-USE-AVAILABLE,T00675.013,Items::EquipmentPartStats,cost,cost,,med,field refs exist
+F-USE-AVAILABLE,T00675.014,Items::EquipmentPartStats,material,material,,med,field refs exist
+F-USE-AVAILABLE,T00675.015,Items::EquipmentPartStats,reserved14,unk14,,low,field refs exist
+F-USE-AVAILABLE,T00675.016,Items::EquipmentPartStats,gemSlots,gemSlots,,med,field refs exist
+F-USE-AVAILABLE,T00675.017,Items::EquipmentPartStats,gemEffects,gemEffects,,med,field refs exist
+F-USE-AVAILABLE,T00675.018,Items::EquipmentPartStats,index,index,,med,field refs exist
+F-USE-AVAILABLE,T00675.019,Items::EquipmentPartStats,range,range,,med,field refs exist
+F-USE-AVAILABLE,T00675.020,Items::EquipmentPartStats,types,types,,med,field refs exist
+F-USE-AVAILABLE,T00675.021,Items::EquipmentPartStats,classes,classes,,med,field refs exist
+F-USE-AVAILABLE,T00675.022,Items::EquipmentPartStats,affinities,affinities,,med,field refs exist
+F-USE-AVAILABLE,T00677.000,Items::MiscItemStack,id,id,,med,field refs exist
+F-USE-AVAILABLE,T00677.001,Items::MiscItemStack,count,count,,med,field refs exist
+F-USE-AVAILABLE,T00678.000,Items::MiscItemDrop,id,id,,med,field refs exist
+F-USE-AVAILABLE,T00678.001,Items::MiscItemDrop,dropRate,dropRate,,med,field refs exist
+F-USE-AVAILABLE,T00682.000,Items::WeaponSpawnLoadout,blade,blade,,med,field refs exist
+F-USE-AVAILABLE,T00682.001,Items::WeaponSpawnLoadout,grip,grip,,med,field refs exist
+F-USE-AVAILABLE,T00682.002,Items::WeaponSpawnLoadout,gems,gems,,med,field refs exist
+F-USE-AVAILABLE,T00682.003,Items::WeaponSpawnLoadout,material,material,,med,field refs exist
+F-USE-AVAILABLE,T00682.004,Items::WeaponSpawnLoadout,dropRate,dropRate,,med,field refs exist
+F-USE-AVAILABLE,T00682.005,Items::WeaponSpawnLoadout,index,index,,med,field refs exist
+F-USE-AVAILABLE,T00682.006,Items::WeaponSpawnLoadout,name,name,,med,field refs exist
+F-USE-AVAILABLE,T00683.000,Actors::WeaponModel,boneCount,nBones,,med,field refs exist
+F-USE-AVAILABLE,T00683.002,Actors::WeaponModel,triangleCount,nTriangles,,med,field refs exist
+F-USE-AVAILABLE,T00683.003,Actors::WeaponModel,quadCount,nQuads,,med,field refs exist
+F-USE-AVAILABLE,T00683.004,Actors::WeaponModel,otherPrimitiveCount,nOther,,med,field refs exist
+F-USE-AVAILABLE,T00683.005,Actors::WeaponModel,actorId,actorId,,med,field refs exist
+F-USE-AVAILABLE,T00683.007,Actors::WeaponModel,isWideTexture,isWideTexture,,med,field refs exist
+F-USE-AVAILABLE,T00683.009,Actors::WeaponModel,isDoubleClut,isDoubleClut,,med,field refs exist
+F-USE-AVAILABLE,T00683.010,Actors::WeaponModel,reserved09Bits0,unk9_0,,low,field refs exist
+F-USE-AVAILABLE,T00683.011,Actors::WeaponModel,material,material,,med,field refs exist
+F-USE-AVAILABLE,T00683.014,Actors::WeaponModel,paletteColorCount,nClutColors,,med,field refs exist
+F-USE-AVAILABLE,T00683.017,Actors::WeaponModel,modelId,modelId,,med,field refs exist
+F-USE-AVAILABLE,T00683.018,Actors::WeaponModel,textureSlot,texSlot,,med,field refs exist
+F-USE-AVAILABLE,T00683.019,Actors::WeaponModel,paletteSlotOffset,clutSlotOffset,,med,field refs exist
+F-USE-AVAILABLE,T00683.022,Actors::WeaponModel,reserved13,unk13,,low,field refs exist
+F-USE-AVAILABLE,T00683.026,Actors::WeaponModel,sectionOffsets,offsets,,med,field refs exist
+F-USE-AVAILABLE,T00683.027,Actors::WeaponModel,reserved20,unk20,,low,field refs exist
+F-USE-AVAILABLE,T00683.029,Actors::WeaponModel,palettes,palettes,,med,field refs exist
+F-USE-AVAILABLE,T00685.000,Render::ClosedRingPacket,tag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00685.001,Render::ClosedRingPacket,poly,poly,,med,field refs exist
+F-USE-AVAILABLE,T00685.002,Render::ClosedRingPacket,drawMode,drawMode,,med,field refs exist
+F-USE-AVAILABLE,T00688.000,Render::GridPacket,tag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00688.001,Render::GridPacket,poly,poly,,med,field refs exist
+F-USE-AVAILABLE,T00688.002,Render::GridPacket,drawMode,drawMode,,med,field refs exist
+F-USE-AVAILABLE,T00700.006,Items::InventoryIndices,misc,misc,,med,field refs exist
+F-USE-AVAILABLE,T00701.002,Items::InventoryMisc,index,index,,med,field refs exist
+F-USE-AVAILABLE,T00702.001,Items::InventoryShield,isEquipped,isEquipped,,med,field refs exist
+F-USE-AVAILABLE,T00704.005,Items::Inventory,gems,gems,,med,field refs exist
+F-USE-AVAILABLE,T00705.000,State::RoomVisitFlags,roomFlags,roomFlags,,med,field refs exist
+F-USE-AVAILABLE,T00705.001,State::RoomVisitFlags,areaFlags,areaFlags,,med,field refs exist
+F-USE-AVAILABLE,T00707.007,State::Settings,slotState,slotState,,med,field refs exist
+F-USE-AVAILABLE,T00707.014,State::Settings,key,key,,med,field refs exist
+F-USE-AVAILABLE,T00707.015,State::Settings,cumulativeSaveCount,cumulativeSaveCount,,med,field refs exist
+F-USE-AVAILABLE,T00711.000,Items::Container,items,data,,med,field refs exist
+F-USE-AVAILABLE,T00712.002,Items::ContainerData,blades,blades,,med,field refs exist
+F-USE-AVAILABLE,T00712.003,Items::ContainerData,grips,grips,,med,field refs exist
+F-USE-AVAILABLE,T00712.005,Items::ContainerData,gems,gems,,med,field refs exist
+F-USE-AVAILABLE,T00713.005,Items::ContainerIndices,gems,gems,,med,field refs exist
+F-USE-AVAILABLE,T00715.000,Render::Mesh10Packet,tag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00715.001,Render::Mesh10Packet,poly,poly,,med,field refs exist
+F-USE-AVAILABLE,T00715.002,Render::Mesh10Packet,drawMode,drawMode,,med,field refs exist
+F-USE-AVAILABLE,T00717.000,Render::Mesh10TexCoord,u,u,,med,field refs exist
+F-USE-AVAILABLE,T00717.001,Render::Mesh10TexCoord,v,v,,med,field refs exist
+F-USE-AVAILABLE,T00718.000,Render::MirrorSurfacePacket,tag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00718.001,Render::MirrorSurfacePacket,poly,poly,,med,field refs exist
+F-USE-AVAILABLE,T00718.002,Render::MirrorSurfacePacket,drawMode,drawMode,,med,field refs exist
+F-USE-AVAILABLE,T00720.000,Render::ParticleLinePacket,tag0,unk0,,low,field refs exist
+F-USE-AVAILABLE,T00720.003,Render::ParticleLinePacket,wordCount,unk3,,med,field refs exist
+F-USE-AVAILABLE,T00720.004,Render::ParticleLinePacket,line,line,,med,field refs exist
+F-USE-AVAILABLE,T00720.005,Render::ParticleLinePacket,drawMode,drawMode,,med,field refs exist
+F-USE-AVAILABLE,T00721.000,Render::ParticleQuadPacket,tag0,unk0,,low,field refs exist
+F-USE-AVAILABLE,T00721.003,Render::ParticleQuadPacket,wordCount,unk3,,med,field refs exist
+F-USE-AVAILABLE,T00721.004,Render::ParticleQuadPacket,opaque4,unk4,,low,field refs exist
+F-USE-AVAILABLE,T00721.005,Render::ParticleQuadPacket,drawMode,unk38,,med,field refs exist
+F-USE-AVAILABLE,T00722.000,Render::RingPacket,tag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00722.001,Render::RingPacket,poly,poly,,med,field refs exist
+F-USE-AVAILABLE,T00722.002,Render::RingPacket,drawMode,drawMode,,med,field refs exist
+F-USE-AVAILABLE,T00724.000,Render::RotatingSurfacePacket,tag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00724.001,Render::RotatingSurfacePacket,poly,poly,,med,field refs exist
+F-USE-AVAILABLE,T00724.002,Render::RotatingSurfacePacket,drawMode,drawMode,,med,field refs exist
+F-USE-AVAILABLE,T00727.000,Render::SurfacePacket,tag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00727.001,Render::SurfacePacket,poly,poly,,med,field refs exist
+F-USE-AVAILABLE,T00727.002,Render::SurfacePacket,drawMode,drawMode,,med,field refs exist
+F-USE-AVAILABLE,T00729.000,Render::TiledRingPacket,tag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00729.001,Render::TiledRingPacket,poly,poly,,med,field refs exist
+F-USE-AVAILABLE,T00729.002,Render::TiledRingPacket,drawMode,drawMode,,med,field refs exist
+F-USE-AVAILABLE,T00731.000,Render::TiledRingTexCoord,u,u,,med,field refs exist
+F-USE-AVAILABLE,T00731.001,Render::TiledRingTexCoord,v,v,,med,field refs exist
+F-USE-AVAILABLE,T00733.000,Render::Trail9Packet,tag0,unk0,,low,field refs exist
+F-USE-AVAILABLE,T00735.000,Render::TransposedRingPacket,tag,tag,,med,field refs exist
+F-USE-AVAILABLE,T00735.001,Render::TransposedRingPacket,poly,poly,,med,field refs exist
+F-USE-AVAILABLE,T00735.002,Render::TransposedRingPacket,drawMode,drawMode,,med,field refs exist
+F-USE-AVAILABLE,T00738.002,State::TrialScore,difficulty,difficulty,,med,field refs exist
+F-USE-AVAILABLE,T00741.002,Actors::ZudHeader,characterShapeOffset,model,,med,field refs exist
+F-USE-AVAILABLE,T00741.004,Actors::ZudHeader,weaponOffset,blade,,med,field refs exist
+F-USE-AVAILABLE,T00741.006,Actors::ZudHeader,shieldOffset,shield,,med,field refs exist
+F-USE-AVAILABLE,T00741.008,Actors::ZudHeader,commonAnimationOffset,effect,,med,field refs exist
+F-USE-AVAILABLE,T00741.009,Actors::ZudHeader,commonAnimationSize,effectSize,,med,field refs exist
+F-USE-AVAILABLE,T00741.010,Actors::ZudHeader,battleAnimationOffset,weaponEffect,,med,field refs exist
+F-USE-AVAILABLE,T00741.011,Actors::ZudHeader,battleAnimationSize,weaponEffectSize,,med,field refs exist
+F-USE-AVAILABLE,T00748.000,Field::PackedShortPair,halves,s16,,med,field refs exist
+F-USE-AVAILABLE,T00748.001,Field::PackedShortPair,word,s32,,med,field refs exist
+F-USE-AVAILABLE,T00753.000,Field::RoomEffectOperand,unsignedHalves,u16,,med,field refs exist
+F-USE-AVAILABLE,T00753.001,Field::RoomEffectOperand,signedHalves,s16,,med,field refs exist
+F-USE-AVAILABLE,T00753.002,Field::RoomEffectOperand,word,s32,,med,field refs exist
+F-USE-AVAILABLE,T00760.001,Battle::Ai::PositionWord,bytes,b,,low,field refs exist
+F-USE-AVAILABLE,T00763.001,Battle::Ai::SavedSettingsWord,bits,bits,,low,field refs exist
+F-USE-AVAILABLE,T00785.000,Input::PressedButtonsView,allButtons,all,,med,field refs exist
+F-USE-AVAILABLE,T00786.000,Input::PressedButtonsView,allButtons,all,,med,field refs exist
+F-USE-AVAILABLE,T00793.000,Input::PressedButtonsView,allButtons,all,,med,field refs exist
+F-USE-AVAILABLE,T00793.001,Input::PressedButtonsView,ports,pad,,med,field refs exist
+F-USE-AVAILABLE,T00794.000,Title::FileMenuPrimitivePayload,sprite,sprt,,med,field refs exist
+F-USE-AVAILABLE,T00794.001,Title::FileMenuPrimitivePayload,texturedTile,tile_tpage,,med,field refs exist
+F-USE-AVAILABLE,T00794.002,Title::FileMenuPrimitivePayload,tile,tile,,med,field refs exist
+F-USE-AVAILABLE,T00794.003,Title::FileMenuPrimitivePayload,texturedGradientQuad,polyG4_tpage,,med,field refs exist
+F-USE-AVAILABLE,T00794.004,Title::FileMenuPrimitivePayload,gradientQuad,polyG4,,med,field refs exist
+F-USE-AVAILABLE,T00794.005,Title::FileMenuPrimitivePayload,tileAndGradientQuad,tilePoly,,med,field refs exist
+F-USE-AVAILABLE,T00795.000,Input::PressedButtonsView,allButtons,all,,med,field refs exist
+F-USE-AVAILABLE,T00795.001,Input::PressedButtonsView,ports,pad,,med,field refs exist
+F-USE-AVAILABLE,T00796.000,Audio::StreamWordBytes,word,s32,,med,field refs exist
+F-USE-AVAILABLE,T00796.001,Audio::StreamWordBytes,bytes,u8,,med,field refs exist

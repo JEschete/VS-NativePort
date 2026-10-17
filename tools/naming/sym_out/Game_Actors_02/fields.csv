@@ -28,7 +28,7 @@ T00675.011,damageType,Damage type,med,declaration-only;source:146C.h:309
 T00675.012,costType,Risk or MP cost type,med,declaration-only;source:146C.h:310
 T00675.013,cost,Cost amount,med,declaration-only;source:146C.h:311
 T00675.014,material,Material,med,declaration-only;source:146C.h:312
-T00675.015,reserved14,Unreferenced byte,low,declaration-only;source:146C.h:313
+T00675.015,opaque14,Copied into the weapon stats (unk10B) and inventory blade; meaning not established,low,source:146C.c:988;sanity pass 2026-10-17
 T00675.016,gemSlots,Gem slot count,med,declaration-only;source:146C.h:314
 T00675.017,gemEffects,Gem special effect identifier,med,declaration-only;source:146C.h:315
 T00675.018,index,Inventory index,med,declaration-only;source:146C.h:316
@@ -59,7 +59,7 @@ T00683.006,reserved08Bit4,Flag that toggles bytes 0x11 and 0x12 between 0 and 0x
 T00683.007,isWideTexture,Texture uses the wide layout,med,declaration-only;source:3A1A0.h:410
 T00683.008,reserved08Bit6,Flag set together with byte 0x5C0,low,source:30DB0.c:3369
 T00683.009,isDoubleClut,Uses two palettes,med,declaration-only;source:3A1A0.h:412
-T00683.010,reserved09Bits0,Unreferenced bits,low,declaration-only;source:3A1A0.h:413
+T00683.010,ownerMotionState,Copy of the owner's motion/appearance state during appearance transitions,med,source:40564.c:1876;sanity pass 2026-10-17
 T00683.011,material,Weapon material,med,declaration-only;source:3A1A0.h:414
 T00683.012,reserved0ABits0,Unreferenced bits,low,declaration-only;source:3A1A0.h:415
 T00683.013,reserved0ABit7,Unreferenced bit,low,declaration-only;source:3A1A0.h:416
@@ -76,7 +76,7 @@ T00683.023,reserved14,Unreferenced word,low,declaration-only;source:3A1A0.h:426
 T00683.024,reserved18,Unreferenced short,low,declaration-only;source:3A1A0.h:427
 T00683.025,reserved1A,Short tested with byte 0x12,low,source:71618.c:1119
 T00683.026,sectionOffsets,Offsets of model data sections,med,declaration-only;source:3A1A0.h:429
-T00683.027,reserved20,Unreferenced matrices,low,declaration-only;source:3A1A0.h:430
+T00683.027,boneWorldMatrices,World matrix of each weapon bone,high,source:49268.c:209;source:49268.c:194;sanity pass 2026-10-17
 T00683.028,bones,Bone records copied from model data,high,source:30DB0.c:840
 T00683.029,palettes,Source palettes,med,declaration-only;source:3A1A0.h:432
 T00683.030,workingPalette,Palette assembled from source palette ranges,high,source:30DB0.c:876

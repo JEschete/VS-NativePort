@@ -49,13 +49,13 @@ T00278.010,updateFlags,Voice parameters that need writing,high,source:25AC.c:157
 T00278.011,effectVoiceMask,Voices assigned to the sound-effect program,high,source:25AC.c:2658
 T00278.012,effectId,Sound-effect id the channel plays,high,source:25AC.c:2646;source:25AC.c:2624
 T00278.013,effectPitchScale,Per-effect pitch scale set by command 0xA4,high,source:25AC.c:3437
-T00278.014,reserved44,No channel access found,low,declaration-only;source:sound.h:336
+T00278.014,effectPitchScaleSlideStep,Per-tick step of the effect pitch scale slide (command 0xA5/0xAD),high,source:25AC.c:3464;source:25AC.c:4127;sanity pass 2026-10-17
 T00278.015,volume,Channel volume,high,source:25AC.c:1421
 T00278.016,volumeSlideStep,Per-tick volume slide step,high,source:25AC.c:1422
 T00278.017,pitchSlideStep,Per-tick pitch slide step,high,source:25AC.c:1558
 T00278.018,finePitchDelta,Pitch offset from fine tuning,high,source:25AC.c:1659
 T00278.019,priority,Eviction priority of a sound effect,high,source:25AC.c:2582
-T00278.020,reserved5C,No channel access found,low,source:25AC.c:5195
+T00278.020,keyOnVolume,Volume a key-on starts from when a key-on volume slide is set (opcode FE19),high,source:25AC.c:5195;source:25AC.c:4870;sanity pass 2026-10-17
 T00278.021,keyOnVolumeSlideStep,Per-tick key-on volume slide step,high,source:25AC.c:5206
 T00278.022,type,Music or sound-effect channel,high,source:25AC.c:2660
 T00278.023,noteLength,Ticks until the next note,high,source:25AC.c:2436

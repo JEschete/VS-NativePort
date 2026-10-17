@@ -1776,7 +1776,7 @@ T00255.000,T00255,D_800F45E0_t,0,unk0,1,char,,,,boneCount,SHP bone count; zero f
 T00255.001,T00255,D_800F45E0_t,1,unk1,1,char,,,,reserved1,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:453
 T00255.002,T00255,D_800F45E0_t,2,unk2,1,char,,,,reserved2,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:454
 T00255.003,T00255,D_800F45E0_t,3,unk3,1,char,,,,reserved3,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:455
-T00255.004,T00255,D_800F45E0_t,4,unk4,1,int,,,,reserved4,Not read by the decompiled users,low,source:30DB0.c:305
+T00255.004,T00255,D_800F45E0_t,4,unk4,1,int,,,,reserved4,Copied from the model template's word 4 when the gimmick is created; not read,low,source:30DB0.c:328;sanity pass 2026-10-17
 T00255.005,T00255,D_800F45E0_t,5,unk8_0,1,char,1,,,isSkipped,Set when display flag bit 0 is clear,med,source:30DB0.c:3957
 T00255.006,T00255,D_800F45E0_t,6,unk8_1,1,char,1,,,isVisible,Drawn when set (display flag bit 1),high,source:30DB0.c:3958
 T00255.007,T00255,D_800F45E0_t,7,unk8_2,1,char,1,,,reserved8Bits2,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:459
@@ -1804,7 +1804,7 @@ T00255.028,T00255,D_800F45E0_t,28,unk11,1,signed char,,,,delay,Frames before the
 T00255.029,T00255,D_800F45E0_t,29,unk12,1,u_char,,,,parent,Parent gimmick; 0xFF when none,med,source:30DB0.c:355
 T00255.030,T00255,D_800F45E0_t,30,unk13,1,u_char,,,,linkedGimmick,Gimmick whose appearance this one follows,low,source:40564.c:1906
 T00255.031,T00255,D_800F45E0_t,31,unk14,1,int,,,,reserved14,Not read by the decompiled users,low,source:6FC00.c:744
-T00255.032,T00255,D_800F45E0_t,32,unk18,1,short,,,,rotationTicks,Frames left in the current rotation,low,declaration-only;source:3A1A0.h:484
+T00255.032,T00255,D_800F45E0_t,32,unk18,1,short,,,,rotationTicks,Frames left in the current rotation tween,high,source:upstream:44F14.c:1694;source:upstream:44F14.c:1703;sanity pass 2026-10-17
 T00255.033,T00255,D_800F45E0_t,33,unk1A,1,short,,,,mode,Motion mode; 0xFC to 0xFF are landing and falling modes,med,source:30DB0.c:3271
 T00255.034,T00255,D_800F45E0_t,34,unk1C,1,short,,,,positionX,World X,high,source:30DB0.c:371
 T00255.035,T00255,D_800F45E0_t,35,unk1E,1,short,,,vertical position,positionY,World Y,high,source:30DB0.c:373
@@ -1822,9 +1822,9 @@ T00255.046,T00255,D_800F45E0_t,46,unk34,1,short,,,,slideX,Remaining X slide,med,
 T00255.047,T00255,D_800F45E0_t,47,unk36,1,short,,,,velocityY,Vertical speed,low,source:30DB0.c:3270
 T00255.048,T00255,D_800F45E0_t,48,unk38,1,short,,,,slideZ,Remaining Z slide,med,source:3A1A0.c:761
 T00255.049,T00255,D_800F45E0_t,49,unk3A,1,short,,,,orientation,Orientation applied while carried,low,source:3A1A0.c:754
-T00255.050,T00255,D_800F45E0_t,50,unk3C,1,short,,,,reserved3C,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:501
-T00255.051,T00255,D_800F45E0_t,51,unk3E,1,short,,,layout:upstream,reserved3E,Not read by the decompiled users,low,source:upstream:44F14.c:1697
-T00255.052,T00255,D_800F45E0_t,52,unk40,1,short,,,,reserved40,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:502
+T00255.050,T00255,D_800F45E0_t,50,unk3C,1,short,,,,rotationDeltaX,X rotation still to apply over rotationTicks,high,source:upstream:44F14.c:1694;sanity pass 2026-10-17
+T00255.051,T00255,D_800F45E0_t,51,unk3E,1,short,,,layout:upstream,rotationDeltaY,Y rotation still to apply over rotationTicks,high,source:upstream:44F14.c:1697;sanity pass 2026-10-17
+T00255.052,T00255,D_800F45E0_t,52,unk40,1,short,,,,rotationDeltaZ,Z rotation still to apply over rotationTicks,high,source:upstream:44F14.c:1700;sanity pass 2026-10-17
 T00255.053,T00255,D_800F45E0_t,53,unk42,1,short,,,layout:upstream,reserved42,Not read by the decompiled users,low,declaration-only;source:upstream:3A1A0.h:523
 T00255.054,T00255,D_800F45E0_t,54,unk44,1,int,,,,reserved44,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:503
 T00255.055,T00255,D_800F45E0_t,55,unk48,1,int,,,,reserved48,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:504
@@ -2240,13 +2240,13 @@ T00278.010,T00278,FSoundChannel,10,UpdateFlags,0,u_int,,,,updateFlags,Voice para
 T00278.011,T00278,FSoundChannel,11,unk38,1,int,,,sampleBankSlotMask,effectVoiceMask,Voices assigned to the sound-effect program,high,source:25AC.c:2658
 T00278.012,T00278,FSoundChannel,12,unk3C,1,int,,,soundEffectId | soundEffectIdOrBlobPointer,effectId,Sound-effect id the channel plays,high,source:25AC.c:2646;source:25AC.c:2624
 T00278.013,T00278,FSoundChannel,13,unk40,1,int,,,externalPitchScale | pitchScale,effectPitchScale,Per-effect pitch scale set by command 0xA4,high,source:25AC.c:3437
-T00278.014,T00278,FSoundChannel,14,unk44,1,u_int,,,pitchScaleSlideStep,reserved44,No channel access found,low,declaration-only;source:sound.h:336
+T00278.014,T00278,FSoundChannel,14,unk44,1,u_int,,,pitchScaleSlideStep,effectPitchScaleSlideStep,Per-tick step of the effect pitch scale slide (command 0xA5/0xAD),high,source:25AC.c:3464;source:25AC.c:4127;sanity pass 2026-10-17
 T00278.015,T00278,FSoundChannel,15,Volume,0,int,,,,volume,Channel volume,high,source:25AC.c:1421
 T00278.016,T00278,FSoundChannel,16,VolumeSlideStep,0,int,,,,volumeSlideStep,Per-tick volume slide step,high,source:25AC.c:1422
 T00278.017,T00278,FSoundChannel,17,PitchSlideStep,0,int,,,,pitchSlideStep,Per-tick pitch slide step,high,source:25AC.c:1558
 T00278.018,T00278,FSoundChannel,18,FinePitchDelta,0,int,,,,finePitchDelta,Pitch offset from fine tuning,high,source:25AC.c:1659
 T00278.019,T00278,FSoundChannel,19,unk58,1,int,,,voiceEvictionPriority,priority,Eviction priority of a sound effect,high,source:25AC.c:2582
-T00278.020,T00278,FSoundChannel,20,unk5C,1,int,,,keyOnVolumeStart,reserved5C,No channel access found,low,source:25AC.c:5195
+T00278.020,T00278,FSoundChannel,20,unk5C,1,int,,,keyOnVolumeStart,keyOnVolume,Volume a key-on starts from when a key-on volume slide is set (opcode FE19),high,source:25AC.c:5195;source:25AC.c:4870;sanity pass 2026-10-17
 T00278.021,T00278,FSoundChannel,21,unk60,1,int,,,keyOnVolumeSlideStep,keyOnVolumeSlideStep,Per-tick key-on volume slide step,high,source:25AC.c:5206
 T00278.022,T00278,FSoundChannel,22,Type,0,u_short,,,,type,Music or sound-effect channel,high,source:25AC.c:2660
 T00278.023,T00278,FSoundChannel,23,Length1,0,u_short,,,,noteLength,Ticks until the next note,high,source:25AC.c:2436
@@ -2559,7 +2559,7 @@ T00303.004,T00303,_armature_t,4,unk7,1,u_char,,,,limbIds,High nibble: limb group
 T00303.005,T00303,_armature_t,5,unk8,1,u_char,,,,auxiliaryTag,Second lookup tag; 3 to 6 select an actor joint slot,high,source:38C1C.c:151;source:30DB0.c:1382
 T00303.006,T00303,_armature_t,6,unk9,1,u_char,,,,reserved9,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:77
 T00303.007,T00303,_armature_t,7,unkA,1,u_short,,,,jointInitValue,Initial value of the joint slot chosen by auxiliaryTag,med,source:30DB0.c:1385
-T00303.008,T00303,_armature_t,8,unkC,1,u_char,,,pose lock slot,reservedC,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:79
+T00303.008,T00303,_armature_t,8,unkC,1,u_char,,,pose lock slot,poseLockSlot,Locked-pose slot (1 or 2) holding this bone's saved transform; 0 when unlocked,high,source:40564.c:2214;source:40564.c:2229;sanity pass 2026-10-17
 T00303.009,T00303,_armature_t,9,unkD,1,u_char,,,,reservedD,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:80
 T00303.010,T00303,_armature_t,10,unkE,1,u_char,,,,reservedE,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:81
 T00303.011,T00303,_armature_t,11,unkF,1,u_char,,,,reservedF,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:82
@@ -2921,17 +2921,17 @@ T00332.009,T00332,_mpdRoomSection13,9,unk12,1,short,,,,facing,Direction the ches
 T00332.010,T00332,_mpdRoomSection13,10,unk14,1,vs_battle_loot,,,,loot,Chest contents,high,source:146C.c:17392
 T00333.000,T00333,_mpdRoomSection3,0,unk0_0,1,u_int,5,,,surfaceKind,Surface kind for footsteps and impacts,high,source:44F14.c:765;source:3A1A0.c:2222
 T00333.001,T00333,_mpdRoomSection3,1,unk0_5,1,u_int,1,,,reserved00Bit5,Unreferenced bit,low,declaration-only;source:146C.h:68
-T00333.002,T00333,_mpdRoomSection3,2,unk0_6,1,u_int,1,,,reserved00Bit6,Unreferenced bit,low,declaration-only;source:146C.h:69
+T00333.002,T00333,_mpdRoomSection3,2,unk0_6,1,u_int,1,,,blocksSphereTerrain,Target-sphere terrain sampling treats the tile as solid and unoccupiable,med,source:58578.c:1062;sanity pass 2026-10-17
 T00333.003,T00333,_mpdRoomSection3,3,unk0_7,1,u_int,1,,,reserved00Bit7,Unreferenced bit,low,declaration-only;source:146C.h:70
 T00333.004,T00333,_mpdRoomSection3,4,unk0_8,1,u_int,1,,,reserved00Bit8,Unreferenced bit,low,declaration-only;source:146C.h:71
 T00333.005,T00333,_mpdRoomSection3,5,unk0_9,1,u_int,1,,,reserved00Bit9,Unreferenced bit,low,declaration-only;source:146C.h:72
 T00333.006,T00333,_mpdRoomSection3,6,unk0_10,1,u_int,3,,collision blocking mode | tile footprint shape,doorPassability,Door blocking bits toggled when a door opens,med,source:146C.c:16268;source:146C.c:16899
-T00333.007,T00333,_mpdRoomSection3,7,unk0_13,1,u_int,1,,,reserved00Bit13,Unreferenced bit,low,declaration-only;source:146C.h:74
+T00333.007,T00333,_mpdRoomSection3,7,unk0_13,1,u_int,1,,,hasEventTrigger,Entering the tile evaluates the room's event triggers (may start a cutscene),high,source:146C.c:5406;sanity pass 2026-10-17
 T00333.008,T00333,_mpdRoomSection3,8,unk0_14,1,u_int,1,,,isPlatformDocked,Set while a platform rests at its terminal waypoint,med,source:146C.c:16636;source:146C.c:16648
 T00333.009,T00333,_mpdRoomSection3,9,unk0_15,1,u_int,1,,,reserved00Bit15,Unreferenced bit,low,declaration-only;source:146C.h:76
-T00333.010,T00333,_mpdRoomSection3,10,unk0_16,1,u_int,1,,,reserved00Bit16,Unreferenced bit,low,declaration-only;source:146C.h:77
+T00333.010,T00333,_mpdRoomSection3,10,unk0_16,1,u_int,1,,,hasRoomTrigger,"The tile has a room trigger (trap, chest or transition) looked up on entry",high,source:146C.c:5421;source:146C.c:5544;sanity pass 2026-10-17
 T00333.011,T00333,_mpdRoomSection3,11,unk0_17,1,u_int,1,,,isPit,Falling onto this tile kills or moves the player,high,source:146C.c:5472;source:146C.c:5562;source:3A1A0.c:3058
-T00333.012,T00333,_mpdRoomSection3,12,unk0_18,1,u_int,2,,,reserved00Bits18,Unreferenced bits,low,declaration-only;source:146C.h:79
+T00333.012,T00333,_mpdRoomSection3,12,unk0_18,1,u_int,2,,,occlusionAndFloorFlags,Bit 0 applies the tile's camera geometry occlusion; bit 1 keeps it sampled as floor,med,source:146C.c:5356;source:58578.c:1065;sanity pass 2026-10-17
 T00333.013,T00333,_mpdRoomSection3,13,unk0_19,1,u_int,12,,,reserved00Bits19,Unreferenced bits,low,declaration-only;source:146C.h:80
 T00334.000,T00334,_mpdRoomSection9,0,unk0,1,short,,,tile x,tileX,Tile X,high,source:146C.c:16818
 T00334.001,T00334,_mpdRoomSection9,1,unk2,1,short,,,tile z,tileZ,Tile Z,high,source:146C.c:16818
@@ -2952,7 +2952,7 @@ T00336.002,T00336,_mpdRoomSectionB,2,unk24,1,int,,,,reserved24,Unreferenced word
 T00336.003,T00336,_mpdRoomSectionB,3,unk28,1,int,,,,reserved28,Unreferenced word,low,declaration-only;source:146C.h:112
 T00336.004,T00336,_mpdRoomSectionB,4,unk2C,1,int,,,,freezeEffectId,Room effect toggled when platforms freeze or minus one,med,source:146C.c:17359
 T00336.005,T00336,_mpdRoomSectionB,5,isWorkshop,0,char,,,,isWorkshop,Room is a workshop,med,declaration-only;source:146C.h:114
-T00336.006,T00336,_mpdRoomSectionB,6,unk31,1,char,,,,reserved31,Unreferenced byte,low,declaration-only;source:146C.h:115
+T00336.006,T00336,_mpdRoomSectionB,6,unk31,1,char,,,,environmentFlags,Room environment flag byte returned by RoomEnvironmentFlags,med,source:146C.c:16800;sanity pass 2026-10-17
 T00336.007,T00336,_mpdRoomSectionB,7,trapLevel,0,char,,,,trapLevel,Trap level,med,declaration-only;source:146C.h:116
 T00336.008,T00336,_mpdRoomSectionB,8,unk33,1,char,,,,reserved33,Unreferenced byte,low,declaration-only;source:146C.h:117
 T00336.009,T00336,_mpdRoomSectionB,9,unk34,1,short,,,weather type,weatherKind,Weather kind,high,source:146C.c:17508
@@ -2967,9 +2967,9 @@ T00336.017,T00336,_mpdRoomSectionB,17,unk44,1,short,,,,windStrengthLimit,Wind st
 T00336.018,T00336,_mpdRoomSectionB,18,unk46,1,short,,,,windStrengthInterval,Mask index for wind strength variation,high,source:2842C.c:351
 T00336.019,T00336,_mpdRoomSectionB,19,unk48,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5)[2],,,weather emission bounds | weather rectangle origin and extent,weatherArea,Weather area origin and size in tiles,high,source:146C.c:17478;source:2842C.c:287
 T00336.020,T00336,_mpdRoomSectionB,20,sceneId,0,short,,,,sceneId,Scene identifier,med,declaration-only;source:146C.h:132
-T00336.021,T00336,_mpdRoomSectionB,21,unk52,1,short,,,fall destination zone,reserved52,Unreferenced short,low,declaration-only;source:146C.h:133
-T00336.022,T00336,_mpdRoomSectionB,22,unk54,1,short,,,fall destination room,reserved54,Unreferenced short,low,declaration-only;source:146C.h:134
-T00336.023,T00336,_mpdRoomSectionB,23,unk56,1,short,,,,reserved56,Unreferenced short,low,declaration-only;source:146C.h:135
+T00336.021,T00336,_mpdRoomSectionB,21,unk52,1,short,,,fall destination zone,fallDestinationZone,Zone a fall through this room's pit leads to (high half of RoomFallDestination),high,source:146C.c:16806;source:146C.c:5475;sanity pass 2026-10-17
+T00336.022,T00336,_mpdRoomSectionB,22,unk54,1,short,,,fall destination room,fallDestinationRoom,Room a fall through this room's pit leads to (low half of RoomFallDestination),high,source:146C.c:16807;source:146C.c:5476;sanity pass 2026-10-17
+T00336.023,T00336,_mpdRoomSectionB,23,unk56,1,short,,,,opaque56,Returned by RoomEnvironmentParameter; no caller in decompiled code,low,source:146C.c:17329;sanity pass 2026-10-17
 T00337.000,T00337,_mpdRoomSectionE,0,unk0,1,int,,,,reserved00,Unreferenced word,low,declaration-only;source:146C.h:139
 T00337.001,T00337,_mpdRoomSectionE,1,unk4,1,int,,,,secondArrayOffset,Byte offset of the second array,med,source:146C.c:15710
 T00337.002,T00337,_mpdRoomSectionE,2,unk8,1,int,,,,hasSecondArray,Second array present when positive,med,source:146C.c:15708
@@ -3921,7 +3921,7 @@ T00434.011,T00434,func_8006C4C4_t,11,unk12,1,short,,,,opaque12,"Used, but its me
 T00434.012,T00434,func_8006C4C4_t,12,unk14,1,func_8008631C_t2,,,,opaque14,"Used, but its meaning is not established",low,source:146C.c:1941
 T00434.013,T00434,func_8006C4C4_t,13,unk18,1,int[50],,,,reserved1C,Not read by decompiled code,low,declaration-only;source:146C.c:243
 T00435.000,T00435,func_8006EBF8_t,0,unk0,1,func_8006EBF8_t3,,,,location,Actor tile and position,high,source:146C.c:1969
-T00435.001,T00435,func_8006EBF8_t,1,unkC,1,int,,,,reserved0C,Unreferenced word,low,declaration-only;source:func_8006EBF8_t.h:21
+T00435.001,T00435,func_8006EBF8_t,1,unkC,1,int,,,,actorIndex,Actor that triggered the trap or opens the chest,high,source:146C.c:5004;source:146C.c:5052;sanity pass 2026-10-17
 T00436.000,T00436,func_8006EBF8_t2,0,unk0,1,int,,,,reserved0,Not read by decompiled code,low,declaration-only;source:146C.c:171
 T00436.001,T00436,func_8006EBF8_t2,1,unk4,1,int,,,,reserved4,Not read by decompiled code,low,declaration-only;source:146C.c:172
 T00436.002,T00436,func_8006EBF8_t2,2,unk8,1,int,,,,reserved8,Not read by decompiled code,low,declaration-only;source:146C.c:173
@@ -6024,7 +6024,7 @@ T00675.011,T00675,vs_battle_uiEquipment,11,damageType,0,char,,,,damageType,Damag
 T00675.012,T00675,vs_battle_uiEquipment,12,costType,0,char,,,,costType,Risk or MP cost type,med,declaration-only;source:146C.h:310
 T00675.013,T00675,vs_battle_uiEquipment,13,cost,0,char,,,,cost,Cost amount,med,declaration-only;source:146C.h:311
 T00675.014,T00675,vs_battle_uiEquipment,14,material,0,char,,,,material,Material,med,declaration-only;source:146C.h:312
-T00675.015,T00675,vs_battle_uiEquipment,15,unk14,1,char,,,,reserved14,Unreferenced byte,low,declaration-only;source:146C.h:313
+T00675.015,T00675,vs_battle_uiEquipment,15,unk14,1,char,,,,opaque14,Copied into the weapon stats (unk10B) and inventory blade; meaning not established,low,source:146C.c:988;sanity pass 2026-10-17
 T00675.016,T00675,vs_battle_uiEquipment,16,gemSlots,0,char,,,,gemSlots,Gem slot count,med,declaration-only;source:146C.h:314
 T00675.017,T00675,vs_battle_uiEquipment,17,gemEffects,0,char,,,,gemEffects,Gem special effect identifier,med,declaration-only;source:146C.h:315
 T00675.018,T00675,vs_battle_uiEquipment,18,index,0,char,,,,index,Inventory index,med,declaration-only;source:146C.h:316
@@ -6112,7 +6112,7 @@ T00683.006,T00683,vs_battle_wepModels_t,6,unk8_4,1,u_char,1,,,reserved08Bit4,Fla
 T00683.007,T00683,vs_battle_wepModels_t,7,isWideTexture,0,u_char,1,,,isWideTexture,Texture uses the wide layout,med,declaration-only;source:3A1A0.h:410
 T00683.008,T00683,vs_battle_wepModels_t,8,unk8_6,1,u_char,1,,,reserved08Bit6,Flag set together with byte 0x5C0,low,source:30DB0.c:3369
 T00683.009,T00683,vs_battle_wepModels_t,9,isDoubleClut,0,u_char,1,,,isDoubleClut,Uses two palettes,med,declaration-only;source:3A1A0.h:412
-T00683.010,T00683,vs_battle_wepModels_t,10,unk9_0,1,u_char,4,,,reserved09Bits0,Unreferenced bits,low,declaration-only;source:3A1A0.h:413
+T00683.010,T00683,vs_battle_wepModels_t,10,unk9_0,1,u_char,4,,,ownerMotionState,Copy of the owner's motion/appearance state during appearance transitions,med,source:40564.c:1876;sanity pass 2026-10-17
 T00683.011,T00683,vs_battle_wepModels_t,11,material,0,u_char,4,,,material,Weapon material,med,declaration-only;source:3A1A0.h:414
 T00683.012,T00683,vs_battle_wepModels_t,12,unkA_0,1,u_char,7,,,reserved0ABits0,Unreferenced bits,low,declaration-only;source:3A1A0.h:415
 T00683.013,T00683,vs_battle_wepModels_t,13,unkA_7,1,u_char,1,,,reserved0ABit7,Unreferenced bit,low,declaration-only;source:3A1A0.h:416
@@ -6129,7 +6129,7 @@ T00683.023,T00683,vs_battle_wepModels_t,23,unk14,1,int,,,,reserved14,Unreference
 T00683.024,T00683,vs_battle_wepModels_t,24,unk18,1,short,,,,reserved18,Unreferenced short,low,declaration-only;source:3A1A0.h:427
 T00683.025,T00683,vs_battle_wepModels_t,25,unk1A,1,short,,,,reserved1A,Short tested with byte 0x12,low,source:71618.c:1119
 T00683.026,T00683,vs_battle_wepModels_t,26,offsets,0,_wepModelOffsets *,,,,sectionOffsets,Offsets of model data sections,med,declaration-only;source:3A1A0.h:429
-T00683.027,T00683,vs_battle_wepModels_t,27,unk20,1,MATRIX[4],,,,reserved20,Unreferenced matrices,low,declaration-only;source:3A1A0.h:430
+T00683.027,T00683,vs_battle_wepModels_t,27,unk20,1,MATRIX[4],,,,boneWorldMatrices,World matrix of each weapon bone,high,source:49268.c:209;source:49268.c:194;sanity pass 2026-10-17
 T00683.028,T00683,vs_battle_wepModels_t,28,unkBoneInfo,0,SVECTOR[4],,,,bones,Bone records copied from model data,high,source:30DB0.c:840
 T00683.029,T00683,vs_battle_wepModels_t,29,palettes,0,u_short[7][64],,,,palettes,Source palettes,med,declaration-only;source:3A1A0.h:432
 T00683.030,T00683,vs_battle_wepModels_t,30,unk440,1,u_short[96],,,,workingPalette,Palette assembled from source palette ranges,high,source:30DB0.c:876

@@ -219,17 +219,17 @@ T00331.020,positionZ,Current Z in 20.12 fixed point,high,source:146C.c:16517
 T00331.021,tileCell,Tile cell carried with the platform,high,source:146C.c:16636
 T00333.000,surfaceKind,Surface kind for footsteps and impacts,high,source:44F14.c:765;source:3A1A0.c:2222
 T00333.001,reserved00Bit5,Unreferenced bit,low,declaration-only;source:146C.h:68
-T00333.002,reserved00Bit6,Unreferenced bit,low,declaration-only;source:146C.h:69
+T00333.002,blocksSphereTerrain,Target-sphere terrain sampling treats the tile as solid and unoccupiable,med,source:58578.c:1062;sanity pass 2026-10-17
 T00333.003,reserved00Bit7,Unreferenced bit,low,declaration-only;source:146C.h:70
 T00333.004,reserved00Bit8,Unreferenced bit,low,declaration-only;source:146C.h:71
 T00333.005,reserved00Bit9,Unreferenced bit,low,declaration-only;source:146C.h:72
 T00333.006,doorPassability,Door blocking bits toggled when a door opens,med,source:146C.c:16268;source:146C.c:16899
-T00333.007,reserved00Bit13,Unreferenced bit,low,declaration-only;source:146C.h:74
+T00333.007,hasEventTrigger,Entering the tile evaluates the room's event triggers (may start a cutscene),high,source:146C.c:5406;sanity pass 2026-10-17
 T00333.008,isPlatformDocked,Set while a platform rests at its terminal waypoint,med,source:146C.c:16636;source:146C.c:16648
 T00333.009,reserved00Bit15,Unreferenced bit,low,declaration-only;source:146C.h:76
-T00333.010,reserved00Bit16,Unreferenced bit,low,declaration-only;source:146C.h:77
+T00333.010,hasRoomTrigger,"The tile has a room trigger (trap, chest or transition) looked up on entry",high,source:146C.c:5421;source:146C.c:5544;sanity pass 2026-10-17
 T00333.011,isPit,Falling onto this tile kills or moves the player,high,source:146C.c:5472;source:146C.c:5562;source:3A1A0.c:3058
-T00333.012,reserved00Bits18,Unreferenced bits,low,declaration-only;source:146C.h:79
+T00333.012,occlusionAndFloorFlags,Bit 0 applies the tile's camera geometry occlusion; bit 1 keeps it sampled as floor,med,source:146C.c:5356;source:58578.c:1065;sanity pass 2026-10-17
 T00333.013,reserved00Bits19,Unreferenced bits,low,declaration-only;source:146C.h:80
 T00334.000,tileX,Tile X,high,source:146C.c:16818
 T00334.001,tileZ,Tile Z,high,source:146C.c:16818
@@ -250,7 +250,7 @@ T00336.002,reserved24,Unreferenced word,low,declaration-only;source:146C.h:111
 T00336.003,reserved28,Unreferenced word,low,declaration-only;source:146C.h:112
 T00336.004,freezeEffectId,Room effect toggled when platforms freeze or minus one,med,source:146C.c:17359
 T00336.005,isWorkshop,Room is a workshop,med,declaration-only;source:146C.h:114
-T00336.006,reserved31,Unreferenced byte,low,declaration-only;source:146C.h:115
+T00336.006,environmentFlags,Room environment flag byte returned by RoomEnvironmentFlags,med,source:146C.c:16800;sanity pass 2026-10-17
 T00336.007,trapLevel,Trap level,med,declaration-only;source:146C.h:116
 T00336.008,reserved33,Unreferenced byte,low,declaration-only;source:146C.h:117
 T00336.009,weatherKind,Weather kind,high,source:146C.c:17508
@@ -265,9 +265,9 @@ T00336.017,windStrengthLimit,Wind strength clamp limit,high,source:2842C.c:357
 T00336.018,windStrengthInterval,Mask index for wind strength variation,high,source:2842C.c:351
 T00336.019,weatherArea,Weather area origin and size in tiles,high,source:146C.c:17478;source:2842C.c:287
 T00336.020,sceneId,Scene identifier,med,declaration-only;source:146C.h:132
-T00336.021,reserved52,Unreferenced short,low,declaration-only;source:146C.h:133
-T00336.022,reserved54,Unreferenced short,low,declaration-only;source:146C.h:134
-T00336.023,reserved56,Unreferenced short,low,declaration-only;source:146C.h:135
+T00336.021,fallDestinationZone,Zone a fall through this room's pit leads to (high half of RoomFallDestination),high,source:146C.c:16806;source:146C.c:5475;sanity pass 2026-10-17
+T00336.022,fallDestinationRoom,Room a fall through this room's pit leads to (low half of RoomFallDestination),high,source:146C.c:16807;source:146C.c:5476;sanity pass 2026-10-17
+T00336.023,opaque56,Returned by RoomEnvironmentParameter; no caller in decompiled code,low,source:146C.c:17329;sanity pass 2026-10-17
 T00337.000,reserved00,Unreferenced word,low,declaration-only;source:146C.h:139
 T00337.001,secondArrayOffset,Byte offset of the second array,med,source:146C.c:15710
 T00337.002,hasSecondArray,Second array present when positive,med,source:146C.c:15708
@@ -382,7 +382,7 @@ T00348.024,mpdEnemyCount,Number of room enemy placements,med,declaration-only;so
 T00348.025,mpdEnemies,Room enemy placements,med,declaration-only;source:146C.h:717
 T00348.026,currentSceneId,Scene identifier used to detect scene changes,high,source:146C.c:15308
 T00435.000,location,Actor tile and position,high,source:146C.c:1969
-T00435.001,reserved0C,Unreferenced word,low,declaration-only;source:func_8006EBF8_t.h:21
+T00435.001,actorIndex,Actor that triggered the trap or opens the chest,high,source:146C.c:5004;source:146C.c:5052;sanity pass 2026-10-17
 T00437.000,packedTile,Packed tile coordinates,high,source:146C.c:3197
 T00437.001,position,World position,high,source:146C.c:1969
 T00447.000,geometryOffset,Offset of the animated polygon,med,declaration-only;source:2842C.c:120
