@@ -6,7 +6,6 @@ Last updated at commit after `d9664700`. Read with `.github/copilot-instructions
 
 ## Rules (owner)
 
-- Never attribute AI in commits (no `Co-authored-by`, no tool names). Committing without attribution is allowed.
 - Never edit generated files. Fixes go into `tools\port\copy_to_native.py` or `tools\port\copy_fixups.py`; hand
   ports go through `python tools\port\own.py <id> --to Native\<Project>\src\<Area>\<File>.c`.
 - Never commit a BIOS. x64 layouts: **option B** (per-site fixes, 64-bit pointer members kept).

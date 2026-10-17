@@ -200,7 +200,7 @@ These scripts regenerate committed files. They are not part of the build.
 | `python tools\port\copy_to_native.py` | Regenerate the copied code in `Native\` from the decomp (never edit its output; `tools\port\own.py` takes an item over by hand) |
 | `python tools\port\understood.py vs_title_exec@TITLE.PRG [--mark]` | Check (and mark) `understood` for every function reachable from a root |
 | `python tools\naming\merge_names.py --check-all` | Validate the function catalog naming |
-| `python tools\scaffold\gen_solution.py` | Regenerate the `.sln` / `.vcxproj` files, including the `Tools` solution folder that shows `tools\` and `C:\Tools` (set `VS_EXTERNAL_TOOLS` for another location). **Run it after any project change**; do not hand-edit the project files. |
+| `python tools\scaffold\gen_solution.py` | Regenerate the `.sln` / `.vcxproj` files, including the `Tools` solution folder that shows `tools\` and `C:\Tools` (set `VS_EXTERNAL_TOOLS` for another location) and `Solution Items`, discovered from the repository (root files, all of `Docs\` with its subfolders, `.github\`; new files appear on the next run). **Run it after any project change**; do not hand-edit the project files. |
 
 **Legacy, do not use:** `tools\Setup-Windows.ps1`, `tools\Probe-Native.ps1` and `tools\windows.py` belong to the
 earlier, abandoned emulator-style port (VS 2022/CMake, `vagrant-native.exe`). They are not part of this build.

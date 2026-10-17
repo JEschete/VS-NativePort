@@ -17,12 +17,51 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VS.Tests", "Native\Tests\VS
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F6F3FF77-BB1D-5D33-9C8A-5256501ED7B4}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\NATIVE_SOURCE_PORT_PLAN.md = Docs\NATIVE_SOURCE_PORT_PLAN.md
-		Docs\ENEMY_DATA_SCHEME.md = Docs\ENEMY_DATA_SCHEME.md
-		Docs\TOOLS_INVENTORY.md = Docs\TOOLS_INVENTORY.md
-		Docs\ledgers\SUMMARY.md = Docs\ledgers\SUMMARY.md
+		.gitignore = .gitignore
+		.gitmodules = .gitmodules
 		Directory.Build.props = Directory.Build.props
+		README.md = README.md
+		build-native.cmd = build-native.cmd
+		test-native.cmd = test-native.cmd
 		vcpkg.json = vcpkg.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{CBD4FBF1-BEF9-5417-B613-DD283F053A41}"
+	ProjectSection(SolutionItems) = preProject
+		.github\copilot-instructions.md = .github\copilot-instructions.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{46E34AD5-0AA2-5F6C-BFBD-C964BE74A2CF}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\ASSET_PIPELINE.md = Docs\ASSET_PIPELINE.md
+		Docs\BUILDING.md = Docs\BUILDING.md
+		Docs\EMULATION_COMPATIBILITY_AUDIT.md = Docs\EMULATION_COMPATIBILITY_AUDIT.md
+		Docs\ENEMY_DATA_SCHEME.md = Docs\ENEMY_DATA_SCHEME.md
+		Docs\HANDOFF.md = Docs\HANDOFF.md
+		Docs\NAMING_CONVENTIONS.md = Docs\NAMING_CONVENTIONS.md
+		Docs\NATIVE_SOURCE_PORT_PLAN.md = Docs\NATIVE_SOURCE_PORT_PLAN.md
+		Docs\PORTING_WATCHLIST.md = Docs\PORTING_WATCHLIST.md
+		Docs\RUNTIME_TRACING.md = Docs\RUNTIME_TRACING.md
+		Docs\TOOLS_INVENTORY.md = Docs\TOOLS_INVENTORY.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PhaseIdeas", "PhaseIdeas", "{D7208116-D3B2-5B74-8045-C6DC531C788F}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\PhaseIdeas\Phase2.md = Docs\PhaseIdeas\Phase2.md
+		Docs\PhaseIdeas\Phase3.md = Docs\PhaseIdeas\Phase3.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ledgers", "ledgers", "{B9B1CF7E-C648-5E57-9EEB-347208BDD4B1}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\ledgers\DATA_LEDGER.csv = Docs\ledgers\DATA_LEDGER.csv
+		Docs\ledgers\FIELD_LEDGER.csv = Docs\ledgers\FIELD_LEDGER.csv
+		Docs\ledgers\FUNCTION_CATALOG.csv = Docs\ledgers\FUNCTION_CATALOG.csv
+		Docs\ledgers\SDK_API_LEDGER.md = Docs\ledgers\SDK_API_LEDGER.md
+		Docs\ledgers\SOURCE_FILE_LEDGER.md = Docs\ledgers\SOURCE_FILE_LEDGER.md
+		Docs\ledgers\SUMMARY.md = Docs\ledgers\SUMMARY.md
+		Docs\ledgers\TRACE_QUEUE.csv = Docs\ledgers\TRACE_QUEUE.csv
+		Docs\ledgers\TYPE_LEDGER.csv = Docs\ledgers\TYPE_LEDGER.csv
+		Docs\ledgers\UPSTREAM_LAYOUTS.csv = Docs\ledgers\UPSTREAM_LAYOUTS.csv
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{225CA01A-31F1-5259-BE2E-F958BC82010A}"
@@ -73,5 +112,9 @@ Global
 		{1E4BA3C1-448D-5A8F-B9D5-0B541FE2C2CE} = {225CA01A-31F1-5259-BE2E-F958BC82010A}
 		{192C3DA7-A9C5-561A-8C17-9EDBE53653EA} = {225CA01A-31F1-5259-BE2E-F958BC82010A}
 		{9D7351B3-9D6B-5484-AF00-1E5CF06F9755} = {225CA01A-31F1-5259-BE2E-F958BC82010A}
+		{CBD4FBF1-BEF9-5417-B613-DD283F053A41} = {F6F3FF77-BB1D-5D33-9C8A-5256501ED7B4}
+		{46E34AD5-0AA2-5F6C-BFBD-C964BE74A2CF} = {F6F3FF77-BB1D-5D33-9C8A-5256501ED7B4}
+		{D7208116-D3B2-5B74-8045-C6DC531C788F} = {46E34AD5-0AA2-5F6C-BFBD-C964BE74A2CF}
+		{B9B1CF7E-C648-5E57-9EEB-347208BDD4B1} = {46E34AD5-0AA2-5F6C-BFBD-C964BE74A2CF}
 	EndGlobalSection
 EndGlobal

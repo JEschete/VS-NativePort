@@ -222,8 +222,22 @@ def filters(p: Project, files: list[tuple[str, str]]) -> str:
 
 FOLDER_GUID = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}"
 CPP_GUID = "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}"
-SOLUTION_ITEMS = ["Docs\\NATIVE_SOURCE_PORT_PLAN.md", "Docs\\ENEMY_DATA_SCHEME.md", "Docs\\TOOLS_INVENTORY.md",
-                  "Docs\\ledgers\\SUMMARY.md", "Directory.Build.props", "vcpkg.json"]
+# Solution Items are discovered (tracked or new, not ignored): the repository's root files, and every file under
+# these folders as nested solution folders (Solution Items\Docs\ledgers, ...).
+SOLUTION_ITEM_DIRS = ["Docs", ".github"]
+
+
+def solution_item_files() -> list[str]:
+    import subprocess
+    listed = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"], cwd=ROOT,
+                            capture_output=True, text=True).stdout.split("\0")
+    out = []
+    for f in sorted({t.replace("/", "\\") for t in listed if t}):
+        top = f.split("\\")[0]
+        if ("\\" not in f and not f.endswith(".sln")) or top in SOLUTION_ITEM_DIRS:
+            if (ROOT / f).is_file():
+                out.append(f)
+    return out
 
 # Tool folders shown in Solution Explorer (no build). The repository's tools\ and the machine's external tool root
 # (C:\Tools, or the VS_EXTERNAL_TOOLS environment variable) hold multi-GB toolchain and emulator trees, so a folder
@@ -347,10 +361,29 @@ def solution() -> str:
     for p in ordered:
         path = rel(ROOT, p.dir / f"{p.name}.vcxproj")
         lines += [f'Project("{CPP_GUID}") = "{p.name}", "{path}", "{p.guid}"', "EndProject"]
-    lines += [f'Project("{FOLDER_GUID}") = "Solution Items", "Solution Items", "{guid_of("folder:Solution Items")}"',
-              "\tProjectSection(SolutionItems) = preProject"]
-    lines += [f"\t\t{i} = {i}" for i in SOLUTION_ITEMS]
-    lines += ["\tEndProjectSection", "EndProject"]
+    by_dir: dict[str, list[str]] = {}
+    for f in solution_item_files():
+        by_dir.setdefault(f.rpartition("\\")[0], []).append(f)
+    for d in list(by_dir):   # parents of nested folders, even without files of their own
+        while "\\" in d:
+            d = d.rpartition("\\")[0]
+            by_dir.setdefault(d, [])
+    by_dir.setdefault("", [])
+
+    def item_folder(d: str) -> str:
+        return guid_of("folder:Solution Items" + ("\\" + d if d else ""))
+
+    item_nesting = []
+    for d in sorted(by_dir):
+        name = d.rpartition("\\")[2] if d else "Solution Items"
+        lines += [f'Project("{FOLDER_GUID}") = "{name}", "{name}", "{item_folder(d)}"']
+        if by_dir[d]:
+            lines += ["\tProjectSection(SolutionItems) = preProject"]
+            lines += [f"\t\t{i} = {i}" for i in by_dir[d]]
+            lines += ["\tEndProjectSection"]
+        lines += ["EndProject"]
+        if d:
+            item_nesting.append(f"\t\t{item_folder(d)} = {item_folder(d.rpartition(chr(92))[0])}")
     tools_folder = guid_of("folder:Tools")
     lines += [f'Project("{FOLDER_GUID}") = "Tools", "Tools", "{tools_folder}"', "EndProject"]
     for ip in ITEM_PROJECTS:
@@ -369,6 +402,7 @@ def solution() -> str:
               "\tGlobalSection(NestedProjects) = preSolution"]
     lines += [f"\t\t{ip.guid} = {tools_folder}" for ip in ITEM_PROJECTS]
     lines += [f"\t\t{BY_NAME['VS.Extract'].guid} = {tools_folder}"]
+    lines += item_nesting
     lines += ["\tEndGlobalSection", "EndGlobal", ""]
     return "\r\n".join(lines)
 
