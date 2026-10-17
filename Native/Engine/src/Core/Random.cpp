@@ -1,4 +1,5 @@
 #include "Core/Random.hpp"
+#include "Core/BiosRand.h"
 
 namespace VS::Core {
 
@@ -42,3 +43,18 @@ i32 Random::NextSmoothed(i32 max)
 }
 
 } // namespace VS::Core
+
+namespace {
+// The BIOS rand() state shared by every copied caller of rand()/srand(); seeded with 1 at boot like the original.
+VS::Core::Rand15 g_biosRand;
+} // namespace
+
+extern "C" int Core_Random_Rand(void)
+{
+    return g_biosRand.Next();
+}
+
+extern "C" void Core_Random_Seed(unsigned int seed)
+{
+    g_biosRand.Seed(seed);
+}

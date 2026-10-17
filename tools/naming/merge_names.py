@@ -144,20 +144,66 @@ def check_unique(all_rows: dict[str, dict], extra_targets: dict[str, dict] | Non
     return errs
 
 
+DECOMP_SRC = ROOT / "resources" / "rood-reverseWin" / "src"
+
+
+def template_header(r: dict, bodies: dict | None = None) -> str | None:
+    """The template header an instance binding feeds: the first `#include "src/EFFECT/<stem>.h"` after the
+    binding's `#define` that defines the bound macro's function (plugins bind the same macro for several headers,
+    e.g. trails9 and trails5 in PLG057, and bind render functions before the setup header that only calls them)."""
+    try:
+        lines = (DECOMP_SRC / r["file"]).read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return None
+    macro = r["kind"].rsplit(":", 1)[-1]
+    first = None
+    for line in lines[int(r["line"]) - 1:]:
+        m = re.match(r'\s*#include\s+"src/EFFECT/(\w+)\.h"', line)
+        if m:
+            hdr = f"EFFECT/{m[1]}.h"
+            first = first or hdr
+            if bodies is None or (hdr, macro) in bodies:
+                return hdr
+    return first
+
+
 def template_rows(catalog: list[dict]) -> dict[str, dict]:
+    """Mechanical names for effect template instances: Effects::Plg<NNN>::<template body name>, placed with the
+    template body (Templates\\<Name>.c). The body is the template-body row of the header the binding feeds and the
+    bound macro."""
+    bodies = {(r["file"], r["name"]): r["final_name"].rsplit("::", 1)[-1] for r in catalog
+              if r["kind"] == "template-body" and r["final_name"]}
     out = {}
-    for r in catalog:
-        if r["copy"] != "yes" or not r["kind"].startswith("template:"):
-            continue
+    seen: collections.Counter = collections.Counter()
+    rows = sorted((r for r in catalog if r["copy"] == "yes" and r["kind"].startswith("template:")),
+                  key=lambda r: (r["overlay"], r["file"], int(r["line"] or 0)))
+    # a binding is an instance only when the header it feeds defines that macro's function; other bindings
+    # (PLG065 rebinds its particle functions so particleDispatch.h can call them) refer to that instance
+    real = {}
+    for r in rows:
+        macro = r["kind"].rsplit(":", 1)[-1]
+        if (template_header(r, bodies), macro) in bodies:
+            real.setdefault((r["overlay"], r["name"]), r["id"])
+    for r in rows:
         macro = r["kind"].rsplit(":", 1)[-1]  # VS_PARTICLE_RENDER_FUNCTION
-        tmpl = "".join(w.capitalize() for w in macro.removeprefix("VS_").removesuffix("_FUNCTION").split("_"))
+        inst = real.get((r["overlay"], r["name"]))
+        if inst and inst != r["id"]:
+            continue
+        tmpl = bodies.get((template_header(r, bodies), macro)) or "".join(
+            w.capitalize() for w in macro.removeprefix("VS_").removesuffix("_FUNCTION").split("_"))
         plg = re.sub(r"\D", "", r["overlay"]) or r["overlay"]
+        seen[(plg, tmpl)] += 1
+        nth = seen[(plg, tmpl)]
         out[r["id"]] = {
-            "final_name": f"Effects::Plg{plg}::{tmpl}",
+            "final_name": f"Effects::Plg{plg}::{tmpl}{nth if nth > 1 else ''}",
             "final_location": f"Native\\Game\\src\\Effects\\Templates\\{tmpl}.c",
             "purpose": f"PLG{plg} instance of the shared {tmpl} effect template; its parameters become an effects-catalog row.",
             "confidence": "high", "notes": "template-instance",
         }
+    for r in rows:
+        inst = real.get((r["overlay"], r["name"]))
+        if inst and inst != r["id"] and inst in out:
+            out[r["id"]] = {**out[inst], "notes": f"template-binding;dup-of:{inst}"}
     return out
 
 
@@ -201,7 +247,8 @@ def main() -> int:
 
     catalog = read_csv(CATALOG)
     cols = list(catalog[0].keys())
-    named = {**all_rows, **template_rows(catalog)}
+    templates = template_rows(catalog)
+    named = {**all_rows, **templates}
     applied = 0
     for r in catalog:
         n = named.get(r["id"])
@@ -211,9 +258,14 @@ def main() -> int:
         r["final_location"] = n["final_location"].strip()
         r["purpose"] = n["purpose"].strip()
         tokens = [t for t in (r.get("notes") or "").split(";") if t and not t.startswith("conf:")]
+        # dup-of comes from the batch output (or the template rule) alone, so a corrected target replaces the old one
+        tokens = [t for t in tokens if not t.startswith("dup-of:")]
+        if r["id"] in templates:
+            # mechanical template names are recomputed every apply: drop the previous run's template tokens
+            tokens = [t for t in tokens if not t.startswith(("template-instance", "template-binding"))]
         tokens.insert(0, f"conf:{n['confidence'].strip()}")
         extra = (n.get("notes") or "").strip()
-        if extra and extra not in (r.get("notes") or ""):
+        if extra and extra not in ";".join(tokens):
             tokens.append(extra)
         r["notes"] = ";".join(tokens)
         if re.search(r"(^|;)\s*is-data\b", extra):

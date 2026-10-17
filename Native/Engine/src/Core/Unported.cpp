@@ -44,3 +44,8 @@ void DumpUnportedToLog()
 }
 
 } // namespace VS::Core
+
+extern "C" void Core_RecordUnported(const char* site)
+{
+    VS::Core::RecordUnported(site);
+}

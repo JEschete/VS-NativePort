@@ -22,8 +22,8 @@ SDK_HEADERS = ("libgpu", "libgte", "libgs", "libetc", "libapi", "libcd", "libds"
 
 RULES: list[tuple[str, re.Pattern[str]]] = [
     ("decomp-include", re.compile(r'#\s*include\s*[<"][^>"]*(rood-reverse|resources[/\\])', re.I)),
-    ("sdk-include", re.compile(r'#\s*include\s*[<"][^>"]*(' + "|".join(re.escape(h) for h in SDK_HEADERS) + r')',
-                               re.I)),
+    ("sdk-include", re.compile(r'#\s*include\s*[<"](?!Legacy/)[^>"]*(' + "|".join(re.escape(h) for h in SDK_HEADERS) +
+                               r')', re.I)),
     ("ps1-address", re.compile(r'\b0x(80|A0)[0-9A-Fa-f]{6}\b')),
     ("scratchpad", re.compile(r'\b0x1F80[0-9A-Fa-f]{4}\b|getScratchAddr')),
     ("raw-symbol", re.compile(r'\b(D|func)_80[0-9A-Fa-f]{6}\b')),

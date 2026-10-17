@@ -4,22 +4,1870 @@
     <Filter Include="include">
       <UniqueIdentifier>{F4EF33CB-87D8-555A-80F8-49814F54F4E4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Battle">
+      <UniqueIdentifier>{D01075AB-3FA6-535F-AAEC-111A4A297F29}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Boot">
       <UniqueIdentifier>{722EFB4F-0880-558D-8955-C5662D446503}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Items">
+      <UniqueIdentifier>{1D41767F-4F50-54FF-BE39-1D5F1897B58C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Menu">
+      <UniqueIdentifier>{1F22F31A-05D5-580B-810E-2ABF8457BA62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Menu\Framework">
+      <UniqueIdentifier>{EC2E19C3-730C-5083-A87C-1AC3D1CA2E85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\State">
+      <UniqueIdentifier>{5C6F0E0E-46C9-5E7B-9E34-5D22414E35BA}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{9518611B-ED3E-5EFF-86F3-2D7587897B58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Actors">
+      <UniqueIdentifier>{F9E51E63-C02B-5A11-B80F-A9559BD677B1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Battle">
+      <UniqueIdentifier>{BE74A6A3-5395-55C3-A6D7-076D16F1980A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Battle\Ai">
+      <UniqueIdentifier>{CBF443CB-C756-52B8-8F11-2B292A329380}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Boot">
       <UniqueIdentifier>{0748C621-8807-5D09-9758-B3EC1411DDDB}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Effects">
+      <UniqueIdentifier>{8B8D1C81-72C5-5E61-A692-1E99EC59640E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Effects\Plugins">
+      <UniqueIdentifier>{31CDEF0D-23A6-5C47-B48A-36BA29444D5F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Effects\ScreenDistortion">
+      <UniqueIdentifier>{083809B0-DA88-5C61-8F4E-683868C77D1C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Effects\Templates">
+      <UniqueIdentifier>{7E5FD1E7-D344-59E9-AAD8-1C16F9130DCD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Ending">
+      <UniqueIdentifier>{B53D3FDA-8455-5424-9DEB-6AEC4A57C3A4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Ending\Credits">
+      <UniqueIdentifier>{2259CABC-48F0-5B28-BCD0-ABEA890DEE5E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Event">
+      <UniqueIdentifier>{7516F81B-6895-508E-9315-AB9E6183C47C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Field">
+      <UniqueIdentifier>{07E8ED6C-025F-59B0-B8C9-4CDFCC5CA035}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Items">
+      <UniqueIdentifier>{68ADA3BB-EA3F-5348-8C6C-D3A1D85304E9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Menu">
+      <UniqueIdentifier>{C605FFF2-4159-567F-825A-88CE6E4282D2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Menu\Container">
+      <UniqueIdentifier>{F5B18DC4-B488-5077-B4EA-3C7FEE603CBD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Menu\Framework">
+      <UniqueIdentifier>{4577B920-88F6-579A-8361-04B8AF0538F8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Menu\Inventory">
+      <UniqueIdentifier>{7B761647-D857-5EAD-B604-59A7E430E63F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Menu\Loot">
+      <UniqueIdentifier>{A482D66B-212E-59A5-B189-BE3D3D2DC4CF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Menu\Results">
+      <UniqueIdentifier>{E68FA319-9D1C-5423-A072-AFC482826D87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Menu\Score">
+      <UniqueIdentifier>{1449C1C4-30B7-53A6-A30B-612D9CBE07E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Menu\Setup">
+      <UniqueIdentifier>{BBC0E47F-B5A3-5757-8FAD-602ADFA53FB8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Menu\Status">
+      <UniqueIdentifier>{87250127-6DC0-58B9-8A20-FA87A1430593}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\State">
+      <UniqueIdentifier>{3A39455F-5F22-57B3-888A-EFC812F4D87D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Title">
+      <UniqueIdentifier>{465E6AF6-BBD6-5962-96B3-6D313DCAC72A}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Actors\ActorAllocation.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\ActorLoading.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\ActorLoading.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actors\ActorRecord.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\ActorState.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\ActorState.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\Animation.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\Animation.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\Appearance.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\Appearance.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\Ashley.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\Ashley.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actors\CharacterInit.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\Lifecycle.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\Lifecycle.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actors\Location.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actors\ModelDraw.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actors\ModelInstance.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\ModelRendering.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\ModelRendering.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\Movement.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\Movement.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actors\Palette.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actors\RoomActorCache.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\RoomState.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\RoomState.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actors\Shadow.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\Skeleton.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\Skeleton.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actors\Spawn.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\Spawning.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\Spawning.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\Stats.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\Stats.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\TextureAnimation.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\TextureAnimation.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\Textures.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\Textures.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actors\WeaponModel.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Actors\Zud.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Abilities.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Abilities.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\ActionAnimation.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\ActionAnimation.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\ActionEffects.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\ActionEffects.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\ActionExecution.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\ActionExecution.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\ActionFlow.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\ActionFlow.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\ActionMenu.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\ActionMenu.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\ActionResolution.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\ActionResolution.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\ActionTable.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\ActionTable.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battle\Actor.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\ActionPlanning.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\ActionPlanning.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\ActionSelection.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\ActionSelection.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\ActorState.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\ActorState.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battle\Ai\AiState.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battle\Ai\AiViews.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\Behavior.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\Behavior.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\Movement.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\Movement.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\Navigation.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\Navigation.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\OrbitingBoss.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\OrbitingBoss.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\Perception.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\Perception.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\AttackPrerequisites.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\AttackPrerequisites.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\BattleMode.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\BattleMode.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battle\BattleTypes.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Damage.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Damage.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Feedback.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Feedback.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battle\Hit.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\HitChance.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\HitChance.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Hud.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Hud.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Legacy.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Legacy.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Recovery.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Recovery.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Rewards.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Rewards.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battle\Room.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Sphere.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Sphere.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\StatusEffects.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\StatusEffects.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Targeting.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Targeting.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battle\TargetVolume.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\TextBoxes.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\TextBoxes.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battle\ValueLabels.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
     <ClCompile Include="src\Boot\GameApp.cpp">
       <Filter>src\Boot</Filter>
     </ClCompile>
+    <ClCompile Include="src\Boot\GameLoop.c">
+      <Filter>src\Boot</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Boot\GameLoop.h">
+      <Filter>src\Boot</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Boot\GameplayInit.c">
+      <Filter>src\Boot</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Boot\GameplayInit.h">
+      <Filter>src\Boot</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Boot\Lifecycle.c">
+      <Filter>src\Boot</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Boot\Lifecycle.h">
+      <Filter>src\Boot</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Boot\OverlayReset.c">
+      <Filter>src\Boot</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Boot\OverlayReset.h">
+      <Filter>src\Boot</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\ActionEffects.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\ActionEffects.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Camera.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Camera.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Curves.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Curves.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\EffectResources.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\EffectResources.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Loading.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Package.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Particles.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Particles.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg005.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg005.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg044.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg044.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg045.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg045.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg047.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg047.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg049.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg049.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg050.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg050.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg051.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg051.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg052.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg052.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg053.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg053.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg057.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg057.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg061.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg061.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg065.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg065.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg069.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg069.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg073.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg073.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg074.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg074.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg077.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg077.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg081.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg081.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg082.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg082.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg085.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg085.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg086.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg086.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg087.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg087.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg114.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg114.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg128.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg128.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg129.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg129.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg134.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg134.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg135.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg135.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg137.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg137.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg138.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg138.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg141.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg141.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg142.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg142.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg143.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg143.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg146.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg146.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg147.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg147.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg148.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg148.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg149.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg149.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg150.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg150.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg153.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg153.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg154.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg154.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg156.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg156.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg158.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg158.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg160.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg160.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg161.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg161.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg162.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg162.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg165.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg165.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg166.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg166.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg167.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg167.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg168.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg168.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg169.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg169.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg170.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg170.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg224.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg224.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg232.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg232.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg236.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg236.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg242.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg242.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg250.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg250.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg255.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg255.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg260.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg260.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg263.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg263.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg265.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg265.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg266.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg266.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg272.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg272.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg273.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg273.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg291.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg291.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg297.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg297.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg300.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg300.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Plugins\Plg301.c">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Plugins\Plg301.h">
+      <Filter>src\Effects\Plugins</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\PurgeTables.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\PurgeTables.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Runtime.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Runtime.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\ScreenDistortion\ScreenDistortion.c">
+      <Filter>src\Effects\ScreenDistortion</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\ScreenDistortion\ScreenDistortion.h">
+      <Filter>src\Effects\ScreenDistortion</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\ScreenEffects.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\ScreenEffects.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\ScriptVm.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\ScriptVm.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\ClosedRing.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\ClosedRing.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\ClosedRing.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\Grid.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\Grid.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\Grid.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\Mesh10.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\Mesh10.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\Mesh10.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\MirrorSurface.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\MirrorSurface.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\MirrorSurface.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\ParticleControl.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\ParticleControl.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\ParticleControl.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\ParticleDispatch.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\ParticleDispatch.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\ParticleDispatch.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\ParticleLineRender.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\ParticleLineRender.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\ParticleLineRender.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\ParticleOrigin.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\ParticleOrigin.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\ParticleOrigin.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\ParticleRender.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\ParticleRender.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\ParticleRender.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\ParticleTarget.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\ParticleTarget.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\ParticleTarget.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\Ring.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\Ring.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\Ring.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\RotatingSurface.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\RotatingSurface.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\RotatingSurface.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\Surface.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\Surface.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\Surface.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TemplateState.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TiledRing.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TiledRing.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TiledRing.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailControl.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailControl.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailControl.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailDispatch.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailDispatch.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailDispatch.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailInit.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailInit.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailInit.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailNineControl.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailNineControl.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailNineControl.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailNineDispatch.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailNineDispatch.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailNineDispatch.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailNineInit.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailNineInit.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailNineInit.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailNineOrigin.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailNineOrigin.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailNineOrigin.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailNineRender.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailNineRender.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailNineRender.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailNineTarget.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailNineTarget.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailNineTarget.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailNineUpdate.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailNineUpdate.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailNineUpdate.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailOrigin.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailOrigin.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailOrigin.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailRender.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailRender.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailRender.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailTarget.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailTarget.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailTarget.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\TrailUpdate.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\TrailUpdate.h">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Effects\Templates\TrailUpdate.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Timeline.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Timeline.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Trails.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Trails.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Transforms.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Transforms.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Weather.c">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Weather.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Ending\ClearResults.c">
+      <Filter>src\Ending</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Ending\ClearResults.h">
+      <Filter>src\Ending</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Ending\Credits\StaffRoll.c">
+      <Filter>src\Ending\Credits</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Ending\Credits\StaffRoll.h">
+      <Filter>src\Ending\Credits</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Ending\Credits.c">
+      <Filter>src\Ending</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Ending\Credits.h">
+      <Filter>src\Ending</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Ending\Results.c">
+      <Filter>src\Ending</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Ending\Results.h">
+      <Filter>src\Ending</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\Actors.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\Actors.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Event\Camera.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\Cutscene.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\Cutscene.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Event\Dialog.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Event\Interpolation.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\Playback.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\Playback.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Event\Screen.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\Script.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\Script.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\ScriptActors.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptActors.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\ScriptAudio.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptAudio.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\ScriptCamera.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptCamera.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\ScriptDialog.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptDialog.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\ScriptEffects.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptEffects.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\ScriptField.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptField.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\ScriptScreen.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptScreen.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\ScriptVm.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\ScriptVm.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\Sound.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\Sound.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Event\Splash.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Event\Triggers.c">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\Triggers.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Event\Weather.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Field\Actors.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Background.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Background.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Camera.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Camera.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Collision.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Collision.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Doors.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Doors.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Environment.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Environment.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\GameMode.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\GameMode.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Field\GimmickMotion.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Gimmicks.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Gimmicks.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Input.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Input.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Field\Interaction.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Interactions.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Interactions.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Locations.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Locations.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Manual.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Manual.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Map.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Map.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\MapProgress.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\MapProgress.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Minimap.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Minimap.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Field\Mpd.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Field\Platforms.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Room.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Room.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\RoomEffects.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\RoomEffects.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\RoomLoading.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\RoomLoading.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\RoomRendering.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\RoomRendering.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\RoomState.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\RoomState.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Transitions.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Transitions.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Traps.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Traps.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\TriggerMarkers.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\TriggerMarkers.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\Weather.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\Weather.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Field\Znd.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Field\Zone.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Items\Categories.c">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Items\Categories.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Items\EquipmentAffinity.c">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Items\EquipmentAffinity.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Items\EquipmentInit.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Items\EquipmentStats.c">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Items\EquipmentStats.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Items\EquipmentWear.c">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Items\EquipmentWear.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Items\Inventory.c">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Items\Loot.c">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Items\Loot.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Items\Materials.c">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Items\Materials.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Items\Recovery.c">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Items\Recovery.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Items\TreasureChests.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Items\Weapons.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\BattleAbilities.c">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\BattleAbilities.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\BreakArts.c">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\BreakArts.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Container\ItemView.c">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Container\ItemView.h">
+      <Filter>src\Menu\Container</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Container\Storage.c">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Container\Storage.h">
+      <Filter>src\Menu\Container</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Files.c">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Files.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Framework\ActorPreview.c">
+      <Filter>src\Menu\Framework</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Framework\ActorPreview.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Menu\Framework\AshleyPreview.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Framework\EquipmentDetails.c">
+      <Filter>src\Menu\Framework</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Framework\EquipmentDetails.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Framework\Framework.c">
+      <Filter>src\Menu\Framework</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Framework\Framework.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Framework\ItemRows.c">
+      <Filter>src\Menu\Framework</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Framework\ItemRows.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Menu\Framework\MenuItems.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Menu\Framework\MenuMemory.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Menu\Framework\MenuRows.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Framework\Menus.c">
+      <Filter>src\Menu\Framework</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Framework\Menus.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Framework\TextBoxes.c">
+      <Filter>src\Menu\Framework</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Framework\TextBoxes.h">
+      <Filter>src\Menu\Framework</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Inventory\Inventory.c">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Inventory\Inventory.h">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Inventory\ItemDetails.c">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Inventory\ItemDetails.h">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Inventory\ItemList.c">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Inventory\ItemList.h">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Legacy.c">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Legacy.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Loot\LootInventory.c">
+      <Filter>src\Menu\Loot</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Loot\LootInventory.h">
+      <Filter>src\Menu\Loot</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Loot\LootScreen.c">
+      <Filter>src\Menu\Loot</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Loot\LootScreen.h">
+      <Filter>src\Menu\Loot</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Magic.c">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Magic.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Manual.c">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Manual.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Map.c">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Map.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Options.c">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Options.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Rename.c">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Rename.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Results\CubePuzzle.c">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Results\CubePuzzle.h">
+      <Filter>src\Menu\Results</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Results\Results.c">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Results\Results.h">
+      <Filter>src\Menu\Results</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Results\TimeAttack.c">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Results\TimeAttack.h">
+      <Filter>src\Menu\Results</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Score\Encyclopedia.c">
+      <Filter>src\Menu\Score</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Score\Encyclopedia.h">
+      <Filter>src\Menu\Score</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Score\Records.c">
+      <Filter>src\Menu\Score</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Score\Records.h">
+      <Filter>src\Menu\Score</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Score\ScoreScreen.c">
+      <Filter>src\Menu\Score</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Score\ScoreScreen.h">
+      <Filter>src\Menu\Score</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Setup\Assembly.c">
+      <Filter>src\Menu\Setup</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Setup\Assembly.h">
+      <Filter>src\Menu\Setup</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Setup\Combination.c">
+      <Filter>src\Menu\Setup</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Setup\Combination.h">
+      <Filter>src\Menu\Setup</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Setup\SetupScreen.c">
+      <Filter>src\Menu\Setup</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Setup\SetupScreen.h">
+      <Filter>src\Menu\Setup</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Sounds.c">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Sounds.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Status\ActorStatus.c">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Status\ActorStatus.h">
+      <Filter>src\Menu\Status</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Status\EquipmentDetails.c">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Status\EquipmentDetails.h">
+      <Filter>src\Menu\Status</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\TextBox.c">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\TextBox.h">
+      <Filter>src\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="src\State\Ashley.c">
+      <Filter>src\State</Filter>
+    </ClCompile>
+    <ClInclude Include="src\State\Ashley.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClCompile Include="src\State\Flags.c">
+      <Filter>src\State</Filter>
+    </ClCompile>
+    <ClInclude Include="src\State\Flags.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClCompile Include="src\State\Location.c">
+      <Filter>src\State</Filter>
+    </ClCompile>
+    <ClInclude Include="src\State\Location.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClCompile Include="src\State\PlayTime.c">
+      <Filter>src\State</Filter>
+    </ClCompile>
+    <ClInclude Include="src\State\PlayTime.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClCompile Include="src\State\Progress.c">
+      <Filter>src\State</Filter>
+    </ClCompile>
+    <ClInclude Include="src\State\RoomCache.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClCompile Include="src\State\RoomLoad.c">
+      <Filter>src\State</Filter>
+    </ClCompile>
+    <ClInclude Include="src\State\RoomLoad.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClCompile Include="src\State\RoomMemory.c">
+      <Filter>src\State</Filter>
+    </ClCompile>
+    <ClInclude Include="src\State\RoomMemory.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClInclude Include="src\State\SceneTimer.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClCompile Include="src\State\Score.c">
+      <Filter>src\State</Filter>
+    </ClCompile>
+    <ClInclude Include="src\State\Score.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClInclude Include="src\State\Settings.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClInclude Include="src\State\StateFlags.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClCompile Include="src\State\Timers.c">
+      <Filter>src\State</Filter>
+    </ClCompile>
+    <ClInclude Include="src\State\Timers.h">
+      <Filter>src\State</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Title\Credits.c">
+      <Filter>src\Title</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Title\Credits.h">
+      <Filter>src\Title</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Title\NewGame.c">
+      <Filter>src\Title</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Title\NewGame.h">
+      <Filter>src\Title</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Title\SaveCard.c">
+      <Filter>src\Title</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Title\SaveCard.h">
+      <Filter>src\Title</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Title\SaveFiles.c">
+      <Filter>src\Title</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Title\SaveFiles.h">
+      <Filter>src\Title</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Title\TitleMenu.c">
+      <Filter>src\Title</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Title\TitleMenu.h">
+      <Filter>src\Title</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Title\TitleScreen.c">
+      <Filter>src\Title</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Title\TitleScreen.h">
+      <Filter>src\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Action.h">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Enemy.h">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
     <ClInclude Include="include\Boot\GameApp.hpp">
       <Filter>include\Boot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\Equipment.h">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\Inventory.h">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\KeyItems.h">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\Loadout.h">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Framework\ActionSelection.h">
+      <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\State\GameTime.h">
+      <Filter>include\State</Filter>
+    </ClInclude>
+    <ClInclude Include="include\State\Progress.h">
+      <Filter>include\State</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

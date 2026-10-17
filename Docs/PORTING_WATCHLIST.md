@@ -19,10 +19,14 @@ values for the whole run.
 - Scale: 1,296 `state` globals live in reloadable modules (MENU 775, BATTLE 356, TITLE 76, EFFECT 47, ENDING 32).
   285 of them have an initial value (MENU 274, TITLE 8).
 
-**How:** the copy tool groups each module's statics (with their declared initial values) into one state struct per
-module and generates `<Module>::ResetOnLoad()`. Boot calls it at the points where the original loads that module
-(menu overlay load, title/battle/ending entry, effect plugin load). During development, any bug that shows up
-"the second time a screen opens" should first be checked against this list.
+**How:** the copy tool generates the reset. Initialised statics of each reloadable module (284 rows) are restored
+from `static const` copies of their initial values; the 158 function-local ones are hoisted to file scope so the
+reset reaches them. `Boot/OverlayReset.c` has one `Boot_Reset<Overlay>Statics()` per module (16); Boot calls it at
+the points where the original loads that module (menu overlay load, title/battle/ending entry, effect plugin load).
+That wiring is the first 1b task. Four statics are not reset because their initial value names something local to
+the function: `Menu::Status::animateActorSwitchState` and `Menu::BreakArts::weaponCategoriesState` (local enum
+values) and the two inventory sort tables (built from other local statics, never written). During development, any
+bug that shows up "the second time a screen opens" should first be checked against this list.
 
 ## 2. 64-bit and layout assumptions (handled during modernization)
 
@@ -39,6 +43,11 @@ The copied code compiles for x64, but some of it assumes 32-bit pointers or fixe
 it to compile. Keep the clang casting warnings (`-Wpointer-to-int-cast`, `-Wint-to-pointer-cast`,
 `-Wshorten-64-to-32`) visible and counted for copied `.c`, and make a size literal next to a struct an assert
 (`static_assert(sizeof(T) == 0x178)`) so the first run on x64 points at it.
+
+As copied (2026-10-17): the build shows about 520 pointer-to-int casts, 520 incompatible-pointer conversions and 100
+int-to-pointer casts. Ordering-table links (`addPrim`, `setaddr`, the game's `vs_getTag`, `_insertTPage`) still
+store 24-bit addresses in packet tags, which truncates x64 pointers: the first render work in 1b replaces them with
+sort keys (plan Step 6). The size-literal asserts are not generated yet.
 
 ## 3. Texture and palette references by video-memory coordinates (AI rewrite tool)
 
@@ -104,6 +113,10 @@ that does exist as C uses that C code instead of a stub. Example: PLG054/055 `fu
 byte-identical to PLG053's, which is the closed-ring effect template instance F01925, so they become effects-catalog
 rows of that template.
 
+As copied: 244 stubs. 10 of them are C functions whose body is raw MIPS assembly, and 70 are never declared in C;
+those are stubbed as `int f()`, the implicit declaration their callers compiled with. One assembly row (F01920,
+PLG052) is written from its C twin (F01998, PLG077).
+
 ## 6. Scratchpad memory
 
 1,061 uses in 266 functions (Menu 81, Battle 52, Field 40, Effects 37) of the PS1's 1 KiB fast scratchpad, which the
@@ -113,9 +126,37 @@ code uses as shared temporary memory.
 only, the copy tool maps `getScratchAddr(n)` and `vs_scratch` to a per-module scratch struct (or one `Core` scratch
 area), so the code compiles and runs unchanged until each function is modernized.
 
+As copied: one `Core` scratch block (`Core/Scratch.h`, 1 KiB). `getScratchAddr(n)`, the game's scratch struct
+(`Render::frameScratch`, a view of the block's start) and scratch literals (`(T*)0x1F8003EC`) all reach the same
+bytes. Note that the block's struct holds pointers, which are 8 bytes on x64, so its later members sit at other
+offsets than raw literals assume (§2).
+
 ## 7. Extractor (deferred)
 
 **Owner, 2026-10-17:** `VS.Extract` stays C++. Its decoders will be ported from VS-Workshop's `Workshop.Core`
 (`D:\Dev\Modding\VS-Workshop`, C#), which already decodes BIN/CUE, ISO9660, MPD/ZND/SHP/WEP/ZUD/SEQ/ESQ/TIM, palettes
 and P-file effects. Workshop is still in development, so the port waits until it is further along. It is part of
 Phase 1a step 5 (data disposition and asset extraction). AKAO, XA and STR are not in Workshop and are ours to write.
+
+## 8. Left by the copy (Step 4), for 1b and modernization
+
+What the mechanical copy kept as it was, so that each item gets a deliberate fix rather than a guess:
+
+- **Shims and stubs.** T shims (`Native\Engine\Legacy\`, `Native\Content\Legacy\`) and the 244 assembly-only
+  functions record `VS_UNPORTED` and do nothing yet. `Core::DumpUnportedToLog` lists the ones a run reaches, which
+  orders the work. libpad, VSync and the root counters (strategy R in the SDK ledger) are still shims with the SDK
+  names because Engine\Input and Core::FrameClock have no matching API yet.
+- **GTE math.** `Core/Gte.h` follows the documented GTE arithmetic; its rotation order, `rsin`/`ratan2` rounding,
+  projection divide and fog setup need the parity tests of plan ?6.1 before gameplay depends on them.
+- **Casts for per-file declarations.** 98 uses go through a cast to the view a decomp file declared and 30 calls go
+  through an unprototyped pointer (copy report `view-cast`, `implicit-call-cast`). Each marks a place where two
+  files disagreed about a type or an argument list; modernization picks the real type.
+- **Disc positions.** `Content/DiscLayout.h` keeps real LBAs/sizes because the code does sector arithmetic; Content
+  must map a sector to its converted file. `MENUBGSZ` is the ledger size of the title background asset.
+- **String ids.** `Content/StringTables.h` holds the decomp's per-overlay string-table ids; the strings are Step 5.
+- **Disc data.** 101 arrays whose size the ledger does not know are tentative one-element definitions, and data
+  spliced in from the disc is zero; Step 5 loads both.
+- **Helper macros.** The game's packet macros (`vs_getXY`, `vs_getRGB0`, `vs_getTag`...) keep their decomp names
+  (they are not ledger rows) until the primitive code moves to the render queue.
+- **Review list.** `tools\port\copy_fixups.py` holds the hand-reviewed text fixes (merged-layout member access, the
+  save copies, `_insertTPage` in C, two nested same-as types); the copy fails if one stops matching.

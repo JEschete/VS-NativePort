@@ -619,3 +619,27 @@ bodies). Of these, 98,033 are direct ledger ids, 1,655 are `sdk:`, 301 are `plug
 share a load address), 82 are member paths through upstream-merged layouts, 11 are widened views (`~w`), and 90
 are multi-target (headers included by several overlays, e.g. per-instance statics). There are **0 unresolved and
 0 text mismatches**. A full run takes about 10 minutes; rerun it after any ledger or naming change.
+
+#### 11.5 Naming fixes found by the copy (2026-10-17)
+
+Copying and compiling everything (plan Step 4) showed six naming defects; each is fixed at its source:
+
+- **Effect template instances** were named from the bound macro alone, so a plugin binding the same macro for two
+  templates got two functions with one name (PLG057 binds VS_TRAIL_* for trails9 and trails5). `merge_names.py`
+  now names an instance after the template body it feeds: the first `#include` after the binding whose header
+  defines that macro's function (`Effects::Plg057::TrailNineOrigin`, `ParticleLineRender`). A binding whose header
+  does not define it (PLG065 rebinds its particle functions so particleDispatch.h can call them) is a reference:
+  `template-binding;dup-of:<instance>`. 430 instances and 50 bindings; every copied C name is unique.
+- **Stale dup-of target:** F02001 (PLG077) was dup-of F01922, the stale PLG053/0.c row that is not copied; it is
+  dup-of the PLG053 closed-ring template instance F01925. `merge_names.py --apply` now replaces a row's old dup-of
+  with the batch output's instead of keeping both.
+- **Type placement:** `Battle::EffectInstanceTargets` (T00264) is only a member of `Effects::EffectInstance` and holds
+  Effects types by value, so the two headers needed each other: it is `Effects::EffectInstanceTargets` in
+  `Effects\Runtime.h`.
+- **Function-local name collisions:** five functions had two unused layout-padding statics (decomp `_0`, `_1`) with
+  one name; the second is `...LayoutPadding2`.
+- **Nested types of same-as types:** TITLE's `primBuf_t` is same-as MENU7's, but the unions nested in it were named
+  separately (`sprite` / `sprt`). The copy writes MENU7's, so `tools\port\copy_fixups.py` maps T00794 -> T00784 and
+  T00838 -> T00836 (field references follow by index).
+- **Same-as field names:** a field reference through a same-as type now uses the canonical type's field at the same
+  index, since only the canonical type is written.

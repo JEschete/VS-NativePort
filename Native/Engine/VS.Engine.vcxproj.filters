@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Legacy">
+      <UniqueIdentifier>{38B64845-5577-5CD9-B86F-5039D65D0209}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Legacy\Audio">
+      <UniqueIdentifier>{D9CD3D54-BB1E-5D37-BC3E-B1F420EE6347}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Legacy\Core">
+      <UniqueIdentifier>{8FCFF963-1336-5A31-8A18-21B56C09FCFD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Legacy\Input">
+      <UniqueIdentifier>{F9500361-2920-5536-AE5B-96CFACBC1EE4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Legacy\Movie">
+      <UniqueIdentifier>{65B684BB-6CDB-5E80-AEAC-BE5851F1FDCF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Legacy\Render">
+      <UniqueIdentifier>{CEC37E17-3F8E-5DE0-85DC-AD936EF98D2C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Legacy\Save">
+      <UniqueIdentifier>{2E571E54-E82A-57E3-BF14-C0044A33B8BC}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include">
       <UniqueIdentifier>{122E4CFA-FC76-57EA-923B-38F76DF7CEA6}</UniqueIdentifier>
     </Filter>
@@ -9,6 +30,12 @@
     </Filter>
     <Filter Include="include\Core">
       <UniqueIdentifier>{411A9FF0-2D82-5177-A472-B0B4F9689234}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Core\Core">
+      <UniqueIdentifier>{F7C013F6-BBD9-58F9-AE32-6D6917D435EA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Core\Text">
+      <UniqueIdentifier>{EE72470B-3E88-5B60-BCD1-8CB388B0E83F}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\Input">
       <UniqueIdentifier>{22165FBD-851A-5C57-9FCD-A92B7AB26FCB}</UniqueIdentifier>
@@ -31,8 +58,41 @@
     <Filter Include="src\Audio">
       <UniqueIdentifier>{9C2CA301-D5BD-5747-8CBD-41E2604A25DB}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Audio\Control">
+      <UniqueIdentifier>{3278D349-E187-54A1-B6CE-9CB22AFC04D7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Audio\Cutscene">
+      <UniqueIdentifier>{993BCA09-C8A3-5677-BDA8-26ACDA1D9FB0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Audio\Driver">
+      <UniqueIdentifier>{62F30A97-A574-5CFD-855F-8D4622377C00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Audio\Mixer">
+      <UniqueIdentifier>{FEB9A53A-4EA2-52AB-9A17-A3685AFD24EC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Audio\Playback">
+      <UniqueIdentifier>{38EF73FE-6A01-5E8C-8979-7CC080E1FBDA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Audio\Samples">
+      <UniqueIdentifier>{48ABAC7C-3906-51DE-BB95-9599CC77AC99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Audio\Seq">
+      <UniqueIdentifier>{12E2F1A2-98E0-58FC-9657-15E0D2DD08E1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Audio\SoundEffects">
+      <UniqueIdentifier>{AE806A6E-4B56-5041-9511-4E6B35B289F7}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Core">
       <UniqueIdentifier>{6643D381-A1D4-5EFC-81F4-3F517E25C596}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Core\Math">
+      <UniqueIdentifier>{5DC02ADC-307A-5B1D-AC8D-C26FD58F5735}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Core\Memory">
+      <UniqueIdentifier>{A3D8ED63-2250-588A-9A34-648388C3A420}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Core\String">
+      <UniqueIdentifier>{C353F7F4-4116-57B0-A8D3-2BA5DFF0F9CD}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Input">
       <UniqueIdentifier>{B97DA791-72DF-56D8-9142-97DBB02FDC64}</UniqueIdentifier>
@@ -40,54 +100,501 @@
     <Filter Include="src\Movie">
       <UniqueIdentifier>{14C85961-36E1-57B2-AB6E-3B299B307D82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Movie\Intro">
+      <UniqueIdentifier>{8E188FF8-B5F6-5FBE-9C78-79446A3E4975}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Platform">
       <UniqueIdentifier>{31599A4B-3522-58BA-A03D-F954BD474391}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Render">
       <UniqueIdentifier>{286D7176-EA8A-5627-B0F4-9AECE8917C37}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Render\Text">
+      <UniqueIdentifier>{A6275CB3-7A43-5885-8AE7-CA346AB4F756}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Save">
       <UniqueIdentifier>{1A22E65B-8E6B-57A6-AB6E-04ED278ED288}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Save\MemoryCard">
+      <UniqueIdentifier>{24EE3F41-985E-5873-ABCF-D4DDD9F13985}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Audio\ActorSound.c">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\ActorSound.h">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Audio\Akao.h">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Ambience.c">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Ambience.h">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
     <ClCompile Include="src\Audio\AudioDevice.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="src\Audio\Control\SoundControl.c">
+      <Filter>src\Audio\Control</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Control\SoundControl.h">
+      <Filter>src\Audio\Control</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Cutscene\Stream.c">
+      <Filter>src\Audio\Cutscene</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Cutscene\Stream.h">
+      <Filter>src\Audio\Cutscene</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Driver\SoundDriver.c">
+      <Filter>src\Audio\Driver</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Driver\SoundDriver.h">
+      <Filter>src\Audio\Driver</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Legacy.c">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Legacy.h">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\LegacyFiles.c">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\LegacyFiles.h">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Mixer\MixControl.c">
+      <Filter>src\Audio\Mixer</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Mixer\MixControl.h">
+      <Filter>src\Audio\Mixer</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Mixer\VoiceMixer.c">
+      <Filter>src\Audio\Mixer</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Mixer\VoiceMixer.h">
+      <Filter>src\Audio\Mixer</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Music.c">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Music.h">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Playback\SoundPlayback.c">
+      <Filter>src\Audio\Playback</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Playback\SoundPlayback.h">
+      <Filter>src\Audio\Playback</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Samples\SampleBanks.c">
+      <Filter>src\Audio\Samples</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Samples\SampleBanks.h">
+      <Filter>src\Audio\Samples</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Audio\Seq\AkaoFormat.h">
+      <Filter>src\Audio\Seq</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Seq\Channel.c">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Seq\Channel.h">
+      <Filter>src\Audio\Seq</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Seq\Control.c">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Seq\Control.h">
+      <Filter>src\Audio\Seq</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Seq\Envelope.c">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Seq\Envelope.h">
+      <Filter>src\Audio\Seq</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Seq\Modulation.c">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Seq\Modulation.h">
+      <Filter>src\Audio\Seq</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Seq\MusicSequence.c">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Seq\MusicSequence.h">
+      <Filter>src\Audio\Seq</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Seq\Sequencer.c">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Seq\Sequencer.h">
+      <Filter>src\Audio\Seq</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Sfx.c">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Sfx.h">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\SoundBanks.c">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\SoundBanks.h">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\SoundEffects\SoundEffects.c">
+      <Filter>src\Audio\SoundEffects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\SoundEffects\SoundEffects.h">
+      <Filter>src\Audio\SoundEffects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Audio\Stream.c">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Stream.h">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Audio\Voices.h">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Callbacks.c">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Callbacks.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Compatibility.c">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Compatibility.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Containers.c">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Containers.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
     <ClCompile Include="src\Core\FrameClock.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Core\Gte.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Legacy.c">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Legacy.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
     <ClCompile Include="src\Core\Log.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Math\FixedPoint.c">
+      <Filter>src\Core\Math</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Math\FixedPoint.h">
+      <Filter>src\Core\Math</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Math\Interpolation.c">
+      <Filter>src\Core\Math</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Math\Interpolation.h">
+      <Filter>src\Core\Math</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Math\Matrix.c">
+      <Filter>src\Core\Math</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Math\Matrix.h">
+      <Filter>src\Core\Math</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Math\Trig.c">
+      <Filter>src\Core\Math</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Math\Trig.h">
+      <Filter>src\Core\Math</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Math\Vector.c">
+      <Filter>src\Core\Math</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Math\Vector.h">
+      <Filter>src\Core\Math</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Memory\Copy.c">
+      <Filter>src\Core\Memory</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Memory\Copy.h">
+      <Filter>src\Core\Memory</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Memory\Heap.c">
+      <Filter>src\Core\Memory</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Memory\Heap.h">
+      <Filter>src\Core\Memory</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Memory.c">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Memory.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Overlays.c">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Overlays.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Random.c">
       <Filter>src\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\Random.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
+    <ClInclude Include="src\Core\Random.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Runtime.c">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Runtime.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Scratch.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\String\GameText.c">
+      <Filter>src\Core\String</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\String\GameText.h">
+      <Filter>src\Core\String</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Core\Timing.c">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Timing.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
     <ClCompile Include="src\Core\Unported.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
+    <ClInclude Include="src\Input\Buttons.h">
+      <Filter>src\Input</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Input\Controller.c">
+      <Filter>src\Input</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Input\Controller.h">
+      <Filter>src\Input</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Input\Controllers.c">
+      <Filter>src\Input</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Input\Controllers.h">
+      <Filter>src\Input</Filter>
+    </ClInclude>
     <ClCompile Include="src\Input\Pad.cpp">
       <Filter>src\Input</Filter>
     </ClCompile>
+    <ClCompile Include="src\Input\Vibration.c">
+      <Filter>src\Input</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Input\Vibration.h">
+      <Filter>src\Input</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Movie\Intro\Playback.c">
+      <Filter>src\Movie\Intro</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Movie\Intro\Playback.h">
+      <Filter>src\Movie\Intro</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Movie\Intro.c">
+      <Filter>src\Movie</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Movie\Intro.h">
+      <Filter>src\Movie</Filter>
+    </ClInclude>
     <ClCompile Include="src\Movie\Movie.cpp">
       <Filter>src\Movie</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\App.cpp">
       <Filter>src\Platform</Filter>
     </ClCompile>
+    <ClCompile Include="src\Render\Camera.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Camera.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
     <ClCompile Include="src\Render\Device.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
+    <ClCompile Include="src\Render\Display.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Display.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\Font.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Font.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\Frame.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Frame.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\FramebufferEffects.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\FramebufferEffects.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\Images.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Images.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\LegacyPackets.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\Lighting.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Lighting.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\Loading.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Loading.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\Model.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Model.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\ModelDraw.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\Palette.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Palette.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\Primitives.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\Render.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\ResultAtlas.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\ResultAtlas.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\RoomGeometry.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\RoomGeometry.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\ScreenTransition.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\ScreenTransition.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\Text\CompactFont.c">
+      <Filter>src\Render\Text</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Text\CompactFont.h">
+      <Filter>src\Render\Text</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\Text\VariableFont.c">
+      <Filter>src\Render\Text</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Text\VariableFont.h">
+      <Filter>src\Render\Text</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\TextureAnimation.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\TextureAnimation.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\Textures.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Textures.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\UiPrimitives.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\UiPrimitives.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\Upload.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Upload.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Save\MemoryCard\GameFiles.c">
+      <Filter>src\Save\MemoryCard</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Save\MemoryCard\GameFiles.h">
+      <Filter>src\Save\MemoryCard</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Save\MemoryCard\Resources.c">
+      <Filter>src\Save\MemoryCard</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Save\MemoryCard\Resources.h">
+      <Filter>src\Save\MemoryCard</Filter>
+    </ClInclude>
     <ClCompile Include="src\Save\SaveStore.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
+    <ClCompile Include="src\Save\Snapshot.c">
+      <Filter>src\Save</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Save\Snapshot.h">
+      <Filter>src\Save</Filter>
+    </ClInclude>
     <ClInclude Include="include\Audio\AudioDevice.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Assert.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
+    <ClInclude Include="include\Core\BiosRand.h">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Core\IntPair.h">
+      <Filter>include\Core\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Core\WordPair.h">
+      <Filter>include\Core\Core</Filter>
+    </ClInclude>
     <ClInclude Include="include\Core\FrameClock.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Gte.h">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Handle.hpp">
@@ -99,7 +606,16 @@
     <ClInclude Include="include\Core\Random.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
+    <ClInclude Include="include\Core\Scratch.h">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Text\TextCode.h">
+      <Filter>include\Core\Text</Filter>
+    </ClInclude>
     <ClInclude Include="include\Core\Types.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Unported.h">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Unported.hpp">
@@ -119,6 +635,51 @@
     </ClInclude>
     <ClInclude Include="include\Save\SaveStore.hpp">
       <Filter>include\Save</Filter>
+    </ClInclude>
+    <ClCompile Include="Legacy\Audio\LibSpu.cpp">
+      <Filter>Legacy\Audio</Filter>
+    </ClCompile>
+    <ClInclude Include="Legacy\Audio\LibSpu.h">
+      <Filter>Legacy\Audio</Filter>
+    </ClInclude>
+    <ClCompile Include="Legacy\Core\LibEtc.cpp">
+      <Filter>Legacy\Core</Filter>
+    </ClCompile>
+    <ClInclude Include="Legacy\Core\LibEtc.h">
+      <Filter>Legacy\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Legacy\Core\PsxTypes.h">
+      <Filter>Legacy\Core</Filter>
+    </ClInclude>
+    <ClCompile Include="Legacy\Input\LibPad.cpp">
+      <Filter>Legacy\Input</Filter>
+    </ClCompile>
+    <ClInclude Include="Legacy\Input\LibPad.h">
+      <Filter>Legacy\Input</Filter>
+    </ClInclude>
+    <ClCompile Include="Legacy\Movie\LibPress.cpp">
+      <Filter>Legacy\Movie</Filter>
+    </ClCompile>
+    <ClInclude Include="Legacy\Movie\LibPress.h">
+      <Filter>Legacy\Movie</Filter>
+    </ClInclude>
+    <ClInclude Include="Legacy\Psx.h">
+      <Filter>Legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="Legacy\Removed.h">
+      <Filter>Legacy</Filter>
+    </ClInclude>
+    <ClCompile Include="Legacy\Render\LibGpu.cpp">
+      <Filter>Legacy\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="Legacy\Render\LibGpu.h">
+      <Filter>Legacy\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="Legacy\Save\LibCard.cpp">
+      <Filter>Legacy\Save</Filter>
+    </ClCompile>
+    <ClInclude Include="Legacy\Save\LibCard.h">
+      <Filter>Legacy\Save</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

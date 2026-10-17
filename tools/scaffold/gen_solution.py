@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 NATIVE = ROOT / "Native"
 NS = uuid.UUID("6f1c2a52-3c1e-4c55-9a43-56d0a1f0b7e1")  # deterministic GUIDs
 SOURCE_ROOTS = ("src", "include", "Legacy")
-CODE = {".cpp": "ClCompile", ".c": "ClCompile", ".hpp": "ClInclude", ".h": "ClInclude"}
+CODE = {".cpp": "ClCompile", ".c": "ClCompile", ".hpp": "ClInclude", ".h": "ClInclude", ".inl": "ClInclude"}
 
 
 @dataclass
@@ -38,6 +38,7 @@ class Project:
     folders: list[str] = field(default_factory=list)    # per-system/module folders under src\, include\ (Legacy\)
     legacy: bool = False
     libs: list[str] = field(default_factory=list)       # vcpkg packages to link (exe only): sdl3, catch2
+    whole_archive: list[str] = field(default_factory=list)  # libraries linked in full (exe only)
 
     @property
     def guid(self) -> str:
@@ -61,7 +62,7 @@ PROJECTS = [
     Project("VS.Extract", "Tools\\Extract", kind="exe", console=True, refs=["VS.Engine", "VS.Content"],
             libs=["sdl3"]),
     Project("VS.Tests", "Tests", kind="exe", console=True, refs=["VS.Engine", "VS.Content", "VS.Game"],
-            libs=["sdl3", "catch2"]),
+            libs=["sdl3", "catch2"], whole_archive=["VS.Engine", "VS.Content", "VS.Game"]),
 ]
 BY_NAME = {p.name: p for p in PROJECTS}
 
@@ -106,7 +107,16 @@ def vcxproj(p: Project, files: list[tuple[str, str]]) -> str:
             # Copied decomp code (.c) gets a relaxed warning set until promoted to .cpp (plan §8.2).
             compile_items.append(f'    <ClCompile Include="{path}">\n'
                                  f'      <TreatWarningAsError>false</TreatWarningAsError>\n'
-                                 f'      <WarningLevel>Level3</WarningLevel>\n'
+                                 f'      <WarningLevel>Level1</WarningLevel>\n'
+                                 f'      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)'
+                                 f'</AdditionalIncludeDirectories>\n'
+                                 f'      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>\n'
+                                 f'    </ClCompile>')
+        elif "\\Legacy\\" in "\\" + path or path.startswith("Legacy\\"):
+            # Legacy shims include the C SDK headers of other projects.
+            compile_items.append(f'    <ClCompile Include="{path}">\n'
+                                 f'      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)'
+                                 f'</AdditionalIncludeDirectories>\n'
                                  f'    </ClCompile>')
         else:
             compile_items.append(f'    <ClCompile Include="{path}" />')
@@ -122,7 +132,14 @@ def vcxproj(p: Project, files: list[tuple[str, str]]) -> str:
             if libs:
                 deps += (f"      <AdditionalDependencies Condition=\"'$(Configuration)'=='{cfg}'\">"
                          f"{';'.join(libs)};%(AdditionalDependencies)</AdditionalDependencies>\n")
-        link = f"    <Link>\n      <SubSystem>{sub}</SubSystem>\n{deps}    </Link>\n"
+        whole = ""
+        if p.whole_archive:
+            # link every object of these libraries, so an unresolved or duplicate symbol in copied code fails the
+            # build even before anything calls it
+            whole = ("      <AdditionalOptions>" +
+                     " ".join(f"/WHOLEARCHIVE:$(OutDir){lib}.lib" for lib in p.whole_archive) +
+                     " %(AdditionalOptions)</AdditionalOptions>\n")
+        link = f"    <Link>\n      <SubSystem>{sub}</SubSystem>\n{deps}{whole}    </Link>\n"
     configs = ""
     for cfg in ("Debug", "Release"):
         dbg = "true" if cfg == "Debug" else "false"

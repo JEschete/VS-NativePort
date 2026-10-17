@@ -1,0 +1,201 @@
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Legacy/Psx.h"
+#include "Actors/ActorState.h"
+#include "Core/Compatibility.h"
+#include "Core/Memory/Copy.h"
+#include "Event/Actors.h"
+#include "Event/ScriptActors.h"
+#include "Event/ScriptScreen.h"
+#include "Event/Splash.h"
+#include "Field/RoomState.h"
+#include "Field/Transitions.h"
+#include "Render/Display.h"
+#include "Render/Images.h"
+#include "Render/Palette.h"
+
+// decomp: D_800F4B30 (D_800F4B30@BATTLE/BATTLE.PRG)
+Event_SplashTween Event_splashTweens[6];
+
+// decomp: BATTLE.PRG func_800B6724 (src/BATTLE/BATTLE.PRG/4A0A8.c:609)
+int Event_ScriptWaitForSplashFile(u_char* arg0, short arg1) { return Render_gimLayers->isLoadPending; }
+
+// decomp: BATTLE.PRG vs_battle_script_loadGim (src/BATTLE/BATTLE.PRG/4A0A8.c:851)
+int Event_ScriptLoadSplashImage(u_char* arg0, short arg1)
+{
+    Render_QueueGimImage(Core_Memory_ReadUnalignedShort(arg0 + 1), arg0[3]);
+    return 0;
+}
+
+// decomp: BATTLE.PRG func_800B7014 (src/BATTLE/BATTLE.PRG/4A0A8.c:857)
+int Event_ScriptConfigureSplashLayer(u_char* arg0, short arg1)
+{
+    Event_SplashTween* new_var;
+
+    Event_SplashLayerView* temp_a1 = Render_gimLayers;
+
+    if (temp_a1 == NULL) {
+        return 0;
+    }
+
+    new_var = &Event_splashTweens[arg0[1] >> 6];
+    new_var->durationFrames = 0;
+    temp_a1 = temp_a1 + ((arg0[1] >> 6));
+    temp_a1->renderMode = arg0[1] & 3;
+    temp_a1->offsetX = (signed char)arg0[2] * 2;
+    temp_a1->offsetY = (signed char)arg0[3] * 2;
+    temp_a1->scaleFixed12 = arg0[4] << 7;
+    temp_a1->brightness = arg0[5];
+    Render_ActivateGimLayer(arg0[1] >> 6, temp_a1, arg0);
+    return 0;
+}
+
+// decomp: BATTLE.PRG func_800B70E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:879)
+int Event_ScriptTweenSplashLayer(u_char* arg0, short arg1)
+{
+    Event_SplashLayerView* temp_a3 = Render_gimLayers;
+    int temp_a2 = arg0[5] >> 6;
+    Event_SplashTween* temp_a1 = &Event_splashTweens[temp_a2];
+
+    if (temp_a3 == NULL) {
+        return 0;
+    }
+
+    temp_a3 += temp_a2;
+
+    if (temp_a1->durationFrames != 0) {
+        return 1;
+    }
+
+    temp_a1->deltaX = (((signed char)arg0[1] * 2) - (temp_a1->startX = temp_a3->offsetX));
+    temp_a1->deltaY = (((signed char)arg0[2] * 2) - (temp_a1->startY = temp_a3->offsetY));
+    temp_a1->deltaScaleFixed12 = ((arg0[3] << 7) - (temp_a1->startScaleFixed12 = temp_a3->scaleFixed12));
+    temp_a1->deltaBrightness = arg0[4] - (temp_a1->startBrightness = ((char*)temp_a3)[3]);
+    temp_a1->easingMode = arg0[5] & 7;
+    temp_a1->durationFrames = arg0[6];
+    temp_a1->elapsedFrames = 0;
+    return 0;
+}
+
+// decomp: BATTLE.PRG func_800B71C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:905)
+int Event_ScriptFreeSplashImage(u_char* arg0, short arg1)
+{
+    Render_ReleaseGimImages();
+    return (Event_skipState == 2) * 4;
+}
+
+// decomp: BATTLE.PRG func_800B71F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:911)
+int Event_ScriptWaitForSplashTween(u_char* arg0, short arg1)
+{
+    return (Event_splashTweens[2].durationFrames | (Event_splashTweens[0].durationFrames | Event_splashTweens[1].durationFrames)) != 0;
+}
+
+// decomp: BATTLE.PRG func_800B9A40 (src/BATTLE/BATTLE.PRG/4A0A8.c:2049)
+int Event_ScriptFadeOutAndWait(u_char* arg0, short arg1)
+{
+    int temp_v0 = Field_ScreenTransitionPhase();
+    if (temp_v0 != 5) {
+        if (temp_v0 == 0) {
+            Field_BeginScreenFadeOut(arg0[1], arg0[2], arg0[3] * 0x10);
+        }
+        return 1;
+    }
+    return 0;
+}
+
+// decomp: BATTLE.PRG func_800B9A94 (src/BATTLE/BATTLE.PRG/4A0A8.c:2061)
+int Event_ScriptFadeIn(u_char* arg0)
+{
+    Field_BeginScreenFadeIn(arg0[1], arg0[2], arg0[3] * 0x10);
+    return 0;
+}
+
+// decomp: BATTLE.PRG func_800B9AC4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2067)
+int Event_ScriptSetWipeAngle(u_char* arg0, short arg1)
+{
+    Field_SetTransitionWipeAngle(arg0[1] * 0x10);
+    return 0;
+}
+
+// decomp: BATTLE.PRG func_800B9AE8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2073)
+int Event_ScriptConfigureScreenTransition(u_char* arg0, short arg1)
+{
+    Field_ConfigureScreenTransition(arg0[1], arg0[2], arg0[3] * 0x10);
+    return 0;
+}
+
+// decomp: BATTLE.PRG func_800B9B18 (src/BATTLE/BATTLE.PRG/4A0A8.c:2079)
+int Event_ScriptSetRoomDisplayFlags(u_char* arg0, short arg1)
+{
+    switch (arg0[1] & 3) {
+    case 0:
+        Render_DisableDisplay();
+        break;
+    case 1:
+        Render_EnableDisplay();
+        break;
+    }
+
+    switch ((arg0[1] >> 2) & 3) {
+    case 0:
+        Field_HidePrimaryRoomGeometry();
+        break;
+    case 1:
+        Field_ShowPrimaryRoomGeometry();
+        break;
+    }
+
+    switch ((arg0[1] >> 4) & 3) {
+    case 0:
+        Actors_DisableAllActorModels();
+        break;
+    case 1:
+        Actors_EnableAllActorModels();
+        break;
+    }
+    return 0;
+}
+
+// decomp: BATTLE.PRG func_800B9BF8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2110)
+int Event_ScriptWaitForScreenTransition(void) { return Field_ScreenTransitionPhase() != 0; }
+
+// decomp: BATTLE.PRG func_800B9C18 (src/BATTLE/BATTLE.PRG/4A0A8.c:2112)
+int Event_ScriptTogglePaletteHook(u_char* arg0, short arg1)
+{
+    if (arg0[1] != 0) {
+        Core_NoOperation();
+    } else {
+        Core_NoOperation();
+    }
+    return 0;
+}
+
+// decomp: BATTLE.PRG func_800B9C58 (src/BATTLE/BATTLE.PRG/4A0A8.c:2122)
+int Event_ScriptTransformPalettes(u_char* arg0, short arg1)
+{
+    Event_ActorSelection sp18;
+    int temp_a2;
+
+    switch (arg0[1] >> 4) {
+    case 0:
+        Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(arg0 + 2), &sp18);
+        while (1) {
+            temp_a2 = Event_NextScriptSelectedActor(&sp18);
+            if (temp_a2 == 1) {
+                break;
+            }
+            Render_TransformActorColors(arg0[1] & 0xF, (1 << arg0[4]) & 0x1F, temp_a2,
+                (signed char)arg0[5], (signed char)arg0[6], (signed char)arg0[7]);
+        }
+        break;
+    case 1:
+        Render_TransformSceneColors(arg0[1] & 0xF, (1 << arg0[4]) & 0x1F, (signed char)arg0[5],
+            (signed char)arg0[6], (signed char)arg0[7]);
+        break;
+    case 2:
+        Render_TransformBackgroundColors(arg0[1] & 0xF, (1 << arg0[4]) & 0x1F, (signed char)arg0[5],
+            (signed char)arg0[6], (signed char)arg0[7]);
+        break;
+    }
+    return 0;
+}
+

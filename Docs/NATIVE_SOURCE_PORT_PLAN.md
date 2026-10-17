@@ -201,7 +201,7 @@ One row per game function: **3,679 rows**. There are 2,918 C functions, 480 effe
 
 | Column | `yes` means |
 |---|---|
-| `copied` | The function body exists at `final_location` with a provenance comment |
+| `copied` | The function body exists at `final_location` with a provenance comment (`stub` = assembly-only, a `VS_UNPORTED` stub with the real prototype until ported) |
 | `compiles` | It builds in Debug and Release x64 with zero errors |
 | `named` | `final_name` is set and used in code, all parameters and locals have meaningful names, no `argN`/`varN`/`unk` remain |
 | `understood` | `purpose` is filled, and every struct field it touches is named in the type ledger |
@@ -321,8 +321,46 @@ For each row (in file order):
 7. Mark `copied`.
 8. Effect template instantiations (`copy = template`) are **not** duplicated. One shared implementation per template (`tiledRings`, `particleSetup`, `trails9`, …) is copied. Each instantiation becomes a row in the effects catalog (§6.8).
 9. Rename by reference, not by text. `tools\port\ref_index.py` resolves every identifier occurrence in game code (declarations and uses, including those inside macro bodies) to its ledger row with libclang. It writes `build\port\refs.json` as `[line, col, length, kind, target]` per source file, so a member such as `unk4` is renamed only where it belongs to the right type. The copy tool checks that the text at each position equals the original spelling before replacing it. The target forms are documented in the script; the full run's stats are in [NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md) §11.4.
-10. Module statics go into one state struct per module with a generated `ResetOnLoad()`; scratchpad uses map to a per-module scratch struct; asm-only functions become `VS_UNPORTED` stubs ([PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §1, §5, §6).
+10. Module statics with an initial value are restored by generated per-module resets (as built: the statics stay named variables; folding them into the `state:` structs the data ledger names is Step 5); scratchpad uses map to Core's scratch block; asm-only functions become `VS_UNPORTED` stubs ([PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §1, §5, §6).
 11. Re-run `tools\scaffold\gen_solution.py` so the projects list the new files.
+
+**As built (2026-10-17).** `python tools\port\decl_index.py` (libclang declaration extents, about 90 s), then
+`python tools\port\copy_to_native.py` (about 1 min), then `gen_solution.py` and a build; `copy_to_native.py --mark`
+after a successful build fills `copied`/`compiles`. The copy is regenerated from the decomp until Phase 1a closes,
+so fixes go into the tool or its reviewed fix list (`tools\port\copy_fixups.py`), never into the output.
+`tools\port\check_leftovers.py` lists decomp-style names left in the output (only local variable names and the
+game's `vs_get*` packet helper macros remain).
+
+- **Output:** 751 files (328 `.c`, 395 `.h`, 28 `.inl`). Of 3,758 functions, 3,514 are copied C and 244 are
+  assembly-only `VS_UNPORTED` stubs with their real prototypes. Every global (2,174) and type (842) is written.
+- **Headers:** each `X.c` has a sibling `X.h` with its prototypes and externs. Generated headers have a types
+  section (macros, types) and a declarations section; type dependencies are included in types-only mode, so
+  include cycles between declaration sections resolve. Includes come from the names each file uses (plus types
+  reachable through pointers for `.c` files). Where the ledger has both `include\M\X.h` and `src\M\X.h` they are
+  one public header.
+- **Declaration differences between decomp files** (each file declared its own view of a global or prototype):
+  98 uses go through a cast to that file's declaration, and 30 calls compiled through an implicit or unprototyped
+  declaration go through `ret (*)()`. Both preserve what the original compiled; they are modernization targets.
+- **Legacy SDK layer** (`Native\Engine\Legacy\`, `Native\Content\Legacy\LibDs.h`, umbrella `Legacy/Psx.h`): own
+  PS1 type layouts, packet macros and prototypes for the 287 SDK names in use. R: libgte and the GTE inline macros
+  become `Core/Gte.h` (fixed-point math with the GTE's small state), `rand`/`srand` the BIOS LCG
+  (`Core/BiosRand.h`), `getScratchAddr` and scratch literals `Core/Scratch.h`, CRT-clashing libapi file calls
+  `LegacyApi_*`. D: whole-statement calls are deleted (expression uses keep no-ops in `Legacy/Removed.h`).
+  T: shims record `VS_UNPORTED` until they translate into their system.
+- **Effect templates:** one body per template (`Effects\Templates\<Name>.inl`); each plugin instance is a block in
+  `<Name>.c` that defines that plugin's bindings, includes the body and undefines them. EFFPURGE's address-only
+  entry table resolves each slot to its effect's plugin (48 shipped plugins are byte-identical twins of covered
+  ones).
+- **Disc-derived constants:** LBAs/sizes stay real values in `Content/DiscLayout.h` (the code does sector
+  arithmetic; Content maps a sector to its converted file at run time). String-table ids are
+  `Content/StringTables.h`, named per overlay because same-named tables differ. Data the decomp spliced in from
+  the disc is zero until Step 5 loads it.
+- **Module reload (PORTING_WATCHLIST.md §1):** 158 function-local statics with an initial value are hoisted to
+  file scope; per-file reset functions restore every reloadable module's initialised statics, and
+  `Boot/OverlayReset.c` has one `Boot_Reset<Overlay>Statics()` per overlay (16). Calling them at the overlay load
+  points is the first 1b wiring task.
+- **Gate check:** VS.Tests links the three libraries in full (`/WHOLEARCHIVE`), so an unresolved or duplicate
+  symbol anywhere in copied code fails the build even before anything calls it.
 
 ### Step 5: Data disposition and asset extraction
 Fill in `disposition` in the data ledger and generate the Tier 1 table decoders for `catalog` rows. Convert `constexpr` rows. Fold `state` rows into system state structs. Build the `VS.Extract` skeleton and manifest, generate `CONTENT_LEDGER.csv`, and write the converters in the order the 1b title slice needs them. Every disc file is converted up front by Phase 1 exit; the per-sub-phase asset gates are in [ASSET_PIPELINE.md](ASSET_PIPELINE.md) §9.
@@ -340,6 +378,12 @@ Fix until the solution builds. Hazards are fixed now, not later (x64):
 | inline asm | C++ |
 
 Mark `compiles`.
+
+**Status (2026-10-17):** the solution builds in Debug and Release x64 with 0 errors and the tests pass; every
+copied row is marked `compiles`. Copied `.c` builds with old-C leniency as warnings (about 1,700, mostly
+incompatible pointers and pointer/integer casts: the 64-bit hazards, counted, PORTING_WATCHLIST.md §2).
+`tools\lint\native_boundary.py` reports 59 remaining hazards (hardware register and KSEG addresses, 24-bit
+ordering-table links); per the owner's 2026-10-17 ruling these are fixed as each function is modernized.
 
 ### Step 7: Gate review
 Confirm that the ledger percentages match §1, that the CI lint is clean and that the tests are green.
@@ -634,7 +678,7 @@ Fixed-step simulation, the original RNG sequence, no wall-clock in game logic, a
    `tools\port\copy_to_native.py` must refuse any global/type/field name whose ledger row lacks evidence.
    See [NAMING_CONVENTIONS.md §11.2](NAMING_CONVENTIONS.md#112-saved-naming-progress) for per-batch status and
    unresolved identity/layout questions. Follow §11.1 recovery limits rather than relaunching the original fan-out.
-6. ⏭ Write `tools\port\copy_to_native.py` and copy everything (Step 4). Compile (Step 6). The occurrence-level reference index it builds on (Step 4 item 9) is done. Things to check during this work: [PORTING_WATCHLIST.md](PORTING_WATCHLIST.md).
+6. ✅ `tools\port\copy_to_native.py` copies everything (Step 4) and the solution compiles and links in Debug and Release (Step 6); see Step 4 "As built". Things to check during this work: [PORTING_WATCHLIST.md](PORTING_WATCHLIST.md).
 7. ⏭ Start the 1b title slice.
 
 ### Open questions

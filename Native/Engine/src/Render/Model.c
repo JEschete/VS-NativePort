@@ -1,0 +1,89 @@
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Legacy/Psx.h"
+#include "Actors/ActorRecord.h"
+#include "Actors/Animation.h"
+#include "Actors/ModelDraw.h"
+#include "Actors/ModelInstance.h"
+#include "Actors/Shadow.h"
+#include "Actors/Skeleton.h"
+#include "Actors/WeaponModel.h"
+#include "Core/Math/FixedPoint.h"
+#include "Field/Gimmicks.h"
+#include "Render/Camera.h"
+#include "Render/Model.h"
+#include "Render/ModelDraw.h"
+#include "Render/Palette.h"
+#include "Render/Render.h"
+
+// decomp: BATTLE.PRG func_800AECA0 (src/BATTLE/BATTLE.PRG/44F14.c:853)
+void Render_PrepareActorCameraMatrices(MATRIX* source)
+{
+    MATRIX roll;
+    Render_ModelScratchpad* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);
+    Render_FrameScratch* view = (void*)((uintptr_t)Core_ScratchBase() + 0x000);
+    int i;
+
+    for (i = 0; i < 3; ++i) {
+        scratch->matrix.m[0][i] = Render_cameraBasisMatrix.m[i][0];
+        scratch->matrix.m[1][i] = Render_cameraBasisMatrix.m[i][1];
+        scratch->matrix.m[2][i] = Render_cameraBasisMatrix.m[i][2];
+    }
+
+    roll.m[1][1] = roll.m[0][0] = Core_Gte_Cos(-view->camera.angles.vz);
+    roll.m[1][0] = Core_Gte_Sin(-view->camera.angles.vz);
+    roll.m[0][1] = -roll.m[1][0];
+    roll.m[2][2] = ONE;
+    roll.m[0][2] = roll.m[1][2] = roll.m[2][0] = roll.m[2][1] = 0;
+    setVector(&scratch->scale, 3640, ONE, ONE);
+    Core_Gte_ScaleMatrix(&scratch->matrix, &scratch->scale);
+    Core_Math_MultiplyMatrixIntoRight(&scratch->matrix, &roll);
+    scratch->matrix = roll;
+    i = ONE * ONE / view->camera.farClip;
+    setVector(&scratch->scale, i, i, i);
+    Core_Gte_ScaleMatrix(&scratch->matrix, &scratch->scale);
+    // BUG: copies from the stack slot of the pointer, not from the matrix it points to
+    Render_actorCameraMatrix = *(MATRIX*)&source;
+    Actors_boneMatrixScratch = scratch->matrix;
+    Actors_boneMatrixScratch.t[0] = source->t[0];
+    Actors_boneMatrixScratch.t[1] = source->t[1];
+    Actors_boneMatrixScratch.t[2] = source->t[2];
+}
+
+// decomp: BATTLE.PRG func_800B3A68 (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
+int Render_ProjectModelVertices(void*, MATRIX*, int, void*)
+{
+    VS_UNPORTED("Render::ProjectModelVertices");
+    return 0;
+}
+
+// decomp: BATTLE.PRG func_800B3CF0 (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
+void Render_DrawModelFlatPolygons(Actors_ModelRenderContext*, Actors_WeaponModel*, CVECTOR*, void*)
+{
+    VS_UNPORTED("Render::DrawModelFlatPolygons");
+}
+
+// decomp: BATTLE.PRG func_800B4594 (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
+void Render_DrawModelGouraudPolygons(Actors_ModelRenderContext*, Field_GimmickInstance*, int*, void*)
+{
+    VS_UNPORTED("Render::DrawModelGouraudPolygons");
+}
+
+// decomp: BATTLE.PRG func_800B4B14 (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
+int Render_DrawActorGroundShadow()
+{
+    VS_UNPORTED("Render::DrawActorGroundShadow");
+    return 0;
+}
+
+// decomp: BATTLE.PRG func_800B516C (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
+void Render_DrawModelFlatPolygonsWithOverrides(Actors_ModelRenderContext*, Actors_WeaponModel*, CVECTOR*, void*)
+{
+    VS_UNPORTED("Render::DrawModelFlatPolygonsWithOverrides");
+}
+
+// decomp: BATTLE.PRG func_800B5C30 (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
+void Render_DrawModelGouraudPolygonsWithOverrides(Actors_ModelRenderContext*, Field_GimmickInstance*, int*, void*)
+{
+    VS_UNPORTED("Render::DrawModelGouraudPolygonsWithOverrides");
+}
+

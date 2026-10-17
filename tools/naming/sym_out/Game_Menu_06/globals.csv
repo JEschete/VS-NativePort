@@ -80,7 +80,7 @@ G01730,state,Menu::Container::transferredMiscCount,Native\Game\src\Menu\Containe
 G01731,state,Menu::Container::detailsClosedWithTriangle,Native\Game\src\Menu\Container\ItemView.c,"Is set when Triangle closed the item details, which leaves the item list.",med,source:234.c:804;source:234.c:1258
 G01732,state,Menu::Container::otherStorage,Native\Game\src\Menu\Container\ItemView.c,Points to the storage not being browsed: the transfer destination.,high,source:234.c:2440;source:234.c:2443
 G01733,drop,Menu::Container::transferDirectionLayoutPadding,Native\Game\src\Menu\Container\ItemView.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:234.c:3042
-G01734,drop,Menu::Container::transferDirectionLayoutPadding,Native\Game\src\Menu\Container\ItemView.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:234.c:3045
+G01734,drop,Menu::Container::transferDirectionLayoutPadding2,Native\Game\src\Menu\Container\ItemView.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:234.c:3045;second padding block of the function
 G01735,drop,Menu::Container::discardMenuLayoutPadding,Native\Game\src\Menu\Container\Storage.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:234.c:1707
 G01736,drop,Menu::Container::transferConfirmationLayoutPadding,Native\Game\src\Menu\Container\ItemView.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:234.c:2336
 G01737,drop,Menu::Container::itemListLayoutPadding,Native\Game\src\Menu\Container\ItemView.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:234.c:2399

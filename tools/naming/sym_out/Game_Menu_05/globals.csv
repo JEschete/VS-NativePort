@@ -109,7 +109,7 @@ G01497,state,Menu::Loot::previewedLoot,Native\Game\src\Menu\Loot\LootScreen.c,Ho
 G01498,drop,Menu::Loot::updateLayoutPadding,Native\Game\src\Menu\Loot\LootScreen.c,"Pads the original data layout; only ever cleared, never read.",high,replaced-by:nothing;layout padding;source:MENU/MENUB.PRG/260.c:1953;source:MENU/MENUB.PRG/260.c:1982
 G01499,drop,Menu::Loot::disassemblyLayoutPadding,Native\Game\src\Menu\Loot\LootScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENUB.PRG/260.c:252
 G01500,drop,Menu::Loot::leaveConfirmationLayoutPadding,Native\Game\src\Menu\Loot\LootScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENUB.PRG/260.c:1383
-G01501,drop,Menu::Loot::updateLayoutPadding,Native\Game\src\Menu\Loot\LootScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENUB.PRG/260.c:1954
+G01501,drop,Menu::Loot::updateLayoutPadding2,Native\Game\src\Menu\Loot\LootScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENUB.PRG/260.c:1954;second padding block of the function
 G01502,state,Menu::Loot::controlsEnabled,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::RenderBagCapacities, Menu::Loot::Update, Menu::Loot::UpdateLootSelection.",med,source:MENU/MENUB.PRG/260.c:1088;fork name kept
 G01503,state,Menu::Loot::gradientStateIndex,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::RenderLootRows.,med,source:MENU/MENUB.PRG/260.c:1207;fork name kept
 G01504,state,Menu::Loot::inventory,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::BuildStagedInventory, Menu::Loot::CountContainedCategory, Menu::Loot::RefreshClaimableRows and 15 more.",med,source:MENU/MENUB.PRG/260.c:290;fork name kept
@@ -178,7 +178,7 @@ G01566,state,Menu::Setup::firstEntry,Native\Game\src\Menu\Setup\SetupScreen.c,Is
 G01567,drop,Menu::Setup::gemAttachmentLayoutPadding,Native\Game\src\Menu\Setup\Assembly.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:1677
 G01568,drop,Menu::Setup::disassemblyCategoryLayoutPadding,Native\Game\src\Menu\Setup\SetupScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2288
 G01569,drop,Menu::Setup::layoutPadding3,Native\Game\src\Menu\Setup\Combination.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2290
-G01570,drop,Menu::Setup::disassemblyCategoryLayoutPadding,Native\Game\src\Menu\Setup\SetupScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2290
+G01570,drop,Menu::Setup::disassemblyCategoryLayoutPadding2,Native\Game\src\Menu\Setup\SetupScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2290;second padding block of the function
 G01571,drop,Menu::Setup::layoutPadding5,Native\Game\src\Menu\Setup\Combination.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:3939
 G01572,drop,Menu::Setup::layoutPadding6,Native\Game\src\Menu\Setup\Assembly.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:48
 G01573,drop,Menu::Setup::assemblyBladeLayoutPadding,Native\Game\src\Menu\Setup\Assembly.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:808

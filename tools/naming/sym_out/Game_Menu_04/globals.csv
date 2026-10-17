@@ -254,7 +254,7 @@ G01379,drop,Menu::Rename::unusedFrameCycle,Native\Game\src\Menu\Rename.c,Cycles 
 G01380,drop,Menu::Rename::unusedEditorFlag,Native\Game\src\Menu\Rename.c,Is cleared when the name editor starts and never read.,high,source:21A0.c:491
 G01381,drop,Menu::Rename::confirmationLayoutPadding,Native\Game\src\Menu\Rename.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:21A0.c:367
 G01382,drop,Menu::Rename::layoutPadding2,Native\Game\src\Menu\Rename.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:21A0.c:15
-G01383,drop,Menu::Rename::confirmationLayoutPadding,Native\Game\src\Menu\Rename.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:21A0.c:371
+G01383,drop,Menu::Rename::confirmationLayoutPadding2,Native\Game\src\Menu\Rename.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:21A0.c:371;second padding block of the function
 G01384,drop,Menu::Options::layoutPadding1,Native\Game\src\Menu\Options.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:21A0.c:18
 G01385,drop,Menu::Options::layoutPadding2,Native\Game\src\Menu\Options.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:21A0.c:20
 G01386,state,Menu::Rename::animStep,Native\Game\src\Menu\Rename.c,"Fork name kept; used by Menu::Rename::Update, Menu::Rename::UpdateNameEditor.",med,source:21A0.c:730;fork name kept

@@ -9,6 +9,12 @@
     <VcpkgManifestRoot>$(VSRepositoryRoot)</VcpkgManifestRoot>
     <VcpkgInstalledDir>$(VSRepositoryRoot)vcpkg_installed\</VcpkgInstalledDir>
     <VcpkgTriplet>x64-windows</VcpkgTriplet>
+    <!-- Copied decomp C (.c, plan Step 4): sees every project's src\ and include\ plus the Legacy SDK layer, and
+         keeps the old-C leniency as warnings. The pointer/integer casting warnings stay on and are counted
+         (PORTING_WATCHLIST.md section 2). -->
+    <VSNative>$(VSRepositoryRoot)Native\</VSNative>
+    <VSCopiedCIncludes>$(VSNative)Engine;$(VSNative)Content;$(VSNative)Engine\include;$(VSNative)Engine\src;$(VSNative)Content\include;$(VSNative)Content\src;$(VSNative)Game\include;$(VSNative)Game\src</VSCopiedCIncludes>
+    <VSCopiedCOptions>/clang:-Wno-error=int-conversion /clang:-Wno-error=incompatible-pointer-types /clang:-Wno-error=incompatible-function-pointer-types /clang:-Wno-error=implicit-function-declaration /clang:-Wno-error=implicit-int /clang:-Wno-error=return-type /clang:-Wno-error=int-to-pointer-cast /clang:-Wno-c2x-extensions /clang:-Wno-unused /clang:-Wno-parentheses /clang:-Wno-missing-braces /clang:-Wno-sign-compare /clang:-Wno-pointer-sign /clang:-Wno-switch /clang:-Wno-unknown-pragmas /clang:-Wno-microsoft-anon-tag /clang:-fms-extensions</VSCopiedCOptions>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -18,6 +24,9 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <!-- Native\ has files with the same name in different folders (Actors\Movement.c, Battle\Ai\Movement.c) and
+           a copied .c next to a hand-written .cpp (Core\Random.c, Core\Random.cpp): one object per source path. -->
+      <ObjectFileName>$(IntDir)%(RelativeDir)%(Filename)%(Extension).obj</ObjectFileName>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>

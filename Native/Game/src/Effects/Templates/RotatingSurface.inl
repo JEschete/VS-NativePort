@@ -1,0 +1,306 @@
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Legacy/Psx.h"
+#include "Core/Math/Interpolation.h"
+#include "Core/Math/Vector.h"
+#include "Core/Memory/Heap.h"
+#include "Effects/Curves.h"
+#include "Effects/Package.h"
+#include "Effects/Particles.h"
+#include "Effects/Runtime.h"
+#include "Effects/Templates/TemplateState.h"
+#include "Effects/Transforms.h"
+#include "Render/Camera.h"
+#include "Render/LegacyPackets.h"
+#include "Render/Render.h"
+#include "Render/UiPrimitives.h"
+
+// Template body: Effects::Templates::RotatingSurface (decomp src/EFFECT/rotatingSurfaces.h:34). Included once per instance by Effects/Templates/RotatingSurface.c with that plugin's bindings.
+#ifndef VS_ROTATING_SURFACE_TYPES
+#define VS_ROTATING_SURFACE_TYPES
+#endif
+#ifdef VS_ROTATING_SURFACE_REPEAT
+#define VS_ROTATING_SURFACE_U_SEGMENTS 4
+#define VS_ROTATING_SURFACE_U_INDEX(column) ((column) & 3)
+#else
+#define VS_ROTATING_SURFACE_U_SEGMENTS 16
+#define VS_ROTATING_SURFACE_U_INDEX(column) (column)
+#endif
+
+int VS_ROTATING_SURFACE_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
+{
+    SVECTOR vertices[5][16];
+    int screen[5][16];
+    int depths[5][16];
+    CVECTOR colors[5];
+    int maxFactor;
+    u_char u[VS_ROTATING_SURFACE_U_SEGMENTS + 1];
+    u_char v[5];
+    Effects_RotatingSurfaceState* state;
+    Effects_ParticleEmitterScratch* scratch = (Effects_ParticleEmitterScratch*)((uintptr_t)Core_ScratchBase() + 0x1D0);
+    Effects_ParticleDefinition* effect;
+    Effects_EffectInstance* battle;
+    int alive;
+    int heightPosition;
+    int heightValue;
+    int heightStep;
+    int radiusValue;
+    int radiusStep;
+    int baseAngle;
+    int angleSpeed;
+    int angleAccel;
+    int row, column, quadrant;
+    int sample;
+    int depth;
+    int curveIndex;
+    int initIndex, tempHeight, tempRadius, heightBase;
+    int speed, oldAngle, radiusBase;
+    int cosAngle, sinAngle;
+    MATRIX* actorMatrix;
+    Render_RotatingSurfacePacket* prim;
+    Effects_PackageTexture* texture;
+
+    alive = 1;
+    state = arg0->rendererState;
+    battle = Effects_currentInstance;
+    switch (arg1) {
+    case 1:
+        state = Core_Memory_AllocateFromHighEnd(sizeof *state);
+        arg0->rendererState = state;
+        state->effect = arg2 >> 8;
+        state->lifetime = arg2;
+        state->radiusSpeed = 0;
+        state->radius = 0;
+        state->heightSpeed = 0;
+        state->height = 0;
+        state->angle = 0;
+        state->age = 0;
+        effect = &Effects_package->block5Data->definitions[state->effect];
+        curveIndex = effect->transparencyCurve;
+        if (curveIndex) {
+            sample = Effects_package->curveBlock->curveSizes[curveIndex];
+            if (sample >= 2) {
+                --sample;
+            }
+            for (initIndex = 0; initIndex < 5; ++initIndex) {
+                state->factors[initIndex] =
+                    Effects_package->curves[effect->transparencyCurve][sample * initIndex / 4]
+                    * 2;
+                if (state->factors[initIndex] == 256) {
+                    state->factors[initIndex] = 255;
+                }
+            }
+        } else {
+            maxFactor = 255;
+            for (initIndex = 4; initIndex >= 0; --initIndex) {
+                state->factors[initIndex] = maxFactor;
+            }
+        }
+        Effects_ClearParticleTextureState((int*)&state->texture);
+        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);
+        break;
+    case 2: {
+        effect = &Effects_package->block5Data->definitions[state->effect];
+        scratch->flags = effect->flags;
+        actorMatrix = &battle->transforms[effect->transformIndex].world;
+        Core_Math_InterpolatePairsToWideVector(effect->positionRange,
+            Effects_SampleEffectCurve(effect->positionCurve, state->age), &scratch->position);
+        switch (scratch->flags & 7) {
+        case 0:
+            break;
+        case 1:
+            Core_Math_AddWideAndShortVectors(&scratch->position, Effects_effectOrigin, &scratch->position);
+            break;
+        case 2:
+            scratch->position.vx += actorMatrix->t[0];
+            scratch->position.vy += actorMatrix->t[1];
+            scratch->position.vz += actorMatrix->t[2];
+            break;
+        }
+        Core_Math_InterpolatePairsToWideVector(effect->extentRange,
+            Effects_SampleEffectCurve(effect->extentCurve, state->age), &scratch->extent);
+        sample = Effects_SampleEffectCurve(effect->forceCurve, state->age);
+        Core_Math_InterpolatePairsToShortVector(effect->vectorRanges[2], sample, &scratch->forceMin);
+        Core_Math_InterpolatePairsToShortVector(effect->vectorRanges[3], sample, &scratch->forceMax);
+        sample = Effects_SampleEffectCurve(effect->accelerationCurve, state->age);
+        Core_Math_InterpolatePairsToShortVector(effect->vectorRanges[4], sample, &scratch->accelerationMin);
+        Core_Math_InterpolatePairsToShortVector(effect->vectorRanges[5], sample, &scratch->accelerationMax);
+        Core_Math_InterpolatePairsToWideVector(effect->vectorRanges[1],
+            Effects_SampleEffectCurve(effect->directionJitterCurve, state->age), &scratch->directionJitter);
+        Core_Math_InterpolatePairsToPlaneVector(effect->pairRanges[2],
+            Effects_SampleEffectCurve(effect->speedCurve, state->age), scratch->speedRange);
+        state->heightSpeed += scratch->accelerationMin.vy;
+        tempHeight = state->height += scratch->forceMin.vy + state->heightSpeed;
+        heightBase = scratch->extent.vy;
+        state->radiusSpeed += scratch->accelerationMin.vx;
+        tempRadius = state->radius += scratch->forceMin.vx + state->radiusSpeed;
+        radiusBase = scratch->extent.vx;
+        heightValue = tempHeight + heightBase;
+        radiusValue = tempRadius + radiusBase;
+        oldAngle = state->angle;
+        if (scratch->speedRange[0] != scratch->speedRange[1]) {
+            if (scratch->speedRange[1] < scratch->speedRange[0]) {
+                speed = Core_Random_Rand() % (scratch->speedRange[0] - scratch->speedRange[1] + 1)
+                      + scratch->speedRange[1];
+            } else {
+                speed = Core_Random_Rand() % (scratch->speedRange[1] - scratch->speedRange[0] + 1)
+                      + scratch->speedRange[0];
+            }
+        } else {
+            speed = scratch->speedRange[0];
+        }
+        baseAngle = state->angle = oldAngle + speed;
+        angleAccel = 0;
+        angleSpeed = 0;
+        heightStep = 0;
+        radiusStep = 0;
+        heightPosition = 0;
+        for (row = 0; row < 5; ++row) {
+            for (column = 0, quadrant = 0; column < 4; ++column, ++quadrant) {
+                vertices[row][quadrant].vx =
+                    (cosAngle = (radiusValue * Core_Gte_Cos(baseAngle + column * 256)) >> 12);
+                vertices[row][column + 12].vz = vertices[row][column + 8].vx =
+                    -(vertices[row][column + 4].vz = cosAngle);
+                sinAngle = Core_Gte_Sin(baseAngle + column * 256);
+                sinAngle = (radiusValue * sinAngle) >> 12;
+                vertices[row][quadrant].vz = sinAngle;
+                vertices[row][column + 12].vx = sinAngle;
+                vertices[row][column + 8].vz = -sinAngle;
+                vertices[row][column + 4].vx = -sinAngle;
+            }
+            for (column = 0; column < 16; ++column) {
+                vertices[row][column].vx += scratch->position.vx;
+                vertices[row][column].vy = scratch->position.vy + heightPosition;
+                vertices[row][column].vz += scratch->position.vz;
+            }
+            heightStep += scratch->accelerationMax.vy;
+            heightValue += heightStep + scratch->forceMax.vy;
+            heightPosition += heightValue;
+            radiusStep += scratch->accelerationMax.vx;
+            radiusValue += radiusStep + scratch->forceMax.vx;
+            angleAccel += scratch->directionJitter.vz;
+            angleSpeed += angleAccel + scratch->directionJitter.vy;
+            baseAngle += angleSpeed + scratch->directionJitter.vx;
+            if (effect->rCurve) {
+                colors[row].r = state->factors[row]
+                              * Effects_SampleEffectCurve(effect->rCurve, state->age) / 128;
+            } else {
+                colors[row].r = state->factors[row];
+            }
+            if (effect->gCurve) {
+                colors[row].g = state->factors[row]
+                              * Effects_SampleEffectCurve(effect->gCurve, state->age) / 128;
+            } else {
+                colors[row].g = state->factors[row];
+            }
+            if (effect->bCurve) {
+                colors[row].b = state->factors[row]
+                              * Effects_SampleEffectCurve(effect->bCurve, state->age) / 128;
+            } else {
+                colors[row].b = state->factors[row];
+            }
+            colors[row].cd = Render_LegacyPrimitiveCode_PolyGt4SemiTrans;
+        }
+        if (scratch->flags & 0x20000) {
+            Core_Gte_SetRotMatrix(&battle->transforms[effect->transformIndex].view);
+            Core_Gte_SetTransMatrix(&battle->transforms[effect->transformIndex].view);
+        } else {
+            Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);
+            Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix);
+        }
+        for (row = 0; row < 5; ++row) {
+            for (column = 0; column < 16; ++column) {
+                Core_Gte_LoadV0(&vertices[row][column]);
+                Core_Gte_Rtps();
+                Core_Gte_StoreSxy2(&screen[row][column]);
+                Core_Gte_StoreSz3Otz(&depths[row][column]);
+            }
+        }
+        Effects_AdvanceParticleTextureAnimation(&state->texture);
+        texture = &Effects_package->textures[state->texture.textureInfo->dataIndex];
+        for (sample = 0; sample < VS_ROTATING_SURFACE_U_SEGMENTS + 1; ++sample) {
+            u[sample] = texture->u + texture->w * sample / VS_ROTATING_SURFACE_U_SEGMENTS;
+        }
+        for (sample = 0; sample < 5; ++sample) {
+            v[sample] = texture->v + texture->h * sample / 4;
+        }
+        for (row = 0; row < 4; ++row) {
+            for (column = 0; column < 15; ++column) {
+                depth = (depths[row][column] + depths[row][column + 1]
+                            + depths[row + 1][column] + depths[row + 1][column + 1])
+                      / 4;
+                if (depth < 0x800 && Render_nearClip < depth) {
+                    prim = Render_frameScratch.primitiveCursor;
+                    Render_frameScratch.primitiveCursor = prim + 1;
+                    prim->poly.tag = 0xE1000000;
+                    prim->drawMode = 0xE1000200;
+                    *(int*)&prim->poly.x0 = screen[row][column];
+                    *(int*)&prim->poly.x1 = screen[row][column + 1];
+                    *(int*)&prim->poly.x2 = screen[row + 1][column];
+                    *(int*)&prim->poly.x3 = screen[row + 1][column + 1];
+                    *(int*)&prim->poly.r0 = *(int*)&prim->poly.r1 = *(int*)&colors[row];
+                    *(int*)&prim->poly.r2 = *(int*)&prim->poly.r3 =
+                        *(int*)&colors[row + 1];
+                    prim->poly.u0 = prim->poly.u2 =
+                        u[VS_ROTATING_SURFACE_U_INDEX(column)];
+                    prim->poly.u1 = prim->poly.u3 =
+                        u[VS_ROTATING_SURFACE_U_INDEX(column) + 1];
+                    prim->poly.v0 = prim->poly.v1 = v[row];
+                    prim->poly.v2 = prim->poly.v3 = v[row + 1];
+                    prim->poly.tpage = texture->tpage;
+                    prim->poly.clut = texture->clut;
+                    prim->tag =
+                        (((u_long*)Render_frameScratch.orderingTable)[depth] & 0xFFFFFF) | 0x0E000000;
+                    ((u_long*)Render_frameScratch.orderingTable)[depth] =
+                        (((u_long*)Render_frameScratch.orderingTable)[depth] & 0xFF000000)
+                        | ((u_long)prim & 0xFFFFFF);
+                }
+            }
+            depth = (depths[row][15] + depths[row][0] + depths[row + 1][15]
+                        + depths[row + 1][0])
+                  / 4;
+            if (depth < 0x800 && Render_nearClip < depth) {
+                prim = Render_frameScratch.primitiveCursor;
+                Render_frameScratch.primitiveCursor = prim + 1;
+                prim->poly.tag = 0xE1000000;
+                prim->drawMode = 0xE1000200;
+                *(int*)&prim->poly.x0 = screen[row][15];
+                *(int*)&prim->poly.x1 = screen[row][0];
+                *(int*)&prim->poly.x2 = screen[row + 1][15];
+                *(int*)&prim->poly.x3 = screen[row + 1][0];
+                *(int*)&prim->poly.r0 = *(int*)&prim->poly.r1 = *(int*)&colors[row];
+                *(int*)&prim->poly.r2 = *(int*)&prim->poly.r3 = *(int*)&colors[row + 1];
+                prim->poly.u0 = prim->poly.u2 = u[VS_ROTATING_SURFACE_U_INDEX(column)];
+                prim->poly.u1 = prim->poly.u3 =
+                    u[VS_ROTATING_SURFACE_U_INDEX(column) + 1];
+                prim->poly.v0 = prim->poly.v1 = v[row];
+                prim->poly.v2 = prim->poly.v3 = v[row + 1];
+                prim->poly.tpage = texture->tpage;
+                prim->poly.clut = texture->clut;
+                prim->tag = (((u_long*)Render_frameScratch.orderingTable)[depth] & 0xFFFFFF) | 0x0E000000;
+                ((u_long*)Render_frameScratch.orderingTable)[depth] =
+                    (((u_long*)Render_frameScratch.orderingTable)[depth] & 0xFF000000)
+                    | ((u_long)prim & 0xFFFFFF);
+            }
+        }
+        ++state->age;
+        if (state->lifetime) {
+            --state->lifetime;
+            if (!state->lifetime) {
+                alive = 0;
+            }
+        }
+        break;
+    }
+    case 3:
+        state->lifetime = 1;
+        break;
+    case 4:
+        alive = 0;
+        break;
+    }
+    return alive;
+}
+#undef VS_ROTATING_SURFACE_TYPES
+#undef VS_ROTATING_SURFACE_U_SEGMENTS
+#undef VS_ROTATING_SURFACE_U_INDEX
+
