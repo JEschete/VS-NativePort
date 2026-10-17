@@ -373,21 +373,22 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Field_01 | 63 | 59 | 500 | Validated and applied |
 | Game_Field_02 | 54 | 0 | 0 | Validated and applied |
 | Game_Menu_01 | 0 | 95 | 557 | Validated and applied |
-| Game_Menu_02 | 38 | 63 | 582 | Pending |
-| Game_Menu_03 | 262 | 0 | 0 | Pending |
-| Game_Menu_04 | 262 | 0 | 0 | Pending |
-| Game_Menu_05 | 262 | 0 | 0 | Pending |
-| Game_Menu_06 | 199 | 0 | 0 | Pending |
+| Game_Menu_02 | 38 | 63 | 582 | Validated and applied |
+| Game_Menu_03 | 262 | 0 | 0 | Validated and applied |
+| Game_Menu_04 | 262 | 0 | 0 | Validated and applied |
+| Game_Menu_05 | 262 | 0 | 0 | Validated and applied |
+| Game_Menu_06 | 199 | 0 | 0 | Validated and applied |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **1,151 / 2,174** | **759 / 822** | **6,288 / 6,870** | **19 / 24 batches applied** |
+| **Applied / inventoried** | **2,174 / 2,174** | **822 / 822** | **6,870 / 6,870** | **24 / 24 batches applied** |
 
 Inventory changed on 2026-10-17 when 25 upstream layouts were adopted (15 merged layouts, 10 type-only retypes; two
 new upstream-only types, `func_800D52A4_t`/`_t2`, the effect node's motion block). Applied rows kept their names;
 four applied fields changed C type only (`AkaoSeqHeader.magic` `char[4]`→`int`, `_mpdEnemy.settings`
 `u_char[8]`→`actorSpawnSettings`, `vs_battle_objectData.material`/`variant` `char`→`u_char`).
 
-Applied rows still include 51 low-confidence globals, 78 low-confidence types and 2,158 low-confidence fields. Validation checks coverage,
+Applied rows still include 53 low-confidence globals, 78 low-confidence types and 2,275 low-confidence fields
+(1,042 globals, 457 types and 3,216 fields are `med`; the low/med sanity pass reviews them before copying). Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -518,6 +519,20 @@ names, locations and collisions; it does not prove semantics or close migration 
   (`fileMenuElementStateAnimateX` -> `AnimateX`). `tempFileCreated` becomes `TemporaryFileCreated` (forbidden token).
   T00746 takes the names earlier same-as rows expect (`Input::PressedButtonsView`: `allButtons`, `ports`); T00124 and
   T00187 are same-as T00192 (`Input::ButtonBytePair`), written against the applied row.
+- Game_Menu_02 (2026-10-17): nine more function-local state enums (named after their functions), 15 other enums and
+  the remaining menu structs; four C-name collisions were renamed (`data` -> `items`, `MenuControlState`, `MenuRow`,
+  `Menu::TextBoxState`). A receiver review (citations whose receiver differs from the type's usual one) moved 16
+  auto-cited fields that had matched a same-named member of another type back to declaration-only.
+- Game_Menu_03..06 (2026-10-17): 985 menu globals from `sym_gen/menu_globals.py` (rules) and
+  `sym_gen/menu_globals_manual.py` (rows read by hand). Each global's uses are searched in its own scope from the
+  ledger key (the declaring function for local statics, the file, or the including overlay for header statics).
+  A meaningful fork name is kept at `med`, cited by its first use, in the namespace and file of its main user
+  (local statics are prefixed with their function's context). Address names are named from recognised use patterns
+  (cursor animation, OK blink, yes/no choice, selected row plus one, step switch, slide counters, item source and
+  index from the argument) or by hand; three pattern names were wrong on reading (`D_80109A4D` is the sort category,
+  `D_80109A7A` the browsed storage, `D_80109A7D` the controls panel mode, not the capacity panel) and were replaced.
+  `_`/`_0`.. statics are layout padding (`__attribute__((unused))`, or only cleared) and are dropped. `items1.h`
+  `extern` rows are `dup-of` the `_toggleUi.h` statics. Every row's citation names the global (checked).
 - Correction (Game_Field_01): T00223 was `Battle::PendingAbilityState` with "unidentified" shorts, but it is the menu
   result returned by `Menu::Framework::ActionSelectionState` (D_800F4E98): `menuStatus` (146C.c:7771) and
   `selectionKind` (146C.c:4693); renamed `Menu::Framework::ActionSelection`.

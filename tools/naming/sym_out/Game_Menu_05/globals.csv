@@ -1,0 +1,263 @@
+id,disposition,final_name,final_location,purpose,confidence,notes
+G01390,state,Menu::Rename::nameEditorCharTableRow,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::UpdateNameEditor.,med,source:21A0.c:489;fork name kept
+G01391,state,Menu::Rename::frameControllerActionAnimationCounters,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::DrawFrame.,med,source:21A0.c:167;fork name kept
+G01392,state,Menu::Rename::nameEditorCursorAnimState,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::UpdateNameEditor.,med,source:21A0.c:492;fork name kept
+G01393,state,Menu::Options::menuStrings,Native\Game\src\Menu\Options.c,"Fork name kept; used by Menu::Options::Update, Menu::Options::UpdateAbilityTimingChoice, Menu::Options::UpdateArmorStatusChoice and 7 more.",med,source:88.c:38;fork name kept
+G01394,state,Menu::Rename::nameEditorNameBuffer,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::UpdateNameEditor.,med,source:21A0.c:734;fork name kept
+G01395,state,Menu::Rename::nameNavIconAnim,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::DrawFrame.,med,source:21A0.c:239;fork name kept
+G01396,state,Menu::Rename::renderRenameMenuStrings,Native\Game\src\Menu\Rename.c,"Fork name kept; used by Menu::Rename::DrawFrame, Menu::Rename::Update, Menu::Rename::UpdateConfirmation and 1 more.",med,source:21A0.c:207;fork name kept
+G01397,state,Menu::Rename::selectedControllerAction,Native\Game\src\Menu\Rename.c,"Fork name kept; used by Menu::Rename::DrawFrame, Menu::Rename::SetCommandHighlight.",med,source:21A0.c:167;fork name kept
+G01398,state,Menu::Rename::showRenameInterface,Native\Game\src\Menu\Rename.c,"Fork name kept; used by Menu::Rename::Update, Menu::Rename::UpdateNameEditor.",med,source:21A0.c:725;fork name kept
+G01399,state,Menu::Options::simpleMapValues,Native\Game\src\Menu\Options.c,"Fork name kept; used by Menu::Options::Update, Menu::Options::UpdateSimpleMapChoice.",med,source:88.c:44;fork name kept
+G01400,state,Menu::Rename::stringBuf,Native\Game\src\Menu\Rename.c,"Fork name kept; used by Menu::Rename::CopyTrimmedName, Menu::Rename::DrawFrame, Menu::Rename::EditNameAtCursor and 2 more.",med,source:21A0.c:42;fork name kept
+G01401,state,Menu::Rename::nameEditorCurrentPos,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::UpdateNameEditor.,med,source:21A0.c:490;fork name kept
+G01402,state,Menu::Rename::confirmationCursorState,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::UpdateConfirmation.,med,source:21A0.c:435;fork name kept
+G01403,state,Menu::Rename::frameNamePlaceHolder,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::DrawFrame.,med,source:21A0.c:219;fork name kept
+G01404,state,Menu::Rename::confirmationSelectedRow,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::UpdateConfirmation.,med,source:21A0.c:376;fork name kept
+G01405,state,Menu::Options::abilityTimingChoiceSelectedRow,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateAbilityTimingChoice.,med,source:88.c:111;fork name kept
+G01406,state,Menu::Options::armorStatusChoiceSelectedRow,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateArmorStatusChoice.,med,source:88.c:228;fork name kept
+G01407,state,Menu::Options::cursorMemoryChoiceSelectedRow,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateCursorMemoryChoice.,med,source:88.c:286;fork name kept
+G01408,state,Menu::Options::informationChoiceSelectedRow,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateInformationChoice.,med,source:88.c:343;fork name kept
+G01409,state,Menu::Options::puzzleModeChoiceSelectedRow,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdatePuzzleModeChoice.,med,source:88.c:402;fork name kept
+G01410,state,Menu::Options::simpleMapChoiceSelectedRow,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateSimpleMapChoice.,med,source:88.c:53;fork name kept
+G01411,state,Menu::Options::soundChoiceSelectedRow,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateSoundChoice.,med,source:88.c:459;fork name kept
+G01412,state,Menu::Options::vibrationChoiceSelectedRow,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateVibrationChoice.,med,source:88.c:519;fork name kept
+G01413,state,Menu::Options::weaponStatusChoiceSelectedRow,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateWeaponStatusChoice.,med,source:88.c:169;fork name kept
+G01414,state,Menu::Rename::confirmationState,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::UpdateConfirmation.,med,source:21A0.c:377;fork name kept
+G01415,state,Menu::Rename::nameEditorState,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::UpdateNameEditor.,med,source:21A0.c:465;fork name kept
+G01416,state,Menu::Options::abilityTimingChoiceState,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateAbilityTimingChoice.,med,source:88.c:90;fork name kept
+G01417,state,Menu::Options::armorStatusChoiceState,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateArmorStatusChoice.,med,source:88.c:206;fork name kept
+G01418,state,Menu::Options::cursorMemoryChoiceState,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateCursorMemoryChoice.,med,source:88.c:265;fork name kept
+G01419,state,Menu::Options::informationChoiceState,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateInformationChoice.,med,source:88.c:323;fork name kept
+G01420,state,Menu::Options::puzzleModeChoiceState,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdatePuzzleModeChoice.,med,source:88.c:380;fork name kept
+G01421,state,Menu::Options::simpleMapChoiceState,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateSimpleMapChoice.,med,source:88.c:30;fork name kept
+G01422,state,Menu::Options::soundChoiceState,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateSoundChoice.,med,source:88.c:439;fork name kept
+G01423,state,Menu::Options::vibrationChoiceState,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateVibrationChoice.,med,source:88.c:497;fork name kept
+G01424,state,Menu::Options::weaponStatusChoiceState,Native\Game\src\Menu\Options.c,Fork name kept; used by Menu::Options::UpdateWeaponStatusChoice.,med,source:88.c:148;fork name kept
+G01425,state,Menu::Rename::weaponId,Native\Game\src\Menu\Rename.c,"Fork name kept; used by Menu::Rename::Update, Menu::Rename::UpdateNameEditor.",med,source:21A0.c:738;fork name kept
+G01426,drop,Menu::Score::layoutPadding1,Native\Game\src\Menu\Score\ScoreScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:238.c:383
+G01427,drop,Menu::Score::layoutPadding2,Native\Game\src\Menu\Score\ScoreScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:238.c:411
+G01428,constexpr,Menu::Score::kBgColorStops0,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::DrawEnemyBanner, Menu::Score::DrawGradientPanel.",med,source:238.c:1566;fork name kept
+G01429,constexpr,Menu::Score::kBgColorStops1,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::DrawEnemyBanner, Menu::Score::DrawGradientPanel.",med,source:238.c:1568;fork name kept
+G01430,state,Menu::Score::buttonHeld,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::Update.,med,source:238.c:1088;fork name kept
+G01431,state,Menu::Score::screenCalculateProgressComplete,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::UpdateScreen.,med,source:238.c:285;fork name kept
+G01432,state,Menu::Score::cameraAngles,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::BuildViewerCamera, Menu::Score::Update.",med,source:238.c:579;fork name kept
+G01433,state,Menu::Score::cameraAnglesBackup,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::CalculateProgress, Menu::Score::RestoreCamera.",med,source:238.c:466;fork name kept
+G01434,state,Menu::Score::cameraDistance,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::BuildViewerCamera, Menu::Score::Update.",med,source:238.c:576;fork name kept
+G01435,state,Menu::Score::cameraHeightOffset,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::BuildViewerCamera, Menu::Score::Update.",med,source:238.c:577;fork name kept
+G01436,state,Menu::Score::cameraPositionBackup,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::CalculateProgress, Menu::Score::RestoreCamera.",med,source:238.c:463;fork name kept
+G01437,state,Menu::Score::characterRank,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::DetermineRiskbreakerRank, Menu::Score::Update.",med,source:238.c:584;fork name kept
+G01438,catalog,Menu::Score::determineRiskbreakerRankCharacterRankPointThresholds,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::DetermineRiskbreakerRank.,med,source:238.c:2652;fork name kept
+G01439,catalog,Menu::Score::determineRiskbreakerRankCharacterRankTitleThresholds,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::DetermineRiskbreakerRank.,med,source:238.c:2651;fork name kept
+G01440,state,Menu::Score::clearCount,Native\Game\src\Menu\Score\Records.c,"Fork name kept; used by Menu::Score::AwardTitles, Menu::Score::CalculateProgress, Menu::Score::CalculateScore and 2 more.",med,source:238.c:454;fork name kept
+G01441,state,Menu::Score::enemyDescriptions,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::RenderEnemyList, Menu::Score::ShowEnemyDescription, Menu::Score::Update.",med,source:238.c:946;fork name kept
+G01442,state,Menu::Score::enemyNavigationState,Native\Game\src\Menu\Score\Encyclopedia.c,"Fork name kept; used by Menu::Score::Update, Menu::Score::UpdateEnemyNavigation.",med,source:238.c:1103;fork name kept
+G01443,state,Menu::Score::enemySkipDelay,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::Update.,med,source:238.c:1248;fork name kept
+G01444,catalog,Menu::Score::gazetteRows,Native\Game\src\Menu\Score\Records.c,"Fork name kept; used by Menu::Score::CreateStatisticRows, Menu::Score::CreateTimeTrialRows, Menu::Score::CreateTitleRows and 5 more.",med,source:238.c:924;fork name kept
+G01445,state,Menu::Score::hideUi,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::CalculateProgress, Menu::Score::RenderEnemyViewer, Menu::Score::Update and 1 more.",med,source:238.c:428;fork name kept
+G01446,state,Menu::Score::initCameraDistance,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::Update.,med,source:238.c:578;fork name kept
+G01447,state,Menu::Score::mapCompletion,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::CalculateProgress, Menu::Score::RenderStatistics.",med,source:238.c:434;fork name kept
+G01448,state,Menu::Score::menuState,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::CalculateProgress, Menu::Score::Update.",med,source:238.c:427;fork name kept
+G01449,state,Menu::Score::menuText,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::UpdateTopMenu.,med,source:238.c:1446;fork name kept
+G01450,state,Menu::Score::miscInfo,Native\Game\src\Menu\Score\Records.c,"Fork name kept; used by Menu::Score::CreateTimeTrialRows, Menu::Score::CreateTitleRows, Menu::Score::FormatFastestClearTime and 2 more.",med,source:238.c:1421;fork name kept
+G01451,state,Menu::Score::modelVariant,Native\Game\src\Menu\Score\Encyclopedia.c,"Fork name kept; used by Menu::Score::LoadEnemyModelParts, Menu::Score::QueueEnemyModelRead.",med,source:592C.c:187;fork name kept
+G01452,state,Menu::Score::modelVariants,Native\Game\src\Menu\Score\Encyclopedia.c,Fork name kept; used by Menu::Score::QueueEnemyModelRead.,med,source:592C.c:190;fork name kept
+G01453,state,Menu::Score::monBinCdQueueSlot,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::Update.,med,source:238.c:613;fork name kept
+G01454,state,Menu::Score::monBinData,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::InitializeEnemyList, Menu::Score::RenderEnemyList, Menu::Score::RenderEnemyViewer and 2 more.",med,source:238.c:612;fork name kept
+G01455,constexpr,Menu::Score::kMonBinFile,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::Update.,med,source:238.c:612;fork name kept
+G01456,state,Menu::Score::scrollableRowNavigationAnimState,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::RenderScrollableRow.,med,source:238.c:92;fork name kept
+G01457,state,Menu::Score::nextState,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::Update.,med,source:238.c:608;fork name kept
+G01458,drop,Menu::Score::unusedNoString,Native\Game\src\Menu\Score\ScoreScreen.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:238.c:518
+G01459,state,Menu::Score::openedChestCount,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::CalculateProgress, Menu::Score::RenderStatistics.",med,source:238.c:446;fork name kept
+G01460,state,Menu::Score::paletteFlag,Native\Game\src\Menu\Score\Encyclopedia.c,"Fork name kept; used by Menu::Score::LoadEnemyModelParts, Menu::Score::QueueEnemyModelRead.",med,source:592C.c:186;fork name kept
+G01461,catalog,Menu::Score::paletteFlags,Native\Game\src\Menu\Score\Encyclopedia.c,Fork name kept; used by Menu::Score::QueueEnemyModelRead.,med,source:592C.c:186;fork name kept
+G01462,state,Menu::Score::scrollableRowPreviousFrameBuf,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::RenderScrollableRow.,med,source:238.c:90;fork name kept
+G01463,state,Menu::Score::rankText,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::Update.,med,source:238.c:584;fork name kept
+G01464,state,Menu::Score::rotationColor,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::RenderEnemyViewer, Menu::Score::Update.",med,source:238.c:1127;fork name kept
+G01465,state,Menu::Score::score,Native\Game\src\Menu\Score\Records.c,"Fork name kept; used by Menu::Score::CalculateScore, Menu::Score::DetermineRiskbreakerRank, Menu::Score::RenderOverview.",med,source:238.c:1701;fork name kept
+G01466,state,Menu::Score::selectedEnemy,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::RenderEnemyViewer, Menu::Score::ShowEnemyDescription, Menu::Score::Update.",med,source:238.c:1091;fork name kept
+G01467,state,Menu::Score::screenSelectedRow,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::UpdateScreen.,med,source:238.c:315;fork name kept
+G01468,state,Menu::Score::statDescriptions,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::CreateStatisticRows.,med,source:238.c:2209;fork name kept
+G01469,state,Menu::Score::statHeaders,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::CreateStatisticRows.,med,source:238.c:2208;fork name kept
+G01470,state,Menu::Score::timeAttackDescriptions,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::CreateTimeTrialRows.,med,source:238.c:2477;fork name kept
+G01471,constexpr,Menu::Score::kTimeAttackReferenceTimes,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::RenderTimeTrialRecords.,med,source:238.c:2623;fork name kept
+G01472,state,Menu::Score::timeAttacks,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::CreateTimeTrialRows.,med,source:238.c:2475;fork name kept
+G01473,state,Menu::Score::titleDescriptions,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::CreateTitleRows.,med,source:238.c:1739;fork name kept
+G01474,state,Menu::Score::titleText,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::CreateTitleRows.,med,source:238.c:1738;fork name kept
+G01475,state,Menu::Score::variantMap,Native\Game\src\Menu\Score\Encyclopedia.c,Fork name kept; used by Menu::Score::LoadEnemyModelParts.,med,source:592C.c:228;fork name kept
+G01476,drop,Menu::Score::unusedYesString,Native\Game\src\Menu\Score\ScoreScreen.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:238.c:517
+G01477,state,Menu::Score::zoomColor,Native\Game\src\Menu\Score\ScoreScreen.c,"Fork name kept; used by Menu::Score::RenderEnemyViewer, Menu::Score::Update.",med,source:238.c:1128;fork name kept
+G01478,state,Menu::Score::zudBuffer,Native\Game\src\Menu\Score\Encyclopedia.c,"Fork name kept; used by Menu::Score::FreeEnemyModelBuffer, Menu::Score::LoadEnemyModelParts, Menu::Score::QueueEnemyModelRead.",med,source:592C.c:197;fork name kept
+G01479,state,Menu::Score::zudCdSlot,Native\Game\src\Menu\Score\Encyclopedia.c,"Fork name kept; used by Menu::Score::LoadEnemyModelParts, Menu::Score::QueueEnemyModelRead.",med,source:592C.c:181;fork name kept
+G01480,state,Menu::Score::zudData,Native\Game\src\Menu\Score\Encyclopedia.c,"Fork name kept; used by Menu::Score::LoadEnemyModelParts, Menu::Score::QueueEnemyModelRead.",med,source:592C.c:182;fork name kept
+G01481,catalog,Menu::Score::zudLbas,Native\Game\src\Menu\Score\Encyclopedia.c,Fork name kept; used by Menu::Score::QueueEnemyModelRead.,med,source:592C.c:178;fork name kept
+G01482,catalog,Menu::Score::zudSizes,Native\Game\src\Menu\Score\Encyclopedia.c,Fork name kept; used by Menu::Score::QueueEnemyModelRead.,med,source:592C.c:180;fork name kept
+G01483,state,Menu::Score::titlesCursorAnimState,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::RenderTitles.,med,source:238.c:1796;fork name kept
+G01484,state,Menu::Score::statisticsCursorAnimStep,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::RenderStatistics.,med,source:238.c:2272;fork name kept
+G01485,state,Menu::Score::timeTrialRecordsCursorAnimStep,Native\Game\src\Menu\Score\Records.c,Fork name kept; used by Menu::Score::RenderTimeTrialRecords.,med,source:238.c:2567;fork name kept
+G01486,state,Menu::Score::enemyListCursorAnimStep,Native\Game\src\Menu\Score\Encyclopedia.c,Fork name kept; used by Menu::Score::RenderEnemyList.,med,source:238.c:2031;fork name kept
+G01487,state,Menu::Score::screenInitDelay,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::UpdateScreen.,med,source:238.c:284;fork name kept
+G01488,state,Menu::Score::updateMenuAnimState,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::Update.,med,source:238.c:587;fork name kept
+G01490,state,Menu::Score::topMenuSelectedRow,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::UpdateTopMenu.,med,source:238.c:1440;fork name kept
+G01491,state,Menu::Score::topMenuState,Native\Game\src\Menu\Score\ScoreScreen.c,Fork name kept; used by Menu::Score::UpdateTopMenu.,med,source:238.c:1439;fork name kept
+G01492,state,Menu::Score::queueEnemyModelReadZudId,Native\Game\src\Menu\Score\Encyclopedia.c,Fork name kept; used by Menu::Score::QueueEnemyModelRead.,med,source:592C.c:179;fork name kept
+G01493,state,Menu::Loot::hudWasHidden,Native\Game\src\Menu\Loot\LootScreen.c,Saves whether the battle HUD was hidden so leaving the loot menu restores it.,high,source:MENU/MENUB.PRG/260.c:111;source:MENU/MENUB.PRG/260.c:133
+G01494,state,Menu::Loot::disassemblyYesNoChoice,Native\Game\src\Menu\Loot\LootScreen.c,"Selected answer of the yes/no prompt (0 yes, 1 no); in Menu::Loot::UpdateDisassembly.",med,source:MENU/MENUB.PRG/260.c:357
+G01495,state,Menu::Loot::stackConsolidationYesNoChoice,Native\Game\src\Menu\Loot\LootScreen.c,"Selected answer of the yes/no prompt (0 yes, 1 no); in Menu::Loot::UpdateStackConsolidation.",med,source:MENU/MENUB.PRG/260.c:601
+G01496,state,Menu::Loot::leaveConfirmationYesNoChoice,Native\Game\src\Menu\Loot\LootScreen.c,"Selected answer of the yes/no prompt (0 yes, 1 no); in Menu::Loot::UpdateLeaveConfirmation.",med,source:MENU/MENUB.PRG/260.c:1442
+G01497,state,Menu::Loot::previewedLoot,Native\Game\src\Menu\Loot\LootScreen.c,Holds the highlighted loot entry plus one whose capacity effect is previewed (-128 for none).,med,source:MENU/MENUB.PRG/260.c:1940;source:MENU/MENUB.PRG/260.c:1037
+G01498,drop,Menu::Loot::updateLayoutPadding,Native\Game\src\Menu\Loot\LootScreen.c,"Pads the original data layout; only ever cleared, never read.",high,replaced-by:nothing;layout padding;source:MENU/MENUB.PRG/260.c:1953;source:MENU/MENUB.PRG/260.c:1982
+G01499,drop,Menu::Loot::disassemblyLayoutPadding,Native\Game\src\Menu\Loot\LootScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENUB.PRG/260.c:252
+G01500,drop,Menu::Loot::leaveConfirmationLayoutPadding,Native\Game\src\Menu\Loot\LootScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENUB.PRG/260.c:1383
+G01501,drop,Menu::Loot::updateLayoutPadding,Native\Game\src\Menu\Loot\LootScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENUB.PRG/260.c:1954
+G01502,state,Menu::Loot::controlsEnabled,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::RenderBagCapacities, Menu::Loot::Update, Menu::Loot::UpdateLootSelection.",med,source:MENU/MENUB.PRG/260.c:1088;fork name kept
+G01503,state,Menu::Loot::gradientStateIndex,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::RenderLootRows.,med,source:MENU/MENUB.PRG/260.c:1207;fork name kept
+G01504,state,Menu::Loot::inventory,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::BuildStagedInventory, Menu::Loot::CountContainedCategory, Menu::Loot::RefreshClaimableRows and 15 more.",med,source:MENU/MENUB.PRG/260.c:290;fork name kept
+G01505,state,Menu::Loot::inventoryBackup,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::ShowLootDescription, Menu::Loot::Update, Menu::Loot::UpdateStackConsolidation.",med,source:MENU/MENUB.PRG/260.c:480;fork name kept
+G01506,state,Menu::Loot::inventoryCapacityFlyinTimer,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::Update.,med,source:MENU/MENUB.PRG/260.c:1989;fork name kept
+G01507,state,Menu::Loot::itemCategoryHeaders,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::RenderBagCapacities.,med,source:MENU/MENUB.PRG/260.c:1064;fork name kept
+G01508,state,Menu::Loot::lootClaimed,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::Update, Menu::Loot::UpdateLeaveConfirmation, Menu::Loot::UpdateLootSelection.",med,source:MENU/MENUB.PRG/260.c:1399;fork name kept
+G01509,state,Menu::Loot::lootLeftEdge,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::Update, Menu::Loot::UpdateDisassembly, Menu::Loot::UpdateLootSelection and 1 more.",med,source:MENU/MENUB.PRG/260.c:278;fork name kept
+G01510,state,Menu::Loot::lootList,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::AppendLootRow, Menu::Loot::RefreshClaimableRows, Menu::Loot::RenderBagCapacities and 7 more.",med,source:MENU/MENUB.PRG/260.c:260;fork name kept
+G01511,state,Menu::Loot::lootListCount,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::AppendLootRow, Menu::Loot::RefreshClaimableRows, Menu::Loot::RenderBagCapacities and 6 more.",med,source:MENU/MENUB.PRG/260.c:263;fork name kept
+G01512,state,Menu::Loot::lootListOffset,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::RefreshClaimableRows, Menu::Loot::RenderBagCapacities, Menu::Loot::RenderLootRows and 4 more.",med,source:MENU/MENUB.PRG/260.c:267;fork name kept
+G01513,state,Menu::Loot::lootListWorkingCopy,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::Update, Menu::Loot::UpdateDisassembly, Menu::Loot::UpdateStackConsolidation.",med,source:MENU/MENUB.PRG/260.c:260;fork name kept
+G01514,state,Menu::Loot::selectedLoot,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::RefreshClaimableRows, Menu::Loot::UpdateDisassembly, Menu::Loot::UpdateLootSelection and 1 more.",med,source:MENU/MENUB.PRG/260.c:266;fork name kept
+G01515,state,Menu::Loot::showInventory,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::Update, Menu::Loot::UpdateInventoryTransition.",med,source:MENU/MENUB.PRG/260.c:73;fork name kept
+G01516,state,Menu::Loot::showLoot,Native\Game\src\Menu\Loot\LootScreen.c,"Fork name kept; used by Menu::Loot::Update, Menu::Loot::UpdateDisassembly, Menu::Loot::UpdateInventoryTransition and 1 more.",med,source:MENU/MENUB.PRG/260.c:74;fork name kept
+G01517,state,Menu::Loot::stackConsolidationAmountToAdd,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateStackConsolidation.,med,source:MENU/MENUB.PRG/260.c:496;fork name kept
+G01518,state,Menu::Loot::organizationMenuAvailableAction,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateOrganizationMenu.,med,source:MENU/MENUB.PRG/260.c:1527;fork name kept
+G01519,state,Menu::Loot::organizationMenuCursorAnimState,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateOrganizationMenu.,med,source:MENU/MENUB.PRG/260.c:1604;fork name kept
+G01520,state,Menu::Loot::leaveConfirmationCursorAnimStep,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateLeaveConfirmation.,med,source:MENU/MENUB.PRG/260.c:1474;fork name kept
+G01521,state,Menu::Loot::stackConsolidationCursorMemory,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateStackConsolidation.,med,source:MENU/MENUB.PRG/260.c:633;fork name kept
+G01522,state,Menu::Loot::disassemblyCursorMemory,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateDisassembly.,med,source:MENU/MENUB.PRG/260.c:382;fork name kept
+G01523,state,Menu::Loot::lootSelectionCursorMemory,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateLootSelection.,med,source:MENU/MENUB.PRG/260.c:1808;fork name kept
+G01524,state,Menu::Loot::disassembleItemCategory,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateDisassembly.,med,source:MENU/MENUB.PRG/260.c:265;fork name kept
+G01525,state,Menu::Loot::organizationMenuItemCategory,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateOrganizationMenu.,med,source:MENU/MENUB.PRG/260.c:1524;fork name kept
+G01526,state,Menu::Loot::stackConsolidationItemId,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateStackConsolidation.,med,source:MENU/MENUB.PRG/260.c:484;fork name kept
+G01527,state,Menu::Loot::leaveConfirmationItemName,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateLeaveConfirmation.,med,source:MENU/MENUB.PRG/260.c:1407;fork name kept
+G01528,state,Menu::Loot::stackConsolidationLootCount,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateStackConsolidation.,med,source:MENU/MENUB.PRG/260.c:483;fork name kept
+G01529,state,Menu::Loot::disassemblyLootCount,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateDisassembly.,med,source:MENU/MENUB.PRG/260.c:263;fork name kept
+G01530,state,Menu::Loot::organizationMenuSelectedRow,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateOrganizationMenu.,med,source:MENU/MENUB.PRG/260.c:1526;fork name kept
+G01531,state,Menu::Loot::stackConsolidationState,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateStackConsolidation.,med,source:MENU/MENUB.PRG/260.c:488;fork name kept
+G01532,state,Menu::Loot::disassemblyState,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateDisassembly.,med,source:MENU/MENUB.PRG/260.c:234;fork name kept
+G01533,state,Menu::Loot::leaveConfirmationState,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateLeaveConfirmation.,med,source:MENU/MENUB.PRG/260.c:1392;fork name kept
+G01534,state,Menu::Loot::organizationMenuState,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateOrganizationMenu.,med,source:MENU/MENUB.PRG/260.c:1525;fork name kept
+G01535,state,Menu::Loot::lootSelectionState,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateLootSelection.,med,source:MENU/MENUB.PRG/260.c:1624;fork name kept
+G01536,state,Menu::Loot::inventoryTransitionState,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateInventoryTransition.,med,source:MENU/MENUB.PRG/260.c:63;fork name kept
+G01537,state,Menu::Loot::disassemblyTargetItemIndex,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateDisassembly.,med,source:MENU/MENUB.PRG/260.c:264;fork name kept
+G01538,state,Menu::Loot::stackConsolidationTotalCount,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateStackConsolidation.,med,source:MENU/MENUB.PRG/260.c:507;fork name kept
+G01539,state,Menu::Loot::lootSelectionUpdateLootDelay,Native\Game\src\Menu\Loot\LootScreen.c,Fork name kept; used by Menu::Loot::UpdateLootSelection.,med,source:MENU/MENUB.PRG/260.c:1745;fork name kept
+G01540,state,Menu::Setup::assemblyCursorAnimation,Native\Game\src\Menu\Setup\Assembly.c,Animation phase of the menu cursor; in Menu::Setup::UpdateAssembly.,med,source:168.c:1458
+G01541,state,Menu::Setup::assemblyOkBlinkPhase,Native\Game\src\Menu\Setup\Assembly.c,Blink phase of the OK marker (advanced by 16); in Menu::Setup::UpdateAssembly.,med,source:168.c:1291
+G01542,state,Menu::Setup::gemAttachmentCursorAnimation,Native\Game\src\Menu\Setup\Assembly.c,Animation phase of the menu cursor; in Menu::Setup::UpdateGemAttachment.,med,source:168.c:1909
+G01543,state,Menu::Setup::gemAttachmentOkBlinkPhase,Native\Game\src\Menu\Setup\Assembly.c,Blink phase of the OK marker (advanced by 16); in Menu::Setup::UpdateGemAttachment.,med,source:168.c:1836
+G01544,state,Menu::Setup::bladeCombinationCursorAnimation,Native\Game\src\Menu\Setup\Combination.c,Animation phase of the menu cursor; in Menu::Setup::UpdateBladeCombination.,med,source:168.c:3177
+G01545,state,Menu::Setup::shieldCombinationCursorAnimation,Native\Game\src\Menu\Setup\Combination.c,Animation phase of the menu cursor; in Menu::Setup::UpdateShieldCombination.,med,source:168.c:3803
+G01546,state,Menu::Setup::armorCombinationCursorAnimation,Native\Game\src\Menu\Setup\Combination.c,Animation phase of the menu cursor; in Menu::Setup::UpdateArmorCombination.,med,source:168.c:4327
+G01547,state,Menu::Setup::assemblyGripSelectedRow,Native\Game\src\Menu\Setup\Assembly.c,"Selected row plus one (0 none, -1 cancelled); in Menu::Setup::SelectAssemblyGrip.",med,source:168.c:1016
+G01548,state,Menu::Setup::gemSelectedRow,Native\Game\src\Menu\Setup\Assembly.c,"Selected row plus one (0 none, -1 cancelled); in Menu::Setup::SelectGem.",med,source:168.c:1125
+G01549,state,Menu::Setup::gemAttachmentAppearStep,Native\Game\src\Menu\Setup\Assembly.c,"Appearance step, counted up to 5; in Menu::Setup::UpdateGemAttachment.",med,source:168.c:1814
+G01550,state,Menu::Setup::selectedGemSlot,Native\Game\src\Menu\Setup\Assembly.c,Holds the selected gem slot row; equal to the slot count when OK is selected.,high,source:168.c:1847;source:168.c:1884
+G01551,state,Menu::Setup::stagedGems,Native\Game\src\Menu\Setup\Assembly.c,Holds the gems being arranged before they are attached.,med,source:168.c:1805;source:168.c:1859
+G01552,state,Menu::Setup::disassemblyAppearStep,Native\Game\src\Menu\Setup\SetupScreen.c,"Appearance step, counted up to 5; in Menu::Setup::UpdateDisassembly.",med,source:168.c:2214
+G01553,state,Menu::Setup::weaponRenameAppearStep,Native\Game\src\Menu\Setup\SetupScreen.c,"Appearance step, counted up to 5; in Menu::Setup::UpdateWeaponRename.",med,source:168.c:2458
+G01554,state,Menu::Setup::combinationBladeSlot,Native\Game\src\Menu\Setup\Combination.c,Identifies the blade slot (1 or 2) being chosen for a combination.,high,source:168.c:2816;source:168.c:2822
+G01555,state,Menu::Setup::bladeCombinationRow,Native\Game\src\Menu\Setup\Combination.c,"Holds the selected row of the blade combination screen (1-2 slots, 3 confirm).",med,source:168.c:3073;source:168.c:3071
+G01556,state,Menu::Setup::bladeCombinationOkBlinkPhase,Native\Game\src\Menu\Setup\Combination.c,Blink phase of the OK marker (advanced by 16); in Menu::Setup::UpdateBladeCombination.,med,source:168.c:3032
+G01557,state,Menu::Setup::combinationShieldSelectedRow,Native\Game\src\Menu\Setup\Combination.c,"Selected row plus one (0 none, -1 cancelled); in Menu::Setup::SelectCombinationShield.",med,source:168.c:3519
+G01558,state,Menu::Setup::combinationShieldSlot,Native\Game\src\Menu\Setup\Combination.c,Identifies the shield slot (1 or 2) being chosen for a combination.,high,source:168.c:3438;source:168.c:3445
+G01559,state,Menu::Setup::shieldCombinationRow,Native\Game\src\Menu\Setup\Combination.c,"Holds the selected row of the shield combination screen (1-2 slots, 3 confirm).",med,source:168.c:3695;source:168.c:3693
+G01560,state,Menu::Setup::shieldCombinationOkBlinkPhase,Native\Game\src\Menu\Setup\Combination.c,Blink phase of the OK marker (advanced by 16); in Menu::Setup::UpdateShieldCombination.,med,source:168.c:3656
+G01561,state,Menu::Setup::combinationArmorSelectedRow,Native\Game\src\Menu\Setup\Combination.c,"Selected row plus one (0 none, -1 cancelled); in Menu::Setup::SelectCombinationArmor.",med,source:168.c:4102
+G01562,state,Menu::Setup::combinationArmorStep,Native\Game\src\Menu\Setup\Combination.c,Step of this function's state machine; in Menu::Setup::SelectCombinationArmor.,med,source:168.c:4046
+G01563,state,Menu::Setup::combinationArmorSlot,Native\Game\src\Menu\Setup\Combination.c,Identifies the armor slot (1 or 2) being chosen for a combination.,high,source:168.c:4035;source:168.c:4041
+G01564,state,Menu::Setup::armorCombinationRow,Native\Game\src\Menu\Setup\Combination.c,"Holds the selected row of the armor combination screen (1-2 slots, 3 confirm).",med,source:168.c:4245;source:168.c:4244
+G01565,state,Menu::Setup::armorCombinationOkBlinkPhase,Native\Game\src\Menu\Setup\Combination.c,Blink phase of the OK marker (advanced by 16); in Menu::Setup::UpdateArmorCombination.,med,source:168.c:4218
+G01566,state,Menu::Setup::firstEntry,Native\Game\src\Menu\Setup\SetupScreen.c,Is set on first entry; afterwards the setup menu reopens at the remembered row.,high,source:168.c:4561;source:168.c:4609
+G01567,drop,Menu::Setup::gemAttachmentLayoutPadding,Native\Game\src\Menu\Setup\Assembly.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:1677
+G01568,drop,Menu::Setup::disassemblyCategoryLayoutPadding,Native\Game\src\Menu\Setup\SetupScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2288
+G01569,drop,Menu::Setup::layoutPadding3,Native\Game\src\Menu\Setup\Combination.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2290
+G01570,drop,Menu::Setup::disassemblyCategoryLayoutPadding,Native\Game\src\Menu\Setup\SetupScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2290
+G01571,drop,Menu::Setup::layoutPadding5,Native\Game\src\Menu\Setup\Combination.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:3939
+G01572,drop,Menu::Setup::layoutPadding6,Native\Game\src\Menu\Setup\Assembly.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:48
+G01573,drop,Menu::Setup::assemblyBladeLayoutPadding,Native\Game\src\Menu\Setup\Assembly.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:808
+G01574,drop,Menu::Setup::assemblyGripLayoutPadding,Native\Game\src\Menu\Setup\Assembly.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:929
+G01575,drop,Menu::Setup::assemblyLayoutPadding,Native\Game\src\Menu\Setup\Assembly.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:1177
+G01576,drop,Menu::Setup::gemCategoryMenuLayoutPadding,Native\Game\src\Menu\Setup\Assembly.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2020
+G01577,drop,Menu::Setup::bladeCombinationLayoutPadding,Native\Game\src\Menu\Setup\Combination.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2946
+G01578,drop,Menu::Setup::shieldCombinationLayoutPadding,Native\Game\src\Menu\Setup\Combination.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:3569
+G01579,drop,Menu::Setup::threeChoicePromptLayoutPadding,Native\Game\src\Menu\Setup\SetupScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:231
+G01580,drop,Menu::Setup::loadCombinationRecipesLayoutPadding,Native\Game\src\Menu\Setup\Combination.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2665
+G01581,drop,Menu::Setup::weaponRenameLayoutPadding,Native\Game\src\Menu\Setup\SetupScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2379
+G01582,drop,Menu::Setup::repairLayoutPadding,Native\Game\src\Menu\Setup\SetupScreen.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:168.c:2513
+G01583,catalog,Menu::Setup::combineClassOrAffinityValuesAffinityFactorLookup,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::CombineClassOrAffinityValues.,med,source:168.c:4838;fork name kept
+G01584,state,Menu::Setup::armorBuf,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::PreviewArmorCombination, Menu::Setup::UpdateArmorCombination.",med,source:168.c:3963;fork name kept
+G01585,catalog,Menu::Setup::availableItems,Native\Game\src\Menu\Setup\Assembly.c,"Fork name kept; used by Menu::Setup::SelectAssemblyBlade, Menu::Setup::SelectAssemblyGrip, Menu::Setup::SelectCombinationArmor and 6 more.",med,source:168.c:848;fork name kept
+G01586,state,Menu::Setup::bladeBuf,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::PreviewBladeCombination, Menu::Setup::UpdateBladeCombination.",med,source:168.c:2753;fork name kept
+G01587,state,Menu::Setup::bladeCombinationInitData,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::BuildCombinedBlade.,med,source:168.c:4955;fork name kept
+G01588,catalog,Menu::Setup::combineClassOrAffinityValuesClassFactorLookup,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::CombineClassOrAffinityValues.,med,source:168.c:4836;fork name kept
+G01589,state,Menu::Setup::combinationInitData,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::BuildCombinedArmor.,med,source:168.c:5068;fork name kept
+G01590,state,Menu::Setup::combinationResults,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::BuildCombinedArmor, Menu::Setup::BuildCombinedBlade, Menu::Setup::BuildCombinedShield.",med,source:168.c:4953;fork name kept
+G01591,state,Menu::Setup::combiningArmorIds,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::PreviewArmorCombination, Menu::Setup::SelectCombinationArmor, Menu::Setup::UpdateArmorCombination.",med,source:168.c:3953;fork name kept
+G01592,state,Menu::Setup::combiningBladeIds,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::PreviewBladeCombination, Menu::Setup::SelectCombinationBlade, Menu::Setup::UpdateBladeCombination.",med,source:168.c:2743;fork name kept
+G01593,state,Menu::Setup::combiningItem,Native\Game\src\Menu\Setup\Assembly.c,"Fork name kept; used by Menu::Setup::AssembleWeapon, Menu::Setup::CancelAssembly, Menu::Setup::RestoreGemsAndLeaveSelection and 5 more.",med,source:168.c:350;fork name kept
+G01594,state,Menu::Setup::currentWorkshop,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::SelectCombinationArmor, Menu::Setup::SelectCombinationBlade, Menu::Setup::SelectCombinationShield and 1 more.",med,source:168.c:2861;fork name kept
+G01595,state,Menu::Setup::assemblyCursorPositions,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateAssembly.,med,source:168.c:1452;fork name kept
+G01596,state,Menu::Setup::combineClassOrAffinityValuesDifferentMaterialStatFactors,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::CombineClassOrAffinityValues.,med,source:168.c:4845;fork name kept
+G01597,state,Menu::Setup::combinePhysicalTypeValuesDifferentMaterialTypeFactors,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::CombinePhysicalTypeValues.,med,source:168.c:4904;fork name kept
+G01598,state,Menu::Setup::itemCount,Native\Game\src\Menu\Setup\SetupScreen.c,"Fork name kept; used by Menu::Setup::BuildItemList, Menu::Setup::UpdateItemList.",med,source:168.c:457;fork name kept
+G01599,state,Menu::Setup::itemsList,Native\Game\src\Menu\Setup\SetupScreen.c,"Fork name kept; used by Menu::Setup::BuildItemList, Menu::Setup::GetSelectedItemRow, Menu::Setup::UpdateItemList.",med,source:168.c:468;fork name kept
+G01600,state,Menu::Setup::itemsListSelection,Native\Game\src\Menu\Setup\SetupScreen.c,"Fork name kept; used by Menu::Setup::BuildItemList, Menu::Setup::GetSelectedItemRow, Menu::Setup::SelectAssemblyBlade and 6 more.",med,source:168.c:459;fork name kept
+G01601,state,Menu::Setup::itemsListState,Native\Game\src\Menu\Setup\SetupScreen.c,"Fork name kept; used by Menu::Setup::BuildItemList, Menu::Setup::SelectAssemblyBlade, Menu::Setup::SelectAssemblyGrip and 5 more.",med,source:168.c:460;fork name kept
+G01602,state,Menu::Setup::itemsListWindow,Native\Game\src\Menu\Setup\SetupScreen.c,"Fork name kept; used by Menu::Setup::BuildItemList, Menu::Setup::SelectAssemblyBlade, Menu::Setup::SelectAssemblyGrip and 5 more.",med,source:168.c:458;fork name kept
+G01603,state,Menu::Setup::itemsToCombine,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::PreviewShieldCombination, Menu::Setup::SelectCombinationShield, Menu::Setup::UpdateShieldCombination.",med,source:168.c:3358;fork name kept
+G01604,state,Menu::Setup::materialResults,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::BuildCombinedArmor, Menu::Setup::BuildCombinedBlade, Menu::Setup::BuildCombinedShield.",med,source:168.c:4954;fork name kept
+G01605,state,Menu::Setup::rowInfoUnused,Native\Game\src\Menu\Setup\SetupScreen.c,"Fork name kept; used by Menu::Setup::BuildItemList, Menu::Setup::UpdateItemList.",med,source:168.c:504;fork name kept
+G01606,state,Menu::Setup::combineClassOrAffinityValuesSameMaterialStatFactors,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::CombineClassOrAffinityValues.,med,source:168.c:4842;fork name kept
+G01607,state,Menu::Setup::combinePhysicalTypeValuesSameMaterialTypeFactors,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::CombinePhysicalTypeValues.,med,source:168.c:4902;fork name kept
+G01608,state,Menu::Setup::shieldBuf,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::PreviewShieldCombination, Menu::Setup::UpdateShieldCombination.",med,source:168.c:3369;fork name kept
+G01609,state,Menu::Setup::shieldCombinationInitData,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::BuildCombinedShield.,med,source:168.c:5019;fork name kept
+G01610,state,Menu::Setup::slotSelectionHistory,Native\Game\src\Menu\Setup\Assembly.c,"Fork name kept; used by Menu::Setup::PopSlotSelection, Menu::Setup::RecordSlotSelection.",med,source:168.c:64;fork name kept
+G01611,state,Menu::Setup::loadCombinationRecipesSydCdQueueSlot,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::LoadCombinationRecipes.,med,source:168.c:2674;fork name kept
+G01612,state,Menu::Setup::sydData,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::LoadCombinationRecipes, Menu::Setup::PreviewArmorCombination, Menu::Setup::PreviewBladeCombination and 2 more.",med,source:168.c:2671;fork name kept
+G01613,state,Menu::Setup::loadCombinationRecipesSydFileLoading,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::LoadCombinationRecipes.,med,source:168.c:2676;fork name kept
+G01614,state,Menu::Setup::loadCombinationRecipesSydLbas,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::LoadCombinationRecipes.,med,source:168.c:2672;fork name kept
+G01615,state,Menu::Setup::loadCombinationRecipesSydSizes,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::LoadCombinationRecipes.,med,source:168.c:2671;fork name kept
+G01616,state,Menu::Setup::isGripCompatibleValidGripFlags,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::IsGripCompatible.,med,source:168.c:410;fork name kept
+G01617,state,Menu::Setup::workshopMaterials,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::SelectCombinationArmor, Menu::Setup::SelectCombinationBlade, Menu::Setup::SelectCombinationShield.",med,source:168.c:2861;fork name kept
+G01618,state,Menu::Setup::gemAttachmentAttachedGems,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateGemAttachment.,med,source:168.c:1792;fork name kept
+G01619,state,Menu::Setup::assemblyBladeBladeToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyBlade.,med,source:168.c:819;fork name kept
+G01620,state,Menu::Setup::assemblyGripBladeToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyGrip.,med,source:168.c:942;fork name kept
+G01621,state,Menu::Setup::assemblyBladeToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateAssembly.,med,source:168.c:1197;fork name kept
+G01622,state,Menu::Setup::threeChoicePromptCancelCombinePos,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateThreeChoicePrompt.,med,source:168.c:241;fork name kept
+G01623,state,Menu::Setup::combineMenus,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::UpdateCombinationCategory.,med,source:168.c:4457;fork name kept
+G01624,state,Menu::Setup::itemListCursorAnimState,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateItemList.,med,source:168.c:720;fork name kept
+G01625,state,Menu::Setup::threeChoicePromptCursorState,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateThreeChoicePrompt.,med,source:168.c:290;fork name kept
+G01626,state,Menu::Setup::confirmationPromptCursorState,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateConfirmationPrompt.,med,source:168.c:202;fork name kept
+G01627,state,Menu::Setup::combinationCategoryForceNoCursorMemory,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::UpdateCombinationCategory.,med,source:168.c:4469;fork name kept
+G01628,state,Menu::Setup::disassemblyCategoryForceNoCursorMemory,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateDisassemblyCategory.,med,source:168.c:2299;fork name kept
+G01629,state,Menu::Setup::assemblyGemInfo,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateAssembly.,med,source:168.c:1199;fork name kept
+G01630,state,Menu::Setup::gemAttachmentGemSlots,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateGemAttachment.,med,source:168.c:1725;fork name kept
+G01631,state,Menu::Setup::gemToAttach,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectGem.,med,source:168.c:1062;fork name kept
+G01632,state,Menu::Setup::assemblyBladeGripToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyBlade.,med,source:168.c:820;fork name kept
+G01633,state,Menu::Setup::assemblyGripGripToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyGrip.,med,source:168.c:941;fork name kept
+G01634,state,Menu::Setup::assemblyGripToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateAssembly.,med,source:168.c:1198;fork name kept
+G01635,state,Menu::Setup::gemAttachmentIsShield,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateGemAttachment.,med,source:168.c:1696;fork name kept
+G01636,state,Menu::Setup::disassemblyIsShield,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateDisassembly.,med,source:168.c:2120;fork name kept
+G01637,state,Menu::Setup::gemCategoryMenuNoForceCursorMemory,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateGemCategoryMenu.,med,source:168.c:2027;fork name kept
+G01638,state,Menu::Setup::repairReturnedFromPrompt,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateRepair.,med,source:168.c:2539;fork name kept
+G01639,state,Menu::Setup::assemblySelectedOption,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateAssembly.,med,source:168.c:1200;fork name kept
+G01640,state,Menu::Setup::threeChoicePromptSelectedOption,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateThreeChoicePrompt.,med,source:168.c:242;fork name kept
+G01641,state,Menu::Setup::confirmationPromptSelectedOption,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateConfirmationPrompt.,med,source:168.c:168;fork name kept
+G01642,state,Menu::Setup::assemblyBladeSelectedRow,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyBlade.,med,source:168.c:893;fork name kept
+G01643,state,Menu::Setup::gemAttachmentSelectedRow,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateGemAttachment.,med,source:168.c:1755;fork name kept
+G01644,state,Menu::Setup::disassemblySelectedRow,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateDisassembly.,med,source:168.c:2176;fork name kept
+G01645,state,Menu::Setup::weaponRenameSelectedRow,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateWeaponRename.,med,source:168.c:2423;fork name kept
+G01646,state,Menu::Setup::combinationBladeSelectedRow,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::SelectCombinationBlade.,med,source:168.c:2895;fork name kept
+G01647,state,Menu::Setup::assemblyBladeState,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyBlade.,med,source:168.c:822;fork name kept
+G01648,state,Menu::Setup::assemblyGripState,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyGrip.,med,source:168.c:944;fork name kept
+G01649,state,Menu::Setup::assemblyState,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateAssembly.,med,source:168.c:1201;fork name kept
+G01650,state,Menu::Setup::gemState,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectGem.,med,source:168.c:1064;fork name kept
+G01651,state,Menu::Setup::gemAttachmentState,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateGemAttachment.,med,source:168.c:1697;fork name kept
+G01652,state,Menu::Setup::gemCategoryMenuState,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateGemCategoryMenu.,med,source:168.c:2029;fork name kept

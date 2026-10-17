@@ -1,0 +1,263 @@
+id,disposition,final_name,final_location,purpose,confidence,notes
+G01092,state,Menu::Inventory::dispatchEquipmentMenuEquipMenuHandlers,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::DispatchEquipmentMenu.,med,source:16C.c:1030;fork name kept
+G01093,state,Menu::Inventory::equipMenuRowTypes,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateEquipmentMenu.,med,source:16C.c:1144;fork name kept
+G01094,state,Menu::Inventory::sortMenuEquipmentSortStats,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateSortMenu.,med,source:items1.h:1094;fork name kept
+G01095,state,Menu::Inventory::accessoryMenuEquippedAccessory,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateAccessoryMenu.,med,source:16C.c:368;fork name kept
+G01096,state,Menu::Inventory::gripDetailsGemSlotCountBuf,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateGripDetails.,med,source:items1.h:341;fork name kept
+G01097,state,Menu::Inventory::sortMenuGripSortStats,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateSortMenu.,med,source:items1.h:1093;fork name kept
+G01098,state,Menu::Inventory::shieldDetailsInitRow,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateShieldDetails.,med,source:items1.h:387;fork name kept
+G01099,state,Menu::Inventory::weaponDetailsInitRow,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateWeaponDetails.,med,source:items1.h:120;fork name kept
+G01100,state,Menu::Inventory::discardMenuItemCategory,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateDiscardMenu.,med,source:items1.h:1222;fork name kept
+G01101,state,Menu::Inventory::itemDetailsItemCategory,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateItemDetails.,med,source:items1.h:652;fork name kept
+G01102,state,Menu::Inventory::sortMenuItemCategory,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateSortMenu.,med,source:items1.h:1107;fork name kept
+G01103,state,Menu::Inventory::armorDetailsItemIndex,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateArmorDetails.,med,source:items1.h:479;fork name kept
+G01104,state,Menu::Inventory::bladeDetailsItemIndex,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateBladeDetails.,med,source:items1.h:210;fork name kept
+G01105,state,Menu::Inventory::gemDetailsItemIndex,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateGemDetails.,med,source:items1.h:569;fork name kept
+G01106,state,Menu::Inventory::gripDetailsItemIndex,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateGripDetails.,med,source:items1.h:292;fork name kept
+G01107,state,Menu::Inventory::shieldDetailsItemIndex,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateShieldDetails.,med,source:items1.h:382;fork name kept
+G01108,state,Menu::Inventory::weaponDetailsItemIndex,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateWeaponDetails.,med,source:items1.h:115;fork name kept
+G01109,state,Menu::Inventory::armorDetailsItemRow,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateArmorDetails.,med,source:items1.h:478;fork name kept
+G01110,state,Menu::Inventory::bladeDetailsItemRow,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateBladeDetails.,med,source:items1.h:209;fork name kept
+G01111,state,Menu::Inventory::gemDetailsItemRow,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateGemDetails.,med,source:items1.h:568;fork name kept
+G01112,state,Menu::Inventory::gripDetailsItemRow,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateGripDetails.,med,source:items1.h:291;fork name kept
+G01113,state,Menu::Inventory::shieldDetailsItemRow,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateShieldDetails.,med,source:items1.h:381;fork name kept
+G01114,state,Menu::Inventory::weaponDetailsItemRow,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateWeaponDetails.,med,source:items1.h:114;fork name kept
+G01115,state,Menu::Inventory::shieldMenuMaterial,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateShieldMenu.,med,source:16C.c:811;fork name kept
+G01116,state,Menu::Inventory::weaponMenuMaterial,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateWeaponMenu.,med,source:16C.c:637;fork name kept
+G01117,state,Menu::Inventory::discardMenuMaxAmount,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateDiscardMenu.,med,source:items1.h:1260;fork name kept
+G01118,state,Menu::Inventory::sortMenuMiscSortStats,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateSortMenu.,med,source:items1.h:1094;fork name kept
+G01119,state,Menu::Inventory::itemListNoItems,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateItemList.,med,source:items2.h:327;fork name kept
+G01120,state,Menu::Framework::ashleyProjectionDistance,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::RenderAshley.,med,source:_renderAshley.h:122;fork name kept
+G01121,state,Menu::Framework::ashleyRender,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::RenderAshley.,med,source:_renderAshley.h:89;fork name kept
+G01122,state,Menu::Inventory::accessoryMenuSelectedAccessory,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateAccessoryMenu.,med,source:16C.c:452;fork name kept
+G01123,state,Menu::Inventory::armorMenuSelectedArmor,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateArmorMenu.,med,source:16C.c:977;fork name kept
+G01124,state,Menu::Inventory::discardMenuSelectedItem,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateDiscardMenu.,med,source:items1.h:1223;fork name kept
+G01125,state,Menu::Inventory::equipmentMenuSelectedRow,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateEquipmentMenu.,med,source:16C.c:1157;fork name kept
+G01126,state,Menu::Inventory::itemListSelectedRow,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateItemList.,med,source:items2.h:396;fork name kept
+G01127,state,Menu::Inventory::shieldMenuSelectedShield,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateShieldMenu.,med,source:16C.c:791;fork name kept
+G01128,state,Menu::Inventory::weaponMenuSelectedWeapon,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateWeaponMenu.,med,source:16C.c:616;fork name kept
+G01129,state,Menu::Inventory::sortMenuShieldSortStats,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateSortMenu.,med,source:items1.h:1093;fork name kept
+G01130,state,Menu::Framework::ashleySkipFrame,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::RenderAshley.,med,source:_renderAshley.h:84;fork name kept
+G01131,state,Menu::Inventory::sortMenuSortStatSizes,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateSortMenu.,med,source:items1.h:1118;fork name kept
+G01132,state,Menu::Inventory::sortMenuSortStats,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateSortMenu.,med,source:items1.h:1116;fork name kept
+G01133,state,Menu::Inventory::equipListStep,Native\Game\src\Menu\Inventory\Inventory.c,"Steps the equipment list: rows 1-5 are created one per frame, then 16 waits for the menu and 17 takes input.",high,source:16C.c:48;source:16C.c:122;source:16C.c:166
+G01134,state,Menu::Inventory::accessoryMenuState,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateAccessoryMenu.,med,source:16C.c:345;fork name kept
+G01135,state,Menu::Inventory::armorMenuState,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateArmorMenu.,med,source:16C.c:858;fork name kept
+G01136,state,Menu::Inventory::equipmentMenuState,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateEquipmentMenu.,med,source:16C.c:1056;fork name kept
+G01137,state,Menu::Inventory::shieldMenuState,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateShieldMenu.,med,source:16C.c:685;fork name kept
+G01138,state,Menu::Inventory::weaponMenuState,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateWeaponMenu.,med,source:16C.c:505;fork name kept
+G01139,state,Menu::Inventory::bladeDetailsState,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateBladeDetails.,med,source:items1.h:197;fork name kept
+G01140,state,Menu::Inventory::discardMenuState,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateDiscardMenu.,med,source:items1.h:1189;fork name kept
+G01141,state,Menu::Inventory::gemDetailsState,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateGemDetails.,med,source:items1.h:556;fork name kept
+G01142,state,Menu::Inventory::gripDetailsState,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateGripDetails.,med,source:items1.h:277;fork name kept
+G01143,state,Menu::Inventory::shieldDetailsState,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateShieldDetails.,med,source:items1.h:367;fork name kept
+G01144,state,Menu::Inventory::sortMenuState,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateSortMenu.,med,source:items1.h:1079;fork name kept
+G01145,state,Menu::Inventory::weaponDetailsState,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateWeaponDetails.,med,source:items1.h:100;fork name kept
+G01146,state,Menu::Inventory::itemListState,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateItemList.,med,source:items2.h:203;fork name kept
+G01147,state,Menu::Inventory::armorDetailsStatus,Native\Game\src\Menu\Inventory\ItemDetails.c,Fork name kept; used by Menu::Inventory::UpdateArmorDetails.,med,source:items1.h:484;fork name kept
+G01148,state,Menu::Framework::ashleyViewMatrixBackup,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::RenderAshley.,med,source:_renderAshley.h:126;fork name kept
+G01149,state,Menu::Inventory::sortMenuWeaponSortStats,Native\Game\src\Menu\Inventory\ItemList.c,Fork name kept; used by Menu::Inventory::UpdateSortMenu.,med,source:items1.h:1092;fork name kept
+G01150,state,Menu::Inventory::shieldMenuWepId,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateShieldMenu.,med,source:16C.c:810;fork name kept
+G01151,state,Menu::Inventory::weaponMenuWepId,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateWeaponMenu.,med,source:16C.c:636;fork name kept
+G01152,constexpr,Menu::Status::kLimbCursorPositions,Native\Game\src\Menu\Status\ActorStatus.c,Gives the cursor position of each status view element.,high,source:120.c:2545
+G01153,constexpr,Menu::Status::kLimbNavigation,Native\Game\src\Menu\Status\ActorStatus.c,Gives the element reached from each status view element when Up is pressed.,med,source:120.c:2495
+G01154,state,Menu::Status::limbCursorAnimation,Native\Game\src\Menu\Status\ActorStatus.c,Holds the animation phase of the status view cursor.,high,source:120.c:2545
+G01155,state,Menu::Status::savedProjectionDistance,Native\Game\src\Menu\Status\ActorStatus.c,Saves the projection distance while the status view uses its own.,high,source:120.c:2338;source:120.c:2782
+G01156,state,Menu::Status::savedViewMatrix,Native\Game\src\Menu\Status\ActorStatus.c,Saves the view matrix while the status view shows the actor model.,high,source:120.c:2344;source:120.c:2784
+G01157,state,Menu::Status::savedCamera,Native\Game\src\Menu\Status\ActorStatus.c,Saves the camera while the status view shows the actor model.,high,source:120.c:2345;source:120.c:2785
+G01158,drop,Menu::Status::layoutPadding1,Native\Game\src\Menu\Status\ActorStatus.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:120.c:967
+G01159,drop,Menu::Status::equipmentListLayoutPadding,Native\Game\src\Menu\Status\EquipmentDetails.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:120.c:1888
+G01160,drop,Menu::Status::navigateStatusEffectsLayoutPadding,Native\Game\src\Menu\Status\ActorStatus.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:120.c:967
+G01161,drop,Menu::Status::limbPanelLayoutPadding,Native\Game\src\Menu\Status\ActorStatus.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:120.c:1150
+G01162,drop,Menu::Status::updateLayoutPadding,Native\Game\src\Menu\Status\ActorStatus.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:120.c:2295
+G01163,state,Menu::Status::updateAnimationIndex,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::Update.,med,source:120.c:2311;fork name kept
+G01164,state,Menu::Status::animationStep,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::AnimateActorSwitch, Menu::Status::DrawFrame, Menu::Status::Update and 2 more.",med,source:120.c:616;fork name kept
+G01165,state,Menu::Status::basicStatsAnimDelay,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::BeginVitalsTransition, Menu::Status::DrawVitals.",med,source:120.c:532;fork name kept
+G01166,state,Menu::Status::basicStatsAnimState,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::DrawVitals, Menu::Status::Update, Menu::Status::UpdateEquipmentDetails.",med,source:120.c:752;fork name kept
+G01167,state,Menu::Status::equipmentDetailsCursorAnimState,Native\Game\src\Menu\Status\EquipmentDetails.c,Fork name kept; used by Menu::Status::UpdateEquipmentDetails.,med,source:120.c:1728;fork name kept
+G01168,state,Menu::Status::delayScreenUpdate,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::AnimateActorSwitch, Menu::Status::DrawFrame.",med,source:120.c:631;fork name kept
+G01169,state,Menu::Status::drawBackgroundFirst,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::AnimateActorSwitch, Menu::Status::DrawBackground, Menu::Status::Update and 1 more.",med,source:120.c:617;fork name kept
+G01170,state,Menu::Status::equipmentDetailRowToRender,Native\Game\src\Menu\Status\EquipmentDetails.c,Fork name kept; used by Menu::Status::UpdateEquipmentDetails.,med,source:120.c:1518;fork name kept
+G01171,state,Menu::Status::equipmentDetailSelectedElement,Native\Game\src\Menu\Status\EquipmentDetails.c,Fork name kept; used by Menu::Status::UpdateEquipmentDetails.,med,source:120.c:1517;fork name kept
+G01172,state,Menu::Status::equipmentDetailState,Native\Game\src\Menu\Status\EquipmentDetails.c,Fork name kept; used by Menu::Status::UpdateEquipmentDetails.,med,source:120.c:1519;fork name kept
+G01173,state,Menu::Status::equipmentScreenState,Native\Game\src\Menu\Status\EquipmentDetails.c,Fork name kept; used by Menu::Status::UpdateEquipmentList.,med,source:120.c:1911;fork name kept
+G01174,state,Menu::Status::fadeScreen,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::AnimateActorSwitch, Menu::Status::DrawModelSlideFade, Menu::Status::Update and 1 more.",med,source:120.c:627;fork name kept
+G01175,state,Menu::Status::initializedActor,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::BeginVitalsTransition, Menu::Status::Update.",med,source:120.c:533;fork name kept
+G01176,state,Menu::Status::limbStatuses,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::UpdateLimbPanel.,med,source:120.c:1210;fork name kept
+G01177,state,Menu::Status::previousActor,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::DrawVitals, Menu::Status::Update, Menu::Status::UpdateEquipmentList.",med,source:120.c:761;fork name kept
+G01178,state,Menu::Status::renderBasicStatsState,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::BeginVitalsTransition, Menu::Status::DrawVitals, Menu::Status::Update and 1 more.",med,source:120.c:531;fork name kept
+G01179,state,Menu::Status::selectedActor,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::AnimateActorSwitch, Menu::Status::DrawVitals, Menu::Status::EquipmentRowCount and 6 more.",med,source:120.c:594;fork name kept
+G01180,state,Menu::Status::selectedElement,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::NavigateStatusEffects, Menu::Status::PopulateSelectedLimbDefense, Menu::Status::ShowSelectedLimbCondition and 2 more.",med,source:120.c:994;fork name kept
+G01181,state,Menu::Status::equipmentDetailsSelectedEquipmentRow,Native\Game\src\Menu\Status\EquipmentDetails.c,Fork name kept; used by Menu::Status::UpdateEquipmentDetails.,med,source:120.c:1510;fork name kept
+G01182,state,Menu::Status::selectedStatRow,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::Update.,med,source:120.c:2453;fork name kept
+G01183,state,Menu::Status::statusStrings,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::BeginDetailTransition, Menu::Status::NavigateStatusEffects, Menu::Status::ShowSelectedLimbCondition and 3 more.",med,source:120.c:1098;fork name kept
+G01184,state,Menu::Status::equipmentListTimer,Native\Game\src\Menu\Status\EquipmentDetails.c,Fork name kept; used by Menu::Status::UpdateEquipmentList.,med,source:120.c:1970;fork name kept
+G01185,state,Menu::Status::xPos,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::DrawFrame, Menu::Status::NavigateStatusEffects, Menu::Status::Update.",med,source:120.c:1038;fork name kept
+G01186,state,Menu::Status::yPos,Native\Game\src\Menu\Status\ActorStatus.c,"Fork name kept; used by Menu::Status::DrawFrame, Menu::Status::NavigateStatusEffects, Menu::Status::Update.",med,source:120.c:1039;fork name kept
+G01187,catalog,Menu::Status::navigateStatusEffectsActiveStatusModifiers,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::NavigateStatusEffects.,med,source:120.c:986;fork name kept
+G01188,state,Menu::Status::updateAnimWait,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::Update.,med,source:120.c:2337;fork name kept
+G01189,state,Menu::Status::navigateStatusEffectsAnimationState,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::NavigateStatusEffects.,med,source:120.c:1102;fork name kept
+G01190,state,Menu::Status::limbPanelLimbAnimSteps,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::UpdateLimbPanel.,med,source:120.c:1183;fork name kept
+G01191,state,Menu::Status::updateScreenEnabled,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::Update.,med,source:120.c:2310;fork name kept
+G01192,state,Menu::Status::navigateStatusEffectsSelectedStatusModifier,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::NavigateStatusEffects.,med,source:120.c:991;fork name kept
+G01193,state,Menu::Status::limbPanelState,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::UpdateLimbPanel.,med,source:120.c:1174;fork name kept
+G01194,state,Menu::Status::animateActorSwitchState,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::AnimateActorSwitch.,med,source:120.c:581;fork name kept
+G01195,state,Menu::Status::navigateStatusEffectsStatusModifersCurrentTarget,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::NavigateStatusEffects.,med,source:120.c:981;fork name kept
+G01196,state,Menu::Status::navigateStatusEffectsStatusModifierCount,Native\Game\src\Menu\Status\ActorStatus.c,Fork name kept; used by Menu::Status::NavigateStatusEffects.,med,source:120.c:982;fork name kept
+G01197,state,Menu::Status::limbPanelActor,Native\Game\src\Menu\Status\ActorStatus.c,Identifies the actor whose limbs the limb panel shows.,high,source:120.c:1180;source:120.c:1165
+G01198,drop,Menu::Map::unusedGlobal1,Native\Game\src\Menu\Map.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:4D8.c:408
+G01199,constexpr,Menu::Map::kDoorMarkerUpperRects,Native\Game\src\Menu\Map.c,Gives the texture rectangle of the upper door marker part for each door state.,med,source:4D8.c:2190
+G01200,constexpr,Menu::Map::kDoorMarkerLowerRects,Native\Game\src\Menu\Map.c,Gives the texture rectangle of the lower door marker part for each door state.,med,source:4D8.c:2206
+G01201,state,Menu::Map::menuResult,Native\Game\src\Menu\Map.c,Holds the map menu manager's result; 2 returns to menu 6.,med,source:4D8.c:309;source:4D8.c:355
+G01202,drop,Menu::Map::layoutPadding1,Native\Game\src\Menu\Map.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:4D8.c:432
+G01203,drop,Menu::Map::layoutPadding2,Native\Game\src\Menu\Map.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:4D8.c:441
+G01204,drop,Menu::Map::screenLayoutPadding,Native\Game\src\Menu\Map.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:4D8.c:248
+G01205,state,Menu::Map::armFileBuff,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::UpdateMapMenu.,med,source:4D8.c:818;fork name kept
+G01206,constexpr,Menu::Map::kAshleyIconBrightness,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::DrawRoom.,med,source:4D8.c:1463;fork name kept
+G01207,state,Menu::Map::backgroundBrightness,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::LoadSceneMap, Menu::Map::UpdateMapMenu.",med,source:4D8.c:480;fork name kept
+G01208,state,Menu::Map::cameraAngles,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::ApplyCamera, Menu::Map::DrawCompass, Menu::Map::DrawControls and 2 more.",med,source:4D8.c:463;fork name kept
+G01209,state,Menu::Map::cameraDistance,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::ApplyCamera, Menu::Map::LoadSceneMap, Menu::Map::UpdateMapMenu.",med,source:4D8.c:485;fork name kept
+G01210,state,Menu::Map::cameraPos,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::ApplyCamera, Menu::Map::LoadSceneMap.",med,source:4D8.c:464;fork name kept
+G01211,state,Menu::Map::centerPoint,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::AnimateCentering, Menu::Map::CenterOnRoom, Menu::Map::SetRoomCenterTarget.",med,source:4D8.c:1557;fork name kept
+G01212,catalog,Menu::Map::compassBounds,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::ComputeCompassCorners, Menu::Map::DrawCompass.",med,source:4D8.c:1067;fork name kept
+G01213,state,Menu::Map::connectingMaps,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::DrawConnectingAreaLabel.,med,source:4D8.c:2432;fork name kept
+G01214,state,Menu::Map::currentMapRow,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::ConfigureAreaList, Menu::Map::UpdateScreen.",med,source:4D8.c:135;fork name kept
+G01215,state,Menu::Map::currentRoomIndex,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawRoom, Menu::Map::LoadSceneMap, Menu::Map::SelectAdjacentVisitedRoom and 1 more.",med,source:4D8.c:467;fork name kept
+G01216,state,Menu::Map::currentScene,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawControls, Menu::Map::DrawFrame, Menu::Map::LoadSceneMap and 2 more.",med,source:4D8.c:470;fork name kept
+G01217,state,Menu::Map::currentSceneRow,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::LoadSceneMap, Menu::Map::UpdateAreaSelection, Menu::Map::UpdateMapMenu.",med,source:4D8.c:478;fork name kept
+G01218,state,Menu::Map::doors,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::DrawDoorLabel.,med,source:4D8.c:2249;fork name kept
+G01219,state,Menu::Map::geomOffsetX,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawVisitedRooms, Menu::Map::LoadSceneMap, Menu::Map::UpdateMapMenu.",med,source:4D8.c:482;fork name kept
+G01220,state,Menu::Map::geomOffsetY,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawVisitedRooms, Menu::Map::LoadSceneMap, Menu::Map::UpdateMapMenu.",med,source:4D8.c:483;fork name kept
+G01221,state,Menu::Map::hideUi,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::LoadSceneMap, Menu::Map::UpdateMapMenu.",med,source:4D8.c:461;fork name kept
+G01222,catalog,Menu::Map::iconRects,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::DrawFeatureMarker.,med,source:4D8.c:2167;fork name kept
+G01223,state,Menu::Map::isCurrentScene,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawRoom, Menu::Map::InitialRoomIndex.",med,source:4D8.c:1400;fork name kept
+G01224,state,Menu::Map::isPaling,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawFrame, Menu::Map::LoadSceneMap, Menu::Map::UpdateMapMenu.",med,source:4D8.c:488;fork name kept
+G01225,state,Menu::Map::mapLabelCount,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawLabels, Menu::Map::DrawVisitedRooms, Menu::Map::QueueLabel.",med,source:4D8.c:1096;fork name kept
+G01226,state,Menu::Map::mapLabelY,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawConnectingAreaLabel, Menu::Map::DrawDoorLabel, Menu::Map::UpdateMapMenu.",med,source:4D8.c:540;fork name kept
+G01227,catalog,Menu::Map::mapLabels,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawLabels, Menu::Map::QueueLabel.",med,source:4D8.c:1074;fork name kept
+G01228,state,Menu::Map::mapNames,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::LoadSceneMap, Menu::Map::UpdateAreaSelection, Menu::Map::UpdateMapMenu.",med,source:4D8.c:513;fork name kept
+G01229,state,Menu::Map::menuCommandsState,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawControls, Menu::Map::DrawLabels, Menu::Map::LoadSceneMap and 1 more.",med,source:4D8.c:486;fork name kept
+G01230,state,Menu::Map::menuFramesCounter,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawPalingDistortion, Menu::Map::DrawRoom, Menu::Map::LoadSceneMap and 1 more.",med,source:4D8.c:481;fork name kept
+G01231,state,Menu::Map::menuState,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::LoadSceneMap, Menu::Map::UpdateMapMenu.",med,source:4D8.c:479;fork name kept
+G01232,state,Menu::Map::framePaling,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::DrawFrame.,med,source:4D8.c:933;fork name kept
+G01233,state,Menu::Map::quitState,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::LoadSceneMap, Menu::Map::UpdateMapMenu.",med,source:4D8.c:484;fork name kept
+G01234,state,Menu::Map::roomNamesTable,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::LoadSceneMap, Menu::Map::SelectAdjacentVisitedRoom, Menu::Map::UpdateMapMenu.",med,source:4D8.c:503;fork name kept
+G01235,constexpr,Menu::Map::kSceneArmFiles,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::LoadSceneMap, Menu::Map::UpdateMapMenu.",med,source:4D8.c:490;fork name kept
+G01236,state,Menu::Map::sceneCdQueueSlot,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::LoadSceneMap, Menu::Map::UpdateMapMenu.",med,source:4D8.c:491;fork name kept
+G01237,catalog,Menu::Map::sceneRowIdMap,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::UpdateAreaSelection, Menu::Map::UpdateMapMenu.",med,source:4D8.c:815;fork name kept
+G01238,state,Menu::Map::selectedMap,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::UpdateMapMenu.,med,source:4D8.c:796;fork name kept
+G01239,state,Menu::Map::triggerHideUi,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawControls, Menu::Map::DrawLabels, Menu::Map::LoadSceneMap and 1 more.",med,source:4D8.c:460;fork name kept
+G01240,state,Menu::Map::uiAnimationState,Native\Game\src\Menu\Map.c,"Fork name kept; used by Menu::Map::DrawControls, Menu::Map::LoadSceneMap, Menu::Map::UpdateMapMenu.",med,source:4D8.c:487;fork name kept
+G01241,state,Menu::Map::screenArmFileLoaded,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::UpdateScreen.,med,source:4D8.c:281;fork name kept
+G01242,state,Menu::Map::screenArmfileLoadDelay,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::UpdateScreen.,med,source:4D8.c:280;fork name kept
+G01243,state,Menu::Map::backgroundImage,Native\Game\src\Menu\Map.c,Holds the map background image (CLUT then 160x240 pixels) while it is uploaded.,high,source:4D8.c:217;source:4D8.c:226
+G01244,state,Menu::Map::screenMenuBgBackRects,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::UpdateScreen.,med,source:4D8.c:255;fork name kept
+G01245,state,Menu::Map::screenMenuBgBackup,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::UpdateScreen.,med,source:4D8.c:254;fork name kept
+G01246,state,Menu::Map::areaSelectionSelectedMap,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::UpdateAreaSelection.,med,source:4D8.c:994;fork name kept
+G01247,state,Menu::Map::loadBackgroundSlot,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::LoadBackground.,med,source:4D8.c:216;fork name kept
+G01248,state,Menu::Map::loadBackgroundState,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::LoadBackground.,med,source:4D8.c:219;fork name kept
+G01249,state,Menu::Map::areaSelectionState,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::UpdateAreaSelection.,med,source:4D8.c:981;fork name kept
+G01250,state,Menu::Map::controlsUiXOffset,Native\Game\src\Menu\Map.c,Fork name kept; used by Menu::Map::DrawControls.,med,source:4D8.c:1999;fork name kept
+G01252,drop,Menu::Files::layoutPadding1,Native\Game\src\Menu\Files.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:268
+G01253,drop,Menu::Files::layoutPadding2,Native\Game\src\Menu\Files.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:857
+G01254,drop,Menu::Files::layoutPadding3,Native\Game\src\Menu\Files.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:1182
+G01255,drop,Menu::Files::gameOverChoicesLayoutPadding,Native\Game\src\Menu\Files.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:3484
+G01256,drop,Menu::Files::loadGameOverAssetsStepLayoutPadding,Native\Game\src\Menu\Files.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:3401
+G01257,drop,Save::MemoryCard::initializeMenuResourcesStepLayoutPadding,Native\Save\src\MemoryCard\GameFiles.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:1090
+G01258,drop,Menu::Files::dataLoadMenuLayoutPadding,Native\Game\src\Menu\Files.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:3204
+G01259,drop,Save::MemoryCard::readSaveStepLayoutPadding,Native\Save\src\MemoryCard\GameFiles.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:880
+G01260,drop,Menu::Files::confirmationLayoutPadding,Native\Game\src\Menu\Files.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:2103
+G01261,drop,Menu::Files::formatPromptLayoutPadding,Native\Game\src\Menu\Files.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:2205
+G01262,drop,Menu::Files::containerConfirmationLayoutPadding,Native\Game\src\Menu\Files.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:3735
+G01263,drop,Save::MemoryCard::writeSaveStepLayoutPadding,Native\Save\src\MemoryCard\GameFiles.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:975
+G01264,drop,Menu::Files::dataSaveMenuLayoutPadding,Native\Game\src\Menu\Files.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:2692
+G01265,drop,Menu::Files::checkCardStepLayoutPadding,Native\Game\src\Menu\Files.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:MENU/MENU7.PRG/260.c:1643
+G01266,state,Menu::Files::backupMainSetting,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveFiles.,med,source:MENU/MENU7.PRG/260.c:2440;fork name kept
+G01267,state,Menu::Files::containerDataEmpty,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::UpdateDataSaveMenu, Menu::Files::UpdateSaveFiles.",med,source:MENU/MENU7.PRG/260.c:2439;fork name kept
+G01268,state,Menu::Files::containerItemCapacities,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::ContainerIndexSection, Menu::Files::CopySelectedContainerItems.",med,source:MENU/MENU7.PRG/260.c:3811;fork name kept
+G01269,state,Menu::Files::containerStrings,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::UpdateContainerConfirmation, Menu::Files::UpdateContainerSave.",med,source:MENU/MENU7.PRG/260.c:3742;fork name kept
+G01270,state,Menu::Files::cursorFileOpSaturation,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::DrawElement, Menu::Files::DrawFrame.",med,source:MENU/MENU7.PRG/260.c:1931;fork name kept
+G01271,state,Menu::Files::dataNotSaved,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::UpdateContainerSave, Menu::Files::UpdateDataSaveMenu, Menu::Files::UpdateSaveFiles.",med,source:MENU/MENU7.PRG/260.c:2426;fork name kept
+G01272,state,Menu::Files::gameOverDifficulty,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateGameOver.,med,source:MENU/MENU7.PRG/260.c:3629;fork name kept
+G01273,state,Menu::Files::hpMpSummaryDigitDivisors,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::DrawHpMpSummary.,med,source:MENU/MENU7.PRG/260.c:1333;fork name kept
+G01276,catalog,Menu::Files::fileMenuElements,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::AreAnimationsComplete, Menu::Files::ClearElement, Menu::Files::DrawFrame and 9 more.",med,source:MENU/MENU7.PRG/260.c:1455;fork name kept
+G01277,state,Menu::Files::fileMenuScreenFade,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::DrawFrame, Menu::Files::ResetElements, Menu::Files::UpdateDataLoadMenu.",med,source:MENU/MENU7.PRG/260.c:1453;fork name kept
+G01279,state,Menu::Files::fileProgressCounter,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::DrawElement, Menu::Files::ResetElements, Menu::Files::UpdateLoadFiles and 3 more.",med,source:MENU/MENU7.PRG/260.c:904;fork name kept
+G01286,state,Menu::Files::isSaving,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::DrawElement, Menu::Files::DrawTransferComplete, Menu::Files::DrawTransferProgress and 2 more.",med,source:MENU/MENU7.PRG/260.c:1362;fork name kept
+G01292,state,Menu::Files::memoryCardMessage,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::CheckCardStep, Menu::Files::DrawFrame, Menu::Files::FindCurrentDataSaveStep and 9 more.",med,source:MENU/MENU7.PRG/260.c:1449;fork name kept
+G01293,state,Menu::Files::menuElementStops,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::DrawFrame.,med,source:MENU/MENU7.PRG/260.c:1983;fork name kept
+G01294,catalog,Menu::Files::menuItemTextClut,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::LoadGameOverAssetsStep, Menu::Files::UpdateGameOverChoices.",med,source:MENU/MENU7.PRG/260.c:3419;fork name kept
+G01297,state,Menu::Files::playTime,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::DrawPlayTime.,med,source:MENU/MENU7.PRG/260.c:4176;fork name kept
+G01298,state,Menu::Files::primBuf,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::DrawElement, Menu::Files::DrawFrame, Menu::Files::DrawGlyph and 4 more.",med,source:MENU/MENU7.PRG/260.c:1191;fork name kept
+G01300,catalog,Menu::Files::summaryLabelSaveInfoUVClut,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::DrawSummaryLabel.,med,source:MENU/MENU7.PRG/260.c:1233;fork name kept
+G01301,catalog,Menu::Files::summaryLabelSaveInfoWh,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::DrawSummaryLabel.,med,source:MENU/MENU7.PRG/260.c:1233;fork name kept
+G01302,state,Menu::Files::selectCursorColor,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::DrawFrame, Menu::Files::ResetElements.",med,source:MENU/MENU7.PRG/260.c:1450;fork name kept
+G01303,state,Menu::Files::selectCursorXy,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::DrawFrame, Menu::Files::ResetElements, Menu::Files::UpdateConfirmation and 4 more.",med,source:MENU/MENU7.PRG/260.c:1451;fork name kept
+G01305,state,Menu::Files::textTable,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::CheckCardStep, Menu::Files::DrawElement, Menu::Files::FindCurrentDataSaveStep and 12 more.",med,source:MENU/MENU7.PRG/260.c:1101;fork name kept
+G01306,state,Menu::Files::textArrowState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::DrawText.,med,source:MENU/MENU7.PRG/260.c:1690;fork name kept
+G01307,state,Menu::Files::loadFilesBackupTime,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadFiles.,med,source:MENU/MENU7.PRG/260.c:3022;fork name kept
+G01308,state,Menu::Files::gameOverChoicesBlendFactor1,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateGameOverChoices.,med,source:MENU/MENU7.PRG/260.c:3493;fork name kept
+G01309,state,Menu::Files::gameOverChoicesBlendFactor2,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateGameOverChoices.,med,source:MENU/MENU7.PRG/260.c:3494;fork name kept
+G01310,state,Menu::Files::containerConfirmationCancelWithMenuButton,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateContainerConfirmation.,med,source:MENU/MENU7.PRG/260.c:3747;fork name kept
+G01311,state,Menu::Files::confirmationCancelled,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateConfirmation.,med,source:MENU/MENU7.PRG/260.c:2109;fork name kept
+G01312,catalog,Menu::Files::gameOverChoicesClut,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateGameOverChoices.,med,source:MENU/MENU7.PRG/260.c:3574;fork name kept
+G01313,catalog,Menu::Files::gameOverClutBuf,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateGameOver.,med,source:MENU/MENU7.PRG/260.c:3662;fork name kept
+G01314,state,Menu::Files::gameOverChoicesColor1,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateGameOverChoices.,med,source:MENU/MENU7.PRG/260.c:3490;fork name kept
+G01315,state,Menu::Files::gameOverChoicesColor2,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateGameOverChoices.,med,source:MENU/MENU7.PRG/260.c:3491;fork name kept
+G01316,state,Menu::Files::gameOverChoicesColor3,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateGameOverChoices.,med,source:MENU/MENU7.PRG/260.c:3492;fork name kept
+G01317,state,Menu::Files::elementBackgroundColorColors1,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::ElementBackgroundColor.,med,source:MENU/MENU7.PRG/260.c:1756;fork name kept
+G01318,state,Menu::Files::elementBackgroundColorColors2,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::ElementBackgroundColor.,med,source:MENU/MENU7.PRG/260.c:1757;fork name kept
+G01319,state,Menu::Files::loadFilesCompleteTimer,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadFiles.,med,source:MENU/MENU7.PRG/260.c:2914;fork name kept
+G01320,state,Menu::Files::overwritePromptConfirmed,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateOverwritePrompt.,med,source:MENU/MENU7.PRG/260.c:2179;fork name kept
+G01321,state,Menu::Files::containerConfirmationCursorAnimation,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateContainerConfirmation.,med,source:MENU/MENU7.PRG/260.c:3783;fork name kept
+G01325,state,Menu::Files::dataLoadMenuFadeout,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateDataLoadMenu.,med,source:MENU/MENU7.PRG/260.c:3210;fork name kept
+G01330,state,Menu::Files::loadFilesFileLoaded,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadFiles.,med,source:MENU/MENU7.PRG/260.c:2913;fork name kept
+G01331,state,Menu::Files::loadGameOverAssetsStepGameOverBin,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::LoadGameOverAssetsStep.,med,source:MENU/MENU7.PRG/260.c:3409;fork name kept
+G01332,catalog,Menu::Files::glyphWidths,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::DrawGlyph.,med,source:MENU/MENU7.PRG/260.c:1558;fork name kept
+G01334,state,Menu::Files::overwritePromptInitialized,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateOverwritePrompt.,med,source:MENU/MENU7.PRG/260.c:2170;fork name kept
+G01336,state,Menu::Files::loadFilesLeaveTimer,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadFiles.,med,source:MENU/MENU7.PRG/260.c:3001;fork name kept
+G01337,state,Menu::Files::saveFilesLeaveTimer,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveFiles.,med,source:MENU/MENU7.PRG/260.c:2321;fork name kept
+G01338,state,Menu::Files::checkCardStepMask,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::CheckCardStep.,med,source:MENU/MENU7.PRG/260.c:1649;fork name kept
+G01339,state,Menu::Files::loadFilesPage,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadFiles.,med,source:MENU/MENU7.PRG/260.c:2905;fork name kept
+G01340,state,Menu::Files::saveFilesPage,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveFiles.,med,source:MENU/MENU7.PRG/260.c:2312;fork name kept
+G01343,state,Menu::Files::formatPromptPort,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateFormatPrompt.,med,source:MENU/MENU7.PRG/260.c:2210;fork name kept
+G01345,state,Menu::Files::loadCardPort,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadCard.,med,source:MENU/MENU7.PRG/260.c:3082;fork name kept
+G01346,state,Menu::Files::saveCardPort,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveCard.,med,source:MENU/MENU7.PRG/260.c:2556;fork name kept
+G01347,state,Menu::Files::loadFilesPort,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadFiles.,med,source:MENU/MENU7.PRG/260.c:2903;fork name kept
+G01348,state,Menu::Files::saveFilesPort,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveFiles.,med,source:MENU/MENU7.PRG/260.c:2307;fork name kept
+G01349,state,Menu::Files::loadGameOverAssetsStepQueueSlot,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::LoadGameOverAssetsStep.,med,source:MENU/MENU7.PRG/260.c:3408;fork name kept
+G01351,state,Menu::Files::gameOverResetDelay,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateGameOver.,med,source:MENU/MENU7.PRG/260.c:3645;fork name kept
+G01352,state,Menu::Files::saveFilesSaveSuccessful,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveFiles.,med,source:MENU/MENU7.PRG/260.c:2320;fork name kept
+G01353,state,Menu::Files::dataLoadMenuSelectedFile,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateDataLoadMenu.,med,source:MENU/MENU7.PRG/260.c:3211;fork name kept
+G01354,state,Menu::Files::dataSaveMenuSelectedFile,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateDataSaveMenu.,med,source:MENU/MENU7.PRG/260.c:2700;fork name kept
+G01355,state,Menu::Files::gameOverChoicesSelectedOption,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateGameOverChoices.,med,source:MENU/MENU7.PRG/260.c:3495;fork name kept
+G01356,state,Menu::Files::containerConfirmationSelectedOption,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateContainerConfirmation.,med,source:MENU/MENU7.PRG/260.c:3746;fork name kept
+G01357,state,Menu::Files::saveFilesSettingsBackup,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveFiles.,med,source:MENU/MENU7.PRG/260.c:2436;fork name kept
+G01358,state,Menu::Files::gameOverSettingsBackup,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateGameOver.,med,source:MENU/MENU7.PRG/260.c:3628;fork name kept
+G01359,state,Menu::Files::loadFilesSlot,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadFiles.,med,source:MENU/MENU7.PRG/260.c:2904;fork name kept
+G01360,state,Menu::Files::saveFilesSlot,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveFiles.,med,source:MENU/MENU7.PRG/260.c:2308;fork name kept
+G01361,state,Menu::Files::findCurrentDataSaveStepState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::FindCurrentDataSaveStep.,med,source:MENU/MENU7.PRG/260.c:1583;fork name kept
+G01362,state,Menu::Files::loadGameOverAssetsStepState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::LoadGameOverAssetsStep.,med,source:MENU/MENU7.PRG/260.c:3411;fork name kept
+G01363,state,Menu::Files::dataLoadMenuState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateDataLoadMenu.,med,source:MENU/MENU7.PRG/260.c:3189;fork name kept
+G01366,state,Menu::Files::confirmationState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateConfirmation.,med,source:MENU/MENU7.PRG/260.c:2094;fork name kept
+G01367,state,Menu::Files::formatPromptState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateFormatPrompt.,med,source:MENU/MENU7.PRG/260.c:2201;fork name kept
+G01368,state,Menu::Files::overwritePromptState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateOverwritePrompt.,med,source:MENU/MENU7.PRG/260.c:2173;fork name kept
+G01369,state,Menu::Files::containerConfirmationState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateContainerConfirmation.,med,source:MENU/MENU7.PRG/260.c:3729;fork name kept
+G01371,state,Menu::Files::loadCardState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadCard.,med,source:MENU/MENU7.PRG/260.c:3065;fork name kept
+G01372,state,Menu::Files::saveCardState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveCard.,med,source:MENU/MENU7.PRG/260.c:2539;fork name kept
+G01373,state,Menu::Files::loadFilesState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadFiles.,med,source:MENU/MENU7.PRG/260.c:2880;fork name kept
+G01374,state,Menu::Files::saveFilesState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveFiles.,med,source:MENU/MENU7.PRG/260.c:2279;fork name kept
+G01375,state,Menu::Files::dataSaveMenuState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateDataSaveMenu.,med,source:MENU/MENU7.PRG/260.c:2675;fork name kept
+G01376,state,Menu::Files::findCurrentDataSaveStepSubState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::FindCurrentDataSaveStep.,med,source:MENU/MENU7.PRG/260.c:1584;fork name kept
+G01378,state,Menu::Rename::navIconPulseRequest,Native\Game\src\Menu\Rename.c,Is set by insert/delete so the next frame highlights and advances the L1/R1 icons.,med,source:21A0.c:34;source:21A0.c:239
+G01379,drop,Menu::Rename::unusedFrameCycle,Native\Game\src\Menu\Rename.c,Cycles 0-11 each rename frame but is never read.,high,source:21A0.c:279
+G01380,drop,Menu::Rename::unusedEditorFlag,Native\Game\src\Menu\Rename.c,Is cleared when the name editor starts and never read.,high,source:21A0.c:491
+G01381,drop,Menu::Rename::confirmationLayoutPadding,Native\Game\src\Menu\Rename.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:21A0.c:367
+G01382,drop,Menu::Rename::layoutPadding2,Native\Game\src\Menu\Rename.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:21A0.c:15
+G01383,drop,Menu::Rename::confirmationLayoutPadding,Native\Game\src\Menu\Rename.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:21A0.c:371
+G01384,drop,Menu::Options::layoutPadding1,Native\Game\src\Menu\Options.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:21A0.c:18
+G01385,drop,Menu::Options::layoutPadding2,Native\Game\src\Menu\Options.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:21A0.c:20
+G01386,state,Menu::Rename::animStep,Native\Game\src\Menu\Rename.c,"Fork name kept; used by Menu::Rename::Update, Menu::Rename::UpdateNameEditor.",med,source:21A0.c:730;fork name kept
+G01387,catalog,Menu::Rename::frameBackgroundHexCoords,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::DrawFrame.,med,source:21A0.c:302;fork name kept
+G01388,state,Menu::Rename::charTable,Native\Game\src\Menu\Rename.c,"Fork name kept; used by Menu::Rename::Update, Menu::Rename::UpdateNameEditor.",med,source:21A0.c:644;fork name kept
+G01389,state,Menu::Rename::nameEditorCharTableColumn,Native\Game\src\Menu\Rename.c,Fork name kept; used by Menu::Rename::UpdateNameEditor.,med,source:21A0.c:488;fork name kept

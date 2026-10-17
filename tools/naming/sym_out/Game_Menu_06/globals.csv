@@ -1,0 +1,200 @@
+id,disposition,final_name,final_location,purpose,confidence,notes
+G01653,state,Menu::Setup::armorCombinationState,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::UpdateArmorCombination.,med,source:168.c:4165;fork name kept
+G01654,state,Menu::Setup::bladeCombinationState,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::UpdateBladeCombination.,med,source:168.c:2967;fork name kept
+G01655,state,Menu::Setup::shieldCombinationState,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::UpdateShieldCombination.,med,source:168.c:3594;fork name kept
+G01656,state,Menu::Setup::combinationCategoryState,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::UpdateCombinationCategory.,med,source:168.c:4471;fork name kept
+G01657,state,Menu::Setup::threeChoicePromptState,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateThreeChoicePrompt.,med,source:168.c:243;fork name kept
+G01658,state,Menu::Setup::confirmationPromptState,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateConfirmationPrompt.,med,source:168.c:169;fork name kept
+G01659,state,Menu::Setup::disassemblyState,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateDisassembly.,med,source:168.c:2121;fork name kept
+G01660,state,Menu::Setup::disassemblyCategoryState,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateDisassemblyCategory.,med,source:168.c:2301;fork name kept
+G01661,state,Menu::Setup::weaponRenameState,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateWeaponRename.,med,source:168.c:2392;fork name kept
+G01662,state,Menu::Setup::repairState,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateRepair.,med,source:168.c:2521;fork name kept
+G01663,state,Menu::Setup::combinationBladeState,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::SelectCombinationBlade.,med,source:168.c:2818;fork name kept
+G01664,state,Menu::Setup::combinationShieldState,Native\Game\src\Menu\Setup\Combination.c,Fork name kept; used by Menu::Setup::SelectCombinationShield.,med,source:168.c:3441;fork name kept
+G01665,state,Menu::Setup::gemAttachmentTargetGems,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateGemAttachment.,med,source:168.c:1810;fork name kept
+G01666,state,Menu::Container::gemSlotCountText,Native\Game\src\Menu\Container\ItemView.c,Holds the grip gem slot count text; its digit is patched in place (a write to .rodata).,med,source:234.c:967;source:234.c:1021
+G01667,constexpr,Menu::Container::kItemDetailHandlers,Native\Game\src\Menu\Container\ItemView.c,Lists the detail view handler of each equipment category.,high,source:234.c:1237
+G01668,constexpr,Menu::Container::kWeaponSortStats,Native\Game\src\Menu\Container\Storage.c,Lists the sort stats offered for weapons and blades.,high,source:234.c:1658
+G01669,constexpr,Menu::Container::kGripSortStats,Native\Game\src\Menu\Container\Storage.c,Lists the sort stats offered for grips.,high,source:234.c:1615
+G01670,constexpr,Menu::Container::kShieldSortStats,Native\Game\src\Menu\Container\Storage.c,Lists the sort stats offered for shields.,high,source:234.c:1661
+G01671,constexpr,Menu::Container::kArmorSortStats,Native\Game\src\Menu\Container\Storage.c,Lists the sort stats offered for armor.,high,source:234.c:1616
+G01672,constexpr,Menu::Container::kGemSortStats,Native\Game\src\Menu\Container\Storage.c,Lists the sort stats offered for gems.,high,source:234.c:1616
+G01673,constexpr,Menu::Container::kMiscSortStats,Native\Game\src\Menu\Container\Storage.c,Lists the sort stats offered for miscellaneous items.,high,source:234.c:1664
+G01674,constexpr,Menu::Container::kSortStatCounts,Native\Game\src\Menu\Container\Storage.c,Gives the number of sort stats of each category.,high,source:234.c:1639
+G01675,constexpr,Menu::Container::kSortStatLists,Native\Game\src\Menu\Container\Storage.c,Points to the sort stat list of each category.,high,source:234.c:1637
+G01676,state,Menu::Container::discardMenuCursorAnimation,Native\Game\src\Menu\Container\Storage.c,Animation phase of the menu cursor; in Menu::Container::UpdateDiscardMenu.,med,source:234.c:1880
+G01677,constexpr,Menu::Container::kStorageNames,Native\Game\src\Menu\Container\ItemView.c,Names the two storages: GADGET BAG and CONTAINER.,high,source:234.c:1921
+G01678,constexpr,Menu::Container::kCategoryLabels,Native\Game\src\Menu\Container\ItemView.c,Labels the item categories in capacity lists.,high,source:234.c:1922
+G01679,state,Menu::Container::transferDirectionOkBlink,Native\Game\src\Menu\Container\ItemView.c,Advances by 16 each frame to pulse the OK text of the transfer direction prompt.,high,source:234.c:3097;source:234.c:3099
+G01680,state,Menu::Container::transferDirectionCursorAnimation,Native\Game\src\Menu\Container\ItemView.c,Animation phase of the menu cursor; in Menu::Container::UpdateTransferDirection.,med,source:234.c:3101
+G01681,state,Menu::Container::directionCursorResetPending,Native\Game\src\Menu\Container\ItemView.c,"When set, the next prompt forgets the remembered transfer direction; no decompiled code sets it.",med,source:234.c:3054
+G01682,state,Menu::Container::weaponDetailsStep,Native\Game\src\Menu\Container\ItemView.c,Step of this function's state machine; in Menu::Container::UpdateWeaponDetails.,med,source:234.c:854
+G01683,state,Menu::Container::weaponDetailsSlideStep,Native\Game\src\Menu\Container\ItemView.c,"Slide-in step, counted up to 10; in Menu::Container::UpdateWeaponDetails.",med,source:234.c:865
+G01684,state,Menu::Container::weaponDetailsItemSource,Native\Game\src\Menu\Container\ItemView.c,High byte of the argument: where the shown item comes from; in Menu::Container::UpdateWeaponDetails.,med,source:234.c:845
+G01685,drop,Menu::Container::unusedWeaponDetailsFlag,Native\Game\src\Menu\Container\ItemView.c,Is cleared when weapon details open and never read.,high,source:234.c:848
+G01686,state,Menu::Container::bladeDetailsStep,Native\Game\src\Menu\Container\ItemView.c,Step of this function's state machine; in Menu::Container::UpdateBladeDetails.,med,source:234.c:925
+G01687,state,Menu::Container::bladeDetailsDelay,Native\Game\src\Menu\Container\ItemView.c,Counts the 10 frames before blade details accept input.,high,source:234.c:920;source:234.c:937
+G01688,state,Menu::Container::bladeDetailsItemSource,Native\Game\src\Menu\Container\ItemView.c,High byte of the argument: where the shown item comes from; in Menu::Container::UpdateBladeDetails.,med,source:234.c:917
+G01689,state,Menu::Container::bladeDetailsItemIndex,Native\Game\src\Menu\Container\ItemView.c,Index of the shown item (argument minus one); in Menu::Container::UpdateBladeDetails.,med,source:234.c:918
+G01690,state,Menu::Container::gripDetailsStep,Native\Game\src\Menu\Container\ItemView.c,Step of this function's state machine; in Menu::Container::UpdateGripDetails.,med,source:234.c:989
+G01691,state,Menu::Container::gripDetailsSlideStep,Native\Game\src\Menu\Container\ItemView.c,"Slide-in step, counted up to 10; in Menu::Container::UpdateGripDetails.",med,source:234.c:999
+G01692,state,Menu::Container::gripDetailsItemSource,Native\Game\src\Menu\Container\ItemView.c,High byte of the argument: where the shown item comes from; in Menu::Container::UpdateGripDetails.,med,source:234.c:981
+G01693,state,Menu::Container::gripDetailsItemIndex,Native\Game\src\Menu\Container\ItemView.c,Index of the shown item (argument minus one); in Menu::Container::UpdateGripDetails.,med,source:234.c:982
+G01694,drop,Menu::Container::unusedGripDetailsFlag,Native\Game\src\Menu\Container\ItemView.c,Is cleared when grip details open and never read.,high,source:234.c:984
+G01695,state,Menu::Container::shieldDetailsStep,Native\Game\src\Menu\Container\ItemView.c,Step of this function's state machine; in Menu::Container::UpdateShieldDetails.,med,source:234.c:1060
+G01696,state,Menu::Container::shieldDetailsSlideStep,Native\Game\src\Menu\Container\ItemView.c,"Slide-in step, counted up to 10; in Menu::Container::UpdateShieldDetails.",med,source:234.c:1071
+G01697,state,Menu::Container::shieldDetailsItemSource,Native\Game\src\Menu\Container\ItemView.c,High byte of the argument: where the shown item comes from; in Menu::Container::UpdateShieldDetails.,med,source:234.c:1051
+G01698,state,Menu::Container::shieldDetailsItemIndex,Native\Game\src\Menu\Container\ItemView.c,Index of the shown item (argument minus one); in Menu::Container::UpdateShieldDetails.,med,source:234.c:1052
+G01699,drop,Menu::Container::unusedShieldDetailsFlag,Native\Game\src\Menu\Container\ItemView.c,Is cleared when shield details open and never read.,high,source:234.c:1054
+G01700,state,Menu::Container::armorDetailsStep,Native\Game\src\Menu\Container\ItemView.c,Step of this function's state machine; in Menu::Container::UpdateArmorDetails.,med,source:234.c:1131
+G01701,state,Menu::Container::armorDetailsDelay,Native\Game\src\Menu\Container\ItemView.c,Counts the 10 frames before armor details accept input.,high,source:234.c:1126;source:234.c:1148
+G01702,state,Menu::Container::armorDetailsItemSource,Native\Game\src\Menu\Container\ItemView.c,High byte of the argument: where the shown item comes from; in Menu::Container::UpdateArmorDetails.,med,source:234.c:1123
+G01703,state,Menu::Container::armorDetailsItemIndex,Native\Game\src\Menu\Container\ItemView.c,Index of the shown item (argument minus one); in Menu::Container::UpdateArmorDetails.,med,source:234.c:1124
+G01704,state,Menu::Container::gemDetailsStep,Native\Game\src\Menu\Container\ItemView.c,Step of this function's state machine; in Menu::Container::UpdateGemDetails.,med,source:234.c:1197
+G01705,state,Menu::Container::gemDetailsDelay,Native\Game\src\Menu\Container\ItemView.c,Counts the 10 frames before gem details accept input.,high,source:234.c:1192;source:234.c:1207
+G01706,state,Menu::Container::gemDetailsItemSource,Native\Game\src\Menu\Container\ItemView.c,High byte of the argument: where the shown item comes from; in Menu::Container::UpdateGemDetails.,med,source:234.c:1189
+G01707,state,Menu::Container::gemDetailsItemIndex,Native\Game\src\Menu\Container\ItemView.c,Index of the shown item (argument minus one); in Menu::Container::UpdateGemDetails.,med,source:234.c:1190
+G01708,state,Menu::Container::detailsCategory,Native\Game\src\Menu\Container\ItemView.c,Selects the detail view handler (equipment category) in use.,high,source:234.c:1247;source:234.c:1255
+G01709,state,Menu::Container::sortMenuStep,Native\Game\src\Menu\Container\Storage.c,Step of this function's state machine; in Menu::Container::UpdateSortMenu.,med,source:234.c:1634
+G01710,state,Menu::Container::sortCategory,Native\Game\src\Menu\Container\Storage.c,Selects the item category whose sort stats the sort menu offers.,high,source:234.c:1629;source:234.c:1637
+G01711,state,Menu::Container::transferConfirmationSelectedAction,Native\Game\src\Menu\Container\ItemView.c,Selected action plus one (0 none); in Menu::Container::UpdateTransferConfirmation.,med,source:234.c:2367
+G01712,state,Menu::Container::transferConfirmationStep,Native\Game\src\Menu\Container\ItemView.c,Steps the transfer confirmation prompt.,high,source:234.c:2352;source:234.c:2382
+G01713,state,Menu::Container::itemActionIds,Native\Game\src\Menu\Container\ItemView.c,Maps each item action menu row to its action.,high,source:234.c:2837;source:234.c:2866
+G01714,state,Menu::Container::itemListStep,Native\Game\src\Menu\Container\ItemView.c,Step of this function's state machine; in Menu::Container::UpdateItemList.,med,source:234.c:2451
+G01715,state,Menu::Container::categoryEmpty,Native\Game\src\Menu\Container\ItemView.c,Is set when the selected category has no items to list.,high,source:234.c:2467;source:234.c:2468
+G01716,state,Menu::Container::itemListFirstEntry,Native\Game\src\Menu\Container\ItemView.c,Is set on first entry; afterwards the item list reopens at the remembered row.,high,source:234.c:2427;source:234.c:2473
+G01717,state,Menu::Container::itemListSelectedRow,Native\Game\src\Menu\Container\ItemView.c,"Selected row plus one (0 none, -1 cancelled); in Menu::Container::UpdateItemList.",med,source:234.c:2515
+G01718,state,Menu::Container::transferDirectionStep,Native\Game\src\Menu\Container\ItemView.c,Step of this function's state machine; in Menu::Container::UpdateTransferDirection.,med,source:234.c:3065
+G01719,state,Menu::Container::screenResult,Native\Game\src\Menu\Container\ItemView.c,Holds the result of the transfer direction prompt or item list.,med,source:234.c:3180;source:234.c:3200
+G01720,state,Menu::Container::directionReopenDelay,Native\Game\src\Menu\Container\ItemView.c,Counts the 5 frames before the transfer direction prompt reopens.,high,source:234.c:3209;source:234.c:3173
+G01721,state,Menu::Container::capacityListSlideStep,Native\Game\src\Menu\Container\ItemView.c,Counts the 10 slide steps of the other storage's capacity list.,high,source:234.c:3316;source:234.c:3324
+G01722,state,Menu::Container::browsingGadgetBag,Native\Game\src\Menu\Container\ItemView.c,Is 1 while the gadget bag is browsed (the container is the destination) and 0 for the container.,med,source:234.c:2437;source:234.c:3266
+G01723,state,Menu::Container::categoryTitleVisible,Native\Game\src\Menu\Container\ItemView.c,Shows the category title row; it slides in while set and out while clear.,high,source:234.c:661;source:234.c:3236
+G01724,state,Menu::Container::categoryIconsVisible,Native\Game\src\Menu\Container\ItemView.c,Shows the category icons; they slide in while set and out while clear.,high,source:234.c:662;source:234.c:3275
+G01725,state,Menu::Container::controlsPanelMode,Native\Game\src\Menu\Container\ItemView.c,Shows the STATUS/CANCEL/END controls while nonzero; bit 2 dims END and slides the capacity list away.,med,source:234.c:663;source:234.c:3315
+G01726,state,Menu::Container::categoryTitleSlideStep,Native\Game\src\Menu\Container\ItemView.c,Counts the 10 slide steps of the category title row.,high,source:234.c:3237;source:234.c:3240
+G01727,state,Menu::Container::categoryIconsSlideStep,Native\Game\src\Menu\Container\ItemView.c,Counts the 4 slide steps of the category icons.,high,source:234.c:3276;source:234.c:3283
+G01728,state,Menu::Container::controlsPanelSlideStep,Native\Game\src\Menu\Container\ItemView.c,Counts the 10 slide steps of the STATUS/CANCEL/END controls panel.,high,source:234.c:3289;source:234.c:3286
+G01729,state,Menu::Container::detailsViewPhase,Native\Game\src\Menu\Container\ItemView.c,"Is 1 while item details are open, 2 while leaving them and 0 otherwise.",med,source:234.c:803;source:234.c:1248;source:234.c:3248
+G01730,state,Menu::Container::transferredMiscCount,Native\Game\src\Menu\Container\Storage.c,Counts the miscellaneous items the destination would hold after the staged transfer.,med,source:234.c:279;source:234.c:280
+G01731,state,Menu::Container::detailsClosedWithTriangle,Native\Game\src\Menu\Container\ItemView.c,"Is set when Triangle closed the item details, which leaves the item list.",med,source:234.c:804;source:234.c:1258
+G01732,state,Menu::Container::otherStorage,Native\Game\src\Menu\Container\ItemView.c,Points to the storage not being browsed: the transfer destination.,high,source:234.c:2440;source:234.c:2443
+G01733,drop,Menu::Container::transferDirectionLayoutPadding,Native\Game\src\Menu\Container\ItemView.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:234.c:3042
+G01734,drop,Menu::Container::transferDirectionLayoutPadding,Native\Game\src\Menu\Container\ItemView.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:234.c:3045
+G01735,drop,Menu::Container::discardMenuLayoutPadding,Native\Game\src\Menu\Container\Storage.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:234.c:1707
+G01736,drop,Menu::Container::transferConfirmationLayoutPadding,Native\Game\src\Menu\Container\ItemView.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:234.c:2336
+G01737,drop,Menu::Container::itemListLayoutPadding,Native\Game\src\Menu\Container\ItemView.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:234.c:2399
+G01738,state,Menu::Container::containerItemCapacities,Native\Game\src\Menu\Container\Storage.c,"Fork name kept; used by Menu::Container::AppendItemIndex, Menu::Container::BuildItemRows, Menu::Container::CategoryIndices and 9 more.",med,source:234.c:92;fork name kept
+G01739,state,Menu::Container::menuText,Native\Game\src\Menu\Container\ItemView.c,"Fork name kept; used by Menu::Container::UpdateItemList, Menu::Container::UpdateScreen, Menu::Container::UpdateTransferConfirmation and 1 more.",med,source:234.c:2357;fork name kept
+G01740,state,Menu::Container::weaponDetailsSelectedWeapon,Native\Game\src\Menu\Container\ItemView.c,Fork name kept; used by Menu::Container::UpdateWeaponDetails.,med,source:234.c:846;fork name kept
+G01741,state,Menu::Container::discardMenuCountTemplate,Native\Game\src\Menu\Container\Storage.c,Fork name kept; used by Menu::Container::UpdateDiscardMenu.,med,source:234.c:1756;fork name kept
+G01742,state,Menu::Container::discardCount,Native\Game\src\Menu\Container\Storage.c,Fork name kept; used by Menu::Container::UpdateDiscardMenu.,med,source:234.c:1770;fork name kept
+G01743,state,Menu::Container::discardStep,Native\Game\src\Menu\Container\Storage.c,Fork name kept; used by Menu::Container::UpdateDiscardMenu.,med,source:234.c:1769;fork name kept
+G01744,state,Menu::Container::discardSteps,Native\Game\src\Menu\Container\Storage.c,Fork name kept; used by Menu::Container::UpdateDiscardMenu.,med,source:234.c:1834;fork name kept
+G01745,state,Menu::Container::discardType,Native\Game\src\Menu\Container\Storage.c,Fork name kept; used by Menu::Container::UpdateDiscardMenu.,med,source:234.c:1721;fork name kept
+G01746,state,Menu::Container::discardMenuItemCategory,Native\Game\src\Menu\Container\Storage.c,Fork name kept; used by Menu::Container::UpdateDiscardMenu.,med,source:234.c:1722;fork name kept
+G01747,state,Menu::Container::discardMenuMaxAmount,Native\Game\src\Menu\Container\Storage.c,Fork name kept; used by Menu::Container::UpdateDiscardMenu.,med,source:234.c:1754;fork name kept
+G01748,state,Menu::Container::discardMenuSelectedItem,Native\Game\src\Menu\Container\Storage.c,Fork name kept; used by Menu::Container::UpdateDiscardMenu.,med,source:234.c:1723;fork name kept
+G01749,state,Menu::Container::discardMenuState,Native\Game\src\Menu\Container\Storage.c,Fork name kept; used by Menu::Container::UpdateDiscardMenu.,med,source:234.c:1682;fork name kept
+G01750,state,Menu::Container::containerData,Native\Game\src\Menu\Container\ItemView.c,"Fork name kept; used by Menu::Container::BuildItemRows, Menu::Container::CopyEquipmentStats, Menu::Container::CountShieldGems and 18 more.",med,source:234.c:675;fork name kept
+G01751,state,Menu::Manual::openDelay,Native\Game\src\Menu\Manual.c,Counts the 8 frames waited before the manual menu finishes opening.,high,source:494.c:154;source:494.c:163
+G01752,drop,Menu::Manual::layoutPadding1,Native\Game\src\Menu\Manual.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:494.c:140
+G01753,drop,Menu::Manual::screenLayoutPadding,Native\Game\src\Menu\Manual.c,Pads the original data layout.,high,replaced-by:nothing;layout padding;source:494.c:149
+G01754,constexpr,Menu::Manual::kColorStops0,Native\Game\src\Menu\Manual.c,Fork name kept; used by Menu::Manual::DrawPageBackground.,med,source:494.c:724;fork name kept
+G01755,constexpr,Menu::Manual::kColorStops1,Native\Game\src\Menu\Manual.c,Fork name kept; used by Menu::Manual::DrawPageBackground.,med,source:494.c:725;fork name kept
+G01756,state,Menu::Manual::helpAssets,Native\Game\src\Menu\Manual.c,"Fork name kept; used by Menu::Manual::InitHelpState, Menu::Manual::UpdateHelpPages.",med,source:494.c:229;fork name kept
+G01757,state,Menu::Manual::helpAssetsCdQueue,Native\Game\src\Menu\Manual.c,Fork name kept; used by Menu::Manual::UpdateHelpPages.,med,source:494.c:297;fork name kept
+G01758,constexpr,Menu::Manual::kHelpFileCdFiles,Native\Game\src\Menu\Manual.c,Fork name kept; used by Menu::Manual::UpdateHelpPages.,med,source:494.c:295;fork name kept
+G01759,state,Menu::Manual::helpPageLoadCounter,Native\Game\src\Menu\Manual.c,Fork name kept; used by Menu::Manual::UpdateHelpPages.,med,source:494.c:333;fork name kept
+G01760,state,Menu::Manual::helpText,Native\Game\src\Menu\Manual.c,"Fork name kept; used by Menu::Manual::CopyPageText, Menu::Manual::DrawDiagramLines, Menu::Manual::DrawPageContent and 3 more.",med,source:494.c:228;fork name kept
+G01761,state,Menu::Manual::helpTextCdQueue,Native\Game\src\Menu\Manual.c,Fork name kept; used by Menu::Manual::UpdateHelpPages.,med,source:494.c:300;fork name kept
+G01762,state,Menu::Manual::lineCount,Native\Game\src\Menu\Manual.c,"Fork name kept; used by Menu::Manual::InitHelpState, Menu::Manual::UpdateHelpPages.",med,source:494.c:227;fork name kept
+G01763,constexpr,Menu::Manual::kMenuBgChunkWidths,Native\Game\src\Menu\Manual.c,"Fork name kept; used by Menu::Manual::DrawLowerScrollFade, Menu::Manual::DrawUpperScrollFade.",med,source:494.c:751;fork name kept
+G01764,constexpr,Menu::Manual::kMenuBgTransparencies,Native\Game\src\Menu\Manual.c,"Fork name kept; used by Menu::Manual::DrawLowerScrollFade, Menu::Manual::DrawUpperScrollFade.",med,source:494.c:754;fork name kept
+G01765,state,Menu::Manual::menuText,Native\Game\src\Menu\Manual.c,Fork name kept; used by Menu::Manual::UpdateTopicMenu.,med,source:494.c:465;fork name kept
+G01766,state,Menu::Manual::pageArrowAnimState,Native\Game\src\Menu\Manual.c,"Fork name kept; used by Menu::Manual::DrawPageArrow, Menu::Manual::UpdateHelpPages.",med,source:494.c:414;fork name kept
+G01767,state,Menu::Manual::scrollPosition,Native\Game\src\Menu\Manual.c,"Fork name kept; used by Menu::Manual::CopyPageText, Menu::Manual::DrawDiagramLines, Menu::Manual::DrawIllustration and 2 more.",med,source:494.c:226;fork name kept
+G01768,state,Menu::Manual::selectedRow,Native\Game\src\Menu\Manual.c,Fork name kept; used by Menu::Manual::UpdateTopicMenu.,med,source:494.c:459;fork name kept
+G01769,state,Menu::Manual::showMenuState,Native\Game\src\Menu\Manual.c,"Fork name kept; used by Menu::Manual::InitHelpState, Menu::Manual::UpdateHelpPages.",med,source:494.c:225;fork name kept
+G01770,state,Menu::Manual::topMenuState,Native\Game\src\Menu\Manual.c,Fork name kept; used by Menu::Manual::UpdateTopicMenu.,med,source:494.c:458;fork name kept
+G01771,state,Menu::Manual::screenIsInit,Native\Game\src\Menu\Manual.c,Fork name kept; used by Menu::Manual::UpdateScreen.,med,source:494.c:155;fork name kept
+G01772,state,Menu::Manual::screenMenuResult,Native\Game\src\Menu\Manual.c,Fork name kept; used by Menu::Manual::UpdateScreen.,med,source:494.c:175;fork name kept
+G01773,constexpr,Menu::Results::kFramebufferEffectParams,Native\Game\src\Menu\Results\TimeAttack.c,Gives the framebuffer effect scales (entries 0-2) and offset used by the time attack intro.,med,source:3B8.c:1098;source:3B8.c:1063
+G01774,state,Menu::Results::buffReelIndex,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::DrawBonusReel, Menu::Results::InitializeGameClear, Menu::Results::UpdateGameClear.",med,source:3B8.c:192;fork name kept
+G01775,state,Menu::Results::buffReelSelection,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::DrawBonusReel, Menu::Results::InitializeCubePuzzleQuit, Menu::Results::InitializeCubePuzzleStart and 3 more.",med,source:3B8.c:185;fork name kept
+G01776,catalog,Menu::Results::buffReels,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::DrawBonusReel, Menu::Results::UpdateGameClear.",med,source:3B8.c:859;fork name kept
+G01777,state,Menu::Results::clearCount,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::CalculateScore, Menu::Results::InitializeGameClear.",med,source:3B8.c:207;fork name kept
+G01778,catalog,Menu::Results::clutBuf,Native\Game\src\Menu\Results\CubePuzzle.c,"Fork name kept; used by Menu::Results::InitializeCubePuzzleQuit, Menu::Results::InitializeCubePuzzleStart, Menu::Results::InitializeTimeAttackResults and 2 more.",med,source:3B8.c:297;fork name kept
+G01779,constexpr,Menu::Results::kDisFiles,Native\Game\src\Menu\Results\TimeAttack.c,"Fork name kept; used by Menu::Results::InitializeCubePuzzleQuit, Menu::Results::InitializeCubePuzzleStart, Menu::Results::InitializeGameClear and 2 more.",med,source:3B8.c:129;fork name kept
+G01780,catalog,Menu::Results::disMap,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::DrawAverageTimeHeading, Menu::Results::DrawBestTime, Menu::Results::DrawBonusReel and 23 more.",med,source:3B8.c:1162;fork name kept
+G01781,state,Menu::Results::elementAnimationState,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::DrawBonusReel, Menu::Results::InitializeCubePuzzleQuit, Menu::Results::InitializeCubePuzzleStart and 7 more.",med,source:3B8.c:184;fork name kept
+G01782,state,Menu::Results::initializeCubePuzzleQuitEscDisCdSLot,Native\Game\src\Menu\Results\CubePuzzle.c,Fork name kept; used by Menu::Results::InitializeCubePuzzleQuit.,med,source:3B8.c:2376;fork name kept
+G01783,state,Menu::Results::initializeCubePuzzleQuitEscDisData,Native\Game\src\Menu\Results\CubePuzzle.c,Fork name kept; used by Menu::Results::InitializeCubePuzzleQuit.,med,source:3B8.c:2375;fork name kept
+G01784,state,Menu::Results::incrementingMapCompletion,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::DrawCountingMapCompletion, Menu::Results::UpdateGameClear.",med,source:3B8.c:813;fork name kept
+G01785,state,Menu::Results::incrementingScore,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::DrawCountingScore, Menu::Results::UpdateGameClear.",med,source:3B8.c:812;fork name kept
+G01786,state,Menu::Results::initializeCubePuzzleStartIqDisCdSlot,Native\Game\src\Menu\Results\CubePuzzle.c,Fork name kept; used by Menu::Results::InitializeCubePuzzleStart.,med,source:3B8.c:2279;fork name kept
+G01787,state,Menu::Results::initializeCubePuzzleStartIqDisData,Native\Game\src\Menu\Results\CubePuzzle.c,Fork name kept; used by Menu::Results::InitializeCubePuzzleStart.,med,source:3B8.c:2278;fork name kept
+G01788,state,Menu::Results::mapCompletion,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::DrawCountingMapCompletion, Menu::Results::DrawMapCompletion, Menu::Results::InitializeGameClear and 1 more.",med,source:3B8.c:241;fork name kept
+G01789,state,Menu::Results::newTimeSlot,Native\Game\src\Menu\Results\TimeAttack.c,"Fork name kept; used by Menu::Results::DrawLeaderboard, Menu::Results::DrawLeaderboardEntry, Menu::Results::InitializeTimeAttackResults and 1 more.",med,source:3B8.c:359;fork name kept
+G01790,state,Menu::Results::onScreenMapCompletion,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::DrawCountingMapCompletion, Menu::Results::InitializeCubePuzzleQuit, Menu::Results::InitializeCubePuzzleStart and 3 more.",med,source:3B8.c:180;fork name kept
+G01791,state,Menu::Results::onScreenScore,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::DrawCountingScore, Menu::Results::InitializeCubePuzzleQuit, Menu::Results::InitializeCubePuzzleStart and 3 more.",med,source:3B8.c:181;fork name kept
+G01792,catalog,Menu::Results::cubePuzzleResultsPuzzleModeRankPoints,Native\Game\src\Menu\Results\CubePuzzle.c,Fork name kept; used by Menu::Results::UpdateCubePuzzleResults.,med,source:3B8.c:2547;fork name kept
+G01793,state,Menu::Results::puzzleParTime,Native\Game\src\Menu\Results\CubePuzzle.c,"Fork name kept; used by Menu::Results::DrawCubePuzzleParTime, Menu::Results::InitializeCubePuzzleStart, Menu::Results::UpdateCubePuzzleResults.",med,source:3B8.c:2315;fork name kept
+G01794,state,Menu::Results::puzzleRankCap,Native\Game\src\Menu\Results\CubePuzzle.c,"Fork name kept; used by Menu::Results::InitializeCubePuzzleStart, Menu::Results::UpdateCubePuzzleResults.",med,source:3B8.c:2316;fork name kept
+G01795,state,Menu::Results::rank,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::DetermineRiskbreakerRank, Menu::Results::DrawRiskbreakerRank.",med,source:3B8.c:1639;fork name kept
+G01796,catalog,Menu::Results::riskbreakerRanks,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DrawRiskbreakerRank.,med,source:3B8.c:1639;fork name kept
+G01797,state,Menu::Results::score,Native\Game\src\Menu\Results\Results.c,"Fork name kept; used by Menu::Results::CalculateScore, Menu::Results::DetermineRiskbreakerRank, Menu::Results::DrawCountingScore and 2 more.",med,source:3B8.c:815;fork name kept
+G01798,state,Menu::Results::screenState,Native\Game\src\Menu\Results\TimeAttack.c,"Fork name kept; used by Menu::Results::InitializeCubePuzzleQuit, Menu::Results::InitializeCubePuzzleStart, Menu::Results::InitializeGameClear and 8 more.",med,source:3B8.c:183;fork name kept
+G01799,state,Menu::Results::screenTimer,Native\Game\src\Menu\Results\TimeAttack.c,"Fork name kept; used by Menu::Results::InitializeCubePuzzleQuit, Menu::Results::InitializeCubePuzzleStart, Menu::Results::InitializeGameClear and 8 more.",med,source:3B8.c:182;fork name kept
+G01800,state,Menu::Results::gameClearStateTimer,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::UpdateGameClear.,med,source:3B8.c:797;fork name kept
+G01801,state,Menu::Results::timeTrialTime,Native\Game\src\Menu\Results\TimeAttack.c,"Fork name kept; used by Menu::Results::DrawCountingTimeAttackTime, Menu::Results::DrawTimeAttackRating, Menu::Results::DrawTimeAttackRatingWipe and 2 more.",med,source:3B8.c:309;fork name kept
+G01802,state,Menu::Results::initializeGameClearCdSlot,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::InitializeGameClear.,med,source:3B8.c:130;fork name kept
+G01803,state,Menu::Results::initializeTimeAttackResultsCdSlot,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::InitializeTimeAttackResults.,med,source:3B8.c:269;fork name kept
+G01804,state,Menu::Results::initializeTimeAttackStartCdSlot,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::InitializeTimeAttackStart.,med,source:3B8.c:382;fork name kept
+G01805,state,Menu::Results::congratulationsColors,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DrawCongratulations.,med,source:3B8.c:1345;fork name kept
+G01806,state,Menu::Results::cubePuzzleRankColors,Native\Game\src\Menu\Results\CubePuzzle.c,Fork name kept; used by Menu::Results::DrawCubePuzzleRank.,med,source:3B8.c:2725;fork name kept
+G01807,state,Menu::Results::evolveOrDieColors,Native\Game\src\Menu\Results\CubePuzzle.c,Fork name kept; used by Menu::Results::DrawEvolveOrDie.,med,source:3B8.c:2653;fork name kept
+G01808,state,Menu::Results::foodChainColors,Native\Game\src\Menu\Results\CubePuzzle.c,Fork name kept; used by Menu::Results::DrawFoodChain.,med,source:3B8.c:2677;fork name kept
+G01809,state,Menu::Results::countingMapCompletionColors,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DrawCountingMapCompletion.,med,source:3B8.c:1581;fork name kept
+G01810,state,Menu::Results::countingScoreColors,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DrawCountingScore.,med,source:3B8.c:1462;fork name kept
+G01811,state,Menu::Results::mapCompletionColors,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DrawMapCompletion.,med,source:3B8.c:1502;fork name kept
+G01812,state,Menu::Results::riskbreakerRankColors,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DrawRiskbreakerRank.,med,source:3B8.c:1637;fork name kept
+G01813,state,Menu::Results::riskbreakerRankHeadingColors,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DrawRiskbreakerRankHeading.,med,source:3B8.c:1611;fork name kept
+G01814,state,Menu::Results::scoreColors,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DrawScore.,med,source:3B8.c:1374;fork name kept
+G01815,state,Menu::Results::bonusReelColors,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DrawBonusReel.,med,source:3B8.c:2021;fork name kept
+G01816,state,Menu::Results::timeAttackHeadingColors,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::DrawTimeAttackHeading.,med,source:3B8.c:1160;fork name kept
+G01817,state,Menu::Results::timeAttackRatingWipeColors,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::DrawTimeAttackRatingWipe.,med,source:3B8.c:1740;fork name kept
+G01818,state,Menu::Results::timeAttackResultsHeadingColors,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::DrawTimeAttackResultsHeading.,med,source:3B8.c:1667;fork name kept
+G01819,state,Menu::Results::timeAttackStartColors,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::UpdateTimeAttackStart.,med,source:3B8.c:1062;fork name kept
+G01820,catalog,Menu::Results::timeAttackStartCountdownOffsets,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::UpdateTimeAttackStart.,med,source:3B8.c:1123;fork name kept
+G01821,catalog,Menu::Results::determineRiskbreakerRankRankScores,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DetermineRiskbreakerRank.,med,source:3B8.c:2793;fork name kept
+G01822,state,Menu::Results::initializeGameClearTimData,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::InitializeGameClear.,med,source:3B8.c:129;fork name kept
+G01823,state,Menu::Results::initializeTimeAttackResultsTimData,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::InitializeTimeAttackResults.,med,source:3B8.c:268;fork name kept
+G01824,state,Menu::Results::initializeTimeAttackStartTimData,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::InitializeTimeAttackStart.,med,source:3B8.c:381;fork name kept
+G01825,catalog,Menu::Results::determineRiskbreakerRankTitleThresholds,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DetermineRiskbreakerRank.,med,source:3B8.c:2792;fork name kept
+G01905,drop,Audio::Seq::unusedMaterialModifiers,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.c:7950
+G01934,state,Battle::puzzleTimer,Native\Game\src\Battle\Hud.c,Holds the puzzle timer value drawn by DrawPuzzleTimer (byte 3 set shows 59:59:99).,med,source:5BF94.c:4049;source:5BF94.c:3849
+G01946,state,Input::stickPosBuf,Native\Input\src\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8802;fork name kept
+G01952,state,Input::buttonRepeat,Native\Input\src\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8862;fork name kept
+G01962,state,Input::buttonsPressed,Native\Input\src\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8849;fork name kept
+G01965,state,Render::frameBuf,Native\Graphics\src\Display.c,Fork name kept; used by Render::UploadLoadingScreenBackBuffer.,med,source:main.c:8106;fork name kept
+G01968,state,Input::buttonsState,Native\Input\src\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8795;fork name kept
+G01980,drop,Audio::Seq::unusedScoredata,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:496
+G01985,state,Input::settings,Native\Input\src\Controller.c,"Fork name kept; used by Input::UpdateControllers, Input::UpdateVibrationPatterns.",med,source:main.c:8763;fork name kept
+G01986,drop,Audio::Seq::unusedArtsStatus,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:501
+G01989,drop,Audio::Seq::unusedInventory,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:504
+G01993,drop,Audio::Seq::unusedStateFlags,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:508
+G01994,drop,Audio::Seq::unusedInventoryIndices,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:509
+G02065,state,Menu::Files::frameBuf,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::DrawExitFade, Menu::Files::InitializeDisplay, Menu::Files::SwapBuffers and 2 more.",med,source:22C.c:3080;fork name kept
+G02096,state,Menu::Files::textArrowState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::DrawText.,med,source:22C.c:1535;fork name kept
+G02101,state,Menu::Files::elementBackgroundColorColors1,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::ElementBackgroundColor.,med,source:22C.c:1595;fork name kept
+G02102,state,Menu::Files::elementBackgroundColorColors2,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::ElementBackgroundColor.,med,source:22C.c:1596;fork name kept
+G02104,state,Menu::Files::clearSaveReminderConfirm,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateClearSaveReminder.,med,source:22C.c:3244;fork name kept
+G02110,state,Menu::Files::loadMenuFadeout,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadMenu.,med,source:22C.c:2236;fork name kept
+G02148,state,Menu::Files::loadMenuSelectedFile,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadMenu.,med,source:22C.c:2237;fork name kept
+G02149,state,Menu::Files::saveMenuSelectedFile,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveMenu.,med,source:22C.c:2906;fork name kept
+G02153,state,Menu::Files::findCurrentSaveStepState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::FindCurrentSaveStep.,med,source:22C.c:1438;fork name kept
+G02157,state,Menu::Files::loadMenuState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateLoadMenu.,med,source:22C.c:2215;fork name kept
+G02164,state,Menu::Files::clearSaveReminderState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateClearSaveReminder.,med,source:22C.c:3228;fork name kept
+G02169,state,Menu::Files::saveMenuState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::UpdateSaveMenu.,med,source:22C.c:2882;fork name kept
+G02170,state,Menu::Files::findCurrentSaveStepSubState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::FindCurrentSaveStep.,med,source:22C.c:1439;fork name kept
