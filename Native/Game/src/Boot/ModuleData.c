@@ -10,7 +10,6 @@
 #include "Audio/ActorSound.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Legacy.h"
-#include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
@@ -36,12 +35,9 @@
 #include "Core/Random.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
-#include "Effects/Plugins/Plg044.h"
 #include "Effects/Plugins/Plg045.h"
-#include "Effects/Plugins/Plg047.h"
 #include "Effects/Plugins/Plg049.h"
 #include "Effects/Plugins/Plg050.h"
-#include "Effects/Plugins/Plg051.h"
 #include "Effects/Plugins/Plg057.h"
 #include "Effects/Plugins/Plg061.h"
 #include "Effects/Plugins/Plg065.h"
@@ -319,7 +315,6 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x83AE4, sizeof Effects_effectBufferIndex, &Effects_effectBufferIndex}, // G00219 D_800EC2E4
     {"BATTLE/BATTLE.PRG", 0x83AE8, sizeof Effects_trailAdditiveColors, &Effects_trailAdditiveColors}, // G00220 D_800EC2E8
     {"BATTLE/BATTLE.PRG", 0x83B08, sizeof Effects_trailColors, &Effects_trailColors}, // G00221 D_800EC308
-    {"BATTLE/BATTLE.PRG", 0x83B24, sizeof Effects_scriptRenderers, &Effects_scriptRenderers}, // G00222 D_800EC324
     {"BATTLE/BATTLE.PRG", 0x83B28, sizeof Effects_emissionCounter, &Effects_emissionCounter}, // G00223 D_800EC328
     {"BATTLE/BATTLE.PRG", 0x83B2C, sizeof Effects_actionVariantValues, &Effects_actionVariantValues}, // G00224 D_800EC32C
     {"BATTLE/BATTLE.PRG", 0x83B30, sizeof Effects_pairedParticleColorPresets, &Effects_pairedParticleColorPresets}, // G00225 D_800EC330
@@ -333,12 +328,9 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x88FC8, sizeof Battle_Ai_settingsBits8Values, &Battle_Ai_settingsBits8Values}, // G00235 D_800F17C8
     {"BATTLE/BATTLE.PRG", 0x88FD8, sizeof Battle_Ai_facingDelayScales, &Battle_Ai_facingDelayScales}, // G00236 D_800F17D8
     {"BATTLE/BATTLE.PRG", 0x88FDC, sizeof Battle_Ai_radialRetreatPath, &Battle_Ai_radialRetreatPath}, // G00237 D_800F17DC
-    {"EFFECT/PLG044.BIN", 0xEF8, sizeof Effects_Plg044_tiledRingColorFactorsExtern, &Effects_Plg044_tiledRingColorFactorsExtern}, // G00632 D_800FA6F8
     {"EFFECT/PLG045.BIN", 0x1DB4, sizeof Effects_Plg045_particleEmissionCounter, &Effects_Plg045_particleEmissionCounter}, // G00634 D_800FB5B4
-    {"EFFECT/PLG047.BIN", 0xF6C, sizeof Effects_Plg047_closedRingColorFactorsExtern, &Effects_Plg047_closedRingColorFactorsExtern}, // G00635 D_800FA76C
     {"EFFECT/PLG049.BIN", 0x4BD4, sizeof Effects_Plg049_trailEmissionCounter, &Effects_Plg049_trailEmissionCounter}, // G00637 D_800FE3D4
     {"EFFECT/PLG050.BIN", 0x2E44, sizeof Effects_Plg050_trailEmissionCounter, &Effects_Plg050_trailEmissionCounter}, // G00641 D_800FC644
-    {"EFFECT/PLG051.BIN", 0xF70, sizeof Effects_Plg051_closedRingColorFactorsExtern, &Effects_Plg051_closedRingColorFactorsExtern}, // G00642 D_800FA770
     {"EFFECT/PLG057.BIN", 0x61B4, sizeof Effects_Plg057_particleEmissionCounter, &Effects_Plg057_particleEmissionCounter}, // G00645 D_800FF9B4
     {"EFFECT/PLG057.BIN", 0x61B8, sizeof Effects_Plg057_trailEmissionCounter, &Effects_Plg057_trailEmissionCounter}, // G00646 D_800FF9B8
     {"EFFECT/PLG057.BIN", 0x61BC, sizeof Effects_Plg057_trailEmissionCounter2, &Effects_Plg057_trailEmissionCounter2}, // G00647 D_800FF9BC
@@ -444,18 +436,10 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"SLUS_010.40", 0x1FE6C, sizeof Audio_Seq_kNoteRemapTables, &Audio_Seq_kNoteRemapTables}, // G01836 D_8002F66C
     {"SLUS_010.40", 0x1FE9C, sizeof Audio_Seq_kRandomPitchOffsets, &Audio_Seq_kRandomPitchOffsets}, // G01837 D_8002F69C
     {"SLUS_010.40", 0x1FF9C, sizeof Audio_Mixer_kPanGains, &Audio_Mixer_kPanGains}, // G01838 g_Sound_StereoPanGainTableQ15
-    {"SLUS_010.40", 0x2009C, sizeof Audio_Mixer_kCenterPanGain, &Audio_Mixer_kCenterPanGain}, // G01839 D_8002F89C
-    {"SLUS_010.40", 0x209E0, sizeof Audio_Mixer_kCommandHandlers, &Audio_Mixer_kCommandHandlers}, // G01841 D_800301E0
     {"SLUS_010.40", 0x30A10, sizeof Core_kSineTable, &Core_kSineTable}, // G01902 _trig_table
     {"SLUS_010.40", 0x31214, sizeof Core_Math_kArcTangentTable, &Core_Math_kArcTangentTable}, // G01903 D_80040A14
     {"SLUS_010.40", 0x3F5DC, sizeof Audio_Seq_unusedMaterialModifiers, &Audio_Seq_unusedMaterialModifiers}, // G01905 vs_main_materialModifiers
     {"SLUS_010.40", 0x3F6CC, sizeof Battle_statusEffectParams, &Battle_statusEffectParams}, // G01906 vs_main_statusEffectParams
-    {"SLUS_010.40", 0x3F720, sizeof Battle_statusParams5Duration, &Battle_statusParams5Duration}, // G01907 D_8004EF20
-    {"SLUS_010.40", 0x3F780, sizeof Battle_statusParams11Duration, &Battle_statusParams11Duration}, // G01908 D_8004EF80
-    {"SLUS_010.40", 0x3F7A0, sizeof Battle_statusParams13Duration, &Battle_statusParams13Duration}, // G01909 D_8004EFA0
-    {"SLUS_010.40", 0x3F7B2, sizeof Battle_statusParams14TickInterval, &Battle_statusParams14TickInterval}, // G01910 D_8004EFB2
-    {"SLUS_010.40", 0x3F7E2, sizeof Battle_statusParams17TickInterval, &Battle_statusParams17TickInterval}, // G01911 D_8004EFE2
-    {"SLUS_010.40", 0x3F800, sizeof Battle_statusParams19Duration, &Battle_statusParams19Duration}, // G01912 D_8004F000
     {"SLUS_010.40", 0x3F8CC, sizeof Field_locationDestinations, &Field_locationDestinations}, // G01913 vs_main_locationZoneMapIds
     {"SLUS_010.40", 0x404CC, sizeof Field_zoneMusicIds, &Field_zoneMusicIds}, // G01914 D_8004FCCC
     {"SLUS_010.40", 0x405D0, sizeof Actors_placeholderActorName, &Actors_placeholderActorName}, // G01915 D_8004FDD0

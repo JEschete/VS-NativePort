@@ -4,6 +4,9 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: D_800378E2 (D_800378E2@SLUS_010.40): a view into another global
+#define Audio_Seq_discVolumeLevel (*(short*)((u_char*)&Audio_Seq_discVolume + 2))
+
 #endif // VS_AUDIO_CONTROL_SOUNDCONTROL_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_CONTROL_SOUNDCONTROL_H_DECLS)
@@ -13,7 +16,6 @@ extern CdlATV Audio_Control_legacyDiscMixAttenuation;
 extern int Audio_Seq_discVolumeFadeStep;
 extern short Audio_Seq_discVolumeFadeLength;
 extern int Audio_Seq_discVolume;
-extern short Audio_Seq_discVolumeLevel;
 void Audio_Control_SetMusicMuteMask(void* arg0);
 void Audio_Control_SetMusicBranchThreshold(void* arg0);
 void Audio_Control_PausePlaybackGroup(u_int arg0);

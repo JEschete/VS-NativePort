@@ -39,22 +39,19 @@ char Audio_Seq_kNoteRemapTables[304]; /* contents: module image (ModuleData.c) *
 char Audio_Seq_kRandomPitchOffsets[256]; /* contents: module image (ModuleData.c) */
 
 // decomp: g_Sound_LfoTable (g_Sound_LfoTable@SLUS_010.40)
-short* Audio_Seq_kLfoWaveforms[408]; /* data: contents loaded in Step 5 */
+short* Audio_Seq_kLfoWaveforms[408]; /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800305E0 (D_800305E0@SLUS_010.40)
-void (*Audio_Seq_kOpcodeHandlers[136])(Audio_SeqChannel*, int); /* data: contents loaded in Step 5 */
+void (*Audio_Seq_kOpcodeHandlers[136])(Audio_SeqChannel*, int); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_80030760 (D_80030760@SLUS_010.40)
-void (*Audio_Seq_kExtendedOpcodeHandlers[40])(Audio_SeqChannel*, int); /* data: contents loaded in Step 5 */
+void (*Audio_Seq_kExtendedOpcodeHandlers[40])(Audio_SeqChannel*, int); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_80037800 (D_80037800@SLUS_010.40)
 Audio_CommandParams Audio_Seq_embeddedSoundEffectParams;
 
 // decomp: g_Sound_MasterFadeTimer (g_Sound_MasterFadeTimer@SLUS_010.40)
 Audio_FadeTimer Audio_Seq_masterFade;
-
-// decomp: D_800378D4 (D_800378D4@SLUS_010.40)
-int Audio_Seq_musicTransitionTimer;
 
 // decomp: g_Sound_LfoPhase (g_Sound_LfoPhase@SLUS_010.40)
 int Audio_Seq_randomPitchPhase;

@@ -33,10 +33,6 @@ int Movie_Intro_DecodeNextFrame(Movie_Intro_MdecState* movie);
 u_short* Movie_Intro_ReadNextFrame(Movie_Intro_MdecState* movie);
 void Movie_Intro_WaitForDecodedFrame(Movie_Intro_MdecState* movie, int arg1 __attribute__((unused)));
 void Movie_Intro_StartDiscStream(DslLOC* loc);
-void Movie_Intro_Start(void);
-void Movie_Intro_Stop(void);
-void Movie_Intro_StopAfterAudioTail(void);
-int Movie_Intro_Play(void);
 void Movie_Intro_Playback_ResetTitleStatics(void);
 
 #endif // VS_MOVIE_INTRO_PLAYBACK_H_DECLS

@@ -4,3 +4,8 @@ F03475,function,Content_UpdateDiscCommands,Native\Content\src\DiscReader.c,Nativ
 F03479,function,Content_ResetDiscDrive,Native\Content\src\DiscReader.c,Native\Content\src\DiscReader.h,2026-10-17,from Native\Content\src\CdDrive.c
 F03572,function,Core_Memory_CopyAlignedWords,Native\Engine\src\Core\Memory\WordCopy.c,Native\Engine\src\Core\Memory\WordCopy.h,2026-10-17,from Native\Engine\src\Core\Memory\Heap.c
 F03573,function,Core_Memory_ZeroAlignedWords,Native\Engine\src\Core\Memory\WordCopy.c,Native\Engine\src\Core\Memory\WordCopy.h,2026-10-17,from Native\Engine\src\Core\Memory\Heap.c
+F03160,function,Audio_Driver_ResetPlaybackState,Native\Engine\src\Audio\Driver\PlaybackReset.c,Native\Engine\src\Audio\Driver\PlaybackReset.h,2026-10-17,from Native\Engine\src\Audio\Driver\SoundDriver.c
+F03650,function,Movie_Intro_Start,Native\Engine\src\Movie\Intro\Player.c,Native\Engine\src\Movie\Intro\Player.h,2026-10-17,from Native\Engine\src\Movie\Intro\Playback.c
+F03651,function,Movie_Intro_Stop,Native\Engine\src\Movie\Intro\Player.c,Native\Engine\src\Movie\Intro\Player.h,2026-10-17,from Native\Engine\src\Movie\Intro\Playback.c
+F03652,function,Movie_Intro_StopAfterAudioTail,Native\Engine\src\Movie\Intro\Player.c,Native\Engine\src\Movie\Intro\Player.h,2026-10-17,from Native\Engine\src\Movie\Intro\Playback.c
+F03653,function,Movie_Intro_Play,Native\Engine\src\Movie\Intro\Player.c,Native\Engine\src\Movie\Intro\Player.h,2026-10-17,from Native\Engine\src\Movie\Intro\Playback.c

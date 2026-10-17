@@ -6,6 +6,15 @@
 typedef struct Audio_CutsceneStreamData Audio_CutsceneStreamData;
 typedef struct Audio_CutsceneStreamState Audio_CutsceneStreamState;
 
+// decomp: D_80039B14 (D_80039B14@SLUS_010.40): a view into another global
+#define Audio_Cutscene_streamVoices (*(int*)(&Audio_Cutscene_streamState.voiceMask))
+
+// decomp: D_80039B48 (D_80039B48@SLUS_010.40): a view into another global
+#define Audio_Cutscene_streamVolume (*(int*)(&Audio_Cutscene_streamState.volume))
+
+// decomp: D_80039B64 (D_80039B64@SLUS_010.40): a view into another global
+#define Audio_Cutscene_streamControlFlags (*(int*)(&Audio_Cutscene_streamState.controlFlags))
+
 // decomp: FSoundCutsceneStreamState (src/include/sound.h:597)
 typedef struct Audio_CutsceneStreamState {
     /* 0x00 */ void* currentChunk;
@@ -46,9 +55,6 @@ typedef struct Audio_CutsceneStreamState {
 
 extern volatile int Audio_Cutscene_legacySpuTransferBusy;
 extern Audio_CutsceneStreamState Audio_Cutscene_streamState;
-extern int Audio_Cutscene_streamVoices;
-extern int Audio_Cutscene_streamVolume;
-extern int Audio_Cutscene_streamControlFlags;
 void Audio_Cutscene_PauseStream(Audio_CommandParams* in_Params __attribute__((unused)));
 void Audio_Cutscene_ResumeStream(Audio_CommandParams* in_Params __attribute__((unused)));
 void Audio_Cutscene_StopStreamVoices(void);

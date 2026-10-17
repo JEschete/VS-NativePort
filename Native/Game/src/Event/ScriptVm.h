@@ -4,6 +4,9 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: D_800F4B8B (D_800F4B8B@BATTLE/BATTLE.PRG): a view into another global
+#define Event_weatherTweenDuration (*(char*)(&Event_weatherTween.durationFrames))
+
 #endif // VS_EVENT_SCRIPTVM_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EVENT_SCRIPTVM_H_DECLS)
@@ -18,7 +21,6 @@ extern u_char Event_kOpcodeSizes[256];
 extern int (*Event_kOpcodeHandlers[572])(u_char*, short);
 extern u_char* Event_textBoxFrameStyles[16];
 extern u_short Event_customEasingCurves[66];
-extern char Event_weatherTweenDuration;
 extern u_short* Event_dialogStrings;
 extern char Event_cachedFlagValue;
 extern short Event_isFieldCameraRestoreScripted;

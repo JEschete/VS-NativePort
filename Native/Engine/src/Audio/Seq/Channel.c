@@ -18,9 +18,6 @@ Audio_SeqChannel Audio_Seq_musicChannels[0x20];
 // decomp: g_PushedMusicConfig (g_PushedMusicConfig@SLUS_010.40)
 Audio_MusicConfig Audio_Seq_savedMusicConfig;
 
-// decomp: D_800358FE (D_800358FE@SLUS_010.40)
-short Audio_Seq_savedMusicId;
-
 // decomp: g_pSecondaryMusicChannels (g_pSecondaryMusicChannels@SLUS_010.40)
 Audio_SeqChannel* Audio_Seq_secondaryMusicChannels;
 

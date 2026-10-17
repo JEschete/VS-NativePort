@@ -4,6 +4,9 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: SfxSoundChannels (SfxSoundChannels@SLUS_010.40): a view into another global
+#define Audio_SoundEffects_programPairChannels (Audio_SoundEffects_channels + 10)
+
 #endif // VS_AUDIO_SOUNDEFFECTS_SOUNDEFFECTS_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_SOUNDEFFECTS_SOUNDEFFECTS_H_DECLS)
@@ -13,8 +16,7 @@
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
 
-extern Audio_SeqChannel Audio_SoundEffects_channels[10];
-extern Audio_SeqChannel Audio_SoundEffects_programPairChannels[12];
+extern Audio_SeqChannel Audio_SoundEffects_channels[22];
 void Audio_SoundEffects_ReleaseMatchingVoices(int in_SfxId, int in_StopFlags);
 void Audio_SoundEffects_StartChannelProgram(Audio_SeqChannel* in_Channel, Audio_CommandParams* in_CommandParams,
     int in_VoiceBit, char* in_ProgramCounter);

@@ -27,7 +27,7 @@
 #include "State/Timers.h"
 
 // decomp: vs_battle_limbNames (vs_battle_limbNames@BATTLE/BATTLE.PRG)
-char* Battle_limbNames[146]; /* data: contents loaded in Step 5 */
+char* Battle_limbNames[146]; /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800EB9AE (D_800EB9AE@BATTLE/BATTLE.PRG)
 char Battle_hudStatusIconsHidden; /* contents: module image (ModuleData.c) */

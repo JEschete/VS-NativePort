@@ -8,6 +8,24 @@ typedef struct Audio_VoiceModeMasks Audio_VoiceModeMasks;
 typedef struct Audio_VoiceParams Audio_VoiceParams;
 typedef struct Audio_VoiceScheduler Audio_VoiceScheduler;
 
+// decomp: D_8002F89C (D_8002F89C@SLUS_010.40): a view into another global
+#define Audio_Mixer_kCenterPanGain (*(short*)((u_char*)&Audio_Mixer_kPanGains + 256))
+
+// decomp: D_80037894 (D_80037894@SLUS_010.40): a view into another global
+#define Audio_Mixer_pendingKeyOnVoices (*(int*)(&Audio_Mixer_voiceScheduler.pendingKeyOn))
+
+// decomp: D_80037898 (D_80037898@SLUS_010.40): a view into another global
+#define Audio_Mixer_keyedVoices (*(int*)(&Audio_Mixer_voiceScheduler.keyedVoices))
+
+// decomp: D_8003789C (D_8003789C@SLUS_010.40): a view into another global
+#define Audio_Mixer_pendingKeyOffVoices (*(int*)(&Audio_Mixer_voiceScheduler.pendingKeyOff))
+
+// decomp: D_800378A0 (D_800378A0@SLUS_010.40): a view into another global
+#define Audio_Mixer_pausedSoundEffectVoices (*(int*)(&Audio_Mixer_voiceScheduler.pausedEffectVoices))
+
+// decomp: D_80039AF2 (D_80039AF2@SLUS_010.40): a view into another global
+#define Audio_Mixer_tempoScaleLevel (*(char*)((u_char*)&Audio_Mixer_tempoScale + 2))
+
 // decomp: src/include/sound.h:7
 #define VOICE_COUNT 24
 
@@ -95,7 +113,6 @@ _Static_assert(sizeof(Audio_VoiceEnvelope) == 0x8, "Audio_VoiceEnvelope must kee
 // decomp: src/SLUS_010.40/25AC.c:173
 #define SPU_PAN_TABLE_SIZE (0x100)
 extern short Audio_Mixer_kPanGains[SPU_PAN_TABLE_SIZE];
-extern short Audio_Mixer_kCenterPanGain;
 extern Audio_CommandHandler Audio_Mixer_kCommandHandlers[392];
 extern Audio_VoiceEnvelope Audio_Mixer_voiceEnvelopes[VOICE_COUNT];
 extern int Audio_Mixer_musicPitchScaleStep;
@@ -104,14 +121,9 @@ extern short Audio_Mixer_musicPitchScaleSlideLength;
 extern short Audio_Mixer_tempoScaleSlideLength;
 extern Audio_CommandParams Audio_Mixer_commandParams;
 extern Audio_VoiceScheduler Audio_Mixer_voiceScheduler;
-extern int Audio_Mixer_pendingKeyOnVoices;
-extern int Audio_Mixer_keyedVoices;
-extern int Audio_Mixer_pendingKeyOffVoices;
-extern int Audio_Mixer_pausedSoundEffectVoices;
 extern int Audio_Mixer_mutedMusicChannels;
 extern int Audio_Mixer_musicPitchScale;
 extern int Audio_Mixer_tempoScale;
-extern char Audio_Mixer_tempoScaleLevel;
 extern Audio_MusicConfig* Audio_Mixer_voiceOwners[VOICE_COUNT];
 extern Audio_VoiceModeMasks Audio_Mixer_voiceModes;
 void Audio_Mixer_UpdateChannelSlidesAndDelays(

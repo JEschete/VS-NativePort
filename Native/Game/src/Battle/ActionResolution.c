@@ -35,7 +35,7 @@ u_char Battle_limbInjuryStatusIds[20]; /* contents: module image (ModuleData.c) 
 
 // decomp: _actionEffectMediators (_actionEffectMediators@BATTLE/BATTLE.PRG)
 void (*Battle_actionEffectMediators[100])(
-    Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* data: contents loaded in Step 5 */
+    Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800F1A00 (D_800F1A00@BATTLE/BATTLE.PRG)
 u_int Battle_hitPrerequisiteResult;

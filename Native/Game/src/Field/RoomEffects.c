@@ -16,10 +16,10 @@
 #include "State/StateFlags.h"
 
 // decomp: D_800E85CC (D_800E85CC@BATTLE/BATTLE.PRG)
-int (*Field_kTextureEffectHandlers[37])(Field_SwingEffectRecord*); /* data: contents loaded in Step 5 */
+int (*Field_kTextureEffectHandlers[37])(Field_SwingEffectRecord*); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800E85E8 (D_800E85E8@BATTLE/BATTLE.PRG)
-int (*Field_kRoomEffectOpcodeHandlers[30])(Field_RoomEffectObjectView*, Field_RoomEffectCommandHeader*); /* data: contents loaded in Step 5 */
+int (*Field_kRoomEffectOpcodeHandlers[30])(Field_RoomEffectObjectView*, Field_RoomEffectCommandHeader*); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800F1D00 (D_800F1D00@BATTLE/BATTLE.PRG)
 short Field_isRoomEffectSoundRestored;

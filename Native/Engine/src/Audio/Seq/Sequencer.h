@@ -5,6 +5,9 @@
 
 typedef struct Audio_FadeTimer Audio_FadeTimer;
 
+// decomp: D_800378D4 (D_800378D4@SLUS_010.40): a view into another global
+#define Audio_Seq_musicTransitionTimer (*(int*)(&Audio_Driver_commandArguments.extParam2))
+
 // decomp: src/include/hw.h:24
 #define CD_VOL_L ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x1B0))
 
@@ -43,7 +46,6 @@ extern void (*Audio_Seq_kOpcodeHandlers[136])(Audio_SeqChannel*, int);
 extern void (*Audio_Seq_kExtendedOpcodeHandlers[40])(Audio_SeqChannel*, int);
 extern Audio_CommandParams Audio_Seq_embeddedSoundEffectParams;
 extern Audio_FadeTimer Audio_Seq_masterFade;
-extern int Audio_Seq_musicTransitionTimer;
 extern int Audio_Seq_randomPitchPhase;
 void Audio_Seq_WriteDiscVolume(void);
 void Audio_Seq_UpdateGlobalSlides(void);

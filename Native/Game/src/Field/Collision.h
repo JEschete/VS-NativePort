@@ -7,6 +7,9 @@ typedef struct Field_CollisionSampleScratch Field_CollisionSampleScratch;
 typedef struct Field_GimmickInstance Field_GimmickInstance;
 typedef struct Field_SavedPositionWords Field_SavedPositionWords;
 
+// decomp: D_800F4B0A (D_800F4B0A@BATTLE/BATTLE.PRG): a view into another global
+#define Field_collisionProbeHeight (*(short*)((u_char*)&Field_collisionProbePosition + 2))
+
 // decomp: D_1F8003BC_t (src/BATTLE/BATTLE.PRG/3A1A0.h:646)
 typedef struct Field_CollisionSampleScratch {
     int searchFloor;
@@ -48,7 +51,6 @@ extern u_int* Field_collisionProbeTile;
 extern u_char Field_collisionProbeDirection;
 extern short Field_platformContactSearchDepth;
 extern SVECTOR Field_collisionProbePosition;
-extern short Field_collisionProbeHeight;
 Field_MpdTileCell* Field_RoomCollisionCells(void);
 int Field_CollisionMapDimensions(int arg0 __attribute__((unused)));
 Field_ZoneBounds* Field_RoomCameraBounds(int arg0 __attribute__((unused)));

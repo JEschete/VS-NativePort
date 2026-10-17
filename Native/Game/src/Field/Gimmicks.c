@@ -55,7 +55,7 @@ char Field_triggerMarkerRecordTail[192]; /* contents: module image (ModuleData.c
 u_char Field_gimmickPaletteParameters[32]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E8FB4 (D_800E8FB4@BATTLE/BATTLE.PRG)
-void* Field_gimmickModelTemplates[5]; /* data: contents loaded in Step 5 */
+void* Field_gimmickModelTemplates[5]; /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800E8FD0 (D_800E8FD0@BATTLE/BATTLE.PRG)
 u_char Field_kGimmickRollOrientations[3424]; /* contents: module image (ModuleData.c) */

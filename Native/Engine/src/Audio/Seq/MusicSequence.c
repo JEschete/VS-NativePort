@@ -11,6 +11,7 @@
 #include "Audio/Seq/MusicSequence.h"
 #include "Audio/Seq/Sequencer.h"
 #include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/Stream.h"
 #include "Core/Memory/Copy.h"
 
 // decomp: SLUS_010.40 func_80015BAC (src/SLUS_010.40/25AC.c:2326) [INCLUDE_ASM: not yet ported]

@@ -60,24 +60,6 @@ int Battle_unusedGlobal2;
 // decomp: vs_main_statusEffectParams (vs_main_statusEffectParams@SLUS_010.40)
 Battle_StatusEffectParams Battle_statusEffectParams[32]; /* contents: module image (ModuleData.c) */
 
-// decomp: D_8004EF20 (D_8004EF20@SLUS_010.40)
-u_char Battle_statusParams5Duration; /* contents: module image (ModuleData.c) */
-
-// decomp: D_8004EF80 (D_8004EF80@SLUS_010.40)
-u_char Battle_statusParams11Duration; /* contents: module image (ModuleData.c) */
-
-// decomp: D_8004EFA0 (D_8004EFA0@SLUS_010.40)
-u_char Battle_statusParams13Duration; /* contents: module image (ModuleData.c) */
-
-// decomp: D_8004EFB2 (D_8004EFB2@SLUS_010.40)
-u_char Battle_statusParams14TickInterval; /* contents: module image (ModuleData.c) */
-
-// decomp: D_8004EFE2 (D_8004EFE2@SLUS_010.40)
-u_char Battle_statusParams17TickInterval; /* contents: module image (ModuleData.c) */
-
-// decomp: D_8004F000 (D_8004F000@SLUS_010.40)
-u_char Battle_statusParams19Duration; /* contents: module image (ModuleData.c) */
-
 // decomp: BATTLE.PRG func_8007C31C (src/BATTLE/BATTLE.PRG/146C.c:8736)
 void Battle_PreserveAshleyStatuses(void) { Battle_RemoveActorStatuses(0, Battle_characterState->stats); }
 

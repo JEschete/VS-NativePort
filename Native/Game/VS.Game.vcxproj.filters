@@ -441,6 +441,9 @@
     <ClCompile Include="src\Boot\ModuleData.c">
       <Filter>src\Boot</Filter>
     </ClCompile>
+    <ClCompile Include="src\Boot\ModulePointers.c">
+      <Filter>src\Boot</Filter>
+    </ClCompile>
     <ClCompile Include="src\Boot\OverlayReset.c">
       <Filter>src\Boot</Filter>
     </ClCompile>

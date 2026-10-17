@@ -8,6 +8,9 @@ typedef struct Field_DoorMatchList Field_DoorMatchList;
 typedef struct Field_DoorTileLocation Field_DoorTileLocation;
 typedef struct Field_MpdDoorRecord Field_MpdDoorRecord;
 
+// decomp: D_800F1CCA (D_800F1CCA@BATTLE/BATTLE.PRG): a view into another global
+#define Field_entranceDoorPlatformFlags (*(u_short*)(&Field_entranceDoorRecord.tileLocation))
+
 // decomp: D_800F18E8_t (src/BATTLE/BATTLE.PRG/146C.h:731)
 typedef struct Field_DoorFlagIdWord {
     u_short requiredFlagId : 10;
@@ -42,7 +45,6 @@ extern Field_DoorFlagIdWord Field_snapshotDoorFlagSource;
 extern Field_MpdDoorRecord Field_pendingDestinationDoor;
 extern short Field_enteredDoorId;
 extern Field_MpdDoorRecord Field_entranceDoorRecord;
-extern u_short Field_entranceDoorPlatformFlags;
 extern Field_DoorMatchList Field_matchingDoorRecords;
 void Field_StoreEntranceDoorForReload(void);
 void Field_SetEntranceDoorRecord(char (*arg0)[12]);

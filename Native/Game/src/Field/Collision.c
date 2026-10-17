@@ -34,9 +34,6 @@ short Field_platformContactSearchDepth;
 // decomp: D_800F4B08 (D_800F4B08@BATTLE/BATTLE.PRG)
 SVECTOR Field_collisionProbePosition;
 
-// decomp: D_800F4B0A (D_800F4B0A@BATTLE/BATTLE.PRG)
-short Field_collisionProbeHeight;
-
 // decomp: BATTLE.PRG func_8008B6EC (src/BATTLE/BATTLE.PRG/146C.c:16059)
 Field_MpdTileCell* Field_RoomCollisionCells(void) { return Field_roomData.tileCells; }
 

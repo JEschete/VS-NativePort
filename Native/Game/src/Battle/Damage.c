@@ -29,7 +29,7 @@
 u_short Battle_bladePpDamageBonuses[12]; /* contents: module image (ModuleData.c) */
 
 // decomp: _statCalculators (_statCalculators@BATTLE/BATTLE.PRG)
-short (*Battle_statCalculators[27])(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* data: contents loaded in Step 5 */
+short (*Battle_statCalculators[27])(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: vs_battle_actors (vs_battle_actors@BATTLE/BATTLE.PRG)
 Battle_Actor* Battle_actors[42];

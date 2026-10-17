@@ -4,6 +4,9 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: D_800F1BB6 (D_800F1BB6@BATTLE/BATTLE.PRG): a view into another global
+#define Field_isRoomTintActive (*(short*)(&Field_roomTint.isActive))
+
 #endif // VS_FIELD_ROOMRENDERING_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_ROOMRENDERING_H_DECLS)
@@ -15,7 +18,6 @@ extern int Field_isFieldRenderingEnabled;
 extern u_short Field_areRoomUpdatesPaused;
 extern u_short* Field_roomPalettes;
 extern Field_RoomTint Field_roomTint;
-extern short Field_isRoomTintActive;
 void Field_SetFieldRenderingEnabled(int arg0);
 int Field_EnableOwnedRoomRendering(int arg0);
 int Field_DisableOwnedRoomRendering(int arg0);

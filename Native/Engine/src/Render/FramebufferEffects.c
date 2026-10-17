@@ -13,9 +13,6 @@ int Render_framebufferEffectParameter;
 // decomp: D_800F1A28 (D_800F1A28@BATTLE/BATTLE.PRG)
 SVECTOR Render_framebufferEffectRotation;
 
-// decomp: D_800F1A2C (D_800F1A2C@BATTLE/BATTLE.PRG)
-short Render_framebufferEffectRoll;
-
 // decomp: D_800F1A30 (D_800F1A30@BATTLE/BATTLE.PRG)
 VECTOR Render_framebufferEffectScale;
 

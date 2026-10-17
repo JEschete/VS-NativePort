@@ -23,9 +23,6 @@ int Audio_Samples_bankChunkHeader[16];
 // decomp: D_80039BC8 (D_80039BC8@SLUS_010.40)
 Audio_BankStreamState Audio_Samples_bankStream;
 
-// decomp: D_80039BCC (D_80039BCC@SLUS_010.40)
-int Audio_Samples_bankStreamDestination;
-
 // decomp: SLUS_010.40 func_80012BB8 (src/SLUS_010.40/25AC.c:719)
 void Audio_Samples_LoadBank(void* arg0, int arg1)
 {

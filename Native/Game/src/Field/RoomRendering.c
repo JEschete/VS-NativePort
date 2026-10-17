@@ -44,9 +44,6 @@ u_short* Field_roomPalettes;
 // decomp: D_800F1BB0 (D_800F1BB0@BATTLE/BATTLE.PRG)
 Field_RoomTint Field_roomTint;
 
-// decomp: D_800F1BB6 (D_800F1BB6@BATTLE/BATTLE.PRG)
-short Field_isRoomTintActive;
-
 // decomp: BATTLE.PRG func_8008A4DC (src/BATTLE/BATTLE.PRG/146C.c:15521)
 void Field_SetFieldRenderingEnabled(int arg0)
 {

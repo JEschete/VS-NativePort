@@ -1,9 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
 #include "Movie/Intro.h"
 #include "Movie/Intro/Playback.h"
 
@@ -168,102 +164,6 @@ void Movie_Intro_StartDiscStream(DslLOC* loc)
             ;
         VSync(3);
     } while (DsRead2(loc, Movie_Intro_legacyDiscStreamingMode) == 0);
-}
-
-// decomp: TITLE.PRG _initIntroMovie (src/TITLE/TITLE.PRG/22C.c:3649)
-void Movie_Intro_Start(void)
-{
-    Movie_Intro_legacyDiscStreamingMode = DslModeStream2 | DslModeSpeed | DslModeRT;
-    DsIntToPos(VS_TITLE_STR_LBA, &Movie_Intro_legacyDiscStreamLocation);
-    Movie_Intro_legacyDiscRingBuffer = Core_Memory_AllocateFromLowEnd(0x20000);
-    Movie_Intro_legacyEncodedFrameZero = Core_Memory_AllocateFromLowEnd(0x23000);
-    Movie_Intro_legacyEncodedFrameOne = Core_Memory_AllocateFromLowEnd(0x23000);
-    Movie_Intro_legacyDecodedStripZero = Core_Memory_AllocateFromLowEnd(0x2A00);
-    Movie_Intro_legacyDecodedStripOne = Core_Memory_AllocateFromLowEnd(0x2A00);
-    Movie_Intro_InitializeFrameBuffers(&Movie_Intro_legacyMdecState, 0, 0, 0, 224);
-    Movie_Intro_InitializeStream(&Movie_Intro_legacyDiscStreamLocation, Movie_Intro_OnDecodedStrip);
-    DecDCTvlcBuild(Movie_Intro_legacyVlcDecodeTable);
-
-    while (Movie_Intro_DecodeNextFrame(&Movie_Intro_legacyMdecState) == -1) {
-        DslLOC loc = Movie_Intro_legacyDiscStreamLocation;
-        Movie_Intro_StartDiscStream(&loc);
-    }
-    Movie_Intro_isPlaying = 1;
-    Movie_Intro_playbackStartTick = VSync(-1);
-}
-
-// decomp: TITLE.PRG _stopIntroMovie (src/TITLE/TITLE.PRG/22C.c:3670)
-void Movie_Intro_Stop(void)
-{
-    SpuSetCommonMasterVolume(0, 0);
-    Movie_Intro_isPlaying = 0;
-    DecDCToutCallback(0);
-    StUnSetRing();
-    while (DsControlB(DslPause, 0, 0) == 0)
-        ;
-    Core_Memory_FreeFromLowEnd(Movie_Intro_legacyDecodedStripOne);
-    Core_Memory_FreeFromLowEnd(Movie_Intro_legacyDecodedStripZero);
-    Core_Memory_FreeFromLowEnd(Movie_Intro_legacyEncodedFrameOne);
-    Core_Memory_FreeFromLowEnd(Movie_Intro_legacyEncodedFrameZero);
-    Core_Memory_FreeFromLowEnd(Movie_Intro_legacyDiscRingBuffer);
-    SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
-}
-
-// decomp: TITLE.PRG _stopMovieIfComplete (src/TITLE/TITLE.PRG/22C.c:3686)
-void Movie_Intro_StopAfterAudioTail(void)
-{
-    if ((Movie_Intro_isPlaying != 0) && ((VSync(-1) - Movie_Intro_playbackStartTick) >= 4401)) {
-        Movie_Intro_Stop();
-    }
-}
-
-// decomp: TITLE.PRG _playIntroMovie (src/TITLE/TITLE.PRG/22C.c:3693)
-int Movie_Intro_Play(void)
-{
-    DslLOC loc;
-    DISPENV disp;
-    int var_s2;
-    u_int dataSize;
-
-    var_s2 = 0;
-
-    while (1) {
-        DecDCTin(Movie_Intro_legacyMdecState.encodedBuffers[Movie_Intro_legacyMdecState.encodedBufferIndex], 3);
-        dataSize = Movie_Intro_legacyMdecState.sliceRect.w * Movie_Intro_legacyMdecState.sliceRect.h;
-        DecDCTout(Movie_Intro_legacyMdecState.decodedBuffers[Movie_Intro_legacyMdecState.decodedBufferIndex],
-            (int)(dataSize + (dataSize >> 0x1F)) >> 1);
-
-        while (Movie_Intro_DecodeNextFrame(&Movie_Intro_legacyMdecState) == -1) {
-            if ((u_int)(StGetBackloc(&loc) - 1) >= 0x44CU) {
-                loc = Movie_Intro_legacyDiscStreamLocation;
-            }
-            Movie_Intro_StartDiscStream(&loc);
-        }
-
-        Movie_Intro_WaitForDecodedFrame(&Movie_Intro_legacyMdecState, 0);
-        VSync(0);
-        Input_UpdateControllers();
-
-        if ((VSync(-1) - Movie_Intro_playbackStartTick) >= 0x8F5) {
-            return 0;
-        }
-
-        SetDefDispEnv(&disp, 0, Movie_Intro_legacyMdecState.frameRectIndex == 0 ? 224 : 0, 480, 224);
-        disp.screen.h = 224;
-        disp.screen.y = 8;
-        disp.isrgb24 = 1;
-        disp.disp.w = (disp.disp.w * 2) / 3;
-        PutDispEnv(&disp);
-
-        if (++var_s2 != 1) {
-            SetDispMask(1);
-        }
-
-        if ((Input_buttonsPressed.allButtons & (PADRright | PADstart))) {
-            return 1;
-        }
-    }
-    return 0;
 }
 
 // TITLE.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).

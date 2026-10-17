@@ -4,12 +4,14 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: D_800FA6F8 (D_800FA6F8@EFFECT/PLG044.BIN): a view into another global
+#define Effects_Plg044_tiledRingColorFactorsExtern (Effects_Plg044_tiledRingColorFactors + 0)
+
 #endif // VS_EFFECTS_PLUGINS_PLG044_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG044_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG044_H_DECLS
 
-extern CVECTOR Effects_Plg044_tiledRingColorFactorsExtern[32 / sizeof(CVECTOR)];
 extern CVECTOR Effects_Plg044_tiledRingColorFactors[];
 
 #endif // VS_EFFECTS_PLUGINS_PLG044_H_DECLS

@@ -23,13 +23,13 @@
 u_char Effects_effectBufferIndex; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC324 (D_800EC324@BATTLE/BATTLE.PRG)
-Effects_EffectRenderer Effects_scriptRenderers[5458]; /* contents: module image (ModuleData.c) */
+Effects_EffectRenderer Effects_scriptRenderers[5458]; /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800EC32C (D_800EC32C@BATTLE/BATTLE.PRG)
 char Effects_actionVariantValues[21824]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC3F4 (D_800EC3F4@BATTLE/BATTLE.PRG)
-int (*Effects_scriptOpcodeHandlers[5406])(void*); /* data: contents loaded in Step 5 */
+int (*Effects_scriptOpcodeHandlers[5406])(void*); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800EC4B8 (D_800EC4B8@BATTLE/BATTLE.PRG)
 u_char Effects_lastReactionSoundVariant; /* contents: module image (ModuleData.c) */

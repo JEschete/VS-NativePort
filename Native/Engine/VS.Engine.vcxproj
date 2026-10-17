@@ -64,6 +64,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Audio\Driver\PlaybackReset.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Audio\Driver\SoundDriver.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -312,6 +318,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Movie\Intro\Player.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Movie\Intro.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -319,6 +331,7 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Movie\Movie.cpp" />
+    <ClCompile Include="src\Movie\MoviePlayer.cpp" />
     <ClCompile Include="src\Platform\App.cpp" />
     <ClCompile Include="src\Platform\CrashHandler.cpp" />
     <ClCompile Include="src\Platform\GameFiber.cpp" />
@@ -482,6 +495,7 @@
     <ClInclude Include="src\Audio\Ambience.h" />
     <ClInclude Include="src\Audio\Control\SoundControl.h" />
     <ClInclude Include="src\Audio\Cutscene\Stream.h" />
+    <ClInclude Include="src\Audio\Driver\PlaybackReset.h" />
     <ClInclude Include="src\Audio\Driver\SoundDriver.h" />
     <ClInclude Include="src\Audio\Legacy.h" />
     <ClInclude Include="src\Audio\LegacyFiles.h" />
@@ -525,6 +539,7 @@
     <ClInclude Include="src\Input\Controllers.h" />
     <ClInclude Include="src\Input\Vibration.h" />
     <ClInclude Include="src\Movie\Intro\Playback.h" />
+    <ClInclude Include="src\Movie\Intro\Player.h" />
     <ClInclude Include="src\Movie\Intro.h" />
     <ClInclude Include="src\Render\Camera.h" />
     <ClInclude Include="src\Render\Display.h" />
@@ -571,6 +586,7 @@
     <ClInclude Include="include\Input\LegacyPad.hpp" />
     <ClInclude Include="include\Input\Pad.hpp" />
     <ClInclude Include="include\Movie\Movie.hpp" />
+    <ClInclude Include="include\Movie\MoviePlayer.h" />
     <ClInclude Include="include\Platform\App.hpp" />
     <ClInclude Include="include\Platform\CrashHandler.hpp" />
     <ClInclude Include="include\Platform\GameFiber.hpp" />

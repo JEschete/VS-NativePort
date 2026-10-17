@@ -20,9 +20,6 @@ short Audio_Seq_discVolumeFadeLength;
 // decomp: g_CdVolume (g_CdVolume@SLUS_010.40)
 int Audio_Seq_discVolume;
 
-// decomp: D_800378E2 (D_800378E2@SLUS_010.40)
-short Audio_Seq_discVolumeLevel;
-
 // decomp: SLUS_010.40 func_80012440 (src/SLUS_010.40/25AC.c:459)
 void Audio_Control_SetMusicMuteMask(void* arg0)
 {

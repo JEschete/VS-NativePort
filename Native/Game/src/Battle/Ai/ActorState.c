@@ -31,7 +31,7 @@ unsigned int Battle_Ai_kPerceptionRangesSquared[320]; /* contents: module image 
 Battle_Ai_WanderTiming Battle_Ai_kWanderTimingPresets[208]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F1790 (D_800F1790@BATTLE/BATTLE.PRG)
-int (*Battle_Ai_decisionCallbacks[55])(Battle_Ai_ActorAiState*); /* data: contents loaded in Step 5 */
+int (*Battle_Ai_decisionCallbacks[55])(Battle_Ai_ActorAiState*); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800F17B8 (D_800F17B8@BATTLE/BATTLE.PRG)
 unsigned short Battle_Ai_viewAngles[45][2]; /* contents: module image (ModuleData.c) */

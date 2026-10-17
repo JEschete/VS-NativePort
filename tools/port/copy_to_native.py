@@ -325,6 +325,7 @@ class Copier:
         self.report: dict[str, list] = collections.defaultdict(list)
         self.asset_extents = splat_asset_extents()
         self.module_data: list[tuple[dict, str, int | None]] = []   # (row, C name, bytes if unsized) filled at boot
+        self.module_pointers: list[tuple[dict, str, int]] = []      # (row, C name, element count) relocated at boot
         self.deleted_calls = 0
         self.type_edges: dict[str, set[str]] = {}
         self.macro_body: dict[str, str] = {}
@@ -839,7 +840,83 @@ class Copier:
             return text
         return f"{first[:m.start()].rstrip()} {parts[-1].strip()}"
 
+    VIEW_RX = re.compile(r"(?:^|;)\s*view-of:(G\d{5})([+-](?:0x[0-9A-Fa-f]+|\d+))?")
+
+    def plan_views(self) -> None:
+        """Globals the decomp declares as views into another global (`view-of:BASE+OFF` in the data ledger): on the
+        PS1 both names reach the same bytes, so natively the view is written in terms of its base. A view of
+        array elements grows its base array to cover the view."""
+        self.views: dict[str, tuple[str, int]] = {}
+        self.view_base_min: dict[str, int] = {}
+        for r in self.data:
+            m = self.VIEW_RX.search(r["notes"] or "")
+            if not m:
+                continue
+            base_id = m[1]
+            b = self.data_by_id.get(base_id)
+            if m[2] is not None:
+                off = int(m[2], 0)
+            elif b and r["address"] and b["address"]:
+                off = int(r["address"], 0) - int(b["address"], 0)  # no offset written: the addresses give it
+            else:
+                off = 0
+            self.views[r["id"]] = (base_id, off)
+            dims_v, dims_b = re.findall(r"\[(\d+)\]", r["type"]), re.findall(r"\[(\d+)\]", b["type"] if b else "")
+            if b and len(dims_v) == 1 and len(dims_b) == 1 and r["type"].split("[")[0] == b["type"].split("[")[0]:
+                elem = int(b["size"]) // int(dims_b[0])
+                if elem and off % elem == 0 and off >= 0:
+                    need = off // elem + int(dims_v[0])
+                    self.view_base_min[base_id] = max(self.view_base_min.get(base_id, 0), need)
+
+    def view_macro(self, r: dict, name: str, decl: str) -> str | None:
+        """The view as a macro over its base, or None if it cannot be expressed (reported)."""
+        base_id, off = self.views[r["id"]]
+        b = self.data_by_id.get(base_id)
+        if b is None or base_id not in self.emitted:
+            self.report["view-base-missing"].append(f"{r['id']} {r['final_name']} -> {base_id}")
+            return None
+        bname = c_name(b["final_name"])
+        arr = re.search(rf"\b{re.escape(name)}\s*((?:\[[^\]]*\])+)", decl)
+        vtype = decl[:arr.start()].strip() if arr else re.sub(rf"\b{re.escape(name)}\b", "", decl).strip()
+        dims_b = re.findall(r"\[(\d+)\]", b["type"])
+        if off < 0:
+            self.report["view-negative-offset"].append(f"{r['id']} {r['final_name']} = {base_id}{off}")
+            return None
+        if arr and len(dims_b) == 1 and r["type"].split("[")[0] == b["type"].split("[")[0]:
+            elem = int(b["size"]) // int(dims_b[0])
+            if elem and off % elem == 0:
+                return f"({bname} + {off // elem})"
+        target = None
+        tid = self.canon_type(b["type_id"]) if b["type_id"] else ""
+        prefix, rem = bname, off
+        if tid and "[" in b["type"]:
+            elem = int(self.type_by_id.get(tid, {}).get("size") or 0)
+            if elem > 0:
+                prefix, rem = f"{bname}[{off // elem}]", off % elem
+        if tid and self.type_by_id.get(tid, {}).get("kind") in ("struct", "union"):
+            self.type_has_pointer(tid)  # builds self._gen
+            try:
+                lay = self._gen.layout(tid)
+                for m, f in zip(self._gen.members[tid], lay["fields"]):
+                    if (f["offset"] or 0) == rem * 8 and not m.get("bits") and m["id"] in self.fields:
+                        target = f"&{prefix}.{self.fields[m['id']]['final_name']}"
+                        break
+            except KeyError:
+                pass
+            if target is None and not self.type_has_pointer(tid):
+                target = f"(u_char*)&{prefix} + {rem}"
+        elif not tid and off == 0:
+            target = f"&{bname}"
+        elif not tid or not self.type_has_pointer(tid):
+            target = f"(u_char*)&{bname} + {off}"
+        if target is None:
+            self.report["view-unresolved"].append(f"{r['id']} {r['final_name']} = {base_id}+{off}")
+            return None
+        return f"(({vtype}*)({target}))" if arr else f"(*({vtype}*)({target}))"
+
     def copy_globals(self) -> None:
+        self.plan_views()
+        deferred = []
         for r in self.data:
             if note(r, "dup-of") or r["linkage"] == "local-static":
                 continue
@@ -858,6 +935,7 @@ class Copier:
                 continue
             ov = r["overlay"] or (r["instances"].split() or ["SLUS_010.40"])[0]
             d = self.pick_decl(r["id"], kind="var", definition=True)
+            e = None
             prov = f"// decomp: {r['name']} ({r['key']})"
             if d is not None:
                 text = self.name_inline_type(
@@ -904,12 +982,20 @@ class Copier:
                     # an assembly label declared `extern void` (only its address is used): bytes of its size
                     decl = f"u_char {name}[{max(int(r['size'] or 0), 1)}]"
                 tag = {"bss": "", "unknown": ""}.get(r["segment"], f" /* {r['segment']}: contents loaded in Step 5 */")
-                if self.module_data_source(r) is not None:
+                if self.module_data_source(r, decl) is not None:
                     tag = " /* contents: module image (ModuleData.c) */"
                     # filled at start-up, so it cannot live in read-only memory (pointer-free: const is top-level)
                     decl = re.sub(r"\bconst\s+", "", decl)
                     # an array the copy could not size: the ledger's byte count stands in for sizeof
                     self.module_data.append((r, name, int(r["size"] or 0) if re.search(r"\[\s*\]", decl) else None))
+                elif self.module_data_source(r, pointers=True) is not None and \
+                        (count := self.pointer_array_count(decl, name)):
+                    tag = " /* contents: module image, relocated (ModulePointers.c) */"
+                    # filled at start-up: the elements (pointers) cannot be const
+                    decl = re.sub(r"\*\s*const\b\s*", "*", decl)
+                    if any(i in self._ptr_typedefs for i in IDENT.findall(decl)):
+                        decl = re.sub(r"^\s*const\s+", "", decl)
+                    self.module_pointers.append((r, name, count))
                 elif tag:
                     self.report["module-data-skipped"].append(
                         f"{r['id']} {r['final_name']} ({r['overlay'] or r['instances']}, pointers={r['has_pointers']})")
@@ -919,13 +1005,40 @@ class Copier:
             if r["id"] in self.ptr_globals:
                 text = self.retype_global(r["id"], name, text)
                 decl = self.retype_global("", name, decl) if d is None else decl
-            self.out(loc).items.append(Item("var", f"{prov}\n{text}\n", name, r["id"], need, (1, r["id"]), src))
-            self.emitted[r["id"]] = d if d is not None else e
-            self.item_row[name] = r["id"]
+            if r["id"] in self.view_base_min:
+                n_min = self.view_base_min[r["id"]]
+
+                def grow(s: str, n_min: int = n_min, name: str = name) -> str:
+                    return re.sub(rf"(\b{re.escape(name)}\s*)\[(\d+)\]", lambda m: f"{m[1]}[{max(int(m[2]), n_min)}]",
+                                  s, count=1)
+                text, decl = grow(text), grow(decl)
+                self.report["view-base-grown"].append(f"{r['final_name']} -> {n_min}")
+            if r["id"] in self.views:
+                deferred.append((r, name, decl, text, prov, loc, need, src, d, e))
+                continue
+            self.emit_global(r, name, decl, text, prov, loc, need, src, d, e)
+        for r, name, decl, text, prov, loc, need, src, d, e in deferred:
+            macro = self.view_macro(r, name, decl)
+            if macro is None:
+                self.emit_global(r, name, decl, text, prov, loc, need, src, d, e)
+                continue
             hdr = sibling_header(loc)
-            self.out(hdr).items.append(Item("extern", f"extern {decl if d is None else self.split_init(text)[0]};\n",
-                                            name, r["id"], need, (3, r["id"]), src))
+            self.out(hdr).items.append(Item("macro", f"{prov}: a view into another global\n#define {name} {macro}\n",
+                                            name, r["id"], need, (0,), src))
+            self.macro_body[name] = macro
             self.provide(name, hdr)
+            self.emitted[r["id"]] = d if d is not None else e
+            self.report["view-macro"].append(f"{r['final_name']} = {macro}")
+
+    def emit_global(self, r: dict, name: str, decl: str, text: str, prov: str, loc: str, need: list, src: str,
+                    d: dict | None, e: dict | None) -> None:
+        self.out(loc).items.append(Item("var", f"{prov}\n{text}\n", name, r["id"], need, (1, r["id"]), src))
+        self.emitted[r["id"]] = d if d is not None else e
+        self.item_row[name] = r["id"]
+        hdr = sibling_header(loc)
+        self.out(hdr).items.append(Item("extern", f"extern {decl if d is None else self.split_init(text)[0]};\n",
+                                        name, r["id"], need, (3, r["id"]), src))
+        self.provide(name, hdr)
 
     # ------------------------------------------------------------------------------------------------- types
     def inline_type(self, r: dict) -> str | None:
@@ -1463,10 +1576,12 @@ class Copier:
     DISC_LAYOUT = r"Native\Content\include\Content\DiscLayout.h"
     MODULE_DATA = r"Native\Game\src\Boot\ModuleData.c"
 
-    def module_data_source(self, r: dict) -> tuple[str, int] | None:
+    def module_data_source(self, r: dict, decl: str = "", pointers: bool = False) -> tuple[str, int] | None:
         """Where a global with no C initializer gets its contents: (module file on the disc, byte offset). Only
-        pointer-free data with one known home: pointers in module images are PS1 addresses and need relocating."""
-        if r["segment"] in ("bss", "") or r["has_pointers"] != "0" or not r["overlay"]:
+        pointer-free data with one known home, unless `pointers` (tables the loader relocates)."""
+        if r["segment"] in ("bss", "") or not r["overlay"] or (r["has_pointers"] != "0" and not pointers):
+            return None
+        if decl and self.decl_has_pointer(decl, c_name(r["final_name"])):
             return None
         ext = self.asset_extents.get((r["overlay"], r["name"]))
         if ext is not None:
@@ -1475,11 +1590,109 @@ class Copier:
             return r["overlay"], int(r["file_offset"], 0)
         return None
 
+    def decl_has_pointer(self, decl: str, name: str) -> bool:
+        """Whether a native declaration's type holds a pointer: written in the declarator, in a struct or union it
+        names, or behind one of the decomp's pointer typedefs (the data ledger's flag misses typedefs)."""
+        if not hasattr(self, "_ptr_typedefs"):
+            names = set()
+            for p in dx.SRC.rglob("*.[ch]"):
+                t = p.read_text(encoding="utf-8", errors="replace")
+                names |= set(re.findall(r"typedef[^;{}]*\(\s*\*\s*(\w+)\s*\)", t))
+                names |= set(re.findall(r"typedef[^;{}()]*\*\s*(\w+)\s*;", t))
+            self._ptr_typedefs = {c_name(r["final_name"]) for r in self.types if r["name"] in names} | names
+            self._tid_by_cname = {c_name(r["final_name"]): self.canon_type(r["id"]) for r in self.types}
+        text = re.sub(r"sizeof\([^()]*\)", "", re.sub(rf"\b{re.escape(name)}\b", "", decl))
+        if "*" in text or "(" in text:
+            return True
+        for ident in IDENT.findall(text):
+            if ident in self._ptr_typedefs or ident in self.SDK_POINTER_TYPES:
+                return True
+            tid = self._tid_by_cname.get(ident)
+            if tid and self.type_by_id[tid]["kind"] in ("struct", "union") and self.type_has_pointer(tid):
+                return True
+        return False
+
+    def pointer_array_count(self, decl: str, name: str) -> int:
+        """Element count of a one-dimensional array of pointers (data, function, or a pointer typedef); 0 otherwise."""
+        self.decl_has_pointer(decl, name)  # loads the pointer typedefs
+        m = re.search(rf"\b{re.escape(name)}\s*\[\s*(\d+)\s*\]\s*(\)|$)", decl)
+        if not m:
+            return 0
+        before = decl[:m.start()]
+        if re.search(r"\(\s*\*\s*$", before) or before.rstrip().endswith("*") or \
+                any(i in self._ptr_typedefs for i in IDENT.findall(before)):
+            return int(m[1])
+        return 0
+
+    SPLAT_ARTIFACTS = dx.DECOMP / "build" / "splat-artifacts"
+    MODULE_POINTERS = r"Native\Game\src\Boot\ModulePointers.c"
+
+    def copy_module_pointers(self) -> None:
+        """Pointer tables kept in the module images (handler tables, string and data pointer arrays): the loader
+        reads their PS1 addresses from the user's disc and resolves each through the map of the module's symbols
+        (address -> native function or global) from the decomp's splat symbol listing."""
+        tables, modules = [], set()
+        for r, name, count in self.module_pointers:
+            if int(r["size"] or 0) != count * 4:
+                self.report["module-pointers-size"].append(f"{r['id']} {r['final_name']} ({r['size']} != {count}*4)")
+                continue
+            module, offset = self.module_data_source(r, pointers=True)
+            tables.append(f'    {{"{module}", 0x{offset:X}, {count}u, (void**){name}}}, // {r["id"]} {r["name"]}')
+            modules.add(module)
+        if modules:
+            modules.add("SLUS_010.40")  # the resident module, reachable from every overlay
+        emitted_fns = {i.name for f in self.files.values() for i in f.items if i.kind == "function"}
+        emitted_fns |= {o["name"].strip() for o in self.owned.values() if o["kind"].strip() == "function"}
+        fn_by_key = {(r["overlay"], r["name"]): r for r in self.cat_by_id.values()}
+        data_by_key = {(r["overlay"], r["name"]): r for r in self.data}
+        symbols = []
+        for module in sorted(modules):
+            path = self.SPLAT_ARTIFACTS / module / "splat_symbols.csv"
+            if not path.exists():
+                self.report["module-pointers-no-symbols"].append(module)
+                continue
+            seen = set()
+            with path.open(encoding="utf-8", newline="") as fh:
+                for s in csv.DictReader(fh):
+                    if s["defined"] != "True" or s["name"] in seen:
+                        continue
+                    addr = int(s["vram_start"], 16)
+                    if s["type"] == "func":
+                        r = fn_by_key.get((module, s["name"]))
+                        hops = 0
+                        while r is not None and c_name(r["final_name"]) not in emitted_fns and hops < 8:
+                            dup = note(r, "dup-of")
+                            r, hops = (self.cat_by_id.get(dup) if dup else None), hops + 1
+                        if r is None or c_name(r["final_name"]) not in emitted_fns:
+                            continue
+                        cname, size = c_name(r["final_name"]), 0
+                    else:
+                        r = data_by_key.get((module, s["name"]))
+                        if r is None or r["id"] not in self.emitted or r["id"] == SCRATCH_GLOBAL or \
+                                r["id"] in self.views:
+                            continue
+                        cname = c_name(r["final_name"])
+                        size = max(int(s["size"] or 0), int(r["size"] or 0))  # splat often reports a default 4
+                    if cname not in self.provider:
+                        continue
+                    seen.add(s["name"])
+                    symbols.append(f'    {{"{module}", 0x{addr:08X}u, {size}u, (void*)&{cname}}},')
+        text = ("// Pointer tables in the module images and the symbol map that relocates them (splat_symbols.csv).\n"
+                '#include "Content/ModuleData.h"\n\n'
+                "const Content_ModuleSymbol Content_moduleSymbols[] = {\n" + "\n".join(symbols) + "\n};\n"
+                "const unsigned Content_moduleSymbolCount = sizeof Content_moduleSymbols / sizeof Content_moduleSymbols[0];\n\n"
+                "const Content_ModulePointerTable Content_modulePointers[] = {\n" + "\n".join(tables) + "\n};\n"
+                "const unsigned Content_modulePointerCount = sizeof Content_modulePointers / sizeof Content_modulePointers[0];\n")
+        self.out(self.MODULE_POINTERS).items.append(Item("var", text, "Content_moduleSymbols", "", [], (0,)))
+        self.report["module-pointer-tables"] = [t.split("// ")[-1] for t in tables]
+
     def copy_module_data(self) -> None:
         """The table Content_LoadModuleData fills globals from: contents of initialised data the decomp keeps in the
         module images (data, rodata, assets) rather than in C. Positions only; the bytes come from the user's disc."""
         rows = []
         for r, name, bytes_ in sorted(self.module_data, key=lambda x: (x[0]["overlay"], self.module_data_source(x[0])[1])):
+            if r["id"] in self.views and name in self.macro_body:
+                continue  # a view: its base is filled from the same bytes
             module, offset = self.module_data_source(r)
             if bytes_ is not None and bytes_ <= 0:
                 self.report["module-data-unsized"].append(f"{r['id']} {r['final_name']}")
@@ -1877,6 +2090,7 @@ def main() -> int:
     cp.copy_resets()
     cp.copy_disc_layout()
     cp.copy_module_data()
+    cp.copy_module_pointers()
     cp.copy_string_tables()
     cp.copy_macros()
     rendered = cp.finish()

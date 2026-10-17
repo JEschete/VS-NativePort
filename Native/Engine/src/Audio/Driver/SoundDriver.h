@@ -6,6 +6,12 @@
 typedef struct Audio_CommandArguments Audio_CommandArguments;
 typedef struct Audio_DriverFlags Audio_DriverFlags;
 
+// decomp: D_80039AFC (D_80039AFC@SLUS_010.40): a view into another global
+#define Audio_Driver_mixBehavior (*(int*)(&Audio_Driver_controlLatches.mixBehavior))
+
+// decomp: D_80039B00 (D_80039B00@SLUS_010.40): a view into another global
+#define Audio_Driver_pendingUpdates (*(int*)(&Audio_Driver_controlLatches.updateFlags))
+
 // decomp: src/include/hw.h:7
 #define VOICE_00_LEFT_RIGHT ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x000))
 
@@ -113,14 +119,11 @@ extern char Audio_Driver_legacySpuFlushBytes[64];
 extern char Audio_Driver_legacySpuAllocatorTable;
 extern Audio_CommandArguments Audio_Driver_commandArguments;
 extern Audio_DriverFlags Audio_Driver_controlLatches;
-extern int Audio_Driver_mixBehavior;
-extern int Audio_Driver_pendingUpdates;
 void Audio_Driver_CompleteSampleTransfer(void);
 void Audio_Driver_ArmSampleTransferCallback(void);
 void Audio_Driver_WriteSampleMemory(char* data, u_int len);
 void Audio_Driver_ReadSampleMemory(char* data, u_int len);
 void Audio_Driver_WaitForSampleTransfer(void);
-void Audio_Driver_ResetPlaybackState(void);
 void Audio_Driver_Start(void);
 void Audio_Driver_Stop(void);
 void Audio_Driver_KeyOnVoices(u_int in_KeyOn);

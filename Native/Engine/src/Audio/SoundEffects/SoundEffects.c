@@ -14,10 +14,7 @@
 #include "Audio/Stream.h"
 
 // decomp: D_80035910 (D_80035910@SLUS_010.40)
-Audio_SeqChannel Audio_SoundEffects_channels[10];
-
-// decomp: SfxSoundChannels (SfxSoundChannels@SLUS_010.40)
-Audio_SeqChannel Audio_SoundEffects_programPairChannels[12];
+Audio_SeqChannel Audio_SoundEffects_channels[22];
 
 // decomp: SLUS_010.40 Sound_EvictSfxVoice (src/SLUS_010.40/25AC.c:2539)
 void Audio_SoundEffects_ReleaseMatchingVoices(int in_SfxId, int in_StopFlags)

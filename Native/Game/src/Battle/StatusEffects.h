@@ -7,6 +7,24 @@ typedef struct Battle_StatusEffectParams Battle_StatusEffectParams;
 typedef struct Battle_StatusEffectTick Battle_StatusEffectTick;
 typedef struct Battle_StatusEffectTickTable Battle_StatusEffectTickTable;
 
+// decomp: D_8004EF20 (D_8004EF20@SLUS_010.40): a view into another global
+#define Battle_statusParams5Duration (*(u_char*)(&Battle_statusEffectParams[5].duration))
+
+// decomp: D_8004EF80 (D_8004EF80@SLUS_010.40): a view into another global
+#define Battle_statusParams11Duration (*(u_char*)(&Battle_statusEffectParams[11].duration))
+
+// decomp: D_8004EFA0 (D_8004EFA0@SLUS_010.40): a view into another global
+#define Battle_statusParams13Duration (*(u_char*)(&Battle_statusEffectParams[13].duration))
+
+// decomp: D_8004EFB2 (D_8004EFB2@SLUS_010.40): a view into another global
+#define Battle_statusParams14TickInterval (*(u_char*)(&Battle_statusEffectParams[14].tickInterval))
+
+// decomp: D_8004EFE2 (D_8004EFE2@SLUS_010.40): a view into another global
+#define Battle_statusParams17TickInterval (*(u_char*)(&Battle_statusEffectParams[17].tickInterval))
+
+// decomp: D_8004F000 (D_8004F000@SLUS_010.40): a view into another global
+#define Battle_statusParams19Duration (*(u_char*)(&Battle_statusEffectParams[19].duration))
+
 // decomp: vs_battle_statuses (src/BATTLE/BATTLE.PRG/146C.h:485)
 enum Battle_StatusFlag {
     Battle_StatusFlag_StrDown = 1 << 0,
@@ -88,12 +106,6 @@ extern int Battle_unusedSubmenuState;
 extern Menu_Framework_PreviewPoseState* Battle_unusedGlobal1[1];
 extern int Battle_unusedGlobal2;
 extern Battle_StatusEffectParams Battle_statusEffectParams[32];
-extern u_char Battle_statusParams5Duration;
-extern u_char Battle_statusParams11Duration;
-extern u_char Battle_statusParams13Duration;
-extern u_char Battle_statusParams14TickInterval;
-extern u_char Battle_statusParams17TickInterval;
-extern u_char Battle_statusParams19Duration;
 void Battle_PreserveAshleyStatuses(void);
 int Battle_QueueApplicableStatusChanges(int arg0, Battle_HitResult* entity);
 int Battle_QueueStatusRemovalMask(int arg0, Battle_HitResult* entity);

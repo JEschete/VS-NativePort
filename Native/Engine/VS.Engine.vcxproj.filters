@@ -150,6 +150,12 @@
     <ClInclude Include="src\Audio\Cutscene\Stream.h">
       <Filter>src\Audio\Cutscene</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\Driver\PlaybackReset.c">
+      <Filter>src\Audio\Driver</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Audio\Driver\PlaybackReset.h">
+      <Filter>src\Audio\Driver</Filter>
+    </ClInclude>
     <ClCompile Include="src\Audio\Driver\SoundDriver.c">
       <Filter>src\Audio\Driver</Filter>
     </ClCompile>
@@ -423,6 +429,12 @@
     <ClInclude Include="src\Movie\Intro\Playback.h">
       <Filter>src\Movie\Intro</Filter>
     </ClInclude>
+    <ClCompile Include="src\Movie\Intro\Player.c">
+      <Filter>src\Movie\Intro</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Movie\Intro\Player.h">
+      <Filter>src\Movie\Intro</Filter>
+    </ClInclude>
     <ClCompile Include="src\Movie\Intro.c">
       <Filter>src\Movie</Filter>
     </ClCompile>
@@ -430,6 +442,9 @@
       <Filter>src\Movie</Filter>
     </ClInclude>
     <ClCompile Include="src\Movie\Movie.cpp">
+      <Filter>src\Movie</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Movie\MoviePlayer.cpp">
       <Filter>src\Movie</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\App.cpp">
@@ -649,6 +664,9 @@
       <Filter>include\Input</Filter>
     </ClInclude>
     <ClInclude Include="include\Movie\Movie.hpp">
+      <Filter>include\Movie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Movie\MoviePlayer.h">
       <Filter>include\Movie</Filter>
     </ClInclude>
     <ClInclude Include="include\Platform\App.hpp">

@@ -16,11 +16,8 @@
 short Audio_Mixer_kPanGains[SPU_PAN_TABLE_SIZE]; /* contents: module image (ModuleData.c) */
 #undef SPU_PAN_TABLE_SIZE
 
-// decomp: D_8002F89C (D_8002F89C@SLUS_010.40)
-short Audio_Mixer_kCenterPanGain; /* contents: module image (ModuleData.c) */
-
 // decomp: D_800301E0 (D_800301E0@SLUS_010.40)
-Audio_CommandHandler Audio_Mixer_kCommandHandlers[392]; /* contents: module image (ModuleData.c) */
+Audio_CommandHandler Audio_Mixer_kCommandHandlers[392]; /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: g_SpuVoiceInfo (g_SpuVoiceInfo@SLUS_010.40)
 Audio_VoiceEnvelope Audio_Mixer_voiceEnvelopes[VOICE_COUNT];
@@ -43,18 +40,6 @@ Audio_CommandParams Audio_Mixer_commandParams;
 // decomp: g_Sound_VoiceSchedulerState (g_Sound_VoiceSchedulerState@SLUS_010.40)
 Audio_VoiceScheduler Audio_Mixer_voiceScheduler;
 
-// decomp: D_80037894 (D_80037894@SLUS_010.40)
-int Audio_Mixer_pendingKeyOnVoices;
-
-// decomp: D_80037898 (D_80037898@SLUS_010.40)
-int Audio_Mixer_keyedVoices;
-
-// decomp: D_8003789C (D_8003789C@SLUS_010.40)
-int Audio_Mixer_pendingKeyOffVoices;
-
-// decomp: D_800378A0 (D_800378A0@SLUS_010.40)
-int Audio_Mixer_pausedSoundEffectVoices;
-
 // decomp: D_800378E4 (D_800378E4@SLUS_010.40)
 int Audio_Mixer_mutedMusicChannels;
 
@@ -63,9 +48,6 @@ int Audio_Mixer_musicPitchScale;
 
 // decomp: g_Sound_TempoMultiplier (g_Sound_TempoMultiplier@SLUS_010.40)
 int Audio_Mixer_tempoScale;
-
-// decomp: D_80039AF2 (D_80039AF2@SLUS_010.40)
-char Audio_Mixer_tempoScaleLevel;
 
 // decomp: g_Sound_VoiceChannelConfigs (g_Sound_VoiceChannelConfigs@SLUS_010.40)
 Audio_MusicConfig* Audio_Mixer_voiceOwners[VOICE_COUNT];

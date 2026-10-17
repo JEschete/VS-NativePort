@@ -33,6 +33,7 @@ def generated(cp: ct.Copier) -> dict[str, str]:
     cp.copy_resets()
     cp.copy_disc_layout()
     cp.copy_module_data()
+    cp.copy_module_pointers()
     cp.copy_string_tables()
     cp.copy_macros()
     return cp.finish()

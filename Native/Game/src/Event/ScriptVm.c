@@ -33,6 +33,7 @@
 #include "Event/ScriptVm.h"
 #include "Event/Splash.h"
 #include "Event/Triggers.h"
+#include "Event/Weather.h"
 #include "Field/Camera.h"
 #include "Field/Gimmicks.h"
 #include "Field/RoomEffects.h"
@@ -69,16 +70,13 @@ short Event_kSpecialOperationTenArguments[152]; /* contents: module image (Modul
 u_char Event_kOpcodeSizes[256]; /* contents: module image (ModuleData.c) */
 
 // decomp: _opcodeFunctionTable (_opcodeFunctionTable@BATTLE/BATTLE.PRG)
-int (*Event_kOpcodeHandlers[572])(u_char*, short); /* data: contents loaded in Step 5 */
+int (*Event_kOpcodeHandlers[572])(u_char*, short); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800EB588 (D_800EB588@BATTLE/BATTLE.PRG)
-u_char* Event_textBoxFrameStyles[16]; /* data: contents loaded in Step 5 */
+u_char* Event_textBoxFrameStyles[16]; /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800F4B28 (D_800F4B28@BATTLE/BATTLE.PRG)
 u_short Event_customEasingCurves[66];
-
-// decomp: D_800F4B8B (D_800F4B8B@BATTLE/BATTLE.PRG)
-char Event_weatherTweenDuration;
 
 // decomp: D_800F4BB0 (D_800F4BB0@BATTLE/BATTLE.PRG)
 u_short* Event_dialogStrings;

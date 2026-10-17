@@ -21,7 +21,7 @@
 Event_SplashLayerView* Render_gimLayers; /* data: contents loaded in Step 5 */
 
 // decomp: D_800EC25C (D_800EC25C@BATTLE/BATTLE.PRG)
-void (*Render_kGimLayerDrawRoutines[4])(Render_GimLayer*, int, u_long*); /* data: contents loaded in Step 5 */
+void (*Render_kGimLayerDrawRoutines[4])(Render_GimLayer*, int, u_long*); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800F51C8 (D_800F51C8@BATTLE/BATTLE.PRG)
 char Render_gimBlendSelect;

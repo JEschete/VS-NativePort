@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Audio/Cutscene/Stream.h"
+#include "Audio/Driver/PlaybackReset.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Envelope.h"
@@ -26,12 +27,6 @@ Audio_CommandArguments Audio_Driver_commandArguments;
 
 // decomp: g_Sound_GlobalFlags (g_Sound_GlobalFlags@SLUS_010.40)
 Audio_DriverFlags Audio_Driver_controlLatches;
-
-// decomp: D_80039AFC (D_80039AFC@SLUS_010.40)
-int Audio_Driver_mixBehavior;
-
-// decomp: D_80039B00 (D_80039B00@SLUS_010.40)
-int Audio_Driver_pendingUpdates;
 
 // decomp: SLUS_010.40 _spuWriteComplete (src/SLUS_010.40/25AC.c:989)
 void Audio_Driver_CompleteSampleTransfer(void)
@@ -70,12 +65,6 @@ void Audio_Driver_WaitForSampleTransfer(void)
 
         } while (Audio_Cutscene_legacySpuTransferBusy == 1);
     }
-}
-
-// decomp: SLUS_010.40 func_8001369C (src/SLUS_010.40/25AC.c:1058) [INCLUDE_ASM: not yet ported]
-void Audio_Driver_ResetPlaybackState(void)
-{
-    VS_UNPORTED("Audio::Driver::ResetPlaybackState");
 }
 
 // decomp: SLUS_010.40 StartSound (src/SLUS_010.40/25AC.c:1060)

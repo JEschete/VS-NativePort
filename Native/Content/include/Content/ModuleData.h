@@ -18,6 +18,28 @@ typedef struct Content_ModuleDataEntry {
 extern const Content_ModuleDataEntry Content_moduleData[];
 extern const unsigned Content_moduleDataCount;
 
+// Arrays of pointers kept in the module images (generated: Native\Game\src\Boot\ModulePointers.c). Each element on
+// the disc is a PS1 address; the loader resolves it through the symbol map: exactly for a function, within the
+// symbol's extent for data.
+typedef struct Content_ModuleSymbol {
+    const char* module;
+    unsigned address;     // PS1 address
+    unsigned size;        // bytes (data); 0 for a function
+    void* target;         // the native function or global
+} Content_ModuleSymbol;
+
+typedef struct Content_ModulePointerTable {
+    const char* module;
+    unsigned offset;      // byte offset of the table in the module file
+    unsigned count;       // pointers
+    void** target;        // the native array
+} Content_ModulePointerTable;
+
+extern const Content_ModuleSymbol Content_moduleSymbols[];
+extern const unsigned Content_moduleSymbolCount;
+extern const Content_ModulePointerTable Content_modulePointers[];
+extern const unsigned Content_modulePointerCount;
+
 #ifdef __cplusplus
 }
 #endif

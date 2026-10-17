@@ -18,7 +18,7 @@
 #include "Render/Palette.h"
 
 // decomp: _hitFunctions (_hitFunctions@BATTLE/BATTLE.PRG)
-int (*Battle_hitFunctions[8])(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* data: contents loaded in Step 5 */
+int (*Battle_hitFunctions[8])(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: BATTLE.PRG _getAttackGemBuff (src/BATTLE/BATTLE.PRG/146C.c:9712)
 short Battle_AttackGemHitBonus(Battle_ActionDefinition* action, Battle_ActorStats* actor)

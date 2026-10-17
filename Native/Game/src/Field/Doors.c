@@ -33,9 +33,6 @@ short Field_enteredDoorId;
 // decomp: D_800F1CC8 (D_800F1CC8@BATTLE/BATTLE.PRG)
 Field_MpdDoorRecord Field_entranceDoorRecord;
 
-// decomp: D_800F1CCA (D_800F1CCA@BATTLE/BATTLE.PRG)
-u_short Field_entranceDoorPlatformFlags;
-
 // decomp: D_800F1D08 (D_800F1D08@BATTLE/BATTLE.PRG)
 Field_DoorMatchList Field_matchingDoorRecords;
 

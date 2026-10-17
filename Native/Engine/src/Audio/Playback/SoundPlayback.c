@@ -11,6 +11,7 @@
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/Stream.h"
 
 // decomp: g_Sound_SfxProgramOffsets (g_Sound_SfxProgramOffsets@SLUS_010.40)
 u_int* Audio_Playback_soundEffectProgramOffsets;

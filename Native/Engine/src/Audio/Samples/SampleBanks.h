@@ -7,6 +7,9 @@ typedef struct Audio_BankStreamState Audio_BankStreamState;
 typedef struct Audio_Instrument Audio_Instrument;
 typedef struct Audio_MusicSampleBankIds Audio_MusicSampleBankIds;
 
+// decomp: D_80039BCC (D_80039BCC@SLUS_010.40): a view into another global
+#define Audio_Samples_bankStreamDestination (*(int*)(&Audio_Samples_bankStream.spuAddress))
+
 // decomp: D_80036770_t (src/SLUS_010.40/25AC.c:22)
 typedef struct Audio_MusicSampleBankIds {
     int bankId;
@@ -47,7 +50,6 @@ extern Audio_Instrument Audio_Samples_instruments[256];
 extern int Audio_Samples_soundEffectBankIds[3];
 extern int Audio_Samples_bankChunkHeader[16];
 extern Audio_BankStreamState Audio_Samples_bankStream;
-extern int Audio_Samples_bankStreamDestination;
 void Audio_Samples_LoadBank(void* arg0, int arg1);
 int Audio_Samples_TransferStatus(void);
 int Audio_Samples_ChooseMusicBankDestination(int* arg0, int* arg1, int* arg2);

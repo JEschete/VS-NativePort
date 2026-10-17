@@ -18,6 +18,7 @@
 #include "Items/Weapons.h"
 #include "Menu/Files.h"
 #include "Movie/Intro/Playback.h"
+#include "Movie/Intro/Player.h"
 #include "Render/Display.h"
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"

@@ -13,15 +13,6 @@ volatile int Audio_Cutscene_legacySpuTransferBusy;
 // decomp: g_Sound_Cutscene_StreamState (g_Sound_Cutscene_StreamState@SLUS_010.40)
 Audio_CutsceneStreamState Audio_Cutscene_streamState;
 
-// decomp: D_80039B14 (D_80039B14@SLUS_010.40)
-int Audio_Cutscene_streamVoices;
-
-// decomp: D_80039B48 (D_80039B48@SLUS_010.40)
-int Audio_Cutscene_streamVolume;
-
-// decomp: D_80039B64 (D_80039B64@SLUS_010.40)
-int Audio_Cutscene_streamControlFlags;
-
 // decomp: SLUS_010.40 Sound_Cmd_9F_unk (src/SLUS_010.40/25AC.c:3786)
 void Audio_Cutscene_PauseStream(Audio_CommandParams* in_Params __attribute__((unused)))
 {

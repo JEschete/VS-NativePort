@@ -6,6 +6,9 @@
 typedef struct Render_FramebufferEffectTranslation Render_FramebufferEffectTranslation;
 typedef struct Render_LegacyFramebufferEffectPackets Render_LegacyFramebufferEffectPackets;
 
+// decomp: D_800F1A2C (D_800F1A2C@BATTLE/BATTLE.PRG): a view into another global
+#define Render_framebufferEffectRoll (*(short*)((u_char*)&Render_framebufferEffectRotation + 4))
+
 // decomp: D_800F1A68_t (src/BATTLE/BATTLE.PRG/146C.h:726)
 typedef struct Render_FramebufferEffectTranslation {
     int x;
@@ -30,7 +33,6 @@ _Static_assert(sizeof(Render_LegacyFramebufferEffectPackets) == 0x2D0, "Render_L
 
 extern int Render_framebufferEffectParameter;
 extern SVECTOR Render_framebufferEffectRotation;
-extern short Render_framebufferEffectRoll;
 extern VECTOR Render_framebufferEffectScale;
 extern int Render_framebufferEffectUsesPreviousFrame;
 extern u_int Render_framebufferEffectDepth;

@@ -18,6 +18,9 @@ typedef struct Audio_SeqChannel Audio_SeqChannel;
 #undef VS_AUDIO_SEQ_CHANNEL_H_SET_TYPES_ONLY
 #endif
 
+// decomp: D_800358FE (D_800358FE@SLUS_010.40): a view into another global
+#define Audio_Seq_savedMusicId (*(short*)(&Audio_Seq_savedMusicConfig.musicId))
+
 // decomp: src/include/sound.h:42
 #define SOUND_CHANNEL_TYPE_MUSIC 0x0
 
@@ -201,7 +204,6 @@ typedef struct Audio_MusicConfig {
 
 extern Audio_SeqChannel Audio_Seq_musicChannels[0x20];
 extern Audio_MusicConfig Audio_Seq_savedMusicConfig;
-extern short Audio_Seq_savedMusicId;
 extern Audio_SeqChannel* Audio_Seq_secondaryMusicChannels;
 extern Audio_MusicConfig* Audio_Seq_secondaryMusicConfig;
 extern Audio_MusicConfig Audio_Seq_primaryMusicConfig;
