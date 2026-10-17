@@ -526,6 +526,11 @@ names, locations and collisions; it does not prove semantics or close migration 
   238.c; 6 BATTLE 146C.c at lines 8280-8317; 4 in 44F14.c including the animation event interpreter; 4 in 5BF94.c;
   1 ENDING D4.c). The other 372 indexed functions missing by file live in shared EFFECT headers and are catalogued
   under the overlays that include them. The 56 need catalog rows named from read code before copying starts.
+  Resolved: `tools\ledger\add_missing_functions.py` appends the 57 functions the scanner missed (the count above
+  left out `func_800AD714`) as F04121-F04177 with columns from `build_ledgers.py`'s own helpers; re-running
+  `build_ledgers.py` would renumber every id, so do not. They were named from the read functions in batch
+  `CATALOG_GAP` (`Menu::*::UpdateScreen` for the MENU5/9/E entry points, the reward pause pair in `Battle::`,
+  the CLUT/background-gradient/tint transforms in `Render::`, `Actors::RunAnimationEvents`). Coverage is 3736/3736.
 
 The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
 The native audio player must own playback position rather than reading another module's timing globals.
