@@ -1,46 +1,46 @@
 id,final_name,meaning,confidence,notes
-T00668.000,base,Shield part stats,med,declaration-only;source:146C.h:775
+T00668.000,base,Shield part stats,med,source:146C.c:6597;use cited by sanity pass;source:146C.h:775
 T00668.001,gems,Socketed gem stats,med,declaration-only;source:146C.h:776
 T00668.002,material,Shield material,med,declaration-only;source:146C.h:777
 T00668.003,dropRate,Drop chance,med,declaration-only;source:146C.h:778
 T00668.004,index,Inventory index,med,declaration-only;source:146C.h:779
-T00673.000,accessory,Accessory part stats,med,declaration-only;source:146C.h:414
-T00673.001,currentStr,Strength contribution,med,declaration-only;source:146C.h:415
-T00673.002,currentInt,Intelligence contribution,med,declaration-only;source:146C.h:416
-T00673.003,currentAgility,Agility contribution,med,declaration-only;source:146C.h:417
-T00673.004,dropRate,Drop chance,med,declaration-only;source:146C.h:418
+T00673.000,accessory,Accessory part stats,med,source:146C.c:1084;use cited by sanity pass;source:146C.h:414
+T00673.001,currentStr,Strength contribution,med,source:146C.c:1086;use cited by sanity pass;source:146C.h:415
+T00673.002,currentInt,Intelligence contribution,med,source:146C.c:1087;use cited by sanity pass;source:146C.h:416
+T00673.003,currentAgility,Agility contribution,med,source:146C.c:1088;use cited by sanity pass;source:146C.h:417
+T00673.004,dropRate,Drop chance,med,source:146C.c:1654;use cited by sanity pass;source:146C.h:418
 T00673.005,index,Inventory index,med,declaration-only;source:146C.h:419
-T00673.006,types,Damage-type resistances,med,declaration-only;source:146C.h:420
-T00673.007,classes,Enemy-class resistances,med,declaration-only;source:146C.h:421
-T00673.008,affinities,Elemental affinities,med,declaration-only;source:146C.h:422
-T00675.000,id,Item identifier,med,declaration-only;source:146C.h:298
+T00673.006,types,Damage-type resistances,med,source:16C.c:325;use cited by sanity pass;source:146C.h:420
+T00673.007,classes,Enemy-class resistances,med,source:146C.c:11374;use cited by sanity pass;source:146C.h:421
+T00673.008,affinities,Elemental affinities,med,source:16C.c:324;use cited by sanity pass;source:146C.h:422
+T00675.000,id,Item identifier,med,source:146C.c:1548;use cited by sanity pass;source:146C.h:298
 T00675.001,subId,Variant identifier,med,declaration-only;source:146C.h:299
-T00675.002,weaponModelId,Weapon model identifier,med,declaration-only;source:146C.h:300
-T00675.003,category,Item category,med,declaration-only;source:146C.h:301
-T00675.004,strength,Strength modifier,med,declaration-only;source:146C.h:302
-T00675.005,intelligence,Intelligence modifier,med,declaration-only;source:146C.h:303
-T00675.006,agility,Agility modifier,med,declaration-only;source:146C.h:304
-T00675.007,currentDp,Current durability points,med,declaration-only;source:146C.h:305
-T00675.008,maxDp,Maximum durability points,med,declaration-only;source:146C.h:306
-T00675.009,currentPp,Current phantom points,med,declaration-only;source:146C.h:307
-T00675.010,maxPp,Maximum phantom points,med,declaration-only;source:146C.h:308
-T00675.011,damageType,Damage type,med,declaration-only;source:146C.h:309
-T00675.012,costType,Risk or MP cost type,med,declaration-only;source:146C.h:310
-T00675.013,cost,Cost amount,med,declaration-only;source:146C.h:311
-T00675.014,material,Material,med,declaration-only;source:146C.h:312
+T00675.002,weaponModelId,Weapon model identifier,med,source:146C.c:6596;use cited by sanity pass;source:146C.h:300
+T00675.003,category,Item category,med,source:146C.c:1814;use cited by sanity pass;source:146C.h:301
+T00675.004,strength,Strength modifier,med,source:146C.c:996;use cited by sanity pass;source:146C.h:302
+T00675.005,intelligence,Intelligence modifier,med,source:146C.c:999;use cited by sanity pass;source:146C.h:303
+T00675.006,agility,Agility modifier,med,source:146C.c:1003;use cited by sanity pass;source:146C.h:304
+T00675.007,currentDp,Current durability points,med,source:items1.h:961;use cited by sanity pass;source:146C.h:305
+T00675.008,maxDp,Maximum durability points,med,source:items1.h:963;use cited by sanity pass;source:146C.h:306
+T00675.009,currentPp,Current phantom points,med,source:items1.h:965;use cited by sanity pass;source:146C.h:307
+T00675.010,maxPp,Maximum phantom points,med,source:items1.h:967;use cited by sanity pass;source:146C.h:308
+T00675.011,damageType,Damage type,med,source:2D10.c:154;use cited by sanity pass;source:146C.h:309
+T00675.012,costType,Risk or MP cost type,med,source:146C.c:985;use cited by sanity pass;source:146C.h:310
+T00675.013,cost,Cost amount,med,source:146C.c:987;use cited by sanity pass;source:146C.h:311
+T00675.014,material,Material,med,source:146C.c:8982;use cited by sanity pass;source:146C.h:312
 T00675.015,opaque14,Copied into the weapon stats (unk10B) and inventory blade; meaning not established,low,source:146C.c:988;sanity pass 2026-10-17
-T00675.016,gemSlots,Gem slot count,med,declaration-only;source:146C.h:314
-T00675.017,gemEffects,Gem special effect identifier,med,declaration-only;source:146C.h:315
+T00675.016,gemSlots,Gem slot count,med,source:120.c:1364;use cited by sanity pass;source:146C.h:314
+T00675.017,gemEffects,Gem special effect identifier,med,source:146C.c:9722;use cited by sanity pass;source:146C.h:315
 T00675.018,index,Inventory index,med,declaration-only;source:146C.h:316
 T00675.019,range,Attack range,med,declaration-only;source:146C.h:317
-T00675.020,types,Damage-type values,med,declaration-only;source:146C.h:318
-T00675.021,classes,Enemy-class values,med,declaration-only;source:146C.h:319
-T00675.022,affinities,Elemental affinity values,med,declaration-only;source:146C.h:320
+T00675.020,types,Damage-type values,med,source:146C.c:986;use cited by sanity pass;source:146C.h:318
+T00675.021,classes,Enemy-class values,med,source:146C.c:1010;use cited by sanity pass;source:146C.h:319
+T00675.022,affinities,Elemental affinity values,med,source:146C.c:1018;use cited by sanity pass;source:146C.h:320
 T00677.000,id,Consumable item identifier,med,declaration-only;source:146C.h:427
-T00677.001,count,Item count,med,declaration-only;source:146C.h:428
+T00677.001,count,Item count,med,source:146C.c:6748;use cited by sanity pass;source:146C.h:428
 T00677.002,reserved03,Unreferenced byte,low,declaration-only;source:146C.h:429
 T00678.000,id,Consumable item identifier,med,declaration-only;source:146C.h:433
-T00678.001,dropRate,Drop chance,med,declaration-only;source:146C.h:434
+T00678.001,dropRate,Drop chance,med,source:146C.c:1710;use cited by sanity pass;source:146C.h:434
 T00678.002,reserved03,Unreferenced byte,low,declaration-only;source:146C.h:435
 T00682.000,blade,Blade part stats,med,declaration-only;source:146C.h:765
 T00682.001,grip,Grip part stats,med,declaration-only;source:146C.h:766
@@ -49,36 +49,36 @@ T00682.003,material,Blade material,med,declaration-only;source:146C.h:768
 T00682.004,dropRate,Drop chance,med,declaration-only;source:146C.h:769
 T00682.005,index,Inventory index,med,declaration-only;source:146C.h:770
 T00682.006,name,Weapon name in game text encoding,med,declaration-only;source:146C.h:771
-T00683.000,boneCount,Number of bones,med,declaration-only;source:3A1A0.h:403
+T00683.000,boneCount,Number of bones,med,source:30DB0.c:632;use cited by sanity pass;source:3A1A0.h:403
 T00683.001,vertexGroupCount,Number of vertex groups,med,declaration-only;source:3A1A0.h:404
-T00683.002,triangleCount,Number of triangles,med,declaration-only;source:3A1A0.h:405
-T00683.003,quadCount,Number of quads,med,declaration-only;source:3A1A0.h:406
-T00683.004,otherPrimitiveCount,Number of other primitives,med,declaration-only;source:3A1A0.h:407
-T00683.005,actorId,Owning actor slot,med,declaration-only;source:3A1A0.h:408
+T00683.002,triangleCount,Number of triangles,med,source:30DB0.c:818;use cited by sanity pass;source:3A1A0.h:405
+T00683.003,quadCount,Number of quads,med,source:30DB0.c:712;use cited by sanity pass;source:3A1A0.h:406
+T00683.004,otherPrimitiveCount,Number of other primitives,med,source:30DB0.c:818;use cited by sanity pass;source:3A1A0.h:407
+T00683.005,actorId,Owning actor slot,med,source:30DB0.c:497;use cited by sanity pass;source:3A1A0.h:408
 T00683.006,reserved08Bit4,Flag that toggles bytes 0x11 and 0x12 between 0 and 0x40,low,source:30DB0.c:2207
-T00683.007,isWideTexture,Texture uses the wide layout,med,declaration-only;source:3A1A0.h:410
+T00683.007,isWideTexture,Texture uses the wide layout,med,source:30DB0.c:643;use cited by sanity pass;source:3A1A0.h:410
 T00683.008,reserved08Bit6,Flag set together with byte 0x5C0,low,source:30DB0.c:3369
-T00683.009,isDoubleClut,Uses two palettes,med,declaration-only;source:3A1A0.h:412
+T00683.009,isDoubleClut,Uses two palettes,med,source:30DB0.c:787;use cited by sanity pass;source:3A1A0.h:412
 T00683.010,ownerMotionState,Copy of the owner's motion/appearance state during appearance transitions,med,source:40564.c:1876;sanity pass 2026-10-17
-T00683.011,material,Weapon material,med,declaration-only;source:3A1A0.h:414
+T00683.011,material,Weapon material,med,source:30DB0.c:866;use cited by sanity pass;source:3A1A0.h:414
 T00683.012,reserved0ABits0,Unreferenced bits,low,declaration-only;source:3A1A0.h:415
 T00683.013,reserved0ABit7,Unreferenced bit,low,declaration-only;source:3A1A0.h:416
-T00683.014,paletteColorCount,Colors per palette,med,declaration-only;source:3A1A0.h:417
+T00683.014,paletteColorCount,Colors per palette,med,source:30DB0.c:788;use cited by sanity pass;source:3A1A0.h:417
 T00683.015,attachmentSlot,Attachment slot code such as blade or shield,med,source:30DB0.c:678
 T00683.016,attachmentBone,Actor bone the model attaches to,med,source:30DB0.c:679
 T00683.017,modelId,Weapon model identifier,med,declaration-only;source:3A1A0.h:420
-T00683.018,textureSlot,Texture slot,med,declaration-only;source:3A1A0.h:421
-T00683.019,paletteSlotOffset,Palette slot offset,med,declaration-only;source:3A1A0.h:422
+T00683.018,textureSlot,Texture slot,med,source:30DB0.c:629;use cited by sanity pass;source:3A1A0.h:421
+T00683.019,paletteSlotOffset,Palette slot offset,med,source:30DB0.c:669;use cited by sanity pass;source:3A1A0.h:422
 T00683.020,reserved11,Byte set to 0 or 0x40,low,source:30DB0.c:2208
 T00683.021,reserved12,Byte set to 0 or 0x40 and tested with 0x1A,low,source:71618.c:1119
-T00683.022,reserved13,Byte cleared on load,low,declaration-only;source:3A1A0.h:425
+T00683.022,reserved13,Byte cleared on load,low,source:30DB0.c:676;use cited by sanity pass;source:3A1A0.h:425
 T00683.023,reserved14,Unreferenced word,low,declaration-only;source:3A1A0.h:426
 T00683.024,reserved18,Unreferenced short,low,declaration-only;source:3A1A0.h:427
 T00683.025,reserved1A,Short tested with byte 0x12,low,source:71618.c:1119
-T00683.026,sectionOffsets,Offsets of model data sections,med,declaration-only;source:3A1A0.h:429
+T00683.026,sectionOffsets,Offsets of model data sections,med,source:30DB0.c:649;use cited by sanity pass;source:3A1A0.h:429
 T00683.027,boneWorldMatrices,World matrix of each weapon bone,high,source:49268.c:209;source:49268.c:194;sanity pass 2026-10-17
 T00683.028,bones,Bone records copied from model data,high,source:30DB0.c:840
-T00683.029,palettes,Source palettes,med,declaration-only;source:3A1A0.h:432
+T00683.029,palettes,Source palettes,med,source:30DB0.c:801;use cited by sanity pass;source:3A1A0.h:432
 T00683.030,workingPalette,Palette assembled from source palette ranges,high,source:30DB0.c:876
 T00683.031,uploadPalette,Palette copy uploaded to the CLUT,high,source:30DB0.c:877
 T00683.032,reserved5C0,Byte set with bit 0x08.6,low,source:30DB0.c:3368
@@ -97,13 +97,13 @@ T00683.044,reserved5E0,Unreferenced member,low,declaration-only;source:3A1A0.h:4
 T00683.045,reserved5E4,Unreferenced member,low,declaration-only;source:3A1A0.h:448
 T00741.000,characterIds,Character weapon category and material identifiers,high,DataCrystal $00-$03
 T00741.001,shieldIds,Shield and shield-material identifiers then padding,high,DataCrystal $04-$07
-T00741.002,characterShapeOffset,Character SHP section offset,med,declaration-only;source:146C.c:265
+T00741.002,characterShapeOffset,Character SHP section offset,med,source:146C.c:6648;use cited by sanity pass;source:146C.c:265
 T00741.003,characterShapeSize,Character SHP section length,med,declaration-only;source:146C.c:266
 T00741.004,weaponOffset,Weapon WEP section offset,med,declaration-only;source:146C.c:267
 T00741.005,weaponSize,Weapon WEP section length,med,declaration-only;source:146C.c:268
 T00741.006,shieldOffset,Shield WEP section offset,med,declaration-only;source:146C.c:269
 T00741.007,shieldSize,Shield WEP section length,med,declaration-only;source:146C.c:270
-T00741.008,commonAnimationOffset,Common unarmed SEQ offset,med,loaded as animation data at 146C.c:6714;declaration-only;source:146C.c:271
-T00741.009,commonAnimationSize,Common unarmed SEQ length,med,declaration-only;source:146C.c:272
-T00741.010,battleAnimationOffset,Weapon-category battle SEQ offset,med,loaded with weapon category at 146C.c:6706;declaration-only;source:146C.c:273
-T00741.011,battleAnimationSize,Weapon-category battle SEQ length,med,declaration-only;source:146C.c:274
+T00741.008,commonAnimationOffset,Common unarmed SEQ offset,med,loaded as animation data at 146C.c:6714;source:146C.c:6717;use cited by sanity pass;source:146C.c:271
+T00741.009,commonAnimationSize,Common unarmed SEQ length,med,source:146C.c:6714;use cited by sanity pass;source:146C.c:272
+T00741.010,battleAnimationOffset,Weapon-category battle SEQ offset,med,loaded with weapon category at 146C.c:6706;source:146C.c:6709;use cited by sanity pass;source:146C.c:273
+T00741.011,battleAnimationSize,Weapon-category battle SEQ length,med,source:146C.c:6706;use cited by sanity pass;source:146C.c:274

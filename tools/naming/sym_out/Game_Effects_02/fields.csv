@@ -1,7 +1,7 @@
 id,final_name,meaning,confidence,notes
 T00729.000,tag,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:24
-T00729.001,poly,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:25
-T00729.002,drawMode,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:26
+T00729.001,poly,Named in the fork; see cited use,med,source:tiledRings.h:237;use cited by sanity pass;source:tiledRings.h:25
+T00729.002,drawMode,Named in the fork; see cited use,med,source:tiledRings.h:238;use cited by sanity pass;source:tiledRings.h:26
 T00730.000,lifetime,Named in the fork; see cited use,med,source:tiledRings.h:73
 T00730.001,effect,Named in the fork; see cited use,med,source:tiledRings.h:74
 T00730.002,reserved2,Not read by decompiled code,low,declaration-only;source:tiledRings.h:14
@@ -38,8 +38,8 @@ T00734.005,curveSampleDistance,Named in the fork; see cited use,med,source:trail
 T00734.006,texture,Texture animation state,med,source:trails9.h:514
 T00734.007,sampledTransparencyCurve,Named in the fork; see cited use,med,source:trails9.h:555
 T00735.000,tag,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:22
-T00735.001,poly,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:23
-T00735.002,drawMode,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:24
+T00735.001,poly,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:240;use cited by sanity pass;source:EFFECT/PLG162.BIN/0.c:23
+T00735.002,drawMode,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:241;use cited by sanity pass;source:EFFECT/PLG162.BIN/0.c:24
 T00736.000,lifetime,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:74
 T00736.001,effect,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:75
 T00736.002,reserved2,Not read by decompiled code,low,declaration-only;source:EFFECT/PLG162.BIN/0.c:12

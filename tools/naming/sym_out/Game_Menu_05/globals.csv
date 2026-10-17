@@ -227,7 +227,7 @@ G01615,state,Menu::Setup::loadCombinationRecipesSydSizes,Native\Game\src\Menu\Se
 G01616,state,Menu::Setup::isGripCompatibleValidGripFlags,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::IsGripCompatible.,med,source:168.c:410;fork name kept
 G01617,state,Menu::Setup::workshopMaterials,Native\Game\src\Menu\Setup\Combination.c,"Fork name kept; used by Menu::Setup::SelectCombinationArmor, Menu::Setup::SelectCombinationBlade, Menu::Setup::SelectCombinationShield.",med,source:168.c:2861;fork name kept
 G01618,state,Menu::Setup::gemAttachmentAttachedGems,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateGemAttachment.,med,source:168.c:1792;fork name kept
-G01619,state,Menu::Setup::assemblyBladeBladeToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyBlade.,med,source:168.c:819;fork name kept
+G01619,state,Menu::Setup::assemblyBladeToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyBlade.,med,source:168.c:819;fork name kept
 G01620,state,Menu::Setup::assemblyGripBladeToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyGrip.,med,source:168.c:942;fork name kept
 G01621,state,Menu::Setup::assemblyBladeToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateAssembly.,med,source:168.c:1197;fork name kept
 G01622,state,Menu::Setup::threeChoicePromptCancelCombinePos,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateThreeChoicePrompt.,med,source:168.c:241;fork name kept
@@ -241,7 +241,7 @@ G01629,state,Menu::Setup::assemblyGemInfo,Native\Game\src\Menu\Setup\Assembly.c,
 G01630,state,Menu::Setup::gemAttachmentGemSlots,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateGemAttachment.,med,source:168.c:1725;fork name kept
 G01631,state,Menu::Setup::gemToAttach,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectGem.,med,source:168.c:1062;fork name kept
 G01632,state,Menu::Setup::assemblyBladeGripToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyBlade.,med,source:168.c:820;fork name kept
-G01633,state,Menu::Setup::assemblyGripGripToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyGrip.,med,source:168.c:941;fork name kept
+G01633,state,Menu::Setup::assemblyGripToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::SelectAssemblyGrip.,med,source:168.c:941;fork name kept
 G01634,state,Menu::Setup::assemblyGripToAssemble,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateAssembly.,med,source:168.c:1198;fork name kept
 G01635,state,Menu::Setup::gemAttachmentIsShield,Native\Game\src\Menu\Setup\Assembly.c,Fork name kept; used by Menu::Setup::UpdateGemAttachment.,med,source:168.c:1696;fork name kept
 G01636,state,Menu::Setup::disassemblyIsShield,Native\Game\src\Menu\Setup\SetupScreen.c,Fork name kept; used by Menu::Setup::UpdateDisassembly.,med,source:168.c:2120;fork name kept

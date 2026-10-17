@@ -167,7 +167,7 @@ G01817,state,Menu::Results::timeAttackRatingWipeColors,Native\Game\src\Menu\Resu
 G01818,state,Menu::Results::timeAttackResultsHeadingColors,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::DrawTimeAttackResultsHeading.,med,source:3B8.c:1667;fork name kept
 G01819,state,Menu::Results::timeAttackStartColors,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::UpdateTimeAttackStart.,med,source:3B8.c:1062;fork name kept
 G01820,catalog,Menu::Results::timeAttackStartCountdownOffsets,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::UpdateTimeAttackStart.,med,source:3B8.c:1123;fork name kept
-G01821,catalog,Menu::Results::determineRiskbreakerRankRankScores,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DetermineRiskbreakerRank.,med,source:3B8.c:2793;fork name kept
+G01821,catalog,Menu::Results::determineRiskbreakerRankScores,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DetermineRiskbreakerRank.,med,source:3B8.c:2793;fork name kept
 G01822,state,Menu::Results::initializeGameClearTimData,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::InitializeGameClear.,med,source:3B8.c:129;fork name kept
 G01823,state,Menu::Results::initializeTimeAttackResultsTimData,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::InitializeTimeAttackResults.,med,source:3B8.c:268;fork name kept
 G01824,state,Menu::Results::initializeTimeAttackStartTimData,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::InitializeTimeAttackStart.,med,source:3B8.c:381;fork name kept

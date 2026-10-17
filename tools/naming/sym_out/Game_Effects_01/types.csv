@@ -7,7 +7,7 @@ T00265,State,Effects::EffectTimeline,Native\Game\src\Effects\Runtime.h,"Holds a 
 T00266,State,Effects::CameraShakeChannel,Native\Game\src\Effects\Camera.h,"Holds one camera shake channel: phase, shape curve, phase-step modes and curves, amplitude and angle.",med,source:5BF94.c:6652
 T00267,State,Effects::EffectCamera,Native\Game\src\Effects\Camera.h,"Holds the effect camera: pose, shake offsets and clip.",med,source:5BF94.c:6535
 T00268,State,Effects::ParticleGravity,Native\Game\src\Effects\Particles.h,Holds the gravity applied to particles.,high,source:5BF94.c:7836
-T00269,State,Effects::EffectLoadState,Native\Game\src\Effects\Loading.h,Holds effect package loading state; not read by decompiled functions.,low,declaration-only;source:6F014.c:52
+T00269,State,Effects::TextureLoadList,Native\Game\src\Effects\Loading.h,"Lists the effect texture files to load: count, disc locations, upload slots and CLUT flags.",high,source:6F014.c:734;source:6F014.c:633;sanity pass 2026-10-17
 T00270,State,Effects::EffectPackage,Native\Game\src\Effects\Runtime.h,"Points to the loaded effect package blocks: particle definitions, curves, programs, textures, timelines, sounds and the current action request.",high,source:5BF94.c:5487
 T00292,State,Effects::Plg005::AnalyzeGridQuad,Native\Game\src\Effects\Plugins\Plg005.h,Holds one Analyze grid quad of plugin 005.,low,declaration-only;source:EFFECT/PLG005.BIN/18.c:11
 T00294,Packet,Render::TrailPacket,Native\Graphics\src\LegacyPackets.h,Is one trail segment's gouraud quad packet.,med,declaration-only;source:5BF94.c:138

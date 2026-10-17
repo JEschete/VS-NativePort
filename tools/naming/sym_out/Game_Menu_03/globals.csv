@@ -80,9 +80,9 @@ G00907,constexpr,Menu::Framework::kTabNavigationControls,Native\Game\src\Menu\Fr
 G00908,state,Menu::Framework::itemDetailsCursorAnimStep,Native\Game\src\Menu\Framework\EquipmentDetails.c,Fork name kept; used by Menu::Framework::UpdateItemDetails.,med,source:2D10.c:1004;fork name kept
 G00909,state,Menu::Framework::actionMenuCursorAnimStep,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::UpdateActionMenu.,med,source:58EC.c:359;fork name kept
 G00910,state,Menu::Framework::rowSelectionCursorAnimStep,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::UpdateRowSelection.,med,source:58EC.c:1157;fork name kept
-G00911,state,Menu::Framework::quitDelayDelay,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::QuitDelay.,med,source:MENU/MAINMENU.PRG/C48.c:309;fork name kept
+G00911,state,Menu::Framework::quitDelay,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::QuitDelay.,med,source:MENU/MAINMENU.PRG/C48.c:309;fork name kept
 G00912,state,Menu::Framework::dpPpBarAnimState,Native\Game\src\Menu\Framework\EquipmentDetails.c,Fork name kept; used by Menu::Framework::UpdateDpPpBars.,med,source:MENU/MAINMENU.PRG/C48.c:1149;fork name kept
-G00913,catalog,Menu::Framework::rowIconIconUvs,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::DrawRowIcon.,med,source:58EC.c:635;fork name kept
+G00913,catalog,Menu::Framework::rowIconUvs,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::DrawRowIcon.,med,source:58EC.c:635;fork name kept
 G00914,catalog,Menu::Framework::setInformationMessageInfoMessage,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::SetInformationMessage.,med,source:58EC.c:482;fork name kept
 G00915,catalog,Menu::Framework::commandLabelMenuActionRenderPostitions,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::DrawCommandLabel.,med,source:58EC.c:440;fork name kept
 G00916,state,Menu::Framework::commandLabelMenuActionUvs,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::DrawCommandLabel.,med,source:58EC.c:444;fork name kept
@@ -90,7 +90,7 @@ G00917,state,Menu::Inventory::miscItemShortcutMisc,Native\Game\src\Menu\Inventor
 G00918,state,Menu::Framework::equipmentStatPageNegativeStatColors,Native\Game\src\Menu\Framework\EquipmentDetails.c,Fork name kept; used by Menu::Framework::DrawEquipmentStatPage.,med,source:MENU/MAINMENU.PRG/C48.c:831;fork name kept
 G00919,state,Menu::Inventory::miscItemShortcutNoForceCursorMemory,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateMiscItemShortcut.,med,source:MENU/MAINMENU.PRG/C48.c:508;fork name kept
 G00920,state,Menu::Inventory::miscItemShortcutNoItems,Native\Game\src\Menu\Inventory\Inventory.c,Fork name kept; used by Menu::Inventory::UpdateMiscItemShortcut.,med,source:MENU/MAINMENU.PRG/C48.c:585;fork name kept
-G00921,catalog,Menu::Framework::equipmentStatPagePageHeader,Native\Game\src\Menu\Framework\EquipmentDetails.c,Fork name kept; used by Menu::Framework::DrawEquipmentStatPage.,med,source:MENU/MAINMENU.PRG/C48.c:882;fork name kept
+G00921,catalog,Menu::Framework::equipmentStatPageHeader,Native\Game\src\Menu\Framework\EquipmentDetails.c,Fork name kept; used by Menu::Framework::DrawEquipmentStatPage.,med,source:MENU/MAINMENU.PRG/C48.c:882;fork name kept
 G00922,state,Menu::Framework::equipmentStatPagePositiveStatColors,Native\Game\src\Menu\Framework\EquipmentDetails.c,Fork name kept; used by Menu::Framework::DrawEquipmentStatPage.,med,source:MENU/MAINMENU.PRG/C48.c:819;fork name kept
 G00923,state,Menu::Framework::scrollableRowPreviousFrameBuf,Native\Game\src\Menu\Framework\Framework.c,Fork name kept; used by Menu::Framework::DrawScrollableRow.,med,source:58EC.c:1341;fork name kept
 G00924,state,Menu::Framework::itemDetailsPreviousItem,Native\Game\src\Menu\Framework\EquipmentDetails.c,Fork name kept; used by Menu::Framework::UpdateItemDetails.,med,source:2D10.c:891;fork name kept

@@ -387,8 +387,8 @@ new upstream-only types, `func_800D52A4_t`/`_t2`, the effect node's motion block
 four applied fields changed C type only (`AkaoSeqHeader.magic` `char[4]`→`int`, `_mpdEnemy.settings`
 `u_char[8]`→`actorSpawnSettings`, `vs_battle_objectData.material`/`variant` `char`→`u_char`).
 
-Applied rows still include 53 low-confidence globals, 78 low-confidence types and 2,275 low-confidence fields
-(1,042 globals, 457 types and 3,216 fields are `med`; the low/med sanity pass reviews them before copying). Validation checks coverage,
+Applied rows still include 52 low-confidence globals, 77 low-confidence types and 2,246 low-confidence fields
+(1,042 globals, 457 types and 3,227 fields are `med`; §11.3 records the low/med sanity pass). Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -546,6 +546,42 @@ names, locations and collisions; it does not prove semantics or close migration 
   `build_ledgers.py` would renumber every id, so do not. They were named from the read functions in batch
   `CATALOG_GAP` (`Menu::*::UpdateScreen` for the MENU5/9/E entry points, the reward pause pair in `Battle::`,
   the CLUT/background-gradient/tint transforms in `Render::`, `Actors::RunAnimationEvents`). Coverage is 3736/3736.
+
+#### 11.3 Low/med sanity pass (2026-10-17)
+
+After every row was named, the low and med rows were re-checked against evidence that did not exist when they were
+first named (all functions named, later batches' types and globals named, the refreshed upstream index).
+`tools\naming\sanity_pass.py` writes candidates to `tools\naming\sanity\report.csv`; accepted corrections live in
+`tools\naming\sanity_fixes.py` (each cites the code read) and are patched into the owning batch outputs and re-applied.
+**Re-run `sanity_fixes.py` after regenerating any batch.**
+
+- Upstream: for 3,114 low/med members whose struct also exists upstream, upstream uses the same member name as the
+  fork at the same bits (6 differ, and there the fork name is the better one); upstream `symbol_addrs.txt` names
+  equal the pinned ones. The upstream update reveals no new member or data names.
+- Claims checked against all pinned and upstream references: 18 `reserved` members described as unreferenced are
+  read. They are now named from those reads (`GimmickInstance.rotationDeltaX/Y/Z`, `SeqChannel.keyOnVolume` and
+  `effectPitchScaleSlideStep`, `ShpBone.poseLockSlot`, `MpdTileCell.hasEventTrigger`/`hasRoomTrigger`/
+  `blocksSphereTerrain`/`occlusionAndFloorFlags`, `MpdEnvironment.environmentFlags`/`fallDestinationZone`/
+  `fallDestinationRoom`, `ActorLocationQuery.actorIndex`, `WeaponModel.boneWorldMatrices`/`ownerMotionState`), or
+  become `opaque` where the meaning is still unknown. The other 45 reserved members that are referenced are only
+  cleared or copied (their meaning says so). `D_800F22D0` (G00389) said "no reader" but frees the sequence buffer:
+  `Content::legacySequenceBufferOwned`. T00269 said "not read" but is the effect texture load list:
+  `Effects::TextureLoadList` with `assetCount`.
+- Parameter names: an opaque/low member passed straight to a function whose parameter has a meaningful name.
+  Accepted after checking the receiver type: `TargetVolume.kind/angle/scale/position`, `ActionCandidate.targetLimb`,
+  the container screen's `storedContainer`/`transferPreview`/`stagedTransfer`/`gadgetBag`, and the camera shake
+  step curves. Rejected: generic parameter names (`block`, `img`, `src`, `id`) and four PLG005 hits whose receiver
+  is another type with the same member names.
+- Evidence: 439 `declaration-only` members now cite a use. The citing function references this type's member and
+  no other type with a member of that name, so the receiver cannot be another type. 113 remain declaration-only
+  because every citing function is ambiguous.
+- Sampled audit (random seeds 17, 23 and 31): 25 kept fork names, 20 other med globals, 30 med fields with uses, 30
+  declaration-only fields, 20 med types, 25 low named fields and 15 opaque fields were each read against their
+  citation. No wrong name was found. The only issues were six local-static names with a doubled word
+  (`quitDelayDelay`), now merged by `menu_globals.py`.
+- Totals after the pass: globals 1,080 high / 1,042 med / 52 low; types 288 / 457 / 77; fields 1,397 / 3,227 /
+  2,246. Most low fields are `reserved` (never read) or `opaque` (read, meaning not established); they need behavior
+  tracing, not renaming.
 
 The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
 The native audio player must own playback position rather than reading another module's timing globals.

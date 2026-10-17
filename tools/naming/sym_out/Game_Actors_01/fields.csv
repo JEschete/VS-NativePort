@@ -344,7 +344,7 @@ T00255.024,reservedD,Not read by the decompiled users,low,declaration-only;sourc
 T00255.025,reservedE,Not read by the decompiled users,low,source:74088.c:1489
 T00255.026,slot,Gimmick slot,high,source:30DB0.c:348
 T00255.027,reserved10,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:479
-T00255.028,delay,Frames before the motion starts (offset of Field::GimmickPhysicsView.delay),low,declaration-only;source:3A1A0.h:480
+T00255.028,delay,Frames before the motion starts (offset of Field::GimmickPhysicsView.delay),low,source:upstream:44F14.c:1688;use cited by sanity pass;source:3A1A0.h:480
 T00255.029,parent,Parent gimmick; 0xFF when none,med,source:30DB0.c:355
 T00255.030,linkedGimmick,Gimmick whose appearance this one follows,low,source:40564.c:1906
 T00255.031,reserved14,Not read by the decompiled users,low,source:6FC00.c:744
@@ -388,7 +388,7 @@ T00255.068,matrices,Model matrices; entry 4 is the orientation matrix,med,source
 T00255.069,rotationOffset,Rotation added when drawing,med,source:49268.c:81
 T00255.070,reserved114,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:519
 T00255.071,basePalette,Palette before effects,high,source:30DB0.c:346
-T00255.072,pulsedPalette,Palette uploaded with the pulse applied,med,declaration-only;source:3A1A0.h:521
+T00255.072,pulsedPalette,Palette uploaded with the pulse applied,med,source:upstream:40564.c:1710;use cited by sanity pass;source:3A1A0.h:521
 T00255.073,objectInfo,"Object id, material and durability",med,source:30DB0.c:280
 T00255.074,reserved178,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:523
 T00255.075,reserved5ACBits0,Not read by the decompiled users,low,source:30DB0.c:4093

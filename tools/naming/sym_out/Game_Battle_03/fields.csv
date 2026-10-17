@@ -28,7 +28,7 @@ T00412.025,reserved132,Not read through this view,low,declaration-only;source:71
 T00412.026,movementTarget,Actor the movement heads for; 16 for none,med,source:71618.c:826
 T00412.027,reserved15D,Not read through this view,low,declaration-only;source:71618.c:742
 T00412.028,relations,Relation word for each actor,high,source:71618.c:874
-T00412.029,distancesSquared,Squared distance to each actor,med,declaration-only;source:71618.c:744
+T00412.029,distancesSquared,Squared distance to each actor,med,source:71618.c:917;use cited by sanity pass;source:71618.c:744
 T00412.030,reserved224,Not read through this view,low,declaration-only;source:71618.c:745
 T00412.031,candidateOrder,Candidates in priority order,med,source:71618.c:816
 T00413.000,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:71618.c:764
@@ -39,7 +39,7 @@ T00413.004,reserved3Bit3,Not read by decompiled code,low,declaration-only;source
 T00413.005,oldMode,Named in the fork; see cited use,med,source:71618.c:987
 T00413.006,reserved3Bit6,Not read by decompiled code,low,declaration-only;source:71618.c:765
 T00414.000,reserved0,Not read through this view,low,declaration-only;source:71618.c:769
-T00414.001,relations,Relation word for each actor,med,declaration-only;source:71618.c:770
+T00414.001,relations,Relation word for each actor,med,source:71618.c:982;use cited by sanity pass;source:71618.c:770
 T00415.000,tested,Named in the fork; see cited use,med,source:771A8.c:907
 T00415.001,valid,Named in the fork; see cited use,med,source:771A8.c:908
 T00805.000,word,Whole word,med,source:771A8.c:1101
@@ -141,11 +141,11 @@ T00482.000,reserved0Bit0,Not read by decompiled code,low,source:58578.c:416
 T00482.001,opaque1Bit0,"Used, but its meaning is not established",low,source:58578.c:274
 T00482.002,reserved2Bit0,Not read by decompiled code,low,source:5BF94.c:706
 T00482.003,opaque3Bit0,"Used, but its meaning is not established",low,source:58578.c:431
-T00483.000,opaque0,"Used, but its meaning is not established",low,source:146C.c:13451
+T00483.000,kind,Volume kind (as TargetSphereSpec.kind); 2 is transformed by its scale and angle,med,source:58578.c:129;sanity pass 2026-10-17
 T00483.001,opaque1,"Used, but its meaning is not established",low,source:146C.c:13459
-T00483.002,opaque2,"Used, but its meaning is not established",low,source:146C.c:13465
-T00483.003,opaque4,"Used, but its meaning is not established",low,source:146C.c:13450
-T00483.004,opaque8,"Used, but its meaning is not established",low,source:146C.c:13471
+T00483.002,angle,Rotation angle passed to BuildSphereVolumeTransform,med,source:58578.c:135;sanity pass 2026-10-17
+T00483.003,scale,Scale values passed to BuildSphereVolumeTransform (y doubled first),med,source:58578.c:134;sanity pass 2026-10-17
+T00483.004,position,Volume position; offset by half the transformed height and sampled for terrain,med,source:58578.c:137;source:5BF94.c:661;sanity pass 2026-10-17
 T00484.000,opaque0,"Used, but its meaning is not established",low,source:5BE50.c:73
 T00484.001,reserved6,Not read by decompiled code,low,declaration-only;source:58578.c:56
 T00484.002,reserved7,Not read by decompiled code,low,declaration-only;source:58578.c:57
@@ -256,7 +256,7 @@ T00517.004,threshold,Named in the fork; see cited use (same bits as T00350 thres
 T00517.005,reserved7Bit5,Not read by decompiled code,low,declaration-only;source:6F014.c:104
 T00517.006,distanceSquared,Named in the fork; see cited use (same bits as T00350 distanceSquared),med,source:71618.c:663
 T00517.007,targetId,Named in the fork; see cited use (same bits as T00350 targetId),med,source:71618.c:623
-T00517.008,opaqueCBit4,"Used, but its meaning is not established",low,source:71618.c:1022
+T00517.008,targetLimb,Limb the candidate's action targets (passed to PreviewActionAgainstLimb),high,source:74088.c:523;sanity pass 2026-10-17
 T00517.009,opaqueCBit7,"Used, but its meaning is not established",low,source:71618.c:1023
 T00517.010,weight,Named in the fork; see cited use (same bits as T00350 weight),med,source:74088.c:553
 T00517.011,reservedFBit3,Not read by decompiled code,low,declaration-only;source:6F014.c:110
@@ -421,7 +421,7 @@ T00532.030,reserved28,Not read through this view,low,declaration-only;source:ups
 T00532.031,settingsBit14,Bit 14 of the AI settings word,low,source:upstream:6E644.c:3184
 T00532.032,hasTaggedBone3,Model has a bone tagged 3,med,declaration-only;source:upstream:6E644.c:201
 T00532.033,settingsModeLow,Low bit of the settings mode field,low,source:74088.c:642
-T00532.034,settingsBits21,Bits 21-22 of the AI settings word; 3 excludes the actor from relations,low,declaration-only;source:6F014.c:153
+T00532.034,settingsBits21,Bits 21-22 of the AI settings word; 3 excludes the actor from relations,low,source:upstream:6E644.c:2076;use cited by sanity pass;source:6F014.c:153
 T00532.035,reserved2D,Not read through this view,low,declaration-only;source:upstream:6E644.c:204
 T00532.036,settingsBit25,Bit 25 of the AI settings word,low,source:upstream:6E644.c:2046
 T00532.037,reserved31,Not read through this view,low,declaration-only;source:upstream:6E644.c:206
@@ -449,12 +449,12 @@ T00532.058,opaque98,"Used, but its meaning is not established",low,source:73700.
 T00532.059,opaque9A,"Used, but its meaning is not established",low,source:73700.c:487
 T00532.060,reserved9C,Not read through this view,low,declaration-only;source:6F014.c:174
 T00532.061,maxRange,Reach in units of 32,high,source:71618.c:793
-T00532.062,moveDistance,Distance of the current move,med,declaration-only;source:6F014.c:176
+T00532.062,moveDistance,Distance of the current move,med,source:upstream:6E644.c:3068;use cited by sanity pass;source:6F014.c:176
 T00532.063,bodyHeight,Model height used for occlusion and reach,low,source:upstream:6E644.c:2845
 T00532.064,facingDelay,Frames before re-facing a target,low,source:upstream:6E644.c:3468
 T00532.065,reservedBC,Not read through this view,low,declaration-only;source:upstream:6E644.c:234
 T00532.066,flightHeight,Flight height above the ground,med,source:771A8.c:1312
-T00532.067,wanderPhase,Wander phase counter,low,declaration-only;source:6F014.c:178
+T00532.067,wanderPhase,Wander phase counter,low,source:upstream:6E644.c:3345;use cited by sanity pass;source:6F014.c:178
 T00532.068,wanderTimer,Wander timer,med,source:upstream:6E644.c:3307
 T00532.069,wanderRangeSquared,Squared wander radius,med,source:upstream:6E644.c:3349
 T00532.070,reservedC8,Not read through this view,low,declaration-only;source:upstream:6E644.c:239
@@ -482,12 +482,12 @@ T00532.091,reserved12B,Not read through this view,low,declaration-only;source:6F
 T00532.092,behaviorMode,"Behavior mode (1 reacting, 2 wandering)",low,source:upstream:6E644.c:2020
 T00532.093,planMode,"Plan mode of the queued action (1 approach, 2 planned tile, 7 retreat)",med,source:upstream:6E644.c:1037
 T00532.094,opaque12F,"Used, but its meaning is not established",low,source:73700.c:419
-T00532.095,opaque130,"Used, but its meaning is not established",low,declaration-only;source:6F014.c:184
+T00532.095,opaque130,"Used, but its meaning is not established",low,source:upstream:6E644.c:1727;use cited by sanity pass;source:6F014.c:184
 T00532.096,actionStatus,Status of the selected action,low,source:71618.c:620
 T00532.097,reserved132,Not read through this view,low,declaration-only;source:6F014.c:186
 T00532.098,plannedTile,Tile the plan moves to,high,source:upstream:6E644.c:1093
 T00532.099,opaque138,"Used, but its meaning is not established",low,source:6FA60.c:409
-T00532.100,opaque13A,"Used, but its meaning is not established",low,declaration-only;source:6F014.c:188
+T00532.100,opaque13A,"Used, but its meaning is not established",low,source:upstream:6E644.c:3494;use cited by sanity pass;source:6F014.c:188
 T00532.101,opaque13C,"Used, but its meaning is not established",low,source:upstream:6E644.c:3535
 T00532.102,reserved13E,Not read through this view,low,declaration-only;source:upstream:6E644.c:271
 T00532.103,minActionDelay,Minimum delay before the next action,med,source:71618.c:1029
@@ -507,7 +507,7 @@ T00532.116,moveX,Target X in 20.12 fixed point,med,source:771A8.c:1315
 T00532.117,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:1314
 T00532.118,moveY,Target Y in 20.12 fixed point,med,source:771A8.c:1313
 T00532.119,heading,Heading in eighth turns,med,source:771A8.c:1305
-T00532.120,angle,Facing angle,med,declaration-only;source:6F014.c:196
+T00532.120,angle,Facing angle,med,source:upstream:6E644.c:3486;use cited by sanity pass;source:6F014.c:196
 T00532.121,reserved18C,Not read through this view,low,declaration-only;source:upstream:6E644.c:290
 T00532.122,opaque19A,"Used, but its meaning is not established",low,source:upstream:6E644.c:2686
 T00532.123,reserved19B,Not read through this view,low,declaration-only;source:upstream:6E644.c:292
@@ -518,7 +518,7 @@ T00532.127,reserved224,Not read through this view,low,declaration-only;source:6F
 T00532.128,stallCounter,Frames without progress,low,source:771A8.c:1325
 T00532.129,currentCandidate,Candidate being executed,med,source:71618.c:1017
 T00532.130,actionSlots,Action slot configuration by row and column,med,source:74088.c:910
-T00532.131,candidates,Action candidates,med,declaration-only;source:6F014.c:204
+T00532.131,candidates,Action candidates,med,source:upstream:6E644.c:2540;use cited by sanity pass;source:6F014.c:204
 T00532.132,candidateOrder,Candidates in priority order,med,source:71618.c:622
 T00532.133,candidateCount,Number of candidates,high,source:71618.c:629
 T00532.134,reserved474,Not read through this view,low,declaration-only;source:upstream:6E644.c:303

@@ -253,7 +253,12 @@ class MenuGlobals:
                 continue
             leaf = camel(name)
             if owner and not leaf.lower().startswith(context(owner).lower()[:5]):
-                leaf = context(owner) + leaf[0].upper() + leaf[1:]
+                ctx, rest = context(owner), leaf[0].upper() + leaf[1:]
+                last = re.findall(r"[A-Z]?[a-z0-9]+$", ctx)
+                if last and rest.lower().startswith(last[0].lower()) and \
+                        (len(rest) == len(last[0]) or rest[len(last[0])].isupper()):
+                    rest = rest[len(last[0]):]  # quitDelay + Delay, rowIcon + IconUvs
+                leaf = ctx + (rest[0].upper() + rest[1:] if rest else "")
             fnames = sorted({u[3][0] for u in real if u[3]})
             purpose = "Fork name kept; used by " + ", ".join(fnames[:3]) + (f" and {len(fnames) - 3} more" if len(fnames) > 3 else "") + "."
             disp = r["proposed_disposition"] if r["proposed_disposition"] in ("state", "catalog", "constexpr", "asset") else "state"

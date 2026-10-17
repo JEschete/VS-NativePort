@@ -74,7 +74,7 @@ T00618.002,x,Named in the fork; see cited use,med,source:58EC.c:659
 T00814.000,t,Named in the fork; see cited use,med,source:D4.c:1509
 T00814.001,all,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:4165
 T00644.000,x,Named in the fork; see cited use,med,source:146C.c:15863
-T00644.001,y,Named in the fork; see cited use,med,declaration-only;source:2EA3C.h:6
+T00644.001,y,Named in the fork; see cited use,med,source:4D8.c:1091;use cited by sanity pass;source:2EA3C.h:6
 T00092.000,None,InformationBoxHeader None,med,declaration-only;source:5BF94.h:539
 T00092.001,Caution,InformationBoxHeader Caution,med,declaration-only;source:5BF94.h:540
 T00092.002,Information,InformationBoxHeader Information,med,declaration-only;source:5BF94.h:541
@@ -495,7 +495,7 @@ T00701.000,id,Named in the fork; see cited use,med,source:146C.c:9664
 T00701.001,count,Named in the fork; see cited use,med,source:146C.c:9699
 T00701.002,index,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:105
 T00702.000,index,Named in the fork; see cited use,med,source:146C.c:1303
-T00702.001,isEquipped,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:96
+T00702.001,isEquipped,Named in the fork; see cited use,med,source:2D10.c:453;use cited by sanity pass;source:func_8006B57C_t.h:96
 T00702.002,reserved2,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:97
 T00702.003,base,Named in the fork; see cited use,med,source:146C.c:1305
 T00702.004,gems,Named in the fork; see cited use,med,source:146C.c:1310
@@ -510,7 +510,7 @@ T00704.001,shields,Named in the fork; see cited use,med,source:BATTLE/INITBTL.PR
 T00704.002,blades,Named in the fork; see cited use,med,source:146C.c:1270
 T00704.003,grips,Named in the fork; see cited use,med,source:146C.c:1276
 T00704.004,armor,Named in the fork; see cited use,med,source:146C.c:9680
-T00704.005,gems,Named in the fork; see cited use,med,declaration-only;source:main.h:402
+T00704.005,gems,Named in the fork; see cited use,med,source:146C.c:9688;use cited by sanity pass;source:main.h:402
 T00704.006,misc,Named in the fork; see cited use,med,source:146C.c:9698
 T00706.000,titles,Named in the fork; see cited use,med,source:D4.c:1577
 T00706.001,enemyKills,Named in the fork; see cited use,med,source:146C.c:1780
@@ -539,7 +539,7 @@ T00707.003,weaponStatChange,Named in the fork; see cited use,med,source:2842C.c:
 T00707.004,armorStatChange,Named in the fork; see cited use,med,source:2842C.c:2702
 T00707.005,cursorMemory,Named in the fork; see cited use,med,source:5BF94.c:2837
 T00707.006,menuFlags,Named in the fork; see cited use,med,source:5BF94.c:2833
-T00707.007,slotState,Named in the fork; see cited use,med,declaration-only;source:main.h:152
+T00707.007,slotState,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:2726;use cited by sanity pass;source:main.h:152
 T00707.008,information,Named in the fork; see cited use,med,source:146C.c:4077
 T00707.009,simpleMap,Named in the fork; see cited use,med,source:146C.c:15834
 T00707.010,monoSound,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:725
@@ -554,14 +554,14 @@ T00710.000,lStickX,Named in the fork; see cited use,med,source:4D8.c:611
 T00710.001,lStickY,Named in the fork; see cited use,med,source:4D8.c:612
 T00710.002,rStickX,Named in the fork; see cited use,med,source:5BF94.c:667
 T00710.003,rStickY,Named in the fork; see cited use,med,source:5BF94.c:668
-T00711.000,items,Items by category,med,declaration-only;source:func_8006B57C_t.h:130
+T00711.000,items,Items by category,med,source:2D10.c:177;use cited by sanity pass;source:func_8006B57C_t.h:130
 T00711.001,indices,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:4090
 T00712.000,weapons,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3844
 T00712.001,shields,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3888
-T00712.002,blades,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:111
-T00712.003,grips,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:112
+T00712.002,blades,Named in the fork; see cited use,med,source:234.c:32;use cited by sanity pass;source:func_8006B57C_t.h:111
+T00712.003,grips,Named in the fork; see cited use,med,source:234.c:38;use cited by sanity pass;source:func_8006B57C_t.h:112
 T00712.004,armor,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3903
-T00712.005,gems,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:114
+T00712.005,gems,Named in the fork; see cited use,med,source:234.c:212;use cited by sanity pass;source:func_8006B57C_t.h:114
 T00712.006,misc,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3930
 T00713.000,weapons,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3844
 T00713.001,blades,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3850
@@ -572,12 +572,12 @@ T00713.005,gems,Named in the fork; see cited use,med,declaration-only;source:fun
 T00713.006,misc,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3930
 T00714.000,savedInventory,Copy of the inventory,med,source:MENU/MENU7.PRG/260.c:4052
 T00714.001,savedInventoryIndices,Copy of the inventory order,med,source:MENU/MENU7.PRG/260.c:4054
-T00714.002,opaqueFB0,"Used, but its meaning is not established",low,source:MENU/MENU7.PRG/260.c:4056
-T00714.003,opaque4BB0,"Used, but its meaning is not established",low,source:234.c:263
-T00714.004,opaque87B0,"Used, but its meaning is not established",low,source:234.c:271
+T00714.002,storedContainer,Container contents copied into the working container when the screen opens,med,source:234.c:3158;sanity pass 2026-10-17
+T00714.003,transferPreview,"Destination contents with the staged miscellaneous items added, for capacity counts",med,source:234.c:263;source:234.c:280;sanity pass 2026-10-17
+T00714.004,stagedTransfer,"Items staged for transfer, counted with the destination for capacity",med,source:234.c:2434;source:234.c:3340;sanity pass 2026-10-17
 T00714.005,itemsToTransfer,Named in the fork; see cited use,med,source:234.c:267
 T00714.006,container,The container,med,source:234.c:2440
-T00714.007,gadgetBag,The bag's working copy,low,source:234.c:560
+T00714.007,gadgetBag,Working gadget bag; browsed with the gadget bag item capacities,med,source:234.c:2439;sanity pass 2026-10-17
 T00738.000,time,Named in the fork; see cited use,med,source:D4.c:2294
 T00738.001,round,Named in the fork; see cited use,med,source:238.c:2600
-T00738.002,difficulty,Named in the fork; see cited use,med,declaration-only;source:main.h:178
+T00738.002,difficulty,Named in the fork; see cited use,med,source:22C.c:4723;use cited by sanity pass;source:main.h:178

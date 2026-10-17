@@ -187,23 +187,23 @@ T00598.014,recentRoomEnemyStates,Recent room enemy states,high,source:260.c:833
 T00598.015,artsStatus,Break art progress,high,source:260.c:834
 T00598.016,containerData,Container contents,high,source:260.c:830
 T00598.017,reserved59E0,Zero padding to the end of the 23 blocks,low,source:260.c:752;no member access;source:260.c:107
-T00599.000,cardHeader,Card file header with title and icon palette,med,declaration-only;source:22C.c:264;same layout as T00598
-T00599.001,iconBitmap,Card icon bitmap,med,declaration-only;source:22C.c:265;same layout as T00598
-T00599.002,reserved100,Zero block included in checksum block 1,low,declaration-only;source:22C.c:266;same layout as T00598
-T00599.003,protectedHeader,Cipher key slot header summary and block checksums,med,declaration-only;source:22C.c:267;same layout as T00598
-T00599.004,stateFlags,Game state flags,med,declaration-only;source:22C.c:268;same layout as T00598
-T00599.005,learnedActions,Learned action flags,med,declaration-only;source:22C.c:269;same layout as T00598
-T00599.006,mapStatus,Visited room and area flags,med,declaration-only;source:22C.c:270;same layout as T00598
-T00599.007,settings,Player settings,med,declaration-only;source:22C.c:271;same layout as T00598
-T00599.008,ashleySnapshot,Ashley's statistics snapshot,med,declaration-only;source:22C.c:272;same layout as T00598
-T00599.009,inventory,Inventory,med,declaration-only;source:22C.c:273;same layout as T00598
-T00599.010,inventoryIndices,Inventory ordering indices,med,declaration-only;source:22C.c:274;same layout as T00598
-T00599.011,entryDoor,Door the player entered the current room through,med,declaration-only;source:22C.c:275;same layout as T00598
-T00599.012,scoreData,Score and record statistics,med,declaration-only;source:22C.c:276;same layout as T00598
-T00599.013,roomStateSlot,Current room state slot,med,declaration-only;source:22C.c:277;same layout as T00598
-T00599.014,recentRoomEnemyStates,Recent room enemy states,med,declaration-only;source:22C.c:278;same layout as T00598
-T00599.015,artsStatus,Break art progress,med,declaration-only;source:22C.c:279;same layout as T00598
-T00599.016,containerData,Container contents,med,declaration-only;source:22C.c:280;same layout as T00598
+T00599.000,cardHeader,Card file header with title and icon palette,med,source:MENU/MENU7.PRG/260.c:753;use cited by sanity pass;source:22C.c:264;same layout as T00598
+T00599.001,iconBitmap,Card icon bitmap,med,source:MENU/MENU7.PRG/260.c:773;use cited by sanity pass;source:22C.c:265;same layout as T00598
+T00599.002,reserved100,Zero block included in checksum block 1,low,source:MENU/MENU7.PRG/260.c:376;use cited by sanity pass;source:22C.c:266;same layout as T00598
+T00599.003,protectedHeader,Cipher key slot header summary and block checksums,med,source:MENU/MENU7.PRG/260.c:369;use cited by sanity pass;source:22C.c:267;same layout as T00598
+T00599.004,stateFlags,Game state flags,med,source:22C.c:596;use cited by sanity pass;source:22C.c:268;same layout as T00598
+T00599.005,learnedActions,Learned action flags,med,source:22C.c:597;use cited by sanity pass;source:22C.c:269;same layout as T00598
+T00599.006,mapStatus,Visited room and area flags,med,source:MENU/MENU7.PRG/260.c:711;use cited by sanity pass;source:22C.c:270;same layout as T00598
+T00599.007,settings,Player settings,med,source:22C.c:599;use cited by sanity pass;source:22C.c:271;same layout as T00598
+T00599.008,ashleySnapshot,Ashley's statistics snapshot,med,source:MENU/MENU7.PRG/260.c:713;use cited by sanity pass;source:22C.c:272;same layout as T00598
+T00599.009,inventory,Inventory,med,source:22C.c:601;use cited by sanity pass;source:22C.c:273;same layout as T00598
+T00599.010,inventoryIndices,Inventory ordering indices,med,source:MENU/MENU7.PRG/260.c:716;use cited by sanity pass;source:22C.c:274;same layout as T00598
+T00599.011,entryDoor,Door the player entered the current room through,med,source:MENU/MENU7.PRG/260.c:717;use cited by sanity pass;source:22C.c:275;same layout as T00598
+T00599.012,scoreData,Score and record statistics,med,source:22C.c:605;use cited by sanity pass;source:22C.c:276;same layout as T00598
+T00599.013,roomStateSlot,Current room state slot,med,source:MENU/MENU7.PRG/260.c:719;use cited by sanity pass;source:22C.c:277;same layout as T00598
+T00599.014,recentRoomEnemyStates,Recent room enemy states,med,source:MENU/MENU7.PRG/260.c:720;use cited by sanity pass;source:22C.c:278;same layout as T00598
+T00599.015,artsStatus,Break art progress,med,source:MENU/MENU7.PRG/260.c:722;use cited by sanity pass;source:22C.c:279;same layout as T00598
+T00599.016,containerData,Container contents,med,source:MENU/MENU7.PRG/260.c:781;use cited by sanity pass;source:22C.c:280;same layout as T00598
 T00599.017,reserved59E0,Zero padding to the end of the 23 blocks,low,declaration-only;source:22C.c:281;same layout as T00598
 T00600.000,cipherKey,Key for the save byte stream cipher,high,source:260.c:786
 T00600.001,slotHeader,Slot state generation and format version,high,source:260.c:787

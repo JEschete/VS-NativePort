@@ -175,6 +175,74 @@ def main() -> int:
             rows.append(["F-USE-AVAILABLE", f["id"], T[f["type_id"]]["final_name"], f["final_name"], f["name"], "",
                          f["confidence"], "field refs exist"])
 
+    # F-PARAM: an opaque/low member passed straight to a function whose parameter has a meaningful name
+    params = {}
+    for p in ("", "upstream:"):
+        for fn in g.trees[p].ix["functions"].values():
+            names = [x["name"] for x in fn.get("params") or []]
+            if any(meaningful(n) and not re.fullmatch(r"arg\d+|a\d|p\d?", n) for n in names):
+                params.setdefault(fn["name"], names)
+    call = re.compile(r"\b(\w+)\s*\(")
+
+    def split_args(s: str, start: int) -> list[str]:
+        depth, cur, out = 0, "", []
+        for ch in s[start:]:
+            if ch == "(":
+                depth += 1
+                if depth == 1:
+                    continue
+            elif ch == ")":
+                depth -= 1
+                if depth == 0:
+                    out.append(cur.strip())
+                    return out
+            elif ch == "," and depth == 1:
+                out.append(cur.strip())
+                cur = ""
+                continue
+            if depth >= 1:
+                cur += ch
+        return out
+
+    for f in F:
+        if f["confidence"] == "high" or not (f["final_name"].startswith("opaque") or f["confidence"] == "low") \
+                or f["type_id"] not in T or f["value"] != "":
+            continue
+        t = T[f["type_id"]]
+        tnames = {t["name"], *t["aliases"].split()}
+        member = re.compile(r"(\.|->)\s*" + re.escape(f["name"]) + r"$")
+        found = None
+        for p in ("", "upstream:"):
+            tree = g.trees[p]
+            for fn in tree.ix["functions"].values():
+                if not any(f"{n}.{f['name']}" in (fn.get("refs") or {}).get("field", {}) for n in tnames):
+                    continue
+                ls = tree.lines(fn["file"].removeprefix("src/"))
+                for k in range(fn["line"] - 1, min(fn["end_line"], len(ls))):
+                    line = ls[k]
+                    for m in call.finditer(line):
+                        callee = m.group(1)
+                        if callee not in params:
+                            continue
+                        args = split_args(line, m.end() - 1)
+                        for i, a in enumerate(args):
+                            if member.search(a) and i < len(params[callee]) and meaningful(params[callee][i]) \
+                                    and not re.fullmatch(r"arg\d+", params[callee][i]):
+                                found = (params[callee][i], f"{callee} param {i} ({p or 'pinned'}"
+                                         f" {fn['file'].removeprefix('src/')}:{k + 1})")
+                                break
+                        if found:
+                            break
+                    if found:
+                        break
+                if found:
+                    break
+            if found:
+                break
+        if found and found[0].lower() not in f["final_name"].lower():
+            rows.append(["F-PARAM", f["id"], t["final_name"], f["final_name"], f["name"], found[0], f["confidence"],
+                         found[1]])
+
     OUT.mkdir(parents=True, exist_ok=True)
     with open(OUT / "report.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh, lineterminator="\n")

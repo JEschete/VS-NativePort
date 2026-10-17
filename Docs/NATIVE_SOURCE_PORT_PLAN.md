@@ -615,7 +615,7 @@ Fixed-step simulation, the original RNG sequence, no wall-clock in game logic, a
    `tools\ledger\scan_native.py` and the CONTENT ledger generator remain pending.
 5. In progress: every function (3,736, including the 57 the scanner missed), global (2,174), type (822) and
    field/enumerator (6,870) is named; all 24 symbol batches are applied with cited source evidence
-   (NAMING_CONVENTIONS.md §11.1-11.2). Remaining: the low/med sanity pass before copying.
+   (NAMING_CONVENTIONS.md §11.1-11.2). The low/med sanity pass is done (NAMING_CONVENTIONS.md 11.3).
    `tools\port\copy_to_native.py` must refuse any global/type/field name whose ledger row lacks evidence.
    See [NAMING_CONVENTIONS.md §11.2](NAMING_CONVENTIONS.md#112-saved-naming-progress) for per-batch status and
    unresolved identity/layout questions. Follow §11.1 recovery limits rather than relaunching the original fan-out.

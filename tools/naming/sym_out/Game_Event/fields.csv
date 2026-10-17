@@ -22,38 +22,38 @@ T00219.005,brightness,Layer brightness; zero hides the layer,high,source:5BF94.c
 T00219.006,gridAndImageId,Merged view of tile columns rows and image ID,med,view merges gim_t columns rows and id;declaration-only;source:4A0A8.c:136
 T00219.007,offsetX,Horizontal screen offset in pixels,high,source:4A0A8.c:869
 T00219.008,offsetY,Vertical screen offset in pixels,high,source:4A0A8.c:870
-T00219.009,scaleFixed12,Layer scale in 4.12 fixed point,med,initialized to 0x1000 at 5BF94.c:2367;declaration-only;source:4A0A8.c:139
+T00219.009,scaleFixed12,Layer scale in 4.12 fixed point,med,initialized to 0x1000 at 5BF94.c:2367;source:4A0A8.c:873;use cited by sanity pass;source:4A0A8.c:139
 T00219.010,loaderAndImageData,Opaque view of palette selector buffers disc request ripple table and tile table,med,view spans gim_t +0x10 to +0x3F8;replace with typed native fields;declaration-only;source:4A0A8.c:140
 T00258.000,reserved00,Unreferenced leading byte,low,declaration-only;source:4A0A8.c:159
 T00258.001,reserved01,Unreferenced byte,low,declaration-only;source:4A0A8.c:160
 T00258.002,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:2998
-T00258.003,durationFrames,Tween duration or zero when inactive,med,G00442 aliases this byte;declaration-only;source:4A0A8.c:162
+T00258.003,durationFrames,Tween duration or zero when inactive,med,G00442 aliases this byte;source:4A0A8.c:2205;use cited by sanity pass;source:4A0A8.c:162
 T00258.004,windDirection,Current wind direction angle in 4096 units,high,source:4A0A8.c:2999
-T00258.005,startWindDirection,Initial wind direction angle,med,declaration-only;source:4A0A8.c:164
-T00258.006,deltaWindDirection,Shortest wrapped change in wind direction,med,declaration-only;source:4A0A8.c:165
+T00258.005,startWindDirection,Initial wind direction angle,med,source:4A0A8.c:2198;use cited by sanity pass;source:4A0A8.c:164
+T00258.006,deltaWindDirection,Shortest wrapped change in wind direction,med,source:4A0A8.c:2204;use cited by sanity pass;source:4A0A8.c:165
 T00258.007,windStrength,Current wind strength passed with direction to weather,med,source:4A0A8.c:3001
-T00258.008,startWindStrength,Initial wind strength,med,declaration-only;source:4A0A8.c:167
-T00258.009,deltaWindStrength,Target minus initial wind strength,med,declaration-only;source:4A0A8.c:168
+T00258.008,startWindStrength,Initial wind strength,med,source:4A0A8.c:2197;use cited by sanity pass;source:4A0A8.c:167
+T00258.009,deltaWindStrength,Target minus initial wind strength,med,source:4A0A8.c:2196;use cited by sanity pass;source:4A0A8.c:168
 T00258.010,intensity,Current weather intensity,high,source:4A0A8.c:3002
-T00258.011,startIntensity,Initial weather intensity,med,declaration-only;source:4A0A8.c:170
-T00258.012,deltaIntensity,Target minus initial weather intensity,med,declaration-only;source:4A0A8.c:171
-T00259.000,lookAt,Look-at endpoint camera track,med,declaration-only;source:4A0A8.c:101
-T00259.001,eye,Eye endpoint camera track,med,declaration-only;source:4A0A8.c:102
+T00258.011,startIntensity,Initial weather intensity,med,source:4A0A8.c:2194;use cited by sanity pass;source:4A0A8.c:170
+T00258.012,deltaIntensity,Target minus initial weather intensity,med,source:4A0A8.c:2195;use cited by sanity pass;source:4A0A8.c:171
+T00259.000,lookAt,Look-at endpoint camera track,med,source:4A0A8.c:3026;use cited by sanity pass;source:4A0A8.c:101
+T00259.001,eye,Eye endpoint camera track,med,source:4A0A8.c:3025;use cited by sanity pass;source:4A0A8.c:102
 T00259.002,cameraRoll,Camera roll angle tween,high,source:4A0A8.c:3605
 T00259.003,capturedScreenRoll,Captured-screen roll angle tween,high,source:4A0A8.c:3608
-T00259.004,projectionDistance,Projection distance tween,med,declaration-only;source:4A0A8.c:105
-T00259.005,nearClip,Near-clip tween,med,declaration-only;source:4A0A8.c:106
-T00259.006,farClip,Far-clip tween,med,declaration-only;source:4A0A8.c:107
-T00259.007,shakeOscillatorA,Active shake count followed by the first oscillator,med,oscillators actually start at +0x1A6;first short is active count;declaration-only;source:4A0A8.c:108
-T00259.008,shakeOscillatorB,Second shake oscillator view,med,declared offset is two bytes before actual oscillator data;declaration-only;source:4A0A8.c:109
+T00259.004,projectionDistance,Projection distance tween,med,source:4A0A8.c:3068;use cited by sanity pass;source:4A0A8.c:105
+T00259.005,nearClip,Near-clip tween,med,source:4A0A8.c:3071;use cited by sanity pass;source:4A0A8.c:106
+T00259.006,farClip,Far-clip tween,med,source:4A0A8.c:3074;use cited by sanity pass;source:4A0A8.c:107
+T00259.007,shakeOscillatorA,Active shake count followed by the first oscillator,med,oscillators actually start at +0x1A6;first short is active count;source:4A0A8.c:3077;use cited by sanity pass;source:4A0A8.c:108
+T00259.008,shakeOscillatorB,Second shake oscillator view,med,declared offset is two bytes before actual oscillator data;source:4A0A8.c:3078;use cited by sanity pass;source:4A0A8.c:109
 T00259.009,reserved1BC,Tail bytes of the second oscillator view,low,covered by oscillator read at +0x1A6;declaration-only;source:4A0A8.c:110
 T00259.010,shakeEyeOffsetX,Summed eye shake X offset,high,source:4A0A8.c:4006
-T00259.011,shakeEyeOffsetY,Summed eye shake Y offset,med,declaration-only;source:4A0A8.c:112
-T00259.012,shakeEyeOffsetZ,Summed eye shake Z offset,med,declaration-only;source:4A0A8.c:113
+T00259.011,shakeEyeOffsetY,Summed eye shake Y offset,med,source:4A0A8.c:4010;use cited by sanity pass;source:4A0A8.c:112
+T00259.012,shakeEyeOffsetZ,Summed eye shake Z offset,med,source:4A0A8.c:4011;use cited by sanity pass;source:4A0A8.c:113
 T00259.013,reserved1C4,Unreferenced short between shake offsets,low,declaration-only;source:4A0A8.c:114
 T00259.014,shakeLookAtOffsetX,Summed look-at shake X offset,high,source:4A0A8.c:4009
-T00259.015,shakeLookAtOffsetY,Summed look-at shake Y offset,med,declaration-only;source:4A0A8.c:116
-T00259.016,shakeLookAtOffsetZ,Summed look-at shake Z offset,med,declaration-only;source:4A0A8.c:117
+T00259.015,shakeLookAtOffsetY,Summed look-at shake Y offset,med,source:4A0A8.c:4013;use cited by sanity pass;source:4A0A8.c:116
+T00259.016,shakeLookAtOffsetZ,Summed look-at shake Z offset,med,source:4A0A8.c:4014;use cited by sanity pass;source:4A0A8.c:117
 T00259.017,actorQueryScratch,Buffer receiving actor position and rotation queries,med,source:4A0A8.c:3331;rotation read at +0x1DA
 T00259.018,originActorId,Actor whose position offsets the camera or 0x2000 for none,high,source:4A0A8.c:3079
 T00259.019,reserved1EA,Unreferenced short after origin actor ID,low,declaration-only;source:4A0A8.c:120
@@ -61,56 +61,56 @@ T00259.020,originOffset,Origin actor position in 20.12 fixed point,high,source:4
 T00259.021,screenScale,Screen scale tween,high,source:4A0A8.c:3700
 T00259.022,screenTint,Screen tint color tween,high,source:4A0A8.c:3716
 T00259.023,screenTranslation,Screen translation tween,high,source:4A0A8.c:3732
-T00259.024,screenEffectTween,Scripted screen effect value and parameter tween,med,opcode 237 at 4A0A8.c:3749;declaration-only;source:4A0A8.c:125
+T00259.024,screenEffectTween,Scripted screen effect value and parameter tween,med,opcode 237 at 4A0A8.c:3749;source:4A0A8.c:3066;use cited by sanity pass;source:4A0A8.c:125
 T00259.025,lastTerrainPosition,Last terrain-following candidate position,high,source:4A0A8.c:3551
 T00260.000,motionMode,Track motion mode; 15 is idle,high,source:4A0A8.c:3212
 T00260.001,easingPrimary,First easing selector for the active motion mode,med,source:4A0A8.c:3224
 T00260.002,easingSecondary,Second easing selector for orbit or spiral modes,med,source:4A0A8.c:3248
 T00260.003,easingTertiary,Third easing selector for orbit or spiral modes,med,source:4A0A8.c:3249
-T00260.004,elapsedFrames,Elapsed motion frames,med,declaration-only;source:4A0A8.c:24
-T00260.005,durationFrames,Motion duration in frames,med,declaration-only;source:4A0A8.c:25
+T00260.004,elapsedFrames,Elapsed motion frames,med,source:4A0A8.c:3222;use cited by sanity pass;source:4A0A8.c:24
+T00260.005,durationFrames,Motion duration in frames,med,source:4A0A8.c:3224;use cited by sanity pass;source:4A0A8.c:25
 T00260.006,followRequest,Requested follow mode,med,source:4A0A8.c:4073
-T00260.007,isFollowing,Follow currently engaged,med,declaration-only;source:4A0A8.c:27
-T00260.008,motionScalar,Mode-specific radius actor ID or step length,med,varies by motion mode;declaration-only;source:4A0A8.c:28
-T00260.009,motionScalarDelta,Mode-specific change in radius or parameter,med,declaration-only;source:4A0A8.c:29
+T00260.007,isFollowing,Follow currently engaged,med,source:4A0A8.c:3031;use cited by sanity pass;source:4A0A8.c:27
+T00260.008,motionScalar,Mode-specific radius actor ID or step length,med,varies by motion mode;source:4A0A8.c:3518;use cited by sanity pass;source:4A0A8.c:28
+T00260.009,motionScalarDelta,Mode-specific change in radius or parameter,med,source:4A0A8.c:3253;use cited by sanity pass;source:4A0A8.c:29
 T00260.010,orbitAngle,Starting orbit angle around the partner endpoint,high,source:4A0A8.c:3256
 T00260.011,orbitAngleDelta,Orbit angle change,high,source:4A0A8.c:3283
-T00260.012,startPosition,Position at motion start,med,declaration-only;source:4A0A8.c:32
+T00260.012,startPosition,Position at motion start,med,source:4A0A8.c:3225;use cited by sanity pass;source:4A0A8.c:32
 T00260.013,destination,Scripted destination position,high,source:4A0A8.c:3214
 T00260.014,displacement,Destination minus start or height delta,high,source:4A0A8.c:3227
 T00260.015,heightOffset,Orbit height offset from partner endpoint,med,source:4A0A8.c:3284
-T00260.016,followDelta,Offset applied while following,med,declaration-only;source:4A0A8.c:36
-T00260.017,followPosition,Followed position,med,declaration-only;source:4A0A8.c:37
-T00260.018,previousCameraPosition,Camera position from the previous update,med,declaration-only;source:4A0A8.c:38
-T00260.019,computedPosition,Position computed by the active motion,med,declaration-only;source:4A0A8.c:39
-T00260.020,currentPosition,Current endpoint position,med,declaration-only;source:4A0A8.c:40
+T00260.016,followDelta,Offset applied while following,med,source:4A0A8.c:3482;use cited by sanity pass;source:4A0A8.c:36
+T00260.017,followPosition,Followed position,med,source:4A0A8.c:3482;use cited by sanity pass;source:4A0A8.c:37
+T00260.018,previousCameraPosition,Camera position from the previous update,med,source:4A0A8.c:3478;use cited by sanity pass;source:4A0A8.c:38
+T00260.019,computedPosition,Position computed by the active motion,med,source:4A0A8.c:3360;use cited by sanity pass;source:4A0A8.c:39
+T00260.020,currentPosition,Current endpoint position,med,source:4A0A8.c:3025;use cited by sanity pass;source:4A0A8.c:40
 T00260.021,partnerPosition,Current position of the paired endpoint,high,source:4A0A8.c:3417
-T00402.000,distance,Remaining distance to the candidate,med,scratchpad overlay;declaration-only;source:4A0A8.c:213
-T00402.001,steps,Number of terrain motion steps,med,scratchpad overlay;declaration-only;source:4A0A8.c:214
+T00402.000,distance,Remaining distance to the candidate,med,scratchpad overlay;source:4A0A8.c:3517;use cited by sanity pass;source:4A0A8.c:213
+T00402.001,steps,Number of terrain motion steps,med,scratchpad overlay;source:4A0A8.c:3518;use cited by sanity pass;source:4A0A8.c:214
 T00402.002,pad08,Unused scratch bytes,low,scratchpad overlay;declaration-only;source:4A0A8.c:215
-T00402.003,delta,Step delta vector,med,scratchpad overlay;declaration-only;source:4A0A8.c:216
-T00402.004,candidate,Candidate camera position,med,scratchpad overlay;declaration-only;source:4A0A8.c:217
+T00402.003,delta,Step delta vector,med,scratchpad overlay;source:4A0A8.c:3514;use cited by sanity pass;source:4A0A8.c:216
+T00402.004,candidate,Candidate camera position,med,scratchpad overlay;source:4A0A8.c:3532;use cited by sanity pass;source:4A0A8.c:217
 T00402.005,direction,Normalized motion direction,med,scratchpad overlay;declaration-only;source:4A0A8.c:218
 T00402.006,pad40,Unused scratch bytes,low,scratchpad overlay;declaration-only;source:4A0A8.c:219
-T00402.007,matrix,Working rotation matrix,med,scratchpad overlay;declaration-only;source:4A0A8.c:220
+T00402.007,matrix,Working rotation matrix,med,scratchpad overlay;source:4A0A8.c:3511;use cited by sanity pass;source:4A0A8.c:220
 T00403.000,value,Working eased fraction or angle,med,scratchpad overlay;declaration-only;source:4A0A8.c:199
-T00403.001,distance,Working distance,med,scratchpad overlay;declaration-only;source:4A0A8.c:200
+T00403.001,distance,Working distance,med,scratchpad overlay;source:4A0A8.c:3415;use cited by sanity pass;source:4A0A8.c:200
 T00403.002,pad08,Unused scratch bytes,low,scratchpad overlay;declaration-only;source:4A0A8.c:201
-T00403.003,currentOffset,Current horizontal offset from partner,med,scratchpad overlay;declaration-only;source:4A0A8.c:202
-T00403.004,destinationOffset,Destination horizontal offset from partner,med,scratchpad overlay;declaration-only;source:4A0A8.c:203
+T00403.003,currentOffset,Current horizontal offset from partner,med,scratchpad overlay;source:4A0A8.c:3248;use cited by sanity pass;source:4A0A8.c:202
+T00403.004,destinationOffset,Destination horizontal offset from partner,med,scratchpad overlay;source:4A0A8.c:3252;use cited by sanity pass;source:4A0A8.c:203
 T00403.005,workVector,Temporary vector,med,scratchpad overlay;declaration-only;source:4A0A8.c:204
 T00403.006,pad40,Unused scratch bytes,low,scratchpad overlay;declaration-only;source:4A0A8.c:205
-T00403.007,rotation,Working rotation,med,scratchpad overlay;declaration-only;source:4A0A8.c:206
-T00403.008,actorRotation,Queried actor rotation,med,scratchpad overlay;declaration-only;source:4A0A8.c:207
+T00403.007,rotation,Working rotation,med,scratchpad overlay;source:4A0A8.c:3426;use cited by sanity pass;source:4A0A8.c:206
+T00403.008,actorRotation,Queried actor rotation,med,scratchpad overlay;source:4A0A8.c:3332;use cited by sanity pass;source:4A0A8.c:207
 T00403.009,pad60,Unused scratch bytes,low,scratchpad overlay;declaration-only;source:4A0A8.c:208
-T00403.010,matrix,Working rotation matrix,med,scratchpad overlay;declaration-only;source:4A0A8.c:209
+T00403.010,matrix,Working rotation matrix,med,scratchpad overlay;source:4A0A8.c:3356;use cited by sanity pass;source:4A0A8.c:209
 T00404.000,pad00,Leading scratch bytes before the shake vectors,low,scratchpad overlay;declaration-only;source:4A0A8.c:224
-T00404.001,eyeShake,Summed eye shake offset,med,scratchpad overlay;declaration-only;source:4A0A8.c:225
-T00404.002,lookAtShake,Summed look-at shake offset,med,scratchpad overlay;declaration-only;source:4A0A8.c:226
-T00404.003,axisShake,Current oscillator offset by axis,med,scratchpad overlay;declaration-only;source:4A0A8.c:227
-T00475.000,remainingCount,Selected actors not yet returned,med,declaration-only;source:4A0A8.c:179
-T00475.001,cursor,Next selection index,med,declaration-only;source:4A0A8.c:180
-T00475.002,actorIds,Selected actor IDs,med,declaration-only;source:4A0A8.c:181
+T00404.001,eyeShake,Summed eye shake offset,med,scratchpad overlay;source:4A0A8.c:3991;use cited by sanity pass;source:4A0A8.c:225
+T00404.002,lookAtShake,Summed look-at shake offset,med,scratchpad overlay;source:4A0A8.c:3991;use cited by sanity pass;source:4A0A8.c:226
+T00404.003,axisShake,Current oscillator offset by axis,med,scratchpad overlay;source:4A0A8.c:3995;use cited by sanity pass;source:4A0A8.c:227
+T00475.000,remainingCount,Selected actors not yet returned,med,source:4A0A8.c:2884;use cited by sanity pass;source:4A0A8.c:179
+T00475.001,cursor,Next selection index,med,source:4A0A8.c:2885;use cited by sanity pass;source:4A0A8.c:180
+T00475.002,actorIds,Selected actor IDs,med,source:4A0A8.c:2898;use cited by sanity pass;source:4A0A8.c:181
 T00476.000,hasChanged,Value updated since last application,high,source:4A0A8.c:3647
 T00476.001,easingMode,Interpolation curve selector,high,source:4A0A8.c:3647
 T00476.002,angle,Current angle in 4096 units,high,source:4A0A8.c:3647
@@ -135,15 +135,15 @@ T00477.013,reserved18,Unreferenced short,low,source:4A0A8.c:3838
 T00477.014,reserved1A,Unreferenced short,low,source:4A0A8.c:3838
 T00477.015,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:3838
 T00477.016,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:3838
-T00478.000,easedFraction,Eased fraction in 4.12 fixed point,med,scratchpad overlay;declaration-only;source:4A0A8.c:175
+T00478.000,easedFraction,Eased fraction in 4.12 fixed point,med,scratchpad overlay;source:4A0A8.c:3851;use cited by sanity pass;source:4A0A8.c:175
 T00479.000,envelopeShape,Envelope selector in byte one; byte zero overlaps camera shake count,med,source:4A0A8.c:3962
 T00479.001,displacement,Current oscillator displacement,high,source:4A0A8.c:3974
-T00479.002,cycles,Oscillation cycles over the duration,med,declaration-only;source:4A0A8.c:60
-T00479.003,amplitude,Peak displacement,med,declaration-only;source:4A0A8.c:61
-T00479.004,elapsedFrames,Elapsed oscillation frames,med,declaration-only;source:4A0A8.c:62
-T00479.005,durationFrames,Oscillation duration or zero when inactive,med,declaration-only;source:4A0A8.c:63
+T00479.002,cycles,Oscillation cycles over the duration,med,source:4A0A8.c:3947;use cited by sanity pass;source:4A0A8.c:60
+T00479.003,amplitude,Peak displacement,med,source:4A0A8.c:3973;use cited by sanity pass;source:4A0A8.c:61
+T00479.004,elapsedFrames,Elapsed oscillation frames,med,source:4A0A8.c:3953;use cited by sanity pass;source:4A0A8.c:62
+T00479.005,durationFrames,Oscillation duration or zero when inactive,med,source:4A0A8.c:3949;use cited by sanity pass;source:4A0A8.c:63
 T00479.006,axisMask,Endpoint and per-axis sign selection bits,high,source:4A0A8.c:3995
-T00479.007,reserved0B,Byte cleared at camera initialization,low,declaration-only;source:4A0A8.c:65
+T00479.007,reserved0B,Byte cleared at camera initialization,low,source:4A0A8.c:3078;use cited by sanity pass;source:4A0A8.c:65
 T00480.000,hasChanged,Value updated since last application,high,source:4A0A8.c:3927
 T00480.001,easingMode,Interpolation curve selector,high,source:4A0A8.c:3927
 T00480.002,value,Current lens value,high,source:4A0A8.c:3927
@@ -153,9 +153,9 @@ T00480.005,elapsedFrames,Elapsed tween frames,high,source:4A0A8.c:3927
 T00480.006,durationFrames,Tween duration or zero when inactive,high,source:4A0A8.c:3927
 T00480.007,reserved0A,Unreferenced byte,low,source:4A0A8.c:3927
 T00480.008,reserved0B,Unreferenced byte,low,source:4A0A8.c:3927
-T00602.000,lowByte,Low byte of a little-endian script value,med,declaration-only;source:4A0A8.c:231
-T00602.001,highByte,High byte of a little-endian script value,med,declaration-only;source:4A0A8.c:232
-T00620.000,anchorOffset,Packed anchor offset alignment and flags,med,declaration-only;source:4A0A8.c:192
-T00620.001,screenX,Dialog anchor screen X,med,declaration-only;source:4A0A8.c:193
-T00620.002,screenY,Dialog anchor screen Y,med,declaration-only;source:4A0A8.c:194
-T00620.003,clampDistance,Displacement applied when clamping the dialog on screen,med,declaration-only;source:4A0A8.c:195
+T00602.000,lowByte,Low byte of a little-endian script value,med,source:4A0A8.c:4620;use cited by sanity pass;source:4A0A8.c:231
+T00602.001,highByte,High byte of a little-endian script value,med,source:4A0A8.c:4620;use cited by sanity pass;source:4A0A8.c:232
+T00620.000,anchorOffset,Packed anchor offset alignment and flags,med,source:4A0A8.c:754;use cited by sanity pass;source:4A0A8.c:192
+T00620.001,screenX,Dialog anchor screen X,med,source:4A0A8.c:826;use cited by sanity pass;source:4A0A8.c:193
+T00620.002,screenY,Dialog anchor screen Y,med,source:4A0A8.c:826;use cited by sanity pass;source:4A0A8.c:194
+T00620.003,clampDistance,Displacement applied when clamping the dialog on screen,med,source:4A0A8.c:784;use cited by sanity pass;source:4A0A8.c:195

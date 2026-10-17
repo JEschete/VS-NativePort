@@ -177,27 +177,27 @@ T00281.002,reservedAC,Unidentified bytes after the header,low,declaration-only;s
 T00281.003,audioData,Variable-length audio data,med,declaration-only;source:sound.h:565
 T00296.000,colorZeroAndCode,First vertex color and command code,med,declaration-only;source:gpu.h:73
 T00296.001,positionZero,First vertex position,med,declaration-only;source:gpu.h:74
-T00296.002,colorOne,Second vertex color,med,declaration-only;source:gpu.h:75
-T00296.003,positionOne,Second vertex position,med,declaration-only;source:gpu.h:76
-T00296.004,colorTwo,Third vertex color,med,declaration-only;source:gpu.h:77
-T00296.005,positionTwo,Third vertex position,med,declaration-only;source:gpu.h:78
-T00296.006,colorThree,Fourth vertex color,med,declaration-only;source:gpu.h:79
-T00296.007,positionThree,Fourth vertex position,med,declaration-only;source:gpu.h:80
-T00297.000,texturePage,Texture page command word,med,declaration-only;source:gpu.h:61
-T00297.001,colorZeroAndCode,First vertex color and command code,med,declaration-only;source:gpu.h:62
-T00297.002,positionZero,First vertex position,med,declaration-only;source:gpu.h:63
-T00297.003,colorOne,Second vertex color,med,declaration-only;source:gpu.h:64
-T00297.004,positionOne,Second vertex position,med,declaration-only;source:gpu.h:65
-T00297.005,colorTwo,Third vertex color,med,declaration-only;source:gpu.h:66
-T00297.006,positionTwo,Third vertex position,med,declaration-only;source:gpu.h:67
-T00297.007,colorThree,Fourth vertex color,med,declaration-only;source:gpu.h:68
-T00297.008,positionThree,Fourth vertex position,med,declaration-only;source:gpu.h:69
-T00299.000,colorAndCode,Fill color and command code,med,declaration-only;source:gpu.h:47
-T00299.001,position,Top-left position,med,declaration-only;source:gpu.h:48
-T00299.002,size,Width and height,med,declaration-only;source:gpu.h:49
-T00327.000,tileX,Door tile X,med,declaration-only;source:main.h:425
-T00327.001,tileZ,Door tile Z,med,declaration-only;source:main.h:426
-T00327.002,floorLayer,Floor layer; two or more selects a moving platform,med,declaration-only;source:main.h:427
+T00296.002,colorOne,Second vertex color,med,source:MENU/MENU7.PRG/260.c:1317;use cited by sanity pass;source:gpu.h:75
+T00296.003,positionOne,Second vertex position,med,source:MENU/MENU7.PRG/260.c:1318;use cited by sanity pass;source:gpu.h:76
+T00296.004,colorTwo,Third vertex color,med,source:MENU/MENU7.PRG/260.c:1319;use cited by sanity pass;source:gpu.h:77
+T00296.005,positionTwo,Third vertex position,med,source:MENU/MENU7.PRG/260.c:1320;use cited by sanity pass;source:gpu.h:78
+T00296.006,colorThree,Fourth vertex color,med,source:MENU/MENU7.PRG/260.c:1321;use cited by sanity pass;source:gpu.h:79
+T00296.007,positionThree,Fourth vertex position,med,source:MENU/MENU7.PRG/260.c:1322;use cited by sanity pass;source:gpu.h:80
+T00297.000,texturePage,Texture page command word,med,source:MENU/MENU7.PRG/260.c:1383;use cited by sanity pass;source:gpu.h:61
+T00297.001,colorZeroAndCode,First vertex color and command code,med,source:MENU/MENU7.PRG/260.c:1378;use cited by sanity pass;source:gpu.h:62
+T00297.002,positionZero,First vertex position,med,source:MENU/MENU7.PRG/260.c:1380;use cited by sanity pass;source:gpu.h:63
+T00297.003,colorOne,Second vertex color,med,source:58578.c:711;use cited by sanity pass;source:gpu.h:64
+T00297.004,positionOne,Second vertex position,med,source:58578.c:712;use cited by sanity pass;source:gpu.h:65
+T00297.005,colorTwo,Third vertex color,med,source:58578.c:713;use cited by sanity pass;source:gpu.h:66
+T00297.006,positionTwo,Third vertex position,med,source:58578.c:714;use cited by sanity pass;source:gpu.h:67
+T00297.007,colorThree,Fourth vertex color,med,source:58578.c:715;use cited by sanity pass;source:gpu.h:68
+T00297.008,positionThree,Fourth vertex position,med,source:58578.c:716;use cited by sanity pass;source:gpu.h:69
+T00299.000,colorAndCode,Fill color and command code,med,source:22C.c:3307;use cited by sanity pass;source:gpu.h:47
+T00299.001,position,Top-left position,med,source:22C.c:3308;use cited by sanity pass;source:gpu.h:48
+T00299.002,size,Width and height,med,source:58578.c:707;use cited by sanity pass;source:gpu.h:49
+T00327.000,tileX,Door tile X,med,source:146C.c:5477;use cited by sanity pass;source:main.h:425
+T00327.001,tileZ,Door tile Z,med,source:146C.c:5478;use cited by sanity pass;source:main.h:426
+T00327.002,floorLayer,Floor layer; two or more selects a moving platform,med,source:146C.c:5479;use cited by sanity pass;source:main.h:427
 T00327.003,entryDirection,Facing direction on entry copied into actor placement,med,source:146C.c:15151;source:3A1A0.c:286
 T00008.000,Spell,ActionType Spell,med,declaration-only;source:main.h:52
 T00008.001,Ability,ActionType Ability,med,declaration-only;source:main.h:53

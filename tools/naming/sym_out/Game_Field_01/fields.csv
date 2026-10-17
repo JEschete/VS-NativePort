@@ -8,164 +8,164 @@ T00129.000,tileX,Tile x of the gimmick tile target,med,declaration-only;source:3
 T00129.001,tileY,Tile y of the gimmick tile target,med,declaration-only;source:3A1A0.c:733
 T00129.002,tileZ,Tile z of the gimmick tile target,med,declaration-only;source:3A1A0.c:734
 T00129.003,direction,Direction of the gimmick tile target,med,declaration-only;source:3A1A0.c:735
-T00323.000,roomSectionOffset,Room section offset of the MPD header,med,declaration-only;source:146C.c:316
+T00323.000,roomSectionOffset,Room section offset of the MPD header,med,source:146C.c:15299;use cited by sanity pass;source:146C.c:316
 T00323.001,roomSectionSize,Room section size of the MPD header,med,declaration-only;source:146C.c:317
-T00323.002,clearedSectionOffset,Cleared section offset of the MPD header,med,declaration-only;source:146C.c:318
-T00323.003,clearedSectionSize,Cleared section size of the MPD header,med,declaration-only;source:146C.c:319
-T00323.004,scriptSectionOffset,Script section offset of the MPD header,med,declaration-only;source:146C.c:320
-T00323.005,scriptSectionSize,Script section size of the MPD header,med,declaration-only;source:146C.c:321
-T00323.006,doorSectionOffset,Door section offset of the MPD header,med,declaration-only;source:146C.c:322
-T00323.007,doorSectionSize,Door section size of the MPD header,med,declaration-only;source:146C.c:323
-T00323.008,enemySectionOffset,Enemy section offset of the MPD header,med,declaration-only;source:146C.c:324
-T00323.009,enemySectionSize,Enemy section size of the MPD header,med,declaration-only;source:146C.c:325
-T00323.010,lootSectionOffset,Loot section offset of the MPD header,med,declaration-only;source:146C.c:326
-T00323.011,lootSectionSize,Loot section size of the MPD header,med,declaration-only;source:146C.c:327
-T00339.000,yaw,Yaw of the spherical camera,low,used as a rotation phase 0 1 2 when this is the delta member at 146C.c:2643;declaration-only;source:146C.h:734
-T00339.001,pitch,Pitch of the spherical camera,med,declaration-only;source:146C.h:735
-T00339.002,distance,Distance of the spherical camera,med,declaration-only;source:146C.h:736
-T00339.003,mode,Mode of the spherical camera,med,declaration-only;source:146C.h:737
-T00346.000,mpdListOffset,Mpd list offset of the ZND header,med,declaration-only;source:146C.c:283
-T00346.001,mpdListSize,Mpd list size of the ZND header,med,declaration-only;source:146C.c:284
-T00346.002,enemiesOffset,Enemies offset of the ZND header,med,declaration-only;source:146C.c:285
-T00346.003,enemiesSize,Enemies size of the ZND header,med,declaration-only;source:146C.c:286
-T00346.004,texturesOffset,Textures offset of the ZND header,med,declaration-only;source:146C.c:287
+T00323.002,clearedSectionOffset,Cleared section offset of the MPD header,med,source:146C.c:15358;use cited by sanity pass;source:146C.c:318
+T00323.003,clearedSectionSize,Cleared section size of the MPD header,med,source:146C.c:15367;use cited by sanity pass;source:146C.c:319
+T00323.004,scriptSectionOffset,Script section offset of the MPD header,med,source:146C.c:15360;use cited by sanity pass;source:146C.c:320
+T00323.005,scriptSectionSize,Script section size of the MPD header,med,source:146C.c:15368;use cited by sanity pass;source:146C.c:321
+T00323.006,doorSectionOffset,Door section offset of the MPD header,med,source:146C.c:15362;use cited by sanity pass;source:146C.c:322
+T00323.007,doorSectionSize,Door section size of the MPD header,med,source:146C.c:15364;use cited by sanity pass;source:146C.c:323
+T00323.008,enemySectionOffset,Enemy section offset of the MPD header,med,source:146C.c:15376;use cited by sanity pass;source:146C.c:324
+T00323.009,enemySectionSize,Enemy section size of the MPD header,med,source:146C.c:15378;use cited by sanity pass;source:146C.c:325
+T00323.010,lootSectionOffset,Loot section offset of the MPD header,med,source:146C.c:15349;use cited by sanity pass;source:146C.c:326
+T00323.011,lootSectionSize,Loot section size of the MPD header,med,source:146C.c:15348;use cited by sanity pass;source:146C.c:327
+T00339.000,yaw,Yaw of the spherical camera,low,used as a rotation phase 0 1 2 when this is the delta member at 146C.c:2643;source:146C.c:2643;use cited by sanity pass;source:146C.h:734
+T00339.001,pitch,Pitch of the spherical camera,med,source:146C.c:2647;use cited by sanity pass;source:146C.h:735
+T00339.002,distance,Distance of the spherical camera,med,source:146C.c:2434;use cited by sanity pass;source:146C.h:736
+T00339.003,mode,Mode of the spherical camera,med,source:146C.c:2713;use cited by sanity pass;source:146C.h:737
+T00346.000,mpdListOffset,Mpd list offset of the ZND header,med,source:146C.c:14852;use cited by sanity pass;source:146C.c:283
+T00346.001,mpdListSize,Mpd list size of the ZND header,med,source:146C.c:14852;use cited by sanity pass;source:146C.c:284
+T00346.002,enemiesOffset,Enemies offset of the ZND header,med,source:146C.c:14850;use cited by sanity pass;source:146C.c:285
+T00346.003,enemiesSize,Enemies size of the ZND header,med,source:146C.c:14850;use cited by sanity pass;source:146C.c:286
+T00346.004,texturesOffset,Textures offset of the ZND header,med,source:146C.c:14851;use cited by sanity pass;source:146C.c:287
 T00346.005,texturesSize,Textures size of the ZND header,med,declaration-only;source:146C.c:288
 T00346.006,musicId,Music id of the ZND header,med,declaration-only;source:146C.c:289
-T00347.000,minX,Min x of the zone bounds,med,declaration-only;source:146C.h:210
-T00347.001,minZ,Min z of the zone bounds,med,declaration-only;source:146C.h:211
-T00347.002,maxX,Max x of the zone bounds,med,declaration-only;source:146C.h:212
-T00347.003,maxZ,Max z of the zone bounds,med,declaration-only;source:146C.h:213
-T00439.000,position,Position of the camera pair,med,declaration-only;source:146C.c:209
+T00347.000,minX,Min x of the zone bounds,med,source:146C.c:2435;use cited by sanity pass;source:146C.h:210
+T00347.001,minZ,Min z of the zone bounds,med,source:146C.c:2450;use cited by sanity pass;source:146C.h:211
+T00347.002,maxX,Max x of the zone bounds,med,source:146C.c:2436;use cited by sanity pass;source:146C.h:212
+T00347.003,maxZ,Max z of the zone bounds,med,source:146C.c:2451;use cited by sanity pass;source:146C.h:213
+T00439.000,position,Position of the camera pair,med,source:146C.c:2602;use cited by sanity pass;source:146C.c:209
 T00439.001,lookAt,Look at of the camera pair,med,declaration-only;source:146C.c:210
-T00452.000,size,Size of the effect chunk,med,declaration-only;source:2842C.c:192
-T00452.001,type,Type of the effect chunk,med,declaration-only;source:2842C.c:193
+T00452.000,size,Size of the effect chunk,med,source:2842C.c:936;use cited by sanity pass;source:2842C.c:192
+T00452.001,type,Type of the effect chunk,med,source:2842C.c:936;use cited by sanity pass;source:2842C.c:193
 T00466.000,words,Words of the saved position,med,declaration-only;source:3A1A0.c:28
 T00566.000,reserved00,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:91
-T00566.001,flags,Flags of the gimmick motion,med,declaration-only;source:44F14.c:92
+T00566.001,flags,Flags of the gimmick motion,med,source:44F14.c:1990;use cited by sanity pass;source:44F14.c:92
 T00566.002,reserved0C,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:93
-T00566.003,objectId,Object id of the gimmick motion,med,declaration-only;source:44F14.c:94
+T00566.003,objectId,Object id of the gimmick motion,med,source:44F14.c:1980;use cited by sanity pass;source:44F14.c:94
 T00566.004,reserved10,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:95
-T00566.005,mode,Mode of the gimmick motion,med,declaration-only;source:44F14.c:96
-T00566.006,x,X of the gimmick motion,med,declaration-only;source:44F14.c:97
-T00566.007,y,Y of the gimmick motion,med,declaration-only;source:44F14.c:97
-T00566.008,z,Z of the gimmick motion,med,declaration-only;source:44F14.c:97
+T00566.005,mode,Mode of the gimmick motion,med,source:44F14.c:1927;use cited by sanity pass;source:44F14.c:96
+T00566.006,x,X of the gimmick motion,med,source:44F14.c:1973;use cited by sanity pass;source:44F14.c:97
+T00566.007,y,Y of the gimmick motion,med,source:44F14.c:1929;use cited by sanity pass;source:44F14.c:97
+T00566.008,z,Z of the gimmick motion,med,source:44F14.c:1939;use cited by sanity pass;source:44F14.c:97
 T00566.009,pad22,Alignment padding,low,declaration-only;source:44F14.c:97
-T00566.010,rotationX,Rotation x of the gimmick motion,med,declaration-only;source:44F14.c:98
-T00566.011,rotationY,Rotation y of the gimmick motion,med,declaration-only;source:44F14.c:98
-T00566.012,rotationZ,Rotation z of the gimmick motion,med,declaration-only;source:44F14.c:98
+T00566.010,rotationX,Rotation x of the gimmick motion,med,source:44F14.c:1930;use cited by sanity pass;source:44F14.c:98
+T00566.011,rotationY,Rotation y of the gimmick motion,med,source:44F14.c:1931;use cited by sanity pass;source:44F14.c:98
+T00566.012,rotationZ,Rotation z of the gimmick motion,med,source:44F14.c:1932;use cited by sanity pass;source:44F14.c:98
 T00566.013,pad2A,Alignment padding,low,declaration-only;source:44F14.c:98
-T00566.014,scaleX,Scale x of the gimmick motion,med,declaration-only;source:44F14.c:99
-T00566.015,scaleY,Scale y of the gimmick motion,med,declaration-only;source:44F14.c:99
-T00566.016,scaleZ,Scale z of the gimmick motion,med,declaration-only;source:44F14.c:99
+T00566.014,scaleX,Scale x of the gimmick motion,med,source:44F14.c:2001;use cited by sanity pass;source:44F14.c:99
+T00566.015,scaleY,Scale y of the gimmick motion,med,source:44F14.c:2002;use cited by sanity pass;source:44F14.c:99
+T00566.016,scaleZ,Scale z of the gimmick motion,med,source:44F14.c:2003;use cited by sanity pass;source:44F14.c:99
 T00566.017,pad32,Alignment padding,low,declaration-only;source:44F14.c:99
 T00566.018,reserved34,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:99
-T00566.019,deltaY,Delta y of the gimmick motion,med,declaration-only;source:44F14.c:100
+T00566.019,deltaY,Delta y of the gimmick motion,med,source:44F14.c:1955;use cited by sanity pass;source:44F14.c:100
 T00566.020,reserved38,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:100
-T00566.021,orientation,Orientation of the gimmick motion,med,declaration-only;source:44F14.c:100
+T00566.021,orientation,Orientation of the gimmick motion,med,source:44F14.c:1938;use cited by sanity pass;source:44F14.c:100
 T00566.022,reserved3C,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:101
-T00566.023,savedState,Saved state of the gimmick motion,med,declaration-only;source:44F14.c:102
-T00566.024,state,State of the gimmick motion,med,declaration-only;source:44F14.c:103
+T00566.023,savedState,Saved state of the gimmick motion,med,source:44F14.c:1989;use cited by sanity pass;source:44F14.c:102
+T00566.024,state,State of the gimmick motion,med,source:44F14.c:1989;use cited by sanity pass;source:44F14.c:103
 T00566.025,reserved16C,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:104
-T00566.026,material,Material of the gimmick motion,med,declaration-only;source:44F14.c:105
+T00566.026,material,Material of the gimmick motion,med,source:44F14.c:1980;use cited by sanity pass;source:44F14.c:105
 T00566.027,reserved16F,Opaque bytes not used by the motion code,low,declaration-only;source:44F14.c:105
-T00566.028,frame,Frame of the gimmick motion,med,declaration-only;source:44F14.c:105
-T00638.000,textureRect,Texture rect of the background tile,med,declaration-only;source:2842C.h:7
-T00638.001,cornerColors,Corner colors of the background tile,med,declaration-only;source:2842C.h:8
-T00639.000,fromCameraState,From camera state of the camera transition,med,declaration-only;source:146C.h:805
-T00639.001,fromSpherical,From spherical of the camera transition,med,declaration-only;source:146C.h:806
-T00639.002,fromNearClip,From near clip of the camera transition,med,declaration-only;source:146C.h:807
-T00639.003,fromProjectionDistance,From projection distance of the camera transition,med,declaration-only;source:146C.h:808
-T00639.004,fromFarClip,From far clip of the camera transition,med,declaration-only;source:146C.h:809
-T00639.005,toSpherical,To spherical of the camera transition,med,declaration-only;source:146C.h:810
-T00639.006,toNearClip,To near clip of the camera transition,med,declaration-only;source:146C.h:811
-T00639.007,toProjectionDistance,To projection distance of the camera transition,med,declaration-only;source:146C.h:812
-T00639.008,toFarClip,To far clip of the camera transition,med,declaration-only;source:146C.h:813
-T00639.009,targetPosition,Target position of the camera transition,med,declaration-only;source:146C.h:814
-T00639.010,targetLookAt,Target look at of the camera transition,med,declaration-only;source:146C.h:815
-T00639.011,direction,Direction of the camera transition,med,declaration-only;source:146C.h:816
-T00639.012,lookAtStep,Look at step of the camera transition,med,declaration-only;source:146C.h:817
-T00639.013,farClipStep,Far clip step of the camera transition,med,declaration-only;source:146C.h:818
-T00639.014,nearClipStep,Near clip step of the camera transition,med,declaration-only;source:146C.h:819
-T00639.015,projectionDistanceStep,Projection distance step of the camera transition,med,declaration-only;source:146C.h:820
-T00639.016,transitionSpeed,Transition speed of the camera transition,med,declaration-only;source:146C.h:821
-T00639.017,transitionFrames,Transition frames of the camera transition,med,declaration-only;source:146C.h:822
-T00705.000,roomFlags,Room flags of the room visit flags,med,declaration-only;source:main.h:392
-T00705.001,areaFlags,Area flags of the room visit flags,med,declaration-only;source:main.h:393
-T00211.000,positionX,Horizontal position plus 128,med,declaration-only;source:146C.c:187
-T00211.001,height,Ground height at the marker,med,declaration-only;source:146C.c:188
-T00211.002,positionZ,Depth position plus 128,med,declaration-only;source:146C.c:189
+T00566.028,frame,Frame of the gimmick motion,med,source:44F14.c:1921;use cited by sanity pass;source:44F14.c:105
+T00638.000,textureRect,Texture rect of the background tile,med,source:2842C.c:507;use cited by sanity pass;source:2842C.h:7
+T00638.001,cornerColors,Corner colors of the background tile,med,source:2842C.c:516;use cited by sanity pass;source:2842C.h:8
+T00639.000,fromCameraState,From camera state of the camera transition,med,source:146C.c:4555;use cited by sanity pass;source:146C.h:805
+T00639.001,fromSpherical,From spherical of the camera transition,med,source:146C.c:4556;use cited by sanity pass;source:146C.h:806
+T00639.002,fromNearClip,From near clip of the camera transition,med,source:146C.c:4557;use cited by sanity pass;source:146C.h:807
+T00639.003,fromProjectionDistance,From projection distance of the camera transition,med,source:146C.c:4558;use cited by sanity pass;source:146C.h:808
+T00639.004,fromFarClip,From far clip of the camera transition,med,source:146C.c:4559;use cited by sanity pass;source:146C.h:809
+T00639.005,toSpherical,To spherical of the camera transition,med,source:146C.c:3080;use cited by sanity pass;source:146C.h:810
+T00639.006,toNearClip,To near clip of the camera transition,med,source:146C.c:3114;use cited by sanity pass;source:146C.h:811
+T00639.007,toProjectionDistance,To projection distance of the camera transition,med,source:146C.c:3117;use cited by sanity pass;source:146C.h:812
+T00639.008,toFarClip,To far clip of the camera transition,med,source:146C.c:3111;use cited by sanity pass;source:146C.h:813
+T00639.009,targetPosition,Target position of the camera transition,med,source:146C.c:3070;use cited by sanity pass;source:146C.h:814
+T00639.010,targetLookAt,Target look at of the camera transition,med,source:146C.c:3079;use cited by sanity pass;source:146C.h:815
+T00639.011,direction,Direction of the camera transition,med,source:146C.c:3066;use cited by sanity pass;source:146C.h:816
+T00639.012,lookAtStep,Look at step of the camera transition,med,source:146C.c:3100;use cited by sanity pass;source:146C.h:817
+T00639.013,farClipStep,Far clip step of the camera transition,med,source:146C.c:3110;use cited by sanity pass;source:146C.h:818
+T00639.014,nearClipStep,Near clip step of the camera transition,med,source:146C.c:3113;use cited by sanity pass;source:146C.h:819
+T00639.015,projectionDistanceStep,Projection distance step of the camera transition,med,source:146C.c:3116;use cited by sanity pass;source:146C.h:820
+T00639.016,transitionSpeed,Transition speed of the camera transition,med,source:146C.c:3068;use cited by sanity pass;source:146C.h:821
+T00639.017,transitionFrames,Transition frames of the camera transition,med,source:146C.c:3074;use cited by sanity pass;source:146C.h:822
+T00705.000,roomFlags,Room flags of the room visit flags,med,source:146C.c:3218;use cited by sanity pass;source:main.h:392
+T00705.001,areaFlags,Area flags of the room visit flags,med,source:146C.c:3215;use cited by sanity pass;source:main.h:393
+T00211.000,positionX,Horizontal position plus 128,med,source:146C.c:17222;use cited by sanity pass;source:146C.c:187
+T00211.001,height,Ground height at the marker,med,source:146C.c:17224;use cited by sanity pass;source:146C.c:188
+T00211.002,positionZ,Depth position plus 128,med,source:146C.c:17223;use cited by sanity pass;source:146C.c:189
 T00211.003,reserved06,Not written by the marker code,low,declaration-only;source:146C.c:190
 T00211.004,reserved08,Not written by the marker code,low,declaration-only;source:146C.c:191
-T00211.005,vertexShades,Three vertex shade triples,med,declaration-only;source:146C.c:192
+T00211.005,vertexShades,Three vertex shade triples,med,source:146C.c:17226;use cited by sanity pass;source:146C.c:192
 T00211.006,reserved18,Not written by the marker code,low,declaration-only;source:146C.c:193
 T00211.007,reserved1C,Not written by the marker code,low,declaration-only;source:146C.c:194
 T00211.008,reserved20,Not written by the marker code,low,declaration-only;source:146C.c:195
 T00211.009,lastVertexShade,Shade of the final vertex,med,declaration-only;source:146C.c:196
 T00212.000,instanceFlags,Flags copied into the new instance,med,declaration-only;source:30DB0.c:32
 T00212.001,instanceWord4,Word copied into the new instance,low,declaration-only;source:30DB0.c:33
-T00212.002,recolorCount,Count passed to the palette recolor routine,low,declaration-only;source:30DB0.c:34
+T00212.002,recolorCount,Count passed to the palette recolor routine,low,source:30DB0.c:329;use cited by sanity pass;source:30DB0.c:34
 T00212.003,modelDataSize,Size passed to the model parser,med,declaration-only;source:30DB0.c:35
 T00221.000,reserved00,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:304
 T00221.001,reserved02,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:305
 T00221.002,reserved04,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:306
 T00221.003,reserved06,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:307
-T00221.004,reserved08,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:308
+T00221.004,reserved08,Cleared on room load; no reader identified,low,source:146C.c:15338;use cited by sanity pass;source:146C.c:308
 T00221.005,reserved0A,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:309
 T00221.006,reserved0C,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:310
 T00221.007,reserved10,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:311
-T00221.008,reserved14,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:312
-T00224.000,triggerRecord,Trigger record being shown,med,declaration-only;source:146C.c:157
-T00224.001,actorQuery,Actor position query and parameter,med,declaration-only;source:146C.c:158
+T00221.008,reserved14,Cleared on room load; no reader identified,low,source:146C.c:15382;use cited by sanity pass;source:146C.c:312
+T00224.000,triggerRecord,Trigger record being shown,med,source:146C.c:5049;use cited by sanity pass;source:146C.c:157
+T00224.001,actorQuery,Actor position query and parameter,med,source:146C.c:5049;use cited by sanity pass;source:146C.c:158
 T00231.000,red,Red offset,med,declaration-only;source:146C.c:162
-T00231.001,green,Green offset,med,declaration-only;source:146C.c:163
-T00231.002,blue,Blue offset,med,declaration-only;source:146C.c:164
+T00231.001,green,Green offset,med,source:146C.c:17596;use cited by sanity pass;source:146C.c:163
+T00231.002,blue,Blue offset,med,source:146C.c:17597;use cited by sanity pass;source:146C.c:164
 T00231.003,reserved03,Unreferenced byte,low,declaration-only;source:146C.c:165
-T00231.004,strength,Tint strength,med,declaration-only;source:146C.c:166
-T00231.005,isActive,Tint applied when nonzero,med,declaration-only;source:146C.c:167
-T00232.000,count,Number of matches,med,declaration-only;source:146C.c:278
-T00232.001,records,Matching door records,med,declaration-only;source:146C.c:279
-T00233.000,jobKind,0 free 1 transition 2 countdown-then-apply 3 countdown-then-finish,med,declaration-only;source:146C.c:247
-T00233.001,trigger,Trigger record the job acts on,med,declaration-only;source:146C.c:248
-T00235.000,isActive,Effect is running,med,declaration-only;source:2842C.c:52
-T00235.001,kindOrObjectCount,Texture-effect kind or script object count,med,declaration-only;source:2842C.c:53
-T00235.002,isUpdateEnabled,Updates enabled,med,declaration-only;source:2842C.c:54
-T00235.003,reserved03,Cleared at setup; no reader identified,low,declaration-only;source:2842C.c:55
-T00235.004,currentData,Current effect data or script cursor,med,declaration-only;source:2842C.c:56
-T00235.005,originalData,Script start restored on restart,med,declaration-only;source:2842C.c:57
-T00338.000,values,Current yaw pitch distance and mode,med,declaration-only;source:146C.h:741
-T00338.001,delta,Pending rotation phase target pitch and zoom step,med,declaration-only;source:146C.h:742
-T00338.002,initialDistance,Default camera distance,med,declaration-only;source:146C.h:743
-T00338.003,zoomVelocity,Distance change per frame,med,declaration-only;source:146C.h:744
-T00338.004,speed,Camera step speed,med,declaration-only;source:146C.h:745
-T00345.000,recordBytes,Raw enemy record bytes,med,declaration-only;source:146C.h:658
-T00444.000,tileX,Tile X,med,declaration-only;source:3A1A0.h:5
-T00444.001,direction,Facing direction,med,declaration-only;source:3A1A0.h:6
-T00444.002,tileZ,Tile Z,med,declaration-only;source:3A1A0.h:7
-T00444.003,height,Height in units of 64,med,declaration-only;source:3A1A0.h:8
-T00445.000,x,Contact X,med,declaration-only;source:146C.c:252
-T00445.001,height,Contact height,med,declaration-only;source:146C.c:253
-T00445.002,z,Contact Z,med,declaration-only;source:146C.c:254
-T00445.003,platformIndex,Moving platform index,med,declaration-only;source:146C.c:255
-T00446.000,x,Contact X,med,declaration-only;source:3A1A0.c:16
-T00446.001,height,Contact height,med,declaration-only;source:3A1A0.c:17
-T00446.002,z,Contact Z,med,declaration-only;source:3A1A0.c:18
-T00446.003,platformIndex,Moving platform index,med,declaration-only;source:3A1A0.c:19
-T00451.000,objectCount,Number of scripted objects,med,declaration-only;source:2842C.c:185
+T00231.004,strength,Tint strength,med,source:146C.c:16002;use cited by sanity pass;source:146C.c:166
+T00231.005,isActive,Tint applied when nonzero,med,source:146C.c:15934;use cited by sanity pass;source:146C.c:167
+T00232.000,count,Number of matches,med,source:146C.c:5449;use cited by sanity pass;source:146C.c:278
+T00232.001,records,Matching door records,med,source:146C.c:5450;use cited by sanity pass;source:146C.c:279
+T00233.000,jobKind,0 free 1 transition 2 countdown-then-apply 3 countdown-then-finish,med,source:146C.c:16345;use cited by sanity pass;source:146C.c:247
+T00233.001,trigger,Trigger record the job acts on,med,source:146C.c:16347;use cited by sanity pass;source:146C.c:248
+T00235.000,isActive,Effect is running,med,source:2842C.c:621;use cited by sanity pass;source:2842C.c:52
+T00235.001,kindOrObjectCount,Texture-effect kind or script object count,med,source:2842C.c:621;use cited by sanity pass;source:2842C.c:53
+T00235.002,isUpdateEnabled,Updates enabled,med,source:2842C.c:622;use cited by sanity pass;source:2842C.c:54
+T00235.003,reserved03,Cleared at setup; no reader identified,low,source:2842C.c:883;use cited by sanity pass;source:2842C.c:55
+T00235.004,currentData,Current effect data or script cursor,med,source:2842C.c:623;use cited by sanity pass;source:2842C.c:56
+T00235.005,originalData,Script start restored on restart,med,source:2842C.c:634;use cited by sanity pass;source:2842C.c:57
+T00338.000,values,Current yaw pitch distance and mode,med,source:146C.c:2434;use cited by sanity pass;source:146C.h:741
+T00338.001,delta,Pending rotation phase target pitch and zoom step,med,source:146C.c:2643;use cited by sanity pass;source:146C.h:742
+T00338.002,initialDistance,Default camera distance,med,source:146C.c:2727;use cited by sanity pass;source:146C.h:743
+T00338.003,zoomVelocity,Distance change per frame,med,source:146C.c:2745;use cited by sanity pass;source:146C.h:744
+T00338.004,speed,Camera step speed,med,source:146C.c:2544;use cited by sanity pass;source:146C.h:745
+T00345.000,recordBytes,Raw enemy record bytes,med,source:146C.c:6649;use cited by sanity pass;source:146C.h:658
+T00444.000,tileX,Tile X,med,source:146C.c:15149;use cited by sanity pass;source:3A1A0.h:5
+T00444.001,direction,Facing direction,med,source:146C.c:15151;use cited by sanity pass;source:3A1A0.h:6
+T00444.002,tileZ,Tile Z,med,source:146C.c:15150;use cited by sanity pass;source:3A1A0.h:7
+T00444.003,height,Height in units of 64,med,source:146C.c:15152;use cited by sanity pass;source:3A1A0.h:8
+T00445.000,x,Contact X,med,source:146C.c:16782;use cited by sanity pass;source:146C.c:252
+T00445.001,height,Contact height,med,source:146C.c:3764;use cited by sanity pass;source:146C.c:253
+T00445.002,z,Contact Z,med,source:146C.c:16785;use cited by sanity pass;source:146C.c:254
+T00445.003,platformIndex,Moving platform index,med,source:146C.c:16786;use cited by sanity pass;source:146C.c:255
+T00446.000,x,Contact X,med,source:146C.c:16782;use cited by sanity pass;source:3A1A0.c:16
+T00446.001,height,Contact height,med,source:146C.c:16785;use cited by sanity pass;source:3A1A0.c:17
+T00446.002,z,Contact Z,med,source:3A1A0.c:1122;use cited by sanity pass;source:3A1A0.c:18
+T00446.003,platformIndex,Moving platform index,med,source:3A1A0.c:1099;use cited by sanity pass;source:3A1A0.c:19
+T00451.000,objectCount,Number of scripted objects,med,source:2842C.c:914;use cited by sanity pass;source:2842C.c:185
 T00451.001,reserved01,Unreferenced byte,low,declaration-only;source:2842C.c:186
-T00451.002,isActive,Sequence starts active,med,declaration-only;source:2842C.c:187
+T00451.002,isActive,Sequence starts active,med,source:2842C.c:913;use cited by sanity pass;source:2842C.c:187
 T00451.003,reserved03,Unreferenced byte,low,declaration-only;source:2842C.c:188
 T00453.000,sceneEntry,Scene object the effect drives,med,declaration-only;source:2842C.c:66
-T00453.001,scriptCursor,Current command position,med,declaration-only;source:2842C.c:67
+T00453.001,scriptCursor,Current command position,med,source:2842C.c:1044;use cited by sanity pass;source:2842C.c:67
 T00453.002,reserved08,Remaining object state,low,declaration-only;source:2842C.c:68
-T00454.000,size,Command size in bytes,med,declaration-only;source:2842C.c:61
-T00454.001,opcode,Command opcode,med,declaration-only;source:2842C.c:62
-T00637.000,width,Tile columns,med,declaration-only;source:2842C.h:12
-T00637.001,height,Tile rows,med,declaration-only;source:2842C.h:13
+T00454.000,size,Command size in bytes,med,source:2842C.c:1048;use cited by sanity pass;source:2842C.c:61
+T00454.001,opcode,Command opcode,med,source:2842C.c:1048;use cited by sanity pass;source:2842C.c:62
+T00637.000,width,Tile columns,med,source:146C.c:17582;use cited by sanity pass;source:2842C.h:12
+T00637.001,height,Tile rows,med,source:146C.c:17582;use cited by sanity pass;source:2842C.h:13
 T00637.002,reserved08,Unreferenced word,low,declaration-only;source:2842C.h:14
-T00637.003,tiles,Background tiles,med,declaration-only;source:2842C.h:15
-T00655.000,currentManual,Selected manual,med,declaration-only;source:146C.h:649
+T00637.003,tiles,Background tiles,med,source:2842C.c:481;use cited by sanity pass;source:2842C.h:15
+T00655.000,currentManual,Selected manual,med,source:494.c:304;use cited by sanity pass;source:146C.h:649
 T00655.001,reserved02,Unreferenced short,low,declaration-only;source:146C.h:650
-T00655.002,scrollPositions,Scroll position per manual,med,declaration-only;source:146C.h:651
+T00655.002,scrollPositions,Scroll position per manual,med,source:494.c:330;use cited by sanity pass;source:146C.h:651
 T00655.003,reserved20,Unreferenced short,low,declaration-only;source:146C.h:652
 T00655.004,reserved22,Unreferenced byte,low,declaration-only;source:146C.h:653
 T00655.005,reserved23,Unreferenced byte,low,declaration-only;source:146C.h:654
@@ -249,9 +249,9 @@ T00336.001,backgroundRotation,Background dome rotation angles,high,source:146C.c
 T00336.002,reserved24,Unreferenced word,low,declaration-only;source:146C.h:111
 T00336.003,reserved28,Unreferenced word,low,declaration-only;source:146C.h:112
 T00336.004,freezeEffectId,Room effect toggled when platforms freeze or minus one,med,source:146C.c:17359
-T00336.005,isWorkshop,Room is a workshop,med,declaration-only;source:146C.h:114
+T00336.005,isWorkshop,Room is a workshop,med,source:146C.c:16798;use cited by sanity pass;source:146C.h:114
 T00336.006,environmentFlags,Room environment flag byte returned by RoomEnvironmentFlags,med,source:146C.c:16800;sanity pass 2026-10-17
-T00336.007,trapLevel,Trap level,med,declaration-only;source:146C.h:116
+T00336.007,trapLevel,Trap level,med,source:146C.c:17331;use cited by sanity pass;source:146C.h:116
 T00336.008,reserved33,Unreferenced byte,low,declaration-only;source:146C.h:117
 T00336.009,weatherKind,Weather kind,high,source:146C.c:17508
 T00336.010,windDirection,Initial wind direction,high,source:2842C.c:277
@@ -264,7 +264,7 @@ T00336.016,windStrength,Initial wind strength,high,source:2842C.c:276
 T00336.017,windStrengthLimit,Wind strength clamp limit,high,source:2842C.c:357
 T00336.018,windStrengthInterval,Mask index for wind strength variation,high,source:2842C.c:351
 T00336.019,weatherArea,Weather area origin and size in tiles,high,source:146C.c:17478;source:2842C.c:287
-T00336.020,sceneId,Scene identifier,med,declaration-only;source:146C.h:132
+T00336.020,sceneId,Scene identifier,med,source:146C.c:16802;use cited by sanity pass;source:146C.h:132
 T00336.021,fallDestinationZone,Zone a fall through this room's pit leads to (high half of RoomFallDestination),high,source:146C.c:16806;source:146C.c:5475;sanity pass 2026-10-17
 T00336.022,fallDestinationRoom,Room a fall through this room's pit leads to (low half of RoomFallDestination),high,source:146C.c:16807;source:146C.c:5476;sanity pass 2026-10-17
 T00336.023,opaque56,Returned by RoomEnvironmentParameter; no caller in decompiled code,low,source:146C.c:17329;sanity pass 2026-10-17
@@ -303,18 +303,18 @@ T00329.025,section16,Unidentified section,low,declaration-only;source:146C.h:267
 T00329.026,section17,Unidentified section,low,declaration-only;source:146C.h:268
 T00329.027,zoneBounds,Tile bounds of the map,high,source:146C.c:16074
 T00199.000,searchFloor,Lowest search offset for floor samples,med,source:3A1A0.c:2476
-T00199.001,excluded,Excluded sample directions,med,declaration-only;source:3A1A0.h:637
+T00199.001,excluded,Excluded sample directions,med,source:40564.c:213;use cited by sanity pass;source:3A1A0.h:637
 T00199.002,pad15,Alignment padding,low,declaration-only;source:3A1A0.h:638
 T00199.003,movingActor,Actor whose surroundings are sampled,high,source:3A1A0.c:2471
 T00199.004,sampleHeights,Floor heights sampled around the actor,high,source:3A1A0.c:2271
-T00199.005,blocked,Blocked sample flags,med,declaration-only;source:3A1A0.h:641
-T00199.006,attributes,Sampled tile attributes,med,declaration-only;source:3A1A0.h:642
-T00199.007,centerAttribute,Tile attribute under the actor,med,declaration-only;source:3A1A0.h:643
+T00199.005,blocked,Blocked sample flags,med,source:3A1A0.c:1007;use cited by sanity pass;source:3A1A0.h:641
+T00199.006,attributes,Sampled tile attributes,med,source:3A1A0.c:2288;use cited by sanity pass;source:3A1A0.h:642
+T00199.007,centerAttribute,Tile attribute under the actor,med,source:3A1A0.c:2286;use cited by sanity pass;source:3A1A0.h:643
 T00199.008,pad3D,Alignment padding,low,declaration-only;source:3A1A0.h:644
 T00199.009,searchCeiling,Upper search offset,low,source:3A1A0.c:2478
 T00223.000,menuStatus,"Menu status: 1 while the menu is still open, 2 once a selection is made",med,source:146C.c:7771
 T00223.001,selectionKind,"Kind of selection (6-8 actions or items, 8 consumes a misc item, 10 a field command)",med,source:146C.c:4693
-T00223.002,executeAbility,Packed execute-ability parameters,med,declaration-only;source:5BF94.h:159
+T00223.002,executeAbility,Packed execute-ability parameters,med,source:146C.c:3816;use cited by sanity pass;source:5BF94.h:159
 T00236.000,geometryOffset,Offset of the animated geometry entry,high,source:2842C.c:831
 T00236.001,needsReset,Reset angle and velocity on the next update,high,source:2842C.c:808
 T00236.002,startsInactive,Effect starts inactive when nonzero,high,source:2842C.c:881
@@ -327,77 +327,77 @@ T00236.008,angle,Current angle,high,source:2842C.c:814
 T00236.009,restAngle,Angle the swing settles toward,high,source:2842C.c:816;source:2842C.c:826
 T00236.010,startAngle,Angle restored on reset,high,source:2842C.c:810
 T00236.011,initialVelocity,Velocity restored on reset,high,source:2842C.c:811
-T00320.000,kind,Enemy kind,med,declaration-only;source:146C.h:662
+T00320.000,kind,Enemy kind,med,source:146C.c:14926;use cited by sanity pass;source:146C.h:662
 T00320.001,index,Enemy table index,med,declaration-only;source:146C.h:663
-T00320.002,isHidden,Hidden until revealed,med,declaration-only;source:146C.h:664
+T00320.002,isHidden,Hidden until revealed,med,source:146C.c:15209;use cited by sanity pass;source:146C.h:664
 T00320.003,reserved03,Unidentified byte,low,declaration-only;source:146C.h:665
-T00320.004,enemyId,Enemy identifier,med,declaration-only;source:146C.h:666
+T00320.004,enemyId,Enemy identifier,med,source:146C.c:15016;use cited by sanity pass;source:146C.h:666
 T00320.005,slot,Actor slot,med,declaration-only;source:146C.h:667
-T00320.006,flagTest,Flag condition kind,med,declaration-only;source:146C.h:668
-T00320.007,statTest,Stat condition kind,med,declaration-only;source:146C.h:669
-T00320.008,flagValue,Flag condition value,med,declaration-only;source:146C.h:670
-T00320.009,statValue,Stat condition value,med,declaration-only;source:146C.h:671
+T00320.006,flagTest,Flag condition kind,med,source:146C.c:14959;use cited by sanity pass;source:146C.h:668
+T00320.007,statTest,Stat condition kind,med,source:146C.c:14979;use cited by sanity pass;source:146C.h:669
+T00320.008,flagValue,Flag condition value,med,source:146C.c:14961;use cited by sanity pass;source:146C.h:670
+T00320.009,statValue,Stat condition value,med,source:146C.c:14981;use cited by sanity pass;source:146C.h:671
 T00320.010,tileX,Tile X,med,declaration-only;source:146C.h:672
 T00320.011,direction,Facing direction,med,declaration-only;source:146C.h:673
 T00320.012,tileZ,Tile Z,med,declaration-only;source:146C.h:674
-T00320.013,height,Spawn height,med,declaration-only;source:146C.h:675
-T00320.014,settings,Spawn settings bytes,med,declaration-only;source:146C.h:676
+T00320.013,height,Spawn height,med,source:146C.c:15087;use cited by sanity pass;source:146C.h:675
+T00320.014,settings,Spawn settings bytes,med,source:146C.c:6755;use cited by sanity pass;source:146C.h:676
 T00320.015,reserved18,Unidentified bytes,low,declaration-only;source:146C.h:677
-T00320.016,itemId,First carried item,med,declaration-only;source:146C.h:678
-T00320.017,item2Id,Second carried item,med,declaration-only;source:146C.h:679
-T00320.018,item3Id,Third carried item,med,declaration-only;source:146C.h:680
-T00320.019,itemCount,First item count,med,declaration-only;source:146C.h:681
-T00320.020,item2Count,Second item count,med,declaration-only;source:146C.h:682
-T00320.021,item3Count,Third item count,med,declaration-only;source:146C.h:683
-T00320.022,facing,Initial facing,med,declaration-only;source:146C.h:684
+T00320.016,itemId,First carried item,med,source:146C.c:6747;use cited by sanity pass;source:146C.h:678
+T00320.017,item2Id,Second carried item,med,source:146C.c:6749;use cited by sanity pass;source:146C.h:679
+T00320.018,item3Id,Third carried item,med,source:146C.c:6751;use cited by sanity pass;source:146C.h:680
+T00320.019,itemCount,First item count,med,source:146C.c:6748;use cited by sanity pass;source:146C.h:681
+T00320.020,item2Count,Second item count,med,source:146C.c:6750;use cited by sanity pass;source:146C.h:682
+T00320.021,item3Count,Third item count,med,source:146C.c:6752;use cited by sanity pass;source:146C.h:683
+T00320.022,facing,Initial facing,med,source:146C.c:6742;use cited by sanity pass;source:146C.h:684
 T00320.023,actorStateByte,Byte copied into the actor at spawn,low,source:146C.c:881
 T00320.024,variant,Enemy variant,med,declaration-only;source:146C.h:686
-T00320.025,reserved26,Unidentified byte,low,declaration-only;source:146C.h:687
-T00320.026,sceneTest,Scene condition,med,declaration-only;source:146C.h:688
-T00348.000,zndId,Loaded zone identifier,med,declaration-only;source:146C.h:692
-T00348.001,mpdFiles,Room file descriptors of the zone,med,declaration-only;source:146C.h:693
-T00348.002,zndEnemyCount,Number of zone enemy records,med,declaration-only;source:146C.h:694
-T00348.003,zndEnemies,Zone enemy records,med,declaration-only;source:146C.h:695
-T00348.004,zudFiles,Unit file descriptors of the zone,med,declaration-only;source:146C.h:696
+T00320.025,reserved26,Unidentified byte,low,source:146C.c:6743;use cited by sanity pass;source:146C.h:687
+T00320.026,sceneTest,Scene condition,med,source:146C.c:14939;use cited by sanity pass;source:146C.h:688
+T00348.000,zndId,Loaded zone identifier,med,source:146C.c:8914;use cited by sanity pass;source:146C.h:692
+T00348.001,mpdFiles,Room file descriptors of the zone,med,source:146C.c:14779;use cited by sanity pass;source:146C.h:693
+T00348.002,zndEnemyCount,Number of zone enemy records,med,source:146C.c:14785;use cited by sanity pass;source:146C.h:694
+T00348.003,zndEnemies,Zone enemy records,med,source:146C.c:6649;use cited by sanity pass;source:146C.h:695
+T00348.004,zudFiles,Unit file descriptors of the zone,med,source:146C.c:6629;use cited by sanity pass;source:146C.h:696
 T00348.005,loadedZudIndexPlusOne,Index plus one of the loaded unit file,high,source:146C.c:6642
 T00348.006,zudDiscRequest,Disc request loading a unit file,high,source:146C.c:6634
 T00348.007,zudData,Loaded unit file data,high,source:146C.c:6635
-T00348.008,zndDiscRequest,Disc request loading the zone file,med,declaration-only;source:146C.h:700
-T00348.009,zndData,Loaded zone file data,med,declaration-only;source:146C.h:701
-T00348.010,musicId,Zone music,med,declaration-only;source:146C.h:702
-T00348.011,musicSlot,Music slot,med,declaration-only;source:146C.h:703
+T00348.008,zndDiscRequest,Disc request loading the zone file,med,source:146C.c:14809;use cited by sanity pass;source:146C.h:700
+T00348.009,zndData,Loaded zone file data,med,source:146C.c:14813;use cited by sanity pass;source:146C.h:701
+T00348.010,musicId,Zone music,med,source:BATTLE/INITBTL.PRG/18.c:547;use cited by sanity pass;source:146C.h:702
+T00348.011,musicSlot,Music slot,med,source:146C.c:14873;use cited by sanity pass;source:146C.h:703
 T00348.012,isMusicFadeEnabled,Fade music when the next zone uses another track,med,source:146C.c:14818;source:146C.c:14882
-T00348.013,mapId,Loaded room identifier,med,declaration-only;source:146C.h:705
+T00348.013,mapId,Loaded room identifier,med,source:146C.c:8914;use cited by sanity pass;source:146C.h:705
 T00348.014,reserved38,Cleared on zone load; no reader identified,low,source:146C.c:14883
 T00348.015,tileColumns,Collision map columns,high,source:146C.c:15331
 T00348.016,tileRows,Collision map rows,high,source:146C.c:15332
-T00348.017,bounds,Map tile bounds,med,declaration-only;source:146C.h:709
+T00348.017,bounds,Map tile bounds,med,source:146C.c:2435;use cited by sanity pass;source:146C.h:709
 T00348.018,reserved48,Unreferenced word,low,declaration-only;source:146C.h:710
 T00348.019,reserved4C,Unreferenced word,low,declaration-only;source:146C.h:711
 T00348.020,reserved50,Unreferenced word,low,declaration-only;source:146C.h:712
 T00348.021,reserved54,Unreferenced word,low,declaration-only;source:146C.h:713
-T00348.022,mpdDiscRequest,Disc request loading the room file,med,declaration-only;source:146C.h:714
-T00348.023,mpdData,Loaded room file data,med,declaration-only;source:146C.h:715
-T00348.024,mpdEnemyCount,Number of room enemy placements,med,declaration-only;source:146C.h:716
-T00348.025,mpdEnemies,Room enemy placements,med,declaration-only;source:146C.h:717
+T00348.022,mpdDiscRequest,Disc request loading the room file,med,source:146C.c:15261;use cited by sanity pass;source:146C.h:714
+T00348.023,mpdData,Loaded room file data,med,source:146C.c:15265;use cited by sanity pass;source:146C.h:715
+T00348.024,mpdEnemyCount,Number of room enemy placements,med,source:146C.c:14924;use cited by sanity pass;source:146C.h:716
+T00348.025,mpdEnemies,Room enemy placements,med,source:146C.c:14925;use cited by sanity pass;source:146C.h:717
 T00348.026,currentSceneId,Scene identifier used to detect scene changes,high,source:146C.c:15308
 T00435.000,location,Actor tile and position,high,source:146C.c:1969
 T00435.001,actorIndex,Actor that triggered the trap or opens the chest,high,source:146C.c:5004;source:146C.c:5052;sanity pass 2026-10-17
 T00437.000,packedTile,Packed tile coordinates,high,source:146C.c:3197
 T00437.001,position,World position,high,source:146C.c:1969
-T00447.000,geometryOffset,Offset of the animated polygon,med,declaration-only;source:2842C.c:120
+T00447.000,geometryOffset,Offset of the animated polygon,med,source:2842C.c:658;use cited by sanity pass;source:2842C.c:120
 T00447.001,reserved04,Unreferenced bytes,low,declaration-only;source:2842C.c:121
-T00447.002,delay,Ticks per frame,med,declaration-only;source:2842C.c:122
-T00447.003,baseU,Strip origin U,med,declaration-only;source:2842C.c:123
-T00447.004,baseV,Strip origin V,med,declaration-only;source:2842C.c:124
-T00447.005,frameCount,Number of frames,med,declaration-only;source:2842C.c:125
-T00447.006,columns,Frames per row,med,declaration-only;source:2842C.c:126
-T00447.007,frameWidth,Frame width,med,declaration-only;source:2842C.c:127
-T00447.008,frameHeight,Frame height,med,declaration-only;source:2842C.c:128
-T00447.009,tick,Ticks into the current frame,med,declaration-only;source:2842C.c:129
-T00447.010,frame,Current frame,med,declaration-only;source:2842C.c:130
-T00447.011,u,Per-vertex U offsets,med,declaration-only;source:2842C.c:131
-T00447.012,v,Per-vertex V offsets,med,declaration-only;source:2842C.c:132
+T00447.002,delay,Ticks per frame,med,source:2842C.c:645;use cited by sanity pass;source:2842C.c:122
+T00447.003,baseU,Strip origin U,med,source:2842C.c:656;use cited by sanity pass;source:2842C.c:123
+T00447.004,baseV,Strip origin V,med,source:2842C.c:657;use cited by sanity pass;source:2842C.c:124
+T00447.005,frameCount,Number of frames,med,source:2842C.c:652;use cited by sanity pass;source:2842C.c:125
+T00447.006,columns,Frames per row,med,source:2842C.c:656;use cited by sanity pass;source:2842C.c:126
+T00447.007,frameWidth,Frame width,med,source:2842C.c:656;use cited by sanity pass;source:2842C.c:127
+T00447.008,frameHeight,Frame height,med,source:2842C.c:657;use cited by sanity pass;source:2842C.c:128
+T00447.009,tick,Ticks into the current frame,med,source:2842C.c:645;use cited by sanity pass;source:2842C.c:129
+T00447.010,frame,Current frame,med,source:2842C.c:652;use cited by sanity pass;source:2842C.c:130
+T00447.011,u,Per-vertex U offsets,med,source:2842C.c:661;use cited by sanity pass;source:2842C.c:131
+T00447.012,v,Per-vertex V offsets,med,source:2842C.c:664;use cited by sanity pass;source:2842C.c:132
 T00448.000,positionAndFirstColor,Vertex positions and first color,med,DataCrystal
 T00448.001,type,Polygon type,high,DataCrystal
 T00448.002,secondColor,Second vertex color,med,DataCrystal
@@ -413,31 +413,31 @@ T00448.011,textureIdAndFourthPosition,Texture identifier and fourth vertex posit
 T00448.012,u3,Fourth vertex U,high,DataCrystal
 T00448.013,fourthColor,Fourth vertex color,med,DataCrystal
 T00448.014,v3,Fourth vertex V,high,DataCrystal
-T00449.000,geometryOffset,Offset of the scrolled polygon,med,declaration-only;source:2842C.c:154
+T00449.000,geometryOffset,Offset of the scrolled polygon,med,source:2842C.c:714;use cited by sanity pass;source:2842C.c:154
 T00449.001,reserved04,Unreferenced bytes,low,declaration-only;source:2842C.c:155
-T00449.002,delay,Ticks per step,med,declaration-only;source:2842C.c:156
-T00449.003,baseU,Window origin U,med,declaration-only;source:2842C.c:157
-T00449.004,baseV,Window origin V,med,declaration-only;source:2842C.c:158
-T00449.005,width,Texture width,med,declaration-only;source:2842C.c:159
-T00449.006,height,Texture height,med,declaration-only;source:2842C.c:160
-T00449.007,currentU,Current U,med,declaration-only;source:2842C.c:161
-T00449.008,currentV,Current V,med,declaration-only;source:2842C.c:162
-T00449.009,windowWidth,Window width,med,declaration-only;source:2842C.c:163
-T00449.010,windowHeight,Window height,med,declaration-only;source:2842C.c:164
-T00449.011,stepU,U step,med,declaration-only;source:2842C.c:165
-T00449.012,stepV,V step,med,declaration-only;source:2842C.c:166
-T00449.013,tick,Ticks into the current step,med,declaration-only;source:2842C.c:167
+T00449.002,delay,Ticks per step,med,source:2842C.c:687;use cited by sanity pass;source:2842C.c:156
+T00449.003,baseU,Window origin U,med,source:2842C.c:696;use cited by sanity pass;source:2842C.c:157
+T00449.004,baseV,Window origin V,med,source:2842C.c:700;use cited by sanity pass;source:2842C.c:158
+T00449.005,width,Texture width,med,source:2842C.c:697;use cited by sanity pass;source:2842C.c:159
+T00449.006,height,Texture height,med,source:2842C.c:701;use cited by sanity pass;source:2842C.c:160
+T00449.007,currentU,Current U,med,source:2842C.c:688;use cited by sanity pass;source:2842C.c:161
+T00449.008,currentV,Current V,med,source:2842C.c:689;use cited by sanity pass;source:2842C.c:162
+T00449.009,windowWidth,Window width,med,source:2842C.c:697;use cited by sanity pass;source:2842C.c:163
+T00449.010,windowHeight,Window height,med,source:2842C.c:701;use cited by sanity pass;source:2842C.c:164
+T00449.011,stepU,U step,med,source:2842C.c:692;use cited by sanity pass;source:2842C.c:165
+T00449.012,stepV,V step,med,source:2842C.c:693;use cited by sanity pass;source:2842C.c:166
+T00449.013,tick,Ticks into the current step,med,source:2842C.c:687;use cited by sanity pass;source:2842C.c:167
 T00449.014,reserved13,Unreferenced byte,low,declaration-only;source:2842C.c:168
-T00449.015,u,Per-vertex U offsets,med,declaration-only;source:2842C.c:169
-T00449.016,v,Per-vertex V offsets,med,declaration-only;source:2842C.c:170
-T00450.000,tick,Ticks into the current step,med,declaration-only;source:2842C.c:174
-T00450.001,frame,Current step,med,declaration-only;source:2842C.c:175
-T00450.002,frameCount,Number of steps,med,declaration-only;source:2842C.c:176
-T00450.003,columns,Steps per row,med,declaration-only;source:2842C.c:177
+T00449.015,u,Per-vertex U offsets,med,source:2842C.c:717;use cited by sanity pass;source:2842C.c:169
+T00449.016,v,Per-vertex V offsets,med,source:2842C.c:720;use cited by sanity pass;source:2842C.c:170
+T00450.000,tick,Ticks into the current step,med,source:2842C.c:743;use cited by sanity pass;source:2842C.c:174
+T00450.001,frame,Current step,med,source:2842C.c:754;use cited by sanity pass;source:2842C.c:175
+T00450.002,frameCount,Number of steps,med,source:2842C.c:754;use cited by sanity pass;source:2842C.c:176
+T00450.003,columns,Steps per row,med,source:2842C.c:758;use cited by sanity pass;source:2842C.c:177
 T00450.004,reserved04,Unreferenced bytes,low,declaration-only;source:2842C.c:178
-T00450.005,delay,Ticks per step,med,declaration-only;source:2842C.c:179
-T00450.006,scrollStep,Scroll distance per step,med,declaration-only;source:2842C.c:180
-T00450.007,rect,Scrolled texture rectangle,med,declaration-only;source:2842C.c:181
+T00450.005,delay,Ticks per step,med,source:2842C.c:743;use cited by sanity pass;source:2842C.c:179
+T00450.006,scrollStep,Scroll distance per step,med,source:2842C.c:753;use cited by sanity pass;source:2842C.c:180
+T00450.007,rect,Scrolled texture rectangle,med,source:2842C.c:749;use cited by sanity pass;source:2842C.c:181
 T00455.000,sceneEntry,Scene object entry,high,source:2842C.c:972
 T00455.001,scriptCursor,Current command position,high,source:2842C.c:959
 T00455.002,objectId,Scene object identifier or minus one,high,source:2842C.c:968
@@ -488,14 +488,14 @@ T00562.000,kind,Object kind,med,declaration-only;source:146C.c:379
 T00562.001,reserved01,Unidentified byte,low,declaration-only;source:146C.c:380
 T00562.002,reserved02,Unidentified byte,low,declaration-only;source:146C.c:381
 T00562.003,reserved03,Unidentified byte,low,declaration-only;source:146C.c:382
-T00562.004,flag,Condition flag,med,declaration-only;source:146C.c:383
-T00562.005,flagMin,Minimum flag value,med,declaration-only;source:146C.c:384
-T00562.006,flagMax,Maximum flag value,med,declaration-only;source:146C.c:385
+T00562.004,flag,Condition flag,med,source:146C.c:15094;use cited by sanity pass;source:146C.c:383
+T00562.005,flagMin,Minimum flag value,med,source:146C.c:15098;use cited by sanity pass;source:146C.c:384
+T00562.006,flagMax,Maximum flag value,med,source:146C.c:15096;use cited by sanity pass;source:146C.c:385
 T00562.007,slot,Object slot,med,declaration-only;source:146C.c:386
 T00562.008,reserved09,Unidentified byte,low,declaration-only;source:146C.c:387
 T00562.009,tileX,Tile X,med,declaration-only;source:146C.c:388
 T00562.010,tileZ,Tile Z,med,declaration-only;source:146C.c:389
-T00562.011,height,Height,med,declaration-only;source:146C.c:390
+T00562.011,height,Height,med,source:146C.c:15101;use cited by sanity pass;source:146C.c:390
 T00562.012,direction,Facing direction,med,declaration-only;source:146C.c:391
-T00562.013,model,Model identifier,med,declaration-only;source:146C.c:392
+T00562.013,model,Model identifier,med,source:146C.c:15118;use cited by sanity pass;source:146C.c:392
 T00562.014,reserved10,Unidentified bytes,low,declaration-only;source:146C.c:393
