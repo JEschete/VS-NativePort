@@ -3,68 +3,68 @@ G00115,catalog,Event::sfxSourceIds,Native\Game\src\Event\Sound.c,Maps script sou
 G00116,catalog,Event::weaponDrawStates,Native\Game\src\Event\Actors.c,Maps script operands to actor weapon-drawn states.,med,catalog:event-weapon-states;source:4A0A8.c:1540
 G00117,catalog,Event::animationBankBases,Native\Game\src\Event\Actors.c,Provides animation-ID bases selected by the top two bits of animation commands.,med,catalog:event-animation-banks;source:4A0A8.c:1042
 G00118,catalog,Event::specialSubroutineScript,Native\Game\src\Event\Script.c,Provides the built-in script run by special operation sixteen before returning.,high,catalog:event-builtin-scripts;source:4A0A8.c:2700
-G00119,state,Event::skipPaletteResetCommand,Native\Game\src\Event\Skip.c,Stores the palette-reset command patched per layer when a cutscene is skipped.,high,state:Event::SkipState;mutable template written at 4A0A8.c:624;source:4A0A8.c:288;source:4A0A8.c:623
-G00120,constexpr,Event::kSkipSoundRestoreMarker,Native\Game\src\Event\Skip.c,Identifies the command that suppresses room-effect sound restart after a skip.,med,source:4A0A8.c:631
-G00121,constexpr,Event::kDialogPlacementOrder,Native\Game\src\Event\Dialog.c,Lists anchor directions tried in order when placing an actor dialog box.,med,source:4A0A8.c:808
-G00122,constexpr,Event::kMenuTransitionModes,Native\Game\src\Event\Menu.c,Maps menu transitions ten through twelve to transition state values.,high,source:4A0A8.c:1826
-G00123,constexpr,Event::kSceneTimerModes,Native\Game\src\Event\Timer.c,Maps script timer operands to scene timer modes.,high,source:4A0A8.c:1889
-G00124,constexpr,Event::kSceneTimerResetScopes,Native\Game\src\Event\Timer.c,Maps script timer operands to scene timer reset scopes.,high,source:4A0A8.c:1889
-G00125,constexpr,Event::kSpecialOperationTenArguments,Native\Game\src\Event\Script.c,Provides values passed by special operation ten.,low,meaning-unresolved;callee func_8007CE74 not yet characterized;source:4A0A8.c:2704
-G00126,constexpr,Event::kDefaultScreenTint,Native\Game\src\Event\Screen.c,Defines the neutral screen tint applied when an event camera starts.,high,source:4A0A8.c:3060
-G00127,constexpr,Event::kDefaultScreenTransform,Native\Game\src\Event\Screen.c,Defines the default screen scale and translation applied when an event camera starts.,med,source:4A0A8.c:3055;same record passed to scale and translation setters
-G00128,state,Event::fieldCameraReturnCommands,Native\Game\src\Event\Camera.c,Stores eye and look-at commands whose duration is patched before returning to the field camera.,high,state:Event::CameraState;mutable template written at 4A0A8.c:3193;source:4A0A8.c:296;source:4A0A8.c:3194
-G00129,constexpr,Event::kOrbitReturnHeightOffsets,Native\Game\src\Event\Camera.c,Adds height offsets by camera distance setting when returning from an orbit.,high,source:4A0A8.c:4054
-G00130,constexpr,Event::kOrbitReturnFirstCommand,Native\Game\src\Event\Camera.c,Provides the first track command issued when returning from an orbit.,med,source:4A0A8.c:4068;declared as one byte but parsed as a command
-G00131,constexpr,Event::kOrbitReturnSecondCommand,Native\Game\src\Event\Camera.c,Provides the second track command issued when returning from an orbit.,med,source:4A0A8.c:4069;declared as one byte but parsed as a command
-G00132,constexpr,Event::kOpcodeSizes,Native\Game\src\Event\Script.c,Gives the encoded byte length of each event-script opcode.,high,source:573B8.c:154
-G00133,constexpr,Event::kOpcodeHandlers,Native\Game\src\Event\Script.c,Maps each event-script opcode to its normal-playback handler.,high,replace function-pointer table with typed native dispatch;source:573B8.c:98
-G00148,state,Event::textBoxFrameStyles,Native\Game\src\Event\Dialog.c,References text-box frame styles including entries supplied by the loaded event data.,high,state:Event::ScriptState;entries nine to fifteen point into event data;source:4A0A8.c:4594
+G00119,state,Event::skipPaletteResetCommand,Native\Game\src\Event\ScriptVm.c,Stores the palette-reset command patched per layer when a cutscene is skipped.,high,state:Event::SkipState;mutable template written at 4A0A8.c:624;source:4A0A8.c:288;source:4A0A8.c:623
+G00120,constexpr,Event::kSkipSoundRestoreMarker,Native\Game\src\Event\ScriptVm.c,Identifies the command that suppresses room-effect sound restart after a skip.,med,source:4A0A8.c:631
+G00121,constexpr,Event::kDialogPlacementOrder,Native\Game\src\Event\ScriptDialog.c,Lists anchor directions tried in order when placing an actor dialog box.,med,source:4A0A8.c:808
+G00122,constexpr,Event::kMenuTransitionModes,Native\Game\src\Event\ScriptField.c,Maps menu transitions ten through twelve to transition state values.,high,source:4A0A8.c:1826
+G00123,constexpr,Event::kSceneTimerModes,Native\Game\src\Event\ScriptVm.c,Maps script timer operands to scene timer modes.,high,source:4A0A8.c:1889
+G00124,constexpr,Event::kSceneTimerResetScopes,Native\Game\src\Event\ScriptVm.c,Maps script timer operands to scene timer reset scopes.,high,source:4A0A8.c:1889
+G00125,constexpr,Event::kSpecialOperationTenArguments,Native\Game\src\Event\ScriptVm.c,Provides values passed by special operation ten.,low,meaning-unresolved;callee func_8007CE74 not yet characterized;source:4A0A8.c:2704
+G00126,constexpr,Event::kDefaultScreenTint,Native\Game\src\Event\ScriptCamera.c,Defines the neutral screen tint applied when an event camera starts.,high,source:4A0A8.c:3060
+G00127,constexpr,Event::kDefaultScreenTransform,Native\Game\src\Event\ScriptCamera.c,Defines the default screen scale and translation applied when an event camera starts.,med,source:4A0A8.c:3055;same record passed to scale and translation setters
+G00128,state,Event::fieldCameraReturnCommands,Native\Game\src\Event\ScriptCamera.c,Stores eye and look-at commands whose duration is patched before returning to the field camera.,high,state:Event::CameraState;mutable template written at 4A0A8.c:3193;source:4A0A8.c:296;source:4A0A8.c:3194
+G00129,constexpr,Event::kOrbitReturnHeightOffsets,Native\Game\src\Event\ScriptCamera.c,Adds height offsets by camera distance setting when returning from an orbit.,high,source:4A0A8.c:4054
+G00130,constexpr,Event::kOrbitReturnFirstCommand,Native\Game\src\Event\ScriptCamera.c,Provides the first track command issued when returning from an orbit.,med,source:4A0A8.c:4068;declared as one byte but parsed as a command
+G00131,constexpr,Event::kOrbitReturnSecondCommand,Native\Game\src\Event\ScriptCamera.c,Provides the second track command issued when returning from an orbit.,med,source:4A0A8.c:4069;declared as one byte but parsed as a command
+G00132,constexpr,Event::kOpcodeSizes,Native\Game\src\Event\ScriptVm.c,Gives the encoded byte length of each event-script opcode.,high,source:573B8.c:154
+G00133,constexpr,Event::kOpcodeHandlers,Native\Game\src\Event\ScriptVm.c,Maps each event-script opcode to its normal-playback handler.,high,replace function-pointer table with typed native dispatch;source:573B8.c:98
+G00148,state,Event::textBoxFrameStyles,Native\Game\src\Event\ScriptVm.c,References text-box frame styles including entries supplied by the loaded event data.,high,state:Event::ScriptState;entries nine to fifteen point into event data;source:4A0A8.c:4594
 G00238,state,Field::isMenuRequestQueued,Native\Game\src\Field\Input.c,Queues a menu-open press made while the command menu is temporarily unavailable.,high,state:Field::InputState;source:146C.c:7638
-G00249,state,Field::roomMusicSlot,Native\Game\src\Field\Music.c,Identifies the room music slot resumed or faded back after a cutscene.,med,state:Field::RoomState;source:146C.c:4813
-G00437,state,Event::scanlineOverlayFrame,Native\Game\src\Event\Screen.c,Counts frames used to alternate the scanline overlay pattern.,high,state:Event::ScreenState;source:4A0A8.c:2944
-G00438,state,Event::customEasingCurves,Native\Game\src\Event\Interpolation.c,Stores four script-configured interpolation curves.,high,state:Event::ScriptState;source:4A0A8.c:1948
-G00439,state,Event::splashTweens,Native\Game\src\Event\Splash.c,Stores the tween state for the three splash layers.,high,state:Event::SplashState;source:4A0A8.c:306;source:4A0A8.c:867
-G00440,state,Event::scriptControlledActors,Native\Game\src\Event\Actors.c,Marks the seventeen actors currently controlled by event scripts.,high,state:Event::ScriptState;source:573B8.c:133
-G00441,state,Event::weatherTween,Native\Game\src\Event\Weather.c,Stores the scripted weather direction strength and intensity tween.,high,state:Event::ScriptState;source:4A0A8.c:308;source:4A0A8.c:2184
-G00442,state,Event::weatherTweenDuration,Native\Game\src\Event\Weather.c,Aliases the duration byte of the scripted weather tween.,high,view-of:G00441+3;do not allocate separate native storage;source:4A0A8.c:4620
-G00443,state,Event::skipNextFieldCameraRestore,Native\Game\src\Event\Camera.c,Suppresses the next automatic restoration of the field camera.,high,state:Event::CameraState;source:4A0A8.c:3180
-G00444,state,Event::camera,Native\Game\src\Event\Camera.c,References the active event camera state.,high,state:Event::CameraState;handle:Event::CameraState;heap allocation becomes owned native state;source:4A0A8.c:311;source:4A0A8.c:3020
-G00445,state,Event::isDirectEventRequest,Native\Game\src\Event\Playback.c,Marks events started directly rather than by room trigger conditions.,med,state:Event::PlaybackState;source:4A0A8.c:4346
+G00249,state,Field::roomMusicSlot,Native\Game\src\Field\RoomLoading.c,Identifies the room music slot resumed or faded back after a cutscene.,med,state:Field::RoomState;source:146C.c:4813
+G00437,state,Event::scanlineOverlayFrame,Native\Game\src\Event\ScriptEffects.c,Counts frames used to alternate the scanline overlay pattern.,high,state:Event::ScreenState;source:4A0A8.c:2944
+G00438,state,Event::customEasingCurves,Native\Game\src\Event\ScriptVm.c,Stores four script-configured interpolation curves.,high,state:Event::ScriptState;source:4A0A8.c:1948
+G00439,state,Event::splashTweens,Native\Game\src\Event\ScriptScreen.c,Stores the tween state for the three splash layers.,high,state:Event::SplashState;source:4A0A8.c:306;source:4A0A8.c:867
+G00440,state,Event::scriptControlledActors,Native\Game\src\Event\ScriptActors.c,Marks the seventeen actors currently controlled by event scripts.,high,state:Event::ScriptState;source:573B8.c:133
+G00441,state,Event::weatherTween,Native\Game\src\Event\ScriptField.c,Stores the scripted weather direction strength and intensity tween.,high,state:Event::ScriptState;source:4A0A8.c:308;source:4A0A8.c:2184
+G00442,state,Event::weatherTweenDuration,Native\Game\src\Event\ScriptVm.c,Aliases the duration byte of the scripted weather tween.,high,view-of:G00441+3;do not allocate separate native storage;source:4A0A8.c:4620
+G00443,state,Event::skipNextFieldCameraRestore,Native\Game\src\Event\ScriptCamera.c,Suppresses the next automatic restoration of the field camera.,high,state:Event::CameraState;source:4A0A8.c:3180
+G00444,state,Event::camera,Native\Game\src\Event\ScriptCamera.c,References the active event camera state.,high,state:Event::CameraState;handle:Event::CameraState;heap allocation becomes owned native state;source:4A0A8.c:311;source:4A0A8.c:3020
+G00445,state,Event::isDirectEventRequest,Native\Game\src\Event\Triggers.c,Marks events started directly rather than by room trigger conditions.,med,state:Event::PlaybackState;source:4A0A8.c:4346
 G00446,state,Event::roomEventTriggers,Native\Game\src\Event\Triggers.c,References the loaded room event-trigger conditions.,high,state:Event::RoomEvents;decode MPD trigger data into native records;source:4A0A8.c:312;source:4A0A8.c:4214
-G00447,state,Event::dialogStrings,Native\Game\src\Event\Dialog.c,References the string table of the loaded event data.,high,state:Event::ScriptState;source:4A0A8.c:4593
-G00448,state,Event::cachedFlagValue,Native\Game\src\Event\Script.c,Caches a state-flag value for later conditional branches.,high,state:Event::ScriptState;source:4A0A8.c:1642
-G00449,state,Event::isFieldCameraRestoreScripted,Native\Game\src\Event\Camera.c,Records that the script already requested field-camera restoration.,high,state:Event::ScriptState;source:4A0A8.c:2785
-G00450,state,Event::isStartConfirmed,Native\Game\src\Event\Playback.c,Confirms a pending event may begin playback.,high,state:Event::PlaybackState;source:4A0A8.c:4290
-G00451,state,Event::isEffectWaitPending,Native\Game\src\Event\Effects.c,Tracks an in-progress wait for an effect state or release.,high,state:Event::ScriptState;source:4A0A8.c:2470
+G00447,state,Event::dialogStrings,Native\Game\src\Event\ScriptVm.c,References the string table of the loaded event data.,high,state:Event::ScriptState;source:4A0A8.c:4593
+G00448,state,Event::cachedFlagValue,Native\Game\src\Event\ScriptVm.c,Caches a state-flag value for later conditional branches.,high,state:Event::ScriptState;source:4A0A8.c:1642
+G00449,state,Event::isFieldCameraRestoreScripted,Native\Game\src\Event\ScriptVm.c,Records that the script already requested field-camera restoration.,high,state:Event::ScriptState;source:4A0A8.c:2785
+G00450,state,Event::isStartConfirmed,Native\Game\src\Event\ScriptVm.c,Confirms a pending event may begin playback.,high,state:Event::PlaybackState;source:4A0A8.c:4290
+G00451,state,Event::isEffectWaitPending,Native\Game\src\Event\ScriptEffects.c,Tracks an in-progress wait for an effect state or release.,high,state:Event::ScriptState;source:4A0A8.c:2470
 G00452,drop,Event::eventFileDiscRequest,Native\Game\src\Event\Playback.c,Tracks the original CD request loading an event file.,high,replaced-by:Content event AssetId requests;source:4A0A8.c:318;source:4A0A8.c:603
-G00453,state,Event::vibrationPatterns,Native\Game\src\Event\Vibration.c,References the eight vibration patterns supplied by loaded event data.,high,state:Event::ScriptState;source:4A0A8.c:4600
-G00454,state,Event::eventSource,Native\Game\src\Event\Playback.c,Selects whether the pending event comes from a file room-entry script or door data.,high,state:Event::PlaybackState;source:4A0A8.c:4657
-G00455,state,Event::roomChangeState,Native\Game\src\Event\Playback.c,Sequences room changes requested by event scripts.,high,state:Event::PlaybackState;source:4A0A8.c:2018
-G00456,state,Event::isScanlineOverlayEnabled,Native\Game\src\Event\Screen.c,Enables the alternating scanline overlay.,high,state:Event::ScreenState;source:4A0A8.c:2821
+G00453,state,Event::vibrationPatterns,Native\Game\src\Event\ScriptVm.c,References the eight vibration patterns supplied by loaded event data.,high,state:Event::ScriptState;source:4A0A8.c:4600
+G00454,state,Event::eventSource,Native\Game\src\Event\ScriptVm.c,Selects whether the pending event comes from a file room-entry script or door data.,high,state:Event::PlaybackState;source:4A0A8.c:4657
+G00455,state,Event::roomChangeState,Native\Game\src\Event\ScriptVm.c,Sequences room changes requested by event scripts.,high,state:Event::PlaybackState;source:4A0A8.c:2018
+G00456,state,Event::isScanlineOverlayEnabled,Native\Game\src\Event\ScriptVm.c,Enables the alternating scanline overlay.,high,state:Event::ScreenState;source:4A0A8.c:2821
 G00457,state,Event::roomDoorEventData,Native\Game\src\Event\Triggers.c,References embedded room door events indexed by event ID.,high,state:Event::RoomEvents;source:4A0A8.c:4662
 G00458,drop,Event::eventFileDiscLocation,Native\Game\src\Event\Playback.c,Stores the CD location and size of the requested event file.,high,replaced-by:Content event AssetId manifest;source:573B8.c:21;source:573B8.c:225
-G00459,state,Event::isMenuTransitionActive,Native\Game\src\Event\Menu.c,Tracks an in-progress menu or ending transition started by a script.,high,state:Event::ScriptState;source:4A0A8.c:1825
-G00460,state,Event::isTextBoxAwaitingClose,Native\Game\src\Event\Dialog.c,Marks text boxes waiting for confirmation before their script command completes.,high,state:Event::ScriptState;source:4A0A8.c:713
-G00461,state,Event::isAmbientSoundSuspended,Native\Game\src\Event\Sound.c,Tracks whether a script suspended the room ambient sound.,med,state:Event::ScriptState;source:4A0A8.c:2220
-G00462,state,Event::loopCounters,Native\Game\src\Event\Script.c,Stores counters for script backward-jump loops.,high,state:Event::ScriptState;source:4A0A8.c:1659
-G00463,state,Event::stopsMusicOnSkip,Native\Game\src\Event\Skip.c,Requests that music stop when the cutscene is skipped.,high,state:Event::SkipState;source:573B8.c:84
-G00464,state,Event::isMainThreadFinished,Native\Game\src\Event\Playback.c,Marks completion of the main event-script thread.,high,state:Event::PlaybackState;source:4A0A8.c:4692
-G00465,state,Event::chainedEventBuffer,Native\Game\src\Event\Playback.c,Stores a preloaded event to run after the current one.,high,state:Event::PlaybackState;source:4A0A8.c:2775
+G00459,state,Event::isMenuTransitionActive,Native\Game\src\Event\ScriptVm.c,Tracks an in-progress menu or ending transition started by a script.,high,state:Event::ScriptState;source:4A0A8.c:1825
+G00460,state,Event::isTextBoxAwaitingClose,Native\Game\src\Event\ScriptVm.c,Marks text boxes waiting for confirmation before their script command completes.,high,state:Event::ScriptState;source:4A0A8.c:713
+G00461,state,Event::isAmbientSoundSuspended,Native\Game\src\Event\ScriptAudio.c,Tracks whether a script suspended the room ambient sound.,med,state:Event::ScriptState;source:4A0A8.c:2220
+G00462,state,Event::loopCounters,Native\Game\src\Event\ScriptVm.c,Stores counters for script backward-jump loops.,high,state:Event::ScriptState;source:4A0A8.c:1659
+G00463,state,Event::stopsMusicOnSkip,Native\Game\src\Event\ScriptVm.c,Requests that music stop when the cutscene is skipped.,high,state:Event::SkipState;source:573B8.c:84
+G00464,state,Event::isMainThreadFinished,Native\Game\src\Event\ScriptVm.c,Marks completion of the main event-script thread.,high,state:Event::PlaybackState;source:4A0A8.c:4692
+G00465,state,Event::chainedEventBuffer,Native\Game\src\Event\ScriptVm.c,Stores a preloaded event to run after the current one.,high,state:Event::PlaybackState;source:4A0A8.c:2775
 G00466,drop,Event::legacySkipHandlerCopy,Native\Game\src\Event\Script.c,Holds a heap copy of the skip-mode opcode handler table.,high,replaced-by:G00621 used directly as a constant table;source:573B8.h:72;source:573B8.c:101
-G00467,state,Event::skipState,Native\Game\src\Event\Skip.c,Tracks whether a cutscene is not skippable skippable or being skipped.,high,state:Event::SkipState;source:573B8.c:78
-G00468,state,Event::scriptBuffer,Native\Game\src\Event\Playback.c,Stores the loaded event script and data.,high,state:Event::PlaybackState;6144-byte original allocation;source:4A0A8.h:179;source:4A0A8.c:4241
-G00469,state,Event::playbackPhase,Native\Game\src\Event\Playback.c,Sequences event playback through pending loading and running phases.,high,state:Event::PlaybackState;source:4A0A8.c:4637
-G00470,state,Event::threadCursors,Native\Game\src\Event\Script.c,Stores the current command position of the four event-script threads.,high,state:Event::ScriptState;source:4A0A8.c:4603
-G00471,state,Event::vibrationPatternBuffer,Native\Game\src\Event\Vibration.c,Stores a copied vibration pattern played by a script command.,high,state:Event::ScriptState;source:4A0A8.c:2527
-G00472,state,Event::suspendedAmbientSoundId,Native\Game\src\Event\Sound.c,Stores the room ambient sound restored after a script suspension.,high,state:Event::ScriptState;source:4A0A8.c:2227
-G00473,state,Event::reservedResetByte,Native\Game\src\Event\Script.c,Retains a byte cleared at event initialization; no reader is identified.,low,meaning-unresolved;source:4A0A8.c:4608
+G00467,state,Event::skipState,Native\Game\src\Event\ScriptActors.c,Tracks whether a cutscene is not skippable skippable or being skipped.,high,state:Event::SkipState;source:573B8.c:78
+G00468,state,Event::scriptBuffer,Native\Game\src\Event\ScriptVm.c,Stores the loaded event script and data.,high,state:Event::PlaybackState;6144-byte original allocation;source:4A0A8.h:179;source:4A0A8.c:4241
+G00469,state,Event::playbackPhase,Native\Game\src\Event\ScriptVm.c,Sequences event playback through pending loading and running phases.,high,state:Event::PlaybackState;source:4A0A8.c:4637
+G00470,state,Event::threadCursors,Native\Game\src\Event\ScriptVm.c,Stores the current command position of the four event-script threads.,high,state:Event::ScriptState;source:4A0A8.c:4603
+G00471,state,Event::vibrationPatternBuffer,Native\Game\src\Event\ScriptEffects.c,Stores a copied vibration pattern played by a script command.,high,state:Event::ScriptState;source:4A0A8.c:2527
+G00472,state,Event::suspendedAmbientSoundId,Native\Game\src\Event\ScriptAudio.c,Stores the room ambient sound restored after a script suspension.,high,state:Event::ScriptState;source:4A0A8.c:2227
+G00473,state,Event::reservedResetByte,Native\Game\src\Event\ScriptVm.c,Retains a byte cleared at event initialization; no reader is identified.,low,meaning-unresolved;source:4A0A8.c:4608
 G00474,state,Event::hasRoomEntryScript,Native\Game\src\Event\Triggers.c,Marks that the room has an entry script waiting to run.,high,state:Event::RoomEvents;source:4A0A8.c:4237
-G00475,state,Event::eventId,Native\Game\src\Event\Playback.c,Identifies the event file or door event to load.,high,state:Event::PlaybackState;source:573B8.h:73;source:4A0A8.c:2847
-G00476,state,Event::isChainedEventLoaded,Native\Game\src\Event\Playback.c,Marks that a chained event has been preloaded.,high,state:Event::PlaybackState;source:4A0A8.c:2778
-G00477,state,Event::threadWaitFrames,Native\Game\src\Event\Script.c,Stores remaining wait frames per event-script thread.,high,state:Event::ScriptState;source:4A0A8.c:1909
-G00478,state,Event::isTextSelectionActive,Native\Game\src\Event\Dialog.c,Tracks an in-progress text-box choice selection.,high,state:Event::ScriptState;source:4A0A8.c:953
-G00479,state,Event::subroutineReturnCursor,Native\Game\src\Event\Script.c,Stores the script position resumed after the built-in subroutine.,high,state:Event::ScriptState;source:4A0A8.c:2699
-G00480,state,Event::isSkipForced,Native\Game\src\Event\Skip.c,Requests a skip without waiting for the Start button.,high,state:Event::SkipState;source:4A0A8.c:2680
-G00481,state,Event::musicSlot,Native\Game\src\Event\Sound.c,Identifies the music slot targeted by event music commands.,high,state:Event::ScriptState;source:4A0A8.c:2350
-G00482,state,Event::isScriptBackdropEnabled,Native\Game\src\Event\Camera.c,Enables a script-selected backdrop applied with the far-clip distance.,med,state:Event::CameraState;source:4A0A8.c:1975
-G00621,constexpr,Event::kSkipOpcodeHandlers,Native\Game\src\Event\Script.c,Maps each event-script opcode to its skip-mode handler.,high,replace function-pointer table with typed native dispatch;source:12AC.c:6
+G00475,state,Event::eventId,Native\Game\src\Event\ScriptVm.c,Identifies the event file or door event to load.,high,state:Event::PlaybackState;source:573B8.h:73;source:4A0A8.c:2847
+G00476,state,Event::isChainedEventLoaded,Native\Game\src\Event\ScriptVm.c,Marks that a chained event has been preloaded.,high,state:Event::PlaybackState;source:4A0A8.c:2778
+G00477,state,Event::threadWaitFrames,Native\Game\src\Event\ScriptVm.c,Stores remaining wait frames per event-script thread.,high,state:Event::ScriptState;source:4A0A8.c:1909
+G00478,state,Event::isTextSelectionActive,Native\Game\src\Event\ScriptVm.c,Tracks an in-progress text-box choice selection.,high,state:Event::ScriptState;source:4A0A8.c:953
+G00479,state,Event::subroutineReturnCursor,Native\Game\src\Event\ScriptVm.c,Stores the script position resumed after the built-in subroutine.,high,state:Event::ScriptState;source:4A0A8.c:2699
+G00480,state,Event::isSkipForced,Native\Game\src\Event\ScriptVm.c,Requests a skip without waiting for the Start button.,high,state:Event::SkipState;source:4A0A8.c:2680
+G00481,state,Event::musicSlot,Native\Game\src\Event\ScriptAudio.c,Identifies the music slot targeted by event music commands.,high,state:Event::ScriptState;source:4A0A8.c:2350
+G00482,state,Event::isScriptBackdropEnabled,Native\Game\src\Event\ScriptVm.c,Enables a script-selected backdrop applied with the far-clip distance.,med,state:Event::CameraState;source:4A0A8.c:1975
+G00621,constexpr,Event::kSkipOpcodeHandlers,Native\Game\src\Event\ScriptVm.c,Maps each event-script opcode to its skip-mode handler.,high,replace function-pointer table with typed native dispatch;source:12AC.c:6

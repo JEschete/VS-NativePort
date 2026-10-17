@@ -417,10 +417,15 @@ names, locations and collisions; it does not prove semantics or close migration 
   entries 10-11. The binary labels `g_Sound_GlobalFlags` as one word; its C struct's second and third words are
   the separate globals G01891/G01892, and the stereo/mono commands overwrite G01891 whole. Several unsized Audio
   tables have inventory sizes that overlap the next symbol; their capacities come from address gaps (noted per row).
-- Final locations of data rows and the function catalog disagree in places (`Input\src\Controllers.c` vs
+- Final locations of data rows and the function catalog disagreed in places (`Input\src\Controllers.c` vs
   `Controller.c`, `Graphics\src\ScreenTransition.c` vs `FramebufferEffects.c`, `Core\src\Memory.c` vs
   `Memory\Heap.c`, `Content\src\DiscQueue.c` vs `CdDrive.c`, `Video\src\Intro.c` vs `Intro\Playback.c`).
-  Reconcile file placement once, before copying, instead of per batch.
+  Resolved 2026-10-17 by `tools\ledger\reconcile_locations.py` (run by `sanity_fixes.py`): 232 `state`/`constexpr`
+  globals in files no function lives in moved to the catalog file their users live in, within the same namespace
+  root. 62 stay in data-only files on purpose: per-plugin effect state (`Effects::PlgNNN`, see §6.8 templates),
+  shared game state in `Game\src\State\`, the write-only reset words in the trace queue, and constants such as
+  `Core::kNegativeYAxis` used from other roots. `catalog`, `asset` and `drop` rows produce no source file, so their
+  locations do not matter. The 202 catalog rows proposed as `Triage` now carry the system of their final name.
 - T00595.003 (`iconHeaderBytes`) receives `CardUiResources.fileIconPalettes`; the save header written at
   `260.c:753` (icon flag 0x11) matches the standard PS1 card layout with the icon palette at 0x60, so it can be
   renamed `iconPalette` when Shared/Title rows are next revised.

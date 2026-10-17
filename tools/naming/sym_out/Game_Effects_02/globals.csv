@@ -12,12 +12,12 @@ G00227,catalog,Effects::scriptOpcodeHandlers,Native\Game\src\Effects\Runtime.c,D
 G00228,state,Effects::lastReactionSoundVariant,Native\Game\src\Effects\Runtime.c,Keeps the last random reaction sound so the next one differs.,high,source:5BF94.c:8295
 G00229,state,Effects::emptyPackage,Native\Game\src\Effects\Runtime.c,Is the empty effect package bound when effect resources are initialised.,low,source:6F014.c:457
 G00239,state,Effects::tintedActor,Native\Game\src\Effects\Runtime.c,"Remembers the actor tinted red during an action, to restore its color.",high,source:146C.c:2213;source:146C.c:2219
-G00339,state,Field::weatherParameters,Native\Game\src\Field\Weather.c,Holds the weather parameters: the drift vector in entries 0-2 and room values from 4 up.,med,source:146C.c:17780;source:2842C.c:276
-G00349,state,Field::weatherParticleCount,Native\Game\src\Field\Weather.c,"Counts the weather particles drawn, set from the weather intensity.",high,source:2842C.c:415;source:146C.c:17774
-G00350,state,Field::weatherParticleCapacity,Native\Game\src\Field\Weather.c,Gives the most weather particles allocated.,high,source:2842C.c:415
+G00339,state,Field::weatherParameters,Native\Game\src\Field\Environment.c,Holds the weather parameters: the drift vector in entries 0-2 and room values from 4 up.,med,source:146C.c:17780;source:2842C.c:276
+G00349,state,Field::weatherParticleCount,Native\Game\src\Field\Environment.c,"Counts the weather particles drawn, set from the weather intensity.",high,source:2842C.c:415;source:146C.c:17774
+G00350,state,Field::weatherParticleCapacity,Native\Game\src\Field\Environment.c,Gives the most weather particles allocated.,high,source:2842C.c:415
 G00353,state,Field::screenWeatherFade,Native\Game\src\Field\Weather.c,Fades screen-space weather in and out by 8 per frame up to 96.,med,source:146C.c:18097;source:146C.c:18147
-G00356,state,Field::roomWeatherKind,Native\Game\src\Field\Weather.c,Gives the current room's weather kind; 0 for none.,high,source:2842C.c:374;source:2842C.c:278
-G00360,state,Field::weatherParticles,Native\Game\src\Field\Weather.c,Points to the 0x800-byte weather particle buffer.,high,source:146C.c:17450;points to Field::WeatherParticle
+G00356,state,Field::roomWeatherKind,Native\Game\src\Field\Environment.c,Gives the current room's weather kind; 0 for none.,high,source:2842C.c:374;source:2842C.c:278
+G00360,state,Field::weatherParticles,Native\Game\src\Field\Environment.c,Points to the 0x800-byte weather particle buffer.,high,source:146C.c:17450;points to Field::WeatherParticle
 G00512,state,Effects::screenEffectDefaults,Native\Game\src\Effects\ScreenEffects.c,Holds the screen effect state used when no overlay is loaded (warp 0x1000).,med,source:5BF94.c:3481;source:5BF94.c:3919
 G00524,state,Effects::menuReloadSlot,Native\Game\src\Effects\Runtime.c,Holds the read that reloads the main menu after a primary effect.,med,source:5BF94.c:5233;source:5BF94.c:5300
 G00525,state,Effects::pendingTracks,Native\Game\src\Effects\Runtime.c,Holds one bit per primary effect track not yet started.,high,source:5BF94.c:5227;source:5BF94.c:5421
@@ -53,24 +53,24 @@ G00556,state,Effects::particlePoolReferences,Native\Game\src\Effects\Particles.c
 G00557,state,Effects::scriptSelector,Native\Game\src\Effects\Runtime.c,Keeps the selector byte read by the effect script; not otherwise read.,low,source:5BF94.c:7542
 G00558,state,Effects::particleDrag,Native\Game\src\Effects\Particles.c,Gives the drag applied to particles.,high,source:5BF94.c:7828;source:5BF94.c:7835
 G00559,state,Effects::particleGravity,Native\Game\src\Effects\Particles.c,Gives the gravity applied to particles.,high,source:5BF94.c:7826;type Effects::ParticleGravity
-G00560,state,Effects::textureLoadIndex,Native\Game\src\Effects\Loading.c,Indexes the effect texture being loaded.,high,source:6F014.c:657;source:6F014.c:638
-G00561,state,Effects::textureLoads,Native\Game\src\Effects\Loading.c,"Lists the effect textures to load: count, files, slots and CLUT flags.",high,source:6F014.c:619;type Effects::EffectLoadState
-G00562,state,Effects::packageBuffer,Native\Game\src\Effects\Loading.c,Points to the loaded effect package file.,high,source:6F014.c:585;fork name pfileBuf
-G00563,state,Effects::textureLoadState,Native\Game\src\Effects\Loading.c,Holds the effect texture loading state; loading starts while zero.,med,source:6F014.c:740;source:6F014.c:619
-G00564,state,Effects::purgeOverlayLoaded,Native\Game\src\Effects\Loading.c,Set while the effect purge overlay is loaded.,med,source:6F014.c:574;source:5BF94.c:5198
-G00565,state,Effects::packageFile,Native\Game\src\Effects\Loading.c,Gives the effect package file to load.,high,source:6F014.c:588;fork name pFileLoadContext
-G00566,state,Effects::resourceReadSlot,Native\Game\src\Effects\Loading.c,Holds the read of an effect resource.,high,source:6F014.c:556
-G00567,state,Effects::pluginLoadState,Native\Game\src\Effects\Loading.c,Holds the effect plugin loading state.,high,source:6F014.c:744;fork name kept
-G00568,state,Effects::pluginFile,Native\Game\src\Effects\Loading.c,Gives the effect plugin file to load.,high,source:6F014.c:720;fork name kept
+G00560,state,Effects::textureLoadIndex,Native\Game\src\Effects\EffectResources.c,Indexes the effect texture being loaded.,high,source:6F014.c:657;source:6F014.c:638
+G00561,state,Effects::textureLoads,Native\Game\src\Effects\EffectResources.c,"Lists the effect textures to load: count, files, slots and CLUT flags.",high,source:6F014.c:619;type Effects::EffectLoadState
+G00562,state,Effects::packageBuffer,Native\Game\src\Effects\EffectResources.c,Points to the loaded effect package file.,high,source:6F014.c:585;fork name pfileBuf
+G00563,state,Effects::textureLoadState,Native\Game\src\Effects\EffectResources.c,Holds the effect texture loading state; loading starts while zero.,med,source:6F014.c:740;source:6F014.c:619
+G00564,state,Effects::purgeOverlayLoaded,Native\Game\src\Effects\EffectResources.c,Set while the effect purge overlay is loaded.,med,source:6F014.c:574;source:5BF94.c:5198
+G00565,state,Effects::packageFile,Native\Game\src\Effects\EffectResources.c,Gives the effect package file to load.,high,source:6F014.c:588;fork name pFileLoadContext
+G00566,state,Effects::resourceReadSlot,Native\Game\src\Effects\EffectResources.c,Holds the read of an effect resource.,high,source:6F014.c:556
+G00567,state,Effects::pluginLoadState,Native\Game\src\Effects\EffectResources.c,Holds the effect plugin loading state.,high,source:6F014.c:744;fork name kept
+G00568,state,Effects::pluginFile,Native\Game\src\Effects\EffectResources.c,Gives the effect plugin file to load.,high,source:6F014.c:720;fork name kept
 G00569,state,Effects::savedPackage,Native\Game\src\Effects\Runtime.c,Keeps the selected effect package while another is used.,high,source:6F014.c:471
 G00570,state,Effects::package,Native\Game\src\Effects\Runtime.c,Points to the selected effect package.,high,source:6F014.c:465;points to Effects::EffectPackage
-G00571,state,Effects::textureLoadBuffer,Native\Game\src\Effects\Loading.c,Points to the buffer effect textures are read into.,high,source:6F014.c:630
-G00572,state,Effects::pluginEntryPointCount,Native\Game\src\Effects\Loading.c,Gives the number of renderer entry points of the loaded plugin.,med,source:6F014.c:722;fork name kept
+G00571,state,Effects::textureLoadBuffer,Native\Game\src\Effects\EffectResources.c,Points to the buffer effect textures are read into.,high,source:6F014.c:630
+G00572,state,Effects::pluginEntryPointCount,Native\Game\src\Effects\EffectResources.c,Gives the number of renderer entry points of the loaded plugin.,med,source:6F014.c:722;fork name kept
 G00574,state,Effects::effectRenderers,Native\Game\src\Effects\Runtime.c,Gives the renderer bound to each renderer index by the plugin.,high,source:6F014.c:727;fork name kept
 G00575,state,Effects::actionPackage,Native\Game\src\Effects\Runtime.c,Holds the action effect package.,med,source:6F014.c:465;source:EFFECT/EFFPURGE.BIN/0.c:919
 G00576,state,Effects::actionRequestPointer,Native\Game\src\Effects\Runtime.c,Points to the action request; not read by decompiled code.,low,source:6F014.c:455
 G00577,state,Effects::secondaryPackage,Native\Game\src\Effects\Runtime.c,"Holds the secondary effect package, whose request is the secondary request.",med,source:6F014.c:454;source:6F014.c:463
-G00578,state,Effects::loadedTextureSlots,Native\Game\src\Effects\Loading.c,"Holds one bit per texture slot (24-31) holding an effect texture, released with the package.",med,source:6F014.c:643;source:6F014.c:603
+G00578,state,Effects::loadedTextureSlots,Native\Game\src\Effects\EffectResources.c,"Holds one bit per texture slot (24-31) holding an effect texture, released with the package.",med,source:6F014.c:643;source:6F014.c:603
 G00622,catalog,Effects::effectUsesTextures,Native\Game\src\Effects\PurgeTables.c,Marks the effects that load texture files.,med,source:EFFECT/EFFPURGE.BIN/0.c:931
 G00623,catalog,Effects::effectEntryPointIndices,Native\Game\src\Effects\PurgeTables.c,Gives each effect's first renderer entry point; the next entry ends it.,high,source:EFFECT/EFFPURGE.BIN/0.c:956;fork name kept
 G00624,catalog,Effects::effectEntryPoints,Native\Game\src\Effects\PurgeTables.c,Lists every effect renderer entry point.,high,source:EFFECT/EFFPURGE.BIN/0.c:963;fork name kept
@@ -236,5 +236,5 @@ G00783,catalog,Effects::Plg300::ringColorFactors,Native\Game\src\Effects\Plugins
 G00784,catalog,Effects::Plg300::ringColorFactors2,Native\Game\src\Effects\Plugins\Plg300.c,Gives the ring template's color factors for each transparency mode.,high,source:EFFECT/PLG300.BIN/110.c:418;source:rings.h:93;indexed inline like the rings.h template
 G00785,state,Effects::Plg301::particleEmissionCounter,Native\Game\src\Effects\Plugins\Plg301.c,Steps the box corner (0-7) or ring position the particle template emits from next.,high,source:EFFECT/PLG301.BIN/110.c:14;source:particleSetup.h:161;bound by the plugin source
 G00786,catalog,Effects::Plg301::closedRingColorFactors,Native\Game\src\Effects\Plugins\Plg301.c,Gives the closed ring template's color factors for each transparency mode.,high,source:EFFECT/PLG301.BIN/110.c:22;source:closedRings.h:98;bound by the plugin source
-G01957,state,Render::nearClip,Native\Engine\src\Render\Render.c,Gives the camera near clip distance.,high,source:146C.c:9043;source:5BF94.c:6521;fork name kept
+G01957,state,Render::nearClip,Native\Engine\src\Render\Camera.c,Gives the camera near clip distance.,high,source:146C.c:9043;source:5BF94.c:6521;fork name kept
 G02018,state,Core::overlaySlots,Native\Engine\src\Core\Overlays.c,"Gives the addresses overlays are loaded at, by slot.",high,source:6F014.c:577;replaced by native module loading

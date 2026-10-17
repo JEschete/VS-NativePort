@@ -1,8 +1,8 @@
 """Corrections from the low/med sanity pass (tools\\naming\\sanity_pass.py), each from read code.
 
 Patches the owning batch output (tools\\naming\\sym_out\\<batch>\\{fields,types,globals}.csv) row by id, mirrors field
-fixes onto same-as duplicate types, then re-applies the touched batches. Re-run after regenerating any batch whose
-generator does not include these fixes.
+fixes onto same-as duplicate types, re-applies the touched batches, then runs tools\\ledger\\reconcile_locations.py.
+Re-run after regenerating any batch whose generator does not include these fixes.
 
   python tools\\naming\\sanity_fixes.py [--dry-run]
 """
@@ -249,7 +249,11 @@ def main() -> int:
         if r.returncode:
             print(r.stdout, r.stderr)
             return 1
-    return 0
+    # globals placed in data-only files move to the catalog file that uses them (tools\ledger\reconcile_locations.py)
+    sys.path.insert(0, str(ROOT / "tools" / "ledger"))
+    import reconcile_locations
+    sys.argv = [sys.argv[0]]
+    return reconcile_locations.main()
 
 
 if __name__ == "__main__":

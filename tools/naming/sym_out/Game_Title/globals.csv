@@ -1,5 +1,5 @@
 id,disposition,final_name,final_location,purpose,confidence,notes
-G02016,state,Title::titleScreenVisitCount,Native\Game\src\Title\TitleScreen.c,Counts title-screen entries to select startup and attract-mode behavior.,high,state:Title::TitleState;source:main.c:142;source:22C.c:4477
+G02016,state,Title::titleScreenVisitCount,Native\Game\src\Title\TitleMenu.c,Counts title-screen entries to select startup and attract-mode behavior.,high,state:Title::TitleState;source:main.c:142;source:22C.c:4477
 G02019,asset,Title::developerLogo,Native\Game\src\Title\Credits.c,Provides the developer logo and palettes for the startup credit sequence.,high,asset:textures/title/developer.png;source:22C.c:3582;source:22C.c:3624
 G02020,asset,Title::titleScreenBackground,Native\Game\src\Title\TitleScreen.c,Provides the compressed title-screen background image.,high,asset:textures/title/background.png;source:22C.c:3791;source:22C.c:3793
 G02021,asset,Title::copyrightImage,Native\Game\src\Title\TitleScreen.c,Provides the copyright image blended into the title screen.,high,asset:textures/title/copyright.png;source:22C.c:3933;source:22C.c:3936
@@ -45,9 +45,9 @@ G02073,drop,Title::cardEventDescriptors,Native\Game\src\Title\SaveCard.c,Stores 
 G02075,drop,Title::cardDirectoryEntries,Native\Game\src\Title\SaveCard.c,Stores PS1 directory entries for the fifteen memory-card slots.,high,replaced-by:Save file enumeration;source:22C.c:188;source:22C.c:359
 G02076,state,Title::memoryCardMessage,Native\Game\src\Title\SaveFiles.c,Selects the text displayed during a save or load operation.,high,state:Title::SaveFilesState;source:22C.c:1230;source:22C.c:1323
 G02077,constexpr,Title::kFileMenuAnimationStops,Native\Game\src\Title\SaveFiles.c,Defines the easing steps used by animated file-menu elements.,high,source:22C.c:1108
-G02078,constexpr,Title::kMenuItemOutlinePalettes,Native\Game\src\Title\TitleScreen.c,Defines the two outline color ramps for title-menu text.,high,source:titleData.c:24
-G02079,state,Title::menuItemStates,Native\Game\src\Title\TitleScreen.c,Stores enabled flags and animation state for each title-menu item.,high,state:Title::TitleState;source:22C.c:3759;source:22C.c:3763
-G02080,constexpr,Title::kMenuItemTextPalettes,Native\Game\src\Title\TitleScreen.c,Defines the two text color ramps for title-menu items.,high,source:titleData.c:6
+G02078,constexpr,Title::kMenuItemOutlinePalettes,Native\Game\src\Title\TitleMenu.c,Defines the two outline color ramps for title-menu text.,high,source:titleData.c:24
+G02079,state,Title::menuItemStates,Native\Game\src\Title\TitleMenu.c,Stores enabled flags and animation state for each title-menu item.,high,state:Title::TitleState;source:22C.c:3759;source:22C.c:3763
+G02080,constexpr,Title::kMenuItemTextPalettes,Native\Game\src\Title\TitleMenu.c,Defines the two text color ramps for title-menu items.,high,source:titleData.c:6
 G02085,drop,Title::fileMenuPrimitiveBuffer,Native\Game\src\Title\SaveFiles.c,Stores the scratch GPU packet used for immediate file-menu drawing.,high,replaced-by:Render draw commands;source:22C.c:1080;source:22C.c:1085
 G02086,state,Title::saveFileSummaries,Native\Game\src\Title\SaveFiles.c,Points to save metadata used to display and select title-menu files.,high,state:Title::SaveFilesState;source:22C.c:190;source:22C.c:199
 G02087,drop,Title::saveSummaryUvClutWords,Native\Game\src\Title\SaveFiles.c,Defines packed PS1 texture coordinates and palettes for save summary glyphs.,high,replaced-by:Render atlas regions;preserve glyph mapping before removing packed words;source:22C.c:1115;source:22C.c:1125
@@ -59,7 +59,7 @@ G02092,asset,Title::memoryCardUiResource,Native\Game\src\Title\SaveFiles.c,Point
 G02093,catalog,Title::saveMenuText,Native\Game\src\Title\SaveFiles.c,Points to the text table used by the title save and load menus.,high,catalog:title-save-text;source:22C.c:186;source:22C.c:960
 G02095,catalog,Title::initialLearnedActionBits,Native\Game\src\Title\NewGame.c,Defines the initial learned-action bitsets for new-game initialization.,high,catalog:new-game-actions;source:titleData.c:252;source:22C.c:4711
 G02097,state,Title::loadMenuGameTimeBackup,Native\Game\src\Title\SaveFiles.c,Preserves the current game time while the load menu previews saves.,high,state:Title::LoadMenuState;source:22C.c:1927;source:22C.c:2061
-G02098,state,Title::lastButtonActivityFrame,Native\Game\src\Title\TitleScreen.c,Records the frame of the last button activity for title-menu idle behavior.,high,state:Title::TitleState;despite original name this stores VSync ticks;source:22C.c:4498;source:22C.c:4549
+G02098,state,Title::lastButtonActivityFrame,Native\Game\src\Title\TitleMenu.c,Records the frame of the last button activity for title-menu idle behavior.,high,state:Title::TitleState;despite original name this stores VSync ticks;source:22C.c:4498;source:22C.c:4549
 G02099,state,Title::confirmationWasCancelled,Native\Game\src\Title\SaveFiles.c,Retains the cancellation result across confirmation animation frames.,high,state:Title::ConfirmationState;source:22C.c:2340;source:22C.c:2347
 G02103,state,Title::loadCompleteTimerFrames,Native\Game\src\Title\SaveFiles.c,Times the completion display after a save file is loaded.,high,state:Title::LoadMenuState;source:22C.c:1934;source:22C.c:1952
 G02105,state,Title::overwriteWasConfirmed,Native\Game\src\Title\SaveFiles.c,Retains the selected answer to the overwrite confirmation.,high,state:Title::OverwritePromptState;source:22C.c:2395;source:22C.c:2408
@@ -77,15 +77,15 @@ G02117,state,Title::saveMenuFileSlot,Native\Game\src\Title\SaveFiles.c,Retains t
 G02120,constexpr,Title::kSaveMenuGlyphWidths,Native\Game\src\Title\SaveFiles.c,Defines glyph widths used by the save-menu text renderer.,high,source:22C.c:1386
 G02121,drop,Title::cardInitializationPollCount,Native\Game\src\Title\SaveCard.c,Counts initialization polling attempts before testing PS1 card events.,high,replaced-by:Save asynchronous completion;source:22C.c:470;source:22C.c:479
 G02122,state,Title::isOverwritePromptInitialized,Native\Game\src\Title\SaveFiles.c,Tracks whether the overwrite confirmation has initialized its UI.,high,state:Title::OverwritePromptState;source:22C.c:2397;source:22C.c:2400
-G02123,state,Title::lastIntroMovieFrame,Native\Game\src\Title\TitleScreen.c,Records the frame used to gate replay of the intro movie.,high,state:Title::TitleState;source:22C.c:4499;source:22C.c:4548
+G02123,state,Title::lastIntroMovieFrame,Native\Game\src\Title\TitleMenu.c,Records the frame used to gate replay of the intro movie.,high,state:Title::TitleState;source:22C.c:4499;source:22C.c:4548
 G02124,state,Title::isReadingTemporarySave,Native\Game\src\Title\SaveCard.c,Distinguishes temporary save filenames during save reading.,high,state:Title::SaveReadState;source:22C.c:752;source:22C.c:764
 G02125,state,Title::loadMenuExitTimerFrames,Native\Game\src\Title\SaveFiles.c,Times the closing animation of the load-file menu.,high,state:Title::LoadMenuState;source:22C.c:1933;source:22C.c:2040
 G02126,state,Title::saveMenuExitTimerFrames,Native\Game\src\Title\SaveFiles.c,Times the closing animation of the save-file menu.,high,state:Title::SaveMenuState;source:22C.c:2517;source:22C.c:2539
 G02127,drop,Title::cardEventResultMask,Native\Game\src\Title\SaveCard.c,Retains the accepted PS1 event mask across masked card-event polls.,high,replaced-by:Save asynchronous completion;source:22C.c:1490;source:22C.c:1497
 G02128,drop,Title::outlineTexturePageWords,Native\Game\src\Title\TitleScreen.c,Defines packed PS1 texture-page commands for title-menu outlines.,high,replaced-by:Render atlas regions;preserve outline atlas selection;source:titleData.c:65;source:22C.c:4100
 G02129,drop,Title::outlineUvClutWords,Native\Game\src\Title\TitleScreen.c,Defines packed PS1 coordinates and palettes for title-menu outlines.,high,replaced-by:Render atlas regions;preserve outline atlas coordinates;source:titleData.c:59;source:22C.c:4110
-G02130,constexpr,Title::kMenuOutlineSizes,Native\Game\src\Title\TitleScreen.c,Defines title-menu outline widths and heights in pixels.,high,source:titleData.c:76;unpack into native size values
-G02131,constexpr,Title::kMenuOutlinePositions,Native\Game\src\Title\TitleScreen.c,Defines title-menu outline screen positions in pixels.,high,source:titleData.c:80;unpack into native coordinates
+G02130,constexpr,Title::kMenuOutlineSizes,Native\Game\src\Title\TitleMenu.c,Defines title-menu outline widths and heights in pixels.,high,source:titleData.c:76;unpack into native size values
+G02131,constexpr,Title::kMenuOutlinePositions,Native\Game\src\Title\TitleMenu.c,Defines title-menu outline screen positions in pixels.,high,source:titleData.c:80;unpack into native coordinates
 G02132,state,Title::loadMenuPageIndex,Native\Game\src\Title\SaveFiles.c,Retains the current page of the load-file menu.,high,state:Title::LoadMenuState;source:22C.c:1931;source:22C.c:1943
 G02133,state,Title::saveMenuPageIndex,Native\Game\src\Title\SaveFiles.c,Retains the current page of the save-file menu.,high,state:Title::SaveMenuState;source:22C.c:2515;source:22C.c:2530
 G02134,state,Title::saveReadCardSlot,Native\Game\src\Title\SaveCard.c,Retains the selected card slot during save reading.,high,state:Title::SaveReadState;source:22C.c:750;source:22C.c:763

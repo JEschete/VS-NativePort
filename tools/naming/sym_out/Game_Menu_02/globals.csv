@@ -10,20 +10,20 @@ G00007,state,Menu::Inventory::secondaryTitleEnabled,Native\Game\src\Menu\Invento
 G00008,state,Menu::Inventory::selectedItemCategoryIconOnTop,Native\Game\src\Menu\Inventory\Inventory.c,Draws the selected category icon above the others.,high,source:items1.h:82;fork name kept
 G00009,state,Menu::Inventory::statusCommandAnimationStep,Native\Game\src\Menu\Inventory\Inventory.c,Steps the status command's slide.,high,source:16C.c:1263;fork name kept
 G00010,state,Menu::Inventory::statusCommandState,Native\Game\src\Menu\Inventory\Inventory.c,Shows the status command.,high,source:items1.h:668;fork name kept
-G00011,state,Render::frameScratch,Native\Engine\src\Render\Render.c,Holds the per-frame drawing context kept in the scratchpad.,high,source:146C.c:2468;type Render::FrameScratch
+G00011,state,Render::frameScratch,Native\Engine\src\Render\UiPrimitives.c,Holds the per-frame drawing context kept in the scratchpad.,high,source:146C.c:2468;type Render::FrameScratch
 G00063,state,Menu::Inventory::equipmentModelLoadStep,Native\Game\src\Menu\Inventory\Inventory.c,Steps reloading the equipment models after an equipment change.,med,source:68C4.c:18;fork name loadObjectDataState
 G00138,catalog,Battle::limbNames,Native\Game\src\Battle\Hud.c,Gives the name of each limb.,high,"source:5BF94.c:1039;fork name kept;inventory size is an address gap, not a capacity"
-G00155,state,Menu::Framework::loadedSubMenu,Native\Game\src\Menu\Framework\Menus.c,Gives the menu overlay currently loaded.,high,source:5BF94.c:2594;fork name kept
+G00155,state,Menu::Framework::loadedSubMenu,Native\Game\src\Menu\Framework\Framework.c,Gives the menu overlay currently loaded.,high,source:5BF94.c:2594;fork name kept
 G00156,state,Battle::hudStatusIconsHidden,Native\Game\src\Battle\Hud.c,Hides the HUD status icons while the status menu is open.,med,source:120.c:2321;source:5BF94.c:3379
 G00158,state,Battle::hudSlideOffset,Native\Game\src\Battle\Hud.c,Gives how far the HUD has slid offscreen (0 shown).,high,source:5BF94.c:3091;source:5BF94.c:3348
-G00162,state,Menu::Framework::menuItems,Native\Game\src\Menu\Framework\Menus.c,Points to the menu rows.,high,source:5BF94.c:2658;fork name kept
-G00163,state,Menu::Framework::lootLists,Native\Game\src\Menu\Framework\Menus.c,Points to the loot lists the loot menu applies.,high,source:5BF94.c:3725;source:MENU/MENUB.PRG/260.c:1985
-G00164,state,Menu::Framework::lootEntry,Native\Game\src\Menu\Framework\Menus.c,Points to the single loot record the loot menu applies.,high,source:5BF94.c:3732;source:MENU/MENUB.PRG/260.c:1184
-G00167,state,Menu::textBoxBufferIndex,Native\Game\src\Menu\Framework\TextBoxes.c,Selects which of three text box ordering tables is filled this frame.,high,source:5BF94.c:4044
-G00169,state,Menu::Framework::menuBackgroundBuffer,Native\Game\src\Menu\Framework\Menus.c,Points to the unpacked menu background.,high,source:5BF94.c:2619;fork name menuBgUnpackedBuf
-G00170,state,Menu::sceneNotificationBuffer,Native\Game\src\Menu\Framework\TextBoxes.c,Points to the 112-byte text of the scene notification.,high,source:5BF94.c:3773
+G00162,state,Menu::Framework::menuItems,Native\Game\src\Menu\Framework\Framework.c,Points to the menu rows.,high,source:5BF94.c:2658;fork name kept
+G00163,state,Menu::Framework::lootLists,Native\Game\src\Menu\Framework\Framework.c,Points to the loot lists the loot menu applies.,high,source:5BF94.c:3725;source:MENU/MENUB.PRG/260.c:1985
+G00164,state,Menu::Framework::lootEntry,Native\Game\src\Menu\Framework\Framework.c,Points to the single loot record the loot menu applies.,high,source:5BF94.c:3732;source:MENU/MENUB.PRG/260.c:1184
+G00167,state,Menu::textBoxBufferIndex,Native\Game\src\Menu\Framework\Framework.c,Selects which of three text box ordering tables is filled this frame.,high,source:5BF94.c:4044
+G00169,state,Menu::Framework::menuBackgroundBuffer,Native\Game\src\Menu\Framework\Framework.c,Points to the unpacked menu background.,high,source:5BF94.c:2619;fork name menuBgUnpackedBuf
+G00170,state,Menu::sceneNotificationBuffer,Native\Game\src\Menu\TextBox.c,Points to the 112-byte text of the scene notification.,high,source:5BF94.c:3773
 G00171,asset,Menu::menuStrings,Native\Game\src\Menu\Framework\Menus.c,Holds the battle menu strings: offsets followed by encoded text.,high,asset:text/battle/menu-strings;source:5BF94.c:2958;assets/BATTLE/BATTLE.PRG/menuStrings.yaml
-G00172,constexpr,Menu::Framework::kMainMenuHelpText,Native\Game\src\Menu\Framework\Menus.c,Is the text shown when the main menu's help is requested.,low,"source:5BF94.c:2934;inventory size is an address gap, not a capacity"
+G00172,constexpr,Menu::Framework::kMainMenuHelpText,Native\Game\src\Menu\Framework\Framework.c,Is the text shown when the main menu's help is requested.,low,"source:5BF94.c:2934;inventory size is an address gap, not a capacity"
 G00173,catalog,Menu::Framework::gradientTopColors,Native\Game\src\Menu\Framework\Menus.c,Gives the top gradient color of menu row colors 16 and up.,med,"source:5BF94.c:2730;inventory size is an address gap, not a capacity"
 G00174,catalog,Menu::Framework::gradientBottomColors,Native\Game\src\Menu\Framework\Menus.c,Gives the bottom gradient color of menu row colors 16 and up.,med,"source:5BF94.c:2731;inventory size is an address gap, not a capacity"
 G00175,catalog,Menu::Framework::rowAnimationSteps,Native\Game\src\Menu\Framework\Menus.c,Gives the x offset of each menu row slide step.,high,"source:58578.c:773;fork name kept;inventory size is an address gap, not a capacity"
@@ -33,7 +33,7 @@ G00201,catalog,Menu::Magic::warlockSpellIds,Native\Game\src\Menu\Magic.c,Lists t
 G00202,catalog,Menu::Magic::shamanSpellIds,Native\Game\src\Menu\Magic.c,Lists the Shaman spell action ids.,high,"source:84.c:541;fork name kept;inventory size is an address gap, not a capacity"
 G00203,catalog,Menu::Magic::sorcererSpellIds,Native\Game\src\Menu\Magic.c,Lists the Sorcerer spell action ids.,high,"source:84.c:641;fork name kept;inventory size is an address gap, not a capacity"
 G00204,catalog,Menu::Magic::enchanterSpellIds,Native\Game\src\Menu\Magic.c,Lists the Enchanter spell action ids.,high,"source:84.c:740;fork name kept;inventory size is an address gap, not a capacity"
-G00210,constexpr,Menu::kNotificationItemNames,Native\Game\src\Menu\Framework\TextBoxes.c,Gives the 12-byte names shown for items from 0x1CA in scene notifications (every second entry).,low,"source:5BF94.c:3794;inventory size is an address gap, not a capacity"
+G00210,constexpr,Menu::kNotificationItemNames,Native\Game\src\Menu\TextBox.c,Gives the 12-byte names shown for items from 0x1CA in scene notifications (every second entry).,low,"source:5BF94.c:3794;inventory size is an address gap, not a capacity"
 G00214,catalog,Menu::Framework::cursorBrightnessAnimation,Native\Game\src\Menu\Framework\Menus.c,Gives the brightness of each cursor blink step.,high,"source:58578.c:1030;fork name kept;inventory size is an address gap, not a capacity"
 G00216,catalog,Menu::textBoxAnchors,Native\Game\src\Menu\Framework\TextBoxes.c,Gives the two anchor offsets of each text box kind.,med,"source:5BF94.c:4550;element type Menu::TextAnchorWord;inventory size is an address gap, not a capacity"
 G00217,catalog,Menu::informationHeaderPositions,Native\Game\src\Menu\Framework\TextBoxes.c,Gives the sprite position of each information box header.,med,"source:5BF94.c:4636;inventory size is an address gap, not a capacity"
