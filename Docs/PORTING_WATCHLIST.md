@@ -138,6 +138,19 @@ offsets than raw literals assume (§2).
 and P-file effects. Workshop is still in development, so the port waits until it is further along. It is part of
 Phase 1a step 5 (data disposition and asset extraction). AKAO, XA and STR are not in Workshop and are ours to write.
 
+**Workshop headless API (available 2026-10-17).** `VS.Workshop.Headless.exe` serves the same readers over local
+HTTP (127.0.0.1, bearer token from `WORKSHOP_API_TOKEN`, never committed or printed) or MCP over stdio; see
+`D:\Dev\Modding\VS-Workshop\API.md`. Verified against `disks\SLUS-01040.cue` (39 operations; assets list, bytes,
+fields). Where it helps this port, without replacing the C++ extractor decision:
+
+- **Decoder oracle:** `asset_read`, `asset_texture` (PNG per palette), `asset_inspect` and the GLB export are the
+  reference that `VS.Extract`'s decoders and the round-trip tests (ASSET_PIPELINE.md §7) compare against.
+- **Naming evidence:** `asset_fields` returns verified field identities for on-disc formats (ZND enemy records,
+  MPD, SHP...), which can confirm or correct low/opaque `OnDisc` fields in FIELD_LEDGER.csv with a citation to the
+  Workshop field, alongside runtime tracing (RUNTIME_TRACING.md).
+- **Development data for 1b:** extracting the few files the title slice needs before the converters exist; such
+  output stays under `build\` or `Native\data\` (git-ignored), never in the repo.
+
 ## 8. Left by the copy (Step 4), for 1b and modernization
 
 What the mechanical copy kept as it was, so that each item gets a deliberate fix rather than a guess:
