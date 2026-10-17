@@ -536,7 +536,7 @@ T00273.007,cooldown,Frames before the orbit can restart; 900 when started,med,so
 T00273.008,requested,Orbit requested,low,source:7EE98.c:782
 T00273.009,orbitAngle,Angle around the centre,med,source:upstream:6E644.c:3954
 T00273.010,savedHeight,Height saved when the orbit starts,low,source:7EE98.c:809
-T00273.011,reserved14,Not read,low,declaration-only;source:6F014.c:234
+T00273.011,healthPhase,"Advances when the boss's HP ratio falls below 3/4, then below 1/4; each advance requests an orbit",med,source:upstream:6E644.c:4112
 T00273.012,reserved15,Not read,low,declaration-only;source:upstream:6E644.c:339
 T00273.013,planSaved,The actor's plan count is saved,low,source:7EE98.c:786
 T00273.014,savedPlanCount,Plan count restored when the orbit ends,low,source:7EE98.c:783

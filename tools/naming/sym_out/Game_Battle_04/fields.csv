@@ -1,1 +1,527 @@
 id,final_name,meaning,confidence,notes
+T00587.000,heading,Heading toward the arena centre (same bits as T00273 unk0),low,source:7EE98.c:536
+T00587.001,phase,Orbit phase (same bits as T00273 unk2),med,source:7EE98.c:514
+T00587.002,distanceCached,Set once the distance is measured (same bits as T00273 unk3),low,source:7EE98.c:548
+T00587.003,reserved4,Not read by decompiled code,low,declaration-only;source:7EE98.c:493
+T00587.004,isOrbiting,Set while orbiting (same bits as T00273 unkA),low,source:7EE98.c:516
+T00587.005,pathStep,Step in the orbit path table (same bits as T00273 unkB),med,source:7EE98.c:512
+T00587.006,reservedC,Not read by decompiled code,low,declaration-only;source:7EE98.c:495
+T00587.007,orbitAngle,Angle around the centre (same bits as T00273 unk10),med,source:7EE98.c:520
+T00587.008,reserved12,Not read by decompiled code,low,declaration-only;source:7EE98.c:497
+T00587.009,startX,X where the orbit started (same bits as T00273 unk18),med,source:7EE98.c:523
+T00587.010,startZ,Z where the orbit started (same bits as T00273 unk1A),med,source:7EE98.c:524
+T00588.000,reserved0,Not read by decompiled code,low,declaration-only;source:7EE98.c:501
+T00588.001,opaque8,"Used, but its meaning is not established",low,source:7EE98.c:528
+T00589.000,reserved0,Not read by decompiled code,low,declaration-only;source:7EE98.c:477
+T00589.001,reserved5B0Bit0,Not read by decompiled code,low,declaration-only;source:7EE98.c:478
+T00589.002,active,Named in the fork; see cited use,med,source:7EE98.c:512
+T00589.003,reserved5B0Bit5,Not read by decompiled code,low,declaration-only;source:7EE98.c:478
+T00590.000,reserved0,Not read through this view,low,declaration-only;source:7EE98.c:481
+T00590.001,x,Named in the fork view; see cited use,med,source:7EE98.c:513
+T00590.002,y,Named in the fork view; see cited use,med,source:7EE98.c:546
+T00590.003,z,Named in the fork view; see cited use,med,source:7EE98.c:513
+T00590.004,reserved52,Not read through this view,low,declaration-only;source:7EE98.c:483
+T00590.005,model,Model record,med,source:7EE98.c:508
+T00590.006,reserved5C,Not read through this view,low,declaration-only;source:7EE98.c:485
+T00590.007,moveX,Target X in 20.12 fixed point,med,source:7EE98.c:543
+T00590.008,moveZ,Target Z in 20.12 fixed point,med,source:7EE98.c:545
+T00590.009,moveY,Target Y in 20.12 fixed point,med,source:7EE98.c:546
+T00590.010,reserved188,Not read through this view,low,declaration-only;source:7EE98.c:487
+T00590.011,candidateCount,Number of candidates,high,source:7EE98.c:511
+T00591.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:557
+T00591.001,position,Named in the fork; see cited use,med,source:771A8.c:661
+T00592.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:562
+T00592.001,closedGates,Named in the fork; see cited use,med,source:771A8.c:632
+T00593.000,reserved0,Not read through this view,low,declaration-only;source:771A8.c:524
+T00593.001,opaque5,"Used, but its meaning is not established",low,source:771A8.c:650
+T00593.002,reserved6,Not read through this view,low,declaration-only;source:771A8.c:526
+T00593.003,tile,Current tile word,high,source:771A8.c:604
+T00593.004,reserved38,Not read through this view,low,declaration-only;source:771A8.c:528
+T00593.005,x,Named in the fork view; see cited use,med,source:771A8.c:669
+T00593.006,y,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:530
+T00593.007,z,Named in the fork view; see cited use,med,source:771A8.c:669
+T00593.008,reserved52,Not read through this view,low,declaration-only;source:771A8.c:532
+T00593.009,actorId,Actor id,high,source:771A8.c:635
+T00593.010,reserved89,Not read through this view,low,declaration-only;source:771A8.c:534
+T00593.011,cooldown,Named in the fork view; see cited use,med,source:771A8.c:670
+T00593.012,period,Named in the fork view; see cited use,med,source:771A8.c:670
+T00593.013,reserved13E,Not read through this view,low,declaration-only;source:771A8.c:537
+T00593.014,area,Named in the fork view; see cited use,med,source:771A8.c:583
+T00593.015,reserved155,Not read through this view,low,declaration-only;source:771A8.c:539
+T00593.016,movementTarget,Actor the movement heads for; 16 for none,med,source:771A8.c:658
+T00593.017,reserved15D,Not read through this view,low,declaration-only;source:771A8.c:541
+T00593.018,destination,Destination tile,high,source:771A8.c:734
+T00593.019,reserved16C,Not read through this view,low,declaration-only;source:771A8.c:543
+T00593.020,nextTile,Next tile on the way,high,source:771A8.c:679
+T00593.021,reserved174,Not read through this view,low,declaration-only;source:771A8.c:545
+T00593.022,moveX,Target X in 20.12 fixed point,med,source:771A8.c:660
+T00593.023,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:662
+T00593.024,reserved184,Not read through this view,low,declaration-only;source:771A8.c:548
+T00593.025,heading,Heading in eighth turns,med,source:771A8.c:697
+T00593.026,angle,Facing angle,med,source:771A8.c:668
+T00593.027,reserved18C,Not read through this view,low,declaration-only;source:771A8.c:551
+T00593.028,gate,Named in the fork view; see cited use,med,source:771A8.c:634
+T00593.029,exit,Named in the fork view; see cited use,med,source:771A8.c:638
+T00604.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.c:633
+T00604.001,reserved2,Not read by decompiled code,low,declaration-only;source:5BF94.c:634
+T00604.002,reserved3,Not read by decompiled code,low,declaration-only;source:5BF94.c:634
+T00604.003,reserved4,Not read by decompiled code,low,declaration-only;source:5BF94.c:635
+T00604.004,reserved10,Not read by decompiled code,low,declaration-only;source:5BF94.c:636
+T00606.000,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:1164
+T00607.000,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:1157
+T00607.001,reserved4,Not read by decompiled code,low,declaration-only;source:74088.c:1158
+T00607.002,reserved6,Not read by decompiled code,low,declaration-only;source:74088.c:1159
+T00607.003,reserved8,Not read by decompiled code,low,declaration-only;source:74088.c:1160
+T00607.004,reservedC,Not read by decompiled code,low,declaration-only;source:74088.c:1161
+T00811.000,word,Whole word,med,source:71618.c:1223
+T00811.001,tile,Tile bytes,med,source:71618.c:1226
+T00608.000,reserved0,Not read through this view,low,declaration-only;source:71618.c:1190
+T00608.001,isStuck,Set when the actor has not left its tile,med,source:71618.c:1224
+T00608.002,reserved3,Not read through this view,low,declaration-only;source:71618.c:1192
+T00608.003,opaque1C,"Used, but its meaning is not established",low,source:71618.c:1263
+T00608.004,reserved1D,Not read through this view,low,declaration-only;source:71618.c:1194
+T00608.005,tile,Current tile word,high,source:71618.c:1223
+T00608.006,previousTile,Previous tile word; -1 to forget,high,source:71618.c:1223
+T00608.007,reserved3C,Not read through this view,low,declaration-only;source:71618.c:1197
+T00608.008,x,Named in the fork view; see cited use,med,source:71618.c:1226
+T00608.009,reserved4E,Not read through this view,low,declaration-only;source:71618.c:1199
+T00608.010,z,Named in the fork view; see cited use,med,source:71618.c:1227
+T00608.011,reserved52,Not read through this view,low,declaration-only;source:71618.c:1201
+T00608.012,detourStep,Detour attempts at the current tile,med,source:71618.c:1225
+T00608.013,opaqueFB,"Used, but its meaning is not established",low,source:71618.c:1277
+T00608.014,reservedFC,Not read through this view,low,declaration-only;source:71618.c:1204
+T00608.015,detourDirections,Directions tried by the detour,high,source:71618.c:1247
+T00608.016,reserved11C,Not read through this view,low,declaration-only;source:71618.c:1206
+T00608.017,movementTarget,Actor the movement heads for; 16 for none,med,source:71618.c:1277
+T00608.018,reserved15D,Not read through this view,low,declaration-only;source:71618.c:1208
+T00608.019,destination,Destination tile,high,source:71618.c:1226
+T00610.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:1898
+T00610.001,id,Named in the fork; see cited use,med,source:771A8.c:2093
+T00611.000,active,Relation is live this frame (same bits as T00136 active) (same bits as T00515 unk0_0),med,source:771A8.c:1999
+T00611.001,opaque0Bit1,"Used, but its meaning is not established",low,source:771A8.c:2099
+T00611.002,opaque0Bit2,"Used, but its meaning is not established",low,source:771A8.c:2001
+T00611.003,reserved0Bit3,Not read by decompiled code,low,declaration-only;source:771A8.c:1895
+T00611.004,visible,Target is visible (same bits as T00136 visible) (same bits as T00515 unk0_5),med,source:771A8.c:2106
+T00611.005,reserved0Bit6,Not read by decompiled code,low,declaration-only;source:771A8.c:1895
+T00612.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:1902
+T00612.001,opaque8,"Used, but its meaning is not established",low,source:771A8.c:1983
+T00612.002,reservedC,Not read by decompiled code,low,declaration-only;source:771A8.c:1904
+T00612.003,x,Named in the fork; see cited use,med,source:771A8.c:1987
+T00612.004,reserved1E,Not read by decompiled code,low,declaration-only;source:771A8.c:1906
+T00612.005,z,Named in the fork; see cited use,med,source:771A8.c:1987
+T00812.000,word,Whole word,med,source:771A8.c:2053
+T00812.001,bytes,Bytes of the word,med,source:771A8.c:1988
+T00613.000,opaque0,"Used, but its meaning is not established",low,source:771A8.c:2048
+T00613.001,opaque1,"Used, but its meaning is not established",low,source:771A8.c:2051
+T00613.002,reserved2,Not read through this view,low,declaration-only;source:771A8.c:1912
+T00613.003,opaque3,"Used, but its meaning is not established",low,source:771A8.c:2078
+T00613.004,opaque4,"Used, but its meaning is not established",low,source:771A8.c:2080
+T00613.005,reserved5,Not read through this view,low,declaration-only;source:771A8.c:1915
+T00613.006,opaque9,"Used, but its meaning is not established",low,source:771A8.c:2085
+T00613.007,reservedA,Not read through this view,low,declaration-only;source:771A8.c:1917
+T00613.008,opaqueC,"Used, but its meaning is not established",low,source:771A8.c:2050
+T00613.009,opaqueD,"Used, but its meaning is not established",low,source:771A8.c:2065
+T00613.010,reservedE,Not read through this view,low,declaration-only;source:771A8.c:1920
+T00613.011,settingsBit13,Bit 13 of the AI settings word,low,source:771A8.c:2100
+T00613.012,reserved25,Not read through this view,low,declaration-only;source:771A8.c:1922
+T00613.013,settingsByte0Bit7,Bit 7 of settings byte 0,low,source:771A8.c:2083
+T00613.014,tile,Current tile word,high,source:771A8.c:2062
+T00613.015,reserved38,Not read through this view,low,declaration-only;source:771A8.c:1925
+T00613.016,savedDestination,Saved destination tile,med,source:771A8.c:2059
+T00613.017,x,Named in the fork view; see cited use,med,source:771A8.c:2054
+T00613.018,reserved4E,Not read through this view,low,declaration-only;source:771A8.c:1928
+T00613.019,z,Named in the fork view; see cited use,med,source:771A8.c:2055
+T00613.020,reserved52,Not read through this view,low,declaration-only;source:771A8.c:1930
+T00613.021,actor,Battle actor,med,source:771A8.c:2093
+T00613.022,model,Model record,med,source:771A8.c:1983
+T00613.023,reserved5C,Not read through this view,low,declaration-only;source:771A8.c:1933
+T00613.024,actorId,Actor id,high,source:771A8.c:1978
+T00613.025,reserved89,Not read through this view,low,declaration-only;source:771A8.c:1935
+T00613.026,range,Named in the fork view; see cited use,med,source:771A8.c:1990
+T00613.027,previousRange,Named in the fork view; see cited use,med,source:771A8.c:1990
+T00613.028,opaqueE4,"Used, but its meaning is not established",low,source:771A8.c:2000
+T00613.029,targetId,Named in the fork view; see cited use,med,source:771A8.c:1975
+T00613.030,timeout,Named in the fork view; see cited use,med,source:771A8.c:2102
+T00613.031,opaqueE7,"Used, but its meaning is not established",low,source:771A8.c:1994
+T00613.032,opaqueE8,"Used, but its meaning is not established",low,source:771A8.c:1993
+T00613.033,rangeMode,Named in the fork view; see cited use,med,source:771A8.c:2002
+T00613.034,previousOption,Named in the fork view; see cited use,med,source:771A8.c:1991
+T00613.035,previousTargetId,Named in the fork view; see cited use,med,source:771A8.c:1990
+T00613.036,cachedDestination,Named in the fork view; see cited use,med,source:771A8.c:2103
+T00613.037,reservedF0,Not read through this view,low,declaration-only;source:771A8.c:1947
+T00613.038,targetTileX,Named in the fork view; see cited use,med,source:771A8.c:1987
+T00613.039,reservedF5,Not read through this view,low,declaration-only;source:771A8.c:1949
+T00613.040,targetTileZ,Named in the fork view; see cited use,med,source:771A8.c:1987
+T00613.041,reservedF7,Not read through this view,low,declaration-only;source:771A8.c:1951
+T00613.042,opaqueF8,"Used, but its meaning is not established",low,source:771A8.c:1991
+T00613.043,reservedFA,Not read through this view,low,declaration-only;source:771A8.c:1953
+T00613.044,targetX,Target X,med,source:771A8.c:2086
+T00613.045,targetZ,Target Z,med,source:771A8.c:2087
+T00613.046,movementTarget,Actor the movement heads for; 16 for none,med,source:771A8.c:2069
+T00613.047,reserved15D,Not read through this view,low,declaration-only;source:771A8.c:1957
+T00613.048,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:771A8.c:2052
+T00613.049,reserved160,Not read through this view,low,declaration-only;source:771A8.c:1959
+T00613.050,destination,Destination tile,high,source:771A8.c:1988
+T00613.051,reserved16C,Not read through this view,low,declaration-only;source:771A8.c:1961
+T00613.052,moveX,Target X in 20.12 fixed point,med,source:771A8.c:2081
+T00613.053,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:2082
+T00613.054,reserved184,Not read through this view,low,declaration-only;source:771A8.c:1964
+T00613.055,relations,Relation word for each actor,high,source:771A8.c:1999
+T00613.056,distancesSquared,Squared distance to each actor,high,source:771A8.c:2006
+T00614.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:1480
+T00614.001,commandOpcode,Queued command opcode; 9 walks (same offset as Battle::Actor.commandOpcode),med,source:771A8.c:1532
+T00614.002,reservedA,Not read by decompiled code,low,declaration-only;source:771A8.c:1482
+T00614.003,commandHeading,Low half of the first command argument: the walk heading,low,source:771A8.c:1534
+T00813.000,word,Whole word,med,source:771A8.c:1524
+T00813.001,tile,Tile bytes,med,source:771A8.c:1520
+T00615.000,reserved0,Not read through this view,low,declaration-only;source:771A8.c:1486
+T00615.001,isStuck,Set when the actor has not left its tile,med,source:771A8.c:1572
+T00615.002,reserved3,Not read through this view,low,declaration-only;source:771A8.c:1488
+T00615.003,opaque4,"Used, but its meaning is not established",low,source:771A8.c:1544
+T00615.004,opaque5,"Used, but its meaning is not established",low,source:771A8.c:1545
+T00615.005,reserved6,Not read through this view,low,declaration-only;source:771A8.c:1491
+T00615.006,opaque1A,"Used, but its meaning is not established",low,source:771A8.c:1546
+T00615.007,reserved1B,Not read through this view,low,declaration-only;source:771A8.c:1493
+T00615.008,settingsBit14,Bit 14 of the AI settings word,low,source:771A8.c:1553
+T00615.009,reserved2A,Not read through this view,low,declaration-only;source:771A8.c:1495
+T00615.010,tile,Current tile word,high,source:771A8.c:1520
+T00615.011,reserved38,Not read through this view,low,declaration-only;source:771A8.c:1497
+T00615.012,position,Named in the fork view; see cited use,med,source:771A8.c:1524
+T00615.013,reserved52,Not read through this view,low,declaration-only;source:771A8.c:1499
+T00615.014,actor,Battle actor,med,source:771A8.c:1522
+T00615.015,reserved58,Not read through this view,low,declaration-only;source:771A8.c:1501
+T00615.016,destination,Destination tile,high,source:771A8.c:1551
+T00615.017,reserved16C,Not read through this view,low,declaration-only;source:771A8.c:1503
+T00615.018,moveX,Target X in 20.12 fixed point,med,source:771A8.c:1526
+T00615.019,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:1526
+T00615.020,reserved184,Not read through this view,low,declaration-only;source:771A8.c:1506
+T00615.021,angle,Named in the fork view; see cited use,med,source:771A8.c:1534
+T00619.000,x,Named in the fork; see cited use,med,source:4A0A8.c:756
+T00619.001,y,Named in the fork; see cited use,med,source:4A0A8.c:757
+T00619.002,alignment,Named in the fork; see cited use,med,source:4A0A8.c:832
+T00619.003,opaque3Bit2,"Used, but its meaning is not established",low,source:4A0A8.c:833
+T00621.000,heading,Heading toward the arena centre (same bits as T00273 unk0),low,source:7EE98.c:611
+T00621.001,phase,Orbit phase (same bits as T00273 unk2),med,declaration-only;source:7EE98.c:584
+T00621.002,distanceCached,Set once the distance is measured (same bits as T00273 unk3),low,source:7EE98.c:615
+T00621.003,distanceSquared,Squared distance to the arena centre (same bits as T00273 unk4),med,source:7EE98.c:616
+T00621.004,reserved8,Not read by decompiled code,low,declaration-only;source:7EE98.c:586
+T00621.005,cooldown,Frames before the orbit can restart; 900 when started (same bits as T00273 unkC),med,source:7EE98.c:691
+T00621.006,requested,Orbit requested (same bits as T00273 unkE),low,source:7EE98.c:699
+T00621.007,orbitAngle,Angle around the centre (same bits as T00273 unk10),med,declaration-only;source:7EE98.c:587
+T00621.008,savedHeight,Height saved when the orbit starts (same bits as T00273 unk12),low,source:7EE98.c:612
+T00621.009,healthPhase,"Advances when the boss's HP ratio falls below 3/4, then below 1/4; each advance requests an orbit (same bits as T00273 unk14)",med,source:7EE98.c:692
+T00621.010,reserved15,Not read by decompiled code,low,declaration-only;source:7EE98.c:589
+T00621.011,started,Set when the orbit begins (same bits as T00273 unk1C),low,source:7EE98.c:607
+T00622.000,reserved0,Not read by decompiled code,low,declaration-only;source:7EE98.c:593
+T00622.001,x,Named in the fork; see cited use,med,source:7EE98.c:649
+T00622.002,reserved1E,Not read by decompiled code,low,declaration-only;source:7EE98.c:594
+T00622.003,z,Named in the fork; see cited use,med,source:7EE98.c:650
+T00623.000,reserved0,Not read through this view,low,declaration-only;source:7EE98.c:572
+T00623.001,x,Named in the fork view; see cited use,med,source:7EE98.c:608
+T00623.002,y,Named in the fork view; see cited use,med,source:7EE98.c:612
+T00623.003,z,Named in the fork view; see cited use,med,source:7EE98.c:608
+T00623.004,reserved52,Not read through this view,low,declaration-only;source:7EE98.c:574
+T00623.005,model,Model record,med,source:7EE98.c:619
+T00623.006,stats,Actor statistics,high,source:7EE98.c:690
+T00623.007,reserved60,Not read through this view,low,declaration-only;source:7EE98.c:577
+T00623.008,movementTarget,Actor the movement heads for; 16 for none,med,source:7EE98.c:704
+T00623.009,reserved15D,Not read through this view,low,declaration-only;source:7EE98.c:579
+T00623.010,moveX,Target X in 20.12 fixed point,med,source:7EE98.c:706
+T00623.011,moveZ,Target Z in 20.12 fixed point,med,source:7EE98.c:708
+T00623.012,moveY,Target Y in 20.12 fixed point,med,source:7EE98.c:746
+T00624.000,reserved0,Not read by decompiled code,low,declaration-only;source:7EE98.c:568
+T00624.001,currentHp,Current HP (same offset as Battle::ActorStats.currentHp),high,source:7EE98.c:690
+T00624.002,maxHp,Maximum HP (same offset as Battle::ActorStats.maxHp),high,source:7EE98.c:690
+T00628.000,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:main.h:63
+T00628.001,opaque0Bit4,"With the actor's settingsModeLow set, scores the action as special with weight 40",low,source:74088.c:642
+T00628.002,rarelyChosen,The AI rejects the action 115 times in 128,med,source:74088.c:632
+T00628.003,reserved0Bit6,Not read by decompiled code,low,declaration-only;source:main.h:66
+T00628.004,shapedArea,Area reach comes from the area range shape,med,source:7CD68.c:467
+T00628.005,reserved1Bit0,Not read by decompiled code,low,declaration-only;source:main.h:68
+T00628.006,opaque1Bit4,Copied into the candidate and fallback flags,low,source:74088.c:1044
+T00628.007,radialArea,Area reach is areaRangeY times 32,med,source:7CD68.c:465
+T00628.008,reserved1Bit6,Not read by decompiled code,low,declaration-only;source:main.h:71
+T00629.000,id,Action id,med,source:146C.c:9759
+T00629.001,effectId,Presentation effect id,high,source:146C.c:3967
+T00629.002,returnsToMenuOnCancel,Cancelling targeting returns to the battle action menu; otherwise menus close and recovery begins,med,source:146C.c:3604
+T00629.003,type,Action type (Battle::ActionType),high,source:146C.c:9719
+T00629.004,category,Targeting category; indexes the category targeting tables,high,source:146C.c:4469
+T00629.005,cost,MP or HP cost,med,source:146C.c:10025
+T00629.006,rangeX,Range first component,med,source:146C.c:4099
+T00629.007,rangeY,Range second component,med,source:146C.c:4100
+T00629.008,rangeZ,Range third component,med,source:146C.c:4101
+T00629.009,shape,Range shape,med,source:146C.c:4097
+T00629.010,angle,Range shape angle,med,source:146C.c:4204
+T00629.011,areaRangeX,Area first component,med,source:146C.c:4360
+T00629.012,areaRangeY,Area second component; times 32 is the radial reach,med,source:7CD68.c:466
+T00629.013,areaRangeZ,Area third component,med,source:146C.c:4362
+T00629.014,areaShape,Area shape in the low three bits,med,source:146C.c:4359
+T00629.015,recoveryDelay,Recovery delay added after the action; 0xFF uses the weapon's,high,source:146C.c:13177
+T00629.016,reservedDBit0,Not read by decompiled code,low,declaration-only;source:main.h:91
+T00629.017,opaqueDBit4,Copied to the action state; 1 is cleared when the first target is 0x1C1 or farther,low,source:146C.c:3857
+T00629.018,resetsHitResults,Hits are reset to outcome 4 after their effects (bit 0x4000 of the word at 0xC),low,declaration-only;source:main.h:93;source:146C.c:13338
+T00629.019,unlocked,Set once the player has learned the action,med,source:146C.c:3325
+T00629.020,aiFlags,Flags read by enemy AI action selection,med,source:74088.c:629
+T00629.021,reserved10,Not read by decompiled code,low,declaration-only;source:main.h:96
+T00629.022,hits,"Two hit definitions: effect, prerequisite, hit, stat calculator, factor, type and affinity",high,source:146C.c:10085
+T00629.023,name,Display name,high,source:5BF94.c:3782
+T00630.000,next,Next actor in the room's actor list,high,source:146C.c:897
+T00630.001,id,Actor slot index,high,source:146C.c:6297
+T00630.002,commandState,"Queued command state: 0x80 queued, 0x40 running, 0 idle",high,source:146C.c:5652;source:146C.c:5695
+T00630.003,commandOpcode,Queued command opcode,high,source:146C.c:5654
+T00630.004,commandTarget,Target actor of the queued command; 16 or more for an immediate position,med,source:146C.c:5720
+T00630.005,commandFlags,"Bits 24-27 of the command word: model sound and follow-up, read through the word",low,declaration-only;source:146C.h:567;source:146C.c:5704
+T00630.006,commandArg0,First command argument; the remaining x offset (fixed point) of a step command,med,source:146C.c:5579
+T00630.007,commandArg1,Second command argument; the remaining z offset of a step command,med,source:146C.c:5595
+T00630.008,commandArg2,Third command argument; the remaining y offset of a step command,med,source:146C.c:5611
+T00630.009,modelId,Model id the actor was created from,high,source:146C.c:9132
+T00630.010,subType,Template sub-type; scored when an enemy is killed,med,source:146C.c:1774
+T00630.011,kind,"Actor kind bits: 1 Ashley, 2 non-hostile, 4 hostile, 8 object, 0x10 auxiliary; 0x8000 excludes targeting",high,source:146C.c:6306;source:146C.c:4133
+T00630.012,facing,Facing from the room spawn,med,source:146C.c:6742
+T00630.013,spawnByte26,Byte 0x26 of the room spawn record; not read afterwards,low,source:146C.c:6743
+T00630.014,weaponDrawn,Bit 0 set while the actor is in battle mode,high,source:146C.c:8655
+T00630.015,interactionFlags,Spawn flag bits 2-4; 4 lets the player trigger the actor's event with the action button,low,source:146C.c:6328;source:146C.c:7649
+T00630.016,equippedWeaponCategory,Category of the equipped blade; 10 when unarmed,high,source:146C.c:6616
+T00630.017,retainAfterDefeat,Keeps the actor after its defeat (spawn flag 0x80),high,source:146C.c:9158
+T00630.018,roomSpawnIndex,Index of the actor's room spawn; 0x80 for none,high,source:146C.c:6744
+T00630.019,defeated,Set once the actor's defeat has been handled,med,source:146C.c:1828
+T00630.020,killCounted,Set when a killing blow on the actor counted toward Break Art progress,high,source:146C.c:13046
+T00630.021,bladeId,Blade model id of the equipped weapon,med,source:146C.c:6300
+T00630.022,shieldId,Shield model id,med,source:146C.c:6301
+T00630.023,lastTriggerTile,Tile word last checked for floor triggers,med,source:146C.c:5541
+T00630.024,aiGroup,AI group number other actors link to,med,source:7CD68.c:582
+T00630.025,reserved30Bit4,Not read by decompiled code,low,declaration-only;source:146C.h:594
+T00630.026,aiLinkedGroup,AI group this actor follows or guards,med,source:7CD68.c:582
+T00630.027,reserved31Bit6,Not read by decompiled code,low,declaration-only;source:146C.h:596
+T00630.028,reserved34,Not read by decompiled code,low,declaration-only;source:146C.h:597
+T00630.029,templateWord2C,Word 0x2C of the actor template; not read afterwards,low,source:146C.c:6757
+T00630.030,stats,Combat statistics,high,source:146C.c:6600
+T00630.031,allocationKind,"Allocation layout: 1 with two equipment model slots, 2 with one",med,source:146C.c:6601;source:146C.c:943
+T00630.032,model,Actor model and animation state,high,source:146C.c:6602
+T00630.033,equipmentModels,Weapon and shield model slots,high,source:146C.c:6603
+T00631.000,name,Display name,high,source:5BF94.c:1268
+T00631.001,currentHp,Current HP,high,source:146C.c:6336
+T00631.002,maxHp,Maximum HP,high,source:146C.c:6335
+T00631.003,currentMp,Current MP,high,source:146C.c:6338
+T00631.004,maxMp,Maximum MP,high,source:146C.c:6337
+T00631.005,risk,Risk,high,source:146C.c:6339
+T00631.006,strength,Base STR,med,source:146C.c:6181
+T00631.007,totalStrength,STR with equipment,med,source:146C.c:6180
+T00631.008,intelligence,Base INT,med,source:146C.c:6194
+T00631.009,totalIntelligence,INT with equipment,med,source:146C.c:6193
+T00631.010,agility,Base AGL,med,source:146C.c:6207
+T00631.011,totalAgility,AGL with equipment,med,source:146C.c:6206
+T00631.012,baseWalkSpeed,Walk speed without statuses (nine tenths of the template's),high,source:146C.c:13610
+T00631.013,baseRunSpeed,Run speed without statuses (nine tenths of the template's),high,source:146C.c:13611
+T00631.014,movementClass,Template movement class; 0x10 and 0x20 make saved placement use the current tile while flying,low,source:146C.c:6208;source:146C.c:879
+T00631.015,walkSpeed,Current walk speed; halved by some statuses,high,source:146C.c:5760
+T00631.016,gaitClass,Template gait class; 2 and 0x40 make queued walks use the run speed,low,source:146C.c:5755
+T00631.017,runSpeed,Current run speed; halved by some statuses,high,source:146C.c:5756
+T00631.018,mobilityLimb0,"First limb whose injury, with the second, inflicts Agility Down; 0 for none",med,source:146C.c:12942
+T00631.019,mobilityLimb1,"Second limb whose injury, with the first, inflicts Agility Down; 0 for none",med,source:146C.c:14464
+T00631.020,defaultTargetLimb,Limb targeted when an action does not pick one,high,source:146C.c:13523
+T00631.021,enemyClass,Enemy class,med,source:146C.c:1780
+T00631.022,reach,Reach added to the weapon's ranges,med,source:146C.c:1402
+T00631.023,currentRange,Current attack range,med,source:146C.c:1401
+T00631.024,currentRangeY,Current attack range second component: weapon range plus reach,med,source:146C.c:1402
+T00631.025,currentRangeZ,Current attack range third component: weapon range plus reach,med,source:146C.c:1403
+T00631.026,currentAttackShape,Current attack range shape; 1 when a weapon is equipped,med,source:146C.c:1405
+T00631.027,currentAttackShapeAngle,Current attack range shape angle,med,source:146C.c:1404
+T00631.028,weapon,Equipped weapon statistics,high,source:146C.c:1390
+T00631.029,shield,Equipped shield statistics,high,source:146C.c:1413
+T00631.030,accessory,Equipped accessory statistics,high,source:146C.c:1429
+T00631.031,limbs,Statistics of the six limbs,high,source:146C.c:1421
+T00631.032,limbActions,Up to four action slots per limb,high,source:146C.c:6260
+T00631.033,dpSplash,Fork name kept; see cited use,low,source:146C.c:6269
+T00631.034,statusImmunities,Status flags the actor cannot receive,high,source:146C.c:10138
+T00631.035,statuses,Active status flags (Battle::StatusFlag),high,source:146C.c:1360
+T00631.036,statusTimers,Remaining time of timed statuses,high,source:146C.c:6286
+T00631.037,actionRecoveryTimer,Recovery time after an action; actions are restricted while non-zero,high,source:146C.c:13178;source:146C.c:15570
+T00631.038,cancelsHitResults,Hits on the actor are reset to outcome 4 after their effects are applied; set for placeholders,low,source:146C.c:13323
+T00631.039,isAnalyzed,Set once the actor has been analyzed,med,source:146C.c:6219
+T00631.040,recoveryDelayBonus,Template value added to every action's recovery delay,med,source:146C.c:6214
+T00631.041,actorId,Actor slot index; 0x80 for placeholder statistics,high,source:146C.c:9717;source:146C.c:6061
+T00631.042,dropItem,First item the actor drops,med,source:146C.c:6747
+T00631.043,secondDropItem,Second item the actor drops,med,source:146C.c:6749
+T00631.044,randomDropItem,"Third item the actor drops, with a drop rate",med,source:146C.c:1745
+T00632.000,reserved0,Not read by decompiled code,low,declaration-only;source:146C.h:450
+T00632.001,reserved2Bit0,Not read by decompiled code,low,declaration-only;source:146C.h:451
+T00632.002,reserved2Bit1,Not read by decompiled code,low,declaration-only;source:146C.h:452
+T00632.003,reserved2Bit2,Not read by decompiled code,low,declaration-only;source:146C.h:453
+T00632.004,reserved3,Not read by decompiled code,low,declaration-only;source:146C.h:454
+T00636.000,actionId,Action in the slot,high,source:146C.c:6260
+T00636.001,index,Template index,low,source:146C.c:6261
+T00636.002,effectModelId,Effect model shown when the action is presented,med,source:146C.c:6262
+T00636.003,opaque3,Set to 1 when the slot is filled; not read,low,source:146C.c:6263
+T00641.000,classes,Class values (renamed: class is a C++ keyword),med,source:146C.c:1007
+T00641.001,affinities,Affinity values,med,source:146C.c:1015
+T00642.000,classes,Class values per set (renamed: class is a C++ keyword),med,source:146C.c:1008
+T00642.001,affinities,Affinity values per set,med,source:146C.c:1016
+T00643.000,reserved0,Not read by decompiled code,low,declaration-only;source:146C.h:624
+T00643.001,reserved1,Not read by decompiled code,low,declaration-only;source:146C.h:625
+T00643.002,reserved2,Not read by decompiled code,low,declaration-only;source:146C.h:626
+T00643.003,reserved3,Not read by decompiled code,low,declaration-only;source:146C.h:627
+T00093.000,Critical,LimbConditionLevel Critical,med,declaration-only;source:5BF94.h:503
+T00093.001,Damaged,LimbConditionLevel Damaged,med,declaration-only;source:5BF94.h:504
+T00093.002,Wounded,LimbConditionLevel Wounded,med,declaration-only;source:5BF94.h:505
+T00093.003,Good,LimbConditionLevel Good,med,declaration-only;source:5BF94.h:506
+T00093.004,Excellent,LimbConditionLevel Excellent,med,declaration-only;source:5BF94.h:507
+T00649.000,difficultyFlags,Difficulties under which the item drops,med,source:MENU/MENUB.PRG/260.c:1132
+T00649.001,reserved1,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:181
+T00649.002,reserved2,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:182
+T00649.003,reserved3,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:183
+T00649.004,blade,The looted blade,med,source:MENU/MENUB.PRG/260.c:1133
+T00650.000,difficultyFlags,Difficulties under which the item drops,med,source:MENU/MENUB.PRG/260.c:1156
+T00650.001,reserved1,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:222
+T00650.002,reserved2,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:223
+T00650.003,reserved3,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:224
+T00650.004,gem,The looted gem,med,source:MENU/MENUB.PRG/260.c:1157
+T00651.000,difficultyFlags,Difficulties under which the item drops,med,source:MENU/MENUB.PRG/260.c:1136
+T00651.001,reserved1,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:189
+T00651.002,reserved2,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:190
+T00651.003,reserved3,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:191
+T00651.004,grip,The looted grip,med,source:MENU/MENUB.PRG/260.c:1137
+T00094.000,None,MenuItemScroll None,med,declaration-only;source:5BF94.h:28
+T00094.001,Up,MenuItemScroll Up,med,declaration-only;source:5BF94.h:29
+T00094.002,Down,MenuItemScroll Down,med,declaration-only;source:5BF94.h:30
+T00095.000,Inactive,MenuItemState Inactive,med,declaration-only;source:5BF94.h:34
+T00095.001,Idle,MenuItemState Idle,med,declaration-only;source:5BF94.h:35
+T00095.002,SlideX,MenuItemState SlideX,med,declaration-only;source:5BF94.h:36
+T00095.003,SlideY,MenuItemState SlideY,med,declaration-only;source:5BF94.h:37
+T00095.004,SlideXY,MenuItemState SlideXY,med,declaration-only;source:5BF94.h:38
+T00095.005,Dismiss,MenuItemState Dismiss,med,declaration-only;source:5BF94.h:39
+T00096.000,MainMenu,MenuState MainMenu,med,declaration-only;source:5BF94.h:69
+T00096.001,NoneClosing,MenuState NoneClosing,med,declaration-only;source:5BF94.h:70
+T00096.002,NoneClosed,MenuState NoneClosed,med,declaration-only;source:5BF94.h:71
+T00096.003,OpenedFromMainMenu,MenuState OpenedFromMainMenu,med,declaration-only;source:5BF94.h:72
+T00815.000,word,Whole word,med,source:6FC00.c:464
+T00815.001,tile,Tile bytes,med,source:6FC00.c:440
+T00816.000,word,Whole word,med,source:6FC00.c:464
+T00816.001,tile,Tile bytes,med,source:6FC00.c:440
+T00817.000,word,Whole word,med,source:6FC00.c:464
+T00817.001,tile,Tile bytes,med,source:6FC00.c:440
+T00818.000,word,Whole word,med,source:6FC00.c:464
+T00818.001,tile,Tile bytes,med,source:6FC00.c:440
+T00661.000,reserved0,Not read by decompiled code,low,declaration-only;source:146C.h:631
+T00661.001,reserved1,Not read by decompiled code,low,declaration-only;source:146C.h:632
+T00661.002,reserved2,Not read by decompiled code,low,declaration-only;source:146C.h:633
+T00661.003,reserved3,Not read by decompiled code,low,declaration-only;source:146C.h:634
+T00097.000,StrDown,StatusFlag StrDown,med,declaration-only;source:146C.h:486
+T00097.001,StrUp,StatusFlag StrUp,med,declaration-only;source:146C.h:487
+T00097.002,IntDown,StatusFlag IntDown,med,declaration-only;source:146C.h:488
+T00097.003,IntUp,StatusFlag IntUp,med,declaration-only;source:146C.h:489
+T00097.004,AgiDown,StatusFlag AgiDown,med,declaration-only;source:146C.h:490
+T00097.005,AgiUp,StatusFlag AgiUp,med,declaration-only;source:146C.h:491
+T00097.006,Quicken,StatusFlag Quicken,med,declaration-only;source:146C.h:492
+T00097.007,Silent,StatusFlag Silent,med,declaration-only;source:146C.h:493
+T00097.008,Paralysis,StatusFlag Paralysis,med,declaration-only;source:146C.h:494
+T00097.009,Poison,StatusFlag Poison,med,declaration-only;source:146C.h:495
+T00097.010,Numbness,StatusFlag Numbness,med,declaration-only;source:146C.h:496
+T00097.011,Curse,StatusFlag Curse,med,declaration-only;source:146C.h:497
+T00097.012,Regen,StatusFlag Regen,med,declaration-only;source:146C.h:498
+T00097.013,Ward,StatusFlag Ward,med,declaration-only;source:146C.h:499
+T00097.014,EquDown,StatusFlag EquDown,med,declaration-only;source:146C.h:500
+T00097.015,EquUp,StatusFlag EquUp,med,declaration-only;source:146C.h:501
+T00097.016,AirAtkUp,StatusFlag AirAtkUp,med,declaration-only;source:146C.h:502
+T00097.017,FireAtkUp,StatusFlag FireAtkUp,med,declaration-only;source:146C.h:503
+T00097.018,EarthAtkUp,StatusFlag EarthAtkUp,med,declaration-only;source:146C.h:504
+T00097.019,WaterAtkUp,StatusFlag WaterAtkUp,med,declaration-only;source:146C.h:505
+T00097.020,AirDefUp,StatusFlag AirDefUp,med,declaration-only;source:146C.h:506
+T00097.021,FireDefUp,StatusFlag FireDefUp,med,declaration-only;source:146C.h:507
+T00097.022,EarthDefUp,StatusFlag EarthDefUp,med,declaration-only;source:146C.h:508
+T00097.023,WaterDefUp,StatusFlag WaterDefUp,med,declaration-only;source:146C.h:509
+T00672.000,kind,Box kind; 4 uses the alternate font table,med,source:5BF94.c:4007
+T00672.001,openStyle,Opening style; selects the opening step count,low,source:5BF94.c:3977
+T00672.002,alignment,Anchor alignment; flips the frame,med,source:4A0A8.c:832
+T00672.003,frameShape,Frame shape index,med,source:5BF94.c:4720
+T00672.004,framePart,Frame part selected from the shape,low,source:5BF94.c:4744
+T00672.005,arrowAnimFrame,Continue-arrow animation frame,med,source:5BF94.c:1776
+T00672.006,speakerTexture,Speaker portrait texture; bit 0x20 for none,med,source:4A0A8.c:831
+T00672.007,done,Set when the text has finished,med,source:5BF94.c:1747
+T00672.008,opaque3Bit7,Tested first each update; meaning not established,low,source:5BF94.c:3952
+T00676.000,hp,Current HP,high,source:146C.c:864
+T00676.001,maxHp,Maximum HP,high,source:146C.c:6230
+T00676.002,agilityDefenseBonus,Fork name kept; see cited use,med,source:146C.c:6231
+T00676.003,anchorBone,Model bone the limb's labels and markers are projected from,high,source:146C.c:6236;source:120.c:1214
+T00676.004,nameIndex,Limb name index,med,source:146C.c:6237
+T00676.005,chainEvasion,Chain evasion,med,source:146C.c:6243
+T00676.006,types,Type values,med,source:146C.c:6246
+T00676.007,affinities,Affinity values,med,source:146C.c:6250
+T00676.008,armor,Equipped armor statistics,high,source:146C.c:1421
+T00681.000,reserved0,Not read by decompiled code,low,declaration-only;source:146C.h:285
+T00098.000,SolidShock,WarlockSpell SolidShock,med,declaration-only;source:5BF94.h:7
+T00098.001,LightningBolt,WarlockSpell LightningBolt,med,declaration-only;source:5BF94.h:8
+T00098.002,Fireball,WarlockSpell Fireball,med,declaration-only;source:5BF94.h:9
+T00098.003,VulcanLance,WarlockSpell VulcanLance,med,declaration-only;source:5BF94.h:10
+T00098.004,AquaBlast,WarlockSpell AquaBlast,med,declaration-only;source:5BF94.h:11
+T00098.005,SpiritSurge,WarlockSpell SpiritSurge,med,declaration-only;source:5BF94.h:12
+T00098.006,DarkChant,WarlockSpell DarkChant,med,declaration-only;source:5BF94.h:13
+T00098.007,Exorcism,WarlockSpell Exorcism,med,declaration-only;source:5BF94.h:14
+T00098.008,Banish,WarlockSpell Banish,med,declaration-only;source:5BF94.h:15
+T00098.009,Explosion,WarlockSpell Explosion,med,declaration-only;source:5BF94.h:16
+T00098.010,Thunderburst,WarlockSpell Thunderburst,med,declaration-only;source:5BF94.h:17
+T00098.011,FlameSphere,WarlockSpell FlameSphere,med,declaration-only;source:5BF94.h:18
+T00098.012,GaeaStrike,WarlockSpell GaeaStrike,med,declaration-only;source:5BF94.h:19
+T00098.013,Avalanche,WarlockSpell Avalanche,med,declaration-only;source:5BF94.h:20
+T00098.014,RadialSurge,WarlockSpell RadialSurge,med,declaration-only;source:5BF94.h:21
+T00098.015,Meteor,WarlockSpell Meteor,med,declaration-only;source:5BF94.h:22
+T00098.016,DrainHeart,WarlockSpell DrainHeart,med,declaration-only;source:5BF94.h:23
+T00098.017,DrainMind,WarlockSpell DrainMind,med,declaration-only;source:5BF94.h:24
+T00101.000,Shield,GemTarget Shield,med,declaration-only;source:func_8006B57C_t.h:166
+T00102.000,Weapon,ItemCategory Weapon,med,declaration-only;source:func_8006B57C_t.h:156
+T00102.001,Blade,ItemCategory Blade,med,declaration-only;source:func_8006B57C_t.h:157
+T00102.002,Grip,ItemCategory Grip,med,declaration-only;source:func_8006B57C_t.h:158
+T00102.003,Shield,ItemCategory Shield,med,declaration-only;source:func_8006B57C_t.h:159
+T00102.004,Armor,ItemCategory Armor,med,declaration-only;source:func_8006B57C_t.h:160
+T00102.005,Gem,ItemCategory Gem,med,declaration-only;source:func_8006B57C_t.h:161
+T00102.006,Misc,ItemCategory Misc,med,declaration-only;source:func_8006B57C_t.h:162
+T00102.007,Manage,ItemCategory Manage,med,declaration-only;source:func_8006B57C_t.h:163
+T00709.000,statusFlags,Status flags the effect sets,med,source:146C.c:11207
+T00709.001,reserved4,Not read by decompiled code,low,declaration-only;source:main.h:111
+T00709.002,tickInterval,Ticks per HP change of a damage-over-time status,med,source:74088.c:1223
+T00709.003,cancelledStatuses,Active statuses the effect cancels instead of stacking,med,source:146C.c:11209
+T00709.004,blockingStatuses,Active statuses that keep the effect from applying,med,source:146C.c:11206
+T00726.000,primitiveCursor,Next free primitive in the frame's primitive buffer,high,source:146C.c:7587
+T00726.001,orderingTable,Main ordering table,high,source:146C.c:7585
+T00726.002,overlayOrderingTable,"Ordering table entry for overlay sprites, in front of the main table",high,source:146C.c:7584
+T00726.003,reservedC,Not read by decompiled code,low,declaration-only;source:scratch.h:16
+T00726.004,firstPersonViewFacing,Facing of the first-person view,med,source:146C.c:779
+T00726.005,viewMatrix,View matrix,med,source:146C.c:2503
+T00726.006,camera,Camera,med,source:146C.c:2468
+T00739.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:1588
+T00739.001,opaque8,"Used, but its meaning is not established",low,source:771A8.c:1727
+T00740.000,reserved0,Not read through this view,low,declaration-only;source:771A8.c:1592
+T00740.001,isStuck,Set when the actor has not left its tile,med,source:771A8.c:1676
+T00740.002,opaque3,"Used, but its meaning is not established",low,source:771A8.c:1800
+T00740.003,reserved4,Not read through this view,low,declaration-only;source:771A8.c:1595
+T00740.004,opaque8,"Used, but its meaning is not established",low,source:771A8.c:1774
+T00740.005,reserved9,Not read through this view,low,declaration-only;source:771A8.c:1597
+T00740.006,tile,Current tile word,high,source:771A8.c:1781
+T00740.007,reserved38,Not read through this view,low,declaration-only;source:771A8.c:1599
+T00740.008,savedDestination,Saved destination tile,med,source:771A8.c:1823
+T00740.009,x,Named in the fork view; see cited use,med,source:771A8.c:1820
+T00740.010,y,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:1601
+T00740.011,z,Named in the fork view; see cited use,med,source:771A8.c:1821
+T00740.012,reserved52,Not read through this view,low,declaration-only;source:771A8.c:1602
+T00740.013,model,Model record,med,source:771A8.c:1727
+T00740.014,reserved5C,Not read through this view,low,declaration-only;source:771A8.c:1604
+T00740.015,moveDistance,Distance of the current move,med,source:771A8.c:1781
+T00740.016,reservedB8,Not read through this view,low,declaration-only;source:771A8.c:1606
+T00740.017,wanderPhase,Wander phase counter,low,source:771A8.c:1713
+T00740.018,wanderTimer,Wander timer,med,source:771A8.c:1723
+T00740.019,wanderRangeSquared,Squared wander radius,med,source:771A8.c:1761
+T00740.020,reservedC8,Not read through this view,low,declaration-only;source:771A8.c:1610
+T00740.021,wanderHeading,Heading of the wander walk,med,source:771A8.c:1690
+T00740.022,wanderCooldown,Frames before the next wander walk,med,source:771A8.c:1712
+T00740.023,restPeriod,Wander rest period,med,source:771A8.c:1725
+T00740.024,movePeriod,Wander move period,med,source:771A8.c:1726
+T00740.025,wanderRate,Wander chance exponent,med,source:771A8.c:1724
+T00740.026,reservedD9,Not read through this view,low,declaration-only;source:771A8.c:1616
+T00740.027,goal,Wander goal tile,med,source:771A8.c:1650
+T00740.028,reserved120,Not read through this view,low,declaration-only;source:771A8.c:1618
+T00740.029,behaviorMode,"Behavior mode (1 reacting, 2 wandering)",low,source:771A8.c:1732
+T00740.030,reserved12E,Not read through this view,low,declaration-only;source:771A8.c:1620
+T00740.031,count,Named in the fork view; see cited use,med,source:771A8.c:1649
+T00740.032,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:771A8.c:1654
+T00740.033,reserved160,Not read through this view,low,declaration-only;source:771A8.c:1623
+T00740.034,destination,Destination tile,high,source:771A8.c:1814

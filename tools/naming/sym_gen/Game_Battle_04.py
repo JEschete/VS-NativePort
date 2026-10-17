@@ -233,5 +233,397 @@ G("G00188", "catalog", "Battle::secondShortcutIconPositions", HUD,
   "Gives the x then y positions of the icons of shortcuts 4-7.", M,
   c(("5BF94.c", "((temp_s3 + D_800EBCA0[i]) & 0xFFFF) | (D_800EBCA0[i + 4] << 0x10),")) + GAP)
 
+
+# ================================================================ types
+STATE_RECV = r"\b(?:state|s|arg0|self|context)"
+VIEW = ";view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying"
+FOLD = ";fork-only view; fold into its canonical type when copying"
+
+# ---------------------------------------------------------------- AI actor state views (offset table)
+for _tid, _name, _purpose in (
+        ("T00608", "Battle::Ai::BlockedRecoveryView", "Views the AI actor state while blocked movement is recovered by a detour."),
+        ("T00740", "Battle::Ai::WanderView", "Views the AI actor state while it wanders."),
+        ("T00593", "Battle::Ai::AreaRouteView", "Views the AI actor state while a route between navigation areas is resolved."),
+        ("T00615", "Battle::Ai::TerrainMoveView", "Views the AI actor state while it moves through height-filtered directions."),
+        ("T00613", "Battle::Ai::TargetApproachView", "Views the AI actor state while it approaches a target."),
+        ("T00590", "Battle::Ai::RadialRetreatView", "Views the AI actor state while a boss retreats along the arena radius."),
+        ("T00623", "Battle::Ai::OrbitTrackingView", "Views the AI actor state while a boss orbits the arena centre tracking the player.")):
+    T(_tid, "State", _name, AI + "AiState.h", _purpose, M,
+      "declaration-only;" + g.decl(_tid, g.members[_tid][0]["name"]) + VIEW, ai_state.view_specs(g, _tid), recv=STATE_RECV)
+
+# ---------------------------------------------------------------- arena orbit views (Battle::Ai::ArenaOrbitState)
+for _tid, _name, _purpose in (
+        ("T00587", "Battle::Ai::RadialRetreatOrbitView", "Views the arena orbit state while a boss retreats along the arena radius."),
+        ("T00621", "Battle::Ai::OrbitTrackingOrbitView", "Views the arena orbit state while a boss orbits the arena centre.")):
+    T(_tid, "State", _name, AI + "AiViews.h", _purpose, M,
+      "declaration-only;" + g.decl(_tid, "facing") + ";view of D_800F5920 (Battle::Ai::ArenaOrbitState, T00273); names by offset" + FOLD,
+      g.generic_specs(_tid, g.names_from_views(_tid, ["T00273"])), recv=r"\bmotion")
+
+# ---------------------------------------------------------------- other AI views
+T("T00588", "State", "Battle::Ai::RetreatPlayerRecordView", AI + "AiViews.h",
+  "Views the player's actor record flags while a boss retreat ends.", L,
+  c(("7EE98.c", "if (((radialMotionActor*)D_800F4538[0])->flags & 0x70000) {")) + ";view of Actors::ActorRecord" + FOLD,
+  g.generic_specs("T00588"), recv=r"\(\(radialMotionActor\*\)D_800F4538\[0\]\)")
+T("T00589", "State", "Battle::Ai::ModelActiveView", AI + "AiViews.h",
+  "Views the actor record's active bit (bit 4 of the word at 0x5B0) set while a boss moves along its path.", L,
+  c(("7EE98.c", "context->active = motion->frame < 14;")) + ";view of Actors::ActorRecord" + FOLD,
+  g.generic_specs("T00589"), recv=r"\b(?:context|state->context)")
+T("T00622", "State", "Battle::Ai::OrbitPlayerRecordView", AI + "AiViews.h",
+  "Views the player's actor record position while a boss tracks the player.", L,
+  c(("7EE98.c", "playerAngle = ratan2(0x7C0 - ((trackingMotionActor*)D_800F4538[0])->x,")) + ";view of Actors::ActorRecord" + FOLD,
+  g.generic_specs("T00622"), recv=r"\(\(trackingMotionActor\*\)D_800F4538\[0\]\)")
+T("T00624", "State", "Battle::Ai::OrbitStatsView", AI + "AiViews.h",
+  "Views the boss's HP in its actor statistics while orbit tracking picks a phase.", M,
+  c(("7EE98.c", "ratio = (state->stats->current << 16) / state->stats->maximum;")) + ";view of Battle::ActorStats" + FOLD,
+  [("pad", "reserved0", "Not read by decompiled code", L),
+   ("current", "currentHp", "Current HP (same offset as Battle::ActorStats.currentHp)", H),
+   ("maximum", "maxHp", "Maximum HP (same offset as Battle::ActorStats.maxHp)", H)], recv=r"state->stats")
+T("T00591", "State", "Battle::Ai::RouteActorView", AI + "AiViews.h",
+  "Views an actor's position pointer while a route between navigation areas is resolved.", L,
+  c(("771A8.c", "((routeEdgeActor**)0x1F80037C)[state->target]->position[0];")) + FOLD,
+  g.generic_specs("T00591"), recv=r"\[state->target\]")
+T("T00592", "State", "Battle::Ai::RouteGateView", AI + "AiViews.h",
+  "Views the room AI state's closed-gate bits while a route between navigation areas is resolved.", M,
+  c(("771A8.c", "if (!((((routeEdgeGlobals*)D_800F58BC)->closedGates >> candidate.p.y)"))
+  + ";view of D_800F58BC (Battle::Ai::RoomAiState, T00271) at offset 14, which its declaration leaves undeclared" + FOLD,
+  g.generic_specs("T00592"), recv=r"\(\(routeEdgeGlobals\*\)D_800F58BC\)")
+g.TYPES.append(["T00745", "Value", "Battle::Ai::RouteEdgePair", AI + "Navigation.h",
+                "Holds the two route halves of a navigation edge, read as one word or by half.", M,
+                c(("771A8.c", "typedef u_short routeEdgePair[2];"), ("771A8.c", "static inline u_short routeHalf(routeEdgePair* pair, int index) { return (*pair)[index]; }"))])
+T("T00610", "State", "Battle::Ai::ApproachActorView", AI + "AiViews.h",
+  "Views a battle actor's id while a target approach is updated.", L,
+  "declaration-only;" + g.decl("T00610", "id") + ";view of Battle::Actor" + FOLD, g.generic_specs("T00610"), recv=r"\bactor")
+T("T00611", "State", "Battle::Ai::ApproachRelationBits", AI + "AiViews.h",
+  "Views the relation word bits tested while a target approach is updated.", L,
+  "declaration-only;" + g.decl("T00611", "f0") + ";view of Battle::Ai::RelationWord" + FOLD,
+  g.generic_specs("T00611", g.names_from_views("T00611", ["T00515"])), recv=r"targets\[[^\]]*\]")
+T("T00612", "State", "Battle::Ai::ApproachTargetRecordView", AI + "AiViews.h",
+  "Views a target's actor record flags and position while a target approach is updated.", L,
+  c(("771A8.c", "model = (targetMovementModel*)D_800F4538[target];")) + ";view of Actors::ActorRecord" + FOLD,
+  g.generic_specs("T00612"), recv=r"\b(?:model|s->model)")
+T("T00614", "State", "Battle::Ai::TerrainMoveActorView", AI + "AiViews.h",
+  "Views the battle actor's queued command while a height-filtered move is issued.", M,
+  c(("771A8.c", "terrainMovementActor* actor = state->actor;")) + ";view of Battle::Actor" + FOLD,
+  [("pad0", "reserved0", "Not read by decompiled code", L),
+   ("mode", "commandOpcode", "Queued command opcode; 9 walks (same offset as Battle::Actor.commandOpcode)", M),
+   ("padA", "reservedA", "Not read by decompiled code", L),
+   ("angle", "commandHeading", "Low half of the first command argument: the walk heading", L)], recv=r"\bactor")
+T("T00739", "State", "Battle::Ai::WanderRecordView", AI + "AiViews.h",
+  "Views an actor record's flags while wandering.", L,
+  c(("771A8.c", "if (state->object->flags & 0x200000) {")) + ";view of Actors::ActorRecord" + FOLD,
+  g.generic_specs("T00739"), recv=r"state->object")
+
+# ---------------------------------------------------------------- tile words
+T("T00815", "State", "Battle::Ai::TilePosition", AI + "Navigation.h",
+  "Holds a tile position as one word or as tile x, height, z and status bytes.", M,
+  "declaration-only;" + g.decl("T00815", "raw") + ";upstream vs_battle_movementPosition; tile bytes are Battle::Ai::TileWord",
+  [("raw", "word", "Whole word", M), ("p", "tile", "Tile bytes", M)], recv=r"[\w\]\)]+")
+g.D("T00815", ["T00816", "T00817", "T00818"])
+for _tid, _name, _member in (("T00811", "Battle::Ai::BlockedTileWord", "p"), ("T00813", "Battle::Ai::TerrainTileWord", "p"),
+                             ("T00812", "Battle::Ai::ApproachTileWord", "b")):
+    T(_tid, "State", _name, AI + "AiViews.h", "Holds a tile word as a word or tile bytes.", M,
+      "declaration-only;" + g.decl(_tid, "raw") + ";view of Battle::Ai::TilePosition" + FOLD,
+      [("raw", "word", "Whole word", M), (_member, "tile" if _member == "p" else "bytes",
+                                         "Tile bytes" if _member == "p" else "Bytes of the word", M)], recv=r"[\w\]\)]+")
+
+# ---------------------------------------------------------------- unreferenced fork declarations
+for _tid, _name, _loc, _purpose in (
+        ("T00604", "Battle::SoundEventTargets", B + "ActionEffects.h", "Declares a sound event header followed by its targets; not read."),
+        ("T00606", "Battle::StatusEffectTickTable", B + "StatusEffects.h", "Declares a table of status effect ticks; not read."),
+        ("T00607", "Battle::StatusEffectTick", B + "StatusEffects.h", "Declares one status effect tick: mask and interval; not read."),
+        ("T00632", "Battle::ActorStatsFlags", B + "Actor.h", "Declares a flag word of the actor statistics; not read."),
+        ("T00643", "Battle::DoorRecord", B + "Room.h", "Declares a door record: id, exit, flags and lock; not read."),
+        ("T00661", "Battle::PrimitiveBytes", B + "Room.h", "Declares four primitive bytes; not read."),
+        ("T00681", "Items::WeaponReservedBlock", "Native\\Game\\include\\Items\\Loadout.h", "Declares 24 reserved halfwords of a weapon's statistics; not read.")):
+    T(_tid, "State", _name, _loc, _purpose, L,
+      "declaration-only;" + g.decl(_tid, g.members[_tid][0]["name"]) + ";no decompiled function reads it",
+      g.generic_specs(_tid), recv=None)
+
+T("T00619", "Value", "Battle::TextAnchorOffset", B + "TextBoxes.h",
+  "Gives a dialog box anchor's packed offset, alignment and frame flags.", M,
+  c(("4A0A8.c", "result->x = x = origin->vx + result->offset.x;")),
+  g.generic_specs("T00619"), recv=r"\b(?:result->offset|best->offset)")
+
+# ---------------------------------------------------------------- core battle types
+ACT = B + "Actor.h"
+T("T00630", "State", "Battle::Actor", ACT,
+  "Links one battle actor: id, kind, queued command, equipment models, spawn data and its statistics.", H,
+  c(("146C.c", "temp_s1->id = id;"), ("146C.c", "if (actor->unk8 == 0x40) {")), [
+      ("next", "next", "Next actor in the room's actor list", H, c(("146C.c", "actor->next = vs_battle_actors[0]->next;"))),
+      ("id", "id", "Actor slot index", H, c(("146C.c", "temp_s1->id = id;"))),
+      ("unk8", "commandState", "Queued command state: 0x80 queued, 0x40 running, 0 idle", H,
+       c(("146C.c", "if (actor->unk8 == 0x40) {"), ("146C.c", "if (actor->unk8 != 0x80) {"))),
+      ("unk9", "commandOpcode", "Queued command opcode", H, c(("146C.c", "switch (actor->unk9) {"))),
+      ("unkA", "commandTarget", "Target actor of the queued command; 16 or more for an immediate position", M,
+       c(("146C.c", "if (actor->unkA >= 16) {"))),
+      ("unkB", "commandFlags", "Bits 24-27 of the command word: model sound and follow-up, read through the word", L,
+       "declaration-only;" + g.decl("T00630", "unkB") + ";" + c(("146C.c", "switch ((*(u_int*)&actor->unk8 >> 26) & 3) {"))),
+      ("unkC", "commandArg0", "First command argument; the remaining x offset (fixed point) of a step command", M,
+       c(("146C.c", "if (arg0->unkC < 0) {"))),
+      ("unk10", "commandArg1", "Second command argument; the remaining z offset of a step command", M,
+       c(("146C.c", "if (arg0->unk10.s32 < 0) {"))),
+      ("unk14", "commandArg2", "Third command argument; the remaining y offset of a step command", M,
+       c(("146C.c", "if (arg0->unk14 < 0) {"))),
+      ("unk18", "modelId", "Model id the actor was created from", H,
+       c(("146C.c", "if ((vs_battle_actors[i] != 0) && (vs_battle_actors[i]->unk18 == arg0)) {"))),
+      ("subType", "subType", "Template sub-type; scored when an enemy is killed", M, c(("146C.c", "u_int subType = enemy->subType;"))),
+      ("unk1C", "kind", "Actor kind bits: 1 Ashley, 2 non-hostile, 4 hostile, 8 object, 0x10 auxiliary; 0x8000 excludes targeting", H,
+       c(("146C.c", "temp_s1->unk1C = 1;"), ("146C.c", "&& !(vs_battle_actors[i]->unk1C & 0x8000)) {"))),
+      ("unk1E", "facing", "Facing from the room spawn", M, c(("146C.c", "actor->unk1E = spawn->facing;"))),
+      ("unk1F", "spawnByte26", "Byte 0x26 of the room spawn record; not read afterwards", L, c(("146C.c", "actor->unk1F = spawn->unk26;"))),
+      ("weaponDrawn", "weaponDrawn", "Bit 0 set while the actor is in battle mode", H,
+       c(("146C.c", "int func_8007C088(int arg0) { return vs_battle_actors[arg0]->weaponDrawn & 1; }"))),
+      ("unk24", "interactionFlags", "Spawn flag bits 2-4; 4 lets the player trigger the actor's event with the action button", L,
+       c(("146C.c", "temp_s1->unk24 = arg4 & 0x1C;"), ("146C.c", "if ((i >= 0) && (vs_battle_actors[i]->unk24 == 4)"))),
+      ("equippedWeaponCategory", "equippedWeaponCategory", "Category of the equipped blade; 10 when unarmed", H,
+       c(("146C.c", "actor->equippedWeaponCategory = category;"))),
+      ("unk26", "retainAfterDefeat", "Keeps the actor after its defeat (spawn flag 0x80)", H,
+       c(("146C.c", "return vs_battle_actors[arg0]->unk26;"))),
+      ("unk27", "roomSpawnIndex", "Index of the actor's room spawn; 0x80 for none", H, c(("146C.c", "actor->unk27 = spawn->index;"))),
+      ("defeated", "defeated", "Set once the actor's defeat has been handled", M, c(("146C.c", "if ((enemy->unk27 == 0x80) || (enemy->defeated != 0)) {"))),
+      ("unk29", "killCounted", "Set when a killing blow on the actor counted toward Break Art progress", H,
+       c(("146C.c", "vs_battle_actors[arg2->unk0.targetActor]->unk29 = 1;"))),
+      ("unk2A", "bladeId", "Blade model id of the equipped weapon", M, c(("146C.c", "temp_s1->unk2A = arg2;"))),
+      ("unk2B", "shieldId", "Shield model id", M, c(("146C.c", "temp_s1->unk2B = arg3;"))),
+      ("unk2C", "lastTriggerTile", "Tile word last checked for floor triggers", M,
+       c(("146C.c", "if (((s2->unk0.value & 0xFFFFFF) != (temp_s0->unk2C.s32 & 0xFFFFFF))"))),
+      ("unk30_0", "aiGroup", "AI group number other actors link to", M, c(("7CD68.c", "if (other->unk30_0 == actor->unk30_9) {"))),
+      ("unk30_4", "reserved30Bit4", "Not read by decompiled code", L),
+      ("unk30_9", "aiLinkedGroup", "AI group this actor follows or guards", M, c(("7CD68.c", "if (other->unk30_0 == actor->unk30_9) {"))),
+      ("unk30_14", "reserved31Bit6", "Not read by decompiled code", L),
+      ("unk34", "reserved34", "Not read by decompiled code", L),
+      ("unk38", "templateWord2C", "Word 0x2C of the actor template; not read afterwards", L, c(("146C.c", "actor->unk38 = init->unk2C;"))),
+      ("unk3C", "stats", "Combat statistics", H, c(("146C.c", "actor->unk3C = (vs_battle_actor2*)(actor + 1);"))),
+      ("unk40", "allocationKind", "Allocation layout: 1 with two equipment model slots, 2 with one", M,
+       c(("146C.c", "actor->unk40 = 2;"), ("146C.c", "if (actor->unk40 == 2) {"))),
+      ("unk44", "model", "Actor model and animation state", H, c(("146C.c", "actor->unk44 = (void*)((char*)actor + 0x9B4);"))),
+      ("unk48", "equipmentModels", "Weapon and shield model slots", H, c(("146C.c", "actor->unk48[0] = (void*)((char*)actor + 0x22B4);"))),
+  ])
+T("T00631", "State", "Battle::ActorStats", ACT,
+  "Holds one battle actor's statistics: name, HP, MP, Risk, attributes, speeds, ranges, equipment, limbs, actions, "
+  "statuses, recovery timer and drops.", H,
+  c(("146C.c", "temp_s0->maxHP = 100;"), ("146C.c", "actor->unk944 = init->unk28;")), [
+      ("name", "name", "Display name", H, c(("5BF94.c", "vs_battle_stringContext.strings[0] = vs_battle_actors[i]->unk3C->name;"))),
+      ("currentHP", "currentHp", "Current HP", H, c(("146C.c", "temp_s0->currentHP = 100;"))),
+      ("maxHP", "maxHp", "Maximum HP", H, c(("146C.c", "temp_s0->maxHP = 100;"))),
+      ("currentMP", "currentMp", "Current MP", H, c(("146C.c", "temp_s0->currentMP = 100;"))),
+      ("maxMP", "maxMp", "Maximum MP", H, c(("146C.c", "temp_s0->maxMP = 100;"))),
+      ("risk", "risk", "Risk", H, c(("146C.c", "temp_s0->risk = 0;"))),
+      ("strength", "strength", "Base STR", M, None),
+      ("totalStrength", "totalStrength", "STR with equipment", M, None),
+      ("intelligence", "intelligence", "Base INT", M, None),
+      ("totalIntelligence", "totalIntelligence", "INT with equipment", M, None),
+      ("agility", "agility", "Base AGL", M, None),
+      ("totalAgility", "totalAgility", "AGL with equipment", M, None),
+      ("unk2E", "baseWalkSpeed", "Walk speed without statuses (nine tenths of the template's)", H,
+       c(("146C.c", "arg1->unk31 = arg1->unk2E;"))),
+      ("unk2F", "baseRunSpeed", "Run speed without statuses (nine tenths of the template's)", H, c(("146C.c", "arg1->unk33 = arg1->unk2F;"))),
+      ("unk30", "movementClass", "Template movement class; 0x10 and 0x20 make saved placement use the current tile while flying", L,
+       c(("146C.c", "actor->unk30 = init->unk24;"), ("146C.c", "func_800A36E0(arg0, temp_s1->unk30, &sp10);"))),
+      ("unk31", "walkSpeed", "Current walk speed; halved by some statuses", H, c(("146C.c", "movementSpeed = actor->unk3C->unk31 << 12;"))),
+      ("unk32", "gaitClass", "Template gait class; 2 and 0x40 make queued walks use the run speed", L,
+       c(("146C.c", "if (actor->unk3C->unk32 == 2) {"))),
+      ("unk33", "runSpeed", "Current run speed; halved by some statuses", H, c(("146C.c", "movementSpeed = actor->unk3C->unk33 << 12;"))),
+      ("unk34", "mobilityLimb0", "First limb whose injury, with the second, inflicts Agility Down; 0 for none", M,
+       c(("146C.c", "var_a2 = temp_s3->limbs[temp_s3->unk34].hp + arg0->limbs[temp_s3->unk34].hp;"))),
+      ("unk35", "mobilityLimb1", "Second limb whose injury, with the first, inflicts Agility Down; 0 for none", M,
+       c(("146C.c", "if ((actor->unk35 != 0) && (actor->limbs[actor->unk35].hp >= 2)) {"))),
+      ("unk36", "defaultTargetLimb", "Limb targeted when an action does not pick one", H,
+       c(("146C.c", "sp10.unk4C[0].unk0.targetLimb = vs_battle_actors[targetActor]->unk3C->unk36;"))),
+      ("enemyClass", "enemyClass", "Enemy class", M, None),
+      ("reach", "reach", "Reach added to the weapon's ranges", M, c(("146C.c", "actor->unk39 = actor->weapon.range.unk1 + actor->reach;"))),
+      ("currentRange", "currentRange", "Current attack range", M, None),
+      ("unk39", "currentRangeY", "Current attack range second component: weapon range plus reach", M,
+       c(("146C.c", "actor->unk39 = actor->weapon.range.unk1 + actor->reach;"))),
+      ("unk3A", "currentRangeZ", "Current attack range third component: weapon range plus reach", M,
+       c(("146C.c", "actor->unk3A = actor->weapon.range.unk2 + actor->reach;"))),
+      ("unk3B_0", "currentAttackShape", "Current attack range shape; 1 when a weapon is equipped", M, c(("146C.c", "actor->unk3B_0 = 1;"))),
+      ("currentAttackShapeAngle", "currentAttackShapeAngle", "Current attack range shape angle", M, None),
+      ("weapon", "weapon", "Equipped weapon statistics", H, None),
+      ("shield", "shield", "Equipped shield statistics", H, None),
+      ("accessory", "accessory", "Equipped accessory statistics", H, None),
+      ("limbs", "limbs", "Statistics of the six limbs", H, None),
+      ("armor", "limbActions", "Up to four action slots per limb", H,
+       c(("146C.c", "actor->armor[i][j].id = init->limbs[i].actions[j].id;"))),
+      ("dpSplash", "dpSplash", "Fork name kept; see cited use", L, None),
+      ("unk944", "statusImmunities", "Status flags the actor cannot receive", H,
+       c(("146C.c", "if ((!(params->unk0 & temp_a1->unk944)) && (!(params->unkC & temp_a1->statuses))) {"))),
+      ("statuses", "statuses", "Active status flags (Battle::StatusFlag)", H, None),
+      ("statusTimers", "statusTimers", "Remaining time of timed statuses", H, None),
+      ("unk954", "actionRecoveryTimer", "Recovery time after an action; actions are restricted while non-zero", H,
+       c(("146C.c", "arg1->unk954 += (arg1->weapon.unk10B + arg1->unk956_2) << 8;"), ("146C.c", "int ret = actor->unk954 != 0;"))),
+      ("unk956_0", "cancelsHitResults", "Hits on the actor are reset to outcome 4 after their effects are applied; set for placeholders", L,
+       c(("146C.c", "if (arg3 && stats->unk956_0) {"))),
+      ("isAnalyzed", "isAnalyzed", "Set once the actor has been analyzed", M, None),
+      ("unk956_2", "recoveryDelayBonus", "Template value added to every action's recovery delay", M,
+       c(("146C.c", "actor->unk956_2 = init->unk23;"))),
+      ("unk957", "actorId", "Actor slot index; 0x80 for placeholder statistics", H,
+       c(("146C.c", "if (vs_battle_actors[actor->unk957]->weaponDrawn & 1) {"), ("146C.c", "temp_s0->unk957 = 0x80;"))),
+      ("miscItem", "dropItem", "First item the actor drops", M, c(("146C.c", "actor->unk3C->miscItem.id = spawn->itemId;"))),
+      ("unk95C", "secondDropItem", "Second item the actor drops", M, c(("146C.c", "actor->unk3C->unk95C.id = spawn->item2Id;"))),
+      ("unk960", "randomDropItem", "Third item the actor drops, with a drop rate", M,
+       c(("146C.c", "lootList->actorId |= _dropMiscRand(&lootList->loot, &temp_s2->unk960);"))),
+  ], recv=r"\b(?:temp_s0|temp_a1|temp_a2|temp_s3|actor|arg1|stats|vs_battle_characterState->unk3C|->unk3C)")
+
+ACTION = "Native\\Game\\include\\Battle\\Action.h"
+T("T00629", "Def", "Battle::ActionDefinition", ACTION,
+  "Defines one action: presentation effect, type, category, cost, range and area, recovery delay, AI flags, two hit "
+  "definitions and its name.", H,
+  c(("146C.c", "category = vs_main_actions[action].unk2_4;"), ("146C.c", "if (new_var->flags_0 == 0xFF) {")), [
+      ("id", "id", "Action id", M, c(("146C.c", "u_int v = action->id;"))),
+      ("unk1", "effectId", "Presentation effect id", H, c(("146C.c", "request.effectId = vs_main_actions[action->actionIndex].unk1;"))),
+      ("unk2_0", "returnsToMenuOnCancel", "Cancelling targeting returns to the battle action menu; otherwise menus close and recovery begins", M,
+       c(("146C.c", "if (!vs_main_actions[D_800F19CC->unk8.actionIndex].unk2_0) {"))),
+      ("type", "type", "Action type (Battle::ActionType)", H, None),
+      ("unk2_4", "category", "Targeting category; indexes the category targeting tables", H,
+       c(("146C.c", "category = vs_main_actions[action].unk2_4;"))),
+      ("cost", "cost", "MP or HP cost", M, None),
+      ("rangeX", "rangeX", "Range first component", M, None),
+      ("rangeY", "rangeY", "Range second component", M, None),
+      ("rangeZ", "rangeZ", "Range third component", M, None),
+      ("shape", "shape", "Range shape", M, None),
+      ("angle", "angle", "Range shape angle", M, None),
+      ("aoe_0", "areaRangeX", "Area first component", M, c(("146C.c", "D_800F19CC->unk29B4 = spec->aoe_0;"))),
+      ("aoe_8", "areaRangeY", "Area second component; times 32 is the radial reach", M, c(("7CD68.c", "r = action->aoe_8 << 5;"))),
+      ("aoe_16", "areaRangeZ", "Area third component", M, c(("146C.c", "D_800F19CC->unk29B6 = spec->aoe_16;"))),
+      ("aoe_24", "areaShape", "Area shape in the low three bits", M, c(("146C.c", "D_800F19CC->unk29B0 = spec->aoe_24 & 7;"))),
+      ("flags_0", "recoveryDelay", "Recovery delay added after the action; 0xFF uses the weapon's", H,
+       c(("146C.c", "if (new_var->flags_0 == 0xFF) {"))),
+      ("flagsD_0", "reservedDBit0", "Not read by decompiled code", L),
+      ("flagsD_4", "opaqueDBit4", "Copied to the action state; 1 is cleared when the first target is 0x1C1 or farther", L,
+       c(("146C.c", "&& (((vs_main_actions[D_800F19CC->unk8.actionIndex].flagsD_4)) == 1)) {"))),
+      ("flagsD_6", "resetsHitResults", "Hits are reset to outcome 4 after their effects (bit 0x4000 of the word at 0xC)", L,
+       "declaration-only;" + g.decl("T00629", "flagsD_6") + ";" + c(("146C.c", "if (arg3 && (*(int*)&spec->flags_0 & 0x4000)) {"))),
+      ("unlocked", "unlocked", "Set once the player has learned the action", M, None),
+      ("flagsE", "aiFlags", "Flags read by enemy AI action selection", M, c(("74088.c", "flags = arg3->flagsE;"))),
+      ("unk10", "reserved10", "Not read by decompiled code", L),
+      ("hitParams", "hits", "Two hit definitions: effect, prerequisite, hit, stat calculator, factor, type and affinity", H,
+       c(("146C.c", "threshold = _hitFunctions[action->hitParams[hitNumber].hitFunction]("))),
+      ("name", "name", "Display name", H, None),
+  ], recv=r"\b(?:action|spec|new_var|info|arg3|vs_main_actions\[[^\]]*\])")
+T("T00628", "Value", "Battle::ActionAiFlags", ACTION,
+  "Holds the action flags read by enemy AI action selection.", M,
+  c(("74088.c", "if (flags.unk5 && (rand() & 0x7F) < 115) {")), [
+      ("unk0", "reserved0Bit0", "Not read by decompiled code", L),
+      ("unk4", "opaque0Bit4", "With the actor's settingsModeLow set, scores the action as special with weight 40", L,
+       c(("74088.c", "if (arg0->unk2B && flags.unk4) {"))),
+      ("unk5", "rarelyChosen", "The AI rejects the action 115 times in 128", M, c(("74088.c", "if (flags.unk5 && (rand() & 0x7F) < 115) {"))),
+      ("unk6", "reserved0Bit6", "Not read by decompiled code", L),
+      ("unk7", "shapedArea", "Area reach comes from the area range shape", M, c(("7CD68.c", "} else if (action->flagsE.unk7 << 0x17) {"))),
+      ("unk8", "reserved1Bit0", "Not read by decompiled code", L),
+      ("unk12", "opaque1Bit4", "Copied into the candidate and fallback flags", L,
+       c(("74088.c", "list[1].unk10.unk2 = info->flagsE.unk12;"))),
+      ("unk13", "radialArea", "Area reach is areaRangeY times 32", M, c(("7CD68.c", "if (action->flagsE.unk13 << 0x1D) {"))),
+      ("unk14", "reserved1Bit6", "Not read by decompiled code", L),
+  ])
+T("T00709", "Def", "Battle::StatusEffectParams", B + "StatusEffects.h",
+  "Defines one status effect: its status flags, tick interval, the statuses it cancels and the statuses that block it.", M,
+  c(("146C.c", "if ((!(params->unk0 & temp_a1->unk944)) && (!(params->unkC & temp_a1->statuses))) {")), [
+      ("unk0", "statusFlags", "Status flags the effect sets", M, c(("146C.c", "remove = params->unk0 & ~temp_a2->unk944 & (~temp_t0 | params->unk8);"))),
+      ("unk4", "reserved4", "Not read by decompiled code", L),
+      ("unk6", "tickInterval", "Ticks per HP change of a damage-over-time status", M,
+       c(("74088.c", "stats->currentHP -= ticks / vs_main_statusEffectParams[14].unk6 * scale / 100;"))),
+      ("unk8", "cancelledStatuses", "Active statuses the effect cancels instead of stacking", M,
+       c(("146C.c", "inflict = params->unk8 & temp_a2->statuses;"))),
+      ("unkC", "blockingStatuses", "Active statuses that keep the effect from applying", M, c(("146C.c", "if (!(temp_t0 & params->unkC)) {"))),
+  ])
+T("T00726", "State", "Render::FrameScratch", "Native\\Graphics\\src\\Render.h",
+  "Holds the per-frame drawing context kept in the scratchpad: primitive cursor, ordering tables, view facing, view "
+  "matrix and camera.", H,
+  c(("146C.c", "vs_scratch.unk0 = D_8005E0C0[vs_main_frameBuf];"), ("146C.c", "vs_scratch.unk4 = ot + 18;")), [
+      ("unk0", "primitiveCursor", "Next free primitive in the frame's primitive buffer", H,
+       c(("146C.c", "vs_scratch.unk0 = D_8005E0C0[vs_main_frameBuf];"))),
+      ("unk4", "orderingTable", "Main ordering table", H, c(("146C.c", "vs_scratch.unk4 = ot + 18;"))),
+      ("unk8", "overlayOrderingTable", "Ordering table entry for overlay sprites, in front of the main table", H,
+       c(("146C.c", "vs_scratch.unk8 = ot + 2;"))),
+      ("unkC", "reservedC", "Not read by decompiled code", L),
+      ("firstPersonViewFacing", "firstPersonViewFacing", "Facing of the first-person view", M, None),
+      ("viewMatrix", "viewMatrix", "View matrix", M, None),
+      ("camera", "camera", "Camera", M, None),
+  ], recv=r"\b(?:vs_scratch|\(\(vs_scratch_t\*\)0x1F800000\))")
+T("T00636", "State", "Battle::ActionSlot", ACT,
+  "Holds one limb action slot: action id, template index, effect model and a set marker.", M,
+  c(("146C.c", "actor->armor[i][j].id = init->limbs[i].actions[j].id;")), [
+      ("id", "actionId", "Action in the slot", H, c(("146C.c", "actor->armor[i][j].id = init->limbs[i].actions[j].id;"))),
+      ("index", "index", "Template index", L, c(("146C.c", "actor->armor[i][j].index = init->limbs[i].actions[j].index;"))),
+      ("unk2_4", "effectModelId", "Effect model shown when the action is presented", M,
+       c(("146C.c", "actor->armor[i][j].unk2_4 = init->limbs[i].actions[j].unk2;"))),
+      ("unk3", "opaque3", "Set to 1 when the slot is filled; not read", L, c(("146C.c", "actor->armor[i][j].unk3 = 1;"))),
+  ])
+T("T00676", "State", "Battle::LimbStats", ACT,
+  "Holds one limb's HP, bone, name, evasion, types, affinities and armor.", H,
+  c(("146C.c", "actor->limbs[i].unk5 = j;")), [
+      ("hp", "hp", "Current HP", H, None), ("maxHp", "maxHp", "Maximum HP", H, None),
+      ("agilityDefenseBonus", "agilityDefenseBonus", "Fork name kept; see cited use", M, None),
+      ("unk5", "anchorBone", "Model bone the limb's labels and markers are projected from", H,
+       c(("146C.c", "actor->limbs[i].unk5 = j;"), ("MENU/MENU4.PRG/120.c", "func_800A13EC(1, limb->unk5, lineXy, 0);"))),
+      ("nameIndex", "nameIndex", "Limb name index", M, None),
+      ("chainEvasion", "chainEvasion", "Chain evasion", M, None),
+      ("types", "types", "Type values", M, None),
+      ("affinities", "affinities", "Affinity values", M, None),
+      ("armor", "armor", "Equipped armor statistics", H, None),
+  ], recv=r"\b(?:limbs\[[^\]]*\]|limb)")
+T("T00672", "State", "Battle::TextBoxFlags", B + "TextBoxes.h",
+  "Packs a text box's kind, open style, alignment, frame shape and part, arrow frame, speaker texture and state bits.", M,
+  c(("5BF94.c", "switch (box->unk0.unk0_0) {")), [
+      ("unk0_0", "kind", "Box kind; 4 uses the alternate font table", M, c(("5BF94.c", "switch (box->unk0.unk0_0) {"))),
+      ("unk0_4", "openStyle", "Opening style; selects the opening step count", L, c(("5BF94.c", "switch (box->unk0.unk0_4) {"))),
+      ("unk0_6", "alignment", "Anchor alignment; flips the frame", M, c(("4A0A8.c", "box->unk0.unk0_6 = best->offset.alignment;"))),
+      ("unk0_8", "frameShape", "Frame shape index", M, c(("5BF94.c", "u_short* verts = (u_short*)D_800EB588[box->unk0.unk0_8];"))),
+      ("unk0_12", "framePart", "Frame part selected from the shape", L, c(("5BF94.c", "part = ((int*)shape)[box->unk0.unk0_12];"))),
+      ("arrowAnimFrame", "arrowAnimFrame", "Continue-arrow animation frame", M, None),
+      ("unk0_24", "speakerTexture", "Speaker portrait texture; bit 0x20 for none", M, c(("4A0A8.c", "box->unk0.unk0_24 = texture;"))),
+      ("done", "done", "Set when the text has finished", M, None),
+      ("unk0_31", "opaque3Bit7", "Tested first each update; meaning not established", L, c(("5BF94.c", "if (box->unk0.unk0_31) {"))),
+  ], recv=r"\b(?:box->unk0|arg0->unk0|ctx->unk0|vs_battle_textBoxes\[[^\]]*\]\.unk0|temp_s1->unk0)")
+LOOT = "Native\\Game\\src\\Items\\Loot.h"
+LOOT_CITE = {"blade": ("if (_droppableUnderCurrentDifficulty(arg0->blade.difficultyFlags) != 0) {",
+                         "_addLootToList(itemCategoryBlade, _copyBladeToInventory(&arg0->blade.blade, 0));"),
+             "gem": ("if (_droppableUnderCurrentDifficulty(arg0->gem.difficultyFlags) != 0) {",
+                     "_addLootToList(itemCategoryGem, _copyGemToInventory(&arg0->gem.gem, 0));"),
+             "grip": ("if (_droppableUnderCurrentDifficulty(arg0->grip.difficultyFlags) != 0) {",
+                      "_addLootToList(itemCategoryGrip, _copyGripToInventory(&arg0->grip.grip, 0));")}
+for _tid, _name, _item in (("T00649", "Items::LootedBlade", "blade"), ("T00650", "Items::LootedGem", "gem"), ("T00651", "Items::LootedGrip", "grip")):
+    _flags, _copy = LOOT_CITE[_item]
+    T(_tid, "State", _name, LOOT, f"Holds a looted {_item} with the difficulty flags that allow its drop.", M,
+      c(("MENU/MENUB.PRG/260.c", _flags)), [
+          ("difficultyFlags", "difficultyFlags", "Difficulties under which the item drops", M, c(("MENU/MENUB.PRG/260.c", _flags))),
+          ("unk1", "reserved1", "Not read by decompiled code", L), ("unk2", "reserved2", "Not read by decompiled code", L),
+          ("unk3", "reserved3", "Not read by decompiled code", L),
+          (_item, _item, f"The looted {_item}", M, c(("MENU/MENUB.PRG/260.c", _copy)))])
+AFF = "Native\\Game\\include\\Items\\Loadout.h"
+T("T00641", "State", "Items::ClassAffinityBaseline", AFF, "Holds an item's baseline class and affinity values.", M,
+  c(("146C.c", "target->classAffinityBaseline.class[i] =")), [
+      ("class", "classes", "Class values (renamed: class is a C++ keyword)", M, c(("146C.c", "target->classAffinityBaseline.class[i] ="))),
+      ("affinity", "affinities", "Affinity values", M, c(("146C.c", "target->classAffinityBaseline.affinity[i] ="))),
+  ])
+T("T00642", "State", "Items::ClassAffinityCurrent", AFF, "Holds an item's two sets of current class and affinity values.", M,
+  c(("146C.c", "target->classAffinityCurrent.class[0][i] =")), [
+      ("class", "classes", "Class values per set (renamed: class is a C++ keyword)", M, c(("146C.c", "target->classAffinityCurrent.class[0][i] ="))),
+      ("affinity", "affinities", "Affinity values per set", M, c(("146C.c", "target->classAffinityCurrent.affinity[0][i] ="))),
+  ])
+
+
+def E(tid, name, loc, purpose, prefix):
+    specs = []
+    for m in g.members[tid]:
+        rest = m["name"][len(prefix):] if m["name"].startswith(prefix) else m["name"]
+        final = rest[0].upper() + rest[1:]
+        specs.append((m["name"], final, f"{name.rsplit('::', 1)[1]} {final}", M))
+    T(tid, "Enum", name, loc, purpose, M, "declaration-only;" + g.decl(tid, g.members[tid][0]["name"]), specs)
+
+
+E("T00093", "Battle::LimbConditionLevel", ACT, "Names the five limb conditions from critical to excellent.", "limbStatus")
+E("T00094", "Menu::Framework::MenuItemScroll", "Native\\Game\\src\\Menu\\Framework\\MenuItems.h",
+  "Names a menu row's scroll arrow.", "menuItem_scroll")
+E("T00095", "Menu::Framework::MenuItemState", "Native\\Game\\src\\Menu\\Framework\\MenuItems.h",
+  "Names a menu row's animation state.", "menuItemState")
+E("T00096", "Menu::Framework::MenuState", "Native\\Game\\src\\Menu\\Framework\\MenuItems.h",
+  "Names the battle menu states.", "menuState")
+E("T00097", "Battle::StatusFlag", B + "StatusEffects.h", "Names the battle status flag bits.", "vsBattleStatus")
+E("T00098", "Battle::WarlockSpell", ACTION, "Names the Warlock spell action ids.", "vs_battle_spell_")
+E("T00101", "Items::GemTarget", "Native\\Game\\include\\Items\\Equipment.h", "Names the gem target for shields.", "gemTarget")
+E("T00102", "Items::ItemCategory", "Native\\Game\\include\\Items\\Inventory.h", "Names the item categories.", "itemCategory")
+
 if __name__ == "__main__":
-    g.write(partial=True)
+    g.write()

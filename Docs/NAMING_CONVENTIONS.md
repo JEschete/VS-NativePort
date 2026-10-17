@@ -364,7 +364,7 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Battle_01 | 0 | 92 | 583 | Validated and applied |
 | Game_Battle_02 | 0 | 66 | 689 | Validated and applied |
 | Game_Battle_03 | 0 | 78 | 737 | Validated and applied |
-| Game_Battle_04 | 58 | 58 | 526 | Pending |
+| Game_Battle_04 | 58 | 58 | 526 | Validated and applied |
 | Game_Battle_05 | 114 | 0 | 0 | Pending |
 | Game_Effects_01 | 0 | 80 | 659 | Pending |
 | Game_Effects_02 | 239 | 9 | 53 | Pending |
@@ -380,14 +380,14 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **740 / 2,174** | **517 / 822** | **4,493 / 6,870** | **14 / 24 batches applied** |
+| **Applied / inventoried** | **798 / 2,174** | **575 / 822** | **5,019 / 6,870** | **15 / 24 batches applied** |
 
 Inventory changed on 2026-10-17 when 25 upstream layouts were adopted (15 merged layouts, 10 type-only retypes; two
 new upstream-only types, `func_800D52A4_t`/`_t2`, the effect node's motion block). Applied rows kept their names;
 four applied fields changed C type only (`AkaoSeqHeader.magic` `char[4]`→`int`, `_mpdEnemy.settings`
 `u_char[8]`→`actorSpawnSettings`, `vs_battle_objectData.material`/`variant` `char`→`u_char`).
 
-Applied rows still include 32 low-confidence globals, 48 low-confidence types and 1,727 low-confidence fields. Validation checks coverage,
+Applied rows still include 35 low-confidence globals, 63 low-confidence types and 1,921 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -474,6 +474,18 @@ names, locations and collisions; it does not prove semantics or close migration 
   `CandidateEntryView`, `ActionSlotMetadata` (T00520) from `ActionMetadataEntry`, and `RelationWord` (T00515,
   upstream's bit split) from `TargetRelationBits`. 506 of 737 fields are `low` (287 reserved, 176 opaque); most
   opaque members are AI state bytes that are set and tested without a behavior that explains them.
+- Game_Battle_04 (2026-10-17): the core battle types are named member by member from their read uses:
+  `Battle::Actor` (vs_battle_actor: a queued command `commandState`/`commandOpcode`/`commandTarget`/`commandArg0-2`,
+  `kind`, spawn data, `stats`, `model`), `Battle::ActorStats` (vs_battle_actor2: speeds, mobility limbs, ranges,
+  `limbActions`, `statusImmunities`, `actionRecoveryTimer`, drops), `Battle::ActionDefinition` (vs_action_t:
+  `category` indexes the targeting tables, `recoveryDelay`, `areaRange*`), `Battle::StatusEffectParams` and
+  `Render::FrameScratch` (the scratchpad frame context). Seven more AI state views use the offset table; two views of
+  D_800F5920 take `Battle::Ai::ArenaOrbitState` names by offset. `class` members become `classes` (C++ keyword).
+  Globals: the three status-string globals are `statusStrings` entries addressed directly (u16 offsets 142, 167 and
+  246 = `targetTemplate`, `line23`, `empty`), dropped in favour of the table; G00147 sits in rodata but is the
+  target-menu step counter; G00017/G00018 are unreferenced. Corrections: T00273 offset 0x14 (Battle_01) is
+  `healthPhase` (upstream 6E644.c:4112 reads it). Gap found: `func_800AD714` (44F14.c:168, the animation event
+  interpreter) is missing from FUNCTION_CATALOG.csv. 195 of 526 fields are `low` (137 reserved, 30 opaque).
 
 The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
 The native audio player must own playback position rather than reading another module's timing globals.

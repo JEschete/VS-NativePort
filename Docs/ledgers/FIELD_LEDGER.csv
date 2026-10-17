@@ -520,66 +520,66 @@ T00092.000,T00092,vs_battle_informationTextBoxHeader,0,informationTextBoxHeaderN
 T00092.001,T00092,vs_battle_informationTextBoxHeader,1,informationTextBoxHeaderCaution,0,,,1,,,,,
 T00092.002,T00092,vs_battle_informationTextBoxHeader,2,informationTextBoxHeaderInformation,0,,,2,,,,,
 T00092.003,T00092,vs_battle_informationTextBoxHeader,3,informationTextBoxHeaderCheck,0,,,3,,,,,
-T00093.000,T00093,vs_battle_limbStatus,0,limbStatusCritical,0,,,0,,,,,
-T00093.001,T00093,vs_battle_limbStatus,1,limbStatusDamaged,0,,,1,,,,,
-T00093.002,T00093,vs_battle_limbStatus,2,limbStatusWounded,0,,,2,,,,,
-T00093.003,T00093,vs_battle_limbStatus,3,limbStatusGood,0,,,3,,,,,
-T00093.004,T00093,vs_battle_limbStatus,4,limbStatusExcellent,0,,,4,,,,,
-T00094.000,T00094,vs_battle_menuItemScrollable,0,menuItem_scrollNone,0,,,0,,,,,
-T00094.001,T00094,vs_battle_menuItemScrollable,1,menuItem_scrollUp,0,,,1,,,,,
-T00094.002,T00094,vs_battle_menuItemScrollable,2,menuItem_scrollDown,0,,,2,,,,,
-T00095.000,T00095,vs_battle_menuItemState,0,menuItemStateInactive,0,,,0,,,,,
-T00095.001,T00095,vs_battle_menuItemState,1,menuItemStateIdle,0,,,1,,,,,
-T00095.002,T00095,vs_battle_menuItemState,2,menuItemStateSlideX,0,,,2,,,,,
-T00095.003,T00095,vs_battle_menuItemState,3,menuItemStateSlideY,0,,,3,,,,,
-T00095.004,T00095,vs_battle_menuItemState,4,menuItemStateSlideXY,0,,,4,,,,,
-T00095.005,T00095,vs_battle_menuItemState,5,menuItemStateDismiss,0,,,5,,,,,
-T00096.000,T00096,vs_battle_menuStates,0,menuStateMainMenu,0,,,0,,,,,
-T00096.001,T00096,vs_battle_menuStates,1,menuStateNoneClosing,0,,,31,,,,,
-T00096.002,T00096,vs_battle_menuStates,2,menuStateNoneClosed,0,,,63,,,,,
-T00096.003,T00096,vs_battle_menuStates,3,menuStateOpenedFromMainMenu,0,,,64,,,,,
-T00097.000,T00097,vs_battle_statuses,0,vsBattleStatusStrDown,0,,,1,,,,,
-T00097.001,T00097,vs_battle_statuses,1,vsBattleStatusStrUp,0,,,2,,,,,
-T00097.002,T00097,vs_battle_statuses,2,vsBattleStatusIntDown,0,,,4,,,,,
-T00097.003,T00097,vs_battle_statuses,3,vsBattleStatusIntUp,0,,,8,,,,,
-T00097.004,T00097,vs_battle_statuses,4,vsBattleStatusAgiDown,0,,,16,,,,,
-T00097.005,T00097,vs_battle_statuses,5,vsBattleStatusAgiUp,0,,,32,,,,,
-T00097.006,T00097,vs_battle_statuses,6,vsBattleStatusQuicken,0,,,64,,,,,
-T00097.007,T00097,vs_battle_statuses,7,vsBattleStatusSilent,0,,,128,,,,,
-T00097.008,T00097,vs_battle_statuses,8,vsBattleStatusParalysis,0,,,256,,,,,
-T00097.009,T00097,vs_battle_statuses,9,vsBattleStatusPoison,0,,,512,,,,,
-T00097.010,T00097,vs_battle_statuses,10,vsBattleStatusNumbness,0,,,1024,,,,,
-T00097.011,T00097,vs_battle_statuses,11,vsBattleStatusCurse,0,,,2048,,,,,
-T00097.012,T00097,vs_battle_statuses,12,vsBattleStatusRegen,0,,,4096,,,,,
-T00097.013,T00097,vs_battle_statuses,13,vsBattleStatusWard,0,,,8192,,,,,
-T00097.014,T00097,vs_battle_statuses,14,vsBattleStatusEquDown,0,,,16384,,,,,
-T00097.015,T00097,vs_battle_statuses,15,vsBattleStatusEquUp,0,,,32768,,,,,
-T00097.016,T00097,vs_battle_statuses,16,vsBattleStatusAirAtkUp,0,,,65536,,,,,
-T00097.017,T00097,vs_battle_statuses,17,vsBattleStatusFireAtkUp,0,,,131072,,,,,
-T00097.018,T00097,vs_battle_statuses,18,vsBattleStatusEarthAtkUp,0,,,262144,,,,,
-T00097.019,T00097,vs_battle_statuses,19,vsBattleStatusWaterAtkUp,0,,,524288,,,,,
-T00097.020,T00097,vs_battle_statuses,20,vsBattleStatusAirDefUp,0,,,1048576,,,,,
-T00097.021,T00097,vs_battle_statuses,21,vsBattleStatusFireDefUp,0,,,2097152,,,,,
-T00097.022,T00097,vs_battle_statuses,22,vsBattleStatusEarthDefUp,0,,,4194304,,,,,
-T00097.023,T00097,vs_battle_statuses,23,vsBattleStatusWaterDefUp,0,,,8388608,,,,,
-T00098.000,T00098,vs_battle_warlockSpellIds_e,0,vs_battle_spell_solidShock,0,,,97,,,,,
-T00098.001,T00098,vs_battle_warlockSpellIds_e,1,vs_battle_spell_lightningBolt,0,,,98,,,,,
-T00098.002,T00098,vs_battle_warlockSpellIds_e,2,vs_battle_spell_fireball,0,,,99,,,,,
-T00098.003,T00098,vs_battle_warlockSpellIds_e,3,vs_battle_spell_vulcanLance,0,,,100,,,,,
-T00098.004,T00098,vs_battle_warlockSpellIds_e,4,vs_battle_spell_aquaBlast,0,,,101,,,,,
-T00098.005,T00098,vs_battle_warlockSpellIds_e,5,vs_battle_spell_spiritSurge,0,,,102,,,,,
-T00098.006,T00098,vs_battle_warlockSpellIds_e,6,vs_battle_spell_darkChant,0,,,103,,,,,
-T00098.007,T00098,vs_battle_warlockSpellIds_e,7,vs_battle_spell_exorcism,0,,,104,,,,,
-T00098.008,T00098,vs_battle_warlockSpellIds_e,8,vs_battle_spell_banish,0,,,105,,,,,
-T00098.009,T00098,vs_battle_warlockSpellIds_e,9,vs_battle_spell_explosion,0,,,106,,,,,
-T00098.010,T00098,vs_battle_warlockSpellIds_e,10,vs_battle_spell_thunderburst,0,,,110,,,,,
-T00098.011,T00098,vs_battle_warlockSpellIds_e,11,vs_battle_spell_flameSphere,0,,,114,,,,,
-T00098.012,T00098,vs_battle_warlockSpellIds_e,12,vs_battle_spell_gaeaStrike,0,,,118,,,,,
-T00098.013,T00098,vs_battle_warlockSpellIds_e,13,vs_battle_spell_avalanche,0,,,122,,,,,
-T00098.014,T00098,vs_battle_warlockSpellIds_e,14,vs_battle_spell_radialSurge,0,,,126,,,,,
-T00098.015,T00098,vs_battle_warlockSpellIds_e,15,vs_battle_spell_meteor,0,,,130,,,,,
-T00098.016,T00098,vs_battle_warlockSpellIds_e,16,vs_battle_spell_drainHeart,0,,,94,,,,,
-T00098.017,T00098,vs_battle_warlockSpellIds_e,17,vs_battle_spell_drainMind,0,,,95,,,,,
+T00093.000,T00093,vs_battle_limbStatus,0,limbStatusCritical,0,,,0,,Critical,LimbConditionLevel Critical,med,declaration-only;source:5BF94.h:503
+T00093.001,T00093,vs_battle_limbStatus,1,limbStatusDamaged,0,,,1,,Damaged,LimbConditionLevel Damaged,med,declaration-only;source:5BF94.h:504
+T00093.002,T00093,vs_battle_limbStatus,2,limbStatusWounded,0,,,2,,Wounded,LimbConditionLevel Wounded,med,declaration-only;source:5BF94.h:505
+T00093.003,T00093,vs_battle_limbStatus,3,limbStatusGood,0,,,3,,Good,LimbConditionLevel Good,med,declaration-only;source:5BF94.h:506
+T00093.004,T00093,vs_battle_limbStatus,4,limbStatusExcellent,0,,,4,,Excellent,LimbConditionLevel Excellent,med,declaration-only;source:5BF94.h:507
+T00094.000,T00094,vs_battle_menuItemScrollable,0,menuItem_scrollNone,0,,,0,,None,MenuItemScroll None,med,declaration-only;source:5BF94.h:28
+T00094.001,T00094,vs_battle_menuItemScrollable,1,menuItem_scrollUp,0,,,1,,Up,MenuItemScroll Up,med,declaration-only;source:5BF94.h:29
+T00094.002,T00094,vs_battle_menuItemScrollable,2,menuItem_scrollDown,0,,,2,,Down,MenuItemScroll Down,med,declaration-only;source:5BF94.h:30
+T00095.000,T00095,vs_battle_menuItemState,0,menuItemStateInactive,0,,,0,,Inactive,MenuItemState Inactive,med,declaration-only;source:5BF94.h:34
+T00095.001,T00095,vs_battle_menuItemState,1,menuItemStateIdle,0,,,1,,Idle,MenuItemState Idle,med,declaration-only;source:5BF94.h:35
+T00095.002,T00095,vs_battle_menuItemState,2,menuItemStateSlideX,0,,,2,,SlideX,MenuItemState SlideX,med,declaration-only;source:5BF94.h:36
+T00095.003,T00095,vs_battle_menuItemState,3,menuItemStateSlideY,0,,,3,,SlideY,MenuItemState SlideY,med,declaration-only;source:5BF94.h:37
+T00095.004,T00095,vs_battle_menuItemState,4,menuItemStateSlideXY,0,,,4,,SlideXY,MenuItemState SlideXY,med,declaration-only;source:5BF94.h:38
+T00095.005,T00095,vs_battle_menuItemState,5,menuItemStateDismiss,0,,,5,,Dismiss,MenuItemState Dismiss,med,declaration-only;source:5BF94.h:39
+T00096.000,T00096,vs_battle_menuStates,0,menuStateMainMenu,0,,,0,,MainMenu,MenuState MainMenu,med,declaration-only;source:5BF94.h:69
+T00096.001,T00096,vs_battle_menuStates,1,menuStateNoneClosing,0,,,31,,NoneClosing,MenuState NoneClosing,med,declaration-only;source:5BF94.h:70
+T00096.002,T00096,vs_battle_menuStates,2,menuStateNoneClosed,0,,,63,,NoneClosed,MenuState NoneClosed,med,declaration-only;source:5BF94.h:71
+T00096.003,T00096,vs_battle_menuStates,3,menuStateOpenedFromMainMenu,0,,,64,,OpenedFromMainMenu,MenuState OpenedFromMainMenu,med,declaration-only;source:5BF94.h:72
+T00097.000,T00097,vs_battle_statuses,0,vsBattleStatusStrDown,0,,,1,,StrDown,StatusFlag StrDown,med,declaration-only;source:146C.h:486
+T00097.001,T00097,vs_battle_statuses,1,vsBattleStatusStrUp,0,,,2,,StrUp,StatusFlag StrUp,med,declaration-only;source:146C.h:487
+T00097.002,T00097,vs_battle_statuses,2,vsBattleStatusIntDown,0,,,4,,IntDown,StatusFlag IntDown,med,declaration-only;source:146C.h:488
+T00097.003,T00097,vs_battle_statuses,3,vsBattleStatusIntUp,0,,,8,,IntUp,StatusFlag IntUp,med,declaration-only;source:146C.h:489
+T00097.004,T00097,vs_battle_statuses,4,vsBattleStatusAgiDown,0,,,16,,AgiDown,StatusFlag AgiDown,med,declaration-only;source:146C.h:490
+T00097.005,T00097,vs_battle_statuses,5,vsBattleStatusAgiUp,0,,,32,,AgiUp,StatusFlag AgiUp,med,declaration-only;source:146C.h:491
+T00097.006,T00097,vs_battle_statuses,6,vsBattleStatusQuicken,0,,,64,,Quicken,StatusFlag Quicken,med,declaration-only;source:146C.h:492
+T00097.007,T00097,vs_battle_statuses,7,vsBattleStatusSilent,0,,,128,,Silent,StatusFlag Silent,med,declaration-only;source:146C.h:493
+T00097.008,T00097,vs_battle_statuses,8,vsBattleStatusParalysis,0,,,256,,Paralysis,StatusFlag Paralysis,med,declaration-only;source:146C.h:494
+T00097.009,T00097,vs_battle_statuses,9,vsBattleStatusPoison,0,,,512,,Poison,StatusFlag Poison,med,declaration-only;source:146C.h:495
+T00097.010,T00097,vs_battle_statuses,10,vsBattleStatusNumbness,0,,,1024,,Numbness,StatusFlag Numbness,med,declaration-only;source:146C.h:496
+T00097.011,T00097,vs_battle_statuses,11,vsBattleStatusCurse,0,,,2048,,Curse,StatusFlag Curse,med,declaration-only;source:146C.h:497
+T00097.012,T00097,vs_battle_statuses,12,vsBattleStatusRegen,0,,,4096,,Regen,StatusFlag Regen,med,declaration-only;source:146C.h:498
+T00097.013,T00097,vs_battle_statuses,13,vsBattleStatusWard,0,,,8192,,Ward,StatusFlag Ward,med,declaration-only;source:146C.h:499
+T00097.014,T00097,vs_battle_statuses,14,vsBattleStatusEquDown,0,,,16384,,EquDown,StatusFlag EquDown,med,declaration-only;source:146C.h:500
+T00097.015,T00097,vs_battle_statuses,15,vsBattleStatusEquUp,0,,,32768,,EquUp,StatusFlag EquUp,med,declaration-only;source:146C.h:501
+T00097.016,T00097,vs_battle_statuses,16,vsBattleStatusAirAtkUp,0,,,65536,,AirAtkUp,StatusFlag AirAtkUp,med,declaration-only;source:146C.h:502
+T00097.017,T00097,vs_battle_statuses,17,vsBattleStatusFireAtkUp,0,,,131072,,FireAtkUp,StatusFlag FireAtkUp,med,declaration-only;source:146C.h:503
+T00097.018,T00097,vs_battle_statuses,18,vsBattleStatusEarthAtkUp,0,,,262144,,EarthAtkUp,StatusFlag EarthAtkUp,med,declaration-only;source:146C.h:504
+T00097.019,T00097,vs_battle_statuses,19,vsBattleStatusWaterAtkUp,0,,,524288,,WaterAtkUp,StatusFlag WaterAtkUp,med,declaration-only;source:146C.h:505
+T00097.020,T00097,vs_battle_statuses,20,vsBattleStatusAirDefUp,0,,,1048576,,AirDefUp,StatusFlag AirDefUp,med,declaration-only;source:146C.h:506
+T00097.021,T00097,vs_battle_statuses,21,vsBattleStatusFireDefUp,0,,,2097152,,FireDefUp,StatusFlag FireDefUp,med,declaration-only;source:146C.h:507
+T00097.022,T00097,vs_battle_statuses,22,vsBattleStatusEarthDefUp,0,,,4194304,,EarthDefUp,StatusFlag EarthDefUp,med,declaration-only;source:146C.h:508
+T00097.023,T00097,vs_battle_statuses,23,vsBattleStatusWaterDefUp,0,,,8388608,,WaterDefUp,StatusFlag WaterDefUp,med,declaration-only;source:146C.h:509
+T00098.000,T00098,vs_battle_warlockSpellIds_e,0,vs_battle_spell_solidShock,0,,,97,,SolidShock,WarlockSpell SolidShock,med,declaration-only;source:5BF94.h:7
+T00098.001,T00098,vs_battle_warlockSpellIds_e,1,vs_battle_spell_lightningBolt,0,,,98,,LightningBolt,WarlockSpell LightningBolt,med,declaration-only;source:5BF94.h:8
+T00098.002,T00098,vs_battle_warlockSpellIds_e,2,vs_battle_spell_fireball,0,,,99,,Fireball,WarlockSpell Fireball,med,declaration-only;source:5BF94.h:9
+T00098.003,T00098,vs_battle_warlockSpellIds_e,3,vs_battle_spell_vulcanLance,0,,,100,,VulcanLance,WarlockSpell VulcanLance,med,declaration-only;source:5BF94.h:10
+T00098.004,T00098,vs_battle_warlockSpellIds_e,4,vs_battle_spell_aquaBlast,0,,,101,,AquaBlast,WarlockSpell AquaBlast,med,declaration-only;source:5BF94.h:11
+T00098.005,T00098,vs_battle_warlockSpellIds_e,5,vs_battle_spell_spiritSurge,0,,,102,,SpiritSurge,WarlockSpell SpiritSurge,med,declaration-only;source:5BF94.h:12
+T00098.006,T00098,vs_battle_warlockSpellIds_e,6,vs_battle_spell_darkChant,0,,,103,,DarkChant,WarlockSpell DarkChant,med,declaration-only;source:5BF94.h:13
+T00098.007,T00098,vs_battle_warlockSpellIds_e,7,vs_battle_spell_exorcism,0,,,104,,Exorcism,WarlockSpell Exorcism,med,declaration-only;source:5BF94.h:14
+T00098.008,T00098,vs_battle_warlockSpellIds_e,8,vs_battle_spell_banish,0,,,105,,Banish,WarlockSpell Banish,med,declaration-only;source:5BF94.h:15
+T00098.009,T00098,vs_battle_warlockSpellIds_e,9,vs_battle_spell_explosion,0,,,106,,Explosion,WarlockSpell Explosion,med,declaration-only;source:5BF94.h:16
+T00098.010,T00098,vs_battle_warlockSpellIds_e,10,vs_battle_spell_thunderburst,0,,,110,,Thunderburst,WarlockSpell Thunderburst,med,declaration-only;source:5BF94.h:17
+T00098.011,T00098,vs_battle_warlockSpellIds_e,11,vs_battle_spell_flameSphere,0,,,114,,FlameSphere,WarlockSpell FlameSphere,med,declaration-only;source:5BF94.h:18
+T00098.012,T00098,vs_battle_warlockSpellIds_e,12,vs_battle_spell_gaeaStrike,0,,,118,,GaeaStrike,WarlockSpell GaeaStrike,med,declaration-only;source:5BF94.h:19
+T00098.013,T00098,vs_battle_warlockSpellIds_e,13,vs_battle_spell_avalanche,0,,,122,,Avalanche,WarlockSpell Avalanche,med,declaration-only;source:5BF94.h:20
+T00098.014,T00098,vs_battle_warlockSpellIds_e,14,vs_battle_spell_radialSurge,0,,,126,,RadialSurge,WarlockSpell RadialSurge,med,declaration-only;source:5BF94.h:21
+T00098.015,T00098,vs_battle_warlockSpellIds_e,15,vs_battle_spell_meteor,0,,,130,,Meteor,WarlockSpell Meteor,med,declaration-only;source:5BF94.h:22
+T00098.016,T00098,vs_battle_warlockSpellIds_e,16,vs_battle_spell_drainHeart,0,,,94,,DrainHeart,WarlockSpell DrainHeart,med,declaration-only;source:5BF94.h:23
+T00098.017,T00098,vs_battle_warlockSpellIds_e,17,vs_battle_spell_drainMind,0,,,95,,DrainMind,WarlockSpell DrainMind,med,declaration-only;source:5BF94.h:24
 T00099.000,T00099,vs_dithering,0,ditheringOff,0,,,0,,Off,Dithering Off,med,declaration-only;source:gpu.h:15
 T00099.001,T00099,vs_dithering,1,ditheringOn,0,,,1,,On,Dithering On,med,declaration-only;source:gpu.h:15
 T00100.000,T00100,vs_fileMenuUiIds_e,0,vs_uiids_colon,0,,,0,,,,,
@@ -592,15 +592,15 @@ T00100.006,T00100,vs_fileMenuUiIds_e,6,vs_uiids_percent,0,,,6,,,,,
 T00100.007,T00100,vs_fileMenuUiIds_e,7,vs_uiids_hp,0,,,7,,,,,
 T00100.008,T00100,vs_fileMenuUiIds_e,8,vs_uiids_mp,0,,,8,,,,,
 T00100.009,T00100,vs_fileMenuUiIds_e,9,vs_uiids_dot,0,,,9,,,,,
-T00101.000,T00101,vs_gemTargets,0,gemTargetShield,0,,,128,,,,,
-T00102.000,T00102,vs_itemCategories,0,itemCategoryWeapon,0,,,0,,,,,
-T00102.001,T00102,vs_itemCategories,1,itemCategoryBlade,0,,,1,,,,,
-T00102.002,T00102,vs_itemCategories,2,itemCategoryGrip,0,,,2,,,,,
-T00102.003,T00102,vs_itemCategories,3,itemCategoryShield,0,,,3,,,,,
-T00102.004,T00102,vs_itemCategories,4,itemCategoryArmor,0,,,4,,,,,
-T00102.005,T00102,vs_itemCategories,5,itemCategoryGem,0,,,5,,,,,
-T00102.006,T00102,vs_itemCategories,6,itemCategoryMisc,0,,,6,,,,,
-T00102.007,T00102,vs_itemCategories,7,itemCategoryManage,0,,,7,,,,,
+T00101.000,T00101,vs_gemTargets,0,gemTargetShield,0,,,128,,Shield,GemTarget Shield,med,declaration-only;source:func_8006B57C_t.h:166
+T00102.000,T00102,vs_itemCategories,0,itemCategoryWeapon,0,,,0,,Weapon,ItemCategory Weapon,med,declaration-only;source:func_8006B57C_t.h:156
+T00102.001,T00102,vs_itemCategories,1,itemCategoryBlade,0,,,1,,Blade,ItemCategory Blade,med,declaration-only;source:func_8006B57C_t.h:157
+T00102.002,T00102,vs_itemCategories,2,itemCategoryGrip,0,,,2,,Grip,ItemCategory Grip,med,declaration-only;source:func_8006B57C_t.h:158
+T00102.003,T00102,vs_itemCategories,3,itemCategoryShield,0,,,3,,Shield,ItemCategory Shield,med,declaration-only;source:func_8006B57C_t.h:159
+T00102.004,T00102,vs_itemCategories,4,itemCategoryArmor,0,,,4,,Armor,ItemCategory Armor,med,declaration-only;source:func_8006B57C_t.h:160
+T00102.005,T00102,vs_itemCategories,5,itemCategoryGem,0,,,5,,Gem,ItemCategory Gem,med,declaration-only;source:func_8006B57C_t.h:161
+T00102.006,T00102,vs_itemCategories,6,itemCategoryMisc,0,,,6,,Misc,ItemCategory Misc,med,declaration-only;source:func_8006B57C_t.h:162
+T00102.007,T00102,vs_itemCategories,7,itemCategoryManage,0,,,7,,Manage,ItemCategory Manage,med,declaration-only;source:func_8006B57C_t.h:163
 T00103.000,T00103,vs_mainMenu_actionsMenuActions,0,actionMenuDiscard,0,,,4,,,,,
 T00103.001,T00103,vs_mainMenu_actionsMenuActions,1,actionMenuSort,0,,,45,,,,,
 T00104.000,T00104,vs_mainMenu_buttonIDs,0,buttonIdTriangle,0,,,0,,,,,
@@ -2159,7 +2159,7 @@ T00273.007,T00273,D_800F5920_t,7,unkC,1,short,,,special-action cooldown,cooldown
 T00273.008,T00273,D_800F5920_t,8,unkE,1,short,,,special-action request,requested,Orbit requested,low,source:7EE98.c:782
 T00273.009,T00273,D_800F5920_t,9,unk10,1,short,,,,orbitAngle,Angle around the centre,med,source:upstream:6E644.c:3954
 T00273.010,T00273,D_800F5920_t,10,unk12,1,short,,,,savedHeight,Height saved when the orbit starts,low,source:7EE98.c:809
-T00273.011,T00273,D_800F5920_t,11,unk14,1,u_char,,,,reserved14,Not read,low,declaration-only;source:6F014.c:234
+T00273.011,T00273,D_800F5920_t,11,unk14,1,u_char,,,,healthPhase,"Advances when the boss's HP ratio falls below 3/4, then below 1/4; each advance requests an orbit",med,source:upstream:6E644.c:4112
 T00273.012,T00273,D_800F5920_t,12,unk15,1,char,,,layout:upstream,reserved15,Not read,low,declaration-only;source:upstream:6E644.c:339
 T00273.013,T00273,D_800F5920_t,13,unk16,1,u_char,,,,planSaved,The actor's plan count is saved,low,source:7EE98.c:786
 T00273.014,T00273,D_800F5920_t,14,unk17,1,u_char,,,,savedPlanCount,Plan count restored when the orbit ends,low,source:7EE98.c:783
@@ -5262,69 +5262,69 @@ T00585.000,T00585,primBuf_t,0,tag,0,u_long,,,,,,,
 T00585.001,T00585,primBuf_t,1,prim,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),,,,,,,
 T00586.000,T00586,primBuf_t,0,tag,0,u_long,,,,,,,
 T00586.001,T00586,primBuf_t,1,prim,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),,,,,,,
-T00587.000,T00587,radialMotion,0,facing,0,short,,,,,,,
-T00587.001,T00587,radialMotion,1,state,0,unsigned char,,,,,,,
-T00587.002,T00587,radialMotion,2,flag3,0,unsigned char,,,,,,,
-T00587.003,T00587,radialMotion,3,pad4,1,char[6],,,,,,,
-T00587.004,T00587,radialMotion,4,flagA,0,unsigned char,,,,,,,
-T00587.005,T00587,radialMotion,5,frame,0,unsigned char,,,,,,,
-T00587.006,T00587,radialMotion,6,padC,1,char[4],,,,,,,
-T00587.007,T00587,radialMotion,7,angle,0,short,,,,,,,
-T00587.008,T00587,radialMotion,8,pad12,1,char[6],,,,,,,
-T00587.009,T00587,radialMotion,9,x,0,short,,,,,,,
-T00587.010,T00587,radialMotion,10,z,0,short,,,,,,,
-T00588.000,T00588,radialMotionActor,0,pad,1,char[8],,,,,,,
-T00588.001,T00588,radialMotionActor,1,flags,0,unsigned int,,,,,,,
-T00589.000,T00589,radialMotionContext,0,pad,1,char[1456],,,,,,,
-T00589.001,T00589,radialMotionContext,1,a,0,unsigned int,4,,,,,,
-T00589.002,T00589,radialMotionContext,2,active,0,unsigned int,1,,,,,,
-T00589.003,T00589,radialMotionContext,3,b,0,unsigned int,27,,,,,,
-T00590.000,T00590,radialMotionState,0,pad,1,char[76],,,,,,,
-T00590.001,T00590,radialMotionState,1,x,0,short,,,,,,,
-T00590.002,T00590,radialMotionState,2,y,0,short,,,,,,,
-T00590.003,T00590,radialMotionState,3,z,0,short,,,,,,,
-T00590.004,T00590,radialMotionState,4,pad52,1,char[6],,,,,,,
-T00590.005,T00590,radialMotionState,5,context,0,radialMotionContext *,,,,,,,
-T00590.006,T00590,radialMotionState,6,pad5C,1,char[288],,,,,,,
-T00590.007,T00590,radialMotionState,7,targetX,0,int,,,,,,,
-T00590.008,T00590,radialMotionState,8,targetZ,0,int,,,,,,,
-T00590.009,T00590,radialMotionState,9,targetY,0,int,,,,,,,
-T00590.010,T00590,radialMotionState,10,pad188,1,char[744],,,,,,,
-T00590.011,T00590,radialMotionState,11,field470,1,int,,,,,,,
-T00591.000,T00591,routeEdgeActor,0,unk0,1,char[96],,,,,,,
-T00591.001,T00591,routeEdgeActor,1,position,0,short *,,,,,,,
-T00592.000,T00592,routeEdgeGlobals,0,unk0,1,char[14],,,,,,,
-T00592.001,T00592,routeEdgeGlobals,1,closedGates,0,u_char,,,,,,,
-T00593.000,T00593,routeEdgeState,0,unk0,1,char[5],,,,,,,
-T00593.001,T00593,routeEdgeState,1,unk5,1,u_char,,,,,,,
-T00593.002,T00593,routeEdgeState,2,unk6,1,char[46],,,,,,,
-T00593.003,T00593,routeEdgeState,3,tile,0,vs_battle_movementPosition,,,,,,,
-T00593.004,T00593,routeEdgeState,4,unk38,1,char[20],,,,,,,
-T00593.005,T00593,routeEdgeState,5,x,0,short,,,,,,,
-T00593.006,T00593,routeEdgeState,6,y,0,short,,,,,,,
-T00593.007,T00593,routeEdgeState,7,z,0,short,,,,,,,
-T00593.008,T00593,routeEdgeState,8,unk52,1,char[54],,,,,,,
-T00593.009,T00593,routeEdgeState,9,id,0,u_char,,,,,,,
-T00593.010,T00593,routeEdgeState,10,unk89,1,char[177],,,,,,,
-T00593.011,T00593,routeEdgeState,11,cooldown,0,u_short,,,,,,,
-T00593.012,T00593,routeEdgeState,12,period,0,u_short,,,,,,,
-T00593.013,T00593,routeEdgeState,13,unk13E,1,char[22],,,,,,,
-T00593.014,T00593,routeEdgeState,14,area,0,u_char,,,,,,,
-T00593.015,T00593,routeEdgeState,15,unk155,1,char[7],,,,,,,
-T00593.016,T00593,routeEdgeState,16,target,0,u_char,,,,,,,
-T00593.017,T00593,routeEdgeState,17,unk15D,1,char[11],,,,,,,
-T00593.018,T00593,routeEdgeState,18,destination,0,vs_battle_movementPosition,,,,,,,
-T00593.019,T00593,routeEdgeState,19,unk16C,1,char[4],,,,,,,
-T00593.020,T00593,routeEdgeState,20,next,0,vs_battle_movementPosition,,,,,,,
-T00593.021,T00593,routeEdgeState,21,unk174,1,char[8],,,,,,,
-T00593.022,T00593,routeEdgeState,22,moveX,0,int,,,,,,,
-T00593.023,T00593,routeEdgeState,23,moveZ,0,int,,,,,,,
-T00593.024,T00593,routeEdgeState,24,unk184,1,char[4],,,,,,,
-T00593.025,T00593,routeEdgeState,25,heading,0,short,,,,,,,
-T00593.026,T00593,routeEdgeState,26,angle,0,short,,,,,,,
-T00593.027,T00593,routeEdgeState,27,unk18C,1,char[15],,,,,,,
-T00593.028,T00593,routeEdgeState,28,gate,0,u_char,,,,,,,
-T00593.029,T00593,routeEdgeState,29,exit,0,func_800DFA54_t,,,,,,,
+T00587.000,T00587,radialMotion,0,facing,0,short,,,,heading,Heading toward the arena centre (same bits as T00273 unk0),low,source:7EE98.c:536
+T00587.001,T00587,radialMotion,1,state,0,unsigned char,,,,phase,Orbit phase (same bits as T00273 unk2),med,source:7EE98.c:514
+T00587.002,T00587,radialMotion,2,flag3,0,unsigned char,,,,distanceCached,Set once the distance is measured (same bits as T00273 unk3),low,source:7EE98.c:548
+T00587.003,T00587,radialMotion,3,pad4,1,char[6],,,,reserved4,Not read by decompiled code,low,declaration-only;source:7EE98.c:493
+T00587.004,T00587,radialMotion,4,flagA,0,unsigned char,,,,isOrbiting,Set while orbiting (same bits as T00273 unkA),low,source:7EE98.c:516
+T00587.005,T00587,radialMotion,5,frame,0,unsigned char,,,,pathStep,Step in the orbit path table (same bits as T00273 unkB),med,source:7EE98.c:512
+T00587.006,T00587,radialMotion,6,padC,1,char[4],,,,reservedC,Not read by decompiled code,low,declaration-only;source:7EE98.c:495
+T00587.007,T00587,radialMotion,7,angle,0,short,,,,orbitAngle,Angle around the centre (same bits as T00273 unk10),med,source:7EE98.c:520
+T00587.008,T00587,radialMotion,8,pad12,1,char[6],,,,reserved12,Not read by decompiled code,low,declaration-only;source:7EE98.c:497
+T00587.009,T00587,radialMotion,9,x,0,short,,,,startX,X where the orbit started (same bits as T00273 unk18),med,source:7EE98.c:523
+T00587.010,T00587,radialMotion,10,z,0,short,,,,startZ,Z where the orbit started (same bits as T00273 unk1A),med,source:7EE98.c:524
+T00588.000,T00588,radialMotionActor,0,pad,1,char[8],,,,reserved0,Not read by decompiled code,low,declaration-only;source:7EE98.c:501
+T00588.001,T00588,radialMotionActor,1,flags,0,unsigned int,,,,opaque8,"Used, but its meaning is not established",low,source:7EE98.c:528
+T00589.000,T00589,radialMotionContext,0,pad,1,char[1456],,,,reserved0,Not read by decompiled code,low,declaration-only;source:7EE98.c:477
+T00589.001,T00589,radialMotionContext,1,a,0,unsigned int,4,,,reserved5B0Bit0,Not read by decompiled code,low,declaration-only;source:7EE98.c:478
+T00589.002,T00589,radialMotionContext,2,active,0,unsigned int,1,,,active,Named in the fork; see cited use,med,source:7EE98.c:512
+T00589.003,T00589,radialMotionContext,3,b,0,unsigned int,27,,,reserved5B0Bit5,Not read by decompiled code,low,declaration-only;source:7EE98.c:478
+T00590.000,T00590,radialMotionState,0,pad,1,char[76],,,,reserved0,Not read through this view,low,declaration-only;source:7EE98.c:481
+T00590.001,T00590,radialMotionState,1,x,0,short,,,,x,Named in the fork view; see cited use,med,source:7EE98.c:513
+T00590.002,T00590,radialMotionState,2,y,0,short,,,,y,Named in the fork view; see cited use,med,source:7EE98.c:546
+T00590.003,T00590,radialMotionState,3,z,0,short,,,,z,Named in the fork view; see cited use,med,source:7EE98.c:513
+T00590.004,T00590,radialMotionState,4,pad52,1,char[6],,,,reserved52,Not read through this view,low,declaration-only;source:7EE98.c:483
+T00590.005,T00590,radialMotionState,5,context,0,radialMotionContext *,,,,model,Model record,med,source:7EE98.c:508
+T00590.006,T00590,radialMotionState,6,pad5C,1,char[288],,,,reserved5C,Not read through this view,low,declaration-only;source:7EE98.c:485
+T00590.007,T00590,radialMotionState,7,targetX,0,int,,,,moveX,Target X in 20.12 fixed point,med,source:7EE98.c:543
+T00590.008,T00590,radialMotionState,8,targetZ,0,int,,,,moveZ,Target Z in 20.12 fixed point,med,source:7EE98.c:545
+T00590.009,T00590,radialMotionState,9,targetY,0,int,,,,moveY,Target Y in 20.12 fixed point,med,source:7EE98.c:546
+T00590.010,T00590,radialMotionState,10,pad188,1,char[744],,,,reserved188,Not read through this view,low,declaration-only;source:7EE98.c:487
+T00590.011,T00590,radialMotionState,11,field470,1,int,,,,candidateCount,Number of candidates,high,source:7EE98.c:511
+T00591.000,T00591,routeEdgeActor,0,unk0,1,char[96],,,,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:557
+T00591.001,T00591,routeEdgeActor,1,position,0,short *,,,,position,Named in the fork; see cited use,med,source:771A8.c:661
+T00592.000,T00592,routeEdgeGlobals,0,unk0,1,char[14],,,,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:562
+T00592.001,T00592,routeEdgeGlobals,1,closedGates,0,u_char,,,,closedGates,Named in the fork; see cited use,med,source:771A8.c:632
+T00593.000,T00593,routeEdgeState,0,unk0,1,char[5],,,,reserved0,Not read through this view,low,declaration-only;source:771A8.c:524
+T00593.001,T00593,routeEdgeState,1,unk5,1,u_char,,,,opaque5,"Used, but its meaning is not established",low,source:771A8.c:650
+T00593.002,T00593,routeEdgeState,2,unk6,1,char[46],,,,reserved6,Not read through this view,low,declaration-only;source:771A8.c:526
+T00593.003,T00593,routeEdgeState,3,tile,0,vs_battle_movementPosition,,,,tile,Current tile word,high,source:771A8.c:604
+T00593.004,T00593,routeEdgeState,4,unk38,1,char[20],,,,reserved38,Not read through this view,low,declaration-only;source:771A8.c:528
+T00593.005,T00593,routeEdgeState,5,x,0,short,,,,x,Named in the fork view; see cited use,med,source:771A8.c:669
+T00593.006,T00593,routeEdgeState,6,y,0,short,,,,y,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:530
+T00593.007,T00593,routeEdgeState,7,z,0,short,,,,z,Named in the fork view; see cited use,med,source:771A8.c:669
+T00593.008,T00593,routeEdgeState,8,unk52,1,char[54],,,,reserved52,Not read through this view,low,declaration-only;source:771A8.c:532
+T00593.009,T00593,routeEdgeState,9,id,0,u_char,,,,actorId,Actor id,high,source:771A8.c:635
+T00593.010,T00593,routeEdgeState,10,unk89,1,char[177],,,,reserved89,Not read through this view,low,declaration-only;source:771A8.c:534
+T00593.011,T00593,routeEdgeState,11,cooldown,0,u_short,,,,cooldown,Named in the fork view; see cited use,med,source:771A8.c:670
+T00593.012,T00593,routeEdgeState,12,period,0,u_short,,,,period,Named in the fork view; see cited use,med,source:771A8.c:670
+T00593.013,T00593,routeEdgeState,13,unk13E,1,char[22],,,,reserved13E,Not read through this view,low,declaration-only;source:771A8.c:537
+T00593.014,T00593,routeEdgeState,14,area,0,u_char,,,,area,Named in the fork view; see cited use,med,source:771A8.c:583
+T00593.015,T00593,routeEdgeState,15,unk155,1,char[7],,,,reserved155,Not read through this view,low,declaration-only;source:771A8.c:539
+T00593.016,T00593,routeEdgeState,16,target,0,u_char,,,,movementTarget,Actor the movement heads for; 16 for none,med,source:771A8.c:658
+T00593.017,T00593,routeEdgeState,17,unk15D,1,char[11],,,,reserved15D,Not read through this view,low,declaration-only;source:771A8.c:541
+T00593.018,T00593,routeEdgeState,18,destination,0,vs_battle_movementPosition,,,,destination,Destination tile,high,source:771A8.c:734
+T00593.019,T00593,routeEdgeState,19,unk16C,1,char[4],,,,reserved16C,Not read through this view,low,declaration-only;source:771A8.c:543
+T00593.020,T00593,routeEdgeState,20,next,0,vs_battle_movementPosition,,,,nextTile,Next tile on the way,high,source:771A8.c:679
+T00593.021,T00593,routeEdgeState,21,unk174,1,char[8],,,,reserved174,Not read through this view,low,declaration-only;source:771A8.c:545
+T00593.022,T00593,routeEdgeState,22,moveX,0,int,,,,moveX,Target X in 20.12 fixed point,med,source:771A8.c:660
+T00593.023,T00593,routeEdgeState,23,moveZ,0,int,,,,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:662
+T00593.024,T00593,routeEdgeState,24,unk184,1,char[4],,,,reserved184,Not read through this view,low,declaration-only;source:771A8.c:548
+T00593.025,T00593,routeEdgeState,25,heading,0,short,,,,heading,Heading in eighth turns,med,source:771A8.c:697
+T00593.026,T00593,routeEdgeState,26,angle,0,short,,,,angle,Facing angle,med,source:771A8.c:668
+T00593.027,T00593,routeEdgeState,27,unk18C,1,char[15],,,,reserved18C,Not read through this view,low,declaration-only;source:771A8.c:551
+T00593.028,T00593,routeEdgeState,28,gate,0,u_char,,,,gate,Named in the fork view; see cited use,med,source:771A8.c:634
+T00593.029,T00593,routeEdgeState,29,exit,0,func_800DFA54_t,,,,exit,Named in the fork view; see cited use,med,source:771A8.c:638
 T00594.000,T00594,saveBase_t,0,slotState,0,enum slotState_e,,,saveIdentityWhenOccupied,,,,
 T00594.001,T00594,saveBase_t,1,generation,0,u_int,,,,,,,
 T00594.002,T00594,saveBase_t,2,unk8,1,int,,,formatSignature,,,,
@@ -5412,11 +5412,11 @@ T00603.013,T00603,soundData_t,13,unk70,1,int *[3],,,,reserved70,Cleared at bank 
 T00603.014,T00603,soundData_t,14,soundFileId,0,int,,,,waveBankId,Loaded WAVE bank,high,source:main.c:10390
 T00603.015,T00603,soundData_t,15,soundData,0,void *,,,,waveBankData,Loaded WAVE bank data,high,source:main.c:10385
 T00603.016,T00603,soundData_t,16,soundQueueSlot,0,vs_main_CdQueueSlot *,,,,waveBankRequest,Disc request of the WAVE bank,high,source:main.c:10379
-T00604.000,T00604,soundEventTargets,0,unk0,1,u_short,,,,,,,
-T00604.001,T00604,soundEventTargets,1,count,0,u_char,,,,,,,
-T00604.002,T00604,soundEventTargets,2,unk3,1,u_char,,,,,,,
-T00604.003,T00604,soundEventTargets,3,prefix,0,char[12],,,,,,,
-T00604.004,T00604,soundEventTargets,4,target,0,actionEffectTarget[0],,,,,,,
+T00604.000,T00604,soundEventTargets,0,unk0,1,u_short,,,,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.c:633
+T00604.001,T00604,soundEventTargets,1,count,0,u_char,,,,reserved2,Not read by decompiled code,low,declaration-only;source:5BF94.c:634
+T00604.002,T00604,soundEventTargets,2,unk3,1,u_char,,,,reserved3,Not read by decompiled code,low,declaration-only;source:5BF94.c:634
+T00604.003,T00604,soundEventTargets,3,prefix,0,char[12],,,,reserved4,Not read by decompiled code,low,declaration-only;source:5BF94.c:635
+T00604.004,T00604,soundEventTargets,4,target,0,actionEffectTarget[0],,,,reserved10,Not read by decompiled code,low,declaration-only;source:5BF94.c:636
 T00605.000,T00605,stats_t,0,gameTime,0,vs_Gametime_t,,,,,,,
 T00605.001,T00605,stats_t,1,cumulativeSaveCount,0,u_short,,,,,,,
 T00605.002,T00605,stats_t,2,currentGameSaveCount,0,u_short,,,,,,,
@@ -5428,131 +5428,131 @@ T00605.007,T00605,stats_t,7,mapCompletion,0,char,,,,,,,
 T00605.008,T00605,stats_t,8,unk1B,1,char,,,,,,,
 T00605.009,T00605,stats_t,9,currentMP,0,u_short,,,,,,,
 T00605.010,T00605,stats_t,10,maxMP,0,u_short,,,,,,,
-T00606.000,T00606,statusEffectTable,0,entries,0,statusEffectTick[1],,,,,,,
-T00607.000,T00607,statusEffectTick,0,mask,0,int,,,,,,,
-T00607.001,T00607,statusEffectTick,1,unk4,1,u_short,,,,,,,
-T00607.002,T00607,statusEffectTick,2,interval,0,u_short,,,,,,,
-T00607.003,T00607,statusEffectTick,3,unk8,1,int,,,,,,,
-T00607.004,T00607,statusEffectTick,4,unkC,1,int,,,,,,,
-T00608.000,T00608,stuckMovementState,0,unk0,1,char[2],,,,,,,
-T00608.001,T00608,stuckMovementState,1,stuck,0,u_char,,,,,,,
-T00608.002,T00608,stuckMovementState,2,unk3,1,char[25],,,,,,,
-T00608.003,T00608,stuckMovementState,3,unk1C,1,u_char,,,,,,,
-T00608.004,T00608,stuckMovementState,4,unk1D,1,char[23],,,,,,,
-T00608.005,T00608,stuckMovementState,5,position,0,stuckMovementPosition,,,,,,,
-T00608.006,T00608,stuckMovementState,6,previous,0,stuckMovementPosition,,,,,,,
-T00608.007,T00608,stuckMovementState,7,unk3C,1,char[16],,,,,,,
-T00608.008,T00608,stuckMovementState,8,x,0,short,,,,,,,
-T00608.009,T00608,stuckMovementState,9,unk4E,1,char[2],,,,,,,
-T00608.010,T00608,stuckMovementState,10,z,0,short,,,,,,,
-T00608.011,T00608,stuckMovementState,11,unk52,1,char[168],,,,,,,
-T00608.012,T00608,stuckMovementState,12,detourStep,0,u_char,,,,,,,
-T00608.013,T00608,stuckMovementState,13,unkFB,1,u_char,,,,,,,
-T00608.014,T00608,stuckMovementState,14,unkFC,1,char[28],,,,,,,
-T00608.015,T00608,stuckMovementState,15,detourDirections,0,u_char[4],,,,,,,
-T00608.016,T00608,stuckMovementState,16,unk11C,1,char[64],,,,,,,
-T00608.017,T00608,stuckMovementState,17,unk15C,1,u_char,,,,,,,
-T00608.018,T00608,stuckMovementState,18,unk15D,1,char[11],,,,,,,
-T00608.019,T00608,stuckMovementState,19,destination,0,stuckMovementPosition,,,,,,,
+T00606.000,T00606,statusEffectTable,0,entries,0,statusEffectTick[1],,,,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:1164
+T00607.000,T00607,statusEffectTick,0,mask,0,int,,,,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:1157
+T00607.001,T00607,statusEffectTick,1,unk4,1,u_short,,,,reserved4,Not read by decompiled code,low,declaration-only;source:74088.c:1158
+T00607.002,T00607,statusEffectTick,2,interval,0,u_short,,,,reserved6,Not read by decompiled code,low,declaration-only;source:74088.c:1159
+T00607.003,T00607,statusEffectTick,3,unk8,1,int,,,,reserved8,Not read by decompiled code,low,declaration-only;source:74088.c:1160
+T00607.004,T00607,statusEffectTick,4,unkC,1,int,,,,reservedC,Not read by decompiled code,low,declaration-only;source:74088.c:1161
+T00608.000,T00608,stuckMovementState,0,unk0,1,char[2],,,,reserved0,Not read through this view,low,declaration-only;source:71618.c:1190
+T00608.001,T00608,stuckMovementState,1,stuck,0,u_char,,,,isStuck,Set when the actor has not left its tile,med,source:71618.c:1224
+T00608.002,T00608,stuckMovementState,2,unk3,1,char[25],,,,reserved3,Not read through this view,low,declaration-only;source:71618.c:1192
+T00608.003,T00608,stuckMovementState,3,unk1C,1,u_char,,,,opaque1C,"Used, but its meaning is not established",low,source:71618.c:1263
+T00608.004,T00608,stuckMovementState,4,unk1D,1,char[23],,,,reserved1D,Not read through this view,low,declaration-only;source:71618.c:1194
+T00608.005,T00608,stuckMovementState,5,position,0,stuckMovementPosition,,,,tile,Current tile word,high,source:71618.c:1223
+T00608.006,T00608,stuckMovementState,6,previous,0,stuckMovementPosition,,,,previousTile,Previous tile word; -1 to forget,high,source:71618.c:1223
+T00608.007,T00608,stuckMovementState,7,unk3C,1,char[16],,,,reserved3C,Not read through this view,low,declaration-only;source:71618.c:1197
+T00608.008,T00608,stuckMovementState,8,x,0,short,,,,x,Named in the fork view; see cited use,med,source:71618.c:1226
+T00608.009,T00608,stuckMovementState,9,unk4E,1,char[2],,,,reserved4E,Not read through this view,low,declaration-only;source:71618.c:1199
+T00608.010,T00608,stuckMovementState,10,z,0,short,,,,z,Named in the fork view; see cited use,med,source:71618.c:1227
+T00608.011,T00608,stuckMovementState,11,unk52,1,char[168],,,,reserved52,Not read through this view,low,declaration-only;source:71618.c:1201
+T00608.012,T00608,stuckMovementState,12,detourStep,0,u_char,,,,detourStep,Detour attempts at the current tile,med,source:71618.c:1225
+T00608.013,T00608,stuckMovementState,13,unkFB,1,u_char,,,,opaqueFB,"Used, but its meaning is not established",low,source:71618.c:1277
+T00608.014,T00608,stuckMovementState,14,unkFC,1,char[28],,,,reservedFC,Not read through this view,low,declaration-only;source:71618.c:1204
+T00608.015,T00608,stuckMovementState,15,detourDirections,0,u_char[4],,,,detourDirections,Directions tried by the detour,high,source:71618.c:1247
+T00608.016,T00608,stuckMovementState,16,unk11C,1,char[64],,,,reserved11C,Not read through this view,low,declaration-only;source:71618.c:1206
+T00608.017,T00608,stuckMovementState,17,unk15C,1,u_char,,,,movementTarget,Actor the movement heads for; 16 for none,med,source:71618.c:1277
+T00608.018,T00608,stuckMovementState,18,unk15D,1,char[11],,,,reserved15D,Not read through this view,low,declaration-only;source:71618.c:1208
+T00608.019,T00608,stuckMovementState,19,destination,0,stuckMovementPosition,,,,destination,Destination tile,high,source:71618.c:1226
 T00609.000,T00609,tagsprt_t,0,tag,0,u_long,,,,dmaTag,PS1 DMA packet tag,med,replaced-by:Render sprite commands;declaration-only;source:22C.c:4186
 T00609.001,T00609,tagsprt_t,1,sprt,0,VS_SPRT,,,,sprite,Sprite and texture-page packet,med,replaced-by:Render sprite commands;declaration-only;source:22C.c:4187
-T00610.000,T00610,targetMovementActor,0,pad,1,char[9],,,,,,,
-T00610.001,T00610,targetMovementActor,1,id,0,unsigned char,,,,,,,
-T00611.000,T00611,targetMovementFlags,0,f0,0,unsigned int,1,,,,,,
-T00611.001,T00611,targetMovementFlags,1,f1,0,unsigned int,1,,,,,,
-T00611.002,T00611,targetMovementFlags,2,f2,0,unsigned int,1,,,,,,
-T00611.003,T00611,targetMovementFlags,3,pad3,1,unsigned int,2,,,,,,
-T00611.004,T00611,targetMovementFlags,4,f5,0,unsigned int,1,,,,,,
-T00611.005,T00611,targetMovementFlags,5,pad6,1,unsigned int,26,,,,,,
-T00612.000,T00612,targetMovementModel,0,pad0,1,char[8],,,,,,,
-T00612.001,T00612,targetMovementModel,1,flags,0,unsigned int,,,,,,,
-T00612.002,T00612,targetMovementModel,2,padC,1,char[16],,,,,,,
-T00612.003,T00612,targetMovementModel,3,x,0,short,,,,,,,
-T00612.004,T00612,targetMovementModel,4,pad1E,1,char[2],,,,,,,
-T00612.005,T00612,targetMovementModel,5,z,0,short,,,,,,,
-T00613.000,T00613,targetMovementState,0,b0,0,unsigned char,,,,,,,
-T00613.001,T00613,targetMovementState,1,b1,0,unsigned char,,,,,,,
-T00613.002,T00613,targetMovementState,2,pad2,1,char[1],,,,,,,
-T00613.003,T00613,targetMovementState,3,b3,0,unsigned char,,,,,,,
-T00613.004,T00613,targetMovementState,4,b4,0,unsigned char,,,,,,,
-T00613.005,T00613,targetMovementState,5,pad5,1,char[4],,,,,,,
-T00613.006,T00613,targetMovementState,6,b9,0,unsigned char,,,,,,,
-T00613.007,T00613,targetMovementState,7,padA,1,char[2],,,,,,,
-T00613.008,T00613,targetMovementState,8,bC,0,unsigned char,,,,,,,
-T00613.009,T00613,targetMovementState,9,bD,0,unsigned char,,,,,,,
-T00613.010,T00613,targetMovementState,10,padE,1,char[22],,,,,,,
-T00613.011,T00613,targetMovementState,11,b24,0,unsigned char,,,,,,,
-T00613.012,T00613,targetMovementState,12,pad25,1,char[14],,,,,,,
-T00613.013,T00613,targetMovementState,13,b33,0,unsigned char,,,,,,,
-T00613.014,T00613,targetMovementState,14,tile,0,vs_battle_movementPosition,,,,,,,
-T00613.015,T00613,targetMovementState,15,pad38,1,char[16],,,,,,,
-T00613.016,T00613,targetMovementState,16,previousDestination,0,targetMovementPoint,,,,,,,
-T00613.017,T00613,targetMovementState,17,x,0,short,,,,,,,
-T00613.018,T00613,targetMovementState,18,pad4E,1,char[2],,,,,,,
-T00613.019,T00613,targetMovementState,19,z,0,short,,,,,,,
-T00613.020,T00613,targetMovementState,20,pad52,1,char[2],,,,,,,
-T00613.021,T00613,targetMovementState,21,actor,0,targetMovementActor *,,,,,,,
-T00613.022,T00613,targetMovementState,22,model,0,targetMovementModel *,,,,,,,
-T00613.023,T00613,targetMovementState,23,pad5C,1,char[44],,,,,,,
-T00613.024,T00613,targetMovementState,24,id,0,unsigned char,,,,,,,
-T00613.025,T00613,targetMovementState,25,pad89,1,char[83],,,,,,,
-T00613.026,T00613,targetMovementState,26,range,0,int,,,,,,,
-T00613.027,T00613,targetMovementState,27,previousRange,0,int,,,,,,,
-T00613.028,T00613,targetMovementState,28,bE4,0,unsigned char,,,,,,,
-T00613.029,T00613,targetMovementState,29,targetId,0,unsigned char,,,,,,,
-T00613.030,T00613,targetMovementState,30,timeout,0,unsigned char,,,,,,,
-T00613.031,T00613,targetMovementState,31,bE7,0,unsigned char,,,,,,,
-T00613.032,T00613,targetMovementState,32,bE8,0,unsigned char,,,,,,,
-T00613.033,T00613,targetMovementState,33,rangeMode,0,unsigned char,,,,,,,
-T00613.034,T00613,targetMovementState,34,previousOption,0,unsigned char,,,,,,,
-T00613.035,T00613,targetMovementState,35,previousTargetId,0,unsigned char,,,,,,,
-T00613.036,T00613,targetMovementState,36,cachedDestination,0,targetMovementPoint,,,,,,,
-T00613.037,T00613,targetMovementState,37,padF0,1,char[4],,,,,,,
-T00613.038,T00613,targetMovementState,38,targetTileX,0,unsigned char,,,,,,,
-T00613.039,T00613,targetMovementState,39,padF5,1,char[1],,,,,,,
-T00613.040,T00613,targetMovementState,40,targetTileZ,0,unsigned char,,,,,,,
-T00613.041,T00613,targetMovementState,41,padF7,1,char[1],,,,,,,
-T00613.042,T00613,targetMovementState,42,timer,0,unsigned short,,,,,,,
-T00613.043,T00613,targetMovementState,43,padFA,1,char[94],,,,,,,
-T00613.044,T00613,targetMovementState,44,destinationX,0,short,,,,,,,
-T00613.045,T00613,targetMovementState,45,destinationZ,0,short,,,,,,,
-T00613.046,T00613,targetMovementState,46,movementTargetId,0,unsigned char,,,,,,,
-T00613.047,T00613,targetMovementState,47,pad15D,1,char[1],,,,,,,
-T00613.048,T00613,targetMovementState,48,flags15E,0,unsigned short,,,,,,,
-T00613.049,T00613,targetMovementState,49,pad160,1,char[8],,,,,,,
-T00613.050,T00613,targetMovementState,50,destination,0,targetMovementPoint,,,,,,,
-T00613.051,T00613,targetMovementState,51,pad16C,1,char[16],,,,,,,
-T00613.052,T00613,targetMovementState,52,targetX,0,int,,,,,,,
-T00613.053,T00613,targetMovementState,53,targetZ,0,int,,,,,,,
-T00613.054,T00613,targetMovementState,54,pad184,1,char[32],,,,,,,
-T00613.055,T00613,targetMovementState,55,targets,0,targetMovementFlags[16],,,,,,,
-T00613.056,T00613,targetMovementState,56,distances,0,unsigned int[16],,,,,,,
-T00614.000,T00614,terrainMovementActor,0,pad0,1,char[9],,,,,,,
-T00614.001,T00614,terrainMovementActor,1,mode,0,unsigned char,,,,,,,
-T00614.002,T00614,terrainMovementActor,2,padA,1,char[2],,,,,,,
-T00614.003,T00614,terrainMovementActor,3,angle,0,unsigned short,,,,,,,
-T00615.000,T00615,terrainMovementState,0,pad0,1,char[2],,,,,,,
-T00615.001,T00615,terrainMovementState,1,f2,0,unsigned char,,,,,,,
-T00615.002,T00615,terrainMovementState,2,pad3,1,char[1],,,,,,,
-T00615.003,T00615,terrainMovementState,3,f4,0,unsigned char,,,,,,,
-T00615.004,T00615,terrainMovementState,4,f5,0,unsigned char,,,,,,,
-T00615.005,T00615,terrainMovementState,5,pad6,1,char[20],,,,,,,
-T00615.006,T00615,terrainMovementState,6,f1A,0,unsigned char,,,,,,,
-T00615.007,T00615,terrainMovementState,7,pad1B,1,char[14],,,,,,,
-T00615.008,T00615,terrainMovementState,8,f29,0,unsigned char,,,,,,,
-T00615.009,T00615,terrainMovementState,9,pad2A,1,char[10],,,,,,,
-T00615.010,T00615,terrainMovementState,10,tile,0,terrainMovementPoint,,,,,,,
-T00615.011,T00615,terrainMovementState,11,pad38,1,char[20],,,,,,,
-T00615.012,T00615,terrainMovementState,12,position,0,short[3],,,,,,,
-T00615.013,T00615,terrainMovementState,13,pad52,1,char[2],,,,,,,
-T00615.014,T00615,terrainMovementState,14,actor,0,terrainMovementActor *,,,,,,,
-T00615.015,T00615,terrainMovementState,15,pad58,1,char[272],,,,,,,
-T00615.016,T00615,terrainMovementState,16,destination,0,terrainMovementPoint,,,,,,,
-T00615.017,T00615,terrainMovementState,17,pad16C,1,char[16],,,,,,,
-T00615.018,T00615,terrainMovementState,18,targetX,0,int,,,,,,,
-T00615.019,T00615,terrainMovementState,19,targetZ,0,int,,,,,,,
-T00615.020,T00615,terrainMovementState,20,pad184,1,char[4],,,,,,,
-T00615.021,T00615,terrainMovementState,21,angle,0,short,,,,,,,
+T00610.000,T00610,targetMovementActor,0,pad,1,char[9],,,,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:1898
+T00610.001,T00610,targetMovementActor,1,id,0,unsigned char,,,,id,Named in the fork; see cited use,med,source:771A8.c:2093
+T00611.000,T00611,targetMovementFlags,0,f0,0,unsigned int,1,,,active,Relation is live this frame (same bits as T00136 active) (same bits as T00515 unk0_0),med,source:771A8.c:1999
+T00611.001,T00611,targetMovementFlags,1,f1,0,unsigned int,1,,,opaque0Bit1,"Used, but its meaning is not established",low,source:771A8.c:2099
+T00611.002,T00611,targetMovementFlags,2,f2,0,unsigned int,1,,,opaque0Bit2,"Used, but its meaning is not established",low,source:771A8.c:2001
+T00611.003,T00611,targetMovementFlags,3,pad3,1,unsigned int,2,,,reserved0Bit3,Not read by decompiled code,low,declaration-only;source:771A8.c:1895
+T00611.004,T00611,targetMovementFlags,4,f5,0,unsigned int,1,,,visible,Target is visible (same bits as T00136 visible) (same bits as T00515 unk0_5),med,source:771A8.c:2106
+T00611.005,T00611,targetMovementFlags,5,pad6,1,unsigned int,26,,,reserved0Bit6,Not read by decompiled code,low,declaration-only;source:771A8.c:1895
+T00612.000,T00612,targetMovementModel,0,pad0,1,char[8],,,,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:1902
+T00612.001,T00612,targetMovementModel,1,flags,0,unsigned int,,,,opaque8,"Used, but its meaning is not established",low,source:771A8.c:1983
+T00612.002,T00612,targetMovementModel,2,padC,1,char[16],,,,reservedC,Not read by decompiled code,low,declaration-only;source:771A8.c:1904
+T00612.003,T00612,targetMovementModel,3,x,0,short,,,,x,Named in the fork; see cited use,med,source:771A8.c:1987
+T00612.004,T00612,targetMovementModel,4,pad1E,1,char[2],,,,reserved1E,Not read by decompiled code,low,declaration-only;source:771A8.c:1906
+T00612.005,T00612,targetMovementModel,5,z,0,short,,,,z,Named in the fork; see cited use,med,source:771A8.c:1987
+T00613.000,T00613,targetMovementState,0,b0,0,unsigned char,,,,opaque0,"Used, but its meaning is not established",low,source:771A8.c:2048
+T00613.001,T00613,targetMovementState,1,b1,0,unsigned char,,,,opaque1,"Used, but its meaning is not established",low,source:771A8.c:2051
+T00613.002,T00613,targetMovementState,2,pad2,1,char[1],,,,reserved2,Not read through this view,low,declaration-only;source:771A8.c:1912
+T00613.003,T00613,targetMovementState,3,b3,0,unsigned char,,,,opaque3,"Used, but its meaning is not established",low,source:771A8.c:2078
+T00613.004,T00613,targetMovementState,4,b4,0,unsigned char,,,,opaque4,"Used, but its meaning is not established",low,source:771A8.c:2080
+T00613.005,T00613,targetMovementState,5,pad5,1,char[4],,,,reserved5,Not read through this view,low,declaration-only;source:771A8.c:1915
+T00613.006,T00613,targetMovementState,6,b9,0,unsigned char,,,,opaque9,"Used, but its meaning is not established",low,source:771A8.c:2085
+T00613.007,T00613,targetMovementState,7,padA,1,char[2],,,,reservedA,Not read through this view,low,declaration-only;source:771A8.c:1917
+T00613.008,T00613,targetMovementState,8,bC,0,unsigned char,,,,opaqueC,"Used, but its meaning is not established",low,source:771A8.c:2050
+T00613.009,T00613,targetMovementState,9,bD,0,unsigned char,,,,opaqueD,"Used, but its meaning is not established",low,source:771A8.c:2065
+T00613.010,T00613,targetMovementState,10,padE,1,char[22],,,,reservedE,Not read through this view,low,declaration-only;source:771A8.c:1920
+T00613.011,T00613,targetMovementState,11,b24,0,unsigned char,,,,settingsBit13,Bit 13 of the AI settings word,low,source:771A8.c:2100
+T00613.012,T00613,targetMovementState,12,pad25,1,char[14],,,,reserved25,Not read through this view,low,declaration-only;source:771A8.c:1922
+T00613.013,T00613,targetMovementState,13,b33,0,unsigned char,,,,settingsByte0Bit7,Bit 7 of settings byte 0,low,source:771A8.c:2083
+T00613.014,T00613,targetMovementState,14,tile,0,vs_battle_movementPosition,,,,tile,Current tile word,high,source:771A8.c:2062
+T00613.015,T00613,targetMovementState,15,pad38,1,char[16],,,,reserved38,Not read through this view,low,declaration-only;source:771A8.c:1925
+T00613.016,T00613,targetMovementState,16,previousDestination,0,targetMovementPoint,,,,savedDestination,Saved destination tile,med,source:771A8.c:2059
+T00613.017,T00613,targetMovementState,17,x,0,short,,,,x,Named in the fork view; see cited use,med,source:771A8.c:2054
+T00613.018,T00613,targetMovementState,18,pad4E,1,char[2],,,,reserved4E,Not read through this view,low,declaration-only;source:771A8.c:1928
+T00613.019,T00613,targetMovementState,19,z,0,short,,,,z,Named in the fork view; see cited use,med,source:771A8.c:2055
+T00613.020,T00613,targetMovementState,20,pad52,1,char[2],,,,reserved52,Not read through this view,low,declaration-only;source:771A8.c:1930
+T00613.021,T00613,targetMovementState,21,actor,0,targetMovementActor *,,,,actor,Battle actor,med,source:771A8.c:2093
+T00613.022,T00613,targetMovementState,22,model,0,targetMovementModel *,,,,model,Model record,med,source:771A8.c:1983
+T00613.023,T00613,targetMovementState,23,pad5C,1,char[44],,,,reserved5C,Not read through this view,low,declaration-only;source:771A8.c:1933
+T00613.024,T00613,targetMovementState,24,id,0,unsigned char,,,,actorId,Actor id,high,source:771A8.c:1978
+T00613.025,T00613,targetMovementState,25,pad89,1,char[83],,,,reserved89,Not read through this view,low,declaration-only;source:771A8.c:1935
+T00613.026,T00613,targetMovementState,26,range,0,int,,,,range,Named in the fork view; see cited use,med,source:771A8.c:1990
+T00613.027,T00613,targetMovementState,27,previousRange,0,int,,,,previousRange,Named in the fork view; see cited use,med,source:771A8.c:1990
+T00613.028,T00613,targetMovementState,28,bE4,0,unsigned char,,,,opaqueE4,"Used, but its meaning is not established",low,source:771A8.c:2000
+T00613.029,T00613,targetMovementState,29,targetId,0,unsigned char,,,,targetId,Named in the fork view; see cited use,med,source:771A8.c:1975
+T00613.030,T00613,targetMovementState,30,timeout,0,unsigned char,,,,timeout,Named in the fork view; see cited use,med,source:771A8.c:2102
+T00613.031,T00613,targetMovementState,31,bE7,0,unsigned char,,,,opaqueE7,"Used, but its meaning is not established",low,source:771A8.c:1994
+T00613.032,T00613,targetMovementState,32,bE8,0,unsigned char,,,,opaqueE8,"Used, but its meaning is not established",low,source:771A8.c:1993
+T00613.033,T00613,targetMovementState,33,rangeMode,0,unsigned char,,,,rangeMode,Named in the fork view; see cited use,med,source:771A8.c:2002
+T00613.034,T00613,targetMovementState,34,previousOption,0,unsigned char,,,,previousOption,Named in the fork view; see cited use,med,source:771A8.c:1991
+T00613.035,T00613,targetMovementState,35,previousTargetId,0,unsigned char,,,,previousTargetId,Named in the fork view; see cited use,med,source:771A8.c:1990
+T00613.036,T00613,targetMovementState,36,cachedDestination,0,targetMovementPoint,,,,cachedDestination,Named in the fork view; see cited use,med,source:771A8.c:2103
+T00613.037,T00613,targetMovementState,37,padF0,1,char[4],,,,reservedF0,Not read through this view,low,declaration-only;source:771A8.c:1947
+T00613.038,T00613,targetMovementState,38,targetTileX,0,unsigned char,,,,targetTileX,Named in the fork view; see cited use,med,source:771A8.c:1987
+T00613.039,T00613,targetMovementState,39,padF5,1,char[1],,,,reservedF5,Not read through this view,low,declaration-only;source:771A8.c:1949
+T00613.040,T00613,targetMovementState,40,targetTileZ,0,unsigned char,,,,targetTileZ,Named in the fork view; see cited use,med,source:771A8.c:1987
+T00613.041,T00613,targetMovementState,41,padF7,1,char[1],,,,reservedF7,Not read through this view,low,declaration-only;source:771A8.c:1951
+T00613.042,T00613,targetMovementState,42,timer,0,unsigned short,,,,opaqueF8,"Used, but its meaning is not established",low,source:771A8.c:1991
+T00613.043,T00613,targetMovementState,43,padFA,1,char[94],,,,reservedFA,Not read through this view,low,declaration-only;source:771A8.c:1953
+T00613.044,T00613,targetMovementState,44,destinationX,0,short,,,,targetX,Target X,med,source:771A8.c:2086
+T00613.045,T00613,targetMovementState,45,destinationZ,0,short,,,,targetZ,Target Z,med,source:771A8.c:2087
+T00613.046,T00613,targetMovementState,46,movementTargetId,0,unsigned char,,,,movementTarget,Actor the movement heads for; 16 for none,med,source:771A8.c:2069
+T00613.047,T00613,targetMovementState,47,pad15D,1,char[1],,,,reserved15D,Not read through this view,low,declaration-only;source:771A8.c:1957
+T00613.048,T00613,targetMovementState,48,flags15E,0,unsigned short,,,,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:771A8.c:2052
+T00613.049,T00613,targetMovementState,49,pad160,1,char[8],,,,reserved160,Not read through this view,low,declaration-only;source:771A8.c:1959
+T00613.050,T00613,targetMovementState,50,destination,0,targetMovementPoint,,,,destination,Destination tile,high,source:771A8.c:1988
+T00613.051,T00613,targetMovementState,51,pad16C,1,char[16],,,,reserved16C,Not read through this view,low,declaration-only;source:771A8.c:1961
+T00613.052,T00613,targetMovementState,52,targetX,0,int,,,,moveX,Target X in 20.12 fixed point,med,source:771A8.c:2081
+T00613.053,T00613,targetMovementState,53,targetZ,0,int,,,,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:2082
+T00613.054,T00613,targetMovementState,54,pad184,1,char[32],,,,reserved184,Not read through this view,low,declaration-only;source:771A8.c:1964
+T00613.055,T00613,targetMovementState,55,targets,0,targetMovementFlags[16],,,,relations,Relation word for each actor,high,source:771A8.c:1999
+T00613.056,T00613,targetMovementState,56,distances,0,unsigned int[16],,,,distancesSquared,Squared distance to each actor,high,source:771A8.c:2006
+T00614.000,T00614,terrainMovementActor,0,pad0,1,char[9],,,,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:1480
+T00614.001,T00614,terrainMovementActor,1,mode,0,unsigned char,,,,commandOpcode,Queued command opcode; 9 walks (same offset as Battle::Actor.commandOpcode),med,source:771A8.c:1532
+T00614.002,T00614,terrainMovementActor,2,padA,1,char[2],,,,reservedA,Not read by decompiled code,low,declaration-only;source:771A8.c:1482
+T00614.003,T00614,terrainMovementActor,3,angle,0,unsigned short,,,,commandHeading,Low half of the first command argument: the walk heading,low,source:771A8.c:1534
+T00615.000,T00615,terrainMovementState,0,pad0,1,char[2],,,,reserved0,Not read through this view,low,declaration-only;source:771A8.c:1486
+T00615.001,T00615,terrainMovementState,1,f2,0,unsigned char,,,,isStuck,Set when the actor has not left its tile,med,source:771A8.c:1572
+T00615.002,T00615,terrainMovementState,2,pad3,1,char[1],,,,reserved3,Not read through this view,low,declaration-only;source:771A8.c:1488
+T00615.003,T00615,terrainMovementState,3,f4,0,unsigned char,,,,opaque4,"Used, but its meaning is not established",low,source:771A8.c:1544
+T00615.004,T00615,terrainMovementState,4,f5,0,unsigned char,,,,opaque5,"Used, but its meaning is not established",low,source:771A8.c:1545
+T00615.005,T00615,terrainMovementState,5,pad6,1,char[20],,,,reserved6,Not read through this view,low,declaration-only;source:771A8.c:1491
+T00615.006,T00615,terrainMovementState,6,f1A,0,unsigned char,,,,opaque1A,"Used, but its meaning is not established",low,source:771A8.c:1546
+T00615.007,T00615,terrainMovementState,7,pad1B,1,char[14],,,,reserved1B,Not read through this view,low,declaration-only;source:771A8.c:1493
+T00615.008,T00615,terrainMovementState,8,f29,0,unsigned char,,,,settingsBit14,Bit 14 of the AI settings word,low,source:771A8.c:1553
+T00615.009,T00615,terrainMovementState,9,pad2A,1,char[10],,,,reserved2A,Not read through this view,low,declaration-only;source:771A8.c:1495
+T00615.010,T00615,terrainMovementState,10,tile,0,terrainMovementPoint,,,,tile,Current tile word,high,source:771A8.c:1520
+T00615.011,T00615,terrainMovementState,11,pad38,1,char[20],,,,reserved38,Not read through this view,low,declaration-only;source:771A8.c:1497
+T00615.012,T00615,terrainMovementState,12,position,0,short[3],,,,position,Named in the fork view; see cited use,med,source:771A8.c:1524
+T00615.013,T00615,terrainMovementState,13,pad52,1,char[2],,,,reserved52,Not read through this view,low,declaration-only;source:771A8.c:1499
+T00615.014,T00615,terrainMovementState,14,actor,0,terrainMovementActor *,,,,actor,Battle actor,med,source:771A8.c:1522
+T00615.015,T00615,terrainMovementState,15,pad58,1,char[272],,,,reserved58,Not read through this view,low,declaration-only;source:771A8.c:1501
+T00615.016,T00615,terrainMovementState,16,destination,0,terrainMovementPoint,,,,destination,Destination tile,high,source:771A8.c:1551
+T00615.017,T00615,terrainMovementState,17,pad16C,1,char[16],,,,reserved16C,Not read through this view,low,declaration-only;source:771A8.c:1503
+T00615.018,T00615,terrainMovementState,18,targetX,0,int,,,,moveX,Target X in 20.12 fixed point,med,source:771A8.c:1526
+T00615.019,T00615,terrainMovementState,19,targetZ,0,int,,,,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:1526
+T00615.020,T00615,terrainMovementState,20,pad184,1,char[4],,,,reserved184,Not read through this view,low,declaration-only;source:771A8.c:1506
+T00615.021,T00615,terrainMovementState,21,angle,0,short,,,,angle,Named in the fork view; see cited use,med,source:771A8.c:1534
 T00616.000,T00616,texMapAnimation_t,0,overlay,0,u_char,,,,overlayIndex,Texture overlay that receives the cell,high,source:40564.c:1441
 T00616.001,T00616,texMapAnimation_t,1,x,0,u_char,,,,sourceX,Source X of the cell,high,source:40564.c:1453
 T00616.002,T00616,texMapAnimation_t,2,y,0,u_char,,,,sourceY,Source Y of the cell,high,source:40564.c:1454
@@ -5564,46 +5564,46 @@ T00617.003,T00617,texMapOverlay_t,3,h,0,u_char,,,,height,Overlay height,high,sou
 T00618.000,T00618,textHeader_t,0,text,0,char[14],,,,,,,
 T00618.001,T00618,textHeader_t,1,disabled,0,char,,,,,,,
 T00618.002,T00618,textHeader_t,2,x,0,char,,,,,,,
-T00619.000,T00619,textOffset,0,x,0,int,12,,,,,,
-T00619.001,T00619,textOffset,1,y,0,int,12,,,,,,
-T00619.002,T00619,textOffset,2,alignment,0,u_int,2,,,,,,
-T00619.003,T00619,textOffset,3,flags,0,u_int,4,,,,,,
+T00619.000,T00619,textOffset,0,x,0,int,12,,,x,Named in the fork; see cited use,med,source:4A0A8.c:756
+T00619.001,T00619,textOffset,1,y,0,int,12,,,y,Named in the fork; see cited use,med,source:4A0A8.c:757
+T00619.002,T00619,textOffset,2,alignment,0,u_int,2,,,alignment,Named in the fork; see cited use,med,source:4A0A8.c:832
+T00619.003,T00619,textOffset,3,flags,0,u_int,4,,,opaque3Bit2,"Used, but its meaning is not established",low,source:4A0A8.c:833
 T00620.000,T00620,textPlacement,0,offset,0,textOffset,,,,anchorOffset,Packed anchor offset alignment and flags,med,declaration-only;source:4A0A8.c:192
 T00620.001,T00620,textPlacement,1,x,0,short,,,,screenX,Dialog anchor screen X,med,declaration-only;source:4A0A8.c:193
 T00620.002,T00620,textPlacement,2,y,0,short,,,,screenY,Dialog anchor screen Y,med,declaration-only;source:4A0A8.c:194
 T00620.003,T00620,textPlacement,3,distance,0,int,,,screen-clamp displacement magnitude,clampDistance,Displacement applied when clamping the dialog on screen,med,declaration-only;source:4A0A8.c:195
-T00621.000,T00621,trackingMotion,0,facing,0,unsigned short,,,,,,,
-T00621.001,T00621,trackingMotion,1,state,0,unsigned char,,,,,,,
-T00621.002,T00621,trackingMotion,2,flag3,0,unsigned char,,,,,,,
-T00621.003,T00621,trackingMotion,3,radiusSquared,0,int,,,,,,,
-T00621.004,T00621,trackingMotion,4,pad8,1,char[4],,,,,,,
-T00621.005,T00621,trackingMotion,5,stateC,0,short,,,,,,,
-T00621.006,T00621,trackingMotion,6,stateE,0,short,,,,,,,
-T00621.007,T00621,trackingMotion,7,angle,0,short,,,,,,,
-T00621.008,T00621,trackingMotion,8,height,0,short,,,,,,,
-T00621.009,T00621,trackingMotion,9,phase,0,unsigned char,,,,,,,
-T00621.010,T00621,trackingMotion,10,pad15,1,char[7],,,,,,,
-T00621.011,T00621,trackingMotion,11,initialized,0,unsigned char,,,,,,,
-T00622.000,T00622,trackingMotionActor,0,pad,1,char[28],,,,,,,
-T00622.001,T00622,trackingMotionActor,1,x,0,short,,,,,,,
-T00622.002,T00622,trackingMotionActor,2,y,0,short,,,,,,,
-T00622.003,T00622,trackingMotionActor,3,z,0,short,,,,,,,
-T00623.000,T00623,trackingMotionState,0,pad,1,char[76],,,,,,,
-T00623.001,T00623,trackingMotionState,1,x,0,short,,,,,,,
-T00623.002,T00623,trackingMotionState,2,y,0,short,,,,,,,
-T00623.003,T00623,trackingMotionState,3,z,0,short,,,,,,,
-T00623.004,T00623,trackingMotionState,4,pad52,1,char[6],,,,,,,
-T00623.005,T00623,trackingMotionState,5,context,0,radialMotionContext *,,,,,,,
-T00623.006,T00623,trackingMotionState,6,stats,0,trackingMotionStats *,,,,,,,
-T00623.007,T00623,trackingMotionState,7,pad60,1,char[252],,,,,,,
-T00623.008,T00623,trackingMotionState,8,targetActor,0,unsigned char,,,,,,,
-T00623.009,T00623,trackingMotionState,9,pad15D,1,char[31],,,,,,,
-T00623.010,T00623,trackingMotionState,10,targetX,0,int,,,,,,,
-T00623.011,T00623,trackingMotionState,11,targetZ,0,int,,,,,,,
-T00623.012,T00623,trackingMotionState,12,targetY,0,int,,,,,,,
-T00624.000,T00624,trackingMotionStats,0,pad,1,char[24],,,,,,,
-T00624.001,T00624,trackingMotionStats,1,current,0,short,,,,,,,
-T00624.002,T00624,trackingMotionStats,2,maximum,0,short,,,,,,,
+T00621.000,T00621,trackingMotion,0,facing,0,unsigned short,,,,heading,Heading toward the arena centre (same bits as T00273 unk0),low,source:7EE98.c:611
+T00621.001,T00621,trackingMotion,1,state,0,unsigned char,,,,phase,Orbit phase (same bits as T00273 unk2),med,declaration-only;source:7EE98.c:584
+T00621.002,T00621,trackingMotion,2,flag3,0,unsigned char,,,,distanceCached,Set once the distance is measured (same bits as T00273 unk3),low,source:7EE98.c:615
+T00621.003,T00621,trackingMotion,3,radiusSquared,0,int,,,,distanceSquared,Squared distance to the arena centre (same bits as T00273 unk4),med,source:7EE98.c:616
+T00621.004,T00621,trackingMotion,4,pad8,1,char[4],,,,reserved8,Not read by decompiled code,low,declaration-only;source:7EE98.c:586
+T00621.005,T00621,trackingMotion,5,stateC,0,short,,,,cooldown,Frames before the orbit can restart; 900 when started (same bits as T00273 unkC),med,source:7EE98.c:691
+T00621.006,T00621,trackingMotion,6,stateE,0,short,,,,requested,Orbit requested (same bits as T00273 unkE),low,source:7EE98.c:699
+T00621.007,T00621,trackingMotion,7,angle,0,short,,,,orbitAngle,Angle around the centre (same bits as T00273 unk10),med,declaration-only;source:7EE98.c:587
+T00621.008,T00621,trackingMotion,8,height,0,short,,,,savedHeight,Height saved when the orbit starts (same bits as T00273 unk12),low,source:7EE98.c:612
+T00621.009,T00621,trackingMotion,9,phase,0,unsigned char,,,,healthPhase,"Advances when the boss's HP ratio falls below 3/4, then below 1/4; each advance requests an orbit (same bits as T00273 unk14)",med,source:7EE98.c:692
+T00621.010,T00621,trackingMotion,10,pad15,1,char[7],,,,reserved15,Not read by decompiled code,low,declaration-only;source:7EE98.c:589
+T00621.011,T00621,trackingMotion,11,initialized,0,unsigned char,,,,started,Set when the orbit begins (same bits as T00273 unk1C),low,source:7EE98.c:607
+T00622.000,T00622,trackingMotionActor,0,pad,1,char[28],,,,reserved0,Not read by decompiled code,low,declaration-only;source:7EE98.c:593
+T00622.001,T00622,trackingMotionActor,1,x,0,short,,,,x,Named in the fork; see cited use,med,source:7EE98.c:649
+T00622.002,T00622,trackingMotionActor,2,y,0,short,,,,reserved1E,Not read by decompiled code,low,declaration-only;source:7EE98.c:594
+T00622.003,T00622,trackingMotionActor,3,z,0,short,,,,z,Named in the fork; see cited use,med,source:7EE98.c:650
+T00623.000,T00623,trackingMotionState,0,pad,1,char[76],,,,reserved0,Not read through this view,low,declaration-only;source:7EE98.c:572
+T00623.001,T00623,trackingMotionState,1,x,0,short,,,,x,Named in the fork view; see cited use,med,source:7EE98.c:608
+T00623.002,T00623,trackingMotionState,2,y,0,short,,,,y,Named in the fork view; see cited use,med,source:7EE98.c:612
+T00623.003,T00623,trackingMotionState,3,z,0,short,,,,z,Named in the fork view; see cited use,med,source:7EE98.c:608
+T00623.004,T00623,trackingMotionState,4,pad52,1,char[6],,,,reserved52,Not read through this view,low,declaration-only;source:7EE98.c:574
+T00623.005,T00623,trackingMotionState,5,context,0,radialMotionContext *,,,,model,Model record,med,source:7EE98.c:619
+T00623.006,T00623,trackingMotionState,6,stats,0,trackingMotionStats *,,,,stats,Actor statistics,high,source:7EE98.c:690
+T00623.007,T00623,trackingMotionState,7,pad60,1,char[252],,,,reserved60,Not read through this view,low,declaration-only;source:7EE98.c:577
+T00623.008,T00623,trackingMotionState,8,targetActor,0,unsigned char,,,,movementTarget,Actor the movement heads for; 16 for none,med,source:7EE98.c:704
+T00623.009,T00623,trackingMotionState,9,pad15D,1,char[31],,,,reserved15D,Not read through this view,low,declaration-only;source:7EE98.c:579
+T00623.010,T00623,trackingMotionState,10,targetX,0,int,,,,moveX,Target X in 20.12 fixed point,med,source:7EE98.c:706
+T00623.011,T00623,trackingMotionState,11,targetZ,0,int,,,,moveZ,Target Z in 20.12 fixed point,med,source:7EE98.c:708
+T00623.012,T00623,trackingMotionState,12,targetY,0,int,,,,moveY,Target Y in 20.12 fixed point,med,source:7EE98.c:746
+T00624.000,T00624,trackingMotionStats,0,pad,1,char[24],,,,reserved0,Not read by decompiled code,low,declaration-only;source:7EE98.c:568
+T00624.001,T00624,trackingMotionStats,1,current,0,short,,,,currentHp,Current HP (same offset as Battle::ActorStats.currentHp),high,source:7EE98.c:690
+T00624.002,T00624,trackingMotionStats,2,maximum,0,short,,,,maxHp,Maximum HP (same offset as Battle::ActorStats.maxHp),high,source:7EE98.c:690
 T00625.000,T00625,uiTable_t,0,page0,0,char[224][128],,,,pageZeroPixels,224 rows of 128 packed indexed texture bytes,high,source:22C.c:3114
 T00625.001,T00625,uiTable_t,1,page1,0,char[256][128],,,,pageOnePixels,256 rows of 128 packed indexed texture bytes,high,source:22C.c:3114
 T00626.000,T00626,unkPrim,0,unk0,1,u_long,,,,,,,
@@ -5616,123 +5616,123 @@ T00627.002,T00627,unkPrim,2,unk2,1,u_char,,,,,,,
 T00627.003,T00627,unkPrim,3,unk3,1,u_char,,,,,,,
 T00627.004,T00627,unkPrim,4,unk4,1,POLY_GT4,,,,,,,
 T00627.005,T00627,unkPrim,5,unk38,1,int,,,,,,,
-T00628.000,T00628,vs_actionFlags_t,0,unk0,1,u_short,4,,,,,,
-T00628.001,T00628,vs_actionFlags_t,1,unk4,1,u_short,1,,,,,,
-T00628.002,T00628,vs_actionFlags_t,2,unk5,1,u_short,1,,,,,,
-T00628.003,T00628,vs_actionFlags_t,3,unk6,1,u_short,1,,,,,,
-T00628.004,T00628,vs_actionFlags_t,4,unk7,1,u_short,1,,,,,,
-T00628.005,T00628,vs_actionFlags_t,5,unk8,1,u_short,4,,,,,,
-T00628.006,T00628,vs_actionFlags_t,6,unk12,1,u_short,1,,,,,,
-T00628.007,T00628,vs_actionFlags_t,7,unk13,1,u_short,1,,,,,,
-T00628.008,T00628,vs_actionFlags_t,8,unk14,1,u_short,2,,,,,,
-T00629.000,T00629,vs_action_t,0,id,0,u_char,,,,,,,
-T00629.001,T00629,vs_action_t,1,unk1,1,u_char,,,,,,,
-T00629.002,T00629,vs_action_t,2,unk2_0,1,u_char,1,,,,,,
-T00629.003,T00629,vs_action_t,3,type,0,u_char,3,,,,,,
-T00629.004,T00629,vs_action_t,4,unk2_4,1,u_char,4,,,,,,
-T00629.005,T00629,vs_action_t,5,cost,0,u_char,,,,,,,
-T00629.006,T00629,vs_action_t,6,rangeX,0,u_char,,,,,,,
-T00629.007,T00629,vs_action_t,7,rangeY,0,u_char,,,,,,,
-T00629.008,T00629,vs_action_t,8,rangeZ,0,u_char,,,,,,,
-T00629.009,T00629,vs_action_t,9,shape,0,u_char,3,,,,,,
-T00629.010,T00629,vs_action_t,10,angle,0,u_char,5,,,,,,
-T00629.011,T00629,vs_action_t,11,aoe_0,0,u_char,,,,,,,
-T00629.012,T00629,vs_action_t,12,aoe_8,0,u_char,,,,,,,
-T00629.013,T00629,vs_action_t,13,aoe_16,0,u_char,,,,,,,
-T00629.014,T00629,vs_action_t,14,aoe_24,0,u_char,,,,,,,
-T00629.015,T00629,vs_action_t,15,flags_0,0,u_char,,,,,,,
-T00629.016,T00629,vs_action_t,16,flagsD_0,0,u_int,4,,,,,,
-T00629.017,T00629,vs_action_t,17,flagsD_4,0,u_int,2,,,,,,
-T00629.018,T00629,vs_action_t,18,flagsD_6,0,u_int,1,,,,,,
-T00629.019,T00629,vs_action_t,19,unlocked,0,u_int,1,,,,,,
-T00629.020,T00629,vs_action_t,20,flagsE,0,vs_actionFlags_t,,,,,,,
-T00629.021,T00629,vs_action_t,21,unk10,1,int,,,,,,,
-T00629.022,T00629,vs_action_t,22,hitParams,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5)[2],,,,,,,
-T00629.023,T00629,vs_action_t,23,name,0,char[24],,,,,,,
-T00630.000,T00630,vs_battle_actor,0,next,0,struct vs_battle_actor *,,,,,,,
-T00630.001,T00630,vs_battle_actor,1,id,0,int,,,,,,,
-T00630.002,T00630,vs_battle_actor,2,unk8,1,u_char,,,command execution state | command state | logicState,,,,
-T00630.003,T00630,vs_battle_actor,3,unk9,1,u_char,,,command opcode,,,,
-T00630.004,T00630,vs_battle_actor,4,unkA,1,u_char,,,command target actor or immediate marker,,,,
-T00630.005,T00630,vs_battle_actor,5,unkB,1,u_char,,,,,,,
-T00630.006,T00630,vs_battle_actor,6,unkC,1,int,,,,,,,
-T00630.007,T00630,vs_battle_actor,7,unk10,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),,,,,,,
-T00630.008,T00630,vs_battle_actor,8,unk14,1,int,,,,,,,
-T00630.009,T00630,vs_battle_actor,9,unk18,1,u_short,,,modelId,,,,
-T00630.010,T00630,vs_battle_actor,10,subType,0,u_short,,,,,,,
-T00630.011,T00630,vs_battle_actor,11,unk1C,1,u_short,,,dispositionFlags,,,,
-T00630.012,T00630,vs_battle_actor,12,unk1E,1,u_char,,,,,,,
-T00630.013,T00630,vs_battle_actor,13,unk1F,1,u_char,,,,,,,
-T00630.014,T00630,vs_battle_actor,14,weaponDrawn,0,int,,,,,,,
-T00630.015,T00630,vs_battle_actor,15,unk24,1,u_char,,,,,,,
-T00630.016,T00630,vs_battle_actor,16,equippedWeaponCategory,0,u_char,,,,,,,
-T00630.017,T00630,vs_battle_actor,17,unk26,1,u_char,,,retainAfterDefeat,,,,
-T00630.018,T00630,vs_battle_actor,18,unk27,1,u_char,,,room spawn index with 128 sentinel,,,,
-T00630.019,T00630,vs_battle_actor,19,defeated,0,u_char,,,,,,,
-T00630.020,T00630,vs_battle_actor,20,unk29,1,u_char,,,,,,,
-T00630.021,T00630,vs_battle_actor,21,unk2A,1,u_char,,,bladeModelId,,,,
-T00630.022,T00630,vs_battle_actor,22,unk2B,1,u_char,,,shieldModelId,,,,
-T00630.023,T00630,vs_battle_actor,23,unk2C,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:589:5),,,last trigger tile and movement mode,,,,
-T00630.024,T00630,vs_battle_actor,24,unk30_0,1,u_short,4,,,,,,
-T00630.025,T00630,vs_battle_actor,25,unk30_4,1,u_short,5,,,,,,
-T00630.026,T00630,vs_battle_actor,26,unk30_9,1,u_int,5,,,,,,
-T00630.027,T00630,vs_battle_actor,27,unk30_14,1,u_int,18,,,,,,
-T00630.028,T00630,vs_battle_actor,28,unk34,1,int,,,,,,,
-T00630.029,T00630,vs_battle_actor,29,unk38,1,int,,,,,,,
-T00630.030,T00630,vs_battle_actor,30,unk3C,1,vs_battle_actor2 *,,,combatStats,,,,
-T00630.031,T00630,vs_battle_actor,31,unk40,1,int,,,modelLayoutKind,,,,
-T00630.032,T00630,vs_battle_actor,32,unk44,1,D_800F4538_unk0 *,,,modelState,,,,
-T00630.033,T00630,vs_battle_actor,33,unk48,1,vs_battle_actor4 *[2],,,equipmentModels,,,,
-T00631.000,T00631,vs_battle_actor2,0,name,0,char[24],,,,,,,
-T00631.001,T00631,vs_battle_actor2,1,currentHP,0,short,,,,,,,
-T00631.002,T00631,vs_battle_actor2,2,maxHP,0,short,,,,,,,
-T00631.003,T00631,vs_battle_actor2,3,currentMP,0,short,,,,,,,
-T00631.004,T00631,vs_battle_actor2,4,maxMP,0,short,,,,,,,
-T00631.005,T00631,vs_battle_actor2,5,risk,0,u_short,,,,,,,
-T00631.006,T00631,vs_battle_actor2,6,strength,0,u_short,,,,,,,
-T00631.007,T00631,vs_battle_actor2,7,totalStrength,0,u_short,,,,,,,
-T00631.008,T00631,vs_battle_actor2,8,intelligence,0,u_short,,,,,,,
-T00631.009,T00631,vs_battle_actor2,9,totalIntelligence,0,u_short,,,,,,,
-T00631.010,T00631,vs_battle_actor2,10,agility,0,u_short,,,,,,,
-T00631.011,T00631,vs_battle_actor2,11,totalAgility,0,u_short,,,,,,,
-T00631.012,T00631,vs_battle_actor2,12,unk2E,1,char,,,,,,,
-T00631.013,T00631,vs_battle_actor2,13,unk2F,1,char,,,,,,,
-T00631.014,T00631,vs_battle_actor2,14,unk30,1,char,,,,,,,
-T00631.015,T00631,vs_battle_actor2,15,unk31,1,char,,,current walk speed | walk speed | walkSpeed,,,,
-T00631.016,T00631,vs_battle_actor2,16,unk32,1,char,,,,,,,
-T00631.017,T00631,vs_battle_actor2,17,unk33,1,char,,,current run speed | run speed | runSpeed,,,,
-T00631.018,T00631,vs_battle_actor2,18,unk34,1,u_int,8,,,,,,
-T00631.019,T00631,vs_battle_actor2,19,unk35,1,u_int,8,,,,,,
-T00631.020,T00631,vs_battle_actor2,20,unk36,1,u_int,8,,,,,,
-T00631.021,T00631,vs_battle_actor2,21,enemyClass,0,u_int,3,,,,,,
-T00631.022,T00631,vs_battle_actor2,22,reach,0,u_int,5,,,,,,
-T00631.023,T00631,vs_battle_actor2,23,currentRange,0,u_int,8,,,,,,
-T00631.024,T00631,vs_battle_actor2,24,unk39,1,u_int,8,,,,,,
-T00631.025,T00631,vs_battle_actor2,25,unk3A,1,u_int,8,,,,,,
-T00631.026,T00631,vs_battle_actor2,26,unk3B_0,1,u_int,3,,,,,,
-T00631.027,T00631,vs_battle_actor2,27,currentAttackShapeAngle,0,u_int,5,,,,,,
-T00631.028,T00631,vs_battle_actor2,28,weapon,0,vs_battle_uiWeapon,,,,,,,
-T00631.029,T00631,vs_battle_actor2,29,shield,0,vs_battle_uiShield,,,,,,,
-T00631.030,T00631,vs_battle_actor2,30,accessory,0,vs_battle_uiAccessory,,,,,,,
-T00631.031,T00631,vs_battle_actor2,31,limbs,0,vs_battle_uiEquipment_limb[6],,,,,,,
-T00631.032,T00631,vs_battle_actor2,32,armor,0,vs_battle_actor_unk8C0[6][4],,,,,,,
-T00631.033,T00631,vs_battle_actor2,33,dpSplash,0,char[6][6],,,,,,,
-T00631.034,T00631,vs_battle_actor2,34,unk944,1,int,,,status immunity mask,,,,
-T00631.035,T00631,vs_battle_actor2,35,statuses,0,int,,,,,,,
-T00631.036,T00631,vs_battle_actor2,36,statusTimers,0,u_char[8],,,,,,,
-T00631.037,T00631,vs_battle_actor2,37,unk954,1,u_short,,,action recovery timer,,,,
-T00631.038,T00631,vs_battle_actor2,38,unk956_0,1,u_char,1,,,,,,
-T00631.039,T00631,vs_battle_actor2,39,isAnalyzed,0,u_char,1,,,,,,
-T00631.040,T00631,vs_battle_actor2,40,unk956_2,1,u_char,6,,,,,,
-T00631.041,T00631,vs_battle_actor2,41,unk957,1,u_char,,,,,,,
-T00631.042,T00631,vs_battle_actor2,42,miscItem,0,vs_battle_uiMisc,,,,,,,
-T00631.043,T00631,vs_battle_actor2,43,unk95C,1,vs_battle_uiMisc,,,,,,,
-T00631.044,T00631,vs_battle_actor2,44,unk960,1,vs_battle_uiMiscRand,,,,,,,
-T00632.000,T00632,vs_battle_actor2_flags,0,unk0,1,u_short,,,,,,,
-T00632.001,T00632,vs_battle_actor2_flags,1,unk2_0,1,char,1,,,,,,
-T00632.002,T00632,vs_battle_actor2_flags,2,unk2_1,1,char,1,,,,,,
-T00632.003,T00632,vs_battle_actor2_flags,3,unk2_2,1,char,6,,,,,,
-T00632.004,T00632,vs_battle_actor2_flags,4,unk3,1,u_char,,,,,,,
+T00628.000,T00628,vs_actionFlags_t,0,unk0,1,u_short,4,,,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:main.h:63
+T00628.001,T00628,vs_actionFlags_t,1,unk4,1,u_short,1,,,opaque0Bit4,"With the actor's settingsModeLow set, scores the action as special with weight 40",low,source:74088.c:642
+T00628.002,T00628,vs_actionFlags_t,2,unk5,1,u_short,1,,,rarelyChosen,The AI rejects the action 115 times in 128,med,source:74088.c:632
+T00628.003,T00628,vs_actionFlags_t,3,unk6,1,u_short,1,,,reserved0Bit6,Not read by decompiled code,low,declaration-only;source:main.h:66
+T00628.004,T00628,vs_actionFlags_t,4,unk7,1,u_short,1,,,shapedArea,Area reach comes from the area range shape,med,source:7CD68.c:467
+T00628.005,T00628,vs_actionFlags_t,5,unk8,1,u_short,4,,,reserved1Bit0,Not read by decompiled code,low,declaration-only;source:main.h:68
+T00628.006,T00628,vs_actionFlags_t,6,unk12,1,u_short,1,,,opaque1Bit4,Copied into the candidate and fallback flags,low,source:74088.c:1044
+T00628.007,T00628,vs_actionFlags_t,7,unk13,1,u_short,1,,,radialArea,Area reach is areaRangeY times 32,med,source:7CD68.c:465
+T00628.008,T00628,vs_actionFlags_t,8,unk14,1,u_short,2,,,reserved1Bit6,Not read by decompiled code,low,declaration-only;source:main.h:71
+T00629.000,T00629,vs_action_t,0,id,0,u_char,,,,id,Action id,med,source:146C.c:9759
+T00629.001,T00629,vs_action_t,1,unk1,1,u_char,,,,effectId,Presentation effect id,high,source:146C.c:3967
+T00629.002,T00629,vs_action_t,2,unk2_0,1,u_char,1,,,returnsToMenuOnCancel,Cancelling targeting returns to the battle action menu; otherwise menus close and recovery begins,med,source:146C.c:3604
+T00629.003,T00629,vs_action_t,3,type,0,u_char,3,,,type,Action type (Battle::ActionType),high,source:146C.c:9719
+T00629.004,T00629,vs_action_t,4,unk2_4,1,u_char,4,,,category,Targeting category; indexes the category targeting tables,high,source:146C.c:4469
+T00629.005,T00629,vs_action_t,5,cost,0,u_char,,,,cost,MP or HP cost,med,source:146C.c:10025
+T00629.006,T00629,vs_action_t,6,rangeX,0,u_char,,,,rangeX,Range first component,med,source:146C.c:4099
+T00629.007,T00629,vs_action_t,7,rangeY,0,u_char,,,,rangeY,Range second component,med,source:146C.c:4100
+T00629.008,T00629,vs_action_t,8,rangeZ,0,u_char,,,,rangeZ,Range third component,med,source:146C.c:4101
+T00629.009,T00629,vs_action_t,9,shape,0,u_char,3,,,shape,Range shape,med,source:146C.c:4097
+T00629.010,T00629,vs_action_t,10,angle,0,u_char,5,,,angle,Range shape angle,med,source:146C.c:4204
+T00629.011,T00629,vs_action_t,11,aoe_0,0,u_char,,,,areaRangeX,Area first component,med,source:146C.c:4360
+T00629.012,T00629,vs_action_t,12,aoe_8,0,u_char,,,,areaRangeY,Area second component; times 32 is the radial reach,med,source:7CD68.c:466
+T00629.013,T00629,vs_action_t,13,aoe_16,0,u_char,,,,areaRangeZ,Area third component,med,source:146C.c:4362
+T00629.014,T00629,vs_action_t,14,aoe_24,0,u_char,,,,areaShape,Area shape in the low three bits,med,source:146C.c:4359
+T00629.015,T00629,vs_action_t,15,flags_0,0,u_char,,,,recoveryDelay,Recovery delay added after the action; 0xFF uses the weapon's,high,source:146C.c:13177
+T00629.016,T00629,vs_action_t,16,flagsD_0,0,u_int,4,,,reservedDBit0,Not read by decompiled code,low,declaration-only;source:main.h:91
+T00629.017,T00629,vs_action_t,17,flagsD_4,0,u_int,2,,,opaqueDBit4,Copied to the action state; 1 is cleared when the first target is 0x1C1 or farther,low,source:146C.c:3857
+T00629.018,T00629,vs_action_t,18,flagsD_6,0,u_int,1,,,resetsHitResults,Hits are reset to outcome 4 after their effects (bit 0x4000 of the word at 0xC),low,declaration-only;source:main.h:93;source:146C.c:13338
+T00629.019,T00629,vs_action_t,19,unlocked,0,u_int,1,,,unlocked,Set once the player has learned the action,med,source:146C.c:3325
+T00629.020,T00629,vs_action_t,20,flagsE,0,vs_actionFlags_t,,,,aiFlags,Flags read by enemy AI action selection,med,source:74088.c:629
+T00629.021,T00629,vs_action_t,21,unk10,1,int,,,,reserved10,Not read by decompiled code,low,declaration-only;source:main.h:96
+T00629.022,T00629,vs_action_t,22,hitParams,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5)[2],,,,hits,"Two hit definitions: effect, prerequisite, hit, stat calculator, factor, type and affinity",high,source:146C.c:10085
+T00629.023,T00629,vs_action_t,23,name,0,char[24],,,,name,Display name,high,source:5BF94.c:3782
+T00630.000,T00630,vs_battle_actor,0,next,0,struct vs_battle_actor *,,,,next,Next actor in the room's actor list,high,source:146C.c:897
+T00630.001,T00630,vs_battle_actor,1,id,0,int,,,,id,Actor slot index,high,source:146C.c:6297
+T00630.002,T00630,vs_battle_actor,2,unk8,1,u_char,,,command execution state | command state | logicState,commandState,"Queued command state: 0x80 queued, 0x40 running, 0 idle",high,source:146C.c:5652;source:146C.c:5695
+T00630.003,T00630,vs_battle_actor,3,unk9,1,u_char,,,command opcode,commandOpcode,Queued command opcode,high,source:146C.c:5654
+T00630.004,T00630,vs_battle_actor,4,unkA,1,u_char,,,command target actor or immediate marker,commandTarget,Target actor of the queued command; 16 or more for an immediate position,med,source:146C.c:5720
+T00630.005,T00630,vs_battle_actor,5,unkB,1,u_char,,,,commandFlags,"Bits 24-27 of the command word: model sound and follow-up, read through the word",low,declaration-only;source:146C.h:567;source:146C.c:5704
+T00630.006,T00630,vs_battle_actor,6,unkC,1,int,,,,commandArg0,First command argument; the remaining x offset (fixed point) of a step command,med,source:146C.c:5579
+T00630.007,T00630,vs_battle_actor,7,unk10,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:569:5),,,,commandArg1,Second command argument; the remaining z offset of a step command,med,source:146C.c:5595
+T00630.008,T00630,vs_battle_actor,8,unk14,1,int,,,,commandArg2,Third command argument; the remaining y offset of a step command,med,source:146C.c:5611
+T00630.009,T00630,vs_battle_actor,9,unk18,1,u_short,,,modelId,modelId,Model id the actor was created from,high,source:146C.c:9132
+T00630.010,T00630,vs_battle_actor,10,subType,0,u_short,,,,subType,Template sub-type; scored when an enemy is killed,med,source:146C.c:1774
+T00630.011,T00630,vs_battle_actor,11,unk1C,1,u_short,,,dispositionFlags,kind,"Actor kind bits: 1 Ashley, 2 non-hostile, 4 hostile, 8 object, 0x10 auxiliary; 0x8000 excludes targeting",high,source:146C.c:6306;source:146C.c:4133
+T00630.012,T00630,vs_battle_actor,12,unk1E,1,u_char,,,,facing,Facing from the room spawn,med,source:146C.c:6742
+T00630.013,T00630,vs_battle_actor,13,unk1F,1,u_char,,,,spawnByte26,Byte 0x26 of the room spawn record; not read afterwards,low,source:146C.c:6743
+T00630.014,T00630,vs_battle_actor,14,weaponDrawn,0,int,,,,weaponDrawn,Bit 0 set while the actor is in battle mode,high,source:146C.c:8655
+T00630.015,T00630,vs_battle_actor,15,unk24,1,u_char,,,,interactionFlags,Spawn flag bits 2-4; 4 lets the player trigger the actor's event with the action button,low,source:146C.c:6328;source:146C.c:7649
+T00630.016,T00630,vs_battle_actor,16,equippedWeaponCategory,0,u_char,,,,equippedWeaponCategory,Category of the equipped blade; 10 when unarmed,high,source:146C.c:6616
+T00630.017,T00630,vs_battle_actor,17,unk26,1,u_char,,,retainAfterDefeat,retainAfterDefeat,Keeps the actor after its defeat (spawn flag 0x80),high,source:146C.c:9158
+T00630.018,T00630,vs_battle_actor,18,unk27,1,u_char,,,room spawn index with 128 sentinel,roomSpawnIndex,Index of the actor's room spawn; 0x80 for none,high,source:146C.c:6744
+T00630.019,T00630,vs_battle_actor,19,defeated,0,u_char,,,,defeated,Set once the actor's defeat has been handled,med,source:146C.c:1828
+T00630.020,T00630,vs_battle_actor,20,unk29,1,u_char,,,,killCounted,Set when a killing blow on the actor counted toward Break Art progress,high,source:146C.c:13046
+T00630.021,T00630,vs_battle_actor,21,unk2A,1,u_char,,,bladeModelId,bladeId,Blade model id of the equipped weapon,med,source:146C.c:6300
+T00630.022,T00630,vs_battle_actor,22,unk2B,1,u_char,,,shieldModelId,shieldId,Shield model id,med,source:146C.c:6301
+T00630.023,T00630,vs_battle_actor,23,unk2C,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:589:5),,,last trigger tile and movement mode,lastTriggerTile,Tile word last checked for floor triggers,med,source:146C.c:5541
+T00630.024,T00630,vs_battle_actor,24,unk30_0,1,u_short,4,,,aiGroup,AI group number other actors link to,med,source:7CD68.c:582
+T00630.025,T00630,vs_battle_actor,25,unk30_4,1,u_short,5,,,reserved30Bit4,Not read by decompiled code,low,declaration-only;source:146C.h:594
+T00630.026,T00630,vs_battle_actor,26,unk30_9,1,u_int,5,,,aiLinkedGroup,AI group this actor follows or guards,med,source:7CD68.c:582
+T00630.027,T00630,vs_battle_actor,27,unk30_14,1,u_int,18,,,reserved31Bit6,Not read by decompiled code,low,declaration-only;source:146C.h:596
+T00630.028,T00630,vs_battle_actor,28,unk34,1,int,,,,reserved34,Not read by decompiled code,low,declaration-only;source:146C.h:597
+T00630.029,T00630,vs_battle_actor,29,unk38,1,int,,,,templateWord2C,Word 0x2C of the actor template; not read afterwards,low,source:146C.c:6757
+T00630.030,T00630,vs_battle_actor,30,unk3C,1,vs_battle_actor2 *,,,combatStats,stats,Combat statistics,high,source:146C.c:6600
+T00630.031,T00630,vs_battle_actor,31,unk40,1,int,,,modelLayoutKind,allocationKind,"Allocation layout: 1 with two equipment model slots, 2 with one",med,source:146C.c:6601;source:146C.c:943
+T00630.032,T00630,vs_battle_actor,32,unk44,1,D_800F4538_unk0 *,,,modelState,model,Actor model and animation state,high,source:146C.c:6602
+T00630.033,T00630,vs_battle_actor,33,unk48,1,vs_battle_actor4 *[2],,,equipmentModels,equipmentModels,Weapon and shield model slots,high,source:146C.c:6603
+T00631.000,T00631,vs_battle_actor2,0,name,0,char[24],,,,name,Display name,high,source:5BF94.c:1268
+T00631.001,T00631,vs_battle_actor2,1,currentHP,0,short,,,,currentHp,Current HP,high,source:146C.c:6336
+T00631.002,T00631,vs_battle_actor2,2,maxHP,0,short,,,,maxHp,Maximum HP,high,source:146C.c:6335
+T00631.003,T00631,vs_battle_actor2,3,currentMP,0,short,,,,currentMp,Current MP,high,source:146C.c:6338
+T00631.004,T00631,vs_battle_actor2,4,maxMP,0,short,,,,maxMp,Maximum MP,high,source:146C.c:6337
+T00631.005,T00631,vs_battle_actor2,5,risk,0,u_short,,,,risk,Risk,high,source:146C.c:6339
+T00631.006,T00631,vs_battle_actor2,6,strength,0,u_short,,,,strength,Base STR,med,source:146C.c:6181
+T00631.007,T00631,vs_battle_actor2,7,totalStrength,0,u_short,,,,totalStrength,STR with equipment,med,source:146C.c:6180
+T00631.008,T00631,vs_battle_actor2,8,intelligence,0,u_short,,,,intelligence,Base INT,med,source:146C.c:6194
+T00631.009,T00631,vs_battle_actor2,9,totalIntelligence,0,u_short,,,,totalIntelligence,INT with equipment,med,source:146C.c:6193
+T00631.010,T00631,vs_battle_actor2,10,agility,0,u_short,,,,agility,Base AGL,med,source:146C.c:6207
+T00631.011,T00631,vs_battle_actor2,11,totalAgility,0,u_short,,,,totalAgility,AGL with equipment,med,source:146C.c:6206
+T00631.012,T00631,vs_battle_actor2,12,unk2E,1,char,,,,baseWalkSpeed,Walk speed without statuses (nine tenths of the template's),high,source:146C.c:13610
+T00631.013,T00631,vs_battle_actor2,13,unk2F,1,char,,,,baseRunSpeed,Run speed without statuses (nine tenths of the template's),high,source:146C.c:13611
+T00631.014,T00631,vs_battle_actor2,14,unk30,1,char,,,,movementClass,Template movement class; 0x10 and 0x20 make saved placement use the current tile while flying,low,source:146C.c:6208;source:146C.c:879
+T00631.015,T00631,vs_battle_actor2,15,unk31,1,char,,,current walk speed | walk speed | walkSpeed,walkSpeed,Current walk speed; halved by some statuses,high,source:146C.c:5760
+T00631.016,T00631,vs_battle_actor2,16,unk32,1,char,,,,gaitClass,Template gait class; 2 and 0x40 make queued walks use the run speed,low,source:146C.c:5755
+T00631.017,T00631,vs_battle_actor2,17,unk33,1,char,,,current run speed | run speed | runSpeed,runSpeed,Current run speed; halved by some statuses,high,source:146C.c:5756
+T00631.018,T00631,vs_battle_actor2,18,unk34,1,u_int,8,,,mobilityLimb0,"First limb whose injury, with the second, inflicts Agility Down; 0 for none",med,source:146C.c:12942
+T00631.019,T00631,vs_battle_actor2,19,unk35,1,u_int,8,,,mobilityLimb1,"Second limb whose injury, with the first, inflicts Agility Down; 0 for none",med,source:146C.c:14464
+T00631.020,T00631,vs_battle_actor2,20,unk36,1,u_int,8,,,defaultTargetLimb,Limb targeted when an action does not pick one,high,source:146C.c:13523
+T00631.021,T00631,vs_battle_actor2,21,enemyClass,0,u_int,3,,,enemyClass,Enemy class,med,source:146C.c:1780
+T00631.022,T00631,vs_battle_actor2,22,reach,0,u_int,5,,,reach,Reach added to the weapon's ranges,med,source:146C.c:1402
+T00631.023,T00631,vs_battle_actor2,23,currentRange,0,u_int,8,,,currentRange,Current attack range,med,source:146C.c:1401
+T00631.024,T00631,vs_battle_actor2,24,unk39,1,u_int,8,,,currentRangeY,Current attack range second component: weapon range plus reach,med,source:146C.c:1402
+T00631.025,T00631,vs_battle_actor2,25,unk3A,1,u_int,8,,,currentRangeZ,Current attack range third component: weapon range plus reach,med,source:146C.c:1403
+T00631.026,T00631,vs_battle_actor2,26,unk3B_0,1,u_int,3,,,currentAttackShape,Current attack range shape; 1 when a weapon is equipped,med,source:146C.c:1405
+T00631.027,T00631,vs_battle_actor2,27,currentAttackShapeAngle,0,u_int,5,,,currentAttackShapeAngle,Current attack range shape angle,med,source:146C.c:1404
+T00631.028,T00631,vs_battle_actor2,28,weapon,0,vs_battle_uiWeapon,,,,weapon,Equipped weapon statistics,high,source:146C.c:1390
+T00631.029,T00631,vs_battle_actor2,29,shield,0,vs_battle_uiShield,,,,shield,Equipped shield statistics,high,source:146C.c:1413
+T00631.030,T00631,vs_battle_actor2,30,accessory,0,vs_battle_uiAccessory,,,,accessory,Equipped accessory statistics,high,source:146C.c:1429
+T00631.031,T00631,vs_battle_actor2,31,limbs,0,vs_battle_uiEquipment_limb[6],,,,limbs,Statistics of the six limbs,high,source:146C.c:1421
+T00631.032,T00631,vs_battle_actor2,32,armor,0,vs_battle_actor_unk8C0[6][4],,,,limbActions,Up to four action slots per limb,high,source:146C.c:6260
+T00631.033,T00631,vs_battle_actor2,33,dpSplash,0,char[6][6],,,,dpSplash,Fork name kept; see cited use,low,source:146C.c:6269
+T00631.034,T00631,vs_battle_actor2,34,unk944,1,int,,,status immunity mask,statusImmunities,Status flags the actor cannot receive,high,source:146C.c:10138
+T00631.035,T00631,vs_battle_actor2,35,statuses,0,int,,,,statuses,Active status flags (Battle::StatusFlag),high,source:146C.c:1360
+T00631.036,T00631,vs_battle_actor2,36,statusTimers,0,u_char[8],,,,statusTimers,Remaining time of timed statuses,high,source:146C.c:6286
+T00631.037,T00631,vs_battle_actor2,37,unk954,1,u_short,,,action recovery timer,actionRecoveryTimer,Recovery time after an action; actions are restricted while non-zero,high,source:146C.c:13178;source:146C.c:15570
+T00631.038,T00631,vs_battle_actor2,38,unk956_0,1,u_char,1,,,cancelsHitResults,Hits on the actor are reset to outcome 4 after their effects are applied; set for placeholders,low,source:146C.c:13323
+T00631.039,T00631,vs_battle_actor2,39,isAnalyzed,0,u_char,1,,,isAnalyzed,Set once the actor has been analyzed,med,source:146C.c:6219
+T00631.040,T00631,vs_battle_actor2,40,unk956_2,1,u_char,6,,,recoveryDelayBonus,Template value added to every action's recovery delay,med,source:146C.c:6214
+T00631.041,T00631,vs_battle_actor2,41,unk957,1,u_char,,,,actorId,Actor slot index; 0x80 for placeholder statistics,high,source:146C.c:9717;source:146C.c:6061
+T00631.042,T00631,vs_battle_actor2,42,miscItem,0,vs_battle_uiMisc,,,,dropItem,First item the actor drops,med,source:146C.c:6747
+T00631.043,T00631,vs_battle_actor2,43,unk95C,1,vs_battle_uiMisc,,,,secondDropItem,Second item the actor drops,med,source:146C.c:6749
+T00631.044,T00631,vs_battle_actor2,44,unk960,1,vs_battle_uiMiscRand,,,,randomDropItem,"Third item the actor drops, with a drop rate",med,source:146C.c:1745
+T00632.000,T00632,vs_battle_actor2_flags,0,unk0,1,u_short,,,,reserved0,Not read by decompiled code,low,declaration-only;source:146C.h:450
+T00632.001,T00632,vs_battle_actor2_flags,1,unk2_0,1,char,1,,,reserved2Bit0,Not read by decompiled code,low,declaration-only;source:146C.h:451
+T00632.002,T00632,vs_battle_actor2_flags,2,unk2_1,1,char,1,,,reserved2Bit1,Not read by decompiled code,low,declaration-only;source:146C.h:452
+T00632.003,T00632,vs_battle_actor2_flags,3,unk2_2,1,char,6,,,reserved2Bit2,Not read by decompiled code,low,declaration-only;source:146C.h:453
+T00632.004,T00632,vs_battle_actor2_flags,4,unk3,1,u_char,,,,reserved3,Not read by decompiled code,low,declaration-only;source:146C.h:454
 T00633.000,T00633,vs_battle_actor4,0,unk0,1,char[1512],,,,storage,Slot storage,low,declaration-only;source:146C.h:439
 T00634.000,T00634,vs_battle_actor_dat,0,unk0,1,vs_battle_actor_dat2,,,,core,Actor and model record,high,source:146C.c:6507
 T00634.001,T00634,vs_battle_actor_dat,1,unkB2C,1,char[6024],,,,reservedB2C,Not read by the decompiled users,low,declaration-only;source:146C.h:619
@@ -5743,10 +5743,10 @@ T00635.002,T00635,vs_battle_actor_dat2,2,unk6C,1,MATRIX[8],,,,reserved6C,Not rea
 T00635.003,T00635,vs_battle_actor_dat2,3,unk16C,1,int,,,,reserved16C,Not read by the decompiled users,low,declaration-only;source:146C.h:612
 T00635.004,T00635,vs_battle_actor_dat2,4,unk170,1,int,,,,reserved170,Not read by the decompiled users,low,declaration-only;source:146C.h:613
 T00635.005,T00635,vs_battle_actor_dat2,5,unk174,1,int,,,,reserved174,Not read by the decompiled users,low,declaration-only;source:146C.h:614
-T00636.000,T00636,vs_battle_actor_unk8C0,0,id,0,u_short,,,,,,,
-T00636.001,T00636,vs_battle_actor_unk8C0,1,index,0,char,4,,,,,,
-T00636.002,T00636,vs_battle_actor_unk8C0,2,unk2_4,1,char,4,,,,,,
-T00636.003,T00636,vs_battle_actor_unk8C0,3,unk3,1,char,,,,,,,
+T00636.000,T00636,vs_battle_actor_unk8C0,0,id,0,u_short,,,,actionId,Action in the slot,high,source:146C.c:6260
+T00636.001,T00636,vs_battle_actor_unk8C0,1,index,0,char,4,,,index,Template index,low,source:146C.c:6261
+T00636.002,T00636,vs_battle_actor_unk8C0,2,unk2_4,1,char,4,,,effectModelId,Effect model shown when the action is presented,med,source:146C.c:6262
+T00636.003,T00636,vs_battle_actor_unk8C0,3,unk3,1,char,,,,opaque3,Set to 1 when the slot is filled; not read,low,source:146C.c:6263
 T00637.000,T00637,vs_battle_backgroundLayout,0,width,0,int,,,,width,Tile columns,med,declaration-only;source:2842C.h:12
 T00637.001,T00637,vs_battle_backgroundLayout,1,height,0,int,,,,height,Tile rows,med,declaration-only;source:2842C.h:13
 T00637.002,T00637,vs_battle_backgroundLayout,2,unk8,1,int,,,,reserved08,Unreferenced word,low,declaration-only;source:2842C.h:14
@@ -5797,14 +5797,14 @@ T00640.022,T00640,vs_battle_charInitData,22,shield,0,vs_battle_shieldIntermediat
 T00640.023,T00640,vs_battle_charInitData,23,accessory,0,_accessoryIntermediate,,,,accessory,Equipped accessory,high,source:146C.c:6227
 T00640.024,T00640,vs_battle_charInitData,24,limbs,0,_limbInit[6],,,,limbs,Per-limb initial state,high,source:146C.c:6230
 T00640.025,T00640,vs_battle_charInitData,25,mpdIdentifer,0,int,,,,zudIndex,Index of the character's ZUD in the zone,high,source:146C.c:6595
-T00641.000,T00641,vs_battle_classAffinityBaseline,0,class,0,short[8],,,,,,,
-T00641.001,T00641,vs_battle_classAffinityBaseline,1,affinity,0,u_short[8],,,,,,,
-T00642.000,T00642,vs_battle_classAffinityCurrent,0,class,0,short[2][8],,,,,,,
-T00642.001,T00642,vs_battle_classAffinityCurrent,1,affinity,0,short[2][8],,,,,,,
-T00643.000,T00643,vs_battle_door,0,id,0,char,,,,,,,
-T00643.001,T00643,vs_battle_door,1,exit,0,char,,,,,,,
-T00643.002,T00643,vs_battle_door,2,flags,0,char,,,,,,,
-T00643.003,T00643,vs_battle_door,3,lock,0,char,,,,,,,
+T00641.000,T00641,vs_battle_classAffinityBaseline,0,class,0,short[8],,,,classes,Class values (renamed: class is a C++ keyword),med,source:146C.c:1007
+T00641.001,T00641,vs_battle_classAffinityBaseline,1,affinity,0,u_short[8],,,,affinities,Affinity values,med,source:146C.c:1015
+T00642.000,T00642,vs_battle_classAffinityCurrent,0,class,0,short[2][8],,,,classes,Class values per set (renamed: class is a C++ keyword),med,source:146C.c:1008
+T00642.001,T00642,vs_battle_classAffinityCurrent,1,affinity,0,short[2][8],,,,affinities,Affinity values per set,med,source:146C.c:1016
+T00643.000,T00643,vs_battle_door,0,id,0,char,,,,reserved0,Not read by decompiled code,low,declaration-only;source:146C.h:624
+T00643.001,T00643,vs_battle_door,1,exit,0,char,,,,reserved1,Not read by decompiled code,low,declaration-only;source:146C.h:625
+T00643.002,T00643,vs_battle_door,2,flags,0,char,,,,reserved2,Not read by decompiled code,low,declaration-only;source:146C.h:626
+T00643.003,T00643,vs_battle_door,3,lock,0,char,,,,reserved3,Not read by decompiled code,low,declaration-only;source:146C.h:627
 T00644.000,T00644,vs_battle_geomOffset,0,x,0,int,,,,,,,
 T00644.001,T00644,vs_battle_geomOffset,1,y,0,int,,,,,,,
 T00645.000,T00645,vs_battle_loot,0,weapon,0,vs_battle_lootedWeapon,,,,,,,
@@ -5828,21 +5828,21 @@ T00648.001,T00648,vs_battle_lootedArmor,1,unk1,1,char,,,,reserved1,Not read,low,
 T00648.002,T00648,vs_battle_lootedArmor,2,unk2,1,char,,,,reserved2,Not read,low,declaration-only;source:func_8006B57C_t.h:207
 T00648.003,T00648,vs_battle_lootedArmor,3,unk3,1,char,,,,reserved3,Not read,low,declaration-only;source:func_8006B57C_t.h:208
 T00648.004,T00648,vs_battle_lootedArmor,4,armor,0,vs_main_inventoryArmor,,,,armor,Armor,high,source:146C.c:1671
-T00649.000,T00649,vs_battle_lootedBlade,0,difficultyFlags,0,char,,,,,,,
-T00649.001,T00649,vs_battle_lootedBlade,1,unk1,1,char,,,,,,,
-T00649.002,T00649,vs_battle_lootedBlade,2,unk2,1,char,,,,,,,
-T00649.003,T00649,vs_battle_lootedBlade,3,unk3,1,char,,,,,,,
-T00649.004,T00649,vs_battle_lootedBlade,4,blade,0,vs_main_inventoryBlade,,,,,,,
-T00650.000,T00650,vs_battle_lootedGem,0,difficultyFlags,0,char,,,,,,,
-T00650.001,T00650,vs_battle_lootedGem,1,unk1,1,char,,,,,,,
-T00650.002,T00650,vs_battle_lootedGem,2,unk2,1,char,,,,,,,
-T00650.003,T00650,vs_battle_lootedGem,3,unk3,1,char,,,,,,,
-T00650.004,T00650,vs_battle_lootedGem,4,gem,0,vs_main_inventoryGem,,,,,,,
-T00651.000,T00651,vs_battle_lootedGrip,0,difficultyFlags,0,char,,,,,,,
-T00651.001,T00651,vs_battle_lootedGrip,1,unk1,1,char,,,,,,,
-T00651.002,T00651,vs_battle_lootedGrip,2,unk2,1,char,,,,,,,
-T00651.003,T00651,vs_battle_lootedGrip,3,unk3,1,char,,,,,,,
-T00651.004,T00651,vs_battle_lootedGrip,4,grip,0,vs_main_inventoryGrip,,,,,,,
+T00649.000,T00649,vs_battle_lootedBlade,0,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the item drops,med,source:MENU/MENUB.PRG/260.c:1132
+T00649.001,T00649,vs_battle_lootedBlade,1,unk1,1,char,,,,reserved1,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:181
+T00649.002,T00649,vs_battle_lootedBlade,2,unk2,1,char,,,,reserved2,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:182
+T00649.003,T00649,vs_battle_lootedBlade,3,unk3,1,char,,,,reserved3,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:183
+T00649.004,T00649,vs_battle_lootedBlade,4,blade,0,vs_main_inventoryBlade,,,,blade,The looted blade,med,source:MENU/MENUB.PRG/260.c:1133
+T00650.000,T00650,vs_battle_lootedGem,0,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the item drops,med,source:MENU/MENUB.PRG/260.c:1156
+T00650.001,T00650,vs_battle_lootedGem,1,unk1,1,char,,,,reserved1,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:222
+T00650.002,T00650,vs_battle_lootedGem,2,unk2,1,char,,,,reserved2,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:223
+T00650.003,T00650,vs_battle_lootedGem,3,unk3,1,char,,,,reserved3,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:224
+T00650.004,T00650,vs_battle_lootedGem,4,gem,0,vs_main_inventoryGem,,,,gem,The looted gem,med,source:MENU/MENUB.PRG/260.c:1157
+T00651.000,T00651,vs_battle_lootedGrip,0,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the item drops,med,source:MENU/MENUB.PRG/260.c:1136
+T00651.001,T00651,vs_battle_lootedGrip,1,unk1,1,char,,,,reserved1,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:189
+T00651.002,T00651,vs_battle_lootedGrip,2,unk2,1,char,,,,reserved2,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:190
+T00651.003,T00651,vs_battle_lootedGrip,3,unk3,1,char,,,,reserved3,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:191
+T00651.004,T00651,vs_battle_lootedGrip,4,grip,0,vs_main_inventoryGrip,,,,grip,The looted grip,med,source:MENU/MENUB.PRG/260.c:1137
 T00652.000,T00652,vs_battle_lootedMisc,0,id,0,u_short,,,,itemId,Item,high,source:146C.c:1693
 T00652.001,T00652,vs_battle_lootedMisc,1,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the drop is kept,high,source:146C.c:1697
 T00652.002,T00652,vs_battle_lootedMisc,2,count,0,char,,,,count,Count,high,source:146C.c:1696
@@ -5916,10 +5916,10 @@ T00660.000,T00660,vs_battle_objectData_flags,0,unk0_0,1,u_int,8,,,tileX,Tile X,h
 T00660.001,T00660,vs_battle_objectData_flags,1,unk0_8,1,u_int,8,,,direction,Facing direction,high,source:146C.c:15086
 T00660.002,T00660,vs_battle_objectData_flags,2,unk0_16,1,u_int,8,,,tileZ,Tile Z,high,source:146C.c:15085
 T00660.003,T00660,vs_battle_objectData_flags,3,unk0_24,1,u_int,8,,,height,Height in units of 64,high,source:146C.c:15087
-T00661.000,T00661,vs_battle_prim,0,p0,0,char,,,,,,,
-T00661.001,T00661,vs_battle_prim,1,p1,0,char,,,,,,,
-T00661.002,T00661,vs_battle_prim,2,p2,0,char,,,,,,,
-T00661.003,T00661,vs_battle_prim,3,p3,0,char,,,,,,,
+T00661.000,T00661,vs_battle_prim,0,p0,0,char,,,,reserved0,Not read by decompiled code,low,declaration-only;source:146C.h:631
+T00661.001,T00661,vs_battle_prim,1,p1,0,char,,,,reserved1,Not read by decompiled code,low,declaration-only;source:146C.h:632
+T00661.002,T00661,vs_battle_prim,2,p2,0,char,,,,reserved2,Not read by decompiled code,low,declaration-only;source:146C.h:633
+T00661.003,T00661,vs_battle_prim,3,p3,0,char,,,,reserved3,Not read by decompiled code,low,declaration-only;source:146C.h:634
 T00662.000,T00662,vs_battle_range_t,0,range,0,char,,,,range,Primary range,high,source:146C.c:1401
 T00662.001,T00662,vs_battle_range_t,1,unk1,1,char,,,,secondRange,"Second range, extended by reach",low,source:146C.c:1402
 T00662.002,T00662,vs_battle_range_t,2,unk2,1,char,,,,thirdRange,"Third range, extended by reach",low,source:146C.c:1403
@@ -5974,15 +5974,15 @@ T00671.021,T00671,vs_battle_textBox,21,unk28,1,short,,,animated width,,,,
 T00671.022,T00671,vs_battle_textBox,22,unk2A,1,short,,,animated height,,,,
 T00671.023,T00671,vs_battle_textBox,23,unk2C,1,short,,,,,,,
 T00671.024,T00671,vs_battle_textBox,24,unk2E,1,short,,,actor texture-animation selection,,,,
-T00672.000,T00672,vs_battle_textBox_fields,0,unk0_0,1,u_int,4,,,,,,
-T00672.001,T00672,vs_battle_textBox_fields,1,unk0_4,1,u_int,2,,,,,,
-T00672.002,T00672,vs_battle_textBox_fields,2,unk0_6,1,u_int,2,,,,,,
-T00672.003,T00672,vs_battle_textBox_fields,3,unk0_8,1,u_int,4,,,,,,
-T00672.004,T00672,vs_battle_textBox_fields,4,unk0_12,1,u_int,4,,,,,,
-T00672.005,T00672,vs_battle_textBox_fields,5,arrowAnimFrame,0,u_int,8,,,,,,
-T00672.006,T00672,vs_battle_textBox_fields,6,unk0_24,1,u_int,6,,,,,,
-T00672.007,T00672,vs_battle_textBox_fields,7,done,0,u_int,1,,,,,,
-T00672.008,T00672,vs_battle_textBox_fields,8,unk0_31,1,u_int,1,,,,,,
+T00672.000,T00672,vs_battle_textBox_fields,0,unk0_0,1,u_int,4,,,kind,Box kind; 4 uses the alternate font table,med,source:5BF94.c:4007
+T00672.001,T00672,vs_battle_textBox_fields,1,unk0_4,1,u_int,2,,,openStyle,Opening style; selects the opening step count,low,source:5BF94.c:3977
+T00672.002,T00672,vs_battle_textBox_fields,2,unk0_6,1,u_int,2,,,alignment,Anchor alignment; flips the frame,med,source:4A0A8.c:832
+T00672.003,T00672,vs_battle_textBox_fields,3,unk0_8,1,u_int,4,,,frameShape,Frame shape index,med,source:5BF94.c:4720
+T00672.004,T00672,vs_battle_textBox_fields,4,unk0_12,1,u_int,4,,,framePart,Frame part selected from the shape,low,source:5BF94.c:4744
+T00672.005,T00672,vs_battle_textBox_fields,5,arrowAnimFrame,0,u_int,8,,,arrowAnimFrame,Continue-arrow animation frame,med,source:5BF94.c:1776
+T00672.006,T00672,vs_battle_textBox_fields,6,unk0_24,1,u_int,6,,,speakerTexture,Speaker portrait texture; bit 0x20 for none,med,source:4A0A8.c:831
+T00672.007,T00672,vs_battle_textBox_fields,7,done,0,u_int,1,,,done,Set when the text has finished,med,source:5BF94.c:1747
+T00672.008,T00672,vs_battle_textBox_fields,8,unk0_31,1,u_int,1,,,opaque3Bit7,Tested first each update; meaning not established,low,source:5BF94.c:3952
 T00673.000,T00673,vs_battle_uiAccessory,0,accessory,0,vs_battle_uiEquipment,,,,accessory,Accessory part stats,med,declaration-only;source:146C.h:414
 T00673.001,T00673,vs_battle_uiAccessory,1,currentStr,0,short,,,,currentStr,Strength contribution,med,declaration-only;source:146C.h:415
 T00673.002,T00673,vs_battle_uiAccessory,2,currentInt,0,short,,,,currentInt,Intelligence contribution,med,declaration-only;source:146C.h:416
@@ -6032,15 +6032,15 @@ T00675.019,T00675,vs_battle_uiEquipment,19,range,0,vs_battle_range_t,,,,range,At
 T00675.020,T00675,vs_battle_uiEquipment,20,types,0,signed char[4],,,,types,Damage-type values,med,declaration-only;source:146C.h:318
 T00675.021,T00675,vs_battle_uiEquipment,21,classes,0,signed char[8],,,,classes,Enemy-class values,med,declaration-only;source:146C.h:319
 T00675.022,T00675,vs_battle_uiEquipment,22,affinities,0,signed char[8],,,,affinities,Elemental affinity values,med,declaration-only;source:146C.h:320
-T00676.000,T00676,vs_battle_uiEquipment_limb,0,hp,0,short,,,,,,,
-T00676.001,T00676,vs_battle_uiEquipment_limb,1,maxHp,0,short,,,,,,,
-T00676.002,T00676,vs_battle_uiEquipment_limb,2,agilityDefenseBonus,0,signed char,,,,,,,
-T00676.003,T00676,vs_battle_uiEquipment_limb,3,unk5,1,char,,,modelLimbAnchorIndex,,,,
-T00676.004,T00676,vs_battle_uiEquipment_limb,4,nameIndex,0,u_char,,,,,,,
-T00676.005,T00676,vs_battle_uiEquipment_limb,5,chainEvasion,0,char,,,,,,,
-T00676.006,T00676,vs_battle_uiEquipment_limb,6,types,0,short[4],,,,,,,
-T00676.007,T00676,vs_battle_uiEquipment_limb,7,affinities,0,short[8],,,,,,,
-T00676.008,T00676,vs_battle_uiEquipment_limb,8,armor,0,vs_battle_uiArmor,,,,,,,
+T00676.000,T00676,vs_battle_uiEquipment_limb,0,hp,0,short,,,,hp,Current HP,high,source:146C.c:864
+T00676.001,T00676,vs_battle_uiEquipment_limb,1,maxHp,0,short,,,,maxHp,Maximum HP,high,source:146C.c:6230
+T00676.002,T00676,vs_battle_uiEquipment_limb,2,agilityDefenseBonus,0,signed char,,,,agilityDefenseBonus,Fork name kept; see cited use,med,source:146C.c:6231
+T00676.003,T00676,vs_battle_uiEquipment_limb,3,unk5,1,char,,,modelLimbAnchorIndex,anchorBone,Model bone the limb's labels and markers are projected from,high,source:146C.c:6236;source:120.c:1214
+T00676.004,T00676,vs_battle_uiEquipment_limb,4,nameIndex,0,u_char,,,,nameIndex,Limb name index,med,source:146C.c:6237
+T00676.005,T00676,vs_battle_uiEquipment_limb,5,chainEvasion,0,char,,,,chainEvasion,Chain evasion,med,source:146C.c:6243
+T00676.006,T00676,vs_battle_uiEquipment_limb,6,types,0,short[4],,,,types,Type values,med,source:146C.c:6246
+T00676.007,T00676,vs_battle_uiEquipment_limb,7,affinities,0,short[8],,,,affinities,Affinity values,med,source:146C.c:6250
+T00676.008,T00676,vs_battle_uiEquipment_limb,8,armor,0,vs_battle_uiArmor,,,,armor,Equipped armor statistics,high,source:146C.c:1421
 T00677.000,T00677,vs_battle_uiMisc,0,id,0,u_short,,,,id,Consumable item identifier,med,declaration-only;source:146C.h:427
 T00677.001,T00677,vs_battle_uiMisc,1,count,0,char,,,,count,Item count,med,declaration-only;source:146C.h:428
 T00677.002,T00677,vs_battle_uiMisc,2,unk3,1,char,,,,reserved03,Unreferenced byte,low,declaration-only;source:146C.h:429
@@ -6094,7 +6094,7 @@ T00680.022,T00680,vs_battle_uiWeapon,22,range,0,vs_battle_range_t,,,,,,,
 T00680.023,T00680,vs_battle_uiWeapon,23,classAffinityCurrent,0,vs_battle_classAffinityCurrent,,,,,,,
 T00680.024,T00680,vs_battle_uiWeapon,24,unk168,1,short[8],,,temporary affinity bonuses | temporary elemental affinity offsets,,,,
 T00680.025,T00680,vs_battle_uiWeapon,25,classAffinityBaseline,0,vs_battle_classAffinityBaseline,,,,,,,
-T00681.000,T00681,vs_battle_uiWeapon_unk,0,unk0,1,u_short[24],,,,,,,
+T00681.000,T00681,vs_battle_uiWeapon_unk,0,unk0,1,u_short[24],,,,reserved0,Not read by decompiled code,low,declaration-only;source:146C.h:285
 T00682.000,T00682,vs_battle_weaponIntermediate,0,blade,0,vs_battle_uiEquipment,,,,blade,Blade part stats,med,declaration-only;source:146C.h:765
 T00682.001,T00682,vs_battle_weaponIntermediate,1,grip,0,vs_battle_uiEquipment,,,,grip,Grip part stats,med,declaration-only;source:146C.h:766
 T00682.002,T00682,vs_battle_weaponIntermediate,2,gems,0,vs_battle_uiEquipment[3],,,,gems,Socketed gem stats,med,declaration-only;source:146C.h:767
@@ -6479,11 +6479,11 @@ T00708.000,T00708,vs_main_sfxContext,0,unk0,1,int,,,,reserved0,No access found,l
 T00708.001,T00708,vs_main_sfxContext,1,unk4,1,int,,,,reserved4,No access found,low,declaration-only;source:25AC.h:6
 T00708.002,T00708,vs_main_sfxContext,2,unk8,1,char,,,,reserved8,No access found,low,declaration-only;source:25AC.h:7
 T00708.003,T00708,vs_main_sfxContext,3,unk9,1,char,,,metadataFlagByte,flags,Bit 7 requests playback tags,high,source:25AC.c:443
-T00709.000,T00709,vs_main_statusEffectParams_t,0,unk0,1,int,,,,,,,
-T00709.001,T00709,vs_main_statusEffectParams_t,1,unk4,1,u_short,,,,,,,
-T00709.002,T00709,vs_main_statusEffectParams_t,2,unk6,1,u_short,,,,,,,
-T00709.003,T00709,vs_main_statusEffectParams_t,3,unk8,1,int,,,,,,,
-T00709.004,T00709,vs_main_statusEffectParams_t,4,unkC,1,int,,,,,,,
+T00709.000,T00709,vs_main_statusEffectParams_t,0,unk0,1,int,,,,statusFlags,Status flags the effect sets,med,source:146C.c:11207
+T00709.001,T00709,vs_main_statusEffectParams_t,1,unk4,1,u_short,,,,reserved4,Not read by decompiled code,low,declaration-only;source:main.h:111
+T00709.002,T00709,vs_main_statusEffectParams_t,2,unk6,1,u_short,,,,tickInterval,Ticks per HP change of a damage-over-time status,med,source:74088.c:1223
+T00709.003,T00709,vs_main_statusEffectParams_t,3,unk8,1,int,,,,cancelledStatuses,Active statuses the effect cancels instead of stacking,med,source:146C.c:11209
+T00709.004,T00709,vs_main_statusEffectParams_t,4,unkC,1,int,,,,blockingStatuses,Active statuses that keep the effect from applying,med,source:146C.c:11206
 T00710.000,T00710,vs_main_stickPos,0,lStickX,0,int,,,,,,,
 T00710.001,T00710,vs_main_stickPos,1,lStickY,0,int,,,,,,,
 T00710.002,T00710,vs_main_stickPos,2,rStickX,0,int,,,,,,,
@@ -6575,13 +6575,13 @@ T00725.007,T00725,vs_rotatingSurfaceState,7,angle,0,int,,,,,,,
 T00725.008,T00725,vs_rotatingSurfaceState,8,age,0,int,,,,,,,
 T00725.009,T00725,vs_rotatingSurfaceState,9,factors,0,int[5],,,,,,,
 T00725.010,T00725,vs_rotatingSurfaceState,10,texture,0,func_800D6CF_t,,,,,,,
-T00726.000,T00726,vs_scratch_t,0,unk0,1,void *,,,,,,,
-T00726.001,T00726,vs_scratch_t,1,unk4,1,void *,,,,,,,
-T00726.002,T00726,vs_scratch_t,2,unk8,1,void *,,,,,,,
-T00726.003,T00726,vs_scratch_t,3,unkC,1,void *,,,,,,,
-T00726.004,T00726,vs_scratch_t,4,firstPersonViewFacing,0,u_int,,,,,,,
-T00726.005,T00726,vs_scratch_t,5,viewMatrix,0,MATRIX,,,,,,,
-T00726.006,T00726,vs_scratch_t,6,camera,0,vs_camera_t,,,,,,,
+T00726.000,T00726,vs_scratch_t,0,unk0,1,void *,,,,primitiveCursor,Next free primitive in the frame's primitive buffer,high,source:146C.c:7587
+T00726.001,T00726,vs_scratch_t,1,unk4,1,void *,,,,orderingTable,Main ordering table,high,source:146C.c:7585
+T00726.002,T00726,vs_scratch_t,2,unk8,1,void *,,,,overlayOrderingTable,"Ordering table entry for overlay sprites, in front of the main table",high,source:146C.c:7584
+T00726.003,T00726,vs_scratch_t,3,unkC,1,void *,,,,reservedC,Not read by decompiled code,low,declaration-only;source:scratch.h:16
+T00726.004,T00726,vs_scratch_t,4,firstPersonViewFacing,0,u_int,,,,firstPersonViewFacing,Facing of the first-person view,med,source:146C.c:779
+T00726.005,T00726,vs_scratch_t,5,viewMatrix,0,MATRIX,,,,viewMatrix,View matrix,med,source:146C.c:2503
+T00726.006,T00726,vs_scratch_t,6,camera,0,vs_camera_t,,,,camera,Camera,med,source:146C.c:2468
 T00727.000,T00727,vs_surfacePrim,0,tag,0,int,,,,,,,
 T00727.001,T00727,vs_surfacePrim,1,poly,0,POLY_GT4,,,,,,,
 T00727.002,T00727,vs_surfacePrim,2,drawMode,0,int,,,,,,,
@@ -6651,43 +6651,43 @@ T00737.001,T00737,vs_transposedRingUV,1,v,0,u_char,,,,,,,
 T00738.000,T00738,vs_trialScore_t,0,time,0,u_int,24,,,,,,
 T00738.001,T00738,vs_trialScore_t,1,round,0,u_int,7,,,,,,
 T00738.002,T00738,vs_trialScore_t,2,difficulty,0,u_int,1,,,,,,
-T00739.000,T00739,wanderObject,0,pad0,1,char[8],,,,,,,
-T00739.001,T00739,wanderObject,1,flags,0,unsigned int,,,,,,,
-T00740.000,T00740,wanderState,0,pad0,1,char[2],,,,,,,
-T00740.001,T00740,wanderState,1,flag2,0,unsigned char,,,,,,,
-T00740.002,T00740,wanderState,2,flag3,0,unsigned char,,,,,,,
-T00740.003,T00740,wanderState,3,pad4,1,char[4],,,,,,,
-T00740.004,T00740,wanderState,4,flag8,0,unsigned char,,,,,,,
-T00740.005,T00740,wanderState,5,pad9,1,char[43],,,,,,,
-T00740.006,T00740,wanderState,6,tile,0,vs_battle_movementPosition,,,,,,,
-T00740.007,T00740,wanderState,7,pad38,1,char[16],,,,,,,
-T00740.008,T00740,wanderState,8,saved,0,vs_battle_movementPosition,,,,,,,
-T00740.009,T00740,wanderState,9,x,0,short,,,,,,,
-T00740.010,T00740,wanderState,10,y,0,short,,,,,,,
-T00740.011,T00740,wanderState,11,z,0,short,,,,,,,
-T00740.012,T00740,wanderState,12,pad52,1,char[6],,,,,,,
-T00740.013,T00740,wanderState,13,object,0,wanderObject *,,,,,,,
-T00740.014,T00740,wanderState,14,pad5C,1,char[88],,,,,,,
-T00740.015,T00740,wanderState,15,moveArg,0,unsigned int,,,,,,,
-T00740.016,T00740,wanderState,16,padB8,1,char[8],,,,,,,
-T00740.017,T00740,wanderState,17,mode,0,unsigned short,,,,,,,
-T00740.018,T00740,wanderState,18,timer,0,unsigned short,,,,,,,
-T00740.019,T00740,wanderState,19,rangeSquared,0,int,,,,,,,
-T00740.020,T00740,wanderState,20,padC8,1,char[8],,,,,,,
-T00740.021,T00740,wanderState,21,angle,0,short,,,,,,,
-T00740.022,T00740,wanderState,22,cooldown,0,unsigned short,,,,,,,
-T00740.023,T00740,wanderState,23,restPeriod,0,unsigned short,,,,,,,
-T00740.024,T00740,wanderState,24,movePeriod,0,unsigned short,,,,,,,
-T00740.025,T00740,wanderState,25,rate,0,unsigned char,,,,,,,
-T00740.026,T00740,wanderState,26,padD9,1,char[67],,,,,,,
-T00740.027,T00740,wanderState,27,goal,0,vs_battle_movementPosition,,,,,,,
-T00740.028,T00740,wanderState,28,pad120,1,char[13],,,,,,,
-T00740.029,T00740,wanderState,29,mode12D,0,unsigned char,,,,,,,
-T00740.030,T00740,wanderState,30,pad12E,1,char[47],,,,,,,
-T00740.031,T00740,wanderState,31,count,0,unsigned char,,,,,,,
-T00740.032,T00740,wanderState,32,flags,0,unsigned short,,,,,,,
-T00740.033,T00740,wanderState,33,pad160,1,char[8],,,,,,,
-T00740.034,T00740,wanderState,34,dest,0,vs_battle_movementPosition,,,,,,,
+T00739.000,T00739,wanderObject,0,pad0,1,char[8],,,,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:1588
+T00739.001,T00739,wanderObject,1,flags,0,unsigned int,,,,opaque8,"Used, but its meaning is not established",low,source:771A8.c:1727
+T00740.000,T00740,wanderState,0,pad0,1,char[2],,,,reserved0,Not read through this view,low,declaration-only;source:771A8.c:1592
+T00740.001,T00740,wanderState,1,flag2,0,unsigned char,,,,isStuck,Set when the actor has not left its tile,med,source:771A8.c:1676
+T00740.002,T00740,wanderState,2,flag3,0,unsigned char,,,,opaque3,"Used, but its meaning is not established",low,source:771A8.c:1800
+T00740.003,T00740,wanderState,3,pad4,1,char[4],,,,reserved4,Not read through this view,low,declaration-only;source:771A8.c:1595
+T00740.004,T00740,wanderState,4,flag8,0,unsigned char,,,,opaque8,"Used, but its meaning is not established",low,source:771A8.c:1774
+T00740.005,T00740,wanderState,5,pad9,1,char[43],,,,reserved9,Not read through this view,low,declaration-only;source:771A8.c:1597
+T00740.006,T00740,wanderState,6,tile,0,vs_battle_movementPosition,,,,tile,Current tile word,high,source:771A8.c:1781
+T00740.007,T00740,wanderState,7,pad38,1,char[16],,,,reserved38,Not read through this view,low,declaration-only;source:771A8.c:1599
+T00740.008,T00740,wanderState,8,saved,0,vs_battle_movementPosition,,,,savedDestination,Saved destination tile,med,source:771A8.c:1823
+T00740.009,T00740,wanderState,9,x,0,short,,,,x,Named in the fork view; see cited use,med,source:771A8.c:1820
+T00740.010,T00740,wanderState,10,y,0,short,,,,y,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:1601
+T00740.011,T00740,wanderState,11,z,0,short,,,,z,Named in the fork view; see cited use,med,source:771A8.c:1821
+T00740.012,T00740,wanderState,12,pad52,1,char[6],,,,reserved52,Not read through this view,low,declaration-only;source:771A8.c:1602
+T00740.013,T00740,wanderState,13,object,0,wanderObject *,,,,model,Model record,med,source:771A8.c:1727
+T00740.014,T00740,wanderState,14,pad5C,1,char[88],,,,reserved5C,Not read through this view,low,declaration-only;source:771A8.c:1604
+T00740.015,T00740,wanderState,15,moveArg,0,unsigned int,,,,moveDistance,Distance of the current move,med,source:771A8.c:1781
+T00740.016,T00740,wanderState,16,padB8,1,char[8],,,,reservedB8,Not read through this view,low,declaration-only;source:771A8.c:1606
+T00740.017,T00740,wanderState,17,mode,0,unsigned short,,,,wanderPhase,Wander phase counter,low,source:771A8.c:1713
+T00740.018,T00740,wanderState,18,timer,0,unsigned short,,,,wanderTimer,Wander timer,med,source:771A8.c:1723
+T00740.019,T00740,wanderState,19,rangeSquared,0,int,,,,wanderRangeSquared,Squared wander radius,med,source:771A8.c:1761
+T00740.020,T00740,wanderState,20,padC8,1,char[8],,,,reservedC8,Not read through this view,low,declaration-only;source:771A8.c:1610
+T00740.021,T00740,wanderState,21,angle,0,short,,,,wanderHeading,Heading of the wander walk,med,source:771A8.c:1690
+T00740.022,T00740,wanderState,22,cooldown,0,unsigned short,,,,wanderCooldown,Frames before the next wander walk,med,source:771A8.c:1712
+T00740.023,T00740,wanderState,23,restPeriod,0,unsigned short,,,,restPeriod,Wander rest period,med,source:771A8.c:1725
+T00740.024,T00740,wanderState,24,movePeriod,0,unsigned short,,,,movePeriod,Wander move period,med,source:771A8.c:1726
+T00740.025,T00740,wanderState,25,rate,0,unsigned char,,,,wanderRate,Wander chance exponent,med,source:771A8.c:1724
+T00740.026,T00740,wanderState,26,padD9,1,char[67],,,,reservedD9,Not read through this view,low,declaration-only;source:771A8.c:1616
+T00740.027,T00740,wanderState,27,goal,0,vs_battle_movementPosition,,,,goal,Wander goal tile,med,source:771A8.c:1650
+T00740.028,T00740,wanderState,28,pad120,1,char[13],,,,reserved120,Not read through this view,low,declaration-only;source:771A8.c:1618
+T00740.029,T00740,wanderState,29,mode12D,0,unsigned char,,,,behaviorMode,"Behavior mode (1 reacting, 2 wandering)",low,source:771A8.c:1732
+T00740.030,T00740,wanderState,30,pad12E,1,char[47],,,,reserved12E,Not read through this view,low,declaration-only;source:771A8.c:1620
+T00740.031,T00740,wanderState,31,count,0,unsigned char,,,,count,Named in the fork view; see cited use,med,source:771A8.c:1649
+T00740.032,T00740,wanderState,32,flags,0,unsigned short,,,,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:771A8.c:1654
+T00740.033,T00740,wanderState,33,pad160,1,char[8],,,,reserved160,Not read through this view,low,declaration-only;source:771A8.c:1623
+T00740.034,T00740,wanderState,34,dest,0,vs_battle_movementPosition,,,,destination,Destination tile,high,source:771A8.c:1814
 T00741.000,T00741,zudHeader,0,unk0,1,int,,,,characterIds,Character weapon category and material identifiers,high,DataCrystal $00-$03
 T00741.001,T00741,zudHeader,1,unk4,1,int,,,,shieldIds,Shield and shield-material identifiers then padding,high,DataCrystal $04-$07
 T00741.002,T00741,zudHeader,2,model,0,int,,,,characterShapeOffset,Character SHP section offset,med,declaration-only;source:146C.c:265
@@ -6851,21 +6851,21 @@ T00809.000,T00809,movementPath,0,raw,0,u_int,,,,word,Whole word,med,source:771A8
 T00809.001,T00809,movementPath,1,bits,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:2339:5),,,,bits,Bit fields,med,source:771A8.c:2409
 T00810.000,T00810,movementStepPosition,0,raw,0,unsigned int,,,,word,Whole word,med,source:771A8.c:1101
 T00810.001,T00810,movementStepPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1021:5),,,,tile,Tile fields,med,source:771A8.c:1097
-T00811.000,T00811,stuckMovementPosition,0,raw,0,u_int,,,,,,,
-T00811.001,T00811,stuckMovementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:1184:5),,,,,,,
-T00812.000,T00812,targetMovementPoint,0,raw,0,unsigned int,,,,,,,
-T00812.001,T00812,targetMovementPoint,1,b,0,unsigned char[4],,,,,,,
-T00813.000,T00813,terrainMovementPoint,0,raw,0,unsigned int,,,,,,,
-T00813.001,T00813,terrainMovementPoint,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1475:5),,,,,,,
+T00811.000,T00811,stuckMovementPosition,0,raw,0,u_int,,,,word,Whole word,med,source:71618.c:1223
+T00811.001,T00811,stuckMovementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:1184:5),,,,tile,Tile bytes,med,source:71618.c:1226
+T00812.000,T00812,targetMovementPoint,0,raw,0,unsigned int,,,,word,Whole word,med,source:771A8.c:2053
+T00812.001,T00812,targetMovementPoint,1,b,0,unsigned char[4],,,,bytes,Bytes of the word,med,source:771A8.c:1988
+T00813.000,T00813,terrainMovementPoint,0,raw,0,unsigned int,,,,word,Whole word,med,source:771A8.c:1524
+T00813.001,T00813,terrainMovementPoint,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1475:5),,,,tile,Tile bytes,med,source:771A8.c:1520
 T00814.000,T00814,vs_Gametime_t,0,t,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),,,,,,,
 T00814.001,T00814,vs_Gametime_t,1,all,0,u_int,,,,,,,
-T00815.000,T00815,vs_battle_movementPosition,0,raw,0,unsigned int,,,,,,,
-T00815.001,T00815,vs_battle_movementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),,,,,,,
-T00816.000,T00816,vs_battle_movementPosition,0,raw,0,unsigned int,,,,,,,
-T00816.001,T00816,vs_battle_movementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:437:5),,,,,,,
-T00817.000,T00817,vs_battle_movementPosition,0,raw,0,unsigned int,,,,,,,
-T00817.001,T00817,vs_battle_movementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:441:5),,,,,,,
-T00818.000,T00818,vs_battle_movementPosition,0,raw,0,unsigned int,,,,,,,
-T00818.001,T00818,vs_battle_movementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),,,,,,,
+T00815.000,T00815,vs_battle_movementPosition,0,raw,0,unsigned int,,,,word,Whole word,med,source:6FC00.c:464
+T00815.001,T00815,vs_battle_movementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),,,,tile,Tile bytes,med,source:6FC00.c:440
+T00816.000,T00816,vs_battle_movementPosition,0,raw,0,unsigned int,,,,word,Whole word,med,source:6FC00.c:464
+T00816.001,T00816,vs_battle_movementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\71618.c:437:5),,,,tile,Tile bytes,med,source:6FC00.c:440
+T00817.000,T00817,vs_battle_movementPosition,0,raw,0,unsigned int,,,,word,Whole word,med,source:6FC00.c:464
+T00817.001,T00817,vs_battle_movementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:441:5),,,,tile,Tile bytes,med,source:6FC00.c:440
+T00818.000,T00818,vs_battle_movementPosition,0,raw,0,unsigned int,,,,word,Whole word,med,source:6FC00.c:464
+T00818.001,T00818,vs_battle_movementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7EE98.c:420:5),,,,tile,Tile bytes,med,source:6FC00.c:440
 T00819.000,T00819,vs_hitParams_t,0,u16,0,u_short[2],,,,halves,Parameters as two 16-bit halves,med,declaration-only;source:main.h:47
 T00819.001,T00819,vs_hitParams_t,1,s32,0,u_int,,,,word,Parameters as one 32-bit word,med,declaration-only;source:main.h:48
