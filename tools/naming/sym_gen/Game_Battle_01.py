@@ -322,5 +322,153 @@ T("T00147", "State", "Battle::Ai::ActorStateFlagBits", AI + "AiState.h",
       ("f26", "bits26", "Bits 26-27", LOW), ("high", "highBits", "Bits 28-31", LOW),
   ], recv=r"flags\.bits")
 
+# ---------------------------------------------------------------- group B: small named battle types
+T("T00200", "State", "Actors::KeyframeRangeScratch", "Native\\Game\\src\\Actors\\Animation.h",
+  "Holds the frame range and track data pointer while one animation track is decoded on the scratchpad.", "med",
+  c(("44F14.c", "for (frame = scratch->first; frame <= scratch->last; ++frame) {")), [
+      ("unk0", "reserved0", "Not read", LOW),
+      ("first", "firstFrame", "First frame decoded", HIGH),
+      ("last", "lastFrame", "Last frame decoded", HIGH),
+      ("data", "trackData", "Track data being decoded", MED),
+  ], recv=r"scratch")
+T("T00217", "State", "Battle::TargetSphereSpec", B + "TargetVolume.h",
+  "Describes one targeting sphere volume; set as a whole, and only its kind byte is read by decompiled code.", "low",
+  c(("573B8.c", "D_800EB9B8->unk0.unk0 |= 0x80;")), [
+      ("unk0", "kind", "Volume kind; bit 7 marks it active", MED, c(("573B8.c", "D_800EB9B8->unk0.unk0 |= 0x80;"))),
+      ("unk1", "reserved1", "Copied with the volume; not read by decompiled code", LOW),
+      ("unk2", "reserved2", "Copied with the volume; not read by decompiled code", LOW),
+      ("unk3", "reserved3", "Copied with the volume; not read by decompiled code", LOW),
+      ("unk4", "reserved4", "Copied with the volume; not read by decompiled code", LOW),
+      ("unk8", "reserved8", "Copied with the volume; not read by decompiled code", LOW),
+      ("unkC", "reservedC", "Copied with the volume; not read by decompiled code", LOW),
+  ])
+T("T00218", "State", "Battle::SphereTargetLabel", B + "TargetVolume.h",
+  "Holds one floating label shown on a targeting sphere: state, depth, gradient, screen slide, color and text.", "med",
+  c(("58578.c", "vs_battle_renderTextRawColor(arg0->unk10, textXy, color, nextPrim);")), [
+      ("unk0", "state", "0 inactive, 2 sliding in; above 1 is not settled", MED, c(("58578.c", "if (D_800EB9B8->unk990[i].unk0 > 1) {"))),
+      ("unk1", "depth", "Ordering-table depth of the label", MED, c(("58578.c", "u_long* nextPrim = vs_scratch.unk8 - (arg0->unk1 * 4 - 8);"))),
+      ("unk2", "gradient", "Gradient style", MED, c(("58578.c", "int gradient = arg0->unk2;"))),
+      ("unk3", "ringSize", "Ring size passed to the ring draw", LOW, c(("58578.c", "func_800C1A40(sxy, ringXy, arg0->unk3 - 2);"))),
+      ("unk4", "screenX", "Screen X; slides toward its row", MED, c(("58578.c", "x = arg0->unk4 & 0xFFFF;"))),
+      ("unk6", "offsetY", "Y offset added to the label row", MED, c(("58578.c", "y = arg0->unk6 + D_800F4CB4;"))),
+      ("unk7", "fade", "Color fade step", MED, c(("58578.c", "color0 = vs_battle_uiGradientStop(color0, arg0->unk7 * 8, 0x80);"))),
+      ("unk8", "worldPosition", "World position projected for the label", HIGH, c(("58578.c", "gte_ldv0(&arg0->unk8);"))),
+      ("unk10", "text", "Label text", HIGH, c(("58578.c", "vs_battle_renderTextRawColor(arg0->unk10, textXy, color, nextPrim);"))),
+  ])
+T("T00220", "Def", "Battle::Ai::DirectionDelta", AI + "Navigation.h",
+  "Gives the tile X and Z step of one movement direction.", "high",
+  c(("6FC00.c", "dest.p.x = source.p.x + ((D_800F16EC_t*)0x1F8003EC)[direction].dx;")), [
+      ("dx", "dx", "X step (-1, 0 or 1)", HIGH),
+      ("unk0_2", "reserved2Bits", "Not read", LOW),
+      ("dz", "dz", "Z step (-1, 0 or 1)", HIGH),
+      ("unk0_6", "reserved6Bits", "Not read", LOW),
+  ], recv=r"\]")
+T("T00227", "State", "Battle::TargetPreview", B + "Targeting.h",
+  "Describes one selectable target and its preview: position, actor and limb, previewed effect and amounts.", "med",
+  c(("146C.c", "arg0->unkE = arg2->unk0.hitThreshold;"), ("146C.c", "D_800F19CC->unk29C0[count].unk0.vz = room[j].unk2 * 128 + 64;")), [
+      ("unk0", "position", "World position of the target", HIGH,
+       c(("146C.c", "D_800F19CC->unk29C0[count].unk0.vz = room[j].unk2 * 128 + 64;"))),
+      ("unk8", "kind", "Target kind; 16 for chests", LOW, c(("146C.c", "target->unk8 = 16;"))),
+      ("unk9", "actorId", "Actor id; chest index | 0x20 for chests", MED,
+       c(("146C.c", "if (D_800F19CC->unk29C0[i].unk9 < 0x10) {"))),
+      ("unkA", "limb", "Target limb", HIGH,
+       c(("146C.c", "D_800F19CC->unk8.unk4C[i].unk0.targetLimb = D_800F19CC->unk29C0[i].unkA;"))),
+      ("effect", "effect", "Previewed hit effect", HIGH, c(("146C.c", "arg0->effect = effect;"))),
+      ("unkC", "previewAmount", "Current HP or MP shown by the preview", MED, c(("146C.c", "arg0->unkC = var_v0;"))),
+      ("unkE", "hitChance", "Hit chance; for chests a risk-based trap chance", MED,
+       c(("146C.c", "arg0->unkE = arg2->unk0.hitThreshold;"))),
+      ("unk10", "removedStatuses", "Statuses the action removes", HIGH, c(("146C.c", "arg0->unk10 = arg2->removeStatuses & 0x1FFFFFE0;"))),
+      ("unk14", "actionKind", "Kind byte of the action", MED, c(("146C.c", "arg0->unk14 = vs_main_actions[arg1->actionIndex].unk2_4;"))),
+      ("unk15", "opaque15", "Copied from the action request; meaning not established", LOW, c(("146C.c", "arg0->unk15 = arg1->unk3;"))),
+      ("unk16", "opaque16", "Copied from the action request; meaning not established", LOW, c(("146C.c", "arg0->unk16 = arg1->unk2;"))),
+      ("enemyClass", "enemyClass", "Enemy class of the target", HIGH),
+  ], recv=r"arg0|target")
+T("T00230", "State", "Battle::FloatingLabel", B + "ValueLabels.h",
+  "Holds one floating battle label (damage value, status, chain count or timing result): position, key, timing, "
+  "scale and text.", "med",
+  c(("2842C.c", "sprintf(p->displayText, \"%d\", p->unkC & 0x7FFF);")), [
+      ("unk0", "position", "World position; pad is the remaining lifetime", MED,
+       c(("2842C.c", "if (label->unk8.u8[0] == 6 && --label->unk0.pad == -1) {"))),
+      ("unk8", "key", "Label kind and actor", HIGH),
+      ("unkA", "limb", "Limb or sprite index", MED, c(("2842C.c", "p->unkA = arg1;"))),
+      ("unkB", "frame", "Animation frame", MED, c(("2842C.c", "frame = p->unkB;"))),
+      ("unkC", "value", "Displayed value; bit 15 marks healing", MED, c(("2842C.c", "p->unkC = 999 | ((arg2 >> 16) & 0x8000);"))),
+      ("unkE", "colorFlags", "Color and flags; bit 7 is cleared once shown", LOW, c(("2842C.c", "p->unkE = arg3 | flags;"))),
+      ("displayTextLen", "textLength", "Length of the text", HIGH),
+      ("unk10", "scaleX", "Horizontal scale (ONE = 1.0)", MED, c(("2842C.c", "p->unk10 = ONE;"))),
+      ("unk12", "scaleY", "Vertical scale; grows by 10 per frame while rising", MED,
+       c(("2842C.c", "(*D_800F1BAC)[p].unk12 += 10;"))),
+      ("displayText", "text", "Text drawn as digit sprites", HIGH),
+  ], recv=r"\bp|label|q")
+T("T00240", "State", "Field::GimmickObjectInfo", FD + "Gimmicks.h",
+  "Holds a gimmick's object identity, stacking state, kind, material, carrier and support count.", "med",
+  c(("30DB0.c", "&& (D_800F45E0[i]->unk16C.actorId == arg0->actorId))) {")), [
+      ("actorId", "objectId", "Object id matched when models are shared", HIGH),
+      ("unk0_3", "isFalling", "Set when the stack under it is removed", LOW, c(("30DB0.c", "temp_s0->unk16C.unk0_3 = 1;"))),
+      ("unk0_4", "interaction", "Interaction kind; 1 is interactable ahead, 2 drops", LOW,
+       c(("3A1A0.c", "if (object->unk16C.unk0_4 == 1) {"))),
+      ("unk0_7", "reservedBits7", "Not read", LOW),
+      ("unk1", "subtype", "Gimmick subtype", HIGH, c(("30DB0.c", "return temp_a0->unk16C.unk1;"))),
+      ("unk2", "material", "Material; also the orientation table index", MED, c(("30DB0.c", "obj->unk16C.unk2 = material;"))),
+      ("unk3", "carrier", "Gimmick it rests on; 0xFF when none", MED, c(("30DB0.c", "s1->unk16C.unk3 = 0xFF;"))),
+      ("unk4", "supportIndex", "First support slot scanned when moving", LOW, c(("3A1A0.c", "for (i = object->unk16C.unk4; i < 15; i++) {"))),
+      ("unk5", "reserved5", "Not read", LOW),
+      ("unk6", "reserved6", "Not read", LOW),
+      ("unk7", "reserved7", "Not read", LOW),
+      ("unk8", "reserved8", "Not read", LOW),
+  ])
+T("T00244", "State", "Actors::MovementRequest", "Native\\Game\\src\\Actors\\Movement.h",
+  "Holds an actor's pending movement: mode, direction, facing, distance and step vector.", "med",
+  c(("3A1A0.c", "mode = actor->unk1848.unk0;")), [
+      ("unk0", "mode", "Movement mode (0 none, 1, 2, 6 turn, 7 jump)", MED, c(("3A1A0.c", "actor->unk1848.unk0 = 7;"))),
+      ("unk1", "reserved1", "Not read", LOW),
+      ("unk2", "reserved2", "Not read", LOW),
+      ("unk3", "reserved3", "Not read", LOW),
+      ("unk4", "direction", "Movement direction", MED, c(("3A1A0.c", "actor->unk1848.unk4 = direction;"))),
+      ("unk6", "facing", "Facing to turn to", MED, c(("38C1C.c", "func_800AA850(actor->unk0.unkF, actor->unk1848.unk6, 12);"))),
+      ("unk8", "distance", "Distance or speed of the move", MED, c(("3A1A0.c", "actor->unk1848.unk8 = distance;"))),
+      ("unkC", "reservedC", "Not read", LOW),
+      ("unk10", "step", "Movement vector added to the position", HIGH,
+       c(("38C1C.c", "addVector(&arg0->unk0.position, &arg0->unk1848.unk10);"))),
+  ])
+T("T00246", "State", "Actors::CompanionOffset", "Native\\Game\\src\\Actors\\ActorRecord.h",
+  "Offsets a linked companion actor from its anchor and biases its draw depth.", "med",
+  c(("44F14.c", "frame->depth += actor->unk6F4.unk3 * 4;")), [
+      ("unk0", "offsetX", "X offset added to the position", MED, c(("44F14.c", "+ (signed char)(u_char)actor->unk6F4.unk0;"))),
+      ("unk1", "offsetY", "Y offset added to the position", MED, c(("44F14.c", "+ (signed char)(u_char)actor->unk6F4.unk1;"))),
+      ("unk2", "offsetZ", "Z offset added to the position", MED, c(("44F14.c", "+ (signed char)(u_char)actor->unk6F4.unk2;"))),
+      ("unk3", "depthBias", "Draw depth bias in units of 4; 8 by default", MED, c(("44F14.c", "frame->depth += actor->unk6F4.unk3 * 4;"))),
+  ])
+T("T00264", "State", "Battle::EffectInstanceTargets", B + "Effects.h",
+  "Holds a running effect's four target slots, its timeline, renderer, effect id, phase and parameter.", "med",
+  c(("5BF94.c", "arg1->unkD1C.unk0 = *arg0->unk0;"), ("5BF94.c", "spawn.unk4 = &arg0->targets[i];")), [
+      ("unk0", "source", "Effect source", MED, c(("5BF94.c", "arg1->unkD1C.unk0 = *arg0->unk0;"))),
+      ("unkC", "emitFrom", "Where the effect starts: the source, or the target for reversed effects", LOW,
+       c(("5BF94.c", "arg1->unkD1C.unkC = *arg0->unk4;"))),
+      ("unk18", "target", "Effect target; byte 2 also selects a color preset", LOW, c(("5BF94.c", "arg1->unkD1C.unk18 = *arg0->unk8;"))),
+      ("unk24", "emitTo", "Where the effect ends: the target, or the source for reversed effects", LOW,
+       c(("5BF94.c", "arg1->unkD1C.unk24 = *arg0->unkC;"))),
+      ("unk30", "timeline", "Effect timeline", MED, c(("5BF94.c", "if (var_s0->unkD1C.unk30 != NULL) {"))),
+      ("unk34", "renderer", "Renderer attached to the effect", MED, c(("5BF94.c", "var_s1 = arg0->unkD1C.unk34;"))),
+      ("unk38", "effectId", "Effect id", HIGH, c(("5BF94.c", "child->unkD1C.unk38 = arg0->effectId;"))),
+      ("unk3A", "phase", "Secondary effect phase", MED, c(("5BF94.c", "switch (var_s1->unkD1C.unk3A) {"))),
+      ("unk3C", "parameter", "Spawn parameter; nonzero attaches a renderer", LOW, c(("5BF94.c", "child->unkD1C.unk3C = arg2;"))),
+  ])
+T("T00272", "OnDisc", "Battle::Ai::RouteGateEnd", AI + "Navigation.h",
+  "Gives the tile of one end of a route gate; ends are stored in linked pairs.", "med",
+  c(("771A8.c", "if (D_800F5910[i * 2].unk0_0 == arg0->unk0")), [
+      ("unk0_0", "tileX", "Tile X", MED, c(("771A8.c", "if (D_800F5910[i * 2].unk0_0 == arg0->unk0"))),
+      ("unk0_5", "tileZ", "Tile Z", MED, c(("771A8.c", "&& D_800F5910[i * 2].unk0_5 == arg0->unk2) {"))),
+      ("unk0_10", "reservedBits10", "Not read", LOW),
+  ])
+T("T00295", "Value", "Render::PolyFt4", "Native\\Graphics\\src\\Primitives.h",
+  "Is a flat textured quad GPU packet: color code, then XY and UV words with the palette and texture page.", "med",
+  "declaration-only;" + c(("gpu.h", "} VS_POLY_FT4;")) + ";standard PSX POLY_FT4 word layout", [
+      ("r0g0b0code", "colorCode", "Color and command", MED), ("x0y0", "xy0", "Vertex 0", MED),
+      ("u0v0clut", "uv0Palette", "UV 0 and palette", MED), ("x1y1", "xy1", "Vertex 1", MED),
+      ("u1v1tpage", "uv1TexturePage", "UV 1 and texture page", MED), ("x2y2", "xy2", "Vertex 2", MED),
+      ("u2v2", "uv2", "UV 2", MED), ("x3y3", "xy3", "Vertex 3", MED), ("u3v3", "uv3", "UV 3", MED),
+  ])
+
 if __name__ == "__main__":
     g.write(partial=True)

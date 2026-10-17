@@ -301,3 +301,95 @@ T00791.000,switchValue,Switch position; toggled between 0 and 1,med,source:146C.
 T00791.001,lock,Lock state and door rotation,med,source:146C.c:2175
 T00792.000,target,Tile and facing fields,high,source:146C.c:2804
 T00792.001,word,Whole tile word,high,source:146C.c:881
+T00200.000,reserved0,Not read,low,declaration-only;source:44F14.c:14
+T00200.001,firstFrame,First frame decoded,high,source:44F14.c:1383
+T00200.002,lastFrame,Last frame decoded,high,source:44F14.c:1383
+T00200.003,trackData,Track data being decoded,med,source:44F14.c:1381
+T00217.000,kind,Volume kind; bit 7 marks it active,med,source:573B8.c:454
+T00217.001,reserved1,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:25
+T00217.002,reserved2,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:26
+T00217.003,reserved3,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:27
+T00217.004,reserved4,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:28
+T00217.005,reserved8,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:29
+T00217.006,reservedC,Copied with the volume; not read by decompiled code,low,declaration-only;source:573B8.c:30
+T00218.000,state,"0 inactive, 2 sliding in; above 1 is not settled",med,source:58578.c:649
+T00218.001,depth,Ordering-table depth of the label,med,source:58578.c:659
+T00218.002,gradient,Gradient style,med,source:58578.c:658
+T00218.003,ringSize,Ring size passed to the ring draw,low,source:58578.c:736
+T00218.004,screenX,Screen X; slides toward its row,med,source:58578.c:702
+T00218.005,offsetY,Y offset added to the label row,med,source:58578.c:684
+T00218.006,fade,Color fade step,med,source:58578.c:674
+T00218.007,worldPosition,World position projected for the label,high,source:58578.c:729
+T00218.008,text,Label text,high,source:58578.c:696
+T00220.000,dx,"X step (-1, 0 or 1)",high,source:6FC00.c:462
+T00220.001,reserved2Bits,Not read,low,declaration-only;source:6F014.c:67
+T00220.002,dz,"Z step (-1, 0 or 1)",high,source:6FC00.c:463
+T00220.003,reserved6Bits,Not read,low,declaration-only;source:6F014.c:69
+T00227.000,position,World position of the target,high,source:146C.c:4266
+T00227.001,kind,Target kind; 16 for chests,low,source:146C.c:4276
+T00227.002,actorId,Actor id; chest index | 0x20 for chests,med,source:146C.c:3702
+T00227.003,limb,Target limb,high,source:146C.c:3705
+T00227.004,effect,Previewed hit effect,high,source:146C.c:3244
+T00227.005,previewAmount,Current HP or MP shown by the preview,med,source:146C.c:3245
+T00227.006,hitChance,Hit chance; for chests a risk-based trap chance,med,source:146C.c:3262
+T00227.007,removedStatuses,Statuses the action removes,high,source:146C.c:3263
+T00227.008,actionKind,Kind byte of the action,med,source:146C.c:3264
+T00227.009,opaque15,Copied from the action request; meaning not established,low,source:146C.c:3265
+T00227.010,opaque16,Copied from the action request; meaning not established,low,source:146C.c:3266
+T00227.011,enemyClass,Enemy class of the target,high,source:146C.c:3267
+T00230.000,position,World position; pad is the remaining lifetime,med,source:2842C.c:1778
+T00230.001,key,Label kind and actor,high,source:2842C.c:1571
+T00230.002,limb,Limb or sprite index,med,source:2842C.c:1750
+T00230.003,frame,Animation frame,med,source:2842C.c:1572
+T00230.004,value,Displayed value; bit 15 marks healing,med,source:2842C.c:1632
+T00230.005,colorFlags,Color and flags; bit 7 is cleared once shown,low,source:2842C.c:1628
+T00230.006,textLength,Length of the text,high,source:2842C.c:1638
+T00230.007,scaleX,Horizontal scale (ONE = 1.0),med,source:2842C.c:1620
+T00230.008,scaleY,Vertical scale; grows by 10 per frame while rising,med,source:2842C.c:1781
+T00230.009,text,Text drawn as digit sprites,high,source:2842C.c:1637
+T00240.000,objectId,Object id matched when models are shared,med,declaration-only;source:3A1A0.h:12
+T00240.001,isFalling,Set when the stack under it is removed,low,source:30DB0.c:3264
+T00240.002,interaction,"Interaction kind; 1 is interactable ahead, 2 drops",low,source:3A1A0.c:608
+T00240.003,reservedBits7,Not read,low,declaration-only;source:3A1A0.h:15
+T00240.004,subtype,Gimmick subtype,high,source:30DB0.c:3360
+T00240.005,material,Material; also the orientation table index,med,source:30DB0.c:3698
+T00240.006,carrier,Gimmick it rests on; 0xFF when none,med,source:30DB0.c:354
+T00240.007,supportIndex,First support slot scanned when moving,low,source:3A1A0.c:1772
+T00240.008,reserved5,Not read,low,declaration-only;source:3A1A0.h:20
+T00240.009,reserved6,Not read,low,declaration-only;source:3A1A0.h:21
+T00240.010,reserved7,Not read,low,declaration-only;source:3A1A0.h:22
+T00240.011,reserved8,Not read,low,declaration-only;source:3A1A0.h:23
+T00244.000,mode,"Movement mode (0 none, 1, 2, 6 turn, 7 jump)",med,source:3A1A0.c:1084
+T00244.001,reserved1,Not read,low,declaration-only;source:3A1A0.h:103
+T00244.002,reserved2,Not read,low,declaration-only;source:3A1A0.h:104
+T00244.003,reserved3,Not read,low,declaration-only;source:3A1A0.h:105
+T00244.004,direction,Movement direction,med,source:3A1A0.c:1085
+T00244.005,facing,Facing to turn to,med,source:38C1C.c:690
+T00244.006,distance,Distance or speed of the move,med,source:3A1A0.c:1086
+T00244.007,reservedC,Not read,low,declaration-only;source:3A1A0.h:109
+T00244.008,step,Movement vector added to the position,high,source:38C1C.c:714
+T00246.000,offsetX,X offset added to the position,med,source:44F14.c:1067
+T00246.001,offsetY,Y offset added to the position,med,source:44F14.c:1069
+T00246.002,offsetZ,Z offset added to the position,med,source:44F14.c:1071
+T00246.003,depthBias,Draw depth bias in units of 4; 8 by default,med,source:44F14.c:1065
+T00264.000,source,Effect source,med,source:5BF94.c:5104
+T00264.001,emitFrom,"Where the effect starts: the source, or the target for reversed effects",low,source:5BF94.c:5105
+T00264.002,target,Effect target; byte 2 also selects a color preset,low,source:5BF94.c:5106
+T00264.003,emitTo,"Where the effect ends: the target, or the source for reversed effects",low,source:5BF94.c:5107
+T00264.004,timeline,Effect timeline,med,source:5BF94.c:5470
+T00264.005,renderer,Renderer attached to the effect,med,source:5BF94.c:5158
+T00264.006,effectId,Effect id,high,source:5BF94.c:5518
+T00264.007,phase,Secondary effect phase,med,source:5BF94.c:5336
+T00264.008,parameter,Spawn parameter; nonzero attaches a renderer,low,source:5BF94.c:5517
+T00272.000,tileX,Tile X,med,source:771A8.c:464
+T00272.001,tileZ,Tile Z,med,source:771A8.c:465
+T00272.002,reservedBits10,Not read,low,declaration-only;source:6F014.c:42
+T00295.000,colorCode,Color and command,med,declaration-only;source:gpu.h:84
+T00295.001,xy0,Vertex 0,med,declaration-only;source:gpu.h:85
+T00295.002,uv0Palette,UV 0 and palette,med,declaration-only;source:gpu.h:86
+T00295.003,xy1,Vertex 1,med,declaration-only;source:gpu.h:87
+T00295.004,uv1TexturePage,UV 1 and texture page,med,declaration-only;source:gpu.h:88
+T00295.005,xy2,Vertex 2,med,declaration-only;source:gpu.h:89
+T00295.006,uv2,UV 2,med,declaration-only;source:gpu.h:90
+T00295.007,xy3,Vertex 3,med,declaration-only;source:gpu.h:91
+T00295.008,uv3,UV 3,med,declaration-only;source:gpu.h:92
