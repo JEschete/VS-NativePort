@@ -53,6 +53,10 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
     "F03466": [("((size + 0xF) >> 4) + 1", "((size + sizeof(Core_HeapBlockHeader) - 1) / sizeof(Core_HeapBlockHeader)) + 1",
                 "heap unit is the block header")],
     "F03467": [("value / 16 - 1", "value / sizeof(Core_HeapBlockHeader) - 1", "heap unit is the block header")],
+    # main.c:8093 reaches the loading image's pixels as the words after its 4-byte size header (one rgb555Sized
+    # asset in the module image); natively the pixels are their own global, filled from the same bytes.
+    "F03421": [("(u_long*)&Render_legacyLoadingImageHeader + 1", "Render_loadingScreenPixels",
+                "pixels follow the size header")],
 }
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [

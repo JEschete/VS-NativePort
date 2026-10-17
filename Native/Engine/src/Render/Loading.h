@@ -19,7 +19,7 @@ _Static_assert(sizeof(Render_LegacyImageSize) == 0x4, "Render_LegacyImageSize mu
 #if !defined(VS_TYPES_ONLY) && !defined(VS_RENDER_LOADING_H_DECLS)
 #define VS_RENDER_LOADING_H_DECLS
 
-extern u_long Render_loadingScreenPixels[];
+extern u_long Render_loadingScreenPixels[1260];
 extern Render_LegacyImageSize Render_legacyLoadingImageHeader;
 
 #endif // VS_RENDER_LOADING_H_DECLS

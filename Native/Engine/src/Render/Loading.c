@@ -3,8 +3,8 @@
 #include "Render/Loading.h"
 
 // decomp: _nowLoading_data (_nowLoading_data@SLUS_010.40)
-u_long Render_loadingScreenPixels[];
+u_long Render_loadingScreenPixels[1260]; /* contents: module image (ModuleData.c) */
 
 // decomp: _nowLoading_header (_nowLoading_header@SLUS_010.40)
-Render_LegacyImageSize Render_legacyLoadingImageHeader;
+Render_LegacyImageSize Render_legacyLoadingImageHeader; /* contents: module image (ModuleData.c) */
 

@@ -220,6 +220,7 @@ def splat_asset_extents() -> dict[tuple[str, str], tuple[int, int]]:
             continue
         module = m[1]
         starts: list[tuple[int, str | None]] = []
+        sized: set[str] = set()   # rgb555Sized: a 4-byte width/height header, then the pixels
         for ln in text.splitlines():
             ln = ln.strip()
             if not ln.startswith("- "):
@@ -229,6 +230,8 @@ def splat_asset_extents() -> dict[tuple[str, str], tuple[int, int]]:
                 kind = (b[2] or "").strip()
                 name = (b[3] or "").strip() if kind and not kind.startswith(".") and kind not in ("c", "asm", "hasm",
                                                                                                     "bin") else None
+                if name and kind == "rgb555Sized":
+                    sized.add(name)
                 starts.append((int(b[1], 0), name))
                 continue
             d = re.match(r"-\s*\{\s*start:\s*(0x[0-9A-Fa-f]+|\d+)", ln)
@@ -239,6 +242,9 @@ def splat_asset_extents() -> dict[tuple[str, str], tuple[int, int]]:
             if name and nxt > start:
                 out[(module, name)] = (start, nxt - start)
                 out.setdefault((module, name + "_clut"), (start, nxt - start))
+                if name in sized:
+                    out[(module, name + "_header")] = (start, 4)
+                    out[(module, name + "_data")] = (start + 4, nxt - start - 4)
     return out
 
 

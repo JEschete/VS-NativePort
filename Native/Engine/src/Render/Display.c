@@ -142,11 +142,11 @@ void Render_ShowLoadingScreen(void)
     setRECT(&rect, (320 - IMG_W(Render_legacyLoadingImageHeader)) / 2,
         (224 - IMG_H(Render_legacyLoadingImageHeader)) / 2, IMG_W(Render_legacyLoadingImageHeader),
         IMG_H(Render_legacyLoadingImageHeader));
-    LoadImage(&rect, (u_long*)&Render_legacyLoadingImageHeader + 1);
+    LoadImage(&rect, Render_loadingScreenPixels);
     setRECT(&rect, ((320 - IMG_W(Render_legacyLoadingImageHeader)) / 2) + 320,
         (224 - IMG_H(Render_legacyLoadingImageHeader)) / 2, IMG_W(Render_legacyLoadingImageHeader),
         IMG_H(Render_legacyLoadingImageHeader));
-    LoadImage(&rect, (u_long*)&Render_legacyLoadingImageHeader + 1);
+    LoadImage(&rect, Render_loadingScreenPixels);
     SetDispMask(1);
 }
 #undef IMG_H

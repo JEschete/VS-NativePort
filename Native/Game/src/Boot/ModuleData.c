@@ -114,6 +114,7 @@
 #include "Render/Font.h"
 #include "Render/FramebufferEffects.h"
 #include "Render/Images.h"
+#include "Render/Loading.h"
 #include "Render/ResultAtlas.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
@@ -438,6 +439,8 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"SLUS_010.40", 0x1FF9C, sizeof Audio_Mixer_kPanGains, &Audio_Mixer_kPanGains}, // G01838 g_Sound_StereoPanGainTableQ15
     {"SLUS_010.40", 0x30A10, sizeof Core_kSineTable, &Core_kSineTable}, // G01902 _trig_table
     {"SLUS_010.40", 0x31214, sizeof Core_Math_kArcTangentTable, &Core_Math_kArcTangentTable}, // G01903 D_80040A14
+    {"SLUS_010.40", 0x39950, sizeof Render_legacyLoadingImageHeader, &Render_legacyLoadingImageHeader}, // G02006 _nowLoading_header
+    {"SLUS_010.40", 0x39954, sizeof Render_loadingScreenPixels, &Render_loadingScreenPixels}, // G02005 _nowLoading_data
     {"SLUS_010.40", 0x3F5DC, sizeof Audio_Seq_unusedMaterialModifiers, &Audio_Seq_unusedMaterialModifiers}, // G01905 vs_main_materialModifiers
     {"SLUS_010.40", 0x3F6CC, sizeof Battle_statusEffectParams, &Battle_statusEffectParams}, // G01906 vs_main_statusEffectParams
     {"SLUS_010.40", 0x3F8CC, sizeof Field_locationDestinations, &Field_locationDestinations}, // G01913 vs_main_locationZoneMapIds
