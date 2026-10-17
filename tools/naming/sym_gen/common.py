@@ -107,6 +107,7 @@ class Gen:
         """Functions whose libclang field references include type.member (any alias of the type), then the
         functions recorded as referencing the type."""
         names = {type_name, *self.types[tid].get("aliases", "").split()} if tid in self.types else {type_name}
+        names |= {f"{k} {n}" for n in list(names) if n.startswith("(unnamed") for k in ("struct", "union")}
         seen = set()
         for fn in tree.ix["functions"].values():
             fields = (fn.get("refs") or {}).get("field", {})
@@ -152,6 +153,24 @@ class Gen:
     def G(self, gid, disp, name, loc, purpose, conf, notes) -> None:
         self.GLOBALS.append([gid, disp, name, loc, purpose, conf, notes])
 
+    def D(self, canonical: str, duplicates: list[str], why: str = "identical layout indexed through a different include path") -> None:
+        """Duplicate type rows: same final name, location and field names as `canonical` (already written by T())."""
+        trow = next(t for t in self.TYPES if t[0] == canonical)
+        cfields = [f for f in self.FIELDS if f[0].startswith(canonical + ".")]
+        for tid in duplicates:
+            if len(self.members[tid]) != len(cfields):
+                sys.exit(f"{tid}: {len(self.members[tid])} members, canonical {canonical} has {len(cfields)}")
+            corig = [m["name"] for m in self.members[canonical]]
+            if [m["name"] for m in self.members[tid]] != corig and "different member spellings" not in why:
+                sys.exit(f"{tid}: member names differ from {canonical}; pass why='... different member spellings ...'")
+            self.TYPES.append([tid, trow[1], trow[2], trow[3], trow[4], trow[5], f"same-as:{canonical};{why};{trow[6]}"])
+            for m, cf in zip(self.members[tid], cfields):
+                self.FIELDS.append([m["id"], cf[1], cf[2], cf[3], cf[4]])
+
+    def applied(self, tid: str) -> tuple[dict, list[dict]]:
+        """An already-applied type row and its field rows (to keep a canonical consistent with a named twin)."""
+        return self.types[tid], self.members[tid]
+
     def T(self, tid, role, name, loc, purpose, conf, notes, specs, recv: str | None = None) -> None:
         """specs: (orig, final, meaning, conf[, cite]); cite None -> first use through recv, else declaration-only."""
         self.TYPES.append([tid, role, name, loc, purpose, conf, notes])
@@ -174,7 +193,10 @@ class Gen:
     def write(self, partial: bool = False) -> None:
         problems = []
         orig_of = {m["id"]: m["name"] for ms in self.members.values() for m in ms}
+        dup_types = {t[0] for t in self.TYPES if t[6].startswith("same-as:")}
         for fid, final, meaning, conf, notes in self.FIELDS:
+            if fid.split(".")[0] in dup_types:
+                continue
             orig = orig_of[fid]
             cites = re.findall(r"source:(?:upstream:)?[^:;]+:\d+", notes)
             if not any(re.search(r"(?<!\w)" + re.escape(orig) + r"(?!\w)", self.resolve(x)) for x in cites):

@@ -247,6 +247,7 @@ def main() -> int:
                 hits: list[str] = []
                 from_upstream = "layout:upstream" in f.get("hints", "") or t["files"].startswith("upstream:")
                 names = {t["name"], *t.get("aliases", "").split()}
+                names |= {f"{k} {n}" for n in list(names) if n.startswith("(unnamed") for k in ("struct", "union")}
                 typed = [(orig, rel, lo, hi) for n in names for orig, rel, lo, hi in field_users.get(f"{n}.{f['name']}", [])]
                 seen_fns = {(rel, orig) for orig, rel, lo, hi in typed}
                 fallback = [(orig, rel, lo, hi) for _, orig, rel, lo, hi in ref_functions(labels) if (rel, orig) not in seen_fns]

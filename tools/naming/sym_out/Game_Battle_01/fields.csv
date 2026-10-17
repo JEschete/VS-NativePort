@@ -1,0 +1,303 @@
+id,final_name,meaning,confidence,notes
+T00125.000,effectId,Hit effect; indexes the effect mediators,high,source:146C.c:13024
+T00125.001,prerequisiteFunctionId,Prerequisite check selected for the hit,high,source:146C.c:13306
+T00125.002,hitFunctionId,Hit-chance function index,high,source:146C.c:10085
+T00125.003,statCalculatorId,Stat-change calculator index,high,source:146C.c:12257
+T00125.004,statFactor,Factor applied by the stat calculation,med,source:146C.c:11645
+T00125.005,damageType,Damage type; 0 is physical,med,source:146C.c:11289
+T00125.006,affinity,Affinity + 1; 0 for none,high,source:146C.c:10783
+T00747.000,effects,Effect values for the limb,high,source:146C.c:10641
+T00747.001,packed,Both effect values as one word; summed across entities,low,source:146C.c:12942
+T00126.000,geometryLength,Geometry section length,med,declaration-only;source:146C.h:221
+T00126.001,collisionMapLength,Collision map section length,med,declaration-only;source:146C.h:222
+T00126.002,tileCellsLength,Tile cell section length,med,declaration-only;source:146C.h:223
+T00126.003,doorsLength,Door section length; 12-byte records,high,source:146C.c:16148
+T00126.004,lightingLength,Lighting section length,med,declaration-only;source:146C.h:225
+T00126.005,section6Length,Section 6 length,low,declaration-only;source:146C.h:226
+T00126.006,section7Length,Section 7 length,low,declaration-only;source:146C.h:227
+T00126.007,section8Length,Section 8 length,low,declaration-only;source:146C.h:228
+T00126.008,floorTriggersLength,Floor trigger section length; 12-byte records,high,source:146C.c:16815
+T00126.009,lockTriggersLength,Lock trigger section length; 20-byte records,high,source:146C.c:16222
+T00126.010,environmentLength,Environment section length,med,declaration-only;source:146C.h:231
+T00126.011,textureEffectsLength,Texture effect section length,high,source:2842C.c:870
+T00126.012,effectScriptsLength,Effect script section length,high,source:2842C.c:899
+T00126.013,sectionELength,Section E length,low,declaration-only;source:146C.h:234
+T00126.014,minimapSceneLength,Minimap scene section length,med,declaration-only;source:146C.h:235
+T00126.015,tiledBackgroundLength,Tiled background section length,med,declaration-only;source:146C.h:236
+T00126.016,viewTriggersLength,View trigger section length,high,source:146C.c:16426
+T00126.017,movingPlatformsLength,Moving platform section length; 184-byte records,high,source:146C.c:16506
+T00126.018,containersLength,Treasure chest section length,high,source:146C.c:16841
+T00126.019,soundDataLength,AKAO sound section length,med,declaration-only;source:146C.h:240
+T00126.020,section15Length,Section 15 length,low,declaration-only;source:146C.h:241
+T00126.021,section16Length,Section 16 length,low,declaration-only;source:146C.h:242
+T00126.022,section17Length,Section 17 length,low,declaration-only;source:146C.h:243
+T00126.023,zoneBoundsLength,Zone bounds section length,med,declaration-only;source:146C.h:244
+T00749.000,bytes,Bytes 0 and 2 seed the target selection,med,source:146C.c:4509
+T00749.001,halves,Last targeted actor and limb,low,source:146C.c:4308
+T00749.002,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
+T00750.000,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
+T00750.001,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
+T00127.000,actor,Battle actor,high,source:146C.c:6505
+T00127.001,stats,Statistics block,high,source:146C.c:6088
+T00751.000,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
+T00751.001,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00752.000,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
+T00752.001,lock,Lock state and door rotation,med,source:146C.c:2175
+T00128.000,count,Number of label sprites; 0 for none,high,source:2842C.c:2220
+T00128.001,labels,Label sprite indices,high,source:2842C.c:2257
+T00128.002,spacing,Read as the width offset between sprites,low,source:2842C.c:2266
+T00754.000,bytes,Byte 1 is the envelope shape,med,source:4A0A8.c:3917
+T00754.001,count,Remaining shake count,med,source:4A0A8.c:4007
+T00130.000,corners,Projected corners,high,source:58578.c:393
+T00130.001,normalClip,Normal-clip result of the corners,high,source:58578.c:402
+T00131.000,localPoint,Point in shape space,high,source:58578.c:372
+T00131.001,rotatedPoint,Point rotated into world space,high,source:58578.c:380
+T00131.002,origin,Shape origin,high,source:58578.c:369
+T00132.000,tile,Box tile,high,source:58578.c:705
+T00132.001,shadePoly,Shaded polygon,high,source:58578.c:708
+T00132.002,texturePageCommand,Texture-page command word,low,declaration-only;source:58578.c:76
+T00755.000,flags,Shape flags,med,source:58578.c:413
+T00755.001,extents,Size along each axis; byte 0 is the action's X range,med,source:146C.c:13460
+T00756.000,word,All bytes; 0xFFFFFF clears the highlight,med,source:5BF94.c:3500
+T00756.001,bytes,Byte 1 is the highlighted entry,low,source:5BF94.c:3388
+T00133.000,currentCategory,Selected category + 1,high,source:items0.h:49
+T00133.001,reserved1,Not read,low,declaration-only;source:5BF94.h:128
+T00133.002,categoryCursors,List cursor of each category,high,source:items2.h:922
+T00757.000,bits,Packed ability fields,med,source:146C.c:4705
+T00757.001,halves,Half 0 is the chosen item; half 1 the consumed item,med,source:146C.c:3816
+T00757.002,word,Whole command word,med,source:146C.c:4699
+T00134.000,redCurve,Red fade curve,med,declaration-only;source:5BF94.h:275
+T00134.001,greenCurve,Green fade curve,med,declaration-only;source:5BF94.h:276
+T00134.002,blueCurve,Blue fade curve,med,declaration-only;source:5BF94.h:277
+T00134.003,age,Particle age,high,source:5BF94.c:7493
+T00758.000,actor,Actor and part,high,source:146C.c:3179
+T00758.001,position,World position,high,source:146C.c:3181
+T00135.000,tileX,Tile X,high,source:771A8.c:583
+T00135.001,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00135.002,tileZ,Tile Z,high,source:771A8.c:583
+T00135.003,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00759.000,word,Whole flag word,med,source:6FC00.c:706
+T00759.001,bits,Bit fields,low,source:6FC00.c:1034
+T00136.000,active,Relation is live this frame,med,source:6FC00.c:751
+T00136.001,wasActive,Value of active in the previous update,low,source:6FC00.c:753
+T00136.002,hidden,Target is hidden from the actor,med,source:6FC00.c:731
+T00136.003,inView,Target is inside the view cone,med,source:6FC00.c:741
+T00136.004,reserved4,Not read,low,declaration-only;source:6FC00.c:597
+T00136.005,visible,Target is visible,med,source:6FC00.c:752
+T00136.006,classification,Relation classification,med,source:6FC00.c:840
+T00136.007,counter,Classification counter,low,source:6FC00.c:845
+T00136.008,timer,Relation timer,low,source:6FC00.c:762
+T00136.009,classificationTimer,Frames before the classification reverts,low,source:6FC00.c:837
+T00136.010,blocked,Path to the target is blocked (not read by decompiled code),low,declaration-only;source:6FC00.c:603
+T00136.011,previousClassification,Classification restored when the timer ends,med,source:6FC00.c:840
+T00136.012,outOfReach,Target is beyond reach,med,source:6FC00.c:728
+T00136.013,onMarkedTile,Target stands on a tile flagged 0x2000,low,source:6FC00.c:784
+T00760.000,word,Position word,med,source:6FC00.c:1071
+T00760.001,bytes,Position bytes,low,declaration-only;source:6FC00.c:905
+T00761.000,samples,Recent coordinate bytes,high,source:6FC00.c:1108
+T00761.001,words,Samples compared as two words,high,source:6FC00.c:962
+T00762.000,samples,Recent coordinate bytes,high,source:6FC00.c:1108
+T00762.001,words,Samples compared as two words,high,source:6FC00.c:962
+T00137.000,tileX,Tile X,high,source:771A8.c:583
+T00137.001,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00137.002,tileZ,Tile Z,high,source:771A8.c:583
+T00137.003,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00138.000,tileX,Tile X,high,source:771A8.c:583
+T00138.001,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00138.002,tileZ,Tile Z,high,source:771A8.c:583
+T00138.003,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00139.000,reserved0Bits,Not read here,low,declaration-only;source:74088.c:679
+T00139.001,classification,Relation classification,med,source:74088.c:765
+T00139.002,reserved8Bits,Not read here,low,declaration-only;source:74088.c:679
+T00139.003,timer,Relation timer; set to 28 on reaction,low,source:74088.c:755
+T00139.004,counter,Classification counter,low,source:74088.c:766
+T00139.005,reserved27Bit,Not read here,low,declaration-only;source:74088.c:680
+T00139.006,previousClassification,Classification restored later,low,source:74088.c:768
+T00139.007,reserved30Bits,Not read here,low,declaration-only;source:74088.c:680
+T00140.000,firstByte,First byte; bits 6-7 are the classification,low,source:74088.c:751
+T00140.001,reserved1,Remaining bytes,low,declaration-only;source:74088.c:683
+T00141.000,positionX,World X,med,source:771A8.c:1099
+T00141.001,positionY,World Y,med,source:771A8.c:1120
+T00142.000,tileX,Tile X,high,source:771A8.c:583
+T00142.001,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00142.002,tileZ,Tile Z,high,source:771A8.c:583
+T00142.003,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00143.000,reserved0,Not read,low,declaration-only;source:771A8.c:2340
+T00143.001,heading,Heading in eighth turns,high,source:771A8.c:2413
+T00143.002,clockwise,Turns clockwise around the obstacle,high,source:771A8.c:2414
+T00143.003,steps,Steps left; 0 ends the detour,med,source:771A8.c:2409
+T00143.004,visited,"Visited mask, cleared on start",low,source:771A8.c:2433
+T00143.005,stop,Ends the detour,med,source:771A8.c:2543
+T00143.006,changed,Heading changed this step,low,source:771A8.c:2424
+T00143.007,cell,Cell the detour started from,low,source:771A8.c:2483
+T00143.008,boundX,X bound in tiles,med,source:771A8.c:2438
+T00143.009,boundZ,Z bound in tiles,med,source:771A8.c:2439
+T00144.000,tileX,Tile X,high,source:771A8.c:583
+T00144.001,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00144.002,tileZ,Tile Z,high,source:771A8.c:583
+T00144.003,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00145.000,tileX,Tile X,high,source:771A8.c:583
+T00145.001,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00145.002,tileZ,Tile Z,high,source:771A8.c:583
+T00145.003,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00763.000,word,Whole settings word; bit 14 selects a range table,low,source:7CD68.c:743
+T00763.001,bits,Settings fields,low,declaration-only;source:7CD68.c:614
+T00146.000,byte0,Byte 0,low,declaration-only;source:7CD68.c:822
+T00146.001,byte1,Byte 1; cleared when the AI state is created,low,source:7CD68.c:1039
+T00146.002,byte2,Byte 2,low,declaration-only;source:7CD68.c:822
+T00146.003,byte3,Byte 3,low,declaration-only;source:7CD68.c:822
+T00147.000,lowBits,Bits 0-23,low,declaration-only;source:7CD68.c:825
+T00147.001,bits24,Bits 24-25,low,source:7CD68.c:1041
+T00147.002,bits26,Bits 26-27,low,source:7CD68.c:1040
+T00147.003,highBits,Bits 28-31,low,declaration-only;source:7CD68.c:825
+T00148.000,tileX,Tile X,high,source:771A8.c:583
+T00148.001,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00148.002,tileZ,Tile Z,high,source:771A8.c:583
+T00148.003,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00149.000,tileX,Tile X,high,source:771A8.c:583
+T00149.001,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
+T00149.002,tileZ,Tile Z,high,source:771A8.c:583
+T00149.003,searchStatus,"Search state of the tile (1 searched, 2 accepted)",low,source:6FC00.c:440
+T00764.000,target,Tile and facing fields,high,source:146C.c:2804
+T00764.001,word,Whole tile word,high,source:146C.c:881
+T00766.000,halves,Halves of the packed pair,med,declaration-only;source:146C.h:129
+T00766.001,word,Word of the packed pair,med,declaration-only;source:146C.h:130
+T00154.000,geometryLength,Geometry section length,med,declaration-only;source:146C.h:221
+T00154.001,collisionMapLength,Collision map section length,med,declaration-only;source:146C.h:222
+T00154.002,tileCellsLength,Tile cell section length,med,declaration-only;source:146C.h:223
+T00154.003,doorsLength,Door section length; 12-byte records,high,source:146C.c:16148
+T00154.004,lightingLength,Lighting section length,med,declaration-only;source:146C.h:225
+T00154.005,section6Length,Section 6 length,low,declaration-only;source:146C.h:226
+T00154.006,section7Length,Section 7 length,low,declaration-only;source:146C.h:227
+T00154.007,section8Length,Section 8 length,low,declaration-only;source:146C.h:228
+T00154.008,floorTriggersLength,Floor trigger section length; 12-byte records,high,source:146C.c:16815
+T00154.009,lockTriggersLength,Lock trigger section length; 20-byte records,high,source:146C.c:16222
+T00154.010,environmentLength,Environment section length,med,declaration-only;source:146C.h:231
+T00154.011,textureEffectsLength,Texture effect section length,high,source:2842C.c:870
+T00154.012,effectScriptsLength,Effect script section length,high,source:2842C.c:899
+T00154.013,sectionELength,Section E length,low,declaration-only;source:146C.h:234
+T00154.014,minimapSceneLength,Minimap scene section length,med,declaration-only;source:146C.h:235
+T00154.015,tiledBackgroundLength,Tiled background section length,med,declaration-only;source:146C.h:236
+T00154.016,viewTriggersLength,View trigger section length,high,source:146C.c:16426
+T00154.017,movingPlatformsLength,Moving platform section length; 184-byte records,high,source:146C.c:16506
+T00154.018,containersLength,Treasure chest section length,high,source:146C.c:16841
+T00154.019,soundDataLength,AKAO sound section length,med,declaration-only;source:146C.h:240
+T00154.020,section15Length,Section 15 length,low,declaration-only;source:146C.h:241
+T00154.021,section16Length,Section 16 length,low,declaration-only;source:146C.h:242
+T00154.022,section17Length,Section 17 length,low,declaration-only;source:146C.h:243
+T00154.023,zoneBoundsLength,Zone bounds section length,med,declaration-only;source:146C.h:244
+T00767.000,bytes,Bytes 0 and 2 seed the target selection,med,source:146C.c:4509
+T00767.001,halves,Last targeted actor and limb,low,source:146C.c:4308
+T00767.002,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
+T00768.000,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
+T00768.001,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
+T00155.000,actor,Battle actor,high,source:146C.c:6505
+T00155.001,stats,Statistics block,high,source:146C.c:6088
+T00769.000,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
+T00769.001,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00770.000,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
+T00770.001,lock,Lock state and door rotation,med,source:146C.c:2175
+T00156.000,currentCategory,Selected category + 1,high,source:items0.h:49
+T00156.001,reserved1,Not read,low,declaration-only;source:5BF94.h:128
+T00156.002,categoryCursors,List cursor of each category,high,source:items2.h:922
+T00771.000,bits,Packed ability fields,med,source:146C.c:4705
+T00771.001,halves,Half 0 is the chosen item; half 1 the consumed item,med,source:146C.c:3816
+T00771.002,word,Whole command word,med,source:146C.c:4699
+T00157.000,redCurve,Red fade curve,med,declaration-only;source:5BF94.h:275
+T00157.001,greenCurve,Green fade curve,med,declaration-only;source:5BF94.h:276
+T00157.002,blueCurve,Blue fade curve,med,declaration-only;source:5BF94.h:277
+T00157.003,age,Particle age,high,source:5BF94.c:7493
+T00772.000,actor,Actor and part,high,source:146C.c:3179
+T00772.001,position,World position,high,source:146C.c:3181
+T00773.000,target,Tile and facing fields,high,source:146C.c:2804
+T00773.001,word,Whole tile word,high,source:146C.c:881
+T00776.000,halves,Halves of the packed pair,med,declaration-only;source:146C.h:129
+T00776.001,word,Word of the packed pair,med,declaration-only;source:146C.h:130
+T00166.000,geometryLength,Geometry section length,med,declaration-only;source:146C.h:221
+T00166.001,collisionMapLength,Collision map section length,med,declaration-only;source:146C.h:222
+T00166.002,tileCellsLength,Tile cell section length,med,declaration-only;source:146C.h:223
+T00166.003,doorsLength,Door section length; 12-byte records,high,source:146C.c:16148
+T00166.004,lightingLength,Lighting section length,med,declaration-only;source:146C.h:225
+T00166.005,section6Length,Section 6 length,low,declaration-only;source:146C.h:226
+T00166.006,section7Length,Section 7 length,low,declaration-only;source:146C.h:227
+T00166.007,section8Length,Section 8 length,low,declaration-only;source:146C.h:228
+T00166.008,floorTriggersLength,Floor trigger section length; 12-byte records,high,source:146C.c:16815
+T00166.009,lockTriggersLength,Lock trigger section length; 20-byte records,high,source:146C.c:16222
+T00166.010,environmentLength,Environment section length,med,declaration-only;source:146C.h:231
+T00166.011,textureEffectsLength,Texture effect section length,high,source:2842C.c:870
+T00166.012,effectScriptsLength,Effect script section length,high,source:2842C.c:899
+T00166.013,sectionELength,Section E length,low,declaration-only;source:146C.h:234
+T00166.014,minimapSceneLength,Minimap scene section length,med,declaration-only;source:146C.h:235
+T00166.015,tiledBackgroundLength,Tiled background section length,med,declaration-only;source:146C.h:236
+T00166.016,viewTriggersLength,View trigger section length,high,source:146C.c:16426
+T00166.017,movingPlatformsLength,Moving platform section length; 184-byte records,high,source:146C.c:16506
+T00166.018,containersLength,Treasure chest section length,high,source:146C.c:16841
+T00166.019,soundDataLength,AKAO sound section length,med,declaration-only;source:146C.h:240
+T00166.020,section15Length,Section 15 length,low,declaration-only;source:146C.h:241
+T00166.021,section16Length,Section 16 length,low,declaration-only;source:146C.h:242
+T00166.022,section17Length,Section 17 length,low,declaration-only;source:146C.h:243
+T00166.023,zoneBoundsLength,Zone bounds section length,med,declaration-only;source:146C.h:244
+T00777.000,bytes,Bytes 0 and 2 seed the target selection,med,source:146C.c:4509
+T00777.001,halves,Last targeted actor and limb,low,source:146C.c:4308
+T00777.002,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
+T00778.000,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
+T00778.001,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
+T00167.000,actor,Battle actor,high,source:146C.c:6505
+T00167.001,stats,Statistics block,high,source:146C.c:6088
+T00779.000,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
+T00779.001,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00780.000,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
+T00780.001,lock,Lock state and door rotation,med,source:146C.c:2175
+T00168.000,currentCategory,Selected category + 1,high,source:items0.h:49
+T00168.001,reserved1,Not read,low,declaration-only;source:5BF94.h:128
+T00168.002,categoryCursors,List cursor of each category,high,source:items2.h:922
+T00781.000,bits,Packed ability fields,med,source:146C.c:4705
+T00781.001,halves,Half 0 is the chosen item; half 1 the consumed item,med,source:146C.c:3816
+T00781.002,word,Whole command word,med,source:146C.c:4699
+T00169.000,redCurve,Red fade curve,med,declaration-only;source:5BF94.h:275
+T00169.001,greenCurve,Green fade curve,med,declaration-only;source:5BF94.h:276
+T00169.002,blueCurve,Blue fade curve,med,declaration-only;source:5BF94.h:277
+T00169.003,age,Particle age,high,source:5BF94.c:7493
+T00782.000,actor,Actor and part,high,source:146C.c:3179
+T00782.001,position,World position,high,source:146C.c:3181
+T00783.000,target,Tile and facing fields,high,source:146C.c:2804
+T00783.001,word,Whole tile word,high,source:146C.c:881
+T00787.000,halves,Halves of the packed pair,med,declaration-only;source:146C.h:129
+T00787.001,word,Word of the packed pair,med,declaration-only;source:146C.h:130
+T00182.000,geometryLength,Geometry section length,med,declaration-only;source:146C.h:221
+T00182.001,collisionMapLength,Collision map section length,med,declaration-only;source:146C.h:222
+T00182.002,tileCellsLength,Tile cell section length,med,declaration-only;source:146C.h:223
+T00182.003,doorsLength,Door section length; 12-byte records,high,source:146C.c:16148
+T00182.004,lightingLength,Lighting section length,med,declaration-only;source:146C.h:225
+T00182.005,section6Length,Section 6 length,low,declaration-only;source:146C.h:226
+T00182.006,section7Length,Section 7 length,low,declaration-only;source:146C.h:227
+T00182.007,section8Length,Section 8 length,low,declaration-only;source:146C.h:228
+T00182.008,floorTriggersLength,Floor trigger section length; 12-byte records,high,source:146C.c:16815
+T00182.009,lockTriggersLength,Lock trigger section length; 20-byte records,high,source:146C.c:16222
+T00182.010,environmentLength,Environment section length,med,declaration-only;source:146C.h:231
+T00182.011,textureEffectsLength,Texture effect section length,high,source:2842C.c:870
+T00182.012,effectScriptsLength,Effect script section length,high,source:2842C.c:899
+T00182.013,sectionELength,Section E length,low,declaration-only;source:146C.h:234
+T00182.014,minimapSceneLength,Minimap scene section length,med,declaration-only;source:146C.h:235
+T00182.015,tiledBackgroundLength,Tiled background section length,med,declaration-only;source:146C.h:236
+T00182.016,viewTriggersLength,View trigger section length,high,source:146C.c:16426
+T00182.017,movingPlatformsLength,Moving platform section length; 184-byte records,high,source:146C.c:16506
+T00182.018,containersLength,Treasure chest section length,high,source:146C.c:16841
+T00182.019,soundDataLength,AKAO sound section length,med,declaration-only;source:146C.h:240
+T00182.020,section15Length,Section 15 length,low,declaration-only;source:146C.h:241
+T00182.021,section16Length,Section 16 length,low,declaration-only;source:146C.h:242
+T00182.022,section17Length,Section 17 length,low,declaration-only;source:146C.h:243
+T00182.023,zoneBoundsLength,Zone bounds section length,med,declaration-only;source:146C.h:244
+T00788.000,bytes,Bytes 0 and 2 seed the target selection,med,source:146C.c:4509
+T00788.001,halves,Last targeted actor and limb,low,source:146C.c:4308
+T00788.002,word,"Pending Z movement in 20.12 fixed point, consumed 8 units per step",med,source:146C.c:5601
+T00789.000,bytes,Byte 3 is the tile mode,med,source:146C.c:5409
+T00789.001,word,"Tile word (X, layer, Z) of the last trigger",med,source:146C.c:5408
+T00183.000,actor,Battle actor,high,source:146C.c:6505
+T00183.001,stats,Statistics block,high,source:146C.c:6088
+T00790.000,bytes,"Byte 0 is the label kind, byte 1 the actor",med,source:2842C.c:1571
+T00790.001,halfword,Kind and actor as one value; compared with a kind when the actor is 0,med,source:2842C.c:1650
+T00791.000,switchValue,Switch position; toggled between 0 and 1,med,source:146C.c:16874
+T00791.001,lock,Lock state and door rotation,med,source:146C.c:2175
+T00792.000,target,Tile and facing fields,high,source:146C.c:2804
+T00792.001,word,Whole tile word,high,source:146C.c:881
