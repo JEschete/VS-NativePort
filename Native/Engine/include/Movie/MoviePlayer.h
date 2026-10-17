@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-// Opens the converted movie for a disc path ("TITLE/TITLE.STR") and starts its soundtrack. Returns 0 if it is
+// Opens the converted movie for a disc path ("MOV/TITLE.STR") and starts its soundtrack. Returns 0 if it is
 // not available (logged); the other calls then do nothing.
 int Movie_PlayerOpen(const char* discPath);
 

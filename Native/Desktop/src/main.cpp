@@ -5,6 +5,7 @@
 #include "Core/Log.hpp"
 #include "Boot/GameApp.hpp"
 #include "Input/Pad.hpp"
+#include "Movie/MoviePlayer.h"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
 #include "Render/Device.hpp"
@@ -248,5 +249,6 @@ int main(int argc, char** argv)
             break;
         }
     }
+    Movie_PlayerClose();  // its soundtrack source must go before the audio device and SDL
     return 0;
 }

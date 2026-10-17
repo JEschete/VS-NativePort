@@ -6,6 +6,9 @@
   "dependencies": [
     "sdl3",
     "catch2",
-    "nlohmann-json"
+    "nlohmann-json",
+    "dav1d",
+    "libwebm",
+    "drlibs"
   ]
 }

@@ -58,11 +58,11 @@ PROJECTS = [
     Project("VS.Engine", "Engine", refs=[], see=["VS.Content"], folders=ENGINE_SYSTEMS, legacy=True),
     Project("VS.Content", "Content", refs=["VS.Engine"], legacy=True),
     Project("VS.Game", "Game", refs=["VS.Engine", "VS.Content"], folders=GAME_MODULES),
-    Project("VS.Desktop", "Desktop", kind="exe", refs=["VS.Engine", "VS.Content", "VS.Game"], libs=["sdl3"]),
+    Project("VS.Desktop", "Desktop", kind="exe", refs=["VS.Engine", "VS.Content", "VS.Game"], libs=["sdl3", "movie"]),
     Project("VS.Extract", "Tools\\Extract", kind="exe", console=True, refs=["VS.Engine", "VS.Content"],
             libs=["sdl3"]),
     Project("VS.Tests", "Tests", kind="exe", console=True, refs=["VS.Engine", "VS.Content", "VS.Game"],
-            libs=["sdl3", "catch2"], whole_archive=["VS.Engine", "VS.Content", "VS.Game"]),
+            libs=["sdl3", "catch2", "movie"], whole_archive=["VS.Engine", "VS.Content", "VS.Game"]),
 ]
 BY_NAME = {p.name: p for p in PROJECTS}
 
@@ -70,6 +70,8 @@ BY_NAME = {p.name: p for p in PROJECTS}
 VCPKG_LIBS = {
     "sdl3": {"Debug": ["SDL3.lib"], "Release": ["SDL3.lib"]},
     "catch2": {"Debug": ["Catch2d.lib"], "Release": ["Catch2.lib"]},
+    # Engine\Movie: AV1 decoding and Matroska demuxing (dr_flac is header-only)
+    "movie": {"Debug": ["dav1d.lib", "webm.lib"], "Release": ["dav1d.lib", "webm.lib"]},
 }
 VCPKG_PROPS = r"$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props"
 VCPKG_TARGETS = r"$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.targets"

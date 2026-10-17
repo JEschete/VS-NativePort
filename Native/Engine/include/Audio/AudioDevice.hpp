@@ -29,8 +29,17 @@ public:
     i32 QueuedBytes() const;
     bool IsOpen() const { return m_stream != nullptr; }
 
+    // Another s16 source mixed into this device at its own rate (a movie soundtrack, a streamed track); SDL
+    // resamples it. Null if the device is closed. Release with CloseSource.
+    SDL_AudioStream* OpenSource(i32 sampleRate, i32 channels);
+    static void CloseSource(SDL_AudioStream* source);
+
+    // The first device opened (the desktop host's), for engine systems that play sound on their own.
+    static AudioDevice* Primary();
+
 private:
     SDL_AudioStream* m_stream = nullptr;
+    u32 m_device = 0;  // SDL_AudioDeviceID
 };
 
 } // namespace VS::Audio

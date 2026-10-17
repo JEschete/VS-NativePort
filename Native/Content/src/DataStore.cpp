@@ -97,7 +97,9 @@ const DataStore::Entry* DataStore::FindBySector(u32 lba) const
 
 fs::path DataStore::FileOf(const Entry& e) const
 {
-    return m_root / "disc" / fs::path(e.path);
+    // a converted file keeps the disc name with its form as the extension (MOV/TITLE.STR.mkv)
+    const fs::path disc = m_root / "disc" / fs::path(e.path);
+    return e.form == "raw" ? disc : fs::path(disc.string() + "." + e.form);
 }
 
 bool DataStore::Read(const Entry& e, u64 offset, std::span<u8> out) const

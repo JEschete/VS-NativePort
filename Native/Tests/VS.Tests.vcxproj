@@ -39,8 +39,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;Catch2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;Catch2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;Catch2d.lib;dav1d.lib;webm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;Catch2.lib;dav1d.lib;webm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/WHOLEARCHIVE:$(OutDir)VS.Engine.lib /WHOLEARCHIVE:$(OutDir)VS.Content.lib /WHOLEARCHIVE:$(OutDir)VS.Game.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>

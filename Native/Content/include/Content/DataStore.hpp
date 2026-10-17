@@ -13,7 +13,8 @@ namespace VS::Content {
 
 // The extracted game data: what VS.Extract wrote from the user's disc (Native\data by default, never committed).
 // Files keep their disc paths under disc\; files.tsv lists each one's first sector, size and form ("raw" = the disc
-// file as is, otherwise the converter that produced it), so code that still addresses the disc by sector finds it.
+// file as is; otherwise the converted file's extension, e.g. "mkv" for MOV/TITLE.STR.mkv; "stream" = an
+// interleaved file not converted), so code that still addresses the disc by sector finds it.
 class DataStore {
 public:
     struct Entry {

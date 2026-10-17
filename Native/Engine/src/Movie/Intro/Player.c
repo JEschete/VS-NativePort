@@ -24,7 +24,7 @@ void Movie_Intro_Start(void)
     setRECT(&rect, 0, 0, 480, 448);
     ClearImage(&rect, 0, 0, 0);
     Movie_Intro_legacyMdecState.frameRectIndex = 0;
-    Movie_PlayerOpen("TITLE/TITLE.STR");
+    Movie_PlayerOpen("MOV/TITLE.STR");
     Movie_Intro_isPlaying = 1;
     Movie_Intro_playbackStartTick = VSync(-1);
 }
