@@ -14,6 +14,7 @@
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
+#include "Render/Sprites.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/UiPrimitives.h"

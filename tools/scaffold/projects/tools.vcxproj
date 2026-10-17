@@ -307,6 +307,7 @@
     <None Include="..\..\port\data_inventory.py" />
     <None Include="..\..\port\decl_index.py" />
     <None Include="..\..\port\decomp_index.py" />
+    <None Include="..\..\port\field_at.py" />
     <None Include="..\..\port\gen_decomp_headers.py" />
     <None Include="..\..\port\hazard_index.py" />
     <None Include="..\..\port\layout_check.py" />

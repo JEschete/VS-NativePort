@@ -52,7 +52,7 @@
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "Render/Palette.h"
-#include "Render/UiPrimitives.h"
+#include "Render/Sprites.h"
 
 // decomp: D_800E8184 (D_800E8184@BATTLE/BATTLE.PRG)
 char Battle_categoryNeedsTargetSelection[96]; /* contents: module image (ModuleData.c) */

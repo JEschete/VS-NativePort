@@ -215,6 +215,7 @@
 #include "Render/Render.h"
 #include "Render/RoomGeometry.h"
 #include "Render/ScreenTransition.h"
+#include "Render/Sprites.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/Textures.h"

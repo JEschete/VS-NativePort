@@ -18,11 +18,6 @@
 
 extern int Render_kStatGaugeColors[4];
 void Render_AppendOverlayPrimitive(int* arg0);
-u_long* Render_QueueDefaultSprite(int wh, int xy);
-u_long* Render_QueueSpriteWithTexturePage(
-    int brightnessTransparency, int xy, int wh, u_long* nextPrim);
-u_long* Render_QueueSprite(int brightnessTransparency, int xy, int wh, u_long* nextPrim);
-void Render_LoadFrameViewMatrix(void);
 void Render_SplicePrimitiveList(u_long* arg0, int* arg1);
 u_int Render_BlendRgbWithBrightness(u_int color0, u_int color1, int brightness, int blendFactor);
 void Render_DrawNumericGlyph(int font, int xy, int digit, u_long* before);

@@ -16,6 +16,7 @@
 #include "Menu/Sounds.h"
 #include "Render/Font.h"
 #include "Render/Render.h"
+#include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
 

@@ -5,6 +5,7 @@
 #include "Render/Frame.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
+#include "Render/Sprites.h"
 #include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
 #include "Render/Upload.h"
@@ -15,34 +16,6 @@ int Render_kStatGaugeColors[4]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG func_8007A824 (src/BATTLE/BATTLE.PRG/146C.c:8055)
 void Render_AppendOverlayPrimitive(int* arg0) { Render_SplicePrimitiveList(Render_legacyCurrentOrderingTable + 0x2084, arg0); }
-
-// decomp: BATTLE.PRG vs_battle_setSpriteDefault (src/BATTLE/BATTLE.PRG/573B8.c:270) [inline-asm: not yet ported]
-u_long* Render_QueueDefaultSprite(int wh, int xy)
-{
-    VS_UNPORTED("Render::QueueDefaultSprite");
-    return 0;
-}
-
-// decomp: BATTLE.PRG vs_battle_setSpriteDefaultTexPage (src/BATTLE/BATTLE.PRG/573B8.c:275) [inline-asm-entry: not yet ported]
-u_long* Render_QueueSpriteWithTexturePage(
-    int brightnessTransparency, int xy, int wh, u_long* nextPrim)
-{
-    VS_UNPORTED("Render::QueueSpriteWithTexturePage");
-    return 0;
-}
-
-// decomp: BATTLE.PRG vs_battle_setSprite (src/BATTLE/BATTLE.PRG/573B8.c:281) [inline-asm: not yet ported]
-u_long* Render_QueueSprite(int brightnessTransparency, int xy, int wh, u_long* nextPrim)
-{
-    VS_UNPORTED("Render::QueueSprite");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800C02A8 (src/BATTLE/BATTLE.PRG/573B8.c:315) [inline-asm: not yet ported]
-void Render_LoadFrameViewMatrix(void)
-{
-    VS_UNPORTED("Render::LoadFrameViewMatrix");
-}
 
 // decomp: BATTLE.PRG func_800C64D0 (src/BATTLE/BATTLE.PRG/5BF94.c:1332)
 void Render_SplicePrimitiveList(u_long* arg0, int* arg1)

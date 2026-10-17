@@ -9,3 +9,7 @@ F03650,function,Movie_Intro_Start,Native\Engine\src\Movie\Intro\Player.c,Native\
 F03651,function,Movie_Intro_Stop,Native\Engine\src\Movie\Intro\Player.c,Native\Engine\src\Movie\Intro\Player.h,2026-10-17,from Native\Engine\src\Movie\Intro\Playback.c
 F03652,function,Movie_Intro_StopAfterAudioTail,Native\Engine\src\Movie\Intro\Player.c,Native\Engine\src\Movie\Intro\Player.h,2026-10-17,from Native\Engine\src\Movie\Intro\Playback.c
 F03653,function,Movie_Intro_Play,Native\Engine\src\Movie\Intro\Player.c,Native\Engine\src\Movie\Intro\Player.h,2026-10-17,from Native\Engine\src\Movie\Intro\Playback.c
+F04190,function,Render_QueueDefaultSprite,Native\Engine\src\Render\Sprites.c,Native\Engine\src\Render\Sprites.h,2026-10-17,from Native\Engine\src\Render\UiPrimitives.c
+F04191,function,Render_QueueSpriteWithTexturePage,Native\Engine\src\Render\Sprites.c,Native\Engine\src\Render\Sprites.h,2026-10-17,from Native\Engine\src\Render\UiPrimitives.c
+F04192,function,Render_QueueSprite,Native\Engine\src\Render\Sprites.c,Native\Engine\src\Render\Sprites.h,2026-10-17,from Native\Engine\src\Render\UiPrimitives.c
+F04193,function,Render_LoadFrameViewMatrix,Native\Engine\src\Render\Sprites.c,Native\Engine\src\Render\Sprites.h,2026-10-17,from Native\Engine\src\Render\UiPrimitives.c

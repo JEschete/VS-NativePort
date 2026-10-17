@@ -5,6 +5,7 @@
 #include "Effects/ScreenEffects.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
+#include "Render/Sprites.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 

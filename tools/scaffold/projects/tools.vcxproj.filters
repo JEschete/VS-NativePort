@@ -1872,6 +1872,9 @@
     <None Include="..\..\port\decomp_index.py">
       <Filter>tools\port</Filter>
     </None>
+    <None Include="..\..\port\field_at.py">
+      <Filter>tools\port</Filter>
+    </None>
     <None Include="..\..\port\gen_decomp_headers.py">
       <Filter>tools\port</Filter>
     </None>

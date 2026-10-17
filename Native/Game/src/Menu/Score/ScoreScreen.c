@@ -41,6 +41,7 @@
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/RoomGeometry.h"
+#include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "State/Progress.h"

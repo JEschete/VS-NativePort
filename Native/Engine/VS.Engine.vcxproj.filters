@@ -552,6 +552,12 @@
     <ClInclude Include="src\Render\ScreenTransition.h">
       <Filter>src\Render</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\Sprites.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\Sprites.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
     <ClCompile Include="src\Render\Text\CompactFont.c">
       <Filter>src\Render\Text</Filter>
     </ClCompile>
