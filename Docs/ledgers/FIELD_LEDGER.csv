@@ -1323,8 +1323,8 @@ T00221.007,T00221,D_800F18C8_t,7,unk10,1,int,,,,reserved10,Cleared on room load;
 T00221.008,T00221,D_800F18C8_t,8,unk14,1,int,,,,reserved14,Cleared on room load; no reader identified,low,declaration-only;source:146C.c:312
 T00222.000,T00222,D_800F18E8_t,0,unk0_0,1,u_short,10,,,requiredFlagId,State flag id copied to the saved door's requiredFlagId,med,source:main.c:8399
 T00222.001,T00222,D_800F18E8_t,1,unk0_10,1,u_short,6,,,reservedBits10,Upper six bits; no access found,low,declaration-only;source:146C.h:730
-T00223.000,T00223,D_800F18EC_t,0,unk0,1,short,,,,reserved00,Unidentified short,low,declaration-only;source:5BF94.h:148
-T00223.001,T00223,D_800F18EC_t,1,unk2,1,short,,,,reserved02,Unidentified short,low,declaration-only;source:5BF94.h:149
+T00223.000,T00223,D_800F18EC_t,0,unk0,1,short,,,,menuStatus,"Menu status: 1 while the menu is still open, 2 once a selection is made",med,source:146C.c:7771
+T00223.001,T00223,D_800F18EC_t,1,unk2,1,short,,,,selectionKind,"Kind of selection (6-8 actions or items, 8 consumes a misc item, 10 a field command)",med,source:146C.c:4693
 T00223.002,T00223,D_800F18EC_t,2,executeAbility,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),,,,executeAbility,Packed execute-ability parameters,med,declaration-only;source:5BF94.h:159
 T00224.000,T00224,D_800F1910_t,0,unk0,1,_mpdRoomSectionA *,,,,triggerRecord,Trigger record being shown,med,declaration-only;source:146C.c:157
 T00224.001,T00224,D_800F1910_t,1,unk4,1,func_8006EBF8_t,,,,actorQuery,Actor position query and parameter,med,declaration-only;source:146C.c:158
@@ -6480,7 +6480,7 @@ T00708.001,T00708,vs_main_sfxContext,1,unk4,1,int,,,,reserved4,No access found,l
 T00708.002,T00708,vs_main_sfxContext,2,unk8,1,char,,,,reserved8,No access found,low,declaration-only;source:25AC.h:7
 T00708.003,T00708,vs_main_sfxContext,3,unk9,1,char,,,metadataFlagByte,flags,Bit 7 requests playback tags,high,source:25AC.c:443
 T00709.000,T00709,vs_main_statusEffectParams_t,0,unk0,1,int,,,,statusFlags,Status flags the effect sets,med,source:146C.c:11207
-T00709.001,T00709,vs_main_statusEffectParams_t,1,unk4,1,u_short,,,,reserved4,Not read by decompiled code,low,declaration-only;source:main.h:111
+T00709.001,T00709,vs_main_statusEffectParams_t,1,unk4,1,u_short,,,,duration,"Status timer duration; read only through byte aliases (G01907-G01909, G01912 = entries 5, 11, 13, 19)",med,declaration-only;source:main.h:111;address of G01907 is 0x8004EECC + 5 * 16 + 4
 T00709.002,T00709,vs_main_statusEffectParams_t,2,unk6,1,u_short,,,,tickInterval,Ticks per HP change of a damage-over-time status,med,source:74088.c:1223
 T00709.003,T00709,vs_main_statusEffectParams_t,3,unk8,1,int,,,,cancelledStatuses,Active statuses the effect cancels instead of stacking,med,source:146C.c:11209
 T00709.004,T00709,vs_main_statusEffectParams_t,4,unkC,1,int,,,,blockingStatuses,Active statuses that keep the effect from applying,med,source:146C.c:11206

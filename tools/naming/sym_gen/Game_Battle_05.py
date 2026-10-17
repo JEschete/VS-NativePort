@@ -142,5 +142,199 @@ G("G00613", "constexpr", "Battle::kStatChangeSecondWordRects", FB,
   "Gives the texture rectangle of the second word of an equipment stat change label.", M,
   c(("2842C.c", "setXY4(prim, x, y, x + D_8006917C[p->unkA].w, y, x, y + D_8006917C[p->unkA].h,")))
 
+# ---------------------------------------------------------------- group B: AI tables and room AI state
+AST, NAV, PLAN, PER, MOV = AI + "ActorState.c", AI + "Navigation.c", AI + "ActionPlanning.c", AI + "Perception.c", AI + "Movement.c"
+ORB = AI + "OrbitingBoss.c"
+G("G00230", "catalog", "Battle::Ai::directionDeltas", NAV,
+  "Gives the tile x and z step of each AI direction; the flood fill steps through every second entry.", M,
+  c(("7CD68.c", "x = arg0 + D_800F16EC[i * 2].dx;"), ("7CD68.c", "for (i = 0, step = D_800F16EC; i < 4; ++i, step += 2) {"))
+  + ";element type Battle::Ai::DirectionDelta" + GAP)
+G("G00231", "state", "Battle::Ai::frameTickBudget", PER,
+  "Skips an actor's AI work for the frame once the elapsed root-counter ticks exceed it.", M,
+  c(("6FC00.c", "if (D_800F16F4 < arg) {"), ("71618.c", "if (D_800F16F4 < value) {")) + ";compared with Core::ElapsedFrameCounterTicks")
+G("G00232", "catalog", "Battle::Ai::routeStepDirections", NAV,
+  "Maps a route edge's two direction bits (bits 11-12) to an AI direction index.", M,
+  c(("771A8.c", "step = &D_800F175C[(route >> 11) & 3];"), ("771A8.c", "direction = &table[(route >> 11) & 3];")) + GAP)
+G("G00233", "catalog", "Battle::Ai::decisionCallbacks", AST,
+  "Gives the decision function an actor uses, selected by bits 4-8 of its AI flags; stored as decisionCallback.", H,
+  c(("7CD68.c", "state->callback = D_800F1790[(actor->flags.raw >> 4) & 31];")) + GAP)
+G("G00234", "catalog", "Battle::Ai::viewAngles", AST,
+  "Gives the view angle in degrees selected by bits 16-17 of the AI settings word (360, 190, 85, 40 in BATTLE.PRG).", H,
+  c(("7CD68.c", "state->angle = D_800F17B8[settings->half[1] & 3][0];"), ("7CD68.c", "state->cosine = rcos((state->angle / 2) * 4096 / 360);")) + GAP)
+G("G00235", "catalog", "Battle::Ai::settingsBits8Values", AST,
+  "Gives the AI state value at 0xB0 selected by bits 8-9 of the AI settings word (0, 130, 258, 514 in BATTLE.PRG).", L,
+  c(("7CD68.c", "state->fB0 = D_800F17C8[(settings->raw >> 8) & 3][0];")) + ";value meaning not established" + GAP)
+G("G00236", "catalog", "Battle::Ai::facingDelayScales", AST,
+  "Gives the facing delay scale (sixteenths of 128, or 32 for large actors) selected by bits 2-3 of the AI settings word.", M,
+  c(("7CD68.c", "state->fBA = (step * D_800F17D8[(settings->raw >> 2) & 3]) >> 4;")) + ";stored at AI state offset 0xBA (facingDelay)" + GAP)
+G("G00237", "catalog", "Battle::Ai::radialRetreatPath", ORB,
+  "Gives a retreating boss's radial distance and height for each frame; an all-zero entry ends the retreat.", M,
+  c(("7EE98.c", "if (!D_800F17DC[motion->frame][0] && !D_800F17DC[motion->frame][1]) {"),
+    ("7EE98.c", "state->targetY = (state->y + D_800F17DC[motion->frame][1]) << 12;")) + GAP)
+G("G00579", "state", "Battle::Ai::actorAiStates", AST, "Points to each actor's AI state, indexed by actor id.", H,
+  c(("7CD68.c", "D_800F5878[id] = (void*)state;"), ("6FC00.c", "height = ((actorRelationState*)D_800F5878[id])->height;"))
+  + ";points to Battle::Ai::ActorAiState")
+G("G00580", "state", "Battle::Ai::tileFlagMap", NAV,
+  "Points to the room's 32 by 32 AI tile flags: 0x20 special terrain, 0x10 a tile an actor starts on, 0x70 no ground.", M,
+  c(("7CD68.c", "if (x < 32 && z < 32 && !(D_800F58B8[z][x] & 0x70)) {"), ("7CD68.c", "if ((D_800F58B8[z][x] & 0x20) && !(D_800F58D0[z][x] & 0x2000)) {"))
+  + ";filled by code that is not decompiled")
+G("G00581", "state", "Battle::Ai::roomAiState", AST, "Points to the room's AI state: bounds, readiness level and engaged actors.", H,
+  c(("6FC00.c", "if (D_800F58BC->unk18 < 0xFFFE) {"), ("6FC00.c", "D_800F58BC->unk24 = 0;")) + ";points to Battle::Ai::RoomAiState")
+G("G00582", "state", "Battle::Ai::roomHasWaypoints", AST,
+  "Enables waypoint behavior: when set and a waypoint is enabled, bit 12 of the AI settings word is applied.", L,
+  c(("7CD68.c", "if (D_800F58C0) {")) + ";filled by code that is not decompiled")
+G("G00583", "state", "Battle::Ai::savedMovementRandomState", MOV, "Keeps the movement random generator state saved from the scratchpad.", H,
+  c(("6FC00.c", "void func_800D9538(void) { D_800F58C4 = *(int*)0x1F8003F8; }")))
+G("G00584", "state", "Battle::Ai::roomWaypoints", NAV,
+  "Points to the room's waypoint words: bit 15 enabled, bits 0-4 tile x, bits 5-9 tile z.", M,
+  c(("74088.c", "entry = *nearestWaypointAddress(D_800F58C8, index);"), ("7CD68.c", "if (D_800F58C8[i] >> 15) {")))
+G("G00585", "state", "Battle::Ai::specialTerrainHeights", NAV,
+  "Points to the 32 by 32 heights filled into special terrain from its neighbours: bits 0-9 height, bit 13 filled.", M,
+  c(("7CD68.c", "D_800F58D0[arg1][arg0] = (D_800F58D0[arg1][arg0] & 0xFC00) | value | 0x2000;"), ("74088.c", "*(int*)0x1F8003BC = (int)D_800F58D0;"))
+  + ";the nearest-waypoint search uses it as the height map")
+G("G00586", "state", "Battle::Ai::secondPerceptionTarget", PER,
+  "Gives the argument of a second perception pass; the pass is skipped while it is zero.", L,
+  c(("6FC00.c", "arg = D_800F58D4;")) + ";never written by decompiled code")
+G("G00587", "state", "Battle::Ai::patrolRoutes", MOV, "Points to the room's patrol routes, eight waypoints per route.", M,
+  c(("771A8.c", "row = D_800F58D8[state->row];")))
+G("G00588", "state", "Battle::Ai::candidateEngagedThisUpdate", PER,
+  "Set when an actor engages an action candidate; cleared at the start of each perception update.", L,
+  c(("6FC00.c", "D_800F58E0 = 0;"), ("71618.c", "D_800F58E0 = 1;")) + ";not read by decompiled code")
+G("G00589", "state", "Battle::Ai::planningStatsSnapshot", PLAN,
+  "Holds every actor's statistics while plans are simulated, restored afterwards.", H,
+  c(("74088.c", "D_800F58E8 = vs_main_allocHeapR(sizeof(vs_battle_actor2) * 16);"), ("74088.c", "func_800DC3E8(&D_800F58E8[actor->id], actor->unk3C);")))
+G("G00594", "state", "Battle::Ai::planningWorkspace", PLAN,
+  "Points to the 0x1ECC-byte planning workspace: the reaction record, then pass candidates, exclusions and fallbacks.", H,
+  c(("74088.c", "D_800F5900 = vs_main_allocHeapR(0x1ECC);"), ("74088.c", "if (D_800F5900->unk4.unk40 == 0) {")))
+G("G00590", "state", "Battle::Ai::planningPassCandidates", PLAN, "Points to 16 candidates per planning pass, inside the planning workspace.", M,
+  c(("74088.c", "D_800F58EC = (void*)((char*)D_800F5900 + 0x9CC);"), ("74088.c", "func_800DC2E0(&D_800F58EC[pass][i], state->entries[i]);")))
+G("G00595", "state", "Battle::Ai::candidateExclusions", PLAN,
+  "Points to one flag per target and action; a set flag keeps that action off that target.", M,
+  c(("74088.c", "D_800F5904 = (void*)((char*)D_800F5900 + 0xD8C);"), ("74088.c", "if (!func_800E4CF4(arg0, candidate, id) || D_800F5904[id][action]) {")))
+G("G00593", "state", "Battle::Ai::fallbackCandidates", PLAN, "Points to the fallback candidates used when a plan has none.", M,
+  c(("74088.c", "D_800F58F8 = (void*)((char*)D_800F5900 + 0x1D8C);"), ("74088.c", "func_800DC2E0(fallback, &D_800F58F8[i]);")))
+G("G00591", "state", "Battle::Ai::fallbackCandidateCount", PLAN, "Counts the fallback candidates.", M,
+  c(("74088.c", "for (i = 0; i < D_800F58F0; ++i) {"), ("74088.c", "state->count = D_800F58F0;")))
+G("G00592", "state", "Battle::Ai::unusedPlanCounter", PLAN,
+  "Cleared at the start of each plan build beside fallbackCandidateCount; not otherwise used by decompiled code.", L,
+  c(("74088.c", "D_800F58F4 = 0;")))
+G("G00596", "state", "Battle::Ai::attributeActorMask", AST,
+  "Holds one bit per actor whose attributes have any of bits 0, 2 and 4 when its AI state is created.", L,
+  c(("7CD68.c", "D_800F590C |= 1 << id;")) + ";not read by decompiled code")
+G("G00597", "state", "Battle::Ai::routeGates", NAV, "Points to the room's route gates as pairs of entry and exit ends.", M,
+  c(("771A8.c", "if (D_800F5910[i * 2].unk0_0 == arg0->unk0"), ("771A8.c", "arg1->unk0 = D_800F5910[i * 2 + 1].unk0_0;")) + ";element type Battle::Ai::RouteGateEnd")
+G("G00598", "state", "Battle::Ai::orbitAngularVelocity", ORB, "Gives the orbiting boss's angular velocity (16.16) added to its heading.", M,
+  c(("7EE98.c", "D_800F5918 += delta;"), ("7EE98.c", "motion->facing += D_800F5918 >> 16;")))
+G("G00599", "state", "Battle::Ai::orbitHeightOffset", ORB, "Gives the orbiting boss's height above the arena centre, kept between -100 and 500.", M,
+  c(("7EE98.c", "D_800F591C += correction >> 16;"), ("7EE98.c", "state->targetY = center[1] - (D_800F591C << 12);")))
+G("G00600", "state", "Battle::Ai::arenaOrbit", ORB, "Points to the boss arena orbit state; null in other rooms.", M,
+  c(("71618.c", "if (D_800F5920 == NULL) {"), ("74088.c", "if (D_800F5920->unk16 && (u_int)(self->subType - 172) < 2) {"))
+  + ";points to Battle::Ai::ArenaOrbitState")
+G("G00615", "constexpr", "Battle::Ai::kFlags34Bit14Values", AST,
+  "Gives the AI state value at 0x102 selected by bit 14 of the actor's second flag word (9 or 7).", L,
+  c(("7CD68.c", "state->f102 = D_80069C08[(actor->flags34.raw >> 14) & 1];")) + ";value meaning not established")
+G("G00619", "constexpr", "Battle::Ai::kStatusScores", PLAN, "Gives the planning score of each of the 32 status bits.", H,
+  c(("74088.c", "score += statusScores[i];")) + ";fork name kept")
+
+# ---------------------------------------------------------------- group C: battle flow
+REW, FLOW, EXE = B + "Rewards.c", B + "ActionFlow.c", B + "ActionExecution.c"
+G("G00240", "state", "Battle::lootMenuOpened", REW, "Set once the loot list menu is opened, so closing it continues to the loot results.", M,
+  c(("146C.c", "D_800F1860 = 1;"), ("146C.c", "if (D_800F1860 != 0) {")))
+G("G00241", "state", "Battle::rewardsFollowAction", REW,
+  "Set when rewards follow an action rather than an event; Ashley's pose and ability celebration are restored around them.", M,
+  c(("146C.c", "D_800F1864 = 1;"), ("146C.c", "D_800F1864 = 0;")))
+G("G00242", "state", "Effects::effectBusyFlags", "Native\\Game\\src\\Effects\\Runtime.c",
+  "Holds the effect runtime's busy bits each frame: bit 0 primary, bit 1 secondary effects still running.", M,
+  c(("146C.c", "D_800F1868 = func_800CF060();"), ("146C.c", "int func_80074294(void) { return D_800F1868 & 3; }")))
+G("G00255", "state", "Battle::actionSelection", FLOW,
+  "Points to the menu action-selection state captured when the battle menu returns a selection; kind 8 uses a misc item.", M,
+  c(("146C.c", "D_800F18EC = menu;"), ("146C.c", "vs_battle_decreaseMiscCount(D_800F18EC->executeAbility.u16[1]);")))
+G("G00256", "state", "Battle::actionFlowMode", FLOW,
+  "Selects the stage of the action flow (targeting, execution, ability timing, rewards, loot) that the camera tracking "
+  "and game loop switch on.", M,
+  c(("146C.c", "switch (_cameraMode) {"), ("146C.c", "_cameraMode = 0xB;")) + ";fork calls it _cameraMode; values 0-14")
+G("G00259", "state", "Battle::recoveryRewardMode", FLOW,
+  "Recovery kind passed to BeginPostActionRecovery: 0 skips the ability reward check, 2 checks Break Art unlocks first.", M,
+  c(("146C.c", "D_800F18FC = arg0;"), ("146C.c", "switch (D_800F18FC) {")))
+G("G00265", "state", "Battle::actors", B + "Actors.c", "Points to the battle actor in each of the 16 actor slots.", H,
+  c(("146C.c", "vs_battle_actor* actor = vs_battle_actors[i];")) + ";points to Battle::Actor;fork name kept")
+G("G00274", "state", "Battle::actionState", FLOW, "Points to the current action state.", H,
+  c(("146C.c", "if (D_800F19CC->unk8.actionIndex >= 40) {")) + ";points to Battle::ActionState")
+G("G00276", "state", "Battle::settledCameraDistance", EXE,
+  "Compared with the action's camera distance; the action sequence waits until they match.", L,
+  c(("146C.c", "if ((vs_main_projectionDistance != 512) || (D_800F19D8 != D_800F19CC->unk2C0C)")) + ";never written by decompiled code")
+G("G00277", "state", "Battle::cameraEaseMode", EXE,
+  "When 1 or 3, the projection and camera distance ease toward their targets while an action finishes.", L,
+  c(("146C.c", "if ((D_800F19EC == 1) || (D_800F19EC == 3)) {")) + ";never written by decompiled code")
+RES = B + "ActionResolution.c"
+G("G00279", "state", "Battle::hitPrerequisiteResult", RES,
+  "Holds the current hit's prerequisite result; when zero the hit threshold becomes 255.", M,
+  c(("146C.c", "D_800F1A00 = _canPerformAttack(spec, (char*)entry, hit);"), ("146C.c", "if (D_800F1A00 == 0) {")))
+G("G00280", "state", "Battle::previousHitResult", RES,
+  "Holds the previous hit's result; a follow-up hit function returns 100 when it hit, else 255.", M,
+  c(("146C.c", "D_800F1A04 = _doesAttackHit(spec, entry, entry, hit, arg3);"), ("146C.c", "return D_800F1A04 != 0 ? 100 : 255;")))
+G("G00281", "state", "Battle::lastActionStatValue", B + "Damage.c", "Keeps the last stat change a hit calculated, for later scaling.", H,
+  c(("146C.c", "_lastValue = amount;"), ("146C.c", "return (_lastValue * arg0->hitParams[arg3].statFactor) / 10;")) + ";fork name kept")
+G("G00282", "state", "Battle::criticalHitOccurred", B + "Damage.c",
+  "Set when a basic attack's damage was doubled by the Risk-based critical chance; the hit is then shown as critical.", H,
+  c(("146C.c", "D_800F1A0C = 1;"), ("146C.c", "arg2->hpEffect = 3;")))
+G("G00283", "state", "Battle::limbArmorDpLoss", B + "Damage.c",
+  "Holds each limb's share of a hit's value; each limb's armor later loses that much DP.", M,
+  c(("146C.c", "_armorDpAdjustmentAmounts[i] = baseValue / limbs;"), ("146C.c", "target->limbs[i].armor.currentDp -= _armorDpAdjustmentAmounts[i];")))
+ANIMB = B + "ActionAnimation.c"
+G("G00423", "state", "Battle::chainAbilityAnimationSide", ANIMB,
+  "Alternates the side of successive Chain Ability animations; reset when a chain starts.", H,
+  c(("30DB0.c", "D_800F49D8 ^= 1;"), ("30DB0.c", "anim += D_800F49D8;")))
+G("G00426", "state", "Battle::specialActionPitch", ANIMB,
+  "Gives the target elevation of the current special action: 0 below, 1 level, 2 above; selects its animation.", H,
+  c(("30DB0.c", "D_800F49E4 = 2;"), ("40564.c", "idx = idx * 3 + D_800F49E4;")))
+
+# ---------------------------------------------------------------- group C: unreferenced and aliases
+G("G00530", "drop", "Battle::legacyUnusedTargetBlock", "Native\\Game\\src\\Battle\\Legacy.c",
+  "Reserves an unreferenced effect target block declared in the target selection unit.", H,
+  "replaced-by:nothing;no function references in either tree;" + c(("5BF94.c", "extern D_800F53B8_t3 D_800F5234;")))
+G("G00531", "drop", "Battle::legacyUnreferencedByte", "Native\\Game\\src\\Battle\\Legacy.c",
+  "Reserves an unreferenced byte declared in the target selection unit.", H,
+  "replaced-by:nothing;no function references in either tree;" + c(("5BF94.c", "extern u_char D_800F5238;")))
+G("G00573", "drop", "Effects::rendererTableAlias", "Native\\Game\\src\\Effects\\Runtime.c",
+  "Is the effect renderer table (G00574) declared again under its address name.", H,
+  "view-of:G00574;replaced-by:the renderer table;" + c(("6F014.c", "extern effectExec D_800F56A8[];"), ("6F014.c", "vs_battle_effectRenderers[index] = func;"))
+  + ";same address 0x800F56A8")
+
+# ---------------------------------------------------------------- group C: main executable data used by battle
+G("G01903", "constexpr", "Core::Math::kArcTangentTable", "Native\\Core\\src\\Math\\FixedPoint.c",
+  "Gives the arctangent for a ratio scaled to 0-512, used by the fixed-point atan2.", H,
+  c(("SLUS_010.40/31B7C.c", "c = D_80040A14[c];"), ("573B8.c", "angle = D_80040A14[angle];")) + GAP)
+G("G01904", "catalog", "Battle::actionDefinitions", "Native\\Game\\src\\Battle\\ActionTable.c", "Defines the 256 actions.", H,
+  c(("146C.c", "category = vs_main_actions[action].unk2_4;")) + ";element type Battle::ActionDefinition")
+G("G01906", "catalog", "Battle::statusEffectParams", B + "StatusEffects.c", "Defines the 32 status effects.", H,
+  c(("146C.c", "vs_main_statusEffectParams_t* params = &vs_main_statusEffectParams[arg0];")) + ";element type Battle::StatusEffectParams")
+for _gid, _entry, _off, _name, _cite in (
+        ("G01907", 5, 4, "statusParams5Duration", "arg1->statusTimers[0] = D_8004EF20;"),
+        ("G01908", 11, 4, "statusParams11Duration", "arg1->statusTimers[1] = D_8004EF80;"),
+        ("G01909", 13, 4, "statusParams13Duration", "arg1->statusTimers[3] = D_8004EFA0;"),
+        ("G01910", 14, 6, "statusParams14TickInterval", "arg1->statusTimers[5] = D_8004EFB2;"),
+        ("G01911", 17, 6, "statusParams17TickInterval", "arg1->statusTimers[5] = D_8004EFE2;"),
+        ("G01912", 19, 4, "statusParams19Duration", "arg1->statusTimers[2] = D_8004F000;")):
+    G(_gid, "drop", "Battle::" + _name, B + "StatusEffects.c",
+      f"Is the low byte of statusEffectParams[{_entry}] at offset {_off}, loaded into a status timer.", H,
+      f"view-of:G01906;replaced-by:Battle::statusEffectParams[{_entry}];" + c(("146C.c", _cite))
+      + f";address = 0x8004EECC + {_entry} * 16 + {_off}")
+G("G01916", "catalog", "Battle::breakArtPointRequirements", B + "Abilities.c",
+  "Gives the kill points each weapon category needs for each of its four Break Arts.", H,
+  c(("146C.c", ">= vs_main_artsPointsRequirements[category][artsLearned];")) + ";fork name kept" + GAP)
+G("G01917", "catalog", "Battle::battleAbilityPointRequirements", B + "Abilities.c",
+  "Gives the points needed to learn each next Battle Ability.", H,
+  c(("146C.c", ">= vs_main_battleAbilitiesPointsRequirements[vs_main_artsStatus.kills")) + ";fork name kept" + GAP)
+G("G01972", "state", "State::tickSpeed", "Native\\Game\\src\\State\\GameTime.c",
+  "Gives the game ticks per frame (2 or 4); timers advance by it.", H,
+  c(("146C.c", "vs_gametime_tickspeed = 2;"), ("146C.c", "D_800F19CC->battleAbilityTimer + vs_gametime_tickspeed * 2;")) + ";fork name kept")
+G("G01981", "state", "Battle::spellCommitFlag", FLOW,
+  "Cleared when an action from index 55 up is committed; not read by decompiled code.", L,
+  c(("146C.c", "D_8005FFAF = 0;")))
+G("G01982", "state", "Battle::abilityInputResult", B + "Abilities.c",
+  "Cleared when a Battle Ability input is not successful; not read by decompiled code.", L,
+  c(("146C.c", "D_8005FFB0 = 0;")))
+
 if __name__ == "__main__":
-    g.write(partial=True)
+    g.write()

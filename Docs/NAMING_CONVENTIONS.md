@@ -365,7 +365,7 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Battle_02 | 0 | 66 | 689 | Validated and applied |
 | Game_Battle_03 | 0 | 78 | 737 | Validated and applied |
 | Game_Battle_04 | 58 | 58 | 526 | Validated and applied |
-| Game_Battle_05 | 114 | 0 | 0 | Pending |
+| Game_Battle_05 | 114 | 0 | 0 | Validated and applied |
 | Game_Effects_01 | 0 | 80 | 659 | Pending |
 | Game_Effects_02 | 239 | 9 | 53 | Pending |
 | Game_Ending | 75 | 6 | 59 | Validated and applied |
@@ -380,14 +380,14 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **798 / 2,174** | **575 / 822** | **5,019 / 6,870** | **15 / 24 batches applied** |
+| **Applied / inventoried** | **912 / 2,174** | **575 / 822** | **5,019 / 6,870** | **16 / 24 batches applied** |
 
 Inventory changed on 2026-10-17 when 25 upstream layouts were adopted (15 merged layouts, 10 type-only retypes; two
 new upstream-only types, `func_800D52A4_t`/`_t2`, the effect node's motion block). Applied rows kept their names;
 four applied fields changed C type only (`AkaoSeqHeader.magic` `char[4]`→`int`, `_mpdEnemy.settings`
 `u_char[8]`→`actorSpawnSettings`, `vs_battle_objectData.material`/`variant` `char`→`u_char`).
 
-Applied rows still include 35 low-confidence globals, 63 low-confidence types and 1,921 low-confidence fields. Validation checks coverage,
+Applied rows still include 46 low-confidence globals, 63 low-confidence types and 1,920 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -486,6 +486,17 @@ names, locations and collisions; it does not prove semantics or close migration 
   target-menu step counter; G00017/G00018 are unreferenced. Corrections: T00273 offset 0x14 (Battle_01) is
   `healthPhase` (upstream 6E644.c:4112 reads it). Gap found: `func_800AD714` (44F14.c:168, the animation event
   interpreter) is missing from FUNCTION_CATALOG.csv. 195 of 526 fields are `low` (137 reserved, 30 opaque).
+- Game_Battle_05 (2026-10-17): 114 globals named from read uses. `D_800EBDDC` is the `doorStrings` asset (splat
+  offset 0x835DC). The puzzle timer text `D_80069998` is declared const but rewritten every frame through the pointer
+  `D_800EC258` (initial value read from BATTLE.PRG), so it is state and the pointer is dropped. `D_800F56A8` is the
+  effect renderer table (G00574) under its address name. G01907-G01912 are single bytes of `statusEffectParams`
+  entries 5, 11, 13, 14, 17 and 19 (address arithmetic from 0x8004EECC), which shows offset 4 is a duration:
+  T00709 `unk4` is now `duration` (Battle_04 had it as unread). Room AI tables (tile flags, special terrain heights,
+  waypoints, patrol routes, route gates) are filled by code that is not decompiled; their names rest on reads only.
+  `_cameraMode` is `Battle::actionFlowMode` (it selects action-flow stages, not only the camera). 11 globals are `low`.
+- Correction (Game_Field_01): T00223 was `Battle::PendingAbilityState` with "unidentified" shorts, but it is the menu
+  result returned by `Menu::Framework::ActionSelectionState` (D_800F4E98): `menuStatus` (146C.c:7771) and
+  `selectionKind` (146C.c:4693); renamed `Menu::Framework::ActionSelection`.
 - Function catalog gap (2026-10-17): 56 functions defined in `.c` files of the pinned index are not in
   FUNCTION_CATALOG.csv (14 in SLUS main.c, CLUT transforms; 10 MAINMENU C48.c; 7 MENU5 4D8.c; 6 MENUE 494.c; 4 MENU9
   238.c; 6 BATTLE 146C.c at lines 8280-8317; 4 in 44F14.c including the animation event interpreter; 4 in 5BF94.c;

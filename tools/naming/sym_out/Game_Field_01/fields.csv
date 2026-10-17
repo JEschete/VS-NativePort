@@ -312,8 +312,8 @@ T00199.006,attributes,Sampled tile attributes,med,declaration-only;source:3A1A0.
 T00199.007,centerAttribute,Tile attribute under the actor,med,declaration-only;source:3A1A0.h:643
 T00199.008,pad3D,Alignment padding,low,declaration-only;source:3A1A0.h:644
 T00199.009,searchCeiling,Upper search offset,low,source:3A1A0.c:2478
-T00223.000,reserved00,Unidentified short,low,declaration-only;source:5BF94.h:148
-T00223.001,reserved02,Unidentified short,low,declaration-only;source:5BF94.h:149
+T00223.000,menuStatus,"Menu status: 1 while the menu is still open, 2 once a selection is made",med,source:146C.c:7771
+T00223.001,selectionKind,"Kind of selection (6-8 actions or items, 8 consumes a misc item, 10 a field command)",med,source:146C.c:4693
 T00223.002,executeAbility,Packed execute-ability parameters,med,declaration-only;source:5BF94.h:159
 T00236.000,geometryOffset,Offset of the animated geometry entry,high,source:2842C.c:831
 T00236.001,needsReset,Reset angle and velocity on the next update,high,source:2842C.c:808

@@ -477,7 +477,7 @@ T00102.005,Gem,ItemCategory Gem,med,declaration-only;source:func_8006B57C_t.h:16
 T00102.006,Misc,ItemCategory Misc,med,declaration-only;source:func_8006B57C_t.h:162
 T00102.007,Manage,ItemCategory Manage,med,declaration-only;source:func_8006B57C_t.h:163
 T00709.000,statusFlags,Status flags the effect sets,med,source:146C.c:11207
-T00709.001,reserved4,Not read by decompiled code,low,declaration-only;source:main.h:111
+T00709.001,duration,"Status timer duration; read only through byte aliases (G01907-G01909, G01912 = entries 5, 11, 13, 19)",med,declaration-only;source:main.h:111;address of G01907 is 0x8004EECC + 5 * 16 + 4
 T00709.002,tickInterval,Ticks per HP change of a damage-over-time status,med,source:74088.c:1223
 T00709.003,cancelledStatuses,Active statuses the effect cancels instead of stacking,med,source:146C.c:11209
 T00709.004,blockingStatuses,Active statuses that keep the effect from applying,med,source:146C.c:11206
