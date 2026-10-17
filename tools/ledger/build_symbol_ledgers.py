@@ -24,8 +24,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 LEDGERS = ROOT / "Docs" / "ledgers"
 INDEX = ROOT / "build" / "port" / "index.json"
+INDEX_UPSTREAM = ROOT / "build" / "port" / "index_upstream.json"
 DATA = ROOT / "build" / "port" / "data.json"
 CATALOG = LEDGERS / "FUNCTION_CATALOG.csv"
+ADOPTED = LEDGERS / "UPSTREAM_LAYOUTS.csv"
 
 GENERIC_GLOBAL = re.compile(r"^(D|B|jtbl|jpt|g)_[0-9A-Fa-f]{6,8}(_\w+)?$")
 GENERIC_TYPE = re.compile(r"(^|_)(D|func)_[0-9A-Fa-f]{8}|_t\d*$|^unk|^Unk")
@@ -123,10 +125,42 @@ def field_hints() -> dict[str, list[str]]:
     return hints
 
 
+def adopted_layouts(index: dict) -> tuple[dict[str, dict], list[dict]]:
+    """Types listed in UPSTREAM_LAYOUTS.csv: row key -> merged layout (tools/naming/upstream_layout.py), plus the
+    upstream-only member types those layouts need."""
+    if not ADOPTED.exists():
+        return {}, []
+    with ADOPTED.open(encoding="utf-8", newline="") as f:
+        rows = [r for r in csv.DictReader(f)]
+    if not rows:
+        return {}, []
+    if not INDEX_UPSTREAM.exists():
+        sys.exit(f"{ADOPTED.name} lists adopted layouts; run tools/port/decomp_index.py --root resources/rood-reverse "
+                 f"--out {INDEX_UPSTREAM.relative_to(ROOT)} first")
+    sys.path.insert(0, str(ROOT / "tools" / "naming"))
+    import upstream_layout  # noqa: E402
+
+    upstream = json.loads(INDEX_UPSTREAM.read_text(encoding="utf-8"))
+    recs = upstream_layout.analyse([{"id": r["type_id"], "key": r["key"], "name": r["name"]} for r in rows],
+                                   index, upstream)
+    out, extra, seen = {}, [], set()
+    for rec in recs:
+        if rec["merge"] is None:
+            sys.exit(f"{rec['row']['id']} {rec['row']['name']}: adopted layout no longer differs ({rec['class']}); "
+                     f"remove it from {ADOPTED.name}")
+        out[rec["row"]["key"]] = rec["merge"]
+        for dep in rec["deps"]:
+            if dep not in seen:
+                seen.add(dep)
+                extra += [{**t, "file": "upstream:" + t["file"]} for t in upstream_layout.by_key(upstream)[dep][:1]]
+    return out, extra
+
+
 def main() -> int:
     index = json.loads(INDEX.read_text(encoding="utf-8"))
     idents = json.loads(DATA.read_text(encoding="utf-8"))
     sdk_types = set(index.get("sdk_types", []))
+    merged, upstream_types = adopted_layouts(index)
 
     catalog: dict[str, dict] = {}
     with CATALOG.open(encoding="utf-8", newline="") as f:
@@ -140,7 +174,7 @@ def main() -> int:
         return hashlib.sha1(sig.encode()).hexdigest()[:8]
 
     by_key: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
-    for t in index["types"].values():
+    for t in [*index["types"].values(), *upstream_types]:
         name = t["key"].split(":", 1)[1]
         if name in sdk_types:
             continue
@@ -244,18 +278,20 @@ def main() -> int:
     t_rows, f_rows = [], []
     for row_key, key, lh, decls, nlay in t_rows_src:
         t = decls[0]
+        m = merged.get(row_key)
+        t_fields = m["fields"] if m else t["fields"]
         kind, name = key.split(":", 1)
         tid = tids[row_key]
         tid_of_key.setdefault(key, tid)
         names = [name, *aliases.get(key, [])]
-        gen_fields = sum(1 for x in t["fields"] if GENERIC_FIELD.match(x.get("name") or ""))
+        gen_fields = sum(1 for x in t_fields if GENERIC_FIELD.match(x.get("name") or ""))
         sysc = type_systems.get(key) or type_systems.get("~" + key) or Counter(
             {s: 1 for s in [fallback_system(t["file"])] if s})
         prev = old_t.get(row_key, {})
         row = {
             "id": tid, "key": row_key, "kind": kind, "name": name,
             "generic": int(bool(GENERIC_TYPE.search(name))), "aliases": " ".join(aliases.get(key, [])),
-            "size": t.get("size", ""), "fields": len(t["fields"]), "generic_fields": gen_fields,
+            "size": m["size"] if m else t.get("size", ""), "fields": len(t_fields), "generic_fields": gen_fields,
             "layouts": nlay, "decls": len(decls),
             "files": " ".join(sorted({d["file"].removeprefix("src/") for d in decls})[:6]),
             "used_by_funcs": func_type_refs.get(key, 0), "used_by_globals": type_globals.get(key, 0),
@@ -263,10 +299,12 @@ def main() -> int:
         }
         row.update({c: prev.get(c, "") for c in TYPE_HUMAN})
         t_rows.append(row)
-        for n, x in enumerate(t["fields"]):
+        for n, x in enumerate(t_fields):
             fid = f"{tid}.{n:03d}"
             fname = x.get("name") or ""
             h = sorted({v for nm in names for v in hints.get(f"{nm}.{fname}", [])})
+            if x.get("source") == "upstream":
+                h.append("layout:upstream")
             fr = {"id": fid, "type_id": tid, "type_name": name, "index": n, "name": fname,
                   "generic": int(bool(GENERIC_FIELD.match(fname))), "type": x.get("type", ""),
                   "bits": x.get("bits", "") or "", "value": x.get("value", ""), "hints": " | ".join(h)}

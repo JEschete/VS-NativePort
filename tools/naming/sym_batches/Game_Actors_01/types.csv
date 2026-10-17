@@ -14,7 +14,7 @@ T00249,struct:D_800F4538_unk614,struct,D_800F4538_unk614,D_800F4538_unk614,4,4,1
 T00251,struct:D_800F4538_unk64,struct,D_800F4538_unk64,D_800F4538_unk64,4,4,4,1,BATTLE/BATTLE.PRG/3A1A0.h,7,0,Game.Actors
 T00252,struct:D_800F4538_unk68,struct,D_800F4538_unk68,D_800F4538_unk68,64,6,1,1,BATTLE/BATTLE.PRG/3A1A0.h,17,0,Game.Actors
 T00253,struct:D_800F4538_unkC54,struct,D_800F4538_unkC54,D_800F4538_unkC54,1360,13,12,1,BATTLE/BATTLE.PRG/3A1A0.h,5,0,Game.Actors
-T00255,struct:D_800F45E0_t,struct,D_800F45E0_t,D_800F45E0_t,6272,181,181,1,BATTLE/BATTLE.PRG/3A1A0.h,56,1,Game.Actors
+T00255,struct:D_800F45E0_t,struct,D_800F45E0_t,D_800F45E0_t,6272,184,184,1,BATTLE/BATTLE.PRG/3A1A0.h,56,1,Game.Actors
 T00301,struct:_accessoryIntermediate,struct,_accessoryIntermediate,_accessoryIntermediate,52,5,2,1,BATTLE/BATTLE.PRG/146C.h,2,0,Game.Items
 T00302,struct:_actions,struct,_actions,_actions,4,3,1,1,BATTLE/BATTLE.PRG/146C.h,1,0,Game.Actors
 T00303,struct:_armature_t,struct,_armature_t,_armature_t,16,12,12,1,BATTLE/BATTLE.PRG/3A1A0.h,10,0,Game.Actors

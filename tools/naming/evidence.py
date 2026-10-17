@@ -26,6 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REF = ROOT / "resources" / "rood-reverseWin"
+UPSTREAM_REF = ROOT / "resources" / "rood-reverse"
 BATCHES = ROOT / "tools" / "naming" / "sym_batches"
 ANON = re.compile(r"\(unnamed at (?:.*[\\/])?src[\\/](.+?):(\d+):\d+\)")
 LABEL = re.compile(r"\(([^:()]+):(\d+) (\w+)\)$")
@@ -44,6 +45,54 @@ class Source:
     def show(self, rel: str, n: int) -> str:
         text = self.lines(rel)
         return f"{Path(rel).name}:{n}: {text[n - 1].strip()[:140]}" if 0 < n <= len(text) else f"{rel}:{n}: ?"
+
+
+class UpstreamSource:
+    """Member accesses in resources\\rood-reverse (upstream main) for fields whose layout was adopted from upstream
+    (hint `layout:upstream`, see tools\\naming\\upstream_layout.py). Lines print as `upstream:<file>:<line>`."""
+
+    def __init__(self) -> None:
+        self.ix: dict | None = None
+        self.cache: dict[str, list[str]] = {}
+
+    def lines(self, rel: str) -> list[str]:
+        if rel not in self.cache:
+            p = UPSTREAM_REF / rel
+            self.cache[rel] = p.read_text(encoding="utf-8", errors="replace").splitlines() if p.exists() else []
+        return self.cache[rel]
+
+    def show(self, rel: str, n: int) -> str:
+        text = self.lines(rel)
+        return f"upstream:{rel.removeprefix('src/')}:{n}: {text[n - 1].strip()[:140]}" if 0 < n <= len(text) else "?"
+
+    def decl(self, type_name: str) -> str | None:
+        self.load()
+        for t in self.ix["types"].values():
+            if t["key"].split(":", 1)[1] == type_name and t["fields"]:
+                return self.show(t["file"], t["line"])
+        return None
+
+    def load(self) -> None:
+        if self.ix is None:
+            path = ROOT / "build" / "port" / "index_upstream.json"
+            if not path.exists():
+                sys.exit(f"{path} missing: run tools\\port\\decomp_index.py --root resources\\rood-reverse --out {path}")
+            self.ix = json.loads(path.read_text(encoding="utf-8"))
+
+    def hits(self, type_name: str, member: str, limit: int) -> list[str]:
+        self.load()
+        mpat = re.compile(r"(->|\.)" + re.escape(member) + r"\b")
+        out = []
+        for fn in self.ix["functions"].values():
+            if f"{type_name}.{member}" not in (fn.get("refs") or {}).get("field", {}):
+                continue
+            text = self.lines(fn["file"])
+            for i in range(fn["line"] - 1, min(fn["end_line"], len(text))):
+                if mpat.search(text[i]):
+                    out.append(f"[{fn['name']}] {self.show(fn['file'], i + 1)}")
+                    if len(out) >= limit:
+                        return out
+        return out
 
 
 class Upstream:
@@ -105,6 +154,7 @@ def main() -> int:
     fields = [r for r in csv.DictReader(open(ROOT / "Docs" / "ledgers" / "FIELD_LEDGER.csv", encoding="utf-8"))]
     only = {i.strip() for i in a.ids.split(",") if i.strip()}
     src = Source()
+    upsrc = UpstreamSource()
     out: list[str] = []
 
     def ref_functions(labels: list[str]):
@@ -179,6 +229,10 @@ def main() -> int:
                         break
             if decl:
                 out.append(f"   DECL {src.show(*decl)}")
+            elif t["files"].startswith("upstream:"):
+                d = upsrc.decl(t["name"])
+                if d:
+                    out.append(f"   DECL {d}")
             out.extend(f"   {h}" for h in up.lines(t["name"]))
             labels = context["types"].get(tid, [])
             for final, orig, rel, lo, hi in ref_functions(labels):
@@ -186,7 +240,8 @@ def main() -> int:
             for f in members.get(tid, []):
                 mpat = re.compile(r"(->|\.)" + re.escape(f["name"]) + r"\b")
                 hits: list[str] = []
-                for final, orig, rel, lo, hi in ref_functions(labels):
+                from_upstream = "layout:upstream" in f.get("hints", "") or t["files"].startswith("upstream:")
+                for final, orig, rel, lo, hi in ([] if from_upstream else ref_functions(labels)):
                     text = src.lines(rel)
                     for i in range(lo - 1, min(hi, len(text))):
                         if mpat.search(text[i]):
@@ -195,8 +250,11 @@ def main() -> int:
                                 break
                     if len(hits) >= a.max:
                         break
+                if from_upstream:
+                    hits = upsrc.hits(t["name"], f["name"], a.max)
                 desc = f"{f['type']}" + (f":{f['bits']}" if f["bits"] else "") + (f"={f['value']}" if f["value"] else "")
-                out.append(f"   .{f['name']} ({f['id']}, {desc})" + ("" if hits else "  -- no access in referencing functions"))
+                tag = "  [layout from upstream]" if from_upstream else ""
+                out.append(f"   .{f['name']} ({f['id']}, {desc}){tag}" + ("" if hits else "  -- no access in referencing functions"))
                 out.extend(f"      {h}" for h in hits)
             out.append("")
 

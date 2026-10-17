@@ -3,6 +3,8 @@
 Writes tools\\naming\\sym_batches\\<batch>\\{globals,types,fields}.csv + context.md.
 Rows are grouped by proposed system so one agent sees a system's globals and types together; a type always travels
 with all its fields. Only rows without a final_name are batched, so re-running after a merge batches what is left.
+
+--refresh keeps the existing batches and only rewrites the rows of batches not yet applied (after a ledger rebuild).
 """
 from __future__ import annotations
 
@@ -53,7 +55,47 @@ T_COLS = ["id", "key", "kind", "name", "aliases", "size", "fields", "generic_fie
 F_COLS = ["id", "type_id", "type_name", "index", "name", "type", "bits", "value", "hints"]
 
 
+def refresh() -> int:
+    """Rewrite the rows of batches not yet applied (no sym_out\\<batch>) from the current ledgers, keeping each
+    batch's membership. Unnamed types in no batch (e.g. member types added by UPSTREAM_LAYOUTS.csv) join the batch
+    holding a type whose fields use them."""
+    data = {r["id"]: r for r in read(LEDGERS / "DATA_LEDGER.csv")}
+    types = {r["id"]: r for r in read(LEDGERS / "TYPE_LEDGER.csv")}
+    f_by_type: dict[str, list[dict]] = defaultdict(list)
+    for f in read(LEDGERS / "FIELD_LEDGER.csv"):
+        f_by_type[f["type_id"]].append(f)
+    applied_dir = ROOT / "tools" / "naming" / "sym_out"
+    member: dict[str, dict[str, list[str]]] = {}
+    batched = set()
+    for d in sorted(p for p in OUT.iterdir() if p.is_dir()):
+        g = [r["id"] for r in read(d / "globals.csv")] if (d / "globals.csv").exists() else []
+        t = [r["id"] for r in read(d / "types.csv")] if (d / "types.csv").exists() else []
+        batched |= set(t)
+        if not (applied_dir / d.name).exists():
+            member[d.name] = {"g": g, "t": t}
+    for tid, t in types.items():
+        if tid in batched or t["final_name"]:
+            continue
+        home = next((b for b, m in member.items() for u in m["t"]
+                     if any(t["name"] in (f["type"] or "") for f in f_by_type[u])), None)
+        if home is None:
+            print(f"unbatched: {tid} {t['name']} (no pending batch uses it)")
+            continue
+        member[home]["t"].append(tid)
+        print(f"added {tid} {t['name']} -> {home}")
+    for name, m in member.items():
+        d = OUT / name
+        ts = [types[i] for i in m["t"] if i in types]
+        write(d / "globals.csv", [data[i] for i in m["g"] if i in data], G_COLS)
+        write(d / "types.csv", ts, T_COLS)
+        write(d / "fields.csv", [f for t in ts for f in f_by_type[t["id"]]], F_COLS)
+        print(f"{name:22} globals {len(m['g']):4} types {len(ts):4} fields {sum(len(f_by_type[t['id']]) for t in ts):5}")
+    return 0
+
+
 def main() -> int:
+    if "--refresh" in sys.argv[1:]:
+        return refresh()
     data = [r for r in read(LEDGERS / "DATA_LEDGER.csv") if not r["final_name"]]
     types = read(LEDGERS / "TYPE_LEDGER.csv")
     fields = read(LEDGERS / "FIELD_LEDGER.csv")

@@ -156,7 +156,20 @@ Abbreviations allowed in names: `Hp`, `Mp`, `Dp`, `Pp`, `Ui`, `Hud`, `Fx`, `Rgb`
   written with an AI model are tagged `[AI-declared]` (all of noprompt's PRs say so) and deserve the same scrutiny
   as our own agents' output; e.g. PR#206 calls `func_8007D734` a map/compass overlay, but its five 64-pixel
   sprite strips cover the full 320-pixel screen (`146C.c:9385`). Maintainer review threads are fetched on demand
-  through the GitHub MCP server when a symbol is ambiguous.
+  through the GitHub MCP server when a symbol is ambiguous. The cache also holds the PR review and conversation
+  comments (957 as of #251); refresh it after each upstream update.
+- Upstream main, `resources\rood-reverse` (read-only). The pinned reference `rood-reverseWin` is noprompt's fork at
+  `062096da` (`upstream.json`); upstream main merges that work in reviewed batches, so its struct layouts are the
+  maintainer-accepted ones. **Layouts are adopted from upstream where it is finer** (decision 2026-10-17):
+  `tools\naming\upstream_layout.py` compares every type in the two decomp indexes and merges per byte range (the
+  finer side wins; on equal members upstream C types win and the more meaningful name stays). Adopted types are listed
+  in `Docs\ledgers\UPSTREAM_LAYOUTS.csv`, and `tools\ledger\build_symbol_ledgers.py` emits their fields from the merge.
+  A field that exists only upstream carries the hint `layout:upstream` and is cited from upstream source as
+  `source:upstream:<path>:<line>`; `evidence.py` prints those lines. Each adopted row lists the pinned functions
+  that touch replaced or retyped members; the copy step must adapt them (take upstream's reviewed body where it
+  exists, e.g. `func_800DD344`; otherwise edit the pinned body to the merged layout).
+- Upstream `config\**\symbol_addrs.txt` adds nothing over the pinned reference: the two trees agree on all
+  ~2,340 address names (upstream adds only the SDK's `DS_close`); new names arrive through C declarations.
 
 ---
 
@@ -168,8 +181,8 @@ libclang index, and the rules below apply to them. `tools\naming\merge_symbols.p
 | Ledger | Row | Rows | What the pass fills |
 |---|---|---|---|
 | `DATA_LEDGER.csv` | `G#####`, one per **storage identity** (see §8.1) | 2,174 | `disposition`, `final_name`, `final_location`, `purpose`, `confidence`, `notes` |
-| `TYPE_LEDGER.csv` | `T#####`, one per distinct type layout | 820 | `role`, `final_name`, `final_location`, `purpose`, `confidence`, `notes` |
-| `FIELD_LEDGER.csv` | `T#####.NNN`, one per struct/union field or enumerator | 6,766 | `final_name`, `meaning`, `confidence`, `notes` |
+| `TYPE_LEDGER.csv` | `T#####`, one per distinct type layout | 822 | `role`, `final_name`, `final_location`, `purpose`, `confidence`, `notes` |
+| `FIELD_LEDGER.csv` | `T#####.NNN`, one per struct/union field or enumerator | 6,870 | `final_name`, `meaning`, `confidence`, `notes` |
 
 Every row gets a name, including ones that already look fine (`vs_main_*`, `_portInfo`): they are converted to these
 conventions the same way functions were.
@@ -239,6 +252,12 @@ used by several systems goes to that system's `State.c` (e.g. `Native\Game\src\B
   partial view of the other (then `same-as:T#####` in `notes`, and the merged layout is resolved when copying).
 - The generic decomp names (`D_800F19CC_t`, `func_8006B57C_t`, `unk_t`) must all go. The `aliases` column lists the
   folded typedef spellings, which all map to the one final name.
+- **Fork-only view types.** About 176 types exist only in the pinned fork, most of them per-unit views over one
+  shared struct (e.g. `actionReactionState` where upstream's reviewed `func_800DD344` takes `func_800E78F4_t*`;
+  #247: "per-unit views ... are not brought over"). They are named like any other type, **but only where the cited
+  code supports a meaningful name**; a view whose uses do not explain it keeps no invented meaning (name it after the
+  struct it views, with `same-as:`/`view-of` notes, or leave its fields `reserved<Off>` at `low`). List each
+  view's canonical struct in `notes` so the copy step can fold views back into it.
 
 ## 10. Fields and enumerators (`FIELD_LEDGER.csv`)
 
@@ -296,6 +315,13 @@ fields.csv   id,final_name,meaning,confidence,notes
   `actor->unkC` for `vs_battle_objectData.unkC`); confirm the receiver's type before citing a hit.
 - Write citations by searching for exact source text rather than typing line numbers, and check that each field
   row cites at least one line naming the original member (Engine_01's generator does both).
+- Upstream refresh, after `resources\rood-reverse` moves: `python tools\port\decomp_index.py --root
+  resources\rood-reverse --out build\port\index_upstream.json`, then `python tools\naming\upstream_layout.py report
+  --out build\port\upstream_layout\all.md` (classes: same / type-only / layout / fork-only; identical struct source
+  counts as same, since shared effect headers differ only by per-overlay macros such as `TRAIL_SAMPLE_COUNT`),
+  `upstream_layout.py adopt --all` (refuses a type whose filled rows would move), `python
+  tools\ledger\build_symbol_ledgers.py`, and `python tools\naming\make_symbol_batches.py --refresh`, which rewrites
+  only the batches not yet applied and keeps their membership.
 
 After a complete batch passes `python tools\naming\merge_symbols.py --check <batch>`, merge it immediately with
 `python tools\naming\merge_symbols.py --apply-batch <batch>`. This validates the batch against names already applied
@@ -323,14 +349,14 @@ must refuse names whose rows do not pass the evidence check.
 | Audio | 92 | 20 | 270 | Validated and applied |
 | Engine_01 | 151 | 38 | 252 | Validated and applied |
 | Engine_02 | 60 | 0 | 0 | Validated and applied |
-| Game_Actors_01 | 0 | 55 | 768 | Pending |
+| Game_Actors_01 | 0 | 55 | 771 | Pending |
 | Game_Actors_02 | 48 | 8 | 108 | Validated and applied |
-| Game_Battle_01 | 0 | 92 | 575 | Pending |
+| Game_Battle_01 | 0 | 92 | 583 | Pending |
 | Game_Battle_02 | 0 | 66 | 689 | Pending |
-| Game_Battle_03 | 0 | 78 | 648 | Pending |
+| Game_Battle_03 | 0 | 78 | 737 | Pending |
 | Game_Battle_04 | 58 | 58 | 526 | Pending |
 | Game_Battle_05 | 114 | 0 | 0 | Pending |
-| Game_Effects_01 | 0 | 78 | 655 | Pending |
+| Game_Effects_01 | 0 | 80 | 659 | Pending |
 | Game_Effects_02 | 239 | 9 | 53 | Pending |
 | Game_Ending | 75 | 6 | 59 | Validated and applied |
 | Game_Event | 69 | 17 | 160 | Validated and applied |
@@ -344,7 +370,12 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **740 / 2,174** | **226 / 820** | **1,713 / 6,766** | **10 / 24 batches applied** |
+| **Applied / inventoried** | **740 / 2,174** | **226 / 822** | **1,713 / 6,870** | **10 / 24 batches applied** |
+
+Inventory changed on 2026-10-17 when 25 upstream layouts were adopted (15 merged layouts, 10 type-only retypes; two
+new upstream-only types, `func_800D52A4_t`/`_t2`, the effect node's motion block). Applied rows kept their names;
+four applied fields changed C type only (`AkaoSeqHeader.magic` `char[4]`→`int`, `_mpdEnemy.settings`
+`u_char[8]`→`actorSpawnSettings`, `vs_battle_objectData.material`/`variant` `char`→`u_char`).
 
 Applied rows still include 32 low-confidence globals, 5 low-confidence types and 257 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
@@ -388,6 +419,13 @@ names, locations and collisions; it does not prove semantics or close migration 
   runtime, so they are state, not constants.
 - G02005/G02006 identify loading-image pixels/header through consumers, but their source definitions and extraction
   bindings are not located by the inventory. Converted asset paths in output notes remain proposed destinations.
+- Upstream layout adoption (2026-10-17): `vs_battle_movementPosition` is a union (`raw` + `p.x/y/z/status`) in the
+  pinned fork and a plain byte struct upstream; the pinned union is kept because the copied code uses its members,
+  but the native type should be the struct and the `.raw` word compares become an explicit packed compare. Shared
+  effect headers (`trails.h`, `grids.h`, `rings.h`, …) are instantiated per overlay with macros such as
+  `TRAIL_SAMPLE_COUNT`; port them as one parameterised type, not one type per overlay. Adopted layouts that retype
+  members still used by pinned-only bodies (e.g. `func_800D2904_t.unk5C`, `int` in `func_800D2ADC`, `char[4]`
+  upstream, where `func_800D2ADC` is still asm) must be reconciled per function when copying.
 
 The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
 The native audio player must own playback position rather than reading another module's timing globals.

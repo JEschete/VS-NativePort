@@ -250,8 +250,8 @@ Each row gets a `disposition`:
 
 | Ledger | Generated from | Purpose |
 |---|---|---|
-| `TYPE_LEDGER.csv` ✅ | `build_symbol_ledgers.py` over every struct/union/enum/typedef in the index | One row (`T#####`) per distinct type layout (820; typedef aliases folded into their struct; repeated `*_t.h` copies deduplicated, differing layouts of one name kept apart and flagged in `layouts`). Final C++ name, owner system, `role` (Def / Instance / State / OnDisc / Packet / Enum), field naming % |
-| `FIELD_LEDGER.csv` ✅ | same | One row (`T#####.NNN`) per field or enumerator (6,766; 2,888 generic `unk*`). Seeded with the `fields:` hints the function-naming agents left in `FUNCTION_CATALOG.csv` notes |
+| `TYPE_LEDGER.csv` ✅ | `build_symbol_ledgers.py` over every struct/union/enum/typedef in the index | One row (`T#####`) per distinct type layout (822; typedef aliases folded into their struct; repeated `*_t.h` copies deduplicated, differing layouts of one name kept apart and flagged in `layouts`; 25 layouts merged with upstream main via `UPSTREAM_LAYOUTS.csv`). Final C++ name, owner system, `role` (Def / Instance / State / OnDisc / Packet / Enum), field naming % |
+| `FIELD_LEDGER.csv` ✅ | same | One row (`T#####.NNN`) per field or enumerator (6,870; 2,983 generic `unk*`). Seeded with the `fields:` hints the function-naming agents left in `FUNCTION_CATALOG.csv` notes; fields taken from upstream carry `layout:upstream` |
 | `CONTENT_LEDGER.csv` | ISO9660 listing of the disc (all files, sizes, types) | Every disc file → format → decoder → catalog/asset → tests. Includes the 192 zero-byte placeholder files, marked `n/a` |
 | `VERIFY_LEDGER.csv` | hand + replay system | Parity checkpoints (screen, scene, replay), reference capture, last pass |
 | `SHIM_USES` (auto) | `tools\ledger\scan_native.py` over `Native\` | Fills `copied`/`compiles` and the live shim use counts automatically; CI fails if the ledgers disagree with the code |

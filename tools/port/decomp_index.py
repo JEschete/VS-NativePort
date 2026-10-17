@@ -6,7 +6,10 @@ Every game translation unit (non-SDK .c under resources/rood-reverseWin/src) is 
 preprocessor flags plus build/port/gen (see gen_decomp_headers.py). Declarations are de-duplicated across
 translation units by (kind, name, file, line).
 
-Usage: python tools/port/decomp_index.py [--only <substring>]
+Usage: python tools/port/decomp_index.py [--only <substring>] [--root <decomp checkout>] [--out <json>]
+
+--root indexes another checkout with the same layout (e.g. resources/rood-reverse, the upstream main branch) so
+tools/naming/upstream_layout.py can compare struct layouts against the pinned reference.
 """
 from __future__ import annotations
 
@@ -29,11 +32,23 @@ OUT = REPO / "build" / "port" / "index.json"
 sys.path.insert(0, str(REPO / "tools" / "ledger"))
 from build_ledgers import is_sdk_path  # noqa: E402
 
-ARGS = [
-    "-target", "mipsel-unknown-none", "-nostdinc",
-    "-I", str(PSXINC), "-I", str(DECOMP / "src" / "include"), "-I", str(DECOMP), "-I", str(GEN),
-    "-D__attribute__(x)=", "-D_LANGUAGE_C", "-DMENUBGSZ=1", "-std=gnu89", "-fms-extensions", "-Wno-everything",
-]
+def clang_args() -> list[str]:
+    return [
+        "-target", "mipsel-unknown-none", "-nostdinc",
+        "-I", str(PSXINC), "-I", str(DECOMP / "src" / "include"), "-I", str(DECOMP), "-I", str(GEN),
+        "-D__attribute__(x)=", "-D_LANGUAGE_C", "-DMENUBGSZ=1", "-std=gnu89", "-fms-extensions", "-Wno-everything",
+    ]
+
+
+ARGS = clang_args()
+
+
+def configure(root: Path) -> None:
+    global DECOMP, SRC, PSXINC, ARGS
+    DECOMP = root.resolve()
+    SRC = DECOMP / "src"
+    PSXINC = DECOMP / "include" / "psx"
+    ARGS = clang_args()
 K = ci.CursorKind
 TYPE_DECLS = {K.STRUCT_DECL: "struct", K.UNION_DECL: "union", K.ENUM_DECL: "enum", K.TYPEDEF_DECL: "typedef"}
 
@@ -137,7 +152,8 @@ class Index:
             for fc in c.get_children():
                 if fc.kind == K.FIELD_DECL:
                     fields.append({"name": fc.spelling, "type": fc.type.spelling,
-                                   "bits": fc.get_bitfield_width() if fc.is_bitfield() else 0})
+                                   "bits": fc.get_bitfield_width() if fc.is_bitfield() else 0,
+                                   "offset": fc.get_field_offsetof()})
                     d, by_value = decl_of_type(fc.type)
                     if d is not None and d.kind in TYPE_DECLS:
                         deps[type_key(d)] = deps.get(type_key(d), False) or by_value
@@ -308,7 +324,12 @@ def game_tus(only: str | None) -> list[Path]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--only")
+    ap.add_argument("--root", type=Path)
+    ap.add_argument("--out", type=Path)
     a = ap.parse_args()
+    if a.root:
+        configure(a.root)
+    out = a.out or OUT
     if not (GEN / "build" / "src" / "include" / "lbas.h").exists():
         sys.exit("run tools/port/gen_decomp_headers.py first")
     t0 = time.time()
@@ -318,15 +339,15 @@ def main() -> int:
     for p in files:
         ix.parse(p, idx)
     ix.macros_per_function(files, idx)
-    OUT.parent.mkdir(parents=True, exist_ok=True)
+    out.parent.mkdir(parents=True, exist_ok=True)
     data = {
         "functions": ix.functions, "globals": ix.globals, "types": ix.types, "macros": ix.macros,
         "enum_consts": ix.enum_consts, "sdk_types": dict(ix.sdk_types.most_common()), "tu_errors": ix.tu_errors,
     }
-    OUT.write_text(json.dumps(data, indent=1), encoding="utf-8")
+    out.write_text(json.dumps(data, indent=1), encoding="utf-8")
     print(f"{len(files)} TUs in {time.time() - t0:.0f}s: {len(ix.functions)} functions, {len(ix.globals)} globals, "
           f"{len(ix.types)} types, {len(ix.macros)} macros, {len(ix.enum_consts)} enum consts, "
-          f"{len(ix.sdk_types)} SDK types used, {len(ix.tu_errors)} TUs with errors -> {OUT}")
+          f"{len(ix.sdk_types)} SDK types used, {len(ix.tu_errors)} TUs with errors -> {out}")
     return 0
 
 
