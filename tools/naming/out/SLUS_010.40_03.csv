@@ -1,75 +1,75 @@
 id,final_name,final_location,purpose,confidence,notes
-F03397,Core::Math::BuildRotationYxz,Native\Core\src\Math\FixedPoint.c,Builds a fixed-point rotation matrix in Y-X-Z order for actor and camera transforms.,high,asm;matrix product Ry*Rx*Rz
-F03398,Core::Math::BuildRotationXyz,Native\Core\src\Math\FixedPoint.c,Builds a fixed-point rotation matrix in X-Y-Z order for actor and camera transforms.,high,asm;matrix product Rx*Ry*Rz
-F03399,Core::Math::LookupSineCosinePair,Native\Core\src\Math\FixedPoint.c,Resolves an angle octant to a signed sine and cosine pair for the rotation builders.,high,asm;custom register ABI and eight computed entry points
-F03400,Core::Math::Cosine,Native\Core\src\Math\FixedPoint.c,Returns the fixed-point cosine of an angle measured in 4096 units per revolution.,high,asm
-F03401,Core::Math::Sine,Native\Core\src\Math\FixedPoint.c,Returns the fixed-point sine of an angle measured in 4096 units per revolution.,high,asm
-F03402,Core::Math::ArcTangent2,Native\Core\src\Math\FixedPoint.c,Returns the signed angle of a two-dimensional vector using a fixed-point lookup table.,high,
-F03403,Core::Math::ScaleMatrixColumns,Native\Core\src\Math\FixedPoint.c,Scales each rotation-matrix column by the corresponding fixed-point vector component.,high,asm
-F03404,Render::ApplyDepthCueColor,Native\Graphics\src\Lighting.c,Interpolates a color toward the far color using the supplied depth-cue factor.,high,asm
-F03405,Core::Math::InverseSquareRootParts,Native\Core\src\Math\FixedPoint.c,Returns a lookup-table reciprocal-square-root mantissa and binary exponent through output pointers.,high,asm
-F03406,Core::Math::MultiplyMatrixIntoLeft,Native\Core\src\Math\FixedPoint.c,Multiplies two rotation matrices and overwrites the left operand with the result.,high,asm
-F03407,Core::Math::CrossProductFixed,Native\Core\src\Math\FixedPoint.c,Computes a vector cross product with a twelve-bit fixed-point shift.,high,asm;OuterProduct0 actually executes op with shift enabled
-F03408,Render::SetFogNearDistance,Native\Graphics\src\Lighting.c,Sets the depth-cue scale and offset from the fog near distance and projection distance.,high,asm
-F03409,Core::Math::SquareVectorComponents,Native\Core\src\Math\FixedPoint.c,Squares each vector component without a fixed-point shift.,high,asm
-F03410,Core::Math::SquareRootFixed,Native\Core\src\Math\FixedPoint.c,Returns the square root of a twelve-fractional-bit fixed-point value.,high,asm
-F03411,Core::Math::NormalizeVector,Native\Core\src\Math\FixedPoint.c,Normalizes a vector of 32-bit components to fixed-point unit length and stores 32-bit components.,high,asm
-F03412,Core::Math::NormalizeVectorToShort,Native\Core\src\Math\FixedPoint.c,Normalizes a vector of 32-bit components and stores three 16-bit fixed-point components.,high,asm
-F03413,Core::Math::NormalizeShortVector,Native\Core\src\Math\FixedPoint.c,Normalizes a vector of 16-bit components and stores three 16-bit fixed-point components.,high,asm
-F03414,Core::Math::NormalizeVectorRegisters,Native\Core\src\Math\FixedPoint.c,Normalizes the vector held in temporary registers using a reciprocal-square-root table.,high,asm;custom register ABI shared by three normalization entry points
-F03415,Core::Math::MultiplyMatrixIntoRight,Native\Core\src\Math\FixedPoint.c,Multiplies two rotation matrices and overwrites the right operand with the result.,high,asm
-F03416,Core::Math::SquareRootInteger,Native\Core\src\Math\FixedPoint.c,Returns an integer square root from a leading-zero count and square-root lookup table.,high,asm;original rsqrt spelling means root square rather than reciprocal square root
+F03397,Core::Math::BuildRotationYxz,Native\Engine\src\Core\Math\FixedPoint.c,Builds a fixed-point rotation matrix in Y-X-Z order for actor and camera transforms.,high,asm;matrix product Ry*Rx*Rz
+F03398,Core::Math::BuildRotationXyz,Native\Engine\src\Core\Math\FixedPoint.c,Builds a fixed-point rotation matrix in X-Y-Z order for actor and camera transforms.,high,asm;matrix product Rx*Ry*Rz
+F03399,Core::Math::LookupSineCosinePair,Native\Engine\src\Core\Math\FixedPoint.c,Resolves an angle octant to a signed sine and cosine pair for the rotation builders.,high,asm;custom register ABI and eight computed entry points
+F03400,Core::Math::Cosine,Native\Engine\src\Core\Math\FixedPoint.c,Returns the fixed-point cosine of an angle measured in 4096 units per revolution.,high,asm
+F03401,Core::Math::Sine,Native\Engine\src\Core\Math\FixedPoint.c,Returns the fixed-point sine of an angle measured in 4096 units per revolution.,high,asm
+F03402,Core::Math::ArcTangent2,Native\Engine\src\Core\Math\FixedPoint.c,Returns the signed angle of a two-dimensional vector using a fixed-point lookup table.,high,
+F03403,Core::Math::ScaleMatrixColumns,Native\Engine\src\Core\Math\FixedPoint.c,Scales each rotation-matrix column by the corresponding fixed-point vector component.,high,asm
+F03404,Render::ApplyDepthCueColor,Native\Engine\src\Render\Lighting.c,Interpolates a color toward the far color using the supplied depth-cue factor.,high,asm
+F03405,Core::Math::InverseSquareRootParts,Native\Engine\src\Core\Math\FixedPoint.c,Returns a lookup-table reciprocal-square-root mantissa and binary exponent through output pointers.,high,asm
+F03406,Core::Math::MultiplyMatrixIntoLeft,Native\Engine\src\Core\Math\FixedPoint.c,Multiplies two rotation matrices and overwrites the left operand with the result.,high,asm
+F03407,Core::Math::CrossProductFixed,Native\Engine\src\Core\Math\FixedPoint.c,Computes a vector cross product with a twelve-bit fixed-point shift.,high,asm;OuterProduct0 actually executes op with shift enabled
+F03408,Render::SetFogNearDistance,Native\Engine\src\Render\Lighting.c,Sets the depth-cue scale and offset from the fog near distance and projection distance.,high,asm
+F03409,Core::Math::SquareVectorComponents,Native\Engine\src\Core\Math\FixedPoint.c,Squares each vector component without a fixed-point shift.,high,asm
+F03410,Core::Math::SquareRootFixed,Native\Engine\src\Core\Math\FixedPoint.c,Returns the square root of a twelve-fractional-bit fixed-point value.,high,asm
+F03411,Core::Math::NormalizeVector,Native\Engine\src\Core\Math\FixedPoint.c,Normalizes a vector of 32-bit components to fixed-point unit length and stores 32-bit components.,high,asm
+F03412,Core::Math::NormalizeVectorToShort,Native\Engine\src\Core\Math\FixedPoint.c,Normalizes a vector of 32-bit components and stores three 16-bit fixed-point components.,high,asm
+F03413,Core::Math::NormalizeShortVector,Native\Engine\src\Core\Math\FixedPoint.c,Normalizes a vector of 16-bit components and stores three 16-bit fixed-point components.,high,asm
+F03414,Core::Math::NormalizeVectorRegisters,Native\Engine\src\Core\Math\FixedPoint.c,Normalizes the vector held in temporary registers using a reciprocal-square-root table.,high,asm;custom register ABI shared by three normalization entry points
+F03415,Core::Math::MultiplyMatrixIntoRight,Native\Engine\src\Core\Math\FixedPoint.c,Multiplies two rotation matrices and overwrites the right operand with the result.,high,asm
+F03416,Core::Math::SquareRootInteger,Native\Engine\src\Core\Math\FixedPoint.c,Returns an integer square root from a leading-zero count and square-root lookup table.,high,asm;original rsqrt spelling means root square rather than reciprocal square root
 F03417,Boot::LoadBattleOverlays,Native\Game\src\Boot\Lifecycle.c,Loads BATTLE and INITBTL into their overlay slots and waits for both reads to finish.,high,
 F03418,Boot::LoadTitleOverlay,Native\Game\src\Boot\Lifecycle.c,Loads TITLE into the primary overlay slot and waits for the read to finish.,high,
 F03419,Boot::LoadEndingOverlay,Native\Game\src\Boot\Lifecycle.c,Loads ENDING into the primary overlay slot and waits for the read to finish.,high,
-F03420,Render::InitializeLoadingDisplay,Native\Graphics\src\Display.c,Configures the display environment and visible rectangle for the loading screen.,high,
-F03421,Render::ShowLoadingScreen,Native\Graphics\src\Display.c,Clears video memory and uploads the Now Loading image into both frame buffers.,high,
-F03422,Render::UploadLoadingScreenBackBuffer,Native\Graphics\src\Display.c,Uploads the Now Loading image into the frame buffer that is not currently displayed.,high,
+F03420,Render::InitializeLoadingDisplay,Native\Engine\src\Render\Display.c,Configures the display environment and visible rectangle for the loading screen.,high,
+F03421,Render::ShowLoadingScreen,Native\Engine\src\Render\Display.c,Clears video memory and uploads the Now Loading image into both frame buffers.,high,
+F03422,Render::UploadLoadingScreenBackBuffer,Native\Engine\src\Render\Display.c,Uploads the Now Loading image into the frame buffer that is not currently displayed.,high,
 F03423,Boot::ResetToTitle,Native\Game\src\Boot\Lifecycle.c,"Stops disc and audio activity, clears controller motors, and restores the title-entry stack.",high,
 F03424,Boot::EnterBattle,Native\Game\src\Boot\Lifecycle.c,"Resets display and audio state, loads battle overlays, and jumps to battle with the saved stack.",high,
 F03425,Boot::RunEndingAndReturnToTitle,Native\Game\src\Boot\Lifecycle.c,"Snapshots Ashley, plays the ending overlay, and resets to the title with game-clear data enabled.",high,
 F03426,State::UpdatePlayTimeAndLoading,Native\Game\src\State\PlayTime.c,Services disc loading and advances the capped play-time clock after the requested vertical synchronization.,high,
-F03427,Core::IgnoreCall,Native\Core\src\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,
-F03428,Core::IgnoreCall,Native\Core\src\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
-F03429,Core::IgnoreCall,Native\Core\src\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
-F03430,Core::IgnoreCall,Native\Core\src\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
-F03431,Core::IgnoreCall,Native\Core\src\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
-F03432,Core::IgnoreCall,Native\Core\src\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
-F03433,Core::Random::InitializeShuffleTable,Native\Core\src\Random.c,Seeds the deterministic random generator and fills its shuffle table.,high,replaced-by:Core::Random::Initialize
-F03434,Core::Random::NextBounded,Native\Core\src\Random.c,Draws a shuffled pseudorandom value scaled to the supplied exclusive upper bound.,high,replaced-by:Core::Random::Next
-F03435,Core::Random::NextAveraged,Native\Core\src\Random.c,Averages twelve bounded random draws to concentrate combat variation near the midpoint.,high,
+F03427,Core::IgnoreCall,Native\Engine\src\Core\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,
+F03428,Core::IgnoreCall,Native\Engine\src\Core\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
+F03429,Core::IgnoreCall,Native\Engine\src\Core\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
+F03430,Core::IgnoreCall,Native\Engine\src\Core\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
+F03431,Core::IgnoreCall,Native\Engine\src\Core\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
+F03432,Core::IgnoreCall,Native\Engine\src\Core\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
+F03433,Core::Random::InitializeShuffleTable,Native\Engine\src\Core\Random.c,Seeds the deterministic random generator and fills its shuffle table.,high,replaced-by:Core::Random::Initialize
+F03434,Core::Random::NextBounded,Native\Engine\src\Core\Random.c,Draws a shuffled pseudorandom value scaled to the supplied exclusive upper bound.,high,replaced-by:Core::Random::Next
+F03435,Core::Random::NextAveraged,Native\Engine\src\Core\Random.c,Averages twelve bounded random draws to concentrate combat variation near the midpoint.,high,
 F03436,Boot::InitializePlatformServices,Native\Game\src\Boot\Lifecycle.c,"Initializes display, memory cards, controllers, disc access, random state, and soft-reset defaults.",high,
 F03437,Boot::InitializeTitleSession,Native\Game\src\Boot\Lifecycle.c,"Reinitializes rendering, heap, disc queue, menu sounds, controllers, and play time before the title.",high,
 F03438,Boot::RunTitleAndBattle,Native\Game\src\Boot\Lifecycle.c,"Runs the title overlay, loads battle overlays, and enters gameplay with saved stack checkpoints.",high,
 F03439,Boot::RunGame,Native\Game\src\Boot\Lifecycle.c,"Initializes platform services, saves the reset stack, and starts the title-to-game flow.",high,
 F03440,Boot::WaitForOverlayReady,Native\Game\src\Boot\Lifecycle.c,Invokes the overlay delay after an executable overlay has been loaded.,high,
 F03441,Boot::SetSoftResetEnabled,Native\Game\src\Boot\Lifecycle.c,Enables or disables the controller chord that resets the game to the title.,high,
-F03442,Save::MarkAshleySnapshotValid,Native\Save\src\Snapshot.c,Marks the loaded Ashley snapshot for restoration during battle initialization.,high,fields:D_80060068_t3.unk0=restoreSnapshot
-F03443,Save::CaptureAshleySnapshot,Native\Save\src\Snapshot.c,"Copies Ashley stats, limbs, learned actions, camera state, and room-entry state into persistent save buffers.",high,fields:D_80060068_t3.unk80=cameraPitchDelta;fields:D_80060068_t3.unk84=cameraInitialDistance
-F03444,Input::InvalidateControllerConnections,Native\Input\src\Controller.c,Marks both controller ports as disconnected so actuator negotiation runs again.,high,
-F03445,Input::UnlockAnalogModeSwitch,Native\Input\src\Controller.c,Invalidates controller connections and unlocks analog mode switching on the first port.,high,
-F03446,Input::ConfigureControllerActuators,Native\Input\src\Controller.c,Resets actuator bytes and configures controller mode and motor alignment for a port.,high,
-F03447,Input::ReadControllerPort,Native\Input\src\Controller.c,Decodes a controller packet into button bits and analog-stick positions for one port.,high,
-F03448,Input::UpdateControllerConnection,Native\Input\src\Controller.c,Negotiates motor alignment and restores default actuator settings when a controller becomes ready.,high,
-F03449,Input::SetMotorCommand,Native\Input\src\Controller.c,Sets a controller motor byte while preserving the fallback value for non-analog controllers.,high,
-F03450,Input::MotorCommand,Native\Input\src\Controller.c,Returns a controller port actuator command byte.,high,
-F03451,Input::StartVibrationPattern,Native\Input\src\Controller.c,Starts a bytecoded vibration pattern in a requested or free effect slot and assigns its owner tag.,high,fields:padAct_t.unk8=active;fields:padAct_t.unkA=ownerTag;fields:padAct_t.unkC=pattern;two six-word envelopes exceed the declared unk10[10] array
-F03452,Input::ClearVibrationSlot,Native\Input\src\Controller.c,"Clears a vibration slot motor intensities, pattern pointer, and active flag.",high,
-F03453,Input::StopVibrationPatterns,Native\Input\src\Controller.c,"Stops a selected vibration slot, all slots, or slots matching an owner tag.",high,
-F03454,Input::PauseVibrationSlot,Native\Input\src\Controller.c,Clears a vibration slot active flag without discarding its pattern progress.,high,
-F03455,Input::PauseVibrationPatterns,Native\Input\src\Controller.c,Pauses the selected vibration slot or every vibration slot.,high,
-F03456,Input::ResumeVibrationSlot,Native\Input\src\Controller.c,Sets a vibration slot active flag so its saved pattern can advance again.,high,
-F03457,Input::ResumeVibrationPatterns,Native\Input\src\Controller.c,Resumes the selected vibration slot or every vibration slot.,high,
-F03458,Input::ResetVibrationPatterns,Native\Input\src\Controller.c,Clears both vibration effect slots and invalidates controller actuator connections.,high,
-F03459,Input::RoundMotorIntensityTowardZero,Native\Input\src\Controller.c,Biases negative fixed-point motor intensity before its eight-bit arithmetic shift.,high,original abs name is misleading and does not compute absolute value
-F03460,Input::UpdateVibrationPatterns,Native\Input\src\Controller.c,"Advances two motor envelopes per effect, mixes their intensities, and updates the first controller motors.",high,fields:padAct_t.unk0=mixedMotorIntensities;fields:padAct_t.unk10=motorEnvelopeStates
-F03461,Input::PlayVibrationPreset,Native\Input\src\Controller.c,Looks up a built-in vibration pattern and starts it in a free effect slot with the options-preview tag.,high,
-F03462,Input::UpdateControllers,Native\Input\src\Controller.c,"Polls both controllers, maps analog movement, computes button edges and repeats, and checks the reset chord.",high,
-F03463,Core::Memory::FreeFromHighEnd,Native\Core\src\Memory\Heap.c,Returns a heap block to the free list using a reverse search and merges adjacent free blocks.,high,
-F03464,Core::Memory::FreeFromLowEnd,Native\Core\src\Memory\Heap.c,Returns a heap block to the free list using a forward search and merges adjacent free blocks.,high,
-F03465,Core::Memory::AllocateFromHighEnd,Native\Core\src\Memory\Heap.c,Allocates a sixteen-byte-aligned heap block by searching and splitting from the high end.,high,
-F03466,Core::Memory::AllocateFromLowEnd,Native\Core\src\Memory\Heap.c,Allocates a sixteen-byte-aligned heap block by searching and splitting from the low end.,high,
-F03467,Core::Memory::InitializeHeap,Native\Core\src\Memory\Heap.c,Initializes the heap free-list sentinels and one free region from a supplied memory range.,high,fields:vs_main_HeapHeader.blockSz=sizeInSixteenByteUnits
+F03442,Save::MarkAshleySnapshotValid,Native\Engine\src\Save\Snapshot.c,Marks the loaded Ashley snapshot for restoration during battle initialization.,high,fields:D_80060068_t3.unk0=restoreSnapshot
+F03443,Save::CaptureAshleySnapshot,Native\Engine\src\Save\Snapshot.c,"Copies Ashley stats, limbs, learned actions, camera state, and room-entry state into persistent save buffers.",high,fields:D_80060068_t3.unk80=cameraPitchDelta;fields:D_80060068_t3.unk84=cameraInitialDistance
+F03444,Input::InvalidateControllerConnections,Native\Engine\src\Input\Controller.c,Marks both controller ports as disconnected so actuator negotiation runs again.,high,
+F03445,Input::UnlockAnalogModeSwitch,Native\Engine\src\Input\Controller.c,Invalidates controller connections and unlocks analog mode switching on the first port.,high,
+F03446,Input::ConfigureControllerActuators,Native\Engine\src\Input\Controller.c,Resets actuator bytes and configures controller mode and motor alignment for a port.,high,
+F03447,Input::ReadControllerPort,Native\Engine\src\Input\Controller.c,Decodes a controller packet into button bits and analog-stick positions for one port.,high,
+F03448,Input::UpdateControllerConnection,Native\Engine\src\Input\Controller.c,Negotiates motor alignment and restores default actuator settings when a controller becomes ready.,high,
+F03449,Input::SetMotorCommand,Native\Engine\src\Input\Controller.c,Sets a controller motor byte while preserving the fallback value for non-analog controllers.,high,
+F03450,Input::MotorCommand,Native\Engine\src\Input\Controller.c,Returns a controller port actuator command byte.,high,
+F03451,Input::StartVibrationPattern,Native\Engine\src\Input\Controller.c,Starts a bytecoded vibration pattern in a requested or free effect slot and assigns its owner tag.,high,fields:padAct_t.unk8=active;fields:padAct_t.unkA=ownerTag;fields:padAct_t.unkC=pattern;two six-word envelopes exceed the declared unk10[10] array
+F03452,Input::ClearVibrationSlot,Native\Engine\src\Input\Controller.c,"Clears a vibration slot motor intensities, pattern pointer, and active flag.",high,
+F03453,Input::StopVibrationPatterns,Native\Engine\src\Input\Controller.c,"Stops a selected vibration slot, all slots, or slots matching an owner tag.",high,
+F03454,Input::PauseVibrationSlot,Native\Engine\src\Input\Controller.c,Clears a vibration slot active flag without discarding its pattern progress.,high,
+F03455,Input::PauseVibrationPatterns,Native\Engine\src\Input\Controller.c,Pauses the selected vibration slot or every vibration slot.,high,
+F03456,Input::ResumeVibrationSlot,Native\Engine\src\Input\Controller.c,Sets a vibration slot active flag so its saved pattern can advance again.,high,
+F03457,Input::ResumeVibrationPatterns,Native\Engine\src\Input\Controller.c,Resumes the selected vibration slot or every vibration slot.,high,
+F03458,Input::ResetVibrationPatterns,Native\Engine\src\Input\Controller.c,Clears both vibration effect slots and invalidates controller actuator connections.,high,
+F03459,Input::RoundMotorIntensityTowardZero,Native\Engine\src\Input\Controller.c,Biases negative fixed-point motor intensity before its eight-bit arithmetic shift.,high,original abs name is misleading and does not compute absolute value
+F03460,Input::UpdateVibrationPatterns,Native\Engine\src\Input\Controller.c,"Advances two motor envelopes per effect, mixes their intensities, and updates the first controller motors.",high,fields:padAct_t.unk0=mixedMotorIntensities;fields:padAct_t.unk10=motorEnvelopeStates
+F03461,Input::PlayVibrationPreset,Native\Engine\src\Input\Controller.c,Looks up a built-in vibration pattern and starts it in a free effect slot with the options-preview tag.,high,
+F03462,Input::UpdateControllers,Native\Engine\src\Input\Controller.c,"Polls both controllers, maps analog movement, computes button edges and repeats, and checks the reset chord.",high,
+F03463,Core::Memory::FreeFromHighEnd,Native\Engine\src\Core\Memory\Heap.c,Returns a heap block to the free list using a reverse search and merges adjacent free blocks.,high,
+F03464,Core::Memory::FreeFromLowEnd,Native\Engine\src\Core\Memory\Heap.c,Returns a heap block to the free list using a forward search and merges adjacent free blocks.,high,
+F03465,Core::Memory::AllocateFromHighEnd,Native\Engine\src\Core\Memory\Heap.c,Allocates a sixteen-byte-aligned heap block by searching and splitting from the high end.,high,
+F03466,Core::Memory::AllocateFromLowEnd,Native\Engine\src\Core\Memory\Heap.c,Allocates a sixteen-byte-aligned heap block by searching and splitting from the low end.,high,
+F03467,Core::Memory::InitializeHeap,Native\Engine\src\Core\Memory\Heap.c,Initializes the heap free-list sentinels and one free region from a supplied memory range.,high,fields:vs_main_HeapHeader.blockSz=sizeInSixteenByteUnits
 F03468,Content::ReadSectorCallback,Native\Content\src\CdDrive.c,Receives a disc sector into the destination or ring buffer and updates read completion counters.,high,fields:vs_main_disk_t.unk4=sectorsReceived;fields:vs_main_disk_t.unk3C=ringWriteIndex;fields:vs_main_disk_t.unk38=bufferedSectorsReceived
 F03469,Content::ReadCommandCallback,Native\Content\src\CdDrive.c,Starts sector-ready handling after a disc read command completes or records a read error.,high,
 F03470,Content::SeekCommandCallback,Native\Content\src\CdDrive.c,Updates disc state when an asynchronous seek completes or fails.,high,
@@ -79,103 +79,103 @@ F03473,Content::ClearDiscReadError,Native\Content\src\CdDrive.c,Returns the disc
 F03474,Content::BeginDiscRead,Native\Content\src\CdDrive.c,Initializes a read or seek request when the disc is idle and calculates its sector count.,high,
 F03475,Content::UpdateDiscCommands,Native\Content\src\CdDrive.c,"Advances disc read, seek, retry, and XA streaming states and drains buffered sectors.",high,fields:vs_main_disk_t.unk3=retryCount;fields:vs_main_disk_t.unk34=unconsumedSectorCount
 F03476,Content::ReadDiscFileBlocking,Native\Content\src\CdDrive.c,Starts a disc read and services play time and disc commands until the request leaves its busy states.,high,
-F03477,Audio::BeginXaStream,Native\Audio\src\Stream.c,Queues XA playback from a disc sector if no other disc operation is active.,high,byteCount is reused as the initial XA volume by the disc state machine
-F03478,Audio::RequestXaStreamStop,Native\Audio\src\Stream.c,Requests a stop for an active XA stream and reports whether the request was accepted.,high,original checkStreamXaEnd changes state rather than checking completion
+F03477,Audio::BeginXaStream,Native\Engine\src\Audio\Stream.c,Queues XA playback from a disc sector if no other disc operation is active.,high,byteCount is reused as the initial XA volume by the disc state machine
+F03478,Audio::RequestXaStreamStop,Native\Engine\src\Audio\Stream.c,Requests a stop for an active XA stream and reports whether the request was accepted.,high,original checkStreamXaEnd changes state rather than checking completion
 F03479,Content::ResetDiscDrive,Native\Content\src\CdDrive.c,"Pauses disc activity, clears read state, and restores the default disc mode.",high,
 F03480,Content::InitializeDiscQueue,Native\Content\src\CdDrive.c,Marks all thirty-two disc request slots free and clears queued and active counts.,high,
 F03481,Content::AllocateDiscRequest,Native\Content\src\CdDrive.c,Claims a free disc queue slot and copies the requested file sector and size into it.,high,
 F03482,Content::ReleaseDiscRequest,Native\Content\src\CdDrive.c,Marks a completed or otherwise releasable disc request slot free.,high,
 F03483,Content::EnqueueDiscRequest,Native\Content\src\CdDrive.c,Appends a disc read request to the queue with its destination buffer.,high,
 F03484,Content::EnqueuePriorityDiscRequest,Native\Content\src\CdDrive.c,Moves a disc read request to the front and shifts existing queued priorities back.,high,
-F03485,Core::IgnoreCall,Native\Core\src\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
+F03485,Core::IgnoreCall,Native\Engine\src\Core\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
 F03486,Content::UpdateDiscQueue,Native\Content\src\CdDrive.c,"Dispatches the next queued file read, marks completed requests, and advances disc commands.",high,
-F03487,Audio::MusicBeatPosition,Native\Audio\src\Music.c,Returns the active music sequence beat counters packed into a single integer.,high,
-F03488,Audio::SaveMusicPlaybackState,Native\Audio\src\Music.c,Copies active music channel state into the driver backup configuration.,high,
-F03489,Audio::SetMusicJumpThreshold,Native\Audio\src\Music.c,Sets the active music sequence conditional-jump threshold.,high,
-F03490,Audio::StopMusicSlotPlayback,Native\Audio\src\Music.c,Stops the selected music slot or all music and clears matching playback handles.,high,fields:soundData_t.unk14=musicHandles;fields:soundData_t.unk4=currentMusicHandle
-F03491,Audio::ResumeMusicSlot,Native\Audio\src\Music.c,Selects a loaded music slot and starts or restores its sequence through the resume command.,med,driver command 14 resume semantics inferred from sequence dispatch
-F03492,Audio::CrossfadeMusicSlot,Native\Audio\src\Music.c,Selects a loaded music slot and crossfades from saved music to its sequence over the requested duration.,high,
-F03493,Audio::PlayMusicSlot,Native\Audio\src\Music.c,"Selects a loaded music slot, starts its field-music sequence, and applies a volume fade.",high,
-F03494,Audio::CurrentMusicSlot,Native\Audio\src\Music.c,Returns the currently selected music slot number.,high,
-F03495,Audio::CurrentMusicId,Native\Audio\src\Music.c,Returns the file identifier stored in the currently selected music slot.,high,
-F03496,Audio::LoadMusicSlot,Native\Audio\src\Music.c,Queues a music file into one of four slots and replaces any previously loaded sequence there.,high,
-F03497,Audio::LoadMusicIntoFreeSlot,Native\Audio\src\Music.c,Finds an unused music slot and queues the requested music file into it.,high,
-F03498,Audio::PollMusicSlotLoad,Native\Audio\src\Music.c,Releases the music slot disc request after completion and reports pending or failed loading.,high,
-F03499,Audio::PollMusicLoads,Native\Audio\src\Music.c,Polls all four music slot requests and combines their pending or failure status.,high,
-F03500,Audio::LoadMusicSlotBlocking,Native\Audio\src\Music.c,Queues a music file into a selected slot and services loading until that slot finishes.,high,
-F03501,Audio::LoadFreeMusicSlotBlocking,Native\Audio\src\Music.c,Queues music into a free slot and waits while servicing all outstanding music loads.,high,
-F03502,Audio::FreeMusicSlot,Native\Audio\src\Music.c,Stops a music slot and releases its loaded sequence buffer.,high,
-F03503,Core::ReturnZero,Native\Core\src\Runtime.c,Returns zero for an unused legacy query.,high,
-F03504,Audio::MusicSlotVolume,Native\Audio\src\Music.c,Returns the driver volume for a music slot with a valid playback handle.,high,
-F03505,Audio::QueryMusicSlotVolume,Native\Audio\src\Music.c,Forwards a slot-volume query to the music playback handle lookup.,high,
-F03506,Audio::FadeMusicSlotVolume,Native\Audio\src\Music.c,Fades music volume only when the requested slot is currently selected.,high,
-F03507,Audio::FadeMusicSlotTempo,Native\Audio\src\Music.c,Fades the global tempo multiplier only when the requested music slot is currently selected.,high,
-F03508,Audio::FadeMusicSlotPitch,Native\Audio\src\Music.c,Fades the global pitch scale only when the requested music slot is currently selected.,high,
-F03509,Core::ReturnZero,Native\Core\src\Runtime.c,Returns zero for an unused legacy query.,high,dup-of:F03503
-F03510,Core::ReturnZero,Native\Core\src\Runtime.c,Returns zero for an unused legacy query.,high,dup-of:F03503
-F03511,Audio::StopAndFreeCurrentMusic,Native\Audio\src\Music.c,Stops and releases the currently selected music slot if one is active.,high,
-F03512,Audio::PlaySfxOnPrimaryChannel,Native\Audio\src\Sfx.c,Plays a built-in sound effect at centered pan and full volume on the primary effect channel.,high,primary channel mask remains one after the update
-F03513,Audio::PlayBuiltInSfxChannel,Native\Audio\src\Sfx.c,Plays a built-in sound effect and suppresses duplicate playback on the exclusive effect channel.,high,
-F03514,Audio::PlaySfxProgramChannel,Native\Audio\src\Sfx.c,Plays a sound-effect program and suppresses duplicate playback on the exclusive effect channel.,high,
-F03515,Audio::PlaySfx,Native\Audio\src\Sfx.c,"Resolves a sound category and effect identifier, rotates channel masks, and starts the selected sound.",high,
-F03516,Audio::PlaySfxCentered,Native\Audio\src\Sfx.c,Plays a sound effect at centered pan and full volume.,high,
-F03517,Audio::SfxPanAndVolume,Native\Audio\src\Sfx.c,Converts projected horizontal position and depth into packed stereo pan and distance volume.,high,
-F03518,Audio::PlayProjectedSfx,Native\Audio\src\Sfx.c,Derives pan and volume from screen coordinates and plays the sound if its volume remains positive.,high,
-F03519,Audio::PlayWorldSfx,Native\Audio\src\Sfx.c,Projects a world position through the view matrix and plays a distance-attenuated stereo sound.,high,
-F03520,Audio::ResolveSfxProgram,Native\Audio\src\Sfx.c,Resolves a banked effect index to its bytecode pointer or returns zero for built-in sound categories.,high,both banked masks resolve the current bank here unlike PlaySfx
-F03521,Audio::FadeSfxVolume,Native\Audio\src\Sfx.c,"Fades sound-effect volume by resolved program, built-in identifier, or channel-category mask.",high,
-F03522,Audio::FadeSfxPitch,Native\Audio\src\Sfx.c,"Fades sound-effect pitch by resolved program, built-in identifier, or channel-category mask.",high,
-F03523,Audio::FadeSfxPan,Native\Audio\src\Sfx.c,"Fades sound-effect pan by resolved program, built-in identifier, or channel-category mask.",high,
-F03524,Audio::StopSfx,Native\Audio\src\Sfx.c,"Stops a sound effect selected by resolved program, built-in identifier, or channel-category mask.",high,
-F03525,Audio::StopAllSfxPlayback,Native\Audio\src\Sfx.c,Stops sound-effect playback through the driver global sound-effect stop command.,high,
-F03526,Audio::LoadSfxBankSlot,Native\Audio\src\SoundBanks.c,Queues a sound-effect bank file into one of three free bank slots.,high,
-F03527,Audio::LoadSfxBankIntoFreeSlot,Native\Audio\src\SoundBanks.c,Finds a free sound-effect bank slot and queues the requested bank file.,high,
-F03528,Audio::PollSfxBankSlotLoad,Native\Audio\src\SoundBanks.c,Releases a bank slot disc request after completion and reports pending or failed loading.,high,
-F03529,Audio::PollSfxBankLoads,Native\Audio\src\SoundBanks.c,Polls all three sound-effect bank requests and combines their pending or failure status.,high,
-F03530,Audio::LoadSfxBankBlocking,Native\Audio\src\SoundBanks.c,Queues a sound-effect bank into a free slot and waits while servicing outstanding bank reads.,high,
-F03531,Audio::SelectSfxBankSlot,Native\Audio\src\SoundBanks.c,Selects a loaded bank slot for subsequent indexed sound-effect playback.,high,
-F03532,Audio::FreeSfxBankSlot,Native\Audio\src\SoundBanks.c,"Stops banked effects, clears the selected bank when needed, and releases the bank buffer.",high,
-F03533,Audio::BindRoomSfxBank,Native\Audio\src\SoundBanks.c,Binds an externally owned room sound-effect bank to slot three if that slot is empty.,high,unk14[16] aliases sfxData[2] at offset 0x54 in soundData_t
-F03534,Audio::UnbindRoomSfxBank,Native\Audio\src\SoundBanks.c,Stops room-bank effects and clears slot three without freeing its externally owned buffer.,high,
-F03535,Audio::PlayBankSfx,Native\Audio\src\Sfx.c,"Resolves an effect from a supplied bank and plays it using the requested channel category, pan, and volume.",high,
-F03536,Audio::PlayBankSfxCentered,Native\Audio\src\Sfx.c,Plays an indexed sound from a supplied bank at centered pan and full volume.,high,
-F03537,Audio::PlayProjectedBankSfx,Native\Audio\src\Sfx.c,Converts projected position and depth to pan and volume for an effect in a supplied bank.,high,uses a distinct screen-pan and depth attenuation curve from PlayProjectedSfx
-F03538,Audio::PlayWorldBankSfx,Native\Audio\src\Sfx.c,Projects a world position and plays a spatialized sound from the supplied bank.,high,
-F03539,Audio::StopBankSfx,Native\Audio\src\Sfx.c,Stops an indexed program in a supplied bank or all programs in the requested category.,high,
-F03540,Audio::FadeBankSfxVolume,Native\Audio\src\Sfx.c,Fades an indexed bank program volume or the requested sound-category volume.,high,
-F03541,Audio::StopCutsceneStream,Native\Audio\src\Stream.c,Stops the driver cutscene audio stream and releases its playback voices.,high,
-F03542,Audio::PlayCutsceneStreamSlot,Native\Audio\src\Stream.c,Starts a loaded cutscene audio slot after setting its volume and pan.,high,fields:soundData_t.unk64=cutsceneStreamData
-F03543,Audio::PlayCutsceneStreamSlotCentered,Native\Audio\src\Stream.c,Starts a loaded cutscene audio slot at centered pan and full volume.,high,
-F03544,Audio::FreeCutsceneStreamSlot,Native\Audio\src\Stream.c,Stops cutscene audio and frees the selected loaded stream buffer.,high,
-F03545,Audio::BindRoomCutsceneStream,Native\Audio\src\Stream.c,Binds an externally owned room cutscene stream into slot three if that slot is empty.,high,unk14[22] aliases unk64[2] at offset 0x6C in soundData_t
-F03546,Audio::UnbindRoomCutsceneStream,Native\Audio\src\Stream.c,Stops cutscene audio and clears its externally owned room stream slot without freeing it.,high,
-F03547,Audio::LoadWaveBankFile,Native\Audio\src\SoundBanks.c,Queues a wave bank file unless its identifier already matches a resident driver bank.,high,
-F03548,Audio::LoadMappedWaveBank,Native\Audio\src\SoundBanks.c,Maps a sound identifier to its wave bank file and queues that file for loading.,high,
-F03549,Audio::UpdateWaveBankLoad,Native\Audio\src\SoundBanks.c,Transfers a loaded wave bank to sound memory and releases its disc request and staging buffer when finished.,high,
-F03550,Audio::LoadWaveBankBlocking,Native\Audio\src\SoundBanks.c,Queues a mapped wave bank and services disc and sound transfers until loading finishes.,high,
-F03551,Audio::SetMonoOutput,Native\Audio\src\SoundBanks.c,Sets the sound driver mono-output option.,high,
-F03552,Audio::SetXaVolumeMaximum,Native\Audio\src\Stream.c,Sets the XA audio volume accumulator to its maximum driver value.,high,
-F03553,Audio::InitializeMenuSoundBanks,Native\Audio\src\SoundBanks.c,Initializes audio and loads shared wave banks and the built-in menu sound-effect program bank.,high,
-F03554,Audio::ResetSoundSlots,Native\Audio\src\SoundBanks.c,"Clears loaded music, sound-effect, stream, and wave-bank slot records and restores effect channel masks.",high,fields:soundData_t.unk8=currentMusicFileId
-F03555,Render::BuildClutTransition,Native\Graphics\src\Palette.c,Sets per-color interpolation deltas or immediately replaces the colors of a palette slot.,high,
-F03556,Render::StartClutTransition,Native\Graphics\src\Palette.c,Starts a palette-slot transition from the requested sixteen-color offset when palette animation is enabled.,high,
-F03557,Render::StartClutTransitionWithBase,Native\Graphics\src\Palette.c,Starts a palette transition and stores the source palette as the slot base colors.,high,
-F03558,Render::UpdateModelColorTransitions,Native\Graphics\src\Palette.c,Advances room and actor color-offset envelopes and switches repeating or finishing transition modes.,high,fields:D_8005DC80_t.unk10=colorValuesAndSteps;fields:D_8005DC80_t.unk0[0]=active;fields:D_8005DC80_t.unk0[4]=transitionMode
-F03559,Render::UpdateClutTransitions,Native\Graphics\src\Palette.c,"Advances palette-color interpolation, chains oscillating transitions, and marks palettes for upload.",high,
-F03560,Render::StopClutTransition,Native\Graphics\src\Palette.c,Disables the animation of a selected palette slot.,high,
-F03561,Render::LoadClutColors,Native\Graphics\src\Palette.c,Loads palette colors directly to video memory or updates the managed palette buffer and base colors.,high,
-F03562,Render::TransformClutBase,Native\Graphics\src\Palette.c,Applies color offsets or grayscale transforms to a palette base and optionally updates its live colors.,high,
-F03563,Render::OffsetClutBase,Native\Graphics\src\Palette.c,"Adds red, green, and blue offsets to a palette base using the shared transform routine.",high,
-F03564,Render::CaptureRoomBackgroundColors,Native\Graphics\src\Palette.c,Copies the room renderer five background colors into palette animation base and fixed-point buffers.,high,fields:_clutState_t.unk7F14=baseBackgroundColors
-F03565,Render::CommitClutBuffer,Native\Graphics\src\Palette.c,Uploads all fourteen managed palettes when the palette buffer has pending changes.,high,
-F03566,Render::SetClutAnimationEnabled,Native\Graphics\src\Palette.c,Enables or disables palette transition requests.,high,
-F03567,Render::InitializeClutAnimation,Native\Graphics\src\Palette.c,"Resets palette locks, transition flags, background animation, and model-color envelopes.",high,
-F03568,Core::IdleInstruction,Native\Core\src\Runtime.c,Executes a single no-operation instruction at the game-time synchronization hook.,high,inline asm
-F03569,Core::IgnoreDiagnostic,Native\Core\src\Runtime.c,Discards the two legacy diagnostic arguments without reporting an error.,high,
-F03570,Core::IgnoreDiagnostic,Native\Core\src\Runtime.c,Discards the two legacy diagnostic arguments without reporting an error.,high,dup-of:F03569
-F03571,Core::IgnoreCall,Native\Core\src\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
-F03572,Core::Memory::CopyAlignedWords,Native\Core\src\Memory\Heap.c,Copies aligned memory in sixteen-byte chunks and remaining words without copying trailing bytes.,high,inline asm;requires word alignment and word-multiple length;positive length required by assembly loop
-F03573,Core::Memory::ZeroAlignedWords,Native\Core\src\Memory\Heap.c,Clears aligned words while leaving any trailing bytes untouched.,high,inline asm
-F03574,Core::IgnoreCall,Native\Core\src\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
+F03487,Audio::MusicBeatPosition,Native\Engine\src\Audio\Music.c,Returns the active music sequence beat counters packed into a single integer.,high,
+F03488,Audio::SaveMusicPlaybackState,Native\Engine\src\Audio\Music.c,Copies active music channel state into the driver backup configuration.,high,
+F03489,Audio::SetMusicJumpThreshold,Native\Engine\src\Audio\Music.c,Sets the active music sequence conditional-jump threshold.,high,
+F03490,Audio::StopMusicSlotPlayback,Native\Engine\src\Audio\Music.c,Stops the selected music slot or all music and clears matching playback handles.,high,fields:soundData_t.unk14=musicHandles;fields:soundData_t.unk4=currentMusicHandle
+F03491,Audio::ResumeMusicSlot,Native\Engine\src\Audio\Music.c,Selects a loaded music slot and starts or restores its sequence through the resume command.,med,driver command 14 resume semantics inferred from sequence dispatch
+F03492,Audio::CrossfadeMusicSlot,Native\Engine\src\Audio\Music.c,Selects a loaded music slot and crossfades from saved music to its sequence over the requested duration.,high,
+F03493,Audio::PlayMusicSlot,Native\Engine\src\Audio\Music.c,"Selects a loaded music slot, starts its field-music sequence, and applies a volume fade.",high,
+F03494,Audio::CurrentMusicSlot,Native\Engine\src\Audio\Music.c,Returns the currently selected music slot number.,high,
+F03495,Audio::CurrentMusicId,Native\Engine\src\Audio\Music.c,Returns the file identifier stored in the currently selected music slot.,high,
+F03496,Audio::LoadMusicSlot,Native\Engine\src\Audio\Music.c,Queues a music file into one of four slots and replaces any previously loaded sequence there.,high,
+F03497,Audio::LoadMusicIntoFreeSlot,Native\Engine\src\Audio\Music.c,Finds an unused music slot and queues the requested music file into it.,high,
+F03498,Audio::PollMusicSlotLoad,Native\Engine\src\Audio\Music.c,Releases the music slot disc request after completion and reports pending or failed loading.,high,
+F03499,Audio::PollMusicLoads,Native\Engine\src\Audio\Music.c,Polls all four music slot requests and combines their pending or failure status.,high,
+F03500,Audio::LoadMusicSlotBlocking,Native\Engine\src\Audio\Music.c,Queues a music file into a selected slot and services loading until that slot finishes.,high,
+F03501,Audio::LoadFreeMusicSlotBlocking,Native\Engine\src\Audio\Music.c,Queues music into a free slot and waits while servicing all outstanding music loads.,high,
+F03502,Audio::FreeMusicSlot,Native\Engine\src\Audio\Music.c,Stops a music slot and releases its loaded sequence buffer.,high,
+F03503,Core::ReturnZero,Native\Engine\src\Core\Runtime.c,Returns zero for an unused legacy query.,high,
+F03504,Audio::MusicSlotVolume,Native\Engine\src\Audio\Music.c,Returns the driver volume for a music slot with a valid playback handle.,high,
+F03505,Audio::QueryMusicSlotVolume,Native\Engine\src\Audio\Music.c,Forwards a slot-volume query to the music playback handle lookup.,high,
+F03506,Audio::FadeMusicSlotVolume,Native\Engine\src\Audio\Music.c,Fades music volume only when the requested slot is currently selected.,high,
+F03507,Audio::FadeMusicSlotTempo,Native\Engine\src\Audio\Music.c,Fades the global tempo multiplier only when the requested music slot is currently selected.,high,
+F03508,Audio::FadeMusicSlotPitch,Native\Engine\src\Audio\Music.c,Fades the global pitch scale only when the requested music slot is currently selected.,high,
+F03509,Core::ReturnZero,Native\Engine\src\Core\Runtime.c,Returns zero for an unused legacy query.,high,dup-of:F03503
+F03510,Core::ReturnZero,Native\Engine\src\Core\Runtime.c,Returns zero for an unused legacy query.,high,dup-of:F03503
+F03511,Audio::StopAndFreeCurrentMusic,Native\Engine\src\Audio\Music.c,Stops and releases the currently selected music slot if one is active.,high,
+F03512,Audio::PlaySfxOnPrimaryChannel,Native\Engine\src\Audio\Sfx.c,Plays a built-in sound effect at centered pan and full volume on the primary effect channel.,high,primary channel mask remains one after the update
+F03513,Audio::PlayBuiltInSfxChannel,Native\Engine\src\Audio\Sfx.c,Plays a built-in sound effect and suppresses duplicate playback on the exclusive effect channel.,high,
+F03514,Audio::PlaySfxProgramChannel,Native\Engine\src\Audio\Sfx.c,Plays a sound-effect program and suppresses duplicate playback on the exclusive effect channel.,high,
+F03515,Audio::PlaySfx,Native\Engine\src\Audio\Sfx.c,"Resolves a sound category and effect identifier, rotates channel masks, and starts the selected sound.",high,
+F03516,Audio::PlaySfxCentered,Native\Engine\src\Audio\Sfx.c,Plays a sound effect at centered pan and full volume.,high,
+F03517,Audio::SfxPanAndVolume,Native\Engine\src\Audio\Sfx.c,Converts projected horizontal position and depth into packed stereo pan and distance volume.,high,
+F03518,Audio::PlayProjectedSfx,Native\Engine\src\Audio\Sfx.c,Derives pan and volume from screen coordinates and plays the sound if its volume remains positive.,high,
+F03519,Audio::PlayWorldSfx,Native\Engine\src\Audio\Sfx.c,Projects a world position through the view matrix and plays a distance-attenuated stereo sound.,high,
+F03520,Audio::ResolveSfxProgram,Native\Engine\src\Audio\Sfx.c,Resolves a banked effect index to its bytecode pointer or returns zero for built-in sound categories.,high,both banked masks resolve the current bank here unlike PlaySfx
+F03521,Audio::FadeSfxVolume,Native\Engine\src\Audio\Sfx.c,"Fades sound-effect volume by resolved program, built-in identifier, or channel-category mask.",high,
+F03522,Audio::FadeSfxPitch,Native\Engine\src\Audio\Sfx.c,"Fades sound-effect pitch by resolved program, built-in identifier, or channel-category mask.",high,
+F03523,Audio::FadeSfxPan,Native\Engine\src\Audio\Sfx.c,"Fades sound-effect pan by resolved program, built-in identifier, or channel-category mask.",high,
+F03524,Audio::StopSfx,Native\Engine\src\Audio\Sfx.c,"Stops a sound effect selected by resolved program, built-in identifier, or channel-category mask.",high,
+F03525,Audio::StopAllSfxPlayback,Native\Engine\src\Audio\Sfx.c,Stops sound-effect playback through the driver global sound-effect stop command.,high,
+F03526,Audio::LoadSfxBankSlot,Native\Engine\src\Audio\SoundBanks.c,Queues a sound-effect bank file into one of three free bank slots.,high,
+F03527,Audio::LoadSfxBankIntoFreeSlot,Native\Engine\src\Audio\SoundBanks.c,Finds a free sound-effect bank slot and queues the requested bank file.,high,
+F03528,Audio::PollSfxBankSlotLoad,Native\Engine\src\Audio\SoundBanks.c,Releases a bank slot disc request after completion and reports pending or failed loading.,high,
+F03529,Audio::PollSfxBankLoads,Native\Engine\src\Audio\SoundBanks.c,Polls all three sound-effect bank requests and combines their pending or failure status.,high,
+F03530,Audio::LoadSfxBankBlocking,Native\Engine\src\Audio\SoundBanks.c,Queues a sound-effect bank into a free slot and waits while servicing outstanding bank reads.,high,
+F03531,Audio::SelectSfxBankSlot,Native\Engine\src\Audio\SoundBanks.c,Selects a loaded bank slot for subsequent indexed sound-effect playback.,high,
+F03532,Audio::FreeSfxBankSlot,Native\Engine\src\Audio\SoundBanks.c,"Stops banked effects, clears the selected bank when needed, and releases the bank buffer.",high,
+F03533,Audio::BindRoomSfxBank,Native\Engine\src\Audio\SoundBanks.c,Binds an externally owned room sound-effect bank to slot three if that slot is empty.,high,unk14[16] aliases sfxData[2] at offset 0x54 in soundData_t
+F03534,Audio::UnbindRoomSfxBank,Native\Engine\src\Audio\SoundBanks.c,Stops room-bank effects and clears slot three without freeing its externally owned buffer.,high,
+F03535,Audio::PlayBankSfx,Native\Engine\src\Audio\Sfx.c,"Resolves an effect from a supplied bank and plays it using the requested channel category, pan, and volume.",high,
+F03536,Audio::PlayBankSfxCentered,Native\Engine\src\Audio\Sfx.c,Plays an indexed sound from a supplied bank at centered pan and full volume.,high,
+F03537,Audio::PlayProjectedBankSfx,Native\Engine\src\Audio\Sfx.c,Converts projected position and depth to pan and volume for an effect in a supplied bank.,high,uses a distinct screen-pan and depth attenuation curve from PlayProjectedSfx
+F03538,Audio::PlayWorldBankSfx,Native\Engine\src\Audio\Sfx.c,Projects a world position and plays a spatialized sound from the supplied bank.,high,
+F03539,Audio::StopBankSfx,Native\Engine\src\Audio\Sfx.c,Stops an indexed program in a supplied bank or all programs in the requested category.,high,
+F03540,Audio::FadeBankSfxVolume,Native\Engine\src\Audio\Sfx.c,Fades an indexed bank program volume or the requested sound-category volume.,high,
+F03541,Audio::StopCutsceneStream,Native\Engine\src\Audio\Stream.c,Stops the driver cutscene audio stream and releases its playback voices.,high,
+F03542,Audio::PlayCutsceneStreamSlot,Native\Engine\src\Audio\Stream.c,Starts a loaded cutscene audio slot after setting its volume and pan.,high,fields:soundData_t.unk64=cutsceneStreamData
+F03543,Audio::PlayCutsceneStreamSlotCentered,Native\Engine\src\Audio\Stream.c,Starts a loaded cutscene audio slot at centered pan and full volume.,high,
+F03544,Audio::FreeCutsceneStreamSlot,Native\Engine\src\Audio\Stream.c,Stops cutscene audio and frees the selected loaded stream buffer.,high,
+F03545,Audio::BindRoomCutsceneStream,Native\Engine\src\Audio\Stream.c,Binds an externally owned room cutscene stream into slot three if that slot is empty.,high,unk14[22] aliases unk64[2] at offset 0x6C in soundData_t
+F03546,Audio::UnbindRoomCutsceneStream,Native\Engine\src\Audio\Stream.c,Stops cutscene audio and clears its externally owned room stream slot without freeing it.,high,
+F03547,Audio::LoadWaveBankFile,Native\Engine\src\Audio\SoundBanks.c,Queues a wave bank file unless its identifier already matches a resident driver bank.,high,
+F03548,Audio::LoadMappedWaveBank,Native\Engine\src\Audio\SoundBanks.c,Maps a sound identifier to its wave bank file and queues that file for loading.,high,
+F03549,Audio::UpdateWaveBankLoad,Native\Engine\src\Audio\SoundBanks.c,Transfers a loaded wave bank to sound memory and releases its disc request and staging buffer when finished.,high,
+F03550,Audio::LoadWaveBankBlocking,Native\Engine\src\Audio\SoundBanks.c,Queues a mapped wave bank and services disc and sound transfers until loading finishes.,high,
+F03551,Audio::SetMonoOutput,Native\Engine\src\Audio\SoundBanks.c,Sets the sound driver mono-output option.,high,
+F03552,Audio::SetXaVolumeMaximum,Native\Engine\src\Audio\Stream.c,Sets the XA audio volume accumulator to its maximum driver value.,high,
+F03553,Audio::InitializeMenuSoundBanks,Native\Engine\src\Audio\SoundBanks.c,Initializes audio and loads shared wave banks and the built-in menu sound-effect program bank.,high,
+F03554,Audio::ResetSoundSlots,Native\Engine\src\Audio\SoundBanks.c,"Clears loaded music, sound-effect, stream, and wave-bank slot records and restores effect channel masks.",high,fields:soundData_t.unk8=currentMusicFileId
+F03555,Render::BuildClutTransition,Native\Engine\src\Render\Palette.c,Sets per-color interpolation deltas or immediately replaces the colors of a palette slot.,high,
+F03556,Render::StartClutTransition,Native\Engine\src\Render\Palette.c,Starts a palette-slot transition from the requested sixteen-color offset when palette animation is enabled.,high,
+F03557,Render::StartClutTransitionWithBase,Native\Engine\src\Render\Palette.c,Starts a palette transition and stores the source palette as the slot base colors.,high,
+F03558,Render::UpdateModelColorTransitions,Native\Engine\src\Render\Palette.c,Advances room and actor color-offset envelopes and switches repeating or finishing transition modes.,high,fields:D_8005DC80_t.unk10=colorValuesAndSteps;fields:D_8005DC80_t.unk0[0]=active;fields:D_8005DC80_t.unk0[4]=transitionMode
+F03559,Render::UpdateClutTransitions,Native\Engine\src\Render\Palette.c,"Advances palette-color interpolation, chains oscillating transitions, and marks palettes for upload.",high,
+F03560,Render::StopClutTransition,Native\Engine\src\Render\Palette.c,Disables the animation of a selected palette slot.,high,
+F03561,Render::LoadClutColors,Native\Engine\src\Render\Palette.c,Loads palette colors directly to video memory or updates the managed palette buffer and base colors.,high,
+F03562,Render::TransformClutBase,Native\Engine\src\Render\Palette.c,Applies color offsets or grayscale transforms to a palette base and optionally updates its live colors.,high,
+F03563,Render::OffsetClutBase,Native\Engine\src\Render\Palette.c,"Adds red, green, and blue offsets to a palette base using the shared transform routine.",high,
+F03564,Render::CaptureRoomBackgroundColors,Native\Engine\src\Render\Palette.c,Copies the room renderer five background colors into palette animation base and fixed-point buffers.,high,fields:_clutState_t.unk7F14=baseBackgroundColors
+F03565,Render::CommitClutBuffer,Native\Engine\src\Render\Palette.c,Uploads all fourteen managed palettes when the palette buffer has pending changes.,high,
+F03566,Render::SetClutAnimationEnabled,Native\Engine\src\Render\Palette.c,Enables or disables palette transition requests.,high,
+F03567,Render::InitializeClutAnimation,Native\Engine\src\Render\Palette.c,"Resets palette locks, transition flags, background animation, and model-color envelopes.",high,
+F03568,Core::IdleInstruction,Native\Engine\src\Core\Runtime.c,Executes a single no-operation instruction at the game-time synchronization hook.,high,inline asm
+F03569,Core::IgnoreDiagnostic,Native\Engine\src\Core\Runtime.c,Discards the two legacy diagnostic arguments without reporting an error.,high,
+F03570,Core::IgnoreDiagnostic,Native\Engine\src\Core\Runtime.c,Discards the two legacy diagnostic arguments without reporting an error.,high,dup-of:F03569
+F03571,Core::IgnoreCall,Native\Engine\src\Core\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
+F03572,Core::Memory::CopyAlignedWords,Native\Engine\src\Core\Memory\Heap.c,Copies aligned memory in sixteen-byte chunks and remaining words without copying trailing bytes.,high,inline asm;requires word alignment and word-multiple length;positive length required by assembly loop
+F03573,Core::Memory::ZeroAlignedWords,Native\Engine\src\Core\Memory\Heap.c,Clears aligned words while leaving any trailing bytes untouched.,high,inline asm
+F03574,Core::IgnoreCall,Native\Engine\src\Core\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
 F03575,Boot::CaptureOverlayStack,Native\Game\src\Boot\Lifecycle.c,Stores the current stack pointer so an overlay transition can restore its execution stack.,high,inline asm;replaced-by:Boot::OverlayDispatcher
 F03576,Boot::DelayAfterOverlayLoad,Native\Game\src\Boot\Lifecycle.c,Executes 4096 no-operation instructions as the legacy post-load overlay delay.,high,inline asm;replaced-by:Boot::OverlayDispatcher

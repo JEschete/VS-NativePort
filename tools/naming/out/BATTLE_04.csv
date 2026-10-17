@@ -44,8 +44,8 @@ F00536,Field::SpawnRoomActors,Native\Game\src\Field\RoomLoading.c,"Spawns enemie
 F00537,Field::PlaceAshleyAtRoomEntrance,Native\Game\src\Field\RoomLoading.c,"Places Ashley at the transition destination and initializes his movement, animation, and camera attachment.",high,
 F00538,Field::RestoreRoomEnemyCache,Native\Game\src\Field\RoomLoading.c,Restores enemy visibility from the four-room cache or replaces its least-recently-used entry.,high,fields:D_80061078.unk0=room cache recency rank
 F00539,Field::LoadRoomEnemyPlacements,Native\Game\src\Field\RoomLoading.c,Copies MPD enemy placements and records their count for subsequent room spawning.,high,
-F00540,Render::ShowDisplay,Native\Graphics\src\Display.c,Enables display output after a room transition.,high,replaced-by:native presentation visibility
-F00541,Render::HideDisplay,Native\Graphics\src\Display.c,Disables display output during a room transition.,high,replaced-by:native presentation visibility
+F00540,Render::ShowDisplay,Native\Engine\src\Render\Display.c,Enables display output after a room transition.,high,replaced-by:native presentation visibility
+F00541,Render::HideDisplay,Native\Engine\src\Render\Display.c,Disables display output during a room transition.,high,replaced-by:native presentation visibility
 F00542,Field::QueueRoomLoad,Native\Game\src\Field\RoomLoading.c,Queues a priority MPD read using the current zone's room file table.,high,
 F00543,Field::FinishRoomLoad,Native\Game\src\Field\RoomLoading.c,"Installs MPD sections, restores room actors, initializes the camera, and starts entry scripts or field control.",high,fields:_zoneContext.unk3C=room width in collision units;fields:_zoneContext.unk3E=room depth in collision units
 F00544,Field::RemoveRoomActors,Native\Game\src\Field\RoomLoading.c,Removes room-owned actors in slots two through fifteen while preserving Ashley and the reserved companion slot.,high,
@@ -113,7 +113,7 @@ F00605,Field::FreezeMovingPlatforms,Native\Game\src\Field\Gimmicks.c,Sets a movi
 F00606,Field::BeginSwitchToggle,Native\Game\src\Field\Gimmicks.c,Starts a room switch toggle immediately or queues its initial activation delay.,med,Reuses the leading room-trigger layout within the door record type
 F00607,Field::ToggleRoomSwitch,Native\Game\src\Field\Gimmicks.c,"Plays switch sounds, triggers its geometry animation, toggles its state, and updates collision blocking.",high,
 F00608,Items::RestoreRoomChestStates,Native\Game\src\Items\Loot.c,Restores chest geometry and collision from persistent treasure-opened flags.,high,fields:_mpdRoomSection13.unk8=opened;fields:_mpdRoomSection13.unk10=chest state flag index
-F00609,Render::ParseTextureImage,Native\Graphics\src\Textures.c,Decodes TIM image and optional CLUT block pointers for texture uploading.,high,Parses the PS1 TIM block format without copying image bytes
+F00609,Render::ParseTextureImage,Native\Engine\src\Render\Textures.c,Decodes TIM image and optional CLUT block pointers for texture uploading.,high,Parses the PS1 TIM block format without copying image bytes
 F00610,Field::SceneDoorId,Native\Game\src\Field\Doors.c,Resolves a room door index to its scene-map door identifier.,high,
 F00611,Field::MarkEntranceDoorOnSceneMap,Native\Game\src\Field\Doors.c,Records the entered door and marks its entry flag in the scene-map door table.,high,
 F00612,Field::InterpolatedFloorHeight,Native\Game\src\Field\Collision.c,Interpolates neighboring floor samples while preserving the collision surface flag.,high,fields:_mpdRoomCollisionMapSection.unk4=height origin in eight-world-unit steps
@@ -130,7 +130,7 @@ F00622,Items::RoomTreasureChests,Native\Game\src\Items\Loot.c,Returns the room t
 F00623,Field::RoomInteractiveDoors,Native\Game\src\Field\Doors.c,Returns the room interactive-door array and its entry count.,high,
 F00624,Field::ActiveRoomTriggers,Native\Game\src\Field\Gimmicks.c,Returns room trigger records and their count unless field interaction is locked.,high,
 F00625,Field::IsRoomAudioSequenceAbsent,Native\Game\src\Field\RoomLoading.c,Reports whether the MPD room has no embedded AKAO audio-sequence section.,high,section14 corresponds to header.akaoSectionLen
-F00626,Audio::SetRoomAmbienceDucked,Native\Audio\src\Ambience.c,Ducks or restores both the room audio sequence and the active weather sound over eight ticks.,high,Callees adjust AKAO sequence volume to 0x20 or 0x7F and weather sound volume to quarter or full
+F00626,Audio::SetRoomAmbienceDucked,Native\Engine\src\Audio\Ambience.c,Ducks or restores both the room audio sequence and the active weather sound over eight ticks.,high,Callees adjust AKAO sequence volume to 0x20 or 0x7F and weather sound volume to quarter or full
 F00627,Field::RoomEnvironmentParameter,Native\Game\src\Field\RoomLoading.c,Returns the final short parameter in the room environment block.,low,sectionB.unk56 has no callers in the available source; exact meaning remains unverified
 F00628,Field::RoomTrapLevel,Native\Game\src\Field\RoomLoading.c,Returns the current room's trap level for damage and healing panel calculations.,high,
 F00629,Field::SetPlatformFreezeAppearance,Native\Game\src\Field\Gimmicks.c,Switches platform freeze palettes and refreshes affected geometry animation state.,high,

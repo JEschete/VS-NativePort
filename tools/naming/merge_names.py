@@ -21,19 +21,22 @@ BATCHES = ROOT / "tools" / "naming" / "batches"
 OUTS = ROOT / "tools" / "naming" / "out"
 HEADER = ["id", "final_name", "final_location", "purpose", "confidence", "notes"]
 
-SYSTEM_ROOTS = {"Core": "Core", "Render": "Graphics", "Audio": "Audio", "Content": "Content", "Input": "Input",
-                "Movie": "Video", "Save": "Save"}
+# Hybrid layout (gen_solution.py): engine systems in Native\Engine\src\<Root>\, content in Native\Content\src\,
+# game modules in Native\Game\src\<Root>\.
+ENGINE_ROOTS = ["Core", "Platform", "Render", "Audio", "Input", "Movie", "Save"]
 GAME_MODULES = ["Boot", "Title", "Field", "Battle", "Actors", "Items", "Menu", "Event", "Effects", "Ending", "State"]
 FORBIDDEN = re.compile(r"(^|::)(Func|Sub|Unk|Unknown|Helper|Do|Process)($|::|[0-9A-F]{6,})|[0-9A-Fa-f]{8}|^Vs|::Vs[A-Z_]",
                        re.I)
 NAME_RX = re.compile(r"^([A-Z][A-Za-z0-9]*)(::[A-Z][A-Za-z0-9]*){1,3}$")
-LOC_RX = re.compile(r"^Native\\(?P<proj>[A-Za-z]+)\\src\\(?P<rest>(?:[A-Z][A-Za-z0-9]*\\){0,2}[A-Z][A-Za-z0-9]*\.c)$")
+LOC_RX = re.compile(r"^Native\\(?P<proj>[A-Za-z]+)\\src\\(?P<rest>(?:[A-Z][A-Za-z0-9]*\\){0,3}[A-Z][A-Za-z0-9]*\.c)$")
 CONF = {"high", "med", "low"}
 
 
 def expected_dir(root: str) -> str | None:
-    if root in SYSTEM_ROOTS:
-        return f"Native\\{SYSTEM_ROOTS[root]}\\src\\"
+    if root in ENGINE_ROOTS:
+        return f"Native\\Engine\\src\\{root}\\"
+    if root == "Content":
+        return "Native\\Content\\src\\"
     if root in GAME_MODULES:
         return f"Native\\Game\\src\\{root}\\"
     return None

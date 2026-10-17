@@ -1,5 +1,5 @@
-#include "vs/core/FrameClock.hpp"
-#include "vs/core/Random.hpp"
+#include "Core/FrameClock.hpp"
+#include "Core/Random.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 

@@ -1,11 +1,11 @@
-#include "vs/audio/AudioDevice.hpp"
-#include "vs/content/Disc.hpp"
-#include "vs/core/FrameClock.hpp"
-#include "vs/core/Log.hpp"
-#include "vs/game/boot/GameApp.hpp"
-#include "vs/input/Pad.hpp"
-#include "vs/platform/App.hpp"
-#include "vs/render/Device.hpp"
+#include "Audio/AudioDevice.hpp"
+#include "Content/Disc.hpp"
+#include "Core/FrameClock.hpp"
+#include "Core/Log.hpp"
+#include "Boot/GameApp.hpp"
+#include "Input/Pad.hpp"
+#include "Platform/App.hpp"
+#include "Render/Device.hpp"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>

@@ -70,13 +70,13 @@ to `.cpp` later.
 
 | Namespace root | Location root | What goes there |
 |---|---|---|
-| `Core` | `Native\Core\src\` | Fixed-point/vector/matrix math (GTE replacements), RNG, memory/heap helpers, string utils, generic containers |
-| `Render` | `Native\Graphics\src\` | Generic rendering: primitive building, model/mesh drawing (SHP/WEP), texture/CLUT upload, sprite and font/glyph drawing, screen effects, camera projection, display setup |
-| `Audio` | `Native\Audio\src\` | Sound driver, SEQ sequencer, SFX playback, voice allocation, music control, XA/streamed audio control |
+| `Core` | `Native\Engine\src\Core\` | Fixed-point/vector/matrix math (GTE replacements), RNG, memory/heap helpers, string utils, generic containers |
+| `Render` | `Native\Engine\src\Render\` | Generic rendering: primitive building, model/mesh drawing (SHP/WEP), texture/CLUT upload, sprite and font/glyph drawing, screen effects, camera projection, display setup |
+| `Audio` | `Native\Engine\src\Audio\` | Sound driver, SEQ sequencer, SFX playback, voice allocation, music control, XA/streamed audio control |
 | `Content` | `Native\Content\src\` | File loading, CD read queue, file tables, archive/format decoders, decompression |
-| `Input` | `Native\Input\src\` | Pad processing, button repeat, vibration |
-| `Movie` | `Native\Video\src\` | FMV/STR playback, MDEC decode |
-| `Save` | `Native\Save\src\` | Memory card I/O, save/load serialization, save menu data handling (not the menu UI) |
+| `Input` | `Native\Engine\src\Input\` | Pad processing, button repeat, vibration |
+| `Movie` | `Native\Engine\src\Movie\` | FMV/STR playback, MDEC decode |
+| `Save` | `Native\Engine\src\Save\` | Memory card I/O, save/load serialization, save menu data handling (not the menu UI) |
 | `Boot` | `Native\Game\src\Boot\` | Startup, main loop, mode switching (title ⇄ game ⇄ battle ⇄ menu), reset |
 | `Title` | `Native\Game\src\Title\` | Dev credits, intro movie control, title screen, title menu, attract/demo |
 | `Field` | `Native\Game\src\Field\` | Rooms/zones (MPD/ZND/ZUD), map loading, collision, doors, traps, camera control, minimap, room transitions |

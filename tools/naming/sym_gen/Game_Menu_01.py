@@ -18,7 +18,7 @@ g = Gen("Game_Menu_01")
 c = g.c
 L, M, H = "low", "med", "high"
 FN = {r["final_name"]: r for r in csv.DictReader(open(LEDGERS / "FUNCTION_CATALOG.csv", encoding="utf-8")) if r["final_name"]}
-SAVE = "Native\\Save\\src\\MemoryCard\\GameFiles.h"
+SAVE = "Native\\Engine\\src\\Save\\MemoryCard\\GameFiles.h"
 
 
 def header_of(function: str) -> str:
@@ -141,7 +141,7 @@ E("T00030", "Menu::Magic::ShortcutMagicMenu", header_of("Menu::Magic::Update"), 
 E("T00032", "Menu::Files::StatType", header_of("Menu::Files::DrawElement"), "Names the HP and MP bars of a file entry.")
 
 # ---------------------------------------------------------------- structs
-INPUT = "Native\\Input\\src\\Buttons.h"
+INPUT = "Native\\Engine\\src\\Input\\Buttons.h"
 T("T00746", "State", "Input::PressedButtonsView", INPUT, "Holds the pressed buttons as one word or as two ports of two bytes.", M,
   {"all": ("allButtons", "Pressed buttons for both ports", H, c(("146C.c", "if (vs_main_buttonsPressed.all & PADRdown) {"))),
    "pad": ("ports", "Pressed button byte pairs per port", M, g.decl("T00746", "pad"))})
@@ -194,7 +194,7 @@ T("T00310", "State", "Menu::Score::Row", SCORE, "Holds one Score menu row: selec
 T("T00319", "State", "Menu::Score::EnemyEntry", SCORE, "Holds one enemy list entry: model, class, kill flags, selection and name.", M)
 T("T00349", "OnDisc", "Menu::Score::ZudHeader", SCORE, "Gives a ZUD model file's character, equipment and the offsets of its parts.", M)
 T("T00316", "State", "Menu::Loot::LootListItem", header_of("Menu::Loot::AppendLootRow"), "Gives one loot row's category, index and state.", M)
-T("T00342", "Value", "Render::TextureRegion", "Native\\Graphics\\src\\Images.h", "Gives a texture region: position, size, page and CLUT.", M)
+T("T00342", "Value", "Render::TextureRegion", "Native\\Engine\\src\\Render\\Images.h", "Gives a texture region: position, size, page and CLUT.", M)
 
 if __name__ == "__main__":
     g.write()

@@ -448,7 +448,7 @@ T("T00234", "State", "Field::WeatherParticle", "Native\\Game\\src\\Field\\Weathe
 T("T00343", "State", "Effects::Trail", E + "Trails.h", "Holds one trail effect's state.", M, D("T00343", g.members["T00343"][0]["name"]))
 T("T00421", "State", "Effects::BoneTrail", E + "Trails.h", "Holds a bone trail: configuration, age and the two edge histories.", M,
   D("T00421", "config"), recv=r"\b(?:t|trail|arg0|arg1)")
-T("T00294", "Packet", "Render::TrailPacket", "Native\\Graphics\\src\\LegacyPackets.h", "Is one trail segment's gouraud quad packet.", M,
+T("T00294", "Packet", "Render::TrailPacket", "Native\\Engine\\src\\Render\\LegacyPackets.h", "Is one trail segment's gouraud quad packet.", M,
   D("T00294", g.members["T00294"][0]["name"]), {
       "b0": ("blue0", "Blue of the first head vertex", M, c(("5BF94.c", "p->b0 = p->b1 = D_800EC308[t->config.color].b * head - 128;"))),
       "b1": ("blue1", "Blue of the second head vertex", M, c(("5BF94.c", "p->b0 = p->b1 = D_800EC308[t->config.color].b * head - 128;"))),
@@ -480,7 +480,7 @@ T("T00443", "Value", "Battle::HitTargetWord", "Native\\Game\\src\\Battle\\Action
   }, recv=r"unk0")
 T("T00292", "State", "Effects::Plg005::AnalyzeGridQuad", E + "Plugins\\Plg005.h", "Holds one Analyze grid quad of plugin 005.", L,
   D("T00292", g.members["T00292"][0]["name"]), recv=r"\bfp")
-PRIM = "Native\\Graphics\\src\\LegacyPackets.h"
+PRIM = "Native\\Engine\\src\\Render\\LegacyPackets.h"
 for _tid, _name, _tex in (("T00626", "Render::EffectFlatQuadPacket", "flat textured"), ("T00627", "Render::EffectGouraudQuadPacket", "gouraud textured"),
                           ("T00721", "Render::ParticleQuadPacket", "gouraud textured"), ("T00720", "Render::ParticleLinePacket", "line")):
     _ov = {}

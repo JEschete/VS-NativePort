@@ -461,7 +461,7 @@ T("T00272", "OnDisc", "Battle::Ai::RouteGateEnd", AI + "Navigation.h",
       ("unk0_5", "tileZ", "Tile Z", MED, c(("771A8.c", "&& D_800F5910[i * 2].unk0_5 == arg0->unk2) {"))),
       ("unk0_10", "reservedBits10", "Not read", LOW),
   ])
-T("T00295", "Value", "Render::PolyFt4", "Native\\Graphics\\src\\Primitives.h",
+T("T00295", "Value", "Render::PolyFt4", "Native\\Engine\\src\\Render\\Primitives.h",
   "Is a flat textured quad GPU packet: color code, then XY and UV words with the palette and texture page.", "med",
   "declaration-only;" + c(("gpu.h", "} VS_POLY_FT4;")) + ";standard PSX POLY_FT4 word layout", [
       ("r0g0b0code", "colorCode", "Color and command", MED), ("x0y0", "xy0", "Vertex 0", MED),

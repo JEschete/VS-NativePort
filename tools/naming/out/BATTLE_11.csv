@@ -10,36 +10,36 @@ F01320,Battle::DismissTargetSelectionRows,Native\Game\src\Battle\Targeting.c,Cle
 F01321,Battle::InitTargetSelectionRow,Native\Game\src\Battle\Targeting.c,Initializes a sliding target-list row with its limb label and target data.,high,fields:func_800C56C0_t2.unk4=row x;fields:func_800C56C0_t2.unk6=row y
 F01322,Battle::FirstTargetStatusText,Native\Game\src\Battle\Targeting.c,Returns the first active target status description or the empty status string.,high,
 F01323,Battle::UpdateTargetSelectionMenu,Native\Game\src\Battle\Targeting.c,Animates and navigates the target-part list and formats the selected target information box.,high,fields:func_800C5798_t.unk9=target group;fields:func_800C5798_t.unkA=actor part;fields:func_800C5798_t.unk10=status flags
-F01324,Render::SplicePrimitiveList,Native\Graphics\src\UiPrimitives.c,Splices a primitive list into another ordering-table chain by replacing its terminating link.,high,
-F01325,Render::DrawCompactTextColor,Native\Graphics\src\Font.c,"Draws compact ASCII text with the chosen color, kerning and inline alignment markers.",high,
-F01326,Render::DrawCompactText,Native\Graphics\src\Font.c,Draws compact ASCII text with the default neutral font color.,high,
-F01327,Render::TerminateEncodedString,Native\Graphics\src\Font.c,Writes the terminator for a game-encoded string.,high,Source literal is transformed by pragma vsstring
-F01328,Render::FormatEncodedText,Native\Graphics\src\Font.c,"Expands decimal, hexadecimal and string substitutions from the shared game-text context.",high,
+F01324,Render::SplicePrimitiveList,Native\Engine\src\Render\UiPrimitives.c,Splices a primitive list into another ordering-table chain by replacing its terminating link.,high,
+F01325,Render::DrawCompactTextColor,Native\Engine\src\Render\Font.c,"Draws compact ASCII text with the chosen color, kerning and inline alignment markers.",high,
+F01326,Render::DrawCompactText,Native\Engine\src\Render\Font.c,Draws compact ASCII text with the default neutral font color.,high,
+F01327,Render::TerminateEncodedString,Native\Engine\src\Render\Font.c,Writes the terminator for a game-encoded string.,high,Source literal is transformed by pragma vsstring
+F01328,Render::FormatEncodedText,Native\Engine\src\Render\Font.c,"Expands decimal, hexadecimal and string substitutions from the shared game-text context.",high,
 F01329,Menu::SetTextBoxText,Native\Game\src\Menu\TextBox.c,Starts printing a string in a text box or reports whether its existing text has finished.,high,
 F01330,Menu::SelectTextBoxChoice,Native\Game\src\Menu\TextBox.c,Navigates vertically ordered text-box choices and returns the confirmed one-based choice index.,high,
-F01331,Render::MeasureEncodedTextLine,Native\Graphics\src\Font.c,Measures the next game-text line in six-pixel units while accounting for supported control codes.,high,
-F01332,Render::DrawVariableWidthGlyph,Native\Graphics\src\Font.c,Draws one game-font glyph using the current font style and returns the next pen position.,high,
-F01333,Render::SetMenuFontStyle,Native\Graphics\src\Font.c,"Selects the menu font table, brightness and palette index for subsequent glyph drawing.",high,
-F01334,Render::DrawProgressiveTextBoxText,Native\Graphics\src\Font.c,"Draws variable-width text with progressive reveal, substitutions, continuation prompts and text sound effects.",high,
-F01335,Render::DrawScaledTextBoxText,Native\Graphics\src\Font.c,Draws fixed-width game text at the text box animation scale with font and alignment controls.,high,
-F01336,Render::BlendGlyphIntoPixels,Native\Graphics\src\Font.c,Reads a font glyph and alpha-blends its nontransparent pixels into a sixteen-bit image buffer.,high,
-F01337,Render::BlendTextBoxIntoFramebuffer,Native\Graphics\src\Font.c,Composites text directly into a captured framebuffer region during text-box transitions.,high,
-F01338,Render::QueueGimImage,Native\Graphics\src\Images.c,Allocates three GIM image layers and queues their shared image data for loading.,high,
-F01339,Render::ActivateGimLayer,Native\Graphics\src\Images.c,Activates a GIM layer and initializes its scanline wipe or reserves its blend workspace.,high,fields:gim_t.unk0_3=transition renderer;fields:gim_t.unk18=scanline wipe widths
-F01340,Render::ReleaseGimImages,Native\Graphics\src\Images.c,Releases GIM texture reservations and image-layer state after image loading has completed.,high,
-F01341,Render::UpdateGimImages,Native\Graphics\src\Images.c,"Completes GIM loading, uploads tile textures and palettes, and draws active image layers.",high,fields:gim_t.unk0_6=loading phase;fields:gim_t.unk0_9=reserved texture-page count
+F01331,Render::MeasureEncodedTextLine,Native\Engine\src\Render\Font.c,Measures the next game-text line in six-pixel units while accounting for supported control codes.,high,
+F01332,Render::DrawVariableWidthGlyph,Native\Engine\src\Render\Font.c,Draws one game-font glyph using the current font style and returns the next pen position.,high,
+F01333,Render::SetMenuFontStyle,Native\Engine\src\Render\Font.c,"Selects the menu font table, brightness and palette index for subsequent glyph drawing.",high,
+F01334,Render::DrawProgressiveTextBoxText,Native\Engine\src\Render\Font.c,"Draws variable-width text with progressive reveal, substitutions, continuation prompts and text sound effects.",high,
+F01335,Render::DrawScaledTextBoxText,Native\Engine\src\Render\Font.c,Draws fixed-width game text at the text box animation scale with font and alignment controls.,high,
+F01336,Render::BlendGlyphIntoPixels,Native\Engine\src\Render\Font.c,Reads a font glyph and alpha-blends its nontransparent pixels into a sixteen-bit image buffer.,high,
+F01337,Render::BlendTextBoxIntoFramebuffer,Native\Engine\src\Render\Font.c,Composites text directly into a captured framebuffer region during text-box transitions.,high,
+F01338,Render::QueueGimImage,Native\Engine\src\Render\Images.c,Allocates three GIM image layers and queues their shared image data for loading.,high,
+F01339,Render::ActivateGimLayer,Native\Engine\src\Render\Images.c,Activates a GIM layer and initializes its scanline wipe or reserves its blend workspace.,high,fields:gim_t.unk0_3=transition renderer;fields:gim_t.unk18=scanline wipe widths
+F01340,Render::ReleaseGimImages,Native\Engine\src\Render\Images.c,Releases GIM texture reservations and image-layer state after image loading has completed.,high,
+F01341,Render::UpdateGimImages,Native\Engine\src\Render\Images.c,"Completes GIM loading, uploads tile textures and palettes, and draws active image layers.",high,fields:gim_t.unk0_6=loading phase;fields:gim_t.unk0_9=reserved texture-page count
 F01342,Menu::Framework::LoadMenuOverlay,Native\Game\src\Menu\Framework\Framework.c,Loads the requested menu overlay and prepares the main-menu background or miscellaneous-item shortcut.,high,
 F01343,Menu::InitInformationTextBox,Native\Game\src\Menu\TextBox.c,Initializes text box seven with the requested information-box header style.,high,
 F01344,Menu::Framework::MenuItem,Native\Game\src\Menu\Framework\Framework.c,Returns the menu-row state for the requested row index.,high,
 F01345,Menu::Framework::SetMenuItem,Native\Game\src\Menu\Framework\Framework.c,Initializes a menu row and copies its printable text and spacing codes into the row buffer.,high,
-F01346,Render::BlendRgbWithBrightness,Native\Graphics\src\UiPrimitives.c,Interpolates two RGB colors and scales the result by the requested brightness.,high,
+F01346,Render::BlendRgbWithBrightness,Native\Engine\src\Render\UiPrimitives.c,Interpolates two RGB colors and scales the result by the requested brightness.,high,
 F01347,Menu::Framework::GradientStopColor,Native\Game\src\Menu\Framework\Framework.c,"Returns a menu gradient color for the requested palette, blend step and brightness.",high,
 F01348,Menu::Framework::DrawMenuItem,Native\Game\src\Menu\Framework\Framework.c,"Draws a menu row with variable-width text, selection gradient, shadow and optional subtext.",high,
 F01349,Menu::Framework::UpdateMainMenuSelection,Native\Game\src\Menu\Framework\Framework.c,Initializes or navigates the enabled main-menu entries and displays reasons for unavailable actions.,high,
 F01350,Menu::Framework::UpdateMenuOverlay,Native\Game\src\Menu\Framework\Framework.c,Dispatches the active menu overlay and draws main-menu rows while loading or changing screens.,high,
-F01351,Render::DrawNumericGlyph,Native\Graphics\src\UiPrimitives.c,Draws a digit or numeric separator using one of the interface number fonts.,high,
-F01352,Render::DrawIntegerRightAligned,Native\Graphics\src\UiPrimitives.c,Draws a decimal integer right-to-left and returns the position preceding its first digit.,high,
-F01353,Render::DrawStatGauge,Native\Graphics\src\UiPrimitives.c,Draws a bordered sixty-four-pixel stat gauge with a brightness gradient.,high,
+F01351,Render::DrawNumericGlyph,Native\Engine\src\Render\UiPrimitives.c,Draws a digit or numeric separator using one of the interface number fonts.,high,
+F01352,Render::DrawIntegerRightAligned,Native\Engine\src\Render\UiPrimitives.c,Draws a decimal integer right-to-left and returns the position preceding its first digit.,high,
+F01353,Render::DrawStatGauge,Native\Engine\src\Render\UiPrimitives.c,Draws a bordered sixty-four-pixel stat gauge with a brightness gradient.,high,
 F01354,Battle::DrawHudStatGauge,Native\Game\src\Battle\Hud.c,"Draws an Hp, Mp or Risk gauge with its numeric value and identifying label.",high,
 F01355,Battle::DrawSlidingStatusIcon,Native\Game\src\Battle\Hud.c,Draws a clipped status icon as it slides through the battle HUD status carousel.,high,
 F01356,Battle::StatusIconFlags,Native\Game\src\Battle\Hud.c,Maps actor status bits to the status-icon flags used by the HUD and status menu.,high,
@@ -79,22 +79,22 @@ F01389,Effects::DrawScreenEffectOverlay,Native\Game\src\Effects\ScreenEffects.c,
 F01390,Effects::AcquireScreenEffectOverlay,Native\Game\src\Effects\ScreenEffects.c,Acquires screen-effect texture space and starts loading the secondary screen-effect overlay.,high,
 F01391,Effects::ReleaseScreenEffectOverlay,Native\Game\src\Effects\ScreenEffects.c,Releases screen-effect texture reservations and resets the overlay controller.,high,
 F01392,Menu::UpdateTextBoxes,Native\Game\src\Menu\TextBox.c,"Animates and renders active text boxes, rotates their primitive lists and draws shared interface overlays.",high,fields:vs_battle_textBox.unk22=animation duration;fields:vs_battle_textBox.unk24=animated x;fields:vs_battle_textBox.unk26=animated y;fields:vs_battle_textBox.unk28=animated width;fields:vs_battle_textBox.unk2A=animated height
-F01393,Render::DrawGimTiles,Native\Graphics\src\Images.c,Draws scaled GIM image tiles and fills exposed background regions using the layer color.,high,fields:gim_t.unk3=brightness or transition parameter;fields:gim_t.unkC=scale and ordering flags;fields:gim_t.unkE=background color
-F01394,Render::DrawGimFramebufferFade,Native\Graphics\src\Images.c,Draws a GIM layer blended with the previous framebuffer according to its fade brightness.,high,
-F01395,Render::DrawGimScanlineWipe,Native\Graphics\src\Images.c,Draws a GIM layer through irregular horizontal scanline wipe boundaries.,high,
-F01396,Render::SetGimWorkspaceDrawArea,Native\Graphics\src\Images.c,Queues drawing-area and offset commands for the offscreen GIM blend workspace.,high,
-F01397,Render::SetGimFramebufferDrawArea,Native\Graphics\src\Images.c,Queues drawing-area and offset commands for the GIM destination framebuffer.,high,
-F01398,Render::DrawGimCrossfade,Native\Graphics\src\Images.c,Composites GIM tiles and the previous framebuffer through a column-sized blend workspace.,high,
-F01399,Render::DrawGimLayer,Native\Graphics\src\Images.c,Selects a GIM layer palette and dispatches its transition renderer at the requested draw depth.,high,
+F01393,Render::DrawGimTiles,Native\Engine\src\Render\Images.c,Draws scaled GIM image tiles and fills exposed background regions using the layer color.,high,fields:gim_t.unk3=brightness or transition parameter;fields:gim_t.unkC=scale and ordering flags;fields:gim_t.unkE=background color
+F01394,Render::DrawGimFramebufferFade,Native\Engine\src\Render\Images.c,Draws a GIM layer blended with the previous framebuffer according to its fade brightness.,high,
+F01395,Render::DrawGimScanlineWipe,Native\Engine\src\Render\Images.c,Draws a GIM layer through irregular horizontal scanline wipe boundaries.,high,
+F01396,Render::SetGimWorkspaceDrawArea,Native\Engine\src\Render\Images.c,Queues drawing-area and offset commands for the offscreen GIM blend workspace.,high,
+F01397,Render::SetGimFramebufferDrawArea,Native\Engine\src\Render\Images.c,Queues drawing-area and offset commands for the GIM destination framebuffer.,high,
+F01398,Render::DrawGimCrossfade,Native\Engine\src\Render\Images.c,Composites GIM tiles and the previous framebuffer through a column-sized blend workspace.,high,
+F01399,Render::DrawGimLayer,Native\Engine\src\Render\Images.c,Selects a GIM layer palette and dispatches its transition renderer at the requested draw depth.,high,
 F01400,Items::ConsumeMiscItem,Native\Game\src\Items\Inventory.c,Consumes one matching miscellaneous item and clears its inventory slot when the count reaches zero.,high,
-F01401,Core::Memory::ZeroWordsBackward,Native\Core\src\Memory\Copy.c,Clears an aligned memory region one word at a time from its end toward its start.,high,Requires positive word-multiple size
-F01402,Core::Memory::CopyBytesBackward,Native\Core\src\Memory\Copy.c,Copies a positive-sized byte region from its last byte to its first byte.,high,Backward copy preserves overlap only when destination is not below source
-F01403,Core::Math::SplitDecimalDigit,Native\Core\src\Math\FixedPoint.c,Packs the decimal ones digit into the low nibble and the remaining decimal quotient into the higher bits.,high,Not a full binary-to-packed-decimal conversion
-F01404,Core::Random::NextInterfaceRandomBits,Native\Core\src\Random.c,Advances the interface multiplicative random stream and returns high bits from its previous state.,high,Zero-bit requests still advance the stream
-F01405,Render::InsertThreeWordPrimitive,Native\Graphics\src\UiPrimitives.c,Allocates a three-word primitive payload and inserts it before the supplied ordering-table link.,high,Also carries lines and draw-area commands; not limited to tiles
-F01406,Render::InsertDrawModeCommand,Native\Graphics\src\UiPrimitives.c,Inserts a one-word drawing-state command before the supplied ordering-table link.,high,Accepts texture-window commands as well as texture-page commands
+F01401,Core::Memory::ZeroWordsBackward,Native\Engine\src\Core\Memory\Copy.c,Clears an aligned memory region one word at a time from its end toward its start.,high,Requires positive word-multiple size
+F01402,Core::Memory::CopyBytesBackward,Native\Engine\src\Core\Memory\Copy.c,Copies a positive-sized byte region from its last byte to its first byte.,high,Backward copy preserves overlap only when destination is not below source
+F01403,Core::Math::SplitDecimalDigit,Native\Engine\src\Core\Math\FixedPoint.c,Packs the decimal ones digit into the low nibble and the remaining decimal quotient into the higher bits.,high,Not a full binary-to-packed-decimal conversion
+F01404,Core::Random::NextInterfaceRandomBits,Native\Engine\src\Core\Random.c,Advances the interface multiplicative random stream and returns high bits from its previous state.,high,Zero-bit requests still advance the stream
+F01405,Render::InsertThreeWordPrimitive,Native\Engine\src\Render\UiPrimitives.c,Allocates a three-word primitive payload and inserts it before the supplied ordering-table link.,high,Also carries lines and draw-area commands; not limited to tiles
+F01406,Render::InsertDrawModeCommand,Native\Engine\src\Render\UiPrimitives.c,Inserts a one-word drawing-state command before the supplied ordering-table link.,high,Accepts texture-window commands as well as texture-page commands
 F01407,Menu::Framework::DrawMainMenuCursor,Native\Game\src\Menu\Framework\Framework.c,Draws the pulsing main-menu cursor at the requested row and advances its brightness animation.,high,
-F01408,Render::UploadImageRectangle,Native\Graphics\src\UiPrimitives.c,Uploads an image rectangle using a rotating pool of persistent rectangle descriptors.,high,
+F01408,Render::UploadImageRectangle,Native\Engine\src\Render\UiPrimitives.c,Uploads an image rectangle using a rotating pool of persistent rectangle descriptors.,high,
 F01409,Menu::TextBox,Native\Game\src\Menu\TextBox.c,Returns the text-box state for the requested box identifier.,high,
 F01410,Menu::TextBoxAnchor,Native\Game\src\Menu\TextBox.c,"Computes a text-box origin and attachment flags from an anchor preset, facing and text dimensions.",high,fields:func_800CCE10_t.unk0_0=x;fields:func_800CCE10_t.unk0_12=y;fields:func_800CCE10_t.unk0_24=orientation flags
 F01411,Menu::InitTextBox,Native\Game\src\Menu\TextBox.c,"Initializes a text box layout, animation style, font brightness and opening state.",high,

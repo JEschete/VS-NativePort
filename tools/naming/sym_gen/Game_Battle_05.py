@@ -302,7 +302,7 @@ G("G00573", "drop", "Effects::rendererTableAlias", "Native\\Game\\src\\Effects\\
   + ";same address 0x800F56A8")
 
 # ---------------------------------------------------------------- group C: main executable data used by battle
-G("G01903", "constexpr", "Core::Math::kArcTangentTable", "Native\\Core\\src\\Math\\FixedPoint.c",
+G("G01903", "constexpr", "Core::Math::kArcTangentTable", "Native\\Engine\\src\\Core\\Math\\FixedPoint.c",
   "Gives the arctangent for a ratio scaled to 0-512, used by the fixed-point atan2.", H,
   c(("SLUS_010.40/31B7C.c", "c = D_80040A14[c];"), ("573B8.c", "angle = D_80040A14[angle];")) + GAP)
 G("G01904", "catalog", "Battle::actionDefinitions", "Native\\Game\\src\\Battle\\ActionTable.c", "Defines the 256 actions.", H,

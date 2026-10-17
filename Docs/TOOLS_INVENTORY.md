@@ -80,7 +80,7 @@ Removed by decision (2026-10-15): `psx-spx` and `beetle-psx-libretro`. The port 
 | `PCSX-Redux` (source + binary) | TOOL | Lua-scriptable debugger: break on `vs_*` entry points, trace CD reads, dump the SPU state. |
 | `MemcardRex` | TOOL | Inspect and convert `.mcd` saves created by the port. |
 | `PSn00bSDK` | REFERENCE | Open-source PS1 SDK; documents what each SDK call the game makes is *supposed* to do, so the modern replacement covers the same behavior. Never reimplemented as an API. |
-| `ps1-tests` | TOOL/oracle | Expected results for fixed-point transform math; used only to check `VS.Core` math against the original numbers. |
+| `ps1-tests` | TOOL/oracle | Expected results for fixed-point transform math; used only to check `Engine\Core` math against the original numbers. |
 
 Mirrors in `tools\PSX\Asset-Tools\jpsxdec`, `tools\PSX\Emulators\{DuckStation,PCSX-Redux}` and `tools\PSX\Toolchains\PSn00bSDK`.
 

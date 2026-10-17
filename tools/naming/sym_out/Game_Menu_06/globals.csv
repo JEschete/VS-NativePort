@@ -172,19 +172,19 @@ G01822,state,Menu::Results::initializeGameClearTimData,Native\Game\src\Menu\Resu
 G01823,state,Menu::Results::initializeTimeAttackResultsTimData,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::InitializeTimeAttackResults.,med,source:3B8.c:268;fork name kept
 G01824,state,Menu::Results::initializeTimeAttackStartTimData,Native\Game\src\Menu\Results\TimeAttack.c,Fork name kept; used by Menu::Results::InitializeTimeAttackStart.,med,source:3B8.c:381;fork name kept
 G01825,catalog,Menu::Results::determineRiskbreakerRankTitleThresholds,Native\Game\src\Menu\Results\Results.c,Fork name kept; used by Menu::Results::DetermineRiskbreakerRank.,med,source:3B8.c:2792;fork name kept
-G01905,drop,Audio::Seq::unusedMaterialModifiers,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.c:7950
+G01905,drop,Audio::Seq::unusedMaterialModifiers,Native\Engine\src\Audio\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.c:7950
 G01934,state,Battle::puzzleTimer,Native\Game\src\Battle\Hud.c,Holds the puzzle timer value drawn by DrawPuzzleTimer (byte 3 set shows 59:59:99).,med,source:5BF94.c:4049;source:5BF94.c:3849
-G01946,state,Input::stickPosBuf,Native\Input\src\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8802;fork name kept
-G01952,state,Input::buttonRepeat,Native\Input\src\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8862;fork name kept
-G01962,state,Input::buttonsPressed,Native\Input\src\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8849;fork name kept
-G01965,state,Render::frameBuf,Native\Graphics\src\Display.c,Fork name kept; used by Render::UploadLoadingScreenBackBuffer.,med,source:main.c:8106;fork name kept
-G01968,state,Input::buttonsState,Native\Input\src\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8795;fork name kept
-G01980,drop,Audio::Seq::unusedScoredata,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:496
-G01985,state,Input::settings,Native\Input\src\Controller.c,"Fork name kept; used by Input::UpdateControllers, Input::UpdateVibrationPatterns.",med,source:main.c:8763;fork name kept
-G01986,drop,Audio::Seq::unusedArtsStatus,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:501
-G01989,drop,Audio::Seq::unusedInventory,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:504
-G01993,drop,Audio::Seq::unusedStateFlags,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:508
-G01994,drop,Audio::Seq::unusedInventoryIndices,Native\Audio\src\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:509
+G01946,state,Input::stickPosBuf,Native\Engine\src\Input\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8802;fork name kept
+G01952,state,Input::buttonRepeat,Native\Engine\src\Input\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8862;fork name kept
+G01962,state,Input::buttonsPressed,Native\Engine\src\Input\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8849;fork name kept
+G01965,state,Render::frameBuf,Native\Engine\src\Render\Display.c,Fork name kept; used by Render::UploadLoadingScreenBackBuffer.,med,source:main.c:8106;fork name kept
+G01968,state,Input::buttonsState,Native\Engine\src\Input\Controller.c,Fork name kept; used by Input::UpdateControllers.,med,source:main.c:8795;fork name kept
+G01980,drop,Audio::Seq::unusedScoredata,Native\Engine\src\Audio\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:496
+G01985,state,Input::settings,Native\Engine\src\Input\Controller.c,"Fork name kept; used by Input::UpdateControllers, Input::UpdateVibrationPatterns.",med,source:main.c:8763;fork name kept
+G01986,drop,Audio::Seq::unusedArtsStatus,Native\Engine\src\Audio\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:501
+G01989,drop,Audio::Seq::unusedInventory,Native\Engine\src\Audio\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:504
+G01993,drop,Audio::Seq::unusedStateFlags,Native\Engine\src\Audio\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:508
+G01994,drop,Audio::Seq::unusedInventoryIndices,Native\Engine\src\Audio\Seq\Channel.c,Is declared but not used by the decompiled code.,high,replaced-by:nothing;no uses;source:main.h:509
 G02065,state,Menu::Files::frameBuf,Native\Game\src\Menu\Files.c,"Fork name kept; used by Menu::Files::DrawExitFade, Menu::Files::InitializeDisplay, Menu::Files::SwapBuffers and 2 more.",med,source:22C.c:3080;fork name kept
 G02096,state,Menu::Files::textArrowState,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::DrawText.,med,source:22C.c:1535;fork name kept
 G02101,state,Menu::Files::elementBackgroundColorColors1,Native\Game\src\Menu\Files.c,Fork name kept; used by Menu::Files::ElementBackgroundColor.,med,source:22C.c:1595;fork name kept

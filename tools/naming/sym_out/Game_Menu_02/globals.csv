@@ -10,7 +10,7 @@ G00007,state,Menu::Inventory::secondaryTitleEnabled,Native\Game\src\Menu\Invento
 G00008,state,Menu::Inventory::selectedItemCategoryIconOnTop,Native\Game\src\Menu\Inventory\Inventory.c,Draws the selected category icon above the others.,high,source:items1.h:82;fork name kept
 G00009,state,Menu::Inventory::statusCommandAnimationStep,Native\Game\src\Menu\Inventory\Inventory.c,Steps the status command's slide.,high,source:16C.c:1263;fork name kept
 G00010,state,Menu::Inventory::statusCommandState,Native\Game\src\Menu\Inventory\Inventory.c,Shows the status command.,high,source:items1.h:668;fork name kept
-G00011,state,Render::frameScratch,Native\Graphics\src\Render.c,Holds the per-frame drawing context kept in the scratchpad.,high,source:146C.c:2468;type Render::FrameScratch
+G00011,state,Render::frameScratch,Native\Engine\src\Render\Render.c,Holds the per-frame drawing context kept in the scratchpad.,high,source:146C.c:2468;type Render::FrameScratch
 G00063,state,Menu::Inventory::equipmentModelLoadStep,Native\Game\src\Menu\Inventory\Inventory.c,Steps reloading the equipment models after an equipment change.,med,source:68C4.c:18;fork name loadObjectDataState
 G00138,catalog,Battle::limbNames,Native\Game\src\Battle\Hud.c,Gives the name of each limb.,high,"source:5BF94.c:1039;fork name kept;inventory size is an address gap, not a capacity"
 G00155,state,Menu::Framework::loadedSubMenu,Native\Game\src\Menu\Framework\Menus.c,Gives the menu overlay currently loaded.,high,source:5BF94.c:2594;fork name kept

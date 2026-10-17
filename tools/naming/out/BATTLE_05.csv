@@ -1,7 +1,7 @@
 id,final_name,final_location,purpose,confidence,notes
 F00658,Field::SetRoomWeather,Native\Game\src\Field\Environment.c,"Selects room weather, sizes its particle population from room bounds, and switches the ambient weather sound.",high,fields:_mpdRoomSectionB.unk48=weather emission bounds
 F00659,Field::UpdateRoomWeather,Native\Game\src\Field\Environment.c,"Varies room wind angles and weather intensity, then updates the selected weather particles.",high,fields:_mpdRoomSectionB.unk36=minimum wind azimuth;fields:_mpdRoomSectionB.unk38=maximum wind azimuth
-F00660,Core::Math::ClampSignedShort,Native\Core\src\Math\FixedPoint.c,Clamps a signed short between two bounds regardless of their order.,high,
+F00660,Core::Math::ClampSignedShort,Native\Engine\src\Core\Math\FixedPoint.c,Clamps a signed short between two bounds regardless of their order.,high,
 F00661,Field::ApplyWeatherIntensity,Native\Game\src\Field\Environment.c,"Derives active particle count, weather sound volume, and streak scale from the current weather intensity.",high,fields:_mpdRoomSectionB.unk3C=minimum weather intensity;fields:_mpdRoomSectionB.unk3E=maximum weather intensity
 F00662,Field::SetWeatherVariationEnabled,Native\Game\src\Field\Environment.c,Enables or disables automatic variation of room wind and weather intensity.,high,
 F00663,Field::SetWeatherIntensity,Native\Game\src\Field\Environment.c,"Sets weather intensity and refreshes particle limits, ambient sound volume, and wind velocity.",high,
@@ -73,7 +73,7 @@ F00728,Battle::DrawChainCount,Native\Game\src\Battle\Feedback.c,Draws the queued
 F00729,Battle::SetActorMarkersHidden,Native\Game\src\Battle\Feedback.c,Sets the global suppression flag for overhead actor markers.,high,
 F00730,Battle::SetActorMarker,Native\Game\src\Battle\Feedback.c,"Sets or masks an overhead actor marker, or initializes all marker slots when the actor index is zero.",high,
 F00731,Battle::DrawActorMarker,Native\Game\src\Battle\Feedback.c,"Draws an actor's overhead marker or nearby-object interaction icon, including offscreen direction arrows.",med,Marker glyph meanings remain partly inferred; low three bits select the marker kind
-F00732,Core::Math::AddPackedScreenCoordinates,Native\Core\src\Math\Vector.c,Adds two packed signed screen-coordinate pairs without carrying the low coordinate into the high coordinate.,high,
+F00732,Core::Math::AddPackedScreenCoordinates,Native\Engine\src\Core\Math\Vector.c,Adds two packed signed screen-coordinate pairs without carrying the low coordinate into the high coordinate.,high,
 F00733,Battle::DrawActorMarkers,Native\Game\src\Battle\Feedback.c,Draws enabled actor markers unless the global marker suppression flag is set.,high,
 F00734,Battle::ReserveFloatingLabel,Native\Game\src\Battle\Feedback.c,Returns the next feedback-label slot or evicts the oldest label when all 32 slots are occupied.,high,
 F00735,Battle::CompactFloatingLabels,Native\Game\src\Battle\Feedback.c,Removes the requested number of inactive feedback-label entries from the queue.,high,
@@ -85,35 +85,35 @@ F00740,Battle::ShowAbilityTimingCue,Native\Game\src\Battle\Feedback.c,Positions 
 F00741,Battle::DrawAbilityTimingCue,Native\Game\src\Battle\Feedback.c,Draws the red BattleAbility timing cue above its stored screen position.,high,
 F00742,Battle::CommitEquipmentStatChanges,Native\Game\src\Battle\Feedback.c,Activates pending equipment stat-change labels so they enter the visible notification queue.,high,
 F00743,Battle::SuppressAshleyStatusLabels,Native\Game\src\Battle\Feedback.c,Suppresses Ashley's floating status captions while leaving other actors' captions visible.,high,
-F00744,Render::DrawRoomGeometry,Native\Graphics\src\RoomGeometry.c,"Draws visible MPD geometry groups with their prepared transforms, facing masks, and subdivision settings.",high,asm
-F00745,Render::DrawRoomGeometryPolygons,Native\Graphics\src\RoomGeometry.c,Projects and emits an MPD group's textured triangles and quads with culling and optional subdivision.,high,asm
-F00746,Render::DecodeRoomPolygonVertices,Native\Graphics\src\RoomGeometry.c,Expands the first packed room polygon's base position and signed vertex offsets into triangle vertices.,high,asm
-F00747,Render::ProjectAndDecodeRoomPolygon,Native\Graphics\src\RoomGeometry.c,"Projects one packed room triangle, calculates winding and depth, and decodes the following polygon's vertices.",high,asm
-F00748,Render::SubdivideRoomTriangle,Native\Graphics\src\RoomGeometry.c,Recursively subdivides a textured room triangle and emits its visible leaf primitives.,high,asm
-F00749,Render::SubdivideRoomQuad,Native\Graphics\src\RoomGeometry.c,Recursively subdivides a textured room quad and emits its visible leaf primitives.,high,asm
-F00750,Render::InterpolateRoomVertexMidpoint,Native\Graphics\src\RoomGeometry.c,"Averages two room subdivision vertices' positions, colors, and texture coordinates into a midpoint.",high,asm
-F00751,Render::IsRoomPolygonOnScreen,Native\Graphics\src\RoomGeometry.c,Tests whether a projected room triangle or quad intersects the configured screen bounds.,high,asm
-F00752,Render::LinkRoomPolygonByDepth,Native\Graphics\src\RoomGeometry.c,Rejects clipped room polygons and links accepted primitives into the depth-biased ordering table.,high,asm
-F00753,Render::SetRoomPolygonNearClip,Native\Graphics\src\RoomGeometry.c,Sets the near-depth limit used when linking room geometry polygons.,high,asm;Original patches two depth-comparison instruction immediates
-F00754,Render::SetRoomPolygonFarClip,Native\Graphics\src\RoomGeometry.c,Sets the far-depth limit used when linking room geometry polygons.,high,asm;Original patches the far-depth comparison instruction
-F00755,Render::SetRoomTextureLodDepth,Native\Graphics\src\RoomGeometry.c,Sets the depth threshold at which room polygons switch to half-resolution texture coordinates.,high,asm;Not a far clip despite callers from the far-clip setter
-F00756,Render::SetRoomPolygonScreenBounds,Native\Graphics\src\RoomGeometry.c,Sets the screen rectangle used by room polygon visibility tests.,high,asm;Original patches comparison immediates
-F00757,Render::DrawSkyDome,Native\Graphics\src\RoomGeometry.c,Transforms the fixed 34-vertex sky mesh and emits its visible colored triangles behind the room.,high,asm
-F00758,Render::UpdateRoomGroupTransforms,Native\Graphics\src\RoomGeometry.c,Builds view transforms for visible room geometry groups and applies camera-facing transforms to billboard groups.,high,asm;Geometry flag 0x400 selects camera-facing behavior
-F00759,Render::BuildRoomGeometryViewMatrix,Native\Graphics\src\RoomGeometry.c,Combines room-object Euler rotation and translation with the current camera view matrix.,high,asm
-F00760,Render::BuildScaleCompensatedRoomView,Native\Graphics\src\RoomGeometry.c,Builds a room view transform with inverse far-clip scaling for background geometry.,high,asm;Used for the sky when camera farClip differs from one
-F00761,Core::Math::BuildEulerRotationMatrix,Native\Core\src\Math\Matrix.c,Builds a fixed-point rotation matrix from three Euler angles using the shared trigonometric table.,high,asm
-F00762,Core::Math::LookupRotationSineCosine,Native\Core\src\Math\Trig.c,Resolves angle octants into sine and cosine values for the Euler rotation-matrix builder.,high,asm;Table-dispatch blocks share a custom continuation-register convention
-F00763,Core::Math::MultiplyRotationMatrixInPlace,Native\Core\src\Math\Matrix.c,Premultiplies a rotation matrix by another matrix and writes the result back to the second matrix.,high,asm
-F00764,Core::Math::CosineFixedPoint,Native\Core\src\Math\Trig.c,Returns the fixed-point cosine by shifting the input angle and entering the sine lookup routine.,high,asm;Falls through into the sine implementation
-F00765,Core::Math::SineFixedPoint,Native\Core\src\Math\Trig.c,Returns a signed fixed-point sine using quadrant folding and the shared trigonometric table.,high,asm
+F00744,Render::DrawRoomGeometry,Native\Engine\src\Render\RoomGeometry.c,"Draws visible MPD geometry groups with their prepared transforms, facing masks, and subdivision settings.",high,asm
+F00745,Render::DrawRoomGeometryPolygons,Native\Engine\src\Render\RoomGeometry.c,Projects and emits an MPD group's textured triangles and quads with culling and optional subdivision.,high,asm
+F00746,Render::DecodeRoomPolygonVertices,Native\Engine\src\Render\RoomGeometry.c,Expands the first packed room polygon's base position and signed vertex offsets into triangle vertices.,high,asm
+F00747,Render::ProjectAndDecodeRoomPolygon,Native\Engine\src\Render\RoomGeometry.c,"Projects one packed room triangle, calculates winding and depth, and decodes the following polygon's vertices.",high,asm
+F00748,Render::SubdivideRoomTriangle,Native\Engine\src\Render\RoomGeometry.c,Recursively subdivides a textured room triangle and emits its visible leaf primitives.,high,asm
+F00749,Render::SubdivideRoomQuad,Native\Engine\src\Render\RoomGeometry.c,Recursively subdivides a textured room quad and emits its visible leaf primitives.,high,asm
+F00750,Render::InterpolateRoomVertexMidpoint,Native\Engine\src\Render\RoomGeometry.c,"Averages two room subdivision vertices' positions, colors, and texture coordinates into a midpoint.",high,asm
+F00751,Render::IsRoomPolygonOnScreen,Native\Engine\src\Render\RoomGeometry.c,Tests whether a projected room triangle or quad intersects the configured screen bounds.,high,asm
+F00752,Render::LinkRoomPolygonByDepth,Native\Engine\src\Render\RoomGeometry.c,Rejects clipped room polygons and links accepted primitives into the depth-biased ordering table.,high,asm
+F00753,Render::SetRoomPolygonNearClip,Native\Engine\src\Render\RoomGeometry.c,Sets the near-depth limit used when linking room geometry polygons.,high,asm;Original patches two depth-comparison instruction immediates
+F00754,Render::SetRoomPolygonFarClip,Native\Engine\src\Render\RoomGeometry.c,Sets the far-depth limit used when linking room geometry polygons.,high,asm;Original patches the far-depth comparison instruction
+F00755,Render::SetRoomTextureLodDepth,Native\Engine\src\Render\RoomGeometry.c,Sets the depth threshold at which room polygons switch to half-resolution texture coordinates.,high,asm;Not a far clip despite callers from the far-clip setter
+F00756,Render::SetRoomPolygonScreenBounds,Native\Engine\src\Render\RoomGeometry.c,Sets the screen rectangle used by room polygon visibility tests.,high,asm;Original patches comparison immediates
+F00757,Render::DrawSkyDome,Native\Engine\src\Render\RoomGeometry.c,Transforms the fixed 34-vertex sky mesh and emits its visible colored triangles behind the room.,high,asm
+F00758,Render::UpdateRoomGroupTransforms,Native\Engine\src\Render\RoomGeometry.c,Builds view transforms for visible room geometry groups and applies camera-facing transforms to billboard groups.,high,asm;Geometry flag 0x400 selects camera-facing behavior
+F00759,Render::BuildRoomGeometryViewMatrix,Native\Engine\src\Render\RoomGeometry.c,Combines room-object Euler rotation and translation with the current camera view matrix.,high,asm
+F00760,Render::BuildScaleCompensatedRoomView,Native\Engine\src\Render\RoomGeometry.c,Builds a room view transform with inverse far-clip scaling for background geometry.,high,asm;Used for the sky when camera farClip differs from one
+F00761,Core::Math::BuildEulerRotationMatrix,Native\Engine\src\Core\Math\Matrix.c,Builds a fixed-point rotation matrix from three Euler angles using the shared trigonometric table.,high,asm
+F00762,Core::Math::LookupRotationSineCosine,Native\Engine\src\Core\Math\Trig.c,Resolves angle octants into sine and cosine values for the Euler rotation-matrix builder.,high,asm;Table-dispatch blocks share a custom continuation-register convention
+F00763,Core::Math::MultiplyRotationMatrixInPlace,Native\Engine\src\Core\Math\Matrix.c,Premultiplies a rotation matrix by another matrix and writes the result back to the second matrix.,high,asm
+F00764,Core::Math::CosineFixedPoint,Native\Engine\src\Core\Math\Trig.c,Returns the fixed-point cosine by shifting the input angle and entering the sine lookup routine.,high,asm;Falls through into the sine implementation
+F00765,Core::Math::SineFixedPoint,Native\Engine\src\Core\Math\Trig.c,Returns a signed fixed-point sine using quadrant folding and the shared trigonometric table.,high,asm
 F00766,Field::CallRoomEntryPoint,Native\Game\src\Field\RoomEffects.c,Transfers control to the entry point embedded after the MPD room's section E header.,med,asm;Room section E pointer plus 0x14 is treated as executable code
-F00767,Render::SampleRoomLighting,Native\Graphics\src\RoomGeometry.c,Finds a room lighting triangle containing a point and samples its color or returns the layer's default color.,high,asm;Assembly consumes an output-color pointer in a2 despite the incomplete C prototype
-F00768,Render::InterpolateRoomLightTriangle,Native\Graphics\src\RoomGeometry.c,Tests a point against a lighting triangle and interpolates its vertex colors using signed triangle areas.,high,asm
-F00769,Render::TintRoomGeometryPrimitives,Native\Graphics\src\RoomGeometry.c,Applies room color offsets and optional desaturation to the emitted textured triangle and quad primitives.,high,asm
-F00770,Render::TintRoomPrimitiveColor,Native\Graphics\src\RoomGeometry.c,"Desaturates a primitive vertex color when requested, adds signed color offsets, and clamps the channels.",high,asm
+F00767,Render::SampleRoomLighting,Native\Engine\src\Render\RoomGeometry.c,Finds a room lighting triangle containing a point and samples its color or returns the layer's default color.,high,asm;Assembly consumes an output-color pointer in a2 despite the incomplete C prototype
+F00768,Render::InterpolateRoomLightTriangle,Native\Engine\src\Render\RoomGeometry.c,Tests a point against a lighting triangle and interpolates its vertex colors using signed triangle areas.,high,asm
+F00769,Render::TintRoomGeometryPrimitives,Native\Engine\src\Render\RoomGeometry.c,Applies room color offsets and optional desaturation to the emitted textured triangle and quad primitives.,high,asm
+F00770,Render::TintRoomPrimitiveColor,Native\Engine\src\Render\RoomGeometry.c,"Desaturates a primitive vertex color when requested, adds signed color offsets, and clamps the channels.",high,asm
 F00771,Field::DrawMinimapScene,Native\Game\src\Field\Minimap.c,"Draws visited scene rooms, connections, and gated door markers into the simple minimap.",high,asm
 F00772,Field::SampleCollisionHeightCode,Native\Game\src\Field\Collision.c,Decodes a collision layer's tiled height sample and preserves its high-bit surface flag.,high,asm;Samples 4-by-4 patterns indexed by collision-map tiles
-F00773,Render::GetProjectionScreenOffset,Native\Graphics\src\RoomGeometry.c,Reads the geometry projection center coordinates from the rendering registers.,high,asm
+F00773,Render::GetProjectionScreenOffset,Native\Engine\src\Render\RoomGeometry.c,Reads the geometry projection center coordinates from the rendering registers.,high,asm
 F00774,Field::ResolveSceneRoomData,Native\Game\src\Field\Minimap.c,Replaces scene room-data lengths with pointers and returns the room-name table following the room payloads.,high,asm;fields:vs_battle_room.dataAddress=resolved room payload pointer
-F00775,Render::SetProjectionScreenOffset,Native\Graphics\src\RoomGeometry.c,Sets the geometry projection center coordinates in the rendering registers.,high,asm
+F00775,Render::SetProjectionScreenOffset,Native\Engine\src\Render\RoomGeometry.c,Sets the geometry projection center coordinates in the rendering registers.,high,asm

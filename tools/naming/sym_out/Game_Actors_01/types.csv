@@ -1,5 +1,5 @@
 id,role,final_name,final_location,purpose,confidence,notes
-T00198,State,Render::ModelScratchpad,Native\Graphics\src\ModelDraw.h,"Holds the scratchpad working set at 0x1F80035C used while building actor, weapon and gimmick model transforms.",high,source:30DB0.c:3700
+T00198,State,Render::ModelScratchpad,Native\Engine\src\Render\ModelDraw.h,"Holds the scratchpad working set at 0x1F80035C used while building actor, weapon and gimmick model transforms.",high,source:30DB0.c:3700
 T00208,State,State::AshleyLimbSnapshot,Native\Game\src\State\Ashley.h,Saves one of Ashley's limbs: hit points and per-limb type and affinity values.,high,source:BATTLE/INITBTL.PRG/18.c:337
 T00209,State,State::AshleyStatsSnapshot,Native\Game\src\State\Ashley.h,"Saves Ashley's statistics, statuses, limbs, weapon stance and camera settings for restoring after re-entry.",high,source:BATTLE/INITBTL.PRG/18.c:317;source:BATTLE/INITBTL.PRG/18.c:356
 T00210,State,State::RoomEnemyStates,Native\Game\src\State\RoomCache.h,"Remembers up to eight actor states for one recently visited room, with the room's visit recency.",high,source:146C.c:15233;source:146C.c:832
@@ -9,7 +9,7 @@ T00239,State,Actors::ActorRecord,Native\Game\src\Actors\ActorRecord.h,"Holds one
 T00241,State,Actors::ModelInstance,Native\Game\src\Actors\ModelInstance.h,"Is the header shared by actor and gimmick records: SHP counts, display and motion flags, transform, tiles, tint and model pointer.",high,source:30DB0.c:1137;source:30DB0.c:1150
 T00242,State,Actors::TextureAnimationSlot,Native\Game\src\Actors\TextureAnimation.h,Plays one of an actor's two texture-animation timelines.,high,source:40564.c:1385
 T00245,State,Actors::ShadowBlend,Native\Game\src\Actors\Shadow.h,Blends an actor's shadow level and radius rates toward new values over a number of frames.,med,source:30DB0.c:3882
-T00247,Value,Render::ColorCode,Native\Graphics\src\Palette.h,Packs three color bytes and a code byte into one word.,med,source:30DB0.c:3912
+T00247,Value,Render::ColorCode,Native\Engine\src\Render\Palette.h,Packs three color bytes and a code byte into one word.,med,source:30DB0.c:3912
 T00249,OnDisc,Actors::TextureCellOrigin,Native\Game\src\Actors\TextureAnimation.h,Gives the default staged texture cell of one texture-animation channel.,high,source:40564.c:1442
 T00251,State,Actors::ModelEffectSlot,Native\Game\src\Actors\ModelInstance.h,Holds a small per-model effect: the palette pulse in the header and the sound override in the actor record.,med,source:40564.c:1672;source:40564.c:2808
 T00252,OnDisc,Actors::ShpModel,Native\Game\src\Actors\Skeleton.h,"Holds a loaded SHP model: header bytes, section offsets relocated to addresses, and the bone table.",high,source:30DB0.c:1146;DataCrystal SHP files
@@ -24,19 +24,19 @@ T00332,OnDisc,Items::TreasureChest,Native\Game\src\Items\TreasureChests.h,"Descr
 T00344,OnDisc,Actors::WeaponModelData,Native\Game\src\Actors\WeaponModel.h,"Holds a loaded WEP file: header bytes and its section offsets, relocated to addresses on load.",high,source:30DB0.c:663
 T00383,State,Battle::Ai::AiActorView,Native\Game\src\Battle\Ai\AiState.h,Views an actor record while its AI state is created.,med,source:7CD68.c:934;source:upstream:146C.c:6481;view of vs_battle_actor (T00630); fold into it when copying
 T00393,OnDisc,Actors::SpawnSettings,Native\Game\src\Actors\CharacterInit.h,"Holds the eight MPD spawn setting bytes copied into the actor, where the AI reads them as saved settings.",med,source:146C.c:6754
-T00395,State,Render::ModelScratchpadAnglesView,Native\Graphics\src\ModelDraw.h,Views Render::ModelScratchpad for the root-angle and gimmick-rotation updates.,high,source:44F14.c:1683;view of T00198 (scratchpad 0x1F80035C)
-T00427,State,Render::DrawDepthScratch,Native\Graphics\src\ModelDraw.h,Holds the ordering-table depth offset used while one actor is drawn.,med,source:44F14.c:1065
+T00395,State,Render::ModelScratchpadAnglesView,Native\Engine\src\Render\ModelDraw.h,Views Render::ModelScratchpad for the root-angle and gimmick-rotation updates.,high,source:44F14.c:1683;view of T00198 (scratchpad 0x1F80035C)
+T00427,State,Render::DrawDepthScratch,Native\Engine\src\Render\ModelDraw.h,Holds the ordering-table depth offset used while one actor is drawn.,med,source:44F14.c:1065
 T00431,State,Actors::RoomActorRecordWrite,Native\Game\src\Actors\RoomActorCache.h,"Writes one room actor's saved state; the same 40-byte slot as Actors::RoomActorRecord, with the tile placement stored as one word.",high,source:146C.c:855;source:146C.c:881;view of T00597 (same slot); fold into one native type when copying
 T00438,Value,Actors::TileTarget,Native\Game\src\Actors\Location.h,Packs a target tile and facing into one word for tile lookups and tile moves.,med,source:146C.c:5352;source:40564.c:532
 T00462,State,Actors::PlacementBuffer,Native\Game\src\Actors\Location.h,Is a stack buffer whose words are not read by the decompiled code.,low,source:146C.c:2839
-T00463,State,Render::ModelScratchpadBoneView,Native\Graphics\src\ModelDraw.h,Views Render::ModelScratchpad while converting a bone matrix to world space.,high,source:38C1C.c:414;view of T00198 (scratchpad 0x1F80035C)
+T00463,State,Render::ModelScratchpadBoneView,Native\Engine\src\Render\ModelDraw.h,Views Render::ModelScratchpad while converting a bone matrix to world space.,high,source:38C1C.c:414;view of T00198 (scratchpad 0x1F80035C)
 T00464,Value,Actors::FallDirection,Native\Game\src\Actors\Movement.h,Gives the horizontal direction of a fall; only the signs of X and Z are used.,high,source:3A1A0.c:263;source:3A1A0.c:266
 T00465,Value,Actors::TurnRequest,Native\Game\src\Actors\Movement.h,Says whether a new facing restarts the actor's turn or adjusts the turn in progress.,med,source:3A1A0.c:1928
 T00467,Def,Actors::TextureAnimationKey,Native\Game\src\Actors\TextureAnimation.h,Gives one key of an actor texture-animation timeline: the frame to show and how long to hold it.,high,source:40564.c:1392
 T00468,State,Actors::TextureOverlayUpload,Native\Game\src\Actors\TextureAnimation.h,Requests a staged texture rectangle copy into one of an actor's texture overlays.,high,source:40564.c:1525
 T00469,State,Actors::PalettePulseView,Native\Game\src\Actors\Palette.h,Views a gimmick record while its palette is pulsed toward blue.,med,source:40564.c:1756;view of D_800F45E0_t (T00255)
 T00472,State,Actors::AirborneTickAccumulator,Native\Game\src\Actors\Movement.h,Views an actor word whose top byte carries fractional ticks between airborne frames.,med,source:40564.c:2354
-T00473,Value,Core::WordPair,Native\Core\include\Core\WordPair.h,Copies eight bytes as two words; the native code assigns the members directly.,med,source:40564.c:2552
+T00473,Value,Core::WordPair,Native\Engine\include\Core\Core\WordPair.h,Copies eight bytes as two words; the native code assigns the members directly.,med,source:40564.c:2552
 T00474,State,Actors::SeqAnimationBank,Native\Game\src\Actors\Animation.h,"Locates a SEQ animation bank's data, animation-id map and per-animation frame headers.",high,source:40564.c:2778
 T00565,State,Field::GimmickPhysicsView,Native\Game\src\Field\Gimmicks.h,"Views a gimmick record while its rotation, sliding, falling, stacking and durability are updated.",med,source:44F14.c:1727;view of D_800F45E0_t (T00255)
 T00597,State,Actors::RoomActorRecord,Native\Game\src\Actors\RoomActorCache.h,"Saves one room actor's health, statistics, statuses, AI flags and tile placement while the room is left.",high,source:146C.c:6762;source:146C.c:6653

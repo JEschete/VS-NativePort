@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{122E4CFA-FC76-57EA-923B-38F76DF7CEA6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Audio">
+      <UniqueIdentifier>{4BC533DD-C4DF-544E-A227-F5023F66BA4F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Core">
+      <UniqueIdentifier>{411A9FF0-2D82-5177-A472-B0B4F9689234}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Input">
+      <UniqueIdentifier>{22165FBD-851A-5C57-9FCD-A92B7AB26FCB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Movie">
+      <UniqueIdentifier>{252B8FC9-EE75-5EDF-99AD-D442338C012E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Platform">
+      <UniqueIdentifier>{2081CDBE-466B-5F32-A19B-D8B1397A1F62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Render">
+      <UniqueIdentifier>{C4467D7A-D4BE-5F62-9D61-BF4E0E285D7C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Save">
+      <UniqueIdentifier>{4C3E531E-032F-5723-8AC7-FD37812E1440}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{25BB5EF3-46A2-50A1-AE11-AA476707C841}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Audio">
+      <UniqueIdentifier>{9C2CA301-D5BD-5747-8CBD-41E2604A25DB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Core">
+      <UniqueIdentifier>{6643D381-A1D4-5EFC-81F4-3F517E25C596}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Input">
+      <UniqueIdentifier>{B97DA791-72DF-56D8-9142-97DBB02FDC64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Movie">
+      <UniqueIdentifier>{14C85961-36E1-57B2-AB6E-3B299B307D82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform">
+      <UniqueIdentifier>{31599A4B-3522-58BA-A03D-F954BD474391}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Render">
+      <UniqueIdentifier>{286D7176-EA8A-5627-B0F4-9AECE8917C37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Save">
+      <UniqueIdentifier>{1A22E65B-8E6B-57A6-AB6E-04ED278ED288}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Audio\AudioDevice.cpp">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\FrameClock.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Log.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Random.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Unported.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Input\Pad.cpp">
+      <Filter>src\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Movie\Movie.cpp">
+      <Filter>src\Movie</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\App.cpp">
+      <Filter>src\Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Device.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Save\SaveStore.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
+    <ClInclude Include="include\Audio\AudioDevice.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Assert.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\FrameClock.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Handle.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Log.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Random.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Types.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Unported.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Input\Pad.hpp">
+      <Filter>include\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Movie\Movie.hpp">
+      <Filter>include\Movie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Platform\App.hpp">
+      <Filter>include\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\Device.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\SaveStore.hpp">
+      <Filter>include\Save</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

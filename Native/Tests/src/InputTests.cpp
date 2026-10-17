@@ -1,4 +1,4 @@
-#include "vs/input/Pad.hpp"
+#include "Input/Pad.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 

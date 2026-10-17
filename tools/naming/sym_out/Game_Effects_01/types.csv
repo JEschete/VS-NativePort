@@ -10,7 +10,7 @@ T00268,State,Effects::ParticleGravity,Native\Game\src\Effects\Particles.h,Holds 
 T00269,State,Effects::TextureLoadList,Native\Game\src\Effects\Loading.h,"Lists the effect texture files to load: count, disc locations, upload slots and CLUT flags.",high,source:6F014.c:734;source:6F014.c:633;sanity pass 2026-10-17
 T00270,State,Effects::EffectPackage,Native\Game\src\Effects\Runtime.h,"Points to the loaded effect package blocks: particle definitions, curves, programs, textures, timelines, sounds and the current action request.",high,source:5BF94.c:5487
 T00292,State,Effects::Plg005::AnalyzeGridQuad,Native\Game\src\Effects\Plugins\Plg005.h,Holds one Analyze grid quad of plugin 005.,low,declaration-only;source:EFFECT/PLG005.BIN/18.c:11
-T00294,Packet,Render::TrailPacket,Native\Graphics\src\LegacyPackets.h,Is one trail segment's gouraud quad packet.,med,declaration-only;source:5BF94.c:138
+T00294,Packet,Render::TrailPacket,Native\Engine\src\Render\LegacyPackets.h,Is one trail segment's gouraud quad packet.,med,declaration-only;source:5BF94.c:138
 T00315,State,Effects::FileLoadContext,Native\Game\src\Effects\Loading.h,Holds one effect file load in progress.,med,declaration-only;source:6E644.h:5
 T00343,State,Effects::Trail,Native\Game\src\Effects\Trails.h,Holds one trail effect's state.,med,declaration-only;source:trails.h:7
 T00363,Value,Effects::ActionEffectRequest,Native\Game\src\Effects\Runtime.h,"Requests an action's effects: effect id, targets, others and position.",high,declaration-only;source:6E644.h:24
@@ -57,25 +57,25 @@ T00577,OnDisc,Effects::CurveBlock,Native\Game\src\Effects\Package.h,Heads the cu
 T00578,OnDisc,Effects::PackageTexture,Native\Game\src\Effects\Package.h,Describes one package texture.,med,declaration-only;source:5BF94.h:337
 T00579,OnDisc,Effects::PackageTextureInfo,Native\Game\src\Effects\Package.h,Selects one package texture.,med,declaration-only;source:5BF94.h:211
 T00580,OnDisc,Effects::PackageFile,Native\Game\src\Effects\Package.h,Heads an effect package file.,med,declaration-only;source:6F014.c:301
-T00626,Packet,Render::EffectFlatQuadPacket,Native\Graphics\src\LegacyPackets.h,Is one flat textured effect packet with its draw mode word.,med,declaration-only;source:EFFECT/PLG005.BIN/18.c:29
-T00627,Packet,Render::EffectGouraudQuadPacket,Native\Graphics\src\LegacyPackets.h,Is one gouraud textured effect packet with its draw mode word.,med,declaration-only;source:EFFECT/PLG005.BIN/18.c:29
-T00685,Packet,Render::ClosedRingPacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (ClosedRingPacket).,med,declaration-only;source:closedRings.h:34
+T00626,Packet,Render::EffectFlatQuadPacket,Native\Engine\src\Render\LegacyPackets.h,Is one flat textured effect packet with its draw mode word.,med,declaration-only;source:EFFECT/PLG005.BIN/18.c:29
+T00627,Packet,Render::EffectGouraudQuadPacket,Native\Engine\src\Render\LegacyPackets.h,Is one gouraud textured effect packet with its draw mode word.,med,declaration-only;source:EFFECT/PLG005.BIN/18.c:29
+T00685,Packet,Render::ClosedRingPacket,Native\Engine\src\Render\LegacyPackets.h,Is one effect template packet (ClosedRingPacket).,med,declaration-only;source:closedRings.h:34
 T00686,State,Effects::ClosedRingState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one ClosedRing effect template's state.,med,declaration-only;source:closedRings.h:22
-T00687,Packet,Render::ClosedRingTexCoord,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (ClosedRingTexCoord).,med,declaration-only;source:EFFECT/PLG077.BIN/18.c:32
-T00688,Packet,Render::GridPacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (GridPacket).,med,declaration-only;source:grids.h:16
+T00687,Packet,Render::ClosedRingTexCoord,Native\Engine\src\Render\LegacyPackets.h,Is one effect template packet (ClosedRingTexCoord).,med,declaration-only;source:EFFECT/PLG077.BIN/18.c:32
+T00688,Packet,Render::GridPacket,Native\Engine\src\Render\LegacyPackets.h,Is one effect template packet (GridPacket).,med,declaration-only;source:grids.h:16
 T00689,State,Effects::GridState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one Grid effect template's state.,med,declaration-only;source:grids.h:10
-T00715,Packet,Render::Mesh10Packet,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (Mesh10Packet).,med,declaration-only;source:meshes10.h:18
+T00715,Packet,Render::Mesh10Packet,Native\Engine\src\Render\LegacyPackets.h,Is one effect template packet (Mesh10Packet).,med,declaration-only;source:meshes10.h:18
 T00716,State,Effects::Mesh10State,Native\Game\src\Effects\Templates\TemplateState.h,Holds one Mesh10 effect template's state.,med,declaration-only;source:meshes10.h:11
-T00717,Packet,Render::Mesh10TexCoord,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (Mesh10TexCoord).,med,declaration-only;source:meshes10.h:23
-T00718,Packet,Render::MirrorSurfacePacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (MirrorSurfacePacket).,med,declaration-only;source:mirroredSurfaces.h:19
+T00717,Packet,Render::Mesh10TexCoord,Native\Engine\src\Render\LegacyPackets.h,Is one effect template packet (Mesh10TexCoord).,med,declaration-only;source:meshes10.h:23
+T00718,Packet,Render::MirrorSurfacePacket,Native\Engine\src\Render\LegacyPackets.h,Is one effect template packet (MirrorSurfacePacket).,med,declaration-only;source:mirroredSurfaces.h:19
 T00719,State,Effects::MirrorSurfaceState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one MirrorSurface effect template's state.,med,declaration-only;source:mirroredSurfaces.h:12
-T00720,Packet,Render::ParticleLinePacket,Native\Graphics\src\LegacyPackets.h,Is one line effect packet with its draw mode word.,med,declaration-only;source:particleLineRender.h:6
-T00721,Packet,Render::ParticleQuadPacket,Native\Graphics\src\LegacyPackets.h,Is one gouraud textured effect packet with its draw mode word.,med,declaration-only;source:particleRender.h:7
-T00722,Packet,Render::RingPacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (RingPacket).,med,declaration-only;source:rings.h:19
+T00720,Packet,Render::ParticleLinePacket,Native\Engine\src\Render\LegacyPackets.h,Is one line effect packet with its draw mode word.,med,declaration-only;source:particleLineRender.h:6
+T00721,Packet,Render::ParticleQuadPacket,Native\Engine\src\Render\LegacyPackets.h,Is one gouraud textured effect packet with its draw mode word.,med,declaration-only;source:particleRender.h:7
+T00722,Packet,Render::RingPacket,Native\Engine\src\Render\LegacyPackets.h,Is one effect template packet (RingPacket).,med,declaration-only;source:rings.h:19
 T00723,State,Effects::RingState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one Ring effect template's state.,med,declaration-only;source:rings.h:13
-T00724,Packet,Render::RotatingSurfacePacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (RotatingSurfacePacket).,med,declaration-only;source:rotatingSurfaces.h:20
+T00724,Packet,Render::RotatingSurfacePacket,Native\Engine\src\Render\LegacyPackets.h,Is one effect template packet (RotatingSurfacePacket).,med,declaration-only;source:rotatingSurfaces.h:20
 T00725,State,Effects::RotatingSurfaceState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one RotatingSurface effect template's state.,med,declaration-only;source:rotatingSurfaces.h:13
-T00727,Packet,Render::SurfacePacket,Native\Graphics\src\LegacyPackets.h,Is one effect template packet (SurfacePacket).,med,declaration-only;source:surfaces.h:19
+T00727,Packet,Render::SurfacePacket,Native\Engine\src\Render\LegacyPackets.h,Is one effect template packet (SurfacePacket).,med,declaration-only;source:surfaces.h:19
 T00728,State,Effects::SurfaceState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one Surface effect template's state.,med,declaration-only;source:surfaces.h:12
 T00820,State,Effects::ParticleMotion,Native\Game\src\Effects\Particles.h,"Holds a particle's mass, gravity scale, position, velocity, force and acceleration.",high,declaration-only;source:upstream:5BF94.h:370;upstream layout adopted for the particle node
 T00821,Value,Effects::FixedVector,Native\Game\src\Effects\Particles.h,Holds a 20.12 fixed-point vector.,med,declaration-only;source:upstream:5BF94.h:364

@@ -208,7 +208,7 @@ Additions the reference does not have, required by P4 (lossless). They go in `ex
 - **Placement:** images that the original placed in a shared VRAM page are written as **separate** files. Their placement in VRAM is runtime layout, not content (plan §0.1). Any UV remapping is done by the converter and checked in the round-trip.
 
 ### 6.5 Sequenced audio (owner choice: **sequenced**)
-The game plays music and sound effects by sequencing sampled instruments at runtime. Tempo, volume, fades and battle transitions change live, so the content is converted into equivalent modern pieces and our ported sequencer (`VS.Audio.Sequencer`, copied from the decomp `Audio\Seq`) plays it:
+The game plays music and sound effects by sequencing sampled instruments at runtime. Tempo, volume, fades and battle transitions change live, so the content is converted into equivalent modern pieces and our ported sequencer (`Audio::Seq`, copied from the decomp `Audio\Seq`) plays it:
 
 | Piece | Format | Detail |
 |---|---|---|
@@ -226,7 +226,7 @@ The game plays music and sound effects by sequencing sampled instruments at runt
 - **Source:** `ENDING\ENDING.XA` (77 MB, interleaved channels: ending music/voice). XA is read from the raw mode-2 form-2 sectors. It cannot come from the ISO-extracted `SLUS-01040\` folder, because that drops the subheaders.
 - **Decode:** each channel (file/channel subheader) is decoded from XA ADPCM to PCM at its native rate (37.8 or 18.9 kHz, mono or stereo).
 - **Output:** one **FLAC** file per channel (lossless) in `audio\streams\ending\<ch>.flac`, plus `streams.json` (channel → use, length, loop).
-- **Runtime:** `VS.Audio::StreamPlayer` decodes the FLAC (dr_flac or libFLAC) and resamples it to the 48 kHz mixer.
+- **Runtime:** `Audio::StreamPlayer` decodes the FLAC (dr_flac or libFLAC) and resamples it to the 48 kHz mixer.
 
 ### 6.7 Movies (STR → AV1 Matroska) (owner choice: **AV1**)
 - **Source:** `MOV\TITLE.STR` (26 MB, raw mode-2 sectors: MDEC video + interleaved XA audio). It is read from the `.bin`, like XA. Whether it holds more than one movie (intro, attract) is settled from the decomp's movie code (`_initIntroMovie`, `_playIntroMovie`) and recorded in CONTENT_LEDGER.
@@ -239,7 +239,7 @@ The game plays music and sound effects by sequencing sampled instruments at runt
      Fixed settings make the output reproducible: `-c:v libsvtav1 -preset 4 -crf 12 -pix_fmt yuv420p -g <fps*2> -c:a flac`.
   3. The result is muxed into Matroska: `movies\<name>.mkv`. WebM cannot carry FLAC, so the container is MKV.
 - **Encoder dependency:** ffmpeg is an **extract-time tool only**. It is never linked or shipped. `VS.Extract` finds it on `PATH` or through `--ffmpeg <path>`, and fails clearly if it is missing or lacks `libsvtav1`. Verified on the dev machine: ffmpeg 8.1.1 (winget Gyan.FFmpeg) has `libsvtav1` and `flac`.
-- **Runtime (`VS.Movie`):**
+- **Runtime (`Engine\Movie`):**
   - Matroska demux: libwebm `mkvparser`, BSD.
   - AV1 decode: **dav1d**, BSD.
   - FLAC decode: dr_flac or libFLAC.
@@ -309,9 +309,9 @@ Schema validation runs at load in every build. Round-trip tests run in CI where 
 |---|---|---|---|
 | JSON | nlohmann-json | MIT | VS.Content, VS.Extract |
 | PNG read/write | lodepng (or libspng) | zlib / BSD | VS.Content, VS.Extract |
-| AV1 decode | dav1d | BSD-2 | VS.Movie |
-| Matroska demux | libwebm | BSD-3 | VS.Movie |
-| FLAC encode/decode | libFLAC (or dr_flac for decode) | BSD-3 / public domain | VS.Extract, VS.Audio |
+| AV1 decode | dav1d | BSD-2 | Engine\Movie |
+| Matroska demux | libwebm | BSD-3 | Engine\Movie |
+| FLAC encode/decode | libFLAC (or dr_flac for decode) | BSD-3 / public domain | VS.Extract, Engine\Audio |
 | AV1 encode, STR decode | ffmpeg (external executable, extract time only) | LGPL/GPL build. Not linked, not shipped | user machine |
 
 All of these come from vcpkg (`vcpkg.json`). The VS 2026 vcpkg registry has `dav1d` 1.5.4, `libwebm` 1.0.0.32 and `libflac` 1.5.0. Libraries are added to `gen_solution.py`'s `VCPKG_LIBS` when the first converter or loader that needs them lands.

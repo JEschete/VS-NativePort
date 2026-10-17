@@ -1,39 +1,39 @@
 id,role,final_name,final_location,purpose,confidence,notes
 T00122,Value,State::GameTimeComponents,Native\Game\include\State\GameTime.h,Splits elapsed game time into frame second minute and hour bytes.,high,same-as:T00190;identical layout indexed through a different include path;source:main.h:166
 T00184,State,Content::DiscRequestCounts,Native\Content\src\DiscQueue.h,Counts disc requests being read and requests still waiting in the queue.,high,source:main.c:9465;both counters are tested together as one word
-T00197,State,Render::PaletteEntryFade,Native\Graphics\src\Palette.h,"Holds one palette entry's current 5-bit color, mask bit and per-channel fade table rows.",high,source:main.c:10531
+T00197,State,Render::PaletteEntryFade,Native\Engine\src\Render\Palette.h,"Holds one palette entry's current 5-bit color, mask bit and per-channel fade table rows.",high,source:main.c:10531
 T00204,State,State::SceneTimer,Native\Game\src\State\SceneTimer.h,Runs the script timer that counts up or down and mirrors its time into state flags 0xA0 to 0xA3.,high,source:146C.c:8527
-T00205,Value,Render::ColorRgb8,Native\Graphics\src\Palette.h,Stores an 8-bit red green blue color with one padding byte.,high,source:main.c:11654
-T00206,State,Render::ModelColorFade,Native\Graphics\src\Palette.h,Fades the room tint (slot 0) or one actor tint (slots 1-16) toward a target color with optional pulsing.,high,source:main.c:11319;source:main.c:11322
+T00205,Value,Render::ColorRgb8,Native\Engine\src\Render\Palette.h,Stores an 8-bit red green blue color with one padding byte.,high,source:main.c:11654
+T00206,State,Render::ModelColorFade,Native\Engine\src\Render\Palette.h,Fades the room tint (slot 0) or one actor tint (slots 1-16) toward a target color with optional pulsing.,high,source:main.c:11319;source:main.c:11322
 T00207,State,State::AshleySnapshot,Native\Game\src\State\Ashley.h,Captures Ashley's statistics and limbs for saves and room transitions.,high,source:260.c:825
 T00222,Value,Field::DoorFlagIdWord,Native\Game\src\Field\Doors.h,Packs the door state-flag id copied into the saved entry door.,med,source:main.c:8399
-T00228,Value,Render::FramebufferEffectTranslation,Native\Graphics\src\FramebufferEffects.h,Holds the screen translation applied to the captured framebuffer.,high,source:146C.c:9324
-T00229,Packet,Render::LegacyFramebufferEffectPackets,Native\Graphics\src\FramebufferEffects.h,Holds the PS1 packets that redraw the captured screen as five 64-pixel strips per frame buffer.,high,source:146C.c:9395;replaced-by:native framebuffer effect pass
+T00228,Value,Render::FramebufferEffectTranslation,Native\Engine\src\Render\FramebufferEffects.h,Holds the screen translation applied to the captured framebuffer.,high,source:146C.c:9324
+T00229,Packet,Render::LegacyFramebufferEffectPackets,Native\Engine\src\Render\FramebufferEffects.h,Holds the PS1 packets that redraw the captured screen as five 64-pixel strips per frame buffer.,high,source:146C.c:9395;replaced-by:native framebuffer effect pass
 T00243,State,Actors::TextureScrollState,Native\Game\src\Actors\TextureAnimation.h,Tracks one scrolling texture window of an actor model.,high,source:40564.c:1582
 T00250,Def,Actors::TextureScrollBounds,Native\Game\src\Actors\TextureAnimation.h,"Defines the window, initial step, interval and edge behavior of one actor texture scroll.",high,source:30DB0.c:1391
-T00291,State,Movie::Intro::MdecState,Native\Video\src\Intro\Playback.h,"Double-buffers encoded frames, decoded slices and frame rectangles for intro movie decoding.",high,source:22C.c:3445;replaced-by:native movie decoder
+T00291,State,Movie::Intro::MdecState,Native\Engine\src\Movie\Intro\Playback.h,"Double-buffers encoded frames, decoded slices and frame rectangles for intro movie decoding.",high,source:22C.c:3445;replaced-by:native movie decoder
 T00293,OnDisc,Content::SystemDatHeader,Native\Content\src\SystemResources.h,"Lists the byte offsets of the images, palette and interface data inside SYSTEM.DAT.",high,source:18.c:265
-T00307,State,Render::PaletteSlot,Native\Graphics\src\Palette.h,"Holds one CLUT slot's lock, fade timer, per-entry fade data and base colors.",high,source:main.c:10528
-T00308,State,Render::PaletteTransitionState,Native\Graphics\src\Palette.h,Holds every CLUT slot fade plus the room background and model tint fades.,high,source:main.c:10556
+T00307,State,Render::PaletteSlot,Native\Engine\src\Render\Palette.h,"Holds one CLUT slot's lock, fade timer, per-entry fade data and base colors.",high,source:main.c:10528
+T00308,State,Render::PaletteTransitionState,Native\Engine\src\Render\Palette.h,Holds every CLUT slot fade plus the room background and model tint fades.,high,source:main.c:10556
 T00013,Enum,Content::DiscBufferMode,Native\Content\src\DiscQueue.h,Selects whether disc sectors go straight to the destination or through the sector ring buffer.,high,source:main.c:9048
-T00407,State,Render::PaletteTransitionTimer,Native\Graphics\src\Palette.h,Times one CLUT slot fade and stores its transition mode and pulse offsets.,high,source:main.c:10543
+T00407,State,Render::PaletteTransitionTimer,Native\Engine\src\Render\Palette.h,Times one CLUT slot fade and stores its transition mode and pulse offsets.,high,source:main.c:10543
 T00460,OnDisc,Content::SequenceBuffer,Native\Content\src\ActorAssets.h,Views a loaded SEQ animation file whose first two words are offsets rebased to addresses.,med,source:30DB0.c:1610
 T00499,OnDisc,Content::PFileTimelineTable,Native\Content\src\PFile.h,Lists the tracks of one P-file timeline section.,high,source:5BF94.c:7881
 T00500,OnDisc,Content::PFileTimelineTrackEntry,Native\Content\src\PFile.h,Describes one P-file timeline track by packed header and data offset.,high,source:5BF94.c:7904
-T00542,State,Render::GimLayer,Native\Graphics\src\Images.h,"Holds one of three GIM image layers: load phase, tile table, palette, placement and transition.",high,source:5BF94.c:2354
-T00543,OnDisc,Render::LegacyImageSize,Native\Graphics\src\Loading.h,Stores the little-endian width and height that precede the NOW LOADING image pixels.,high,source:main.c:8078
-T00547,OnDisc,Save::CardUiResources,Native\Save\src\MemoryCard\Resources.h,Holds the memory-card menu resources loaded from SPMCIMG.BIN after three save images.,high,source:260.c:1100
-T00025,Enum,Save::CardReadinessResult,Native\Save\src\MemoryCard\GameFiles.h,Reports the progress of bringing a memory card to a usable state.,high,source:260.c:586;replaced-by:Save asynchronous completion
-T00091,Enum,Save::CardEventSignal,Native\Save\src\MemoryCard\GameFiles.h,Identifies the first signalled memory-card event in a group.,high,source:260.c:177;replaced-by:Save asynchronous completion
-T00581,State,Input::VibrationPatternSlot,Native\Input\src\Vibration.h,Plays one bytecoded vibration pattern on the two controller motors.,med,source:main.c:8720;layout-conflict: channels are used as int[2][6] (48 bytes) but only 40 remain; an element likely starts at +8 with motor levels stored separately
-T00583,Value,Core::PercentSuffixText,Native\Core\src\Text\Format.h,Holds the encoded percent sign appended to percentages.,high,source:238.c:2376
-T00584,State,Input::ControllerPortState,Native\Input\src\Controllers.h,"Holds one controller port's type, stick positions, actuator levels and connection state.",high,source:main.c:8470
-T00598,OnDisc,Save::GameSaveImage,Native\Save\src\MemoryCard\GameFiles.h,"Lays out the 23-block save file: card header, protected header and game state.",high,source:260.c:735
-T00599,OnDisc,Save::GameSaveImage,Native\Save\src\MemoryCard\GameFiles.h,"Lays out the 23-block save file: card header, protected header and game state.",high,same-as:T00598;identical offsets in the Title overlay copy;source:22C.c:282
-T00600,OnDisc,Save::SaveCipherHeader,Native\Save\src\MemoryCard\GameFiles.h,Stores the key that encodes the protected save region and the slot header that starts it.,high,source:260.c:689
-T00601,OnDisc,Save::SaveProtectedHeader,Native\Save\src\MemoryCard\GameFiles.h,"Holds the cipher header, summary statistics and per-block checksums of a save.",high,source:260.c:749
+T00542,State,Render::GimLayer,Native\Engine\src\Render\Images.h,"Holds one of three GIM image layers: load phase, tile table, palette, placement and transition.",high,source:5BF94.c:2354
+T00543,OnDisc,Render::LegacyImageSize,Native\Engine\src\Render\Loading.h,Stores the little-endian width and height that precede the NOW LOADING image pixels.,high,source:main.c:8078
+T00547,OnDisc,Save::CardUiResources,Native\Engine\src\Save\MemoryCard\Resources.h,Holds the memory-card menu resources loaded from SPMCIMG.BIN after three save images.,high,source:260.c:1100
+T00025,Enum,Save::CardReadinessResult,Native\Engine\src\Save\MemoryCard\GameFiles.h,Reports the progress of bringing a memory card to a usable state.,high,source:260.c:586;replaced-by:Save asynchronous completion
+T00091,Enum,Save::CardEventSignal,Native\Engine\src\Save\MemoryCard\GameFiles.h,Identifies the first signalled memory-card event in a group.,high,source:260.c:177;replaced-by:Save asynchronous completion
+T00581,State,Input::VibrationPatternSlot,Native\Engine\src\Input\Vibration.h,Plays one bytecoded vibration pattern on the two controller motors.,med,source:main.c:8720;layout-conflict: channels are used as int[2][6] (48 bytes) but only 40 remain; an element likely starts at +8 with motor levels stored separately
+T00583,Value,Core::PercentSuffixText,Native\Engine\src\Core\Text\Format.h,Holds the encoded percent sign appended to percentages.,high,source:238.c:2376
+T00584,State,Input::ControllerPortState,Native\Engine\src\Input\Controllers.h,"Holds one controller port's type, stick positions, actuator levels and connection state.",high,source:main.c:8470
+T00598,OnDisc,Save::GameSaveImage,Native\Engine\src\Save\MemoryCard\GameFiles.h,"Lays out the 23-block save file: card header, protected header and game state.",high,source:260.c:735
+T00599,OnDisc,Save::GameSaveImage,Native\Engine\src\Save\MemoryCard\GameFiles.h,"Lays out the 23-block save file: card header, protected header and game state.",high,same-as:T00598;identical offsets in the Title overlay copy;source:22C.c:282
+T00600,OnDisc,Save::SaveCipherHeader,Native\Engine\src\Save\MemoryCard\GameFiles.h,Stores the key that encodes the protected save region and the slot header that starts it.,high,source:260.c:689
+T00601,OnDisc,Save::SaveProtectedHeader,Native\Engine\src\Save\MemoryCard\GameFiles.h,"Holds the cipher header, summary statistics and per-block checksums of a save.",high,source:260.c:749
 T00659,State,Content::ActorAssetRequest,Native\Content\src\ActorAssets.h,"Requests loading of one actor asset: model, weapon, sequence or effect data.",high,source:30DB0.c:1085
-T00667,Packet,Render::LegacyTransitionWipePacket,Native\Graphics\src\ScreenTransition.h,Holds the PS1 quads covering the wiped screen area and drawing the wipe edge.,high,source:146C.c:2290;replaced-by:native transition pass
-T00670,State,Render::TextureSlot,Native\Graphics\src\Textures.h,"Tracks one actor or weapon texture slot's page, palettes and user count.",high,source:30DB0.c:1113
-T00692,State,Core::HeapBlockHeader,Native\Core\src\Memory\Heap.h,Links one free or allocated heap block and records its size.,high,source:main.c:8955;replaced-by:native allocator
+T00667,Packet,Render::LegacyTransitionWipePacket,Native\Engine\src\Render\ScreenTransition.h,Holds the PS1 quads covering the wiped screen area and drawing the wipe edge.,high,source:146C.c:2290;replaced-by:native transition pass
+T00670,State,Render::TextureSlot,Native\Engine\src\Render\Textures.h,"Tracks one actor or weapon texture slot's page, palettes and user count.",high,source:30DB0.c:1113
+T00692,State,Core::HeapBlockHeader,Native\Engine\src\Core\Memory\Heap.h,Links one free or allocated heap block and records its size.,high,source:main.c:8955;replaced-by:native allocator
 T00694,State,Content::DiscDrive,Native\Content\src\DiscQueue.h,"Holds the disc drive read state: target, progress counters, ring buffer indices and XA settings.",high,source:main.c:9140

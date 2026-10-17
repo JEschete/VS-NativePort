@@ -1,10 +1,10 @@
 id,role,final_name,final_location,purpose,confidence,notes
-T00729,Packet,Render::TiledRingPacket,Native\Graphics\src\LegacyPackets.h,Is one tiled ring template packet with its draw mode word.,med,declaration-only;source:tiledRings.h:24
+T00729,Packet,Render::TiledRingPacket,Native\Engine\src\Render\LegacyPackets.h,Is one tiled ring template packet with its draw mode word.,med,declaration-only;source:tiledRings.h:24
 T00730,State,Effects::TiledRingState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one tiled ring effect template's state.,med,declaration-only;source:tiledRings.h:12
-T00731,Packet,Render::TiledRingTexCoord,Native\Graphics\src\LegacyPackets.h,Gives one tiled ring texture coordinate.,med,declaration-only;source:tiledRings.h:29
+T00731,Packet,Render::TiledRingTexCoord,Native\Engine\src\Render\LegacyPackets.h,Gives one tiled ring texture coordinate.,med,declaration-only;source:tiledRings.h:29
 T00732,State,Effects::Trail9,Native\Game\src\Effects\Templates\TemplateState.h,"Holds one nine-sample trail: spline points, samples, progress and speed.",med,declaration-only;source:trails9Types.h:7
-T00733,Packet,Render::Trail9Packet,Native\Graphics\src\LegacyPackets.h,Is one trail template gouraud packet with its draw mode word.,med,declaration-only;source:trails9.h:17
+T00733,Packet,Render::Trail9Packet,Native\Engine\src\Render\LegacyPackets.h,Is one trail template gouraud packet with its draw mode word.,med,declaration-only;source:trails9.h:17
 T00734,State,Effects::Trail9State,Native\Game\src\Effects\Templates\TemplateState.h,"Holds the trail template's state: lifetime, definition, trails, age and texture animation.",med,declaration-only;source:trails9Types.h:19
-T00735,Packet,Render::TransposedRingPacket,Native\Graphics\src\LegacyPackets.h,Is one transposed ring template packet with its draw mode word.,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:22
+T00735,Packet,Render::TransposedRingPacket,Native\Engine\src\Render\LegacyPackets.h,Is one transposed ring template packet with its draw mode word.,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:22
 T00736,State,Effects::TransposedRingState,Native\Game\src\Effects\Templates\TemplateState.h,Holds one transposed ring effect template's state.,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:10
-T00737,Packet,Render::TransposedRingTexCoord,Native\Graphics\src\LegacyPackets.h,Gives one transposed ring texture coordinate.,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:27
+T00737,Packet,Render::TransposedRingTexCoord,Native\Engine\src\Render\LegacyPackets.h,Gives one transposed ring texture coordinate.,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:27

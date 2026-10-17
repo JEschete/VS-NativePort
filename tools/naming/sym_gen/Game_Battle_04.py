@@ -36,10 +36,10 @@ G("G00016", "constexpr", "Battle::Ai::kWanderTimingPresets", AI + "ActorState.c"
     ("7CD68.c", "state->fD8 = D_80069C3C[(settings->raw >> 4) & 7].third;")) + ";element type Battle::Ai::WanderTiming" + GAP)
 
 # ---------------------------------------------------------------- globals: unreferenced
-G("G00017", "drop", "Audio::legacyUnreferencedTable", "Native\\Audio\\src\\Legacy.c",
+G("G00017", "drop", "Audio::legacyUnreferencedTable", "Native\\Engine\\src\\Audio\\Legacy.c",
   "Reserves an unreferenced table declared beside the alternate sample bank remapping.", H,
   "replaced-by:nothing;no function references in either tree;" + c(("25AC.c", "extern int D_80094FAC[];")))
-G("G00018", "drop", "Audio::legacyUnreferencedWord", "Native\\Audio\\src\\Legacy.c",
+G("G00018", "drop", "Audio::legacyUnreferencedWord", "Native\\Engine\\src\\Audio\\Legacy.c",
   "Reserves an unreferenced word declared beside the alternate sample bank remapping.", H,
   "replaced-by:nothing;no function references in either tree;" + c(("25AC.c", "extern int D_80094FFC;")))
 
@@ -528,7 +528,7 @@ T("T00709", "Def", "Battle::StatusEffectParams", B + "StatusEffects.h",
        c(("146C.c", "inflict = params->unk8 & temp_a2->statuses;"))),
       ("unkC", "blockingStatuses", "Active statuses that keep the effect from applying", M, c(("146C.c", "if (!(temp_t0 & params->unkC)) {"))),
   ])
-T("T00726", "State", "Render::FrameScratch", "Native\\Graphics\\src\\Render.h",
+T("T00726", "State", "Render::FrameScratch", "Native\\Engine\\src\\Render\\Render.h",
   "Holds the per-frame drawing context kept in the scratchpad: primitive cursor, ordering tables, view facing, view "
   "matrix and camera.", H,
   c(("146C.c", "vs_scratch.unk0 = D_8005E0C0[vs_main_frameBuf];"), ("146C.c", "vs_scratch.unk4 = ot + 18;")), [

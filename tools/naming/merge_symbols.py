@@ -29,8 +29,8 @@ HEADERS = {
 }
 LEDGER = {"globals": "DATA_LEDGER.csv", "types": "TYPE_LEDGER.csv", "fields": "FIELD_LEDGER.csv"}
 
-SYSTEM_ROOTS = {"Core": "Core", "Render": "Graphics", "Audio": "Audio", "Content": "Content", "Input": "Input",
-                "Movie": "Video", "Save": "Save"}
+# Hybrid layout (tools\scaffold\gen_solution.py): engine systems live in Native\Engine\{src,include}\<Root>\.
+ENGINE_ROOTS = {"Core", "Platform", "Render", "Audio", "Input", "Movie", "Save"}
 GAME_MODULES = {"Boot", "Title", "Field", "Battle", "Actors", "Items", "Menu", "Event", "Effects", "Ending", "State"}
 DISPOSITIONS = {"catalog", "constexpr", "state", "asset", "drop"}
 ROLES = {"Def", "Instance", "State", "OnDisc", "Packet", "Enum", "Value", "Misc"}
@@ -50,8 +50,10 @@ HDR_LOC = re.compile(r"^Native\\(?P<proj>[A-Za-z]+)\\(?:include|src)\\(?:[A-Z][A
 
 
 def project_for(root: str) -> str | None:
-    if root in SYSTEM_ROOTS:
-        return SYSTEM_ROOTS[root]
+    if root in ENGINE_ROOTS:
+        return "Engine"
+    if root == "Content":
+        return "Content"
     return "Game" if root in GAME_MODULES else None
 
 
@@ -82,6 +84,8 @@ def check_common(kind: str, r: dict, errs: list[str]) -> None:
                         + ("src\\...\\File.c" if kind == "globals" else "{include|src}\\...\\File.h"))
         elif proj and m["proj"] != proj:
             errs.append(f"{rid}: '{name}' belongs in Native\\{proj}, not Native\\{m['proj']}")
+        elif proj == "Engine" and loc.split("\\")[3] != root:
+            errs.append(f"{rid}: '{name}' belongs under Native\\Engine\\{loc.split(chr(92))[2]}\\{root}\\")
         if not r.get("purpose", "").strip():
             errs.append(f"{rid}: purpose is empty")
         elif len(r["purpose"]) > 200:

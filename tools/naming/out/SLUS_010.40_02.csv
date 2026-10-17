@@ -1,162 +1,162 @@
 id,final_name,final_location,purpose,confidence,notes
-F03236,Audio::Mixer::SetSoundEffectPitchScale,Native\Audio\src\Mixer\MixControl.c,Sets the pitch scale of active sound effects selected by group flags or sound identifier.,high,fields:FSoundChannel.unk40=pitchScale;fields:FSoundChannel.unk86=pitchScaleSlideLength
-F03237,Audio::Mixer::SlideSoundEffectPitchScale,Native\Audio\src\Mixer\MixControl.c,Slides the pitch scale of matching active sound effects over the requested duration.,high,fields:FSoundChannel.unk44=pitchScaleSlideStep
-F03238,Audio::Mixer::SetWorldSoundEffectPitchScale,Native\Audio\src\Mixer\MixControl.c,Sets pitch scaling for all sound-effect channels except protected effects.,high,Protected effects carry unk28 bit 0x02000000
-F03239,Audio::Mixer::SlideWorldSoundEffectPitchScale,Native\Audio\src\Mixer\MixControl.c,Slides pitch scaling for active sound effects except protected effects.,high,
-F03240,Audio::Mixer::SetTempoScale,Native\Audio\src\Mixer\MixControl.c,Sets the global tempo multiplier and cancels its current slide.,med,Global multiplier storage is clear; relationship to D_80039AF2 remains unresolved
-F03241,Audio::Mixer::SlideTempoScale,Native\Audio\src\Mixer\MixControl.c,Starts a global tempo-multiplier slide toward the requested value.,med,
-F03242,Audio::Mixer::SetTempoScaleRamp,Native\Audio\src\Mixer\MixControl.c,Sets an initial global tempo multiplier and starts a slide toward a second value.,med,Duration guard tests Param2 rather than Param1 in the original
-F03243,Audio::Mixer::SetMusicPitchScale,Native\Audio\src\Mixer\MixControl.c,Sets the global music pitch scale and cancels its current slide.,high,
-F03244,Audio::Mixer::SlideMusicPitchScale,Native\Audio\src\Mixer\MixControl.c,Starts a global music pitch-scale slide toward the requested value.,high,
-F03245,Audio::Mixer::SetMusicPitchScaleRamp,Native\Audio\src\Mixer\MixControl.c,Sets an initial music pitch scale and starts a slide toward a second value.,high,Duration guard tests Param2 rather than Param1 in the original
-F03246,Audio::Mixer::StopMusicAndCancelReplacement,Native\Audio\src\Mixer\MixControl.c,Stops active and saved music and cancels the pending replacement sequence.,high,
-F03247,Audio::Mixer::StopMatchingMusic,Native\Audio\src\Mixer\MixControl.c,Stops active music matching the requested identifier and optionally matching saved music.,high,Param1 zero stops active music only; nonzero identifier is also tested against saved music
-F03248,Audio::Mixer::StopWorldSoundEffects,Native\Audio\src\Mixer\MixControl.c,Releases active sound-effect channels except effects protected by their category flags.,high,
-F03249,Audio::Mixer::EnableStereoOutput,Native\Audio\src\Mixer\MixControl.c,Selects stereo output and marks active music and sound-effect volumes for recomputation.,high,
-F03250,Audio::Mixer::EnableMonoOutput,Native\Audio\src\Mixer\MixControl.c,Selects mono output and marks active music and sound-effect volumes for recomputation.,high,
-F03251,Audio::Mixer::SetMusicMuteMask,Native\Audio\src\Mixer\MixControl.c,Sets the music-channel mute mask and requests fresh left and right voice volumes.,high,
-F03252,Audio::Mixer::SetMusicJumpThreshold,Native\Audio\src\Mixer\MixControl.c,Sets the threshold used by conditional jumps in the active music sequence.,high,
-F03253,Audio::Mixer::PauseMusic,Native\Audio\src\Mixer\MixControl.c,Preserves active music-channel membership and silences music voices while playback is paused.,high,fields:FSoundChannelConfig.unk1C=pausedChannelMask
-F03254,Audio::Mixer::ResumeMusic,Native\Audio\src\Mixer\MixControl.c,Restores paused music channels and marks their voice parameters for refresh.,high,
-F03255,Audio::Mixer::PauseWorldSoundEffects,Native\Audio\src\Mixer\MixControl.c,Suspends and silences active sound effects while leaving protected effects running.,high,fields:FSoundVoiceSchedulerState.unk_Flags_0x10=pausedVoiceMask
-F03256,Audio::Mixer::ResumeWorldSoundEffects,Native\Audio\src\Mixer\MixControl.c,Restores paused sound-effect voices and requests refreshed voice parameters.,med,Refresh scan uses D_800378A0 while mask restoration uses scheduler unk_Flags_0x10
-F03257,Audio::Cutscene::PauseStream,Native\Audio\src\Cutscene\Stream.c,Pauses cutscene audio by setting both streaming voices to zero playback rate.,high,
-F03258,Audio::Cutscene::ResumeStream,Native\Audio\src\Cutscene\Stream.c,Restores the recorded playback rate on both cutscene streaming voices.,high,
-F03259,Audio::Mixer::IgnoreCommand,Native\Audio\src\Mixer\MixControl.c,Accepts a sound command without changing audio state.,high,Empty command handler has a different signature from sequence no-op handlers
-F03260,Audio::Mixer::SetReverbMode,Native\Audio\src\Mixer\MixControl.c,Changes the reverb mode only when needed and clears its work area during the switch.,high,
-F03261,Audio::Mixer::DispatchCommand,Native\Audio\src\Mixer\MixControl.c,Validates sequence commands and dispatches audio operations with the sound event temporarily disabled.,high,
-F03262,Audio::Seq::WriteDiscVolume,Native\Audio\src\Seq\Sequencer.c,Writes the cached disc-audio volume to both hardware volume registers.,high,Reads D_800378E2 rather than g_CdVolume directly
-F03263,Core::Memory::CopyWords,Native\Core\src\Memory\Copy.c,"Copies a byte-sized buffer in aligned words, ignoring any trailing bytes smaller than a word.",high,Source pointer precedes destination; size is measured in bytes
-F03264,Core::Memory::SwapWords,Native\Core\src\Memory\Copy.c,"Exchanges two buffers in aligned words, ignoring any trailing bytes smaller than a word.",high,
-F03265,Audio::Seq::UpdateGlobalSlides,Native\Audio\src\Seq\Sequencer.c,"Advances global modulation phase and the volume, tempo, pan and pitch slides for audio playback.",high,fields:FSoundChannel.unk6C=panOffset;fields:FSoundChannel.unk6E=panOffsetSlideLength;fields:FSoundChannel.unkDA=panOffsetSlideStep
-F03266,Audio::Seq::AdvanceMusicTransition,Native\Audio\src\Seq\Sequencer.c,Advances synchronized active and saved music switching when the sequence timer reaches a boundary.,med,ControlLatches encode transition states; exact musical layer roles remain inferred
-F03267,Audio::Seq::UpdateMusicSequence,Native\Audio\src\Seq\Sequencer.c,"Advances music channels, slides and timing counters when the tempo accumulator reaches a tick.",high,fields:FSoundChannelConfig.unk28=tempoAccumulator;fields:FSoundChannelConfig.unk5C=reverbDepthSlideStep
-F03268,Audio::Seq::UpdateSavedMusicFade,Native\Audio\src\Seq\Sequencer.c,Advances the saved-music fade and stops its channels when the fade timer expires.,high,
-F03269,Audio::Seq::TickPlayback,Native\Audio\src\Seq\Sequencer.c,"Services queued notes, sequence timing, saved music and sound effects on each sound-driver tick.",high,
-F03270,Audio::Seq::PeekNextNote,Native\Audio\src\Seq\Sequencer.c,Scans sequence control flow to find the next note or rest without advancing the channel program counter.,high,Lookahead also clears legato and full-length flags for selected opcodes
-F03271,Audio::Seq::ResolveSoundEffectInstrument,Native\Audio\src\Seq\Sequencer.c,Remaps instrument identifiers into alternate sound-effect banks according to channel flags.,high,
-F03272,Audio::Seq::ResolveMusicInstrument,Native\Audio\src\Seq\Sequencer.c,Remaps music instruments into the alternate bank when the sequence bank flag is set.,high,
-F03273,Audio::Seq::SelectNotePatch,Native\Audio\src\Seq\Sequencer.c,"Chooses the key-range patch and applies its sample addresses, envelope and volume to a music channel.",high,
-F03274,Audio::Seq::CalculateNotePitch,Native\Audio\src\Seq\Sequencer.c,"Computes sample pitch and fine-pitch delta from an instrument, note and tuning value.",high,
-F03275,Audio::Seq::StartDrumNote,Native\Audio\src\Seq\Sequencer.c,"Applies a drum-keymap entry and schedules its note with the entry's pitch, pan and reverb settings.",high,
-F03276,Audio::Seq::ExecuteChannelStep,Native\Audio\src\Seq\Sequencer.c,"Executes sequence commands through the next note and updates note length, pitch and key requests.",high,
-F03277,Audio::Seq::ApplyInstrumentParameters,Native\Audio\src\Seq\Sequencer.c,Copies instrument sample addresses and envelope registers into a channel and marks them dirty.,high,
-F03278,Audio::Seq::SelectChannelInstrument,Native\Audio\src\Seq\Sequencer.c,Selects an instrument and applies its sample addresses and envelope to the channel.,high,
-F03279,Audio::Seq::ReleaseSoundEffectVoice,Native\Audio\src\Seq\Sequencer.c,Removes a sound-effect voice from scheduler masks and clears its group and sound identifiers.,high,fields:FSoundChannel.unk28=effectGroupFlags;fields:FSoundChannel.unk3C=soundEffectId
-F03280,Audio::Seq::FinishChannel,Native\Audio\src\Seq\Control.c,Ends a sequence channel and releases its music or sound-effect scheduling masks.,high,
-F03281,Audio::Seq::FinishChannelOnReplacement,Native\Audio\src\Seq\Control.c,Ends the channel only when a replacement music sequence has been requested.,high,
-F03282,Audio::Seq::SetTempo,Native\Audio\src\Seq\Control.c,Reads the sequence tempo and cancels the active tempo slide.,high,
-F03283,Audio::Seq::SlideTempo,Native\Audio\src\Seq\Control.c,Reads a target tempo and duration and starts a sequence tempo slide.,high,
-F03284,Audio::Seq::SetReverbDepth,Native\Audio\src\Seq\Control.c,Reads the master reverb depth and requests an audio-driver update.,high,
-F03285,Audio::Seq::SlideReverbDepth,Native\Audio\src\Seq\Control.c,Starts a timed slide of the active sequence's master reverb depth.,high,
-F03286,Audio::Seq::JumpRelative,Native\Audio\src\Seq\Control.c,Branches the channel program counter by a signed relative offset.,high,
-F03287,Audio::Seq::JumpAtThreshold,Native\Audio\src\Seq\Control.c,Branches by a relative offset when the sequence jump threshold meets the encoded minimum.,high,
-F03288,Audio::Seq::CallRelative,Native\Audio\src\Seq\Control.c,Saves the return position and branches to a relative sequence subroutine.,high,
-F03289,Audio::Seq::ReturnFromCall,Native\Audio\src\Seq\Control.c,Restores the channel program counter saved by a sequence subroutine call.,high,
-F03290,Audio::Seq::SetVolumeBalance,Native\Audio\src\Seq\Channel.c,Sets the channel's volume-balance multiplier and requests a volume update.,high,
-F03291,Audio::Seq::SlideVolumeBalance,Native\Audio\src\Seq\Channel.c,Starts a timed slide of the channel's volume-balance multiplier.,high,
-F03292,Audio::Seq::SetVolume,Native\Audio\src\Seq\Channel.c,Sets channel volume and cancels current and key-on volume slides.,high,
-F03293,Audio::Seq::SlideVolume,Native\Audio\src\Seq\Channel.c,Starts a channel volume slide and disables any key-on volume-slide preset.,high,
-F03294,Audio::Seq::SetKeyOnVolumeRamp,Native\Audio\src\Seq\Channel.c,Stores a starting volume and slide step to apply whenever a new music note is keyed on.,high,fields:FSoundChannel.unk5C=keyOnVolumeStart;fields:FSoundChannel.unk60=keyOnVolumeSlideStep
-F03295,Audio::Seq::EnableFullNoteLength,Native\Audio\src\Seq\Channel.c,Prevents early key-off by making music notes use their full encoded duration.,high,UpdateFlags bit 0x40 is consumed by ExecuteChannelStep
-F03296,Audio::Seq::DisableFullNoteLength,Native\Audio\src\Seq\Channel.c,Restores early key-off timing for music notes by clearing the full-duration flag.,high,
-F03297,Audio::Seq::SetSequenceControlValue,Native\Audio\src\Seq\Control.c,Reads one byte into the active sequence's auxiliary control value.,low,fields:FSoundChannelConfig.unk34=auxiliaryControlValue;no consumer found in this source
-F03298,Audio::Seq::IgnoreInstruction,Native\Audio\src\Seq\Control.c,Accepts a sequence instruction without consuming operands or changing audio state.,high,
-F03299,Audio::Seq::SetEffectVolumeScale,Native\Audio\src\Seq\Channel.c,Sets the auxiliary sound-effect volume multiplier and cancels its slide.,high,Unused handler;fields:FSoundChannel.unkDC=effectVolumeScale;fields:FSoundChannel.unk8C=effectVolumeSlideLength
-F03300,Audio::Seq::SlideEffectVolumeScale,Native\Audio\src\Seq\Channel.c,Starts a slide of the channel's auxiliary sound-effect volume multiplier.,high,Unused handler;fields:FSoundChannel.unkDE=effectVolumeSlideStep
-F03301,Audio::Seq::SetPan,Native\Audio\src\Seq\Channel.c,Sets the channel pan position and cancels the current pan slide.,high,
-F03302,Audio::Seq::SlidePan,Native\Audio\src\Seq\Channel.c,Starts a timed slide toward a new channel pan position.,high,
-F03303,Audio::Seq::SetOctave,Native\Audio\src\Seq\Channel.c,Reads and stores the channel octave for subsequent note decoding.,high,
-F03304,Audio::Seq::IncreaseOctave,Native\Audio\src\Seq\Channel.c,Raises the channel octave with wrapping across the sixteen encoded octaves.,high,
-F03305,Audio::Seq::DecreaseOctave,Native\Audio\src\Seq\Channel.c,Lowers the channel octave with wrapping across the sixteen encoded octaves.,high,
-F03306,Audio::Seq::LoadInstrument,Native\Audio\src\Seq\Channel.c,Selects a bank-adjusted instrument and resets keymap and envelope-override modes.,high,
-F03307,Audio::Seq::LoadSilentInstrument,Native\Audio\src\Seq\Channel.c,Loads an instrument's envelope and loop address while selecting the silent sample start address.,high,Original ClearInstrument name obscures retained envelope and loop settings
-F03308,Audio::Seq::SelectPatch,Native\Audio\src\Seq\Channel.c,Selects a sequence patch table entry for key-range instrument selection.,high,An absent patch silences the channel's instrument volume scale
-F03309,Audio::Seq::ResetEnvelope,Native\Audio\src\Seq\Envelope.c,Restores the selected instrument's default envelope and clears channel override flags.,high,
-F03310,Audio::Seq::SetTranspose,Native\Audio\src\Seq\Channel.c,Sets the signed semitone transposition for subsequent channel notes.,high,
-F03311,Audio::Seq::AddTranspose,Native\Audio\src\Seq\Channel.c,Adds a signed semitone offset to the channel transposition.,high,
-F03312,Audio::Seq::SetPitchBendSlide,Native\Audio\src\Seq\Channel.c,Stores a pitch-bend duration and signed destination transposition for note playback.,high,
-F03313,Audio::Seq::EnablePortamento,Native\Audio\src\Seq\Channel.c,Enables note-to-note pitch sliding and resets saved note and transposition state.,high,
-F03314,Audio::Seq::DisablePortamento,Native\Audio\src\Seq\Channel.c,Disables note-to-note pitch sliding for the channel.,high,
-F03315,Audio::Seq::SetFineTune,Native\Audio\src\Seq\Channel.c,Sets channel fine tuning and recalculates its fine-pitch delta.,high,
-F03316,Audio::Seq::AddFineTune,Native\Audio\src\Seq\Channel.c,Adds to channel fine tuning and recalculates its fine-pitch delta.,high,
-F03317,Audio::Seq::EnableVibrato,Native\Audio\src\Seq\Modulation.c,Configures vibrato timing and waveform and derives its pitch amplitude for the channel.,high,fields:FSoundChannel.unkA4=vibratoPhaseCountdown
-F03318,Audio::Seq::SetVibratoDepth,Native\Audio\src\Seq\Modulation.c,Sets vibrato depth and recomputes its amplitude from the channel's base pitch.,high,
-F03319,Audio::Seq::SlideVibratoDepth,Native\Audio\src\Seq\Modulation.c,Starts a timed slide toward a new channel vibrato depth.,high,
-F03320,Audio::Seq::DisableVibrato,Native\Audio\src\Seq\Modulation.c,Clears vibrato pitch contribution and requests a channel pitch update.,high,
-F03321,Audio::Seq::EnableTremolo,Native\Audio\src\Seq\Modulation.c,"Configures tremolo delay, rate and waveform for the channel.",high,fields:FSoundChannel.unkB6=tremoloPhaseCountdown
-F03322,Audio::Seq::SetTremoloDepth,Native\Audio\src\Seq\Modulation.c,Reads and stores the channel's tremolo depth.,high,
-F03323,Audio::Seq::SlideTremoloDepth,Native\Audio\src\Seq\Modulation.c,Starts a timed slide toward a new channel tremolo depth.,high,
-F03324,Audio::Seq::DisableTremolo,Native\Audio\src\Seq\Modulation.c,Clears tremolo volume contribution and requests a channel volume update.,high,
-F03325,Audio::Seq::EnableAutoPan,Native\Audio\src\Seq\Modulation.c,Configures the waveform and rate for automatic channel panning.,high,
-F03326,Audio::Seq::SetAutoPanDepth,Native\Audio\src\Seq\Modulation.c,Reads and stores the channel's automatic-panning depth.,high,
-F03327,Audio::Seq::SlideAutoPanDepth,Native\Audio\src\Seq\Modulation.c,Starts a timed slide toward a new automatic-panning depth.,high,
-F03328,Audio::Seq::DisableAutoPan,Native\Audio\src\Seq\Modulation.c,Clears automatic-panning contribution and requests a channel volume update.,high,
-F03329,Audio::Seq::EnableNoise,Native\Audio\src\Seq\Modulation.c,Enables noise generation for the current music or sound-effect voice.,high,
-F03330,Audio::Seq::DisableNoise,Native\Audio\src\Seq\Modulation.c,Disables channel noise generation and clears its delayed-toggle timer.,high,
-F03331,Audio::Seq::EnableFrequencyModulation,Native\Audio\src\Seq\Modulation.c,Enables frequency modulation for music or eligible sound-effect voices.,high,Sound-effect enable additionally requires UpdateFlags bit 0x10000
-F03332,Audio::Seq::DisableFrequencyModulation,Native\Audio\src\Seq\Modulation.c,Disables channel frequency modulation and clears its delayed-toggle timer.,high,
-F03333,Audio::Seq::EnableReverb,Native\Audio\src\Seq\Modulation.c,Enables reverb for the current music or sound-effect voice.,high,
-F03334,Audio::Seq::DisableReverb,Native\Audio\src\Seq\Modulation.c,Disables reverb for the current music or sound-effect voice.,high,
-F03335,Audio::Seq::EnableLegato,Native\Audio\src\Seq\Channel.c,Enables connected note playback without retriggering each note.,high,
-F03336,Audio::Seq::IgnoreInstruction,Native\Audio\src\Seq\Control.c,Accepts a sequence instruction without consuming operands or changing audio state.,high,dup-of:F03298
-F03337,Audio::Seq::EnableSustainedSoundEffect,Native\Audio\src\Seq\Channel.c,Makes subsequent sound-effect notes use sustained full-length playback.,high,
-F03338,Audio::Seq::IgnoreInstruction,Native\Audio\src\Seq\Control.c,Accepts a sequence instruction without consuming operands or changing audio state.,high,dup-of:F03298
-F03339,Audio::Seq::SetNoiseClock,Native\Audio\src\Seq\Modulation.c,Sets or offsets the shared noise-clock frequency for music or sound effects.,high,
-F03340,Audio::Seq::SetAttackRate,Native\Audio\src\Seq\Envelope.c,Sets the channel envelope attack rate and preserves it across instrument changes.,high,
-F03341,Audio::Seq::SetDecayRate,Native\Audio\src\Seq\Envelope.c,Sets the channel envelope decay rate and requests a voice-register update.,high,
-F03342,Audio::Seq::SetSustainLevel,Native\Audio\src\Seq\Envelope.c,Sets the channel envelope sustain level and requests a voice-register update.,high,
-F03343,Audio::Seq::SetSustainRate,Native\Audio\src\Seq\Envelope.c,Sets the channel envelope sustain rate and preserves it across instrument changes.,high,
-F03344,Audio::Seq::SetReleaseRate,Native\Audio\src\Seq\Envelope.c,Sets the channel envelope release rate and preserves it across instrument changes.,high,
-F03345,Audio::Seq::SetAttackMode,Native\Audio\src\Seq\Envelope.c,Sets the envelope attack mode from the encoded mode value.,high,
-F03346,Audio::Seq::SetSustainMode,Native\Audio\src\Seq\Envelope.c,Sets the envelope sustain direction and curve from the encoded mode value.,high,
-F03347,Audio::Seq::SetReleaseMode,Native\Audio\src\Seq\Envelope.c,Sets the envelope release curve from the encoded mode value.,high,
-F03348,Audio::Seq::SetVoiceAllocationStart,Native\Audio\src\Seq\Control.c,Sets the lowest voice index considered during normal music voice allocation and stealing.,high,fields:FSoundChannelConfig.SomeIndexRelatedToSpuVoiceInfo=voiceAllocationStart
-F03349,Audio::Seq::ResetVoiceAllocationStart,Native\Audio\src\Seq\Control.c,Restores normal music voice allocation to begin at voice zero.,high,
-F03350,Audio::Seq::PushLoop,Native\Audio\src\Seq\Control.c,Pushes the current sequence position and instruction counter onto the four-entry loop stack.,high,
-F03351,Audio::Seq::RepeatLoop,Native\Audio\src\Seq\Control.c,Repeats the current sequence loop until its encoded iteration count is reached.,high,
-F03352,Audio::Seq::JumpOnLoopPass,Native\Audio\src\Seq\Control.c,Branches to a relative sequence offset on the specified loop iteration.,high,
-F03353,Audio::Seq::ExitLoopOnPass,Native\Audio\src\Seq\Control.c,Branches to a relative sequence offset and pops the loop stack on the specified iteration.,high,
-F03354,Audio::Seq::RepeatLoopForever,Native\Audio\src\Seq\Control.c,Repeats the current loop and restores its saved instruction counter.,high,
-F03355,Audio::Seq::SetNextNoteLength,Native\Audio\src\Seq\Channel.c,Sets the next note duration and clears the persistent fixed-duration override.,high,
-F03356,Audio::Seq::SetFixedNoteLength,Native\Audio\src\Seq\Channel.c,"Derives a persistent note duration from the previous duration and a signed offset, or disables it.",high,Zero disables the override; nonzero results clamp to 1 through 255
-F03357,Audio::Seq::EnableDrumKeymap,Native\Audio\src\Seq\Channel.c,Enables drum-keymap playback when the sequence provides a keymap table.,high,Original ClearKeymapTable name is misleading; table is not cleared
-F03358,Audio::Seq::MuteInstrument,Native\Audio\src\Seq\Channel.c,Zeros instrument volume scaling and exits drum-keymap playback.,high,
-F03359,Audio::Seq::SetTimerDivisors,Native\Audio\src\Seq\Control.c,Sets the sequence timer's lower and upper divisors and resets their current counters.,high,
-F03360,Audio::Seq::SetTimerCount,Native\Audio\src\Seq\Control.c,Reads a sixteen-bit value into the sequence timer's top-level counter.,high,
-F03361,Audio::Seq::SetDecayAndSustain,Native\Audio\src\Seq\Envelope.c,Reads and applies both envelope decay rate and sustain level.,high,
-F03362,Audio::Seq::EnableTimedNoise,Native\Audio\src\Seq\Modulation.c,Enables channel noise generation and arms its delayed-toggle timer.,high,
-F03363,Audio::Seq::SetNoiseToggleDelay,Native\Audio\src\Seq\Modulation.c,Sets the delay before the channel noise-enable state is toggled.,high,
-F03364,Audio::Seq::EnableTimedFrequencyModulation,Native\Audio\src\Seq\Modulation.c,Enables channel frequency modulation and arms its delayed-toggle timer.,high,
-F03365,Audio::Seq::SetFrequencyModulationToggleDelay,Native\Audio\src\Seq\Modulation.c,Sets the delay before the channel frequency-modulation state is toggled.,high,
-F03366,Audio::Seq::ResetVoiceEffects,Native\Audio\src\Seq\Modulation.c,"Disables modulation, noise and reverb and clears legato and sustained-note flags.",high,
-F03367,Audio::Seq::EnablePitchSidechain,Native\Audio\src\Seq\Modulation.c,Makes channel playback pitch follow the preceding channel's playback rate.,high,
-F03368,Audio::Seq::DisablePitchSidechain,Native\Audio\src\Seq\Modulation.c,Stops deriving the channel playback pitch from the preceding channel.,high,
-F03369,Audio::Seq::EnableVolumeSidechain,Native\Audio\src\Seq\Modulation.c,Makes channel volume follow the preceding channel's playback rate.,high,
-F03370,Audio::Seq::DisableVolumeSidechain,Native\Audio\src\Seq\Modulation.c,Stops deriving channel volume from the preceding channel's playback rate.,high,
-F03371,Audio::Seq::PlayEmbeddedSoundEffect,Native\Audio\src\Seq\Control.c,Starts embedded sound-effect programs with the current channel's pan and volume.,high,
-F03372,Audio::Seq::EnableLoopBoundaryStop,Native\Audio\src\Seq\Channel.c,Defers sound-effect eviction until the sequence reaches its infinite-loop boundary.,high,UpdateFlags bit 0x100000 causes eviction to latch bit 0x200000
-F03373,Audio::Seq::SelectNoteRemapTable,Native\Audio\src\Seq\Control.c,Selects a per-note transposition table used when global note remapping is enabled.,high,fields:FSoundChannelConfig.unk44=noteRemapTable;index is a byte offset into D_8002F66C
-F03374,Audio::Seq::MarkChannelKeyed,Native\Audio\src\Seq\Control.c,Marks the current music channel for reserved voice allocation.,med,KeyedMask bypasses the normal allocation start index
-F03375,Audio::Seq::ClearChannelKeyed,Native\Audio\src\Seq\Control.c,Clears the current music channel's reserved-allocation marker.,med,
-F03376,Audio::Seq::SetRandomPitchDepth,Native\Audio\src\Seq\Modulation.c,Reads the depth used to vary subsequent note pitches with the driver modulation table.,high,
-F03377,Audio::Seq::ResetRandomPitchDepth,Native\Audio\src\Seq\Modulation.c,Disables random pitch variation for subsequent notes.,high,
-F03378,Audio::Seq::StopOnInvalidInstruction,Native\Audio\src\Seq\Control.c,Ends the channel when an unsupported sequence instruction is encountered.,high,
-F03379,Audio::Cutscene::StopStreamVoices,Native\Audio\src\Cutscene\Stream.c,"Disables the stream interrupt, releases both streaming voices and removes their reverb flags.",high,
-F03380,Audio::Cutscene::FindFreeVoicePair,Native\Audio\src\Cutscene\Stream.c,"Finds a free sound-effect voice pair for cutscene audio, evicting eligible effects when needed.",high,
-F03381,Audio::Cutscene::UploadSecondMonoBuffer,Native\Audio\src\Cutscene\Stream.c,Uploads the second initial mono stream buffer and installs the mono playback-start callback.,high,
-F03382,Audio::Cutscene::StartStream,Native\Audio\src\Cutscene\Stream.c,Reserves two voices and uploads initial mono or stereo cutscene samples with optional looping and reverb.,high,fields:FSoundCutsceneStreamState.field2_0x8=streamFormatFlags;bit 0 stereo;bit 1 looping
-F03383,Audio::Cutscene::InitializeStreamVoice,Native\Audio\src\Cutscene\Stream.c,"Configures a streaming voice's pan, sample addresses, playback rate and envelope.",high,
-F03384,Audio::Cutscene::BeginStreamPlayback,Native\Audio\src\Cutscene\Stream.c,Starts both streaming voices and arms the next buffer interrupt or end-of-stream callback.,high,fields:FSoundCutsceneStreamState.TotalPages=remainingSampleBytes;name TotalPages is misleading
-F03385,Audio::Cutscene::BeginMonoPlayback,Native\Audio\src\Cutscene\Stream.c,Initializes both voices on shared mono sample buffers and starts interrupt-driven playback.,high,
-F03386,Audio::Cutscene::BeginStereoPlayback,Native\Audio\src\Cutscene\Stream.c,Initializes separately panned left and right sample buffers and starts stereo stream playback.,high,
-F03387,Audio::Cutscene::RefillStreamBuffer,Native\Audio\src\Cutscene\Stream.c,"Uploads the next sample buffer, updates repeat addresses and arms continuation or stream termination.",high,fields:FSoundCutsceneStreamState.unk_Mask_0x4=loopSampleStart;fields:FSoundCutsceneStreamState.field7_0x1c=loopSampleBytes
-F03388,Audio::Cutscene::RefillMonoFirstBuffer,Native\Audio\src\Cutscene\Stream.c,Refills the first mono sample buffer and arms the callback for the second buffer.,high,
-F03389,Audio::Cutscene::RefillMonoSecondBuffer,Native\Audio\src\Cutscene\Stream.c,Refills the second mono sample buffer and arms the callback for the first buffer.,high,
-F03390,Audio::Cutscene::RefillStereoFirstBuffer,Native\Audio\src\Cutscene\Stream.c,Refills the first left and right sample buffers and arms the second-buffer callback.,high,
-F03391,Audio::Cutscene::RefillStereoSecondBuffer,Native\Audio\src\Cutscene\Stream.c,Refills the second left and right sample buffers and arms the first-buffer callback.,high,
-F03392,Audio::Cutscene::ReplaceStream,Native\Audio\src\Cutscene\Stream.c,"Stops the previous cutscene stream, starts a replacement and reserves its voices against sound effects.",high,
-F03393,Audio::Cutscene::StopStream,Native\Audio\src\Cutscene\Stream.c,Requests immediate shutdown of the cutscene streaming voices through the stream-stop routine.,high,
-F03394,Audio::Cutscene::SetStreamVolume,Native\Audio\src\Cutscene\Stream.c,"Sets cutscene stream volume, cancels its fade and applies split left and right voice volumes.",high,Does not honor mono-output mixing in this setter
-F03395,Audio::Cutscene::SlideStreamVolume,Native\Audio\src\Cutscene\Stream.c,Starts a timed cutscene stream volume slide toward the requested value.,high,Original FadeOutCutscene name is too narrow; target volume is arbitrary
-F03396,Audio::Cutscene::SetStreamPan,Native\Audio\src\Cutscene\Stream.c,Updates packed cutscene stream panning and recomputes voice volumes for mono or stereo output.,high,fields:FSoundCutsceneStreamState.field19_0x4c.u8[1]=panIndex
+F03236,Audio::Mixer::SetSoundEffectPitchScale,Native\Engine\src\Audio\Mixer\MixControl.c,Sets the pitch scale of active sound effects selected by group flags or sound identifier.,high,fields:FSoundChannel.unk40=pitchScale;fields:FSoundChannel.unk86=pitchScaleSlideLength
+F03237,Audio::Mixer::SlideSoundEffectPitchScale,Native\Engine\src\Audio\Mixer\MixControl.c,Slides the pitch scale of matching active sound effects over the requested duration.,high,fields:FSoundChannel.unk44=pitchScaleSlideStep
+F03238,Audio::Mixer::SetWorldSoundEffectPitchScale,Native\Engine\src\Audio\Mixer\MixControl.c,Sets pitch scaling for all sound-effect channels except protected effects.,high,Protected effects carry unk28 bit 0x02000000
+F03239,Audio::Mixer::SlideWorldSoundEffectPitchScale,Native\Engine\src\Audio\Mixer\MixControl.c,Slides pitch scaling for active sound effects except protected effects.,high,
+F03240,Audio::Mixer::SetTempoScale,Native\Engine\src\Audio\Mixer\MixControl.c,Sets the global tempo multiplier and cancels its current slide.,med,Global multiplier storage is clear; relationship to D_80039AF2 remains unresolved
+F03241,Audio::Mixer::SlideTempoScale,Native\Engine\src\Audio\Mixer\MixControl.c,Starts a global tempo-multiplier slide toward the requested value.,med,
+F03242,Audio::Mixer::SetTempoScaleRamp,Native\Engine\src\Audio\Mixer\MixControl.c,Sets an initial global tempo multiplier and starts a slide toward a second value.,med,Duration guard tests Param2 rather than Param1 in the original
+F03243,Audio::Mixer::SetMusicPitchScale,Native\Engine\src\Audio\Mixer\MixControl.c,Sets the global music pitch scale and cancels its current slide.,high,
+F03244,Audio::Mixer::SlideMusicPitchScale,Native\Engine\src\Audio\Mixer\MixControl.c,Starts a global music pitch-scale slide toward the requested value.,high,
+F03245,Audio::Mixer::SetMusicPitchScaleRamp,Native\Engine\src\Audio\Mixer\MixControl.c,Sets an initial music pitch scale and starts a slide toward a second value.,high,Duration guard tests Param2 rather than Param1 in the original
+F03246,Audio::Mixer::StopMusicAndCancelReplacement,Native\Engine\src\Audio\Mixer\MixControl.c,Stops active and saved music and cancels the pending replacement sequence.,high,
+F03247,Audio::Mixer::StopMatchingMusic,Native\Engine\src\Audio\Mixer\MixControl.c,Stops active music matching the requested identifier and optionally matching saved music.,high,Param1 zero stops active music only; nonzero identifier is also tested against saved music
+F03248,Audio::Mixer::StopWorldSoundEffects,Native\Engine\src\Audio\Mixer\MixControl.c,Releases active sound-effect channels except effects protected by their category flags.,high,
+F03249,Audio::Mixer::EnableStereoOutput,Native\Engine\src\Audio\Mixer\MixControl.c,Selects stereo output and marks active music and sound-effect volumes for recomputation.,high,
+F03250,Audio::Mixer::EnableMonoOutput,Native\Engine\src\Audio\Mixer\MixControl.c,Selects mono output and marks active music and sound-effect volumes for recomputation.,high,
+F03251,Audio::Mixer::SetMusicMuteMask,Native\Engine\src\Audio\Mixer\MixControl.c,Sets the music-channel mute mask and requests fresh left and right voice volumes.,high,
+F03252,Audio::Mixer::SetMusicJumpThreshold,Native\Engine\src\Audio\Mixer\MixControl.c,Sets the threshold used by conditional jumps in the active music sequence.,high,
+F03253,Audio::Mixer::PauseMusic,Native\Engine\src\Audio\Mixer\MixControl.c,Preserves active music-channel membership and silences music voices while playback is paused.,high,fields:FSoundChannelConfig.unk1C=pausedChannelMask
+F03254,Audio::Mixer::ResumeMusic,Native\Engine\src\Audio\Mixer\MixControl.c,Restores paused music channels and marks their voice parameters for refresh.,high,
+F03255,Audio::Mixer::PauseWorldSoundEffects,Native\Engine\src\Audio\Mixer\MixControl.c,Suspends and silences active sound effects while leaving protected effects running.,high,fields:FSoundVoiceSchedulerState.unk_Flags_0x10=pausedVoiceMask
+F03256,Audio::Mixer::ResumeWorldSoundEffects,Native\Engine\src\Audio\Mixer\MixControl.c,Restores paused sound-effect voices and requests refreshed voice parameters.,med,Refresh scan uses D_800378A0 while mask restoration uses scheduler unk_Flags_0x10
+F03257,Audio::Cutscene::PauseStream,Native\Engine\src\Audio\Cutscene\Stream.c,Pauses cutscene audio by setting both streaming voices to zero playback rate.,high,
+F03258,Audio::Cutscene::ResumeStream,Native\Engine\src\Audio\Cutscene\Stream.c,Restores the recorded playback rate on both cutscene streaming voices.,high,
+F03259,Audio::Mixer::IgnoreCommand,Native\Engine\src\Audio\Mixer\MixControl.c,Accepts a sound command without changing audio state.,high,Empty command handler has a different signature from sequence no-op handlers
+F03260,Audio::Mixer::SetReverbMode,Native\Engine\src\Audio\Mixer\MixControl.c,Changes the reverb mode only when needed and clears its work area during the switch.,high,
+F03261,Audio::Mixer::DispatchCommand,Native\Engine\src\Audio\Mixer\MixControl.c,Validates sequence commands and dispatches audio operations with the sound event temporarily disabled.,high,
+F03262,Audio::Seq::WriteDiscVolume,Native\Engine\src\Audio\Seq\Sequencer.c,Writes the cached disc-audio volume to both hardware volume registers.,high,Reads D_800378E2 rather than g_CdVolume directly
+F03263,Core::Memory::CopyWords,Native\Engine\src\Core\Memory\Copy.c,"Copies a byte-sized buffer in aligned words, ignoring any trailing bytes smaller than a word.",high,Source pointer precedes destination; size is measured in bytes
+F03264,Core::Memory::SwapWords,Native\Engine\src\Core\Memory\Copy.c,"Exchanges two buffers in aligned words, ignoring any trailing bytes smaller than a word.",high,
+F03265,Audio::Seq::UpdateGlobalSlides,Native\Engine\src\Audio\Seq\Sequencer.c,"Advances global modulation phase and the volume, tempo, pan and pitch slides for audio playback.",high,fields:FSoundChannel.unk6C=panOffset;fields:FSoundChannel.unk6E=panOffsetSlideLength;fields:FSoundChannel.unkDA=panOffsetSlideStep
+F03266,Audio::Seq::AdvanceMusicTransition,Native\Engine\src\Audio\Seq\Sequencer.c,Advances synchronized active and saved music switching when the sequence timer reaches a boundary.,med,ControlLatches encode transition states; exact musical layer roles remain inferred
+F03267,Audio::Seq::UpdateMusicSequence,Native\Engine\src\Audio\Seq\Sequencer.c,"Advances music channels, slides and timing counters when the tempo accumulator reaches a tick.",high,fields:FSoundChannelConfig.unk28=tempoAccumulator;fields:FSoundChannelConfig.unk5C=reverbDepthSlideStep
+F03268,Audio::Seq::UpdateSavedMusicFade,Native\Engine\src\Audio\Seq\Sequencer.c,Advances the saved-music fade and stops its channels when the fade timer expires.,high,
+F03269,Audio::Seq::TickPlayback,Native\Engine\src\Audio\Seq\Sequencer.c,"Services queued notes, sequence timing, saved music and sound effects on each sound-driver tick.",high,
+F03270,Audio::Seq::PeekNextNote,Native\Engine\src\Audio\Seq\Sequencer.c,Scans sequence control flow to find the next note or rest without advancing the channel program counter.,high,Lookahead also clears legato and full-length flags for selected opcodes
+F03271,Audio::Seq::ResolveSoundEffectInstrument,Native\Engine\src\Audio\Seq\Sequencer.c,Remaps instrument identifiers into alternate sound-effect banks according to channel flags.,high,
+F03272,Audio::Seq::ResolveMusicInstrument,Native\Engine\src\Audio\Seq\Sequencer.c,Remaps music instruments into the alternate bank when the sequence bank flag is set.,high,
+F03273,Audio::Seq::SelectNotePatch,Native\Engine\src\Audio\Seq\Sequencer.c,"Chooses the key-range patch and applies its sample addresses, envelope and volume to a music channel.",high,
+F03274,Audio::Seq::CalculateNotePitch,Native\Engine\src\Audio\Seq\Sequencer.c,"Computes sample pitch and fine-pitch delta from an instrument, note and tuning value.",high,
+F03275,Audio::Seq::StartDrumNote,Native\Engine\src\Audio\Seq\Sequencer.c,"Applies a drum-keymap entry and schedules its note with the entry's pitch, pan and reverb settings.",high,
+F03276,Audio::Seq::ExecuteChannelStep,Native\Engine\src\Audio\Seq\Sequencer.c,"Executes sequence commands through the next note and updates note length, pitch and key requests.",high,
+F03277,Audio::Seq::ApplyInstrumentParameters,Native\Engine\src\Audio\Seq\Sequencer.c,Copies instrument sample addresses and envelope registers into a channel and marks them dirty.,high,
+F03278,Audio::Seq::SelectChannelInstrument,Native\Engine\src\Audio\Seq\Sequencer.c,Selects an instrument and applies its sample addresses and envelope to the channel.,high,
+F03279,Audio::Seq::ReleaseSoundEffectVoice,Native\Engine\src\Audio\Seq\Sequencer.c,Removes a sound-effect voice from scheduler masks and clears its group and sound identifiers.,high,fields:FSoundChannel.unk28=effectGroupFlags;fields:FSoundChannel.unk3C=soundEffectId
+F03280,Audio::Seq::FinishChannel,Native\Engine\src\Audio\Seq\Control.c,Ends a sequence channel and releases its music or sound-effect scheduling masks.,high,
+F03281,Audio::Seq::FinishChannelOnReplacement,Native\Engine\src\Audio\Seq\Control.c,Ends the channel only when a replacement music sequence has been requested.,high,
+F03282,Audio::Seq::SetTempo,Native\Engine\src\Audio\Seq\Control.c,Reads the sequence tempo and cancels the active tempo slide.,high,
+F03283,Audio::Seq::SlideTempo,Native\Engine\src\Audio\Seq\Control.c,Reads a target tempo and duration and starts a sequence tempo slide.,high,
+F03284,Audio::Seq::SetReverbDepth,Native\Engine\src\Audio\Seq\Control.c,Reads the master reverb depth and requests an audio-driver update.,high,
+F03285,Audio::Seq::SlideReverbDepth,Native\Engine\src\Audio\Seq\Control.c,Starts a timed slide of the active sequence's master reverb depth.,high,
+F03286,Audio::Seq::JumpRelative,Native\Engine\src\Audio\Seq\Control.c,Branches the channel program counter by a signed relative offset.,high,
+F03287,Audio::Seq::JumpAtThreshold,Native\Engine\src\Audio\Seq\Control.c,Branches by a relative offset when the sequence jump threshold meets the encoded minimum.,high,
+F03288,Audio::Seq::CallRelative,Native\Engine\src\Audio\Seq\Control.c,Saves the return position and branches to a relative sequence subroutine.,high,
+F03289,Audio::Seq::ReturnFromCall,Native\Engine\src\Audio\Seq\Control.c,Restores the channel program counter saved by a sequence subroutine call.,high,
+F03290,Audio::Seq::SetVolumeBalance,Native\Engine\src\Audio\Seq\Channel.c,Sets the channel's volume-balance multiplier and requests a volume update.,high,
+F03291,Audio::Seq::SlideVolumeBalance,Native\Engine\src\Audio\Seq\Channel.c,Starts a timed slide of the channel's volume-balance multiplier.,high,
+F03292,Audio::Seq::SetVolume,Native\Engine\src\Audio\Seq\Channel.c,Sets channel volume and cancels current and key-on volume slides.,high,
+F03293,Audio::Seq::SlideVolume,Native\Engine\src\Audio\Seq\Channel.c,Starts a channel volume slide and disables any key-on volume-slide preset.,high,
+F03294,Audio::Seq::SetKeyOnVolumeRamp,Native\Engine\src\Audio\Seq\Channel.c,Stores a starting volume and slide step to apply whenever a new music note is keyed on.,high,fields:FSoundChannel.unk5C=keyOnVolumeStart;fields:FSoundChannel.unk60=keyOnVolumeSlideStep
+F03295,Audio::Seq::EnableFullNoteLength,Native\Engine\src\Audio\Seq\Channel.c,Prevents early key-off by making music notes use their full encoded duration.,high,UpdateFlags bit 0x40 is consumed by ExecuteChannelStep
+F03296,Audio::Seq::DisableFullNoteLength,Native\Engine\src\Audio\Seq\Channel.c,Restores early key-off timing for music notes by clearing the full-duration flag.,high,
+F03297,Audio::Seq::SetSequenceControlValue,Native\Engine\src\Audio\Seq\Control.c,Reads one byte into the active sequence's auxiliary control value.,low,fields:FSoundChannelConfig.unk34=auxiliaryControlValue;no consumer found in this source
+F03298,Audio::Seq::IgnoreInstruction,Native\Engine\src\Audio\Seq\Control.c,Accepts a sequence instruction without consuming operands or changing audio state.,high,
+F03299,Audio::Seq::SetEffectVolumeScale,Native\Engine\src\Audio\Seq\Channel.c,Sets the auxiliary sound-effect volume multiplier and cancels its slide.,high,Unused handler;fields:FSoundChannel.unkDC=effectVolumeScale;fields:FSoundChannel.unk8C=effectVolumeSlideLength
+F03300,Audio::Seq::SlideEffectVolumeScale,Native\Engine\src\Audio\Seq\Channel.c,Starts a slide of the channel's auxiliary sound-effect volume multiplier.,high,Unused handler;fields:FSoundChannel.unkDE=effectVolumeSlideStep
+F03301,Audio::Seq::SetPan,Native\Engine\src\Audio\Seq\Channel.c,Sets the channel pan position and cancels the current pan slide.,high,
+F03302,Audio::Seq::SlidePan,Native\Engine\src\Audio\Seq\Channel.c,Starts a timed slide toward a new channel pan position.,high,
+F03303,Audio::Seq::SetOctave,Native\Engine\src\Audio\Seq\Channel.c,Reads and stores the channel octave for subsequent note decoding.,high,
+F03304,Audio::Seq::IncreaseOctave,Native\Engine\src\Audio\Seq\Channel.c,Raises the channel octave with wrapping across the sixteen encoded octaves.,high,
+F03305,Audio::Seq::DecreaseOctave,Native\Engine\src\Audio\Seq\Channel.c,Lowers the channel octave with wrapping across the sixteen encoded octaves.,high,
+F03306,Audio::Seq::LoadInstrument,Native\Engine\src\Audio\Seq\Channel.c,Selects a bank-adjusted instrument and resets keymap and envelope-override modes.,high,
+F03307,Audio::Seq::LoadSilentInstrument,Native\Engine\src\Audio\Seq\Channel.c,Loads an instrument's envelope and loop address while selecting the silent sample start address.,high,Original ClearInstrument name obscures retained envelope and loop settings
+F03308,Audio::Seq::SelectPatch,Native\Engine\src\Audio\Seq\Channel.c,Selects a sequence patch table entry for key-range instrument selection.,high,An absent patch silences the channel's instrument volume scale
+F03309,Audio::Seq::ResetEnvelope,Native\Engine\src\Audio\Seq\Envelope.c,Restores the selected instrument's default envelope and clears channel override flags.,high,
+F03310,Audio::Seq::SetTranspose,Native\Engine\src\Audio\Seq\Channel.c,Sets the signed semitone transposition for subsequent channel notes.,high,
+F03311,Audio::Seq::AddTranspose,Native\Engine\src\Audio\Seq\Channel.c,Adds a signed semitone offset to the channel transposition.,high,
+F03312,Audio::Seq::SetPitchBendSlide,Native\Engine\src\Audio\Seq\Channel.c,Stores a pitch-bend duration and signed destination transposition for note playback.,high,
+F03313,Audio::Seq::EnablePortamento,Native\Engine\src\Audio\Seq\Channel.c,Enables note-to-note pitch sliding and resets saved note and transposition state.,high,
+F03314,Audio::Seq::DisablePortamento,Native\Engine\src\Audio\Seq\Channel.c,Disables note-to-note pitch sliding for the channel.,high,
+F03315,Audio::Seq::SetFineTune,Native\Engine\src\Audio\Seq\Channel.c,Sets channel fine tuning and recalculates its fine-pitch delta.,high,
+F03316,Audio::Seq::AddFineTune,Native\Engine\src\Audio\Seq\Channel.c,Adds to channel fine tuning and recalculates its fine-pitch delta.,high,
+F03317,Audio::Seq::EnableVibrato,Native\Engine\src\Audio\Seq\Modulation.c,Configures vibrato timing and waveform and derives its pitch amplitude for the channel.,high,fields:FSoundChannel.unkA4=vibratoPhaseCountdown
+F03318,Audio::Seq::SetVibratoDepth,Native\Engine\src\Audio\Seq\Modulation.c,Sets vibrato depth and recomputes its amplitude from the channel's base pitch.,high,
+F03319,Audio::Seq::SlideVibratoDepth,Native\Engine\src\Audio\Seq\Modulation.c,Starts a timed slide toward a new channel vibrato depth.,high,
+F03320,Audio::Seq::DisableVibrato,Native\Engine\src\Audio\Seq\Modulation.c,Clears vibrato pitch contribution and requests a channel pitch update.,high,
+F03321,Audio::Seq::EnableTremolo,Native\Engine\src\Audio\Seq\Modulation.c,"Configures tremolo delay, rate and waveform for the channel.",high,fields:FSoundChannel.unkB6=tremoloPhaseCountdown
+F03322,Audio::Seq::SetTremoloDepth,Native\Engine\src\Audio\Seq\Modulation.c,Reads and stores the channel's tremolo depth.,high,
+F03323,Audio::Seq::SlideTremoloDepth,Native\Engine\src\Audio\Seq\Modulation.c,Starts a timed slide toward a new channel tremolo depth.,high,
+F03324,Audio::Seq::DisableTremolo,Native\Engine\src\Audio\Seq\Modulation.c,Clears tremolo volume contribution and requests a channel volume update.,high,
+F03325,Audio::Seq::EnableAutoPan,Native\Engine\src\Audio\Seq\Modulation.c,Configures the waveform and rate for automatic channel panning.,high,
+F03326,Audio::Seq::SetAutoPanDepth,Native\Engine\src\Audio\Seq\Modulation.c,Reads and stores the channel's automatic-panning depth.,high,
+F03327,Audio::Seq::SlideAutoPanDepth,Native\Engine\src\Audio\Seq\Modulation.c,Starts a timed slide toward a new automatic-panning depth.,high,
+F03328,Audio::Seq::DisableAutoPan,Native\Engine\src\Audio\Seq\Modulation.c,Clears automatic-panning contribution and requests a channel volume update.,high,
+F03329,Audio::Seq::EnableNoise,Native\Engine\src\Audio\Seq\Modulation.c,Enables noise generation for the current music or sound-effect voice.,high,
+F03330,Audio::Seq::DisableNoise,Native\Engine\src\Audio\Seq\Modulation.c,Disables channel noise generation and clears its delayed-toggle timer.,high,
+F03331,Audio::Seq::EnableFrequencyModulation,Native\Engine\src\Audio\Seq\Modulation.c,Enables frequency modulation for music or eligible sound-effect voices.,high,Sound-effect enable additionally requires UpdateFlags bit 0x10000
+F03332,Audio::Seq::DisableFrequencyModulation,Native\Engine\src\Audio\Seq\Modulation.c,Disables channel frequency modulation and clears its delayed-toggle timer.,high,
+F03333,Audio::Seq::EnableReverb,Native\Engine\src\Audio\Seq\Modulation.c,Enables reverb for the current music or sound-effect voice.,high,
+F03334,Audio::Seq::DisableReverb,Native\Engine\src\Audio\Seq\Modulation.c,Disables reverb for the current music or sound-effect voice.,high,
+F03335,Audio::Seq::EnableLegato,Native\Engine\src\Audio\Seq\Channel.c,Enables connected note playback without retriggering each note.,high,
+F03336,Audio::Seq::IgnoreInstruction,Native\Engine\src\Audio\Seq\Control.c,Accepts a sequence instruction without consuming operands or changing audio state.,high,dup-of:F03298
+F03337,Audio::Seq::EnableSustainedSoundEffect,Native\Engine\src\Audio\Seq\Channel.c,Makes subsequent sound-effect notes use sustained full-length playback.,high,
+F03338,Audio::Seq::IgnoreInstruction,Native\Engine\src\Audio\Seq\Control.c,Accepts a sequence instruction without consuming operands or changing audio state.,high,dup-of:F03298
+F03339,Audio::Seq::SetNoiseClock,Native\Engine\src\Audio\Seq\Modulation.c,Sets or offsets the shared noise-clock frequency for music or sound effects.,high,
+F03340,Audio::Seq::SetAttackRate,Native\Engine\src\Audio\Seq\Envelope.c,Sets the channel envelope attack rate and preserves it across instrument changes.,high,
+F03341,Audio::Seq::SetDecayRate,Native\Engine\src\Audio\Seq\Envelope.c,Sets the channel envelope decay rate and requests a voice-register update.,high,
+F03342,Audio::Seq::SetSustainLevel,Native\Engine\src\Audio\Seq\Envelope.c,Sets the channel envelope sustain level and requests a voice-register update.,high,
+F03343,Audio::Seq::SetSustainRate,Native\Engine\src\Audio\Seq\Envelope.c,Sets the channel envelope sustain rate and preserves it across instrument changes.,high,
+F03344,Audio::Seq::SetReleaseRate,Native\Engine\src\Audio\Seq\Envelope.c,Sets the channel envelope release rate and preserves it across instrument changes.,high,
+F03345,Audio::Seq::SetAttackMode,Native\Engine\src\Audio\Seq\Envelope.c,Sets the envelope attack mode from the encoded mode value.,high,
+F03346,Audio::Seq::SetSustainMode,Native\Engine\src\Audio\Seq\Envelope.c,Sets the envelope sustain direction and curve from the encoded mode value.,high,
+F03347,Audio::Seq::SetReleaseMode,Native\Engine\src\Audio\Seq\Envelope.c,Sets the envelope release curve from the encoded mode value.,high,
+F03348,Audio::Seq::SetVoiceAllocationStart,Native\Engine\src\Audio\Seq\Control.c,Sets the lowest voice index considered during normal music voice allocation and stealing.,high,fields:FSoundChannelConfig.SomeIndexRelatedToSpuVoiceInfo=voiceAllocationStart
+F03349,Audio::Seq::ResetVoiceAllocationStart,Native\Engine\src\Audio\Seq\Control.c,Restores normal music voice allocation to begin at voice zero.,high,
+F03350,Audio::Seq::PushLoop,Native\Engine\src\Audio\Seq\Control.c,Pushes the current sequence position and instruction counter onto the four-entry loop stack.,high,
+F03351,Audio::Seq::RepeatLoop,Native\Engine\src\Audio\Seq\Control.c,Repeats the current sequence loop until its encoded iteration count is reached.,high,
+F03352,Audio::Seq::JumpOnLoopPass,Native\Engine\src\Audio\Seq\Control.c,Branches to a relative sequence offset on the specified loop iteration.,high,
+F03353,Audio::Seq::ExitLoopOnPass,Native\Engine\src\Audio\Seq\Control.c,Branches to a relative sequence offset and pops the loop stack on the specified iteration.,high,
+F03354,Audio::Seq::RepeatLoopForever,Native\Engine\src\Audio\Seq\Control.c,Repeats the current loop and restores its saved instruction counter.,high,
+F03355,Audio::Seq::SetNextNoteLength,Native\Engine\src\Audio\Seq\Channel.c,Sets the next note duration and clears the persistent fixed-duration override.,high,
+F03356,Audio::Seq::SetFixedNoteLength,Native\Engine\src\Audio\Seq\Channel.c,"Derives a persistent note duration from the previous duration and a signed offset, or disables it.",high,Zero disables the override; nonzero results clamp to 1 through 255
+F03357,Audio::Seq::EnableDrumKeymap,Native\Engine\src\Audio\Seq\Channel.c,Enables drum-keymap playback when the sequence provides a keymap table.,high,Original ClearKeymapTable name is misleading; table is not cleared
+F03358,Audio::Seq::MuteInstrument,Native\Engine\src\Audio\Seq\Channel.c,Zeros instrument volume scaling and exits drum-keymap playback.,high,
+F03359,Audio::Seq::SetTimerDivisors,Native\Engine\src\Audio\Seq\Control.c,Sets the sequence timer's lower and upper divisors and resets their current counters.,high,
+F03360,Audio::Seq::SetTimerCount,Native\Engine\src\Audio\Seq\Control.c,Reads a sixteen-bit value into the sequence timer's top-level counter.,high,
+F03361,Audio::Seq::SetDecayAndSustain,Native\Engine\src\Audio\Seq\Envelope.c,Reads and applies both envelope decay rate and sustain level.,high,
+F03362,Audio::Seq::EnableTimedNoise,Native\Engine\src\Audio\Seq\Modulation.c,Enables channel noise generation and arms its delayed-toggle timer.,high,
+F03363,Audio::Seq::SetNoiseToggleDelay,Native\Engine\src\Audio\Seq\Modulation.c,Sets the delay before the channel noise-enable state is toggled.,high,
+F03364,Audio::Seq::EnableTimedFrequencyModulation,Native\Engine\src\Audio\Seq\Modulation.c,Enables channel frequency modulation and arms its delayed-toggle timer.,high,
+F03365,Audio::Seq::SetFrequencyModulationToggleDelay,Native\Engine\src\Audio\Seq\Modulation.c,Sets the delay before the channel frequency-modulation state is toggled.,high,
+F03366,Audio::Seq::ResetVoiceEffects,Native\Engine\src\Audio\Seq\Modulation.c,"Disables modulation, noise and reverb and clears legato and sustained-note flags.",high,
+F03367,Audio::Seq::EnablePitchSidechain,Native\Engine\src\Audio\Seq\Modulation.c,Makes channel playback pitch follow the preceding channel's playback rate.,high,
+F03368,Audio::Seq::DisablePitchSidechain,Native\Engine\src\Audio\Seq\Modulation.c,Stops deriving the channel playback pitch from the preceding channel.,high,
+F03369,Audio::Seq::EnableVolumeSidechain,Native\Engine\src\Audio\Seq\Modulation.c,Makes channel volume follow the preceding channel's playback rate.,high,
+F03370,Audio::Seq::DisableVolumeSidechain,Native\Engine\src\Audio\Seq\Modulation.c,Stops deriving channel volume from the preceding channel's playback rate.,high,
+F03371,Audio::Seq::PlayEmbeddedSoundEffect,Native\Engine\src\Audio\Seq\Control.c,Starts embedded sound-effect programs with the current channel's pan and volume.,high,
+F03372,Audio::Seq::EnableLoopBoundaryStop,Native\Engine\src\Audio\Seq\Channel.c,Defers sound-effect eviction until the sequence reaches its infinite-loop boundary.,high,UpdateFlags bit 0x100000 causes eviction to latch bit 0x200000
+F03373,Audio::Seq::SelectNoteRemapTable,Native\Engine\src\Audio\Seq\Control.c,Selects a per-note transposition table used when global note remapping is enabled.,high,fields:FSoundChannelConfig.unk44=noteRemapTable;index is a byte offset into D_8002F66C
+F03374,Audio::Seq::MarkChannelKeyed,Native\Engine\src\Audio\Seq\Control.c,Marks the current music channel for reserved voice allocation.,med,KeyedMask bypasses the normal allocation start index
+F03375,Audio::Seq::ClearChannelKeyed,Native\Engine\src\Audio\Seq\Control.c,Clears the current music channel's reserved-allocation marker.,med,
+F03376,Audio::Seq::SetRandomPitchDepth,Native\Engine\src\Audio\Seq\Modulation.c,Reads the depth used to vary subsequent note pitches with the driver modulation table.,high,
+F03377,Audio::Seq::ResetRandomPitchDepth,Native\Engine\src\Audio\Seq\Modulation.c,Disables random pitch variation for subsequent notes.,high,
+F03378,Audio::Seq::StopOnInvalidInstruction,Native\Engine\src\Audio\Seq\Control.c,Ends the channel when an unsupported sequence instruction is encountered.,high,
+F03379,Audio::Cutscene::StopStreamVoices,Native\Engine\src\Audio\Cutscene\Stream.c,"Disables the stream interrupt, releases both streaming voices and removes their reverb flags.",high,
+F03380,Audio::Cutscene::FindFreeVoicePair,Native\Engine\src\Audio\Cutscene\Stream.c,"Finds a free sound-effect voice pair for cutscene audio, evicting eligible effects when needed.",high,
+F03381,Audio::Cutscene::UploadSecondMonoBuffer,Native\Engine\src\Audio\Cutscene\Stream.c,Uploads the second initial mono stream buffer and installs the mono playback-start callback.,high,
+F03382,Audio::Cutscene::StartStream,Native\Engine\src\Audio\Cutscene\Stream.c,Reserves two voices and uploads initial mono or stereo cutscene samples with optional looping and reverb.,high,fields:FSoundCutsceneStreamState.field2_0x8=streamFormatFlags;bit 0 stereo;bit 1 looping
+F03383,Audio::Cutscene::InitializeStreamVoice,Native\Engine\src\Audio\Cutscene\Stream.c,"Configures a streaming voice's pan, sample addresses, playback rate and envelope.",high,
+F03384,Audio::Cutscene::BeginStreamPlayback,Native\Engine\src\Audio\Cutscene\Stream.c,Starts both streaming voices and arms the next buffer interrupt or end-of-stream callback.,high,fields:FSoundCutsceneStreamState.TotalPages=remainingSampleBytes;name TotalPages is misleading
+F03385,Audio::Cutscene::BeginMonoPlayback,Native\Engine\src\Audio\Cutscene\Stream.c,Initializes both voices on shared mono sample buffers and starts interrupt-driven playback.,high,
+F03386,Audio::Cutscene::BeginStereoPlayback,Native\Engine\src\Audio\Cutscene\Stream.c,Initializes separately panned left and right sample buffers and starts stereo stream playback.,high,
+F03387,Audio::Cutscene::RefillStreamBuffer,Native\Engine\src\Audio\Cutscene\Stream.c,"Uploads the next sample buffer, updates repeat addresses and arms continuation or stream termination.",high,fields:FSoundCutsceneStreamState.unk_Mask_0x4=loopSampleStart;fields:FSoundCutsceneStreamState.field7_0x1c=loopSampleBytes
+F03388,Audio::Cutscene::RefillMonoFirstBuffer,Native\Engine\src\Audio\Cutscene\Stream.c,Refills the first mono sample buffer and arms the callback for the second buffer.,high,
+F03389,Audio::Cutscene::RefillMonoSecondBuffer,Native\Engine\src\Audio\Cutscene\Stream.c,Refills the second mono sample buffer and arms the callback for the first buffer.,high,
+F03390,Audio::Cutscene::RefillStereoFirstBuffer,Native\Engine\src\Audio\Cutscene\Stream.c,Refills the first left and right sample buffers and arms the second-buffer callback.,high,
+F03391,Audio::Cutscene::RefillStereoSecondBuffer,Native\Engine\src\Audio\Cutscene\Stream.c,Refills the second left and right sample buffers and arms the first-buffer callback.,high,
+F03392,Audio::Cutscene::ReplaceStream,Native\Engine\src\Audio\Cutscene\Stream.c,"Stops the previous cutscene stream, starts a replacement and reserves its voices against sound effects.",high,
+F03393,Audio::Cutscene::StopStream,Native\Engine\src\Audio\Cutscene\Stream.c,Requests immediate shutdown of the cutscene streaming voices through the stream-stop routine.,high,
+F03394,Audio::Cutscene::SetStreamVolume,Native\Engine\src\Audio\Cutscene\Stream.c,"Sets cutscene stream volume, cancels its fade and applies split left and right voice volumes.",high,Does not honor mono-output mixing in this setter
+F03395,Audio::Cutscene::SlideStreamVolume,Native\Engine\src\Audio\Cutscene\Stream.c,Starts a timed cutscene stream volume slide toward the requested value.,high,Original FadeOutCutscene name is too narrow; target volume is arbitrary
+F03396,Audio::Cutscene::SetStreamPan,Native\Engine\src\Audio\Cutscene\Stream.c,Updates packed cutscene stream panning and recomputes voice volumes for mono or stereo output.,high,fields:FSoundCutsceneStreamState.field19_0x4c.u8[1]=panIndex

@@ -22,7 +22,7 @@ F00019,Items::LoadInventoryWeaponStats,Native\Game\src\Items\EquipmentStats.c,"B
 F00020,Items::LoadInventoryShieldStats,Native\Game\src\Items\EquipmentStats.c,"Builds runtime shield statistics from inventory armor and gems, or clears them when unequipped.",high,
 F00021,Items::LoadInventoryArmorStats,Native\Game\src\Items\EquipmentStats.c,"Builds runtime armor statistics from an inventory entry, or clears them when unequipped.",high,
 F00022,Items::LoadInventoryAccessoryStats,Native\Game\src\Items\EquipmentStats.c,"Builds runtime accessory statistics from an inventory entry, or clears them when unequipped.",high,
-F00023,Core::IgnoreCallback,Native\Core\src\Callbacks.c,Returns without changing state for optional callbacks retained by the original game.,high,Original equipment callback has an unused actor parameter
+F00023,Core::IgnoreCallback,Native\Engine\src\Core\Callbacks.c,Returns without changing state for optional callbacks retained by the original game.,high,Original equipment callback has an unused actor parameter
 F00024,Items::RemoveEquipmentBoostOnEquip,Native\Game\src\Items\EquipmentStats.c,Removes Ashley's equipment-stat boost when equipment is changed.,high,Mask 0x100000; header enum is shifted relative to status-mask comments
 F00025,Items::RemoveWeaponEnchantmentOnEquip,Native\Game\src\Items\EquipmentStats.c,Removes Ashley's elemental attack enchantments after changing weapons.,high,Mask 0x01E00000 matches status-mask comments rather than header enum
 F00026,Items::RemoveArmorEnchantmentOnEquip,Native\Game\src\Items\EquipmentStats.c,Removes Ashley's elemental defense enchantments after changing non-weapon equipment.,high,Mask 0x1E000000 matches status-mask comments rather than header enum
@@ -54,7 +54,7 @@ F00051,Field::PauseFieldForInteractionDialog,Native\Game\src\Field\GameMode.c,St
 F00052,Field::PauseFieldForObjectInteraction,Native\Game\src\Field\GameMode.c,Stops other actors and pauses field simulation during an object interaction.,med,
 F00053,Field::PauseFieldForMenu,Native\Game\src\Field\GameMode.c,Dims the field and suspends field updates while a gameplay menu is active.,high,
 F00054,Field::ResumeFieldAfterMenu,Native\Game\src\Field\GameMode.c,"Restores field colors, actor animation freezing and gameplay updates after closing a menu.",high,
-F00055,Core::IgnoreCallback,Native\Core\src\Callbacks.c,Returns without changing state for optional callbacks retained by the original game.,high,dup-of:F00023
+F00055,Core::IgnoreCallback,Native\Engine\src\Core\Callbacks.c,Returns without changing state for optional callbacks retained by the original game.,high,dup-of:F00023
 F00056,Effects::StartWeaponTrail,Native\Game\src\Effects\ActionEffects.c,Starts a persistent motion trail on an actor bone for an attack effect.,high,Effect 54; callee packs actor and bone into trail configuration
 F00057,Effects::FadeWeaponTrails,Native\Game\src\Effects\ActionEffects.c,Requests an eight-frame fade for all active weapon motion trails.,high,Arguments ignored by callee; affects all trail renderer nodes
 F00058,Effects::QueueActionHitEffect,Native\Game\src\Effects\ActionEffects.c,Queues an action's hit effect with actor-part or world-position targets.,high,
@@ -62,14 +62,14 @@ F00059,Battle::PlayWeaponHitSounds,Native\Game\src\Battle\ActionFlow.c,Plays pos
 F00060,Effects::QueueActionImpactEffects,Native\Game\src\Effects\ActionEffects.c,"Chooses hit, miss or block effects for the current action targets and plays weapon impact sounds.",high,
 F00061,Battle::ApplyActionSourceEffects,Native\Game\src\Battle\ActionFlow.c,Applies the current action's source-side stat effects and reaction animation.,high,The source record reuses the targetActor field
 F00062,Battle::ApplyActionTargetEffects,Native\Game\src\Battle\ActionFlow.c,"Applies current-action effects to a matching actor and selects its reaction, or dispatches an environment hit.",high,asm;switches hit outcomes then calls _applyBattleAbilityEffect per matching target
-F00063,Audio::PlayRandomActorImpactSound,Native\Audio\src\ActorSound.c,Plays one of four actor sound-bank entries starting at entry eight with the supplied pan and volume.,med,Called for actor animation sound type 8
+F00063,Audio::PlayRandomActorImpactSound,Native\Engine\src\Audio\ActorSound.c,Plays one of four actor sound-bank entries starting at entry eight with the supplied pan and volume.,med,Called for actor animation sound type 8
 F00064,Effects::SignalActorEffectAnimation,Native\Game\src\Effects\ActionEffects.c,Sets the actor animation flag used to advance an effect-synchronized animation script.,med,Sets model flag unk5AC_18; animation opcode 13 consumes and clears it
 F00065,Field::DisableTrapAtPosition,Native\Game\src\Field\Gimmicks.c,Disables a trap at a world position and updates its persistent room state.,high,
 F00066,Field::FreezeRoomGimmicksTemporarily,Native\Game\src\Field\Gimmicks.c,Freezes animated room gimmicks for 180 update ticks through the room gimmick timer.,med,Timer pauses section12 updates; visual state toggles near expiry
 F00067,Field::ApplyUnlockEffectToRoomObject,Native\Game\src\Field\Interactions.c,Removes eligible magical locks from a door or chest when the unlock effect succeeds.,high,
 F00068,Effects::TintActionActorRed,Native\Game\src\Effects\ActionEffects.c,Applies a red palette tint to the selected actor and remembers it for restoration.,high,
 F00069,Effects::RestoreActionActorTint,Native\Game\src\Effects\ActionEffects.c,Restores the remembered actor palette after its action tint ends.,high,
-F00070,Render::DrawScreenTransition,Native\Graphics\src\FramebufferEffects.c,"Draws and advances black fades, white fades and rotated screen wipes.",high,
+F00070,Render::DrawScreenTransition,Native\Engine\src\Render\FramebufferEffects.c,"Draws and advances black fades, white fades and rotated screen wipes.",high,
 F00071,Field::AddCameraStepWithFallback,Native\Game\src\Field\Camera.c,"Adds a signed camera step capped by remaining displacement, using displacement when the step is zero.",high,
 F00072,Field::AddClampedCameraStep,Native\Game\src\Field\Camera.c,Adds a signed camera step capped at the remaining displacement on one axis.,high,
 F00073,Field::ClampCameraLookAtToZone,Native\Game\src\Field\Camera.c,Clamps camera focus within Zone bounds using the current zoom and a vertical dead zone.,high,Bounds apply to camera focus rather than actor collision
@@ -161,6 +161,6 @@ F00158,Field::CheckAshleyTileTriggers,Native\Game\src\Field\Interactions.c,"Chec
 F00159,Field::CheckActorTrapAndFallTriggers,Native\Game\src\Field\Interactions.c,Checks a non-player actor's new tile for traps and fatal falls and requests the resulting event or defeat.,high,
 F00160,Actors::ConsumeActorMovementOffset,Native\Game\src\Actors\Movement.c,Consumes at most eight units per axis from an actor's pending fixed-point movement offset.,high,"Command 13 uses unkC, unk10 and unk14 as remaining x, z and y offsets"
 F00161,Actors::ExecuteQueuedActorCommands,Native\Game\src\Actors\Movement.c,"Executes actor movement, animation and attack commands and checks their trap and fall consequences.",high,fields:vs_battle_actor.unkA=command target actor or immediate marker;command states 128 queued and 64 waiting
-F00162,Render::ConfigureFieldDisplay,Native\Graphics\src\Display.c,"Initializes double-buffered field display surfaces, projection and background colors.",high,
-F00163,Render::PresentFieldFrame,Native\Graphics\src\Display.c,"Submits the field ordering table, swaps buffers and updates timing while supporting debug frame stepping.",high,
+F00162,Render::ConfigureFieldDisplay,Native\Engine\src\Render\Display.c,"Initializes double-buffered field display surfaces, projection and background colors.",high,
+F00163,Render::PresentFieldFrame,Native\Engine\src\Render\Display.c,"Submits the field ordering table, swaps buffers and updates timing while supporting debug frame stepping.",high,
 F00164,Actors::InitializePlaceholderActorStats,Native\Game\src\Actors\Lifecycle.c,"Clears a placeholder actor's statistics, assigns one health and initializes its actor and spawn sentinels.",med,Default name data is ambiguous; not normal character stat initialization

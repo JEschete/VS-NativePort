@@ -96,17 +96,17 @@ F01237,Event::StopEventCameraMotion,Native\Game\src\Event\ScriptCamera.c,Stops b
 F01238,Event::StartEventCameraOrbitReturn,Native\Game\src\Event\ScriptCamera.c,Places the camera beside its saved field orientation and starts an orbital return transition.,high,State flags AF and B0 select saved field camera direction and zoom
 F01239,Event::ScaleEventCameraTrackDuration,Native\Game\src\Event\ScriptCamera.c,Scales a camera track duration by its remaining world-space distance.,high,
 F01240,Event::ScaleEventCameraDuration,Native\Game\src\Event\ScriptCamera.c,Distance-scales one camera track duration or synchronizes the distance-scaled durations of both tracks.,high,
-F01241,Core::Math::AddVectors,Native\Core\src\Math\Vector.c,Adds the three components of two vectors into a destination vector.,high,
-F01242,Core::Math::SubtractVectors,Native\Core\src\Math\Vector.c,Subtracts the second vector from the first into a destination vector.,high,
-F01243,Core::Math::ScaleFixedVector,Native\Core\src\Math\FixedPoint.c,Multiplies each vector component by a 12-bit fixed-point scalar.,high,
-F01244,Core::Math::CopyVector,Native\Core\src\Math\Vector.c,Copies the three components of a vector and returns the destination.,high,
-F01245,Core::Math::FixedVectorMagnitude,Native\Core\src\Math\FixedPoint.c,Returns a fixed-point vector length after truncating its components to integer coordinates.,high,
+F01241,Core::Math::AddVectors,Native\Engine\src\Core\Math\Vector.c,Adds the three components of two vectors into a destination vector.,high,
+F01242,Core::Math::SubtractVectors,Native\Engine\src\Core\Math\Vector.c,Subtracts the second vector from the first into a destination vector.,high,
+F01243,Core::Math::ScaleFixedVector,Native\Engine\src\Core\Math\FixedPoint.c,Multiplies each vector component by a 12-bit fixed-point scalar.,high,
+F01244,Core::Math::CopyVector,Native\Engine\src\Core\Math\Vector.c,Copies the three components of a vector and returns the destination.,high,
+F01245,Core::Math::FixedVectorMagnitude,Native\Engine\src\Core\Math\FixedPoint.c,Returns a fixed-point vector length after truncating its components to integer coordinates.,high,
 F01246,Event::ReadScriptFixedVector,Native\Game\src\Event\ScriptCamera.c,Reads three signed little-endian script operands into a 12-bit fixed-point vector.,high,
-F01247,Core::Math::ShortVectorToFixed,Native\Core\src\Math\FixedPoint.c,Converts a short integer vector into a 12-bit fixed-point vector.,high,
-F01248,Core::Math::MultiplyFixed,Native\Core\src\Math\FixedPoint.c,Returns the low 32 bits of a signed product shifted right by twelve fractional bits.,high,asm;Inline MIPS multiply combines high and low product words
-F01249,Core::Math::FixedAtan2,Native\Core\src\Math\Trig.c,Computes a fixed-point heading after downscaling both arguments to protect the angle calculation.,high,
-F01250,Core::Math::DirectionRotationMatrix,Native\Core\src\Math\Matrix.c,Builds a zero-roll rotation matrix from the yaw and pitch of a fixed-point direction vector.,high,
-F01251,Core::Math::NormalizeFixedVector,Native\Core\src\Math\FixedPoint.c,Normalizes an integer-downscaled fixed-point vector into a fixed-point unit vector.,high,
+F01247,Core::Math::ShortVectorToFixed,Native\Engine\src\Core\Math\FixedPoint.c,Converts a short integer vector into a 12-bit fixed-point vector.,high,
+F01248,Core::Math::MultiplyFixed,Native\Engine\src\Core\Math\FixedPoint.c,Returns the low 32 bits of a signed product shifted right by twelve fractional bits.,high,asm;Inline MIPS multiply combines high and low product words
+F01249,Core::Math::FixedAtan2,Native\Engine\src\Core\Math\Trig.c,Computes a fixed-point heading after downscaling both arguments to protect the angle calculation.,high,
+F01250,Core::Math::DirectionRotationMatrix,Native\Engine\src\Core\Math\Matrix.c,Builds a zero-roll rotation matrix from the yaw and pitch of a fixed-point direction vector.,high,
+F01251,Core::Math::NormalizeFixedVector,Native\Engine\src\Core\Math\FixedPoint.c,Normalizes an integer-downscaled fixed-point vector into a fixed-point unit vector.,high,
 F01252,Event::LoadRoomEventSections,Native\Game\src\Event\Triggers.c,"Copies MPD trigger, script, and door-event sections and clears room-local script flags on fresh entry.",high,
 F01253,Event::EventPlaybackState,Native\Game\src\Event\ScriptVm.c,Returns the current event playback state for gameplay and room-transition checks.,high,fields:D_800F4C34=event playback state
 F01254,Event::PendingEventSelector,Native\Game\src\Event\ScriptVm.c,"Returns the pending event identifier packed with its external, room-script, or door-script source kind.",high,fields:D_800F4BE0=event source kind

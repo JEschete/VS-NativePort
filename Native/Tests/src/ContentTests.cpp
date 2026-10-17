@@ -1,4 +1,4 @@
-#include "vs/content/Disc.hpp"
+#include "Content/Disc.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 

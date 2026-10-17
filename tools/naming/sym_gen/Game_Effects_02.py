@@ -273,13 +273,13 @@ G("G00631", "catalog", "Effects::pluginFiles", PG, "Gives each effect's plugin f
   c(("EFFECT/EFFPURGE.BIN/0.c", "_plgFiles[D_800F5230.effectId].lba, _plgFiles[D_800F5230.effectId].size, count);")) + ";fork name plgFiles")
 
 # ---------------------------------------------------------------- main executable
-G("G01957", "state", "Render::nearClip", "Native\\Graphics\\src\\Render.c", "Gives the camera near clip distance.", H,
+G("G01957", "state", "Render::nearClip", "Native\\Engine\\src\\Render\\Render.c", "Gives the camera near clip distance.", H,
   c(("146C.c", "vs_main_nearClip = arg0;"), ("5BF94.c", "arg0->nearClip = vs_main_nearClip;")) + ";fork name kept")
-G("G02018", "state", "Core::overlaySlots", "Native\\Core\\src\\Overlays.c", "Gives the addresses overlays are loaded at, by slot.", H,
+G("G02018", "state", "Core::overlaySlots", "Native\\Engine\\src\\Core\\Overlays.c", "Gives the addresses overlays are loaded at, by slot.", H,
   c(("6F014.c", "return _loadfile(VS_EFFPURGE_BIN_LBA, VS_EFFPURGE_BIN_SIZE, vs_overlay_slots[3]);")) + ";replaced by native module loading")
 
 # ---------------------------------------------------------------- template types
-PRIM, TPL = "Native\\Graphics\\src\\LegacyPackets.h", E + "Templates\\TemplateState.h"
+PRIM, TPL = "Native\\Engine\\src\\Render\\LegacyPackets.h", E + "Templates\\TemplateState.h"
 
 
 def TT(tid, role, name, loc, purpose, conf, overrides=None, recv=None):

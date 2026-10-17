@@ -1,5 +1,5 @@
-#include "vs/content/Disc.hpp"
-#include "vs/core/Log.hpp"
+#include "Content/Disc.hpp"
+#include "Core/Log.hpp"
 
 #include <cstdio>
 #include <filesystem>

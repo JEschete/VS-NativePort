@@ -42,7 +42,7 @@ OVERLAY_DEFAULT = {
     "MENU/MENUF.PRG": ("Menu::Results", "Native\\Game\\src\\Menu\\Results\\Results.c"),
     "TITLE/TITLE.PRG": ("Title", "Native\\Game\\src\\Title\\TitleScreen.c"),
     "BATTLE/BATTLE.PRG": ("Menu::Framework", "Native\\Game\\src\\Menu\\Framework\\Menus.c"),
-    "SLUS_010.40": ("Core", "Native\\Core\\src\\Main.c"),
+    "SLUS_010.40": ("Core", "Native\\Engine\\src\\Core\\Main.c"),
 }
 
 _ix = json.loads((ROOT / "build" / "port" / "index.json").read_text(encoding="utf-8"))

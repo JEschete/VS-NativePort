@@ -236,5 +236,5 @@ G00783,catalog,Effects::Plg300::ringColorFactors,Native\Game\src\Effects\Plugins
 G00784,catalog,Effects::Plg300::ringColorFactors2,Native\Game\src\Effects\Plugins\Plg300.c,Gives the ring template's color factors for each transparency mode.,high,source:EFFECT/PLG300.BIN/110.c:418;source:rings.h:93;indexed inline like the rings.h template
 G00785,state,Effects::Plg301::particleEmissionCounter,Native\Game\src\Effects\Plugins\Plg301.c,Steps the box corner (0-7) or ring position the particle template emits from next.,high,source:EFFECT/PLG301.BIN/110.c:14;source:particleSetup.h:161;bound by the plugin source
 G00786,catalog,Effects::Plg301::closedRingColorFactors,Native\Game\src\Effects\Plugins\Plg301.c,Gives the closed ring template's color factors for each transparency mode.,high,source:EFFECT/PLG301.BIN/110.c:22;source:closedRings.h:98;bound by the plugin source
-G01957,state,Render::nearClip,Native\Graphics\src\Render.c,Gives the camera near clip distance.,high,source:146C.c:9043;source:5BF94.c:6521;fork name kept
-G02018,state,Core::overlaySlots,Native\Core\src\Overlays.c,"Gives the addresses overlays are loaded at, by slot.",high,source:6F014.c:577;replaced by native module loading
+G01957,state,Render::nearClip,Native\Engine\src\Render\Render.c,Gives the camera near clip distance.,high,source:146C.c:9043;source:5BF94.c:6521;fork name kept
+G02018,state,Core::overlaySlots,Native\Engine\src\Core\Overlays.c,"Gives the addresses overlays are loaded at, by slot.",high,source:6F014.c:577;replaced by native module loading

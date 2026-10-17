@@ -34,7 +34,7 @@ F00196,Battle::UpdateLootResults,Native\Game\src\Battle\Rewards.c,Updates the lo
 F00197,Battle::UpdateAbilityUnlockDelay,Native\Game\src\Battle\Rewards.c,Waits for effect playback before displaying the newly unlocked action or Battle Ability.,high,
 F00198,Battle::UpdateAbilityUnlockResults,Native\Game\src\Battle\Rewards.c,Closes an unlock message after dialog and effect playback finish and continues post-action rewards.,high,
 F00199,Boot::RunGameLoop,Native\Game\src\Boot\GameLoop.c,"Runs room and zone loading, field input, combat, events, actor updates and rendering during gameplay.",high,
-F00200,Render::AppendOverlayPrimitive,Native\Graphics\src\UiPrimitives.c,Appends a model overlay primitive to the gameplay overlay ordering-table chain.,high,
+F00200,Render::AppendOverlayPrimitive,Native\Engine\src\Render\UiPrimitives.c,Appends a model overlay primitive to the gameplay overlay ordering-table chain.,high,
 F00201,Field::SyncCameraAnglesFromPosition,Native\Game\src\Field\Camera.c,Derives camera yaw and pitch from its position and focus and optionally updates spherical camera values.,high,
 F00202,Field::ComputeSphericalCameraPosition,Native\Game\src\Field\Camera.c,"Computes a camera position from a focus point, spherical angles and distance.",high,
 F00203,Field::SetCameraPositionFromAngles,Native\Game\src\Field\Camera.c,Repositions the field camera around its current focus using spherical camera values.,high,
@@ -45,15 +45,15 @@ F00207,Field::CameraLookAt,Native\Game\src\Field\Camera.c,Copies the current fie
 F00208,Field::SetCameraLookAt,Native\Game\src\Field\Camera.c,Replaces the current field camera focus position.,high,
 F00209,Field::SetCameraRoll,Native\Game\src\Field\Camera.c,Sets the field camera roll angle.,high,
 F00210,Field::CameraRoll,Native\Game\src\Field\Camera.c,Returns the field camera roll wrapped to one revolution.,high,
-F00211,Render::BuildCameraViewMatrix,Native\Graphics\src\Camera.c,"Builds the view matrix from camera position, focus, roll, aspect correction and clip scale.",high,
-F00212,Core::Math::BuildLookAtOrientation,Native\Core\src\Math\Matrix.c,Builds an orientation matrix facing from one point toward another using a fixed vertical reference.,high,Orientation only; no translation is written
-F00213,Core::NoOperation,Native\Core\src\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,
-F00214,Core::NoOperation,Native\Core\src\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,dup-of:F00213
-F00215,Render::TransformRoomPalettes,Native\Graphics\src\Palette.c,Applies the same palette color transform to all three room palette banks.,high,
-F00216,Render::TransformSceneColors,Native\Graphics\src\Palette.c,Transforms room and shared palettes together with background lighting colors.,high,
-F00217,Render::TransformActorColors,Native\Graphics\src\Palette.c,Transforms an actor palette bank and its matching model lighting colors.,high,
-F00218,Render::TransformBackgroundColors,Native\Graphics\src\Palette.c,Starts a background lighting color transform through the active palette controller.,high,
-F00219,Render::LoadRoomPaletteTransition,Native\Graphics\src\Palette.c,Loads three consecutive room palette banks as a palette transition.,high,Original omits the duration argument on the second and third bank calls
+F00211,Render::BuildCameraViewMatrix,Native\Engine\src\Render\Camera.c,"Builds the view matrix from camera position, focus, roll, aspect correction and clip scale.",high,
+F00212,Core::Math::BuildLookAtOrientation,Native\Engine\src\Core\Math\Matrix.c,Builds an orientation matrix facing from one point toward another using a fixed vertical reference.,high,Orientation only; no translation is written
+F00213,Core::NoOperation,Native\Engine\src\Core\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,
+F00214,Core::NoOperation,Native\Engine\src\Core\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,dup-of:F00213
+F00215,Render::TransformRoomPalettes,Native\Engine\src\Render\Palette.c,Applies the same palette color transform to all three room palette banks.,high,
+F00216,Render::TransformSceneColors,Native\Engine\src\Render\Palette.c,Transforms room and shared palettes together with background lighting colors.,high,
+F00217,Render::TransformActorColors,Native\Engine\src\Render\Palette.c,Transforms an actor palette bank and its matching model lighting colors.,high,
+F00218,Render::TransformBackgroundColors,Native\Engine\src\Render\Palette.c,Starts a background lighting color transform through the active palette controller.,high,
+F00219,Render::LoadRoomPaletteTransition,Native\Engine\src\Render\Palette.c,Loads three consecutive room palette banks as a palette transition.,high,Original omits the duration argument on the second and third bank calls
 F00220,Battle::ShowPendingRewardUnlock,Native\Game\src\Battle\Rewards.c,Displays and records the pending action unlock or the next earned Break Art or Battle Ability.,high,
 F00221,Battle::OpenPendingLootRewards,Native\Game\src\Battle\Rewards.c,Opens accumulated enemy loot when progression permits it or continues to ability unlocks.,high,
 F00222,Battle::OpenRewardResults,Native\Game\src\Battle\Rewards.c,Opens the initial reward result dialog when progression permits it or continues to loot.,med,
@@ -71,11 +71,11 @@ F00233,State::ResetSceneTimer,Native\Game\src\State\Timers.c,Clears the scene ti
 F00234,State::SetSceneTimerPaused,Native\Game\src\State\Timers.c,Suspends or restores the scene timer mode and hides or shows its display.,high,fields:D_80050468_t.unk1=suspendedTimerMode
 F00235,Battle::SetGameplayHudHidden,Native\Game\src\Battle\Hud.c,Hides or shows the gameplay HUD and its associated field overlay.,med,
 F00236,Field::SetFirstPersonViewDisabled,Native\Game\src\Field\Camera.c,Resets first-person camera state and enables first-person view when the disable argument is clear.,high,
-F00237,Audio::SetZoneMusicSwitchEnabled,Native\Audio\src\Music.c,Controls whether a zone load replaces the current music with the zone's music.,high,D_800F18B0 controls music replacement in _finishLoadZnd
+F00237,Audio::SetZoneMusicSwitchEnabled,Native\Engine\src\Audio\Music.c,Controls whether a zone load replaces the current music with the zone's music.,high,D_800F18B0 controls music replacement in _finishLoadZnd
 F00238,Effects::StartScriptedActorEffect,Native\Game\src\Effects\ActionEffects.c,Starts a scripted effect on one actor and includes other loaded actors as background participants.,high,
 F00239,Effects::ReleaseScriptedEffectTrigger,Native\Game\src\Effects\ActionEffects.c,Releases the requested pending action-effect trigger for scripted playback.,high,
 F00240,Effects::ScriptedEffectPlaybackState,Native\Game\src\Effects\ActionEffects.c,Returns the current action-effect playback state for event wait commands.,high,
-F00241,Core::NoOperation,Native\Core\src\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,dup-of:F00213
+F00241,Core::NoOperation,Native\Engine\src\Core\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,dup-of:F00213
 F00242,Effects::IsScriptedEffectTriggerReady,Native\Game\src\Effects\ActionEffects.c,Reports whether action-effect playback has a pending trigger ready for release.,high,
 F00243,Field::ShowPrimaryRoomGeometry,Native\Game\src\Field\RoomState.c,Enables display of the loaded primary room geometry when it is available.,med,sets vs_battle_roomData.unk1 from its loaded marker
 F00244,Field::HidePrimaryRoomGeometry,Native\Game\src\Field\RoomState.c,Disables display of the loaded primary room geometry without unloading it.,med,
@@ -92,8 +92,8 @@ F00254,Battle::PreserveAshleyStatuses,Native\Game\src\Battle\StatusEffects.c,"In
 F00255,Actors::InterruptActorAction,Native\Game\src\Actors\Animation.c,Interrupts an actor's current action and optionally plays its interruption animation.,med,
 F00256,State::SetTickSpeed,Native\Game\src\State\Timers.c,Sets gameplay tick speed to two or four when valid and returns the current speed.,high,
 F00257,Field::ScreenTransitionPhase,Native\Game\src\Field\Transitions.c,Returns a normalized phase code for the current gameplay screen transition.,high,
-F00258,Render::EnableDisplay,Native\Graphics\src\Display.c,Enables the display output for gameplay and scripted transitions.,high,
-F00259,Render::DisableDisplay,Native\Graphics\src\Display.c,Disables the display output for gameplay and scripted transitions.,high,
+F00258,Render::EnableDisplay,Native\Engine\src\Render\Display.c,Enables the display output for gameplay and scripted transitions.,high,
+F00259,Render::DisableDisplay,Native\Engine\src\Render\Display.c,Disables the display output for gameplay and scripted transitions.,high,
 F00260,Field::ConfigureScreenTransition,Native\Game\src\Field\Transitions.c,"Sets the effect, speed and wipe angle for subsequent gameplay screen transitions.",high,
 F00261,Field::SetTransitionWipeAngle,Native\Game\src\Field\Transitions.c,Sets the wipe angle used by gameplay screen transitions.,high,
 F00262,Field::BeginScreenFadeOut,Native\Game\src\Field\Transitions.c,Starts a scripted fade-out unless a room or zone transition is already in progress.,high,Sets transition step 5; phase 5 is the completed fade-out wait result
@@ -106,7 +106,7 @@ F00268,Field::BeginScriptedZoneTransition,Native\Game\src\Field\Transitions.c,St
 F00269,Field::TeleportToLocation,Native\Game\src\Field\Transitions.c,Queues the zone or room for a location and prepares Ashley's destination position and facing.,high,
 F00270,Field::FindLocationId,Native\Game\src\Field\RoomState.c,Looks up the global location identifier for a zone and MPD pair.,high,Returns zero if no pair matches
 F00271,Field::CurrentRoomId,Native\Game\src\Field\RoomState.c,Returns the global location identifier of the current room.,high,
-F00272,Audio::PlayActorScriptSound,Native\Audio\src\Music.c,Plays an actor model sound with spatial pan and volume for a script command.,high,
+F00272,Audio::PlayActorScriptSound,Native\Engine\src\Audio\Music.c,Plays an actor model sound with spatial pan and volume for a script command.,high,
 F00273,Actors::ActorLoadProbeResult,Native\Game\src\Actors\ActorLoading.c,Returns zero from an unused actor-loading probe.,low,Constant-zero stub without callers; original intent is not recoverable from this body
 F00274,Actors::QueueAshleyModelLoad,Native\Game\src\Actors\ActorLoading.c,Queues a model load in Ashley's model slot and returns a one-based load request result.,med,"Only modelId, dataType and index are initialized by this wrapper"
 F00275,Actors::QueueScriptedActorSpawn,Native\Game\src\Actors\ActorLoading.c,"Allocates a scripted actor, queues its model and initializes its default state without waiting for loading.",high,
@@ -120,9 +120,9 @@ F00282,Actors::ReleaseSequenceEffectTextures,Native\Game\src\Actors\Animation.c,
 F00283,Actors::SetSharedSequenceBank,Native\Game\src\Actors\Animation.c,Selects the shared animation bank and stops incompatible active model animations.,high,void wrapper around Actors::SelectSharedSequenceBank (F00801) that discards the status result
 F00284,Actors::SharedSequenceBank,Native\Game\src\Actors\Animation.c,Returns the one-based identifier of the selected shared animation bank.,high,
 F00285,Actors::FirstFreeAssetLoadSlot,Native\Game\src\Actors\ActorLoading.c,"Returns the first free object asset queue slot, or minus one when every slot is occupied.",high,"The original name is accurate; zero means the compact queue is drained, not a general pending-count query"
-F00286,Render::SetCameraNearClip,Native\Graphics\src\Camera.c,Sets the projection near clip and updates the renderer's near-plane clipping thresholds.,high,
-F00287,Render::SetCameraProjectionDistance,Native\Graphics\src\Camera.c,Sets the camera projection distance and updates the geometry projection state.,high,
-F00288,Render::SetCameraFarClip,Native\Graphics\src\Camera.c,Sets the camera clip scale and optionally derives the renderer's far-plane threshold.,high,
+F00286,Render::SetCameraNearClip,Native\Engine\src\Render\Camera.c,Sets the projection near clip and updates the renderer's near-plane clipping thresholds.,high,
+F00287,Render::SetCameraProjectionDistance,Native\Engine\src\Render\Camera.c,Sets the camera projection distance and updates the geometry projection state.,high,
+F00288,Render::SetCameraFarClip,Native\Engine\src\Render\Camera.c,Sets the camera clip scale and optionally derives the renderer's far-plane threshold.,high,
 F00289,Field::InitializeSphericalCamera,Native\Game\src\Field\Camera.c,Centers the camera on Ashley with an optional facing and battle or field orbit distance.,high,
 F00290,Field::SetCameraPitchPreset,Native\Game\src\Field\Camera.c,Selects a supported field camera pitch or falls back to the default pitch.,high,
 F00291,Actors::ReturnActorToIdle,Native\Game\src\Actors\Animation.c,Requests an actor's idle animation unless it is already in a protected recovery pose.,high,
@@ -140,27 +140,27 @@ F00302,Actors::ResetActorMovement,Native\Game\src\Actors\Movement.c,Clears an ac
 F00303,Battle::IsActionUnlocked,Native\Game\src\Battle\Abilities.c,Checks whether a valid action identifier has been unlocked.,high,
 F00304,Battle::UnlockAction,Native\Game\src\Battle\Abilities.c,Marks a valid action identifier as unlocked.,high,
 F00305,Actors::RemoveScriptedActor,Native\Game\src\Actors\ActorLoading.c,Removes a scripted actor from its room slot without the defeat-removal option.,high,
-F00306,Render::ResetFramebufferEffect,Native\Graphics\src\FramebufferEffects.c,"Resets framebuffer feedback state, transform, tint, blend mode and ordering depth.",high,
-F00307,Render::InitializeFramebufferEffect,Native\Graphics\src\FramebufferEffects.c,Clears the framebuffer effect allocation pointer and initializes its default state.,high,
-F00308,Render::BuildFramebufferEffectPrimitives,Native\Graphics\src\FramebufferEffects.c,Builds double-buffered textured strips and sprites for drawing a framebuffer feedback effect.,high,
-F00309,Render::DrawFramebufferEffect,Native\Graphics\src\FramebufferEffects.c,Draws tinted and transformed framebuffer strips and advances feedback allocation teardown.,high,
-F00310,Render::SetFramebufferEffectEnabled,Native\Graphics\src\FramebufferEffects.c,Starts framebuffer feedback drawing or schedules its primitive buffers for delayed release.,high,
-F00311,Render::SetFramebufferEffectRotation,Native\Graphics\src\FramebufferEffects.c,Sets the framebuffer feedback rotation angle around the screen center.,high,D_800F1A2C aliases D_800F1A28.vz
-F00312,Render::SetFramebufferEffectScale,Native\Graphics\src\FramebufferEffects.c,Sets the horizontal and vertical scale of the framebuffer feedback image.,high,fields:D_800F1A68_t.unk0=x;fields:D_800F1A68_t.unk4=y
-F00313,Render::SetFramebufferEffectTint,Native\Graphics\src\FramebufferEffects.c,Sets the RGB tint applied to framebuffer feedback strips.,high,
-F00314,Render::SetFramebufferEffectOffset,Native\Graphics\src\FramebufferEffects.c,Sets the framebuffer feedback image's screen offset.,high,
-F00315,Render::SetFramebufferEffectBlendMode,Native\Graphics\src\FramebufferEffects.c,Sets the blend mode used when sampling framebuffer feedback texture pages.,high,
-F00316,Render::SetFramebufferEffectParameter,Native\Graphics\src\FramebufferEffects.c,Stores an auxiliary framebuffer effect parameter that has no visible rendering consumer.,low,"D_800F1A20 is only reset, written and read; its intended effect is unresolved"
-F00317,Render::SetFramebufferEffectDepth,Native\Graphics\src\FramebufferEffects.c,Sets a valid ordering-table depth for framebuffer feedback drawing.,high,
-F00318,Render::SetFramebufferPreviousFrame,Native\Graphics\src\FramebufferEffects.c,Selects whether framebuffer feedback samples the previous buffer or the current buffer.,high,
-F00319,Render::FramebufferEffectState,Native\Graphics\src\FramebufferEffects.c,Returns the framebuffer feedback activation or teardown state.,high,
-F00320,Render::FramebufferEffectRotation,Native\Graphics\src\FramebufferEffects.c,Returns the stored framebuffer feedback rotation angle.,high,
-F00321,Render::FramebufferEffectScale,Native\Graphics\src\FramebufferEffects.c,Copies framebuffer feedback scale values to the caller using the original duplicated horizontal scale.,high,Original writes vx to both outputs rather than returning vy in the second output
-F00322,Render::FramebufferEffectTint,Native\Graphics\src\FramebufferEffects.c,Copies the current framebuffer feedback tint to the caller.,high,
-F00323,Render::FramebufferEffectOffset,Native\Graphics\src\FramebufferEffects.c,Copies the framebuffer feedback image offset to the caller.,high,
-F00324,Render::FramebufferEffectBlendMode,Native\Graphics\src\FramebufferEffects.c,Returns the blend mode selected for framebuffer feedback drawing.,high,
-F00325,Render::FramebufferEffectParameter,Native\Graphics\src\FramebufferEffects.c,Returns the auxiliary framebuffer effect parameter with no visible rendering consumer.,low,D_800F1A20 has no observed semantic consumer
-F00326,Render::FramebufferEffectDepth,Native\Graphics\src\FramebufferEffects.c,Returns the ordering-table depth selected for framebuffer feedback drawing.,high,
-F00327,Render::UsesFramebufferPreviousFrame,Native\Graphics\src\FramebufferEffects.c,Reports whether framebuffer feedback samples the previous frame buffer.,high,
-F00328,Core::NoOperation,Native\Core\src\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,dup-of:F00213
-F00329,Render::InitializeTextureSlotReservations,Native\Graphics\src\Textures.c,Reserves the first twenty-five texture slots and clears the remaining slots and allocation lock.,med,D_800F19A8 is a 32-slot reservation table; D_800F18F8 tracks an exclusive allocation owner
+F00306,Render::ResetFramebufferEffect,Native\Engine\src\Render\FramebufferEffects.c,"Resets framebuffer feedback state, transform, tint, blend mode and ordering depth.",high,
+F00307,Render::InitializeFramebufferEffect,Native\Engine\src\Render\FramebufferEffects.c,Clears the framebuffer effect allocation pointer and initializes its default state.,high,
+F00308,Render::BuildFramebufferEffectPrimitives,Native\Engine\src\Render\FramebufferEffects.c,Builds double-buffered textured strips and sprites for drawing a framebuffer feedback effect.,high,
+F00309,Render::DrawFramebufferEffect,Native\Engine\src\Render\FramebufferEffects.c,Draws tinted and transformed framebuffer strips and advances feedback allocation teardown.,high,
+F00310,Render::SetFramebufferEffectEnabled,Native\Engine\src\Render\FramebufferEffects.c,Starts framebuffer feedback drawing or schedules its primitive buffers for delayed release.,high,
+F00311,Render::SetFramebufferEffectRotation,Native\Engine\src\Render\FramebufferEffects.c,Sets the framebuffer feedback rotation angle around the screen center.,high,D_800F1A2C aliases D_800F1A28.vz
+F00312,Render::SetFramebufferEffectScale,Native\Engine\src\Render\FramebufferEffects.c,Sets the horizontal and vertical scale of the framebuffer feedback image.,high,fields:D_800F1A68_t.unk0=x;fields:D_800F1A68_t.unk4=y
+F00313,Render::SetFramebufferEffectTint,Native\Engine\src\Render\FramebufferEffects.c,Sets the RGB tint applied to framebuffer feedback strips.,high,
+F00314,Render::SetFramebufferEffectOffset,Native\Engine\src\Render\FramebufferEffects.c,Sets the framebuffer feedback image's screen offset.,high,
+F00315,Render::SetFramebufferEffectBlendMode,Native\Engine\src\Render\FramebufferEffects.c,Sets the blend mode used when sampling framebuffer feedback texture pages.,high,
+F00316,Render::SetFramebufferEffectParameter,Native\Engine\src\Render\FramebufferEffects.c,Stores an auxiliary framebuffer effect parameter that has no visible rendering consumer.,low,"D_800F1A20 is only reset, written and read; its intended effect is unresolved"
+F00317,Render::SetFramebufferEffectDepth,Native\Engine\src\Render\FramebufferEffects.c,Sets a valid ordering-table depth for framebuffer feedback drawing.,high,
+F00318,Render::SetFramebufferPreviousFrame,Native\Engine\src\Render\FramebufferEffects.c,Selects whether framebuffer feedback samples the previous buffer or the current buffer.,high,
+F00319,Render::FramebufferEffectState,Native\Engine\src\Render\FramebufferEffects.c,Returns the framebuffer feedback activation or teardown state.,high,
+F00320,Render::FramebufferEffectRotation,Native\Engine\src\Render\FramebufferEffects.c,Returns the stored framebuffer feedback rotation angle.,high,
+F00321,Render::FramebufferEffectScale,Native\Engine\src\Render\FramebufferEffects.c,Copies framebuffer feedback scale values to the caller using the original duplicated horizontal scale.,high,Original writes vx to both outputs rather than returning vy in the second output
+F00322,Render::FramebufferEffectTint,Native\Engine\src\Render\FramebufferEffects.c,Copies the current framebuffer feedback tint to the caller.,high,
+F00323,Render::FramebufferEffectOffset,Native\Engine\src\Render\FramebufferEffects.c,Copies the framebuffer feedback image offset to the caller.,high,
+F00324,Render::FramebufferEffectBlendMode,Native\Engine\src\Render\FramebufferEffects.c,Returns the blend mode selected for framebuffer feedback drawing.,high,
+F00325,Render::FramebufferEffectParameter,Native\Engine\src\Render\FramebufferEffects.c,Returns the auxiliary framebuffer effect parameter with no visible rendering consumer.,low,D_800F1A20 has no observed semantic consumer
+F00326,Render::FramebufferEffectDepth,Native\Engine\src\Render\FramebufferEffects.c,Returns the ordering-table depth selected for framebuffer feedback drawing.,high,
+F00327,Render::UsesFramebufferPreviousFrame,Native\Engine\src\Render\FramebufferEffects.c,Reports whether framebuffer feedback samples the previous frame buffer.,high,
+F00328,Core::NoOperation,Native\Engine\src\Core\Compatibility.c,Returns without changing state for an empty compatibility hook.,high,dup-of:F00213
+F00329,Render::InitializeTextureSlotReservations,Native\Engine\src\Render\Textures.c,Reserves the first twenty-five texture slots and clears the remaining slots and allocation lock.,med,D_800F19A8 is a 32-slot reservation table; D_800F18F8 tracks an exclusive allocation owner

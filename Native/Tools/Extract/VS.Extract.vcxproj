@@ -35,7 +35,7 @@
   <Import Project="$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props" Condition="Exists('$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props')" />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;$(MSBuildThisFileDirectory)src;$(MSBuildThisFileDirectory)..\..\Core\include;$(MSBuildThisFileDirectory)..\..\Platform\include;$(MSBuildThisFileDirectory)..\..\Content\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;$(MSBuildThisFileDirectory)src;$(MSBuildThisFileDirectory)..\..\Engine\include;$(MSBuildThisFileDirectory)..\..\Content\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -44,24 +44,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\**\*.cpp" />
-    <ClCompile Include="src\**\*.c">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level3</WarningLevel>
-    </ClCompile>
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\**\*.hpp" />
-    <ClInclude Include="include\**\*.h" />
-    <ClInclude Include="src\**\*.hpp" />
-    <ClInclude Include="src\**\*.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Core\VS.Core.vcxproj">
-      <Project>{C27287D3-89B5-5065-87A2-25C1DAC99227}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Platform\VS.Platform.vcxproj">
-      <Project>{262D0677-4171-5FF2-BE80-290B30181E85}</Project>
+    <ProjectReference Include="..\..\Engine\VS.Engine.vcxproj">
+      <Project>{9D58D6B3-8334-58BF-8E05-EA4D406395CB}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\Content\VS.Content.vcxproj">
       <Project>{7E2C0870-8C2A-56AC-9C05-63DC8ED53BED}</Project>

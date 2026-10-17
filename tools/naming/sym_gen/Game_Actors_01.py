@@ -18,7 +18,7 @@ ST = "Native\\Game\\src\\State\\"
 IT = "Native\\Game\\src\\Items\\"
 FD = "Native\\Game\\src\\Field\\"
 AI = "Native\\Game\\src\\Battle\\Ai\\"
-RD = "Native\\Graphics\\src\\ModelDraw.h"
+RD = "Native\\Engine\\src\\Render\\ModelDraw.h"
 INIT = "BATTLE/INITBTL.PRG/18.c"
 SCRATCH = r"scratch|\(\(D_1F80035C_t\*\)0x1F80035C\)"
 
@@ -274,7 +274,7 @@ T("T00472", "State", "Actors::AirborneTickAccumulator", GA + "Movement.h",
       ("unk0", "reserved0", "Lower bytes owned by other members", "low"),
       ("timer", "tickRemainder", "Fractional ticks carried between frames", "med"),
   ], recv=r"\(\(func_800AC690_timer_t\*\)&actor->unk5B4\)")
-T("T00473", "Value", "Core::WordPair", "Native\\Core\\include\\Core\\WordPair.h",
+T("T00473", "Value", "Core::WordPair", "Native\\Engine\\include\\Core\\Core\\WordPair.h",
   "Copies eight bytes as two words; the native code assigns the members directly.", "med",
   c(("40564.c", "*(func_800ACF54_t*)&arg0->unk4C = *(func_800ACF54_t*)&arg0->unk1C;")), [
       ("unk0", "low", "First word", "med"),
@@ -656,7 +656,7 @@ T("T00245", "State", "Actors::ShadowBlend", GA + "Shadow.h",
       ("unk12", "radiusShrinkDelta", "Shrink-rate change still to apply", "high",
        c(("30DB0.c", "a2->unk12 = arg0->shadowRadiusShrinkRate - a2->unkE;"))),
   ])
-T("T00247", "Value", "Render::ColorCode", "Native\\Graphics\\src\\Palette.h",
+T("T00247", "Value", "Render::ColorCode", "Native\\Engine\\src\\Render\\Palette.h",
   "Packs three color bytes and a code byte into one word.", "med",
   c(("30DB0.c", "temp_a0->unk6F2 = arg1->unk0;")), [
       ("unk0", "red", "First color byte", "med", c(("30DB0.c", "temp_a0->unk6F2 = arg1->unk0;"))),

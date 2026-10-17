@@ -1,7 +1,7 @@
 id,final_name,final_location,purpose,confidence,notes
-F00330,Render::AdvanceTexturePageRetirements,Native\Graphics\src\Textures.c,Advances released texture pages through the two-frame retirement delay before allowing reuse.,high,
-F00331,Render::ReserveTexturePageRange,Native\Graphics\src\Textures.c,Reserves a free texture-page range for the requesting owner and rejects overlapping allocations.,high,
-F00332,Render::RetireTexturePageRange,Native\Graphics\src\Textures.c,Checks ownership and queues a texture-page range for deferred reuse.,high,
+F00330,Render::AdvanceTexturePageRetirements,Native\Engine\src\Render\Textures.c,Advances released texture pages through the two-frame retirement delay before allowing reuse.,high,
+F00331,Render::ReserveTexturePageRange,Native\Engine\src\Render\Textures.c,Reserves a free texture-page range for the requesting owner and rejects overlapping allocations.,high,
+F00332,Render::RetireTexturePageRange,Native\Engine\src\Render\Textures.c,Checks ownership and queues a texture-page range for deferred reuse.,high,
 F00333,Content::AcquireOverlayWorkspace,Native\Content\src\OverlayWorkspace.c,Claims the shared overlay workspace for a loader or menu owner.,med,Owner token shared by effect loading and menu setup.
 F00334,Content::ReleaseOverlayWorkspace,Native\Content\src\OverlayWorkspace.c,Releases the shared overlay workspace only when the caller owns it.,med,
 F00335,Items::RebuildArmorClassAffinity,Native\Game\src\Items\EquipmentAffinity.c,Rebuilds current and baseline Class and Affinity totals for actor armor equipment.,high,fields:vs_battle_uiArmor.unk88=temporary affinity bonuses;classAffinityCurrent[0]=effective totals;classAffinityCurrent[1]=unmodified totals

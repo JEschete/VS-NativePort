@@ -163,7 +163,7 @@ F01754,Battle::Ai::RefreshDetourProgress,Native\Game\src\Battle\Ai\Navigation.c,
 F01755,Battle::Ai::CardinalPassabilityMask,Native\Game\src\Battle\Ai\Navigation.c,Tests the four cardinal directions and packs their passability results into a bit mask.,high,asm
 F01756,Battle::Ai::InitializeObstacleDetour,Native\Game\src\Battle\Ai\Navigation.c,"Initializes detour direction, turning handedness, countdown, and local passability state.",high,asm
 F01757,Battle::Ai::UpdateHesitationTurn,Native\Game\src\Battle\Ai\Behavior.c,Runs a timed hesitation and turning sequence selected by movement behavior and a probability threshold.,med,asm
-F01758,Core::Memory::ClearAlignedWords,Native\Core\src\Memory\Copy.c,Clears aligned memory in sixteen-byte blocks followed by remaining whole words.,high,asm;size must be word aligned
+F01758,Core::Memory::ClearAlignedWords,Native\Engine\src\Core\Memory\Copy.c,Clears aligned memory in sixteen-byte blocks followed by remaining whole words.,high,asm;size must be word aligned
 F01759,Field::GroundHeightAtWorldPosition,Native\Game\src\Field\Collision.c,Returns collision ground height at world-space horizontal coordinates.,high,asm
 F01760,Field::GroundHeightAtPackedTile,Native\Game\src\Field\Collision.c,Returns collision ground height for a packed tile coordinate.,high,asm
 F01761,Field::GroundHeightAtTile,Native\Game\src\Field\Collision.c,Returns the signed ground height at the supplied tile coordinates.,high,asm
@@ -174,4 +174,4 @@ F01765,Battle::Ai::TickActorDecisionTimers,Native\Game\src\Battle\Ai\Perception.
 F01766,Battle::Ai::TargetFacingCosine,Native\Game\src\Battle\Ai\Perception.c,Returns the normalized horizontal dot product between the actor's facing and its target direction.,high,asm
 F01767,Field::IsPositionAboveGround,Native\Game\src\Field\Collision.c,Tests whether a world position lies above the decoded collision ground surface.,high,asm
 F01768,Field::IsTerrainSegmentBlocked,Native\Game\src\Field\Collision.c,Samples an extent-adjusted segment and reports whether terrain blocks any of its sixteen steps.,high,asm
-F01769,Core::ElapsedFrameCounterTicks,Native\Core\src\Timing.c,Returns the elapsed hardware root-counter ticks since the frame timing baseline.,high,asm;uses root counter 1 with 16-bit wraparound
+F01769,Core::ElapsedFrameCounterTicks,Native\Engine\src\Core\Timing.c,Returns the elapsed hardware root-counter ticks since the frame timing baseline.,high,asm;uses root counter 1 with 16-bit wraparound

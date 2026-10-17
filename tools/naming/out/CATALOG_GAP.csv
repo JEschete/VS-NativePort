@@ -1,6 +1,6 @@
 id,final_name,final_location,purpose,confidence,notes
-F04121,Render::StartSharedPaletteTransition,Native\Graphics\src\Palette.c,Starts a palette transition in shared palette slot 4 plus the given index (unused).,med,source:BATTLE/BATTLE.PRG/146C.c:8280;read whole function
-F04122,Render::ApplyBackgroundGradientColors,Native\Graphics\src\Palette.c,Forwards five background gradient colors and a duration to SetBackgroundGradientColors.,high,source:BATTLE/BATTLE.PRG/146C.c:8285;read whole function
+F04121,Render::StartSharedPaletteTransition,Native\Engine\src\Render\Palette.c,Starts a palette transition in shared palette slot 4 plus the given index (unused).,med,source:BATTLE/BATTLE.PRG/146C.c:8280;read whole function
+F04122,Render::ApplyBackgroundGradientColors,Native\Engine\src\Render\Palette.c,Forwards five background gradient colors and a duration to SetBackgroundGradientColors.,high,source:BATTLE/BATTLE.PRG/146C.c:8285;read whole function
 F04123,Battle::BeginRewardPause,Native\Game\src\Battle\Rewards.c,"Dims room palettes, pauses room animation, hides the minimap and ducks ambience while a reward dialog is up.",high,source:BATTLE/BATTLE.PRG/146C.c:8287;read whole function
 F04124,Battle::EndRewardPause,Native\Game\src\Battle\Rewards.c,"Restores room palettes, freezes actor animation again, resumes room animation and ambience after rewards.",high,source:BATTLE/BATTLE.PRG/146C.c:8298;read whole function
 F04125,Battle::ResumeAfterRewards,Native\Game\src\Battle\Rewards.c,"Returns the action flow to mode 2, ends the reward pause and restores Ashley's idle pose after an action.",high,source:BATTLE/BATTLE.PRG/146C.c:8308;read whole function
@@ -9,9 +9,9 @@ F04127,Actors::RunAnimationEvents,Native\Game\src\Actors\Animation.c,Interprets 
 F04128,Actors::AdvanceSkeletalAnimation,Native\Game\src\Actors\Animation.c,"Steps an actor's motion interpolation and animation frame, starts queued animations and decodes bone tracks.",med,source:BATTLE/BATTLE.PRG/44F14.c:1252;read whole function
 F04129,Actors::DecodeAnimationTrack,Native\Game\src\Actors\Animation.c,"Decodes a compressed keyframe delta track over the scratch frame range, wrapping rotations to 13 bits.",high,source:BATTLE/BATTLE.PRG/44F14.c:1373;read whole function
 F04130,Actors::UpdateMotionAndLookAt,Native\Game\src\Actors\Animation.c,"Steps scale, rotation and position interpolation (updating tiles on arrival) and the clamped head look-at angles.",med,source:BATTLE/BATTLE.PRG/44F14.c:1486;read whole function
-F04131,Core::Math::LargerMagnitude,Native\Core\src\Math\Vector.c,Returns whichever of two integers has the larger absolute value (unused).,high,source:BATTLE/BATTLE.PRG/5BF94.c:5849;read whole function
-F04132,Core::Math::SetIdentityRotation,Native\Core\src\Math\Matrix.c,Writes an identity rotation into a matrix.,high,source:BATTLE/BATTLE.PRG/5BF94.c:5922;read whole function
-F04133,Core::Math::SetTranslationMatrix,Native\Core\src\Math\Matrix.c,Writes an identity rotation and the given translation into a matrix.,high,source:BATTLE/BATTLE.PRG/5BF94.c:5932;read whole function
+F04131,Core::Math::LargerMagnitude,Native\Engine\src\Core\Math\Vector.c,Returns whichever of two integers has the larger absolute value (unused).,high,source:BATTLE/BATTLE.PRG/5BF94.c:5849;read whole function
+F04132,Core::Math::SetIdentityRotation,Native\Engine\src\Core\Math\Matrix.c,Writes an identity rotation into a matrix.,high,source:BATTLE/BATTLE.PRG/5BF94.c:5922;read whole function
+F04133,Core::Math::SetTranslationMatrix,Native\Engine\src\Core\Math\Matrix.c,Writes an identity rotation and the given translation into a matrix.,high,source:BATTLE/BATTLE.PRG/5BF94.c:5932;read whole function
 F04134,Effects::InitializeTransformStates,Native\Game\src\Effects\Transforms.c,"Initializes each effect definition's transform state: rotation, facing, attached actor or point, and target.",high,source:BATTLE/BATTLE.PRG/5BF94.c:5940;read whole function
 F04135,Ending::Credits::DrawIllustration,Native\Game\src\Ending\Credits\StaffRoll.c,Loads and fades a staff roll illustration and draws its two halves as sprites.,high,source:ENDING/ENDING.PRG/D4.c:583;read whole function
 F04136,Menu::Framework::NextFreeActorAssetRequest,Native\Game\src\Menu\Framework\Framework.c,Advances the actor asset queue and returns a free request slot (unused).,high,source:MENU/MAINMENU.PRG/C48.c:81;read whole function
@@ -42,17 +42,17 @@ F04160,Menu::Manual::PollMenuReady,Native\Game\src\Menu\Manual.c,Calls the menu-
 F04161,Menu::Manual::UpdateScreen,Native\Game\src\Menu\Manual.c,"Runs the Manual screen: opens it, shows the help pages and exits.",high,source:MENU/MENUE.PRG/494.c:142;read whole function
 F04162,Menu::Manual::InitHelpState,Native\Game\src\Menu\Manual.c,Resets the manual display state and help page buffers and reserves its texture pages.,high,source:MENU/MENUE.PRG/494.c:219;read whole function
 F04163,Menu::Manual::UpdateHelpPages,Native\Game\src\Menu\Manual.c,"Runs the topic menu, loads a topic's help text and assets and shows its pages.",high,source:MENU/MENUE.PRG/494.c:245;read whole function
-F04164,Render::SaveClutBase,Native\Graphics\src\Palette.c,Copies a palette slot's current colors into its base colors (unused).,high,source:SLUS_010.40/main.c:10579;read whole function
-F04165,Render::WeightedLuminance,Native\Graphics\src\Palette.c,Weights packed color channels into one luminance value.,med,source:SLUS_010.40/main.c:10590;read whole function
-F04166,Render::ApplyClutSlotTransform,Native\Graphics\src\Palette.c,Applies a color transform mode to a palette slot and starts its timed transition.,high,source:SLUS_010.40/main.c:10595;read whole function
-F04167,Render::TransformClutSlot,Native\Graphics\src\Palette.c,Applies a palette slot color transform when palette animation is enabled.,high,source:SLUS_010.40/main.c:10768;read whole function
-F04168,Render::ToFixed16,Native\Graphics\src\Palette.c,Shifts a color channel into 16.16 fixed point.,high,source:SLUS_010.40/main.c:10778;read whole function
-F04169,Render::SetBackgroundGradientColors,Native\Graphics\src\Palette.c,Sets the five background gradient colors now or starts a timed transition to them.,high,source:SLUS_010.40/main.c:10780;read whole function
-F04170,Render::SetBackgroundGradientBase,Native\Graphics\src\Palette.c,Sets the background gradient colors and records them as the base colors.,high,source:SLUS_010.40/main.c:10822;read whole function
-F04171,Render::TransformBackgroundGradient,Native\Graphics\src\Palette.c,"Applies a color transform mode to the background gradient colors, optionally over time.",high,source:SLUS_010.40/main.c:10834;read whole function
-F04172,Render::RequestBackgroundGradientTransform,Native\Graphics\src\Palette.c,Transforms the background gradient colors when palette animation is enabled.,high,source:SLUS_010.40/main.c:10990;read whole function
-F04173,Render::SetModelTint,Native\Graphics\src\Palette.c,Sets or transitions the room tint (slot 0) or an actor's fade color (slot n).,med,source:SLUS_010.40/main.c:10997;read whole function
-F04174,Render::SetModelTintBase,Native\Graphics\src\Palette.c,Sets a model tint and records it as the slot's base color (unused).,med,source:SLUS_010.40/main.c:11047;read whole function
-F04175,Render::TransformModelTint,Native\Graphics\src\Palette.c,"Applies a color transform mode to a room or actor tint, optionally over time.",med,source:SLUS_010.40/main.c:11055;read whole function
-F04176,Render::RequestModelTintTransform,Native\Graphics\src\Palette.c,Transforms a room or actor tint when palette animation is enabled.,med,source:SLUS_010.40/main.c:11222;read whole function
-F04177,Render::UpdateBackgroundGradientTransition,Native\Graphics\src\Palette.c,Advances the background gradient color transition and chains pulsing transitions.,high,source:SLUS_010.40/main.c:11229;read whole function
+F04164,Render::SaveClutBase,Native\Engine\src\Render\Palette.c,Copies a palette slot's current colors into its base colors (unused).,high,source:SLUS_010.40/main.c:10579;read whole function
+F04165,Render::WeightedLuminance,Native\Engine\src\Render\Palette.c,Weights packed color channels into one luminance value.,med,source:SLUS_010.40/main.c:10590;read whole function
+F04166,Render::ApplyClutSlotTransform,Native\Engine\src\Render\Palette.c,Applies a color transform mode to a palette slot and starts its timed transition.,high,source:SLUS_010.40/main.c:10595;read whole function
+F04167,Render::TransformClutSlot,Native\Engine\src\Render\Palette.c,Applies a palette slot color transform when palette animation is enabled.,high,source:SLUS_010.40/main.c:10768;read whole function
+F04168,Render::ToFixed16,Native\Engine\src\Render\Palette.c,Shifts a color channel into 16.16 fixed point.,high,source:SLUS_010.40/main.c:10778;read whole function
+F04169,Render::SetBackgroundGradientColors,Native\Engine\src\Render\Palette.c,Sets the five background gradient colors now or starts a timed transition to them.,high,source:SLUS_010.40/main.c:10780;read whole function
+F04170,Render::SetBackgroundGradientBase,Native\Engine\src\Render\Palette.c,Sets the background gradient colors and records them as the base colors.,high,source:SLUS_010.40/main.c:10822;read whole function
+F04171,Render::TransformBackgroundGradient,Native\Engine\src\Render\Palette.c,"Applies a color transform mode to the background gradient colors, optionally over time.",high,source:SLUS_010.40/main.c:10834;read whole function
+F04172,Render::RequestBackgroundGradientTransform,Native\Engine\src\Render\Palette.c,Transforms the background gradient colors when palette animation is enabled.,high,source:SLUS_010.40/main.c:10990;read whole function
+F04173,Render::SetModelTint,Native\Engine\src\Render\Palette.c,Sets or transitions the room tint (slot 0) or an actor's fade color (slot n).,med,source:SLUS_010.40/main.c:10997;read whole function
+F04174,Render::SetModelTintBase,Native\Engine\src\Render\Palette.c,Sets a model tint and records it as the slot's base color (unused).,med,source:SLUS_010.40/main.c:11047;read whole function
+F04175,Render::TransformModelTint,Native\Engine\src\Render\Palette.c,"Applies a color transform mode to a room or actor tint, optionally over time.",med,source:SLUS_010.40/main.c:11055;read whole function
+F04176,Render::RequestModelTintTransform,Native\Engine\src\Render\Palette.c,Transforms a room or actor tint when palette animation is enabled.,med,source:SLUS_010.40/main.c:11222;read whole function
+F04177,Render::UpdateBackgroundGradientTransition,Native\Engine\src\Render\Palette.c,Advances the background gradient color transition and chains pulsing transitions.,high,source:SLUS_010.40/main.c:11229;read whole function

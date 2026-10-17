@@ -23,12 +23,12 @@ F02818,Menu::Score::InitializeEnemyList,Native\Game\src\Menu\Score\Encyclopedia.
 F02819,Menu::Score::RenderEnemyList,Native\Game\src\Menu\Score\Encyclopedia.c,"Renders the scrolling encyclopedia enemy list with lock state, animated rows, and selection highlighting.",high,
 F02820,Menu::Score::RenderEnemyViewer,Native\Game\src\Menu\Score\Encyclopedia.c,"Renders the selected enemy model, encyclopedia identification, and viewer control prompts.",high,
 F02821,Menu::Score::DrawViewerEdgeFade,Native\Game\src\Menu\Score\ScoreScreen.c,Draws translucent edge strips that fade the encyclopedia model view into the menu background.,high,
-F02822,Core::String::CopyGameText,Native\Core\src\String\GameText.c,Copies game-encoded text through its 0xE7 terminator.,high,Not a null-terminated string operation.
-F02823,Core::String::AppendGameText,Native\Core\src\String\GameText.c,Appends game-encoded text at the destination's 0xE7 terminator.,high,Not a null-terminated string operation.
+F02822,Core::String::CopyGameText,Native\Engine\src\Core\String\GameText.c,Copies game-encoded text through its 0xE7 terminator.,high,Not a null-terminated string operation.
+F02823,Core::String::AppendGameText,Native\Engine\src\Core\String\GameText.c,Appends game-encoded text at the destination's 0xE7 terminator.,high,Not a null-terminated string operation.
 F02824,Menu::Score::CreateStatisticRows,Native\Game\src\Menu\Score\Records.c,"Creates the 23 rows for completion, exploration, Chain, enemy-class kills, and weapon-usage statistics.",high,
 F02825,Menu::Score::RenderStatistics,Native\Game\src\Menu\Score\Records.c,"Renders the general statistics page with completion, chest, map, Chain, kill, and weapon-usage values.",high,Former _renderBossRushDetails is not a boss-rush page.
-F02826,Core::String::FormatGameInteger,Native\Core\src\String\GameText.c,Formats an integer as game-encoded decimal digits followed by a 0xE7 terminator.,high,
-F02827,Core::String::FormatGamePercent,Native\Core\src\String\GameText.c,Formats an integer as game-encoded decimal digits with a percent suffix and 0xE7 terminator.,high,
+F02826,Core::String::FormatGameInteger,Native\Engine\src\Core\String\GameText.c,Formats an integer as game-encoded decimal digits followed by a 0xE7 terminator.,high,
+F02827,Core::String::FormatGamePercent,Native\Engine\src\Core\String\GameText.c,Formats an integer as game-encoded decimal digits with a percent suffix and 0xE7 terminator.,high,
 F02828,Menu::Score::FormatFastestClearTime,Native\Game\src\Menu\Score\Records.c,"Formats the fastest completed round and capped clear time, or a placeholder when no game has been cleared.",high,Input completionTimeMinutes is split by 60; misleading local names describe minutes and seconds.
 F02829,Menu::Score::CreateTimeTrialRows,Native\Game\src\Menu\Score\Records.c,Creates the eight Time Trial boss choices and marks bosses with recorded results selectable.,high,The missing-record sentinel is 0x800000.
 F02830,Menu::Score::LeaveTimeTrialMenu,Native\Game\src\Menu\Score\Records.c,Slides active Time Trial rows out and cancels rows whose staggered entrance has not begun.,high,

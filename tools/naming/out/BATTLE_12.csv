@@ -1,13 +1,13 @@
 id,final_name,final_location,purpose,confidence,notes
-F01454,Core::Math::InterpolateSevenBitScalar,Native\Core\src\Math\Interpolation.c,Interpolates two integers using a seven-bit fixed-point weight.,high,
-F01455,Core::Random::RandomRangeExclusive,Native\Core\src\Random.c,"Returns a random integer between unordered bounds, excluding the larger bound unless both are equal.",high,Uses modulo reduction; the old Uniform name overstated distribution quality.
-F01456,Core::Math::GreatestMagnitudeComponent,Native\Core\src\Math\Vector.c,Returns the signed component with the greatest absolute magnitude among three integers.,high,Preserves the selected component sign rather than returning an absolute value.
-F01457,Core::Math::InterpolateCosineScalar,Native\Core\src\Math\Interpolation.c,Interpolates two integers over a duration using cosine easing.,high,
-F01458,Core::Math::InterpolatePairsToWideVector,Native\Core\src\Math\Interpolation.c,Interpolates three packed short endpoint pairs into an integer vector using a seven-bit weight.,high,
-F01459,Core::Math::InterpolatePairsToShortVector,Native\Core\src\Math\Interpolation.c,Interpolates three packed short endpoint pairs into a short vector using a seven-bit weight.,high,
-F01460,Core::Math::InterpolatePairsToPlaneVector,Native\Core\src\Math\Interpolation.c,Interpolates two packed short endpoint pairs into a two-component integer vector.,high,
-F01461,Core::Math::InterpolateShortPair,Native\Core\src\Math\Interpolation.c,Interpolates one packed short endpoint pair using a seven-bit fixed-point weight.,high,
-F01462,Core::Math::AddShortAndWideVectors,Native\Core\src\Math\Vector.c,Adds a short vector and an integer vector into an integer result.,high,Argument order differs from F01511.
+F01454,Core::Math::InterpolateSevenBitScalar,Native\Engine\src\Core\Math\Interpolation.c,Interpolates two integers using a seven-bit fixed-point weight.,high,
+F01455,Core::Random::RandomRangeExclusive,Native\Engine\src\Core\Random.c,"Returns a random integer between unordered bounds, excluding the larger bound unless both are equal.",high,Uses modulo reduction; the old Uniform name overstated distribution quality.
+F01456,Core::Math::GreatestMagnitudeComponent,Native\Engine\src\Core\Math\Vector.c,Returns the signed component with the greatest absolute magnitude among three integers.,high,Preserves the selected component sign rather than returning an absolute value.
+F01457,Core::Math::InterpolateCosineScalar,Native\Engine\src\Core\Math\Interpolation.c,Interpolates two integers over a duration using cosine easing.,high,
+F01458,Core::Math::InterpolatePairsToWideVector,Native\Engine\src\Core\Math\Interpolation.c,Interpolates three packed short endpoint pairs into an integer vector using a seven-bit weight.,high,
+F01459,Core::Math::InterpolatePairsToShortVector,Native\Engine\src\Core\Math\Interpolation.c,Interpolates three packed short endpoint pairs into a short vector using a seven-bit weight.,high,
+F01460,Core::Math::InterpolatePairsToPlaneVector,Native\Engine\src\Core\Math\Interpolation.c,Interpolates two packed short endpoint pairs into a two-component integer vector.,high,
+F01461,Core::Math::InterpolateShortPair,Native\Engine\src\Core\Math\Interpolation.c,Interpolates one packed short endpoint pair using a seven-bit fixed-point weight.,high,
+F01462,Core::Math::AddShortAndWideVectors,Native\Engine\src\Core\Math\Vector.c,Adds a short vector and an integer vector into an integer result.,high,Argument order differs from F01511.
 F01463,Effects::InterpolateTransformPosition,Native\Game\src\Effects\Transforms.c,"Moves an effect transform between its attachment and saved target using linear, cosine, or sampled-curve timing.",high,
 F01464,Effects::InterpolateTransformSpline,Native\Game\src\Effects\Transforms.c,"Moves an effect transform along a four-point path with linear, cosine, or sampled-curve timing.",high,
 F01465,Effects::AdvanceTransformMotion,Native\Game\src\Effects\Transforms.c,Updates an effect transform's selected motion path and advances its enabled animation frame.,high,fields:func_800D0548_arg1.flags.bit2=advanceMotionFrame
@@ -21,20 +21,20 @@ F01472,Effects::SampleAllEffectCurves,Native\Game\src\Effects\Curves.c,Samples e
 F01473,Effects::SampleEffectCurve,Native\Game\src\Effects\Curves.c,"Returns a looping P-file curve sample by one-based curve identifier, or zero for an invalid identifier.",high,
 F01474,Effects::SampleSegmentedEffectCurve,Native\Game\src\Effects\Curves.c,Interpolates a duration-value curve in P-file block 11 and returns minus one after its final sample.,high,
 F01475,Effects::SegmentedEffectCurveDuration,Native\Game\src\Effects\Curves.c,Returns the sum of segment durations plus the terminal sample for a P-file block 11 curve.,high,
-F01476,Core::Math::InterpolateFixedPointRatio,Native\Core\src\Math\Interpolation.c,Interpolates integers using a ratio first quantized to twelve fractional bits.,high,
-F01477,Core::Math::InterpolateLagrangeShortVector,Native\Core\src\Math\Interpolation.c,Interpolates a short vector through four control points using fixed-point cubic Lagrange weights.,high,"The polynomial passes through control points at t=-1,0,1,2; it is not a Bezier spline."
-F01478,Core::Math::InterpolateLagrangeScalar,Native\Core\src\Math\Interpolation.c,Interpolates an integer through four control values using fixed-point cubic Lagrange weights.,high,
-F01479,Core::Math::InterpolateThirteenBitScalar,Native\Core\src\Math\Interpolation.c,Interpolates two integers using a weight whose full scale is 8192.,high,
-F01480,Core::Math::InterpolateThirteenBitShortVector,Native\Core\src\Math\Interpolation.c,Interpolates short-vector components using a weight whose full scale is 8192.,high,
-F01481,Core::Math::InterpolateCosineShortVector,Native\Core\src\Math\Interpolation.c,Interpolates two short vectors over a duration using cosine easing.,high,
-F01482,Core::Math::InterpolateTimedShortVector,Native\Core\src\Math\Interpolation.c,Interpolates two short vectors at an elapsed frame within a duration.,high,
-F01483,Core::Math::InterpolateThirteenBitWideVector,Native\Core\src\Math\Interpolation.c,Interpolates integer-vector components using a weight whose full scale is 8192.,high,
-F01484,Core::Math::InterpolateCosineWideVector,Native\Core\src\Math\Interpolation.c,Interpolates two integer vectors over a duration using cosine easing.,high,
-F01485,Core::Math::InterpolateTimedWideVector,Native\Core\src\Math\Interpolation.c,Interpolates two integer vectors at an elapsed frame within a duration.,high,
-F01486,Core::Math::InterpolateCosineTimedScalar,Native\Core\src\Math\Interpolation.c,Interpolates integers over a duration with cosine easing through the shared thirteen-bit interpolator.,high,Same mathematical easing as F01457 but delegates to the shared scalar interpolator.
-F01487,Core::Math::InterpolateTimedScalar,Native\Core\src\Math\Interpolation.c,Interpolates integers at an elapsed frame within a duration through the shared thirteen-bit interpolator.,high,
+F01476,Core::Math::InterpolateFixedPointRatio,Native\Engine\src\Core\Math\Interpolation.c,Interpolates integers using a ratio first quantized to twelve fractional bits.,high,
+F01477,Core::Math::InterpolateLagrangeShortVector,Native\Engine\src\Core\Math\Interpolation.c,Interpolates a short vector through four control points using fixed-point cubic Lagrange weights.,high,"The polynomial passes through control points at t=-1,0,1,2; it is not a Bezier spline."
+F01478,Core::Math::InterpolateLagrangeScalar,Native\Engine\src\Core\Math\Interpolation.c,Interpolates an integer through four control values using fixed-point cubic Lagrange weights.,high,
+F01479,Core::Math::InterpolateThirteenBitScalar,Native\Engine\src\Core\Math\Interpolation.c,Interpolates two integers using a weight whose full scale is 8192.,high,
+F01480,Core::Math::InterpolateThirteenBitShortVector,Native\Engine\src\Core\Math\Interpolation.c,Interpolates short-vector components using a weight whose full scale is 8192.,high,
+F01481,Core::Math::InterpolateCosineShortVector,Native\Engine\src\Core\Math\Interpolation.c,Interpolates two short vectors over a duration using cosine easing.,high,
+F01482,Core::Math::InterpolateTimedShortVector,Native\Engine\src\Core\Math\Interpolation.c,Interpolates two short vectors at an elapsed frame within a duration.,high,
+F01483,Core::Math::InterpolateThirteenBitWideVector,Native\Engine\src\Core\Math\Interpolation.c,Interpolates integer-vector components using a weight whose full scale is 8192.,high,
+F01484,Core::Math::InterpolateCosineWideVector,Native\Engine\src\Core\Math\Interpolation.c,Interpolates two integer vectors over a duration using cosine easing.,high,
+F01485,Core::Math::InterpolateTimedWideVector,Native\Engine\src\Core\Math\Interpolation.c,Interpolates two integer vectors at an elapsed frame within a duration.,high,
+F01486,Core::Math::InterpolateCosineTimedScalar,Native\Engine\src\Core\Math\Interpolation.c,Interpolates integers over a duration with cosine easing through the shared thirteen-bit interpolator.,high,Same mathematical easing as F01457 but delegates to the shared scalar interpolator.
+F01487,Core::Math::InterpolateTimedScalar,Native\Engine\src\Core\Math\Interpolation.c,Interpolates integers at an elapsed frame within a duration through the shared thirteen-bit interpolator.,high,
 F01488,Effects::ResetEffectCameraMotion,Native\Game\src\Effects\Camera.c,Clears effect camera transitions and shake channels when the effect camera controller resets.,high,
-F01489,Render::BuildLookAtViewMatrix,Native\Graphics\src\Camera.c,Builds a normalized look-at view matrix and inverse camera translation from a position and target.,high,
+F01489,Render::BuildLookAtViewMatrix,Native\Engine\src\Render\Camera.c,Builds a normalized look-at view matrix and inverse camera translation from a position and target.,high,
 F01490,Effects::CaptureEffectCamera,Native\Game\src\Effects\Camera.c,"Captures the camera position, look-at point, roll, projection distance, and clipping planes for effect animation.",high,
 F01491,Effects::ApplyEffectCamera,Native\Game\src\Effects\Camera.c,"Applies an effect camera pose with camera-relative shake offsets, roll, and clipping parameters.",high,fields:D_800F54D8_t.unk20=horizontalShake;fields:D_800F54D8_t.unk24=verticalShake;fields:D_800F54D8_t.unk28=depthShake;fields:D_800F54D8_t.unk2C=rollShake
 F01492,Effects::EnableCameraShakeChannels,Native\Game\src\Effects\Camera.c,Enables selected channels in the effect camera shake mask.,high,
@@ -55,10 +55,10 @@ F01506,Effects::ReleaseParticlePool,Native\Game\src\Effects\Particles.c,Releases
 F01507,Effects::AllocateEffectParticle,Native\Game\src\Effects\Particles.c,Moves a free particle into an effect's active list and resets its texture animation state.,high,fields:D_800F53B8_t.unk8=particleCount;fields:D_800F53B8_t.unk18=particleList
 F01508,Effects::ReleaseEffectParticle,Native\Game\src\Effects\Particles.c,Unlinks a particle from an effect and returns it to the shared free list.,high,
 F01509,Effects::ReleaseAllEffectParticles,Native\Game\src\Effects\Particles.c,Returns an effect's entire particle chain to the free list and clears its active particle count.,high,Does not clear the stored list head; callers discard or reinitialize the effect context.
-F01510,Core::Math::AddWideVectors,Native\Core\src\Math\Vector.c,Adds two integer vectors component by component.,high,
-F01511,Core::Math::AddWideAndShortVectors,Native\Core\src\Math\Vector.c,Adds an integer vector and a short vector into an integer result.,high,Argument order differs from F01462.
-F01512,Core::Math::WidenShortVector,Native\Core\src\Math\Vector.c,Copies short-vector components into an integer vector without fixed-point scaling.,high,
-F01513,Core::Math::NarrowWideVector,Native\Core\src\Math\Vector.c,Copies integer-vector components into a short vector with narrowing conversions.,high,
+F01510,Core::Math::AddWideVectors,Native\Engine\src\Core\Math\Vector.c,Adds two integer vectors component by component.,high,
+F01511,Core::Math::AddWideAndShortVectors,Native\Engine\src\Core\Math\Vector.c,Adds an integer vector and a short vector into an integer result.,high,Argument order differs from F01462.
+F01512,Core::Math::WidenShortVector,Native\Engine\src\Core\Math\Vector.c,Copies short-vector components into an integer vector without fixed-point scaling.,high,
+F01513,Core::Math::NarrowWideVector,Native\Engine\src\Core\Math\Vector.c,Copies integer-vector components into a short vector with narrowing conversions.,high,
 F01514,Effects::SetParticleSpawnPosition,Native\Game\src\Effects\Particles.c,Rotates a particle's emission offset when requested and adds it to its fixed-point origin.,high,
 F01515,Effects::EmitParticleEvent,Native\Game\src\Effects\Particles.c,"Emits a curve-driven particle burst with shape sampling, velocity, force, lifetime, texture, and child events.",high,fields:func_800D2904_t.unk8=mass;fields:func_800D2904_t.unkA=gravityScale;fields:func_800D2904_t.unkC=positionX;fields:func_800D2904_t.unk18=velocity;fields:func_800D2904_t.unk24=force;fields:func_800D2904_t.unk30=forceIncrement
 F01516,Effects::BranchEffectScriptIf,Native\Game\src\Effects\ScriptVm.c,"Reads an absolute script destination when the condition is true, or skips its two-byte operand otherwise.",high,fields:D_800F53B8_t.unkA=scriptOffset;fields:D_800F53B8_t.unkC=scriptBytes

@@ -1,4 +1,4 @@
-#include "vs/content/Disc.hpp"
+#include "Content/Disc.hpp"
 
 #include <algorithm>
 #include <cctype>

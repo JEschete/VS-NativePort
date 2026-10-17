@@ -23,7 +23,7 @@ def c(*pairs):
     return ";".join(cite(f, t) for f, t in pairs)
 
 
-A = "Native\\Audio\\src\\"
+A = "Native\\Engine\\src\\Audio\\"
 DRV, SEQ, MIX = A + "Driver\\SoundDriver.c", A + "Seq\\Sequencer.c", A + "Mixer\\VoiceMixer.c"
 CH, SFX, SMP = A + "Seq\\Channel.c", A + "SoundEffects\\SoundEffects.c", A + "Samples\\SampleBanks.c"
 CUT, PLY, CTL = A + "Cutscene\\Stream.c", A + "Playback\\SoundPlayback.c", A + "Control\\SoundControl.c"

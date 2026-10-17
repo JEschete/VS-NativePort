@@ -1,21 +1,21 @@
 id,role,final_name,final_location,purpose,confidence,notes
-T00194,OnDisc,Audio::AkaoFileHeader,Native\Audio\src\Seq\AkaoFormat.h,"Starts every AKAO music or effect file with its signature, id, length, reverb mode and timestamp.",high,source:25AC.c:3836
-T00201,State,Audio::MusicSampleBankIds,Native\Audio\src\Samples\SampleBanks.h,Records the sample bank ids loaded for music.,med,source:25AC.c:258
-T00202,State,Audio::CommandArguments,Native\Audio\src\Driver\SoundDriver.h,Holds the six arguments the game writes before dispatching a sound command.,high,source:25AC.c:3949
-T00203,State,Audio::BankStreamState,Native\Audio\src\Samples\SampleBanks.h,Tracks an instrument bank streamed to SPU memory in chunks.,high,source:25AC.c:830
-T00276,OnDisc,Audio::AkaoSequenceFile,Native\Audio\src\Seq\AkaoFormat.h,"Lays out an AKAO music or instrument file: masks, region offsets and the bytecode payload.",high,source:25AC.c:2395
-T00278,State,Audio::SeqChannel,Native\Audio\src\Seq\Channel.h,"Holds one sequencer channel: program position, loops, note timing, slides, modulation and voice.",high,source:25AC.c:5317
-T00279,State,Audio::MusicConfig,Native\Audio\src\Seq\Channel.h,"Holds one music's channel masks, tempo, tables, reverb, master volume and timers.",high,source:25AC.c:2975;real extent 0x80 bytes;members from 0x80 are not part of it
-T00742,Value,Audio::CommandHandler,Native\Audio\src\Mixer\MixControl.h,Is the signature of a sound command handler taking the command parameters.,high,source:25AC.c:3918
-T00280,Value,Audio::CommandParams,Native\Audio\src\Mixer\MixControl.h,Carries a sound command's four parameters and two extended parameters.,high,source:25AC.c:3828
-T00282,State,Audio::CutsceneStreamState,Native\Audio\src\Cutscene\Stream.h,"Holds the cutscene audio stream's voices, page ring, volume fade, pan and flags.",high,source:25AC.c:3788
-T00283,State,Audio::FadeTimer,Native\Audio\src\Seq\Sequencer.h,Steps a value toward a target over a number of ticks and keeps a saved value.,high,source:25AC.c:3023
-T00284,State,Audio::DriverFlags,Native\Audio\src\Driver\SoundDriver.h,"Groups the driver's control latches, mix behavior and pending update words.",high,source:25AC.c:4141;in the binary the second and third words are separate labels (G01891 G01892)
-T00285,Def,Audio::Instrument,Native\Audio\src\Samples\SampleBanks.h,"Describes one instrument: sample addresses, tuning, root note and envelope.",high,source:25AC.c:4892
-T00286,Def,Audio::KeymapEntry,Native\Audio\src\Seq\AkaoFormat.h,"Maps a key to an instrument, note, envelope rates, volume and pan.",med,declaration-only;source:sound.h:421
-T00287,State,Audio::VoiceModeMasks,Native\Audio\src\Mixer\VoiceMixer.h,"Holds the reverb, noise and FM voice masks.",high,source:25AC.c:2147
-T00288,State,Audio::VoiceParams,Native\Audio\src\Mixer\VoiceMixer.h,Holds the hardware voice parameters a channel writes when they change.,high,source:25AC.c:1319
-T00289,State,Audio::VoiceScheduler,Native\Audio\src\Mixer\VoiceMixer.h,"Holds sound-effect voice masks, key-on and key-off requests, tempo accumulation and the noise clock.",high,source:25AC.c:6248
-T00290,State,Audio::VoiceEnvelope,Native\Audio\src\Mixer\VoiceMixer.h,Caches one voice's envelope level for allocation.,high,source:25AC.c:1894
-T00603,State,Audio::SoundState,Native\Audio\src\SoundBanks.h,"Tracks music slots, sound-effect banks, cutscene streams and the wave bank with their disc requests.",high,source:146C.c:14821
-T00708,OnDisc,Audio::SfxProgramHeader,Native\Audio\src\Playback\SoundPlayback.h,Starts a sound-effect program passed by address; bit 7 of byte 9 requests playback tags.,med,source:25AC.c:439
+T00194,OnDisc,Audio::AkaoFileHeader,Native\Engine\src\Audio\Seq\AkaoFormat.h,"Starts every AKAO music or effect file with its signature, id, length, reverb mode and timestamp.",high,source:25AC.c:3836
+T00201,State,Audio::MusicSampleBankIds,Native\Engine\src\Audio\Samples\SampleBanks.h,Records the sample bank ids loaded for music.,med,source:25AC.c:258
+T00202,State,Audio::CommandArguments,Native\Engine\src\Audio\Driver\SoundDriver.h,Holds the six arguments the game writes before dispatching a sound command.,high,source:25AC.c:3949
+T00203,State,Audio::BankStreamState,Native\Engine\src\Audio\Samples\SampleBanks.h,Tracks an instrument bank streamed to SPU memory in chunks.,high,source:25AC.c:830
+T00276,OnDisc,Audio::AkaoSequenceFile,Native\Engine\src\Audio\Seq\AkaoFormat.h,"Lays out an AKAO music or instrument file: masks, region offsets and the bytecode payload.",high,source:25AC.c:2395
+T00278,State,Audio::SeqChannel,Native\Engine\src\Audio\Seq\Channel.h,"Holds one sequencer channel: program position, loops, note timing, slides, modulation and voice.",high,source:25AC.c:5317
+T00279,State,Audio::MusicConfig,Native\Engine\src\Audio\Seq\Channel.h,"Holds one music's channel masks, tempo, tables, reverb, master volume and timers.",high,source:25AC.c:2975;real extent 0x80 bytes;members from 0x80 are not part of it
+T00742,Value,Audio::CommandHandler,Native\Engine\src\Audio\Mixer\MixControl.h,Is the signature of a sound command handler taking the command parameters.,high,source:25AC.c:3918
+T00280,Value,Audio::CommandParams,Native\Engine\src\Audio\Mixer\MixControl.h,Carries a sound command's four parameters and two extended parameters.,high,source:25AC.c:3828
+T00282,State,Audio::CutsceneStreamState,Native\Engine\src\Audio\Cutscene\Stream.h,"Holds the cutscene audio stream's voices, page ring, volume fade, pan and flags.",high,source:25AC.c:3788
+T00283,State,Audio::FadeTimer,Native\Engine\src\Audio\Seq\Sequencer.h,Steps a value toward a target over a number of ticks and keeps a saved value.,high,source:25AC.c:3023
+T00284,State,Audio::DriverFlags,Native\Engine\src\Audio\Driver\SoundDriver.h,"Groups the driver's control latches, mix behavior and pending update words.",high,source:25AC.c:4141;in the binary the second and third words are separate labels (G01891 G01892)
+T00285,Def,Audio::Instrument,Native\Engine\src\Audio\Samples\SampleBanks.h,"Describes one instrument: sample addresses, tuning, root note and envelope.",high,source:25AC.c:4892
+T00286,Def,Audio::KeymapEntry,Native\Engine\src\Audio\Seq\AkaoFormat.h,"Maps a key to an instrument, note, envelope rates, volume and pan.",med,declaration-only;source:sound.h:421
+T00287,State,Audio::VoiceModeMasks,Native\Engine\src\Audio\Mixer\VoiceMixer.h,"Holds the reverb, noise and FM voice masks.",high,source:25AC.c:2147
+T00288,State,Audio::VoiceParams,Native\Engine\src\Audio\Mixer\VoiceMixer.h,Holds the hardware voice parameters a channel writes when they change.,high,source:25AC.c:1319
+T00289,State,Audio::VoiceScheduler,Native\Engine\src\Audio\Mixer\VoiceMixer.h,"Holds sound-effect voice masks, key-on and key-off requests, tempo accumulation and the noise clock.",high,source:25AC.c:6248
+T00290,State,Audio::VoiceEnvelope,Native\Engine\src\Audio\Mixer\VoiceMixer.h,Caches one voice's envelope level for allocation.,high,source:25AC.c:1894
+T00603,State,Audio::SoundState,Native\Engine\src\Audio\SoundBanks.h,"Tracks music slots, sound-effect banks, cutscene streams and the wave bank with their disc requests.",high,source:146C.c:14821
+T00708,OnDisc,Audio::SfxProgramHeader,Native\Engine\src\Audio\Playback\SoundPlayback.h,Starts a sound-effect program passed by address; bit 7 of byte 9 requests playback tags.,med,source:25AC.c:439

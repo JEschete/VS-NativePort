@@ -94,7 +94,7 @@ for _tid, _name, _loc, _purpose, _single in (
 T("T00605", "OnDisc", "Save::SaveFileStats", SAVE, "Gives a save file's summary: play time, save counts, HP, MP, location, clears and map completion.", M)
 T("T00618", "Value", "Menu::Framework::TextHeader", MM, "Gives a menu header's text, disabled flag and x.", M)
 T("T00814", "Value", "State::PlayTime", "Native\\Game\\src\\State\\GameTime.h", "Holds the play time as fields or as one word.", M)
-T("T00644", "Value", "Render::ScreenOffset", "Native\\Graphics\\src\\Render.h", "Gives a screen geometry offset.", M)
+T("T00644", "Value", "Render::ScreenOffset", "Native\\Engine\\src\\Render\\Render.h", "Gives a screen geometry offset.", M)
 T("T00645", "State", "Items::BattleLoot", "Native\\Game\\src\\Items\\Loot.h", "Holds one battle's loot: weapon, blade, grip, shield, armor, accessory, gem and items.", M)
 T("T00656", "State", "Menu::Score::CursorMemory", header_of("Menu::Score::Update"), "Remembers the Score menu's pages and rows.", M)
 T("T00657", "State", "Menu::Framework::MenuRow", MM, "Holds one menu row: state, size, animation, selection, icons, colors and text.", M)
@@ -121,7 +121,7 @@ T("T00680", "State", "Items::WeaponLoadout", LOAD, "Holds an equipped weapon's s
     "unk10B": ("recoveryDelay", "Recovery delay after the weapon's attacks (20 for placeholders)", M,
                c(("146C.c", "arg1->unk954 += (arg1->weapon.unk10B + arg1->unk956_2) << 8;"))),
     "unk168": (*AFF, c(("146C.c", "temp_v0_2 + arg0->weapon.unk168[i];")))}, recv=r"\b(?:target|weapon|arg1->weapon)")
-T("T00684", "State", "Render::Camera", "Native\\Graphics\\src\\Render.h", "Holds the camera position, look-at, angles and far clip.", M)
+T("T00684", "State", "Render::Camera", "Native\\Engine\\src\\Render\\Render.h", "Holds the camera position, look-at, angles and far clip.", M)
 T("T00690", "Value", "Content::DiscFile", "Native\\Content\\src\\DiscQueue.h", "Gives a disc file's sector and size.", H)
 T("T00691", "State", "Content::DiscQueueSlot", "Native\\Content\\src\\DiscQueue.h", "Holds one queued disc read: state, priority, file and destination.", M)
 T("T00693", "State", "State::ArtsStatus", "Native\\Game\\src\\State\\Progress.h", "Holds Break Arts learned and kills per weapon category.", M)
@@ -138,7 +138,7 @@ T("T00703", "State", "Items::InventoryWeapon", INV, "Holds one inventory weapon:
 T("T00704", "State", "Items::Inventory", INV, "Holds the inventory by category.", H)
 T("T00706", "State", "State::ScoreData", "Native\\Game\\src\\State\\Progress.h", "Holds titles, kills, attacks, time trial scores, chains, clears and completion.", M)
 T("T00707", "State", "State::Settings", "Native\\Game\\src\\State\\Settings.h", "Holds the option settings.", M)
-T("T00710", "Value", "Input::StickPosition", "Native\\Input\\src\\Buttons.h", "Gives the analog stick positions.", M)
+T("T00710", "Value", "Input::StickPosition", "Native\\Engine\\src\\Input\\Buttons.h", "Gives the analog stick positions.", M)
 T("T00711", "State", "Items::Container", INV, "Holds the container's items and display order.", M,
   {"data": ("items", "Items by category", M, D("T00711", "data"))})
 T("T00712", "State", "Items::ContainerData", INV, "Holds the container's items by category.", M)
@@ -168,7 +168,7 @@ for _gid, _name, _purpose, _cite in (
         ("G00009", "statusCommandAnimationStep", "Steps the status command's slide", ("MENU/MENU3.PRG/16C.c", "_statusCommandAnimationStep = 0;")),
         ("G00010", "statusCommandState", "Shows the status command", ("MENU/items1.h", "_statusCommandState = 1;"))):
     G(_gid, "state", "Menu::Inventory::" + _name, MI, _purpose + ".", H, c(_cite) + ";fork name kept")
-G("G00011", "state", "Render::frameScratch", "Native\\Graphics\\src\\Render.c", "Holds the per-frame drawing context kept in the scratchpad.", H,
+G("G00011", "state", "Render::frameScratch", "Native\\Engine\\src\\Render\\Render.c", "Holds the per-frame drawing context kept in the scratchpad.", H,
   c(("146C.c", "bound = inPos->vy - vs_scratch.camera.lookAt.vy;")) + ";type Render::FrameScratch")
 G("G00063", "state", "Menu::Inventory::equipmentModelLoadStep", MI, "Steps reloading the equipment models after an equipment change.", M,
   c(("MENU/MENU3.PRG/68C4.c", "switch (vs_battle_loadObjectDataState) {")) + ";fork name loadObjectDataState")

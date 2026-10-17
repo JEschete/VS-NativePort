@@ -54,6 +54,6 @@ T00098,Enum,Battle::WarlockSpell,Native\Game\include\Battle\Action.h,Names the W
 T00101,Enum,Items::GemTarget,Native\Game\include\Items\Equipment.h,Names the gem target for shields.,med,declaration-only;source:func_8006B57C_t.h:166
 T00102,Enum,Items::ItemCategory,Native\Game\include\Items\Inventory.h,Names the item categories.,med,declaration-only;source:func_8006B57C_t.h:156
 T00709,Def,Battle::StatusEffectParams,Native\Game\src\Battle\StatusEffects.h,"Defines one status effect: its status flags, tick interval, the statuses it cancels and the statuses that block it.",med,source:146C.c:10138
-T00726,State,Render::FrameScratch,Native\Graphics\src\Render.h,"Holds the per-frame drawing context kept in the scratchpad: primitive cursor, ordering tables, view facing, view matrix and camera.",high,source:146C.c:7587;source:146C.c:7585
+T00726,State,Render::FrameScratch,Native\Engine\src\Render\Render.h,"Holds the per-frame drawing context kept in the scratchpad: primitive cursor, ordering tables, view facing, view matrix and camera.",high,source:146C.c:7587;source:146C.c:7585
 T00739,State,Battle::Ai::WanderRecordView,Native\Game\src\Battle\Ai\AiViews.h,Views an actor record's flags while wandering.,low,source:771A8.c:1003;view of Actors::ActorRecord;fork-only view; fold into its canonical type when copying
 T00740,State,Battle::Ai::WanderView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state while it wanders.,med,declaration-only;source:771A8.c:1592;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying

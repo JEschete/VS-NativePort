@@ -1,6 +1,6 @@
-#include "vs/game/boot/GameApp.hpp"
+#include "Boot/GameApp.hpp"
 
-#include "vs/input/Pad.hpp"
+#include "Input/Pad.hpp"
 
 namespace VS::Game {
 

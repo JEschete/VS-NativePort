@@ -44,9 +44,9 @@ def T(tid, role, name, loc, purpose, conf, notes, flds):
 
 
 DECL = "declaration-only;"
-G = "Native\\Graphics\\src\\"
+G = "Native\\Engine\\src\\Render\\"
 C = "Native\\Content\\src\\"
-S = "Native\\Save\\src\\MemoryCard\\"
+S = "Native\\Engine\\src\\Save\\MemoryCard\\"
 
 T("T00122", "Value", "State::GameTimeComponents", "Native\\Game\\include\\State\\GameTime.h",
   "Splits elapsed game time into frame second minute and hour bytes.", "high",
@@ -186,7 +186,7 @@ T("T00250", "Def", "Actors::TextureScrollBounds", "Native\\Game\\src\\Actors\\Te
       ("unk7", "interval", "Ticks between steps copied into the scroll state", "high", cites(("30DB0.c", "state->interval = bounds->unk7;"))),
   ])
 
-T("T00291", "State", "Movie::Intro::MdecState", "Native\\Video\\src\\Intro\\Playback.h",
+T("T00291", "State", "Movie::Intro::MdecState", "Native\\Engine\\src\\Movie\\Intro\\Playback.h",
   "Double-buffers encoded frames, decoded slices and frame rectangles for intro movie decoding.", "high",
   cites(("22C.c", "arg0->encodedData[0] = _encodedDataBuf0;")) + ";replaced-by:native movie decoder", [
       ("encodedData", "encodedBuffers", "Two buffers holding compressed frames", "high",
@@ -390,7 +390,7 @@ T("T00091", "Enum", "Save::CardEventSignal", S + "GameFiles.h",
   ])
 
 CONFLICT = "layout-conflict: channels are used as int[2][6] (48 bytes) but only 40 remain; an element likely starts at +8 with motor levels stored separately"
-T("T00581", "State", "Input::VibrationPatternSlot", "Native\\Input\\src\\Vibration.h",
+T("T00581", "State", "Input::VibrationPatternSlot", "Native\\Engine\\src\\Input\\Vibration.h",
   "Plays one bytecoded vibration pattern on the two controller motors.", "med",
   cites(("main.c", "int (*a1)[6] = (int (*)[6])_padAct[j].unk10;")) + ";" + CONFLICT, [
       ("unk0", "motorLevels", "Summed motor levels; only slot 0's copy is used", "med",
@@ -402,13 +402,13 @@ T("T00581", "State", "Input::VibrationPatternSlot", "Native\\Input\\src\\Vibrati
        cites(("main.c", "int (*a1)[6] = (int (*)[6])_padAct[j].unk10;")) + ";" + CONFLICT),
   ])
 
-T("T00583", "Value", "Core::PercentSuffixText", "Native\\Core\\src\\Text\\Format.h",
+T("T00583", "Value", "Core::PercentSuffixText", "Native\\Engine\\src\\Core\\Text\\Format.h",
   "Holds the encoded percent sign appended to percentages.", "high",
   cites(("238.c", "static percent_t percent = { \"%\\0\" };")), [
       ("data", "text", "Encoded percent sign and terminator", "high", cites(("238.c", "static percent_t percent = { \"%\\0\" };")) + ";source:238.c:2373"),
   ])
 
-T("T00584", "State", "Input::ControllerPortState", "Native\\Input\\src\\Controllers.h",
+T("T00584", "State", "Input::ControllerPortState", "Native\\Engine\\src\\Input\\Controllers.h",
   "Holds one controller port's type, stick positions, actuator levels and connection state.", "high",
   cites(("main.c", "portInfo_t* port = &_portInfo[portID >> 4];")), [
       ("mode", "controllerType", "Controller type from PadInfoMode; 5 and 7 report sticks", "high",
@@ -530,7 +530,7 @@ T("T00670", "State", "Render::TextureSlot", G + "Textures.h",
       ("refCount", "referenceCount", "Number of users; zero frees the slot", "high", cites(("30DB0.c", "if (D_800F46A8[i].refCount == 0) {"))),
   ])
 
-T("T00692", "State", "Core::HeapBlockHeader", "Native\\Core\\src\\Memory\\Heap.h",
+T("T00692", "State", "Core::HeapBlockHeader", "Native\\Engine\\src\\Core\\Memory\\Heap.h",
   "Links one free or allocated heap block and records its size.", "high",
   cites(("main.c", "if (var_a1->blockSz >= blockSz) {")) + ";replaced-by:native allocator", [
       ("prev", "prev", "Previous block", "high", cites(("main.c", "var_a1->next->prev = var_a1->prev;"))),

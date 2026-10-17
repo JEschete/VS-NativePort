@@ -113,7 +113,7 @@ GROUP_B = [
 ]
 for tid, name, purpose, ov in GROUP_B:
     specs = g.generic_specs(tid, ov)
-    T(tid, "State", name, ("Native\\Graphics\\src\\ModelDraw.h" if name.startswith("Render::") else AI + "AiViews.h"),
+    T(tid, "State", name, ("Native\\Engine\\src\\Render\\ModelDraw.h" if name.startswith("Render::") else AI + "AiViews.h"),
       purpose, L if "not read" in purpose else M,
       "declaration-only;" + g.decl(tid, g.members[tid][0]["name"]) + ";fork-only view; fold into its canonical type",
       specs, recv=ANYR)
