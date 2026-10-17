@@ -455,7 +455,7 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"TITLE/TITLE.PRG", 0x449A8, sizeof Title_copyrightImage, &Title_copyrightImage}, // G02021 _menuCopyright
     {"TITLE/TITLE.PRG", 0x46B68, sizeof Title_saveMenuFontAtlas, &Title_saveMenuFontAtlas}, // G02022 _fontTable
     {"TITLE/TITLE.PRG", 0x54B68, sizeof Title_debugFontAtlas, &Title_debugFontAtlas}, // G02023 _debugFont
-    {"TITLE/TITLE.PRG", 0x59868, sizeof Title_saveMenuUiAtlas, &Title_saveMenuUiAtlas}, // G02024 _uiTable
+    {"TITLE/TITLE.PRG", 0x59A68, sizeof Title_saveMenuUiAtlas, &Title_saveMenuUiAtlas}, // G02024 _uiTable
     {"TITLE/TITLE.PRG", 0x68A68, sizeof Title_saveMenuBackground, &Title_saveMenuBackground}, // G02089 _saveMenuBg_clut
 };
 const unsigned Content_moduleDataCount = sizeof Content_moduleData / sizeof Content_moduleData[0];

@@ -155,8 +155,11 @@ build\Release\VS.Desktop.exe
 | `--scripted` | Ignore keyboard and gamepad (only `--press` input). |
 
 **Today:** the original boot and title run (see Current state); the game reads `Native\data\` for its files, and
-the disc only to report its label. The title screen appears about 55 s after start (skip the movie with Start or
-Circle).
+the disc only to report its label. The title screen appears about 55 s after start; **Start (or Circle) skips the
+intro movie**, so test runs press it: `--press 1000:Start` puts the menu up by tick ~1100.
+`tools\test\run_native.ps1` wraps copy, build and a captured run (`-SkipIntro`), and
+`tools\test\duckstation_capture.ps1` makes the matching DuckStation reference (see `.github\copilot-instructions.md`
+for the emulator and BIOS locations).
 
 The game reads only `Native\data\` (⏭ plus `Native\Content\patches\` and `mods\`). The disc is optional at run
 time; if it is found, its label is logged. If `Native\data\` is missing, the game stops with a message that says to
@@ -196,7 +199,7 @@ These scripts regenerate committed files. They are not part of the build.
 | `python tools\port\copy_to_native.py` | Regenerate the copied code in `Native\` from the decomp (never edit its output; `tools\port\own.py` takes an item over by hand) |
 | `python tools\port\understood.py vs_title_exec@TITLE.PRG [--mark]` | Check (and mark) `understood` for every function reachable from a root |
 | `python tools\naming\merge_names.py --check-all` | Validate the function catalog naming |
-| `python tools\scaffold\gen_solution.py` | Regenerate the `.sln` / `.vcxproj` files. **Run it after any project change**; do not hand-edit the project files. |
+| `python tools\scaffold\gen_solution.py` | Regenerate the `.sln` / `.vcxproj` files, including the `Tools` solution folder that shows `tools\` and `C:\Tools` (set `VS_EXTERNAL_TOOLS` for another location). **Run it after any project change**; do not hand-edit the project files. |
 
 **Legacy, do not use:** `tools\Setup-Windows.ps1`, `tools\Probe-Native.ps1` and `tools\windows.py` belong to the
 earlier, abandoned emulator-style port (VS 2022/CMake, `vagrant-native.exe`). They are not part of this build.

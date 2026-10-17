@@ -1,0 +1,4069 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="C-Tools">
+      <UniqueIdentifier>{B9161747-B66E-5FB3-AF6A-AB2F3204F397}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\.vscode">
+      <UniqueIdentifier>{C64C3910-6BE3-5483-B594-C8EBEC90FD3E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base">
+      <UniqueIdentifier>{E3005788-E431-5763-BDA3-7141EB0E5ECD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Analysis">
+      <UniqueIdentifier>{E41AF675-97F2-55F1-98AF-01B2F35FF466}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Analysis\Ghidra">
+      <UniqueIdentifier>{0038BFBC-87EB-5B4B-B4DD-039A9DDA98E2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Analysis\Ghidra\11.4.2">
+      <UniqueIdentifier>{EC33566E-4F73-5276-8667-CDBFACEBF9EF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Analysis\Ghidra\12.1.2">
+      <UniqueIdentifier>{399C3C02-AA71-5036-91D4-A6209C80E669}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Analysis\Ghidra\12.1.3">
+      <UniqueIdentifier>{EE34B497-9E4D-5C62-86E1-4678345DE9C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Analysis\Ghidra\12.1.4">
+      <UniqueIdentifier>{FB6384F3-10F9-549B-811C-814761794D91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Analysis\REA">
+      <UniqueIdentifier>{245F762C-D9A6-5DFD-B433-3720297D6B5C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Analysis\REA\Source">
+      <UniqueIdentifier>{3ECEB621-89ED-5882-A639-AF4280D82148}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Assemblers">
+      <UniqueIdentifier>{AEE41CC9-E823-50D3-B76A-7AE197C9F8F3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Assemblers\WLA-DX">
+      <UniqueIdentifier>{9CB401BF-7068-57D3-881E-705A1C50B3BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Assemblers\WLA-DX\Release-10.7">
+      <UniqueIdentifier>{D39F0EA1-8F40-54D6-AA0E-D5613B004985}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Assemblers\WLA-DX\Source">
+      <UniqueIdentifier>{0BDD781F-284B-53A4-811D-CDF1F2107E5B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Asset-Analysis">
+      <UniqueIdentifier>{A2B2BEF0-7A4F-5056-BB5E-E7AECA20BF87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Asset-Analysis\Noesis">
+      <UniqueIdentifier>{8B074CED-726B-541E-A932-C7084F1711BB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Audio">
+      <UniqueIdentifier>{8D303F2F-AC16-523E-88F9-5618AC8007F8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Audio\vgmstream">
+      <UniqueIdentifier>{51B638F1-D332-54EE-B2E2-D3AC4D208A6F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation">
+      <UniqueIdentifier>{95FDBE29-5404-5135-BB35-7393F0A6C166}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\asm-differ">
+      <UniqueIdentifier>{C58A285E-318F-59C9-ABCA-3E9640FB3010}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\decomp-permuter">
+      <UniqueIdentifier>{41BC79CC-78EF-590C-8058-CB7D18D00CC7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser">
+      <UniqueIdentifier>{64FBA131-8CAC-5110-916E-E50AC735CFA5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\decomp-permuter\src">
+      <UniqueIdentifier>{93BF8DC5-07D4-50B2-ADE2-B75FB8A791A4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\decomp-permuter\test">
+      <UniqueIdentifier>{32BABC52-B427-520D-9FF2-9E336F8691BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\m2c">
+      <UniqueIdentifier>{D050FC9F-DB26-50C9-9D40-445118C06E47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\m2c\.venv">
+      <UniqueIdentifier>{CB2D2A16-D8F0-53E0-A201-D3A2522FC581}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\m2c\browser">
+      <UniqueIdentifier>{CDD4F01F-0D8F-5A37-ADD2-D1233330E869}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\m2c\m2c">
+      <UniqueIdentifier>{4F2D51FC-B1C4-51D6-923C-9F9E0C4A608B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\m2c\m2c_pycparser">
+      <UniqueIdentifier>{1F7A532F-8502-5C01-A4E9-B1BAFC064EEC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\m2c\tests">
+      <UniqueIdentifier>{766A39EA-BF22-5393-8D2B-7C336EF1B26E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\objdiff">
+      <UniqueIdentifier>{D96FFB1B-F678-5FAA-8D68-FC23C232324D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Decompilation\objdiff\v3.8.2">
+      <UniqueIdentifier>{7759AB8D-B386-5E9E-98D8-9BC5AF03FAE6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Emulators">
+      <UniqueIdentifier>{3B40589E-AD25-541A-AEDB-77FF09D95ED2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Emulators\Mesen2">
+      <UniqueIdentifier>{4C15A10A-843D-5EDF-AC4E-4BC4F59532C0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Emulators\ares-v148">
+      <UniqueIdentifier>{5C71DA10-CA8C-5100-9507-0B45D518B140}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Emulators\ares-v148\Shaders">
+      <UniqueIdentifier>{CA9EE43F-3A28-5B4A-9703-16D4D3F787FE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Graphics">
+      <UniqueIdentifier>{AE0A0524-8AE2-535E-A4D0-A81A048079A2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Graphics\Sharp">
+      <UniqueIdentifier>{032BAF57-284B-5979-BA6F-9B2CC946BE16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Graphics\Sharp\Runtime">
+      <UniqueIdentifier>{C4B89778-558A-50B7-8C97-132C4C34F3D4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Graphics\Validation">
+      <UniqueIdentifier>{195D49D3-6E1F-5DA8-9029-A59A1626C6A2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Graphics\Validation\2026-10-15T07-11-12-575Z">
+      <UniqueIdentifier>{971A78BD-09DD-5EDE-A062-F77BB8D5E537}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Patching">
+      <UniqueIdentifier>{F8B4E978-BD07-5195-A144-1D0A1ADD09C6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Patching\Floating-IPS">
+      <UniqueIdentifier>{C68295C1-D215-56E7-B848-8AC30DBA37EE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing">
+      <UniqueIdentifier>{C9BD5DCA-9F95-5CFF-B313-BCF8CC04041E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\hypothesis">
+      <UniqueIdentifier>{7F7A2436-96A5-5479-937C-C4992D6CBA62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\hypothesis\.claude">
+      <UniqueIdentifier>{FDA5160E-E11D-55A2-9A31-C926C3E6242F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\hypothesis\brand">
+      <UniqueIdentifier>{3AC955F8-AB32-52B2-80D8-EB1C45FA196F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\hypothesis\guides">
+      <UniqueIdentifier>{4D18E197-2B53-55FC-8EED-5354E9E7CDB7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\hypothesis\hypothesis">
+      <UniqueIdentifier>{17406E31-AFA1-538F-A7ED-75519F9444AE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\hypothesis\requirements">
+      <UniqueIdentifier>{515950B3-BB59-5A5D-A18D-B045517A5666}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\hypothesis\tooling">
+      <UniqueIdentifier>{8F604ED7-5044-572A-94FB-446A4D81FBFD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\hypothesis\website">
+      <UniqueIdentifier>{76FFEBF4-5FBB-5431-9450-6421941A205D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\hypothesis\whole_repo_tests">
+      <UniqueIdentifier>{284FA1FA-898F-597C-9B03-BDE0D35530CF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\rapidcheck">
+      <UniqueIdentifier>{8CA00BDA-B25C-5500-9ACD-EE2E77D07BD5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\rapidcheck\doc">
+      <UniqueIdentifier>{BBEA1E7D-5952-50E8-BC11-52B6D3F1BD33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\rapidcheck\examples">
+      <UniqueIdentifier>{DED4DC81-BB77-5009-92DE-91A669BB5683}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\rapidcheck\ext">
+      <UniqueIdentifier>{B0E45F5A-3800-5FFB-8053-0567BE523EC1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\rapidcheck\extras">
+      <UniqueIdentifier>{9EC5D11D-EC71-50FE-94E2-B80065F6EA2C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Testing\rapidcheck\test">
+      <UniqueIdentifier>{9C63C6AE-8F07-5F3A-BBF4-56FB70CFD1CE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains">
+      <UniqueIdentifier>{CA0455B1-BB12-50E6-8814-2DFBB1D98322}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\cc65">
+      <UniqueIdentifier>{9A4F34F3-C832-5967-8F7A-FBF3F3F18C77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\cc65\.github">
+      <UniqueIdentifier>{9A77C0F8-183C-562A-B9DB-2520FAC576C2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\cc65\cfg">
+      <UniqueIdentifier>{CAC5DDC3-55B1-51A8-9C99-1E41C93B6542}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\cc65\libsrc">
+      <UniqueIdentifier>{F60F471D-D5B9-577F-A4AE-9C7E3620D869}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\cc65\samples">
+      <UniqueIdentifier>{B1363A3D-5869-5F3D-A647-DC2078AC8018}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\cc65\src">
+      <UniqueIdentifier>{557EA363-1A19-57B1-8B90-4FF528273126}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\cc65\targettest">
+      <UniqueIdentifier>{62AA3A9E-E3A0-54ED-BD7F-AAB6BEF149F3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\cc65\test">
+      <UniqueIdentifier>{46C46E29-BB06-5719-B2A2-86ADAF267612}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\devkitPro">
+      <UniqueIdentifier>{668FF017-CC8A-51ED-99CE-FB69114D16D7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\devkitPro\libgba">
+      <UniqueIdentifier>{DA45DBFD-22EC-56FB-9DE8-02F8011CE3D7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\devkitPro\libmirko">
+      <UniqueIdentifier>{4397F330-CA63-56DB-8E45-CCC526DB8DD2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\devkitPro\libnds">
+      <UniqueIdentifier>{F85848F3-1D79-5A8D-9A4B-1C7C92ACF214}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Base\Toolchains\devkitPro\msys2">
+      <UniqueIdentifier>{F8FC6010-1330-5C44-9240-DB9502AF0075}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\LibreHardwareMonitor">
+      <UniqueIdentifier>{9AAF40E7-2FA3-505B-8A26-85F6A167D1D5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\RA_docs">
+      <UniqueIdentifier>{C837E076-D6FA-50E7-A0E5-962502E40A13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\RE_Docs">
+      <UniqueIdentifier>{509E0434-71EA-5836-8251-CC09749BDAF0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\RE_Docs\Decompilation">
+      <UniqueIdentifier>{2EE0549C-6601-5421-AC18-DE3B4D747050}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\RE_Docs\Disassembly">
+      <UniqueIdentifier>{8CF82870-299C-51BD-B861-AD544014F159}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\RE_Docs\Native_Ports">
+      <UniqueIdentifier>{9BBE3ECB-8783-5FD5-AE4B-CF50875F4685}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems">
+      <UniqueIdentifier>{F76728A8-0733-5A01-B971-FB07657BDEB1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\GB-GBC">
+      <UniqueIdentifier>{40AF9CFD-E54E-5042-9524-2AC2F470F12A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\GB-GBC\Emulators">
+      <UniqueIdentifier>{D3C65A13-315D-55E4-A45E-E9148EEB8B8D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\GB-GBC\Emulators\BGB">
+      <UniqueIdentifier>{8F48F93C-F700-502F-8A3E-44D51E6DA857}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\GB-GBC\Emulators\SameBoy-1.0.3">
+      <UniqueIdentifier>{5D963870-3A2E-58C2-93BA-8D2DA2D4409A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\GB-GBC\Ghidra-Extensions">
+      <UniqueIdentifier>{EA3613D2-D50E-5B6B-9B21-D767DDEAB1C8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\GB-GBC\Ghidra-Extensions\GhidraBoy">
+      <UniqueIdentifier>{0888A178-D4D3-5E35-BE83-2EAB805D0CF4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\GB-GBC\Toolchains">
+      <UniqueIdentifier>{70088EE9-9E48-5F77-BDAF-D00253431780}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\GB-GBC\Toolchains\GBDK-2020">
+      <UniqueIdentifier>{ED2BADF0-88B9-56C1-971F-EF8EB306A7C9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\GBA">
+      <UniqueIdentifier>{8C4FDAF8-6465-53BE-BDE5-51DFD0DFD31A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\GBA\Emulators">
+      <UniqueIdentifier>{8D88C743-768B-5434-9B8D-EFA2746E7BAD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\GBA\Emulators\mGBA-0.10.5">
+      <UniqueIdentifier>{25B1FE90-2AB6-571B-880E-3B2D8D3BC179}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\N64">
+      <UniqueIdentifier>{0129C90C-EDAA-5757-8CAE-715CEAB6BBD1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\N64\Analysis">
+      <UniqueIdentifier>{BBA9435D-DE6A-5AFE-BC0A-8E52866ACCBD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\N64\Analysis\rabbitizer">
+      <UniqueIdentifier>{6EF1B44D-718D-5E1C-AF71-15BA1E57C0E9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\N64\Analysis\spimdisasm">
+      <UniqueIdentifier>{285A56BE-D248-5615-BD1C-F7F46FA5FF5E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\N64\Emulators">
+      <UniqueIdentifier>{C82AFC5D-809F-5140-B281-A6772C6C99BB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\N64\Emulators\Project64">
+      <UniqueIdentifier>{1B21FE1B-3B92-584F-83AE-C2E3CB19A0C3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\N64\Ghidra-Extensions">
+      <UniqueIdentifier>{EB2B229D-FC71-558A-AEDB-7E6689299466}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\N64\Ghidra-Extensions\N64LoaderWV">
+      <UniqueIdentifier>{07C0CA03-938A-55C3-BA95-BF817F96017C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\NES">
+      <UniqueIdentifier>{D62B7616-D246-51CD-BFCC-D58A0FE781C2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\NES\Assemblers">
+      <UniqueIdentifier>{990241E6-BA6D-5764-BA79-7FD23ED4E4E7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\NES\Assemblers\asm6f">
+      <UniqueIdentifier>{C814E6FE-21C9-53FD-90F6-30EFB6229742}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\NES\Emulators">
+      <UniqueIdentifier>{A1E98101-F709-5A83-B356-71BD44B33B81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\NES\Emulators\FCEUX-2.6.6">
+      <UniqueIdentifier>{BB916F9A-637E-5B07-AA44-8893B4D9C9CD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\NES\Ghidra-Extensions">
+      <UniqueIdentifier>{95E839E9-EC1B-583F-AEB6-BBACB8EE01CB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\NES\Ghidra-Extensions\GhidraNes">
+      <UniqueIdentifier>{16E61775-283C-594C-8092-51BD113DA451}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\NES\Graphics">
+      <UniqueIdentifier>{C48330F1-2868-53F5-A0CE-0A1A0CC67B6D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\NES\Graphics\NEXXT-3.7.7">
+      <UniqueIdentifier>{5F1C8A3C-5CB0-5ACB-BD08-42B24CEB3B89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSP">
+      <UniqueIdentifier>{AAB28698-C411-5288-938A-42714FF820E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSP\Disc-Tools">
+      <UniqueIdentifier>{44C3E74D-8CA6-5F86-894B-DF944741C635}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSP\Disc-Tools\maxcso">
+      <UniqueIdentifier>{0642D4A6-A031-5627-807B-73D692310EA9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSP\Documentation">
+      <UniqueIdentifier>{658975A1-B5FD-548C-8750-84028433BB6E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSP\Documentation\psplibdoc">
+      <UniqueIdentifier>{0CAC95B2-DE7F-52A6-884E-24CA3CDF25A0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSP\Emulators">
+      <UniqueIdentifier>{742B90FA-95BC-555D-A524-4F13422318B2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSP\Emulators\PPSSPP-1.20.4-dev">
+      <UniqueIdentifier>{D32104A2-8E7D-55A7-B9E6-8BF2BBE7BFFB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSP\Ghidra-Extensions">
+      <UniqueIdentifier>{1F7FE5B3-21BA-5065-92CC-3F63E04CE5CB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSP\Ghidra-Extensions\ghidra-allegrex">
+      <UniqueIdentifier>{B936E21F-61CC-5F74-9E4D-E068224433FD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSP\Ghidra-Extensions\psp-ghidra-scripts">
+      <UniqueIdentifier>{A151D16B-6DC6-52D9-A037-1F9DCBB7DBE2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX">
+      <UniqueIdentifier>{D283ED28-D196-5264-A640-D38BC18B2B39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Asset-Tools">
+      <UniqueIdentifier>{2AC61B5B-B894-5836-9685-D22677D0BFBE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Asset-Tools\jpsxdec">
+      <UniqueIdentifier>{AFAF5C19-7D5B-5C65-BDC6-D49BEAF33994}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Asset-Tools\vstools">
+      <UniqueIdentifier>{287A6FEB-E96E-5232-BB1A-C7E61BF53C56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Build-Tools">
+      <UniqueIdentifier>{D82C53E8-6446-5642-A362-F763A9442E2E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Build-Tools\maspsx">
+      <UniqueIdentifier>{412AE715-9AF3-5069-B5CB-E474CB74D2AC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Disc-Tools">
+      <UniqueIdentifier>{FE083D34-6CD7-533E-82C9-305123314991}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Disc-Tools\mkpsxiso">
+      <UniqueIdentifier>{E4A9CF0A-F453-5DD1-86E5-53F7E6AD1BBE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Emulators">
+      <UniqueIdentifier>{0E9BD4BB-C411-57B2-9C03-8259D5E3CC80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Emulators\DuckStation">
+      <UniqueIdentifier>{C1B26589-6691-5702-958C-8D69F46C9E7F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Emulators\PCSX-Redux">
+      <UniqueIdentifier>{487A245D-D1CA-51A3-AD70-0324794F5595}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Toolchains">
+      <UniqueIdentifier>{418FB4FF-C452-5C1C-B677-82C60E6B03DC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Toolchains\PSn00bSDK">
+      <UniqueIdentifier>{7B5C52F1-287E-5C27-B578-38654B62F86E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Validation">
+      <UniqueIdentifier>{6B950DC2-DEF6-5A03-9E5D-7FFF2083FCCC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\PSX\Validation\ps1-tests">
+      <UniqueIdentifier>{C0C2A4B9-BEFA-5AC0-AFD6-05C39A6A6D98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\SNES">
+      <UniqueIdentifier>{D7FA3747-3266-529E-9ECE-7FD80D46248A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\SNES\Ghidra-Extensions">
+      <UniqueIdentifier>{036C5032-BDD4-55E8-B00E-6A75E39AB68B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\SNES\Ghidra-Extensions\ghidra-65816">
+      <UniqueIdentifier>{24987A6F-4A1E-5F14-B155-3A78777F93EF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\SNES\Ghidra-Extensions\ghidra-snes-loader">
+      <UniqueIdentifier>{9724CFE9-6447-537E-9CF0-2C628DFCC9DD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\SNES\Ghidra-Extensions\ghidra-snes-loader-Raikaru">
+      <UniqueIdentifier>{13B0CF87-03B0-50EB-B178-1B360B8856FC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\Sega-Genesis">
+      <UniqueIdentifier>{D60B2BA4-6813-5456-AE7F-A5718FDC118A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\Sega-Genesis\Build-Tools">
+      <UniqueIdentifier>{2829A655-F9D4-566E-83CC-5DC769A0057D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\Sega-Genesis\Build-Tools\mdtools">
+      <UniqueIdentifier>{0B2892C2-468C-5258-9135-567697A8FE92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\Sega-Genesis\Emulators">
+      <UniqueIdentifier>{7CA55A40-01D9-5A25-A4F1-4901FDC79471}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\Sega-Genesis\Emulators\BlastEm">
+      <UniqueIdentifier>{76E5226E-E7D6-55C9-ADA8-A31BA659D4F4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\Sega-Genesis\Toolchains">
+      <UniqueIdentifier>{238B3434-0E60-591C-90BB-9A83D92A74BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\Systems\Sega-Genesis\Toolchains\SGDK">
+      <UniqueIdentifier>{D3C20D3D-50D2-565F-8AB5-A390980B3CFF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro">
+      <UniqueIdentifier>{B337A600-BC82-5111-9E41-F9BFF1253424}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitA64">
+      <UniqueIdentifier>{C4852112-1B15-5303-9ADD-D20136D145F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitA64\aarch64-none-elf">
+      <UniqueIdentifier>{555C2223-A131-5D17-B8C3-8A55A89AFEC3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitA64\aarch64-none-elf\bin">
+      <UniqueIdentifier>{7C529D01-AD33-58D1-B779-C200B62B9EC3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitA64\aarch64-none-elf\lib">
+      <UniqueIdentifier>{E26FECA2-506E-5626-99D2-00152825515E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitA64\bin">
+      <UniqueIdentifier>{2C3028A0-5D98-5521-8F8C-7094C7C6FEFC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitARM">
+      <UniqueIdentifier>{72F9B0E7-CA5D-556E-B359-01FD354FBF3B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitARM\arm-none-eabi">
+      <UniqueIdentifier>{A90AC86E-8A4A-5CDC-A53D-7DB57718DDC8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitARM\arm-none-eabi\bin">
+      <UniqueIdentifier>{D4BE6472-5228-5C38-9EEC-075FB676D790}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitARM\arm-none-eabi\lib">
+      <UniqueIdentifier>{966D5425-49B6-59BC-9A3E-E6BC10950376}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitARM\bin">
+      <UniqueIdentifier>{C55B2432-A42F-5D7E-B028-225D6C0701A0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitPPC">
+      <UniqueIdentifier>{D3BD9CCD-3CB0-5700-B304-80F1A0F01DC1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitPPC\bin">
+      <UniqueIdentifier>{85E90283-86B3-59A7-AC47-58668E1766C5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitPPC\mn10200">
+      <UniqueIdentifier>{A762BD50-4C8A-5E34-952B-9252AA1A289A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitPPC\mn10200\bin">
+      <UniqueIdentifier>{1210B3F0-C0BD-5638-8340-7FE17A08379F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitPPC\powerpc-eabi">
+      <UniqueIdentifier>{56DD7B98-E450-52C6-B8DE-816731DFA3E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitPPC\powerpc-eabi\bin">
+      <UniqueIdentifier>{1AEADDD7-3A6A-5F80-A787-211CEE5D230D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\devkitPPC\powerpc-eabi\lib">
+      <UniqueIdentifier>{061D7B7B-9337-594D-A3FA-06678E246CA0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\examples">
+      <UniqueIdentifier>{550F8FB1-158C-5E77-8899-CE3807FA309F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\examples\3ds">
+      <UniqueIdentifier>{A9155595-9423-5ED7-8B29-BCBCB05F0399}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\examples\3ds\app_launch">
+      <UniqueIdentifier>{CD22F1FB-D138-548F-AEBB-07F9DC78D383}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\examples\3ds\audio">
+      <UniqueIdentifier>{84B6E79E-03E6-5707-8D61-0A9262D35C67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\examples\3ds\get_system_language">
+      <UniqueIdentifier>{0EAB686C-D392-58A6-BCEA-05729E2BC90E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\examples\3ds\mvd">
+      <UniqueIdentifier>{222D0BE4-9C06-5BF6-8933-B44050875E3B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\examples\3ds\nfc">
+      <UniqueIdentifier>{E3487825-3179-59DB-A630-0DA70BCDB391}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\examples\3ds\sdmc">
+      <UniqueIdentifier>{E6103AEC-8A3E-571E-9ADA-D89D01C6EB09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\examples\gba">
+      <UniqueIdentifier>{48638FEE-E3F4-54DF-9F6F-14E9C4B39C78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\examples\switch">
+      <UniqueIdentifier>{1776D08E-334B-5631-936B-E737C9C6DAA5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\examples\switch\usb">
+      <UniqueIdentifier>{7588B797-6A21-5AB1-BB7F-7F4E5C0BAAB8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\libgba">
+      <UniqueIdentifier>{55E898D0-0F6C-5F3A-8BB7-ED20E01CB8EC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\libmirko">
+      <UniqueIdentifier>{9FFB53D1-758A-56CD-949A-A4F27732FEC7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\libnds">
+      <UniqueIdentifier>{7AF6AFB4-7FFF-5E08-AD7C-9A4091218246}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\msys2">
+      <UniqueIdentifier>{AB94ACF4-CD2A-57B4-82FE-88B560D000E2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\msys2\usr">
+      <UniqueIdentifier>{97630D99-E7C2-54C7-A837-B83D89F9FC42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\msys2\usr\bin">
+      <UniqueIdentifier>{88DB4455-4EE6-56AA-B30C-AA627EE4BEE6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\msys2\usr\libexec">
+      <UniqueIdentifier>{7FA701C1-141E-56E7-BEB9-799EFDC52800}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\tools">
+      <UniqueIdentifier>{C9E342E5-284B-5BA8-9F6C-89AED174B2F8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C-Tools\devkitPro\tools\bin">
+      <UniqueIdentifier>{2C1408C1-54AC-5EAB-9CBE-8C84554F3EC5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Tools\.vscode\settings.json">
+      <Filter>C-Tools\.vscode</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\11.4.2\GettingStarted.md">
+      <Filter>C-Tools\Base\Analysis\Ghidra\11.4.2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\11.4.2\bom.json">
+      <Filter>C-Tools\Base\Analysis\Ghidra\11.4.2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\11.4.2\ghidraRun.bat">
+      <Filter>C-Tools\Base\Analysis\Ghidra\11.4.2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\12.1.2\GettingStarted.md">
+      <Filter>C-Tools\Base\Analysis\Ghidra\12.1.2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\12.1.2\bom.json">
+      <Filter>C-Tools\Base\Analysis\Ghidra\12.1.2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\12.1.2\ghidraRun.bat">
+      <Filter>C-Tools\Base\Analysis\Ghidra\12.1.2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\12.1.3\GettingStarted.md">
+      <Filter>C-Tools\Base\Analysis\Ghidra\12.1.3</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\12.1.3\bom.json">
+      <Filter>C-Tools\Base\Analysis\Ghidra\12.1.3</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\12.1.3\ghidraRun.bat">
+      <Filter>C-Tools\Base\Analysis\Ghidra\12.1.3</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\12.1.4\GettingStarted.md">
+      <Filter>C-Tools\Base\Analysis\Ghidra\12.1.4</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\12.1.4\bom.json">
+      <Filter>C-Tools\Base\Analysis\Ghidra\12.1.4</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\Ghidra\12.1.4\ghidraRun.bat">
+      <Filter>C-Tools\Base\Analysis\Ghidra\12.1.4</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\rea.cmd">
+      <Filter>C-Tools\Base\Analysis\REA</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\.jscpd.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\.oxfmtrc.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\.oxlintrc.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\.release-please-manifest.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\AGENTS.md">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\CHANGELOG.md">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\CONTRIBUTING.md">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\DISCLAIMER.md">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\README.md">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\SECURITY.md">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\THIRD_PARTY_NOTICES.md">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\knip.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\package-lock.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\package.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\release-please-config.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\server.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\tsconfig.build.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\tsconfig.frida-verification.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\tsconfig.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\tsconfig.reverse-tools-mutation.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Analysis\REA\Source\turbo.json">
+      <Filter>C-Tools\Base\Analysis\REA\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\byte_tester.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-6502.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-65816.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-65c02.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-65ce02.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-6800.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-68000.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-6801.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-6809.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-8008.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-8080.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-cx4.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-ez80.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-gb.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-huc6280.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-sh2.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-spc700.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-superfx.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-z80.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wla-z80n.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wlab.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Release-10.7\wlalink.exe">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Release-10.7</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\.readthedocs.yaml">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\CMakeLists.txt">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\CONTRIBUTING.md">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\INSTALL.md">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\README.md">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\azure-pipelines-linux-clang.yml">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\azure-pipelines-linux-gcc.yml">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\azure-pipelines-macos-clang.yml">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\azure-pipelines-macos-gcc.yml">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\azure-pipelines-sanitizers.yml">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\azure-pipelines-windows-clang.yml">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\azure-pipelines-windows-msvc.yml">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Assemblers\WLA-DX\Source\azure-pipelines-windows-xp-32bit.yml">
+      <Filter>C-Tools\Base\Assemblers\WLA-DX\Source</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Asset-Analysis\Noesis\Noesis.exe">
+      <Filter>C-Tools\Base\Asset-Analysis\Noesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Asset-Analysis\Noesis\Noesis64.exe">
+      <Filter>C-Tools\Base\Asset-Analysis\Noesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Asset-Analysis\Noesis\ReadMe.txt">
+      <Filter>C-Tools\Base\Asset-Analysis\Noesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Audio\vgmstream\README.md">
+      <Filter>C-Tools\Base\Audio\vgmstream</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Audio\vgmstream\USAGE.md">
+      <Filter>C-Tools\Base\Audio\vgmstream</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Audio\vgmstream\vgmstream-cli.exe">
+      <Filter>C-Tools\Base\Audio\vgmstream</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\asm-differ\.pre-commit-config.yaml">
+      <Filter>C-Tools\Base\Decompilation\asm-differ</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\asm-differ\README.md">
+      <Filter>C-Tools\Base\Decompilation\asm-differ</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\asm-differ\diff.py">
+      <Filter>C-Tools\Base\Decompilation\asm-differ</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\asm-differ\diff_settings.py">
+      <Filter>C-Tools\Base\Decompilation\asm-differ</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\asm-differ\mypy.ini">
+      <Filter>C-Tools\Base\Decompilation\asm-differ</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\asm-differ\pyproject.toml">
+      <Filter>C-Tools\Base\Decompilation\asm-differ</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\asm-differ\test.py">
+      <Filter>C-Tools\Base\Decompilation\asm-differ</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\.pre-commit-config.yaml">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\README.md">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\USAGE.md">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\default_weights.toml">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\example_settings.toml">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\import.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\mypy.ini">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\pah.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\permuter.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\permuter_settings_example.toml">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\pyproject.toml">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\strip_other_fns.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\test.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\__init__.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\_ast_gen.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\_build_tables.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\_c_ast.cfg">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\ast_transforms.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\c_ast.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\c_generator.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\c_lexer.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\c_parser.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\lextab.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\plyparser.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\test.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\perm_pycparser\yacctab.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\perm_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\__init__.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\ast_types.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\ast_util.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\candidate.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\compiler.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\error.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\helpers.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\main.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\objdump.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\permuter.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\preprocess.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\printer.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\profiler.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\randomizer.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\src\scorer.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\test\__init__.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\test</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\test\test_deduplicate_typedefs.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\test</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\decomp-permuter\test\test_perm.py">
+      <Filter>C-Tools\Base\Decompilation\decomp-permuter\test</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\.pre-commit-config.yaml">
+      <Filter>C-Tools\Base\Decompilation\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\README.md">
+      <Filter>C-Tools\Base\Decompilation\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c.py">
+      <Filter>C-Tools\Base\Decompilation\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\mypy.ini">
+      <Filter>C-Tools\Base\Decompilation\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\pyproject.toml">
+      <Filter>C-Tools\Base\Decompilation\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\run_tests.py">
+      <Filter>C-Tools\Base\Decompilation\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\website.py">
+      <Filter>C-Tools\Base\Decompilation\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\.venv\pyvenv.cfg">
+      <Filter>C-Tools\Base\Decompilation\m2c\.venv</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\browser\build_bundle.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\browser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\browser\vendor-lock.json">
+      <Filter>C-Tools\Base\Decompilation\m2c\browser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\__init__.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\arch_arm.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\arch_mips.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\arch_ppc.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\arch_sh.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\asm_file.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\asm_instruction.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\asm_pattern.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\c_types.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\demangle_codewarrior.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\error.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\evaluate.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\flow_graph.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\if_statements.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\instruction.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\ir_pattern.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\main.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\options.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\translate.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c\types.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\__init__.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\_ast_gen.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\_build_tables.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\_c_ast.cfg">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\ast_transforms.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\c_ast.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\c_generator.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\c_lexer.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\c_parser.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\lextab.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\plyparser.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\test.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\m2c_pycparser\yacctab.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\m2c_pycparser</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\tests\add_test.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\tests</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\tests\elf_file.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\tests</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\tests\ppc_disasm.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\tests</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\m2c\tests\shc_to_gas.py">
+      <Filter>C-Tools\Base\Decompilation\m2c\tests</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\objdiff\v3.8.2\objdiff-cli-windows-x86_64.exe">
+      <Filter>C-Tools\Base\Decompilation\objdiff\v3.8.2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Decompilation\objdiff\v3.8.2\objdiff-windows-x86_64.exe">
+      <Filter>C-Tools\Base\Decompilation\objdiff\v3.8.2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Emulators\Mesen2\Mesen.exe">
+      <Filter>C-Tools\Base\Emulators\Mesen2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Emulators\ares-v148\ares.exe">
+      <Filter>C-Tools\Base\Emulators\ares-v148</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Emulators\ares-v148\Shaders\README.md">
+      <Filter>C-Tools\Base\Emulators\ares-v148\Shaders</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Emulators\ares-v148\Shaders\shader_deploy.py">
+      <Filter>C-Tools\Base\Emulators\ares-v148\Shaders</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Graphics\aseprite.cmd">
+      <Filter>C-Tools\Base\Graphics</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Graphics\inkscape.cmd">
+      <Filter>C-Tools\Base\Graphics</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Graphics\magick.cmd">
+      <Filter>C-Tools\Base\Graphics</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Graphics\sharp.cmd">
+      <Filter>C-Tools\Base\Graphics</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Graphics\Sharp\Runtime\package-lock.json">
+      <Filter>C-Tools\Base\Graphics\Sharp\Runtime</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Graphics\Sharp\Runtime\package.json">
+      <Filter>C-Tools\Base\Graphics\Sharp\Runtime</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Graphics\Validation\latest.json">
+      <Filter>C-Tools\Base\Graphics\Validation</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Graphics\Validation\2026-10-15T07-11-12-575Z\report.json">
+      <Filter>C-Tools\Base\Graphics\Validation\2026-10-15T07-11-12-575Z</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Graphics\Validation\2026-10-15T07-11-12-575Z\sprite-sheet.json">
+      <Filter>C-Tools\Base\Graphics\Validation\2026-10-15T07-11-12-575Z</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Patching\Floating-IPS\flips.exe">
+      <Filter>C-Tools\Base\Patching\Floating-IPS</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\.readthedocs.yml">
+      <Filter>C-Tools\Base\Testing\hypothesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\LICENSE.txt">
+      <Filter>C-Tools\Base\Testing\hypothesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\README.md">
+      <Filter>C-Tools\Base\Testing\hypothesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\paper.md">
+      <Filter>C-Tools\Base\Testing\hypothesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\pyproject.toml">
+      <Filter>C-Tools\Base\Testing\hypothesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\.claude\CLAUDE.md">
+      <Filter>C-Tools\Base\Testing\hypothesis\.claude</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\brand\README.md">
+      <Filter>C-Tools\Base\Testing\hypothesis\brand</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\guides\README.md">
+      <Filter>C-Tools\Base\Testing\hypothesis\guides</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\hypothesis\LICENSE.txt">
+      <Filter>C-Tools\Base\Testing\hypothesis\hypothesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\hypothesis\README.md">
+      <Filter>C-Tools\Base\Testing\hypothesis\hypothesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\hypothesis\pyproject.toml">
+      <Filter>C-Tools\Base\Testing\hypothesis\hypothesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\hypothesis\pyrightconfig.json">
+      <Filter>C-Tools\Base\Testing\hypothesis\hypothesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\hypothesis\tox.ini">
+      <Filter>C-Tools\Base\Testing\hypothesis\hypothesis</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\requirements\coverage.txt">
+      <Filter>C-Tools\Base\Testing\hypothesis\requirements</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\requirements\crosshair.txt">
+      <Filter>C-Tools\Base\Testing\hypothesis\requirements</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\requirements\fuzzing.txt">
+      <Filter>C-Tools\Base\Testing\hypothesis\requirements</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\requirements\test.txt">
+      <Filter>C-Tools\Base\Testing\hypothesis\requirements</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\requirements\tools.txt">
+      <Filter>C-Tools\Base\Testing\hypothesis\requirements</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\tooling\README.md">
+      <Filter>C-Tools\Base\Testing\hypothesis\tooling</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\tooling\codespell-dict.txt">
+      <Filter>C-Tools\Base\Testing\hypothesis\tooling</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\tooling\codespell-ignore.txt">
+      <Filter>C-Tools\Base\Testing\hypothesis\tooling</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\tooling\setup.py">
+      <Filter>C-Tools\Base\Testing\hypothesis\tooling</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\website\pelicanconf.py">
+      <Filter>C-Tools\Base\Testing\hypothesis\website</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\hypothesis\whole_repo_tests\__init__.py">
+      <Filter>C-Tools\Base\Testing\hypothesis\whole_repo_tests</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\.travis.yml">
+      <Filter>C-Tools\Base\Testing\rapidcheck</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\CMakeLists.txt">
+      <Filter>C-Tools\Base\Testing\rapidcheck</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\LICENSE.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\README.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\appveyor.yml">
+      <Filter>C-Tools\Base\Testing\rapidcheck</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\Gen.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\Seq.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\Shrinkable.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\assertions.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\boost.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\boost_test.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\catch.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\configuration.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\debugging.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\displaying.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\distribution.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\doctest.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\generators.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\generators_ref.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\gmock.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\gtest.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\properties.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\state.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\state_ref.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\doc\user_guide.md">
+      <Filter>C-Tools\Base\Testing\rapidcheck\doc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\examples\CMakeLists.txt">
+      <Filter>C-Tools\Base\Testing\rapidcheck\examples</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\ext\CMakeLists.txt">
+      <Filter>C-Tools\Base\Testing\rapidcheck\ext</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\extras\CMakeLists.txt">
+      <Filter>C-Tools\Base\Testing\rapidcheck\extras</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Testing\rapidcheck\test\CMakeLists.txt">
+      <Filter>C-Tools\Base\Testing\rapidcheck\test</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\.travis.yml">
+      <Filter>C-Tools\Base\Toolchains\cc65</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\Code_of_Conduct.md">
+      <Filter>C-Tools\Base\Toolchains\cc65</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\Contributing.md">
+      <Filter>C-Tools\Base\Toolchains\cc65</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\README.md">
+      <Filter>C-Tools\Base\Toolchains\cc65</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\.github\PULL_REQUEST_TEMPLATE.md">
+      <Filter>C-Tools\Base\Toolchains\cc65\.github</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\agat.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\apple2-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\apple2-hgr.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\apple2-overlay.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\apple2-system.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\apple2.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\apple2enh-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\apple2enh-hgr.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\apple2enh-overlay.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\apple2enh-system.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\apple2enh.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atari-asm-xex.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atari-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atari-cart.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atari-cassette.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atari-overlay.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atari-xex.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atari.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atari2600.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atari5200.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atari7800.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atarixl-largehimem.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atarixl-overlay.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atarixl-xex.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atarixl.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\atmos.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\bbc.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\c128-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\c128-overlay.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\c128.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\c16-32k.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\c16-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\c16.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\c64-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\c64-overlay.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\c64.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\c65-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\c65.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\cbm510.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\cbm610.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\creativision.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\cx16-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\cx16-bank.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\cx16.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\gamate.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\geos-apple.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\geos-cbm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\kim1-60k.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\kim1-mtu60k.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\kim1-mtuE000.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\kim1.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\lunix.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\lynx-bll.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\lynx-coll.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\lynx-uploader.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\lynx.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\mega65-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\mega65.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\module.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\nes.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\none.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\osic1p-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\osic1p.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\pce.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\pet-overlay.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\pet.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\plus4-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\plus4-hires.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\plus4.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\rp6502.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\sim6502.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\sim65c02.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\supervision-128k.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\supervision-16k.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\supervision-64k.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\supervision.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\sym1-32k.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\sym1-4k.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\sym1.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\telestrat.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\vic20-32k.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\vic20-asm-32k.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\vic20-asm-3k.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\vic20-asm.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\vic20-tgi.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\cfg\vic20.cfg">
+      <Filter>C-Tools\Base\Toolchains\cc65\cfg</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\libsrc\NameClashes.md">
+      <Filter>C-Tools\Base\Toolchains\cc65\libsrc</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\samples\readme.txt">
+      <Filter>C-Tools\Base\Toolchains\cc65\samples</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\src\msbuild.cmd">
+      <Filter>C-Tools\Base\Toolchains\cc65\src</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\targettest\readme.txt">
+      <Filter>C-Tools\Base\Toolchains\cc65\targettest</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\cc65\test\readme.txt">
+      <Filter>C-Tools\Base\Toolchains\cc65\test</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\devkitProUpdate.ini">
+      <Filter>C-Tools\Base\Toolchains\devkitPro</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\devkitProUpdater-3.0.3.exe">
+      <Filter>C-Tools\Base\Toolchains\devkitPro</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\installed.ini">
+      <Filter>C-Tools\Base\Toolchains\devkitPro</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\uninst.exe">
+      <Filter>C-Tools\Base\Toolchains\devkitPro</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\libgba\libgba_license.txt">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\libgba</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\libgba\maxmod_license.txt">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\libgba</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\libmirko\license.txt">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\libmirko</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\libnds\dswifi_license.txt">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\libnds</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\libnds\libnds_license.txt">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\libnds</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\libnds\maxmod_license.txt">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\libnds</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\autorebase.bat">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\clang64.exe">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\clang64.ini">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\clangarm64.exe">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\clangarm64.ini">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\mingw32.exe">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\mingw32.ini">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\mingw64.exe">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\mingw64.ini">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\msys2.exe">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\msys2.ini">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\msys2_shell.bat">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\msys2_shell.cmd">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\ucrt64.exe">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\Base\Toolchains\devkitPro\msys2\ucrt64.ini">
+      <Filter>C-Tools\Base\Toolchains\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\LibreHardwareMonitor\LibreHardwareMonitor.exe">
+      <Filter>C-Tools\LibreHardwareMonitor</Filter>
+    </None>
+    <None Include="C:\Tools\RA_docs\MODEL_FREE_GRAPHICS.md">
+      <Filter>C-Tools\RA_docs</Filter>
+    </None>
+    <None Include="C:\Tools\RA_docs\MODEL_FREE_GRAPHICS_SETUP.json">
+      <Filter>C-Tools\RA_docs</Filter>
+    </None>
+    <None Include="C:\Tools\RA_docs\README.md">
+      <Filter>C-Tools\RA_docs</Filter>
+    </None>
+    <None Include="C:\Tools\RA_docs\REA_SETUP.json">
+      <Filter>C-Tools\RA_docs</Filter>
+    </None>
+    <None Include="C:\Tools\RA_docs\REA_SETUP.md">
+      <Filter>C-Tools\RA_docs</Filter>
+    </None>
+    <None Include="C:\Tools\RA_docs\SESSION_TOOL_SUMMARY_2026-10-15.json">
+      <Filter>C-Tools\RA_docs</Filter>
+    </None>
+    <None Include="C:\Tools\RA_docs\SESSION_WORK_RECORD_2026-10-15.md">
+      <Filter>C-Tools\RA_docs</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\CROSS_SYSTEM_MATRIX.md">
+      <Filter>C-Tools\RE_Docs</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\DW4_RELEASES_2026-10-14.json">
+      <Filter>C-Tools\RE_Docs</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\DW4_REPOS_2026-10-14.json">
+      <Filter>C-Tools\RE_Docs</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\PIXEL_ART_ANIMATION_RESEARCH.md">
+      <Filter>C-Tools\RE_Docs</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\PIXEL_ART_PROPORTIONS_AND_ERAS.md">
+      <Filter>C-Tools\RE_Docs</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\README.md">
+      <Filter>C-Tools\RE_Docs</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\VAGRANT_STORY_RELEASES_2026-10-14.json">
+      <Filter>C-Tools\RE_Docs</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\VAGRANT_STORY_REPOS_2026-10-14.json">
+      <Filter>C-Tools\RE_Docs</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\VS_NATIVEPORT_CONTEXT.md">
+      <Filter>C-Tools\RE_Docs</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Decompilation\ANGR.md">
+      <Filter>C-Tools\RE_Docs\Decompilation</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Decompilation\ASM_DIFFER.md">
+      <Filter>C-Tools\RE_Docs\Decompilation</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Decompilation\GAMECUBE_WII_DECOMP.md">
+      <Filter>C-Tools\RE_Docs\Decompilation</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Decompilation\HISTORICAL_COMPILER_HOSTS.md">
+      <Filter>C-Tools\RE_Docs\Decompilation</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Decompilation\HUMAN_DISASSEMBLY_PROCESS.md">
+      <Filter>C-Tools\RE_Docs\Decompilation</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Decompilation\M2C.md">
+      <Filter>C-Tools\RE_Docs\Decompilation</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Decompilation\MATCHING_WORKFLOW.md">
+      <Filter>C-Tools\RE_Docs\Decompilation</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Decompilation\README.md">
+      <Filter>C-Tools\RE_Docs\Decompilation</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Decompilation\RETDEC.md">
+      <Filter>C-Tools\RE_Docs\Decompilation</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Decompilation\ROOD_REVERSE_PRACTICES.md">
+      <Filter>C-Tools\RE_Docs\Decompilation</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\ARMIPS.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\CC65_DA65_CA65.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\CROSS_SYSTEM_STATIC_TOOLS.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\DUCKSTATION.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\GHIDRA.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\GHIDRA_MCP.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\GHIDRA_NES_LOADER.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\IMHEX.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\KAITAI_STRUCT.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\MIPS_TOOLKIT.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\MULTI_SYSTEM_DEBUGGERS.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\NO_PSX.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\PCSX_REDUX.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\PSP_PS2_DREAMCAST_DEBUGGERS.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\PSX_SPX.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\REA.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\README.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\RGBDS_GB_TOOLS.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Disassembly\WLA_DX.md">
+      <Filter>C-Tools\RE_Docs\Disassembly</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Native_Ports\DW4_TOOLING.md">
+      <Filter>C-Tools\RE_Docs\Native_Ports</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Native_Ports\N64_RECOMP.md">
+      <Filter>C-Tools\RE_Docs\Native_Ports</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Native_Ports\PS2_RECOMP_EXPERIMENTAL.md">
+      <Filter>C-Tools\RE_Docs\Native_Ports</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Native_Ports\README.md">
+      <Filter>C-Tools\RE_Docs\Native_Ports</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Native_Ports\RENDERDOC.md">
+      <Filter>C-Tools\RE_Docs\Native_Ports</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Native_Ports\SDL3.md">
+      <Filter>C-Tools\RE_Docs\Native_Ports</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Native_Ports\TRACY.md">
+      <Filter>C-Tools\RE_Docs\Native_Ports</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Native_Ports\UNICORN.md">
+      <Filter>C-Tools\RE_Docs\Native_Ports</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Native_Ports\VAGRANT_STORY_TOOLING.md">
+      <Filter>C-Tools\RE_Docs\Native_Ports</Filter>
+    </None>
+    <None Include="C:\Tools\RE_Docs\Native_Ports\XENON_RECOMP_COMPARISON.md">
+      <Filter>C-Tools\RE_Docs\Native_Ports</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GB-GBC\Emulators\BGB\bgb.exe">
+      <Filter>C-Tools\Systems\GB-GBC\Emulators\BGB</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GB-GBC\Emulators\BGB\bgb.ini">
+      <Filter>C-Tools\Systems\GB-GBC\Emulators\BGB</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GB-GBC\Emulators\SameBoy-1.0.3\sameboy.exe">
+      <Filter>C-Tools\Systems\GB-GBC\Emulators\SameBoy-1.0.3</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GB-GBC\Emulators\SameBoy-1.0.3\sameboy_debugger.txt">
+      <Filter>C-Tools\Systems\GB-GBC\Emulators\SameBoy-1.0.3</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GB-GBC\Ghidra-Extensions\GhidraBoy\gradlew.bat">
+      <Filter>C-Tools\Systems\GB-GBC\Ghidra-Extensions\GhidraBoy</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GB-GBC\Toolchains\GBDK-2020\asmlnk_manual.txt">
+      <Filter>C-Tools\Systems\GB-GBC\Toolchains\GBDK-2020</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GBA\Emulators\mGBA-0.10.5\CHANGES.txt">
+      <Filter>C-Tools\Systems\GBA\Emulators\mGBA-0.10.5</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GBA\Emulators\mGBA-0.10.5\LICENSE.txt">
+      <Filter>C-Tools\Systems\GBA\Emulators\mGBA-0.10.5</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GBA\Emulators\mGBA-0.10.5\config.ini">
+      <Filter>C-Tools\Systems\GBA\Emulators\mGBA-0.10.5</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GBA\Emulators\mGBA-0.10.5\mGBA.exe">
+      <Filter>C-Tools\Systems\GBA\Emulators\mGBA-0.10.5</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GBA\Emulators\mGBA-0.10.5\mgba-sdl.exe">
+      <Filter>C-Tools\Systems\GBA\Emulators\mGBA-0.10.5</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GBA\Emulators\mGBA-0.10.5\portable.ini">
+      <Filter>C-Tools\Systems\GBA\Emulators\mGBA-0.10.5</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\GBA\Emulators\mGBA-0.10.5\qt.ini">
+      <Filter>C-Tools\Systems\GBA\Emulators\mGBA-0.10.5</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Analysis\rabbitizer\CHANGELOG.md">
+      <Filter>C-Tools\Systems\N64\Analysis\rabbitizer</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Analysis\rabbitizer\Cargo.toml">
+      <Filter>C-Tools\Systems\N64\Analysis\rabbitizer</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Analysis\rabbitizer\README.md">
+      <Filter>C-Tools\Systems\N64\Analysis\rabbitizer</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Analysis\rabbitizer\pyproject.toml">
+      <Filter>C-Tools\Systems\N64\Analysis\rabbitizer</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Analysis\rabbitizer\setup.py">
+      <Filter>C-Tools\Systems\N64\Analysis\rabbitizer</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Analysis\spimdisasm\AGENTS.md">
+      <Filter>C-Tools\Systems\N64\Analysis\spimdisasm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Analysis\spimdisasm\CHANGELOG.md">
+      <Filter>C-Tools\Systems\N64\Analysis\spimdisasm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Analysis\spimdisasm\README.md">
+      <Filter>C-Tools\Systems\N64\Analysis\spimdisasm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Analysis\spimdisasm\mypy.ini">
+      <Filter>C-Tools\Systems\N64\Analysis\spimdisasm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Analysis\spimdisasm\pyproject.toml">
+      <Filter>C-Tools\Systems\N64\Analysis\spimdisasm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Analysis\spimdisasm\requirements.txt">
+      <Filter>C-Tools\Systems\N64\Analysis\spimdisasm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Emulators\Project64\Project64.exe">
+      <Filter>C-Tools\Systems\N64\Emulators\Project64</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Ghidra-Extensions\N64LoaderWV\README.md">
+      <Filter>C-Tools\Systems\N64\Ghidra-Extensions\N64LoaderWV</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Ghidra-Extensions\N64LoaderWV\example_n64sym.txt">
+      <Filter>C-Tools\Systems\N64\Ghidra-Extensions\N64LoaderWV</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Ghidra-Extensions\N64LoaderWV\example_signatures.txt">
+      <Filter>C-Tools\Systems\N64\Ghidra-Extensions\N64LoaderWV</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\N64\Ghidra-Extensions\N64LoaderWV\gradlew.bat">
+      <Filter>C-Tools\Systems\N64\Ghidra-Extensions\N64LoaderWV</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\NES\Assemblers\asm6f\LICENSE.txt">
+      <Filter>C-Tools\Systems\NES\Assemblers\asm6f</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\NES\Assemblers\asm6f\changelog.txt">
+      <Filter>C-Tools\Systems\NES\Assemblers\asm6f</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\NES\Assemblers\asm6f\readme-original.txt">
+      <Filter>C-Tools\Systems\NES\Assemblers\asm6f</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\NES\Assemblers\asm6f\readme.txt">
+      <Filter>C-Tools\Systems\NES\Assemblers\asm6f</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\NES\Emulators\FCEUX-2.6.6\fceux.cfg">
+      <Filter>C-Tools\Systems\NES\Emulators\FCEUX-2.6.6</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\NES\Emulators\FCEUX-2.6.6\fceux64.exe">
+      <Filter>C-Tools\Systems\NES\Emulators\FCEUX-2.6.6</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\NES\Ghidra-Extensions\GhidraNes\CHANGELOG.md">
+      <Filter>C-Tools\Systems\NES\Ghidra-Extensions\GhidraNes</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\NES\Ghidra-Extensions\GhidraNes\README.md">
+      <Filter>C-Tools\Systems\NES\Ghidra-Extensions\GhidraNes</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\NES\Graphics\NEXXT-3.7.7\Changelog 3.7.7.txt">
+      <Filter>C-Tools\Systems\NES\Graphics\NEXXT-3.7.7</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\NES\Graphics\NEXXT-3.7.7\NEXXT.exe">
+      <Filter>C-Tools\Systems\NES\Graphics\NEXXT-3.7.7</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Disc-Tools\maxcso\.travis.yml">
+      <Filter>C-Tools\Systems\PSP\Disc-Tools\maxcso</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Disc-Tools\maxcso\LICENSE.md">
+      <Filter>C-Tools\Systems\PSP\Disc-Tools\maxcso</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Disc-Tools\maxcso\README.md">
+      <Filter>C-Tools\Systems\PSP\Disc-Tools\maxcso</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Disc-Tools\maxcso\README_CSO.md">
+      <Filter>C-Tools\Systems\PSP\Disc-Tools\maxcso</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Disc-Tools\maxcso\README_ZSO.md">
+      <Filter>C-Tools\Systems\PSP\Disc-Tools\maxcso</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Disc-Tools\maxcso\maxcso.exe">
+      <Filter>C-Tools\Systems\PSP\Disc-Tools\maxcso</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Documentation\psplibdoc\README.md">
+      <Filter>C-Tools\Systems\PSP\Documentation\psplibdoc</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Documentation\psplibdoc\build_stats_pages.py">
+      <Filter>C-Tools\Systems\PSP\Documentation\psplibdoc</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Documentation\psplibdoc\detect_obfuscations.py">
+      <Filter>C-Tools\Systems\PSP\Documentation\psplibdoc</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Documentation\psplibdoc\match-nids.py">
+      <Filter>C-Tools\Systems\PSP\Documentation\psplibdoc</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Documentation\psplibdoc\psp_libdoc.py">
+      <Filter>C-Tools\Systems\PSP\Documentation\psplibdoc</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Documentation\psplibdoc\verify-sources.py">
+      <Filter>C-Tools\Systems\PSP\Documentation\psplibdoc</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Emulators\PPSSPP-1.20.4-dev\PPSSPPWindows.exe">
+      <Filter>C-Tools\Systems\PSP\Emulators\PPSSPP-1.20.4-dev</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Emulators\PPSSPP-1.20.4-dev\PPSSPPWindows64.exe">
+      <Filter>C-Tools\Systems\PSP\Emulators\PPSSPP-1.20.4-dev</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Emulators\PPSSPP-1.20.4-dev\README.md">
+      <Filter>C-Tools\Systems\PSP\Emulators\PPSSPP-1.20.4-dev</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Ghidra-Extensions\ghidra-allegrex\CHANGES.md">
+      <Filter>C-Tools\Systems\PSP\Ghidra-Extensions\ghidra-allegrex</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Ghidra-Extensions\ghidra-allegrex\README.md">
+      <Filter>C-Tools\Systems\PSP\Ghidra-Extensions\ghidra-allegrex</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Ghidra-Extensions\ghidra-allegrex\gradlew.bat">
+      <Filter>C-Tools\Systems\PSP\Ghidra-Extensions\ghidra-allegrex</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Ghidra-Extensions\psp-ghidra-scripts\Readme.md">
+      <Filter>C-Tools\Systems\PSP\Ghidra-Extensions\psp-ghidra-scripts</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Ghidra-Extensions\psp-ghidra-scripts\SonyPSPMapHWRegisters.py">
+      <Filter>C-Tools\Systems\PSP\Ghidra-Extensions\psp-ghidra-scripts</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Ghidra-Extensions\psp-ghidra-scripts\SonyPSPResolveNIDs.py">
+      <Filter>C-Tools\Systems\PSP\Ghidra-Extensions\psp-ghidra-scripts</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSP\Ghidra-Extensions\psp-ghidra-scripts\gradlew.bat">
+      <Filter>C-Tools\Systems\PSP\Ghidra-Extensions\psp-ghidra-scripts</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Asset-Tools\jpsxdec\CONTRIBUTING.md">
+      <Filter>C-Tools\Systems\PSX\Asset-Tools\jpsxdec</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Asset-Tools\jpsxdec\README.md">
+      <Filter>C-Tools\Systems\PSX\Asset-Tools\jpsxdec</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Asset-Tools\vstools\.eslintrc.json">
+      <Filter>C-Tools\Systems\PSX\Asset-Tools\vstools</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Asset-Tools\vstools\LICENSE.md">
+      <Filter>C-Tools\Systems\PSX\Asset-Tools\vstools</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Asset-Tools\vstools\README.md">
+      <Filter>C-Tools\Systems\PSX\Asset-Tools\vstools</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Asset-Tools\vstools\package-lock.json">
+      <Filter>C-Tools\Systems\PSX\Asset-Tools\vstools</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Asset-Tools\vstools\package.json">
+      <Filter>C-Tools\Systems\PSX\Asset-Tools\vstools</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Build-Tools\maspsx\README.md">
+      <Filter>C-Tools\Systems\PSX\Build-Tools\maspsx</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Build-Tools\maspsx\maspsx.py">
+      <Filter>C-Tools\Systems\PSX\Build-Tools\maspsx</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Disc-Tools\mkpsxiso\CMakeLists.txt">
+      <Filter>C-Tools\Systems\PSX\Disc-Tools\mkpsxiso</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Disc-Tools\mkpsxiso\CMakePresets.json">
+      <Filter>C-Tools\Systems\PSX\Disc-Tools\mkpsxiso</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Disc-Tools\mkpsxiso\LICENSE.md">
+      <Filter>C-Tools\Systems\PSX\Disc-Tools\mkpsxiso</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Disc-Tools\mkpsxiso\README.md">
+      <Filter>C-Tools\Systems\PSX\Disc-Tools\mkpsxiso</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\DuckStation\LICENSE.txt">
+      <Filter>C-Tools\Systems\PSX\Emulators\DuckStation</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\DuckStation\duckstation-qt-x64-ReleaseLTCG.exe">
+      <Filter>C-Tools\Systems\PSX\Emulators\DuckStation</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\DuckStation\uninstaller.exe">
+      <Filter>C-Tools\Systems\PSX\Emulators\DuckStation</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\DuckStation\updater.exe">
+      <Filter>C-Tools\Systems\PSX\Emulators\DuckStation</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\.coderabbit.yaml">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\CODE_OF_CONDUCT.md">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\CONTRIBUTING.md">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\LICENSES.md">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\README.md">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\TODO.md">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\azure-pipelines-cli.yml">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\azure-pipelines-linux.yml">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\azure-pipelines-vsce.yml">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\azure-pipelines.yml">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\compile_flags.txt">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\crowdin.yml">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\dockermake.bat">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\dockershell.bat">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Emulators\PCSX-Redux\mips.ps1">
+      <Filter>C-Tools\Systems\PSX\Emulators\PCSX-Redux</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Toolchains\PSn00bSDK\CMakeLists.txt">
+      <Filter>C-Tools\Systems\PSX\Toolchains\PSn00bSDK</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Toolchains\PSn00bSDK\CMakePresets.json">
+      <Filter>C-Tools\Systems\PSX\Toolchains\PSn00bSDK</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Toolchains\PSn00bSDK\LICENSE.md">
+      <Filter>C-Tools\Systems\PSX\Toolchains\PSn00bSDK</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Toolchains\PSn00bSDK\README.md">
+      <Filter>C-Tools\Systems\PSX\Toolchains\PSn00bSDK</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Validation\ps1-tests\CONTRIBUTORS.md">
+      <Filter>C-Tools\Systems\PSX\Validation\ps1-tests</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\PSX\Validation\ps1-tests\README.md">
+      <Filter>C-Tools\Systems\PSX\Validation\ps1-tests</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\SNES\Ghidra-Extensions\ghidra-65816\README.md">
+      <Filter>C-Tools\Systems\SNES\Ghidra-Extensions\ghidra-65816</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\SNES\Ghidra-Extensions\ghidra-65816\gradlew.bat">
+      <Filter>C-Tools\Systems\SNES\Ghidra-Extensions\ghidra-65816</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\SNES\Ghidra-Extensions\ghidra-snes-loader\README.md">
+      <Filter>C-Tools\Systems\SNES\Ghidra-Extensions\ghidra-snes-loader</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\SNES\Ghidra-Extensions\ghidra-snes-loader-Raikaru\CHANGELOG.md">
+      <Filter>C-Tools\Systems\SNES\Ghidra-Extensions\ghidra-snes-loader-Raikaru</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\SNES\Ghidra-Extensions\ghidra-snes-loader-Raikaru\README.md">
+      <Filter>C-Tools\Systems\SNES\Ghidra-Extensions\ghidra-snes-loader-Raikaru</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Build-Tools\mdtools\.lgtm.yml">
+      <Filter>C-Tools\Systems\Sega-Genesis\Build-Tools\mdtools</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Build-Tools\mdtools\CMakeLists.txt">
+      <Filter>C-Tools\Systems\Sega-Genesis\Build-Tools\mdtools</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Build-Tools\mdtools\README.md">
+      <Filter>C-Tools\Systems\Sega-Genesis\Build-Tools\mdtools</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Emulators\BlastEm\CHANGELOG.txt">
+      <Filter>C-Tools\Systems\Sega-Genesis\Emulators\BlastEm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Emulators\BlastEm\COPYING.txt">
+      <Filter>C-Tools\Systems\Sega-Genesis\Emulators\BlastEm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Emulators\BlastEm\GLEW-LICENSE.txt">
+      <Filter>C-Tools\Systems\Sega-Genesis\Emulators\BlastEm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Emulators\BlastEm\README.txt">
+      <Filter>C-Tools\Systems\Sega-Genesis\Emulators\BlastEm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Emulators\BlastEm\SDL-LICENSE.txt">
+      <Filter>C-Tools\Systems\Sega-Genesis\Emulators\BlastEm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Emulators\BlastEm\blastem.exe">
+      <Filter>C-Tools\Systems\Sega-Genesis\Emulators\BlastEm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Emulators\BlastEm\default.cfg">
+      <Filter>C-Tools\Systems\Sega-Genesis\Emulators\BlastEm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Emulators\BlastEm\gamecontrollerdb.txt">
+      <Filter>C-Tools\Systems\Sega-Genesis\Emulators\BlastEm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Emulators\BlastEm\systems.cfg">
+      <Filter>C-Tools\Systems\Sega-Genesis\Emulators\BlastEm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Emulators\BlastEm\tmss.md">
+      <Filter>C-Tools\Systems\Sega-Genesis\Emulators\BlastEm</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Toolchains\SGDK\CMakeLists.txt">
+      <Filter>C-Tools\Systems\Sega-Genesis\Toolchains\SGDK</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Toolchains\SGDK\build_adv.bat">
+      <Filter>C-Tools\Systems\Sega-Genesis\Toolchains\SGDK</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Toolchains\SGDK\build_lib.bat">
+      <Filter>C-Tools\Systems\Sega-Genesis\Toolchains\SGDK</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Toolchains\SGDK\build_samples.bat">
+      <Filter>C-Tools\Systems\Sega-Genesis\Toolchains\SGDK</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Toolchains\SGDK\changelog.txt">
+      <Filter>C-Tools\Systems\Sega-Genesis\Toolchains\SGDK</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Toolchains\SGDK\license.txt">
+      <Filter>C-Tools\Systems\Sega-Genesis\Toolchains\SGDK</Filter>
+    </None>
+    <None Include="C:\Tools\Systems\Sega-Genesis\Toolchains\SGDK\readme.md">
+      <Filter>C-Tools\Systems\Sega-Genesis\Toolchains\SGDK</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitProUpdate.ini">
+      <Filter>C-Tools\devkitPro</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitProUpdater-3.0.3.exe">
+      <Filter>C-Tools\devkitPro</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\installed.ini">
+      <Filter>C-Tools\devkitPro</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\uninst.exe">
+      <Filter>C-Tools\devkitPro</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\bin\ar.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\bin\as.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\bin\ld.bfd.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\bin\ld.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\bin\nm.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\bin\objcopy.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\bin\objdump.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\bin\ranlib.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\bin\readelf.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\bin\strip.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\lib\libstdc++.a-gdb.py">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\lib</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\aarch64-none-elf\lib\libstdc++.modules.json">
+      <Filter>C-Tools\devkitPro\devkitA64\aarch64-none-elf\lib</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-addr2line.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-ar.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-as.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-c++.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-c++filt.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-cpp.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-elfedit.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-g++.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-gcc-16.1.0.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-gcc-ar.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-gcc-nm.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-gcc-ranlib.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-gcc.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-gcov-dump.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-gcov-tool.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-gcov.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-gdb.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-gprof.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-ld.bfd.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-ld.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-lto-dump.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-nm.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-objcopy.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-objdump.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-ranlib.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-readelf.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-size.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-strings.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitA64\bin\aarch64-none-elf-strip.exe">
+      <Filter>C-Tools\devkitPro\devkitA64\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\bin\ar.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\bin\as.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\bin\ld.bfd.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\bin\ld.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\bin\nm.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\bin\objcopy.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\bin\objdump.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\bin\ranlib.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\bin\readelf.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\bin\strip.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\lib\libstdc++.a-gdb.py">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\lib</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\arm-none-eabi\lib\libstdc++.modules.json">
+      <Filter>C-Tools\devkitPro\devkitARM\arm-none-eabi\lib</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-addr2line.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-ar.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-as.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-c++.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-c++filt.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-cpp.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-elfedit.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-g++.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-gcc-16.1.0.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-gcc-ar.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-gcc-nm.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-gcc-ranlib.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-gcc.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-gcov-dump.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-gcov-tool.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-gcov.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-gdb.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-gprof.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-ld.bfd.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-ld.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-lto-dump.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-nm.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-objcopy.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-objdump.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-ranlib.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-readelf.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-size.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-strings.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitARM\bin\arm-none-eabi-strip.exe">
+      <Filter>C-Tools\devkitPro\devkitARM\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-addr2line.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-ar.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-as.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-c++filt.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-elfedit.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-gprof.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-ld.bfd.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-ld.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-nm.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-objcopy.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-objdump.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-ranlib.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-readelf.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-size.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-strings.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\mn10200-strip.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-addr2line.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-ar.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-as.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-c++.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-c++filt.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-cpp.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-elfedit.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-g++.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-gcc-16.1.0.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-gcc-ar.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-gcc-nm.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-gcc-ranlib.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-gcc.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-gcov-dump.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-gcov-tool.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-gcov.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-gdb.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-gprof.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-ld.bfd.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-ld.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-lto-dump.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-nm.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-objcopy.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-objdump.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-ranlib.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-readelf.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-size.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-strings.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\bin\powerpc-eabi-strip.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\mn10200\bin\ar.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\mn10200\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\mn10200\bin\as.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\mn10200\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\mn10200\bin\ld.bfd.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\mn10200\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\mn10200\bin\ld.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\mn10200\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\mn10200\bin\nm.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\mn10200\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\mn10200\bin\objcopy.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\mn10200\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\mn10200\bin\objdump.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\mn10200\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\mn10200\bin\ranlib.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\mn10200\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\mn10200\bin\strip.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\mn10200\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\bin\ar.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\bin\as.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\bin\ld.bfd.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\bin\ld.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\bin\nm.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\bin\objcopy.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\bin\objdump.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\bin\ranlib.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\bin\readelf.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\bin\strip.exe">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\lib\libstdc++.a-gdb.py">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\lib</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\devkitPPC\powerpc-eabi\lib\libstdc++.modules.json">
+      <Filter>C-Tools\devkitPro\devkitPPC\powerpc-eabi\lib</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\examples\3ds\README.md">
+      <Filter>C-Tools\devkitPro\examples\3ds</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\examples\3ds\app_launch\README.md">
+      <Filter>C-Tools\devkitPro\examples\3ds\app_launch</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\examples\3ds\audio\README.md">
+      <Filter>C-Tools\devkitPro\examples\3ds\audio</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\examples\3ds\get_system_language\README.md">
+      <Filter>C-Tools\devkitPro\examples\3ds\get_system_language</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\examples\3ds\mvd\README.md">
+      <Filter>C-Tools\devkitPro\examples\3ds\mvd</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\examples\3ds\nfc\README.md">
+      <Filter>C-Tools\devkitPro\examples\3ds\nfc</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\examples\3ds\sdmc\README.md">
+      <Filter>C-Tools\devkitPro\examples\3ds\sdmc</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\examples\gba\README.md">
+      <Filter>C-Tools\devkitPro\examples\gba</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\examples\switch\README.md">
+      <Filter>C-Tools\devkitPro\examples\switch</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\examples\switch\usb\README.md">
+      <Filter>C-Tools\devkitPro\examples\switch\usb</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\libgba\libgba_license.txt">
+      <Filter>C-Tools\devkitPro\libgba</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\libgba\maxmod_license.txt">
+      <Filter>C-Tools\devkitPro\libgba</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\libmirko\license.txt">
+      <Filter>C-Tools\devkitPro\libmirko</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\libnds\dswifi_license.txt">
+      <Filter>C-Tools\devkitPro\libnds</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\libnds\libnds_license.txt">
+      <Filter>C-Tools\devkitPro\libnds</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\libnds\maxmod_license.txt">
+      <Filter>C-Tools\devkitPro\libnds</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\autorebase.bat">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\clang64.exe">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\clang64.ini">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\clangarm64.exe">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\clangarm64.ini">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\mingw32.exe">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\mingw32.ini">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\mingw64.exe">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\mingw64.ini">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\msys2.exe">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\msys2.ini">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\msys2_shell.bat">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\msys2_shell.cmd">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\ucrt64.exe">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\ucrt64.ini">
+      <Filter>C-Tools\devkitPro\msys2</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\[.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\afslog.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\agetty.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\arch.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ash.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\awk.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\b2sum.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\base32.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\base64.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\basename.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\basenc.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\bash.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\blkid.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\brotli.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\bsdtar.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\bsearch.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\bunzip2.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\bzcat.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\bzip2.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\bzip2recover.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cal.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\captoinfo.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cat.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ccmake.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cfdisk.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\chattr.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\chcon.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\chgrp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\chmod.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\chown.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\chroot.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\chrt.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cksum.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\clear.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cmake.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cmp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\col.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\colcrt.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\colrm.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\column.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\comm.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cpack.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\csplit.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ctest.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\curl.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cut.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cygcheck.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cygpath.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\cygwin-console-helper.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\dash.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\date.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_archive.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_checkpoint.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_convert.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_deadlock.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_dump.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_hotbackup.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_load.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_log_verify.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_printlog.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_recover.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_replicate.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_stat.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_tuner.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_upgrade.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\db_verify.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\dd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\df.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\diff.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\diff3.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\dir.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\dircolors.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\dirmngr-client.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\dirmngr.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\dirname.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\dnsdomainname.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\du.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\dumper.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\dumpsexp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\echo.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\env.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\envsubst.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\expand.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\expr.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\factor.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\fallocate.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\false.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\fdisk.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\file.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\find.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\findfs.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\flock.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\fmt.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\fold.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\fsck.cramfs.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\fsck.minix.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ftp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gawk-5.3.2.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gawk.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gdbm_dump.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gdbm_load.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gdbmtool.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gencat.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\getconf.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\getent.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\getfacl.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\getopt.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gettext.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\git-receive-pack.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\git-shell.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\git-upload-archive.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\git-upload-pack.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\git.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gkill.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gmondump.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpg-agent.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpg-card.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpg-connect-agent.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpg-error.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpg-mail-tube.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpg-wks-client.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpg-wks-server.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpg.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpgconf.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpgparsemail.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpgscm.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpgsm.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpgsplit.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpgtar.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gpgv.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\grep.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\groups.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gsstool.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\gzip.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\hardlink.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\head.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\heimtools.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\hexdump.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\hmac256.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\hostid.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\hostname.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\hxtool.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\iconv.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\id.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\idn-lookup.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\info.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\infocmp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\infotocap.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\install-info.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\install.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ipcmk.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\iprop-log.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\isosize.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\join.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\kadmin.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\kbxutil.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\kdestroy.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\kf.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\kgetcred.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\kill.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\kinit.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\klist.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\kpasswd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\kstash.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ksu.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\kswitch.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ktutil.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\lastlog2.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ldd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ldh.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\less.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\lessecho.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\lesskey.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\link.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ln.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\locale.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\locate.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\logger.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\logname.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\look.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ls.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\lsattr.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\lzcat.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\lzma.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\lzmadec.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\lzmainfo.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\m4.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\make.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mcookie.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\md5sum.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\minidumper.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mintty.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mkdir.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mkfifo.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mkfs.bfs.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mkfs.cramfs.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mkfs.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mkfs.minix.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mkgroup.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mknod.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mkpasswd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mkswap.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mktemp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\more.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mount.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mpicalc.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msgattrib.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msgcat.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msgcmp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msgcomm.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msgconv.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msgen.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msgexec.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msgfilter.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msgfmt.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msggrep.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msginit.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msgmerge.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msgunfmt.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\msguniq.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\mv.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\namei.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\nano.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\nettle-hash.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\nettle-lfib-stream.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\nettle-pbkdf2.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\newgrp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ngettext.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\nice.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\nl.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\nohup.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\nologin.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\nproc.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\numfmt.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\od.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\openssl.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\otp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\otpprint.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\p11-kit.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pacman-conf.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pacman.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pacsort.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pactree.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pagsh.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\passwd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\paste.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pathchk.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\peflags.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\perl.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\perl5.38.4.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pg.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pinentry-w32.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pinentry.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pinky.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pkcs1-conv.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pkg-config.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pkgconf.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pldd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pr.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\printenv.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\printf.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\profiler.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ps.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\psl.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ptx.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\pwd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\rcp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\readlink.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\realpath.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\rebase.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\recode-sr-latin.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\regtool.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\rename.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\renice.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\reset.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\rev.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\rlogin.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\rm.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\rmdir.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\rnano.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\rsh.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\runcon.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\scalar.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\scp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\script.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\scriptlive.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\scriptreplay.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sdiff.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sed.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\seq.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\setfacl.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\setmetamode.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\setpgid.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\setsid.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sexp-conv.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sfdisk.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sftp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sh.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sha1sum.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sha224sum.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sha256sum.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sha384sum.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sha512sum.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\shred.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\shuf.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sleep.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sort.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\split.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ssh-add.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ssh-agent.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ssh-keygen.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ssh-keyscan.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ssh.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sshd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ssp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\stat.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\stdbuf.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\strace.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\string2key.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\stty.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sum.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\swaplabel.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\sync.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tabs.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tac.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tail.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\talk.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tar.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\taskset.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tee.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\telnet.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\test.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\testpkg.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tic.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\time.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\timeout.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\toe.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\touch.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tput.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tr.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\true.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\truncate.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\trust.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tset.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tsort.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tty.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\tzset.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\ul.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\umount.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\uname.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\unexpand.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\uniq.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\unlink.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\unlzma.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\unxz.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\unzstd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\users.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\uuidd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\uuidgen.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\uuidparse.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\vdir.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\vercmp.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\verify_krb5_conf.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\watchgnupg.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\wc.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\wget.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\whereis.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\which.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\who.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\whoami.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\wipefs.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\x86_64-pc-msys-pkg-config.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\xargs.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\xgettext.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\xz.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\xzcat.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\xzdec.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\yat2m.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\yes.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\zdump.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\zic.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\zstd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\zstdcat.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\bin\zstdmt.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\digest-service.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\frcode.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\getprocaddr32.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\getprocaddr64.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\hprop.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\hpropd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\ipropd-master.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\ipropd-slave.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\kadmind.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\kdc.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\kdigest.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\kfd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\kimpersonate.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\msys2\usr\libexec\kpasswdd.exe">
+      <Filter>C-Tools\devkitPro\msys2\usr\libexec</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\3dslink.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\3dsxdump.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\3dsxtool.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\b2fxec.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\bin2s.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\bmp2bin.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\build_pfs0.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\build_romfs.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\catnip.cmd">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\dlditool.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\dslink.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\elf2dol.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\elf2kip.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\elf2nro.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\elf2nso.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\gbafix.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\gbalzss.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\gbfs.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\gcdsptool.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\gpd.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\grit.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\gxtexconv.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\insgbfs.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\lsgbfs.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\mkbcfnt.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\mkromfs3ds.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\mmutil.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\nacptool.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\nds_texcompress.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\ndstool.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\npdmtool.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\nxlink.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\padbin.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\picasso.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\r4denc.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\raw2c.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\smdhtool.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\tex3ds.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\uam.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\unfxe.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\ungbfs.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\wiiload.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\zda_compressor.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+    <None Include="C:\Tools\devkitPro\tools\bin\zda_tester.exe">
+      <Filter>C-Tools\devkitPro\tools\bin</Filter>
+    </None>
+  </ItemGroup>
+</Project>

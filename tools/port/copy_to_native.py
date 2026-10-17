@@ -213,7 +213,8 @@ def splat_asset_extents(known: set[tuple[str, str]] | None = None) -> dict[tuple
     symbols (images, palettes) have no C type, so their extent is from their start to the next subsegment that is a
     boundary: code or data, or an asset the C code declares itself (`known`, (module, name) pairs). Splat may cut one
     C array into several images (`_fontTable[]` is `_fontTable` and `_fontTable1`); those stay one extent. An
-    indexed image whose palette comes first is reached as `<name>_clut`, the start of the same bytes."""
+    `indexed` image keeps its palettes first unless `cluts_after: true`: the segment start is then `<name>_clut`
+    and `<name>` is the pixels after the palettes (num_cluts, default 1, of 16 or 256 entries by bitdepth)."""
     out: dict[tuple[str, str], tuple[int, int]] = {}
     for cfg in sorted((dx.DECOMP / "config").rglob("splat.yaml")):
         text = cfg.read_text(encoding="utf-8")
@@ -223,6 +224,7 @@ def splat_asset_extents(known: set[tuple[str, str]] | None = None) -> dict[tuple
         module = m[1]
         starts: list[tuple[int, str | None]] = []
         sized: set[str] = set()   # rgb555Sized: a 4-byte width/height header, then the pixels
+        clut_first: dict[str, int] = {}   # indexed image -> bytes of palettes before its pixels
         for ln in text.splitlines():
             ln = ln.strip()
             if not ln.startswith("- "):
@@ -239,6 +241,11 @@ def splat_asset_extents(known: set[tuple[str, str]] | None = None) -> dict[tuple
             d = re.match(r"-\s*\{\s*start:\s*(0x[0-9A-Fa-f]+|\d+)", ln)
             if d:
                 n = re.search(r"\bname:\s*([\w]+)", ln)
+                if n and re.search(r"\btype:\s*indexed\b", ln) and not re.search(r"\bcluts_after:\s*true", ln):
+                    cluts = re.search(r"\bnum_cluts:\s*(\d+)", ln)
+                    depth = re.search(r"\bbitdepth:\s*(\d+)", ln)
+                    entries = 256 if depth and depth[1] == "8" else 16
+                    clut_first[n[1]] = (int(cluts[1]) if cluts else 1) * entries * 2
                 starts.append((int(d[1], 0), n[1] if n else None))
         def boundary(name: str | None) -> bool:
             if name is None or known is None:
@@ -248,8 +255,13 @@ def splat_asset_extents(known: set[tuple[str, str]] | None = None) -> dict[tuple
         for k, (start, name) in enumerate(starts[:-1]):
             nxt = next((s for s, n in starts[k + 1:] if boundary(n)), starts[-1][0])
             if name and nxt > start:
-                out[(module, name)] = (start, nxt - start)
-                out.setdefault((module, name + "_clut"), (start, nxt - start))
+                if name in clut_first:
+                    cb = clut_first[name]
+                    out[(module, name + "_clut")] = (start, nxt - start)
+                    out[(module, name)] = (start + cb, nxt - start - cb)
+                else:
+                    out[(module, name)] = (start, nxt - start)
+                    out.setdefault((module, name + "_clut"), (start, nxt - start))
                 if name in sized:
                     out[(module, name + "_header")] = (start, 4)
                     out[(module, name + "_data")] = (start + 4, nxt - start - 4)

@@ -76,7 +76,7 @@ Removed by decision (2026-10-15): `psx-spx` and `beetle-psx-libretro`. The port 
 | `vstools` | VENDOR/TOOL (MIT) | Format parsers (see §1.2). |
 | `maspsx` | TOOL | Decomp build only (matching). |
 | `mkpsxiso` / `dumpsxiso` | TOOL | Produced `disks\SLUS-01040.xml` and the extraction in `SLUS-01040\`. |
-| `DuckStation` (binary) | TOOL | Golden runs: screenshots, VRAM dumps, GPU dumps, save states for side-by-side comparison. |
+| `DuckStation` (binary) | TOOL | Golden runs: screenshots, VRAM dumps, GPU dumps, save states for side-by-side comparison. Installed at `C:\Tools\Systems\PSX\Emulators\DuckStation\duckstation-qt-x64-ReleaseLTCG.exe`; tests use a portable copy in `build\duckstation` made by `tools\test\duckstation_setup.ps1`. BIOS: `F:\Emulators\PlayStation\bios\SCPH1001.BIN` (NTSC-U). |
 | `PCSX-Redux` (source + binary) | TOOL | Lua-scriptable debugger: break on `vs_*` entry points, trace CD reads, dump the SPU state. |
 | `MemcardRex` | TOOL | Inspect and convert `.mcd` saves created by the port. |
 | `PSn00bSDK` | REFERENCE | Open-source PS1 SDK; documents what each SDK call the game makes is *supposed* to do, so the modern replacement covers the same behavior. Never reimplemented as an API. |
@@ -102,6 +102,10 @@ Mirrors in `tools\PSX\Asset-Tools\jpsxdec`, `tools\PSX\Emulators\{DuckStation,PC
 | `Setup-Windows.ps1`, `windows.py` | Existing environment bootstrap scripts from the decomp workflow. |
 | `Probe-Native.ps1` | Old probe script for the removed emulated-RAM build. Retire it in M0. |
 | `.clang-format`, `permuter_settings.toml` | Decomp formatting and permuter configuration. |
+| `port\` | Copy pipeline: `copy_to_native.py`, `copy_fixups.py`, `own.py`, `understood.py`, indexes (BUILDING.md §8). |
+| `scaffold\gen_solution.py` | Generates the solution, including the `Tools` folder's item projects for `tools\` and `C:\Tools` (`scaffold\projects\`, entry files only for untracked trees). |
+| `test\run_native.ps1` | Copy, build and run the port with captures and scripted input (`-SkipIntro` presses Start during the movie). |
+| `test\duckstation_setup.ps1`, `test\duckstation_capture.ps1` | Portable DuckStation for reference captures, with key input. |
 
 ---
 
