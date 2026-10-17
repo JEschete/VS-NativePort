@@ -581,7 +581,7 @@ first named (all functions named, later batches' types and globals named, the re
   (`quitDelayDelay`), now merged by `menu_globals.py`.
 - Totals after the pass: globals 1,080 high / 1,042 med / 52 low; types 288 / 457 / 77; fields 1,397 / 3,227 /
   2,246. Most low fields are `reserved` (never read) or `opaque` (read, meaning not established); they need behavior
-  tracing, not renaming.
+  tracing, not renaming: see [RUNTIME_TRACING.md](RUNTIME_TRACING.md) and `tools\naming\trace_queue.py`.
 
 The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
 The native audio player must own playback position rather than reading another module's timing globals.
