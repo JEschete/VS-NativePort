@@ -3,6 +3,7 @@
 #include "ActorAssets.h"
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorLoading.h"
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/CharacterInit.h"
@@ -11,8 +12,10 @@
 #include "Actors/Movement.h"
 #include "Actors/RoomActorCache.h"
 #include "Actors/RoomState.h"
+#include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/Spawning.h"
+#include "Actors/TextureAnimation.h"
 #include "Actors/Zud.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/Actor.h"
@@ -569,18 +572,18 @@ Battle_Actor* Actors_SpawnRoomEnemy(
         bladeId = (u_char)init->weapon.blade.weaponModelId;
         shieldId = (u_char)init->shield.base.weaponModelId;
         if (Actors_usesSecondaryBodyModel[(u_char)init->characterKind]) {
-            actor = Core_Memory_AllocateFromLowEnd(0x3BB4);
+            actor = Core_Memory_AllocateFromLowEnd(offsetof(Actors_ActorAllocation, modelSlots) + sizeof(Actors_ActorRecord));
             actor->stats = (Battle_ActorStats*)(actor + 1);
             actor->allocationKind = 2;
-            actor->model = (void*)((char*)actor + 0x9B4);
-            actor->equipmentModels[0] = (void*)((char*)actor + 0x22B4);
+            actor->model = (void*)&((Actors_ActorAllocation*)actor)->core.model;
+            actor->equipmentModels[0] = (void*)((Actors_ActorAllocation*)actor)->modelSlots;
         } else {
-            actor = Core_Memory_AllocateFromLowEnd(0x2E84);
+            actor = Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorAllocation));
             actor->stats = (Battle_ActorStats*)(actor + 1);
             actor->allocationKind = 1;
-            actor->model = (void*)((char*)actor + 0x9B4);
-            actor->equipmentModels[0] = (void*)((char*)actor + 0x22B4);
-            actor->equipmentModels[1] = (void*)((char*)actor + 0x289C);
+            actor->model = (void*)&((Actors_ActorAllocation*)actor)->core.model;
+            actor->equipmentModels[0] = (void*)((Actors_ActorAllocation*)actor)->modelSlots;
+            actor->equipmentModels[1] = (void*)&((Actors_ActorAllocation*)actor)->modelSlots[1];
         }
         category = 10;
         if (bladeId) {
@@ -724,7 +727,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
         actor->stats->randomDropItem.id = spawn->item3Id;
         actor->stats->randomDropItem.dropRate = spawn->item3Count;
         do {
-            *(Actors_SpawnSettings*)((char*)actor + 0x30) =
+            *(Actors_SpawnSettings*)((char*)&actor->reserved34 - 4) =
                 *(Actors_SpawnSettings*)spawn->settings;
         } while (0);
         actor->templateWord2C = init->opaque2C;

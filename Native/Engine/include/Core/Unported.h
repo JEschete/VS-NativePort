@@ -9,6 +9,9 @@ extern "C" {
 
 void Core_RecordUnported(const char* site);
 
+// printf-style line in the log under "trace": a development aid for following copied code.
+void Core_Tracef(const char* format, ...);
+
 #ifdef __cplusplus
 }
 #endif

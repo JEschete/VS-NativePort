@@ -580,6 +580,23 @@ These are target designs, not an implemented-feature inventory. See §0.2 and th
 
 Overlays become modules with explicit `Init()`, `Shutdown()`, `Update(dt)` and `Reset()`. Statics that the original re-initialized by reloading the overlay are reset in `Reset()`.
 
+### 6.8.1 Actors and their assets: one shared path (owner, 2026-10-17)
+
+Every actor (Ashley, NPCs, enemies, bosses, menu previews, the attract demos) goes through the same few
+components, and every fix lands there, never in a scene:
+
+| Component | Today (copied, x64-fixed) | Target |
+|---|---|---|
+| **Actor asset loader**: SHP models, SEQ animation banks, WEP weapons, ETM | `Content\src\ActorAssets.c`: the asset request queue (`Content_QueueActorAssetRequest` → `Content_UpdateActorAssetQueue`) and one parser per format (`Content_ParseActorModel`, `Content_ParseActorSequence`, `Content_ParseWeaponModel`) | `Content::ShpModel`, `Content::SeqBank`, `Content::WepModel` typed objects, decoded by VS.Extract (glTF + animation JSON) and loaded by Content (§6.6); the queue becomes `AsyncLoader` handles |
+| **Actor handler**: records, spawn/despawn, equipment, placement | `Actors\ActorLoading.c`, `ActorState.c` (`Actors_AllocateActorWithEquipment`, `Actors_SpawnRoomEnemy`, `Actors_PlaceActorInRoom`), records laid out by `Actors::ActorAllocation` | `Actors::ActorSystem` owning actors as components (`Transform`, `Model`, `Animator`, `Stats`, `Equipment`) |
+| **Sequence handler**: playing SEQ animations, animation events | `Actors\Animation.c` (`Actors_PlayActorAnimation`, `Actors_FindActorAnimationHeader`, `Actors_InitializeActorAnimationPose`, `Actors_RunAnimationEvents`) | `Actors::Animator` over `Content::SeqBank`, with the same keyframe decoding and event script |
+
+x64 rule for these formats until the typed decoders replace them: a loaded file keeps its own layout. Pointers
+the PS1 loader relocated in place stay 32-bit offsets (`copy_fixups.ONDISC_OFFSETS`; uses go through
+`VS_ONDISC`, `Legacy/OnDisc.h`), and records the code addresses by PS1 offset are reached by named field
+(`tools\port\field_at.py`). Each fix is a copy-tool rule or a reviewed fixup on the shared function, so it holds
+for every actor and every caller; `Native\Tests\src\LayoutAsserts.c` checks the layouts they rely on.
+
 ---
 
 ## 7. Retirement strategies, in detail

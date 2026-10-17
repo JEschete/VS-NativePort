@@ -64,10 +64,10 @@ typedef struct Field_RoomRecord {
     Field_MpdCollisionHeader* collisionMap;
     Field_MpdTileCell* tileCells;
     Field_MpdDoorRecord* doors;
-    int lighting;
-    int section6;
-    int section7;
-    int section8;
+    void* lighting; /* a section pointer (filled with the others) */
+    void* section6; /* a section pointer (filled with the others) */
+    void* section7; /* a section pointer (filled with the others) */
+    void* section8; /* a section pointer (filled with the others) */
     Field_MpdFloorTrigger* floorTriggers;
     Field_MpdLockTrigger* lockTriggers;
     Field_MpdEnvironment* environment;
@@ -80,9 +80,9 @@ typedef struct Field_RoomRecord {
     Field_MpdMovingPlatform* movingPlatforms;
     Items_TreasureChest* containers;
     u_int* soundData;
-    int section15;
-    int section16;
-    int section17;
+    void* section15; /* a section pointer (filled with the others) */
+    void* section16; /* a section pointer (filled with the others) */
+    void* section17; /* a section pointer (filled with the others) */
     Field_ZoneBounds* zoneBounds;
 } Field_RoomRecord;
 

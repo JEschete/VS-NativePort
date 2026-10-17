@@ -155,7 +155,7 @@ int Audio_FreeSfxBankSlot(u_int id)
 }
 
 // decomp: SLUS_010.40 func_80046168 (src/SLUS_010.40/main.c:10161)
-int Audio_BindRoomSfxBank(u_int arg0)
+int Audio_BindRoomSfxBank(uintptr_t arg0)
 {
     if (Audio_soundState.musicHandles[16] == 0) {
         Audio_soundState.musicHandles[16] = arg0;

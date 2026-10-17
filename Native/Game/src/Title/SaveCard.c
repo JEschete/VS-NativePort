@@ -328,7 +328,7 @@ int Title_SaveCard_ValidateAndApplyLoadedSave(int verifyOnly)
     Save_SaveCipherHeader* unk180 = &spmcimg[1].protectedHeader.cipherHeader;
 
     Save_MemoryCard_DecodeSaveBytes(unk180->cipherKey, &unk180->slotHeader.slotState,
-        sizeof(Save_GameSaveImage) - (u_long) & ((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState);
+        sizeof(Save_GameSaveImage) - (uintptr_t) & ((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState);
 
     blockCount = 92;
     if (verifyOnly != 0) {

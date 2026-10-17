@@ -298,7 +298,7 @@ void Event_FinishSkippedCutscene(u_char* arg0)
 }
 
 // decomp: BATTLE.PRG func_800B6868 (src/BATTLE/BATTLE.PRG/4A0A8.c:642)
-int Event_ScriptEndCutsceneAndJump(u_char* arg0, short arg1)
+intptr_t Event_ScriptEndCutsceneAndJump(u_char* arg0, short arg1)
 {
     char temp_v1 = Event_skipState;
     Event_skipState = 0;
@@ -306,7 +306,7 @@ int Event_ScriptEndCutsceneAndJump(u_char* arg0, short arg1)
         Event_FinishSkippedCutscene(arg0);
         return 4;
     }
-    return (int)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 1)];
+    return (intptr_t)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 1)];
 }
 
 // decomp: BATTLE.PRG func_800B68C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:653)
@@ -331,7 +331,7 @@ int Event_ScriptWaitForButtonAndYield(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlag (src/BATTLE/BATTLE.PRG/4A0A8.c:1543)
-int Event_ScriptBranchOnFlagImmediate(u_char* arg0, short arg1)
+intptr_t Event_ScriptBranchOnFlagImmediate(u_char* arg0, short arg1)
 {
     char temp_a0 =
         State_ScriptFlag(((u_char)arg0[2] >> 2) | ((arg0[1] & 0xF) << 6));
@@ -374,11 +374,11 @@ int Event_ScriptBranchOnFlagImmediate(u_char* arg0, short arg1)
         }
         break;
     }
-    return (long)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 4)];
+    return (intptr_t)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 4)];
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlags (src/BATTLE/BATTLE.PRG/4A0A8.c:1589)
-int Event_ScriptBranchOnFlagPair(u_char* arg0, short arg1)
+intptr_t Event_ScriptBranchOnFlagPair(u_char* arg0, short arg1)
 {
     char temp_s0 =
         State_ScriptFlag(((u_char)arg0[2] >> 2) | ((arg0[1] & 0xF) << 6));
@@ -416,13 +416,13 @@ int Event_ScriptBranchOnFlagPair(u_char* arg0, short arg1)
         }
         break;
     }
-    return (long)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 4)];
+    return (intptr_t)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 4)];
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpFwd (src/BATTLE/BATTLE.PRG/4A0A8.c:1630)
-int Event_ScriptJumpForward(u_char* arg0, short arg1)
+intptr_t Event_ScriptJumpForward(u_char* arg0, short arg1)
 {
-    return (long)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 1)];
+    return (intptr_t)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 1)];
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagImmContext (src/BATTLE/BATTLE.PRG/4A0A8.c:1640)
@@ -433,10 +433,10 @@ int Event_ScriptCacheFlagValue(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlagContext (src/BATTLE/BATTLE.PRG/4A0A8.c:1646)
-int Event_ScriptBranchOnCachedFlag(u_char* arg0, short arg1)
+intptr_t Event_ScriptBranchOnCachedFlag(u_char* arg0, short arg1)
 {
     if (Event_cachedFlagValue == arg0[1]) {
-        return (long)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 2)];
+        return (intptr_t)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 2)];
     }
     return 0;
 }
@@ -454,13 +454,13 @@ int Event_ScriptSetLoopCounter(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpBackIf (src/BATTLE/BATTLE.PRG/4A0A8.c:1664)
-int Event_ScriptLoopBackward(u_char* arg0, short arg1)
+intptr_t Event_ScriptLoopBackward(u_char* arg0, short arg1)
 {
     if (arg0[1] == 0xFF) {
-        return (long)&arg0[-Core_Memory_ReadUnalignedShort(arg0 + 2)];
+        return (intptr_t)&arg0[-Core_Memory_ReadUnalignedShort(arg0 + 2)];
     }
     if (--Event_loopCounters[arg0[1]] != 0) {
-        return (long)&arg0[-Core_Memory_ReadUnalignedShort(arg0 + 2)];
+        return (intptr_t)&arg0[-Core_Memory_ReadUnalignedShort(arg0 + 2)];
     }
     return 0;
 }
@@ -620,7 +620,7 @@ int Event_ScriptConfigureEasingCurve(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG vs_battle_script_specialOp (src/BATTLE/BATTLE.PRG/4A0A8.c:2651)
-int Event_CommandSpecialOperation(u_char* arg0, short arg1)
+intptr_t Event_CommandSpecialOperation(u_char* arg0, short arg1)
 {
     char sp10[32];
 
@@ -691,7 +691,7 @@ int Event_CommandSpecialOperation(u_char* arg0, short arg1)
         break;
     case 16:
         Event_subroutineReturnCursor = (intptr_t)(arg0 + 6);
-        return (long)&Event_specialSubroutineScript;
+        return (intptr_t)&Event_specialSubroutineScript;
     case 17:
         Field_CancelPendingRoomVisit();
         break;
@@ -738,10 +738,10 @@ int Event_CommandWaitScriptContext(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BB554 (src/BATTLE/BATTLE.PRG/4A0A8.c:2837)
-int Event_CommandStartScriptContext(u_char* arg0, short arg1)
+intptr_t Event_CommandStartScriptContext(u_char* arg0, short arg1)
 {
     Event_threadCursors[arg0[1]] = arg0 + 4;
-    return (int)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 2)];
+    return (intptr_t)&arg0[Core_Memory_ReadUnalignedShort(arg0 + 2)];
 }
 
 // decomp: BATTLE.PRG func_800BB5A4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2843)

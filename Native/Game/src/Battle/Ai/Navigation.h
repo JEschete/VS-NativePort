@@ -76,7 +76,7 @@ unsigned short* Battle_Ai_WaypointAddress(unsigned short* row, int index);
 void Battle_Ai_FindNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state, Battle_Ai_WaypointTile* destination);
 void Battle_Ai_ResolveRouteGateExit(Battle_Ai_RouteGateTile* arg0, Battle_Ai_RouteGateTile* arg1);
 void Battle_Ai_FindNearestRouteGateEntry(int arg0, int arg1, int arg2, Battle_Ai_RouteGateTile* arg3);
-int Battle_Ai_FindRouteGateAtTile(int arg0, u_int arg1, int arg2);
+int Battle_Ai_FindRouteGateAtTile(intptr_t arg0, u_int arg1, int arg2);
 u_int Battle_Ai_RouteEndpointPair(Battle_Ai_RouteEdgePair* pair);
 u_short Battle_Ai_RouteEndpointValue(Battle_Ai_RouteEdgePair* pair, int index);
 u_int Battle_Ai_NavigationTileFlags(int z, int x);

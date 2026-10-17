@@ -212,7 +212,7 @@ typedef struct Effects_ParticleEmitterScratch {
     /* 0x174 */ int sinAngle1;
     /* 0x178 */ int cosAngle0;
     /* 0x17C */ int cosAngle1;
-    /* 0x180 */ u_char transparency;
+    /* 0x180 */ int transparency;
     /* 0x184 */ int ringSegments;
     /* 0x188 */ int ringPositions;
 } Effects_ParticleEmitterScratch;

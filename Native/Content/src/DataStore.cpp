@@ -2,6 +2,7 @@
 #include "Content/DataAccess.h"
 
 #include "Core/Log.hpp"
+#include "Platform/CrashHandler.hpp"
 
 #include <algorithm>
 #include <charconv>
@@ -143,6 +144,7 @@ extern "C" int Content_ReadDiscBytes(unsigned lba, unsigned bytes, void* dest)
         if (e == nullptr) {
             VS_LOG_ERROR("content", "no extracted file holds sector {} (read of {} bytes at sector {})", sector, bytes,
                          lba);
+            VS::Platform::LogCallStack("bad disc read");
             std::memset(out, 0, remaining);
             return 0;
         }

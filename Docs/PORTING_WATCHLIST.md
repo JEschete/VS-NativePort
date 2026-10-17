@@ -76,6 +76,29 @@ every pointer-to-4-byte-integer cast and where its value goes):
 Types that hold pointers (111) differ from the PS1 layout by design. Code that reaches their members by literal
 offsets, or reads them from disc, is where the remaining §2 work is.
 
+**Option B (owner, 1b attract path):** per-site fixes, keeping 64-bit pointer members (not `__ptr32` with
+`/LARGEADDRESSAWARE:NO`). Mechanisms, all in the copy tool (`tools\port\copy_fixups.py`), so they hold for every
+actor and room:
+
+- **On-disc offsets stay offsets.** `ONDISC_OFFSETS` lists members of file images that the PS1 relocated in place
+  (SHP, SEQ, SEQ animation bank, WEP, MPD section E). They stay 32-bit `u_int` offsets; every use becomes
+  `VS_ONDISC(base, member, T)` (`Legacy/OnDisc.h`), which resolves base + offset when read, and the in-place
+  relocation loops are deleted.
+- **Signatures that carry pointers.** `SIG_RETYPE` (plus hazard `return:`/`param:` rows) makes such returns and
+  parameters `intptr_t`/`uintptr_t`, in definitions, stubs and view casts (e.g. `Actors::FindActorAnimationHeader`,
+  `Field::RoomAuxiliaryData`).
+- **Type text fixes.** `TYPE_FIXES` corrects copied type text (pointer slots in `Field::RoomRecord`, padding in
+  `T00634`); the layout writer uses the field ledger's scalar type when it fits the gap.
+  `Native\Tests\src\LayoutAsserts.c` statically asserts the layouts code depends on (actor allocation span, stats
+  placement, SHP/SEQ headers).
+- **Literal offsets and sizes.** `(char*)x + 0xNN` views and `0x1900`-style sizes become named members / `sizeof`
+  (`python tools\port\field_at.py <Type> 0xOFF[:bit]` maps a PS1 offset to the member). Still raw, to check when
+  reached: ActionPlanning 0x9CC/0xD8C/0x1D8C, Behavior +12, Timeline +0x14, ScriptCamera +0x1DA, Gimmicks +0x16C,
+  Appearance 0x55-0x64; the audio `>= 0x80000000` KSEG pointer test.
+- **Debug aids.** `Core_Tracef` (C log), `Platform::LogCallStack` (also on bad data reads),
+  `Platform_WatchWrites(addr, bytes)` (hardware write watchpoint), and the crash handler recovers the caller after a
+  call through a null function pointer.
+
 ## 3. Texture and palette references by video-memory coordinates (AI rewrite tool)
 
 The game addresses textures and palettes by PS1 video-memory coordinates (`getTPage` ×49, `setClut`, `LoadImage`
@@ -236,3 +259,12 @@ module, not only the title.
 - **Pad stick bytes.** `Input_ReadControllerPort` stores receive-buffer bytes 4/5 as the left stick and 6/7 as the
   right; the controller sends the right stick first. The shim writes the hardware order, so the names in
   `Input\Controller.c` (from the decomp) are swapped; check against analog movement in 1c before renaming.
+- **Palette-first images.** A splat `indexed` image without `cluts_after` stores its palette first, so the C symbol
+  starts 512 bytes into the segment (`_uiTable`, the load screen's CAUTION label).
+- **Overlay names.** Module pointer tables match the catalog overlay by file name (`BATTLE.PRG` vs
+  `BATTLE/BATTLE.PRG`); before that, BATTLE function tables stayed unresolved.
+- **Attract scenes (title idle) reach assembly-only rendering.** Loading (actors, SHP/SEQ/WEP, ZONE020/MAP213) and
+  the game loop run; drawing reaches unported stubs: `Actors::DrawActorModel` (~1150 lines of assembly),
+  `Render::SetRoomPolygonNearClip`, `Render::BuildRoomGeometryViewMatrix`, `Render::DrawSkyDome`,
+  `Render::QueueSpriteWithTexturePage`, `Core::Math::MultiplyMatrixIntoRight`, `Field::SampleCollisionHeightCode`,
+  `Battle::Ai::InitializeRoomAiMap`. These come first in the §5 rewrite order.

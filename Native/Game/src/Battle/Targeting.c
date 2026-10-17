@@ -1543,7 +1543,7 @@ int Battle_CalculateRangeShapeExtent(Battle_Ai_ActionRangeShape* arg0)
 }
 
 // decomp: BATTLE.PRG func_800E5600 (src/BATTLE/BATTLE.PRG/7CD68.c:459)
-int Battle_CalculateActionAreaReach(int arg0, int actionId, u_int arg2)
+int Battle_CalculateActionAreaReach(intptr_t arg0, int actionId, u_int arg2)
 {
     Battle_ActionDefinition* action = &Battle_actionDefinitions[actionId];
     int r = 0;

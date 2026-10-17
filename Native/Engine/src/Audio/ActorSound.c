@@ -106,11 +106,11 @@ void Audio_PlayActorModelSound(Actors_ModelInstance* arg0, int arg1)
     }
 
     if (type == 8) {
-        Audio_PlayRandomActorImpactSound(arg0->model->soundSection, sp[0], sp[1]);
+        Audio_PlayRandomActorImpactSound(VS_ONDISC(arg0->model, soundSection, void *), sp[0], sp[1]);
     } else if (type == 4) {
-        Audio_PlayBankSfx(0x7E, arg0->model->soundSection, Core_Random_Rand() % 4 + 4, sp[0], sp[1]);
+        Audio_PlayBankSfx(0x7E, VS_ONDISC(arg0->model, soundSection, void *), Core_Random_Rand() % 4 + 4, sp[0], sp[1]);
     } else {
-        Audio_PlayBankSfx(0x180, arg0->model->soundSection, type, sp[0], sp[1]);
+        Audio_PlayBankSfx(0x180, VS_ONDISC(arg0->model, soundSection, void *), type, sp[0], sp[1]);
     }
 }
 

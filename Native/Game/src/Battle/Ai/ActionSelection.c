@@ -64,7 +64,7 @@ void Battle_Ai_BuildAiActionMetadata(Battle_Ai_ActionMetadataView* state)
             mask = 1 << ((action->opaque0.word >> 20) & 15);
             entry->rangeSquared = Battle_CalculateActionRangeSquared((void*)state, id);
             entry->radius =
-                Battle_CalculateActionAreaReach((int)state, id, Core_Math_SquareRootInteger(entry->rangeSquared));
+                Battle_CalculateActionAreaReach((intptr_t)state, id, Core_Math_SquareRootInteger(entry->rangeSquared));
             entry->longRange =
                 entry->rangeSquared > 0x51000 && !(action->opaqueC & 0x20000000);
             if (mask & 0x4198) {

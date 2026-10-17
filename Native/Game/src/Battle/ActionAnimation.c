@@ -132,7 +132,7 @@ void Battle_SetEnemyCombatPose(int arg0, int arg1)
         }
         ++var_s0;
         var_s1 = 8;
-        ((int (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(temp_s2, var_s0, sp10);
+        ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(temp_s2, var_s0, sp10);
         if (sp10[0] == 0) {
             var_s0 = 6;
             var_s1 = 0x10;
@@ -199,7 +199,7 @@ void Battle_PlaySpellCastAnimation(int arg0, SVECTOR* arg1, int arg2)
         anim += 100;
     }
 
-    ((int (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, anim, &sp20);
+    ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, anim, &sp20);
 
     if (sp20 == 0) {
         anim = sp18[arg2];
@@ -503,7 +503,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
         if ((u_short)actor->collisionRadius >= 0x80U) {
             actor->instance.turnFrames = 0x14;
         }
-        ((int (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, 0xBFU, &animation);
+        ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, 0xBFU, &animation);
         value = 0xBF;
         if (animation == NULL) {
             value = 0xC1;
@@ -512,7 +512,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
         Actors_ResetActorHeadTrackingSpeed(actor);
         return;
     } else if (mode == 1) {
-        ((int (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, 0xFFU, &animation);
+        ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, 0xFFU, &animation);
         if (animation == NULL) {
             fallbackActor = Actors_actorRecords[actorId];
             if (fallbackActor != NULL) {
@@ -573,7 +573,7 @@ void Battle_PlayBreakArtAnimation(int arg0, SVECTOR* arg1, int arg2)
 
     Battle_PlaySpecialActionAnimation(arg0, arg1, arg2);
     if (arg2 == 1) {
-        ((int (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(Actors_actorRecords[arg0], 0xFE, &sp10);
+        ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(Actors_actorRecords[arg0], 0xFE, &sp10);
         if (sp10 != 0) {
             Actors_QueueActorAnimation((int)arg0, 0xFE, 8, 0);
         }

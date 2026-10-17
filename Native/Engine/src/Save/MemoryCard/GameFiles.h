@@ -172,7 +172,7 @@ u_int Save_MemoryCard_NewestSaveSlot(void);
 int Save_MemoryCard_FindMatchingSaveSlot(void);
 int Save_MemoryCard_ParseSaveFileNumber(char* filename);
 int Save_MemoryCard_HasChecksumError(Save_GameSaveImage data[], int sectorCount);
-void Save_MemoryCard_DecodeSaveBytes(u_int key, void* buf, int count);
+void Save_MemoryCard_DecodeSaveBytes(u_int key, void* buf, uintptr_t count);
 int Save_MemoryCard_ReadSaveSummary(int id);
 int Save_MemoryCard_HasSaveSuffix(int id);
 int Save_MemoryCard_DeleteRedundantTemporaryFiles(int port);

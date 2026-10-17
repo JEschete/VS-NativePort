@@ -179,14 +179,14 @@ void Effects_BindEffectSoundSequences(u_char* arg0) { Effects_package->block11Da
 void Effects_BindEffectSoundBank(void* arg0)
 {
     Effects_package->block12Data = arg0;
-    Audio_BindRoomSfxBank((u_int)arg0);
+    Audio_BindRoomSfxBank((uintptr_t)arg0);
 }
 
 // decomp: BATTLE.PRG _parsePfileBlock13 (src/BATTLE/BATTLE.PRG/6F014.c:543)
 void Effects_BindEffectAuxiliarySoundBank(void* arg0)
 {
     Effects_package->block13Data = arg0;
-    Effects_package->auxiliarySoundHandle = Audio_BindRoomCutsceneStream((u_int)arg0);
+    Effects_package->auxiliarySoundHandle = Audio_BindRoomCutsceneStream((uintptr_t)arg0);
 }
 
 // decomp: BATTLE.PRG _loadfile (src/BATTLE/BATTLE.PRG/6F014.c:549)

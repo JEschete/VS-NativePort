@@ -598,6 +598,7 @@
     <ClInclude Include="Legacy\Core\PsxTypes.h" />
     <ClInclude Include="Legacy\Input\LibPad.h" />
     <ClInclude Include="Legacy\Movie\LibPress.h" />
+    <ClInclude Include="Legacy\OnDisc.h" />
     <ClInclude Include="Legacy\Psx.h" />
     <ClInclude Include="Legacy\Removed.h" />
     <ClInclude Include="Legacy\Render\LibGpu.h" />

@@ -424,7 +424,7 @@ void Audio_StopBankSfx(int arg0, int* arg1, int arg2)
         var_a0 = 0;
         var_a1 = arg0;
     }
-    Audio_Playback_StopSoundEffects((int)var_a0, var_a1);
+    Audio_Playback_StopSoundEffects((intptr_t)var_a0, var_a1);
 }
 
 // decomp: SLUS_010.40 func_80046494 (src/SLUS_010.40/main.c:10299)

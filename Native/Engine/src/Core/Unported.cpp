@@ -3,6 +3,8 @@
 #include "Core/Log.hpp"
 
 #include <algorithm>
+#include <cstdarg>
+#include <cstdio>
 #include <map>
 #include <mutex>
 
@@ -48,4 +50,14 @@ void DumpUnportedToLog()
 extern "C" void Core_RecordUnported(const char* site)
 {
     VS::Core::RecordUnported(site);
+}
+
+extern "C" void Core_Tracef(const char* format, ...)
+{
+    char line[512];
+    va_list args;
+    va_start(args, format);
+    std::vsnprintf(line, sizeof line, format, args);
+    va_end(args);
+    VS_LOG_INFO("trace", "{}", line);
 }

@@ -978,12 +978,12 @@ int Field_LoadRoomSections(int arg0, void* data)
 
     sectionE = Field_roomData.sectionE;
     if (sectionE != NULL) {
-        sectionE->firstArray = (int*)(sectionE + 1);
+        sectionE->firstArray = sizeof(*sectionE);
         if (sectionE->hasSecondArray > 0) {
-            sectionE->secondArray = (int*)(sectionE + 1);
-            sectionE->secondArray += sectionE->secondArrayOffset >> 2;
+            sectionE->secondArray = sizeof(*sectionE);
+            sectionE->secondArray += (sectionE->secondArrayOffset >> 2) * sizeof(int);
         } else {
-            sectionE->secondArray = NULL;
+            sectionE->secondArray = 0;
         }
     }
 
@@ -1044,10 +1044,10 @@ int Field_ReleaseOwnedRoomSections(int arg0)
 void Field_ZoneCleanupHook(int arg0 __attribute__((unused))) { }
 
 // decomp: BATTLE.PRG func_8008B6FC (src/BATTLE/BATTLE.PRG/146C.c:16061)
-int Field_RoomAuxiliaryData(void) { return Field_roomData.section6; }
+intptr_t Field_RoomAuxiliaryData(void) { return Field_roomData.section6; }
 
 // decomp: BATTLE.PRG func_8008C478 (src/BATTLE/BATTLE.PRG/146C.c:16467)
-int Field_RoomSupplementalRecord(int arg0)
+intptr_t Field_RoomSupplementalRecord(int arg0)
 {
     if (Field_roomData.section7 != 0) {
         return Field_roomData.section7 + (arg0 * 8);

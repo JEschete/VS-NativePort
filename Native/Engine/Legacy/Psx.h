@@ -11,6 +11,7 @@
 #include "Core/Unported.h"
 #include "Legacy/Core/LibEtc.h"
 #include "Legacy/Removed.h"
+#include "Legacy/OnDisc.h"
 #include "Legacy/Render/LibGpu.h"
 #include "Legacy/Input/LibPad.h"
 #include "Legacy/Audio/LibSpu.h"

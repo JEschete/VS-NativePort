@@ -78,7 +78,7 @@ Battle_TargetSphereLabelEntry* Battle_InitTargetSelectionRow(int arg0, int arg1,
 char* Battle_FirstTargetStatusText(uint arg0);
 int Battle_UpdateTargetSelectionMenu(u_char* target);
 int Battle_CalculateRangeShapeExtent(Battle_Ai_ActionRangeShape* arg0);
-int Battle_CalculateActionAreaReach(int arg0, int actionId, u_int arg2);
+int Battle_CalculateActionAreaReach(intptr_t arg0, int actionId, u_int arg2);
 int Battle_CalculateActionRangeSquared(Battle_Ai_ActionRangeView* arg0, int actionId);
 
 #endif // VS_BATTLE_TARGETING_H_DECLS

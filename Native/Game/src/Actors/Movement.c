@@ -778,13 +778,13 @@ void Actors_BeginActorJumpToTile(Actors_ActorRecord* actor, u_char* target, int 
     }
 
     actor->instance.jumpCountdown = 6;
-    *(u_int*)((char*)actor + 0x5AC) &= ~0x4000000;
+    actor->landingPending = 0;
     if (speed >= actor->runSpeed) {
         actor->instance.jumpCountdown = 2;
     }
     if (speed < 18) {
         speed = 18;
-        *(u_int*)((char*)actor + 0x5AC) |= 0x4000000;
+        actor->landingPending = 1;
     }
 
     if (target[1] >= 2) {

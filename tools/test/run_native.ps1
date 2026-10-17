@@ -20,7 +20,8 @@ param(
     [string]$Press = '',
     [string]$Cap = 'build\cap1',
     [string]$Config = 'Debug',
-    [switch]$Devices   # use the keyboard/gamepad too (default: scripted input only)
+    [switch]$Devices,  # use the keyboard/gamepad too (default: scripted input only)
+    [int]$Speed = 1    # logical ticks per real tick (attract/long runs: 8)
 )
 $repo = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 Set-Location $repo
@@ -40,6 +41,7 @@ if ($Press) { $presses += $Press }
 $argv = @('--frames', "$Frames", '--capture', $Cap, '--at', $At)
 if ($presses) { $argv += @('--press', ($presses -join ',')) }
 if (-not $Devices) { $argv += '--scripted' }
+if ($Speed -gt 1) { $argv += @('--speed', "$Speed") }
 $p = Start-Process -FilePath "build\$Config\VS.Desktop.exe" -ArgumentList $argv -PassThru
 if (-not $p.WaitForExit(300000)) { Stop-Process -Id $p.Id; 'TIMEOUT' }
 "exit: $($p.ExitCode)"

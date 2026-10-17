@@ -69,7 +69,7 @@ int Audio_FreeCutsceneStreamSlot(int arg0)
 }
 
 // decomp: SLUS_010.40 func_80046608 (src/SLUS_010.40/main.c:10339)
-int Audio_BindRoomCutsceneStream(u_int arg0)
+int Audio_BindRoomCutsceneStream(uintptr_t arg0)
 {
     if (Audio_soundState.musicHandles[22] == 0) {
         Audio_soundState.musicHandles[22] = arg0;

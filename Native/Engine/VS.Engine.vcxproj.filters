@@ -714,6 +714,9 @@
     <ClInclude Include="Legacy\Movie\LibPress.h">
       <Filter>Legacy\Movie</Filter>
     </ClInclude>
+    <ClInclude Include="Legacy\OnDisc.h">
+      <Filter>Legacy</Filter>
+    </ClInclude>
     <ClInclude Include="Legacy\Psx.h">
       <Filter>Legacy</Filter>
     </ClInclude>

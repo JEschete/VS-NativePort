@@ -292,10 +292,11 @@ typedef struct Field_MpdSectionE {
     int reserved00;
     int secondArrayOffset;
     int hasSecondArray;
-    int* firstArray;
-    int* secondArray;
+    u_int firstArray; /* offset from the struct (on-disc pointer) */
+    u_int secondArray; /* offset from the struct (on-disc pointer) */
     int payload[0];
 } Field_MpdSectionE;
+_Static_assert(sizeof(Field_MpdSectionE) == 0x14, "Field_MpdSectionE must keep its PS1 layout");
 
 // decomp: func_80091C6C_t2 (src/BATTLE/BATTLE.PRG/2842C.c:151)
 typedef struct Field_MpdPolygonUvView {

@@ -925,7 +925,7 @@ exit:
             return -2;
         }
 
-        temp_v1_2 = s1->model->polygonSection;
+        temp_v1_2 = VS_ONDISC(s1->model, polygonSection, void *);
         j = arg0->subKind;
 
         if (j >= 6) {

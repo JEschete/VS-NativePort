@@ -393,10 +393,6 @@ int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
 
                 /* dst doubles as the relocation delta for the copied pointers */
                 dst = (Actors_WeaponModelData*)((uintptr_t)buf - (uintptr_t)data);
-                buf->textureSection += (u_long)dst;
-                buf->vertexGroupSection += (u_long)dst;
-                buf->vertexSection += (u_long)dst;
-                buf->polygonSection += (u_long)dst;
             }
 
             model->paletteSlotOffset = objectData->textureSlot + (objectData->subKind << 1) + 16;
@@ -464,10 +460,6 @@ int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
 
     memcpy(dst, data, size);
 
-    dst->textureSection += (u_long)dst;
-    dst->vertexGroupSection += (u_long)dst;
-    dst->vertexSection += (u_long)dst;
-    dst->polygonSection += (u_long)dst;
     model->sectionOffsets = dst;
 
     if (dst == NULL) {
@@ -549,7 +541,7 @@ int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
 
 fixPrims:
     count = model->otherPrimitiveCount + model->triangleCount + model->quadCount;
-    pData = (void*)model->sectionOffsets->polygonSection;
+    pData = (void*)VS_ONDISC(model->sectionOffsets, polygonSection, void*);
     texU = (model->textureSlot & 1) * 64;
 
     for (n = 0; n < count; n++) {
@@ -825,7 +817,7 @@ int Content_ParseActorModel(Content_ActorAssetRequest* object)
             if (actor == NULL) {
                 return -2;
             }
-            memset(actor, 0, 0x1900);
+            memset(actor, 0, sizeof(Actors_ActorRecord));
             actor->textureSlot = 0xFF;
             actor->instance.attachParent = 0xFF;
         }
@@ -845,14 +837,14 @@ int Content_ParseActorModel(Content_ActorAssetRequest* object)
 
         if ((u_long)object->dataAddress < 17) {
         copyShared:
-            Core_Memory_CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], 0x1900);
+            Core_Memory_CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], sizeof(Actors_ActorRecord));
             if (actor->holdsTextureSlots && actor->textureSlot != 0xFF) {
                 for (i = 0; i < actor->instance.textureSlotCountMinusOne + 1; ++i) {
                     ++Render_legacyActorTextureSlots[actor->textureSlot + i].referenceCount;
                 }
             }
             *(Field_ActorPlacement*)&actor->instance.currentTileX = object->placement;
-            if (*(u_int*)((char*)actor + 0x5AC) & 0x08000000) {
+            if (actor->textureHeaderBit) {
                 Content_legacyShpCopiedWordCount = 0xA0;
             } else {
                 Content_legacyShpCopiedWordCount = 0x10;
@@ -881,10 +873,6 @@ int Content_ParseActorModel(Content_ActorAssetRequest* object)
     data += 4;
     model = Core_Memory_AllocateFromLowEnd(size);
     memcpy(model, data, size);
-    model->soundSection = (char*)model->soundSection + (intptr_t)model;
-    model->groupSection = (char*)model->groupSection + (intptr_t)model;
-    model->vertexSection = (char*)model->vertexSection + (intptr_t)model;
-    model->polygonSection = (char*)model->polygonSection + (intptr_t)model;
     actor->instance.model = model;
     if (model == NULL) {
         return -2;
@@ -1000,7 +988,7 @@ found:
         Render_legacyActorTextureSlots[i + j].referenceCount = 1;
     }
     actor->textureSlot = i;
-    if (*(u_int*)((char*)actor + 0x5AC) & 0x08000000) {
+    if (actor->textureHeaderBit) {
         Render_legacyActorTextureSlots[actor->textureSlot].texturePage |= 0x80;
     } else {
         Render_legacyActorTextureSlots[actor->textureSlot].texturePage &= ~0x180;
@@ -1023,7 +1011,7 @@ found:
 
 fixUVs:
     j = actor->instance.otherPolygonCount + actor->instance.triangleCount + actor->instance.quadCount;
-    pData = actor->instance.model->polygonSection;
+    pData = VS_ONDISC(actor->instance.model, polygonSection, void *);
     texV = Actors_textureSlotRowOffsets[actor->textureSlot] << 6;
 
     switch (actor->instance.uvLayout) {
@@ -1225,7 +1213,7 @@ int Content_UpdateActorSequenceLoad(Content_ActorAssetRequest* object)
     switch (object->subKind) {
     case 0:
         sequences = (char*)actor + 0x5F4;
-        sectors = *(u_short*)(sequences + 0xA0 + object->modelId * 2) >> 11;
+        sectors = actor->chainAttackAnimationIds[object->modelId] >> 11;
         if (!sectors) {
             return 0;
         }
@@ -1234,7 +1222,7 @@ int Content_UpdateActorSequenceLoad(Content_ActorAssetRequest* object)
         if (!Content_legacySequenceFileBuffer) {
             return -2;
         }
-        Content_legacySequenceFileLocation.lba = *(u_int*)(sequences + 0x70 + object->modelId * 4);
+        Content_legacySequenceFileLocation.lba = actor->battleSequenceLbas[object->modelId];
         if (object->targetSlot == 0 && (model = object->modelId) != 0) {
             queued.assetKind = 7;
             queued.targetSlot = 0;
@@ -1328,10 +1316,6 @@ parse:
 void Content_CopyRelocatedWeaponSequence(Content_SequenceBuffer* arg0, Content_SequenceBuffer* arg1)
 {
     Core_Memory_CopyAlignedWords(arg0, arg1, 0x7800);
-    arg0->firstSectionPointer -= (intptr_t)arg1;
-    arg0->secondSectionPointer -= (intptr_t)arg1;
-    arg0->firstSectionPointer += (intptr_t)arg0;
-    arg0->secondSectionPointer += (intptr_t)arg0;
 }
 
 // decomp: BATTLE.PRG _loadSeq (src/BATTLE/BATTLE.PRG/30DB0.c:1617)
@@ -1439,9 +1423,7 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
         actor->sequenceModelId = object->modelId;
     copy:
         Core_Memory_CopyAlignedWords(seq, Content_legacySequenceParseData, size);
-        seq->firstSectionPointer = (char*)seq->firstSectionPointer + (intptr_t)seq;
-        seq->secondSectionPointer = (char*)seq->secondSectionPointer + (intptr_t)seq;
-        return 0;
+                return 0;
     } else if (object->subKind == 3) {
         Content_legacySequenceParseData += 4;
         size = *(int*)Content_legacySequenceParseData;
@@ -1491,9 +1473,7 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
         for (i = 0; i < count; ++i) {
             Actors_sharedSequenceAnimationData[slot][i] += (intptr_t)Content_legacySequenceParseData;
             seq = (Content_SequenceBuffer*)(Actors_sharedSequenceAnimationData[slot][i] + 8);
-            seq->firstSectionPointer = (char*)seq->firstSectionPointer + (intptr_t)(Actors_sharedSequenceAnimationData[slot][i] + 8);
-            seq->secondSectionPointer = (char*)seq->secondSectionPointer + (intptr_t)(Actors_sharedSequenceAnimationData[slot][i] + 8);
-        }
+                        }
         Actors_sharedSequenceAnimationData[slot][i] = (char*)-1;
         for (i = 0; i < 17; ++i) {
             if (Actors_actorRecords[i] != NULL) {
@@ -1652,7 +1632,7 @@ int Content_ReleaseActorModel(int arg0)
         }
     exit:
         if (var_v0 == 0) {
-            Audio_StopBankSfx(0x180, temp_s1->instance.model->soundSection, 0);
+            Audio_StopBankSfx(0x180, VS_ONDISC(temp_s1->instance.model, soundSection, void *), 0);
             Core_Memory_FreeFromLowEnd(temp_s1->instance.model);
             Core_Memory_FreeFromLowEnd(temp_s1->ownedSequence);
         }

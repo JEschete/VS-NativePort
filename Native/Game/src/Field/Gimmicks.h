@@ -88,7 +88,7 @@ typedef struct Field_GimmickInstance {
     /* 0x0E */ u_char reservedE;
     /* 0x0F */ u_char slot;
     /* 0x10 */ u_char reserved10;
-    /* 0x11 */ u_char delay;
+    /* 0x11 */ signed char delay;
     /* 0x12 */ u_char parent;
     /* 0x13 */ u_char linkedGimmick;
     /* 0x14 */ int reserved14;
@@ -100,7 +100,7 @@ typedef struct Field_GimmickInstance {
     /* 0x22 */ short reserved22;
     /* 0x24 */ short rotationX;
     /* 0x26 */ u_short rotationY;
-    /* 0x28 */ int rotationZ;
+    /* 0x28 */ u_short rotationZ;
     /* 0x2A */ short reserved2A;
     /* 0x2C */ short scaleX;
     /* 0x2E */ short scaleY;
@@ -110,9 +110,9 @@ typedef struct Field_GimmickInstance {
     /* 0x36 */ short velocityY;
     /* 0x38 */ short slideZ;
     /* 0x3A */ short orientation;
-    /* 0x3C */ int rotationDeltaX;
+    /* 0x3C */ short rotationDeltaX;
     /* 0x3E */ short rotationDeltaY;
-    /* 0x40 */ int rotationDeltaZ;
+    /* 0x40 */ short rotationDeltaZ;
     /* 0x42 */ short reserved42;
     /* 0x44 */ int reserved44;
     /* 0x48 */ int reserved48;

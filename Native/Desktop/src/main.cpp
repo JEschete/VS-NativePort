@@ -14,6 +14,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
+#include <algorithm>
 #include <charconv>
 #include <filesystem>
 #include <optional>
@@ -184,6 +185,11 @@ int main(int argc, char** argv)
         return 1;
     }
     u64 maxTicks = 0;
+    u32 speed = 1;   // --speed N: N logical ticks per real tick (test runs; audio still plays in real time)
+    if (auto s = Option(argc, argv, "--speed")) {
+        std::from_chars(s->data(), s->data() + s->size(), speed);
+        speed = std::max(speed, 1u);
+    }
     if (auto frames = Option(argc, argv, "--frames")) {
         std::from_chars(frames->data(), frames->data() + frames->size(), maxTicks);
     }
@@ -220,7 +226,7 @@ int main(int argc, char** argv)
 
     while (app.PumpEvents([&](const SDL_Event& ev) { input.HandleEvent(ev); })) {
         const double now = app.NowSeconds();
-        const u32 ticks = clock.Advance(now - last);
+        const u32 ticks = clock.Advance(now - last) * speed;
         last = now;
         bool shown = false;
         for (u32 i = 0; i < ticks; ++i) {

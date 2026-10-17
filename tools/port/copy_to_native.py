@@ -389,6 +389,7 @@ class Copier:
 
     # ------------------------------------------------------------------------------------------------- x64 hazards
     BASE_INT = r"(?:unsigned\s+long|unsigned\s+int|signed\s+int|unsigned|long|int|u_long|u_int|uint|ulong)"
+    SCALAR = r"(?:(?:un)?signed\s+)?(?:char|short|int|long|u_char|u_short|u_int|u_long)"
 
     SIGNED_INTS = re.compile(r"^\s*(signed\s+)?(int|long|short|char|s8|s16|s32|long\s+int)\s*$")
 
@@ -404,6 +405,7 @@ class Copier:
         Struct-size literals of structs that hold pointers become sizeof."""
         self.ptr_fields: set[str] = set()
         self.ptr_globals: set[str] = set()
+        self.sig_retype: dict[tuple[str, int | str], str] = {}   # (function id, "ret" | param index) -> type
         path = PORT / "hazards.json"
         if not path.exists():
             self.report["hazards-not-indexed"].append("run tools/port/hazard_index.py")
@@ -415,7 +417,14 @@ class Copier:
             d = c["dest"]
             kind = d.split(":", 1)[0]
             fixed = True  # whether the value lands somewhere pointer-sized after the edits
-            if kind == "field" and d != "field:?":
+            sig = re.match(r"(return|param):(F\d{5})(?::(\d+))?$", d)
+            if sig:
+                # the function's return value or parameter carries the pointer: it becomes pointer-sized in every
+                # declaration (retype_signature), and the cast with it
+                cast = re.match(r"\(([^)]*)\)", c["text"])
+                self.sig_retype[(sig[2], "ret" if sig[1] == "return" else int(sig[3]))] = \
+                    self.pointer_int(cast[1] if cast else "")
+            elif kind == "field" and d != "field:?":
                 fid = re.sub(r"~w\d+$", "", d[6:]).split(">")[-1]
                 tid, _, idx = fid.partition(".")
                 t = self.type_by_id.get(tid)
@@ -457,6 +466,104 @@ class Copier:
             edits[s["file"]].append((s["start"], s["end"] - s["start"], "edit", text))
         for rel, es in edits.items():
             self.src.extra[rel] = sorted(set(es))
+        for fid, sig in getattr(cf, "SIG_RETYPE", {}).items():   # reviewed additions (pointer returns not cast)
+            for k, t in sig.items():
+                self.sig_retype[(fid, k)] = t
+        for rel, es in self.ondisc_edits().items():
+            self.src.extra[rel] = sorted(set(self.src.extra.get(rel, []) + es))
+
+    def ondisc_edits(self) -> dict[str, list]:
+        """`E->m` / `E.m` for the members in copy_fixups.ONDISC_OFFSETS -> VS_ONDISC(E, m, T) (Legacy/OnDisc.h): the
+        member holds the file's offset from the struct, and the use gets the pointer it stood for."""
+        edits: dict[str, list] = collections.defaultdict(list)
+        ident = set(b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")
+
+        def back_ws(b: bytes, j: int) -> int:
+            while j > 0 and b[j - 1] in b" \t\r\n":
+                j -= 1
+            return j
+
+        def match_back(b: bytes, close_at: int) -> int:
+            close = b[close_at]
+            opener = ord("(") if close == ord(")") else ord("[")
+            depth = 0
+            for k in range(close_at, -1, -1):
+                if b[k] == close:
+                    depth += 1
+                elif b[k] == opener:
+                    depth -= 1
+                    if depth == 0:
+                        return k
+            return 0
+
+        def base_start(b: bytes, end: int) -> int:
+            j = end
+            while True:
+                j = back_ws(b, j)
+                if j == 0:
+                    break
+                c = b[j - 1]
+                if c == ord("]"):
+                    j = match_back(b, j - 1)
+                    continue
+                if c == ord(")"):
+                    j = match_back(b, j - 1)
+                    k = back_ws(b, j)
+                    if k and b[k - 1] in ident:   # a call: include the callee
+                        while k and b[k - 1] in ident:
+                            k -= 1
+                        j = k
+                elif c in ident:
+                    while j and b[j - 1] in ident:
+                        j -= 1
+                else:
+                    break
+                k = back_ws(b, j)
+                if k >= 2 and b[k - 2:k] == b"->":
+                    j = k - 2
+                    continue
+                if k >= 1 and b[k - 1:k] == b".":
+                    j = k - 1
+                    continue
+                break
+            return back_ws(b, end) if j == end else j
+
+        for rel, occ in self.src.refs.items():
+            hits = [o for o in occ if o[3] in ("field", "field@macro") and o[4] in cf.ONDISC_OFFSETS]
+            if not hits:
+                continue
+            p = dx.SRC / rel[4:] if rel.startswith("src/") else (dx.GEN / rel[4:] if rel.startswith("gen/")
+                                                                 else dx.DECOMP / rel)
+            b = p.read_bytes()
+            starts = [0] + [i + 1 for i, ch in enumerate(b) if ch == 10]
+            for line, col, n, kind, fid in hits:
+                off = starts[line - 1] + col - 1
+                k = back_ws(b, off)
+                arrow = k - 2 if b[k - 2:k] == b"->" else (k - 1 if b[k - 1:k] == b"." else None)
+                if arrow is None:
+                    continue  # the member's declaration
+                if kind != "field":
+                    self.report["ondisc-in-macro"].append(f"{rel}:{line} {fid}")
+                    continue
+                start = base_start(b, arrow)
+                f = self.fields[fid]
+                ctype = self.spelled_type(f["type"]).strip()
+                if "*" not in ctype:
+                    ctype = "void*"   # stored as an integer in the decomp's view
+                macro = "VS_ONDISC" if b[arrow:arrow + 1] == b"-" else "VS_ONDISC_DOT"
+                edits[rel].append((start, 0, "edit", f"{macro}("))
+                edits[rel].append((arrow, off + n - arrow, "edit", f", {f['final_name']}, {ctype})"))
+                self.report["ondisc-use"].append(f"{rel}:{line} {fid}")
+        return edits
+
+    def retype_ondisc(self, tid: str, text: str) -> str:
+        """On-disc offset members are declared as the file has them: 32-bit offsets."""
+        for fid in sorted(f for f in cf.ONDISC_OFFSETS if f.split(".")[0] == tid):
+            name = self.fields[fid]["final_name"]
+            text, n = re.subn(rf"(?m)^(\s*(?:/\*[^*]*\*/\s*)?)[\w\s]+?\*+\s*({re.escape(name)}\s*;)",
+                              r"\1u_int \2 /* offset from the struct (on-disc pointer) */", text)
+            self.report["ondisc-member" if n else "ondisc-member-not-retyped"].append(f"{fid} {name}")
+        return text
 
     def retype_members(self, tid: str, text: str) -> str:
         for fid in sorted(f for f in self.ptr_fields if f.split(".")[0] == tid):
@@ -600,6 +707,7 @@ class Copier:
             # arguments it passes; call through an unprototyped pointer to the real return type
             ov = overlay_of(emitted["file"]) if emitted["file"].startswith("src/") else "SLUS_010.40"
             head = self.head_of(self.drop_storage(self.renamed(emitted["file"], emitted["start"], emitted["end"], ov)))
+            head = self.retype_signature(target, head, name)
             m = re.search(rf"\b{re.escape(name)}\s*\(", head)
             if m and "(*" not in head[:m.start()]:
                 cast = f"(({head[:m.start()].strip()} (*)()){name})"
@@ -619,7 +727,7 @@ class Copier:
         text = self.drop_storage(self.renamed(d["file"], d["start"], d["end"], ov))
         text = re.sub(r"^\s*extern\s+", "", text)
         if kind == "function":
-            text = self.head_of(text).rstrip(";").strip()
+            text = self.retype_signature(target, self.head_of(text).rstrip(";").strip(), name)
         else:
             text = self.split_init(self.own_declarator(d, text).strip())[0]
         abstract, k = re.subn(rf"\b{re.escape(name)}\b", "(*)", text, count=1)
@@ -715,6 +823,41 @@ class Copier:
             return m[0]
         return re.sub(r"\bfunc_[0-9A-F]{8}\b", sub, text)
 
+    def retype_signature(self, fid: str, text: str, name: str) -> str:
+        """Return type / parameters that carry pointers (hazards `return:`/`param:`) become pointer-sized."""
+        keys = {k[1]: t for k, t in self.sig_retype.items() if k[0] == fid}
+        if not keys:
+            return text
+        m = re.search(rf"\b{re.escape(name)}\s*\(", text)
+        if m is None:
+            return text
+        head, rest = text[:m.start()], text[m.end():]
+        if "ret" in keys:
+            head, n = re.subn(rf"\b{self.BASE_INT}(\s*)$", lambda x: keys["ret"] + x[1], head, count=1)
+            self.report["signature-return-retyped" if n else "signature-return-not-retyped"].append(f"{fid} {name}")
+        depth, start, params = 0, 0, []
+        for i, ch in enumerate(rest):
+            if ch in "([":
+                depth += 1
+            elif ch in ")]":
+                if depth == 0:
+                    params.append(rest[start:i])
+                    end = i
+                    break
+                depth -= 1
+            elif ch == "," and depth == 0:
+                params.append(rest[start:i])
+                start = i + 1
+        else:
+            return head + text[m.start():m.end()] + rest
+        for idx, t in keys.items():
+            if idx == "ret" or idx >= len(params):
+                continue
+            new, n = re.subn(rf"^(\s*){self.BASE_INT}\b", lambda x: x[1] + t, params[idx], count=1)
+            params[idx] = new
+            self.report["signature-param-retyped" if n else "signature-param-not-retyped"].append(f"{fid}:{idx} {name}")
+        return head + text[m.start():m.end()] + ",".join(params) + rest[end:]
+
     def copy_functions(self) -> None:
         # declaration each function is emitted from (definition, else prototype), known before any body is copied
         for r in self.cat:
@@ -765,6 +908,7 @@ class Copier:
                 if re.search(r"#\s*if(n?def)?\b", text):
                     text = resolve_conditionals(text, self.config_defined(d, r))
                 text = self.apply_fixups(r, text)
+                text = self.retype_signature(r["id"], text, name)
                 text = self.rename_leftovers(text, r["overlay"])
                 text = self.hoist_local_statics(src_row, text, loc)
                 if "MENUBGSZ" in text:
@@ -788,6 +932,7 @@ class Copier:
                     if p.get("variadic"):
                         self.report["stub-variadic"].append(r["final_name"])
                 body = f'    VS_UNPORTED("{r["final_name"].strip()}");\n'
+                head = self.retype_signature(r["id"], head, name)
                 if ret == "RECORD":
                     body += f"    {p['ret']} result = {{0}};\n    return result;\n"
                 elif ret != "VOID":
@@ -1115,11 +1260,29 @@ class Copier:
         lay = g.layout(r["id"])
         kw = "union" if r["kind"] == "union" else "struct"
         lines = [f"typedef {kw} {name} {{"]
-        for m, f in zip(g.members[r["id"]], lay["fields"]):
+        sizes = {"char": 1, "short": 2, "int": 4, "long": 4}
+
+        def scalar_size(s: str) -> int:
+            return next((v for k, v in sizes.items() if re.search(rf"\b{k}\b", s)), 0)
+
+        fields_all = lay["fields"]
+        for idx, (m, f) in enumerate(zip(g.members[r["id"]], fields_all)):
             t = self.spelled_type(f["type"]).strip()
+            ft = (self.fields.get(m["id"]) or {}).get("type", "").strip()
+            nxt = next((x["offset"] for x in fields_all[idx + 1:] if x["offset"] > f["offset"]), None)
+            gap = (nxt - f["offset"]) // 8 if nxt is not None else 4
+            if ft and ft != f["type"] and re.fullmatch(self.SCALAR, t) and re.fullmatch(self.SCALAR, ft) and \
+                    not m.get("bits") and scalar_size(ft) <= gap:
+                # a merged upstream layout: the field ledger has the member's real width (Field::GimmickInstance
+                # unk28 is a u_short next to unk2A, where the pinned view had one int)
+                self.report["layout-type-from-ledger"].append(f"{m['id']} {t} -> {ft}")
+                t = ft
             if m["id"] in self.ptr_fields and re.fullmatch(self.BASE_INT, t):
                 t = "uintptr_t"
                 self.report["hazard-member-uintptr"].append(m["id"])
+            elif m["id"] in cf.ONDISC_OFFSETS:
+                t = "u_int"  # offset from the struct (on-disc pointer)
+                self.report["ondisc-member"].append(m["id"])
             elif t == "size_t":
                 t = "u_int"
             fname = self.fields[m["id"]]["final_name"]
@@ -1153,7 +1316,9 @@ class Copier:
             return True  # unknown layout: make no claim
         if any(m["id"] in self.ptr_fields for m in self._gen.members.get(tid, [])):
             return True
-        for f in fields:
+        for m, f in zip(self._gen.members.get(tid, []), fields):
+            if m["id"] in cf.ONDISC_OFFSETS:
+                continue  # a 32-bit offset natively
             t = f.get("type") or ""
             if "*" in t or "(" in t or any(n in self.SDK_POINTER_TYPES for n in IDENT.findall(t)):
                 return True
@@ -1277,6 +1442,11 @@ class Copier:
             ov = overlay_of(d["file"]) if d["file"].startswith("src/") else "SLUS_010.40"
             text = self.renamed(d["file"], d["start"], d["end"], ov).strip()
             text = self.retype_members(tid, text)
+            text = self.retype_ondisc(tid, text)
+            for old, new, why in cf.TYPE_FIXES.get(tid, []):
+                if old not in text:
+                    raise SystemExit(f"copy_fixups: {tid} {r['final_name']}: '{old}' not found ({why})")
+                text = text.replace(old, new)
             if r["kind"] in ("struct", "union"):
                 text = self.bitfield_units(tid, text)
                 # size_t was 32 bits on the PS1; a member of a layout keeps that width (SYSTEM.DAT header offsets)
@@ -1679,6 +1849,7 @@ class Copier:
         emitted_fns = {i.name for f in self.files.values() for i in f.items if i.kind == "function"}
         emitted_fns |= {o["name"].strip() for o in self.owned.values() if o["kind"].strip() == "function"}
         fn_by_key = {(r["overlay"], r["name"]): r for r in self.cat_by_id.values()}
+        fn_overlay = lambda m: m.split("/")[-1]  # noqa: E731  (catalog: "BATTLE.PRG"; ledger/splat: "BATTLE/BATTLE.PRG")
         data_by_key = {(r["overlay"], r["name"]): r for r in self.data}
         symbols = []
         for module in sorted(modules):
@@ -1693,7 +1864,7 @@ class Copier:
                         continue
                     addr = int(s["vram_start"], 16)
                     if s["type"] == "func":
-                        r = fn_by_key.get((module, s["name"]))
+                        r = fn_by_key.get((fn_overlay(module), s["name"]))
                         hops = 0
                         while r is not None and c_name(r["final_name"]) not in emitted_fns and hops < 8:
                             dup = note(r, "dup-of")

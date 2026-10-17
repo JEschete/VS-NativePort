@@ -355,7 +355,7 @@ void Actors_BeginActorDeath(int actorId, void* context, int animate)
             if (actor->actionPoseActive) {
                 animationId = 0x3A;
             }
-            ((int (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, 0xABU, (int*)&animation);
+            ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, 0xABU, (int*)&animation);
             if (animation != NULL) {
                 if (actor->instance.movementMode == 0) {
                     animationId = 0x47;

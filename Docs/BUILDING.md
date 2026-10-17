@@ -153,6 +153,7 @@ build\Release\VS.Desktop.exe
 | `--capture <dir> --at <t1,t2,...>` | Write the picture at those ticks as `frame_<t>.bmp` (reference comparisons). |
 | `--press <t:Buttons,...>` | Scripted presses, each held 3 ticks, e.g. `3400:Down,3500:Circle` (names: Up Down Left Right Cross Circle Square Triangle L1 R1 L2 R2 L3 R3 Start Select, joined with `+`). |
 | `--scripted` | Ignore keyboard and gamepad (only `--press` input). |
+| `--speed <n>` | Run `n` logical ticks per real tick (e.g. 8 to reach the title attract scenes, about tick 5300, quickly). |
 
 **Today:** the original boot and title run (see Current state); the game reads `Native\data\` for its files, and
 the disc only to report its label. The title screen appears about 55 s after start; **Start (or Circle) skips the

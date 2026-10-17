@@ -21,7 +21,7 @@ typedef struct Actors_AnimationPose {
     /* 0x150 */ SVECTOR scaleKeys[42];
     /* 0x2A0 */ SVECTOR reserved2A0[42];
     /* 0x3F0 */ SVECTOR trackStates[42];
-    /* 0x540 */ u_short frame;
+    /* 0x540 */ short frame;
     /* 0x542 */ u_short nextEventFrame;
     /* 0x544 */ u_char *eventScript;
     /* 0x548 */ u_char animationId;
@@ -35,9 +35,10 @@ typedef struct Actors_AnimationPose {
 // decomp: func_800AD494_t (src/BATTLE/BATTLE.PRG/40564.c:18)
 typedef struct Actors_SeqAnimationBank {
     int animationData;
-    u_char* animationMap;
+    u_int animationMap; /* offset from the struct (on-disc pointer) */
     u_short headers[0];
 } Actors_SeqAnimationBank;
+_Static_assert(sizeof(Actors_SeqAnimationBank) == 0x8, "Actors_SeqAnimationBank must keep its PS1 layout");
 
 #endif // VS_ACTORS_ANIMATION_H_TYPES
 
@@ -112,7 +113,7 @@ void Actors_SetActorBonePoseLock(Actors_ActorRecord* arg0, int arg1, int arg2);
 void Actors_ClearActorBonePoseLocks(Actors_ActorRecord* arg0);
 void Actors_DecodeInitialPoseVector(short* arg0, u_char* arg1, int arg2);
 void Actors_InitializeActorAnimationPose(Actors_ActorRecord* actor, Actors_AnimationPose* pose);
-int Actors_FindActorAnimationHeader(void* arg0, int arg1, u_short** arg2);
+intptr_t Actors_FindActorAnimationHeader(void* arg0, int arg1, u_short** arg2);
 int Actors_RunAnimationEvents(Actors_ActorRecord* actor, Actors_AnimationPose* state, int mode);
 void Actors_IgnoreAnimationEvent(void);
 void Actors_RestartActorAnimationEvents(Actors_ActorRecord* arg0);

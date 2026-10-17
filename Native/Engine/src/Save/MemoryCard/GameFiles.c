@@ -182,7 +182,7 @@ int Save_MemoryCard_HasChecksumError(Save_GameSaveImage data[], int sectorCount)
 }
 
 // decomp: MENU7.PRG _decode (src/MENU/MENU7.PRG/260.c:388)
-void Save_MemoryCard_DecodeSaveBytes(u_int key, void* buf, int count)
+void Save_MemoryCard_DecodeSaveBytes(u_int key, void* buf, uintptr_t count)
 {
     for (; count != 0; --count) {
         key *= 0x19660D;
@@ -453,7 +453,7 @@ int Save_MemoryCard_ValidateAndApplyLoadedSave(int write)
     Save_SaveCipherHeader* unk180 = &spmcimg[1].protectedHeader.cipherHeader;
 
     Save_MemoryCard_DecodeSaveBytes(unk180->cipherKey, &unk180->slotHeader.slotState,
-        sizeof(Save_GameSaveImage) - (u_long) & ((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState);
+        sizeof(Save_GameSaveImage) - (uintptr_t) & ((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState);
 
     blockCount = 92;
     if (write != 0) {

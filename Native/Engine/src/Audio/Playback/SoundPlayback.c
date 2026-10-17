@@ -210,7 +210,7 @@ int Audio_Playback_PlaySoundEffect(u_long arg0, int arg1, int arg2, int arg3)
 }
 
 // decomp: SLUS_010.40 func_800121F0 (src/SLUS_010.40/25AC.c:365)
-int Audio_Playback_PlaySoundEffectBlob(void* arg0, int arg1, int arg2, int arg3)
+uintptr_t Audio_Playback_PlaySoundEffectBlob(void* arg0, int arg1, int arg2, int arg3)
 {
     void* var_v0;
 
@@ -223,11 +223,11 @@ int Audio_Playback_PlaySoundEffectBlob(void* arg0, int arg1, int arg2, int arg3)
         Audio_Mixer_DispatchCommand(0x24);
         var_v0 = arg0;
     }
-    return (u_long)var_v0;
+    return (uintptr_t)var_v0;
 }
 
 // decomp: SLUS_010.40 func_80012288 (src/SLUS_010.40/25AC.c:381)
-void Audio_Playback_StopSoundEffects(u_long arg0, int arg1)
+void Audio_Playback_StopSoundEffects(intptr_t arg0, int arg1)
 {
     Audio_Driver_commandArguments.param1 = (void*)arg0;
     Audio_Driver_commandArguments.param2 = arg1 & 0xFFFFFF;

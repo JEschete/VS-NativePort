@@ -240,7 +240,7 @@ found:
 }
 
 // decomp: BATTLE.PRG func_800DFAF8 (src/BATTLE/BATTLE.PRG/771A8.c:498)
-int Battle_Ai_FindRouteGateAtTile(int arg0, u_int arg1, int arg2)
+int Battle_Ai_FindRouteGateAtTile(intptr_t arg0, u_int arg1, int arg2)
 {
     Field_PlatformContactPoint sp10[4];
     Field_PlatformContactPoint* m;
@@ -327,7 +327,7 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
             if (route & 0x8000) {
                 continue;
             }
-            result = Battle_Ai_FindRouteGateAtTile((int)state, position.word, 1);
+            result = Battle_Ai_FindRouteGateAtTile((intptr_t)state, position.word, 1);
             if (result >= 0 && ((int (*)(int))Field_MovingPlatformDwellTicks)(i = result >> 1) >= 0) {
                 candidate.tile.tag = i + 2;
                 if (!((((Battle_Ai_RouteGateView*)Battle_Ai_roomAiState)->closedGates >> candidate.tile.tag)

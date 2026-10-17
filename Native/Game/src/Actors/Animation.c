@@ -110,7 +110,7 @@ void Actors_QueueActorWeaponSequenceLoad(char* arg0, int arg1, int arg2, int arg
     if (((arg2 != 0) || (arg1 >= 2)) && ((arg1 < 2) || ((arg3 & 3) == 1))) {
         sp10.assetKind = 7;
         sp10.targetSlot = arg1;
-        sp10.modelId = arg0[37];
+        sp10.modelId = ((Battle_Actor*)arg0)->equippedWeaponCategory;
         sp10.subKind = 0;
         Content_QueueActorAssetRequest(&sp10);
     }
@@ -679,11 +679,11 @@ int Actors_PlayActorAnimation(int actorId, int animation, int arg2, int blendFra
     if (actor == NULL) {
         return -1;
     }
-    if ((*(int*)((char*)actor + 0x5AC)) & 0x1000000) {
+    if (actor->animationLocked) {
         return 0;
     }
     actor->animationEventFlag = 0;
-    if ((*(int*)((char*)actor + 0x5AC)) & 0x800000) {
+    if (actor->poseOverrideActive) {
         Actors_RestartActorAnimationEvents(actor);
     }
     actor->poseOverrideActive = 0;
@@ -698,7 +698,7 @@ int Actors_PlayActorAnimation(int actorId, int animation, int arg2, int blendFra
     actor->textureAnimationFrames[1].overlayIndex = 0;
     Actors_SetActorTextureAnimation(actorId, 1, 1, 1);
     Actors_ClearActorBonePoseLocks(actor);
-    if (((*(int*)((char*)actor + 0x5AC)) & 0x8000) && !keepFlag15) {
+    if ((actor->isRunning) && !keepFlag15) {
         actor->isRunning = 0;
     }
     anim = animation;
@@ -756,7 +756,7 @@ int Actors_PlayActorAnimation(int actorId, int animation, int arg2, int blendFra
     }
 
 retry:
-    found = ((int (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, anim, (int*)&frames);
+    found = ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, anim, (int*)&frames);
     if (found == 0 || frames == NULL) {
         actor->isRunning = 0;
         if (anim == 0) {
@@ -940,7 +940,7 @@ int Actors_UpdateActorLocomotionAnimation(Actors_ActorRecord* actor, int speed, 
             }
         }
 
-        ((int (*)())Actors_FindActorAnimationHeader)(actor, next, &entry);
+        ((intptr_t (*)())Actors_FindActorAnimationHeader)(actor, next, &entry);
         if (entry == NULL) {
             next = 6;
         }
@@ -1097,7 +1097,7 @@ void Actors_InitializeActorAnimationPose(Actors_ActorRecord* actor, Actors_Anima
     int frame;
     int i;
 
-    if (*(int*)((u_char*)actor + 0x5AC) & 0x800000) {
+    if (actor->poseOverrideActive) {
         Actors_RestartActorAnimationEvents(actor);
     }
     actor->poseOverrideActive = 0;
@@ -1114,7 +1114,7 @@ void Actors_InitializeActorAnimationPose(Actors_ActorRecord* actor, Actors_Anima
     if (header[2] == 0) {
         pose->nextEventFrame = 0xFFFF;
     } else {
-        data = (u_char*)anim->animationData;
+        data = (u_char*)VS_ONDISC(anim, animationData, u_char *);
         data += header[2];
         i = data[0];
         if (i == 0xFF) {
@@ -1130,7 +1130,7 @@ void Actors_InitializeActorAnimationPose(Actors_ActorRecord* actor, Actors_Anima
     pose->animationId = actor->animationId;
     if (header[4] != 0) {
         key = &pose->scaleKeys[41];
-        data = (u_char*)anim->animationData;
+        data = (u_char*)VS_ONDISC(anim, animationData, u_char *);
         data += header[4];
         Actors_DecodeInitialPoseVector(key, data, 0xFF);
     }
@@ -1139,18 +1139,18 @@ void Actors_InitializeActorAnimationPose(Actors_ActorRecord* actor, Actors_Anima
         header = (u_short*)((u_char*)anim + ((actor->instance.boneCount * 4 + 10) * frame + 8));
     }
     key = &pose->boneKeys[41];
-    data = (u_char*)anim->animationData;
+    data = (u_char*)VS_ONDISC(anim, animationData, u_char *);
     data += header[3];
     Actors_DecodeInitialPoseVector(key, data, frame);
     for (i = 0; i < actor->instance.boneCount; ++i) {
         key = &pose->boneKeys[i];
-        data = (u_char*)anim->animationData;
+        data = (u_char*)VS_ONDISC(anim, animationData, u_char *);
         data += header[5 + i];
         Actors_DecodeInitialPoseVector(key, data, frame);
     }
     if (((u_char*)header)[3] & 1) {
         for (i = 0; i < actor->instance.boneCount; ++i) {
-            data = (u_char*)anim->animationData;
+            data = (u_char*)VS_ONDISC(anim, animationData, u_char *);
             data += header[actor->instance.boneCount + i + 5];
             if (data[0] == 0xFE && data[1] == 1) {
                 data += 2;
@@ -1185,7 +1185,7 @@ void Actors_InitializeActorAnimationPose(Actors_ActorRecord* actor, Actors_Anima
 }
 
 // decomp: BATTLE.PRG func_800AD494 (src/BATTLE/BATTLE.PRG/40564.c:2719)
-int Actors_FindActorAnimationHeader(void* arg0, int arg1, u_short** arg2)
+intptr_t Actors_FindActorAnimationHeader(void* arg0, int arg1, u_short** arg2)
 {
     Actors_ActorRecord* actor = arg0;
     Actors_SeqAnimationBank* p;
@@ -1244,7 +1244,7 @@ int Actors_FindActorAnimationHeader(void* arg0, int arg1, u_short** arg2)
         return 0;
     }
 
-    idx = p->animationMap[idx];
+    idx = VS_ONDISC(p, animationMap, u_char *)[idx];
     Actors_lastResolvedSequenceIndex = idx;
 
     if (idx == 0xFF) {
@@ -1252,7 +1252,7 @@ int Actors_FindActorAnimationHeader(void* arg0, int arg1, u_short** arg2)
     } else {
         *arg2 = &p->headers[(((actor->instance.boneCount * 4) + 10) * idx) >> 1];
     }
-    return (int)p;
+    return (intptr_t)p;
 }
 
 // decomp: BATTLE.PRG func_800AD714 (src/BATTLE/BATTLE.PRG/44F14.c:168)
@@ -1481,12 +1481,12 @@ loop: {
         state->frame = 0;
         goto check;
     case 12:
-        if (!(*(int*)((char*)actor + 0x5AC) & 0x10000)) {
+        if (!(actor->animationEventFlag)) {
             Effects_StartEffectTrack(script[1]);
         }
         break;
     case 13:
-        if (Effects_effectBusyFlags == 1 && !(*(int*)((char*)actor + 0x5AC) & 0x40000)) {
+        if (Effects_effectBusyFlags == 1 && !(actor->advanceRequested)) {
             ((void (*)(void*, void*))Actors_InitializeActorAnimationPose)(actor, state);
             actor->animationEventFlag = 1;
             goto reload;
@@ -1511,7 +1511,7 @@ loop: {
         if (mode == 2) {
             delta = -packed;
         }
-        ((short*)((SVECTOR*)actor->instance.model->vertexSection + arg))[op - 36] += delta;
+        ((short*)((SVECTOR*)VS_ONDISC(actor->instance.model, vertexSection, void *) + arg))[op - 36] += delta;
         actor->poseOverrideActive = 1;
         break;
     case 39:
@@ -1521,13 +1521,13 @@ loop: {
         arg = packed & 0x1FF;
         packed >>= 9;
         if (mode == 2) {
-            ((SVECTOR*)actor->instance.model->vertexSection)[arg].vx -= packed;
-            ((SVECTOR*)actor->instance.model->vertexSection)[arg].vy -= (signed char)script[3];
-            ((SVECTOR*)actor->instance.model->vertexSection)[arg].vz -= (signed char)script[4];
+            ((SVECTOR*)VS_ONDISC(actor->instance.model, vertexSection, void *))[arg].vx -= packed;
+            ((SVECTOR*)VS_ONDISC(actor->instance.model, vertexSection, void *))[arg].vy -= (signed char)script[3];
+            ((SVECTOR*)VS_ONDISC(actor->instance.model, vertexSection, void *))[arg].vz -= (signed char)script[4];
         } else {
-            ((SVECTOR*)actor->instance.model->vertexSection)[arg].vx += packed;
-            ((SVECTOR*)actor->instance.model->vertexSection)[arg].vy += (signed char)script[3];
-            ((SVECTOR*)actor->instance.model->vertexSection)[arg].vz += (signed char)script[4];
+            ((SVECTOR*)VS_ONDISC(actor->instance.model, vertexSection, void *))[arg].vx += packed;
+            ((SVECTOR*)VS_ONDISC(actor->instance.model, vertexSection, void *))[arg].vy += (signed char)script[3];
+            ((SVECTOR*)VS_ONDISC(actor->instance.model, vertexSection, void *))[arg].vz += (signed char)script[4];
         }
         actor->poseOverrideActive = 1;
         break;
@@ -1663,7 +1663,7 @@ loop: {
         }
         break;
     case 63:
-        if (!(*(int*)((char*)actor + 0x5AC) & 0x10000)) {
+        if (!(actor->animationEventFlag)) {
             Effects_SpawnSourceActorEffect();
         }
         break;

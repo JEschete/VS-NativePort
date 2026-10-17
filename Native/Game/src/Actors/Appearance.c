@@ -399,12 +399,12 @@ void Actors_UpdateActorAppearanceTransition(Field_GimmickInstance* arg0)
             }
         }
     }
-    flags = *(u_int*)((char*)arg0 + 8);
+    flags = arg0->transitionFlag ? 0x80 : 0;
     speed = State_tickSpeed / 2;
     skip = 0;
     if (flags & 0x80) {
         skip = 1;
-        if (*(int*)((char*)arg0 + 0x5AC) & 0x08000000) {
+        if ((arg0->reserved5ACBits25 & 4)) {
             count = 160;
         } else {
             skip = 0;
@@ -415,8 +415,8 @@ void Actors_UpdateActorAppearanceTransition(Field_GimmickInstance* arg0)
     } else {
         object = arg0;
         count = 16;
-        colors = (void*)((char*)arg0 + 0x14C);
-        reference = (void*)((char*)arg0 + 0x12C);
+        colors = (void*)arg0->pulsedPalette;
+        reference = (void*)arg0->basePalette;
         if (arg0->motionState == 2) {
             speed *= 2;
         }
@@ -466,7 +466,7 @@ void Actors_UpdateActorAppearanceTransition(Field_GimmickInstance* arg0)
             }
         } else {
             Render_LoadClutColors(
-                (u_short*)((char*)object + 0x14C), 31, object->slot * 16, 16);
+                (u_short*)object->pulsedPalette, 31, object->slot * 16, 16);
         }
         if (changed == 0) {
             ++arg0->motionState;
@@ -488,7 +488,7 @@ void Actors_UpdateActorAppearanceTransition(Field_GimmickInstance* arg0)
         mode = 1;
         goto fade;
     case 4:
-        if (*(int*)((char*)arg0 + 0x5AC) & 8) {
+        if (arg0->actionPoseActive) {
             object = Field_gimmickInstances[arg0->linkedGimmick];
             ((void (*)(int, int, SVECTOR*, int))Actors_ActorTaggedBonePosition)(object->parent, 0xF0, &boneA, 1);
             ((void (*)(int, int, SVECTOR*, int))Actors_ActorTaggedBonePosition)(object->parent, 0xF1, &boneB, 1);
@@ -497,7 +497,8 @@ void Actors_UpdateActorAppearanceTransition(Field_GimmickInstance* arg0)
             object->positionY = (boneA.vy + boneB.vy) / 2 + 60;
             angle = (u_short)arg0->rotationY;
             object->mode = 0xFC;
-            *(int*)((char*)object + 0x34) = 0;
+            object->slideX = 0;
+            object->velocityY = 0;
             object->parent = 0xFF;
             object->rotationY = (object->rotationY + angle) & 0xFFF;
             arg0->actionPoseActive = 0;

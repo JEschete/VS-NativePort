@@ -18,10 +18,11 @@ typedef struct Content_SequenceBuffer Content_SequenceBuffer;
 
 // decomp: func_8009C378_t (src/BATTLE/BATTLE.PRG/30DB0.h:9)
 typedef struct Content_SequenceBuffer {
-    void* firstSectionPointer;
-    void* secondSectionPointer;
+    u_int firstSectionPointer; /* offset from the struct (on-disc pointer) */
+    u_int secondSectionPointer; /* offset from the struct (on-disc pointer) */
     char body[0x78F8];
 } Content_SequenceBuffer;
+_Static_assert(sizeof(Content_SequenceBuffer) == 0x7900, "Content_SequenceBuffer must keep its PS1 layout");
 
 // decomp: vs_battle_objectData (src/BATTLE/BATTLE.PRG/2842C.h:36)
 typedef struct Content_ActorAssetRequest {
