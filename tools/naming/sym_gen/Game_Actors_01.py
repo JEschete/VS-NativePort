@@ -629,6 +629,86 @@ T("T00241", "State", "Actors::ModelInstance", GA + "ModelInstance.h",
       ("unk68", "model", "SHP model", "high"),
   ], recv=r"unk0|arg0|object")
 
+T("T00242", "State", "Actors::TextureAnimationSlot", GA + "TextureAnimation.h",
+  "Plays one of an actor's two texture-animation timelines.", "high",
+  c(("40564.c", "p = &D_800E909C[slot->unk0_0][slot->unk2];")), [
+      ("unk0_0", "timeline", "Timeline played; 0 when idle", "high", c(("40564.c", "p = &D_800E909C[slot->unk0_0][slot->unk2];"))),
+      ("unk0_4", "mode", "0 plays once, 1 loops, 2 is paused", "med", c(("40564.c", "switch (slot->unk0_4) {"))),
+      ("unk1", "currentFrame", "Overlay frame + 1 being shown", "high", c(("40564.c", "slot->unk1 = p->unk0;"))),
+      ("unk2", "keyIndex", "Key of the timeline being shown", "high", c(("40564.c", "++slot->unk2;"))),
+      ("unk3", "ticks", "Ticks the current key has been shown", "high", c(("40564.c", "++slot->unk3;"))),
+  ])
+T("T00245", "State", "Actors::ShadowBlend", GA + "Shadow.h",
+  "Blends an actor's shadow level and radius rates toward new values over a number of frames.", "med",
+  c(("30DB0.c", "a2->unkC = arg0->shadowRadiusExpandRate;")), [
+      ("unk0", "reserved0", "Not read", "low"),
+      ("unk4", "levelFrames", "Frames left in the level blend", "med", c(("44F14.c", "temp_lo = a2->unkA / a2->unk4;"))),
+      ("unk5", "radiusFrames", "Frames left in the radius-rate blend", "med", c(("44F14.c", "temp_lo = a2->unk10 / a2->unk5;"))),
+      ("unk6", "reserved6", "Not read", "low"),
+      ("unk7", "reserved7", "Not read", "low"),
+      ("unk8", "level", "Shadow level being blended", "low", c(("44F14.c", "a2->unk8 += temp_lo;"))),
+      ("unkA", "levelDelta", "Level change still to apply", "med", c(("30DB0.c", "a2->unkA = -a2->unk8;"))),
+      ("unkC", "radiusExpandRate", "Current shadow radius expand rate", "high", c(("30DB0.c", "a2->unkC = arg0->shadowRadiusExpandRate;"))),
+      ("unkE", "radiusShrinkRate", "Current shadow radius shrink rate", "high", c(("30DB0.c", "a2->unkE = arg0->shadowRadiusShrinkRate;"))),
+      ("unk10", "radiusExpandDelta", "Expand-rate change still to apply", "high",
+       c(("30DB0.c", "a2->unk10 = arg0->shadowRadiusExpandRate - a2->unkC;"))),
+      ("unk12", "radiusShrinkDelta", "Shrink-rate change still to apply", "high",
+       c(("30DB0.c", "a2->unk12 = arg0->shadowRadiusShrinkRate - a2->unkE;"))),
+  ])
+T("T00247", "Value", "Render::ColorCode", "Native\\Graphics\\src\\Palette.h",
+  "Packs three color bytes and a code byte into one word.", "med",
+  c(("30DB0.c", "temp_a0->unk6F2 = arg1->unk0;")), [
+      ("unk0", "red", "First color byte", "med", c(("30DB0.c", "temp_a0->unk6F2 = arg1->unk0;"))),
+      ("unk1", "green", "Second color byte", "med", c(("30DB0.c", "temp_a0->unk6F1 = arg1->unk1;"))),
+      ("unk2", "blue", "Third color byte", "med", c(("30DB0.c", "temp_a0->unk6F0 = arg1->unk2;"))),
+      ("unk3", "code", "Code byte; cleared for plain colors", "low"),
+  ], recv=r"sp10|sp18|sp10\[\d\]")
+T("T00249", "OnDisc", "Actors::TextureCellOrigin", GA + "TextureAnimation.h",
+  "Gives the default staged texture cell of one texture-animation channel.", "high",
+  c(("40564.c", "fallback.x = actor->unk614[index].x;")), [
+      ("x", "x", "Cell X", "high"), ("y", "y", "Cell Y", "high"),
+      ("columns", "columns", "Cells per row", "high", c(("40564.c", "fallback.columns = actor->unk614[index].columns;"))),
+      ("unk3", "reserved3", "Not read", "low"),
+  ], recv=r"unk614\[index\]")
+T("T00251", "State", "Actors::ModelEffectSlot", GA + "ModelInstance.h",
+  "Holds a small per-model effect: the palette pulse in the header and the sound override in the actor record.", "med",
+  c(("40564.c", "value = state->unk1;"), ("40564.c", "if (temp_s0->unk17E4.unk1 != 0) {")), [
+      ("unk0", "kind", "Effect kind; 0 when inactive", "med", c(("44F14.c", "if ((actor->unk17E4.unk0 == 1) && actor->unk17E4.unk3 != 0) {"))),
+      ("unk1", "level", "Effect level", "med", c(("40564.c", "value = state->unk1;"))),
+      ("unk2", "flags", "Effect flags; bit 0 direction, bit 1 hold", "low", c(("40564.c", "if (!(state->unk2 & 2)) {"))),
+      ("unk3", "parameter", "Effect parameter", "low", c(("44F14.c", "if ((actor->unk17E4.unk0 == 1) && actor->unk17E4.unk3 != 0) {"))),
+  ])
+T("T00252", "OnDisc", "Actors::ShpModel", GA + "Skeleton.h",
+  "Holds a loaded SHP model: header bytes, section offsets relocated to addresses, and the bone table.", "high",
+  c(("30DB0.c", "model->akaoOffset = (char*)model->akaoOffset + (int)model;")) + ";DataCrystal SHP files", [
+      ("unk0", "header", "SHP header bytes before the section offsets", "med"),
+      ("akaoOffset", "soundSection", "AKAO sound section; relocated on load", "high"),
+      ("groupOffset", "groupSection", "Vertex group section; relocated on load", "high"),
+      ("vertexOffset", "vertexSection", "Vertex section; relocated on load", "high"),
+      ("polyOffset", "polygonSection", "Polygon section; relocated on load", "high"),
+      ("armatures", "bones", "Bone table", "high", c(("30DB0.c", "armature = &actor->unk0.unk68->armatures[i];"))),
+  ], recv=r"model")
+T("T00253", "State", "Actors::AnimationPose", GA + "Animation.h",
+  "Holds an actor's current SEQ pose keys, frame counter and animation event stream.", "high",
+  c(("upstream:40564.c", "pose->unk548 = actor->animationId;"), ("40564.c", "pose->unk544 = data;")), [
+      ("unk0", "boneKeys", "Current rotation key of each bone; entry 41 is the root translation", "high",
+       c(("upstream:40564.c", "key = &pose->unk0[41];"), ("upstream:40564.c", "key = &pose->unk0[i];"))),
+      ("unk150", "scaleKeys", "Per-bone scale keys (0x40 = 1.0); entry 41 is the optional root track", "high",
+       c(("40564.c", "*(int*)&pose->unk150[i].vx = 0x400040;"))),
+      ("unk2A0", "reserved2A0", "Not read by the decompiled users", "low"),
+      ("unk3F0", "trackStates", "Per-bone track state bytes, cleared on load", "low", c(("40564.c", "pose->unk3F0[i].pad = 0;"))),
+      ("unk540", "frame", "Frame counter compared with the animation length", "high",
+       c(("44F14.c", "if ((short)state->unk540 >= (int)(u_short)actor->unk5BC) {"))),
+      ("unk542", "nextEventFrame", "Frame of the next event; 0xFFFF when none", "high", c(("40564.c", "pose->unk542 = 0xFFFF;"))),
+      ("unk544", "eventScript", "Next byte of the animation event stream", "high", c(("40564.c", "pose->unk544 = data;"))),
+      ("animationId", "animationId", "Animation loaded into the pose", "high", c(("upstream:40564.c", "pose->unk548 = actor->animationId;"))),
+      ("unk549", "eventWait", "Frames left in an event-script wait", "high", c(("44F14.c", "state->unk549 = script[1];"))),
+      ("unk548_16", "holdingLastFrame", "Set while the pose holds the last frame", "med", c(("44F14.c", "state->unk548_16 = 1;"))),
+      ("unk548_17", "reachedEnd", "Set when the frame counter reaches the animation length", "med", c(("44F14.c", "state->unk548_17 = 1;"))),
+      ("unk548_18", "reservedBits", "Not read", "low"),
+      ("unk54C", "reserved54C", "Not read", "low"),
+  ])
+
 # ---------------------------------------------------------------- placement word (same layout as Field::ActorPlacement)
 placement = next(r for r in csv.DictReader(open(LEDGERS / "TYPE_LEDGER.csv", encoding="utf-8")) if r["id"] == "T00444")
 T("T00660", "Value", placement["final_name"], placement["final_location"], placement["purpose"], "high",

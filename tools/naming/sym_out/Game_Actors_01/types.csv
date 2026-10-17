@@ -6,6 +6,13 @@ T00210,State,State::RoomEnemyStates,Native\Game\src\State\RoomCache.h,"Remembers
 T00237,State,Actors::ModelRenderContext,Native\Game\src\Actors\ModelDraw.h,"Holds shared rendering state passed to every actor, weapon and gimmick model draw.",med,source:44F14.c:830;source:30DB0.c:3475
 T00238,State,Actors::SkeletonPose,Native\Game\src\Actors\ModelDraw.h,Holds the per-bone world matrices and scale of the skeleton being drawn.,high,source:49268.c:208
 T00241,State,Actors::ModelInstance,Native\Game\src\Actors\ModelInstance.h,"Is the header shared by actor and gimmick records: SHP counts, display and motion flags, transform, tiles, tint and model pointer.",high,source:30DB0.c:1137;source:30DB0.c:1150
+T00242,State,Actors::TextureAnimationSlot,Native\Game\src\Actors\TextureAnimation.h,Plays one of an actor's two texture-animation timelines.,high,source:40564.c:1385
+T00245,State,Actors::ShadowBlend,Native\Game\src\Actors\Shadow.h,Blends an actor's shadow level and radius rates toward new values over a number of frames.,med,source:30DB0.c:3882
+T00247,Value,Render::ColorCode,Native\Graphics\src\Palette.h,Packs three color bytes and a code byte into one word.,med,source:30DB0.c:3912
+T00249,OnDisc,Actors::TextureCellOrigin,Native\Game\src\Actors\TextureAnimation.h,Gives the default staged texture cell of one texture-animation channel.,high,source:40564.c:1442
+T00251,State,Actors::ModelEffectSlot,Native\Game\src\Actors\ModelInstance.h,Holds a small per-model effect: the palette pulse in the header and the sound override in the actor record.,med,source:40564.c:1672;source:40564.c:2808
+T00252,OnDisc,Actors::ShpModel,Native\Game\src\Actors\Skeleton.h,"Holds a loaded SHP model: header bytes, section offsets relocated to addresses, and the bone table.",high,source:30DB0.c:1146;DataCrystal SHP files
+T00253,State,Actors::AnimationPose,Native\Game\src\Actors\Animation.h,"Holds an actor's current SEQ pose keys, frame counter and animation event stream.",high,source:upstream:40564.c:2090;source:40564.c:2659
 T00301,OnDisc,Items::AccessoryInit,Native\Game\src\Items\EquipmentInit.h,"Gives an accessory's statistics, drop rate and index.",high,source:146C.c:1086
 T00302,OnDisc,Actors::LimbActionInit,Native\Game\src\Actors\CharacterInit.h,Gives one action a limb can perform.,high,source:146C.c:6260
 T00303,OnDisc,Actors::ShpBone,Native\Game\src\Actors\Skeleton.h,"Describes one SHP skeleton bone: length, parent, lookup tags and the joint slot it initializes.",high,"source:30DB0.c:1381;DataCrystal SHP files (joint: length, parent)"

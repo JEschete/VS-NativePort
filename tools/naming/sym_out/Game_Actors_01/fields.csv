@@ -115,6 +115,53 @@ T00241.063,previousTileZ,Tile Z before the last move,high,source:3A1A0.c:1787
 T00241.064,reserved63,Not read,low,declaration-only;source:3A1A0.h:187
 T00241.065,palettePulse,Palette pulse state,high,source:44F14.c:953
 T00241.066,model,SHP model,high,source:30DB0.c:1150
+T00242.000,timeline,Timeline played; 0 when idle,high,source:40564.c:1385
+T00242.001,mode,"0 plays once, 1 loops, 2 is paused",med,source:40564.c:1339
+T00242.002,currentFrame,Overlay frame + 1 being shown,high,source:40564.c:1407
+T00242.003,keyIndex,Key of the timeline being shown,high,source:40564.c:1394
+T00242.004,ticks,Ticks the current key has been shown,high,source:40564.c:1390
+T00245.000,reserved0,Not read,low,declaration-only;source:3A1A0.h:41
+T00245.001,levelFrames,Frames left in the level blend,med,source:44F14.c:1233
+T00245.002,radiusFrames,Frames left in the radius-rate blend,med,source:44F14.c:1242
+T00245.003,reserved6,Not read,low,declaration-only;source:3A1A0.h:44
+T00245.004,reserved7,Not read,low,declaration-only;source:3A1A0.h:45
+T00245.005,level,Shadow level being blended,low,source:44F14.c:1235
+T00245.006,levelDelta,Level change still to apply,med,source:30DB0.c:3888
+T00245.007,radiusExpandRate,Current shadow radius expand rate,high,source:30DB0.c:3882
+T00245.008,radiusShrinkRate,Current shadow radius shrink rate,high,source:30DB0.c:3883
+T00245.009,radiusExpandDelta,Expand-rate change still to apply,high,source:30DB0.c:3886
+T00245.010,radiusShrinkDelta,Shrink-rate change still to apply,high,source:30DB0.c:3887
+T00247.000,red,First color byte,med,source:30DB0.c:3912
+T00247.001,green,Second color byte,med,source:30DB0.c:3913
+T00247.002,blue,Third color byte,med,source:30DB0.c:3914
+T00247.003,code,Code byte; cleared for plain colors,low,source:4A0A8.c:1518
+T00249.000,x,Cell X,high,source:40564.c:1442
+T00249.001,y,Cell Y,high,source:40564.c:1443
+T00249.002,columns,Cells per row,high,source:40564.c:1444
+T00249.003,reserved3,Not read,low,declaration-only;source:3A1A0.h:211
+T00251.000,kind,Effect kind; 0 when inactive,med,source:44F14.c:961
+T00251.001,level,Effect level,med,source:40564.c:1672
+T00251.002,flags,"Effect flags; bit 0 direction, bit 1 hold",low,source:40564.c:1675
+T00251.003,parameter,Effect parameter,low,source:44F14.c:961
+T00252.000,header,SHP header bytes before the section offsets,med,declaration-only;source:3A1A0.h:86
+T00252.001,soundSection,AKAO sound section; relocated on load,high,source:30DB0.c:1146
+T00252.002,groupSection,Vertex group section; relocated on load,high,source:30DB0.c:1147
+T00252.003,vertexSection,Vertex section; relocated on load,high,source:30DB0.c:1148
+T00252.004,polygonSection,Polygon section; relocated on load,high,source:30DB0.c:1149
+T00252.005,bones,Bone table,high,source:30DB0.c:1381
+T00253.000,boneKeys,Current rotation key of each bone; entry 41 is the root translation,high,source:upstream:40564.c:2105;source:upstream:40564.c:2111
+T00253.001,scaleKeys,Per-bone scale keys (0x40 = 1.0); entry 41 is the optional root track,high,source:40564.c:2711
+T00253.002,reserved2A0,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:57
+T00253.003,trackStates,"Per-bone track state bytes, cleared on load",low,source:40564.c:2707
+T00253.004,frame,Frame counter compared with the animation length,high,source:44F14.c:1292
+T00253.005,nextEventFrame,Frame of the next event; 0xFFFF when none,high,source:40564.c:2647
+T00253.006,eventScript,Next byte of the animation event stream,high,source:40564.c:2659
+T00253.007,animationId,Animation loaded into the pose,high,source:upstream:40564.c:2090
+T00253.008,eventWait,Frames left in an event-script wait,high,source:44F14.c:243
+T00253.009,holdingLastFrame,Set while the pose holds the last frame,med,source:44F14.c:1309
+T00253.010,reachedEnd,Set when the frame counter reaches the animation length,med,source:44F14.c:1293
+T00253.011,reservedBits,Not read,low,declaration-only;source:3A1A0.h:66
+T00253.012,reserved54C,Not read,low,declaration-only;source:3A1A0.h:67
 T00301.000,equipment,Accessory statistics,high,source:146C.c:1084
 T00301.001,dropRate,Drop rate,high,source:146C.c:1089
 T00301.002,index,Index,high,source:146C.c:1090
