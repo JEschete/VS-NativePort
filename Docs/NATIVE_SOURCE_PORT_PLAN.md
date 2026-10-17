@@ -320,7 +320,7 @@ For each row (in file order):
 6. Write the result to `final_location` with a provenance comment, and generate the module headers.
 7. Mark `copied`.
 8. Effect template instantiations (`copy = template`) are **not** duplicated. One shared implementation per template (`tiledRings`, `particleSetup`, `trails9`, …) is copied. Each instantiation becomes a row in the effects catalog (§6.8).
-9. Rename by reference, not by text: every identifier occurrence is resolved to its declaration with libclang (`tools\port\decomp_index.py --refs`), so a member such as `unk4` is renamed only where it belongs to the right type.
+9. Rename by reference, not by text. `tools\port\ref_index.py` resolves every identifier occurrence in game code (declarations and uses, including those inside macro bodies) to its ledger row with libclang. It writes `build\port\refs.json` as `[line, col, length, kind, target]` per source file, so a member such as `unk4` is renamed only where it belongs to the right type. The copy tool checks that the text at each position equals the original spelling before replacing it. The target forms are documented in the script; the full run's stats are in [NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md) §11.4.
 10. Module statics go into one state struct per module with a generated `ResetOnLoad()`; scratchpad uses map to a per-module scratch struct; asm-only functions become `VS_UNPORTED` stubs ([PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §1, §5, §6).
 11. Re-run `tools\scaffold\gen_solution.py` so the projects list the new files.
 
@@ -626,14 +626,15 @@ Fixed-step simulation, the original RNG sequence, no wall-clock in game logic, a
 3. ✅ Scaffold `VagrantStory.Native.sln` + projects + `Directory.Build.props` + SDL3 (Step 2).
 4. In progress: `tools\lint\native_boundary.py` and the TYPE/FIELD ledger generators exist;
    `tools\ledger\scan_native.py` and the CONTENT ledger generator remain pending.
-5. In progress: every function (3,736, including the 57 the scanner missed), global (2,174), type (822) and
-   field/enumerator (6,870) is named; all 24 symbol batches are applied with cited source evidence
-   (NAMING_CONVENTIONS.md §11.1-11.2). The low/med sanity pass is done (NAMING_CONVENTIONS.md 11.3).
+5. ✅ Every function to copy (3,758, including the 82 the scanner missed; 3 rows from a stale split file are
+   `not-linked`), global (2,174), type (842) and field/enumerator (6,926) is named; all 25 symbol batches are
+   applied with cited source evidence (NAMING_CONVENTIONS.md §11.1-11.2, 11.4). The low/med sanity pass is done
+   (NAMING_CONVENTIONS.md 11.3).
    Deferred: runtime tracing of the remaining low rows (RUNTIME_TRACING.md, after the copy compiles).
    `tools\port\copy_to_native.py` must refuse any global/type/field name whose ledger row lacks evidence.
    See [NAMING_CONVENTIONS.md §11.2](NAMING_CONVENTIONS.md#112-saved-naming-progress) for per-batch status and
    unresolved identity/layout questions. Follow §11.1 recovery limits rather than relaunching the original fan-out.
-6. ⏭ Write `tools\port\copy_to_native.py` and copy everything (Step 4). Compile (Step 6). Prerequisite: the occurrence-level reference index (Step 4 item 9). Things to check during this work: [PORTING_WATCHLIST.md](PORTING_WATCHLIST.md).
+6. ⏭ Write `tools\port\copy_to_native.py` and copy everything (Step 4). Compile (Step 6). The occurrence-level reference index it builds on (Step 4 item 9) is done. Things to check during this work: [PORTING_WATCHLIST.md](PORTING_WATCHLIST.md).
 7. ⏭ Start the 1b title slice.
 
 ### Open questions

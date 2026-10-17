@@ -1,0 +1,3 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F04200,SLUS_010.40/overlay.c,20,vs_overlay_jumpToTitle,inline-asm,1,Game.Battle,,vs_main_resetGame vs_main_showEndingAndReturnToTitle,
+F04201,SLUS_010.40/overlay.c,21,vs_overlay_jumpToBattle,inline-asm,1,Game.Battle,,vs_main_jumpToBattle,

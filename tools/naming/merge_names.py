@@ -71,6 +71,9 @@ def check_row(r: dict) -> list[str]:
         path = loc[len(exp):-2].split("\\")  # folders below the system/module root + file stem
         sub = name.split("::")[1:-1]
         ok = path[:-1] == sub or (sub and path[-len(sub):] == sub and len(path) - len(sub) <= 1)
+        # asm copy of an effect template instance: named and placed like the template rows (template_rows)
+        ok = ok or (path[:-1] == ["Templates"] and re.fullmatch(r"Effects::Plg\d+::" + re.escape(path[-1]), name)
+                    and "dup-of:" in (r.get("notes") or ""))
         if not ok:
             errs.append(f"namespace '{'::'.join(name.split('::')[:-1])}' must match the folders below {exp} "
                         f"or end in the file name (got '{loc[len(exp):]}')")
@@ -119,7 +122,8 @@ def dup_target(notes: str) -> str | None:
     return m.group(1) if m else None
 
 
-def check_unique(all_rows: dict[str, dict]) -> list[str]:
+def check_unique(all_rows: dict[str, dict], extra_targets: dict[str, dict] | None = None) -> list[str]:
+    """`extra_targets`: catalog rows named by rule (template instances) that dup-of may point at."""
     errs = []
     by_c: dict[str, list[str]] = collections.defaultdict(list)
     for rid, r in all_rows.items():
@@ -132,7 +136,7 @@ def check_unique(all_rows: dict[str, dict]) -> list[str]:
     for rid, r in all_rows.items():
         t = dup_target(r.get("notes", ""))
         if t:
-            tr = all_rows.get(t)
+            tr = all_rows.get(t) or (extra_targets or {}).get(t)
             if not tr:
                 errs.append(f"{rid}: dup-of target {t} not in outputs (yet)")
             elif tr["final_name"].strip() != r["final_name"].strip():
@@ -167,7 +171,7 @@ def main() -> int:
 
     if args.check:
         errs, rows = check_batch(args.check)
-        errs += check_unique({r["id"]: r for r in rows if r.get("final_name")})
+        errs += check_unique({r["id"]: r for r in rows if r.get("final_name")}, template_rows(read_csv(CATALOG)))
         for e in errs[:200]:
             print(e)
         print(f"{args.check}: {len(rows)} rows, {len(errs)} errors")
@@ -186,7 +190,7 @@ def main() -> int:
         done += 1
         for r in rows:
             all_rows[r["id"]] = r
-    all_errs += check_unique(all_rows)
+    all_errs += check_unique(all_rows, template_rows(read_csv(CATALOG)))
     conf = collections.Counter(r.get("confidence", "").strip() for r in all_rows.values())
     print(f"{done}/{len(batches)} batch outputs, {len(all_rows)} rows, confidence {dict(conf)}")
     for e in all_errs[:300]:
@@ -214,6 +218,8 @@ def main() -> int:
         r["notes"] = ";".join(tokens)
         if re.search(r"(^|;)\s*is-data\b", extra):
             r["copy"] = "data"  # disassembly mistook a data table for a function; copied as a data definition
+        if re.search(r"(^|;)\s*not-linked\b", extra):
+            r["copy"] = "no"  # stale split file the overlay's splat.yaml does not build; the linked file has the code
         applied += 1
     with CATALOG.open("w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=cols)

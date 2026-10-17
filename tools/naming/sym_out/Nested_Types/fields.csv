@@ -1,0 +1,57 @@
+id,final_name,meaning,confidence,notes
+T00822.000,state,"Lock state: 0 open, 1 or 3 locked by a key or sigil; cleared when opened",high,source:146C.c:4849
+T00822.001,roomEffect,Room effect started or tested for this trigger,high,source:146C.c:16320
+T00823.000,row,Remembered cursor row,med,declaration-only;source:5BF94.h:131
+T00823.001,page,Remembered list page,med,declaration-only;source:5BF94.h:132
+T00824.000,location,Teleport destination location index,high,source:146C.c:4705
+T00824.001,tileX,Destination tile X,high,source:146C.c:4706
+T00824.002,tileZ,Destination tile Z,high,source:146C.c:4706
+T00824.003,mpCost,MP subtracted from Ashley when the teleport runs,high,source:146C.c:4709
+T00825.000,actor,Target actor index,high,source:146C.c:3970
+T00825.001,eventActorSlot,Slot in the event's actor list; battle code sets 0,med,source:5BF94.c:8031
+T00825.002,part,Targeted body part; 0xFD is a special marker,med,source:146C.c:3308
+T00825.003,reserved3,Not read,low,declaration-only;source:6E644.h:17
+T00826.000,reserved0,Not read through this view,low,declaration-only;source:6FC00.c:568
+T00826.001,skipStateA,Nonzero skips the object's perception update (with skipStateB),med,source:6FC00.c:1034
+T00826.002,skipStateB,Nonzero skips the object's perception update (with skipStateA),med,source:6FC00.c:1034
+T00826.003,reserved21,Not read,low,declaration-only;source:6FC00.c:571
+T00826.004,forcesPerception,Set: the object's target perception is updated immediately,med,source:6FC00.c:1038
+T00827.000,reserved0,Not read through this view,low,declaration-only;source:7CD68.c:613
+T00827.001,mode,Two-bit mode: bit 1 and bit 0 become separate AI state flags,med,source:7CD68.c:739
+T00827.002,upperBits,Bits 14-31; bit 14 is read through the word,low,declaration-only;source:7CD68.c:613
+T00828.000,state,"Lock state: 0 open, 1 or 3 locked by a key or sigil; cleared when opened",high,source:146C.c:4849
+T00828.001,roomEffect,Room effect started or tested for this trigger,high,source:146C.c:16320
+T00829.000,row,Remembered cursor row,med,declaration-only;source:5BF94.h:131
+T00829.001,page,Remembered list page,med,declaration-only;source:5BF94.h:132
+T00830.000,location,Teleport destination location index,high,source:146C.c:4705
+T00830.001,tileX,Destination tile X,high,source:146C.c:4706
+T00830.002,tileZ,Destination tile Z,high,source:146C.c:4706
+T00830.003,mpCost,MP subtracted from Ashley when the teleport runs,high,source:146C.c:4709
+T00831.000,actor,Target actor index,high,source:146C.c:3970
+T00831.001,eventActorSlot,Slot in the event's actor list; battle code sets 0,med,source:5BF94.c:8031
+T00831.002,part,Targeted body part; 0xFD is a special marker,med,source:146C.c:3308
+T00831.003,reserved3,Not read,low,declaration-only;source:6E644.h:17
+T00832.000,state,"Lock state: 0 open, 1 or 3 locked by a key or sigil; cleared when opened",high,source:146C.c:4849
+T00832.001,roomEffect,Room effect started or tested for this trigger,high,source:146C.c:16320
+T00833.000,row,Remembered cursor row,med,declaration-only;source:5BF94.h:131
+T00833.001,page,Remembered list page,med,declaration-only;source:5BF94.h:132
+T00834.000,location,Teleport destination location index,high,source:146C.c:4705
+T00834.001,tileX,Destination tile X,high,source:146C.c:4706
+T00834.002,tileZ,Destination tile Z,high,source:146C.c:4706
+T00834.003,mpCost,MP subtracted from Ashley when the teleport runs,high,source:146C.c:4709
+T00835.000,actor,Target actor index,high,source:146C.c:3970
+T00835.001,eventActorSlot,Slot in the event's actor list; battle code sets 0,med,source:5BF94.c:8031
+T00835.002,part,Targeted body part; 0xFD is a special marker,med,source:146C.c:3308
+T00835.003,reserved3,Not read,low,declaration-only;source:6E644.h:17
+T00836.000,tileTpage,Textured tile with its texture page,high,source:MENU/MENU7.PRG/260.c:1308
+T00836.001,polyG4,Gradient quad,high,source:MENU/MENU7.PRG/260.c:1315
+T00837.000,state,"Lock state: 0 open, 1 or 3 locked by a key or sigil; cleared when opened",high,source:146C.c:4849
+T00837.001,roomEffect,Room effect started or tested for this trigger,high,source:146C.c:16320
+T00838.000,texturedTile,Textured tile with its texture page,high,source:22C.c:1191
+T00838.001,gradientQuad,Gradient quad,med,declaration-only;source:22C.c:1072
+T00839.000,position,Row and page,med,declaration-only;source:5BF94.h:133
+T00839.001,word,Both bytes as one word,med,declaration-only;source:5BF94.h:134
+T00840.000,position,Row and page,med,declaration-only;source:5BF94.h:133
+T00840.001,word,Both bytes as one word,med,declaration-only;source:5BF94.h:134
+T00841.000,position,Row and page,med,declaration-only;source:5BF94.h:133
+T00841.001,word,Both bytes as one word,med,declaration-only;source:5BF94.h:134

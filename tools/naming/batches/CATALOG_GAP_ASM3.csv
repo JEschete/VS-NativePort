@@ -1,0 +1,2 @@
+id,file,line,name,kind,lines,proposed_system,sdk_apis,callers,callees
+F04202,BATTLE/BATTLE.PRG/70D4C.s,458,D_800D9B6C,asm-entry,166,Game.Battle,,,func_800D98E8 func_800E4690

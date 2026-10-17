@@ -99,6 +99,11 @@ the 1a compile gate reachable meanwhile, an unported function compiles as a stub
 `VS_UNPORTED("<catalog name>")` (`Core/Unported.hpp`). The log shows which stubs a slice actually reaches, which
 sets the order.
 
+Before stubbing, the copy tool follows `dup-of:` in the catalog notes. An assembly row whose bytes equal a function
+that does exist as C uses that C code instead of a stub. Example: PLG054/055 `func_800FA368` (F01927, F01929) are
+byte-identical to PLG053's, which is the closed-ring effect template instance F01925, so they become effects-catalog
+rows of that template.
+
 ## 6. Scratchpad memory
 
 1,061 uses in 266 functions (Menu 81, Battle 52, Field 40, Effects 37) of the PS1's 1 KiB fast scratchpad, which the

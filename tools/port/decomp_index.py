@@ -150,6 +150,8 @@ class Index:
                 deps[type_key(d)] = deps.get(type_key(d), False) or by_value
         elif c.kind in (K.STRUCT_DECL, K.UNION_DECL):
             for fc in c.get_children():
+                if fc.kind in TYPE_DECLS and fc.kind != K.TYPEDEF_DECL:
+                    self.add_type(fc)  # nested definitions at any depth (struct in union in struct)
                 if fc.kind == K.FIELD_DECL:
                     fields.append({"name": fc.spelling, "type": fc.type.spelling,
                                    "bits": fc.get_bitfield_width() if fc.is_bitfield() else 0,

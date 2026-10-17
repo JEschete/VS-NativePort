@@ -1,0 +1,2 @@
+id,final_name,final_location,purpose,confidence,notes
+F04202,Battle::Ai::CanWalkInDirection,Native\Game\src\Battle\Ai\Movement.c,"Returns whether a wandering actor can step in a direction, from the per-frame direction cache or by testing blocking actors and terrain.",high,source:BATTLE/BATTLE.PRG/70D4C.s:458;read whole function (alternate entry);used as the ground wander check beside CanFlyInDirection (771A8.c:1730)

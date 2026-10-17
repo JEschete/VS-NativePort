@@ -1,0 +1,3 @@
+id,final_name,final_location,purpose,confidence,notes
+F04200,Boot::JumpToTitle,Native\Game\src\Boot\Lifecycle.c,"Restores the stack pointer saved by CaptureOverlayStack and jumps to the title entry, abandoning the current call stack.",high,source:SLUS_010.40/overlay.c:20;read whole function (jumpFunc macro);callers main.c:8135 and 8185
+F04201,Boot::JumpToGameLoop,Native\Game\src\Boot\Lifecycle.c,"Restores the stack pointer saved by CaptureOverlayStack and jumps to the game loop, abandoning the current call stack.",high,source:SLUS_010.40/overlay.c:21;read whole function (jumpFunc macro);caller vs_main_jumpToBattle

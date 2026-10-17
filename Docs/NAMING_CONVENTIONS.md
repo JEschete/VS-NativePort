@@ -590,3 +590,32 @@ first named (all functions named, later batches' types and globals named, the re
 
 The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
 The native audio player must own playback position rather than reading another module's timing globals.
+
+#### 11.4 Catalog gaps closed and the reference index (2026-10-18)
+
+Building the occurrence-level reference index (`tools\port\ref_index.py`, plan Step 4 item 9) resolved every
+identifier in game code to a ledger row. That surfaced the last gaps, now closed:
+
+- **Inline assembly and link-time names.** `tools\ledger\add_missing_functions.py --batch <name>` now also catalogs
+  `glabel`/`alabel` entry points written as inline assembly in `.c` files, `jumpFunc NAME, TARGET` lines, and `.s`
+  alternate entry points that C code references. These were batches `CATALOG_GAP_ASM` (22 rows, F04178-F04199:
+  actor movement-request starters, halfword copies, sprite queueing, menu sounds), `CATALOG_GAP_ASM2`
+  (`Boot::JumpToTitle`, `Boot::JumpToGameLoop`) and `CATALOG_GAP_ASM3` (`Battle::Ai::CanWalkInDirection`,
+  `BATTLE/BATTLE.PRG/70D4C.s:458`, the ground wander check beside `CanFlyInDirection`). The script refuses to
+  overwrite an existing batch.
+- **Nested unnamed types.** `decomp_index.py` now recurses into struct/union/enum definitions nested two or more
+  levels deep. That added 20 types and 56 fields, named in symbol batch `Nested_Types`.
+- **Stale split file.** `EFFECT/PLG053.BIN/0.c` is not built: its `splat.yaml` has the single subsegment
+  `[0x18, c]` (`18.c`), and upstream deleted the file. Its rows F01921-F01923 carry `not-linked`, which merge_names
+  turns into `copy = no`. PLG054/055 `func_800FA368` (byte-identical images) are now `dup-of` the PLG053 closed-ring
+  template instance F01925. A `dup-of` row may point at a template instance and use its `Templates\` location.
+- **Link alias.** `_toVsStringPercentAlias` exists only as `--defsym` in `config/MENU/MENU9.PRG/Makefile`. In the
+  shipped MENU9.PRG, address 0x80106D5C is the start of `_toVsStringPercent`, so the index maps the alias to that
+  function.
+
+Function rows to copy: 3,758, all named. Full index run: 138 translation units, 100,172 occurrences
+(fields 46,749, variables 23,334, functions 19,616, types 6,831, enumerators 3,642, including 1,253 inside macro
+bodies). Of these, 98,033 are direct ledger ids, 1,655 are `sdk:`, 301 are `plugin:` (effect entry points that
+share a load address), 82 are member paths through upstream-merged layouts, 11 are widened views (`~w`), and 90
+are multi-target (headers included by several overlays, e.g. per-instance statics). There are **0 unresolved and
+0 text mismatches**. A full run takes about 10 minutes; rerun it after any ledger or naming change.
