@@ -1,9 +1,7 @@
 **/__pycache__
 /.claude
 /.direnv
-/.vscode/*
-!/.vscode/settings.json
-!/.vscode/c_cpp_properties.json
+/.vscode/
 /build
 /config/*.xml
 /data/
@@ -15,6 +13,12 @@
 /nonmatchings/
 /tools/.sysdeps
 /tools/python
+/resources/Sydney Losstarot (Dying)
+
+# Local Python virtual environments (including numbered duplicates)
+.venv/
+.venv-*/
+venv/
 
 # Upstream build log, committed by accident upstream. Not ours to keep.
 /make.log
