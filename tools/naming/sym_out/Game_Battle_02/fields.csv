@@ -1,0 +1,343 @@
+id,final_name,meaning,confidence,notes
+T00351.000,reserved0,Not read through this view,low,declaration-only;source:6FC00.c:505
+T00351.001,actionStatus,Status of the selected action,low,source:6FC00.c:559
+T00351.002,reserved132,Not read through this view,low,declaration-only;source:6FC00.c:507
+T00351.003,relations,Relation word for each actor,high,source:6FC00.c:547
+T00351.004,distancesSquared,Squared distance to each actor,med,declaration-only;source:6FC00.c:509
+T00351.005,reserved224,Not read through this view,low,declaration-only;source:6FC00.c:510
+T00351.006,candidateOrder,Candidates in priority order,med,source:6FC00.c:523
+T00351.007,candidateCount,Number of candidates,high,source:6FC00.c:522
+T00356.000,reserved0,Not read through this view,low,declaration-only;source:74088.c:875
+T00356.001,isDead,Set when the actor's HP is zero,high,source:74088.c:1574
+T00356.002,reserved1C,Not read through this view,low,declaration-only;source:74088.c:877
+T00356.003,stats,Actor statistics,high,source:74088.c:1333
+T00356.004,reserved60,Not read through this view,low,declaration-only;source:74088.c:879
+T00356.005,pointHeight,Height of the tagged point above the position,low,declaration-only;source:74088.c:880
+T00356.006,reserved84,Not read through this view,low,declaration-only;source:74088.c:881
+T00356.007,currentChoice,Action choice being executed,med,declaration-only;source:74088.c:882
+T00356.008,reserved154,Not read through this view,low,declaration-only;source:74088.c:883
+T00356.009,actionSlots,Action slot configuration by row and column,med,declaration-only;source:74088.c:884
+T00362.000,opaque0,"Used, but its meaning is not established",low,source:71618.c:1165
+T00362.001,opaque4,"Used, but its meaning is not established",low,source:71618.c:1166
+T00362.002,opaque8,"Used, but its meaning is not established",low,source:71618.c:1167
+T00362.003,reservedC,Not read through this view,low,declaration-only;source:71618.c:1058
+T00362.004,reservedE,Not read through this view,low,declaration-only;source:71618.c:1058
+T00362.005,reserved10,Not read through this view,low,declaration-only;source:71618.c:1059
+T00362.006,opaque14,"Used, but its meaning is not established",low,source:71618.c:1136
+T00362.007,reserved15,Not read through this view,low,declaration-only;source:71618.c:1061
+T00362.008,opaque1D,"Used, but its meaning is not established",low,source:71618.c:1136
+T00362.009,reserved1E,Not read through this view,low,declaration-only;source:71618.c:1063
+T00362.010,tileX,Named in the fork view; see cited use,med,source:71618.c:1160
+T00362.011,reserved35,Not read through this view,low,declaration-only;source:71618.c:1064
+T00362.012,tileZ,Named in the fork view; see cited use,med,source:71618.c:1169
+T00362.013,reserved37,Not read through this view,low,declaration-only;source:71618.c:1065
+T00362.014,savedDestination,Saved destination tile,med,source:71618.c:1162
+T00362.015,position,Named in the fork view; see cited use,med,source:71618.c:1147
+T00362.016,reserved52,Not read through this view,low,declaration-only;source:71618.c:1068
+T00362.017,pointHeight,Height of the tagged point above the position,low,source:71618.c:1150
+T00362.018,reserved84,Not read through this view,low,declaration-only;source:71618.c:1070
+T00362.019,bodyHeight,Model height used for occlusion and reach,low,source:71618.c:1148
+T00362.020,reservedBA,Not read through this view,low,declaration-only;source:71618.c:1072
+T00362.021,opaque132,"Used, but its meaning is not established",low,source:71618.c:1172
+T00362.022,reserved133,Not read through this view,low,declaration-only;source:71618.c:1074
+T00362.023,fallback,Named in the fork view; see cited use,med,declaration-only;source:71618.c:1075
+T00362.024,reserved150,Not read through this view,low,declaration-only;source:71618.c:1076
+T00362.025,opaque154,"Used, but its meaning is not established",low,source:71618.c:1171
+T00362.026,reserved155,Not read through this view,low,declaration-only;source:71618.c:1078
+T00362.027,movementTarget,Actor the movement heads for; 16 for none,med,source:71618.c:1161
+T00362.028,reserved15D,Not read through this view,low,declaration-only;source:71618.c:1080
+T00362.029,distance,Named in the fork view; see cited use,med,source:71618.c:1155
+T00362.030,reserved1E8,Not read through this view,low,declaration-only;source:71618.c:1082
+T00362.031,candidateOrder,Candidates in priority order,med,declaration-only;source:71618.c:1083
+T00362.032,candidateCount,Number of candidates,med,declaration-only;source:71618.c:1084
+T00368.000,reserved0,Not read through this view,low,declaration-only;source:7CD68.c:517
+T00368.001,actionCostEnabled,Zero when actions cost nothing,low,source:7CD68.c:532
+T00368.002,reserved18,Not read through this view,low,declaration-only;source:7CD68.c:519
+T00368.003,stats,Actor statistics,high,source:7CD68.c:537
+T00368.004,reserved60,Not read through this view,low,declaration-only;source:7CD68.c:521
+T00368.005,actorId,Actor id,high,source:7CD68.c:531
+T00368.006,reserved89,Not read through this view,low,declaration-only;source:7CD68.c:523
+T00368.007,actionSlots,Action slot configuration by row and column,med,source:7CD68.c:539
+T00370.000,reserved0,Not read through this view,low,declaration-only;source:74088.c:1268
+T00370.001,allowFallbackAction,Plans a fallback action when no candidate exists,med,source:74088.c:1400
+T00370.002,reserved27,Not read through this view,low,declaration-only;source:74088.c:1270
+T00370.003,actor,Battle actor,med,source:74088.c:1444
+T00370.004,reserved58,Not read through this view,low,declaration-only;source:74088.c:1272
+T00370.005,stats,Actor statistics,high,source:74088.c:1333
+T00370.006,reserved60,Not read through this view,low,declaration-only;source:74088.c:1274
+T00370.007,actorId,Actor id,high,source:74088.c:1352
+T00370.008,reserved89,Not read through this view,low,declaration-only;source:74088.c:1276
+T00370.009,planMode,"Plan mode of the queued action (1 approach, 2 planned tile, 7 retreat)",med,source:74088.c:1438
+T00370.010,reserved12F,Not read through this view,low,declaration-only;source:74088.c:1278
+T00370.011,minActionDelay,Minimum delay before the next action,med,source:74088.c:1357
+T00370.012,reserved140,Not read through this view,low,declaration-only;source:74088.c:1280
+T00370.013,candidates,Action candidates,high,source:74088.c:1390
+T00370.014,candidateOrder,Candidates in priority order,med,source:74088.c:1378
+T00370.015,candidateCount,Number of candidates,high,source:74088.c:1351
+T00373.000,reserved0,Not read through this view,low,declaration-only;source:74088.c:687
+T00373.001,usesRoomActionDelay,"When zero the room's default action delay applies, else 50",low,source:74088.c:749
+T00373.002,reserved14,Not read through this view,low,declaration-only;source:74088.c:689
+T00373.003,settingsBit26,Bit 26 of the AI settings word,low,source:74088.c:763
+T00373.004,settingsByte3Bit0,Bit 0 of settings byte 3,low,source:74088.c:810
+T00373.005,reserved22,Not read through this view,low,declaration-only;source:74088.c:691
+T00373.006,settingsBit27,Bit 27 of the AI settings word,low,source:74088.c:749
+T00373.007,reserved28,Not read through this view,low,declaration-only;source:74088.c:693
+T00373.008,settingsBits21,Bits 21-22 of the AI settings word; 3 excludes the actor from relations,low,source:74088.c:796
+T00373.009,reserved2D,Not read through this view,low,declaration-only;source:74088.c:695
+T00373.010,settingsBit25,Bit 25 of the AI settings word,low,source:74088.c:763
+T00373.011,reserved31,Not read through this view,low,declaration-only;source:74088.c:697
+T00373.012,actorId,Actor id,high,source:74088.c:725
+T00373.013,reserved89,Not read through this view,low,declaration-only;source:74088.c:699
+T00373.014,behaviorMode,"Behavior mode (1 reacting, 2 wandering)",low,source:74088.c:745
+T00373.015,reserved12E,Not read through this view,low,declaration-only;source:74088.c:701
+T00373.016,relations,Relation word for each actor,high,source:74088.c:751
+T00381.000,reserved0,Not read through this view,low,declaration-only;source:74088.c:1525
+T00381.001,usesRoomActionDelay,"When zero the room's default action delay applies, else 50",low,source:74088.c:1580
+T00381.002,reserved14,Not read through this view,low,declaration-only;source:74088.c:1527
+T00381.003,isDead,Set when the actor's HP is zero,high,source:74088.c:1574
+T00381.004,reserved1C,Not read through this view,low,declaration-only;source:74088.c:1529
+T00381.005,actorId,Actor id,high,source:74088.c:1565
+T00381.006,reserved89,Not read through this view,low,declaration-only;source:74088.c:1531
+T00381.007,opaque9A,"Used, but its meaning is not established",low,source:74088.c:1568
+T00381.008,reserved9C,Not read through this view,low,declaration-only;source:74088.c:1533
+T00381.009,opaqueE7,"Used, but its meaning is not established",low,source:74088.c:1563
+T00381.010,opaqueE8,"Used, but its meaning is not established",low,source:74088.c:1562
+T00381.011,reservedE9,Not read through this view,low,declaration-only;source:74088.c:1536
+T00381.012,opaque19A,"Used, but its meaning is not established",low,source:74088.c:1564
+T00385.000,reserved0,Not read through this view,low,declaration-only;source:7CD68.c:871
+T00385.001,hasTaggedBone3,Model has a bone tagged 3,med,source:7CD68.c:991
+T00385.002,reserved2B,Not read through this view,low,declaration-only;source:7CD68.c:873
+T00385.003,tile,Current tile word,high,source:7CD68.c:1021
+T00385.004,previousTile,Previous tile word; -1 to forget,high,source:7CD68.c:1043
+T00385.005,reserved3C,Not read through this view,low,declaration-only;source:7CD68.c:876
+T00385.006,options,Options passed when the AI state is created,med,source:7CD68.c:1044
+T00385.007,reserved44,Not read through this view,low,declaration-only;source:7CD68.c:878
+T00385.008,actor,Battle actor,med,source:7CD68.c:964
+T00385.009,model,Model record,med,source:7CD68.c:966
+T00385.010,stats,Actor statistics,high,source:7CD68.c:967
+T00385.011,positionSource,Pointer to the model position,low,source:7CD68.c:986
+T00385.012,tileSource,Pointer to the model tile word,med,source:7CD68.c:987
+T00385.013,reserved68,Not read through this view,low,declaration-only;source:7CD68.c:884
+T00385.014,pointHeight,Height of the tagged point above the position,low,source:7CD68.c:969
+T00385.015,reserved84,Not read through this view,low,declaration-only;source:7CD68.c:886
+T00385.016,actorId,Actor id,high,source:7CD68.c:963
+T00385.017,opaque89,"Used, but its meaning is not established",low,source:7CD68.c:988
+T00385.018,opaque8A,"Used, but its meaning is not established",low,source:7CD68.c:989
+T00385.019,reserved8B,Not read through this view,low,declaration-only;source:7CD68.c:890
+T00385.020,radius,Actor radius,high,source:7CD68.c:972
+T00385.021,collisionRadius,Collision radius,high,source:7CD68.c:980
+T00385.022,reserved96,Not read through this view,low,declaration-only;source:7CD68.c:893
+T00385.023,opaque9C,"Used, but its meaning is not established",low,source:7CD68.c:1024
+T00385.024,reservedA0,Not read through this view,low,declaration-only;source:7CD68.c:895
+T00385.025,farDistanceSquared,Squared perception range,med,source:7CD68.c:1015
+T00385.026,reservedB0,Not read through this view,low,declaration-only;source:7CD68.c:897
+T00385.027,maxRange,Reach in units of 32,high,source:7CD68.c:1007
+T00385.028,moveDistance,Distance of the current move,med,source:7CD68.c:998
+T00385.029,bodyHeight,Model height used for occlusion and reach,low,source:7CD68.c:1020
+T00385.030,reservedBA,Not read through this view,low,declaration-only;source:7CD68.c:901
+T00385.031,groundClearance,Ground clearance of flying actors,med,source:7CD68.c:1018
+T00385.032,flightHeight,Flight height above the ground,med,source:7CD68.c:1019
+T00385.033,reservedC0,Not read through this view,low,declaration-only;source:7CD68.c:904
+T00385.034,opaque103,"Used, but its meaning is not established",low,source:7CD68.c:990
+T00385.035,reserved104,Not read through this view,low,declaration-only;source:7CD68.c:906
+T00385.036,opaque110,"Used, but its meaning is not established",low,source:7CD68.c:1022
+T00385.037,reserved114,Not read through this view,low,declaration-only;source:7CD68.c:908
+T00385.038,opaque124,"Used, but its meaning is not established",low,source:7CD68.c:1042
+T00385.039,reserved125,Not read through this view,low,declaration-only;source:7CD68.c:910
+T00385.040,behaviorMode,"Behavior mode (1 reacting, 2 wandering)",low,source:7CD68.c:1035
+T00385.041,reserved12E,Not read through this view,low,declaration-only;source:7CD68.c:912
+T00385.042,stepHeight,Named in the fork view; see cited use,med,source:7CD68.c:979
+T00385.043,reserved13E,Not read through this view,low,declaration-only;source:7CD68.c:914
+T00385.044,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:7CD68.c:1027
+T00385.045,reserved160,Not read through this view,low,declaration-only;source:7CD68.c:916
+T00385.046,nextTile,Next tile on the way,high,source:7CD68.c:1030
+T00385.047,reserved174,Not read through this view,low,declaration-only;source:7CD68.c:918
+T00385.048,moveY,Target Y in 20.12 fixed point,med,source:7CD68.c:1025
+T00385.049,reserved188,Not read through this view,low,declaration-only;source:7CD68.c:920
+T00385.050,opaque194,"Used, but its meaning is not established",low,source:7CD68.c:1023
+T00385.051,reserved198,Not read through this view,low,declaration-only;source:7CD68.c:922
+T00385.052,opaque224,"Used, but its meaning is not established",low,source:7CD68.c:993
+T00385.053,opaque225,"Used, but its meaning is not established",low,source:7CD68.c:994
+T00385.054,opaque226,"Used, but its meaning is not established",low,source:7CD68.c:995
+T00385.055,opaque227,"Used, but its meaning is not established",low,source:7CD68.c:996
+T00389.000,reserved0,Not read through this view,low,declaration-only;source:6FC00.c:611
+T00389.001,settingsBit23,Bit 23 of the AI settings word,low,source:6FC00.c:843
+T00389.002,reserved23,Not read through this view,low,declaration-only;source:6FC00.c:613
+T00389.003,settingsBit15,Bit 15 of the AI settings word; also lets out-of-reach targets count,low,source:6FC00.c:757
+T00389.004,reserved26,Not read through this view,low,declaration-only;source:6FC00.c:615
+T00389.005,tile,Current tile word,high,source:6FC00.c:722
+T00389.006,reserved38,Not read through this view,low,source:6FC00.c:1071
+T00389.007,position,World position,high,source:6FC00.c:707
+T00389.008,reserved54,Not read through this view,low,declaration-only;source:6FC00.c:619
+T00389.009,model,Model record,med,source:6FC00.c:740
+T00389.010,reserved5C,Not read through this view,low,declaration-only;source:6FC00.c:621
+T00389.011,pointHeight,Height of the tagged point above the position,low,source:6FC00.c:668
+T00389.012,reserved84,Not read through this view,low,declaration-only;source:6FC00.c:623
+T00389.013,actorId,Actor id,high,source:6FC00.c:750
+T00389.014,reserved89,Not read through this view,low,declaration-only;source:6FC00.c:625
+T00389.015,radius,Actor radius,high,source:6FC00.c:804
+T00389.016,reserved94,Not read through this view,low,declaration-only;source:6FC00.c:627
+T00389.017,nearDistanceSquared,Squared near range,med,source:6FC00.c:775
+T00389.018,viewCosine,Cosine of half the view angle,med,source:6FC00.c:745
+T00389.019,farDistanceSquared,Squared perception range,med,source:6FC00.c:756
+T00389.020,reservedB0,Not read through this view,low,declaration-only;source:6FC00.c:631
+T00389.021,bodyHeight,Model height used for occlusion and reach,low,source:6FC00.c:653
+T00389.022,reservedBA,Not read through this view,low,declaration-only;source:6FC00.c:633
+T00389.023,phase,Named in the fork view; see cited use,med,source:6FC00.c:727
+T00389.024,reserved12C,Not read through this view,low,declaration-only;source:6FC00.c:635
+T00389.025,relations,Relation word for each actor,high,source:6FC00.c:725
+T00389.026,distancesSquared,Squared distance to each actor,high,source:6FC00.c:716
+T00392.000,reserved0,Not read through this view,low,declaration-only;source:7CD68.c:618
+T00392.001,linkedActor,Actor this one follows or guards; 16 for none,med,source:7CD68.c:755
+T00392.002,reserved17,Not read through this view,low,declaration-only;source:7CD68.c:620
+T00392.003,settingsConstant19,Set to 1 when the settings are applied,low,source:7CD68.c:750
+T00392.004,reserved1A,Not read through this view,low,declaration-only;source:7CD68.c:622
+T00392.005,settingsBit26,Bit 26 of the AI settings word,low,source:7CD68.c:729
+T00392.006,settingsByte3Bit0,Bit 0 of settings byte 3,low,source:7CD68.c:724
+T00392.007,settingsBit23,Bit 23 of the AI settings word,low,source:7CD68.c:725
+T00392.008,settingsConstant23,Set to 1 when the settings are applied,low,source:7CD68.c:723
+T00392.009,settingsBit13,Bit 13 of the AI settings word,low,source:7CD68.c:704
+T00392.010,settingsBit15,Bit 15 of the AI settings word; also lets out-of-reach targets count,low,source:7CD68.c:702
+T00392.011,allowFallbackAction,Plans a fallback action when no candidate exists,med,source:7CD68.c:740
+T00392.012,settingsBit27,Bit 27 of the AI settings word,low,source:7CD68.c:733
+T00392.013,reserved28,Not read through this view,low,declaration-only;source:7CD68.c:631
+T00392.014,settingsBit14,Bit 14 of the AI settings word,low,source:7CD68.c:703
+T00392.015,hasTaggedBone3,Model has a bone tagged 3,med,declaration-only;source:7CD68.c:633
+T00392.016,settingsModeLow,Low bit of the settings mode field,low,source:7CD68.c:742
+T00392.017,settingsBits21,Bits 21-22 of the AI settings word; 3 excludes the actor from relations,low,source:7CD68.c:726
+T00392.018,opaque2D,"Used, but its meaning is not established",low,source:7CD68.c:705
+T00392.019,reserved2E,Not read through this view,low,declaration-only;source:7CD68.c:637
+T00392.020,settingsBits28,Bits 28-29 of the AI settings word,low,source:7CD68.c:727
+T00392.021,settingsBit25,Bit 25 of the AI settings word,low,source:7CD68.c:734
+T00392.022,settingsBits30,Bits 30-31 of the AI settings word,low,source:7CD68.c:728
+T00392.023,settingsBits30Value,Table value selected by settingsBits30,low,source:7CD68.c:736
+T00392.024,settingsByte0Bit7,Bit 7 of settings byte 0,low,source:7CD68.c:738
+T00392.025,reserved34,Not read through this view,low,declaration-only;source:7CD68.c:643
+T00392.026,actor,Battle actor,med,source:7CD68.c:691
+T00392.027,reserved58,Not read through this view,low,declaration-only;source:7CD68.c:645
+T00392.028,decisionCallback,Decision function chosen by the settings,med,source:7CD68.c:749
+T00392.029,reserved6C,Not read through this view,low,declaration-only;source:7CD68.c:647
+T00392.030,collisionRadius,Collision radius,high,source:7CD68.c:719
+T00392.031,reserved96,Not read through this view,low,declaration-only;source:7CD68.c:649
+T00392.032,nearDistanceSquared,Squared near range,med,source:7CD68.c:699
+T00392.033,viewCosine,Cosine of half the view angle,med,source:7CD68.c:701
+T00392.034,farDistanceSquared,Squared perception range,med,source:7CD68.c:695
+T00392.035,opaqueB0,"Used, but its meaning is not established",low,source:7CD68.c:717
+T00392.036,opaqueB2,"Used, but its meaning is not established",low,source:7CD68.c:716
+T00392.037,reservedB3,Not read through this view,low,declaration-only;source:7CD68.c:655
+T00392.038,facingDelay,Frames before re-facing a target,low,source:7CD68.c:722
+T00392.039,reservedBC,Not read through this view,low,declaration-only;source:7CD68.c:657
+T00392.040,opaqueC8,"Used, but its meaning is not established",low,source:7CD68.c:745
+T00392.041,opaqueCC,"Used, but its meaning is not established",low,source:7CD68.c:746
+T00392.042,reservedCD,Not read through this view,low,declaration-only;source:7CD68.c:660
+T00392.043,opaqueCE,"Used, but its meaning is not established",low,source:7CD68.c:747
+T00392.044,reservedCF,Not read through this view,low,declaration-only;source:7CD68.c:662
+T00392.045,restPeriod,Wander rest period,med,source:7CD68.c:731
+T00392.046,movePeriod,Wander move period,med,source:7CD68.c:730
+T00392.047,wanderRate,Wander chance exponent,med,source:7CD68.c:732
+T00392.048,reservedD9,Not read through this view,low,declaration-only;source:7CD68.c:666
+T00392.049,opaque101,"Used, but its meaning is not established",low,source:7CD68.c:744
+T00392.050,opaque102,"Used, but its meaning is not established",low,source:7CD68.c:743
+T00392.051,reserved103,Not read through this view,low,declaration-only;source:7CD68.c:669
+T00392.052,angle,Named in the fork view; see cited use,med,source:7CD68.c:700
+T00392.053,reserved12A,Not read through this view,low,declaration-only;source:7CD68.c:671
+T00392.054,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:7CD68.c:735
+T00394.000,reserved0,Not read through this view,low,declaration-only;source:73700.c:449
+T00394.001,actor,Battle actor,med,source:73700.c:508
+T00394.002,reserved58,Not read through this view,low,declaration-only;source:73700.c:451
+T00394.003,actorId,Actor id,high,source:6FC00.c:1150
+T00394.004,reserved89,Not read through this view,low,declaration-only;source:73700.c:453
+T00394.005,reserved8E,Not read through this view,low,declaration-only;source:73700.c:454
+T00394.006,reserved90,Not read through this view,low,declaration-only;source:73700.c:455
+T00394.007,reserved98,Not read through this view,low,declaration-only;source:73700.c:456
+T00394.008,reserved9A,Not read through this view,low,declaration-only;source:73700.c:456
+T00394.009,reserved9C,Not read through this view,low,declaration-only;source:73700.c:457
+T00394.010,phase,Named in the fork view; see cited use,med,source:73700.c:510
+T00394.011,direction,Named in the fork view; see cited use,med,source:73700.c:511
+T00394.012,reserved131,Not read through this view,low,declaration-only;source:73700.c:459
+T00394.013,nextEngaged,Next actor in the engagement list,med,source:73700.c:524
+T00394.014,targetFlags,Named in the fork view; see cited use,med,source:73700.c:509
+T00399.000,reserved0,Not read through this view,low,declaration-only;source:6FC00.c:888
+T00399.001,opaque8,"Used, but its meaning is not established",low,source:6FC00.c:1082
+T00399.002,reserved9,Not read through this view,low,declaration-only;source:6FC00.c:890
+T00399.003,opaqueE,"Used, but its meaning is not established",low,source:6FC00.c:1161
+T00399.004,reservedF,Not read through this view,low,declaration-only;source:6FC00.c:892
+T00399.005,opaque14,"Used, but its meaning is not established",low,source:6FC00.c:1024
+T00399.006,reserved15,Not read through this view,low,declaration-only;source:6FC00.c:894
+T00399.007,opaque18,"Used, but its meaning is not established",low,source:6FC00.c:1049
+T00399.008,reserved19,Not read through this view,low,declaration-only;source:6FC00.c:896
+T00399.009,opaque1C,"Used, but its meaning is not established",low,source:6FC00.c:1073
+T00399.010,opaque1D,"Used, but its meaning is not established",low,source:6FC00.c:1015
+T00399.011,reserved1E,Not read through this view,low,declaration-only;source:6FC00.c:899
+T00399.012,settingsBits28,Bits 28-29 of the AI settings word,low,source:6FC00.c:1139
+T00399.013,reserved30,Not read through this view,low,declaration-only;source:6FC00.c:901
+T00399.014,tile,Current tile word,high,source:6FC00.c:1069
+T00399.015,previousTile,Previous tile word; -1 to forget,high,source:6FC00.c:1071
+T00399.016,opaque3C,"Used, but its meaning is not established",low,source:6FC00.c:1169
+T00399.017,opaque40,"Used, but its meaning is not established",low,source:6FC00.c:1167
+T00399.018,reserved42,Not read through this view,low,declaration-only;source:6FC00.c:909
+T00399.019,opaque45,"Used, but its meaning is not established",low,source:6FC00.c:1074
+T00399.020,opaque46,"Used, but its meaning is not established",low,source:6FC00.c:1062
+T00399.021,reserved48,Not read through this view,low,declaration-only;source:6FC00.c:912
+T00399.022,opaque4C,"Used, but its meaning is not established",low,source:6FC00.c:1099
+T00399.023,opaque50,"Used, but its meaning is not established",low,source:6FC00.c:1100
+T00399.024,actor,Battle actor,med,source:6FC00.c:1135
+T00399.025,model,Model record,med,source:6FC00.c:1016
+T00399.026,stats,Actor statistics,med,declaration-only;source:6FC00.c:917
+T00399.027,positionSource,Pointer to the model position,low,source:6FC00.c:1097
+T00399.028,tileSource,Pointer to the model tile word,med,source:6FC00.c:1069
+T00399.029,reserved68,Not read through this view,low,declaration-only;source:6FC00.c:920
+T00399.030,historyX,Recent X coordinates,med,source:6FC00.c:962
+T00399.031,historyZ,Recent Z coordinates,med,source:6FC00.c:963
+T00399.032,historyIndex,Next history slot,med,source:6FC00.c:1108
+T00399.033,historyMask,Filled history slots,med,source:6FC00.c:968
+T00399.034,reserved82,Not read through this view,low,declaration-only;source:6FC00.c:931
+T00399.035,statusFlags,Status flags copied from the statistics,low,source:6FC00.c:1017
+T00399.036,reserved92,Not read through this view,low,declaration-only;source:6FC00.c:933
+T00399.037,detourStep,Detour attempts at the current tile,med,source:6FC00.c:1077
+T00399.038,opaqueFB,"Used, but its meaning is not established",low,source:6FC00.c:1072
+T00399.039,reservedFC,Not read through this view,low,declaration-only;source:6FC00.c:936
+T00399.040,opaque114,"Used, but its meaning is not established",low,source:6FC00.c:1146
+T00399.041,reserved116,Not read through this view,low,declaration-only;source:6FC00.c:938
+T00399.042,opaque120,"Used, but its meaning is not established",low,source:6FC00.c:1101
+T00399.043,opaque124,"Used, but its meaning is not established",low,source:6FC00.c:1092
+T00399.044,reserved125,Not read through this view,low,declaration-only;source:6FC00.c:941
+T00399.045,opaque12A,"Used, but its meaning is not established",low,source:6FC00.c:1050
+T00399.046,reserved12B,Not read through this view,low,declaration-only;source:6FC00.c:943
+T00399.047,actionStatus,Status of the selected action,low,source:6FC00.c:1157
+T00399.048,reserved132,Not read through this view,low,declaration-only;source:6FC00.c:945
+T00399.049,opaque138,"Used, but its meaning is not established",low,source:6FC00.c:1050
+T00399.050,reserved13A,Not read through this view,low,declaration-only;source:6FC00.c:947
+T00399.051,opaque156,"Used, but its meaning is not established",low,source:6FC00.c:1162
+T00399.052,reserved158,Not read through this view,low,declaration-only;source:6FC00.c:949
+T00399.053,opaque18C,"Used, but its meaning is not established",low,source:6FC00.c:1033
+T00399.054,reserved190,Not read through this view,low,declaration-only;source:6FC00.c:951
+T00399.055,opaque190,"Used, but its meaning is not established",low,source:6FC00.c:1116
+T00399.056,reserved191,Not read through this view,low,declaration-only;source:6FC00.c:953
+T00399.057,reserved194,Not read through this view,low,declaration-only;source:6FC00.c:954
+T00399.058,opaque19A,"Used, but its meaning is not established",low,source:6FC00.c:1057
+T00399.059,reserved19B,Not read through this view,low,declaration-only;source:6FC00.c:956
+T00399.060,relations,Relation word for each actor,high,source:6FC00.c:1150
+T00406.000,reserved0,Not read through this view,low,declaration-only;source:71618.c:481
+T00406.001,opaque1,"Used, but its meaning is not established",low,source:71618.c:591
+T00406.002,reserved2,Not read through this view,low,declaration-only;source:71618.c:483
+T00406.003,position,Named in the fork view; see cited use,med,source:71618.c:586
+T00406.004,reserved52,Not read through this view,low,declaration-only;source:71618.c:485
+T00406.005,pointHeight,Height of the tagged point above the position,low,source:71618.c:575
+T00406.006,reserved84,Not read through this view,low,declaration-only;source:71618.c:487
+T00406.007,maxRange,Reach in units of 32,high,source:71618.c:530
+T00406.008,reservedB4,Not read through this view,low,declaration-only;source:71618.c:489
+T00406.009,planMode,"Plan mode of the queued action (1 approach, 2 planned tile, 7 retreat)",med,source:71618.c:525
+T00406.010,reserved12F,Not read through this view,low,declaration-only;source:71618.c:491
+T00406.011,plannedTile,Tile the plan moves to,high,source:71618.c:570
+T00406.012,reserved138,Not read through this view,low,declaration-only;source:71618.c:493
+T00406.013,movementTarget,Actor the movement heads for; 16 for none,med,source:71618.c:588
+T00406.014,reserved15D,Not read through this view,low,declaration-only;source:71618.c:495
+T00406.015,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:71618.c:529
+T00406.016,reserved160,Not read through this view,low,declaration-only;source:71618.c:497
+T00406.017,destination,Destination tile,high,source:71618.c:582
+T00406.018,reserved16C,Not read through this view,low,declaration-only;source:71618.c:499
+T00406.019,relations,Relation word for each actor,high,source:71618.c:533
+T00406.020,distancesSquared,Squared distance to each actor,high,source:71618.c:555
+T00406.021,reserved224,Not read through this view,low,declaration-only;source:71618.c:502
+T00406.022,candidateCount,Number of candidates,high,source:71618.c:518
