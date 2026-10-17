@@ -320,9 +320,14 @@ For each row (in file order):
 6. Write the result to `final_location` with a provenance comment, and generate the module headers.
 7. Mark `copied`.
 8. Effect template instantiations (`copy = template`) are **not** duplicated. One shared implementation per template (`tiledRings`, `particleSetup`, `trails9`, …) is copied. Each instantiation becomes a row in the effects catalog (§6.8).
+9. Rename by reference, not by text: every identifier occurrence is resolved to its declaration with libclang (`tools\port\decomp_index.py --refs`), so a member such as `unk4` is renamed only where it belongs to the right type.
+10. Module statics go into one state struct per module with a generated `ResetOnLoad()`; scratchpad uses map to a per-module scratch struct; asm-only functions become `VS_UNPORTED` stubs ([PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §1, §5, §6).
+11. Re-run `tools\scaffold\gen_solution.py` so the projects list the new files.
 
 ### Step 5: Data disposition and asset extraction
 Fill in `disposition` in the data ledger and generate the Tier 1 table decoders for `catalog` rows. Convert `constexpr` rows. Fold `state` rows into system state structs. Build the `VS.Extract` skeleton and manifest, generate `CONTENT_LEDGER.csv`, and write the converters in the order the 1b title slice needs them. Every disc file is converted up front by Phase 1 exit; the per-sub-phase asset gates are in [ASSET_PIPELINE.md](ASSET_PIPELINE.md) §9.
+
+`VS.Extract` stays C++ (owner, 2026-10-17). Its decoders are ported from VS-Workshop's `Workshop.Core` (`D:\Dev\Modding\VS-Workshop`) once Workshop is further along; it already decodes BIN/CUE, ISO9660, MPD/ZND/SHP/WEP/ZUD/SEQ/ESQ/TIM, palettes and P-file effects. AKAO, XA and STR converters are ours to write ([PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §7).
 
 ### Step 6: Compile everything
 Fix until the solution builds. Hazards are fixed now, not later (x64):
@@ -381,6 +386,7 @@ Each system lists: responsibility, API sketch, ledger rows it absorbs, Phase 1 w
 - **Sequencer:** the decomp's AKAO sequence interpreter (in `Audio`, 254 rows) is copied and becomes `Audio::Seq`. It drives `Voice`s directly instead of SPU registers, and it reads the decoded `*.seq.json` event lists (music stays sequenced, D18).
 - **Absorbs:** libspu (36), libsnd (2) via `Legacy\spu_*.cpp` → migrated.
 - **Phase 2:** better resampling, optional interpolation modes, volume channels, replacement music hooks.
+- **Proposal (pending owner review):** instruments exported as SFZ + WAV and played by sfizz, driven by our ported AKAO sequencer through MIDI-style events; SDL3 output; tuned algorithmic or computed-IR reverb ([PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §4).
 - **Tests:** sequence-event traces versus a reference capture; ADPCM decoder versus known vectors.
 
 ### 6.4 Video (`Engine\Movie`)
@@ -627,7 +633,7 @@ Fixed-step simulation, the original RNG sequence, no wall-clock in game logic, a
    `tools\port\copy_to_native.py` must refuse any global/type/field name whose ledger row lacks evidence.
    See [NAMING_CONVENTIONS.md §11.2](NAMING_CONVENTIONS.md#112-saved-naming-progress) for per-batch status and
    unresolved identity/layout questions. Follow §11.1 recovery limits rather than relaunching the original fan-out.
-6. ⏭ Write `tools\port\copy_to_native.py` and copy everything (Step 4). Compile (Step 6).
+6. ⏭ Write `tools\port\copy_to_native.py` and copy everything (Step 4). Compile (Step 6). Prerequisite: the occurrence-level reference index (Step 4 item 9). Things to check during this work: [PORTING_WATCHLIST.md](PORTING_WATCHLIST.md).
 7. ⏭ Start the 1b title slice.
 
 ### Open questions
