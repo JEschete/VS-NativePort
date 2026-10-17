@@ -112,26 +112,15 @@ PLACEHOLDER = re.compile(r"^(unk|pad|field|f|flag|flags|b|timer|target|terrain|f
 
 
 def offsets(g, tid: str) -> list[tuple[int, int]]:
-    """(offset, size) of each member of a pinned type, from the decomp index."""
-    t = g.types[tid]
-    key = t["key"].partition("#")[0]
-    ix = g.trees[""].ix
-    lay = next(x for x in ix["types"].values() if x["key"] == key and len(x["fields"]) == len(g.members[tid]))
+    """(byte offset, byte size) of each member, from the index layout matching the ledger (pinned or upstream)."""
+    lay = g.layout(tid)
     offs = [f["offset"] // 8 if f["offset"] is not None and f["offset"] >= 0 else -1 for f in lay["fields"]]
     sizes = [(offs[i + 1] if i + 1 < len(offs) else lay["size"]) - offs[i] for i in range(len(offs))]
     return list(zip(offs, sizes))
 
 
-_REFS: set[str] | None = None
-
-
 def used(g, tid: str, member: str) -> bool:
-    global _REFS
-    if _REFS is None:
-        _REFS = {k for fn in g.trees[""].ix["functions"].values() for k in (fn.get("refs") or {}).get("field", {})}
-    names = {g.types[tid]["name"]}
-    names |= {f"{k} {n}" for n in list(names) if n.startswith("(unnamed") for k in ("struct", "union")}
-    return any(f"{n}.{member}" in _REFS for n in names)
+    return g.is_used(tid, member)
 
 
 def camel(name: str) -> str:

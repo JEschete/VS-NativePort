@@ -1,0 +1,738 @@
+id,final_name,meaning,confidence,notes
+T00412.000,reserved0,Not read through this view,low,declaration-only;source:71618.c:716
+T00412.001,opaqueE,"Used, but its meaning is not established",low,source:71618.c:843
+T00412.002,opaqueF,"Used, but its meaning is not established",low,source:71618.c:877
+T00412.003,reserved10,Not read through this view,low,declaration-only;source:71618.c:718
+T00412.004,linkedActor,Actor this one follows or guards; 16 for none,med,source:71618.c:822
+T00412.005,reserved17,Not read through this view,low,declaration-only;source:71618.c:720
+T00412.006,opaque18,"Used, but its meaning is not established",low,source:71618.c:933
+T00412.007,reserved19,Not read through this view,low,declaration-only;source:71618.c:722
+T00412.008,tile,Current tile word,med,declaration-only;source:71618.c:723
+T00412.009,reserved38,Not read through this view,low,declaration-only;source:71618.c:724
+T00412.010,opaque44,"Used, but its meaning is not established",low,source:71618.c:895
+T00412.011,reserved45,Not read through this view,low,declaration-only;source:71618.c:726
+T00412.012,x,Named in the fork view; see cited use,med,source:71618.c:889
+T00412.013,reserved4E,Not read through this view,low,declaration-only;source:71618.c:728
+T00412.014,z,Named in the fork view; see cited use,med,source:71618.c:889
+T00412.015,reserved52,Not read through this view,low,declaration-only;source:71618.c:730
+T00412.016,actorId,Actor id,high,source:71618.c:872
+T00412.017,reserved89,Not read through this view,low,declaration-only;source:71618.c:732
+T00412.018,maxRange,Reach in units of 32,med,declaration-only;source:71618.c:733
+T00412.019,reservedB4,Not read through this view,low,declaration-only;source:71618.c:734
+T00412.020,opaqueE9,"Used, but its meaning is not established",low,source:71618.c:825
+T00412.021,reservedEA,Not read through this view,low,declaration-only;source:71618.c:736
+T00412.022,planMode,"Plan mode of the queued action (1 approach, 2 planned tile, 7 retreat)",med,source:71618.c:825
+T00412.023,reserved12F,Not read through this view,low,declaration-only;source:71618.c:738
+T00412.024,actionStatus,Status of the selected action,low,source:71618.c:819
+T00412.025,reserved132,Not read through this view,low,declaration-only;source:71618.c:740
+T00412.026,movementTarget,Actor the movement heads for; 16 for none,med,source:71618.c:826
+T00412.027,reserved15D,Not read through this view,low,declaration-only;source:71618.c:742
+T00412.028,relations,Relation word for each actor,high,source:71618.c:874
+T00412.029,distancesSquared,Squared distance to each actor,med,declaration-only;source:71618.c:744
+T00412.030,reserved224,Not read through this view,low,declaration-only;source:71618.c:745
+T00412.031,candidateOrder,Candidates in priority order,med,source:71618.c:816
+T00413.000,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:71618.c:764
+T00413.001,mode,Named in the fork; see cited use,med,source:71618.c:970
+T00413.002,reserved1Bit0,Not read by decompiled code,low,declaration-only;source:71618.c:764
+T00413.003,category,Named in the fork; see cited use,med,source:71618.c:983
+T00413.004,reserved3Bit3,Not read by decompiled code,low,declaration-only;source:71618.c:764
+T00413.005,oldMode,Named in the fork; see cited use,med,source:71618.c:987
+T00413.006,reserved3Bit6,Not read by decompiled code,low,declaration-only;source:71618.c:765
+T00414.000,reserved0,Not read through this view,low,declaration-only;source:71618.c:769
+T00414.001,relations,Relation word for each actor,med,declaration-only;source:71618.c:770
+T00415.000,tested,Named in the fork; see cited use,med,source:771A8.c:907
+T00415.001,valid,Named in the fork; see cited use,med,source:771A8.c:908
+T00805.000,word,Whole word,med,source:771A8.c:1101
+T00805.001,tile,Tile fields,med,source:771A8.c:913
+T00416.000,reserved0,Not read through this view,low,declaration-only;source:771A8.c:892
+T00416.001,tile,Current tile word,high,source:771A8.c:913
+T00416.002,previousTile,Previous tile word; -1 to forget,high,source:771A8.c:922
+T00416.003,reserved3C,Not read through this view,low,declaration-only;source:771A8.c:894
+T00416.004,flightHeight,Flight height above the ground,med,source:771A8.c:926
+T00418.000,opaque0,"Used, but its meaning is not established",low,source:5BF94.c:5957
+T00418.001,opaque2,"Used, but its meaning is not established",low,source:5BF94.c:5980
+T00418.002,reserved4,Not read by decompiled code,low,declaration-only;source:5BF94.c:607
+T00418.003,reserved5,Not read by decompiled code,low,declaration-only;source:5BF94.c:608
+T00418.004,reserved6,Not read by decompiled code,low,declaration-only;source:5BF94.c:609
+T00418.005,reserved7,Not read by decompiled code,low,declaration-only;source:5BF94.c:610
+T00418.006,opaque8,"Used, but its meaning is not established",low,source:5BF94.c:5947
+T00418.007,opaqueC,"Used, but its meaning is not established",low,source:5BF94.c:5948
+T00418.008,opaque10,"Used, but its meaning is not established",low,source:5BF94.c:5949
+T00418.009,reserved14,Not read by decompiled code,low,declaration-only;source:5BF94.c:614
+T00418.010,reserved20,Not read by decompiled code,low,declaration-only;source:5BF94.c:615
+T00418.011,reserved2C,Not read by decompiled code,low,declaration-only;source:5BF94.c:616
+T00420.000,actor,Named in the fork; see cited use,med,source:5BF94.c:4973
+T00420.001,bone,Named in the fork; see cited use,med,source:5BF94.c:4973
+T00420.002,color,Named in the fork; see cited use,med,source:5BF94.c:4923
+T00420.003,texture,Named in the fork; see cited use,med,source:5BF94.c:4941
+T00420.004,life,Named in the fork; see cited use,med,source:5BF94.c:5023
+T00422.000,rotation,Named in the fork; see cited use,med,source:5BF94.c:5947
+T00422.001,opaque6,"Used, but its meaning is not established",low,source:5BF94.c:5954
+T00422.002,reserved8,Not read by decompiled code,low,declaration-only;source:5BF94.c:594
+T00422.003,frame,Named in the fork; see cited use,med,source:5BF94.c:5955
+T00422.004,reserved10,Not read by decompiled code,low,declaration-only;source:5BF94.c:596
+T00422.005,position,Named in the fork; see cited use,med,source:5BF94.c:5950
+T00422.006,reserved2C,Not read by decompiled code,low,declaration-only;source:5BF94.c:598
+T00422.007,actor,Named in the fork; see cited use,med,source:5BF94.c:5956
+T00422.008,bone,Named in the fork; see cited use,med,source:5BF94.c:5962
+T00422.009,targetActor,Named in the fork; see cited use,med,source:5BF94.c:5992
+T00422.010,targetBone,Named in the fork; see cited use,med,source:5BF94.c:5993
+T00422.011,reserved38,Not read by decompiled code,low,declaration-only;source:5BF94.c:600
+T00422.012,reserved58,Not read by decompiled code,low,declaration-only;source:5BF94.c:600
+T00422.013,attachment,Named in the fork; see cited use,med,source:5BF94.c:5966
+T00422.014,facing,Named in the fork; see cited use,med,source:5BF94.c:5953
+T00422.015,saved,Named in the fork; see cited use,med,source:5BF94.c:5996
+T00422.016,reservedC0,Not read by decompiled code,low,declaration-only;source:5BF94.c:601
+T00422.017,reservedC8,Not read by decompiled code,low,declaration-only;source:5BF94.c:601
+T00423.000,x,Named in the fork; see cited use,med,source:146C.c:3746
+T00423.001,y,Named in the fork; see cited use,med,source:146C.c:3747
+T00423.002,z,Named in the fork; see cited use,med,source:146C.c:3751
+T00423.003,radius,Named in the fork; see cited use,med,source:146C.c:3752
+T00423.004,reserved8,Not read by decompiled code,low,declaration-only;source:146C.c:347
+T00423.005,kind,Named in the fork; see cited use,med,source:146C.c:3745
+T00424.000,action,Named in the fork; see cited use,med,source:146C.c:3738
+T00424.001,reserved2,Not read by decompiled code,low,declaration-only;source:146C.c:353
+T00424.002,count,Named in the fork; see cited use,med,source:146C.c:3736
+T00424.003,targets,Named in the fork; see cited use,med,source:146C.c:3745
+T00429.000,reserved0,Not read by decompiled code,low,declaration-only;source:30DB0.c:27
+T00429.001,reserved30,Not read by decompiled code,low,declaration-only;source:30DB0.c:28
+T00436.000,reserved0,Not read by decompiled code,low,declaration-only;source:146C.c:171
+T00436.001,reserved4,Not read by decompiled code,low,declaration-only;source:146C.c:172
+T00436.002,reserved8,Not read by decompiled code,low,declaration-only;source:146C.c:173
+T00806.000,bytes,Bytes of the word,med,declaration-only;source:146C.c:293
+T00806.001,word,Whole word,med,declaration-only;source:146C.c:294
+T00440.000,reserved0,Not read by decompiled code,low,declaration-only;source:146C.c:200
+T00441.000,reserved0,Not read by decompiled code,low,declaration-only;source:146C.c:204
+T00441.001,reserved44,Not read by decompiled code,low,declaration-only;source:146C.c:205
+T00442.000,reserved0,Not read by decompiled code,low,source:146C.c:13246
+T00442.001,reserved1,Not read by decompiled code,low,declaration-only;source:146C.c:215
+T00442.002,opaque2,"Used, but its meaning is not established",low,source:146C.c:13192
+T00442.003,opaque3,"Used, but its meaning is not established",low,source:146C.c:13195
+T00442.004,reserved4,Not read by decompiled code,low,source:146C.c:13243
+T00442.005,reserved8,Not read by decompiled code,low,declaration-only;source:146C.c:219
+T00442.006,reservedC,Not read by decompiled code,low,declaration-only;source:146C.c:220
+T00442.007,reserved10,Not read by decompiled code,low,declaration-only;source:146C.c:221
+T00442.008,opaque14,"Used, but its meaning is not established",low,source:146C.c:13211
+T00442.009,opaque18,"Used, but its meaning is not established",low,source:146C.c:13211
+T00442.010,opaque1C,"Used, but its meaning is not established",low,source:146C.c:13196
+T00442.011,reserved20,Not read by decompiled code,low,declaration-only;source:146C.c:225
+T00442.012,opaque40,"Used, but its meaning is not established",low,source:146C.c:13191
+T00459.000,opaque0,"Used, but its meaning is not established",low,source:2842C.c:1482
+T00459.001,opaque2,"Used, but its meaning is not established",low,source:2842C.c:1483
+T00459.002,opaque4,"Used, but its meaning is not established",low,source:2842C.c:1484
+T00459.003,reserved6,Not read by decompiled code,low,declaration-only;source:2842C.c:75
+T00459.004,opaque8,"Used, but its meaning is not established",low,source:2842C.c:1481
+T00459.005,reserved9,Not read by decompiled code,low,declaration-only;source:2842C.c:77
+T00459.006,reservedA,Not read by decompiled code,low,declaration-only;source:2842C.c:78
+T00459.007,opaqueB,"Used, but its meaning is not established",low,source:2842C.c:1480
+T00459.008,reservedC,Not read by decompiled code,low,declaration-only;source:2842C.c:80
+T00459.009,reservedE,Not read by decompiled code,low,declaration-only;source:2842C.c:81
+T00459.010,reservedF,Not read by decompiled code,low,declaration-only;source:2842C.c:82
+T00470.000,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:40564.c:56
+T00470.001,reserved0Bit4,Not read by decompiled code,low,declaration-only;source:40564.c:57
+T00471.000,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:40564.c:50
+T00471.001,reserved2Bit0,Not read by decompiled code,low,declaration-only;source:40564.c:51
+T00471.002,reserved2Bit3,Not read by decompiled code,low,declaration-only;source:40564.c:52
+T00481.000,opaque0,"Used, but its meaning is not established",low,source:58578.c:181
+T00481.001,opaque8,"Used, but its meaning is not established",low,source:58578.c:216
+T00481.002,opaque10,"Used, but its meaning is not established",low,source:58578.c:177
+T00481.003,opaque18,"Used, but its meaning is not established",low,source:58578.c:178
+T00482.000,reserved0Bit0,Not read by decompiled code,low,source:58578.c:416
+T00482.001,opaque1Bit0,"Used, but its meaning is not established",low,source:58578.c:274
+T00482.002,reserved2Bit0,Not read by decompiled code,low,source:5BF94.c:706
+T00482.003,opaque3Bit0,"Used, but its meaning is not established",low,source:58578.c:431
+T00483.000,opaque0,"Used, but its meaning is not established",low,source:146C.c:13451
+T00483.001,opaque1,"Used, but its meaning is not established",low,source:146C.c:13459
+T00483.002,opaque2,"Used, but its meaning is not established",low,source:146C.c:13465
+T00483.003,opaque4,"Used, but its meaning is not established",low,source:146C.c:13450
+T00483.004,opaque8,"Used, but its meaning is not established",low,source:146C.c:13471
+T00484.000,opaque0,"Used, but its meaning is not established",low,source:5BE50.c:73
+T00484.001,reserved6,Not read by decompiled code,low,declaration-only;source:58578.c:56
+T00484.002,reserved7,Not read by decompiled code,low,declaration-only;source:58578.c:57
+T00484.003,reserved8,Not read by decompiled code,low,declaration-only;source:58578.c:58
+T00484.004,opaque9,"Used, but its meaning is not established",low,source:5BE50.c:71
+T00484.005,opaqueA,"Used, but its meaning is not established",low,source:5BE50.c:74
+T00484.006,reservedB,Not read by decompiled code,low,declaration-only;source:58578.c:61
+T00807.000,vector,Vector view,low,declaration-only;source:5BF94.c:564
+T00807.001,words,Word view,low,declaration-only;source:5BF94.c:565
+T00485.000,opaque0,"Used, but its meaning is not established",low,source:5BF94.c:646
+T00485.001,reserved20,Not read by decompiled code,low,declaration-only;source:5BF94.c:280
+T00485.002,opaque22,"Used, but its meaning is not established",low,source:5BF94.c:706
+T00485.003,reserved24,Not read by decompiled code,low,declaration-only;source:5BF94.c:282
+T00485.004,reserved28,Not read by decompiled code,low,declaration-only;source:5BF94.c:283
+T00485.005,opaque2A,"Used, but its meaning is not established",low,source:5BF94.c:658
+T00485.006,opaque2C,"Used, but its meaning is not established",low,source:5BF94.c:899
+T00485.007,opaque2D,"Used, but its meaning is not established",low,source:5BF94.c:916
+T00485.008,opaque2E,"Used, but its meaning is not established",low,source:5BF94.c:745
+T00485.009,opaque2F,"Used, but its meaning is not established",low,source:5BF94.c:921
+T00485.010,opaque30,"Used, but its meaning is not established",low,source:5BF94.c:923
+T00485.011,opaque31,"Used, but its meaning is not established",low,source:5BF94.c:895
+T00485.012,reserved32,Not read by decompiled code,low,declaration-only;source:5BF94.c:291
+T00485.013,opaque34,"Used, but its meaning is not established",low,source:5BF94.c:910
+T00485.014,opaque38,"Used, but its meaning is not established",low,source:5BF94.c:644
+T00485.015,opaque40,"Used, but its meaning is not established",low,source:5BF94.c:892
+T00485.016,opaque44,"Used, but its meaning is not established",low,source:5BF94.c:745
+T00485.017,reserved48,Not read by decompiled code,low,declaration-only;source:5BF94.c:296
+T00485.018,opaque990,"Used, but its meaning is not established",low,source:5BF94.c:1013
+T00485.019,reservedB70,Not read by decompiled code,low,declaration-only;source:5BF94.c:298
+T00485.020,textBuffer,Named in the fork; see cited use,med,source:5BF94.c:1317
+T00486.000,opaque0,"Used, but its meaning is not established",low,source:5BF94.c:1013
+T00486.001,opaque1,"Used, but its meaning is not established",low,source:5BF94.c:1125
+T00486.002,opaque4,"Used, but its meaning is not established",low,source:5BF94.c:1030
+T00486.003,opaque6,"Used, but its meaning is not established",low,source:5BF94.c:1029
+T00486.004,opaque7,"Used, but its meaning is not established",low,source:5BF94.c:1040
+T00486.005,opaque8,"Used, but its meaning is not established",low,source:5BF94.c:1031
+T00486.006,opaqueC,"Used, but its meaning is not established",low,source:5BF94.c:1032
+T00486.007,limbName,Named in the fork; see cited use,med,source:5BF94.c:1036
+T00487.000,opaque0,"Used, but its meaning is not established",low,source:5BF94.c:1028
+T00487.001,opaque4,"Used, but its meaning is not established",low,source:5BF94.c:1030
+T00487.002,opaque8,"Used, but its meaning is not established",low,source:5BF94.c:1031
+T00487.003,opaque9,"Used, but its meaning is not established",low,source:5BF94.c:769
+T00487.004,opaqueA,"Used, but its meaning is not established",low,source:5BF94.c:770
+T00487.005,opaqueB,"Used, but its meaning is not established",low,source:5BF94.c:1276
+T00487.006,opaqueC,"Used, but its meaning is not established",low,source:5BF94.c:1315
+T00487.007,reservedD,Not read by decompiled code,low,declaration-only;source:5BF94.c:258
+T00487.008,opaqueE,"Used, but its meaning is not established",low,source:5BF94.c:1281
+T00487.009,opaque10,"Used, but its meaning is not established",low,source:5BF94.c:1293
+T00487.010,opaque14,"Used, but its meaning is not established",low,source:5BF94.c:1298
+T00487.011,opaque15,"Used, but its meaning is not established",low,source:5BF94.c:1310
+T00487.012,opaque16,"Used, but its meaning is not established",low,source:5BF94.c:1313
+T00487.013,opaque17,"Used, but its meaning is not established",low,source:5BF94.c:1306
+T00491.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.h:206
+T00491.001,reserved2,Not read by decompiled code,low,declaration-only;source:5BF94.h:207
+T00492.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.c:568
+T00492.001,reserved2,Not read by decompiled code,low,declaration-only;source:5BF94.c:569
+T00492.002,reserved5,Not read by decompiled code,low,declaration-only;source:5BF94.c:570
+T00492.003,reserved6,Not read by decompiled code,low,declaration-only;source:5BF94.c:571
+T00492.004,reservedA,Not read by decompiled code,low,declaration-only;source:5BF94.c:572
+T00492.005,reservedC,Not read by decompiled code,low,declaration-only;source:5BF94.c:573
+T00492.006,reservedE,Not read by decompiled code,low,declaration-only;source:5BF94.c:574
+T00492.007,reservedF,Not read by decompiled code,low,declaration-only;source:5BF94.c:575
+T00492.008,reserved10,Not read by decompiled code,low,declaration-only;source:5BF94.c:576
+T00492.009,reserved12,Not read by decompiled code,low,declaration-only;source:5BF94.c:577
+T00496.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.c:551
+T00496.001,reserved34,Not read by decompiled code,low,declaration-only;source:5BF94.c:552
+T00496.002,reserved35,Not read by decompiled code,low,declaration-only;source:5BF94.c:553
+T00496.003,reserved36,Not read by decompiled code,low,declaration-only;source:5BF94.c:554
+T00496.004,reserved78,Not read by decompiled code,low,declaration-only;source:5BF94.c:555
+T00496.005,reserved98,Not read by decompiled code,low,declaration-only;source:5BF94.c:556
+T00496.006,reservedBE,Not read by decompiled code,low,declaration-only;source:5BF94.c:557
+T00808.000,word,Whole word,med,source:5BF94.c:7492
+T00808.001,fields,Field view,med,source:5BF94.c:7493
+T00508.000,reserved0,Not read by decompiled code,low,declaration-only;source:5BF94.c:560
+T00508.001,reserved10,Not read by decompiled code,low,declaration-only;source:5BF94.c:561
+T00514.000,reserved0,Not read through this view,low,declaration-only;source:6FC00.c:420
+T00514.001,movementDisabled,Adjacent-tile search and flight movement are skipped,low,source:6FC00.c:437
+T00514.002,reserved8,Not read through this view,low,declaration-only;source:6FC00.c:422
+T00514.003,tile,Current tile word,high,source:6FC00.c:441
+T00514.004,reserved38,Not read through this view,low,declaration-only;source:6FC00.c:424
+T00514.005,destination,Destination tile,high,source:771A8.c:1360
+T00515.000,active,Relation is live this frame (same bits as T00136 active),med,source:71618.c:798
+T00515.001,reserved0Bit1,Not read by decompiled code,low,declaration-only;source:6F014.c:128
+T00515.002,visible,Target is visible (same bits as T00136 visible),med,source:upstream:6E644.c:1329
+T00515.003,classification,Relation classification (same bits as T00136 kind),med,source:71618.c:642
+T00515.004,counter,Classification counter (same bits as T00136 counter),low,declaration-only;source:6F014.c:130
+T00515.005,timer,Relation timer (same bits as T00136 timer),low,source:upstream:6E644.c:2032
+T00515.006,classificationTimer,Frames before the classification reverts (same bits as T00136 kindTimer),low,source:upstream:6E644.c:1442
+T00515.007,blocked,Path to the target is blocked (not read by decompiled code) (same bits as T00136 blocked),low,declaration-only;source:upstream:6E644.c:137
+T00515.008,previousClassification,Classification restored when the timer ends (same bits as T00136 previousKind),med,source:upstream:6E644.c:1446
+T00515.009,reserved3Bit6,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:139
+T00516.000,opaque0Bit0,"Used, but its meaning is not established",low,source:74088.c:572
+T00516.001,reserved0Bit4,Not read by decompiled code,low,declaration-only;source:6F014.c:243
+T00516.002,opaque4,"Used, but its meaning is not established",low,source:74088.c:478
+T00516.003,opaque6,"Used, but its meaning is not established",low,source:74088.c:489
+T00516.004,opaque8,"Used, but its meaning is not established",low,source:74088.c:485
+T00516.005,opaqueA,"Used, but its meaning is not established",low,source:74088.c:485
+T00516.006,opaqueC,"Used, but its meaning is not established",low,source:74088.c:507
+T00516.007,opaque10,"Used, but its meaning is not established",low,source:74088.c:493
+T00516.008,opaque12,"Used, but its meaning is not established",low,source:74088.c:493
+T00516.009,opaque14,"Used, but its meaning is not established",low,source:74088.c:506
+T00516.010,opaque16,"Used, but its meaning is not established",low,source:74088.c:506
+T00517.000,opaque0,"Used, but its meaning is not established",low,source:74088.c:633
+T00517.001,row,Named in the fork; see cited use (same bits as T00350 row),med,source:74088.c:921
+T00517.002,column,Named in the fork; see cited use (same bits as T00350 column),med,source:74088.c:920
+T00517.003,action,Named in the fork; see cited use (same bits as T00350 action),med,source:71618.c:1109
+T00517.004,threshold,Named in the fork; see cited use (same bits as T00350 threshold),med,source:71618.c:632
+T00517.005,reserved7Bit5,Not read by decompiled code,low,declaration-only;source:6F014.c:104
+T00517.006,distanceSquared,Named in the fork; see cited use (same bits as T00350 distanceSquared),med,source:71618.c:663
+T00517.007,targetId,Named in the fork; see cited use (same bits as T00350 targetId),med,source:71618.c:623
+T00517.008,opaqueCBit4,"Used, but its meaning is not established",low,source:71618.c:1022
+T00517.009,opaqueCBit7,"Used, but its meaning is not established",low,source:71618.c:1023
+T00517.010,weight,Named in the fork; see cited use (same bits as T00350 weight),med,source:74088.c:553
+T00517.011,reservedFBit3,Not read by decompiled code,low,declaration-only;source:6F014.c:110
+T00517.012,opaque10,"Used, but its meaning is not established",low,source:74088.c:923
+T00518.000,reserved0,Not read by decompiled code,low,declaration-only;source:6F014.c:415
+T00518.001,reserved88,Not read by decompiled code,low,declaration-only;source:6F014.c:416
+T00519.000,opaque0Bit0,"Used, but its meaning is not established",low,source:74088.c:927
+T00519.001,opaque0Bit1,"Used, but its meaning is not established",low,source:74088.c:923
+T00519.002,opaque0Bit2,"Used, but its meaning is not established",low,source:74088.c:925
+T00519.003,opaque0Bit3,"Used, but its meaning is not established",low,source:74088.c:928
+T00519.004,opaque0Bit4,"Used, but its meaning is not established",low,source:74088.c:1047
+T00519.005,opaque0Bit5,"Used, but its meaning is not established",low,source:74088.c:1058
+T00519.006,opaque0Bit6,"Used, but its meaning is not established",low,source:74088.c:1046
+T00519.007,reserved2Bit6,Not read by decompiled code,low,declaration-only;source:6F014.c:95
+T00520.000,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:6F014.c:115
+T00520.001,opaque0Bit1,"Used, but its meaning is not established",low,source:upstream:6E644.c:3774
+T00520.002,opaque0Bit2,"Used, but its meaning is not established",low,source:74088.c:1045
+T00520.003,kind,Named in the fork; see cited use (same bits as T00366 kind),med,source:74088.c:1065
+T00520.004,longRange,Named in the fork; see cited use (same bits as T00366 longRange),med,source:74088.c:1059
+T00520.005,special,Named in the fork; see cited use (same bits as T00366 special),med,source:74088.c:913
+T00520.006,opaque0Bit7,"Used, but its meaning is not established",low,source:74088.c:1035
+T00520.007,radius,Named in the fork; see cited use (same bits as T00366 radius),med,source:74088.c:1046
+T00520.008,reserved3Bit0,Not read by decompiled code,low,declaration-only;source:6F014.c:122
+T00520.009,rangeSquared,Named in the fork; see cited use (same bits as T00366 rangeSquared),med,source:74088.c:914
+T00521.000,opaque0,"Used, but its meaning is not established",low,source:74088.c:479
+T00521.001,reserved1,Not read by decompiled code,low,declaration-only;source:6F014.c:257
+T00521.002,opaque2,"Used, but its meaning is not established",low,source:74088.c:548
+T00521.003,reserved3,Not read by decompiled code,low,declaration-only;source:6F014.c:259
+T00521.004,opaque4,"Used, but its meaning is not established",low,source:74088.c:478
+T00521.005,opaque6,"Used, but its meaning is not established",low,source:74088.c:489
+T00521.006,reserved8,Not read by decompiled code,low,source:74088.c:485
+T00521.007,opaque14,"Used, but its meaning is not established",low,source:74088.c:506
+T00521.008,opaque18,"Used, but its meaning is not established",low,source:74088.c:508
+T00521.009,opaque1CBit0,"Used, but its meaning is not established",low,source:74088.c:503
+T00521.010,opaque1CBit2,"Used, but its meaning is not established",low,source:74088.c:504
+T00521.011,reserved1CBit4,Not read by decompiled code,low,declaration-only;source:6F014.c:267
+T00521.012,opaque1EBit2,"Used, but its meaning is not established",low,source:74088.c:505
+T00521.013,reserved1EBit4,Not read by decompiled code,low,declaration-only;source:6F014.c:269
+T00521.014,opaque1EBit6,"Used, but its meaning is not established",low,source:74088.c:506
+T00521.015,reserved1FBit0,Not read by decompiled code,low,declaration-only;source:6F014.c:271
+T00521.016,reserved20,Not read by decompiled code,low,declaration-only;source:6F014.c:272
+T00521.017,opaque38,"Used, but its meaning is not established",low,source:74088.c:505
+T00521.018,reserved3A,Not read by decompiled code,low,declaration-only;source:6F014.c:274
+T00521.019,opaque3C,"Used, but its meaning is not established",low,source:74088.c:506
+T00521.020,reserved3E,Not read by decompiled code,low,declaration-only;source:6F014.c:276
+T00521.021,opaque40,"Used, but its meaning is not established",low,source:74088.c:478
+T00522.000,reserved0,Not read by decompiled code,low,source:74088.c:1473
+T00522.001,opaque8,"Used, but its meaning is not established",low,source:7EE98.c:806
+T00522.002,opaque9,"Used, but its meaning is not established",low,source:74088.c:1480
+T00522.003,reservedA,Not read by decompiled code,low,source:7EE98.c:776
+T00522.004,reservedBBit0,Not read by decompiled code,low,declaration-only;source:6F014.c:77
+T00522.005,opaqueBBit2,"Used, but its meaning is not established",low,source:73700.c:420
+T00522.006,reservedBBit4,Not read by decompiled code,low,declaration-only;source:6F014.c:79
+T00522.007,opaqueC,"Used, but its meaning is not established",low,source:74088.c:1488
+T00522.008,opaqueE,"Used, but its meaning is not established",low,source:74088.c:1489
+T00522.009,opaque10,"Used, but its meaning is not established",low,source:7EE98.c:801
+T00522.010,reserved18,Not read by decompiled code,low,declaration-only;source:6F014.c:83
+T00522.011,opaque3C,"Used, but its meaning is not established",low,source:7EE98.c:798
+T00523.000,opaque0,"Used, but its meaning is not established",low,source:74088.c:479
+T00523.001,reserved2,Not read by decompiled code,low,source:74088.c:548
+T00523.002,opaque4,"Used, but its meaning is not established",low,source:74088.c:478
+T00523.003,reserved48,Not read by decompiled code,low,declaration-only;source:6F014.c:284
+T00523.004,opaque4A,"Used, but its meaning is not established",low,source:74088.c:498
+T00523.005,opaque4C,"Used, but its meaning is not established",low,source:74088.c:499
+T00524.000,reserved0,Not read through this view,low,declaration-only;source:6F014.c:420
+T00524.001,linkedActor,Actor this one follows or guards; 16 for none,med,declaration-only;source:6F014.c:421
+T00524.002,reserved17,Not read through this view,low,declaration-only;source:6F014.c:422
+T00524.003,previousTile,Previous tile word; -1 to forget,high,source:6FC00.c:1071
+T00524.004,reserved3C,Not read through this view,low,source:6FC00.c:1169
+T00524.005,actor,Battle actor,med,declaration-only;source:6F014.c:425
+T00524.006,reserved58,Not read through this view,low,declaration-only;source:6F014.c:426
+T00524.007,reserved9A,Not read through this view,low,declaration-only;source:6F014.c:427
+T00524.008,reserved9C,Not read through this view,low,declaration-only;source:6F014.c:428
+T00524.009,reservedFB,Not read through this view,low,source:6FC00.c:1072
+T00524.010,reservedFC,Not read through this view,low,declaration-only;source:6F014.c:430
+T00524.011,reserved12A,Not read through this view,low,source:6FC00.c:1050
+T00524.012,reserved12B,Not read through this view,low,declaration-only;source:6F014.c:432
+T00524.013,reserved138,Not read through this view,low,source:6FC00.c:1050
+T00524.014,reserved13A,Not read through this view,low,declaration-only;source:6F014.c:434
+T00524.015,candidateOrder,Candidates in priority order,med,declaration-only;source:6F014.c:435
+T00524.016,candidateCount,Number of candidates,med,declaration-only;source:6F014.c:436
+T00525.000,opaque0,"Used, but its meaning is not established",low,source:771A8.c:464
+T00525.001,opaque1,"Used, but its meaning is not established",low,source:771A8.c:473
+T00525.002,opaque2,"Used, but its meaning is not established",low,source:771A8.c:465
+T00526.000,reserved0,Not read through this view,low,declaration-only;source:6F014.c:393
+T00526.001,movementDisabled,Adjacent-tile search and flight movement are skipped,low,declaration-only;source:6F014.c:394
+T00526.002,reserved8,Not read through this view,low,declaration-only;source:6F014.c:395
+T00526.003,reserved34,Not read through this view,low,declaration-only;source:6F014.c:396
+T00526.004,reserved35,Not read through this view,low,declaration-only;source:6F014.c:397
+T00526.005,reserved36,Not read through this view,low,declaration-only;source:6F014.c:398
+T00526.006,reserved37,Not read through this view,low,declaration-only;source:6F014.c:399
+T00526.007,reserved4E,Not read through this view,low,declaration-only;source:6F014.c:400
+T00526.008,reserved50,Not read through this view,low,declaration-only;source:6F014.c:401
+T00526.009,model,Model record,med,declaration-only;source:6F014.c:402
+T00526.010,reserved5C,Not read through this view,low,declaration-only;source:6F014.c:403
+T00526.011,flightHeight,Flight height above the ground,med,declaration-only;source:6F014.c:404
+T00526.012,reservedC0,Not read through this view,low,declaration-only;source:6F014.c:405
+T00526.013,moveX,Target X in 20.12 fixed point,med,declaration-only;source:6F014.c:406
+T00526.014,moveZ,Target Z in 20.12 fixed point,med,declaration-only;source:6F014.c:407
+T00526.015,moveY,Target Y in 20.12 fixed point,med,declaration-only;source:6F014.c:408
+T00526.016,heading,Heading in eighth turns,med,declaration-only;source:6F014.c:409
+T00526.017,reserved18A,Not read through this view,low,declaration-only;source:6F014.c:410
+T00526.018,stallCounter,Frames without progress,low,declaration-only;source:6F014.c:411
+T00527.000,reserved0,Not read by decompiled code,low,declaration-only;source:6F014.c:134
+T00527.001,reserved4,Not read by decompiled code,low,declaration-only;source:6F014.c:135
+T00527.002,reserved8Bit0,Not read by decompiled code,low,declaration-only;source:6F014.c:136
+T00527.003,opaqueABit5,"Used, but its meaning is not established",low,source:771A8.c:1322
+T00527.004,reservedABit6,Not read by decompiled code,low,declaration-only;source:6F014.c:138
+T00527.005,reservedC,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:155
+T00527.006,opaque14,"Used, but its meaning is not established",low,source:upstream:6E644.c:3496
+T00527.007,reserved16,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:157
+T00527.008,opaque1C,"Used, but its meaning is not established",low,source:upstream:6E644.c:2862
+T00527.009,reserved24,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:159
+T00527.010,opaque26,"Used, but its meaning is not established",low,source:upstream:6E644.c:3496
+T00527.011,reserved28,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:161
+T00527.012,opaque5C,"Used, but its meaning is not established",low,source:upstream:6E644.c:1332
+T00527.013,reserved60,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:163
+T00527.014,reserved5B0Bit0,Not read by decompiled code,low,declaration-only;source:upstream:6E644.c:164
+T00527.015,opaque5B0Bit4,"Used, but its meaning is not established",low,source:upstream:6E644.c:3947
+T00528.000,reserved0,Not read by decompiled code,low,source:7CD68.c:482
+T00528.001,rangeY,Named in the fork; see cited use,med,source:7CD68.c:449
+T00528.002,rangeZ,Named in the fork; see cited use,med,source:7CD68.c:446
+T00528.003,shape,Named in the fork; see cited use,med,source:7CD68.c:444
+T00528.004,angle,Named in the fork; see cited use,med,source:7CD68.c:455
+T00529.000,reserved0,Not read by decompiled code,low,declaration-only;source:6F014.c:35
+T00529.001,opaque5C,"Used, but its meaning is not established",low,source:7CD68.c:483
+T00530.000,reserved0,Not read by decompiled code,low,declaration-only;source:6F014.c:30
+T00530.001,opaque38,"Used, but its meaning is not established",low,source:7CD68.c:483
+T00531.000,reserved0,Not read by decompiled code,low,declaration-only;source:6F014.c:17
+T00531.001,opaque4,"Used, but its meaning is not established",low,source:7CD68.c:597
+T00532.000,reserved0,Not read through this view,low,source:74088.c:633
+T00532.001,opaque1,"Used, but its meaning is not established",low,source:upstream:6E644.c:1113
+T00532.002,isStuck,Set when the actor has not left its tile,med,source:upstream:6E644.c:1534
+T00532.003,opaque3,"Used, but its meaning is not established",low,source:upstream:6E644.c:3393
+T00532.004,opaque4,"Used, but its meaning is not established",low,source:upstream:6E644.c:3172
+T00532.005,opaque5,"Used, but its meaning is not established",low,source:upstream:6E644.c:3173
+T00532.006,reserved6,Not read through this view,low,declaration-only;source:upstream:6E644.c:175
+T00532.007,movementDisabled,Adjacent-tile search and flight movement are skipped,low,source:771A8.c:1295
+T00532.008,opaque8,"Used, but its meaning is not established",low,source:6FC00.c:1082
+T00532.009,opaque9,"Used, but its meaning is not established",low,source:upstream:6E644.c:3537
+T00532.010,reservedA,Not read through this view,low,declaration-only;source:upstream:6E644.c:179
+T00532.011,opaqueD,"Used, but its meaning is not established",low,source:upstream:6E644.c:3081
+T00532.012,opaqueE,"Used, but its meaning is not established",low,source:upstream:6E644.c:1298
+T00532.013,opaqueF,"Used, but its meaning is not established",low,source:upstream:6E644.c:1326
+T00532.014,reserved10,Not read through this view,low,declaration-only;source:upstream:6E644.c:183
+T00532.015,usesRoomActionDelay,"When zero the room's default action delay applies, else 50",low,source:71618.c:1029
+T00532.016,reserved14,Not read through this view,low,source:6FC00.c:1024
+T00532.017,linkedActor,Actor this one follows or guards; 16 for none,med,source:7CD68.c:578
+T00532.018,actionCostEnabled,Zero when actions cost nothing,low,source:74088.c:572
+T00532.019,opaque18,"Used, but its meaning is not established",low,source:6FC00.c:1049
+T00532.020,settingsConstant19,Set to 1 when the settings are applied,low,declaration-only;source:upstream:6E644.c:189
+T00532.021,opaque1A,"Used, but its meaning is not established",low,source:upstream:6E644.c:3175
+T00532.022,isDead,Set when the actor's HP is zero,high,source:74088.c:1052
+T00532.023,opaque1C,"Used, but its meaning is not established",low,source:6FC00.c:1073
+T00532.024,reserved1D,Not read through this view,low,declaration-only;source:upstream:6E644.c:193
+T00532.025,settingsBit26,Bit 26 of the AI settings word,low,source:upstream:6E644.c:2046
+T00532.026,settingsByte3Bit0,Bit 0 of settings byte 3,low,source:upstream:6E644.c:2091
+T00532.027,reserved22,Not read through this view,low,declaration-only;source:upstream:6E644.c:196
+T00532.028,allowFallbackAction,Plans a fallback action when no candidate exists,med,source:upstream:6E644.c:2552
+T00532.029,settingsBit27,Bit 27 of the AI settings word,low,source:upstream:6E644.c:2025
+T00532.030,reserved28,Not read through this view,low,declaration-only;source:upstream:6E644.c:199
+T00532.031,settingsBit14,Bit 14 of the AI settings word,low,source:upstream:6E644.c:3184
+T00532.032,hasTaggedBone3,Model has a bone tagged 3,med,declaration-only;source:upstream:6E644.c:201
+T00532.033,settingsModeLow,Low bit of the settings mode field,low,source:74088.c:642
+T00532.034,settingsBits21,Bits 21-22 of the AI settings word; 3 excludes the actor from relations,low,declaration-only;source:6F014.c:153
+T00532.035,reserved2D,Not read through this view,low,declaration-only;source:upstream:6E644.c:204
+T00532.036,settingsBit25,Bit 25 of the AI settings word,low,source:upstream:6E644.c:2046
+T00532.037,reserved31,Not read through this view,low,declaration-only;source:upstream:6E644.c:206
+T00532.038,tile,Current tile word,high,source:771A8.c:953
+T00532.039,previousTile,Previous tile word; -1 to forget,high,source:7C4E8.c:407
+T00532.040,reserved3C,Not read through this view,low,source:6FC00.c:1169
+T00532.041,opaque44,"Used, but its meaning is not established",low,source:upstream:6E644.c:1345
+T00532.042,reserved45,Not read through this view,low,declaration-only;source:upstream:6E644.c:211
+T00532.043,savedDestination,Saved destination tile,med,source:upstream:6E644.c:3082
+T00532.044,position,World position,high,source:upstream:6E644.c:1108
+T00532.045,actor,Battle actor,med,source:73700.c:416
+T00532.046,model,Model record,med,source:771A8.c:1322
+T00532.047,stats,Actor statistics,high,source:74088.c:905
+T00532.048,reserved60,Not read through this view,low,source:6FC00.c:1097
+T00532.049,pointHeight,Height of the tagged point above the position,low,source:74088.c:1129
+T00532.050,reserved84,Not read through this view,low,declaration-only;source:6F014.c:167
+T00532.051,actorId,Actor id,high,source:73700.c:479
+T00532.052,reserved89,Not read through this view,low,declaration-only;source:6F014.c:169
+T00532.053,moveAttempts,Destination attempts; gives up at 6,med,source:upstream:6E644.c:3090
+T00532.054,opaque8E,"Used, but its meaning is not established",low,source:73700.c:465
+T00532.055,reserved90,Not read through this view,low,source:6FC00.c:1017
+T00532.056,radius,Actor radius,high,source:upstream:6E644.c:2844
+T00532.057,reserved94,Not read through this view,low,declaration-only;source:upstream:6E644.c:226
+T00532.058,opaque98,"Used, but its meaning is not established",low,source:73700.c:495
+T00532.059,opaque9A,"Used, but its meaning is not established",low,source:73700.c:487
+T00532.060,reserved9C,Not read through this view,low,declaration-only;source:6F014.c:174
+T00532.061,maxRange,Reach in units of 32,high,source:71618.c:793
+T00532.062,moveDistance,Distance of the current move,med,declaration-only;source:6F014.c:176
+T00532.063,bodyHeight,Model height used for occlusion and reach,low,source:upstream:6E644.c:2845
+T00532.064,facingDelay,Frames before re-facing a target,low,source:upstream:6E644.c:3468
+T00532.065,reservedBC,Not read through this view,low,declaration-only;source:upstream:6E644.c:234
+T00532.066,flightHeight,Flight height above the ground,med,source:771A8.c:1312
+T00532.067,wanderPhase,Wander phase counter,low,declaration-only;source:6F014.c:178
+T00532.068,wanderTimer,Wander timer,med,source:upstream:6E644.c:3307
+T00532.069,wanderRangeSquared,Squared wander radius,med,source:upstream:6E644.c:3349
+T00532.070,reservedC8,Not read through this view,low,declaration-only;source:upstream:6E644.c:239
+T00532.071,wanderHeading,Heading of the wander walk,med,source:upstream:6E644.c:3279
+T00532.072,wanderCooldown,Frames before the next wander walk,med,source:upstream:6E644.c:3345
+T00532.073,restPeriod,Wander rest period,med,source:upstream:6E644.c:3302
+T00532.074,movePeriod,Wander move period,med,source:upstream:6E644.c:3303
+T00532.075,wanderRate,Wander chance exponent,med,source:upstream:6E644.c:3301
+T00532.076,reservedD9,Not read through this view,low,declaration-only;source:upstream:6E644.c:245
+T00532.077,opaqueE7,"Used, but its meaning is not established",low,source:upstream:6E644.c:2685
+T00532.078,opaqueE8,"Used, but its meaning is not established",low,source:upstream:6E644.c:2684
+T00532.079,opaqueE9,"Used, but its meaning is not established",low,source:upstream:6E644.c:1277
+T00532.080,reservedEA,Not read through this view,low,declaration-only;source:upstream:6E644.c:249
+T00532.081,detourStep,Detour attempts at the current tile,med,source:upstream:6E644.c:1536
+T00532.082,opaqueFB,"Used, but its meaning is not established",low,source:6FC00.c:1072
+T00532.083,reservedFC,Not read through this view,low,declaration-only;source:6F014.c:180
+T00532.084,previousFacingTile,Tile faced last time,low,source:upstream:6E644.c:3483
+T00532.085,facingPending,A facing change is pending,low,source:upstream:6E644.c:3477
+T00532.086,reserved10D,Not read through this view,low,declaration-only;source:upstream:6E644.c:255
+T00532.087,detourDirections,Directions tried by the detour,high,source:upstream:6E644.c:1568
+T00532.088,goal,Wander goal tile,med,source:upstream:6E644.c:3232
+T00532.089,reserved120,Not read through this view,low,declaration-only;source:upstream:6E644.c:258
+T00532.090,opaque12A,"Used, but its meaning is not established",low,source:6FA60.c:410
+T00532.091,reserved12B,Not read through this view,low,declaration-only;source:6F014.c:182
+T00532.092,behaviorMode,"Behavior mode (1 reacting, 2 wandering)",low,source:upstream:6E644.c:2020
+T00532.093,planMode,"Plan mode of the queued action (1 approach, 2 planned tile, 7 retreat)",med,source:upstream:6E644.c:1037
+T00532.094,opaque12F,"Used, but its meaning is not established",low,source:73700.c:419
+T00532.095,opaque130,"Used, but its meaning is not established",low,declaration-only;source:6F014.c:184
+T00532.096,actionStatus,Status of the selected action,low,source:71618.c:620
+T00532.097,reserved132,Not read through this view,low,declaration-only;source:6F014.c:186
+T00532.098,plannedTile,Tile the plan moves to,high,source:upstream:6E644.c:1093
+T00532.099,opaque138,"Used, but its meaning is not established",low,source:6FA60.c:409
+T00532.100,opaque13A,"Used, but its meaning is not established",low,declaration-only;source:6F014.c:188
+T00532.101,opaque13C,"Used, but its meaning is not established",low,source:upstream:6E644.c:3535
+T00532.102,reserved13E,Not read through this view,low,declaration-only;source:upstream:6E644.c:271
+T00532.103,minActionDelay,Minimum delay before the next action,med,source:71618.c:1029
+T00532.104,currentChoice,Action choice being executed,med,source:71618.c:1107
+T00532.105,reserved154,Not read through this view,low,declaration-only;source:6F014.c:191
+T00532.106,targetX,Target X,med,source:upstream:6E644.c:3539
+T00532.107,targetZ,Target Z,med,source:upstream:6E644.c:3539
+T00532.108,movementTarget,Actor the movement heads for; 16 for none,med,source:upstream:6E644.c:1110
+T00532.109,opaque15D,"Used, but its meaning is not established",low,source:upstream:6E644.c:3231
+T00532.110,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:upstream:6E644.c:1042
+T00532.111,reserved160,Not read through this view,low,declaration-only;source:upstream:6E644.c:280
+T00532.112,destination,Destination tile,high,source:upstream:6E644.c:1104
+T00532.113,reserved16C,Not read through this view,low,declaration-only;source:upstream:6E644.c:282
+T00532.114,nextTile,Next tile on the way,high,source:upstream:6E644.c:3110
+T00532.115,reserved174,Not read through this view,low,declaration-only;source:upstream:6E644.c:284
+T00532.116,moveX,Target X in 20.12 fixed point,med,source:771A8.c:1315
+T00532.117,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:1314
+T00532.118,moveY,Target Y in 20.12 fixed point,med,source:771A8.c:1313
+T00532.119,heading,Heading in eighth turns,med,source:771A8.c:1305
+T00532.120,angle,Facing angle,med,declaration-only;source:6F014.c:196
+T00532.121,reserved18C,Not read through this view,low,declaration-only;source:upstream:6E644.c:290
+T00532.122,opaque19A,"Used, but its meaning is not established",low,source:upstream:6E644.c:2686
+T00532.123,reserved19B,Not read through this view,low,declaration-only;source:upstream:6E644.c:292
+T00532.124,nextEngaged,Next actor in the engagement list,med,source:73700.c:429
+T00532.125,relations,Relation word for each actor,high,source:71618.c:642
+T00532.126,distancesSquared,Squared distance to each actor,high,source:71618.c:690
+T00532.127,reserved224,Not read through this view,low,declaration-only;source:6F014.c:200
+T00532.128,stallCounter,Frames without progress,low,source:771A8.c:1325
+T00532.129,currentCandidate,Candidate being executed,med,source:71618.c:1017
+T00532.130,actionSlots,Action slot configuration by row and column,med,source:74088.c:910
+T00532.131,candidates,Action candidates,med,declaration-only;source:6F014.c:204
+T00532.132,candidateOrder,Candidates in priority order,med,source:71618.c:622
+T00532.133,candidateCount,Number of candidates,high,source:71618.c:629
+T00532.134,reserved474,Not read through this view,low,declaration-only;source:upstream:6E644.c:303
+T00532.135,reactionPending,A reaction turn is pending,low,source:upstream:6E644.c:3472
+T00533.000,reserved0,Not read by decompiled code,low,declaration-only;source:6F014.c:388
+T00533.001,reserved4,Not read by decompiled code,low,declaration-only;source:6F014.c:389
+T00541.000,reserved0,Not read by decompiled code,low,declaration-only;source:146C.h:289
+T00541.001,reserved2,Not read by decompiled code,low,declaration-only;source:146C.h:290
+T00541.002,reserved4,Not read by decompiled code,low,declaration-only;source:146C.h:291
+T00541.003,reserved5,Not read by decompiled code,low,declaration-only;source:146C.h:292
+T00541.004,reserved6,Not read by decompiled code,low,declaration-only;source:146C.h:293
+T00541.005,reserved7,Not read by decompiled code,low,declaration-only;source:146C.h:294
+T00544.000,reserved0,Not read by decompiled code,low,source:44F14.c:1497
+T00544.001,reserved4,Not read by decompiled code,low,declaration-only;source:44F14.c:87
+T00545.000,tag,Named in the fork; see cited use,med,source:58578.c:704
+T00545.001,box,Named in the fork; see cited use,med,source:58578.c:704
+T00546.000,opaque0,"Used, but its meaning is not established",low,source:146C.c:10641
+T00546.001,opaque2,"Used, but its meaning is not established",low,source:146C.c:12568
+T00551.000,xyz,Named in the fork; see cited use,med,source:573B8.c:505
+T00551.001,opaque6,"Used, but its meaning is not established",low,source:573B8.c:517
+T00552.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:2267
+T00552.001,x,Named in the fork; see cited use,med,source:771A8.c:2291
+T00552.002,reserved1E,Not read by decompiled code,low,declaration-only;source:771A8.c:2268
+T00552.003,z,Named in the fork; see cited use,med,source:771A8.c:2291
+T00553.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:965
+T00553.001,opaque8,"Used, but its meaning is not established",low,source:771A8.c:994
+T00554.000,reserved0,Not read through this view,low,declaration-only;source:771A8.c:969
+T00554.001,tile,Current tile word,high,source:771A8.c:995
+T00554.002,reserved38,Not read through this view,low,declaration-only;source:771A8.c:971
+T00554.003,model,Model record,med,source:771A8.c:997
+T00554.004,reserved5C,Not read through this view,low,declaration-only;source:771A8.c:973
+T00554.005,flightHeight,Flight height above the ground,med,source:771A8.c:1002
+T00554.006,reservedC0,Not read through this view,low,declaration-only;source:771A8.c:975
+T00554.007,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:771A8.c:994
+T00554.008,reserved160,Not read through this view,low,declaration-only;source:771A8.c:977
+T00554.009,destination,Destination tile,high,source:771A8.c:995
+T00555.000,reserved0,Not read through this view,low,declaration-only;source:771A8.c:2155
+T00555.001,x,Named in the fork view; see cited use,med,source:771A8.c:2203
+T00555.002,padding4E,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:2157
+T00555.003,z,Named in the fork view; see cited use,med,source:771A8.c:2203
+T00555.004,reserved52,Not read through this view,low,declaration-only;source:771A8.c:2159
+T00555.005,model,Model record,med,source:771A8.c:2187
+T00555.006,padding5C,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:2161
+T00555.007,actorId,Actor id,high,source:771A8.c:2189
+T00555.008,reserved89,Not read through this view,low,declaration-only;source:771A8.c:2163
+T00555.009,facingDelay,Frames before re-facing a target,low,source:771A8.c:2193
+T00555.010,paddingBC,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:2165
+T00555.011,previousFacingTile,Tile faced last time,low,source:771A8.c:2204
+T00555.012,facingPending,A facing change is pending,low,source:771A8.c:2200
+T00555.013,padding10D,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:2168
+T00555.014,opaque13A,"Used, but its meaning is not established",low,source:771A8.c:2215
+T00555.015,padding13C,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:2170
+T00555.016,destination,Destination tile,high,source:771A8.c:2204
+T00555.017,padding16C,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:2172
+T00555.018,moveX,Target X in 20.12 fixed point,med,source:771A8.c:2203
+T00555.019,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:2203
+T00555.020,reserved184,Not read through this view,low,declaration-only;source:771A8.c:2175
+T00555.021,reserved188,Not read through this view,low,declaration-only;source:771A8.c:2176
+T00555.022,angle,Facing angle,med,source:771A8.c:2208
+T00555.023,padding18C,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:2178
+T00555.024,targetFlags,Named in the fork view; see cited use,med,source:771A8.c:2205
+T00555.025,padding1E8,Named in the fork view; see cited use,med,declaration-only;source:771A8.c:2180
+T00555.026,reactionPending,A reaction turn is pending,low,source:771A8.c:2196
+T00556.000,reserved0,Not read through this view,low,declaration-only;source:771A8.c:1364
+T00556.001,opaqueD,"Used, but its meaning is not established",low,source:771A8.c:1405
+T00556.002,reservedE,Not read through this view,low,declaration-only;source:771A8.c:1366
+T00556.003,tile,Current tile word,high,source:771A8.c:1394
+T00556.004,reserved38,Not read through this view,low,declaration-only;source:771A8.c:1368
+T00556.005,savedDestination,Saved destination tile,med,source:771A8.c:1407
+T00556.006,x,Named in the fork view; see cited use,med,source:771A8.c:1397
+T00556.007,reserved4E,Not read through this view,low,declaration-only;source:771A8.c:1371
+T00556.008,z,Named in the fork view; see cited use,med,source:771A8.c:1398
+T00556.009,reserved52,Not read through this view,low,declaration-only;source:771A8.c:1373
+T00556.010,moveAttempts,Destination attempts; gives up at 6,med,source:771A8.c:1413
+T00556.011,reserved8E,Not read through this view,low,declaration-only;source:771A8.c:1375
+T00556.012,moveDistance,Distance of the current move,med,source:771A8.c:1391
+T00556.013,reservedB8,Not read through this view,low,declaration-only;source:771A8.c:1377
+T00556.014,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:771A8.c:1404
+T00556.015,reserved160,Not read through this view,low,declaration-only;source:771A8.c:1379
+T00556.016,destination,Destination tile,high,source:771A8.c:1394
+T00556.017,reserved16C,Not read through this view,low,declaration-only;source:771A8.c:1381
+T00556.018,nextTile,Next tile on the way,high,source:771A8.c:1431
+T00556.019,reserved174,Not read through this view,low,declaration-only;source:771A8.c:1383
+T00556.020,moveX,Target X in 20.12 fixed point,med,source:771A8.c:1445
+T00556.021,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:1446
+T00809.000,word,Whole word,med,source:771A8.c:2429
+T00809.001,bits,Bit fields,med,source:771A8.c:2409
+T00557.000,reserved0,Not read through this view,low,declaration-only;source:771A8.c:2354
+T00557.001,opaque1,"Used, but its meaning is not established",low,source:771A8.c:2408
+T00557.002,reserved2,Not read through this view,low,declaration-only;source:771A8.c:2356
+T00557.003,opaque4,"Used, but its meaning is not established",low,source:771A8.c:2424
+T00557.004,opaque5,"Used, but its meaning is not established",low,source:771A8.c:2407
+T00557.005,reserved6,Not read through this view,low,declaration-only;source:771A8.c:2359
+T00557.006,tile,Current tile word,high,source:771A8.c:2425
+T00557.007,reserved38,Not read through this view,low,declaration-only;source:771A8.c:2361
+T00557.008,x,Named in the fork view; see cited use,med,source:771A8.c:2460
+T00557.009,reserved4E,Not read through this view,low,declaration-only;source:771A8.c:2363
+T00557.010,z,Named in the fork view; see cited use,med,source:771A8.c:2453
+T00557.011,reserved52,Not read through this view,low,declaration-only;source:771A8.c:2365
+T00557.012,opaqueE4,"Used, but its meaning is not established",low,source:771A8.c:2448
+T00557.013,reservedE5,Not read through this view,low,declaration-only;source:771A8.c:2367
+T00557.014,opaqueE7,"Used, but its meaning is not established",low,source:771A8.c:2447
+T00557.015,opaqueE8,"Used, but its meaning is not established",low,source:771A8.c:2446
+T00557.016,reservedE9,Not read through this view,low,declaration-only;source:771A8.c:2370
+T00557.017,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:771A8.c:2494
+T00557.018,reserved160,Not read through this view,low,declaration-only;source:771A8.c:2372
+T00557.019,destination,Destination tile,high,source:771A8.c:2452
+T00557.020,reserved16C,Not read through this view,low,declaration-only;source:771A8.c:2374
+T00557.021,nextTile,Next tile on the way,high,source:771A8.c:2522
+T00557.022,reserved174,Not read through this view,low,declaration-only;source:771A8.c:2376
+T00557.023,path,Named in the fork view; see cited use,med,source:771A8.c:2406
+T00557.024,reserved194,Not read through this view,low,declaration-only;source:771A8.c:2378
+T00557.025,opaque199,"Used, but its meaning is not established",low,source:771A8.c:2408
+T00557.026,waitTimer,Named in the fork view; see cited use,med,source:771A8.c:2494
+T00558.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:2236
+T00558.001,opaque8,"Used, but its meaning is not established",low,source:771A8.c:2281
+T00558.002,reservedC,Not read by decompiled code,low,declaration-only;source:771A8.c:2238
+T00558.003,angle14,Named in the fork; see cited use,med,source:771A8.c:2306
+T00558.004,reserved16,Not read by decompiled code,low,declaration-only;source:771A8.c:2240
+T00558.005,angle26,Named in the fork; see cited use,med,source:771A8.c:2306
+T00559.000,reserved0,Not read through this view,low,declaration-only;source:771A8.c:2244
+T00559.001,opaque9,"Used, but its meaning is not established",low,source:771A8.c:2295
+T00559.002,reservedA,Not read through this view,low,declaration-only;source:771A8.c:2246
+T00559.003,tile,Current tile word,high,source:771A8.c:2283
+T00559.004,reserved38,Not read through this view,low,declaration-only;source:771A8.c:2248
+T00559.005,x,Named in the fork view; see cited use,med,source:771A8.c:2291
+T00559.006,reserved4E,Not read through this view,low,declaration-only;source:771A8.c:2250
+T00559.007,z,Named in the fork view; see cited use,med,source:771A8.c:2291
+T00559.008,reserved52,Not read through this view,low,declaration-only;source:771A8.c:2252
+T00559.009,model,Model record,med,source:771A8.c:2274
+T00559.010,reserved5C,Not read through this view,low,declaration-only;source:771A8.c:2254
+T00559.011,opaque13A,"Used, but its meaning is not established",low,source:771A8.c:2293
+T00559.012,duration,Named in the fork view; see cited use,med,source:771A8.c:2293
+T00559.013,reserved13E,Not read through this view,low,declaration-only;source:771A8.c:2256
+T00559.014,targetX,Target X,med,source:771A8.c:2296
+T00559.015,targetZ,Target Z,med,source:771A8.c:2296
+T00559.016,movementTarget,Actor the movement heads for; 16 for none,med,source:771A8.c:2288
+T00559.017,reserved15D,Not read through this view,low,declaration-only;source:771A8.c:2259
+T00559.018,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:771A8.c:2281
+T00559.019,reserved160,Not read through this view,low,declaration-only;source:771A8.c:2261
+T00559.020,heading,Heading in eighth turns,med,source:771A8.c:2297
+T00559.021,angle,Facing angle,med,source:771A8.c:2292
+T00559.022,reserved18C,Not read through this view,low,declaration-only;source:771A8.c:2263
+T00559.023,stallCounter,Frames without progress,low,source:771A8.c:2281
+T00560.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:1053
+T00560.001,y,Named in the fork; see cited use,med,source:771A8.c:1111
+T00560.002,reserved20,Not read by decompiled code,low,declaration-only;source:771A8.c:1055
+T00560.003,tile,Named in the fork; see cited use,med,source:771A8.c:1101
+T00560.004,reserved60,Not read by decompiled code,low,declaration-only;source:771A8.c:1057
+T00560.005,height,Named in the fork; see cited use,med,source:771A8.c:1114
+T00810.000,word,Whole word,med,source:771A8.c:1101
+T00810.001,tile,Tile fields,med,source:771A8.c:1097
+T00561.000,opaque0,"Used, but its meaning is not established",low,source:771A8.c:1101
+T00561.001,reserved1,Not read through this view,low,declaration-only;source:771A8.c:1028
+T00561.002,movementDisabled,Adjacent-tile search and flight movement are skipped,low,source:771A8.c:1093
+T00561.003,reserved8,Not read through this view,low,declaration-only;source:771A8.c:1030
+T00561.004,tile,Current tile word,high,source:771A8.c:1101
+T00561.005,reserved38,Not read through this view,low,declaration-only;source:771A8.c:1032
+T00561.006,position,Named in the fork view; see cited use,med,source:771A8.c:1099
+T00561.007,z,Named in the fork view; see cited use,med,source:771A8.c:1099
+T00561.008,reserved52,Not read through this view,low,declaration-only;source:771A8.c:1035
+T00561.009,model,Model record,med,source:771A8.c:1089
+T00561.010,reserved5C,Not read through this view,low,declaration-only;source:771A8.c:1037
+T00561.011,groundClearance,Ground clearance of flying actors,med,source:771A8.c:1211
+T00561.012,flightHeight,Flight height above the ground,med,source:771A8.c:1114
+T00561.013,reservedC0,Not read through this view,low,declaration-only;source:771A8.c:1040
+T00561.014,actorId,Named in the fork view; see cited use,med,source:771A8.c:1111
+T00561.015,reservedE6,Not read through this view,low,declaration-only;source:771A8.c:1042
+T00561.016,destination,Destination tile,high,source:771A8.c:1097
+T00561.017,reserved16C,Not read through this view,low,declaration-only;source:771A8.c:1044
+T00561.018,moveX,Target X in 20.12 fixed point,med,source:771A8.c:1129
+T00561.019,moveZ,Target Z in 20.12 fixed point,med,source:771A8.c:1134
+T00561.020,moveY,Target Y in 20.12 fixed point,med,source:771A8.c:1125
+T00561.021,heading,Heading in eighth turns,med,source:771A8.c:1190
+T00561.022,reserved18A,Not read through this view,low,declaration-only;source:771A8.c:1049
+T00561.023,stallCounter,Frames without progress,low,source:771A8.c:1236
+T00563.000,x,Named in the fork; see cited use,med,source:74088.c:983
+T00563.001,reserved1,Not read by decompiled code,low,source:74088.c:985
+T00563.002,z,Named in the fork; see cited use,med,source:74088.c:984
+T00563.003,reserved3,Not read by decompiled code,low,declaration-only;source:74088.c:943
+T00564.000,reserved0,Not read through this view,low,declaration-only;source:74088.c:939
+T00564.001,x,Named in the fork view; see cited use,med,source:74088.c:983
+T00564.002,y,Named in the fork view; see cited use,med,source:74088.c:985
+T00564.003,z,Named in the fork view; see cited use,med,source:74088.c:984
+T00567.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:792
+T00567.001,reserved1,Not read by decompiled code,low,declaration-only;source:771A8.c:792
+T00567.002,tested,Named in the fork; see cited use,med,source:771A8.c:806
+T00567.003,reserved3,Not read by decompiled code,low,declaration-only;source:771A8.c:792
+T00567.004,result,Named in the fork; see cited use,med,source:771A8.c:807
+T00568.000,reserved0,Not read by decompiled code,low,declaration-only;source:771A8.c:774
+T00568.001,position,Named in the fork; see cited use,med,source:771A8.c:809
+T00569.000,reserved0,Not read through this view,low,declaration-only;source:771A8.c:778
+T00569.001,position,World position,high,source:771A8.c:809
+T00569.002,reserved54,Not read through this view,low,declaration-only;source:771A8.c:780
+T00569.003,model,Model record,med,source:771A8.c:842
+T00569.004,reserved5C,Not read through this view,low,declaration-only;source:771A8.c:782
+T00569.005,actorId,Actor id,high,source:771A8.c:843
+T00569.006,reserved89,Not read through this view,low,declaration-only;source:771A8.c:784
+T00569.007,radius,Actor radius,high,source:771A8.c:831
+T00569.008,reserved94,Not read through this view,low,declaration-only;source:771A8.c:786
+T00569.009,maxRange,Reach in units of 32,high,source:771A8.c:809
+T00569.010,reservedB4,Not read through this view,low,declaration-only;source:771A8.c:788
+T00569.011,height,Named in the fork view; see cited use,med,source:771A8.c:832
+T00570.000,x,Named in the fork; see cited use,med,source:771A8.c:809
+T00570.001,y,Named in the fork; see cited use,med,source:771A8.c:810
+T00570.002,z,Named in the fork; see cited use,med,source:771A8.c:811
+T00570.003,reserved6,Not read by decompiled code,low,declaration-only;source:771A8.c:771
+T00582.000,reserved0,Not read through this view,low,declaration-only;source:771A8.c:1848
+T00582.001,tile,Current tile word,high,source:771A8.c:1870
+T00582.002,reserved38,Not read through this view,low,declaration-only;source:771A8.c:1850
+T00582.003,index,Named in the fork view; see cited use,med,source:771A8.c:1869
+T00582.004,row,Named in the fork view; see cited use,med,source:771A8.c:1868
+T00582.005,rate,Named in the fork view; see cited use,med,source:771A8.c:1874
+T00582.006,direction,Named in the fork view; see cited use,med,source:771A8.c:1877
+T00582.007,opaque104,"Used, but its meaning is not established",low,source:771A8.c:1871
+T00582.008,reserved105,Not read through this view,low,declaration-only;source:771A8.c:1852
+T00582.009,destination,Destination tile,high,source:771A8.c:1885

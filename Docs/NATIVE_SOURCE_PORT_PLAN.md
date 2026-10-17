@@ -614,7 +614,7 @@ Fixed-step simulation, the original RNG sequence, no wall-clock in game logic, a
 4. In progress: `tools\lint\native_boundary.py` and the TYPE/FIELD ledger generators exist;
    `tools\ledger\scan_native.py` and the CONTENT ledger generator remain pending.
 5. In progress: function names are assigned; global/type/field naming continues in saved, validated checkpoints.
-   Thirteen of 24 symbol batches are applied (740 globals, 439 types, 3,756 fields/enumerators), all with cited source
+   Fourteen of 24 symbol batches are applied (740 globals, 517 types, 4,493 fields/enumerators), all with cited source
    evidence after the 2026-10-16 backfill (NAMING_CONVENTIONS.md §11.1-11.2).
    `tools\port\copy_to_native.py` must refuse any global/type/field name whose ledger row lacks evidence.
    See [NAMING_CONVENTIONS.md §11.2](NAMING_CONVENTIONS.md#112-saved-naming-progress) for per-batch status and

@@ -177,7 +177,8 @@ class Gen:
 
     def field_refs(self) -> set[str]:
         if not hasattr(self, "_refs"):
-            self._refs = {k for fn in self.trees[""].ix["functions"].values() for k in (fn.get("refs") or {}).get("field", {})}
+            self._refs = {k for p in ("", "upstream:") for fn in self.trees[p].ix["functions"].values()
+                          for k in (fn.get("refs") or {}).get("field", {})}
         return self._refs
 
     def is_used(self, tid: str, member: str) -> bool:
@@ -185,12 +186,23 @@ class Gen:
         names |= {f"{k} {n}" for n in list(names) if n.startswith("(unnamed") for k in ("struct", "union")}
         return any(f"{n}.{member}" in self.field_refs() for n in names)
 
+    def layout(self, tid: str) -> dict:
+        """Index layout matching the ledger's member list: pinned first, then upstream (adopted merged layouts)."""
+        key = self.types[tid]["key"].partition("#")[0]
+        want = [m["name"] for m in self.members[tid]]
+        for p in ("", "upstream:"):
+            for x in self.trees[p].ix["types"].values():
+                if x["key"] == key and [f["name"] for f in x["fields"]] == want:
+                    return x
+        for p in ("", "upstream:"):
+            for x in self.trees[p].ix["types"].values():
+                if x["key"] == key and len(x["fields"]) == len(want):
+                    return x
+        raise KeyError(f"{tid}: no index layout with {len(want)} members")
+
     def member_offsets(self, tid: str) -> list[int]:
         """Bit offset of each member."""
-        key = self.types[tid]["key"].partition("#")[0]
-        lay = next(x for x in self.trees[""].ix["types"].values()
-                   if x["key"] == key and len(x["fields"]) == len(self.members[tid]))
-        return [f["offset"] if f["offset"] is not None and f["offset"] >= 0 else 0 for f in lay["fields"]]
+        return [f["offset"] if f["offset"] is not None and f["offset"] >= 0 else 0 for f in self.layout(tid)["fields"]]
 
     def generic_specs(self, tid: str, overrides: dict | None = None) -> list[tuple]:
         """Used member: keep a meaningful fork name (med) or opaque<Off> (low); unread member: reserved<Off> (low)."""
@@ -212,6 +224,30 @@ class Gen:
             seen.add(spec[1])
             out.append(spec)
         return out
+
+    def names_from_views(self, tid: str, sources: list[str]) -> dict:
+        """Overrides for generic_specs: canonical members take the applied (or already generated) name of a view
+        member with the same bit offset and width, unless that name is reserved/opaque."""
+        named = {f["id"]: (f["final_name"], f["meaning"], f["confidence"])
+                 for ms in self.members.values() for f in ms if f.get("final_name")}
+        named.update({f[0]: (f[1], f[2], f[3]) for f in self.FIELDS})
+
+        def spans(t):
+            lay, ms = self.layout(t), self.members[t]
+            offs = [f["offset"] for f in lay["fields"]]
+            out = []
+            for i, (m, f) in enumerate(zip(ms, lay["fields"])):
+                width = int(m["bits"]) if m.get("bits") else (
+                    ((offs[i + 1] if i + 1 < len(offs) else lay["size"] * 8) - offs[i]))
+                out.append(((f["offset"], width), m))
+            return out
+        src = {}
+        for s in sources:
+            for key, m in spans(s):
+                n = named.get(m["id"])
+                if n and not n[0].startswith(("reserved", "opaque")):
+                    src.setdefault(key, (n[0], f"{n[1]} (same bits as {s} {m['name']})", n[2]))
+        return {m["name"]: src[key] for key, m in spans(tid) if key in src}
 
     def T(self, tid, role, name, loc, purpose, conf, notes, specs, recv: str | None = None) -> None:
         """specs: (orig, final, meaning, conf[, cite]); cite None -> first use through recv, else declaration-only."""

@@ -363,7 +363,7 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Actors_02 | 48 | 8 | 108 | Validated and applied |
 | Game_Battle_01 | 0 | 92 | 583 | Validated and applied |
 | Game_Battle_02 | 0 | 66 | 689 | Validated and applied |
-| Game_Battle_03 | 0 | 78 | 737 | Pending |
+| Game_Battle_03 | 0 | 78 | 737 | Validated and applied |
 | Game_Battle_04 | 58 | 58 | 526 | Pending |
 | Game_Battle_05 | 114 | 0 | 0 | Pending |
 | Game_Effects_01 | 0 | 80 | 659 | Pending |
@@ -380,14 +380,14 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **740 / 2,174** | **439 / 822** | **3,756 / 6,870** | **13 / 24 batches applied** |
+| **Applied / inventoried** | **740 / 2,174** | **517 / 822** | **4,493 / 6,870** | **14 / 24 batches applied** |
 
 Inventory changed on 2026-10-17 when 25 upstream layouts were adopted (15 merged layouts, 10 type-only retypes; two
 new upstream-only types, `func_800D52A4_t`/`_t2`, the effect node's motion block). Applied rows kept their names;
 four applied fields changed C type only (`AkaoSeqHeader.magic` `char[4]`→`int`, `_mpdEnemy.settings`
 `u_char[8]`→`actorSpawnSettings`, `vs_battle_objectData.material`/`variant` `char`→`u_char`).
 
-Applied rows still include 32 low-confidence globals, 32 low-confidence types and 1,222 low-confidence fields. Validation checks coverage,
+Applied rows still include 32 low-confidence globals, 48 low-confidence types and 1,727 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -467,6 +467,13 @@ names, locations and collisions; it does not prove semantics or close migration 
   meaningful fork name (cited by its use) or becomes `opaque<Off>`; an unread member is `reserved<Off>` (bitfields
   `reserved<Off>Bit<n>`) even when the fork gave it a plausible name. Battle_03 must name T00532 from the same table.
   421 of 689 fields are `low` (294 reserved, 81 opaque).
+- Game_Battle_03 (2026-10-17): T00532 is `Battle::Ai::ActorAiState`, named from the same offset table as its 28 fork
+  views (15 more views here, including the small prefix views `DirectionCacheView`, `WaypointSearchView` and
+  `ObstructionView`). Canonical entry types whose fork views were already named by use take those names where the
+  bit offset and width match (`common.Gen.names_from_views`): `ActionCandidate` (T00517) from
+  `CandidateEntryView`, `ActionSlotMetadata` (T00520) from `ActionMetadataEntry`, and `RelationWord` (T00515,
+  upstream's bit split) from `TargetRelationBits`. 506 of 737 fields are `low` (287 reserved, 176 opaque); most
+  opaque members are AI state bytes that are set and tested without a behavior that explains them.
 
 The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
 The native audio player must own playback position rather than reading another module's timing globals.

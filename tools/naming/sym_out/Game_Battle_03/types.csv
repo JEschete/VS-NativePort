@@ -1,0 +1,79 @@
+id,role,final_name,final_location,purpose,confidence,notes
+T00412,State,Battle::Ai::EscortView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state for escort and close-follow behavior.,med,declaration-only;source:71618.c:716;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00413,State,Battle::Ai::EscortRelationBits,Native\Game\src\Battle\Ai\AiViews.h,Views a relation word's mode and category bits for escort behavior.,med,declaration-only;source:71618.c:764
+T00414,State,Battle::Ai::EscortRelationsView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state's relation words for escort behavior.,med,declaration-only;source:71618.c:769;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00415,State,Battle::Ai::DirectionCacheBits,Native\Game\src\Battle\Ai\AiViews.h,Holds tested and open direction bits of the direction cache.,med,declaration-only;source:771A8.c:899
+T00805,State,Battle::Ai::DirectionCacheTile,Native\Game\src\Battle\Ai\AiViews.h,Holds the cached tile word as a word or tile bytes.,med,declaration-only;source:771A8.c:886
+T00416,State,Battle::Ai::DirectionCacheView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state's tiles and flight height for the direction cache.,med,declaration-only;source:771A8.c:892;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00418,State,Battle::EffectDefinitionView,Native\Game\src\Battle\BattleTypes.h,Views an effect definition record while effect transforms are set up.,med,declaration-only;source:5BF94.c:605
+T00420,State,Battle::EffectTrailConfig,Native\Game\src\Battle\BattleTypes.h,"Gives an effect trail's actor, bone, color, texture and lifetime.",med,declaration-only;source:5BF94.c:116
+T00422,State,Battle::EffectTransformState,Native\Game\src\Battle\BattleTypes.h,"Holds one effect transform: rotation, frame, position, attachment and targets.",med,declaration-only;source:5BF94.c:592
+T00423,State,Battle::EnvironmentTarget,Native\Game\src\Battle\BattleTypes.h,"Describes one room object an action can target: position, radius and kind.",med,declaration-only;source:146C.c:343
+T00424,State,Battle::EnvironmentTargetList,Native\Game\src\Battle\BattleTypes.h,Lists the room objects an action can target.,med,declaration-only;source:146C.c:352
+T00429,State,Audio::SoundReleaseView,Native\Audio\src\SoundBanks.h,Views a sound record while it is released; not read.,low,declaration-only;source:30DB0.c:27
+T00436,State,Actors::ActorLocationWords,Native\Game\src\Actors\Spawn.h,Holds an actor location as three words; not read.,low,declaration-only;source:146C.c:171
+T00806,State,Actors::AuxiliaryActorWord,Native\Game\src\Actors\Spawn.h,Holds an auxiliary actor setup word as bytes or a word; not read.,low,declaration-only;source:146C.c:293
+T00440,State,Actors::SpawnScratch,Native\Game\src\Actors\Spawn.h,Holds a 16-byte spawn scratch value; not read.,low,declaration-only;source:146C.c:200
+T00441,State,Actors::SpawnScratchPair,Native\Game\src\Actors\Spawn.h,Holds two spawn scratch blocks; not read.,low,declaration-only;source:146C.c:204
+T00442,State,Battle::HitStatusView,Native\Game\src\Battle\BattleTypes.h,Views a hit result's threshold and status words (upstream merged it into Battle::HitResult).,med,declaration-only;source:146C.c:214
+T00459,State,Battle::FloatingLabelSpec,Native\Game\src\Battle\BattleTypes.h,Gives the layout parameters of a floating battle label.,med,declaration-only;source:2842C.c:72
+T00470,State,Actors::JumpContactView,Native\Game\src\Actors\Spawn.h,Views a jump's contact word; not read.,low,declaration-only;source:40564.c:56
+T00471,State,Actors::JumpFlagsView,Native\Game\src\Actors\Spawn.h,Views a jump's flag word; not read.,low,declaration-only;source:40564.c:50
+T00481,State,Battle::TargetVolumeMatrix,Native\Game\src\Battle\BattleTypes.h,Holds the transform used to test points against a target volume.,med,declaration-only;source:58578.c:65
+T00482,State,Battle::TargetVolumeFlags,Native\Game\src\Battle\BattleTypes.h,Holds a target volume's shape flags.,med,declaration-only;source:58578.h:6
+T00483,State,Battle::TargetVolume,Native\Game\src\Battle\BattleTypes.h,"Describes a target volume: shape, kind, facing, extents and origin.",med,declaration-only;source:58578.h:13
+T00484,State,Battle::TargetLabelLine,Native\Game\src\Battle\BattleTypes.h,Holds one line of a target label.,med,declaration-only;source:58578.c:55
+T00807,State,Battle::VectorWords,Native\Game\src\Battle\BattleTypes.h,Views a vector as words; not read.,low,declaration-only;source:5BF94.c:564
+T00485,State,Battle::TargetSphereLabelView,Native\Game\src\Battle\BattleTypes.h,Views Battle::TargetSphere with its label text buffer.,med,declaration-only;source:5BF94.c:279
+T00486,State,Battle::TargetSphereLabelEntry,Native\Game\src\Battle\BattleTypes.h,"Holds one target label entry: actor, limb, values and limb name.",med,declaration-only;source:5BF94.c:268
+T00487,State,Battle::TargetInfoLine,Native\Game\src\Battle\BattleTypes.h,Holds one target information line.,med,declaration-only;source:5BF94.c:251
+T00491,State,Battle::EffectScriptWord,Native\Game\src\Battle\BattleTypes.h,Holds an effect script word; not read.,low,declaration-only;source:5BF94.h:206
+T00492,State,Battle::EffectTransformDefinition,Native\Game\src\Battle\BattleTypes.h,Gives an effect transform definition; not read through this view.,low,declaration-only;source:5BF94.c:568
+T00496,State,Battle::EffectRendererState,Native\Game\src\Battle\BattleTypes.h,Holds an effect renderer's state; not read.,low,declaration-only;source:5BF94.c:551
+T00808,State,Effects::ParticleColorWord,Native\Game\src\Effects\Particles.h,Holds a particle's color curves as a word or fields.,med,declaration-only;source:5BF94.h:273
+T00508,State,Battle::EffectTransformBlock,Native\Game\src\Battle\BattleTypes.h,Holds an effect transform block; not read.,low,declaration-only;source:5BF94.c:560
+T00514,State,Battle::Ai::MoveTargetView,Native\Game\src\Battle\Ai\AiState.h,Views the first 364 bytes of the AI actor state when a tile move is chosen.,med,declaration-only;source:6FC00.c:420;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00515,State,Battle::Ai::RelationWord,Native\Game\src\Battle\Ai\Perception.h,Holds what an AI actor perceives about one other actor (upstream bit split of the relation word).,med,declaration-only;source:6F014.c:127;names from the same bits of T00136 (Battle::Ai::TargetRelationBits)
+T00516,State,Battle::Ai::ActionTiming,Native\Game\src\Battle\Ai\AiViews.h,Holds the timing and target of an AI action being executed.,med,declaration-only;source:6F014.c:242
+T00517,State,Battle::Ai::ActionCandidate,Native\Game\src\Battle\Ai\AiState.h,"Scores one action candidate: action slot, readiness threshold, squared distance, target, weight and range.",med,declaration-only;source:6F014.c:99;names from the same bits of T00350 (Battle::Ai::CandidateEntryView)
+T00518,State,Battle::Ai::CandidateTable,Native\Game\src\Battle\Ai\AiViews.h,Holds the AI candidate table; not read.,low,declaration-only;source:6F014.c:415
+T00519,State,Battle::Ai::CandidateFlags,Native\Game\src\Battle\Ai\AiViews.h,Holds the flag bytes of an AI action candidate.,med,declaration-only;source:6F014.c:88
+T00520,State,Battle::Ai::ActionSlotMetadata,Native\Game\src\Battle\Ai\AiState.h,"Holds an action slot's AI metadata: kind, range class, special flag, radius and squared range.",med,declaration-only;source:6F014.c:123;names from the same bits of T00366 (Battle::Ai::ActionMetadataEntry)
+T00521,State,Battle::Ai::EngagementActor,Native\Game\src\Battle\Ai\AiViews.h,Views a battle actor while the engagement list is managed.,med,declaration-only;source:6F014.c:256
+T00522,State,Battle::Ai::EngagementData,Native\Game\src\Battle\Ai\AiViews.h,Holds an actor's engagement data.,med,declaration-only;source:6F014.c:73
+T00523,State,Battle::Ai::ReactionRecord,Native\Game\src\Battle\Ai\AiViews.h,Holds a reaction record handed to the AI.,med,declaration-only;source:6F014.c:281
+T00524,State,Battle::Ai::ActionExecutionView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state while an action is executed.,med,declaration-only;source:6F014.c:420;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00525,State,Battle::Ai::RouteGateTile,Native\Game\src\Battle\Ai\AiViews.h,"Holds a route gate tile: X, Z and gate.",med,declaration-only;source:6F014.c:46
+T00526,State,Battle::Ai::FloorHeightView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state while floor heights are sampled.,med,declaration-only;source:6F014.c:393;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00527,State,Battle::Ai::AiModelView,Native\Game\src\Battle\Ai\AiViews.h,Views a model record as the AI uses it (upstream layout).,med,declaration-only;source:6F014.c:134
+T00528,State,Battle::Ai::ActionRangeShape,Native\Game\src\Battle\Ai\AiViews.h,"Gives an action's range extents, shape and angle.",med,declaration-only;source:6F014.c:22
+T00529,State,Battle::Ai::ActionRangeView,Native\Game\src\Battle\Ai\AiViews.h,Views a record holding an action's range.,med,declaration-only;source:6F014.c:35
+T00530,State,Battle::Ai::ActionRangeView2,Native\Game\src\Battle\Ai\AiViews.h,Views a second record holding an action's range.,med,declaration-only;source:6F014.c:30
+T00531,State,Battle::Ai::SavedSettingsPair,Native\Game\src\Battle\Ai\AiViews.h,Holds saved AI settings words.,med,declaration-only;source:6F014.c:17
+T00532,State,Battle::Ai::ActorAiState,Native\Game\src\Battle\Ai\AiState.h,"Holds one actor's AI state: settings, tile and movement state, perception history and relations, action slots, candidates and plan, allocated per actor when its AI starts.",high,"source:7CD68.c:960;source:upstream:6E644.c:1037;names by offset from sym_gen/ai_state.py, shared with every fork view"
+T00533,State,Battle::Ai::WordPair,Native\Game\src\Battle\Ai\AiViews.h,Holds two words; not read.,low,declaration-only;source:6F014.c:388
+T00541,State,Battle::EffectParameterBytes,Native\Game\src\Battle\BattleTypes.h,Holds effect parameter bytes; not read.,low,declaration-only;source:146C.h:289
+T00544,State,Core::IntPair,Native\Core\include\Core\IntPair.h,Holds two integers; not read.,low,declaration-only;source:44F14.c:86
+T00545,State,Battle::TargetLabelPrimitive,Native\Game\src\Battle\BattleTypes.h,Holds the primitive tag and box behind a target label.,med,declaration-only;source:58578.c:72
+T00546,State,Battle::LimbEffects,Native\Game\src\Battle\BattleTypes.h,Holds two limb effect values.,med,declaration-only;source:146C.c:40
+T00551,State,Battle::ShapeVertex,Native\Game\src\Battle\BattleTypes.h,Holds one wireframe vertex and its flags.,med,declaration-only;source:573B8.h:6
+T00552,State,Battle::Ai::ActorPositionView,Native\Game\src\Battle\Ai\AiViews.h,Views an actor's X and Z position.,med,declaration-only;source:771A8.c:2267
+T00553,State,Battle::Ai::CheckObjectView,Native\Game\src\Battle\Ai\AiViews.h,Views an object's flags while a direction is checked.,med,declaration-only;source:771A8.c:965
+T00554,State,Battle::Ai::MovementCheckView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state while a direction is checked.,med,declaration-only;source:771A8.c:969;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00555,State,Battle::Ai::MovementDecisionView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state while movement is decided.,med,declaration-only;source:771A8.c:2155;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00556,State,Battle::Ai::MovementDestinationView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state while a destination is chosen.,med,declaration-only;source:771A8.c:1364;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00809,State,Battle::Ai::DetourWord,Native\Game\src\Battle\Ai\AiViews.h,Holds the obstacle detour state as a word or bits.,med,declaration-only;source:771A8.c:2338
+T00557,State,Battle::Ai::MovementPathView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state while an obstacle detour is followed.,med,declaration-only;source:771A8.c:2354;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00744,Value,Battle::Ai::PathTest,Native\Game\src\Battle\Ai\Navigation.h,Is the function type that tests whether a detour may step in a direction.,med,declaration-only;source:771A8.c:2383
+T00558,State,Battle::Ai::RecoveryModelView,Native\Game\src\Battle\Ai\AiViews.h,Views a model record's flags and angles during movement recovery.,med,declaration-only;source:771A8.c:2236
+T00559,State,Battle::Ai::MovementRecoveryView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state while blocked movement is recovered.,med,declaration-only;source:771A8.c:2244;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00560,State,Battle::Ai::StepActorView,Native\Game\src\Battle\Ai\AiViews.h,Views an actor record's height and tile during step movement.,med,declaration-only;source:771A8.c:1053
+T00810,State,Battle::Ai::StepPositionWord,Native\Game\src\Battle\Ai\AiViews.h,Holds a step position as a word or X/Y halves.,med,declaration-only;source:771A8.c:1020
+T00561,State,Battle::Ai::MovementStepView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state while it steps or flies.,med,declaration-only;source:771A8.c:1027;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00563,State,Battle::Ai::WaypointTile,Native\Game\src\Battle\Ai\AiViews.h,"Holds a waypoint tile: X, Z and flags.",med,declaration-only;source:74088.c:943
+T00564,State,Battle::Ai::WaypointSearchView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state's position during a waypoint search.,med,declaration-only;source:74088.c:939;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00567,State,Battle::Ai::ObstructionCache,Native\Game\src\Battle\Ai\AiViews.h,Caches an obstruction test result.,med,declaration-only;source:771A8.c:792
+T00568,State,Battle::Ai::ObstructionModel,Native\Game\src\Battle\Ai\AiViews.h,Views a model record's position for obstruction tests.,med,declaration-only;source:771A8.c:774
+T00569,State,Battle::Ai::ObstructionView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state for obstruction tests.,med,declaration-only;source:771A8.c:778;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
+T00570,State,Battle::Ai::ObstructionVector,Native\Game\src\Battle\Ai\AiViews.h,Holds an obstruction test vector.,med,declaration-only;source:771A8.c:771
+T00582,State,Battle::Ai::PatrolView,Native\Game\src\Battle\Ai\AiState.h,Views the AI actor state while it patrols waypoints.,med,declaration-only;source:771A8.c:1848;view of the AI actor state T00532 (upstream func_800E78F4_t); fold into it when copying
