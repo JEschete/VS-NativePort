@@ -266,7 +266,10 @@ used by several systems goes to that system's `State.c` (e.g. `Native\Game\src\B
 - Enumerators: **PascalCase** without the enum prefix (`ItemCategory::Blade`); the C spelling is generated
   (`ItemCategory_Blade`).
 - `unk*` is forbidden. If the code never reads a field and nothing explains it, name it `reserved<OffsetHex>`
-  (`reserved1C`) with confidence `low`; padding the compiler would insert is `pad<OffsetHex>`.
+  (`reserved1C`) with confidence `low`; padding the compiler would insert is `pad<OffsetHex>`. A field that is read
+  but only copied somewhere whose meaning is not established is `opaque<OffsetHex>` (`opaque2C`), confidence `low`,
+  with the copy cited, so it is not mistaken for an unused one. Unread bitfields are `reserved<Offset>Bit<n>` /
+  `reserved<Offset>Bits<n>`.
 - `hints` holds what the function-naming agents worked out (`fields:` notes in `FUNCTION_CATALOG.csv`). Use them, and
   resolve any disagreement between hints.
 - `meaning`: one short phrase (≤ 100 characters), units included (`HP lost this frame`, `fixed 4.12 angle`).
@@ -314,7 +317,14 @@ fields.csv   id,final_name,meaning,confidence,notes
   by name inside referencing functions, so a hit can belong to another struct with the same member name (e.g.
   `actor->unkC` for `vs_battle_objectData.unkC`); confirm the receiver's type before citing a hit.
 - Write citations by searching for exact source text rather than typing line numbers, and check that each field
-  row cites at least one line naming the original member (Engine_01's generator does both).
+  row cites at least one line naming the original member (Engine_01's generator does both). From Game_Actors_01 on,
+  generators import `tools\naming\sym_gen\common.py` (`Gen`): `c(("file", "text"))` cites either tree
+  (`upstream:` prefix for resources\rood-reverse), `T(...)` auto-cites a field's first access through a receiver
+  pattern, `g.decl()` cites a declaration explicitly, and `write()` refuses a field whose cited lines do not name it.
+- Member uses are searched first in functions whose libclang field references (`build\port\index.json` `refs.field`)
+  contain the exact `Type.member`, so `actor->unk0.x` is found for the header type even when the function never
+  names that type. `evidence.py` and `common.Gen` both do this. Auto-citations still land on reset lines (`= 0`) that
+  prove identity but not meaning; pin meaning-bearing lines explicitly for every name above `low`.
 - Upstream refresh, after `resources\rood-reverse` moves: `python tools\port\decomp_index.py --root
   resources\rood-reverse --out build\port\index_upstream.json`, then `python tools\naming\upstream_layout.py report
   --out build\port\upstream_layout\all.md` (classes: same / type-only / layout / fork-only; identical struct source
@@ -349,7 +359,7 @@ must refuse names whose rows do not pass the evidence check.
 | Audio | 92 | 20 | 270 | Validated and applied |
 | Engine_01 | 151 | 38 | 252 | Validated and applied |
 | Engine_02 | 60 | 0 | 0 | Validated and applied |
-| Game_Actors_01 | 0 | 55 | 771 | Pending |
+| Game_Actors_01 | 0 | 55 | 771 | Validated and applied |
 | Game_Actors_02 | 48 | 8 | 108 | Validated and applied |
 | Game_Battle_01 | 0 | 92 | 583 | Pending |
 | Game_Battle_02 | 0 | 66 | 689 | Pending |
@@ -370,14 +380,14 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **740 / 2,174** | **226 / 822** | **1,713 / 6,870** | **10 / 24 batches applied** |
+| **Applied / inventoried** | **740 / 2,174** | **281 / 822** | **2,484 / 6,870** | **11 / 24 batches applied** |
 
 Inventory changed on 2026-10-17 when 25 upstream layouts were adopted (15 merged layouts, 10 type-only retypes; two
 new upstream-only types, `func_800D52A4_t`/`_t2`, the effect node's motion block). Applied rows kept their names;
 four applied fields changed C type only (`AkaoSeqHeader.magic` `char[4]`→`int`, `_mpdEnemy.settings`
 `u_char[8]`→`actorSpawnSettings`, `vs_battle_objectData.material`/`variant` `char`→`u_char`).
 
-Applied rows still include 32 low-confidence globals, 5 low-confidence types and 257 low-confidence fields. Validation checks coverage,
+Applied rows still include 32 low-confidence globals, 6 low-confidence types and 603 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -426,6 +436,17 @@ names, locations and collisions; it does not prove semantics or close migration 
   `TRAIL_SAMPLE_COUNT`; port them as one parameterised type, not one type per overlay. Adopted layouts that retype
   members still used by pinned-only bodies (e.g. `func_800D2904_t.unk5C`, `int` in `func_800D2ADC`, `char[4]`
   upstream, where `func_800D2ADC` is still asm) must be reconciled per function when copying.
+- Game_Actors_01 (2026-10-17): `Field::GimmickInstance` (T00255) begins with the `Actors::ModelInstance` header
+  laid out as gimmick motion fields (the same bytes `Field::GimmickPhysicsView`, `Field::GimmickMotionView` and
+  `Actors::PalettePulseView` read); its tail from +0x178 is actor-record space gimmicks never use (named
+  `reserved<Off>`). Native code should give gimmicks a header plus their own fields, not a cast of the actor record.
+  `Actors::RoomActorRecordWrite` (T00431) is the write-side view of `Actors::RoomActorRecord` (T00597), and
+  `Battle::Ai::AiActorView` (T00383) is a fork-only view of `vs_battle_actor` (T00630, upstream callers pass
+  `vs_battle_actor*`): fold views into their canonical types when copying. Placement word byte 1 (applied as
+  `direction`) only keeps bit 0 at spawn and feeds tile lookups as a layer (`Actors::TileTarget.tileLayer`,
+  `ModelInstance.currentTileLayer`); revisit T00444's name when Field rows are next revised.
+  346 of the 771 fields are `low` (239 `reserved`, 13 `opaque`); most actor-record flag bits are only reset and
+  tested, and need behavior tracing before their names can be raised.
 
 The ending frame counter G01964 counts presented frames for XA resume seeking; it is **not** a frame duration.
 The native audio player must own playback position rather than reading another module's timing globals.

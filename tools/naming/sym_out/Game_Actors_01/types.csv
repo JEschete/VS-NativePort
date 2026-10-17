@@ -14,6 +14,7 @@ T00249,OnDisc,Actors::TextureCellOrigin,Native\Game\src\Actors\TextureAnimation.
 T00251,State,Actors::ModelEffectSlot,Native\Game\src\Actors\ModelInstance.h,Holds a small per-model effect: the palette pulse in the header and the sound override in the actor record.,med,source:40564.c:1672;source:40564.c:2808
 T00252,OnDisc,Actors::ShpModel,Native\Game\src\Actors\Skeleton.h,"Holds a loaded SHP model: header bytes, section offsets relocated to addresses, and the bone table.",high,source:30DB0.c:1146;DataCrystal SHP files
 T00253,State,Actors::AnimationPose,Native\Game\src\Actors\Animation.h,"Holds an actor's current SEQ pose keys, frame counter and animation event stream.",high,source:upstream:40564.c:2090;source:40564.c:2659
+T00255,State,Field::GimmickInstance,Native\Game\src\Field\Gimmicks.h,"Holds one room gimmick: the model-instance header laid out as gimmick motion fields, palette and object info, followed by actor-record space gimmicks do not use.",high,source:30DB0.c:371;source:49268.c:54
 T00301,OnDisc,Items::AccessoryInit,Native\Game\src\Items\EquipmentInit.h,"Gives an accessory's statistics, drop rate and index.",high,source:146C.c:1086
 T00302,OnDisc,Actors::LimbActionInit,Native\Game\src\Actors\CharacterInit.h,Gives one action a limb can perform.,high,source:146C.c:6260
 T00303,OnDisc,Actors::ShpBone,Native\Game\src\Actors\Skeleton.h,"Describes one SHP skeleton bone: length, parent, lookup tags and the joint slot it initializes.",high,"source:30DB0.c:1381;DataCrystal SHP files (joint: length, parent)"

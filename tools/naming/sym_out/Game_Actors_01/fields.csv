@@ -316,6 +316,190 @@ T00253.009,holdingLastFrame,Set while the pose holds the last frame,med,source:4
 T00253.010,reachedEnd,Set when the frame counter reaches the animation length,med,source:44F14.c:1293
 T00253.011,reservedBits,Not read,low,declaration-only;source:3A1A0.h:66
 T00253.012,reserved54C,Not read,low,declaration-only;source:3A1A0.h:67
+T00255.000,boneCount,SHP bone count; zero for a free slot,med,source:30DB0.c:416
+T00255.001,reserved1,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:453
+T00255.002,reserved2,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:454
+T00255.003,reserved3,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:455
+T00255.004,reserved4,Not read by the decompiled users,low,source:30DB0.c:305
+T00255.005,isSkipped,Set when display flag bit 0 is clear,med,source:30DB0.c:3957
+T00255.006,isVisible,Drawn when set (display flag bit 1),high,source:30DB0.c:3958
+T00255.007,reserved8Bits2,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:459
+T00255.008,reserved8Bits3,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:460
+T00255.009,reserved8Bits4,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:461
+T00255.010,reserved8Bits5,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:462
+T00255.011,reserved8Bits6,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:463
+T00255.012,transitionFlag,Selects the appearance transition path,low,source:40564.c:1846
+T00255.013,motionState,"Motion state; 0 idle, 6 and above are appearance transitions",med,source:49268.c:136
+T00255.014,reserved9Bits4,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:466
+T00255.015,transitionMode,Appearance transition mode,low,source:40564.c:1795
+T00255.016,reservedABits3,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:468
+T00255.017,reservedABits5,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:469
+T00255.018,reservedABits7,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:470
+T00255.019,reservedBBits0,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:471
+T00255.020,reservedBBits4,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:472
+T00255.021,reservedBBits7,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:473
+T00255.022,supportLayer,Tile layer under the gimmick,low,source:40564.c:2554
+T00255.023,reservedCBits4,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:475
+T00255.024,reservedD,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:476
+T00255.025,reservedE,Not read by the decompiled users,low,source:74088.c:1489
+T00255.026,slot,Gimmick slot,high,source:30DB0.c:348
+T00255.027,reserved10,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:479
+T00255.028,delay,Frames before the motion starts (offset of Field::GimmickPhysicsView.delay),low,declaration-only;source:3A1A0.h:480
+T00255.029,parent,Parent gimmick; 0xFF when none,med,source:30DB0.c:355
+T00255.030,linkedGimmick,Gimmick whose appearance this one follows,low,source:40564.c:1906
+T00255.031,reserved14,Not read by the decompiled users,low,source:6FC00.c:744
+T00255.032,rotationTicks,Frames left in the current rotation,low,declaration-only;source:3A1A0.h:484
+T00255.033,mode,Motion mode; 0xFC to 0xFF are landing and falling modes,med,source:30DB0.c:3271
+T00255.034,positionX,World X,high,source:30DB0.c:371
+T00255.035,positionY,World Y,high,source:30DB0.c:373
+T00255.036,positionZ,World Z,high,source:30DB0.c:372
+T00255.037,reserved22,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:489
+T00255.038,rotationX,X rotation,high,source:49268.c:81
+T00255.039,rotationY,Y rotation (facing),high,source:3A1A0.c:887
+T00255.040,rotationZ,Z rotation,high,source:49268.c:82
+T00255.041,reserved2A,Not read by the decompiled users,low,declaration-only;source:upstream:3A1A0.h:511
+T00255.042,scaleX,X scale (64 = 1.0),high,source:30DB0.c:362
+T00255.043,scaleY,Y scale (64 = 1.0),high,source:30DB0.c:363
+T00255.044,scaleZ,Z scale (64 = 1.0),high,source:30DB0.c:364
+T00255.045,reserved32,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:496
+T00255.046,slideX,Remaining X slide,med,source:3A1A0.c:760
+T00255.047,velocityY,Vertical speed,low,source:30DB0.c:3270
+T00255.048,slideZ,Remaining Z slide,med,source:3A1A0.c:761
+T00255.049,orientation,Orientation applied while carried,low,source:3A1A0.c:754
+T00255.050,reserved3C,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:501
+T00255.051,reserved3E,Not read by the decompiled users,low,source:upstream:44F14.c:1697
+T00255.052,reserved40,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:502
+T00255.053,reserved42,Not read by the decompiled users,low,declaration-only;source:upstream:3A1A0.h:523
+T00255.054,reserved44,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:503
+T00255.055,reserved48,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:504
+T00255.056,savedPosition,Position saved when grounded,med,source:40564.c:2552
+T00255.057,reserved50,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:506
+T00255.058,savedRotationY,Y rotation saved when grounded,med,source:40564.c:2558
+T00255.059,baseColor,Base light color; 0x808080 neutral,med,source:30DB0.c:361
+T00255.060,tint,Model tint,med,source:40564.c:1987
+T00255.061,tileX,Tile X,high,source:30DB0.c:371
+T00255.062,tileLayer,Tile layer,med,source:30DB0.c:3284
+T00255.063,tileZ,Tile Z,high,source:30DB0.c:372
+T00255.064,reserved5F,Cleared on creation; not read,low,source:30DB0.c:370
+T00255.065,savedTile,Tile word saved when grounded,med,source:40564.c:2551
+T00255.066,palettePulse,Palette pulse state,high,source:30DB0.c:366
+T00255.067,model,SHP model,high,source:49268.c:54
+T00255.068,matrices,Model matrices; entry 4 is the orientation matrix,med,source:49268.c:95
+T00255.069,rotationOffset,Rotation added when drawing,med,source:49268.c:81
+T00255.070,reserved114,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:519
+T00255.071,basePalette,Palette before effects,high,source:30DB0.c:346
+T00255.072,pulsedPalette,Palette uploaded with the pulse applied,med,declaration-only;source:3A1A0.h:521
+T00255.073,objectInfo,"Object id, material and durability",med,source:30DB0.c:280
+T00255.074,reserved178,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:523
+T00255.075,reserved5ACBits0,Not read by the decompiled users,low,source:30DB0.c:4093
+T00255.076,actionPoseActive,Cleared by the appearance transition,low,source:40564.c:1917
+T00255.077,reserved5ACBits4,Not read by the decompiled users,low,source:30DB0.c:4115
+T00255.078,reserved5ACBits6,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:527
+T00255.079,reserved5ACBits8,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:528
+T00255.080,bypassActorCollision,Collision bypass flag,low,source:3A1A0.c:3023
+T00255.081,reserved5ACBits11,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:530
+T00255.082,reserved5ACBits12,Not read by the decompiled users,low,source:3A1A0.c:1513
+T00255.083,reserved5ACBits13,Not read by the decompiled users,low,source:3A1A0.c:2472
+T00255.084,reserved5ACBits14,Not read by the decompiled users,low,source:3A1A0.c:2472
+T00255.085,reserved5ACBits15,Not read by the decompiled users,low,source:3A1A0.c:1483
+T00255.086,reserved5ACBits16,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:535
+T00255.087,reserved5ACBits18,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:536
+T00255.088,reserved5ACBits19,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:537
+T00255.089,reserved5ACBits20,Not read by the decompiled users,low,source:3A1A0.c:746
+T00255.090,reserved5ACBits21,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:539
+T00255.091,reserved5ACBits22,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:540
+T00255.092,reserved5ACBits23,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:541
+T00255.093,animationLocked,Cleared by the appearance transition,low,source:40564.c:1808
+T00255.094,reserved5ACBits25,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:543
+T00255.095,reserved5B0,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:544
+T00255.096,reserved5B1,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:545
+T00255.097,reserved5B2,Not read by the decompiled users,low,source:44F14.c:1000
+T00255.098,reserved5B3,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:547
+T00255.099,reserved5B4,Not read by the decompiled users,low,source:30DB0.c:4130
+T00255.100,reserved5B5,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:549
+T00255.101,reserved5B6,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:550
+T00255.102,reserved5B7,Not read by the decompiled users,low,source:40564.c:2334
+T00255.103,reserved5B8,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:552
+T00255.104,reserved5B9,Not read by the decompiled users,low,source:3A1A0.c:1415
+T00255.105,reserved5BA,Not read by the decompiled users,low,source:3A1A0.c:1416
+T00255.106,reserved5BB,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:555
+T00255.107,reserved5BC,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:556
+T00255.108,reserved5BE,Not read by the decompiled users,low,source:3A1A0.c:1568
+T00255.109,reserved5C0,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:558
+T00255.110,reserved5C1,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:559
+T00255.111,reserved5C2,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:560
+T00255.112,reserved5C4,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:561
+T00255.113,reserved5C8,Not read by the decompiled users,low,source:30DB0.c:2828
+T00255.114,reserved5CC,Not read by the decompiled users,low,source:40564.c:2527
+T00255.115,reserved5CD,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:564
+T00255.116,reserved5CE,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:565
+T00255.117,reserved5D0,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:566
+T00255.118,reserved5D4,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:567
+T00255.119,reserved5D8,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:568
+T00255.120,reserved5DC,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:569
+T00255.121,reserved5E0,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:570
+T00255.122,reserved5E4,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:571
+T00255.123,reserved5E8,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:572
+T00255.124,reserved5EC,Not read by the decompiled users,low,source:3A1A0.c:686
+T00255.125,collisionRadius,Collision size; scales the transition distance,low,source:40564.c:1797
+T00255.126,reserved63E,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:575
+T00255.127,reserved640,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:576
+T00255.128,reserved648,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:577
+T00255.129,reserved64C,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:578
+T00255.130,reserved64D,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:579
+T00255.131,reserved64E,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:580
+T00255.132,reserved650,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:581
+T00255.133,reserved652,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:582
+T00255.134,reserved654,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:583
+T00255.135,reserved656,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:584
+T00255.136,reserved658,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:585
+T00255.137,reserved6E0,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:586
+T00255.138,reserved6E1,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:587
+T00255.139,reserved6E2,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:588
+T00255.140,reserved6E3,Not read by the decompiled users,low,source:3A1A0.c:1395
+T00255.141,reserved6E4,Not read by the decompiled users,low,source:3A1A0.c:1510
+T00255.142,reserved6E5,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:591
+T00255.143,reserved6E6,Not read by the decompiled users,low,source:3A1A0.c:680
+T00255.144,reserved6E8,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:593
+T00255.145,reserved6EA,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:594
+T00255.146,reserved6EC,Not read by the decompiled users,low,source:3A1A0.c:1436
+T00255.147,reserved6F0,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:596
+T00255.148,fadeGreen,Fade color green; transition target,low,source:40564.c:1976
+T00255.149,fadeRed,Fade color red; transition step,low,source:40564.c:1930
+T00255.150,reserved6F3,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:599
+T00255.151,reserved6F4,Not read by the decompiled users,low,source:44F14.c:1065
+T00255.152,reserved6F8,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:601
+T00255.153,reserved6FC,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:602
+T00255.154,reserved700,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:603
+T00255.155,reserved704,Not read by the decompiled users,low,source:38C1C.c:424
+T00255.156,reservedC54,Not read by the decompiled users,low,source:30DB0.c:2643
+T00255.157,reserved11A4,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:606
+T00255.158,basePaletteRows,Reference palette rows for the transition,low,source:40564.c:1828
+T00255.159,transitionPalette,Palette rows blended by the transition,low,source:40564.c:1827
+T00255.160,reserved16A4,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:609
+T00255.161,reserved17FC,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:610
+T00255.162,reserved17FD,Not read by the decompiled users,low,source:30DB0.c:3243
+T00255.163,reserved17FE,Not read by the decompiled users,low,source:3A1A0.c:2689
+T00255.164,reserved17FF,Not read by the decompiled users,low,source:3A1A0.c:1725
+T00255.165,reserved1800,Not read by the decompiled users,low,source:3A1A0.c:1407
+T00255.166,reserved183C,Not read by the decompiled users,low,source:38C1C.c:426
+T00255.167,reserved183E,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:616
+T00255.168,reserved1840,Not read by the decompiled users,low,source:3A1A0.c:1485
+T00255.169,reserved1842,Not read by the decompiled users,low,source:3A1A0.c:1486
+T00255.170,reserved1844,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:619
+T00255.171,reserved1846,Not read by the decompiled users,low,source:30DB0.c:2818
+T00255.172,reserved1847,Not read by the decompiled users,low,source:3A1A0.c:1497
+T00255.173,reserved1848,Not read by the decompiled users,low,source:38C1C.c:638
+T00255.174,reserved1849,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:623
+T00255.175,reserved184A,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:624
+T00255.176,reserved184B,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:625
+T00255.177,reserved184C,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:626
+T00255.178,reserved184E,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:627
+T00255.179,reserved1850,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:628
+T00255.180,reserved1854,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:629
+T00255.181,shadowBlend,Shadow blend state,med,source:44F14.c:1230
+T00255.182,savedPlacement,Placement word saved when grounded,med,source:40564.c:2555
+T00255.183,reserved187C,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:632
 T00301.000,equipment,Accessory statistics,high,source:146C.c:1084
 T00301.001,dropRate,Drop rate,high,source:146C.c:1089
 T00301.002,index,Index,high,source:146C.c:1090

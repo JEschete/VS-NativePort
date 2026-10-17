@@ -4,6 +4,7 @@ Group 1: snapshots, saved room actors, loot, initialization records, model scrat
 Group 2: the actor record family (D_800F4538_t and its members) and the gimmick record (D_800F45E0_t).
 """
 import csv
+import re
 import sys
 from pathlib import Path
 
@@ -870,6 +871,78 @@ T("T00239", "State", "Actors::ActorRecord", GA + "ActorRecord.h",
       ("unk18D8", "previousTargetZ", "Z of the previous blocked move target", LOW),
   ], recv=r"actor|arg0|arg1|a2|s0|temp_\w+|var_\w+|D_800F4538\[\w+\]|object|other|target")
 
+GIMMICK = {
+    "unk0": ("boneCount", "SHP bone count; zero for a free slot", MED, c(("30DB0.c", "if (temp_s0->unk0 == 0) {"))),
+    "unk8_0": ("isSkipped", "Set when display flag bit 0 is clear", MED, c(("30DB0.c", "temp_a0->unk8_0 = (arg1 & 1) ^ 1;"))),
+    "unk8_1": ("isVisible", "Drawn when set (display flag bit 1)", HIGH, c(("30DB0.c", "temp_a0->unk8_1 = arg1 >> 1;"))),
+    "unk8_7": ("transitionFlag", "Selects the appearance transition path", LOW),
+    "unk9_0": ("motionState", "Motion state; 0 idle, 6 and above are appearance transitions", MED,
+               c(("49268.c", "if (object->unk64.unk0 != 0 || object->unk9_0 >= 6) {"))),
+    "unkA_0": ("transitionMode", "Appearance transition mode", LOW),
+    "unkC_0": ("supportLayer", "Tile layer under the gimmick", LOW),
+    "unkF": ("slot", "Gimmick slot", HIGH, c(("30DB0.c", "s1->unkF = arg0->index;"))),
+    "unk11": ("delay", "Frames before the motion starts (offset of Field::GimmickPhysicsView.delay)", LOW,
+              "declaration-only;" + g.decl("T00255", "unk11")),
+    "unk12": ("parent", "Parent gimmick; 0xFF when none", MED, c(("30DB0.c", "s1->unk12 = 0xFF;"))),
+    "unk13": ("linkedGimmick", "Gimmick whose appearance this one follows", LOW),
+    "unk18": ("rotationTicks", "Frames left in the current rotation", LOW),
+    "unk1A": ("mode", "Motion mode; 0xFC to 0xFF are landing and falling modes", MED, c(("30DB0.c", "temp_s1->unk1A = 0xFC;"))),
+    "unk1C": ("positionX", "World X", HIGH, c(("30DB0.c", "s1->unk1C = (s1->unk5C << 7) + 0x40;"))),
+    "unk1E": ("positionY", "World Y", HIGH),
+    "unk20": ("positionZ", "World Z", HIGH, c(("30DB0.c", "s1->unk20 = (s1->unk5E << 7) + 0x40;"))),
+    "unk24": ("rotationX", "X rotation", HIGH),
+    "unk26": ("rotationY", "Y rotation (facing)", HIGH),
+    "unk28": ("rotationZ", "Z rotation", HIGH),
+    "unk2C": ("scaleX", "X scale (64 = 1.0)", HIGH, c(("30DB0.c", "s1->unk2C = 0x40;"))),
+    "unk2E": ("scaleY", "Y scale (64 = 1.0)", HIGH, c(("30DB0.c", "s1->unk2E = 0x40;"))),
+    "unk30": ("scaleZ", "Z scale (64 = 1.0)", HIGH, c(("30DB0.c", "s1->unk30 = 0x40;"))),
+    "unk34": ("slideX", "Remaining X slide", MED),
+    "unk36": ("velocityY", "Vertical speed", LOW),
+    "unk38": ("slideZ", "Remaining Z slide", MED),
+    "unk3A": ("orientation", "Orientation applied while carried", LOW),
+    "unk4C": ("savedPosition", "Position saved when grounded", MED),
+    "unk52": ("savedRotationY", "Y rotation saved when grounded", MED, c(("40564.c", "arg0->unk52 = arg0->unk26;"))),
+    "unk54": ("baseColor", "Base light color; 0x808080 neutral", MED, c(("30DB0.c", "s1->unk54 = 0x808080;"))),
+    "unk58": ("tint", "Model tint", MED),
+    "unk5C": ("tileX", "Tile X", HIGH, c(("30DB0.c", "s1->unk1C = (s1->unk5C << 7) + 0x40;"))),
+    "unk5D": ("tileLayer", "Tile layer", MED),
+    "unk5E": ("tileZ", "Tile Z", HIGH, c(("30DB0.c", "s1->unk20 = (s1->unk5E << 7) + 0x40;"))),
+    "unk5F": ("reserved5F", "Cleared on creation; not read", LOW),
+    "unk60": ("savedTile", "Tile word saved when grounded", MED),
+    "unk64": ("palettePulse", "Palette pulse state", HIGH),
+    "unk68": ("model", "SHP model", HIGH, c(("49268.c", "scratch->model = object->unk68;"))),
+    "unk6C": ("matrices", "Model matrices; entry 4 is the orientation matrix", MED,
+              c(("49268.c", "MulMatrix(&scratch->matrix, &object->unk6C[4]);"))),
+    "unk10C": ("rotationOffset", "Rotation added when drawing", MED),
+    "unk12C": ("basePalette", "Palette before effects", HIGH),
+    "unk14C": ("pulsedPalette", "Palette uploaded with the pulse applied", MED),
+    "unk16C": ("objectInfo", "Object id, material and durability", MED),
+    "unk5AC_3": ("actionPoseActive", "Cleared by the appearance transition", LOW),
+    "unk5AC_9": ("bypassActorCollision", "Collision bypass flag", LOW),
+    "unk5AC_24": ("animationLocked", "Cleared by the appearance transition", LOW),
+    "unk63C": ("collisionRadius", "Collision size; scales the transition distance", LOW),
+    "unk6F1": ("fadeGreen", "Fade color green; transition target", LOW),
+    "unk6F2": ("fadeRed", "Fade color red; transition step", LOW),
+    "unk1424": ("basePaletteRows", "Reference palette rows for the transition", LOW),
+    "unk1564": ("transitionPalette", "Palette rows blended by the transition", LOW),
+    "unk1864": ("shadowBlend", "Shadow blend state", MED),
+    "unk1868": ("savedPlacement", "Placement word saved when grounded", MED),
+}
+_gspecs = []
+for _m in g.members["T00255"]:
+    _n = _m["name"]
+    if _n in GIMMICK:
+        _gspecs.append((_n, *GIMMICK[_n]))
+        continue
+    _mm = re.fullmatch(r"unk([0-9A-F]+)(?:_(\d+))?", _n)
+    _gspecs.append((_n, f"reserved{_mm.group(1)}" + (f"Bits{_mm.group(2)}" if _mm.group(2) else ""),
+                    "Not read by the decompiled users", LOW))
+T("T00255", "State", "Field::GimmickInstance", FD + "Gimmicks.h",
+  "Holds one room gimmick: the model-instance header laid out as gimmick motion fields, palette and object "
+  "info, followed by actor-record space gimmicks do not use.", "high",
+  c(("30DB0.c", "s1->unk1C = (s1->unk5C << 7) + 0x40;"), ("49268.c", "scratch->model = object->unk68;")), _gspecs,
+  recv=r"object|arg0|s1|temp_\w+|D_800F45E0\[\w+\]|actor")
+
 # ---------------------------------------------------------------- placement word (same layout as Field::ActorPlacement)
 placement = next(r for r in csv.DictReader(open(LEDGERS / "TYPE_LEDGER.csv", encoding="utf-8")) if r["id"] == "T00444")
 T("T00660", "Value", placement["final_name"], placement["final_location"], placement["purpose"], "high",
@@ -881,4 +954,4 @@ T("T00660", "Value", placement["final_name"], placement["final_location"], place
   ], recv=r"\bdata")
 
 if __name__ == "__main__":
-    g.write(partial=True)
+    g.write()
