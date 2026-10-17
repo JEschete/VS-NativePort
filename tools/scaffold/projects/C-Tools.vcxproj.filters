@@ -554,7 +554,7 @@
       <UniqueIdentifier>{2C1408C1-54AC-5EAB-9CBE-8C84554F3EC5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="Exists('C:\Tools')">
     <None Include="C:\Tools\.vscode\settings.json">
       <Filter>C-Tools\.vscode</Filter>
     </None>
