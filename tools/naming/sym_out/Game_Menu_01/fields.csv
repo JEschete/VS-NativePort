@@ -1,0 +1,558 @@
+id,final_name,meaning,confidence,notes
+T00746.000,allButtons,Pressed buttons for both ports,high,source:146C.c:7641
+T00746.001,ports,Pressed button byte pairs per port,med,source:main.h:487
+T00124.000,lowByte,Low eight bits of controller buttons,med,same-as:T00192
+T00124.001,highByte,High eight bits of controller buttons,med,same-as:T00192
+T00170.000,x,Named in the fork; see cited use,med,source:4D8.c:2301
+T00170.001,y,Named in the fork; see cited use,med,source:4D8.c:2301
+T00171.000,x,Named in the fork; see cited use,med,source:4D8.c:2443
+T00171.001,y,Named in the fork; see cited use,med,source:4D8.c:2444
+T00171.002,type,Named in the fork; see cited use,med,source:4D8.c:2445
+T00171.003,id,Named in the fork; see cited use,med,source:4D8.c:2446
+T00784.000,sprt,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
+T00784.001,tileTpage,Tile with a texture page command,med,source:MENU/MENU7.PRG/260.c:140
+T00784.002,tile,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:2043
+T00784.003,polyG4Tpage,Gouraud quad with a texture page command,med,source:MENU/MENU7.PRG/260.c:142
+T00784.004,polyG4,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1424
+T00784.005,tilePoly,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1307
+T00784.006,reserved0,Not read by decompiled code,low,declaration-only;source:MENU/MENU7.PRG/260.c:148
+T00172.000,reserved0,Not read by decompiled code,low,source:168.c:4961
+T00172.001,wepId,Named in the fork; see cited use,med,source:168.c:4964
+T00172.002,category,Blade category,med,declaration-only;source:168.c:4940
+T00172.003,damageType,Named in the fork; see cited use,med,source:168.c:4967
+T00172.004,costType,Named in the fork; see cited use,med,source:168.c:4968
+T00172.005,cost,Named in the fork; see cited use,med,source:168.c:4966
+T00172.006,opaque6,"Used, but its meaning is not established",low,source:168.c:4969
+T00172.007,reserved7,Not read by decompiled code,low,declaration-only;source:168.c:4945
+T00172.008,strength,Named in the fork; see cited use,med,source:168.c:4971
+T00172.009,intelligence,Named in the fork; see cited use,med,source:168.c:4972
+T00172.010,agility,Named in the fork; see cited use,med,source:168.c:4974
+T00172.011,reservedB,Not read by decompiled code,low,declaration-only;source:168.c:4949
+T00172.012,range,Named in the fork; see cited use,med,source:168.c:4970
+T00181.000,zoneId,Named in the fork; see cited use,med,source:3B8.c:2321
+T00181.001,mapId,Named in the fork; see cited use,med,source:3B8.c:2322
+T00181.002,par,Named in the fork; see cited use,med,source:3B8.c:2323
+T00181.003,rankCap,Named in the fork; see cited use,med,source:3B8.c:2324
+T00187.000,lowByte,Low eight bits of controller buttons,med,same-as:T00192
+T00187.001,highByte,High eight bits of controller buttons,med,same-as:T00192
+T00196.000,reserved0,Not read by decompiled code,low,declaration-only;source:494.c:37
+T00196.001,frameMask,Named in the fork; see cited use,med,source:494.c:948
+T00196.002,frameDuration,Named in the fork; see cited use,med,source:494.c:951
+T00196.003,repeat,Named in the fork; see cited use,med,source:494.c:954
+T00196.004,currentFrame,Named in the fork; see cited use,med,source:494.c:944
+T00196.005,timer,Named in the fork; see cited use,med,source:494.c:951
+T00196.006,isActive,Named in the fork; see cited use,med,source:494.c:945
+T00000.000,Str,BuffReelStat Str,med,declaration-only;source:3B8.c:709
+T00000.001,Agi,BuffReelStat Agi,med,declaration-only;source:3B8.c:710
+T00000.002,Int,BuffReelStat Int,med,declaration-only;source:3B8.c:711
+T00000.003,Hp,BuffReelStat Hp,med,declaration-only;source:3B8.c:712
+T00000.004,Mp,BuffReelStat Mp,med,declaration-only;source:3B8.c:713
+T00248.000,opaque0Bit0,"Used, but its meaning is not established",low,source:224.c:128
+T00248.001,opaque1Bit0,"Used, but its meaning is not established",low,source:224.c:129
+T00248.002,opaque2Bit0,"Used, but its meaning is not established",low,source:224.c:130
+T00248.003,opaque3Bit0,"Used, but its meaning is not established",low,source:224.c:131
+T00254.000,reserved0,Not read by decompiled code,low,source:224.c:118
+T00254.001,reserved4,Not read by decompiled code,low,declaration-only;source:30DB0.h:13
+T00254.002,opaque8,"Used, but its meaning is not established",low,source:224.c:112
+T00254.003,reservedC,Not read by decompiled code,low,declaration-only;source:30DB0.h:15
+T00254.004,reserved10,Not read by decompiled code,low,declaration-only;source:30DB0.h:16
+T00254.005,opaque11,"Used, but its meaning is not established",low,source:68C4.c:67
+T00261.000,cursorMemories,Named in the fork; see cited use,med,source:58EC.c:74
+T00261.001,opaque34,"Used, but its meaning is not established",low,source:143C.c:171
+T00261.002,opaque3A,"Used, but its meaning is not established",low,source:items0.h:49
+T00261.003,reserved4C,Not read by decompiled code,low,declaration-only;source:5BF94.h:137
+T00261.004,reserved50,Not read by decompiled code,low,declaration-only;source:5BF94.h:138
+T00261.005,opaque51,"Used, but its meaning is not established",low,source:120.c:1169
+T00261.006,selectedEquipment,Named in the fork; see cited use,med,source:120.c:1910
+T00261.007,opaque85,"Used, but its meaning is not established",low,source:MENU/MENU7.PRG/260.c:2703
+T00261.008,opaque9E,"Used, but its meaning is not established",low,source:234.c:3057
+T00261.009,opaqueA0,"Used, but its meaning is not established",low,source:234.c:2431
+T00261.010,reservedB2,Not read by decompiled code,low,declaration-only;source:5BF94.h:144
+T00304.000,reserved0,Not read by decompiled code,low,source:168.c:5074
+T00304.001,wepId,Named in the fork; see cited use,med,source:168.c:5027
+T00304.002,category,Named in the fork; see cited use,med,source:168.c:5028
+T00304.003,gemSlots,Named in the fork; see cited use,med,source:168.c:5029
+T00304.004,strength,Named in the fork; see cited use,med,source:168.c:5030
+T00304.005,intelligence,Named in the fork; see cited use,med,source:168.c:5031
+T00304.006,agility,Named in the fork; see cited use,med,source:168.c:5033
+T00304.007,reserved7,Not read by decompiled code,low,declaration-only;source:168.c:4999
+T00306.000,stat,Named in the fork; see cited use,med,source:3B8.c:860
+T00306.001,amount,Named in the fork; see cited use,med,source:3B8.c:859
+T00001.000,Rank,DisFile Rank,med,declaration-only;source:3B8.c:44
+T00001.001,Time,DisFile Time,med,declaration-only;source:3B8.c:44
+T00001.002,Attack,DisFile Attack,med,declaration-only;source:3B8.c:44
+T00001.003,Iq,DisFile Iq,med,declaration-only;source:3B8.c:44
+T00001.004,Esc,DisFile Esc,med,declaration-only;source:3B8.c:44
+T00002.000,Timeout,FindSaveResult Timeout,med,declaration-only;source:MENU/MENU7.PRG/260.c:1562
+T00002.001,NotFound,FindSaveResult NotFound,med,declaration-only;source:MENU/MENU7.PRG/260.c:1563
+T00002.002,Pending,FindSaveResult Pending,med,declaration-only;source:MENU/MENU7.PRG/260.c:1564
+T00310.000,selected,Named in the fork; see cited use,med,source:238.c:1732
+T00310.001,opaque1,"Used, but its meaning is not established",low,source:238.c:1737
+T00310.002,animationState,Named in the fork; see cited use,med,source:238.c:926
+T00310.003,disabled,Named in the fork; see cited use,med,source:238.c:1734
+T00310.004,x,Named in the fork; see cited use,med,source:238.c:1730
+T00310.005,rowIndex,Named in the fork; see cited use,med,source:238.c:1731
+T00310.006,title,Named in the fork; see cited use,med,source:238.c:1738
+T00310.007,description,Named in the fork; see cited use,med,source:238.c:1739
+T00313.000,name,Named in the fork; see cited use,med,source:58EC.c:166
+T00313.001,menuRowFlags,Named in the fork; see cited use,med,source:58EC.c:120
+T00313.002,description,Named in the fork; see cited use,med,source:58EC.c:134
+T00316.000,itemCategory,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:265
+T00316.001,itemIndex,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:274
+T00316.002,opaque2,"Used, but its meaning is not established",low,source:MENU/MENUB.PRG/260.c:545
+T00316.003,state,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:286
+T00003.000,IgnoreNoEvent,EventMask IgnoreNoEvent,med,declaration-only;source:MENU/MENU7.PRG/260.c:1625
+T00003.001,All,EventMask All,med,declaration-only;source:MENU/MENU7.PRG/260.c:1626
+T00317.000,reserved0,Not read by decompiled code,low,declaration-only;source:494.c:26
+T00317.001,reserved4,Not read by decompiled code,low,declaration-only;source:494.c:27
+T00317.002,reserved8,Not read by decompiled code,low,declaration-only;source:494.c:28
+T00318.000,reserved0,Not read by decompiled code,low,declaration-only;source:494.c:19
+T00318.001,reserved4,Not read by decompiled code,low,declaration-only;source:494.c:20
+T00318.002,reserved8,Not read by decompiled code,low,declaration-only;source:494.c:21
+T00318.003,reservedC,Not read by decompiled code,low,declaration-only;source:494.c:22
+T00319.000,zudId,Named in the fork; see cited use,med,source:238.c:1352
+T00319.001,classId,Named in the fork; see cited use,med,source:238.c:2137
+T00319.002,killFlagsOffset,Named in the fork; see cited use,med,source:238.c:1926
+T00319.003,killFlagsCount,Named in the fork; see cited use,med,source:238.c:1927
+T00319.004,selected,Named in the fork; see cited use,med,source:238.c:1986
+T00319.005,animationState,Named in the fork; see cited use,med,source:238.c:1999
+T00319.006,unlocked,Named in the fork; see cited use,med,source:238.c:1416
+T00319.007,prev,Named in the fork; see cited use,med,source:238.c:1102
+T00319.008,next,Named in the fork; see cited use,med,source:238.c:1253
+T00319.009,reservedF,Not read by decompiled code,low,declaration-only;source:238.c:375
+T00319.010,name,Named in the fork; see cited use,med,source:238.c:2036
+T00005.000,None,LimbUiMode None,med,declaration-only;source:120.c:1138
+T00005.001,Init,LimbUiMode Init,med,declaration-only;source:120.c:1138
+T00340.000,combinationsOffset,Named in the fork; see cited use,med,source:168.c:4953
+T00340.001,materialsOffset,Named in the fork; see cited use,med,source:168.c:4954
+T00340.002,initDataOffset,Named in the fork; see cited use,med,source:168.c:4955
+T00340.003,reservedC,Not read by decompiled code,low,declaration-only;source:168.c:4919
+T00341.000,order,Named in the fork; see cited use,med,source:5BF94.c:1586
+T00341.001,reserved8,Not read by decompiled code,low,declaration-only;source:5BF94.c:181
+T00341.002,reserved9,Not read by decompiled code,low,declaration-only;source:5BF94.c:182
+T00341.003,selectedIndex,Named in the fork; see cited use,med,source:5BF94.c:1596
+T00341.004,count,Named in the fork; see cited use,med,source:5BF94.c:1569
+T00341.005,reservedC,Not read by decompiled code,low,declaration-only;source:5BF94.c:185
+T00342.000,x,Named in the fork; see cited use,med,source:renderTextures.h:17
+T00342.001,y,Named in the fork; see cited use,med,source:renderTextures.h:17
+T00342.002,w,Named in the fork; see cited use,med,source:D4.c:1940
+T00342.003,h,Named in the fork; see cited use,med,source:renderTextures.h:15
+T00342.004,tpage,Named in the fork; see cited use,med,source:renderTextures.h:41
+T00342.005,clut,Named in the fork; see cited use,med,source:renderTextures.h:40
+T00349.000,characterId,Named in the fork; see cited use,med,source:592C.c:218
+T00349.001,weapon,Named in the fork; see cited use,med,source:592C.c:236
+T00349.002,opaque2,"Used, but its meaning is not established",low,source:592C.c:266
+T00349.003,weaponMaterial,Named in the fork; see cited use,med,source:592C.c:244
+T00349.004,shield,Named in the fork; see cited use,med,source:592C.c:248
+T00349.005,shieldMaterial,Named in the fork; see cited use,med,source:592C.c:256
+T00349.006,defaultMaterial,Named in the fork; see cited use,med,source:592C.c:222
+T00349.007,shpOffset,Named in the fork; see cited use,med,source:592C.c:217
+T00349.008,reservedC,Not read by decompiled code,low,declaration-only;source:592C.c:16
+T00349.009,weaponWepOffset,Named in the fork; see cited use,med,source:592C.c:239
+T00349.010,reserved14,Not read by decompiled code,low,declaration-only;source:592C.c:18
+T00349.011,shieldWepOffset,Named in the fork; see cited use,med,source:592C.c:251
+T00349.012,reserved1C,Not read by decompiled code,low,declaration-only;source:592C.c:20
+T00349.013,commonSeqOffset,Named in the fork; see cited use,med,source:592C.c:273
+T00349.014,commonSeqLen,Named in the fork; see cited use,med,source:592C.c:270
+T00349.015,battleSeqOffset,Named in the fork; see cited use,med,source:592C.c:264
+T00349.016,battleSeqLen,Named in the fork; see cited use,med,source:592C.c:261
+T00006.000,None,RemainingAbilities None,med,declaration-only;source:143C.c:209
+T00006.001,ChainOnly,RemainingAbilities ChainOnly,med,declaration-only;source:143C.c:210
+T00006.002,DefenseOnly,RemainingAbilities DefenseOnly,med,declaration-only;source:143C.c:211
+T00006.003,Both,RemainingAbilities Both,med,declaration-only;source:143C.c:212
+T00007.000,Chain,AbilityType Chain,med,declaration-only;source:64.c:55
+T00007.001,Defense,AbilityType Defense,med,declaration-only;source:64.c:55
+T00009.000,UseItem,ItemAction UseItem,med,declaration-only;source:items2.h:216
+T00009.001,SearchItem,ItemAction SearchItem,med,declaration-only;source:items2.h:217
+T00009.002,DiscardItem,ItemAction DiscardItem,med,declaration-only;source:items2.h:218
+T00009.003,DiscardAllItems,ItemAction DiscardAllItems,med,declaration-only;source:items2.h:219
+T00009.004,SortItems,ItemAction SortItems,med,declaration-only;source:items2.h:220
+T00011.000,Up,ArrowType Up,med,declaration-only;source:494.c:32
+T00011.001,Down,ArrowType Down,med,declaration-only;source:494.c:33
+T00012.000,Render,AshleyRenderMode Render,med,declaration-only;source:_renderAshley.h:12
+T00012.001,Init,AshleyRenderMode Init,med,declaration-only;source:_renderAshley.h:13
+T00012.002,Restore,AshleyRenderMode Restore,med,declaration-only;source:_renderAshley.h:14
+T00014.000,CopyContainerFlagsCopy,CopyContainerFlag CopyContainerFlagsCopy,med,declaration-only;source:234.c:17
+T00015.000,CommonZero,DisIndex CommonZero,med,declaration-only;source:3B8.c:492
+T00015.001,Rank0Comma,DisIndex Rank0Comma,med,declaration-only;source:3B8.c:493
+T00015.002,Rank0Bonus,DisIndex Rank0Bonus,med,declaration-only;source:3B8.c:494
+T00015.003,Rank0RiskbreakerRank,DisIndex Rank0RiskbreakerRank,med,declaration-only;source:3B8.c:495
+T00015.004,Rank0Str,DisIndex Rank0Str,med,declaration-only;source:3B8.c:496
+T00015.005,Rank0Agl,DisIndex Rank0Agl,med,declaration-only;source:3B8.c:497
+T00015.006,Rank0Int,DisIndex Rank0Int,med,declaration-only;source:3B8.c:498
+T00015.007,Rank0Hp,DisIndex Rank0Hp,med,declaration-only;source:3B8.c:499
+T00015.008,Rank0Mp,DisIndex Rank0Mp,med,declaration-only;source:3B8.c:500
+T00015.009,Rank0Score,DisIndex Rank0Score,med,declaration-only;source:3B8.c:501
+T00015.010,Rank0Percent,DisIndex Rank0Percent,med,declaration-only;source:3B8.c:502
+T00015.011,Rank0Pts,DisIndex Rank0Pts,med,declaration-only;source:3B8.c:503
+T00015.012,Rank0MapCompleted,DisIndex Rank0MapCompleted,med,declaration-only;source:3B8.c:504
+T00015.013,Rank0Congratulations,DisIndex Rank0Congratulations,med,declaration-only;source:3B8.c:505
+T00015.014,Rank0Plus,DisIndex Rank0Plus,med,declaration-only;source:3B8.c:506
+T00015.015,Rank0Minus,DisIndex Rank0Minus,med,declaration-only;source:3B8.c:507
+T00015.016,Rank0Colon,DisIndex Rank0Colon,med,declaration-only;source:3B8.c:508
+T00015.017,Rank1Grand,DisIndex Rank1Grand,med,declaration-only;source:3B8.c:509
+T00015.018,Rank1Master,DisIndex Rank1Master,med,declaration-only;source:3B8.c:510
+T00015.019,Rank1Breaker,DisIndex Rank1Breaker,med,declaration-only;source:3B8.c:511
+T00015.020,Rank1Paladin,DisIndex Rank1Paladin,med,declaration-only;source:3B8.c:512
+T00015.021,Rank1Gladiator,DisIndex Rank1Gladiator,med,declaration-only;source:3B8.c:513
+T00015.022,Rank1Raging,DisIndex Rank1Raging,med,declaration-only;source:3B8.c:514
+T00015.023,Rank1Berserker,DisIndex Rank1Berserker,med,declaration-only;source:3B8.c:515
+T00015.024,Rank1Radiant,DisIndex Rank1Radiant,med,declaration-only;source:3B8.c:516
+T00015.025,Rank1Couragous,DisIndex Rank1Couragous,med,declaration-only;source:3B8.c:517
+T00015.026,Rank1Adventurer,DisIndex Rank1Adventurer,med,declaration-only;source:3B8.c:518
+T00015.027,Rank1Knight,DisIndex Rank1Knight,med,declaration-only;source:3B8.c:519
+T00015.028,Rank1Archer,DisIndex Rank1Archer,med,declaration-only;source:3B8.c:520
+T00015.029,Rank1DareDevil,DisIndex Rank1DareDevil,med,declaration-only;source:3B8.c:521
+T00015.030,Rank1Blade,DisIndex Rank1Blade,med,declaration-only;source:3B8.c:522
+T00015.031,Rank2Of,DisIndex Rank2Of,med,declaration-only;source:3B8.c:523
+T00015.032,Rank2Mystic,DisIndex Rank2Mystic,med,declaration-only;source:3B8.c:524
+T00015.033,Rank2Wanderer,DisIndex Rank2Wanderer,med,declaration-only;source:3B8.c:525
+T00015.034,Rank2Destroyer,DisIndex Rank2Destroyer,med,declaration-only;source:3B8.c:526
+T00015.035,Rank2Gladiator,DisIndex Rank2Gladiator,med,declaration-only;source:3B8.c:527
+T00015.036,Rank2Spectrebane,DisIndex Rank2Spectrebane,med,declaration-only;source:3B8.c:528
+T00015.037,Rank2Normal,DisIndex Rank2Normal,med,declaration-only;source:3B8.c:529
+T00015.038,Rank2Phantom,DisIndex Rank2Phantom,med,declaration-only;source:3B8.c:530
+T00015.039,Rank2Fighter,DisIndex Rank2Fighter,med,declaration-only;source:3B8.c:531
+T00015.040,Rank2Demon,DisIndex Rank2Demon,med,declaration-only;source:3B8.c:532
+T00015.041,Rank2Eater,DisIndex Rank2Eater,med,declaration-only;source:3B8.c:533
+T00015.042,Rank2Agent,DisIndex Rank2Agent,med,declaration-only;source:3B8.c:534
+T00015.043,Rank2Dragon,DisIndex Rank2Dragon,med,declaration-only;source:3B8.c:535
+T00015.044,Rank2Slayer,DisIndex Rank2Slayer,med,declaration-only;source:3B8.c:536
+T00015.045,Rank2Cartographer,DisIndex Rank2Cartographer,med,declaration-only;source:3B8.c:537
+T00015.046,Time0NewRecord,DisIndex Time0NewRecord,med,declaration-only;source:3B8.c:538
+T00015.047,Time0TimeAttackResults,DisIndex Time0TimeAttackResults,med,declaration-only;source:3B8.c:539
+T00015.048,Time0Time,DisIndex Time0Time,med,declaration-only;source:3B8.c:540
+T00015.049,Time0Prime,DisIndex Time0Prime,med,declaration-only;source:3B8.c:541
+T00015.050,Time0DoublePrime,DisIndex Time0DoublePrime,med,declaration-only;source:3B8.c:542
+T00015.051,Time0First,DisIndex Time0First,med,declaration-only;source:3B8.c:543
+T00015.052,Time0Excellent,DisIndex Time0Excellent,med,declaration-only;source:3B8.c:544
+T00015.053,Time0Dash,DisIndex Time0Dash,med,declaration-only;source:3B8.c:545
+T00015.054,Attack0Course,DisIndex Attack0Course,med,declaration-only;source:3B8.c:546
+T00015.055,Attack0Minotaur,DisIndex Attack0Minotaur,med,declaration-only;source:3B8.c:547
+T00015.056,Attack0Death,DisIndex Attack0Death,med,declaration-only;source:3B8.c:548
+T00015.057,Attack0OgreZombie,DisIndex Attack0OgreZombie,med,declaration-only;source:3B8.c:549
+T00015.058,Attack0BestTime,DisIndex Attack0BestTime,med,declaration-only;source:3B8.c:550
+T00015.059,Attack0Three,DisIndex Attack0Three,med,declaration-only;source:3B8.c:551
+T00015.060,Attack0TimeAttack,DisIndex Attack0TimeAttack,med,declaration-only;source:3B8.c:552
+T00015.061,Iq0EvolveOrDie,DisIndex Iq0EvolveOrDie,med,declaration-only;source:3B8.c:553
+T00015.062,Iq0AverageTime,DisIndex Iq0AverageTime,med,declaration-only;source:3B8.c:554
+T00015.063,Iq0Foodchain,DisIndex Iq0Foodchain,med,declaration-only;source:3B8.c:555
+T00015.064,Iq1GameDesigner,DisIndex Iq1GameDesigner,med,declaration-only;source:3B8.c:556
+T00015.065,Esc0GivingUp,DisIndex Esc0GivingUp,med,declaration-only;source:3B8.c:557
+T00015.066,Esc0Chicken,DisIndex Esc0Chicken,med,declaration-only;source:3B8.c:558
+T00017.000,OptForceCursorMemory,ArtListOption OptForceCursorMemory,med,declaration-only;source:30.c:94
+T00020.000,Inactive,ElementState Inactive,med,declaration-only;source:MENU/MENU7.PRG/260.c:111
+T00020.001,Static,ElementState Static,med,declaration-only;source:MENU/MENU7.PRG/260.c:112
+T00020.002,AnimateX,ElementState AnimateX,med,declaration-only;source:MENU/MENU7.PRG/260.c:113
+T00020.003,AnimateY,ElementState AnimateY,med,declaration-only;source:MENU/MENU7.PRG/260.c:114
+T00020.004,AnimateNegX,ElementState AnimateNegX,med,declaration-only;source:MENU/MENU7.PRG/260.c:115
+T00425.000,state,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1471
+T00425.001,slotId,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1472
+T00425.002,outertextBlendFactor,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1782
+T00425.003,innertextBlendFactor,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1790
+T00425.004,selected,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1781
+T00425.005,slotUnavailable,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1786
+T00425.006,saveLocation,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1833
+T00425.007,reserved7,Not read by decompiled code,low,declaration-only;source:MENU/MENU7.PRG/260.c:126
+T00425.008,targetPosition,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1974
+T00425.009,reservedA,Not read by decompiled code,low,declaration-only;source:MENU/MENU7.PRG/260.c:128
+T00425.010,x,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1473
+T00425.011,y,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1789
+T00425.012,w,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1474
+T00425.013,h,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1805
+T00425.014,text,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1480
+T00488.000,x,Named in the fork; see cited use (same bits as T00619 x),med,source:5BF94.c:4551
+T00488.001,y,Named in the fork; see cited use (same bits as T00619 y),med,source:5BF94.c:4552
+T00488.002,alignment,Named in the fork; see cited use (same bits as T00619 alignment),med,source:5BF94.c:4553
+T00488.003,opaque3Bit2,"Used, but its meaning is not established",low,source:5BF94.c:4563
+T00022.000,None,LootItemState None,med,declaration-only;source:MENU/MENUB.PRG/260.c:16
+T00022.001,Copied,LootItemState Copied,med,declaration-only;source:MENU/MENUB.PRG/260.c:17
+T00022.002,NoIndent,LootItemState NoIndent,med,declaration-only;source:MENU/MENUB.PRG/260.c:18
+T00022.003,Indent1,LootItemState Indent1,med,declaration-only;source:MENU/MENUB.PRG/260.c:19
+T00022.004,Indent2,LootItemState Indent2,med,declaration-only;source:MENU/MENUB.PRG/260.c:20
+T00022.005,Indent3,LootItemState Indent3,med,declaration-only;source:MENU/MENUB.PRG/260.c:21
+T00023.000,Warlock,MagicSubmenu Warlock,med,declaration-only;source:15AC.c:294
+T00023.001,Shaman,MagicSubmenu Shaman,med,declaration-only;source:15AC.c:294
+T00023.002,Sorcerer,MagicSubmenu Sorcerer,med,declaration-only;source:15AC.c:294
+T00023.003,Enchanter,MagicSubmenu Enchanter,med,declaration-only;source:15AC.c:294
+T00023.004,Teleport,MagicSubmenu Teleport,med,declaration-only;source:15AC.c:294
+T00024.000,Error,MaskedHandlerResult Error,med,declaration-only;source:MENU/MENU7.PRG/260.c:1630
+T00024.001,Pending,MaskedHandlerResult Pending,med,declaration-only;source:MENU/MENU7.PRG/260.c:1631
+T00024.002,Complete,MaskedHandlerResult Complete,med,declaration-only;source:MENU/MENU7.PRG/260.c:1632
+T00585.000,tag,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
+T00585.001,prim,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
+T00586.000,tag,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
+T00586.001,prim,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
+T00594.000,slotState,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:285
+T00594.001,generation,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:286
+T00594.002,opaque8,"Used, but its meaning is not established",low,source:MENU/MENU7.PRG/260.c:698
+T00596.000,base,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:285
+T00596.001,stats,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:307
+T00596.002,opaque20,"Used, but its meaning is not established",low,source:MENU/MENU7.PRG/260.c:758
+T00030.000,Warlock,ShortcutMagicMenu Warlock,med,declaration-only;source:15AC.c:204
+T00030.001,Shaman,ShortcutMagicMenu Shaman,med,declaration-only;source:15AC.c:204
+T00030.002,Sorcerer,ShortcutMagicMenu Sorcerer,med,declaration-only;source:15AC.c:204
+T00030.003,Enchanter,ShortcutMagicMenu Enchanter,med,declaration-only;source:15AC.c:204
+T00032.000,HP,StatType HP,med,declaration-only;source:MENU/MENU7.PRG/260.c:1265
+T00032.001,MP,StatType MP,med,declaration-only;source:MENU/MENU7.PRG/260.c:1265
+T00033.000,Init,EquipmentDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00033.001,Wait,EquipmentDetailsState Wait,med,declaration-only;source:items1.h:197
+T00033.002,ManageInput,EquipmentDetailsState ManageInput,med,declaration-only;source:items1.h:100
+T00033.003,ReturnMenuReady,EquipmentDetailsState ReturnMenuReady,med,declaration-only;source:items1.h:100
+T00034.000,Init,EquipmentSlotMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00034.001,HandleInput,EquipmentSlotMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00034.002,LoadObject,EquipmentSlotMenuState LoadObject,med,declaration-only;source:16C.c:345
+T00034.003,WaitMenuReady,EquipmentSlotMenuState WaitMenuReady,med,declaration-only;source:16C.c:345
+T00035.000,Init,InitOnlyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00036.000,Init,SpellListMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00036.001,HandleInput,SpellListMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00036.002,ReturnIfready,SpellListMenuState ReturnIfready,med,declaration-only;source:84.c:615
+T00037.000,Init,ArtSelectionState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00037.001,WaitForSelection,ArtSelectionState WaitForSelection,med,declaration-only;source:30.c:106
+T00037.002,ReturnSelection,ArtSelectionState ReturnSelection,med,declaration-only;source:30.c:106
+T00038.000,Init,AbilityListState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00038.001,AbilityMenu,AbilityListState AbilityMenu,med,declaration-only;source:64.c:219
+T00039.000,Init,DiscardMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00039.001,DiscardOneInit,DiscardMenuState DiscardOneInit,med,declaration-only;source:items1.h:1191
+T00039.002,DiscardMultipleInit,DiscardMenuState DiscardMultipleInit,med,declaration-only;source:items1.h:1192
+T00039.003,DiscardOne,DiscardMenuState DiscardOne,med,declaration-only;source:items1.h:1193
+T00039.004,ClearTemplate,DiscardMenuState ClearTemplate,med,declaration-only;source:items1.h:1194
+T00039.005,DetermineDiscardAmount,DiscardMenuState DetermineDiscardAmount,med,declaration-only;source:items1.h:1195
+T00039.006,DiscardMultipleConfirm,DiscardMenuState DiscardMultipleConfirm,med,declaration-only;source:items1.h:1196
+T00039.007,DiscardMultiple,DiscardMenuState DiscardMultiple,med,declaration-only;source:items1.h:1197
+T00040.000,Init,CardReadinessState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00040.001,Ready,CardReadinessState Ready,med,declaration-only;source:MENU/MENU7.PRG/260.c:567
+T00040.002,Unformatted,CardReadinessState Unformatted,med,declaration-only;source:MENU/MENU7.PRG/260.c:568
+T00040.003,Confirmed,CardReadinessState Confirmed,med,declaration-only;source:MENU/MENU7.PRG/260.c:569
+T00040.004,LoadReady,CardReadinessState LoadReady,med,declaration-only;source:MENU/MENU7.PRG/260.c:570
+T00040.005,Loaded,CardReadinessState Loaded,med,declaration-only;source:MENU/MENU7.PRG/260.c:571
+T00041.000,Init,SaveReadState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00041.001,Reading,SaveReadState Reading,med,declaration-only;source:MENU/MENU7.PRG/260.c:873
+T00042.000,Init,SaveWriteState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00042.001,TemporaryFileCreated,SaveWriteState TemporaryFileCreated,med,declaration-only;source:MENU/MENU7.PRG/260.c:964
+T00042.002,ReadReady,SaveWriteState ReadReady,med,declaration-only;source:MENU/MENU7.PRG/260.c:965
+T00042.003,VerifyPending,SaveWriteState VerifyPending,med,declaration-only;source:MENU/MENU7.PRG/260.c:966
+T00042.004,FileVerified,SaveWriteState FileVerified,med,declaration-only;source:MENU/MENU7.PRG/260.c:967
+T00043.000,None,ResourceInitState None,med,declaration-only;source:15AC.c:169
+T00043.001,QueueReady,ResourceInitState QueueReady,med,declaration-only;source:MENU/MENU7.PRG/260.c:1084
+T00043.002,Enqueued,ResourceInitState Enqueued,med,declaration-only;source:MENU/MENU7.PRG/260.c:1085
+T00044.000,InitYes,ConfirmationState InitYes,med,declaration-only;source:MENU/MENU7.PRG/260.c:2095
+T00044.001,InitNo,ConfirmationState InitNo,med,declaration-only;source:MENU/MENU7.PRG/260.c:2096
+T00044.002,WaitForAnimation,ConfirmationState WaitForAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2097
+T00044.003,HandleInput,ConfirmationState HandleInput,med,declaration-only;source:15AC.c:24
+T00045.000,PromptConfirm,FormatPromptState PromptConfirm,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00045.001,InitEvents,FormatPromptState InitEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00045.002,HandleEvents,FormatPromptState HandleEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00045.003,Format,FormatPromptState Format,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00046.000,Init,SaveFilesState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00046.001,HandleInput,SaveFilesState HandleInput,med,declaration-only;source:15AC.c:24
+T00046.002,SlotSelected,SaveFilesState SlotSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:2282
+T00046.003,OverwritePrompt,SaveFilesState OverwritePrompt,med,declaration-only;source:MENU/MENU7.PRG/260.c:2283
+T00046.004,InitOverwrite,SaveFilesState InitOverwrite,med,declaration-only;source:MENU/MENU7.PRG/260.c:2284
+T00046.005,Save,SaveFilesState Save,med,declaration-only;source:MENU/MENU7.PRG/260.c:2285
+T00046.006,Validate,SaveFilesState Validate,med,declaration-only;source:MENU/MENU7.PRG/260.c:2286
+T00046.007,LeaveWithTimer,SaveFilesState LeaveWithTimer,med,declaration-only;source:MENU/MENU7.PRG/260.c:2287
+T00046.008,Leave,SaveFilesState Leave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2288
+T00046.009,Format,SaveFilesState Format,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00046.010,LeaveError,SaveFilesState LeaveError,med,declaration-only;source:MENU/MENU7.PRG/260.c:2290
+T00047.000,Init,SaveCardState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00047.001,WaitForUnselectedAnimation,SaveCardState WaitForUnselectedAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2541
+T00047.002,WaitForAnimation,SaveCardState WaitForAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2097
+T00047.003,HandleEvents,SaveCardState HandleEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00047.004,AnimateLeave,SaveCardState AnimateLeave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2544
+T00047.005,Leave,SaveCardState Leave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2288
+T00047.006,InitSaveMenu,SaveCardState InitSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2546
+T00047.007,ShowSaveMenu,SaveCardState ShowSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2547
+T00048.000,Init,SaveMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00048.001,SaveExists,SaveMenuState SaveExists,med,declaration-only;source:MENU/MENU7.PRG/260.c:2677
+T00048.002,LoadSave,SaveMenuState LoadSave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2678
+T00048.003,InitSlot1,SaveMenuState InitSlot1,med,declaration-only;source:MENU/MENU7.PRG/260.c:2679
+T00048.004,InitSlot2,SaveMenuState InitSlot2,med,declaration-only;source:MENU/MENU7.PRG/260.c:2680
+T00048.005,WaitForSlotAnimation,SaveMenuState WaitForSlotAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2681
+T00048.006,HandleInput,SaveMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00048.007,SelectCard,SaveMenuState SelectCard,med,declaration-only;source:MENU/MENU7.PRG/260.c:2683
+T00048.008,ReturnNoSave,SaveMenuState ReturnNoSave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2684
+T00048.009,ContainerWarn,SaveMenuState ContainerWarn,med,declaration-only;source:MENU/MENU7.PRG/260.c:2685
+T00048.010,EraseContainerData,SaveMenuState EraseContainerData,med,declaration-only;source:MENU/MENU7.PRG/260.c:2686
+T00048.011,DiscardChanges,SaveMenuState DiscardChanges,med,declaration-only;source:MENU/MENU7.PRG/260.c:2687
+T00049.000,Init,LoadFilesState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00049.001,HandleInput,LoadFilesState HandleInput,med,declaration-only;source:15AC.c:24
+T00049.002,StartLoad,LoadFilesState StartLoad,med,declaration-only;source:MENU/MENU7.PRG/260.c:2883
+T00049.003,ApplyLoad,LoadFilesState ApplyLoad,med,declaration-only;source:MENU/MENU7.PRG/260.c:2884
+T00049.004,Loaded,LoadFilesState Loaded,med,declaration-only;source:MENU/MENU7.PRG/260.c:571
+T00049.005,Exiting,LoadFilesState Exiting,med,declaration-only;source:MENU/MENU7.PRG/260.c:2886
+T00050.000,Init,LoadCardState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00050.001,WaitForUnselectedAnimation,LoadCardState WaitForUnselectedAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2541
+T00050.002,PollEventsInit,LoadCardState PollEventsInit,med,declaration-only;source:MENU/MENU7.PRG/260.c:3068
+T00050.003,PollEvents,LoadCardState PollEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:3069
+T00050.004,Leave,LoadCardState Leave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2288
+T00050.005,ReturnNotSelected,LoadCardState ReturnNotSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:3071
+T00050.006,PollSuccess,LoadCardState PollSuccess,med,declaration-only;source:MENU/MENU7.PRG/260.c:3072
+T00050.007,SelectFile,LoadCardState SelectFile,med,declaration-only;source:MENU/MENU7.PRG/260.c:3073
+T00051.000,Init,LoadMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00051.001,DisplaySlot1,LoadMenuState DisplaySlot1,med,declaration-only;source:MENU/MENU7.PRG/260.c:3191
+T00051.002,DisplaySlot2,LoadMenuState DisplaySlot2,med,declaration-only;source:MENU/MENU7.PRG/260.c:3192
+T00051.003,WaitForSlotAnimation,LoadMenuState WaitForSlotAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2681
+T00051.004,HandleInput,LoadMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00051.005,SlotSelected,LoadMenuState SlotSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:2282
+T00051.006,Exit,LoadMenuState Exit,med,declaration-only;source:15AC.c:184
+T00051.007,FadeAndReturnSelected,LoadMenuState FadeAndReturnSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:3197
+T00051.008,FadeAndReturnNotSelected,LoadMenuState FadeAndReturnNotSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:3198
+T00052.000,Init,EquipmentDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00052.001,Animate,EquipmentDetailsState Animate,med,declaration-only;source:234.c:837
+T00052.002,HandleInput,EquipmentDetailsState HandleInput,med,declaration-only;source:15AC.c:24
+T00052.003,Exit,EquipmentDetailsState Exit,med,declaration-only;source:15AC.c:184
+T00053.000,Init,MiscItemShortcutState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.001,WaitTitle,MiscItemShortcutState WaitTitle,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.002,InitItemRows,MiscItemShortcutState InitItemRows,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.003,WaitForInput,MiscItemShortcutState WaitForInput,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.004,Quit,MiscItemShortcutState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00054.000,InitTeleport,TeleportMenuState InitTeleport,med,declaration-only;source:15AC.c:24
+T00054.001,HandleInput,TeleportMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00054.002,ReturnIfReady,TeleportMenuState ReturnIfReady,med,declaration-only;source:15AC.c:24
+T00055.000,None,MagicMenuState None,med,declaration-only;source:15AC.c:169
+T00055.001,HandleShortcut,MagicMenuState HandleShortcut,med,declaration-only;source:15AC.c:170
+T00055.002,InitSubmenu,MagicMenuState InitSubmenu,med,declaration-only;source:15AC.c:171
+T00055.003,HandleSubmenu,MagicMenuState HandleSubmenu,med,declaration-only;source:15AC.c:172
+T00055.004,InitWarlockMenu,MagicMenuState InitWarlockMenu,med,declaration-only;source:15AC.c:173
+T00055.005,WarlockMenu,MagicMenuState WarlockMenu,med,declaration-only;source:15AC.c:174
+T00055.006,InitShamanMenu,MagicMenuState InitShamanMenu,med,declaration-only;source:15AC.c:175
+T00055.007,ShamanMenu,MagicMenuState ShamanMenu,med,declaration-only;source:15AC.c:176
+T00055.008,InitSorcererMenu,MagicMenuState InitSorcererMenu,med,declaration-only;source:15AC.c:177
+T00055.009,SorcererMenu,MagicMenuState SorcererMenu,med,declaration-only;source:15AC.c:178
+T00055.010,InitEnchanterMenu,MagicMenuState InitEnchanterMenu,med,declaration-only;source:15AC.c:179
+T00055.011,EnchanterMenu,MagicMenuState EnchanterMenu,med,declaration-only;source:15AC.c:180
+T00055.012,TeleportMenu,MagicMenuState TeleportMenu,med,declaration-only;source:15AC.c:181
+T00055.013,ExitToMainMenu,MagicMenuState ExitToMainMenu,med,declaration-only;source:15AC.c:182
+T00055.014,ExecuteMagic,MagicMenuState ExecuteMagic,med,declaration-only;source:15AC.c:183
+T00055.015,Exit,MagicMenuState Exit,med,declaration-only;source:15AC.c:184
+T00056.000,Init,WarlockMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00056.001,HandleInput,WarlockMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00056.002,ReturnIfReady,WarlockMenuState ReturnIfReady,med,declaration-only;source:15AC.c:24
+T00056.003,LevelledSpellInit,WarlockMenuState LevelledSpellInit,med,declaration-only;source:84.c:166
+T00056.004,LevelledSpell,WarlockMenuState LevelledSpell,med,declaration-only;source:84.c:166
+T00057.000,Init,ShamanMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00057.001,HandleInput,ShamanMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00057.002,ReturnIfReady,ShamanMenuState ReturnIfReady,med,declaration-only;source:15AC.c:24
+T00058.000,None,BreakArtsMenuState None,med,declaration-only;source:15AC.c:169
+T00058.001,Init,BreakArtsMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00058.002,ArtsInit,BreakArtsMenuState ArtsInit,med,declaration-only;source:30.c:363
+T00058.003,ArtsInitWithTitle,BreakArtsMenuState ArtsInitWithTitle,med,declaration-only;source:30.c:364
+T00058.004,ArtsMenu,BreakArtsMenuState ArtsMenu,med,declaration-only;source:30.c:365
+T00058.005,WeaponCategoryMenu,BreakArtsMenuState WeaponCategoryMenu,med,declaration-only;source:30.c:366
+T00058.006,ExitToMainMenu,BreakArtsMenuState ExitToMainMenu,med,declaration-only;source:15AC.c:182
+T00058.007,ExecuteArt,BreakArtsMenuState ExecuteArt,med,declaration-only;source:30.c:368
+T00058.008,Exit,BreakArtsMenuState Exit,med,declaration-only;source:15AC.c:184
+T00059.000,Init,AbilityUnlockState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00059.001,BothRemaining,AbilityUnlockState BothRemaining,med,declaration-only;source:143C.c:129
+T00059.002,ChainOnly,AbilityUnlockState ChainOnly,med,declaration-only;source:143C.c:130
+T00059.003,DefenseOnly,AbilityUnlockState DefenseOnly,med,declaration-only;source:143C.c:131
+T00059.004,UnlockChainAbility,AbilityUnlockState UnlockChainAbility,med,declaration-only;source:143C.c:132
+T00059.005,UnlockDefenseAbility,AbilityUnlockState UnlockDefenseAbility,med,declaration-only;source:143C.c:133
+T00059.006,ShowMessage,AbilityUnlockState ShowMessage,med,declaration-only;source:143C.c:134
+T00059.007,Reinit,AbilityUnlockState Reinit,med,declaration-only;source:143C.c:135
+T00060.000,Init,UnlockNotificationState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00060.001,BreakArtInit,UnlockNotificationState BreakArtInit,med,declaration-only;source:143C.c:424
+T00060.002,BreakArtUnlock,UnlockNotificationState BreakArtUnlock,med,declaration-only;source:143C.c:424
+T00060.003,AbilityInit,UnlockNotificationState AbilityInit,med,declaration-only;source:143C.c:424
+T00060.004,AbilityUnlock,UnlockNotificationState AbilityUnlock,med,declaration-only;source:143C.c:424
+T00060.005,Exit,UnlockNotificationState Exit,med,declaration-only;source:15AC.c:184
+T00061.000,Init,AssignmentState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00061.001,WaitReady,AssignmentState WaitReady,med,declaration-only;source:64.c:219
+T00061.002,AbilityMenu,AssignmentState AbilityMenu,med,declaration-only;source:64.c:219
+T00062.000,None,BattleAbilitiesMenuState None,med,declaration-only;source:15AC.c:169
+T00062.001,Init,BattleAbilitiesMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00062.002,SelectTypeInit,BattleAbilitiesMenuState SelectTypeInit,med,declaration-only;source:64.c:661
+T00062.003,SelectType,BattleAbilitiesMenuState SelectType,med,declaration-only;source:64.c:662
+T00062.004,Chain,BattleAbilitiesMenuState Chain,med,declaration-only;source:64.c:663
+T00062.005,Defense,BattleAbilitiesMenuState Defense,med,declaration-only;source:64.c:664
+T00062.006,ExitToMainMenu,BattleAbilitiesMenuState ExitToMainMenu,med,declaration-only;source:15AC.c:182
+T00062.007,ExitToBattle,BattleAbilitiesMenuState ExitToBattle,med,declaration-only;source:64.c:666
+T00063.000,Init,WeaponDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00063.001,InitWeapon,WeaponDetailsState InitWeapon,med,declaration-only;source:items1.h:100
+T00063.002,ManageInput,WeaponDetailsState ManageInput,med,declaration-only;source:items1.h:100
+T00063.003,ReturnMenuReady,WeaponDetailsState ReturnMenuReady,med,declaration-only;source:items1.h:100
+T00064.000,Init,ShieldDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00064.001,InitShield,ShieldDetailsState InitShield,med,declaration-only;source:items1.h:367
+T00064.002,ManageInput,ShieldDetailsState ManageInput,med,declaration-only;source:items1.h:100
+T00064.003,ReturnMenuReady,ShieldDetailsState ReturnMenuReady,med,declaration-only;source:items1.h:100
+T00065.000,Init,SortMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00065.001,Sort,SortMenuState Sort,med,declaration-only;source:items1.h:1079
+T00066.000,None,ItemListState None,med,declaration-only;source:15AC.c:169
+T00066.001,Init,ItemListState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00066.002,WaitInit,ItemListState WaitInit,med,declaration-only;source:items2.h:206
+T00066.003,ViewDetails,ItemListState ViewDetails,med,declaration-only;source:items2.h:207
+T00066.004,PopulateActions,ItemListState PopulateActions,med,declaration-only;source:items2.h:208
+T00066.005,ProcessAction,ItemListState ProcessAction,med,declaration-only;source:items2.h:209
+T00066.006,Search,ItemListState Search,med,declaration-only;source:items2.h:210
+T00066.007,Discard,ItemListState Discard,med,declaration-only;source:items2.h:211
+T00066.008,Sort,ItemListState Sort,med,declaration-only;source:items1.h:1079
+T00067.000,Init,EquipmentMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00067.001,InitMenu,EquipmentMenuState InitMenu,med,declaration-only;source:16C.c:1056
+T00067.002,TopMenu,EquipmentMenuState TopMenu,med,declaration-only;source:16C.c:1056
+T00067.003,Quit,EquipmentMenuState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00067.004,InitEquipSubMenu,EquipmentMenuState InitEquipSubMenu,med,declaration-only;source:16C.c:1056
+T00067.005,EquipSubMenu,EquipmentMenuState EquipSubMenu,med,declaration-only;source:16C.c:1056
+T00068.000,None,InventoryMenuState None,med,declaration-only;source:15AC.c:169
+T00068.001,Init,InventoryMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00068.002,LoadItemNamesWait,InventoryMenuState LoadItemNamesWait,med,declaration-only;source:16C.c:1241
+T00068.003,ItemsTop,InventoryMenuState ItemsTop,med,declaration-only;source:16C.c:1242
+T00068.004,Equip,InventoryMenuState Equip,med,declaration-only;source:16C.c:1243
+T00068.005,Quit,InventoryMenuState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00068.006,QuitToBattle,InventoryMenuState QuitToBattle,med,declaration-only;source:16C.c:1245
+T00069.000,MenuLoaded,ActorSwitchState MenuLoaded,med,declaration-only;source:120.c:582
+T00069.001,MenuLoading,ActorSwitchState MenuLoading,med,declaration-only;source:120.c:583
+T00069.002,AnimateForward,ActorSwitchState AnimateForward,med,declaration-only;source:120.c:584
+T00069.003,MenuLoadedReverse,ActorSwitchState MenuLoadedReverse,med,declaration-only;source:120.c:585
+T00069.004,MenuLoadingReverse,ActorSwitchState MenuLoadingReverse,med,declaration-only;source:120.c:586
+T00069.005,AnimateReverse,ActorSwitchState AnimateReverse,med,declaration-only;source:120.c:587
+T00069.006,Complete,ActorSwitchState Complete,med,declaration-only;source:120.c:588
+T00070.000,Init,EquipmentListState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00070.001,AnimWait,EquipmentListState AnimWait,med,declaration-only;source:120.c:1879
+T00070.002,HandleInput,EquipmentListState HandleInput,med,declaration-only;source:15AC.c:24
+T00070.003,WaitChangeActor,EquipmentListState WaitChangeActor,med,declaration-only;source:120.c:1881
+T00070.004,WaitActorInit,EquipmentListState WaitActorInit,med,declaration-only;source:120.c:1882
+T00070.005,EquipDetailScreen,EquipmentListState EquipDetailScreen,med,declaration-only;source:120.c:1883
+T00071.000,None,StatusMenuState None,med,declaration-only;source:15AC.c:169
+T00071.001,Init,StatusMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00071.002,WaitForMenu,StatusMenuState WaitForMenu,med,declaration-only;source:120.c:2275
+T00071.003,ViewEquipment,StatusMenuState ViewEquipment,med,declaration-only;source:120.c:2276
+T00071.004,WaitQuitToMenu,StatusMenuState WaitQuitToMenu,med,declaration-only;source:120.c:2277
+T00071.005,QuitToMenu,StatusMenuState QuitToMenu,med,declaration-only;source:120.c:2278
+T00071.006,WaitQuitToBattle,StatusMenuState WaitQuitToBattle,med,declaration-only;source:120.c:2279
+T00071.007,QuitToBattle,StatusMenuState QuitToBattle,med,declaration-only;source:16C.c:1245
+T00072.000,Init,InitOnlyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00073.000,Init,MapMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00073.001,ProcessInput,MapMenuState ProcessInput,med,declaration-only;source:4D8.c:527
+T00073.002,DisplayMapMenu,MapMenuState DisplayMapMenu,med,declaration-only;source:4D8.c:528
+T00073.003,Quit,MapMenuState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00073.004,InitNewMap,MapMenuState InitNewMap,med,declaration-only;source:4D8.c:530
+T00073.005,WaitForMapAnimation,MapMenuState WaitForMapAnimation,med,declaration-only;source:4D8.c:531
+T00074.000,Init,AreaSelectionState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00074.001,GetSelection,AreaSelectionState GetSelection,med,declaration-only;source:4D8.c:981
+T00075.000,Init,GameOverState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00075.001,LoadAssets,GameOverState LoadAssets,med,declaration-only;source:MENU/MENU7.PRG/260.c:3607
+T00075.002,DisplayGameOver,GameOverState DisplayGameOver,med,declaration-only;source:MENU/MENU7.PRG/260.c:3608
+T00075.003,InitFileMenu,GameOverState InitFileMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:3609
+T00075.004,DisplayFileMenu,GameOverState DisplayFileMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:3610
+T00075.005,SelectFile,GameOverState SelectFile,med,declaration-only;source:MENU/MENU7.PRG/260.c:3073
+T00075.006,RestartIntro,GameOverState RestartIntro,med,declaration-only;source:MENU/MENU7.PRG/260.c:3612
+T00075.007,ReturnToTitle,GameOverState ReturnToTitle,med,declaration-only;source:MENU/MENU7.PRG/260.c:3613
+T00076.000,Init,ContainerConfirmationState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00076.001,AnimWait,ContainerConfirmationState AnimWait,med,declaration-only;source:120.c:1879
+T00076.002,HandleInput,ContainerConfirmationState HandleInput,med,declaration-only;source:15AC.c:24
+T00076.003,ReturnSelection,ContainerConfirmationState ReturnSelection,med,declaration-only;source:30.c:106
+T00077.000,None,DataMenuState None,med,declaration-only;source:15AC.c:169
+T00077.001,Init,DataMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00077.002,LoadWait,DataMenuState LoadWait,med,declaration-only;source:MENU/MENU7.PRG/260.c:4192
+T00077.003,InitSaveMenu,DataMenuState InitSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2546
+T00077.004,ShowSaveMenu,DataMenuState ShowSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2547
+T00077.005,InitLoadMenu,DataMenuState InitLoadMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:4195
+T00077.006,HandleInput,DataMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00078.000,Init,NameEditorState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00078.001,State1,NameEditorState State1,med,declaration-only;source:21A0.c:467
+T00078.002,State2,NameEditorState State2,med,declaration-only;source:21A0.c:468
+T00078.003,LeaveRenameScreen,NameEditorState LeaveRenameScreen,med,declaration-only;source:21A0.c:469
+T00078.004,InitConfirmationScreen,NameEditorState InitConfirmationScreen,med,declaration-only;source:21A0.c:470
+T00078.005,ConfirmationScreen,NameEditorState ConfirmationScreen,med,declaration-only;source:21A0.c:471
+T00078.006,ReturnToRenameScreen,NameEditorState ReturnToRenameScreen,med,declaration-only;source:21A0.c:472

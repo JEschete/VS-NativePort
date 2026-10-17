@@ -1,118 +1,118 @@
 id,type_id,type_name,index,name,generic,type,bits,value,hints,final_name,meaning,confidence,notes
-T00000.000,T00000,BuffReelStats,0,buffReelStatStr,0,,,13,,,,,
-T00000.001,T00000,BuffReelStats,1,buffReelStatAgi,0,,,14,,,,,
-T00000.002,T00000,BuffReelStats,2,buffReelStatInt,0,,,15,,,,,
-T00000.003,T00000,BuffReelStats,3,buffReelStatHp,0,,,16,,,,,
-T00000.004,T00000,BuffReelStats,4,buffReelStatMp,0,,,17,,,,,
-T00001.000,T00001,_disFileIndices,0,rankDis,0,,,0,,,,,
-T00001.001,T00001,_disFileIndices,1,timeDis,0,,,1,,,,,
-T00001.002,T00001,_disFileIndices,2,attackDis,0,,,2,,,,,
-T00001.003,T00001,_disFileIndices,3,iqDis,0,,,3,,,,,
-T00001.004,T00001,_disFileIndices,4,escDis,0,,,4,,,,,
-T00002.000,T00002,_findCurrentSave_e,0,findSaveTimeout,0,,,-2,,,,,
-T00002.001,T00002,_findCurrentSave_e,1,findSaveNotFound,0,,,-1,,,,,
-T00002.002,T00002,_findCurrentSave_e,2,findSavePending,0,,,0,,,,,
-T00003.000,T00003,_memcardEventMask_e,0,memcardEventMaskIgnoreNoEvent,0,,,48,,,,,
-T00003.001,T00003,_memcardEventMask_e,1,memcardEventMaskAll,0,,,112,,,,,
+T00000.000,T00000,BuffReelStats,0,buffReelStatStr,0,,,13,,Str,BuffReelStat Str,med,declaration-only;source:3B8.c:709
+T00000.001,T00000,BuffReelStats,1,buffReelStatAgi,0,,,14,,Agi,BuffReelStat Agi,med,declaration-only;source:3B8.c:710
+T00000.002,T00000,BuffReelStats,2,buffReelStatInt,0,,,15,,Int,BuffReelStat Int,med,declaration-only;source:3B8.c:711
+T00000.003,T00000,BuffReelStats,3,buffReelStatHp,0,,,16,,Hp,BuffReelStat Hp,med,declaration-only;source:3B8.c:712
+T00000.004,T00000,BuffReelStats,4,buffReelStatMp,0,,,17,,Mp,BuffReelStat Mp,med,declaration-only;source:3B8.c:713
+T00001.000,T00001,_disFileIndices,0,rankDis,0,,,0,,Rank,DisFile Rank,med,declaration-only;source:3B8.c:44
+T00001.001,T00001,_disFileIndices,1,timeDis,0,,,1,,Time,DisFile Time,med,declaration-only;source:3B8.c:44
+T00001.002,T00001,_disFileIndices,2,attackDis,0,,,2,,Attack,DisFile Attack,med,declaration-only;source:3B8.c:44
+T00001.003,T00001,_disFileIndices,3,iqDis,0,,,3,,Iq,DisFile Iq,med,declaration-only;source:3B8.c:44
+T00001.004,T00001,_disFileIndices,4,escDis,0,,,4,,Esc,DisFile Esc,med,declaration-only;source:3B8.c:44
+T00002.000,T00002,_findCurrentSave_e,0,findSaveTimeout,0,,,-2,,Timeout,FindSaveResult Timeout,med,declaration-only;source:MENU/MENU7.PRG/260.c:1562
+T00002.001,T00002,_findCurrentSave_e,1,findSaveNotFound,0,,,-1,,NotFound,FindSaveResult NotFound,med,declaration-only;source:MENU/MENU7.PRG/260.c:1563
+T00002.002,T00002,_findCurrentSave_e,2,findSavePending,0,,,0,,Pending,FindSaveResult Pending,med,declaration-only;source:MENU/MENU7.PRG/260.c:1564
+T00003.000,T00003,_memcardEventMask_e,0,memcardEventMaskIgnoreNoEvent,0,,,48,,IgnoreNoEvent,EventMask IgnoreNoEvent,med,declaration-only;source:MENU/MENU7.PRG/260.c:1625
+T00003.001,T00003,_memcardEventMask_e,1,memcardEventMaskAll,0,,,112,,All,EventMask All,med,declaration-only;source:MENU/MENU7.PRG/260.c:1626
 T00004.000,T00004,_memcardMaskedHandler_e,0,memcardMaskedHandlerError,0,,,-1,,Error,Masked card operation failed,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1483
 T00004.001,T00004,_memcardMaskedHandler_e,1,memcardMaskedHandlerPending,0,,,0,,Pending,Masked card operation is pending,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1484
 T00004.002,T00004,_memcardMaskedHandler_e,2,memcardMaskedHandlerComplete,0,,,1,,Complete,Masked card operation completed,med,replaced-by:Save asynchronous completion;declaration-only;source:22C.c:1485
-T00005.000,T00005,_renderLimbUiState,0,_renderLimbUiNone,0,,,0,,,,,
-T00005.001,T00005,_renderLimbUiState,1,_renderLimbUiInit,0,,,1,,,,,
-T00006.000,T00006,abilityState_e,0,abilitiesNone,0,,,0,,,,,
-T00006.001,T00006,abilityState_e,1,abilitiesChainOnly,0,,,1,,,,,
-T00006.002,T00006,abilityState_e,2,abilitiesDefenseOnly,0,,,2,,,,,
-T00006.003,T00006,abilityState_e,3,abilitiesBoth,0,,,3,,,,,
-T00007.000,T00007,abilityType,0,abilityTypeChain,0,,,24,,,,,
-T00007.001,T00007,abilityType,1,abilityTypeDefense,0,,,25,,,,,
+T00005.000,T00005,_renderLimbUiState,0,_renderLimbUiNone,0,,,0,,None,LimbUiMode None,med,declaration-only;source:120.c:1138
+T00005.001,T00005,_renderLimbUiState,1,_renderLimbUiInit,0,,,1,,Init,LimbUiMode Init,med,declaration-only;source:120.c:1138
+T00006.000,T00006,abilityState_e,0,abilitiesNone,0,,,0,,None,RemainingAbilities None,med,declaration-only;source:143C.c:209
+T00006.001,T00006,abilityState_e,1,abilitiesChainOnly,0,,,1,,ChainOnly,RemainingAbilities ChainOnly,med,declaration-only;source:143C.c:210
+T00006.002,T00006,abilityState_e,2,abilitiesDefenseOnly,0,,,2,,DefenseOnly,RemainingAbilities DefenseOnly,med,declaration-only;source:143C.c:211
+T00006.003,T00006,abilityState_e,3,abilitiesBoth,0,,,3,,Both,RemainingAbilities Both,med,declaration-only;source:143C.c:212
+T00007.000,T00007,abilityType,0,abilityTypeChain,0,,,24,,Chain,AbilityType Chain,med,declaration-only;source:64.c:55
+T00007.001,T00007,abilityType,1,abilityTypeDefense,0,,,25,,Defense,AbilityType Defense,med,declaration-only;source:64.c:55
 T00008.000,T00008,actionTypes,0,actionTypeSpell,0,,,1,,Spell,ActionType Spell,med,declaration-only;source:main.h:52
 T00008.001,T00008,actionTypes,1,actionTypeAbility,0,,,2,,Ability,ActionType Ability,med,declaration-only;source:main.h:53
 T00008.002,T00008,actionTypes,2,actionTypeBreakArt,0,,,3,,BreakArt,ActionType BreakArt,med,declaration-only;source:main.h:54
 T00008.003,T00008,actionTypes,3,actionTypeItem,0,,,5,,Item,ActionType Item,med,declaration-only;source:main.h:55
 T00008.004,T00008,actionTypes,4,actionTypeBaseAttack,0,,,6,,BaseAttack,ActionType BaseAttack,med,declaration-only;source:main.h:56
 T00008.005,T00008,actionTypes,5,actionTypeTrap,0,,,7,,Trap,ActionType Trap,med,declaration-only;source:main.h:57
-T00009.000,T00009,actions,0,useItem,0,,,1,,,,,
-T00009.001,T00009,actions,1,searchItem,0,,,2,,,,,
-T00009.002,T00009,actions,2,discardItem,0,,,3,,,,,
-T00009.003,T00009,actions,3,discardAllItems,0,,,4,,,,,
-T00009.004,T00009,actions,4,sortItems,0,,,5,,,,,
+T00009.000,T00009,actions,0,useItem,0,,,1,,UseItem,ItemAction UseItem,med,declaration-only;source:items2.h:216
+T00009.001,T00009,actions,1,searchItem,0,,,2,,SearchItem,ItemAction SearchItem,med,declaration-only;source:items2.h:217
+T00009.002,T00009,actions,2,discardItem,0,,,3,,DiscardItem,ItemAction DiscardItem,med,declaration-only;source:items2.h:218
+T00009.003,T00009,actions,3,discardAllItems,0,,,4,,DiscardAllItems,ItemAction DiscardAllItems,med,declaration-only;source:items2.h:219
+T00009.004,T00009,actions,4,sortItems,0,,,5,,SortItems,ItemAction SortItems,med,declaration-only;source:items2.h:220
 T00010.000,T00010,actions_e,0,vs_main_actions_daggerArt1,0,,,184,,DaggerArtOne,ActionId DaggerArtOne,med,declaration-only;source:main.h:44
-T00011.000,T00011,arrowType_e,0,arrowTypeUp,0,,,0,,,,,
-T00011.001,T00011,arrowType_e,1,arrowTypeDown,0,,,1,,,,,
-T00012.000,T00012,ashleyRenderMode,0,ashleyRenderModeRender,0,,,0,,,,,
-T00012.001,T00012,ashleyRenderMode,1,ashleyRenderModeInit,0,,,1,,,,,
-T00012.002,T00012,ashleyRenderMode,2,ashleyRenderModeRestore,0,,,2,,,,,
+T00011.000,T00011,arrowType_e,0,arrowTypeUp,0,,,0,,Up,ArrowType Up,med,declaration-only;source:494.c:32
+T00011.001,T00011,arrowType_e,1,arrowTypeDown,0,,,1,,Down,ArrowType Down,med,declaration-only;source:494.c:33
+T00012.000,T00012,ashleyRenderMode,0,ashleyRenderModeRender,0,,,0,,Render,AshleyRenderMode Render,med,declaration-only;source:_renderAshley.h:12
+T00012.001,T00012,ashleyRenderMode,1,ashleyRenderModeInit,0,,,1,,Init,AshleyRenderMode Init,med,declaration-only;source:_renderAshley.h:13
+T00012.002,T00012,ashleyRenderMode,2,ashleyRenderModeRestore,0,,,2,,Restore,AshleyRenderMode Restore,med,declaration-only;source:_renderAshley.h:14
 T00013.000,T00013,cdBufferModes_e,0,cdBufferModeNone,0,,,0,,Direct,Sectors are read straight into the destination,high,source:main.c:9039
 T00013.001,T00013,cdBufferModes_e,1,cdBufferModeBuffered,0,,,1,,Buffered,Sectors go to the ring and are copied out each frame,high,source:main.c:9305
 T00013.002,T00013,cdBufferModes_e,2,cdBufferModeManual,0,,,2,,Manual,Sectors go to the ring and the caller consumes them,med,source:main.c:9058
-T00014.000,T00014,copyContainerFlags,0,copyContainerFlagsCopy,0,,,16,,,,,
-T00015.000,T00015,disIndices,0,disIndexCommonZero,0,,,0,,,,,
-T00015.001,T00015,disIndices,1,disIndexRank0Comma,0,,,10,,,,,
-T00015.002,T00015,disIndices,2,disIndexRank0Bonus,0,,,11,,,,,
-T00015.003,T00015,disIndices,3,disIndexRank0RiskbreakerRank,0,,,12,,,,,
-T00015.004,T00015,disIndices,4,disIndexRank0Str,0,,,13,,,,,
-T00015.005,T00015,disIndices,5,disIndexRank0Agl,0,,,14,,,,,
-T00015.006,T00015,disIndices,6,disIndexRank0Int,0,,,15,,,,,
-T00015.007,T00015,disIndices,7,disIndexRank0Hp,0,,,16,,,,,
-T00015.008,T00015,disIndices,8,disIndexRank0Mp,0,,,17,,,,,
-T00015.009,T00015,disIndices,9,disIndexRank0Score,0,,,18,,,,,
-T00015.010,T00015,disIndices,10,disIndexRank0Percent,0,,,19,,,,,
-T00015.011,T00015,disIndices,11,disIndexRank0Pts,0,,,20,,,,,
-T00015.012,T00015,disIndices,12,disIndexRank0MapCompleted,0,,,21,,,,,
-T00015.013,T00015,disIndices,13,disIndexRank0Congratulations,0,,,22,,,,,
-T00015.014,T00015,disIndices,14,disIndexRank0Plus,0,,,24,,,,,
-T00015.015,T00015,disIndices,15,disIndexRank0Minus,0,,,25,,,,,
-T00015.016,T00015,disIndices,16,disIndexRank0Colon,0,,,26,,,,,
-T00015.017,T00015,disIndices,17,disIndexRank1Grand,0,,,27,,,,,
-T00015.018,T00015,disIndices,18,disIndexRank1Master,0,,,28,,,,,
-T00015.019,T00015,disIndices,19,disIndexRank1Breaker,0,,,29,,,,,
-T00015.020,T00015,disIndices,20,disIndexRank1Paladin,0,,,30,,,,,
-T00015.021,T00015,disIndices,21,disIndexRank1Gladiator,0,,,31,,,,,
-T00015.022,T00015,disIndices,22,disIndexRank1Raging,0,,,32,,,,,
-T00015.023,T00015,disIndices,23,disIndexRank1Berserker,0,,,33,,,,,
-T00015.024,T00015,disIndices,24,disIndexRank1Radiant,0,,,34,,,,,
-T00015.025,T00015,disIndices,25,disIndexRank1Couragous,0,,,35,,,,,
-T00015.026,T00015,disIndices,26,disIndexRank1Adventurer,0,,,36,,,,,
-T00015.027,T00015,disIndices,27,disIndexRank1Knight,0,,,37,,,,,
-T00015.028,T00015,disIndices,28,disIndexRank1Archer,0,,,39,,,,,
-T00015.029,T00015,disIndices,29,disIndexRank1DareDevil,0,,,42,,,,,
-T00015.030,T00015,disIndices,30,disIndexRank1Blade,0,,,44,,,,,
-T00015.031,T00015,disIndices,31,disIndexRank2Of,0,,,48,,,,,
-T00015.032,T00015,disIndices,32,disIndexRank2Mystic,0,,,55,,,,,
-T00015.033,T00015,disIndices,33,disIndexRank2Wanderer,0,,,56,,,,,
-T00015.034,T00015,disIndices,34,disIndexRank2Destroyer,0,,,57,,,,,
-T00015.035,T00015,disIndices,35,disIndexRank2Gladiator,0,,,58,,,,,
-T00015.036,T00015,disIndices,36,disIndexRank2Spectrebane,0,,,59,,,,,
-T00015.037,T00015,disIndices,37,disIndexRank2Normal,0,,,60,,,,,
-T00015.038,T00015,disIndices,38,disIndexRank2Phantom,0,,,61,,,,,
-T00015.039,T00015,disIndices,39,disIndexRank2Fighter,0,,,62,,,,,
-T00015.040,T00015,disIndices,40,disIndexRank2Demon,0,,,63,,,,,
-T00015.041,T00015,disIndices,41,disIndexRank2Eater,0,,,64,,,,,
-T00015.042,T00015,disIndices,42,disIndexRank2Agent,0,,,65,,,,,
-T00015.043,T00015,disIndices,43,disIndexRank2Dragon,0,,,66,,,,,
-T00015.044,T00015,disIndices,44,disIndexRank2Slayer,0,,,67,,,,,
-T00015.045,T00015,disIndices,45,disIndexRank2Cartographer,0,,,68,,,,,
-T00015.046,T00015,disIndices,46,disIndexTime0NewRecord,0,,,69,,,,,
-T00015.047,T00015,disIndices,47,disIndexTime0TimeAttackResults,0,,,70,,,,,
-T00015.048,T00015,disIndices,48,disIndexTime0Time,0,,,72,,,,,
-T00015.049,T00015,disIndices,49,disIndexTime0Prime,0,,,73,,,,,
-T00015.050,T00015,disIndices,50,disIndexTime0DoublePrime,0,,,74,,,,,
-T00015.051,T00015,disIndices,51,disIndexTime0First,0,,,75,,,,,
-T00015.052,T00015,disIndices,52,disIndexTime0Excellent,0,,,78,,,,,
-T00015.053,T00015,disIndices,53,disIndexTime0Dash,0,,,83,,,,,
-T00015.054,T00015,disIndices,54,disIndexAttack0Course,0,,,84,,,,,
-T00015.055,T00015,disIndices,55,disIndexAttack0Minotaur,0,,,85,,,,,
-T00015.056,T00015,disIndices,56,disIndexAttack0Death,0,,,91,,,,,
-T00015.057,T00015,disIndices,57,disIndexAttack0OgreZombie,0,,,93,,,,,
-T00015.058,T00015,disIndices,58,disIndexAttack0BestTime,0,,,95,,,,,
-T00015.059,T00015,disIndices,59,disIndexAttack0Three,0,,,96,,,,,
-T00015.060,T00015,disIndices,60,disIndexAttack0TimeAttack,0,,,100,,,,,
-T00015.061,T00015,disIndices,61,disIndexIq0EvolveOrDie,0,,,102,,,,,
-T00015.062,T00015,disIndices,62,disIndexIq0AverageTime,0,,,104,,,,,
-T00015.063,T00015,disIndices,63,disIndexIq0Foodchain,0,,,105,,,,,
-T00015.064,T00015,disIndices,64,disIndexIq1GameDesigner,0,,,107,,,,,
-T00015.065,T00015,disIndices,65,disIndexEsc0GivingUp,0,,,123,,,,,
-T00015.066,T00015,disIndices,66,disIndexEsc0Chicken,0,,,125,,,,,
+T00014.000,T00014,copyContainerFlags,0,copyContainerFlagsCopy,0,,,16,,CopyContainerFlagsCopy,CopyContainerFlag CopyContainerFlagsCopy,med,declaration-only;source:234.c:17
+T00015.000,T00015,disIndices,0,disIndexCommonZero,0,,,0,,CommonZero,DisIndex CommonZero,med,declaration-only;source:3B8.c:492
+T00015.001,T00015,disIndices,1,disIndexRank0Comma,0,,,10,,Rank0Comma,DisIndex Rank0Comma,med,declaration-only;source:3B8.c:493
+T00015.002,T00015,disIndices,2,disIndexRank0Bonus,0,,,11,,Rank0Bonus,DisIndex Rank0Bonus,med,declaration-only;source:3B8.c:494
+T00015.003,T00015,disIndices,3,disIndexRank0RiskbreakerRank,0,,,12,,Rank0RiskbreakerRank,DisIndex Rank0RiskbreakerRank,med,declaration-only;source:3B8.c:495
+T00015.004,T00015,disIndices,4,disIndexRank0Str,0,,,13,,Rank0Str,DisIndex Rank0Str,med,declaration-only;source:3B8.c:496
+T00015.005,T00015,disIndices,5,disIndexRank0Agl,0,,,14,,Rank0Agl,DisIndex Rank0Agl,med,declaration-only;source:3B8.c:497
+T00015.006,T00015,disIndices,6,disIndexRank0Int,0,,,15,,Rank0Int,DisIndex Rank0Int,med,declaration-only;source:3B8.c:498
+T00015.007,T00015,disIndices,7,disIndexRank0Hp,0,,,16,,Rank0Hp,DisIndex Rank0Hp,med,declaration-only;source:3B8.c:499
+T00015.008,T00015,disIndices,8,disIndexRank0Mp,0,,,17,,Rank0Mp,DisIndex Rank0Mp,med,declaration-only;source:3B8.c:500
+T00015.009,T00015,disIndices,9,disIndexRank0Score,0,,,18,,Rank0Score,DisIndex Rank0Score,med,declaration-only;source:3B8.c:501
+T00015.010,T00015,disIndices,10,disIndexRank0Percent,0,,,19,,Rank0Percent,DisIndex Rank0Percent,med,declaration-only;source:3B8.c:502
+T00015.011,T00015,disIndices,11,disIndexRank0Pts,0,,,20,,Rank0Pts,DisIndex Rank0Pts,med,declaration-only;source:3B8.c:503
+T00015.012,T00015,disIndices,12,disIndexRank0MapCompleted,0,,,21,,Rank0MapCompleted,DisIndex Rank0MapCompleted,med,declaration-only;source:3B8.c:504
+T00015.013,T00015,disIndices,13,disIndexRank0Congratulations,0,,,22,,Rank0Congratulations,DisIndex Rank0Congratulations,med,declaration-only;source:3B8.c:505
+T00015.014,T00015,disIndices,14,disIndexRank0Plus,0,,,24,,Rank0Plus,DisIndex Rank0Plus,med,declaration-only;source:3B8.c:506
+T00015.015,T00015,disIndices,15,disIndexRank0Minus,0,,,25,,Rank0Minus,DisIndex Rank0Minus,med,declaration-only;source:3B8.c:507
+T00015.016,T00015,disIndices,16,disIndexRank0Colon,0,,,26,,Rank0Colon,DisIndex Rank0Colon,med,declaration-only;source:3B8.c:508
+T00015.017,T00015,disIndices,17,disIndexRank1Grand,0,,,27,,Rank1Grand,DisIndex Rank1Grand,med,declaration-only;source:3B8.c:509
+T00015.018,T00015,disIndices,18,disIndexRank1Master,0,,,28,,Rank1Master,DisIndex Rank1Master,med,declaration-only;source:3B8.c:510
+T00015.019,T00015,disIndices,19,disIndexRank1Breaker,0,,,29,,Rank1Breaker,DisIndex Rank1Breaker,med,declaration-only;source:3B8.c:511
+T00015.020,T00015,disIndices,20,disIndexRank1Paladin,0,,,30,,Rank1Paladin,DisIndex Rank1Paladin,med,declaration-only;source:3B8.c:512
+T00015.021,T00015,disIndices,21,disIndexRank1Gladiator,0,,,31,,Rank1Gladiator,DisIndex Rank1Gladiator,med,declaration-only;source:3B8.c:513
+T00015.022,T00015,disIndices,22,disIndexRank1Raging,0,,,32,,Rank1Raging,DisIndex Rank1Raging,med,declaration-only;source:3B8.c:514
+T00015.023,T00015,disIndices,23,disIndexRank1Berserker,0,,,33,,Rank1Berserker,DisIndex Rank1Berserker,med,declaration-only;source:3B8.c:515
+T00015.024,T00015,disIndices,24,disIndexRank1Radiant,0,,,34,,Rank1Radiant,DisIndex Rank1Radiant,med,declaration-only;source:3B8.c:516
+T00015.025,T00015,disIndices,25,disIndexRank1Couragous,0,,,35,,Rank1Couragous,DisIndex Rank1Couragous,med,declaration-only;source:3B8.c:517
+T00015.026,T00015,disIndices,26,disIndexRank1Adventurer,0,,,36,,Rank1Adventurer,DisIndex Rank1Adventurer,med,declaration-only;source:3B8.c:518
+T00015.027,T00015,disIndices,27,disIndexRank1Knight,0,,,37,,Rank1Knight,DisIndex Rank1Knight,med,declaration-only;source:3B8.c:519
+T00015.028,T00015,disIndices,28,disIndexRank1Archer,0,,,39,,Rank1Archer,DisIndex Rank1Archer,med,declaration-only;source:3B8.c:520
+T00015.029,T00015,disIndices,29,disIndexRank1DareDevil,0,,,42,,Rank1DareDevil,DisIndex Rank1DareDevil,med,declaration-only;source:3B8.c:521
+T00015.030,T00015,disIndices,30,disIndexRank1Blade,0,,,44,,Rank1Blade,DisIndex Rank1Blade,med,declaration-only;source:3B8.c:522
+T00015.031,T00015,disIndices,31,disIndexRank2Of,0,,,48,,Rank2Of,DisIndex Rank2Of,med,declaration-only;source:3B8.c:523
+T00015.032,T00015,disIndices,32,disIndexRank2Mystic,0,,,55,,Rank2Mystic,DisIndex Rank2Mystic,med,declaration-only;source:3B8.c:524
+T00015.033,T00015,disIndices,33,disIndexRank2Wanderer,0,,,56,,Rank2Wanderer,DisIndex Rank2Wanderer,med,declaration-only;source:3B8.c:525
+T00015.034,T00015,disIndices,34,disIndexRank2Destroyer,0,,,57,,Rank2Destroyer,DisIndex Rank2Destroyer,med,declaration-only;source:3B8.c:526
+T00015.035,T00015,disIndices,35,disIndexRank2Gladiator,0,,,58,,Rank2Gladiator,DisIndex Rank2Gladiator,med,declaration-only;source:3B8.c:527
+T00015.036,T00015,disIndices,36,disIndexRank2Spectrebane,0,,,59,,Rank2Spectrebane,DisIndex Rank2Spectrebane,med,declaration-only;source:3B8.c:528
+T00015.037,T00015,disIndices,37,disIndexRank2Normal,0,,,60,,Rank2Normal,DisIndex Rank2Normal,med,declaration-only;source:3B8.c:529
+T00015.038,T00015,disIndices,38,disIndexRank2Phantom,0,,,61,,Rank2Phantom,DisIndex Rank2Phantom,med,declaration-only;source:3B8.c:530
+T00015.039,T00015,disIndices,39,disIndexRank2Fighter,0,,,62,,Rank2Fighter,DisIndex Rank2Fighter,med,declaration-only;source:3B8.c:531
+T00015.040,T00015,disIndices,40,disIndexRank2Demon,0,,,63,,Rank2Demon,DisIndex Rank2Demon,med,declaration-only;source:3B8.c:532
+T00015.041,T00015,disIndices,41,disIndexRank2Eater,0,,,64,,Rank2Eater,DisIndex Rank2Eater,med,declaration-only;source:3B8.c:533
+T00015.042,T00015,disIndices,42,disIndexRank2Agent,0,,,65,,Rank2Agent,DisIndex Rank2Agent,med,declaration-only;source:3B8.c:534
+T00015.043,T00015,disIndices,43,disIndexRank2Dragon,0,,,66,,Rank2Dragon,DisIndex Rank2Dragon,med,declaration-only;source:3B8.c:535
+T00015.044,T00015,disIndices,44,disIndexRank2Slayer,0,,,67,,Rank2Slayer,DisIndex Rank2Slayer,med,declaration-only;source:3B8.c:536
+T00015.045,T00015,disIndices,45,disIndexRank2Cartographer,0,,,68,,Rank2Cartographer,DisIndex Rank2Cartographer,med,declaration-only;source:3B8.c:537
+T00015.046,T00015,disIndices,46,disIndexTime0NewRecord,0,,,69,,Time0NewRecord,DisIndex Time0NewRecord,med,declaration-only;source:3B8.c:538
+T00015.047,T00015,disIndices,47,disIndexTime0TimeAttackResults,0,,,70,,Time0TimeAttackResults,DisIndex Time0TimeAttackResults,med,declaration-only;source:3B8.c:539
+T00015.048,T00015,disIndices,48,disIndexTime0Time,0,,,72,,Time0Time,DisIndex Time0Time,med,declaration-only;source:3B8.c:540
+T00015.049,T00015,disIndices,49,disIndexTime0Prime,0,,,73,,Time0Prime,DisIndex Time0Prime,med,declaration-only;source:3B8.c:541
+T00015.050,T00015,disIndices,50,disIndexTime0DoublePrime,0,,,74,,Time0DoublePrime,DisIndex Time0DoublePrime,med,declaration-only;source:3B8.c:542
+T00015.051,T00015,disIndices,51,disIndexTime0First,0,,,75,,Time0First,DisIndex Time0First,med,declaration-only;source:3B8.c:543
+T00015.052,T00015,disIndices,52,disIndexTime0Excellent,0,,,78,,Time0Excellent,DisIndex Time0Excellent,med,declaration-only;source:3B8.c:544
+T00015.053,T00015,disIndices,53,disIndexTime0Dash,0,,,83,,Time0Dash,DisIndex Time0Dash,med,declaration-only;source:3B8.c:545
+T00015.054,T00015,disIndices,54,disIndexAttack0Course,0,,,84,,Attack0Course,DisIndex Attack0Course,med,declaration-only;source:3B8.c:546
+T00015.055,T00015,disIndices,55,disIndexAttack0Minotaur,0,,,85,,Attack0Minotaur,DisIndex Attack0Minotaur,med,declaration-only;source:3B8.c:547
+T00015.056,T00015,disIndices,56,disIndexAttack0Death,0,,,91,,Attack0Death,DisIndex Attack0Death,med,declaration-only;source:3B8.c:548
+T00015.057,T00015,disIndices,57,disIndexAttack0OgreZombie,0,,,93,,Attack0OgreZombie,DisIndex Attack0OgreZombie,med,declaration-only;source:3B8.c:549
+T00015.058,T00015,disIndices,58,disIndexAttack0BestTime,0,,,95,,Attack0BestTime,DisIndex Attack0BestTime,med,declaration-only;source:3B8.c:550
+T00015.059,T00015,disIndices,59,disIndexAttack0Three,0,,,96,,Attack0Three,DisIndex Attack0Three,med,declaration-only;source:3B8.c:551
+T00015.060,T00015,disIndices,60,disIndexAttack0TimeAttack,0,,,100,,Attack0TimeAttack,DisIndex Attack0TimeAttack,med,declaration-only;source:3B8.c:552
+T00015.061,T00015,disIndices,61,disIndexIq0EvolveOrDie,0,,,102,,Iq0EvolveOrDie,DisIndex Iq0EvolveOrDie,med,declaration-only;source:3B8.c:553
+T00015.062,T00015,disIndices,62,disIndexIq0AverageTime,0,,,104,,Iq0AverageTime,DisIndex Iq0AverageTime,med,declaration-only;source:3B8.c:554
+T00015.063,T00015,disIndices,63,disIndexIq0Foodchain,0,,,105,,Iq0Foodchain,DisIndex Iq0Foodchain,med,declaration-only;source:3B8.c:555
+T00015.064,T00015,disIndices,64,disIndexIq1GameDesigner,0,,,107,,Iq1GameDesigner,DisIndex Iq1GameDesigner,med,declaration-only;source:3B8.c:556
+T00015.065,T00015,disIndices,65,disIndexEsc0GivingUp,0,,,123,,Esc0GivingUp,DisIndex Esc0GivingUp,med,declaration-only;source:3B8.c:557
+T00015.066,T00015,disIndices,66,disIndexEsc0Chicken,0,,,125,,Esc0Chicken,DisIndex Esc0Chicken,med,declaration-only;source:3B8.c:558
 T00016.000,T00016,diskState_e,0,diskIdle,0,,,0,,Idle,DiscDriveState Idle,med,declaration-only;source:main.c:78
 T00016.001,T00016,diskState_e,1,diskSeekReady,0,,,1,,SeekReady,DiscDriveState SeekReady,med,declaration-only;source:main.c:79
 T00016.002,T00016,diskState_e,2,diskReadReady,0,,,2,,ReadReady,DiscDriveState ReadReady,med,declaration-only;source:main.c:80
@@ -122,33 +122,33 @@ T00016.005,T00016,diskState_e,5,diskReadXaInit,0,,,6,,ReadXaInit,DiscDriveState 
 T00016.006,T00016,diskState_e,6,diskStreamXa,0,,,7,,StreamXa,DiscDriveState StreamXa,med,declaration-only;source:main.c:84
 T00016.007,T00016,diskState_e,7,diskCommandFailed,0,,,8,,CommandFailed,DiscDriveState CommandFailed,med,declaration-only;source:main.c:85
 T00016.008,T00016,diskState_e,8,diskStreamXaEnd,0,,,9,,StreamXaEnd,DiscDriveState StreamXaEnd,med,declaration-only;source:main.c:86
-T00017.000,T00017,drawArtsListOpt,0,opt_forceCursorMemory,0,,,16,,,,,
+T00017.000,T00017,drawArtsListOpt,0,opt_forceCursorMemory,0,,,16,,OptForceCursorMemory,ArtListOption OptForceCursorMemory,med,declaration-only;source:30.c:94
 T00018.000,T00018,easeMode,0,easeModeLinear,0,,,0,,Linear,Linear interpolation,high,source:D4.c:1289
 T00018.001,T00018,easeMode,1,easeModeEaseOut,0,,,1,,EaseOut,Quarter-sine ease-out interpolation,high,source:D4.c:1289
 T00018.002,T00018,easeMode,2,easeModeEaseInOut,0,,,2,,EaseInOut,Half-cosine ease-in-out interpolation,high,source:D4.c:1289
 T00018.003,T00018,easeMode,3,easeModeEaseIn,0,,,3,,EaseIn,Shifted quarter-sine ease-in interpolation,high,source:D4.c:1289
 T00019.000,T00019,enemyClasses,0,enemyClassUndead,0,,,2,,Undead,EnemyClass Undead,med,declaration-only;source:main.h:60
-T00020.000,T00020,fileMenuElementState_e,0,fileMenuElementStateInactive,0,,,0,,,,,
-T00020.001,T00020,fileMenuElementState_e,1,fileMenuElementStateStatic,0,,,1,,,,,
-T00020.002,T00020,fileMenuElementState_e,2,fileMenuElementStateAnimateX,0,,,2,,,,,
-T00020.003,T00020,fileMenuElementState_e,3,fileMenuElementStateAnimateY,0,,,3,,,,,
-T00020.004,T00020,fileMenuElementState_e,4,fileMenuElementStateAnimateNegX,0,,,4,,,,,
+T00020.000,T00020,fileMenuElementState_e,0,fileMenuElementStateInactive,0,,,0,,Inactive,ElementState Inactive,med,declaration-only;source:MENU/MENU7.PRG/260.c:111
+T00020.001,T00020,fileMenuElementState_e,1,fileMenuElementStateStatic,0,,,1,,Static,ElementState Static,med,declaration-only;source:MENU/MENU7.PRG/260.c:112
+T00020.002,T00020,fileMenuElementState_e,2,fileMenuElementStateAnimateX,0,,,2,,AnimateX,ElementState AnimateX,med,declaration-only;source:MENU/MENU7.PRG/260.c:113
+T00020.003,T00020,fileMenuElementState_e,3,fileMenuElementStateAnimateY,0,,,3,,AnimateY,ElementState AnimateY,med,declaration-only;source:MENU/MENU7.PRG/260.c:114
+T00020.004,T00020,fileMenuElementState_e,4,fileMenuElementStateAnimateNegX,0,,,4,,AnimateNegX,ElementState AnimateNegX,med,declaration-only;source:MENU/MENU7.PRG/260.c:115
 T00021.000,T00021,itemIdentifiers,0,bronzeKey,0,,,458,,BronzeKey,KeyItemId BronzeKey,med,declaration-only;source:main.h:238
 T00021.001,T00021,itemIdentifiers,1,chamomileSigil,0,,,466,,ChamomileSigil,KeyItemId ChamomileSigil,med,declaration-only;source:main.h:238
-T00022.000,T00022,lootItemState,0,lootStateNone,0,,,0,,,,,
-T00022.001,T00022,lootItemState,1,lootStateCopied,0,,,1,,,,,
-T00022.002,T00022,lootItemState,2,lootStateNoIndent,0,,,2,,,,,
-T00022.003,T00022,lootItemState,3,lootStateIndent1,0,,,3,,,,,
-T00022.004,T00022,lootItemState,4,lootStateIndent2,0,,,4,,,,,
-T00022.005,T00022,lootItemState,5,lootStateIndent3,0,,,5,,,,,
-T00023.000,T00023,magicSubMenu,0,warlock,0,,,0,,,,,
-T00023.001,T00023,magicSubMenu,1,shaman,0,,,1,,,,,
-T00023.002,T00023,magicSubMenu,2,sorcerer,0,,,2,,,,,
-T00023.003,T00023,magicSubMenu,3,enchanter,0,,,3,,,,,
-T00023.004,T00023,magicSubMenu,4,teleport,0,,,4,,,,,
-T00024.000,T00024,maskedHandler_e,0,memcardMaskedHandlerError,0,,,-1,,,,,
-T00024.001,T00024,maskedHandler_e,1,memcardMaskedHandlerPending,0,,,0,,,,,
-T00024.002,T00024,maskedHandler_e,2,memcardMaskedHandlerComplete,0,,,1,,,,,
+T00022.000,T00022,lootItemState,0,lootStateNone,0,,,0,,None,LootItemState None,med,declaration-only;source:MENU/MENUB.PRG/260.c:16
+T00022.001,T00022,lootItemState,1,lootStateCopied,0,,,1,,Copied,LootItemState Copied,med,declaration-only;source:MENU/MENUB.PRG/260.c:17
+T00022.002,T00022,lootItemState,2,lootStateNoIndent,0,,,2,,NoIndent,LootItemState NoIndent,med,declaration-only;source:MENU/MENUB.PRG/260.c:18
+T00022.003,T00022,lootItemState,3,lootStateIndent1,0,,,3,,Indent1,LootItemState Indent1,med,declaration-only;source:MENU/MENUB.PRG/260.c:19
+T00022.004,T00022,lootItemState,4,lootStateIndent2,0,,,4,,Indent2,LootItemState Indent2,med,declaration-only;source:MENU/MENUB.PRG/260.c:20
+T00022.005,T00022,lootItemState,5,lootStateIndent3,0,,,5,,Indent3,LootItemState Indent3,med,declaration-only;source:MENU/MENUB.PRG/260.c:21
+T00023.000,T00023,magicSubMenu,0,warlock,0,,,0,,Warlock,MagicSubmenu Warlock,med,declaration-only;source:15AC.c:294
+T00023.001,T00023,magicSubMenu,1,shaman,0,,,1,,Shaman,MagicSubmenu Shaman,med,declaration-only;source:15AC.c:294
+T00023.002,T00023,magicSubMenu,2,sorcerer,0,,,2,,Sorcerer,MagicSubmenu Sorcerer,med,declaration-only;source:15AC.c:294
+T00023.003,T00023,magicSubMenu,3,enchanter,0,,,3,,Enchanter,MagicSubmenu Enchanter,med,declaration-only;source:15AC.c:294
+T00023.004,T00023,magicSubMenu,4,teleport,0,,,4,,Teleport,MagicSubmenu Teleport,med,declaration-only;source:15AC.c:294
+T00024.000,T00024,maskedHandler_e,0,memcardMaskedHandlerError,0,,,-1,,Error,MaskedHandlerResult Error,med,declaration-only;source:MENU/MENU7.PRG/260.c:1630
+T00024.001,T00024,maskedHandler_e,1,memcardMaskedHandlerPending,0,,,0,,Pending,MaskedHandlerResult Pending,med,declaration-only;source:MENU/MENU7.PRG/260.c:1631
+T00024.002,T00024,maskedHandler_e,2,memcardMaskedHandlerComplete,0,,,1,,Complete,MaskedHandlerResult Complete,med,declaration-only;source:MENU/MENU7.PRG/260.c:1632
 T00025.000,T00025,memcardEventHandler_e,0,memcardEventPending,0,,,0,,Pending,Still working,high,source:260.c:586
 T00025.001,T00025,memcardEventHandler_e,1,memcardEventIoEnd,0,,,1,,Ready,Card responded and is usable,med,declaration-only;source:260.c:40
 T00025.002,T00025,memcardEventHandler_e,2,memcardEventTimeout,0,,,2,,Timeout,Card did not respond,high,source:260.c:591
@@ -169,277 +169,277 @@ T00028.006,T00028,menuItems,6,menuItemVibrationOff,0,,,5,,VibrationOff,Disable c
 T00028.007,T00028,menuItems,7,menuItemVibrationOn,0,,,6,,VibrationOn,Enable controller vibration,high,source:22C.c:4234
 T00028.008,T00028,menuItems,8,menuItemSoundStereo,0,,,7,,Stereo,Select stereo sound,high,source:22C.c:4234
 T00029.000,T00029,opcodes,0,wait,0,,,1,,Wait,Wait twice the following byte value in frames,high,source:D4.c:1212
-T00030.000,T00030,shortcutMagicMenu,0,warlock,0,,,1,,,,,
-T00030.001,T00030,shortcutMagicMenu,1,shaman,0,,,2,,,,,
-T00030.002,T00030,shortcutMagicMenu,2,sorcerer,0,,,3,,,,,
-T00030.003,T00030,shortcutMagicMenu,3,enchanter,0,,,4,,,,,
+T00030.000,T00030,shortcutMagicMenu,0,warlock,0,,,1,,Warlock,ShortcutMagicMenu Warlock,med,declaration-only;source:15AC.c:204
+T00030.001,T00030,shortcutMagicMenu,1,shaman,0,,,2,,Shaman,ShortcutMagicMenu Shaman,med,declaration-only;source:15AC.c:204
+T00030.002,T00030,shortcutMagicMenu,2,sorcerer,0,,,3,,Sorcerer,ShortcutMagicMenu Sorcerer,med,declaration-only;source:15AC.c:204
+T00030.003,T00030,shortcutMagicMenu,3,enchanter,0,,,4,,Enchanter,ShortcutMagicMenu Enchanter,med,declaration-only;source:15AC.c:204
 T00031.000,T00031,slotState_e,0,slotStateUnavailable,0,,,0,,Unavailable,Save slot cannot be used,high,source:22C.c:132
 T00031.001,T00031,slotState_e,1,slotStateAvailable,0,,,1,,Available,Save slot is available,high,source:22C.c:132
 T00031.002,T00031,slotState_e,2,slotStateTemporary,0,,,2,,Temporary,Slot contains a temporary save,high,source:22C.c:132
 T00031.003,T00031,slotState_e,3,slotStateInUse,0,,,3,,InUse,Slot contains an occupied save,high,source:22C.c:132
-T00032.000,T00032,statType_e,0,statTypeHP,0,,,0,,,,,
-T00032.001,T00032,statType_e,1,statTypeMP,0,,,1,,,,,
-T00033.000,T00033,state,0,init,0,,,0,,,,,
-T00033.001,T00033,state,1,wait,0,,,1,,,,,
-T00033.002,T00033,state,2,manageInput,0,,,2,,,,,
-T00033.003,T00033,state,3,returnMenuReady,0,,,3,,,,,
-T00034.000,T00034,state,0,init,0,,,0,,,,,
-T00034.001,T00034,state,1,handleInput,0,,,1,,,,,
-T00034.002,T00034,state,2,loadObject,0,,,2,,,,,
-T00034.003,T00034,state,3,waitMenuReady,0,,,3,,,,,
-T00035.000,T00035,state,0,init,0,,,0,,,,,
-T00036.000,T00036,state,0,init,0,,,0,,,,,
-T00036.001,T00036,state,1,handleInput,0,,,1,,,,,
-T00036.002,T00036,state,2,returnIfready,0,,,2,,,,,
-T00037.000,T00037,state,0,init,0,,,0,,,,,
-T00037.001,T00037,state,1,waitForSelection,0,,,1,,,,,
-T00037.002,T00037,state,2,returnSelection,0,,,2,,,,,
-T00038.000,T00038,state,0,init,0,,,0,,,,,
-T00038.001,T00038,state,1,abilityMenu,0,,,1,,,,,
-T00039.000,T00039,state,0,init,0,,,0,,,,,
-T00039.001,T00039,state,1,discardOneInit,0,,,1,,,,,
-T00039.002,T00039,state,2,discardMultipleInit,0,,,2,,,,,
-T00039.003,T00039,state,3,discardOne,0,,,3,,,,,
-T00039.004,T00039,state,4,clearTemplate,0,,,4,,,,,
-T00039.005,T00039,state,5,determineDiscardAmount,0,,,5,,,,,
-T00039.006,T00039,state,6,discardMultipleConfirm,0,,,6,,,,,
-T00039.007,T00039,state,7,discardMultiple,0,,,7,,,,,
-T00040.000,T00040,state,0,init,0,,,0,,,,,
-T00040.001,T00040,state,1,ready,0,,,1,,,,,
-T00040.002,T00040,state,2,unformatted,0,,,2,,,,,
-T00040.003,T00040,state,3,confirmed,0,,,3,,,,,
-T00040.004,T00040,state,4,loadReady,0,,,4,,,,,
-T00040.005,T00040,state,5,loaded,0,,,5,,,,,
-T00041.000,T00041,state,0,init,0,,,0,,,,,
-T00041.001,T00041,state,1,reading,0,,,1,,,,,
-T00042.000,T00042,state,0,init,0,,,0,,,,,
-T00042.001,T00042,state,1,tempFileCreated,0,,,1,,,,,
-T00042.002,T00042,state,2,readReady,0,,,2,,,,,
-T00042.003,T00042,state,3,verifyPending,0,,,3,,,,,
-T00042.004,T00042,state,4,fileVerified,0,,,4,,,,,
-T00043.000,T00043,state,0,none,0,,,0,,,,,
-T00043.001,T00043,state,1,queueReady,0,,,1,,,,,
-T00043.002,T00043,state,2,enqueued,0,,,2,,,,,
-T00044.000,T00044,state,0,initYes,0,,,0,,,,,
-T00044.001,T00044,state,1,initNo,0,,,1,,,,,
-T00044.002,T00044,state,2,waitForAnimation,0,,,2,,,,,
-T00044.003,T00044,state,3,handleInput,0,,,3,,,,,
-T00045.000,T00045,state,0,promptConfirm,0,,,0,,,,,
-T00045.001,T00045,state,1,initEvents,0,,,1,,,,,
-T00045.002,T00045,state,2,handleEvents,0,,,2,,,,,
-T00045.003,T00045,state,3,format,0,,,3,,,,,
-T00046.000,T00046,state,0,init,0,,,0,,,,,
-T00046.001,T00046,state,1,handleInput,0,,,1,,,,,
-T00046.002,T00046,state,2,slotSelected,0,,,2,,,,,
-T00046.003,T00046,state,3,overwritePrompt,0,,,3,,,,,
-T00046.004,T00046,state,4,initOverwrite,0,,,4,,,,,
-T00046.005,T00046,state,5,save,0,,,5,,,,,
-T00046.006,T00046,state,6,validate,0,,,6,,,,,
-T00046.007,T00046,state,7,leaveWithTimer,0,,,7,,,,,
-T00046.008,T00046,state,8,leave,0,,,8,,,,,
-T00046.009,T00046,state,9,format,0,,,9,,,,,
-T00046.010,T00046,state,10,leaveError,0,,,10,,,,,
-T00047.000,T00047,state,0,init,0,,,0,,,,,
-T00047.001,T00047,state,1,waitForUnselectedAnimation,0,,,1,,,,,
-T00047.002,T00047,state,2,waitForAnimation,0,,,2,,,,,
-T00047.003,T00047,state,3,handleEvents,0,,,3,,,,,
-T00047.004,T00047,state,4,animateLeave,0,,,4,,,,,
-T00047.005,T00047,state,5,leave,0,,,5,,,,,
-T00047.006,T00047,state,6,initSaveMenu,0,,,6,,,,,
-T00047.007,T00047,state,7,showSaveMenu,0,,,7,,,,,
-T00048.000,T00048,state,0,init,0,,,0,,,,,
-T00048.001,T00048,state,1,saveExists,0,,,1,,,,,
-T00048.002,T00048,state,2,loadSave,0,,,2,,,,,
-T00048.003,T00048,state,3,initSlot1,0,,,3,,,,,
-T00048.004,T00048,state,4,initSlot2,0,,,4,,,,,
-T00048.005,T00048,state,5,waitForSlotAnimation,0,,,5,,,,,
-T00048.006,T00048,state,6,handleInput,0,,,6,,,,,
-T00048.007,T00048,state,7,selectCard,0,,,7,,,,,
-T00048.008,T00048,state,8,returnNoSave,0,,,8,,,,,
-T00048.009,T00048,state,9,containerWarn,0,,,9,,,,,
-T00048.010,T00048,state,10,eraseContainerData,0,,,10,,,,,
-T00048.011,T00048,state,11,discardChanges,0,,,11,,,,,
-T00049.000,T00049,state,0,init,0,,,0,,,,,
-T00049.001,T00049,state,1,handleInput,0,,,1,,,,,
-T00049.002,T00049,state,2,startLoad,0,,,2,,,,,
-T00049.003,T00049,state,3,applyLoad,0,,,3,,,,,
-T00049.004,T00049,state,4,loaded,0,,,4,,,,,
-T00049.005,T00049,state,5,exiting,0,,,5,,,,,
-T00050.000,T00050,state,0,init,0,,,0,,,,,
-T00050.001,T00050,state,1,waitForUnselectedAnimation,0,,,1,,,,,
-T00050.002,T00050,state,2,pollEventsInit,0,,,2,,,,,
-T00050.003,T00050,state,3,pollEvents,0,,,3,,,,,
-T00050.004,T00050,state,4,leave,0,,,4,,,,,
-T00050.005,T00050,state,5,returnNotSelected,0,,,5,,,,,
-T00050.006,T00050,state,6,pollSuccess,0,,,6,,,,,
-T00050.007,T00050,state,7,selectFile,0,,,7,,,,,
-T00051.000,T00051,state,0,init,0,,,0,,,,,
-T00051.001,T00051,state,1,displaySlot1,0,,,1,,,,,
-T00051.002,T00051,state,2,displaySlot2,0,,,2,,,,,
-T00051.003,T00051,state,3,waitForSlotAnimation,0,,,3,,,,,
-T00051.004,T00051,state,4,handleInput,0,,,4,,,,,
-T00051.005,T00051,state,5,slotSelected,0,,,5,,,,,
-T00051.006,T00051,state,6,exit,0,,,6,,,,,
-T00051.007,T00051,state,7,fadeAndReturnSelected,0,,,7,,,,,
-T00051.008,T00051,state,8,fadeAndReturnNotSelected,0,,,8,,,,,
-T00052.000,T00052,state,0,init,0,,,0,,,,,
-T00052.001,T00052,state,1,animate,0,,,1,,,,,
-T00052.002,T00052,state,2,handleInput,0,,,2,,,,,
-T00052.003,T00052,state,3,exit,0,,,3,,,,,
-T00053.000,T00053,state,0,init,0,,,0,,,,,
-T00053.001,T00053,state,1,waitTitle,0,,,1,,,,,
-T00053.002,T00053,state,2,initItemRows,0,,,2,,,,,
-T00053.003,T00053,state,3,waitForInput,0,,,3,,,,,
-T00053.004,T00053,state,4,quit,0,,,4,,,,,
-T00054.000,T00054,state,0,initTeleport,0,,,0,,,,,
-T00054.001,T00054,state,1,handleInput,0,,,1,,,,,
-T00054.002,T00054,state,2,returnIfReady,0,,,2,,,,,
-T00055.000,T00055,state,0,none,0,,,0,,,,,
-T00055.001,T00055,state,1,handleShortcut,0,,,3,,,,,
-T00055.002,T00055,state,2,initSubmenu,0,,,4,,,,,
-T00055.003,T00055,state,3,handleSubmenu,0,,,5,,,,,
-T00055.004,T00055,state,4,initWarlockMenu,0,,,6,,,,,
-T00055.005,T00055,state,5,warlockMenu,0,,,7,,,,,
-T00055.006,T00055,state,6,initShamanMenu,0,,,8,,,,,
-T00055.007,T00055,state,7,shamanMenu,0,,,9,,,,,
-T00055.008,T00055,state,8,initSorcererMenu,0,,,10,,,,,
-T00055.009,T00055,state,9,sorcererMenu,0,,,11,,,,,
-T00055.010,T00055,state,10,initEnchanterMenu,0,,,12,,,,,
-T00055.011,T00055,state,11,enchanterMenu,0,,,13,,,,,
-T00055.012,T00055,state,12,teleportMenu,0,,,14,,,,,
-T00055.013,T00055,state,13,exitToMainMenu,0,,,15,,,,,
-T00055.014,T00055,state,14,executeMagic,0,,,16,,,,,
-T00055.015,T00055,state,15,exit,0,,,17,,,,,
-T00056.000,T00056,state,0,init,0,,,0,,,,,
-T00056.001,T00056,state,1,handleInput,0,,,1,,,,,
-T00056.002,T00056,state,2,returnIfReady,0,,,2,,,,,
-T00056.003,T00056,state,3,levelledSpellInit,0,,,3,,,,,
-T00056.004,T00056,state,4,levelledSpell,0,,,4,,,,,
-T00057.000,T00057,state,0,init,0,,,0,,,,,
-T00057.001,T00057,state,1,handleInput,0,,,1,,,,,
-T00057.002,T00057,state,2,returnIfReady,0,,,2,,,,,
-T00058.000,T00058,state,0,none,0,,,0,,,,,
-T00058.001,T00058,state,1,init,0,,,3,,,,,
-T00058.002,T00058,state,2,artsInit,0,,,4,,,,,
-T00058.003,T00058,state,3,artsInitWithTitle,0,,,5,,,,,
-T00058.004,T00058,state,4,artsMenu,0,,,6,,,,,
-T00058.005,T00058,state,5,weaponCategoryMenu,0,,,7,,,,,
-T00058.006,T00058,state,6,exitToMainMenu,0,,,8,,,,,
-T00058.007,T00058,state,7,executeArt,0,,,9,,,,,
-T00058.008,T00058,state,8,exit,0,,,10,,,,,
-T00059.000,T00059,state,0,init,0,,,0,,,,,
-T00059.001,T00059,state,1,bothRemaining,0,,,1,,,,,
-T00059.002,T00059,state,2,chainOnly,0,,,2,,,,,
-T00059.003,T00059,state,3,defenseOnly,0,,,3,,,,,
-T00059.004,T00059,state,4,unlockChainAbility,0,,,4,,,,,
-T00059.005,T00059,state,5,unlockDefenseAbility,0,,,5,,,,,
-T00059.006,T00059,state,6,showMessage,0,,,6,,,,,
-T00059.007,T00059,state,7,reinit,0,,,7,,,,,
-T00060.000,T00060,state,0,init,0,,,0,,,,,
-T00060.001,T00060,state,1,breakArtInit,0,,,1,,,,,
-T00060.002,T00060,state,2,breakArtUnlock,0,,,2,,,,,
-T00060.003,T00060,state,3,abilityInit,0,,,3,,,,,
-T00060.004,T00060,state,4,abilityUnlock,0,,,4,,,,,
-T00060.005,T00060,state,5,exit,0,,,5,,,,,
-T00061.000,T00061,state,0,init,0,,,0,,,,,
-T00061.001,T00061,state,1,waitReady,0,,,16,,,,,
-T00061.002,T00061,state,2,abilityMenu,0,,,17,,,,,
-T00062.000,T00062,state,0,none,0,,,0,,,,,
-T00062.001,T00062,state,1,init,0,,,3,,,,,
-T00062.002,T00062,state,2,selectTypeInit,0,,,4,,,,,
-T00062.003,T00062,state,3,selectType,0,,,5,,,,,
-T00062.004,T00062,state,4,chain,0,,,6,,,,,
-T00062.005,T00062,state,5,defense,0,,,7,,,,,
-T00062.006,T00062,state,6,exitToMainMenu,0,,,8,,,,,
-T00062.007,T00062,state,7,exitToBattle,0,,,9,,,,,
-T00063.000,T00063,state,0,init,0,,,0,,,,,
-T00063.001,T00063,state,1,initWeapon,0,,,1,,,,,
-T00063.002,T00063,state,2,manageInput,0,,,2,,,,,
-T00063.003,T00063,state,3,returnMenuReady,0,,,3,,,,,
-T00064.000,T00064,state,0,init,0,,,0,,,,,
-T00064.001,T00064,state,1,initShield,0,,,1,,,,,
-T00064.002,T00064,state,2,manageInput,0,,,2,,,,,
-T00064.003,T00064,state,3,returnMenuReady,0,,,3,,,,,
-T00065.000,T00065,state,0,init,0,,,0,,,,,
-T00065.001,T00065,state,1,sort,0,,,1,,,,,
-T00066.000,T00066,state,0,none,0,,,0,,,,,
-T00066.001,T00066,state,1,init,0,,,1,,,,,
-T00066.002,T00066,state,2,waitInit,0,,,5,,,,,
-T00066.003,T00066,state,3,viewDetails,0,,,7,,,,,
-T00066.004,T00066,state,4,populateActions,0,,,8,,,,,
-T00066.005,T00066,state,5,processAction,0,,,9,,,,,
-T00066.006,T00066,state,6,search,0,,,10,,,,,
-T00066.007,T00066,state,7,discard,0,,,11,,,,,
-T00066.008,T00066,state,8,sort,0,,,12,,,,,
-T00067.000,T00067,state,0,init,0,,,0,,,,,
-T00067.001,T00067,state,1,initMenu,0,,,1,,,,,
-T00067.002,T00067,state,2,topMenu,0,,,2,,,,,
-T00067.003,T00067,state,3,quit,0,,,3,,,,,
-T00067.004,T00067,state,4,initEquipSubMenu,0,,,4,,,,,
-T00067.005,T00067,state,5,equipSubMenu,0,,,5,,,,,
-T00068.000,T00068,state,0,none,0,,,0,,,,,
-T00068.001,T00068,state,1,init,0,,,3,,,,,
-T00068.002,T00068,state,2,loadItemNamesWait,0,,,4,,,,,
-T00068.003,T00068,state,3,itemsTop,0,,,5,,,,,
-T00068.004,T00068,state,4,equip,0,,,6,,,,,
-T00068.005,T00068,state,5,quit,0,,,9,,,,,
-T00068.006,T00068,state,6,quitToBattle,0,,,10,,,,,
-T00069.000,T00069,state,0,menuLoaded,0,,,0,,,,,
-T00069.001,T00069,state,1,menuLoading,0,,,1,,,,,
-T00069.002,T00069,state,2,animateForward,0,,,2,,,,,
-T00069.003,T00069,state,3,menuLoadedReverse,0,,,3,,,,,
-T00069.004,T00069,state,4,menuLoadingReverse,0,,,4,,,,,
-T00069.005,T00069,state,5,animateReverse,0,,,5,,,,,
-T00069.006,T00069,state,6,complete,0,,,6,,,,,
-T00070.000,T00070,state,0,init,0,,,0,,,,,
-T00070.001,T00070,state,1,animWait,0,,,1,,,,,
-T00070.002,T00070,state,2,handleInput,0,,,2,,,,,
-T00070.003,T00070,state,3,waitChangeActor,0,,,3,,,,,
-T00070.004,T00070,state,4,waitActorInit,0,,,4,,,,,
-T00070.005,T00070,state,5,equipDetailScreen,0,,,5,,,,,
-T00071.000,T00071,state,0,none,0,,,0,,,,,
-T00071.001,T00071,state,1,init,0,,,3,,,,,
-T00071.002,T00071,state,2,waitForMenu,0,,,4,,,,,
-T00071.003,T00071,state,3,viewEquipment,0,,,7,,,,,
-T00071.004,T00071,state,4,waitQuitToMenu,0,,,11,,,,,
-T00071.005,T00071,state,5,quitToMenu,0,,,12,,,,,
-T00071.006,T00071,state,6,waitQuitToBattle,0,,,13,,,,,
-T00071.007,T00071,state,7,quitToBattle,0,,,14,,,,,
-T00072.000,T00072,state,0,init,0,,,3,,,,,
-T00073.000,T00073,state,0,init,0,,,0,,,,,
-T00073.001,T00073,state,1,processInput,0,,,1,,,,,
-T00073.002,T00073,state,2,displayMapMenu,0,,,2,,,,,
-T00073.003,T00073,state,3,quit,0,,,3,,,,,
-T00073.004,T00073,state,4,initNewMap,0,,,4,,,,,
-T00073.005,T00073,state,5,waitForMapAnimation,0,,,5,,,,,
-T00074.000,T00074,state,0,init,0,,,0,,,,,
-T00074.001,T00074,state,1,getSelection,0,,,1,,,,,
-T00075.000,T00075,state,0,init,0,,,0,,,,,
-T00075.001,T00075,state,1,loadAssets,0,,,1,,,,,
-T00075.002,T00075,state,2,displayGameOver,0,,,2,,,,,
-T00075.003,T00075,state,3,initFileMenu,0,,,3,,,,,
-T00075.004,T00075,state,4,displayFileMenu,0,,,4,,,,,
-T00075.005,T00075,state,5,selectFile,0,,,5,,,,,
-T00075.006,T00075,state,6,restartIntro,0,,,6,,,,,
-T00075.007,T00075,state,7,returnToTitle,0,,,7,,,,,
-T00076.000,T00076,state,0,init,0,,,0,,,,,
-T00076.001,T00076,state,1,animWait,0,,,1,,,,,
-T00076.002,T00076,state,2,handleInput,0,,,2,,,,,
-T00076.003,T00076,state,3,returnSelection,0,,,3,,,,,
-T00077.000,T00077,state,0,none,0,,,0,,,,,
-T00077.001,T00077,state,1,init,0,,,3,,,,,
-T00077.002,T00077,state,2,loadWait,0,,,4,,,,,
-T00077.003,T00077,state,3,initSaveMenu,0,,,7,,,,,
-T00077.004,T00077,state,4,showSaveMenu,0,,,8,,,,,
-T00077.005,T00077,state,5,initLoadMenu,0,,,9,,,,,
-T00077.006,T00077,state,6,handleInput,0,,,10,,,,,
-T00078.000,T00078,state,0,init,0,,,0,,,,,
-T00078.001,T00078,state,1,state1,0,,,1,,,,,
-T00078.002,T00078,state,2,state2,0,,,2,,,,,
-T00078.003,T00078,state,3,leaveRenameScreen,0,,,3,,,,,
-T00078.004,T00078,state,4,initConfirmationScreen,0,,,4,,,,,
-T00078.005,T00078,state,5,confirmationScreen,0,,,5,,,,,
-T00078.006,T00078,state,6,returnToRenameScreen,0,,,6,,,,,
+T00032.000,T00032,statType_e,0,statTypeHP,0,,,0,,HP,StatType HP,med,declaration-only;source:MENU/MENU7.PRG/260.c:1265
+T00032.001,T00032,statType_e,1,statTypeMP,0,,,1,,MP,StatType MP,med,declaration-only;source:MENU/MENU7.PRG/260.c:1265
+T00033.000,T00033,state,0,init,0,,,0,,Init,EquipmentDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00033.001,T00033,state,1,wait,0,,,1,,Wait,EquipmentDetailsState Wait,med,declaration-only;source:items1.h:197
+T00033.002,T00033,state,2,manageInput,0,,,2,,ManageInput,EquipmentDetailsState ManageInput,med,declaration-only;source:items1.h:100
+T00033.003,T00033,state,3,returnMenuReady,0,,,3,,ReturnMenuReady,EquipmentDetailsState ReturnMenuReady,med,declaration-only;source:items1.h:100
+T00034.000,T00034,state,0,init,0,,,0,,Init,EquipmentSlotMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00034.001,T00034,state,1,handleInput,0,,,1,,HandleInput,EquipmentSlotMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00034.002,T00034,state,2,loadObject,0,,,2,,LoadObject,EquipmentSlotMenuState LoadObject,med,declaration-only;source:16C.c:345
+T00034.003,T00034,state,3,waitMenuReady,0,,,3,,WaitMenuReady,EquipmentSlotMenuState WaitMenuReady,med,declaration-only;source:16C.c:345
+T00035.000,T00035,state,0,init,0,,,0,,Init,InitOnlyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00036.000,T00036,state,0,init,0,,,0,,Init,SpellListMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00036.001,T00036,state,1,handleInput,0,,,1,,HandleInput,SpellListMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00036.002,T00036,state,2,returnIfready,0,,,2,,ReturnIfready,SpellListMenuState ReturnIfready,med,declaration-only;source:84.c:615
+T00037.000,T00037,state,0,init,0,,,0,,Init,ArtSelectionState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00037.001,T00037,state,1,waitForSelection,0,,,1,,WaitForSelection,ArtSelectionState WaitForSelection,med,declaration-only;source:30.c:106
+T00037.002,T00037,state,2,returnSelection,0,,,2,,ReturnSelection,ArtSelectionState ReturnSelection,med,declaration-only;source:30.c:106
+T00038.000,T00038,state,0,init,0,,,0,,Init,AbilityListState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00038.001,T00038,state,1,abilityMenu,0,,,1,,AbilityMenu,AbilityListState AbilityMenu,med,declaration-only;source:64.c:219
+T00039.000,T00039,state,0,init,0,,,0,,Init,DiscardMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00039.001,T00039,state,1,discardOneInit,0,,,1,,DiscardOneInit,DiscardMenuState DiscardOneInit,med,declaration-only;source:items1.h:1191
+T00039.002,T00039,state,2,discardMultipleInit,0,,,2,,DiscardMultipleInit,DiscardMenuState DiscardMultipleInit,med,declaration-only;source:items1.h:1192
+T00039.003,T00039,state,3,discardOne,0,,,3,,DiscardOne,DiscardMenuState DiscardOne,med,declaration-only;source:items1.h:1193
+T00039.004,T00039,state,4,clearTemplate,0,,,4,,ClearTemplate,DiscardMenuState ClearTemplate,med,declaration-only;source:items1.h:1194
+T00039.005,T00039,state,5,determineDiscardAmount,0,,,5,,DetermineDiscardAmount,DiscardMenuState DetermineDiscardAmount,med,declaration-only;source:items1.h:1195
+T00039.006,T00039,state,6,discardMultipleConfirm,0,,,6,,DiscardMultipleConfirm,DiscardMenuState DiscardMultipleConfirm,med,declaration-only;source:items1.h:1196
+T00039.007,T00039,state,7,discardMultiple,0,,,7,,DiscardMultiple,DiscardMenuState DiscardMultiple,med,declaration-only;source:items1.h:1197
+T00040.000,T00040,state,0,init,0,,,0,,Init,CardReadinessState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00040.001,T00040,state,1,ready,0,,,1,,Ready,CardReadinessState Ready,med,declaration-only;source:MENU/MENU7.PRG/260.c:567
+T00040.002,T00040,state,2,unformatted,0,,,2,,Unformatted,CardReadinessState Unformatted,med,declaration-only;source:MENU/MENU7.PRG/260.c:568
+T00040.003,T00040,state,3,confirmed,0,,,3,,Confirmed,CardReadinessState Confirmed,med,declaration-only;source:MENU/MENU7.PRG/260.c:569
+T00040.004,T00040,state,4,loadReady,0,,,4,,LoadReady,CardReadinessState LoadReady,med,declaration-only;source:MENU/MENU7.PRG/260.c:570
+T00040.005,T00040,state,5,loaded,0,,,5,,Loaded,CardReadinessState Loaded,med,declaration-only;source:MENU/MENU7.PRG/260.c:571
+T00041.000,T00041,state,0,init,0,,,0,,Init,SaveReadState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00041.001,T00041,state,1,reading,0,,,1,,Reading,SaveReadState Reading,med,declaration-only;source:MENU/MENU7.PRG/260.c:873
+T00042.000,T00042,state,0,init,0,,,0,,Init,SaveWriteState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00042.001,T00042,state,1,tempFileCreated,0,,,1,,TemporaryFileCreated,SaveWriteState TemporaryFileCreated,med,declaration-only;source:MENU/MENU7.PRG/260.c:964
+T00042.002,T00042,state,2,readReady,0,,,2,,ReadReady,SaveWriteState ReadReady,med,declaration-only;source:MENU/MENU7.PRG/260.c:965
+T00042.003,T00042,state,3,verifyPending,0,,,3,,VerifyPending,SaveWriteState VerifyPending,med,declaration-only;source:MENU/MENU7.PRG/260.c:966
+T00042.004,T00042,state,4,fileVerified,0,,,4,,FileVerified,SaveWriteState FileVerified,med,declaration-only;source:MENU/MENU7.PRG/260.c:967
+T00043.000,T00043,state,0,none,0,,,0,,None,ResourceInitState None,med,declaration-only;source:15AC.c:169
+T00043.001,T00043,state,1,queueReady,0,,,1,,QueueReady,ResourceInitState QueueReady,med,declaration-only;source:MENU/MENU7.PRG/260.c:1084
+T00043.002,T00043,state,2,enqueued,0,,,2,,Enqueued,ResourceInitState Enqueued,med,declaration-only;source:MENU/MENU7.PRG/260.c:1085
+T00044.000,T00044,state,0,initYes,0,,,0,,InitYes,ConfirmationState InitYes,med,declaration-only;source:MENU/MENU7.PRG/260.c:2095
+T00044.001,T00044,state,1,initNo,0,,,1,,InitNo,ConfirmationState InitNo,med,declaration-only;source:MENU/MENU7.PRG/260.c:2096
+T00044.002,T00044,state,2,waitForAnimation,0,,,2,,WaitForAnimation,ConfirmationState WaitForAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2097
+T00044.003,T00044,state,3,handleInput,0,,,3,,HandleInput,ConfirmationState HandleInput,med,declaration-only;source:15AC.c:24
+T00045.000,T00045,state,0,promptConfirm,0,,,0,,PromptConfirm,FormatPromptState PromptConfirm,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00045.001,T00045,state,1,initEvents,0,,,1,,InitEvents,FormatPromptState InitEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00045.002,T00045,state,2,handleEvents,0,,,2,,HandleEvents,FormatPromptState HandleEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00045.003,T00045,state,3,format,0,,,3,,Format,FormatPromptState Format,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00046.000,T00046,state,0,init,0,,,0,,Init,SaveFilesState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00046.001,T00046,state,1,handleInput,0,,,1,,HandleInput,SaveFilesState HandleInput,med,declaration-only;source:15AC.c:24
+T00046.002,T00046,state,2,slotSelected,0,,,2,,SlotSelected,SaveFilesState SlotSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:2282
+T00046.003,T00046,state,3,overwritePrompt,0,,,3,,OverwritePrompt,SaveFilesState OverwritePrompt,med,declaration-only;source:MENU/MENU7.PRG/260.c:2283
+T00046.004,T00046,state,4,initOverwrite,0,,,4,,InitOverwrite,SaveFilesState InitOverwrite,med,declaration-only;source:MENU/MENU7.PRG/260.c:2284
+T00046.005,T00046,state,5,save,0,,,5,,Save,SaveFilesState Save,med,declaration-only;source:MENU/MENU7.PRG/260.c:2285
+T00046.006,T00046,state,6,validate,0,,,6,,Validate,SaveFilesState Validate,med,declaration-only;source:MENU/MENU7.PRG/260.c:2286
+T00046.007,T00046,state,7,leaveWithTimer,0,,,7,,LeaveWithTimer,SaveFilesState LeaveWithTimer,med,declaration-only;source:MENU/MENU7.PRG/260.c:2287
+T00046.008,T00046,state,8,leave,0,,,8,,Leave,SaveFilesState Leave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2288
+T00046.009,T00046,state,9,format,0,,,9,,Format,SaveFilesState Format,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00046.010,T00046,state,10,leaveError,0,,,10,,LeaveError,SaveFilesState LeaveError,med,declaration-only;source:MENU/MENU7.PRG/260.c:2290
+T00047.000,T00047,state,0,init,0,,,0,,Init,SaveCardState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00047.001,T00047,state,1,waitForUnselectedAnimation,0,,,1,,WaitForUnselectedAnimation,SaveCardState WaitForUnselectedAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2541
+T00047.002,T00047,state,2,waitForAnimation,0,,,2,,WaitForAnimation,SaveCardState WaitForAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2097
+T00047.003,T00047,state,3,handleEvents,0,,,3,,HandleEvents,SaveCardState HandleEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00047.004,T00047,state,4,animateLeave,0,,,4,,AnimateLeave,SaveCardState AnimateLeave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2544
+T00047.005,T00047,state,5,leave,0,,,5,,Leave,SaveCardState Leave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2288
+T00047.006,T00047,state,6,initSaveMenu,0,,,6,,InitSaveMenu,SaveCardState InitSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2546
+T00047.007,T00047,state,7,showSaveMenu,0,,,7,,ShowSaveMenu,SaveCardState ShowSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2547
+T00048.000,T00048,state,0,init,0,,,0,,Init,SaveMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00048.001,T00048,state,1,saveExists,0,,,1,,SaveExists,SaveMenuState SaveExists,med,declaration-only;source:MENU/MENU7.PRG/260.c:2677
+T00048.002,T00048,state,2,loadSave,0,,,2,,LoadSave,SaveMenuState LoadSave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2678
+T00048.003,T00048,state,3,initSlot1,0,,,3,,InitSlot1,SaveMenuState InitSlot1,med,declaration-only;source:MENU/MENU7.PRG/260.c:2679
+T00048.004,T00048,state,4,initSlot2,0,,,4,,InitSlot2,SaveMenuState InitSlot2,med,declaration-only;source:MENU/MENU7.PRG/260.c:2680
+T00048.005,T00048,state,5,waitForSlotAnimation,0,,,5,,WaitForSlotAnimation,SaveMenuState WaitForSlotAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2681
+T00048.006,T00048,state,6,handleInput,0,,,6,,HandleInput,SaveMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00048.007,T00048,state,7,selectCard,0,,,7,,SelectCard,SaveMenuState SelectCard,med,declaration-only;source:MENU/MENU7.PRG/260.c:2683
+T00048.008,T00048,state,8,returnNoSave,0,,,8,,ReturnNoSave,SaveMenuState ReturnNoSave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2684
+T00048.009,T00048,state,9,containerWarn,0,,,9,,ContainerWarn,SaveMenuState ContainerWarn,med,declaration-only;source:MENU/MENU7.PRG/260.c:2685
+T00048.010,T00048,state,10,eraseContainerData,0,,,10,,EraseContainerData,SaveMenuState EraseContainerData,med,declaration-only;source:MENU/MENU7.PRG/260.c:2686
+T00048.011,T00048,state,11,discardChanges,0,,,11,,DiscardChanges,SaveMenuState DiscardChanges,med,declaration-only;source:MENU/MENU7.PRG/260.c:2687
+T00049.000,T00049,state,0,init,0,,,0,,Init,LoadFilesState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00049.001,T00049,state,1,handleInput,0,,,1,,HandleInput,LoadFilesState HandleInput,med,declaration-only;source:15AC.c:24
+T00049.002,T00049,state,2,startLoad,0,,,2,,StartLoad,LoadFilesState StartLoad,med,declaration-only;source:MENU/MENU7.PRG/260.c:2883
+T00049.003,T00049,state,3,applyLoad,0,,,3,,ApplyLoad,LoadFilesState ApplyLoad,med,declaration-only;source:MENU/MENU7.PRG/260.c:2884
+T00049.004,T00049,state,4,loaded,0,,,4,,Loaded,LoadFilesState Loaded,med,declaration-only;source:MENU/MENU7.PRG/260.c:571
+T00049.005,T00049,state,5,exiting,0,,,5,,Exiting,LoadFilesState Exiting,med,declaration-only;source:MENU/MENU7.PRG/260.c:2886
+T00050.000,T00050,state,0,init,0,,,0,,Init,LoadCardState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00050.001,T00050,state,1,waitForUnselectedAnimation,0,,,1,,WaitForUnselectedAnimation,LoadCardState WaitForUnselectedAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2541
+T00050.002,T00050,state,2,pollEventsInit,0,,,2,,PollEventsInit,LoadCardState PollEventsInit,med,declaration-only;source:MENU/MENU7.PRG/260.c:3068
+T00050.003,T00050,state,3,pollEvents,0,,,3,,PollEvents,LoadCardState PollEvents,med,declaration-only;source:MENU/MENU7.PRG/260.c:3069
+T00050.004,T00050,state,4,leave,0,,,4,,Leave,LoadCardState Leave,med,declaration-only;source:MENU/MENU7.PRG/260.c:2288
+T00050.005,T00050,state,5,returnNotSelected,0,,,5,,ReturnNotSelected,LoadCardState ReturnNotSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:3071
+T00050.006,T00050,state,6,pollSuccess,0,,,6,,PollSuccess,LoadCardState PollSuccess,med,declaration-only;source:MENU/MENU7.PRG/260.c:3072
+T00050.007,T00050,state,7,selectFile,0,,,7,,SelectFile,LoadCardState SelectFile,med,declaration-only;source:MENU/MENU7.PRG/260.c:3073
+T00051.000,T00051,state,0,init,0,,,0,,Init,LoadMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00051.001,T00051,state,1,displaySlot1,0,,,1,,DisplaySlot1,LoadMenuState DisplaySlot1,med,declaration-only;source:MENU/MENU7.PRG/260.c:3191
+T00051.002,T00051,state,2,displaySlot2,0,,,2,,DisplaySlot2,LoadMenuState DisplaySlot2,med,declaration-only;source:MENU/MENU7.PRG/260.c:3192
+T00051.003,T00051,state,3,waitForSlotAnimation,0,,,3,,WaitForSlotAnimation,LoadMenuState WaitForSlotAnimation,med,declaration-only;source:MENU/MENU7.PRG/260.c:2681
+T00051.004,T00051,state,4,handleInput,0,,,4,,HandleInput,LoadMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00051.005,T00051,state,5,slotSelected,0,,,5,,SlotSelected,LoadMenuState SlotSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:2282
+T00051.006,T00051,state,6,exit,0,,,6,,Exit,LoadMenuState Exit,med,declaration-only;source:15AC.c:184
+T00051.007,T00051,state,7,fadeAndReturnSelected,0,,,7,,FadeAndReturnSelected,LoadMenuState FadeAndReturnSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:3197
+T00051.008,T00051,state,8,fadeAndReturnNotSelected,0,,,8,,FadeAndReturnNotSelected,LoadMenuState FadeAndReturnNotSelected,med,declaration-only;source:MENU/MENU7.PRG/260.c:3198
+T00052.000,T00052,state,0,init,0,,,0,,Init,EquipmentDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00052.001,T00052,state,1,animate,0,,,1,,Animate,EquipmentDetailsState Animate,med,declaration-only;source:234.c:837
+T00052.002,T00052,state,2,handleInput,0,,,2,,HandleInput,EquipmentDetailsState HandleInput,med,declaration-only;source:15AC.c:24
+T00052.003,T00052,state,3,exit,0,,,3,,Exit,EquipmentDetailsState Exit,med,declaration-only;source:15AC.c:184
+T00053.000,T00053,state,0,init,0,,,0,,Init,MiscItemShortcutState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.001,T00053,state,1,waitTitle,0,,,1,,WaitTitle,MiscItemShortcutState WaitTitle,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.002,T00053,state,2,initItemRows,0,,,2,,InitItemRows,MiscItemShortcutState InitItemRows,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.003,T00053,state,3,waitForInput,0,,,3,,WaitForInput,MiscItemShortcutState WaitForInput,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.004,T00053,state,4,quit,0,,,4,,Quit,MiscItemShortcutState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00054.000,T00054,state,0,initTeleport,0,,,0,,InitTeleport,TeleportMenuState InitTeleport,med,declaration-only;source:15AC.c:24
+T00054.001,T00054,state,1,handleInput,0,,,1,,HandleInput,TeleportMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00054.002,T00054,state,2,returnIfReady,0,,,2,,ReturnIfReady,TeleportMenuState ReturnIfReady,med,declaration-only;source:15AC.c:24
+T00055.000,T00055,state,0,none,0,,,0,,None,MagicMenuState None,med,declaration-only;source:15AC.c:169
+T00055.001,T00055,state,1,handleShortcut,0,,,3,,HandleShortcut,MagicMenuState HandleShortcut,med,declaration-only;source:15AC.c:170
+T00055.002,T00055,state,2,initSubmenu,0,,,4,,InitSubmenu,MagicMenuState InitSubmenu,med,declaration-only;source:15AC.c:171
+T00055.003,T00055,state,3,handleSubmenu,0,,,5,,HandleSubmenu,MagicMenuState HandleSubmenu,med,declaration-only;source:15AC.c:172
+T00055.004,T00055,state,4,initWarlockMenu,0,,,6,,InitWarlockMenu,MagicMenuState InitWarlockMenu,med,declaration-only;source:15AC.c:173
+T00055.005,T00055,state,5,warlockMenu,0,,,7,,WarlockMenu,MagicMenuState WarlockMenu,med,declaration-only;source:15AC.c:174
+T00055.006,T00055,state,6,initShamanMenu,0,,,8,,InitShamanMenu,MagicMenuState InitShamanMenu,med,declaration-only;source:15AC.c:175
+T00055.007,T00055,state,7,shamanMenu,0,,,9,,ShamanMenu,MagicMenuState ShamanMenu,med,declaration-only;source:15AC.c:176
+T00055.008,T00055,state,8,initSorcererMenu,0,,,10,,InitSorcererMenu,MagicMenuState InitSorcererMenu,med,declaration-only;source:15AC.c:177
+T00055.009,T00055,state,9,sorcererMenu,0,,,11,,SorcererMenu,MagicMenuState SorcererMenu,med,declaration-only;source:15AC.c:178
+T00055.010,T00055,state,10,initEnchanterMenu,0,,,12,,InitEnchanterMenu,MagicMenuState InitEnchanterMenu,med,declaration-only;source:15AC.c:179
+T00055.011,T00055,state,11,enchanterMenu,0,,,13,,EnchanterMenu,MagicMenuState EnchanterMenu,med,declaration-only;source:15AC.c:180
+T00055.012,T00055,state,12,teleportMenu,0,,,14,,TeleportMenu,MagicMenuState TeleportMenu,med,declaration-only;source:15AC.c:181
+T00055.013,T00055,state,13,exitToMainMenu,0,,,15,,ExitToMainMenu,MagicMenuState ExitToMainMenu,med,declaration-only;source:15AC.c:182
+T00055.014,T00055,state,14,executeMagic,0,,,16,,ExecuteMagic,MagicMenuState ExecuteMagic,med,declaration-only;source:15AC.c:183
+T00055.015,T00055,state,15,exit,0,,,17,,Exit,MagicMenuState Exit,med,declaration-only;source:15AC.c:184
+T00056.000,T00056,state,0,init,0,,,0,,Init,WarlockMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00056.001,T00056,state,1,handleInput,0,,,1,,HandleInput,WarlockMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00056.002,T00056,state,2,returnIfReady,0,,,2,,ReturnIfReady,WarlockMenuState ReturnIfReady,med,declaration-only;source:15AC.c:24
+T00056.003,T00056,state,3,levelledSpellInit,0,,,3,,LevelledSpellInit,WarlockMenuState LevelledSpellInit,med,declaration-only;source:84.c:166
+T00056.004,T00056,state,4,levelledSpell,0,,,4,,LevelledSpell,WarlockMenuState LevelledSpell,med,declaration-only;source:84.c:166
+T00057.000,T00057,state,0,init,0,,,0,,Init,ShamanMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00057.001,T00057,state,1,handleInput,0,,,1,,HandleInput,ShamanMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00057.002,T00057,state,2,returnIfReady,0,,,2,,ReturnIfReady,ShamanMenuState ReturnIfReady,med,declaration-only;source:15AC.c:24
+T00058.000,T00058,state,0,none,0,,,0,,None,BreakArtsMenuState None,med,declaration-only;source:15AC.c:169
+T00058.001,T00058,state,1,init,0,,,3,,Init,BreakArtsMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00058.002,T00058,state,2,artsInit,0,,,4,,ArtsInit,BreakArtsMenuState ArtsInit,med,declaration-only;source:30.c:363
+T00058.003,T00058,state,3,artsInitWithTitle,0,,,5,,ArtsInitWithTitle,BreakArtsMenuState ArtsInitWithTitle,med,declaration-only;source:30.c:364
+T00058.004,T00058,state,4,artsMenu,0,,,6,,ArtsMenu,BreakArtsMenuState ArtsMenu,med,declaration-only;source:30.c:365
+T00058.005,T00058,state,5,weaponCategoryMenu,0,,,7,,WeaponCategoryMenu,BreakArtsMenuState WeaponCategoryMenu,med,declaration-only;source:30.c:366
+T00058.006,T00058,state,6,exitToMainMenu,0,,,8,,ExitToMainMenu,BreakArtsMenuState ExitToMainMenu,med,declaration-only;source:15AC.c:182
+T00058.007,T00058,state,7,executeArt,0,,,9,,ExecuteArt,BreakArtsMenuState ExecuteArt,med,declaration-only;source:30.c:368
+T00058.008,T00058,state,8,exit,0,,,10,,Exit,BreakArtsMenuState Exit,med,declaration-only;source:15AC.c:184
+T00059.000,T00059,state,0,init,0,,,0,,Init,AbilityUnlockState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00059.001,T00059,state,1,bothRemaining,0,,,1,,BothRemaining,AbilityUnlockState BothRemaining,med,declaration-only;source:143C.c:129
+T00059.002,T00059,state,2,chainOnly,0,,,2,,ChainOnly,AbilityUnlockState ChainOnly,med,declaration-only;source:143C.c:130
+T00059.003,T00059,state,3,defenseOnly,0,,,3,,DefenseOnly,AbilityUnlockState DefenseOnly,med,declaration-only;source:143C.c:131
+T00059.004,T00059,state,4,unlockChainAbility,0,,,4,,UnlockChainAbility,AbilityUnlockState UnlockChainAbility,med,declaration-only;source:143C.c:132
+T00059.005,T00059,state,5,unlockDefenseAbility,0,,,5,,UnlockDefenseAbility,AbilityUnlockState UnlockDefenseAbility,med,declaration-only;source:143C.c:133
+T00059.006,T00059,state,6,showMessage,0,,,6,,ShowMessage,AbilityUnlockState ShowMessage,med,declaration-only;source:143C.c:134
+T00059.007,T00059,state,7,reinit,0,,,7,,Reinit,AbilityUnlockState Reinit,med,declaration-only;source:143C.c:135
+T00060.000,T00060,state,0,init,0,,,0,,Init,UnlockNotificationState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00060.001,T00060,state,1,breakArtInit,0,,,1,,BreakArtInit,UnlockNotificationState BreakArtInit,med,declaration-only;source:143C.c:424
+T00060.002,T00060,state,2,breakArtUnlock,0,,,2,,BreakArtUnlock,UnlockNotificationState BreakArtUnlock,med,declaration-only;source:143C.c:424
+T00060.003,T00060,state,3,abilityInit,0,,,3,,AbilityInit,UnlockNotificationState AbilityInit,med,declaration-only;source:143C.c:424
+T00060.004,T00060,state,4,abilityUnlock,0,,,4,,AbilityUnlock,UnlockNotificationState AbilityUnlock,med,declaration-only;source:143C.c:424
+T00060.005,T00060,state,5,exit,0,,,5,,Exit,UnlockNotificationState Exit,med,declaration-only;source:15AC.c:184
+T00061.000,T00061,state,0,init,0,,,0,,Init,AssignmentState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00061.001,T00061,state,1,waitReady,0,,,16,,WaitReady,AssignmentState WaitReady,med,declaration-only;source:64.c:219
+T00061.002,T00061,state,2,abilityMenu,0,,,17,,AbilityMenu,AssignmentState AbilityMenu,med,declaration-only;source:64.c:219
+T00062.000,T00062,state,0,none,0,,,0,,None,BattleAbilitiesMenuState None,med,declaration-only;source:15AC.c:169
+T00062.001,T00062,state,1,init,0,,,3,,Init,BattleAbilitiesMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00062.002,T00062,state,2,selectTypeInit,0,,,4,,SelectTypeInit,BattleAbilitiesMenuState SelectTypeInit,med,declaration-only;source:64.c:661
+T00062.003,T00062,state,3,selectType,0,,,5,,SelectType,BattleAbilitiesMenuState SelectType,med,declaration-only;source:64.c:662
+T00062.004,T00062,state,4,chain,0,,,6,,Chain,BattleAbilitiesMenuState Chain,med,declaration-only;source:64.c:663
+T00062.005,T00062,state,5,defense,0,,,7,,Defense,BattleAbilitiesMenuState Defense,med,declaration-only;source:64.c:664
+T00062.006,T00062,state,6,exitToMainMenu,0,,,8,,ExitToMainMenu,BattleAbilitiesMenuState ExitToMainMenu,med,declaration-only;source:15AC.c:182
+T00062.007,T00062,state,7,exitToBattle,0,,,9,,ExitToBattle,BattleAbilitiesMenuState ExitToBattle,med,declaration-only;source:64.c:666
+T00063.000,T00063,state,0,init,0,,,0,,Init,WeaponDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00063.001,T00063,state,1,initWeapon,0,,,1,,InitWeapon,WeaponDetailsState InitWeapon,med,declaration-only;source:items1.h:100
+T00063.002,T00063,state,2,manageInput,0,,,2,,ManageInput,WeaponDetailsState ManageInput,med,declaration-only;source:items1.h:100
+T00063.003,T00063,state,3,returnMenuReady,0,,,3,,ReturnMenuReady,WeaponDetailsState ReturnMenuReady,med,declaration-only;source:items1.h:100
+T00064.000,T00064,state,0,init,0,,,0,,Init,ShieldDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00064.001,T00064,state,1,initShield,0,,,1,,InitShield,ShieldDetailsState InitShield,med,declaration-only;source:items1.h:367
+T00064.002,T00064,state,2,manageInput,0,,,2,,ManageInput,ShieldDetailsState ManageInput,med,declaration-only;source:items1.h:100
+T00064.003,T00064,state,3,returnMenuReady,0,,,3,,ReturnMenuReady,ShieldDetailsState ReturnMenuReady,med,declaration-only;source:items1.h:100
+T00065.000,T00065,state,0,init,0,,,0,,Init,SortMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00065.001,T00065,state,1,sort,0,,,1,,Sort,SortMenuState Sort,med,declaration-only;source:items1.h:1079
+T00066.000,T00066,state,0,none,0,,,0,,None,ItemListState None,med,declaration-only;source:15AC.c:169
+T00066.001,T00066,state,1,init,0,,,1,,Init,ItemListState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00066.002,T00066,state,2,waitInit,0,,,5,,WaitInit,ItemListState WaitInit,med,declaration-only;source:items2.h:206
+T00066.003,T00066,state,3,viewDetails,0,,,7,,ViewDetails,ItemListState ViewDetails,med,declaration-only;source:items2.h:207
+T00066.004,T00066,state,4,populateActions,0,,,8,,PopulateActions,ItemListState PopulateActions,med,declaration-only;source:items2.h:208
+T00066.005,T00066,state,5,processAction,0,,,9,,ProcessAction,ItemListState ProcessAction,med,declaration-only;source:items2.h:209
+T00066.006,T00066,state,6,search,0,,,10,,Search,ItemListState Search,med,declaration-only;source:items2.h:210
+T00066.007,T00066,state,7,discard,0,,,11,,Discard,ItemListState Discard,med,declaration-only;source:items2.h:211
+T00066.008,T00066,state,8,sort,0,,,12,,Sort,ItemListState Sort,med,declaration-only;source:items1.h:1079
+T00067.000,T00067,state,0,init,0,,,0,,Init,EquipmentMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00067.001,T00067,state,1,initMenu,0,,,1,,InitMenu,EquipmentMenuState InitMenu,med,declaration-only;source:16C.c:1056
+T00067.002,T00067,state,2,topMenu,0,,,2,,TopMenu,EquipmentMenuState TopMenu,med,declaration-only;source:16C.c:1056
+T00067.003,T00067,state,3,quit,0,,,3,,Quit,EquipmentMenuState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00067.004,T00067,state,4,initEquipSubMenu,0,,,4,,InitEquipSubMenu,EquipmentMenuState InitEquipSubMenu,med,declaration-only;source:16C.c:1056
+T00067.005,T00067,state,5,equipSubMenu,0,,,5,,EquipSubMenu,EquipmentMenuState EquipSubMenu,med,declaration-only;source:16C.c:1056
+T00068.000,T00068,state,0,none,0,,,0,,None,InventoryMenuState None,med,declaration-only;source:15AC.c:169
+T00068.001,T00068,state,1,init,0,,,3,,Init,InventoryMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00068.002,T00068,state,2,loadItemNamesWait,0,,,4,,LoadItemNamesWait,InventoryMenuState LoadItemNamesWait,med,declaration-only;source:16C.c:1241
+T00068.003,T00068,state,3,itemsTop,0,,,5,,ItemsTop,InventoryMenuState ItemsTop,med,declaration-only;source:16C.c:1242
+T00068.004,T00068,state,4,equip,0,,,6,,Equip,InventoryMenuState Equip,med,declaration-only;source:16C.c:1243
+T00068.005,T00068,state,5,quit,0,,,9,,Quit,InventoryMenuState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00068.006,T00068,state,6,quitToBattle,0,,,10,,QuitToBattle,InventoryMenuState QuitToBattle,med,declaration-only;source:16C.c:1245
+T00069.000,T00069,state,0,menuLoaded,0,,,0,,MenuLoaded,ActorSwitchState MenuLoaded,med,declaration-only;source:120.c:582
+T00069.001,T00069,state,1,menuLoading,0,,,1,,MenuLoading,ActorSwitchState MenuLoading,med,declaration-only;source:120.c:583
+T00069.002,T00069,state,2,animateForward,0,,,2,,AnimateForward,ActorSwitchState AnimateForward,med,declaration-only;source:120.c:584
+T00069.003,T00069,state,3,menuLoadedReverse,0,,,3,,MenuLoadedReverse,ActorSwitchState MenuLoadedReverse,med,declaration-only;source:120.c:585
+T00069.004,T00069,state,4,menuLoadingReverse,0,,,4,,MenuLoadingReverse,ActorSwitchState MenuLoadingReverse,med,declaration-only;source:120.c:586
+T00069.005,T00069,state,5,animateReverse,0,,,5,,AnimateReverse,ActorSwitchState AnimateReverse,med,declaration-only;source:120.c:587
+T00069.006,T00069,state,6,complete,0,,,6,,Complete,ActorSwitchState Complete,med,declaration-only;source:120.c:588
+T00070.000,T00070,state,0,init,0,,,0,,Init,EquipmentListState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00070.001,T00070,state,1,animWait,0,,,1,,AnimWait,EquipmentListState AnimWait,med,declaration-only;source:120.c:1879
+T00070.002,T00070,state,2,handleInput,0,,,2,,HandleInput,EquipmentListState HandleInput,med,declaration-only;source:15AC.c:24
+T00070.003,T00070,state,3,waitChangeActor,0,,,3,,WaitChangeActor,EquipmentListState WaitChangeActor,med,declaration-only;source:120.c:1881
+T00070.004,T00070,state,4,waitActorInit,0,,,4,,WaitActorInit,EquipmentListState WaitActorInit,med,declaration-only;source:120.c:1882
+T00070.005,T00070,state,5,equipDetailScreen,0,,,5,,EquipDetailScreen,EquipmentListState EquipDetailScreen,med,declaration-only;source:120.c:1883
+T00071.000,T00071,state,0,none,0,,,0,,None,StatusMenuState None,med,declaration-only;source:15AC.c:169
+T00071.001,T00071,state,1,init,0,,,3,,Init,StatusMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00071.002,T00071,state,2,waitForMenu,0,,,4,,WaitForMenu,StatusMenuState WaitForMenu,med,declaration-only;source:120.c:2275
+T00071.003,T00071,state,3,viewEquipment,0,,,7,,ViewEquipment,StatusMenuState ViewEquipment,med,declaration-only;source:120.c:2276
+T00071.004,T00071,state,4,waitQuitToMenu,0,,,11,,WaitQuitToMenu,StatusMenuState WaitQuitToMenu,med,declaration-only;source:120.c:2277
+T00071.005,T00071,state,5,quitToMenu,0,,,12,,QuitToMenu,StatusMenuState QuitToMenu,med,declaration-only;source:120.c:2278
+T00071.006,T00071,state,6,waitQuitToBattle,0,,,13,,WaitQuitToBattle,StatusMenuState WaitQuitToBattle,med,declaration-only;source:120.c:2279
+T00071.007,T00071,state,7,quitToBattle,0,,,14,,QuitToBattle,StatusMenuState QuitToBattle,med,declaration-only;source:16C.c:1245
+T00072.000,T00072,state,0,init,0,,,3,,Init,InitOnlyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00073.000,T00073,state,0,init,0,,,0,,Init,MapMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00073.001,T00073,state,1,processInput,0,,,1,,ProcessInput,MapMenuState ProcessInput,med,declaration-only;source:4D8.c:527
+T00073.002,T00073,state,2,displayMapMenu,0,,,2,,DisplayMapMenu,MapMenuState DisplayMapMenu,med,declaration-only;source:4D8.c:528
+T00073.003,T00073,state,3,quit,0,,,3,,Quit,MapMenuState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00073.004,T00073,state,4,initNewMap,0,,,4,,InitNewMap,MapMenuState InitNewMap,med,declaration-only;source:4D8.c:530
+T00073.005,T00073,state,5,waitForMapAnimation,0,,,5,,WaitForMapAnimation,MapMenuState WaitForMapAnimation,med,declaration-only;source:4D8.c:531
+T00074.000,T00074,state,0,init,0,,,0,,Init,AreaSelectionState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00074.001,T00074,state,1,getSelection,0,,,1,,GetSelection,AreaSelectionState GetSelection,med,declaration-only;source:4D8.c:981
+T00075.000,T00075,state,0,init,0,,,0,,Init,GameOverState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00075.001,T00075,state,1,loadAssets,0,,,1,,LoadAssets,GameOverState LoadAssets,med,declaration-only;source:MENU/MENU7.PRG/260.c:3607
+T00075.002,T00075,state,2,displayGameOver,0,,,2,,DisplayGameOver,GameOverState DisplayGameOver,med,declaration-only;source:MENU/MENU7.PRG/260.c:3608
+T00075.003,T00075,state,3,initFileMenu,0,,,3,,InitFileMenu,GameOverState InitFileMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:3609
+T00075.004,T00075,state,4,displayFileMenu,0,,,4,,DisplayFileMenu,GameOverState DisplayFileMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:3610
+T00075.005,T00075,state,5,selectFile,0,,,5,,SelectFile,GameOverState SelectFile,med,declaration-only;source:MENU/MENU7.PRG/260.c:3073
+T00075.006,T00075,state,6,restartIntro,0,,,6,,RestartIntro,GameOverState RestartIntro,med,declaration-only;source:MENU/MENU7.PRG/260.c:3612
+T00075.007,T00075,state,7,returnToTitle,0,,,7,,ReturnToTitle,GameOverState ReturnToTitle,med,declaration-only;source:MENU/MENU7.PRG/260.c:3613
+T00076.000,T00076,state,0,init,0,,,0,,Init,ContainerConfirmationState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00076.001,T00076,state,1,animWait,0,,,1,,AnimWait,ContainerConfirmationState AnimWait,med,declaration-only;source:120.c:1879
+T00076.002,T00076,state,2,handleInput,0,,,2,,HandleInput,ContainerConfirmationState HandleInput,med,declaration-only;source:15AC.c:24
+T00076.003,T00076,state,3,returnSelection,0,,,3,,ReturnSelection,ContainerConfirmationState ReturnSelection,med,declaration-only;source:30.c:106
+T00077.000,T00077,state,0,none,0,,,0,,None,DataMenuState None,med,declaration-only;source:15AC.c:169
+T00077.001,T00077,state,1,init,0,,,3,,Init,DataMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00077.002,T00077,state,2,loadWait,0,,,4,,LoadWait,DataMenuState LoadWait,med,declaration-only;source:MENU/MENU7.PRG/260.c:4192
+T00077.003,T00077,state,3,initSaveMenu,0,,,7,,InitSaveMenu,DataMenuState InitSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2546
+T00077.004,T00077,state,4,showSaveMenu,0,,,8,,ShowSaveMenu,DataMenuState ShowSaveMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:2547
+T00077.005,T00077,state,5,initLoadMenu,0,,,9,,InitLoadMenu,DataMenuState InitLoadMenu,med,declaration-only;source:MENU/MENU7.PRG/260.c:4195
+T00077.006,T00077,state,6,handleInput,0,,,10,,HandleInput,DataMenuState HandleInput,med,declaration-only;source:15AC.c:24
+T00078.000,T00078,state,0,init,0,,,0,,Init,NameEditorState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00078.001,T00078,state,1,state1,0,,,1,,State1,NameEditorState State1,med,declaration-only;source:21A0.c:467
+T00078.002,T00078,state,2,state2,0,,,2,,State2,NameEditorState State2,med,declaration-only;source:21A0.c:468
+T00078.003,T00078,state,3,leaveRenameScreen,0,,,3,,LeaveRenameScreen,NameEditorState LeaveRenameScreen,med,declaration-only;source:21A0.c:469
+T00078.004,T00078,state,4,initConfirmationScreen,0,,,4,,InitConfirmationScreen,NameEditorState InitConfirmationScreen,med,declaration-only;source:21A0.c:470
+T00078.005,T00078,state,5,confirmationScreen,0,,,5,,ConfirmationScreen,NameEditorState ConfirmationScreen,med,declaration-only;source:21A0.c:471
+T00078.006,T00078,state,6,returnToRenameScreen,0,,,6,,ReturnToRenameScreen,NameEditorState ReturnToRenameScreen,med,declaration-only;source:21A0.c:472
 T00079.000,T00079,state,0,none,0,,,0,,,,,
 T00079.001,T00079,state,1,waitReady,0,,,3,,,,,
 T00079.002,T00079,state,2,init,0,,,4,,,,,
@@ -711,8 +711,8 @@ T00122.003,T00122,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00123.000,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
 T00123.001,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
 T00123.002,T00123,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
-T00124.000,T00124,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,,,,
-T00124.001,T00124,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,,,,
+T00124.000,T00124,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,med,same-as:T00192
+T00124.001,T00124,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,med,same-as:T00192
 T00125.000,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect; indexes the effect mediators,high,source:146C.c:13024
 T00125.001,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check selected for the hit,high,source:146C.c:13306
 T00125.002,T00125,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit-chance function index,high,source:146C.c:10085
@@ -958,25 +958,25 @@ T00169.000,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00169.001,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),1,gCurve,0,u_char,,,,greenCurve,Green fade curve,med,declaration-only;source:5BF94.h:276
 T00169.002,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),2,bCurve,0,u_char,,,,blueCurve,Blue fade curve,med,declaration-only;source:5BF94.h:277
 T00169.003,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),3,age,0,u_char,,,,age,Particle age,high,source:5BF94.c:7493
-T00170.000,T00170,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),0,x,0,int,,,,,,,
-T00170.001,T00170,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),1,y,0,int,,,,,,,
-T00171.000,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),0,x,0,short,,,,,,,
-T00171.001,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),1,y,0,short,,,,,,,
-T00171.002,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),2,type,0,short,,,,,,,
-T00171.003,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),3,id,0,short,,,,,,,
-T00172.000,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),0,subId,0,char,,,,,,,
-T00172.001,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),1,wepId,0,char,,,,,,,
-T00172.002,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),2,category,0,char,,,,,,,
-T00172.003,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),3,damageType,0,char,,,,,,,
-T00172.004,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),4,costType,0,char,,,,,,,
-T00172.005,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),5,cost,0,char,,,,,,,
-T00172.006,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),6,unk6,1,char,,,,,,,
-T00172.007,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),7,unk7,1,char,,,,,,,
-T00172.008,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),8,strength,0,char,,,,,,,
-T00172.009,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),9,intelligence,0,char,,,,,,,
-T00172.010,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),10,agility,0,char,,,,,,,
-T00172.011,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),11,_,0,char,,,,,,,
-T00172.012,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),12,range,0,vs_battle_range_t,,,,,,,
+T00170.000,T00170,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),0,x,0,int,,,,x,Named in the fork; see cited use,med,source:4D8.c:2301
+T00170.001,T00170,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),1,y,0,int,,,,y,Named in the fork; see cited use,med,source:4D8.c:2301
+T00171.000,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),0,x,0,short,,,,x,Named in the fork; see cited use,med,source:4D8.c:2443
+T00171.001,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),1,y,0,short,,,,y,Named in the fork; see cited use,med,source:4D8.c:2444
+T00171.002,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),2,type,0,short,,,,type,Named in the fork; see cited use,med,source:4D8.c:2445
+T00171.003,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),3,id,0,short,,,,id,Named in the fork; see cited use,med,source:4D8.c:2446
+T00172.000,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),0,subId,0,char,,,,reserved0,Not read by decompiled code,low,source:168.c:4961
+T00172.001,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),1,wepId,0,char,,,,wepId,Named in the fork; see cited use,med,source:168.c:4964
+T00172.002,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),2,category,0,char,,,,category,Blade category,med,declaration-only;source:168.c:4940
+T00172.003,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),3,damageType,0,char,,,,damageType,Named in the fork; see cited use,med,source:168.c:4967
+T00172.004,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),4,costType,0,char,,,,costType,Named in the fork; see cited use,med,source:168.c:4968
+T00172.005,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),5,cost,0,char,,,,cost,Named in the fork; see cited use,med,source:168.c:4966
+T00172.006,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),6,unk6,1,char,,,,opaque6,"Used, but its meaning is not established",low,source:168.c:4969
+T00172.007,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),7,unk7,1,char,,,,reserved7,Not read by decompiled code,low,declaration-only;source:168.c:4945
+T00172.008,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),8,strength,0,char,,,,strength,Named in the fork; see cited use,med,source:168.c:4971
+T00172.009,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),9,intelligence,0,char,,,,intelligence,Named in the fork; see cited use,med,source:168.c:4972
+T00172.010,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),10,agility,0,char,,,,agility,Named in the fork; see cited use,med,source:168.c:4974
+T00172.011,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),11,_,0,char,,,,reservedB,Not read by decompiled code,low,declaration-only;source:168.c:4949
+T00172.012,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),12,range,0,vs_battle_range_t,,,,range,Named in the fork; see cited use,med,source:168.c:4970
 T00173.000,T00173,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,med,declaration-only;source:main.h:167
 T00173.001,T00173,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,med,declaration-only;source:main.h:168
 T00173.002,T00173,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,med,declaration-only;source:main.h:169
@@ -1009,10 +1009,10 @@ T00180.003,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00180.004,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
 T00180.005,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
 T00180.006,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
-T00181.000,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),0,zoneId,0,short,,,,,,,
-T00181.001,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),1,mapId,0,short,,,,,,,
-T00181.002,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),2,par,0,short,,,,,,,
-T00181.003,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),3,rankCap,0,short,,,,,,,
+T00181.000,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),0,zoneId,0,short,,,,zoneId,Named in the fork; see cited use,med,source:3B8.c:2321
+T00181.001,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),1,mapId,0,short,,,,mapId,Named in the fork; see cited use,med,source:3B8.c:2322
+T00181.002,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),2,par,0,short,,,,par,Named in the fork; see cited use,med,source:3B8.c:2323
+T00181.003,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),3,rankCap,0,short,,,,rankCap,Named in the fork; see cited use,med,source:3B8.c:2324
 T00182.000,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,geometryLength,Geometry section length,med,declaration-only;source:146C.h:221
 T00182.001,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,collisionMapLength,Collision map section length,med,declaration-only;source:146C.h:222
 T00182.002,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,tileCellsLength,Tile cell section length,med,declaration-only;source:146C.h:223
@@ -1048,8 +1048,8 @@ T00185.003,T00185,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00186.000,T00186,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),0,weaponCategories,0,u_short[10],,,,weaponCategoryKills,Kills per weapon category,med,declaration-only;source:main.h:371
 T00186.001,T00186,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),1,battleAbilitiesUnlocked,0,u_short,,,,battleAbilitiesUnlocked,Battle abilities unlocked by kill progress,med,declaration-only;source:main.h:372
 T00186.002,T00186,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:370:5),2,total,0,u_short,,,,totalKills,Total kills,med,declaration-only;source:main.h:373
-T00187.000,T00187,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),0,low,0,char,,,,,,,
-T00187.001,T00187,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,,,,
+T00187.000,T00187,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),0,low,0,char,,,,lowByte,Low eight bits of controller buttons,med,same-as:T00192
+T00187.001,T00187,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:484:5),1,hi,0,char,,,,highByte,High eight bits of controller buttons,med,same-as:T00192
 T00188.000,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),0,effect,0,u_int,7,,,effectId,Hit effect identifier,med,declaration-only;source:main.h:98
 T00188.001,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),1,prerequisiteFunction,0,u_int,6,,,prerequisiteFunctionId,Prerequisite check function index,med,declaration-only;source:main.h:99
 T00188.002,T00188,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\main.h:97:5),2,hitFunction,0,u_int,3,,,hitFunctionId,Hit resolution function index,med,declaration-only;source:main.h:100
@@ -1087,13 +1087,13 @@ T00195.002,T00195,AkaoTimeStamp,2,day_bcd,0,char,,,,dayBcd,BCD day of the timest
 T00195.003,T00195,AkaoTimeStamp,3,hours_bcd,0,char,,,,hoursBcd,BCD hours of the timestamp,med,declaration-only;source:25AC.c:30
 T00195.004,T00195,AkaoTimeStamp,4,minutes_bcd,0,char,,,,minutesBcd,BCD minutes of the timestamp,med,declaration-only;source:25AC.c:31
 T00195.005,T00195,AkaoTimeStamp,5,seconds_bcd,0,char,,,,secondsBcd,BCD seconds of the timestamp,med,declaration-only;source:25AC.c:32
-T00196.000,T00196,AnimationState_t,0,enabled,0,short,,,,,,,
-T00196.001,T00196,AnimationState_t,1,frameMask,0,u_short,,,per-frame-visible-bits,,,,
-T00196.002,T00196,AnimationState_t,2,frameDuration,0,short,,,,,,,
-T00196.003,T00196,AnimationState_t,3,repeat,0,short,,,,,,,
-T00196.004,T00196,AnimationState_t,4,currentFrame,0,short,,,,,,,
-T00196.005,T00196,AnimationState_t,5,timer,0,short,,,,,,,
-T00196.006,T00196,AnimationState_t,6,isActive,0,short,,,hidden-when-one,,,,
+T00196.000,T00196,AnimationState_t,0,enabled,0,short,,,,reserved0,Not read by decompiled code,low,declaration-only;source:494.c:37
+T00196.001,T00196,AnimationState_t,1,frameMask,0,u_short,,,per-frame-visible-bits,frameMask,Named in the fork; see cited use,med,source:494.c:948
+T00196.002,T00196,AnimationState_t,2,frameDuration,0,short,,,,frameDuration,Named in the fork; see cited use,med,source:494.c:951
+T00196.003,T00196,AnimationState_t,3,repeat,0,short,,,,repeat,Named in the fork; see cited use,med,source:494.c:954
+T00196.004,T00196,AnimationState_t,4,currentFrame,0,short,,,,currentFrame,Named in the fork; see cited use,med,source:494.c:944
+T00196.005,T00196,AnimationState_t,5,timer,0,short,,,,timer,Named in the fork; see cited use,med,source:494.c:951
+T00196.006,T00196,AnimationState_t,6,isActive,0,short,,,hidden-when-one,isActive,Named in the fork; see cited use,med,source:494.c:945
 T00197.000,T00197,ColorInfo,0,r,0,char,,,,red,Current 5-bit red,high,source:main.c:10535
 T00197.001,T00197,ColorInfo,1,g,0,char,,,,green,Current 5-bit green,high,source:main.c:10536
 T00197.002,T00197,ColorInfo,2,b,0,char,,,,blue,Current 5-bit blue,high,source:main.c:10537
@@ -1726,10 +1726,10 @@ T00247.000,T00247,D_800F4538_unk58_2,0,unk0,1,u_char,,,,red,First color byte,med
 T00247.001,T00247,D_800F4538_unk58_2,1,unk1,1,u_char,,,,green,Second color byte,med,source:30DB0.c:3913
 T00247.002,T00247,D_800F4538_unk58_2,2,unk2,1,u_char,,,,blue,Third color byte,med,source:30DB0.c:3914
 T00247.003,T00247,D_800F4538_unk58_2,3,unk3,1,u_char,,,,code,Code byte; cleared for plain colors,low,source:4A0A8.c:1518
-T00248.000,T00248,D_800F4538_unk58_3,0,unk0_0,1,u_int,8,,,,,,
-T00248.001,T00248,D_800F4538_unk58_3,1,unk0_8,1,u_int,8,,,,,,
-T00248.002,T00248,D_800F4538_unk58_3,2,unk0_16,1,u_int,8,,,,,,
-T00248.003,T00248,D_800F4538_unk58_3,3,unk0_24,1,u_int,8,,,,,,
+T00248.000,T00248,D_800F4538_unk58_3,0,unk0_0,1,u_int,8,,,opaque0Bit0,"Used, but its meaning is not established",low,source:224.c:128
+T00248.001,T00248,D_800F4538_unk58_3,1,unk0_8,1,u_int,8,,,opaque1Bit0,"Used, but its meaning is not established",low,source:224.c:129
+T00248.002,T00248,D_800F4538_unk58_3,2,unk0_16,1,u_int,8,,,opaque2Bit0,"Used, but its meaning is not established",low,source:224.c:130
+T00248.003,T00248,D_800F4538_unk58_3,3,unk0_24,1,u_int,8,,,opaque3Bit0,"Used, but its meaning is not established",low,source:224.c:131
 T00249.000,T00249,D_800F4538_unk614,0,x,0,u_char,,,,x,Cell X,high,source:40564.c:1442
 T00249.001,T00249,D_800F4538_unk614,1,y,0,u_char,,,,y,Cell Y,high,source:40564.c:1443
 T00249.002,T00249,D_800F4538_unk614,2,columns,0,u_char,,,,columns,Cells per row,high,source:40564.c:1444
@@ -1766,12 +1766,12 @@ T00253.009,T00253,D_800F4538_unkC54,9,unk548_16,1,int,1,,,holdingLastFrame,Set w
 T00253.010,T00253,D_800F4538_unkC54,10,unk548_17,1,int,1,,,reachedEnd,Set when the frame counter reaches the animation length,med,source:44F14.c:1293
 T00253.011,T00253,D_800F4538_unkC54,11,unk548_18,1,int,14,,,reservedBits,Not read,low,declaration-only;source:3A1A0.h:66
 T00253.012,T00253,D_800F4538_unkC54,12,unk54C,1,int,,,,reserved54C,Not read,low,declaration-only;source:3A1A0.h:67
-T00254.000,T00254,D_800F4590_t,0,unk0,1,int,,,,,,,
-T00254.001,T00254,D_800F4590_t,1,unk4,1,int,,,,,,,
-T00254.002,T00254,D_800F4590_t,2,unk8,1,int,,,,,,,
-T00254.003,T00254,D_800F4590_t,3,unkC,1,int,,,,,,,
-T00254.004,T00254,D_800F4590_t,4,unk10,1,char,,,,,,,
-T00254.005,T00254,D_800F4590_t,5,unk11,1,char,,,,,,,
+T00254.000,T00254,D_800F4590_t,0,unk0,1,int,,,,reserved0,Not read by decompiled code,low,source:224.c:118
+T00254.001,T00254,D_800F4590_t,1,unk4,1,int,,,,reserved4,Not read by decompiled code,low,declaration-only;source:30DB0.h:13
+T00254.002,T00254,D_800F4590_t,2,unk8,1,int,,,,opaque8,"Used, but its meaning is not established",low,source:224.c:112
+T00254.003,T00254,D_800F4590_t,3,unkC,1,int,,,,reservedC,Not read by decompiled code,low,declaration-only;source:30DB0.h:15
+T00254.004,T00254,D_800F4590_t,4,unk10,1,char,,,,reserved10,Not read by decompiled code,low,declaration-only;source:30DB0.h:16
+T00254.005,T00254,D_800F4590_t,5,unk11,1,char,,,,opaque11,"Used, but its meaning is not established",low,source:68C4.c:67
 T00255.000,T00255,D_800F45E0_t,0,unk0,1,char,,,,boneCount,SHP bone count; zero for a free slot,med,source:30DB0.c:416
 T00255.001,T00255,D_800F45E0_t,1,unk1,1,char,,,,reserved1,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:453
 T00255.002,T00255,D_800F45E0_t,2,unk2,1,char,,,,reserved2,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:454
@@ -2031,17 +2031,17 @@ T00260.018,T00260,D_800F4BA4_t2,18,previousCamera,0,VECTOR,,,,previousCameraPosi
 T00260.019,T00260,D_800F4BA4_t2,19,computed,0,VECTOR,,,,computedPosition,Position computed by the active motion,med,declaration-only;source:4A0A8.c:39
 T00260.020,T00260,D_800F4BA4_t2,20,current,0,VECTOR,,,,currentPosition,Current endpoint position,med,declaration-only;source:4A0A8.c:40
 T00260.021,T00260,D_800F4BA4_t2,21,target,0,VECTOR,,,,partnerPosition,Current position of the paired endpoint,high,source:4A0A8.c:3417
-T00261.000,T00261,D_800F4EE8_t,0,cursorMemories,0,char[52],,,,,,,
-T00261.001,T00261,D_800F4EE8_t,1,unk34,1,char[6],,,,,,,
-T00261.002,T00261,D_800F4EE8_t,2,unk3A,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),,,inventory-category-and-cursor-memory,,,,
-T00261.003,T00261,D_800F4EE8_t,3,unk4C,1,char[4],,,,,,,
-T00261.004,T00261,D_800F4EE8_t,4,unk50,1,char,,,,,,,
-T00261.005,T00261,D_800F4EE8_t,5,unk51,1,char[51],,,,,,,
-T00261.006,T00261,D_800F4EE8_t,6,selectedEquipment,0,char,,,,,,,
-T00261.007,T00261,D_800F4EE8_t,7,unk85,1,char[25],,,,,,,
-T00261.008,T00261,D_800F4EE8_t,8,unk9E,1,u_short,,,container-transfer-direction-selection,,,,
-T00261.009,T00261,D_800F4EE8_t,9,unkA0,1,char[18],,,container-category-and-cursor-memory,,,,
-T00261.010,T00261,D_800F4EE8_t,10,unkB2,1,char[64],,,,,,,
+T00261.000,T00261,D_800F4EE8_t,0,cursorMemories,0,char[52],,,,cursorMemories,Named in the fork; see cited use,med,source:58EC.c:74
+T00261.001,T00261,D_800F4EE8_t,1,unk34,1,char[6],,,,opaque34,"Used, but its meaning is not established",low,source:143C.c:171
+T00261.002,T00261,D_800F4EE8_t,2,unk3A,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),,,inventory-category-and-cursor-memory,opaque3A,"Used, but its meaning is not established",low,source:items0.h:49
+T00261.003,T00261,D_800F4EE8_t,3,unk4C,1,char[4],,,,reserved4C,Not read by decompiled code,low,declaration-only;source:5BF94.h:137
+T00261.004,T00261,D_800F4EE8_t,4,unk50,1,char,,,,reserved50,Not read by decompiled code,low,declaration-only;source:5BF94.h:138
+T00261.005,T00261,D_800F4EE8_t,5,unk51,1,char[51],,,,opaque51,"Used, but its meaning is not established",low,source:120.c:1169
+T00261.006,T00261,D_800F4EE8_t,6,selectedEquipment,0,char,,,,selectedEquipment,Named in the fork; see cited use,med,source:120.c:1910
+T00261.007,T00261,D_800F4EE8_t,7,unk85,1,char[25],,,,opaque85,"Used, but its meaning is not established",low,source:MENU/MENU7.PRG/260.c:2703
+T00261.008,T00261,D_800F4EE8_t,8,unk9E,1,u_short,,,container-transfer-direction-selection,opaque9E,"Used, but its meaning is not established",low,source:234.c:3057
+T00261.009,T00261,D_800F4EE8_t,9,unkA0,1,char[18],,,container-category-and-cursor-memory,opaqueA0,"Used, but its meaning is not established",low,source:234.c:2431
+T00261.010,T00261,D_800F4EE8_t,10,unkB2,1,char[64],,,,reservedB2,Not read by decompiled code,low,declaration-only;source:5BF94.h:144
 T00262.000,T00262,D_800F53B8_t,0,next,0,struct D_800F53B8_t *,,,,next,Named in the fork; see cited use,med,source:5BF94.c:5124
 T00262.001,T00262,D_800F53B8_t,1,previous,0,struct D_800F53B8_t *,,,,parent,Parent instance that spawned this one (fork name previous),high,source:5BF94.c:7779
 T00262.002,T00262,D_800F53B8_t,2,unk8,1,char,,,particleCount,particleCount,Particles the instance owns,high,source:5BF94.c:6839
@@ -2563,21 +2563,21 @@ T00303.008,T00303,_armature_t,8,unkC,1,u_char,,,pose lock slot,reservedC,Not rea
 T00303.009,T00303,_armature_t,9,unkD,1,u_char,,,,reservedD,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:80
 T00303.010,T00303,_armature_t,10,unkE,1,u_char,,,,reservedE,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:81
 T00303.011,T00303,_armature_t,11,unkF,1,u_char,,,,reservedF,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:82
-T00304.000,T00304,_armorInfo,0,subId,0,char,,,,,,,
-T00304.001,T00304,_armorInfo,1,wepId,0,char,,,,,,,
-T00304.002,T00304,_armorInfo,2,category,0,char,,,,,,,
-T00304.003,T00304,_armorInfo,3,gemSlots,0,char,,,,,,,
-T00304.004,T00304,_armorInfo,4,strength,0,char,,,,,,,
-T00304.005,T00304,_armorInfo,5,intelligence,0,char,,,,,,,
-T00304.006,T00304,_armorInfo,6,agility,0,char,,,,,,,
-T00304.007,T00304,_armorInfo,7,_,0,char,,,,,,,
+T00304.000,T00304,_armorInfo,0,subId,0,char,,,,reserved0,Not read by decompiled code,low,source:168.c:5074
+T00304.001,T00304,_armorInfo,1,wepId,0,char,,,,wepId,Named in the fork; see cited use,med,source:168.c:5027
+T00304.002,T00304,_armorInfo,2,category,0,char,,,,category,Named in the fork; see cited use,med,source:168.c:5028
+T00304.003,T00304,_armorInfo,3,gemSlots,0,char,,,,gemSlots,Named in the fork; see cited use,med,source:168.c:5029
+T00304.004,T00304,_armorInfo,4,strength,0,char,,,,strength,Named in the fork; see cited use,med,source:168.c:5030
+T00304.005,T00304,_armorInfo,5,intelligence,0,char,,,,intelligence,Named in the fork; see cited use,med,source:168.c:5031
+T00304.006,T00304,_armorInfo,6,agility,0,char,,,,agility,Named in the fork; see cited use,med,source:168.c:5033
+T00304.007,T00304,_armorInfo,7,_,0,char,,,,reserved7,Not read by decompiled code,low,declaration-only;source:168.c:4999
 T00305.000,T00305,_armorIntermediate,0,equip,0,vs_battle_uiEquipment,,,,equipment,Armor statistics,high,source:146C.c:1109
 T00305.001,T00305,_armorIntermediate,1,material,0,char,,,,material,Material,high,source:146C.c:1111
 T00305.002,T00305,_armorIntermediate,2,dropRate,0,char,,,,dropRate,Drop rate,high,source:146C.c:1138
 T00305.003,T00305,_armorIntermediate,3,unk32,1,char,,,,opaque32,Copied into the armor state; meaning not established,low,source:146C.c:1139
 T00305.004,T00305,_armorIntermediate,4,index,0,char,,,,index,Index,high,source:146C.c:1117
-T00306.000,T00306,_buffReels_t,0,stat,0,short,,,,,,,
-T00306.001,T00306,_buffReels_t,1,amount,0,short,,,,,,,
+T00306.000,T00306,_buffReels_t,0,stat,0,short,,,,stat,Named in the fork; see cited use,med,source:3B8.c:860
+T00306.001,T00306,_buffReels_t,1,amount,0,short,,,,amount,Named in the fork; see cited use,med,source:3B8.c:859
 T00307.000,T00307,_clutSlot,0,unk4,1,char,,,,reserved0,First byte; no access found,low,declaration-only;source:main.c:35
 T00307.001,T00307,_clutSlot,1,locked,0,char,,,,locked,Prevents vs_main_loadClut from replacing the slot,high,source:main.c:11483
 T00307.002,T00307,_clutSlot,2,animState,0,struct clutAnimState_t,,,,transition,Fade timer of the slot,high,source:main.c:10543
@@ -2612,14 +2612,14 @@ T00309.010,T00309,_creditsElement,10,unk20,1,int,,,,reserved20,Unused member at 
 T00309.011,T00309,_creditsElement,11,unk24,1,int,,,,reserved24,Unused member at byte offset 0x24,low,No member accesses found;preserve until representation modernization;declaration-only;source:D4.c:27
 T00309.012,T00309,_creditsElement,12,unk28,1,int,,,,reserved28,Unused member at byte offset 0x28,low,No member accesses found;preserve until representation modernization;declaration-only;source:D4.c:28
 T00309.013,T00309,_creditsElement,13,unk2C,1,int,,,,reserved2C,Unused member at byte offset 0x2C,low,No member accesses found;preserve until representation modernization;declaration-only;source:D4.c:29
-T00310.000,T00310,_gazetteRow,0,selected,0,char,,,,,,,
-T00310.001,T00310,_gazetteRow,1,unk1,1,char,,,unlockedHighlightEnabled,,,,
-T00310.002,T00310,_gazetteRow,2,animationState,0,char,,,,,,,
-T00310.003,T00310,_gazetteRow,3,disabled,0,char,,,,,,,
-T00310.004,T00310,_gazetteRow,4,x,0,short,,,,,,,
-T00310.005,T00310,_gazetteRow,5,rowIndex,0,short,,,,,,,
-T00310.006,T00310,_gazetteRow,6,title,0,char *,,,,,,,
-T00310.007,T00310,_gazetteRow,7,description,0,char *,,,,,,,
+T00310.000,T00310,_gazetteRow,0,selected,0,char,,,,selected,Named in the fork; see cited use,med,source:238.c:1732
+T00310.001,T00310,_gazetteRow,1,unk1,1,char,,,unlockedHighlightEnabled,opaque1,"Used, but its meaning is not established",low,source:238.c:1737
+T00310.002,T00310,_gazetteRow,2,animationState,0,char,,,,animationState,Named in the fork; see cited use,med,source:238.c:926
+T00310.003,T00310,_gazetteRow,3,disabled,0,char,,,,disabled,Named in the fork; see cited use,med,source:238.c:1734
+T00310.004,T00310,_gazetteRow,4,x,0,short,,,,x,Named in the fork; see cited use,med,source:238.c:1730
+T00310.005,T00310,_gazetteRow,5,rowIndex,0,short,,,,rowIndex,Named in the fork; see cited use,med,source:238.c:1731
+T00310.006,T00310,_gazetteRow,6,title,0,char *,,,,title,Named in the fork; see cited use,med,source:238.c:1738
+T00310.007,T00310,_gazetteRow,7,description,0,char *,,,,description,Named in the fork; see cited use,med,source:238.c:1739
 T00311.000,T00311,_hitEntity_t,0,unk0,1,func_8008631C_t2,,,,target,"Target actor and limb with HP, MP and hit chance",high,source:146C.c:4498
 T00311.001,T00311,_hitEntity_t,1,risk,0,short,,,,riskChange,Risk change,high,source:146C.c:12904
 T00311.002,T00311,_hitEntity_t,2,strength,0,short,,,,strengthChange,Strength change,high,source:146C.c:12722
@@ -2673,9 +2673,9 @@ T00312.019,T00312,_hitIntermediate,19,armorStat,0,short,,,,armorStat,Named in th
 T00312.020,T00312,_hitIntermediate,20,statFactor,0,short,,,,statFactor,Named in the fork; see cited use,med,source:146C.c:11382
 T00312.021,T00312,_hitIntermediate,21,shieldStatFactor,0,short,,,,shieldStatFactor,Named in the fork; see cited use,med,source:146C.c:11381
 T00312.022,T00312,_hitIntermediate,22,armorStatFactor,0,short,,,,armorStatFactor,Named in the fork; see cited use,med,source:146C.c:11380
-T00313.000,T00313,_itemsText_t,0,name,0,u_short[14],,,,,,,
-T00313.001,T00313,_itemsText_t,1,menuRowFlags,0,int,,,packed disabled/style/count/material/capacity/icon flags,,,,
-T00313.002,T00313,_itemsText_t,2,description,0,u_short[48],,,,,,,
+T00313.000,T00313,_itemsText_t,0,name,0,u_short[14],,,,name,Named in the fork; see cited use,med,source:58EC.c:166
+T00313.001,T00313,_itemsText_t,1,menuRowFlags,0,int,,,packed disabled/style/count/material/capacity/icon flags,menuRowFlags,Named in the fork; see cited use,med,source:58EC.c:120
+T00313.002,T00313,_itemsText_t,2,description,0,u_short[48],,,,description,Named in the fork; see cited use,med,source:58EC.c:134
 T00314.000,T00314,_limbInit,0,hp,0,u_short,,,,hp,Hit points (also the maximum),high,source:146C.c:6230
 T00314.001,T00314,_limbInit,1,agilityDefenseBonus,0,char,,,,agilityDefenseBonus,Agility defense bonus,high,source:146C.c:6231
 T00314.002,T00314,_limbInit,2,chainEvasion,0,char,,,,chainEvasion,Chain evasion,high,source:146C.c:6243
@@ -2687,28 +2687,28 @@ T00314.007,T00314,_limbInit,7,dpSplash,0,char[6],,,,dpSplash,Damage-point splash
 T00314.008,T00314,_limbInit,8,unk5A,1,char[2],,,,reserved5A,Not read,low,declaration-only;source:146C.h:856
 T00315.000,T00315,_loadFileContext,0,lba,0,u_short,,,,lba,Named in the fork; see cited use,med,source:5BF94.c:5191
 T00315.001,T00315,_loadFileContext,1,size,0,u_short,,,,size,Named in the fork; see cited use,med,source:6F014.c:585
-T00316.000,T00316,_lootListItem,0,itemCategory,0,char,,,,,,,
-T00316.001,T00316,_lootListItem,1,itemIndex,0,u_char,,,zeroBasedWorkingInventoryIndex,,,,
-T00316.002,T00316,_lootListItem,2,unk2,1,char,,,claimFlyoutAnimationStep,,,,
-T00316.003,T00316,_lootListItem,3,state,0,char,,,claimabilityOrComponentIndentation,,,,
-T00317.000,T00317,_menuBgChunkWidths_t,0,unk0,1,int,,,,,,,
-T00317.001,T00317,_menuBgChunkWidths_t,1,unk4,1,int,,,,,,,
-T00317.002,T00317,_menuBgChunkWidths_t,2,unk8,1,int,,,,,,,
-T00318.000,T00318,_menuBgTransparencies_t,0,unk0,1,int,,,,,,,
-T00318.001,T00318,_menuBgTransparencies_t,1,unk4,1,int,,,,,,,
-T00318.002,T00318,_menuBgTransparencies_t,2,unk8,1,int,,,,,,,
-T00318.003,T00318,_menuBgTransparencies_t,3,unkC,1,int,,,,,,,
-T00319.000,T00319,_monBinData_t,0,zudId,0,short,,,,,,,
-T00319.001,T00319,_monBinData_t,1,classId,0,short,,,,,,,
-T00319.002,T00319,_monBinData_t,2,killFlagsOffset,0,short,,,firstDefeatBit,,,,
-T00319.003,T00319,_monBinData_t,3,killFlagsCount,0,short,,,defeatBitCount,,,,
-T00319.004,T00319,_monBinData_t,4,selected,0,short,,,,,,,
-T00319.005,T00319,_monBinData_t,5,animationState,0,short,,,,,,,
-T00319.006,T00319,_monBinData_t,6,unlocked,0,u_char,,,,,,,
-T00319.007,T00319,_monBinData_t,7,prev,0,u_char,,,,,,,
-T00319.008,T00319,_monBinData_t,8,next,0,u_char,,,,,,,
-T00319.009,T00319,_monBinData_t,9,_,0,u_char,,,,,,,
-T00319.010,T00319,_monBinData_t,10,name,0,char[28],,,,,,,
+T00316.000,T00316,_lootListItem,0,itemCategory,0,char,,,,itemCategory,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:265
+T00316.001,T00316,_lootListItem,1,itemIndex,0,u_char,,,zeroBasedWorkingInventoryIndex,itemIndex,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:274
+T00316.002,T00316,_lootListItem,2,unk2,1,char,,,claimFlyoutAnimationStep,opaque2,"Used, but its meaning is not established",low,source:MENU/MENUB.PRG/260.c:545
+T00316.003,T00316,_lootListItem,3,state,0,char,,,claimabilityOrComponentIndentation,state,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:286
+T00317.000,T00317,_menuBgChunkWidths_t,0,unk0,1,int,,,,reserved0,Not read by decompiled code,low,declaration-only;source:494.c:26
+T00317.001,T00317,_menuBgChunkWidths_t,1,unk4,1,int,,,,reserved4,Not read by decompiled code,low,declaration-only;source:494.c:27
+T00317.002,T00317,_menuBgChunkWidths_t,2,unk8,1,int,,,,reserved8,Not read by decompiled code,low,declaration-only;source:494.c:28
+T00318.000,T00318,_menuBgTransparencies_t,0,unk0,1,int,,,,reserved0,Not read by decompiled code,low,declaration-only;source:494.c:19
+T00318.001,T00318,_menuBgTransparencies_t,1,unk4,1,int,,,,reserved4,Not read by decompiled code,low,declaration-only;source:494.c:20
+T00318.002,T00318,_menuBgTransparencies_t,2,unk8,1,int,,,,reserved8,Not read by decompiled code,low,declaration-only;source:494.c:21
+T00318.003,T00318,_menuBgTransparencies_t,3,unkC,1,int,,,,reservedC,Not read by decompiled code,low,declaration-only;source:494.c:22
+T00319.000,T00319,_monBinData_t,0,zudId,0,short,,,,zudId,Named in the fork; see cited use,med,source:238.c:1352
+T00319.001,T00319,_monBinData_t,1,classId,0,short,,,,classId,Named in the fork; see cited use,med,source:238.c:2137
+T00319.002,T00319,_monBinData_t,2,killFlagsOffset,0,short,,,firstDefeatBit,killFlagsOffset,Named in the fork; see cited use,med,source:238.c:1926
+T00319.003,T00319,_monBinData_t,3,killFlagsCount,0,short,,,defeatBitCount,killFlagsCount,Named in the fork; see cited use,med,source:238.c:1927
+T00319.004,T00319,_monBinData_t,4,selected,0,short,,,,selected,Named in the fork; see cited use,med,source:238.c:1986
+T00319.005,T00319,_monBinData_t,5,animationState,0,short,,,,animationState,Named in the fork; see cited use,med,source:238.c:1999
+T00319.006,T00319,_monBinData_t,6,unlocked,0,u_char,,,,unlocked,Named in the fork; see cited use,med,source:238.c:1416
+T00319.007,T00319,_monBinData_t,7,prev,0,u_char,,,,prev,Named in the fork; see cited use,med,source:238.c:1102
+T00319.008,T00319,_monBinData_t,8,next,0,u_char,,,,next,Named in the fork; see cited use,med,source:238.c:1253
+T00319.009,T00319,_monBinData_t,9,_,0,u_char,,,,reservedF,Not read by decompiled code,low,declaration-only;source:238.c:375
+T00319.010,T00319,_monBinData_t,10,name,0,char[28],,,,name,Named in the fork; see cited use,med,source:238.c:2036
 T00320.000,T00320,_mpdEnemy,0,type,0,u_char,,,,kind,Enemy kind,med,declaration-only;source:146C.h:662
 T00320.001,T00320,_mpdEnemy,1,index,0,u_char,,,,index,Enemy table index,med,declaration-only;source:146C.h:663
 T00320.002,T00320,_mpdEnemy,2,hidden,0,u_char,,,,isHidden,Hidden until revealed,med,declaration-only;source:146C.h:664
@@ -2985,22 +2985,22 @@ T00339.000,T00339,_sphericalValues,0,yaw,0,int,,,,yaw,Yaw of the spherical camer
 T00339.001,T00339,_sphericalValues,1,pitch,0,int,,,,pitch,Pitch of the spherical camera,med,declaration-only;source:146C.h:735
 T00339.002,T00339,_sphericalValues,2,distance,0,int,,,,distance,Distance of the spherical camera,med,declaration-only;source:146C.h:736
 T00339.003,T00339,_sphericalValues,3,mode,0,int,,,,mode,Mode of the spherical camera,med,declaration-only;source:146C.h:737
-T00340.000,T00340,_syd,0,combinationsOffset,0,u_long,,,typeRecipeTableOffset,,,,
-T00340.001,T00340,_syd,1,materialsOffset,0,u_long,,,materialRecipeTableOffset,,,,
-T00340.002,T00340,_syd,2,initDataOffset,0,u_long,,,baseStatTableOffset,,,,
-T00340.003,T00340,_syd,3,data,0,char[0],,,,,,,
-T00341.000,T00341,_textBoxSelector_t,0,order,0,u_char[8],,,,,,,
-T00341.001,T00341,_textBoxSelector_t,1,unk8,1,u_char,,,,,,,
-T00341.002,T00341,_textBoxSelector_t,2,unk9,1,u_char,,,,,,,
-T00341.003,T00341,_textBoxSelector_t,3,selectedIndex,0,u_char,,,,,,,
-T00341.004,T00341,_textBoxSelector_t,4,count,0,u_char,,,,,,,
-T00341.005,T00341,_textBoxSelector_t,5,unkC,1,u_char,,,,,,,
-T00342.000,T00342,_texture_t,0,x,0,char,,,,,,,
-T00342.001,T00342,_texture_t,1,y,0,char,,,,,,,
-T00342.002,T00342,_texture_t,2,w,0,char,,,,,,,
-T00342.003,T00342,_texture_t,3,h,0,char,,,,,,,
-T00342.004,T00342,_texture_t,4,tpage,0,u_short,,,,,,,
-T00342.005,T00342,_texture_t,5,clut,0,u_short,,,,,,,
+T00340.000,T00340,_syd,0,combinationsOffset,0,u_long,,,typeRecipeTableOffset,combinationsOffset,Named in the fork; see cited use,med,source:168.c:4953
+T00340.001,T00340,_syd,1,materialsOffset,0,u_long,,,materialRecipeTableOffset,materialsOffset,Named in the fork; see cited use,med,source:168.c:4954
+T00340.002,T00340,_syd,2,initDataOffset,0,u_long,,,baseStatTableOffset,initDataOffset,Named in the fork; see cited use,med,source:168.c:4955
+T00340.003,T00340,_syd,3,data,0,char[0],,,,reservedC,Not read by decompiled code,low,declaration-only;source:168.c:4919
+T00341.000,T00341,_textBoxSelector_t,0,order,0,u_char[8],,,,order,Named in the fork; see cited use,med,source:5BF94.c:1586
+T00341.001,T00341,_textBoxSelector_t,1,unk8,1,u_char,,,,reserved8,Not read by decompiled code,low,declaration-only;source:5BF94.c:181
+T00341.002,T00341,_textBoxSelector_t,2,unk9,1,u_char,,,,reserved9,Not read by decompiled code,low,declaration-only;source:5BF94.c:182
+T00341.003,T00341,_textBoxSelector_t,3,selectedIndex,0,u_char,,,,selectedIndex,Named in the fork; see cited use,med,source:5BF94.c:1596
+T00341.004,T00341,_textBoxSelector_t,4,count,0,u_char,,,,count,Named in the fork; see cited use,med,source:5BF94.c:1569
+T00341.005,T00341,_textBoxSelector_t,5,unkC,1,u_char,,,,reservedC,Not read by decompiled code,low,declaration-only;source:5BF94.c:185
+T00342.000,T00342,_texture_t,0,x,0,char,,,,x,Named in the fork; see cited use,med,source:renderTextures.h:17
+T00342.001,T00342,_texture_t,1,y,0,char,,,,y,Named in the fork; see cited use,med,source:renderTextures.h:17
+T00342.002,T00342,_texture_t,2,w,0,char,,,,w,Named in the fork; see cited use,med,source:D4.c:1940
+T00342.003,T00342,_texture_t,3,h,0,char,,,,h,Named in the fork; see cited use,med,source:renderTextures.h:15
+T00342.004,T00342,_texture_t,4,tpage,0,u_short,,,,tpage,Named in the fork; see cited use,med,source:renderTextures.h:41
+T00342.005,T00342,_texture_t,5,clut,0,u_short,,,,clut,Named in the fork; see cited use,med,source:renderTextures.h:40
 T00343.000,T00343,_trail,0,splinePoints,0,SVECTOR[4],,,,splinePoints,Named in the fork; see cited use,med,source:trails5.h:73
 T00343.001,T00343,_trail,1,stepCount,0,u_char,,,,stepCount,Named in the fork; see cited use,med,source:trails5.h:395
 T00343.002,T00343,_trail,2,splineSampleCount,0,u_char,,,,splineSampleCount,Named in the fork; see cited use,med,source:trails5.h:396
@@ -3055,23 +3055,23 @@ T00348.023,T00348,_zoneContext_t,23,mpdData,0,void *,,,,mpdData,Loaded room file
 T00348.024,T00348,_zoneContext_t,24,mpdEnemyCount,0,u_int,,,,mpdEnemyCount,Number of room enemy placements,med,declaration-only;source:146C.h:716
 T00348.025,T00348,_zoneContext_t,25,mpdEnemies,0,_mpdEnemy *,,,,mpdEnemies,Room enemy placements,med,declaration-only;source:146C.h:717
 T00348.026,T00348,_zoneContext_t,26,unk68,1,int,,,,currentSceneId,Scene identifier used to detect scene changes,high,source:146C.c:15308
-T00349.000,T00349,_zudData_t,0,characterId,0,u_char,,,,,,,
-T00349.001,T00349,_zudData_t,1,weapon,0,u_char,,,,,,,
-T00349.002,T00349,_zudData_t,2,unk2,1,u_char,,,battleSequenceModelSelector,,,,
-T00349.003,T00349,_zudData_t,3,weaponMaterial,0,u_char,,,,,,,
-T00349.004,T00349,_zudData_t,4,shield,0,u_char,,,,,,,
-T00349.005,T00349,_zudData_t,5,shieldMaterial,0,u_char,,,,,,,
-T00349.006,T00349,_zudData_t,6,defaultMaterial,0,u_char,,,,,,,
-T00349.007,T00349,_zudData_t,7,shpOffset,0,u_long,,,,,,,
-T00349.008,T00349,_zudData_t,8,shpLen,0,int,,,,,,,
-T00349.009,T00349,_zudData_t,9,weaponWepOffset,0,u_long,,,,,,,
-T00349.010,T00349,_zudData_t,10,wepLen,0,int,,,,,,,
-T00349.011,T00349,_zudData_t,11,shieldWepOffset,0,u_long,,,,,,,
-T00349.012,T00349,_zudData_t,12,shieldWepLen,0,int,,,,,,,
-T00349.013,T00349,_zudData_t,13,commonSeqOffset,0,u_long,,,,,,,
-T00349.014,T00349,_zudData_t,14,commonSeqLen,0,int,,,,,,,
-T00349.015,T00349,_zudData_t,15,battleSeqOffset,0,u_long,,,,,,,
-T00349.016,T00349,_zudData_t,16,battleSeqLen,0,int,,,,,,,
+T00349.000,T00349,_zudData_t,0,characterId,0,u_char,,,,characterId,Named in the fork; see cited use,med,source:592C.c:218
+T00349.001,T00349,_zudData_t,1,weapon,0,u_char,,,,weapon,Named in the fork; see cited use,med,source:592C.c:236
+T00349.002,T00349,_zudData_t,2,unk2,1,u_char,,,battleSequenceModelSelector,opaque2,"Used, but its meaning is not established",low,source:592C.c:266
+T00349.003,T00349,_zudData_t,3,weaponMaterial,0,u_char,,,,weaponMaterial,Named in the fork; see cited use,med,source:592C.c:244
+T00349.004,T00349,_zudData_t,4,shield,0,u_char,,,,shield,Named in the fork; see cited use,med,source:592C.c:248
+T00349.005,T00349,_zudData_t,5,shieldMaterial,0,u_char,,,,shieldMaterial,Named in the fork; see cited use,med,source:592C.c:256
+T00349.006,T00349,_zudData_t,6,defaultMaterial,0,u_char,,,,defaultMaterial,Named in the fork; see cited use,med,source:592C.c:222
+T00349.007,T00349,_zudData_t,7,shpOffset,0,u_long,,,,shpOffset,Named in the fork; see cited use,med,source:592C.c:217
+T00349.008,T00349,_zudData_t,8,shpLen,0,int,,,,reservedC,Not read by decompiled code,low,declaration-only;source:592C.c:16
+T00349.009,T00349,_zudData_t,9,weaponWepOffset,0,u_long,,,,weaponWepOffset,Named in the fork; see cited use,med,source:592C.c:239
+T00349.010,T00349,_zudData_t,10,wepLen,0,int,,,,reserved14,Not read by decompiled code,low,declaration-only;source:592C.c:18
+T00349.011,T00349,_zudData_t,11,shieldWepOffset,0,u_long,,,,shieldWepOffset,Named in the fork; see cited use,med,source:592C.c:251
+T00349.012,T00349,_zudData_t,12,shieldWepLen,0,int,,,,reserved1C,Not read by decompiled code,low,declaration-only;source:592C.c:20
+T00349.013,T00349,_zudData_t,13,commonSeqOffset,0,u_long,,,,commonSeqOffset,Named in the fork; see cited use,med,source:592C.c:273
+T00349.014,T00349,_zudData_t,14,commonSeqLen,0,int,,,,commonSeqLen,Named in the fork; see cited use,med,source:592C.c:270
+T00349.015,T00349,_zudData_t,15,battleSeqOffset,0,u_long,,,,battleSeqOffset,Named in the fork; see cited use,med,source:592C.c:264
+T00349.016,T00349,_zudData_t,16,battleSeqLen,0,int,,,,battleSeqLen,Named in the fork; see cited use,med,source:592C.c:261
 T00350.000,T00350,actionCandidateEntry,0,score,0,int,,,,reserved0,Not read by decompiled code,low,declaration-only;source:6FC00.c:494
 T00350.001,T00350,actionCandidateEntry,1,row,0,unsigned int,3,,,row,Named in the fork; see cited use,med,source:6FC00.c:526
 T00350.002,T00350,actionCandidateEntry,2,column,0,unsigned int,2,,,column,Named in the fork; see cited use,med,source:6FC00.c:526
@@ -3827,21 +3827,21 @@ T00424.000,T00424,environmentTargetList,0,action,0,u_short,,,,action,Named in th
 T00424.001,T00424,environmentTargetList,1,reserved2,0,char[72],,,,reserved2,Not read by decompiled code,low,declaration-only;source:146C.c:353
 T00424.002,T00424,environmentTargetList,2,count,0,u_short,,,,count,Named in the fork; see cited use,med,source:146C.c:3736
 T00424.003,T00424,environmentTargetList,3,targets,0,environmentTarget[30],,,,targets,Named in the fork; see cited use,med,source:146C.c:3745
-T00425.000,T00425,fileMenuElements_t,0,state,0,char,,,,,,,
-T00425.001,T00425,fileMenuElements_t,1,slotId,0,char,,,,,,,
-T00425.002,T00425,fileMenuElements_t,2,outertextBlendFactor,0,char,,,,,,,
-T00425.003,T00425,fileMenuElements_t,3,innertextBlendFactor,0,char,,,,,,,
-T00425.004,T00425,fileMenuElements_t,4,selected,0,char,,,,,,,
-T00425.005,T00425,fileMenuElements_t,5,slotUnavailable,0,char,,,,,,,
-T00425.006,T00425,fileMenuElements_t,6,saveLocation,0,char,,,,,,,
-T00425.007,T00425,fileMenuElements_t,7,unk7,1,char,,,,,,,
-T00425.008,T00425,fileMenuElements_t,8,targetPosition,0,short,,,,,,,
-T00425.009,T00425,fileMenuElements_t,9,unkA,1,short,,,,,,,
-T00425.010,T00425,fileMenuElements_t,10,x,0,short,,,,,,,
-T00425.011,T00425,fileMenuElements_t,11,y,0,short,,,,,,,
-T00425.012,T00425,fileMenuElements_t,12,w,0,short,,,,,,,
-T00425.013,T00425,fileMenuElements_t,13,h,0,short,,,,,,,
-T00425.014,T00425,fileMenuElements_t,14,text,0,char[32],,,,,,,
+T00425.000,T00425,fileMenuElements_t,0,state,0,char,,,,state,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1471
+T00425.001,T00425,fileMenuElements_t,1,slotId,0,char,,,,slotId,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1472
+T00425.002,T00425,fileMenuElements_t,2,outertextBlendFactor,0,char,,,,outertextBlendFactor,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1782
+T00425.003,T00425,fileMenuElements_t,3,innertextBlendFactor,0,char,,,,innertextBlendFactor,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1790
+T00425.004,T00425,fileMenuElements_t,4,selected,0,char,,,,selected,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1781
+T00425.005,T00425,fileMenuElements_t,5,slotUnavailable,0,char,,,,slotUnavailable,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1786
+T00425.006,T00425,fileMenuElements_t,6,saveLocation,0,char,,,,saveLocation,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1833
+T00425.007,T00425,fileMenuElements_t,7,unk7,1,char,,,,reserved7,Not read by decompiled code,low,declaration-only;source:MENU/MENU7.PRG/260.c:126
+T00425.008,T00425,fileMenuElements_t,8,targetPosition,0,short,,,,targetPosition,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1974
+T00425.009,T00425,fileMenuElements_t,9,unkA,1,short,,,,reservedA,Not read by decompiled code,low,declaration-only;source:MENU/MENU7.PRG/260.c:128
+T00425.010,T00425,fileMenuElements_t,10,x,0,short,,,,x,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1473
+T00425.011,T00425,fileMenuElements_t,11,y,0,short,,,,y,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1789
+T00425.012,T00425,fileMenuElements_t,12,w,0,short,,,,w,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1474
+T00425.013,T00425,fileMenuElements_t,13,h,0,short,,,,h,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1805
+T00425.014,T00425,fileMenuElements_t,14,text,0,char[32],,,,text,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1480
 T00426.000,T00426,fontTable_t,0,data,0,char[220][128],,,,indexedPixels,Four-bit indexed font pixels in 128-byte rows,high,source:22C.c:3109
 T00426.001,T00426,fontTable_t,1,clut,0,u_short[16][16],,,,palettes,Sixteen palettes of sixteen RGB555 colors,high,source:22C.c:3109
 T00427.000,T00427,frameScratch,0,unused,0,int,,,,reserved0,Not read,low,declaration-only;source:44F14.c:138
@@ -4244,10 +4244,10 @@ T00487.010,T00487,func_800C5798_t,10,unk14,1,u_char,,,,opaque14,"Used, but its m
 T00487.011,T00487,func_800C5798_t,11,unk15,1,u_char,,,,opaque15,"Used, but its meaning is not established",low,source:5BF94.c:1310
 T00487.012,T00487,func_800C5798_t,12,unk16,1,u_char,,,,opaque16,"Used, but its meaning is not established",low,source:5BF94.c:1313
 T00487.013,T00487,func_800C5798_t,13,unk17,1,u_char,,,,opaque17,"Used, but its meaning is not established",low,source:5BF94.c:1306
-T00488.000,T00488,func_800CCE10_t,0,unk0_0,1,int,12,,x,,,,
-T00488.001,T00488,func_800CCE10_t,1,unk0_12,1,int,12,,y,,,,
-T00488.002,T00488,func_800CCE10_t,2,unk0_24,1,u_int,2,,orientation flags,,,,
-T00488.003,T00488,func_800CCE10_t,3,unk0_26,1,u_int,4,,,,,,
+T00488.000,T00488,func_800CCE10_t,0,unk0_0,1,int,12,,x,x,Named in the fork; see cited use (same bits as T00619 x),med,source:5BF94.c:4551
+T00488.001,T00488,func_800CCE10_t,1,unk0_12,1,int,12,,y,y,Named in the fork; see cited use (same bits as T00619 y),med,source:5BF94.c:4552
+T00488.002,T00488,func_800CCE10_t,2,unk0_24,1,u_int,2,,orientation flags,alignment,Named in the fork; see cited use (same bits as T00619 alignment),med,source:5BF94.c:4553
+T00488.003,T00488,func_800CCE10_t,3,unk0_26,1,u_int,4,,,opaque3Bit2,"Used, but its meaning is not established",low,source:5BF94.c:4563
 T00489.000,T00489,func_800CE714_t2_2,0,unk0,1,int,,,,reserved0,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5092
 T00489.001,T00489,func_800CE714_t2_2,1,unk4,1,int,,,,reserved4,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5090
 T00489.002,T00489,func_800CE714_t2_2,2,unk8,1,int,,,,reserved8,Cleared when the instance is initialised; not otherwise read,low,source:5BF94.c:5094
@@ -5258,10 +5258,10 @@ T00584.006,T00584,portInfo_t,6,lStickY,0,char,,,,leftStickY,Left stick Y,high,so
 T00584.007,T00584,portInfo_t,7,lock,0,char,,,,modeLock,Mode lock passed to PadSetMainMode,high,source:main.c:8476
 T00584.008,T00584,portInfo_t,8,actData,0,char[2],,,,actuatorLevels,Motor levels sent with PadSetAct,high,source:main.c:8482
 T00584.009,T00584,portInfo_t,9,connected,0,char,,,,connected,Port finished connection setup,high,source:main.c:8546
-T00585.000,T00585,primBuf_t,0,tag,0,u_long,,,,,,,
-T00585.001,T00585,primBuf_t,1,prim,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),,,,,,,
-T00586.000,T00586,primBuf_t,0,tag,0,u_long,,,,,,,
-T00586.001,T00586,primBuf_t,1,prim,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),,,,,,,
+T00585.000,T00585,primBuf_t,0,tag,0,u_long,,,,tag,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
+T00585.001,T00585,primBuf_t,1,prim,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),,,,prim,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
+T00586.000,T00586,primBuf_t,0,tag,0,u_long,,,,tag,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
+T00586.001,T00586,primBuf_t,1,prim,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1064:5),,,,prim,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
 T00587.000,T00587,radialMotion,0,facing,0,short,,,,heading,Heading toward the arena centre (same bits as T00273 unk0),low,source:7EE98.c:536
 T00587.001,T00587,radialMotion,1,state,0,unsigned char,,,,phase,Orbit phase (same bits as T00273 unk2),med,source:7EE98.c:514
 T00587.002,T00587,radialMotion,2,flag3,0,unsigned char,,,,distanceCached,Set once the distance is measured (same bits as T00273 unk3),low,source:7EE98.c:548
@@ -5325,16 +5325,16 @@ T00593.026,T00593,routeEdgeState,26,angle,0,short,,,,angle,Facing angle,med,sour
 T00593.027,T00593,routeEdgeState,27,unk18C,1,char[15],,,,reserved18C,Not read through this view,low,declaration-only;source:771A8.c:551
 T00593.028,T00593,routeEdgeState,28,gate,0,u_char,,,,gate,Named in the fork view; see cited use,med,source:771A8.c:634
 T00593.029,T00593,routeEdgeState,29,exit,0,func_800DFA54_t,,,,exit,Named in the fork view; see cited use,med,source:771A8.c:638
-T00594.000,T00594,saveBase_t,0,slotState,0,enum slotState_e,,,saveIdentityWhenOccupied,,,,
-T00594.001,T00594,saveBase_t,1,generation,0,u_int,,,,,,,
-T00594.002,T00594,saveBase_t,2,unk8,1,int,,,formatSignature,,,,
+T00594.000,T00594,saveBase_t,0,slotState,0,enum slotState_e,,,saveIdentityWhenOccupied,slotState,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:285
+T00594.001,T00594,saveBase_t,1,generation,0,u_int,,,,generation,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:286
+T00594.002,T00594,saveBase_t,2,unk8,1,int,,,formatSignature,opaque8,"Used, but its meaning is not established",low,source:MENU/MENU7.PRG/260.c:698
 T00595.000,T00595,saveFileInfo_t,0,key,0,u_int,,,,key,Original save-file key word,high,source:22C.c:165
 T00595.001,T00595,saveFileInfo_t,1,unk4,1,saveFileSubInfo_t,,,,summary,Save slot metadata statistics and formatted card title,high,source:22C.c:640
 T00595.002,T00595,saveFileInfo_t,2,unk44,1,char[28],,,,reserved44,Unresolved 28-byte range in the original save header,low,No direct field accesses found;preserve in legacy decoder;declaration-only;source:260.c:74
 T00595.003,T00595,saveFileInfo_t,3,unk60,1,char[32],,,,iconHeaderBytes,32 bytes copied from the selected card image header,med,source:22C.c:654;exact subformat still needs confirmation
-T00596.000,T00596,saveFileSubInfo_t,0,base,0,saveBase_t,,,,,,,
-T00596.001,T00596,saveFileSubInfo_t,1,stats,0,stats_t,,,,,,,
-T00596.002,T00596,saveFileSubInfo_t,2,unk20,1,u_short[16],,,,,,,
+T00596.000,T00596,saveFileSubInfo_t,0,base,0,saveBase_t,,,,base,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:285
+T00596.001,T00596,saveFileSubInfo_t,1,stats,0,stats_t,,,,stats,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:307
+T00596.002,T00596,saveFileSubInfo_t,2,unk20,1,u_short[16],,,,opaque20,"Used, but its meaning is not established",low,source:MENU/MENU7.PRG/260.c:758
 T00597.000,T00597,savedEnemyState,0,unk0,1,u_char,,,,spawnSlot,Spawn index + 1; 0 marks a free slot,med,declaration-only;source:146C.c:359
 T00597.001,T00597,savedEnemyState,1,hidden,0,u_char,,,,isHidden,Hidden flag saved for the spawn,high,source:146C.c:15131
 T00597.002,T00597,savedEnemyState,2,unk2,1,short,,,,aiFlags,Packed AI relation and behavior flags handed to the AI on respawn,high,source:146C.c:6774
@@ -6700,8 +6700,8 @@ T00741.008,T00741,zudHeader,8,effect,0,int,,,,commonAnimationOffset,Common unarm
 T00741.009,T00741,zudHeader,9,effectSize,0,int,,,,commonAnimationSize,Common unarmed SEQ length,med,declaration-only;source:146C.c:272
 T00741.010,T00741,zudHeader,10,weaponEffect,0,int,,,,battleAnimationOffset,Weapon-category battle SEQ offset,med,loaded with weapon category at 146C.c:6706;declaration-only;source:146C.c:273
 T00741.011,T00741,zudHeader,11,weaponEffectSize,0,int,,,,battleAnimationSize,Weapon-category battle SEQ length,med,declaration-only;source:146C.c:274
-T00746.000,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,,,,
-T00746.001,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,,,,
+T00746.000,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,high,source:146C.c:7641
+T00746.001,T00746,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,source:main.h:487
 T00747.000,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),0,effects,0,limbEffects_t,,,,effects,Effect values for the limb,high,source:146C.c:10641
 T00747.001,T00747,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:69:5),1,hp,0,u_int,,,,packed,Both effect values as one word; summed across entities,low,source:146C.c:12942
 T00748.000,T00748,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:128:5),0,s16,0,short[2],,,,halves,Halves of the packed pair,med,declaration-only;source:146C.h:129
@@ -6783,13 +6783,13 @@ T00782.000,T00782,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00782.001,T00782,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:12:5),1,position,0,SVECTOR,,,,position,World position,high,source:146C.c:3181
 T00783.000,T00783,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),0,fields,0,func_8006EBF8_t_fields,,,,target,Tile and facing fields,high,source:146C.c:2804
 T00783.001,T00783,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\func_8006EBF8_t.h:12:5),1,value,0,int,,,,word,Whole tile word,high,source:146C.c:881
-T00784.000,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),0,sprt,0,VS_SPRT,,,,,,,
-T00784.001,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),1,tile_tpage,0,VS_TILE_TPAGE,,,,,,,
-T00784.002,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),2,tile,0,VS_TILE,,,,,,,
-T00784.003,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),3,polyG4_tpage,0,VS_POLY_G4_TPAGE,,,,,,,
-T00784.004,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),4,polyG4,0,VS_POLY_G4,,,,,,,
-T00784.005,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),5,tilePoly,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:144:9),,,,,,,
-T00784.006,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),6,raw,0,u_long[15],,,,,,,
+T00784.000,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),0,sprt,0,VS_SPRT,,,,sprt,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
+T00784.001,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),1,tile_tpage,0,VS_TILE_TPAGE,,,,tileTpage,Tile with a texture page command,med,source:MENU/MENU7.PRG/260.c:140
+T00784.002,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),2,tile,0,VS_TILE,,,,tile,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:2043
+T00784.003,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),3,polyG4_tpage,0,VS_POLY_G4_TPAGE,,,,polyG4Tpage,Gouraud quad with a texture page command,med,source:MENU/MENU7.PRG/260.c:142
+T00784.004,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),4,polyG4,0,VS_POLY_G4,,,,polyG4,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1424
+T00784.005,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),5,tilePoly,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:144:9),,,,tilePoly,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1307
+T00784.006,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),6,raw,0,u_long[15],,,,reserved0,Not read by decompiled code,low,declaration-only;source:MENU/MENU7.PRG/260.c:148
 T00785.000,T00785,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
 T00785.001,T00785,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00786.000,T00786,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483

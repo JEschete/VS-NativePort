@@ -372,7 +372,7 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Event | 69 | 17 | 160 | Validated and applied |
 | Game_Field_01 | 63 | 59 | 500 | Validated and applied |
 | Game_Field_02 | 54 | 0 | 0 | Validated and applied |
-| Game_Menu_01 | 0 | 95 | 557 | Pending |
+| Game_Menu_01 | 0 | 95 | 557 | Validated and applied |
 | Game_Menu_02 | 38 | 63 | 582 | Pending |
 | Game_Menu_03 | 262 | 0 | 0 | Pending |
 | Game_Menu_04 | 262 | 0 | 0 | Pending |
@@ -380,14 +380,14 @@ must refuse names whose rows do not pass the evidence check.
 | Game_Menu_06 | 199 | 0 | 0 | Pending |
 | Game_Title | 121 | 21 | 82 | Validated and applied |
 | Shared | 7 | 57 | 282 | Validated and applied |
-| **Applied / inventoried** | **1,151 / 2,174** | **664 / 822** | **5,731 / 6,870** | **18 / 24 batches applied** |
+| **Applied / inventoried** | **1,151 / 2,174** | **759 / 822** | **6,288 / 6,870** | **19 / 24 batches applied** |
 
 Inventory changed on 2026-10-17 when 25 upstream layouts were adopted (15 merged layouts, 10 type-only retypes; two
 new upstream-only types, `func_800D52A4_t`/`_t2`, the effect node's motion block). Applied rows kept their names;
 four applied fields changed C type only (`AkaoSeqHeader.magic` `char[4]`→`int`, `_mpdEnemy.settings`
 `u_char[8]`→`actorSpawnSettings`, `vs_battle_objectData.material`/`variant` `char`→`u_char`).
 
-Applied rows still include 51 low-confidence globals, 72 low-confidence types and 2,108 low-confidence fields. Validation checks coverage,
+Applied rows still include 51 low-confidence globals, 78 low-confidence types and 2,158 low-confidence fields. Validation checks coverage,
 names, locations and collisions; it does not prove semantics or close migration hazards. In particular:
 
 - G00805/G00806: the ending atlas declaration and a shared-header per-overlay declaration overlap. Resolve their
@@ -512,6 +512,12 @@ names, locations and collisions; it does not prove semantics or close migration 
   the same template twice; three template `extern` rows are views of the plugin's own definition. The BATTLE effect
   runtime globals (primary/secondary instance lists, phase, tracks, tokens, particle pool, camera motion, package
   loading) and the EFFPURGE load tables are named from their read uses. 5 globals are `low`.
+- Game_Menu_01 (2026-10-17): 49 function-local `enum state` types are named after the function that declares
+  them (`Menu::Files::SaveFilesState`, `Save::CardReadinessState` for the save code shared by MENU7 and TITLE) and
+  placed in that function's header; enumerators drop the prefix all of a type's enumerators share
+  (`fileMenuElementStateAnimateX` -> `AnimateX`). `tempFileCreated` becomes `TemporaryFileCreated` (forbidden token).
+  T00746 takes the names earlier same-as rows expect (`Input::PressedButtonsView`: `allButtons`, `ports`); T00124 and
+  T00187 are same-as T00192 (`Input::ButtonBytePair`), written against the applied row.
 - Correction (Game_Field_01): T00223 was `Battle::PendingAbilityState` with "unidentified" shorts, but it is the menu
   result returned by `Menu::Framework::ActionSelectionState` (D_800F4E98): `menuStatus` (146C.c:7771) and
   `selectionKind` (146C.c:4693); renamed `Menu::Framework::ActionSelection`.

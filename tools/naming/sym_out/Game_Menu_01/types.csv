@@ -1,0 +1,96 @@
+id,role,final_name,final_location,purpose,confidence,notes
+T00746,State,Input::PressedButtonsView,Native\Input\src\Buttons.h,Holds the pressed buttons as one word or as two ports of two bytes.,med,declaration-only;source:main.h:483
+T00124,Packet,Input::ButtonBytePair,Native\Input\src\Buttons.h,Exposes the low and high bytes of one packed PS1 controller button word.,high,same-as:T00192;identical layout indexed through a different include path
+T00170,Value,Menu::Map::CompassBound,Native\Game\src\Menu\Map.h,Gives one compass corner's screen position.,med,declaration-only;source:4D8.c:1065
+T00171,Value,Menu::Map::MapLabel,Native\Game\src\Menu\Map.h,"Gives one queued map label: position, kind and id.",med,declaration-only;source:4D8.c:1070
+T00784,Packet,Menu::Files::FilePrimitive,Native\Game\src\Menu\Files.h,"Is one file menu primitive: sprite, tile, gradient or tile with gradient.",med,declaration-only;source:MENU/MENU7.PRG/260.c:139
+T00172,OnDisc,Menu::Setup::CombinedBladeRecord,Native\Game\src\Menu\Setup\Combination.h,"Gives a combined blade's ids, category, damage and cost types, cost, stats and range.",med,declaration-only;source:168.c:4938
+T00181,OnDisc,Menu::Results::PuzzleRecord,Native\Game\src\Menu\Results\Results.h,"Gives one cube puzzle's zone, map, par time and rank cap.",med,declaration-only;source:3B8.c:2268
+T00187,Packet,Input::ButtonBytePair,Native\Input\src\Buttons.h,Exposes the low and high bytes of one packed PS1 controller button word.,high,same-as:T00192;identical layout indexed through a different include path
+T00196,State,Menu::Manual::AnimationState,Native\Game\src\Menu\Manual.h,"Holds one manual illustration animation: enable, frame mask and duration, repeat and timer.",med,declaration-only;source:494.c:37
+T00000,Enum,Menu::Results::BuffReelStat,Native\Game\src\Menu\Results\Results.h,Names the stats a bonus reel can raise.,med,declaration-only;source:3B8.c:709
+T00248,State,Menu::Framework::PreviewPoseBytes,Native\Game\src\Menu\Framework\ActorPreview.h,Views four bytes of an actor record while the preview pose is reset.,low,declaration-only;source:224.c:94
+T00254,State,Menu::Framework::PreviewPoseState,Native\Game\src\Menu\Framework\ActorPreview.h,Holds the actor preview pose state reset when models reload.,low,declaration-only;source:30DB0.h:12
+T00261,State,Menu::Framework::MenuMemory,Native\Game\src\Menu\Framework\MenuMemory.h,"Holds remembered menu cursors, item categories and selected equipment.",med,declaration-only;source:5BF94.h:124
+T00304,OnDisc,Menu::Setup::CombinedArmorRecord,Native\Game\src\Menu\Setup\Combination.h,"Gives a combined armor or shield's ids, category, gem slots and stats.",med,declaration-only;source:168.c:4992
+T00306,Value,Menu::Results::BuffReel,Native\Game\src\Menu\Results\Results.h,Gives one bonus reel's stat and amount.,med,declaration-only;source:3B8.c:16
+T00001,Enum,Menu::Results::DisFile,Native\Game\src\Menu\Results\Results.h,Names the results screen DIS image files.,med,declaration-only;source:3B8.c:44
+T00002,Enum,Save::FindSaveResult,Native\Save\src\MemoryCard\GameFiles.h,Names the outcome of looking for the current save on the card.,med,declaration-only;source:MENU/MENU7.PRG/260.c:1562
+T00310,State,Menu::Score::Row,Native\Game\src\Menu\Score\ScoreScreen.h,"Holds one Score menu row: selection, animation, position, title and description.",med,declaration-only;source:238.c:355
+T00313,Value,Menu::Framework::ItemText,Native\Game\src\Menu\Framework\MenuRows.h,"Gives an item's name, row flags and description.",med,declaration-only;source:58EC.c:12
+T00316,State,Menu::Loot::LootListItem,Native\Game\src\Menu\Loot\LootInventory.h,"Gives one loot row's category, index and state.",med,declaration-only;source:MENU/MENUB.PRG/260.c:25
+T00003,Enum,Save::EventMask,Native\Save\src\MemoryCard\GameFiles.h,Names the memory card event masks.,med,declaration-only;source:MENU/MENU7.PRG/260.c:1625
+T00317,Value,Menu::Manual::BackgroundChunkWidths,Native\Game\src\Menu\Manual.h,Gives the widths of the manual background's scroll-fade chunks.,low,declaration-only;source:494.c:26
+T00318,Value,Menu::Manual::BackgroundTransparencies,Native\Game\src\Menu\Manual.h,Gives the transparencies of the manual background's scroll-fade chunks.,low,declaration-only;source:494.c:19
+T00319,State,Menu::Score::EnemyEntry,Native\Game\src\Menu\Score\ScoreScreen.h,"Holds one enemy list entry: model, class, kill flags, selection and name.",med,declaration-only;source:238.c:366
+T00005,Enum,Menu::Status::LimbUiMode,Native\Game\src\Menu\Status\ActorStatus.h,Names the limb display modes of the status screen.,med,declaration-only;source:120.c:1138
+T00340,OnDisc,Menu::Setup::SydHeader,Native\Game\src\Menu\Setup\Combination.h,"Gives the offsets of the combination, material and initial data tables of a SYD file.",med,declaration-only;source:168.c:4916
+T00341,State,Menu::Framework::TextBoxSelector,Native\Game\src\Menu\Framework\TextBoxes.h,"Holds a text box selector: display order, selected index and count.",med,declaration-only;source:5BF94.c:180
+T00342,Value,Render::TextureRegion,Native\Graphics\src\Images.h,"Gives a texture region: position, size, page and CLUT.",med,declaration-only;source:texture_t.h:6
+T00349,OnDisc,Menu::Score::ZudHeader,Native\Game\src\Menu\Score\ScoreScreen.h,"Gives a ZUD model file's character, equipment and the offsets of its parts.",med,declaration-only;source:592C.c:8
+T00006,Enum,Menu::BattleAbilities::RemainingAbilities,Native\Game\src\Menu\BattleAbilities.h,Names which ability kinds remain to be learned.,med,declaration-only;source:143C.c:209
+T00007,Enum,Menu::BattleAbilities::AbilityType,Native\Game\src\Menu\BattleAbilities.h,Names the Chain and Defense ability kinds.,med,declaration-only;source:64.c:55
+T00009,Enum,Menu::Inventory::ItemAction,Native\Game\src\Menu\Inventory\ItemList.h,Names the actions of the item list.,med,declaration-only;source:items2.h:216
+T00011,Enum,Menu::Manual::ArrowType,Native\Game\src\Menu\Manual.h,Names the scroll arrows.,med,declaration-only;source:494.c:32
+T00012,Enum,Menu::Framework::AshleyRenderMode,Native\Game\src\Menu\Framework\AshleyPreview.h,Names the Ashley preview render modes.,med,declaration-only;source:_renderAshley.h:12
+T00014,Enum,Menu::Container::CopyContainerFlag,Native\Game\src\Menu\Container\Storage.h,Names the container copy flag.,med,declaration-only;source:234.c:17
+T00015,Enum,Menu::Results::DisIndex,Native\Game\src\Menu\Results\Results.h,Names the images of the results screen DIS files.,med,declaration-only;source:3B8.c:492
+T00017,Enum,Menu::BreakArts::ArtListOption,Native\Game\src\Menu\BreakArts.h,Names the Break Art list options.,med,declaration-only;source:30.c:94
+T00020,Enum,Menu::Files::ElementState,Native\Game\src\Menu\Files.h,Names a file menu element's animation state.,med,declaration-only;source:MENU/MENU7.PRG/260.c:111
+T00425,State,Menu::Files::FileMenuElement,Native\Game\src\Menu\Files.h,"Holds one animated file menu element: state, slot, blend, position, size and text.",med,declaration-only;source:MENU/MENU7.PRG/260.c:119
+T00488,Value,Menu::TextAnchorWord,Native\Game\src\Menu\Framework\TextBoxes.h,"Gives a text box anchor's packed offset, alignment and flags (as Battle::TextAnchorOffset).",med,declaration-only;source:5BF94.c:303
+T00022,Enum,Menu::Loot::LootItemState,Native\Game\src\Menu\Loot\LootInventory.h,Names a loot row's state and indent.,med,declaration-only;source:MENU/MENUB.PRG/260.c:16
+T00023,Enum,Menu::Magic::MagicSubmenu,Native\Game\src\Menu\Magic.h,Names the Magic submenus.,med,declaration-only;source:15AC.c:294
+T00024,Enum,Save::MaskedHandlerResult,Native\Save\src\MemoryCard\GameFiles.h,Names the outcome of a masked card operation.,med,declaration-only;source:MENU/MENU7.PRG/260.c:1630
+T00585,Packet,Menu::Files::PrimitiveBuffer,Native\Game\src\Menu\Files.h,Holds one tagged file menu primitive.,low,declaration-only;source:MENU/MENU7.PRG/260.c:137
+T00586,Packet,Menu::Files::PrimitiveBuffer,Native\Game\src\Menu\Files.h,Holds one tagged file menu primitive.,low,same-as:T00585;identical layout indexed through a different include path;declaration-only;source:MENU/MENU7.PRG/260.c:137
+T00594,OnDisc,Save::SaveSlotBase,Native\Save\src\MemoryCard\GameFiles.h,Holds a save slot's state and generation (the newest generation is the current save).,med,declaration-only;source:MENU/MENU7.PRG/260.c:46
+T00596,OnDisc,Save::SaveFileSummary,Native\Save\src\MemoryCard\GameFiles.h,"Holds a save file's slot base record, summary stats and an extra word.",med,declaration-only;source:MENU/MENU7.PRG/260.c:66
+T00030,Enum,Menu::Magic::ShortcutMagicMenu,Native\Game\src\Menu\Magic.h,Names the spell classes reachable by shortcut.,med,declaration-only;source:15AC.c:204
+T00032,Enum,Menu::Files::StatType,Native\Game\src\Menu\Files.h,Names the HP and MP bars of a file entry.,med,declaration-only;source:MENU/MENU7.PRG/260.c:1265
+T00033,Enum,Menu::Inventory::EquipmentDetailsState,Native\Game\src\Menu\Inventory\ItemDetails.h,"Steps the blade, grip and armor detail screens (declared in Menu::Inventory::UpdateBladeDetails)",med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00034,Enum,Menu::Inventory::EquipmentSlotMenuState,Native\Game\src\Menu\Inventory\Inventory.h,"Steps the weapon, shield and accessory menus (declared in Menu::Inventory::UpdateWeaponMenu)",med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00035,Enum,Menu::Framework::InitOnlyState,Native\Game\src\Menu\Status\EquipmentDetails.h,Has only the initial step of a one-step menu update (declared in Menu::Status::UpdateEquipmentDetails),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00036,Enum,Menu::Magic::SpellListMenuState,Native\Game\src\Menu\Magic.h,Steps the Sorcerer and Enchanter spell lists (declared in Menu::Magic::UpdateSorcererMenu),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00037,Enum,Menu::BreakArts::ArtSelectionState,Native\Game\src\Menu\BreakArts.h,Steps the Break Art and weapon category lists (declared in Menu::BreakArts::UpdateArtList),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00038,Enum,Menu::BattleAbilities::AbilityListState,Native\Game\src\Menu\BattleAbilities.h,Steps the Chain and Defense Ability lists (declared in Menu::BattleAbilities::UpdateChainAbilityMenu),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00039,Enum,Menu::Inventory::DiscardMenuState,Native\Game\src\Menu\Inventory\ItemList.h,Steps the discard menu (declared in Menu::Inventory::UpdateDiscardMenu),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00040,Enum,Save::CardReadinessState,Native\Save\src\MemoryCard\GameFiles.h,Steps the memory card readiness check (declared in Save::MemoryCard::AdvanceCardReadiness),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00041,Enum,Save::SaveReadState,Native\Save\src\MemoryCard\GameFiles.h,Steps a save file read (declared in Save::MemoryCard::ReadSaveStep),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00042,Enum,Save::SaveWriteState,Native\Save\src\MemoryCard\GameFiles.h,Steps a save file write and verification (declared in Save::MemoryCard::WriteSaveStep),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00043,Enum,Save::ResourceInitState,Native\Save\src\MemoryCard\GameFiles.h,Steps the save menu resource setup (declared in Save::MemoryCard::InitializeMenuResourcesStep),med,declaration-only;source:15AC.c:169
+T00044,Enum,Menu::Files::ConfirmationState,Native\Game\src\Menu\Files.h,Steps the yes/no confirmation (declared in Menu::Files::UpdateConfirmation),med,declaration-only;source:MENU/MENU7.PRG/260.c:2095
+T00045,Enum,Menu::Files::FormatPromptState,Native\Game\src\Menu\Files.h,Steps the format prompt (declared in Menu::Files::UpdateFormatPrompt),med,declaration-only;source:MENU/MENU7.PRG/260.c:2201
+T00046,Enum,Menu::Files::SaveFilesState,Native\Game\src\Menu\Files.h,Steps the save file list (declared in Menu::Files::UpdateSaveFiles),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00047,Enum,Menu::Files::SaveCardState,Native\Game\src\Menu\Files.h,Steps the save card selection (declared in Menu::Files::UpdateSaveCard),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00048,Enum,Menu::Files::SaveMenuState,Native\Game\src\Menu\Files.h,Steps the save menu (declared in Menu::Files::UpdateDataSaveMenu),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00049,Enum,Menu::Files::LoadFilesState,Native\Game\src\Menu\Files.h,Steps the load file list (declared in Menu::Files::UpdateLoadFiles),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00050,Enum,Menu::Files::LoadCardState,Native\Game\src\Menu\Files.h,Steps the load card selection (declared in Menu::Files::UpdateLoadCard),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00051,Enum,Menu::Files::LoadMenuState,Native\Game\src\Menu\Files.h,Steps the load menu (declared in Menu::Files::UpdateDataLoadMenu),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00052,Enum,Menu::Container::EquipmentDetailsState,Native\Game\src\Menu\Container\ItemView.h,Steps the container weapon and blade detail screens (declared in Menu::Container::UpdateWeaponDetails),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053,Enum,Menu::Inventory::MiscItemShortcutState,Native\Game\src\Menu\Inventory\Inventory.h,Steps the item shortcut menu (declared in Menu::Inventory::UpdateMiscItemShortcut),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00054,Enum,Menu::Magic::TeleportMenuState,Native\Game\src\Menu\Magic.h,Steps the teleport menu (declared in Menu::Magic::UpdateTeleportMenu),med,declaration-only;source:15AC.c:24
+T00055,Enum,Menu::Magic::MagicMenuState,Native\Game\src\Menu\Magic.h,Steps the Magic menu (declared in Menu::Magic::Update),med,declaration-only;source:15AC.c:169
+T00056,Enum,Menu::Magic::WarlockMenuState,Native\Game\src\Menu\Magic.h,Steps the Warlock spell list (declared in Menu::Magic::UpdateWarlockMenu),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00057,Enum,Menu::Magic::ShamanMenuState,Native\Game\src\Menu\Magic.h,Steps the Shaman spell list (declared in Menu::Magic::UpdateShamanMenu),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00058,Enum,Menu::BreakArts::BreakArtsMenuState,Native\Game\src\Menu\BreakArts.h,Steps the Break Arts menu (declared in Menu::BreakArts::Update),med,declaration-only;source:15AC.c:169
+T00059,Enum,Menu::BattleAbilities::AbilityUnlockState,Native\Game\src\Menu\BattleAbilities.h,Steps the ability unlock screen (declared in Menu::BattleAbilities::UpdateAbilityUnlock),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00060,Enum,Menu::BattleAbilities::UnlockNotificationState,Native\Game\src\Menu\BattleAbilities.h,Steps the unlock notifications (declared in Menu::BattleAbilities::UpdateUnlockNotifications),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00061,Enum,Menu::BattleAbilities::AssignmentState,Native\Game\src\Menu\BattleAbilities.h,Steps the ability assignment screen (declared in Menu::BattleAbilities::UpdateAssignments),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00062,Enum,Menu::BattleAbilities::BattleAbilitiesMenuState,Native\Game\src\Menu\BattleAbilities.h,Steps the Battle Abilities menu (declared in Menu::BattleAbilities::Update),med,declaration-only;source:15AC.c:169
+T00063,Enum,Menu::Inventory::WeaponDetailsState,Native\Game\src\Menu\Inventory\ItemDetails.h,Steps the weapon detail screen (declared in Menu::Inventory::UpdateWeaponDetails),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00064,Enum,Menu::Inventory::ShieldDetailsState,Native\Game\src\Menu\Inventory\ItemDetails.h,Steps the shield detail screen (declared in Menu::Inventory::UpdateShieldDetails),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00065,Enum,Menu::Inventory::SortMenuState,Native\Game\src\Menu\Inventory\ItemList.h,Steps the sort menu (declared in Menu::Inventory::UpdateSortMenu),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00066,Enum,Menu::Inventory::ItemListState,Native\Game\src\Menu\Inventory\ItemList.h,Steps the item list (declared in Menu::Inventory::UpdateItemList),med,declaration-only;source:15AC.c:169
+T00067,Enum,Menu::Inventory::EquipmentMenuState,Native\Game\src\Menu\Inventory\Inventory.h,Steps the equipment menu (declared in Menu::Inventory::UpdateEquipmentMenu),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00068,Enum,Menu::Inventory::InventoryMenuState,Native\Game\src\Menu\Inventory\Inventory.h,Steps the Items menu (declared in Menu::Inventory::Update),med,declaration-only;source:15AC.c:169
+T00069,Enum,Menu::Status::ActorSwitchState,Native\Game\src\Menu\Status\ActorStatus.h,Steps the actor switch animation (declared in Menu::Status::AnimateActorSwitch),med,declaration-only;source:120.c:582
+T00070,Enum,Menu::Status::EquipmentListState,Native\Game\src\Menu\Status\EquipmentDetails.h,Steps the status equipment list (declared in Menu::Status::UpdateEquipmentList),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00071,Enum,Menu::Status::StatusMenuState,Native\Game\src\Menu\Status\ActorStatus.h,Steps the Status menu (declared in Menu::Status::Update),med,declaration-only;source:15AC.c:169
+T00072,Enum,Menu::Framework::InitOnlyState,Native\Game\src\Menu\Status\EquipmentDetails.h,Has only the initial step of a one-step menu update (declared in Menu::Status::UpdateEquipmentDetails),med,same-as:T00035;identical layout indexed through a different include path;declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00073,Enum,Menu::Map::MapMenuState,Native\Game\src\Menu\Map.h,Steps the Map menu (declared in Menu::Map::UpdateAreaSelection),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00074,Enum,Menu::Map::AreaSelectionState,Native\Game\src\Menu\Map.h,Steps the map area selection (declared in Menu::Map::UpdateAreaSelection),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00075,Enum,Menu::Files::GameOverState,Native\Game\src\Menu\Files.h,Steps the game over screen (declared in Menu::Files::UpdateGameOver),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00076,Enum,Menu::Files::ContainerConfirmationState,Native\Game\src\Menu\Files.h,Steps the container save confirmation (declared in Menu::Files::UpdateContainerConfirmation),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00077,Enum,Menu::Files::DataMenuState,Native\Game\src\Menu\Files.h,Steps the Data menu (declared in Menu::Files::UpdateDataMenu),med,declaration-only;source:15AC.c:169
+T00078,Enum,Menu::Rename::NameEditorState,Native\Game\src\Menu\Rename.h,Steps the name editor (declared in Menu::Rename::UpdateNameEditor),med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
