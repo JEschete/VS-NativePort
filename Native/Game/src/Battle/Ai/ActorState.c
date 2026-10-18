@@ -14,9 +14,9 @@
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Copy.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
@@ -31,7 +31,7 @@ unsigned int Battle_Ai_kPerceptionRangesSquared[320]; /* contents: module image 
 Battle_Ai_WanderTiming Battle_Ai_kWanderTimingPresets[208]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F1790 (D_800F1790@BATTLE/BATTLE.PRG)
-int (*Battle_Ai_decisionCallbacks[55])(Battle_Ai_ActorAiState*); /* contents: module image, relocated (ModulePointers.c) */
+int (*Battle_Ai_decisionCallbacks[9])(Battle_Ai_ActorAiState*); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800F17B8 (D_800F17B8@BATTLE/BATTLE.PRG)
 unsigned short Battle_Ai_viewAngles[45][2]; /* contents: module image (ModuleData.c) */
@@ -43,13 +43,13 @@ unsigned short Battle_Ai_settingsBits8Values[41][2]; /* contents: module image (
 unsigned char Battle_Ai_facingDelayScales[148]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F5878 (D_800F5878@BATTLE/BATTLE.PRG)
-Battle_Ai_ActorAiState* Battle_Ai_actorAiStates[];
+Battle_Ai_ActorAiState* Battle_Ai_actorAiStates[16];
 
 // decomp: D_800F58BC (D_800F58BC@BATTLE/BATTLE.PRG)
 Battle_Ai_RoomAiState* Battle_Ai_roomAiState;
 
 // decomp: D_800F58C0 (D_800F58C0@BATTLE/BATTLE.PRG)
-int Battle_Ai_roomHasWaypoints;
+void* Battle_Ai_roomHasWaypoints;
 
 // decomp: D_800F590C (D_800F590C@BATTLE/BATTLE.PRG)
 int Battle_Ai_attributeActorMask;
@@ -198,7 +198,10 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     int id = actor->actorId;
     int i, kind, temp, packed;
     unsigned int radius, range;
-    unsigned short result[4];
+    SVECTOR result;
+    Core_Debugf("ai", "create actor=%p nativeId=%d viewId=%d options=0x%X nativeModel=%p stats=%p",
+        (void*)actor, ((Battle_Actor*)actor)->id, id, (unsigned int)options,
+        (void*)((Battle_Actor*)actor)->model, (void*)((Battle_Actor*)actor)->stats);
     if (actor->aiControlFlags & 0x15) {
         Battle_Ai_attributeActorMask |= 1 << id;
     }
@@ -206,8 +209,8 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
         kind = actor->model->kind & 7;
         if (kind == 2 || kind == 4) {
             for (i = 0; i < 4; i++) {
-                if (!((int*)Battle_Ai_roomAiState)[10 + i]) {
-                    ((int*)Battle_Ai_roomAiState)[10 + i] = (int)actor;
+                if (!Battle_Ai_roomAiState->specialActors[i]) {
+                    Battle_Ai_roomAiState->specialActors[i] = (Battle_Actor*)actor;
                     break;
                 }
             }
@@ -216,16 +219,18 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     if (!(actor->aiControlFlags & 5)) {
         return 0;
     }
-    state = Core_Memory_AllocateFromLowEnd(0x484);
+    state = Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ActorAiState));
     Battle_Ai_actorAiStates[id] = (void*)state;
-    Core_Memory_ClearAlignedWords(state, 0x484);
+    Core_Memory_ClearAlignedWords(state, sizeof(Battle_Ai_ActorAiState));
     state->actorId = id;
     state->actor = actor;
     model = actor->model;
     state->model = model;
     state->stats = actor->stats;
-    ((void (*)(unsigned char, int, void*, int))Actors_ActorTaggedBonePosition)(state->actorId, 250, result, 0);
-    state->pointHeight = result[1] - model->position[1];
+    Core_Debugf("ai", "created state=%p id=%u viewModel=%p viewStats=%p",
+        (void*)state, (unsigned int)state->actorId, (void*)model, (void*)state->stats);
+    Actors_ActorTaggedBonePosition(state->actorId, 0xFA, &result, 0);
+    state->pointHeight = result.vy - model->position[1];
     radius = model->radius;
     if (!id) {
         state->radius = 40;
@@ -306,6 +311,9 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
         while (Battle_Ai_RebuildActorActionPlans(0))
             ;
     }
+    Core_Debugf("ai", "initialized actor=%d state=%p bytes=%u radius=%u height=%u",
+        id, (void*)state, (unsigned int)sizeof(Battle_Ai_ActorAiState),
+        (unsigned int)state->radius, (unsigned int)state->pointHeight);
     return (short)options >= 0 && (((int)(short)options << 26) < 0);
 }
 
@@ -334,12 +342,6 @@ int Battle_Ai_ClearActorAiNavigationReset()
 void Battle_Ai_InitializeActorAiExtensionHook(void)
 {
     VS_UNPORTED("Battle::Ai::InitializeActorAiExtensionHook");
-}
-
-// decomp: BATTLE.PRG func_800E6F1C (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-void Battle_Ai_FreeRoomAiState(void)
-{
-    VS_UNPORTED("Battle::Ai::FreeRoomAiState");
 }
 
 // decomp: BATTLE.PRG func_800E72D0 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]

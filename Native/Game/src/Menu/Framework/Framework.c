@@ -113,7 +113,7 @@ char Menu_Framework_kMainMenuHelpText[336]; /* contents: module image (ModuleDat
 int Menu_Framework_mainMenuCursorAnimation;
 
 // decomp: D_800F4CD0 (D_800F4CD0@BATTLE/BATTLE.PRG)
-u_long Menu_textBoxOrderingTables;
+u_long Menu_textBoxOrderingTables[102];
 
 // decomp: vs_battle_shortcutInvoked (vs_battle_shortcutInvoked@BATTLE/BATTLE.PRG)
 char Menu_Framework_shortcutInvoked;
@@ -744,7 +744,7 @@ void Menu_Framework_InitGameInterface(void* arg0)
     Core_Memory_ZeroWordsBackward(&Menu_textBoxes[0], sizeof Menu_textBoxes[0]);
     Core_Memory_ZeroWordsBackward(Menu_Framework_submenuStates, sizeof Menu_Framework_submenuStates);
     Menu_Framework_menuMemory = (Menu_Framework_MenuMemory) { { 0 } };
-    Menu_activeTextBoxOrderingTable = &Menu_textBoxOrderingTables;
+    Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
     Render_UploadImageRectangle(0x340, arg0, 0xE00040);
     Render_UploadImageRectangle(0x380, arg0 + 0x7000, 0xE00040);
     Render_UploadImageRectangle(0x4203C0, arg0 + 0xE000, 0x9E0040);

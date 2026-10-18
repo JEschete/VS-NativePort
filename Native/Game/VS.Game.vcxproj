@@ -75,6 +75,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Actors\ModelDrawing.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Actors\ModelRendering.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -88,6 +94,12 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Actors\RoomState.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Actors\SequencePlayback.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -195,6 +207,18 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ConditionSnapshot.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\DecisionCallbacks.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\Movement.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -214,6 +238,12 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\Perception.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\RoomState.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -329,6 +359,12 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Boot\OverlayReset.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Boot\Session.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1102,6 +1138,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Field\CollisionSampling.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Field\Doors.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1583,12 +1625,14 @@
     <ClInclude Include="src\Actors\Lifecycle.h" />
     <ClInclude Include="src\Actors\Location.h" />
     <ClInclude Include="src\Actors\ModelDraw.h" />
+    <ClInclude Include="src\Actors\ModelDrawing.h" />
     <ClInclude Include="src\Actors\ModelInstance.h" />
     <ClInclude Include="src\Actors\ModelRendering.h" />
     <ClInclude Include="src\Actors\Movement.h" />
     <ClInclude Include="src\Actors\Palette.h" />
     <ClInclude Include="src\Actors\RoomActorCache.h" />
     <ClInclude Include="src\Actors\RoomState.h" />
+    <ClInclude Include="src\Actors\SequencePlayback.h" />
     <ClInclude Include="src\Actors\Shadow.h" />
     <ClInclude Include="src\Actors\Skeleton.h" />
     <ClInclude Include="src\Actors\Spawn.h" />
@@ -1613,10 +1657,13 @@
     <ClInclude Include="src\Battle\Ai\AiState.h" />
     <ClInclude Include="src\Battle\Ai\AiViews.h" />
     <ClInclude Include="src\Battle\Ai\Behavior.h" />
+    <ClInclude Include="src\Battle\Ai\ConditionSnapshot.h" />
+    <ClInclude Include="src\Battle\Ai\DecisionCallbacks.h" />
     <ClInclude Include="src\Battle\Ai\Movement.h" />
     <ClInclude Include="src\Battle\Ai\Navigation.h" />
     <ClInclude Include="src\Battle\Ai\OrbitingBoss.h" />
     <ClInclude Include="src\Battle\Ai\Perception.h" />
+    <ClInclude Include="src\Battle\Ai\RoomState.h" />
     <ClInclude Include="src\Battle\AttackPrerequisites.h" />
     <ClInclude Include="src\Battle\BattleMode.h" />
     <ClInclude Include="src\Battle\BattleTypes.h" />
@@ -1639,6 +1686,7 @@
     <ClInclude Include="src\Boot\GameplayInit.h" />
     <ClInclude Include="src\Boot\Lifecycle.h" />
     <ClInclude Include="src\Boot\OverlayReset.h" />
+    <ClInclude Include="src\Boot\Session.h" />
     <ClInclude Include="src\Effects\ActionEffects.h" />
     <ClInclude Include="src\Effects\Camera.h" />
     <ClInclude Include="src\Effects\Curves.h" />
@@ -1805,6 +1853,7 @@
     <ClInclude Include="src\Field\Background.h" />
     <ClInclude Include="src\Field\Camera.h" />
     <ClInclude Include="src\Field\Collision.h" />
+    <ClInclude Include="src\Field\CollisionSampling.h" />
     <ClInclude Include="src\Field\Doors.h" />
     <ClInclude Include="src\Field\Environment.h" />
     <ClInclude Include="src\Field\GameMode.h" />

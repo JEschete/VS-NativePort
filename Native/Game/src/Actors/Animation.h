@@ -120,10 +120,7 @@ void Actors_RestartActorAnimationEvents(Actors_ActorRecord* arg0);
 void Actors_BlendActorPoseHalfway(Actors_AnimationPose* dst, Actors_AnimationPose* src, int count);
 void Actors_UpdateActorAnimationBlend(Actors_ActorRecord* arg0);
 void Actors_AlignPoseRotationBranches(SVECTOR* dst, SVECTOR* src, int count);
-void Actors_AdvanceSkeletalAnimation(Actors_ActorRecord* actor, Actors_AnimationPose* state, int mode);
-void Actors_DecodeAnimationTrack(int offset, SVECTOR* value, int rotation);
 void Actors_UpdateMotionAndLookAt(Actors_ActorRecord* actor, int arg1);
-void Actors_BlendActorPose(Actors_AnimationPose*, Actors_AnimationPose*, int, int, int);
 void Actors_ApplyLockedBoneTransform(Actors_ActorRecord* actor, MATRIX* parent, int bone, int saved);
 
 #endif // VS_ACTORS_ANIMATION_H_DECLS

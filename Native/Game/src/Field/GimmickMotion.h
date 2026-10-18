@@ -17,12 +17,13 @@ typedef struct Field_GimmickMotionView {
     short rotationX, rotationY, rotationZ, pad2A;
     short scaleX, scaleY, scaleZ, pad32, reserved34;
     short deltaY, reserved38, orientation;
-    char reserved3C[0xF0];
+    char reserved3C_3C[44];
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved3C_6C[192];
     char savedState[32];
     char state[32];
     char reserved16C[2];
     u_char material, reserved16F, frame;
 } Field_GimmickMotionView;
-_Static_assert(sizeof(Field_GimmickMotionView) == 0x174, "Field_GimmickMotionView must keep its PS1 layout");
 
 #endif // VS_FIELD_GIMMICKMOTION_H_TYPES

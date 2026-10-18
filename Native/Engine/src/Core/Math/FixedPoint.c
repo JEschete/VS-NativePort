@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
 
 // decomp: D_80040A14 (D_80040A14@SLUS_010.40)
@@ -61,13 +62,6 @@ VECTOR* Core_Math_ShortVectorToFixed(VECTOR* arg0, SVECTOR* arg1)
     arg0->vy = arg1->vy * ONE;
     arg0->vz = arg1->vz * ONE;
     return arg0;
-}
-
-// decomp: BATTLE.PRG _fixedPointMult (src/BATTLE/BATTLE.PRG/4A0A8.c:4163) [C: not yet ported]
-int Core_Math_MultiplyFixed(int a, int b)
-{
-    VS_UNPORTED("Core::Math::MultiplyFixed");
-    return 0;
 }
 
 // decomp: BATTLE.PRG _toNormalIntegerVector (src/BATTLE/BATTLE.PRG/4A0A8.c:4193)
@@ -150,13 +144,6 @@ long Core_Math_ArcTangent2(long y, long x)
     return c;
 }
 
-// decomp: SLUS_010.40 ScaleMatrix (src/SLUS_010.40/31C0C.s:0) [asm-file: not yet ported]
-int Core_Math_ScaleMatrixColumns()
-{
-    VS_UNPORTED("Core::Math::ScaleMatrixColumns");
-    return 0;
-}
-
 // decomp: SLUS_010.40 InvSquareRoot (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
 int Core_Math_InverseSquareRootParts()
 {
@@ -217,19 +204,6 @@ int Core_Math_NormalizeShortVector()
 int Core_Math_NormalizeVectorRegisters()
 {
     VS_UNPORTED("Core::Math::NormalizeVectorRegisters");
-    return 0;
-}
-
-// decomp: SLUS_010.40 func_80041C68 (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
-void Core_Math_MultiplyMatrixIntoRight(MATRIX*, MATRIX*)
-{
-    VS_UNPORTED("Core::Math::MultiplyMatrixIntoRight");
-}
-
-// decomp: SLUS_010.40 vs_gte_rsqrt (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
-int Core_Math_SquareRootInteger(int)
-{
-    VS_UNPORTED("Core::Math::SquareRootInteger");
     return 0;
 }
 

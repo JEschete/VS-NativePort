@@ -4,10 +4,15 @@ This file is the single source of truth for getting from a fresh clone to a play
 **Keep it current:** any change to prerequisites, scripts, dependencies, output layout or the extraction
 step must update this file in the same commit (plan D19).
 
-> **Current state (Phase 1b).** The solution builds and the tests pass. After the extraction step (§5), `VS.Desktop`
+> **Current state (shared rendering slice).** Debug and Release build and pass the full test suite.
+> After the extraction step (§5), `VS.Desktop`
 > runs the original boot and title code: NOW LOADING, the publisher and developer logos, the intro movie with the
 > opening music, the title screen and its menu (New Game / Continue / Vibration / Sound), driven by gamepad or
-> keyboard. Menu sound effects are not played yet, New Game stops at gameplay (1c), and there is no memory card.
+> keyboard. Shared room/actor geometry, dialogue, and facial texture animation render in attract and early
+> New Game scenes. The manor splash and the reported room-AI/condition-snapshot crashes have focused fixes;
+> rendering parity, full cutscene motion, and interactive combat remain incomplete. Audio control timing
+> advances, but full sound output/parity and memory-card support are not established.
+> See [HANDOFF.md](HANDOFF.md) for the verified captures, tests, and remaining limits.
 > Planned items are marked ⏭ and turn into normal instructions when they land.
 
 ---
@@ -103,7 +108,10 @@ Everything goes to `build\<Config>\` (git-ignored):
 | `VS.Tests.exe` | unit tests |
 | `vs-native.log` | the log written by `VS.Desktop` at run time |
 
-Warnings are errors (`/W4 /WX`). A clean build has zero warnings.
+C++ sources use warnings as errors (`/W4 /WX`). The solution generator currently overrides `.c` items
+to warning level 1 with non-fatal warnings, including hand-maintained C ports. Compatibility options are in
+[Directory.Build.props](../Directory.Build.props). A successful build is therefore not necessarily
+warning-free: pointer/ABI, bounds, and uninitialized-value warnings still need source and runtime review.
 
 ---
 
@@ -154,6 +162,17 @@ build\Release\VS.Desktop.exe
 | `--press <t:Buttons,...>` | Scripted presses, each held 3 ticks, e.g. `3400:Down,3500:Circle` (names: Up Down Left Right Cross Circle Square Triangle L1 R1 L2 R2 L3 R3 Start Select, joined with `+`). |
 | `--scripted` | Ignore keyboard and gamepad (only `--press` input). |
 | `--speed <n>` | Run `n` logical ticks per real tick (e.g. 8 to reach the title attract scenes, about tick 5300, quickly). |
+| `--log-level <level>` | Minimum severity: `trace`, `debug`, `info` (default), `warn`, `error`, or `off`. `off` suppresses all normal logging, including crash messages. Invalid/missing values fail startup. |
+| `--log-channels <names>` | Exact, case-sensitive comma-separated channels, without spaces; default `*` selects all. Filters trace/debug/info only; warnings/errors remain visible unless excluded by severity or `off`. |
+
+Logs go to the console and `build\<Config>\vs-native.log` (truncated each run, including an empty log with `off`).
+Each line includes `[tick=N]`: zero is startup, otherwise the logical simulation tick, not elapsed wall time.
+For AI diagnosis use `--log-level debug --log-channels ai,actors,boot,input,content`.
+`--log-level trace --log-channels frame,trace` enables per-tick begin/end markers and legacy C trace sites;
+this is intentionally verbose. Disabled messages skip formatting. C ports can use `Core_Debugf(channel, format, ...)`;
+existing `Core_Tracef` sites now require trace level. Do not use `off` when collecting crash evidence.
+The capture helper accepts the same controls as `-LogLevel debug -LogChannels 'ai,actors,boot,input,content'`
+and fails on build/run errors, timeouts, logged crashes, or missing requested captures within the tick limit.
 
 **Today:** the original boot and title run (see Current state); the game reads `Native\data\` for its files, and
 the disc only to report its label. The title screen appears about 55 s after start; **Start (or Circle) skips the

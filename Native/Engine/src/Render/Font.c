@@ -14,6 +14,7 @@
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
+#include "Render/ScaledFont.h"
 #include "Render/Sprites.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
@@ -49,7 +50,7 @@ void Render_DrawCompactTextColor(char const* text, int x, int color, u_long* nex
         nextPrim = Render_frameScratch.overlayOrderingTable;
     }
 
-    prim[0] = (((uintptr_t)(prim + 2) << 8) >> 8) | 0x01000000;
+    prim[0] = (LegacyGpu_Handle(prim + 2)) | 0x01000000;
     prim[1] = _get_mode(0, 0, getTPage(0, 0, 768, 0));
     prim += 2;
 
@@ -96,7 +97,7 @@ void Render_DrawCompactTextColor(char const* text, int x, int color, u_long* nex
             }
 
             index = Render_compactGlyphIndices[c];
-            prim[0] = (((uintptr_t)(prim + 5) << 8) >> 8) | 0x04000000;
+            prim[0] = (LegacyGpu_Handle(prim + 5)) | 0x04000000;
             prim[1] = vs_getRGB0Raw(Render_LegacyPrimitiveCode_Sprite, color);
             prim[2] = vs_getXY_2(x, y);
             prim[3] = vs_getUV0Clut(index & 0xFE, (index & 1) * 10 + 76, 864, 223);
@@ -124,7 +125,7 @@ void Render_DrawCompactTextColor(char const* text, int x, int color, u_long* nex
     }
 
     *prim = *nextPrim & 0xFFFFFF;
-    *nextPrim = ((u_long)Render_frameScratch.primitiveCursor << 8) >> 8;
+    *nextPrim = LegacyGpu_Handle(Render_frameScratch.primitiveCursor);
     Render_frameScratch.primitiveCursor = prim + 1;
 }
 
@@ -235,16 +236,16 @@ int Render_MeasureEncodedTextLine(char* str)
 
     while (1) {
         u_char c = *str++;
-        if (c < '\f') {
+        if (c < 0xE5) {
             length += Render_variableFontGlyphWidths[c];
             continue;
-        } else if ((c == '\f') || (c == '\0') || (c == '\n')) {
+        } else if ((c == 0xE5) || (c == 0xE7) || (c == 0xE8)) {
             return length / 6;
         } else if (c == Core_TextCode_Spacing) {
-            length += *str++;
+            length += (u_char)*str++;
         } else if (c == Core_TextCode_PrintDecimal) {
             c = *str++;
-            if (c > '9') {
+            if (c > 9) {
                 length += (c / 10) * 6;
             }
         } else if (c >= Core_TextCode_ChunkSize) {
@@ -260,7 +261,7 @@ int Render_DrawVariableWidthGlyph(u_int glyphId, int x, int y, u_long* ot)
     u_int glyphCol;
     u_long* sprite;
 
-    if (glyphId == ' ') {
+    if (glyphId == 0x8F) {
         return x + 6;
     }
 
@@ -331,10 +332,10 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
             if (postContinuation != 0) {
                 --postContinuation;
             }
-            currentChar = *currentString;
+            currentChar = (u_char)*currentString;
             ++currentString;
             if (currentChar < 0xEC) {
-                if (currentChar < '\f') {
+                if (currentChar < 0xE5) {
                     printX = Render_DrawVariableWidthGlyph(
                         currentChar, printX, printY, sp20);
                     charsRemaining -= speed;
@@ -397,7 +398,7 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
                     break;
                 }
             } else {
-                opcodeParam = *currentString;
+                opcodeParam = (u_char)*currentString;
                 ++currentString;
 
                 switch (currentChar) {
@@ -551,13 +552,6 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
     }
 }
 
-// decomp: BATTLE.PRG _printFixedWidthFontChar (src/BATTLE/BATTLE.PRG/5BF94.c:1977) [inline-asm: not yet ported]
-int Render_DrawScaledFontChar(int charId, int x, int y, int width, int height, int scale)
-{
-    VS_UNPORTED("Render::DrawScaledFontChar");
-    return 0;
-}
-
 // decomp: BATTLE.PRG _printFixedWidthFont (src/BATTLE/BATTLE.PRG/5BF94.c:2096)
 void Render_DrawScaledTextBoxText(Menu_TextBoxState* ctx, int scale)
 {
@@ -589,16 +583,16 @@ void Render_DrawScaledTextBoxText(Menu_TextBoxState* ctx, int scale)
         done = 0;
 
         while (1) {
-            u_int currentChar = *str++;
+            u_int currentChar = (u_char)*str++;
 
             if (currentChar < 0xEC) {
-                if (currentChar < '\f') {
+                if (currentChar < 0xE5) {
                     printX = Render_DrawScaledFontChar(
                         currentChar, printX, printY, charWidth, charHeight, scale);
                     continue;
                 }
 
-                switch (currentChar - '\f') {
+                switch (currentChar - 0xE5) {
                 case 2: // 0xE7 Termination
                     done = 1;
                     break;
@@ -617,7 +611,7 @@ void Render_DrawScaledTextBoxText(Menu_TextBoxState* ctx, int scale)
                     break;
                 }
             } else {
-                u_int opcodeParam = *str++;
+                u_int opcodeParam = (u_char)*str++;
 
                 switch (currentChar - 0xF8) {
                 case 2: // Offset x

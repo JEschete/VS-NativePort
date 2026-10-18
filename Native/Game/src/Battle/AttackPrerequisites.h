@@ -10,7 +10,7 @@
 #define VS_BATTLE_ATTACKPREREQUISITES_H_DECLS
 #include "Battle/Action.h"
 
-extern int (*Battle_attackPrerequisiteFunctions[46])(Battle_ActionDefinition*, u_char*);
+extern int (*Battle_attackPrerequisiteFunctions[40])(Battle_ActionDefinition*, u_char*);
 int Battle_IsStatusEffectBlocked(int debuff, u_char* arg1);
 int Battle_TargetEnemyClass(u_char* arg0);
 int Battle_RejectAttackPrerequisite(

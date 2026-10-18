@@ -100,12 +100,22 @@ typedef struct Battle_Ai_RoomAiState {
 
 // decomp: actionCandidateState (src/BATTLE/BATTLE.PRG/6FC00.c:513)
 typedef struct Battle_Ai_CandidateReadinessView {
-    char reserved0[0x131];
+    char reserved0_0[84];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved0_6C[197];
     unsigned char actionStatus;
-    char reserved132[0x72];
+    char reserved132_132[110];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     Battle_Ai_RelationByteView relations[16];
     unsigned int distancesSquared[16];
-    char reserved224[0x20C];
+    char reserved224_224[8];
+    void* nativePointer22C; /* PS1 pointer slot 0x22C */
+    char reserved224_230[512];
     Battle_Ai_CandidateEntryView* candidateOrder[16];
     int candidateCount;
 } Battle_Ai_CandidateReadinessView;
@@ -114,13 +124,21 @@ typedef struct Battle_Ai_CandidateReadinessView {
 typedef struct Battle_Ai_ActionChoiceView {
     char reserved0[0x1B];
     u_char isDead;
-    char reserved1C[0x40];
+    char reserved1C_1C[56];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
     Battle_ActorStats* stats;
-    char reserved60[0x22];
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved60_6C[22];
     short pointHeight;
     char reserved84[0xBC];
     Battle_Ai_ActionChoiceEntryView currentChoice;
-    char reserved154[0xDC];
+    char reserved154_154[76];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
+    char reserved154_1A4[136];
+    void* nativePointer22C; /* PS1 pointer slot 0x22C */
     Battle_Ai_ActionSlotConfigView actionSlots[6][4];
 } Battle_Ai_ActionChoiceView;
 
@@ -137,7 +155,14 @@ typedef struct Battle_Ai_DecisionDispatchView {
     char reserved37[0x11];
     int savedDestination;
     short position[3];
-    char reserved52[0x30];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved52_6C[22];
     short pointHeight;
     char reserved84[0x34];
     short bodyHeight;
@@ -149,9 +174,13 @@ typedef struct Battle_Ai_DecisionDispatchView {
     signed char opaque154;
     char reserved155[7];
     unsigned char movementTarget;
-    char reserved15D[0x87];
+    char reserved15D_15D[67];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
+    char reserved15D_1A4[64];
     unsigned int distance;
-    char reserved1E8[0x248];
+    char reserved1E8_1E8[68];
+    void* nativePointer22C; /* PS1 pointer slot 0x22C */
+    char reserved1E8_230[512];
     Battle_Ai_DispatchEntryView* candidateOrder[16];
     int candidateCount;
 } Battle_Ai_DecisionDispatchView;
@@ -160,11 +189,19 @@ typedef struct Battle_Ai_DecisionDispatchView {
 typedef struct Battle_Ai_ActionMetadataView {
     char reserved0[0x17];
     unsigned char actionCostEnabled;
-    char reserved18[0x44];
+    char reserved18_18[60];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
     Battle_Ai_MetadataStatsView* stats;
-    char reserved60[0x28];
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved60_6C[28];
     unsigned char actorId;
-    char reserved89[0x1A7];
+    char reserved89_89[279];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
+    char reserved89_1A4[136];
+    void* nativePointer22C; /* PS1 pointer slot 0x22C */
     Battle_Ai_ActionMetadataEntry actionSlots[6][4];
 } Battle_Ai_ActionMetadataView;
 
@@ -174,15 +211,22 @@ typedef struct Battle_Ai_ActionPlanView {
     u_char allowFallbackAction;
     char reserved27[0x2D];
     Battle_Actor* actor;
-    char reserved58[4];
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
     Battle_ActorStats* stats;
-    char reserved60[0x28];
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved60_6C[28];
     u_char actorId;
     char reserved89[0xA5];
     u_char planMode;
     char reserved12F[0x10];
     u_char minActionDelay;
-    char reserved140[0x1B0];
+    char reserved140_140[96];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
+    char reserved140_1A4[136];
+    void* nativePointer22C; /* PS1 pointer slot 0x22C */
+    char reserved140_230[192];
     Battle_Ai_CandidateEntryView candidates[16];
     Battle_Ai_CandidateEntryView* candidateOrder[16];
     int candidateCount;
@@ -200,11 +244,19 @@ typedef struct Battle_Ai_ReactionView {
     unsigned char settingsBits21;
     char reserved2D[3];
     unsigned char settingsBit25;
-    char reserved31[0x57];
+    char reserved31_31[35];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved31_6C[28];
     unsigned char actorId;
     char reserved89[0xA4];
     unsigned char behaviorMode;
-    char reserved12E[0x76];
+    char reserved12E_12E[114];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     Battle_Ai_RelationWordView relations[16];
 } Battle_Ai_ReactionView;
 
@@ -214,7 +266,14 @@ typedef struct Battle_Ai_PlanEvaluationView {
     unsigned char usesRoomActionDelay;
     char reserved14[7];
     unsigned char isDead;
-    char reserved1C[108];
+    char reserved1C_1C[56];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved1C_6C[28];
     unsigned char actorId;
     char reserved89[17];
     unsigned short opaque9A;
@@ -224,11 +283,10 @@ typedef struct Battle_Ai_PlanEvaluationView {
     char reservedE9[177];
     unsigned char opaque19A;
 } Battle_Ai_PlanEvaluationView;
-_Static_assert(sizeof(Battle_Ai_PlanEvaluationView) == 0x19C, "Battle_Ai_PlanEvaluationView must keep its PS1 layout");
 
 // decomp: actorInitializationActor (src/BATTLE/BATTLE.PRG/7CD68.c:869)
 typedef struct Battle_Ai_AiActorView {
-    char reserved0[4];
+    void* nativePointer0; /* PS1 pointer slot 0x0 */
     int actorId;
     Battle_Ai_ActorStateFlags stateFlags;
     char reservedC[16];
@@ -259,7 +317,8 @@ typedef struct Battle_Ai_AiCreationView {
     Battle_Ai_CreationStatsView* stats;
     short* positionSource;
     unsigned int* tileSource;
-    char reserved68[26];
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved68_6C[22];
     unsigned short pointHeight;
     char reserved84[4];
     unsigned char actorId;
@@ -297,7 +356,9 @@ typedef struct Battle_Ai_AiCreationView {
     int moveY;
     char reserved188[12];
     int opaque194;
-    char reserved198[140];
+    char reserved198_198[8];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
+    char reserved198_1A4[128];
     unsigned char opaque224;
     unsigned char opaque225;
     unsigned char opaque226;
@@ -314,9 +375,13 @@ typedef struct Battle_Ai_PerceptionView {
     Battle_Ai_TilePosition tile;
     char reserved38[0x14];
     SVECTOR position;
-    char reserved54[4];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
     Battle_Ai_PerceivedObjectView* model;
-    char reserved5C[0x26];
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved5C_6C[22];
     short pointHeight;
     char reserved84[4];
     u_char actorId;
@@ -330,7 +395,8 @@ typedef struct Battle_Ai_PerceptionView {
     short bodyHeight;
     char reservedBA[0x71];
     u_char phase;
-    char reserved12C[0x78];
+    char reserved12C_12C[116];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     Battle_Ai_TargetRelation relations[16];
     u_int distancesSquared[16];
 } Battle_Ai_PerceptionView;
@@ -364,7 +430,10 @@ typedef struct Battle_Ai_SettingsView {
     unsigned char settingsByte0Bit7;
     char reserved34[32];
     Battle_Ai_SettingsActorView* actor;
-    char reserved58[16];
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
     int (*decisionCallback)(Battle_Ai_ActorAiState*);
     char reserved6C[40];
     unsigned short collisionRadius;
@@ -398,7 +467,12 @@ typedef struct Battle_Ai_SettingsView {
 typedef struct Battle_Ai_EngagementView {
     char reserved0[0x54];
     Battle_Ai_EngagementActorView* actor;
-    char reserved58[0x30];
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved58_6C[28];
     unsigned char actorId;
     char reserved89[5];
     unsigned short reserved8E;
@@ -445,7 +519,8 @@ typedef struct Battle_Ai_PerceptionUpdateView {
     Battle_Ai_PositionLinkView* stats;
     Battle_Ai_PositionLinkView* positionSource;
     Battle_Ai_PositionLinkView* tileSource;
-    char reserved68[8];
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved68_6C[4];
     union {
         u_char samples[8];
         int words[2];
@@ -481,7 +556,8 @@ typedef struct Battle_Ai_PerceptionUpdateView {
     u_int reserved191 : 20;
     char reserved194[6];
     u_char opaque19A;
-    char reserved19B[9];
+    char reserved19B_19B[5];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     u_int relations[16];
 } Battle_Ai_PerceptionUpdateView;
 
@@ -491,7 +567,14 @@ typedef struct Battle_Ai_CandidateMovementView {
     unsigned char opaque1;
     char reserved2[74];
     short position[3];
-    char reserved52[48];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved52_6C[22];
     short pointHeight;
     char reserved84[47];
     unsigned char maxRange;
@@ -505,20 +588,38 @@ typedef struct Battle_Ai_CandidateMovementView {
     unsigned short movementFlags;
     char reserved160[8];
     Battle_Ai_CandidateTileWord destination;
-    char reserved16C[56];
+    char reserved16C_16C[52];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     Battle_Ai_CandidateTileWord relations[16];
     unsigned int distancesSquared[16];
-    char reserved224[588];
+    char reserved224_224[8];
+    void* nativePointer22C; /* PS1 pointer slot 0x22C */
+    char reserved224_230[512];
+    void* nativePointer430; /* PS1 pointer slot 0x430 */
+    void* nativePointer434; /* PS1 pointer slot 0x434 */
+    void* nativePointer438; /* PS1 pointer slot 0x438 */
+    void* nativePointer43C; /* PS1 pointer slot 0x43C */
+    void* nativePointer440; /* PS1 pointer slot 0x440 */
+    void* nativePointer444; /* PS1 pointer slot 0x444 */
+    void* nativePointer448; /* PS1 pointer slot 0x448 */
+    void* nativePointer44C; /* PS1 pointer slot 0x44C */
+    void* nativePointer450; /* PS1 pointer slot 0x450 */
+    void* nativePointer454; /* PS1 pointer slot 0x454 */
+    void* nativePointer458; /* PS1 pointer slot 0x458 */
+    void* nativePointer45C; /* PS1 pointer slot 0x45C */
+    void* nativePointer460; /* PS1 pointer slot 0x460 */
+    void* nativePointer464; /* PS1 pointer slot 0x464 */
+    void* nativePointer468; /* PS1 pointer slot 0x468 */
+    void* nativePointer46C; /* PS1 pointer slot 0x46C */
     int candidateCount;
 } Battle_Ai_CandidateMovementView;
-_Static_assert(sizeof(Battle_Ai_CandidateMovementView) == 0x474, "Battle_Ai_CandidateMovementView must keep its PS1 layout");
 
 // decomp: da4bcState (src/BATTLE/BATTLE.PRG/71618.c:747)
 typedef struct Battle_Ai_EscortView {
     char reserved0[14];
     unsigned char opaqueE, opaqueF;
     char reserved10[6];
-    short linkedActor : 8;
+    signed char linkedActor;
     char reserved17;
     unsigned char opaque18;
     char reserved19[27];
@@ -529,7 +630,14 @@ typedef struct Battle_Ai_EscortView {
     short x;
     char reserved4E[2];
     short z;
-    char reserved52[54];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved52_6C[28];
     unsigned char actorId;
     char reserved89[42];
     unsigned char maxRange;
@@ -541,25 +649,42 @@ typedef struct Battle_Ai_EscortView {
     unsigned char actionStatus;
     char reserved132[42];
     unsigned char movementTarget;
-    char reserved15D[71];
+    char reserved15D_15D[67];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     unsigned int relations[16];
     unsigned int distancesSquared[16];
-    char reserved224[524];
+    char reserved224_224[8];
+    void* nativePointer22C; /* PS1 pointer slot 0x22C */
+    char reserved224_230[512];
     Battle_Ai_EscortEntryView* candidateOrder[16];
 } Battle_Ai_EscortView;
 
 // decomp: da4bcTargetState (src/BATTLE/BATTLE.PRG/71618.c:771)
 typedef struct Battle_Ai_EscortRelationsView {
-    char reserved0[0x1A4];
+    char reserved0_0[84];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved0_6C[308];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     Battle_Ai_EscortRelationBits relations[16];
 } Battle_Ai_EscortRelationsView;
-_Static_assert(sizeof(Battle_Ai_EscortRelationsView) == 0x1E4, "Battle_Ai_EscortRelationsView must keep its PS1 layout");
 
 // decomp: directionalCacheState (src/BATTLE/BATTLE.PRG/771A8.c:896)
 typedef struct Battle_Ai_DirectionCacheView {
     char reserved0[0x34];
     Battle_Ai_DirectionCacheTile tile, previousTile;
-    char reserved3C[0x82];
+    char reserved3C_3C[24];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved3C_6C[82];
     short flightHeight;
 } Battle_Ai_DirectionCacheView;
 
@@ -569,7 +694,14 @@ typedef struct Battle_Ai_MoveTargetView {
     unsigned char movementDisabled;
     unsigned char reserved8[0x2C];
     Battle_Ai_TilePosition tile;
-    char reserved38[0x130];
+    char reserved38_38[28];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved38_6C[252];
     Battle_Ai_TilePosition destination;
 } Battle_Ai_MoveTargetView;
 
@@ -614,7 +746,12 @@ typedef struct Battle_Ai_ActionExecutionView {
     int previousTile;
     char reserved3C[0x18];
     Battle_Ai_EngagementData* actor;
-    char reserved58[0x42];
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved58_6C[46];
     short reserved9A;
     char reserved9C[0x5F];
     u_char reservedFB;
@@ -622,7 +759,11 @@ typedef struct Battle_Ai_ActionExecutionView {
     u_char reserved12A;
     char reserved12B[0xD];
     u_short reserved138;
-    char reserved13A[0x2F6];
+    char reserved13A_13A[102];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
+    char reserved13A_1A4[136];
+    void* nativePointer22C; /* PS1 pointer slot 0x22C */
+    char reserved13A_230[512];
     Battle_Ai_ActionCandidate* candidateOrder[16];
     int candidateCount;
 } Battle_Ai_ActionExecutionView;
@@ -637,16 +778,23 @@ typedef struct Battle_Ai_FloorHeightView {
     u_char reserved36;
     char reserved37[0x17];
     short reserved4E;
-    char reserved50[8];
+    char reserved50_50[4];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
     Battle_Ai_AiModelView* model;
-    char reserved5C[0x62];
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved5C_6C[82];
     short flightHeight;
     char reservedC0[0xBC];
     int moveX;
     int moveZ;
     int moveY;
     short heading;
-    char reserved18A[0x9E];
+    char reserved18A_18A[22];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
+    char reserved18A_1A4[132];
     int stallCounter;
 } Battle_Ai_FloorHeightView;
 
@@ -669,7 +817,7 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x10 */ char reserved10[3];
     /* 0x13 */ u_char usesRoomActionDelay;
     /* 0x14 */ char reserved14[2];
-    /* 0x16 */ int linkedActor : 8;
+    /* 0x16 */ signed char linkedActor;
     /* 0x17 */ u_char actionCostEnabled;
     /* 0x18 */ u_char opaque18;
     /* 0x19 */ char settingsConstant19;
@@ -700,7 +848,10 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x54 */ Battle_Ai_EngagementData *actor;
     /* 0x58 */ Battle_Ai_AiModelView *model;
     /* 0x5C */ Battle_ActorStats *stats;
-    /* 0x60 */ char reserved60[34];
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved60_6C[22];
     /* 0x82 */ short pointHeight;
     /* 0x84 */ char reserved84[4];
     /* 0x88 */ u_char actorId;
@@ -772,7 +923,7 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x180 */ int moveZ;
     /* 0x184 */ int moveY;
     /* 0x188 */ short heading;
-    /* 0x18A */ int angle : 16;
+    /* 0x18A */ short angle : 16;
     /* 0x18C */ char reserved18C[14];
     /* 0x19A */ u_char opaque19A;
     /* 0x19B */ char reserved19B[5];
@@ -794,9 +945,14 @@ typedef struct Battle_Ai_ActorAiState {
 typedef struct Battle_Ai_MovementCheckView {
     char reserved0[0x34];
     int tile;
-    char reserved38[0x20];
+    char reserved38_38[28];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
     Battle_Ai_CheckObjectView* model;
-    char reserved5C[0x62];
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved5C_6C[82];
     short flightHeight;
     char reservedC0[0x9E];
     unsigned short movementFlags;
@@ -810,9 +966,14 @@ typedef struct Battle_Ai_MovementDecisionView {
     short x;
     short padding4E;
     short z;
-    char reserved52[6];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
     Actors_ActorRecord* model;
-    char padding5C[0x2C];
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char padding5C_6C[28];
     u_char actorId;
     char reserved89[0x31];
     u_short facingDelay;
@@ -829,9 +990,29 @@ typedef struct Battle_Ai_MovementDecisionView {
     char reserved184[4];
     u_int reserved188 : 16;
     int angle : 16;
-    char padding18C[0x18];
+    char padding18C_18C[20];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     u_int targetFlags[17];
-    char padding1E8[0x299];
+    char padding1E8_1E8[68];
+    void* nativePointer22C; /* PS1 pointer slot 0x22C */
+    char padding1E8_230[512];
+    void* nativePointer430; /* PS1 pointer slot 0x430 */
+    void* nativePointer434; /* PS1 pointer slot 0x434 */
+    void* nativePointer438; /* PS1 pointer slot 0x438 */
+    void* nativePointer43C; /* PS1 pointer slot 0x43C */
+    void* nativePointer440; /* PS1 pointer slot 0x440 */
+    void* nativePointer444; /* PS1 pointer slot 0x444 */
+    void* nativePointer448; /* PS1 pointer slot 0x448 */
+    void* nativePointer44C; /* PS1 pointer slot 0x44C */
+    void* nativePointer450; /* PS1 pointer slot 0x450 */
+    void* nativePointer454; /* PS1 pointer slot 0x454 */
+    void* nativePointer458; /* PS1 pointer slot 0x458 */
+    void* nativePointer45C; /* PS1 pointer slot 0x45C */
+    void* nativePointer460; /* PS1 pointer slot 0x460 */
+    void* nativePointer464; /* PS1 pointer slot 0x464 */
+    void* nativePointer468; /* PS1 pointer slot 0x468 */
+    void* nativePointer46C; /* PS1 pointer slot 0x46C */
+    char padding1E8_470[17];
     u_char reactionPending;
 } Battle_Ai_MovementDecisionView;
 
@@ -846,7 +1027,14 @@ typedef struct Battle_Ai_MovementDestinationView {
     short x;
     char reserved4E[2];
     short z;
-    char reserved52[0x3A];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved52_6C[32];
     unsigned short moveAttempts;
     char reserved8E[0x26];
     int moveDistance;
@@ -873,7 +1061,14 @@ typedef struct Battle_Ai_MovementPathView {
     short x;
     char reserved4E[2];
     short z;
-    char reserved52[0x92];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved52_6C[120];
     u_char opaqueE4;
     char reservedE5[2];
     u_char opaqueE7;
@@ -901,9 +1096,14 @@ struct Battle_Ai_MovementRecoveryView {
     short x;
     char reserved4E[2];
     short z;
-    char reserved52[6];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
     Battle_Ai_RecoveryModelView* model;
-    char reserved5C[0xDE];
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved5C_6C[206];
     unsigned short opaque13A, duration;
     char reserved13E[0x1A];
     short targetX, targetZ;
@@ -912,7 +1112,9 @@ struct Battle_Ai_MovementRecoveryView {
     unsigned short movementFlags;
     char reserved160[0x28];
     unsigned short heading, angle;
-    char reserved18C[0x9C];
+    char reserved18C_18C[20];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
+    char reserved18C_1A4[132];
     int stallCounter;
 };
 typedef struct Battle_Ai_MovementRecoveryView Battle_Ai_MovementRecoveryView;
@@ -927,9 +1129,14 @@ typedef struct Battle_Ai_MovementStepView {
     char reserved38[0x14];
     Battle_Ai_StepPositionWord position;
     short z;
-    char reserved52[6];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
     Battle_Ai_CheckObjectView* model;
-    char reserved5C[0x60];
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved5C_6C[80];
     short groundClearance;
     short flightHeight;
     char reservedC0[0x25];
@@ -941,7 +1148,9 @@ typedef struct Battle_Ai_MovementStepView {
     int moveZ;
     int moveY;
     short heading;
-    char reserved18A[0x9E];
+    char reserved18A_18A[22];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
+    char reserved18A_1A4[132];
     int stallCounter;
 } Battle_Ai_MovementStepView;
 
@@ -950,15 +1159,18 @@ typedef struct Battle_Ai_WaypointSearchView {
     char reserved0[0x4C];
     short x, y, z;
 } Battle_Ai_WaypointSearchView;
-_Static_assert(sizeof(Battle_Ai_WaypointSearchView) == 0x52, "Battle_Ai_WaypointSearchView must keep its PS1 layout");
 
 // decomp: obstructionState (src/BATTLE/BATTLE.PRG/771A8.c:790)
 typedef struct Battle_Ai_ObstructionView {
     char reserved0[0x4C];
     Battle_Ai_ObstructionVector position;
-    char reserved54[4];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
     Battle_Ai_ObstructionModel* model;
-    char reserved5C[0x2C];
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved5C_6C[28];
     unsigned char actorId;
     char reserved89[9];
     unsigned short radius;
@@ -972,7 +1184,14 @@ typedef struct Battle_Ai_ObstructionView {
 typedef struct Battle_Ai_PatrolView {
     char reserved0[0x34];
     Battle_Ai_TilePosition tile;
-    char reserved38[0xC8];
+    char reserved38_38[28];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved38_6C[148];
     unsigned char index, row, rate, direction, opaque104;
     char reserved105[0x63];
     Battle_Ai_TilePosition destination;
@@ -982,11 +1201,36 @@ typedef struct Battle_Ai_PatrolView {
 struct Battle_Ai_RadialRetreatView {
     char reserved0[0x4C];
     short x, y, z;
-    char reserved52[6];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
     Battle_Ai_ModelActiveView* model;
-    char reserved5C[0x120];
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved5C_6C[272];
     int moveX, moveZ, moveY;
-    char reserved188[0x2E8];
+    char reserved188_188[24];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
+    char reserved188_1A4[136];
+    void* nativePointer22C; /* PS1 pointer slot 0x22C */
+    char reserved188_230[512];
+    void* nativePointer430; /* PS1 pointer slot 0x430 */
+    void* nativePointer434; /* PS1 pointer slot 0x434 */
+    void* nativePointer438; /* PS1 pointer slot 0x438 */
+    void* nativePointer43C; /* PS1 pointer slot 0x43C */
+    void* nativePointer440; /* PS1 pointer slot 0x440 */
+    void* nativePointer444; /* PS1 pointer slot 0x444 */
+    void* nativePointer448; /* PS1 pointer slot 0x448 */
+    void* nativePointer44C; /* PS1 pointer slot 0x44C */
+    void* nativePointer450; /* PS1 pointer slot 0x450 */
+    void* nativePointer454; /* PS1 pointer slot 0x454 */
+    void* nativePointer458; /* PS1 pointer slot 0x458 */
+    void* nativePointer45C; /* PS1 pointer slot 0x45C */
+    void* nativePointer460; /* PS1 pointer slot 0x460 */
+    void* nativePointer464; /* PS1 pointer slot 0x464 */
+    void* nativePointer468; /* PS1 pointer slot 0x468 */
+    void* nativePointer46C; /* PS1 pointer slot 0x46C */
     int candidateCount;
 };
 typedef struct Battle_Ai_RadialRetreatView Battle_Ai_RadialRetreatView;
@@ -1001,7 +1245,14 @@ typedef struct Battle_Ai_AreaRouteView {
     short x;
     short y;
     short z;
-    char reserved52[0x36];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved52_6C[28];
     u_char actorId;
     char reserved89[0xB1];
     u_short cooldown;
@@ -1038,7 +1289,14 @@ typedef struct Battle_Ai_BlockedRecoveryView {
     short x;
     char reserved4E[2];
     short z;
-    char reserved52[0xA8];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved52_6C[142];
     u_char detourStep;
     u_char opaqueFB;
     char reservedFC[0x1C];
@@ -1074,7 +1332,11 @@ typedef struct Battle_Ai_TargetApproachView {
     char reserved52[2];
     Battle_Ai_ApproachActorView* actor;
     Battle_Ai_ApproachTargetRecordView* model;
-    char reserved5C[44];
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved5C_6C[28];
     unsigned char actorId;
     char reserved89[83];
     int range;
@@ -1105,7 +1367,8 @@ typedef struct Battle_Ai_TargetApproachView {
     char reserved16C[16];
     int moveX;
     int moveZ;
-    char reserved184[32];
+    char reserved184_184[28];
+    void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     Battle_Ai_ApproachRelationBits relations[16];
     unsigned int distancesSquared[16];
 } Battle_Ai_TargetApproachView;
@@ -1127,7 +1390,12 @@ typedef struct Battle_Ai_TerrainMoveView {
     short position[3];
     char reserved52[2];
     Battle_Ai_TerrainMoveActorView* actor;
-    char reserved58[272];
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved58_6C[252];
     Battle_Ai_TerrainTileWord destination;
     char reserved16C[16];
     int moveX;
@@ -1140,10 +1408,14 @@ typedef struct Battle_Ai_TerrainMoveView {
 struct Battle_Ai_OrbitTrackingView {
     char reserved0[0x4C];
     short x, y, z;
-    char reserved52[6];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
     Battle_Ai_ModelActiveView* model;
     Battle_Ai_OrbitStatsView* stats;
-    char reserved60[0xFC];
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved60_6C[240];
     unsigned char movementTarget;
     char reserved15D[0x1F];
     int moveX, moveZ, moveY;
@@ -1162,9 +1434,14 @@ typedef struct Battle_Ai_WanderView {
     char reserved38[0x10];
     Battle_Ai_TilePosition savedDestination;
     short x, y, z;
-    char reserved52[6];
+    char reserved52_52[2];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
     Battle_Ai_WanderRecordView* model;
-    char reserved5C[0x58];
+    void* nativePointer5C; /* PS1 pointer slot 0x5C */
+    void* nativePointer60; /* PS1 pointer slot 0x60 */
+    void* nativePointer64; /* PS1 pointer slot 0x64 */
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved5C_6C[72];
     unsigned int moveDistance;
     char reservedB8[8];
     unsigned short wanderPhase;

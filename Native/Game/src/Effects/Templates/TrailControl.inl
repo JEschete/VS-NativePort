@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Core/Math/FixedPoint.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Matrix.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"

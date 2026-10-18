@@ -30,7 +30,7 @@ _Static_assert(sizeof(Battle_HitTargetWord) == 0x8, "Battle_HitTargetWord must k
 #include "Items/Weapons.h"
 
 extern u_char Battle_limbInjuryStatusIds[20];
-extern void (*Battle_actionEffectMediators[100])(
+extern void (*Battle_actionEffectMediators[70])(
     Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int);
 extern u_int Battle_hitPrerequisiteResult;
 extern u_int Battle_previousHitResult;

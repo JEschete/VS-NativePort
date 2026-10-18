@@ -91,7 +91,7 @@ int Actors_RemoveActorAtSlot(u_int index, int arg1)
             Battle_Ai_FreeActorAiState(actor);
 
             for (i = 0; i < 16; ++i) {
-                if (Battle_actors[i]->next == actor) {
+                if (Battle_actors[i] != NULL && Battle_actors[i]->next == actor) {
                     Battle_actors[i]->next = actor->next;
                     break;
                 }

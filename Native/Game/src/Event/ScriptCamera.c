@@ -5,6 +5,7 @@
 #include "Actors/Skeleton.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Math/Matrix.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
 #include "Core/Memory/Copy.h"
@@ -46,14 +47,14 @@ char Event_skipNextFieldCameraRestore;
 Event_CameraState* Event_camera;
 
 // decomp: BATTLE.PRG func_800BB33C (src/BATTLE/BATTLE.PRG/4A0A8.c:2761)
-int Event_CommandStopCameraMotion(u_char* arg0, short arg1)
+intptr_t Event_CommandStopCameraMotion(u_char* arg0, short arg1)
 {
     Event_StopEventCameraMotion();
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BB35C (src/BATTLE/BATTLE.PRG/4A0A8.c:2767)
-int Event_CommandSetCameraFollowing(u_char* arg0, short arg1)
+intptr_t Event_CommandSetCameraFollowing(u_char* arg0, short arg1)
 {
     int new_var = arg0[1] & 2;
     Event_SetEventCameraFollowing(arg0[1] & 1, new_var != 0);
@@ -61,14 +62,14 @@ int Event_CommandSetCameraFollowing(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BB38C (src/BATTLE/BATTLE.PRG/4A0A8.c:2774)
-int Event_CommandSetCameraOriginActor(u_char* arg0, short arg1)
+intptr_t Event_CommandSetCameraOriginActor(u_char* arg0, short arg1)
 {
     Event_SetEventCameraOriginActor(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)));
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BB3BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2780)
-int Event_CommandRestoreFieldCamera(u_char* arg0, short arg1)
+intptr_t Event_CommandRestoreFieldCamera(u_char* arg0, short arg1)
 {
     Event_RestoreEventFieldCamera(
         arg0[1] != 0xFF ? ((arg0[1] + 4) & 7) : -1, arg0[2] != 0 ? arg0[2] : -1);
@@ -77,13 +78,13 @@ int Event_CommandRestoreFieldCamera(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BB41C (src/BATTLE/BATTLE.PRG/4A0A8.c:2788)
-int Event_CommandWaitCameraTracks(u_char* arg0, short arg1)
+intptr_t Event_CommandWaitCameraTracks(u_char* arg0, short arg1)
 {
     return arg0[1] != (arg0[1] & Event_EventCameraCompletionMask());
 }
 
 // decomp: BATTLE.PRG func_800BB450 (src/BATTLE/BATTLE.PRG/4A0A8.c:2793)
-int Event_CommandSetScreenCapture(u_char* arg0, short arg1)
+intptr_t Event_CommandSetScreenCapture(u_char* arg0, short arg1)
 {
     Render_SetFramebufferEffectEnabled(arg0[1]);
     return 0;
@@ -283,7 +284,7 @@ void Event_RestoreEventFieldCamera(short arg0, int arg1)
 }
 
 // decomp: BATTLE.PRG func_800BC2E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:3200)
-int Event_CommandCameraMotion(u_char* script, short unused)
+intptr_t Event_CommandCameraMotion(u_char* script, short unused)
 {
     Event_CameraTrack* c;
     Event_CameraTrack* other;
@@ -689,7 +690,7 @@ int Event_EventCameraGroundClearance(MATRIX* arg0)
 }
 
 // decomp: BATTLE.PRG func_800BD444 (src/BATTLE/BATTLE.PRG/4A0A8.c:3601)
-int Event_CommandTweenCameraRoll(u_char* arg0, short arg1)
+intptr_t Event_CommandTweenCameraRoll(u_char* arg0, short arg1)
 {
     Event_AngleTween* var_s0;
 
@@ -782,7 +783,7 @@ int Event_EventCameraCompletionMask(void)
 }
 
 // decomp: BATTLE.PRG func_800BD6C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:3691)
-int Event_CommandScreenTransform(u_char* script, short arg1)
+intptr_t Event_CommandScreenTransform(u_char* script, short arg1)
 {
     Render_FramebufferEffectTranslation values;
     CVECTOR color;
@@ -956,7 +957,7 @@ int Event_UpdateEventTripleTween(Event_TripleTween* arg0)
 }
 
 // decomp: BATTLE.PRG func_800BDC9C (src/BATTLE/BATTLE.PRG/4A0A8.c:3862)
-int Event_CommandCameraLensOrShake(u_char* script, short arg1)
+intptr_t Event_CommandCameraLensOrShake(u_char* script, short arg1)
 {
     Event_ShakeOscillator* entry;
     short i;

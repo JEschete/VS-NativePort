@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Core/Math/FixedPoint.h"
 #include "Core/Math/Matrix.h"
+#include "Core/Math/ScalarMath.h"
 
 // decomp: BATTLE.PRG vs_battle_lookAt (src/BATTLE/BATTLE.PRG/146C.c:8209)
 void Core_Math_BuildLookAtOrientation(VECTOR* from, VECTOR* to, MATRIX* mat)
@@ -51,18 +51,6 @@ int Core_Math_LookupRotationTrigQuadrant()
 {
     VS_UNPORTED("Core::Math::LookupRotationTrigQuadrant");
     return 0;
-}
-
-// decomp: BATTLE.PRG func_800B17F0 (src/BATTLE/BATTLE.PRG/48C7C.s:0) [asm-file: not yet ported]
-void Core_Math_BuildEulerRotationMatrixQuadrant(SVECTOR*, MATRIX*)
-{
-    VS_UNPORTED("Core::Math::BuildEulerRotationMatrixQuadrant");
-}
-
-// decomp: BATTLE.PRG func_800B196C (src/BATTLE/BATTLE.PRG/48C7C.s:0) [asm-file: not yet ported]
-void Core_Math_PremultiplyRotationMatrix(MATRIX*, MATRIX*)
-{
-    VS_UNPORTED("Core::Math::PremultiplyRotationMatrix");
 }
 
 // decomp: BATTLE.PRG _vecToRotMatrix (src/BATTLE/BATTLE.PRG/4A0A8.c:4179)

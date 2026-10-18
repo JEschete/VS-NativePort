@@ -16,7 +16,7 @@
 #include "Render/Palette.h"
 
 // decomp: _attackPrerequisiteFunctions (_attackPrerequisiteFunctions@BATTLE/BATTLE.PRG)
-int (*Battle_attackPrerequisiteFunctions[46])(Battle_ActionDefinition*, u_char*); /* contents: module image, relocated (ModulePointers.c) */
+int (*Battle_attackPrerequisiteFunctions[40])(Battle_ActionDefinition*, u_char*); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: BATTLE.PRG _hitPrerequisiteCanApplyEffect (src/BATTLE/BATTLE.PRG/146C.c:10133)
 int Battle_IsStatusEffectBlocked(int debuff, u_char* arg1)

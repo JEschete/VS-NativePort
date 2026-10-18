@@ -150,6 +150,12 @@
     <ClInclude Include="src\Actors\ModelDraw.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClCompile Include="src\Actors\ModelDrawing.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\ModelDrawing.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
     <ClInclude Include="src\Actors\ModelInstance.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
@@ -175,6 +181,12 @@
       <Filter>src\Actors</Filter>
     </ClCompile>
     <ClInclude Include="src\Actors\RoomState.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Actors\SequencePlayback.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\SequencePlayback.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClInclude Include="src\Actors\Shadow.h">
@@ -300,6 +312,18 @@
     <ClInclude Include="src\Battle\Ai\Behavior.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\ConditionSnapshot.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\ConditionSnapshot.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\DecisionCallbacks.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\DecisionCallbacks.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\Ai\Movement.c">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -322,6 +346,12 @@
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
     <ClInclude Include="src\Battle\Ai\Perception.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\RoomState.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\RoomState.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\AttackPrerequisites.c">
@@ -448,6 +478,12 @@
       <Filter>src\Boot</Filter>
     </ClCompile>
     <ClInclude Include="src\Boot\OverlayReset.h">
+      <Filter>src\Boot</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Boot\Session.c">
+      <Filter>src\Boot</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Boot\Session.h">
       <Filter>src\Boot</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\ActionEffects.c">
@@ -1330,6 +1366,12 @@
       <Filter>src\Field</Filter>
     </ClCompile>
     <ClInclude Include="src\Field\Collision.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\CollisionSampling.c">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\CollisionSampling.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Doors.c">

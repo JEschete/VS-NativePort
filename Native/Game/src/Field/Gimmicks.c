@@ -37,7 +37,7 @@
 #include "Render/ModelDraw.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomGeometry.h"
+#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 #include "State/StateFlags.h"
 #include "State/Timers.h"

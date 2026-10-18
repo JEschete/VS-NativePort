@@ -14,6 +14,7 @@
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/RoomState.h"
 #include "Core/Math/Vector.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
@@ -982,19 +983,6 @@ int Battle_Ai_BuildAiTerrainHeightsWithWorkspace()
 void Battle_Ai_ReleaseActorAiContactOccupancy(int)
 {
     VS_UNPORTED("Battle::Ai::ReleaseActorAiContactOccupancy");
-}
-
-// decomp: BATTLE.PRG func_800E6F9C (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-void Battle_Ai_InitializeRoomAiMap(void)
-{
-    VS_UNPORTED("Battle::Ai::InitializeRoomAiMap");
-}
-
-// decomp: BATTLE.PRG func_800E71DC (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-int Battle_Ai_SampleAiTileGroundHeight()
-{
-    VS_UNPORTED("Battle::Ai::SampleAiTileGroundHeight");
-    return 0;
 }
 
 // decomp: BATTLE.PRG func_800E75EC (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]

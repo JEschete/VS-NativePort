@@ -3,6 +3,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelDraw.h"
+#include "Actors/ModelDrawing.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
@@ -10,10 +11,11 @@
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Field/Gimmicks.h"
 #include "Render/Model.h"
 #include "Render/ModelDraw.h"
+#include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"
 
 // decomp: D_800F3C58 (D_800F3C58@BATTLE/BATTLE.PRG)
@@ -188,13 +190,6 @@ int Actors_ProjectActorBone(int arg0, int arg1, int* arg2, int arg3)
         return var_v0;
     }
 
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800A141C (src/BATTLE/BATTLE.PRG/38C1C.c:39) [C: not yet ported]
-int Actors_ProjectActorBoneEndpoint(int arg0, int arg1, int* arg2, int arg3)
-{
-    VS_UNPORTED("Actors::ProjectActorBoneEndpoint");
     return 0;
 }
 
@@ -509,7 +504,7 @@ MATRIX* Actors_ActorBoneWorldTransform(int actorId, int bone, MATRIX* unused)
 {
     MATRIX zeroTranslation;
     long flag;
-    Render_ModelScratchpadBoneView* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);
+    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
     Actors_ActorRecord* actor = Actors_actorRecords[actorId];
 
     if (actor == NULL) {

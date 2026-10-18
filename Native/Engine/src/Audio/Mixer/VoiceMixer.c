@@ -17,7 +17,7 @@ short Audio_Mixer_kPanGains[SPU_PAN_TABLE_SIZE]; /* contents: module image (Modu
 #undef SPU_PAN_TABLE_SIZE
 
 // decomp: D_800301E0 (D_800301E0@SLUS_010.40)
-Audio_CommandHandler Audio_Mixer_kCommandHandlers[392]; /* contents: module image, relocated (ModulePointers.c) */
+Audio_CommandHandler Audio_Mixer_kCommandHandlers[256]; /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: g_SpuVoiceInfo (g_SpuVoiceInfo@SLUS_010.40)
 Audio_VoiceEnvelope Audio_Mixer_voiceEnvelopes[VOICE_COUNT];
@@ -809,14 +809,14 @@ void Audio_Mixer_CommitPlaybackVoices(void)
     }
     if (Flags & 0x100) {
         Audio_Mixer_BuildVoiceModeMask(&Audio_Mixer_voiceModes.noise,
-            Audio_Seq_secondaryMusicConfig->noiseChannels,
+            (Audio_Seq_secondaryMusicConfig != NULL ? Audio_Seq_secondaryMusicConfig->noiseChannels : 0),
             Audio_Seq_activeMusicConfig->noiseChannels,
             Audio_Mixer_voiceScheduler.noiseVoices);
         Audio_Mixer_BuildVoiceModeMask(&Audio_Mixer_voiceModes.reverb,
-            Audio_Seq_secondaryMusicConfig->reverbChannels,
+            (Audio_Seq_secondaryMusicConfig != NULL ? Audio_Seq_secondaryMusicConfig->reverbChannels : 0),
             Audio_Seq_activeMusicConfig->reverbChannels,
             Audio_Mixer_voiceScheduler.reverbVoices);
-        Audio_Mixer_BuildVoiceModeMask(&Audio_Mixer_voiceModes.fm, Audio_Seq_secondaryMusicConfig->fmChannels,
+        Audio_Mixer_BuildVoiceModeMask(&Audio_Mixer_voiceModes.fm, (Audio_Seq_secondaryMusicConfig != NULL ? Audio_Seq_secondaryMusicConfig->fmChannels : 0),
             Audio_Seq_activeMusicConfig->fmChannels,
             Audio_Mixer_voiceScheduler.fmVoices);
         Audio_Driver_SetVoiceReverbMask(Audio_Mixer_voiceModes.reverb);

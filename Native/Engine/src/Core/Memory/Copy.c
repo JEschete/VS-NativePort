@@ -43,12 +43,6 @@ void Core_Memory_CopyBytesBackward(void* dest, void const* src, int size)
     } while (size != 0);
 }
 
-// decomp: BATTLE.PRG func_800E4288 (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
-void Core_Memory_ClearAlignedWords(void*, int)
-{
-    VS_UNPORTED("Core::Memory::ClearAlignedWords");
-}
-
 // decomp: SLUS_010.40 Sound_memcpy32 (src/SLUS_010.40/25AC.c:3965)
 void Core_Memory_CopyWords(void* in_Src, void* in_Dst, u_int in_Size)
 {

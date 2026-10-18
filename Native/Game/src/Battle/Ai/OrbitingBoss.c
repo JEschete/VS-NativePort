@@ -18,7 +18,7 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"

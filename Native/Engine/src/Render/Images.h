@@ -26,14 +26,14 @@ _Static_assert(sizeof(Render_TextureRegion) == 0x8, "Render_TextureRegion must k
 
 // decomp: gim_t (src/BATTLE/BATTLE.PRG/5BF94.c:82)
 typedef struct Render_GimLayer {
-    u_int drawEnabled : 1;
-    u_int loading : 1;
-    u_int textureMode : 1;
-    u_int drawRoutine : 3;
-    u_int loadPhase : 3;
-    u_int texturePageCount : 3;
-    u_int ownsPalette : 1;
-    u_int reservedBits13 : 3;
+    u_short drawEnabled : 1;
+    u_short loading : 1;
+    u_short textureMode : 1;
+    u_short drawRoutine : 3;
+    u_short loadPhase : 3;
+    u_short texturePageCount : 3;
+    u_short ownsPalette : 1;
+    u_short reservedBits13 : 3;
     char vramPage;
     char brightness;
     u_char columns;

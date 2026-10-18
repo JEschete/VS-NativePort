@@ -12,7 +12,295 @@ so a stale fix is noticed.
 """
 from __future__ import annotations
 
+MODULE_DATA_BLOBS = (
+    ("BATTLE/BATTLE.PRG", 0x1060, 0x80069860, 0x98, "Content_battleLimbNameBytes",
+     "58578.c INCLUDE_RODATA D_80069860; strings end at jtbl_800698F8"),
+    ("BATTLE/BATTLE.PRG", 0x80B0C, 0x800E930C, 0x71C, "Content_battleGimmickTemplateBytes",
+     "30DB0.c:_loadGimmick; three 16-byte headers plus modelDataSize payloads"),
+    ("BATTLE/BATTLE.PRG", 0x823AC, 0x800EABAC, 0x9DC, "Content_battleTextboxFrameBytes",
+     "5BF94.c:textbox frame vertices; nine styles precede D_800EB588"),
+    ("SLUS_010.40", 0x2019C, 0x8002F99C, 0x804, "Content_residentLfoSamples",
+     "25AC.c:SoundVM_B4_Vibrato; sixteen short waveform sequences precede g_Sound_LfoTable"),
+)
+
+MODULE_FUNCTION_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x800DBA4C, "F04203"),
+    ("BATTLE/BATTLE.PRG", 0x800DBA88, "F04204"),
+    ("BATTLE/BATTLE.PRG", 0x800DBB98, "F04205"),
+    ("BATTLE/BATTLE.PRG", 0x800DBC0C, "F04206"),
+)
+
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F00589": [("void Field_SampleRoomGroundColor(int arg0) { Render_SampleRoomLighting(arg0, 0); }",
+                 "void Field_SampleRoomGroundColor(int arg0, int layer, Render_ColorCode* color)\n"
+                 "{\n    (void)layer;\n    Render_SampleRoomLighting(arg0, 0, color);\n}",
+                 "preserve the output-color argument consumed by the original assembly")],
+    "G00582": [("int Battle_Ai_roomHasWaypoints", "void* Battle_Ai_roomHasWaypoints",
+                 "func_800E6F9C stores the room auxiliary-data pointer, not a boolean")],
+    "F01020": [
+        ("&Actors_skeletonPose.scale", "&Actors_roomActorScale",
+         "D_800F3C58+0x7E0 aliases D_800F4438; use the canonical initialized room scale"),
+    ],
+    "F03192": [
+        (f"Audio_Seq_secondaryMusicConfig->{field}",
+         f"(Audio_Seq_secondaryMusicConfig != NULL ? Audio_Seq_secondaryMusicConfig->{field} : 0)",
+         "BuildVoiceModeMask accepts no saved layer; do not eagerly read the null optional config")
+        for field in ("noiseChannels", "reverbChannels", "fmChannels")
+    ],
+    "F00975": [
+        ("    frame = Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15;",
+         '    Core_Debugf("texture", "actor=%u model=%u bank=%u slot=%u clut=%u channel=%d frame=%d overlay=%u row=%u src=(%d,%d) dst=(%d,%d) size=(%d,%d)",\n'
+         "        (unsigned)actor->instance.slot, (unsigned)actor->modelId, (unsigned)Actors_sharedSequenceBankIndex,\n"
+         "        (unsigned)actor->textureSlot, (unsigned)actor->clutA, index, frame, (unsigned)animation->overlayIndex,\n"
+         "        (unsigned)actor->textureRowOffsets[Actors_sharedSequenceBankIndex],\n"
+         "        (Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15) * 64 + srcX, srcY + 256,\n"
+         "        dstX + x * 64, y * 256 + row * 64 + py, width, height);\n"
+         "    frame = Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15;",
+         "toggleable live facial tile selection and copy rectangle diagnostics"),
+    ],
+    "F00801": [
+        ("*((u_char*)temp_s0 + Actors_sharedSequenceBankIndex + 0x183E)",
+         "temp_s0->textureRowOffsets[Actors_sharedSequenceBankIndex]",
+         "func_8009CE9C: active facial bank row through the native actor layout"),
+        ("*((u_char*)temp_s0 + arg0 + 0x183D)", "temp_s0->textureRowOffsets[arg0 - 1]",
+         "func_8009CE9C: restore frame zero before selecting an unavailable facial bank"),
+    ],
+    "F00804": [
+        ("    if (Actors_sequenceTexturePagesOneBased[arg0] != 0) {",
+         "    if (arg0 < 1 || arg0 > 3) return -1;\n"
+         "    if (Actors_sequenceTexturePagesOneBased[arg0] != 0) {", "one-based shared ETM slot bounds"),
+        ("Actors_sequenceTexturePagesOneBased[arg0]", "Actors_sharedSequenceBankTexturePages[arg0 - 1]",
+         "D_800F244F+slot and D_800F2450+bank are the same original byte"),
+    ],
+    "F00805": [
+        ("    switch (Content_legacyEtmLoadPhase) {",
+         "    if (objdata->targetSlot < 1 || objdata->targetSlot > 3) return -2;\n"
+         "    switch (Content_legacyEtmLoadPhase) {", "one-based shared ETM slot bounds"),
+        ("Actors_sequenceTexturePagesOneBased[objdata->targetSlot]",
+         "Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1]",
+         "publish the ETM page to the same bank table read by facial animation"),
+    ],
+    "F00536": [("Field_isRoomActorSpawnEnabled", "Field_zoneContext.mpdEnemyCount",
+                 "D_800F18E0 aliases _zoneContext +0x60 (mpdEnemyCount), not an independent enable flag")],
+    "F00275": [("    if (arg0 < 16) {",
+                 '    Core_Debugf("actors", "script spawn actor=%u model=%d existing=%p", arg0, arg1,\n'
+                 "        arg0 < 16 ? (void*)Battle_actors[arg0] : NULL);\n    if (arg0 < 16) {",
+                 "script-spawn selection and duplicate gate diagnostics")],
+    "F00778": [("    if (ret == -1) {\n        return 1;\n    }",
+                 "    if (ret == -1) {\n        return 1;\n    }\n"
+                 '    Core_Debugf("actors", "loaded kind=%u actor=%u model=%d result=%d record=%p",\n'
+                 "        (unsigned)slot->assetKind, (unsigned)slot->targetSlot, (int)slot->modelId, ret,\n"
+                 "        slot->targetSlot < 17 ? (void*)Actors_actorRecords[slot->targetSlot] : NULL);",
+                 "completed actor-load result and installed record diagnostics")],
+    "F00947": [("    Actors_ActorRecord* actor = Actors_actorRecords[id];",
+                 "    Actors_ActorRecord* actor = Actors_actorRecords[id];\n"
+                 '    if (actor == NULL) Core_Debugf("actors", "movement references missing actor %d", id);',
+                 "identify a failed script actor binding before the required movement operation")],
+    "F01860": [(f"(*(int (*)[])&Actors_sharedSequenceData)[{index}] = 0;",
+                  f"Actors_sharedSequenceData[{index}] = NULL;", "reset whole native SEQ bank pointers")
+                 for index in range(3)],
+    "F00777": [("    *dst = *objectData;",
+                 '    Core_Debugf("actors", "queue kind=%u actor=%u model=%u phase=%u parse=%u",\n'
+                 "        (unsigned)objectData->assetKind, (unsigned)objectData->targetSlot,\n"
+                 "        (unsigned)objectData->modelId, (unsigned)Content_legacyModelLoadPhase,\n"
+                 "        (unsigned)Content_modelParseResetFlag);\n    *dst = *objectData;",
+                 "shared actor-load request and parser-state diagnostics")],
+    "F01325": [
+        ("((uintptr_t)(prim + 2) << 8) >> 8", "LegacyGpu_Handle(prim + 2)", "compact-text draw-mode link"),
+        ("((uintptr_t)(prim + 5) << 8) >> 8", "LegacyGpu_Handle(prim + 5)", "compact-text glyph link"),
+        ("((u_long)Render_frameScratch.primitiveCursor << 8) >> 8", "LegacyGpu_Handle(Render_frameScratch.primitiveCursor)",
+         "compact-text chain head retains its native address"),
+    ],
+    "F01353": [("((u_long)primBuf << 8) >> 8", "LegacyGpu_Handle(primBuf)", "stat-gauge native packet link")],
+    "F01416": [("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+                 "textbox ordering entries hold native link handles, never truncated address bits")],
+    **{fid: [("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+              "shared primitive helpers use the native link table")] for fid in ("F01405", "F01406")},
+    "F03423": [("    while (DsControlB(DslPause, NULL, NULL) == 0)\n        ;\n", "",
+                 "main.c:8119; native extracted-file reads have no CD transport to pause")],
+    "G00497": [("u_long Menu_textBoxOrderingTables", "u_long Menu_textBoxOrderingTables[102]",
+                 "5BF94.c:4044-4046; three 34-word textbox ordering tables")],
+    "F01331": [
+        ("c < '\\f'", "c < 0xE5", "vs_battle_getTextLineLength.s:0x800C702C"),
+        ("c == '\\f'", "c == 0xE5", "encoded page boundary"),
+        ("c == '\\0'", "c == 0xE7", "encoded terminator"),
+        ("c == '\\n'", "c == 0xE8", "encoded newline"),
+        ("c > '9'", "c > 9", "0x800C70B0 uses decimal operand count, not ASCII"),
+        ("length += *str++;", "length += (u_char)*str++;", "unsigned spacing operand"),
+    ],
+    "F01332": [("glyphId == ' '", "glyphId == 0x8F", "game-encoded space in the vsstring region")],
+    "F01334": [
+        ("currentChar = *currentString;", "currentChar = (u_char)*currentString;",
+         "_printVariableWidthFont.s:0x800C7340 uses lbu"),
+        ("opcodeParam = *currentString;", "opcodeParam = (u_char)*currentString;", "unsigned text operand"),
+        ("currentChar < '\\f'", "currentChar < 0xE5", "0x800C7354 compares the game control boundary"),
+    ],
+    "F01335": [
+        ("u_int currentChar = *str++;", "u_int currentChar = (u_char)*str++;",
+         "_printFixedWidthFont.s:0x800C7CC4 uses lbu"),
+        ("u_int opcodeParam = *str++;", "u_int opcodeParam = (u_char)*str++;", "unsigned text operand"),
+        ("currentChar < '\\f'", "currentChar < 0xE5", "0x800C7CD8 compares the game control boundary"),
+        ("currentChar - '\\f'", "currentChar - 0xE5", "0x800C7D00 dispatches E7 termination and E8 newline"),
+    ],
+    "F00557": [
+        ("    Core_Gte_SetRotMatrix((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014));",
+         "    if (!Render_ValidateRoomGeometry(arg0, Field_roomData.header.geometryLength)) {\n"
+         '        Core_Debugf("render", "Invalid room geometry extent");\n'
+         "        return;\n    }\n"
+         "    Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);",
+         "146C.c:15926; validate the MPD section and use the native frame matrix"),
+        ("(MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014)", "&Render_frameScratch.viewMatrix", "native frame translation source"),
+        ("*(void**)((uintptr_t)Core_ScratchBase() + 0x000)", "Render_frameScratch.primitiveCursor", "native primitive cursor"),
+    ],
+    # _removeActorAtIndex / 146C.c:926: the linked list is stored in a sparse actor slot table.
+    "F00010": [("if (Battle_actors[i]->next == actor)",
+                "if (Battle_actors[i] != NULL && Battle_actors[i]->next == actor)",
+                "ignore empty slots when unlinking a removed actor")],
+    # func_800A0204 / 30DB0.c:3725 caches a native SEQ bank, not a 32-bit guest address.
+    "F00856": [
+        ("    int found;", "    intptr_t found;", "preserve the resolved bank pointer"),
+        ("found = ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, anim, (int*)&frames);",
+         "found = Actors_FindActorAnimationHeader(actor, anim, &frames);", "use the declared header output type"),
+    ],
+    # func_800AEF94 / 44F14.c:923: room actor slots are sparse, including an absent companion in slot 1.
+    "F01008": [
+        ("if ((*previous)->modelId == texture)", "if (*previous != NULL && (*previous)->modelId == texture)",
+         "empty actor slots cannot share texture animation"),
+        ("if ((*previousAttached)->modelId == texture)",
+         "if (*previousAttached != NULL && (*previousAttached)->modelId == texture)",
+         "attached-actor texture lookup also traverses sparse slots"),
+           ("struct Render_DrawDepthScratch* frame;", "Render_FrameScratch* frame;", "native ordering-table view"),
+           ("frame->depth += actor->companionState.depthBias * 4;",
+            "frame->orderingTable = (u_char*)frame->orderingTable + actor->companionState.depthBias * 4;",
+            "companion depth shifts the native ordering-table base"),
+           ("frame->depth -= actor->companionState.depthBias * 4;",
+            "frame->orderingTable = (u_char*)frame->orderingTable - actor->companionState.depthBias * 4;",
+            "restore the native ordering-table base"),
+           ("frame->depth += 0x10;", "frame->orderingTable = (u_char*)frame->orderingTable + 0x10;",
+            "gimmick depth shifts the ordering table without touching the primitive pointer"),
+           ("frame->depth = (int)(frame->depth - 0x10);",
+            "frame->orderingTable = (u_char*)frame->orderingTable - 0x10;", "restore the gimmick ordering-table base"),
+    ],
+        "F01006": [("*(MATRIX*)&source", "*source", "44F14.c:853; copy the supplied camera matrix, not pointer-stack bytes")],
+    # func_800AE47C / 44F14.c:610: the SEQ header starts with offsets, not a native pointer.
+    "F00998": [
+        ("u_char** v0 = ((u_char** (*)(Actors_ActorRecord*, u_char, u_short**))Actors_FindActorAnimationHeader)(arg0, arg0->animationId, &sp10);",
+         "Actors_SeqAnimationBank* v0 = (Actors_SeqAnimationBank*)Actors_FindActorAnimationHeader(arg0, arg0->animationId, &sp10);",
+         "typed on-disc sequence header"),
+        ("u_char* temp_a3 = *v0;", "u_char* temp_a3 = VS_ONDISC(v0, animationData, u_char*);",
+         "resolve the event stream's 32-bit offset"),
+    ],
+    # F01393 / BATTLE func_800CBBCC, 5BF94.c:4056: GIM grid coordinates are temporary, not guest memory.
+    "F01393": [
+        ("    short* columnX = (short*)(0x1F800400 - (columns + 1) * 2);\n"
+         "    short* rowY = columnX - (rows + 1);",
+         "    // Byte-sized dimensions need at most 256 boundary coordinates per axis.\n"
+         "    short columnX[256];\n"
+         "    short rowY[256];", "bounded native GIM coordinates, independent of shared scratch storage"),
+        ("    for (i = 0; i <= columns; ++i) {",
+         "    if (columns * rows > (int)(sizeof image->tileTable / sizeof image->tileTable[0]) - 4) {\n"
+         '        Core_Debugf("render", "GIM grid %dx%d exceeds tile table capacity", columns, rows);\n'
+         "        return;\n"
+         "    }\n\n"
+         "    for (i = 0; i <= columns; ++i) {", "reject grids beyond the embedded tile table before reading tiles"),
+        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)", "scaled GIM quad links must retain native pointers"),
+    ],
+    # F01818 / BATTLE 7CD68.c:934: runtime views are rebased by native_views.py, not on-disc structs.
+    "F01818": [
+        ("    unsigned short result[4];", "    SVECTOR result;\n"
+         '    Core_Debugf("ai", "create actor=%p nativeId=%d viewId=%d options=0x%X nativeModel=%p stats=%p",\n'
+         "        (void*)actor, ((Battle_Actor*)actor)->id, id, (unsigned int)options,\n"
+         "        (void*)((Battle_Actor*)actor)->model, (void*)((Battle_Actor*)actor)->stats);",
+         "AI creation identity and native/view layout diagnosis"),
+        ("    state->stats = actor->stats;", "    state->stats = actor->stats;\n"
+         '    Core_Debugf("ai", "created state=%p id=%u viewModel=%p viewStats=%p",\n'
+         "        (void*)state, (unsigned int)state->actorId, (void*)model, (void*)state->stats);",
+         "AI state links before tagged bone lookup"),
+        ("((int*)Battle_Ai_roomAiState)[10 + i]", "Battle_Ai_roomAiState->specialActors[i]",
+         "room special actors are native pointers, not PS1 word offsets"),
+        ("= (int)actor;", "= (Battle_Actor*)actor;", "preserve special actor pointer"),
+        ("Core_Memory_AllocateFromLowEnd(0x484)", "Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ActorAiState))",
+         "allocate full native state, never sizeof the partial initialization view"),
+        ("Core_Memory_ClearAlignedWords(state, 0x484)", "Core_Memory_ClearAlignedWords(state, sizeof(Battle_Ai_ActorAiState))",
+         "clear full native state including candidate pointer array"),
+        ("((void (*)(unsigned char, int, void*, int))Actors_ActorTaggedBonePosition)(state->actorId, 250, result, 0)",
+         "Actors_ActorTaggedBonePosition(state->actorId, 0xFA, &result, 0)", "use actual int/SVECTOR signature"),
+        ("result[1]", "result.vy", "typed tagged bone height"),
+        ("    return (short)options >= 0", '    Core_Debugf("ai", "initialized actor=%d state=%p bytes=%u radius=%u height=%u",\n'
+         "        id, (void*)state, (unsigned int)sizeof(Battle_Ai_ActorAiState),\n"
+         "        (unsigned int)state->radius, (unsigned int)state->pointHeight);\n"
+         "    return (short)options >= 0", "successful initialization gate"),
+    ],
+    # Actor IDs are 0..15 (146C.c:8936); 0x10 is the linked-actor sentinel, not a table index.
+    # 7E05C.s:541-575 identifies the next BSS symbol, tileFlagMap at 0x800F58B8: 0x40 bytes after D_800F5878.
+    "G00579": [("Battle_Ai_actorAiStates[]", "Battle_Ai_actorAiStates[16]", "AI actor pointer table extent")],
+    # BATTLE 5BF94.c:7885/8442: the timeline header stays eight bytes, but tracks contain native pointers.
+    "F01557": [
+        ("entry->trackCount * 16 + 8", "sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack)",
+         "allocate native timeline tracks"),
+        ("    p->flags = count ? 2 : 0;", "    p->flags = count ? 2 : 0;\n"
+         '    Core_Debugf("effects", "timeline=%d state=%p tracks=%d stride=%u", arg1, (void*)p,\n'
+         "        (int)p->trackCount, (unsigned int)sizeof(Effects_TimelineTrack));", "timeline allocation diagnosis"),
+    ],
+    "F01589": [
+        ("(Effects_TimelineTrack*)&arg0->context.timeline[var_s1 * 2 + 1]", "&arg0->context.timeline->tracks[var_s1]",
+         "index native tracks, not PS1 eight-byte header units"),
+    ],
+    # BATTLE 573B8.c:67: opcode results are control codes 0..4 or native instruction addresses.
+    "F01271": [
+        ("    int ret;", "    intptr_t ret;", "preserve opcode branch addresses"),
+        ("        switch (ret) {",
+         '        Core_Debugf("event-step", "event=%d thread=%d op=%02X result=%lld args=%02X,%02X,%02X pc=%p",\n'
+         "            (int)Event_eventId, (int)arg1, (unsigned)*script, (long long)ret,\n"
+         "            Event_kOpcodeSizes[*script] > 1 ? (unsigned)script[1] : 0,\n"
+         "            Event_kOpcodeSizes[*script] > 2 ? (unsigned)script[2] : 0,\n"
+         "            Event_kOpcodeSizes[*script] > 3 ? (unsigned)script[3] : 0, (void*)script);\n"
+         "        switch (ret) {", "toggleable event wait and command argument diagnostics"),
+        ("        default:\n            script = (u_char*)ret;",
+         '        default:\n            Core_Debugf("event", "thread=%d branch=%p -> %p skip=%d",\n'
+         "                (int)arg1, (void*)script, (void*)ret, (int)Event_skipState);\n"
+         "            script = (u_char*)ret;", "native branch trace"),
+    ],
+    "G00133": [
+        ("int (*", "intptr_t (*", "normal opcode return contract"),
+        ("Event_kOpcodeHandlers[]", "Event_kOpcodeHandlers[256]", "one handler per byte opcode"),
+    ],
+    **{rid: [(f"{name}[]", f"{name}[{count}]", evidence)] for rid, name, count, evidence in (
+        ("G00029", "Battle_attackPrerequisiteFunctions", 40,
+         "146C.c:_canPerformAttack; US table has forty functions before the hit-factor words"),
+        ("G00032", "Battle_actionEffectMediators", 70,
+         "146C.c:func_80085390; US table ends after the seventy effect mediators"),
+        ("G00044", "Field_kTextureEffectHandlers", 7,
+         "2842C.c:texture effect dispatch; seven handlers precede D_800E85E8"),
+        ("G00045", "Field_kRoomEffectOpcodeHandlers", 13,
+         "2842C.c:room effect dispatch; thirteen handlers precede numeric room-effect data"),
+        ("G00138", "Battle_limbNames", 20,
+         "5BF94.h:limb-name strings; twenty US addresses precede signed coordinate pairs"),
+        ("G00222", "Effects_scriptRenderers", 2,
+         "5BF94.c:func_800D47F4; renderer and null entry precede D_800EC32C byte selectors"),
+        ("G00227", "Effects_scriptOpcodeHandlers", 49,
+         "5BF94.c:func_800D51D8; forty-nine US handlers precede effect resource data"),
+        ("G00233", "Battle_Ai_decisionCallbacks", 9,
+         "7CD68.c:decision callback selection; nine US function addresses precede AI constants"),
+        ("G01840", "Audio_Seq_kLfoWaveforms", 16,
+         "25AC.c:LFO selection; sixteen waveform addresses precede D_800301E0"),
+        ("G01841", "Audio_Mixer_kCommandHandlers", 256,
+         "25AC.c:SoundCommand; byte command table ends at D_800305E0"),
+        ("G01842", "Audio_Seq_kOpcodeHandlers", 96,
+         "25AC.c:func_8001A8D8 indexes byte opcode minus 0xA0; table ends at D_80030760"),
+        ("G01843", "Audio_Seq_kExtendedOpcodeHandlers", 32,
+         "25AC.c:func_8001A8D8 extended dispatch; thirty-two handlers precede numeric data"),
+    )},
+    "G00466": [("int (**", "intptr_t (**", "copied skip opcode return contract")],
+    "G00621": [
+        ("int (*", "intptr_t (*", "skip opcode return contract"),
+        ("Event_kSkipOpcodeHandlers[]", "Event_kSkipOpcodeHandlers[256]", "one handler per byte opcode"),
+    ],
+    # INITBTL 12AC.c:69 copied 256 four-byte pointers; native pointers require the full table size.
+    "F01850": [("0x400", "sizeof(Event_kSkipOpcodeHandlers)", "native skip table allocation and copy")],
+    # BATTLE 4A0A8.c:2110 is called only through the opcode table; it ignores both dispatch arguments.
+    "F01126": [("Event_ScriptWaitForScreenTransition(void)",
+                 "Event_ScriptWaitForScreenTransition(u_char* arg0, short arg1)", "consistent opcode signature")],
     # 771A8.c:942 adds a direction delta to `arg0->unk34`, an int in the pinned view; the merged layout of
     # T00532 has the packed tile word as Battle::Ai::TilePosition (union of the word and its bytes).
     "F01731": [("arg0->tile + ", "arg0->tile.word + ", "packed tile word arithmetic (771A8.c:950)")],
@@ -106,7 +394,23 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
                 "clear at 0x34")],
 }
 
+FIXES["F00798"] += [
+    # _loadSeq / 30DB0.c:1766-1774: four-byte offsets relative to the payload after the offset table, not pointers.
+    ("Actors_sharedSequenceAnimationData[slot][i] = *(char**)Content_legacySequenceParseData;",
+     "Actors_sharedSequenceAnimationData[slot][i] = (char*)Content_legacySequenceParseData\n"
+     "                + (count - i) * sizeof(u_int) + *(u_int*)Content_legacySequenceParseData;",
+     "read one 32-bit file offset and resolve it relative to the shared sequence payload"),
+    ("            Actors_sharedSequenceAnimationData[slot][i] += (intptr_t)Content_legacySequenceParseData;\n", "",
+     "shared sequence entries already point into the payload"),
+]
+
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    (r"^Menu::", r"&Menu_textBoxOrderingTables\b", "Menu_textBoxOrderingTables",
+     "textbox ordering storage is a bounded array, not a scalar address"),
+    (r"^(Actors|Render)::", r"\(void\*\)\(\(uintptr_t\)Core_ScratchBase\(\) \+ 0x35C\)",
+     "Render_ModelWorkspace()", "native model workspace cannot fit in the original scratchpad tail"),
+    (r"^Actors::", r"\bRender_ModelScratchpad(?:AnglesView|BoneView)\b",
+     "Render_ModelScratchpad", "model workspace consumers share the native pointer-bearing layout"),
     # Flag tests through the 32-bit word at 0x5AC of an actor record (`*(int*)((char*)actor + 0x5AC) & 0x800000`):
     # the word is a run of 1-bit bitfields, whose x64 offset differs; each mask is the named flag at that bit
     # (tools/port/field_at.py Actors_ActorRecord 0x5AC:<bit>).
@@ -180,10 +484,40 @@ ONDISC_OFFSETS: dict[str, str] = {
 
 # Reviewed fixes to copied type definitions: type id -> [(old, new, reason)]. Checked by Native\Tests\src\LayoutAsserts.c.
 TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "T00456": [("int* reserved00;", "unsigned int reserved00;",
+                 "room-effect commands begin with a four-byte size/opcode header, not a native pointer")],
+    "T00453": [("int sceneEntry;", "int* sceneEntry;",
+                 "runtime room-effect view shares the canonical native geometry pointer")],
+    "T00542": [
+        (f"u_int {field} :", f"u_short {field} :", "GIM flags occupy two bytes before vramPage and brightness")
+        for field in ("drawEnabled", "loading", "textureMode", "drawRoutine", "loadPhase", "texturePageCount",
+                      "ownsPalette", "reservedBits13")
+    ],
+    "T00219": [
+        ("    int loaderAndImageData[0xFA];",
+         "    union {\n        struct {\n            void* nativePointer10;\n"
+         "            void* nativePointer14;\n            int reservedLoaderData[0xF8];\n"
+         "        };\n        int loaderAndImageData[0xF8 + 2 * sizeof(void*) / sizeof(int)];\n    };",
+         "event splash layers share the GIM renderer's native file/request pointer slots and array stride"),
+    ],
+    "T00237": [("u_char workArea[0x1FD0];",
+                 "long projectedVertices[768];\n    int vertexDepths[768];\n"
+                 "    unsigned projectedVertexCount;\n    u_char reserved1804[0x7CC];",
+                 "4B16C.s:func_800B3A68 screen/depth arrays; retain the surrounding context extent")],
+    "T00239": [
+        ("    int animationHeader;", "    intptr_t animationHeader;", "native SEQ bank cache"),
+        ("    u_char textureRowOffsets[2];\n    short momentumDistance;",
+         "    union {\n        u_char textureRowOffsets[3];\n        struct {\n"
+         "            u_char reservedTextureRows[2];\n            short momentumDistance;\n"
+         "        };\n    };",
+         "func_8009CE9C reads three bytes at actor+0x183E; bank 2 aliases momentumDistance at +0x1840"),
+        ("    u_short previousTargetZ;", "    u_short previousTargetZ;\n    unsigned modelDataSize;",
+         "native SHP allocation extent for validated model traversal"),
+    ],
     # 146C.h:621: an actor's record is placed at core.model and runs into reservedB2C (the PS1 slot was 0x1900 bytes,
     # the record 0x18DC). The x64 record is 68 bytes larger than the PS1 one; the reserve grows so the record still
     # ends before the weapon model slots.
-    "T00634": [("char reservedB2C[0x1788];", "char reservedB2C[0x1788 + 72]; /* x64: the actor record is larger */",
+    "T00634": [("char reservedB2C[0x1788];", "char reservedB2C[0x1788 + 80]; /* x64: the actor record is larger */",
                 "room for the x64 actor record")],
 }
 
@@ -193,6 +527,17 @@ FIXES["F00793"] = FIXES["F00793"] + [
     ("Core_Memory_CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], 0x1900);",
      "Core_Memory_CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], sizeof(Actors_ActorRecord));",
      "record size"),
+    ("    model = Core_Memory_AllocateFromLowEnd(size);\n"
+     "    memcpy(model, data, size);\n"
+     "    actor->instance.model = model;\n"
+     "    if (model == NULL) {\n        return -2;\n    }",
+     "    if (size < (int)sizeof(Actors_ShpModel)) {\n        return -2;\n    }\n"
+     "    model = Core_Memory_AllocateFromLowEnd(size);\n"
+     "    if (model == NULL) {\n        return -2;\n    }\n"
+     "    memcpy(model, data, size);\n"
+     "    actor->instance.model = model;\n"
+     "    actor->modelDataSize = (unsigned)size;",
+     "retain allocation bounds and reject allocation failure before copying the SHP"),
 ]
 
 # The WEP header (Actors::WeaponModelData, 30DB0.c:598): four section offsets, relocated in place by _parseWep and
@@ -213,6 +558,18 @@ TYPE_FIXES["T00329"] = [(f"    int {m};", f"    void* {m}; /* a section pointer 
                                                     "section16", "section17")]
 # Accessors that return those section pointers as int.
 SIG_RETYPE: dict[str, dict] = {"F00572": {"ret": "intptr_t"}, "F00590": {"ret": "intptr_t"}}
+
+# All 182 targets of BATTLE's 256 normal opcodes and INITBTL 12AC.c's skip table. The excluded rows are
+# helpers, not handlers. Keep even control-code-only handlers compatible with the pointer-returning branches.
+EVENT_OPCODE_HANDLERS = frozenset(
+    {f"F{i:05}" for i in range(1027, 1208)} - {"F01033", "F01039", "F01186"}
+    | {"F01221", "F01226", "F01229", "F01232"})
+SIG_RETYPE.update({fid: {"ret": "intptr_t"} for fid in EVENT_OPCODE_HANDLERS})
+
+# These normal-only handlers omit their unused thread argument in 4A0A8.c. They have no direct C callers,
+# but the dispatch ABI still requires both arguments (check_event_dispatch.py checks all table targets).
+for fid in ("F01055", "F01069", "F01071", "F01074", "F01075", "F01122", "F01143", "F01153", "F01178", "F01183"):
+    FIXES.setdefault(fid, []).append(("(u_char* arg0)", "(u_char* arg0, short arg1)", "consistent opcode signature"))
 
 # The MPD section E header (Field::MpdSectionE, 146C.c:15700): two array pointers into its own payload, set by
 # _loadMpdRoomSection and read only by assembly-era code; offsets from the header natively.

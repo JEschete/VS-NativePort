@@ -113,7 +113,7 @@ _Static_assert(sizeof(Audio_VoiceEnvelope) == 0x8, "Audio_VoiceEnvelope must kee
 // decomp: src/SLUS_010.40/25AC.c:173
 #define SPU_PAN_TABLE_SIZE (0x100)
 extern short Audio_Mixer_kPanGains[SPU_PAN_TABLE_SIZE];
-extern Audio_CommandHandler Audio_Mixer_kCommandHandlers[392];
+extern Audio_CommandHandler Audio_Mixer_kCommandHandlers[256];
 extern Audio_VoiceEnvelope Audio_Mixer_voiceEnvelopes[VOICE_COUNT];
 extern int Audio_Mixer_musicPitchScaleStep;
 extern int Audio_Mixer_tempoScaleStep;

@@ -881,6 +881,7 @@ int Save_MemoryCard_InitializeMenuResourcesStep(int init)
 
 
         for (i = 0; i < 8; ++i) {
+            EnableEvent(Title_cardEventDescriptors[i]);
         }
         return 1;
     }
@@ -893,10 +894,12 @@ void Save_MemoryCard_ReleaseMenuResources(void)
     int i;
 
     for (i = 0; i < 8; ++i) {
+        DisableEvent(Title_cardEventDescriptors[i]);
     }
 
 
     for (i = 0; i < 8; ++i) {
+        CloseEvent(Title_cardEventDescriptors[i]);
     }
 
     Boot_SetSoftResetEnabled(1);
@@ -1150,6 +1153,7 @@ int Save_MemoryCard_InitializeResourcesStep(int init)
 
 
         for (i = 0; i < 8; ++i) {
+            EnableEvent(Title_cardEventDescriptors[i]);
         }
         return 1;
     }
@@ -1162,10 +1166,12 @@ void Save_MemoryCard_ReleaseResources(void)
     int i;
 
     for (i = 0; i < 8; ++i) {
+        DisableEvent(Title_cardEventDescriptors[i]);
     }
 
 
     for (i = 0; i < 8; ++i) {
+        CloseEvent(Title_cardEventDescriptors[i]);
     }
 
     Boot_SetSoftResetEnabled(1);

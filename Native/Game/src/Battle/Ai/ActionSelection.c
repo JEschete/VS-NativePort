@@ -12,7 +12,7 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Targeting.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 

@@ -9,7 +9,7 @@
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
@@ -917,6 +917,7 @@ void Menu_Map_DrawFrame(void)
 
     stp = (DR_STP*)(pScratch[0]);
 
+    SetDrawStp(stp, 1);
     AddPrim((DR_STP*)(pScratch[1] + 0x1FFC), stp++);
 
     flags = &Audio_Seq_unusedStateFlags;

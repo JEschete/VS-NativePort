@@ -10,6 +10,7 @@
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
+#include "Actors/SequencePlayback.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
@@ -21,8 +22,7 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
 #include "Core/Core/IntPair.h"
-#include "Core/Math/FixedPoint.h"
-#include "Core/Math/Matrix.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/WordCopy.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
@@ -33,6 +33,7 @@
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/ModelDraw.h"
+#include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"
 #include "State/Timers.h"
 
@@ -193,8 +194,8 @@ int Actors_SelectSharedSequenceBank(u_int arg0)
 
     for (i = 0; i < 17; ++i) {
         Actors_ActorRecord* temp_s0 = Actors_actorRecords[i];
-        if ((temp_s0 != NULL) && *((u_char*)temp_s0 + Actors_sharedSequenceBankIndex + 0x183E) != 0xFF
-            && (*((u_char*)temp_s0 + arg0 + 0x183D) == 0xFF)) {
+        if ((temp_s0 != NULL) && temp_s0->textureRowOffsets[Actors_sharedSequenceBankIndex] != 0xFF
+            && (temp_s0->textureRowOffsets[arg0 - 1] == 0xFF)) {
             if (temp_s0->textureAnimationSlots[0].currentFrame >= 2) {
                 Actors_UploadActorTextureFrame(temp_s0, 0, 0);
             }
@@ -670,7 +671,7 @@ int Actors_PlayActorAnimation(int actorId, int animation, int arg2, int blendFra
     Actors_ActorRecord* actor;
     int keepFlag15;
     int anim;
-    int found;
+    intptr_t found;
 
     if (animation == 0) {
         return 0;
@@ -756,7 +757,7 @@ int Actors_PlayActorAnimation(int actorId, int animation, int arg2, int blendFra
     }
 
 retry:
-    found = ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, anim, (int*)&frames);
+    found = Actors_FindActorAnimationHeader(actor, anim, &frames);
     if (found == 0 || frames == NULL) {
         actor->isRunning = 0;
         if (anim == 0) {
@@ -1704,8 +1705,8 @@ void Actors_RestartActorAnimationEvents(Actors_ActorRecord* arg0)
     int var_v1;
     void* var_a3;
 
-    u_char** v0 = ((u_char** (*)(Actors_ActorRecord*, u_char, u_short**))Actors_FindActorAnimationHeader)(arg0, arg0->animationId, &sp10);
-    u_char* temp_a3 = *v0;
+    Actors_SeqAnimationBank* v0 = (Actors_SeqAnimationBank*)Actors_FindActorAnimationHeader(arg0, arg0->animationId, &sp10);
+    u_char* temp_a3 = VS_ONDISC(v0, animationData, u_char*);
     temp_a3 += sp10[2];
 
     var_v1 = temp_a3[0];
@@ -1852,246 +1853,10 @@ void Actors_AlignPoseRotationBranches(SVECTOR* dst, SVECTOR* src, int count)
     }
 }
 
-// decomp: BATTLE.PRG func_800AFA28 (src/BATTLE/BATTLE.PRG/44F14.c:1252)
-void Actors_AdvanceSkeletalAnimation(Actors_ActorRecord* actor, Actors_AnimationPose* state, int mode)
-{
-    u_short* header;
-    struct Actors_KeyframeRangeScratch* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x3EC);
-    Actors_AnimationPose* boneState;
-    Actors_ShadowBlend* shadow;
-    int frame;
-    int frameOrOffset;
-    int x;
-    int y;
-    int z;
-    int delta;
-    int lastFrame;
-    int i;
-    u_short rootTrack;
-    u_char** data;
-    u_char queuedAnimation;
-
-    state->reachedEnd = 0;
-    frameOrOffset = (short)state->frame;
-    i = 0;
-    if (actor->framesPerStep != 0) {
-        shadow = &actor->shadowBlend;
-    advance_frame:
-        if (shadow->levelFrames != 0) {
-            delta = shadow->levelDelta / shadow->levelFrames;
-            shadow->levelDelta -= delta;
-            shadow->level += delta;
-            --shadow->levelFrames;
-        }
-        shadow->level &= 0xFFF;
-        if (shadow->radiusFrames != 0) {
-            delta = shadow->radiusExpandDelta / shadow->radiusFrames;
-            shadow->radiusExpandDelta -= delta;
-            shadow->radiusExpandRate += delta;
-            delta = shadow->radiusShrinkDelta / shadow->radiusFrames;
-            shadow->radiusShrinkDelta -= delta;
-            shadow->radiusShrinkRate += delta;
-            --shadow->radiusFrames;
-        }
-        if ((short)state->frame >= (int)(u_short)actor->animationLength) {
-            state->reachedEnd = 1;
-            queuedAnimation = actor->queuedAnimation;
-            if (queuedAnimation != 0) {
-                Actors_PlayActorAnimationAtFrame((int)actor->instance.slot, (int)actor->queuedAnimation,
-                    (int)actor->queuedParameterA, (int)actor->queuedParameterB);
-                actor->queuedAnimation = 0;
-                return;
-            }
-        }
-        if (actor->instance.isFrozen) {
-            if (state->nextEventFrame == (short)state->frame) {
-                Actors_RunAnimationEvents(actor, state, mode);
-            }
-        }
-        if ((short)state->frame >= (int)(u_short)actor->animationLength) {
-            state->frame -= 1;
-            state->holdingLastFrame = 1;
-        }
-        state->frame += 1;
-        i += 1;
-        if (i >= (int)actor->framesPerStep) {
-            goto update_bones;
-        }
-        goto advance_frame;
-    }
-update_bones:
-    frame = (short)state->frame;
-    if ((frame != 1) && !state->holdingLastFrame) {
-        lastFrame = frame - 1;
-        if (state->eventWait == 0) {
-            if (lastFrame < frameOrOffset) {
-                frameOrOffset = 1;
-            }
-            if (frameOrOffset == 0) {
-                frameOrOffset = 1;
-            }
-            data = ((u_char** (*)(Actors_ActorRecord*, u_char, u_short**))Actors_FindActorAnimationHeader)(actor, actor->animationId, &header);
-            if (data != NULL) {
-                scratch->firstFrame = (int)frameOrOffset;
-                scratch->lastFrame = lastFrame;
-                scratch->trackData = data;
-                rootTrack = header[4];
-                if (rootTrack != 0) {
-                    Actors_DecodeAnimationTrack(rootTrack, &state->scaleKeys[0x29], 0);
-                    x = state->scaleKeys[0x29].vx;
-                    if (x < 0) {
-                        x += 3;
-                    }
-                    actor->instance.position.vx = (u_short)actor->instance.position.vx + (x >> 2);
-                    y = state->scaleKeys[0x29].vy;
-                    if (y < 0) {
-                        y += 3;
-                    }
-                    actor->instance.position.vy = (u_short)actor->instance.position.vy + (y >> 2);
-                    z = state->scaleKeys[0x29].vz;
-                    if (z < 0) {
-                        z += 3;
-                    }
-                    actor->instance.position.vz = (u_short)actor->instance.position.vz + (z >> 2);
-                }
-                Actors_DecodeAnimationTrack(header[3], &state->boneKeys[0x29], 0);
-                i = 0;
-                if (actor->instance.boneCount != 0) {
-                    frameOrOffset = 0x150;
-                    boneState = state;
-                    do {
-                        Actors_DecodeAnimationTrack(header[i + 5], boneState->boneKeys, 1);
-                        if (((u_char*)header)[3] & 2) {
-                            Actors_DecodeAnimationTrack(header[i + actor->instance.boneCount + 5],
-                                (SVECTOR*)((char*)state + frameOrOffset), 0);
-                        }
-                        frameOrOffset += 8;
-                        boneState = (void*)((char*)boneState + 8);
-                    } while (++i < (int)actor->instance.boneCount);
-                }
-            }
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_800AFDE8 (src/BATTLE/BATTLE.PRG/44F14.c:1373)
-void Actors_DecodeAnimationTrack(int offset, SVECTOR* value, int rotation)
-{
-    Actors_KeyframeRangeScratch* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x3EC);
-    SVECTOR* delta = &value[84];
-    u_char* data = (u_char*)(u_int)(u_short)value->pad;
-    int nextFrame = (u_short)delta->pad;
-    int frame;
-
-    data += offset + (intptr_t)*scratch->trackData;
-
-    for (frame = scratch->firstFrame; frame <= scratch->lastFrame; ++frame) {
-        while (1) {
-            int flags;
-            int count;
-
-            if (nextFrame >= frame) {
-                addVector(value, delta);
-
-                if (rotation) {
-                    *(int*)value &= 0x1FFF1FFF;
-                    value->vz &= 0x1FFF;
-                }
-                break;
-            }
-
-            flags = *data;
-
-            if (flags == 0) {
-                return;
-            }
-
-            if (flags & 0xE0) {
-                count = flags & 0x1F;
-
-                if (count == 0x1F) {
-                    nextFrame += 32;
-                    nextFrame += data[1];
-                    data += 2;
-                } else {
-                    nextFrame += count + 1;
-                    ++data;
-                }
-            } else {
-                int packed;
-
-                count = flags & 3;
-
-                if (count == 3) {
-                    nextFrame += 4;
-                    nextFrame += data[1];
-                    data += 2;
-                } else {
-                    nextFrame += count + 1;
-                    ++data;
-                }
-
-                flags <<= 3;
-                count = (signed char)data[0];
-                count <<= 8;
-                count |= data[1];
-                data += 2;
-                packed = count;
-                count >>= 3;
-
-                if (packed & 4) {
-                    delta->vx = count;
-                    flags &= 0x60;
-
-                    if (packed & 3) {
-                        count = (signed char)data[0];
-                        count <<= 8;
-                        count |= data[1];
-                        data += 2;
-                    }
-                }
-
-                if (packed & 2) {
-                    delta->vy = count;
-                    flags &= 0xA0;
-
-                    if (packed & 1) {
-                        count = (signed char)data[0];
-                        count <<= 8;
-                        count |= data[1];
-                        data += 2;
-                    }
-                }
-
-                if (packed & 1) {
-                    delta->vz = count;
-                    flags &= 0xC0;
-                }
-            }
-
-            if (flags & 0x80) {
-                delta->vx = (signed char)*data++;
-            }
-
-            if (flags & 0x40) {
-                delta->vy = (signed char)*data++;
-            }
-
-            if (flags & 0x20) {
-                delta->vz = (signed char)*data++;
-            }
-        }
-    }
-
-    data -= offset + (intptr_t)*scratch->trackData;
-    value->pad = (int)data;
-    delta->pad = nextFrame;
-}
-
 // decomp: BATTLE.PRG func_800B002C (src/BATTLE/BATTLE.PRG/44F14.c:1486)
 void Actors_UpdateMotionAndLookAt(Actors_ActorRecord* actor, int arg1)
 {
-    Render_ModelScratchpadAnglesView* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);
+    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
     int dx;
     int dz;
     int yaw;
@@ -2298,16 +2063,10 @@ void Actors_UpdateMotionAndLookAt(Actors_ActorRecord* actor, int arg1)
     }
 }
 
-// decomp: BATTLE.PRG func_800B147C (src/BATTLE/BATTLE.PRG/48C7C.s:0) [asm-file: not yet ported]
-void Actors_BlendActorPose(Actors_AnimationPose*, Actors_AnimationPose*, int, int, int)
-{
-    VS_UNPORTED("Actors::BlendActorPose");
-}
-
 // decomp: BATTLE.PRG func_800B26B8 (src/BATTLE/BATTLE.PRG/49268.c:246)
 void Actors_ApplyLockedBoneTransform(Actors_ActorRecord* actor, MATRIX* parent, int bone, int saved)
 {
-    Render_ModelScratchpad* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);
+    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
 
     scratch->matrix = *(actor->lockedBoneMatrices + saved - 1);
     Core_Math_PremultiplyRotationMatrix(parent, &scratch->matrix);

@@ -324,6 +324,12 @@
     <ClInclude Include="src\Core\Math\Matrix.h">
       <Filter>src\Core\Math</Filter>
     </ClInclude>
+    <ClCompile Include="src\Core\Math\ScalarMath.c">
+      <Filter>src\Core\Math</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\Math\ScalarMath.h">
+      <Filter>src\Core\Math</Filter>
+    </ClInclude>
     <ClCompile Include="src\Core\Math\Trig.c">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
@@ -519,6 +525,15 @@
     <ClInclude Include="src\Render\ModelDraw.h">
       <Filter>src\Render</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\ModelGeometry.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\ModelGeometry.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\ModelWorkspace.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClCompile Include="src\Render\PageSpace.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -540,10 +555,28 @@
     <ClInclude Include="src\Render\ResultAtlas.h">
       <Filter>src\Render</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\RoomDraw.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\RoomDraw.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
     <ClCompile Include="src\Render\RoomGeometry.c">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\RoomGeometry.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\RoomLighting.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\RoomLighting.h">
+      <Filter>src\Render</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Render\ScaledFont.c">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Render\ScaledFont.h">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClCompile Include="src\Render\ScreenTransition.c">
@@ -685,6 +718,9 @@
       <Filter>include\Platform</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\Device.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\ModelWorkspace.h">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\PageSpace.hpp">

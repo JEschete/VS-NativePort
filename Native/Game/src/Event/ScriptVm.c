@@ -70,7 +70,7 @@ short Event_kSpecialOperationTenArguments[152]; /* contents: module image (Modul
 u_char Event_kOpcodeSizes[256]; /* contents: module image (ModuleData.c) */
 
 // decomp: _opcodeFunctionTable (_opcodeFunctionTable@BATTLE/BATTLE.PRG)
-int (*Event_kOpcodeHandlers[572])(u_char*, short); /* contents: module image, relocated (ModulePointers.c) */
+intptr_t (*Event_kOpcodeHandlers[256])(u_char*, short); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800EB588 (D_800EB588@BATTLE/BATTLE.PRG)
 u_char* Event_textBoxFrameStyles[16]; /* contents: module image, relocated (ModulePointers.c) */
@@ -154,7 +154,7 @@ char Event_isSkipForced;
 char Event_isScriptBackdropEnabled;
 
 // decomp: D_800FAF7C (D_800FAF7C@src/BATTLE/INITBTL.PRG/12AC.c)
-int (*Event_kSkipOpcodeHandlers[])(u_char*, short) = { Event_ScriptReportInvalidOpcode,
+intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
     Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode, Event_ScriptReportInvalidOpcode,
@@ -240,7 +240,7 @@ void Event_RestoreScriptTextureRectangle(void)
 }
 
 // decomp: BATTLE.PRG vs_battle_invalidOpcode (src/BATTLE/BATTLE.PRG/4A0A8.c:588)
-int Event_ScriptReportInvalidOpcode(u_char* arg0, short arg1)
+intptr_t Event_ScriptReportInvalidOpcode(u_char* arg0, short arg1)
 {
     char buf[64];
 
@@ -250,13 +250,13 @@ int Event_ScriptReportInvalidOpcode(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B66E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:597)
-int Event_ScriptNoOperation(u_char* arg0, short arg1) { return 0; }
+intptr_t Event_ScriptNoOperation(u_char* arg0, short arg1) { return 0; }
 
 // decomp: BATTLE.PRG func_800B66EC (src/BATTLE/BATTLE.PRG/4A0A8.c:599)
-int Event_ScriptYieldFrame(u_char* arg0, short arg1) { return 4; }
+intptr_t Event_ScriptYieldFrame(u_char* arg0, short arg1) { return 4; }
 
 // decomp: BATTLE.PRG func_800B66F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:601)
-int Event_ScriptWaitForEventFile(u_char* arg0, short arg1)
+intptr_t Event_ScriptWaitForEventFile(u_char* arg0, short arg1)
 {
     if ((Event_eventFileDiscRequest != 0) && (*Event_eventFileDiscRequest != 4)) {
         return 1;
@@ -265,7 +265,7 @@ int Event_ScriptWaitForEventFile(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B6744 (src/BATTLE/BATTLE.PRG/4A0A8.c:611)
-int Event_ScriptBeginSkippableCutscene(u_char* arg0, short arg1)
+intptr_t Event_ScriptBeginSkippableCutscene(u_char* arg0, short arg1)
 {
     Event_skipState = 1;
     Event_stopsMusicOnSkip = !(arg0[1] & 1);
@@ -310,7 +310,7 @@ intptr_t Event_ScriptEndCutsceneAndJump(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B68C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:653)
-int Event_ScriptEndCutscene(u_char* arg0, short arg1)
+intptr_t Event_ScriptEndCutscene(u_char* arg0, short arg1)
 {
     char temp_v1 = Event_skipState;
     Event_skipState = 0;
@@ -322,7 +322,7 @@ int Event_ScriptEndCutscene(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG vs_battle_script_buttonPressed (src/BATTLE/BATTLE.PRG/4A0A8.c:843)
-int Event_ScriptWaitForButtonAndYield(u_char* arg0, short arg1)
+intptr_t Event_ScriptWaitForButtonAndYield(u_char* arg0, short arg1)
 {
     if (Input_buttonsPressed.allButtons & arg0[1]) {
         return 4;
@@ -426,7 +426,7 @@ intptr_t Event_ScriptJumpForward(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagImmContext (src/BATTLE/BATTLE.PRG/4A0A8.c:1640)
-int Event_ScriptCacheFlagValue(u_char* arg0, short arg1)
+intptr_t Event_ScriptCacheFlagValue(u_char* arg0, short arg1)
 {
     Event_cachedFlagValue = State_ScriptFlag(Core_Memory_ReadUnalignedShort(arg0 + 1));
     return 0;
@@ -442,10 +442,10 @@ intptr_t Event_ScriptBranchOnCachedFlag(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B8C44 (src/BATTLE/BATTLE.PRG/4A0A8.c:1654)
-int Event_ScriptReturnToSavedAddress(u_char* arg0, short arg1) { return Event_subroutineReturnCursor; }
+intptr_t Event_ScriptReturnToSavedAddress(u_char* arg0, short arg1) { return Event_subroutineReturnCursor; }
 
 // decomp: BATTLE.PRG func_800B8C54 (src/BATTLE/BATTLE.PRG/4A0A8.c:1656)
-int Event_ScriptSetLoopCounter(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetLoopCounter(u_char* arg0, short arg1)
 {
     if (arg0[1] != 0xFF) {
         Event_loopCounters[arg0[1]] = arg0[2];
@@ -466,7 +466,7 @@ intptr_t Event_ScriptLoopBackward(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagImm (src/BATTLE/BATTLE.PRG/4A0A8.c:1685)
-int Event_ScriptApplyImmediateFlagOperation(u_char* arg0, short arg1)
+intptr_t Event_ScriptApplyImmediateFlagOperation(u_char* arg0, short arg1)
 {
     int temp_a1 = arg0[1];
     short temp_s1 = arg0[3];
@@ -502,7 +502,7 @@ int Event_ScriptApplyImmediateFlagOperation(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlag (src/BATTLE/BATTLE.PRG/4A0A8.c:1720)
-int Event_ScriptApplyFlagPairOperation(u_char* arg0, short arg1)
+intptr_t Event_ScriptApplyFlagPairOperation(u_char* arg0, short arg1)
 {
     int tmp;
     char prev;
@@ -556,7 +556,7 @@ int Event_ScriptApplyFlagPairOperation(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagIfItemInInventory (src/BATTLE/BATTLE.PRG/4A0A8.c:1773)
-int Event_ScriptStoreInventoryItemPresence(u_char* arg0, short arg1)
+intptr_t Event_ScriptStoreInventoryItemPresence(u_char* arg0, short arg1)
 {
     State_SetScriptFlag(Core_Memory_ReadUnalignedShort(arg0 + 3),
         Items_InventoryItemCount(Core_Memory_ReadUnalignedShort(arg0 + 1)));
@@ -564,7 +564,7 @@ int Event_ScriptStoreInventoryItemPresence(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagIfButton (src/BATTLE/BATTLE.PRG/4A0A8.c:1798)
-int Event_ScriptStoreButtonState(u_char* arg0, short arg1)
+intptr_t Event_ScriptStoreButtonState(u_char* arg0, short arg1)
 {
     short temp_v0 = Core_Memory_ReadUnalignedShort(arg0 + 1);
     State_SetScriptFlag(temp_v0 & 0x3FF, temp_v0 & 0x8000
@@ -574,7 +574,7 @@ int Event_ScriptStoreButtonState(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B94D8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1886)
-int Event_ScriptConfigureTimer(u_char* arg0, short arg1)
+intptr_t Event_ScriptConfigureTimer(u_char* arg0, short arg1)
 {
     if (arg0[1] != 0) {
         State_StartSceneTimer(Event_kSceneTimerModes[arg0[3]], Event_kSceneTimerResetScopes[arg0[2]],
@@ -586,7 +586,7 @@ int Event_ScriptConfigureTimer(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B96B0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1934)
-int Event_ScriptWaitForButtonOrTimeout(u_char* arg0, short arg1)
+intptr_t Event_ScriptWaitForButtonOrTimeout(u_char* arg0, short arg1)
 {
     if (Event_threadWaitFrames[arg1] == 0) {
         Event_threadWaitFrames[arg1] = arg0[2];
@@ -601,7 +601,7 @@ int Event_ScriptWaitForButtonOrTimeout(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B9724 (src/BATTLE/BATTLE.PRG/4A0A8.c:1948)
-int Event_ScriptConfigureEasingCurve(u_char* arg0, short arg1)
+intptr_t Event_ScriptConfigureEasingCurve(u_char* arg0, short arg1)
 {
     int var_v1;
     u_char* temp_a1;
@@ -703,7 +703,7 @@ intptr_t Event_CommandSpecialOperation(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BB474 (src/BATTLE/BATTLE.PRG/4A0A8.c:2799)
-int Event_CommandWaitFrames(u_char* arg0, short arg1)
+intptr_t Event_CommandWaitFrames(u_char* arg0, short arg1)
 {
     if (Event_threadWaitFrames[arg1] == 0) {
         Event_threadWaitFrames[arg1] = arg0[1];
@@ -720,14 +720,14 @@ int Event_CommandWaitFrames(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BB4CC (src/BATTLE/BATTLE.PRG/4A0A8.c:2815)
-int Event_CommandSetTickSpeed(u_char* arg0, short arg1)
+intptr_t Event_CommandSetTickSpeed(u_char* arg0, short arg1)
 {
     State_SetTickSpeed(arg0[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BB504 (src/BATTLE/BATTLE.PRG/4A0A8.c:2827)
-int Event_CommandWaitScriptContext(u_char* arg0, short arg1)
+intptr_t Event_CommandWaitScriptContext(u_char* arg0, short arg1)
 {
     u_short temp_a0 = arg0[1] & 3;
     if ((arg0[1] & 0x80)) {
@@ -745,10 +745,10 @@ intptr_t Event_CommandStartScriptContext(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BB5A4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2843)
-int Event_CommandStopScriptContext(u_char* arg0, short arg1) { return 3; }
+intptr_t Event_CommandStopScriptContext(u_char* arg0, short arg1) { return 3; }
 
 // decomp: BATTLE.PRG func_800BB5AC (src/BATTLE/BATTLE.PRG/4A0A8.c:2845)
-int Event_CommandLoadNextEvent(u_char* arg0, short arg1)
+intptr_t Event_CommandLoadNextEvent(u_char* arg0, short arg1)
 {
     Event_eventId = Core_Memory_ReadUnalignedShort(arg0 + 1);
     Event_chainedEventBuffer = Core_Memory_AllocateFromHighEnd(0x1800);
@@ -758,7 +758,7 @@ int Event_CommandLoadNextEvent(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BB604 (src/BATTLE/BATTLE.PRG/4A0A8.c:2854)
-int Event_CommandFinishEvent(u_char* arg0, short arg1)
+intptr_t Event_CommandFinishEvent(u_char* arg0, short arg1)
 {
     int i;
     int var_s1;
@@ -931,7 +931,7 @@ int Event_UpdateEventPlayback(void)
 // decomp: BATTLE.PRG func_800BFBB8 (src/BATTLE/BATTLE.PRG/573B8.c:67)
 short Event_ExecuteScriptThread(u_char** arg0, short arg1)
 {
-    int ret;
+    intptr_t ret;
     u_char* script = *arg0;
 
     if ((arg1 == 0) && (Event_skipState == 1)
@@ -966,6 +966,11 @@ short Event_ExecuteScriptThread(u_char** arg0, short arg1)
             ret = Event_legacySkipHandlerCopy[*script](script, arg1);
         }
 
+        Core_Debugf("event-step", "event=%d thread=%d op=%02X result=%lld args=%02X,%02X,%02X pc=%p",
+            (int)Event_eventId, (int)arg1, (unsigned)*script, (long long)ret,
+            Event_kOpcodeSizes[*script] > 1 ? (unsigned)script[1] : 0,
+            Event_kOpcodeSizes[*script] > 2 ? (unsigned)script[2] : 0,
+            Event_kOpcodeSizes[*script] > 3 ? (unsigned)script[3] : 0, (void*)script);
         switch (ret) {
         case 0:
             script += Event_OpcodeSize(script);
@@ -986,6 +991,8 @@ short Event_ExecuteScriptThread(u_char** arg0, short arg1)
             break;
 
         default:
+            Core_Debugf("event", "thread=%d branch=%p -> %p skip=%d",
+                (int)arg1, (void*)script, (void*)ret, (int)Event_skipState);
             script = (u_char*)ret;
             continue;
         }
@@ -1109,7 +1116,7 @@ void Event_InitializeScriptOpcodeTable(void)
     Event_roomChangeState = 0;
     Event_scriptBuffer = Core_Memory_AllocateFromLowEnd(0x1800);
     Event_vibrationPatternBuffer = Core_Memory_AllocateFromLowEnd(0x80);
-    Event_legacySkipHandlerCopy = Core_Memory_AllocateFromLowEnd(0x400);
-    Core_Memory_CopyAlignedWords(Event_legacySkipHandlerCopy, Event_kSkipOpcodeHandlers, 0x400);
+    Event_legacySkipHandlerCopy = Core_Memory_AllocateFromLowEnd(sizeof(Event_kSkipOpcodeHandlers));
+    Core_Memory_CopyAlignedWords(Event_legacySkipHandlerCopy, Event_kSkipOpcodeHandlers, sizeof(Event_kSkipOpcodeHandlers));
 }
 

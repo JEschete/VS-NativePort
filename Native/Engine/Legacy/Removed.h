@@ -13,7 +13,6 @@ static inline int DrawSync(int mode) { (void)mode; return 0; }
 static inline u_long DrawSyncCallback(void (*func)(void)) { (void)func; return 0; }
 static inline int ResetGraph(int mode) { (void)mode; return 0; }
 static inline int SetGraphDebug(int level) { (void)level; return 0; }
-static inline void SetDrawStp(void* p, int pbw) { (void)p; (void)pbw; }
 static inline void FntLoad(int tx, int ty) { (void)tx; (void)ty; }
 static inline int FntOpen(int x, int y, int w, int h, int isbg, int n) { (void)x; (void)y; (void)w; (void)h; (void)isbg; (void)n; return 0; }
 static inline void SetDumpFnt(int id) { (void)id; }
@@ -23,12 +22,7 @@ static inline void __main(void) { }  // GCC runtime start-up (static constructor
 static inline int ResetCallback(void) { return 0; }
 static inline int EnterCriticalSection(void) { return 0; }
 static inline void ExitCriticalSection(void) { }
-static inline long OpenEvent(unsigned long desc, long spec, long mode, long (*func)(void)) { (void)desc; (void)spec; (void)mode; (void)func; return 0; }
-// PsyQ returns 1 for success here and the copied code retries until it gets it
-static inline long CloseEvent(long ev) { (void)ev; return 1; }
 static inline long TestEvent(long ev) { (void)ev; return 0; }
-static inline long EnableEvent(long ev) { (void)ev; return 1; }
-static inline long DisableEvent(long ev) { (void)ev; return 1; }
 static inline void UnDeliverEvent(unsigned long desc, unsigned long spec) { (void)desc; (void)spec; }
 static inline void SystemError(char c, long n) { (void)c; (void)n; }
 static inline void _bu_init(void) { }

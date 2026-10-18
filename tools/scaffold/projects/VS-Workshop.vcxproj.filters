@@ -51,6 +51,9 @@
     <None Include="D:\Dev\Modding\VS-Workshop\EDITOR-UX-PROPOSAL.md">
       <Filter>VS-Workshop</Filter>
     </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\ETM-EVIDENCE.md">
+      <Filter>VS-Workshop</Filter>
+    </None>
     <None Include="D:\Dev\Modding\VS-Workshop\README.txt">
       <Filter>VS-Workshop</Filter>
     </None>
@@ -79,6 +82,9 @@
       <Filter>VS-Workshop\schemas</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\ActorAnimationSelection.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\ActorSelectionRegression.cs">
       <Filter>VS-Workshop\src\Workshop.App</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\App.xaml">
@@ -147,7 +153,13 @@
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\MaterialBrowserRegression.cs">
       <Filter>VS-Workshop\src\Workshop.App</Filter>
     </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\NativePlacementRegression.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\NavigationStats.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\PlacementPreview.cs">
       <Filter>VS-Workshop\src\Workshop.App</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\Playback.cs">
@@ -165,7 +177,43 @@
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\RenderingRegression.cs">
       <Filter>VS-Workshop\src\Workshop.App</Filter>
     </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneAssetDrawer.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneDeselectionRegression.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneEditorState.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneFeaturesRegression.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneImport.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneImportRegression.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneNavigation.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneNavigationRegression.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\ScenePlacement.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneRenderer.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneSelection.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneSelectionHighlight.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SceneWorkspace.cs">
       <Filter>VS-Workshop\src\Workshop.App</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SemanticNavigation.cs">
@@ -175,6 +223,9 @@
       <Filter>VS-Workshop\src\Workshop.App</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\SettingsWindow.xaml.cs">
+      <Filter>VS-Workshop\src\Workshop.App</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\ViewportCameraGesture.cs">
       <Filter>VS-Workshop\src\Workshop.App</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.App\Workshop.App.csproj">
@@ -267,6 +318,15 @@
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.Core\GltfExporter.cs">
       <Filter>VS-Workshop\src\Workshop.Core</Filter>
     </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.Core\GltfImportAccessor.cs">
+      <Filter>VS-Workshop\src\Workshop.Core</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.Core\GltfImportSource.cs">
+      <Filter>VS-Workshop\src\Workshop.Core</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.Core\GltfImporter.cs">
+      <Filter>VS-Workshop\src\Workshop.Core</Filter>
+    </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.Core\InitialPose.cs">
       <Filter>VS-Workshop\src\Workshop.Core</Filter>
     </None>
@@ -286,6 +346,9 @@
       <Filter>VS-Workshop\src\Workshop.Core</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.Core\RecordEditDraft.cs">
+      <Filter>VS-Workshop\src\Workshop.Core</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.Core\RoomActorPose.cs">
       <Filter>VS-Workshop\src\Workshop.Core</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.Core\RoomEditing.cs">
@@ -325,6 +388,9 @@
       <Filter>VS-Workshop\src\Workshop.Core</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.Core\WorldToolController.cs">
+      <Filter>VS-Workshop\src\Workshop.Core</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.Core\WorldTransformMath.cs">
       <Filter>VS-Workshop\src\Workshop.Core</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\src\Workshop.Core\ZoneTextures.cs">
@@ -375,10 +441,16 @@
     <None Include="D:\Dev\Modding\VS-Workshop\tests\Workshop.Tests\EditorWorkflowSuite.cs">
       <Filter>VS-Workshop\tests\Workshop.Tests</Filter>
     </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\tests\Workshop.Tests\EtmEvidenceSuite.cs">
+      <Filter>VS-Workshop\tests\Workshop.Tests</Filter>
+    </None>
     <None Include="D:\Dev\Modding\VS-Workshop\tests\Workshop.Tests\ExchangeFixtures.cs">
       <Filter>VS-Workshop\tests\Workshop.Tests</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\tests\Workshop.Tests\GeometryDescriptionSuite.cs">
+      <Filter>VS-Workshop\tests\Workshop.Tests</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\tests\Workshop.Tests\GltfImportSuite.cs">
       <Filter>VS-Workshop\tests\Workshop.Tests</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\tests\Workshop.Tests\Program.cs">
@@ -388,6 +460,9 @@
       <Filter>VS-Workshop\tests\Workshop.Tests</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\tests\Workshop.Tests\ReportedAssets.cs">
+      <Filter>VS-Workshop\tests\Workshop.Tests</Filter>
+    </None>
+    <None Include="D:\Dev\Modding\VS-Workshop\tests\Workshop.Tests\RoomActorPoseSuite.cs">
       <Filter>VS-Workshop\tests\Workshop.Tests</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\tests\Workshop.Tests\SyntheticDisc.cs">

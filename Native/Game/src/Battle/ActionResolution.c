@@ -19,7 +19,7 @@
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/Targeting.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/WordCopy.h"
 #include "Field/Collision.h"
 #include "Items/Equipment.h"
@@ -34,7 +34,7 @@
 u_char Battle_limbInjuryStatusIds[20]; /* contents: module image (ModuleData.c) */
 
 // decomp: _actionEffectMediators (_actionEffectMediators@BATTLE/BATTLE.PRG)
-void (*Battle_actionEffectMediators[100])(
+void (*Battle_actionEffectMediators[70])(
     Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int); /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800F1A00 (D_800F1A00@BATTLE/BATTLE.PRG)

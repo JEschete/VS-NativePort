@@ -59,7 +59,6 @@ int Actors_ActorTaggedBoneMatrix(int arg0, int arg1, MATRIX* arg2, u_long* arg3)
 void Actors_ActorBoneMatrix(int arg0, int arg1, MATRIX* arg2, u_long* arg3);
 int Actors_ProjectActorTaggedBone(int arg0, int arg1, SVECTOR* arg2, int arg3);
 int Actors_ProjectActorBone(int arg0, int arg1, int* arg2, int arg3);
-int Actors_ProjectActorBoneEndpoint(int arg0, int arg1, int* arg2, int arg3);
 int Actors_FindActorBoneTag(int arg0, int arg1, int arg2);
 int Actors_ActorBoneTag(int arg0, int arg1, int arg2);
 int Actors_ActorAnchorMatrix(int arg0, int arg1, int* arg2, int* arg3);

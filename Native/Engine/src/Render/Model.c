@@ -7,11 +7,12 @@
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/WeaponModel.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Field/Gimmicks.h"
 #include "Render/Camera.h"
 #include "Render/Model.h"
 #include "Render/ModelDraw.h"
+#include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 
@@ -19,7 +20,7 @@
 void Render_PrepareActorCameraMatrices(MATRIX* source)
 {
     MATRIX roll;
-    Render_ModelScratchpad* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);
+    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
     Render_FrameScratch* view = (void*)((uintptr_t)Core_ScratchBase() + 0x000);
     int i;
 
@@ -42,30 +43,11 @@ void Render_PrepareActorCameraMatrices(MATRIX* source)
     setVector(&scratch->scale, i, i, i);
     Core_Gte_ScaleMatrix(&scratch->matrix, &scratch->scale);
     // BUG: copies from the stack slot of the pointer, not from the matrix it points to
-    Render_actorCameraMatrix = *(MATRIX*)&source;
+    Render_actorCameraMatrix = *source;
     Actors_boneMatrixScratch = scratch->matrix;
     Actors_boneMatrixScratch.t[0] = source->t[0];
     Actors_boneMatrixScratch.t[1] = source->t[1];
     Actors_boneMatrixScratch.t[2] = source->t[2];
-}
-
-// decomp: BATTLE.PRG func_800B3A68 (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
-int Render_ProjectModelVertices(void*, MATRIX*, int, void*)
-{
-    VS_UNPORTED("Render::ProjectModelVertices");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B3CF0 (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
-void Render_DrawModelFlatPolygons(Actors_ModelRenderContext*, Actors_WeaponModel*, CVECTOR*, void*)
-{
-    VS_UNPORTED("Render::DrawModelFlatPolygons");
-}
-
-// decomp: BATTLE.PRG func_800B4594 (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
-void Render_DrawModelGouraudPolygons(Actors_ModelRenderContext*, Field_GimmickInstance*, int*, void*)
-{
-    VS_UNPORTED("Render::DrawModelGouraudPolygons");
 }
 
 // decomp: BATTLE.PRG func_800B4B14 (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]

@@ -18,6 +18,7 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
+#include "Battle/Ai/ConditionSnapshot.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
@@ -26,9 +27,9 @@
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
-#include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Copy.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Field/Gimmicks.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -166,12 +167,6 @@ void Battle_Ai_SortActionCandidates(Battle_Ai_ActionPlanView*)
 void Battle_Ai_CopyPlanningActorStats(Battle_ActorStats* src, Battle_ActorStats* dst)
 {
     VS_UNPORTED("Battle::Ai::CopyPlanningActorStats");
-}
-
-// decomp: BATTLE.PRG func_800DC424 (src/BATTLE/BATTLE.PRG/73C24.s:0) [asm-file: not yet ported]
-void Battle_Ai_CaptureActorConditionTable(Battle_Ai_ActionTiming*)
-{
-    VS_UNPORTED("Battle::Ai::CaptureActorConditionTable");
 }
 
 // decomp: BATTLE.PRG func_800DC484 (src/BATTLE/BATTLE.PRG/73C84.s:0) [asm-file: not yet ported]

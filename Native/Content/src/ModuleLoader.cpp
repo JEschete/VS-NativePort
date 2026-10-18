@@ -51,10 +51,9 @@ private:
 // PS1 address -> native pointer, searching the table's own module, then the resident one.
 class SymbolMap {
 public:
-    SymbolMap()
+    explicit SymbolMap(std::span<const Content_ModuleSymbol> symbols)
     {
-        for (unsigned i = 0; i < Content_moduleSymbolCount; ++i) {
-            const Content_ModuleSymbol& s = Content_moduleSymbols[i];
+        for (const Content_ModuleSymbol& s : symbols) {
             m_byModule[s.module].push_back(&s);
         }
         for (auto& [module, list] : m_byModule) {
@@ -86,8 +85,17 @@ private:
         if (s->address == address) {
             return s->target;
         }
-        if (s->size != 0 && address < s->address + s->size) {
-            return static_cast<u8*>(s->target) + (address - s->address);
+        const u64 offset = static_cast<u64>(address) - s->address;
+        if (offset < s->size && s->sourceElementSize != 0 && s->nativeElementSize != 0) {
+            const u64 element = offset / s->sourceElementSize;
+            const u64 within = offset % s->sourceElementSize;
+            if (within != 0 && s->sourceElementSize != s->nativeElementSize) {
+                return nullptr;
+            }
+            const u64 nativeOffset = element * s->nativeElementSize + within;
+            if (nativeOffset < s->nativeSize) {
+                return static_cast<u8*>(s->target) + nativeOffset;
+            }
         }
         return nullptr;
     }
@@ -101,45 +109,52 @@ int LoadData(Modules& modules)
     for (unsigned i = 0; i < Content_moduleDataCount; ++i) {
         const Content_ModuleDataEntry& m = Content_moduleData[i];
         const std::vector<u8>& image = modules.Get(m.module);
-        if (static_cast<u64>(m.offset) + m.size > image.size()) {
+        if (!Content::CopyModuleDataEntry(m, image)) {
             if (!image.empty()) {
-                VS_LOG_ERROR("content", "module data: {} +0x{:X} ({} bytes) is past the end", m.module, m.offset, m.size);
+                VS_LOG_ERROR("content", "module data: {} +0x{:X} ({} bytes, capacity {}) is invalid",
+                             m.module, m.offset, m.size, m.capacity);
             }
             ++failed;
             continue;
         }
-        std::memcpy(m.target, image.data() + m.offset, m.size);
     }
     return failed;
 }
 
+bool RelocateTable(const Content_ModulePointerTable& table, std::span<const u8> image, const SymbolMap& symbols)
+{
+    if (table.module == nullptr || (table.count != 0 && table.target == nullptr) || table.count > table.capacity ||
+        static_cast<u64>(table.offset) + table.count * 4ull > image.size()) {
+        VS_LOG_ERROR("content", "pointer table {} +0x{:X}: {} entries exceed source or capacity {}",
+                     table.module ? table.module : "<missing>", table.offset, table.count, table.capacity);
+        return false;
+    }
+    std::vector<void*> resolved(table.count);
+    unsigned unresolved = 0;
+    for (unsigned index = 0; index < table.count; ++index) {
+        u32 address = 0;
+        std::memcpy(&address, image.data() + table.offset + index * 4ull, 4);
+        resolved[index] = address != 0 ? symbols.Resolve(table.module, address) : nullptr;
+        if (address != 0 && resolved[index] == nullptr) {
+            VS_LOG_ERROR("content", "pointer table {} +0x{:X}: [{}] 0x{:08X} has no safe native mapping",
+                         table.module, table.offset, index, address);
+            ++unresolved;
+        }
+    }
+    if (unresolved != 0) {
+        return false;
+    }
+    std::ranges::copy(resolved, table.target);
+    return true;
+}
+
 int RelocatePointers(Modules& modules)
 {
-    const SymbolMap symbols;
+    const SymbolMap symbols({Content_moduleSymbols, Content_moduleSymbolCount});
     int failed = 0;
-    for (unsigned i = 0; i < Content_modulePointerCount; ++i) {
-        const Content_ModulePointerTable& t = Content_modulePointers[i];
-        const std::vector<u8>& image = modules.Get(t.module);
-        if (static_cast<u64>(t.offset) + t.count * 4ull > image.size()) {
-            ++failed;
-            continue;
-        }
-        int unresolved = 0;
-        for (unsigned k = 0; k < t.count; ++k) {
-            u32 address = 0;
-            std::memcpy(&address, image.data() + t.offset + k * 4, 4);
-            void* p = address != 0 ? symbols.Resolve(t.module, address) : nullptr;
-            if (address != 0 && p == nullptr) {
-                if (unresolved++ == 0) {
-                    VS_LOG_WARN("content", "pointer table {} +0x{:X}: [{}] 0x{:08X} has no native symbol", t.module,
-                                t.offset, k, address);
-                }
-            }
-            t.target[k] = p;
-        }
-        if (unresolved != 0) {
-            VS_LOG_WARN("content", "pointer table {} +0x{:X}: {} of {} unresolved", t.module, t.offset, unresolved,
-                        t.count);
+    for (unsigned index = 0; index < Content_modulePointerCount; ++index) {
+        const Content_ModulePointerTable& table = Content_modulePointers[index];
+        if (!RelocateTable(table, modules.Get(table.module), symbols)) {
             ++failed;
         }
     }
@@ -147,6 +162,33 @@ int RelocatePointers(Modules& modules)
 }
 
 } // namespace
+
+namespace VS::Content {
+
+bool CopyModuleDataEntry(const Content_ModuleDataEntry& entry, std::span<const unsigned char> image)
+{
+    if (entry.target == nullptr || entry.size > entry.capacity ||
+        static_cast<u64>(entry.offset) + entry.size > image.size()) {
+        return false;
+    }
+    if (entry.size != 0) {
+        std::memcpy(entry.target, image.data() + entry.offset, entry.size);
+    }
+    return true;
+}
+
+void* ResolveModuleAddress(std::span<const Content_ModuleSymbol> symbols, std::string_view module, unsigned address)
+{
+    return SymbolMap(symbols).Resolve(module, address);
+}
+
+bool RelocateModulePointerTable(const Content_ModulePointerTable& table, std::span<const unsigned char> image,
+                               std::span<const Content_ModuleSymbol> symbols)
+{
+    return RelocateTable(table, image, SymbolMap(symbols));
+}
+
+} // namespace VS::Content
 
 extern "C" int Content_LoadModuleData(void)
 {

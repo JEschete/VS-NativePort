@@ -27,7 +27,6 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera);
 void Actors_TransformActorRootOffset(Actors_ActorRecord* actor);
 void Actors_DrawGimmickModel(Field_GimmickInstance* object, MATRIX* camera);
 void Actors_DrawActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source);
-void Actors_DrawActorModel(void*, MATRIX*, char);
 void Actors_InitializeActorModelResources(void);
 
 #endif // VS_ACTORS_MODELRENDERING_H_DECLS

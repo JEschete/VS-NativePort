@@ -6,10 +6,124 @@
 #include <DbgHelp.h>
 
 #include <cstring>
+#include <csignal>
+#include <cstdlib>
+#include <exception>
+#include <chrono>
+#include <condition_variable>
+#include <cstdio>
+#include <filesystem>
+#include <mutex>
+#include <thread>
 
 #pragma comment(lib, "dbghelp.lib")
 
 namespace VS::Platform {
+
+struct ProgressWatchdog::State {
+    HANDLE thread = nullptr;
+    std::mutex mutex;
+    std::condition_variable changed;
+    std::chrono::steady_clock::time_point progress = std::chrono::steady_clock::now();
+    std::uint64_t tick = 0;
+    bool stopped = false;
+    std::thread worker;
+
+    void Report()
+    {
+        CONTEXT context{};
+        context.ContextFlags = CONTEXT_FULL;
+        bool captured = false;
+        if (SuspendThread(thread) != static_cast<DWORD>(-1)) {
+            captured = GetThreadContext(thread, &context) != FALSE;
+            ResumeThread(thread);
+        }
+        wchar_t executable[32768]{};
+        GetModuleFileNameW(nullptr, executable, static_cast<DWORD>(std::size(executable)));
+        const auto path = std::filesystem::path(executable).parent_path() / "vs-native-hang.log";
+        std::FILE* report = _wfopen(path.c_str(), L"w");
+        if (report == nullptr) return;
+        std::fprintf(report, "No logical progress for 10 seconds; tick=%llu; context=%s\n",
+                     static_cast<unsigned long long>(tick), captured ? "captured" : "unavailable");
+        if (captured) {
+            HANDLE process = GetCurrentProcess();
+            SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
+            SymInitialize(process, nullptr, TRUE);
+            STACKFRAME64 frame{};
+            frame.AddrPC = {context.Rip, 0, AddrModeFlat};
+            frame.AddrFrame = {context.Rbp, 0, AddrModeFlat};
+            frame.AddrStack = {context.Rsp, 0, AddrModeFlat};
+            alignas(SYMBOL_INFO) char buffer[sizeof(SYMBOL_INFO) + 256]{};
+            for (int depth = 0; depth < 32 && frame.AddrPC.Offset != 0; ++depth) {
+                auto* symbol = reinterpret_cast<SYMBOL_INFO*>(buffer);
+                symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+                symbol->MaxNameLen = 255;
+                DWORD64 displacement = 0;
+                const char* name = SymFromAddr(process, frame.AddrPC.Offset, &displacement, symbol) ? symbol->Name : "?";
+                IMAGEHLP_LINE64 line{};
+                line.SizeOfStruct = sizeof line;
+                DWORD lineDisplacement = 0;
+                if (SymGetLineFromAddr64(process, frame.AddrPC.Offset, &lineDisplacement, &line)) {
+                    std::fprintf(report, "#%d %s (%s:%lu)\n", depth, name, line.FileName, line.LineNumber);
+                } else {
+                    std::fprintf(report, "#%d %s +0x%llX [0x%llX]\n", depth, name,
+                                 static_cast<unsigned long long>(displacement),
+                                 static_cast<unsigned long long>(frame.AddrPC.Offset));
+                }
+                if (!StackWalk64(IMAGE_FILE_MACHINE_AMD64, process, thread, &frame, &context, nullptr,
+                                 SymFunctionTableAccess64, SymGetModuleBase64, nullptr)) break;
+            }
+        }
+        std::fclose(report);
+    }
+};
+
+ProgressWatchdog::ProgressWatchdog(bool enabled)
+{
+    if (!enabled) return;
+    m_state = std::make_unique<State>();
+    if (!DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &m_state->thread,
+                         THREAD_GET_CONTEXT | THREAD_SUSPEND_RESUME | THREAD_QUERY_INFORMATION, FALSE, 0)) {
+        m_state.reset();
+        return;
+    }
+    State* state = m_state.get();
+    state->worker = std::thread([state] {
+        std::unique_lock lock(state->mutex);
+        while (!state->stopped) {
+            const auto observed = state->progress;
+            if (!state->changed.wait_until(lock, observed + std::chrono::seconds(10),
+                                          [&] { return state->stopped || state->progress != observed; })) {
+                lock.unlock();
+                state->Report();
+                std::_Exit(124);
+            }
+        }
+    });
+}
+
+ProgressWatchdog::~ProgressWatchdog()
+{
+    if (!m_state) return;
+    {
+        std::lock_guard lock(m_state->mutex);
+        m_state->stopped = true;
+    }
+    m_state->changed.notify_one();
+    m_state->worker.join();
+    CloseHandle(m_state->thread);
+}
+
+void ProgressWatchdog::Pulse(std::uint64_t tick)
+{
+    if (!m_state) return;
+    {
+        std::lock_guard lock(m_state->mutex);
+        m_state->progress = std::chrono::steady_clock::now();
+        m_state->tick = tick;
+    }
+    m_state->changed.notify_one();
+}
 
 namespace {
 
@@ -73,7 +187,26 @@ LONG WINAPI OnCrash(EXCEPTION_POINTERS* info)
 
 void InstallCrashHandler()
 {
+    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
     SetUnhandledExceptionFilter(&OnCrash);
+    _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+    std::signal(SIGABRT, [](int) {
+        LogCallStack("runtime abort");
+        std::_Exit(3);
+    });
+    std::set_terminate([] {
+        if (const auto error = std::current_exception()) {
+            try {
+                std::rethrow_exception(error);
+            } catch (const std::exception& exception) {
+                VS_LOG_ERROR("crash", "uncaught exception: {}", exception.what());
+            } catch (...) {
+                VS_LOG_ERROR("crash", "uncaught nonstandard exception");
+            }
+        }
+        LogCallStack("runtime termination");
+        std::_Exit(3);
+    });
 }
 
 void LogCallStack(const char* why)
@@ -104,6 +237,21 @@ void LogCallStack(const char* why)
         } else {
             VS_LOG_WARN("stack", "  #{} {}", i, name);
         }
+    }
+}
+
+void LogAddress(const void* address)
+{
+    HANDLE process = GetCurrentProcess();
+    SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
+    SymInitialize(process, nullptr, TRUE);
+    alignas(SYMBOL_INFO) char buffer[sizeof(SYMBOL_INFO) + 256]{};
+    auto* symbol = reinterpret_cast<SYMBOL_INFO*>(buffer);
+    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+    symbol->MaxNameLen = 255;
+    DWORD64 displacement = 0;
+    if (SymFromAddr(process, reinterpret_cast<DWORD64>(address), &displacement, symbol)) {
+        VS_LOG_ERROR("render", "address {} is {} +0x{:X}", address, symbol->Name, displacement);
     }
 }
 

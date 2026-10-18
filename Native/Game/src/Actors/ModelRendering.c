@@ -5,6 +5,7 @@
 #include "Actors/Animation.h"
 #include "Actors/Appearance.h"
 #include "Actors/ModelDraw.h"
+#include "Actors/ModelDrawing.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
@@ -14,8 +15,7 @@
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
-#include "Core/Math/FixedPoint.h"
-#include "Core/Math/Matrix.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Event/ScriptVm.h"
 #include "Field/Actors.h"
@@ -25,7 +25,10 @@
 #include "Render/Camera.h"
 #include "Render/Model.h"
 #include "Render/ModelDraw.h"
+#include "Render/ModelGeometry.h"
+#include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"
+#include "Render/Render.h"
 #include "Render/Textures.h"
 #include "State/Timers.h"
 
@@ -38,7 +41,7 @@ Actors_ModelRenderContext Actors_modelRenderContext;
 // decomp: BATTLE.PRG func_800AEAE8 (src/BATTLE/BATTLE.PRG/44F14.c:826)
 void Actors_PrepareActorRootTransform(Actors_ActorRecord* actor)
 {
-    Render_ModelScratchpad* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);
+    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
 
     Actors_modelRenderContext.modelScale[0] = 64;
     Actors_modelRenderContext.modelScale[1] = 64;
@@ -68,8 +71,8 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
 {
     /* The original routine reserves 0x30 bytes of unused local storage. */
     int unused[12];
-    Render_ModelScratchpadAnglesView* objectScratch;
-    struct Render_DrawDepthScratch* frame;
+    Render_ModelScratchpad* objectScratch;
+    Render_FrameScratch* frame;
     Actors_ActorRecord** previous;
     Actors_ActorRecord** previousAttached;
     Actors_ActorRecord* actor;
@@ -128,7 +131,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                     previous = entries;
                     do {
                         ++step;
-                        if ((*previous)->modelId == texture) {
+                        if (*previous != NULL && (*previous)->modelId == texture) {
                             goto texture_ready;
                         }
                         ++previous;
@@ -195,7 +198,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                                 previousAttached = entries;
                                 do {
                                     ++step;
-                                    if ((*previousAttached)->modelId == texture) {
+                                    if (*previousAttached != NULL && (*previousAttached)->modelId == texture) {
                                         goto linked_texture_ready;
                                     }
                                     ++previousAttached;
@@ -206,7 +209,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                         }
                     }
                     frame = (void*)((uintptr_t)Core_ScratchBase() + 0x000);
-                    frame->depth += actor->companionState.depthBias * 4;
+                    frame->orderingTable = (u_char*)frame->orderingTable + actor->companionState.depthBias * 4;
                     actor->instance.position.vx = (u_short)actor->instance.position.vx
                                             + (signed char)(u_char)actor->companionState.offsetX;
                     actor->instance.position.vy = (u_short)actor->instance.position.vy
@@ -215,7 +218,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                                             + (signed char)(u_char)actor->companionState.offsetZ;
                     Actors_UpdateMotionAndLookAt(actor, (int)actor->companionSlot);
                     Actors_DrawActorModel(actor, camera, actor->companionSlot);
-                    frame->depth -= actor->companionState.depthBias * 4;
+                    frame->orderingTable = (u_char*)frame->orderingTable - actor->companionState.depthBias * 4;
                     actor->instance.position.vx = (u_short)actor->instance.position.vx
                                             - (signed char)(u_char)actor->companionState.offsetX;
                     actor->instance.position.vy = (u_short)actor->instance.position.vy
@@ -255,11 +258,11 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
         i += 1;
         weapons++;
     } while (i < 0x14);
-    objectScratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);
+    objectScratch = Render_ModelWorkspace();
     frame = (void*)((uintptr_t)Core_ScratchBase() + 0x000);
     i = 0;
     entries = (void*)Field_gimmickInstances;
-    frame->depth += 0x10;
+    frame->orderingTable = (u_char*)frame->orderingTable + 0x10;
     do {
         object = (void*)*entries;
         if ((object != NULL) && (object->boneCount != 0)) {
@@ -283,14 +286,14 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
         entries++;
     } while (i < 0x10);
     (*(u_char (*))&Actors_isActorUpdateComplete) = 0;
-    frame->depth = (int)(frame->depth - 0x10);
+    frame->orderingTable = (u_char*)frame->orderingTable - 0x10;
     Actors_renderPassCounter += 1;
 }
 
 // decomp: BATTLE.PRG func_800B07DC (src/BATTLE/BATTLE.PRG/44F14.c:1695)
 void Actors_TransformActorRootOffset(Actors_ActorRecord* actor)
 {
-    Render_ModelScratchpad* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);
+    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
 
     setVector(
         &scratch->rotation, actor->instance.rotationX, actor->instance.facing, actor->instance.rotationZ);
@@ -313,7 +316,7 @@ void Actors_TransformActorRootOffset(Actors_ActorRecord* actor)
 // decomp: BATTLE.PRG func_800B1A68 (src/BATTLE/BATTLE.PRG/49268.c:48)
 void Actors_DrawGimmickModel(Field_GimmickInstance* object, MATRIX* camera)
 {
-    Render_ModelScratchpad* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);
+    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
     u_int attachment;
     int value;
 
@@ -376,7 +379,7 @@ void Actors_DrawGimmickModel(Field_GimmickInstance* object, MATRIX* camera)
 
     Core_Math_PremultiplyRotationMatrix(camera, &scratch->matrix);
 composed:
-    Core_Math_ScaleMatrixColumns(&scratch->matrix, &Actors_skeletonPose.scale);
+    Core_Math_ScaleMatrixColumns(&scratch->matrix, &Actors_roomActorScale);
     Actors_skeletonPose.boneMatrices[0] = scratch->matrix;
     object->matrices[0] = scratch->matrix;
 
@@ -422,7 +425,7 @@ composed:
 void Actors_DrawActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source)
 {
     CVECTOR color;
-    Render_ModelScratchpad* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);
+    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
     Actors_ActorRecord* actor = Actors_actorRecords[weapon->actorId];
     int value;
     int i;
@@ -510,12 +513,6 @@ void Actors_DrawActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source)
     }
 }
 
-// decomp: BATTLE.PRG func_800B28A8 (src/BATTLE/BATTLE.PRG/49268.c:264) [INCLUDE_ASM: not yet ported]
-void Actors_DrawActorModel(void*, MATRIX*, char)
-{
-    VS_UNPORTED("Actors::DrawActorModel");
-}
-
 // decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19)
 void Actors_InitializeActorModelResources(void)
 {
@@ -578,9 +575,9 @@ void Actors_InitializeActorModelResources(void)
     (*(char (*)[])&Actors_sharedSequenceBankTexturePages)[0] = 0;
     (*(char (*)[])&Actors_sharedSequenceBankTexturePages)[1] = 0;
     (*(char (*)[])&Actors_sharedSequenceBankTexturePages)[2] = 0;
-    (*(int (*)[])&Actors_sharedSequenceData)[0] = 0;
-    (*(int (*)[])&Actors_sharedSequenceData)[1] = 0;
-    (*(int (*)[])&Actors_sharedSequenceData)[2] = 0;
+    Actors_sharedSequenceData[0] = NULL;
+    Actors_sharedSequenceData[1] = NULL;
+    Actors_sharedSequenceData[2] = NULL;
     (*(char (*))&Content_legacySequenceParsePhase) = 0;
     (*(char (*))&Content_legacyEtmLoadPhase) = 0;
     Actors_reservedControlByte = 0;

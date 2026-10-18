@@ -282,6 +282,7 @@ void AddPrim(void* ot, void* p);
 void AddPrims(void* ot, void* p0, void* p1);
 void SetDrawArea(DR_AREA* p, RECT* r);
 void SetDrawMode(DR_MODE* p, int dfe, int dtd, int tpage, RECT* tw);
+void SetDrawStp(DR_STP* packet, int enabled);
 void SetDrawTPage(DR_TPAGE* p, int dfe, int dtd, int tpage);
 void SetDrawMove(DR_MOVE* p, RECT* rect, int x, int y);
 void SetLineF2(LINE_F2* p);

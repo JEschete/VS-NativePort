@@ -22,7 +22,7 @@
 #include "Battle/Hit.h"
 #include "Battle/Targeting.h"
 #include "Core/Core/WordPair.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Runtime.h"
 #include "Effects/ActionEffects.h"
 #include "Field/Camera.h"
@@ -2098,6 +2098,7 @@ void Actors_MoveActorToTileAtRate(int arg0, Actors_TileTarget* arg1, int arg2, i
 void Actors_MoveActorToPositionAtRate(int id, SVECTOR* target, int arg2, int arg3)
 {
     Actors_ActorRecord* actor = Actors_actorRecords[id];
+    if (actor == NULL) Core_Debugf("actors", "movement references missing actor %d", id);
     int angle;
     int dz;
 

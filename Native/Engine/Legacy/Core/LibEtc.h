@@ -1,8 +1,8 @@
 #pragma once
 
 // libetc/libapi timing and kernel surface (plan §2.2). VSync and the root counters are timing (strategy R,
-// backed by Core::FrameClock in LibEtc.cpp); kernel events and IRQ setup have no native meaning (strategy D) and
-// are in Legacy/Removed.h.
+// backed by logical frames in LibEtc.cpp). Counter 2 dispatches its registered sound callback; other removed
+// kernel and IRQ operations remain in Legacy/Removed.h.
 
 #include "Legacy/Core/PsxTypes.h"
 
@@ -12,7 +12,7 @@ extern "C" {
 
 #define MODE_NTSC 0
 
-// kernel event descriptors (values only; the event calls themselves are removed)
+// kernel event descriptors
 #define DescHW 0xF0000000
 #define DescSW 0xF4000000
 #define DescRC 0xF2000000
@@ -35,6 +35,11 @@ long SetRCnt(unsigned long spec, unsigned short target, long mode);
 long GetRCnt(unsigned long spec);
 long StartRCnt(unsigned long spec);
 long StopRCnt(unsigned long spec);
+long OpenEvent(unsigned long desc, long spec, long mode, long (*callback)(void));
+long CloseEvent(long event);
+long EnableEvent(long event);
+long DisableEvent(long event);
+void Legacy_AdvanceCounter2(unsigned elapsedClocks);
 
 #ifdef __cplusplus
 }

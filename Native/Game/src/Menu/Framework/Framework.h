@@ -182,7 +182,7 @@ extern char Menu_textBoxBufferIndex;
 extern u_int* Menu_Framework_menuBackgroundBuffer;
 extern char Menu_Framework_kMainMenuHelpText[336];
 extern int Menu_Framework_mainMenuCursorAnimation;
-extern u_long Menu_textBoxOrderingTables;
+extern u_long Menu_textBoxOrderingTables[102];
 extern char Menu_Framework_shortcutInvoked;
 extern char Menu_saveLocationId;
 extern char Menu_Framework_submenuStates[16];

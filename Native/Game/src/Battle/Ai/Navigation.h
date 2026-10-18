@@ -127,8 +127,6 @@ void Battle_Ai_MarkAiTileDynamicObstacle(int, int);
 int Battle_Ai_MinimumAiGroundHeightAlongSegment(int, int, int, int);
 int Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
 void Battle_Ai_ReleaseActorAiContactOccupancy(int);
-void Battle_Ai_InitializeRoomAiMap(void);
-int Battle_Ai_SampleAiTileGroundHeight();
 int Battle_Ai_RoomNavigationCeilingHeight(void);
 
 #endif // VS_BATTLE_AI_NAVIGATION_H_DECLS

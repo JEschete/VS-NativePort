@@ -224,6 +224,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Core\Math\ScalarMath.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Core\Math\Trig.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -390,6 +396,18 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Render\ModelGeometry.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Render\ModelWorkspace.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Render\PageSpace.cpp" />
     <ClCompile Include="src\Render\Palette.c">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -403,7 +421,25 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Render\RoomDraw.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Render\RoomGeometry.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Render\RoomLighting.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Render\ScaledFont.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -529,6 +565,7 @@
     <ClInclude Include="src\Core\Math\FixedPoint.h" />
     <ClInclude Include="src\Core\Math\Interpolation.h" />
     <ClInclude Include="src\Core\Math\Matrix.h" />
+    <ClInclude Include="src\Core\Math\ScalarMath.h" />
     <ClInclude Include="src\Core\Math\Trig.h" />
     <ClInclude Include="src\Core\Math\Vector.h" />
     <ClInclude Include="src\Core\Memory\Copy.h" />
@@ -558,11 +595,15 @@
     <ClInclude Include="src\Render\Loading.h" />
     <ClInclude Include="src\Render\Model.h" />
     <ClInclude Include="src\Render\ModelDraw.h" />
+    <ClInclude Include="src\Render\ModelGeometry.h" />
     <ClInclude Include="src\Render\Palette.h" />
     <ClInclude Include="src\Render\Primitives.h" />
     <ClInclude Include="src\Render\Render.h" />
     <ClInclude Include="src\Render\ResultAtlas.h" />
+    <ClInclude Include="src\Render\RoomDraw.h" />
     <ClInclude Include="src\Render\RoomGeometry.h" />
+    <ClInclude Include="src\Render\RoomLighting.h" />
+    <ClInclude Include="src\Render\ScaledFont.h" />
     <ClInclude Include="src\Render\ScreenTransition.h" />
     <ClInclude Include="src\Render\Sprites.h" />
     <ClInclude Include="src\Render\Text\CompactFont.h" />
@@ -598,6 +639,7 @@
     <ClInclude Include="include\Platform\CrashHandler.hpp" />
     <ClInclude Include="include\Platform\GameFiber.hpp" />
     <ClInclude Include="include\Render\Device.hpp" />
+    <ClInclude Include="include\Render\ModelWorkspace.h" />
     <ClInclude Include="include\Render\PageSpace.hpp" />
     <ClInclude Include="include\Save\SaveStore.hpp" />
     <ClInclude Include="Legacy\Audio\LibSpu.h" />

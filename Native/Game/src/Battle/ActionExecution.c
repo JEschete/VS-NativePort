@@ -16,7 +16,7 @@
 #include "Battle/Hud.h"
 #include "Battle/Sphere.h"
 #include "Battle/Targeting.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Effects/Runtime.h"
 #include "Event/Cutscene.h"
 #include "Event/Triggers.h"

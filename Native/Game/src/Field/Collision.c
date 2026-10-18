@@ -8,6 +8,7 @@
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Field/Collision.h"
+#include "Field/CollisionSampling.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
@@ -254,13 +255,6 @@ int Field_FloorAndCeilingHeightsAt(int arg0, int arg1)
         }
     }
     return sp10;
-}
-
-// decomp: BATTLE.PRG func_80099514 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-u_char Field_SampleCollisionHeightCode(u_int, int, int)
-{
-    VS_UNPORTED("Field::SampleCollisionHeightCode");
-    return 0;
 }
 
 // decomp: BATTLE.PRG func_800A0A1C (src/BATTLE/BATTLE.PRG/30DB0.c:3994)

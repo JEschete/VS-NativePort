@@ -15,7 +15,7 @@
 #include "Battle/TextBoxes.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
 #include "Core/Text/TextCode.h"

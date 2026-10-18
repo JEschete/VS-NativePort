@@ -113,7 +113,7 @@ _Static_assert(sizeof(Field_RoomEffectChunkHeader) == 0x4, "Field_RoomEffectChun
 
 // decomp: func_80092B04_t (src/BATTLE/BATTLE.PRG/2842C.c:69)
 typedef struct Field_RoomEffectObjectView {
-    int sceneEntry;
+    int* sceneEntry;
     void* scriptCursor;
     char reserved08[0x2C];
 } Field_RoomEffectObjectView;
@@ -139,7 +139,7 @@ typedef struct Field_RoomEffectObject {
 
 // decomp: func_80092F74_t2 (src/BATTLE/BATTLE.PRG/2842C.c:34)
 typedef struct Field_RoomEffectCommand {
-    int* reserved00;
+    unsigned int reserved00;
     union {
         u_short unsignedHalves[2];
         short signedHalves[2];
@@ -154,8 +154,8 @@ typedef struct Field_RoomEffectCommand {
 #if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_ROOMEFFECTS_H_DECLS)
 #define VS_FIELD_ROOMEFFECTS_H_DECLS
 
-extern int (*Field_kTextureEffectHandlers[37])(Field_SwingEffectRecord*);
-extern int (*Field_kRoomEffectOpcodeHandlers[30])(Field_RoomEffectObjectView*, Field_RoomEffectCommandHeader*);
+extern int (*Field_kTextureEffectHandlers[7])(Field_SwingEffectRecord*);
+extern int (*Field_kRoomEffectOpcodeHandlers[13])(Field_RoomEffectObjectView*, Field_RoomEffectCommandHeader*);
 extern short Field_isRoomEffectSoundRestored;
 extern Field_RoomEffectInstance Field_roomEffectInstances[100];
 extern short Field_roomEffectSoundId;

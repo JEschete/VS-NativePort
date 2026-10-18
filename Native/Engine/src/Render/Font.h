@@ -43,7 +43,6 @@ int Render_MeasureEncodedTextLine(char* str);
 int Render_DrawVariableWidthGlyph(u_int glyphId, int x, int y, u_long* ot);
 void Render_SetMenuFontStyle(int arg0);
 void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0);
-int Render_DrawScaledFontChar(int charId, int x, int y, int width, int height, int scale);
 void Render_DrawScaledTextBoxText(Menu_TextBoxState* ctx, int scale);
 void Render_BlendGlyphIntoPixels(u_short* destination, u_int glyph, int stride, u_int alpha);
 void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* arg0, int arg1);

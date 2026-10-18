@@ -296,9 +296,9 @@ _Static_assert(sizeof(Effects_ShakeChannelKey) == 0x8, "Effects_ShakeChannelKey 
 #include "Effects/Package.h"
 
 extern u_char Effects_effectBufferIndex;
-extern Effects_EffectRenderer Effects_scriptRenderers[5458];
+extern Effects_EffectRenderer Effects_scriptRenderers[2];
 extern char Effects_actionVariantValues[21824];
-extern int (*Effects_scriptOpcodeHandlers[5406])(void*);
+extern int (*Effects_scriptOpcodeHandlers[49])(void*);
 extern u_char Effects_lastReactionSoundVariant;
 extern Effects_PackageFile Effects_emptyPackage;
 extern int Effects_tintedActor;

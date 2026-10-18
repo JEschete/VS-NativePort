@@ -573,8 +573,10 @@ void Boot_RunGameLoop(void)
                         Battle_Ai_UpdateActorNavigationOverrides();
                     }
                     if ((Render_framebufferEffectState == 1) || (Render_framebufferEffectState == 2)) {
+                        SetDrawStp(&Render_legacyMaskBitOnPackets[Render_frameBuf], 1);
                         AddPrim(ot + 0x820, &Render_legacyMaskBitOnPackets[Render_frameBuf]);
                     } else {
+                        SetDrawStp(&Render_legacyMaskBitOnPackets[Render_frameBuf], 0);
                         AddPrim(ot + 0x820, &Render_legacyMaskBitOnPackets[Render_frameBuf]);
                     }
                     Core_ElapsedFrameCounterTicks();
@@ -610,6 +612,10 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     Render_legacyPrimitiveBuffers[0] = NULL;
     Render_legacyOrderingTables[0] = Core_Memory_AllocateFromLowEnd(0x2088);
     Render_legacyOrderingTables[1] = Core_Memory_AllocateFromLowEnd(0x2088);
+    SetDrawStp(&Render_legacyMaskBitOffPackets[0], 0);
+    SetDrawStp(&Render_legacyMaskBitOffPackets[1], 0);
+    SetDrawStp(&Render_legacyMaskBitOnPackets[0], 1);
+    SetDrawStp(&Render_legacyMaskBitOnPackets[1], 1);
     Render_InitializeClutAnimation();
     Field_InitializeRoomTransitionPrimitives();
     Render_InitializeFramebufferEffect();

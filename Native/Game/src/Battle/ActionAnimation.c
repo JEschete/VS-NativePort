@@ -8,7 +8,7 @@
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Battle/ActionAnimation.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/WordCopy.h"
 #include "Effects/ActionEffects.h"
 #include "Field/Gimmicks.h"

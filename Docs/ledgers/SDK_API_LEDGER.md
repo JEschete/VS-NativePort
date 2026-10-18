@@ -61,7 +61,7 @@ Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), 
 | [ ] | T | `setaddr` | macro | 10 | 1 | ENDING.PRG (10) |
 | [ ] | T | `SetSemiTrans` | function | 8 | 2 | BATTLE.PRG (5), INITBTL.PRG (3) |
 | [ ] | T | `GetClut` | function | 7 | 2 | INITBTL.PRG (5), BATTLE.PRG (2) |
-| [ ] | D | `SetDrawStp` | function | 7 | 3 | INITBTL.PRG (4), BATTLE.PRG (2), MENU5.PRG (1) |
+| [x] | T | `SetDrawStp` | function | 7 | 3 | INITBTL.PRG (4), BATTLE.PRG (2), MENU5.PRG (1) |
 | [ ] | T | `setPolyG4` | macro | 7 | 4 | MENU9.PRG (4), BATTLE.PRG (1), MENU5.PRG (1), MENUE.PRG (1) |
 | [ ] | T | `MoveImage` | function | 6 | 2 | BATTLE.PRG (6) |
 | [ ] | D | `ResetGraph` | function | 6 | 1 | SLUS_010.40 (6) |

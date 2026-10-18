@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Render/Camera.h"
 #include "Render/Render.h"
-#include "Render/RoomGeometry.h"
+#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 
 // decomp: D_800F4910 (D_800F4910@BATTLE/BATTLE.PRG)

@@ -19,7 +19,7 @@
 #include "Items/TreasureChests.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomGeometry.h"
+#include "Render/RoomDraw.h"
 #include "Render/Textures.h"
 
 // decomp: D_80068C1C (D_80068C1C@BATTLE/BATTLE.PRG)

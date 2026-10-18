@@ -1,9 +1,13 @@
 #include "Legacy/Render/LibGpu.h"
+#include "Core/Log.hpp"
 #include "Core/Unported.h"
+#include "Platform/CrashHandler.hpp"
 #include "Render/PageSpace.hpp"
 
 #include <span>
+#include <stdexcept>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 // Transitional libgpu shims (plan §2.2): each call acts on the page space (Render/PageSpace.hpp, owner decision
@@ -42,7 +46,13 @@ void SubmitPacket(const P_TAG* p)
     usize at = 0;
     while (at < words.size()) {
         const usize used = GamePages().Execute(words.subspan(at));
-        at += used ? used : 1;
+        if (used == 0) {
+            VS_LOG_ERROR("render", "truncated command 0x{:02X} in packet {} ({} words), offset {}; first=0x{:08X}",
+                         words[at] >> 24, static_cast<const void*>(p), len, at, words[0]);
+            VS::Platform::LogAddress(p);
+            throw std::runtime_error("Truncated render command");
+        }
+        at += used;
     }
 }
 
@@ -96,8 +106,12 @@ void* LegacyGpu_Pointer(u_long link)
 int LegacyGpu_WalkList(const void* p)
 {
     int count = 0;
-    // a list longer than every packet ever linked has a cycle
-    for (size_t guard = Links().pointers.size() + 1; p != nullptr && guard != 0; --guard) {
+    std::unordered_set<const void*> visited;
+    for (; p != nullptr;) {
+        if (!visited.insert(p).second) {
+            VS_LOG_ERROR("render", "cyclic packet chain at {} after {} entries", p, count);
+            return -1;
+        }
         const P_TAG* tag = static_cast<const P_TAG*>(p);
         SubmitPacket(tag);
         ++count;
@@ -271,6 +285,13 @@ void SetDrawMode(DR_MODE* p, int dfe, int dtd, int tpage, RECT* tw)
     setlen(p, 2);
     p->code[0] = _get_mode(dfe, dtd, tpage);
     p->code[1] = 0xE2000000u | TextureWindow(tw);
+}
+
+void SetDrawStp(DR_STP* packet, int enabled)
+{
+    setlen(packet, 2);
+    packet->code[0] = 0xE6000000u | (enabled != 0 ? 1u : 0u);
+    packet->code[1] = 0;
 }
 
 void SetDrawTPage(DR_TPAGE* p, int dfe, int dtd, int tpage)

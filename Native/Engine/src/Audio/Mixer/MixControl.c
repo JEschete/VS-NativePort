@@ -419,6 +419,7 @@ u_int Audio_Mixer_DispatchCommand(u_int in_Command)
     int fadeLength;
 
     result = 0;
+    DisableEvent(Audio_Driver_legacySpuEvent);
     in_Command &= 0xFF;
     pParams = &Audio_Mixer_commandParams;
 
@@ -546,6 +547,7 @@ u_int Audio_Mixer_DispatchCommand(u_int in_Command)
         break;
     }
     Audio_Mixer_kCommandHandlers[in_Command](pParams);
+    EnableEvent(Audio_Driver_legacySpuEvent);
     return result;
 }
 #undef AKAO_MAGIC

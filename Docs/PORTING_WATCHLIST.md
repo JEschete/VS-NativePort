@@ -87,10 +87,25 @@ actor and room:
 - **Signatures that carry pointers.** `SIG_RETYPE` (plus hazard `return:`/`param:` rows) makes such returns and
   parameters `intptr_t`/`uintptr_t`, in definitions, stubs and view casts (e.g. `Actors::FindActorAnimationHeader`,
   `Field::RoomAuxiliaryData`).
+- **Dispatch must agree end to end.** Event opcodes return either control codes or script pointers. Retyping only
+  branch functions left `int` in the dispatch tables and interpreter, truncating the address at tick 5485.
+  All 179 distinct normal/skip handlers (182 catalog rows) now return `intptr_t` with compatible arguments, as do their table slots;
+  `ExecuteScriptThread` stores the full result. The skip-table copy uses `sizeof`, not 256 PS1 words.
+  `check_event_dispatch.py` audits the target set and all signatures, including normal-only handlers with
+  formerly omitted arguments; changing the return type alone is not enough.
 - **Type text fixes.** `TYPE_FIXES` corrects copied type text (pointer slots in `Field::RoomRecord`, padding in
   `T00634`); the layout writer uses the field ledger's scalar type when it fits the gap.
   `Native\Tests\src\LayoutAsserts.c` statically asserts the layouts code depends on (actor allocation span, stats
   placement, SHP/SEQ headers).
+- **Partial runtime views.** `native_views.py` exposes reviewed pointer slots hidden inside byte padding for
+  actor/AI/model views. `check_native_views.py` compares 532 selected field offsets against canonical native
+  records; guarded tests cover AI storage and pointer round trips. This is not a generic ABI or bounds proof.
+  Allocate the full canonical AI state, never `sizeof` its partial creation view. `layout_check.py` separates
+  these explicitly rebased runtime records from fixed file layouts. The AI-state table has 16 slots (the
+  next symbol is `tileFlagMap`, not `roomAiState`); generator fixups must reach extern-only globals too.
+- **Native record strides.** Effect timelines allocate `sizeof(header) + count * sizeof(track)` and index their
+  `tracks` array. The PS1 stride was 16 bytes; native tracks are 24. A two-track regression catches
+  incorrect playback strides; allocation is also exercised by the attract run.
 - **Literal offsets and sizes.** `(char*)x + 0xNN` views and `0x1900`-style sizes become named members / `sizeof`
   (`python tools\port\field_at.py <Type> 0xOFF[:bit]` maps a PS1 offset to the member). Still raw, to check when
   reached: ActionPlanning 0x9CC/0xD8C/0x1D8C, Behavior +12, Timeline +0x14, ScriptCamera +0x1DA, Gimmicks +0x16C,
@@ -180,6 +195,12 @@ As copied: one `Core` scratch block (`Core/Scratch.h`, 1 KiB). `getScratchAddr(n
 (`Render::frameScratch`, a view of the block's start) and scratch literals (`(T*)0x1F8003EC`) all reach the same
 bytes. Note that the block's struct holds pointers, which are 8 bytes on x64, so its later members sit at other
 offsets than raw literals assume (§2).
+
+**GIM follow-up:** F01393 (`Render::DrawGimTiles`, BATTLE `func_800CBBCC`, `5BF94.c:4056`) formed coordinate
+arrays backward from `0x1F800400`. Its copy-tool fix uses independent native `short[256]` arrays, sufficient for
+each byte-sized dimension plus its final boundary, and checks the tile-table capacity. Tests verify packet
+coordinates and that the rest of Core's shared scratch remains untouched; do not rebase this workspace into it.
+The same function's scaled-quad links now use native handles rather than truncated pointers.
 
 ## 7. Extractor (deferred)
 

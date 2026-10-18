@@ -36,7 +36,7 @@ void Effects_LoadEffectTimeline(Effects_EffectInstance* arg0, int arg1, int arg2
         Core_Memory_FreeFromHighEnd(arg0->context.timeline);
     }
 
-    arg0->context.timeline = Core_Memory_AllocateFromHighEnd(entry->trackCount * 16 + 8);
+    arg0->context.timeline = Core_Memory_AllocateFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack));
     p = arg0->context.timeline;
     p->trackCount = entry->trackCount;
     p->frame = 0;
@@ -58,6 +58,8 @@ void Effects_LoadEffectTimeline(Effects_EffectInstance* arg0, int arg1, int arg2
     }
 
     p->flags = count ? 2 : 0;
+    Core_Debugf("effects", "timeline=%d state=%p tracks=%d stride=%u", arg1, (void*)p,
+        (int)p->trackCount, (unsigned int)sizeof(Effects_TimelineTrack));
 }
 
 // decomp: BATTLE.PRG func_800D5700 (src/BATTLE/BATTLE.PRG/5BF94.c:7920)
@@ -595,7 +597,7 @@ void Effects_TickEffectTimeline(Effects_EffectInstance* arg0, int arg1)
         if ((arg0->context.timeline->activeTracks >> var_s1) & 1) {
             int temp;
             Effects_TimelineTrack* temp_a1 =
-                (Effects_TimelineTrack*)&arg0->context.timeline[var_s1 * 2 + 1];
+                &arg0->context.timeline->tracks[var_s1];
             switch (temp_a1->header.kind) {
             case 1:
                 temp = Effects_TickParticleEmissionTrack(arg0, temp_a1);

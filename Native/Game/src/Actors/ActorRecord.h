@@ -166,8 +166,13 @@ typedef struct Actors_ActorRecord {
     short destinationMode;
     Actors_TextureScrollState textureScroll[4];
     short scale;
-    u_char textureRowOffsets[2];
-    short momentumDistance;
+    union {
+        u_char textureRowOffsets[3];
+        struct {
+            u_char reservedTextureRows[2];
+            short momentumDistance;
+        };
+    };
     short momentumDirection;
     short reserved1844;
     u_char runFrames;
@@ -179,7 +184,7 @@ typedef struct Actors_ActorRecord {
     u_char reserved1863;
     Actors_ShadowBlend shadowBlend;
     int savedPlacement;
-    int animationHeader;
+    intptr_t animationHeader;
     u_char jointSlots[0x10];
     MATRIX lockedBoneMatrices[2];
     u_char lockedBones[2];
@@ -187,6 +192,7 @@ typedef struct Actors_ActorRecord {
     u_short pendingTargetZ;
     u_short previousTargetX;
     u_short previousTargetZ;
+    unsigned modelDataSize;
 } Actors_ActorRecord;
 
 #endif // VS_ACTORS_ACTORRECORD_H_TYPES

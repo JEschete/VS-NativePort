@@ -33,6 +33,6 @@ void Field_ClearRoomTint(void);
 void Field_SetRoomAnimationsPaused(int arg0);
 int Field_ApplyCameraGeometryOcclusion(int arg0, int arg1, int arg2, int arg3);
 void Field_ClearGeometryOcclusion(void);
-void Field_SampleRoomGroundColor(int arg0);
+void Field_SampleRoomGroundColor(int arg0, int layer, Render_ColorCode* color);
 
 #endif // VS_FIELD_ROOMRENDERING_H_DECLS

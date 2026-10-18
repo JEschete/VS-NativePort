@@ -17,13 +17,8 @@ void Boot_EnterBattle(void);
 void Boot_RunEndingAndReturnToTitle(void);
 void Boot_InitializePlatformServices(void);
 void Boot_InitializeTitleSession(void);
-int Boot_RunTitleAndBattle(void);
-void Boot_RunGame(void);
 void Boot_WaitForOverlayReady(void);
 void Boot_SetSoftResetEnabled(int enable);
 void Boot_CaptureOverlayStack(int*);
-void Boot_JumpToTitle(int*);
-void Boot_JumpToGameLoop(int*);
-void Boot_DelayAfterOverlayLoad(void);
 
 #endif // VS_BOOT_LIFECYCLE_H_DECLS

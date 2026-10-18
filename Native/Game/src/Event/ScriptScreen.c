@@ -17,17 +17,17 @@
 Event_SplashTween Event_splashTweens[6];
 
 // decomp: BATTLE.PRG func_800B6724 (src/BATTLE/BATTLE.PRG/4A0A8.c:609)
-int Event_ScriptWaitForSplashFile(u_char* arg0, short arg1) { return Render_gimLayers->isLoadPending; }
+intptr_t Event_ScriptWaitForSplashFile(u_char* arg0, short arg1) { return Render_gimLayers->isLoadPending; }
 
 // decomp: BATTLE.PRG vs_battle_script_loadGim (src/BATTLE/BATTLE.PRG/4A0A8.c:851)
-int Event_ScriptLoadSplashImage(u_char* arg0, short arg1)
+intptr_t Event_ScriptLoadSplashImage(u_char* arg0, short arg1)
 {
     Render_QueueGimImage(Core_Memory_ReadUnalignedShort(arg0 + 1), arg0[3]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B7014 (src/BATTLE/BATTLE.PRG/4A0A8.c:857)
-int Event_ScriptConfigureSplashLayer(u_char* arg0, short arg1)
+intptr_t Event_ScriptConfigureSplashLayer(u_char* arg0, short arg1)
 {
     Event_SplashTween* new_var;
 
@@ -50,7 +50,7 @@ int Event_ScriptConfigureSplashLayer(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B70E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:879)
-int Event_ScriptTweenSplashLayer(u_char* arg0, short arg1)
+intptr_t Event_ScriptTweenSplashLayer(u_char* arg0, short arg1)
 {
     Event_SplashLayerView* temp_a3 = Render_gimLayers;
     int temp_a2 = arg0[5] >> 6;
@@ -77,20 +77,20 @@ int Event_ScriptTweenSplashLayer(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B71C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:905)
-int Event_ScriptFreeSplashImage(u_char* arg0, short arg1)
+intptr_t Event_ScriptFreeSplashImage(u_char* arg0, short arg1)
 {
     Render_ReleaseGimImages();
     return (Event_skipState == 2) * 4;
 }
 
 // decomp: BATTLE.PRG func_800B71F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:911)
-int Event_ScriptWaitForSplashTween(u_char* arg0, short arg1)
+intptr_t Event_ScriptWaitForSplashTween(u_char* arg0, short arg1)
 {
     return (Event_splashTweens[2].durationFrames | (Event_splashTweens[0].durationFrames | Event_splashTweens[1].durationFrames)) != 0;
 }
 
 // decomp: BATTLE.PRG func_800B9A40 (src/BATTLE/BATTLE.PRG/4A0A8.c:2049)
-int Event_ScriptFadeOutAndWait(u_char* arg0, short arg1)
+intptr_t Event_ScriptFadeOutAndWait(u_char* arg0, short arg1)
 {
     int temp_v0 = Field_ScreenTransitionPhase();
     if (temp_v0 != 5) {
@@ -103,28 +103,28 @@ int Event_ScriptFadeOutAndWait(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B9A94 (src/BATTLE/BATTLE.PRG/4A0A8.c:2061)
-int Event_ScriptFadeIn(u_char* arg0)
+intptr_t Event_ScriptFadeIn(u_char* arg0, short arg1)
 {
     Field_BeginScreenFadeIn(arg0[1], arg0[2], arg0[3] * 0x10);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9AC4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2067)
-int Event_ScriptSetWipeAngle(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetWipeAngle(u_char* arg0, short arg1)
 {
     Field_SetTransitionWipeAngle(arg0[1] * 0x10);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9AE8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2073)
-int Event_ScriptConfigureScreenTransition(u_char* arg0, short arg1)
+intptr_t Event_ScriptConfigureScreenTransition(u_char* arg0, short arg1)
 {
     Field_ConfigureScreenTransition(arg0[1], arg0[2], arg0[3] * 0x10);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9B18 (src/BATTLE/BATTLE.PRG/4A0A8.c:2079)
-int Event_ScriptSetRoomDisplayFlags(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetRoomDisplayFlags(u_char* arg0, short arg1)
 {
     switch (arg0[1] & 3) {
     case 0:
@@ -156,10 +156,10 @@ int Event_ScriptSetRoomDisplayFlags(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B9BF8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2110)
-int Event_ScriptWaitForScreenTransition(void) { return Field_ScreenTransitionPhase() != 0; }
+intptr_t Event_ScriptWaitForScreenTransition(u_char* arg0, short arg1) { return Field_ScreenTransitionPhase() != 0; }
 
 // decomp: BATTLE.PRG func_800B9C18 (src/BATTLE/BATTLE.PRG/4A0A8.c:2112)
-int Event_ScriptTogglePaletteHook(u_char* arg0, short arg1)
+intptr_t Event_ScriptTogglePaletteHook(u_char* arg0, short arg1)
 {
     if (arg0[1] != 0) {
         Core_NoOperation();
@@ -170,7 +170,7 @@ int Event_ScriptTogglePaletteHook(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B9C58 (src/BATTLE/BATTLE.PRG/4A0A8.c:2122)
-int Event_ScriptTransformPalettes(u_char* arg0, short arg1)
+intptr_t Event_ScriptTransformPalettes(u_char* arg0, short arg1)
 {
     Event_ActorSelection sp18;
     int temp_a2;

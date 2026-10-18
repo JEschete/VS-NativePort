@@ -13,7 +13,7 @@
 #include "Battle/BattleMode.h"
 #include "Battle/Rewards.h"
 #include "Battle/StatusEffects.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Copy.h"
 #include "Event/Actors.h"
 #include "Event/ScriptActors.h"
@@ -33,7 +33,7 @@ char Event_scriptControlledActors[17];
 char Event_skipState;
 
 // decomp: BATTLE.PRG func_800B7428 (src/BATTLE/BATTLE.PRG/4A0A8.c:967)
-int Event_ScriptResetActorGroupState(u_char* arg0, short arg1)
+intptr_t Event_ScriptResetActorGroupState(u_char* arg0, short arg1)
 {
     Event_ActorSelection sp10;
 
@@ -49,7 +49,7 @@ int Event_ScriptResetActorGroupState(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7490 (src/BATTLE/BATTLE.PRG/4A0A8.c:983)
-int Event_ScriptStoreActorTile(u_char* arg0, short arg1)
+intptr_t Event_ScriptStoreActorTile(u_char* arg0, short arg1)
 {
     u_char position[12];
     u_short actor = Core_Memory_ReadUnalignedShort(arg0 + 1);
@@ -76,7 +76,7 @@ int Event_ScriptStoreActorTile(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7574 (src/BATTLE/BATTLE.PRG/4A0A8.c:1009)
-int Event_ScriptSpawnActor(u_char* arg0, short arg1)
+intptr_t Event_ScriptSpawnActor(u_char* arg0, short arg1)
 {
     u_char sp10[12];
 
@@ -90,7 +90,7 @@ int Event_ScriptSpawnActor(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B75F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1022)
-int Event_ScriptNavigateActorToTile(u_char* arg0, short arg1)
+intptr_t Event_ScriptNavigateActorToTile(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
     u_short temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
@@ -109,7 +109,7 @@ int Event_ScriptNavigateActorToTile(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B76A8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1040)
-int Event_ScriptPlayActorAnimation(u_char* arg0)
+intptr_t Event_ScriptPlayActorAnimation(u_char* arg0, short arg1)
 {
     Actors_PlayActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)),
         Event_animationBankBases[arg0[5] >> 6] + arg0[3], arg0[4], arg0[5] & 0x3F);
@@ -117,7 +117,7 @@ int Event_ScriptPlayActorAnimation(u_char* arg0)
 }
 
 // decomp: BATTLE.PRG func_800B770C (src/BATTLE/BATTLE.PRG/4A0A8.c:1047)
-int Event_ScriptSetActorGroupFlags(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorGroupFlags(u_char* arg0, short arg1)
 {
     Event_ActorSelection sp10;
     int temp_s0;
@@ -151,7 +151,7 @@ int Event_ScriptSetActorGroupFlags(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B77DC (src/BATTLE/BATTLE.PRG/4A0A8.c:1080)
-int Event_ScriptSetActorSoundMix(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorSoundMix(u_char* arg0, short arg1)
 {
     Actors_ModelEffectSlot sp10;
     int var_a0;
@@ -169,7 +169,7 @@ int Event_ScriptSetActorSoundMix(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B784C (src/BATTLE/BATTLE.PRG/4A0A8.c:1097)
-int Event_ScriptWalkActorToTile(u_char* arg0, short arg1)
+intptr_t Event_ScriptWalkActorToTile(u_char* arg0, short arg1)
 {
     u_char sp10[10];
     u_short temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
@@ -189,7 +189,7 @@ int Event_ScriptWalkActorToTile(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B792C (src/BATTLE/BATTLE.PRG/4A0A8.c:1116)
-int Event_ScriptWalkActorToWorldPos(u_char* arg0, short arg1)
+intptr_t Event_ScriptWalkActorToWorldPos(u_char* arg0, short arg1)
 {
     Actors_ActorLocationQuery sp10;
 
@@ -222,7 +222,7 @@ int Event_ScriptWalkActorToWorldPos(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7A98 (src/BATTLE/BATTLE.PRG/4A0A8.c:1148)
-int Event_ScriptSlideActorToTile(u_char* arg0, short arg1)
+intptr_t Event_ScriptSlideActorToTile(u_char* arg0, short arg1)
 {
     u_char sp10[16];
     u_short temp_s0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
@@ -242,7 +242,7 @@ int Event_ScriptSlideActorToTile(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7B58 (src/BATTLE/BATTLE.PRG/4A0A8.c:1167)
-int Event_ScriptSlideActorToWorldPos(u_char* arg0, short arg1)
+intptr_t Event_ScriptSlideActorToWorldPos(u_char* arg0, short arg1)
 {
     Actors_ActorLocationQuery sp10;
     short temp_s3;
@@ -276,7 +276,7 @@ int Event_ScriptSlideActorToWorldPos(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7C90 (src/BATTLE/BATTLE.PRG/4A0A8.c:1200)
-int Event_ScriptSetActorAttachment(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorAttachment(u_char* arg0, short arg1)
 {
     u_short temp_s1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
     u_int temp_a1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3)) & 0xFFFF;
@@ -289,7 +289,7 @@ int Event_ScriptSetActorAttachment(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7D10 (src/BATTLE/BATTLE.PRG/4A0A8.c:1212)
-int Event_ScriptNavigateActorToWorldPos(u_char* arg0, short arg1)
+intptr_t Event_ScriptNavigateActorToWorldPos(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
     u_short temp_s1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1) & 0xFFFF);
@@ -308,7 +308,7 @@ int Event_ScriptNavigateActorToWorldPos(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7DC4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1230)
-int Event_ScriptTurnActorToFacing(u_char* arg0, short arg1)
+intptr_t Event_ScriptTurnActorToFacing(u_char* arg0, short arg1)
 {
     Actors_ActorLocationQuery sp10;
     u_short temp_s1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
@@ -345,7 +345,7 @@ int Event_ScriptTurnActorToFacing(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7EF0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1266)
-int Event_ScriptFaceOtherActor(u_char* arg0, short arg1)
+intptr_t Event_ScriptFaceOtherActor(u_char* arg0, short arg1)
 {
     Actors_ActorLocationQuery sp10;
     int temp_s0;
@@ -365,7 +365,7 @@ int Event_ScriptFaceOtherActor(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7F84 (src/BATTLE/BATTLE.PRG/4A0A8.c:1285)
-int Event_ScriptFaceTile(u_char* arg0, short arg1)
+intptr_t Event_ScriptFaceTile(u_char* arg0, short arg1)
 {
     Actors_TileTarget sp10;
     int temp_s0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)) & 0xFFFF;
@@ -380,7 +380,7 @@ int Event_ScriptFaceTile(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B804C (src/BATTLE/BATTLE.PRG/4A0A8.c:1299)
-int Event_ScriptScaleActor(u_char* arg0, short arg1)
+intptr_t Event_ScriptScaleActor(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
 
@@ -391,7 +391,7 @@ int Event_ScriptScaleActor(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B80B4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1309)
-int Event_ScriptRemoveActorGroup(u_char* arg0, short arg1)
+intptr_t Event_ScriptRemoveActorGroup(u_char* arg0, short arg1)
 {
     Event_ActorSelection sp10;
 
@@ -407,7 +407,7 @@ int Event_ScriptRemoveActorGroup(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B810C (src/BATTLE/BATTLE.PRG/4A0A8.c:1324)
-int Event_ScriptWaitForActorFlags(u_char* arg0)
+intptr_t Event_ScriptWaitForActorFlags(u_char* arg0, short arg1)
 {
     short temp_v0;
     u_short temp_s3;
@@ -428,7 +428,7 @@ int Event_ScriptWaitForActorFlags(u_char* arg0)
 }
 
 // decomp: BATTLE.PRG func_800B81A0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1344)
-int Event_ScriptSetActorColorOverride(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorColorOverride(u_char* arg0, short arg1)
 {
     Render_ColorCode sp10;
 
@@ -445,7 +445,7 @@ int Event_ScriptSetActorColorOverride(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B822C (src/BATTLE/BATTLE.PRG/4A0A8.c:1360)
-int Event_ScriptQueueActorAnimation(u_char* arg0)
+intptr_t Event_ScriptQueueActorAnimation(u_char* arg0, short arg1)
 {
     Actors_QueueActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)),
         Event_animationBankBases[arg0[5] >> 6] + arg0[3], arg0[5] & 0x3F, 0);
@@ -453,7 +453,7 @@ int Event_ScriptQueueActorAnimation(u_char* arg0)
 }
 
 // decomp: BATTLE.PRG func_800B8290 (src/BATTLE/BATTLE.PRG/4A0A8.c:1367)
-int Event_ScriptRotateActorAxes(u_char* arg0, short arg1)
+intptr_t Event_ScriptRotateActorAxes(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
     u_short temp_s2;
@@ -477,7 +477,7 @@ int Event_ScriptRotateActorAxes(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B8360 (src/BATTLE/BATTLE.PRG/4A0A8.c:1390)
-int Event_ScriptSetActorHeadAngles(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorHeadAngles(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
     int temp_v0;
@@ -496,7 +496,7 @@ int Event_ScriptSetActorHeadAngles(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B83D4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1408)
-int Event_ScriptPlayActorAnimationAtFrame(u_char* arg0)
+intptr_t Event_ScriptPlayActorAnimationAtFrame(u_char* arg0, short arg1)
 {
     Actors_PlayActorAnimationAtFrame(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)),
         Event_animationBankBases[arg0[6] >> 6] + arg0[3], arg0[6] & 0x3F, arg0[4]);
@@ -504,7 +504,7 @@ int Event_ScriptPlayActorAnimationAtFrame(u_char* arg0)
 }
 
 // decomp: BATTLE.PRG func_800B8438 (src/BATTLE/BATTLE.PRG/4A0A8.c:1415)
-int Event_ScriptQueueActorAnimationAtFrame(u_char* arg0)
+intptr_t Event_ScriptQueueActorAnimationAtFrame(u_char* arg0, short arg1)
 {
     Actors_QueueActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)),
         Event_animationBankBases[arg0[6] >> 6] + arg0[3], arg0[6] & 0x3F, arg0[4]);
@@ -512,7 +512,7 @@ int Event_ScriptQueueActorAnimationAtFrame(u_char* arg0)
 }
 
 // decomp: BATTLE.PRG func_800B849C (src/BATTLE/BATTLE.PRG/4A0A8.c:1422)
-int Event_ScriptSetActorIdleAnimation(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorIdleAnimation(u_char* arg0, short arg1)
 {
     int temp_a0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
 
@@ -525,7 +525,7 @@ int Event_ScriptSetActorIdleAnimation(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B8510 (src/BATTLE/BATTLE.PRG/4A0A8.c:1434)
-int Event_ScriptLookAtActor(u_char* arg0, short arg1)
+intptr_t Event_ScriptLookAtActor(u_char* arg0, short arg1)
 {
     int var_a3;
 
@@ -546,7 +546,7 @@ int Event_ScriptLookAtActor(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B8590 (src/BATTLE/BATTLE.PRG/4A0A8.c:1454)
-int Event_ScriptLookAtWorldPos(u_char* arg0, short arg1)
+intptr_t Event_ScriptLookAtWorldPos(u_char* arg0, short arg1)
 {
     SVECTOR sp10;
     int temp_v0;
@@ -564,7 +564,7 @@ int Event_ScriptLookAtWorldPos(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B860C (src/BATTLE/BATTLE.PRG/4A0A8.c:1471)
-int Event_ScriptLoadObjectModel(u_char* arg0, short arg1)
+intptr_t Event_ScriptLoadObjectModel(u_char* arg0, short arg1)
 {
     switch ((arg0[3] >> 2) & 3) {
     case 0:
@@ -582,10 +582,10 @@ int Event_ScriptLoadObjectModel(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B86E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1488)
-int Event_ScriptWaitForObjectLoad(u_char* arg0, short arg1) { return Actors_FirstFreeAssetLoadSlot() > 0; }
+intptr_t Event_ScriptWaitForObjectLoad(u_char* arg0, short arg1) { return Actors_FirstFreeAssetLoadSlot() > 0; }
 
 // decomp: BATTLE.PRG func_800B8708 (src/BATTLE/BATTLE.PRG/4A0A8.c:1490)
-int Event_ScriptReleaseObjectModel(u_char* arg0, short arg1)
+intptr_t Event_ScriptReleaseObjectModel(u_char* arg0, short arg1)
 {
     if (arg0[1] & 4) {
         Actors_ReleaseSequenceEffectTextures(arg0[1] & 3);
@@ -596,14 +596,14 @@ int Event_ScriptReleaseObjectModel(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B8764 (src/BATTLE/BATTLE.PRG/4A0A8.c:1500)
-int Event_ScriptSelectObjectTextureBank(u_char* arg0, short arg1)
+intptr_t Event_ScriptSelectObjectTextureBank(u_char* arg0, short arg1)
 {
     Actors_SetSharedSequenceBank(arg0[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B8788 (src/BATTLE/BATTLE.PRG/4A0A8.c:1506)
-int Event_ScriptSetActorOverlayPass(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorOverlayPass(u_char* arg0, short arg1)
 {
     Render_ColorCode sp10[6];
 
@@ -624,7 +624,7 @@ int Event_ScriptSetActorOverlayPass(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B884C (src/BATTLE/BATTLE.PRG/4A0A8.c:1526)
-int Event_ScriptSetActorWeaponDrawn(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorWeaponDrawn(u_char* arg0, short arg1)
 {
     Event_ActorSelection sp10;
     int temp_a0;
@@ -642,28 +642,28 @@ int Event_ScriptSetActorWeaponDrawn(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B91F0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1786)
-int Event_ScriptPlayActorAnimationSound(u_char* arg0, short arg1)
+intptr_t Event_ScriptPlayActorAnimationSound(u_char* arg0, short arg1)
 {
     Actors_PlayActorWeaponDrawSound(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), arg0[3]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9230 (src/BATTLE/BATTLE.PRG/4A0A8.c:1792)
-int Event_ScriptSetNpcUpdatesEnabled(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetNpcUpdatesEnabled(u_char* arg0, short arg1)
 {
     Actors_SetOtherActorLogicEnabled(arg0[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B92A0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1807)
-int Event_ScriptRestoreActorVitals(u_char* arg0, short arg1)
+intptr_t Event_ScriptRestoreActorVitals(u_char* arg0, short arg1)
 {
     Actors_RestoreActorVitals(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)));
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9608 (src/BATTLE/BATTLE.PRG/4A0A8.c:1916)
-int Event_ScriptSetActorEquipmentModels(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorEquipmentModels(u_char* arg0, short arg1)
 {
     u_short temp_a0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
 
@@ -676,42 +676,42 @@ int Event_ScriptSetActorEquipmentModels(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B9670 (src/BATTLE/BATTLE.PRG/4A0A8.c:1928)
-int Event_ScriptSetActorYawOscillation(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorYawOscillation(u_char* arg0, short arg1)
 {
     Actors_SetActorPaletteFade(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), arg0[3]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B97F8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1988)
-int Event_ScriptClearAshleyStatusEffects(u_char* arg0, short arg1)
+intptr_t Event_ScriptClearAshleyStatusEffects(u_char* arg0, short arg1)
 {
     Battle_PreserveAshleyStatuses();
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9D74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2151)
-int Event_ScriptSetActorRenderMode(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorRenderMode(u_char* arg0, short arg1)
 {
     Actors_StartActorAppearanceTransition(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), arg0[3]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9DB4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2158) [INCLUDE_ASM: not yet ported]
-int Event_ScriptSetAshleyBattleMode(u_char*, short)
+intptr_t Event_ScriptSetAshleyBattleMode(u_char*, short)
 {
     VS_UNPORTED("Event::ScriptSetAshleyBattleMode");
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BAC38 (src/BATTLE/BATTLE.PRG/4A0A8.c:2549)
-int Event_CommandSetEnteredDoor(u_char* arg0, short arg1)
+intptr_t Event_CommandSetEnteredDoor(u_char* arg0, short arg1)
 {
     Field_MarkEntranceDoorOnSceneMap(arg0[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BAC5C (src/BATTLE/BATTLE.PRG/4A0A8.c:2555)
-int Event_CommandStoreActorRangeBearing(u_char* arg0, short arg1)
+intptr_t Event_CommandStoreActorRangeBearing(u_char* arg0, short arg1)
 {
     Actors_ActorLocationQuery sp10;
     Actors_ActorLocationQuery sp20;
@@ -732,7 +732,7 @@ int Event_CommandStoreActorRangeBearing(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BAD78 (src/BATTLE/BATTLE.PRG/4A0A8.c:2575)
-int Event_CommandSetActorActivity(u_char* arg0, short arg1)
+intptr_t Event_CommandSetActorActivity(u_char* arg0, short arg1)
 {
     Event_ActorSelection sp10;
 
@@ -748,7 +748,7 @@ int Event_CommandSetActorActivity(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BADE0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2590)
-int Event_CommandAwardMiscLoot(u_char* arg0)
+intptr_t Event_CommandAwardMiscLoot(u_char* arg0, short arg1)
 {
     if (Event_isMenuTransitionActive == 0) {
         Items_PresentScriptedLoot(
@@ -765,14 +765,14 @@ int Event_CommandAwardMiscLoot(u_char* arg0)
 }
 
 // decomp: BATTLE.PRG func_800BAE74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2606)
-int Event_CommandConsumeMiscItem(u_char* arg0, short arg1)
+intptr_t Event_CommandConsumeMiscItem(u_char* arg0, short arg1)
 {
     Items_ConsumeMiscItem(Core_Memory_ReadUnalignedShort(arg0 + 1));
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BAEA0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2612)
-int Event_CommandStoreActorDistance(u_char* arg0, short arg1)
+intptr_t Event_CommandStoreActorDistance(u_char* arg0, short arg1)
 {
     Actors_ActorLocationQuery sp10;
     Actors_ActorLocationQuery sp20;

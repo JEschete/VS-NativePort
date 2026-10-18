@@ -22,7 +22,7 @@
 #include "Field/Transitions.h"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
-#include "Render/RoomGeometry.h"
+#include "Render/RoomDraw.h"
 #include "State/Flags.h"
 
 // decomp: D_800E9BF0 (D_800E9BF0@BATTLE/BATTLE.PRG)
@@ -32,21 +32,21 @@ u_char Event_kMenuTransitionModes[320]; /* contents: module image (ModuleData.c)
 Event_WeatherTween Event_weatherTween;
 
 // decomp: BATTLE.PRG func_800B91C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1780)
-int Event_ScriptPreloadRoom(u_char* arg0, short arg1)
+intptr_t Event_ScriptPreloadRoom(u_char* arg0, short arg1)
 {
     Field_ClearSavedRoomEnemies(arg0[2], arg0[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B92D0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1813)
-int Event_ScriptSetHudVisible(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetHudVisible(u_char* arg0, short arg1)
 {
     Battle_SetGameplayHudHidden(arg0[1] ^ 1);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B92F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1819)
-int Event_ScriptRunMenuTransition(u_char* script, short arg1)
+intptr_t Event_ScriptRunMenuTransition(u_char* script, short arg1)
 {
     switch (script[1]) {
     case 10:
@@ -114,14 +114,14 @@ int Event_ScriptRunMenuTransition(u_char* script, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B9770 (src/BATTLE/BATTLE.PRG/4A0A8.c:1966)
-int Event_ScriptSetGimmickVisibility(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetGimmickVisibility(u_char* arg0, short arg1)
 {
     Field_SetMovingPlatformVisibility(arg0[1], arg0[2]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B979C (src/BATTLE/BATTLE.PRG/4A0A8.c:1972)
-int Event_ScriptOverrideDepthCueDistance(u_char* arg0, short arg1)
+intptr_t Event_ScriptOverrideDepthCueDistance(u_char* arg0, short arg1)
 {
     short temp_v0 = Core_Memory_ReadUnalignedShort(arg0 + 1);
     Event_isScriptBackdropEnabled = (temp_v0 << 0x10) >> 0x1F;
@@ -132,42 +132,42 @@ int Event_ScriptOverrideDepthCueDistance(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B97E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1982)
-int Event_ScriptSetRoomLightingMode(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetRoomLightingMode(u_char* arg0, short arg1)
 {
     Field_roomGeometryDrawMode = arg0[1];
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9818 (src/BATTLE/BATTLE.PRG/4A0A8.c:1994)
-int Event_ScriptShowGeometryGroup(u_char* arg0, short arg1)
+intptr_t Event_ScriptShowGeometryGroup(u_char* arg0, short arg1)
 {
     Field_ShowRoomGeometryGroup(arg0[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B983C (src/BATTLE/BATTLE.PRG/4A0A8.c:2000)
-int Event_ScriptHideGeometryGroup(u_char* arg0, short arg1)
+intptr_t Event_ScriptHideGeometryGroup(u_char* arg0, short arg1)
 {
     Field_HideRoomGeometryGroup(arg0[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9860 (src/BATTLE/BATTLE.PRG/4A0A8.c:2006)
-int Event_ScriptSwapGeometryGroupFlags(u_char* arg0, short arg1)
+intptr_t Event_ScriptSwapGeometryGroupFlags(u_char* arg0, short arg1)
 {
     Field_SwapRoomGeometryGroupFlags(arg0[1], arg0[2]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B988C (src/BATTLE/BATTLE.PRG/4A0A8.c:2012)
-int Event_ScriptSetCollisionTileMode(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetCollisionTileMode(u_char* arg0, short arg1)
 {
     Field_SetCollisionCellBlocked(arg0[1], arg0[3], arg0[2], arg0[4]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B98C0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2018)
-int Event_ScriptChangeRoom(u_char* arg0, short arg1)
+intptr_t Event_ScriptChangeRoom(u_char* arg0, short arg1)
 {
     Field_MpdDoorRecord sp10;
 
@@ -199,31 +199,31 @@ int Event_ScriptChangeRoom(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B9F28 (src/BATTLE/BATTLE.PRG/4A0A8.c:2160)
-int Event_ScriptSetRoomBackgroundVisible(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetRoomBackgroundVisible(u_char* arg0, short arg1)
 {
     Field_SetTiledBackgroundEnabled(arg0[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9F4C (src/BATTLE/BATTLE.PRG/4A0A8.c:2166)
-int Event_ScriptLoadRoomBackground(u_char* arg0, short arg1)
+intptr_t Event_ScriptLoadRoomBackground(u_char* arg0, short arg1)
 {
     Field_QueueTiledBackgroundLoad(arg0[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9F70 (src/BATTLE/BATTLE.PRG/4A0A8.c:2172)
-int Event_ScriptWaitForRoomBackground(u_char* arg0, short arg1) { return Field_FinishTiledBackgroundLoad() == 0; }
+intptr_t Event_ScriptWaitForRoomBackground(u_char* arg0, short arg1) { return Field_FinishTiledBackgroundLoad() == 0; }
 
 // decomp: BATTLE.PRG func_800B9F90 (src/BATTLE/BATTLE.PRG/4A0A8.c:2174)
-int Event_ScriptFreeRoomBackground(u_char* arg0, short arg1)
+intptr_t Event_ScriptFreeRoomBackground(u_char* arg0, short arg1)
 {
     Field_ReleaseTiledBackground();
     return (Event_skipState == 2) * 4;
 }
 
 // decomp: BATTLE.PRG func_800B9FC0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2180)
-int Event_ScriptSetEnvironmentParticles(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetEnvironmentParticles(u_char* arg0, short arg1)
 {
     ((int (*)(int))Field_SetRoomWeather)(arg0[1] >> 4);
     if (arg0[4] == 0) {
@@ -255,14 +255,14 @@ int Event_ScriptSetEnvironmentParticles(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BA0E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2211)
-int Event_ScriptSetParticleVariationEnabled(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetParticleVariationEnabled(u_char* arg0, short arg1)
 {
     Field_SetWeatherVariationEnabled(arg0[1] ^ 1);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BA108 (src/BATTLE/BATTLE.PRG/4A0A8.c:2217)
-int Event_ScriptMuteEnvironmentSound(u_char* arg0, short arg1)
+intptr_t Event_ScriptMuteEnvironmentSound(u_char* arg0, short arg1)
 {
     if (arg0[1] != 0) {
         if (Event_isAmbientSoundSuspended != 0) {
@@ -284,7 +284,7 @@ int Event_ScriptMuteEnvironmentSound(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BA194 (src/BATTLE/BATTLE.PRG/4A0A8.c:2238)
-int Event_ScriptControlRoomAnimation(u_char* arg0, short arg1)
+intptr_t Event_ScriptControlRoomAnimation(u_char* arg0, short arg1)
 {
     int temp_s0 = arg0[2];
 
@@ -303,28 +303,28 @@ int Event_ScriptControlRoomAnimation(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BA218 (src/BATTLE/BATTLE.PRG/4A0A8.c:2256)
-int Event_ScriptSetBackgroundOffset(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetBackgroundOffset(u_char* arg0, short arg1)
 {
     Field_SetRoomBackgroundOffset(Core_Memory_ReadUnalignedShort(arg0 + 1), Core_Memory_ReadUnalignedShort(arg0 + 3));
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BA264 (src/BATTLE/BATTLE.PRG/4A0A8.c:2262)
-int Event_ScriptSetFirstPersonView(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetFirstPersonView(u_char* arg0, short arg1)
 {
     Field_SetFirstPersonViewDisabled(arg0[1] != 0);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BA288 (src/BATTLE/BATTLE.PRG/4A0A8.c:2268)
-int Event_ScriptAdjustGeometryDepthBias(u_char* arg0, short arg1)
+intptr_t Event_ScriptAdjustGeometryDepthBias(u_char* arg0, short arg1)
 {
     Field_AddRoomGeometryDepthBias(arg0[1], (signed char)arg0[2]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BA2B4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2274)
-int Event_ScriptSetBackgroundParallax(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetBackgroundParallax(u_char* arg0, short arg1)
 {
     Field_SetBackgroundParallaxScale((signed char)arg0[1] << 7, (signed char)arg0[2] << 7);
     return 0;

@@ -195,6 +195,12 @@ void Actors_UploadActorTextureFrame(Actors_ActorRecord* actor, int index, int fr
     y = (*(short (*)[])&Actors_textureSlotOrigins)[actor->textureSlot * 2 + 1];
     row = Actors_textureSlotRowOffsets[actor->textureSlot];
     py = overlay->y;
+    Core_Debugf("texture", "actor=%u model=%u bank=%u slot=%u clut=%u channel=%d frame=%d overlay=%u row=%u src=(%d,%d) dst=(%d,%d) size=(%d,%d)",
+        (unsigned)actor->instance.slot, (unsigned)actor->modelId, (unsigned)Actors_sharedSequenceBankIndex,
+        (unsigned)actor->textureSlot, (unsigned)actor->clutA, index, frame, (unsigned)animation->overlayIndex,
+        (unsigned)actor->textureRowOffsets[Actors_sharedSequenceBankIndex],
+        (Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15) * 64 + srcX, srcY + 256,
+        dstX + x * 64, y * 256 + row * 64 + py, width, height);
     frame = Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15;
     setRECT(&rect, (frame * 64) + srcX, srcY + 256, width, height);
     srcY = (y * 256) + (row * 64) + py;

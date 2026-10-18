@@ -8,7 +8,10 @@ typedef struct Actors_SkeletonPose Actors_SkeletonPose;
 
 // decomp: D_800F2458_t (src/BATTLE/BATTLE.PRG/30DB0.h:25)
 typedef struct Actors_ModelRenderContext {
-    u_char workArea[0x1FD0];
+    long projectedVertices[768];
+    int vertexDepths[768];
+    unsigned projectedVertexCount;
+    u_char reserved1804[0x7CC];
     int modelScale[3];
     int reserved1FDC;
     u_short actorScale;

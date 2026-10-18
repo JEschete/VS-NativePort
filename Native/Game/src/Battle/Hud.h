@@ -23,7 +23,7 @@ _Static_assert(sizeof(Battle_HudHighlightWord) == 0x4, "Battle_HudHighlightWord 
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 
-extern char* Battle_limbNames[146];
+extern char* Battle_limbNames[20];
 extern char Battle_hudStatusIconsHidden;
 extern char Battle_hudHidden;
 extern int Battle_hudSlideOffset;

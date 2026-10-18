@@ -6,6 +6,8 @@
 #include "Input/Pad.hpp"
 #include "Platform/GameFiber.hpp"
 
+#include <stdexcept>
+
 // The copied boot entry (vs_main_exec): the original's endless loop, run on the game fiber.
 extern "C" void Boot_RunGame(void);
 
@@ -31,7 +33,8 @@ struct GameApp::Runner {
 GameApp::GameApp(Services services) : m_services(services)
 {
     if (const int failed = Content_LoadModuleData(); failed != 0) {
-        VS_LOG_WARN("boot", "{} module data entries not loaded", failed);
+        VS_LOG_ERROR("boot", "{} required module data entries failed; game execution was not started", failed);
+        throw std::runtime_error("Required module data initialization failed");
     }
     m_runner = std::make_unique<Runner>();
 }

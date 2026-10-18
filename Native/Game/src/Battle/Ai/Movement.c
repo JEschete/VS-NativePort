@@ -19,7 +19,7 @@
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"

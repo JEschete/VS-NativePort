@@ -54,10 +54,26 @@ extern "C" void Core_RecordUnported(const char* site)
 
 extern "C" void Core_Tracef(const char* format, ...)
 {
+    if (!VS::Core::IsLogEnabled(VS::Core::LogLevel::Trace, "trace")) {
+        return;
+    }
     char line[512];
     va_list args;
     va_start(args, format);
     std::vsnprintf(line, sizeof line, format, args);
     va_end(args);
-    VS_LOG_INFO("trace", "{}", line);
+    VS_LOG_TRACE("trace", "{}", line);
+}
+
+extern "C" void Core_Debugf(const char* channel, const char* format, ...)
+{
+    if (!VS::Core::IsLogEnabled(VS::Core::LogLevel::Debug, channel)) {
+        return;
+    }
+    char line[512];
+    va_list args;
+    va_start(args, format);
+    std::vsnprintf(line, sizeof line, format, args);
+    va_end(args);
+    VS_LOG_DEBUG(channel, "{}", line);
 }

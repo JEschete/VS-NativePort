@@ -60,7 +60,6 @@ short Field_InterpolatedFloorHeight(int arg0, int arg1);
 short Field_FloorHeightAt(int arg0, int arg1);
 short Field_CeilingHeightAt(int arg0, int arg1);
 int Field_FloorAndCeilingHeightsAt(int arg0, int arg1);
-u_char Field_SampleCollisionHeightCode(u_int, int, int);
 void Field_SetActorCollisionBypass(int arg0, int arg1);
 int Field_ActorCollisionBypass(int arg0);
 int Field_RelativeCollisionSampleHeight(

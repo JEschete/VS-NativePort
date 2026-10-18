@@ -17,6 +17,7 @@ import clang.cindex as ci
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import copy_to_native as ct  # noqa: E402
+import native_views as nv  # noqa: E402
 
 K = ci.CursorKind
 NATIVE = ct.REPO / "Native"
@@ -69,7 +70,7 @@ def main() -> int:
         if diffs or (size_ps1 and size_x64 != size_ps1):
             entry = {"type": name, "id": r["id"], "role": r["role"], "ps1_size": size_ps1, "x64_size": size_x64,
                      "first_diffs": diffs[:4], "bitfields": any(f.is_bitfield() for f in fields)}
-            out["with-pointers" if cp.type_has_pointer(r["id"]) else "pointer-free"].append(entry)
+            out["with-pointers" if cp.type_has_pointer(r["id"]) or nv.pointer_slots(r["id"]) else "pointer-free"].append(entry)
     print(f"checked {out['checked']} types; pointer-free mismatches {len(out['pointer-free'])}, "
           f"with pointers {len(out['with-pointers'])}; parse errors {len(errors)}")
     for e in out["pointer-free"]:

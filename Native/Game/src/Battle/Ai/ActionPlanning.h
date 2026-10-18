@@ -39,7 +39,6 @@ void Battle_Ai_ApplySimulatedStatDelta(short*, short*, int, int);
 void Battle_Ai_AppendActionCandidate(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*);
 void Battle_Ai_SortActionCandidates(Battle_Ai_ActionPlanView*);
 void Battle_Ai_CopyPlanningActorStats(Battle_ActorStats* src, Battle_ActorStats* dst);
-void Battle_Ai_CaptureActorConditionTable(Battle_Ai_ActionTiming*);
 int Battle_Ai_IsActionHarmfulToActor(int, int);
 int Battle_Ai_IsActionBeneficialToActor(int, int);
 void Battle_Ai_CacheFallbackActionCandidate(Battle_Ai_ActionCandidate*, Battle_ActionDefinition*);

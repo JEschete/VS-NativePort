@@ -20,6 +20,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/RoomState.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
@@ -271,7 +272,7 @@ void Field_SpawnRoomActors(void)
     u_short slot;
     u_short id;
 
-    if (Field_isRoomActorSpawnEnabled == 0) {
+    if (Field_zoneContext.mpdEnemyCount == 0) {
         return;
     }
 

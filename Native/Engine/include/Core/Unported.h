@@ -9,8 +9,10 @@ extern "C" {
 
 void Core_RecordUnported(const char* site);
 
-// printf-style line in the log under "trace": a development aid for following copied code.
+// printf-style diagnostics; formatting is skipped when the level/channel is disabled.
+// Core_Tracef uses trace level and the "trace" channel; Core_Debugf uses debug level.
 void Core_Tracef(const char* format, ...);
+void Core_Debugf(const char* channel, const char* format, ...);
 
 #ifdef __cplusplus
 }

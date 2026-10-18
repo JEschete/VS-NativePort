@@ -145,6 +145,10 @@ usize PageSpace::Execute(std::span<const u32> w)
         p.semi = cmd & 0x02;
         p.raw = cmd & 0x01;
         const int n = quad ? 4 : 3;
+        const usize required = 1 + n + (p.gouraud ? n - 1 : 0) + (p.textured ? n : 0);
+        if (w.size() < required) {
+            return 0;
+        }
         Vertex v[4]{};
         usize i = 1;
         u32 col = color(w[0]);
@@ -178,6 +182,9 @@ usize PageSpace::Execute(std::span<const u32> w)
         p.gouraud = cmd & 0x10;
         p.semi = cmd & 0x02;
         const bool poly = cmd & 0x08;
+        if (w.size() < (p.gouraud ? 4u : 3u)) {
+            return 0;
+        }
         usize i = 1;
         u32 col = color(w[0]);
         Vertex prev = vertexAt(w[i++], col);
@@ -209,6 +216,10 @@ usize PageSpace::Execute(std::span<const u32> w)
         p.textured = cmd & 0x04;
         p.semi = cmd & 0x02;
         p.raw = cmd & 0x01;
+        const usize required = 2 + (p.textured ? 1 : 0) + (((cmd >> 3) & 3) == 0 ? 1 : 0);
+        if (w.size() < required) {
+            return 0;
+        }
         usize i = 1;
         const u32 col = color(w[0]);
         const u32 xy = w[i++];

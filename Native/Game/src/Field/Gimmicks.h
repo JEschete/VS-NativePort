@@ -274,11 +274,12 @@ struct Field_GimmickPhysicsView {
     short rotationRemainingX, rotationRemainingY, rotationRemainingZ;
     char reserved42[0x1A];
     u_char tileX, reserved5D, tileZ, reserved5F;
-    char reserved60[0x10C];
+    char reserved60_60[8];
+    void* nativePointer68; /* PS1 pointer slot 0x68 */
+    char reserved60_6C[256];
     u_char material, durability, reserved16E, carrier, frame;
 };
 typedef struct Field_GimmickPhysicsView Field_GimmickPhysicsView;
-_Static_assert(sizeof(Field_GimmickPhysicsView) == 0x174, "Field_GimmickPhysicsView must keep its PS1 layout");
 
 #endif // VS_FIELD_GIMMICKS_H_TYPES
 

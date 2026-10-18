@@ -115,7 +115,7 @@ void Render_DrawStatGauge(int colorIndex, int w, u_long* before, int xy)
     rgb1 = w;
     primBuf[12] = xy + rgb1;
     primBuf[13] = vs_getTpage(0, 0, 0, 0, 0);
-    *before = ((u_long)primBuf << 8) >> 8;
+    *before = LegacyGpu_Handle(primBuf);
     Render_frameScratch.primitiveCursor = primBuf + 14;
 }
 
@@ -127,7 +127,7 @@ void Render_InsertThreeWordPrimitive(u_long* before, int rgb0, int xy, int wh)
     prim[1] = rgb0;
     prim[2] = xy;
     prim[3] = wh;
-    *before = ((u_long)prim << 8) >> 8;
+    *before = LegacyGpu_Handle(prim);
     Render_frameScratch.primitiveCursor = prim + 4;
 }
 
@@ -137,7 +137,7 @@ void Render_InsertDrawModeCommand(int tpage, u_long* before)
     u_long* prim = Render_frameScratch.primitiveCursor;
     prim[0] = vs_getTag(sizeof(int), *before);
     prim[1] = tpage;
-    *before = ((u_long)prim << 8) >> 8;
+    *before = LegacyGpu_Handle(prim);
     Render_frameScratch.primitiveCursor = prim + 2;
 }
 

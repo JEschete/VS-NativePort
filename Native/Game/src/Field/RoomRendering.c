@@ -27,7 +27,9 @@
 #include "Render/Display.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
+#include "Render/RoomDraw.h"
 #include "Render/RoomGeometry.h"
+#include "Render/RoomLighting.h"
 #include "Render/UiPrimitives.h"
 #include "State/Settings.h"
 #include "State/Timers.h"
@@ -213,12 +215,16 @@ void Field_DrawRoomScene(void)
 // decomp: BATTLE.PRG func_8008B1FC (src/BATTLE/BATTLE.PRG/146C.c:15926)
 void Field_DrawRoomGeometry(void* arg0)
 {
-    Core_Gte_SetRotMatrix((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014)); // _camera.viewMatrix
-    Core_Gte_SetTransMatrix((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014)); // _camera.viewMatrix
+    if (!Render_ValidateRoomGeometry(arg0, Field_roomData.header.geometryLength)) {
+        Core_Debugf("render", "Invalid room geometry extent");
+        return;
+    }
+    Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix); // _camera.viewMatrix
+    Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix); // _camera.viewMatrix
     Render_UpdateRoomGroupTransforms(arg0);
-    Field_roomPrimitiveRangeStart = *(void**)((uintptr_t)Core_ScratchBase() + 0x000); // _camera.unk0
+    Field_roomPrimitiveRangeStart = Render_frameScratch.primitiveCursor; // _camera.unk0
     Render_DrawRoomGeometry(arg0, Field_roomGeometryDrawMode);
-    Field_roomPrimitiveRangeEnd = *(void**)((uintptr_t)Core_ScratchBase() + 0x000); // _camera.unk0
+    Field_roomPrimitiveRangeEnd = Render_frameScratch.primitiveCursor; // _camera.unk0
     if (Field_roomTint.isActive != 0) {
         Render_TintRoomGeometryPrimitives(Field_roomPrimitiveRangeStart, Field_roomPrimitiveRangeEnd, &Field_roomTint, 0);
     }
@@ -361,5 +367,9 @@ void Field_ClearGeometryOcclusion(void)
 }
 
 // decomp: BATTLE.PRG func_8008C458 (src/BATTLE/BATTLE.PRG/146C.c:16465)
-void Field_SampleRoomGroundColor(int arg0) { Render_SampleRoomLighting(arg0, 0); }
+void Field_SampleRoomGroundColor(int arg0, int layer, Render_ColorCode* color)
+{
+    (void)layer;
+    Render_SampleRoomLighting(arg0, 0, color);
+}
 

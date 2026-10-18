@@ -1,15 +1,26 @@
 #include "Core/Log.hpp"
 
 #include <atomic>
+#include <algorithm>
 #include <cstdio>
 #include <mutex>
+#include <string>
+#include <vector>
 
 namespace VS::Core {
 
 namespace {
 std::atomic<LogLevel> g_level{LogLevel::Info};
+std::atomic<std::uint64_t> g_tick{0};
 std::mutex g_mutex;
 std::FILE* g_file = nullptr;
+std::vector<std::string> g_channels;
+
+bool ChannelEnabled(LogLevel level, std::string_view channel)
+{
+    return level >= LogLevel::Warn || g_channels.empty() ||
+           std::ranges::find(g_channels, channel) != g_channels.end();
+}
 
 const char* LevelName(LogLevel level)
 {
@@ -19,12 +30,57 @@ const char* LevelName(LogLevel level)
     case LogLevel::Info: return "info";
     case LogLevel::Warn: return "warn";
     case LogLevel::Error: return "error";
+    case LogLevel::Off: return "off";
     }
     return "?";
 }
 } // namespace
 
 void SetLogLevel(LogLevel level) { g_level = level; }
+
+std::optional<LogLevel> ParseLogLevel(std::string_view name)
+{
+    for (auto level : {LogLevel::Trace, LogLevel::Debug, LogLevel::Info, LogLevel::Warn, LogLevel::Error,
+                       LogLevel::Off}) {
+        if (name == LevelName(level)) {
+            return level;
+        }
+    }
+    return std::nullopt;
+}
+
+bool SetLogChannels(std::string_view channels)
+{
+    std::vector<std::string> parsed;
+    if (!channels.empty() && channels != "*") {
+        for (;;) {
+            const auto comma = channels.find(',');
+            const auto item = channels.substr(0, comma);
+            if (item.empty() || item.find_first_of("* \t\r\n") != std::string_view::npos) {
+                return false;
+            }
+            parsed.emplace_back(item);
+            if (comma == std::string_view::npos) {
+                break;
+            }
+            channels.remove_prefix(comma + 1);
+        }
+    }
+    std::lock_guard lock(g_mutex);
+    g_channels = std::move(parsed);
+    return true;
+}
+
+bool IsLogEnabled(LogLevel level, std::string_view channel)
+{
+    if (level == LogLevel::Off || level < g_level.load()) {
+        return false;
+    }
+    std::lock_guard lock(g_mutex);
+    return ChannelEnabled(level, channel);
+}
+
+void SetLogTick(std::uint64_t tick) { g_tick = tick; }
 
 bool SetLogFile(const char* path)
 {
@@ -36,21 +92,25 @@ bool SetLogFile(const char* path)
     if (path && *path) {
         g_file = std::fopen(path, "w");
     }
-    return g_file != nullptr;
+    return !path || !*path || g_file != nullptr;
 }
 
 void LogWrite(LogLevel level, std::string_view channel, std::string_view message)
 {
-    if (level < g_level.load()) {
+    if (level == LogLevel::Off || level < g_level.load()) {
         return;
     }
     std::lock_guard lock(g_mutex);
+    if (!ChannelEnabled(level, channel)) {
+        return;
+    }
+    const auto tick = static_cast<unsigned long long>(g_tick.load());
     std::FILE* out = level >= LogLevel::Warn ? stderr : stdout;
-    std::fprintf(out, "[%s] %.*s: %.*s\n", LevelName(level), static_cast<int>(channel.size()), channel.data(),
-                 static_cast<int>(message.size()), message.data());
+    std::fprintf(out, "[%s] [tick=%llu] %.*s: %.*s\n", LevelName(level), tick,
+                 static_cast<int>(channel.size()), channel.data(), static_cast<int>(message.size()), message.data());
     std::fflush(out);
     if (g_file) {
-        std::fprintf(g_file, "[%s] %.*s: %.*s\n", LevelName(level), static_cast<int>(channel.size()),
+        std::fprintf(g_file, "[%s] [tick=%llu] %.*s: %.*s\n", LevelName(level), tick, static_cast<int>(channel.size()),
                      channel.data(), static_cast<int>(message.size()), message.data());
         std::fflush(g_file);
     }

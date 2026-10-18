@@ -67,6 +67,10 @@ int Content_QueueActorAssetRequest(Content_ActorAssetRequest* objectData)
     }
 
     dst = &Content_legacyActorAssetRequests[slot];
+    Core_Debugf("actors", "queue kind=%u actor=%u model=%u phase=%u parse=%u",
+        (unsigned)objectData->assetKind, (unsigned)objectData->targetSlot,
+        (unsigned)objectData->modelId, (unsigned)Content_legacyModelLoadPhase,
+        (unsigned)Content_modelParseResetFlag);
     *dst = *objectData;
     return slot;
 }
@@ -124,6 +128,9 @@ int Content_UpdateActorAssetQueue(void)
     if (ret == -1) {
         return 1;
     }
+    Core_Debugf("actors", "loaded kind=%u actor=%u model=%d result=%d record=%p",
+        (unsigned)slot->assetKind, (unsigned)slot->targetSlot, (int)slot->modelId, ret,
+        slot->targetSlot < 17 ? (void*)Actors_actorRecords[slot->targetSlot] : NULL);
 
     for (i = 1; i < 15; ++i) {
         Core_Memory_CopyAlignedWords(&Content_legacyActorAssetRequests[i - 1], &Content_legacyActorAssetRequests[i],
@@ -871,12 +878,16 @@ int Content_ParseActorModel(Content_ActorAssetRequest* object)
     data += 0xE8;
     size = *(int*)data;
     data += 4;
+    if (size < (int)sizeof(Actors_ShpModel)) {
+        return -2;
+    }
     model = Core_Memory_AllocateFromLowEnd(size);
-    memcpy(model, data, size);
-    actor->instance.model = model;
     if (model == NULL) {
         return -2;
     }
+    memcpy(model, data, size);
+    actor->instance.model = model;
+    actor->modelDataSize = (unsigned)size;
     data += size;
 
     queued.assetKind = 8;
@@ -1467,11 +1478,11 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
         }
         Actors_sharedSequenceAnimationIds[slot][i] = -1;
         for (i = 0; i < count; ++i) {
-            Actors_sharedSequenceAnimationData[slot][i] = *(char**)Content_legacySequenceParseData;
+            Actors_sharedSequenceAnimationData[slot][i] = (char*)Content_legacySequenceParseData
+                + (count - i) * sizeof(u_int) + *(u_int*)Content_legacySequenceParseData;
             Content_legacySequenceParseData += 4;
         }
         for (i = 0; i < count; ++i) {
-            Actors_sharedSequenceAnimationData[slot][i] += (intptr_t)Content_legacySequenceParseData;
             seq = (Content_SequenceBuffer*)(Actors_sharedSequenceAnimationData[slot][i] + 8);
                         }
         Actors_sharedSequenceAnimationData[slot][i] = (char*)-1;
@@ -1674,12 +1685,13 @@ int Content_ReleaseActorModel(int arg0)
 // decomp: BATTLE.PRG func_8009D208 (src/BATTLE/BATTLE.PRG/30DB0.c:1996)
 int Content_ReleaseSequenceEffectTexture(int arg0)
 {
-    if (Actors_sequenceTexturePagesOneBased[arg0] != 0) {
+    if (arg0 < 1 || arg0 > 3) return -1;
+    if (Actors_sharedSequenceBankTexturePages[arg0 - 1] != 0) {
         Actors_ResetActorTextureFrames(arg0 - 1);
-        if (Render_RetireTexturePageRange(Actors_sequenceTexturePagesOneBased[arg0], 1, 4) == 0) {
+        if (Render_RetireTexturePageRange(Actors_sharedSequenceBankTexturePages[arg0 - 1], 1, 4) == 0) {
             return -3;
         }
-        Actors_sequenceTexturePagesOneBased[arg0] = 0;
+        Actors_sharedSequenceBankTexturePages[arg0 - 1] = 0;
     }
     return 0;
 }
@@ -1692,6 +1704,7 @@ int Content_UpdateSequenceEffectTextureLoad(Content_ActorAssetRequest* objdata)
     int sectorSize;
     int h;
 
+    if (objdata->targetSlot < 1 || objdata->targetSlot > 3) return -2;
     switch (Content_legacyEtmLoadPhase) {
     default:
         Content_legacyEtmLoadPhase = 1;
@@ -1719,18 +1732,18 @@ int Content_UpdateSequenceEffectTextureLoad(Content_ActorAssetRequest* objdata)
 
         Content_ReleaseDiscRequest(Content_legacyEtmDiscRequest);
 
-        if (Actors_sequenceTexturePagesOneBased[objdata->targetSlot] != 0) {
-            if (Render_RetireTexturePageRange(Actors_sequenceTexturePagesOneBased[objdata->targetSlot], 1, 4) == 0) {
+        if (Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1] != 0) {
+            if (Render_RetireTexturePageRange(Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1], 1, 4) == 0) {
                 return -3;
             }
-            Actors_sequenceTexturePagesOneBased[objdata->targetSlot] = 0;
+            Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1] = 0;
         }
 
         if (Render_ReserveTexturePageRange(objdata->textureSlot, 1, 4) == 0) {
             return -2;
         }
 
-        Actors_sequenceTexturePagesOneBased[objdata->targetSlot] = objdata->textureSlot;
+        Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1] = objdata->textureSlot;
         ++Content_legacyEtmFileBuffer;
         h = *Content_legacyEtmFileBuffer;
         ++Content_legacyEtmFileBuffer;

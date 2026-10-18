@@ -18,6 +18,6 @@ _Static_assert(sizeof(Event_ScriptBytePair) == 0x2, "Event_ScriptBytePair must k
 #define VS_EVENT_SCRIPT_H_DECLS
 
 extern u_char Event_specialSubroutineScript[468];
-extern int (**Event_legacySkipHandlerCopy)(u_char*, short);
+extern intptr_t (**Event_legacySkipHandlerCopy)(u_char*, short);
 
 #endif // VS_EVENT_SCRIPT_H_DECLS

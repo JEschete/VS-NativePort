@@ -4,12 +4,6 @@
 #include "Render/Render.h"
 #include "Render/RoomGeometry.h"
 
-// decomp: BATTLE.PRG func_8009723C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-void Render_DrawRoomGeometry(void*, int)
-{
-    VS_UNPORTED("Render::DrawRoomGeometry");
-}
-
 // decomp: BATTLE.PRG func_80097388 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
 int Render_DrawRoomGeometryPolygons()
 {
@@ -66,12 +60,6 @@ int Render_LinkRoomPolygonByDepth()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_80098160 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-void Render_SetRoomPolygonNearClip(int)
-{
-    VS_UNPORTED("Render::SetRoomPolygonNearClip");
-}
-
 // decomp: BATTLE.PRG func_8009817C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
 int Render_SetRoomPolygonFarClip()
 {
@@ -79,47 +67,11 @@ int Render_SetRoomPolygonFarClip()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_80098194 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-void Render_SetRoomTextureLodDepth(int)
-{
-    VS_UNPORTED("Render::SetRoomTextureLodDepth");
-}
-
 // decomp: BATTLE.PRG func_800981B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
 int Render_SetRoomPolygonScreenBounds()
 {
     VS_UNPORTED("Render::SetRoomPolygonScreenBounds");
     return 0;
-}
-
-// decomp: BATTLE.PRG func_8009820C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-void Render_DrawSkyDome(void*)
-{
-    VS_UNPORTED("Render::DrawSkyDome");
-}
-
-// decomp: BATTLE.PRG func_800983F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-void Render_UpdateRoomGroupTransforms(void*)
-{
-    VS_UNPORTED("Render::UpdateRoomGroupTransforms");
-}
-
-// decomp: BATTLE.PRG func_800985AC (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-void Render_BuildRoomGeometryViewMatrix(VECTOR*, VECTOR*, MATRIX*)
-{
-    VS_UNPORTED("Render::BuildRoomGeometryViewMatrix");
-}
-
-// decomp: BATTLE.PRG func_80098648 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-void Render_BuildScaleCompensatedRoomView(VECTOR*, VECTOR*, MATRIX*)
-{
-    VS_UNPORTED("Render::BuildScaleCompensatedRoomView");
-}
-
-// decomp: BATTLE.PRG func_80098B38 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-void Render_SampleRoomLighting(int, int)
-{
-    VS_UNPORTED("Render::SampleRoomLighting");
 }
 
 // decomp: BATTLE.PRG func_80098C3C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]

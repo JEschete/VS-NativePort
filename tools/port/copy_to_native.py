@@ -46,6 +46,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import decomp_index as dx  # noqa: E402
 import copy_fixups as cf  # noqa: E402
+import native_views as nv  # noqa: E402
 from ref_index import RESIDENT, overlay_of  # noqa: E402
 from ref_index import norm_key as rx_norm  # noqa: E402
 
@@ -345,7 +346,9 @@ class Copier:
             for t in d["targets"]:
                 self.by_target[t].append(d)
         self.files: dict[str, OutFile] = {}
-        self.provider: dict[str, str] = {}      # C name -> header path that declares it
+        self.provider: dict[str, str] = {
+            "Render_ModelWorkspace": r"Native\Engine\include\Render\ModelWorkspace.h",
+        }      # C name -> header path that declares it
         self.struct_names: set[str] = set()     # C names of struct/union types (forward-declarable)
         self.type_home: dict[str, str] = {}     # type id (canonical) -> header path
         self.report: dict[str, list] = collections.defaultdict(list)
@@ -1142,6 +1145,7 @@ class Copier:
                     continue
                 decl = self.name_inline_type(
                     re.sub(r"^\s*extern\s+", "", self.own_declarator(e, self.renamed(e["file"], e["start"], e["end"], ov))).strip(), e)
+                decl = self.apply_fixups(r, decl)
                 if not re.search(rf"\b{re.escape(name)}\b", decl):
                     # declared in a template header under its binding macro (`extern CVECTOR VS_RING_COLORS[];`)
                     decl = re.sub(r"\b(\w+)(\s*(?:\[[^\]]*\])*)\s*$", lambda m: f"{name}{m[2]}", decl, count=1)
@@ -1332,7 +1336,7 @@ class Copier:
     def size_assert(self, tid: str, name: str) -> str:
         r = self.type_by_id[tid]
         size = int(r["size"] or 0)
-        if r["kind"] not in ("struct", "union") or size <= 0 or self.type_has_pointer(tid):
+        if r["kind"] not in ("struct", "union") or size <= 0 or self.type_has_pointer(tid) or nv.pointer_slots(tid):
             return ""
         self.report["size-assert"].append(name)
         return f'\n_Static_assert(sizeof({name}) == 0x{size:X}, "{name} must keep its PS1 layout");'
@@ -1351,7 +1355,7 @@ class Copier:
                  "unsigned short": 2, "signed short": 2}
 
         def declared(fname: str) -> tuple[str, int] | None:
-            m = re.search(rf"(?m)^\s*((?:unsigned\s+|signed\s+)?\w+)\s+{re.escape(fname)}\s*:\s*(\d+)\s*;", text)
+            m = re.search(rf"(?m)^\s*(?:/\*[^\n]*?\*/\s*)?((?:unsigned\s+|signed\s+)?\w+)\s+{re.escape(fname)}\s*:\s*(\d+)\s*;", text)
             return (m[1], int(m[2])) if m else None
 
         # runs of consecutive bitfields as the emitted text declares them, at the PS1 offsets of the ledger layout
@@ -1395,7 +1399,7 @@ class Copier:
             for fname, t in zip(names, types):
                 unsigned = t.startswith(("u_", "unsigned"))
                 unit = {1: ("u_char", "char"), 2: ("u_short", "short"), 4: ("u_int", "int")}[nbytes][0 if unsigned else 1]
-                text = re.sub(rf"(?m)^(\s*)(?:unsigned\s+|signed\s+)?\w+(\s+{re.escape(fname)}\s*:)", rf"\g<1>{unit}\2",
+                text = re.sub(rf"(?m)^(\s*(?:/\*[^\n]*?\*/\s*)?)(?:unsigned\s+|signed\s+)?\w+(\s+{re.escape(fname)}\s*:)", rf"\g<1>{unit}\2",
                               text, count=1)
             self.report["bitfield-run-unit"].append(f"{tid} bit {start}: {nbytes} byte unit")
         return text
@@ -1417,7 +1421,12 @@ class Copier:
                      for d in self.by_target.get(t, []) if d["kind"] == "type" and d["def"]]
             bodies = [d for d in cands if d["ckind"] in ("STRUCT_DECL", "UNION_DECL", "ENUM_DECL")]
             if tid in merged or (not bodies and r["kind"] in ("struct", "union") and not self.inline_type(r)):
-                text = self.generated_type(r, name) + self.size_assert(tid, name)
+                text = self.generated_type(r, name)
+                if nv.pointer_slots(tid):
+                    text = nv.rebase(tid, text, [(m["final_name"], f) for m, f in
+                                     zip(self._gen.members[tid], self._gen.layout(tid)["fields"])])
+                    text = self.bitfield_units(tid, text)
+                text += self.size_assert(tid, name)
                 need = sorted({self._tid_by_name[n] for f in self._gen.layout(tid)["fields"]
                                if "*" not in f["type"] for n in IDENT.findall(f["type"]) if n in self._tid_by_name})
                 self.struct_names.add(name)
@@ -1449,6 +1458,9 @@ class Copier:
                 text = text.replace(old, new)
             if r["kind"] in ("struct", "union"):
                 text = self.bitfield_units(tid, text)
+                if nv.pointer_slots(tid):
+                    text = nv.rebase(tid, text, [(m["final_name"], f) for m, f in
+                                     zip(self._gen.members[tid], self._gen.layout(tid)["fields"])])
                 # size_t was 32 bits on the PS1; a member of a layout keeps that width (SYSTEM.DAT header offsets)
                 text, n = re.subn(r"(?m)^(\s*)size_t(\s+\w+\s*(?:\[[^\]]*\]\s*)*;)", r"\1u_int\2", text)
                 if n:
@@ -1838,11 +1850,12 @@ class Copier:
         (address -> native function or global) from the decomp's splat symbol listing."""
         tables, modules = [], set()
         for r, name, count in self.module_pointers:
-            if int(r["size"] or 0) != count * 4:
-                self.report["module-pointers-size"].append(f"{r['id']} {r['final_name']} ({r['size']} != {count}*4)")
+            if int(r["size"] or 0) < count * 4:
+                self.report["module-pointers-size"].append(f"{r['id']} {r['final_name']} ({r['size']} < {count}*4)")
                 continue
             module, offset = self.module_data_source(r, pointers=True)
-            tables.append(f'    {{"{module}", 0x{offset:X}, {count}u, (void**){name}}}, // {r["id"]} {r["name"]}')
+            tables.append(f'    {{"{module}", 0x{offset:X}, {count}u, (void**){name}, '
+                          f'sizeof {name} / sizeof {name}[0]}}, // {r["id"]} {r["name"]}')
             modules.add(module)
         if modules:
             modules.add("SLUS_010.40")  # the resident module, reachable from every overlay
@@ -1851,6 +1864,9 @@ class Copier:
         fn_by_key = {(r["overlay"], r["name"]): r for r in self.cat_by_id.values()}
         fn_overlay = lambda m: m.split("/")[-1]  # noqa: E731  (catalog: "BATTLE.PRG"; ledger/splat: "BATTLE/BATTLE.PRG")
         data_by_key = {(r["overlay"], r["name"]): r for r in self.data}
+        pointer_arrays = {name: count for _, name, count in self.module_pointers}
+        incomplete_arrays = {item.name for output in self.files.values() for item in output.items
+                     if item.kind == "extern" and re.search(r"\[\s*\]", item.text)}
         symbols = []
         for module in sorted(modules):
             path = self.SPLAT_ARTIFACTS / module / "splat_symbols.csv"
@@ -1872,6 +1888,7 @@ class Copier:
                         if r is None or c_name(r["final_name"]) not in emitted_fns:
                             continue
                         cname, size = c_name(r["final_name"]), 0
+                        layout = "0u, 0u, 0u"
                     else:
                         r = data_by_key.get((module, s["name"]))
                         if r is None or r["id"] not in self.emitted or r["id"] == SCRATCH_GLOBAL or \
@@ -1879,12 +1896,32 @@ class Copier:
                             continue
                         cname = c_name(r["final_name"])
                         size = max(int(s["size"] or 0), int(r["size"] or 0))  # splat often reports a default 4
+                        tid = self.canon_type(r["type_id"]) if r["type_id"] else ""
+                        if cname in incomplete_arrays:
+                            layout = "0u, 0u, 0u"
+                        elif cname in pointer_arrays:
+                            size = pointer_arrays[cname] * 4
+                            layout = f"sizeof {cname}, 4u, sizeof {cname}[0]"
+                        elif r["has_pointers"] == "0" and (not tid or not self.type_has_pointer(tid)):
+                            layout = f"sizeof {cname}, 1u, 1u"
+                        else:
+                            layout = f"sizeof {cname}, 0u, 0u"
                     if cname not in self.provider:
                         continue
                     seen.add(s["name"])
-                    symbols.append(f'    {{"{module}", 0x{addr:08X}u, {size}u, (void*)&{cname}}},')
+                    symbols.append(f'    {{"{module}", 0x{addr:08X}u, {size}u, (void*)&{cname}, {layout}}},')
+        for module, address, fid in cf.MODULE_FUNCTION_ENTRIES:
+            name = c_name(self.cat_by_id[fid]["final_name"])
+            if name not in emitted_fns or name not in self.provider:
+                raise ValueError(f"Missing reviewed module entry {fid}: {name}")
+            symbols.append(f'    {{"{module}", 0x{address:08X}u, 0u, (void*)&{name}, 0u, 0u, 0u}},')
+        declarations = []
+        for module, _, address, size, name, _ in cf.MODULE_DATA_BLOBS:
+            declarations.append(f"extern unsigned int {name}[{size // 4}];")
+            symbols.append(f'    {{"{module}", 0x{address:08X}u, {size}u, (void*){name}, '
+                   f'sizeof {name}, 1u, 1u}},')
         text = ("// Pointer tables in the module images and the symbol map that relocates them (splat_symbols.csv).\n"
-                '#include "Content/ModuleData.h"\n\n'
+            '#include "Content/ModuleData.h"\n\n' + "\n".join(declarations) + "\n\n"
                 "const Content_ModuleSymbol Content_moduleSymbols[] = {\n" + "\n".join(symbols) + "\n};\n"
                 "const unsigned Content_moduleSymbolCount = sizeof Content_moduleSymbols / sizeof Content_moduleSymbols[0];\n\n"
                 "const Content_ModulePointerTable Content_modulePointers[] = {\n" + "\n".join(tables) + "\n};\n"
@@ -1904,9 +1941,14 @@ class Copier:
                 self.report["module-data-unsized"].append(f"{r['id']} {r['final_name']}")
                 continue
             size = f"sizeof {name}" if bytes_ is None else f"{bytes_}u"
-            rows.append(f'    {{"{module}", 0x{offset:X}, {size}, &{name}}}, // {r["id"]} {r["name"]}')
+            rows.append(f'    {{"{module}", 0x{offset:X}, {size}, &{name}, sizeof {name}}}, // {r["id"]} {r["name"]}')
+        definitions = []
+        for module, offset, _, size, name, evidence in cf.MODULE_DATA_BLOBS:
+            assert size % 4 == 0
+            definitions.append(f"// decomp: {module} {evidence}\nunsigned int {name}[{size // 4}];")
+            rows.append(f'    {{"{module}", 0x{offset:X}, {size}u, {name}, sizeof {name}}},')
         text = ("// Globals whose contents are in the module images (DATA_LEDGER segment data/rodata/asset, no pointers).\n"
-                '#include "Content/ModuleData.h"\n\n'
+            '#include "Content/ModuleData.h"\n\n' + "\n".join(definitions) + "\n\n"
                 "const Content_ModuleDataEntry Content_moduleData[] = {\n" + "\n".join(rows) + "\n};\n"
                 "const unsigned Content_moduleDataCount = sizeof Content_moduleData / sizeof Content_moduleData[0];\n")
         self.out(self.MODULE_DATA).items.append(Item("var", text, "Content_moduleData", "", [], (0,)))

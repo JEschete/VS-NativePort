@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Actors/Skeleton.h"
-#include "Core/Math/FixedPoint.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Matrix.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Random.h"

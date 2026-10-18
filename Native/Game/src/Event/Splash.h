@@ -18,9 +18,15 @@ typedef struct Event_SplashLayerView {
     short offsetX;
     short offsetY;
     short scaleFixed12;
-    int loaderAndImageData[0xFA];
+    union {
+        struct {
+            void* nativePointer10;
+            void* nativePointer14;
+            int reservedLoaderData[0xF8];
+        };
+        int loaderAndImageData[0xF8 + 2 * sizeof(void*) / sizeof(int)];
+    };
 } Event_SplashLayerView;
-_Static_assert(sizeof(Event_SplashLayerView) == 0x3F8, "Event_SplashLayerView must keep its PS1 layout");
 
 // decomp: D_800F4B30_t (src/BATTLE/BATTLE.PRG/4A0A8.c:156)
 typedef struct Event_SplashTween {

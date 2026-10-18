@@ -783,6 +783,8 @@ int Actors_QueueScriptedActorSpawn(u_int arg0, int arg1, Field_ActorPlacement* a
     Battle_Actor** temp_s1;
     int s0;
 
+    Core_Debugf("actors", "script spawn actor=%u model=%d existing=%p", arg0, arg1,
+        arg0 < 16 ? (void*)Battle_actors[arg0] : NULL);
     if (arg0 < 16) {
         if (Battle_actors[arg0] == NULL) {
             temp_s1 = &Battle_actors[arg0];

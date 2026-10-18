@@ -26,7 +26,7 @@
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/WordCopy.h"
 #include "Field/Camera.h"

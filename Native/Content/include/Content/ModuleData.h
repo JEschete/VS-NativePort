@@ -13,6 +13,7 @@ typedef struct Content_ModuleDataEntry {
     unsigned offset;      // byte offset in that file
     unsigned size;        // bytes to copy (sizeof the native global)
     void* target;
+    unsigned capacity;
 } Content_ModuleDataEntry;
 
 extern const Content_ModuleDataEntry Content_moduleData[];
@@ -26,6 +27,9 @@ typedef struct Content_ModuleSymbol {
     unsigned address;     // PS1 address
     unsigned size;        // bytes (data); 0 for a function
     void* target;         // the native function or global
+    unsigned nativeSize;
+    unsigned sourceElementSize;
+    unsigned nativeElementSize;
 } Content_ModuleSymbol;
 
 typedef struct Content_ModulePointerTable {
@@ -33,6 +37,7 @@ typedef struct Content_ModulePointerTable {
     unsigned offset;      // byte offset of the table in the module file
     unsigned count;       // pointers
     void** target;        // the native array
+    unsigned capacity;
 } Content_ModulePointerTable;
 
 extern const Content_ModuleSymbol Content_moduleSymbols[];
@@ -41,5 +46,15 @@ extern const Content_ModulePointerTable Content_modulePointers[];
 extern const unsigned Content_modulePointerCount;
 
 #ifdef __cplusplus
+}
+
+#include <span>
+#include <string_view>
+
+namespace VS::Content {
+bool CopyModuleDataEntry(const Content_ModuleDataEntry& entry, std::span<const unsigned char> image);
+void* ResolveModuleAddress(std::span<const Content_ModuleSymbol> symbols, std::string_view module, unsigned address);
+bool RelocateModulePointerTable(const Content_ModulePointerTable& table, std::span<const unsigned char> image,
+                               std::span<const Content_ModuleSymbol> symbols);
 }
 #endif

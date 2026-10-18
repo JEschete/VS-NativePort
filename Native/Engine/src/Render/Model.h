@@ -19,9 +19,6 @@
 #include "Render/Palette.h"
 
 void Render_PrepareActorCameraMatrices(MATRIX* source);
-int Render_ProjectModelVertices(void*, MATRIX*, int, void*);
-void Render_DrawModelFlatPolygons(Actors_ModelRenderContext*, Actors_WeaponModel*, CVECTOR*, void*);
-void Render_DrawModelGouraudPolygons(Actors_ModelRenderContext*, Field_GimmickInstance*, int*, void*);
 int Render_DrawActorGroundShadow();
 void Render_DrawModelFlatPolygonsWithOverrides(Actors_ModelRenderContext*, Actors_WeaponModel*, CVECTOR*, void*);
 void Render_DrawModelGouraudPolygonsWithOverrides(Actors_ModelRenderContext*, Field_GimmickInstance*, int*, void*);

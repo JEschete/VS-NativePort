@@ -6,10 +6,28 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AiLayoutTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ContentTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\CoreTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EffectTimelineTests.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EventScriptTestCases.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EventScriptTests.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GimRenderTestCases.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GimRenderTests.c">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\InputTests.cpp">
@@ -21,7 +39,19 @@
     <ClCompile Include="src\LegacyGpuTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\LogTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MemoryTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SequenceTestCases.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SequenceTests.c">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

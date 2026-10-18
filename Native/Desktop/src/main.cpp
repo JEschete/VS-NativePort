@@ -16,7 +16,10 @@
 
 #include <algorithm>
 #include <charconv>
+#include <cstdio>
+#include <exception>
 #include <filesystem>
+#include <fstream>
 #include <optional>
 #include <set>
 #include <string>
@@ -26,6 +29,37 @@ namespace fs = std::filesystem;
 using namespace VS;
 
 namespace {
+
+bool ConfigureLogging(int argc, char** argv)
+{
+    for (int i = 1; i < argc; ++i) {
+        const std::string_view option = argv[i];
+        if (option != "--log-level" && option != "--log-channels") {
+            continue;
+        }
+        if (i + 1 == argc || std::string_view(argv[i + 1]).starts_with("--")) {
+            std::fprintf(stderr, "%s requires a value\n", argv[i]);
+            return false;
+        }
+        const std::string_view value = argv[++i];
+        if (option == "--log-level") {
+            const auto level = Core::ParseLogLevel(value);
+            if (!level) {
+                std::fprintf(stderr, "--log-level expects trace, debug, info, warn, error, or off\n");
+                return false;
+            }
+            Core::SetLogLevel(*level);
+        } else if (!Core::SetLogChannels(value)) {
+            std::fprintf(stderr, "--log-channels expects comma-separated names (no spaces), or *\n");
+            return false;
+        }
+    }
+    if (!Core::SetLogFile((Platform::ExecutableDir() / "vs-native.log").string().c_str())) {
+        std::fprintf(stderr, "cannot open vs-native.log\n");
+        return false;
+    }
+    return true;
+}
 
 std::optional<std::string> Option(int argc, char** argv, std::string_view name)
 {
@@ -83,6 +117,7 @@ std::optional<fs::path> LocateData(int argc, char** argv)
 struct Capture {
     fs::path dir;
     std::set<u64> ticks;
+    bool pages = false;
 
     void Write(u64 tick, const std::vector<u32>& rgba, i32 w, i32 h) const
     {
@@ -98,12 +133,36 @@ struct Capture {
             VS_LOG_INFO("capture", "{} ({}x{})", file.string(), w, h);
         }
         SDL_DestroySurface(s);
+        if (pages) {
+            const auto source = Render::GamePages().Pixels();
+            std::ofstream raw(dir / ("pages_" + std::to_string(tick) + ".bin"), std::ios::binary);
+            raw.write(reinterpret_cast<const char*>(source.data()), static_cast<std::streamsize>(source.size_bytes()));
+            if (!raw) VS_LOG_ERROR("capture", "Failed to write raw pages at tick {}", tick);
+            std::vector<u32> colors(source.size());
+            for (usize index = 0; index < source.size(); ++index) {
+                const u32 pixel = source[index];
+                const u32 red = (pixel & 31) * 255 / 31;
+                const u32 green = ((pixel >> 5) & 31) * 255 / 31;
+                const u32 blue = ((pixel >> 10) & 31) * 255 / 31;
+                colors[index] = 0xFF000000u | red | (green << 8) | (blue << 16);
+            }
+            SDL_Surface* surface = SDL_CreateSurfaceFrom(Render::PageSpace::Width, Render::PageSpace::Height,
+                SDL_PIXELFORMAT_ABGR8888, colors.data(), Render::PageSpace::Width * 4);
+            const fs::path output = dir / ("pages_" + std::to_string(tick) + ".bmp");
+            if (surface == nullptr || !SDL_SaveBMP(surface, output.string().c_str())) {
+                VS_LOG_ERROR("capture", "{}: {}", output.string(), SDL_GetError());
+            }
+            SDL_DestroySurface(surface);
+        }
     }
 };
 
 Capture ParseCapture(int argc, char** argv)
 {
     Capture c;
+    c.pages = std::any_of(argv + 1, argv + argc, [](const char* argument) {
+        return std::string_view(argument) == "--capture-pages";
+    });
     if (auto dir = Option(argc, argv, "--capture")) {
         c.dir = *dir;
         const std::string at = Option(argc, argv, "--at").value_or("");
@@ -161,8 +220,11 @@ InputScript ParseInputScript(int argc, char** argv)
 } // namespace
 
 int main(int argc, char** argv)
+try
 {
-    Core::SetLogFile((Platform::ExecutableDir() / "vs-native.log").string().c_str());
+    if (!ConfigureLogging(argc, argv)) {
+        return 1;
+    }
     Platform::InstallCrashHandler();
     // The game reads only the extracted data (plan D20); the disc, if found, is only identified in the log.
     std::unique_ptr<Content::Disc> disc;
@@ -195,6 +257,7 @@ int main(int argc, char** argv)
     }
     const Capture capture = ParseCapture(argc, argv);
     const InputScript script = ParseInputScript(argc, argv);
+    VS_LOG_INFO("boot", "run: tick limit={}, speed={}, scripted presses={}", maxTicks, speed, script.presses.size());
 
     Platform::App app;
     if (auto r = app.Init({}); !r) {
@@ -219,6 +282,7 @@ int main(int argc, char** argv)
         }
     }
     Game::GameApp game({disc.get()});
+    Platform::ProgressWatchdog watchdog(maxTicks != 0);
     Core::FrameClock clock;
     double last = app.NowSeconds();
     std::vector<u32> frame;
@@ -229,7 +293,10 @@ int main(int argc, char** argv)
         const u32 ticks = clock.Advance(now - last) * speed;
         last = now;
         bool shown = false;
-        for (u32 i = 0; i < ticks; ++i) {
+        for (u32 i = 0; i < ticks && (maxTicks == 0 || game.Ticks() < maxTicks); ++i) {
+            watchdog.Pulse(game.Ticks() + 1);
+            Core::SetLogTick(game.Ticks() + 1);
+            VS_LOG_TRACE("frame", "begin tick");
             input.Inject(script.MaskAt(game.Ticks() + 1));
             const auto& pad = input.Update();
             if (pad.pressed) {
@@ -237,6 +304,7 @@ int main(int argc, char** argv)
             }
             game.Tick(pad, true);
             shown = Render::GamePages().Present(frame, frameW, frameH);
+            VS_LOG_TRACE("frame", "end tick; presented={}, image={}x{}", shown, frameW, frameH);
             if (shown) {
                 capture.Write(game.Ticks(), frame, frameW, frameH);
             }
@@ -256,4 +324,9 @@ int main(int argc, char** argv)
     }
     Movie_PlayerClose();  // its soundtrack source must go before the audio device and SDL
     return 0;
+}
+catch (const std::exception& error)
+{
+    VS_LOG_ERROR("boot", "{}", error.what());
+    return 1;
 }

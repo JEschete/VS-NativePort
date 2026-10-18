@@ -295,10 +295,16 @@ void Render_DrawGimTiles(Render_GimLayer* image, int clut, u_long* ot)
     int columns = image->columns;
     int rows = image->rows;
     int color;
-    short* columnX = (short*)(0x1F800400 - (columns + 1) * 2);
-    short* rowY = columnX - (rows + 1);
+    // Byte-sized dimensions need at most 256 boundary coordinates per axis.
+    short columnX[256];
+    short rowY[256];
     int i;
     int j = image->offsetX + 160;
+
+    if (columns * rows > (int)(sizeof image->tileTable / sizeof image->tileTable[0]) - 4) {
+        Core_Debugf("render", "GIM grid %dx%d exceeds tile table capacity", columns, rows);
+        return;
+    }
 
     for (i = 0; i <= columns; ++i) {
         columnX[i] = (((i * 2 - columns) * scale) >> 7) + j;
@@ -407,7 +413,7 @@ void Render_DrawGimTiles(Render_GimLayer* image, int clut, u_long* ot)
                     prim[8] = u | (v + 0xF00);
                     prim[9] = right | (bottom << 16);
                     prim[10] = u1 | (v + 0xF00);
-                    *ot = ((u_long)prim << 8) >> 8;
+                    *ot = LegacyGpu_Handle(prim);
                     Render_frameScratch.primitiveCursor = prim + 11;
                 }
 
