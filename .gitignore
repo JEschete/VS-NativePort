@@ -49,3 +49,4 @@ venv/
 /Native/data/
 /mods/
 vs-native.log
+/.github/copilot-instructions.md
