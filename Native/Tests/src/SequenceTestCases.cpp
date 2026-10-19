@@ -1,3 +1,8 @@
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/SequencePlayback.h"
@@ -173,6 +178,26 @@ TEST_CASE("Animation track rotation wrapping and packed deltas match SEQ rules",
     CHECK(value.vx == 68);
     CHECK(value.vy == -34);
     CHECK(delta.pad == 34);
+  }
+  SECTION("halfword-aligned vector is sufficient") {
+    alignas(std::int32_t)
+        std::array<std::byte, sizeof(SVECTOR) + sizeof(std::int32_t)>
+            storage{};
+    auto* value = std::construct_at(
+        reinterpret_cast<SVECTOR*>(storage.data() + sizeof(std::int16_t)),
+        SVECTOR{8191, 0, 8191, 0});
+    REQUIRE(reinterpret_cast<std::uintptr_t>(value) % alignof(std::int32_t) !=
+            0);
+    const unsigned char data[] = {0xE0, 1, 255, 1, 0};
+    Actors_AnimationTrackContext context{data, 1, 1};
+    SVECTOR delta{};
+    Actors_DecodeAnimationTrack(&context, 0, value, &delta, 1);
+    CHECK(value->vx == 0);
+    CHECK(value->vy == 8191);
+    CHECK(value->vz == 0);
+    CHECK(value->pad == 4);
+    CHECK(delta.pad == 1);
+    std::destroy_at(value);
   }
 }
 

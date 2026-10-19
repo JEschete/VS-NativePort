@@ -56,6 +56,7 @@ static int16_t SignedTrackWord(const u_char* data) {
 // PS1 scratchpad's end.
 void Actors_AdvanceSkeletalAnimation(Actors_ActorRecord* actor,
                                      Actors_AnimationPose* state, int mode) {
+  enum { kRootScaleTrackIndex = 4 };
   u_short* header;
   Actors_AnimationTrackContext context;
   Actors_ShadowBlend* shadow;
@@ -140,7 +141,7 @@ update_bones:
         context.firstFrame = frame_or_offset;
         context.lastFrame = last_frame;
         context.data = VS_ONDISC(bank, animationData, const u_char*);
-        root_track = header[4];
+        root_track = header[kRootScaleTrackIndex];
         if (root_track != 0) {
           Actors_DecodeAnimationTrack(&context, root_track,
                                       &state->scaleKeys[41],
@@ -181,115 +182,98 @@ update_bones:
   }
 }
 
+static const u_char* DecodeTrackCommand(const u_char* data, int* next_frame,
+                                        SVECTOR* delta) {
+  enum {
+    kByteDeltaX = 0x80,
+    kByteDeltaY = 0x40,
+    kByteDeltaZ = 0x20,
+    kByteDeltaAxes = kByteDeltaX | kByteDeltaY | kByteDeltaZ,
+    kLongRunMask = 0x1F,
+    kShortRunMask = 3,
+    kPackedAxisBits = 3,
+    kPackedX = 4,
+    kPackedY = 2,
+    kPackedZ = 1
+  };
+  int flags = *data;
+  if (flags == 0) return NULL;
+  const int frame_mask =
+      (flags & kByteDeltaAxes) != 0 ? kLongRunMask : kShortRunMask;
+  const int run = flags & frame_mask;
+  *next_frame += run + 1;
+  if (run == frame_mask) {
+    *next_frame += data[1];
+    data += 2;
+  } else {
+    ++data;
+  }
+  if ((flags & kByteDeltaAxes) == 0) {
+    flags <<= kPackedAxisBits;
+    const int packed = SignedTrackWord(data);
+    data += sizeof(int16_t);
+    int value = packed >> kPackedAxisBits;
+    if (packed & kPackedX) {
+      delta->vx = Core_Math_WrapSigned16((uint32_t)value);
+      flags &= kByteDeltaY | kByteDeltaZ;
+      if (packed & (kPackedY | kPackedZ)) {
+        value = SignedTrackWord(data);
+        data += sizeof(int16_t);
+      }
+    }
+    if (packed & kPackedY) {
+      delta->vy = Core_Math_WrapSigned16((uint32_t)value);
+      flags &= kByteDeltaX | kByteDeltaZ;
+      if (packed & kPackedZ) {
+        value = SignedTrackWord(data);
+        data += sizeof(int16_t);
+      }
+    }
+    if (packed & kPackedZ) {
+      delta->vz = Core_Math_WrapSigned16((uint32_t)value);
+      flags &= kByteDeltaX | kByteDeltaY;
+    }
+  }
+  if (flags & kByteDeltaX) delta->vx = SignedTrackByte(*data++);
+  if (flags & kByteDeltaY) delta->vy = SignedTrackByte(*data++);
+  if (flags & kByteDeltaZ) delta->vz = SignedTrackByte(*data++);
+  return data;
+}
+
 // decomp: BATTLE.PRG func_800AFDE8 (src/BATTLE/BATTLE.PRG/44F14.c:1373)
 // The original delta was value + 84 SVECTORs; callers now pass the matching
 // pose array explicitly.
 void Actors_DecodeAnimationTrack(const Actors_AnimationTrackContext* context,
                                  int offset, SVECTOR* value, SVECTOR* delta,
                                  int rotation) {
+  enum { kRotationMask = 0x1FFF };
   const u_char* start = context->data + offset;
   const u_char* data = start + (u_short)value->pad;
   int next_frame = (u_short)delta->pad;
-  int frame;
-
-  for (frame = context->firstFrame; frame <= context->lastFrame; ++frame) {
-    while (1) {
-      int flags;
-      int count;
-
-      if (next_frame >= frame) {
-        addVector(value, delta);
-
-        if (rotation) {
-          *(int*)value &= 0x1FFF1FFF;
-          value->vz &= 0x1FFF;
-        }
-        break;
-      }
-
-      flags = *data;
-
-      if (flags == 0) {
-        return;
-      }
-
-      if (flags & 0xE0) {
-        count = flags & 0x1F;
-
-        if (count == 0x1F) {
-          next_frame += 32;
-          next_frame += data[1];
-          data += 2;
-        } else {
-          next_frame += count + 1;
-          ++data;
-        }
-      } else {
-        int packed;
-
-        count = flags & 3;
-
-        if (count == 3) {
-          next_frame += 4;
-          next_frame += data[1];
-          data += 2;
-        } else {
-          next_frame += count + 1;
-          ++data;
-        }
-
-        flags <<= 3;
-        count = SignedTrackWord(data);
-        data += 2;
-        packed = count;
-        count >>= 3;
-
-        if (packed & 4) {
-          delta->vx = Core_Math_WrapSigned16((uint32_t)count);
-          flags &= 0x60;
-
-          if (packed & 3) {
-            count = SignedTrackWord(data);
-            data += 2;
-          }
-        }
-
-        if (packed & 2) {
-          delta->vy = Core_Math_WrapSigned16((uint32_t)count);
-          flags &= 0xA0;
-
-          if (packed & 1) {
-            count = SignedTrackWord(data);
-            data += 2;
-          }
-        }
-
-        if (packed & 1) {
-          delta->vz = Core_Math_WrapSigned16((uint32_t)count);
-          flags &= 0xC0;
-        }
-      }
-
-      if (flags & 0x80) {
-        delta->vx = SignedTrackByte(*data++);
-      }
-
-      if (flags & 0x40) {
-        delta->vy = SignedTrackByte(*data++);
-      }
-
-      if (flags & 0x20) {
-        delta->vz = SignedTrackByte(*data++);
-      }
+  for (int frame = context->firstFrame; frame <= context->lastFrame; ++frame) {
+    while (next_frame < frame) {
+      data = DecodeTrackCommand(data, &next_frame, delta);
+      if (data == NULL) return;
+    }
+    value->vx =
+        Core_Math_WrapSigned16((uint32_t)value->vx + (uint32_t)delta->vx);
+    value->vy =
+        Core_Math_WrapSigned16((uint32_t)value->vy + (uint32_t)delta->vy);
+    value->vz =
+        Core_Math_WrapSigned16((uint32_t)value->vz + (uint32_t)delta->vz);
+    if (rotation) {
+      value->vx = (int16_t)((uint16_t)value->vx & kRotationMask);
+      value->vy = (int16_t)((uint16_t)value->vy & kRotationMask);
+      value->vz = (int16_t)((uint16_t)value->vz & kRotationMask);
     }
   }
-
-  value->pad = (int16_t)(data - start);
+  value->pad = Core_Math_WrapSigned16((uint32_t)(data - start));
   delta->pad = Core_Math_WrapSigned16((uint32_t)next_frame);
 }
 
 static int16_t BlendComponent(int16_t from, int16_t to, int weight,
                               int rotation) {
+  enum { kFixedFractionBits = 12 };
   int delta = (int)to - from;
   if (rotation) {
     if (delta >= ONE) {
@@ -300,7 +284,8 @@ static int16_t BlendComponent(int16_t from, int16_t to, int weight,
   }
   // GPF loads a signed 16-bit IR component, then shifts its product
   // arithmetically by 12.
-  return (int16_t)(from + (((int)(int16_t)delta * weight) >> 12));
+  return (int16_t)(from +
+                   (((int)(int16_t)delta * weight) >> kFixedFractionBits));
 }
 
 static void BlendVector(SVECTOR* dst, const SVECTOR* src, int weight,
