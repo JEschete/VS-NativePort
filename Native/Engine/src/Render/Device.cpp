@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL.h>
 
+#include <limits>
 #include <string>
 
 #include "Core/Log.hpp"
@@ -44,15 +45,19 @@ void Device::Shutdown() {
   }
 }
 
+std::optional<u32> Device::FrameByteCount(i32 width, i32 height) {
+  if (width <= 0 || height <= 0) return std::nullopt;
+  const u64 bytes =
+      static_cast<u64>(width) * static_cast<u64>(height) * sizeof(u32);
+  if (bytes > std::numeric_limits<u32>::max()) return std::nullopt;
+  return static_cast<u32>(bytes);
+}
+
 bool Device::EnsureFrameTexture(i32 width, i32 height) {
-  if (m_frame_ && m_frame_w_ == width && m_frame_h_ == height) {
+  const auto bytes = FrameByteCount(width, height);
+  if (!bytes || !m_device_) return false;
+  if (m_frame_ && m_upload_ && m_frame_w_ == width && m_frame_h_ == height) {
     return true;
-  }
-  if (m_frame_) {
-    SDL_ReleaseGPUTexture(m_device_, m_frame_);
-    SDL_ReleaseGPUTransferBuffer(m_device_, m_upload_);
-    m_frame_ = nullptr;
-    m_upload_ = nullptr;
   }
   SDL_GPUTextureCreateInfo ti{};
   ti.type = SDL_GPU_TEXTURETYPE_2D;
@@ -62,16 +67,26 @@ bool Device::EnsureFrameTexture(i32 width, i32 height) {
   ti.height = static_cast<Uint32>(height);
   ti.layer_count_or_depth = 1;
   ti.num_levels = 1;
-  m_frame_ = SDL_CreateGPUTexture(m_device_, &ti);
-  SDL_GPUTransferBufferCreateInfo bi{};
-  bi.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-  bi.size = static_cast<Uint32>(width * height * 4);
-  m_upload_ = SDL_CreateGPUTransferBuffer(m_device_, &bi);
-  if (!m_frame_ || !m_upload_) {
+  SDL_GPUTexture* frame = SDL_CreateGPUTexture(m_device_, &ti);
+  if (!frame) {
     VS_LOG_ERROR("render", "frame texture {}x{}: {}", width, height,
                  SDL_GetError());
     return false;
   }
+  SDL_GPUTransferBufferCreateInfo bi{};
+  bi.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+  bi.size = *bytes;
+  SDL_GPUTransferBuffer* upload = SDL_CreateGPUTransferBuffer(m_device_, &bi);
+  if (!upload) {
+    SDL_ReleaseGPUTexture(m_device_, frame);
+    VS_LOG_ERROR("render", "frame upload {}x{}: {}", width, height,
+                 SDL_GetError());
+    return false;
+  }
+  if (m_frame_) SDL_ReleaseGPUTexture(m_device_, m_frame_);
+  if (m_upload_) SDL_ReleaseGPUTransferBuffer(m_device_, m_upload_);
+  m_frame_ = frame;
+  m_upload_ = upload;
   m_frame_w_ = width;
   m_frame_h_ = height;
   return true;
@@ -79,14 +94,15 @@ bool Device::EnsureFrameTexture(i32 width, i32 height) {
 
 bool Device::PresentImage(const u32* rgba, i32 width, i32 height,
                           float aspect) {
-  if (!EnsureFrameTexture(width, height)) {
+  const auto bytes = FrameByteCount(width, height);
+  if (rgba == nullptr || !bytes || !EnsureFrameTexture(width, height)) {
     return false;
   }
   void* map = SDL_MapGPUTransferBuffer(m_device_, m_upload_, true);
   if (!map) {
     return false;
   }
-  SDL_memcpy(map, rgba, static_cast<size_t>(width) * height * 4);
+  SDL_memcpy(map, rgba, *bytes);
   SDL_UnmapGPUTransferBuffer(m_device_, m_upload_);
 
   SDL_GPUCommandBuffer* cmd = SDL_AcquireGPUCommandBuffer(m_device_);

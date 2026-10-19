@@ -1,6 +1,7 @@
 #pragma once
 
 #include <expected>
+#include <optional>
 #include <string>
 
 #include "Core/Types.hpp"
@@ -25,6 +26,7 @@ struct ClearColor {
 // 1b.
 class Device {
  public:
+  static constexpr float kDefaultDisplayAspect = 4.0f / 3.0f;
   Device() = default;
   ~Device();
   Device(const Device&) = delete;
@@ -40,7 +42,9 @@ class Device {
   // Shows an RGBA8 image (0xAABBGGRR) letterboxed at the given display aspect
   // (4:3 for the PS1 TV picture).
   bool PresentImage(const u32* rgba, i32 width, i32 height,
-                    float aspect = 4.0f / 3.0f);
+                    float aspect = kDefaultDisplayAspect);
+
+  static std::optional<u32> FrameByteCount(i32 width, i32 height);
 
   const char* BackendName() const;
 

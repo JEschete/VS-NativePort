@@ -1,10 +1,12 @@
 #include <array>
 #include <cstring>
+#include <limits>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "Legacy/Render/LibGpu.h"
+#include "Render/Device.hpp"
 #include "Render/PageSpace.hpp"
 #include "Render/RoomDraw.h"
 
@@ -329,4 +331,23 @@ TEST_CASE("Sky background emits visible colored triangles behind room geometry",
   *frame = saved;
   Render_legacyPrimitiveBuffers[0] = savedBuffer;
   Render_frameBuf = savedIndex;
+}
+
+TEST_CASE("GPU frame byte counts reject invalid and overflowing dimensions",
+          "[render][upload]") {
+  using VS::Render::Device;
+  CHECK(Device::FrameByteCount(320, 240) == sizeof(VS::u32) * 320u * 240u);
+  CHECK_FALSE(Device::FrameByteCount(0, 240).has_value());
+  CHECK_FALSE(Device::FrameByteCount(-1, 1).has_value());
+  CHECK_FALSE(Device::FrameByteCount(1, -1).has_value());
+  CHECK_FALSE(Device::FrameByteCount(32768, 32768).has_value());
+  CHECK_FALSE(Device::FrameByteCount(std::numeric_limits<VS::i32>::max(), 1)
+                  .has_value());
+  CHECK(Device::FrameByteCount(
+            static_cast<VS::i32>(UINT32_MAX / sizeof(VS::u32)), 1) ==
+        UINT32_MAX - (sizeof(VS::u32) - 1));
+  Device device;
+  const VS::u32 pixel = 0;
+  CHECK_FALSE(device.PresentImage(&pixel, 32768, 32768));
+  CHECK_FALSE(device.PresentImage(nullptr, 1, 1));
 }
