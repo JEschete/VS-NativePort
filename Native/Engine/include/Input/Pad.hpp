@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <limits>
 #include <string>
 #include <string_view>
 
@@ -35,8 +36,9 @@ enum Button : u32 {
 };
 
 struct Sticks {
-  u8 lx = 128, ly = 128, rx = 128,
-     ry = 128;  // 0..255, 128 = centre (original convention)
+  static constexpr u8 kCenter = 128;
+  u8 lx = kCenter, ly = kCenter, rx = kCenter,
+     ry = kCenter;  // 0..255, 128 = centre (original convention)
 };
 
 struct PadState {
@@ -87,7 +89,7 @@ class InputSystem {
 
   SDL_Gamepad* m_pad_ = nullptr;
   PadState m_state_;
-  std::array<u32, 32> m_held_ticks_{};
+  std::array<u32, std::numeric_limits<u32>::digits> m_held_ticks_{};
   u32 m_injected_ = 0;
   bool m_devices_ = true;
 };

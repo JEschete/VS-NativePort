@@ -12,6 +12,8 @@
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
 
+enum { kInactiveXaMarker = 128 };
+
 // decomp: SLUS_010.40 _diskInitRead (src/SLUS_010.40/main.c:9140)
 int Content_BeginDiscRead(int sector, u_int bytes, void* vram) {
   enum { kDataSectorBytes = 2048 };
@@ -62,8 +64,8 @@ void Content_UpdateDiscCommands(void) {
       Content_discDriveState.state = Content_DiscDriveState_Idle;
       break;
     case Content_DiscDriveState_StreamXaEnd:
-      Content_discDriveState.xaModeMarker = 128;
-      Content_discDriveState.position.minute = 128;
+      Content_discDriveState.xaModeMarker = kInactiveXaMarker;
+      Content_discDriveState.position.minute = kInactiveXaMarker;
       Content_discDriveState.state = Content_DiscDriveState_Idle;
       break;
     default:
@@ -74,8 +76,8 @@ void Content_UpdateDiscCommands(void) {
 // decomp: SLUS_010.40 _diskReset (src/SLUS_010.40/main.c:9385)
 void Content_ResetDiscDrive(void) {
   enum { kModeChangeTicks = 3 };
-  Content_discDriveState.xaModeMarker = 128;
-  Content_discDriveState.position.minute = 128;
+  Content_discDriveState.xaModeMarker = kInactiveXaMarker;
+  Content_discDriveState.position.minute = kInactiveXaMarker;
   Content_discDriveState.reserved2 = 0;
   Content_discDriveState.state = Content_DiscDriveState_Idle;
   Content_discDriveState.bufferMode = Content_DiscBufferMode_Direct;

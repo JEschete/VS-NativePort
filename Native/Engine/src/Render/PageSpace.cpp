@@ -164,8 +164,8 @@ usize PageSpace::Execute(std::span<const u32> w) {
       v[k] = vertexAt(w[i++], col);
       if (p.textured) {
         const u32 uv = w[i++];
-        v[k].u = uv & 0xFF;
-        v[k].v = (uv >> 8) & 0xFF;
+        v[k].u = static_cast<i32>(uv & 0xFF);
+        v[k].v = static_cast<i32>((uv >> 8) & 0xFF);
         if (k == 0) {
           p.clut = static_cast<u16>(uv >> 16);
         } else if (k == 1) {
@@ -229,8 +229,8 @@ usize PageSpace::Execute(std::span<const u32> w) {
     i32 u = 0, v = 0;
     if (p.textured) {
       const u32 uv = w[i++];
-      u = uv & 0xFF;
-      v = (uv >> 8) & 0xFF;
+      u = static_cast<i32>(uv & 0xFF);
+      v = static_cast<i32>((uv >> 8) & 0xFF);
       p.clut = static_cast<u16>(uv >> 16);
     }
     i32 rw = 1, rh = 1;
@@ -270,10 +270,12 @@ usize PageSpace::Execute(std::span<const u32> w) {
       SetTextureWindow(w[0]);
       return 1;
     case 0xE3:
-      m_areaX1 = w[0] & 0x3FF, m_areaY1 = (w[0] >> 10) & 0x1FF;
+      m_areaX1 = static_cast<i32>(w[0] & 0x3FF);
+      m_areaY1 = static_cast<i32>((w[0] >> 10) & 0x1FF);
       return 1;
     case 0xE4:
-      m_areaX2 = w[0] & 0x3FF, m_areaY2 = (w[0] >> 10) & 0x1FF;
+      m_areaX2 = static_cast<i32>(w[0] & 0x3FF);
+      m_areaY2 = static_cast<i32>((w[0] >> 10) & 0x1FF);
       return 1;
     case 0xE5:
       m_offX = Sext11(w[0]), m_offY = Sext11(w[0] >> 11);
@@ -283,9 +285,8 @@ usize PageSpace::Execute(std::span<const u32> w) {
       return 1;
     case 0x00:
     case 0x01:
-      return 1;  // no-op, cache clear
     default:
-      return 1;
+      return 1;  // no-op, cache clear, or unsupported command
   }
 }
 
@@ -431,7 +432,9 @@ void PageSpace::Triangle(const Vertex& a, const Vertex& b, const Vertex& c,
 
 void PageSpace::Rectangle(i32 x, i32 y, i32 w, i32 h, i32 u, i32 v, u32 color,
                           const Prim& p) {
-  const i32 r = color & 0xFF, g = (color >> 8) & 0xFF, b = (color >> 16) & 0xFF;
+  const i32 r = static_cast<i32>(color & 0xFF);
+  const i32 g = static_cast<i32>((color >> 8) & 0xFF);
+  const i32 b = static_cast<i32>((color >> 16) & 0xFF);
   const i32 xs = std::max(x, m_areaX1), xe = std::min(x + w - 1, m_areaX2);
   const i32 ys = std::max(y, m_areaY1), ye = std::min(y + h - 1, m_areaY2);
   for (i32 py = ys; py <= ye; ++py) {

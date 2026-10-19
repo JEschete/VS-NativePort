@@ -13,7 +13,9 @@
 enum {
   kTriangleCorners = 3,
   kLightingHeaderWords = 3,
-  kNeutralLight = 0x808080
+  kNeutralLight = 0x808080,
+  kColorChannels = 3,
+  kLightingTriangleBytes = 32
 };
 
 typedef struct LightingTriangle {
@@ -21,7 +23,7 @@ typedef struct LightingTriangle {
   int16_t points[kTriangleCorners][2];
   unsigned colors[kTriangleCorners];
 } LightingTriangle;
-_Static_assert(sizeof(LightingTriangle) == 32,
+_Static_assert(sizeof(LightingTriangle) == kLightingTriangleBytes,
                "room lighting triangle disk layout");
 
 static int64_t TriangleArea(const int16_t first[2], const int16_t second[2],
@@ -73,9 +75,7 @@ void Render_SampleRoomLighting(int packed_position, int layer,
     const int64_t third = area - first - second;
     if (first < 0 || second < 0 || third < 0) continue;
     unsigned char* channels = (unsigned char*)color;
-    for (unsigned channel = 0;
-         channel < sizeof color->red + sizeof color->green + sizeof color->blue;
-         ++channel) {
+    for (unsigned channel = 0; channel < kColorChannels; ++channel) {
       const unsigned shift = channel * CHAR_BIT;
       const int64_t total =
           ((triangle.colors[0] >> shift) & UINT8_MAX) * first +

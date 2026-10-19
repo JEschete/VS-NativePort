@@ -36,7 +36,25 @@ enum {
   kSkyFaceCount = 64,
   kSkyVertexBytes = 12,
   kSkyFaceBytes = 4,
-  kColorMask = 0xFFFFFF
+  kColorMask = 0xFFFFFF,
+  kRoomCommandOffset = 15,
+  kPacketCommandMask = 0xFE,
+  kPacketCommandShift = 3 * CHAR_BIT,
+  kPalettePacketWord = 3,
+  kPagePacketWord = 6,
+  kDefaultNearDepth = 8,
+  kDefaultLodDepth = 512,
+  kSkipViewUpdateFlag = 0x100,
+  kCameraFacingFlag = 0x400,
+  kSkipGeometryFlags = 0x1100,
+  kAlternatePassShift = 15,
+  kProjectedCoordinateBound = 1024,
+  kTriangleSubdivisionCount = 7,
+  kRecursiveSubdivisionCount = 4,
+  kClutRecordOffset = 26,
+  kPageRecordOffset = 30,
+  kSkyGouraudCommand = 0x30000000,
+  kSkyPacketWords = sizeof(POLY_G3) / sizeof(u_long)
 };
 
 int Render_ValidateRoomGeometry(const void* data, size_t size) {
@@ -120,14 +138,14 @@ void Render_UpdateRoomGroupTransforms(void* data) {
       Core_Gte_Cos(Render_frameScratch.camera.angles.vz), scale);
   for (unsigned index = 0; index < count; ++index) {
     Render_RoomGeometryGroup* group = &groups[index];
-    if ((group->flags & 0x100) != 0) {
+    if ((group->flags & kSkipViewUpdateFlag) != 0) {
       continue;
     }
     VECTOR position = {group->bounds[0][0], group->bounds[1][0],
                        group->bounds[2][0], 0};
     VECTOR angles = {group->angles[0], group->angles[1], group->angles[2], 0};
     BuildRoomView(&position, &angles, &group->view, 0);
-    if ((group->flags & 0x400) != 0) {
+    if ((group->flags & kCameraFacingFlag) != 0) {
       memset(group->view.m, 0, sizeof group->view.m);
       group->view.m[0][0] = group->view.m[1][1] = (int16_t)cosine;
       group->view.m[0][1] = (int16_t)-sine;
@@ -157,8 +175,8 @@ typedef struct RoomVertex {
   uint16_t uv;
 } RoomVertex;
 
-static int roomNearDepth = 8;
-static unsigned roomLodDepth = 512;
+static int room_near_depth = kDefaultNearDepth;
+static unsigned room_lod_depth = kDefaultLodDepth;
 
 // decomp: BATTLE.PRG func_80097F70 (src/BATTLE/BATTLE.PRG/2EA3C.s).
 static RoomVertex Midpoint(const RoomVertex* first, const RoomVertex* second) {
@@ -182,12 +200,58 @@ static RoomVertex Midpoint(const RoomVertex* first, const RoomVertex* second) {
   return midpoint;
 }
 
+typedef struct RoomPolygonMaterial {
+  unsigned flags;
+  unsigned command;
+  unsigned clut;
+  unsigned page;
+} RoomPolygonMaterial;
+
+typedef struct ProjectedRoomPolygon {
+  const RoomVertex* vertices;
+  const Core_GteWord* screen;
+  int corners;
+  Core_GteWord depth;
+  RoomPolygonMaterial material;
+  int low_detail;
+} ProjectedRoomPolygon;
+
+static int WriteRoomPolygon(const ProjectedRoomPolygon* polygon,
+                            uintptr_t limit) {
+  enum { kLowDetailUvMask = 0x7F7F };
+  const size_t words = 1 + (size_t)polygon->corners * kVertexPacketWords;
+  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
+  if (cursor > limit || words * sizeof(u_long) > limit - cursor) return -1;
+  u_long* packet = (void*)cursor;
+  memset(packet, 0, words * sizeof *packet);
+  uint16_t page = (uint16_t)polygon->material.page;
+  if (polygon->low_detail) --page;
+  for (int index = 0; index < polygon->corners; ++index) {
+    const unsigned uv =
+        polygon->low_detail
+            ? (polygon->vertices[index].uv >> 1) & kLowDetailUvMask
+            : polygon->vertices[index].uv;
+    const size_t vertex_word = 1 + (size_t)index * kVertexPacketWords;
+    packet[vertex_word] = polygon->vertices[index].color;
+    packet[vertex_word + 1] = (u_long)polygon->screen[index];
+    packet[vertex_word + 2] = uv;
+  }
+  packet[1] |= (polygon->material.command & kPacketCommandMask)
+               << kPacketCommandShift;
+  packet[kPalettePacketWord] |= polygon->material.clut << kPackedCoordinateBits;
+  packet[kPagePacketWord] |= (unsigned)page << kPackedCoordinateBits;
+  setlen(packet, words - 1);
+  AddPrim((u_long*)Render_frameScratch.orderingTable + polygon->depth, packet);
+  Render_frameScratch.primitiveCursor = packet + words;
+  return 1;
+}
+
 static int EmitSubdividedPolygon(const RoomVertex* vertices, int corners,
-                                 unsigned flags, unsigned command,
-                                 unsigned clut, unsigned page,
+                                 const RoomPolygonMaterial* material,
                                  uintptr_t limit) {
   Core_GteWord screen[kQuadCorners], depth = 0;
-  int left = 1024, top = 1024, right = -1024, bottom = -1024;
+  int left = kProjectedCoordinateBound, top = kProjectedCoordinateBound;
+  int right = -kProjectedCoordinateBound, bottom = -kProjectedCoordinateBound;
   for (int index = 0; index < corners; ++index) {
     SVECTOR position = vertices[index].position;
     Core_GteWord fog, projection_flags;
@@ -203,54 +267,44 @@ static int EmitSubdividedPolygon(const RoomVertex* vertices, int corners,
     if (screen_y > bottom) bottom = screen_y;
   }
   if (right < 0 || bottom < 0 || left >= kViewportWidth ||
-      top >= kViewportHeight || depth < roomNearDepth) {
+      top >= kViewportHeight || depth < room_near_depth) {
     return 0;
   }
-  depth += (int16_t)(flags >> kPackedCoordinateBits);
-  if (depth < roomNearDepth || depth >= kLastOrderingSlot) return 0;
-  const size_t bytes =
-      (1 + (size_t)corners * kVertexPacketWords) * sizeof(u_long);
-  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (cursor > limit || bytes > limit - cursor) return -1;
-  u_long* packet = (void*)cursor;
-  memset(packet, 0, bytes);
-  for (int index = 0; index < corners; ++index) {
-    packet[1 + index * 3] = vertices[index].color;
-    packet[2 + index * 3] = (u_long)screen[index];
-    packet[3 + index * 3] = vertices[index].uv;
+  depth += (int16_t)(material->flags >> kPackedCoordinateBits);
+  if (depth < room_near_depth || depth >= kLastOrderingSlot) return 0;
+  ProjectedRoomPolygon polygon = {.vertices = vertices,
+                                  .screen = screen,
+                                  .corners = corners,
+                                  .depth = depth,
+                                  .material = *material,
+                                  .low_detail = 0};
+  if (corners == kTriangleCorners) {
+    polygon.material.command &= ~(unsigned)kQuadCommandFlag;
   }
-  packet[1] |= (command & 0xFE) << 24;
-  packet[3] |= clut << 16;
-  packet[6] |= page << 16;
-  setlen(packet, corners * 3);
-  AddPrim((u_long*)Render_frameScratch.orderingTable + depth, packet);
-  Render_frameScratch.primitiveCursor = (unsigned char*)packet + bytes;
-  return 1;
+  return WriteRoomPolygon(&polygon, limit);
 }
 
 // decomp: BATTLE.PRG func_80097AEC (src/BATTLE/BATTLE.PRG/2EA3C.s:612).
-static int SubdivideRoomTriangle(const RoomVertex vertices[3], int levels,
-                                 unsigned flags, unsigned command,
-                                 unsigned clut, unsigned page,
+static int SubdivideRoomTriangle(const RoomVertex vertices[kTriangleCorners],
+                                 int levels,
+                                 const RoomPolygonMaterial* material,
                                  uintptr_t limit) {
   if (levels == 0) {
-    return EmitSubdividedPolygon(vertices, kTriangleCorners, flags,
-                                 command & ~(unsigned)kQuadCommandFlag, clut,
-                                 page, limit);
+    return EmitSubdividedPolygon(vertices, kTriangleCorners, material, limit);
   }
   const RoomVertex first = Midpoint(&vertices[0], &vertices[1]);
   const RoomVertex second = Midpoint(&vertices[1], &vertices[2]);
   const RoomVertex third = Midpoint(&vertices[2], &vertices[0]);
-  const RoomVertex children[7][3] = {
+  const RoomVertex children[kTriangleSubdivisionCount][kTriangleCorners] = {
       {vertices[0], first, third},       {second, first, vertices[1]},
       {second, vertices[2], third},      {first, second, third},
       {vertices[2], vertices[0], third}, {vertices[2], second, vertices[1]},
       {first, vertices[0], vertices[1]}};
   int emitted = 0;
-  for (unsigned child = 0; child < 7; ++child) {
-    const int result =
-        SubdivideRoomTriangle(children[child], child < 4 ? levels - 1 : 0,
-                              flags, command, clut, page, limit);
+  for (unsigned child = 0; child < kTriangleSubdivisionCount; ++child) {
+    const int result = SubdivideRoomTriangle(
+        children[child], child < kRecursiveSubdivisionCount ? levels - 1 : 0,
+        material, limit);
     if (result < 0) return result;
     emitted += result;
   }
@@ -258,36 +312,36 @@ static int SubdivideRoomTriangle(const RoomVertex vertices[3], int levels,
 }
 
 // decomp: BATTLE.PRG func_80097CF0 (src/BATTLE/BATTLE.PRG/2EA3C.s:752).
-static int SubdivideRoomQuad(const RoomVertex vertices[4], int levels,
-                             unsigned flags, unsigned command, unsigned clut,
-                             unsigned page, uintptr_t limit) {
+static int SubdivideRoomQuad(const RoomVertex vertices[kQuadCorners],
+                             int levels, const RoomPolygonMaterial* material,
+                             uintptr_t limit) {
   if (levels == 0) {
-    return EmitSubdividedPolygon(vertices, kQuadCorners, flags, command, clut,
-                                 page, limit);
+    return EmitSubdividedPolygon(vertices, kQuadCorners, material, limit);
   }
   const RoomVertex top = Midpoint(&vertices[0], &vertices[1]);
   const RoomVertex right = Midpoint(&vertices[1], &vertices[3]);
   const RoomVertex bottom = Midpoint(&vertices[2], &vertices[3]);
   const RoomVertex left = Midpoint(&vertices[0], &vertices[2]);
   const RoomVertex center = Midpoint(&vertices[1], &vertices[2]);
-  const RoomVertex children[4][4] = {{vertices[0], top, left, center},
-                                     {vertices[1], top, right, center},
-                                     {vertices[3], bottom, right, center},
-                                     {vertices[2], bottom, left, center}};
-  const RoomVertex edges[4][3] = {{vertices[2], bottom, vertices[3]},
-                                  {vertices[2], vertices[0], left},
-                                  {top, vertices[0], vertices[1]},
-                                  {vertices[3], right, vertices[1]}};
+  const RoomVertex children[kQuadCorners][kQuadCorners] = {
+      {vertices[0], top, left, center},
+      {vertices[1], top, right, center},
+      {vertices[3], bottom, right, center},
+      {vertices[2], bottom, left, center}};
+  const RoomVertex edges[kQuadCorners][kTriangleCorners] = {
+      {vertices[2], bottom, vertices[3]},
+      {vertices[2], vertices[0], left},
+      {top, vertices[0], vertices[1]},
+      {vertices[3], right, vertices[1]}};
   int emitted = 0;
-  for (unsigned child = 0; child < 4; ++child) {
-    const int result = SubdivideRoomQuad(children[child], levels - 1, flags,
-                                         command, clut, page, limit);
+  for (unsigned child = 0; child < kQuadCorners; ++child) {
+    const int result =
+        SubdivideRoomQuad(children[child], levels - 1, material, limit);
     if (result < 0) return result;
     emitted += result;
   }
-  for (unsigned edge = 0; edge < 4; ++edge) {
-    const int result = SubdivideRoomTriangle(edges[edge], 0, flags, command,
-                                             clut, page, limit);
+  for (unsigned edge = 0; edge < kQuadCorners; ++edge) {
+    const int result = SubdivideRoomTriangle(edges[edge], 0, material, limit);
     if (result < 0) return result;
     emitted += result;
   }
@@ -297,7 +351,7 @@ static int SubdivideRoomQuad(const RoomVertex vertices[4], int levels,
 static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
                             int corners, int mode, uintptr_t limit) {
   RoomVertex vertices[kQuadCorners] = {0};
-  memcpy(&vertices[0].position, data, 6);
+  memcpy(&vertices[0].position, data, kRoomSpatialDimensions * sizeof(int16_t));
   const int scale = (flags & 0x800) != 0 ? 1 : 8;
   const unsigned delta_offsets[4] = {0, 6, 9, 32};
   const unsigned color_offsets[4] = {12, 16, 20, 36};
@@ -306,7 +360,8 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
   Core_GteWord screen[kQuadCorners];
   Core_GteWord depth = 0;
   Core_GteWord subdivision_depth = 0;
-  int left = 1024, top = 1024, right = -1024, bottom = -1024;
+  int left = kProjectedCoordinateBound, top = kProjectedCoordinateBound;
+  int right = -kProjectedCoordinateBound, bottom = -kProjectedCoordinateBound;
   for (int index = 0; index < corners; ++index) {
     if (index != 0) {
       const signed char* delta =
@@ -322,7 +377,7 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
     vertices[index].color = color[0] | ((unsigned)color[1] << CHAR_BIT) |
                             ((unsigned)color[2] << (2 * CHAR_BIT));
     vertices[index].uv =
-        data[u_offsets[index]] | ((uint16_t)data[v_offsets[index]] << 8);
+        data[u_offsets[index]] | ((uint16_t)data[v_offsets[index]] << CHAR_BIT);
     Core_GteWord fog, projection_flags;
     const Core_GteWord vertex_depth = Core_Gte_RotTransPers(
         &vertices[index].position, &screen[index], &fog, &projection_flags);
@@ -338,14 +393,15 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
     if (y > bottom) bottom = y;
   }
   if (right < 0 || bottom < 0 || left >= kViewportWidth || top >= kDrawHeight ||
-      depth < roomNearDepth) {
+      depth < room_near_depth) {
     return 0;
   }
   const Core_GteWord winding =
       Core_Gte_NormalClip(screen[0], screen[1], screen[2]);
-  if ((data[15] & 1) == 0 && winding <= 0 &&
-      (corners == 3 ||
-       Core_Gte_NormalClip(screen[1], screen[3], screen[2]) <= 0)) {
+  if ((data[kRoomCommandOffset] & 1) == 0 && winding <= 0 &&
+      (corners == kTriangleCorners ||
+       Core_Gte_NormalClip(screen[1], screen[kQuadCorners - 1], screen[2]) <=
+           0)) {
     return 0;
   }
   const int subdivision =
@@ -354,54 +410,43 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
   if (corners == kTriangleCorners && subdivision_area < 0) {
     subdivision_area = -subdivision_area;
   }
-  if (corners == kQuadCorners && winding < 0 && (data[15] & 1) == 0) {
-    subdivision_area = Core_Gte_NormalClip(screen[1], screen[3], screen[2]);
+  if (corners == kQuadCorners && winding < 0 &&
+      (data[kRoomCommandOffset] & 1) == 0) {
+    subdivision_area =
+        Core_Gte_NormalClip(screen[1], screen[kQuadCorners - 1], screen[2]);
   }
   if ((mode & 1) != 0 &&
       (uint32_t)subdivision_area >= kMinimumSubdivisionArea &&
       subdivision > 0) {
     uint16_t clut, page;
-    memcpy(&clut, data + 26, sizeof clut);
-    memcpy(&page, data + 30, sizeof page);
+    memcpy(&clut, data + kClutRecordOffset, sizeof clut);
+    memcpy(&page, data + kPageRecordOffset, sizeof page);
+    const RoomPolygonMaterial material = {.flags = flags,
+                                          .command = data[kRoomCommandOffset],
+                                          .clut = clut,
+                                          .page = page};
     return corners == kTriangleCorners
-               ? SubdivideRoomTriangle(vertices, subdivision, flags, data[15],
-                                       clut, page, limit)
-               : SubdivideRoomQuad(vertices, subdivision, flags, data[15], clut,
-                                   page, limit);
+               ? SubdivideRoomTriangle(vertices, subdivision, &material, limit)
+               : SubdivideRoomQuad(vertices, subdivision, &material, limit);
   }
   depth += (int16_t)(flags >> kPackedCoordinateBits);
-  if (depth < roomNearDepth || depth >= kLastOrderingSlot) {
+  if (depth < room_near_depth || depth >= kLastOrderingSlot) {
     return 0;
   }
-  const size_t bytes =
-      (1 + (size_t)corners * kVertexPacketWords) * sizeof(u_long);
-  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (cursor > limit || bytes > limit - cursor) {
-    return -1;
-  }
-  u_long* packet = (void*)cursor;
-  memset(packet, 0, bytes);
   uint16_t clut, page;
-  memcpy(&clut, data + 26, sizeof clut);
-  memcpy(&page, data + 30, sizeof page);
-  const int low_detail = (uint32_t)depth >= roomLodDepth;
-  if (low_detail) {
-    --page;
-  }
-  for (int index = 0; index < corners; ++index) {
-    const unsigned uv =
-        low_detail ? (vertices[index].uv >> 1) & 0x7F7F : vertices[index].uv;
-    packet[1 + index * 3] = vertices[index].color;
-    packet[2 + index * 3] = (u_long)screen[index];
-    packet[3 + index * 3] = uv;
-  }
-  packet[1] |= (unsigned)(data[15] & 0xFE) << 24;
-  packet[3] |= (unsigned)clut << 16;
-  packet[6] |= (unsigned)page << 16;
-  setlen(packet, corners * 3);
-  AddPrim((u_long*)Render_frameScratch.orderingTable + depth, packet);
-  Render_frameScratch.primitiveCursor = (unsigned char*)packet + bytes;
-  return 1;
+  memcpy(&clut, data + kClutRecordOffset, sizeof clut);
+  memcpy(&page, data + kPageRecordOffset, sizeof page);
+  const ProjectedRoomPolygon polygon = {
+      .vertices = vertices,
+      .screen = screen,
+      .corners = corners,
+      .depth = depth,
+      .material = {.flags = flags,
+                   .command = data[kRoomCommandOffset],
+                   .clut = clut,
+                   .page = page},
+      .low_detail = (uint32_t)depth >= room_lod_depth};
+  return WriteRoomPolygon(&polygon, limit);
 }
 
 // decomp: BATTLE.PRG func_8009723C / func_80097388
@@ -430,9 +475,10 @@ void Render_DrawRoomGeometry(void* data, int mode) {
   for (unsigned index = 0; index < count; ++index) {
     const Render_RoomGeometryGroup* group = &groups[index];
     const unsigned facing = Render_frameScratch.firstPersonViewFacing;
-    if ((group->flags & 0x1100) != 0 ||
-        (((group->flags >> 15) & 1) & (unsigned)mode) != 0 ||
-        ((facing >> 16) == 0 && ((~group->flags) & (facing & 255)) != 0)) {
+    if ((group->flags & kSkipGeometryFlags) != 0 ||
+        (((group->flags >> kAlternatePassShift) & 1) & (unsigned)mode) != 0 ||
+        ((facing >> kPackedCoordinateBits) == 0 &&
+         ((~group->flags) & (facing & UINT8_MAX)) != 0)) {
       continue;
     }
     Core_Gte_SetRotMatrix(&group->view);
@@ -458,13 +504,13 @@ void Render_DrawRoomGeometry(void* data, int mode) {
 // decomp: BATTLE.PRG func_80098160 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file:
 // not yet ported]
 void Render_SetRoomPolygonNearClip(int depth) {
-  roomNearDepth = (int16_t)depth;
+  room_near_depth = (int16_t)depth;
 }
 
 // decomp: BATTLE.PRG func_80098194 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file:
 // not yet ported]
 void Render_SetRoomTextureLodDepth(int depth) {
-  roomLodDepth = (unsigned)(int)(int16_t)depth;
+  room_lod_depth = (unsigned)(int)(int16_t)depth;
 }
 
 // decomp: BATTLE.PRG func_8009820C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file:
@@ -488,12 +534,13 @@ void Render_DrawSkyDome(void* data) {
            sizeof colors[vertex]);
     Core_Gte_RotTrans(&position, &positions[vertex], &flags);
   }
-  bytes += kSkyVertexCount * kSkyVertexBytes;
+  bytes += (size_t)kSkyVertexCount * kSkyVertexBytes;
   for (unsigned face = 0; face < kSkyFaceCount; ++face) {
     const unsigned char* indices = bytes + (size_t)face * kSkyFaceBytes;
     if (indices[0] >= kSkyVertexCount || indices[1] >= kSkyVertexCount ||
-        indices[2] >= kSkyVertexCount)
+        indices[2] >= kSkyVertexCount) {
       return;
+    }
     if (positions[indices[0]].vz <= 0 && positions[indices[1]].vz <= 0 &&
         positions[indices[2]].vz <= 0) {
       continue;
@@ -513,8 +560,9 @@ void Render_DrawSkyDome(void* data) {
                                                  << kPackedCoordinateBits));
     }
     if (right < 0 || left >= kViewportWidth || bottom < 0 ||
-        top >= kViewportHeight)
+        top >= kViewportHeight) {
       continue;
+    }
     const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
     if (cursor > base + kPrimitiveBufferBytes - sizeof(POLY_G3)) return;
     u_long* packet = (void*)cursor;
@@ -523,10 +571,10 @@ void Render_DrawSkyDome(void* data) {
       packet[1 + corner * 2] = colors[indices[corner]] & kColorMask;
       packet[2 + corner * 2] = (u_long)xy[corner];
     }
-    packet[1] |= 0x30000000;
-    setlen(packet, 6);
+    packet[1] |= kSkyGouraudCommand;
+    setlen(packet, kSkyPacketWords - 1);
     AddPrim((u_long*)Render_frameScratch.orderingTable + kLastOrderingSlot,
             packet);
-    Render_frameScratch.primitiveCursor = packet + 7;
+    Render_frameScratch.primitiveCursor = packet + kSkyPacketWords;
   }
 }

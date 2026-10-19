@@ -38,67 +38,107 @@
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
 
+enum {
+  kActorFixedFractionBits = 12,
+  kActorFixedOne = 1 << kActorFixedFractionBits,
+  kActorRotationMask = kActorFixedOne - 1,
+  kPoseScaleFractionBits = 6,
+  kPoseScaleOne = 1 << kPoseScaleFractionBits,
+  kFirstCameraFacingTag = 7,
+  kCameraHeightTag = 8,
+  kLastCameraFacingTag = 9,
+  kColorAdjustmentScale = 4,
+  kHiddenActorHeight = 256,
+  kNeutralModelColor = 128,
+  kTintStateLimit = 4,
+  kProjectionDepthScale = 4,
+  kInvalidBoneResult = -4
+};
+
 static unsigned char ModelColorChannel(unsigned char base,
                                        unsigned char adjustment) {
-  const int value = base + (signed char)adjustment * 4;
+  const int signed_adjustment =
+      adjustment <= INT8_MAX ? adjustment : (int)adjustment - (UINT8_MAX + 1);
+  const int value = base + signed_adjustment * kColorAdjustmentScale;
   if (value < 0) return 0;
-  if (value > 255) return 255;
+  if (value > UINT8_MAX) return UINT8_MAX;
   return (unsigned char)value;
 }
 
 static void TransformBonePosition(const MATRIX* parent, const SVECTOR* local,
                                   MATRIX* output) {
-  const int16_t coordinates[3] = {local->vx, local->vy, local->vz};
-  for (int row = 0; row < 3; ++row) {
+  enum { kFixedFractionBits = 12, kSpatialDimensions = 3 };
+  const int16_t coordinates[kSpatialDimensions] = {local->vx, local->vy,
+                                                   local->vz};
+  for (int row = 0; row < kSpatialDimensions; ++row) {
     int64_t value = 0;
-    for (int axis = 0; axis < 3; ++axis) {
+    for (int axis = 0; axis < kSpatialDimensions; ++axis) {
       value += (int64_t)parent->m[row][axis] * coordinates[axis];
     }
-    output->t[row] = (long)((value >> 12) + parent->t[row]);
+    output->t[row] =
+        (Core_GteWord)((value >> kFixedFractionBits) + parent->t[row]);
   }
 }
 
 static void AdjustBoneRotation(Actors_ActorRecord* actor, unsigned tag,
                                SVECTOR* rotation) {
+  enum {
+    kAuxiliaryAngleShift = 3,
+    kCameraPitchTag = 7,
+    kFirstFrozenJointTag = 3,
+    kLastFrozenJointTag = 6
+  };
   const Render_ModelScratchpad* workspace = Render_ModelWorkspace();
   const unsigned yaw = workspace->angleX;
   const unsigned pitch = workspace->angleY;
   if (tag == 1 || tag == 2) {
     rotation->vx = Core_Math_WrapSigned16((uint32_t)rotation->vx - (yaw >> 1));
-    rotation->vz = Core_Math_WrapSigned16((uint32_t)rotation->vz + (yaw >> 3));
+    rotation->vz = Core_Math_WrapSigned16((uint32_t)rotation->vz +
+                                          (yaw >> kAuxiliaryAngleShift));
     if (tag == 2) {
       rotation->vy =
           Core_Math_WrapSigned16((uint32_t)rotation->vy - (yaw >> 1));
       rotation->vy = Core_Math_WrapSigned16(
-          (uint32_t)rotation->vy + (yaw != 0 ? pitch >> 3 : 0u - (pitch >> 3)));
+          (uint32_t)rotation->vy +
+          (yaw != 0 ? pitch >> kAuxiliaryAngleShift
+                    : 0u - (pitch >> kAuxiliaryAngleShift)));
       rotation->vz =
           Core_Math_WrapSigned16((uint32_t)rotation->vz + (pitch >> 2));
     }
-  } else if (tag >= 3 && tag <= 6 && actor->instance.isFrozen) {
+  } else if (tag >= kFirstFrozenJointTag && tag <= kLastFrozenJointTag &&
+             actor->instance.isFrozen) {
     uint16_t values[2];
-    memcpy(values, actor->jointSlots + (tag - 3) * 4, sizeof values);
+    memcpy(values,
+           actor->jointSlots +
+               (size_t)(tag - kFirstFrozenJointTag) * sizeof values,
+           sizeof values);
     values[1] += values[0];
-    memcpy(actor->jointSlots + (tag - 3) * 4, values, sizeof values);
+    memcpy(actor->jointSlots +
+               (size_t)(tag - kFirstFrozenJointTag) * sizeof values,
+           values, sizeof values);
     rotation->vx = (int16_t)values[1];
-  } else if (tag >= 7 && tag <= 9) {
+  } else if (tag >= kFirstCameraFacingTag && tag <= kLastCameraFacingTag) {
     const Render_Camera* camera = &Render_frameScratch.camera;
-    const int delta_x = camera->position.vx / 4096 - workspace->rootOffset.vx;
-    const int delta_z = camera->position.vz / 4096 - workspace->rootOffset.vz;
-    if (tag == 7) rotation->vx = (int16_t)camera->angles.vx;
+    const int delta_x =
+        camera->position.vx / kActorFixedOne - workspace->rootOffset.vx;
+    const int delta_z =
+        camera->position.vz / kActorFixedOne - workspace->rootOffset.vz;
+    if (tag == kCameraPitchTag) rotation->vx = (int16_t)camera->angles.vx;
     rotation->vy = (int16_t)-Core_Gte_Atan2(delta_z, delta_x);
     rotation->vz = 0;
-    if (tag == 8) {
+    if (tag == kCameraHeightTag) {
       const int64_t squared =
           (int64_t)delta_x * delta_x + (int64_t)delta_z * delta_z;
       const int distance = Core_Math_SquareRootInteger(
           squared > INT32_MAX ? INT32_MAX : (int)squared);
       rotation->vz = (int16_t)Core_Gte_Atan2(
-          camera->position.vy / 4096 - workspace->rootOffset.vy, distance);
+          camera->position.vy / kActorFixedOne - workspace->rootOffset.vy,
+          distance);
     }
   }
-  rotation->vx &= 0xFFF;
-  rotation->vy &= 0xFFF;
-  rotation->vz &= 0xFFF;
+  rotation->vx &= kActorRotationMask;
+  rotation->vy &= kActorRotationMask;
+  rotation->vz &= kActorRotationMask;
 }
 
 // decomp: BATTLE.PRG func_800B28A8, bone loop 0x800B2938..0x800B34CC
@@ -152,7 +192,8 @@ int Actors_BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
     if (bone != 0 && joint->poseLockSlot != 0) {
       Actors_ApplyLockedBoneTransform(actor, camera, (int)bone,
                                       joint->poseLockSlot);
-      cumulative[bone][0] = cumulative[bone][1] = cumulative[bone][2] = 64;
+      cumulative[bone][0] = cumulative[bone][1] = cumulative[bone][2] =
+          kPoseScaleOne;
       continue;
     }
     const unsigned parent = bone == 0 ? 0 : joint->parentIndex;
@@ -163,7 +204,8 @@ int Actors_BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
       rotation.vy = (int16_t)(actor->blendPose.boneKeys[bone].vy >> 1);
       rotation.vz = (int16_t)(actor->blendPose.boneKeys[bone].vz >> 1);
       AdjustBoneRotation(actor, joint->auxiliaryTag, &rotation);
-      if (joint->auxiliaryTag >= 7 && joint->auxiliaryTag <= 9) {
+      if (joint->auxiliaryTag >= kFirstCameraFacingTag &&
+          joint->auxiliaryTag <= kLastCameraFacingTag) {
         Core_Gte_RotMatrixYXZ(&rotation, &matrix);
         Core_Math_PremultiplyRotationMatrix(camera, &matrix);
         scale.vx = scale.vy = scale.vz = actor->scale;
@@ -184,11 +226,11 @@ int Actors_BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
           bone == 0
               ? components[axis]
               : (int)(((int64_t)cumulative[parent][axis] * components[axis]) >>
-                      6);
+                      kPoseScaleFractionBits);
     }
-    scale.vx = cumulative[bone][0] * 64;
-    scale.vy = cumulative[bone][1] * 64;
-    scale.vz = cumulative[bone][2] * 64;
+    scale.vx = cumulative[bone][0] * kPoseScaleOne;
+    scale.vy = cumulative[bone][1] * kPoseScaleOne;
+    scale.vz = cumulative[bone][2] * kPoseScaleOne;
     Core_Math_ScaleMatrixColumns(&matrix, &scale);
     actor->boneMatrices[bone] = matrix;
   }
@@ -204,7 +246,7 @@ void Actors_DrawActorModel(void* actor_data, MATRIX* camera, char companion) {
       !actor->instance.isVisible) {
     return;
   }
-  if (actor->instance.position.vy >= 256 &&
+  if (actor->instance.position.vy >= kHiddenActorHeight &&
       (actor->instance.slot == 0 ||
        Event_EventPlaybackState() != kEventPlaybackActive)) {
     return;
@@ -218,7 +260,8 @@ void Actors_DrawActorModel(void* actor_data, MATRIX* camera, char companion) {
     }
     geometry = Actors_actorRecords[(unsigned char)companion];
   }
-  if (geometry->textureSlot >= 24 ||
+  if (geometry->textureSlot >= sizeof Render_legacyActorTextureSlots /
+                                   sizeof Render_legacyActorTextureSlots[0] ||
       geometry->instance.boneCount > actor->instance.boneCount ||
       !Render_ValidateModelData(&geometry->instance, geometry->instance.model,
                                 geometry->modelDataSize)) {
@@ -233,7 +276,8 @@ void Actors_DrawActorModel(void* actor_data, MATRIX* camera, char companion) {
   workspace->palette = (uint16_t)geometry->clutA;
   workspace->reserved38 = (uint16_t)geometry->clutB;
   if (!Render_ProjectModelVertices(&geometry->instance, actor->boneMatrices,
-                                   -Render_nearClip * 4, workspace->model)) {
+                                   -Render_nearClip * kProjectionDepthScale,
+                                   workspace->model)) {
     actor->instance.isPreviewModel = 1;
     return;
   }
@@ -249,10 +293,10 @@ void Actors_DrawActorModel(void* actor_data, MATRIX* camera, char companion) {
                                     &actor->instance.tint);
       } else {
         actor->instance.tint.red = actor->instance.tint.green =
-            actor->instance.tint.blue = 128;
+            actor->instance.tint.blue = kNeutralModelColor;
       }
     }
-    if (geometry->instance.actionAnimationState < 4) {
+    if (geometry->instance.actionAnimationState < kTintStateLimit) {
       geometry->instance.baseColor.r =
           ModelColorChannel(actor->instance.tint.red, geometry->fadeRed);
       geometry->instance.baseColor.g =
@@ -281,19 +325,31 @@ void Actors_DrawActorModel(void* actor_data, MATRIX* camera, char companion) {
 // yet ported]
 int Actors_ProjectActorBoneEndpoint(int actor_id, int bone, int* output,
                                     int endpoint) {
-  if (actor_id < 0 || actor_id >= 17 || output == NULL) return -1;
+  if ((unsigned)actor_id >=
+          sizeof Actors_actorRecords / sizeof Actors_actorRecords[0] ||
+      output == NULL) {
+    return -1;
+  }
   const Actors_ShpModel* model;
   const MATRIX* matrix;
   const Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
   if (actor != NULL) {
-    if (bone < 0 || bone >= actor->instance.boneCount) return -4;
+    if (bone < 0 || bone >= actor->instance.boneCount) {
+      return kInvalidBoneResult;
+    }
     model = actor->instance.model;
     matrix = &actor->boneMatrices[bone];
   } else {
     const Field_GimmickInstance* object =
-        actor_id < 16 ? Field_gimmickInstances[actor_id] : NULL;
+        (unsigned)actor_id <
+                sizeof Field_gimmickInstances / sizeof Field_gimmickInstances[0]
+            ? Field_gimmickInstances[actor_id]
+            : NULL;
     if (object == NULL) return -1;
-    if (bone < 0 || bone >= object->boneCount || bone >= 5) return -4;
+    if (bone < 0 || bone >= object->boneCount ||
+        (size_t)bone >= sizeof object->matrices / sizeof object->matrices[0]) {
+      return kInvalidBoneResult;
+    }
     model = object->model;
     matrix = &object->matrices[bone];
   }
@@ -306,13 +362,13 @@ int Actors_ProjectActorBoneEndpoint(int actor_id, int bone, int* output,
   }
   Core_Gte_SetRotMatrix(matrix);
   Core_Gte_SetTransMatrix(matrix);
-  long screen, fog, flags;
+  Core_GteWord screen, fog, flags;
   VECTOR transformed;
   Core_Gte_RotTransPers(&position, &screen, &fog, &flags);
   Core_Gte_StoreLvnl(&transformed);
   output[0] = (int)screen;
-  output[1] = transformed.vz < 0       ? 0
-              : transformed.vz > 65535 ? 65535
-                                       : transformed.vz;
+  output[1] = transformed.vz < 0            ? 0
+              : transformed.vz > UINT16_MAX ? UINT16_MAX
+                                            : transformed.vz;
   return 0;
 }

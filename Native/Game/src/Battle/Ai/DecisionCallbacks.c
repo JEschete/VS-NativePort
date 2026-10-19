@@ -31,6 +31,16 @@
 #include "Legacy/Psx.h"
 #include "Render/Palette.h"
 
+enum {
+  kDefaultPursuitDistance = 256,
+  kExtendedPursuitDistance = 320,
+  kSupportDistanceSquared = 0x64000,
+  kSupportWanderRadius = 5,
+  kFirstNonLocomotionCommand = 9,
+  kActionStatusBitMask = 31,
+  kApproachModeMask = 3
+};
+
 // decomp: BATTLE.PRG entry 0x800DBA4C (src/BATTLE/BATTLE.PRG/72B70.s, after
 // .L800DBA40).
 int Battle_Ai_UpdateFleeOrWanderBehavior(Battle_Ai_ActorAiState* state) {
@@ -51,7 +61,8 @@ int Battle_Ai_UpdateAdaptivePursuitBehavior(Battle_Ai_ActorAiState* state) {
     return Battle_Ai_FleeVisibleEnemies((Battle_Ai_CandidateMovementView*)state,
                                         1);
   }
-  const unsigned mode = (1u << (state->actionStatus & 31)) & 3;
+  const unsigned mode =
+      (1u << (state->actionStatus & kActionStatusBitMask)) & kApproachModeMask;
   if (mode == 0) {
     return Battle_Ai_UpdateCombatPursuit(state);
   }
@@ -59,7 +70,8 @@ int Battle_Ai_UpdateAdaptivePursuitBehavior(Battle_Ai_ActorAiState* state) {
   if (candidate == NULL || state->model == NULL) {
     return 0;
   }
-  int distance = state->model->opaqueABit5 ? 320 : 256;
+  int distance = state->model->opaqueABit5 ? kExtendedPursuitDistance
+                                           : kDefaultPursuitDistance;
   if ((mode & 1) != 0) {
     const int candidate_distance =
         Core_Math_SquareRootInteger(candidate->distanceSquared);
@@ -82,14 +94,15 @@ int Battle_Ai_UpdateSupportFollowBehavior(Battle_Ai_ActorAiState* state) {
   }
   unsigned tile = 0;
   const int target = Battle_Ai_FindActorByRelationship(state, &tile, 2);
-  if (target < 0 || target >= 16) {
+  if ((unsigned)target >=
+      sizeof state->distancesSquared / sizeof state->distancesSquared[0]) {
     return 0;
   }
-  if (state->distancesSquared[target] > 0x64000u) {
+  if (state->distancesSquared[target] > kSupportDistanceSquared) {
     Battle_Ai_MoveToTile((Battle_Ai_CandidateMovementView*)state, tile, 0);
   } else {
     Battle_Ai_WanderAroundTile((Battle_Ai_CandidateMovementView*)state, tile,
-                               5);
+                               kSupportWanderRadius);
   }
   return 1;
 }
@@ -102,7 +115,8 @@ int Battle_Ai_UpdateEngagementApproachBehavior(Battle_Ai_ActorAiState* state) {
       return pursuit;
     }
   }
-  const int result = Battle_Ai_ApproachActor(state, 0, 256, 0);
+  const int result =
+      Battle_Ai_ApproachActor(state, 0, kDefaultPursuitDistance, 0);
   return result != 0 ? result : Battle_Ai_TrackActorPosition(state, 0);
 }
 
@@ -110,8 +124,8 @@ int Battle_Ai_UpdateEngagementApproachBehavior(Battle_Ai_ActorAiState* state) {
 void Battle_Ai_UpdateActorLocomotionMode(Battle_Ai_DecisionDispatchView* view) {
   Battle_Ai_ActorAiState* state = (void*)view;
   if (state->behaviorMode == 0) return;
-  if (state->behaviorMode == 1 &&
-      ((Battle_Actor*)state->actor)->commandOpcode < 9) {
+  if (state->behaviorMode == 1 && ((Battle_Actor*)state->actor)->commandOpcode <
+                                      kFirstNonLocomotionCommand) {
     Battle_Ai_IssueActorCommand(state, 1);
     return;
   }

@@ -77,8 +77,8 @@ occurrences of a finding are rejected. Formatting debt is tied to a file's curre
 content, ignoring CRLF/LF differences; edit such a file into Google format rather
 than extending its old formatting.
 
-Style-only debt in `Legacy` directories and the explicit EC-01/EC-03/EC-05
-page-space, GTE-state and scratchpad replacements is reported separately in
+Style-only debt in `Legacy` directories and the explicit EC-01/EC-02/EC-03/EC-05
+page-space, SPU-register reset, GTE-state and scratchpad replacements is reported separately in
 `deferred_replacement_style`. The exact paths are in `RETIRING_NATIVE`; owned C
 gameplay code is not automatically a replacement exception. Safety and compiler
 diagnostics from replacement code remain checked. See
@@ -86,6 +86,22 @@ diagnostics from replacement code remain checked. See
 
 Existing `VS` subsystem namespaces and decomp-linked C exports/types retain their
 published names. Local identifiers and private C++ state use Google naming.
+The naming configuration lists the existing public logging/input/mode values,
+sector/timing constants, generated module-table symbols and native-view field
+spellings that are preserved. These are explicit spelling exceptions, not a
+blanket exemption for new public or private names; a real local-parameter naming
+control remains in the quality tests.
+
+Positional-parameter suggestions for exact function/file pairs in the ownership
+registry are reported as `fixed_interface_advisories`: their published C call
+contracts must be preserved. Private helpers, conversions, bounds and lifetime
+diagnostics are not covered by this exception. Regression controls check both
+the registered path/name match and continued safety reporting.
+
+The positional-argument heuristic requires at least three identical-type
+arguments and does not group implicit conversions. This avoids redesigning
+ordinary two-value APIs solely for lint while still flagging ambiguous private
+argument groups; a real-tool positive control verifies that coverage.
 
 The analyzer's blanket `DeprecatedOrUnsafeBufferHandling` API advisory is disabled:
 bounded standard-library copies are permitted, and Annex K `_s` functions are not

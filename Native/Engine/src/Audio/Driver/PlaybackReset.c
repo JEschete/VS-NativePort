@@ -88,7 +88,8 @@ void Audio_Driver_ResetPlaybackState(void) {
   Audio_Mixer_voiceModes.noise = 0;
   Audio_Mixer_voiceModes.reverb = 0;
   // SPU control: CD audio on (bit 0), CD audio reverb off (bit 2)
-  *SPU_CONTROL = (spu_control & 0xFFFA) | 1;
+  enum { kCdAudioResetMask = 0xFFFA, kCdAudioEnable = 1 };
+  *SPU_CONTROL = (spu_control & kCdAudioResetMask) | kCdAudioEnable;
 
   // the 32 music channels: no voice assigned (24 = none)
   for (i = 0, channel = Audio_Seq_musicChannels; i < 32; ++i, ++channel) {

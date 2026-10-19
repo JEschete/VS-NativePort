@@ -133,6 +133,14 @@ int Tests_RoomAiMapStorage(void) {
                map.flags[0][0] == 0x8000 && map.flags[31][31] == 0x8000 &&
                (unsigned char*)map.flags >= (unsigned char*)(&map.state + 1) &&
                Battle_Ai_DecodeCollisionFlags(0xFFFFFFFFu) == 0x387F;
+  for (unsigned bit = 0; bit < 32; ++bit) {
+    const unsigned input = 1u << bit;
+    const unsigned expected =
+        ((input >> 23) & 15) | ((input >> 23) & 0x10) | ((input >> 12) & 0x20) |
+        ((input >> 22) & 0x40) | ((input >> 20) & 0x800) |
+        ((input >> 18) & 0x1000) | ((input >> 16) & 0x2000);
+    passed = passed && Battle_Ai_DecodeCollisionFlags(input) == expected;
+  }
   unsigned auxiliary[0x498 / 4] = {0};
   auxiliary[0x450 / 4] = (2u << 29) | (99u << 21) | (1u << 20);
   auxiliary[0x494 / 4] = 0x03020A09;

@@ -44,6 +44,13 @@ bool DataStore::Entry::ContainsSector(u32 sector) const {
 }
 
 std::expected<void, std::string> DataStore::Open(const fs::path& root) {
+  enum : usize {
+    kLbaColumn,
+    kSizeColumn,
+    kFormColumn,
+    kPathColumn,
+    kColumnCount
+  };
   std::ifstream in(root / ManifestName);
   if (!in) {
     return std::unexpected("no extracted data at " +
@@ -60,22 +67,23 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
     }
     std::string_view v(line);
     Entry e;
-    std::string_view cols[4];
-    for (int i = 0; i < 4; ++i) {
-      const usize tab = i < 3 ? v.find('\t') : v.size();
+    std::string_view cols[kColumnCount];
+    for (usize column = 0; column < kColumnCount; ++column) {
+      const usize tab = column < kPathColumn ? v.find('\t') : v.size();
       if (tab == std::string_view::npos) {
         return std::unexpected("bad line in " + (root / ManifestName).string() +
                                ": " + line);
       }
-      cols[i] = v.substr(0, tab);
-      v = i < 3 ? v.substr(tab + 1) : std::string_view{};
+      cols[column] = v.substr(0, tab);
+      v = column < kPathColumn ? v.substr(tab + 1) : std::string_view{};
     }
-    if (!ParseU32(cols[0], e.lba) || !ParseU32(cols[1], e.size)) {
+    if (!ParseU32(cols[kLbaColumn], e.lba) ||
+        !ParseU32(cols[kSizeColumn], e.size)) {
       return std::unexpected("bad line in " + (root / ManifestName).string() +
                              ": " + line);
     }
-    e.form = cols[2];
-    e.path = cols[3];
+    e.form = cols[kFormColumn];
+    e.path = cols[kPathColumn];
     store->m_entries_.push_back(std::move(e));
   }
   std::ranges::sort(store->m_entries_, {}, &Entry::lba);
@@ -182,7 +190,7 @@ extern "C" int Content_ReadDiscBytes(unsigned lba, unsigned bytes, void* dest) {
     }
     out += span;
     remaining -= span;
-    sector += static_cast<u32>(span / 2048);
+    sector += static_cast<u32>(span / DataStore::kDataSectorBytes);
   }
   return 1;
 }

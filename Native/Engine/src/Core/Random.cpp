@@ -1,4 +1,4 @@
-#include "Core/Random.hpp"
+#include "Core/Random.hpp"  // NOLINT(build/include): native C++ interface.
 
 #include <bit>
 

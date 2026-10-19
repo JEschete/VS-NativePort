@@ -134,6 +134,8 @@ std::optional<fs::path> LocateData(int argc, char** argv) {
 std::optional<u64> ParseTick(std::string_view text) {
   u64 value = 0;
   const char* end = text.data() + text.size();
+  // from_chars is bounded by end and never expects a null terminator.
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   const auto result = std::from_chars(text.data(), end, value);
   if (result.ec != std::errc() || result.ptr != end) return std::nullopt;
   return value;
@@ -259,50 +261,37 @@ InputScript ParseInputScript(int argc, char** argv) {
   return s;
 }
 
-}  // namespace
-
-int main(int argc, char** argv) try {
-  if (!ConfigureLogging(argc, argv)) {
-    return 1;
-  }
-  Platform::InstallCrashHandler();
-  // The game reads only the extracted data (plan D20); the disc, if found, is
-  // only identified in the log.
-  std::unique_ptr<Content::Disc> disc;
-  if (auto disc_path = LocateDisc(argc, argv)) {
-    if (auto opened = Content::Disc::Open(*disc_path)) {
-      disc = std::move(*opened);
-      VS_LOG_INFO("boot", "disc '{}' ({} entries) from {}", disc->Label(),
-                  disc->Files().size(), disc_path->string());
-    } else {
-      VS_LOG_WARN("boot", "{}", opened.error());
-    }
-  }
-  const auto data_root = LocateData(argc, argv);
-  if (!data_root) {
-    VS_LOG_ERROR("boot",
-                 "no extracted data; run VS.Extract extract <disc> "
-                 "Native\\data, or pass --data <dir>");
-    return 1;
-  }
-  if (auto r = Content::DataStore::Open(*data_root); !r) {
-    VS_LOG_ERROR("boot", "{}", r.error());
-    return 1;
-  }
+struct RunSettings {
   u64 max_ticks = 0;
-  u32 speed = 1;  // --speed N: N logical ticks per real tick (test runs; audio
-                  // still plays in real time)
+  u32 speed = 1;
+  bool devices = true;
+  Capture capture;
+  InputScript script;
+};
+
+RunSettings ParseRunSettings(int argc, char** argv) {
+  RunSettings settings;
   if (auto s = Option(argc, argv, "--speed")) {
-    std::from_chars(s->data(), s->data() + s->size(), speed);
-    speed = std::max(speed, 1u);
+    std::from_chars(s->data(), s->data() + s->size(), settings.speed);
+    settings.speed = std::max(settings.speed, 1u);
   }
   if (auto frames = Option(argc, argv, "--frames")) {
-    std::from_chars(frames->data(), frames->data() + frames->size(), max_ticks);
+    std::from_chars(frames->data(), frames->data() + frames->size(),
+                    settings.max_ticks);
   }
-  const Capture capture = ParseCapture(argc, argv);
-  const InputScript script = ParseInputScript(argc, argv);
+  settings.capture = ParseCapture(argc, argv);
+  settings.script = ParseInputScript(argc, argv);
+  settings.devices =
+      std::none_of(argv + 1, argv + argc, [](const char* argument) {
+        return std::string_view(argument) == "--scripted";
+      });
+  return settings;
+}
+
+int RunGame(const Content::Disc* disc, const RunSettings& settings) {
   VS_LOG_INFO("boot", "run: tick limit={}, speed={}, scripted presses={}",
-              max_ticks, speed, script.presses.size());
+              settings.max_ticks, settings.speed,
+              settings.script.presses.size());
 
   Platform::App app;
   if (auto r = app.Init({}); !r) {
@@ -320,14 +309,12 @@ int main(int argc, char** argv) try {
   }
 
   Input::InputSystem input;
-  for (int i = 1; i < argc; ++i) {
-    if (std::string_view(argv[i]) == "--scripted") {
-      input.SetDevicesEnabled(false);
-      VS_LOG_INFO("input", "--scripted: keyboard and gamepad ignored");
-    }
+  if (!settings.devices) {
+    input.SetDevicesEnabled(false);
+    VS_LOG_INFO("input", "--scripted: keyboard and gamepad ignored");
   }
-  Game::GameApp game({disc.get()});
-  Platform::ProgressWatchdog watchdog(max_ticks != 0);
+  Game::GameApp game({disc});
+  Platform::ProgressWatchdog watchdog(settings.max_ticks != 0);
   Core::FrameClock clock;
   double last = app.NowSeconds();
   std::vector<u32> frame;
@@ -338,15 +325,16 @@ int main(int argc, char** argv) try {
   };
   while (app.PumpEvents(handle_event)) {
     const double now = app.NowSeconds();
-    const u32 ticks = clock.Advance(now - last) * speed;
+    const u32 ticks = clock.Advance(now - last) * settings.speed;
     last = now;
     bool shown = false;
-    for (u32 i = 0; i < ticks && (max_ticks == 0 || game.Ticks() < max_ticks);
-         ++i) {
+    for (u32 index = 0; index < ticks && (settings.max_ticks == 0 ||
+                                          game.Ticks() < settings.max_ticks);
+         ++index) {
       watchdog.Pulse(game.Ticks() + 1);
       Core::SetLogTick(game.Ticks() + 1);
       VS_LOG_TRACE("frame", "begin tick");
-      input.Inject(script.MaskAt(game.Ticks() + 1));
+      input.Inject(settings.script.MaskAt(game.Ticks() + 1));
       const auto& pad = input.Update();
       if (pad.pressed) {
         VS_LOG_INFO("input", "pressed {}", Input::DescribeButtons(pad.pressed));
@@ -356,7 +344,7 @@ int main(int argc, char** argv) try {
       VS_LOG_TRACE("frame", "end tick; presented={}, image={}x{}", shown,
                    frame_w, frame_h);
       if (shown) {
-        capture.Write(game.Ticks(), frame, frame_w, frame_h);
+        settings.capture.Write(game.Ticks(), frame, frame_w, frame_h);
       }
     }
     if (ticks == 0) {
@@ -367,7 +355,7 @@ int main(int argc, char** argv) try {
     } else {
       gpu.PresentClear({0.0f, 0.0f, 0.0f, 1.0f});
     }
-    if (max_ticks != 0 && game.Ticks() >= max_ticks) {
+    if (settings.max_ticks != 0 && game.Ticks() >= settings.max_ticks) {
       VS_LOG_INFO("boot", "stopping after {} ticks (--frames)", game.Ticks());
       break;
     }
@@ -375,6 +363,35 @@ int main(int argc, char** argv) try {
   Movie_PlayerClose();  // its soundtrack source must go before the audio device
                         // and SDL
   return 0;
+}
+
+}  // namespace
+
+int main(int argc, char** argv) try {
+  if (!ConfigureLogging(argc, argv)) return 1;
+  Platform::InstallCrashHandler();
+  std::unique_ptr<Content::Disc> disc;
+  if (auto disc_path = LocateDisc(argc, argv)) {
+    if (auto opened = Content::Disc::Open(*disc_path)) {
+      disc = std::move(*opened);
+      VS_LOG_INFO("boot", "disc '{}' ({} entries) from {}", disc->Label(),
+                  disc->Files().size(), disc_path->string());
+    } else {
+      VS_LOG_WARN("boot", "{}", opened.error());
+    }
+  }
+  const auto data_root = LocateData(argc, argv);
+  if (!data_root) {
+    VS_LOG_ERROR("boot",
+                 "no extracted data; run VS.Extract extract <disc> "
+                 "Native\\data, or pass --data <dir>");
+    return 1;
+  }
+  if (auto result = Content::DataStore::Open(*data_root); !result) {
+    VS_LOG_ERROR("boot", "{}", result.error());
+    return 1;
+  }
+  return RunGame(disc.get(), ParseRunSettings(argc, argv));
 } catch (const std::exception& error) {
   VS_LOG_ERROR("boot", "{}", error.what());
   return 1;

@@ -167,6 +167,8 @@ void Core_Gte_SetGeomOffset(long ofx, long ofy) {
 
 void Core_Gte_SetGeomScreen(long h) { g.h = static_cast<uint16_t>(h); }
 
+// SDK-compatible entry point; copied callers retain this parameter order.
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 void Core_Gte_SetFarColor(long r, long gg, long b) {
   g.farColor[0] = static_cast<int32_t>(r) * 16;
   g.farColor[1] = static_cast<int32_t>(gg) * 16;
@@ -319,6 +321,8 @@ MATRIX* Core_Gte_ScaleMatrix(MATRIX* m, VECTOR* v) {
   return m;
 }
 
+// SDK-compatible entry point; output pointers have distinct register roles.
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 long Core_Gte_RotTransPers(SVECTOR* v0, long* sxy, long* p, long* flag) {
   LoadVector(v0);
   Core_Gte_Rtps();
@@ -335,9 +339,11 @@ void Core_Gte_RotTrans(SVECTOR* v0, VECTOR* v1, long* flag) {
   *flag = static_cast<long>(g.flag);
 }
 
-long Core_Gte_RotTransPers4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3,
-                            long* sxy0, long* sxy1, long* sxy2, long* sxy3,
-                            long* p, long* flag) {
+// SDK-compatible entry point; copied callers retain this parameter order.
+long Core_Gte_RotTransPers4(
+    SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3,
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+    long* sxy0, long* sxy1, long* sxy2, long* sxy3, long* p, long* flag) {
   SVECTOR* v[4] = {v0, v1, v2, v3};
   long* out[4] = {sxy0, sxy1, sxy2, sxy3};
   uint32_t f = 0;

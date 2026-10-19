@@ -40,10 +40,41 @@ enum {
   kGouraudQuadCommand = 0x3C,
   kFlatTriangleBytes = 16,
   kFlatQuadBytes = 20,
+  kFlatIndexOffset = sizeof(uint32_t),
+  kFlatTriangleUvOffset =
+      kFlatIndexOffset + kTriangleCorners * sizeof(uint16_t),
+  kFlatQuadUvOffset = kFlatIndexOffset + kQuadCorners * sizeof(uint16_t),
   kGouraudTriangleBytes = 24,
   kGouraudQuadBytes = 32,
   kColorMask = 0xFFFFFF,
-  kPrimitiveBufferBytes = 0x20000
+  kPrimitiveBufferBytes = 0x20000,
+  kNormalDepthBias = -1,
+  kSpecialDepthBias = -5,
+  kFlatVertexWords = 2,
+  kGouraudVertexWords = 3,
+  kGouraudFirstUvOffset = 6,
+  kGouraudTriangleTailUvOffset = 20,
+  kGouraudQuadUvOffset = 24,
+  kBlendModeMask = 0x60,
+  kSemiTransparencyFlag = 0x10,
+  kQuadCommandFlag = 8,
+  kCommandShift = 3 * CHAR_BIT,
+  kClutPacketWord = 3,
+  kFlatPagePacketWord = 5,
+  kGouraudPagePacketWord = 6,
+  kPolygonGroupCount = 3,
+  kSpecialPolygonGroup = 2,
+  kProjectedCoordinateBound = 1024,
+  kViewportWidth = 320,
+  kViewportHeight = 240,
+  kAdaptiveSplitMode = 3,
+  kTriangleDepthReciprocal = 341,
+  kDepthReciprocalBits = 12,
+  kQuadDepthShift = 4,
+  kDepthBiasMask = 3,
+  kDepthBiasStep = 4,
+  kModelOrderingLimit = 0x7C0,
+  kNeutralTint = 0x808080
 };
 
 static int PolygonCorners(unsigned command, int colored) {
@@ -57,12 +88,19 @@ static int PolygonCorners(unsigned command, int colored) {
   return 0;
 }
 
-static unsigned PolygonBytes(int corners, int colored) {
-  if (colored) {
-    return corners == kTriangleCorners ? kGouraudTriangleBytes
-                                       : kGouraudQuadBytes;
+static unsigned PolygonBytes(unsigned command) {
+  switch (command) {
+    case kFlatTriangleCommand:
+      return kFlatTriangleBytes;
+    case kFlatQuadCommand:
+      return kFlatQuadBytes;
+    case kGouraudTriangleCommand:
+      return kGouraudTriangleBytes;
+    case kGouraudQuadCommand:
+      return kGouraudQuadBytes;
+    default:
+      return 0;
   }
-  return corners == kTriangleCorners ? kFlatTriangleBytes : kFlatQuadBytes;
 }
 
 // decomp: BATTLE.PRG func_800B3A68 (src/BATTLE/BATTLE.PRG/4B16C.s:84).
@@ -92,8 +130,8 @@ int Render_ProjectModelVertices(void* instance, MATRIX* matrices,
   const SVECTOR* vertices = VS_ONDISC(model, vertexSection, const SVECTOR*);
   unsigned previous = 0;
   for (unsigned group = 0; group < group_count; ++group) {
-    const unsigned bone = groups[group * 2];
-    const unsigned end = groups[group * 2 + 1];
+    const unsigned bone = groups[(size_t)group * kGroupWords];
+    const unsigned end = groups[(size_t)group * kGroupWords + 1];
     if (bone >= bone_count || end < previous ||
         end > sizeof context->projectedVertices /
                   sizeof context->projectedVertices[0] ||
@@ -105,8 +143,8 @@ int Render_ProjectModelVertices(void* instance, MATRIX* matrices,
   unsigned vertex = 0;
   int combined_depth = 0;
   for (unsigned group = 0; group < group_count; ++group) {
-    const unsigned end = groups[group * 2 + 1];
-    const MATRIX* matrix = &matrices[groups[group * 2]];
+    const unsigned end = groups[(size_t)group * kGroupWords + 1];
+    const MATRIX* matrix = &matrices[groups[(size_t)group * kGroupWords]];
     Core_Gte_SetRotMatrix(matrix);
     Core_Gte_SetTransMatrix(matrix);
     for (; vertex < end; ++vertex) {
@@ -154,22 +192,136 @@ int Render_ValidateModelData(void* instance, const void* data, size_t size) {
        kSectionAlignmentMask) != 0) {
     return 0;
   }
-  const unsigned counts[3] = {header.triangles, header.quads, header.other};
+  const unsigned counts[kPolygonGroupCount] = {header.triangles, header.quads,
+                                               header.other};
   size_t offset = model->polygonSection;
   const unsigned char* bytes = data;
   const int colored = (((const unsigned char*)instance)[8] & 8) != 0;
-  for (int part = 0; part < 3; ++part) {
+  for (int part = 0; part < kPolygonGroupCount; ++part) {
     for (unsigned face = 0; face < counts[part]; ++face) {
       const unsigned prefix = colored ? 12 : 2;
       if (size - offset < prefix) return 0;
       const unsigned command = bytes[offset + (colored ? 11 : 0)];
       const int corners = PolygonCorners(command, colored);
-      if (corners == 0 || (part != 2 && corners != part + 3)) return 0;
-      const unsigned extent = PolygonBytes(corners, colored);
+      if (corners == 0 || (part != kSpecialPolygonGroup &&
+                           corners != part + kTriangleCorners)) {
+        return 0;
+      }
+      const unsigned extent = PolygonBytes(command);
       if (extent > size - offset) return 0;
       offset += extent;
     }
   }
+  return 1;
+}
+
+static void BuildAdaptiveTriangles(
+    const Actors_ModelRenderContext* context, const unsigned char* data,
+    const uint16_t* indices, const Core_GteWord* screen,
+    unsigned char triangles[2][kFlatTriangleBytes]) {
+  int delta[kTriangleCorners][kTriangleCorners];
+  for (int vertex = 0; vertex < kTriangleCorners; ++vertex) {
+    delta[vertex][0] = (int16_t)screen[vertex + 1] - (int16_t)screen[0];
+    delta[vertex][1] =
+        (int16_t)((uint32_t)screen[vertex + 1] >> kCoordinateBits) -
+        (int16_t)((uint32_t)screen[0] >> kCoordinateBits);
+    const int difference =
+        context->vertexDepths[indices[vertex + 1] / sizeof(Core_GteWord)] -
+        context->vertexDepths[indices[0] / sizeof(Core_GteWord)];
+    delta[vertex][2] = vertex < 2 ? (int16_t)difference : difference;
+  }
+  const int64_t volume = ((int64_t)delta[0][1] * delta[1][2] -
+                          (int64_t)delta[0][2] * delta[1][1]) *
+                             delta[2][0] +
+                         ((int64_t)delta[0][2] * delta[1][0] -
+                          (int64_t)delta[0][0] * delta[1][2]) *
+                             delta[2][1] +
+                         ((int64_t)delta[0][0] * delta[1][1] -
+                          (int64_t)delta[0][1] * delta[1][0]) *
+                             delta[2][2];
+  const unsigned normal[2][kTriangleCorners] = {{0, 1, 2}, {1, 3, 2}};
+  const unsigned alternate[2][kTriangleCorners] = {{0, 1, 3}, {0, 3, 2}};
+  const unsigned (*order)[kTriangleCorners] =
+      (int32_t)(uint32_t)volume > 0 ? normal : alternate;
+  for (int part = 0; part < 2; ++part) {
+    unsigned char* triangle = triangles[part];
+    triangle[0] = kFlatTriangleCommand;
+    triangle[1] = kFlatTriangleBytes;
+    for (int corner = 0; corner < kTriangleCorners; ++corner) {
+      const unsigned vertex = order[part][corner];
+      memcpy(triangle + kFlatIndexOffset + (size_t)corner * sizeof(uint16_t),
+             &indices[vertex], sizeof indices[vertex]);
+      memcpy(triangle + kFlatTriangleUvOffset +
+                 (size_t)((corner + 1) % kTriangleCorners) * sizeof(uint16_t),
+             data + kFlatQuadUvOffset + (size_t)vertex * sizeof(uint16_t),
+             sizeof(uint16_t));
+    }
+  }
+}
+
+typedef struct ProjectedModelPolygon {
+  const unsigned char* data;
+  const Core_GteWord* screen;
+  int corners;
+  int colored;
+  unsigned flags;
+  int depth;
+  unsigned tint;
+} ProjectedModelPolygon;
+
+static int WriteModelPolygon(const ProjectedModelPolygon* polygon,
+                             uintptr_t limit) {
+  const int corners = polygon->corners;
+  const int colored = polygon->colored;
+  const size_t vertex_words = colored ? kGouraudVertexWords : kFlatVertexWords;
+  const size_t words = (colored ? 1 : 2) + (size_t)corners * vertex_words;
+  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
+  if (cursor > limit || words * sizeof(u_long) > limit - cursor) return -1;
+  u_long* packet = (void*)cursor;
+  memset(packet, 0, words * sizeof *packet);
+  const Render_ModelScratchpad* workspace = Render_ModelWorkspace();
+  const unsigned page =
+      workspace->texturePage | (polygon->flags & kBlendModeMask);
+  for (int corner = 0; corner < corners; ++corner) {
+    const unsigned uv_corner = corners == kTriangleCorners
+                                   ? (unsigned)(corner + 1) % kTriangleCorners
+                                   : (unsigned)corner;
+    const size_t uv_offset =
+        colored ? (corners == kTriangleCorners
+                       ? (uv_corner == 0
+                              ? kGouraudFirstUvOffset
+                              : kGouraudTriangleTailUvOffset +
+                                    (size_t)(uv_corner - 1) * sizeof(uint16_t))
+                       : kGouraudQuadUvOffset +
+                             (size_t)uv_corner * sizeof(uint16_t))
+                : kFlatIndexOffset +
+                      (size_t)(corners + uv_corner) * sizeof(uint16_t);
+    uint16_t uv;
+    memcpy(&uv, polygon->data + uv_offset, sizeof uv);
+    const size_t xy_word = 2 + (size_t)corner * vertex_words;
+    packet[xy_word] = (u_long)polygon->screen[corner];
+    packet[xy_word + 1] = uv;
+    if (colored) {
+      unsigned color;
+      memcpy(&color,
+             polygon->data + 2 * sizeof(uint32_t) +
+                 (size_t)corner * sizeof(uint32_t),
+             sizeof color);
+      packet[xy_word - 1] = color & kColorMask;
+    }
+  }
+  const unsigned command =
+      (colored ? kGouraudTriangleCommand : kFlatTriangleCommand) |
+      (corners == kQuadCorners ? kQuadCommandFlag : 0) |
+      ((polygon->flags & kSemiTransparencyFlag) != 0 ? 2u : 0u);
+  if (!colored) packet[1] = polygon->tint & kColorMask;
+  packet[1] |= command << kCommandShift;
+  packet[kClutPacketWord] |= (unsigned)workspace->palette << kCoordinateBits;
+  packet[colored ? kGouraudPagePacketWord : kFlatPagePacketWord] |=
+      page << kCoordinateBits;
+  setlen(packet, words - 1);
+  AddPrim((u_long*)Render_frameScratch.orderingTable + polygon->depth, packet);
+  Render_frameScratch.primitiveCursor = packet + words;
   return 1;
 }
 
@@ -182,7 +334,8 @@ static int QueueModelPolygon(Actors_ModelRenderContext* context,
          (size_t)corners * sizeof indices[0]);
   unsigned depths = 0;
   Core_GteWord screen[kQuadCorners];
-  int left = 1024, top = 1024, right = -1024, bottom = -1024;
+  int left = kProjectedCoordinateBound, top = kProjectedCoordinateBound;
+  int right = -kProjectedCoordinateBound, bottom = -kProjectedCoordinateBound;
   for (int corner = 0; corner < corners; ++corner) {
     if ((indices[corner] & kSectionAlignmentMask) != 0 ||
         indices[corner] / sizeof(Core_GteWord) >=
@@ -199,97 +352,43 @@ static int QueueModelPolygon(Actors_ModelRenderContext* context,
     if (y < top) top = y;
     if (y > bottom) bottom = y;
   }
-  if (!colored && corners == 4 && (flags & 3) == 3) {
-    int delta[3][3];
-    for (int vertex = 0; vertex < 3; ++vertex) {
-      delta[vertex][0] = (int16_t)screen[vertex + 1] - (int16_t)screen[0];
-      delta[vertex][1] = (int16_t)((uint32_t)screen[vertex + 1] >> 16) -
-                         (int16_t)((uint32_t)screen[0] >> 16);
-      const int difference = context->vertexDepths[indices[vertex + 1] / 4] -
-                             context->vertexDepths[indices[0] / 4];
-      delta[vertex][2] = vertex < 2 ? (int16_t)difference : difference;
-    }
-    const int64_t volume = ((int64_t)delta[0][1] * delta[1][2] -
-                            (int64_t)delta[0][2] * delta[1][1]) *
-                               delta[2][0] +
-                           ((int64_t)delta[0][2] * delta[1][0] -
-                            (int64_t)delta[0][0] * delta[1][2]) *
-                               delta[2][1] +
-                           ((int64_t)delta[0][0] * delta[1][1] -
-                            (int64_t)delta[0][1] * delta[1][0]) *
-                               delta[2][2];
-    const unsigned normal[2][3] = {{0, 1, 2}, {1, 3, 2}};
-    const unsigned alternate[2][3] = {{0, 1, 3}, {0, 3, 2}};
-    const unsigned (*order)[3] =
-        (int32_t)(uint32_t)volume > 0 ? normal : alternate;
+  if (!colored && corners == kQuadCorners &&
+      (flags & kAdaptiveSplitMode) == kAdaptiveSplitMode) {
+    unsigned char triangles[2][kFlatTriangleBytes] = {{0}};
+    BuildAdaptiveTriangles(context, data, indices, screen, triangles);
     int emitted = 0;
     for (int part = 0; part < 2; ++part) {
-      unsigned char triangle[kFlatTriangleBytes] = {kFlatTriangleCommand,
-                                                    kFlatTriangleBytes};
-      for (int corner = 0; corner < 3; ++corner) {
-        const unsigned vertex = order[part][corner];
-        memcpy(triangle + 4 + corner * 2, &indices[vertex],
-               sizeof indices[vertex]);
-        memcpy(triangle + 10 + ((corner + 1) % 3) * 2, data + 12 + vertex * 2,
-               2);
-      }
       const int result =
-          QueueModelPolygon(context, triangle, 3, 0, 0, -1, tint, limit);
+          QueueModelPolygon(context, triangles[part], kTriangleCorners, 0, 0,
+                            kNormalDepthBias, tint, limit);
       if (result < 0) return result;
       emitted += result;
     }
     return emitted;
   }
-  if (right < 0 || bottom < 0 || left >= 320 || top >= 240 ||
+  if (right < 0 || bottom < 0 || left >= kViewportWidth ||
+      top >= kViewportHeight ||
       ((flags & 1) == 0 &&
        Core_Gte_NormalClip(screen[0], screen[1], screen[2]) <= 0)) {
     return 0;
   }
-  int depth = (int)(corners == 3 ? (depths * 341u) >> 12 : depths >> 4);
-  depth += bias + (int)((flags >> 2) & 3) * 4;
-  if (depth < 0 || depth >= 0x7C0 ||
+  int depth = (int)(corners == kTriangleCorners
+                        ? (depths * (unsigned)kTriangleDepthReciprocal) >>
+                              kDepthReciprocalBits
+                        : depths >> kQuadDepthShift);
+  depth += bias + (int)((flags >> 2) & kDepthBiasMask) * kDepthBiasStep;
+  if (depth < 0 || depth >= kModelOrderingLimit ||
       Render_frameScratch.orderingTable == NULL) {
     return 0;
   }
-  const size_t words =
-      colored ? 1 + (size_t)corners * 3 : 2 + (size_t)corners * 2;
-  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (cursor > limit || words * sizeof(u_long) > limit - cursor) {
-    return -1;
-  }
-  u_long* packet = (void*)cursor;
-  memset(packet, 0, words * sizeof *packet);
-  const Render_ModelScratchpad* workspace = Render_ModelWorkspace();
-  const unsigned page = workspace->texturePage | (flags & 0x60);
-  for (int corner = 0; corner < corners; ++corner) {
-    const unsigned uv_corner =
-        corners == 3 ? (unsigned)(corner + 1) % 3 : (unsigned)corner;
-    const unsigned uv_offset =
-        colored ? (corners == 3 ? (uv_corner == 0 ? 6 : 18 + uv_corner * 2)
-                                : 24 + uv_corner * 2)
-                : 4 + corners * 2 + uv_corner * 2;
-    uint16_t uv;
-    memcpy(&uv, data + uv_offset, sizeof uv);
-    const unsigned xy_word = colored ? 2 + corner * 3 : 2 + corner * 2;
-    packet[xy_word] = (u_long)screen[corner];
-    packet[xy_word + 1] = uv;
-    if (colored) {
-      unsigned color;
-      memcpy(&color, data + 8 + corner * 4, sizeof color);
-      packet[xy_word - 1] = color & kColorMask;
-    }
-  }
-  const unsigned command = (colored ? 0x34u : 0x24u) |
-                           (corners == 4 ? 8u : 0u) |
-                           ((flags & 0x10) != 0 ? 2u : 0u);
-  if (!colored) packet[1] = tint & kColorMask;
-  packet[1] |= command << 24;
-  packet[3] |= (unsigned)workspace->palette << 16;
-  packet[colored ? 6 : 5] |= page << 16;
-  setlen(packet, words - 1);
-  AddPrim((u_long*)Render_frameScratch.orderingTable + depth, packet);
-  Render_frameScratch.primitiveCursor = packet + words;
-  return 1;
+  const ProjectedModelPolygon polygon = {.data = data,
+                                         .screen = screen,
+                                         .corners = corners,
+                                         .colored = colored,
+                                         .flags = flags,
+                                         .depth = depth,
+                                         .tint = tint};
+  return WriteModelPolygon(&polygon, limit);
 }
 
 static void DrawModelPolygons(Actors_ModelRenderContext* context,
@@ -311,24 +410,28 @@ static void DrawModelPolygons(Actors_ModelRenderContext* context,
   const Actors_ShpModel* model = model_data;
   const unsigned char* polygon =
       VS_ONDISC(model, polygonSection, const unsigned char*);
-  unsigned color = 0x808080;
+  unsigned color = kNeutralTint;
   if (tint != NULL) memcpy(&color, tint, sizeof color);
-  const unsigned counts[3] = {header.triangles, header.quads, header.other};
-  for (int part = 0; part < 3; ++part) {
+  const unsigned counts[kPolygonGroupCount] = {header.triangles, header.quads,
+                                               header.other};
+  for (int part = 0; part < kPolygonGroupCount; ++part) {
     for (unsigned face = 0; face < counts[part]; ++face) {
       const unsigned command = colored ? polygon[11] : polygon[0];
       const int corners = PolygonCorners(command, colored);
-      if (corners == 0 || (part != 2 && corners != part + 3)) {
+      if (corners == 0 || (part != kSpecialPolygonGroup &&
+                           corners != part + kTriangleCorners)) {
         Core_Debugf("render", "Invalid model polygon command 0x%X", command);
         return;
       }
-      const unsigned flags = part == 2 ? polygon[colored ? 19 : 2] : 0;
+      const unsigned flags =
+          part == kSpecialPolygonGroup ? polygon[colored ? 19 : 2] : 0;
       if (QueueModelPolygon(context, polygon, corners, colored, flags,
-                            part == 2 ? -5 : -1, color,
-                            base + kPrimitiveBufferBytes) < 0) {
+                            part == kSpecialPolygonGroup ? kSpecialDepthBias
+                                                         : kNormalDepthBias,
+                            color, base + kPrimitiveBufferBytes) < 0) {
         return;
       }
-      polygon += PolygonBytes(corners, colored);
+      polygon += PolygonBytes(command);
     }
   }
 }

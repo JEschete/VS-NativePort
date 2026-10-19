@@ -8,6 +8,9 @@
 // ticks after the start.
 #include "Movie/Intro/Player.h"
 
+#include <stdint.h>
+#include <string.h>
+
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Legacy/Psx.h"
@@ -18,13 +21,21 @@
 #define VS_INTRO_PICTURE_TICKS 0x8F5
 #define VS_INTRO_SOUNDTRACK_TICKS 4401
 
+enum {
+  kPictureWidth = 320,
+  kPictureHeight = 224,
+  kScreenHeight = 240,
+  kRgbChannels = 3,
+  kPageWidth = kPictureWidth * kRgbChannels / (int)sizeof(uint16_t)
+};
+
 // decomp: TITLE.PRG _initIntroMovie (src/TITLE/TITLE.PRG/22C.c:3649)
 void Movie_Intro_Start(void) {
   RECT rect;
 
   // the original cleared both picture buffers when the first frame's size
   // became known
-  setRECT(&rect, 0, 0, 480, 448);
+  setRECT(&rect, 0, 0, kPageWidth, 2 * kPictureHeight);
   ClearImage(&rect, 0, 0, 0);
   Movie_Intro_legacyMdecState.frameRectIndex = 0;
   Movie_PlayerOpen("MOV/TITLE.STR");
@@ -55,9 +66,11 @@ int Movie_Intro_Play(void) {
   while (1) {
     // the picture alternates between two 480x224 halves of the page space,
     // 24-bit
-    const int target = Movie_Intro_legacyMdecState.frameRectIndex;
-    Movie_PlayerDrawFrame(VSync(-1) - Movie_Intro_playbackStartTick, 0,
-                          target == 0 ? 0 : 224);
+    const u_int target = Movie_Intro_legacyMdecState.frameRectIndex;
+    const uint32_t elapsed_bits = VSync(-1) - Movie_Intro_playbackStartTick;
+    int32_t elapsed;
+    memcpy(&elapsed, &elapsed_bits, sizeof elapsed);
+    Movie_PlayerDrawFrame(elapsed, 0, target == 0 ? 0 : kPictureHeight);
     Movie_Intro_legacyMdecState.frameRectIndex = target == 0;
     VSync(0);
     Input_UpdateControllers();
@@ -66,11 +79,12 @@ int Movie_Intro_Play(void) {
       return 0;
     }
 
-    SetDefDispEnv(&disp, 0, target == 0 ? 0 : 224, 480, 224);
-    disp.screen.h = 224;
-    disp.screen.y = 8;
+    SetDefDispEnv(&disp, 0, target == 0 ? 0 : kPictureHeight, kPageWidth,
+                  kPictureHeight);
+    disp.screen.h = kPictureHeight;
+    disp.screen.y = (kScreenHeight - kPictureHeight) / 2;
     disp.isrgb24 = 1;
-    disp.disp.w = (disp.disp.w * 2) / 3;
+    disp.disp.w = (int16_t)((disp.disp.w * 2) / kRgbChannels);
     PutDispEnv(&disp);
 
     if (++frames != 1) {

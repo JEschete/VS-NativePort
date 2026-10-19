@@ -21,8 +21,14 @@ void* Core_GameHeapArena(void);
 #define CORE_OVERLAY_BASE 0x80068800u
 #define CORE_OVERLAY_SIZE (0x8010C000u - CORE_OVERLAY_BASE)
 extern unsigned char Core_overlayArena[CORE_OVERLAY_SIZE];
+#ifdef __cplusplus
 #define Core_OverlayAddress(psxAddress) \
+  (static_cast<void*>(Core_overlayArena + ((psxAddress) - CORE_OVERLAY_BASE)))
+#else
+#define Core_OverlayAddress(psxAddress)                \
+  /* NOLINTNEXTLINE(readability/casting): C branch. */ \
   ((void*)(Core_overlayArena + ((psxAddress) - CORE_OVERLAY_BASE)))
+#endif
 
 #ifdef __cplusplus
 }

@@ -61,8 +61,9 @@ u_char Field_SampleCollisionHeightCode(u_int sample_x, int sample_z,
          sizeof descriptor);
   const size_t pattern =
       patterns + (size_t)(descriptor & kPatternIndexMask) * kPatternBytes;
-  if (pattern > length || length - pattern < kPatternBytes)
+  if (pattern > length || length - pattern < kPatternBytes) {
     return kInvalidHeight;
+  }
   const unsigned char sample =
       bytes[pattern +
             ((size_t)sample_z & (kSamplesPerAxis - 1)) * kSamplesPerAxis +

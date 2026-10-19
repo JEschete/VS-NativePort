@@ -61,6 +61,12 @@ struct Packet {
 };
 
 class Player {
+  struct TrackSelection {
+    i64 video = -1;
+    i64 audio = -1;
+    std::vector<u8> flac;
+  };
+
  public:
   ~Player() { Close(); }
 
@@ -85,72 +91,12 @@ class Player {
     if (segment->Load() < 0) {
       return false;
     }
-    i64 video_track = -1, audio_track = -1;
-    std::vector<u8> flac;
-    const mkvparser::Tracks* tracks = segment->GetTracks();
-    if (tracks == nullptr) return false;
-    for (decltype(tracks->GetTracksCount()) index = 0;
-         index < tracks->GetTracksCount(); ++index) {
-      const mkvparser::Track* t = tracks->GetTrackByIndex(index);
-      if (t == nullptr) {
-        continue;
-      }
-      const std::string codec = t->GetCodecId() ? t->GetCodecId() : "";
-      if (t->GetType() == mkvparser::Track::kVideo && codec == "V_AV1") {
-        video_track = t->GetNumber();
-        const auto* v = static_cast<const mkvparser::VideoTrack*>(t);
-        if (v->GetWidth() <= 0 || v->GetHeight() <= 0 ||
-            v->GetWidth() > std::numeric_limits<i32>::max() / kRgbChannels ||
-            v->GetHeight() > std::numeric_limits<i32>::max()) {
-          return false;
-        }
-        m_width_ = static_cast<i32>(v->GetWidth());
-        m_height_ = static_cast<i32>(v->GetHeight());
-      } else if (t->GetType() == mkvparser::Track::kAudio &&
-                 codec == "A_FLAC") {
-        audio_track = t->GetNumber();
-        const auto* a = static_cast<const mkvparser::AudioTrack*>(t);
-        m_sample_rate_ = static_cast<i32>(a->GetSamplingRate());
-        m_channels_ = static_cast<i32>(a->GetChannels());
-        size_t size = 0;
-        const unsigned char* priv = t->GetCodecPrivate(size);
-        if (size != 0) {
-          if (priv == nullptr) return false;
-          flac.assign(priv, priv + size);
-        }
-      }
-    }
-    if (video_track < 0) {
-      VS_LOG_ERROR("movie", "{}: no AV1 video track", file);
+    TrackSelection tracks;
+    if (!SelectTracks(*segment, tracks)) {
+      VS_LOG_ERROR("movie", "{}: missing or invalid supported tracks", file);
       return false;
     }
-    for (const mkvparser::Cluster* c = segment->GetFirst();
-         c != nullptr && !c->EOS(); c = segment->GetNext(c)) {
-      const mkvparser::BlockEntry* be = nullptr;
-      if (c->GetFirst(be) < 0) {
-        break;
-      }
-      while (be != nullptr && !be->EOS()) {
-        const mkvparser::Block* b = be->GetBlock();
-        for (int k = 0; k < b->GetFrameCount(); ++k) {
-          const mkvparser::Block::Frame& f = b->GetFrame(k);
-          if (f.len <= 0) return false;
-          std::vector<u8> bytes(static_cast<usize>(f.len));
-          if (f.Read(&reader, bytes.data()) != 0) {
-            continue;
-          }
-          if (b->GetTrackNumber() == video_track) {
-            m_video_.push_back({b->GetTime(c), std::move(bytes)});
-          } else if (b->GetTrackNumber() == audio_track) {
-            flac.insert(flac.end(), bytes.begin(), bytes.end());
-          }
-        }
-        if (c->GetNext(be, be) < 0) {
-          break;
-        }
-      }
-    }
-    if (m_video_.empty()) {
+    if (!ReadPackets(*segment, reader, tracks)) {
       return false;
     }
     Dav1dSettings settings;
@@ -166,7 +112,7 @@ class Player {
       return false;
     }
     m_rgb_.assign(row_bytes * m_height_, 0);
-    StartSoundtrack(flac);
+    StartSoundtrack(tracks.flac);
     VS_LOG_INFO(
         "movie", "{}: {}x{}, {} frames, {:.1f} s", file, m_width_, m_height_,
         m_video_.size(),
@@ -208,6 +154,69 @@ class Player {
   }
 
  private:
+  bool SelectTracks(const mkvparser::Segment& segment,
+                    TrackSelection& selected) {
+    const mkvparser::Tracks* tracks = segment.GetTracks();
+    if (tracks == nullptr) return false;
+    for (decltype(tracks->GetTracksCount()) index = 0;
+         index < tracks->GetTracksCount(); ++index) {
+      const mkvparser::Track* track = tracks->GetTrackByIndex(index);
+      if (track == nullptr) continue;
+      const std::string codec = track->GetCodecId() ? track->GetCodecId() : "";
+      if (track->GetType() == mkvparser::Track::kVideo && codec == "V_AV1") {
+        selected.video = track->GetNumber();
+        const auto* video = static_cast<const mkvparser::VideoTrack*>(track);
+        if (video->GetWidth() <= 0 || video->GetHeight() <= 0 ||
+            video->GetWidth() >
+                std::numeric_limits<i32>::max() / kRgbChannels ||
+            video->GetHeight() > std::numeric_limits<i32>::max()) {
+          return false;
+        }
+        m_width_ = static_cast<i32>(video->GetWidth());
+        m_height_ = static_cast<i32>(video->GetHeight());
+      } else if (track->GetType() == mkvparser::Track::kAudio &&
+                 codec == "A_FLAC") {
+        selected.audio = track->GetNumber();
+        const auto* audio = static_cast<const mkvparser::AudioTrack*>(track);
+        m_sample_rate_ = static_cast<i32>(audio->GetSamplingRate());
+        m_channels_ = static_cast<i32>(audio->GetChannels());
+        size_t size = 0;
+        const unsigned char* metadata = track->GetCodecPrivate(size);
+        if (size != 0) {
+          if (metadata == nullptr) return false;
+          selected.flac.assign(metadata, metadata + size);
+        }
+      }
+    }
+    return selected.video >= 0;
+  }
+
+  bool ReadPackets(mkvparser::Segment& segment, mkvparser::MkvReader& reader,
+                   TrackSelection& tracks) {
+    for (const mkvparser::Cluster* cluster = segment.GetFirst();
+         cluster != nullptr && !cluster->EOS();
+         cluster = segment.GetNext(cluster)) {
+      const mkvparser::BlockEntry* entry = nullptr;
+      if (cluster->GetFirst(entry) < 0) break;
+      while (entry != nullptr && !entry->EOS()) {
+        const mkvparser::Block* block = entry->GetBlock();
+        for (int index = 0; index < block->GetFrameCount(); ++index) {
+          const mkvparser::Block::Frame& frame = block->GetFrame(index);
+          if (frame.len <= 0) return false;
+          std::vector<u8> bytes(static_cast<usize>(frame.len));
+          if (frame.Read(&reader, bytes.data()) != 0) continue;
+          if (block->GetTrackNumber() == tracks.video) {
+            m_video_.push_back({block->GetTime(cluster), std::move(bytes)});
+          } else if (block->GetTrackNumber() == tracks.audio) {
+            tracks.flac.insert(tracks.flac.end(), bytes.begin(), bytes.end());
+          }
+        }
+        if (cluster->GetNext(entry, entry) < 0) break;
+      }
+    }
+    return !m_video_.empty();
+  }
+
   bool DecodeNext() {
     Dav1dPicture pic{};
     while (true) {

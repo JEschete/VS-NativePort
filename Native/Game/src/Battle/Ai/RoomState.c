@@ -40,7 +40,8 @@
 
 // decomp: BATTLE.PRG func_800E6F1C (src/BATTLE/BATTLE.PRG/7E05C.s:541).
 void Battle_Ai_FreeRoomAiState(void) {
-  for (unsigned index = 0; index < 16; ++index) {
+  for (size_t index = 0; index < sizeof Battle_actors / sizeof Battle_actors[0];
+       ++index) {
     if (Battle_actors[index] != NULL) {
       Battle_Ai_FreeActorAiState(Battle_actors[index]);
     }
@@ -57,11 +58,36 @@ void Battle_Ai_FreeRoomAiState(void) {
   Battle_Ai_routeGates = NULL;
 }
 
+enum {
+  kRoomAuxiliaryHeaderBytes = 0x498,
+  kRoomSettingsOffset = 0x450,
+  kRoomBoundsOffset = 0x494,
+  kPatrolRoutesOffset = 0x400,
+  kWaypointsOffset = 0x440,
+  kRouteGatesOffset = 0x454,
+  kPatrolRouteLength = 8,
+  kDefaultActionDelay = 150,
+  kBlockedTile = 0x8000,
+  kHeightFractionBits = 6,
+  kStoredHeightMask = 0x3FF,
+  kTriggerKindCount = 16,
+  kTriggerFlag = 0x100,
+  kActionDelayShift = 21,
+  kNonSpellActionsShift = 20,
+  kRoomOptionsShift = 29
+};
+
 u_short Battle_Ai_DecodeCollisionFlags(unsigned bits) {
-  return (u_short)(((bits >> 23) & 15) | ((bits >> 23) & 0x10) |
-                   ((bits >> 12) & 0x20) | ((bits >> 22) & 0x40) |
-                   ((bits >> 20) & 0x800) | ((bits >> 18) & 0x1000) |
-                   ((bits >> 16) & 0x2000));
+  static const struct {
+    unsigned shift;
+    unsigned output_mask;
+  } fields[] = {{23, 0x1F},  {12, 0x20},   {22, 0x40},
+                {20, 0x800}, {18, 0x1000}, {16, 0x2000}};
+  unsigned flags = 0;
+  for (size_t index = 0; index < sizeof fields / sizeof fields[0]; ++index) {
+    flags |= (bits >> fields[index].shift) & fields[index].output_mask;
+  }
+  return (u_short)flags;
 }
 
 int Battle_Ai_BuildRoomAiMap(Battle_Ai_RoomAiMap* map) {
@@ -69,7 +95,8 @@ int Battle_Ai_BuildRoomAiMap(Battle_Ai_RoomAiMap* map) {
   const unsigned char* auxiliary = Field_roomData.section6;
   const Field_MpdCollisionHeader* dimensions = Field_roomData.collisionMap;
   if (map == NULL ||
-      (auxiliary != NULL && Field_roomData.header.section6Length < 0x498) ||
+      (auxiliary != NULL &&
+       Field_roomData.header.section6Length < kRoomAuxiliaryHeaderBytes) ||
       (dimensions != NULL &&
        (dimensions->width < 0 || dimensions->width > kMapSide ||
         dimensions->height < 0 || dimensions->height > kMapSide))) {
@@ -81,38 +108,44 @@ int Battle_Ai_BuildRoomAiMap(Battle_Ai_RoomAiMap* map) {
                  (unsigned)Field_CollisionMapDimensions(0) >> 12);
   memcpy(&map->state.maxTileX, &bounds, sizeof bounds);
   memcpy(map->state.reserved4, &bounds, sizeof bounds);
-  map->state.flightCeiling = Field_roomData.environment != NULL
-                                 ? -Field_RoomEnvironmentParameter() * 64
-                                 : 0;
-  map->state.defaultActionDelay = 150;
-  for (unsigned tile = 0; tile < 1024; ++tile) {
-    const unsigned tile_x = tile & 31, tile_z = tile >> 5;
+  map->state.flightCeiling =
+      Field_roomData.environment != NULL
+          ? -Field_RoomEnvironmentParameter() * (1 << kHeightFractionBits)
+          : 0;
+  map->state.defaultActionDelay = kDefaultActionDelay;
+  for (int tile = 0; tile < kMapSide * kMapSide; ++tile) {
+    const int tile_x = tile % kMapSide;
+    const int tile_z = tile / kMapSide;
     const Field_MpdTileCell* cell = Field_CollisionCellAt(tile_x, tile_z, 0);
     if (cell == NULL) {
-      map->flags[tile_z][tile_x] = 0x8000;
+      map->flags[tile_z][tile_x] = kBlockedTile;
       continue;
     }
     unsigned bits;
     memcpy(&bits, cell, sizeof bits);
     unsigned flags = Battle_Ai_DecodeCollisionFlags(bits);
     map->heights[tile_z][tile_x] =
-        (u_short)((Battle_Ai_SampleAiTileGroundHeight(tile_x, tile_z) >> 6) &
-                  0x3FF);
+        (u_short)((Battle_Ai_SampleAiTileGroundHeight(tile_x, tile_z) >>
+                   kHeightFractionBits) &
+                  kStoredHeightMask);
     const Field_MpdFloorTrigger* trigger =
         Field_RoomTriggerAtTile(tile_x, tile_z, 0);
-    if (trigger != NULL && (uint16_t)trigger->kind < 16 &&
+    if (trigger != NULL && (uint16_t)trigger->kind < kTriggerKindCount &&
         (uint16_t)trigger->lockState.switchValue < 2) {
-      flags |= 0x100u << trigger->lockState.switchValue;
+      flags |= (unsigned)kTriggerFlag << trigger->lockState.switchValue;
     }
     map->flags[tile_z][tile_x] = (u_short)flags;
   }
   if (auxiliary != NULL) {
     unsigned settings;
-    memcpy(&settings, auxiliary + 0x450, sizeof settings);
-    memcpy(&map->state.maxTileX, auxiliary + 0x494, 4);
-    map->state.defaultActionDelay = (unsigned char)(settings >> 21);
-    map->state.allowsNonSpellActions = (unsigned char)((settings >> 20) & 1);
-    map->state.reservedB[2] = (char)(settings >> 29);
+    memcpy(&settings, auxiliary + kRoomSettingsOffset, sizeof settings);
+    memcpy(&map->state.maxTileX, auxiliary + kRoomBoundsOffset,
+           sizeof(uint32_t));
+    map->state.defaultActionDelay =
+        (unsigned char)(settings >> kActionDelayShift);
+    map->state.allowsNonSpellActions =
+        (unsigned char)((settings >> kNonSpellActionsShift) & 1);
+    map->state.reservedB[2] = (char)(settings >> kRoomOptionsShift);
   }
   return 1;
 }
@@ -130,34 +163,48 @@ void Battle_Ai_InitializeRoomAiMap(void) {
   unsigned char* auxiliary = Field_roomData.section6;
   Battle_Ai_roomHasWaypoints = auxiliary;
   Battle_Ai_patrolRoutes =
-      auxiliary != NULL ? (uint16_t (*)[8])(auxiliary + 0x400) : NULL;
+      auxiliary != NULL
+          ? (uint16_t (*)[kPatrolRouteLength])(auxiliary + kPatrolRoutesOffset)
+          : NULL;
   Battle_Ai_roomWaypoints =
-      auxiliary != NULL ? (uint16_t*)(auxiliary + 0x440) : NULL;
+      auxiliary != NULL ? (uint16_t*)(auxiliary + kWaypointsOffset) : NULL;
   Battle_Ai_routeGates =
-      auxiliary != NULL ? (Battle_Ai_RouteGateEnd*)(auxiliary + 0x454) : NULL;
+      auxiliary != NULL
+          ? (Battle_Ai_RouteGateEnd*)(auxiliary + kRouteGatesOffset)
+          : NULL;
   Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
   Battle_Ai_UpdateRouteGateAvailability();
 }
 
 // decomp: BATTLE.PRG func_800E71DC (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file:
 // not yet ported]
-int Battle_Ai_SelectTileHeight(const int samples[16], int center) {
+int Battle_Ai_SelectTileHeight(const int samples[kAiTileSampleCount],
+                               int center) {
+  enum {
+    kSampleRowWidth = 4,
+    kFallbackSample = 10,
+    kHeightSignBit = 0x4000,
+    kHeightMagnitudeMask = kHeightSignBit - 1,
+    kSolidPatchMask = 0x33
+  };
   int highest = center;
   unsigned invalid = 0;
-  for (unsigned index = 0; index < 16; ++index) {
+  for (unsigned index = 0; index < kAiTileSampleCount; ++index) {
     const int sample = samples[index];
     if (sample < 0) invalid |= 1u << index;
-    const int height = (sample & 0x3FFF) - (sample & 0x4000);
-    const int previous = (highest & 0x3FFF) - (highest & 0x4000);
+    const int height =
+        (sample & kHeightMagnitudeMask) - (sample & kHeightSignBit);
+    const int previous =
+        (highest & kHeightMagnitudeMask) - (highest & kHeightSignBit);
     if (height > previous) highest = sample;
   }
   if (invalid == 0) return highest;
-  for (unsigned index = 0; index < 10; ++index) {
-    if (index == 3 || index == 7) continue;
-    const unsigned patch = 0x33u << index;
+  for (unsigned index = 0; index < kFallbackSample; ++index) {
+    if (index % kSampleRowWidth == kSampleRowWidth - 1) continue;
+    const unsigned patch = (unsigned)kSolidPatchMask << index;
     if ((~invalid & patch) == patch) return highest;
   }
-  return samples[10];
+  return samples[kFallbackSample];
 }
 
 // decomp: BATTLE.PRG func_800E71DC (src/BATTLE/BATTLE.PRG/7E05C.s:738).

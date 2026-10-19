@@ -1,6 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Battle/TargetingDraw.h"
 
+#include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -14,6 +15,16 @@
 
 // decomp: BATTLE.PRG func_800C0B50 (src/BATTLE/BATTLE.PRG/58350.s:8).
 void Battle_DrawSphereVolumeWireframe(Battle_TargetVolume* shape, int color) {
+  enum {
+    kSpatialDimensions = 3,
+    kFixedFractionBits = 12,
+    kFixedOne = 1 << kFixedFractionBits,
+    kPulseAngleStep = 64,
+    kIntensityMaximum = 32,
+    kWireCommand = 0x44000000,
+    kSegmentFlagShift = 25,
+    kCoordinateBits = sizeof(int16_t) * CHAR_BIT
+  };
   Battle_TargetSphere* sphere = (void*)Battle_targetSphere;
   if (sphere == NULL || shape == NULL || sphere->vertexCount < 2) return;
   if ((unsigned)sphere->vertexCount >
@@ -32,7 +43,7 @@ void Battle_DrawSphereVolumeWireframe(Battle_TargetVolume* shape, int color) {
   SVECTOR angles = {sphere->wirePhaseA, sphere->wirePhaseB, sphere->wirePhaseC,
                     0};
   Core_Gte_RotMatrixYXZ(&angles, &rotation);
-  const int pulse = Core_Gte_Cos(sphere->wireShape * 64);
+  const int pulse = Core_Gte_Cos(sphere->wireShape * kPulseAngleStep);
   VECTOR scale = {pulse, pulse, pulse, 0};
   Core_Gte_ScaleMatrix(&rotation, &scale);
   Core_Math_MultiplyMatrixIntoRight(&volume, &rotation);
@@ -40,16 +51,17 @@ void Battle_DrawSphereVolumeWireframe(Battle_TargetVolume* shape, int color) {
   SVECTOR previous = {0};
   for (int index = 0; index < sphere->vertexCount; ++index) {
     const Battle_ShapeVertex* vertex = &sphere->wireVertices[index];
-    int16_t coordinates[3];
-    for (unsigned axis = 0; axis < 3; ++axis) {
-      long long sum = (long long)shape->position[axis] * 4096;
-      for (unsigned component = 0; component < 3; ++component) {
-        sum += (long long)rotation.m[axis][component] * vertex->xyz[component];
+    int16_t coordinates[kSpatialDimensions];
+    for (unsigned axis = 0; axis < kSpatialDimensions; ++axis) {
+      int64_t sum = (int64_t)shape->position[axis] * kFixedOne;
+      for (unsigned component = 0; component < kSpatialDimensions;
+           ++component) {
+        sum += (int64_t)rotation.m[axis][component] * vertex->xyz[component];
       }
-      const long long value = sum >> 12;
-      coordinates[axis] = value < -32768  ? -32768
-                          : value > 32767 ? 32767
-                                          : (int16_t)value;
+      const int64_t value = sum >> kFixedFractionBits;
+      coordinates[axis] = (int16_t)(value < INT16_MIN   ? INT16_MIN
+                                    : value > INT16_MAX ? INT16_MAX
+                                                        : value);
     }
     SVECTOR world = {coordinates[0], coordinates[1], coordinates[2], 0};
     Core_GteWord screen, depth;
@@ -57,13 +69,15 @@ void Battle_DrawSphereVolumeWireframe(Battle_TargetVolume* shape, int color) {
     Core_Gte_Rtps();
     Core_Gte_StoreSxy2(&screen);
     Core_Gte_StoreSz3Otz(&depth);
-    SVECTOR projected = {(int16_t)screen, (int16_t)((u_int)screen >> 16),
+    SVECTOR projected = {(int16_t)screen,
+                         (int16_t)((u_int)screen >> kCoordinateBits),
                          (int16_t)depth, 0};
     if (index != 0 && vertex->opaque6 != 0) {
       const int intensity =
-          32 - (projected.vz + previous.vz - sphere->depth * 2) / extent;
-      const u_int command_color =
-          (0x44000000u | (u_int)color) - ((u_int)vertex->opaque6 << 25);
+          kIntensityMaximum -
+          (projected.vz + previous.vz - sphere->depth * 2) / extent;
+      const u_int command_color = ((u_int)kWireCommand | (u_int)color) -
+                                  ((u_int)vertex->opaque6 << kSegmentFlagShift);
       Battle_DrawSphereWireLine(&projected, &previous, command_color,
                                 intensity);
     }

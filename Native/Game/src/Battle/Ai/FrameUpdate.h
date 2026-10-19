@@ -9,16 +9,23 @@ typedef struct Battle_Ai_RoomAiState Battle_Ai_RoomAiState;
 typedef struct Battle_Ai_PerceptionUpdateView Battle_Ai_PerceptionUpdateView;
 typedef struct Battle_Ai_AiCreationView Battle_Ai_AiCreationView;
 
+enum {
+  kAiFrameActorSlots = 16,
+  kAiFrameGridSide = 32,
+  kAiDirectionCacheWords = 3,
+  kAiDirectionBytes = 8
+};
+
 typedef struct Battle_Ai_FrameContext {
-  Battle_Ai_ActorAiState* actors[16];
+  Battle_Ai_ActorAiState* actors[kAiFrameActorSlots];
   Battle_Ai_RoomAiState* room;
-  u_short (*heightMap)[32];
-  u_short (*tileFlags)[32];
+  u_short (*heightMap)[kAiFrameGridSide];
+  u_short (*tileFlags)[kAiFrameGridSide];
   u_char* terrainRegions;
   int movementResult;
-  u_int directionCache[3];
+  u_int directionCache[kAiDirectionCacheWords];
   u_int roomBounds;
-  u_char directions[8];
+  u_char directions[kAiDirectionBytes];
   void* roomData;
   u_int randomState;
   int lastBudgetTick;

@@ -30,25 +30,25 @@
 #include "State/PlayTime.h"
 #include "Title/TitleMenu.h"
 
-static jmp_buf sessionBoundary;
-static int sessionActive;
+static jmp_buf session_boundary;
+static int session_active;
 
 // Nonlocal transitions stay inside the copied C call graph; the platform owns
 // the surrounding fiber.
 int Boot_RunSessionLoop(Boot_SessionEntry title, Boot_SessionEntry battle) {
-  if (sessionActive || title == NULL || battle == NULL) return -1;
-  sessionActive = 1;
-  const int destination = setjmp(sessionBoundary);
+  if (session_active || title == NULL || battle == NULL) return -1;
+  session_active = 1;
+  const int destination = setjmp(session_boundary);
   const int result = destination == 2 ? battle() : title();
-  sessionActive = 0;
+  session_active = 0;
   return result;
 }
 
 static void RequestSession(int destination) {
-  if (!sessionActive) abort();
+  if (!session_active) abort();
   Core_Debugf("boot", "native session transition: %s",
               destination == 1 ? "title" : "battle");
-  longjmp(sessionBoundary, destination);
+  longjmp(session_boundary, destination);
 }
 
 static int RunLoadedBattle(void) {

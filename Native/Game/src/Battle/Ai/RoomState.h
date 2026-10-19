@@ -21,14 +21,17 @@ void Battle_Ai_FreeRoomAiState(void);
 #include "Actors/Shadow.h"
 #include "Field/Gimmicks.h"
 
+enum { kAiRoomGridSide = 32, kAiTileSampleCount = 16 };
+
 typedef struct Battle_Ai_RoomAiMap {
   Battle_Ai_RoomAiState state;
-  u_short flags[32][32];
-  u_short heights[32][32];
+  u_short flags[kAiRoomGridSide][kAiRoomGridSide];
+  u_short heights[kAiRoomGridSide][kAiRoomGridSide];
 } Battle_Ai_RoomAiMap;
 
 u_short Battle_Ai_DecodeCollisionFlags(unsigned bits);
-int Battle_Ai_SelectTileHeight(const int samples[16], int center);
+int Battle_Ai_SelectTileHeight(const int samples[kAiTileSampleCount],
+                               int center);
 int Battle_Ai_BuildRoomAiMap(Battle_Ai_RoomAiMap* map);
 void Battle_Ai_InitializeRoomAiMap(void);
 

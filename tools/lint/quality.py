@@ -28,6 +28,8 @@ NATIVE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx", ".inl"}
 SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx"}
 PYTHON_FOLDERS = ("lint", "port", "scaffold", "ledger", "naming")
 RETIRING_NATIVE = {
+    "Native/Engine/src/Audio/Driver/PlaybackReset.c": "EC-02",
+    "Native/Engine/src/Audio/Driver/PlaybackReset.h": "EC-02",
     "Native/Engine/include/Core/Gte.h": "EC-03",
     "Native/Engine/src/Core/Gte.cpp": "EC-03",
     "Native/Engine/include/Core/Scratch.h": "EC-05",
@@ -572,6 +574,26 @@ def deferred_replacement_style(item: Finding) -> bool:
     )
 
 
+def registered_interfaces() -> set[tuple[str, str]]:
+    with (ROOT / "tools/port/owned.csv").open(
+        newline="", encoding="utf-8-sig"
+    ) as stream:
+        return {
+            (row[column].replace("\\", "/"), row["name"])
+            for row in csv.DictReader(stream)
+            if row["kind"] == "function"
+            for column in ("path", "header")
+            if row[column]
+        }
+
+
+def fixed_interface_advisory(item: Finding, interfaces: set[tuple[str, str]]) -> bool:
+    if item.tool != "tidy" or item.rule != "bugprone-easily-swappable-parameters":
+        return False
+    function = re.search(r"parameters of '([^']+)'", item.message)
+    return bool(function and (item.path, function[1]) in interfaces)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -645,6 +667,13 @@ def main() -> int:
     findings = [item for item in findings if not intentional_test_fixture(item)]
     replacement_style = [item for item in findings if deferred_replacement_style(item)]
     findings = [item for item in findings if not deferred_replacement_style(item)]
+    interfaces = registered_interfaces()
+    interface_notes = [
+        item for item in findings if fixed_interface_advisory(item, interfaces)
+    ]
+    findings = [
+        item for item in findings if not fixed_interface_advisory(item, interfaces)
+    ]
     previous = (
         json.loads(BASELINE.read_text())
         if BASELINE.is_file()
@@ -668,6 +697,9 @@ def main() -> int:
                 "intentional_test_fixtures": [asdict(item) for item in fixtures],
                 "deferred_replacement_style": [
                     asdict(item) for item in replacement_style
+                ],
+                "fixed_interface_advisories": [
+                    asdict(item) for item in interface_notes
                 ],
                 "findings": [asdict(item) for item in findings],
                 "new": [asdict(item) for item in introduced],
@@ -705,6 +737,9 @@ def main() -> int:
     print("Areas: " + ", ".join(f"{name}={count}" for name, count in areas.items()))
     print(f"Exact test-fixture literals reported separately: {len(fixtures)}")
     print(f"Replacement-layer style reported separately: {len(replacement_style)}")
+    print(
+        f"Registered C interface advisories reported separately: {len(interface_notes)}"
+    )
     print(
         f"Quality: {len(findings)} findings, {len(introduced)} new; report: build/quality/report.json"
     )

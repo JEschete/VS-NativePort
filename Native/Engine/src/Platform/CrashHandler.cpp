@@ -8,8 +8,10 @@
 // clang-format on
 
 #include <chrono>
+#include <cinttypes>
 #include <condition_variable>
 #include <csignal>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -21,6 +23,21 @@
 #include "Core/Log.hpp"
 
 #pragma comment(lib, "dbghelp.lib")
+
+namespace {
+constexpr ULONG kSymbolNameCapacity = 256;
+constexpr int kCrashFrameLimit = 48;
+constexpr ULONG kCapturedFrameLimit = 32;
+constexpr USHORT kLoggedFrameLimit = 16;
+constexpr std::size_t kWindowsPathCapacity = 32768;
+constexpr int kWatchdogSeconds = 10;
+constexpr int kWatchdogExitCode = 124;
+constexpr int kTerminationExitCode = 3;
+constexpr int kWatchFrameLimit = 10;
+constexpr int kWatchHitLimit = 32;
+constexpr unsigned kDebugConditionShift = 16;
+constexpr unsigned kDebugLengthShift = 18;
+}  // namespace
 
 namespace VS::Platform {
 
@@ -42,7 +59,7 @@ struct ProgressWatchdog::State {
       captured = GetThreadContext(thread, &context) != FALSE;
       ResumeThread(thread);
     }
-    wchar_t executable[32768]{};
+    wchar_t executable[kWindowsPathCapacity]{};
     GetModuleFileNameW(nullptr, executable,
                        static_cast<DWORD>(std::size(executable)));
     const auto path =
@@ -50,9 +67,9 @@ struct ProgressWatchdog::State {
     std::FILE* report = _wfopen(path.c_str(), L"w");
     if (report == nullptr) return;
     std::fprintf(report,
-                 "No logical progress for 10 seconds; tick=%llu; context=%s\n",
-                 static_cast<unsigned long long>(tick),
-                 captured ? "captured" : "unavailable");
+                 "No logical progress for %d seconds; tick=%" PRIu64
+                 "; context=%s\n",
+                 kWatchdogSeconds, tick, captured ? "captured" : "unavailable");
     if (captured) {
       HANDLE process = GetCurrentProcess();
       SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
@@ -61,11 +78,13 @@ struct ProgressWatchdog::State {
       frame.AddrPC = {context.Rip, 0, AddrModeFlat};
       frame.AddrFrame = {context.Rbp, 0, AddrModeFlat};
       frame.AddrStack = {context.Rsp, 0, AddrModeFlat};
-      alignas(SYMBOL_INFO) char buffer[sizeof(SYMBOL_INFO) + 256]{};
-      for (int depth = 0; depth < 32 && frame.AddrPC.Offset != 0; ++depth) {
+      alignas(
+          SYMBOL_INFO) char buffer[sizeof(SYMBOL_INFO) + kSymbolNameCapacity]{};
+      for (ULONG depth = 0;
+           depth < kCapturedFrameLimit && frame.AddrPC.Offset != 0; ++depth) {
         auto* symbol = reinterpret_cast<SYMBOL_INFO*>(buffer);
         symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-        symbol->MaxNameLen = 255;
+        symbol->MaxNameLen = kSymbolNameCapacity - 1;
         DWORD64 displacement = 0;
         const char* name =
             SymFromAddr(process, frame.AddrPC.Offset, &displacement, symbol)
@@ -76,12 +95,12 @@ struct ProgressWatchdog::State {
         DWORD line_displacement = 0;
         if (SymGetLineFromAddr64(process, frame.AddrPC.Offset,
                                  &line_displacement, &line)) {
-          std::fprintf(report, "#%d %s (%s:%lu)\n", depth, name, line.FileName,
+          std::fprintf(report, "#%lu %s (%s:%lu)\n", depth, name, line.FileName,
                        line.LineNumber);
         } else {
-          std::fprintf(report, "#%d %s +0x%llX [0x%llX]\n", depth, name,
-                       static_cast<unsigned long long>(displacement),
-                       static_cast<unsigned long long>(frame.AddrPC.Offset));
+          std::fprintf(report, "#%lu %s +0x%" PRIX64 " [0x%" PRIX64 "]\n",
+                       depth, name, static_cast<std::uint64_t>(displacement),
+                       static_cast<std::uint64_t>(frame.AddrPC.Offset));
         }
         if (!StackWalk64(IMAGE_FILE_MACHINE_AMD64, process, thread, &frame,
                          &context, nullptr, SymFunctionTableAccess64,
@@ -111,11 +130,11 @@ ProgressWatchdog::ProgressWatchdog(bool enabled) {
     while (!state->stopped) {
       const auto observed = state->progress;
       if (!state->changed.wait_until(
-              lock, observed + std::chrono::seconds(10),
+              lock, observed + std::chrono::seconds(kWatchdogSeconds),
               [&] { return state->stopped || state->progress != observed; })) {
         lock.unlock();
         state->Report();
-        std::_Exit(124);
+        std::_Exit(kWatchdogExitCode);
       }
     }
   });
@@ -143,11 +162,6 @@ void ProgressWatchdog::Pulse(std::uint64_t tick) {
 }
 
 namespace {
-
-constexpr ULONG kSymbolNameCapacity = 256;
-constexpr int kCrashFrameLimit = 48;
-constexpr ULONG kCapturedFrameLimit = 32;
-constexpr USHORT kLoggedFrameLimit = 16;
 
 void LogStackFrame(HANDLE process, DWORD64 address, Core::LogLevel level,
                    std::string_view channel, unsigned depth) {
@@ -195,7 +209,7 @@ LONG WINAPI OnCrash(EXCEPTION_POINTERS* info) {
     // a call through a null function pointer: the return address is on top of
     // the stack
     ctx.Rip = *reinterpret_cast<DWORD64*>(ctx.Rsp);
-    ctx.Rsp += 8;
+    ctx.Rsp += sizeof(DWORD64);
     VS_LOG_ERROR("crash",
                  "  (called a null function pointer; stack from the caller)");
   }
@@ -229,7 +243,7 @@ void InstallCrashHandler() {
   _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
   std::signal(SIGABRT, [](int) {
     LogCallStack("runtime abort");
-    std::_Exit(3);
+    std::_Exit(kTerminationExitCode);
   });
   std::set_terminate([] {
     if (const auto error = std::current_exception()) {
@@ -242,7 +256,7 @@ void InstallCrashHandler() {
       }
     }
     LogCallStack("runtime termination");
-    std::_Exit(3);
+    std::_Exit(kTerminationExitCode);
   });
 }
 
@@ -268,10 +282,10 @@ void LogAddress(const void* address) {
   HANDLE process = GetCurrentProcess();
   SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
   SymInitialize(process, nullptr, TRUE);
-  alignas(SYMBOL_INFO) char buffer[sizeof(SYMBOL_INFO) + 256]{};
+  alignas(SYMBOL_INFO) char buffer[sizeof(SYMBOL_INFO) + kSymbolNameCapacity]{};
   auto* symbol = reinterpret_cast<SYMBOL_INFO*>(buffer);
   symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-  symbol->MaxNameLen = 255;
+  symbol->MaxNameLen = kSymbolNameCapacity - 1;
   DWORD64 displacement = 0;
   if (SymFromAddr(process, reinterpret_cast<DWORD64>(address), &displacement,
                   symbol)) {
@@ -286,9 +300,9 @@ namespace {
 
 constexpr DWORD kWatchRequest = 0xE0564157;  // private exception code: "set the
                                              // watchpoint from this context"
-const void* g_watchAddress = nullptr;
-int g_watchBytes = 0;
-int g_watchHits = 0;
+const void* g_watch_address = nullptr;
+int g_watch_bytes = 0;
+int g_watch_hits = 0;
 
 void LogContextStack(CONTEXT ctx) {
   HANDLE process = GetCurrentProcess();
@@ -300,8 +314,8 @@ void LogContextStack(CONTEXT ctx) {
   frame.AddrFrame.Mode = AddrModeFlat;
   frame.AddrStack.Offset = ctx.Rsp;
   frame.AddrStack.Mode = AddrModeFlat;
-  alignas(SYMBOL_INFO) char buffer[sizeof(SYMBOL_INFO) + 256];
-  for (int depth = 0; depth < 10; ++depth) {
+  alignas(SYMBOL_INFO) char buffer[sizeof(SYMBOL_INFO) + kSymbolNameCapacity];
+  for (int depth = 0; depth < kWatchFrameLimit; ++depth) {
     if (!StackWalk64(IMAGE_FILE_MACHINE_AMD64, process, thread, &frame, &ctx,
                      nullptr, SymFunctionTableAccess64, SymGetModuleBase64,
                      nullptr) ||
@@ -310,7 +324,7 @@ void LogContextStack(CONTEXT ctx) {
     }
     auto* sym = reinterpret_cast<SYMBOL_INFO*>(buffer);
     sym->SizeOfStruct = sizeof(SYMBOL_INFO);
-    sym->MaxNameLen = 255;
+    sym->MaxNameLen = kSymbolNameCapacity - 1;
     DWORD64 disp = 0;
     const char* name =
         SymFromAddr(process, frame.AddrPC.Offset, &disp, sym) ? sym->Name : "?";
@@ -329,24 +343,28 @@ void LogContextStack(CONTEXT ctx) {
 LONG WINAPI OnWatch(EXCEPTION_POINTERS* info) {
   CONTEXT* ctx = info->ContextRecord;
   if (info->ExceptionRecord->ExceptionCode == kWatchRequest) {
-    const DWORD64 len = g_watchBytes == 8   ? 2
-                        : g_watchBytes == 4 ? 3
-                        : g_watchBytes == 2 ? 1
-                                            : 0;
-    ctx->Dr0 = reinterpret_cast<DWORD64>(g_watchAddress);
+    constexpr DWORD64 kDwordLengthCode = 3;
+    const DWORD64 len = g_watch_bytes == sizeof(std::uint64_t) ? 2
+                        : g_watch_bytes == sizeof(std::uint32_t)
+                            ? kDwordLengthCode
+                        : g_watch_bytes == sizeof(std::uint16_t) ? 1
+                                                                 : 0;
+    ctx->Dr0 = reinterpret_cast<DWORD64>(g_watch_address);
     // DR7: local enable 0, condition 01 (write), length
-    ctx->Dr7 = g_watchAddress ? (1ull | (1ull << 16) | (len << 18)) : 0;
+    ctx->Dr7 = g_watch_address ? (1ull | (1ull << kDebugConditionShift) |
+                                  (len << kDebugLengthShift))
+                               : 0;
     ctx->ContextFlags |= CONTEXT_DEBUG_REGISTERS;
     return EXCEPTION_CONTINUE_EXECUTION;
   }
   if (info->ExceptionRecord->ExceptionCode == EXCEPTION_SINGLE_STEP &&
       (ctx->Dr6 & 1)) {
     ctx->Dr6 = 0;
-    if (g_watchHits++ < 32) {
-      unsigned long long value = 0;
-      std::memcpy(&value, g_watchAddress, static_cast<size_t>(g_watchBytes));
-      VS_LOG_WARN("watch", "write to {} (now 0x{:X}), hit {}", g_watchAddress,
-                  value, g_watchHits);
+    if (g_watch_hits++ < kWatchHitLimit) {
+      std::uint64_t value = 0;
+      std::memcpy(&value, g_watch_address, static_cast<size_t>(g_watch_bytes));
+      VS_LOG_WARN("watch", "write to {} (now 0x{:X}), hit {}", g_watch_address,
+                  value, g_watch_hits);
       LogContextStack(*ctx);
     }
     return EXCEPTION_CONTINUE_EXECUTION;
@@ -365,9 +383,9 @@ void WatchWrites(const void* address, int bytes) {
     SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
     SymInitialize(GetCurrentProcess(), nullptr, TRUE);
   }
-  g_watchAddress = address;
-  g_watchBytes = bytes;
-  g_watchHits = 0;
+  g_watch_address = address;
+  g_watch_bytes = bytes;
+  g_watch_hits = 0;
   RaiseException(kWatchRequest, 0, 0, nullptr);
   VS_LOG_WARN("watch", "watching {} bytes at {}", bytes, address);
 }

@@ -10,10 +10,11 @@ namespace VS::Core {
 class FrameClock {
  public:
   static constexpr double TicksPerSecond = 60000.0 / 1001.0;
+  static constexpr u32 kDefaultCatchUpTicks = 4;
 
   // Feed real elapsed seconds; returns how many logical ticks to run now
   // (capped).
-  u32 Advance(double elapsed_seconds, u32 max_ticks = 4);
+  u32 Advance(double elapsed_seconds, u32 max_ticks = kDefaultCatchUpTicks);
 
   u64 Ticks() const { return m_ticks_; }
   void Reset() {

@@ -20,7 +20,14 @@ void Battle_ApplyActionTargetEffects(int actor_id, SVECTOR* position) {
   enum {
     kActorSlotCount = 16,
     kWorldLabelIdMask = 0x1F0,
-    kWorldLabelIdTag = 0x80
+    kWorldLabelIdTag = 0x80,
+    kRecoveryPose = 6,
+    kBlockImpact = 3,
+    kAlternateBlockImpact = 4,
+    kRecoveryImpact = 5,
+    kActionQueueMask =
+        sizeof Battle_actionState->queue / sizeof Battle_actionState->queue[0] -
+        1
   };
   if (actor_id >= kActorSlotCount) {
     if ((actor_id & kWorldLabelIdMask) == kWorldLabelIdTag) {
@@ -30,7 +37,8 @@ void Battle_ApplyActionTargetEffects(int actor_id, SVECTOR* position) {
   }
   if (actor_id < 0 || Battle_actionState == NULL) abort();
   Battle_ActionRequest* action =
-      &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
+      &Battle_actionState
+           ->queue[Battle_actionState->queueIndex & kActionQueueMask];
   if (action->targetCount >
           sizeof action->targets / sizeof action->targets[0] ||
       action->actionId >= sizeof Battle_actionDefinitions /
@@ -38,11 +46,11 @@ void Battle_ApplyActionTargetEffects(int actor_id, SVECTOR* position) {
     abort();
   }
   enum {
-    ReactionHit,
-    ReactionBlock = 4,
-    ReactionRecover = 5,
-    ReactionNone = 6
-  } reaction = ReactionNone;
+    kReactionHit,
+    kReactionBlock = 4,
+    kReactionRecover = 5,
+    kReactionNone = 6
+  } reaction = kReactionNone;
   for (unsigned index = 0; index < action->targetCount; ++index) {
     Battle_HitResult* hit = &action->targets[index];
     if (hit->targetsPosition != 0 || hit->target.targetActor != actor_id) {
@@ -51,32 +59,34 @@ void Battle_ApplyActionTargetEffects(int actor_id, SVECTOR* position) {
     switch (hit->target.impactKind) {
       case 0:
       case 1:
-        reaction = ReactionHit;
+        reaction = kReactionHit;
         break;
-      case 5:
-        reaction = ReactionRecover;
+      case kRecoveryImpact:
+        reaction = kReactionRecover;
         break;
-      case 3:
-      case 4:
-        if (reaction == ReactionNone &&
+      case kBlockImpact:
+      case kAlternateBlockImpact:
+        if (reaction == kReactionNone &&
             !Battle_categoryIsAreaTarget
                 [Battle_actionDefinitions[action->actionId].category]) {
-          reaction = ReactionBlock;
+          reaction = kReactionBlock;
         }
+        break;
+      default:
         break;
     }
     Battle_ApplyActorActionResult(hit);
   }
   switch (reaction) {
-    case ReactionHit:
+    case kReactionHit:
       Battle_PlayActorDamageReaction(actor_id,
                                      &Battle_actionState->rangeOrigin);
       break;
-    case ReactionBlock:
+    case kReactionBlock:
       Battle_PlayDefenseAnimation(actor_id, &Battle_actionState->rangeOrigin);
       break;
-    case ReactionRecover:
-      if (actor_id == 0) Actors_PlayActorActionPose(0, NULL, 6);
+    case kReactionRecover:
+      if (actor_id == 0) Actors_PlayActorActionPose(0, NULL, kRecoveryPose);
       break;
     default:
       break;

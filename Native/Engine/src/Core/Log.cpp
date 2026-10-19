@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cinttypes>
 #include <cstdio>
 #include <mutex>
 #include <string>
@@ -106,16 +107,17 @@ void LogWrite(LogLevel level, std::string_view channel,
   if (!ChannelEnabled(level, channel)) {
     return;
   }
-  const auto tick = static_cast<unsigned long long>(g_tick.load());
+  const std::uint64_t tick = g_tick.load();
   std::FILE* out = level >= LogLevel::Warn ? stderr : stdout;
-  std::fprintf(out, "[%s] [tick=%llu] %.*s: %.*s\n", LevelName(level), tick,
-               static_cast<int>(channel.size()), channel.data(),
+  std::fprintf(out, "[%s] [tick=%" PRIu64 "] %.*s: %.*s\n", LevelName(level),
+               tick, static_cast<int>(channel.size()), channel.data(),
                static_cast<int>(message.size()), message.data());
   std::fflush(out);
   if (g_file) {
-    std::fprintf(g_file, "[%s] [tick=%llu] %.*s: %.*s\n", LevelName(level),
-                 tick, static_cast<int>(channel.size()), channel.data(),
-                 static_cast<int>(message.size()), message.data());
+    std::fprintf(g_file, "[%s] [tick=%" PRIu64 "] %.*s: %.*s\n",
+                 LevelName(level), tick, static_cast<int>(channel.size()),
+                 channel.data(), static_cast<int>(message.size()),
+                 message.data());
     std::fflush(g_file);
   }
 }

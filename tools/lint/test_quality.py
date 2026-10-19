@@ -13,6 +13,34 @@ import quality
 
 
 class BaselineTests(unittest.TestCase):
+    def test_interface_policy_requires_registered_name_path_and_advisory_rule(
+        self,
+    ) -> None:
+        path = "Native/Game/src/Actors/MovementCommands.c"
+        name = "Actors_QueueNavigationTileTarget"
+        interfaces = {(path, name)}
+        message = f"3 adjacent parameters of '{name}' of similar type ('int')"
+        advisory = quality.Finding(
+            "tidy", "bugprone-easily-swappable-parameters", path, 1, message, "code"
+        )
+        private = quality.Finding(
+            advisory.tool,
+            advisory.rule,
+            path,
+            1,
+            "3 adjacent parameters of 'PrivateHelper' of similar type ('int')",
+            "code",
+        )
+        other_path = quality.Finding(
+            advisory.tool, advisory.rule, "Native/Other.c", 1, message, "code"
+        )
+        safety = quality.Finding(
+            "tidy", "clang-analyzer-core.NullDereference", path, 1, message, "code"
+        )
+        self.assertTrue(quality.fixed_interface_advisory(advisory, interfaces))
+        for item in (private, other_path, safety):
+            self.assertFalse(quality.fixed_interface_advisory(item, interfaces))
+
     def test_replacement_policy_keeps_safety_and_owned_gameplay_visible(self) -> None:
         style = quality.Finding(
             "tidy",
@@ -41,6 +69,24 @@ class BaselineTests(unittest.TestCase):
         self.assertTrue(quality.deferred_replacement_style(style))
         self.assertFalse(quality.deferred_replacement_style(safety))
         self.assertFalse(quality.deferred_replacement_style(gameplay))
+        audio_output = quality.Finding(
+            style.tool,
+            style.rule,
+            "Native/Engine/src/Audio/AudioDevice.cpp",
+            style.line,
+            style.message,
+            style.context,
+        )
+        audio_adapter = quality.Finding(
+            style.tool,
+            style.rule,
+            "Native/Engine/src/Audio/Driver/PlaybackReset.c",
+            style.line,
+            style.message,
+            style.context,
+        )
+        self.assertFalse(quality.deferred_replacement_style(audio_output))
+        self.assertTrue(quality.deferred_replacement_style(audio_adapter))
 
     def test_fixture_policy_never_exempts_production_or_safety_findings(self) -> None:
         fixture = quality.Finding(
@@ -278,6 +324,31 @@ class ToolControlTests(unittest.TestCase):
         findings = quality.check_tidy([path], {path})
         self.assertTrue(
             any(item.rule == "clang-analyzer-core.NullDereference" for item in findings)
+        )
+
+    def test_published_spellings_do_not_disable_local_naming(self) -> None:
+        path = self.source(
+            "naming_control.cc",
+            "int CalculateValue(int inputValue) { return inputValue; }\n",
+        )
+        findings = quality.check_tidy([path], {path})
+        self.assertTrue(
+            any(item.rule == "readability-identifier-naming" for item in findings)
+        )
+
+    def test_clang_tidy_still_detects_ambiguous_private_argument_groups(self) -> None:
+        path = self.source(
+            "arguments_control.cc",
+            "void StoreRed(int value);\nvoid StoreGreen(int value);\n"
+            "void StoreBlue(int value);\n"
+            "void StoreColor(int red, int green, int blue) {\n"
+            "  StoreRed(red);\n  StoreGreen(green);\n  StoreBlue(blue);\n}\n",
+        )
+        findings = quality.check_tidy([path], {path})
+        self.assertTrue(
+            any(
+                item.rule == "bugprone-easily-swappable-parameters" for item in findings
+            )
         )
 
     def test_missing_cpplint_is_an_infrastructure_failure(self) -> None:

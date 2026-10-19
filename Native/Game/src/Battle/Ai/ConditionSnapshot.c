@@ -46,7 +46,8 @@ void Battle_Ai_CaptureActorConditionTable(Battle_Ai_ActionTiming* output) {
   if (output == NULL) abort();
   for (const Battle_Actor* actor = Battle_actors[0]; actor != NULL;
        actor = actor->next) {
-    if ((unsigned)actor->id >= 16 || actor->stats == NULL) {
+    if ((unsigned)actor->id >= sizeof Battle_actors / sizeof Battle_actors[0] ||
+        actor->stats == NULL) {
       Core_Debugf("ai", "Invalid condition snapshot actor=%d stats=%p",
                   actor->id, (void*)actor->stats);
       abort();

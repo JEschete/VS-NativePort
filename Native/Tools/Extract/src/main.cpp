@@ -24,6 +24,9 @@ namespace Platform = VS::Platform;
 
 namespace {
 
+constexpr int kMinimumArguments = 3;
+constexpr int kExtractArguments = 4;
+
 int Usage() {
   std::puts(
       "usage:\n"
@@ -129,7 +132,7 @@ bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
 }  // namespace
 
 int main(int argc, char** argv) try {
-  if (argc < 3) {
+  if (argc < kMinimumArguments) {
     return Usage();
   }
   const std::string cmd = argv[1];
@@ -147,7 +150,7 @@ int main(int argc, char** argv) try {
                 std::string((*disc)->Label()).c_str());
     return 0;
   }
-  if (cmd == "extract" && argc >= 4) {
+  if (cmd == "extract" && argc >= kExtractArguments) {
     // <outdir>\disc\<path> for each file, and the manifest Content::DataStore
     // reads (sector, size, form, path). Interleaved files (movies, XA audio)
     // are listed with form "stream" until their converters write them.

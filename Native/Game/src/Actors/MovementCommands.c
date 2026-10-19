@@ -1,6 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Actors/MovementCommands.h"
 
+#include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -25,12 +26,14 @@ void Actors_QueueNavigationTileTarget(int actor_id, int direction, int distance,
     abort();
   }
   Actors_MovementRequest* request = &Actors_actorRecords[actor_id]->turnState;
-  const u_int orientation = (u_int)direction | ((u_int)facing << 16);
+  enum { kOrientationBits = sizeof(int16_t) * CHAR_BIT };
+  const u_int orientation =
+      (u_int)direction | ((u_int)facing << kOrientationBits);
   request->mode = 1;
   request->reserved1 = 0;
   request->reserved2 = 0;
   request->reserved3 = 0;
   request->direction = (int16_t)orientation;
-  request->facing = (int16_t)(orientation >> 16);
+  request->facing = (int16_t)(orientation >> kOrientationBits);
   request->distance = (u_int)distance;
 }

@@ -2,6 +2,56 @@
 
 ## Current checkpoint
 
+The ordered work tracker is [#4](https://github.com/JEschete/VS-NativePort/issues/4).
+The maintained-production quality pass in [#5](https://github.com/JEschete/VS-NativePort/issues/5)
+is verified locally; the next gameplay task is the missing Guildenstern textbox in
+[#1](https://github.com/JEschete/VS-NativePort/issues/1), then menu rendering in #2.
+Preserve the original dialogue pause and button advance; do not shorten the scene delay.
+
+### Quality verification (2026-10-19)
+
+Verification used `work` at `3c0a1311` plus the pending retained-code cleanup. No baseline
+refresh was used, and no commits were pushed during this work.
+
+- Full `tools/lint/quality.py --tidy`: **zero actionable native-production findings** and
+  zero new findings. Remaining counts are 332 test-harness, 154 tooling and 13 legacy
+  SDK-name/signature/null-spelling diagnostics. Test/tooling follow-up is #25; compatibility
+  retirement remains #18. Exact fixture literals and replacement-only style are reported
+  separately, not described as fixed code. See [QUALITY.md](QUALITY.md) for the explicit policy.
+- Complete Debug and Release solution builds pass. Each full `VS.Tests.exe --reporter compact`
+  run passes **95 test cases / 30707 assertions**. All **23 quality-tool controls** pass.
+- `check_native_views.py`, `layout_check.py` and `check_event_dispatch.py` pass. Running
+  `copy_to_native.py` again leaves the copier manifest SHA-256 unchanged.
+- Release replay: `--frames 14000 --speed 16 --press 1000:Start --capture
+  build/quality/final-release-replay --at 1500,6000,13900 --scripted --log-level info` completes
+  and produces all captures. A corresponding Debug frame at tick 13900 was visually inspected:
+  actor geometry and dialogue are visible. This is regression evidence, not complete gameplay parity.
+- Evidence is under `build/Debug/issue5-final-*` and `build/quality/`. Release logs also live
+  under `build/Debug/` because the bounded runner uses that common log directory.
+
+### Verified defects and remaining limits
+
+- #20: SEQ decoder int-alias/alignment defect, fixed in `7da0da5b`; halfword-aligned vectors,
+  packed signed deltas and rotation/cursor rules are tested.
+- #21: unrepresentable disc-read byte counts, fixed in `c8516e00`; rejection preserves request state.
+- #22: signed squared-length overflow in normalization, reproduced before fixing in `5ab86b63`;
+  full-range positive/negative vectors, zero input, aliasing and padding are tested.
+- #23: manifest sector-range overflow, fixed in `4dfd783b`; synthetic boundary entries avoid
+  large-file allocations and share the same arithmetic as real lookup/read paths.
+- #24: GPU upload byte-count overflow and partial resize ownership, fixed in `3c0a1311`;
+  CPU boundary tests and real presentation pass. Allocation failure handling was reviewed,
+  not fault-injected.
+- #3: pushed Source Quality failure at `54290b05` is fixed locally by `c41dd5b2`; it remains
+  open until an authorized push has a confirmed successful workflow run. Commit permission
+  does not imply push permission.
+- #19: the two owned halfword-copy helpers remain no-ops. They are a confirmed dependency
+  to resolve with #2, not a proven explanation for all preview corruption.
+- Enemy combat completion, sound, item/spell use, chains, Break Arts, drops, equipment and
+  final arena coverage remain open in #6-#16. Follow #4's order rather than treating this
+  quality checkpoint as gameplay completion.
+
+## Previous prologue checkpoint (superseded)
+
 Prologue combat entry and remaining intro regressions are the active priority. The older
 tick-5751 stopping point below is historical, not the current runtime baseline.
 
@@ -184,7 +234,7 @@ Ashley initialization returns at tick 5363; scripted actors 2/3/4 report matchin
 5371/5381/5391. They now take the intended no-AI path according to their actor flags. Loads ZONE020.ZND,
 MAP213.MPD, HEADQUAT.GIM and E229.P; playback now advances to **tick 5751**:
 
-```
+```text
 access violation reading 0xFFFFFFFFFFFFFFFF
 #0 Actors_FindActorAnimationHeader Game\src\Actors\Animation.c:1247
 #1 Actors_PlayActorAnimation       Game\src\Actors\Animation.c:759
@@ -214,7 +264,7 @@ From the log (`[warn] [tick=N] unported:`). Assembly lives in `resources\rood-re
 `INCLUDE_ASM` splat output under `resources\rood-reverseWin\build\splat-artifacts\`.
 
 | Stub | Catalog | Assembly | Size |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `Core::ElapsedFrameCounterTicks` | SLUS | root counter (hardware): modernize to a frame timer; returns 0 now = always within AI budget | tiny |
 | `Core::Math::MultiplyMatrixIntoRight` | F03415 | `SLUS_010.40\32154.s` | small (GTE) |
 | `Field::SampleCollisionHeightCode` | F00772 | `BATTLE\BATTLE.PRG\2EA3C.s` | small |

@@ -51,135 +51,114 @@ static int16_t SignedTrackWord(const u_char* data) {
   return Core_Math_WrapSigned16(((uint32_t)data[0] << CHAR_BIT) | data[1]);
 }
 
+enum { kRootPoseKey = 41 };
+
+static void AdvanceShadowBlend(Actors_ShadowBlend* shadow) {
+  enum { kShadowLevelMask = 0xFFF };
+  if (shadow->levelFrames != 0) {
+    const int delta = shadow->levelDelta / shadow->levelFrames;
+    shadow->levelDelta =
+        Core_Math_WrapSigned16((uint32_t)shadow->levelDelta - (uint32_t)delta);
+    shadow->level += delta;
+    --shadow->levelFrames;
+  }
+  shadow->level &= kShadowLevelMask;
+  if (shadow->radiusFrames != 0) {
+    const int expand = shadow->radiusExpandDelta / shadow->radiusFrames;
+    shadow->radiusExpandDelta = Core_Math_WrapSigned16(
+        (uint32_t)shadow->radiusExpandDelta - (uint32_t)expand);
+    shadow->radiusExpandRate += expand;
+    const int shrink = shadow->radiusShrinkDelta / shadow->radiusFrames;
+    shadow->radiusShrinkDelta = Core_Math_WrapSigned16(
+        (uint32_t)shadow->radiusShrinkDelta - (uint32_t)shrink);
+    shadow->radiusShrinkRate += shrink;
+    --shadow->radiusFrames;
+  }
+}
+
+static void ApplyPoseTracks(Actors_ActorRecord* actor,
+                            Actors_AnimationPose* state, int first_frame,
+                            int last_frame) {
+  enum {
+    kRootScaleTrack = 4,
+    kRootRotationTrack = 3,
+    kFirstBoneTrack = 5,
+    kScaleFlagsByte = 3,
+    kRootTranslationDivisor = 4
+  };
+  u_short* header;
+  Actors_SeqAnimationBank* bank =
+      (Actors_SeqAnimationBank*)Actors_FindActorAnimationHeader(
+          actor, actor->animationId, &header);
+  if (bank == NULL || header == NULL) return;
+  Actors_AnimationTrackContext context = {
+      .data = VS_ONDISC(bank, animationData, const u_char*),
+      .firstFrame = first_frame,
+      .lastFrame = last_frame};
+  if (header[kRootScaleTrack] != 0) {
+    Actors_DecodeAnimationTrack(&context, header[kRootScaleTrack],
+                                &state->scaleKeys[kRootPoseKey],
+                                &state->trackStates[kRootPoseKey], 0);
+    const SVECTOR* delta = &state->scaleKeys[kRootPoseKey];
+    actor->instance.position.vx =
+        Core_Math_WrapSigned16((uint32_t)actor->instance.position.vx +
+                               (uint32_t)(delta->vx / kRootTranslationDivisor));
+    actor->instance.position.vy =
+        Core_Math_WrapSigned16((uint32_t)actor->instance.position.vy +
+                               (uint32_t)(delta->vy / kRootTranslationDivisor));
+    actor->instance.position.vz =
+        Core_Math_WrapSigned16((uint32_t)actor->instance.position.vz +
+                               (uint32_t)(delta->vz / kRootTranslationDivisor));
+  }
+  Actors_DecodeAnimationTrack(&context, header[kRootRotationTrack],
+                              &state->boneKeys[kRootPoseKey],
+                              &state->reserved2A0[kRootPoseKey], 0);
+  for (int bone = 0; bone < actor->instance.boneCount; ++bone) {
+    Actors_DecodeAnimationTrack(&context, header[bone + kFirstBoneTrack],
+                                &state->boneKeys[bone],
+                                &state->reserved2A0[bone], 1);
+    if (((u_char*)header)[kScaleFlagsByte] & 2) {
+      Actors_DecodeAnimationTrack(
+          &context, header[bone + actor->instance.boneCount + kFirstBoneTrack],
+          &state->scaleKeys[bone], &state->trackStates[bone], 0);
+    }
+  }
+}
+
 // decomp: BATTLE.PRG func_800AFA28 (src/BATTLE/BATTLE.PRG/44F14.c:1252)
 // Native frame ranges are local; no pointer-bearing context is placed at the
 // PS1 scratchpad's end.
 void Actors_AdvanceSkeletalAnimation(Actors_ActorRecord* actor,
                                      Actors_AnimationPose* state, int mode) {
-  enum { kRootScaleTrackIndex = 4 };
-  u_short* header;
-  Actors_AnimationTrackContext context;
-  Actors_ShadowBlend* shadow;
-  int frame;
-  int frame_or_offset;
-  int x;
-  int y;
-  int z;
-  int delta;
-  int last_frame;
-  int i;
-  u_short root_track;
-  Actors_SeqAnimationBank* bank;
-  u_char queued_animation;
-
   state->reachedEnd = 0;
-  frame_or_offset = state->frame;
-  i = 0;
-  if (actor->framesPerStep != 0) {
-    shadow = &actor->shadowBlend;
-  advance_frame:
-    if (shadow->levelFrames != 0) {
-      delta = shadow->levelDelta / shadow->levelFrames;
-      shadow->levelDelta = Core_Math_WrapSigned16((uint32_t)shadow->levelDelta -
-                                                  (uint32_t)delta);
-      shadow->level += delta;
-      --shadow->levelFrames;
-    }
-    shadow->level &= 0xFFF;
-    if (shadow->radiusFrames != 0) {
-      delta = shadow->radiusExpandDelta / shadow->radiusFrames;
-      shadow->radiusExpandDelta = Core_Math_WrapSigned16(
-          (uint32_t)shadow->radiusExpandDelta - (uint32_t)delta);
-      shadow->radiusExpandRate += delta;
-      delta = shadow->radiusShrinkDelta / shadow->radiusFrames;
-      shadow->radiusShrinkDelta = Core_Math_WrapSigned16(
-          (uint32_t)shadow->radiusShrinkDelta - (uint32_t)delta);
-      shadow->radiusShrinkRate += delta;
-      --shadow->radiusFrames;
-    }
+  int first_frame = state->frame;
+  for (int step = 0; step < actor->framesPerStep; ++step) {
+    AdvanceShadowBlend(&actor->shadowBlend);
     if (state->frame >= (int)(u_short)actor->animationLength) {
       state->reachedEnd = -1;
-      queued_animation = actor->queuedAnimation;
-      if (queued_animation != 0) {
+      if (actor->queuedAnimation != 0) {
         Actors_PlayActorAnimationAtFrame(
-            (int)actor->instance.slot, (int)actor->queuedAnimation,
-            (int)actor->queuedParameterA, (int)actor->queuedParameterB);
+            actor->instance.slot, actor->queuedAnimation,
+            actor->queuedParameterA, actor->queuedParameterB);
         actor->queuedAnimation = 0;
         return;
       }
     }
-    if (actor->instance.isFrozen) {
-      if (state->nextEventFrame == state->frame) {
-        Actors_RunAnimationEvents(actor, state, mode);
-      }
+    if (actor->instance.isFrozen && state->nextEventFrame == state->frame) {
+      Actors_RunAnimationEvents(actor, state, mode);
     }
     if (state->frame >= (int)(u_short)actor->animationLength) {
-      state->frame -= 1;
+      --state->frame;
       state->holdingLastFrame = -1;
     }
-    state->frame += 1;
-    i += 1;
-    if (i >= (int)actor->framesPerStep) {
-      goto update_bones;
-    }
-    goto advance_frame;
+    ++state->frame;
   }
-update_bones:
-  frame = state->frame;
-  if ((frame != 1) && !state->holdingLastFrame) {
-    last_frame = frame - 1;
-    if (state->eventWait == 0) {
-      if (last_frame < frame_or_offset) {
-        frame_or_offset = 1;
-      }
-      if (frame_or_offset == 0) {
-        frame_or_offset = 1;
-      }
-      bank = (Actors_SeqAnimationBank*)Actors_FindActorAnimationHeader(
-          actor, actor->animationId, &header);
-      if (bank != NULL && header != NULL) {
-        context.firstFrame = frame_or_offset;
-        context.lastFrame = last_frame;
-        context.data = VS_ONDISC(bank, animationData, const u_char*);
-        root_track = header[kRootScaleTrackIndex];
-        if (root_track != 0) {
-          Actors_DecodeAnimationTrack(&context, root_track,
-                                      &state->scaleKeys[41],
-                                      &state->trackStates[41], 0);
-          x = state->scaleKeys[0x29].vx;
-          if (x < 0) {
-            x += 3;
-          }
-          actor->instance.position.vx = Core_Math_WrapSigned16(
-              (uint32_t)actor->instance.position.vx + (uint32_t)(x >> 2));
-          y = state->scaleKeys[0x29].vy;
-          if (y < 0) {
-            y += 3;
-          }
-          actor->instance.position.vy = Core_Math_WrapSigned16(
-              (uint32_t)actor->instance.position.vy + (uint32_t)(y >> 2));
-          z = state->scaleKeys[0x29].vz;
-          if (z < 0) {
-            z += 3;
-          }
-          actor->instance.position.vz = Core_Math_WrapSigned16(
-              (uint32_t)actor->instance.position.vz + (uint32_t)(z >> 2));
-        }
-        Actors_DecodeAnimationTrack(&context, header[3], &state->boneKeys[41],
-                                    &state->reserved2A0[41], 0);
-        for (i = 0; i < actor->instance.boneCount; ++i) {
-          Actors_DecodeAnimationTrack(&context, header[i + 5],
-                                      &state->boneKeys[i],
-                                      &state->reserved2A0[i], 1);
-          if (((u_char*)header)[3] & 2) {
-            Actors_DecodeAnimationTrack(
-                &context, header[i + actor->instance.boneCount + 5],
-                &state->scaleKeys[i], &state->trackStates[i], 0);
-          }
-        }
-      }
-    }
+  if (state->frame == 1 || state->holdingLastFrame || state->eventWait != 0) {
+    return;
   }
+  const int last_frame = state->frame - 1;
+  if (last_frame < first_frame || first_frame == 0) first_frame = 1;
+  ApplyPoseTracks(actor, state, first_frame, last_frame);
 }
 
 static const u_char* DecodeTrackCommand(const u_char* data, int* next_frame,
@@ -310,7 +289,8 @@ void Actors_BlendActorPose(Actors_AnimationPose* dst, Actors_AnimationPose* src,
     return;
   }
   weight = (frame * ONE) / frames;
-  BlendVector(&dst->boneKeys[41], &src->boneKeys[41], weight, 0);
+  BlendVector(&dst->boneKeys[kRootPoseKey], &src->boneKeys[kRootPoseKey],
+              weight, 0);
   for (i = 0; i < count; ++i) {
     BlendVector(&dst->boneKeys[i], &src->boneKeys[i], weight, 1);
     BlendVector(&dst->scaleKeys[i], &src->scaleKeys[i], weight, 0);
