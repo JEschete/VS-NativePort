@@ -26,6 +26,7 @@ namespace Render = VS::Render;
 extern "C" int Tests_ActionDefinitionsLoaded(void);
 extern "C" int Tests_DefaultEffectPackageLoaded(void);
 extern "C" int TestsRoomSfxBankBinding(void);
+extern "C" int TestsDiscReadSizeContract(void);
 
 namespace {
 std::filesystem::path FindRepoDisc() {
@@ -257,4 +258,10 @@ TEST_CASE("Converted intro movie decodes without changing page ownership",
                             [before](u16 pixel) { return pixel != before; }));
   Movie_PlayerClose();
   CHECK(Movie_PlayerDrawFrame(301, 0, 0) == 0);
+}
+
+TEST_CASE(
+    "Disc read rejects unrepresentable sizes without changing request state",
+    "[content][disc]") {
+  REQUIRE(TestsDiscReadSizeContract() == 1);
 }

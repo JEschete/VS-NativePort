@@ -6,17 +6,21 @@
 // callbacks remain.
 #include "DiscReader.h"
 
+#include <limits.h>
+
 #include "Content/DataAccess.h"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
 
 // decomp: SLUS_010.40 _diskInitRead (src/SLUS_010.40/main.c:9140)
 int Content_BeginDiscRead(int sector, u_int bytes, void* vram) {
-  if (Content_discDriveState.state != Content_DiscDriveState_Idle) {
+  enum { kDataSectorBytes = 2048 };
+  if (Content_discDriveState.state != Content_DiscDriveState_Idle ||
+      bytes > INT_MAX) {
     return 0;
   }
   Content_discDriveState.startSector = sector;
-  Content_discDriveState.byteCount = bytes;
+  Content_discDriveState.byteCount = (int)bytes;
   Content_discDriveState.destination = vram;
   Content_discDriveState.ringReadIndex = 0;
   Content_discDriveState.ringWriteIndex = 0;
@@ -25,8 +29,8 @@ int Content_BeginDiscRead(int sector, u_int bytes, void* vram) {
   Content_discDriveState.sectorsReceived = 0;
   Content_discDriveState.failureCount = 0;
   Content_discDriveState.ringSectorsWritten = 0;
-  Content_discDriveState.sectorCount = bytes / 2048;
-  if (bytes % 2048) {
+  Content_discDriveState.sectorCount = bytes / kDataSectorBytes;
+  if (bytes % kDataSectorBytes) {
     ++Content_discDriveState.sectorCount;
   }
   Content_discDriveState.state = Content_DiscDriveState_ReadInit;

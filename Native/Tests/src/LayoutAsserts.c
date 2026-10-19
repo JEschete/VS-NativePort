@@ -22,6 +22,7 @@
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
 #include "Core/Memory/WordCopy.h"
+#include "DiscReader.h"
 #include "Effects/EffectResources.h"
 #include "Effects/Runtime.h"
 #include "Field/GimmickMotion.h"
@@ -47,6 +48,27 @@ int TestsRoomSfxBankBinding(void) {
              Audio_soundState.musicRequests[slot] == NULL;
   }
   Audio_soundState = saved_state;
+  return passed;
+}
+
+int TestsDiscReadSizeContract(void) {
+  const Content_DiscDrive saved = Content_discDriveState;
+  Content_discDriveState = (Content_DiscDrive){0};
+  Content_discDriveState.byteCount = 7;
+  unsigned char destination[2049];
+  int passed = Content_BeginDiscRead(1, UINT32_MAX, destination) == 0 &&
+               Content_discDriveState.state == Content_DiscDriveState_Idle &&
+               Content_discDriveState.byteCount == 7 &&
+               Content_discDriveState.destination == NULL;
+  passed = passed &&
+           Content_BeginDiscRead(1, sizeof destination, destination) == 1 &&
+           Content_discDriveState.state == Content_DiscDriveState_ReadInit &&
+           Content_discDriveState.byteCount == sizeof destination &&
+           Content_discDriveState.sectorCount == 2 &&
+           Content_discDriveState.destination == destination;
+  passed = passed && Content_BeginDiscRead(2, 0, NULL) == 0 &&
+           Content_discDriveState.startSector == 1;
+  Content_discDriveState = saved;
   return passed;
 }
 
