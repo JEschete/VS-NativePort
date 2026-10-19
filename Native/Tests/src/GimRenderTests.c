@@ -3,6 +3,8 @@
 
 #include "Battle/Targeting.h"
 #include "Core/Text/TextCode.h"
+#include "Effects/ScreenDistortion/ScreenDistortion.h"
+#include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
@@ -373,6 +375,68 @@ cleanup:
   Render_frameBuf = savedFrameBuf;
   Render_gimBlendSelect = savedBlend;
   return failedLine;
+}
+
+int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
+  enum {
+    kOrderingEntries = 0x822,
+    kSceneOrderingEntry = 18,
+    kTextOrderingEntry = 12,
+    kFeedbackSpriteCount = 7 * (5 * 3 + 10 * 3),
+    kSpritePacketWords = 6,
+    kFeedbackPacketWords = 8,
+    kRestorePacketWords = 5,
+    kPacketWords = kFeedbackSpriteCount * kSpritePacketWords +
+                   kFeedbackPacketWords + kRestorePacketWords
+  };
+  const u_long guard = 0xDEADBEEF;
+  u_long ordering[kOrderingEntries];
+  u_long storage[kPacketWords + 2];
+  u_long dialogue[] = {0, 0x60000000, 0, 0x00010001};
+  const Render_FrameScratch saved_frame = Render_frameScratch;
+  const int saved_framebuffer = Render_frameBuf;
+  Effects_ScreenEffectOverlay* saved_effect = Effects_screenEffectOverlay;
+  Effects_ScreenEffectOverlay effect = {0};
+  effect.feedbackLayer = feedback_layer;
+  Effects_screenEffectOverlay = &effect;
+  Render_frameBuf = framebuffer;
+  ClearOTagR(ordering, kOrderingEntries);
+  setlen(dialogue, 3);
+  AddPrim(ordering + kTextOrderingEntry, dialogue);
+  for (int index = 0; index < kPacketWords + 2; ++index) {
+    storage[index] = guard;
+  }
+  Render_frameScratch.orderingTable = ordering + kSceneOrderingEntry;
+  Render_frameScratch.primitiveCursor = storage + 1;
+
+  Effects_ScreenDistortion_DrawFeedbackTiles();
+
+  u_long* feedback =
+      storage + 1 + (size_t)kFeedbackSpriteCount * kSpritePacketWords;
+  u_long* restore = feedback + kFeedbackPacketWords;
+  const int feedback_entry = kSceneOrderingEntry + feedback_layer - 3;
+  int passed =
+      nextPrim(ordering + feedback_entry) == feedback &&
+      nextPrim(feedback) == ordering + feedback_entry - 1 &&
+      nextPrim(ordering + kSceneOrderingEntry) == restore &&
+      nextPrim(restore) == feedback - kSpritePacketWords &&
+      Render_frameScratch.primitiveCursor == storage + 1 + kPacketWords &&
+      storage[0] == guard && storage[kPacketWords + 1] == guard;
+  int saw_dialogue = 0;
+  int visited = 0;
+  void* packet = ordering + kOrderingEntries - 1;
+  const int expected_packets = kOrderingEntries + kFeedbackSpriteCount + 3;
+  while (packet != NULL && visited < expected_packets) {
+    saw_dialogue |= packet == dialogue;
+    ++visited;
+    packet = nextPrim(packet);
+  }
+  passed =
+      passed && saw_dialogue && packet == NULL && visited == expected_packets;
+  Render_frameScratch = saved_frame;
+  Render_frameBuf = saved_framebuffer;
+  Effects_screenEffectOverlay = saved_effect;
+  return passed;
 }
 
 #undef CHECK_GIM

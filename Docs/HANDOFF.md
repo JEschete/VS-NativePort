@@ -4,9 +4,50 @@
 
 The ordered work tracker is [#4](https://github.com/JEschete/VS-NativePort/issues/4).
 The maintained-production quality pass in [#5](https://github.com/JEschete/VS-NativePort/issues/5)
-is verified locally; the next gameplay task is the missing Guildenstern textbox in
-[#1](https://github.com/JEschete/VS-NativePort/issues/1), then menu rendering in #2.
+is verified locally. The Guildenstern textbox fix in
+[#1](https://github.com/JEschete/VS-NativePort/issues/1) is now verified locally;
+menu rendering in #2 remains the next ordered gameplay task.
 Preserve the original dialogue pause and button advance; do not shorten the scene delay.
+
+### Guildenstern window dialogue (2026-10-19)
+
+Verification used `35618ef2` plus the feedback-link fix and renderer regression.
+The original line is **"...Where are you, Sydney?"**, not "Where are you hiding Sydney?".
+
+- A hardware write watch identified F02456, `Effects_ScreenDistortion_DrawFeedbackTiles`
+  (`SCREFF2.PRG func_800F986C`, `src/GIM/SCREFF2.PRG/0.c`), writing native address bits
+  into ordering entry 143. The invalid link terminated rendering before the textbox chain.
+  Both the feedback and framebuffer-restore links now use `LegacyGpu_Handle`, through
+  `copy_fixups.py`. The original effect, event delay and controller wait are unchanged.
+- The regression in the existing GIM renderer tests checks both framebuffer buffers,
+  feedback depths 1, 2 and 128, both links, packet-buffer guards and complete traversal
+  through a lower dialogue packet. `[render][text][feedback]` passes all six combinations;
+  all 19 `[render]` cases pass (200 assertions) in Debug and Release. The complete Debug
+  suite passes 96 cases / 30713 assertions.
+- Clean Debug New Game replay: `VS.Desktop.exe --frames 10000 --speed 16 --press
+  1000:Start,1300:Circle,3800:Circle,3980:Circle,4160:Circle,4340:Circle,4520:Circle,
+  4700:Circle,4880:Circle,5060:Circle,5240:Circle,6400:Circle --capture
+  build/quality/issue1-window-final --at 6000,6300,6450,7000,8500,9900 --scripted
+  --log-level debug --log-channels boot,input,content,render`. Join the wrapped
+  `--press` list without whitespace. The line is visibly present at 6000 and 6300;
+  Circle at 6400 advances into ZONE002 at 6450 and MAP002 at 6486. Later ZONE003/MAP003
+  loads at 8757/8793. Exit 0. No event flags or timing were bypassed.
+- Logs: `build/Debug/issue1-window-final.log` and `-stderr.log`; rendered captures:
+  `build/quality/issue1-window-final/`. Earlier before/fixed captures and the write-watch
+  stack remain under `build/quality/issue1-window-*` and
+  `build/Debug/issue1-dialog-write-watch-stderr.log`. Temporary probes are removed.
+- Release repeats the same input schedule with `--frames 7000 --capture
+  build/quality/issue1-window-release --at 6000,6300,6990`; the line is visually verified
+  at 6300 and the same Circle-driven ZONE002/MAP002 transition occurs at 6450/6486.
+  Exit 0; logs are `build/Debug/issue1-window-release.log` and `-stderr.log`.
+- A second `copy_to_native.py` run preserves manifest SHA-256
+  `D52C8D3AE62F712540F2499CAB05D74EE96E8558CDB7790B3AF2D8041111E5E3`.
+- `quality-native.cmd --changed --tidy`: zero new findings; no baseline refresh.
+  Existing uninitialized actor-dialog `texture` warning is separate and not claimed fixed.
+  This verifies the window dialogue, not full scene-rendering parity or the prologue.
+- Latest pushed Source Quality run `39239821866` is successful for `35618ef2`.
+  The fixing commit and closure evidence are recorded in #1. No push was performed for
+  the window-dialogue fix.
 
 ### Quality verification (2026-10-19)
 
@@ -42,8 +83,9 @@ refresh was used, and no commits were pushed during this work.
   CPU boundary tests and real presentation pass. Allocation failure handling was reviewed,
   not fault-injected.
 - #3: pushed Source Quality failure at `54290b05` is fixed locally by `c41dd5b2`; it remains
-  open until an authorized push has a confirmed successful workflow run. Commit permission
-  does not imply push permission.
+  recorded historically. Fresh inspection confirms successful run `39239821866` for
+  pushed `35618ef2`. No commits were pushed during the window-dialogue fix. Commit
+  permission does not imply push permission.
 - #19: the two owned halfword-copy helpers remain no-ops. They are a confirmed dependency
   to resolve with #2, not a proven explanation for all preview corruption.
 - Enemy combat completion, sound, item/spell use, chains, Break Arts, drops, equipment and

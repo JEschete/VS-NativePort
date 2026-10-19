@@ -19,6 +19,8 @@ extern "C" int Tests_GimTilePackets(int columns, int rows, int scale,
                                     int brightness, int framebuffer);
 extern "C" int Tests_ScaledDialogueGlyphs(void);
 extern "C" int Tests_CompactTextAndGaugeLinks(void);
+extern "C" int CheckFeedbackEffectDialogueLinks(int framebuffer,
+                                                int feedback_layer);
 
 TEST_CASE("Compact text and gauge chains retain native packet links",
           "[render][text]") {
@@ -93,4 +95,15 @@ TEST_CASE("GIM wipe and crossfade fast paths use the shared tile renderer",
   REQUIRE(Tests_GimTilePackets(5, 16, 4096, 0, 0, 2, 32, 0) == 0);
   REQUIRE(Tests_GimTilePackets(5, 16, 4096, 0, 0, 3, 128, 0) == 0);
   REQUIRE(Tests_GimTilePackets(5, 16, 2048, 0, 0, 3, 128, 0) == 0);
+}
+
+TEST_CASE("Screen feedback preserves the dialogue ordering chain",
+          "[render][text][feedback]") {
+  for (const int framebuffer : {0, 1}) {
+    for (const int feedback_layer : {1, 2, 128}) {
+      CAPTURE(framebuffer, feedback_layer);
+      REQUIRE(CheckFeedbackEffectDialogueLinks(framebuffer, feedback_layer) ==
+              1);
+    }
+  }
 }

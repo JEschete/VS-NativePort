@@ -334,14 +334,6 @@ void Menu_UpdateTextBoxes(void)
         box->frameWidth = ((box->charsPerLine * 12 + 10) * scale) >> 16;
         box->frameHeight = ((box->lineCount * 13 + 4) * scale) >> 16;
 
-        if (box->x == 88 && box->y == 26) {
-            Core_Debugf("dialog-state", "box=%d state=%d duration=%d scale=%d speed=%u hidden=%u frame=%d,%d,%d,%d style=%p first=%02X,%02X,%02X,%02X prim=%p",
-                id, state, duration, scale, (unsigned)box->speed, (unsigned)box->flags.opaque3Bit7,
-                box->frameX, box->frameY, box->frameWidth, box->frameHeight,
-                (void*)Event_textBoxFrameStyles[box->flags.frameShape],
-                (unsigned char)box->string[0], (unsigned char)box->string[1],
-                (unsigned char)box->string[2], (unsigned char)box->string[3], Render_frameScratch.primitiveCursor);
-        }
         switch (box->flags.kind) {
         case 0:
             if (state < 0) {

@@ -49,31 +49,6 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
-    "F01392": [
-        ("        switch (box->flags.kind) {",
-         '        if (box->x == 88 && box->y == 26) {\n'
-         '            Core_Debugf("dialog-state", "box=%d state=%d duration=%d scale=%d speed=%u hidden=%u frame=%d,%d,%d,%d style=%p first=%02X,%02X,%02X,%02X prim=%p",\n'
-         "                id, state, duration, scale, (unsigned)box->speed, (unsigned)box->flags.opaque3Bit7,\n"
-         "                box->frameX, box->frameY, box->frameWidth, box->frameHeight,\n"
-         "                (void*)Event_textBoxFrameStyles[box->flags.frameShape],\n"
-         "                (unsigned char)box->string[0], (unsigned char)box->string[1],\n"
-         "                (unsigned char)box->string[2], (unsigned char)box->string[3], Render_frameScratch.primitiveCursor);\n"
-         "        }\n"
-         "        switch (box->flags.kind) {",
-         "temporary issue #1 window-box state trace"),
-    ],
-    "F01037": [
-        ("        Menu_SetTextBoxText(script[1], (char*)&Event_dialogStrings[Event_dialogStrings[script[2]]]);",
-         "        Menu_SetTextBoxText(script[1], (char*)&Event_dialogStrings[Event_dialogStrings[script[2]]]);\n"
-         "        const Menu_TextBoxState* dialog = Menu_TextBox(script[1]);\n"
-         '        Core_Debugf("dialog", "show box=%u string=%u kind=%u shape=%u hidden=%u pos=%d,%d size=%d,%d state=%d duration=%d speaker=%u text=%p",\n'
-         "            (unsigned)script[1], (unsigned)script[2], (unsigned)dialog->flags.kind,\n"
-         "            (unsigned)dialog->flags.frameShape, (unsigned)dialog->flags.opaque3Bit7,\n"
-         "            dialog->x, dialog->y, dialog->charsPerLine, dialog->lineCount,\n"
-         "            dialog->state, dialog->openDuration, (unsigned)dialog->flags.speakerTexture,\n"
-         "            (void*)dialog->string);",
-         "temporary issue #1 dialog submission trace"),
-    ],
     "F03533": [
         ("Audio_soundState.musicHandles[16]", "Audio_soundState.sfxBankData[2]",
          "main.c:10161 indexes unk14 beyond its array to alias sfxData[2] at PS1 offset 0x54; use the native field"),
@@ -273,6 +248,12 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
     "F01353": [("((u_long)primBuf << 8) >> 8", "LegacyGpu_Handle(primBuf)", "stat-gauge native packet link")],
     "F01416": [("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
                  "textbox ordering entries hold native link handles, never truncated address bits")],
+    "F02456": [
+        ("((uintptr_t)var_t2 << 8) >> 8", "LegacyGpu_Handle(var_t2)",
+         "SCREFF2.PRG func_800F986C offscreen feedback link must retain the native packet handle"),
+        ("((u_long)var_t2 << 8) >> 8", "LegacyGpu_Handle(var_t2)",
+         "SCREFF2.PRG func_800F986C framebuffer restore link must retain the native packet handle"),
+    ],
     **{fid: [("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
               "shared primitive helpers use the native link table")] for fid in ("F01405", "F01406")},
     "F03423": [("    while (DsControlB(DslPause, NULL, NULL) == 0)\n        ;\n", "",

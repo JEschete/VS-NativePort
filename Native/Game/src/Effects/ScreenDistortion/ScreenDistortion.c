@@ -102,7 +102,7 @@ void Effects_ScreenDistortion_DrawFeedbackTiles(void)
     var_t2[5] = 0;
     var_t2[6] = 0xE00140;
     var_t2[7] = 0xE6000001;
-    temp_s4[var_s0] = ((uintptr_t)var_t2 << 8) >> 8;
+    temp_s4[var_s0] = LegacyGpu_Handle(var_t2);
     var_t2 += 8;
 
     x = Render_frameBuf == 0 ? 0x140 : 0;
@@ -113,7 +113,7 @@ void Effects_ScreenDistortion_DrawFeedbackTiles(void)
     var_t2[3] = x | 0xE5000000;
     var_t2[4] = 0xE6000000;
 
-    *temp_s4 = ((u_long)var_t2 << 8) >> 8;
+    *temp_s4 = LegacyGpu_Handle(var_t2);
     Render_frameScratch.primitiveCursor = var_t2 + 5;
 }
 
