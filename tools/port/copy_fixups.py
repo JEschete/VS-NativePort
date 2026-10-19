@@ -49,6 +49,33 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F02662": [
+        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+         "Status limb indicator packets retain native link handles"),
+    ],
+        "F02663": [
+           ("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+            "Status limb leader-line link must not terminate traversal before the lower UI entries"),
+        ],
+    "F02677": [
+        ("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+         "Status model fade packets retain native link handles"),
+    ],
+    "F02678": [
+        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+         "Status background packets retain native link handles instead of hiding the remaining frame chain"),
+    ],
+    "F02682": [
+        ("        Menu_Status_updateScreenEnabled = 1;\n        Menu_Status_updateAnimWait = 1;",
+         "        Menu_Status_updateAnimWait = 1;",
+         "the native preview slot is not initialized until the actor-switch producer runs"),
+        ("        if (Menu_Status_updateAnimWait != 0) {\n            if (Menu_Status_AnimateActorSwitch(0)) {",
+         "        if (Menu_Status_updateAnimWait != 0) {\n"
+         "            int preview_ready = Menu_Status_AnimateActorSwitch(0);\n"
+         "            Menu_Status_updateScreenEnabled = 1;\n"
+         "            if (preview_ready) {",
+         "enable Status drawing only after the actor-switch producer has loaded its native preview"),
+    ],
     "F03533": [
         ("Audio_soundState.musicHandles[16]", "Audio_soundState.sfxBankData[2]",
          "main.c:10161 indexes unk14 beyond its array to alias sfxData[2] at PS1 offset 0x54; use the native field"),

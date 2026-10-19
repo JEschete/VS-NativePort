@@ -50,9 +50,7 @@ static char Menu_Rename_nameEditorNameBuffer[24];
 char Menu_Rename_nameNavIconAnim = 0;
 
 // decomp: _renderRenameMenuStrings (_renderRenameMenuStrings@src/MENU/MENU8.PRG/21A0.c)
-u_short Menu_Rename_renderRenameMenuStrings[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Rename_renderRenameMenuStrings[208]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _selectedControllerAction (_selectedControllerAction@src/MENU/MENU8.PRG/21A0.c)
 u_char Menu_Rename_selectedControllerAction = 0;
@@ -920,12 +918,6 @@ void Menu_Rename_ResetMenu8Statics(void)
     {
         static const char initial = 0;
         memcpy((void*)&Menu_Rename_nameNavIconAnim, &initial, sizeof Menu_Rename_nameNavIconAnim);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Rename_renderRenameMenuStrings, &initial, sizeof Menu_Rename_renderRenameMenuStrings);
     }
     {
         static const u_char initial = 0;

@@ -45,14 +45,10 @@ u_int Menu_BattleAbilities_abilityMenuState = 0;
 u_short* Menu_BattleAbilities_abilityText = NULL;
 
 // decomp: _battleAbilityMenuStrings (_battleAbilityMenuStrings@src/MENU/MENU2.PRG/143C.c)
-u_short Menu_BattleAbilities_battleAbilityMenuStrings[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_BattleAbilities_battleAbilityMenuStrings[292]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _battleAbilityStrings (_battleAbilityStrings@MENU/MENU2.PRG)
-u_short Menu_BattleAbilities_battleAbilityStrings[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_BattleAbilities_battleAbilityStrings[1060]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _firstAbility (_firstAbility@src/MENU/MENU2.PRG/64.c)
 char Menu_BattleAbilities_firstAbility = 0;
@@ -1319,18 +1315,6 @@ void Menu_BattleAbilities_ResetMenu2Statics(void)
     {
         static const u_short* initial = NULL;
         memcpy((void*)&Menu_BattleAbilities_abilityText, &initial, sizeof Menu_BattleAbilities_abilityText);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_BattleAbilities_battleAbilityMenuStrings, &initial, sizeof Menu_BattleAbilities_battleAbilityMenuStrings);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_BattleAbilities_battleAbilityStrings, &initial, sizeof Menu_BattleAbilities_battleAbilityStrings);
     }
     {
         static const char initial = 0;

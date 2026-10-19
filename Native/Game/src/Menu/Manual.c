@@ -75,9 +75,7 @@ Menu_Manual_BackgroundTransparencies const Menu_Manual_kMenuBgTransparencies[] =
     { 76, 64, 53, 42 }, { 33, 24, 17, 11 }, { 6, 3, 1, 0 } };
 
 // decomp: _menuText (_menuText@src/MENU/MENUE.PRG/494.c)
-u_short Menu_Manual_menuText[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Manual_menuText[516]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _pageArrowAnimState (_pageArrowAnimState@src/MENU/MENUE.PRG/494.c)
 int Menu_Manual_pageArrowAnimState;
@@ -988,12 +986,6 @@ void Menu_Manual_DrawControlsBackground(int x, int y, int w, int h)
 // MENUE.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
 void Menu_Manual_ResetMenueStatics(void)
 {
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Manual_menuText, &initial, sizeof Menu_Manual_menuText);
-    }
     {
         static const char initial = 0;
         memcpy((void*)&Menu_Manual_openDelay, &initial, sizeof Menu_Manual_openDelay);

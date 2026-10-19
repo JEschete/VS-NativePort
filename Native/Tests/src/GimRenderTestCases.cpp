@@ -122,3 +122,11 @@ TEST_CASE("Menu initialization clears every native row and scratch byte",
           "[render][menu][workspace]") {
   REQUIRE(CheckMenuWorkspaceReset() == 1);
 }
+
+extern "C" int CheckStatusPacketLinks(int background_first);
+
+TEST_CASE("Status background and limb packets preserve the complete UI chain",
+          "[render][menu][status]") {
+  REQUIRE(CheckStatusPacketLinks(0) == 1);
+  REQUIRE(CheckStatusPacketLinks(1) == 1);
+}

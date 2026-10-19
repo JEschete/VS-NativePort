@@ -27,6 +27,7 @@ extern "C" int Tests_ActionDefinitionsLoaded(void);
 extern "C" int Tests_DefaultEffectPackageLoaded(void);
 extern "C" int TestsRoomSfxBankBinding(void);
 extern "C" int TestsDiscReadSizeContract(void);
+extern "C" int CheckMenuDiscStringsLoaded(void);
 
 namespace {
 std::filesystem::path FindRepoDisc() {
@@ -64,6 +65,12 @@ TEST_CASE("Module data copies validate both source and destination extents",
   entry.offset = UINT32_MAX;
   CHECK_FALSE(Content::CopyModuleDataEntry(entry, source));
   CHECK(destination == saved);
+  const std::array<unsigned char, 5> odd_source{1, 2, 3, 4, 5};
+  std::array<unsigned char, 6> padded_destination{9, 9, 9, 9, 9, 9};
+  Content_ModuleDataEntry odd_entry{"fixture", 0, 5, padded_destination.data(),
+                                    6};
+  REQUIRE(Content::CopyModuleDataEntry(odd_entry, odd_source));
+  CHECK(padded_destination == std::array<unsigned char, 6>{1, 2, 3, 4, 5, 9});
 }
 
 TEST_CASE("Module relocation maps native strides and rejects unsafe interiors",
@@ -137,6 +144,7 @@ TEST_CASE(
   REQUIRE(Content_LoadModuleData() == 0);
   CHECK(Tests_ActionDefinitionsLoaded() == 1);
   CHECK(Tests_DefaultEffectPackageLoaded() == 1);
+  CHECK(CheckMenuDiscStringsLoaded() == 1);
   for (unsigned index = 0; index < Content_modulePointerCount; ++index) {
     const auto& table = Content_modulePointers[index];
     INFO(table.module << " offset " << table.offset);

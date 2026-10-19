@@ -106,11 +106,22 @@
 #include "Items/Categories.h"
 #include "Items/Materials.h"
 #include "LegacyFiles.h"
+#include "Menu/BattleAbilities.h"
+#include "Menu/BreakArts.h"
+#include "Menu/Container/ItemView.h"
+#include "Menu/Files.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Magic.h"
+#include "Menu/Manual.h"
+#include "Menu/Map.h"
+#include "Menu/Options.h"
+#include "Menu/Rename.h"
+#include "Menu/Score/Records.h"
+#include "Menu/Score/ScoreScreen.h"
+#include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
 #include "ModelLoading.h"
 #include "Render/Font.h"
@@ -435,6 +446,30 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"ENDING/ENDING.PRG", 0x732B0, sizeof Ending_rankLabelTint, &Ending_rankLabelTint, sizeof Ending_rankLabelTint}, // G00815 D_800DBAB0
     {"ENDING/ENDING.PRG", 0x732B8, sizeof Ending_rankTitleThresholds, &Ending_rankTitleThresholds, sizeof Ending_rankTitleThresholds}, // G00816 titleThresholds
     {"ENDING/ENDING.PRG", 0x732D8, sizeof Ending_rankScoreThresholds, &Ending_rankScoreThresholds, sizeof Ending_rankScoreThresholds}, // G00817 rankScores
+    {"MENU/MENU0.PRG", 0x2258, 4924u, &Menu_Magic_magicStrings, sizeof Menu_Magic_magicStrings}, // G00978 _magicStrings
+    {"MENU/MENU0.PRG", 0x3594, 3197u, &Menu_Magic_teleportationStrings, sizeof Menu_Magic_teleportationStrings}, // G00980 _teleportationStrings
+    {"MENU/MENU1.PRG", 0xC78, 4302u, &Menu_BreakArts_strings, sizeof Menu_BreakArts_strings}, // G01004 _strings
+    {"MENU/MENU2.PRG", 0x1E90, 2120u, &Menu_BattleAbilities_battleAbilityStrings, sizeof Menu_BattleAbilities_battleAbilityStrings}, // G01025 _battleAbilityStrings
+    {"MENU/MENU2.PRG", 0x26D8, 584u, &Menu_BattleAbilities_battleAbilityMenuStrings, sizeof Menu_BattleAbilities_battleAbilityMenuStrings}, // G01024 _battleAbilityMenuStrings
+    {"MENU/MENU3.PRG", 0x6BB8, 944u, &Menu_Inventory_menuText, sizeof Menu_Inventory_menuText}, // G01068 _menuText
+    {"MENU/MENU4.PRG", 0x4C48, 3520u, &Menu_Status_statusStrings, sizeof Menu_Status_statusStrings}, // G01183 _statusStrings
+    {"MENU/MENU5.PRG", 0x5BFC, 564u, &Menu_Map_mapNames, sizeof Menu_Map_mapNames}, // G01228 _mapNames
+    {"MENU/MENU5.PRG", 0x5E30, 640u, &Menu_Map_connectingMaps, sizeof Menu_Map_connectingMaps}, // G01213 _connectingMaps
+    {"MENU/MENU5.PRG", 0x60B0, 1044u, &Menu_Map_doors, sizeof Menu_Map_doors}, // G01218 _doors
+    {"MENU/MENU7.PRG", 0x81B0, 1790u, &Menu_Files_containerStrings, sizeof Menu_Files_containerStrings}, // G01269 _containerStrings
+    {"MENU/MENU8.PRG", 0x2D58, 2140u, &Menu_Options_menuStrings, sizeof Menu_Options_menuStrings}, // G01393 _menuStrings
+    {"MENU/MENU8.PRG", 0x35B4, 416u, &Menu_Rename_renderRenameMenuStrings, sizeof Menu_Rename_renderRenameMenuStrings}, // G01396 _renderRenameMenuStrings
+    {"MENU/MENU9.PRG", 0x5D20, 68u, &Menu_Score_menuText, sizeof Menu_Score_menuText}, // G01449 _menuText
+    {"MENU/MENU9.PRG", 0x5D64, 384u, &Menu_Score_rankText, sizeof Menu_Score_rankText}, // G01463 _rankText
+    {"MENU/MENU9.PRG", 0x5EE4, 728u, &Menu_Score_titleText, sizeof Menu_Score_titleText}, // G01474 _titleText
+    {"MENU/MENU9.PRG", 0x61BC, 1568u, &Menu_Score_titleDescriptions, sizeof Menu_Score_titleDescriptions}, // G01473 _titleDescriptions
+    {"MENU/MENU9.PRG", 0x67DC, 548u, &Menu_Score_statHeaders, sizeof Menu_Score_statHeaders}, // G01469 _statHeaders
+    {"MENU/MENU9.PRG", 0x6A00, 920u, &Menu_Score_statDescriptions, sizeof Menu_Score_statDescriptions}, // G01468 _statDescriptions
+    {"MENU/MENU9.PRG", 0x6D98, 116u, &Menu_Score_timeAttacks, sizeof Menu_Score_timeAttacks}, // G01472 _timeAttacks
+    {"MENU/MENU9.PRG", 0x6E0C, 464u, &Menu_Score_timeAttackDescriptions, sizeof Menu_Score_timeAttackDescriptions}, // G01470 _timeAttackDescriptions
+    {"MENU/MENU9.PRG", 0x6FDC, 3292u, &Menu_Score_miscInfo, sizeof Menu_Score_miscInfo}, // G01450 _miscInfo
+    {"MENU/MENUD.PRG", 0x6D2C, 1380u, &Menu_Container_menuText, sizeof Menu_Container_menuText}, // G01739 _menuText
+    {"MENU/MENUE.PRG", 0x2654, 1032u, &Menu_Manual_menuText, sizeof Menu_Manual_menuText}, // G01765 _menuText
     {"SLUS_010.40", 0x1FD44, sizeof Audio_Driver_legacySpuEvent, &Audio_Driver_legacySpuEvent, sizeof Audio_Driver_legacySpuEvent}, // G01826 _soundEvent
     {"SLUS_010.40", 0x1FD48, sizeof Audio_Driver_recentTickCostTotal, &Audio_Driver_recentTickCostTotal, sizeof Audio_Driver_recentTickCostTotal}, // G01827 D_8002F548
     {"SLUS_010.40", 0x1FD4C, sizeof Audio_Seq_tickCounter, &Audio_Seq_tickCounter, sizeof Audio_Seq_tickCounter}, // G01828 D_8002F54C

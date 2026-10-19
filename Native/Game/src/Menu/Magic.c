@@ -83,9 +83,7 @@ char Menu_Magic_availableSorcererSpells[18];
 char Menu_Magic_availableWarlockSpells[18];
 
 // decomp: _magicStrings (_magicStrings@MENU/MENU0.PRG)
-u_short Menu_Magic_magicStrings[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Magic_magicStrings[2462]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _savePointData (_savePointData@MENU/MENU0.PRG)
 int Menu_Magic_savePointData[] = { 0x0305001B, 0x0801000E, 0x04030199, 0x0C0C001C, 0x070C0028,
@@ -98,9 +96,7 @@ int Menu_Magic_savePointData[] = { 0x0305001B, 0x0801000E, 0x04030199, 0x0C0C001
     0x00000000 };
 
 // decomp: _teleportationStrings (_teleportationStrings@MENU/MENU0.PRG)
-u_short Menu_Magic_teleportationStrings[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Magic_teleportationStrings[1599]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: local static of _warlockMagicMenu, at file scope so the module reset reaches it
 static char Menu_Magic_warlockMenuLevelledSpells[] = { Battle_WarlockSpell_Explosion,
@@ -1298,18 +1294,6 @@ int Menu_Magic_UpdateEnchanterMenu(u_int initShortcutInvoked)
 // MENU0.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
 void Menu_Magic_ResetMenu0Statics(void)
 {
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Magic_magicStrings, &initial, sizeof Menu_Magic_magicStrings);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Magic_teleportationStrings, &initial, sizeof Menu_Magic_teleportationStrings);
-    }
     {
         static const char initial[] = { Battle_WarlockSpell_Explosion,
         Battle_WarlockSpell_Thunderburst, Battle_WarlockSpell_FlameSphere,

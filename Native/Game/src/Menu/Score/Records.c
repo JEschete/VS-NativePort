@@ -23,46 +23,32 @@ u_short Menu_Score_clearCount;
 Menu_Score_Row Menu_Score_gazetteRows[32];
 
 // decomp: _miscInfo (_miscInfo@src/MENU/MENU9.PRG/238.c)
-u_short Menu_Score_miscInfo[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Score_miscInfo[1646]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _score (_score@src/MENU/MENU9.PRG/238.c)
 u_long Menu_Score_score;
 
 // decomp: _statDescriptions (_statDescriptions@src/MENU/MENU9.PRG/238.c)
-u_short Menu_Score_statDescriptions[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Score_statDescriptions[460]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _statHeaders (_statHeaders@src/MENU/MENU9.PRG/238.c)
-u_short Menu_Score_statHeaders[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Score_statHeaders[274]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _timeAttackDescriptions (_timeAttackDescriptions@src/MENU/MENU9.PRG/238.c)
-u_short Menu_Score_timeAttackDescriptions[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Score_timeAttackDescriptions[232]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _timeAttackReferenceTimes (_timeAttackReferenceTimes@src/MENU/MENU9.PRG/238.c)
 char const* Menu_Score_kTimeAttackReferenceTimes[] = { "$00:25:00", "$00:30:00", "$00:40:00",
     "$00:50:00", "$01:00:00", "$01:15:00", "$01:00:00", "$01:25:00" };
 
 // decomp: _timeAttacks (_timeAttacks@src/MENU/MENU9.PRG/238.c)
-u_short Menu_Score_timeAttacks[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Score_timeAttacks[58]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _titleDescriptions (_titleDescriptions@src/MENU/MENU9.PRG/238.c)
-u_short Menu_Score_titleDescriptions[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Score_titleDescriptions[784]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _titleText (_titleText@src/MENU/MENU9.PRG/238.c)
-u_short Menu_Score_titleText[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Score_titleText[364]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: local static of _renderTitleMenu, at file scope so the module reset reaches it
 static char Menu_Score_titlesCursorAnimState = 0;
@@ -776,48 +762,6 @@ void Menu_Score_CalculateScore(void)
 // MENU9.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
 void Menu_Score_Records_ResetMenu9Statics(void)
 {
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Score_miscInfo, &initial, sizeof Menu_Score_miscInfo);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Score_statDescriptions, &initial, sizeof Menu_Score_statDescriptions);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Score_statHeaders, &initial, sizeof Menu_Score_statHeaders);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Score_timeAttackDescriptions, &initial, sizeof Menu_Score_timeAttackDescriptions);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Score_timeAttacks, &initial, sizeof Menu_Score_timeAttacks);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Score_titleDescriptions, &initial, sizeof Menu_Score_titleDescriptions);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Score_titleText, &initial, sizeof Menu_Score_titleText);
-    }
     {
         static const char initial = 0;
         memcpy((void*)&Menu_Score_titlesCursorAnimState, &initial, sizeof Menu_Score_titlesCursorAnimState);

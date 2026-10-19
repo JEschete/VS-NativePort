@@ -31,9 +31,7 @@ char Menu_BreakArts_layoutPadding1;
 static char Menu_BreakArts_setHpCostDigitBuffer[16];
 
 // decomp: _strings (_strings@src/MENU/MENU1.PRG/30.c)
-u_short Menu_BreakArts_strings[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_BreakArts_strings[2151]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: local static of _weaponArtsMenu, at file scope so the module reset reaches it
 static u_short Menu_BreakArts_artListActionIds[4];
@@ -497,12 +495,6 @@ int Menu_BreakArts_Update(u_char* state)
 // MENU1.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
 void Menu_BreakArts_ResetMenu1Statics(void)
 {
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_BreakArts_strings, &initial, sizeof Menu_BreakArts_strings);
-    }
     {
         static const char initial[16];
         memcpy((void*)&Menu_BreakArts_setHpCostDigitBuffer, &initial, sizeof Menu_BreakArts_setHpCostDigitBuffer);

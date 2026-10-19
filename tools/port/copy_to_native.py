@@ -354,6 +354,8 @@ class Copier:
         self.type_home: dict[str, str] = {}     # type id (canonical) -> header path
         self.report: dict[str, list] = collections.defaultdict(list)
         self.asset_extents = splat_asset_extents({(r["overlay"], r["name"]) for r in self.data})
+        self.string_asset_extents = splat_asset_extents()
+        self.string_asset_sources: dict[str, tuple[str, int]] = {}
         self.module_data: list[tuple[dict, str, int | None]] = []   # (row, C name, bytes if unsized) filled at boot
         self.module_pointers: list[tuple[dict, str, int]] = []      # (row, C name, element count) relocated at boot
         self.deleted_calls = 0
@@ -1126,11 +1128,26 @@ class Copier:
                     self.drop_storage(self.own_declarator(d, self.renamed(d["file"], d["start"], d["end"], ov))).strip(), d)
                 text = self.apply_fixups(r, text)
                 decl, init = self.split_init(text)
+                original = self.src.load(d["file"])[d["start"]:d["end"]].decode("utf-8")
+                string_include = re.search(r'#\s*include\s+"build/assets/([^"]+)\.vsString"', original)
                 if not re.search(rf"\b{re.escape(name)}\b", decl):
                     # defined under a template binding macro (`static CVECTOR VS_CLOSED_RING_COLORS[] = ...`)
                     decl = re.sub(r"\b(\w+)(\s*(?:\[[^\]]*\])*)\s*$", lambda m: f"{name}{m[2]}", decl, count=1)
                     text = decl + (f" = {init}" if init is not None else "")
-                if init is not None and "#include" in init:
+                if string_include is not None:
+                    asset = Path(string_include[1])
+                    module = asset.parent.as_posix()
+                    extent = self.string_asset_extents.get((module, asset.name))
+                    if extent is None or extent[1] <= 0:
+                        raise ValueError(f"{r['id']}: unresolved disc string asset {asset}")
+                    if not re.match(r"u_short\s+", decl):
+                        raise ValueError(f"{r['id']}: unexpected disc string declaration {decl}")
+                    decl = re.sub(rf"\b{re.escape(name)}\s*\[[^\]]*\]",
+                                  f"{name}[{(extent[1] + 1) // 2}]", decl, count=1)
+                    text = f"{decl}; /* contents: disc string table (ModuleData.c) */"
+                    self.string_asset_sources[r["id"]] = (module, extent[0])
+                    self.module_data.append((r, name, extent[1]))
+                elif init is not None and "#include" in init:
                     text = f"{decl} = {{0}}; /* disc data: {r['disposition']}, loaded in Step 5 */"
                     self.report["disc-initializer"].append(r["final_name"])
                 else:
@@ -1801,6 +1818,8 @@ class Copier:
     def module_data_source(self, r: dict, decl: str = "", pointers: bool = False) -> tuple[str, int] | None:
         """Where a global with no C initializer gets its contents: (module file on the disc, byte offset). Only
         pointer-free data with one known home, unless `pointers` (tables the loader relocates)."""
+        if r["id"] in self.string_asset_sources:
+            return self.string_asset_sources[r["id"]]
         if r["segment"] in ("bss", "") or not r["overlay"] or (r["has_pointers"] != "0" and not pointers):
             return None
         if decl and self.decl_has_pointer(decl, c_name(r["final_name"])):

@@ -122,9 +122,7 @@ char* Menu_Inventory_itemsText;
 char Menu_Inventory_menuRowCount;
 
 // decomp: _menuText (_menuText@src/MENU/items0.h)
-u_short Menu_Inventory_menuText[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Inventory_menuText[472]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _miscActions (_miscActions@src/MENU/MENU3.PRG/16C.c)
 char Menu_Inventory_unusedMiscActions[64];
@@ -1943,12 +1941,6 @@ void Menu_Inventory_ResetMenu3Statics(void)
     {
         static const int initial = 0;
         memcpy((void*)&Menu_Inventory_ashleyYOffset, &initial, sizeof Menu_Inventory_ashleyYOffset);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Inventory_menuText, &initial, sizeof Menu_Inventory_menuText);
     }
     {
         static const char initial = 0;

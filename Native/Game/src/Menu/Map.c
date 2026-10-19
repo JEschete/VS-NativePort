@@ -88,9 +88,7 @@ SVECTOR Menu_Map_centerPoint;
 struct Menu_Map_CompassBound Menu_Map_compassBounds[4];
 
 // decomp: _connectingMaps (_connectingMaps@src/MENU/MENU5.PRG/4D8.c)
-u_short Menu_Map_connectingMaps[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Map_connectingMaps[320]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _currentMapRow (_currentMapRow@src/MENU/MENU5.PRG/4D8.c)
 int Menu_Map_currentMapRow = -1;
@@ -105,9 +103,7 @@ int Menu_Map_currentScene;
 int Menu_Map_currentSceneRow;
 
 // decomp: _doors (_doors@src/MENU/MENU5.PRG/4D8.c)
-u_short Menu_Map_doors[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Map_doors[522]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _geomOffsetX (_geomOffsetX@src/MENU/MENU5.PRG/4D8.c)
 int Menu_Map_geomOffsetX;
@@ -138,9 +134,7 @@ int Menu_Map_mapLabelY;
 struct Menu_Map_MapLabel Menu_Map_mapLabels[8];
 
 // decomp: _mapNames (_mapNames@MENU/MENU5.PRG)
-u_short Menu_Map_mapNames[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Map_mapNames[282]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _menuCommandsState (_menuCommandsState@src/MENU/MENU5.PRG/4D8.c)
 short Menu_Map_menuCommandsState;
@@ -2434,26 +2428,8 @@ int Menu_Map_ShouldDrawDoorStateMarker(int arg0, int arg1, int arg2)
 void Menu_Map_ResetMenu5Statics(void)
 {
     {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Map_connectingMaps, &initial, sizeof Menu_Map_connectingMaps);
-    }
-    {
         static const int initial = -1;
         memcpy((void*)&Menu_Map_currentMapRow, &initial, sizeof Menu_Map_currentMapRow);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Map_doors, &initial, sizeof Menu_Map_doors);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Map_mapNames, &initial, sizeof Menu_Map_mapNames);
     }
     {
         static const u_short initial[] = {

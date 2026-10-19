@@ -114,6 +114,42 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   Passing unit tests and root-menu screenshots do not establish completion of #2.
   Fixing commit/CI and closure evidence for the narrower workspace repair are in #27.
 
+### Status crash and embedded menu strings (2026-10-19)
+
+#27 is closed in pushed `599d3037`, green Source Quality run `39270071612`.
+#28 verification used that revision plus the following pending changes; #2 remains active.
+
+- The copier treated `.vsString` source includes as one-word zero initializers and did
+  not register them with the module loader. It now uses the original source include
+  path and splat asset extents, allocates rounded `u_short` capacity, and loads the exact
+  source byte count (including valid odd-byte tables without reading the next asset).
+  Unresolved assets fail generation. Twenty-four embedded menu text arrays are bound;
+  startup now loads 358 globals from 61 modules, 19 pointer tables, zero failures.
+- Status source table: MENU4.PRG `0x4C48`, 3520 bytes / 1760 words. Inventory menu text:
+  MENU3.PRG `0x6BB8`, 944 bytes / 472 words. The real Status format is valid nested text;
+  its previous zero template led the formatter outside the table at tick 7833.
+- F02682 also enabled Status drawing before its actor-switch producer loaded preview
+  slot 1. Drawing is now enabled after that producer runs. F02662/F02663/F02677/F02678
+  now retain native packet handles for indicators, leader lines, fades and backgrounds.
+  No downstream null guard or scene bypass substitutes for those corrections.
+- Existing content tests check the actual loaded Status/inventory tables and odd-byte
+  destination padding. A guarded Status packet regression traverses the entire ordering
+  chain under both background orders. Clean Debug suite: 103 cases / 30813 assertions.
+  Release `[content][module],[render]`: 27 cases / 257 assertions. Changed-source quality
+  with tidy: zero new findings, no baseline refresh. All temporary probes are removed.
+- Clean Debug/Release replay: `--frames 10500 --speed 16 --press
+  1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle,7500:Down,7800:Circle,
+  8400:Down,8700:Right,9000:Left,9500:Cross,9800:Cross --at 8200,8800,9300,10300
+  --scripted`. Both exit 0. Evidence labels `issue28-status-final-debug` and
+  `issue28-status-final-release` under `build/quality/` and `build/Debug/` (including
+  `-stderr.log`). Prior failing stacks: `issue2-status-release` and `issue28-status-bound`.
+- Copier second generation is stable: SHA-256
+  `58C0CAE0B7E0B320CD7CBABFE325AF479AF37886A86B0951DB96076C0F28487A`.
+- Status now visibly draws Ashley, gauges and limb lines and returns to the root menu;
+  some labels/numeric text and inventory category/detail text are still missing. #2 is
+  not complete. Do not treat the #28 crash repair as complete menu or combat parity.
+  Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
+
 ### Quality verification (2026-10-19)
 
 Verification used `work` at `3c0a1311` plus the pending retained-code cleanup. No baseline

@@ -21,9 +21,7 @@ char Menu_Options_layoutPadding1[2];
 char Menu_Options_layoutPadding2[8];
 
 // decomp: _menuStrings (_menuStrings@src/MENU/MENU8.PRG/88.c)
-u_short Menu_Options_menuStrings[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Options_menuStrings[1070]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _simpleMapValues (_simpleMapValues@src/MENU/MENU8.PRG/88.c)
 char Menu_Options_simpleMapValues[] = { 3, 1, 0 };
@@ -829,12 +827,6 @@ int Menu_Options_Update(u_char* state)
 // MENU8.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
 void Menu_Options_ResetMenu8Statics(void)
 {
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Options_menuStrings, &initial, sizeof Menu_Options_menuStrings);
-    }
     {
         static const char initial[] = { 3, 1, 0 };
         memcpy((void*)&Menu_Options_simpleMapValues, &initial, sizeof Menu_Options_simpleMapValues);

@@ -75,9 +75,7 @@ char Menu_Files_containerDataEmpty;
 u_short Menu_Files_containerItemCapacities[] = { 32, 64, 64, 32, 64, 192, 256, 2 };
 
 // decomp: _containerStrings (_containerStrings@src/MENU/MENU7.PRG/260.c)
-u_short Menu_Files_containerStrings[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Files_containerStrings[895]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _cursorFileOpSaturation (_cursorFileOpSaturation@src/MENU/MENU7.PRG/260.c)
 signed char Menu_Files_cursorFileOpSaturation[] = { 0, -56, -112, -104, -96, -88, -80, -72,
@@ -3518,12 +3516,6 @@ void Menu_Files_ResetMenu7Statics(void)
     {
         static const u_short initial[] = { 32, 64, 64, 32, 64, 192, 256, 2 };
         memcpy((void*)&Menu_Files_containerItemCapacities, &initial, sizeof Menu_Files_containerItemCapacities);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Files_containerStrings, &initial, sizeof Menu_Files_containerStrings);
     }
     {
         static const signed char initial[] = { 0, -56, -112, -104, -96, -88, -80, -72,

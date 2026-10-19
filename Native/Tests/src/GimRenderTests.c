@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "Battle/Targeting.h"
+#include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffects.h"
@@ -9,6 +10,8 @@
 #include "Input/Controller.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Inventory/Inventory.h"
+#include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Render/Font.h"
@@ -557,6 +560,64 @@ int CheckMenuWorkspaceReset(void) {
   Menu_Framework_submenuStates[0] = saved_selection;
   Menu_Framework_mainMenuCursorAnimation = saved_cursor;
   free(storage);
+  return passed;
+}
+
+int CheckMenuDiscStringsLoaded(void) {
+  const unsigned char* format =
+      (const void*)&Menu_Status_statusStrings[Text_Menu4_status_Offset_values];
+  const size_t status_words =
+      sizeof Menu_Status_statusStrings / sizeof Menu_Status_statusStrings[0];
+  const size_t inventory_words =
+      sizeof Menu_Inventory_menuText / sizeof Menu_Inventory_menuText[0];
+  const unsigned int condition =
+      Menu_Status_statusStrings[Text_Menu4_status_Index_critical];
+  return status_words > Text_Menu4_status_Offset_values && condition > 0 &&
+         condition < status_words && Menu_Inventory_menuText[0] > 0 &&
+         Menu_Inventory_menuText[0] < inventory_words &&
+         format[0] == Core_TextCode_PrintString && format[1] == 0 &&
+         format[5] == Core_TextCode_PrintString && format[6] == 1 &&
+         format[7] == Core_TextCode_Terminator;
+}
+
+int CheckStatusPacketLinks(int background_first) {
+  enum {
+    kOrderingWords = 0x822,
+    kPacketWords = 64,
+    kWrittenWords = 53,
+    kInsertedPackets = 5
+  };
+  const u_long guard = 0xDEADBEEF;
+  const Render_FrameScratch saved_frame = Render_frameScratch;
+  const char saved_background = Menu_Status_drawBackgroundFirst;
+  u_long ordering[kOrderingWords];
+  u_long storage[kPacketWords];
+  ClearOTagR(ordering, kOrderingWords);
+  for (int index = 0; index < kPacketWords; ++index) {
+    storage[index] = guard;
+  }
+  Render_frameScratch.primitiveCursor = storage + 1;
+  Render_frameScratch.orderingTable = ordering + 18;
+  Render_frameScratch.overlayOrderingTable = ordering + 2;
+  Menu_Status_drawBackgroundFirst = background_first;
+
+  Menu_Status_DrawBackground();
+  Menu_Status_DrawLimbConditionIndicator(0, 0, 0);
+  Menu_Status_DrawLimbLeaderLine(0, 0, 0, 0);
+
+  int count = 0;
+  void* packet = ordering + kOrderingWords - 1;
+  const int expected_packets = kOrderingWords + kInsertedPackets;
+  while (packet != NULL && count <= expected_packets) {
+    ++count;
+    packet = nextPrim(packet);
+  }
+  int passed =
+      packet == NULL && count == expected_packets &&
+      Render_frameScratch.primitiveCursor == storage + 1 + kWrittenWords &&
+      storage[0] == guard && storage[1 + kWrittenWords] == guard;
+  Menu_Status_drawBackgroundFirst = saved_background;
+  Render_frameScratch = saved_frame;
   return passed;
 }
 

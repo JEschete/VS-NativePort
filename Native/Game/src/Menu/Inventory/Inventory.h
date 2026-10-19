@@ -25,7 +25,7 @@ extern char Menu_Inventory_equippedItem;;
 extern char Menu_Inventory_itemsFirstRow;;
 extern char* Menu_Inventory_itemsText;;
 extern char Menu_Inventory_menuRowCount;;
-extern u_short Menu_Inventory_menuText[];
+extern u_short Menu_Inventory_menuText[472]; /* contents: disc string table (ModuleData.c) */;
 extern char Menu_Inventory_unusedMiscActions[64];;
 extern int Menu_Inventory_selectedItemRow;;
 extern u_char Menu_Inventory_equipListStep;;

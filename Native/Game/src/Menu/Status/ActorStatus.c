@@ -91,9 +91,7 @@ u_char Menu_Status_selectedElement;
 char Menu_Status_selectedStatRow;
 
 // decomp: _statusStrings (_statusStrings@src/MENU/MENU4.PRG/120.c)
-u_short Menu_Status_statusStrings[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Status_statusStrings[1760]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _xPos (_xPos@src/MENU/MENU4.PRG/120.c)
 int Menu_Status_xPos = 0;
@@ -427,7 +425,7 @@ void Menu_Status_DrawLimbConditionIndicator(int colorIndex, int xy, int subdued)
     prim[4] = (color * 2) | (Render_LegacyPrimitiveCode_Tile << 24);
     prim[5] = xy + vs_getXY(1, 1);
     prim[6] = vs_getWH(5, 5);
-    *temp_t1 = ((u_long)prim << 8) >> 8;
+    *temp_t1 = LegacyGpu_Handle(prim);
     Render_frameScratch.primitiveCursor = prim + 7;
 }
 
@@ -466,7 +464,7 @@ void Menu_Status_DrawLimbLeaderLine(
     prim[6] = opaque;
     prim[7] = temp_v0;
     prim[8] = (temp_t2 << 0x10) | 216;
-    temp_t0[-1] = (((uintptr_t)prim << 8) >> 8);
+    temp_t0[-1] = (LegacyGpu_Handle(prim));
     prim += 9;
     Render_frameScratch.primitiveCursor = prim;
 }
@@ -859,7 +857,7 @@ void Menu_Status_DrawModelSlideFade(void)
     prim[12] = vs_getXY(96, 240);
     prim[13] = vs_getUV(96, 240);
 
-    temp_t1[-1] = (((uintptr_t)prim << 8) >> 8);
+    temp_t1[-1] = (LegacyGpu_Handle(prim));
 
     Render_frameScratch.primitiveCursor = prim + 14;
 }
@@ -891,7 +889,7 @@ void Menu_Status_DrawBackground(void)
     prim[11] = vs_getXY(160, 240);
     prim[12] = vs_getUV(160, 240);
     prim[13] = vs_getTpage(0, 0, 0, 0, Render_Dithering_On);
-    *var_t9 = ((u_long)prim << 8) >> 8;
+    *var_t9 = LegacyGpu_Handle(prim);
 
     prim += 14;
     prim[0] = (int)((*var_t9 & 0xFFFFFF) | (8 << 24));
@@ -903,7 +901,7 @@ void Menu_Status_DrawBackground(void)
     prim[6] = vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0);
     prim[7] = vs_getXY(256, 0);
     prim[8] = vs_getWH(64, 240);
-    *var_t9 = ((u_long)prim << 8) >> 8;
+    *var_t9 = LegacyGpu_Handle(prim);
 
     prim += 9;
     prim[0] = (int)((*var_t9 & 0xFFFFFF) | (13 << 24));
@@ -926,7 +924,7 @@ void Menu_Status_DrawBackground(void)
     prim[11] = vs_getRGB888(0, 0, 0);
     prim[12] = vs_getXY(160, 240);
     prim[13] = vs_getUV(160, 240);
-    *var_t9 = ((u_long)prim << 8) >> 8;
+    *var_t9 = LegacyGpu_Handle(prim);
 
     Render_frameScratch.primitiveCursor = prim + 14;
 }
@@ -1064,7 +1062,6 @@ int Menu_Status_Update(u_char* state)
 
         Menu_Status_AnimateActorSwitch(1);
 
-        Menu_Status_updateScreenEnabled = 1;
         Menu_Status_updateAnimWait = 1;
         Menu_Status_savedProjectionDistance = Render_projectionDistance;
 
@@ -1117,7 +1114,9 @@ int Menu_Status_Update(u_char* state)
         }
 
         if (Menu_Status_updateAnimWait != 0) {
-            if (Menu_Status_AnimateActorSwitch(0)) {
+            int preview_ready = Menu_Status_AnimateActorSwitch(0);
+            Menu_Status_updateScreenEnabled = 1;
+            if (preview_ready) {
 
                 Menu_Status_updateAnimWait = 0;
 
@@ -1330,7 +1329,9 @@ int Menu_Status_Update(u_char* state)
         }
 
         if (Menu_Status_updateAnimWait != 0) {
-            if (Menu_Status_AnimateActorSwitch(0)) {
+            int preview_ready = Menu_Status_AnimateActorSwitch(0);
+            Menu_Status_updateScreenEnabled = 1;
+            if (preview_ready) {
 
                 Menu_Status_NavigateStatusEffects(Battle_actors[Menu_Status_selectedActor - 1]->stats, 0);
 
@@ -1632,12 +1633,6 @@ void Menu_Status_ActorStatus_ResetMenu4Statics(void)
     {
         static const int initial = 0;
         memcpy((void*)&Menu_Status_selectedActor, &initial, sizeof Menu_Status_selectedActor);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Status_statusStrings, &initial, sizeof Menu_Status_statusStrings);
     }
     {
         static const int initial = 0;

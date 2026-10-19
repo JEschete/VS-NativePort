@@ -102,9 +102,7 @@ u_short Menu_Score_mapCompletion;
 int Menu_Score_menuState;
 
 // decomp: _menuText (_menuText@src/MENU/MENU9.PRG/238.c)
-u_short Menu_Score_menuText[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Score_menuText[34]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _monBinCdQueueSlot (_monBinCdQueueSlot@src/MENU/MENU9.PRG/238.c)
 Content_DiscQueueSlot* Menu_Score_monBinCdQueueSlot;
@@ -131,9 +129,7 @@ u_short Menu_Score_openedChestCount;
 static char Menu_Score_scrollableRowPreviousFrameBuf = 0;
 
 // decomp: _rankText (_rankText@src/MENU/MENU9.PRG/238.c)
-u_short Menu_Score_rankText[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Score_rankText[192]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: _rotationColor (_rotationColor@src/MENU/MENU9.PRG/238.c)
 int Menu_Score_rotationColor;
@@ -1610,18 +1606,6 @@ void Menu_Score_DrawViewerEdgeFade(void)
 // MENU9.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
 void Menu_Score_ScoreScreen_ResetMenu9Statics(void)
 {
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Score_menuText, &initial, sizeof Menu_Score_menuText);
-    }
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Score_rankText, &initial, sizeof Menu_Score_rankText);
-    }
     {
         static const char initial = 0;
         memcpy((void*)&Menu_Score_scrollableRowNavigationAnimState, &initial, sizeof Menu_Score_scrollableRowNavigationAnimState);

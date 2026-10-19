@@ -83,9 +83,7 @@ int Menu_Container_detailsClosedWithTriangle;
 Items_Container* Menu_Container_otherStorage;
 
 // decomp: _menuText (_menuText@src/MENU/MENUD.PRG/234.c)
-u_short Menu_Container_menuText[] = {
-0 /* disc text table: loaded in Step 5 */
-};
+u_short Menu_Container_menuText[690]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: vs_menuD_containerData (vs_menuD_containerData@MENU/MENUD.PRG)
 Items_Container* Menu_Container_containerData;
@@ -1943,12 +1941,6 @@ int Menu_Container_UpdateScreen(u_char* arg0)
 // MENUD.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
 void Menu_Container_ItemView_ResetMenudStatics(void)
 {
-    {
-        static const u_short initial[] = {
-0 /* disc text table: loaded in Step 5 */
-};
-        memcpy((void*)&Menu_Container_menuText, &initial, sizeof Menu_Container_menuText);
-    }
     {
         static const char* initial = "X     0";
         memcpy((void*)&Menu_Container_gemSlotCountText, &initial, sizeof Menu_Container_gemSlotCountText);

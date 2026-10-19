@@ -23,7 +23,7 @@ extern char Menu_Container_controlsPanelSlideStep;;
 extern char Menu_Container_detailsViewPhase;;
 extern int Menu_Container_detailsClosedWithTriangle;;
 extern Items_Container* Menu_Container_otherStorage;;
-extern u_short Menu_Container_menuText[];
+extern u_short Menu_Container_menuText[690]; /* contents: disc string table (ModuleData.c) */;
 extern Items_Container* Menu_Container_containerData;;
 void Menu_Container_SetPanelVisibility(char arg0);
 int Menu_Container_PollDetailsPaging(int itemCategory, int currentSelection);
