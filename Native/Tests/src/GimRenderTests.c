@@ -6,6 +6,7 @@
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
+#include "Input/Controller.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/TextBox.h"
@@ -18,6 +19,7 @@
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/UiPrimitives.h"
+#include "State/Settings.h"
 
 _Static_assert(sizeof Menu_textBoxOrderingTables == 102 * sizeof(u_long),
                "three textbox ordering buffers");
@@ -436,6 +438,125 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
   Render_frameScratch = saved_frame;
   Render_frameBuf = saved_framebuffer;
   Effects_screenEffectOverlay = saved_effect;
+  return passed;
+}
+
+int CheckMenuRowNativeLinks(int scrolling) {
+  enum {
+    kOrderingWords = 16,
+    kPacketWords = 256,
+    kRowPacketWords = 21,
+    kScrollingPacketWords = 238,
+    kScrollingPackets = 38
+  };
+  const u_long guard = 0xDEADBEEF;
+  const Render_FrameScratch saved_frame = Render_frameScratch;
+  const int saved_color = Render_fontColor;
+  const char saved_palette = Render_fontPaletteOffset;
+  const char saved_table = Render_fontTableSelect;
+  const char saved_width = Render_variableFontGlyphWidths[5];
+  Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
+  Menu_Framework_MenuRow rows[40] = {0};
+  u_long overlay[kOrderingWords];
+  u_long scene[kOrderingWords];
+  u_long expected_scene[kOrderingWords];
+  u_long storage[kPacketWords];
+  Menu_Framework_MenuRow row = {0};
+  row.state = 1;
+  row.x = 20;
+  row.y = 30;
+  row.w = 64;
+  row.text[0] = 5;
+  row.text[1] = (char)0xFF;
+  row.isScrollable = 1;
+  ClearOTagR(overlay, kOrderingWords);
+  ClearOTagR(scene, kOrderingWords);
+  memcpy(expected_scene, scene, sizeof scene);
+  for (int index = 0; index < kPacketWords; ++index) {
+    storage[index] = guard;
+  }
+  Render_frameScratch.overlayOrderingTable = overlay + 4;
+  Render_frameScratch.orderingTable = scene + 4;
+  Render_frameScratch.primitiveCursor = storage + 1;
+  Render_variableFontGlyphWidths[5] = 7;
+  Menu_Framework_menuItems = rows;
+
+  if (scrolling) {
+    Menu_Framework_DrawScrollableRow(&row);
+  } else {
+    Menu_Framework_DrawMenuItem(&row);
+  }
+
+  u_long* glyph = storage + 1;
+  u_long* shadow = glyph + 6;
+  u_long* gradient = shadow + 4;
+  int passed =
+      nextPrim(overlay + 6) == gradient && nextPrim(gradient) == glyph &&
+      nextPrim(glyph) == overlay + 5 && nextPrim(overlay + 7) == shadow &&
+      Render_frameScratch.primitiveCursor == storage + 1 + kRowPacketWords &&
+      storage[0] == guard && storage[1 + kRowPacketWords] == guard &&
+      memcmp(scene, expected_scene, sizeof scene) == 0;
+  if (scrolling) {
+    int count = 0;
+    void* packet = overlay + kOrderingWords - 1;
+    const int expected_packets = kOrderingWords + kScrollingPackets;
+    while (packet != NULL && count <= expected_packets) {
+      ++count;
+      packet = nextPrim(packet);
+    }
+    passed = count == expected_packets && packet == NULL &&
+             Render_frameScratch.primitiveCursor ==
+                 storage + 1 + kScrollingPacketWords &&
+             storage[0] == guard &&
+             storage[1 + kScrollingPacketWords] == guard &&
+             memcmp(scene, expected_scene, sizeof scene) == 0;
+  }
+  Render_frameScratch = saved_frame;
+  Render_fontColor = saved_color;
+  Render_fontPaletteOffset = saved_palette;
+  Render_fontTableSelect = saved_table;
+  Render_variableFontGlyphWidths[5] = saved_width;
+  Menu_Framework_menuItems = saved_items;
+  return passed;
+}
+
+int CheckMenuWorkspaceReset(void) {
+  enum { kRows = 40, kScratchBytes = 0x124, kGuardBytes = 16 };
+  const unsigned char guard = 0xA5;
+  const size_t workspace_bytes =
+      sizeof(Menu_Framework_MenuRow) * kRows + kScratchBytes;
+  const size_t allocation_bytes = workspace_bytes + (size_t)kGuardBytes * 2;
+  unsigned char* storage = malloc(allocation_bytes);
+  if (storage == NULL) {
+    return 0;
+  }
+  memset(storage, guard, allocation_bytes);
+  Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
+  const u_short saved_flags = Input_settings.menuFlags;
+  const unsigned int saved_memory = Input_settings.cursorMemory;
+  const char saved_selection = Menu_Framework_submenuStates[0];
+  const int saved_cursor = Menu_Framework_mainMenuCursorAnimation;
+  Menu_Framework_menuItems = (void*)(storage + kGuardBytes);
+  Input_settings.menuFlags = 1;
+  Input_settings.cursorMemory = 0;
+  Menu_Framework_submenuStates[0] = 0;
+
+  int passed = Menu_Framework_UpdateMainMenuSelection(2) == 0 &&
+               Menu_Framework_menuItems[kRows - 1].subText == NULL;
+  const unsigned char* tail = (const void*)(Menu_Framework_menuItems + kRows);
+  for (int index = 0; index < kScratchBytes; ++index) {
+    passed = passed && tail[index] == 0;
+  }
+  for (int index = 0; index < kGuardBytes; ++index) {
+    passed = passed && storage[index] == guard &&
+             storage[kGuardBytes + workspace_bytes + index] == guard;
+  }
+  Menu_Framework_menuItems = saved_items;
+  Input_settings.menuFlags = saved_flags;
+  Input_settings.cursorMemory = saved_memory;
+  Menu_Framework_submenuStates[0] = saved_selection;
+  Menu_Framework_mainMenuCursorAnimation = saved_cursor;
+  free(storage);
   return passed;
 }
 

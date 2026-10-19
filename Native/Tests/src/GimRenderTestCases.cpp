@@ -107,3 +107,18 @@ TEST_CASE("Screen feedback preserves the dialogue ordering chain",
     }
   }
 }
+
+extern "C" int CheckMenuRowNativeLinks(int scrolling);
+
+TEST_CASE("Menu rows use native overlay links without changing scene ordering",
+          "[render][menu][links]") {
+  REQUIRE(CheckMenuRowNativeLinks(0) == 1);
+  REQUIRE(CheckMenuRowNativeLinks(1) == 1);
+}
+
+extern "C" int CheckMenuWorkspaceReset(void);
+
+TEST_CASE("Menu initialization clears every native row and scratch byte",
+          "[render][menu][workspace]") {
+  REQUIRE(CheckMenuWorkspaceReset() == 1);
+}

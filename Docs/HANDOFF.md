@@ -81,6 +81,39 @@ plus the owned halfword-copy implementations and memory regressions.
   Issue #2 remains active. The copy-helper fixing commit and CI/closure evidence are
   recorded in #19; the main-menu renderer is the next controlling path to inspect.
 
+### Native menu rendering and workspace (2026-10-19)
+
+Verification used pushed `e4442056` plus the pending row/workspace changes. #2 is
+still active; its native workspace defect is #27 and the Status crash is #28.
+
+- F01348 used PS1 scratch offset `+0x008`, which is the scene ordering pointer in the
+  native frame rather than the overlay pointer. It now accesses the native fields and
+  uses a packet handle. F02548's scrolling gradient also now uses a native handle.
+  Root menu labels/gradients, setup labels and return to gameplay are visually verified.
+- #27: F01367 allocates `40 * sizeof(Menu_Framework_MenuRow) + 0x124`, places string
+  scratch after the forty rows, then row-type scratch 96 bytes later. F01349 clears the
+  same native-sized workspace. Original PS1 `0xB24/+0xA00/+0xA60` sizes overlapped the
+  native rows after pointer growth. Fixes are in the copier, not direct generated edits.
+- Existing GIM render tests check normal and scrolling link traversal, separate scene
+  and overlay tables, packet bounds, and real menu initialization of the final native
+  row and all scratch bytes with two guards. `[render][menu]`: two cases / three checks.
+  Release `[render]`: 21 cases / 203 assertions. Full Debug: 102 cases / 30808 assertions.
+  Changed-source quality with tidy: zero new findings; no baseline refresh.
+- Debug menu/item/setup/return inputs: `1000:Start,1300:Circle,3000:Start,4000:Start,
+  7000:Triangle,7600:Circle,8200:Down,8500:Circle,9200:Cross,9600:Cross,10000:Triangle`.
+  Both configurations complete 11500 ticks at speed 16, with stable preview companion
+  slot 1. Debug captures: `build/quality/issue2-items-row-after`; Release captures:
+  `build/quality/issue27-release-menu-return`; corresponding logs are in `build/Debug/`.
+  Root-only restored capture: `build/quality/issue2-mainmenu-row-after/frame_8100.png`.
+- Second copier run is stable: manifest SHA-256
+  `8887CF7992242337205C67EDDA97A0F69906119AE435A740E3906E19A6D39E4F`.
+- Remaining: item overview/category row/detail text is still absent despite visible
+  category icons and Ashley preview. Status entry (`7500:Down,7800:Circle` after the
+  same menu-open inputs) crashes in nested `Render_FormatEncodedText` at tick 7833;
+  logged before repair as #28, evidence `build/Debug/issue2-status-release-stderr.log`.
+  Passing unit tests and root-menu screenshots do not establish completion of #2.
+  Fixing commit/CI and closure evidence for the narrower workspace repair are in #27.
+
 ### Quality verification (2026-10-19)
 
 Verification used `work` at `3c0a1311` plus the pending retained-code cleanup. No baseline

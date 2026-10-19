@@ -437,7 +437,7 @@ void Menu_Framework_DrawMenuItem(Menu_Framework_MenuRow* menuItem)
 {
 
     int y = menuItem->gradientState;
-    u_long* scratch = *(void**)((uintptr_t)Core_ScratchBase() + 0x008) + 8;
+    u_long* scratch = (u_long*)Render_frameScratch.overlayOrderingTable + 2;
     int w = menuItem->w;
     int bgWidth = menuItem->backgroundWidth;
     char* text = menuItem->text;
@@ -501,7 +501,7 @@ void Menu_Framework_DrawMenuItem(Menu_Framework_MenuRow* menuItem)
 
         Render_InsertThreeWordPrimitive(scratch + 1, 0x60000000, vs_getXY_2(x + 2, y + 2), w | 0xC0000);
 
-        prim = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);
+        prim = Render_frameScratch.primitiveCursor;
 
         prim[0] = ((*scratch & 0xFFFFFF) | 0x0A000000);
         prim[1] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_On);
@@ -515,8 +515,8 @@ void Menu_Framework_DrawMenuItem(Menu_Framework_MenuRow* menuItem)
         prim[9] = (((x + w) & 0xFFFF) | ((y + 12) << 0x10));
         prim[10] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
 
-        *scratch = (u_int)((uintptr_t)prim << 8) >> 8;
-        *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = prim + 11;
+        *scratch = LegacyGpu_Handle(prim);
+        Render_frameScratch.primitiveCursor = prim + 11;
 
         v = &menuItem->subText;
         if (*v != NULL) {
@@ -543,7 +543,7 @@ int Menu_Framework_UpdateMainMenuSelection(int mode)
         }
 
         Menu_Framework_submenuStates[0] = selected;
-        Core_Memory_ZeroWordsBackward(Menu_Framework_menuItems, 0xB24);
+        Core_Memory_ZeroWordsBackward(Menu_Framework_menuItems, sizeof(Menu_Framework_MenuRow) * 40 + 0x124);
         mask = 9;
 
         for (mode = 0; mode < 10; ++mode) {
@@ -838,11 +838,11 @@ int Menu_Framework_OpenGameMenu(int menuState, int arg1)
 
             Content_AcquireOverlayWorkspace(6);
 
-            miscIndex = Core_Memory_AllocateFromHighEnd(0xB24);
+            miscIndex = Core_Memory_AllocateFromHighEnd(sizeof(Menu_Framework_MenuRow) * 40 + 0x124);
             var_a1 = Input_settings.menuFlags;
-            Menu_Framework_stringBuf = miscIndex + 0xA00;
+            Menu_Framework_stringBuf = (char*)((Menu_Framework_MenuRow*)miscIndex + 40);
             Menu_Framework_menuItems = miscIndex;
-            Menu_Framework_rowTypeBuf = miscIndex + 0xA60;
+            Menu_Framework_rowTypeBuf = (int*)(Menu_Framework_stringBuf + 0x60);
 
             for (i = 0; i < 3; ++i) {
                 for (var_a0 = Menu_Framework_abilityGroupActionRanges[i * 2]; var_a0 < Menu_Framework_abilityGroupActionRanges[i * 2 + 1];
@@ -2309,7 +2309,7 @@ void Menu_Framework_DrawScrollableRow(Menu_Framework_MenuRow* menuItem)
             prim[5] = ((xy + wh - 1) & 0xFFFF) | ((xy >> 0x10) << 0x10);
             prim[6] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_Off);
 
-            *before = ((u_long)prim << 8) >> 8;
+            *before = LegacyGpu_Handle(prim);
             prim += 7;
             xy += vs_getXY(0, 1);
         }
