@@ -25,6 +25,7 @@
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
 #include "Boot/Lifecycle.h"
+#include "Boot/OverlayReset.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Math/FixedPoint.h"
@@ -353,6 +354,9 @@ int Menu_Framework_LoadMenuOverlay(int arg0)
 
         Content_ReleaseDiscRequest(state->cdQueue);
         Boot_WaitForOverlayReady();
+        if (subMenu == 0) {
+            Boot_ResetMainMenuStatics();
+        }
 
         state->loading = 0;
 

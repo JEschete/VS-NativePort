@@ -123,6 +123,13 @@ TEST_CASE("Menu initialization clears every native row and scratch byte",
   REQUIRE(CheckMenuWorkspaceReset() == 1);
 }
 
+extern "C" int CheckMenuReloadClosingDelay(void);
+
+TEST_CASE("Menu reloads restore the original five-tick closing delay",
+          "[render][menu][lifecycle]") {
+  REQUIRE(CheckMenuReloadClosingDelay() == 1);
+}
+
 extern "C" int CheckStatusPacketLinks(int background_first);
 
 TEST_CASE("Status background and limb packets preserve the complete UI chain",

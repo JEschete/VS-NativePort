@@ -56,6 +56,14 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         (r'"Fandango\0"', r'"\x0F\x24\x31\x27\x24\x31\x2A\x32\xE7"',
          "INITBTL.PRG 18.c pragma vsstring default weapon name; preserve original encoded text"),
     ],
+    "F01342": [
+        ("        Boot_WaitForOverlayReady();",
+         "        Boot_WaitForOverlayReady();\n"
+         "        if (subMenu == 0) {\n"
+         "            Boot_ResetMainMenuStatics();\n"
+         "        }",
+         "5BF94.c:vs_battle_loadMenuPrg MAINMENU reload restores C48.c:_quitDelay and other initialized menu statics"),
+    ],
     "F02535": [
         ("((u_long)poly << 8) >> 8", "LegacyGpu_Handle(poly)",
          "action-cost panel packets retain native handles"),

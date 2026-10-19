@@ -5,9 +5,11 @@
 The ordered work tracker is [#4](https://github.com/JEschete/VS-NativePort/issues/4).
 The maintained-production quality pass in [#5](https://github.com/JEschete/VS-NativePort/issues/5)
 is verified locally. The Guildenstern textbox fix in
-[#1](https://github.com/JEschete/VS-NativePort/issues/1) is now verified locally;
-menu rendering in #2 is verified locally as described below; #6 is next after its
-fixing revision passes CI.
+[#1](https://github.com/JEschete/VS-NativePort/issues/1) is now verified locally.
+Menu issue #2 remains open: later owner comparisons identify additional text,
+equipment/Status, Map/Data and Options gaps. The checkpoints below verify their
+specific fixes, not complete menu parity. #6 remains blocked on #2 acceptance
+and successful CI for its fixing revisions.
 Preserve the original dialogue pause and button advance; do not shorten the scene delay.
 
 ### Guildenstern window dialogue (2026-10-19)
@@ -150,6 +152,66 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   some labels/numeric text and inventory category/detail text are still missing. #2 is
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
+
+### Repeated Options exit freeze (#39/#40, 2026-10-19)
+
+Verification used `2cdc8100` plus the scoped F01342 copier change. No reference,
+disc data, progression flags, quality baseline or hardware-shaped renderer was
+changed.
+
+The first Frame/Simple/Off visit could return normally, but a second Options
+visit froze field control even with Frame unchanged. Read-only samples through
+the matching local PDB showed `Field_controlMode=5`, interaction paused,
+`currentMenu=31` (closing), `menuStatus=1` and allocated menu rows while logical
+ticks continued. Thus a field screenshot or clean bounded process exit was not
+proof of recovery.
+
+The original MAINMENU `C48.c:_quitDelay` completes only on its fifth call. Native
+execution retained its counter across visits: the copier generated the intended
+MAINMENU reset, but no runtime caller invoked it. F01342
+`vs_battle_loadMenuPrg` (`5BF94.c:2576`, native
+`Menu_Framework_LoadMenuOverlay`) now calls the existing
+`Boot_ResetMainMenuStatics` only after a MAINMENU load completes. Already-loaded
+polls do not reset the delay. This restores the original reload boundary rather
+than forcing Map Off, skipping cleanup or weakening the fifth-call condition.
+
+Evidence:
+
+- The public-API regression "Menu reloads restore the original five-tick closing
+  delay" fails before the fix and passes afterward. It exercises three completed
+  load/close cycles, including already-loaded polls, and requires completion on
+  exactly the fifth closing call.
+- Debug and Release each pass all **106 cases / 30,816 assertions**. The focused
+  `[render],[content][module]` selection passes **30 cases / 260 assertions** in
+  both configurations.
+- Both configurations complete **54,000-tick**, speed-16 input replays covering
+  Frame->Frame, Frame->Simple, Simple->Simple, Simple->Off, Off->Off, Off->Simple,
+  Simple->Frame, Frame->Off and Off->Frame, then Cross/back cancellation and
+  Triangle/direct cancellation of an unconfirmed change. All **36 captures per
+  configuration** are present. Direct state reads confirm applied values 3/1/0,
+  unmodified settings on cancellation, root/selector re-entry and actual field
+  recovery (`mode=1`, not paused, `currentMenu=63`, `menuStatus=0`, no retained
+  menu rows). Final movement and another menu open/close remain responsive.
+- A separate **normal-speed Release** Frame->Off->Simple replay completes
+  **18,000 ticks**, all nine requested captures, applied-mode/state checks,
+  movement and menu re-entry. The owner-confirmed manual close of the earlier
+  normal-speed attempt remains an incomplete attempt, not a reproduced crash.
+- Local exact argv, observations and logs are under
+  `build\quality\issue40\matrix-fixed-quiet-debug`,
+  `build\quality\issue40\matrix-fixed-release` and
+  `build\quality\issue40\normal-off-simple-fixed-release`. An earlier Debug
+  trace-heavy matrix timed out at tick 37173 after 240 seconds; the completed
+  reduced-log Debug repeat took 352.9 seconds within its 480-second bound.
+- Changed-source quality with `--tidy` reports **0 new findings**, with no baseline
+  refresh. Second copier generation is stable: manifest SHA-256
+  `A5B925DAF78C5BE11D48602FD1E152670F4B02BEBC9C2E06A06AEF2C7C33AC10`.
+
+Scope remains narrow: this repairs the shared repeated-exit hang. The minimap
+scene resolver/drawer and projection-offset accessors remain unported; original
+minimap geometry parity and the other eight Options' real effects are not
+established by these runs. #39/#40 remain open for their outstanding acceptance
+gates, and #2 still blocks #6. Fixing commit and pushed-CI evidence are recorded
+on the issues; do not infer issue completion from this checkpoint.
 
 ### Restored Submenu Text And Names (2026-10-19)
 

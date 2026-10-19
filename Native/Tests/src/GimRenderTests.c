@@ -3,8 +3,10 @@
 
 #include "Actors/Spawning.h"
 #include "Battle/Targeting.h"
+#include "Boot/OverlayReset.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
+#include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
@@ -561,6 +563,47 @@ int CheckMenuWorkspaceReset(void) {
   Menu_Framework_submenuStates[0] = saved_selection;
   Menu_Framework_mainMenuCursorAnimation = saved_cursor;
   free(storage);
+  return passed;
+}
+
+int CheckMenuReloadClosingDelay(void) {
+  enum { kRows = 40, kVisits = 3, kClosingTicks = 5 };
+  const Menu_Framework_MenuControlState saved_state = Menu_Framework_menuState;
+  Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
+  u_int* saved_background = Menu_Framework_menuBackgroundBuffer;
+  const signed char saved_loaded = Menu_Framework_loadedSubMenu;
+  const char saved_shortcut = Menu_Framework_shortcutInvoked;
+  const char saved_without_main = Menu_Framework_openedWithoutMainMenu;
+  Menu_Framework_MenuRow rows[kRows] = {0};
+  Content_DiscQueueSlot request = {0};
+  int passed = 1;
+  Boot_ResetMainMenuStatics();
+  Menu_Framework_menuItems = rows;
+  Menu_Framework_menuBackgroundBuffer = NULL;
+  Menu_Framework_loadedSubMenu = 0;
+  Menu_Framework_shortcutInvoked = 0;
+  Menu_Framework_openedWithoutMainMenu = 1;
+  Menu_Framework_menuState.cdQueue = &request;
+
+  for (int visit = 0; visit < kVisits; ++visit) {
+    request.state = Content_DiscRequestState_Loaded;
+    Menu_Framework_menuState.loading = 1;
+    passed &= Menu_Framework_LoadMenuOverlay(0) == 1 &&
+              request.state == Content_DiscRequestState_Free &&
+              Menu_Framework_menuState.loading == 0;
+    for (int tick = 1; tick <= kClosingTicks; ++tick) {
+      passed &= Menu_Framework_LoadMenuOverlay(0) == 1;
+      passed &= Menu_Framework_QuitDelay() == (tick == kClosingTicks);
+    }
+  }
+
+  Boot_ResetMainMenuStatics();
+  Menu_Framework_menuState = saved_state;
+  Menu_Framework_menuItems = saved_items;
+  Menu_Framework_menuBackgroundBuffer = saved_background;
+  Menu_Framework_loadedSubMenu = saved_loaded;
+  Menu_Framework_shortcutInvoked = saved_shortcut;
+  Menu_Framework_openedWithoutMainMenu = saved_without_main;
   return passed;
 }
 
