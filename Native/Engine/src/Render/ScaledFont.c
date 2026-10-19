@@ -48,7 +48,8 @@ int Render_DrawScaledFontChar(int char_id, int x, int y, int width, int height,
   };
   if (char_id == kSpaceGlyph) return x + kSpaceAdvance * scale;
   const unsigned glyph =
-      (unsigned)char_id + (unsigned char)Render_fontTableSelect * kGlyphsPerTable;
+      (unsigned)char_id +
+      (unsigned char)Render_fontTableSelect * kGlyphsPerTable;
   if (glyph >= sizeof Render_variableFontGlyphWidths ||
       (unsigned)Render_activeTextBoxIndex >= kTextBoxCount ||
       Menu_activeTextBoxOrderingTable == NULL) {
@@ -67,19 +68,23 @@ int Render_DrawScaledFontChar(int char_id, int x, int y, int width, int height,
   memset(primitive, 0, sizeof *primitive);
   setPolyFT4(primitive);
   memcpy(&primitive->r0, &Render_fontColor, sizeof Render_fontColor);
-    setXY4(primitive, x >> kPositionFractionBits, y >> kPositionFractionBits,
-      (x + width) >> kPositionFractionBits, y >> kPositionFractionBits,
-      x >> kPositionFractionBits, (y + height) >> kPositionFractionBits,
-      (x + width) >> kPositionFractionBits, (y + height) >> kPositionFractionBits);
-    const unsigned column = glyph % kGlyphsPerRow * kGlyphCellSize;
-    const unsigned row = glyph / kGlyphsPerRow * kGlyphCellSize;
-    setUV4(primitive, column, row, column + kGlyphCellSize, row, column, row + kGlyphCellSize,
-      column + kGlyphCellSize, row + kGlyphCellSize);
+  setXY4(primitive, x >> kPositionFractionBits, y >> kPositionFractionBits,
+         (x + width) >> kPositionFractionBits, y >> kPositionFractionBits,
+         x >> kPositionFractionBits, (y + height) >> kPositionFractionBits,
+         (x + width) >> kPositionFractionBits,
+         (y + height) >> kPositionFractionBits);
+  const unsigned column = glyph % kGlyphsPerRow * kGlyphCellSize;
+  const unsigned row = glyph / kGlyphsPerRow * kGlyphCellSize;
+  setUV4(primitive, column, row, column + kGlyphCellSize, row, column,
+         row + kGlyphCellSize, column + kGlyphCellSize, row + kGlyphCellSize);
   primitive->clut =
-        (uint16_t)(kPaletteBaseCode |
-         (((unsigned char)Render_fontPaletteOffset + kFirstPaletteIndex) & kPaletteIndexMask));
-    primitive->tpage = kFontTexturePage;
-    AddPrim(Menu_activeTextBoxOrderingTable + (size_t)Render_activeTextBoxIndex * kTextBoxOrderStride + kTextForegroundLayer,
+      (uint16_t)(kPaletteBaseCode | (((unsigned char)Render_fontPaletteOffset +
+                                      kFirstPaletteIndex) &
+                                     kPaletteIndexMask));
+  primitive->tpage = kFontTexturePage;
+  AddPrim(Menu_activeTextBoxOrderingTable +
+              (size_t)Render_activeTextBoxIndex * kTextBoxOrderStride +
+              kTextForegroundLayer,
           primitive);
   Render_frameScratch.primitiveCursor = primitive + 1;
   return next_x;

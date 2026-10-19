@@ -1,26 +1,25 @@
 #include "Movie/MoviePlayer.h"
 
+#define DR_FLAC_IMPLEMENTATION
+
 #include <SDL3/SDL.h>
 #include <dav1d/dav1d.h>
+#include <dr_flac.h>
 #include <mkvparser/mkvparser.h>
 #include <mkvparser/mkvreader.h>
-
-#include <utility>
-
-#include "Audio/AudioDevice.hpp"
-#include "Content/DataStore.hpp"
-#include "Core/Log.hpp"
-#include "Render/PageSpace.hpp"
-
-#define DR_FLAC_IMPLEMENTATION
-#include <dr_flac.h>
 
 #include <algorithm>
 #include <climits>
 #include <limits>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include "Audio/AudioDevice.hpp"
+#include "Content/DataStore.hpp"
+#include "Core/Log.hpp"
+#include "Render/PageSpace.hpp"
 
 // Plays a movie VS.Extract converted (Matroska: AV1 video, FLAC audio). Both
 // streams are read into memory at open (the title movie is about 10 MB): the

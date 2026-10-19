@@ -40,14 +40,15 @@ u_char Field_SampleCollisionHeightCode(u_int sample_x, int sample_z,
                                        int layer) {
   const Field_MpdCollisionHeader* map = Field_roomData.collisionMap;
   const size_t length = Field_roomData.header.collisionMapLength;
-  if (map == NULL || length < sizeof *map || layer < 0 || layer >= kLayerCount ||
-      sample_z < 0 || map->width <= 0 || map->height <= 0 ||
-      map->cellCount < map->width * map->height ||
+  if (map == NULL || length < sizeof *map || layer < 0 ||
+      layer >= kLayerCount || sample_z < 0 || map->width <= 0 ||
+      map->height <= 0 || map->cellCount < map->width * map->height ||
       (sample_x >> kSamplesPerAxisBits) >= (unsigned)map->width ||
       ((unsigned)sample_z >> kSamplesPerAxisBits) >= (unsigned)map->height) {
     return kInvalidHeight;
   }
-  const size_t patterns = sizeof *map + (size_t)map->cellCount * kLayerCount * sizeof(uint16_t);
+  const size_t patterns =
+      sizeof *map + (size_t)map->cellCount * kLayerCount * sizeof(uint16_t);
   if (patterns > length) return kInvalidHeight;
   const size_t tile =
       ((size_t)sample_z >> kSamplesPerAxisBits) * (unsigned)map->width +
@@ -55,14 +56,20 @@ u_char Field_SampleCollisionHeightCode(u_int sample_x, int sample_z,
   const unsigned char* bytes = (const unsigned char*)map;
   uint16_t descriptor;
   memcpy(&descriptor,
-         bytes + sizeof *map + ((size_t)layer * map->cellCount + tile) * sizeof descriptor,
+         bytes + sizeof *map +
+             ((size_t)layer * map->cellCount + tile) * sizeof descriptor,
          sizeof descriptor);
-    const size_t pattern = patterns + (size_t)(descriptor & kPatternIndexMask) * kPatternBytes;
-    if (pattern > length || length - pattern < kPatternBytes) return kInvalidHeight;
+  const size_t pattern =
+      patterns + (size_t)(descriptor & kPatternIndexMask) * kPatternBytes;
+  if (pattern > length || length - pattern < kPatternBytes)
+    return kInvalidHeight;
   const unsigned char sample =
-      bytes[pattern + ((size_t)sample_z & (kSamplesPerAxis - 1)) * kSamplesPerAxis +
-        (sample_x & (kSamplesPerAxis - 1))];
-    const int signed_sample = sample <= INT8_MAX ? sample : (int)sample - (UINT8_MAX + 1);
-    const int height = signed_sample + ((descriptor & kHeightBiasMask) >> kHeightBiasShift);
-    return (u_char)((height & kHeightValueMask) | (sample & kInvalidHeight));
+      bytes[pattern +
+            ((size_t)sample_z & (kSamplesPerAxis - 1)) * kSamplesPerAxis +
+            (sample_x & (kSamplesPerAxis - 1))];
+  const int signed_sample =
+      sample <= INT8_MAX ? sample : (int)sample - (UINT8_MAX + 1);
+  const int height =
+      signed_sample + ((descriptor & kHeightBiasMask) >> kHeightBiasShift);
+  return (u_char)((height & kHeightValueMask) | (sample & kInvalidHeight));
 }
