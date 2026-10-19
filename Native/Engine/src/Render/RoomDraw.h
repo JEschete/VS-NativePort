@@ -6,20 +6,23 @@
 #include "Legacy/Psx.h"
 #include "Render/Render.h"
 
+enum { kRoomSpatialDimensions = 3, kRoomGeometryGroupBytes = 64 };
+
 // decomp: _mpdGeometryHeader / 146C.h:31; transform access in 2EA3C.s:1265.
 typedef struct Render_RoomGeometryGroup {
   unsigned flags;
-  int16_t bounds[3][2];
-  int angles[3];
+  int16_t bounds[kRoomSpatialDimensions][2];
+  int angles[kRoomSpatialDimensions];
   unsigned polygonOffset;
   MATRIX view;
 } Render_RoomGeometryGroup;
 
 #ifdef __cplusplus
-static_assert(sizeof(Render_RoomGeometryGroup) == 64);
+static_assert(sizeof(Render_RoomGeometryGroup) == kRoomGeometryGroupBytes);
 extern "C" {
 #else
-_Static_assert(sizeof(Render_RoomGeometryGroup) == 64, "MPD group layout");
+_Static_assert(sizeof(Render_RoomGeometryGroup) == kRoomGeometryGroupBytes,
+               "MPD group layout");
 #endif
 
 int Render_ValidateRoomGeometry(const void* data, size_t size);
