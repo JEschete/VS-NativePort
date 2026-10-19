@@ -225,3 +225,33 @@ TEST_CASE("Signed vector components preserve their low sixteen bits",
     CHECK(Core_Math_WrapSigned16(value) == expected);
   }
 }
+
+TEST_CASE("Vector normalization handles full-range squared lengths",
+          "[core][math][normal]") {
+  for (const std::int32_t component :
+       {std::numeric_limits<std::int32_t>::max(),
+        std::numeric_limits<std::int32_t>::min()}) {
+    VECTOR vector{component, component, component, 7};
+    const std::int64_t wide = component;
+    const std::uint64_t squared = static_cast<std::uint64_t>(wide * wide) * 3;
+    const auto result = Core_Gte_VectorNormal(&vector, &vector);
+    const int expected = component > 0 ? 2364 : -2364;
+    const std::array actual{vector.vx, vector.vy, vector.vz, vector.pad};
+    const std::array<decltype(vector.vx), 4> expected_values{expected, expected,
+                                                             expected, 7};
+    CHECK(actual == expected_values);
+    CHECK(static_cast<std::uint32_t>(result) ==
+          static_cast<std::uint32_t>(squared));
+  }
+  VECTOR source{3, 4, 0, 0};
+  VECTOR output{};
+  CHECK(Core_Gte_VectorNormal(&source, &output) == 25);
+  const std::array values{output.vx, output.vy, output.vz};
+  constexpr std::array<decltype(output.vx), 3> kExpected{2457, 3276, 0};
+  CHECK(values == kExpected);
+  source = {};
+  CHECK(Core_Gte_VectorNormal(&source, &output) == 0);
+  const std::array zero_values{output.vx, output.vy, output.vz};
+  constexpr decltype(zero_values) kZero{};
+  CHECK(zero_values == kZero);
+}

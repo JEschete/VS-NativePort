@@ -379,12 +379,14 @@ void Core_Gte_OuterProduct0(VECTOR* v0, VECTOR* v1, VECTOR* v2) {
 
 long Core_Gte_VectorNormal(VECTOR* v0, VECTOR* v1) {
   const int64_t x = v0->vx, y = v0->vy, z = v0->vz;
-  const int64_t sq = x * x + y * y + z * z;
+  const uint64_t sq = static_cast<uint64_t>(x * x) +
+                      static_cast<uint64_t>(y * y) +
+                      static_cast<uint64_t>(z * z);
   const double len = std::sqrt(static_cast<double>(sq));
   if (len > 0) {
-    v1->vx = static_cast<long>(x * 4096 / len);
-    v1->vy = static_cast<long>(y * 4096 / len);
-    v1->vz = static_cast<long>(z * 4096 / len);
+    v1->vx = static_cast<long>(static_cast<double>(x) * 4096 / len);
+    v1->vy = static_cast<long>(static_cast<double>(y) * 4096 / len);
+    v1->vz = static_cast<long>(static_cast<double>(z) * 4096 / len);
   } else {
     v1->vx = v1->vy = v1->vz = 0;
   }
