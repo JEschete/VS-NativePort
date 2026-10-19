@@ -19,11 +19,15 @@ namespace VS::Content {
 // that still addresses the disc by sector finds it.
 class DataStore {
  public:
+  static constexpr u32 kDataSectorBytes = 2048;
   struct Entry {
     std::string path;  // disc path, e.g. "TITLE/TITLE.PRG"
     u32 lba = 0;
     u32 size = 0;
     std::string form;  // "raw", or the converted form
+
+    u32 SectorCount() const;
+    bool ContainsSector(u32 sector) const;
   };
 
   static constexpr const char* ManifestName = "files.tsv";

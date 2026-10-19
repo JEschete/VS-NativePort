@@ -265,3 +265,31 @@ TEST_CASE(
     "[content][disc]") {
   REQUIRE(TestsDiscReadSizeContract() == 1);
 }
+
+TEST_CASE("Manifest sector extents do not wrap at uint32 boundaries",
+          "[content][manifest]") {
+  Content::DataStore::Entry entry{"fixture", 0, UINT32_MAX, "raw"};
+  CHECK(entry.SectorCount() == 2097152);
+  CHECK(entry.ContainsSector(2097151));
+  CHECK_FALSE(entry.ContainsSector(2097152));
+}
+
+TEST_CASE("Manifest high-LBA ranges retain their upper boundary",
+          "[content][manifest]") {
+  Content::DataStore::Entry entry{"fixture", UINT32_MAX - 1, 4096, "raw"};
+  CHECK(entry.ContainsSector(UINT32_MAX));
+  CHECK_FALSE(entry.ContainsSector(0));
+}
+
+TEST_CASE("Manifest sector rounding preserves empty and partial entries",
+          "[content][manifest]") {
+  Content::DataStore::Entry entry{"fixture", 10, 0, "raw"};
+  for (const u32 size : {0u, 1u, 2048u}) {
+    entry.size = size;
+    CHECK(entry.SectorCount() == 1);
+    CHECK(entry.ContainsSector(10));
+    CHECK_FALSE(entry.ContainsSector(11));
+  }
+  entry.size = 2049;
+  CHECK(entry.SectorCount() == 2);
+}

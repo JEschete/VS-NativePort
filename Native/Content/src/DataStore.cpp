@@ -27,10 +27,21 @@ std::unique_ptr<DataStore>& Instance() {
 
 bool ParseU32(std::string_view s, u32& out) {
   const auto r = std::from_chars(s.data(), s.data() + s.size(), out);
-  return r.ec == std::errc{} && r.ptr == s.data() + s.size();
+  return r.ec == std::errc() && r.ptr == s.data() + s.size();
 }
 
 }  // namespace
+
+u32 DataStore::Entry::SectorCount() const {
+  const u64 rounded =
+      (static_cast<u64>(size) + kDataSectorBytes - 1) / kDataSectorBytes;
+  return static_cast<u32>(std::max<u64>(rounded, 1));
+}
+
+bool DataStore::Entry::ContainsSector(u32 sector) const {
+  return sector >= lba &&
+         static_cast<u64>(sector) < static_cast<u64>(lba) + SectorCount();
+}
 
 std::expected<void, std::string> DataStore::Open(const fs::path& root) {
   std::ifstream in(root / ManifestName);
@@ -91,8 +102,7 @@ const DataStore::Entry* DataStore::FindBySector(u32 lba) const {
     return nullptr;
   }
   --it;
-  const u32 sectors = (it->size + 2047) / 2048;
-  return lba < it->lba + std::max<u32>(sectors, 1) ? &*it : nullptr;
+  return it->ContainsSector(lba) ? &*it : nullptr;
 }
 
 fs::path DataStore::FileOf(const Entry& e) const {
@@ -152,10 +162,12 @@ extern "C" int Content_ReadDiscBytes(unsigned lba, unsigned bytes, void* dest) {
       std::memset(out, 0, remaining);
       return 0;
     }
-    const u64 offset = static_cast<u64>(sector - e->lba) * 2048;
-    const u32 sectors = std::max<u32>((e->size + 2047) / 2048, 1);
+    const u64 offset =
+        static_cast<u64>(sector - e->lba) * DataStore::kDataSectorBytes;
+    const u32 sectors = e->SectorCount();
     const usize span = std::min<usize>(
-        remaining, static_cast<usize>(e->lba + sectors - sector) * 2048);
+        remaining, (static_cast<u64>(e->lba) + sectors - sector) *
+                       DataStore::kDataSectorBytes);
     const usize n = static_cast<usize>(
         std::min<u64>(span, offset < e->size ? e->size - offset : 0));
     if (n != 0 && !store->Read(*e, offset, std::span(out, n))) {
