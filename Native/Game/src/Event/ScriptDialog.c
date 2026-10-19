@@ -57,6 +57,13 @@ intptr_t Event_ScriptShowDialogText(u_char* script, short arg1 __attribute__((un
 
     if (Event_isTextBoxAwaitingClose[script[1]] == 0) {
         Menu_SetTextBoxText(script[1], (char*)&Event_dialogStrings[Event_dialogStrings[script[2]]]);
+        const Menu_TextBoxState* dialog = Menu_TextBox(script[1]);
+        Core_Debugf("dialog", "show box=%u string=%u kind=%u shape=%u hidden=%u pos=%d,%d size=%d,%d state=%d duration=%d speaker=%u text=%p",
+            (unsigned)script[1], (unsigned)script[2], (unsigned)dialog->flags.kind,
+            (unsigned)dialog->flags.frameShape, (unsigned)dialog->flags.opaque3Bit7,
+            dialog->x, dialog->y, dialog->charsPerLine, dialog->lineCount,
+            dialog->state, dialog->openDuration, (unsigned)dialog->flags.speakerTexture,
+            (void*)dialog->string);
         if (script[3] == 0) {
             Event_isTextBoxAwaitingClose[script[1]] = 1;
             return 1;
