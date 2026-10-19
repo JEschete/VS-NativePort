@@ -14,12 +14,12 @@ void Core_Memory_ZeroAlignedWords(void* dest, int sz);
 
 void Core_Memory_ClearAlignedWords(void* destination, int size);
 
-#ifdef __cplusplus
-}
-#endif
-
 void Core_Memory_CopyHalfwords(void* dst, const void* src, int num_bytes);
 
 void Core_Memory_CopyHalfwordBlocks(void* dst, const void* src, int num_bytes);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // VS_OWNED_CORE_MEMORY_WORDCOPY_H

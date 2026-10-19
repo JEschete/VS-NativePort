@@ -42,6 +42,7 @@
 - **PS1 BIOS:** `F:\Emulators\PlayStation\bios\SCPH1001.BIN` (NTSC-U, used for SLUS-01040; `scph5501.bin` also there). Copies exist under `F:\Emulators\LaunchBox\Emulators\RetroArch\system\`. Never copy a BIOS into the repository.
 - **Reference captures:** `tools\test\duckstation_capture.ps1 -SkipIntro -Keys '40:Down,42:X' -Seconds 45,50 -Out build\ds_x` (keys briefly take focus; Z = Cross, X = Circle, Return = Start).
 - **Native test runs:** `tools\test\run_native.ps1 -NoCopy -SkipIntro -Frames 1800 -At '1500' -Press '1200:Down,1300:Circle'`. Ticks are 1/60 s. **Skip the intro movie by pressing Start (`-SkipIntro` = `--press 1000:Start`)**: the title menu is then up by tick ~1100 instead of ~3300. Crash stacks are in `build\Debug\vs-native.log`.
+- **Menu testing:** use the original prologue skip: Start during the opening, then Start again at the A. J. Durai quote. Verified replay inputs are `--press 1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle`: MAP009 loads at tick 4058 and MAINMENU.PRG at 7005. Avoid repeated Circle presses, which can toggle the battle sphere. Use the full prologue for combat troubleshooting and implementation; skipping it is not combat verification.
 
 ## Code Translation Guidelines
 - When translating assembly into native implementations, add provenance comments identifying the original decomp symbol and source/assembly location so future upstream decomp progress can be cross-referenced. Use meaningful semantic names and preserve traceability.

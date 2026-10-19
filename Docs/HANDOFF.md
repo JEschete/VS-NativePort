@@ -49,6 +49,38 @@ The original line is **"...Where are you, Sydney?"**, not "Where are you hiding 
   The fixing commit and closure evidence are recorded in #1. No push was performed for
   the window-dialogue fix.
 
+### Menu copy helpers and quick test route (2026-10-19)
+
+Issue #19 supports the active menu-rendering issue #2. Verification used `5694a3d3`
+plus the owned halfword-copy implementations and memory regressions.
+
+- F04188/F04189 are implemented in `Core/Memory/WordCopy.c`, not generated output.
+  Original `573B8.c:242-269` copies leading halfwords, then loads four halfwords before
+  storing each eight-byte block. The native code preserves that forward overlap order,
+  halfword alignment and full native pointer bytes. Nonpositive sizes are no-ops;
+  incomplete halfwords/blocks are ignored rather than entering invalid assembly loops.
+  The header declarations now have C linkage for native C++ consumers.
+- Before repair, the new direct copy tests failed 25 assertions in three cases, leaving
+  destinations unchanged: `build/Debug/issue19-before-test.log`. After repair,
+  `[core][memory]` passes six cases / 141 assertions in Debug and Release. The complete
+  Debug suite passes 100 cases / 30805 assertions. Changed-source quality with tidy
+  reports zero new findings; no baseline refresh.
+- Use real Start presses to skip the opening and the A. J. Durai quote for menu testing:
+  `--press 1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle` loads MAP009 at
+  4058 and MAINMENU.PRG at 7005. Start at 1500 is too early in this replay. Repeated
+  Circle inputs can open/close the battle sphere instead of testing the main menu.
+  Keep the complete prologue for combat troubleshooting and verification.
+- Menu/preview replay in both configurations: `--frames 10000 --speed 16 --press
+  1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle,7600:Circle,8200:Down,8500:Circle
+  --at 7500,7900,8400,9000,9900 --scripted`. Debug captures/logs use
+  `issue19-firstroom-preview`; Release uses `issue19-firstroom-preview-release`
+  (Release captures at 7500,8400,9900). Captures are under `build/quality/`; logs are
+  under `build/Debug/`, including `-stderr.log`. Both exit 0. The item preview renders
+  Ashley without the observed companion-slot corruption; the trace remains at slot 1.
+- Main menu text/graphics still render as black bars and are NOT claimed fixed.
+  Issue #2 remains active. The copy-helper fixing commit and CI/closure evidence are
+  recorded in #19; the main-menu renderer is the next controlling path to inspect.
+
 ### Quality verification (2026-10-19)
 
 Verification used `work` at `3c0a1311` plus the pending retained-code cleanup. No baseline
@@ -86,8 +118,8 @@ refresh was used, and no commits were pushed during this work.
   recorded historically. Fresh inspection confirms successful run `39239821866` for
   pushed `35618ef2`. No commits were pushed during the window-dialogue fix. Commit
   permission does not imply push permission.
-- #19: the two owned halfword-copy helpers remain no-ops. They are a confirmed dependency
-  to resolve with #2, not a proven explanation for all preview corruption.
+- #19: the two owned halfword-copy helpers are implemented and verified as recorded
+  above. This resolves a dependency of #2, not the remaining missing menu graphics.
 - Enemy combat completion, sound, item/spell use, chains, Break Arts, drops, equipment and
   final arena coverage remain open in #6-#16. Follow #4's order rather than treating this
   quality checkpoint as gameplay completion.

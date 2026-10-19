@@ -10,7 +10,11 @@
 #include "Core/Memory.h"
 #include "Legacy/Psx.h"
 
-enum { kWordRemainderMask = sizeof(uint32_t) - 1 };
+enum {
+  kWordRemainderMask = sizeof(uint32_t) - 1,
+  kHalfwordBlockElements = 4,
+  kHalfwordBlockBytes = kHalfwordBlockElements * sizeof(uint16_t)
+};
 
 // decomp: SLUS_010.40 vs_main_memcpy (src/SLUS_010.40/main.c:11669)
 void Core_Memory_CopyAlignedWords(void* dest, void* src, u_int sz) {
@@ -35,13 +39,42 @@ void Core_Memory_ClearAlignedWords(void* destination, int size) {
 }
 
 // decomp: BATTLE.PRG vs_battle_copyAligned (src/BATTLE/BATTLE.PRG/573B8.c:242)
-// [inline-asm: not yet ported]
+// The assembly copies leading halfwords before entering vs_battle_memcpy.
+// Native extension: nonpositive sizes do nothing; incomplete halfwords are
+// ignored.
 void Core_Memory_CopyHalfwords(void* dst, const void* src, int num_bytes) {
-  VS_UNPORTED("Core::Memory::CopyHalfwords");
+  if (num_bytes <= 0) {
+    return;
+  }
+  unsigned char* destination = dst;
+  const unsigned char* source = src;
+  const unsigned int bytes =
+      (unsigned int)num_bytes & ~(unsigned int)(sizeof(uint16_t) - 1);
+  const unsigned int leading = bytes & (kHalfwordBlockBytes - 1);
+  for (unsigned int offset = 0; offset < leading; offset += sizeof(uint16_t)) {
+    uint16_t halfword;
+    memcpy(&halfword, source + offset, sizeof halfword);
+    memcpy(destination + offset, &halfword, sizeof halfword);
+  }
+  Core_Memory_CopyHalfwordBlocks(destination + leading, source + leading,
+                                 (int)(bytes - leading));
 }
 
 // decomp: BATTLE.PRG vs_battle_memcpy (src/BATTLE/BATTLE.PRG/573B8.c:253)
-// [inline-asm: not yet ported]
+// All four halfwords are loaded before the block is stored, preserving forward
+// overlap. Native extension: nonpositive sizes and incomplete eight-byte blocks
+// are ignored.
 void Core_Memory_CopyHalfwordBlocks(void* dst, const void* src, int num_bytes) {
-  VS_UNPORTED("Core::Memory::CopyHalfwordBlocks");
+  if (num_bytes <= 0) {
+    return;
+  }
+  unsigned char* destination = dst;
+  const unsigned char* source = src;
+  const unsigned int bytes =
+      (unsigned int)num_bytes & ~(unsigned int)(kHalfwordBlockBytes - 1);
+  for (unsigned int offset = 0; offset < bytes; offset += kHalfwordBlockBytes) {
+    uint16_t block[kHalfwordBlockElements];
+    memcpy(block, source + offset, sizeof block);
+    memcpy(destination + offset, block, sizeof block);
+  }
 }
