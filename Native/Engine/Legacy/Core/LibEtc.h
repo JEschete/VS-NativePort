@@ -1,8 +1,9 @@
 #pragma once
 
-// libetc/libapi timing and kernel surface (plan §2.2). VSync and the root counters are timing (strategy R,
-// backed by logical frames in LibEtc.cpp). Counter 2 dispatches its registered sound callback; other removed
-// kernel and IRQ operations remain in Legacy/Removed.h.
+// libetc/libapi timing and kernel surface (plan §2.2). VSync and the root
+// counters are timing (strategy R, backed by logical frames in LibEtc.cpp).
+// Counter 2 dispatches its registered sound callback; other removed kernel and
+// IRQ operations remain in Legacy/Removed.h.
 
 #include "Legacy/Core/PsxTypes.h"
 
@@ -35,7 +36,8 @@ long SetRCnt(unsigned long spec, unsigned short target, long mode);
 long GetRCnt(unsigned long spec);
 long StartRCnt(unsigned long spec);
 long StopRCnt(unsigned long spec);
-long OpenEvent(unsigned long desc, long spec, long mode, long (*callback)(void));
+long OpenEvent(unsigned long desc, long spec, long mode,
+               long (*callback)(void));
 long CloseEvent(long event);
 long EnableEvent(long event);
 long DisableEvent(long event);

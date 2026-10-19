@@ -10,6 +10,7 @@
 #include "Battle/Damage.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Copy.h"
+#include "Core/Memory/WordCopy.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Equipment.h"

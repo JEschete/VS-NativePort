@@ -1,79 +1,104 @@
 #include "Platform/App.hpp"
 
-#include "Core/Log.hpp"
-
 #include <SDL3/SDL.h>
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "Core/Log.hpp"
 
 namespace VS::Platform {
 
 App::~App() { Shutdown(); }
 
-std::expected<void, std::string> App::Init(const WindowDesc& desc)
-{
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD)) {
-        return std::unexpected(std::string("SDL_Init failed: ") + SDL_GetError());
-    }
-    m_sdlInit = true;
-    SDL_WindowFlags flags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
-    if (desc.resizable) {
-        flags |= SDL_WINDOW_RESIZABLE;
-    }
-    m_window = SDL_CreateWindow(desc.title.c_str(), desc.width, desc.height, flags);
-    if (!m_window) {
-        return std::unexpected(std::string("SDL_CreateWindow failed: ") + SDL_GetError());
-    }
-    VS_LOG_INFO("platform", "SDL {}.{}.{} window {}x{}", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION,
-                desc.width, desc.height);
-    return {};
+std::expected<void, std::string> App::Init(const WindowDesc& desc) {
+  if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD)) {
+    return std::unexpected(std::string("SDL_Init failed: ") + SDL_GetError());
+  }
+  sdl_initialized_ = true;
+  SDL_WindowFlags flags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
+  if (desc.resizable) {
+    flags |= SDL_WINDOW_RESIZABLE;
+  }
+  window_ =
+      SDL_CreateWindow(desc.title.c_str(), desc.width, desc.height, flags);
+  if (!window_) {
+    return std::unexpected(std::string("SDL_CreateWindow failed: ") +
+                           SDL_GetError());
+  }
+  VS_LOG_INFO("platform", "SDL {}.{}.{} window {}x{}", SDL_MAJOR_VERSION,
+              SDL_MINOR_VERSION, SDL_MICRO_VERSION, desc.width, desc.height);
+  return {};
 }
 
-void App::Shutdown()
-{
-    if (m_window) {
-        SDL_DestroyWindow(m_window);
-        m_window = nullptr;
+void App::Shutdown() {
+  if (window_) {
+    SDL_DestroyWindow(window_);
+    window_ = nullptr;
+  }
+  if (sdl_initialized_) {
+    SDL_Quit();
+    sdl_initialized_ = false;
+  }
+}
+
+bool App::PumpEvents(const std::function<void(const SDL_Event&)>& handler) {
+  bool running = true;
+  SDL_Event ev;
+  while (SDL_PollEvent(&ev)) {
+    if (ev.type == SDL_EVENT_QUIT ||
+        ev.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
+      running = false;
     }
-    if (m_sdlInit) {
-        SDL_Quit();
-        m_sdlInit = false;
+    if (handler) {
+      handler(ev);
     }
+  }
+  return running;
 }
 
-bool App::PumpEvents(const std::function<void(const SDL_Event&)>& handler)
-{
-    bool running = true;
-    SDL_Event ev;
-    while (SDL_PollEvent(&ev)) {
-        if (ev.type == SDL_EVENT_QUIT || ev.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
-            running = false;
-        }
-        if (handler) {
-            handler(ev);
-        }
+double App::NowSeconds() const {
+  return static_cast<double>(SDL_GetPerformanceCounter()) /
+         static_cast<double>(SDL_GetPerformanceFrequency());
+}
+
+std::filesystem::path ExecutableDir() {
+  const char* base = SDL_GetBasePath();
+  return base ? std::filesystem::path(base) : std::filesystem::current_path();
+}
+
+std::filesystem::path UserDataDir() {
+  const std::unique_ptr<char, decltype(&SDL_free)> pref(
+      SDL_GetPrefPath("VS-NativePort", "VagrantStory"), SDL_free);
+  if (!pref) {
+    return std::filesystem::current_path() / "userdata";
+  }
+  return std::filesystem::path(pref.get());
+}
+
+std::expected<int, std::string> RunProcess(
+    std::span<const std::string> arguments) {
+  if (arguments.empty() || arguments.front().empty()) {
+    return std::unexpected("process executable is missing");
+  }
+  std::vector<const char*> pointers;
+  pointers.reserve(arguments.size() + 1);
+  for (const auto& argument : arguments) {
+    if (argument.find('\0') != std::string::npos) {
+      return std::unexpected("process argument contains a null character");
     }
-    return running;
+    pointers.push_back(argument.c_str());
+  }
+  pointers.push_back(nullptr);
+  const std::unique_ptr<SDL_Process, decltype(&SDL_DestroyProcess)> process(
+      SDL_CreateProcess(pointers.data(), false), SDL_DestroyProcess);
+  if (!process) return std::unexpected(std::string(SDL_GetError()));
+  int exit_code = 0;
+  if (!SDL_WaitProcess(process.get(), true, &exit_code)) {
+    return std::unexpected(std::string(SDL_GetError()));
+  }
+  return exit_code;
 }
 
-double App::NowSeconds() const
-{
-    return static_cast<double>(SDL_GetPerformanceCounter()) / static_cast<double>(SDL_GetPerformanceFrequency());
-}
-
-std::filesystem::path ExecutableDir()
-{
-    const char* base = SDL_GetBasePath();
-    return base ? std::filesystem::path(base) : std::filesystem::current_path();
-}
-
-std::filesystem::path UserDataDir()
-{
-    char* pref = SDL_GetPrefPath("VS-NativePort", "VagrantStory");
-    if (!pref) {
-        return std::filesystem::current_path() / "userdata";
-    }
-    std::filesystem::path p(pref);
-    SDL_free(pref);
-    return p;
-}
-
-} // namespace VS::Platform
+}  // namespace VS::Platform

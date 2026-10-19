@@ -22,7 +22,6 @@ void Battle_ReleaseQueuedActorAttacks(void);
 void Battle_ResolveEnemyDefeat(int arg0, int actorId, int arg2);
 int Battle_PlayWeaponHitSounds(int arg0);
 void Battle_ApplyActionSourceEffects(int arg0, SVECTOR* arg1);
-void Battle_ApplyActionTargetEffects(int, SVECTOR*);
 void Battle_WaitForPostActionMovement(void);
 void Battle_BeginPostActionRecovery(int arg0);
 void Battle_BeginActionTrailFade(void);

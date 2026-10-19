@@ -2,6 +2,7 @@
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Core/Memory/Copy.h"
+#include "Core/Memory/WordCopy.h"
 #include "Items/Inventory.h"
 #include "Items/Loot.h"
 #include "Items/Weapons.h"

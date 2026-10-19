@@ -136,7 +136,7 @@ void Render_DrawCompactText(char const* text, int xy, void* nextPrim)
 }
 
 // decomp: BATTLE.PRG _writeStringTerminator (src/BATTLE/BATTLE.PRG/5BF94.c:1443)
-void Render_TerminateEncodedString(char* str) { *str = '\0'; }
+void Render_TerminateEncodedString(char* str) { *str = Core_TextCode_Terminator; }
 
 // decomp: BATTLE.PRG vs_battle_printf (src/BATTLE/BATTLE.PRG/5BF94.c:1445)
 char* Render_FormatEncodedText(char* dest, char* src)
@@ -145,21 +145,21 @@ char* Render_FormatEncodedText(char* dest, char* src)
     int integer;
     int c;
 
-    c = *src++;
+    c = (u_char)*src++;
 
-    while (c != '\0') {
+    while (c != Core_TextCode_Terminator) {
         if (c >= Core_TextCode_Control) {
             switch (c) {
             case Core_TextCode_PrintHex:
-                c = *src++;
+                c = (u_char)*src++;
                 integer = Battle_stringContext.integers[c % 10];
                 if (integer < 0) {
                     integer = -integer;
-                    *dest++ = '-';
+                    *dest++ = 0xA7;
                 }
                 if (c < 10) {
                     if (integer == 0) {
-                        *dest++ = '0';
+                        *dest++ = 0;
                     } else {
                         for (divisor = 0x10000000; (integer / divisor) == 0;
                             divisor >>= 4)
@@ -183,11 +183,11 @@ char* Render_FormatEncodedText(char* dest, char* src)
                 }
                 break;
             case Core_TextCode_PrintDecimal:
-                c = *src++;
+                c = (u_char)*src++;
                 integer = Battle_stringContext.integers[c % 10];
                 if (integer < 0) {
                     integer = -integer;
-                    *dest++ = '-';
+                    *dest++ = 0xA7;
                 }
                 if (c < 10) {
                     if (integer == 0) {
@@ -223,7 +223,7 @@ char* Render_FormatEncodedText(char* dest, char* src)
         } else {
             *dest++ = c;
         }
-        c = *src++;
+        c = (u_char)*src++;
     }
     *dest = c;
     return dest;

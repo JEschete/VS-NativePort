@@ -171,6 +171,12 @@
     <ClInclude Include="src\Actors\Movement.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClCompile Include="src\Actors\MovementCommands.c">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\MovementCommands.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
     <ClInclude Include="src\Actors\Palette.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
@@ -273,6 +279,12 @@
     <ClInclude Include="src\Battle\ActionResolution.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\ActionResults.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\ActionResults.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\ActionTable.c">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -324,6 +336,12 @@
     <ClInclude Include="src\Battle\Ai\DecisionCallbacks.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\FrameUpdate.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\FrameUpdate.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\Ai\Movement.c">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -346,6 +364,12 @@
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
     <ClInclude Include="src\Battle\Ai\Perception.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\Relations.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\Relations.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\Ai\RoomState.c">
@@ -433,6 +457,12 @@
       <Filter>src\Battle</Filter>
     </ClCompile>
     <ClInclude Include="src\Battle\Targeting.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\TargetingDraw.c">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\TargetingDraw.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClInclude Include="src\Battle\TargetVolume.h">

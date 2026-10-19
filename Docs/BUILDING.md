@@ -38,7 +38,8 @@ Tested configuration: VS 2026 Community 18.10, MSVC 14.51, Windows SDK 10.0.2800
 
 | Requirement | Used by |
 |---|---|
-| Python 3.10+ and `pip install -r tools\requirements.txt` (libclang 18.1.1, PyYAML) | `tools\ledger`, `tools\naming`, `tools\port`, `tools\scaffold` |
+| Python 3.10+ and `pip install -r tools\requirements.txt` | Port tools and pinned Google-style/static-analysis checks; see [QUALITY.md](QUALITY.md) |
+| Node.js 22+ and `npm ci --prefix tools/lint --ignore-scripts` | Pinned first-party clone detection |
 | `resources\rood-reverseWin` (in the repo) | Read-only reference that those tools parse. The build never uses it. |
 | Optional: `git submodule update --init` | Fetches `resources\rood-reverse` (upstream decomp) and the Ghidra PSX loader. Neither is needed to build. |
 | Optional: external reference tools | See [TOOLS_INVENTORY.md](TOOLS_INVENTORY.md) |
@@ -112,6 +113,14 @@ C++ sources use warnings as errors (`/W4 /WX`). The solution generator currently
 to warning level 1 with non-fatal warnings, including hand-maintained C ports. Compatibility options are in
 [Directory.Build.props](../Directory.Build.props). A successful build is therefore not necessarily
 warning-free: pointer/ABI, bounds, and uninitialized-value warnings still need source and runtime review.
+
+### 4.4 Source quality
+
+Native sources use Google C++ conventions. Run `quality-native.cmd` for the fast
+no-new-debt gate and `quality-native.cmd --changed --tidy` for compilation-based
+analysis of changed owned code. Reports go to `build/quality`; generated and
+reference sources are excluded from the default style scope. See
+[QUALITY.md](QUALITY.md) for setup, precise scope, baseline policy, and controls.
 
 ---
 

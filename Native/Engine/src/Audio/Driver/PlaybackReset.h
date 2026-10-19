@@ -6,4 +6,4 @@
 
 void Audio_Driver_ResetPlaybackState(void);
 
-#endif // VS_OWNED_AUDIO_DRIVER_PLAYBACKRESET_H
+#endif  // VS_OWNED_AUDIO_DRIVER_PLAYBACKRESET_H

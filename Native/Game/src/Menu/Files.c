@@ -14,6 +14,7 @@
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Core/Random.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"

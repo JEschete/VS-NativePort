@@ -348,6 +348,7 @@ class Copier:
         self.files: dict[str, OutFile] = {}
         self.provider: dict[str, str] = {
             "Render_ModelWorkspace": r"Native\Engine\include\Render\ModelWorkspace.h",
+            "Battle_Ai_FrameState": r"Native\Game\src\Battle\Ai\FrameUpdate.h",
         }      # C name -> header path that declares it
         self.struct_names: set[str] = set()     # C names of struct/union types (forward-declarable)
         self.type_home: dict[str, str] = {}     # type id (canonical) -> header path
@@ -1307,7 +1308,7 @@ class Copier:
         """Whether a ledger type holds a pointer (directly, in a nested type or as a uintptr_t member): its x64 size
         differs from the PS1 one by design."""
         tid = self.canon_type(tid)
-        if tid in seen:
+        if tid in seen or tid in cf.POINTER_FREE_TYPES:
             return False
         self.spelled_type("")  # builds the decomp-name -> type id table
         sys.path.insert(0, str(REPO / "tools" / "naming" / "sym_gen"))
@@ -1422,6 +1423,10 @@ class Copier:
             bodies = [d for d in cands if d["ckind"] in ("STRUCT_DECL", "UNION_DECL", "ENUM_DECL")]
             if tid in merged or (not bodies and r["kind"] in ("struct", "union") and not self.inline_type(r)):
                 text = self.generated_type(r, name)
+                for old, new, why in cf.TYPE_FIXES.get(tid, []):
+                    if old not in text:
+                        raise SystemExit(f"copy_fixups: {tid} {r['final_name']}: '{old}' not found ({why})")
+                    text = text.replace(old, new)
                 if nv.pointer_slots(tid):
                     text = nv.rebase(tid, text, [(m["final_name"], f) for m, f in
                                      zip(self._gen.members[tid], self._gen.layout(tid)["fields"])])
@@ -2081,10 +2086,25 @@ class Copier:
                         self.provide(n, path)
 
     # ------------------------------------------------------------------------------------------------- includes
+    def ai_frame_references(self, text: str) -> str:
+        text = text.replace("*(int*)((uintptr_t)Core_ScratchBase() + 0x3F4)",
+                            "(Battle_Ai_FrameState()->roomData != NULL)")
+
+        def replace(match: re.Match) -> str:
+            member = cf.AI_FRAME_FIELDS.get(int(match[1], 16))
+            if member is None:
+                return match[0]
+            return f"((uintptr_t)&Battle_Ai_FrameState()->{member})"
+
+        return re.sub(r"\(\(uintptr_t\)Core_ScratchBase\(\)\s*\+\s*0x([0-9A-Fa-f]+)\)", replace, text)
+
     def finish(self) -> dict[str, str]:
         rendered = {}
         type_by_cname = {c_name(self.type_by_id[t]["final_name"]): t for t in self.type_home}
         for path, f in sorted(self.files.items()):
+            if path.startswith("Native\\Game\\src\\Battle\\Ai\\"):
+                for item in f.items:
+                    item.text = self.ai_frame_references(item.text)
             own = {i.name for i in f.items}
             if not f.is_header:
                 includes = self.providers_of(f.items, path, own, None, type_by_cname)[0]

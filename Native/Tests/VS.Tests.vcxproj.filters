@@ -9,6 +9,12 @@
     <ClCompile Include="src\AiLayoutTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\CombatTestCases.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatTests.c">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ContentTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -11,11 +11,12 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/RoomState.h"
-#include "Core/Math/Vector.h"
+#include "Core/Math/ScalarMath.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
@@ -74,8 +75,8 @@ unsigned int Battle_Ai_FindAdjacentMovementDestination(
     }
     for (i = 0; i < count; i++) {
         direction = (directions >> (i * 16)) & 0xFFFF;
-        dest.tile.tileX = source.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[direction].dx;
-        dest.tile.tileZ = source.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[direction].dz;
+        dest.tile.tileX = source.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dx;
+        dest.tile.tileZ = source.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dz;
         result = Battle_Ai_CanTraverseTileEdge(state, source.word, dest.word, direction);
         if (result > 0) {
             result = Battle_Ai_DestinationOccupancy(state, dest.word);
@@ -159,7 +160,7 @@ void Battle_Ai_FindNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state, Ba
 {
     int x;
     int z;
-    int savedMap;
+    u_short (*savedMap)[32];
     int dx;
     int dz;
     int index;
@@ -170,11 +171,10 @@ void Battle_Ai_FindNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state, Ba
 
     closest = -1U;
     {
-        int* scratch = (int*)((uintptr_t)Core_ScratchBase() + 0x3BC);
         index = 0;
-        savedMap = *scratch;
+        savedMap = Battle_Ai_FrameState()->heightMap;
     }
-    *(int*)((uintptr_t)Core_ScratchBase() + 0x3BC) = (int)Battle_Ai_specialTerrainHeights;
+    Battle_Ai_FrameState()->heightMap = Battle_Ai_specialTerrainHeights;
     do {
         entry = *Battle_Ai_WaypointAddress(Battle_Ai_roomWaypoints, index);
         packed = entry & 0xFFFF;
@@ -196,7 +196,7 @@ void Battle_Ai_FindNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state, Ba
         }
         index += 1;
     } while (index < 8);
-    *(int*)((uintptr_t)Core_ScratchBase() + 0x3BC) = savedMap;
+    Battle_Ai_FrameState()->heightMap = savedMap;
 }
 
 // decomp: BATTLE.PRG func_800DF9A8 (src/BATTLE/BATTLE.PRG/771A8.c:459)
@@ -275,7 +275,7 @@ u_short Battle_Ai_RouteEndpointValue(Battle_Ai_RouteEdgePair* pair, int index) {
 // decomp: BATTLE.PRG routeTile (src/BATTLE/BATTLE.PRG/771A8.c:576)
 u_int Battle_Ai_NavigationTileFlags(int z, int x)
 {
-    return (*(u_short(**)[32])((uintptr_t)Core_ScratchBase() + 0x3C0))[z][x];
+    return (*(u_short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->tileFlags))[z][x];
 }
 
 // decomp: BATTLE.PRG routeSetArea (src/BATTLE/BATTLE.PRG/771A8.c:581)
@@ -304,7 +304,7 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
 
     /* Both packed words are copied through u_int views. */
     position.word = *(u_int*)&state->tile;
-    *(u_int*)routes = (*(u_int**)((uintptr_t)Core_ScratchBase() + 0x3F4))[area * 16 + index];
+    *(u_int*)routes = (*(u_int**)((uintptr_t)&Battle_Ai_FrameState()->roomData))[area * 16 + index];
     if (!(Battle_Ai_RouteEndpointPair(&routes) & 0x1BE0)) {
         return 6;
     }
@@ -352,17 +352,17 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
             state->opaque5 = 0;
             amount = ((route >> 13) & 3) + 1;
             step = &Battle_Ai_routeStepDirections[(route >> 11) & 3];
-            candidate.tile.tileX += amount * ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[*step].dx;
-            candidate.tile.tileZ += amount * ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[*step].dz;
+            candidate.tile.tileX += amount * ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[*step].dx;
+            candidate.tile.tileZ += amount * ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[*step].dz;
             result = Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView*)state, candidate.word);
             if (result < 0) {
             center:
                 if (state->movementTarget != 16
-                    && ((Battle_Ai_RouteActorView**)((uintptr_t)Core_ScratchBase() + 0x37C))[state->movementTarget]) {
+                    && ((Battle_Ai_RouteActorView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[state->movementTarget]) {
                     state->moveX =
-                        ((Battle_Ai_RouteActorView**)((uintptr_t)Core_ScratchBase() + 0x37C))[state->movementTarget]->position[0];
+                        ((Battle_Ai_RouteActorView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[state->movementTarget]->position[0];
                     state->moveZ =
-                        ((Battle_Ai_RouteActorView**)((uintptr_t)Core_ScratchBase() + 0x37C))[state->movementTarget]->position[2];
+                        ((Battle_Ai_RouteActorView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[state->movementTarget]->position[2];
                 } else {
                     state->moveX = candidate.tile.tileX * 128 + 64;
                     state->moveZ = candidate.tile.tileZ * 128 + 64;
@@ -383,15 +383,15 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
         }
         table = Battle_Ai_routeStepDirections;
         direction = &table[(route >> 11) & 3];
-        candidate.tile.tileX += ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[*direction].dx;
-        candidate.tile.tileZ += ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[*direction].dz;
+        candidate.tile.tileX += ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[*direction].dx;
+        candidate.tile.tileZ += ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[*direction].dz;
         if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView*)state, candidate.word) <= 0) {
             goto center;
         }
-        if ((*(u_short(**)[32])((uintptr_t)Core_ScratchBase() + 0x3BC))[candidate.tile.tileZ][candidate.tile.tileX] & 0x1C00) {
+        if ((*(u_short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->heightMap))[candidate.tile.tileZ][candidate.tile.tileX] & 0x1C00) {
             goto stop;
         }
-        if (((*(u_char**)((uintptr_t)Core_ScratchBase() + 0x3C4))[position.tile.tileZ * *(u_char*)((uintptr_t)Core_ScratchBase() + 0x3DC) + position.tile.tileX]
+        if (((*(u_char**)((uintptr_t)&Battle_Ai_FrameState()->terrainRegions))[position.tile.tileZ * *(u_char*)((uintptr_t)&Battle_Ai_FrameState()->roomBounds) + position.tile.tileX]
                 >> *direction)
             & 1) {
             goto stop;
@@ -420,7 +420,7 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
         } else {
             route = Battle_Ai_RouteEndpointValue(&routes, 1);
         }
-        if (!((*(u_short(**)[32])((uintptr_t)Core_ScratchBase() + 0x3BC))[route & 31][(route >> 5) & 31] & 0x1C00)) {
+        if (!((*(u_short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->heightMap))[route & 31][(route >> 5) & 31] & 0x1C00)) {
             continue;
         }
         if (i) {
@@ -428,9 +428,9 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
         } else {
             route = Battle_Ai_RouteEndpointValue(&routes, 1);
         }
-        if (((*(u_short(**)[32])((uintptr_t)Core_ScratchBase() + 0x3BC))[route & 31][(route >> 5) & 31] & 0x1C00)
+        if (((*(u_short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->heightMap))[route & 31][(route >> 5) & 31] & 0x1C00)
             || count == 1) {
-            state->area = (*(u_short(**)[32])((uintptr_t)Core_ScratchBase() + 0x3C0))[position.tile.tileZ][position.tile.tileX] % 16;
+            state->area = (*(u_short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->tileFlags))[position.tile.tileZ][position.tile.tileX] % 16;
             return 6;
         }
         state->destination.word = ((route & 31) << 16) | ((route >> 5) & 31);
@@ -470,7 +470,7 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1512
-#define TERRAIN_TILES (*(unsigned short(**)[32])((uintptr_t)Core_ScratchBase() + 0x3C0))
+#define TERRAIN_TILES (*(unsigned short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->tileFlags))
 // decomp: BATTLE.PRG func_800E19FC (src/BATTLE/BATTLE.PRG/771A8.c:1540)
 void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state)
 {
@@ -505,7 +505,7 @@ void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state)
             }
         }
         state->isStuck = active;
-        *(unsigned char*)((uintptr_t)Core_ScratchBase() + 0x3D0) = 0;
+        *(unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->directionCache) = 0;
     }
 move:
     Battle_Ai_ResolveDirectionalMovement((void*)state,
@@ -546,15 +546,15 @@ int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_
     hit = Battle_Ai_DirectionalBlockingActor(state, direction);
     blocker = hit - 1;
     if (hit) {
-        if (!(((Battle_Ai_MovementPathView**)((uintptr_t)Core_ScratchBase() + 0x37C))[blocker]->movementFlags & 0x30)
-            && !((Battle_Ai_MovementPathView**)((uintptr_t)Core_ScratchBase() + 0x37C))[blocker]->waitTimer) {
-            ((Battle_Ai_MovementPathView**)((uintptr_t)Core_ScratchBase() + 0x37C))[blocker]->waitTimer = Battle_Ai_NextActorRandomMasked(4) + 4;
+        if (!(((Battle_Ai_MovementPathView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[blocker]->movementFlags & 0x30)
+            && !((Battle_Ai_MovementPathView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[blocker]->waitTimer) {
+            ((Battle_Ai_MovementPathView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[blocker]->waitTimer = Battle_Ai_NextActorRandomMasked(4) + 4;
         }
     }
 
     if (!state->opaque4 && !path.bits.changed && !test(state, path.bits.heading)) {
-        ahead.tile.tileX = state->tile.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[path.bits.heading].dx;
-        ahead.tile.tileZ = state->tile.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[path.bits.heading].dz;
+        ahead.tile.tileX = state->tile.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[path.bits.heading].dx;
+        ahead.tile.tileZ = state->tile.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[path.bits.heading].dz;
         ahead.tile.tag = 0;
         if (!Battle_Ai_CanTraverseTileEdge(
                 (Battle_Ai_MoveTargetView*)state, state->tile.word, ahead.word, path.bits.heading)
@@ -569,9 +569,9 @@ int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_
     boundX = path.bits.boundX << 7;
     boundZ = path.bits.boundZ << 7;
     if (!state->opaque4) {
-        x = state->tile.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[direction].dx;
-        z = state->tile.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[direction].dz;
-        if (((*(unsigned short (**)[32])((uintptr_t)Core_ScratchBase() + 0x3C0))[z][x] >> mask) & 1
+        x = state->tile.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dx;
+        z = state->tile.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dz;
+        if (((*(unsigned short (**)[32])((uintptr_t)&Battle_Ai_FrameState()->tileFlags))[z][x] >> mask) & 1
             || x > Battle_Ai_roomAiState->maxTileX || z > Battle_Ai_roomAiState->maxTileZ || x < Battle_Ai_roomAiState->minTileX
             || z < Battle_Ai_roomAiState->minTileZ) {
             state->opaqueE8 = 0;
@@ -642,8 +642,8 @@ int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_
             path.bits.heading = direction;
             goto keep;
         }
-        point.tile.tileX = state->tile.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[direction].dx;
-        point.tile.tileZ = state->tile.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[direction].dz;
+        point.tile.tileX = state->tile.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dx;
+        point.tile.tileZ = state->tile.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dz;
         point.tile.tag = 0;
         /* Passed through its address: the status byte is left over from the previous
          * probe. */
@@ -933,18 +933,6 @@ void Battle_Ai_ForceReleaseActorAiReservations(int)
 void Battle_Ai_ReleaseActorAiReservations(Battle_Ai_ActorAiState*)
 {
     VS_UNPORTED("Battle::Ai::ReleaseActorAiReservations");
-}
-
-// decomp: BATTLE.PRG func_800E6828 (src/BATTLE/BATTLE.PRG/7E028.s:0) [asm-file: not yet ported]
-void Battle_Ai_InitializeActorLocomotionMode(Battle_Ai_AiCreationView*)
-{
-    VS_UNPORTED("Battle::Ai::InitializeActorLocomotionMode");
-}
-
-// decomp: BATTLE.PRG func_800E685C (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-void Battle_Ai_SetActorVerticalMovementSteps(int, int, int)
-{
-    VS_UNPORTED("Battle::Ai::SetActorVerticalMovementSteps");
 }
 
 // decomp: BATTLE.PRG func_800E6898 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]

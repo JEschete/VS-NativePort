@@ -35,7 +35,7 @@ int (*Effects_scriptOpcodeHandlers[49])(void*); /* contents: module image, reloc
 u_char Effects_lastReactionSoundVariant; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800EC4BC (D_800EC4BC@BATTLE/BATTLE.PRG)
-Effects_PackageFile Effects_emptyPackage; /* contents: module image (ModuleData.c) */
+u_int Effects_emptyPackage[0x5200 / sizeof(u_int)]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F185C (D_800F185C@BATTLE/BATTLE.PRG)
 int Effects_tintedActor;

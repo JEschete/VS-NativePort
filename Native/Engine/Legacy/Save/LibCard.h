@@ -1,8 +1,9 @@
 #pragma once
 
-// Memory card surface (libapi file calls + libcard, plan §6.7, strategy T), translated into Engine\Save.
-// The libapi file calls share names with the C runtime (open, read, rename...), so the copy tool renames them
-// to LegacyApi_*.
+// Memory card surface (libapi file calls + libcard, plan §6.7, strategy T),
+// translated into Engine\Save. The libapi file calls share names with the C
+// runtime (open, read, rename...), so the copy tool renames them to
+// LegacyApi_*.
 
 #include "Legacy/Core/PsxTypes.h"
 
@@ -11,12 +12,12 @@ extern "C" {
 #endif
 
 typedef struct DIRENTRY {
-    char name[20];
-    long attr;
-    long size;
-    struct DIRENTRY* next;
-    long head;
-    char system[4];
+  char name[20];
+  long attr;
+  long size;
+  struct DIRENTRY* next;
+  long head;
+  char system[4];
 } DIRENTRY;
 
 long LegacyApi_open(char* path, unsigned long mode);

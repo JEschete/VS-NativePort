@@ -16,13 +16,13 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/Math/ScalarMath.h"
-#include "Core/Math/Vector.h"
 #include "Core/Timing.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
@@ -90,7 +90,7 @@ void Battle_Ai_TryEngageActor(Battle_Ai_ActorAiState*)
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/6FC00.c:644
-#define RELATION_STATES ((Battle_Ai_PerceptionView**)((uintptr_t)Core_ScratchBase() + 0x37C))
+#define RELATION_STATES ((Battle_Ai_PerceptionView**)((uintptr_t)&Battle_Ai_FrameState()->actors))
 // decomp: BATTLE.PRG checkExtent (src/BATTLE/BATTLE.PRG/6FC00.c:646)
 int Battle_Ai_IsTargetOccludedAtExtent(
     SVECTOR* from, SVECTOR* to, Battle_Ai_PerceptionView* state, int id)
@@ -108,7 +108,7 @@ int Battle_Ai_IsTargetOccludedAtExtent(
 #undef RELATION_STATES
 
 // decomp: src/BATTLE/BATTLE.PRG/6FC00.c:644
-#define RELATION_STATES ((Battle_Ai_PerceptionView**)((uintptr_t)Core_ScratchBase() + 0x37C))
+#define RELATION_STATES ((Battle_Ai_PerceptionView**)((uintptr_t)&Battle_Ai_FrameState()->actors))
 // decomp: BATTLE.PRG checkHeight (src/BATTLE/BATTLE.PRG/6FC00.c:660)
 int Battle_Ai_IsTargetOccludedAtHeight(
     SVECTOR* from, SVECTOR* to, Battle_Ai_PerceptionView* state, int id)
@@ -131,7 +131,7 @@ int Battle_Ai_IsTargetOccludedAtHeight(
 #undef RELATION_STATES
 
 // decomp: src/BATTLE/BATTLE.PRG/6FC00.c:644
-#define RELATION_STATES ((Battle_Ai_PerceptionView**)((uintptr_t)Core_ScratchBase() + 0x37C))
+#define RELATION_STATES ((Battle_Ai_PerceptionView**)((uintptr_t)&Battle_Ai_FrameState()->actors))
 // decomp: BATTLE.PRG func_800D87E8 (src/BATTLE/BATTLE.PRG/6FC00.c:679)
 void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id)
 {
@@ -237,7 +237,7 @@ void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id)
 
     {
         Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model;
-        if ((*(u_short(**)[32])((uintptr_t)Core_ScratchBase() + 0x3C0))[object->tile.tile.tileZ][object->tile.tile.tileX] & 0x2000) {
+        if ((*(u_short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->tileFlags))[object->tile.tile.tileZ][object->tile.tile.tileX] & 0x2000) {
             relation.bits.onMarkedTile = 1;
         } else {
             relation.bits.onMarkedTile = relation.bits.active;
@@ -345,7 +345,7 @@ void Battle_Ai_UpdateActorPerception(void)
         flags = actor->opaque8;
         actor->opaqueBBit0 = 0;
         id = actor->id;
-        state = ((Battle_Ai_PerceptionUpdateView**)((uintptr_t)Core_ScratchBase() + 0x37C))[id];
+        state = ((Battle_Ai_PerceptionUpdateView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[id];
         state->opaque1D = 0;
         object = state->model;
         state->statusFlags = actor->stats->actionRecoveryTimer;
@@ -379,7 +379,7 @@ void Battle_Ai_UpdateActorPerception(void)
         if (Battle_Ai_frameTickBudget < arg) {
             goto idle;
         }
-        *(int*)((uintptr_t)Core_ScratchBase() + 0x3FC) = arg;
+        *(int*)((uintptr_t)&Battle_Ai_FrameState()->lastBudgetTick) = arg;
         if (state->opaque18) {
             if (state->opaque12A != 0 && state->opaque138 == 6) {
             idle:
@@ -786,12 +786,6 @@ void Battle_Ai_NotifyActionRelationshipChanges(Battle_Ai_ReactionRecord* arg0)
 
         Battle_Ai_ApplyActionRelationshipChanges(arg0);
     }
-}
-
-// decomp: BATTLE.PRG func_800E4358 (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
-void Battle_Ai_TickActorDecisionTimers(Battle_Ai_PerceptionUpdateView*)
-{
-    VS_UNPORTED("Battle::Ai::TickActorDecisionTimers");
 }
 
 // decomp: BATTLE.PRG func_800E437C (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]

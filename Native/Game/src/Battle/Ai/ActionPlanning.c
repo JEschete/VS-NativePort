@@ -19,6 +19,7 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/ConditionSnapshot.h"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"

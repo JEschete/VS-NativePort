@@ -418,8 +418,9 @@ int Actors_IsActorActionAnimationBusy(int arg0)
 // decomp: BATTLE.PRG func_8009E5C4 (src/BATTLE/BATTLE.PRG/30DB0.c:2685)
 void Actors_RestoreActorIdlePose(int arg0)
 {
-    if ((Actors_actorRecords[arg0]->animationId != 0x63)
-        && (Actors_actorRecords[arg0]->animationId != 0xC7)) {
+    if (Actors_actorRecords[arg0] == NULL
+        || ((Actors_actorRecords[arg0]->animationId != 0x63)
+            && (Actors_actorRecords[arg0]->animationId != 0xC7))) {
         Actors_RestoreActorBasePose(arg0, 1);
     }
 }

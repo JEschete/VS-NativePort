@@ -8,7 +8,4 @@ extern "C" {
 alignas(64) unsigned char Core_overlayArena[CORE_OVERLAY_SIZE];
 }
 
-extern "C" void* Core_GameHeapArena(void)
-{
-    return g_gameHeap;
-}
+extern "C" void* Core_GameHeapArena(void) { return g_gameHeap; }

@@ -142,8 +142,6 @@ void Actors_UpdateActorAuxiliaryMotion(Field_GimmickInstance* arg0);
 void Actors_BeginTileJump(int, int*, int, int);
 void Actors_BeginAirborneTileJump(int, int*, int, int);
 void Actors_BeginNavigationJump(int, int*, int, int);
-void Actors_SetDirectMovement(int, int, int);
-void Actors_QueueNavigationTileTarget(int, int, int, int);
 void Actors_QueueGroundOffset(int, SVECTOR*);
 void Actors_QueueMovementVector(int, SVECTOR*, int);
 void Actors_QueueFlightMovement(int, SVECTOR*, int, int);

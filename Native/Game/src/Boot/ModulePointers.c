@@ -15,6 +15,7 @@
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
+#include "Actors/MovementCommands.h"
 #include "Actors/Palette.h"
 #include "Actors/RoomState.h"
 #include "Actors/SequencePlayback.h"
@@ -54,6 +55,7 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionResolution.h"
+#include "Battle/ActionResults.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
@@ -64,6 +66,7 @@
 #include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/ConditionSnapshot.h"
 #include "Battle/Ai/DecisionCallbacks.h"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
@@ -83,6 +86,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
+#include "Battle/TargetingDraw.h"
 #include "Battle/TextBoxes.h"
 #include "Battle/ValueLabels.h"
 #include "Boot/GameLoop.h"
@@ -2266,7 +2270,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EC368u, 21764u, (void*)&Effects_particleColorPresetTable, sizeof Effects_particleColorPresetTable, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC3F4u, 196u, (void*)&Effects_scriptOpcodeHandlers, sizeof Effects_scriptOpcodeHandlers, 4u, sizeof Effects_scriptOpcodeHandlers[0]},
     {"BATTLE/BATTLE.PRG", 0x800EC4B8u, 4u, (void*)&Effects_lastReactionSoundVariant, sizeof Effects_lastReactionSoundVariant, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EC4BCu, 4u, (void*)&Effects_emptyPackage, sizeof Effects_emptyPackage, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EC4BCu, 20992u, (void*)&Effects_emptyPackage, sizeof Effects_emptyPackage, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F16ECu, 8u, (void*)&Battle_Ai_directionDeltas, sizeof Battle_Ai_directionDeltas, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F16F4u, 4u, (void*)&Battle_Ai_frameTickBudget, sizeof Battle_Ai_frameTickBudget, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F175Cu, 272u, (void*)&Battle_Ai_routeStepDirections, sizeof Battle_Ai_routeStepDirections, 1u, 1u},
@@ -3169,7 +3173,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8004B668u, 504u, (void*)&Render_paletteDeltaSequenceEight, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004B860u, 252u, (void*)&Render_paletteDeltaSequenceFour, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004B95Cu, 126u, (void*)&Render_paletteDeltaSequenceTwo, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004B9DCu, 13312u, (void*)&Battle_actionDefinitions, sizeof Battle_actionDefinitions, 0u, 0u},
+    {"SLUS_010.40", 0x8004B9DCu, 13312u, (void*)&Battle_actionDefinitions, sizeof Battle_actionDefinitions, 1u, 1u},
     {"SLUS_010.40", 0x8004EDDCu, 240u, (void*)&Audio_Seq_unusedMaterialModifiers, sizeof Audio_Seq_unusedMaterialModifiers, 1u, 1u},
     {"SLUS_010.40", 0x8004EECCu, 512u, (void*)&Battle_statusEffectParams, sizeof Battle_statusEffectParams, 1u, 1u},
     {"SLUS_010.40", 0x8004F0CCu, 1024u, (void*)&Field_locationDestinations, sizeof Field_locationDestinations, 1u, 1u},

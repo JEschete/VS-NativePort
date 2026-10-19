@@ -14,12 +14,13 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
+#include "Battle/Ai/DecisionCallbacks.h"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/Math/ScalarMath.h"
-#include "Core/Math/Vector.h"
 #include "Core/Timing.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
@@ -45,7 +46,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
         return 0;
     }
     id = entry->targetId;
-    if (id == 16 || !((Battle_Ai_CandidateMovementView**)((uintptr_t)Core_ScratchBase() + 0x37C))[id]) {
+    if (id == 16 || !((Battle_Ai_CandidateMovementView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[id]) {
         return 0;
     }
     switch (state->planMode) {
@@ -324,7 +325,7 @@ int Battle_Ai_UpdateGuardMovementBehavior(Battle_Ai_EscortView* state)
     target = state->linkedActor;
     valid = (unsigned int)~candidate >> 31;
     if (state->actorId != target && target != 16) {
-        if (((Battle_Ai_EscortView**)((uintptr_t)Core_ScratchBase() + 0x37C))[target]) {
+        if (((Battle_Ai_EscortView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[target]) {
             active = ((unsigned char)state->relations[target] >> 6) == 2;
         }
     }
@@ -368,7 +369,7 @@ int Battle_Ai_UpdateGuardMovementBehavior(Battle_Ai_EscortView* state)
     }
     if (active) {
         if (valid
-            && ((Battle_Ai_EscortView**)((uintptr_t)Core_ScratchBase() + 0x37C))[target]->distancesSquared[candidate] <= 0x23FFF) {
+            && ((Battle_Ai_EscortView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[target]->distancesSquared[candidate] <= 0x23FFF) {
             state->movementTarget = target;
             ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((void*)state);
             return 1;
@@ -528,13 +529,13 @@ void Battle_Ai_UpdateActorDecisions(void)
     int value, height, coordinate;
     for (actor = ((Battle_Ai_DispatchActorView*)Battle_actors[0])->next; actor;
         actor = actor->next) {
-        state = ((Battle_Ai_DecisionDispatchView**)((uintptr_t)Core_ScratchBase() + 0x37C))[actor->id];
+        state = ((Battle_Ai_DecisionDispatchView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[actor->id];
         if (!state->opaque14 || state->opaque1D) {
             value = Core_ElapsedFrameCounterTicks();
             if (Battle_Ai_frameTickBudget < value) {
                 Battle_Ai_IssueActorCommand((void*)state, 17);
             } else {
-                *(int*)((uintptr_t)Core_ScratchBase() + 0x3FC) = value;
+                *(int*)((uintptr_t)&Battle_Ai_FrameState()->lastBudgetTick) = value;
                 if (state->opaque14 && state->opaque1D) {
                     if (Battle_Ai_actorAiStates[0]) {
                         if ((((Battle_Ai_DispatchModelView*)Actors_actorRecords[0])->opaque8 & 0x180000)
@@ -562,29 +563,17 @@ void Battle_Ai_UpdateActorDecisions(void)
                     state->opaque4 = 0;
                     state->opaque8 = 0;
                     value =
-                        (*(unsigned short (**)[32])((uintptr_t)Core_ScratchBase() + 0x3C0))[state->tileZ][coordinate]
+                        (*(unsigned short (**)[32])((uintptr_t)&Battle_Ai_FrameState()->tileFlags))[state->tileZ][coordinate]
                         & 15;
                     state->opaque154 = value;
                     state->opaque132 = value;
-                    *(int*)((uintptr_t)Core_ScratchBase() + 0x3D0) = 0;
+                    *(int*)((uintptr_t)&Battle_Ai_FrameState()->directionCache) = 0;
                     Battle_Ai_DispatchMovementBehavior(state);
                     Battle_Ai_UpdateActorLocomotionMode(state);
                 }
             }
         }
     }
-}
-
-// decomp: BATTLE.PRG func_800DB7B4 (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-void Battle_Ai_UpdateActorLocomotionMode(Battle_Ai_DecisionDispatchView*)
-{
-    VS_UNPORTED("Battle::Ai::UpdateActorLocomotionMode");
-}
-
-// decomp: BATTLE.PRG func_800DB820 (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-void Battle_Ai_DispatchMovementBehavior(Battle_Ai_DecisionDispatchView*)
-{
-    VS_UNPORTED("Battle::Ai::DispatchMovementBehavior");
 }
 
 // decomp: BATTLE.PRG func_800DB8AC (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]

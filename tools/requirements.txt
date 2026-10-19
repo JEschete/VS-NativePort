@@ -2,3 +2,7 @@
 # Not needed to build or play; see Docs\BUILDING.md.
 libclang==18.1.1
 PyYAML>=6.0
+cpplint==2.0.2
+ruff==0.14.0
+clang-format==22.1.8
+clang-tidy==22.1.8

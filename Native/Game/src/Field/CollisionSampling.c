@@ -1,6 +1,9 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Field/CollisionSampling.h"
-#include "Legacy/Psx.h"
+
+#include <stdint.h>
+#include <string.h>
+
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
@@ -17,30 +20,49 @@
 #include "Field/Zone.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
+#include "Legacy/Psx.h"
 #include "Render/Palette.h"
 
-#include <string.h>
-
+enum {
+  kSamplesPerAxisBits = 2,
+  kSamplesPerAxis = 1 << kSamplesPerAxisBits,
+  kPatternBytes = kSamplesPerAxis * kSamplesPerAxis,
+  kLayerCount = 2,
+  kPatternIndexMask = 0x7FF,
+  kHeightBiasMask = 0xF800,
+  kHeightBiasShift = 9,
+  kInvalidHeight = 0x80,
+  kHeightValueMask = 0x7F
+};
 
 // decomp: BATTLE.PRG func_80099514 (src/BATTLE/BATTLE.PRG/2EA3C.s:2494).
-u_char Field_SampleCollisionHeightCode(u_int sampleX, int sampleZ, int layer)
-{
-    const Field_MpdCollisionHeader* map = Field_roomData.collisionMap;
-    const size_t length = Field_roomData.header.collisionMapLength;
-    if (map == NULL || length < sizeof *map || layer < 0 || layer > 1 || sampleZ < 0
-        || map->width <= 0 || map->height <= 0 || map->cellCount < map->width * map->height
-        || (sampleX >> 2) >= (unsigned)map->width || ((unsigned)sampleZ >> 2) >= (unsigned)map->height) {
-        return 0x80;
-    }
-    const size_t patterns = sizeof *map + (size_t)map->cellCount * 4;
-    if (patterns > length) return 0x80;
-    const size_t tile = ((unsigned)sampleZ >> 2) * (unsigned)map->width + (sampleX >> 2);
-    const unsigned char* bytes = (const unsigned char*)map;
-    unsigned short descriptor;
-    memcpy(&descriptor, bytes + sizeof *map + ((size_t)layer * map->cellCount + tile) * 2, sizeof descriptor);
-    const size_t pattern = patterns + (size_t)(descriptor & 0x7FF) * 16;
-    if (pattern > length || length - pattern < 16) return 0x80;
-    const unsigned char sample = bytes[pattern + ((unsigned)sampleZ & 3) * 4 + (sampleX & 3)];
-    const int height = (signed char)sample + ((descriptor & 0xF800) >> 9);
-    return (u_char)((height & 0x7F) | (sample & 0x80));
+u_char Field_SampleCollisionHeightCode(u_int sample_x, int sample_z,
+                                       int layer) {
+  const Field_MpdCollisionHeader* map = Field_roomData.collisionMap;
+  const size_t length = Field_roomData.header.collisionMapLength;
+  if (map == NULL || length < sizeof *map || layer < 0 || layer >= kLayerCount ||
+      sample_z < 0 || map->width <= 0 || map->height <= 0 ||
+      map->cellCount < map->width * map->height ||
+      (sample_x >> kSamplesPerAxisBits) >= (unsigned)map->width ||
+      ((unsigned)sample_z >> kSamplesPerAxisBits) >= (unsigned)map->height) {
+    return kInvalidHeight;
+  }
+  const size_t patterns = sizeof *map + (size_t)map->cellCount * kLayerCount * sizeof(uint16_t);
+  if (patterns > length) return kInvalidHeight;
+  const size_t tile =
+      ((size_t)sample_z >> kSamplesPerAxisBits) * (unsigned)map->width +
+      (sample_x >> kSamplesPerAxisBits);
+  const unsigned char* bytes = (const unsigned char*)map;
+  uint16_t descriptor;
+  memcpy(&descriptor,
+         bytes + sizeof *map + ((size_t)layer * map->cellCount + tile) * sizeof descriptor,
+         sizeof descriptor);
+    const size_t pattern = patterns + (size_t)(descriptor & kPatternIndexMask) * kPatternBytes;
+    if (pattern > length || length - pattern < kPatternBytes) return kInvalidHeight;
+  const unsigned char sample =
+      bytes[pattern + ((size_t)sample_z & (kSamplesPerAxis - 1)) * kSamplesPerAxis +
+        (sample_x & (kSamplesPerAxis - 1))];
+    const int signed_sample = sample <= INT8_MAX ? sample : (int)sample - (UINT8_MAX + 1);
+    const int height = signed_sample + ((descriptor & kHeightBiasMask) >> kHeightBiasShift);
+    return (u_char)((height & kHeightValueMask) | (sample & kInvalidHeight));
 }

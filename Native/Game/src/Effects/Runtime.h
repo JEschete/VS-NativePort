@@ -293,14 +293,13 @@ _Static_assert(sizeof(Effects_ShakeChannelKey) == 0x8, "Effects_ShakeChannelKey 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_RUNTIME_H_DECLS)
 #define VS_EFFECTS_RUNTIME_H_DECLS
 #include "DiscQueue.h"
-#include "Effects/Package.h"
 
 extern u_char Effects_effectBufferIndex;
 extern Effects_EffectRenderer Effects_scriptRenderers[2];
 extern char Effects_actionVariantValues[21824];
 extern int (*Effects_scriptOpcodeHandlers[49])(void*);
 extern u_char Effects_lastReactionSoundVariant;
-extern Effects_PackageFile Effects_emptyPackage;
+extern u_int Effects_emptyPackage[0x5200 / sizeof(u_int)];
 extern int Effects_tintedActor;
 extern int Effects_effectBusyFlags;
 extern Content_DiscQueueSlot* Effects_menuReloadSlot;

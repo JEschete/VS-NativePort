@@ -1,60 +1,58 @@
 #include "Core/Random.hpp"
+
+#include <bit>
+
 #include "Core/BiosRand.h"
 
 namespace VS::Core {
 
 // decomp: SLUS_010.40 _initRand (src/SLUS_010.40/main.c:8239)
-void Random::Reset(u32 seed)
-{
-    m_rand.Seed(seed);
-    for (auto& v : m_table) {
-        v = m_rand.Next();
-    }
-    m_index = static_cast<i32>(TableSize) - 1;
+void Random::Reset(u32 seed) {
+  m_rand_.Seed(seed);
+  for (auto& v : m_table_) {
+    v = m_rand_.Next();
+  }
+  m_index_ = static_cast<i32>(TableSize) - 1;
 }
 
 // decomp: SLUS_010.40 vs_main_getRand (src/SLUS_010.40/main.c:8251)
-i32 Random::Next(i32 max)
-{
-    i32 scaled = m_table[static_cast<usize>(m_index)] * static_cast<i32>(TableSize);
-    if (scaled < 0) {
-        scaled += 0x7FFF;
-    }
-    m_index = scaled >> 15;
+i32 Random::Next(i32 max) {
+  i32 scaled =
+      m_table_[static_cast<usize>(m_index_)] * static_cast<i32>(TableSize);
+  if (scaled < 0) {
+    scaled += Rand15::kMaximum;
+  }
+  m_index_ = scaled >> Rand15::kValueBits;
 
-    const i32 picked = 0x7FFF - m_table[static_cast<usize>(m_index)];
-    m_table[static_cast<usize>(m_index)] = m_rand.Next();
+  const i32 picked = Rand15::kMaximum - m_table_[static_cast<usize>(m_index_)];
+  m_table_[static_cast<usize>(m_index_)] = m_rand_.Next();
 
-    i32 result = picked * max;
-    if (result < 0) {
-        result += 0x7FFF;
-    }
-    return result >> 15;
+  const u32 product = static_cast<u32>(picked) * static_cast<u32>(max);
+  i32 result = std::bit_cast<i32>(product);
+  if (result < 0) {
+    result += Rand15::kMaximum;
+  }
+  return result >> Rand15::kValueBits;
 }
 
 // decomp: SLUS_010.40 vs_main_getRandSmoothed (src/SLUS_010.40/main.c:8277)
-i32 Random::NextSmoothed(i32 max)
-{
-    i32 sum = 0;
-    for (int i = 0; i < 12; ++i) {
-        sum += Next(max);
-    }
-    return sum / 12;
+i32 Random::NextSmoothed(i32 max) {
+  constexpr int kSampleCount = 12;
+  i32 sum = 0;
+  for (int index = 0; index < kSampleCount; ++index) {
+    sum += Next(max);
+  }
+  return sum / kSampleCount;
 }
 
-} // namespace VS::Core
+}  // namespace VS::Core
 
 namespace {
-// The BIOS rand() state shared by every copied caller of rand()/srand(); seeded with 1 at boot like the original.
-VS::Core::Rand15 g_biosRand;
-} // namespace
+// The BIOS rand() state shared by every copied caller of rand()/srand(); seeded
+// with 1 at boot like the original.
+constinit VS::Core::Rand15 g_bios_rand;
+}  // namespace
 
-extern "C" int Core_Random_Rand(void)
-{
-    return g_biosRand.Next();
-}
+extern "C" int Core_Random_Rand(void) { return g_bios_rand.Next(); }
 
-extern "C" void Core_Random_Seed(unsigned int seed)
-{
-    g_biosRand.Seed(seed);
-}
+extern "C" void Core_Random_Seed(unsigned int seed) { g_bios_rand.Seed(seed); }

@@ -22,6 +22,8 @@
 #include "Menu/Framework/ActorPreview.h"
 #include "Render/Model.h"
 #include "Render/Palette.h"
+#include "Render/Render.h"
+#include "Render/UiPrimitives.h"
 #include "State/Timers.h"
 
 // decomp: MAINMENU.PRG func_800F9A24 (src/MENU/MAINMENU.PRG/224.c:10)
@@ -38,7 +40,7 @@ void Menu_Framework_LoadActorPreview(int arg0)
 // decomp: MAINMENU.PRG func_800F9A78 (src/MENU/MAINMENU.PRG/224.c:20)
 void Menu_Framework_CloneActorPreview(int arg0)
 {
-    Content_ActorAssetRequest sp10;
+    Content_ActorAssetRequest sp10 = {0};
     Actors_ActorRecord* temp_s0;
     Actors_ActorRecord* temp_s2;
     int i;
@@ -46,7 +48,7 @@ void Menu_Framework_CloneActorPreview(int arg0)
     void* temp_v0;
 
     temp_s2 = Actors_actorRecords[arg0];
-    temp_s3 = Core_Memory_AllocateFromLowEnd(0x1900);
+    temp_s3 = Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord));
     sp10.assetKind = 2;
     sp10.targetSlot = 1;
     sp10.modelId = temp_s2->modelId;
@@ -60,7 +62,7 @@ void Menu_Framework_CloneActorPreview(int arg0)
 
     if (temp_s2->companionSlot >= 2) {
         temp_s0 = Actors_actorRecords[temp_s2->companionSlot];
-        temp_v0 = Core_Memory_AllocateFromLowEnd(0x1900);
+        temp_v0 = Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord));
         sp10.assetKind = 2;
         sp10.targetSlot = 16;
         sp10.modelId = temp_s0->modelId;
@@ -222,16 +224,17 @@ int Menu_Framework_DrawActorPreview(MATRIX* arg0)
         Actors_PrepareActorRootTransform(temp_s1);
     }
 
+    Core_Debugf("preview", "before model companion=%u slot16=%p", (unsigned)temp_s1->companionSlot, (void*)Actors_actorRecords[16]);
     Actors_DrawActorModel(temp_s1, arg0, 0);
+    Core_Debugf("preview", "after model companion=%u slot16=%p", (unsigned)temp_s1->companionSlot, (void*)Actors_actorRecords[16]);
 
     if (temp_s1->companionSlot > 1) {
         Actors_UpdateActorTextureScrolling(Actors_actorRecords[16]);
     }
 
     if (temp_s1->companionSlot != 0) {
-        int* p = (int*)((uintptr_t)Core_ScratchBase() + 0x000);
         new_var2 = (temp_s1->companionState.depthBias * 4) + 0xC0;
-        p[1] += new_var2;
+        Render_frameScratch.orderingTable += new_var2 / sizeof(u_long);
 
         applyVector(&temp_s1->instance.position, temp_s1->companionState.offsetX, temp_s1->companionState.offsetY,
             temp_s1->companionState.offsetZ, +=);
@@ -239,9 +242,8 @@ int Menu_Framework_DrawActorPreview(MATRIX* arg0)
         Actors_UpdateMotionAndLookAt(temp_s1, temp_s1->companionSlot);
         Actors_DrawActorModel(temp_s1, arg0, temp_s1->companionSlot);
 
-        p = (int*)((uintptr_t)Core_ScratchBase() + 0x000);
         new_var3 = (temp_s1->companionState.depthBias * 4) + 0xC0;
-        p[1] -= new_var3;
+        Render_frameScratch.orderingTable -= new_var3 / sizeof(u_long);
 
         applyVector(&temp_s1->instance.position, temp_s1->companionState.offsetX, temp_s1->companionState.offsetY,
             temp_s1->companionState.offsetZ, -=);

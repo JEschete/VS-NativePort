@@ -1,0 +1,13 @@
+# Google formatting with Catch2 classified as a third-party header.
+BasedOnStyle: InheritParentConfig
+IncludeCategories:
+  - Regex: '^<catch2/'
+    Priority: 3
+  - Regex: '^<ext/.*\.h>'
+    Priority: 2
+  - Regex: '^<.*\.h>'
+    Priority: 1
+  - Regex: '^<.*'
+    Priority: 2
+  - Regex: '.*'
+    Priority: 4

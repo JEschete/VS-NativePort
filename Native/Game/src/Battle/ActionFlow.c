@@ -228,12 +228,6 @@ void Battle_ApplyActionSourceEffects(int arg0, SVECTOR* arg1)
     }
 }
 
-// decomp: BATTLE.PRG func_8006CB04 (src/BATTLE/BATTLE.PRG/146C.c:2142) [INCLUDE_ASM: not yet ported]
-void Battle_ApplyActionTargetEffects(int, SVECTOR*)
-{
-    VS_UNPORTED("Battle::ApplyActionTargetEffects");
-}
-
 // decomp: BATTLE.PRG func_8006F5FC (src/BATTLE/BATTLE.PRG/146C.c:3228)
 void Battle_WaitForPostActionMovement(void)
 {

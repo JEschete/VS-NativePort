@@ -1278,7 +1278,7 @@ T00214.014,T00214,D_800EB9B8_t,14,unk3C,1,int,,,,reserved3C,Cleared on setup; no
 T00214.015,T00214,D_800EB9B8_t,15,unk40,1,int,,,target record pointer in 58578.c layout,targetList0,First target list,low,source:58578.c:457;use cited by sanity pass;source:573B8.c:49
 T00214.016,T00214,D_800EB9B8_t,16,unk44,1,int,,,,targetList1,Second target list; set from a setup parameter,low,source:573B8.c:468
 T00214.017,T00214,D_800EB9B8_t,17,unk48,1,menuShapeVertex[297],,,wireframe vertex buffer,wireVertices,Wireframe vertices,high,source:573B8.c:501
-T00214.018,T00214,D_800EB9B8_t,18,unk990,1,u_char[15140],,,,labelArea,Label and terrain storage,low,source:58578.c:649;use cited by sanity pass;source:573B8.c:52
+T00214.018,T00214,D_800EB9B8_t,18,unk990,1,u_char[15140],,,,reservedLabelArea,Label and terrain storage viewed through the canonical targeting sphere,high,source:58578.c:649;source:573B8.c:52;contains 24 native label pointers
 T00214.019,T00214,D_800EB9B8_t,19,unk44B4,1,short[770],,,four directional grid-edge lists,wireEdges,Wireframe edge list,med,source:573B8.c:377
 T00214.020,T00214,D_800EB9B8_t,20,unk4AB8,1,u_char[100],,,terrain slope clipping codes,terrainRowFlags,Valid flags of the cached terrain,low,source:58578.c:1045;use cited by sanity pass;source:573B8.c:54
 T00215.000,T00215,D_800EB9B8_t,0,unk0,1,func_800C1564_t[2],,,primary volume,volumes,Primary and secondary target volumes,high,source:58578.c:124

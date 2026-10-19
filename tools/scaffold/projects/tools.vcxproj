@@ -300,7 +300,9 @@
     <None Include="..\..\naming\upstream_layout.py" />
     <None Include="..\..\naming\upstream_prs.py" />
     <None Include="..\..\permuter_settings.toml" />
+    <None Include="..\..\port\check_event_dispatch.py" />
     <None Include="..\..\port\check_leftovers.py" />
+    <None Include="..\..\port\check_native_views.py" />
     <None Include="..\..\port\copy_fixups.py" />
     <None Include="..\..\port\copy_manifest.json" />
     <None Include="..\..\port\copy_to_native.py" />
@@ -311,6 +313,7 @@
     <None Include="..\..\port\gen_decomp_headers.py" />
     <None Include="..\..\port\hazard_index.py" />
     <None Include="..\..\port\layout_check.py" />
+    <None Include="..\..\port\native_views.py" />
     <None Include="..\..\port\own.py" />
     <None Include="..\..\port\owned.csv" />
     <None Include="..\..\port\ref_index.py" />
@@ -1437,6 +1440,7 @@
     <None Include="..\gen_solution.py" />
     <None Include="..\relayout.py" />
     <None Include="..\..\Setup-Windows.ps1" />
+    <None Include="..\..\test\decode_pages.ps1" />
     <None Include="..\..\test\duckstation_capture.ps1" />
     <None Include="..\..\test\duckstation_setup.ps1" />
     <None Include="..\..\test\run_native.ps1" />

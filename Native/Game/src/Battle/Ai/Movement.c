@@ -14,6 +14,7 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
@@ -48,7 +49,7 @@ int Battle_Ai_IsMovementHistoryStalled(Battle_Ai_PerceptionUpdateView* state)
 }
 
 // decomp: BATTLE.PRG func_800D9538 (src/BATTLE/BATTLE.PRG/6FC00.c:1178)
-void Battle_Ai_SaveMovementRandomState(void) { Battle_Ai_savedMovementRandomState = *(int*)((uintptr_t)Core_ScratchBase() + 0x3F8); }
+void Battle_Ai_SaveMovementRandomState(void) { Battle_Ai_savedMovementRandomState = *(int*)((uintptr_t)&Battle_Ai_FrameState()->randomState); }
 
 // decomp: BATTLE.PRG D_800D9B6C (src/BATTLE/BATTLE.PRG/70D4C.s:458) [asm-entry: not yet ported]
 int Battle_Ai_CanWalkInDirection(Battle_Ai_WanderView*, int)
@@ -97,9 +98,9 @@ int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state)
                 probe = 0;
                 for (i = 0; i < 4; ++i) {
                     ((u_char*)&probe)[0] = state->tile.tile.tileX
-                                         + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[directions[i]].dx;
+                                         + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[directions[i]].dx;
                     ((u_char*)&probe)[2] = state->tile.tile.tileZ
-                                         + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[directions[i]].dz;
+                                         + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[directions[i]].dz;
                     if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView*)state, probe) > 0) {
                         state->detourStep = i;
                         break;
@@ -115,12 +116,12 @@ int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state)
             }
             state->destination.tile.tileX =
                 state->tile.tile.tileX
-                + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[state->detourDirections[state->detourStep
+                + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[state->detourDirections[state->detourStep
                                                                       - 1]]
                       .dx;
             state->destination.tile.tileZ =
                 state->tile.tile.tileZ
-                + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[state->detourDirections[state->detourStep
+                + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[state->detourDirections[state->detourStep
                                                                       - 1]]
                       .dz;
             state->movementTarget = state->opaqueFB;
@@ -189,11 +190,11 @@ int Battle_Ai_TrackActorPosition(Battle_Ai_ActorAiState*, int)
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:794
-#define OBSTRUCTION_CACHE ((Battle_Ai_ObstructionCache*)((uintptr_t)Core_ScratchBase() + 0x3D0))
+#define OBSTRUCTION_CACHE ((Battle_Ai_ObstructionCache*)((uintptr_t)&Battle_Ai_FrameState()->directionCache))
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:795
-#define OBSTRUCTION_DIRECTIONS ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))
+#define OBSTRUCTION_DIRECTIONS ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:796
-#define OBSTRUCTION_STATES ((Battle_Ai_ObstructionView**)((uintptr_t)Core_ScratchBase() + 0x37C))
+#define OBSTRUCTION_STATES ((Battle_Ai_ObstructionView**)((uintptr_t)&Battle_Ai_FrameState()->actors))
 // decomp: BATTLE.PRG func_800E02B4 (src/BATTLE/BATTLE.PRG/771A8.c:798)
 int Battle_Ai_IsFlightDirectionObstructed(Battle_Ai_ObstructionView* state, int direction, int ahead)
 {
@@ -282,11 +283,11 @@ int Battle_Ai_IsFlightDirectionObstructed(Battle_Ai_ObstructionView* state, int 
 #undef OBSTRUCTION_CACHE
 
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:901
-#define MOVEMENT_CHECK_CACHE ((Battle_Ai_DirectionCacheBits*)((uintptr_t)Core_ScratchBase() + 0x3D0))
+#define MOVEMENT_CHECK_CACHE ((Battle_Ai_DirectionCacheBits*)((uintptr_t)&Battle_Ai_FrameState()->directionCache))
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:902
-#define MOVEMENT_CHECK_DIRECTIONS ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))
+#define MOVEMENT_CHECK_DIRECTIONS ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:903
-#define MOVEMENT_CHECK_TILES (*(unsigned short(**)[32])((uintptr_t)Core_ScratchBase() + 0x3C0))
+#define MOVEMENT_CHECK_TILES (*(unsigned short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->tileFlags))
 // decomp: BATTLE.PRG func_800E0678 (src/BATTLE/BATTLE.PRG/771A8.c:904)
 int Battle_Ai_CanFlyInDirection(Battle_Ai_DirectionCacheView* state, int direction)
 {
@@ -337,8 +338,8 @@ int Battle_Ai_LowestReachableGroundHeight(Battle_Ai_ActorAiState* arg0, u_int ar
     arg1 = (arg1 >> 9) & 6;
     while (--count != -1) {
         if (Battle_Ai_CanFlyInDirection((void*)arg0, arg1) != 0) {
-            int h = Field_GroundHeightAtTile(arg0->tile.word + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[arg1].dx,
-                arg0->tile.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[arg1].dz);
+            int h = Field_GroundHeightAtTile(arg0->tile.word + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[arg1].dx,
+                arg0->tile.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[arg1].dz);
             if (h < min) {
                 min = h;
             }
@@ -384,9 +385,9 @@ int Battle_Ai_UpdateFlightGroundTransition(Battle_Ai_MovementCheckView* state, i
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1062
-#define MOVEMENT_STEP_TILES (*(unsigned short(**)[32])((uintptr_t)Core_ScratchBase() + 0x3C0))
+#define MOVEMENT_STEP_TILES (*(unsigned short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->tileFlags))
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1063
-#define MOVEMENT_STEP_RESULT (*(int*)((uintptr_t)Core_ScratchBase() + 0x3C8))
+#define MOVEMENT_STEP_RESULT (*(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult))
 // decomp: BATTLE.PRG func_800E0A68 (src/BATTLE/BATTLE.PRG/771A8.c:1064)
 void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int action)
 {
@@ -623,13 +624,13 @@ void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* arg0, int
     arg0->movementDisabled = 1;
     Battle_Ai_ResolveDirectionalMovement(arg0, arg1, 3);
 
-    if (*(int*)((uintptr_t)Core_ScratchBase() + 0x3C8) != 5 && *(int*)((uintptr_t)Core_ScratchBase() + 0x3C8) != 7) {
+    if (*(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) != 5 && *(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) != 7) {
         Battle_Ai_ReleaseActorAiReservations(arg0);
         Battle_Ai_UpdateMovementRecovery((void*)arg0);
         return;
     }
 
-    if (*(int*)((uintptr_t)Core_ScratchBase() + 0x3C8) == 5) {
+    if (*(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) == 5) {
         arg1 = arg0->heading * (ONE / 8);
     }
 
@@ -722,8 +723,8 @@ void Battle_Ai_MoveToRadialDestination(Battle_Ai_MovementDestinationView* state,
         goto begin;
     }
     for (i = 0; i < 4; i++) {
-        dest.tile.tileX = state->destination.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[i * 2].dx;
-        dest.tile.tileZ = state->destination.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[i * 2].dz;
+        dest.tile.tileX = state->destination.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i * 2].dx;
+        dest.tile.tileZ = state->destination.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i * 2].dz;
         if (Battle_Ai_DestinationOccupancy((void*)state, dest.word) > 0) {
             state->destination = dest;
             goto begin;
@@ -767,8 +768,8 @@ u_char Battle_Ai_FilterDirectionsByGroundHeight(u_char arg0, u_int arg1, int arg
 
     for (i = 0; i < 8; ++i) {
         if ((arg0 >> i) & 1) {
-            if (Field_GroundHeightAtTile(x + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[i].dx,
-                    z + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[i].dz)
+            if (Field_GroundHeightAtTile(x + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i].dx,
+                    z + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i].dz)
                 > arg2) {
                 arg0 &= ~(1 << i);
             }
@@ -778,11 +779,11 @@ u_char Battle_Ai_FilterDirectionsByGroundHeight(u_char arg0, u_int arg1, int arg
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1509
-#define TERRAIN_TILE_MASK (*(unsigned char**)((uintptr_t)Core_ScratchBase() + 0x3C4))
+#define TERRAIN_TILE_MASK (*(unsigned char**)((uintptr_t)&Battle_Ai_FrameState()->terrainRegions))
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1510
-#define TERRAIN_MAP_WIDTH (*(unsigned char*)((uintptr_t)Core_ScratchBase() + 0x3DC))
+#define TERRAIN_MAP_WIDTH (*(unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->roomBounds))
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1511
-#define TERRAIN_MOVE_RESULT (*(int*)((uintptr_t)Core_ScratchBase() + 0x3C8))
+#define TERRAIN_MOVE_RESULT (*(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult))
 // decomp: BATTLE.PRG func_800E1908 (src/BATTLE/BATTLE.PRG/771A8.c:1517)
 void Battle_Ai_MoveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* state)
 {
@@ -812,7 +813,7 @@ void Battle_Ai_MoveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* state
 #undef TERRAIN_TILE_MASK
 
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1627
-#define WANDER_DIRECTIONS ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))
+#define WANDER_DIRECTIONS ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))
 // decomp: BATTLE.PRG wanderDirection (src/BATTLE/BATTLE.PRG/771A8.c:1633)
 Battle_Ai_DirectionDelta* Battle_Ai_WanderDirectionOffset(int index)
 {
@@ -821,9 +822,9 @@ Battle_Ai_DirectionDelta* Battle_Ai_WanderDirectionOffset(int index)
 #undef WANDER_DIRECTIONS
 
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1627
-#define WANDER_DIRECTIONS ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))
+#define WANDER_DIRECTIONS ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1628
-#define WANDER_TILES (*(unsigned short(**)[32])((uintptr_t)Core_ScratchBase() + 0x3C0))
+#define WANDER_TILES (*(unsigned short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->tileFlags))
 // decomp: BATTLE.PRG func_800E1BB8 (src/BATTLE/BATTLE.PRG/771A8.c:1638)
 int Battle_Ai_ChooseNextWanderTile(Battle_Ai_WanderView* state, unsigned int tile, unsigned int maxCount, int arg3)
 {
@@ -843,10 +844,10 @@ int Battle_Ai_ChooseNextWanderTile(Battle_Ai_WanderView* state, unsigned int til
     for (i = 0; i < 4; i++) {
         if (!(state->movementFlags & 8)) {
             Battle_Ai_DirectionDelta offset;
-            if (*(int*)((uintptr_t)Core_ScratchBase() + 0x3F4)) {
+            if ((Battle_Ai_FrameState()->roomData != NULL)) {
                 candidate.tile.tag =
-                    (*(unsigned char**)((uintptr_t)Core_ScratchBase() + 0x3C4))[state->goal.tile.tileZ
-                                                       * (*(unsigned char*)((uintptr_t)Core_ScratchBase() + 0x3DC))
+                    (*(unsigned char**)((uintptr_t)&Battle_Ai_FrameState()->terrainRegions))[state->goal.tile.tileZ
+                                                       * (*(unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->roomBounds))
                                                    + state->goal.tile.tileX]
                         >> i * 2
                     & 1;
@@ -909,9 +910,9 @@ void Battle_Ai_StartWanderWalk(Battle_Ai_WanderView* s)
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1627
-#define WANDER_DIRECTIONS ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))
+#define WANDER_DIRECTIONS ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1628
-#define WANDER_TILES (*(unsigned short(**)[32])((uintptr_t)Core_ScratchBase() + 0x3C0))
+#define WANDER_TILES (*(unsigned short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->tileFlags))
 // decomp: BATTLE.PRG func_800E1EAC (src/BATTLE/BATTLE.PRG/771A8.c:1717)
 void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int tile, unsigned int range)
 {
@@ -947,7 +948,7 @@ void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int ti
         state->wanderTimer = (unsigned int)Battle_Ai_NextActorRandomMasked(128) < 44 ? move : 0;
     }
     state->isStuck = 1;
-    *(unsigned char*)((uintptr_t)Core_ScratchBase() + 0x3D0) = 0;
+    *(unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->directionCache) = 0;
     value = state->wanderTimer < move;
     if (!value) {
         goto recover;
@@ -1177,7 +1178,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
             break;
         case 2:
             s->opaque3 = one;
-            *(unsigned char*)((uintptr_t)Core_ScratchBase() + 0x3D0) = 0;
+            *(unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->directionCache) = 0;
             s->opaque4 = one;
             s->moveX = model->x;
             s->moveZ = model->z;
@@ -1346,11 +1347,11 @@ void Battle_Ai_UpdateMovementRecovery(Battle_Ai_MovementRecoveryView* state)
             direction = quadrant * 2;
         }
         i = 0;
-        bounds = (unsigned char*)((uintptr_t)Core_ScratchBase() + 0x3DC);
+        bounds = (unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->roomBounds);
         for (; i < 4; i++) {
             direction = (direction + i * 2) & 7;
-            nx = (unsigned char)(x + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[direction].dx);
-            nz = (unsigned char)(z + ((Battle_Ai_DirectionDelta*)((uintptr_t)Core_ScratchBase() + 0x3EC))[direction].dz);
+            nx = (unsigned char)(x + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dx);
+            nz = (unsigned char)(z + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dz);
             if (nx < bounds[0] && nz < bounds[1]) {
                 height = (Field_GroundHeightFlagsAtTile(nx, nz) << 17) >> 17;
                 if (height > bestHeight) {

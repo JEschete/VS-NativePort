@@ -1,6 +1,7 @@
 #pragma once
 
-// libspu/libsnd surface (plan §6.3, strategy T): voice and reverb control translated into Engine\Audio.
+// libspu/libsnd surface (plan §6.3, strategy T): voice and reverb control
+// translated into Engine\Audio.
 
 #include "Legacy/Core/PsxTypes.h"
 
@@ -16,8 +17,9 @@ extern "C" {
 
 typedef void (*SpuTransferCallbackProc)(void);
 
-// The SPU's register file (0x1F801C00-0x1F801DFF) as ordinary memory: the copy tool maps the game's register
-// literals here, and the audio backend reads the voice state the sound driver writes.
+// The SPU's register file (0x1F801C00-0x1F801DFF) as ordinary memory: the copy
+// tool maps the game's register literals here, and the audio backend reads the
+// voice state the sound driver writes.
 #define LEGACY_SPU_REGISTER_BYTES 0x200
 void* LegacySpu_Registers(void);
 // The SPU's 512 KiB sample memory, filled by SpuWrite.
@@ -28,7 +30,7 @@ SpuTransferCallbackProc SpuSetTransferCallback(SpuTransferCallbackProc func);
 unsigned long SpuSetTransferStartAddr(unsigned long addr);
 
 typedef struct SpuVolume {
-    short left, right;
+  short left, right;
 } SpuVolume;
 
 void SpuStart(void);

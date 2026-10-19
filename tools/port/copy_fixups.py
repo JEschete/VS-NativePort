@@ -12,6 +12,24 @@ so a stale fix is noticed.
 """
 from __future__ import annotations
 
+POINTER_FREE_TYPES = {
+    "T00629": "vs_action_t: two inline 32-bit hit words, no pointers; main.h:74-107",
+}
+
+AI_FRAME_FIELDS = {
+    0x37C: "actors",
+    0x3BC: "heightMap",
+    0x3C0: "tileFlags",
+    0x3C4: "terrainRegions",
+    0x3C8: "movementResult",
+    0x3D0: "directionCache",
+    0x3DC: "roomBounds",
+    0x3EC: "directions",
+    0x3F4: "roomData",
+    0x3F8: "randomState",
+    0x3FC: "lastBudgetTick",
+}
+
 MODULE_DATA_BLOBS = (
     ("BATTLE/BATTLE.PRG", 0x1060, 0x80069860, 0x98, "Content_battleLimbNameBytes",
      "58578.c INCLUDE_RODATA D_80069860; strings end at jtbl_800698F8"),
@@ -31,6 +49,122 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F03533": [
+        ("Audio_soundState.musicHandles[16]", "Audio_soundState.sfxBankData[2]",
+         "main.c:10161 indexes unk14 beyond its array to alias sfxData[2] at PS1 offset 0x54; use the native field"),
+        ("Audio_soundState.sfxBankData[2] = arg0;",
+         "Audio_soundState.sfxBankData[2] = (void*)arg0;",
+         "the room sound bank is an externally owned native pointer, not a 32-bit music handle"),
+    ],
+    "F02467": [
+        ("    Actors_DrawActorModel(temp_s1, arg0, 0);",
+         '    Core_Debugf("preview", "before model companion=%u slot16=%p", (unsigned)temp_s1->companionSlot, (void*)Actors_actorRecords[16]);\n'
+         "    Actors_DrawActorModel(temp_s1, arg0, 0);\n"
+         '    Core_Debugf("preview", "after model companion=%u slot16=%p", (unsigned)temp_s1->companionSlot, (void*)Actors_actorRecords[16]);',
+         "temporary menu companion state trace"),
+        ("        int* p = (int*)((uintptr_t)Core_ScratchBase() + 0x000);\n", "",
+         "use the native frame ordering table"),
+        ("        p = (int*)((uintptr_t)Core_ScratchBase() + 0x000);\n", "",
+         "restore the native frame ordering table"),
+        ("p[1] += new_var2;", "Render_frameScratch.orderingTable += new_var2 / sizeof(u_long);",
+         "preview companion depth changes the native ordering pointer, not half of a pointer"),
+        ("p[1] -= new_var3;", "Render_frameScratch.orderingTable -= new_var3 / sizeof(u_long);",
+         "restore the preview ordering pointer"),
+    ],
+    "F02464": [
+        ("    Content_ActorAssetRequest sp10;", "    Content_ActorAssetRequest sp10 = {0};",
+         "menu clones must not interpret uninitialized placement bytes as a platform id"),
+        ("Core_Memory_AllocateFromLowEnd(0x1900)", "Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord))",
+         "menu actor and companion clones need complete native record storage"),
+    ],
+    "F00195": [
+        ("Battle_cameraEaseMode", "Field_sphericalCamera.delta.mode",
+         "D_800F19EC aliases the spherical camera mode at +0x1C"),
+        ("Battle_settledCameraDistance", "Field_sphericalCamera.values.distance",
+         "D_800F19D8 aliases the spherical camera distance at +0x8"),
+    ],
+    "F00190": [
+        ("    abilityTimer = Battle_actionState->abilityTimer;",
+         "    abilityTimer = Battle_actionState->abilityTimer;\n"
+         "    const Actors_ActorRecord* actingActor = Actors_actorRecords[temp_s3->primaryTarget.target.targetActor];\n"
+         '    Core_Debugf("combat-flow", "animation id=%u state=%u active=%u held=%u timer=%d window=%u effects=%u action=%u",\n'
+         "        (unsigned)actingActor->animationId, (unsigned)actingActor->instance.actionAnimationState,\n"
+         "        (unsigned)actingActor->instance.currentAnimation, (unsigned)actingActor->pose.holdingLastFrame,\n"
+         "        abilityTimer, (unsigned)Battle_actionState->abilityWindow,\n"
+         "        (unsigned)Effects_effectBusyFlags, (unsigned)temp_s3->actionId);",
+         "temporary action animation completion trace"),
+    ],
+    "F00186": [
+        ("    VECTOR sp30;",
+         "    VECTOR sp30;\n"
+         '    Core_Debugf("combat-flow", "camera mode=%d zoom=%d yaw=%d distance=%d action=%u targets=%u",\n'
+         "        Field_sphericalCamera.delta.mode, Battle_actionState->cameraZoomState,\n"
+         "        Field_sphericalCamera.delta.yaw, Field_sphericalCamera.values.distance,\n"
+         "        (unsigned)Battle_actionState->selection.actionId, (unsigned)Battle_actionState->selection.targetCount);",
+         "temporary combat camera gate trace"),
+        ("Field_ComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);",
+         "Field_ComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);\n"
+         '                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", sp20.vx, sp20.vy, sp20.vz);',
+         "temporary camera convergence trace"),
+    ],
+    "F00826": [
+        ("    if ((Actors_actorRecords[arg0]->animationId != 0x63)\n"
+         "        && (Actors_actorRecords[arg0]->animationId != 0xC7)) {",
+         "    if (Actors_actorRecords[arg0] == NULL\n"
+         "        || ((Actors_actorRecords[arg0]->animationId != 0x63)\n"
+         "            && (Actors_actorRecords[arg0]->animationId != 0xC7))) {",
+         "all-slot pose resets must reach the base helper's empty-actor and gimmick handling"),
+    ],
+    "F01364": [
+        ("    Core_Memory_ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);",
+         "    Core_Memory_ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);\n"
+         "    Battle_actionSelection = Menu_Framework_ActionSelectionState();",
+         "basic attacks may precede the first menu open; bind the interface-owned selection state at initialization"),
+    ],
+    "F01327": [
+        ("*str = '\\0'", "*str = Core_TextCode_Terminator", "game text terminates with E7, not a zero glyph"),
+    ],
+    "F01328": [
+        ("c = *src++;", "c = (u_char)*src++;", "unsigned game text and formatting controls"),
+        ("c != '\\0'", "c != Core_TextCode_Terminator", "stop before reading past the encoded template"),
+        ("*dest++ = '-';", "*dest++ = 0xA7;", "vsString minus glyph"),
+        ("*dest++ = '0';", "*dest++ = 0;", "vsString zero glyph"),
+    ],
+    "F01301": [
+        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+         "target-label backdrop uses native ordering links"),
+    ],
+    "F01302": [
+        ("    for (var_s3 = 0; var_s3 < 24; ++var_s3, var_s0 += 10, ++var_s1) {",
+         "    for (var_s3 = 0; var_s3 < 24; ++var_s3, ++var_s1) {\n"
+         "        var_s0 = &var_s1->screenX;",
+         "follow the native label stride; the PS1 20-byte step corrupts adjacent text pointers"),
+    ],
+    "F01287": [
+        ("((u_long)primitive << 8) >> 8", "LegacyGpu_Handle(primitive)",
+         "sphere wireframe packets use native ordering links"),
+    ],
+    "F01710": [
+        ("    int savedMap;", "    u_short (*savedMap)[32];", "cache a native grid pointer"),
+        ("        int* scratch = (int*)((uintptr_t)Core_ScratchBase() + 0x3BC);\n"
+         "        index = 0;\n        savedMap = *scratch;",
+         "        index = 0;\n        savedMap = Battle_Ai_FrameState()->heightMap;",
+         "save the owned AI grid without truncation"),
+        ("*(int*)((uintptr_t)Core_ScratchBase() + 0x3BC) = (int)Battle_Ai_specialTerrainHeights;",
+         "Battle_Ai_FrameState()->heightMap = Battle_Ai_specialTerrainHeights;",
+         "select the full native height-grid pointer"),
+        ("*(int*)((uintptr_t)Core_ScratchBase() + 0x3BC) = savedMap;",
+         "Battle_Ai_FrameState()->heightMap = savedMap;", "restore the full native height-grid pointer"),
+    ],
+    "G00229": [
+        ("Effects_PackageFile Effects_emptyPackage", "u_int Effects_emptyPackage[0x5200 / sizeof(u_int)]",
+         "D_800EC4BC contains nine tagged blocks and the terminator at +0x51FC, not just a header"),
+    ],
+    "F01595": [
+        ("Effects_BindEffectPackageBlocks(&Effects_emptyPackage);",
+         "Effects_BindEffectPackageBlocks((Effects_PackageFile*)Effects_emptyPackage);",
+         "bind the full embedded package stored at original address 0x800EC4BC"),
+    ],
     "F00589": [("void Field_SampleRoomGroundColor(int arg0) { Render_SampleRoomLighting(arg0, 0); }",
                  "void Field_SampleRoomGroundColor(int arg0, int layer, Render_ColorCode* color)\n"
                  "{\n    (void)layer;\n    Render_SampleRoomLighting(arg0, 0, color);\n}",
@@ -484,6 +618,32 @@ ONDISC_OFFSETS: dict[str, str] = {
 
 # Reviewed fixes to copied type definitions: type id -> [(old, new, reason)]. Checked by Native\Tests\src\LayoutAsserts.c.
 TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "T00532": [
+        ("char reserved3C[8];",
+         "union {\n        char reserved3C[8];\n        struct {\n"
+         "            u_char reserved3CPrefix[6];\n            short savedRelationOptions;\n"
+         "        };\n    };",
+         "func_800E72D0 restores relationship options from original offset 0x42"),
+        ("char reserved120[10];",
+         "union {\n        char reserved120[10];\n        struct {\n"
+         "            u_char reserved120Prefix[5];\n            u_char locomotionMode;\n"
+         "            u_char reserved126[4];\n        };\n    };",
+         "func_800E6828 selects the movement dispatcher at original offset 0x125"),
+        ("char reserved154[4];",
+         "union {\n        char reserved154[4];\n        struct {\n"
+         "            u_char reserved154Area;\n            u_char decisionDelay;\n"
+         "            u_char reserved156[2];\n        };\n    };",
+         "func_800E4358 decrements the decision timer at original offset 0x155"),
+        ("char reserved224[4];",
+         "union {\n        char reserved224[4];\n        struct {\n"
+         "            u_short locomotionFlags;\n            u_char walkStep;\n"
+         "            u_char runStep;\n        };\n    };",
+         "func_800E6828/685C use locomotion flags and the paired movement rates"),
+    ],
+    "T00214": [
+        ("    int targetList0;", "    Battle_TargetPreview* targetList0;", "native target-list pointer"),
+        ("    int targetList1;", "    Battle_TargetPreview* targetList1;", "native secondary target-list pointer"),
+    ],
     "T00456": [("int* reserved00;", "unsigned int reserved00;",
                  "room-effect commands begin with a four-byte size/opcode header, not a native pointer")],
     "T00453": [("int sceneEntry;", "int* sceneEntry;",
@@ -557,7 +717,11 @@ TYPE_FIXES["T00329"] = [(f"    int {m};", f"    void* {m}; /* a section pointer 
                          "section slot") for m in ("lighting", "section6", "section7", "section8", "section15",
                                                     "section16", "section17")]
 # Accessors that return those section pointers as int.
-SIG_RETYPE: dict[str, dict] = {"F00572": {"ret": "intptr_t"}, "F00590": {"ret": "intptr_t"}}
+SIG_RETYPE: dict[str, dict] = {
+    "F00572": {"ret": "intptr_t"},
+    "F00590": {"ret": "intptr_t"},
+    "F01281": {3: "Battle_TargetPreview*"},
+}
 
 # All 182 targets of BATTLE's 256 normal opcodes and INITBTL 12AC.c's skip table. The excluded rows are
 # helpers, not handlers. Keep even control-code-only handlers compatible with the pointer-returning branches.

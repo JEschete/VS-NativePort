@@ -840,7 +840,13 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x31 */ char reserved31[3];
     /* 0x34 */ Battle_Ai_TilePosition tile;
     /* 0x38 */ int previousTile;
-    /* 0x3C */ char reserved3C[8];
+    /* 0x3C */ union {
+        char reserved3C[8];
+        struct {
+            u_char reserved3CPrefix[6];
+            short savedRelationOptions;
+        };
+    };
     /* 0x44 */ u_char opaque44;
     /* 0x45 */ char reserved45[3];
     /* 0x48 */ Battle_Ai_TilePosition savedDestination;
@@ -892,7 +898,14 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x10D */ char reserved10D[11];
     /* 0x118 */ u_char detourDirections[4];
     /* 0x11C */ Battle_Ai_TilePosition goal;
-    /* 0x120 */ char reserved120[10];
+    /* 0x120 */ union {
+        char reserved120[10];
+        struct {
+            u_char reserved120Prefix[5];
+            u_char locomotionMode;
+            u_char reserved126[4];
+        };
+    };
     /* 0x12A */ u_char opaque12A;
     /* 0x12B */ char reserved12B[2];
     /* 0x12D */ u_char behaviorMode;
@@ -908,7 +921,14 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x13E */ char reserved13E;
     /* 0x13F */ u_char minActionDelay;
     /* 0x140 */ Battle_Ai_ActionCandidate currentChoice;
-    /* 0x154 */ char reserved154[4];
+    /* 0x154 */ union {
+        char reserved154[4];
+        struct {
+            u_char reserved154Area;
+            u_char decisionDelay;
+            u_char reserved156[2];
+        };
+    };
     /* 0x158 */ short targetX;
     /* 0x15A */ short targetZ;
     /* 0x15C */ u_char movementTarget;
@@ -930,7 +950,14 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x1A0 */ struct Battle_Ai_ActorAiState *nextEngaged;
     /* 0x1A4 */ Battle_Ai_RelationWord relations[16];
     /* 0x1E4 */ u_int distancesSquared[16];
-    /* 0x224 */ char reserved224[4];
+    /* 0x224 */ union {
+        char reserved224[4];
+        struct {
+            u_short locomotionFlags;
+            u_char walkStep;
+            u_char runStep;
+        };
+    };
     /* 0x228 */ int stallCounter;
     /* 0x22C */ Battle_Ai_ActionCandidate *currentCandidate;
     /* 0x230 */ Battle_Ai_ActionSlotMetadata actionSlots[6][4];

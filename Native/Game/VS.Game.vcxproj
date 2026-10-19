@@ -93,6 +93,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Actors\MovementCommands.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Actors\RoomState.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -177,6 +183,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\ActionResults.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Battle\ActionTable.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -219,6 +231,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\FrameUpdate.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\Movement.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -238,6 +256,12 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\Perception.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\Relations.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -316,6 +340,12 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\Targeting.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Battle\TargetingDraw.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1629,6 +1659,7 @@
     <ClInclude Include="src\Actors\ModelInstance.h" />
     <ClInclude Include="src\Actors\ModelRendering.h" />
     <ClInclude Include="src\Actors\Movement.h" />
+    <ClInclude Include="src\Actors\MovementCommands.h" />
     <ClInclude Include="src\Actors\Palette.h" />
     <ClInclude Include="src\Actors\RoomActorCache.h" />
     <ClInclude Include="src\Actors\RoomState.h" />
@@ -1649,6 +1680,7 @@
     <ClInclude Include="src\Battle\ActionFlow.h" />
     <ClInclude Include="src\Battle\ActionMenu.h" />
     <ClInclude Include="src\Battle\ActionResolution.h" />
+    <ClInclude Include="src\Battle\ActionResults.h" />
     <ClInclude Include="src\Battle\ActionTable.h" />
     <ClInclude Include="src\Battle\Actor.h" />
     <ClInclude Include="src\Battle\Ai\ActionPlanning.h" />
@@ -1659,10 +1691,12 @@
     <ClInclude Include="src\Battle\Ai\Behavior.h" />
     <ClInclude Include="src\Battle\Ai\ConditionSnapshot.h" />
     <ClInclude Include="src\Battle\Ai\DecisionCallbacks.h" />
+    <ClInclude Include="src\Battle\Ai\FrameUpdate.h" />
     <ClInclude Include="src\Battle\Ai\Movement.h" />
     <ClInclude Include="src\Battle\Ai\Navigation.h" />
     <ClInclude Include="src\Battle\Ai\OrbitingBoss.h" />
     <ClInclude Include="src\Battle\Ai\Perception.h" />
+    <ClInclude Include="src\Battle\Ai\Relations.h" />
     <ClInclude Include="src\Battle\Ai\RoomState.h" />
     <ClInclude Include="src\Battle\AttackPrerequisites.h" />
     <ClInclude Include="src\Battle\BattleMode.h" />
@@ -1679,6 +1713,7 @@
     <ClInclude Include="src\Battle\Sphere.h" />
     <ClInclude Include="src\Battle\StatusEffects.h" />
     <ClInclude Include="src\Battle\Targeting.h" />
+    <ClInclude Include="src\Battle\TargetingDraw.h" />
     <ClInclude Include="src\Battle\TargetVolume.h" />
     <ClInclude Include="src\Battle\TextBoxes.h" />
     <ClInclude Include="src\Battle\ValueLabels.h" />

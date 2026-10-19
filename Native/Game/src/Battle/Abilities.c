@@ -2,11 +2,15 @@
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
 #include "Actors/ActorAllocation.h"
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
+#include "Actors/Movement.h"
+#include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
+#include "Actors/TextureAnimation.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/Abilities.h"
 #include "Battle/Action.h"
@@ -395,6 +399,12 @@ void Battle_UpdateBattleAbilityTiming(void)
     }
 
     abilityTimer = Battle_actionState->abilityTimer;
+    const Actors_ActorRecord* actingActor = Actors_actorRecords[temp_s3->primaryTarget.target.targetActor];
+    Core_Debugf("combat-flow", "animation id=%u state=%u active=%u held=%u timer=%d window=%u effects=%u action=%u",
+        (unsigned)actingActor->animationId, (unsigned)actingActor->instance.actionAnimationState,
+        (unsigned)actingActor->instance.currentAnimation, (unsigned)actingActor->pose.holdingLastFrame,
+        abilityTimer, (unsigned)Battle_actionState->abilityWindow,
+        (unsigned)Effects_effectBusyFlags, (unsigned)temp_s3->actionId);
 
     if (Battle_actionState->abilityWindow != 0) {
         if (abilityTimer

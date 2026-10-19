@@ -13,6 +13,7 @@
 #include "Audio/Seq/Channel.h"
 #include "Battle/Abilities.h"
 #include "Battle/Action.h"
+#include "Battle/ActionFlow.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/BattleTypes.h"
@@ -29,6 +30,7 @@
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "Core/Overlays.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
@@ -741,6 +743,7 @@ void Menu_Framework_InitGameInterface(void* arg0)
     Core_Memory_ZeroWordsBackward(&Menu_Framework_menuState, sizeof(Menu_Framework_MenuControlState));
     Menu_Framework_menuState.currentMenu = 0x3F;
     Core_Memory_ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);
+    Battle_actionSelection = Menu_Framework_ActionSelectionState();
     Core_Memory_ZeroWordsBackward(&Menu_textBoxes[0], sizeof Menu_textBoxes[0]);
     Core_Memory_ZeroWordsBackward(Menu_Framework_submenuStates, sizeof Menu_Framework_submenuStates);
     Menu_Framework_menuMemory = (Menu_Framework_MenuMemory) { { 0 } };

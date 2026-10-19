@@ -14,9 +14,11 @@
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
 #include "Battle/Abilities.h"
+#include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionResolution.h"
+#include "Battle/ActionTable.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiViews.h"
@@ -450,6 +452,7 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"SLUS_010.40", 0x31214, sizeof Core_Math_kArcTangentTable, &Core_Math_kArcTangentTable, sizeof Core_Math_kArcTangentTable}, // G01903 D_80040A14
     {"SLUS_010.40", 0x39950, sizeof Render_legacyLoadingImageHeader, &Render_legacyLoadingImageHeader, sizeof Render_legacyLoadingImageHeader}, // G02006 _nowLoading_header
     {"SLUS_010.40", 0x39954, sizeof Render_loadingScreenPixels, &Render_loadingScreenPixels, sizeof Render_loadingScreenPixels}, // G02005 _nowLoading_data
+    {"SLUS_010.40", 0x3C1DC, sizeof Battle_actionDefinitions, &Battle_actionDefinitions, sizeof Battle_actionDefinitions}, // G01904 vs_main_actions
     {"SLUS_010.40", 0x3F5DC, sizeof Audio_Seq_unusedMaterialModifiers, &Audio_Seq_unusedMaterialModifiers, sizeof Audio_Seq_unusedMaterialModifiers}, // G01905 vs_main_materialModifiers
     {"SLUS_010.40", 0x3F6CC, sizeof Battle_statusEffectParams, &Battle_statusEffectParams, sizeof Battle_statusEffectParams}, // G01906 vs_main_statusEffectParams
     {"SLUS_010.40", 0x3F8CC, sizeof Field_locationDestinations, &Field_locationDestinations, sizeof Field_locationDestinations}, // G01913 vs_main_locationZoneMapIds

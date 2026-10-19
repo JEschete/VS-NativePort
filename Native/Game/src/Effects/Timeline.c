@@ -7,6 +7,7 @@
 #include "Audio/Stream.h"
 #include "Battle/Abilities.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionResults.h"
 #include "Core/Memory/Heap.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Camera.h"

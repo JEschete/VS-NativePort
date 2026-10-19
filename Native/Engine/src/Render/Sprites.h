@@ -6,11 +6,12 @@
 
 u_long* Render_QueueDefaultSprite(int wh, int xy);
 
-u_long* Render_QueueSpriteWithTexturePage(
-    int brightnessTransparency, int xy, int wh, u_long* nextPrim);
+u_long* Render_QueueSpriteWithTexturePage(int brightness_transparency, int xy,
+                                          int wh, u_long* next_prim);
 
-u_long* Render_QueueSprite(int brightnessTransparency, int xy, int wh, u_long* nextPrim);
+u_long* Render_QueueSprite(int brightness_transparency, int xy, int wh,
+                           u_long* next_prim);
 
 void Render_LoadFrameViewMatrix(void);
 
-#endif // VS_OWNED_RENDER_SPRITES_H
+#endif  // VS_OWNED_RENDER_SPRITES_H

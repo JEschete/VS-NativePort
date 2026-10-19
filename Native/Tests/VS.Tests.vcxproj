@@ -46,6 +46,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\AiLayoutTests.cpp" />
+    <ClCompile Include="src\CombatTestCases.cpp" />
+    <ClCompile Include="src\CombatTests.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\ContentTests.cpp" />
     <ClCompile Include="src\CoreTests.cpp" />
     <ClCompile Include="src\EffectTimelineTests.c">

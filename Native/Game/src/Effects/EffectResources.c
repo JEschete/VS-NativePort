@@ -83,7 +83,7 @@ void Effects_InitializeEffectResources(void)
     Effects_secondaryPackage.request = &Effects_secondaryRequest;
     Effects_actionRequestPointer = &Effects_actionRequest;
     Effects_SelectEffectResourceContext(0);
-    Effects_BindEffectPackageBlocks(&Effects_emptyPackage);
+    Effects_BindEffectPackageBlocks((Effects_PackageFile*)Effects_emptyPackage);
 }
 
 // decomp: BATTLE.PRG func_800D7890 (src/BATTLE/BATTLE.PRG/6F014.c:460)

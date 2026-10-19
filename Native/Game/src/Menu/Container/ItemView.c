@@ -4,6 +4,7 @@
 #include "Content/StringTables.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
+#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"

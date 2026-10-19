@@ -1,12 +1,12 @@
-# Handoff: shared rendering and facial textures
+# Handoff: prologue entry and shared rendering
 
 ## Current checkpoint
 
-Rendering and intro regressions are the active priority. The older
+Prologue combat entry and remaining intro regressions are the active priority. The older
 tick-5751 stopping point below is historical, not the current runtime baseline.
 
-- Debug and Release desktop/test targets build. Both full suites pass **66 tests / 30503 assertions**.
-- Required module initialization reports **333 data entries, 19 pointer tables, 2991 symbols,
+- Debug and Release desktop/test targets build. Both full suites pass **66 tests / 30505 assertions**.
+- Required module initialization reports **334 data entries, 19 pointer tables, 2991 symbols,
   50 modules, zero failures**. Copies and relocations validate source extents, destination capacities,
   and reviewed native element strides; unresolved required data prevents startup.
 - Native views: **590 fields, zero mismatches**. Layout check: **514 types, zero pointer-free
@@ -33,6 +33,16 @@ tick-5751 stopping point below is historical, not the current runtime baseline.
   The two-layer collision sampler now decodes real 4-by-4 patterns and surface flags. The later
   `ActorStatusConditionScore` fault came from the stubbed condition snapshot: the owned producer now
   fills actor IDs, HP, MP, statuses, and equipment DP before scoring. A poisoned-table fixture checks it.
+- The first basic attack reproduced a null-menu access in `Battle_CommitSelectedAction` at tick 12621.
+  G01904 (`Battle_actionDefinitions`) was excluded from startup loading by incorrect pointer metadata
+  and the anonymous hit-record spelling. Its reviewed 52-byte records now load from SLUS offset
+  `0x3C1DC`; basic attack 1 has category 14 and body-part targeting, not zero-filled environment targeting.
+  Native layout assertions and the real-disc module test check its decoded fields and targeting policy.
+- G00229 (`Effects_emptyPackage`, the existing label for the embedded default package) had only its
+  four-byte header allocated. The parser walked into unrelated native memory; a relink exposed a
+  watchdog stall at tick 1372. It now owns all `0x5200` bytes from BATTLE offset `0x83CBC`: nine tagged
+  blocks and the zero terminator at `+0x51FC`. The module regression binds the real package and checks
+  texture, animation, timeline, curve, particle, program, parameter, transform, and sound-table data.
 - GIM rendering and event views now share the two-byte flag header and native pointer stride.
   `ENKEI.GIM` fills the manor splash rather than displaying a small image over the room. Captures
   at ticks 1600/1800 in `build/new-game-actors` match the supplied full-illustration composition.
@@ -40,20 +50,36 @@ tick-5751 stopping point below is historical, not the current runtime baseline.
   Gimmick views expose their native model pointer and use the canonical room scale. Room triangle/quad
   subdivision, adaptive special-model quads, GPU mask packets, and room-light color sampling now have
   focused tests. Actor drawing preserves the update-owned flag and applies signed tint adjustments.
-- Current Debug completes **43000 ticks** across both demos, returning to title at tick **40175**.
-  Its New Game replay reaches **12000 ticks**, then waits at dialogue. Logs are
-  `build/facial-textures/debug-current.log` and `build/new-game-actors/debug-current.log`.
-  Successful exits and matching builds are not proof of complete visual or gameplay parity.
+- Debug and Release New Game replays reach **19000 ticks** with dialogue, basic-attack, and directional
+  button inputs without the reproduced crash. The final Debug log is `build/Debug/prologue-debug-replay.log`;
+  captures and the preserved user playthrough log are in `build/new-game-actors/prologue-input`.
+  Release also completes **43000 ticks** across both demos and returns to title. Its event trace is
+  `build/Debug/window-event-replay.log`, with captures in `build/facial-textures/window-pause`.
+  These accelerated runs are not proof of complete combat or normal-speed timing parity.
 - The null-actor movement dump in `Pasted text.md` matched a detached room-spawn alias. The shared
   caller now reads `Field_zoneContext.mpdEnemyCount`; both current binaries contain that correction.
 
+## Reference update review
+
+- Reviewed `resources/rood-reverse` at `2a589e01`, including the latest pull after `c37e3eb2`.
+  That batch adds shared trail/ring implementations, effect relinking, ending refactors, and image tools.
+  Its battle-path changes rename screen dimensions without changing behavior.
+- Actor dispatch already has the native label `Actors_ExecuteQueuedActorCommands` (F00161), and the
+  pinned snapshot already includes C implementations of it and shared trail routines. Do not duplicate
+  these implementations or replace established native types with another snapshot's layouts.
+- `RunActorAiUpdateStages`, `SetActorVerticalMovementSteps`, and `SetDirectMovement` remain assembly-backed
+  in the updated upstream on the inspected paths. The local `rood-reverse-noprompt` snapshot also retains
+  assembly for those entry points. No reference snapshot was changed or bulk-imported during this review.
+
 ## Remaining limits
 
-- Side-angle facial doubling in VKP, early scene staging, the repeated entrance, door motion, and
-  the full wyvern sequence remain user-reported visual/sequence issues, not certified fixes. A matched
-  single-pass probe did not establish the companion pass as the cause; it was restored. Static UV and
-  head-tag mappings matched the inspected assembly. Material overrides, full lighting/shadows, and
-  broad camera/pose parity remain incomplete. The model workspace is sequential and not reentrant.
+- The user confirmed that lighting fixes resolved the doubled faces and restored title cards resolved
+  the apparent early staging/repeated entrance. Door motion and the full wyvern sequence remain unverified.
+  The companion rendering pass is enabled. Material overrides, full lighting/shadows, and broad
+  camera/pose parity remain incomplete. The model workspace is sequential and not reentrant.
+- The reported extended Guildenstern window pause was not reproduced as a hard stall in the accelerated
+  demo trace; the window scene advances and the demos finish. Normal-speed duration and the recording's
+  exact interval remain unverified. Do not shorten original script delays or claim this pause fixed.
 - `func_800B3A68` does not read its third argument in the original assembly either. The unused native
   `nearOffset` parameter alone is not evidence of a missing clipping operation. Texture scrolling's
   incoming-register comparison also exists in the original assembly; its intended semantics remain
@@ -63,7 +89,9 @@ tick-5751 stopping point below is historical, not the current runtime baseline.
 - The two human encounters and D'tok are interactive prologue gameplay, not skippable demo segments.
   Validation must drive actual controller actions and check combat/scene state. No enemy defeat,
   HP edit, event-flag bypass, or combat completion was used or claimed in these replays. Higher-level
-  navigation, planning, and combat routines still include stubs.
+  navigation, planning, and combat routines still include stubs. The live handoff reaches the unported
+  `RunActorAiUpdateStages`, `SetDirectMovement`, and `DrawSphereVolumeWireframe` paths; completing these
+  and validating actual target selection/action execution is still required for a playable encounter.
 - No full playthrough, collision/combat completion, save support, audio/timing parity, or final
   asset-format conversion is claimed. VS Workshop informs asset layouts but does not execute ETM
   facial overlays or establish runtime visual parity.

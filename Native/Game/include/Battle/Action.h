@@ -169,6 +169,7 @@ typedef struct Battle_ActionDefinition {
     } hits[2];
     char name[24];
 } Battle_ActionDefinition;
+_Static_assert(sizeof(Battle_ActionDefinition) == 0x34, "Battle_ActionDefinition must keep its PS1 layout");
 
 // decomp: vs_hitParams_t (src/SLUS_010.40/main.h:49)
 typedef union Battle_ActionHitParamsWord {

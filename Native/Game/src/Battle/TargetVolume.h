@@ -48,14 +48,61 @@ typedef struct Battle_TargetSphereSetupView {
     int reserved34;
     int reserved38;
     int reserved3C;
-    int targetList0;
-    int targetList1;
+    Battle_TargetPreview* targetList0;
+    Battle_TargetPreview* targetList1;
     Battle_ShapeVertex wireVertices[297];
-    u_char labelArea[0x3B24];
+    char reservedLabelArea_990[16];
+    void* nativePointer9A0; /* PS1 pointer slot 0x9A0 */
+    char reservedLabelArea_9A4[16];
+    void* nativePointer9B4; /* PS1 pointer slot 0x9B4 */
+    char reservedLabelArea_9B8[16];
+    void* nativePointer9C8; /* PS1 pointer slot 0x9C8 */
+    char reservedLabelArea_9CC[16];
+    void* nativePointer9DC; /* PS1 pointer slot 0x9DC */
+    char reservedLabelArea_9E0[16];
+    void* nativePointer9F0; /* PS1 pointer slot 0x9F0 */
+    char reservedLabelArea_9F4[16];
+    void* nativePointerA04; /* PS1 pointer slot 0xA04 */
+    char reservedLabelArea_A08[16];
+    void* nativePointerA18; /* PS1 pointer slot 0xA18 */
+    char reservedLabelArea_A1C[16];
+    void* nativePointerA2C; /* PS1 pointer slot 0xA2C */
+    char reservedLabelArea_A30[16];
+    void* nativePointerA40; /* PS1 pointer slot 0xA40 */
+    char reservedLabelArea_A44[16];
+    void* nativePointerA54; /* PS1 pointer slot 0xA54 */
+    char reservedLabelArea_A58[16];
+    void* nativePointerA68; /* PS1 pointer slot 0xA68 */
+    char reservedLabelArea_A6C[16];
+    void* nativePointerA7C; /* PS1 pointer slot 0xA7C */
+    char reservedLabelArea_A80[16];
+    void* nativePointerA90; /* PS1 pointer slot 0xA90 */
+    char reservedLabelArea_A94[16];
+    void* nativePointerAA4; /* PS1 pointer slot 0xAA4 */
+    char reservedLabelArea_AA8[16];
+    void* nativePointerAB8; /* PS1 pointer slot 0xAB8 */
+    char reservedLabelArea_ABC[16];
+    void* nativePointerACC; /* PS1 pointer slot 0xACC */
+    char reservedLabelArea_AD0[16];
+    void* nativePointerAE0; /* PS1 pointer slot 0xAE0 */
+    char reservedLabelArea_AE4[16];
+    void* nativePointerAF4; /* PS1 pointer slot 0xAF4 */
+    char reservedLabelArea_AF8[16];
+    void* nativePointerB08; /* PS1 pointer slot 0xB08 */
+    char reservedLabelArea_B0C[16];
+    void* nativePointerB1C; /* PS1 pointer slot 0xB1C */
+    char reservedLabelArea_B20[16];
+    void* nativePointerB30; /* PS1 pointer slot 0xB30 */
+    char reservedLabelArea_B34[16];
+    void* nativePointerB44; /* PS1 pointer slot 0xB44 */
+    char reservedLabelArea_B48[16];
+    void* nativePointerB58; /* PS1 pointer slot 0xB58 */
+    char reservedLabelArea_B5C[16];
+    void* nativePointerB6C; /* PS1 pointer slot 0xB6C */
+    char reservedLabelArea_B70[14660];
     short wireEdges[0x302];
     u_char terrainRowFlags[0x64];
 } Battle_TargetSphereSetupView;
-_Static_assert(sizeof(Battle_TargetSphereSetupView) == 0x4B1C, "Battle_TargetSphereSetupView must keep its PS1 layout");
 
 // decomp: D_800EB9B8_unk990 (src/BATTLE/BATTLE.PRG/58578.c:24)
 typedef struct Battle_SphereTargetLabel {

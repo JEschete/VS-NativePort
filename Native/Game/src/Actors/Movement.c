@@ -7,6 +7,7 @@
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
+#include "Actors/MovementCommands.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
@@ -3187,18 +3188,6 @@ void Actors_BeginAirborneTileJump(int, int*, int, int)
 void Actors_BeginNavigationJump(int, int*, int, int)
 {
     VS_UNPORTED("Actors::BeginNavigationJump");
-}
-
-// decomp: BATTLE.PRG func_800B64A8 (src/BATTLE/BATTLE.PRG/4A0A8.c:415) [inline-asm: not yet ported]
-void Actors_SetDirectMovement(int, int, int)
-{
-    VS_UNPORTED("Actors::SetDirectMovement");
-}
-
-// decomp: BATTLE.PRG func_800B64CC (src/BATTLE/BATTLE.PRG/4A0A8.c:428) [C: not yet ported]
-void Actors_QueueNavigationTileTarget(int, int, int, int)
-{
-    VS_UNPORTED("Actors::QueueNavigationTileTarget");
 }
 
 // decomp: BATTLE.PRG func_800B6500 (src/BATTLE/BATTLE.PRG/4A0A8.c:445) [inline-asm: not yet ported]

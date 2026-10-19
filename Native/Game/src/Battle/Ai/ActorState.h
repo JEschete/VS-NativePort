@@ -36,17 +36,13 @@ int Battle_Ai_NextActorRandomMasked(int);
 void Battle_Ai_SetActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView*, int, int);
 void Battle_Ai_ResetActorAiReactionDelay(int);
 void Battle_Ai_RefreshAiResourceRestrictions(Battle_Ai_ActorAiState*);
-void Battle_Ai_RunActorAiUpdateStages(void);
 void Battle_Ai_ResolveAiLinkedActors(void);
 void Battle_Ai_ApplySavedAiSettingsFlags(int* arg0, Battle_Ai_SavedSettingsPair* arg1);
 void Battle_Ai_ApplyActorAiSettings(Battle_Ai_SettingsView* state, Battle_Ai_SettingsWord* settings);
 int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options);
-int Battle_Ai_CacheActorAiWorkingState();
 short Battle_Ai_PackActorAiPersistenceFlags(int);
 int Battle_Ai_ClearActorAiNavigationReset();
 void Battle_Ai_InitializeActorAiExtensionHook(void);
-void Battle_Ai_ApplySavedActorAiRelations(void);
-void Battle_Ai_InitializeActorAiRelations(Battle_Ai_AiCreationView*);
 void Battle_Ai_FreeActorAiState(Battle_Actor*);
 void Battle_Ai_ClearActorAiLinksAndPlan(int);
 

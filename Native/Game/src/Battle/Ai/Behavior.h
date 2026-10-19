@@ -28,8 +28,6 @@ int Battle_Ai_UpdateEscortCombatBehavior(Battle_Ai_EscortView* state);
 int Battle_Ai_TryExecuteActionCandidate(Battle_Ai_ActorAiState* arg0, Battle_Ai_ActionCandidate* arg1);
 int Battle_Ai_TryExecutePlannedActions(Battle_Ai_ActorAiState* arg0);
 void Battle_Ai_UpdateActorDecisions(void);
-void Battle_Ai_UpdateActorLocomotionMode(Battle_Ai_DecisionDispatchView*);
-void Battle_Ai_DispatchMovementBehavior(Battle_Ai_DecisionDispatchView*);
 int Battle_Ai_CanApproachEngagedTarget(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*);
 void Battle_Ai_IssueActorCommand(Battle_Ai_ActorAiState*, int);
 int Battle_Ai_UpdateHesitationTurn(void*, int, int, int);

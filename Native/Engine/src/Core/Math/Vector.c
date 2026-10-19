@@ -119,17 +119,3 @@ int Core_Math_SquaredTileDistanceFromComponents()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_800E4624 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-int Core_Math_SquaredDistanceWithHeightOffsets(short*, short*, int, int)
-{
-    VS_UNPORTED("Core::Math::SquaredDistanceWithHeightOffsets");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E4660 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-unsigned int Core_Math_SquaredVectorLength(int, int, int)
-{
-    VS_UNPORTED("Core::Math::SquaredVectorLength");
-    return 0;
-}
-

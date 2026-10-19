@@ -10,6 +10,7 @@
 #include "Battle/Sphere.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
+#include "Battle/TargetingDraw.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
@@ -145,7 +146,7 @@ void Battle_FreeSphere(void)
 }
 
 // decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444)
-void Battle_SetSphereVolumes(Battle_TargetSphereSpec* arg0, Battle_TargetSphereSpec* arg1, u_char arg2, int arg3)
+void Battle_SetSphereVolumes(Battle_TargetSphereSpec* arg0, Battle_TargetSphereSpec* arg1, u_char arg2, Battle_TargetPreview* arg3)
 {
     Battle_targetSphere->primaryVolume = *arg0;
 
@@ -338,14 +339,8 @@ void Battle_DrawSphereWireLine(SVECTOR* start, SVECTOR* end, u_int color, int in
     primitive[0] = link | 0x04000000;
     primitive[2] = (((color << 8) >> 8) * intensity) | ((color >> 24) << 24);
     primitive[4] = *(u_long*)end;
-    *orderingTable = ((u_long)primitive << 8) >> 8;
+    *orderingTable = LegacyGpu_Handle(primitive);
     Render_frameScratch.primitiveCursor = primitive + 5;
-}
-
-// decomp: BATTLE.PRG func_800C0B50 (src/BATTLE/BATTLE.PRG/58350.s:0) [asm-file: not yet ported]
-void Battle_DrawSphereVolumeWireframe(Battle_TargetVolume* shape, int color)
-{
-    VS_UNPORTED("Battle::DrawSphereVolumeWireframe");
 }
 
 // decomp: BATTLE.PRG func_800C0D78 (src/BATTLE/BATTLE.PRG/58578.c:104)
@@ -975,7 +970,7 @@ void Battle_DrawSphereTargetLabel(Battle_SphereTargetLabel* arg0)
     prim->box.shadePoly.colorThree = color1;
     prim->box.shadePoly.positionThree = vs_getXY_2(x + 0x48, y + 8);
     prim->box.texturePageCommand = _get_mode(0, 0, 0);
-    *nextPrim = ((u_long)prim << 8) >> 8;
+    *nextPrim = LegacyGpu_Handle(prim);
     ++prim;
     Render_frameScratch.primitiveCursor = prim;
 
@@ -1016,7 +1011,8 @@ void Battle_UpdateSphereTargetLabels(void)
     Battle_SphereTargetLabel* var_s1 = (*(Battle_TargetSphere* (*))&Battle_targetSphere)->labels;
     short* var_s0 = &(*(Battle_TargetSphere* (*))&Battle_targetSphere)->labels[0].screenX;
 
-    for (var_s3 = 0; var_s3 < 24; ++var_s3, var_s0 += 10, ++var_s1) {
+    for (var_s3 = 0; var_s3 < 24; ++var_s3, ++var_s1) {
+        var_s0 = &var_s1->screenX;
         int v1 = var_s1->state;
 
         if (v1 == 0) {

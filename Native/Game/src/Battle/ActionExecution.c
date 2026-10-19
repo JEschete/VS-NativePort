@@ -183,6 +183,10 @@ void Battle_UpdateActionCameraZoom(void)
     SVECTOR sp18;
     VECTOR sp20;
     VECTOR sp30;
+    Core_Debugf("combat-flow", "camera mode=%d zoom=%d yaw=%d distance=%d action=%u targets=%u",
+        Field_sphericalCamera.delta.mode, Battle_actionState->cameraZoomState,
+        Field_sphericalCamera.delta.yaw, Field_sphericalCamera.values.distance,
+        (unsigned)Battle_actionState->selection.actionId, (unsigned)Battle_actionState->selection.targetCount);
 
     if ((Field_sphericalCamera.delta.mode == 1)
         || (Field_sphericalCamera.delta.mode == 3)) {
@@ -190,6 +194,7 @@ void Battle_UpdateActionCameraZoom(void)
             Battle_StepCameraTowardActionMidpoint(1);
             Battle_ActionCameraMidpoint(&sp18);
             Field_ComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);
+                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", sp20.vx, sp20.vy, sp20.vz);
             if ((((sp20.vx | sp20.vy | sp20.vz) == 0)
                     && (Field_sphericalCamera.delta.yaw == 0))
                 && ((Field_sphericalCamera.delta.mode == 1)
@@ -212,6 +217,7 @@ void Battle_UpdateActionCameraZoom(void)
             if (Render_projectionDistance == 0x300) {
                 Battle_ActionCameraMidpoint(&sp18);
                 Field_ComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);
+                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", sp20.vx, sp20.vy, sp20.vz);
                 if ((((sp20.vx | sp20.vy | sp20.vz) == 0)
                         && (Field_sphericalCamera.delta.yaw == 0))
                     && ((Field_sphericalCamera.delta.mode == 1)
@@ -230,6 +236,7 @@ void Battle_UpdateActionCameraZoom(void)
             if (Field_sphericalCamera.values.distance == 0x900) {
                 Battle_ActionCameraMidpoint(&sp18);
                 Field_ComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);
+                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", sp20.vx, sp20.vy, sp20.vz);
                 if ((((sp20.vx | sp20.vy | sp20.vz) == 0)
                         && (Field_sphericalCamera.delta.yaw == 0))
                     && ((Field_sphericalCamera.delta.mode == 1)
@@ -336,7 +343,7 @@ void Battle_FinishActionSequence(void)
     int j;
     u_char actor;
 
-    if ((Battle_cameraEaseMode == 1) || (Battle_cameraEaseMode == 3)) {
+    if ((Field_sphericalCamera.delta.mode == 1) || (Field_sphericalCamera.delta.mode == 3)) {
         if (Render_projectionDistance > 512) {
             Render_projectionDistance -= 64;
             if (Render_projectionDistance <= 512) {
@@ -363,7 +370,7 @@ void Battle_FinishActionSequence(void)
             }
         }
     }
-    if ((Render_projectionDistance != 512) || (Battle_settledCameraDistance != Battle_actionState->preferredCameraDistance)
+    if ((Render_projectionDistance != 512) || (Field_sphericalCamera.values.distance != Battle_actionState->preferredCameraDistance)
         || !Field_IsCameraLookAtOnAshley()) {
         return;
     }

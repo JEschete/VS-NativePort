@@ -10,8 +10,6 @@
 #define VS_CORE_MEMORY_COPY_H_DECLS
 
 short Core_Memory_ReadUnalignedShort(u_char* arg0);
-void Core_Memory_CopyHalfwords(void* dst, const void* src, int numBytes);
-void Core_Memory_CopyHalfwordBlocks(void* dst, const void* src, int numBytes);
 void Core_Memory_ZeroWordsBackward(void* arg0, int arg1);
 void Core_Memory_CopyBytesBackward(void* dest, void const* src, int size);
 void Core_Memory_CopyWords(void* in_Src, void* in_Dst, u_int in_Size);

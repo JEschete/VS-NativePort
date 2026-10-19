@@ -1,6 +1,7 @@
 #pragma once
 
-// libpress surface (plan §6.4, strategy T): the movie decoder calls, replaced by Engine\Movie.
+// libpress surface (plan §6.4, strategy T): the movie decoder calls, replaced
+// by Engine\Movie.
 
 #include "Legacy/Core/PsxTypes.h"
 

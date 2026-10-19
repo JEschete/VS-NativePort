@@ -1851,7 +1851,13 @@
     <None Include="..\..\permuter_settings.toml">
       <Filter>tools</Filter>
     </None>
+    <None Include="..\..\port\check_event_dispatch.py">
+      <Filter>tools\port</Filter>
+    </None>
     <None Include="..\..\port\check_leftovers.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\check_native_views.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\copy_fixups.py">
@@ -1882,6 +1888,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\layout_check.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\native_views.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\own.py">
@@ -5261,6 +5270,9 @@
     </None>
     <None Include="..\..\Setup-Windows.ps1">
       <Filter>tools</Filter>
+    </None>
+    <None Include="..\..\test\decode_pages.ps1">
+      <Filter>tools\test</Filter>
     </None>
     <None Include="..\..\test\duckstation_capture.ps1">
       <Filter>tools\test</Filter>

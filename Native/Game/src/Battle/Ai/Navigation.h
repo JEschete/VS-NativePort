@@ -119,8 +119,6 @@ void Battle_Ai_InitializeRoomNavigation(void);
 void Battle_Ai_RefreshActorAiReservations(int);
 void Battle_Ai_ForceReleaseActorAiReservations(int);
 void Battle_Ai_ReleaseActorAiReservations(Battle_Ai_ActorAiState*);
-void Battle_Ai_InitializeActorLocomotionMode(Battle_Ai_AiCreationView*);
-void Battle_Ai_SetActorVerticalMovementSteps(int, int, int);
 void Battle_Ai_AddAiTileOccupant(void*);
 void Battle_Ai_RemoveAiTileOccupant(Field_GimmickInstance*);
 void Battle_Ai_MarkAiTileDynamicObstacle(int, int);

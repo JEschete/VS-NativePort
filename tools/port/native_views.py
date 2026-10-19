@@ -34,6 +34,9 @@ GIMMICK_POINTERS = (0x68,)
 GIM_VIEWS = frozenset(("T00219",))
 GIM_POINTERS = (0x10, 0x14)
 
+SPHERE_VIEWS = frozenset(("T00214", "T00485"))
+SPHERE_POINTERS = (0x40, 0x44, *(0x990 + index * 20 + 16 for index in range(24)))
+
 
 def pointer_slots(tid: str) -> tuple[int, ...]:
     if tid in AI_VIEWS:
@@ -46,6 +49,8 @@ def pointer_slots(tid: str) -> tuple[int, ...]:
         return GIMMICK_POINTERS
     if tid in GIM_VIEWS:
         return GIM_POINTERS
+    if tid in SPHERE_VIEWS:
+        return SPHERE_POINTERS
     return ()
 
 
@@ -70,7 +75,7 @@ def rebase(tid: str, text: str, fields: list[tuple[str, dict]]) -> str:
             raise ValueError('T00380: model slot not found')
     for name, field in fields:
         offset = field['offset'] // 8
-        padding = re.fullmatch(r'(?:unsigned )?char\[(\d+)\]', field['type'])
+        padding = re.fullmatch(r'(?:u_char|(?:unsigned )?char)\[(\d+)\]', field['type'])
         if not padding or not name.startswith(('reserved', 'padding')):
             continue
         end = offset + int(padding[1])
@@ -86,7 +91,7 @@ def rebase(tid: str, text: str, fields: list[tuple[str, dict]]) -> str:
             cursor = slot + 4
         if cursor < end:
             pieces.append(f'    char {name}_{cursor:X}[{end - cursor}];')
-        pattern = rf'(?m)^\s*(?:/\*[^\n]*?\*/\s*)?(?:unsigned\s+)?char\s+{re.escape(name)}\s*\[[^\]]+\];'
+        pattern = rf'(?m)^\s*(?:/\*[^\n]*?\*/\s*)?(?:u_char|(?:unsigned\s+)?char)\s+{re.escape(name)}\s*\[[^\]]+\];'
         text, count = re.subn(pattern, '\n'.join(pieces), text, count=1)
         if count != 1:
             raise ValueError(f'{tid}.{name}: cannot expose native pointer slots')

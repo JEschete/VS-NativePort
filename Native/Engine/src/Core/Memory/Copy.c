@@ -11,18 +11,6 @@ short Core_Memory_ReadUnalignedShort(u_char* arg0)
     return arg0[0] | (arg0[1] << 8);
 }
 
-// decomp: BATTLE.PRG vs_battle_copyAligned (src/BATTLE/BATTLE.PRG/573B8.c:242) [inline-asm: not yet ported]
-void Core_Memory_CopyHalfwords(void* dst, const void* src, int numBytes)
-{
-    VS_UNPORTED("Core::Memory::CopyHalfwords");
-}
-
-// decomp: BATTLE.PRG vs_battle_memcpy (src/BATTLE/BATTLE.PRG/573B8.c:253) [inline-asm: not yet ported]
-void Core_Memory_CopyHalfwordBlocks(void* dst, const void* src, int numBytes)
-{
-    VS_UNPORTED("Core::Memory::CopyHalfwordBlocks");
-}
-
 // decomp: BATTLE.PRG vs_battle_rMemzero (src/BATTLE/BATTLE.PRG/5BF94.c:4476)
 void Core_Memory_ZeroWordsBackward(void* arg0, int arg1)
 {

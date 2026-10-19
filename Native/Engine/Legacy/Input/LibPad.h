@@ -1,8 +1,10 @@
 #pragma once
 
-// libpad surface (plan §6.5). The copied code registers two receive buffers with PadInitDirect and reads them
-// every frame; LibPad.cpp fills them from Engine\Input (SDL3 gamepad and keyboard) in the original pad format, so
-// the game's own pad decoding runs unchanged until it is rewritten against Input::PadState.
+// libpad surface (plan §6.5). The copied code registers two receive buffers
+// with PadInitDirect and reads them every frame; LibPad.cpp fills them from
+// Engine\Input (SDL3 gamepad and keyboard) in the original pad format, so the
+// game's own pad decoding runs unchanged until it is rewritten against
+// Input::PadState.
 
 #include "Legacy/Core/PsxTypes.h"
 

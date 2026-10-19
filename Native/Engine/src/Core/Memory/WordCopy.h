@@ -18,4 +18,8 @@ void Core_Memory_ClearAlignedWords(void* destination, int size);
 }
 #endif
 
-#endif // VS_OWNED_CORE_MEMORY_WORDCOPY_H
+void Core_Memory_CopyHalfwords(void* dst, const void* src, int num_bytes);
+
+void Core_Memory_CopyHalfwordBlocks(void* dst, const void* src, int num_bytes);
+
+#endif  // VS_OWNED_CORE_MEMORY_WORDCOPY_H

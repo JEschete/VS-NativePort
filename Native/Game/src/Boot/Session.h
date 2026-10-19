@@ -25,4 +25,4 @@ void Boot_DelayAfterOverlayLoad(void);
 }
 #endif
 
-#endif // VS_OWNED_BOOT_SESSION_H
+#endif  // VS_OWNED_BOOT_SESSION_H

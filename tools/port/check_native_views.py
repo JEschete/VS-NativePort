@@ -48,6 +48,9 @@ def main() -> int:
                 continue
             old, new = field['offset'], cursor.get_field_offsetof()
             result[base + old] = native_base + new
+            if cursor.type.kind == ci.TypeKind.CONSTANTARRAY and cursor.type.element_type.kind == ci.TypeKind.POINTER:
+                for index in range(cursor.type.element_count):
+                    result[base + old + index * 32] = native_base + new + index * cursor.type.element_type.get_size() * 8
             spelling = field['type'].split('[')[0]
             sub = cp._tid_by_name.get(spelling)
             if sub and '*' not in spelling and sub != tid and ct.c_name(gen.types[sub]['final_name']) in records:
@@ -68,7 +71,7 @@ def main() -> int:
     checked = 0
     for family, canonical in ((nv.AI_VIEWS, 'T00532'), (nv.ACTOR_VIEWS, 'T00630'),
                               (nv.MODEL_VIEWS, 'T00239'), (nv.GIMMICK_VIEWS, 'T00255'),
-                              (nv.GIM_VIEWS, 'T00542')):
+                              (nv.GIM_VIEWS, 'T00542'), (nv.SPHERE_VIEWS, 'T00215')):
         mapping = offsets(canonical)
         for tid in sorted(family):
             if tid == canonical:

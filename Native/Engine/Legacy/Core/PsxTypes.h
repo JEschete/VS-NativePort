@@ -1,7 +1,8 @@
 #pragma once
 
-// Basic PS1 SDK scalar types used by the copied C (Phase 1a). `u_long` is 32 bits here because the build is
-// Windows x64 (LLP64), matching the original; copied code that stores pointers in it is a 64-bit hazard
+// Basic PS1 SDK scalar types used by the copied C (Phase 1a). `u_long` is 32
+// bits here because the build is Windows x64 (LLP64), matching the original;
+// copied code that stores pointers in it is a 64-bit hazard
 // (PORTING_WATCHLIST.md §2).
 
 #include <limits.h>
@@ -20,7 +21,7 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 
 typedef struct quad {
-    long val[2];
+  long val[2];
 } quad;
 
 #define ONE 4096

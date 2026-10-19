@@ -22,7 +22,5 @@ void Core_Math_WidenShortVector(SVECTOR* arg0, VECTOR* arg1);
 void Core_Math_NarrowWideVector(VECTOR* arg0, SVECTOR* arg1);
 unsigned int Core_Math_SquaredTileDistance(unsigned int, unsigned int);
 int Core_Math_SquaredTileDistanceFromComponents();
-int Core_Math_SquaredDistanceWithHeightOffsets(short*, short*, int, int);
-unsigned int Core_Math_SquaredVectorLength(int, int, int);
 
 #endif // VS_CORE_MATH_VECTOR_H_DECLS

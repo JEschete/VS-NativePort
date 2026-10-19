@@ -7,6 +7,7 @@
 #include "Battle/Abilities.h"
 #include "Battle/Actor.h"
 #include "Core/Memory/Copy.h"
+#include "Core/Memory/WordCopy.h"
 #include "Items/Categories.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentStats.h"

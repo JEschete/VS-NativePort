@@ -1,6 +1,9 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Boot/Session.h"
-#include "Legacy/Psx.h"
+
+#include <setjmp.h>
+#include <stdlib.h>
+
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Music.h"
 #include "Audio/Playback/SoundPlayback.h"
@@ -19,6 +22,7 @@
 #include "Ending/Credits/StaffRoll.h"
 #include "Input/Controller.h"
 #include "Input/Controllers.h"
+#include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Save/Snapshot.h"
 #include "State/Ashley.h"
@@ -26,76 +30,67 @@
 #include "State/PlayTime.h"
 #include "Title/TitleMenu.h"
 
-#include <setjmp.h>
-#include <stdlib.h>
-
 static jmp_buf sessionBoundary;
 static int sessionActive;
 
-// Nonlocal transitions stay inside the copied C call graph; the platform owns the surrounding fiber.
-int Boot_RunSessionLoop(Boot_SessionEntry title, Boot_SessionEntry battle)
-{
-    if (sessionActive || title == NULL || battle == NULL) return -1;
-    sessionActive = 1;
-    const int destination = setjmp(sessionBoundary);
-    const int result = destination == 2 ? battle() : title();
-    sessionActive = 0;
-    return result;
+// Nonlocal transitions stay inside the copied C call graph; the platform owns
+// the surrounding fiber.
+int Boot_RunSessionLoop(Boot_SessionEntry title, Boot_SessionEntry battle) {
+  if (sessionActive || title == NULL || battle == NULL) return -1;
+  sessionActive = 1;
+  const int destination = setjmp(sessionBoundary);
+  const int result = destination == 2 ? battle() : title();
+  sessionActive = 0;
+  return result;
 }
 
-static void RequestSession(int destination)
-{
-    if (!sessionActive) abort();
-    Core_Debugf("boot", "native session transition: %s", destination == 1 ? "title" : "battle");
-    longjmp(sessionBoundary, destination);
+static void RequestSession(int destination) {
+  if (!sessionActive) abort();
+  Core_Debugf("boot", "native session transition: %s",
+              destination == 1 ? "title" : "battle");
+  longjmp(sessionBoundary, destination);
 }
 
-static int RunLoadedBattle(void)
-{
-    Boot_isGameplayActive = 1;
-    Boot_RunGameLoop();
-    SetDispMask(0);
-    Audio_StopAndFreeCurrentMusic();
-    return 0;
+static int RunLoadedBattle(void) {
+  Boot_isGameplayActive = 1;
+  Boot_RunGameLoop();
+  SetDispMask(0);
+  Audio_StopAndFreeCurrentMusic();
+  return 0;
 }
 
 // decomp: SLUS_010.40 vs_main_execTitle (src/SLUS_010.40/main.c:8344)
-int Boot_RunTitleAndBattle(void)
-{
-    Core_Debugf("boot", "title session initialization begin");
-    Boot_InitializeTitleSession();
-    Core_Debugf("boot", "title session initialization complete");
-    Boot_LoadTitleOverlay();
-    Core_Debugf("boot", "title module ready");
-    Boot_gameEntryMode = Title_Run();
-    Boot_isClearSavePending = 0;
-    Render_ShowLoadingScreen();
-    Boot_LoadBattleOverlays();
-    return RunLoadedBattle();
+int Boot_RunTitleAndBattle(void) {
+  Core_Debugf("boot", "title session initialization begin");
+  Boot_InitializeTitleSession();
+  Core_Debugf("boot", "title session initialization complete");
+  Boot_LoadTitleOverlay();
+  Core_Debugf("boot", "title module ready");
+  Boot_gameEntryMode = Title_Run();
+  Boot_isClearSavePending = 0;
+  Render_ShowLoadingScreen();
+  Boot_LoadBattleOverlays();
+  return RunLoadedBattle();
 }
 
 // decomp: SLUS_010.40 vs_main_exec (src/SLUS_010.40/main.c:8361)
-void Boot_RunGame(void)
-{
-    Boot_InitializePlatformServices();
-    Boot_RunSessionLoop(Boot_RunTitleAndBattle, RunLoadedBattle);
+void Boot_RunGame(void) {
+  Boot_InitializePlatformServices();
+  Boot_RunSessionLoop(Boot_RunTitleAndBattle, RunLoadedBattle);
 }
 
 // decomp: SLUS_010.40 vs_overlay_jumpToTitle (src/SLUS_010.40/overlay.c:20).
-void Boot_JumpToTitle(int* legacyStack)
-{
-    (void)legacyStack;
-    RequestSession(1);
+void Boot_JumpToTitle(int* legacy_stack) {
+  (void)legacy_stack;
+  RequestSession(1);
 }
 
 // decomp: SLUS_010.40 vs_overlay_jumpToBattle (src/SLUS_010.40/overlay.c:21).
-void Boot_JumpToGameLoop(int* legacyStack)
-{
-    (void)legacyStack;
-    RequestSession(2);
+void Boot_JumpToGameLoop(int* legacy_stack) {
+  (void)legacy_stack;
+  RequestSession(2);
 }
 
-// decomp: SLUS_010.40 vs_overlay_wait (src/SLUS_010.40/overlay.c:23); loaded native code needs no 4096-NOP cache delay.
-void Boot_DelayAfterOverlayLoad(void)
-{
-}
+// decomp: SLUS_010.40 vs_overlay_wait (src/SLUS_010.40/overlay.c:23); loaded
+// native code needs no 4096-NOP cache delay.
+void Boot_DelayAfterOverlayLoad(void) {}

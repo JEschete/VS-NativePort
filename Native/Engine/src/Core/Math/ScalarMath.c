@@ -1,119 +1,177 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Core/Math/ScalarMath.h"
-#include "Legacy/Psx.h"
-#include "Core/Math/Vector.h"
 
+#include <limits.h>
 #include <stdint.h>
 #include <string.h>
 
+#include "Core/Math/Vector.h"
+#include "Legacy/Psx.h"
+
+enum {
+  kVectorDimensions = 3,
+  kFixedFractionBits = 12,
+  kIntermediateScale = 4,
+  kWordBits = sizeof(uint32_t) * CHAR_BIT,
+  kNormalizedIndexShift = 24,
+  kRootLookupFractionBits = 18
+};
+
+int16_t Core_Math_WrapSigned16(uint32_t value) {
+  const uint16_t bits = (uint16_t)value;
+  int16_t result;
+  memcpy(&result, &bits, sizeof result);
+  return result;
+}
+
 // decomp: BATTLE.PRG _fixedPointMult (src/BATTLE/BATTLE.PRG/4A0A8.c:4163).
-int Core_Math_MultiplyFixed(int left, int right)
-{
-    const uint32_t bits = (uint32_t)((uint64_t)((int64_t)left * right) >> 12);
-    int result;
-    memcpy(&result, &bits, sizeof result);
-    return result;
+int Core_Math_MultiplyFixed(int left, int right) {
+  const uint32_t bits =
+      (uint32_t)((uint64_t)((int64_t)left * right) >> kFixedFractionBits);
+  int result;
+  memcpy(&result, &bits, sizeof result);
+  return result;
 }
 
 // decomp: SLUS_010.40 func_80041C68 (src/SLUS_010.40/32154.s:280).
-void Core_Math_MultiplyMatrixIntoRight(MATRIX* left, MATRIX* right)
-{
-    const MATRIX first = *left;
-    const MATRIX second = *right;
-    for (int row = 0; row < 3; ++row) {
-        for (int column = 0; column < 3; ++column) {
-            int64_t product = 0;
-            for (int component = 0; component < 3; ++component) {
-                product += (int64_t)first.m[row][component] * second.m[component][column];
-            }
-            product >>= 12;
-            if (product > 32767) {
-                product = 32767;
-            } else if (product < -32768) {
-                product = -32768;
-            }
-            right->m[row][column] = (short)product;
-        }
+void Core_Math_MultiplyMatrixIntoRight(MATRIX* left, MATRIX* right) {
+  const MATRIX first = *left;
+  const MATRIX second = *right;
+  for (int row = 0; row < kVectorDimensions; ++row) {
+    for (int column = 0; column < kVectorDimensions; ++column) {
+      int64_t product = 0;
+      for (int component = 0; component < kVectorDimensions; ++component) {
+        product +=
+            (int64_t)first.m[row][component] * second.m[component][column];
+      }
+      product >>= kFixedFractionBits;
+      if (product > INT16_MAX) {
+        product = INT16_MAX;
+      } else if (product < INT16_MIN) {
+        product = INT16_MIN;
+      }
+      right->m[row][column] = (int16_t)product;
     }
+  }
 }
 
-static unsigned IntegerSquareRoot(unsigned value)
-{
-    unsigned result = 0;
-    unsigned bit = 1u << 30;
-    while (bit > value) {
-        bit >>= 2;
+static unsigned IntegerSquareRoot(unsigned value) {
+  unsigned result = 0;
+  unsigned bit = 1u << (kWordBits - 2);
+  while (bit > value) {
+    bit >>= 2;
+  }
+  while (bit != 0) {
+    if (value >= result + bit) {
+      value -= result + bit;
+      result = (result >> 1) + bit;
+    } else {
+      result >>= 1;
     }
-    while (bit != 0) {
-        if (value >= result + bit) {
-            value -= result + bit;
-            result = (result >> 1) + bit;
-        } else {
-            result >>= 1;
-        }
-        bit >>= 2;
-    }
-    return result;
+    bit >>= 2;
+  }
+  return result;
 }
 
 // decomp: SLUS_010.40 vs_gte_rsqrt (src/SLUS_010.40/32154.s:207).
 // D_80040C18 contains floor(sqrt(index << 18)) for indices 64..255.
-int Core_Math_SquareRootInteger(int value)
-{
-    if (value <= 0) {
-        return 0;
-    }
-    unsigned leading = 0;
-    unsigned shifted = (unsigned)value;
-    while ((shifted & 0x80000000u) == 0) {
-        shifted <<= 1;
-        ++leading;
-    }
-    leading &= 30;
-    const unsigned normalized = leading >= 24 ? (unsigned)value << (leading - 24)
-                                             : (unsigned)value >> (24 - leading);
-    const unsigned sample = IntegerSquareRoot(normalized << 18);
-    return (int)((sample << ((31 - leading) >> 1)) >> 12);
+int Core_Math_SquareRootInteger(int value) {
+  if (value <= 0) {
+    return 0;
+  }
+  unsigned leading = 0;
+  unsigned shifted = (unsigned)value;
+  while ((shifted & (1u << (kWordBits - 1))) == 0) {
+    shifted <<= 1;
+    ++leading;
+  }
+  leading &= kWordBits - 2;
+  const unsigned normalized =
+      leading >= kNormalizedIndexShift
+          ? (unsigned)value << (leading - kNormalizedIndexShift)
+          : (unsigned)value >> (kNormalizedIndexShift - leading);
+  const unsigned sample =
+      IntegerSquareRoot(normalized << kRootLookupFractionBits);
+  return (int)((sample << ((kWordBits - 1 - leading) >> 1)) >>
+               kFixedFractionBits);
 }
 
 // decomp: BATTLE.PRG func_800B17F0 (src/BATTLE/BATTLE.PRG/48C7C.s:254).
-void Core_Math_BuildEulerRotationMatrixQuadrant(SVECTOR* rotation, MATRIX* output)
-{
-    const int sinX = Core_Gte_Sin(rotation->vx), cosX = Core_Gte_Cos(rotation->vx);
-    const int sinY = Core_Gte_Sin(rotation->vy), cosY = Core_Gte_Cos(rotation->vy);
-    const int sinZ = Core_Gte_Sin(rotation->vz), cosZ = Core_Gte_Cos(rotation->vz);
-    const int sinZSinX = (sinZ * sinX * 4) >> 12;
-    const int sinZCosX = (sinZ * cosX * 4) >> 12;
-    const int cosZSinX = (cosZ * sinX * 4) >> 12;
-    const int cosZCosX = (cosZ * cosX * 4) >> 12;
-    output->m[0][0] = (short)((cosZ * cosY) >> 12);
-    output->m[0][1] = (short)((((sinY * cosZSinX) >> 12) - sinZCosX) >> 2);
-    output->m[0][2] = (short)((((sinY * cosZCosX) >> 12) + sinZSinX) >> 2);
-    output->m[1][0] = (short)((sinZ * cosY) >> 12);
-    output->m[1][1] = (short)((((sinY * sinZSinX) >> 12) + cosZCosX) >> 2);
-    output->m[1][2] = (short)((((sinY * sinZCosX) >> 12) - cosZSinX) >> 2);
-    output->m[2][0] = (short)-sinY;
-    output->m[2][1] = (short)((cosY * sinX) >> 12);
-    output->m[2][2] = (short)((cosY * cosX) >> 12);
+void Core_Math_BuildEulerRotationMatrixQuadrant(SVECTOR* rotation,
+                                                MATRIX* output) {
+  const int sin_x = Core_Gte_Sin(rotation->vx),
+            cos_x = Core_Gte_Cos(rotation->vx);
+  const int sin_y = Core_Gte_Sin(rotation->vy),
+            cos_y = Core_Gte_Cos(rotation->vy);
+  const int sin_z = Core_Gte_Sin(rotation->vz),
+            cos_z = Core_Gte_Cos(rotation->vz);
+  const int sin_z_sin_x =
+      (sin_z * sin_x * kIntermediateScale) >> kFixedFractionBits;
+  const int sin_z_cos_x =
+      (sin_z * cos_x * kIntermediateScale) >> kFixedFractionBits;
+  const int cos_z_sin_x =
+      (cos_z * sin_x * kIntermediateScale) >> kFixedFractionBits;
+  const int cos_z_cos_x =
+      (cos_z * cos_x * kIntermediateScale) >> kFixedFractionBits;
+  output->m[0][0] = (int16_t)((cos_z * cos_y) >> kFixedFractionBits);
+  output->m[0][1] =
+      (int16_t)((((sin_y * cos_z_sin_x) >> kFixedFractionBits) - sin_z_cos_x) >>
+                2);
+  output->m[0][2] =
+      (int16_t)((((sin_y * cos_z_cos_x) >> kFixedFractionBits) + sin_z_sin_x) >>
+                2);
+  output->m[1][0] = (int16_t)((sin_z * cos_y) >> kFixedFractionBits);
+  output->m[1][1] =
+      (int16_t)((((sin_y * sin_z_sin_x) >> kFixedFractionBits) + cos_z_cos_x) >>
+                2);
+  output->m[1][2] =
+      (int16_t)((((sin_y * sin_z_cos_x) >> kFixedFractionBits) - cos_z_sin_x) >>
+                2);
+  output->m[2][0] = (int16_t)-sin_y;
+  output->m[2][1] = (int16_t)((cos_y * sin_x) >> kFixedFractionBits);
+  output->m[2][2] = (int16_t)((cos_y * cos_x) >> kFixedFractionBits);
 }
 
 // decomp: BATTLE.PRG func_800B196C (src/BATTLE/BATTLE.PRG/48C7C.s:365).
-void Core_Math_PremultiplyRotationMatrix(MATRIX* left, MATRIX* right)
-{
-    Core_Math_MultiplyMatrixIntoRight(left, right);
+void Core_Math_PremultiplyRotationMatrix(MATRIX* left, MATRIX* right) {
+  Core_Math_MultiplyMatrixIntoRight(left, right);
 }
 
-// decomp: SLUS_010.40 ScaleMatrix (src/SLUS_010.40/31C0C.s); BATTLE 4B16C.s:8 is identical.
-MATRIX* Core_Math_ScaleMatrixColumns(MATRIX* matrix, VECTOR* scale)
-{
-    const short values[3] = {(short)scale->vx, (short)scale->vy, (short)scale->vz};
-    for (int row = 0; row < 3; ++row) {
-        for (int column = 0; column < 3; ++column) {
-            int product = (matrix->m[row][column] * values[column]) >> 12;
-            if (product > 32767) product = 32767;
-            if (product < -32768) product = -32768;
-            matrix->m[row][column] = (short)product;
-        }
+// decomp: SLUS_010.40 ScaleMatrix (src/SLUS_010.40/31C0C.s); BATTLE 4B16C.s:8
+// is identical.
+MATRIX* Core_Math_ScaleMatrixColumns(MATRIX* matrix, VECTOR* scale) {
+  const int16_t values[kVectorDimensions] = {
+      (int16_t)scale->vx, (int16_t)scale->vy, (int16_t)scale->vz};
+  for (int row = 0; row < kVectorDimensions; ++row) {
+    for (int column = 0; column < kVectorDimensions; ++column) {
+      int product =
+          (matrix->m[row][column] * values[column]) >> kFixedFractionBits;
+      if (product > INT16_MAX) product = INT16_MAX;
+      if (product < INT16_MIN) product = INT16_MIN;
+      matrix->m[row][column] = (int16_t)product;
     }
-    return matrix;
+  }
+  return matrix;
+}
+
+// decomp: BATTLE.PRG func_800E4624 (src/BATTLE/BATTLE.PRG/7BDD4.s:49).
+int Core_Math_SquaredDistanceWithHeightOffsets(int16_t* source, int16_t* target,
+                                               int source_height,
+                                               int target_height) {
+  return (int)Core_Math_SquaredVectorLength(
+      source[0] - target[0],
+      source[1] + source_height - target[1] - target_height,
+      source[2] - target[2]);
+}
+
+// decomp: BATTLE.PRG func_800E4660 (src/BATTLE/BATTLE.PRG/7BDD4.s:68).
+unsigned int Core_Math_SquaredVectorLength(int delta_x, int delta_y,
+                                           int delta_z) {
+  const int components[kVectorDimensions] = {(int16_t)delta_x, (int16_t)delta_y,
+                                             (int16_t)delta_z};
+  unsigned int squared = 0;
+  for (unsigned axis = 0; axis < kVectorDimensions; ++axis) {
+    squared += (unsigned int)(components[axis] * components[axis]);
+  }
+  return squared;
 }

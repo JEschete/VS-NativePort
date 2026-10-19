@@ -28,7 +28,7 @@
     <None Include="D:\Dev\Modding\VS-Workshop\Directory.Build.props" />
     <None Include="D:\Dev\Modding\VS-Workshop\EDITOR-UX-PROPOSAL.md" />
     <None Include="D:\Dev\Modding\VS-Workshop\ETM-EVIDENCE.md" />
-    <None Include="D:\Dev\Modding\VS-Workshop\README.txt" />
+    <None Include="D:\Dev\Modding\VS-Workshop\README.md" />
     <None Include="D:\Dev\Modding\VS-Workshop\Start.ps1" />
     <None Include="D:\Dev\Modding\VS-Workshop\Test.ps1" />
     <None Include="D:\Dev\Modding\VS-Workshop\VALIDATION.md" />

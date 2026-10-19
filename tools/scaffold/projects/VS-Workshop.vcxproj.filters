@@ -54,7 +54,7 @@
     <None Include="D:\Dev\Modding\VS-Workshop\ETM-EVIDENCE.md">
       <Filter>VS-Workshop</Filter>
     </None>
-    <None Include="D:\Dev\Modding\VS-Workshop\README.txt">
+    <None Include="D:\Dev\Modding\VS-Workshop\README.md">
       <Filter>VS-Workshop</Filter>
     </None>
     <None Include="D:\Dev\Modding\VS-Workshop\Start.ps1">

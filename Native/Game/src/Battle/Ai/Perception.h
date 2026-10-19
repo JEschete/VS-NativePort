@@ -62,7 +62,6 @@ void Battle_Ai_ApplyActionRelationshipChanges(Battle_Ai_ReactionRecord*);
 void Battle_Ai_ApplyActorActionReaction(Battle_Ai_ReactionView* state, Battle_Ai_StatApplicationView* app);
 void Battle_Ai_PropagateActorRelationships(Battle_Ai_ReactionView* state);
 void Battle_Ai_NotifyActionRelationshipChanges(Battle_Ai_ReactionRecord* arg0);
-void Battle_Ai_TickActorDecisionTimers(Battle_Ai_PerceptionUpdateView*);
 int Battle_Ai_TargetFacingCosine(SVECTOR*, SVECTOR*, int, u_int);
 
 #endif // VS_BATTLE_AI_PERCEPTION_H_DECLS

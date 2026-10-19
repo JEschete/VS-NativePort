@@ -10,9 +10,11 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/Relations.h"
 #include "Battle/Damage.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
@@ -80,12 +82,6 @@ void Battle_Ai_ResetActorAiReactionDelay(int)
 void Battle_Ai_RefreshAiResourceRestrictions(Battle_Ai_ActorAiState*)
 {
     VS_UNPORTED("Battle::Ai::RefreshAiResourceRestrictions");
-}
-
-// decomp: BATTLE.PRG func_800E511C (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
-void Battle_Ai_RunActorAiUpdateStages(void)
-{
-    VS_UNPORTED("Battle::Ai::RunActorAiUpdateStages");
 }
 
 // decomp: BATTLE.PRG func_800E5998 (src/BATTLE/BATTLE.PRG/7CD68.c:573)
@@ -317,13 +313,6 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     return (short)options >= 0 && (((int)(short)options << 26) < 0);
 }
 
-// decomp: BATTLE.PRG func_800E65DC (src/BATTLE/BATTLE.PRG/7DDDC.s:0) [asm-file: not yet ported]
-int Battle_Ai_CacheActorAiWorkingState()
-{
-    VS_UNPORTED("Battle::Ai::CacheActorAiWorkingState");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800E6694 (src/BATTLE/BATTLE.PRG/7DE94.s:0) [asm-file: not yet ported]
 short Battle_Ai_PackActorAiPersistenceFlags(int)
 {
@@ -342,18 +331,6 @@ int Battle_Ai_ClearActorAiNavigationReset()
 void Battle_Ai_InitializeActorAiExtensionHook(void)
 {
     VS_UNPORTED("Battle::Ai::InitializeActorAiExtensionHook");
-}
-
-// decomp: BATTLE.PRG func_800E72D0 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-void Battle_Ai_ApplySavedActorAiRelations(void)
-{
-    VS_UNPORTED("Battle::Ai::ApplySavedActorAiRelations");
-}
-
-// decomp: BATTLE.PRG func_800E7370 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-void Battle_Ai_InitializeActorAiRelations(Battle_Ai_AiCreationView*)
-{
-    VS_UNPORTED("Battle::Ai::InitializeActorAiRelations");
 }
 
 // decomp: BATTLE.PRG func_800E7454 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]

@@ -1,0 +1,9 @@
+{
+  "name": "vs-native-quality",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Pinned source duplication checker for the native port",
+  "devDependencies": {
+    "jscpd": "4.0.5"
+  }
+}

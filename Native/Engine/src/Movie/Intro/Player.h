@@ -12,4 +12,4 @@ void Movie_Intro_StopAfterAudioTail(void);
 
 int Movie_Intro_Play(void);
 
-#endif // VS_OWNED_MOVIE_INTRO_PLAYER_H
+#endif  // VS_OWNED_MOVIE_INTRO_PLAYER_H
