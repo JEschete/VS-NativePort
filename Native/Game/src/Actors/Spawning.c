@@ -10,7 +10,7 @@
 Actors_CharacterInit Actors_ashleyInitialLoadout = {
     .subType      = 174,
     .reach        = 7,
-    .name         = "Ashley|>6|Riot\0",
+    .name         = "\x0A\x36\x2B\x2F\x28\x3C\xFA\x06\x1B\x2C\x32\x37\xE7",
     .hp           = 250,
     .mp           = 50,
     .strength     = 100,
@@ -56,7 +56,7 @@ Actors_CharacterInit Actors_ashleyInitialLoadout = {
             .types        = {0, 0, 4, 1},
         },
         .material = 3,
-        .name = "Fandango\0",
+        .name = "\x0F\x24\x31\x27\x24\x31\x2A\x32\xE7",
     },
     .accessory = {
         .equipment = {

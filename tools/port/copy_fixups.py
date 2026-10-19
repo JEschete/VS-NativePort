@@ -49,6 +49,21 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "G00620": [
+        (r'"Ashley|>6|Riot\0"',
+         r'"\x0A\x36\x2B\x2F\x28\x3C\xFA\x06\x1B\x2C\x32\x37\xE7"',
+         "INITBTL.PRG 18.c pragma vsstring default actor name; original encode_raw glyphs spacing and terminator"),
+        (r'"Fandango\0"', r'"\x0F\x24\x31\x27\x24\x31\x2A\x32\xE7"',
+         "INITBTL.PRG 18.c pragma vsstring default weapon name; preserve original encoded text"),
+    ],
+    "F02535": [
+        ("((u_long)poly << 8) >> 8", "LegacyGpu_Handle(poly)",
+         "action-cost panel packets retain native handles"),
+    ],
+    "F02536": [
+        ("((uintptr_t)var_t2 << 8) >> 8", "LegacyGpu_Handle(var_t2)",
+         "button-prompt background at ordering entry15 must preserve traversal to submenu labels below it"),
+    ],
     "F02662": [
         ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
          "Status limb indicator packets retain native link handles"),
@@ -84,11 +99,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "the room sound bank is an externally owned native pointer, not a 32-bit music handle"),
     ],
     "F02467": [
-        ("    Actors_DrawActorModel(temp_s1, arg0, 0);",
-         '    Core_Debugf("preview", "before model companion=%u slot16=%p", (unsigned)temp_s1->companionSlot, (void*)Actors_actorRecords[16]);\n'
-         "    Actors_DrawActorModel(temp_s1, arg0, 0);\n"
-         '    Core_Debugf("preview", "after model companion=%u slot16=%p", (unsigned)temp_s1->companionSlot, (void*)Actors_actorRecords[16]);',
-         "temporary menu companion state trace"),
         ("        int* p = (int*)((uintptr_t)Core_ScratchBase() + 0x000);\n", "",
          "use the native frame ordering table"),
         ("        p = (int*)((uintptr_t)Core_ScratchBase() + 0x000);\n", "",

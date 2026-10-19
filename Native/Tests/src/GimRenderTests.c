@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "Actors/Spawning.h"
 #include "Battle/Targeting.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
@@ -619,6 +620,69 @@ int CheckStatusPacketLinks(int background_first) {
   Menu_Status_drawBackgroundFirst = saved_background;
   Render_frameScratch = saved_frame;
   return passed;
+}
+
+int CheckMenuPromptPanelLinks(void) {
+  enum { kOrderingWords = 0x822, kPacketWords = 256, kAnimationFrames = 8 };
+  const u_long guard = 0xDEADBEEF;
+  const Render_FrameScratch saved_frame = Render_frameScratch;
+  const char saved_display = Menu_Framework_displayActionCost;
+  Menu_Framework_TextHeader saved_headers[2];
+  memcpy(saved_headers, Menu_Framework_textHeaders, sizeof saved_headers);
+  u_long ordering[kOrderingWords];
+  u_long storage[kPacketWords];
+  ClearOTagR(ordering, kOrderingWords);
+  for (int index = 0; index < kPacketWords; ++index) {
+    storage[index] = guard;
+  }
+  Render_frameScratch.primitiveCursor = storage + 1;
+  Render_frameScratch.orderingTable = ordering + 18;
+  Render_frameScratch.overlayOrderingTable = ordering + 2;
+  Menu_Framework_displayActionCost = 1;
+  memset(Menu_Framework_textHeaders, 0, sizeof saved_headers);
+
+  Menu_Framework_DrawButtonPromptBackground(20, 160, 80, 3);
+  for (int frame = 0; frame < kAnimationFrames; ++frame) {
+    Menu_Framework_DrawActionCostPanel();
+  }
+
+  int count = 0;
+  void* packet = ordering + kOrderingWords - 1;
+  while (packet != NULL && count < kOrderingWords + kPacketWords) {
+    ++count;
+    packet = nextPrim(packet);
+  }
+  const u_long* end = Render_frameScratch.primitiveCursor;
+  int passed = packet == NULL && count >= kOrderingWords + 5 &&
+               nextPrim(ordering + 15) == storage + 15 && end > storage + 1 &&
+               end < storage + kPacketWords && storage[0] == guard &&
+               *end == guard;
+  memcpy(Menu_Framework_textHeaders, saved_headers, sizeof saved_headers);
+  Menu_Framework_displayActionCost = saved_display;
+  Render_frameScratch = saved_frame;
+  return passed;
+}
+
+int CheckDefaultLoadoutNames(void) {
+  const unsigned char actor_name[] = {0x0A,
+                                      0x36,
+                                      0x2B,
+                                      0x2F,
+                                      0x28,
+                                      0x3C,
+                                      Core_TextCode_Spacing,
+                                      6,
+                                      0x1B,
+                                      0x2C,
+                                      0x32,
+                                      0x37,
+                                      Core_TextCode_Terminator};
+  const unsigned char weapon_name[] = {
+      0x0F, 0x24, 0x31, 0x27, 0x24, 0x31, 0x2A, 0x32, Core_TextCode_Terminator};
+  return memcmp(Actors_ashleyInitialLoadout.name, actor_name,
+                sizeof actor_name) == 0 &&
+         memcmp(Actors_ashleyInitialLoadout.weapon.name, weapon_name,
+                sizeof weapon_name) == 0;
 }
 
 #undef CHECK_GIM

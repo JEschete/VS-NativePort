@@ -6,7 +6,8 @@ The ordered work tracker is [#4](https://github.com/JEschete/VS-NativePort/issue
 The maintained-production quality pass in [#5](https://github.com/JEschete/VS-NativePort/issues/5)
 is verified locally. The Guildenstern textbox fix in
 [#1](https://github.com/JEschete/VS-NativePort/issues/1) is now verified locally;
-menu rendering in #2 remains the next ordered gameplay task.
+menu rendering in #2 is verified locally as described below; #6 is next after its
+fixing revision passes CI.
 Preserve the original dialogue pause and button advance; do not shorten the scene delay.
 
 ### Guildenstern window dialogue (2026-10-19)
@@ -149,6 +150,46 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   some labels/numeric text and inventory category/detail text are still missing. #2 is
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
+
+### Restored Submenu Text And Names (2026-10-19)
+
+Verification used pushed `f991796c` plus the final shared panel/name fixes. #28 is
+closed after successful pushed Source Quality run `39275882740`.
+
+- The remaining missing submenu labels were a shared F02536 prompt-background link
+  at ordering entry 15, not a hidden-row flag or stale frame buffer. Runtime traversal
+  reached entries 15 and above but skipped 0-14 and executed zero variable-width glyphs.
+  Native handles in F02536 and adjacent action-cost F02535 restore all low entries and
+  72 glyph packets in the same Status frame. Normal root, inventory and Status labels,
+  counts, information panels and preview now visibly render.
+- #29: G00620's default names retained unprocessed `#pragma vsstring` ASCII/markup.
+  Original read-only `encode_raw` confirms the encoded actor name, spacing opcode and
+  terminator, and encoded weapon name. Scoped copier literals preserve those exact
+  semantics; the before-fix name regression fails and passes after repair. Status now
+  visibly displays "Ashley Riot" rather than accented glyphs/zeros.
+- Public-API panel regressions traverse the complete lower chain and guard the packet
+  storage. Default-name regression checks original bytes. Full Debug: 105 cases /
+  30815 assertions; Release `[render],[content][module]`: 29 cases / 259 assertions.
+  Clean Debug menu selection: five cases / seven assertions. Final quality with tidy:
+  zero new findings, no baseline refresh. Temporary row/GPU/companion probes removed.
+- Clean Release Status entry/navigation/exit: same input schedule as the #28 section;
+  10500 ticks, exit 0. Evidence `build/quality/issue2-final-status-release` (8800 shows
+  readable names/limb status/stats). Inventory/preview/return uses
+  `1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle,7600:Circle,8200:Right,
+  8500:Circle,9200:Cross,9600:Cross,10000:Triangle`, 11500 ticks, exit 0. Evidence
+  `build/quality/issue2-final-items-release` (9000 inventory, 11000 gameplay).
+  Debug equivalents and regression logs use `issue2-inventory-prompt-final`,
+  `issue2-status-prompt-after`, `issue29-status-names-after`, `issue29-names-before`.
+  Logs are under `build/Debug/`; captures stay local.
+- #2 covers the reported missing menu text/black bars and preview corruption. Item use,
+  spells, chains, Break Arts, drops and equipment operations remain ordered #8-#15;
+  readable menus do not establish those gameplay features. #6 needs the full prologue,
+  not the efficient menu-only skip. Fixing commit and pushed CI/closure evidence for
+  #2/#29 are recorded on those issues.
+- #26 remains open: a clean Debug 35500-tick attract attempt hit the 120-second runner
+  limit without target captures. Last content log was 14464, not proof of a tick stall.
+  No long-attract success or original-34609 corruption repair is claimed. Next useful
+  observation is intermediate capture/tick progress at 15000/20000/25000.
 
 ### Quality verification (2026-10-19)
 

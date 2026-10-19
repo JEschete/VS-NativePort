@@ -130,3 +130,17 @@ TEST_CASE("Status background and limb packets preserve the complete UI chain",
   REQUIRE(CheckStatusPacketLinks(0) == 1);
   REQUIRE(CheckStatusPacketLinks(1) == 1);
 }
+
+extern "C" int CheckMenuPromptPanelLinks(void);
+
+TEST_CASE("Prompt and action-cost panels retain the lower menu chain",
+          "[render][menu][panels]") {
+  REQUIRE(CheckMenuPromptPanelLinks() == 1);
+}
+
+extern "C" int CheckDefaultLoadoutNames(void);
+
+TEST_CASE("Default actor and weapon names retain encoded glyphs and controls",
+          "[render][menu][names]") {
+  REQUIRE(CheckDefaultLoadoutNames() == 1);
+}

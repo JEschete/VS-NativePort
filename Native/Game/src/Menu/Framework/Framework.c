@@ -1620,7 +1620,7 @@ void Menu_Framework_DrawActionCostPanel(void)
         poly[9] = (x1 + 80) | (171 << 16);
         poly[10] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
 
-        *scratch = ((u_long)poly << 8) >> 8;
+        *scratch = LegacyGpu_Handle(poly);
         Render_frameScratch.primitiveCursor = poly + 11;
 
         Render_InsertThreeWordPrimitive(
@@ -1643,7 +1643,7 @@ void Menu_Framework_DrawButtonPromptBackground(int x, int y, int w, int h)
         var_t2[4] = vs_getRGB888(16, 16, 8);
         var_t2[5] = vs_getXY_2((x + w) - i, y + i);
         var_t2[6] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
-        temp_v1[0] = (((uintptr_t)var_t2 << 8) >> 8);
+        temp_v1[0] = (LegacyGpu_Handle(var_t2));
         var_t2 += 7;
     }
 

@@ -224,9 +224,7 @@ int Menu_Framework_DrawActorPreview(MATRIX* arg0)
         Actors_PrepareActorRootTransform(temp_s1);
     }
 
-    Core_Debugf("preview", "before model companion=%u slot16=%p", (unsigned)temp_s1->companionSlot, (void*)Actors_actorRecords[16]);
     Actors_DrawActorModel(temp_s1, arg0, 0);
-    Core_Debugf("preview", "after model companion=%u slot16=%p", (unsigned)temp_s1->companionSlot, (void*)Actors_actorRecords[16]);
 
     if (temp_s1->companionSlot > 1) {
         Actors_UpdateActorTextureScrolling(Actors_actorRecords[16]);
