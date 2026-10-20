@@ -104,6 +104,10 @@ def needs_c_headers(project: str, path: str) -> bool:
             or project == "VS.Game" and path in (
                 r"src\Field\MinimapScene.cpp",
                 r"src\Battle\Ai\PlanningPrimitives.cpp",
+                r"src\Battle\Ai\DecisionPrimitives.cpp",
+                r"src\Battle\Ai\NavigationPrimitives.cpp",
+                r"src\Battle\Ai\ActorCommands.cpp",
+                r"src\Field\TerrainHeight.cpp",
             ))
 
 

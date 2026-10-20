@@ -16,6 +16,7 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
@@ -512,13 +513,6 @@ void Battle_Ai_UpdateActorPerception(void)
 int Battle_Ai_FindActorByRelationship(void*, void*, int)
 {
     VS_UNPORTED("Battle::Ai::FindActorByRelationship");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DBCEC (src/BATTLE/BATTLE.PRG/73460.s:0) [asm-file: not yet ported]
-int Battle_Ai_HasNearbyEnemy()
-{
-    VS_UNPORTED("Battle::Ai::HasNearbyEnemy");
     return 0;
 }
 

@@ -29,7 +29,6 @@ int Battle_Ai_TryExecuteActionCandidate(Battle_Ai_ActorAiState* arg0, Battle_Ai_
 int Battle_Ai_TryExecutePlannedActions(Battle_Ai_ActorAiState* arg0);
 void Battle_Ai_UpdateActorDecisions(void);
 int Battle_Ai_CanApproachEngagedTarget(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*);
-void Battle_Ai_IssueActorCommand(Battle_Ai_ActorAiState*, int);
 int Battle_Ai_UpdateHesitationTurn(void*, int, int, int);
 
 #endif // VS_BATTLE_AI_BEHAVIOR_H_DECLS

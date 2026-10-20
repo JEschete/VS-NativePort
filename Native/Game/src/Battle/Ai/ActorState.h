@@ -32,7 +32,6 @@ extern Battle_Ai_RoomAiState* Battle_Ai_roomAiState;
 extern void* Battle_Ai_roomHasWaypoints;
 extern int Battle_Ai_attributeActorMask;
 extern const unsigned char Battle_Ai_kFlags34Bit14Values[4];
-int Battle_Ai_NextActorRandomMasked(int);
 void Battle_Ai_SetActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView*, int, int);
 void Battle_Ai_ResetActorAiReactionDelay(int);
 void Battle_Ai_ResolveAiLinkedActors(void);

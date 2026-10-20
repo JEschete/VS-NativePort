@@ -1950,48 +1950,6 @@ int Field_GimmickSupportHeightBelow(int arg0, int arg1, int arg2)
     return var_a3;
 }
 
-// decomp: BATTLE.PRG func_800E42D4 (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
-int Field_GroundHeightAtWorldPosition(int, int)
-{
-    VS_UNPORTED("Field::GroundHeightAtWorldPosition");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E42E0 (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
-int Field_GroundHeightAtPackedTile(unsigned int)
-{
-    VS_UNPORTED("Field::GroundHeightAtPackedTile");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E42EC (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
-int Field_GroundHeightAtTile(int, int)
-{
-    VS_UNPORTED("Field::GroundHeightAtTile");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E4308 (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
-int Field_GroundHeightFlagsAtPackedTile()
-{
-    VS_UNPORTED("Field::GroundHeightFlagsAtPackedTile");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E4318 (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
-int Field_GroundHeightFlagsAtWorldPosition()
-{
-    VS_UNPORTED("Field::GroundHeightFlagsAtWorldPosition");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E4320 (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
-int Field_GroundHeightFlagsAtTile(int, int)
-{
-    VS_UNPORTED("Field::GroundHeightFlagsAtTile");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800E4478 (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
 int Field_IsPositionAboveGround()
 {

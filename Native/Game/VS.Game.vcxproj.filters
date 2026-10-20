@@ -306,6 +306,12 @@
     <ClInclude Include="src\Battle\Ai\ActionSelection.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\ActorCommands.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\ActorCommands.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\Ai\ActorState.c">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -336,6 +342,12 @@
     <ClInclude Include="src\Battle\Ai\DecisionCallbacks.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\DecisionPrimitives.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\DecisionPrimitives.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\Ai\FrameUpdate.c">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -354,6 +366,12 @@
     <ClInclude Include="src\Battle\Ai\Navigation.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\NavigationPrimitives.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\NavigationPrimitives.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\Ai\OrbitingBoss.c">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -370,6 +388,9 @@
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
     <ClInclude Include="src\Battle\Ai\PlanningPrimitives.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battle\Ai\PlanningSort.hpp">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\Ai\Relations.c">
@@ -1522,6 +1543,12 @@
       <Filter>src\Field</Filter>
     </ClCompile>
     <ClInclude Include="src\Field\RoomState.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Field\TerrainHeight.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\TerrainHeight.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Transitions.c">

@@ -6,10 +6,10 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActionSelection.h"
+#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
@@ -58,13 +58,6 @@ int Battle_Ai_attributeActorMask;
 
 // decomp: D_80069C08 (D_80069C08@BATTLE/BATTLE.PRG)
 const unsigned char Battle_Ai_kFlags34Bit14Values[4] = { 9, 7, 0, 0 };
-
-// decomp: BATTLE.PRG func_800E45D4 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-int Battle_Ai_NextActorRandomMasked(int)
-{
-    VS_UNPORTED("Battle::Ai::NextActorRandomMasked");
-    return 0;
-}
 
 // decomp: BATTLE.PRG func_800E48A8 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
 void Battle_Ai_SetActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView*, int, int)

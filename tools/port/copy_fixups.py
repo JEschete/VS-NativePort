@@ -803,6 +803,18 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
          "main.c:8584/8720 and MIPS 80043450/8004346C use an overlapping PS1 tail; native slots must not alias or overflow"),
     ],
     "T00532": [
+        ("char reserved9C[23];",
+         "union {\n        char reserved9C[23];\n        struct {\n"
+         "            u_char last_slide_tile_bytes[4];\n            u_char reservedA0[16];\n"
+         "            u_char step_height_bytes[2];\n            u_char reservedB2;\n"
+         "        };\n    };",
+         "func_800DEEFC uses the slide cache at 0x9C and step threshold at 0xB0; byte aliases retain native view layout"),
+        ("char reserved174[8];",
+         "union {\n        char reserved174[8];\n        SVECTOR nextPosition;\n    };",
+         "func_800DEEFC stages the destination point at original offset 0x174"),
+        ("char reserved90[2];",
+         "union {\n        char reserved90[2];\n        u_short actionDelay;\n    };",
+         "func_800DBCB4 checks the action gate halfword at original offset 0x90"),
         ("char reserved10[3];",
          "union {\n        char reserved10[3];\n        struct {\n"
          "            u_char resourceStatusRestricted;\n            u_char lowMp;\n"

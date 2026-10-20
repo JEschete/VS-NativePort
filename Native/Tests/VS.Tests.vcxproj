@@ -45,6 +45,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActorCommandTests.cpp" />
+    <ClCompile Include="src\AiDecisionTests.cpp" />
     <ClCompile Include="src\AiLayoutTests.cpp" />
     <ClCompile Include="src\AiPlanningTests.cpp" />
     <ClCompile Include="src\CombatTestCases.cpp" />
@@ -101,6 +103,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\TerrainHeightTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />
     <ClCompile Include="src\ViewportBoundsTests.cpp" />
   </ItemGroup>

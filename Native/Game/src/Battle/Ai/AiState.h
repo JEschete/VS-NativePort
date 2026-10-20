@@ -871,12 +871,23 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x89 */ char reserved89[3];
     /* 0x8C */ u_short moveAttempts;
     /* 0x8E */ u_short opaque8E;
-    /* 0x90 */ char reserved90[2];
+    /* 0x90 */ union {
+        char reserved90[2];
+        u_short actionDelay;
+    };
     /* 0x92 */ u_short radius;
     /* 0x94 */ char reserved94[4];
     /* 0x98 */ u_short opaque98;
     /* 0x9A */ u_short opaque9A;
-    /* 0x9C */ char reserved9C[23];
+    /* 0x9C */ union {
+        char reserved9C[23];
+        struct {
+            u_char last_slide_tile_bytes[4];
+            u_char reservedA0[16];
+            u_char step_height_bytes[2];
+            u_char reservedB2;
+        };
+    };
     /* 0xB3 */ u_char maxRange;
     /* 0xB4 */ int moveDistance;
     /* 0xB8 */ short bodyHeight;
@@ -945,7 +956,10 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x168 */ Battle_Ai_TilePosition destination;
     /* 0x16C */ char reserved16C[4];
     /* 0x170 */ Battle_Ai_TilePosition nextTile;
-    /* 0x174 */ char reserved174[8];
+    /* 0x174 */ union {
+        char reserved174[8];
+        SVECTOR nextPosition;
+    };
     /* 0x17C */ int moveX;
     /* 0x180 */ int moveZ;
     /* 0x184 */ int moveY;

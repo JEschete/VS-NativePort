@@ -1869,6 +1869,9 @@
     <None Include="..\..\permuter_settings.toml">
       <Filter>tools</Filter>
     </None>
+    <None Include="..\..\port\audit_assembly_gaps.py">
+      <Filter>tools\port</Filter>
+    </None>
     <None Include="..\..\port\check_event_dispatch.py">
       <Filter>tools\port</Filter>
     </None>
@@ -1918,6 +1921,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\ref_index.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\test_assembly_gap_audit.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\understood.py">

@@ -12,6 +12,8 @@
 #include <span>
 #include <utility>
 
+#include "Battle/Ai/PlanningSort.hpp"
+
 extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Ai/ActionPlanning.h"
@@ -48,9 +50,12 @@ void RequireSlot(int row, int column) {
       row >= 0 && row < kLimbCount && column >= 0 && column < kActionsPerLimb,
       "AI planning action slot is out of bounds");
 }
+}  // namespace
 
+namespace VS::Battle::ai {
+// decomp: func_800E6974 / L800E6958 (src/BATTLE/BATTLE.PRG/7E05C.s:114).
 // Equal scores must retain the original midpoint partition's tie ordering.
-void SortByPriority(std::span<Battle_Ai_CandidateEntryView*> entries) {
+void SortCandidatePointers(std::span<Battle_Ai_CandidateEntryView*> entries) {
   if (entries.size() < 2) return;
   std::swap(entries.front(), entries[(entries.size() - 1) / 2]);
   std::size_t boundary = 0;
@@ -60,10 +65,10 @@ void SortByPriority(std::span<Battle_Ai_CandidateEntryView*> entries) {
     }
   }
   std::swap(entries.front(), entries[boundary]);
-  SortByPriority(entries.first(boundary));
-  SortByPriority(entries.subspan(boundary + 1));
+  SortCandidatePointers(entries.first(boundary));
+  SortCandidatePointers(entries.subspan(boundary + 1));
 }
-}  // namespace
+}  // namespace VS::Battle::ai
 
 // decomp: func_800DC2E0 (src/BATTLE/BATTLE.PRG/73AE0.s).
 void Battle_Ai_CopyActionCandidate(Battle_Ai_ActionCandidate* destination,
@@ -119,7 +124,7 @@ void Battle_Ai_SortActionCandidates(Battle_Ai_ActionPlanView* state) {
   Require(std::ranges::all_of(
               order, [](const auto* entry) { return entry != nullptr; }),
           "AI candidate sort contains a null entry");
-  SortByPriority(order);
+  VS::Battle::ai::SortCandidatePointers(order);
 }
 
 // decomp: func_800DC3E8 (src/BATTLE/BATTLE.PRG/73B0C.s).

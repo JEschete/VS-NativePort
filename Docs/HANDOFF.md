@@ -194,7 +194,7 @@ An independent regression failed for both argument orders before the correction;
 signed comparisons and pre-truncation byte packing are covered. The older
 layout fixture's matching minimum assumption was corrected too.
 
-The refreshed inventory has **178 remaining entries**: 177 stubs and one
+The first batch reduced the inventory to **178 remaining entries**: 177 stubs and one
 partial; **137 have C counterparts**, 31 have only located assembly, and ten
 still lack a locally extracted listing. #42 retains the original 186-entry
 checklist; do not remove completed IDs from that historical baseline.
@@ -209,6 +209,54 @@ Debug and Release full suites each pass **159 cases / 364,083 assertions**.
 The audit's 12 tests, 620 native-view fields and 179 event-dispatch signatures
 pass; copier output and owned implementations are idempotent. New C++/header/test
 quality checks report zero findings without changing the quality baseline.
+
+### Continued C-backed fills and native weapon reach (#6/#42, 2026-10-20)
+
+Nineteen further entries are implemented, bringing the original C-backed
+checklist to **27 of 145**; **118 C-backed gaps remain**. The current complete
+inventory has **159 gaps** (158 stubs and one partial): 118 C-backed, 31
+assembly-only, and ten missing local listings.
+
+- [Decision primitives](../Native/Game/src/Battle/Ai/DecisionPrimitives.cpp):
+  F01674-F01677, F01683, F01690-F01693 and F01770. These cover execution and
+  cooldown gates, signed-halfword condition scoring, action/target classes,
+  fallback caching, weight-capped randomized promotion with exact draw ordering,
+  and the actor random accumulator.
+- [Terrain height](../Native/Game/src/Field/TerrainHeight.cpp):
+  F01759-F01764. All 65,536 terrain-cell encodings are tested through tile,
+  packed-tile and world-coordinate consumers, including retained collision flags,
+  signed 15-bit heights and final-grid-cell bounds.
+- [Navigation primitives](../Native/Game/src/Battle/Ai/NavigationPrimitives.cpp):
+  F01775/F01789. Neighbor-step checks use signed direction deltas and reject
+  closed grid boundaries; reservation preserves all other navigation bits.
+- [Actor commands](../Native/Game/src/Battle/Ai/ActorCommands.cpp): F01720.
+  All 18 intent cases now produce real native actor-command packets, including
+  attack targeting, turning, gait choice, jump/drop selection, position staging,
+  reservation and one-per-tile collision slides. Typed packet and movement
+  helpers replace the monolithic assembly dispatch.
+
+The native command/scoring paths deliberately do not recreate unused GTE
+scratch-register clobbers or the proximity routine's guest pointer-array
+pseudo-node. Meaningful arithmetic, packet fields, ordering and RNG consumption
+remain covered; resources stay read-only.
+
+Live read-only PDB observations also exposed an existing coupled range bug:
+T00529 `ActionRangeView` was missing from native AI-view rebasing. Its stats
+pointer was at offset 96, while canonical `ActorAiState.stats` is at 104.
+An independent offset regression failed before the fix; the actual
+`CalculateActionRangeSquared` consumer now returns the expected 25,600 in its
+fixture, and live enemy candidates changed from zero reach to **65,536**.
+The registered mapping repair increases checked native-view fields to **621**.
+
+Debug and Release full suites each pass **187 cases / 760,898 assertions**.
+The native view/dispatch contracts and 12 audit tests pass, with no quality
+baseline changes. Ordinary controller input (after cancelling a stale attack
+menu) now provides a measured in-range replay: Ashley moves from `(1216,0,576)`
+to `(1272,0,1273)`, within squared distance 9,077 of actor 3. Both builds complete
+all 24,000 ticks and ten read-only observations/captures with no logged errors.
+Enemy action selection remains unproven: the engagement-ready/try-engage stubs
+are the next live blockers, alongside the remaining pursuit/navigation work.
+Do not close #6 or treat these checkpoints as completion of #42.
 
 ### Menu-only Options acceptance gate (#2/#39, 2026-10-20)
 

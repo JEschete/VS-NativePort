@@ -51,7 +51,6 @@ int Battle_Ai_IsTargetOccludedAtHeight(
 void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id);
 void Battle_Ai_UpdateActorPerception(void);
 int Battle_Ai_FindActorByRelationship(void*, void*, int);
-int Battle_Ai_HasNearbyEnemy();
 void Battle_Ai_UnlinkEngagedActor(Battle_Ai_ActorAiState* arg0);
 void Battle_Ai_UpdateEngagementBuildup(Battle_Ai_ActorAiState* arg0);
 void Battle_Ai_AnimateEngagementPhase(void);

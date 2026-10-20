@@ -7,10 +7,11 @@
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Behavior.h"
+#include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
@@ -20,6 +21,7 @@
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
+#include "Field/TerrainHeight.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
@@ -711,13 +713,6 @@ int Battle_Ai_InitializeObstacleDetour()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_800E4690 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-int Battle_Ai_IsAdjacentTileStepBlocked(unsigned int, int)
-{
-    VS_UNPORTED("Battle::Ai::IsAdjacentTileStepBlocked");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800E4764 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
 int Battle_Ai_SelectActorVerticalMovementStep(Battle_Ai_ActorAiState*, int*, int*)
 {
@@ -791,13 +786,6 @@ void Battle_Ai_ClearAiContactOccupancy(int)
 void Battle_Ai_SetAiContactOccupancy(int)
 {
     VS_UNPORTED("Battle::Ai::SetAiContactOccupancy");
-}
-
-// decomp: BATTLE.PRG func_800E4C1C (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-int Battle_Ai_ReserveAiDestinationTile()
-{
-    VS_UNPORTED("Battle::Ai::ReserveAiDestinationTile");
-    return 0;
 }
 
 // decomp: BATTLE.PRG func_800E4C28 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]

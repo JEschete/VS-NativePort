@@ -306,6 +306,7 @@
     <None Include="..\..\naming\upstream_layout.py" />
     <None Include="..\..\naming\upstream_prs.py" />
     <None Include="..\..\permuter_settings.toml" />
+    <None Include="..\..\port\audit_assembly_gaps.py" />
     <None Include="..\..\port\check_event_dispatch.py" />
     <None Include="..\..\port\check_leftovers.py" />
     <None Include="..\..\port\check_native_views.py" />
@@ -323,6 +324,7 @@
     <None Include="..\..\port\own.py" />
     <None Include="..\..\port\owned.csv" />
     <None Include="..\..\port\ref_index.py" />
+    <None Include="..\..\port\test_assembly_gap_audit.py" />
     <None Include="..\..\port\understood.py" />
     <None Include="..\..\Probe-Native.ps1" />
     <None Include="..\..\PSX\Asset-Tools\jpsxdec\.github\ISSUE_TEMPLATE\config.yml" />

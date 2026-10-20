@@ -30,14 +30,6 @@ extern Battle_Ai_CandidateEntryView* Battle_Ai_fallbackCandidates;
 extern Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 extern u_char (*Battle_Ai_candidateExclusions)[256];
 int Battle_Ai_RefreshActionCandidateReadiness(Battle_Ai_CandidateReadinessView* state);
-int Battle_Ai_DoesActionRequireCooldown(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*);
-int Battle_Ai_IsActionCooldownReady(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*);
-int Battle_Ai_CanExecuteActionCandidate(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*);
-int Battle_Ai_ScoreActorCondition(int, int, int, int);
-int Battle_Ai_IsActionHarmfulToActor(int, int);
-int Battle_Ai_IsActionBeneficialToActor(int, int);
-void Battle_Ai_CacheFallbackActionCandidate(Battle_Ai_ActionCandidate*, Battle_ActionDefinition*);
-void Battle_Ai_PromoteRandomizedActionCandidate(Battle_Ai_ActionPlanView*, int);
 void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* arg0);
 void Battle_Ai_SimulateActionCandidate(
     Battle_Ai_ActorAiState* arg0, Battle_Ai_ActionTiming* arg1, Battle_Ai_ActionCandidate* arg2, int arg3);

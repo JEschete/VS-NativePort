@@ -9,12 +9,13 @@
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActionPlanning.h"
+#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/DecisionCallbacks.h"
+#include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
@@ -22,8 +23,8 @@
 #include "Battle/Damage.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Timing.h"
-#include "Field/Collision.h"
 #include "Field/Gimmicks.h"
+#include "Field/TerrainHeight.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
@@ -581,12 +582,6 @@ int Battle_Ai_CanApproachEngagedTarget(Battle_Ai_ActorAiState*, Battle_Ai_Action
 {
     VS_UNPORTED("Battle::Ai::CanApproachEngagedTarget");
     return 0;
-}
-
-// decomp: BATTLE.PRG func_800DEEFC (src/BATTLE/BATTLE.PRG/766FC.s:0) [asm-file: not yet ported]
-void Battle_Ai_IssueActorCommand(Battle_Ai_ActorAiState*, int)
-{
-    VS_UNPORTED("Battle::Ai::IssueActorCommand");
 }
 
 // decomp: BATTLE.PRG func_800E4180 (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]

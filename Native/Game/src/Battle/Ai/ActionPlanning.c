@@ -19,6 +19,7 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/ConditionSnapshot.h"
+#include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
@@ -111,60 +112,6 @@ done:
     }
     state->actionStatus = value;
     return changed;
-}
-
-// decomp: BATTLE.PRG func_800DBC60 (src/BATTLE/BATTLE.PRG/73460.s:0) [asm-file: not yet ported]
-int Battle_Ai_DoesActionRequireCooldown(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*)
-{
-    VS_UNPORTED("Battle::Ai::DoesActionRequireCooldown");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DBCB4 (src/BATTLE/BATTLE.PRG/73460.s:0) [asm-file: not yet ported]
-int Battle_Ai_IsActionCooldownReady(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*)
-{
-    VS_UNPORTED("Battle::Ai::IsActionCooldownReady");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DBD80 (src/BATTLE/BATTLE.PRG/73580.s:0) [asm-file: not yet ported]
-int Battle_Ai_CanExecuteActionCandidate(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*)
-{
-    VS_UNPORTED("Battle::Ai::CanExecuteActionCandidate");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DC284 (src/BATTLE/BATTLE.PRG/7399C.s:0) [asm-file: not yet ported]
-int Battle_Ai_ScoreActorCondition(int, int, int, int)
-{
-    VS_UNPORTED("Battle::Ai::ScoreActorCondition");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DC484 (src/BATTLE/BATTLE.PRG/73C84.s:0) [asm-file: not yet ported]
-int Battle_Ai_IsActionHarmfulToActor(int, int)
-{
-    VS_UNPORTED("Battle::Ai::IsActionHarmfulToActor");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DC48C (src/BATTLE/BATTLE.PRG/73C84.s:0) [asm-file: not yet ported]
-int Battle_Ai_IsActionBeneficialToActor(int, int)
-{
-    VS_UNPORTED("Battle::Ai::IsActionBeneficialToActor");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DC4F0 (src/BATTLE/BATTLE.PRG/73C84.s:0) [asm-file: not yet ported]
-void Battle_Ai_CacheFallbackActionCandidate(Battle_Ai_ActionCandidate*, Battle_ActionDefinition*)
-{
-    VS_UNPORTED("Battle::Ai::CacheFallbackActionCandidate");
-}
-
-// decomp: BATTLE.PRG func_800DC574 (src/BATTLE/BATTLE.PRG/73C84.s:0) [asm-file: not yet ported]
-void Battle_Ai_PromoteRandomizedActionCandidate(Battle_Ai_ActionPlanView*, int)
-{
-    VS_UNPORTED("Battle::Ai::PromoteRandomizedActionCandidate");
 }
 
 // decomp: BATTLE.PRG func_800DC888 (src/BATTLE/BATTLE.PRG/74088.c:473)

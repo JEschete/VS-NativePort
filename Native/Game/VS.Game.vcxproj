@@ -207,6 +207,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActorCommands.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\ActorState.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -231,6 +234,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\DecisionPrimitives.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\FrameUpdate.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -248,6 +254,9 @@
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\NavigationPrimitives.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\OrbitingBoss.c">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -1276,6 +1285,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Field\TerrainHeight.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\Transitions.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1691,18 +1703,22 @@
     <ClInclude Include="src\Battle\Actor.h" />
     <ClInclude Include="src\Battle\Ai\ActionPlanning.h" />
     <ClInclude Include="src\Battle\Ai\ActionSelection.h" />
+    <ClInclude Include="src\Battle\Ai\ActorCommands.h" />
     <ClInclude Include="src\Battle\Ai\ActorState.h" />
     <ClInclude Include="src\Battle\Ai\AiState.h" />
     <ClInclude Include="src\Battle\Ai\AiViews.h" />
     <ClInclude Include="src\Battle\Ai\Behavior.h" />
     <ClInclude Include="src\Battle\Ai\ConditionSnapshot.h" />
     <ClInclude Include="src\Battle\Ai\DecisionCallbacks.h" />
+    <ClInclude Include="src\Battle\Ai\DecisionPrimitives.h" />
     <ClInclude Include="src\Battle\Ai\FrameUpdate.h" />
     <ClInclude Include="src\Battle\Ai\Movement.h" />
     <ClInclude Include="src\Battle\Ai\Navigation.h" />
+    <ClInclude Include="src\Battle\Ai\NavigationPrimitives.h" />
     <ClInclude Include="src\Battle\Ai\OrbitingBoss.h" />
     <ClInclude Include="src\Battle\Ai\Perception.h" />
     <ClInclude Include="src\Battle\Ai\PlanningPrimitives.h" />
+    <ClInclude Include="src\Battle\Ai\PlanningSort.hpp" />
     <ClInclude Include="src\Battle\Ai\Relations.h" />
     <ClInclude Include="src\Battle\Ai\RoomState.h" />
     <ClInclude Include="src\Battle\AttackPrerequisites.h" />
@@ -1917,6 +1933,7 @@
     <ClInclude Include="src\Field\RoomLoading.h" />
     <ClInclude Include="src\Field\RoomRendering.h" />
     <ClInclude Include="src\Field\RoomState.h" />
+    <ClInclude Include="src\Field\TerrainHeight.h" />
     <ClInclude Include="src\Field\Transitions.h" />
     <ClInclude Include="src\Field\Traps.h" />
     <ClInclude Include="src\Field\TriggerMarkers.h" />

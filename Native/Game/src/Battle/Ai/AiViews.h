@@ -660,7 +660,9 @@ _Static_assert(sizeof(Battle_Ai_ActionRangeShape) == 0x4, "Battle_Ai_ActionRange
 
 // decomp: func_800E5698_t (src/BATTLE/BATTLE.PRG/6F014.c:37)
 typedef struct Battle_Ai_ActionRangeView {
-    char reserved0[0x5C];
+    char reserved0_0[84];
+    void* nativePointer54; /* PS1 pointer slot 0x54 */
+    void* nativePointer58; /* PS1 pointer slot 0x58 */
     Battle_Ai_ActionRangeView2* opaque5C;
 } Battle_Ai_ActionRangeView;
 
