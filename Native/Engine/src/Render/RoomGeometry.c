@@ -1,7 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Field/Room.h"
-#include "Render/Render.h"
 #include "Render/RoomGeometry.h"
 
 // decomp: BATTLE.PRG func_80097388 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
@@ -92,17 +91,5 @@ int Render_TintRoomPrimitiveColor()
 {
     VS_UNPORTED("Render::TintRoomPrimitiveColor");
     return 0;
-}
-
-// decomp: BATTLE.PRG vs_battle_getGeomOffset (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-void Render_GetProjectionScreenOffset(Render_ScreenOffset*)
-{
-    VS_UNPORTED("Render::GetProjectionScreenOffset");
-}
-
-// decomp: BATTLE.PRG vs_battle_setGeomOffset (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-void Render_SetProjectionScreenOffset(Render_ScreenOffset*)
-{
-    VS_UNPORTED("Render::SetProjectionScreenOffset");
 }
 

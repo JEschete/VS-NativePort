@@ -166,6 +166,7 @@
 #include "Field/Map.h"
 #include "Field/MapProgress.h"
 #include "Field/Minimap.h"
+#include "Field/MinimapScene.h"
 #include "Field/Mpd.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"

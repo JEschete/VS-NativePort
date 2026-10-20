@@ -1240,6 +1240,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Field\MinimapScene.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\Room.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1902,6 +1905,7 @@
     <ClInclude Include="src\Field\Map.h" />
     <ClInclude Include="src\Field\MapProgress.h" />
     <ClInclude Include="src\Field\Minimap.h" />
+    <ClInclude Include="src\Field\MinimapScene.h" />
     <ClInclude Include="src\Field\Mpd.h" />
     <ClInclude Include="src\Field\Platforms.h" />
     <ClInclude Include="src\Field\Room.h" />

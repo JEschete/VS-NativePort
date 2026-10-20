@@ -153,7 +153,62 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
 
-### Repeated Options exit freeze (#39/#40, 2026-10-19)
+### Working minimap scenes (#40, 2026-10-19)
+
+This completes the missing minimap functionality after the shared exit-hang fix
+`ef559a2e`. The resolver and renderer are owned implementations, traced to
+`BATTLE.PRG/2EA3C.s:2085-2489`, not edits to generated output or reference code.
+
+- Scene room records remain **12-byte file records**. The resolver validates the
+  entire section before replacing payload lengths with record-relative offsets;
+  the copier applies the existing `VS_ONDISC` pattern to every native consumer.
+  MPD and ARM callers supply their actual section/file extents. Native pointers
+  are never written into packed scene bytes.
+- The renderer projects visited rooms, draws the current room's fills and dim
+  edges, other visited-room connections, and the original gated/blinking door
+  markers. It validates vertex/primitive indices and reserves bounded packet
+  capacity before writing. Ordering links use native handles. Projection-center
+  accessors now work, including original high-halfword semantics; the field
+  caller restores its rotation, translation and projection center afterward.
+- Synthetic tests cover truncated/malformed scenes without mutation, packed
+  strides/offsets, projected coordinates, colors, command order, both frame
+  buffers, unvisited rooms, entry blinking, locked-door gates, capacity guards
+  and projection restoration/wrapping. Disc-configured tests validate **all 31
+  ARM scenes and all 367 MPD minimap sections**; `SCEN031.ARM` intentionally has
+  no name tail. All MPD minimaps draw within packet guards using test-owned
+  copies. Full Debug and Release suites pass **115 cases / 45,580 assertions**
+  each.
+- Fresh Debug and Release replays each complete **54,000 ticks**, all **36
+  captures**, the full nine-transition Frame/Simple/Off matrix, Cross and
+  Triangle cancellation, movement and menu re-entry. Read-only PDB-based samples
+  confirm every applied setting and actual resumed field state: mode 1,
+  unpaused, current menu 63, selection status 0 and released rows. A fresh
+  **speed-1 Release** Frame->Off->Simple replay completes **18,000 ticks**, all
+  nine captures and the same applied-setting/resume checks.
+- Original-game comparison uses only the portable DuckStation copy and the
+  real two-Start menu-test route. Local `reference-minimap-a` captures at 95 and
+  124 seconds establish Frame's border and Simple's retained room geometry
+  without that border, after real option confirmation and Cross/back exit.
+  Native/reference projected room outline, fill and marker placement agree
+  after accounting for the native capture's eight-pixel presentation margin.
+  This is minimap verification, not whole-scene rendering or combat parity.
+- Evidence, exact replay argv and state observations remain local under
+  `build\quality\issue40\minimap-final-debug`, `minimap-final-release`,
+  `minimap-final-normal-release`, `reference-minimap-a` and the minimap test logs.
+  No captures, disc data or memory dumps are committed/uploaded.
+- Native-view checks cover **620 fields with zero mismatches**; all **179 event
+  handler signatures/dispatch checks** pass. All **24 quality positive
+  controls** pass; changed-source quality with tidy reports **zero new
+  findings**, with no baseline refresh. Copier regeneration is stable, manifest
+  SHA-256 `3C1BAEC71675262FADF0532D30519FBC6076E0D179E295B9FB8C21B593EBC0A5`.
+
+The fixing revision and successful pushed CI are recorded on #40 before closure.
+#39 still owns the remaining eight Options' real effects; #2 remains the menu
+acceptance gate. The separate full Map issue #37 still reproduces a crash in
+`Menu_Map_DrawControlBackdrop` at tick 7747; fixing packed scene records alone
+does not complete that screen.
+
+### Repeated Options exit freeze (#39/#40, 2026-10-19, earlier checkpoint)
 
 Verification used `2cdc8100` plus the scoped F01342 copier change. No reference,
 disc data, progression flags, quality baseline or hardware-shaped renderer was
@@ -206,12 +261,11 @@ Evidence:
   refresh. Second copier generation is stable: manifest SHA-256
   `A5B925DAF78C5BE11D48602FD1E152670F4B02BEBC9C2E06A06AEF2C7C33AC10`.
 
-Scope remains narrow: this repairs the shared repeated-exit hang. The minimap
-scene resolver/drawer and projection-offset accessors remain unported; original
-minimap geometry parity and the other eight Options' real effects are not
-established by these runs. #39/#40 remain open for their outstanding acceptance
-gates, and #2 still blocks #6. Fixing commit and pushed-CI evidence are recorded
-on the issues; do not infer issue completion from this checkpoint.
+This earlier checkpoint repaired only the shared repeated-exit hang. Its
+then-unported minimap resolver/drawer/projection accessors are completed in the
+newer checkpoint above. The other eight Options' real effects remain #39 work,
+and #2 still blocks #6. Do not infer complete Options or menu parity from this
+earlier exit-only evidence.
 
 ### Restored Submenu Text And Names (2026-10-19)
 

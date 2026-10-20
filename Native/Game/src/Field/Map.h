@@ -11,10 +11,11 @@ typedef struct Field_MapScene Field_MapScene;
 // decomp: vs_battle_room (src/BATTLE/BATTLE.PRG/146C.h:152)
 typedef struct Field_MapRoom {
     int visited;
-    void* dataAddress;
+    u_int dataAddress; /* offset from the struct (on-disc pointer) */
     short zoneId;
     short mapId;
 } Field_MapRoom;
+_Static_assert(sizeof(Field_MapRoom) == 0xC, "Field_MapRoom must keep its PS1 layout");
 
 // decomp: vs_battle_roomName (src/BATTLE/BATTLE.PRG/146C.h:646)
 typedef struct Field_MapRoomName {
@@ -36,6 +37,7 @@ typedef struct Field_MapScene {
     int roomCount;
     Field_MapRoom rooms[0];
 } Field_MapScene;
+_Static_assert(sizeof(Field_MapScene) == 0x4, "Field_MapScene must keep its PS1 layout");
 
 #endif // VS_FIELD_MAP_H_TYPES
 

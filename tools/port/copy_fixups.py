@@ -49,6 +49,25 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F00551": [
+        ("Field_ResolveSceneRoomData(Field_roomData.minimapScene);",
+         "Field_ResolveSceneRoomData(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);",
+         "bound scene decoding to its MPD subsection, retaining 12-byte room records"),
+    ],
+    "F00556": [
+        ("Field_DrawMinimapScene(Field_roomData.minimapScene);",
+         "Field_DrawMinimapScene(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);",
+         "bound minimap vertices and primitive tables to the loaded scene"),
+        ("    Core_Gte_SetRotMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);\n    drawArea =",
+         "    Core_Gte_SetRotMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);\n"
+         "    Core_Gte_SetTransMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);\n    drawArea =",
+         "restore the field transform after the minimap's explicit translation"),
+    ],
+    **{fid: [
+        ("Field_ResolveSceneRoomData(Battle_unusedSceneBuffer)",
+         "Field_ResolveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size)",
+         "bound ARM scene decoding to its loaded file extent"),
+    ] for fid in ("F04150", "F04151")},
     "G00620": [
         (r'"Ashley|>6|Riot\0"',
          r'"\x0A\x36\x2B\x2F\x28\x3C\xFA\x06\x1B\x2C\x32\x37\xE7"',
@@ -685,6 +704,7 @@ NESTED_SAME_AS: dict[str, str] = {
 # 32-bit offsets (`u_int`, the file layout), every use `E->m` becomes VS_ONDISC(E, m, T) = (T)((char*)E + E->m), and
 # the relocation statements are removed by the FIXES above. field id -> what it is
 ONDISC_OFFSETS: dict[str, str] = {
+    "T00663.001": "map room payload, resolved as an offset from its 12-byte room record",
     "T00252.001": "SHP sound (AKAO) section",
     "T00252.002": "SHP group section",
     "T00252.003": "SHP vertex section",
@@ -817,7 +837,7 @@ for fid in ("F01055", "F01069", "F01071", "F01074", "F01075", "F01122", "F01143"
 # The MPD section E header (Field::MpdSectionE, 146C.c:15700): two array pointers into its own payload, set by
 # _loadMpdRoomSection and read only by assembly-era code; offsets from the header natively.
 ONDISC_OFFSETS.update({"T00337.003": "MPD section E first array", "T00337.004": "MPD section E second array"})
-FIXES["F00551"] = [
+FIXES["F00551"] += [
     ("VS_ONDISC(sectionE, firstArray, int *) = (int*)(sectionE + 1);",
      "sectionE->firstArray = sizeof(*sectionE);", "offset of the payload"),
     ("VS_ONDISC(sectionE, secondArray, int *) = (int*)(sectionE + 1);",

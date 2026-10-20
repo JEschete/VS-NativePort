@@ -28,7 +28,7 @@
 #include "Render/Font.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomGeometry.h"
+#include "Render/RoomDraw.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "State/Progress.h"
 

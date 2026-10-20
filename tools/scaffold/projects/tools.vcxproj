@@ -30,7 +30,13 @@
     <None Include="..\..\ledger\build_ledgers.py" />
     <None Include="..\..\ledger\build_symbol_ledgers.py" />
     <None Include="..\..\ledger\reconcile_locations.py" />
+    <None Include="..\..\lint\.gitignore" />
+    <None Include="..\..\lint\baseline.json" />
     <None Include="..\..\lint\native_boundary.py" />
+    <None Include="..\..\lint\package-lock.json" />
+    <None Include="..\..\lint\package.json" />
+    <None Include="..\..\lint\quality.py" />
+    <None Include="..\..\lint\test_quality.py" />
     <None Include="..\..\naming\ai_offsets.py" />
     <None Include="..\..\naming\append_rows.py" />
     <None Include="..\..\naming\batches\BATTLE_01.csv" />
@@ -1437,6 +1443,7 @@
     <None Include="..\..\PSX\VagrantStory\vstrack\README.md" />
     <None Include="..\..\PSX\VagrantStory\VSViewer\README.md" />
     <None Include="..\..\requirements.txt" />
+    <None Include="..\..\ruff.toml" />
     <None Include="..\gen_solution.py" />
     <None Include="..\relayout.py" />
     <None Include="..\..\Setup-Windows.ps1" />

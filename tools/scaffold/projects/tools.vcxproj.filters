@@ -1041,7 +1041,25 @@
     <None Include="..\..\ledger\reconcile_locations.py">
       <Filter>tools\ledger</Filter>
     </None>
+    <None Include="..\..\lint\.gitignore">
+      <Filter>tools\lint</Filter>
+    </None>
+    <None Include="..\..\lint\baseline.json">
+      <Filter>tools\lint</Filter>
+    </None>
     <None Include="..\..\lint\native_boundary.py">
+      <Filter>tools\lint</Filter>
+    </None>
+    <None Include="..\..\lint\package-lock.json">
+      <Filter>tools\lint</Filter>
+    </None>
+    <None Include="..\..\lint\package.json">
+      <Filter>tools\lint</Filter>
+    </None>
+    <None Include="..\..\lint\quality.py">
+      <Filter>tools\lint</Filter>
+    </None>
+    <None Include="..\..\lint\test_quality.py">
       <Filter>tools\lint</Filter>
     </None>
     <None Include="..\..\naming\ai_offsets.py">
@@ -5260,6 +5278,9 @@
       <Filter>tools\PSX\VagrantStory\VSViewer</Filter>
     </None>
     <None Include="..\..\requirements.txt">
+      <Filter>tools</Filter>
+    </None>
+    <None Include="..\..\ruff.toml">
       <Filter>tools</Filter>
     </None>
     <None Include="..\gen_solution.py">

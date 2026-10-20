@@ -35,6 +35,8 @@ void Render_DrawRoomGeometry(void* data, int mode);
 void Render_SetRoomPolygonNearClip(int depth);
 void Render_SetRoomTextureLodDepth(int depth);
 void Render_DrawSkyDome(void* data);
+void Render_GetProjectionScreenOffset(Render_ScreenOffset* offset);
+void Render_SetProjectionScreenOffset(Render_ScreenOffset* offset);
 
 #ifdef __cplusplus
 }

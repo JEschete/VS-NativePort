@@ -54,6 +54,9 @@
     <ClCompile Include="src\MemoryTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MinimapTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SequenceTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>

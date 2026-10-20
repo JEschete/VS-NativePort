@@ -14,6 +14,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Field/Minimap.h"
+#include "Field/MinimapScene.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomEffects.h"
@@ -162,9 +163,10 @@ void Field_DrawRoomScene(void)
     mapOffset.x = 392 - (Field_minimapSlideFrame << 4);
     Render_GetProjectionScreenOffset(&originalOffset);
     Render_SetProjectionScreenOffset(&mapOffset);
-    Field_DrawMinimapScene(Field_roomData.minimapScene);
+    Field_DrawMinimapScene(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);
     Render_SetProjectionScreenOffset(&originalOffset);
     Core_Gte_SetRotMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);
+    Core_Gte_SetTransMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);
     drawArea = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;
     SetDrawArea(drawArea, &mapArea);
     AddPrim((u_long*)((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 5, drawArea);

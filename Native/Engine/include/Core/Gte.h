@@ -44,6 +44,7 @@ void Core_Gte_SetRotMatrix(const MATRIX* m);
 void Core_Gte_SetTransMatrix(const MATRIX* m);
 void Core_Gte_SetTransVector(const VECTOR* v);
 void Core_Gte_SetGeomOffset(long ofx, long ofy);
+void Core_Gte_GetGeomOffset(long* ofx, long* ofy);
 void Core_Gte_SetGeomScreen(long h);
 void Core_Gte_SetFarColor(long r, long g, long b);
 void Core_Gte_SetFogNear(long a, long h);

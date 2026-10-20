@@ -8,12 +8,9 @@
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_MINIMAP_H_DECLS)
 #define VS_FIELD_MINIMAP_H_DECLS
-#include "Field/Map.h"
 
 extern int Field_minimapBorderPulsePhase;
 extern short Field_minimapSlideFrame;
 extern char Field_isMinimapVisible;
-void Field_DrawMinimapScene(void*);
-Field_MapRoomName* Field_ResolveSceneRoomData(void*);
 
 #endif // VS_FIELD_MINIMAP_H_DECLS

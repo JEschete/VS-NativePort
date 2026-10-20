@@ -40,7 +40,7 @@
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomGeometry.h"
+#include "Render/RoomDraw.h"
 #include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"

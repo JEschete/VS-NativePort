@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import tempfile
@@ -13,6 +14,26 @@ import quality
 
 
 class BaselineTests(unittest.TestCase):
+    def test_cpp_scene_analysis_uses_the_builds_c_api_include_paths(self) -> None:
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch.object(quality, "OUTPUT", Path(directory)),
+            patch.object(quality, "llvm_tool", return_value="clang-cl"),
+        ):
+            database = quality.compile_commands(
+                ["Native/Game/src/Field/MinimapScene.cpp"]
+            )
+            command = json.loads((database / "compile_commands.json").read_text())[0]
+        includes = [
+            argument[2:]
+            for argument in command["arguments"]
+            if argument.startswith("/I")
+        ]
+        self.assertIn(str(quality.ROOT / "Native" / "Engine"), includes)
+        self.assertIn(str(quality.ROOT / "Native" / "Content" / "src"), includes)
+        self.assertIn("/TP", command["arguments"])
+        self.assertNotIn("/TC", command["arguments"])
+
     def test_interface_policy_requires_registered_name_path_and_advisory_rule(
         self,
     ) -> None:

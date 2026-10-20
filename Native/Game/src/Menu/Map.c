@@ -17,7 +17,7 @@
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
-#include "Field/Minimap.h"
+#include "Field/MinimapScene.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomLoading.h"
@@ -37,7 +37,7 @@
 #include "Render/Font.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomGeometry.h"
+#include "Render/RoomDraw.h"
 #include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
@@ -510,7 +510,7 @@ int Menu_Map_LoadSceneMap(void)
 
     Content_ReleaseDiscRequest(Menu_Map_sceneCdQueueSlot);
 
-    Menu_Map_roomNamesTable = Field_ResolveSceneRoomData(Battle_unusedSceneBuffer);
+    Menu_Map_roomNamesTable = Field_ResolveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 
     Field_RestoreSceneRoomVisits(Battle_unusedSceneBuffer);
     Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));
@@ -862,7 +862,7 @@ int Menu_Map_UpdateMapMenu(void)
                 Battle_unusedSceneBuffer, Menu_Map_armFileBuff, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
             Core_Memory_FreeFromHighEnd(Menu_Map_armFileBuff);
 
-            Menu_Map_roomNamesTable = Field_ResolveSceneRoomData(Battle_unusedSceneBuffer);
+            Menu_Map_roomNamesTable = Field_ResolveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 
             Field_RestoreSceneRoomVisits(Battle_unusedSceneBuffer);
             Menu_Map_ScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));
@@ -1069,7 +1069,7 @@ void Menu_Map_DrawVisitedRooms(Field_MapScene* scene)
 
     for (i = 0; i < roomCount; ++i, ++room) {
         if (room->visited != 0) {
-            Menu_Map_DrawRoom(i, room->dataAddress, room->zoneId, room->mapId);
+            Menu_Map_DrawRoom(i, VS_ONDISC(room, dataAddress, void *), room->zoneId, room->mapId);
         }
     }
 
@@ -1498,7 +1498,7 @@ void Menu_Map_CenterOnRoom(Field_MapScene* scene, int roomId)
     minCorner.vy = -0x8000;
     minCorner.vz = -0x8000;
 
-    roomVertices = room[roomId].dataAddress;
+    roomVertices = VS_ONDISC_DOT(room[roomId], dataAddress, void *);
     roomCount = scene->roomCount;
     vertexCount = roomVertices->vertexCount;
     vector = roomVertices->vertices;
@@ -1530,7 +1530,7 @@ void Menu_Map_CenterOnRoom(Field_MapScene* scene, int roomId)
     Menu_Map_centerPoint.vy = minCorner.vy;
 
     for (j = 0; j < roomCount; ++j, ++room) {
-        roomVertices = room->dataAddress;
+        roomVertices = VS_ONDISC(room, dataAddress, void *);
         vertexCount = roomVertices->vertexCount;
         vector = (SVECTOR*)roomVertices;
         vector = (SVECTOR*)((short*)vector + 2);
@@ -1565,7 +1565,7 @@ void Menu_Map_SetRoomCenterTarget(Field_MapScene* scene, int roomId)
     minCorner.vy = -0x8000;
     minCorner.vz = -0x8000;
 
-    roomVertices = room[roomId].dataAddress;
+    roomVertices = VS_ONDISC_DOT(room[roomId], dataAddress, void *);
     roomCount = scene->roomCount;
     vertexCount = roomVertices->vertexCount;
     vector = roomVertices->vertices;
@@ -1680,7 +1680,7 @@ void Menu_Map_AnimateCentering(Field_MapScene* scene)
     roomCount = scene->roomCount;
 
     for (i = 0; i < roomCount; ++i) {
-        dataAddress = room->dataAddress;
+        dataAddress = VS_ONDISC(room, dataAddress, void *);
         vertexCount = dataAddress->vertexCount;
         vector = (SVECTOR*)dataAddress;
         vector = dataAddress->vertices;
@@ -1712,7 +1712,7 @@ void Menu_Map_ScaleRoomVertices(Field_MapScene* scene, int factor)
     roomCount = scene->roomCount;
 
     for (i = 0; i < roomCount; ++i) {
-        roomVertices = room->dataAddress;
+        roomVertices = VS_ONDISC(room, dataAddress, void *);
         vertextCount = roomVertices->vertexCount;
         vector = (SVECTOR*)roomVertices;
         vector = (SVECTOR*)((int*)vector + 1);

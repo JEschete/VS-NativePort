@@ -578,3 +578,17 @@ void Render_DrawSkyDome(void* data) {
     Render_frameScratch.primitiveCursor = packet + kSkyPacketWords;
   }
 }
+
+// decomp: BATTLE.PRG vs_battle_getGeomOffset (2EA3C.s:2470).
+void Render_GetProjectionScreenOffset(Render_ScreenOffset* offset) {
+  Core_GteWord x;
+  Core_GteWord y;
+  Core_Gte_GetGeomOffset(&x, &y);
+  offset->x = (u_short)x;
+  offset->y = (u_short)y;
+}
+
+// decomp: BATTLE.PRG vs_battle_setGeomOffset (2EA3C.s:2482).
+void Render_SetProjectionScreenOffset(Render_ScreenOffset* offset) {
+  Core_Gte_SetGeomOffset(offset->x, offset->y);
+}

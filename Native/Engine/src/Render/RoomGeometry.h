@@ -9,7 +9,6 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_RENDER_ROOMGEOMETRY_H_DECLS)
 #define VS_RENDER_ROOMGEOMETRY_H_DECLS
 #include "Field/Room.h"
-#include "Render/Render.h"
 
 int Render_DrawRoomGeometryPolygons();
 int Render_DecodeRoomPolygonVertices();
@@ -24,7 +23,5 @@ int Render_SetRoomPolygonScreenBounds();
 int Render_InterpolateRoomLightTriangle();
 void Render_TintRoomGeometryPrimitives(void*, void*, Field_RoomTint*, int);
 int Render_TintRoomPrimitiveColor();
-void Render_GetProjectionScreenOffset(Render_ScreenOffset*);
-void Render_SetProjectionScreenOffset(Render_ScreenOffset*);
 
 #endif // VS_RENDER_ROOMGEOMETRY_H_DECLS

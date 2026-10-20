@@ -91,6 +91,12 @@ typedef struct LINE_G4 {
   u_long pad;
 } LINE_G4;
 
+typedef struct POLY_F3 {
+  u_long tag;
+  u_char r0, g0, b0, code;
+  short x0, y0, x1, y1, x2, y2;
+} POLY_F3;
+
 typedef struct POLY_F4 {
   u_long tag;
   u_char r0, g0, b0, code;
@@ -288,6 +294,7 @@ static inline u_long LegacyGpu_LinkOfPointer(const void* p) {
   ((abe) ? setcode(p, getcode(p) | 0x02) : setcode(p, getcode(p) & ~0x02))
 #define setShadeTex(p, tge) \
   ((tge) ? setcode(p, getcode(p) | 0x01) : setcode(p, getcode(p) & ~0x01))
+#define setPolyF3(p) (setlen(p, 4), setcode(p, 0x20))
 #define setPolyF4(p) (setlen(p, 5), setcode(p, 0x28))
 #define setPolyFT4(p) (setlen(p, 9), setcode(p, 0x2C))
 #define setPolyG3(p) (setlen(p, 6), setcode(p, 0x30))

@@ -48,7 +48,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Locations.h"
 #include "Field/Map.h"
-#include "Field/Minimap.h"
+#include "Field/MinimapScene.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomEffects.h"
@@ -995,7 +995,7 @@ int Field_LoadRoomSections(int arg0, void* data)
     }
 
     if (Field_roomData.minimapScene != NULL) {
-        Field_ResolveSceneRoomData(Field_roomData.minimapScene);
+        Field_ResolveSceneRoomData(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);
         Field_RestoreSceneRoomVisits(Field_roomData.minimapScene);
         Field_roomData.minimapScene->rooms[0].visited = 1;
         if (Audio_Seq_unusedStateFlags.doorEntered == 0) {

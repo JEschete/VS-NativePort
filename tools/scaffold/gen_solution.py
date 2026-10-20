@@ -97,6 +97,13 @@ def files_of(p: Project) -> list[tuple[str, str]]:
     return out
 
 
+def needs_c_headers(project: str, path: str) -> bool:
+    path = path.replace("/", "\\")
+    return (path.endswith(".c") or "\\Legacy\\" in "\\" + path
+            or project == "VS.Tests"
+            or project == "VS.Game" and path == r"src\Field\MinimapScene.cpp")
+
+
 def vcxproj(p: Project, files: list[tuple[str, str]]) -> str:
     ctype = "Application" if p.kind == "exe" else "StaticLibrary"
     inc_dirs = ["$(MSBuildThisFileDirectory)include", "$(MSBuildThisFileDirectory)src"] + [
@@ -116,7 +123,7 @@ def vcxproj(p: Project, files: list[tuple[str, str]]) -> str:
                                  f'</AdditionalIncludeDirectories>\n'
                                  f'      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>\n'
                                  f'    </ClCompile>')
-        elif "\\Legacy\\" in "\\" + path or path.startswith("Legacy\\"):
+        elif needs_c_headers(p.name, path) and p.name != "VS.Tests":
             # Legacy shims include the C SDK headers of other projects.
             compile_items.append(f'    <ClCompile Include="{path}">\n'
                                  f'      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)'

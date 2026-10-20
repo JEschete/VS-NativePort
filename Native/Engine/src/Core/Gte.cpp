@@ -161,8 +161,13 @@ void Core_Gte_ClearTranslation(void) {
 }
 
 void Core_Gte_SetGeomOffset(long ofx, long ofy) {
-  g.ofx = static_cast<int32_t>(ofx) * 65536;
-  g.ofy = static_cast<int32_t>(ofy) * 65536;
+  g.ofx = static_cast<int32_t>(static_cast<uint32_t>(ofx) << 16);
+  g.ofy = static_cast<int32_t>(static_cast<uint32_t>(ofy) << 16);
+}
+
+void Core_Gte_GetGeomOffset(long* ofx, long* ofy) {
+  *ofx = g.ofx >> 16;
+  *ofy = g.ofy >> 16;
 }
 
 void Core_Gte_SetGeomScreen(long h) { g.h = static_cast<uint16_t>(h); }

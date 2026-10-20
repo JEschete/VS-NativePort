@@ -334,11 +334,8 @@ def compile_commands(files: list[str]) -> Path:
                 scaffold["BY_NAME"][name].dir / "include"
                 for name in project.refs + project.see
             ]
-        if (
-            path.endswith(".c")
-            or "/Legacy/" in path
-            or project
-            and project.name == "VS.Tests"
+        if project and scaffold["needs_c_headers"](
+            project.name, str(source.relative_to(project.dir))
         ):
             includes += copied_includes
         arguments = [
