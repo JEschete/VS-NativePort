@@ -69,6 +69,9 @@
     <ClCompile Include="src\MinimapTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\RasterBoundsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SequenceTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>

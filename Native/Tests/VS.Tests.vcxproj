@@ -91,6 +91,7 @@
     <ClCompile Include="src\MapRenderTests.cpp" />
     <ClCompile Include="src\MemoryTests.cpp" />
     <ClCompile Include="src\MinimapTests.cpp" />
+    <ClCompile Include="src\RasterBoundsTests.cpp" />
     <ClCompile Include="src\SequenceTestCases.cpp" />
     <ClCompile Include="src\SequenceTests.c">
       <TreatWarningAsError>false</TreatWarningAsError>

@@ -401,7 +401,7 @@ void PageSpace::Triangle(const Vertex& a, const Vertex& b, const Vertex& c,
   };
   // top-left rule: pixels on a right or bottom edge are not drawn
   auto bias = [](const Vertex* p0, const Vertex* p1) {
-    const bool topLeft = (p0->y == p1->y && p1->x < p0->x) || (p1->y > p0->y);
+    const bool topLeft = (p0->y == p1->y && p1->x > p0->x) || (p1->y < p0->y);
     return topLeft ? 0 : -1;
   };
   const i64 b0 = bias(v1, v2), b1 = bias(v2, v0), b2 = bias(v0, v1);

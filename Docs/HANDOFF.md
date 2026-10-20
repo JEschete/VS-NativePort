@@ -153,6 +153,63 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
 
+### Bardorba bedroom window atlas seams (#34)
+
+The owner identified the affected view as Bardorba lying in bed speaking to
+Rosencrantz, **not** the earlier Guildenstern window. Reproduce with
+`1000:Start,1300:Circle,3000:Start`, then let the quote finish without a second
+Start. MAP008 contains the quote; the actual bedroom is **ZONE018 / MAP062**
+(loads at 4561/5075), followed by `ENKEI2.GIM` at 5130. The first bedside
+caption/window is stable at 5500.
+
+The source image was not corrupt. All three uploaded texture sheets
+(255/255/135 rows) and the entire 256-color palette match the original asset
+byte-for-byte. Matching-PDB reads confirm the actual layer uses 8bpp, page 26,
+a 5x16 grid, offset (20,-20), scale 2688 and draw routine 0. Targeted temporary
+packet/pixel diagnostics also ruled out texture-window state and subsequent
+room-geometry overwrites; all instrumentation was removed before final tests.
+
+The first invalid producer is the owned `PageSpace::Triangle` coverage bias.
+For screen coordinates with Y increasing downward, its purported top-left
+rule instead included bottom/right edges and excluded top/left. The scaled
+64x15 GIM quads from F01393 (`5BF94.c:4056`) therefore sampled lower/right UV
+endpoints from unrelated neighboring atlas tiles. This produced the brick-like
+stripes across the distant skyline. Reversing the two edge comparisons restores
+the original half-open polygon coverage; no GIM/MPD/disc data, palette, loader,
+event delay or input wait was changed.
+
+Three new synthetic 8bpp atlas/coverage tests first fail **1,076 of 7,412
+assertions**, then pass all of them after the fix. They cover both windings,
+inclusive draw-area clipping, poisoned atlas borders, horizontally/vertically
+adjacent tiles in reverse draw order, and shared translucent diagonals shaded
+exactly once. Full Debug and Release suites pass **131 cases / 53,206
+assertions** each. Changed-source tidy quality has zero new findings, with no
+baseline refresh; generated test-project registration is stable on regeneration.
+
+Both builds complete **24,000 ticks / 21 captures** with Circle every 600 ticks
+from 6000 through 18600. The entire bedroom conversation ends normally, then
+the original script loads `JYO.GIM` at 18622, ZONE033/MAP172 at 19686/19692 and
+ZONE010/MAP211 at 22403/22411. The subsequent arrival dialogue remains waiting
+for input; this is **not** a full interactive prologue/combat verification or
+the later MAP009 first room, which remains separate under #6.
+
+The portable original comparison was driven from observed title/opening/quote
+states, avoiding unreliable wall-clock-only scene assumptions. It confirms the
+continuous skyline in the exact bedside shot and the subsequent conversation
+camera. The aligned window crop's mean absolute RGB difference drops from
+**6.20 to 2.27**. Release and **normal-speed Release** reproduce the corrected
+Debug window pixels exactly. The normal-speed route completes **7,200 ticks /
+four captures**. A separate Release **15,400-tick / four-capture** Map, Data,
+Options and field-return smoke replay passes. No accepted runtime logs an
+error or crash.
+
+Exact argv, before/fixed/original captures and diagnostics stay local under
+`build\quality\issue34`, notably `bedroom-before-debug`, `bedroom-final-debug`,
+`bedroom-final-release`, `bedroom-normal-release`, `menu-regression-release`
+and `reference-live`. The fixing revision and successful pushed CI are recorded
+on #34 before closure. #41's separately reported client-border artifacts and
+the remaining #2/#39 acceptance are not claimed resolved by this repair.
+
 ### Data entry and safe no-card lifecycle (#38)
 
 The exact first-room Data entry at pushed `9af8a50e` crashed at tick **7713**,
