@@ -84,6 +84,8 @@ class InputSystem {
   void SetDevicesEnabled(bool enabled) { m_devices_ = enabled; }
 
  private:
+  void UpdateActuators();
+  void CloseGamepad();
   u32 SampleKeyboard() const;
   u32 SampleGamepad(Sticks& sticks) const;
 
@@ -92,6 +94,10 @@ class InputSystem {
   std::array<u32, std::numeric_limits<u32>::digits> m_held_ticks_{};
   u32 m_injected_ = 0;
   bool m_devices_ = true;
+  u16 m_rumble_low_ = 0;
+  u16 m_rumble_high_ = 0;
+  u64 m_rumble_updated_ = 0;
+  bool m_rumble_error_ = false;
 };
 
 }  // namespace VS::Input

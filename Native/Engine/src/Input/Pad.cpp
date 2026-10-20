@@ -6,6 +6,7 @@
 #include <string>
 
 #include "Core/Log.hpp"
+#include "Input/LegacyPad.hpp"
 
 namespace VS::Input {
 
@@ -17,6 +18,8 @@ constexpr i32 kAxisCenter = -std::numeric_limits<Sint16>::min();
 constexpr int kAxisByteShift = std::numeric_limits<u8>::digits;
 constexpr u8 kDpadLowThreshold = 16;
 constexpr u8 kDpadHighThreshold = 241;
+constexpr u32 kRumbleDurationMs = 250;
+constexpr u64 kRumbleRefreshMs = 100;
 
 struct NamedBit {
   u32 bit;
@@ -69,10 +72,21 @@ u32 ParseButtons(std::string_view names) {
   return mask;
 }
 
-InputSystem::~InputSystem() {
+InputSystem::~InputSystem() { CloseGamepad(); }
+
+void InputSystem::CloseGamepad() {
   if (m_pad_) {
+    if ((m_rumble_low_ != 0 || m_rumble_high_ != 0) &&
+        !SDL_RumbleGamepad(m_pad_, 0, 0, 0)) {
+      SDL_LogWarn(SDL_LOG_CATEGORY_INPUT, "stopping gamepad rumble: %s",
+                  SDL_GetError());
+    }
     SDL_CloseGamepad(m_pad_);
+    m_pad_ = nullptr;
   }
+  m_rumble_low_ = m_rumble_high_ = 0;
+  m_rumble_updated_ = 0;
+  m_rumble_error_ = false;
 }
 
 void InputSystem::HandleEvent(const SDL_Event& ev) {
@@ -84,9 +98,35 @@ void InputSystem::HandleEvent(const SDL_Event& ev) {
   } else if (ev.type == SDL_EVENT_GAMEPAD_REMOVED && m_pad_ &&
              SDL_GetGamepadID(m_pad_) == ev.gdevice.which) {
     VS_LOG_INFO("input", "gamepad disconnected: {}", GamepadName());
-    SDL_CloseGamepad(m_pad_);
-    m_pad_ = nullptr;
+    CloseGamepad();
   }
+}
+
+void InputSystem::UpdateActuators() {
+  if (!m_pad_) return;
+  const auto levels =
+      m_devices_ ? Legacy::ReadActuators(0) : Legacy::ActuatorState{};
+  const bool changed = levels.low_frequency != m_rumble_low_ ||
+                       levels.high_frequency != m_rumble_high_;
+  const bool active = levels.low_frequency != 0 || levels.high_frequency != 0;
+  const u64 now = SDL_GetTicks();
+  if ((!changed && (!active || now - m_rumble_updated_ < kRumbleRefreshMs)) ||
+      (m_rumble_error_ && now - m_rumble_updated_ < kRumbleRefreshMs)) {
+    return;
+  }
+  m_rumble_updated_ = now;
+  if (!SDL_RumbleGamepad(m_pad_, levels.low_frequency, levels.high_frequency,
+                         active ? kRumbleDurationMs : 0)) {
+    if (!m_rumble_error_) {
+      VS_LOG_WARN("input", "gamepad rumble on {}: {}", GamepadName(),
+                  SDL_GetError());
+    }
+    m_rumble_error_ = true;
+    return;
+  }
+  m_rumble_low_ = levels.low_frequency;
+  m_rumble_high_ = levels.high_frequency;
+  m_rumble_error_ = false;
 }
 
 std::string InputSystem::GamepadName() const {
@@ -168,6 +208,7 @@ u32 InputSystem::SampleGamepad(Sticks& sticks) const {
 }
 
 const PadState& InputSystem::Update(u32 tick_speed) {
+  UpdateActuators();
   Sticks sticks;
   u32 raw = m_devices_ ? (SampleKeyboard() | SampleGamepad(sticks)) : 0;
   raw |= m_injected_;

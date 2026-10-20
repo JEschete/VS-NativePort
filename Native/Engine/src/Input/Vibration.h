@@ -11,7 +11,7 @@ typedef struct Input_VibrationPatternSlot {
     u_short active;
     u_short ownerTag;
     char* pattern;
-    int channels[10];
+    int channels[12]; /* native: independent six-word envelopes for both motors */
 } Input_VibrationPatternSlot;
 
 #endif // VS_INPUT_VIBRATION_H_TYPES

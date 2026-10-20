@@ -153,6 +153,57 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
 
+### Working vibration output and safe stopping (#39, 2026-10-20)
+
+The owned libpad bridge no longer discards `PadSetAct`'s mutable table. The
+original `_padResetDefaults` registers it once; `vs_main_setVibrateParams`
+subsequently writes its bytes. The host reads those live bytes each input tick,
+mapping the binary small motor to SDL high frequency and the 8-bit large motor
+to low frequency. Only the game's canonical actuator alignment is advertised.
+
+- Vibration Off, scripted input, a missing/disconnected pad and pad reset mute
+  output. This also suppresses stale registered bytes while the original
+  pattern updater is disabled. Device removal and shutdown explicitly stop
+  active motors. SDL requests last 250 ms and refresh every 100 ms while active;
+  redundant logical-tick commands are avoided. Unsupported/failed SDK requests
+  produce warnings, not success-shaped fallbacks. Shutdown uses SDL's C logger
+  for a failed stop so cleanup cannot throw through the formatting logger.
+- The T00581 copier fix gives each native slot two complete six-word envelopes,
+  rather than `channels[10]` aliasing the next slot or overrunning the second.
+  Original MIPS at 80043450/8004346C confirms the overlapping PS1 tail and
+  0x38 stride; this is independent native runtime storage, not an on-disc
+  layout change. The ledgers' original layout-conflict notes remain valid.
+- Three real SDL virtual-controller cases failed before wiring output. A
+  separate producer storage guard failed 10 != 12 before the copier fix.
+  Original pattern parsing, both slots mixing/clamping, full-range intensities,
+  live-table changes, Off/mute/reset, disconnect, destruction and a sustained
+  refresh interval now pass. `[input]`: 11 cases / 116 assertions in both builds.
+  The existing copied-C `/J` already preserves unsigned pattern bytes; the
+  initially suspected signed-byte defect was disproven and not patched.
+- Debug and Release each complete 20,500 scripted menu ticks with 72
+  captures/read-only observations. The real On-confirm preset produces motor
+  commands (28 positive samples in Debug, 25 in Release), followed by On/Off,
+  cancellation, root return, field recovery and re-entry. Scripted runs
+  intentionally do not activate physical devices.
+- With explicit owner approval, hidden `[.hardware-rumble]` selects exactly one
+  device matching `VS_NATIVE_RUMBLE_DEVICE`. A 320 ms, 25%-command large-motor
+  check goes through the same owned input/registered-table bridge and explicit
+  stop. Both attempts pass 27 SDK assertions; the first was missed, and only
+  the ready-coordinated repeat has owner confirmation: felt it and stopped
+  cleanly. The selected device is DualSense Edge Wireless Controller.
+  This is not a claim that the owner felt the scripted game-menu preview.
+- Real-device tests are never part of normal input/full-suite execution.
+  Run the hidden tag only after consent, with the exact device name in the
+  environment, and remove that variable afterward. Logs and game-menu/preset
+  evidence remain under `build/quality/issue39/`; no assets are uploaded.
+- A second copy preserves manifest SHA-256
+  `CADEA2A54F52923034FB2DA5B308AC36198021B690404DD13EFEB546B797CAD5`.
+  Complete Debug and Release suites each pass 144 cases / 360,588 assertions;
+  the explicit physical opt-in is absent. Native view contracts check 620
+  runtime fields with zero mismatches.
+  The fixing commit, final checks and exact pushed CI are recorded in #39.
+  This completes neither combat/audio/progression consumers nor all Options.
+
 ### Menu-first Options and Cursor Memory (#39, 2026-10-20)
 
 The owner explicitly approves finishing menu/device checks now and verifying
@@ -187,11 +238,11 @@ The decision is recorded on #4 and #39, not a silent work-order change.
 - Local arguments, completed logs, screenshots and observed settings/consumer
   states are under `build/quality/issue39/cursor-debug` and `cursor-release`.
   This proves session behavior, not save persistence.
-- Next concrete device gap: owned `Legacy/Input/LibPad.cpp::PadSetAct`
-  discards the registered mutable actuator table, and `InputSystem` has no SDL
-  rumble output. The original controller registers once and then updates those
-  bytes, so a one-shot forwarding call would be incomplete. This gap is logged
-  on #39 before implementation; vibration is not declared complete.
+- The earlier device finding was that owned `Legacy/Input/LibPad.cpp::PadSetAct`
+  discarded the registered mutable actuator table, and `InputSystem` had no SDL
+  rumble output. The original registers once and then updates those bytes.
+  The implementation/verification above supersedes that recorded gap, not the
+  deferred combat/audio/progression acceptance.
 
 ### Late-attract reproduction blocker (#26, 2026-10-20)
 

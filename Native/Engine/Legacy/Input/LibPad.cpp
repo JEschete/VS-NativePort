@@ -1,6 +1,12 @@
 #include "Legacy/Input/LibPad.h"
 
+#include "Core/Log.hpp"
 #include "Input/LegacyPad.hpp"
+#include "Legacy/Psx.h"
+
+extern "C" {
+#include "Input/Controller.h"
+}
 
 // libpad shim (plan §6.5). The game registered two receive buffers with
 // PadInitDirect and decodes them itself; this writes them in the original
@@ -14,6 +20,9 @@ struct Port {
   unsigned char* buffer = nullptr;
   bool connected = false;
   bool analog = false;
+  unsigned char* actuators = nullptr;
+  int actuator_count = 0;
+  bool aligned = false;
 };
 
 Port g_ports[2];
@@ -27,6 +36,24 @@ Port* PortFor(int port) {
 }  // namespace
 
 namespace VS::Legacy {
+
+ActuatorState ReadActuators(int port) {
+  if (port < 0 || port > 1) {
+    VS_LOG_WARN("input", "invalid actuator port index {}", port);
+    return {};
+  }
+  const Port& p = g_ports[port];
+  if (!p.connected || !p.analog || !p.aligned || !p.actuators ||
+      p.actuator_count == 0 || Input_settings.vibrationOn == 0) {
+    return {};
+  }
+  // _padResetDefaults (main.c:8468) registers bytes subsequently mutated by
+  // vs_main_setVibrateParams (main.c:8698); copying them here would lose
+  // pulses.
+  const auto large = p.actuator_count > 1 ? p.actuators[1] : 0;
+  return {static_cast<u16>(large * 257u),
+          static_cast<u16>((p.actuators[0] & 1u) ? 65535u : 0u)};
+}
 
 void FeedPad(int port, const Input::PadState& state, bool connected) {
   if (port < 0 || port > 1) {
@@ -58,6 +85,8 @@ void FeedPad(int port, const Input::PadState& state, bool connected) {
 extern "C" {
 
 void PadInitDirect(unsigned char* port1, unsigned char* port2) {
+  g_ports[0] = Port{};
+  g_ports[1] = Port{};
   g_ports[0].buffer = port1;
   g_ports[1].buffer = port2;
   for (Port& p : g_ports) {
@@ -93,8 +122,16 @@ int PadInfoMode(int port, int term, int offs) {
 }
 
 int PadSetActAlign(int port, unsigned char* table) {
-  (void)port;
-  (void)table;
+  Port* p = PortFor(port);
+  if (p == nullptr || table == nullptr) {
+    VS_LOG_WARN("input", "invalid actuator alignment for port {}", port);
+    return 0;
+  }
+  p->aligned = table[0] == 0 && table[1] == 1;
+  if (!p->aligned) {
+    VS_LOG_WARN("input", "unsupported actuator alignment for port {}", port);
+    return 0;
+  }
   return 1;
 }
 
@@ -106,10 +143,20 @@ int PadSetMainMode(int port, int offs, int lock) {
 }
 
 void PadSetAct(int port, unsigned char* table, int len) {
-  // actuator levels (vibration) go to Engine\Input in the vibration milestone
-  (void)port;
-  (void)table;
-  (void)len;
+  Port* p = PortFor(port);
+  if (p == nullptr) {
+    VS_LOG_WARN("input", "invalid actuator registration port {}", port);
+    return;
+  }
+  if (len < 0 || len > 2 || (len != 0 && table == nullptr)) {
+    p->actuators = nullptr;
+    p->actuator_count = 0;
+    VS_LOG_WARN("input", "invalid actuator buffer length {} for port {}", len,
+                port);
+    return;
+  }
+  p->actuators = len == 0 ? nullptr : table;
+  p->actuator_count = len;
 }
 
 }  // extern "C"

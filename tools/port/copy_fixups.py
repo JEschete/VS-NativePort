@@ -797,6 +797,11 @@ ONDISC_OFFSETS: dict[str, str] = {
 
 # Reviewed fixes to copied type definitions: type id -> [(old, new, reason)]. Checked by Native\Tests\src\LayoutAsserts.c.
 TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "T00581": [
+        ("int channels[10];",
+         "int channels[12]; /* native: independent six-word envelopes for both motors */",
+         "main.c:8584/8720 and MIPS 80043450/8004346C use an overlapping PS1 tail; native slots must not alias or overflow"),
+    ],
     "T00532": [
         ("char reserved3C[8];",
          "union {\n        char reserved3C[8];\n        struct {\n"

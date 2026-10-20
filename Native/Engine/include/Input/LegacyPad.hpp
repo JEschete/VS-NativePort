@@ -8,8 +8,14 @@
 
 namespace VS::Legacy {
 
+struct ActuatorState {
+  u16 low_frequency = 0;
+  u16 high_frequency = 0;
+};
+
 // `connected` false reports an empty port. The state is written in the original
 // receive-buffer format.
 void FeedPad(int port, const Input::PadState& state, bool connected);
+ActuatorState ReadActuators(int port);
 
 }  // namespace VS::Legacy
