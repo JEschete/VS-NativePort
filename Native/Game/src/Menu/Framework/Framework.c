@@ -1396,7 +1396,8 @@ void Menu_Framework_SetInformationMessage(char* message)
 {
 #pragma vsstring(start)
     static char Menu_Framework_setInformationMessageInfoMessage[] =
-        "|!0|000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\0\0";
+        { [0] = Core_TextCode_ChunkSize, [98] = Core_TextCode_Terminator,
+          [99] = Core_TextCode_Terminator, [100] = 0 };
 #pragma vsstring(end)
 
     Core_Memory_CopyHalfwordBlocks(&Menu_Framework_setInformationMessageInfoMessage[2], message, 96);

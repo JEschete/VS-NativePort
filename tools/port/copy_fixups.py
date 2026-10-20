@@ -49,6 +49,12 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F02524": [
+        (r'"|!0|' + "0" * 96 + r'\0\0"',
+         "{ [0] = Core_TextCode_ChunkSize, [98] = Core_TextCode_Terminator,\n"
+         "          [99] = Core_TextCode_Terminator, [100] = 0 }",
+         "58EC.c:475 pragma vsstring encodes |!0| as F8 00; retain 96-byte payload and both E7 guards"),
+    ],
     "F00551": [
         ("Field_ResolveSceneRoomData(Field_roomData.minimapScene);",
          "Field_ResolveSceneRoomData(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);",

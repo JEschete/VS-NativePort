@@ -153,6 +153,66 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
 
+### Contextual information and first-visible-frame text (#30/#31, 2026-10-19)
+
+The shared F02524 `vs_mainmenu_setInformationMessage` producer
+(`MENU/MAINMENU.PRG/58EC.c:475`) still contained literal ASCII `|!0|` from a
+`pragma vsstring` initializer. The original encoder proves this prefix is
+**F8 00**: instantaneous text, not printable glyphs. The helper copies 96
+payload bytes starting at byte two. Thus the unencoded leading pair survived:
+repeatedly rebound Equip/Setup messages spent every frame's initial character
+budget on that pair instead of their body, while one-shot empty-category
+messages revealed progressively with a stray glyph.
+
+The copier now emits the exact encoded prefix, zero-glyph payload storage,
+both original E7 guards and the C terminator. No global text speed, dialogue
+wait, help string, progression gate or Information option semantics changed.
+
+Verification:
+
+- A first-visible-frame regression failed before the repair and passed after.
+  Isolated `InformationTests.cpp` now covers the exact prefix/payload/tail,
+  complete first-frame output despite repeated rebinding, immediate replacement
+  with empty text, ordinary dialogue still revealing one glyph, and Information
+  Off hiding normal help while preserving required cautions. Existing legacy
+  renderer tests were left unchanged rather than reformatting/baselining them.
+- Full Debug and Release suites pass **119 cases / 45,629 assertions** each.
+  Changed-source quality with tidy reports **zero new findings**, without
+  refreshing any baseline.
+- Both configurations complete **26,500-tick** controller replays toggling
+  Information On->Off->On through Options, returning to Items/Equip/Setup and
+  the equipment-category overview, cancelling and re-entering, then returning to the
+  field. All **18 requested captures per configuration** exist. The actual
+  information panel/body disappears when Off and the original contextual
+  messages return when On; this verifies a consumer effect, not merely a bit.
+- Debug's category replay and Release's dense-sampled repeat exercise weapons,
+  blades, grips, empty Shields, back/forward selection, Equip/Setup, chooser
+  details, cancellation and re-entry. Release's first complete new Shields
+  sample is tick **10316** (after the category transition); its body remains
+  byte-identical in all subsequent samples through 10600. The first rendered
+  message is complete, not a gradually revealed string.
+- Portable DuckStation comparison `reference-help-b` uses real title/prologue
+  skips and menu/category inputs. Captures at 128/133/138 seconds cover original
+  Equip/Setup; 158/160 cover empty Shields. Native messages match "Choose items
+  to equip.", the original assembly/disassembly/repair description, and "You
+  have no items in this category." without a leading glyph. An earlier
+  wall-clock reference attempt missed its intended boot state and is retained
+  as an unsuccessful comparison, not evidence.
+
+Exact argv/logs and local captures are under `build\quality\issue30`:
+`help-after-debug`, `categories-after-debug`, `categories-final-release`,
+`information-toggle-debug`, `information-toggle-release`, and
+`reference-help-b`. A deeper 14,800-tick Debug item-detail/actions replay and
+13,900-tick Release Equip->Weapon replay confirm that action cautions and
+cancellation work, but the weapon-detail/chooser view still loses its labels
+and information together (#33). Do not represent those blank views as help
+completion. #30 can close on its verified control/timing repair; #31's root
+Equip/Setup messages are restored, but its deeper-context acceptance remains
+linked to #33 until those views render. Fixing revision and successful pushed
+CI are recorded on the issues. #39 still has other Options effects outstanding;
+this does not complete equipment-changing semantics, the Status Square
+subview or overall #2.
+
 ### Working minimap scenes (#40, 2026-10-19)
 
 This completes the missing minimap functionality after the shared exit-hang fix
