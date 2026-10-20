@@ -153,6 +153,56 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
 
+### Data entry and safe no-card lifecycle (#38)
+
+The exact first-room Data entry at pushed `9af8a50e` crashed at tick **7713**,
+before any card or file confirmation. F02777, `Menu_Files_DrawPlayTime`
+(`MENU7.PRG/260.c:4157`), overwrote digits through a static pointer to a
+read-only string literal. The copier now emits an owned mutable array before
+local-static hoisting. The generated Menu7 reset therefore restores the whole
+12-byte buffer, not a pointer to read-only storage. The original clock, timing
+and 100-hour overflow display are unchanged.
+
+`DataMenuTests.cpp` adds **80 assertions / two cases**: emitted clock glyphs
+at 0/12/99/100 hours, reset/reentry, unchanged global play time and packet
+guards; five empty summaries on each card port remain unavailable, Circle
+never starts a load while paging through them, and Cross returns cancellation.
+The input fixture binds an empty SFX bank, as required by the existing feedback
+API, and restores its pointers and all borrowed public UI/input state. No
+card-readiness result or successful save/load is fabricated.
+
+Both Debug and Release complete **27,800-tick / 18-capture** recorded routes:
+Data entry, Load, both real no-card errors, dismissal, slot/Data/root-menu back,
+three entries, Triangle return, disabled-Save rejection and resumed field
+movement. Read-only matching-PDB observations at ticks 19500/22800/27400
+verify normal control mode, unpaused interaction, menu 63, action 0, no menu
+rows and restored soft reset. At all six observations the card UI allocation
+is back in the real heap freelist and free space is unchanged at **16,267,104
+bytes**, with no accumulating allocation across the repeated exits. The
+existing resource-release path retires the card UI resources; legacy card
+event calls remain unsupported, not a new native callback/persistence backend.
+A separate **normal-speed Release** route completes **11,200 ticks / five
+captures**, including the changing clock, both back steps and field movement.
+No runtime run logs an error or crash.
+
+Portable original-game `reference-data` captures establish the same disabled
+Save/Load root and clock placement (132 seconds), slot 1 and slot 2 no-card
+messages (146/167), dismissal and complete cancellation back to the field.
+Only the portable emulator was used, with both cards `None`. Native output
+matches these semantics after accounting for its eight-pixel presentation
+margin. Empty-slot coverage is a synthetic summary/UI regression, **not**
+working native card enumeration or actual file I/O.
+
+Full Debug and Release suites pass **128 cases / 45,794 assertions** each.
+Changed-source quality with tidy has zero new findings, without a baseline
+refresh; copier, manifest and project output are stable on a second generation.
+Exact argv, pre-fix stack, replay logs, captures and cleanup observations stay
+local under `build\quality\issue38` (`data-entry-before-debug`,
+`data-lifecycle-*`, `data-observed-*`, `normal-data-release`, `reference-data`).
+The fixing revision and successful pushed CI are recorded on #38 before
+closure. Actual persistence, import/format decisions and save/load behavior
+remain scoped to #18; no owner save files were used or overwritten.
+
 ### Full Map entry and lifecycle (#37, 2026-10-19)
 
 The first-room Map crash was independently reproduced at tick 7747 in

@@ -49,6 +49,13 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F02777": [
+        ('static char* Menu_Files_playTime = "00:00:00:00";',
+         'static char Menu_Files_playTime[] = "00:00:00:00";',
+         "260.c:4157 the clock overwrites its digit positions; own mutable storage rather than a read-only literal"),
+        ("        // BUG: invalid write to .rodata\n", "",
+         "the native clock buffer is now mutable and reset by value"),
+    ],
     "F02703": [
         ("*(int**)Core_ScratchAddr(1) + 7",
          "(u_long*)Render_frameScratch.orderingTable + 7",

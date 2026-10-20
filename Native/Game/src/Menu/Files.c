@@ -139,7 +139,7 @@ u_short Menu_Files_menuItemTextClut[][16] = {
 };
 
 // decomp: local static of _drawPlayTime, at file scope so the module reset reaches it
-static char* Menu_Files_playTime = "00:00:00:00";
+static char Menu_Files_playTime[] = "00:00:00:00";
 
 // decomp: _primBuf (_primBuf@src/MENU/MENU7.PRG/260.c)
 Menu_Files_PrimitiveBuffer Menu_Files_primBuf;
@@ -2857,7 +2857,6 @@ void Menu_Files_DrawPlayTime(void)
     }
     for (i = 0; i < 4; ++i) {
         digits = Core_Math_SplitDecimalDigit(time[i]);
-        // BUG: invalid write to .rodata
         Menu_Files_playTime[9 - i * 3] = (digits >> 4) + 48;
         Menu_Files_playTime[10 - i * 3] = (digits & 0xF) + 48;
     }
@@ -3552,7 +3551,7 @@ void Menu_Files_ResetMenu7Statics(void)
         memcpy((void*)&Menu_Files_containerConfirmationCursorAnimation, &initial, sizeof Menu_Files_containerConfirmationCursorAnimation);
     }
     {
-        static const char* initial = "00:00:00:00";
+        static const char initial[] = "00:00:00:00";
         memcpy((void*)&Menu_Files_playTime, &initial, sizeof Menu_Files_playTime);
     }
 }

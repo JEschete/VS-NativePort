@@ -55,6 +55,7 @@
     </ClCompile>
     <ClCompile Include="src\ContentTests.cpp" />
     <ClCompile Include="src\CoreTests.cpp" />
+    <ClCompile Include="src\DataMenuTests.cpp" />
     <ClCompile Include="src\EffectTimelineTests.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
