@@ -19,6 +19,7 @@
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
+#include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Ai/OrbitingBoss.h"
@@ -138,20 +139,6 @@ int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state)
         }
         state->detourStep = 0;
     }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DB370 (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-int Battle_Ai_ApproachActor(Battle_Ai_ActorAiState*, int, int, int)
-{
-    VS_UNPORTED("Battle::Ai::ApproachActor");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DB4AC (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-int Battle_Ai_SetMovementBehavior()
-{
-    VS_UNPORTED("Battle::Ai::SetMovementBehavior");
     return 0;
 }
 

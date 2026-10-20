@@ -375,6 +375,12 @@
     <ClInclude Include="src\Battle\Ai\Movement.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\MovementBehavior.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\MovementBehavior.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\Ai\Navigation.c">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>

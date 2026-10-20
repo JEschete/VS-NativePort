@@ -14,6 +14,7 @@
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
+#include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/RoomState.h"
@@ -727,18 +728,6 @@ int Battle_Ai_IsTileBehindActorTarget()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_800E48F8 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_RefreshAiTargetTileWhenTracking(Battle_Ai_PerceptionUpdateView*)
-{
-    VS_UNPORTED("Battle::Ai::RefreshAiTargetTileWhenTracking");
-}
-
-// decomp: BATTLE.PRG func_800E4904 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_RefreshAiTargetTile(void*)
-{
-    VS_UNPORTED("Battle::Ai::RefreshAiTargetTile");
-}
-
 // decomp: BATTLE.PRG func_800E49D8 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
 int Battle_Ai_FindAiDescentTile()
 {
@@ -768,12 +757,6 @@ void Battle_Ai_MoveActorTowardDestinationTile()
 void Battle_Ai_BeginAiGroundMovement()
 {
     VS_UNPORTED("Battle::Ai::BeginAiGroundMovement");
-}
-
-// decomp: BATTLE.PRG func_800E4BB8 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_RefreshAiMovementCooldown(Battle_Ai_TerrainMoveView*)
-{
-    VS_UNPORTED("Battle::Ai::RefreshAiMovementCooldown");
 }
 
 // decomp: BATTLE.PRG func_800E4BD8 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]

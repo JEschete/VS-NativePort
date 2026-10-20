@@ -65,6 +65,11 @@ def main() -> int:
             if match:
                 old = int(match[1] or match[2], 16) * 8
                 result[base + old] = native_base + cursor.get_field_offsetof()
+        for name, old_byte in nv.NATIVE_FIELD_ALIASES.get(tid, {}).items():
+            new = record.type.get_offset(name)
+            if new < 0:
+                raise ValueError(f'{tid}.{name}: native field alias not found')
+            result[base + old_byte * 8] = native_base + new
         return result
 
     failures = []

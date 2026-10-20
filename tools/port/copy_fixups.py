@@ -904,6 +904,27 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
          "main.c:8584/8720 and MIPS 80043450/8004346C use an overlapping PS1 tail; native slots must not alias or overflow"),
     ],
     "T00532": [
+        ("char reserved22[4];",
+         "union {\n        char reserved22[4];\n        struct {\n"
+         "            u_char reserved22Prefix;\n            signed char movementEnabled;\n"
+         "            u_char reserved24[2];\n        };\n    };",
+         "func_800E4BB8 uses the signed movement-enabled byte at original offset 0x23"),
+        ("char reserved89[3];",
+         "union {\n        char reserved89[3];\n        struct {\n"
+         "            u_char requestedMovementMode;\n            u_char currentMovementMode;\n"
+         "            u_char reserved8B;\n        };\n    };",
+         "func_800DB4AC records the requested and current movement modes at 0x89/0x8A"),
+        ("char reservedFC[12];",
+         "union {\n        char reservedFC[12];\n        struct {\n"
+         "            u_char reservedFCPrefix[4];\n            u_char patrolIndex;\n"
+         "            u_char patrolRow;\n            u_char patrolRate;\n"
+         "            signed char patrolDirection;\n            u_char patrolCooldown;\n"
+         "            u_char reserved105[3];\n        };\n    };",
+         "func_800DB4AC selects the closest flagged entry in one of four patrol rows"),
+        ("char reserved474[13];",
+         "union {\n        char reserved474[13];\n"
+         "        u_char movementModeCounters[13];\n    };",
+         "func_800DB4AC clears one byte per two-byte movement-mode record at 0x474"),
         ("char reserved12B[2];",
          "union {\n        char reserved12B[2];\n        struct {\n"
          "            u_char reserved12BPrefix;\n            u_char engagementRequest;\n"

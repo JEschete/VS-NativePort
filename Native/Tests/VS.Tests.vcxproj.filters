@@ -90,6 +90,12 @@
     <ClCompile Include="src\MinimapTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MovementBehaviorTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PursuitTargetsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\RasterBoundsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

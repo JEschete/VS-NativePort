@@ -112,3 +112,8 @@ F01822,function,Battle_Ai_ForceReleaseActorAiReservations,Native\Game\src\Battle
 F01823,function,Battle_Ai_ReleaseActorAiReservations,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
 F01842,function,Battle_Ai_FreeActorAiState,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-20,from Native\Game\src\Battle\Ai\ActorState.c
 F01771,function,Core_Math_SquaredTileDistance,Native\Engine\src\Core\Math\TileDistance.cpp,Native\Engine\src\Core\Math\TileDistance.h,2026-10-20,from Native\Engine\src\Core\Math\Vector.c
+F01662,function,Battle_Ai_SetMovementBehavior,Native\Game\src\Battle\Ai\MovementBehavior.cpp,Native\Game\src\Battle\Ai\MovementBehavior.h,2026-10-20,from Native\Game\src\Battle\Ai\Movement.c
+F01786,function,Battle_Ai_RefreshAiMovementCooldown,Native\Game\src\Battle\Ai\MovementBehavior.cpp,Native\Game\src\Battle\Ai\MovementBehavior.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
+F01661,function,Battle_Ai_ApproachActor,Native\Game\src\Battle\Ai\MovementBehavior.cpp,Native\Game\src\Battle\Ai\MovementBehavior.h,2026-10-20,from Native\Game\src\Battle\Ai\Movement.c
+F01779,function,Battle_Ai_RefreshAiTargetTileWhenTracking,Native\Game\src\Battle\Ai\MovementBehavior.cpp,Native\Game\src\Battle\Ai\MovementBehavior.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
+F01780,function,Battle_Ai_RefreshAiTargetTile,Native\Game\src\Battle\Ai\MovementBehavior.cpp,Native\Game\src\Battle\Ai\MovementBehavior.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c

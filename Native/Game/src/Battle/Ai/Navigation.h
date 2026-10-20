@@ -43,7 +43,6 @@ typedef union Battle_Ai_TilePosition {
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_NAVIGATION_H_DECLS)
 #define VS_BATTLE_AI_NAVIGATION_H_DECLS
-#include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
@@ -91,14 +90,11 @@ int Battle_Ai_CardinalPassabilityMask(Battle_Ai_MovementPathView*, Battle_Ai_Pat
 int Battle_Ai_InitializeObstacleDetour();
 int Battle_Ai_SelectActorVerticalMovementStep(Battle_Ai_ActorAiState*, int*, int*);
 int Battle_Ai_IsTileBehindActorTarget();
-void Battle_Ai_RefreshAiTargetTileWhenTracking(Battle_Ai_PerceptionUpdateView*);
-void Battle_Ai_RefreshAiTargetTile(void*);
 int Battle_Ai_FindAiDescentTile();
 void Battle_Ai_BeginAiTerrainMovement(void*);
 void Battle_Ai_BeginAiAlternateTerrainMovement(Battle_Ai_ActorAiState*);
 void Battle_Ai_MoveActorTowardDestinationTile();
 void Battle_Ai_BeginAiGroundMovement();
-void Battle_Ai_RefreshAiMovementCooldown(Battle_Ai_TerrainMoveView*);
 void Battle_Ai_ClearAiContactOccupancy(int);
 void Battle_Ai_SetAiContactOccupancy(int);
 int Battle_Ai_BeginAiMovementTowardPoint();

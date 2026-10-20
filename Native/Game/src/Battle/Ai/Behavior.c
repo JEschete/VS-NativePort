@@ -20,6 +20,7 @@
 #include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
+#include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"

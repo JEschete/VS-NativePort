@@ -874,7 +874,14 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x1D */ char reserved1D[3];
     /* 0x20 */ u_char settingsBit26;
     /* 0x21 */ u_char settingsByte3Bit0;
-    /* 0x22 */ char reserved22[4];
+    /* 0x22 */ union {
+        char reserved22[4];
+        struct {
+            u_char reserved22Prefix;
+            signed char movementEnabled;
+            u_char reserved24[2];
+        };
+    };
     /* 0x26 */ u_char allowFallbackAction;
     /* 0x27 */ u_char settingsBit27;
     /* 0x28 */ char reserved28;
@@ -908,7 +915,14 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x82 */ short pointHeight;
     /* 0x84 */ char reserved84[4];
     /* 0x88 */ u_char actorId;
-    /* 0x89 */ char reserved89[3];
+    /* 0x89 */ union {
+        char reserved89[3];
+        struct {
+            u_char requestedMovementMode;
+            u_char currentMovementMode;
+            u_char reserved8B;
+        };
+    };
     /* 0x8C */ u_short moveAttempts;
     /* 0x8E */ u_short opaque8E;
     /* 0x90 */ union {
@@ -950,7 +964,18 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0xEA */ char reservedEA[16];
     /* 0xFA */ u_char detourStep;
     /* 0xFB */ u_char opaqueFB;
-    /* 0xFC */ char reservedFC[12];
+    /* 0xFC */ union {
+        char reservedFC[12];
+        struct {
+            u_char reservedFCPrefix[4];
+            u_char patrolIndex;
+            u_char patrolRow;
+            u_char patrolRate;
+            signed char patrolDirection;
+            u_char patrolCooldown;
+            u_char reserved105[3];
+        };
+    };
     /* 0x108 */ Battle_Ai_TilePosition previousFacingTile;
     /* 0x10C */ u_char facingPending;
     /* 0x10D */ char reserved10D[11];
@@ -1012,7 +1037,8 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x188 */ short heading;
     /* 0x18A */ short angle : 16;
     void* nativePointer18C; /* PS1 pointer slot 0x18C */
-    char reserved18C_190[10];
+    u_int navigationFlags;
+    char reserved194[6];
     /* 0x19A */ u_char opaque19A;
     /* 0x19B */ char reserved19B[5];
     /* 0x1A0 */ struct Battle_Ai_ActorAiState *nextEngaged;
@@ -1032,7 +1058,10 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x2F0 */ Battle_Ai_ActionCandidate candidates[16];
     /* 0x430 */ Battle_Ai_ActionCandidate *candidateOrder[16];
     /* 0x470 */ int candidateCount;
-    /* 0x474 */ char reserved474[13];
+    /* 0x474 */ union {
+        char reserved474[13];
+        u_char movementModeCounters[13];
+    };
     /* 0x481 */ u_char reactionPending;
 } Battle_Ai_ActorAiState;
 

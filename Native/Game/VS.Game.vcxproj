@@ -255,6 +255,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\MovementBehavior.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\Navigation.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1722,6 +1725,7 @@
     <ClInclude Include="src\Battle\Ai\EngagementState.hpp" />
     <ClInclude Include="src\Battle\Ai\FrameUpdate.h" />
     <ClInclude Include="src\Battle\Ai\Movement.h" />
+    <ClInclude Include="src\Battle\Ai\MovementBehavior.h" />
     <ClInclude Include="src\Battle\Ai\Navigation.h" />
     <ClInclude Include="src\Battle\Ai\NavigationPrimitives.h" />
     <ClInclude Include="src\Battle\Ai\OrbitingBoss.h" />

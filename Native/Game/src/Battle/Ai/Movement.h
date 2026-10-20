@@ -55,8 +55,6 @@ int Battle_Ai_IsMovementHistoryStalled(Battle_Ai_PerceptionUpdateView* state);
 void Battle_Ai_SaveMovementRandomState(void);
 int Battle_Ai_CanWalkInDirection(Battle_Ai_WanderView*, int);
 int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state);
-int Battle_Ai_ApproachActor(Battle_Ai_ActorAiState*, int, int, int);
-int Battle_Ai_SetMovementBehavior();
 void Battle_Ai_WanderAroundSavedCenter(void*);
 void Battle_Ai_WanderAroundTile(Battle_Ai_CandidateMovementView*, unsigned int, int);
 void Battle_Ai_MoveToTile(Battle_Ai_CandidateMovementView*, unsigned int, int);

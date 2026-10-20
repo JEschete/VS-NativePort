@@ -438,6 +438,63 @@ to SCORE. Selecting its first TITLE submenu produced `0xC0000409` after tick
 Manual regression or an assumed unimplemented cause. Neither #65 nor the
 remaining combat/audio/save acceptance is closed by this repair.
 
+### Native pursuit modes and tracked target producers (#6/#42, 2026-10-20)
+
+After the #66 publication/CI gate, ordered #6 resumes from `23fdeab9` plus
+the owned [movement behavior implementation](../Native/Game/src/Battle/Ai/MovementBehavior.cpp).
+Five C-backed entries are implemented: F01661/F01662 and
+F01779/F01780/F01786. This brings the original C-backed checklist to
+**52 of 145**, with **93** remaining; the complete audit has **134** open
+entries (133 stubs and one partial), including 31 assembly-only and ten
+missing local listings.
+
+- All seven movement modes preserve the original return values, mode-specific
+  resets, one-byte/two-byte-stride counters and no-op re-entry behavior.
+  Patrol selects enabled waypoints by Manhattan distance and retains the first
+  tie. The four-row bound comes from actor initialization's two-bit row selector.
+  Cooldown refresh retains unrelated navigation bits and the signed enable flag.
+- Native aliases expose the original mode, patrol and navigation fields without
+  changing ownership or recreating scratch memory. The navigation word is named
+  only after widening its adjacent override pointer. The view verifier records
+  original locations for these new aliases; independent native pointer/patrol
+  offset checks and all existing view contracts pass.
+- Real model fields supply current/planned target tiles and moving-platform
+  waypoint gates. Assembly confirms that the planned X coordinate is the signed
+  low halfword of `supportOffset`, not its whole integer. The implementation
+  preserves that width, current/planned tile padding, support-branch retained
+  bytes, target-cache zero distinction and the original intermediate OR-combined
+  target word. No donor guest-pointer helpers or address offsets were imported.
+- Focused `[ai][movement-behavior],[ai][pursuit-targets]`: **17 cases /
+  256 assertions**. Both full suites pass **231 cases / 827,013 assertions**.
+  `check_native_views.py`: 621 fields / zero mismatches;
+  `check_event_dispatch.py`: 179 signatures / zero errors. The 13 gap-audit
+  tests and 24 quality positive controls pass; use `.venv-3\Scripts\python.exe`
+  for the latter's installed tools. Do not run positive controls concurrently
+  with quality analysis: both generate the same compiler database.
+- `quality-native.cmd --changed --tidy`: zero new findings, no baseline refresh.
+  Second-generation manifest SHA-256 is
+  `CFF00291602B60A29016539B31A6808F6A63E45F8B9401D5C1C4194D11794AA7`.
+  Owned files survive regeneration; projects come from `gen_solution.py`.
+- Both full-prologue controller replays finish 48,000 ticks, all 22 captures,
+  exit 0 and no logged errors. Debug enters MAP004/MAP005 at 20,441/23,120;
+  Release at 20,761/23,440. The previous Release route was 20,763/23,440;
+  configuration-dependent encounter timing is not newly claimed deterministic.
+  Both final captures retain the live boss encounter, not a return to title.
+  No HP, actor position, RNG or progression memory was patched.
+- Exact 839-input schedules, capture selections and arguments are retained in
+  `build/quality/issue6-pursuit-{debug,release}-encounter/arguments.json`,
+  with captures and `vs-native.log` alongside. Corresponding full build/test
+  logs and `issue6-pursuit-final-quality.log` are in `build/quality/`.
+
+The live continuation is now **F01799 `DispatchAiLocomotionMode`**, reached at
+tick 19,481 in Debug and 19,845 in Release. Its ground destinations
+F01784/F01785 and directional resolver F01752 remain unimplemented; follow the
+original six-entry table, route-gate continuation, recovery and actor-command
+consumers rather than declaring pursuit complete. Autonomous movement, an
+initial real item drop, complete player-defeat flow and boss victory remain
+unverified. #6 and #42 stay open; these are verified producer contracts and
+integration regressions, not completed encounter acceptance.
+
 ### Menu-only Options acceptance gate (#2/#39, 2026-10-20)
 
 Following the explicit owner-approved menu-first split, all nine Options now

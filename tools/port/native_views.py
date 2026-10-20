@@ -16,6 +16,20 @@ T00559 T00561 T00564 T00569 T00582 T00590 T00591 T00593 T00608 T00613 T00615 T00
 """.split())
 AI_POINTERS = (0x54, 0x58, 0x5C, 0x60, 0x64, 0x68, 0x18C, 0x1A0, 0x22C,
                *range(0x430, 0x470, 4))
+NATIVE_FIELD_ALIASES = {
+    "T00532": {
+        "movementEnabled": 0x23,
+        "requestedMovementMode": 0x89,
+        "currentMovementMode": 0x8A,
+        "patrolIndex": 0x100,
+        "patrolRow": 0x101,
+        "patrolRate": 0x102,
+        "patrolDirection": 0x103,
+        "patrolCooldown": 0x104,
+        "navigationFlags": 0x190,
+        "movementModeCounters": 0x474,
+    },
+}
 
 # Views of vs_battle_actor (146C.h), including the engagement data used by the canonical AI state.
 ACTOR_VIEWS = frozenset("""
@@ -101,4 +115,10 @@ def rebase(tid: str, text: str, fields: list[tuple[str, dict]]) -> str:
         text, count = re.subn(pattern, '\n'.join(pieces), text, count=1)
         if count != 1:
             raise ValueError(f'{tid}.{name}: cannot expose native pointer slots')
+    if tid == 'T00532':
+        # Name the navigation word after widening its adjacent pointer slot.
+        padding = 'char reserved18C_190[10];'
+        if text.count(padding) != 1:
+            raise ValueError('T00532: rebased navigation flag padding not found')
+        text = text.replace(padding, 'u_int navigationFlags;\n    char reserved194[6];')
     return text
