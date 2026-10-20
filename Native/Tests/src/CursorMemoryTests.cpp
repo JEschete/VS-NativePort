@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <cstddef>
 
@@ -7,10 +8,14 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Audio/Seq/Channel.h"
 #include "Core/Memory.h"
 #include "Core/Memory/Heap.h"
 #include "Input/Controller.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/MenuRows.h"
+#include "Menu/Options.h"
+#include "State/StateFlags.h"
 }
 
 namespace {
@@ -72,6 +77,23 @@ struct CursorFixture {
                                   row_types.data());
   }
 };
+
+struct PuzzleOptionsFixture {
+  CursorFixture rows;
+  std::array<u_short, 1070> saved_table =
+      std::to_array(Menu_Options_menuStrings);
+  char saved_disabled = Audio_Seq_unusedStateFlags.puzzleModeDisabled;
+
+  PuzzleOptionsFixture() {
+    std::fill_n(Menu_Options_menuStrings, saved_table.size(), 0xE7E7);
+    std::fill_n(Menu_Options_menuStrings, 18, 64);
+  }
+
+  ~PuzzleOptionsFixture() {
+    std::copy(saved_table.begin(), saved_table.end(), Menu_Options_menuStrings);
+    Audio_Seq_unusedStateFlags.puzzleModeDisabled = saved_disabled;
+  }
+};
 }  // namespace
 
 TEST_CASE("Cursor Memory controls the actual root selection consumer",
@@ -120,4 +142,24 @@ TEST_CASE("Cursor Memory clamps a remembered selection after rows shrink",
   fixture.OpenRows(3);
   REQUIRE(Menu_Framework_itemsText != nullptr);
   CHECK(Menu_Framework_HighlightedRow() == 0);
+}
+
+TEST_CASE("Options retain the real Puzzle Mode availability gate",
+          "[menu][options][puzzle]") {
+  const char disabled = GENERATE(char{0}, char{1});
+  PuzzleOptionsFixture fixture;
+  Audio_Seq_unusedStateFlags.puzzleModeDisabled = disabled;
+  Input_settings.cursorMemory = 0;
+  u_char state = 4;
+  CHECK(Menu_Options_Update(&state) == 0);
+  CHECK(state == 5);
+  CHECK(Input_settings.cursorMemory == 0);
+  REQUIRE(Menu_Framework_itemsText != nullptr);
+  const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(
+      Menu_Framework_itemsText);
+  for (int row = 0; row < 9; ++row) {
+    CAPTURE(disabled, row);
+    CHECK(rows[row].menuRowFlags ==
+          (row == 6 && disabled ? Menu_Framework_RowTypeFlag_Disabled : 0));
+  }
 }

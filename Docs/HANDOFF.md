@@ -6,10 +6,12 @@ The ordered work tracker is [#4](https://github.com/JEschete/VS-NativePort/issue
 The maintained-production quality pass in [#5](https://github.com/JEschete/VS-NativePort/issues/5)
 is verified locally. The Guildenstern textbox fix in
 [#1](https://github.com/JEschete/VS-NativePort/issues/1) is now verified locally.
-Menu issue #2 remains open: later owner comparisons identify additional text,
-equipment/Status, Map/Data and Options gaps. The checkpoints below verify their
-specific fixes, not complete menu parity. #6 remains blocked on #2 acceptance
-and successful CI for its fixing revisions.
+The menu-rendering/lifecycle checkpoints now cover those owner-reported text,
+equipment/Status, Map/Data and Options gaps. The owner approves the menu-first
+split: #39 retains actual combat/audio/cleared-puzzle consumer acceptance rather
+than blocking the rendering/lifecycle gate on later ordered work. Final gate CI
+and closure are recorded in #2; the next ordered implementation is #6. Menu
+shortcuts and setting values are not combat verification.
 Preserve the original dialogue pause and button advance; do not shorten the scene delay.
 
 ### Guildenstern window dialogue (2026-10-19)
@@ -152,6 +154,48 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   some labels/numeric text and inventory category/detail text are still missing. #2 is
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
+
+### Menu-only Options acceptance gate (#2/#39, 2026-10-20)
+
+Following the explicit owner-approved menu-first split, all nine Options now
+have verified menu selection/return coverage. #39's five remaining real
+consumer criteria stay open; this section does not mark them implemented.
+
+- Beyond the completed Simple Map, Information, Cursor Memory and Vibration
+  cases, Debug and Release each complete 36,000 ticks / 41 observed stages for
+  Ability Timing, Weapon Status, Armor Status and Sound. Each exercises both
+  applied values, choice re-entry, a cancelled pending value, submenu/root back,
+  real field return and subsequent Triangle-driven re-entry.
+- Actual packed bits 5/6/7 change 1 -> 0 -> 1 and remain unchanged on cancel.
+  Sound changes Stereo 0 -> Mono 1 -> Stereo 0, preserving the value on cancel.
+  The other packed flags, Cursor Memory byte and menu-enable word are checked
+  against each case's baseline. No unrelated prefix byte changes occur.
+- Puzzle Mode is legitimately available in this fresh scene: the disabled
+  flag is zero without any override. Both configurations complete 15,900 ticks
+  / 11 stages. Setting bit 3 changes 0 -> 1 -> 0; the original puzzleMode state
+  synchronizes to its inverse, stays unchanged on cancellation and survives
+  field return/re-entry. The original message explicitly says this mode only
+  affects cleared levels; no cleared-level puzzle result is claimed here.
+- A persistent UI regression presents both legitimate availability states in
+  an isolated fixture. Only Puzzle Mode's row is disabled when required, all
+  other rows remain enabled, and the temporary Cursor Memory override restores
+  the caller's value. It does not force a progression flag in a live game.
+- Actual screenshots retain all nine labels, the selection arrow, encoded
+  instant contextual text and the expected applied/highlight distinction.
+  Field-return observations require menu state 63 and no bound rows, not merely
+  a clean process exit or moving logical ticks.
+- Related `[menu]` tests pass 16 cases / 214 assertions in both configurations.
+  Complete suites pass 145 cases / 360,614 assertions each after the new gate
+  fixture. Focused quality with tidy has zero new findings, no baseline changes.
+  Arguments, settings/selection observations and captures are retained under
+  `build/quality/issue39/menu-matrix-debug`, `menu-matrix-release`,
+  `puzzle-menu-debug`, and `puzzle-menu-release`; no assets are uploaded.
+- This closes the reported menu rendering/lifecycle slice after its fixing
+  revisions and final regression CI succeed. Actual timing indicators,
+  weapon/armor combat feedback, stereo/mono output parity and cleared-puzzle
+  effects remain #39 work in their ordered stages. Save persistence remains
+  #18, item effects/crash #8/#32, and actual equipment operations #14.
+  Resume #6 with the full prologue and real battle/defeat routes, not menu skips.
 
 ### Working vibration output and safe stopping (#39, 2026-10-20)
 
