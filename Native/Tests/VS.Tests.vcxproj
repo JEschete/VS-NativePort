@@ -94,6 +94,7 @@
     <ClCompile Include="src\LegacyGpuTests.cpp" />
     <ClCompile Include="src\LogTests.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\ManualRenderTests.cpp" />
     <ClCompile Include="src\MapRenderTests.cpp" />
     <ClCompile Include="src\MemoryTests.cpp" />
     <ClCompile Include="src\MinimapTests.cpp" />

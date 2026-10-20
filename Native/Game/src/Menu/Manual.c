@@ -243,7 +243,7 @@ int Menu_Manual_UpdateHelpPages(void)
     int lastPage;
     int selectedRow;
     int currentPage;
-    u_long** s0;
+    Render_FrameScratch* s0;
     int cdState;
 
     switch (Menu_Manual_showMenuState) {
@@ -366,18 +366,18 @@ int Menu_Manual_UpdateHelpPages(void)
                 Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             }
         }
-        s0 = (u_long**)Core_ScratchAddr(0);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, 8, 16, s0[1] + 6);
-        Render_DrawCompactTextColor("TURN    PAGE", 0x12001C, 0x808080, s0[1] + 6);
+        s0 = &Render_frameScratch;
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, 8, 16, ((u_long*)s0->orderingTable) + 6);
+        Render_DrawCompactTextColor("TURN    PAGE", 0x12001C, 0x808080, ((u_long*)s0->orderingTable) + 6);
         Menu_Manual_DrawControlsBackground(0x10, 0x12, 0x60, 0xC);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Circle, 8, 34, s0[1] + 6);
-        Render_DrawCompactTextColor("MENU", 0x24001C, 0x808080, s0[1] + 6);
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Circle, 8, 34, ((u_long*)s0->orderingTable) + 6);
+        Render_DrawCompactTextColor("MENU", 0x24001C, 0x808080, ((u_long*)s0->orderingTable) + 6);
         Menu_Manual_DrawControlsBackground(0x10, 0x24, 0x40, 0xC);
-        Render_DrawCompactTextColor("PAGE", 0xC400D8, 0x808080, s0[1] + 7);
+        Render_DrawCompactTextColor("PAGE", 0xC400D8, 0x808080, ((u_long*)s0->orderingTable) + 7);
         sprintf(charBuf, "#%d/", currentPage + 1);
-        Render_DrawCompactTextColor(charBuf, 0xC40118, 0x808080, s0[1] + 7);
+        Render_DrawCompactTextColor(charBuf, 0xC40118, 0x808080, ((u_long*)s0->orderingTable) + 7);
         sprintf(charBuf, "#%d", lastPage + 1);
-        Render_DrawCompactTextColor(charBuf, 0xC40130, 0x808080, s0[1] + 7);
+        Render_DrawCompactTextColor(charBuf, 0xC40130, 0x808080, ((u_long*)s0->orderingTable) + 7);
         Field_manualDisplayState
             .scrollPositions[Field_manualDisplayState.currentManual] =
             Menu_Manual_scrollPosition;
@@ -519,7 +519,7 @@ int Menu_Manual_LastPageLineOffset(void)
 // decomp: MENUE.PRG _copyNextPageText (src/MENU/MENUE.PRG/494.c:531)
 void Menu_Manual_CopyPageText(void)
 {
-    char buffer[1024];
+    static char buffer[1024];
     int i;
     int nextPage;
     u_short* offsets;
@@ -572,13 +572,13 @@ void Menu_Manual_DrawPageContent(void)
     int i;
     int spriteOffset;
     u_short* spriteData;
-    void** q;
-    void** p = (void**)Core_ScratchAddr(0);
+    Render_FrameScratch* q;
+    Render_FrameScratch* p = &Render_frameScratch;
 
-    area = p[0];
+    area = p->primitiveCursor;
     SetDrawArea(area, &Render_legacyDrawEnvironments[(Render_frameBuf + 1) & 1].clip);
-    AddPrim(p[1], area++);
-    p[0] = area;
+    AddPrim(p->orderingTable, area++);
+    p->primitiveCursor = area;
 
     Menu_Manual_DrawDiagramLines();
 
@@ -600,11 +600,11 @@ void Menu_Manual_DrawPageContent(void)
     rect.y = 55;
     rect.h = 130;
 
-    q = (void**)Core_ScratchAddr(0);
-    area = q[0];
+    q = &Render_frameScratch;
+    area = q->primitiveCursor;
     SetDrawArea(area, &rect);
-    AddPrim(q[1], area++);
-    q[0] = area;
+    AddPrim(q->orderingTable, area++);
+    q->primitiveCursor = area;
 }
 
 // decomp: MENUE.PRG _min (src/MENU/MENUE.PRG/494.c:619)
@@ -636,7 +636,7 @@ void Menu_Manual_DrawIllustration(short* data)
     int j;
     int i;
     SPRT* sprite;
-    u_long** scratch;
+    Render_FrameScratch* scratch;
     short tPage;
 
     if ((*data != 0) && ((Menu_Manual_AdvanceVisibilityAnimation((Menu_Manual_AnimationState*)data) << 0x10) != 0)) {
@@ -678,7 +678,7 @@ void Menu_Manual_DrawIllustration(short* data)
                 continue;
             }
 
-            sprite = *((void**)((uintptr_t)Core_ScratchBase() + 0x000));
+            sprite = Render_frameScratch.primitiveCursor;
             setSprt(sprite);
             setShadeTex(sprite, 1);
             sprite->clut = clutPacked;
@@ -699,9 +699,9 @@ void Menu_Manual_DrawIllustration(short* data)
             sprite->v0 = (spriteV0 << 4);
             setWH(sprite, spriteW, spriteH);
 
-            scratch = (void*)Core_ScratchAddr(0);
-            AddPrim(scratch[1], sprite++);
-            scratch[0] = (void*)sprite;
+            scratch = &Render_frameScratch;
+            AddPrim(scratch->orderingTable, sprite++);
+            scratch->primitiveCursor = (void*)sprite;
             _insertTPage(0, tPage);
         }
     }
@@ -711,9 +711,9 @@ void Menu_Manual_DrawIllustration(short* data)
 void Menu_Manual_DrawPageBackground(int x, int y, int w, int h, int color)
 {
     POLY_G4* poly;
-    u_long** p;
+    Render_FrameScratch* p;
 
-    poly = *(POLY_G4**)Core_ScratchAddr(0);
+    poly = Render_frameScratch.primitiveCursor;
     setPolyG4(poly);
     setXY4(poly, x, y, (x + w) - 1, y, x, (y + h) - 1, (x + w) - 1, (y + h) - 1);
     setRGB0(poly, Menu_Manual_kColorStops0[color].r, Menu_Manual_kColorStops0[color].g, Menu_Manual_kColorStops0[color].b);
@@ -721,9 +721,9 @@ void Menu_Manual_DrawPageBackground(int x, int y, int w, int h, int color)
     setRGB2(poly, Menu_Manual_kColorStops0[color].r, Menu_Manual_kColorStops0[color].g, Menu_Manual_kColorStops0[color].b);
     setRGB3(poly, Menu_Manual_kColorStops1[color].r, Menu_Manual_kColorStops1[color].g, Menu_Manual_kColorStops1[color].b);
 
-    p = (u_long**)Core_ScratchAddr(0);
-    AddPrim(p[1] + 7, poly++);
-    p[0] = (u_long*)poly;
+    p = &Render_frameScratch;
+    AddPrim(((u_long*)p->orderingTable) + 7, poly++);
+    p->primitiveCursor = (u_long*)poly;
     _insertTPage(7, getTPage(0, 3, 0, 0));
 }
 
@@ -749,7 +749,7 @@ void Menu_Manual_DrawUpperScrollFade(void)
     } while (var_v0 != (Menu_Manual_kMenuBgTransparencies + 4));
 
     Menu_Manual_DrawPageArrow(Menu_Manual_ArrowType_Up);
-    poly = *(void**)Core_ScratchAddr(0);
+    poly = Render_frameScratch.primitiveCursor;
 
     for (i = 0; i < 16; ++i) {
         for (j = 0; j < 3; ++j) {
@@ -761,7 +761,7 @@ void Menu_Manual_DrawUpperScrollFade(void)
             poly->tpage = (j + 32) | 128 | (640 >> 6) | (256 >> 4);
             setSemiTrans(poly, 1);
             setRGB0(poly, transparency[i], transparency[i], transparency[i]);
-            AddPrim(*(u_long**)Core_ScratchAddr(1) - 7, poly++);
+            AddPrim(((u_long*)Render_frameScratch.orderingTable) - 7, poly++);
         }
     }
 
@@ -772,10 +772,10 @@ void Menu_Manual_DrawUpperScrollFade(void)
         setXY0(&tile[i], 0, i + 52);
         setWH(&tile[i], 320, 1);
         setRGB0(&tile[i], transparency[i], transparency[i], transparency[i]);
-        AddPrim(*(u_long**)Core_ScratchAddr(1) - 7, &tile[i]);
+        AddPrim(((u_long*)Render_frameScratch.orderingTable) - 7, &tile[i]);
     }
 
-    *(void**)Core_ScratchAddr(0) = (void*)poly + 16 * sizeof(TILE);
+    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);
     _insertTPage(-7, getTPage(0, 2, 0, 0));
 }
 
@@ -802,7 +802,7 @@ void Menu_Manual_DrawLowerScrollFade(void)
 
     Menu_Manual_DrawPageArrow(Menu_Manual_ArrowType_Down);
 
-    poly = *(void**)Core_ScratchAddr(0);
+    poly = Render_frameScratch.primitiveCursor;
 
     for (i = 0; i < 16; ++i) {
         for (j = 0; j < 3; ++j) {
@@ -814,7 +814,7 @@ void Menu_Manual_DrawLowerScrollFade(void)
             poly->tpage = (j + 32) | 128 | (640 >> 6) | (256 >> 4);
             setSemiTrans(poly, 1);
             setRGB0(poly, transparency[i], transparency[i], transparency[i]);
-            AddPrim(*(u_long**)Core_ScratchAddr(1) - 7, poly++);
+            AddPrim(((u_long*)Render_frameScratch.orderingTable) - 7, poly++);
         }
     }
 
@@ -826,10 +826,10 @@ void Menu_Manual_DrawLowerScrollFade(void)
         setXY0(&tile[i], 0, 0xBB - i);
         setWH(&tile[i], 320, 1);
         setRGB0(&tile[i], transparency[i], transparency[i], transparency[i]);
-        AddPrim(*(u_long**)Core_ScratchAddr(1) - 7, &tile[i]);
+        AddPrim(((u_long*)Render_frameScratch.orderingTable) - 7, &tile[i]);
     }
 
-    *(void**)Core_ScratchAddr(0) = (void*)poly + 16 * sizeof(TILE);
+    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);
     _insertTPage(-7, getTPage(0, 2, 0, 0));
 }
 
@@ -838,7 +838,7 @@ void Menu_Manual_DrawPageArrow(enum Menu_Manual_ArrowType arrowType)
 {
     int y;
     POLY_FT4* poly;
-    u_long** p;
+    Render_FrameScratch* p;
 
     if (arrowType != Menu_Manual_ArrowType_Up) {
         if (Menu_Manual_pageArrowAnimState < 9) {
@@ -855,7 +855,7 @@ void Menu_Manual_DrawPageArrow(enum Menu_Manual_ArrowType arrowType)
         }
     }
 
-    poly = (POLY_FT4*)*Core_ScratchAddr(0);
+    poly = (POLY_FT4*)Render_frameScratch.primitiveCursor;
     setPolyFT4(poly);
     setShadeTex(poly, 1);
     setXY4(poly, 152, y, 168, y, 152, y + 16, 168, y + 16);
@@ -868,9 +868,9 @@ void Menu_Manual_DrawPageArrow(enum Menu_Manual_ArrowType arrowType)
     } else {
         setClut(poly, 912, 223);
     }
-    p = (u_long**)Core_ScratchAddr(0);
-    AddPrim(p[1] - 7, poly++);
-    p[0] = (void*)poly;
+    p = &Render_frameScratch;
+    AddPrim(((u_long*)p->orderingTable) - 7, poly++);
+    p->primitiveCursor = (void*)poly;
 }
 
 // decomp: MENUE.PRG _drawContentLines (src/MENU/MENUE.PRG/494.c:883)
@@ -889,7 +889,7 @@ void Menu_Manual_DrawDiagramLines(void)
         return;
     }
 
-    line = *(LINE_F2**)Core_ScratchAddr(0);
+    line = Render_frameScratch.primitiveCursor;
 
     spriteOffset = Menu_Manual_helpText[0];
     if (spriteOffset < 0) {
@@ -925,10 +925,10 @@ void Menu_Manual_DrawDiagramLines(void)
             continue;
         }
         if (((line->y0 < 186) || (line->y1 < 186)) && ((animationState << 16) == 0)) {
-            AddPrim(*(void**)Core_ScratchAddr(1), line++);
+            AddPrim(Render_frameScratch.orderingTable, line++);
         }
     }
-    *(void**)Core_ScratchAddr(0) = line;
+    Render_frameScratch.primitiveCursor = line;
 }
 
 // decomp: MENUE.PRG _getAnimationState (src/MENU/MENUE.PRG/494.c:940)
@@ -961,15 +961,15 @@ void Menu_Manual_DrawControlsBackground(int x, int y, int w, int h)
     int j;
     LINE_G2* line;
     POLY_F4* poly;
-    u_long** p;
+    Render_FrameScratch* p;
 
-    line = (LINE_G2*)*Core_ScratchAddr(0);
+    line = (LINE_G2*)Render_frameScratch.primitiveCursor;
     for (i = y, j = w; i < (y + h) - 1; ++i, --j) {
         setLineG2(line);
         setXY2(line, x, i, (x + j) - 1, i);
         setRGB0(line, 64, 56, 32);
         setRGB1(line, 16, 16, 8);
-        AddPrim(*(u_long**)Core_ScratchAddr(1) + 7, line++);
+        AddPrim(((u_long*)Render_frameScratch.orderingTable) + 7, line++);
     }
     x += 2;
     y += 2;
@@ -978,9 +978,9 @@ void Menu_Manual_DrawControlsBackground(int x, int y, int w, int h)
     setXY4(poly, x, y, (x + w) - 1, y, x, (y + h) - 1, (x + w) - h, (y + h) - 1);
     setRGB0(poly, 0, 0, 0);
 
-    p = (u_long**)Core_ScratchAddr(0);
-    AddPrim(p[1] + 7, poly);
-    p[0] = (u_long*)(poly + 1);
+    p = &Render_frameScratch;
+    AddPrim(((u_long*)p->orderingTable) + 7, poly);
+    p->primitiveCursor = (u_long*)(poly + 1);
 }
 
 // MENUE.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).

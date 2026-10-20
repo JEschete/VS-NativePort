@@ -508,6 +508,59 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("((intptr_t (*)())Actors_FindActorAnimationHeader)",
          "Actors_FindActorAnimationHeader", "type-check the native locomotion header output"),
     ],
+    "F02995": [
+        ("    char buffer[1024];", "    static char buffer[1024];",
+         "retain manual text until the deferred textbox update and render"),
+    ],
+    # MENUE 494.c:577-988 shares the native frame, not two four-byte scratch words.
+    "F04163": [
+        ("    u_long** s0;", "    Render_FrameScratch* s0;", "typed manual frame"),
+        ("s0 = (u_long**)Core_ScratchAddr(0);", "s0 = &Render_frameScratch;", "native frame owner"),
+        ("s0[1]", "((u_long*)s0->orderingTable)", "manual control-label ordering"),
+    ],
+    "F02997": [
+        ("    void** q;", "    Render_FrameScratch* q;", "typed clipping frame"),
+        ("void** p = (void**)Core_ScratchAddr(0);",
+         "Render_FrameScratch* p = &Render_frameScratch;", "native frame owner"),
+        ("q = (void**)Core_ScratchAddr(0);", "q = &Render_frameScratch;", "native frame owner"),
+        *[(f"{name}[{index}]", f"{name}->{member}", "typed manual clipping packet state")
+          for name in ("p", "q")
+          for index, member in ((0, "primitiveCursor"), (1, "orderingTable"))],
+    ],
+    "F03000": [
+        ("    u_long** scratch;", "    Render_FrameScratch* scratch;", "typed illustration frame"),
+        ("sprite = *((void**)((uintptr_t)Core_ScratchBase() + 0x000));",
+         "sprite = Render_frameScratch.primitiveCursor;", "full native sprite cursor"),
+        ("scratch = (void*)Core_ScratchAddr(0);", "scratch = &Render_frameScratch;", "native frame owner"),
+        ("scratch[0]", "scratch->primitiveCursor", "native sprite cursor handoff"),
+        ("scratch[1]", "scratch->orderingTable", "native sprite ordering"),
+    ],
+    **{fid: [
+        ("    u_long** p;", "    Render_FrameScratch* p;", "typed manual panel frame"),
+        ("p = (u_long**)Core_ScratchAddr(0);", "p = &Render_frameScratch;", "native frame owner"),
+        ("p[0]", "p->primitiveCursor", "native panel cursor handoff"),
+        ("p[1]", "((u_long*)p->orderingTable)", "native panel ordering"),
+    ] + cursor for fid, cursor in (
+        ("F03001", [("*(POLY_G4**)Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor",
+                     "full native page-background cursor")]),
+        ("F03004", [("*Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor",
+                     "full native page-arrow cursor")]),
+        ("F03007", [
+            ("*Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor", "full native controls cursor"),
+            ("*(u_long**)Core_ScratchAddr(1)", "((u_long*)Render_frameScratch.orderingTable)",
+             "ordering table follows a native pointer, not a four-byte word"),
+        ]),
+    )},
+    **{fid: [
+        ("*(void**)Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor", "native fade cursor"),
+        ("*(u_long**)Core_ScratchAddr(1)", "((u_long*)Render_frameScratch.orderingTable)",
+         "native fade ordering"),
+    ] for fid in ("F03002", "F03003")},
+    "F03005": [
+        ("*(LINE_F2**)Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor", "native diagram cursor"),
+        ("*(void**)Core_ScratchAddr(0)", "Render_frameScratch.primitiveCursor", "native diagram cursor handoff"),
+        ("*(void**)Core_ScratchAddr(1)", "Render_frameScratch.orderingTable", "native diagram ordering"),
+    ],
     # func_800A0204 / 30DB0.c:3725 caches a native SEQ bank, not a 32-bit guest address.
     "F00856": [
         ("    int found;", "    intptr_t found;", "preserve the resolved bank pointer"),

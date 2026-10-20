@@ -14,6 +14,10 @@ and closure are recorded in #2; the next ordered implementation is #6. Menu
 shortcuts and setting values are not combat verification.
 Preserve the original dialogue pause and button advance; do not shorten the scene delay.
 
+The later Quick Manual report is repaired and verified below (#66). Its scoped
+publication/CI record belongs in that issue. The newly reproduced Score submenu
+fast-fail remains #65; #6 is still the next ordered gameplay implementation.
+
 ### Guildenstern window dialogue (2026-10-19)
 
 Verification used `35618ef2` plus the feedback-link fix and renderer regression.
@@ -381,6 +385,58 @@ Evidence stays local under `build/quality/issue63/` and
 `build/quality/issue6/dtok-fixed-{debug,release}-encounter/`; no gameplay
 memory writes or progression bypasses were used. The gap count remains
 **47/145** C-backed complete, **98** remaining.
+
+### Quick Manual frame pointers and deferred text lifetime (#66, 2026-10-20)
+
+Verification uses `26d74433` plus the scoped Manual generator/test changes.
+The original topic page crashed at tick 9011 in
+`Menu_Manual_DrawControlsBackground`: manual producers treated the native
+frame as two four-byte scratch words. Generator fixes for F04163, F02997,
+F03000-F03005 and F03007 use the typed native frame cursor/ordering fields.
+The independent panel regression first faulted with a packet buffer above
+4 GiB, then passed exact byte/count, bounded link traversal and guard checks.
+
+The no-crash replay exposed a separate blank-text defect in F02995:
+`CopyPageText` passed a stack array to the deferred textbox consumer. Its
+generator fix retains the 1024-byte page buffer for that consumer's lifetime;
+the shared non-owning textbox API is unchanged. A regression failed after
+reusing the returned stack before repair; full ten-line and partial final-page
+encoded output now pass. Original `494.c:325-397,531-575` supplies the paging,
+return, line-offset and control-code semantics; references remain read-only.
+
+- Full Debug and Release suites each pass **214 cases / 826,757 assertions**.
+  Focused `[menu][manual]` coverage is two cases / 38 assertions.
+  `check_native_views.py`: 621 fields, zero mismatches;
+  `check_event_dispatch.py`: 179 signatures, zero errors.
+- `quality-native.cmd --changed --tidy`: zero new findings, no baseline refresh.
+  The second copier run preserves manifest SHA-256
+  `21B918C14B721015F11C76E92BAB3B732CE9D2387E94F24613942CAE1A6911C3`.
+- Both configurations complete 18,000 ticks, 16 requested captures, exit 0 and
+  no logged errors. The menu-only replay uses speed 16, scripted input and:
+  `1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle,7600:Down,7700:Down,
+  7800:Down,7900:Down,8000:Down,8100:Down,8300:Circle,9000:Circle,10100:Down,
+  10198:Square,10200:Square+Down,10400:Circle,10800:Cross,11200:Cross,12000:Triangle,
+  12700:Circle,13300:Circle,13800:Start,13900:Up,14400:Start,14900:Circle,
+  15300:Down,15600:Circle,16200:Down,16600:Circle,17000:Cross,17400:Cross`.
+  Join the wrapped press list without whitespace. Capture ticks are
+  `8750,9500,10300,10700,11100,11500,12500,13000,13700,14200,14700,16000,
+  16400,16900,17300,17900`.
+- Visually checked text/illustrations on page 1 and page 2, remembered re-entry,
+  the final Basic Controls page 22/22, Start returning to page 1, a second
+  Game Modes topic, topic/root back and the final field return. Local captures
+  and logs: `build/quality/issue66-final-{debug,release}/`; full test/build logs
+  and `issue66-quality-accepted.log` are alongside them.
+- Portable DuckStation attempts in `issue66-reference` and
+  `issue66-reference-confirm` did not reach the matching Manual scene. They
+  are not visual parity evidence. This verifies native content/navigation
+  against the original data and source semantics, not pixel-perfect reference
+  rendering or all fourteen topics.
+
+An earlier re-entry schedule mistakenly navigated the remembered root selection
+to SCORE. Selecting its first TITLE submenu produced `0xC0000409` after tick
+13700; the actual route, capture and exit are recorded in #65. It is not a
+Manual regression or an assumed unimplemented cause. Neither #65 nor the
+remaining combat/audio/save acceptance is closed by this repair.
 
 ### Menu-only Options acceptance gate (#2/#39, 2026-10-20)
 
