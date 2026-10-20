@@ -23,3 +23,11 @@ The native implementations use typed host structures rather than the donor's
 guest-memory accessors. Original game symbols and assembly paths are recorded
 above the implementations for independent behavior checks and future upstream
 comparison.
+
+## Native math comparison
+
+The [packed tile distance](Native/Engine/src/Core/Math/TileDistance.cpp) and shared
+wide-to-short normalization behavior were checked against `pc/src/battle_movement.c`
+and `pc/src/boot_sdk.c` at the same pinned rood-boi revision and CC0 dedication.
+Existing native math implementations are reused for compatibility symbols rather
+than importing a second guest-memory/GTE-register implementation.

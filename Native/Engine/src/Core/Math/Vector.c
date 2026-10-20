@@ -105,13 +105,6 @@ void Core_Math_NarrowWideVector(VECTOR* arg0, SVECTOR* arg1)
     arg1->vz = arg0->vz;
 }
 
-// decomp: BATTLE.PRG func_800E45F4 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-unsigned int Core_Math_SquaredTileDistance(unsigned int, unsigned int)
-{
-    VS_UNPORTED("Core::Math::SquaredTileDistance");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800E4604 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
 int Core_Math_SquaredTileDistanceFromComponents()
 {

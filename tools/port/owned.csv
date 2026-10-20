@@ -111,3 +111,4 @@ F01804,function,Battle_Ai_FreeActorNavigationOverride,Native\Game\src\Battle\Ai\
 F01822,function,Battle_Ai_ForceReleaseActorAiReservations,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
 F01823,function,Battle_Ai_ReleaseActorAiReservations,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
 F01842,function,Battle_Ai_FreeActorAiState,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-20,from Native\Game\src\Battle\Ai\ActorState.c
+F01771,function,Core_Math_SquaredTileDistance,Native\Engine\src\Core\Math\TileDistance.cpp,Native\Engine\src\Core\Math\TileDistance.h,2026-10-20,from Native\Engine\src\Core\Math\Vector.c

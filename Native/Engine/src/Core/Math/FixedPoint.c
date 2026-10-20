@@ -76,20 +76,6 @@ void Core_Math_NormalizeFixedVector(VECTOR* arg0, VECTOR* arg1)
 // decomp: BATTLE.PRG vs_battle_toBCD (src/BATTLE/BATTLE.PRG/5BF94.c:4494)
 int Core_Math_SplitDecimalDigit(int value) { return (value % 10) | ((value / 10) * 16); }
 
-// decomp: SLUS_010.40 RotMatrixYXZ_gte (src/SLUS_010.40/31724.s:0) [asm-file: not yet ported]
-int Core_Math_BuildRotationYxz()
-{
-    VS_UNPORTED("Core::Math::BuildRotationYxz");
-    return 0;
-}
-
-// decomp: SLUS_010.40 RotMatrix_gte (src/SLUS_010.40/31724.s:0) [asm-file: not yet ported]
-int Core_Math_BuildRotationXyz()
-{
-    VS_UNPORTED("Core::Math::BuildRotationXyz");
-    return 0;
-}
-
 // decomp: SLUS_010.40 func_80041104 (src/SLUS_010.40/31724.s:0) [asm-file: not yet ported]
 int Core_Math_LookupSineCosinePair()
 {
@@ -158,45 +144,10 @@ int Core_Math_MultiplyMatrixIntoLeft()
     return 0;
 }
 
-// decomp: SLUS_010.40 OuterProduct0 (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
-int Core_Math_CrossProductFixed()
-{
-    VS_UNPORTED("Core::Math::CrossProductFixed");
-    return 0;
-}
-
 // decomp: SLUS_010.40 Square0 (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
 int Core_Math_SquareVectorComponents()
 {
     VS_UNPORTED("Core::Math::SquareVectorComponents");
-    return 0;
-}
-
-// decomp: SLUS_010.40 SquareRoot12 (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
-int Core_Math_SquareRootFixed()
-{
-    VS_UNPORTED("Core::Math::SquareRootFixed");
-    return 0;
-}
-
-// decomp: SLUS_010.40 VectorNormal (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
-int Core_Math_NormalizeVector()
-{
-    VS_UNPORTED("Core::Math::NormalizeVector");
-    return 0;
-}
-
-// decomp: SLUS_010.40 VectorNormalS (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
-int Core_Math_NormalizeVectorToShort()
-{
-    VS_UNPORTED("Core::Math::NormalizeVectorToShort");
-    return 0;
-}
-
-// decomp: SLUS_010.40 VectorNormalSS (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
-int Core_Math_NormalizeShortVector()
-{
-    VS_UNPORTED("Core::Math::NormalizeShortVector");
     return 0;
 }
 

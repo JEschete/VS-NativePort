@@ -64,7 +64,7 @@ IDENT = re.compile(r"[A-Za-z_]\w*")
 GTE_FUNCS = {n: f"Core_Gte_{n}" for n in (
     "MulMatrix", "CompMatrix", "ApplyMatrix", "ApplyRotMatrix", "ApplyMatrixLV", "ApplyMatrixSV", "TransMatrix",
     "ScaleMatrix", "RotTransPers", "RotTrans", "RotTransPers4", "RotAverage4", "NormalClip", "OuterProduct0",
-    "VectorNormal", "VectorNormalSS", "SquareRoot12", "DpqColor", "SetRotMatrix", "SetTransMatrix", "SetGeomOffset",
+    "VectorNormal", "VectorNormalS", "VectorNormalSS", "SquareRoot12", "DpqColor", "SetRotMatrix", "SetTransMatrix", "SetGeomOffset",
     "SetGeomScreen", "SetFarColor", "SetFogNear")}
 SDK_RENAMES = {
     **GTE_FUNCS,
@@ -899,6 +899,19 @@ class Copier:
                 prov += (f"\n// C from {src_row['overlay']} {src_row['name']} (src/{src_row['file']}:{src_row['line']}),"
                          f" the same code (dup-of)")
                 self.report["asm-row-from-c-duplicate"].append(f"{r['id']} <- {src_row['id']}")
+            redirect = cf.NATIVE_FUNCTION_REDIRECTS.get(r["id"])
+            if redirect:
+                target, _source = redirect
+                header = sibling_header(loc)
+                self.out(header).items.append(Item(
+                    "macro", f"{prov.replace(':0)', ')')}\n"
+                    "// Native replacement: shared SDK implementation, not a second legacy body.\n"
+                    f"#define {name} {target}\n", name, r["id"], [],
+                    (2, r["file"], int(r["line"]))))
+                self.macro_body[name] = target
+                self.provide(name, header)
+                self.report["native-api-redirect"].append(f"{r['id']} {name} -> {target}")
+                continue
             d = self.pick_decl(src_row["id"], kind="function", definition=True)
             text = None
             if d is not None and src_row["kind"] in ("C", "C-header"):

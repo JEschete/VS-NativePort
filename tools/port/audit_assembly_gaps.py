@@ -11,6 +11,11 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+if __package__:
+    from .copy_fixups import NATIVE_FUNCTION_REDIRECTS
+else:
+    from copy_fixups import NATIVE_FUNCTION_REDIRECTS
+
 REPO = Path(__file__).resolve().parents[2]
 ASM_KINDS = {"asm-file", "INCLUDE_ASM", "inline-asm", "inline-asm-entry", "asm-entry"}
 REFERENCES = ("rood-reverseWin", "rood-reverse", "rood-reverse-noprompt", "rood-boi")
@@ -254,6 +259,29 @@ def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
         writer.writerows(rows)
 
 
+def redirect_status(row: dict[str, str]) -> tuple[str, str] | None:
+    redirect = NATIVE_FUNCTION_REDIRECTS.get(row["id"])
+    if redirect is None:
+        return None
+    target, source = redirect
+    name = row["final_name"].replace("::", "_")
+    header = REPO / Path(row["final_location"]).with_suffix(".h")
+    body_file = REPO / source
+    if not header.is_file() or not body_file.is_file():
+        return "missing-definition", ""
+    macro = rf"^\s*#\s*define\s+{re.escape(name)}\s+{re.escape(target)}\s*$"
+    if not re.search(macro, mask_literals(header.read_text(encoding="utf-8")), re.MULTILINE):
+        return "missing-definition", ""
+    bodies = definitions(body_file.read_text(encoding="utf-8"), {target})
+    if len(bodies) > 1:
+        raise ValueError(f"Multiple native redirect definitions for {row['id']} {target}")
+    if not bodies:
+        return "missing-definition", ""
+    status = native_status(bodies[0].body)
+    return ("alias-implemented" if status == "implemented" else status,
+            f"{source}:{bodies[0].line}")
+
+
 def audit(output: Path, publish: bool = False) -> dict:
     if output.resolve().is_relative_to((REPO / "resources").resolve()):
         raise ValueError("Audit output must not be inside read-only resources")
@@ -273,6 +301,10 @@ def audit(output: Path, publish: bool = False) -> dict:
             continue
         if row["kind"].startswith("template"):
             states[row["id"]] = template_status(row)
+            continue
+        redirected = redirect_status(row)
+        if redirected is not None:
+            states[row["id"]] = redirected
             continue
         name = row["final_name"].replace("::", "_")
         bodies = [item for item in native[paths[row["id"]]] if item.name == name]

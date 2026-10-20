@@ -25,7 +25,7 @@
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/Math/ScalarMath.h"
-#include "Core/Math/Vector.h"
+#include "Core/Math/TileDistance.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
 #include "Field/TerrainHeight.h"

@@ -85,6 +85,7 @@ long Core_Gte_RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3,
 long Core_Gte_NormalClip(long sxy0, long sxy1, long sxy2);
 void Core_Gte_OuterProduct0(VECTOR* v0, VECTOR* v1, VECTOR* v2);
 long Core_Gte_VectorNormal(VECTOR* v0, VECTOR* v1);
+long Core_Gte_VectorNormalS(VECTOR* input, SVECTOR* output);
 long Core_Gte_VectorNormalSS(SVECTOR* v0, SVECTOR* v1);
 long Core_Gte_SquareRoot12(long a);
 void Core_Gte_DpqColor(CVECTOR* v0, long p, CVECTOR* v1);

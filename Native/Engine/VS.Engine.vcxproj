@@ -230,6 +230,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Core\Math\TileDistance.cpp" />
     <ClCompile Include="src\Core\Math\Trig.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -566,6 +567,7 @@
     <ClInclude Include="src\Core\Math\Interpolation.h" />
     <ClInclude Include="src\Core\Math\Matrix.h" />
     <ClInclude Include="src\Core\Math\ScalarMath.h" />
+    <ClInclude Include="src\Core\Math\TileDistance.h" />
     <ClInclude Include="src\Core\Math\Trig.h" />
     <ClInclude Include="src\Core\Math\Vector.h" />
     <ClInclude Include="src\Core\Memory\Copy.h" />

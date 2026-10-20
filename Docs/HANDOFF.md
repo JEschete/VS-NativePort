@@ -315,6 +315,30 @@ complete all 24,000 ticks/captures without errors and preserve the real
 MAP003 -> MAP004 -> MAP005 transition. Initial drop evidence and autonomous
 pursuit remain outstanding; work continues instead of declaring the tracker done.
 
+### Canonical native math reuse and packed tile distance
+
+Eight further C-backed entries are complete. F01771 now has a typed owned C++
+[packed-tile distance](../Native/Engine/src/Core/Math/TileDistance.cpp)
+implementation. F03397/F03398/F03407/F03410/F03411/F03412/F03413 are deliberately
+redirected by the copy generator to the existing canonical native GTE/math API,
+not duplicated as another PS1 implementation. The missing wide-to-short vector
+normalizer is added to that shared API; short-to-short normalization reuses it.
+Original symbols/assembly paths remain above the generated aliases.
+
+The audit verifies both the exact emitted alias and a real implemented native
+target body before counting a redirect. Wrong/commented aliases, declarations
+without definitions and redirected stubs remain gaps. Its expanded 13-test suite
+checks these failure cases.
+
+The original C-backed set is now **47 of 145**, with **98** remaining
+(**139** total gaps). Both complete suites pass **211 cases / 826,703 assertions**.
+Tests cover exact alias function addresses/native pointer return types,
+translation retention, distinct mixed XYZ/YXZ orders, Q12 cross products and
+square roots, normalization output shapes/pads/in-place use, and all 65,536
+unsigned packed tile-coordinate combinations. Copy idempotence and all native
+contracts pass without changing quality baselines. The ordinary-input Debug
+victory/progression replay also completes cleanly.
+
 ### Menu-only Options acceptance gate (#2/#39, 2026-10-20)
 
 Following the explicit owner-approved menu-first split, all nine Options now

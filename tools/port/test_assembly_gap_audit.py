@@ -14,12 +14,42 @@ from tools.port.audit_assembly_gaps import (
     native_status,
     overlay,
     plain_source,
+    redirect_status,
     source_index,
     template_status,
 )
 
 
 class AssemblyGapAuditTests(unittest.TestCase):
+    def test_redirect_requires_the_expected_macro_and_a_real_native_body(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = r"Native\Engine\src\Core\Gte.cpp"
+            header = root / r"Native\Engine\src\Core\Math\Probe.h"
+            body_file = root / source
+            header.parent.mkdir(parents=True)
+            body_file.parent.mkdir(parents=True, exist_ok=True)
+            row = {"id": "Fprobe", "final_name": "Core::Probe",
+                   "final_location": r"Native\Engine\src\Core\Math\Probe.c"}
+            real = "int Native_Target(int value) { return value + 1; }"
+            cases = [
+                ("#define Core_Probe Native_Target", real, "alias-implemented"),
+                ("#define Core_Probe Native_Other", real, "missing-definition"),
+                ("/* #define Core_Probe Native_Target */", real, "missing-definition"),
+                ("#define Core_Probe Native_Target", "int Native_Target(int);",
+                 "missing-definition"),
+                ("#define Core_Probe Native_Target",
+                 'int Native_Target(int value) { VS_UNPORTED("gap"); return 0; }', "stub"),
+            ]
+            with (patch.object(audit_module, "REPO", root),
+                  patch.dict(audit_module.NATIVE_FUNCTION_REDIRECTS,
+                             {"Fprobe": ("Native_Target", source)})):
+                for macro, body, expected in cases:
+                    with self.subTest(macro=macro, body=body):
+                        header.write_text(macro, encoding="utf-8")
+                        body_file.write_text(body, encoding="utf-8")
+                        self.assertEqual(redirect_status(row)[0], expected)
+
     def test_calls_comments_literals_and_prototypes_are_not_definitions(self):
         text = '''
 // int target(void) { return 0; }

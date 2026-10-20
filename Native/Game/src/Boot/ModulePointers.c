@@ -108,6 +108,7 @@
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Matrix.h"
 #include "Core/Math/ScalarMath.h"
+#include "Core/Math/TileDistance.h"
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
 #include "Core/Memory.h"
@@ -2993,22 +2994,15 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80040A14u, 1296u, (void*)&Core_Math_kArcTangentTable, sizeof Core_Math_kArcTangentTable, 1u, 1u},
     {"SLUS_010.40", 0x80040F24u, 0u, (void*)&Core_Math_Cosine, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80040F28u, 0u, (void*)&Core_Math_Sine, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80040F8Cu, 0u, (void*)&Core_Math_BuildRotationYxz, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041104u, 0u, (void*)&Core_Math_LookupSineCosinePair, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80041200u, 0u, (void*)&Core_Math_BuildRotationXyz, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004137Cu, 0u, (void*)&Core_Math_ArcTangent2, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004140Cu, 0u, (void*)&Core_Math_ScaleMatrixColumns, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041954u, 0u, (void*)&Render_SetFogNearDistance, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041980u, 0u, (void*)&Core_Math_SquareVectorComponents, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800419A8u, 0u, (void*)&Core_Math_CrossProductFixed, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041A00u, 0u, (void*)&Render_ApplyDepthCueColor, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041A1Cu, 0u, (void*)&Core_Math_InverseSquareRootParts, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80041A78u, 0u, (void*)&Core_Math_NormalizeVectorToShort, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80041A94u, 0u, (void*)&Core_Math_NormalizeVector, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80041ABCu, 0u, (void*)&Core_Math_NormalizeShortVector, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041AF4u, 0u, (void*)&Core_Math_NormalizeVectorRegisters, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041B94u, 0u, (void*)&Core_Math_SquareRootInteger, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80041BF0u, 0u, (void*)&Core_Math_SquareRootFixed, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041C60u, 0u, (void*)&Core_Math_MultiplyMatrixIntoLeft, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041C68u, 0u, (void*)&Core_Math_MultiplyMatrixIntoRight, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800420BCu, 0u, (void*)&Render_ShowLoadingScreen, 0u, 0u, 0u},

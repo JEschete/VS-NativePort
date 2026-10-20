@@ -90,6 +90,9 @@
     <ClCompile Include="src\RasterBoundsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SdkMathGapTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SequenceTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -404,12 +404,19 @@ long Core_Gte_VectorNormal(VECTOR* v0, VECTOR* v1) {
   return static_cast<long>(sq);
 }
 
+// decomp: VectorNormalS (src/SLUS_010.40/32154.s), input/output pads untouched.
+long Core_Gte_VectorNormalS(VECTOR* input, SVECTOR* output) {
+  VECTOR normalized{};
+  const auto squared = Core_Gte_VectorNormal(input, &normalized);
+  output->vx = static_cast<int16_t>(normalized.vx);
+  output->vy = static_cast<int16_t>(normalized.vy);
+  output->vz = static_cast<int16_t>(normalized.vz);
+  return squared;
+}
+
 long Core_Gte_VectorNormalSS(SVECTOR* v0, SVECTOR* v1) {
-  VECTOR a{v0->vx, v0->vy, v0->vz, 0}, b{};
-  const long sq = Core_Gte_VectorNormal(&a, &b);
-  v1->vx = static_cast<short>(b.vx), v1->vy = static_cast<short>(b.vy),
-  v1->vz = static_cast<short>(b.vz);
-  return sq;
+  VECTOR input{v0->vx, v0->vy, v0->vz, 0};
+  return Core_Gte_VectorNormalS(&input, v1);
 }
 
 long Core_Gte_SquareRoot12(long a) {

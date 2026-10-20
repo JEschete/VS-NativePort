@@ -12,6 +12,16 @@ so a stale fix is noticed.
 """
 from __future__ import annotations
 
+NATIVE_FUNCTION_REDIRECTS = {
+    "F03397": ("Core_Gte_RotMatrixYXZ", r"Native\Engine\src\Core\Gte.cpp"),
+    "F03398": ("Core_Gte_RotMatrix", r"Native\Engine\src\Core\Gte.cpp"),
+    "F03407": ("Core_Gte_OuterProduct0", r"Native\Engine\src\Core\Gte.cpp"),
+    "F03410": ("Core_Gte_SquareRoot12", r"Native\Engine\src\Core\Gte.cpp"),
+    "F03411": ("Core_Gte_VectorNormal", r"Native\Engine\src\Core\Gte.cpp"),
+    "F03412": ("Core_Gte_VectorNormalS", r"Native\Engine\src\Core\Gte.cpp"),
+    "F03413": ("Core_Gte_VectorNormalSS", r"Native\Engine\src\Core\Gte.cpp"),
+}
+
 POINTER_FREE_TYPES = {
     "T00629": "vs_action_t: two inline 32-bit hit words, no pointers; main.h:74-107",
 }
