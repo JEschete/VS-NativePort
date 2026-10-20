@@ -25,6 +25,8 @@ extern "C" int Tests_TargetSphereWireframe(void);
 extern "C" int Tests_TargetLabelStride(void);
 extern "C" int Tests_SparseIdlePoseReset(void);
 extern "C" int Tests_ActionCameraRecovery(void);
+extern "C" int TestBattleAnimationHeaderOutputs(int consumer, int mode,
+                                                int available);
 
 TEST_CASE(
     "Action recovery reads the owning camera state rather than detached "
@@ -213,4 +215,21 @@ TEST_CASE(
   CHECK(Tests_BlendSequencePose(0) == 1);
   CHECK(Tests_BlendSequencePose(1) == 1);
   CHECK(Tests_BlendSequencePose(2) == 1);
+}
+
+namespace {
+void CheckAnimationHeaderOutput(int consumer, int mode, int available) {
+  REQUIRE(TestBattleAnimationHeaderOutputs(consumer, mode, available) == 1);
+}
+}  // namespace
+
+TEST_CASE("Battle animation queries retain native header outputs",
+          "[actors][sequence][animation-headers]") {
+  for (int consumer : {0, 1, 2, 3}) {
+    for (int mode : {0, 1}) {
+      for (int available : {0, 1}) {
+        CheckAnimationHeaderOutput(consumer, mode, available);
+      }
+    }
+  }
 }

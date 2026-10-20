@@ -105,7 +105,7 @@ void Battle_PlayDefenseAnimation(int arg0, SVECTOR* arg1)
 // decomp: BATTLE.PRG func_8009DF3C (src/BATTLE/BATTLE.PRG/30DB0.c:2408)
 void Battle_SetEnemyCombatPose(int arg0, int arg1)
 {
-    int sp10[2];
+    u_short* sp10;
     Actors_ActorRecord* temp_s2 = Actors_actorRecords[arg0];
 
     int var_s0 = 0;
@@ -132,8 +132,8 @@ void Battle_SetEnemyCombatPose(int arg0, int arg1)
         }
         ++var_s0;
         var_s1 = 8;
-        ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(temp_s2, var_s0, sp10);
-        if (sp10[0] == 0) {
+        Actors_FindActorAnimationHeader(temp_s2, var_s0, &sp10);
+        if (sp10 == NULL) {
             var_s0 = 6;
             var_s1 = 0x10;
         }
@@ -151,7 +151,7 @@ void Battle_PlaySpellCastAnimation(int arg0, SVECTOR* arg1, int arg2)
 {
     u_char sp10[2] = { 0x55, 0x58 };
     u_char sp18[2] = { 0x57, 0x59 };
-    int sp20;
+    u_short* sp20;
     int angle;
     int diff;
     int anim;
@@ -199,7 +199,7 @@ void Battle_PlaySpellCastAnimation(int arg0, SVECTOR* arg1, int arg2)
         anim += 100;
     }
 
-    ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, anim, &sp20);
+    Actors_FindActorAnimationHeader(actor, anim, &sp20);
 
     if (sp20 == 0) {
         anim = sp18[arg2];
@@ -466,7 +466,7 @@ void Battle_PlayDefenseAbilityAnimation(int arg0, SVECTOR* arg1, int arg2)
 // decomp: BATTLE.PRG func_8009EFEC (src/BATTLE/BATTLE.PRG/30DB0.c:3087)
 void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
 {
-    int animation;
+    u_short* animation;
     Actors_ActorRecord* fallbackActor;
     Actors_ActorRecord* actor;
     int facingDelta;
@@ -503,7 +503,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
         if ((u_short)actor->collisionRadius >= 0x80U) {
             actor->instance.turnFrames = 0x14;
         }
-        ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, 0xBFU, &animation);
+        Actors_FindActorAnimationHeader(actor, 0xBFU, &animation);
         value = 0xBF;
         if (animation == NULL) {
             value = 0xC1;
@@ -512,7 +512,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
         Actors_ResetActorHeadTrackingSpeed(actor);
         return;
     } else if (mode == 1) {
-        ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, 0xFFU, &animation);
+        Actors_FindActorAnimationHeader(actor, 0xFFU, &animation);
         if (animation == NULL) {
             fallbackActor = Actors_actorRecords[actorId];
             if (fallbackActor != NULL) {
@@ -569,11 +569,11 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
 // decomp: BATTLE.PRG func_8009F298 (src/BATTLE/BATTLE.PRG/30DB0.c:3189)
 void Battle_PlayBreakArtAnimation(int arg0, SVECTOR* arg1, int arg2)
 {
-    int sp10;
+    u_short* sp10;
 
     Battle_PlaySpecialActionAnimation(arg0, arg1, arg2);
     if (arg2 == 1) {
-        ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(Actors_actorRecords[arg0], 0xFE, &sp10);
+        Actors_FindActorAnimationHeader(Actors_actorRecords[arg0], 0xFE, &sp10);
         if (sp10 != 0) {
             Actors_QueueActorAnimation((int)arg0, 0xFE, 8, 0);
         }

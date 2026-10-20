@@ -13,6 +13,7 @@
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
+#include "Battle/ActionAnimation.h"
 #include "Battle/ActionExecution.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Sphere.h"
@@ -43,6 +44,55 @@ enum {
   kFacialUploadWidth = 4,
   kFacialFirstPixel = 0x100
 };
+
+int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
+  enum { kActorId = 2, kMapOffset = 32, kMapEntries = 256 };
+  u_short file[256] = {0};
+  Actors_SeqAnimationBank* bank = (Actors_SeqAnimationBank*)file;
+  Actors_ActorRecord actor = {0};
+  Actors_ActorRecord* saved_actor = Actors_actorRecords[kActorId];
+  const char saved_index = Actors_lastResolvedSequenceIndex;
+  const char saved_pitch = Battle_specialActionPitch;
+  bank->animationMap = kMapOffset;
+  memset((u_char*)file + kMapOffset, available ? 0 : 0xFF, kMapEntries);
+  actor.instance.slot = kActorId;
+  actor.animationLocked = 1;
+  actor.sequenceModelId = 1;
+  actor.sequenceFlags = 100;
+  actor.commonAnimationCount = 128;
+  actor.battleAnimationCount = 64;
+  actor.commonSequence = bank;
+  actor.battleSequence = bank;
+  actor.sharedSequences[3] = bank;
+  actor.animationId = 0xC6;
+  Actors_actorRecords[kActorId] = &actor;
+  Battle_specialActionPitch = 2;
+  if (consumer == 0) {
+    Battle_PlaySpecialActionAnimation(kActorId, NULL, mode);
+  } else if (consumer == 1) {
+    Battle_PlayBreakArtAnimation(kActorId, NULL, mode);
+  } else if (consumer == 2) {
+    Battle_PlaySpellCastAnimation(kActorId, NULL, mode);
+  } else {
+    Battle_SetEnemyCombatPose(kActorId, 3);
+  }
+  int passed = actor.animationLocked == 1 && actor.animationId == 0xC6;
+  if (consumer < 2) {
+    const int executing = mode == 1 && available;
+    passed &= Battle_specialActionPitch == (executing ? 1 : 2);
+    passed &= actor.headTracking.pad == (executing ? 0 : 30);
+    passed &= actor.instance.turnFrames == (executing ? 0 : 10);
+    passed &= actor.queuedAnimation ==
+              (consumer == 1 && mode == 1 && available ? 0xFE : 0);
+  } else if (consumer == 2) {
+    passed &= actor.headTracking.pad == 30;
+    passed &= actor.instance.turnFrames == (mode == 0 ? 10 : 0);
+  }
+  Actors_actorRecords[kActorId] = saved_actor;
+  Actors_lastResolvedSequenceIndex = saved_index;
+  Battle_specialActionPitch = saved_pitch;
+  return passed;
+}
 
 int Tests_ActionCameraRecovery(void) {
   Battle_ActionState state = {0};

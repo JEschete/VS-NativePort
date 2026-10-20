@@ -942,7 +942,7 @@ int Actors_UpdateActorLocomotionAnimation(Actors_ActorRecord* actor, int speed, 
             }
         }
 
-        ((intptr_t (*)())Actors_FindActorAnimationHeader)(actor, next, &entry);
+        Actors_FindActorAnimationHeader(actor, next, &entry);
         if (entry == NULL) {
             next = 6;
         }

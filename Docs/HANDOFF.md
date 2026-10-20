@@ -339,6 +339,49 @@ unsigned packed tile-coordinate combinations. Copy idempotence and all native
 contracts pass without changing quality baselines. The ordinary-input Debug
 victory/progression replay also completes cleanly.
 
+### D'Tok crash investigation and native animation outputs (#63/#64)
+
+The owner's null-model perception failure is reproduced on untouched
+`d357de4f`: actor/model slots contain only 0 and 2, but AI slot 3 still contains
+the earlier guard. At tick 35,909, perception reads address `0x8`. Actor AI
+teardown was still a stub in that revision. Existing fix `6eae802d` releases
+that state; current replays have no orphan AI at the same boss transition.
+The owner's exact revision is unknown; do not infer it from the report.
+
+A separate current failure was confirmed after tick 36,500 on `c98afc09`.
+A private Windows debugger, attached only after capture 33,900, recorded
+`0xC0000409`, fast-fail code 2 (stack-cookie check). Local PDB public symbols
+and disassembly locate `__report_gsfailure+0xA`, called from
+`Battle_PlaySpecialActionAnimation+0x41E`. This was not a hang or the historical
+perception AV. The old October 19 hang log is unrelated.
+
+`FindActorAnimationHeader` writes a native `u_short*`, but special-action,
+Break Art and spell consumers supplied four-byte integer locals through
+incompatible function-pointer casts. The generator now emits real pointer
+locals and direct declared calls. Enemy pose tests the complete pointer rather
+than its low word; death and locomotion callers also use the declared contract.
+The current upstream reference agrees with the special-action pointer type;
+all reference trees remain read-only.
+
+The independent `[animation-headers]` real-consumer test first exited
+`0xC0000409`. After repair, all 16 absent/present, stage and consumer
+combinations pass. Animation locking isolates lookup, fallback-facing/pitch
+and optional follow-up behavior from pose decoding. Debug and Release each
+pass **212 cases / 826,719 assertions**. Generator idempotence, 621 native
+view fields, 179 dispatch contracts and changed-source quality pass without
+baseline changes.
+
+Both configurations then complete the full-prologue ordinary-input route
+through **48,000 ticks / 22 captures**, exit 0, no logged errors and no orphan
+AI. Captures show the live boss encounter beyond the old failures. The
+retained route does not defeat this boss: Ashley remains out of attack range.
+This verifies these crashes, not autonomous pursuit, boss victory, drops,
+complete defeat flow, audio or the remaining #6 acceptance criteria.
+Evidence stays local under `build/quality/issue63/` and
+`build/quality/issue6/dtok-fixed-{debug,release}-encounter/`; no gameplay
+memory writes or progression bypasses were used. The gap count remains
+**47/145** C-backed complete, **98** remaining.
+
 ### Menu-only Options acceptance gate (#2/#39, 2026-10-20)
 
 Following the explicit owner-approved menu-first split, all nine Options now

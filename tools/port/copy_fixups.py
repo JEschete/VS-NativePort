@@ -478,6 +478,36 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
     "F00010": [("if (Battle_actors[i]->next == actor)",
                 "if (Battle_actors[i] != NULL && Battle_actors[i]->next == actor)",
                 "ignore empty slots when unlinking a removed actor")],
+    # Animation-header outputs are native pointers, not PS1-sized integers.
+    "F00819": [
+        ("    int sp10[2];", "    u_short* sp10;", "native animation-header output"),
+        ("((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(temp_s2, var_s0, sp10);",
+         "Actors_FindActorAnimationHeader(temp_s2, var_s0, &sp10);", "use the declared output contract"),
+        ("if (sp10[0] == 0)", "if (sp10 == NULL)", "test the complete native pointer"),
+    ],
+    "F00823": [
+        ("    int sp20;", "    u_short* sp20;", "native animation-header output"),
+        ("((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, anim, &sp20);",
+         "Actors_FindActorAnimationHeader(actor, anim, &sp20);", "avoid overwriting a four-byte stack local"),
+    ],
+    "F00833": [
+        ("    int animation;", "    u_short* animation;", "native animation-header output"),
+        ("((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)",
+         "Actors_FindActorAnimationHeader", "both special-action stages use the declared output contract"),
+    ],
+    "F00834": [
+        ("    int sp10;", "    u_short* sp10;", "native animation-header output"),
+        ("((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)",
+         "Actors_FindActorAnimationHeader", "avoid overwriting a four-byte stack local"),
+    ],
+    "F00835": [
+        ("((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, 0xABU, (int*)&animation);",
+         "Actors_FindActorAnimationHeader(actor, 0xABU, &animation);", "preserve the declared native pointer output"),
+    ],
+    "F00930": [
+        ("((intptr_t (*)())Actors_FindActorAnimationHeader)",
+         "Actors_FindActorAnimationHeader", "type-check the native locomotion header output"),
+    ],
     # func_800A0204 / 30DB0.c:3725 caches a native SEQ bank, not a 32-bit guest address.
     "F00856": [
         ("    int found;", "    intptr_t found;", "preserve the resolved bank pointer"),
