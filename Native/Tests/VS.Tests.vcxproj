@@ -46,6 +46,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\AiLayoutTests.cpp" />
+    <ClCompile Include="src\AiPlanningTests.cpp" />
     <ClCompile Include="src\CombatTestCases.cpp" />
     <ClCompile Include="src\CombatTests.c">
       <TreatWarningAsError>false</TreatWarningAsError>

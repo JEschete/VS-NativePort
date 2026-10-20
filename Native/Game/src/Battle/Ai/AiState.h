@@ -814,7 +814,14 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x0D */ u_char opaqueD;
     /* 0x0E */ u_char opaqueE;
     /* 0x0F */ u_char opaqueF;
-    /* 0x10 */ char reserved10[3];
+    /* 0x10 */ union {
+        char reserved10[3];
+        struct {
+            u_char resourceStatusRestricted;
+            u_char lowMp;
+            u_char lowHp;
+        };
+    };
     /* 0x13 */ u_char usesRoomActionDelay;
     /* 0x14 */ char reserved14[2];
     /* 0x16 */ signed char linkedActor;

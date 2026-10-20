@@ -35,7 +35,6 @@ extern const unsigned char Battle_Ai_kFlags34Bit14Values[4];
 int Battle_Ai_NextActorRandomMasked(int);
 void Battle_Ai_SetActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView*, int, int);
 void Battle_Ai_ResetActorAiReactionDelay(int);
-void Battle_Ai_RefreshAiResourceRestrictions(Battle_Ai_ActorAiState*);
 void Battle_Ai_ResolveAiLinkedActors(void);
 void Battle_Ai_ApplySavedAiSettingsFlags(int* arg0, Battle_Ai_SavedSettingsPair* arg1);
 void Battle_Ai_ApplyActorAiSettings(Battle_Ai_SettingsView* state, Battle_Ai_SettingsWord* settings);

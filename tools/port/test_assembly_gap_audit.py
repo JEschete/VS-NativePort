@@ -1,0 +1,127 @@
+"""Checks for the read-only, provenance-preserving assembly audit."""
+
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
+from tools.port import audit_assembly_gaps as audit_module
+from tools.port.audit_assembly_gaps import (
+    audit,
+    canonical_id,
+    counterpart_names,
+    definitions,
+    native_status,
+    overlay,
+    plain_source,
+    source_index,
+    template_status,
+)
+
+
+class AssemblyGapAuditTests(unittest.TestCase):
+    def test_calls_comments_literals_and_prototypes_are_not_definitions(self):
+        text = '''
+// int target(void) { return 0; }
+const char* example = "target() { }";
+int target(int value);
+int caller(void) { return target(3); }
+int target(int value) {
+    if (value) { return value; }
+    return 0;
+}
+'''
+        found = definitions(text, {"target"})
+        self.assertEqual(len(found), 1)
+        self.assertIn("return value;", found[0].body)
+        self.assertEqual(found[0].line, 6)
+
+    def test_cpp_noexcept_raw_literals_and_nested_arguments(self):
+        text = '''
+const auto example = R"code(target() { " } // })code";
+extern "C" int target(int (*callback)(int)) noexcept {
+    return callback(1);
+}
+'''
+        found = definitions(text, {"target"})
+        self.assertEqual(len(found), 1)
+        self.assertIn("callback(1)", found[0].body)
+
+    def test_native_stub_and_partial_are_distinguished(self):
+        self.assertEqual(native_status('VS_UNPORTED("gap"); return 0;'), "stub")
+        self.assertEqual(native_status('VS_UNPORTED("gap");'), "stub")
+        self.assertEqual(native_status('return 0; // VS_UNPORTED("not code")'), "implemented")
+        self.assertEqual(native_status('if (x) VS_UNPORTED("gap"); return x;'),
+                         "partial-unported")
+
+    def test_zero_record_stub_is_not_counted_as_implementation(self):
+        self.assertEqual(native_status('VS_UNPORTED("gap"); Record result = {0}; return result;'),
+                         "stub")
+
+    def test_inline_assembly_is_not_plain_c(self):
+        self.assertFalse(plain_source('__asm__ volatile("nop");'))
+        self.assertTrue(plain_source('return 0; /* __asm__ */'))
+
+    def test_psyq_assembly_function_prefix_is_not_plain_c(self):
+        found = definitions("asm void target(register int a0) { jr ra; nop; }", {"target"})
+        self.assertEqual(len(found), 1)
+        self.assertTrue(found[0].assembly)
+
+    def test_duplicate_chain_resolves_and_cycles_fail_explicitly(self):
+        catalog = {"F1": {"id": "F1", "notes": "asm; dup-of:F2"},
+                   "F2": {"id": "F2", "notes": "dup-of:F3"},
+                   "F3": {"id": "F3", "notes": ""}}
+        self.assertEqual(canonical_id(catalog["F1"], catalog), "F3")
+        catalog["F3"]["notes"] = "dup-of:F1"
+        with self.assertRaises(ValueError):
+            canonical_id(catalog["F1"], catalog)
+
+    def test_overlay_scope_includes_resident_and_prg_modules(self):
+        self.assertEqual(overlay(Path(r"src\SLUS_010.40\main.c")), "SLUS_010.40")
+        self.assertEqual(overlay(Path(r"src\BATTLE\BATTLE.PRG\unit.c")), "BATTLE.PRG")
+        self.assertIsNone(overlay(Path(r"pc\src\bridge.cpp")))
+
+    def test_renamed_address_lookup_never_crosses_overlays(self):
+        row = {"name": "func_800F9800", "overlay": "MENU1.PRG"}
+        symbols = {("MENU1.PRG", "Renamed"): 0x800F9800,
+                   ("MENU2.PRG", "WrongOverlay"): 0x800F9800}
+        self.assertEqual(counterpart_names(row, {}, symbols),
+                         {"func_800F9800", "Renamed"})
+
+    def test_template_bindings_have_a_real_checked_implementation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / r"Native\Game\src\Effects"
+            source.mkdir(parents=True)
+            (source / "Unit.c").write_text(
+                '#define MACRO Effects_Unit\n#include "Effects/Unit.inl"\n', encoding="utf-8")
+            body = source / "Unit.inl"
+            body.write_text("void MACRO(void) { run(); }", encoding="utf-8")
+            row = {"id": "F1", "kind": "template:unit:MACRO", "final_name": "Effects::Unit",
+                   "final_location": r"Native\Game\src\Effects\Unit.c"}
+            with patch.object(audit_module, "REPO", root):
+                self.assertEqual(template_status(row)[0], "template-instance")
+                body.write_text('void MACRO(void) { VS_UNPORTED("gap"); }', encoding="utf-8")
+                self.assertEqual(template_status(row)[0], "stub")
+
+    def test_probe_mocks_are_excluded_from_production_c_availability(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for location in (r"pc\tests", r"pc\src"):
+                (root / location).mkdir(parents=True)
+            (root / r"pc\tests\probe.c").write_text(
+                "int target(void) { return 0; }", encoding="utf-8")
+            (root / r"pc\src\actual.c").write_text(
+                "int target(void) { return work(); }", encoding="utf-8")
+            with patch.object(audit_module, "REPO", root):
+                found, _, _ = source_index(root, {"target"})
+            self.assertEqual(len(found[None, "target"]), 1)
+            self.assertIn("actual.c", found[None, "target"][0])
+
+    def test_resource_output_is_rejected_before_any_write(self):
+        with self.assertRaises(ValueError):
+            audit(audit_module.REPO / "resources" / "forbidden")
+
+
+if __name__ == "__main__":
+    unittest.main()

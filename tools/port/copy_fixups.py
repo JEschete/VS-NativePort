@@ -803,6 +803,11 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
          "main.c:8584/8720 and MIPS 80043450/8004346C use an overlapping PS1 tail; native slots must not alias or overflow"),
     ],
     "T00532": [
+        ("char reserved10[3];",
+         "union {\n        char reserved10[3];\n        struct {\n"
+         "            u_char resourceStatusRestricted;\n            u_char lowMp;\n"
+         "            u_char lowHp;\n        };\n    };",
+         "func_800E4F14 writes status/MP/HP condition bytes; func_800E4CF4 consumes their low bits"),
         ("char reserved3C[8];",
          "union {\n        char reserved3C[8];\n        struct {\n"
          "            u_char reserved3CPrefix[6];\n            short savedRelationOptions;\n"

@@ -261,10 +261,10 @@ int Tests_AiMovementSetup(void) {
   Battle_Ai_actorAiStates[2] = &state;
   Battle_Ai_SetActorVerticalMovementSteps(2, 8, 12);
   passed = passed && state.walkStep == 8 && state.runStep == 12 &&
-           state.maxRange == 8;
+           state.maxRange == 12;
   Battle_Ai_SetActorVerticalMovementSteps(2, 16, 6);
   passed = passed && state.walkStep == 16 && state.runStep == 6 &&
-           state.maxRange == 6;
+           state.maxRange == 16;
   Battle_Ai_actorAiStates[2] = NULL;
   Battle_Ai_SetActorVerticalMovementSteps(2, 4, 8);
   passed = passed && state.walkStep == 16 && state.runStep == 6;

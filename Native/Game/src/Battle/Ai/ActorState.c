@@ -78,12 +78,6 @@ void Battle_Ai_ResetActorAiReactionDelay(int)
     VS_UNPORTED("Battle::Ai::ResetActorAiReactionDelay");
 }
 
-// decomp: BATTLE.PRG func_800E4F14 (src/BATTLE/BATTLE.PRG/7C4F4.s:0) [asm-file: not yet ported]
-void Battle_Ai_RefreshAiResourceRestrictions(Battle_Ai_ActorAiState*)
-{
-    VS_UNPORTED("Battle::Ai::RefreshAiResourceRestrictions");
-}
-
 // decomp: BATTLE.PRG func_800E5998 (src/BATTLE/BATTLE.PRG/7CD68.c:573)
 void Battle_Ai_ResolveAiLinkedActors(void)
 {

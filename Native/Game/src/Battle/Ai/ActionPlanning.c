@@ -24,6 +24,7 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/PlanningPrimitives.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -138,36 +139,6 @@ int Battle_Ai_ScoreActorCondition(int, int, int, int)
 {
     VS_UNPORTED("Battle::Ai::ScoreActorCondition");
     return 0;
-}
-
-// decomp: BATTLE.PRG func_800DC2E0 (src/BATTLE/BATTLE.PRG/73AE0.s:0) [asm-file: not yet ported]
-void Battle_Ai_CopyActionCandidate(Battle_Ai_ActionCandidate*, Battle_Ai_ActionCandidate*)
-{
-    VS_UNPORTED("Battle::Ai::CopyActionCandidate");
-}
-
-// decomp: BATTLE.PRG func_800DC30C (src/BATTLE/BATTLE.PRG/73B0C.s:0) [asm-file: not yet ported]
-void Battle_Ai_ApplySimulatedStatDelta(short*, short*, int, int)
-{
-    VS_UNPORTED("Battle::Ai::ApplySimulatedStatDelta");
-}
-
-// decomp: BATTLE.PRG func_800DC344 (src/BATTLE/BATTLE.PRG/73B0C.s:0) [asm-file: not yet ported]
-void Battle_Ai_AppendActionCandidate(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*)
-{
-    VS_UNPORTED("Battle::Ai::AppendActionCandidate");
-}
-
-// decomp: BATTLE.PRG func_800DC3CC (src/BATTLE/BATTLE.PRG/73B0C.s:0) [asm-file: not yet ported]
-void Battle_Ai_SortActionCandidates(Battle_Ai_ActionPlanView*)
-{
-    VS_UNPORTED("Battle::Ai::SortActionCandidates");
-}
-
-// decomp: BATTLE.PRG func_800DC3E8 (src/BATTLE/BATTLE.PRG/73B0C.s:0) [asm-file: not yet ported]
-void Battle_Ai_CopyPlanningActorStats(Battle_ActorStats* src, Battle_ActorStats* dst)
-{
-    VS_UNPORTED("Battle::Ai::CopyPlanningActorStats");
 }
 
 // decomp: BATTLE.PRG func_800DC484 (src/BATTLE/BATTLE.PRG/73C84.s:0) [asm-file: not yet ported]

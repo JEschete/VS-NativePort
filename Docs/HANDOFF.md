@@ -155,6 +155,61 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
 
+### Assembly-only gap census (2026-10-20)
+
+The requested full inventory is complete; conversion has resumed using the
+located C counterparts, checked against the original assembly. See
+[ASSEMBLY_GAPS.md](ASSEMBLY_GAPS.md) and its complete CSV links.
+All 4,207 catalog rows / 3,762 port targets are reconciled against actual native
+bodies, aliases and template implementations, plus four read-only references.
+The initial census was 185 stubs and one partial native entry: 145 had C counterparts,
+31 have assembly but no located matching C, and 10 PLG074 `INCLUDE_ASM` entries
+have no locally extracted listing. C counterparts are not assumed correct or
+ABI-compatible; most PC references still use guest pointers/offsets.
+
+The tagged `7E05C.s` has 21 entries: six implemented, 14 open with C references,
+and one assembly-only gap, F01833 `Field::IsPointOutsideSolidVolumes`.
+Candidate copy/append/sort/readiness C already exists in read-only rood-boi;
+check it against assembly before modernizing instead of treating it as absent.
+Preserve the existing `// decomp: ... (src/...:line)` comment above each future
+implementation. The auditor itself changes no Native or resource code. Re-run
+`python tools\port\audit_assembly_gaps.py --publish` after an authorized reference
+update; the report records revisions/fingerprints for assumption reconciliation.
+
+### C-backed AI planning primitives (#6/#42, 2026-10-20)
+
+Owned C++ [planning primitives](../Native/Game/src/Battle/Ai/PlanningPrimitives.cpp)
+replace eight stubs: F01684-F01688 and F01794-F01796. This covers complete and
+overlapping candidate copies, bounded append/exclusion bookkeeping, signed
+descending candidate ordering with the original midpoint partition's tie order,
+clamped simulated stat deltas, selective planning-stat snapshots, action resource
+usability, target eligibility and the condition flags consumed by targeting.
+No guest pointer accessors or original AI-state byte offsets were imported.
+Reference symbols/assembly paths are above each implementation; donor attribution
+and the pinned CC0 reference are in [THIRD_PARTY.md](../THIRD_PARTY.md).
+
+Assembly/C comparison also exposed a coupled existing F01825 error:
+`SetActorVerticalMovementSteps` selected the minimum instead of the maximum.
+An independent regression failed for both argument orders before the correction;
+signed comparisons and pre-truncation byte packing are covered. The older
+layout fixture's matching minimum assumption was corrected too.
+
+The refreshed inventory has **178 remaining entries**: 177 stubs and one
+partial; **137 have C counterparts**, 31 have only located assembly, and ten
+still lack a locally extracted listing. #42 retains the original 186-entry
+checklist; do not remove completed IDs from that historical baseline.
+
+The actual full prologue reaches MAP003 and the 22,000-tick limit in both builds
+with all requested captures and no logged errors. This is integration/regression
+evidence, not an enemy-action, damage, defeat or drop completion claim. Remaining
+scoring, cooldown/execution, randomized selection and movement stubs still block
+#6's encounter acceptance criteria; neither #6 nor #42 is closed by this batch.
+
+Debug and Release full suites each pass **159 cases / 364,083 assertions**.
+The audit's 12 tests, 620 native-view fields and 179 event-dispatch signatures
+pass; copier output and owned implementations are idempotent. New C++/header/test
+quality checks report zero findings without changing the quality baseline.
+
 ### Menu-only Options acceptance gate (#2/#39, 2026-10-20)
 
 Following the explicit owner-approved menu-first split, all nine Options now

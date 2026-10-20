@@ -366,6 +366,12 @@
     <ClInclude Include="src\Battle\Ai\Perception.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\PlanningPrimitives.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\PlanningPrimitives.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\Ai\Relations.c">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>

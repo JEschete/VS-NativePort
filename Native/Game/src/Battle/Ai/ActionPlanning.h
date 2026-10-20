@@ -34,11 +34,6 @@ int Battle_Ai_DoesActionRequireCooldown(Battle_Ai_ActorAiState*, Battle_Ai_Actio
 int Battle_Ai_IsActionCooldownReady(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*);
 int Battle_Ai_CanExecuteActionCandidate(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*);
 int Battle_Ai_ScoreActorCondition(int, int, int, int);
-void Battle_Ai_CopyActionCandidate(Battle_Ai_ActionCandidate*, Battle_Ai_ActionCandidate*);
-void Battle_Ai_ApplySimulatedStatDelta(short*, short*, int, int);
-void Battle_Ai_AppendActionCandidate(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*);
-void Battle_Ai_SortActionCandidates(Battle_Ai_ActionPlanView*);
-void Battle_Ai_CopyPlanningActorStats(Battle_ActorStats* src, Battle_ActorStats* dst);
 int Battle_Ai_IsActionHarmfulToActor(int, int);
 int Battle_Ai_IsActionBeneficialToActor(int, int);
 void Battle_Ai_CacheFallbackActionCandidate(Battle_Ai_ActionCandidate*, Battle_ActionDefinition*);

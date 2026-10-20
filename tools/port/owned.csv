@@ -72,3 +72,11 @@ F00771,function,Field_DrawMinimapScene,Native\Game\src\Field\MinimapScene.cpp,Na
 F00774,function,Field_ResolveSceneRoomData,Native\Game\src\Field\MinimapScene.cpp,Native\Game\src\Field\MinimapScene.h,2026-10-19,2EA3C.s:2085 bounded 12-byte room records with relative offsets
 F00773,function,Render_GetProjectionScreenOffset,Native\Engine\src\Render\RoomDraw.c,Native\Engine\src\Render\RoomDraw.h,2026-10-19,from Native\Engine\src\Render\RoomGeometry.c
 F00775,function,Render_SetProjectionScreenOffset,Native\Engine\src\Render\RoomDraw.c,Native\Engine\src\Render\RoomDraw.h,2026-10-19,from Native\Engine\src\Render\RoomGeometry.c
+F01684,function,Battle_Ai_CopyActionCandidate,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,Native\Game\src\Battle\Ai\PlanningPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\ActionPlanning.c
+F01685,function,Battle_Ai_ApplySimulatedStatDelta,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,Native\Game\src\Battle\Ai\PlanningPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\ActionPlanning.c
+F01686,function,Battle_Ai_AppendActionCandidate,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,Native\Game\src\Battle\Ai\PlanningPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\ActionPlanning.c
+F01687,function,Battle_Ai_SortActionCandidates,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,Native\Game\src\Battle\Ai\PlanningPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\ActionPlanning.c
+F01688,function,Battle_Ai_CopyPlanningActorStats,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,Native\Game\src\Battle\Ai\PlanningPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\ActionPlanning.c
+F01794,function,Battle_Ai_CanAiActionAffectActor,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,Native\Game\src\Battle\Ai\PlanningPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\ActionSelection.c
+F01795,function,Battle_Ai_RefreshAiActionUsability,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,Native\Game\src\Battle\Ai\PlanningPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\ActionSelection.c
+F01796,function,Battle_Ai_RefreshAiResourceRestrictions,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,Native\Game\src\Battle\Ai\PlanningPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\ActorState.c

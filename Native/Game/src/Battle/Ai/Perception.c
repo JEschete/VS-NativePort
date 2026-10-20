@@ -21,6 +21,7 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/PlanningPrimitives.h"
 #include "Battle/Damage.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Timing.h"

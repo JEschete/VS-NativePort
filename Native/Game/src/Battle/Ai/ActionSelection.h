@@ -18,8 +18,6 @@
 
 void Battle_Ai_RememberAiActionTarget(Battle_Ai_ActorAiState*);
 void Battle_Ai_ForgetAiActionTarget(Battle_Ai_ActorAiState* arg0);
-int Battle_Ai_CanAiActionAffectActor(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*, int);
-int Battle_Ai_RefreshAiActionUsability(Battle_Ai_ActorAiState*, int, int);
 int Battle_Ai_IsAiTargetBeyondNearRadius(void*, int, int);
 void Battle_Ai_BuildAiActionMetadata(Battle_Ai_ActionMetadataView* state);
 

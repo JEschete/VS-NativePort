@@ -101,7 +101,10 @@ def needs_c_headers(project: str, path: str) -> bool:
     path = path.replace("/", "\\")
     return (path.endswith(".c") or "\\Legacy\\" in "\\" + path
             or project == "VS.Tests"
-            or project == "VS.Game" and path == r"src\Field\MinimapScene.cpp")
+            or project == "VS.Game" and path in (
+                r"src\Field\MinimapScene.cpp",
+                r"src\Battle\Ai\PlanningPrimitives.cpp",
+            ))
 
 
 def vcxproj(p: Project, files: list[tuple[str, str]]) -> str:

@@ -71,6 +71,7 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/PlanningPrimitives.h"
 #include "Battle/AttackPrerequisites.h"
 #include "Battle/BattleMode.h"
 #include "Battle/BattleTypes.h"

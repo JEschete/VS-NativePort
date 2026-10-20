@@ -130,5 +130,5 @@ void Battle_Ai_SetActorVerticalMovementSteps(int actor_id, int walk_step,
       (unsigned)walk_step | ((unsigned)run_step << CHAR_BIT);
   state->walkStep = (u_char)packed;
   state->runStep = (u_char)(packed >> CHAR_BIT);
-  state->maxRange = (u_char)(walk_step < run_step ? walk_step : run_step);
+  state->maxRange = (u_char)(walk_step > run_step ? walk_step : run_step);
 }
