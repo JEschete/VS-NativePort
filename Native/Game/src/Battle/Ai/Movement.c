@@ -10,6 +10,7 @@
 #include "Actors/TextureAnimation.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionSelection.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"

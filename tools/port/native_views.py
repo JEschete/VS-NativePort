@@ -14,7 +14,8 @@ T00351 T00356 T00362 T00368 T00370 T00373 T00381 T00385 T00389 T00392 T00394 T00
 T00406 T00412 T00414 T00416 T00514 T00524 T00526 T00529 T00532 T00554 T00555 T00556 T00557
 T00559 T00561 T00564 T00569 T00582 T00590 T00591 T00593 T00608 T00613 T00615 T00623 T00740
 """.split())
-AI_POINTERS = (0x54, 0x58, 0x5C, 0x60, 0x64, 0x68, 0x1A0, 0x22C, *range(0x430, 0x470, 4))
+AI_POINTERS = (0x54, 0x58, 0x5C, 0x60, 0x64, 0x68, 0x18C, 0x1A0, 0x22C,
+               *range(0x430, 0x470, 4))
 
 # Views of vs_battle_actor (146C.h), including the engagement data used by the canonical AI state.
 ACTOR_VIEWS = frozenset("""
@@ -73,6 +74,11 @@ def rebase(tid: str, text: str, fields: list[tuple[str, dict]]) -> str:
         text, count = re.subn(r'int opaque44;', 'void* opaque44;', text)
         if count != 1:
             raise ValueError('T00380: model slot not found')
+    # 7C7E0.s:196 frees the navigation override; perception only tests its presence.
+    if tid == 'T00399':
+        text, count = re.subn(r'int opaque18C;', 'void* opaque18C;', text)
+        if count != 1:
+            raise ValueError('T00399: navigation override slot not found')
     for name, field in fields:
         offset = field['offset'] // 8
         padding = re.fullmatch(r'(?:u_char|(?:unsigned )?char)\[(\d+)\]', field['type'])

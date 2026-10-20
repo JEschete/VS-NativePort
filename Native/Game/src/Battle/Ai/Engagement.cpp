@@ -9,6 +9,8 @@
 #include <cstring>
 #include <iterator>
 
+#include "Battle/Ai/EngagementState.hpp"
+
 extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/Perception.h"
@@ -40,17 +42,19 @@ Battle_Ai_RoomAiState& Room() {
           "AI engagement requires room state");
   return *Battle_Ai_roomAiState;
 }
+}  // namespace
 
+namespace VS::Battle::ai {
 std::uint16_t EngagedMask(const Battle_Ai_RoomAiState& room) {
   std::uint16_t mask = 0;
   std::memcpy(&mask, room.engaged_mask_bytes, sizeof(mask));
   return mask;
 }
 
-void StoreMask(Battle_Ai_RoomAiState& room, std::uint16_t mask) {
+void StoreEngagedMask(Battle_Ai_RoomAiState& room, std::uint16_t mask) {
   std::memcpy(room.engaged_mask_bytes, &mask, sizeof(mask));
 }
-}  // namespace
+}  // namespace VS::Battle::ai
 
 // decomp: func_800D820C (src/BATTLE/BATTLE.PRG/6FA0C.s:9).
 void Battle_Ai_SetActorAwarenessIndicator(int actor_id, int value) {
@@ -97,8 +101,9 @@ int Battle_Ai_TryEngageActor(Battle_Ai_ActorAiState* state) {
   Require(room.engagedCount < kActorSlots,
           "AI engagement count exceeds actor storage");
   state->engagementRequest = 0;
-  StoreMask(room, static_cast<std::uint16_t>(EngagedMask(room) |
-                                             (1u << state->actorId)));
+  VS::Battle::ai::StoreEngagedMask(
+      room, static_cast<std::uint16_t>(VS::Battle::ai::EngagedMask(room) |
+                                       (1u << state->actorId)));
   ++room.engagedCount;
   state->opaque8E = state->opaque9A != 0 ? kReadyFrames : 1;
   if (room.engagedHead == nullptr) room.engagedTail = state;
@@ -112,13 +117,14 @@ void Battle_Ai_DisengageActor(Battle_Ai_ActorAiState* state) {
   Require(state != nullptr, "AI disengagement requires state");
   RequireActorId(state->actorId);
   auto& room = Room();
-  const auto mask = EngagedMask(room);
+  const auto mask = VS::Battle::ai::EngagedMask(room);
   const auto bit = 1u << state->actorId;
   if ((mask & bit) == 0) return;
   Require(room.engagedCount > 0, "AI engagement membership count underflow");
   Require(state->actor != nullptr && Battle_actors[0] != nullptr,
           "AI disengagement requires actor context");
-  StoreMask(room, static_cast<std::uint16_t>(mask & ~bit));
+  VS::Battle::ai::StoreEngagedMask(room,
+                                   static_cast<std::uint16_t>(mask & ~bit));
   state->opaque8E = 0;
   const auto* second = Battle_actors[0]->next;
   state->opaque98 =

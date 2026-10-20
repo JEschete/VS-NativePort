@@ -19,7 +19,7 @@
 #include "Audio/Sfx.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Damage.h"
 #include "Core/Core/IntPair.h"
 #include "Core/Math/ScalarMath.h"

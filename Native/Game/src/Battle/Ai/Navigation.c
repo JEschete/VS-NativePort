@@ -788,12 +788,6 @@ void Battle_Ai_SetAiContactOccupancy(int)
     VS_UNPORTED("Battle::Ai::SetAiContactOccupancy");
 }
 
-// decomp: BATTLE.PRG func_800E4C28 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_ReleaseAiDestinationTile(int, int)
-{
-    VS_UNPORTED("Battle::Ai::ReleaseAiDestinationTile");
-}
-
 // decomp: BATTLE.PRG func_800E4FE0 (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
 int Battle_Ai_BeginAiMovementTowardPoint()
 {
@@ -825,13 +819,6 @@ int Battle_Ai_HasActorNavigationState()
 int Battle_Ai_CopyActorNavigationOverrideState()
 {
     VS_UNPORTED("Battle::Ai::CopyActorNavigationOverrideState");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E5240 (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
-int Battle_Ai_FreeActorNavigationOverride()
-{
-    VS_UNPORTED("Battle::Ai::FreeActorNavigationOverride");
     return 0;
 }
 
@@ -909,18 +896,6 @@ void Battle_Ai_InitializeRoomNavigation(void) { Battle_Ai_InitializeRoomAiMap();
 void Battle_Ai_RefreshActorAiReservations(int)
 {
     VS_UNPORTED("Battle::Ai::RefreshActorAiReservations");
-}
-
-// decomp: BATTLE.PRG func_800E6764 (src/BATTLE/BATTLE.PRG/7DE94.s:0) [asm-file: not yet ported]
-void Battle_Ai_ForceReleaseActorAiReservations(int)
-{
-    VS_UNPORTED("Battle::Ai::ForceReleaseActorAiReservations");
-}
-
-// decomp: BATTLE.PRG func_800E678C (src/BATTLE/BATTLE.PRG/7DE94.s:0) [asm-file: not yet ported]
-void Battle_Ai_ReleaseActorAiReservations(Battle_Ai_ActorAiState*)
-{
-    VS_UNPORTED("Battle::Ai::ReleaseActorAiReservations");
 }
 
 // decomp: BATTLE.PRG func_800E6898 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]

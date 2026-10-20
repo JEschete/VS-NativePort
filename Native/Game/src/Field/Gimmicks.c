@@ -13,6 +13,7 @@
 #include "Audio/ActorSound.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Core/Memory/Heap.h"

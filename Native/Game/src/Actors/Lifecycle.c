@@ -9,7 +9,7 @@
 #include "Actors/Skeleton.h"
 #include "Actors/Spawning.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Core/Memory/Heap.h"

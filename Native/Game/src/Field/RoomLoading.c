@@ -18,7 +18,7 @@
 #include "Audio/SoundBanks.h"
 #include "Battle/Abilities.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/RoomState.h"
 #include "Battle/Damage.h"

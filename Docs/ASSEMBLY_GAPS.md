@@ -7,8 +7,8 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **152** (151 stubs and 1 partial implementations).
-- Matching C/C++ reference bodies located: **111**.
+- Open native entries: **147** (146 stubs and 1 partial implementations).
+- Matching C/C++ reference bodies located: **106**.
 - Assembly located, but no matching C body located: **31**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
@@ -81,7 +81,7 @@ to an ignored build directory first.
 
 ## Tagged file: BATTLE/BATTLE.PRG/7E05C.s
 
-All **21** catalog entries are accounted for: **6 already implemented**, **14 open with C counterparts**, and **1 open with assembly only**.
+All **21** catalog entries are accounted for: **7 already implemented**, **13 open with C counterparts**, and **1 open with assembly only**.
 
 | ID | Original symbol | Native status | Source availability |
 | --- | --- | --- | --- |
@@ -99,7 +99,7 @@ All **21** catalog entries are accounted for: **6 already implemented**, **14 op
 | F01839 | `func_800E71DC` | implemented | c-or-cpp-body-available |
 | F01840 | `func_800E72D0` | implemented | c-or-cpp-body-available |
 | F01841 | `func_800E7370` | implemented | c-or-cpp-body-available |
-| F01842 | `func_800E7454` | stub | c-or-cpp-body-available |
+| F01842 | `func_800E7454` | implemented | c-or-cpp-body-available |
 | F01843 | `func_800E75EC` | stub | c-or-cpp-body-available |
 | F01844 | `func_800E7608` | stub | c-or-cpp-body-available |
 | F01845 | `func_800E7660` | stub | c-or-cpp-body-available |
@@ -143,10 +143,10 @@ as behaviorally complete. No native gameplay issue is closed by this audit.
 
 | Reference | Revision | Production source files scanned | Source SHA-256 |
 | --- | --- | --- | --- |
-| `rood-reverseWin` | `07cfb051225c0d1ab835892657d83dc19fed50f0` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
-| `rood-reverse` | `1100b41764ae853ff779b659b0aa2dc3fd264d9e` | 382 | `61482ad4e98f9ece5d8a16793c1941c644a99a1d7a775d8069b93f4cb6c97776` |
-| `rood-reverse-noprompt` | `fddc69a35ee9c507d92d55dc4152990364ab9fcc` | 389 | `27801b556a70c831283e623c3dbebe22f19166b6faea61723cc73beec8455453` |
-| `rood-boi` | `0ac963f1343b4d53fe4c973e52a22e1eb0cef3f2` | 720 | `b5dd83a4ec589cce5fb1148ea126a5a4d4a987b99d1adda36fb3ae38c72388cf` |
+| `rood-reverseWin` | `d357de4f134e4adb271bd8e364be39c34edcd76e` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
+| `rood-reverse` | `d4f7285631e6bc68e213fa304c662228240bfee7` | 382 | `611d70a7f4feba067403989b80c4acb06ab3dd396191a449128fcd49a5b8d17a` |
+| `rood-reverse-noprompt` | `7339d4e86d99d5e848468ed1a5955b9782ec6ff5` | 389 | `12a7572a90a7007de6aab831b54fd90227230bbdd664390c85a1cea8fa415803` |
+| `rood-boi` | `98459eaea78c2cd357e2a17e542ba9c71b810c8a` | 720 | `b5dd83a4ec589cce5fb1148ea126a5a4d4a987b99d1adda36fb3ae38c72388cf` |
 
 `rood-reverseWin` is a tracked tree inside the parent repository; its
 listed revision is the parent revision, not an independent submodule HEAD.

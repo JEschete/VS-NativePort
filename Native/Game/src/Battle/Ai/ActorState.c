@@ -320,12 +320,6 @@ void Battle_Ai_InitializeActorAiExtensionHook(void)
     VS_UNPORTED("Battle::Ai::InitializeActorAiExtensionHook");
 }
 
-// decomp: BATTLE.PRG func_800E7454 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-void Battle_Ai_FreeActorAiState(Battle_Actor*)
-{
-    VS_UNPORTED("Battle::Ai::FreeActorAiState");
-}
-
 // decomp: BATTLE.PRG func_800E7608 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
 void Battle_Ai_ClearActorAiLinksAndPlan(int)
 {

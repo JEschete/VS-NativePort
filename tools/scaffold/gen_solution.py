@@ -108,6 +108,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\Ai\NavigationPrimitives.cpp",
                 r"src\Battle\Ai\ActorCommands.cpp",
                 r"src\Battle\Ai\Engagement.cpp",
+                r"src\Battle\Ai\ActorCleanup.cpp",
                 r"src\Field\TerrainHeight.cpp",
             ))
 

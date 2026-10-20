@@ -10,7 +10,6 @@
 #define VS_BATTLE_AI_ACTORSTATE_H_DECLS
 #include "Actors/ActorAllocation.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -18,7 +17,6 @@
 #include "Battle/Ai/Perception.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Render/Palette.h"
 
 extern unsigned char Battle_Ai_kSettingsBits30Values[1284];
 extern unsigned int Battle_Ai_kPerceptionRangesSquared[320];
@@ -41,7 +39,6 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options);
 short Battle_Ai_PackActorAiPersistenceFlags(int);
 int Battle_Ai_ClearActorAiNavigationReset();
 void Battle_Ai_InitializeActorAiExtensionHook(void);
-void Battle_Ai_FreeActorAiState(Battle_Actor*);
 void Battle_Ai_ClearActorAiLinksAndPlan(int);
 
 #endif // VS_BATTLE_AI_ACTORSTATE_H_DECLS

@@ -6,6 +6,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActorCleanupTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActorCommandTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

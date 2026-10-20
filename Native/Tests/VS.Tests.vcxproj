@@ -45,6 +45,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActorCleanupTests.cpp" />
     <ClCompile Include="src\ActorCommandTests.cpp" />
     <ClCompile Include="src\AiDecisionTests.cpp" />
     <ClCompile Include="src\AiLayoutTests.cpp" />

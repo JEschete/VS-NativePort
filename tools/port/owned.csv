@@ -106,3 +106,8 @@ F01632,function,Battle_Ai_UpdateTemporaryAwarenessIndicator,Native\Game\src\Batt
 F01633,function,Battle_Ai_DisengageActorById,Native\Game\src\Battle\Ai\Engagement.cpp,Native\Game\src\Battle\Ai\Engagement.h,2026-10-20,from Native\Game\src\Battle\Ai\Perception.c
 F01634,function,Battle_Ai_DisengageActor,Native\Game\src\Battle\Ai\Engagement.cpp,Native\Game\src\Battle\Ai\Engagement.h,2026-10-20,from Native\Game\src\Battle\Ai\Perception.c
 F01635,function,Battle_Ai_TryEngageActor,Native\Game\src\Battle\Ai\Engagement.cpp,Native\Game\src\Battle\Ai\Engagement.h,2026-10-20,from Native\Game\src\Battle\Ai\Perception.c
+F01790,function,Battle_Ai_ReleaseAiDestinationTile,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
+F01804,function,Battle_Ai_FreeActorNavigationOverride,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
+F01822,function,Battle_Ai_ForceReleaseActorAiReservations,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
+F01823,function,Battle_Ai_ReleaseActorAiReservations,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
+F01842,function,Battle_Ai_FreeActorAiState,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-20,from Native\Game\src\Battle\Ai\ActorState.c

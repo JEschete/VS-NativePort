@@ -207,6 +207,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActorCleanup.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\ActorCommands.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -1706,6 +1709,7 @@
     <ClInclude Include="src\Battle\Actor.h" />
     <ClInclude Include="src\Battle\Ai\ActionPlanning.h" />
     <ClInclude Include="src\Battle\Ai\ActionSelection.h" />
+    <ClInclude Include="src\Battle\Ai\ActorCleanup.h" />
     <ClInclude Include="src\Battle\Ai\ActorCommands.h" />
     <ClInclude Include="src\Battle\Ai\ActorState.h" />
     <ClInclude Include="src\Battle\Ai\AiState.h" />
@@ -1715,6 +1719,7 @@
     <ClInclude Include="src\Battle\Ai\DecisionCallbacks.h" />
     <ClInclude Include="src\Battle\Ai\DecisionPrimitives.h" />
     <ClInclude Include="src\Battle\Ai\Engagement.h" />
+    <ClInclude Include="src\Battle\Ai\EngagementState.hpp" />
     <ClInclude Include="src\Battle\Ai\FrameUpdate.h" />
     <ClInclude Include="src\Battle\Ai\Movement.h" />
     <ClInclude Include="src\Battle\Ai\Navigation.h" />

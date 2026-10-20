@@ -289,6 +289,32 @@ An initial real item-drop consumer and autonomous pursuit/movement are still
 unverified; #6 remains open. The observed actor cleanup stub is the next
 continuation, not an excuse to stop at another function-count checkpoint.
 
+### Native actor teardown and navigation-override ownership
+
+Five more entries are implemented in
+[ActorCleanup.cpp](../Native/Game/src/Battle/Ai/ActorCleanup.cpp):
+F01790, F01804, F01822/F01823 and F01842. Cleanup now releases reservation and
+override storage, detaches linked/special actors and encounter membership,
+clears marker/list references, releases actor AI storage and handles shared
+orbiting-boss ownership. Ashley's original persistent AI lifetime is retained.
+Room bounds and gate-mask operations retain the verified original byte semantics.
+
+The prerequisite navigation-override pointer at original `0x18C` was also
+missing from native rebasing. A new independent view-width regression failed
+**4 == 8** before repair. All AI views now reserve that full native pointer;
+perception's former integer presence test is a pointer, and later view fields
+remain aligned with canonical storage. Real high-end heap allocation/free tests
+use addresses above 4 GiB and verify complete heap recovery and repeat cleanup.
+Shared encounter-mask access is extracted rather than duplicated.
+
+The C-backed total is **39 of 145**, with **106** remaining; **147** total gaps
+remain. Full Debug/Release suites each pass **203 cases / 761,040 assertions**,
+with 621 native-view fields, 179 dispatch contracts, 12 audit tests, idempotence
+and zero new quality findings. Both ordinary-input victory replays still
+complete all 24,000 ticks/captures without errors and preserve the real
+MAP003 -> MAP004 -> MAP005 transition. Initial drop evidence and autonomous
+pursuit remain outstanding; work continues instead of declaring the tracker done.
+
 ### Menu-only Options acceptance gate (#2/#39, 2026-10-20)
 
 Following the explicit owner-approved menu-first split, all nine Options now
