@@ -49,6 +49,44 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F02703": [
+        ("*(int**)Core_ScratchAddr(1) + 7",
+         "(u_long*)Render_frameScratch.orderingTable + 7",
+         "4D8.c:1965 scratch word1 is the upper half of a native cursor, not the native ordering pointer"),
+    ],
+    "F02699": [
+        ("    u_long* pScratch1;\n    u_long* pScratch2;\n", "",
+         "4D8.c:1788 use native frame fields instead of two32-bit scratch words"),
+        ("    pScratch1 = Core_ScratchAddr(0);\n", "",
+         "native primitive cursor does not need a word-pointer view"),
+        ("sprt = (SPRT*)pScratch1[0];",
+         "sprt = Render_frameScratch.primitiveCursor;",
+         "preserve all pointer bits on the first framebuffer strip"),
+        ("(void*)(pScratch1[1] + 0x7FE * 4)",
+         "(u_long*)Render_frameScratch.orderingTable + 0x7FE",
+         "first framebuffer strip uses the native scene ordering table"),
+        ("*Core_ScratchAddr(0) = (u_long)sprt;",
+         "Render_frameScratch.primitiveCursor = sprt;",
+         "store the complete native cursor after the first strip"),
+        ("sprt = (SPRT*)*Core_ScratchAddr(0);",
+         "sprt = Render_frameScratch.primitiveCursor;",
+         "preserve all pointer bits on the second framebuffer strip"),
+        ("    pScratch2 = Core_ScratchAddr(0);\n", "",
+         "second strip also uses typed native frame fields"),
+        ("(void*)(pScratch2[1] + 0x7FE * 4)",
+         "(u_long*)Render_frameScratch.orderingTable + 0x7FE",
+         "second framebuffer strip uses the native scene ordering table"),
+        ("pScratch2[0] = (uintptr_t)sprt;",
+         "Render_frameScratch.primitiveCursor = sprt;",
+         "do not truncate the second strip cursor through a32-bit lvalue"),
+    ],
+    "F04153": [
+        ("    short (*var_s1)[4] = (void*)Core_ScratchAddr(64);",
+         "    enum { kMapVertexCapacity = 256 };\n"
+         "    short projectedVertices[kMapVertexCapacity][4];\n"
+         "    short (*var_s1)[4] = projectedVertices;",
+         "4D8.c:1112 byte-indexed scene vertices need a local256-entry cache, not the96-entry shared scratch tail"),
+    ],
     "G00864": [
         ("char Menu_Framework_comparisonStatTotals[8]",
          "short Menu_Framework_comparisonStatTotals[4]",
@@ -99,6 +137,9 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("Field_ResolveSceneRoomData(Battle_unusedSceneBuffer)",
          "Field_ResolveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size)",
          "bound ARM scene decoding to its loaded file extent"),
+        ("*(u_short*)Core_ScratchAddr(22)",
+         "(u_short)Render_frameScratch.camera.angles.vy",
+         "map camera initialization/reset must follow native yaw, not original scratch byte88"),
     ] for fid in ("F04150", "F04151")},
     "G00620": [
         (r'"Ashley|>6|Riot\0"',

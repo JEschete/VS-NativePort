@@ -475,7 +475,7 @@ int Menu_Map_LoadSceneMap(void)
 
         Menu_Map_cameraAngles.vx = 568;
         Menu_Map_currentRoomIndex = 0;
-        Menu_Map_cameraAngles.vz = Menu_Map_cameraAngles.vy = 2048 - *(u_short*)Core_ScratchAddr(22);
+        Menu_Map_cameraAngles.vz = Menu_Map_cameraAngles.vy = 2048 - (u_short)Render_frameScratch.camera.angles.vy;
 
         Menu_Map_currentScene = Field_CurrentSceneId();
 
@@ -717,7 +717,7 @@ int Menu_Map_UpdateMapMenu(void)
                     Menu_Map_geomOffsetY = 0;
                     Menu_Map_cameraDistance = ONE * 3 / 16;
                     Menu_Map_cameraAngles.vx = 0x238;
-                    Menu_Map_cameraAngles.vy = 0x800 - *(u_short*)Core_ScratchAddr(22);
+                    Menu_Map_cameraAngles.vy = 0x800 - (u_short)Render_frameScratch.camera.angles.vy;
                     Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex(Battle_unusedSceneBuffer);
 
                     Menu_Map_CenterOnRoom(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);
@@ -1095,7 +1095,9 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
     TILE* tile;
     int const* new_var;
 
-    short (*var_s1)[4] = (void*)Core_ScratchAddr(64);
+    enum { kMapVertexCapacity = 256 };
+    short projectedVertices[kMapVertexCapacity][4];
+    short (*var_s1)[4] = projectedVertices;
     int elementCount = *(int*)roomData;
     roomData += 4;
 
@@ -1730,13 +1732,10 @@ void Menu_Map_ScaleRoomVertices(Field_MapScene* scene, int factor)
 void Menu_Map_DarkenBackground(void)
 {
     SPRT* sprt;
-    u_long* pScratch1;
-    u_long* pScratch2;
 
     _insertTPage(0x7FE, getTPage(0, 3, 0, 0));
 
-    pScratch1 = Core_ScratchAddr(0);
-    sprt = (SPRT*)pScratch1[0];
+    sprt = Render_frameScratch.primitiveCursor;
     setSprt(sprt);
     setSemiTrans(sprt, 1);
     setShadeTex(sprt, 1);
@@ -1744,8 +1743,8 @@ void Menu_Map_DarkenBackground(void)
     setWH(sprt, 192, 240);
     setUV0(sprt, 0, 0);
     setClut(sprt, 0, 0);
-    AddPrim((void*)(pScratch1[1] + 0x7FE * 4), sprt++);
-    *Core_ScratchAddr(0) = (u_long)sprt;
+    AddPrim((u_long*)Render_frameScratch.orderingTable + 0x7FE, sprt++);
+    Render_frameScratch.primitiveCursor = sprt;
 
     if (Render_frameBuf != 0) {
         _insertTPage(0x7FE, getTPage(2, 0, 320, 0));
@@ -1753,7 +1752,7 @@ void Menu_Map_DarkenBackground(void)
         _insertTPage(0x7FE, getTPage(2, 0, 0, 0));
     }
 
-    sprt = (SPRT*)*Core_ScratchAddr(0);
+    sprt = Render_frameScratch.primitiveCursor;
     setSprt(sprt);
     setSemiTrans(sprt, 1);
     setShadeTex(sprt, 1);
@@ -1762,9 +1761,8 @@ void Menu_Map_DarkenBackground(void)
     setUV0(sprt, 0, 0);
     setClut(sprt, 0, 0);
 
-    pScratch2 = Core_ScratchAddr(0);
-    AddPrim((void*)(pScratch2[1] + 0x7FE * 4), sprt++);
-    pScratch2[0] = (uintptr_t)sprt;
+    AddPrim((u_long*)Render_frameScratch.orderingTable + 0x7FE, sprt++);
+    Render_frameScratch.primitiveCursor = sprt;
 
     if (Render_frameBuf != 0) {
         _insertTPage(0x7FE, getTPage(2, 0, 512, 0));
@@ -1921,7 +1919,7 @@ void Menu_Map_DrawControlBackdrop(int x, int y, int w, int h)
         setXY2(line, x, i, x + lineW - 1, i);
         setRGB0(line, 0x40, 0x38, 0x20);
         setRGB1(line, 0x10, 0x10, 8);
-        AddPrim(*(int**)Core_ScratchAddr(1) + 7, line++);
+        AddPrim((u_long*)Render_frameScratch.orderingTable + 7, line++);
     }
     x += 2;
     y += 2;

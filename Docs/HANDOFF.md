@@ -153,6 +153,56 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
 
+### Full Map entry and lifecycle (#37, 2026-10-19)
+
+The first-room Map crash was independently reproduced at tick 7747 in
+`Menu_Map_DrawControlBackdrop`, not inferred from a minimap warning. F02703
+(`MENU5.PRG/4D8.c:1965`) read an eight-byte ordering pointer through original
+scratch word 1, now the middle of the native primitive pointer. It now uses
+the native frame ordering field. Related Map consumers are corrected through
+the copier:
+
+- F02699 (`4D8.c:1788`) no longer truncates framebuffer-strip cursors or reads
+  the ordering table through two 32-bit scratch words. Both native framebuffer
+  strip chains remain intact.
+- F04150/F04151 use `Render_frameScratch.camera.angles.vy` for initial/reset
+  heading instead of obsolete scratch word 22.
+- F04153 (`4D8.c:1112`) uses a local 256-entry XY/depth/fog workspace for the
+  format's byte-indexed vertices instead of the 96-entry shared scratch tail.
+  The already-bounded scene decoder remains the input-validation boundary;
+  no original room/visited flags or room lists are fabricated.
+
+Three focused tests cover control backdrops at edge/minimal dimensions in
+both framebuffers, both native darkening strip/page chains, and a validated
+256-vertex room referencing the last vertex. Exact projected coordinates,
+complete ordering traversal, packet guards and unchanged scratch beyond the
+native frame are checked. Full Debug and Release suites pass **126 cases /
+45,714 assertions** each; changed-source quality with tidy has **zero new
+findings**, with no baseline refresh.
+
+The identical formerly crashing Map entry now renders the original Wine
+Cellar / "Entrance to Darkness" room. Both configurations complete recorded
+**22,300-tick** routes with all **17 captures**: pan, L2 rotation, R2 zoom,
+Start reset, previous/next visited room, the real visited-area menu and cancel,
+UI hide/show, Cross/back and Triangle/direct return, three entries and resumed
+field movement. No run reports a render error or crash. A separate
+**normal-speed Release** route completes **11,200 ticks / five captures**,
+including entry, back, field return and movement.
+
+Portable original-game `reference-map` captures at 132/139 seconds establish
+initial/reset room geometry, heading, compass, labels and controls; 143/146
+cover real area selection/cancel, and 164 repeats entry after returning to the
+field. Native output matches those menu/room semantics, accounting for its
+eight-pixel presentation margin. This is not full-renderer or full-playthrough
+parity.
+
+Local evidence and exact argv are under `build\quality\issue37`:
+`map-entry-after-debug`, `map-lifecycle-debug`, `map-lifecycle-release`,
+`normal-map-release` and `reference-map`; the pre-fix stack remains under
+`build\quality\issue40\map-entry-before`. The fixing revision and successful
+pushed CI are recorded on #37 before closure. Data-menu persistence support
+and the other remaining #2/#39 acceptance gates stay separate.
+
 ### Equipment details, Status Square and correct comparison values (#31/#33/#35/#36, 2026-10-19)
 
 The blank weapon chooser, item-detail pages and Status Square subview share
