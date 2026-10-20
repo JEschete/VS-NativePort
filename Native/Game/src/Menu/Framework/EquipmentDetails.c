@@ -45,7 +45,7 @@ static u_char Menu_Framework_primaryStatPanelSlideStep = 0;
 short Menu_Framework_comparisonStatDeltas[4];
 
 // decomp: D_80102490 (D_80102490@MENU/MAINMENU.PRG)
-char Menu_Framework_comparisonStatTotals[8];
+short Menu_Framework_comparisonStatTotals[4];
 
 // decomp: D_80102498 (D_80102498@MENU/MAINMENU.PRG)
 short Menu_Framework_comparisonAccessoryStats[4];
@@ -773,7 +773,7 @@ void Menu_Framework_DrawEquipmentStatPage(int xOffset)
         "#DRAGON", "#EVIL", NULL, NULL, "#PHYSICAL", "#AIR", "#FIRE", "#EARTH", "#WATER",
         "#LIGHT", "#DARK", NULL, "#BLUNT", "#EDGED", "#PIERCING" };
 #pragma vsstring(start)
-    static char Menu_Framework_equipmentStatPageHeader[] = "|f0|CLASS|f0|/|f0|AFFINITY|f0|/|f0|TYPE";
+    static char Menu_Framework_equipmentStatPageHeader[] = "\xFB\x00\x0C\x15\x0A\x1C\x1C\xFB\x00\xA1\xFB\x00\x0A\x0F\x0F\x12\x17\x12\x1D\x22\xFB\x00\xA1\xFB\x00\x1D\x22\x19\x0E";
 #pragma vsstring(end)
 
     int statPage;
@@ -954,7 +954,7 @@ void Menu_Framework_DrawEquipmentStatPage(int xOffset)
             prim[2] = ((xOffset & 0xFFFF) | temp_a0_2);
             prim[3] = 0x5D3200;
             prim[4] = (((xOffset - temp_v1_3) & 0xFFFF) | temp_a0_2);
-            *before = ((u_long)prim << 8) >> 8;
+            *before = LegacyGpu_Handle(prim);
             prim += 5;
         }
 
@@ -1091,16 +1091,16 @@ void Menu_Framework_SetActorComparisonStats(int actorId)
     Menu_Framework_comparisonStatDeltas[0] = temp_t0->strength;
     Menu_Framework_comparisonStatDeltas[1] = temp_t0->intelligence;
     Menu_Framework_comparisonStatDeltas[2] = temp_t0->agility;
-    Menu_Framework_comparisonStatDeltas[4] = temp_t0->totalStrength;
-    Menu_Framework_comparisonStatDeltas[5] = temp_t0->totalIntelligence;
+    Menu_Framework_comparisonStatTotals[0] = temp_t0->totalStrength;
+    Menu_Framework_comparisonStatTotals[1] = temp_t0->totalIntelligence;
     Menu_Framework_equipmentSubtype = 0;
-    Menu_Framework_comparisonStatDeltas[6] = temp_t0->totalAgility;
+    Menu_Framework_comparisonStatTotals[2] = temp_t0->totalAgility;
 
     if (actorId < 16) {
         int i;
 
         for (i = 0; i < 3; ++i) {
-            Menu_Framework_comparisonStatDeltas[i] -= Menu_Framework_comparisonStatDeltas[4 + i];
+            Menu_Framework_comparisonStatDeltas[i] -= Menu_Framework_comparisonStatTotals[i];
         }
 
         Menu_Framework_SetPrimaryStats(temp_t0->totalStrength, temp_t0->totalIntelligence,
@@ -1188,7 +1188,7 @@ void Menu_Framework_UpdatePrimaryStatPanel(int animate)
             stat = Menu_Framework_strIntAgi[i];
             Menu_Framework_DrawComparedInteger(
                 stat, position + 28, Menu_Framework_strIntAgi[i + 4], temp_s4);
-            new_var2 = stat + Menu_Framework_comparisonStatDeltas[i + 4];
+            new_var2 = stat + Menu_Framework_comparisonStatTotals[i];
             stat += Menu_Framework_comparisonStatDeltas[i];
             var_a3 = valuesKnown & 1;
             if (var_a3 != 0) {

@@ -12,7 +12,7 @@
 #include "Items/Weapons.h"
 
 extern short Menu_Framework_comparisonStatDeltas[4];;
-extern char Menu_Framework_comparisonStatTotals[8];;
+extern short Menu_Framework_comparisonStatTotals[4];;
 extern short Menu_Framework_comparisonAccessoryStats[4];;
 extern u_short Menu_Framework_currentDp;
 extern u_short Menu_Framework_currentPp;

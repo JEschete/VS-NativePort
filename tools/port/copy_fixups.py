@@ -49,6 +49,32 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "G00864": [
+        ("char Menu_Framework_comparisonStatTotals[8]",
+         "short Menu_Framework_comparisonStatTotals[4]",
+         "C48.c:992 original adjacent8-byte totals region contains signed halfwords, not independent character state"),
+    ],
+    "F02561": [
+        *[(f"Menu_Framework_comparisonStatDeltas[{index + 4}]",
+           f"Menu_Framework_comparisonStatTotals[{index}]",
+           "C48.c:992 write the explicit totals buffer instead of overrunning the four delta/index halfwords")
+          for index in range(3)],
+        ("Menu_Framework_comparisonStatDeltas[4 + i]",
+         "Menu_Framework_comparisonStatTotals[i]",
+         "C48.c:1011 subtract the same typed totals that the original clears through D_80102490"),
+    ],
+    "F02562": [
+        ("Menu_Framework_comparisonStatDeltas[i + 4]",
+         "Menu_Framework_comparisonStatTotals[i]",
+         "C48.c:1025 compare against explicit totals without reading past the delta/index buffer"),
+    ],
+    "F02555": [
+        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+         "C48.c:673 stat-page bars at ordering entry15 must retain traversal through all lower UI entries"),
+        (r'"|f0|CLASS|f0|/|f0|AFFINITY|f0|/|f0|TYPE"',
+         r'"\xFB\x00\x0C\x15\x0A\x1C\x1C\xFB\x00\xA1\xFB\x00\x0A\x0F\x0F\x12\x17\x12\x1D\x22\xFB\x00\xA1\xFB\x00\x1D\x22\x19\x0E"',
+         "C48.c:673 pragma vsstring page header is29bytes; preserve font operands at1/11/24 and19visible glyphs"),
+    ],
     "F02524": [
         (r'"|!0|' + "0" * 96 + r'\0\0"',
          "{ [0] = Core_TextCode_ChunkSize, [98] = Core_TextCode_Terminator,\n"

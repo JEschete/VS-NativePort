@@ -153,7 +153,68 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
 
-### Contextual information and first-visible-frame text (#30/#31, 2026-10-19)
+### Equipment details, Status Square and correct comparison values (#31/#33/#35/#36, 2026-10-19)
+
+The blank weapon chooser, item-detail pages and Status Square subview share
+F02555 `_renderStatPage` (`MENU/MAINMENU.PRG/C48.c:673`). Its stat-bar link at
+ordering entry 15 stored truncated pointer bits, terminating traversal before
+lower titles, rows, values and information. DP/PP and the preview survived
+because they occupied higher entries. The copier now uses a native link handle.
+The same function's local `pragma vsstring` header also remained literal ASCII:
+its 29-byte loop and color operands at 1/11/24 require the original encoded
+CLASS/AFFINITY/TYPE bytes. Those controls are now encoded, not drawn as glyphs.
+
+The newly visible comparison panel exposed the independent #35 data defect.
+Original `D_80102488[4]` and the adjacent eight-byte `D_80102490` region were two
+views of delta/index and total halfwords. Native globals are separate, but
+F02561/F02562 still accessed `comparisonStatDeltas[4..6]` outside its four
+elements, corrupting comparison accessory state. Public-API fixtures reproduced
+the exact wrong values: Status 200/200/200 instead of 100/101/100, and Fandango
+210/201/196 instead of 110/102/96. G00864 now contains four signed halfwords
+in the same eight bytes, and every total write/subtraction/comparison read
+explicitly uses that buffer. No actor formula, original equipment definition,
+game-state bypass or hardcoded subtraction changed.
+
+Evidence:
+
+- Isolated link/header regressions fail before the fix on all three pages and
+  pass afterward, checking complete lower-UI traversal, bounded packet storage
+  and 19 visible header glyphs rather than printed controls. Comparison
+  regressions fail with the exact original report before the typed-buffer fix;
+  both Status and equipment-preview modes now pass with positive, zero and
+  negative actor modifiers and accessory contributions applied exactly once.
+- Full Debug and Release suites pass **123 cases / 45,677 assertions** each.
+  Changed-source quality with tidy reports **zero new findings**, with no
+  baseline refresh.
+- Both configurations complete three recorded input routes: **22,000 ticks**
+  for all equipment stat pages, an actually empty Shield slot, cancellation
+  and repeated entry (**14 captures**); **18,000 ticks** for repeated Status
+  Square/Affinity/Type/navigation/back/re-entry (**13 captures**); and **21,200
+  ticks** with Information Off in the deep weapon and Status views (**13
+  captures**). All 40 requested captures per configuration exist, every run
+  reaches its tick limit, and no log reports a crash, cyclic chain or render
+  error.
+- Native now matches the fresh original's Status ORG 100/100/100 and EQP
+  100/101/100, and Fandango ORG 10/1/-4 with EQP 110/102/96. Original and native
+  show the real Fandango/component rows, matching Class values, encoded page
+  headers and contextual information. Empty Shield shows NONE / "Nothing
+  equipped.", not invented inventory. With Information Off, the body/header
+  disappears but equipment labels, stat values and Status limb rows remain.
+- Portable DuckStation reference `reference-chooser-status` captures original
+  Equip->Weapon at 138/141 seconds, normal Status at 164/166, and Square at
+  171/173. These are real menu inputs in the same fresh-room/default-loadout
+  state. Native actor animation/presentation differences are not represented
+  as full-scene parity.
+
+Exact argv, before/after logs and local captures remain under
+`build\quality\issue33` and `build\quality\issue36`. The final route folders are
+`equipment-cycle-final-<config>`, `status-cycle-final-<config>` and
+`information-off-deep-final-<config>`. The fixing revision and successful
+pushed CI are recorded on #31/#33/#35/#36 before closure. The remaining #39
+Options effects, actual equip/unequip implementation #14 and the Map/Data
+crashes are not completed by these view/comparison fixes.
+
+### Contextual information and first-visible-frame text (#30/#31, 2026-10-19, earlier checkpoint)
 
 The shared F02524 `vs_mainmenu_setInformationMessage` producer
 (`MENU/MAINMENU.PRG/58EC.c:475`) still contained literal ASCII `|!0|` from a
