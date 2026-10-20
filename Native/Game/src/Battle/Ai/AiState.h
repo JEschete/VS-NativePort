@@ -88,7 +88,17 @@ typedef struct Battle_Ai_RoomAiState {
     /* 0x08 */ u_char defaultActionDelay;
     /* 0x09 */ char reserved9;
     /* 0x0A */ u_char allowsNonSpellActions;
-    /* 0x0B */ char reservedB[9];
+    /* 0x0B */ union {
+        char reservedB[9];
+        struct {
+            u_char reservedBPrefix[2];
+            u_char engagementLimit;
+            u_char reservedEPrefix[2];
+            u_char engaged_mask_bytes[2];
+            u_char engagedCount;
+            u_char reserved13;
+        };
+    };
     /* 0x14 */ int flightCeiling;
     /* 0x18 */ u_short readinessLevel;
     /* 0x1A */ char reserved1A[2];
@@ -925,7 +935,13 @@ typedef struct Battle_Ai_ActorAiState {
         };
     };
     /* 0x12A */ u_char opaque12A;
-    /* 0x12B */ char reserved12B[2];
+    /* 0x12B */ union {
+        char reserved12B[2];
+        struct {
+            u_char reserved12BPrefix;
+            u_char engagementRequest;
+        };
+    };
     /* 0x12D */ u_char behaviorMode;
     /* 0x12E */ u_char planMode;
     /* 0x12F */ signed char opaque12F;

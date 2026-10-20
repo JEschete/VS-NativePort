@@ -797,12 +797,25 @@ ONDISC_OFFSETS: dict[str, str] = {
 
 # Reviewed fixes to copied type definitions: type id -> [(old, new, reason)]. Checked by Native\Tests\src\LayoutAsserts.c.
 TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "T00271": [
+        ("char reservedB[9];",
+         "union {\n        char reservedB[9];\n        struct {\n"
+         "            u_char reservedBPrefix[2];\n            u_char engagementLimit;\n"
+         "            u_char reservedEPrefix[2];\n            u_char engaged_mask_bytes[2];\n"
+         "            u_char engagedCount;\n            u_char reserved13;\n        };\n    };",
+         "func_800D836C/82CC use the encounter limit, membership mask and member count; byte aliases preserve native layout"),
+    ],
     "T00581": [
         ("int channels[10];",
          "int channels[12]; /* native: independent six-word envelopes for both motors */",
          "main.c:8584/8720 and MIPS 80043450/8004346C use an overlapping PS1 tail; native slots must not alias or overflow"),
     ],
     "T00532": [
+        ("char reserved12B[2];",
+         "union {\n        char reserved12B[2];\n        struct {\n"
+         "            u_char reserved12BPrefix;\n            u_char engagementRequest;\n"
+         "        };\n    };",
+         "func_800D836C clears the engagement request at original offset 0x12C"),
         ("char reserved9C[23];",
          "union {\n        char reserved9C[23];\n        struct {\n"
          "            u_char last_slide_tile_bytes[4];\n            u_char reservedA0[16];\n"

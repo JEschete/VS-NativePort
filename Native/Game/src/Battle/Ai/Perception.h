@@ -24,8 +24,6 @@ _Static_assert(sizeof(Battle_Ai_RelationWord) == 0x4, "Battle_Ai_RelationWord mu
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_PERCEPTION_H_DECLS)
 #define VS_BATTLE_AI_PERCEPTION_H_DECLS
-#include "Actors/ActorAllocation.h"
-#include "Actors/ModelInstance.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -36,14 +34,7 @@ _Static_assert(sizeof(Battle_Ai_RelationWord) == 0x4, "Battle_Ai_RelationWord mu
 extern int Battle_Ai_frameTickBudget;
 extern int Battle_Ai_secondPerceptionTarget;
 extern int Battle_Ai_candidateEngagedThisUpdate;
-void Battle_Ai_SetActorAwarenessIndicator(int, int);
-void Battle_Ai_ResetActorAwarenessIndicator(struct Battle_Ai_PlanEvaluationView*);
 void Battle_Ai_SetTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* arg0, int arg1, int arg2);
-int Battle_Ai_IsEngagementReady(Battle_Ai_ActorAiState*);
-void Battle_Ai_UpdateTemporaryAwarenessIndicator(Battle_Ai_PerceptionUpdateView*);
-void Battle_Ai_DisengageActorById(int);
-void Battle_Ai_DisengageActor(Battle_Ai_ActorAiState*);
-void Battle_Ai_TryEngageActor(Battle_Ai_ActorAiState*);
 int Battle_Ai_IsTargetOccludedAtExtent(
     SVECTOR* from, SVECTOR* to, Battle_Ai_PerceptionView* state, int id);
 int Battle_Ai_IsTargetOccludedAtHeight(

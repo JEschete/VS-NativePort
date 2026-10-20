@@ -237,6 +237,9 @@
     <ClCompile Include="src\Battle\Ai\DecisionPrimitives.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\Engagement.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\FrameUpdate.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1711,6 +1714,7 @@
     <ClInclude Include="src\Battle\Ai\ConditionSnapshot.h" />
     <ClInclude Include="src\Battle\Ai\DecisionCallbacks.h" />
     <ClInclude Include="src\Battle\Ai\DecisionPrimitives.h" />
+    <ClInclude Include="src\Battle\Ai\Engagement.h" />
     <ClInclude Include="src\Battle\Ai\FrameUpdate.h" />
     <ClInclude Include="src\Battle\Ai\Movement.h" />
     <ClInclude Include="src\Battle\Ai\Navigation.h" />

@@ -17,6 +17,7 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/DecisionPrimitives.h"
+#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
@@ -41,54 +42,11 @@ int Battle_Ai_secondPerceptionTarget;
 // decomp: D_800F58E0 (D_800F58E0@BATTLE/BATTLE.PRG)
 int Battle_Ai_candidateEngagedThisUpdate;
 
-// decomp: BATTLE.PRG func_800D820C (src/BATTLE/BATTLE.PRG/6FA0C.s:0) [asm-file: not yet ported]
-void Battle_Ai_SetActorAwarenessIndicator(int, int)
-{
-    VS_UNPORTED("Battle::Ai::SetActorAwarenessIndicator");
-}
-
-// decomp: BATTLE.PRG func_800D821C (src/BATTLE/BATTLE.PRG/6FA0C.s:0) [asm-file: not yet ported]
-void Battle_Ai_ResetActorAwarenessIndicator(struct Battle_Ai_PlanEvaluationView*)
-{
-    VS_UNPORTED("Battle::Ai::ResetActorAwarenessIndicator");
-}
-
 // decomp: BATTLE.PRG func_800D8260 (src/BATTLE/BATTLE.PRG/6FA60.c:407)
 void Battle_Ai_SetTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* arg0, int arg1, int arg2)
 {
     arg0->opaque138 = arg1;
     arg0->opaque12A = arg2;
-}
-
-// decomp: BATTLE.PRG func_800D826C (src/BATTLE/BATTLE.PRG/6FA6C.s:0) [asm-file: not yet ported]
-int Battle_Ai_IsEngagementReady(Battle_Ai_ActorAiState*)
-{
-    VS_UNPORTED("Battle::Ai::IsEngagementReady");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800D8280 (src/BATTLE/BATTLE.PRG/6FA6C.s:0) [asm-file: not yet ported]
-void Battle_Ai_UpdateTemporaryAwarenessIndicator(Battle_Ai_PerceptionUpdateView*)
-{
-    VS_UNPORTED("Battle::Ai::UpdateTemporaryAwarenessIndicator");
-}
-
-// decomp: BATTLE.PRG func_800D82A8 (src/BATTLE/BATTLE.PRG/6FA6C.s:0) [asm-file: not yet ported]
-void Battle_Ai_DisengageActorById(int)
-{
-    VS_UNPORTED("Battle::Ai::DisengageActorById");
-}
-
-// decomp: BATTLE.PRG func_800D82CC (src/BATTLE/BATTLE.PRG/6FA6C.s:0) [asm-file: not yet ported]
-void Battle_Ai_DisengageActor(Battle_Ai_ActorAiState*)
-{
-    VS_UNPORTED("Battle::Ai::DisengageActor");
-}
-
-// decomp: BATTLE.PRG func_800D836C (src/BATTLE/BATTLE.PRG/6FA6C.s:0) [asm-file: not yet ported]
-void Battle_Ai_TryEngageActor(Battle_Ai_ActorAiState*)
-{
-    VS_UNPORTED("Battle::Ai::TryEngageActor");
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/6FC00.c:644

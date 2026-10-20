@@ -258,6 +258,37 @@ Enemy action selection remains unproven: the engagement-ready/try-engage stubs
 are the next live blockers, alongside the remaining pursuit/navigation work.
 Do not close #6 or treat these checkpoints as completion of #42.
 
+### Active engagement, enemy damage and real prologue victories (#6/#42)
+
+Seven more C-backed entries are implemented in
+[Engagement.cpp](../Native/Game/src/Battle/Ai/Engagement.cpp):
+F01628/F01629 and F01631-F01635. The native room membership mask/count and
+engaged-list links now drive actual join, 32-frame readiness, leave/rejoin
+cooldowns and awareness markers. Existing buildup and actor-command consumers
+are exercised by [EngagementTests.cpp](../Native/Tests/src/EngagementTests.cpp).
+The original return value of `TryEngageActor` is restored as an integer result;
+existing callers may still discard it.
+
+The C-backed total is now **34 of 145**, with **111** remaining. The complete
+inventory has **152** open entries. Both complete builds pass **196 cases /
+760,994 assertions**; native-view/dispatch contracts, audit tests, targeted tidy,
+quality baselines and copier idempotence pass.
+
+Ordinary-input replays now demonstrate actual enemy command opcode 24 and
+player damage, not merely populated plans. The Debug close-range observation
+records Ashley HP **250 -> 240 -> 217 -> 0**, with the native defeat flag
+`0x20`; Release also executes real enemy attacks and damage. This does not by
+itself assert the complete subsequent game-over UI.
+
+A separate normal-input Debug fight defeats both original enemies: actor 3 is
+HP 0/defeat flag `0x20` at tick 19,000, actor 2 at 19,900, while Ashley survives.
+The real prologue then advances to **MAP004 at 20,441** and **MAP005 at 23,120**.
+No HP, position, RNG or progression memory was patched. All 24,000 ticks and ten
+requested read-only observations/captures complete with exit 0 and no errors.
+An initial real item-drop consumer and autonomous pursuit/movement are still
+unverified; #6 remains open. The observed actor cleanup stub is the next
+continuation, not an excuse to stop at another function-count checkpoint.
+
 ### Menu-only Options acceptance gate (#2/#39, 2026-10-20)
 
 Following the explicit owner-approved menu-first split, all nine Options now

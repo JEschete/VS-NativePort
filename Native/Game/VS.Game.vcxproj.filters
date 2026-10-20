@@ -348,6 +348,12 @@
     <ClInclude Include="src\Battle\Ai\DecisionPrimitives.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\Engagement.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\Engagement.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\Ai\FrameUpdate.c">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>

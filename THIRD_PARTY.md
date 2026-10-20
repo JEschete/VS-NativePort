@@ -7,8 +7,9 @@ and [AI decision primitives](Native/Game/src/Battle/Ai/DecisionPrimitives.cpp)
 along with [actor commands](Native/Game/src/Battle/Ai/ActorCommands.cpp),
 [navigation primitives](Native/Game/src/Battle/Ai/NavigationPrimitives.cpp) and
 [terrain height decoding](Native/Game/src/Field/TerrainHeight.cpp)
+and the [engagement lifecycle](Native/Game/src/Battle/Ai/Engagement.cpp)
 adapt the C counterparts in `pc/src/battle_helpers.c`,
-`pc/src/battle_movement.c` and `pc/src/battle_gte.c` from
+`pc/src/battle_movement.c`, `pc/src/battle_gte.c` and `pc/src/actor_cleanup.c` from
 [rood-boi](https://github.com/noprompt/rood-boi), reference revision
 `3be5ba38b008cad919a2b1ca196432c8d4817335`.
 

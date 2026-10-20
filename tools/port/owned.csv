@@ -99,3 +99,10 @@ F01764,function,Field_GroundHeightFlagsAtTile,Native\Game\src\Field\TerrainHeigh
 F01789,function,Battle_Ai_ReserveAiDestinationTile,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,Native\Game\src\Battle\Ai\NavigationPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
 F01775,function,Battle_Ai_IsAdjacentTileStepBlocked,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,Native\Game\src\Battle\Ai\NavigationPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
 F01720,function,Battle_Ai_IssueActorCommand,Native\Game\src\Battle\Ai\ActorCommands.cpp,Native\Game\src\Battle\Ai\ActorCommands.h,2026-10-20,from Native\Game\src\Battle\Ai\Behavior.c
+F01628,function,Battle_Ai_SetActorAwarenessIndicator,Native\Game\src\Battle\Ai\Engagement.cpp,Native\Game\src\Battle\Ai\Engagement.h,2026-10-20,from Native\Game\src\Battle\Ai\Perception.c
+F01629,function,Battle_Ai_ResetActorAwarenessIndicator,Native\Game\src\Battle\Ai\Engagement.cpp,Native\Game\src\Battle\Ai\Engagement.h,2026-10-20,from Native\Game\src\Battle\Ai\Perception.c
+F01631,function,Battle_Ai_IsEngagementReady,Native\Game\src\Battle\Ai\Engagement.cpp,Native\Game\src\Battle\Ai\Engagement.h,2026-10-20,from Native\Game\src\Battle\Ai\Perception.c
+F01632,function,Battle_Ai_UpdateTemporaryAwarenessIndicator,Native\Game\src\Battle\Ai\Engagement.cpp,Native\Game\src\Battle\Ai\Engagement.h,2026-10-20,from Native\Game\src\Battle\Ai\Perception.c
+F01633,function,Battle_Ai_DisengageActorById,Native\Game\src\Battle\Ai\Engagement.cpp,Native\Game\src\Battle\Ai\Engagement.h,2026-10-20,from Native\Game\src\Battle\Ai\Perception.c
+F01634,function,Battle_Ai_DisengageActor,Native\Game\src\Battle\Ai\Engagement.cpp,Native\Game\src\Battle\Ai\Engagement.h,2026-10-20,from Native\Game\src\Battle\Ai\Perception.c
+F01635,function,Battle_Ai_TryEngageActor,Native\Game\src\Battle\Ai\Engagement.cpp,Native\Game\src\Battle\Ai\Engagement.h,2026-10-20,from Native\Game\src\Battle\Ai\Perception.c

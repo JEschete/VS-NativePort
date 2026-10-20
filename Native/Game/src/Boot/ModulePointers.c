@@ -68,6 +68,7 @@
 #include "Battle/Ai/ConditionSnapshot.h"
 #include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/DecisionPrimitives.h"
+#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"

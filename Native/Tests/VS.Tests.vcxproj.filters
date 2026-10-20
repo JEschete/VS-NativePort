@@ -39,6 +39,9 @@
     <ClCompile Include="src\EffectTimelineTests.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EngagementTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EquipmentDetailTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
