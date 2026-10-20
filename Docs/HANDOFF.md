@@ -153,6 +153,71 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
 
+### Late-attract reproduction blocker (#26, 2026-10-20)
+
+The original cyclic chains and malformed packet remain recorded evidence, but
+the corrupt producer is not established. #26 remains open, not claimed fixed.
+
+- Current `70cd21e0` Debug and Release each complete 36,000 attract ticks, with
+  only `1000:Start`, all ten requested captures and no packet errors.
+- Reversing only the two F02456 feedback-link fixes makes the focused regression
+  fail, but still does not reproduce the long-attract failure. Normal sources,
+  manifest and default binaries were restored before that experimental replay.
+- Unchanged source archives of `2d64d275` and tracing checkpoint `35618ef2` each
+  build privately and complete the same 36,000-tick interval with all seven
+  requested captures. Existing installed dependencies and unchanged manifests
+  were used; no main-tree source or reference changes were needed.
+- The first historical run was manually closed by the owner at tick 14,464.
+  Its zero exit is an interrupted attempt, not a passing replay. The subsequent
+  complete runs require captures and the explicit tick-limit stop.
+- Evidence is under `build/quality/issue26/`: `current-attract-debug`,
+  `current-attract-release`, `without-feedback-link-fix`, `historical-2d64d275`,
+  and `historical-35618ef2`. Original failure logs remain untouched.
+- These results establish neither a tracing artifact nor F02456 as #26's cause.
+  Next useful observation is the first invalid link/write in a repeatable
+  failing binary/layout, not another guard that skips a bad command.
+
+### Viewport boundaries and New Game mansion (#41, 2026-10-20)
+
+The owner identifies the reported scene as the mansion immediately after New
+Game and explicitly confirms that the artifact no longer occurs in the latest
+build. This is separate from the Bardorba bedroom texture report.
+
+- Current `70cd21e0` Debug and Release each complete 36,000 ticks of the existing
+  Off/Frame/Simple selection, exit, field recovery and re-entry route.
+  Eleven actual client/full-window pairs per configuration cover physical
+  client sizes 320x240, 640x480, 853x637 and 960x720.
+- The exact mansion route uses only `1000:Start,1300:Circle`, without either
+  prologue skip. MAP001 and ENKEI.GIM load at 1398/1462. Both configurations
+  complete 3,600 ticks and four more client/full-window resize captures.
+  Native mansion frames at 1808, 2304, 2816 and 3328 are byte-identical between
+  Debug and Release.
+- Portable DuckStation's delayed 65-second capture confirms the same mansion
+  view and caption. The initial reference attempt ended during loading/black
+  transition frames and is excluded from scene-parity evidence.
+- Native, 2x and 3x client images match a captured presented frame exactly.
+  Fractional-scale differences are confined to source-coordinate integer
+  sampling ties at the centre row/column and equal the adjacent nearest texel;
+  no unexplained pixels or nonblack pixels outside the destination remain.
+  The analysis retains these differences rather than hiding them in an error
+  tolerance. Intentional minimap Frame borders and black letterboxing remain.
+- Every matched presented image reconstructs exactly from a raw 320x224
+  rectangle at page X=0 or 320, Y=0, with eight black output rows above/below.
+  These are horizontal framebuffers, as initialized by `Render/Display.c`;
+  assuming vertical buffers was an initial diagnostic-oracle error.
+- Historical `2d64d275` mansion captures are retained for comparison, but the
+  old owner artifact was not independently recovered. Do not claim that the
+  known #34 top-left fix is proven to be this report's producer merely because
+  it is included in the verified current revision.
+- `ViewportBoundsTests.cpp` guards the exact output dimensions and all pixels
+  with poisoned surrounding page storage, both framebuffer origins, drawing
+  offsets/clipping and mask on/off. The focused case passes 307,220 assertions;
+  related `[render][gpu]` coverage passes six cases / 314,723 assertions in
+  both configurations. Existing raster/atlas regressions remain unchanged.
+- Local arguments, raw pages, source frames, client/full-window PNGs and pixel
+  results are under `build/quality/issue41/`. No disc-derived evidence is
+  uploaded. The verification/regression commit and its CI are recorded in #41.
+
 ### Bardorba bedroom window atlas seams (#34)
 
 The owner identified the affected view as Bardorba lying in bed speaking to
