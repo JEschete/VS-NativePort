@@ -153,6 +153,46 @@ still active; its native workspace defect is #27 and the Status crash is #28.
   not complete. Do not treat the #28 crash repair as complete menu or combat parity.
   Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
 
+### Menu-first Options and Cursor Memory (#39, 2026-10-20)
+
+The owner explicitly approves finishing menu/device checks now and verifying
+combat/audio/progression consumers in their ordered stages. Keep #39 open for
+those real effects; assess #2's rendering/lifecycle acceptance separately.
+The decision is recorded on #4 and #39, not a silent work-order change.
+
+- Cursor Memory requires no speculative production patch: the actual shared
+  root/row consumers already implement the original semantics.
+  `CursorMemoryTests.cpp` now covers root reset/remember with all entries and
+  the real 0x3F8 enabled mask, repeat visits, shared row/scroll restoration,
+  close/re-entry and a remembered position invalidated by fewer rows.
+- Both Debug and Release complete 24,000 scripted ticks with 17 retained
+  screenshots/read-only PDB observations each. On -> Off -> On -> cancelled
+  Off -> Off applies 1/0/1/1/0, respectively, without changing progression.
+  Field returns have menu state 63 and unbound rows; subsequent Triangle
+  presses really re-open the root menu.
+- Off resets the root to the first enabled entry (internal ID 3, Items),
+  and Options to row 0. On remembers Options (root ID 7) and Cursor Memory
+  (Options row 4). Cancel preserves the applied value but remembers the
+  highlighted choice: Off is still highlighted on the next choice entry.
+  With memory Off the choice instead starts at row 0, On, even while Off is
+  the applied value. Do not confuse the applied marker with the cursor.
+- Initial observer attempts were corrected for Windows' not-yet-populated
+  loader module list, visible versus internal root IDs, and that choice
+  highlight rule. These are retained diagnostic failures, not gameplay
+  regressions or passing runs. No gameplay patch was made to fit an oracle.
+- Focused Cursor Memory coverage passes three cases / 52 assertions; related
+  `[menu]` coverage passes 15 cases / 188 assertions in both configurations.
+  Changed-source quality with tidy has zero new findings; existing legacy
+  advisories are not baselined away.
+- Local arguments, completed logs, screenshots and observed settings/consumer
+  states are under `build/quality/issue39/cursor-debug` and `cursor-release`.
+  This proves session behavior, not save persistence.
+- Next concrete device gap: owned `Legacy/Input/LibPad.cpp::PadSetAct`
+  discards the registered mutable actuator table, and `InputSystem` has no SDL
+  rumble output. The original controller registers once and then updates those
+  bytes, so a one-shot forwarding call would be incomplete. This gap is logged
+  on #39 before implementation; vibration is not declared complete.
+
 ### Late-attract reproduction blocker (#26, 2026-10-20)
 
 The original cyclic chains and malformed packet remain recorded evidence, but
