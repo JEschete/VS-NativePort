@@ -6,6 +6,7 @@
 #include "Audio/SoundBanks.h"
 #include "Battle/Feedback.h"
 #include "Boot/GameLoop.h"
+#include "Boot/PlayerSettings.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
@@ -1029,13 +1030,7 @@ void Title_InitializeSettings(void)
 
     vibrationOn = Input_settings.vibrationOn;
     monoSound = Input_settings.monoSound;
-    memset(&Input_settings, 0, sizeof Input_settings);
-    Input_settings.menuFlags = 0x2D8;
-    Input_settings.information = 1;
-    Input_settings.simpleMap = 3;
-    Input_settings.containerEmpty = 1;
-    Input_settings.abilityTimingDisplay = 1;
-    Input_settings.cursorMemory = 1;
+    Boot_InitializePlayerSettings();
     if (Title_titleScreenVisitCount == 0) {
         Title_ShowPublisherAndDeveloper();
         vibrationOn = 1;

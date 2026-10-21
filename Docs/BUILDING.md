@@ -107,6 +107,7 @@ Everything goes to `build\<Config>\` (git-ignored):
 | `VS.Desktop.exe` + `SDL3.dll`, `dav1d.dll`, `webm.dll` | the game |
 | `VS.Extract.exe` | the asset extractor (§5) |
 | `VS.Tests.exe` | unit tests |
+| `VS.CombatLab.exe` | standalone live encounter editor and production combat host |
 | `vs-native.log` | the log written by `VS.Desktop` at run time |
 
 C++ sources use warnings as errors (`/W4 /WX`). The solution generator currently overrides `.c` items
@@ -121,6 +122,15 @@ no-new-debt gate and `quality-native.cmd --changed --tidy` for compilation-based
 analysis of changed owned code. Reports go to `build/quality`; generated and
 reference sources are excluded from the default style scope. See
 [QUALITY.md](QUALITY.md) for setup, precise scope, baseline policy, and controls.
+
+### 4.5 Standalone Combat Lab
+
+After extracting the data, run `build\Debug\VS.CombatLab.exe` (or Release) for a
+live room/enemy/quantity/placement editor without launching `VS.Desktop` or its
+title/prologue. Combat uses the shared production code. See
+[COMBAT_LAB.md](COMBAT_LAB.md) for controls, presets, extensive per-run logs,
+verified scenarios and current same-zone/loadout/coverage limits. This is not a
+claim that all enemies, items, spells or abilities are complete.
 
 ---
 

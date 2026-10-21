@@ -67,6 +67,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\EncounterTests.cpp" />
     <ClCompile Include="src\EngagementTests.cpp" />
     <ClCompile Include="src\EquipmentDetailTests.cpp" />
     <ClCompile Include="src\EventScriptTestCases.cpp" />
@@ -92,6 +93,7 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\LegacyGpuTests.cpp" />
+    <ClCompile Include="src\LogObserverTests.cpp" />
     <ClCompile Include="src\LogTests.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ManualRenderTests.cpp" />

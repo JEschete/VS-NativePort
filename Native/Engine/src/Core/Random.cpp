@@ -3,6 +3,7 @@
 #include <bit>
 
 #include "Core/BiosRand.h"
+#include "Core/Log.hpp"
 
 namespace VS::Core {
 
@@ -53,6 +54,15 @@ namespace {
 constinit VS::Core::Rand15 g_bios_rand;
 }  // namespace
 
-extern "C" int Core_Random_Rand(void) { return g_bios_rand.Next(); }
+extern "C" int Core_Random_Rand(void) {
+  const auto before = g_bios_rand.State();
+  const int value = g_bios_rand.Next();
+  VS_LOG_TRACE("rng", "raw before={} after={} value={}", before,
+               g_bios_rand.State(), value);
+  return value;
+}
 
-extern "C" void Core_Random_Seed(unsigned int seed) { g_bios_rand.Seed(seed); }
+extern "C" void Core_Random_Seed(unsigned int seed) {
+  g_bios_rand.Seed(seed);
+  VS_LOG_TRACE("rng", "seed={}", seed);
+}

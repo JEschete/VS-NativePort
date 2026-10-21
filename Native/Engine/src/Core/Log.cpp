@@ -17,6 +17,7 @@ std::atomic<std::uint64_t> g_tick{0};
 std::mutex g_mutex;
 std::FILE* g_file = nullptr;
 std::vector<std::string> g_channels;
+LogObserver g_observer;
 
 bool ChannelEnabled(LogLevel level, std::string_view channel) {
   return level >= LogLevel::Warn || g_channels.empty() ||
@@ -41,6 +42,11 @@ const char* LevelName(LogLevel level) {
   return "?";
 }
 }  // namespace
+
+LogObserver SetLogObserver(LogObserver observer) {
+  std::lock_guard lock(g_mutex);
+  return std::exchange(g_observer, std::move(observer));
+}
 
 void SetLogLevel(LogLevel level) { g_level = level; }
 
@@ -103,7 +109,7 @@ void LogWrite(LogLevel level, std::string_view channel,
   if (level == LogLevel::Off || level < g_level.load()) {
     return;
   }
-  std::lock_guard lock(g_mutex);
+  std::unique_lock lock(g_mutex);
   if (!ChannelEnabled(level, channel)) {
     return;
   }
@@ -120,6 +126,9 @@ void LogWrite(LogLevel level, std::string_view channel,
                  message.data());
     std::fflush(g_file);
   }
+  auto observer = g_observer;
+  lock.unlock();
+  if (observer) observer({level, tick, channel, message});
 }
 
 }  // namespace VS::Core

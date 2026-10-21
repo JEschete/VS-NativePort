@@ -18,6 +18,35 @@ The later Quick Manual report is repaired and verified below (#66). Its scoped
 publication/CI record belongs in that issue. The newly reproduced Score submenu
 fast-fail remains #65; #6 is still the next ordered gameplay implementation.
 
+### Standalone Combat Lab checkpoint (2026-10-20)
+
+Owner-requested tooling for #16 now launches independently as `VS.CombatLab.exe`;
+no entry was added to the normal game menu. [COMBAT_LAB.md](COMBAT_LAB.md) records
+the exact local configurations, inputs, evidence paths and limits. Source was
+`69a88618` plus lab edits and pre-existing dirty AI work; none of those results
+should be relabeled as clean-revision verification.
+
+Real two-enemy attacks/retaliation matched across all 1500 Debug/Release frame
+snapshots. Real item inputs consumed one Cure Root and restored HP after enemy
+damage. Live pause/single-step/stop/restart restored initial actor HP/MP.
+Full suites pass 271 cases / 827297 assertions in each configuration; scoped
+tidy has zero new findings and repeated generation preserves owned files/output.
+The lab also exposed and repaired omitted player-settings initialization and
+the unencoded G00917 item-shortcut label (F02553), including its reset initializer.
+
+The host is an initial same-zone, source-profile-backed slice. Full roster,
+loadout editing, spell/ability coverage, collision-aware placement, defeat/rewards,
+sound and reference parity remain open. #16, M8 and the ordered gameplay
+priorities are not closed by this checkpoint. Publication/CI evidence belongs
+in the issue separately from these dirty-worktree tests.
+
+The later lab-only publication snapshot excludes the dirty AI changes. It builds
+in Debug/Release and passes 239 cases / 827068 assertions per configuration.
+Fresh combat, item consumption/healing and live lifecycle runs succeed independently;
+both log files persist real results. Startup parse errors are now logged too.
+See the isolated-publication section of COMBAT_LAB.md for exact runs and differences
+from the earlier combined worktree. #16 remains open for full coverage.
+
 ### Guildenstern window dialogue (2026-10-19)
 
 Verification used `35618ef2` plus the feedback-link fix and renderer regression.

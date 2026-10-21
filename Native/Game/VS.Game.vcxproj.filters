@@ -447,6 +447,9 @@
     <ClInclude Include="src\Battle\Damage.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClInclude Include="src\Battle\EncounterHooks.h">
+      <Filter>src\Battle</Filter>
+    </ClInclude>
     <ClCompile Include="src\Battle\Feedback.c">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -525,6 +528,9 @@
     <ClInclude Include="src\Battle\ValueLabels.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Boot\Encounter.cpp">
+      <Filter>src\Boot</Filter>
+    </ClCompile>
     <ClCompile Include="src\Boot\GameApp.cpp">
       <Filter>src\Boot</Filter>
     </ClCompile>
@@ -556,6 +562,12 @@
       <Filter>src\Boot</Filter>
     </ClCompile>
     <ClInclude Include="src\Boot\OverlayReset.h">
+      <Filter>src\Boot</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Boot\PlayerSettings.c">
+      <Filter>src\Boot</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Boot\PlayerSettings.h">
       <Filter>src\Boot</Filter>
     </ClInclude>
     <ClCompile Include="src\Boot\Session.c">
@@ -1458,6 +1470,12 @@
     <ClInclude Include="src\Field\Doors.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\EncounterCatalog.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\EncounterSpawnProfile.hpp">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClCompile Include="src\Field\Environment.c">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -1978,6 +1996,9 @@
       <Filter>src\Title</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Action.h">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Encounter.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Enemy.h">

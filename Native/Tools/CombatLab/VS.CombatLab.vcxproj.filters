@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{9B9FDC9C-6459-5DC4-BB50-F7BBD4AE62B0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\CombatLab">
+      <UniqueIdentifier>{F5DFFAED-533C-5E87-829F-1AA09E8B57DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{D56A9DB9-747B-5BBA-84E5-3A59F23B878E}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Canvas.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Trace.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClInclude Include="include\CombatLab\Canvas.hpp">
+      <Filter>include\CombatLab</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CombatLab\Editor.hpp">
+      <Filter>include\CombatLab</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CombatLab\Trace.hpp">
+      <Filter>include\CombatLab</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -12,6 +12,17 @@ so a stale fix is noticed.
 """
 from __future__ import annotations
 
+NATIVE_HELPER_HEADERS = {
+    **{name: r"Native\Game\src\Battle\EncounterHooks.h"
+       for name in (
+           "Boot_EncounterRoomPlacements",
+           "Boot_EncounterUsesRoomEvents",
+           "Boot_EncounterLoadRoomEvents",
+           "Boot_EncounterPollStop",
+       )},
+    "Boot_InitializePlayerSettings": r"Native\Game\src\Boot\PlayerSettings.h",
+}
+
 NATIVE_FUNCTION_REDIRECTS = {
     "F03397": ("Core_Gte_RotMatrixYXZ", r"Native\Engine\src\Core\Gte.cpp"),
     "F03398": ("Core_Gte_RotMatrix", r"Native\Engine\src\Core\Gte.cpp"),
@@ -41,6 +52,8 @@ AI_FRAME_FIELDS = {
 }
 
 MODULE_DATA_BLOBS = (
+    ("BATTLE/BATTLE.PRG", 0x88F58, 0x800F1758, 4, "Content_battleAiHesitationLengths",
+     "7B5DC.s:func_800E4180 indexed hesitation lengths; native module-owned data"),
     ("BATTLE/BATTLE.PRG", 0x1060, 0x80069860, 0x98, "Content_battleLimbNameBytes",
      "58578.c INCLUDE_RODATA D_80069860; strings end at jtbl_800698F8"),
     ("BATTLE/BATTLE.PRG", 0x80B0C, 0x800E930C, 0x71C, "Content_battleGimmickTemplateBytes",
@@ -59,6 +72,45 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F02553": [
+        (r'"MISC\00000|0xF8|"',
+         r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"',
+         "C48.c:485 pragma vsstring encodes MISC then E7 termination; preserve reset bytes and avoid runaway glyph packets"),
+    ],
+    "F03669": [
+        ("    memset(&Input_settings, 0, sizeof Input_settings);\n"
+         "    Input_settings.menuFlags = 0x2D8;\n"
+         "    Input_settings.information = 1;\n"
+         "    Input_settings.simpleMap = 3;\n"
+         "    Input_settings.containerEmpty = 1;\n"
+         "    Input_settings.abilityTimingDisplay = 1;\n"
+         "    Input_settings.cursorMemory = 1;",
+         "    Boot_InitializePlayerSettings();",
+         "22C.c:4463 share real settings defaults with direct native sessions without title presentation"),
+    ],
+    "F00199": [
+        ("                    ot = Render_legacyOrderingTables[Render_frameBuf];",
+         "                    Boot_EncounterPollStop();\n"
+         "                    ot = Render_legacyOrderingTables[Render_frameBuf];",
+         "native encounter hosts can stop at a production frame boundary; inactive for normal sessions"),
+    ],
+    "F00539": [
+        ("    if (dataLen != 0) {",
+         "    Boot_EncounterRoomPlacements(&data, &dataLen);\n"
+         "    if (dataLen != 0) {",
+         "explicit encounter definitions replace room placements before the production spawn/cache lifecycle"),
+    ],
+    "F00543": [
+        ("        temp_s4 = Event_LoadRoomEventSections((void*)(arg0),",
+         "        if (!Boot_EncounterUsesRoomEvents()) {\n"
+         "            temp_s4 = Boot_EncounterLoadRoomEvents();\n"
+         "        } else {\n"
+         "        temp_s4 = Event_LoadRoomEventSections((void*)(arg0),",
+         "isolated encounters declare an empty story/door-event set; normal room loading remains unchanged"),
+        ("            Boot_gameEntryMode == new_var);",
+         "            Boot_gameEntryMode == new_var);\n        }",
+         "close the explicit room-event policy branch"),
+    ],
     "F02777": [
         ('static char* Menu_Files_playTime = "00:00:00:00";',
          'static char Menu_Files_playTime[] = "00:00:00:00";',

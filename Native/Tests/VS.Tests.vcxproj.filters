@@ -42,6 +42,9 @@
     <ClCompile Include="src\EffectTimelineTests.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EncounterTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EngagementTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -70,6 +73,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\LegacyGpuTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LogObserverTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\LogTests.cpp">

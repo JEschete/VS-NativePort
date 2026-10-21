@@ -378,6 +378,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Boot\Encounter.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Boot\GameApp.cpp" />
     <ClCompile Include="src\Boot\GameLoop.c">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -410,6 +413,12 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Boot\OverlayReset.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Boot\PlayerSettings.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1201,6 +1210,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Field\EncounterCatalog.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\Environment.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1738,6 +1750,7 @@
     <ClInclude Include="src\Battle\BattleMode.h" />
     <ClInclude Include="src\Battle\BattleTypes.h" />
     <ClInclude Include="src\Battle\Damage.h" />
+    <ClInclude Include="src\Battle\EncounterHooks.h" />
     <ClInclude Include="src\Battle\Feedback.h" />
     <ClInclude Include="src\Battle\Hit.h" />
     <ClInclude Include="src\Battle\HitChance.h" />
@@ -1757,6 +1770,7 @@
     <ClInclude Include="src\Boot\GameplayInit.h" />
     <ClInclude Include="src\Boot\Lifecycle.h" />
     <ClInclude Include="src\Boot\OverlayReset.h" />
+    <ClInclude Include="src\Boot\PlayerSettings.h" />
     <ClInclude Include="src\Boot\Session.h" />
     <ClInclude Include="src\Effects\ActionEffects.h" />
     <ClInclude Include="src\Effects\Camera.h" />
@@ -1926,6 +1940,7 @@
     <ClInclude Include="src\Field\Collision.h" />
     <ClInclude Include="src\Field\CollisionSampling.h" />
     <ClInclude Include="src\Field\Doors.h" />
+    <ClInclude Include="src\Field\EncounterSpawnProfile.hpp" />
     <ClInclude Include="src\Field\Environment.h" />
     <ClInclude Include="src\Field\GameMode.h" />
     <ClInclude Include="src\Field\GimmickMotion.h" />
@@ -2021,6 +2036,7 @@
     <ClInclude Include="src\Title\TitleMenu.h" />
     <ClInclude Include="src\Title\TitleScreen.h" />
     <ClInclude Include="include\Battle\Action.h" />
+    <ClInclude Include="include\Battle\Encounter.hpp" />
     <ClInclude Include="include\Battle\Enemy.h" />
     <ClInclude Include="include\Boot\GameApp.hpp" />
     <ClInclude Include="include\Items\Equipment.h" />

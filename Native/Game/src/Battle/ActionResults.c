@@ -12,6 +12,7 @@
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/Targeting.h"
+#include "Core/Unported.h"
 #include "Legacy/Psx.h"
 
 // decomp: BATTLE.PRG func_8006CB04 (146C/func_8006CB04.s); compared with
@@ -56,6 +57,12 @@ void Battle_ApplyActionTargetEffects(int actor_id, SVECTOR* position) {
     if (hit->targetsPosition != 0 || hit->target.targetActor != actor_id) {
       continue;
     }
+    Core_Debugf("combat.result",
+                "action=%u target=%d limb=%u impact=%u hp=%d mp=%d "
+                "hp_effect=%u mp_effect=%u",
+                action->actionId, actor_id, hit->target.targetLimb,
+                hit->target.impactKind, hit->target.hp, hit->target.mp,
+                hit->hpEffect, hit->mpEffect);
     switch (hit->target.impactKind) {
       case 0:
       case 1:

@@ -2203,7 +2203,7 @@ class Copier:
         names -= own
         includes, forwards = set(), set()
         for n in sorted(names):
-            h = self.provider.get(n)
+            h = self.provider.get(n) or cf.NATIVE_HELPER_HEADERS.get(n)
             if h is None or h == path:
                 continue
             if needed is not None and n in self.struct_names and type_by_cname.get(n) not in needed:

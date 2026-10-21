@@ -24,6 +24,7 @@
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
+#include "Battle/EncounterHooks.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hit.h"
 #include "Battle/Hud.h"
@@ -123,6 +124,7 @@ void Boot_RunGameLoop(void)
                     if (Input_UpdateControllers() == -1) {
                         break;
                     }
+                    Boot_EncounterPollStop();
                     ot = Render_legacyOrderingTables[Render_frameBuf];
                     Render_legacyCurrentOrderingTable = ot;
                     Render_frameScratch.overlayOrderingTable = ot + 2;

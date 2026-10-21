@@ -88,7 +88,7 @@ char Menu_Inventory_statusCommandState;
 char Menu_Inventory_equipmentModelLoadStep; /* contents: module image (ModuleData.c) */
 
 // decomp: local static of vs_mainMenu_miscItemsShortcutMenu, at file scope so the module reset reaches it
-static char Menu_Inventory_miscItemShortcutMisc[] = "MISC\00000|0xF8|";
+static char Menu_Inventory_miscItemShortcutMisc[] = "\x16\x12\x1C\x0C\xE7\x00\x00\xF8";
 
 // decomp: vs_mainMenu_miscItemToActionMap (vs_mainMenu_miscItemToActionMap@MENU/MAINMENU.PRG)
 u_char Menu_Inventory_miscItemToActionMap[] = { 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6,
@@ -1926,7 +1926,7 @@ void Menu_Inventory_QueueEquipmentModel(int wepId, int material)
 void Menu_Inventory_ResetMainMenuStatics(void)
 {
     {
-        static const char initial[] = "MISC\00000|0xF8|";
+        static const char initial[] = "\x16\x12\x1C\x0C\xE7\x00\x00\xF8";
         memcpy((void*)&Menu_Inventory_miscItemShortcutMisc, &initial, sizeof Menu_Inventory_miscItemShortcutMisc);
     }
 }

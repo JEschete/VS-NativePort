@@ -22,6 +22,7 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/RoomState.h"
 #include "Battle/Damage.h"
+#include "Battle/EncounterHooks.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Battle/StatusEffects.h"
@@ -599,6 +600,7 @@ void Field_RestoreRoomEnemyCache(void)
 // decomp: BATTLE.PRG _loadMpdEnemySection (src/BATTLE/BATTLE.PRG/146C.c:15238)
 void Field_LoadRoomEnemyPlacements(void* data, u_int dataLen)
 {
+    Boot_EncounterRoomPlacements(&data, &dataLen);
     if (dataLen != 0) {
         Field_zoneContext.mpdEnemies = Core_Memory_AllocateFromLowEnd(dataLen);
         Core_Memory_CopyAlignedWords(Field_zoneContext.mpdEnemies, data, dataLen);
@@ -723,10 +725,14 @@ void Field_FinishRoomLoad(int arg0)
         arg4 += ((intptr_t)mpdHeader);
         arg5 = ((Field_MpdHeader*)mpdHeader)->doorSectionSize;
         new_var = 1;
+        if (!Boot_EncounterUsesRoomEvents()) {
+            temp_s4 = Boot_EncounterLoadRoomEvents();
+        } else {
         temp_s4 = Event_LoadRoomEventSections((void*)(arg0),
             ((Field_MpdHeader*)mpdHeader)->clearedSectionSize, (void*)(arg2),
             ((Field_MpdHeader*)mpdHeader)->scriptSectionSize, (void*)(arg4), arg5,
             Boot_gameEntryMode == new_var);
+        }
     }
 
     if (Boot_gameEntryMode == 1) {

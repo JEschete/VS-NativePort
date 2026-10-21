@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <format>
+#include <functional>
 #include <optional>
 #include <string_view>
 #include <utility>
@@ -9,6 +10,17 @@
 namespace VS::Core {
 
 enum class LogLevel { Trace, Debug, Info, Warn, Error, Off };
+
+struct LogRecord {
+  LogLevel level;
+  std::uint64_t tick;
+  std::string_view channel;
+  std::string_view message;
+};
+using LogObserver = std::function<void(const LogRecord&)>;
+// Synchronous observation outside the log mutex. Views live for the callback;
+// observers must not throw or log recursively. Returns the previous observer.
+LogObserver SetLogObserver(LogObserver observer);
 
 void SetLogLevel(LogLevel level);
 std::optional<LogLevel> ParseLogLevel(std::string_view name);

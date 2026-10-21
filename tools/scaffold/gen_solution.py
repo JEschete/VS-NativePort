@@ -59,6 +59,8 @@ PROJECTS = [
     Project("VS.Content", "Content", refs=["VS.Engine"], legacy=True),
     Project("VS.Game", "Game", refs=["VS.Engine", "VS.Content"], folders=GAME_MODULES),
     Project("VS.Desktop", "Desktop", kind="exe", refs=["VS.Engine", "VS.Content", "VS.Game"], libs=["sdl3", "movie"]),
+    Project("VS.CombatLab", "Tools\\CombatLab", kind="exe",
+            refs=["VS.Engine", "VS.Content", "VS.Game"], libs=["sdl3", "movie"]),
     Project("VS.Extract", "Tools\\Extract", kind="exe", console=True, refs=["VS.Engine", "VS.Content"],
             libs=["sdl3"]),
     Project("VS.Tests", "Tests", kind="exe", console=True, refs=["VS.Engine", "VS.Content", "VS.Game"],
@@ -101,7 +103,10 @@ def needs_c_headers(project: str, path: str) -> bool:
     path = path.replace("/", "\\")
     return (path.endswith(".c") or "\\Legacy\\" in "\\" + path
             or project == "VS.Tests"
+            or project == "VS.CombatLab"
             or project == "VS.Game" and path in (
+                r"src\Boot\Encounter.cpp",
+                r"src\Field\EncounterCatalog.cpp",
                 r"src\Field\MinimapScene.cpp",
                 r"src\Battle\Ai\PlanningPrimitives.cpp",
                 r"src\Battle\Ai\DecisionPrimitives.cpp",
