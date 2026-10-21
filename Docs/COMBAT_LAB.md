@@ -352,6 +352,27 @@ the original terrain abort is absent. This resolves the reproduced Bat path
 in commit `155a7438`; exact-revision Source Quality CI `39599618892` passed and
 #77 is closed. It does not establish all flight-enemy coverage.
 
+**Game Over fade (#6):** A real full New Game prologue replay (intro Start at
+1000 only, followed by ordinary controls) reaches the Game Over menu after
+combat defeat. Down at tick 21000 and Start at 21100 choose Title; the real
+title-session transition is logged at tick 21177. Debug and Release each
+complete 26000 ticks with eight captures and exit 0, without editing HP,
+positions, RNG, events or progression. Exact inputs, manifests, logs and
+captures are under `build/quality/issue6-gameover-final-{debug,release}/`.
+
+This exercised F02771's negative-fade path. Its original raw host-pointer
+truncation did not produce a native renderer link: the regression failed with
+`LegacyGpu_Pointer` returning null. The copy-generator fix now stores
+`LegacyGpu_Handle(prim)`, and the focused test verifies the overlay ordering
+head resolves to the fade packet. Debug and Release both pass **311 cases /
+828561 assertions**; `quality-native.cmd --changed --tidy` reports zero new
+findings (6 baseline), and the second copier pass is stable. Commit `ae2e30e1`
+passed exact Source Quality CI `39603967134`.
+
+#6 remains open: this confirms current player defeat/fade flow, not fresh enemy
+victory and encounter progression, delivered rewards, or complete flight-roster
+coverage.
+
 Other remaining defects: #76 covers the birds/window rays/particle placement
 reports; #78 confirms a separate fresh eight-Minotaur render-cursor corruption
 at tick 209; #80 tracks the broader multi-part hypothesis and #81 the missing

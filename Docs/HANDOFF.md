@@ -106,6 +106,28 @@ the owned flight source survives regeneration. Commit `155a7438` passed exact-
 revision Source Quality CI `39599618892`, and #77 is closed. #6 remains open
 for its wider acceptance.
 
+### Game Over fade packet link (#6, 2026-10-21)
+
+F02771 (`MENU/MENU7.PRG/260.c:3504`) linked the negative-fade tile by
+truncating its host pointer into the renderer's 24-bit link field. The native
+renderer uses `LegacyGpu_Handle` IDs for that field. The new regression failed
+before the fix (`LegacyGpu_Pointer` returned null for raw link `0x9f13a4`,
+instead of resolving the fade packet); the copier fix now uses the native
+handle and the test passes.
+
+Fresh Debug and Release full New Game prologue replays at 16x speed reach the
+real Game Over screen through ordinary combat. Down at tick 21000 and Start at
+21100 select Title; each run logs a real title-session transition at tick 21177.
+The 26000-tick runs use eight captures apiece and no HP, position, RNG, event or
+progression edits. Exact inputs, manifests, logs and captures are under
+`build/quality/issue6-gameover-final-{debug,release}/`.
+
+Both configurations pass **311 cases / 828561 assertions**. Changed-code tidy
+reports **0 new findings** (6 baseline); a second copier pass is stable.
+Commit `ae2e30e1` passed exact-revision Source Quality CI `39603967134`.
+#6 remains open for fresh enemy-victory/progression and delivered-reward
+evidence, plus broader flight-enemy coverage.
+
 For #78, temporary stage tracing in run `1792579333054718-0` showed a valid
 cursor at tick 207, then `0x00000557FECC05FB` before any room-render stage at
 209. The write producer is not established. Next useful observation is a native
