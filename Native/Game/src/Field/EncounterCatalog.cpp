@@ -150,7 +150,7 @@ EncounterRoom ReadRoom(const Content::DataStore& store, int index,
     for (std::size_t offset = 0; offset < spawns.size();
          offset += sizeof(Field_MpdEnemySpawn)) {
       const auto spawn = Read<Field_MpdEnemySpawn>(spawns, offset);
-      if (spawn.kind == 0 && spawn.facing == 2 && spawn.actorStateByte == 0) {
+      if (IsEncounterHostileSpawn(spawn)) {
         profiles.push_back(
             {room.asset, static_cast<int>(offset / sizeof(Field_MpdEnemySpawn)),
              spawn});
@@ -182,6 +182,11 @@ EncounterZone ReadZone(const Content::DataStore& store,
         ReadRoom(store, static_cast<int>(offset / kFileRecordBytes),
                  Read<std::uint32_t>(rooms, offset), profiles));
   }
+  // Preserve the profile choice for already supported enemies; retained boss
+  // records are a fallback when no ordinary hostile placement exists.
+  std::stable_partition(profiles.begin(), profiles.end(), [](const auto& p) {
+    return p.placement.actorStateByte == 0;
+  });
   if (header.enemiesSize == 0) return zone;
   const auto enemies =
       Section(*bytes, header.enemiesOffset, header.enemiesSize);
@@ -218,10 +223,20 @@ EncounterZone ReadZone(const Content::DataStore& store,
       return p.placement.enemyId == index;
     });
     if (profile == profiles.end()) {
-      enemy.unavailable_reason = "no independent hostile spawn profile";
+      if (enemy.unavailable_reason.empty()) {
+        enemy.unavailable_reason = "no hostile spawn record in this zone";
+      }
     } else {
       enemy.spawn_asset = profile->asset;
       enemy.spawn_index = profile->index;
+    }
+    // func_800E5A9C / func_800E7660: these subtypes require the special arena
+    // orbit state, whose initialization is not implemented by the native port.
+    constexpr std::uint16_t kFirstOrbitingSubtype = 172;
+    constexpr std::uint16_t kLastOrbitingSubtype = 173;
+    if (definition.subType >= kFirstOrbitingSubtype &&
+        definition.subType <= kLastOrbitingSubtype) {
+      enemy.unavailable_reason = "requires unsupported orbiting boss arena";
     }
     zone.enemies.push_back(std::move(enemy));
   }
@@ -284,6 +299,12 @@ std::expected<std::vector<EncounterFloor>, std::string> ReadEncounterFloor(
   }
 }
 
+bool IsEncounterHostileSpawn(const Field_MpdEnemySpawn& source) {
+  // Field_SpawnRoomActors (146C.c:14901): facing 2 selects hostile AI;
+  // actorStateByte instead controls retention after defeat, not activation.
+  return source.kind == 0 && source.facing == 2;
+}
+
 std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
     const EncounterEnemy& enemy) {
   const auto* store = Content::DataStore::Get();
@@ -303,9 +324,8 @@ std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
     auto spawn = Read<Field_MpdEnemySpawn>(
         spawns, static_cast<std::size_t>(enemy.spawn_index) *
                     sizeof(Field_MpdEnemySpawn));
-    if (spawn.kind != 0 || spawn.enemyId != enemy.index || spawn.facing != 2 ||
-        spawn.actorStateByte != 0) {
-      return std::unexpected("source spawn profile changed or needs a script");
+    if (!IsEncounterHostileSpawn(spawn) || spawn.enemyId != enemy.index) {
+      return std::unexpected("source spawn record changed or is not hostile");
     }
     return spawn;
   } catch (const std::exception& error) {
@@ -319,11 +339,10 @@ std::expected<Field_MpdEnemySpawn, std::string> PrepareEncounterSpawn(
   constexpr std::size_t kPrimaryCapacity = kEnemySlotEnd - kFirstEnemySlot;
   constexpr int kTileLimit = 32;
   constexpr int kElevationLimit = 4;
-  if (source.kind != 0 || source.facing != 2 || source.actorStateByte != 0 ||
-      source.enemyId != instance.enemy || instance.enemy < 0 ||
-      instance.enemy >= EncounterLimits::kEnemyIdEnd ||
+  if (!IsEncounterHostileSpawn(source) || source.enemyId != instance.enemy ||
+      instance.enemy < 0 || instance.enemy >= EncounterLimits::kEnemyIdEnd ||
       index >= kPrimaryCapacity) {
-    return std::unexpected("unsupported independent hostile spawn profile");
+    return std::unexpected("unsupported hostile spawn record");
   }
   const auto& position = instance.position;
   if (position.x < 0 || position.x >= kTileLimit || position.z < 0 ||
@@ -346,6 +365,10 @@ std::expected<Field_MpdEnemySpawn, std::string> PrepareEncounterSpawn(
   placement.flagTest = 0;
   placement.statTest = 0;
   placement.sceneTest = 0;
+  // func_80076F24 (146C.c:6367) maps this byte to retainAfterDefeat.
+  // Isolated encounters have no story death event: use ordinary production
+  // defeat/removal instead, without changing the original room or its actor.
+  placement.actorStateByte = 0;
   return placement;
 }
 

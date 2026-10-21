@@ -17,6 +17,8 @@ std::expected<std::vector<EncounterFloor>, std::string> ReadEncounterFloor(
     std::span<const std::uint8_t> collision,
     std::span<const std::uint8_t> tile_cells);
 
+bool IsEncounterHostileSpawn(const Field_MpdEnemySpawn& source);
+
 std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
     const EncounterEnemy& enemy);
 

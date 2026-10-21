@@ -117,7 +117,13 @@ TEST_CASE("Encounter placement preserves source behavior and loot",
   source.flagTest = 2;
   source.statTest = 3;
   source.sceneTest = 1;
+  SECTION("ordinary enemy") {}
+  SECTION("boss retained for a story defeat event") {
+    source.actorStateByte = 1;
+  }
+  SECTION("any nonzero retention byte") { source.actorStateByte = 255; }
   const auto original = source;
+  CHECK(VS::Game::IsEncounterHostileSpawn(source));
   const auto prepared =
       VS::Game::PrepareEncounterSpawn(source, {3, {11, 12, 2, 1}}, 4);
   REQUIRE(prepared.has_value());
@@ -132,11 +138,12 @@ TEST_CASE("Encounter placement preserves source behavior and loot",
   expected.flagTest = 0;
   expected.statTest = 0;
   expected.sceneTest = 0;
+  expected.actorStateByte = 0;
   CHECK(std::memcmp(&*prepared, &expected, sizeof(expected)) == 0);
   CHECK(std::memcmp(&source, &original, sizeof(source)) == 0);
 }
 
-TEST_CASE("Encounter profiles reject unsupported activation and encodings",
+TEST_CASE("Encounter profiles reject nonhostile records and invalid encodings",
           "[combat][encounter]") {
   Field_MpdEnemySpawn source{};
   source.facing = 2;
@@ -144,7 +151,8 @@ TEST_CASE("Encounter profiles reject unsupported activation and encodings",
   std::size_t index = 0;
   SECTION("object profile") { source.kind = 1; }
   SECTION("neutral profile") { source.facing = 0; }
-  SECTION("script activation") { source.actorStateByte = 1; }
+  SECTION("friendly profile") { source.facing = 1; }
+  SECTION("script-only profile") { source.facing = 3; }
   SECTION("wrong enemy") { source.enemyId = 1; }
   SECTION("negative coordinate") { spawn.position.x = -1; }
   SECTION("coordinate overflow") { spawn.position.z = 256; }
@@ -152,6 +160,20 @@ TEST_CASE("Encounter profiles reject unsupported activation and encodings",
   SECTION("direction overflow") { spawn.position.direction = 2; }
   SECTION("instance budget") { index = 8; }
   CHECK_FALSE(VS::Game::PrepareEncounterSpawn(source, spawn, index));
+}
+
+TEST_CASE("Encounter catalog hostility is independent of defeat retention",
+          "[combat][encounter]") {
+  Field_MpdEnemySpawn source{};
+  source.actorStateByte = 1;
+  SECTION("neutral") { source.facing = 0; }
+  SECTION("friendly") { source.facing = 1; }
+  SECTION("script-only") { source.facing = 3; }
+  SECTION("object") {
+    source.facing = 2;
+    source.kind = 1;
+  }
+  CHECK_FALSE(VS::Game::IsEncounterHostileSpawn(source));
 }
 
 TEST_CASE("Direct entry and title share usable player menu defaults",

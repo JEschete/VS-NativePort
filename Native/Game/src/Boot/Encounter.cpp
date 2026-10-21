@@ -243,9 +243,12 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
     const auto placement = PrepareEncounterSpawn(*source, spawn, index);
     if (!placement) return std::unexpected(placement.error());
     staged_placements[index] = *placement;
-    VS_LOG_DEBUG("encounter.spawn",
-                 "instance={} definition={} source={} row={}", index,
-                 spawn.enemy, definition->spawn_asset, definition->spawn_index);
+    VS_LOG_DEBUG(
+        "encounter.spawn",
+        "instance={} definition={} source={} row={} "
+        "source_retains_after_defeat={} isolated_retains_after_defeat={}",
+        index, spawn.enemy, definition->spawn_asset, definition->spawn_index,
+        source->actorStateByte != 0, placement->actorStateByte != 0);
   }
   configuration = setup;
   placements = staged_placements;

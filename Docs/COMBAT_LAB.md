@@ -84,9 +84,15 @@ and `--press <tick:Button[,tick:Button...]>`. A scripted press lasts two ticks;
 ## Production contracts and current limits
 
 - Rooms and enemy stats come from the extracted ZND/MPD definitions. Each accepted
-  enemy also needs an independent hostile MPD placement profile in that zone.
+	enemy also needs a hostile MPD placement profile in that zone.
   Its AI, hostility, drops and variant fields are preserved. Unavailable entries
   carry a reason; enumerating them is not a claim they work.
+- Boss profiles retained for original story death events are now accepted. Only
+  the lab's copied placement clears defeat retention, using normal production
+  defeat/removal because story events are isolated. Original MPD data and normal
+  story sessions are unchanged. Existing ordinary-profile choices remain stable.
+  Guildenstern's orbiting form remains unavailable with a specific arena-support
+  reason: its specialized orbit-state allocator is still unported.
 - Primary actor slots 2–9 and auxiliary-body reservations follow production rules.
   Validation rejects unsupported encodings, unavailable assets, overlaps and
 	exhausted slots. Static-floor preflight uses the production collision decoder
@@ -108,6 +114,53 @@ and `--press <tick:Button[,tick:Button...]>`. A scripted press lasts two ticks;
 - Audio/effect/AI stubs still exist. Defeat/rewards, chains, Break Arts, all items,
   spells and ranks, equipment combinations, and original-game parity are unverified.
   An idle enemy, clean exit or passing unit suite is not acceptance of those features.
+
+## Hostile boss-profile loading checkpoint
+
+Source: `30f5369504d9438bc15b91f5a440383a4c6fba44` plus the scoped encounter
+changes, built in `build/quality/boss-profiles/publish-check`. The isolated
+snapshot excludes unrelated dirty audio, generator, dependency, documentation
+and reference-tree changes. Evidence remains local under
+`build/quality/boss-profiles/`; extracted assets and captures are not committed.
+
+- The old filter confused MPD `actorStateByte` with script-only activation.
+  Original `Field_SpawnRoomActors` / `func_80076F24` instead map it to
+  `retainAfterDefeat`. Discovery, reload and preparation now agree on hostility;
+  preparation clears retention only on the lab copy and logs both policies.
+- `audit.py` and the executable's `--catalog-only` output cover 455 definitions:
+  **315 previously eligible, 53 newly eligible, 368 total**. The remaining one
+  of 54 retained-hostile candidates needs the orbit controller. All 315 previous
+  source asset/row selections are preserved. Definitions without a same-zone
+  hostile record remain unavailable; specific asset errors are no longer
+  overwritten by the missing-profile diagnostic.
+- Debug and Release x64 MSBuild solution builds pass. Direct `VS.Tests.exe`
+  console/JUnit runs each pass **312 cases / 828575 assertions**; Test Explorer
+  did not discover the Catch2 tests. Regressions exercise retained and ordinary
+  hostile profiles, unchanged source bytes/AI/loot, and rejected nonhostile and
+  invalid encodings. Exact commands/results are in `build-*.log`, `tests-*.log`
+  and `tests-*.xml`.
+- `quality-native.cmd --files` selecting `EncounterCatalog.cpp`,
+  `EncounterSpawnProfile.hpp`, `Boot/Encounter.cpp` and `EncounterTests.cpp`,
+  with `--tidy`, passes with zero new findings and no baseline changes. See
+  `quality-expanded.log`; the report separates exact test-fixture literals.
+- `replay.py Release` and `replay.py Debug` run 1500 ticks with `--start --speed 4
+  --scripted`. D'tok (zone 6 definition 0), Dullahan (11/0) and Minotaur (12/0)
+  initialize real hostile AI and execute Bite (3), Drain Heart (94) and Giga
+  Rush (177), respectively. Presets and `*-result.json` retain exact arguments,
+  positions, action results and executable-relative run paths.
+- `lifecycle.py` sends actual F6/F10/editor navigation/Enter/F10 keyboard events
+  to all three bosses in both configurations. Six sessions return and restart
+  with identical freshly initialized actor slots, HP/MP and positions. See
+  `lifecycle-results.json`; the earlier scripted-device attempt did not verify
+  restart and is superseded by these live-key results.
+- A retained hostile soldier (zone 3 definition 0) receives real player attacks
+  and is removed at tick 1312 in both configurations. The 4000-tick replay presses
+  Circle every 80 ticks from 140 through 3740, with no HP or event edits. This
+  exercises retained-profile defeat cleanup, not every boss death sequence.
+- D'tok also receives real player damage, but the bounded follow-up replays do
+  not defeat it as it retreats out of attack range. No claim is made for complete
+  boss defeat/loot coverage, all newly eligible actions, group dependencies,
+  room traversal or original story-event parity. #16 remains open.
 
 ## Extensive diagnostics
 
