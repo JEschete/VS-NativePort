@@ -22,9 +22,10 @@ class Canvas {
   const std::uint32_t* Pixels() const { return pixels_.data(); }
 
  private:
+  static constexpr int kFontPaletteColors = 16;
   std::vector<std::uint32_t> pixels_;
   std::vector<std::uint16_t> font_;
-  std::array<std::uint16_t, 16> font_palette_{};
+  std::array<std::uint16_t, kFontPaletteColors> font_palette_{};
   int font_width_ = 0;
   int font_height_ = 0;
 };
