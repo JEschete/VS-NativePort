@@ -22,8 +22,18 @@ typedef struct Battle_Ai_FrameContext {
   u_short (*heightMap)[kAiFrameGridSide];
   u_short (*tileFlags)[kAiFrameGridSide];
   u_char* terrainRegions;
+  size_t terrain_region_count;
   int movementResult;
-  u_int directionCache[kAiDirectionCacheWords];
+  union {
+    u_int directionCache[kAiDirectionCacheWords];
+    struct {
+      u_char walk_valid;
+      u_char walk_passable;
+      u_char blocker_valid;
+      u_char reserved_cache;
+      u_char blocker_actor[kAiDirectionBytes];
+    };
+  };
   u_int roomBounds;
   u_char directions[kAiDirectionBytes];
   void* roomData;

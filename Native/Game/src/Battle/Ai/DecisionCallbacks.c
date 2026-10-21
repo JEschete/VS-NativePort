@@ -41,6 +41,20 @@ enum {
   kApproachModeMask = 3
 };
 
+// decomp: func_800DAA6C (src/BATTLE/BATTLE.PRG/71618.c:944).
+int Battle_Ai_UpdatePatrolCombatBehavior(Battle_Ai_ActorAiState* state) {
+  if (state->opaqueE != 0) {
+    if (!Battle_Ai_FleeVisibleEnemies((void*)state, 1)) {
+      Battle_Ai_WanderAroundSavedCenter(state);
+    }
+    return 1;
+  }
+  if (!Battle_Ai_UpdateCombatPursuit((void*)state)) {
+    Battle_Ai_PatrolWaypoints(state);
+  }
+  return 1;
+}
+
 // decomp: BATTLE.PRG entry 0x800DBA4C (src/BATTLE/BATTLE.PRG/72B70.s, after
 // .L800DBA40).
 int Battle_Ai_UpdateFleeOrWanderBehavior(Battle_Ai_ActorAiState* state) {

@@ -381,6 +381,10 @@ std::expected<std::vector<EncounterZone>, std::string> ReadEncounterCatalog() {
 std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
                                            const EncounterZone& zone) {
   std::vector<std::string> errors;
+  if (setup.profile < EncounterProfile::kPrologue ||
+      setup.profile > EncounterProfile::kPostMinotaur) {
+    errors.emplace_back("unsupported Ashley profile");
+  }
   if (setup.zone != zone.id) errors.emplace_back("zone does not match catalog");
   const auto room =
       std::ranges::find(zone.rooms, setup.room, &EncounterRoom::index);

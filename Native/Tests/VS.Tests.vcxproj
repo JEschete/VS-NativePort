@@ -50,7 +50,9 @@
     <ClCompile Include="src\AiDecisionTests.cpp" />
     <ClCompile Include="src\AiLayoutTests.cpp" />
     <ClCompile Include="src\AiPlanningTests.cpp" />
+    <ClCompile Include="src\AwarenessMarkerTests.cpp" />
     <ClCompile Include="src\CombatLabCanvasTests.cpp" />
+    <ClCompile Include="src\CombatLabTraceTests.cpp" />
     <ClCompile Include="src\CombatTestCases.cpp" />
     <ClCompile Include="src\CombatTests.c">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -68,6 +70,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\EncounterProfileTests.cpp" />
     <ClCompile Include="src\EncounterTests.cpp" />
     <ClCompile Include="src\EngagementTests.cpp" />
     <ClCompile Include="src\EquipmentDetailTests.cpp" />
@@ -85,6 +88,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\GroundNavigationTests.cpp" />
     <ClCompile Include="src\InformationTests.cpp" />
     <ClCompile Include="src\InputTests.cpp" />
     <ClCompile Include="src\LayoutAsserts.c">
@@ -101,7 +105,9 @@
     <ClCompile Include="src\MapRenderTests.cpp" />
     <ClCompile Include="src\MemoryTests.cpp" />
     <ClCompile Include="src\MinimapTests.cpp" />
+    <ClCompile Include="src\MotionRequestsTests.cpp" />
     <ClCompile Include="src\MovementBehaviorTests.cpp" />
+    <ClCompile Include="src\ParticleRenderTests.cpp" />
     <ClCompile Include="src\PursuitTargetsTests.cpp" />
     <ClCompile Include="src\RasterBoundsTests.cpp" />
     <ClCompile Include="src\SdkMathGapTests.cpp" />
@@ -116,6 +122,7 @@
     <ClCompile Include="src\VibrationTests.cpp" />
     <ClCompile Include="src\ViewportBoundsTests.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp" />
+    <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\VS.Engine.vcxproj">

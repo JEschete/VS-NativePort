@@ -12,7 +12,7 @@
 #include "Effects/Runtime.h"
 
 extern u_char Effects_effectUsesTextures[];
-extern u_short Effects_effectEntryPointIndices[];
+extern u_short Effects_effectEntryPointIndices[400];
 extern Effects_EffectRenderer Effects_effectEntryPoints[];
 extern Effects_FileLoadContext Effects_fbcFiles[];
 extern u_char Effects_fbcSlots[];

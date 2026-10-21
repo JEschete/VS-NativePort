@@ -50,6 +50,32 @@ Load it with `--scenario <path>`; add `--start` to enter immediately. Presets re
 zone/room, seed, player tile/elevation/direction and each enemy definition and
 position. Enemy IDs are local to the selected zone.
 
+### Ashley testing profiles
+
+The **ASHLEY** row selects `prologue`, `post-prologue` or `post-minotaur`.
+These are isolated testing configurations, not imported saves or claims of
+completed story events. The default remains the original New Game equipment,
+inventory and action set. Normal game startup is unchanged.
+
+- **Prologue:** unchanged New Game gates.
+- **Post-prologue:** the original stage-3 Map/Score menu gates.
+- **Post-Minotaur:** those menu gates plus three mapped chain abilities, three
+  defenses, one learned spell from each real spell-class table, and the first
+  Break Art for the equipped weapon family. This is the owner-selected
+  representative set, not an all-actions or all-ranks unlock.
+
+Profiles retain the real weapon, resource, status and target restrictions.
+In particular, draw the weapon before selecting a Break Art; its menu entry
+is unavailable with the weapon sheathed. These profiles do not implement a
+loadout editor or complete the wider spell/ability/equipment trackers.
+Enabling a menu gate does not repair that submenu: the known Score crash
+remains tracked by #65.
+
+Presets and encounter logs include `ashley_profile`. Existing version-1 presets
+without that key still select `prologue`; unknown profile names are rejected.
+F10 followed by Start initializes a fresh player. Changing the ASHLEY row back
+to Prologue also removes the advanced profile's grants on the next start.
+
 Other options: `--data <directory>`, `--frames <ticks>`, `--speed <1..64>`,
 `--capture <bmp-path>`, `--catalog-only`, `--scripted` (ignore gameplay devices),
 and `--press <tick:Button[,tick:Button...]>`. A scripted press lasts two ticks;
@@ -71,12 +97,14 @@ and `--press <tick:Button[,tick:Button...]>`. A scripted press lasts two ticks;
   room. Positions/counts are never silently adjusted to pass validation.
 - Source-backed enemies are currently **same-zone only**. Script-dependent actors,
   cross-zone model loading and full roster verification remain open.
-- Ashley starts with the real new-game equipment, inventory and available actions.
-  There is no full loadout editor, all-items grant, spell/rank unlock editor or
+- Ashley retains the real new-game equipment and inventory; available actions
+  depend on the explicit testing profile above. There is no full loadout editor,
+  all-items grant, spell/rank unlock editor or
   ability coverage matrix yet. Items/spells/abilities that are available use the
   original menus and gameplay path; unavailable actions are not fabricated.
-- Story and door events are explicitly isolated. No progression flags are marked
-  complete. This mode does not verify prologue combat or story encounters.
+- Story and door events are explicitly isolated. Advanced profiles set the
+  documented startup menu stage only; no room event is completed to obtain it.
+  This mode does not verify prologue combat or story encounters.
 - Audio/effect/AI stubs still exist. Defeat/rewards, chains, Break Arts, all items,
   spells and ranks, equipment combinations, and original-game parity are unverified.
   An idle enemy, clean exit or passing unit suite is not acceptance of those features.
@@ -94,11 +122,19 @@ Every process creates `build\<Config>\combat-lab\runs\<timestamp>-<suffix>\`:
 
 File logging is automatic, including option-parsing and content-startup errors;
 no console redirection or debugger is required. The startup log records the run
-directory. Both engine messages and structured events are flushed as written.
+directory. The console shows warnings/errors; the files retain Trace-level
+engine messages and RNG records. Engine file writes are batched and flushed at
+frame/control boundaries, with immediate error flushing. The host restores the
+previous logging policies on teardown; other hosts retain their prior defaults.
 
 Structured writes are flushed and failures terminate the run rather than silently
 losing trace data. A frame snapshot includes HP/MP, risk, statuses, actor commands,
-positions, recovery, weapon state, action/target state and item counts. Logs are
+positions, recovery, weapon state, action/target state and item counts. It also
+records spawn IDs, defeat state, awareness markers, AI candidates/destinations,
+and pending miscellaneous loot by source actor. Pending loot is not proof of
+inventory delivery; `rewards_available` records the original progression gate.
+`performance.summary` contains bounded phase and presentation-interval aggregates,
+including counts above the 16.667 ms tick and 33.333 ms frame budgets. Logs are
 local evidence, not a complete formula/AI decision explanation or a replay restore
 format. Content hashes, a trace browser and persistent coverage reporting remain
 future work. Full tracing can create large files; no rotation is implemented.
@@ -106,6 +142,123 @@ future work. Full tracing can create large files; no rotation is implemented.
 Crash stacks go to the session logs. The existing bounded-run watchdog writes
 `build\<Config>\vs-native-hang.log`. Keep captures, extracted catalogs and game data
 out of commits and issue attachments.
+
+## Combined combat/action checkpoint (2026-10-21)
+
+Source: `fd291cfe29b45656e00ff1e198f53e7730b59a19` plus pending native
+AI/navigation, motion, Lab profiles/diagnostics and effect fixes. These are
+dirty-worktree results. Fixing revisions and successful pushed CI are recorded
+on #69, #71, #72, #73 and #74 separately. #6, #16, #42 and #70 remain broader work.
+All captures, presets and runtime logs below remain local.
+
+Both Debug and Release full builds and suites pass **302 cases / 828486
+assertions**. Logs: `build/quality/issues69-74-{final-<Config>-build,full-<Config>-tests}.log`.
+The focused profile, awareness, particle, emission-capacity and renderer-storage
+selection passes 15 cases / 1006 assertions. Two copier/scaffolder passes preserve
+all 70 owned paths and 775 generated/project paths; the manifest SHA-256 is
+`b5674a43cfef9ce954ca16a7c65de6ba3e7e943b536bbe5e4ea0d8a0af0aec32`.
+Native views: 621 fields / zero mismatches; event dispatch: 179 / zero errors.
+Assembly-gap audit and encounter-fixup regressions pass 13 and 3 tests.
+The final `quality-native.cmd --changed --tidy` gate passes with **zero new
+findings**, retaining 316 existing findings and no baseline edits. Full output:
+`build/quality/issues69-74-full-quality.log`.
+
+### Real action and visual evidence
+
+Every replay here uses `--start --scripted --speed 1`, ordinary controller
+presses and real data. HP, RNG and encounter completion are not forced.
+The advanced scenario is zone 9, room 0, seed 1, Ashley (4,9), Silver Wolf
+definition 4 at (4,10), with `ashley_profile: post-minotaur`.
+
+| Action | Presses | Frames | Debug / Release run IDs |
+| --- | --- | --- | --- |
+| Solid Shock | `140:Triangle,220:Circle,300:Circle,380:Circle,460:Circle,540:Circle` | 1500 | `1792567997566581-0` / `1792568676890936-0` |
+| Equipped Break Art | `140:Circle,330:Triangle,410:Down,490:Circle,570:Circle,650:Circle,730:Circle` | 2000 | `1792568357154255-0` / `1792568709218612-0` |
+| Heavy Shot chain | `140:Circle,180:Circle,220:Circle,272:Circle` | 1000 | `1792568624284307-0` / `1792568749832573-0` |
+| Cure Root | `760:L2,761:L2,762:L2+Up,763:L2+Up,764:L2,900:Circle,1050:Circle` | 1340 | `1792568398043471-0` / `1792568768749218-0` |
+
+Each Debug/Release pair matches every frame snapshot and RNG record: spell
+1500/2275, art 2000/5657, chain 1000/1336, item 1340/3423, respectively.
+The final four-wolf pair also matches all 600 snapshots and 1773 RNG records.
+
+Solid Shock action 97 costs 25 MP, deals 92 HP at tick 724 and returns control.
+The equipped art 188 costs 25 HP, deals 63 at tick 916 and returns control before
+later enemy attacks. A basic attack deals 45 at tick 270; the real timed Circle
+press chains into Heavy Shot action 22, dealing 31 at tick 358. This verifies
+representative actions, not every granted defense/spell/art or reference parity.
+
+The item scenario uses the default prologue profile and adjacent Mandel
+definition 0 at (4,10). Real damage occurs first; Cure Root count goes 10 to 9,
+and action 224 produces a 49-HP recovery result at tick 1318, capped from 208
+to 250 HP. Captures `build/quality/issue72-item-particles-{debug,release}.png`
+at tick 1340 visibly contain the original effect-program particles. The native
+renderer advances actual texture programs/curves and emits bounded native
+ordering packets; it does not substitute a fabricated flash.
+
+Testing exposed two additional production defects: a full particle pool let
+F01515 dereference an uninitialized first node (#73), and the incomplete
+G00574 renderer-table declaration allocated one callback instead of eight (#74).
+The generator now handles zero/full-capacity emission explicitly and preserves
+all eight native callbacks without overwriting the adjacent effect package.
+Regressions cover empty/full/clamped bursts, unchanged RNG on skipped emission,
+all eight slots and every original plugin-index slice.
+
+The awareness repair uses native packet handles and the native frame matrix
+rather than the original scratch offset. All six marker-frame variants have
+high-address traversal/projection tests. Natural four-wolf markers were captured
+at ticks 144 and 164 in Release runs `1792568808686727-0` and
+`1792568798455539-0`; Debug evidence includes `issue71-awareness-speed1.png`.
+
+Live F6/F7/F10, advanced restart and a third start after cycling back to Prologue
+pass in Debug `1792571153025350-0` and Release `1792571186843537-0`.
+Both wait past tick 700 before pausing: natural marker 4 and actual Ashley
+damage precede teardown, and the restarted encounter has cleared markers.
+The final menu captures `issue69-<Config>-profile-reset.png` show the original
+limited menu again, without advanced actions or Score. Both runs exit zero with
+`trace_failed: false`. Exact control ticks: `issue69-<Config>-lifecycle.json`.
+
+### Normal-speed performance limits (#70)
+
+Full tracing remains enabled. In the earlier matched four-wolf 600-tick A/B,
+console filtering/frame-boundary flushing reduced simulation's worst sample
+from 31.131 to 21.710 ms; all 600 snapshots and RNG records matched. Startup
+plus replay wall time changed from 18.227 to 12.378 seconds. This is not a
+claim that all combat stutter is solved.
+
+Final four-wolf measurements:
+
+| Configuration / run | Simulation mean / maximum | Maximum present interval | Intervals >33.333 ms |
+| --- | --- | --- | --- |
+| Debug `1792568914935697-0` | 7.315 / 22.435 ms | 26.057 ms | 0 |
+| Release `1792569400494834-0` | 1.910 / 4.863 ms | 26.526 ms | 0 |
+
+Debug still has 41/600 simulation samples over 16.667 ms. Release has zero.
+No severe stall was reproduced in these final bounded runs; this does not
+establish an all-encounter performance guarantee.
+
+An attempted redraw gate, with both coarse and precise Windows sleeps, reduced
+presentation work but worsened maximum intervals to 39.640/37.196 ms, with
+10/7 intervals over 33.333 ms. Those changes were **rejected**; original
+presentation scheduling remains. The experiments preserved all 600 actor/input
+snapshots and 1773 RNG records but not capture bytes, further limiting the
+experiment's validity. Runs: `1792568974185681-0`, `1792569084718367-0`.
+The next useful observation is a persisted frame/phase trace during the owner's
+remaining stutter, with the configuration, encounter and actual inputs recorded;
+do not weaken the budget or suppress logs to close #70.
+
+### Pending AI/navigation evidence
+
+The same worktree implements native ground queries, bounded occupancy/detours,
+movement behaviors, cleanup and five actor motion-request producers. Earlier
+live Zombie runs `1792564049493217-0` (Debug) and `1792564092031473-0` (Release)
+demonstrated real defeat/removal and two queued Cure Roots at tick 1350; all
+5000 snapshots and 4484 RNG records matched. Inventory was deliberately not
+credited through the disabled prologue reward gate.
+Those runs and the ordinary 24000-tick guard victories predate the newest
+particle fixes; they are not fresh all-gameplay verification of this checkpoint.
+The gap report now retains 50 C-backed, 31 assembly-only and 10 unlocated gaps.
+Ownership, behavior verification, C++ promotion and compatibility retirement
+remain separate; no wider issue is closed just from those counts.
 
 ## Verified local checkpoint (2026-10-20)
 

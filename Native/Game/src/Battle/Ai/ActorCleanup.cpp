@@ -11,7 +11,9 @@
 #include "Battle/Ai/EngagementState.hpp"
 
 extern "C" {
+#include "Actors/ActorRecord.h"
 #include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
@@ -44,6 +46,14 @@ void RequireActorId(int id) {
   Require(id >= 0 && id < kActorSlots, "AI cleanup actor ID is out of bounds");
 }
 
+void ClearLinkedActorReferences(int id) {
+  for (auto* peer : Battle_Ai_actorAiStates) {
+    if (peer != nullptr && peer->linkedActor == id) {
+      peer->linkedActor = kActorSlots;
+    }
+  }
+}
+
 void DetachActorReferences(Battle_Actor* actor) {
   const int id = actor->id;
   if ((actor->kind & kAttributeKindFlags) != 0) {
@@ -51,11 +61,7 @@ void DetachActorReferences(Battle_Actor* actor) {
     Battle_Ai_attributeActorMask = static_cast<int>(
         static_cast<unsigned>(Battle_Ai_attributeActorMask) & ~(1u << id));
   }
-  for (auto* peer : Battle_Ai_actorAiStates) {
-    if (peer != nullptr && peer->linkedActor == id) {
-      peer->linkedActor = kActorSlots;
-    }
-  }
+  ClearLinkedActorReferences(id);
   Require(Battle_Ai_roomAiState != nullptr, "AI cleanup requires room state");
   for (auto*& special : Battle_Ai_roomAiState->specialActors) {
     if (special == actor) special = nullptr;
@@ -71,6 +77,53 @@ void ReleaseOrbitStorage(const Battle_Actor& actor) {
   if (orbit != nullptr) Core_Memory_FreeFromLowEnd(orbit);
 }
 }  // namespace
+
+// decomp: func_800E48A8 (src/BATTLE/BATTLE.PRG/7BDD4.s:246).
+void Battle_Ai_SetActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView* view,
+                                           int value, int range) {
+  Require(view != nullptr, "AI reaction request requires state");
+  const int roll = Battle_Ai_NextActorRandomMasked(range);
+  auto& state = *reinterpret_cast<Battle_Ai_ActorAiState*>(view);
+  if (state.nativePointer18C != nullptr || state.decisionDelay != 0 ||
+      roll >= range) {
+    return;
+  }
+  RequireActorId(state.actorId);
+  auto* actor = Battle_actors[state.actorId];
+  Require(actor != nullptr, "AI reaction request requires an actor");
+  constexpr u_char kReactionDelay = 30;
+  state.decisionDelay = kReactionDelay;
+  actor->commandFlags = static_cast<u_char>(value);
+}
+
+// decomp: func_800E6700 (src/BATTLE/BATTLE.PRG/7DE94.s:42).
+void Battle_Ai_RefreshActorAiReservations(int actor_id) {
+  RequireActorId(actor_id);
+  const auto* actor = Battle_actors[actor_id];
+  constexpr unsigned kReleaseCommands = 0xA41800;
+  if (actor == nullptr ||
+      ((1u << (actor->commandOpcode & kShiftMask)) & kReleaseCommands) == 0) {
+    return;
+  }
+  const auto* model = Actors_actorRecords[actor_id];
+  Require(model != nullptr, "AI reservation refresh requires a model");
+  constexpr unsigned kReactionFlags = 0xB;
+  if (model->instance.movementMode != 0 ||
+      model->instance.locomotionState != 0 ||
+      (model->instance.reactionState & kReactionFlags) != 0) {
+    return;
+  }
+  auto* state = Battle_Ai_actorAiStates[actor_id];
+  if (state != nullptr) Battle_Ai_ReleaseActorAiReservations(state);
+}
+
+// decomp: func_800E7608 (src/BATTLE/BATTLE.PRG/7E05C.s:1052).
+void Battle_Ai_ClearActorAiLinksAndPlan(int actor_id) {
+  RequireActorId(actor_id);
+  ClearLinkedActorReferences(actor_id);
+  auto* state = Battle_Ai_actorAiStates[actor_id];
+  if (state != nullptr) Battle_Ai_DisengageActor(state);
+}
 
 // decomp: func_800E4C28 (src/BATTLE/BATTLE.PRG/7BDD4.s:550).
 void Battle_Ai_ReleaseAiDestinationTile(int x, int z) {

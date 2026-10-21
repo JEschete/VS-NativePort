@@ -106,6 +106,11 @@ int Battle_Ai_BuildRoomAiMap(Battle_Ai_RoomAiMap* map) {
   const uint16_t bounds =
       (uint16_t)((Field_CollisionMapDimensions(0) & 0xFFFF) >> 4 |
                  (unsigned)Field_CollisionMapDimensions(0) >> 12);
+  const size_t region_count = (size_t)(bounds & 0xFFu) * (bounds >> 8);
+  if (auxiliary != NULL && Field_roomData.header.section6Length <
+                               kRoomAuxiliaryHeaderBytes + region_count) {
+    return 0;
+  }
   memcpy(&map->state.maxTileX, &bounds, sizeof bounds);
   memcpy(map->state.reserved4, &bounds, sizeof bounds);
   map->state.flightCeiling =

@@ -1140,7 +1140,7 @@ void Battle_DrawActorMarker(int actor, int kind)
         prim[7] = uv[2];
         prim[8] = Core_Math_AddPackedScreenCoordinates(xy, corners[3]);
         prim[9] = uv[3];
-        *ot = ((u_long)prim << 8) >> 8;
+        *ot = LegacyGpu_Handle(prim);
         ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor = prim + 10;
     } else {
         long depth;

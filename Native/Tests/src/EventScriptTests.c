@@ -141,17 +141,19 @@ int Tests_RoomAiMapStorage(void) {
         ((input >> 18) & 0x1000) | ((input >> 16) & 0x2000);
     passed = passed && Battle_Ai_DecodeCollisionFlags(input) == expected;
   }
-  unsigned auxiliary[0x498 / 4] = {0};
+  unsigned auxiliary[(0x498 + 6 + 3) / 4] = {0};
   auxiliary[0x450 / 4] = (2u << 29) | (99u << 21) | (1u << 20);
   auxiliary[0x494 / 4] = 0x03020A09;
   Field_roomData.section6 = auxiliary;
-  Field_roomData.header.section6Length = sizeof auxiliary;
+  Field_roomData.header.section6Length = 0x498 + 6;
   passed = passed && Battle_Ai_BuildRoomAiMap(&map) == 1 &&
            map.state.maxTileX == 9 && map.state.maxTileZ == 10 &&
            map.state.minTileX == 2 && map.state.minTileZ == 3 &&
            map.state.defaultActionDelay == 99 &&
            map.state.allowsNonSpellActions == 1;
   Field_roomData.header.section6Length--;
+  passed = passed && Battle_Ai_BuildRoomAiMap(&map) == 0;
+  Field_roomData.header.section6Length = 0x497;
   passed = passed && Battle_Ai_BuildRoomAiMap(&map) == 0;
   int samples[16];
   for (unsigned index = 0; index < 16; ++index) samples[index] = 128;

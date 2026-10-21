@@ -18,6 +18,9 @@ AI_POINTERS = (0x54, 0x58, 0x5C, 0x60, 0x64, 0x68, 0x18C, 0x1A0, 0x22C,
                *range(0x430, 0x470, 4))
 NATIVE_FIELD_ALIASES = {
     "T00532": {
+        "ignore_floor_mask": 0x6,
+        "terrain_reject_mask": 0x32,
+        "collision_radius": 0x94,
         "movementEnabled": 0x23,
         "requestedMovementMode": 0x89,
         "currentMovementMode": 0x8A,
@@ -26,7 +29,22 @@ NATIVE_FIELD_ALIASES = {
         "patrolRate": 0x102,
         "patrolDirection": 0x103,
         "patrolCooldown": 0x104,
+        "wander_center_radius": 0xC8,
+        "wander_center": 0xCC,
+        "flee_tile": 0x110,
+        "flee_timer": 0x114,
+        "fine_x": 0x120,
+        "fine_layer": 0x121,
+        "fine_z": 0x122,
+        "fine_status": 0x123,
+        "ground_area": 0x132,
+        "movement_wait": 0x156,
         "navigationFlags": 0x190,
+        "detour_tile_bytes": 0x194,
+        "detour_repeats": 0x198,
+        "detour_run": 0x199,
+        "route_gate": 0x19B,
+        "route_exit_bytes": 0x19C,
         "movementModeCounters": 0x474,
     },
 }
@@ -120,5 +138,19 @@ def rebase(tid: str, text: str, fields: list[tuple[str, dict]]) -> str:
         padding = 'char reserved18C_190[10];'
         if text.count(padding) != 1:
             raise ValueError('T00532: rebased navigation flag padding not found')
-        text = text.replace(padding, 'u_int navigationFlags;\n    char reserved194[6];')
+        text = text.replace(
+            padding,
+            'u_int navigationFlags;\n'
+            '    union { char reserved194[6]; struct {\n'
+            '        u_char detour_tile_bytes[4];\n'
+            '        u_char detour_repeats;\n        u_char detour_run;\n'
+            '    }; };')
+        route = 'char reserved19B[5];'
+        if text.count(route) != 1:
+            raise ValueError('T00532: route gate storage not found')
+        text = text.replace(
+            route,
+            'union { char reserved19B[5]; struct {\n'
+            '        u_char route_gate;\n        u_char route_exit_bytes[4];\n'
+            '    }; };')
     return text

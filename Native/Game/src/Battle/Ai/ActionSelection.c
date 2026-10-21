@@ -25,13 +25,6 @@ void Battle_Ai_RememberAiActionTarget(Battle_Ai_ActorAiState*)
 // decomp: BATTLE.PRG func_800E4CE8 (src/BATTLE/BATTLE.PRG/7C4E8.c:407)
 void Battle_Ai_ForgetAiActionTarget(Battle_Ai_ActorAiState* arg0) { arg0->previousTile = -1; }
 
-// decomp: BATTLE.PRG func_800E4FB0 (src/BATTLE/BATTLE.PRG/7C7B0.s:0) [asm-file: not yet ported]
-int Battle_Ai_IsAiTargetBeyondNearRadius(void*, int, int)
-{
-    VS_UNPORTED("Battle::Ai::IsAiTargetBeyondNearRadius");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800E5710 (src/BATTLE/BATTLE.PRG/7CD68.c:526)
 void Battle_Ai_BuildAiActionMetadata(Battle_Ai_ActionMetadataView* state)
 {

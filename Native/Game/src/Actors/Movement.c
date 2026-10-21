@@ -6,6 +6,7 @@
 #include "Actors/Animation.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
+#include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
 #include "Actors/MovementCommands.h"
 #include "Actors/Shadow.h"
@@ -19,6 +20,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -3191,24 +3193,6 @@ void Actors_BeginNavigationJump(int, int*, int, int)
     VS_UNPORTED("Actors::BeginNavigationJump");
 }
 
-// decomp: BATTLE.PRG func_800B6500 (src/BATTLE/BATTLE.PRG/4A0A8.c:445) [inline-asm: not yet ported]
-void Actors_QueueGroundOffset(int, SVECTOR*)
-{
-    VS_UNPORTED("Actors::QueueGroundOffset");
-}
-
-// decomp: BATTLE.PRG func_800B6530 (src/BATTLE/BATTLE.PRG/4A0A8.c:459) [inline-asm: not yet ported]
-void Actors_QueueMovementVector(int, SVECTOR*, int)
-{
-    VS_UNPORTED("Actors::QueueMovementVector");
-}
-
-// decomp: BATTLE.PRG func_800B653C (src/BATTLE/BATTLE.PRG/4A0A8.c:467) [inline-asm: not yet ported]
-void Actors_QueueFlightMovement(int, SVECTOR*, int, int)
-{
-    VS_UNPORTED("Actors::QueueFlightMovement");
-}
-
 // decomp: BATTLE.PRG func_800B6580 (src/BATTLE/BATTLE.PRG/4A0A8.c:490) [inline-asm: not yet ported]
 void Actors_BeginTeleport(int, int*, int)
 {
@@ -3225,17 +3209,5 @@ void Actors_BeginTileTravel(int, int*, int)
 void Actors_BeginTimedTravel(int, int*, int)
 {
     VS_UNPORTED("Actors::BeginTimedTravel");
-}
-
-// decomp: BATTLE.PRG func_800B6634 (src/BATTLE/BATTLE.PRG/4A0A8.c:551) [C: not yet ported]
-void Actors_TurnNavigationActor(int, int)
-{
-    VS_UNPORTED("Actors::TurnNavigationActor");
-}
-
-// decomp: BATTLE.PRG func_800B668C (src/BATTLE/BATTLE.PRG/4A0A8.c:578) [inline-asm: not yet ported]
-void Actors_TurnActorAtSpeed(int arg0, short arg1, int arg2)
-{
-    VS_UNPORTED("Actors::TurnActorAtSpeed");
 }
 

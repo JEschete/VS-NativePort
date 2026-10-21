@@ -34,6 +34,9 @@ void Battle_Ai_CacheFallbackActionCandidate(Battle_Ai_ActionCandidate*,
 void Battle_Ai_PromoteRandomizedActionCandidate(Battle_Ai_ActionPlanView*, int);
 
 int Battle_Ai_NextActorRandomMasked(int);
+int Battle_Ai_CanApproachEngagedTarget(Battle_Ai_ActorAiState*,
+                                       Battle_Ai_ActionCandidate*);
+int Battle_Ai_IsAiTargetBeyondNearRadius(void*, int target, int range);
 
 #ifdef __cplusplus
 }

@@ -21,6 +21,7 @@ enum Row {
   kOffsetZ,
   kSpacing,
   kSeed,
+  kAshleyProfile,
   kAddGroup,
   kClearGroups,
   kStart,
@@ -28,8 +29,9 @@ enum Row {
   kRowCount
 };
 constexpr int kFirstRowY = 65;
-constexpr int kRowHeight = 20;
+constexpr int kRowHeight = 18;
 constexpr int kPreferredZone = 9;
+constexpr std::size_t kAshleyProfiles = 3;
 constexpr int kMaxTile = Game::EncounterLimits::kTiles - 1;
 constexpr int kMaxSpacing = Game::EncounterLimits::kTiles / 2;
 constexpr int kLabelX = 18;
@@ -171,6 +173,11 @@ void Editor::Change(int direction) {
     case kSeed:
       setup_.seed += static_cast<std::uint32_t>(direction);
       break;
+    case kAshleyProfile:
+      setup_.profile = static_cast<Game::EncounterProfile>(
+          Cycle(static_cast<std::size_t>(setup_.profile), kAshleyProfiles,
+                direction));
+      break;
     default:
       break;
   }
@@ -226,6 +233,7 @@ void Editor::Draw(Canvas& canvas) const {
       std::format("GROUP OFFSET Z: {}", offset_z_),
       std::format("LINE SPACING: {}", spacing_),
       std::format("RANDOM SEED: {}", setup_.seed),
+      std::format("ASHLEY: {}", Game::EncounterProfileId(setup_.profile)),
       "ADD GROUP",
       "CLEAR GROUPS",
       "START ENCOUNTER",

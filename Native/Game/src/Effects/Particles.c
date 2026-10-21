@@ -8,6 +8,7 @@
 #include "Core/Memory/Heap.h"
 #include "Core/Random.h"
 #include "Effects/Package.h"
+#include "Effects/ParticleRender.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
@@ -269,6 +270,12 @@ void Effects_EmitParticleEvent(
     count = Core_Math_InterpolateShortPair(def->countRange, Effects_curveSamples[sample]);
     if (count + Effects_usedParticleCount >= Effects_particleCapacity) {
         count = Effects_particleCapacity - Effects_usedParticleCount;
+    }
+
+    if (count <= 0) {
+        Core_Debugf("effects", "particle emission skipped: count=%d used=%d capacity=%d",
+            count, Effects_usedParticleCount, Effects_particleCapacity);
+        return;
     }
 
     for (i = 0; i < count; ++i) {
@@ -794,8 +801,7 @@ int Effects_TickEffectParticles(Effects_EffectInstance* arg0)
     Effects_Particle* node;
 
     Effects_IntegrateParticleMotion(next);
-    /* The original caller supplies arguments to this argument-free wrapper. */
-    ((void (*)())Effects_DrawEffectParticleList)(arg0->particles, (void*)((uintptr_t)Core_ScratchBase() + 0x15C));
+    Effects_DrawEffectParticleList(arg0->particles);
     node = next;
     while (next != NULL) {
         next = node->next;
@@ -926,14 +932,5 @@ void Effects_AdvanceParticleTextureAnimation(Effects_ParticleTextureAnimation* a
             return;
         }
     }
-}
-
-// decomp: BATTLE.PRG func_800D6E24 (src/BATTLE/BATTLE.PRG/5BF94.c:8554)
-void Effects_DrawEffectParticleList(void) { Effects_DrawAnimatedSpriteParticles(); }
-
-// decomp: BATTLE.PRG func_800D6E44 (src/BATTLE/BATTLE.PRG/6E644.s:0) [asm-file: not yet ported]
-void Effects_DrawAnimatedSpriteParticles(void)
-{
-    VS_UNPORTED("Effects::DrawAnimatedSpriteParticles");
 }
 

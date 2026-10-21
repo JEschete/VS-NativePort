@@ -33,6 +33,11 @@ void SetLogTick(std::uint64_t tick);
 // Additionally mirrors every line to `path` (truncated on open). Pass an empty
 // path to close.
 bool SetLogFile(const char* path);
+// Console filtering does not discard file/observer records. Both setters return
+// the previous policy; normal hosts retain per-message flushing by default.
+LogLevel SetConsoleLogLevel(LogLevel level);
+bool SetLogFlushEachMessage(bool enabled);
+bool FlushLogFile();
 void LogWrite(LogLevel level, std::string_view channel,
               std::string_view message);
 

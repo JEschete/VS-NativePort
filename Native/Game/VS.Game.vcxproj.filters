@@ -165,6 +165,12 @@
     <ClInclude Include="src\Actors\ModelRendering.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClCompile Include="src\Actors\MotionRequests.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\MotionRequests.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
     <ClCompile Include="src\Actors\Movement.c">
       <Filter>src\Actors</Filter>
     </ClCompile>
@@ -367,6 +373,12 @@
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
     <ClInclude Include="src\Battle\Ai\FrameUpdate.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\GroundNavigation.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\GroundNavigation.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\Ai\Movement.c">
@@ -604,6 +616,12 @@
       <Filter>src\Effects</Filter>
     </ClInclude>
     <ClInclude Include="src\Effects\Package.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\ParticleRender.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\ParticleRender.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Particles.c">

@@ -13,6 +13,7 @@
 #include <span>
 #include <utility>
 
+#include "Battle/Ai/EngagementState.hpp"
 #include "Battle/Ai/PlanningSort.hpp"
 
 extern "C" {
@@ -236,6 +237,37 @@ void Battle_Ai_PromoteRandomizedActionCandidate(Battle_Ai_ActionPlanView* state,
       return;
     }
   }
+}
+
+// decomp: func_800DB8AC (src/BATTLE/BATTLE.PRG/72B70.s:439).
+int Battle_Ai_CanApproachEngagedTarget(Battle_Ai_ActorAiState* state,
+                                       Battle_Ai_ActionCandidate* candidate) {
+  Require(state != nullptr && candidate != nullptr,
+          "AI approach gate requires state and a candidate");
+  (void)Battle_Ai_IsActionCooldownReady(state, candidate);
+  if (state->opaque8E != 0) return 1;
+  if (state->opaque98 != 0) return 0;
+  if (!state->relations[candidate->targetId].active) return 0;
+  Require(Battle_Ai_roomAiState != nullptr && state->actorId < kActorSlots,
+          "AI approach gate requires room state and a valid actor ID");
+  const auto& room = *Battle_Ai_roomAiState;
+  if (room.engagementLimit < static_cast<unsigned>(room.approachMoves)) {
+    return 0;
+  }
+  if ((VS::Battle::ai::EngagedMask(room) & (1u << state->actorId)) != 0) {
+    return 1;
+  }
+  return room.engagementLimit >= room.engagedCount;
+}
+
+// decomp: func_800E4FB0 (src/BATTLE/BATTLE.PRG/7C7B0.s:7).
+int Battle_Ai_IsAiTargetBeyondNearRadius(void* view, int target,
+                                         int /*range*/) {
+  Require(view != nullptr && target >= 0 && target < kActorSlots,
+          "AI near-target query requires state and a valid target");
+  const auto& state = *static_cast<Battle_Ai_ActorAiState*>(view);
+  constexpr unsigned kOriginalNearCutoff = 100;
+  return state.distancesSquared[target] > kOriginalNearCutoff;
 }
 
 // decomp: func_800E45D4 (src/BATTLE/BATTLE.PRG/7BDD4.s:10).

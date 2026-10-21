@@ -18,6 +18,8 @@ std::mutex g_mutex;
 std::FILE* g_file = nullptr;
 std::vector<std::string> g_channels;
 LogObserver g_observer;
+LogLevel g_console_level = LogLevel::Trace;
+bool g_flush_each_message = true;
 
 bool ChannelEnabled(LogLevel level, std::string_view channel) {
   return level >= LogLevel::Warn || g_channels.empty() ||
@@ -49,6 +51,21 @@ LogObserver SetLogObserver(LogObserver observer) {
 }
 
 void SetLogLevel(LogLevel level) { g_level = level; }
+
+LogLevel SetConsoleLogLevel(LogLevel level) {
+  std::lock_guard lock(g_mutex);
+  return std::exchange(g_console_level, level);
+}
+
+bool SetLogFlushEachMessage(bool enabled) {
+  std::lock_guard lock(g_mutex);
+  return std::exchange(g_flush_each_message, enabled);
+}
+
+bool FlushLogFile() {
+  std::lock_guard lock(g_mutex);
+  return g_file == nullptr || std::fflush(g_file) == 0;
+}
 
 std::optional<LogLevel> ParseLogLevel(std::string_view name) {
   for (auto level : {LogLevel::Trace, LogLevel::Debug, LogLevel::Info,
@@ -114,17 +131,21 @@ void LogWrite(LogLevel level, std::string_view channel,
     return;
   }
   const std::uint64_t tick = g_tick.load();
-  std::FILE* out = level >= LogLevel::Warn ? stderr : stdout;
-  std::fprintf(out, "[%s] [tick=%" PRIu64 "] %.*s: %.*s\n", LevelName(level),
-               tick, static_cast<int>(channel.size()), channel.data(),
-               static_cast<int>(message.size()), message.data());
-  std::fflush(out);
+  if (level >= g_console_level) {
+    std::FILE* out = level >= LogLevel::Warn ? stderr : stdout;
+    std::fprintf(out, "[%s] [tick=%" PRIu64 "] %.*s: %.*s\n", LevelName(level),
+                 tick, static_cast<int>(channel.size()), channel.data(),
+                 static_cast<int>(message.size()), message.data());
+    std::fflush(out);
+  }
   if (g_file) {
     std::fprintf(g_file, "[%s] [tick=%" PRIu64 "] %.*s: %.*s\n",
                  LevelName(level), tick, static_cast<int>(channel.size()),
                  channel.data(), static_cast<int>(message.size()),
                  message.data());
-    std::fflush(g_file);
+    if (g_flush_each_message || level >= LogLevel::Error) {
+      std::fflush(g_file);
+    }
   }
   auto observer = g_observer;
   lock.unlock();

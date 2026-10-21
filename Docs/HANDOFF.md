@@ -18,6 +18,47 @@ The later Quick Manual report is repaired and verified below (#66). Its scoped
 publication/CI record belongs in that issue. The newly reproduced Score submenu
 fast-fail remains #65; #6 is still the next ordered gameplay implementation.
 
+### Combat Lab profiles, awareness and particles (2026-10-21)
+
+The combined worktree based on `fd291cfe` now has selectable Prologue,
+Post-Prologue and representative Post-Minotaur Ashley profiles. Normal startup
+is unchanged. Presets/logs persist the profile; legacy presets default to
+Prologue. The advanced profile learns/maps real table entries, not every action.
+Weapon/resource/status restrictions still apply, including drawing the weapon
+before Break Arts. The stage-3 gate enables Map/Score, not a new Setup root menu.
+
+Actual speed-1 inputs in Debug/Release execute Solid Shock (97), Heavy Shot
+chaining (22), the equipped art (188), and Cure Root (224). The item capture
+is during the original particle animation, not after it ends. Natural awareness
+markers now render through native links and a native frame matrix. Testing
+also exposed/repaired full-pool emission UB (#73) and a one-element renderer
+table overwriting the effect package (#74). Live pause, single-step, F10 return,
+restart and switching back to a genuinely limited Prologue menu pass.
+
+Full Debug/Release suites: 302 cases / 828486 assertions each. Focused action/
+rendering regressions: 15 / 1006. Two generator runs preserve 70 owned paths and
+775 generated/project paths; native views check 621 fields with zero mismatches,
+event dispatch checks 179 with zero errors. Exact commands, source/dirty-state
+limits, run IDs, captures, timing and generation hashes are in
+[COMBAT_LAB.md](COMBAT_LAB.md), not inferred from successful exits.
+Publication/CI evidence belongs on #69, #71, #72, #73 and #74.
+The full changed-source/shared-header tidy gate passes with zero new findings
+(316 existing); no baseline was changed.
+
+#70 remains open. Console/file batching retains full Trace/RNG files and improves
+the matched normal-speed run, but Debug still exceeds the 16.667 ms simulation
+budget on 41/600 ticks. Final four-wolf Release simulation is 1.910 ms mean /
+4.863 ms maximum; maximum presentation interval is 26.526 ms. Redraw-throttling
+experiments worsened pacing and were removed. Record a fresh trace during any
+remaining owner-visible stutter before choosing another fix.
+
+The pending ground-navigation/motion/cleanup work and older actual defeat,
+queued-drop, Game Over and ordinary prologue victories are documented separately
+in that checkpoint. They do not establish complete roster behavior, delivered
+reward coverage, every ability, C++ promotion or compatibility retirement.
+#6, #16 and #42 retain those wider acceptance limits; the gap report has 50
+C-backed entries remaining. Do not reorder #4 based on easy closures.
+
 ### Standalone Combat Lab checkpoint (2026-10-20)
 
 Owner-requested tooling for #16 now launches independently as `VS.CombatLab.exe`;

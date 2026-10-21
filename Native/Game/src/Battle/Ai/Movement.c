@@ -15,9 +15,9 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
@@ -55,13 +55,6 @@ int Battle_Ai_IsMovementHistoryStalled(Battle_Ai_PerceptionUpdateView* state)
 
 // decomp: BATTLE.PRG func_800D9538 (src/BATTLE/BATTLE.PRG/6FC00.c:1178)
 void Battle_Ai_SaveMovementRandomState(void) { Battle_Ai_savedMovementRandomState = *(int*)((uintptr_t)&Battle_Ai_FrameState()->randomState); }
-
-// decomp: BATTLE.PRG D_800D9B6C (src/BATTLE/BATTLE.PRG/70D4C.s:458) [asm-entry: not yet ported]
-int Battle_Ai_CanWalkInDirection(Battle_Ai_WanderView*, int)
-{
-    VS_UNPORTED("Battle::Ai::CanWalkInDirection");
-    return 0;
-}
 
 // decomp: BATTLE.PRG func_800DB0BC (src/BATTLE/BATTLE.PRG/71618.c:1212)
 int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state)
@@ -139,44 +132,6 @@ int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state)
         }
         state->detourStep = 0;
     }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DB5B0 (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-void Battle_Ai_WanderAroundSavedCenter(void*)
-{
-    VS_UNPORTED("Battle::Ai::WanderAroundSavedCenter");
-}
-
-// decomp: BATTLE.PRG func_800DB5B8 (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-void Battle_Ai_WanderAroundTile(Battle_Ai_CandidateMovementView*, unsigned int, int)
-{
-    VS_UNPORTED("Battle::Ai::WanderAroundTile");
-}
-
-// decomp: BATTLE.PRG func_800DB5DC (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-void Battle_Ai_MoveToTile(Battle_Ai_CandidateMovementView*, unsigned int, int)
-{
-    VS_UNPORTED("Battle::Ai::MoveToTile");
-}
-
-// decomp: BATTLE.PRG func_800DB5FC (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-void Battle_Ai_PatrolWaypoints(void*)
-{
-    VS_UNPORTED("Battle::Ai::PatrolWaypoints");
-}
-
-// decomp: BATTLE.PRG func_800DB61C (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-int Battle_Ai_FleeVisibleEnemies(Battle_Ai_CandidateMovementView*, int)
-{
-    VS_UNPORTED("Battle::Ai::FleeVisibleEnemies");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DB74C (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-int Battle_Ai_TrackActorPosition(Battle_Ai_ActorAiState*, int)
-{
-    VS_UNPORTED("Battle::Ai::TrackActorPosition");
     return 0;
 }
 

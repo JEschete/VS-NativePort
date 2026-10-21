@@ -11,6 +11,12 @@
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int Battle_Ai_UpdatePatrolCombatBehavior(Battle_Ai_ActorAiState* state);
+
 int Battle_Ai_UpdateFleeOrWanderBehavior(Battle_Ai_ActorAiState* state);
 
 int Battle_Ai_UpdateAdaptivePursuitBehavior(Battle_Ai_ActorAiState* state);
@@ -22,5 +28,9 @@ int Battle_Ai_UpdateEngagementApproachBehavior(Battle_Ai_ActorAiState* state);
 void Battle_Ai_UpdateActorLocomotionMode(Battle_Ai_DecisionDispatchView* state);
 
 void Battle_Ai_DispatchMovementBehavior(Battle_Ai_DecisionDispatchView* state);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // VS_OWNED_BATTLE_AI_DECISIONCALLBACKS_H

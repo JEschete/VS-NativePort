@@ -293,7 +293,5 @@ void Effects_IntegrateParticleMotion(Effects_Particle* node);
 void Effects_ClearParticleTextureState(int* arg0);
 void Effects_InitializeParticleTextureAnimation(Effects_ParticleTextureAnimation* arg0, int textureIndex, int arg2);
 void Effects_AdvanceParticleTextureAnimation(Effects_ParticleTextureAnimation* arg0);
-void Effects_DrawEffectParticleList(void);
-void Effects_DrawAnimatedSpriteParticles(void);
 
 #endif // VS_EFFECTS_PARTICLES_H_DECLS

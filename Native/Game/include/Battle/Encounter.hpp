@@ -58,12 +58,18 @@ struct EncounterSpawn {
   EncounterPosition position;
 };
 
+enum class EncounterProfile { kPrologue, kPostPrologue, kPostMinotaur };
+const char* EncounterProfileId(EncounterProfile profile);
+// Lab startup only, after normal New Game initialization and overlay loading.
+void InitializeEncounterPlayerProfile(EncounterProfile profile);
+
 struct EncounterSetup {
   int zone = 0;
   int room = 0;
   std::uint32_t seed = 1;
   EncounterPosition player;
   std::vector<EncounterSpawn> enemies;
+  EncounterProfile profile = EncounterProfile::kPrologue;
 };
 
 // Reads the same extracted ZND/MPD definitions consumed by the room loader.
@@ -86,12 +92,27 @@ struct EncounterActorState {
   int x = 0;
   int y = 0;
   int z = 0;
+  int spawn_index = 0;
+  bool defeated = false;
+  bool ai_present = false;
+  int ai_target = -1;
+  int ai_candidates = 0;
+  int ai_engagement_frames = 0;
+  int ai_movement_mode = 0;
+  int ai_destination_x = 0;
+  int ai_destination_z = 0;
+  int awareness_marker = 0;
 };
 
 struct EncounterItemState {
   int slot = 0;
   int id = 0;
   int count = 0;
+};
+
+struct EncounterLootState {
+  int source_actor = 0;
+  std::vector<EncounterItemState> items;
 };
 
 struct EncounterState {
@@ -106,8 +127,10 @@ struct EncounterState {
   int action = 0;
   int source_actor = 0;
   int target_count = 0;
+  bool rewards_available = false;
   std::vector<EncounterActorState> actors;
   std::vector<EncounterItemState> items;
+  std::vector<EncounterLootState> pending_loot;
 };
 
 // A single production session can be active: existing gameplay owns globals.

@@ -72,6 +72,32 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F01515": [
+        ("    for (i = 0; i < count; ++i) {\n        node = Effects_AllocateEffectParticle(arg0);",
+         '    if (count <= 0) {\n'
+         '        Core_Debugf("effects", "particle emission skipped: count=%d used=%d capacity=%d",\n'
+         '            count, Effects_usedParticleCount, Effects_particleCapacity);\n'
+         '        return;\n'
+         '    }\n\n'
+         '    for (i = 0; i < count; ++i) {\n        node = Effects_AllocateEffectParticle(arg0);',
+         "zero/full-capacity bursts have no first particle; avoid the copied C's uninitialized node"),
+    ],
+    "F01535": [
+        ("    /* The original caller supplies arguments to this argument-free wrapper. */\n", "",
+         "the retained assembly renderer now has an explicit native particle-list contract"),
+        ("((void (*)())Effects_DrawEffectParticleList)(arg0->particles, (void*)((uintptr_t)Core_ScratchBase() + 0x15C));",
+         "Effects_DrawEffectParticleList(arg0->particles);",
+         "forward native particle ownership through a type-checked call"),
+    ],
+    "F00876": [
+        ("(MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014)",
+         "&((Render_FrameScratch*)Core_ScratchBase())->viewMatrix",
+         "the actor overhead projection must use the rebased native frame matrix"),
+    ],
+    "F00731": [
+        ("*ot = ((u_long)prim << 8) >> 8;", "*ot = LegacyGpu_Handle(prim);",
+         "overhead awareness frame links must retain native packet ownership, not truncated addresses"),
+    ],
     "F02553": [
         (r'"MISC\00000|0xF8|"',
          r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"',
@@ -690,7 +716,15 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
     ],
     # Actor IDs are 0..15 (146C.c:8936); 0x10 is the linked-actor sentinel, not a table index.
     # 7E05C.s:541-575 identifies the next BSS symbol, tileFlagMap at 0x800F58B8: 0x40 bytes after D_800F5878.
+    "G00574": [
+        ("Effects_effectRenderers[]", "Effects_effectRenderers[8]",
+         "eight native function pointers occupy the original table range 0x800F56A8..0x800F56C8"),
+    ],
     "G00579": [("Battle_Ai_actorAiStates[]", "Battle_Ai_actorAiStates[16]", "AI actor pointer table extent")],
+    "G00623": [
+        ("Effects_effectEntryPointIndices[]", "Effects_effectEntryPointIndices[400]",
+         "publish the catalogued 400-index plugin slice boundary for bounded native consumers"),
+    ],
     # BATTLE 5BF94.c:7885/8442: the timeline header stays eight bytes, but tracks contain native pointers.
     "F01557": [
         ("entry->trackCount * 16 + 8", "sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack)",
@@ -956,6 +990,33 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
          "main.c:8584/8720 and MIPS 80043450/8004346C use an overlapping PS1 tail; native slots must not alias or overflow"),
     ],
     "T00532": [
+        ("char reservedC8[8];",
+         "union {\n        char reservedC8[8];\n        struct {\n"
+         "            int wander_center_radius;\n"
+         "            Battle_Ai_TilePosition wander_center;\n        };\n    };",
+         "72B70.s restores the configured wander radius and packed center"),
+        ("char reserved10D[11];",
+         "char reserved10D[3];\n    Battle_Ai_TilePosition flee_tile;\n"
+         "    u_short flee_timer;\n    char reserved116[2];",
+         "72B70.s remembers the running hostile center and its 90-frame timeout"),
+        ("char reserved6;",
+         "union { char reserved6; u_char ignore_floor_mask; };",
+         "70D4C.s tests the floor-mask override byte at original offset 6"),
+        ("char reserved31[3];",
+         "union {\n        char reserved31[3];\n        struct {\n"
+         "            u_char reserved31Prefix;\n            u_char terrain_reject_mask;\n"
+         "            u_char reserved33;\n        };\n    };",
+         "70D4C.s uses actor-specific high collision bits at original offset 0x32"),
+        ("char reserved94[4];",
+         "union {\n        char reserved94[4];\n        struct {\n"
+         "            u_short collision_radius;\n            u_char reserved96[2];\n"
+         "        };\n    };",
+         "70D4C.s uses the native collision radius initialized by actor creation"),
+        ("char reserved132[2];",
+         "union {\n        char reserved132[2];\n        struct {\n"
+         "            u_char ground_area;\n            u_char reserved133;\n"
+         "        };\n    };",
+         "70D4C.s compares the destination area against original byte 0x132"),
         ("char reserved22[4];",
          "union {\n        char reserved22[4];\n        struct {\n"
          "            u_char reserved22Prefix;\n            signed char movementEnabled;\n"
@@ -1006,13 +1067,16 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
          "func_800E72D0 restores relationship options from original offset 0x42"),
         ("char reserved120[10];",
          "union {\n        char reserved120[10];\n        struct {\n"
-         "            u_char reserved120Prefix[5];\n            u_char locomotionMode;\n"
+         "            u_char fine_x;\n            u_char fine_layer;\n"
+         "            u_char fine_z;\n            u_char fine_status;\n"
+         "            u_char reserved124;\n            u_char locomotionMode;\n"
          "            u_char reserved126[4];\n        };\n    };",
          "func_800E6828 selects the movement dispatcher at original offset 0x125"),
         ("char reserved154[4];",
          "union {\n        char reserved154[4];\n        struct {\n"
          "            u_char reserved154Area;\n            u_char decisionDelay;\n"
-         "            u_char reserved156[2];\n        };\n    };",
+         "            union { u_char reserved156[2]; u_short movement_wait; };\n"
+         "        };\n    };",
          "func_800E4358 decrements the decision timer at original offset 0x155"),
         ("char reserved224[4];",
          "union {\n        char reserved224[4];\n        struct {\n"

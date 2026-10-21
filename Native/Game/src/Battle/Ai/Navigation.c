@@ -13,6 +13,7 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
@@ -107,34 +108,6 @@ blocked:
     dest.tile.searchStatus = 2;
 done:
     return dest.word & 0xFFFF00FF;
-}
-
-// decomp: BATTLE.PRG func_800D954C (src/BATTLE/BATTLE.PRG/70D4C.s:0) [asm-file: not yet ported]
-int Battle_Ai_DestinationOccupancy(Battle_Ai_MoveTargetView*, unsigned int)
-{
-    VS_UNPORTED("Battle::Ai::DestinationOccupancy");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800D96C8 (src/BATTLE/BATTLE.PRG/70D4C.s:0) [asm-file: not yet ported]
-int Battle_Ai_CanTraverseTileEdge(Battle_Ai_MoveTargetView*, unsigned int, unsigned int, int)
-{
-    VS_UNPORTED("Battle::Ai::CanTraverseTileEdge");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800D98E8 (src/BATTLE/BATTLE.PRG/70D4C.s:0) [asm-file: not yet ported]
-int Battle_Ai_DirectionalBlockingActor(Battle_Ai_MovementPathView*, int)
-{
-    VS_UNPORTED("Battle::Ai::DirectionalBlockingActor");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800DB93C (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-unsigned int Battle_Ai_FindGapLandingTile(Battle_Ai_MoveTargetView*, unsigned int, int, unsigned int)
-{
-    VS_UNPORTED("Battle::Ai::FindGapLandingTile");
-    return 0;
 }
 
 // decomp: BATTLE.PRG func_800DC638 (src/BATTLE/BATTLE.PRG/73C84.s:0) [asm-file: not yet ported]
@@ -680,110 +653,6 @@ done:
     return -1;
 }
 
-// decomp: BATTLE.PRG func_800E3600 (src/BATTLE/BATTLE.PRG/771A8.c:2549) [INCLUDE_ASM: not yet ported]
-void Battle_Ai_ResolveDirectionalMovement(Battle_Ai_ActorAiState*, int, int)
-{
-    VS_UNPORTED("Battle::Ai::ResolveDirectionalMovement");
-}
-
-// decomp: BATTLE.PRG func_800E3BC8 (src/BATTLE/BATTLE.PRG/7B3C8.s:0) [asm-file: not yet ported]
-int Battle_Ai_SetDetourBoundary()
-{
-    VS_UNPORTED("Battle::Ai::SetDetourBoundary");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E3CDC (src/BATTLE/BATTLE.PRG/7B3C8.s:0) [asm-file: not yet ported]
-int Battle_Ai_RefreshDetourProgress()
-{
-    VS_UNPORTED("Battle::Ai::RefreshDetourProgress");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E3D5C (src/BATTLE/BATTLE.PRG/7B55C.s:0) [asm-file: not yet ported]
-int Battle_Ai_CardinalPassabilityMask(Battle_Ai_MovementPathView*, Battle_Ai_PathTest)
-{
-    VS_UNPORTED("Battle::Ai::CardinalPassabilityMask");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E3DDC (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
-int Battle_Ai_InitializeObstacleDetour()
-{
-    VS_UNPORTED("Battle::Ai::InitializeObstacleDetour");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E4764 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-int Battle_Ai_SelectActorVerticalMovementStep(Battle_Ai_ActorAiState*, int*, int*)
-{
-    VS_UNPORTED("Battle::Ai::SelectActorVerticalMovementStep");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E47E4 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-int Battle_Ai_IsTileBehindActorTarget()
-{
-    VS_UNPORTED("Battle::Ai::IsTileBehindActorTarget");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E49D8 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-int Battle_Ai_FindAiDescentTile()
-{
-    VS_UNPORTED("Battle::Ai::FindAiDescentTile");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E4B10 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_BeginAiTerrainMovement(void*)
-{
-    VS_UNPORTED("Battle::Ai::BeginAiTerrainMovement");
-}
-
-// decomp: BATTLE.PRG func_800E4B18 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_BeginAiAlternateTerrainMovement(Battle_Ai_ActorAiState*)
-{
-    VS_UNPORTED("Battle::Ai::BeginAiAlternateTerrainMovement");
-}
-
-// decomp: BATTLE.PRG func_800E4B2C (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_MoveActorTowardDestinationTile()
-{
-    VS_UNPORTED("Battle::Ai::MoveActorTowardDestinationTile");
-}
-
-// decomp: BATTLE.PRG func_800E4B70 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_BeginAiGroundMovement()
-{
-    VS_UNPORTED("Battle::Ai::BeginAiGroundMovement");
-}
-
-// decomp: BATTLE.PRG func_800E4BD8 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_ClearAiContactOccupancy(int)
-{
-    VS_UNPORTED("Battle::Ai::ClearAiContactOccupancy");
-}
-
-// decomp: BATTLE.PRG func_800E4BE0 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_SetAiContactOccupancy(int)
-{
-    VS_UNPORTED("Battle::Ai::SetAiContactOccupancy");
-}
-
-// decomp: BATTLE.PRG func_800E4FE0 (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
-int Battle_Ai_BeginAiMovementTowardPoint()
-{
-    VS_UNPORTED("Battle::Ai::BeginAiMovementTowardPoint");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E50A0 (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
-void Battle_Ai_DispatchAiLocomotionMode(void*, int, int)
-{
-    VS_UNPORTED("Battle::Ai::DispatchAiLocomotionMode");
-}
-
 // decomp: BATTLE.PRG func_800E5154 (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
 int Battle_Ai_ActorNavigationOverrideStatus(void)
 {
@@ -874,12 +743,6 @@ void Battle_Ai_BuildAiSpecialTerrainHeights(void)
 
 // decomp: BATTLE.PRG func_800E6158 (src/BATTLE/BATTLE.PRG/7CD68.c:814)
 void Battle_Ai_InitializeRoomNavigation(void) { Battle_Ai_InitializeRoomAiMap(); }
-
-// decomp: BATTLE.PRG func_800E6700 (src/BATTLE/BATTLE.PRG/7DE94.s:0) [asm-file: not yet ported]
-void Battle_Ai_RefreshActorAiReservations(int)
-{
-    VS_UNPORTED("Battle::Ai::RefreshActorAiReservations");
-}
 
 // decomp: BATTLE.PRG func_800E6898 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
 void Battle_Ai_AddAiTileOccupant(void*)

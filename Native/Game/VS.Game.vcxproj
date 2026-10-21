@@ -87,6 +87,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Actors\MotionRequests.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Actors\Movement.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -248,6 +251,9 @@
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\GroundNavigation.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\Movement.c">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -453,6 +459,9 @@
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Effects\ParticleRender.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Effects\Particles.c">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -1697,6 +1706,7 @@
     <ClInclude Include="src\Actors\ModelDrawing.h" />
     <ClInclude Include="src\Actors\ModelInstance.h" />
     <ClInclude Include="src\Actors\ModelRendering.h" />
+    <ClInclude Include="src\Actors\MotionRequests.h" />
     <ClInclude Include="src\Actors\Movement.h" />
     <ClInclude Include="src\Actors\MovementCommands.h" />
     <ClInclude Include="src\Actors\Palette.h" />
@@ -1736,6 +1746,7 @@
     <ClInclude Include="src\Battle\Ai\Engagement.h" />
     <ClInclude Include="src\Battle\Ai\EngagementState.hpp" />
     <ClInclude Include="src\Battle\Ai\FrameUpdate.h" />
+    <ClInclude Include="src\Battle\Ai\GroundNavigation.h" />
     <ClInclude Include="src\Battle\Ai\Movement.h" />
     <ClInclude Include="src\Battle\Ai\MovementBehavior.h" />
     <ClInclude Include="src\Battle\Ai\Navigation.h" />
@@ -1778,6 +1789,7 @@
     <ClInclude Include="src\Effects\EffectResources.h" />
     <ClInclude Include="src\Effects\Loading.h" />
     <ClInclude Include="src\Effects\Package.h" />
+    <ClInclude Include="src\Effects\ParticleRender.h" />
     <ClInclude Include="src\Effects\Particles.h" />
     <ClInclude Include="src\Effects\Plugins\Plg005.h" />
     <ClInclude Include="src\Effects\Plugins\Plg044.h" />

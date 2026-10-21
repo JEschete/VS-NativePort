@@ -30,7 +30,6 @@ extern Battle_Ai_RoomAiState* Battle_Ai_roomAiState;
 extern void* Battle_Ai_roomHasWaypoints;
 extern int Battle_Ai_attributeActorMask;
 extern const unsigned char Battle_Ai_kFlags34Bit14Values[4];
-void Battle_Ai_SetActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView*, int, int);
 void Battle_Ai_ResetActorAiReactionDelay(int);
 void Battle_Ai_ResolveAiLinkedActors(void);
 void Battle_Ai_ApplySavedAiSettingsFlags(int* arg0, Battle_Ai_SavedSettingsPair* arg1);
@@ -39,6 +38,5 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options);
 short Battle_Ai_PackActorAiPersistenceFlags(int);
 int Battle_Ai_ClearActorAiNavigationReset();
 void Battle_Ai_InitializeActorAiExtensionHook(void);
-void Battle_Ai_ClearActorAiLinksAndPlan(int);
 
 #endif // VS_BATTLE_AI_ACTORSTATE_H_DECLS

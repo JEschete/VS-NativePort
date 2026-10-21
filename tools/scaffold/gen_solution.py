@@ -66,7 +66,9 @@ PROJECTS = [
             libs=["sdl3"]),
     Project("VS.Tests", "Tests", kind="exe", console=True, refs=["VS.Engine", "VS.Content", "VS.Game"],
             libs=["sdl3", "catch2", "movie"], whole_archive=["VS.Engine", "VS.Content", "VS.Game"],
-            see=["VS.CombatLab"], extra_sources=[r"Tools\CombatLab\src\Canvas.cpp"]),
+            see=["VS.CombatLab"], extra_sources=[
+                r"Tools\CombatLab\src\Canvas.cpp",
+                r"Tools\CombatLab\src\Trace.cpp"]),
 ]
 BY_NAME = {p.name: p for p in PROJECTS}
 
@@ -119,6 +121,9 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\Ai\Engagement.cpp",
                 r"src\Battle\Ai\ActorCleanup.cpp",
                 r"src\Battle\Ai\MovementBehavior.cpp",
+                r"src\Actors\MotionRequests.cpp",
+                r"src\Effects\ParticleRender.cpp",
+                r"src\Battle\Ai\GroundNavigation.cpp",
                 r"src\Field\TerrainHeight.cpp",
             ))
 

@@ -34,6 +34,8 @@ class Trace {
   std::uint64_t sequence_ = 0;
   std::atomic<bool> failed_{false};
   Core::LogObserver previous_observer_;
+  Core::LogLevel previous_console_level_ = Core::LogLevel::Trace;
+  bool previous_flush_policy_ = true;
 };
 
 nlohmann::json EncodeSetup(const Game::EncounterSetup& setup);

@@ -15,6 +15,7 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/Engagement.h"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
@@ -97,6 +98,45 @@ struct CleanupFixture {
   }
 };
 }  // namespace
+
+TEST_CASE("Reaction requests draw before checking full-width route ownership",
+          "[ai][cleanup]") {
+  CleanupFixture fixture;
+  auto* state = fixture.AllocateState(1);
+  const auto saved_frame = *Battle_Ai_FrameState();
+  Battle_Ai_FrameState()->randomState = 40;
+  Battle_Ai_FrameState()->lastBudgetTick = 1;
+  state->nativePointer18C =
+      reinterpret_cast<void*>(std::uintptr_t{0x100000000});
+  Battle_Ai_SetActorAiReactionWithDelay(
+      reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(state), 1, 64);
+  CHECK(Battle_Ai_FrameState()->randomState == 41);
+  CHECK(state->decisionDelay == 0);
+  CHECK(fixture.actors[1].commandFlags == 0xFF);
+  state->nativePointer18C = nullptr;
+  Battle_Ai_SetActorAiReactionWithDelay(
+      reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(state), 0x123, 64);
+  CHECK(state->decisionDelay == 30);
+  CHECK(fixture.actors[1].commandFlags == 0x23);
+  *Battle_Ai_FrameState() = saved_frame;
+  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+}
+
+TEST_CASE("Defeat detaches every native peer reference before repeat cleanup",
+          "[ai][cleanup]") {
+  CleanupFixture fixture;
+  auto* first = fixture.AllocateState(1);
+  auto* second = fixture.AllocateState(2);
+  first->linkedActor = 5;
+  second->linkedActor = 5;
+  Battle_Ai_ClearActorAiLinksAndPlan(5);
+  CHECK(first->linkedActor == 16);
+  CHECK(second->linkedActor == 16);
+  Battle_Ai_ClearActorAiLinksAndPlan(5);
+  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+  Battle_Ai_FreeActorAiState(&fixture.actors[2]);
+  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+}
 
 TEST_CASE("AI navigation override views retain a full native pointer",
           "[ai][cleanup][layout]") {

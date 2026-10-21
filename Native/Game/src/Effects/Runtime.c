@@ -110,7 +110,7 @@ Effects_EffectPackage* Effects_package;
 Effects_EffectRenderer Effects_rendererTableAlias[];
 
 // decomp: vs_battle_effectRenderers (vs_battle_effectRenderers@BATTLE/BATTLE.PRG)
-Effects_EffectRenderer Effects_effectRenderers[];
+Effects_EffectRenderer Effects_effectRenderers[8];
 
 // decomp: D_800F56C8 (D_800F56C8@BATTLE/BATTLE.PRG)
 Effects_EffectPackage Effects_actionPackage;

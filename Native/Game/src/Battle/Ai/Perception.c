@@ -13,6 +13,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActionSelection.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -468,13 +469,6 @@ void Battle_Ai_UpdateActorPerception(void)
     }
 }
 
-// decomp: BATTLE.PRG func_800DBB2C (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-int Battle_Ai_FindActorByRelationship(void*, void*, int)
-{
-    VS_UNPORTED("Battle::Ai::FindActorByRelationship");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800DBF00 (src/BATTLE/BATTLE.PRG/73700.c:414)
 void Battle_Ai_UnlinkEngagedActor(Battle_Ai_ActorAiState* arg0)
 {
@@ -591,12 +585,6 @@ void Battle_Ai_TryBeginAshleyAlliance(Battle_Ai_ReactionView*, int)
 void Battle_Ai_MakeTargetHostile(Battle_Ai_ReactionView*, int)
 {
     VS_UNPORTED("Battle::Ai::MakeTargetHostile");
-}
-
-// decomp: BATTLE.PRG func_800DC810 (src/BATTLE/BATTLE.PRG/73C84.s:0) [asm-file: not yet ported]
-void Battle_Ai_ApplyActionRelationshipChanges(Battle_Ai_ReactionRecord*)
-{
-    VS_UNPORTED("Battle::Ai::ApplyActionRelationshipChanges");
 }
 
 // decomp: BATTLE.PRG func_800DD000 (src/BATTLE/BATTLE.PRG/74088.c:716)
@@ -740,12 +728,5 @@ void Battle_Ai_NotifyActionRelationshipChanges(Battle_Ai_ReactionRecord* arg0)
 
         Battle_Ai_ApplyActionRelationshipChanges(arg0);
     }
-}
-
-// decomp: BATTLE.PRG func_800E437C (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
-int Battle_Ai_TargetFacingCosine(SVECTOR*, SVECTOR*, int, u_int)
-{
-    VS_UNPORTED("Battle::Ai::TargetFacingCosine");
-    return 0;
 }
 

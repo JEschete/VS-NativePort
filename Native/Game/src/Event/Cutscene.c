@@ -11,6 +11,7 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"

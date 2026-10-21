@@ -59,12 +59,6 @@ int Battle_Ai_attributeActorMask;
 // decomp: D_80069C08 (D_80069C08@BATTLE/BATTLE.PRG)
 const unsigned char Battle_Ai_kFlags34Bit14Values[4] = { 9, 7, 0, 0 };
 
-// decomp: BATTLE.PRG func_800E48A8 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_SetActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView*, int, int)
-{
-    VS_UNPORTED("Battle::Ai::SetActorAiReactionWithDelay");
-}
-
 // decomp: BATTLE.PRG func_800E4C64 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
 void Battle_Ai_ResetActorAiReactionDelay(int)
 {
@@ -318,11 +312,5 @@ int Battle_Ai_ClearActorAiNavigationReset()
 void Battle_Ai_InitializeActorAiExtensionHook(void)
 {
     VS_UNPORTED("Battle::Ai::InitializeActorAiExtensionHook");
-}
-
-// decomp: BATTLE.PRG func_800E7608 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-void Battle_Ai_ClearActorAiLinksAndPlan(int)
-{
-    VS_UNPORTED("Battle::Ai::ClearActorAiLinksAndPlan");
 }
 

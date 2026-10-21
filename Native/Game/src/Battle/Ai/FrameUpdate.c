@@ -33,6 +33,7 @@
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
+#include "Field/Room.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
@@ -54,10 +55,19 @@ int Battle_Ai_CacheActorAiWorkingState(void) {
   frame_context.heightMap = Battle_Ai_specialTerrainHeights;
   frame_context.tileFlags = Battle_Ai_tileFlagMap;
   frame_context.roomData = Battle_Ai_roomHasWaypoints;
+  if (frame_context.roomData != NULL &&
+      Field_roomData.header.section6Length < kTerrainRegionOffset) {
+    Core_Debugf("ai", "AI terrain bitmap header is truncated");
+    abort();
+  }
   frame_context.terrainRegions =
       frame_context.roomData != NULL
           ? (u_char*)frame_context.roomData + kTerrainRegionOffset
           : NULL;
+  frame_context.terrain_region_count =
+      frame_context.roomData != NULL
+          ? Field_roomData.header.section6Length - kTerrainRegionOffset
+          : 0;
   frame_context.randomState = (u_int)Battle_Ai_savedMovementRandomState;
   memcpy(frame_context.directions, Battle_Ai_directionDeltas,
          sizeof frame_context.directions);

@@ -39,6 +39,8 @@ Trace::Trace(const std::filesystem::path& parent) {
   }
   Core::SetLogLevel(Core::LogLevel::Trace);
   Core::SetLogChannels("*");
+  previous_console_level_ = Core::SetConsoleLogLevel(Core::LogLevel::Warn);
+  previous_flush_policy_ = Core::SetLogFlushEachMessage(false);
   previous_observer_ =
       Core::SetLogObserver([this](const Core::LogRecord& record) noexcept {
         try {
@@ -58,6 +60,8 @@ Trace::Trace(const std::filesystem::path& parent) {
 Trace::~Trace() try {
   Core::SetLogObserver(std::move(previous_observer_));
   Event("session.end", {{"trace_failed", Failed()}});
+  Core::SetLogFlushEachMessage(previous_flush_policy_);
+  Core::SetConsoleLogLevel(previous_console_level_);
   Core::SetLogFile("");
 } catch (...) {
   std::fputs("Combat Lab trace finalization failed\n", stderr);
@@ -73,7 +77,13 @@ void Trace::Event(std::string_view category, const nlohmann::json& details,
                                {"data", details}})
                    .dump()
             << '\n';
-    stream_.flush();
+    const bool boundary =
+        category != "engine" || details.at("level").get<int>() >=
+                                    static_cast<int>(Core::LogLevel::Error);
+    if (boundary) {
+      stream_.flush();
+      if (!Core::FlushLogFile()) failed_ = true;
+    }
     if (!stream_) failed_ = true;
   } catch (...) {
     failed_ = true;
@@ -84,17 +94,38 @@ void Trace::Frame(std::uint64_t tick, const Input::PadState& input,
                   const Game::EncounterState& state) {
   auto actors = nlohmann::json::array();
   for (const auto& actor : state.actors) {
-    actors.push_back({{"slot", actor.slot},
-                      {"hp", actor.hp},
-                      {"mp", actor.mp},
-                      {"risk", actor.risk},
-                      {"statuses", actor.statuses},
-                      {"command", actor.command},
-                      {"command_state", actor.command_state},
-                      {"weapon_drawn", actor.weapon_drawn},
-                      {"actor_flags", actor.actor_flags},
-                      {"recovery", actor.recovery},
-                      {"position", {actor.x, actor.y, actor.z}}});
+    actors.push_back(
+        {{"slot", actor.slot},
+         {"hp", actor.hp},
+         {"mp", actor.mp},
+         {"risk", actor.risk},
+         {"statuses", actor.statuses},
+         {"command", actor.command},
+         {"command_state", actor.command_state},
+         {"weapon_drawn", actor.weapon_drawn},
+         {"actor_flags", actor.actor_flags},
+         {"recovery", actor.recovery},
+         {"spawn_index", actor.spawn_index},
+         {"defeated", actor.defeated},
+         {"awareness_marker", actor.awareness_marker},
+         {"ai",
+          {{"present", actor.ai_present},
+           {"target", actor.ai_target},
+           {"candidates", actor.ai_candidates},
+           {"engagement_frames", actor.ai_engagement_frames},
+           {"movement_mode", actor.ai_movement_mode},
+           {"destination", {actor.ai_destination_x, actor.ai_destination_z}}}},
+         {"position", {actor.x, actor.y, actor.z}}});
+  }
+  auto pending_loot = nlohmann::json::array();
+  for (const auto& loot : state.pending_loot) {
+    auto dropped_items = nlohmann::json::array();
+    for (const auto& item : loot.items) {
+      dropped_items.push_back(
+          {{"slot", item.slot}, {"id", item.id}, {"count", item.count}});
+    }
+    pending_loot.push_back(
+        {{"source_actor", loot.source_actor}, {"items", dropped_items}});
   }
   auto items = nlohmann::json::array();
   for (const auto& item : state.items) {
@@ -122,6 +153,8 @@ void Trace::Frame(std::uint64_t tick, const Input::PadState& input,
          {"action", state.action},
          {"source_actor", state.source_actor},
          {"target_count", state.target_count},
+         {"rewards_available", state.rewards_available},
+         {"pending_loot", pending_loot},
          {"items", items},
          {"actors", actors}},
         tick);
@@ -137,6 +170,7 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
           {"zone", setup.zone},
           {"room", setup.room},
           {"seed", setup.seed},
+          {"ashley_profile", Game::EncounterProfileId(setup.profile)},
           {"player", EncodePosition(setup.player)},
           {"enemies", enemies},
           {"room_events", "isolated"},
@@ -156,6 +190,16 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
     throw std::runtime_error("seed is outside uint32 range");
   }
   setup.seed = static_cast<std::uint32_t>(seed);
+  const auto profile = json.value("ashley_profile", "prologue");
+  if (profile == "prologue") {
+    setup.profile = Game::EncounterProfile::kPrologue;
+  } else if (profile == "post-prologue") {
+    setup.profile = Game::EncounterProfile::kPostPrologue;
+  } else if (profile == "post-minotaur") {
+    setup.profile = Game::EncounterProfile::kPostMinotaur;
+  } else {
+    throw std::runtime_error("unknown encounter Ashley profile");
+  }
   setup.player = DecodePosition(json.at("player"));
   const auto& enemies = json.at("enemies");
   if (!enemies.is_array() || enemies.size() > Game::EncounterLimits::kEnemies) {

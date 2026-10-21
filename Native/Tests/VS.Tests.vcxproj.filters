@@ -33,7 +33,13 @@
     <ClCompile Include="src\AiPlanningTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AwarenessMarkerTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\CombatLabCanvasTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatLabTraceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\CombatTestCases.cpp">
@@ -57,6 +63,9 @@
     <ClCompile Include="src\EffectTimelineTests.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EncounterProfileTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EncounterTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -76,6 +85,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\GimRenderTests.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GroundNavigationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\InformationTests.cpp">
@@ -111,7 +123,13 @@
     <ClCompile Include="src\MinimapTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MotionRequestsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\MovementBehaviorTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ParticleRenderTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\PursuitTargetsTests.cpp">
@@ -139,6 +157,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp">
+      <Filter>..\Tools\CombatLab\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp">
       <Filter>..\Tools\CombatLab\src</Filter>
     </ClCompile>
   </ItemGroup>

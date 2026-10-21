@@ -351,6 +351,7 @@ int Tests_AiFrameCache(void) {
   u_short(*savedFlags)[32] = Battle_Ai_tileFlagMap;
   u_short(*savedHeights)[32] = Battle_Ai_specialTerrainHeights;
   void* savedData = Battle_Ai_roomHasWaypoints;
+  const unsigned saved_aux_length = Field_roomData.header.section6Length;
   const int savedRandom = Battle_Ai_savedMovementRandomState;
   u_char savedScratch[132];
   u_char* scratch = (u_char*)Core_ScratchBase() + 0x37C;
@@ -371,6 +372,7 @@ int Tests_AiFrameCache(void) {
   Battle_Ai_tileFlagMap = flags;
   Battle_Ai_specialTerrainHeights = heights;
   Battle_Ai_roomHasWaypoints = auxiliary;
+  Field_roomData.header.section6Length = sizeof auxiliary;
   Battle_Ai_savedMovementRandomState = 0x12345678;
   const int returned = Battle_Ai_CacheActorAiWorkingState();
   const Battle_Ai_FrameContext* frame = Battle_Ai_FrameState();
@@ -379,6 +381,7 @@ int Tests_AiFrameCache(void) {
                frame->tileFlags == flags && frame->heightMap == heights &&
                frame->roomData == auxiliary &&
                frame->terrainRegions == auxiliary + 0x498 &&
+               frame->terrain_region_count == sizeof auxiliary - 0x498 &&
                frame->randomState == 0x12345678 &&
                memcmp(frame->directions, Battle_Ai_directionDeltas,
                       sizeof frame->directions) == 0;
@@ -391,6 +394,7 @@ int Tests_AiFrameCache(void) {
   Battle_Ai_tileFlagMap = savedFlags;
   Battle_Ai_specialTerrainHeights = savedHeights;
   Battle_Ai_roomHasWaypoints = savedData;
+  Field_roomData.header.section6Length = saved_aux_length;
   Battle_Ai_savedMovementRandomState = savedRandom;
   memcpy(scratch, savedScratch, sizeof savedScratch);
   return passed;

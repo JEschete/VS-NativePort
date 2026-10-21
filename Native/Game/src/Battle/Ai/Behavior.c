@@ -19,6 +19,7 @@
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
@@ -31,12 +32,6 @@
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
-
-// decomp: BATTLE.PRG func_800D9DD8 (src/BATTLE/BATTLE.PRG/70D4C.s:0) [asm-file: not yet ported]
-void Battle_Ai_SelectActionMovementMode(Battle_Ai_CandidateReadinessView*)
-{
-    VS_UNPORTED("Battle::Ai::SelectActionMovementMode");
-}
 
 // decomp: BATTLE.PRG func_800D9E18 (src/BATTLE/BATTLE.PRG/71618.c:511)
 int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Battle_Ai_CandidateEntryView* entry)
@@ -400,21 +395,6 @@ fallback:
     return Battle_Ai_FleeVisibleEnemies((void*)state, 1);
 }
 
-// decomp: BATTLE.PRG func_800DAA6C (src/BATTLE/BATTLE.PRG/71618.c:944)
-int Battle_Ai_UpdatePatrolCombatBehavior(Battle_Ai_EscortView* state)
-{
-    if (state->opaqueE) {
-        if (!Battle_Ai_FleeVisibleEnemies((void*)state, 1)) {
-            Battle_Ai_WanderAroundSavedCenter(state);
-        }
-        return 1;
-    }
-    if (!Battle_Ai_UpdateCombatPursuit((void*)state)) {
-        Battle_Ai_PatrolWaypoints(state);
-    }
-    return 1;
-}
-
 // decomp: BATTLE.PRG func_800DAAD8 (src/BATTLE/BATTLE.PRG/71618.c:958)
 int Battle_Ai_UpdateEscortCombatBehavior(Battle_Ai_EscortView* state)
 {
@@ -578,19 +558,5 @@ void Battle_Ai_UpdateActorDecisions(void)
             }
         }
     }
-}
-
-// decomp: BATTLE.PRG func_800DB8AC (src/BATTLE/BATTLE.PRG/72B70.s:0) [asm-file: not yet ported]
-int Battle_Ai_CanApproachEngagedTarget(Battle_Ai_ActorAiState*, Battle_Ai_ActionCandidate*)
-{
-    VS_UNPORTED("Battle::Ai::CanApproachEngagedTarget");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E4180 (src/BATTLE/BATTLE.PRG/7B5DC.s:0) [asm-file: not yet ported]
-int Battle_Ai_UpdateHesitationTurn(void*, int, int, int)
-{
-    VS_UNPORTED("Battle::Ai::UpdateHesitationTurn");
-    return 0;
 }
 

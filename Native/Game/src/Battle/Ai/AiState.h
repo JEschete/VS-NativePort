@@ -846,7 +846,7 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x03 */ u_char opaque3;
     /* 0x04 */ u_char opaque4;
     /* 0x05 */ u_char opaque5;
-    /* 0x06 */ char reserved6;
+    /* 0x06 */ union { char reserved6; u_char ignore_floor_mask; };
     /* 0x07 */ u_char movementDisabled;
     /* 0x08 */ u_char opaque8;
     /* 0x09 */ u_char opaque9;
@@ -891,7 +891,14 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x2C */ u_char settingsBits21;
     /* 0x2D */ char reserved2D[3];
     /* 0x30 */ u_char settingsBit25;
-    /* 0x31 */ char reserved31[3];
+    /* 0x31 */ union {
+        char reserved31[3];
+        struct {
+            u_char reserved31Prefix;
+            u_char terrain_reject_mask;
+            u_char reserved33;
+        };
+    };
     /* 0x34 */ Battle_Ai_TilePosition tile;
     /* 0x38 */ int previousTile;
     /* 0x3C */ union {
@@ -930,7 +937,13 @@ typedef struct Battle_Ai_ActorAiState {
         u_short actionDelay;
     };
     /* 0x92 */ u_short radius;
-    /* 0x94 */ char reserved94[4];
+    /* 0x94 */ union {
+        char reserved94[4];
+        struct {
+            u_short collision_radius;
+            u_char reserved96[2];
+        };
+    };
     /* 0x98 */ u_short opaque98;
     /* 0x9A */ u_short opaque9A;
     /* 0x9C */ union {
@@ -951,7 +964,13 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0xC0 */ u_short wanderPhase;
     /* 0xC2 */ u_short wanderTimer;
     /* 0xC4 */ int wanderRangeSquared;
-    /* 0xC8 */ char reservedC8[8];
+    /* 0xC8 */ union {
+        char reservedC8[8];
+        struct {
+            int wander_center_radius;
+            Battle_Ai_TilePosition wander_center;
+        };
+    };
     /* 0xD0 */ short wanderHeading;
     /* 0xD2 */ u_short wanderCooldown;
     /* 0xD4 */ u_short restPeriod;
@@ -978,13 +997,20 @@ typedef struct Battle_Ai_ActorAiState {
     };
     /* 0x108 */ Battle_Ai_TilePosition previousFacingTile;
     /* 0x10C */ u_char facingPending;
-    /* 0x10D */ char reserved10D[11];
+    /* 0x10D */ char reserved10D[3];
+    Battle_Ai_TilePosition flee_tile;
+    u_short flee_timer;
+    char reserved116[2];
     /* 0x118 */ u_char detourDirections[4];
     /* 0x11C */ Battle_Ai_TilePosition goal;
     /* 0x120 */ union {
         char reserved120[10];
         struct {
-            u_char reserved120Prefix[5];
+            u_char fine_x;
+            u_char fine_layer;
+            u_char fine_z;
+            u_char fine_status;
+            u_char reserved124;
             u_char locomotionMode;
             u_char reserved126[4];
         };
@@ -1002,7 +1028,13 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x12F */ signed char opaque12F;
     /* 0x130 */ signed char opaque130;
     /* 0x131 */ u_char actionStatus;
-    /* 0x132 */ char reserved132[2];
+    /* 0x132 */ union {
+        char reserved132[2];
+        struct {
+            u_char ground_area;
+            u_char reserved133;
+        };
+    };
     /* 0x134 */ Battle_Ai_TilePosition plannedTile;
     /* 0x138 */ u_short opaque138;
     /* 0x13A */ u_short opaque13A;
@@ -1015,7 +1047,7 @@ typedef struct Battle_Ai_ActorAiState {
         struct {
             u_char reserved154Area;
             u_char decisionDelay;
-            u_char reserved156[2];
+            union { u_char reserved156[2]; u_short movement_wait; };
         };
     };
     /* 0x158 */ short targetX;
@@ -1038,9 +1070,16 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x18A */ short angle : 16;
     void* nativePointer18C; /* PS1 pointer slot 0x18C */
     u_int navigationFlags;
-    char reserved194[6];
+    union { char reserved194[6]; struct {
+        u_char detour_tile_bytes[4];
+        u_char detour_repeats;
+        u_char detour_run;
+    }; };
     /* 0x19A */ u_char opaque19A;
-    /* 0x19B */ char reserved19B[5];
+    /* 0x19B */ union { char reserved19B[5]; struct {
+        u_char route_gate;
+        u_char route_exit_bytes[4];
+    }; };
     /* 0x1A0 */ struct Battle_Ai_ActorAiState *nextEngaged;
     /* 0x1A4 */ Battle_Ai_RelationWord relations[16];
     /* 0x1E4 */ u_int distancesSquared[16];

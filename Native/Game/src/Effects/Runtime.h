@@ -324,7 +324,7 @@ extern int Effects_scriptSelector;
 extern Effects_EffectPackage* Effects_savedPackage;
 extern Effects_EffectPackage* Effects_package;
 extern Effects_EffectRenderer Effects_rendererTableAlias[];
-extern Effects_EffectRenderer Effects_effectRenderers[];
+extern Effects_EffectRenderer Effects_effectRenderers[8];
 extern Effects_EffectPackage Effects_actionPackage;
 extern Effects_ActionEffectRequest* Effects_actionRequestPointer;
 extern Effects_EffectPackage Effects_secondaryPackage;

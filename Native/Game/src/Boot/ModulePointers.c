@@ -14,6 +14,7 @@
 #include "Actors/ModelDrawing.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
+#include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
 #include "Actors/MovementCommands.h"
 #include "Actors/Palette.h"
@@ -71,6 +72,7 @@
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
@@ -128,6 +130,7 @@
 #include "Effects/EffectResources.h"
 #include "Effects/Loading.h"
 #include "Effects/Package.h"
+#include "Effects/ParticleRender.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/ScreenEffects.h"
@@ -264,6 +267,7 @@
 // Pointer tables in the module images and the symbol map that relocates them (splat_symbols.csv).
 #include "Content/ModuleData.h"
 
+extern unsigned int Content_battleAiHesitationLengths[1];
 extern unsigned int Content_battleLimbNameBytes[38];
 extern unsigned int Content_battleGimmickTemplateBytes[455];
 extern unsigned int Content_battleTextboxFrameBytes[631];
@@ -2577,7 +2581,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F569Cu, 4u, (void*)&Effects_package, sizeof Effects_package, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F56A0u, 4u, (void*)&Effects_textureLoadBuffer, sizeof Effects_textureLoadBuffer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F56A4u, 4u, (void*)&Effects_pluginEntryPointCount, sizeof Effects_pluginEntryPointCount, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F56A8u, 4u, (void*)&Effects_effectRenderers, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F56A8u, 4u, (void*)&Effects_effectRenderers, sizeof Effects_effectRenderers, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F56C8u, 212u, (void*)&Effects_actionPackage, sizeof Effects_actionPackage, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5798u, 4u, (void*)&Effects_actionRequestPointer, sizeof Effects_actionRequestPointer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F57A0u, 212u, (void*)&Effects_secondaryPackage, sizeof Effects_secondaryPackage, 0u, 0u},
@@ -3250,6 +3254,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DBA88u, 0u, (void*)&Battle_Ai_UpdateAdaptivePursuitBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBB98u, 0u, (void*)&Battle_Ai_UpdateSupportFollowBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBC0Cu, 0u, (void*)&Battle_Ai_UpdateEngagementApproachBehavior, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F1758u, 4u, (void*)Content_battleAiHesitationLengths, sizeof Content_battleAiHesitationLengths, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069860u, 152u, (void*)Content_battleLimbNameBytes, sizeof Content_battleLimbNameBytes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E930Cu, 1820u, (void*)Content_battleGimmickTemplateBytes, sizeof Content_battleGimmickTemplateBytes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EABACu, 2524u, (void*)Content_battleTextboxFrameBytes, sizeof Content_battleTextboxFrameBytes, 1u, 1u},

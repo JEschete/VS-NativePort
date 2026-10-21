@@ -142,13 +142,8 @@ void Actors_UpdateActorAuxiliaryMotion(Field_GimmickInstance* arg0);
 void Actors_BeginTileJump(int, int*, int, int);
 void Actors_BeginAirborneTileJump(int, int*, int, int);
 void Actors_BeginNavigationJump(int, int*, int, int);
-void Actors_QueueGroundOffset(int, SVECTOR*);
-void Actors_QueueMovementVector(int, SVECTOR*, int);
-void Actors_QueueFlightMovement(int, SVECTOR*, int, int);
 void Actors_BeginTeleport(int, int*, int);
 void Actors_BeginTileTravel(int, int*, int);
 void Actors_BeginTimedTravel(int, int*, int);
-void Actors_TurnNavigationActor(int, int);
-void Actors_TurnActorAtSpeed(int arg0, short arg1, int arg2);
 
 #endif // VS_ACTORS_MOVEMENT_H_DECLS

@@ -51,6 +51,38 @@ struct Options {
   std::vector<Press> presses;
 };
 
+struct PhaseTiming {
+  std::uint64_t count = 0;
+  std::uint64_t total_us = 0;
+  std::uint64_t maximum_us = 0;
+  std::uint64_t over_tick_budget = 0;
+  std::uint64_t over_frame_budget = 0;
+
+  void Record(std::uint64_t start) {
+    constexpr std::uint64_t kNsPerMicrosecond = 1000;
+    constexpr std::uint64_t kTickBudgetUs = 16667;
+    constexpr std::uint64_t kFrameBudgetUs = 33333;
+    const auto elapsed = (SDL_GetTicksNS() - start) / kNsPerMicrosecond;
+    ++count;
+    total_us += elapsed;
+    maximum_us = std::max(maximum_us, elapsed);
+    over_tick_budget += elapsed > kTickBudgetUs;
+    over_frame_budget += elapsed > kFrameBudgetUs;
+  }
+
+  nlohmann::json Summary() const {
+    constexpr double kUsPerMillisecond = 1000;
+    return {{"samples", count},
+            {"mean_ms", count == 0 ? 0.0
+                                   : static_cast<double>(total_us) /
+                                         static_cast<double>(count) /
+                                         kUsPerMillisecond},
+            {"max_ms", static_cast<double>(maximum_us) / kUsPerMillisecond},
+            {"over_16_667_ms", over_tick_budget},
+            {"over_33_333_ms", over_frame_budget}};
+  }
+};
+
 std::uint64_t Number(std::string_view value) {
   std::uint64_t result = 0;
   const auto parsed =
@@ -253,6 +285,13 @@ class LiveSession {
       if (Finished()) break;
     }
     Capture(options_.capture, pixels_, width_, height_);
+    trace_.Event("performance.summary",
+                 {{"simulation", simulation_timing_.Summary()},
+                  {"inspection", inspection_timing_.Summary()},
+                  {"trace_frame", trace_timing_.Summary()},
+                  {"frame_interval", frame_interval_timing_.Summary()},
+                  {"presentation", presentation_timing_.Summary()}},
+                 ticks_);
     trace_.Event(
         "host.exit",
         {{"ticks", ticks_}, {"encounter_interrupted", fiber_ != nullptr}},
@@ -281,6 +320,12 @@ class LiveSession {
   bool step_;
   bool rejected_;
   double previous_ = 0;
+  PhaseTiming simulation_timing_;
+  PhaseTiming inspection_timing_;
+  PhaseTiming trace_timing_;
+  PhaseTiming presentation_timing_;
+  PhaseTiming frame_interval_timing_;
+  std::uint64_t previous_presentation_ = 0;
 
   void Handle(const SDL_Event& event) {
     input_.HandleEvent(event);
@@ -355,9 +400,15 @@ class LiveSession {
     }
     if (fiber_) {
       Legacy::FeedPad(0, pad, true);
+      const auto simulation_start = SDL_GetTicksNS();
       const bool running = fiber_->Resume();
+      simulation_timing_.Record(simulation_start);
+      const auto inspection_start = SDL_GetTicksNS();
       const auto state = Game::InspectEncounter();
+      inspection_timing_.Record(inspection_start);
+      const auto trace_start = SDL_GetTicksNS();
       trace_.Frame(ticks_, pad, state);
+      trace_timing_.Record(trace_start);
       if (!running) {
         fiber_.reset();
         trace_.Event("encounter.end", {{"number", encounter_number_}}, ticks_);
@@ -371,6 +422,7 @@ class LiveSession {
   }
 
   void Present(Render::Device& gpu) {
+    const auto presentation_start = SDL_GetTicksNS();
     if (fiber_) {
       if (Render::GamePages().Present(pixels_, width_, height_)) {
         gpu.PresentImage(pixels_.data(), width_, height_);
@@ -386,6 +438,11 @@ class LiveSession {
           canvas_.Pixels() + std::ptrdiff_t{Canvas::kWidth} * Canvas::kHeight);
       gpu.PresentImage(pixels_.data(), width_, height_);
     }
+    presentation_timing_.Record(presentation_start);
+    if (previous_presentation_ != 0) {
+      frame_interval_timing_.Record(previous_presentation_);
+    }
+    previous_presentation_ = SDL_GetTicksNS();
   }
 
   bool Finished() const {

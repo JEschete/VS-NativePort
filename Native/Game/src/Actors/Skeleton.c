@@ -17,6 +17,7 @@
 #include "Render/ModelDraw.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"
+#include "Render/Render.h"
 
 // decomp: D_800F3C58 (D_800F3C58@BATTLE/BATTLE.PRG)
 Actors_SkeletonPose Actors_skeletonPose;
@@ -155,8 +156,8 @@ int Actors_ProjectActorTaggedBone(int arg0, int arg1, SVECTOR* arg2, int arg3)
             arg2->vy = temp_a1->instance.position.vy - temp_a1->targetPointHeight;
         }
 
-        Core_Gte_SetRotMatrix((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014));
-        Core_Gte_SetTransMatrix((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014));
+        Core_Gte_SetRotMatrix(&((Render_FrameScratch*)Core_ScratchBase())->viewMatrix);
+        Core_Gte_SetTransMatrix(&((Render_FrameScratch*)Core_ScratchBase())->viewMatrix);
         arg2->vz = Core_Gte_RotTransPers(arg2, &sp10, &sp14, &sp18);
         arg2->vx = sp10;
         new_var = &((short*)(&sp10))[1];

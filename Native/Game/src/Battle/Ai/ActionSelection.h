@@ -18,7 +18,6 @@
 
 void Battle_Ai_RememberAiActionTarget(Battle_Ai_ActorAiState*);
 void Battle_Ai_ForgetAiActionTarget(Battle_Ai_ActorAiState* arg0);
-int Battle_Ai_IsAiTargetBeyondNearRadius(void*, int, int);
 void Battle_Ai_BuildAiActionMetadata(Battle_Ai_ActionMetadataView* state);
 
 #endif // VS_BATTLE_AI_ACTIONSELECTION_H_DECLS

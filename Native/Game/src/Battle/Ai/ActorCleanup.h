@@ -19,6 +19,10 @@ void Battle_Ai_ForceReleaseActorAiReservations(int);
 void Battle_Ai_ReleaseActorAiReservations(Battle_Ai_ActorAiState*);
 
 void Battle_Ai_FreeActorAiState(Battle_Actor*);
+void Battle_Ai_SetActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView*,
+                                           int value, int range);
+void Battle_Ai_RefreshActorAiReservations(int actor_id);
+void Battle_Ai_ClearActorAiLinksAndPlan(int actor_id);
 
 #ifdef __cplusplus
 }
