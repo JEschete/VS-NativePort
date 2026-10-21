@@ -110,3 +110,21 @@ TEST_CASE(
   CHECK(data.at("items").empty());
   CHECK(state.pending_loot.front().items.front().count == 2);
 }
+
+TEST_CASE("Combat Lab trace preserves read-only game-over and render state",
+          "[combat][encounter][trace]") {
+  TraceScope scope;
+  auto state = SampleState();
+  state.game_over = true;
+  state.field_rendering_enabled = false;
+  state.menu_state = 7;
+  state.frame_buffer = 1;
+  const auto frame = FlushedFrame(scope, state);
+  const auto& data = frame.at("data");
+  CHECK(data.at("game_over") == true);
+  CHECK(data.at("field_rendering_enabled") == false);
+  CHECK(data.at("menu_state") == 7);
+  CHECK(data.at("frame_buffer") == 1);
+  CHECK(state.game_over);
+  CHECK(state.menu_state == 7);
+}

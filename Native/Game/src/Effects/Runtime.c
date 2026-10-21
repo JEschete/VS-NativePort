@@ -115,9 +115,6 @@ Effects_EffectRenderer Effects_effectRenderers[8];
 // decomp: D_800F56C8 (D_800F56C8@BATTLE/BATTLE.PRG)
 Effects_EffectPackage Effects_actionPackage;
 
-// decomp: D_800F5798 (D_800F5798@BATTLE/BATTLE.PRG)
-Effects_ActionEffectRequest* Effects_actionRequestPointer;
-
 // decomp: D_800F57A0 (D_800F57A0@BATTLE/BATTLE.PRG)
 Effects_EffectPackage Effects_secondaryPackage;
 

@@ -148,7 +148,7 @@ out of commits and issue attachments.
 Source: `fd291cfe29b45656e00ff1e198f53e7730b59a19` plus pending native
 AI/navigation, motion, Lab profiles/diagnostics and effect fixes. These are
 dirty-worktree results. Fixing revisions and successful pushed CI are recorded
-on #69, #71, #72, #73 and #74 separately. #6, #16, #42 and #70 remain broader work.
+on #69, #71, #72, #73 and #74 separately. #6, #16 and #42 remain broader work.
 All captures, presets and runtime logs below remain local.
 
 Both Debug and Release full builds and suites pass **302 cases / 828486
@@ -219,6 +219,10 @@ limited menu again, without advanced actions or Score. Both runs exit zero with
 
 ### Normal-speed performance limits (#70)
 
+The owner subsequently verified that stutter is solved and live combat feels
+natural; **#70 is closed**. The measurements and rejected approaches below are
+retained as diagnostic history, not an outstanding stutter blocker.
+
 Full tracing remains enabled. In the earlier matched four-wolf 600-tick A/B,
 console filtering/frame-boundary flushing reduced simulation's worst sample
 from 31.131 to 21.710 ms; all 600 snapshots and RNG records matched. Startup
@@ -242,9 +246,130 @@ presentation work but worsened maximum intervals to 39.640/37.196 ms, with
 presentation scheduling remains. The experiments preserved all 600 actor/input
 snapshots and 1773 RNG records but not capture bytes, further limiting the
 experiment's validity. Runs: `1792568974185681-0`, `1792569084718367-0`.
-The next useful observation is a persisted frame/phase trace during the owner's
-remaining stutter, with the configuration, encounter and actual inputs recorded;
-do not weaken the budget or suppress logs to close #70.
+These failed approaches remain recorded to avoid repeating them. They were not
+shipped and are not needed for the owner's verified natural live combat.
+
+### Shared special attacks and current effect defects
+
+Enemy specials and magic use a shared, data-driven pipeline, not one complete
+spell implementation per enemy:
+
+1. Enemy stats provide action slots; shared
+   [AI action selection](../Native/Game/src/Battle/Ai/ActionSelection.c) evaluates
+   their IDs, ranges and availability.
+2. The 256-entry [action table](../Native/Game/include/Battle/Action.h) supplies
+   type/category, costs, ranges/area shape, recovery, hit/stat-calculator IDs and
+   the visual `effectId`.
+3. The shared [action flow](../Native/Game/src/Battle/ActionFlow.c) coordinates
+   targets/results, the actor's animation/assets and its effect request.
+4. [Effect resource loading](../Native/Game/src/Effects/EffectResources.c) binds
+   the effect package/textures and optional renderer callbacks. The shared
+   script VM and [timeline](../Native/Game/src/Effects/Timeline.c) drive particles,
+   child effects, sound, colors, actor signals and impact timing.
+5. Generic emitters and [particle rendering](../Native/Game/src/Effects/ParticleRender.cpp)
+   coexist with effect-specific native plugins/templates. Specialized visual
+   geometry is usually selected by effect, not hardcoded to an enemy name.
+
+Correct skeletal/action animations do not establish correct particle source/
+target transforms, velocity/force scaling, attachments or child-effect state.
+Those stages require independent behavioral/reference verification.
+
+The owner's Hellhound report is reproduced as **#75** on `df748add`, Release,
+speed 1, without gameplay inputs or HP/progression edits. Zone 11, room 0,
+seed 1, Prologue Ashley (8,12), eight Hellhounds (definition 3) at (5..12,13).
+Action 147 selects effect 94 (`E094`). At tick 482, the shared
+`Effects_TickChildEffectTrack` (F01563, Timeline.c:168) faults reading address
+`0x2` while evaluating `Effects_package->request->count`. At initial triage its
+producer was unknown; the later shared binding repair is documented below.
+Owner evidence: `build/Release/combat-lab/runs/1792572817191067-0`;
+reproduction: `1792573135209075-0`, with stderr in
+`build/quality/hellhound-owner-repro-stderr.log`.
+
+The separately reported particles flying everywhere are **#76**. They need an
+aligned source/reference spatial comparison; visible original-program particles
+are not proof that their placement/direction matches the game. No cause or fix
+is claimed yet. Keep captures and extracted data local.
+
+### Later playtest repairs and remaining limits (2026-10-21)
+
+The owner confirms ground-enemy movement/rotation are solved and the prologue
+is fully playable apart from the reported visual/audio/combat gaps. This does
+not establish every enemy, ability, or reference-parity case.
+
+**Hellhound #75:** the original request-pointer symbol at `0x800F5798` aliases
+the field at `0xD0` in the primary effect package at `0x800F56C8`. Independent
+native storage left the package request null. The ledger now emits a native
+field view, preserving initialization, reads/writes and native module bindings.
+The final-child gate also reads the native `childCount` field instead of original
+offset `0x14`. The binding regression fails four checks before repair and passes
+all seven afterward; a separate child-track test checks outstanding children.
+
+The original eight-Hellhound preset from
+`build/Release/combat-lab/runs/1792572817191067-0/encounter-1.json` is replayed
+with `--start --scripted --frames 1600 --speed 1`. Debug
+`1792577241138340-0` and Release `1792577275397935-0` match all 1600 snapshots
+and 6586 RNG records. Real breath damage occurs on four Ashley limbs at tick
+534 (24/28/20/27 HP), control returns at 664, and breath executes again at 1572.
+This does not verify every particle's spatial fidelity or the unspecified
+D'tok report.
+
+**Post-defeat restart #79:** the actual one-Minotaur scenario at zone 12/room 0,
+Ashley (9,10), definition 1 at (9,11), produces unedited player defeat at tick
+658. Before repair, run `1792578016560816-0` starts the next healthy player,
+then changes `game_over` to true/menu 7 and disables field rendering because
+the old event thread resumes. Gameplay event initialization now makes playback
+inactive and resets start/finished flags, thread cursors and wait timers.
+It does not suppress real defeat or fabricate progression.
+
+After repair, actual death, pause/single-step/F10 and same-room restart pass:
+Debug `1792578734686541-0`, Release `1792578765217479-0`. Both keep fresh HP
+250, menu 63, `game_over: false` and field rendering throughout their ready
+observation window. A subsequent controller-selected change to zone 9 also
+passes: `1792580129571764-0` / `1792580170367914-0`.
+Local evidence: `build/quality/issue79-<Config>-post-defeat.png`,
+`issue79-<Config>-different-room.png` and lifecycle JSON. The session-workspace
+`verify_lab_lifecycle.ps1` uses `-WaitForDefeat`, the persisted scenario above,
+and optionally `-DifferentZone 9`; no HP or memory writes are used.
+
+Read-only snapshots now persist `game_over`, `menu_state`,
+`field_rendering_enabled` and `frame_buffer`, so healthy player initialization
+is distinguishable from a stale menu/event taking over afterward.
+
+**Remaining defects:** #76 covers the birds/window rays/particle placement
+reports; #77 confirms the Bat flight abort; #78 confirms a separate fresh
+eight-Minotaur render-cursor corruption at tick 209; #80 tracks the broader
+multi-part hypothesis and #81 the missing selected-part glow. Sound remains
+#7 and first-entry Equip weapon preview remains #14. Bosses lacking an
+independent hostile spawn profile remain unsupported under #16; validation is
+not bypassed. D'tok and the additional multi-part cases lack exact reproduction
+details, so no damage/targeting assumption is made.
+
+The #78 temporary stage trace (`1792579333054718-0`) locates the corrupted
+primitive cursor before room drawing, not within minimap emission. Its write
+producer remains unknown; temporary probes were removed. A data-write
+watchpoint is the next concrete observation, not a guessed buffer enlargement
+or actor-count reduction.
+
+Stopping verification for these shared-runtime changes:
+
+- Full Debug/Release solution builds pass; each suite passes **306 cases /
+  828512 assertions**. Exact logs:
+  `build/quality/playtest-stopping-<Config>-{build,tests}.log`.
+- `quality-native.cmd --files` for the changed owned producers, trace/tests and
+  copier fixups, with `--tidy`, reports **zero findings / zero new findings**:
+  `playtest-stopping-focused-quality.log`. The pushed source-wide/header gate
+  must still be confirmed for the exact fixing revision before issue closure.
+- Native view fields: 621 / zero mismatches; event dispatch: 179 / zero errors.
+  Assembly-audit and encounter-fixup regressions pass 13 and 3 tests.
+- Two copier/scaffolder runs preserve 70 owned paths and 775 generated/project
+  paths. Manifest SHA-256:
+  `66d89e88c9cf0ff16d90d68f6aaac5db4e94ddccf60ec2583bc6a866dcb6c5f1`.
+  Details: `playtest-stopping-generation-stability.json` and generation logs.
+
+These runs use the `df748add` plus scoped dirty worktree recorded in their
+manifests. Publication and exact CI evidence belong on #75/#79. Unrelated
+instruction/reference-tree changes are preserved. No full-particle-parity,
+flight, high-count Minotaur, audio or equipment-preview completion is claimed.
 
 ### Pending AI/navigation evidence
 

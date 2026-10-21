@@ -81,6 +81,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\EventSessionTests.cpp" />
     <ClCompile Include="src\GimRenderTestCases.cpp" />
     <ClCompile Include="src\GimRenderTests.c">
       <TreatWarningAsError>false</TreatWarningAsError>

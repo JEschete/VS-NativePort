@@ -196,7 +196,7 @@ int Effects_TickChildEffectTrack(Effects_EffectInstance* arg0, Effects_ChildTrac
             --arg1->delay;
         }
     } else if (arg1->index == Effects_package->request->count) {
-        if ((*(u_int*)((char*)arg0 + 0x14) & 0xF800) == 0) {
+        if (arg0->childCount == 0) {
             spawn.script = Effects_package->block8Data;
             spawn.scriptOffset = arg2;
             spawn.priority = 0;

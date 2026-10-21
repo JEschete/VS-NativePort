@@ -2583,7 +2583,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F56A4u, 4u, (void*)&Effects_pluginEntryPointCount, sizeof Effects_pluginEntryPointCount, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F56A8u, 4u, (void*)&Effects_effectRenderers, sizeof Effects_effectRenderers, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F56C8u, 212u, (void*)&Effects_actionPackage, sizeof Effects_actionPackage, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F5798u, 4u, (void*)&Effects_actionRequestPointer, sizeof Effects_actionRequestPointer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F57A0u, 212u, (void*)&Effects_secondaryPackage, sizeof Effects_secondaryPackage, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5874u, 4u, (void*)&Effects_loadedTextureSlots, sizeof Effects_loadedTextureSlots, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5878u, 4u, (void*)&Battle_Ai_actorAiStates, sizeof Battle_Ai_actorAiStates, 0u, 0u},

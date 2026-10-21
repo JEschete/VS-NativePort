@@ -72,6 +72,11 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F01563": [
+        ("(*(u_int*)((char*)arg0 + 0x14) & 0xF800) == 0",
+         "arg0->childCount == 0",
+         "the original +0x14 child-count bits move when native instance pointers grow"),
+    ],
     "F01515": [
         ("    for (i = 0; i < count; ++i) {\n        node = Effects_AllocateEffectParticle(arg0);",
          '    if (count <= 0) {\n'
@@ -788,7 +793,18 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("Event_kSkipOpcodeHandlers[]", "Event_kSkipOpcodeHandlers[256]", "one handler per byte opcode"),
     ],
     # INITBTL 12AC.c:69 copied 256 four-byte pointers; native pointers require the full table size.
-    "F01850": [("0x400", "sizeof(Event_kSkipOpcodeHandlers)", "native skip table allocation and copy")],
+    "F01850": [
+        ("0x400", "sizeof(Event_kSkipOpcodeHandlers)",
+         "native skip table allocation and copy"),
+        ("    Event_isAmbientSoundSuspended = 0;",
+         "    Event_isAmbientSoundSuspended = 0;\n"
+         "    Event_playbackPhase = 0;\n"
+         "    Event_isStartConfirmed = 0;\n"
+         "    Event_isMainThreadFinished = 0;\n"
+         "    Core_Memory_ZeroAlignedWords(Event_threadCursors, sizeof Event_threadCursors);\n"
+         "    Core_Memory_ZeroAlignedWords(Event_threadWaitFrames, sizeof Event_threadWaitFrames);",
+         "native globals survive overlay loads; a new gameplay session must not resume old event threads"),
+    ],
     # BATTLE 4A0A8.c:2110 is called only through the opcode table; it ignores both dispatch arguments.
     "F01126": [("Event_ScriptWaitForScreenTransition(void)",
                  "Event_ScriptWaitForScreenTransition(u_char* arg0, short arg1)", "consistent opcode signature")],

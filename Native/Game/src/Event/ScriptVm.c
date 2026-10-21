@@ -1113,6 +1113,11 @@ void Event_ResetCutsceneActorsToIdle(void)
 void Event_InitializeScriptOpcodeTable(void)
 {
     Event_isAmbientSoundSuspended = 0;
+    Event_playbackPhase = 0;
+    Event_isStartConfirmed = 0;
+    Event_isMainThreadFinished = 0;
+    Core_Memory_ZeroAlignedWords(Event_threadCursors, sizeof Event_threadCursors);
+    Core_Memory_ZeroAlignedWords(Event_threadWaitFrames, sizeof Event_threadWaitFrames);
     Event_roomChangeState = 0;
     Event_scriptBuffer = Core_Memory_AllocateFromLowEnd(0x1800);
     Event_vibrationPatternBuffer = Core_Memory_AllocateFromLowEnd(0x80);

@@ -81,6 +81,9 @@
     <ClCompile Include="src\EventScriptTests.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EventSessionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\GimRenderTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>

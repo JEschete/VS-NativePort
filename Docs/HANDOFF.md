@@ -18,6 +18,72 @@ The later Quick Manual report is repaired and verified below (#66). Its scoped
 publication/CI record belongs in that issue. The newly reproduced Score submenu
 fast-fail remains #65; #6 is still the next ordered gameplay implementation.
 
+### Owner playtest and shared-runtime repairs (2026-10-21, stopping checkpoint)
+
+Owner feedback on the `df748add` build confirms ground-enemy pathing/rotation
+are solved and the prologue is fully playable apart from the listed gaps.
+This is fresh owner evidence, not a new automated all-content/reference pass.
+Stutter #70 is closed. Sound outside the opening FMV remains #7.
+
+Two further fixes are implemented locally; publication/CI evidence belongs on
+their issues rather than being inferred from the older `df748add` CI:
+
+- **#75 Hellhound breath:** G00576 (`0x800F5798`) is the request field at original
+  offset `0xD0` inside G00575 (`0x800F56C8`), not independent storage. The data
+  ledger now makes it a canonical native field view. Four binding assertions
+  failed before the fix; all seven pass afterward. The child-track completion
+  guard also uses `childCount`, not original byte offset `0x14`.
+  Real speed-1 eight-Hellhound runs
+  `1792577241138340-0` (Debug) / `1792577275397935-0` (Release) pass 1600 ticks,
+  matching every snapshot and all 6586 RNG records. Breath 147 damages limbs
+  0/1/3/4 at tick 534 (24/28/20/27 HP), returns control at 664, and attacks again
+  at 1572. No HP/progression edits or replacement effect were used.
+- **#79 post-defeat arena:** the old Game Over event VM resumed in the next
+  healthy encounter. Before repair, menu 63/game-over false changed to menu
+  7/game-over true, then field rendering was disabled despite HP 250.
+  Gameplay event initialization now resets playback/start/finished state,
+  native thread cursors and wait timers. The initializer regression failed
+  with phase 4 before repair and now passes. Actual Minotaur defeat at tick 658,
+  F6/F7/F10 and same-room restart pass in Debug `1792578734686541-0` /
+  Release `1792578765217479-0`; captures show a real arena, not Continue/Title
+  on black. Same-room followed by a different zone (9) also passes in
+  `1792580129571764-0` / `1792580170367914-0`.
+
+Read-only frame diagnostics now include game-over state, active menu, field
+rendering enable and frame-buffer index. The state was measured before choosing
+the reset fix; no fake story transition or forced health restoration was added.
+Evidence and exact validation commands are in [COMBAT_LAB.md](COMBAT_LAB.md).
+Stopping validation passes both full builds and suites: **306 cases / 828512
+assertions per configuration**. Focused changed-code tidy reports zero findings
+and zero new findings. Native views check 621 fields / zero mismatches; event
+dispatch checks 179 / zero errors; audit/fixup regressions pass 13 and 3 tests.
+Two copier/scaffolder passes preserve 70 owned paths and 775 generated/project
+paths. Exact pushed-revision CI and closure evidence will be recorded on #75/#79;
+the source-wide shared-header gate is not inferred from the focused local gate.
+The owner authorized committing/pushing this bounded checkpoint before stopping.
+
+Remaining owner findings are tracked, not claimed fixed:
+
+| Finding | Tracker / next observation |
+| --- | --- |
+| Birds spawn/path incorrectly; missing window god rays; generally scattered particles | #76; identify aligned original/native effect-space cases. |
+| D'tok fire breath does nothing | #75 follow-up; prologue/Lab and missing VFX/damage distinction still unspecified. |
+| Bat startup abort | #77; confirmed flight query reaches invalid tile `(1074593800,12)`, with required flight helpers still unported. |
+| Eight Minotaur Zombies crash | #78; independently reproduced even in a fresh process after the reset repair. Frame cursor is already corrupt on entry to room drawing at tick 209. |
+| Suspected multi-part abilities | #80; Hellhound's four-limb case now works, other exact action/target cases remain unspecified. |
+| Selected body-part glow | #81; reported, not independently repaired. |
+| Equip paper-doll weapon missing on first entry | #14; reported first-entry/re-equip distinction preserved. |
+| Intro-controlled bosses unavailable | #16; intentional source-profile gate remains a roster limitation; do not fabricate hostile metadata or disable validation. |
+
+For #78, temporary stage tracing in run `1792579333054718-0` showed a valid
+cursor at tick 207, then `0x00000557FECC05FB` before any room-render stage at
+209. The write producer is not established. Next useful observation is a native
+write watchpoint on `Render_frameScratch.primitiveCursor` during that pre-draw
+action/camera update; do not assume packet capacity or solve it by reducing
+enemy count. Temporary probes were removed from both generator and output.
+The owner was unavailable for the D'tok/multi-part clarification; do not invent
+expected damage or modify a scripted sequence on that basis.
+
 ### Combat Lab profiles, awareness and particles (2026-10-21)
 
 The combined worktree based on `fd291cfe` now has selectable Prologue,
@@ -45,12 +111,26 @@ Publication/CI evidence belongs on #69, #71, #72, #73 and #74.
 The full changed-source/shared-header tidy gate passes with zero new findings
 (316 existing); no baseline was changed.
 
-#70 remains open. Console/file batching retains full Trace/RNG files and improves
+The owner confirms stutter is solved and live combat feels natural; #70 is now
+closed. Console/file batching retains full Trace/RNG files and improves
 the matched normal-speed run, but Debug still exceeds the 16.667 ms simulation
 budget on 41/600 ticks. Final four-wolf Release simulation is 1.910 ms mean /
 4.863 ms maximum; maximum presentation interval is 26.526 ms. Redraw-throttling
-experiments worsened pacing and were removed. Record a fresh trace during any
-remaining owner-visible stutter before choosing another fix.
+experiments worsened pacing and were removed. These measurements are diagnostic
+history, not an outstanding stutter blocker.
+
+The owner's new Hellhound fire-breath crash is reproduced as #75 at `df748add`,
+Release speed 1, zone 11/room 0, Prologue Ashley (8,12), eight definition-3
+Hellhounds at (5..12,13), seed 1. With no injected gameplay input, action 147
+loads effect 94 and faults reading `0x2` at tick 482 in shared
+`Effects_TickChildEffectTrack` (F01563, Timeline.c:168). Local owner/repro runs:
+`1792572817191067-0` / `1792573135209075-0`. The failing expression reads
+`Effects_package->request->count`; its producer was unknown at this initial
+triage. The later canonical-request repair is documented above. The scattered-particle report
+is tracked separately as #76 pending a measured spatial/reference comparison.
+Specials/magic share action records, target/result processing and the effect VM/
+timeline, with actor-specific assets and effect-specific plugins. Do not invent
+an independent Hellhound-only fire-breath implementation to bypass the fault.
 
 The pending ground-navigation/motion/cleanup work and older actual defeat,
 queued-drop, Game Over and ordinary prologue victories are documented separately

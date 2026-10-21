@@ -40,10 +40,13 @@ extern "C" {
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/RoomLoading.h"
+#include "Field/RoomRendering.h"
 #include "Field/Transitions.h"
 #include "Field/Zone.h"
 #include "Input/Controller.h"
 #include "Items/Loot.h"
+#include "Menu/Framework/Framework.h"
+#include "Render/Display.h"
 #include "State/Flags.h"
 #include "State/Location.h"
 #include "State/Progress.h"
@@ -276,6 +279,11 @@ EncounterState InspectEncounter() {
   state.zone = Field_zoneContext.zndId;
   state.room = Field_zoneContext.mapId;
   state.control_mode = Field_controlMode;
+  state.game_over = Audio_Seq_unusedStateFlags.gameOver != 0;
+  state.field_rendering_enabled = Field_isFieldRenderingEnabled != 0;
+  state.menu_state =
+      static_cast<unsigned char>(Menu_Framework_menuState.currentMenu);
+  state.frame_buffer = Render_frameBuf;
   state.transition = Field_screenTransitionStep;
   state.native_buttons = Input_buttonsState;
   state.native_pressed = Input_buttonsPressed.allButtons;

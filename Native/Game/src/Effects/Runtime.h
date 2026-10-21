@@ -43,6 +43,9 @@ typedef struct Effects_TransformDefinition Effects_TransformDefinition;
 #undef VS_EFFECTS_RUNTIME_H_SET_TYPES_ONLY
 #endif
 
+// decomp: D_800F5798 (D_800F5798@BATTLE/BATTLE.PRG): a view into another global
+#define Effects_actionRequestPointer (*(Effects_ActionEffectRequest**)(&Effects_actionPackage.request))
+
 // decomp: actionEffectTarget (src/BATTLE/BATTLE.PRG/6E644.h:21)
 typedef struct Effects_ActionEffectTarget {
     u_short type;
@@ -326,7 +329,6 @@ extern Effects_EffectPackage* Effects_package;
 extern Effects_EffectRenderer Effects_rendererTableAlias[];
 extern Effects_EffectRenderer Effects_effectRenderers[8];
 extern Effects_EffectPackage Effects_actionPackage;
-extern Effects_ActionEffectRequest* Effects_actionRequestPointer;
 extern Effects_EffectPackage Effects_secondaryPackage;
 int Effects_IgnoreRuntimeDiagnostic(int arg0 __attribute__((unused)));
 void Effects_InitEffectRuntime(void);

@@ -19,6 +19,7 @@ extern "C" {
 #include "Effects/Particles.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
+#include "Effects/Timeline.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -290,4 +291,57 @@ TEST_CASE("Effect renderer slots retain eight independent native callbacks",
     CHECK(count >= 0);
     CHECK(count <= 8);
   }
+}
+
+TEST_CASE("Primary effect request aliases the canonical native package field",
+          "[effects][request-context]") {
+  auto* saved_context = Effects_package;
+  auto* saved_primary = Effects_actionPackage.request;
+  auto* saved_alias = Effects_actionRequestPointer;
+  auto* saved_secondary = Effects_secondaryPackage.request;
+
+  Effects_actionPackage.request = nullptr;
+  Effects_secondaryPackage.request = &Effects_secondaryRequest;
+  Effects_actionRequestPointer = &Effects_actionRequest;
+  CHECK(Effects_actionPackage.request == &Effects_actionRequest);
+  CHECK(&Effects_actionRequestPointer == &Effects_actionPackage.request);
+  Effects_SelectEffectResourceContext(1);
+  CHECK(Effects_package == &Effects_actionPackage);
+  CHECK(Effects_package->request == &Effects_actionRequest);
+
+  Effects_actionPackage.request = &Effects_secondaryRequest;
+  CHECK(Effects_actionRequestPointer == &Effects_secondaryRequest);
+  Effects_SelectEffectResourceContext(0);
+  CHECK(Effects_package == &Effects_secondaryPackage);
+  CHECK(Effects_package->request == &Effects_secondaryRequest);
+
+  Effects_actionPackage.request = saved_primary;
+  Effects_actionRequestPointer = saved_alias;
+  Effects_secondaryPackage.request = saved_secondary;
+  Effects_package = saved_context;
+}
+
+TEST_CASE("Child effect tracks wait for the native outstanding child count",
+          "[effects][child-tracks]") {
+  ParticleFixture fixture;
+  Effects_ActionEffectRequest request{};
+  Effects_ChildTrackKey key{};
+  Effects_ChildTrackView track{};
+  Effects_EffectTimeline timeline{};
+  fixture.package.request = &request;
+  fixture.instance.context.timeline = &timeline;
+  fixture.instance.childCount = 1;
+  track.event = &key;
+  auto* saved_instances = Effects_primaryInstances;
+  Effects_primaryInstances = nullptr;
+
+  CHECK(Effects_TickChildEffectTrack(&fixture.instance, &track, 0) == 1);
+  CHECK(fixture.instance.childCount == 1);
+  CHECK(track.index == 0);
+  CHECK(Effects_primaryInstances == nullptr);
+
+  while (Effects_primaryInstances != nullptr) {
+    Effects_DestroyPrimaryEffectInstance(Effects_primaryInstances);
+  }
+  Effects_primaryInstances = saved_instances;
 }

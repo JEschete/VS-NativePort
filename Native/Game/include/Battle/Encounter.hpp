@@ -120,6 +120,10 @@ struct EncounterState {
   int zone = 0;
   int room = 0;
   std::uint32_t control_mode = 0;
+  bool game_over = false;
+  bool field_rendering_enabled = false;
+  int menu_state = -1;
+  int frame_buffer = 0;
   std::uint32_t transition = 0;
   std::uint32_t native_buttons = 0;
   std::uint32_t native_pressed = 0;
