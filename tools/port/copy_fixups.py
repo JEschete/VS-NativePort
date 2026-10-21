@@ -103,6 +103,10 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("*ot = ((u_long)prim << 8) >> 8;", "*ot = LegacyGpu_Handle(prim);",
          "overhead awareness frame links must retain native packet ownership, not truncated addresses"),
     ],
+    "F02771": [
+        ("*nextPrim = ((u_long)prim << 8) >> 8;", "*nextPrim = LegacyGpu_Handle(prim);",
+         "260.c:3504 game-over fade links must store the native packet handle, not a truncated host address"),
+    ],
     "F02553": [
         (r'"MISC\00000|0xF8|"',
          r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"',

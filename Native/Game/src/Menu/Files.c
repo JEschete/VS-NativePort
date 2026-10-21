@@ -2213,7 +2213,7 @@ int Menu_Files_UpdateGameOverChoices(int init)
         prim[3] = vs_getXY(0, 0);
         prim[4] = vs_getWH(320, 240);
         prim[2] = vs_getRGB0Raw(Render_LegacyPrimitiveCode_TileSemiTrans, (Menu_Files_gameOverChoicesColor1 + 128) * 0x020202);
-        *nextPrim = ((u_long)prim << 8) >> 8;
+        *nextPrim = LegacyGpu_Handle(prim);
         Render_frameScratch.primitiveCursor = prim + 5;
         Menu_Files_gameOverChoicesColor1 += 8;
         if (Menu_Files_gameOverChoicesColor1 == 0) {

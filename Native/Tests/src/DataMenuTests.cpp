@@ -184,6 +184,27 @@ TEST_CASE("Data play time uses mutable digits and retains overflow formatting",
   CHECK(State_playTime.all == saved);
 }
 
+TEST_CASE("Game Over fade links packets through native handles",
+          "[render][menu][game-over]") {
+  ClockFixture render;
+  EmptySlotsFixture input;
+  Menu_Files_UpdateGameOverChoices(1);
+  for (int frame = 0; frame < 16; ++frame) {
+    Input_buttonsPressed.allButtons = 0;
+    CHECK(Menu_Files_UpdateGameOverChoices(0) == 0);
+  }
+
+  Input_buttonsPressed.allButtons = PADstart;
+  CHECK(Menu_Files_UpdateGameOverChoices(0) == 0);
+  Input_buttonsPressed.allButtons = 0;
+  const auto* fade_packet = Render_frameScratch.primitiveCursor;
+  CHECK(Menu_Files_UpdateGameOverChoices(0) == 0);
+  CHECK(nextPrim(render.ordering.data() + 2) == fade_packet);
+  CHECK(getaddr(render.ordering.data() + 2) == LegacyGpu_Handle(fade_packet));
+  Menu_Files_UpdateGameOverChoices(1);
+  (void)input;
+}
+
 TEST_CASE("Empty Load summaries remain unavailable and can be cancelled",
           "[menu][data][empty]") {
   EmptySlotsFixture fixture;
