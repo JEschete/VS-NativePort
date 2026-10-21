@@ -16,6 +16,7 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/DecisionPrimitives.h"
+#include "Battle/Ai/FlightTerrain.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
@@ -271,29 +272,6 @@ invalid:
 #undef MOVEMENT_CHECK_TILES
 #undef MOVEMENT_CHECK_DIRECTIONS
 #undef MOVEMENT_CHECK_CACHE
-
-// decomp: BATTLE.PRG func_800E0850 (src/BATTLE/BATTLE.PRG/771A8.c:942)
-int Battle_Ai_LowestReachableGroundHeight(Battle_Ai_ActorAiState* arg0, u_int arg1)
-{
-    int min = 0;
-    int count = 1;
-
-    if (arg1 & 0x3FF) {
-        count = 3;
-    }
-    arg1 = (arg1 >> 9) & 6;
-    while (--count != -1) {
-        if (Battle_Ai_CanFlyInDirection((void*)arg0, arg1) != 0) {
-            int h = Field_GroundHeightAtTile(arg0->tile.word + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[arg1].dx,
-                arg0->tile.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[arg1].dz);
-            if (h < min) {
-                min = h;
-            }
-        }
-        arg1 = (arg1 + 1) & 7;
-    }
-    return min;
-}
 
 // decomp: BATTLE.PRG func_800E0918 (src/BATTLE/BATTLE.PRG/771A8.c:985)
 int Battle_Ai_UpdateFlightGroundTransition(Battle_Ai_MovementCheckView* state, int action, int mode)

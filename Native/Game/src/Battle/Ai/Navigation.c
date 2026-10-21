@@ -762,13 +762,6 @@ void Battle_Ai_MarkAiTileDynamicObstacle(int, int)
     VS_UNPORTED("Battle::Ai::MarkAiTileDynamicObstacle");
 }
 
-// decomp: BATTLE.PRG func_800E6A6C (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-int Battle_Ai_MinimumAiGroundHeightAlongSegment(int, int, int, int)
-{
-    VS_UNPORTED("Battle::Ai::MinimumAiGroundHeightAlongSegment");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800E6B4C (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
 int Battle_Ai_BuildAiTerrainHeightsWithWorkspace()
 {
@@ -780,12 +773,5 @@ int Battle_Ai_BuildAiTerrainHeightsWithWorkspace()
 void Battle_Ai_ReleaseActorAiContactOccupancy(int)
 {
     VS_UNPORTED("Battle::Ai::ReleaseActorAiContactOccupancy");
-}
-
-// decomp: BATTLE.PRG func_800E75EC (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-int Battle_Ai_RoomNavigationCeilingHeight(void)
-{
-    VS_UNPORTED("Battle::Ai::RoomNavigationCeilingHeight");
-    return 0;
 }
 

@@ -85,6 +85,27 @@ TEST_CASE("World height decoding selects the tile before decoding its cell",
   }
 }
 
+TEST_CASE(
+    "Optional tile height queries distinguish invalid and missing terrain",
+    "[ai][terrain]") {
+  TerrainFixture fixture;
+  int ground = 1234;
+
+  fixture.heights[9][17] = 1023;
+  CHECK(Field_TryGroundHeightAtTile(17, 9, &ground) == 1);
+  CHECK(ground == -64);
+
+  ground = 1234;
+  CHECK(Field_TryGroundHeightAtTile(-1, 9, &ground) == 0);
+  CHECK(ground == 1234);
+  CHECK(Field_TryGroundHeightAtTile(32, 9, &ground) == 0);
+  CHECK(ground == 1234);
+
+  Battle_Ai_FrameState()->heightMap = nullptr;
+  CHECK(Field_TryGroundHeightAtTile(17, 9, &ground) == 0);
+  CHECK(ground == 1234);
+}
+
 TEST_CASE("Terrain lookup preserves full grid row stride and final cell bounds",
           "[ai][terrain]") {
   TerrainFixture fixture;

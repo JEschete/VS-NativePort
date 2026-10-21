@@ -15,6 +15,7 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
+#include "Battle/Ai/FlightTerrain.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Damage.h"
 }
@@ -160,6 +161,38 @@ TEST_CASE(
   fixture.states[0].terrain_reject_mask = 2;
   fixture.flags[8][9] = 0x200;
   CHECK(fixture.Occupancy(Tile(9, 8)) == 0);
+}
+
+TEST_CASE("Flight ground queries use tile coordinates and reject room edges",
+          "[ai][flight][terrain]") {
+  GroundFixture fixture;
+  fixture.room.minTileX = 0;
+  fixture.room.maxTileX = 31;
+  fixture.room.minTileZ = 0;
+  fixture.room.maxTileZ = 31;
+
+  auto& state = fixture.states[1];
+  state.tile.word = Tile(8, 13) | 0x40000000u;
+  state.previousTile = -1;
+  fixture.heights[13][9] = 1023;
+  CHECK(Battle_Ai_LowestReachableGroundHeight(&state, 6 << 9) == -64);
+
+  state.tile.word = Tile(31, 13) | 0x40000000u;
+  fixture.ClearCache();
+  CHECK(Battle_Ai_LowestReachableGroundHeight(&state, 6 << 9) == 0);
+}
+
+TEST_CASE("Flight terrain helpers preserve sampled heights and room ceiling",
+          "[ai][flight][terrain]") {
+  GroundFixture fixture;
+  fixture.heights[13][9] = 1023;
+  CHECK(Battle_Ai_MinimumAiGroundHeightAlongSegment(
+            8 * 128 + 64, 13 * 128 + 64, 10 * 128 + 64, 13 * 128 + 64) == -64);
+
+  fixture.room.flightCeiling = 512;
+  CHECK(Battle_Ai_RoomNavigationCeilingHeight() == 512);
+  Battle_Ai_roomAiState = nullptr;
+  CHECK(Battle_Ai_RoomNavigationCeilingHeight() == 0);
 }
 
 TEST_CASE(

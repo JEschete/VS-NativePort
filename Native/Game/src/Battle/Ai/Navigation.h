@@ -87,9 +87,7 @@ void Battle_Ai_InitializeRoomNavigation(void);
 void Battle_Ai_AddAiTileOccupant(void*);
 void Battle_Ai_RemoveAiTileOccupant(Field_GimmickInstance*);
 void Battle_Ai_MarkAiTileDynamicObstacle(int, int);
-int Battle_Ai_MinimumAiGroundHeightAlongSegment(int, int, int, int);
 int Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
 void Battle_Ai_ReleaseActorAiContactOccupancy(int);
-int Battle_Ai_RoomNavigationCeilingHeight(void);
 
 #endif // VS_BATTLE_AI_NAVIGATION_H_DECLS

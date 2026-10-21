@@ -12,6 +12,8 @@ int Field_GroundHeightAtPackedTile(unsigned int);
 
 int Field_GroundHeightAtTile(int, int);
 
+int Field_TryGroundHeightAtTile(int, int, int*);
+
 int Field_GroundHeightFlagsAtPackedTile(unsigned int);
 
 int Field_GroundHeightFlagsAtWorldPosition(int, int);

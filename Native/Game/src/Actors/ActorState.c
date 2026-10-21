@@ -18,7 +18,7 @@
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/FlightTerrain.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/Recovery.h"

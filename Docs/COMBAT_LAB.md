@@ -335,14 +335,31 @@ Read-only snapshots now persist `game_over`, `menu_state`,
 `field_rendering_enabled` and `frame_buffer`, so healthy player initialization
 is distinguishable from a stale menu/event taking over afterward.
 
-**Remaining defects:** #76 covers the birds/window rays/particle placement
-reports; #77 confirms the Bat flight abort; #78 confirms a separate fresh
-eight-Minotaur render-cursor corruption at tick 209; #80 tracks the broader
-multi-part hypothesis and #81 the missing selected-part glow. Sound remains
-#7 and first-entry Equip weapon preview remains #14. Bosses lacking an
-independent hostile spawn profile remain unsupported under #16; validation is
-not bypassed. D'tok and the additional multi-part cases lack exact reproduction
-details, so no damage/targeting assumption is made.
+**Bat flight #77:** the failing lowest-reachable-ground query used the packed
+tile word as X, so `0x400D0008` reached the terrain guard as X=`1074593800`.
+The owned fix uses distinct tile X/Z and direction-delta values. The assembly-
+backed 16-sample segment-height and nullable room-ceiling helpers are now native.
+Focused tests cover valid and edge flight tiles, missing height maps, segment
+sampling and an absent room context; the existing strict terrain accessor still
+logs and aborts rather than returning a fabricated height.
+
+The original one-Bat and eight-Bat scenarios were replayed through production
+Combat Lab at speed 1 with no player input. Debug runs
+`1792584773462606-0` / `1792584773457949-0` and Release runs
+`1792584856381806-0` / `1792584856370509-0` each complete 5000 frames. Bats
+select Ashley and move; actual damage reaches Ashley HP 0 and Game Over, and
+the original terrain abort is absent. This resolves the reproduced Bat path
+locally, pending exact-revision CI and issue update; it does not establish all
+flight-enemy coverage.
+
+Other remaining defects: #76 covers the birds/window rays/particle placement
+reports; #78 confirms a separate fresh eight-Minotaur render-cursor corruption
+at tick 209; #80 tracks the broader multi-part hypothesis and #81 the missing
+selected-part glow. Sound remains #7 and first-entry Equip weapon preview
+remains #14. Bosses lacking an independent hostile spawn profile remain
+unsupported under #16; validation is not bypassed. D'tok and the additional
+multi-part cases lack exact reproduction details, so no damage/targeting
+assumption is made.
 
 The #78 temporary stage trace (`1792579333054718-0`) locates the corrupted
 primitive cursor before room drawing, not within minimap emission. Its write
@@ -369,7 +386,8 @@ Stopping verification for these shared-runtime changes:
 These runs use the `df748add` plus scoped dirty worktree recorded in their
 manifests. Publication and exact CI evidence belong on #75/#79. Unrelated
 instruction/reference-tree changes are preserved. No full-particle-parity,
-flight, high-count Minotaur, audio or equipment-preview completion is claimed.
+flight-roster, high-count Minotaur, audio or equipment-preview completion is
+claimed.
 
 ### Pending AI/navigation evidence
 

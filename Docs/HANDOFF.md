@@ -68,12 +68,42 @@ Remaining owner findings are tracked, not claimed fixed:
 | --- | --- |
 | Birds spawn/path incorrectly; missing window god rays; generally scattered particles | #76; identify aligned original/native effect-space cases. |
 | D'tok fire breath does nothing | #75 follow-up; prologue/Lab and missing VFX/damage distinction still unspecified. |
-| Bat startup abort | #77; confirmed flight query reaches invalid tile `(1074593800,12)`, with required flight helpers still unported. |
+| Bat flight terrain | #77; the packed-coordinate query and two required helpers are fixed locally and verified below; exact-revision CI is pending. |
 | Eight Minotaur Zombies crash | #78; independently reproduced even in a fresh process after the reset repair. Frame cursor is already corrupt on entry to room drawing at tick 209. |
 | Suspected multi-part abilities | #80; Hellhound's four-limb case now works, other exact action/target cases remain unspecified. |
 | Selected body-part glow | #81; reported, not independently repaired. |
 | Equip paper-doll weapon missing on first entry | #14; reported first-entry/re-equip distinction preserved. |
 | Intro-controlled bosses unavailable | #16; intentional source-profile gate remains a roster limitation; do not fabricate hostile metadata or disable validation. |
+
+### Bat flight terrain bounds (#77, 2026-10-21)
+
+The Bat crash came from `Battle_Ai_LowestReachableGroundHeight` passing the
+packed tile word (including its `0x40` search/status byte) as the X coordinate
+to `Field_GroundHeightAtTile`; the failing word `0x400D0008` therefore became
+X=`1074593800`. The owned implementation now derives X and Z separately from
+the typed tile coordinates and direction delta. The two flight helpers reached
+on this path are also implemented from their assembly: the segment query samples
+16 signed ground heights, and the room-ceiling query returns the configured
+value or zero when the room navigation context is absent.
+
+`Field_TryGroundHeightAtTile` reports unavailable terrain/bounds without
+changing the output value; the existing required-height query retains its
+explicit diagnostic and abort guard. Regression coverage checks a valid
+negative-height neighbor, a room-edge direction that must not sample outside
+the grid, 16-point segment sampling, the configured/missing ceiling, and
+valid/edge/missing-height-map results.
+
+Production Combat Lab replays at normal speed use the original single-Bat and
+eight-Bat scenarios with no player input (`--scripted`). Debug runs
+`1792584773462606-0` / `1792584773457949-0` and Release runs
+`1792584856381806-0` / `1792584856370509-0` each complete all 5000 frames.
+The Bat actors select Ashley, their positions change during the encounter, and
+Ashley reaches real HP 0/Game Over; no terrain-height abort is logged. These
+four scenarios provide bounded Bat evidence, not full flight-roster coverage.
+Both full test suites pass **310 cases / 828541 assertions**; changed-code tidy
+reports **0 new findings**. Two copier and two scaffold passes are stable, and
+the owned flight source survives regeneration. The exact fixing revision's CI
+and issue update remain pending; #6 remains open for its wider acceptance.
 
 For #78, temporary stage tracing in run `1792579333054718-0` showed a valid
 cursor at tick 207, then `0x00000557FECC05FB` before any room-render stage at

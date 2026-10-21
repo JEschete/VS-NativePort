@@ -51,6 +51,20 @@ int Field_GroundHeightAtTile(int x, int z) {
   return GroundHeight(Field_GroundHeightFlagsAtTile(x, z));
 }
 
+int Field_TryGroundHeightAtTile(int x, int z, int* ground_height) {
+  if (ground_height == nullptr) {
+    Core_Debugf("ai", "Terrain height query requires an output value");
+    std::abort();
+  }
+  const auto* frame = Battle_Ai_FrameState();
+  if (frame->heightMap == nullptr || x < 0 || z < 0 || x >= kAiFrameGridSide ||
+      z >= kAiFrameGridSide) {
+    return 0;
+  }
+  *ground_height = GroundHeight(Field_GroundHeightFlagsAtTile(x, z));
+  return 1;
+}
+
 // decomp: func_800E4308 (src/BATTLE/BATTLE.PRG/7B5DC.s:399).
 int Field_GroundHeightFlagsAtPackedTile(unsigned int tile) {
   return Field_GroundHeightFlagsAtTile(

@@ -56,7 +56,6 @@ void Battle_Ai_SaveMovementRandomState(void);
 int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state);
 int Battle_Ai_IsFlightDirectionObstructed(Battle_Ai_ObstructionView* state, int direction, int ahead);
 int Battle_Ai_CanFlyInDirection(Battle_Ai_DirectionCacheView* state, int direction);
-int Battle_Ai_LowestReachableGroundHeight(Battle_Ai_ActorAiState* arg0, u_int arg1);
 int Battle_Ai_UpdateFlightGroundTransition(Battle_Ai_MovementCheckView* state, int action, int mode);
 void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int action);
 void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* arg0, int arg1);
