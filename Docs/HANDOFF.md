@@ -1627,3 +1627,22 @@ PORTING_WATCHLIST §2 (Option B).
   `python tools\port\check_event_dispatch.py` (requires the extracted US BATTLE.PRG).
   Visual Studio currently does not discover this Catch2 suite; run `build\Debug\VS.Tests.exe` and
   `build\Release\VS.Tests.exe` (or `test-native.cmd <configuration>`).
+
+  ### AI reaction-delay reset (F01791, #6; 2026-10-21)
+
+  `Battle_Ai_ResetActorAiReactionDelay` is now an owned native implementation, traced
+  to `func_800E4C64` in `BATTLE.PRG/7BDD4.s:571`. It ignores Ashley (actor 0) and
+  missing AI states, and resets each present non-player state's minimum action delay
+  to the source value of 30 frames. Out-of-range actor IDs are logged and rejected.
+  The regression covers the player slot, all non-player slots, and a missing state.
+
+  Validation on the current worktree: `test-native.cmd Debug` and
+  `test-native.cmd Release` each pass 307 test cases / 828528 assertions.
+  `quality-native.cmd --changed --tidy` exits successfully with 0 new findings
+  (304 total baseline findings; format, cpplint, Ruff and clone checks each report
+  zero findings). A repeat `python tools\scaffold\gen_solution.py` leaves generated
+  project files byte-identical. `git diff --check` passes on the implementation's
+  scoped files. The worktree also contains unrelated edits to
+  `.github/copilot-instructions.md` and the `resources` repository pointers; those
+  were preserved. #6 remains open: this slice does not establish flight, defeat,
+  reward, or the broader gameplay acceptance criteria.

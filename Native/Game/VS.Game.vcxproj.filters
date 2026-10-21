@@ -330,6 +330,12 @@
     <ClInclude Include="src\Battle\Ai\ActorState.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\ActorStateHelpers.c">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\ActorStateHelpers.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
     <ClInclude Include="src\Battle\Ai\AiState.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>

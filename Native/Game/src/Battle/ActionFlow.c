@@ -19,7 +19,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorStateHelpers.h"
 #include "Battle/Ai/Engagement.h"
 #include "Battle/BattleMode.h"
 #include "Battle/BattleTypes.h"

@@ -17,6 +17,7 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorStateHelpers.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Damage.h"
@@ -110,6 +111,31 @@ TEST_CASE(
                                             &fixture.candidate) == required);
   CHECK(Battle_Ai_IsActionCooldownReady(&fixture.state, &fixture.candidate) ==
         (gate == 0 && (!required || timer == 0)));
+}
+
+TEST_CASE("AI reaction-delay reset updates only existing non-player states",
+          "[ai][decisions]") {
+  const auto saved_states = std::to_array(Battle_Ai_actorAiStates);
+  std::array<Battle_Ai_ActorAiState, 16> states{};
+  std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
+  for (std::size_t id = 0; id < states.size(); ++id) {
+    states[id].minActionDelay = static_cast<u_char>(id + 1);
+    Battle_Ai_actorAiStates[id] = &states[id];
+  }
+  Battle_Ai_actorAiStates[3] = nullptr;
+
+  Battle_Ai_ResetActorAiReactionDelay(0);
+  CHECK(states[0].minActionDelay == 1);
+  for (int id = 1; id < 16; ++id) {
+    Battle_Ai_ResetActorAiReactionDelay(id);
+    if (id == 3) {
+      CHECK(states[id].minActionDelay == id + 1);
+    } else {
+      CHECK(states[id].minActionDelay == 30);
+    }
+  }
+
+  std::copy(saved_states.begin(), saved_states.end(), Battle_Ai_actorAiStates);
 }
 
 TEST_CASE("AI condition scoring uses the source's signed-halfword weights",

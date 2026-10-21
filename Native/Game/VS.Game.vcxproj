@@ -222,6 +222,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActorStateHelpers.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\Behavior.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1737,6 +1743,7 @@
     <ClInclude Include="src\Battle\Ai\ActorCleanup.h" />
     <ClInclude Include="src\Battle\Ai\ActorCommands.h" />
     <ClInclude Include="src\Battle\Ai\ActorState.h" />
+    <ClInclude Include="src\Battle\Ai\ActorStateHelpers.h" />
     <ClInclude Include="src\Battle\Ai\AiState.h" />
     <ClInclude Include="src\Battle\Ai\AiViews.h" />
     <ClInclude Include="src\Battle\Ai\Behavior.h" />

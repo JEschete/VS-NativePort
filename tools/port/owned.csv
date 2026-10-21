@@ -162,3 +162,4 @@ F04183,function,Actors_QueueFlightMovement,Native\Game\src\Actors\MotionRequests
 F04187,function,Actors_TurnActorAtSpeed,Native\Game\src\Actors\MotionRequests.cpp,Native\Game\src\Actors\MotionRequests.h,2026-10-21,from Native\Game\src\Actors\Movement.c
 F01593,function,Effects_DrawEffectParticleList,Native\Game\src\Effects\ParticleRender.cpp,Native\Game\src\Effects\ParticleRender.h,2026-10-21,from Native\Game\src\Effects\Particles.c
 F01594,function,Effects_DrawAnimatedSpriteParticles,Native\Game\src\Effects\ParticleRender.cpp,Native\Game\src\Effects\ParticleRender.h,2026-10-21,from Native\Game\src\Effects\Particles.c
+F01791,function,Battle_Ai_ResetActorAiReactionDelay,Native\Game\src\Battle\Ai\ActorStateHelpers.c,Native\Game\src\Battle\Ai\ActorStateHelpers.h,2026-10-21,from Native\Game\src\Battle\Ai\ActorState.c

@@ -59,12 +59,6 @@ int Battle_Ai_attributeActorMask;
 // decomp: D_80069C08 (D_80069C08@BATTLE/BATTLE.PRG)
 const unsigned char Battle_Ai_kFlags34Bit14Values[4] = { 9, 7, 0, 0 };
 
-// decomp: BATTLE.PRG func_800E4C64 (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_ResetActorAiReactionDelay(int)
-{
-    VS_UNPORTED("Battle::Ai::ResetActorAiReactionDelay");
-}
-
 // decomp: BATTLE.PRG func_800E5998 (src/BATTLE/BATTLE.PRG/7CD68.c:573)
 void Battle_Ai_ResolveAiLinkedActors(void)
 {
