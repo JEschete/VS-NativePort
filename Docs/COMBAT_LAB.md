@@ -349,8 +349,8 @@ Combat Lab at speed 1 with no player input. Debug runs
 `1792584856381806-0` / `1792584856370509-0` each complete 5000 frames. Bats
 select Ashley and move; actual damage reaches Ashley HP 0 and Game Over, and
 the original terrain abort is absent. This resolves the reproduced Bat path
-locally, pending exact-revision CI and issue update; it does not establish all
-flight-enemy coverage.
+in commit `155a7438`; exact-revision Source Quality CI `39599618892` passed and
+#77 is closed. It does not establish all flight-enemy coverage.
 
 Other remaining defects: #76 covers the birds/window rays/particle placement
 reports; #78 confirms a separate fresh eight-Minotaur render-cursor corruption

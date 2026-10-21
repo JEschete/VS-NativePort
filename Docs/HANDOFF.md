@@ -68,7 +68,7 @@ Remaining owner findings are tracked, not claimed fixed:
 | --- | --- |
 | Birds spawn/path incorrectly; missing window god rays; generally scattered particles | #76; identify aligned original/native effect-space cases. |
 | D'tok fire breath does nothing | #75 follow-up; prologue/Lab and missing VFX/damage distinction still unspecified. |
-| Bat flight terrain | #77; the packed-coordinate query and two required helpers are fixed locally and verified below; exact-revision CI is pending. |
+| Bat flight terrain | #77 is closed after commit `155a7438`, four 5000-frame Debug/Release Combat Lab replays, 310-case suites, zero-new-findings quality, and green exact-revision CI `39599618892`. |
 | Eight Minotaur Zombies crash | #78; independently reproduced even in a fresh process after the reset repair. Frame cursor is already corrupt on entry to room drawing at tick 209. |
 | Suspected multi-part abilities | #80; Hellhound's four-limb case now works, other exact action/target cases remain unspecified. |
 | Selected body-part glow | #81; reported, not independently repaired. |
@@ -102,8 +102,9 @@ Ashley reaches real HP 0/Game Over; no terrain-height abort is logged. These
 four scenarios provide bounded Bat evidence, not full flight-roster coverage.
 Both full test suites pass **310 cases / 828541 assertions**; changed-code tidy
 reports **0 new findings**. Two copier and two scaffold passes are stable, and
-the owned flight source survives regeneration. The exact fixing revision's CI
-and issue update remain pending; #6 remains open for its wider acceptance.
+the owned flight source survives regeneration. Commit `155a7438` passed exact-
+revision Source Quality CI `39599618892`, and #77 is closed. #6 remains open
+for its wider acceptance.
 
 For #78, temporary stage tracing in run `1792579333054718-0` showed a valid
 cursor at tick 207, then `0x00000557FECC05FB` before any room-render stage at
