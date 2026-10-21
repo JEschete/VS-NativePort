@@ -1926,6 +1926,9 @@
     <None Include="..\..\port\test_assembly_gap_audit.py">
       <Filter>tools\port</Filter>
     </None>
+    <None Include="..\..\port\test_encounter_fixups.py">
+      <Filter>tools\port</Filter>
+    </None>
     <None Include="..\..\port\understood.py">
       <Filter>tools\port</Filter>
     </None>

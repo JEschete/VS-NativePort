@@ -325,6 +325,7 @@
     <None Include="..\..\port\owned.csv" />
     <None Include="..\..\port\ref_index.py" />
     <None Include="..\..\port\test_assembly_gap_audit.py" />
+    <None Include="..\..\port\test_encounter_fixups.py" />
     <None Include="..\..\port\understood.py" />
     <None Include="..\..\Probe-Native.ps1" />
     <None Include="..\..\PSX\Asset-Tools\jpsxdec\.github\ISSUE_TEMPLATE\config.yml" />
