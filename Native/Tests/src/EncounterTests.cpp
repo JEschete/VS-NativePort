@@ -1,6 +1,8 @@
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <string>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -9,6 +11,7 @@
 
 extern "C" {
 #include "Boot/PlayerSettings.h"
+#include "Field/CollisionSampling.h"
 #include "Input/Controller.h"
 }
 
@@ -20,7 +23,15 @@ using VS::Game::ValidateEncounter;
 EncounterZone TestZone() {
   EncounterZone zone;
   zone.id = 9;
-  zone.rooms.push_back({0, "test-room", 32, 32, {4, 2, 0, 0}, {}});
+  zone.rooms.push_back(
+      {0,
+       "test-room",
+       32,
+       32,
+       {4, 2, 0, 0},
+       {},
+       std::vector<VS::Game::EncounterFloor>(
+           std::size_t{32} * 32, VS::Game::EncounterFloor::kSupported)});
   zone.enemies.push_back({0, "primary", 100, 10, false, {}, {}, -1});
   zone.enemies.push_back({1, "secondary", 200, 20, true, {}, {}, -1});
   zone.enemies.push_back(
@@ -157,4 +168,132 @@ TEST_CASE("Direct entry and title share usable player menu defaults",
   Boot_InitializePlayerSettings();
   CHECK(Input_settings.menuFlags == 0x2D8);
   Input_settings = saved;
+}
+
+namespace {
+struct FloorFixture {
+  static constexpr std::size_t kPatterns = 8 + 4 * 2 * 2;
+  std::vector<std::uint8_t> collision =
+      std::vector<std::uint8_t>(kPatterns + std::size_t{2} * 16);
+  std::array<Field_MpdTileCell, 4> cells{};
+
+  FloorFixture() {
+    // The disc header contains a profile count, not the live cell count.
+    const Field_MpdCollisionHeader header{2, 2, 0, 2};
+    std::memcpy(collision.data(), &header, sizeof(header));
+    std::fill(collision.begin() + kPatterns + 16, collision.end(), 0x80);
+  }
+
+  auto Read() const {
+    const auto* bytes = reinterpret_cast<const std::uint8_t*>(cells.data());
+    return VS::Game::ReadEncounterFloor(collision, {bytes, sizeof(cells)});
+  }
+};
+}  // namespace
+
+TEST_CASE("Encounter floor decoding normalizes only its private header",
+          "[combat][encounter][floor]") {
+  FloorFixture fixture;
+  SECTION("flat floor") {}
+  SECTION("raised floor with valid negative native height") {
+    const std::uint16_t descriptor = 0x800;
+    std::memcpy(fixture.collision.data() + 8, &descriptor, sizeof(descriptor));
+    std::fill_n(fixture.collision.begin() + FloorFixture::kPatterns, 16, 3);
+  }
+  const auto original = fixture.collision;
+  const auto floor = fixture.Read();
+  REQUIRE(floor.has_value());
+  REQUIRE(floor->size() == 4);
+  CHECK(std::ranges::all_of(*floor, [](const auto tile) {
+    return tile == VS::Game::EncounterFloor::kSupported;
+  }));
+  CHECK(fixture.collision == original);
+}
+
+TEST_CASE("Encounter floor rejects blocked partial pit and invalid samples",
+          "[combat][encounter][floor]") {
+  FloorFixture fixture;
+  auto expected = VS::Game::EncounterFloor::kBlocked;
+  SECTION("blocked") { fixture.cells[0].doorPassability = 5; }
+  SECTION("partial") { fixture.cells[0].doorPassability = 1; }
+  SECTION("unsupported collision code") {
+    fixture.cells[0].doorPassability = 7;
+  }
+  SECTION("pit") {
+    fixture.cells[0].isPit = 1;
+    expected = VS::Game::EncounterFloor::kPit;
+  }
+  SECTION("invalid floor pattern") {
+    const std::uint16_t descriptor = 1;
+    std::memcpy(fixture.collision.data() + 8, &descriptor, sizeof(descriptor));
+    expected = VS::Game::EncounterFloor::kNoFloor;
+  }
+  SECTION("missing pattern") {
+    const std::uint16_t descriptor = 0x7FF;
+    std::memcpy(fixture.collision.data() + 8, &descriptor, sizeof(descriptor));
+    expected = VS::Game::EncounterFloor::kNoFloor;
+  }
+  SECTION("invalid edge sample not just center") {
+    fixture.collision[FloorFixture::kPatterns] = 0x80;
+    expected = VS::Game::EncounterFloor::kNoFloor;
+  }
+  const auto floor = fixture.Read();
+  REQUIRE(floor.has_value());
+  CHECK((*floor)[0] == expected);
+}
+
+TEST_CASE("Encounter floor checks collision and tile record bounds",
+          "[combat][encounter][floor]") {
+  FloorFixture fixture;
+  SECTION("header") { fixture.collision.resize(7); }
+  SECTION("descriptor table") {
+    fixture.collision.resize(FloorFixture::kPatterns - 1);
+  }
+  SECTION("unsupported dimensions") {
+    const std::int16_t width = 33;
+    std::memcpy(fixture.collision.data(), &width, sizeof(width));
+  }
+  CHECK_FALSE(fixture.Read().has_value());
+  CHECK_FALSE(
+      VS::Game::ReadEncounterFloor(FloorFixture{}.collision, {}).has_value());
+}
+
+TEST_CASE("Isolated collision sampling preserves layer bias and invalid bits",
+          "[combat][encounter][floor]") {
+  FloorFixture fixture;
+  const std::int16_t live_count = 4;
+  std::memcpy(fixture.collision.data() + 6, &live_count, sizeof(live_count));
+  const std::uint16_t biased = 0x800;
+  std::memcpy(fixture.collision.data() + 8, &biased, sizeof(biased));
+  fixture.collision[FloorFixture::kPatterns] = 0x82;
+  CHECK(Field_SampleCollisionHeightCodeFromData(fixture.collision.data(),
+                                                fixture.collision.size(), 0, 0,
+                                                0) == 0x86);
+  CHECK(Field_SampleCollisionHeightCodeFromData(
+            fixture.collision.data(), fixture.collision.size(), 1, 0, 0) == 4);
+  CHECK(Field_SampleCollisionHeightCodeFromData(
+            fixture.collision.data(), fixture.collision.size(), 1, 0, 1) == 0);
+  CHECK(Field_SampleCollisionHeightCodeFromData(fixture.collision.data(),
+                                                fixture.collision.size(), 8, 0,
+                                                0) == 0x80);
+  CHECK(Field_SampleCollisionHeightCodeFromData(nullptr, 0, 0, 0, 0) == 0x80);
+}
+
+TEST_CASE("Encounter validation identifies unsafe actor tiles before spawning",
+          "[combat][encounter][floor]") {
+  auto zone = TestZone();
+  const auto setup = TestSetup(4);
+  SECTION("missing floor data") { zone.rooms[0].floor.clear(); }
+  SECTION("no floor under first enemy") {
+    zone.rooms[0].floor[8 * 32 + 1] = VS::Game::EncounterFloor::kNoFloor;
+  }
+  SECTION("blocked fourth enemy") {
+    zone.rooms[0].floor[8 * 32 + 4] = VS::Game::EncounterFloor::kBlocked;
+  }
+  SECTION("pit under Ashley") {
+    zone.rooms[0].floor[2 * 32 + 4] = VS::Game::EncounterFloor::kPit;
+  }
+  const auto errors = ValidateEncounter(setup, zone);
+  REQUIRE_FALSE(errors.empty());
+  CHECK(errors.front().find("TILE (") != std::string::npos);
 }

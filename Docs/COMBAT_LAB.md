@@ -18,7 +18,9 @@ the encounter editor; a physical gamepad or keyboard remains active.
 The menu uses the extracted SYSTEM.DAT font. Select zone, room, enemy, quantity,
 Ashley tile/elevation, group offsets, spacing and RNG seed. Add multiple groups
 for mixed enemy definitions; clear groups to return to the current selection.
-The grid shows starting tiles, not a collision or height-map preview.
+The grid shows starting tiles over a conservative static-floor preview: green
+tiles have complete floor support; dark tiles are blocked/partial, pits, missing
+support or unavailable data. Invalid starts identify the actor, tile and reason.
 
 The compact font uses the SYSTEM.DAT interface palette, including its black
 outline and gray shades. The unreadable solid-glyph rendering in the original
@@ -33,6 +35,15 @@ Rebuild and restart the lab to pick up that correction; no data re-extraction is
   stop and returns to the editor. Select Start again for a fresh encounter.
 - Closing the window or reaching `--frames` interrupts the session; this is not
   victory or gameplay-completion evidence.
+
+For four Silver Wolves in zone 9, room 0, use Ashley X=4/Z=9, enemy definition 4,
+quantity 4, X offset -2, Z offset +3, spacing 1, elevation 0. This places wolves
+at (2,12), (3,12), (4,12), (5,12). Use **Clear Groups** first if a group or preset
+is already loaded: the current quantity/offsets do not replace explicit groups.
+The reported spacing-2 layout at X=1,3,5,7 allocated all four actors, but X=1
+has no valid floor and X=7 is blocked. See [#68](https://github.com/JEschete/VS-NativePort/issues/68).
+F10 returns to the builder even while paused. Rebuild/restart to pick up the
+floor-preview fix; a running debugger session does not automatically receive it.
 
 **Save Preset** writes `build\<Config>\combat-lab\last-scenario.json`.
 Load it with `--scenario <path>`; add `--start` to enter immediately. Presets record
@@ -52,8 +63,12 @@ and `--press <tick:Button[,tick:Button...]>`. A scripted press lasts two ticks;
   carry a reason; enumerating them is not a claim they work.
 - Primary actor slots 2–9 and auxiliary-body reservations follow production rules.
   Validation rejects unsupported encodings, unavailable assets, overlaps and
-  exhausted slots. It does **not** yet establish walkability, suitable elevations,
-  large-enemy footprints or safe placement in every room.
+	exhausted slots. Static-floor preflight uses the production collision decoder
+  on a private copy of room data, rejecting blocked/partial tiles, pits and any
+  invalid floor sample. Partial tiles and dynamic platform/gimmick support are
+  conservatively excluded. This does **not** establish ceiling clearance,
+  suitable elevations, large-enemy footprints, paths or safe movement in every
+  room. Positions/counts are never silently adjusted to pass validation.
 - Source-backed enemies are currently **same-zone only**. Script-dependent actors,
   cross-zone model loading and full roster verification remain open.
 - Ashley starts with the real new-game equipment, inventory and available actions.
@@ -175,3 +190,45 @@ No full-game coverage or reference parity is implied.
 
 Publication revision and pushed CI results are recorded on #16. That issue stays
 open for the remaining roster, loadout, spell/ability and gameplay audit work.
+
+## Static-floor placement verification (#68, 2026-10-21)
+
+Source: `0a074f32` plus the scoped floor fix in
+`build/quality/issue68/publish-check`, excluding unrelated dirty AI changes.
+The source MPD loader replaces the on-disk profile count with width*height;
+catalog parsing does the same only on its private copy before reusing the
+checked production sampler. Normal gameplay retains its existing sampler API.
+
+- Isolated Debug/Release x64 full solution builds pass. Full suites pass
+  **248 cases / 827175 assertions** each, including five new floor/validation
+  cases. Tests cover truncated data, invalid profile references, blocked/partial
+  tiles, pits, invalid edge samples, valid raised floors, input preservation and
+  actor-specific errors. Commands: documented MSBuild with
+  `/p:VcpkgManifestInstall=false`, then `VS.Tests.exe` with console/JUnit reporters.
+  Test Explorer did not discover these tests; the Catch2 executable was used.
+- Scoped `quality-native.cmd --files` with CollisionSampling.c,
+  EncounterCatalog.cpp, Editor.cpp and EncounterTests.cpp plus `--tidy` reports
+  zero new findings. No quality baselines or generated files were changed.
+- Exact local inputs and outputs are under `build/quality/issue68/`:
+  `unsafe-wolves.json`, `four-wolves.json`, `verify-ui.ps1`, `ui-results.json`,
+  build/test logs, quality reports and captures. Replay arguments:
+  `--data <Native/data> --scenario <preset> --start --frames 650 --speed 4
+  --scripted --capture <bmp>`. The unsafe preset returns 2 before spawning;
+  its errors identify enemy 1 at (1,12) as missing floor and enemy 4 at (7,12)
+  as blocked. The safe layout starts all four enemy slots at Y=0.
+- Final Debug/Release replays each retain four supported enemies through all
+  599 ready frames. Safe runs: Release `1792561333604857-0`, Debug
+  `1792561348725539-0`; unsafe Debug run `1792561341006280-0` has no ready frame.
+  The preview captures are identical (SHA-256
+  `ebedb02e15c5c07db484d292ef2481c42c40eb153e623e3a909e1dd93e8dad72`);
+  `preview-check.json` verifies green floor versus dark unsupported tiles.
+- Actual native-window F6/F10 and editor keys in Release run
+  `1792561359130756-0` pause after readiness at tick 57, return at 68, restart
+  at 221 and return again at 368. Both encounters begin with all four enemies
+  at Y=0. The first automation attempt lacked Windows scan codes and paused
+  before readiness; it is not counted as lifecycle acceptance. The corrected
+  local script includes scan codes and waits for a ready room.
+
+These are static placement checks, not proof of Silver Wolf AI/combat completion
+or full room/roster coverage. Keep logs/captures local. Pushed revision and CI
+evidence belong on #68; the broader #16 remains open.

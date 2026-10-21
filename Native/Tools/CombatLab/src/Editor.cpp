@@ -51,6 +51,7 @@ constexpr std::uint32_t kHighlight = 0xFF514635;
 constexpr std::uint32_t kWarning = 0xFF7CA4EF;
 constexpr std::uint32_t kPlayerMarker = 0xFFF0B060;
 constexpr std::uint32_t kEnemyMarker = 0xFF6666EE;
+constexpr std::uint32_t kSupportedFloor = 0xFF365437;
 
 std::size_t Cycle(std::size_t index, std::size_t count, int direction) {
   if (count == 0) return 0;
@@ -241,11 +242,21 @@ void Editor::Draw(Canvas& canvas) const {
   canvas.Text(kPreviewX, kFirstRowY,
               std::format("{} ENEMIES", setup.enemies.size()));
   canvas.Text(kPreviewX, kLegendY, "BLUE: ASHLEY / RED: ENEMY");
-  canvas.Text(kPreviewX, kLayoutLabelY, "ROOM-LOCAL TILE LAYOUT");
+  canvas.Text(kPreviewX, kLayoutLabelY, "GREEN: FLOOR / DARK: UNSUPPORTED");
   if (room.width > 0 && room.depth > 0) {
     const int cell = std::max(1, std::min(220 / room.width, 210 / room.depth));
     const int left = 390;
     const int top = 125;
+    for (int z = 0; z < room.depth; ++z) {
+      for (int x = 0; x < room.width; ++x) {
+        const auto index = static_cast<std::size_t>(z) * room.width + x;
+        if (index < room.floor.size() &&
+            room.floor[index] == Game::EncounterFloor::kSupported) {
+          canvas.Rectangle(left + x * cell, top + z * cell, cell, cell,
+                           kSupportedFloor);
+        }
+      }
+    }
     for (int x = 0; x <= room.width; ++x) {
       canvas.Rectangle(left + x * cell, top, 1, room.depth * cell, kHighlight);
     }
@@ -268,12 +279,12 @@ void Editor::Draw(Canvas& canvas) const {
     }
   }
   const auto errors = Game::ValidateEncounter(setup, zone);
-  canvas.Text(kLabelX, kValidationY,
-              errors.empty() ? "PLACEMENT BOUNDS AND SLOT BUDGET VALID"
-                             : errors.front(),
-              kWarning);
+  canvas.Text(
+      kLabelX, kValidationY,
+      errors.empty() ? "STATIC FLOOR AND SLOT BUDGET VALID" : errors.front(),
+      kWarning);
   canvas.Text(kLabelX, kWarningY,
-              "FLOOR AND ENEMY BEHAVIOR ARE NOT YET VERIFIED", kWarning);
+              "LARGE FOOTPRINTS AND ENEMY BEHAVIOR NOT VERIFIED", kWarning);
   canvas.Text(kLabelX, kMessageY, message_, kWarning);
   canvas.Text(kLabelX, kEditorHelpY,
               "ARROWS: SELECT/ADJUST   ENTER OR CIRCLE: CONFIRM");

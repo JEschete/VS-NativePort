@@ -81,6 +81,37 @@ This is editor-readability evidence, not gameplay completion. Assets/captures
 remain local and are not committed. Pushed revision and CI/closure evidence belong
 on #67; #16 remains open for the wider combat audit.
 
+### Combat Lab unsupported placement (#68, 2026-10-21)
+
+The owner's four-Silver-Wolf setup allocated four actors, not two. In zone 9,
+room 0, the line at (1,12), (3,12), (5,12), (7,12) puts the outer actors on an
+invalid floor profile and a blocked tile respectively; later support queries
+reach -3000. Original local run: `1792560287160365-0`, first ready tick 1928.
+MPD tile-cell section is index 2, not index 3. Do not infer invalidity from a
+negative Y alone: valid raised terrain is explicitly covered by the tests.
+
+The lab now classifies complete static tiles with the existing collision decoder,
+using isolated map bytes and normalizing the disc profile count as the loader
+does. It marks supported tiles green and rejects unsafe starts with actor/tile
+reasons, without relocating actors or changing production collision. It is a
+conservative preflight, not footprint/ceiling/dynamic-support/path verification.
+
+Use F10 to return to the builder, including while paused. A supported four-wolf
+layout is Ashley (4,9), enemy 4, quantity 4, offset (-2,+3), spacing 1; clear
+existing groups first. Rebuild and restart after ending the active debugger
+session; the initial workspace build could not update that running process.
+
+Isolated `0a074f32` plus this scoped fix passes Debug/Release full builds and
+248 cases / 827175 assertions each, excluding unrelated AI work. Scoped tidy
+has no new findings and no baseline edits. Both configurations reject the unsafe
+setup before spawning and retain four supported enemies through 599 ready frames.
+Release run `1792561359130756-0` verifies F6 at ready tick 57, F10 return at 68,
+editor restart at 221 and another F10 return at 368. Debug/Release previews match.
+Exact commands, local presets,
+replay evidence and limits are in COMBAT_LAB.md and `build/quality/issue68/`.
+Do not relabel the isolated wolf placement runs as verified AI or combat.
+Publication and CI evidence belong on #68; #16 and ordered gameplay work stay open.
+
 ### Guildenstern window dialogue (2026-10-19)
 
 Verification used `35618ef2` plus the feedback-link fix and renderer regression.

@@ -38,10 +38,20 @@ enum {
 // decomp: BATTLE.PRG func_80099514 (src/BATTLE/BATTLE.PRG/2EA3C.s:2494).
 u_char Field_SampleCollisionHeightCode(u_int sample_x, int sample_z,
                                        int layer) {
-  const Field_MpdCollisionHeader* map = Field_roomData.collisionMap;
-  const size_t length = Field_roomData.header.collisionMapLength;
-  if (map == NULL || length < sizeof *map || layer < 0 ||
-      layer >= kLayerCount || sample_z < 0 || map->width <= 0 ||
+  return Field_SampleCollisionHeightCodeFromData(
+      Field_roomData.collisionMap, Field_roomData.header.collisionMapLength,
+      sample_x, sample_z, layer);
+}
+
+// Same decoder for checked, isolated room data; no live-room state is changed.
+u_char Field_SampleCollisionHeightCodeFromData(const void* data, size_t length,
+                                               u_int sample_x, int sample_z,
+                                               int layer) {
+  Field_MpdCollisionHeader header;
+  if (data == NULL || length < sizeof header) return kInvalidHeight;
+  memcpy(&header, data, sizeof header);
+  const Field_MpdCollisionHeader* map = &header;
+  if (layer < 0 || layer >= kLayerCount || sample_z < 0 || map->width <= 0 ||
       map->height <= 0 || map->cellCount < map->width * map->height ||
       (sample_x >> kSamplesPerAxisBits) >= (unsigned)map->width ||
       ((unsigned)sample_z >> kSamplesPerAxisBits) >= (unsigned)map->height) {
@@ -53,7 +63,7 @@ u_char Field_SampleCollisionHeightCode(u_int sample_x, int sample_z,
   const size_t tile =
       ((size_t)sample_z >> kSamplesPerAxisBits) * (unsigned)map->width +
       (sample_x >> kSamplesPerAxisBits);
-  const unsigned char* bytes = (const unsigned char*)map;
+  const unsigned char* bytes = (const unsigned char*)data;
   uint16_t descriptor;
   memcpy(&descriptor,
          bytes + sizeof *map +

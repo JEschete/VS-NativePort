@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <charconv>
+#include <cstddef>
 #include <cstring>
 #include <format>
 #include <set>
@@ -21,6 +22,7 @@ extern "C" {
 #include "Actors/ActorLoading.h"
 #include "Actors/CharacterInit.h"
 #include "Actors/Spawning.h"
+#include "Field/CollisionSampling.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
 }
@@ -133,6 +135,13 @@ EncounterRoom ReadRoom(const Content::DataStore& store, int index,
     }
     room.entrance.x = room.width / 2;
     room.entrance.z = room.depth / 2;
+    const auto collision_offset =
+        header.roomSectionOffset + sizeof(sections) + sections[0];
+    const auto floor = ReadEncounterFloor(
+        Section(*bytes, collision_offset, sections[1]),
+        Section(*bytes, collision_offset + sections[1], sections[2]));
+    if (!floor) throw std::runtime_error(floor.error());
+    room.floor = *floor;
     const auto spawns =
         Section(*bytes, header.enemySectionOffset, header.enemySectionSize);
     if (spawns.size() % sizeof(Field_MpdEnemySpawn) != 0) {
@@ -218,7 +227,62 @@ EncounterZone ReadZone(const Content::DataStore& store,
   }
   return zone;
 }
+
+EncounterFloor ClassifyFloor(Bytes collision, const Field_MpdTileCell& tile,
+                             int x, int z) {
+  constexpr int kSamplesPerTile = 4;
+  constexpr int kInvalidHeight = 0x80;
+  // func_800A8D64 (40564.c:139) checks passability; func_800A6EE8
+  // (3A1A0.c:2175) handles pits. The lab conservatively requires full tiles,
+  // excluding diagonal partial cells and dynamic platform/gimmick support.
+  if (tile.doorPassability != 0) return EncounterFloor::kBlocked;
+  if (tile.isPit != 0) return EncounterFloor::kPit;
+  for (int sample_z = 0; sample_z < kSamplesPerTile; ++sample_z) {
+    for (int sample_x = 0; sample_x < kSamplesPerTile; ++sample_x) {
+      const auto code = Field_SampleCollisionHeightCodeFromData(
+          collision.data(), collision.size(), x * kSamplesPerTile + sample_x,
+          z * kSamplesPerTile + sample_z, 0);
+      if ((code & kInvalidHeight) != 0) return EncounterFloor::kNoFloor;
+    }
+  }
+  return EncounterFloor::kSupported;
+}
 }  // namespace
+
+std::expected<std::vector<EncounterFloor>, std::string> ReadEncounterFloor(
+    Bytes collision, Bytes tile_cells) {
+  constexpr int kCollisionLayers = 2;
+  try {
+    auto header = Read<Field_MpdCollisionHeader>(collision);
+    if (header.width <= 0 || header.height <= 0 ||
+        header.width > EncounterLimits::kTiles ||
+        header.height > EncounterLimits::kTiles) {
+      return std::unexpected("unsupported collision grid dimensions");
+    }
+    const auto count = std::size_t{static_cast<unsigned>(header.width)} *
+                       static_cast<unsigned>(header.height);
+    Section(collision, sizeof(header),
+            count * kCollisionLayers * sizeof(std::uint16_t));
+    Section(tile_cells, 0, count * sizeof(Field_MpdTileCell));
+    // _loadMpdRoomSection (146C.c:15663) replaces the on-disk profile count
+    // with width*height before the production sampler reads descriptor tables.
+    std::vector<std::uint8_t> samples(collision.begin(), collision.end());
+    header.cellCount = static_cast<std::int16_t>(count);
+    std::memcpy(samples.data(), &header, sizeof(header));
+    std::vector<EncounterFloor> floor(count, EncounterFloor::kSupported);
+    for (int z = 0; z < header.height; ++z) {
+      for (int x = 0; x < header.width; ++x) {
+        const auto index = static_cast<std::size_t>(z) * header.width + x;
+        const auto tile = Read<Field_MpdTileCell>(
+            tile_cells, index * sizeof(Field_MpdTileCell));
+        floor[index] = ClassifyFloor(samples, tile, x, z);
+      }
+    }
+    return floor;
+  } catch (const std::exception& error) {
+    return std::unexpected(error.what());
+  }
+}
 
 std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
     const EncounterEnemy& enemy) {
@@ -325,22 +389,49 @@ std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
     errors.push_back(room->unavailable_reason);
   }
   std::set<std::tuple<int, int, int>> positions;
-  const auto check_position = [&](const EncounterPosition& position) {
+  const auto check_position = [&](const EncounterPosition& position,
+                                  std::string_view actor) {
     if (position.x < 0 || position.x >= room->width || position.z < 0 ||
         position.z >= room->depth || position.elevation < 0 ||
         position.elevation >= EncounterLimits::kElevations ||
         position.direction < 0 || position.direction > 1) {
       errors.emplace_back("placement is outside supported room coordinates");
+      return;
     }
     if (!positions.emplace(position.x, position.z, position.elevation).second) {
       errors.emplace_back("two actors occupy the same starting tile");
     }
+    const auto index =
+        static_cast<std::size_t>(position.z) * room->width + position.x;
+    std::string_view reason;
+    if (index >= room->floor.size()) {
+      reason = "FLOOR DATA UNAVAILABLE";
+    } else {
+      switch (room->floor[index]) {
+        case EncounterFloor::kSupported:
+          break;
+        case EncounterFloor::kBlocked:
+          reason = "BLOCKED OR PARTIAL TILE";
+          break;
+        case EncounterFloor::kPit:
+          reason = "PIT TILE";
+          break;
+        case EncounterFloor::kNoFloor:
+          reason = "NO COMPLETE FLOOR SUPPORT";
+          break;
+      }
+    }
+    if (!reason.empty()) {
+      errors.push_back(std::format("{} TILE ({},{}): {}", actor, position.x,
+                                   position.z, reason));
+    }
   };
-  check_position(setup.player);
+  check_position(setup.player, "ASHLEY");
   std::array<bool, EncounterLimits::kActorSlots> slots{};
   if (setup.enemies.empty()) errors.emplace_back("add at least one enemy");
-  for (const auto& spawn : setup.enemies) {
-    check_position(spawn.position);
+  for (std::size_t index = 0; index < setup.enemies.size(); ++index) {
+    const auto& spawn = setup.enemies[index];
+    check_position(spawn.position, std::format("ENEMY {}", index + 1));
     const auto enemy =
         std::ranges::find(zone.enemies, spawn.enemy, &EncounterEnemy::index);
     if (enemy == zone.enemies.end()) {

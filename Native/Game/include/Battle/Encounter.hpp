@@ -34,6 +34,8 @@ struct EncounterEnemy {
   int spawn_index = -1;
 };
 
+enum class EncounterFloor { kSupported, kBlocked, kPit, kNoFloor };
+
 struct EncounterRoom {
   int index = 0;
   std::string asset;
@@ -41,6 +43,7 @@ struct EncounterRoom {
   int depth = 0;
   EncounterPosition entrance;
   std::string unavailable_reason;
+  std::vector<EncounterFloor> floor;
 };
 
 struct EncounterZone {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <expected>
+#include <span>
 #include <string>
 
 #include "Battle/Encounter.hpp"
@@ -11,6 +12,10 @@ extern "C" {
 }
 
 namespace VS::Game {
+
+std::expected<std::vector<EncounterFloor>, std::string> ReadEncounterFloor(
+    std::span<const std::uint8_t> collision,
+    std::span<const std::uint8_t> tile_cells);
 
 std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
     const EncounterEnemy& enemy);
