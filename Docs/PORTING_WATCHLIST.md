@@ -134,10 +134,11 @@ AI at high speed through a **rewrite tool** that loops until the work is approve
 
 The same tool serves items 2, 5 (sequencer call sites), 6 and 7. It is worth building early in 1b.
 
-## 4. Audio: proposed modern approach (for owner review)
+## 4. Audio: owner-selected modern approach (D23; implementation remains open)
 
 The asset pipeline already keeps music sequenced (ASSET_PIPELINE.md §6.5: samples to WAV, AKAO streams to event
-JSON) and plan §6.3 already avoids sound-chip registers. The open question is what plays the notes. Proposal:
+JSON) and plan §6.3 already avoids sound-chip registers. Owner decision D23 selects sfizz/SFZ+WAV instruments,
+driven by the existing AKAO sequencer. M5 still has to define fidelity and unsupported-mode behavior:
 
 - **Instruments as SFZ.** The extractor writes each instrument bank as an SFZ file (plain text: sample, key range,
   root key, tuning, loop points, envelope, volume, pan) next to the decoded WAVs, instead of a custom JSON schema.
@@ -149,18 +150,16 @@ JSON) and plan §6.3 already avoids sound-chip registers. The open question is w
   and drives sfizz with standard events: note on/off, program change, volume (CC7), pan (CC10), reverb send
   (CC91), pitch bend for slides, and LFO depth for vibrato.
 - **Mixing and output** through SDL3's audio stream (already a dependency), with a float mix bus at 48 kHz.
-- **Reverb:** the PS1 had a fixed set of reverb presets. Two options:
-  - a modern algorithmic reverb tuned per preset (default);
-  - convolution with impulse responses that the extractor computes from the documented reverb algorithm (parity
-    mode). No hardware model runs at runtime either way.
+- **Reverb:** the PS1 had a fixed set of reverb presets. M5 must implement and test the native mapping and document
+  its parity limits; no hardware model runs at runtime.
 - **Parity switches:** optional PS1-style 4-tap interpolation and envelope curves, for side-by-side comparison in
   1b. Phase 2 defaults to the high-quality settings.
 - **Modding for free:** music and instruments become standard MIDI-like events plus SFZ+WAV, so new songs and
   replacement instruments need no custom tools. ASSET_PIPELINE's round-trip rule still applies
   (decode → event JSON + SFZ → encode == original bytes).
 
-Risk to check first: whether SFZ envelopes can match the PS1 envelope curves closely enough. If not, sfizz still
-handles playback and resampling, and our envelope replaces its built-in one for parity mode.
+Risk to check first: whether SFZ envelopes can match the PS1 envelope curves closely enough. If not, document the
+supported sfizz behavior and the remaining parity gap rather than adding a competing voice engine.
 
 ## 5. Assembly-only and inline-assembly functions
 

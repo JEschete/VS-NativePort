@@ -515,16 +515,16 @@ These are target designs, not an implemented-feature inventory. See §0.2 and th
 ### 6.3 Audio (`Engine\Audio`, `Audio::Seq`)
 - **Responsibility:** music, SFX, voice/XA streams.
 - **Model:**
-  - `SampleBank` holds 16-bit PCM loaded from `Native\data\audio\samples\*.wav` (ADPCM was decoded by VS.Extract) and its instrument data from `audio\banks\*.json`.
-  - `Voice` holds pitch, ADSR envelope and volume/pan, emulated *behaviorally* at the envelope level, not at the register level.
-  - `Mixer` runs at 48 kHz with float mixing.
-  - `Reverb` presets are equivalent to the original modes.
+  - sfizz (owner decision D23) renders instruments from SFZ regions and decoded 16-bit PCM WAV samples produced by `VS.Extract`.
+  - `Audio::Seq` retains AKAO timing, ordering, channel state, priorities and transitions; it submits ordered note/control operations to sfizz instead of driving SPU registers.
+  - SDL3 output receives the native float mix at 48 kHz. Audio-thread ownership, buffering and the simulation-to-sample clock are part of M5's acceptance.
+  - Reverb presets and unsupported noise/FM behavior must be explicitly mapped or listed; no success-shaped hardware-register shim.
   - `StreamPlayer` plays the FLAC streams converted from XA.
-- **Sequencer:** the decomp's AKAO sequence interpreter (in `Audio`, 254 rows) is copied and becomes `Audio::Seq`. It drives `Voice`s directly instead of SPU registers, and it reads the decoded `*.seq.json` event lists (music stays sequenced, D18).
-- **Absorbs:** libspu (36), libsnd (2) via `Legacy\spu_*.cpp` → migrated.
+- **Sequencer:** the decomp's AKAO sequence interpreter (in `Audio`, 254 rows) is copied and becomes `Audio::Seq`. It reads the decoded `*.seq.json` event lists (music stays sequenced, D18) and emits events to the selected synth.
+- **Absorbs:** libspu (36), libsnd (2) via typed native sample, voice, mixer and stream APIs; SPU register and RAM compatibility surfaces are retired as their callers migrate.
 - **Phase 2:** better resampling, optional interpolation modes, volume channels, replacement music hooks.
-- **Proposal (pending owner review):** instruments exported as SFZ + WAV and played by sfizz, driven by our ported AKAO sequencer through MIDI-style events; SDL3 output; tuned algorithmic or computed-IR reverb ([PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §4).
-- **Tests:** sequence-event traces versus a reference capture; ADPCM decoder versus known vectors.
+- **Backend:** owner decision D23 selects SFZ + WAV instruments played by sfizz through the ported AKAO sequencer. M5 defines the supported fidelity and explicitly lists unsupported behaviors.
+- **Tests:** sequence-event traces versus a reference capture; ADPCM decoder versus known vectors; rendered samples and lifecycle/transition checks.
 
 ### 6.4 Video (`Engine\Movie`)
 - **Responsibility:** FMV playback (the movies in `TITLE.STR`, converted to `Native\data\movies\*.mkv`).
@@ -839,8 +839,9 @@ The checkmarks below record earlier work, not fresh validation of the current tr
 - **Q4 Compatibility renderer lifetime:** reconcile the page-image decision recorded in `PageSpace.hpp` with
   D1/D8 and §2.2. Working assumption: retain it for comparison while replacing callers, then retire it from the shipping
   path. An optional fidelity backend needs explicit approval, isolated dependencies and its own verification coverage.
-- **Q5 Audio backend:** choose the native synthesis/mixing implementation and supported fidelity rules before M5
-  implementation. The sfizz/SFZ proposal remains a proposal; this revision does not approve or add a dependency.
+- **Q5 Audio backend:** backend selection is resolved by owner decision D23 (sfizz with SFZ+WAV instruments driven by
+  the existing AKAO sequencer). M5 still defines the supported fidelity rules and unsupported modes; no competing
+  synthesis backend is authorized.
 - **Q6 Save encoding and migration:** decide the native versioned representation and supported PS1 import variants
   before M9 persistence work; §6.7 currently leaves JSON versus schema-backed binary open.
 - **Q7 Reference evidence:** select extractable canonical fields and reference checkpoints in M2. Do not assume a
@@ -972,7 +973,8 @@ full EC-01/03 closure waits for all consumers, not just the title.
 ### M5 — Sequenced music/SFX and native audio output
 
 **Scope/files:** `Engine/Audio/Seq`, `SoundEffects`, `Driver`, `Mixer`, `AudioDevice`, `Legacy/Audio/LibSpu.cpp`,
-Content audio conversion; EC-02/04/06. Q5 must select a backend and fidelity requirements before implementation.
+Content audio conversion; EC-02/04/06. Owner decision D23 selects sfizz/SFZ+WAV. M5 defines the supported fidelity
+rules and explicitly lists unsupported SPU modes; no competing synthesis backend is authorized.
 
 1. Separate musical/game rules from physical voice bits and register writes. Define timestamped note/voice operations,
    sample/bank handles, priorities, cancellation, envelopes, loops, pitch/volume/pan and reverb behavior.

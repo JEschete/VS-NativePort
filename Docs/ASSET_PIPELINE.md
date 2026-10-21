@@ -81,7 +81,7 @@ Native\data\
   effects\<id>.json + textures     (EFFECT .P/.FBT/.FBC data)
   audio\
     samples\<bank>\<n>.wav         (16-bit PCM, `smpl` loop chunk)
-    banks\<bank>.json              (instruments: sample, ADSR, pitch/root key, volume/pan, loop)
+    banks\<bank>.sfz               (sfizz instrument regions over the decoded WAV samples)
     music\<id>.seq.json            (decoded AKAO event list per track)
     sfx\<id>.seq.json              (sound-effect sequences)
     streams\<name>\<channel>.flac  (XA streams: ENDING.XA, voice)
@@ -213,7 +213,7 @@ The game plays music and sound effects by sequencing sampled instruments at runt
 | Piece | Format | Detail |
 |---|---|---|
 | Samples | `audio\samples\<bank>\<n>.wav` | PS1 4-bit ADPCM decoded once to **16-bit PCM** (the decode is deterministic, so this is lossless with respect to what the console plays). The loop start/end go in the WAV `smpl` chunk; the original sample rate is kept. |
-| Instrument banks | `audio\banks\<bank>.json` | per instrument/region: sample ref, key range, root key, fine tune, ADSR (the original rate values *and* their computed times in ms), volume, pan, reverb send |
+| Instrument banks | `audio\banks\<bank>.sfz` | SFZ regions map samples, key ranges, root key, fine tune, loop points, envelope, volume and pan for sfizz (owner decision D23); any original values not represented by SFZ must remain available to the event/asset conversion path. |
 | Music | `audio\music\<id>.seq.json` | the AKAO byte stream decoded into an event list per track: `{tick, op, args}` with op names taken from the decomp's sequencer opcode table (note on/off, tempo, volume, pan, program change, loop markers, jumps, vibrato/tremolo, reverb, …). Jumps target event indices, not byte offsets. |
 | Sound effects | `audio\sfx\<id>.seq.json` | same event format; banks are shared or embedded as the original does |
 | Index | `catalogs\music.json`, `catalogs\sfx.json` | `music.<name>` / `sfx.<name>` IDs → files, with `legacyId` (the original track/SE number) |
