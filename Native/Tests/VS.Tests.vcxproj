@@ -35,7 +35,7 @@
   <Import Project="$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props" Condition="Exists('$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props')" />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;$(MSBuildThisFileDirectory)src;$(MSBuildThisFileDirectory)..\Engine\include;$(MSBuildThisFileDirectory)..\Content\include;$(MSBuildThisFileDirectory)..\Game\include;$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;$(MSBuildThisFileDirectory)src;$(MSBuildThisFileDirectory)..\Engine\include;$(MSBuildThisFileDirectory)..\Content\include;$(MSBuildThisFileDirectory)..\Game\include;$(MSBuildThisFileDirectory)..\Tools\CombatLab\include;$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -50,6 +50,7 @@
     <ClCompile Include="src\AiDecisionTests.cpp" />
     <ClCompile Include="src\AiLayoutTests.cpp" />
     <ClCompile Include="src\AiPlanningTests.cpp" />
+    <ClCompile Include="src\CombatLabCanvasTests.cpp" />
     <ClCompile Include="src\CombatTestCases.cpp" />
     <ClCompile Include="src\CombatTests.c">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -114,6 +115,7 @@
     <ClCompile Include="src\TerrainHeightTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />
     <ClCompile Include="src\ViewportBoundsTests.cpp" />
+    <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\VS.Engine.vcxproj">

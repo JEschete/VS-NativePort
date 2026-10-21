@@ -39,6 +39,7 @@ class Project:
     legacy: bool = False
     libs: list[str] = field(default_factory=list)       # vcpkg packages to link (exe only): sdl3, catch2
     whole_archive: list[str] = field(default_factory=list)  # libraries linked in full (exe only)
+    extra_sources: list[str] = field(default_factory=list)  # paths relative to Native\ (shared test subjects)
 
     @property
     def guid(self) -> str:
@@ -64,7 +65,8 @@ PROJECTS = [
     Project("VS.Extract", "Tools\\Extract", kind="exe", console=True, refs=["VS.Engine", "VS.Content"],
             libs=["sdl3"]),
     Project("VS.Tests", "Tests", kind="exe", console=True, refs=["VS.Engine", "VS.Content", "VS.Game"],
-            libs=["sdl3", "catch2", "movie"], whole_archive=["VS.Engine", "VS.Content", "VS.Game"]),
+            libs=["sdl3", "catch2", "movie"], whole_archive=["VS.Engine", "VS.Content", "VS.Game"],
+            see=["VS.CombatLab"], extra_sources=[r"Tools\CombatLab\src\Canvas.cpp"]),
 ]
 BY_NAME = {p.name: p for p in PROJECTS}
 
@@ -96,6 +98,8 @@ def files_of(p: Project) -> list[tuple[str, str]]:
             for f in sorted(base.rglob("*")):
                 if f.is_file() and f.suffix in CODE:
                     out.append((CODE[f.suffix], rel(p.dir, f)))
+    for source in p.extra_sources:
+        out.append((CODE[Path(source).suffix], rel(p.dir, NATIVE / source)))
     return out
 
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <span>
 #include <string_view>
@@ -13,6 +14,7 @@ class Canvas {
   static constexpr int kHeight = 480;
   static constexpr std::uint32_t kTextColor = 0xFFE8E0CE;
   Canvas();
+  explicit Canvas(std::span<const std::uint8_t> system_data);
   void Clear();
   void Rectangle(int x, int y, int width, int height, std::uint32_t color);
   void Text(int x, int y, std::string_view text,
@@ -22,6 +24,7 @@ class Canvas {
  private:
   std::vector<std::uint32_t> pixels_;
   std::vector<std::uint16_t> font_;
+  std::array<std::uint16_t, 16> font_palette_{};
   int font_width_ = 0;
   int font_height_ = 0;
 };

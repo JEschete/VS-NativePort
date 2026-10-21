@@ -47,6 +47,40 @@ both log files persist real results. Startup parse errors are now logged too.
 See the isolated-publication section of COMBAT_LAB.md for exact runs and differences
 from the earlier combined worktree. #16 remains open for full coverage.
 
+### Combat Lab font readability (#67, 2026-10-20)
+
+The owner screenshot exposed unreadable solid menu glyphs. Canvas treated every
+nonzero 4-bit index as the same bright foreground color, so black outlines and
+gray antialiasing filled in the letters. The fix reads the checked compact-font
+CLUT at (864,223) from SYSTEM.DAT's first interface block, uploaded to (832,0)
+by BATTLE/5BF94.c:3484. The image0 font remains on page (768,0); paletteOffset
+is a different palette. Transparency is tested after lookup, including opaque
+black 0x8000, and each RGB555 shade is tinted without flattening it.
+
+Four asset-free Canvas regressions cover shading, tint, zero/nonzero-index
+transparency, clipping and malformed image/palette offsets (66 assertions).
+The solution generator compiles the actual Canvas source into VS.Tests; no
+game-library dependency on the lab executable was added. Two generation runs
+preserved project hashes. Scoped tidy reports zero new findings, no baseline edits.
+
+Verification is based on `30cf4dde` plus this fix. Full Debug/Release combined
+worktree suites pass 275 cases / 827368 assertions, including unrelated dirty AI
+work. The isolated publication worktree excludes that AI work; full Debug/Release
+suites pass 243 cases / 827134 assertions each and its editor capture matches the
+combined-worktree Debug/Release output byte-for-byte (SHA-256
+`30ED2C791662CF763ABF54768F4BAF0D69A43CC24088CE5220AED8D24D70B7E2`).
+The isolated CI-equivalent quality gate also passes with zero new findings.
+
+Local evidence: `build/quality/issue67/`, including `editor-before.bmp`,
+`editor-after.bmp`, `editor-debug-after.bmp`, `editor-publish.bmp`, the corresponding
+Windows OCR text, build/test logs/XML and quality reports. Capture command:
+`VS.CombatLab.exe --frames 2 --scripted --capture <path>`; the isolated run also
+passes the original extracted data root via `--data`. Before-capture OCR returned
+no text; the corrected capture recognizes the title, actions, warnings and controls.
+This is editor-readability evidence, not gameplay completion. Assets/captures
+remain local and are not committed. Pushed revision and CI/closure evidence belong
+on #67; #16 remains open for the wider combat audit.
+
 ### Guildenstern window dialogue (2026-10-19)
 
 Verification used `35618ef2` plus the feedback-link fix and renderer regression.

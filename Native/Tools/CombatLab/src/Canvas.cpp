@@ -4,6 +4,8 @@
 #include <cctype>
 #include <cstring>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 #include "Content/DataStore.hpp"
 #include "Legacy/Psx.h"
@@ -29,6 +31,17 @@ constexpr int kDefaultAdvance = 4;
 constexpr int kNibbleBits = 4;
 constexpr int kNibbleMask = 15;
 constexpr int kGlyphColumnMask = 0xFE;
+constexpr int kFontPageX = 768;
+constexpr int kInterfacePageX = 832;
+constexpr int kInterfaceWidthWords = 64;
+constexpr int kFontPaletteX = 864;
+constexpr int kFontPaletteY = 223;
+constexpr int kColorChannels = 3;
+constexpr int kColorBits = 5;
+constexpr int kColorMask = 31;
+constexpr int kByteBits = 8;
+constexpr int kByteMask = 255;
+constexpr std::uint32_t kAlphaMask = 0xFF000000;
 
 template <typename T>
 T Read(std::span<const std::uint8_t> bytes, std::size_t offset) {
@@ -39,30 +52,55 @@ T Read(std::span<const std::uint8_t> bytes, std::size_t offset) {
   std::memcpy(&value, bytes.data() + offset, sizeof(T));
   return value;
 }
-}  // namespace
 
-Canvas::Canvas() : pixels_(std::size_t{kWidth} * kHeight) {
+std::vector<std::uint8_t> ReadSystemFont() {
   const auto* store = Content::DataStore::Get();
   const auto* entry = store ? store->Find("BATTLE/SYSTEM.DAT") : nullptr;
   if (entry == nullptr) throw std::runtime_error("SYSTEM.DAT is missing");
-  const auto bytes = store->ReadAll(*entry);
+  auto bytes = store->ReadAll(*entry);
   if (!bytes) throw std::runtime_error(bytes.error());
-  const auto header = Read<Content_SystemDatHeader>(*bytes, 0);
-  const auto rect = Read<RECT>(*bytes, header.image0Offset);
+  return std::move(*bytes);
+}
+
+std::uint32_t TintFontColor(std::uint16_t shade, std::uint32_t color) {
+  std::uint32_t result = color & kAlphaMask;
+  for (int channel = 0; channel < kColorChannels; ++channel) {
+    const auto intensity = (shade >> (channel * kColorBits)) & kColorMask;
+    const auto tint = (color >> (channel * kByteBits)) & kByteMask;
+    result |= ((intensity * tint) / kColorMask) << (channel * kByteBits);
+  }
+  return result;
+}
+}  // namespace
+
+Canvas::Canvas() : Canvas(ReadSystemFont()) {}
+
+Canvas::Canvas(std::span<const std::uint8_t> system_data)
+    : pixels_(std::size_t{kWidth} * kHeight) {
+  const auto header = Read<Content_SystemDatHeader>(system_data, 0);
+  const auto rect = Read<RECT>(system_data, header.image0Offset);
   font_width_ = rect.w;
   font_height_ = rect.h;
-  if (font_width_ <= 0 || font_width_ > kPageWidthWords ||
+  if (rect.x != kFontPageX || rect.y != 0 ||
+      font_width_ < kInterfaceWidthWords || font_width_ > kPageWidthWords ||
       font_height_ < kFontMinimumHeight || font_height_ > kPageHeight) {
     throw std::runtime_error("invalid SYSTEM.DAT font dimensions");
   }
-  const auto offset = header.image0Offset + sizeof(RECT);
+  const auto offset = std::size_t{header.image0Offset} + sizeof(RECT);
   const auto length = static_cast<std::size_t>(font_width_) * font_height_ *
                       sizeof(std::uint16_t);
-  if (offset > bytes->size() || length > bytes->size() - offset) {
+  if (offset > system_data.size() || length > system_data.size() - offset) {
     throw std::runtime_error("SYSTEM.DAT font image is outside its file");
   }
   font_.resize(length / sizeof(std::uint16_t));
-  std::memcpy(font_.data(), bytes->data() + offset, length);
+  std::memcpy(font_.data(), system_data.data() + offset, length);
+  // BATTLE/5BF94.c:3484 uploads the first interface block to (832,0).
+  // Compact text uses its CLUT at (864,223), not SYSTEM.DAT paletteOffset.
+  const auto palette_offset =
+      std::size_t{header.interfaceDataOffset} +
+      (kFontPaletteY * kInterfaceWidthWords + kFontPaletteX - kInterfacePageX) *
+          sizeof(std::uint16_t);
+  font_palette_ = Read<decltype(font_palette_)>(system_data, palette_offset);
 }
 
 void Canvas::Clear() {
@@ -106,7 +144,10 @@ void Canvas::Text(int x, int y, std::string_view text, std::uint32_t color) {
         const auto pixel =
             (word >> (((u + column) % kPixelsPerWord) * kNibbleBits)) &
             kNibbleMask;
-        if (pixel != 0) Rectangle(x + column, y + row, 1, 1, color);
+        const auto shade = font_palette_[pixel];
+        if (shade != 0) {
+          Rectangle(x + column, y + row, 1, 1, TintFontColor(shade, color));
+        }
       }
     }
     x += width == 0 ? kDefaultAdvance : width;

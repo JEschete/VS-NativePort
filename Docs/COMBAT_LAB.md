@@ -20,6 +20,11 @@ Ashley tile/elevation, group offsets, spacing and RNG seed. Add multiple groups
 for mixed enemy definitions; clear groups to return to the current selection.
 The grid shows starting tiles, not a collision or height-map preview.
 
+The compact font uses the SYSTEM.DAT interface palette, including its black
+outline and gray shades. The unreadable solid-glyph rendering in the original
+lab checkpoint is tracked separately in [#67](https://github.com/JEschete/VS-NativePort/issues/67).
+Rebuild and restart the lab to pick up that correction; no data re-extraction is needed.
+
 - Arrows / gamepad D-pad: select rows and adjust values.
 - Enter / Circle: confirm. Select **Start Encounter** to enter gameplay.
 - Keyboard gameplay bindings are unchanged: arrows move; C=Circle, X=Cross,

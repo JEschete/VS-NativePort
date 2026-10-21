@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="..">
+      <UniqueIdentifier>{30C91B74-FE21-5391-9664-5F34BE56AA76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\Tools">
+      <UniqueIdentifier>{5663B528-9F13-5E6B-9710-1435AE9640E3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\Tools\CombatLab">
+      <UniqueIdentifier>{CB33C9ED-C9B6-5D6F-8667-7198A6C15EDE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\Tools\CombatLab\src">
+      <UniqueIdentifier>{1E5165DB-8EC7-5511-A167-D460786D1005}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{E2D8E2BE-A836-5D76-87F0-1B39A67C9A1B}</UniqueIdentifier>
     </Filter>
@@ -19,6 +31,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\AiPlanningTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CombatLabCanvasTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\CombatTestCases.cpp">
@@ -122,6 +137,9 @@
     </ClCompile>
     <ClCompile Include="src\ViewportBoundsTests.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp">
+      <Filter>..\Tools\CombatLab\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
