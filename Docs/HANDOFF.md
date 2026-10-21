@@ -10,13 +10,16 @@ The menu-rendering/lifecycle checkpoints now cover those owner-reported text,
 equipment/Status, Map/Data and Options gaps. The owner approves the menu-first
 split: #39 retains actual combat/audio/cleared-puzzle consumer acceptance rather
 than blocking the rendering/lifecycle gate on later ordered work. Final gate CI
-and closure are recorded in #2; the next ordered implementation is #6. Menu
-shortcuts and setting values are not combat verification.
+and closure are recorded in #2. Issue #6's AI, initial-drop, encounter
+progression and defeat-flow acceptance is now verified and closed; the next
+ordered implementation is sound functionality #7. Menu shortcuts and setting
+values are not combat verification.
 Preserve the original dialogue pause and button advance; do not shorten the scene delay.
 
 The later Quick Manual report is repaired and verified below (#66). Its scoped
 publication/CI record belongs in that issue. The newly reproduced Score submenu
-fast-fail remains #65; #6 is still the next ordered gameplay implementation.
+fast-fail remains #65; sound functionality #7 is the next ordered gameplay
+implementation after #6's verified closure.
 
 ### Owner playtest and shared-runtime repairs (2026-10-21, stopping checkpoint)
 
@@ -106,7 +109,7 @@ the owned flight source survives regeneration. Commit `155a7438` passed exact-
 revision Source Quality CI `39599618892`, and #77 is closed. #6 remains open
 for its wider acceptance.
 
-### Game Over fade packet link (#6, 2026-10-21)
+### #6 AI, initial drop and defeat-flow acceptance (2026-10-21)
 
 F02771 (`MENU/MENU7.PRG/260.c:3504`) linked the negative-fade tile by
 truncating its host pointer into the renderer's 24-bit link field. The native
@@ -115,18 +118,35 @@ before the fix (`LegacyGpu_Pointer` returned null for raw link `0x9f13a4`,
 instead of resolving the fade packet); the copier fix now uses the native
 handle and the test passes.
 
-Fresh Debug and Release full New Game prologue replays at 16x speed reach the
-real Game Over screen through ordinary combat. Down at tick 21000 and Start at
-21100 select Title; each run logs a real title-session transition at tick 21177.
-The 26000-tick runs use eight captures apiece and no HP, position, RNG, event or
-progression edits. Exact inputs, manifests, logs and captures are under
-`build/quality/issue6-gameover-final-{debug,release}/`.
+Current Debug and Release Combat Lab runs `1792588127503092-0` and
+`1792588245223129-0` use the original Zone 9 Zombie definition and 32 ordinary
+Circle inputs at 40-tick intervals. The Zombie moves toward Ashley, targets
+actor 0 and executes attacks that lower Ashley's HP from 250 to 230. Its HP
+falls from 121 to 49 by tick 1100 and 0 by 1150; actor 2 is removed by 1350,
+when its real source drop (item 323, count 2) is queued. Ashley survives. The
+New Game reward gate remains false and inventory unchanged, so this verifies
+the initial drop queue, not inventory delivery or full drop-table coverage.
+Exact args, manifests and traces are in the Combat Lab run folders.
+
+Fresh full New Game prologue controller replays use 839 scheduled controls and
+only Start at tick 1000 to skip the intro. Debug and Release each complete
+48000 ticks / 22 captures with exit 0; logs load MAP004 then MAP005 (Debug
+20425/23120; Release 22561/25240), and the final captures remain in the live
+battle. Neither route edits HP, position, RNG, events or progression.
+
+Fresh Debug/Release defeat-flow replays each complete 26000 ticks / eight
+captures with exit 0. The real Game Over menu appears after natural combat
+damage; Down at 21000 and Start at 21100 select Title, with the native title
+transition at 21177. Exact inputs, manifests, logs and captures for both replay
+groups are under `build/quality/issue6-final-{victory,gameover}-<config>/`.
 
 Both configurations pass **311 cases / 828561 assertions**. Changed-code tidy
-reports **0 new findings** (6 baseline); a second copier pass is stable.
-Commit `ae2e30e1` passed exact-revision Source Quality CI `39603967134`.
-#6 remains open for fresh enemy-victory/progression and delivered-reward
-evidence, plus broader flight-enemy coverage.
+reports **0 new findings** (6 baseline), and a second copier pass is stable.
+The F02771 fix in `ae2e30e1` passed exact-revision Source Quality CI
+`39603967134`; documentation revision `b7f97ce0` also passed CI
+`39604755566`. #6 is closed with its explicit acceptance verified. Complete
+item/equipment drop-table coverage remains at priorities 09 and 10; broader
+roster coverage remains separately tracked.
 
 For #78, temporary stage tracing in run `1792579333054718-0` showed a valid
 cursor at tick 207, then `0x00000557FECC05FB` before any room-render stage at

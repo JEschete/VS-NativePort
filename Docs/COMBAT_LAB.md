@@ -352,26 +352,39 @@ the original terrain abort is absent. This resolves the reproduced Bat path
 in commit `155a7438`; exact-revision Source Quality CI `39599618892` passed and
 #77 is closed. It does not establish all flight-enemy coverage.
 
-**Game Over fade (#6):** A real full New Game prologue replay (intro Start at
-1000 only, followed by ordinary controls) reaches the Game Over menu after
-combat defeat. Down at tick 21000 and Start at 21100 choose Title; the real
-title-session transition is logged at tick 21177. Debug and Release each
-complete 26000 ticks with eight captures and exit 0, without editing HP,
-positions, RNG, events or progression. Exact inputs, manifests, logs and
-captures are under `build/quality/issue6-gameover-final-{debug,release}/`.
+**AI, initial drop and defeat-flow acceptance (#6):** Current Debug and Release
+Combat Lab runs `1792588127503092-0` and `1792588245223129-0` replay the original
+Zone 9 Zombie definition with 32 ordinary Circle inputs at 40-tick intervals.
+The Zombie moves toward Ashley, targets actor 0 and executes attacks that lower
+Ashley HP from 250 to 230. Its HP falls from 121 to 49 by tick 1100 and 0 by
+1150; actor 2 is removed by 1350, when its real source drop (item 323, count 2)
+is queued. Ashley survives. The original New Game reward gate remains false
+and inventory unchanged: this verifies the initial drop queue, not inventory
+delivery or complete drop-table coverage. Exact inputs and JSONL traces are in
+the Combat Lab run folders.
 
-This exercised F02771's negative-fade path. Its original raw host-pointer
-truncation did not produce a native renderer link: the regression failed with
-`LegacyGpu_Pointer` returning null. The copy-generator fix now stores
-`LegacyGpu_Handle(prim)`, and the focused test verifies the overlay ordering
-head resolves to the fade packet. Debug and Release both pass **311 cases /
-828561 assertions**; `quality-native.cmd --changed --tidy` reports zero new
-findings (6 baseline), and the second copier pass is stable. Commit `ae2e30e1`
-passed exact Source Quality CI `39603967134`.
+Fresh full New Game prologue replays use 839 scheduled controls and only Start
+at tick 1000 to skip the intro. Debug/Release each complete 48000 ticks and all
+22 captures with exit 0; logs load MAP004 then MAP005 (Debug 20425/23120;
+Release 22561/25240), and final captures show the live battle. Neither route
+edits HP, position, RNG, event or progression state.
 
-#6 remains open: this confirms current player defeat/fade flow, not fresh enemy
-victory and encounter progression, delivered rewards, or complete flight-roster
-coverage.
+Fresh player-defeat/fade replays each complete 26000 ticks and eight captures
+with exit 0. After natural defeat, the real Game Over menu appears; Down at
+21000 and Start at 21100 choose Title, and the title-session transition is
+logged at 21177. Exact inputs, manifests, logs and captures for both replay
+groups are under `build/quality/issue6-final-{victory,gameover}-<config>/`.
+
+F02771's original raw host-pointer truncation failed the focused regression:
+`LegacyGpu_Pointer` returned null instead of resolving the fade packet. The
+copy-generator fix stores `LegacyGpu_Handle(prim)`, and the test now verifies
+the ordering-table head resolves to that packet. Debug and Release both pass
+**311 cases / 828561 assertions**; `quality-native.cmd --changed --tidy`
+reports zero new findings (6 baseline), and the second copier pass is stable.
+Fix commit `ae2e30e1` passed exact Source Quality CI `39603967134`; docs
+revision `b7f97ce0` passed `39604755566`. All explicit #6 acceptance is verified
+and the issue is closed. Complete drop-table coverage remains at priorities 09
+and 10; broader roster coverage remains separately tracked.
 
 Other remaining defects: #76 covers the birds/window rays/particle placement
 reports; #78 confirms a separate fresh eight-Minotaur render-cursor corruption
