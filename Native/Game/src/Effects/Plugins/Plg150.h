@@ -9,7 +9,7 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG150_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG150_H_DECLS
 
-extern CVECTOR Effects_Plg150_tiledRingColorFactors[];
+extern CVECTOR Effects_Plg150_tiledRingColorFactors[8];
 extern SVECTOR Effects_Plg150_surfaceVertices[5][16];
 extern u_char Effects_Plg150_ringColorFactors[][4];
 

@@ -9,5 +9,5 @@ int Effects_Plg049_trailEmissionCounter; /* contents: module image (ModuleData.c
 u_char Effects_Plg049_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FE3F8 (D_800FE3F8@EFFECT/PLG049.BIN)
-CVECTOR Effects_Plg049_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
+CVECTOR Effects_Plg049_tiledRingColorFactors[8]; /* contents: module image (ModuleData.c) */
 

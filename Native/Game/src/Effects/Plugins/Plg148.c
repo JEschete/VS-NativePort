@@ -6,5 +6,5 @@
 int Effects_Plg148_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FC8FC (D_800FC8FC@EFFECT/PLG148.BIN)
-CVECTOR Effects_Plg148_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
+CVECTOR Effects_Plg148_tiledRingColorFactors[8]; /* contents: module image (ModuleData.c) */
 

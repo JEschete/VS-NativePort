@@ -9,6 +9,6 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG085_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG085_H_DECLS
 
-extern CVECTOR Effects_Plg085_tiledRingColorFactors[];
+extern CVECTOR Effects_Plg085_tiledRingColorFactors[8];
 
 #endif // VS_EFFECTS_PLUGINS_PLG085_H_DECLS

@@ -9,7 +9,7 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG146_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG146_H_DECLS
 
-extern CVECTOR Effects_Plg146_tiledRingColorFactors[];
+extern CVECTOR Effects_Plg146_tiledRingColorFactors[8];
 extern SVECTOR Effects_Plg146_mirrorSurfaceVertices[5][16];
 extern int Effects_Plg146_particleEmissionCounter;
 extern u_char Effects_Plg146_ringColorFactors[][4];

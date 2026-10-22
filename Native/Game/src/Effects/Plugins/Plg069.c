@@ -12,5 +12,5 @@ u_char Effects_Plg069_mesh10Faces[16][6]; /* contents: module image (ModuleData.
 int Effects_Plg069_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FD4D8 (D_800FD4D8@EFFECT/PLG069.BIN)
-CVECTOR Effects_Plg069_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
+CVECTOR Effects_Plg069_tiledRingColorFactors[8]; /* contents: module image (ModuleData.c) */
 

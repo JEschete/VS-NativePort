@@ -9,7 +9,7 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG242_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG242_H_DECLS
 
-extern CVECTOR Effects_Plg242_tiledRingColorFactors[];
+extern CVECTOR Effects_Plg242_tiledRingColorFactors[8];
 extern int Effects_Plg242_trailEmissionCounter;
 
 #endif // VS_EFFECTS_PLUGINS_PLG242_H_DECLS

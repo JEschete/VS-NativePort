@@ -11,6 +11,6 @@
 
 extern int Effects_Plg049_trailEmissionCounter;
 extern u_char Effects_Plg049_ringColorFactors[][4];
-extern CVECTOR Effects_Plg049_tiledRingColorFactors[];
+extern CVECTOR Effects_Plg049_tiledRingColorFactors[8];
 
 #endif // VS_EFFECTS_PLUGINS_PLG049_H_DECLS

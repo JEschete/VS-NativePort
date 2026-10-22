@@ -12,5 +12,5 @@ u_char Effects_Plg137_mesh10Faces[16][6]; /* contents: module image (ModuleData.
 int Effects_Plg137_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FE040 (D_800FE040@EFFECT/PLG137.BIN)
-CVECTOR Effects_Plg137_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
+CVECTOR Effects_Plg137_tiledRingColorFactors[8]; /* contents: module image (ModuleData.c) */
 

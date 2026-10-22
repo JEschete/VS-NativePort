@@ -3,7 +3,7 @@
 #include "Effects/Plugins/Plg150.h"
 
 // decomp: D_800FCA1C (D_800FCA1C@EFFECT/PLG150.BIN)
-CVECTOR Effects_Plg150_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
+CVECTOR Effects_Plg150_tiledRingColorFactors[8]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FCA3C (D_800FCA3C@EFFECT/PLG150.BIN)
 SVECTOR Effects_Plg150_surfaceVertices[5][16]; /* contents: module image (ModuleData.c) */

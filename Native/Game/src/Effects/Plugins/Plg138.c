@@ -6,5 +6,5 @@
 u_char Effects_Plg138_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FCD5C (D_800FCD5C@EFFECT/PLG138.BIN)
-CVECTOR Effects_Plg138_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
+CVECTOR Effects_Plg138_tiledRingColorFactors[8]; /* contents: module image (ModuleData.c) */
 

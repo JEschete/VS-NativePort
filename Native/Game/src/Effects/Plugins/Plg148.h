@@ -10,6 +10,6 @@
 #define VS_EFFECTS_PLUGINS_PLG148_H_DECLS
 
 extern int Effects_Plg148_trailEmissionCounter;
-extern CVECTOR Effects_Plg148_tiledRingColorFactors[];
+extern CVECTOR Effects_Plg148_tiledRingColorFactors[8];
 
 #endif // VS_EFFECTS_PLUGINS_PLG148_H_DECLS

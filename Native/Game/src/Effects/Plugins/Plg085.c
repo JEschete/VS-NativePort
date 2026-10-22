@@ -3,5 +3,5 @@
 #include "Effects/Plugins/Plg085.h"
 
 // decomp: D_800FB260 (D_800FB260@src/EFFECT/tiledRings.h)
-CVECTOR Effects_Plg085_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
+CVECTOR Effects_Plg085_tiledRingColorFactors[8]; /* contents: module image (ModuleData.c) */
 

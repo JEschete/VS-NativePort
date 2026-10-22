@@ -22,13 +22,25 @@
 #include "Render/PageSpace.hpp"
 
 extern "C" {
+#include "Effects/Plugins/Plg044.h"
+#include "Effects/Plugins/Plg049.h"
 #include "Effects/Plugins/Plg069.h"
+#include "Effects/Plugins/Plg073.h"
 #include "Effects/Plugins/Plg077.h"
+#include "Effects/Plugins/Plg085.h"
 #include "Effects/Plugins/Plg129.h"
 #include "Effects/Plugins/Plg137.h"
+#include "Effects/Plugins/Plg138.h"
+#include "Effects/Plugins/Plg143.h"
+#include "Effects/Plugins/Plg146.h"
+#include "Effects/Plugins/Plg148.h"
+#include "Effects/Plugins/Plg150.h"
 #include "Effects/Plugins/Plg153.h"
 #include "Effects/Plugins/Plg154.h"
+#include "Effects/Plugins/Plg160.h"
+#include "Effects/Plugins/Plg242.h"
 #include "Effects/Plugins/Plg260.h"
+#include "Effects/Plugins/Plg265.h"
 }
 
 using VS::u16;
@@ -62,7 +74,23 @@ constexpr auto kMesh10Data = std::to_array<Content_ModuleDataEntry>({
     {"EFFECT/PLG260.BIN", 0xB7C, 96, Effects_Plg260_mesh10Faces, 96},
 });
 
-void CheckMesh10Reloads();
+constexpr auto kTiledRingData = std::to_array<Content_ModuleDataEntry>({
+    {"EFFECT/PLG049.BIN", 19448, 32, Effects_Plg049_tiledRingColorFactors, 32},
+    {"EFFECT/PLG069.BIN", 15576, 32, Effects_Plg069_tiledRingColorFactors, 32},
+    {"EFFECT/PLG073.BIN", 22332, 32, Effects_Plg073_tiledRingColorFactors, 32},
+    {"EFFECT/PLG085.BIN", 6752, 32, Effects_Plg085_tiledRingColorFactors, 32},
+    {"EFFECT/PLG137.BIN", 18496, 32, Effects_Plg137_tiledRingColorFactors, 32},
+    {"EFFECT/PLG138.BIN", 13660, 32, Effects_Plg138_tiledRingColorFactors, 32},
+    {"EFFECT/PLG143.BIN", 7780, 32, Effects_Plg143_tiledRingColorFactors, 32},
+    {"EFFECT/PLG146.BIN", 24700, 32, Effects_Plg146_tiledRingColorFactors, 32},
+    {"EFFECT/PLG148.BIN", 12540, 32, Effects_Plg148_tiledRingColorFactors, 32},
+    {"EFFECT/PLG150.BIN", 12828, 32, Effects_Plg150_tiledRingColorFactors, 32},
+    {"EFFECT/PLG160.BIN", 6940, 32, Effects_Plg160_tiledRingColorFactors, 32},
+    {"EFFECT/PLG242.BIN", 15456, 32, Effects_Plg242_tiledRingColorFactors, 32},
+    {"EFFECT/PLG265.BIN", 26008, 32, Effects_Plg265_tiledRingColorFactors, 32},
+});
+
+void CheckTemplateReloads();
 
 std::filesystem::path FindRepoDisc() {
   for (auto dir = std::filesystem::current_path();
@@ -176,7 +204,7 @@ TEST_CASE(
   }
   REQUIRE(Content::DataStore::Open(root).has_value());
   REQUIRE(Content_LoadModuleData() == 0);
-  CheckMesh10Reloads();
+  CheckTemplateReloads();
   CHECK(Tests_ActionDefinitionsLoaded() == 1);
   CHECK(Tests_DefaultEffectPackageLoaded() == 1);
   CHECK(CheckMenuDiscStringsLoaded() == 1);
@@ -338,7 +366,7 @@ TEST_CASE("Manifest sector rounding preserves empty and partial entries",
 }
 
 namespace {
-void CheckMesh10Binding(const Content_ModuleDataEntry& expected) {
+void CheckTemplateBinding(const Content_ModuleDataEntry& expected) {
   INFO(expected.module << " offset " << expected.offset);
   const std::span entries(Content_moduleData, Content_moduleDataCount);
   const auto found = std::ranges::find(entries, expected.target,
@@ -368,32 +396,57 @@ void CheckMesh10Indices(const Content_ModuleDataEntry& expected,
   }
 }
 
+void CheckTemplateSourceBytes(const Content::DataStore& store,
+                              const Content_ModuleDataEntry& expected) {
+  INFO(expected.module << " offset " << expected.offset);
+  const auto* file = store.Find(expected.module);
+  REQUIRE(file != nullptr);
+  std::vector<u8> source(expected.size);
+  REQUIRE(store.Read(*file, expected.offset, source));
+  const std::span native_bytes(static_cast<const u8*>(expected.target),
+                               expected.size);
+  CHECK(std::ranges::equal(native_bytes, source));
+}
+
 void CheckLoadedMesh10Data(const Content::DataStore& store) {
   for (usize index = 0; index < kMesh10Data.size(); ++index) {
     const auto& expected = kMesh10Data[index];
-    INFO(expected.module << " offset " << expected.offset);
-    CheckMesh10Binding(expected);
-    const auto* file = store.Find(expected.module);
-    REQUIRE(file != nullptr);
-    std::array<u8, 96> source{};
-    const auto source_bytes = std::span(source).first(expected.size);
-    REQUIRE(store.Read(*file, expected.offset, source_bytes));
-    const std::span native_bytes(static_cast<const u8*>(expected.target),
-                                 expected.size);
-    CHECK(std::ranges::equal(native_bytes, source_bytes));
+    CheckTemplateBinding(expected);
+    CheckTemplateSourceBytes(store, expected);
     CheckMesh10Indices(expected, index % 2 == 0);
   }
 }
 
-void CheckMesh10Reloads() {
+void CheckLoadedTiledRingData(const Content::DataStore& store) {
+  for (const auto& expected : kTiledRingData) {
+    CheckTemplateBinding(expected);
+    CheckTemplateSourceBytes(store, expected);
+  }
+  const Content_ModuleDataEntry initialized{
+      "EFFECT/PLG044.BIN", 3832, 32, Effects_Plg044_tiledRingColorFactors, 32};
+  CheckTemplateSourceBytes(store, initialized);
+  const Content_ModuleDataEntry shared{
+      "EFFECT/PLG139.BIN", 6752, 32, Effects_Plg085_tiledRingColorFactors, 32};
+  CheckTemplateSourceBytes(store, shared);
+}
+
+void CheckTemplateReloads() {
   CheckLoadedMesh10Data(*Content::DataStore::Get());
+  CheckLoadedTiledRingData(*Content::DataStore::Get());
   REQUIRE(Content_LoadModuleData() == 0);
   CheckLoadedMesh10Data(*Content::DataStore::Get());
+  CheckLoadedTiledRingData(*Content::DataStore::Get());
 }
 }  // namespace
 
 TEST_CASE("Every Mesh10 instance imports complete vertex and triangle tables",
           "[content][module][mesh10]") {
   const unsigned index = GENERATE(Catch::Generators::range(0u, 14u));
-  CheckMesh10Binding(kMesh10Data[index]);
+  CheckTemplateBinding(kMesh10Data[index]);
+}
+
+TEST_CASE("Every tiled ring imports all eight transparency color modes",
+          "[content][module][tiled-ring]") {
+  const unsigned index = GENERATE(Catch::Generators::range(0u, 13u));
+  CheckTemplateBinding(kTiledRingData[index]);
 }

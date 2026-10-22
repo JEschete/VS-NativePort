@@ -3,7 +3,7 @@
 #include "Effects/Plugins/Plg146.h"
 
 // decomp: D_800FF87C (D_800FF87C@EFFECT/PLG146.BIN)
-CVECTOR Effects_Plg146_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
+CVECTOR Effects_Plg146_tiledRingColorFactors[8]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FF89C (D_800FF89C@EFFECT/PLG146.BIN)
 SVECTOR Effects_Plg146_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.c) */

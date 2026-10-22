@@ -506,11 +506,62 @@ acquisition tests:
 
 All four Sword arts have now completed through actual controls in both
 configurations. This is not all-forty execution or positive Poison acceptance:
-the Zombie did not demonstrate Vile Scar's Poison. Shared tiled-ring color
-imports remain defective and are tracked separately in
+the Zombie did not demonstrate Vile Scar's Poison. The separate tiled-ring
+color repair is recorded below under
 [#122](https://github.com/JEschete/VS-NativePort/issues/122). Neither this
 storage repair nor those successful actions establish complete visual parity
 or close the particle-path/trail acceptance in #76.
+
+### Tiled-ring source-data checkpoint (2026-10-22)
+
+[#122](https://github.com/JEschete/VS-NativePort/issues/122) corrects thirteen
+more omitted source tables: PLG049, 069, 073, 085, 137, 138, 143, 146, 148,
+150, 160, 242 and 265. The original shared template defines eight CVECTOR
+colors and selects modes0-7. Each required source extent is32 bytes, not one
+tentative native element. The new regression failed all **13 bindings**
+before their existing ledger sizes were corrected and output regenerated.
+
+All thirteen imports now have checked module/offset/size/capacity and
+byte-for-byte source comparisons across repeated loading. PLG139 shares the
+PLG085 binding; both original tables at offset6752 are byte-identical, and
+the test checks that alias against PLG139 too. The already source-initialized
+PLG044 table remains a separate control. Thus all fifteen shared template
+instances have covered source storage, without changing renderer algorithms.
+
+Real-input Cherry Ronde190 verification repeats three encounters and two
+live-enemy F10/re-entry cycles per configuration:
+
+| Configuration | Run | Damage | Live tiled-ring evidence |
+| --- | --- | --- | --- |
+| Release | `1792697927456019-0` | 4/4/2 | 155 samples per entry, ages1-39 |
+| Debug | `1792698004510448-0` | 4/2/4 | 156 samples per entry, ages1-39 |
+
+The ignored diagnostic resolves callbacks and checks native field offsets
+from the current PDBs, then only reads the effect lists and sends ordinary
+controller input. It observes the actual PLG137 tiled-ring state advancing;
+all32 live color bytes match the original module on every sampled update.
+Every cast pays HP55, applies its exact reported damage and recovers control.
+Unrelated resources/progression remain unchanged. Both sessions end normally
+with `trace_failed:false` and no errors. Two earlier diagnostic attempts
+stopped on PowerShell record/output handling after successful casts; they
+were not native failures and are not accepted re-entry runs.
+
+Validation on `25831e66` plus the scoped dirty repair:
+
+- Standard Debug/Release solution builds and full native suites:
+  **459 cases / 1,082,480 assertions** each.
+- `[content][module]`: **7 cases / 2,116 assertions** each.
+- Stable second generation; existing owned paths preserved; all **11**
+  copier regressions pass.
+- `quality-native.cmd --files Native\Tests\src\ContentTests.cpp --tidy`:
+  **three existing findings, zero new**, with no baseline/suppression changes.
+- `build\quality\live-restart-check.ps1 -Configuration Debug|Release
+  -Art 190 -ArtRuns 3 -ObserveTiledRing`. Local evidence:
+  `build\quality\tiled-ring-*`, `live-tiled-ring-*.json`, and the runs above.
+
+This certifies the repaired source tables and the observed live consumer,
+not every affected effect's appearance. Particle motion/trails and full
+reference visual parity remain #76; full forty-art acceptance remains #11.
 
 ### Original art inventory and acquisition requirements
 

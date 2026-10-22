@@ -3,7 +3,7 @@
 #include "Effects/Plugins/Plg073.h"
 
 // decomp: D_800FEF3C (D_800FEF3C@EFFECT/PLG073.BIN)
-CVECTOR Effects_Plg073_tiledRingColorFactors[]; /* contents: module image (ModuleData.c) */
+CVECTOR Effects_Plg073_tiledRingColorFactors[8]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FEF5C (D_800FEF5C@EFFECT/PLG073.BIN)
 u_char Effects_Plg073_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */

@@ -9,7 +9,7 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG265_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG265_H_DECLS
 
-extern CVECTOR Effects_Plg265_tiledRingColorFactors[];
+extern CVECTOR Effects_Plg265_tiledRingColorFactors[8];
 extern int Effects_Plg265_particleEmissionCounter;
 extern int Effects_Plg265_trailEmissionCounter;
 extern int Effects_Plg265_particleEmissionCounter2;
