@@ -1014,7 +1014,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
         prim[8] = vs_getXY(240, 116);
         prim[9] = vs_getUV(79, 64);
 
-        *temp_s6 = ((u_int)prim << 8) >> 8;
+        *temp_s6 = LegacyGpu_Handle(prim);
         Render_frameScratch.primitiveCursor = prim + 10;
 
         break;

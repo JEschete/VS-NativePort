@@ -60,6 +60,14 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("Effects_InvokeAllPluginUpdates", table)
         self.assertIn("Effects_Plg198_Ring", table)
 
+    def test_rank_menu_preserves_native_packet_link(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Menu/Magic.c").read_text()
+        menu = source.split("int Menu_Magic_UpdateWarlockMenu(", 1)[1]
+        menu = menu.split("int Menu_Magic_UpdateShamanMenu(", 1)[0]
+        self.assertIn("*temp_s6 = LegacyGpu_Handle(prim);", menu)
+        self.assertNotIn("*temp_s6 = ((u_int)prim << 8) >> 8;", menu)
+
 
 if __name__ == "__main__":
     unittest.main()

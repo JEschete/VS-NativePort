@@ -403,6 +403,10 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("((uintptr_t)var_t2 << 8) >> 8", "LegacyGpu_Handle(var_t2)",
          "button-prompt background at ordering entry15 must preserve traversal to submenu labels below it"),
     ],
+    "F02604": [
+        ("((u_int)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+         "MENU0/84.c rank selector must link its final frame packet with a native handle; truncation hides the lower UI chain"),
+    ],
     "F02662": [
         ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
          "Status limb indicator packets retain native link handles"),
