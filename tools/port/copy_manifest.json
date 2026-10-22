@@ -465,7 +465,7 @@
 "Native\\Game\\src\\Effects\\Templates\\ParticleOrigin.inl": "74f084e05829af18a2c0d7cdd718fc95886b5c5b2bbb8a60b2e382dd14ca9bc5",
 "Native\\Game\\src\\Effects\\Templates\\ParticleRender.c": "a5e6b57365d1da9f8f0003ab8d3372e460f77f0beeb1b20a0955510bf4757530",
 "Native\\Game\\src\\Effects\\Templates\\ParticleRender.h": "715bab4c243539bb773aa17d28898bb35ffb76780d301eaf391fda5e3bb182da",
-"Native\\Game\\src\\Effects\\Templates\\ParticleRender.inl": "f674289461c7a7752f0bb00b4e1746f28b7d5a42fb67908d79a691d931175170",
+"Native\\Game\\src\\Effects\\Templates\\ParticleRender.inl": "45257501bf26bf9ccb5ad521571f5cceefaa5f303b6d54f47ac85fa8e53ec146",
 "Native\\Game\\src\\Effects\\Templates\\ParticleTarget.c": "18caa24b53e3e2ca28da6e5b354b1ba44558808d40f5c43beb0787dc26edacd2",
 "Native\\Game\\src\\Effects\\Templates\\ParticleTarget.h": "45eba1ec205114cf4a682f8b992fb6cb781ea163801ab7a702f5f694583bf6bc",
 "Native\\Game\\src\\Effects\\Templates\\ParticleTarget.inl": "b4842ad3fb39dc99dc38634ce03a2a8038303485ec86682acecd3dbd9ed01c06",

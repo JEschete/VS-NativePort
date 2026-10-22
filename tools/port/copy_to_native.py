@@ -1623,6 +1623,7 @@ class Copier:
                     i = j
                 i += 1
             fn = self.drop_storage(self.renamed(hdr, d["start"], d["end"], "EFFECT"))
+            fn = self.apply_fixups(r, fn)
             macro = r["name"]
             stem = r["final_location"].strip()[:-2]
             inl = stem + ".inl"

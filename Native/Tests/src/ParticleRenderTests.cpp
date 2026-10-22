@@ -19,10 +19,12 @@ extern "C" {
 #include "Effects/Particles.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
+#include "Effects/Templates/ParticleRender.h"
 #include "Effects/Timeline.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
+#include "Render/LegacyPackets.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 }
@@ -344,4 +346,96 @@ TEST_CASE("Child effect tracks wait for the native outstanding child count",
     Effects_DestroyPrimaryEffectInstance(Effects_primaryInstances);
   }
   Effects_primaryInstances = saved_instances;
+}
+
+namespace {
+struct RibbonFixture : ParticleFixture {
+  static constexpr int kSegments = 8;
+  Effects_ParticleDefinition definition{};
+  Effects_ParticleEmitterScratch scratch{};
+  Effects_ParticleQuadSet ribbons{};
+  std::array<SVECTOR, 12> points{};
+
+  RibbonFixture() {
+    ribbons.controlPoints = points.data();
+    ribbons.textureAnimation = particle.textureAnimation;
+    // Keep depth independent of extrapolated spline samples.
+    Render_frameScratch.viewMatrix.t[2] = 1024;
+    for (std::size_t index = 0; index < points.size(); ++index) {
+      points[index].vx = static_cast<std::int16_t>((index % 4) * 32);
+    }
+  }
+
+  const Render_ParticleQuadPacket* CheckPackets() const {
+    const auto* packets =
+        reinterpret_cast<const Render_ParticleQuadPacket*>(storage.data() + 1);
+    const auto packet_count =
+        static_cast<std::ptrdiff_t>(ribbons.count) * kSegments;
+    REQUIRE(Render_frameScratch.primitiveCursor == packets + packet_count);
+    const void* previous_packet = ordering.data() + 16 + 255;
+    for (const auto* packet = packets; packet != packets + packet_count;
+         ++packet) {
+      CHECK(nextPrim(packet) == previous_packet);
+      previous_packet = packet;
+    }
+    CHECK(nextPrim(ordering.data() + 16 + 256) == previous_packet);
+    CHECK(storage.front() == 0xDEADBEEF);
+    CHECK(storage.back() == 0xDEADBEEF);
+    return packets;
+  }
+
+  void CheckSamples(int initial_width, int half_width) const {
+    constexpr int kCurveEnd = 0x3000;
+    const auto* packets = CheckPackets();
+    VS::Core::Rand15 expected(1234);
+    for (int ribbon = 0; ribbon < ribbons.count; ++ribbon) {
+      const int width =
+          ribbon == 0 ? (initial_width == 0 ? 1 : initial_width) : half_width;
+      int previous = 0;
+      for (int segment = 0; segment < kSegments; ++segment) {
+        int sample = kCurveEnd;
+        if (segment + 1 < kSegments) {
+          const int random = expected.Next();
+          sample = (segment + 1) * 0x600 +
+                   (width == 0 ? random : random % width) - width / 2;
+        }
+        const auto& quad = packets[ribbon * kSegments + segment].opaque4;
+        CHECK(quad.u0 == texture.u + texture.w * previous / kCurveEnd);
+        CHECK(quad.u1 == texture.u + texture.w * sample / kCurveEnd);
+        previous = sample;
+      }
+    }
+    CHECK(Core_Random_Rand() == expected.Next());
+    CHECK(ribbons.textureAnimation.frameTimer == 8);
+  }
+};
+}  // namespace
+
+TEST_CASE(
+    "Shared particle ribbons preserve original zero-width remainder and RNG",
+    "[effects][particle-ribbon]") {
+  const auto renderer =
+      GENERATE(&Effects_Plg045_ParticleRender, &Effects_Plg057_ParticleRender,
+               &Effects_Plg082_ParticleRender, &Effects_Plg114_ParticleRender,
+               &Effects_Plg152_ParticleRender, &Effects_Plg153_ParticleRender,
+               &Effects_Plg156_ParticleRender, &Effects_Plg263_ParticleRender,
+               &Effects_Plg265_ParticleRender, &Effects_Plg266_ParticleRender,
+               &Effects_Plg300_ParticleRender, &Effects_Plg301_ParticleRender);
+  const auto initial_width = GENERATE(0, 16, -16);
+  const auto half_width = GENERATE(0, 6);
+  const auto count = GENERATE(2, 1, 0, 3);
+  CAPTURE(initial_width, half_width, count);
+  RibbonFixture fixture;
+  fixture.definition.innerExtentRange[0] =
+      fixture.definition.innerExtentRange[1] =
+          static_cast<std::int16_t>(initial_width);
+  fixture.definition.vectorRanges[4][0] =
+      fixture.definition.vectorRanges[4][1] =
+          static_cast<std::int16_t>(half_width * 2);
+  fixture.ribbons.count = static_cast<std::int16_t>(count);
+  Core_Random_Seed(1234);
+  renderer(&fixture.definition, &fixture.scratch, &fixture.instance,
+           &fixture.ribbons);
+  fixture.CheckSamples(initial_width, half_width);
+  Core_Random_Seed(1);
 }

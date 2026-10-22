@@ -692,6 +692,74 @@ This establishes equipment setup and representative per-family execution,
 **not** all forty arts, all secondary effects, visual parity, #76 or #82.
 #11 remains open for the remaining acceptance gates.
 
+### Thunderwave remainder repair and higher-tier checkpoint
+
+At published `91f446c6`, ordinary Greatsword action 193 (Thunderwave) crashed
+with `0xC0000094` at tick 851 in Debug run `1792702303877631-0` (#124).
+The shared ribbon renderer reused the previous ribbon's final half-width
+as the next spline-jitter divisor, which could be zero.
+
+Original PLG045 `func_800FA760` confirms this reuse: `DIV`/`MFHI` at
+`0x800FAA74`/`0x800FAA78`, width updates at `0x800FABB4`, `0x800FACCC` and
+`0x800FB01C`, and the back edge `0x800FB2E8 -> 0x800FAA08` without reloading
+the initial width. The [R3000A division contract](https://psx-spx.consoledev.net/cpuspecifications/#multiplydivide)
+leaves the dividend in HI for a zero divisor; native C `% 0` instead traps.
+Splitting or repeatedly clamping the width would change the original behavior.
+The F01867 producer fix retains the random sample unchanged for zero width,
+otherwise taking its remainder, with exactly one RNG call per sample.
+The copier now applies its existing reviewed-fixup pass to shared template
+bodies as well as ordinary functions. References remain read-only.
+
+The native regression fails before the fix with the same divide-by-zero.
+Afterward it exercises all twelve renderer instances, initial extents
+0/16/-16, final ribbon half-widths 0/6 and zero through three ribbons. It checks
+exact sample-derived UVs and RNG progression, packet counts and native links,
+texture advancement and storage guards. The second generation is stable;
+owned particle-render and encounter implementations are preserved.
+This is bounded behavior verification, not C++ promotion or compatibility
+retirement.
+
+Higher-tier ordinary-input evidence uses the same original-data equipment,
+room, target, starting stats and controller driver as the first-tier table:
+
+| Action / HP cost | Debug run / damage | Release run / damage |
+|---|---|---|
+| Dagger 185 / 40 | `1792702041304012-0` / 5 | `1792702200811712-0` / 5 |
+| Dagger 186 / 55 | `1792702066934572-0` / 3 | `1792702226323079-0` / 7 |
+| Dagger 187 / 75 | `1792702088383033-0` / 3 | `1792702252692436-0` / 1 |
+| Greatsword 193 / 40 | `1792703376728435-0` / 2, 4 | `1792703466908989-0` / 5, 5 |
+| Greatsword 194 / 55 | `1792703589953818-0` / 3 | `1792703739938947-0` / 3 |
+| Greatsword 195 / 75 | `1792703614501626-0` / 3 | `1792703764325378-0` / 3 |
+
+Thunderwave uses `-ArtRuns 2`: each run contains two completed casts separated
+by F10 with the actors alive. Its effect/control-return ticks are 909/1041
+and 2159/2289 in Debug, 907/1039 and 2153/2283 in Release. All rows check exact
+HP costs, positive target HP deltas and recovery, without runtime resource or
+progression edits. Every accepted trace has one final `session.end`,
+`trace_failed:false` and zero error-level records.
+Dagger 185 did **not** apply Paralysis to the Zombie in the inspected Debug
+trace; positive secondary-effect acceptance needs a suitable target.
+
+Validation at base `91f446c6` plus the scoped #124 changes (unrelated dirty
+documentation, solution/tool projects and reference state preserved):
+
+- Debug/Release solution builds pass. `[effects]`: **15 cases / 13,381
+  assertions**; full native suites: **467 cases / 1,094,874 assertions** each.
+- `python -m unittest discover -s tools\port -p test_encounter_fixups.py`:
+  **13 tests pass**. Two `copy_to_native.py` runs confirm stable output.
+- Scoped quality with `--tidy` covers `ParticleRenderTests.cpp`,
+  `copy_fixups.py`, `copy_to_native.py` and `test_encounter_fixups.py`:
+  **0 new findings** (23 existing tooling findings); no baseline changes.
+- Local evidence: `build/quality/thunderwave-{debug,release}-{build,tests,full,live}.log`,
+  `thunderwave-ribbon-before.log`, `thunderwave-generation*.log`,
+  `thunderwave-quality.log`, `thunderwave-trace-audit.log`,
+  `greatsword-{debug,release}-{194,195}.log`, and the run directories above.
+  The original disassembly is local-only in
+  `build/quality/thunderwave-particle-original.asm`.
+
+This does not establish all forty arts, positive secondary effects, complete
+particle visual parity (#76), or resolution of the intermittent #82 report.
+
 ## Learned-spell acceptance checkpoint (2026-10-22)
 
 This closes the bounded representative acceptance of

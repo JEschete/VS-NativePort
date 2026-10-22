@@ -1,4 +1,4 @@
-"""Regressions for encounter-entry source adaptations, without game assets."""
+"""Regressions for encounter and effect source adaptations, without game assets."""
 
 import unittest
 from pathlib import Path
@@ -7,6 +7,16 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_particle_ribbon_preserves_original_zero_divisor_remainder(self):
+        old, new, _ = copy_fixups.FIXES["F01867"][0]
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Effects/Templates/ParticleRender.inl").read_text()
+        self.assertIn(new, source)
+        self.assertNotIn(old, source)
+        self.assertEqual(new.count("Core_Random_Rand()"), 1)
+        self.assertIn("if (width != 0) {\n                sampleJitter %= width;", new)
+        self.assertIn("0x800FAA74", new)
+
     def test_ashley_spawn_initializes_materials_for_empty_equipment_slots(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Actors/Ashley.c").read_text()

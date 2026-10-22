@@ -91,7 +91,12 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
         Core_Gte_StoreSz3Otz(&depths[0]);
         curveSamples[0] = 0;
         for (segment = 1; segment < 8; ++segment) {
-            curveSamples[segment] = segment * 0x600 + Core_Random_Rand() % width - width / 2;
+            int sampleJitter = Core_Random_Rand();
+            // PLG045 func_800FA760, 0x800FAA74: DIV by zero leaves the dividend in HI.
+            if (width != 0) {
+                sampleJitter %= width;
+            }
+            curveSamples[segment] = segment * 0x600 + sampleJitter - width / 2;
             Core_Math_InterpolateLagrangeShortVector(controlPoints, controlPoints + 1,
                 controlPoints + 2, controlPoints + 3, curveSamples[segment] - 0x1000,
                 &arg1->vector);

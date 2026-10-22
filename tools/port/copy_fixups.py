@@ -90,6 +90,17 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F01867": [
+        ("            curveSamples[segment] = segment * 0x600 + Core_Random_Rand() % width - width / 2;",
+         """            int sampleJitter = Core_Random_Rand();
+            // PLG045 func_800FA760, 0x800FAA74: DIV by zero leaves the dividend in HI.
+            if (width != 0) {
+                sampleJitter %= width;
+            }
+            curveSamples[segment] = segment * 0x600 + sampleJitter - width / 2;""",
+         "Preserve the original nontrapping remainder and RNG consumption when the "
+         "width reused from the previous ribbon becomes zero; do not clamp or reload it."),
+    ],
     "F01856": [
         ("    int bladeMaterial;\n    int shieldMaterial;",
          "    int bladeMaterial = 0;\n    int shieldMaterial = 0;",
