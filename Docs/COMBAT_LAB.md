@@ -259,8 +259,127 @@ existing finding, zero new. No baseline/suppression changes. Local evidence:
 `live-chain-22-*-Release.json`; replay command
 `build\quality\live-restart-check.ps1 -Configuration Debug|Release -Chain 22
 -ChainTiming success|early|late|cancel`.
-Remaining #10 gates include every ability's effect, acquisition/unlock
-progression, live defensive timing and actor defeat during a chain.
+The following checkpoint covers effects, live defense, chain defeat and
+earned acquisition.
+
+## Ability effects, defense and defeat checkpoint
+
+The next tests use gameplay revision `2d231c81`, with maintained test changes
+in `Native\Tests\src\CombatTestCases.cpp`. No production effect implementation,
+generated output or progression policy was changed for this checkpoint.
+
+All 28 named abilities have deterministic component tests through the original
+stat calculators and effect mediators. Numeric effects then use production
+stat application; status cases use production infliction/removal without the
+menu-label rendering path. These do not substitute for full hit-roll/target
+resolution, every runtime-table binding, audiovisual parity, or story/save
+acceptance. Random/equipment-wear processing is disabled for these component
+contracts, not in the live replays.
+
+The fixture's previous target hit is 101 combined HP/MP, incoming damage is
+110, and offensive queue offset is 2. Ashley starts at HP 600/1000, MP 100/300,
+weapon DP 100/1000 and PP 70/255; the target starts at HP 800, MP 200.
+
+| Actions | Verified component effect |
+| --- | --- |
+| 22 Heavy Shot | 72 target HP damage |
+| 23 Gain Life / 24 Mind Assault / 25 Gain Magic | 32 Ashley HP / target MP damage / Ashley MP |
+| 26 Raging Ache / 27 Mind Ache | 42 target HP / MP damage from Ashley's missing resource |
+| 28 Temper | 42 target HP damage and weapon DP 100 -> 304 |
+| 29 Crimson Pain | 82 target HP damage and 20 Ashley HP cost |
+| 30 Instill | 12 target HP damage and weapon PP 70 -> 173 |
+| 31 Phantom Pain | 72 target HP damage and weapon PP 70 -> 0 |
+| 32 Paralysis Pulse / 34 Numbing Claw / 35 Dulling Impact / 37 Snake Venom | Paralysis / Numbness / Silence / Poison |
+| 40 Ward | Removes Paralysis and Numbness, preserves Poison |
+| 41 Siphon Soul | 12 MP from incoming spell cost 25; no non-spell recovery |
+| 42 Reflect Magic / 43 Reflect Damage | 44 HP reflected only for the matching attack type and damage effect |
+| 44 Absorb Magic / 45 Absorb Damage | 22 HP restored only for the matching attack type and damage effect |
+| 46 Impact Guard through 52 Demonscale | 55 HP restored for each matching affinity; all mismatches and healing inputs checked |
+| 53 Phantom Shield | 90 HP restored and 90 shield PP consumed only after damage |
+
+Additional tests cover HP/MP/DP/PP capacity and MP-drain clamps. Timing cases
+now explicitly include action IDs 1/54/99/141: the original extended defensive
+window is an **action-ID >= 54** rule, not simply a spell-type rule.
+
+### Live Ward and lethal chain
+
+| Check | Debug run | Release run |
+| --- | --- | --- |
+| Actual enemy attack, timed Ward and Paralysis cure | `1792687747745849-0` | `1792687763174288-0` |
+| Heavy Shot kills Zombie, collect loot, return to field | `1792688551760571-0` | `1792688605774947-0` |
+
+Ward uses the all-abilities fixture above and Lab-only Paralysis setup. Both
+builds show Paralysis active at tick 163, a real enemy hit taking HP 999 -> 903,
+the input observation at 289, cure at 357 and normal return at 437. Risk rises
+0 -> 1; the ability-used flag is set and the original acquisition point rises
+0 -> 1. Other progression and inventory are unchanged. Unlike offensive
+chains, the original defensive point path does not require Minotaur flag
+0x82 >= 10; this source-backed asymmetry is preserved.
+
+The lethal-chain fixture uses the original Zone 9 room 0 Zombie definition 2,
+Ashley at (4,9), enemy at (4,10), all-abilities, HP/MP 999 and other stats
+unchanged. A real weapon hit does 28 HP, followed by alternating Heavy Shot
+and Gain Life. Five Heavy Shots do 19/21/23/25/27 HP; the last kills the
+121-HP enemy. Death occurs at Debug tick 1279 / Release 1277. After normal
+Square take-all, item 323 increases 10 -> 12 and field control returns at
+1613 / 1611 with Ashley alive, recovery zero, Risk 24 and the dead actor
+removed. No HP, event, loot or completion flags were written by the driver.
+
+An earlier diagnostic timeout was the normal loot menu awaiting input, not a
+demonstrated combat deadlock. Emptying its rows through take-all follows the
+original automatic leave path. The corrected replay verifies the inventory
+delta rather than incorrectly expecting unchanged inventory after a kill.
+
+### Earned acquisition and validation
+
+Component tests cover all 22 original cumulative point thresholds, below/at/
+above each boundary, the 22-unlock cap, all ten weapon categories and four
+Break Art thresholds, Break Art priority, and non-mutating ineligible reward
+initialization. Fixtures restore shared tables, definitions and progression.
+
+Real-input earned acquisition passes Debug `1792689722375744-0` and Release
+`1792690148434786-0`. The separate fixture is Zone12 room0, Minotaur Zombie
+definition1, Ashley(9,10), enemy(9,11), `post-minotaur`, HP/MP/STR/INT999,
+original AGI, seed1 and isolated room events. Twenty-one successful Ward
+defenses earn points0->20, then remain capped at20 pending reward selection;
+no ability is prematurely learned or acquisition counter advanced.
+
+The enemy retreats beyond ordinary weapon range, so the profile's actual
+learned attack spell97 finishes it through the production magic menu and
+target selector. A1254-HP result defeats the681-HP enemy at Debug tick8339 /
+Release8337, with MP999->974. Normal loot controls precede the real ability
+reward menu. That menu reserves exactly one unlock; cancelling its ability
+selection neither grants an action nor advances the counter again.
+Reselecting the first available chain ability grants only Gain Magic25 at
+9347 /9343; normal field control returns at9627 /9623. All previously learned
+actions remain learned. Points stay20, unlock count stays1, the32 other
+art/weapon-counter bytes remain unchanged, and original intro/Minotaur/
+Teleport/Break-Art flags are preserved. Only the actual spell/ability-use
+flags change. No progression, HP, loot or event writes bypassed gameplay.
+
+Earlier diagnostic attempts incorrectly assumed melee proximity and then
+Fireball99 rather than this profile's learned97. A Release40-ms key press
+was not sampled during an action with four-tick input cadence; holding100ms
+spans that cadence without changing the game's timing window. Failed
+attempts are not counted as acquisition acceptance. Both accepted sessions
+finish without errors or trace failure.
+
+Final Debug and Release builds and full suites pass **448 cases / 1,074,484
+assertions**. Formatting, cpplint, Ruff and clone checks are clean; focused
+clang-tidy reports **one existing finding, zero new**, without baseline changes.
+Validation uses the documented MSBuild commands, each configuration's
+`VS.Tests.exe`, and
+`quality-native.cmd --files Native\Tests\src\CombatTestCases.cpp --tidy`.
+
+Local evidence: `build\quality\ability-effects-*`,
+`build\quality\ability-acquisition-*`, `live-defense-ward-*.json`,
+`live-chain-defeat-*.json`, `live-ability-acquisition-*.json`, and each run's
+events/manifest/session log.
+The real-input driver selections are
+`build\quality\live-restart-check.ps1 -Configuration Debug|Release -Defense`
+and `-ChainDefeat` / `-Acquire`. These results do not promote C++ ownership,
+retire compatibility bridges, or certify the separate real-story/save gates
+in #17/#18.
 
 ## Learned-spell acceptance checkpoint (2026-10-22)
 
