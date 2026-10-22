@@ -909,6 +909,83 @@ Iron Ripper202/Giga Tempest214 extra armor wear. Nine arts have a second
 physical-damage hit. Remaining arts, these effects and eligibility/target
 gates keep #11 open; #76 and #82 are not resolved by these checks.
 
+### Forty-art damage and secondary-effect checkpoint
+
+Positive ordinary-controller execution now covers **all40 arts in both Debug
+and Release**. The remaining runs below use `07953575` and the same original
+weapon fixtures, seed1 and HP/MP999/AGI200. Every accepted trace has exactly
+one `session.end`, `trace_failed:false` and no error-level engine entries.
+HP costs, immediate reported damage, recovery and unchanged inventory and
+acquisition/story progression were checked by the live driver.
+
+| Art / HP cost | Debug run / HP damage | Release run / HP damage |
+|---|---|---|
+| Giga Tempest214 / 55 | `1792707195424468-0` / 1 | `1792708623983606-0` / 5 |
+| Spiral Scourge215 / 75 | `1792707221602121-0` / 1 | `1792708649879492-0` / 1 |
+| Death Wail218 / 55 | `1792708513516595-0` / 9 | `1792708680207524-0` / 9 |
+| Sanctus Flare219 / 75 | `1792708540704239-0` / 9 | `1792708707225182-0` / 9 |
+| Torpedo222 / 55 | `1792708569135588-0` / 2 | `1792708735568615-0` / 8 |
+| Retribution223 / 75 | `1792708596134006-0` / 3 | `1792708762333533-0` / 3 |
+
+Three further living-target runs complete positive delivery of all eight
+status-inflicting arts:
+
+| Art / newly applied status | Debug run / HP damage | Release run / HP damage |
+|---|---|---|
+| Thunderwave193 / Paralysis | `1792708900706133-0` / 54 | `1792708973838771-0` / 55 |
+| Glacial Gale197 / Numbness | `1792708925480198-0` / 47 | `1792708998430754-0` / 48 |
+| Scythe Wind213 / equipment-down | `1792708950350244-0` / 49 | `1792709023262919-0` / 46 |
+
+All three cost40HP. Original status19 uses mask0x80000 and timer slot2=15;
+the other status contracts are listed above.
+
+Iron Ripper202 and Giga Tempest214 also pass positive armor-wear acceptance
+in the living Sackheim fixture. A read-only observer checks the compiled
+actor/armor layouts against the current PDB before reading them. It samples
+DP after normal hit-equipment wear, at HP-cost payment but before impact,
+and again after recovery. Enemy HP is checked at both boundaries.
+
+| Art | Debug run | Release run | HP damage | Selected limb0 DP | Shield DP |
+|---|---|---|---|---|---|
+| Iron Ripper202 | `1792709260707089-0` | `1792709350998616-0` | 54 | 3446 -> 3230 | 5296 -> 5188 |
+| Giga Tempest214 | `1792709325935945-0` | `1792709375332840-0` | 48 | 3452 -> 3260 | 5302 -> 5206 |
+
+These are the original **4*damage limb / 2*damage shield** additional losses:
+effect35 queues 2*damage in both the per-limb field and the general armor
+field. HP application subtracts the former, then the armor-DP switch applies
+the latter to the selected limb and shield. This is not a newly introduced
+double-subtraction defect. The four final traces were separately audited
+clean. The DP snapshots are in the local driver result files, not ordinary
+native frame telemetry.
+
+The maintained `[art-effects]` tests add two cases / **1,521 assertions**:
+
+- All nine two-physical-hit arts (186/194/210/211/216/217/218/219/222), with
+  original damage types, affinities, factors and dispatch IDs checked against
+  the resident action table and BATTLE.PRG tables. Factor0 means100% of base
+  attack, not zero damage. Independently calculated expectations verify each
+  hit and accumulation. The production target resolver also produces their
+  sum, rejects canceled target results through the second-hit prerequisite,
+  and commits the resolved HP delta. This is deterministic component
+  coverage; the actual-controller executions above remain separate evidence.
+- Both armor-wearing arts, all six limb slots, and DP values
+  0/1/39/40/41/79/80/81/65535: both original subtraction stages saturate at
+  zero, shield loss is exact, and unrelated limbs stay unchanged.
+
+Validation on `07953575` plus these scoped tests: Debug/Release test-project
+builds and full native suites pass **471 cases / 1,096,527 assertions** each.
+Scoped format/cpplint/Ruff/clones/tidy reports **0 new findings**, with one
+existing test finding and no baseline changes. Commands are the documented
+MSBuild invocation targeting `Native\Tests\VS.Tests.vcxproj`, then each
+`build\{Debug,Release}\VS.Tests.exe`, and
+`.\.venv-3\Scripts\python.exe tools\lint\quality.py --files Native\Tests\src\CombatTestCases.cpp --tidy`.
+Local logs use `build/quality/art-effects-*`. Unrelated worktree changes were
+preserved; no production behavior or compatibility-retirement status changed.
+
+The expanded live insufficient-resource, no-target, range and cancellation
+sweep remains in progress. #11 stays open until those remaining gates and
+the published revision's CI are verified. #76 and #82 remain separate.
+
 ## Learned-spell acceptance checkpoint (2026-10-22)
 
 This closes the bounded representative acceptance of

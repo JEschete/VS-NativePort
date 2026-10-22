@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <iterator>
 #include <utility>
 
@@ -20,8 +21,10 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
+#include "Battle/AttackPrerequisites.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Battle/HitChance.h"
 #include "Battle/StatusEffects.h"
 #include "Effects/EffectResources.h"
 #include "Effects/PurgeTables.h"
@@ -295,6 +298,96 @@ struct AbilityEffectFixture : AbilityFixture {
     CHECK(stats[0].currentMp == source_mp);
     CHECK(stats[1].currentHp == target_hp);
     CHECK(stats[1].currentMp == target_mp);
+  }
+};
+
+struct TwoHitArt {
+  int id;
+  int damage_type;
+  int factor;
+  int first_affinity;
+  int second_affinity;
+};
+
+// Both hit words in SLUS_010.40 action records, file offset 0x3C1DC.
+constexpr auto kTwoHitArts = std::to_array<TwoHitArt>({
+    {186, 3, 2, 0, 0},
+    {194, 2, 2, 0, 0},
+    {210, 1, 2, 0, 3},
+    {211, 1, 3, 6, 7},
+    {216, 3, 1, 7, 3},
+    {217, 3, 2, 6, 2},
+    {218, 3, 2, 7, 4},
+    {219, 3, 3, 6, 5},
+    {222, 1, 3, 6, 6},
+});
+
+struct ArtResolutionFixture : AbilityEffectFixture {
+  decltype(std::to_array(Battle_hitFunctions)) saved_hits =
+      std::to_array(Battle_hitFunctions);
+  decltype(std::to_array(
+      Battle_attackPrerequisiteFunctions)) saved_prerequisites =
+      std::to_array(Battle_attackPrerequisiteFunctions);
+  decltype(std::to_array(Battle_actionEffectMediators)) saved_effects =
+      std::to_array(Battle_actionEffectMediators);
+  std::uint32_t saved_previous_hit = Battle_previousHitResult;
+  std::uint32_t saved_prerequisite_result = Battle_hitPrerequisiteResult;
+
+  ArtResolutionFixture() {
+    // BATTLE.PRG dispatch tables at file 0x7FA34, 0x7FA54 and 0x7FB78.
+    Battle_hitFunctions[1] = Battle_PreviousHitSuccessThreshold;
+    Battle_hitFunctions[3] = Battle_AgilityHitChance;
+    Battle_attackPrerequisiteFunctions[1] = Battle_AcceptAttackPrerequisite;
+    Battle_attackPrerequisiteFunctions[2] = Battle_AcceptAttackPrerequisite;
+    Battle_actionEffectMediators[58] =
+        [](Battle_ActionDefinition* definition, Battle_HitResult* source_hit,
+           Battle_HitResult* target_hit, int hit, int random) {
+          Battle_QueueHitDamageAndEquipmentWear(definition, source_hit,
+                                                target_hit, hit, random);
+        };
+    Battle_statCalculators[25] = Battle_PhysicalDamageWithDebuffs;
+    stats[0].agility = 200;
+    stats[0].strength = 150;
+    stats[1].strength = 80;
+    for (int index = 0; index < 7; ++index) {
+      stats[1].limbs[0].affinities[index] =
+          static_cast<std::int16_t>(10 * index);
+      if (index < 4) {
+        stats[1].limbs[0].types[index] = static_cast<std::int16_t>(10 * index);
+      }
+    }
+  }
+
+  ~ArtResolutionFixture() {
+    std::copy(saved_hits.begin(), saved_hits.end(), Battle_hitFunctions);
+    std::copy(saved_prerequisites.begin(), saved_prerequisites.end(),
+              Battle_attackPrerequisiteFunctions);
+    std::copy(saved_effects.begin(), saved_effects.end(),
+              Battle_actionEffectMediators);
+    Battle_previousHitResult = saved_previous_hit;
+    Battle_hitPrerequisiteResult = saved_prerequisite_result;
+  }
+
+  Battle_ActionRequest Resolve(int id) {
+    Battle_ActionRequest input{};
+    Battle_ActionRequest result{};
+    input.targetCount = 1;
+    input.targets[0].target.targetActor = 1;
+    Battle_ResolveActionTargets(id, &result, &input, 0);
+    return result;
+  }
+
+  void CheckResolvedHits(int id, int damage) {
+    const auto resolved = Resolve(id);
+    REQUIRE(resolved.targetCount == 1);
+    CHECK(resolved.targets[0].target.hp == damage);
+    CHECK(resolved.targets[0].hpEffect == 1);
+    stats[1].cancelsHitResults = 1;
+    actors[1].roomSpawnIndex = 0x80;
+    const auto cancelled = Resolve(id);
+    CHECK(cancelled.targets[0].target.hp == 0);
+    CHECK(cancelled.targets[0].target.impactKind == 4);
+    target = resolved.targets[0];
   }
 };
 
@@ -1065,4 +1158,69 @@ TEST_CASE("MP damage abilities cannot drain more MP than the target has",
   CHECK(Battle_lastActionStatValue == damage);
   fixture.Commit();
   fixture.CheckResources(600, 100, 800, mp - damage);
+}
+
+TEST_CASE("Two-hit Break Arts accumulate both original physical hit contracts",
+          "[combat][break-arts][art-effects]") {
+  for (const auto& art : kTwoHitArts) {
+    CAPTURE(art.id);
+    ArtResolutionFixture fixture;
+    auto& definition = Battle_actionDefinitions[art.id];
+    definition.id = static_cast<decltype(definition.id)>(art.id);
+    definition.type = Battle_ActionType_BreakArt;
+    definition.hits[0].damageType = art.damage_type;
+    definition.hits[1].damageType = art.damage_type;
+    definition.hits[0].affinity = art.first_affinity;
+    definition.hits[1].affinity = art.second_affinity;
+    for (int hit = 0; hit < 2; ++hit) {
+      definition.hits[hit].effectId = 58;
+      definition.hits[hit].prerequisiteFunctionId = hit == 0 ? 2 : 1;
+      definition.hits[hit].hitFunctionId = hit == 0 ? 3 : 1;
+    }
+    const int first_affinity = std::max(0, art.first_affinity - 1);
+    const int second_affinity = std::max(0, art.second_affinity - 1);
+    const int first = 150 * (100 + 10 * art.factor) / 100 - 60 -
+                      6 * (art.damage_type + first_affinity);
+    const int second = 150 - 60 - 6 * (art.damage_type + second_affinity);
+    CHECK(first > 0);
+    CHECK(second > 0);
+    fixture.Queue(art.id, 0,
+                  {25, art.factor, Battle_QueueHitDamageAndEquipmentWear});
+    CHECK(fixture.target.target.hp == first);
+    fixture.Queue(art.id, 1, {25, 0, Battle_QueueHitDamageAndEquipmentWear});
+    CHECK(fixture.target.target.hp == first + second);
+    fixture.CheckResolvedHits(art.id, first + second);
+    fixture.Commit();
+    fixture.CheckResources(600, 100, 800 - first - second, 200);
+  }
+}
+
+TEST_CASE("Armor-wearing arts saturate both original DP application stages",
+          "[combat][break-arts][art-effects]") {
+  const int id = GENERATE(202, 214);
+  const int limb = GENERATE(Catch::Generators::range(0, 6));
+  const int dp = GENERATE(0, 1, 39, 40, 41, 79, 80, 81, 65535);
+  AbilityEffectFixture fixture;
+  for (auto& target_limb : fixture.stats[1].limbs) {
+    target_limb.armor.currentDp = 1234;
+  }
+  auto& armor_dp = fixture.stats[1].limbs[limb].armor.currentDp;
+  auto& shield_dp = fixture.stats[1].shield.currentDp;
+  armor_dp = shield_dp = static_cast<std::uint16_t>(dp);
+  fixture.target.target.targetLimb =
+      static_cast<decltype(fixture.target.target.targetLimb)>(limb);
+  fixture.target.target.hp = 20;
+  fixture.target.hpEffect = 1;
+  fixture.Queue(id, 1, {0, 0, Battle_QueueDamageBasedArmorWear});
+  CHECK(fixture.target.armorDpChange == 40);
+  CHECK(fixture.target.limbs[limb].effects.opaque2 == 40);
+  fixture.Commit();
+  CHECK(armor_dp == std::max(0, dp - 80));
+  CHECK(shield_dp == std::max(0, dp - 40));
+  for (int index = 0; index < 6; ++index) {
+    if (index != limb) {
+      CHECK(fixture.stats[1].limbs[index].armor.currentDp == 1234);
+    }
+  }
+  fixture.CheckResources(600, 100, 780, 200);
 }
