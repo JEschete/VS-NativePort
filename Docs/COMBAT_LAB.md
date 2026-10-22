@@ -209,6 +209,59 @@ changes. Local commands/evidence are `build\quality\live-restart-check.ps1
 two configurations' `combat-lab\runs` directories. This does not verify every
 ability's effect, timing, Risk, acquisition or combat-sequence termination.
 
+### Ability timing and Risk checkpoint
+
+The next bounded #10 checks use the published `3cc999c3` gameplay code, with
+new maintained regressions in `Native\Tests\src\CombatTestCases.cpp`.
+All 28 abilities now have original-cost tests at chain steps 0, 9, 10 and 31
+and starting Risk 0, 97 and 100. Preview is non-mutating; committed costs cap
+Risk at 100 without rejecting the ability or spending HP/MP. Offensive costs
+gain `chainStep * chainStep / 10` from step 10; defensive costs do not.
+These are cost tests, not all-ability effect acceptance.
+
+Exact timing tests cover all three buttons, normal/hard difficulty, offensive
+attacks, physical and magical defense, queue depths 0/3/24/99, and both sides
+of every result boundary. The success interval is strictly after the window
+and inclusive of `window + margin`; margins shrink to a minimum of 2.
+Tests also cover simultaneous-button priority, absent/early/repeated input,
+unmapped buttons, no/positional/self/dummy/inappropriate targets, inability to
+continue defenses, and defensive score saturation at 65535.
+
+Real-input Heavy Shot runs use the same all-abilities encounter as above:
+
+| Check | Debug run | Release run |
+| --- | --- | --- |
+| Successful continuation, exact damage and Risk | `1792685582328028-0` | `1792685756776909-0` |
+| Early input does not chain | `1792685719037260-0` | `1792685779484385-0` |
+| Late input does not chain | `1792685732216378-0` | `1792685792667623-0` |
+| Cancel ordinary attack selection | `1792685745501815-0` | `1792685805742540-0` |
+
+Debug's sampled Circle is at tick 233, timer 38 / window 34. Heavy Shot deals
+3 HP (676 -> 673), exactly the truncated 70% of the initial 5-HP weapon hit,
+adds 1 Risk, and returns at 407. Release includes two correctly timed but
+missed/charged Heavy Shots before a positive third attempt: native Circle
+samples are 229/479/725, timers 38/40/38 against window 34. The last Heavy Shot
+deals 2 HP (674 -> 672), from a 3-HP initial hit, and returns at 899. Each
+attempt costs 1 Risk; misses are retained rather than counted as successes.
+Only the ability-use flag changes; unrelated progression and inventory stay
+unchanged. Early/late input performs no ability, and cancellation spends no
+Risk. All eight sessions finalize without error events or trace failure.
+
+The initial early-input probe incorrectly waited for an unarmed window: this
+weapon's window is already 34 at animation timer 0. The corrected probe sends
+input before its success interval. No game change was needed for that
+diagnostic assumption or for legitimate misses.
+
+Both final full suites pass **430 cases / 1,067,689 assertions**. Formatting,
+cpplint, Ruff and clone checks are clean; focused clang-tidy retains one
+existing finding, zero new. No baseline/suppression changes. Local evidence:
+`build\quality\ability-behavior-*`, `live-chain-22-*-Debug.json`,
+`live-chain-22-*-Release.json`; replay command
+`build\quality\live-restart-check.ps1 -Configuration Debug|Release -Chain 22
+-ChainTiming success|early|late|cancel`.
+Remaining #10 gates include every ability's effect, acquisition/unlock
+progression, live defensive timing and actor defeat during a chain.
+
 ## Learned-spell acceptance checkpoint (2026-10-22)
 
 This closes the bounded representative acceptance of
