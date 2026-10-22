@@ -48,6 +48,17 @@ extern "C" void TestsRestoreXaPlayback(void);
 extern "C" int TestsXaCommand(int command, int first, int second, int third);
 extern "C" int TestsSavedMusicVoiceConflicts(void);
 extern "C" int TestsNativeMusicSnapshot(void);
+extern "C" int TestsPendingModulationSlides(int effect, int kind);
+
+TEST_CASE("Unconfigured modulation slides wait for their first waveform sample",
+          "[audio][modulation]") {
+  for (int effect = 0; effect < 2; ++effect) {
+    for (int kind = 0; kind < 3; ++kind) {
+      CAPTURE(effect, kind);
+      CHECK(TestsPendingModulationSlides(effect, kind) == 0);
+    }
+  }
+}
 
 TEST_CASE("Music layer conflicts release only unreserved displaced voices",
           "[audio][music-state]") {

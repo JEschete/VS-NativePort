@@ -13,11 +13,13 @@
 #include "Audio/MusicState.h"
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
+#include "Audio/Seq/Modulation.h"
 #include "Audio/Seq/MusicSequence.h"
 #include "Audio/Seq/Sequencer.h"
 #include "Audio/SequencerOutput.h"
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
+#include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 #include "Audio/StreamPlayback.h"
 #include "Battle/Ai/RoomState.h"
@@ -185,6 +187,133 @@ int TestsNativeMusicSnapshot(void) {
   memcpy(Audio_Seq_savedMusicChannels, original_saved_channels,
          sizeof(original_saved_channels));
   return result;
+}
+
+static int CheckPendingModulationSlides(Audio_SeqChannel* channel, int effect,
+                                        int kind, int16_t* wave) {
+  char slide[] = {4, 64};
+  char enable[] = {0, 2, 0};
+  int failures = 0;
+  int index;
+  channel->programCounter = slide;
+  channel->volume = 0x40000000;
+  channel->volumeBalance = 0x7F00;
+  channel->pitchBase = 0x1000;
+  Audio_Seq_kLfoWaveforms[0] = wave;
+  switch (kind) {
+    case 0:
+      Audio_Seq_SlideVibratoDepth(channel, 1);
+      break;
+    case 1:
+      Audio_Seq_SlideTremoloDepth(channel, 1);
+      break;
+    case 2:
+      Audio_Seq_SlideAutoPanDepth(channel, 1);
+      break;
+    default:
+      fprintf(stderr, "unexpected modulation test kind: %d\n", kind);
+      abort();
+  }
+  for (index = 1; index <= 4; ++index) {
+    Audio_Mixer_UpdateChannelSlidesAndDelays(channel, 1, effect);
+    const unsigned depth = kind == 0   ? channel->vibratoDepth
+                           : kind == 1 ? channel->tremoloDepth
+                                       : channel->autoPanDepth;
+    const unsigned length = kind == 0   ? channel->vibratoDepthSlideLength
+                            : kind == 1 ? channel->tremoloDepthSlideLength
+                                        : channel->autoPanDepthSlideLength;
+    failures |= (depth != (unsigned)(index * (kind == 2 ? 2048 : 4096)) ||
+                 length != (unsigned)(4 - index) ||
+                 channel->vibratoPitch != 0 || channel->tremoloVolume != 0 ||
+                 channel->autoPanOffset != 0 || channel->updateFlags != 0)
+                << 2;
+  }
+  channel->programCounter = enable;
+  switch (kind) {
+    case 0:
+      Audio_Seq_EnableVibrato(channel, 1);
+      break;
+    case 1:
+      Audio_Seq_EnableTremolo(channel, 1);
+      break;
+    case 2:
+      channel->programCounter = enable + 1;
+      Audio_Seq_EnableAutoPan(channel, 1);
+      break;
+    default:
+      fprintf(stderr, "unexpected modulation test kind: %d\n", kind);
+      abort();
+  }
+  if (effect) {
+    Audio_Mixer_UpdateSoundEffectModulation(channel, 1);
+  } else {
+    Audio_Mixer_UpdateMusicChannelModulation(channel, 1);
+  }
+  failures |=
+      ((kind == 0 &&
+        (channel->vibratoWave != wave + 1 || channel->vibratoPitch != 60)) ||
+       (kind == 1 &&
+        (channel->tremoloWave != wave + 1 || channel->tremoloVolume != 4064)) ||
+       (kind == 2 &&
+        (channel->autoPanWave != wave + 1 || channel->autoPanOffset != 16)))
+      << 3;
+  return failures;
+}
+
+int TestsPendingModulationSlides(int effect, int kind) {
+  Audio_SeqChannel saved_music[32];
+  Audio_SeqChannel saved_effects[12];
+  int16_t wave[] = {16384, 8192, 0, 0, -2};
+  int16_t* saved_wave = Audio_Seq_kLfoWaveforms[0];
+  Audio_SeqChannel* channel;
+  int failures = 0;
+  int index;
+  memcpy(saved_music, Audio_Seq_musicChannels, sizeof(saved_music));
+  memcpy(saved_effects, Audio_SoundEffects_channels, sizeof(saved_effects));
+  memset(Audio_Seq_musicChannels, 0, sizeof(saved_music));
+  memset(Audio_SoundEffects_channels, 0, sizeof(saved_effects));
+  Audio_Driver_ResetPlaybackState();
+  for (index = 0; index < 44; ++index) {
+    channel = index < 32 ? &Audio_Seq_musicChannels[index]
+                         : &Audio_SoundEffects_channels[index - 32];
+    failures |= channel->vibratoRateCounter != 1 ||
+                channel->tremoloRateCounter != 1 ||
+                channel->autoPanRateCounter != 1;
+    failures |= (channel->vibratoWave != NULL || channel->tremoloWave != NULL ||
+                 channel->autoPanWave != NULL)
+                << 1;
+  }
+  channel = effect ? Audio_SoundEffects_channels : Audio_Seq_musicChannels;
+  if (failures == 0) {
+    failures |= CheckPendingModulationSlides(channel, effect, kind, wave);
+    channel->vibratoWave = wave + 1;
+    channel->tremoloWave = wave + 1;
+    channel->autoPanWave = wave + 1;
+    channel->vibratoRateCounter = 4;
+    channel->tremoloRateCounter = 5;
+    channel->autoPanRateCounter = 6;
+    Audio_Driver_ResetPlaybackState();
+    failures |=
+        (channel->vibratoWave != wave + 1 || channel->tremoloWave != wave + 1 ||
+         channel->autoPanWave != wave + 1 || channel->vibratoRateCounter != 4 ||
+         channel->tremoloRateCounter != 5 || channel->autoPanRateCounter != 6)
+        << 4;
+    channel->vibratoWave = NULL;
+    channel->tremoloWave = NULL;
+    channel->autoPanWave = NULL;
+    channel->vibratoRateCounter = 0;
+    channel->tremoloRateCounter = 0;
+    channel->autoPanRateCounter = 0;
+    Audio_Driver_ResetPlaybackState();
+    failures |=
+        (channel->vibratoRateCounter != 1 || channel->tremoloRateCounter != 1 ||
+         channel->autoPanRateCounter != 1)
+        << 5;
+  }
+  Audio_Seq_kLfoWaveforms[0] = saved_wave;
+  memcpy(Audio_Seq_musicChannels, saved_music, sizeof(saved_music));
+  memcpy(Audio_SoundEffects_channels, saved_effects, sizeof(saved_effects));
+  return failures;
 }
 
 void TestsPrepareXaPlayback(void) {

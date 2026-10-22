@@ -819,6 +819,96 @@ MP damage, positive secondary effects, remaining arts and eligibility/target
 gates still require #11 acceptance. This repair does not establish complete
 visual parity, C++ promotion, compatibility retirement, or resolution of #82.
 
+### Further art effects and Heaven's Scorn audio initialization (#126)
+
+The following ordinary-controller runs use published `54c62f9a`, except
+Heaven's Scorn, which adds the scoped #126 initialization repair. The original
+weapon fixtures, HP/MP999 and AGI200 are unchanged. All accepted final traces
+have one `session.end`, `trace_failed:false` and no error-level records.
+
+| Action / HP cost | Debug run / HP damage | Release run / HP damage |
+|---|---|---|
+| Staff 206 / 55 | `1792705858803243-0` / 3 | `1792705914558541-0` / 3 |
+| Staff 207 / 75 | `1792705886136965-0` / 1 | `1792705941743300-0` / 1 |
+| Heavy Mace 209 / 40 | `1792706082613957-0` / 5 | `1792706157464890-0` / 2 |
+| Heavy Mace 210 / 55 | `1792706108251707-0` / 4 | `1792706182807394-0` / 9 |
+| Heavy Mace 211 / 75 | `1792706133751022-0` / 17 | `1792706208241735-0` / 12 |
+| Killer Mantis 198 / 55 | `1792706540104270-0` / 49 | `1792706827008737-0` / 49 |
+| Riskbreak 205 / 40 | `1792706757859308-0` / 3 | `1792706801367369-0` / 3 |
+| Heaven's Scorn 217 / 40 | `1792707904346821-0` / 4, 5 | `1792708067805725-0` / 8, 5 |
+
+Killer Mantis uses a separate all-break-arts living fixture: zone9 room0 seed1,
+Ashley (4,9), Sackheim definition6 at (4,11), original enemy HP150/MP15.
+Both builds apply **13 MP damage** as well as the reported HP damage, with the
+exact immediate MP delta verified. The original item fixture is not modified.
+Riskbreak uses the real Lab F3 input to establish Risk25, then reduces Ashley's
+Risk to24: the original source-side effect is half of the preceding damage,
+truncated. It occurs four ticks after the target damage, not in the same
+frame. An initial harness assertion at the target boundary was premature;
+the game required no Riskbreak repair. Natural vitals decay runs in control
+modes0/1, whereas this observed change is in mode2.
+
+Positive ailment checks use the same living fixture and require a newly
+applied flag, not an already-present status:
+
+| Art / effect | Debug run / HP damage | Release run / HP damage |
+|---|---|---|
+| Shadoweave185 / Paralysis | `1792706863540543-0` / 44 | `1792707052127721-0` / 45 |
+| Vile Scar189 / Poison | `1792706888414492-0` / 49 | `1792707076783698-0` / 49 |
+| Accursed Umbra201 / Curse | `1792706912829224-0` / 50 | `1792707101131744-0` / 47 |
+| Quickshock209 / Numbness | `1792706937529827-0` / 83 | `1792707125516404-0` / 84 |
+| Vertigo221 / Numbness | `1792706962171925-0` / 38 | `1792707150002854-0` / 38 |
+
+The exact original initial timer values are15 in slot3 for Paralysis and
+slot4 for Numbness; Poison uses interval2 in slot5. Curse has no duration
+timer. The flags are respectively0x2000,0x4000,0x10000 and0x8000. These checks
+establish art delivery; they do not replace the separate status-mechanics
+coverage. Commands add `-ArtLivingTarget -RequireSecondary` for these cases
+and198, or only `-RequireSecondary` for205.
+
+Heaven's Scorn initially crashed at tick928 in
+`Audio_Mixer_UpdateChannelSlidesAndDelays`, run `1792707252049210-0`.
+A read-only PDB-layout-checked observer reproduced it at tick926 in
+`1792707507227388-0`: voice15 had no auto-pan waveform, counter0, and no
+auto-pan enable flag before executing the original `DF 48 01` depth slide.
+The bytes are in E164.P at offset0x173B. Original resident instructions
+0x8001427C-0x80014318 also read the waveform whenever that counter is not1.
+The raw zero-address read is not portable to native pointers.
+
+Owned `Audio_Driver_ResetPlaybackState` now establishes the pending
+first-sample phase1 for unconfigured vibrato, tremolo and auto-pan oscillators
+in all32 music and12 effect channels. This uses the same pending phase as
+the original B4/B8/BC enable commands. Already-configured waveforms and phase
+counters remain untouched. No waveform, sound program, depth progression,
+enabled modulation or effect emission is skipped or replaced. This is an
+explicit native initialization contract, not emulation of arbitrary low-RAM
+reads or a claim of complete reference waveform parity.
+
+The regression fails in all six music/effect modulation combinations before
+the fix. It verifies all44 channels, each depth-slide step, subsequent genuine
+waveform playback and exact modulation values, cached-state preservation and
+repeat reset. Debug/Release solution builds pass; `[audio]` passes **71 cases /
+162,977 assertions** each, and full suites pass **469 cases /1,095,006
+assertions** each. Scoped format/cpplint/Ruff/clones/tidy has **zero new
+findings** (38 existing test findings), without baseline/suppression changes.
+No generator change is needed for this registered owned implementation.
+
+Each accepted Heaven's Scorn run contains two casts and live-enemy F10
+re-entry. Effect/control-return ticks are Debug897/1059 and2161/2323,
+Release893/1055 and2157/2319. Evidence is in the run directories and
+`build/quality/audio126-{debug,release}-{build,tests,full,live}.log`,
+`audio126-before-tests.log`, `audio126-observed-repro.log`, and
+`audio126-quality.log`. The observer's local sequence bytes are not committed.
+
+Positive execution is now **33/40 arts in both builds**. Additional Debug-only
+Polearm214/215 runs `1792707195424468-0` and `1792707221602121-0` each deal1
+damage and recover, with clean final traces. The complete forty-record audit
+also identifies remaining positive secondary coverage: Thunderwave193
+Paralysis, Glacial Gale197 Numbness, Scythe Wind213 equipment-down, and
+Iron Ripper202/Giga Tempest214 extra armor wear. Nine arts have a second
+physical-damage hit. Remaining arts, these effects and eligibility/target
+gates keep #11 open; #76 and #82 are not resolved by these checks.
+
 ## Learned-spell acceptance checkpoint (2026-10-22)
 
 This closes the bounded representative acceptance of

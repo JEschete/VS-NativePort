@@ -20,6 +20,15 @@
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Legacy/Psx.h"
 
+static void InitializePendingModulation(Audio_SeqChannel* channel) {
+  // Original B4/B8/BC commands (SLUS_010.40/25AC.c) use phase 1 until the
+  // first waveform sample. Depth slides can precede those commands; keep
+  // unconfigured native oscillators pending without altering cached ones.
+  if (channel->vibratoWave == NULL) channel->vibratoRateCounter = 1;
+  if (channel->tremoloWave == NULL) channel->tremoloRateCounter = 1;
+  if (channel->autoPanWave == NULL) channel->autoPanRateCounter = 1;
+}
+
 // decomp: SLUS_010.40 func_8001369C (src/SLUS_010.40/25AC.c:1058)
 void Audio_Driver_ResetPlaybackState(void) {
   Audio_SeqChannel* channel;
@@ -80,6 +89,7 @@ void Audio_Driver_ResetPlaybackState(void) {
     channel->voice.assignedVoice = 24;  // +0xF4
     channel->type = 0;                  // +0x64
     channel->priority = 0;              // +0x58
+    InitializePendingModulation(channel);
   }
   // the 12 sound effect channels own SPU voices 12-23
   for (i = 12, channel = Audio_SoundEffects_channels; i < 24; ++i, ++channel) {
@@ -92,6 +102,7 @@ void Audio_Driver_ResetPlaybackState(void) {
     channel->effectPitchScaleSlideLength = 0;  // +0x86
     channel->effectPitchScale = 0;             // +0x40
     channel->keyOnVolumeSlideLength = 0;       // +0x8A
+    InitializePendingModulation(channel);
   }
 
   Audio_Seq_activeMusicConfig->pendingKeyOff = 0;           // +0x18
