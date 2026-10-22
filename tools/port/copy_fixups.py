@@ -90,6 +90,12 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F01856": [
+        ("    int bladeMaterial;\n    int shieldMaterial;",
+         "    int bladeMaterial = 0;\n    int shieldMaterial = 0;",
+         "INITBTL/18.c:func_800F9CCC passes both materials even when their "
+         "model IDs are zero; initialize empty slots without changing equipped ones."),
+    ],
     "F03210": [
         ("""    if (in_SwapWithSavedState == 0) {
         Core_Memory_CopyWords(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig, 0x80);

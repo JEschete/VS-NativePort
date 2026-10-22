@@ -411,6 +411,68 @@ bool EncounterStatOverrides::Valid() const {
   return true;
 }
 
+std::expected<Items_WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
+    EncounterWeapon weapon) {
+  struct Source {
+    int zone, actor, blade, grip, model, grip_category;
+  };
+  // Original ZND CharacterInit weapon records, not manufactured item stats.
+  constexpr auto kSources = std::to_array<Source>({
+      {9, 10, 1, 96, 1, 1},
+      {1, 0, 15, 96, 15, 1},
+      {13, 18, 25, 96, 28, 1},
+      {9, 1, 35, 105, 35, 2},
+      {15, 8, 51, 106, 55, 2},
+      {24, 2, 60, 111, 60, 2},
+      {12, 0, 70, 105, 68, 2},
+      {13, 11, 71, 115, 71, 3},
+      {9, 9, 83, 121, 83, 4},
+  });
+  if (weapon < EncounterWeapon::kDagger ||
+      weapon > EncounterWeapon::kCrossbow) {
+    return std::unexpected("weapon choice has no source equipment record");
+  }
+  const auto& source = kSources[static_cast<std::size_t>(weapon) - 1];
+  const auto path = std::format("MAP/ZONE{:03}.ZND", source.zone);
+  const auto* store = Content::DataStore::Get();
+  const auto* entry = store ? store->Find(path) : nullptr;
+  if (entry == nullptr) return std::unexpected("missing weapon source " + path);
+  const auto bytes = store->ReadAll(*entry);
+  if (!bytes) return std::unexpected(bytes.error());
+  try {
+    const auto header = Read<Field_ZndHeader>(*bytes);
+    const auto enemies =
+        Section(*bytes, header.enemiesOffset, header.enemiesSize);
+    const auto count = Read<std::uint32_t>(enemies);
+    constexpr std::uint64_t kFileRecordBytes = 8;
+    const auto offset = sizeof(count) + count * kFileRecordBytes;
+    const auto records = Section(
+        enemies, offset, count * std::uint64_t{sizeof(Actors_CharacterInit)});
+    auto result = Read<Actors_CharacterInit>(
+                      records, source.actor * sizeof(Actors_CharacterInit))
+                      .weapon;
+    constexpr unsigned kDamageTypes = 4, kCostTypes = 8, kMaterials = 8;
+    if (result.blade.category != static_cast<int>(weapon) ||
+        result.blade.id != source.blade || result.grip.id != source.grip ||
+        result.blade.weaponModelId != source.model ||
+        result.grip.category != source.grip_category ||
+        static_cast<unsigned char>(result.blade.damageType) >= kDamageTypes ||
+        static_cast<unsigned char>(result.blade.costType) >= kCostTypes ||
+        static_cast<unsigned char>(result.material) >= kMaterials ||
+        std::ranges::any_of(result.gems,
+                            [](const auto& gem) { return gem.id != 0; })) {
+      return std::unexpected("weapon source record changed: " + path);
+    }
+    VS_LOG_INFO("encounter.weapon",
+                "choice={} source={} actor={} blade={} grip={} model={}",
+                EncounterWeaponId(weapon), path, source.actor, source.blade,
+                source.grip, source.model);
+    return result;
+  } catch (const std::runtime_error& error) {
+    return std::unexpected(path + ": " + error.what());
+  }
+}
+
 std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
                                            const EncounterZone& zone) {
   std::vector<std::string> errors;
@@ -420,6 +482,10 @@ std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
   if (setup.profile < EncounterProfile::kPrologue ||
       setup.profile >= EncounterProfile::kCount) {
     errors.emplace_back("unsupported Ashley profile");
+  }
+  if (setup.weapon < EncounterWeapon::kDefault ||
+      setup.weapon >= EncounterWeapon::kCount) {
+    errors.emplace_back("unsupported Ashley weapon");
   }
   if (setup.zone != zone.id) errors.emplace_back("zone does not match catalog");
   const auto room =

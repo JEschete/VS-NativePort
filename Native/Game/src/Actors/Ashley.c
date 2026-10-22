@@ -94,8 +94,8 @@ void Actors_SpawnAshleyWithEquipment(void)
     int j;
     int shieldWepId;
     int bladeWepId;
-    int bladeMaterial;
-    int shieldMaterial;
+    int bladeMaterial = 0;
+    int shieldMaterial = 0;
 
     Field_ActorPlacement sp20;
 

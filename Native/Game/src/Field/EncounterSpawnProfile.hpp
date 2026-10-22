@@ -9,6 +9,7 @@
 
 extern "C" {
 #include "Field/Mpd.h"
+#include "Items/Loadout.h"
 }
 
 namespace VS::Game {
@@ -21,6 +22,9 @@ bool IsEncounterHostileSpawn(const Field_MpdEnemySpawn& source);
 
 std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
     const EncounterEnemy& enemy);
+
+std::expected<Items_WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
+    EncounterWeapon weapon);
 
 std::expected<Field_MpdEnemySpawn, std::string> PrepareEncounterSpawn(
     const Field_MpdEnemySpawn& source, const EncounterSpawn& instance,

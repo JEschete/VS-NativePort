@@ -45,8 +45,10 @@ extern "C" {
 #include "Field/Transitions.h"
 #include "Field/Zone.h"
 #include "Input/Controller.h"
+#include "Items/EquipmentStats.h"
 #include "Items/Loot.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Render/Display.h"
 #include "State/Flags.h"
@@ -90,6 +92,7 @@ int EnterOrFinishEncounter() {
   Boot_gameEntryMode = 0;
   Boot_isClearSavePending = 0;
   Boot_LoadBattleOverlays();
+  InitializeEncounterPlayerWeapon(configuration.weapon);
   InitializeEncounterPlayerProfile(configuration.profile);
   // The original shuffle initialization always seeds with 1. Initialize that
   // same table from the requested seed; combat still calls its real RNG.
@@ -126,6 +129,11 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   snapshot.command = actor.commandOpcode;
   snapshot.command_state = actor.commandState;
   snapshot.weapon_drawn = actor.weaponDrawn;
+  snapshot.weapon_category = actor.equippedWeaponCategory;
+  snapshot.weapon_blade = stats.weapon.blade.id;
+  snapshot.weapon_grip = stats.weapon.grip.id;
+  snapshot.weapon_model = static_cast<unsigned char>(stats.weapon.wepId);
+  snapshot.shield_model = static_cast<unsigned char>(stats.shield.wepId);
   snapshot.actor_flags = Actors_ActorStateFlags(slot);
   snapshot.recovery = stats.actionRecoveryTimer;
   Actors_ActorLocationQuery location{};
@@ -209,7 +217,7 @@ unsigned EquippedBreakArt() {
     return Battle_ActionId_DaggerArtOne +
            static_cast<unsigned>(category - 1) * kArtsPerWeapon;
   }
-  throw std::runtime_error("encounter profile requires an equipped weapon");
+  return Battle_ActionId_DaggerArtOne + kWeaponFamilies * kArtsPerWeapon;
 }
 
 void StockEncounterItems(EncounterProfile profile) {
@@ -431,6 +439,63 @@ void InitializeEncounterPlayerProfile(EncounterProfile profile) {
               all_abilities, all_break_arts);
 }
 
+const char* EncounterWeaponId(EncounterWeapon weapon) {
+  constexpr auto kIds = std::to_array<const char*>({
+      "default",
+      "dagger",
+      "sword",
+      "greatsword",
+      "axe-mace",
+      "greataxe",
+      "staff",
+      "heavy-mace",
+      "polearm",
+      "crossbow",
+      "bare-hands",
+  });
+  static_assert(kIds.size() ==
+                static_cast<std::size_t>(EncounterWeapon::kCount));
+  if (weapon < EncounterWeapon::kDefault || weapon >= EncounterWeapon::kCount) {
+    throw std::runtime_error("invalid encounter Ashley weapon");
+  }
+  return kIds[static_cast<std::size_t>(weapon)];
+}
+
+void InitializeEncounterPlayerWeapon(EncounterWeapon choice) {
+  (void)EncounterWeaponId(choice);
+  if (choice == EncounterWeapon::kDefault) return;
+  auto& inventory = Audio_Seq_unusedInventory;
+  if (choice == EncounterWeapon::kBareHands) {
+    for (auto& weapon : inventory.weapons) weapon.isEquipped = 0;
+    return;
+  }
+  auto source = ReadEncounterWeapon(choice);
+  if (!source) throw std::runtime_error(source.error());
+  const auto equipped = [](const auto& weapon) {
+    return weapon.isEquipped != 0;
+  };
+  if (std::ranges::count_if(inventory.weapons, equipped) != 1) {
+    throw std::runtime_error(
+        "weapon setup requires one New Game equipped weapon");
+  }
+  auto& weapon = *std::ranges::find_if(inventory.weapons, equipped);
+  if (weapon.blade == 0 || weapon.blade > std::size(inventory.blades) ||
+      weapon.grip == 0 || weapon.grip > std::size(inventory.grips) ||
+      std::ranges::any_of(weapon.gems, [](auto gem) { return gem != 0; })) {
+    throw std::runtime_error(
+        "weapon setup requires valid gem-free stock parts");
+  }
+  // Original BATTLE/146C.c applyWeaponStats/copyUiWeaponStats preserve the
+  // stock inventory links; ordinary Ashley spawning loads stats/models later.
+  Items_WeaponLoadout stats{};
+  Items_BuildWeaponStatsFromParts(&stats, &*source);
+  Items_StoreInventoryWeaponStats(&weapon, &stats);
+  // Match MAINMENU/2D10.c's weapon equip restriction (staves are one-handed).
+  if (Menu_Framework_weaponHands[static_cast<int>(choice) - 1] != 0) {
+    for (auto& shield : inventory.shields) shield.isEquipped = 0;
+  }
+}
+
 std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
                                                     const EncounterZone& zone) {
   if (active) return std::unexpected("an encounter is already active");
@@ -440,6 +505,11 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
     std::ostringstream message;
     for (const auto& error : errors) message << error << "; ";
     return std::unexpected(message.str());
+  }
+  if (setup.weapon >= EncounterWeapon::kDagger &&
+      setup.weapon <= EncounterWeapon::kCrossbow) {
+    const auto weapon = ReadEncounterWeapon(setup.weapon);
+    if (!weapon) return std::unexpected(weapon.error());
   }
   std::array<Field_MpdEnemySpawn, placements.size()> staged_placements{};
   for (std::size_t index = 0; index < setup.enemies.size(); ++index) {

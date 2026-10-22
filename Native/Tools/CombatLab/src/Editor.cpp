@@ -67,7 +67,8 @@ constexpr auto kStats = std::to_array<StatField>({
     {"BASE INTELLIGENCE", &Game::EncounterStatOverrides::intelligence},
     {"BASE AGILITY", &Game::EncounterStatOverrides::agility},
 });
-constexpr int kResetStats = static_cast<int>(kStats.size());
+constexpr int kWeapon = static_cast<int>(kStats.size());
+constexpr int kResetStats = kWeapon + 1;
 constexpr int kBackFromStats = kResetStats + 1;
 constexpr int kStatRows = kBackFromStats + 1;
 
@@ -252,8 +253,23 @@ void Editor::UpdateStats(const Input::PadState& pad, bool confirm) {
   }
   if ((buttons & Input::Down) != 0) stat_row_ = (stat_row_ + 1) % kStatRows;
   confirm = confirm || (pad.pressed & Input::Circle) != 0;
+  if (stat_row_ == kWeapon) {
+    const int direction =
+        ((buttons & Input::Right) != 0) - ((buttons & Input::Left) != 0);
+    if (confirm) {
+      setup_.weapon = Game::EncounterWeapon::kDefault;
+    } else if (direction != 0) {
+      setup_.weapon = static_cast<Game::EncounterWeapon>(Cycle(
+          static_cast<std::size_t>(setup_.weapon),
+          static_cast<std::size_t>(Game::EncounterWeapon::kCount), direction));
+    }
+    return;
+  }
   if (stat_row_ >= kResetStats) {
-    if (confirm && stat_row_ == kResetStats) setup_.stat_overrides = {};
+    if (confirm && stat_row_ == kResetStats) {
+      setup_.stat_overrides = {};
+      setup_.weapon = Game::EncounterWeapon::kDefault;
+    }
     if (confirm && stat_row_ == kBackFromStats) stats_open_ = false;
     return;
   }
@@ -276,7 +292,7 @@ void Editor::UpdateStats(const Input::PadState& pad, bool confirm) {
 }
 
 void Editor::DrawStats(Canvas& canvas) const {
-  canvas.Text(kLabelX, kTitleY, "ASHLEY STARTING STAT OVERRIDES");
+  canvas.Text(kLabelX, kTitleY, "ASHLEY STARTING STATS AND WEAPON");
   canvas.Text(kLabelX, kSubtitleY,
               "LAB ONLY - APPLIED ONCE AT ENCOUNTER START");
   for (int index = 0; index < kStatRows; ++index) {
@@ -286,11 +302,13 @@ void Editor::DrawStats(Canvas& canvas) const {
                        kSelectionHeight, kHighlight);
     }
     std::string label;
-    if (index < kResetStats) {
+    if (index < kWeapon) {
       const auto& field = kStats[index];
       const auto value = setup_.stat_overrides.*field.member;
       label = std::format("{}: {}", field.label,
                           value ? std::to_string(*value) : "DEFAULT");
+    } else if (index == kWeapon) {
+      label = std::format("WEAPON: {}", Game::EncounterWeaponId(setup_.weapon));
     } else {
       label = index == kResetStats ? "RESET ALL TO DEFAULT" : "BACK TO SETUP";
     }
@@ -299,13 +317,13 @@ void Editor::DrawStats(Canvas& canvas) const {
   canvas.Text(kLabelX, kValidationY,
               "VALUES 1..999. DEFAULT PRESERVES PROFILE.");
   canvas.Text(kLabelX, kWarningY,
-              "HP / MP START FULL. INVENTORY AND SPELLS ARE UNCHANGED.");
+              "WEAPON REUSES STOCK PARTS. TWO-HANDED: SHIELD UNEQUIPPED.");
   canvas.Text(kLabelX, kMessageY,
               "LEFT FROM DEFAULT: 999. RIGHT FROM DEFAULT: 1.");
   canvas.Text(kLabelX, kEditorHelpY,
               "LEFT/RIGHT: +/-1   HOLD L1/Q: 10   R1/E: 100");
   canvas.Text(kLabelX, kCombatHelpY,
-              "ENTER/CIRCLE: RESET SELECTED STAT   CROSS/X: BACK");
+              "ENTER/CIRCLE: RESET SELECTED VALUE   CROSS/X: BACK");
 }
 
 void Editor::Draw(Canvas& canvas) const {
@@ -324,8 +342,9 @@ void Editor::Draw(Canvas& canvas) const {
           ? "NONE"
           : std::format("{} {}", zone.enemies[enemy_index_].index,
                         zone.enemies[enemy_index_].name);
-  const bool default_stats =
-      setup_.stat_overrides == Game::EncounterStatOverrides{};
+  const Game::EncounterStatOverrides defaults;
+  const bool default_stats = setup_.stat_overrides == defaults &&
+                             setup_.weapon == Game::EncounterWeapon::kDefault;
   const std::array<std::string, kRowCount> rows = {
       std::format("ZONE: {}", zone.id),
       std::format("ROOM: {} {}", room.index, room.asset),
@@ -339,8 +358,8 @@ void Editor::Draw(Canvas& canvas) const {
       std::format("LINE SPACING: {}", spacing_),
       std::format("RANDOM SEED: {}", setup_.seed),
       std::format("ASHLEY: {}", Game::EncounterProfileId(setup_.profile)),
-      default_stats ? "ASHLEY STATS: DEFAULT (ENTER TO EDIT)"
-                    : "ASHLEY STATS: CUSTOM (ENTER TO EDIT)",
+      default_stats ? "ASHLEY SETUP: DEFAULT (ENTER TO EDIT)"
+                    : "ASHLEY SETUP: CUSTOM (ENTER TO EDIT)",
       "ADD GROUP",
       "CLEAR GROUPS",
       "START ENCOUNTER",

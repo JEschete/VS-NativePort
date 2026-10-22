@@ -153,6 +153,11 @@ nlohmann::json EncodeActor(const Game::EncounterActorState& actor) {
           {"command", actor.command},
           {"command_state", actor.command_state},
           {"weapon_drawn", actor.weapon_drawn},
+          {"weapon_category", actor.weapon_category},
+          {"weapon_blade", actor.weapon_blade},
+          {"weapon_grip", actor.weapon_grip},
+          {"weapon_model", actor.weapon_model},
+          {"shield_model", actor.shield_model},
           {"actor_flags", actor.actor_flags},
           {"recovery", actor.recovery},
           {"spawn_index", actor.spawn_index},
@@ -252,6 +257,7 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
           {"seed", setup.seed},
           {"ashley_profile", Game::EncounterProfileId(setup.profile)},
           {"ashley_stats", EncodeStats(setup.stat_overrides)},
+          {"ashley_weapon", Game::EncounterWeaponId(setup.weapon)},
           {"player", EncodePosition(setup.player)},
           {"enemies", enemies},
           {"room_events", "isolated"},
@@ -292,6 +298,16 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
     throw std::runtime_error("unknown encounter Ashley profile");
   }
   setup.player = DecodePosition(json.at("player"));
+  const auto weapon = json.value("ashley_weapon", "default");
+  setup.weapon = Game::EncounterWeapon::kCount;
+  for (int index = 0; index < static_cast<int>(Game::EncounterWeapon::kCount);
+       ++index) {
+    const auto choice = static_cast<Game::EncounterWeapon>(index);
+    if (weapon == Game::EncounterWeaponId(choice)) setup.weapon = choice;
+  }
+  if (setup.weapon == Game::EncounterWeapon::kCount) {
+    throw std::runtime_error("unknown encounter Ashley weapon");
+  }
   if (json.contains("ashley_stats")) {
     setup.stat_overrides = DecodeStats(json.at("ashley_stats"));
   }

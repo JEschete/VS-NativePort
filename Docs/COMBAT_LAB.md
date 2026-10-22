@@ -24,12 +24,12 @@ The grid shows starting tiles over a conservative static-floor preview: green
 tiles have complete floor support; dark tiles are blocked/partial, pits, missing
 support or unavailable data. Invalid starts identify the actor, tile and reason.
 
-Select **ASHLEY STATS** and press Enter/Circle to edit maximum/starting HP and
+Select **ASHLEY SETUP** and press Enter/Circle to edit maximum/starting HP and
 MP, base STR, INT and AGI. Each field starts at **DEFAULT**, preserving the
 selected profile; overrides accept integers **1..999**. Left from DEFAULT
 selects 999, right selects 1. Left/right then adjust by 1; hold L1/Q for steps
 of 10 or R1/E for steps of 100. Enter/Circle on a stat restores DEFAULT;
-**RESET ALL TO DEFAULT** clears every override. Cross/X or **BACK TO SETUP**
+**RESET ALL TO DEFAULT** clears every stat and weapon override. Cross/X or **BACK TO SETUP**
 returns with the edits retained.
 
 Overrides are applied once, after normal Ashley initialization at encounter
@@ -43,6 +43,41 @@ Presets and encounter logs include an optional `ashley_stats` object, for
 example `"ashley_stats": {"max_hp": 999, "max_mp": 999}`. Omitted fields preserve
 defaults, and older presets without this object still work. Invalid types,
 out-of-range values and unknown stat names are rejected explicitly.
+
+The **WEAPON** row in the same submenu cycles through `default`, `dagger`,
+`sword`, `greatsword`, `axe-mace`, `greataxe`, `staff`, `heavy-mace`, `polearm`,
+`crossbow` and `bare-hands`. Enter/Circle restores `default`. The main setup
+row order is unchanged. Presets optionally save `ashley_weapon`; omitted values
+preserve the profile's equipment, and unknown choices are rejected.
+
+Weapon overrides reuse the equipped New Game weapon's existing blade/grip
+slots and indices, with original gem-free equipment records and the production
+part/stat conversion and Ashley model-loading paths. They do not increase
+inventory capacity or change consumables, spells or campaign startup. Bare
+hands only unequips the weapon. The original equip rules unequip, but retain,
+the shield for greatswords, greataxes, heavy maces, polearms and crossbows;
+daggers, swords, axes/maces, staves and bare hands preserve it.
+
+| Family | Original ZND / actor row (zero-based) | Blade / grip / WEP model IDs |
+|---|---|---|
+| Dagger | ZONE009 / 10 | 1 / 96 / 1 |
+| Sword | ZONE001 / 0 | 15 / 96 / 15 |
+| Greatsword | ZONE013 / 18 | 25 / 96 / 28 |
+| Axe/Mace | ZONE009 / 1 | 35 / 105 / 35 |
+| Greataxe | ZONE015 / 8 | 51 / 106 / 55 |
+| Staff | ZONE024 / 2 | 60 / 111 / 60 |
+| Heavy Mace | ZONE012 / 0 | 70 / 105 / 68 |
+| Polearm | ZONE013 / 11 | 71 / 115 / 71 |
+| Crossbow | ZONE009 / 9 | 83 / 121 / 83 |
+
+The selector copies original names, material, DP/PP, damage type, range, stats
+and affinities; it does not relabel Fandango or change a live actor's category.
+Equipment is established before profile grants and normal Ashley spawning.
+Post-Minotaur's representative art follows the selected family, including
+Lotus Palm for bare hands. Each fresh entry restores New Game inventory before
+applying its selection. Frame logs record actual `weapon_category`,
+`weapon_blade`, `weapon_grip`, `weapon_model` and `shield_model` alongside the
+requested choice in the encounter setup.
 
 The compact font uses the SYSTEM.DAT interface palette, including its black
 outline and gray shades. The unreadable solid-glyph rendering in the original
@@ -128,7 +163,7 @@ inventory and action set. Normal game startup is unchanged.
 - **All-spells:** post-prologue menu gates and all 50 spells in the four
   production battle-magic classes, including all four ranks of the seven
   ranked spells (71 learned actions). Starting inventory, equipment, resources,
-  chain mappings and Break Arts are not expanded. Use **ASHLEY STATS** for
+  chain mappings and Break Arts are not expanded. Use **ASHLEY SETUP** for
   starting HP/MP and F8 for MP refill. This is a learned-casting fixture, not
   grimoire-learning evidence; it does not grant the story/save-point Teleport
   feature or bypass door/event requirements.
@@ -144,7 +179,7 @@ inventory and action set. Normal game startup is unchanged.
   Only the currently equipped category is usable; other learned categories
   remain viewable through **View Arts**. Equipment, inventory, HP/MP, chain
   mappings, spells and acquisition/story counters are unchanged. Use
-  **ASHLEY STATS** for starting HP; arts still require more HP than their
+  **ASHLEY SETUP** for starting HP; arts still require more HP than their
   nominal cost (25/40/55/75), leaving at least 1 HP after payment.
   This supports [#11](https://github.com/JEschete/VS-NativePort/issues/11),
   not a claim that every art or acquisition path is already verified.
@@ -592,6 +627,70 @@ coverage; the Lab grants do not advance or certify them in a real campaign.
 [#11](https://github.com/JEschete/VS-NativePort/issues/11) still requires broader
 actual art execution, damage/secondary effects and target/range coverage;
 real-story/save acceptance remains separately tracked in #17/#18.
+
+### Weapon-family setup and empty-slot spawn checkpoint
+
+The Lab selector described above is exercised through ordinary controller
+input, not live category/action-ID edits. The following first-tier arts charge
+their original 25 HP, produce positive damage matching the actual target HP
+delta, and return control in both configurations:
+
+| Choice / action | Debug run | Release run |
+|---|---|---|
+| Dagger / 184 | `1792700918452054-0` | `1792700625662438-0` |
+| Sword / 188 | `1792700943618587-0` | `1792700666124780-0` |
+| Greatsword / 192 | `1792700377365987-0` | `1792700538152386-0` |
+| Axe/Mace / 196 | `1792700963422493-0` | `1792700726681466-0` |
+| Greataxe / 200 | `1792700982967485-0` | `1792700750998140-0` |
+| Staff / 204 | `1792701023378917-0` | `1792700775095309-0` |
+| Heavy Mace / 208 | `1792701048886399-0` | `1792700800394889-0` |
+| Polearm / 212 | `1792701068087802-0` | `1792700819450328-0` |
+| Crossbow / 216 | `1792701091620109-0` | `1792700842904377-0` |
+| Bare hands / 220 | `1792700459155502-0` | `1792700580270050-0` |
+
+These use zone 12, room 0, seed 1, Ashley (9,10), Minotaur Zombie definition 1
+at (9,11), all-break-arts and starting HP/MP 999. All except the first Debug
+greatsword run explicitly set starting AGI 200; STR/INT remain original.
+Greatsword and bare-hands runs each contain two entries separated by F10 with
+both actors alive; Release dagger/sword also have two. All accepted traces
+end with `trace_failed:false` and no error/fatal records.
+
+An earlier default-AGI bare-hands attempt (`1792700253486406-0`) produced two
+misses, then lost a menu shortcut to an enemy action and eventually game over.
+It is not accepted positive-damage evidence. No health, action, category or
+progression memory was edited to obtain subsequent results.
+
+Live editor resets in Debug `1792701230063476-0` (greatsword) and Release
+`1792701259882248-0` (bare hands) return to default and restore Fandango:
+category 2, blade 14, grip 96, model 16. Local captures
+`build/quality/weapon-editor.png` and `weapon-model-{192,216}.png` show the
+readable setup row and native greatsword/crossbow scenes.
+
+Related #123 corrects F01856's uninitialized material arguments when a weapon
+or shield is absent, through `copy_fixups.py`. The pre-fix empty-slot producer
+regression fails; all twelve copier regressions pass after regeneration.
+The second generation is stable and preserves the owned encounter sources.
+This is a bounded behavior repair, not C++ promotion or compatibility retirement.
+
+Validation at base `5272b755` plus these scoped dirty changes:
+Debug/Release solution builds and full native suites pass **466 cases /
+1,082,778 assertions** each. Profile coverage checks every family against
+original source records, production stat round-trips, both shield states,
+unchanged stock links/capacities/other items, repeat/default setup, bare-hands
+profile grants, editor navigation and invalid JSON/stock links.
+Logs use `build/quality/weapon-{debug,release}-{build,tests}.log`,
+`weapon-quality.log` and `weapon-final-generation*.log`.
+The final scoped format, cpplint, ruff, clone and tidy checks pass with zero
+findings/new findings. The selection includes the encounter model and source
+headers, encounter/catalog implementations, Lab editor/trace, both encounter
+test files and the two producer/regression Python files; no baseline changes.
+The ignored ordinary-input driver was invoked as
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File build\quality\live-restart-check.ps1 -Configuration <Debug|Release> -Weapon <choice> -Agility 200 -Art <id>`;
+the repeated runs add `-ArtRuns 2`, and editor-reset runs add `-ResetWeapon`.
+
+This establishes equipment setup and representative per-family execution,
+**not** all forty arts, all secondary effects, visual parity, #76 or #82.
+#11 remains open for the remaining acceptance gates.
 
 ## Learned-spell acceptance checkpoint (2026-10-22)
 

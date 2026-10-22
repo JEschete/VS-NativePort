@@ -7,6 +7,14 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_ashley_spawn_initializes_materials_for_empty_equipment_slots(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Actors/Ashley.c").read_text()
+        spawn = source.split("void Actors_SpawnAshleyWithEquipment(void)", 1)[1]
+        spawn = spawn.split("\n}\n", 1)[0]
+        self.assertIn("int bladeMaterial = 0;", spawn)
+        self.assertIn("int shieldMaterial = 0;", spawn)
+
     def test_misc_shortcut_label_is_encoded_before_reset_capture(self):
         old, new, _ = copy_fixups.FIXES["F02553"][0]
         declaration = 'static char Menu_Inventory_miscItemShortcutMisc[] = ' + old + ';'

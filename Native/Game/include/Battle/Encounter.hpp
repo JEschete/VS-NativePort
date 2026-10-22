@@ -79,6 +79,25 @@ const char* EncounterProfileId(EncounterProfile profile);
 // Lab startup only, after normal New Game initialization and overlay loading.
 void InitializeEncounterPlayerProfile(EncounterProfile profile);
 
+enum class EncounterWeapon {
+  kDefault,
+  kDagger,
+  kSword,
+  kGreatsword,
+  kAxeMace,
+  kGreataxe,
+  kStaff,
+  kHeavyMace,
+  kPolearm,
+  kCrossbow,
+  kBareHands,
+  kCount
+};
+const char* EncounterWeaponId(EncounterWeapon weapon);
+// Lab startup only, after New Game inventory initialization, before
+// profiles/spawn.
+void InitializeEncounterPlayerWeapon(EncounterWeapon weapon);
+
 struct EncounterStatOverrides {
   std::optional<int> max_hp;
   std::optional<int> max_mp;
@@ -100,6 +119,7 @@ struct EncounterSetup {
   std::vector<EncounterSpawn> enemies;
   EncounterProfile profile = EncounterProfile::kPrologue;
   EncounterStatOverrides stat_overrides;
+  EncounterWeapon weapon = EncounterWeapon::kDefault;
 };
 
 // Reads the same extracted ZND/MPD definitions consumed by the room loader.
@@ -128,6 +148,11 @@ struct EncounterActorState {
   int command = 0;
   int command_state = 0;
   int weapon_drawn = 0;
+  int weapon_category = 0;
+  int weapon_blade = 0;
+  int weapon_grip = 0;
+  int weapon_model = 0;
+  int shield_model = 0;
   std::uint32_t actor_flags = 0;
   int recovery = 0;
   int x = 0;

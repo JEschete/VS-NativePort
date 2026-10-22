@@ -227,7 +227,7 @@ TEST_CASE("Combat Lab Ashley stats editor saves and clears overrides",
   CHECK(editor.Setup().stat_overrides == saved.stat_overrides);
   EditorPress(editor, VS::Input::Up, 3);
   EditorPress(editor, VS::Input::Circle);
-  EditorPress(editor, VS::Input::Down, 5);
+  EditorPress(editor, VS::Input::Down, 6);
   EditorPress(editor, VS::Input::Circle);
   CHECK(editor.Setup().stat_overrides == VS::Game::EncounterStatOverrides{});
   EditorPress(editor, VS::Input::Down);
@@ -489,4 +489,49 @@ TEST_CASE("Encounter validation identifies unsafe actor tiles before spawning",
   const auto errors = ValidateEncounter(setup, zone);
   REQUIRE_FALSE(errors.empty());
   CHECK(errors.front().find("TILE (") != std::string::npos);
+}
+
+TEST_CASE("Combat Lab weapon selection wraps through all families",
+          "[combat][encounter][editor][weapon]") {
+  using Weapon = VS::Game::EncounterWeapon;
+  VS::combat_lab::Editor editor({TestZone()});
+  EditorPress(editor, VS::Input::Down, 12);
+  EditorPress(editor, VS::Input::Circle);
+  EditorPress(editor, VS::Input::Down, 5);
+  EditorPress(editor, VS::Input::Left);
+  CHECK(editor.Setup().weapon == Weapon::kBareHands);
+  EditorPress(editor, VS::Input::Right);
+  CHECK(editor.Setup().weapon == Weapon::kDefault);
+  EditorPress(editor, VS::Input::Right, 3);
+  CHECK(editor.Setup().weapon == Weapon::kGreatsword);
+}
+
+TEST_CASE("Combat Lab weapon presets retain and reset equipment choices",
+          "[combat][encounter][editor][weapon]") {
+  using Weapon = VS::Game::EncounterWeapon;
+  VS::combat_lab::Editor editor({TestZone()});
+  auto setup = editor.Setup();
+  setup.weapon = Weapon::kGreatsword;
+  editor.Load(setup);
+  EditorPress(editor, VS::Input::Down, 15);
+  CHECK(editor.Update({}, true) == VS::combat_lab::Editor::Action::kStart);
+  editor.Load(
+      VS::combat_lab::DecodeSetup(VS::combat_lab::EncodeSetup(editor.Setup())));
+  CHECK(editor.Setup().weapon == Weapon::kGreatsword);
+  EditorPress(editor, VS::Input::Up, 3);
+  EditorPress(editor, VS::Input::Circle);
+  EditorPress(editor, VS::Input::Down, 5);
+  EditorPress(editor, VS::Input::Circle);
+  CHECK(editor.Setup().weapon == Weapon::kDefault);
+  EditorPress(editor, VS::Input::Right);
+  EditorPress(editor, VS::Input::Down);
+  EditorPress(editor, VS::Input::Circle);
+  CHECK(editor.Setup().weapon == Weapon::kDefault);
+}
+
+TEST_CASE("Encounter validation rejects unsupported equipment choices",
+          "[combat][encounter][weapon]") {
+  auto setup = TestSetup(0);
+  setup.weapon = VS::Game::EncounterWeapon::kCount;
+  CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
 }

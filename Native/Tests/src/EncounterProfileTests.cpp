@@ -2,15 +2,21 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
+#include <filesystem>
 #include <limits>
 #include <set>
+#include <stdexcept>
 #include <string_view>
+#include <tuple>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Encounter.hpp"
 #include "CombatLab/Trace.hpp"
+#include "Content/DataAccess.h"
+#include "Content/DataStore.hpp"
+#include "Field/EncounterSpawnProfile.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -20,8 +26,13 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Core/Memory.h"
+#include "Core/Memory/Heap.h"
 #include "Input/Controller.h"
+#include "Items/EquipmentStats.h"
+#include "Menu/Setup/Assembly.h"
 #include "State/Progress.h"
+#include "Title/NewGame.h"
 }
 
 namespace {
@@ -574,4 +585,189 @@ TEST_CASE("Ashley stat presets retain defaults and reject invalid numbers",
                 .at("ashley_stats") == json.at("ashley_stats"));
     }
   }
+}
+
+TEST_CASE(
+    "Lab weapon presets round-trip all families and preserve old defaults",
+    "[combat][profile][weapon]") {
+  using Weapon = VS::Game::EncounterWeapon;
+  VS::Game::EncounterSetup setup;
+  for (int index = 0; index < static_cast<int>(Weapon::kCount); ++index) {
+    setup.weapon = static_cast<Weapon>(index);
+    const auto json = VS::combat_lab::EncodeSetup(setup);
+    CHECK(VS::combat_lab::DecodeSetup(json).weapon == setup.weapon);
+  }
+  auto json = VS::combat_lab::EncodeSetup(setup);
+  json.erase("ashley_weapon");
+  CHECK(VS::combat_lab::DecodeSetup(json).weapon == Weapon::kDefault);
+  for (const auto& invalid : {nlohmann::json("invalid"), nlohmann::json(2),
+                              nlohmann::json(nullptr), nlohmann::json(true)}) {
+    json["ashley_weapon"] = invalid;
+    CHECK_THROWS(VS::combat_lab::DecodeSetup(json));
+  }
+  setup.weapon = Weapon::kCount;
+  CHECK_THROWS(VS::combat_lab::EncodeSetup(setup));
+  CHECK_THROWS(VS::Game::InitializeEncounterPlayerWeapon(setup.weapon));
+  CHECK_FALSE(VS::Game::ReadEncounterWeapon(Weapon::kDefault));
+  CHECK_FALSE(VS::Game::ReadEncounterWeapon(Weapon::kBareHands));
+}
+
+TEST_CASE("Default and bare-hands setup preserve stock parts and inventory",
+          "[combat][profile][weapon]") {
+  using Weapon = VS::Game::EncounterWeapon;
+  ProfileFixture fixture;
+  auto expected = Audio_Seq_unusedInventory;
+  VS::Game::InitializeEncounterPlayerWeapon(Weapon::kDefault);
+  CHECK(std::memcmp(&expected, &Audio_Seq_unusedInventory, sizeof expected) ==
+        0);
+  for (auto& weapon : expected.weapons) weapon.isEquipped = 0;
+  VS::Game::InitializeEncounterPlayerWeapon(Weapon::kBareHands);
+  CHECK(std::memcmp(&expected, &Audio_Seq_unusedInventory, sizeof expected) ==
+        0);
+  VS::Game::InitializeEncounterPlayerProfile(
+      VS::Game::EncounterProfile::kPostMinotaur);
+  CHECK(Battle_actionDefinitions[220].unlocked == 1);
+  CHECK(Battle_actionDefinitions[221].unlocked == 0);
+}
+
+namespace {
+void OpenWeaponSourceData() {
+  for (auto dir = std::filesystem::current_path(); dir != dir.parent_path();
+       dir = dir.parent_path()) {
+    const auto root = dir / "Native" / "data";
+    if (std::filesystem::exists(root / VS::Content::DataStore::ManifestName)) {
+      REQUIRE(VS::Content::DataStore::Open(root));
+      REQUIRE(Content_LoadModuleData() == 0);
+      return;
+    }
+  }
+  SKIP("Extracted Native/data is unavailable");
+}
+
+struct WeaponHeap {
+  Core_HeapBlockHeader saved_heap = Core_legacyHeapList;
+  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
+  std::array<Core_HeapBlockHeader, 256> heap{};
+  WeaponHeap() { Core_Memory_InitializeHeap(heap.data(), sizeof heap); }
+  ~WeaponHeap() {
+    Core_legacyHeapList = saved_heap;
+    Core_legacySecondaryHeapList = saved_secondary;
+  }
+};
+
+void CheckWeaponStats(const Items_WeaponLoadout& actual,
+                      Items_WeaponSpawnLoadout source) {
+  Items_WeaponLoadout expected{};
+  Items_BuildWeaponStatsFromParts(&expected, &source);
+  CHECK(std::tie(actual.wepId, actual.blade.id, actual.grip.id,
+                 actual.blade.material, actual.currentDp, actual.maxDp,
+                 actual.currentPp, actual.maxPp, actual.currentStr,
+                 actual.currentInt, actual.currentAgility, actual.damageType,
+                 actual.damageTypeValue, actual.risk, actual.recoveryDelay) ==
+        std::tie(expected.wepId, expected.blade.id, expected.grip.id,
+                 expected.blade.material, expected.currentDp, expected.maxDp,
+                 expected.currentPp, expected.maxPp, expected.currentStr,
+                 expected.currentInt, expected.currentAgility,
+                 expected.damageType, expected.damageTypeValue, expected.risk,
+                 expected.recoveryDelay));
+  CHECK(std::memcmp(&actual.range, &expected.range, sizeof actual.range) == 0);
+  CHECK(std::memcmp(actual.name, expected.name, sizeof actual.name) == 0);
+  CHECK(std::memcmp(&actual.classAffinityBaseline,
+                    &expected.classAffinityBaseline,
+                    sizeof actual.classAffinityBaseline) == 0);
+}
+
+Items_Inventory CheckWeaponParts(const Items_Inventory& original,
+                                 Items_InventoryWeapon& slot, int category) {
+  auto& inventory = Audio_Seq_unusedInventory;
+  if (slot.blade == 0 || slot.blade > std::size(inventory.blades) ||
+      slot.grip == 0 || slot.grip > std::size(inventory.grips)) {
+    throw std::runtime_error(
+        "equipped weapon part indices exceed inventory capacity");
+  }
+  const std::array<int, 9> blades{1, 15, 25, 35, 51, 60, 70, 71, 83};
+  const std::array<int, 9> grips{96, 96, 96, 105, 106, 111, 105, 115, 121};
+  const std::array<int, 9> models{1, 15, 28, 35, 55, 60, 68, 71, 83};
+  const std::array<bool, 9> two_handed{false, false, true, false, true,
+                                       false, true,  true, true};
+  const auto index =
+      static_cast<std::size_t>(&slot - std::begin(inventory.weapons));
+  auto& blade = inventory.blades[slot.blade - 1];
+  auto& grip = inventory.grips[slot.grip - 1];
+  CHECK(std::tuple(blade.id, grip.id, blade.wepId, blade.category) ==
+        std::tuple(blades[category - 1], grips[category - 1],
+                   models[category - 1], category));
+  CHECK(Menu_Setup_IsGripCompatible(&blade, &grip) != 0);
+  CHECK(std::tuple(blade.assembledWeaponIndex, grip.assembledWeaponIndex,
+                   slot.blade, slot.grip) ==
+        std::tuple(original.blades[slot.blade - 1].assembledWeaponIndex,
+                   original.grips[slot.grip - 1].assembledWeaponIndex,
+                   original.weapons[index].blade,
+                   original.weapons[index].grip));
+  auto expected = original;
+  expected.blades[slot.blade - 1] = blade;
+  expected.grips[slot.grip - 1] = grip;
+  std::copy_n(slot.name, std::size(slot.name), expected.weapons[index].name);
+  if (two_handed[category - 1]) {
+    for (auto& shield : expected.shields) shield.isEquipped = 0;
+  }
+  return expected;
+}
+}  // namespace
+
+TEST_CASE(
+    "All nine Lab weapon families use original compatible inventory parts",
+    "[combat][profile][weapon][disc]") {
+  OpenWeaponSourceData();
+  ProfileFixture fixture;
+  WeaponHeap heap;
+  auto& inventory = Audio_Seq_unusedInventory;
+  std::memcpy(&inventory, Title_newGameInventoryTemplate, sizeof inventory);
+  if (GENERATE(false, true)) inventory.shields[0].isEquipped = 1;
+  const auto original = inventory;
+  const auto indices = Audio_Seq_unusedInventoryIndices;
+  for (int category = 1; category <= 9; ++category) {
+    CAPTURE(category);
+    const auto choice = static_cast<VS::Game::EncounterWeapon>(category);
+    inventory = original;
+    VS::Game::InitializeEncounterPlayerWeapon(choice);
+    const auto slot = std::ranges::find_if(
+        inventory.weapons,
+        [](const auto& weapon) { return weapon.isEquipped != 0; });
+    REQUIRE(slot != std::end(inventory.weapons));
+    const auto expected = CheckWeaponParts(original, *slot, category);
+    CHECK(std::memcmp(&inventory, &expected, sizeof inventory) == 0);
+    CHECK(std::memcmp(&indices, &Audio_Seq_unusedInventoryIndices,
+                      sizeof indices) == 0);
+    const auto source = VS::Game::ReadEncounterWeapon(choice);
+    REQUIRE(source);
+    Items_WeaponLoadout actual{};
+    Items_LoadInventoryWeaponStats(&actual, slot);
+    CheckWeaponStats(actual, *source);
+    VS::Game::InitializeEncounterPlayerWeapon(choice);
+    CHECK(std::memcmp(&inventory, &expected, sizeof inventory) == 0);
+    inventory = original;
+    VS::Game::InitializeEncounterPlayerWeapon(
+        VS::Game::EncounterWeapon::kDefault);
+    CHECK(std::memcmp(&inventory, &original, sizeof inventory) == 0);
+  }
+}
+
+TEST_CASE("Weapon setup rejects invalid stock links without mutating inventory",
+          "[combat][profile][weapon][disc]") {
+  OpenWeaponSourceData();
+  ProfileFixture fixture;
+  auto& inventory = Audio_Seq_unusedInventory;
+  inventory.weapons[0].grip = 1;
+  SECTION("blade missing") { inventory.weapons[0].blade = 0; }
+  SECTION("blade outside capacity") { inventory.weapons[0].blade = 17; }
+  SECTION("grip missing") { inventory.weapons[0].grip = 0; }
+  SECTION("grip outside capacity") { inventory.weapons[0].grip = 17; }
+  SECTION("existing gems") { inventory.weapons[0].gems[0] = 1; }
+  SECTION("no equipped weapon") { inventory.weapons[0].isEquipped = 0; }
+  SECTION("multiple equipped weapons") { inventory.weapons[1].isEquipped = 1; }
+  const auto expected = inventory;
+  CHECK_THROWS(VS::Game::InitializeEncounterPlayerWeapon(
+      VS::Game::EncounterWeapon::kDagger));
+  CHECK(std::memcmp(&inventory, &expected, sizeof inventory) == 0);
 }
