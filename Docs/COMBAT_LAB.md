@@ -150,6 +150,113 @@ Other options: `--data <directory>`, `--frames <ticks>`, `--speed <1..64>`,
 and `--press <tick:Button[,tick:Button...]>`. A scripted press lasts two ticks;
 `+` combines buttons. Host function keys remain available during scripted runs.
 
+## Learned-spell acceptance checkpoint (2026-10-22)
+
+This closes the bounded representative acceptance of
+[#9](https://github.com/JEschete/VS-NativePort/issues/9), not every spell/target
+permutation. Replays use published `9b76aabffeb674f55c29ad446a4cdb76545324ba`;
+native code is unchanged from fully validated `ad6b2adb`. Unrelated dirty
+documentation, solution/tool-project files and reference state were preserved.
+The relevant implemented fixes are the all-spells fixture (`fa794fab`),
+elevation plane (`65f3c8f1`), rank selector (`5aa6adab`) and actual-caster
+telemetry (`b6e0a84a`). No new gameplay patch or progression bypass was needed.
+
+Original contracts checked against production code and source:
+
+- [Item selection](../Native/Game/src/Menu/Inventory/Inventory.c) maps a book
+  to its spell and advances only through the four original ranked action IDs.
+  A book can teach an unlearned action; a committed use consumes a copy.
+  [Learned selection](../Native/Game/src/Menu/Magic.c) instead lists unlocked
+  actions/ranks and checks the complete action restriction flags. It consumes
+  MP, not inventory, and does not grant another rank.
+- [Action restrictions](../Native/Game/src/Battle/ActionResolution.c) distinguish
+  unavailable resources (bit 2) from unlearned/Silence restrictions (bit 4).
+  Original action records supply costs, ranges, areas and calculation dispatch.
+  The checked costs below are byte 3 of the 52-byte SLUS records at file offset
+  `0x3C1DC`, not amounts inferred from final MP after passive recovery.
+- [Commit/presentation](../Native/Game/src/Battle/ActionFlow.c) preserves the
+  cancellation boundary and sets the magic-used flag for a committed Ashley
+  spell, including a miss. The existing item checkpoint separately verifies
+  first/already-learned book use, rank learning and book consumption.
+- Original intro, Minotaur, Teleport, ability-used and Break-Art-used flags,
+  plus the 36-byte physical-art/ability progression record, remain unchanged
+  across these learned casts. Magic-used changes `0 -> 1`, then stays 1.
+  Rejected/cancelled attempts leave it 0. These fixtures do not manufacture
+  Minotaur completion: its flag stays 0. The full real-story boundary audit
+  remains [#17](https://github.com/JEschete/VS-NativePort/issues/17).
+
+All runs below use real native-window controller keys at speed 1. No memory,
+enemy HP, event flags or result records were written. Default STR/INT/AGI100
+and HP/MP999 are used except the deliberately capped MP1 rejection fixture
+and INT150 for the final ranked/offensive fixture (Debug Fireball uses INT100).
+Positive offensive fixtures use zone12/room0, Ashley9,10 and Minotaur Zombie
+definition1 at9,12. Recovery/support are solo. Range rejection moves that enemy
+to9,16, outside Fireball's original horizontal extent of576 native units.
+
+| Check | Debug run | Release run |
+| --- | --- | --- |
+| Fireball99, MP25 | `1792680710660736-0` | `1792681280349938-0` |
+| Heal96, MP5 | `1792680761115780-0` | `1792681304556948-0` |
+| Herakles60, MP12 | `1792680782301952-0` | `1792681325760550-0` |
+| Flame Sphere114-117, MP36/44/52/60 | `1792681176530414-0` | `1792681345935960-0` |
+| Unlearned class, original prologue profile | `1792680570406517-0` | `1792680626880351-0` |
+| Insufficient MP | `1792680581486383-0` | `1792680637932388-0` |
+| Silence | `1792680595605230-0` | `1792680652065183-0` |
+| Cancel before commitment | `1792680611716486-0` | `1792680667217956-0` |
+| Out-of-range/no target | `1792681789464823-0` | `1792681805596294-0` |
+
+Measured effect boundaries:
+
+- Fireball: Debug enemy681 ->677 after two explicitly recorded zero-effect
+  casts; Release681 ->642. Every committed attempt costs25MP and returns
+  normally. A miss is not cancellation or permission to refund the cost.
+- Heal: Debug600 ->658; Release600 ->659, exactly matching the reported58/59
+  restoration. The earlier599 setup sample precedes one passive HP recovery;
+  it is not used as the spell's effect boundary.
+- Herakles: actual STR100 ->110 in both builds.
+- Flame Sphere: all four ranks cast in one encounter per build, using the real
+  rank chooser and height/horizontal area controls. Debug enemy HP boundaries:
+  681 ->680,680 ->679,679 ->672,673 ->633. Release:
+  681 ->677,677 ->676,676 ->671,671 ->612. The gap before Debug rankIV is passive
+  enemy recovery, not an edited value. All same-frame limb results are summed
+  before comparing actual actor HP; one limb's message is not the whole cast.
+- Unlearned classes do not open. Low MP and Silence retain the disabled spell
+  list. No-target confirmation returns to the spell menu, matching original
+  target-selection state16/17; it does not cast or remain indefinitely in
+  targeting. All five negative/cancel cases preserve MP, inventory and learning.
+
+The rank/elevation visuals accepted with #85/#86 remain on the same native
+implementation. Fresh replays exercise presentation, result feedback and
+control return; native audio logs record instrument/note playback. This is
+functional feedback evidence, not a new audiovisual parity certification.
+Particle-path fidelity remains [#76](https://github.com/JEschete/VS-NativePort/issues/76).
+
+Local evidence is under `build\<Configuration>\combat-lab\runs\<run>` and
+`build\quality\live-spell-<action>-<gate>-<Configuration>.json`. The local driver
+is `build\quality\live-restart-check.ps1 -Configuration <Debug|Release>
+-Spell <99|96|60|114>`;114 runs all four ranks. Fireball restriction variants
+use `-SpellGate <unlearned|low-mp|silence|cancel|range>`. It uses ordinary
+F1/F8 preconditions, observes memory read-only, records original misses and
+retries input only after actual idle control. Short20ms key probes, assuming
+one area preview/limb, and assuming all casts hit were rejected diagnostic
+approaches, not native defects.
+
+All18 final sessions end with zero error events and `trace_failed=false`.
+Fresh Debug/Release Catch2 selection
+`"[items],[profile],[status],[stats],[encounter]"` passes55 cases /2,098
+assertions each. Native executable invocations use separate stdout/stderr
+redirection and checked exit codes; expected negative-test warnings are not
+test failures. Full native code remains identical to the previously validated
+416-case build; no baseline or generated output changed.
+
+**Coverage limits:** direct execution sampled7 of71 battle-spell action IDs.
+The remaining direct-entry IDs are54-58,61-63,66-73,75-77,79-80,82-83,85,87-88,
+90-95,97-98,100-113 and118-133. Their separately qualified grimoire observations
+are not substitutes for individual learned-entry tests. Retain those entries
+for [#16](https://github.com/JEschete/VS-NativePort/issues/16), along with broader
+targets/ranges/effect permutations. Save persistence, Teleport, matching
+keys/sigils and the full #17 progression audit are not closed by this checkpoint.
+
 ## Production contracts and current limits
 
 - Rooms and enemy stats come from the extracted ZND/MPD definitions. Each accepted
