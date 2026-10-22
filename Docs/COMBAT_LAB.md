@@ -982,9 +982,78 @@ MSBuild invocation targeting `Native\Tests\VS.Tests.vcxproj`, then each
 Local logs use `build/quality/art-effects-*`. Unrelated worktree changes were
 preserved; no production behavior or compatibility-retirement status changed.
 
-The expanded live insufficient-resource, no-target, range and cancellation
-sweep remains in progress. #11 stays open until those remaining gates and
-the published revision's CI are verified. #76 and #82 remain separate.
+### All-art live failure and cancellation acceptance
+
+The expanded sweep passes **60 live encounters / 400 gate selections**:
+each of the40 original arts in both Debug and Release independently passes
+empty-target confirmation, empty-target cancellation, insufficient HP,
+out-of-range confirmation, and cancellation with a valid enemy target.
+All60 final traces were audited for exactly one `session.end`,
+`trace_failed:false`, no error-level engine entries and **no art result
+executed during a rejected/canceled selection**. Each result file was also
+checked for the exact four action IDs in every required phase.
+
+All encounters use zone12 room0, seed1, Ashley(9,10), **all-break-arts**,
+the selected original weapon family and AGI200:
+
+- **Solo:** HP975/MP999, no enemies. All four arts confirm an empty target
+  list and return without payment, then cancel from targeting without
+  payment. Actual Lab F1 inputs reduce HP to1; all four rows become disabled
+  and all four confirmation attempts stay in the menu without payment.
+  Natural field HP regeneration remains enabled and was observed by the
+  driver. Exact cost-1/cost/cost+1 boundaries for every art remain separately
+  covered by the maintained component tests.
+- **Range:** HP/MP999, Minotaur Zombie definition1 at(9,16). All four art
+  previews contain no eligible target and confirmation returns to the menu
+  without payment.
+- **Valid cancel:** HP/MP999, the same enemy at(9,11). Each art first exposes
+  a valid enemy limb, then actual cancel returns without payment. Normal
+  enemy actions after leaving the menu are allowed to finish; they are not
+  misclassified as an unexpected player action.
+
+The checks preserve inventory, learned actions and acquisition/story
+progression. HP/MP/Risk/statuses are compared across the target selections,
+and field control recovers. No process-memory writes, forced completion,
+event-flag edits or enemy-HP changes are used. All owned hosts closed normally.
+
+Each row covers its first art and the next three IDs:
+
+| Family / first art | Debug solo | Debug range | Debug valid cancel | Release solo | Release range | Release valid cancel |
+|---|---|---|---|---|---|---|
+| Dagger184 | `1792710696173852-0` | `1792710834452291-0` | `1792710858375735-0` | `1792711717601532-0` | `1792711764315286-0` | `1792711787766854-0` |
+| Sword188 | `1792710383679562-0` | `1792710892161165-0` | `1792710916022939-0` | `1792711820992073-0` | `1792711867850780-0` | `1792711891360867-0` |
+| Greatsword192 | `1792710949715270-0` | `1792710996899535-0` | `1792711020618147-0` | `1792711924452702-0` | `1792711971318239-0` | `1792711994759752-0` |
+| Axe/Mace196 | `1792711054152786-0` | `1792711101349890-0` | `1792711125206079-0` | `1792712027942091-0` | `1792712074830428-0` | `1792712098290892-0` |
+| Greataxe200 | `1792711158923035-0` | `1792711206137175-0` | `1792711229805759-0` | `1792712131693442-0` | `1792712178633593-0` | `1792712201978468-0` |
+| Staff204 | `1792711263126101-0` | `1792711310099752-0` | `1792711333772484-0` | `1792712235320514-0` | `1792712282091114-0` | `1792712305521334-0` |
+| Heavy Mace208 | `1792711362334712-0` | `1792711409305521-0` | `1792711433102521-0` | `1792712334321822-0` | `1792712381276998-0` | `1792712404791657-0` |
+| Polearm212 | `1792711466683888-0` | `1792711513933375-0` | `1792711537469301-0` | `1792712437988658-0` | `1792712485040102-0` | `1792712508529948-0` |
+| Crossbow216 | `1792711570957927-0` | `1792710512551943-0` | `1792710624124207-0` | `1792712541761048-0` | `1792712588742286-0` | `1792712612404404-0` |
+| Bare hands220 | `1792711618285959-0` | `1792711665510567-0` | `1792711689075547-0` | `1792712645454127-0` | `1792712692353187-0` | `1792712715684502-0` |
+
+Reproduction uses the ignored local driver:
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File build\quality\live-restart-check.ps1 -Configuration Debug -Weapon sword -Agility 200 -Art 188 -ArtGate solo`.
+Select Debug/Release, the family/first art, and solo/range/cancel. The bounded
+batch is `build/quality/run-art-gates.ps1`; its audited index is
+`build/quality/art-gates-batch.json`. Logs and result snapshots are
+`art-gates-{gate}-{configuration}-{first-art}.log` and
+`live-break-art-{first-art}-{gate}-{configuration}.json` under `build/quality`.
+Native session logs remain under the corresponding Combat Lab run directory.
+
+The unchanged production hosts are built from `07953575`; the worktree
+advanced to tests/documentation-only `f432f475` during the sweep, preserving
+unrelated dirty edits. That revision's Source Quality
+[39870437965](https://github.com/JEschete/VS-NativePort/actions/runs/39870437965)
+passed every step. Host SHA-256 values:
+
+- Debug: `dce76c4bb089fa35cc92bf77d982475e3c550924fd6057b32d9b6b624bb7ef16`.
+- Release: `c143f8ea673b21b0eed271bcbd9873fa519223ed28da22dbf42e73d21a54d74c`.
+
+Together with the all-category menu/equipment checks, all40 cost/eligibility
+and acquisition contracts, positive damage/recovery runs and secondary-effect
+coverage above, this completes #11's bounded functional acceptance. Full
+particle/trail visual parity (#76) and the intermittent F10 report (#82)
+remain open; these gates do not claim to resolve them.
 
 ## Learned-spell acceptance checkpoint (2026-10-22)
 
