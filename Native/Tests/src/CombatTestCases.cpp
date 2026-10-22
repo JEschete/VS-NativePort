@@ -332,6 +332,108 @@ struct AbilityUnlockFixture : AbilityFixture {
   }
 };
 
+enum class KillGate {
+  kPreview,
+  kPositionSource,
+  kEnemySource,
+  kPositionTarget,
+  kDummy,
+  kSpell,
+  kItem,
+  kNonlethal,
+  kAshleyTarget,
+  kAlreadyCounted,
+  kStory,
+  kFourArts,
+  kPendingThreshold
+};
+
+struct BreakArtKillFixture : AbilityUnlockFixture {
+  decltype(std::to_array(Battle_actionEffectMediators)) saved_effects =
+      std::to_array(Battle_actionEffectMediators);
+  char saved_story = State_ScriptFlag(0x82);
+  Battle_HitResult source{};
+  Battle_HitResult target{};
+  unsigned counter;
+  int action_id = 184;
+  int apply = 1;
+
+  BreakArtKillFixture(unsigned category, unsigned tier)
+      : counter(category % 10) {
+    actors[0].equippedWeaponCategory = static_cast<u_char>(category);
+    State_SetScriptFlag(0x82, 10);
+    Audio_Seq_unusedArtsStatus.artsLearned[counter] = static_cast<u_char>(tier);
+    Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[counter] =
+        static_cast<u_short>(kBreakArtThresholds[counter][tier] - 1);
+    Battle_InitializeHitResult(&source);
+    Battle_InitializeHitResult(&target);
+    target.target.targetActor = 1;
+    target.target.hp = stats[1].currentHp;
+    Battle_actionDefinitions[184].type = Battle_ActionType_BreakArt;
+    Battle_actionDefinitions[160].type = Battle_ActionType_Item;
+    Battle_actionEffectMediators[0] =
+        [](Battle_ActionDefinition* definition, Battle_HitResult* from,
+           Battle_HitResult* to, int hit, int update) {
+          Battle_IgnoreActionEffect(definition, from, to, hit, update);
+        };
+  }
+
+  ~BreakArtKillFixture() {
+    std::copy(saved_effects.begin(), saved_effects.end(),
+              Battle_actionEffectMediators);
+    State_SetScriptFlag(0x82, saved_story);
+  }
+
+  void Reject(KillGate gate) {
+    switch (gate) {
+      case KillGate::kPreview:
+        apply = 0;
+        break;
+      case KillGate::kPositionSource:
+        source.targetsPosition = 1;
+        break;
+      case KillGate::kEnemySource:
+        source.target.targetActor = 1;
+        break;
+      case KillGate::kPositionTarget:
+        target.targetsPosition = 1;
+        break;
+      case KillGate::kDummy:
+        stats[1].actorId = 0x80;
+        break;
+      case KillGate::kSpell:
+        action_id = 99;
+        break;
+      case KillGate::kItem:
+        action_id = 160;
+        break;
+      case KillGate::kNonlethal:
+        --target.target.hp;
+        break;
+      case KillGate::kAshleyTarget:
+        target.target.targetActor = 0;
+        break;
+      case KillGate::kAlreadyCounted:
+        actors[1].killCounted = 1;
+        break;
+      case KillGate::kStory:
+        State_SetScriptFlag(0x82, 9);
+        break;
+      case KillGate::kFourArts:
+        Audio_Seq_unusedArtsStatus.artsLearned[counter] = 4;
+        break;
+      case KillGate::kPendingThreshold:
+        ++Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[counter];
+        break;
+    }
+  }
+
+  void Resolve() {
+    Battle_ApplyActionHitEffect(&Battle_actionDefinitions[action_id], &source,
+                                &target, apply, 0);
+  }
+};
+
 void CheckAbilityProgress(const State_ArtsStatus& before) {
   CHECK(std::to_array(Audio_Seq_unusedArtsStatus.artsLearned) ==
         std::to_array(before.artsLearned));
@@ -422,6 +524,43 @@ TEST_CASE("Ineligible ability reward menus leave progression unchanged",
   const auto before = progress;
   CHECK(Menu_BattleAbilities_UpdateAbilityUnlock(1) == 1);
   CheckAbilityProgress(before);
+}
+
+TEST_CASE("Qualifying lethal actions count once at every Break Art threshold",
+          "[combat][break-arts][acquisition]") {
+  const unsigned category = GENERATE(Catch::Generators::range(1u, 11u));
+  const unsigned tier = GENERATE(Catch::Generators::range(0u, 4u));
+  const int action_id = GENERATE(1, 22, 184);
+  BreakArtKillFixture fixture(category, tier);
+  fixture.action_id = action_id;
+  auto expected = Audio_Seq_unusedArtsStatus;
+  ++expected.kills.weaponCategoryKills[fixture.counter];
+  fixture.Resolve();
+  CHECK(fixture.actors[1].killCounted == 1);
+  CheckAbilityProgress(expected);
+  fixture.Resolve();
+  CheckAbilityProgress(expected);
+}
+
+TEST_CASE("Break Art kill points preserve original qualification and cap gates",
+          "[combat][break-arts][acquisition]") {
+  const unsigned category = GENERATE(Catch::Generators::range(1u, 11u));
+  const auto gate = GENERATE(
+      KillGate::kPreview, KillGate::kPositionSource, KillGate::kEnemySource,
+      KillGate::kPositionTarget, KillGate::kDummy, KillGate::kSpell,
+      KillGate::kItem, KillGate::kNonlethal, KillGate::kAshleyTarget,
+      KillGate::kAlreadyCounted, KillGate::kStory, KillGate::kFourArts,
+      KillGate::kPendingThreshold);
+  BreakArtKillFixture fixture(category, 0);
+  fixture.Reject(gate);
+  const auto before = Audio_Seq_unusedArtsStatus;
+  fixture.Resolve();
+  CheckAbilityProgress(before);
+  const bool counted =
+      gate == KillGate::kAlreadyCounted || gate == KillGate::kStory ||
+      gate == KillGate::kFourArts || gate == KillGate::kPendingThreshold;
+  CHECK(fixture.actors[1].killCounted == counted);
+  CHECK(fixture.actors[0].killCounted == 0);
 }
 
 TEST_CASE("All battle abilities charge original Risk with chain growth and cap",
