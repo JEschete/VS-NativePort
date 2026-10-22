@@ -311,6 +311,61 @@ Debug/Release real-input checks load models26/27, use Banish to defeat the Ghost
 Separate three-encounter checks stop/re-enter with the Ghost alive in both builds.
 These checks do not reproduce or close the separate F10 crash report #82.
 
+### Item-use acceptance checkpoint (2026-10-22)
+
+The bounded #8 item-use criteria now have production-path evidence, separate
+from the wider learned-spell/fidelity work in #9 and save/load work in #18.
+Consumption covers84/84 named consumables/books; all ten permanent-stat items
+have actual base/max-stat comparisons, and all seven ranked grimoires have
+four uses in one encounter. The owner supplied the faster broad manual run;
+the additional runs below only fill specific effect/eligibility gaps.
+
+- Fireball, Exorcism, Banish, both drains, Degenerate, Stun Cloud, Poison Mist
+  and Curse have positive eligible-target results in Debug and Release.
+  Four cure books remove their actual matching ailments. Clef unlocks the
+  real MAP176 chest when Ashley faces it.
+- **Fixate444/action79:** zone9 room5/MAP014, Ashley11,12, solo profileB.
+  Read-only observation proves the original platform moves before use,
+  remains stationary while the freeze timer decreases with both room and
+  platform updates unpaused, then moves again after expiry. One book and3MP
+  are spent; action79 is learned. Runs: Debug `1792676535074920-0`,
+  Release `1792676584085327-0`.
+- **Eureka447/action93:** zone9 room6/MAP015, Ashley8,7, solo profileB.
+  The real trap at15,9 changes activation0 ->1 and marker fade0 ->128.
+  One book and6MP are spent; action93 is learned. Runs: Debug
+  `1792676277768454-0`, Release `1792676304258865-0`.
+- **Uncapped recovery and mixed cures:** Debug `1792677272197860-0`,
+  Release `1792677331620738-0`. Item329 restores100/99MP respectively;
+  item335 restores100HP+100MP /99HP+101MP. Adjacent-frame gains equal the
+  actual result amounts, below the999 maxima. Original `_itemRecovery`
+  (`146C.c:12109`) uses `factor*5 + smoothed(11)-5`, so factor20 is95..105,
+  not a fixed100. Item344 separately cures INT Down and AGI+Equipment Down,
+  restoring affected attributes90 ->100 while preserving unrelated Poison.
+  STR/INT/AGI modifiers share an original cancellation group; do not construct
+  an impossible simultaneous three-debuff fixture.
+- **First/already-learned use and progression:** Debug
+  `1792678085128728-0`, Release `1792678132098137-0` use Fireball twice,
+  consuming10 ->8 and25MP per cast. Only action99 becomes learned; the second
+  use retains it. Read-only observations preserve intro stage3, locked
+  Teleport0 and unrelated ability/Break Art counters; the real magic-used
+  flag changes0 ->1. Debug's second zero-effect result still consumes at the
+  original commit boundary and returns normally; Release deals damage.
+  Earlier run `1792654884015949-0` verifies cancellation without consumption,
+  first/repeated unranked use, non-stacking STR and an unusable Bronze Key.
+  Prologue/profile tests preserve normal startup gates. Item use does not
+  grant the separate story/save-point Teleport feature.
+
+All eight final environmental/recovery/progression traces finalize without
+error events (`trace_failed=false`). The same native code passes both full
+suites:416 cases /1,060,702 assertions each; copier tests23/23; pushed Source
+Quality run39787313511 reports195 existing findings and zero new. No baseline
+or production behavior was changed to pass these observations. Local command:
+`build\quality\live-restart-check.ps1 -Configuration <Debug|Release>` with
+`-Book 444`, `-Book 447`, `-Recovery`, or `-Book 388 -GateChecks`.
+Positive matching-key/sigil door use remains an additional owner-requested
+follow-up; these checks do not establish that, #82's root cause, all learned
+spell fidelity, native save persistence or compatibility retirement.
+
 ## Combined combat/action checkpoint (2026-10-21)
 
 Source: `fd291cfe29b45656e00ff1e198f53e7730b59a19` plus pending native
