@@ -2,8 +2,10 @@
 #include <SDL3/SDL_main.h>
 
 #include <algorithm>
+#include <array>
 #include <charconv>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <memory>
 #include <optional>
@@ -33,6 +35,18 @@
 namespace VS::combat_lab {
 namespace {
 namespace fs = std::filesystem;
+
+constexpr std::array<Game::EncounterAdjustment, 9> kTestConditions = {
+    Game::EncounterAdjustment::kPoison,
+    Game::EncounterAdjustment::kParalysis,
+    Game::EncounterAdjustment::kNumbness,
+    Game::EncounterAdjustment::kCurse,
+    Game::EncounterAdjustment::kSilence,
+    Game::EncounterAdjustment::kStrengthDown,
+    Game::EncounterAdjustment::kIntelligenceDown,
+    Game::EncounterAdjustment::kAgilityDown,
+    Game::EncounterAdjustment::kEquipmentDown,
+};
 
 struct Press {
   std::uint64_t tick;
@@ -319,6 +333,10 @@ class LiveSession {
   bool paused_;
   bool step_;
   bool rejected_;
+  bool help_ = false;
+  bool paused_before_help_ = false;
+  std::size_t condition_ = 0;
+  std::string adjustment_message_ = "PRECONDITIONS ONLY - USE ITEMS NORMALLY";
   double previous_ = 0;
   PhaseTiming simulation_timing_;
   PhaseTiming inspection_timing_;
@@ -331,10 +349,12 @@ class LiveSession {
     input_.HandleEvent(event);
     if (event.type != SDL_EVENT_KEY_DOWN || event.key.repeat) return;
     if (!fiber_ && event.key.key == SDLK_RETURN) confirm_ = true;
+    if (fiber_ && HandleLabKey(event.key.key)) return;
     if (fiber_ && event.key.key == SDLK_F10) {
       trace_.Event("control.stop", {}, ticks_);
       Game::RequestEncounterStop();
       paused_ = false;
+      help_ = false;
     }
     if (fiber_ && event.key.key == SDLK_F6) {
       paused_ = !paused_;
@@ -344,6 +364,72 @@ class LiveSession {
       paused_ = true;
       step_ = true;
       trace_.Event("control.step", {}, ticks_);
+    }
+  }
+
+  void Adjust(Game::EncounterAdjustment adjustment) {
+    const auto result = Game::AdjustEncounterPlayer(adjustment);
+    nlohmann::json details = {
+        {"adjustment", Game::EncounterAdjustmentName(adjustment)},
+        {"applied", result.has_value()}};
+    if (result) {
+      details["before"] = EncodeActor(result->before);
+      details["after"] = EncodeActor(result->after);
+      adjustment_message_ =
+          std::format("APPLIED: {}", Game::EncounterAdjustmentName(adjustment));
+    } else {
+      details["reason"] = result.error();
+      adjustment_message_ = "REJECTED: " + result.error();
+    }
+    trace_.Event("control.adjust", details, ticks_);
+  }
+
+  bool HandleLabKey(SDL_Keycode key) {
+    if (key == SDLK_F11) {
+      help_ = !help_;
+      if (help_) {
+        paused_before_help_ = paused_;
+        paused_ = true;
+        step_ = false;
+      } else {
+        paused_ = paused_before_help_;
+      }
+      trace_.Event("control.help", {{"visible", help_}, {"paused", paused_}},
+                   ticks_);
+      return true;
+    }
+    if (help_ && (key == SDLK_F6 || key == SDLK_F7)) {
+      adjustment_message_ = "CLOSE HELP WITH F11 BEFORE PAUSING OR STEPPING";
+      trace_.Event("control.rejected", {{"reason", adjustment_message_}},
+                   ticks_);
+      return true;
+    }
+    switch (key) {
+      case SDLK_F1:
+        Adjust(Game::EncounterAdjustment::kLowerHp);
+        return true;
+      case SDLK_F2:
+        Adjust(Game::EncounterAdjustment::kLowerMp);
+        return true;
+      case SDLK_F3:
+        Adjust(Game::EncounterAdjustment::kRaiseRisk);
+        return true;
+      case SDLK_F4:
+        condition_ = (condition_ + 1) % kTestConditions.size();
+        adjustment_message_ = std::format(
+            "SELECTED: {}",
+            Game::EncounterAdjustmentName(kTestConditions[condition_]));
+        trace_.Event("control.condition", {{"selected", adjustment_message_}},
+                     ticks_);
+        return true;
+      case SDLK_F5:
+        Adjust(kTestConditions[condition_]);
+        return true;
+      case SDLK_F8:
+        Adjust(Game::EncounterAdjustment::kRestoreMp);
+        return true;
+      default:
+        return false;
     }
   }
 
@@ -411,6 +497,7 @@ class LiveSession {
       trace_timing_.Record(trace_start);
       if (!running) {
         fiber_.reset();
+        help_ = paused_ = false;
         trace_.Event("encounter.end", {{"number", encounter_number_}}, ticks_);
         editor_.Message("ENCOUNTER ENDED - READY TO CONFIGURE OR RESTART");
       }
@@ -421,16 +508,44 @@ class LiveSession {
     }
   }
 
+  void DrawHelp() {
+    canvas_.Clear();
+    constexpr int kLeft = 24, kTop = 28, kLine = 28;
+    const auto lines = std::to_array<std::string>(
+        {"COMBAT LAB - ITEM TEST CONTROLS",
+         "F11 CLOSE HELP (RESTORES PREVIOUS PAUSE STATE)",
+         "F1  HP -50, NEVER BELOW 1", "F2  MP -25, NEVER BELOW 0",
+         "F3  RISK +25, NEVER ABOVE 100",
+         std::format(
+             "F4  SELECT CONDITION: {}",
+             Game::EncounterAdjustmentName(kTestConditions[condition_])),
+         "F5  APPLY SELECTED CONDITION", "F8  RESTORE MP TO CURRENT MAXIMUM",
+         "F6  PAUSE / RESUME    F7  SINGLE TICK (CLOSE HELP FIRST)",
+         "F10 RETURN TO ENCOUNTER BUILDER",
+         "ADJUSTMENTS REQUIRE LIVING ASHLEY IN IDLE FIELD.",
+         "MENUS / ACTIONS: CLOSE OR FINISH THEM FIRST.",
+         "ITEM SELECTION AND EFFECTS USE PRODUCTION GAMEPLAY.",
+         adjustment_message_,
+         "ALL ADJUSTMENTS AND REJECTIONS ARE LOGGED TO FILE."});
+    for (std::size_t index = 0; index < lines.size(); ++index) {
+      canvas_.Text(kLeft, kTop + static_cast<int>(index) * kLine, lines[index]);
+    }
+  }
+
   void Present(Render::Device& gpu) {
     const auto presentation_start = SDL_GetTicksNS();
-    if (fiber_) {
+    if (fiber_ && !help_) {
       if (Render::GamePages().Present(pixels_, width_, height_)) {
         gpu.PresentImage(pixels_.data(), width_, height_);
       } else {
         gpu.PresentClear({0.0f, 0.0f, 0.0f, 1.0f});
       }
     } else {
-      editor_.Draw(canvas_);
+      if (help_) {
+        DrawHelp();
+      } else {
+        editor_.Draw(canvas_);
+      }
       width_ = Canvas::kWidth;
       height_ = Canvas::kHeight;
       pixels_.assign(

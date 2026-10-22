@@ -39,6 +39,7 @@ class Trace {
 };
 
 nlohmann::json EncodeSetup(const Game::EncounterSetup& setup);
+nlohmann::json EncodeActor(const Game::EncounterActorState& actor);
 Game::EncounterSetup DecodeSetup(const nlohmann::json& json);
 
 }  // namespace VS::combat_lab

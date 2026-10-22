@@ -18,9 +18,31 @@ the encounter editor; a physical gamepad or keyboard remains active.
 The menu uses the extracted SYSTEM.DAT font. Select zone, room, enemy, quantity,
 Ashley tile/elevation, group offsets, spacing and RNG seed. Add multiple groups
 for mixed enemy definitions; clear groups to return to the current selection.
+Set **QUANTITY: 0 (SOLO)** and clear any explicit groups to enter with Ashley
+alone. An empty-enemy preset stays solo when loaded.
 The grid shows starting tiles over a conservative static-floor preview: green
 tiles have complete floor support; dark tiles are blocked/partial, pits, missing
 support or unavailable data. Invalid starts identify the actor, tile and reason.
+
+Select **ASHLEY STATS** and press Enter/Circle to edit maximum/starting HP and
+MP, base STR, INT and AGI. Each field starts at **DEFAULT**, preserving the
+selected profile; overrides accept integers **1..999**. Left from DEFAULT
+selects 999, right selects 1. Left/right then adjust by 1; hold L1/Q for steps
+of 10 or R1/E for steps of 100. Enter/Circle on a stat restores DEFAULT;
+**RESET ALL TO DEFAULT** clears every override. Cross/X or **BACK TO SETUP**
+returns with the edits retained.
+
+Overrides are applied once, after normal Ashley initialization at encounter
+start. HP/MP overrides start full; attribute overrides update both current and
+base values. They do not change equipment, inventory capacity, learned spells
+or main-game startup. Damage and spell costs remain active, so use F8 to refill
+MP between grimoire ranks. For permanent-stat item tests, leave the relevant
+stat below 999 so a genuine increase can be measured.
+
+Presets and encounter logs include an optional `ashley_stats` object, for
+example `"ashley_stats": {"max_hp": 999, "max_mp": 999}`. Omitted fields preserve
+defaults, and older presets without this object still work. Invalid types,
+out-of-range values and unknown stat names are rejected explicitly.
 
 The compact font uses the SYSTEM.DAT interface palette, including its black
 outline and gray shades. The unreadable solid-glyph rendering in the original
@@ -33,6 +55,34 @@ Rebuild and restart the lab to pick up that correction; no data re-extraction is
   Z=Square, S=Triangle, Q/E=L1/R1, 1/3=L2/R2, Enter=Start, Backspace=Select.
 - F6 pauses simulation; F7 advances one tick; F10 requests a production-frame
   stop and returns to the editor. Select Start again for a fresh encounter.
+- F11 opens readable **item-test help**, pauses simulation and restores its
+  previous pause state on closing. F1 reduces HP by 50 (minimum 1), F2 reduces
+  MP by 25 (minimum 0), F3 increases Risk by 25 (maximum 100). F4 cycles the
+  selected negative condition; F5 applies it using the real status policy and
+  timers. F8 restores current MP to Ashley's current maximum without increasing
+  maximum MP, learning spells or changing inventory. Help displays the selection
+  and the last applied/rejected request.
+  Controls also work while help is open; close help before F6/F7.
+  These are Lab-only preconditions, available only for a living Ashley in idle
+  field control, not while loading, in menus or resolving actions. Item use
+  itself still goes through normal menus/targets/results. Every adjustment
+  records before/after actor state or an explicit rejection in the run files.
+  Targeting frames also record the real area center and target-preview
+  coordinates, allowing area-spell input and selected enemies to be checked.
+  No main-game bindings are changed.
+- F4 offers Poison, Paralysis, Numbness, Curse, Silence, Strength Down,
+  Intelligence Down, Agility Down and Equipment Down. Use **Numbness** to test
+  timed half-speed movement. The former **SLOW** entry was removed: its flag
+  represents injured-leg weakness and clears when the legs are healthy, so
+  applying the flag alone was not a valid lasting ailment fixture (#115).
+  Production limb-injury behavior is unchanged.
+- Ranked-grimoire acceptance requires four consecutive uses of the same book
+  within one encounter, checking the selected ranks I-IV, learned actions,
+  inventory counts and actual target results. Restore MP with F8 between uses
+  and provide a valid enemy for offensive spells. Restart only between books,
+  not between ranks; consumption or learning alone does not prove the effect.
+  Use normal speed (`--speed 1`) while the accelerated-audio queue failure in
+  [#83](https://github.com/JEschete/VS-NativePort/issues/83) remains unresolved.
 - Closing the window or reaching `--frames` interrupts the session; this is not
   victory or gameplay-completion evidence.
 
@@ -52,7 +102,8 @@ position. Enemy IDs are local to the selected zone.
 
 ### Ashley testing profiles
 
-The **ASHLEY** row selects `prologue`, `post-prologue` or `post-minotaur`.
+The **ASHLEY** row selects `prologue`, `post-prologue`, `post-minotaur`,
+`all-items-a`, `all-items-b` or `all-spells`.
 These are isolated testing configurations, not imported saves or claims of
 completed story events. The default remains the original New Game equipment,
 inventory and action set. Normal game startup is unchanged.
@@ -63,6 +114,21 @@ inventory and action set. Normal game startup is unchanged.
   defenses, one learned spell from each real spell-class table, and the first
   Break Art for the equipped weapon family. This is the owner-selected
   representative set, not an all-actions or all-ranks unlock.
+- **All-items A / B:** post-prologue menu gates and 58 distinct item stacks
+  each (10 per stack), keeping the normal 64-slot inventory and starting
+  equipment. Together they contain all 116 named non-equipment items:
+  34 ordinary consumables, 50 grimoires and 32 keys/sigils. A has IDs 323-356
+  and the first 24 named grimoires through 430; B has the remaining 26
+  grimoires (431-456) and keys/sigils (458-489). Unnamed holes are excluded.
+  Neither profile pre-learns extra spells or grants equipment. Keys/sigils
+  are stocked for inspection, not claimed to work without their story events.
+- **All-spells:** post-prologue menu gates and all 50 spells in the four
+  production battle-magic classes, including all four ranks of the seven
+  ranked spells (71 learned actions). Starting inventory, equipment, resources,
+  chain mappings and Break Arts are not expanded. Use **ASHLEY STATS** for
+  starting HP/MP and F8 for MP refill. This is a learned-casting fixture, not
+  grimoire-learning evidence; it does not grant the story/save-point Teleport
+  feature or bypass door/event requirements.
 
 Profiles retain the real weapon, resource, status and target restrictions.
 In particular, draw the weapon before selecting a Break Art; its menu entry
@@ -104,12 +170,18 @@ and `--press <tick:Button[,tick:Button...]>`. A scripted press lasts two ticks;
 - Source-backed enemies are currently **same-zone only**. Script-dependent actors,
   cross-zone model loading and full roster verification remain open.
 - Ashley retains the real new-game equipment and inventory; available actions
-  depend on the explicit testing profile above. There is no full loadout editor,
-  all-items grant, spell/rank unlock editor or
-  ability coverage matrix yet. Items/spells/abilities that are available use the
+  depend on the explicit testing profile above. The two item profiles and
+  all-spells profile provide fixed grants; there is no arbitrary loadout or
+  spell/rank unlock editor or complete ability coverage matrix yet.
+  Items/spells/abilities that are available use the
   original menus and gameplay path; unavailable actions are not fabricated.
 - Story and door events are explicitly isolated. Advanced profiles set the
   documented startup menu stage only; no room event is completed to obtain it.
+  Ordinary room lock records and containers are retained independently of
+  those event sections. Clef has unlocked the real MAP176 chest through normal
+  inputs (zone37, room0, chest tile9,11; Ashley at9,10 facing toward it).
+  Keys/sigils still require matching lock-record and real-use evidence; event
+  isolation alone does not prove these interactions unavailable.
   This mode does not verify prologue combat or story encounters.
 - Audio/effect/AI stubs still exist. Defeat/rewards, chains, Break Arts, all items,
   spells and ranks, equipment combinations, and original-game parity are unverified.
@@ -195,6 +267,30 @@ future work. Full tracing can create large files; no rotation is implemented.
 Crash stacks go to the session logs. The existing bounded-run watchdog writes
 `build\<Config>\vs-native-hang.log`. Keep captures, extracted catalogs and game data
 out of commits and issue attachments.
+
+### Reviewing manually played item tests
+
+Manual controller/keyboard play uses the same automatic logs; no scripted run,
+custom capture tool or separate recording step is required. Leave the player's
+window, inputs and encounter lifecycle alone while reading a run. Identify its
+directory from the startup message and check `manifest.json` and `encounter-N.json`
+for the build, dirty revision, profile, overrides and target setup.
+
+For each use, correlate the inventory decrement and selected action with the
+`combat.result` messages, adjacent actor snapshots, learned-action changes and
+return to field control. Check permanent items against base attributes or
+resource maxima, not just current values. Compare the frames immediately around
+the result: passive MP recovery and Risk decay during menu navigation can
+otherwise be mistaken for item effects. A requested recovery amount may exceed
+the actual gain because the actor reaches its maximum.
+
+Keep consumption, learning and positive target effects as separate observations.
+A miss or zero-effect result does not establish damage, and an animation still
+resolving at the end of a read is not a failed action. For a live file, read only
+complete JSON lines and record the last inspected tick/sequence; later events
+remain unreviewed. Four ranked uses must share an encounter, with all four
+learned flags retained afterward. The training dummy suppresses magic effects
+and is not a valid offensive-spell acceptance target.
 
 ## Combined combat/action checkpoint (2026-10-21)
 

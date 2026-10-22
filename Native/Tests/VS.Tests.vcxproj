@@ -120,10 +120,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\StatusBehaviorTests.cpp" />
     <ClCompile Include="src\TerrainHeightTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />
     <ClCompile Include="src\ViewportBoundsTests.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp" />
+    <ClCompile Include="..\Tools\CombatLab\src\Editor.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp" />
   </ItemGroup>
   <ItemGroup>

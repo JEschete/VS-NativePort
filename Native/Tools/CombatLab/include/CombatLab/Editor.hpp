@@ -25,11 +25,15 @@ class Editor {
   void Change(int direction);
   void ResetRoom();
   void AddGroup();
+  void UpdateStats(const Input::PadState& pad, bool confirm);
+  void DrawStats(Canvas& canvas) const;
   std::vector<Game::EncounterZone> catalog_;
   std::size_t zone_index_ = 0;
   std::size_t room_index_ = 0;
   std::size_t enemy_index_ = 0;
   int row_ = 0;
+  int stat_row_ = 0;
+  bool stats_open_ = false;
   int quantity_ = 1;
   int offset_x_ = 0;
   int offset_z_ = 1;

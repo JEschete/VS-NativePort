@@ -68,6 +68,7 @@ PROJECTS = [
             libs=["sdl3", "catch2", "movie", "audio"], whole_archive=["VS.Engine", "VS.Content", "VS.Game"],
             see=["VS.CombatLab"], extra_sources=[
                 r"Tools\CombatLab\src\Canvas.cpp",
+                r"Tools\CombatLab\src\Editor.cpp",
                 r"Tools\CombatLab\src\Trace.cpp"]),
 ]
 BY_NAME = {p.name: p for p in PROJECTS}

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <format>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -22,6 +23,7 @@ enum Row {
   kSpacing,
   kSeed,
   kAshleyProfile,
+  kAshleyStats,
   kAddGroup,
   kClearGroups,
   kStart,
@@ -31,7 +33,6 @@ enum Row {
 constexpr int kFirstRowY = 65;
 constexpr int kRowHeight = 18;
 constexpr int kPreferredZone = 9;
-constexpr std::size_t kAshleyProfiles = 3;
 constexpr int kMaxTile = Game::EncounterLimits::kTiles - 1;
 constexpr int kMaxSpacing = Game::EncounterLimits::kTiles / 2;
 constexpr int kLabelX = 18;
@@ -54,6 +55,21 @@ constexpr std::uint32_t kWarning = 0xFF7CA4EF;
 constexpr std::uint32_t kPlayerMarker = 0xFFF0B060;
 constexpr std::uint32_t kEnemyMarker = 0xFF6666EE;
 constexpr std::uint32_t kSupportedFloor = 0xFF365437;
+
+struct StatField {
+  const char* label;
+  std::optional<int> Game::EncounterStatOverrides::* member;
+};
+constexpr auto kStats = std::to_array<StatField>({
+    {"MAX / STARTING HP", &Game::EncounterStatOverrides::max_hp},
+    {"MAX / STARTING MP", &Game::EncounterStatOverrides::max_mp},
+    {"BASE STRENGTH", &Game::EncounterStatOverrides::strength},
+    {"BASE INTELLIGENCE", &Game::EncounterStatOverrides::intelligence},
+    {"BASE AGILITY", &Game::EncounterStatOverrides::agility},
+});
+constexpr int kResetStats = static_cast<int>(kStats.size());
+constexpr int kBackFromStats = kResetStats + 1;
+constexpr int kStatRows = kBackFromStats + 1;
 
 std::size_t Cycle(std::size_t index, std::size_t count, int direction) {
   if (count == 0) return 0;
@@ -113,10 +129,16 @@ void Editor::Load(const Game::EncounterSetup& setup) {
   zone_index_ = static_cast<std::size_t>(zone - catalog_.begin());
   room_index_ = static_cast<std::size_t>(room - zone->rooms.begin());
   enemy_index_ = 0;
+  quantity_ = setup.enemies.empty() ? 0 : 1;
   setup_ = setup;
+  stats_open_ = false;
 }
 
 void Editor::AddGroup() {
+  if (quantity_ == 0) {
+    message_ = "QUANTITY 0 - NO GROUP ADDED";
+    return;
+  }
   if (Zone().enemies.empty()) return;
   if (setup_.enemies.size() + static_cast<std::size_t>(quantity_) >
       Game::EncounterLimits::kEnemies) {
@@ -148,7 +170,7 @@ void Editor::Change(int direction) {
       break;
     case kQuantity:
       quantity_ =
-          std::clamp(quantity_ + direction, 1, Game::EncounterLimits::kEnemies);
+          std::clamp(quantity_ + direction, 0, Game::EncounterLimits::kEnemies);
       break;
     case kPlayerX:
       setup_.player.x = std::clamp(setup_.player.x + direction, 0, kMaxTile);
@@ -174,9 +196,9 @@ void Editor::Change(int direction) {
       setup_.seed += static_cast<std::uint32_t>(direction);
       break;
     case kAshleyProfile:
-      setup_.profile = static_cast<Game::EncounterProfile>(
-          Cycle(static_cast<std::size_t>(setup_.profile), kAshleyProfiles,
-                direction));
+      setup_.profile = static_cast<Game::EncounterProfile>(Cycle(
+          static_cast<std::size_t>(setup_.profile),
+          static_cast<std::size_t>(Game::EncounterProfile::kCount), direction));
       break;
     default:
       break;
@@ -184,6 +206,10 @@ void Editor::Change(int direction) {
 }
 
 Editor::Action Editor::Update(const Input::PadState& pad, bool confirm) {
+  if (stats_open_) {
+    UpdateStats(pad, confirm);
+    return Action::kNone;
+  }
   const auto buttons = pad.repeat | pad.pressed;
   if ((buttons & Input::Up) != 0) row_ = (row_ + kRowCount - 1) % kRowCount;
   if ((buttons & Input::Down) != 0) row_ = (row_ + 1) % kRowCount;
@@ -191,12 +217,18 @@ Editor::Action Editor::Update(const Input::PadState& pad, bool confirm) {
   if ((buttons & Input::Right) != 0) Change(1);
   if (!confirm && (pad.pressed & Input::Circle) == 0) return Action::kNone;
   switch (row_) {
+    case kAshleyStats:
+      stat_row_ = 0;
+      stats_open_ = true;
+      break;
     case kAddGroup:
       AddGroup();
       break;
     case kClearGroups:
       setup_.enemies.clear();
-      message_ = "GROUPS CLEARED - CURRENT SELECTION WILL BE USED";
+      message_ = quantity_ == 0
+                     ? "GROUPS CLEARED - SOLO ASHLEY"
+                     : "GROUPS CLEARED - CURRENT SELECTION WILL BE USED";
       break;
     case kStart:
       return Action::kStart;
@@ -209,8 +241,79 @@ Editor::Action Editor::Update(const Input::PadState& pad, bool confirm) {
   return Action::kNone;
 }
 
+void Editor::UpdateStats(const Input::PadState& pad, bool confirm) {
+  const auto buttons = pad.repeat | pad.pressed;
+  if ((pad.pressed & Input::Cross) != 0) {
+    stats_open_ = false;
+    return;
+  }
+  if ((buttons & Input::Up) != 0) {
+    stat_row_ = (stat_row_ + kStatRows - 1) % kStatRows;
+  }
+  if ((buttons & Input::Down) != 0) stat_row_ = (stat_row_ + 1) % kStatRows;
+  confirm = confirm || (pad.pressed & Input::Circle) != 0;
+  if (stat_row_ >= kResetStats) {
+    if (confirm && stat_row_ == kResetStats) setup_.stat_overrides = {};
+    if (confirm && stat_row_ == kBackFromStats) stats_open_ = false;
+    return;
+  }
+  auto& value = setup_.stat_overrides.*kStats[stat_row_].member;
+  if (confirm) {
+    value.reset();
+    return;
+  }
+  int step = 1;
+  constexpr int kMediumStep = 10, kLargeStep = 100;
+  if ((pad.held & Input::L1) != 0) step = kMediumStep;
+  if ((pad.held & Input::R1) != 0) step = kLargeStep;
+  const int direction =
+      ((buttons & Input::Right) != 0) - ((buttons & Input::Left) != 0);
+  if (direction == 0) return;
+  constexpr int kMin = Game::EncounterLimits::kMinPlayerStat;
+  constexpr int kMax = Game::EncounterLimits::kMaxPlayerStat;
+  value = value ? std::clamp(*value + direction * step, kMin, kMax)
+                : (direction > 0 ? kMin : kMax);
+}
+
+void Editor::DrawStats(Canvas& canvas) const {
+  canvas.Text(kLabelX, kTitleY, "ASHLEY STARTING STAT OVERRIDES");
+  canvas.Text(kLabelX, kSubtitleY,
+              "LAB ONLY - APPLIED ONCE AT ENCOUNTER START");
+  for (int index = 0; index < kStatRows; ++index) {
+    const int y = kFirstRowY + index * kRowHeight;
+    if (index == stat_row_) {
+      canvas.Rectangle(kSelectionX, y - kSelectionOffset, kSelectionWidth,
+                       kSelectionHeight, kHighlight);
+    }
+    std::string label;
+    if (index < kResetStats) {
+      const auto& field = kStats[index];
+      const auto value = setup_.stat_overrides.*field.member;
+      label = std::format("{}: {}", field.label,
+                          value ? std::to_string(*value) : "DEFAULT");
+    } else {
+      label = index == kResetStats ? "RESET ALL TO DEFAULT" : "BACK TO SETUP";
+    }
+    canvas.Text(kLabelX, y, label);
+  }
+  canvas.Text(kLabelX, kValidationY,
+              "VALUES 1..999. DEFAULT PRESERVES PROFILE.");
+  canvas.Text(kLabelX, kWarningY,
+              "HP / MP START FULL. INVENTORY AND SPELLS ARE UNCHANGED.");
+  canvas.Text(kLabelX, kMessageY,
+              "LEFT FROM DEFAULT: 999. RIGHT FROM DEFAULT: 1.");
+  canvas.Text(kLabelX, kEditorHelpY,
+              "LEFT/RIGHT: +/-1   HOLD L1/Q: 10   R1/E: 100");
+  canvas.Text(kLabelX, kCombatHelpY,
+              "ENTER/CIRCLE: RESET SELECTED STAT   CROSS/X: BACK");
+}
+
 void Editor::Draw(Canvas& canvas) const {
   canvas.Clear();
+  if (stats_open_) {
+    DrawStats(canvas);
+    return;
+  }
   canvas.Text(kLabelX, kTitleY, "VAGRANT STORY - COMBAT LAB");
   canvas.Text(kLabelX, kSubtitleY,
               "STANDALONE ENCOUNTER BUILDER - PRODUCTION GAMEPLAY");
@@ -221,11 +324,13 @@ void Editor::Draw(Canvas& canvas) const {
           ? "NONE"
           : std::format("{} {}", zone.enemies[enemy_index_].index,
                         zone.enemies[enemy_index_].name);
+  const bool default_stats =
+      setup_.stat_overrides == Game::EncounterStatOverrides{};
   const std::array<std::string, kRowCount> rows = {
       std::format("ZONE: {}", zone.id),
       std::format("ROOM: {} {}", room.index, room.asset),
       std::format("ENEMY: {}", enemy_name),
-      std::format("QUANTITY: {}", quantity_),
+      std::format("QUANTITY: {}{}", quantity_, quantity_ == 0 ? " (SOLO)" : ""),
       std::format("ASHLEY TILE X: {}", setup_.player.x),
       std::format("ASHLEY TILE Z: {}", setup_.player.z),
       std::format("ELEVATION: {}", setup_.player.elevation),
@@ -234,6 +339,8 @@ void Editor::Draw(Canvas& canvas) const {
       std::format("LINE SPACING: {}", spacing_),
       std::format("RANDOM SEED: {}", setup_.seed),
       std::format("ASHLEY: {}", Game::EncounterProfileId(setup_.profile)),
+      default_stats ? "ASHLEY STATS: DEFAULT (ENTER TO EDIT)"
+                    : "ASHLEY STATS: CUSTOM (ENTER TO EDIT)",
       "ADD GROUP",
       "CLEAR GROUPS",
       "START ENCOUNTER",
@@ -297,7 +404,7 @@ void Editor::Draw(Canvas& canvas) const {
   canvas.Text(kLabelX, kEditorHelpY,
               "ARROWS: SELECT/ADJUST   ENTER OR CIRCLE: CONFIRM");
   canvas.Text(kLabelX, kCombatHelpY,
-              "IN COMBAT: F6 PAUSE   F7 STEP   F10 RETURN TO EDITOR");
+              "F6 PAUSE  F7 STEP  F10 EDITOR  F11 ITEM TEST HELP");
 }
 
 }  // namespace VS::combat_lab

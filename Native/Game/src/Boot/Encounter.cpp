@@ -29,6 +29,7 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
 #include "Battle/Feedback.h"
+#include "Battle/StatusEffects.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
 #include "Boot/PlayerSettings.h"
@@ -46,6 +47,7 @@ extern "C" {
 #include "Input/Controller.h"
 #include "Items/Loot.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/MenuItems.h"
 #include "Render/Display.h"
 #include "State/Flags.h"
 #include "State/Location.h"
@@ -62,6 +64,7 @@ bool configured = false;
 bool active = false;
 bool entered = false;
 bool room_prepared = false;
+bool player_stats_initialized = false;
 
 int ResumeEncounter() {
   Boot_isGameplayActive = 1;
@@ -107,8 +110,19 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   snapshot.slot = slot;
   snapshot.hp = stats.currentHp;
   snapshot.mp = stats.currentMp;
+  snapshot.max_hp = stats.maxHp;
+  snapshot.max_mp = stats.maxMp;
   snapshot.risk = stats.risk;
+  snapshot.strength = stats.strength;
+  snapshot.intelligence = stats.intelligence;
+  snapshot.agility = stats.agility;
+  snapshot.total_strength = stats.totalStrength;
+  snapshot.total_intelligence = stats.totalIntelligence;
+  snapshot.total_agility = stats.totalAgility;
+  snapshot.walk_speed = static_cast<unsigned char>(stats.walkSpeed);
+  snapshot.run_speed = static_cast<unsigned char>(stats.runSpeed);
   snapshot.statuses = static_cast<std::uint32_t>(stats.statuses);
+  std::ranges::copy(stats.statusTimers, snapshot.status_timers.begin());
   snapshot.command = actor.commandOpcode;
   snapshot.command_state = actor.commandState;
   snapshot.weapon_drawn = actor.weaponDrawn;
@@ -136,6 +150,31 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
     }
   }
   return snapshot;
+}
+
+void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
+  state.action = action.selection.actionId;
+  state.source_actor = action.sourceActorId;
+  state.target_count = action.selection.targetCount;
+  constexpr unsigned kTargetingControl = 2;
+  constexpr unsigned kFirstTargetPhase = 1, kLastTargetPhase = 3;
+  if (state.control_mode != kTargetingControl ||
+      state.action_phase < kFirstTargetPhase ||
+      state.action_phase > kLastTargetPhase) {
+    return;
+  }
+  const auto& center = action.areaCenter;
+  state.area_center = {center.vx, center.vy, center.vz};
+  if (action.previewCount > std::size(action.previews)) {
+    throw std::runtime_error("encounter target previews exceed storage");
+  }
+  for (unsigned index = 0; index < action.previewCount; ++index) {
+    const auto& target = action.previews[index];
+    state.target_previews.push_back(
+        {target.actorId,
+         target.limb,
+         {target.position.vx, target.position.vy, target.position.vz}});
+  }
 }
 
 void LearnAction(unsigned action) {
@@ -172,6 +211,129 @@ unsigned EquippedBreakArt() {
   }
   throw std::runtime_error("encounter profile requires an equipped weapon");
 }
+
+void StockEncounterItems(EncounterProfile profile) {
+  // Named misc IDs from ITEMNAME.BIN.yaml, checked against the original
+  // MAINMENU/2D10.c misc-action map. Exclude equipment and unnamed holes.
+  constexpr auto kItems = std::to_array<u_short>(
+      {323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335,
+       336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348,
+       349, 350, 351, 352, 353, 354, 355, 356, 386, 387, 388, 389, 390,
+       391, 392, 393, 394, 395, 399, 403, 407, 411, 415, 419, 423, 424,
+       425, 426, 427, 428, 429, 430, 431, 432, 433, 434, 435, 436, 437,
+       438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 449, 450,
+       451, 452, 453, 454, 455, 456, 458, 459, 460, 461, 462, 463, 464,
+       465, 466, 467, 468, 469, 470, 471, 472, 473, 474, 475, 476, 477,
+       478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489});
+  constexpr std::size_t kHalf = kItems.size() / 2;
+  constexpr char kStack = 10;
+  auto& items = Audio_Seq_unusedInventory.misc;
+  auto& indices = Audio_Seq_unusedInventoryIndices.misc;
+  static_assert(kItems.size() % 2 == 0 && kHalf <= std::size(items));
+  std::ranges::fill(items, Items_InventoryMisc{});
+  std::ranges::fill(indices, 0);
+  const auto first = profile == EncounterProfile::kAllItemsA ? 0 : kHalf;
+  for (std::size_t slot = 0; slot < kHalf; ++slot) {
+    const auto index = static_cast<char>(slot + 1);
+    items[slot] = {kItems[first + slot], kStack, index};
+    indices[slot] = static_cast<u_char>(index);
+  }
+  VS_LOG_INFO("encounter.profile", "misc_stacks={} count_each={}", kHalf,
+              static_cast<int>(kStack));
+}
+
+struct AdjustmentDefinition {
+  const char* name;
+  int status_parameter;
+};
+
+// Status parameter indices from BATTLE/146C.c _setApplicableStatuses callers.
+constexpr std::array<AdjustmentDefinition, 13> kAdjustments = {
+    {{"HP -50 (MIN 1)", -1},
+     {"MP -25 (MIN 0)", -1},
+     {"RISK +25 (MAX 100)", -1},
+     {"POISON", 14},
+     {"PARALYSIS", 13},
+     {"NUMBNESS", 15},
+     {"CURSE", 16},
+     {"SILENCE", 12},
+     {"STRENGTH DOWN", 5},
+     {"INTELLIGENCE DOWN", 7},
+     {"AGILITY DOWN", 9},
+     {"EQUIPMENT DOWN", 19},
+     {"RESTORE MP TO CURRENT MAXIMUM", -1}},
+};
+static_assert(kAdjustments.size() ==
+              static_cast<std::size_t>(EncounterAdjustment::kCount));
+
+std::expected<void, std::string> ApplyAdjustment(EncounterAdjustment adjustment,
+                                                 Battle_ActorStats& stats) {
+  constexpr int kHpStep = 50, kMpStep = 25, kRiskStep = 25, kMaxRisk = 100;
+  switch (adjustment) {
+    case EncounterAdjustment::kLowerHp:
+      stats.currentHp =
+          static_cast<std::int16_t>(std::max(1, stats.currentHp - kHpStep));
+      return {};
+    case EncounterAdjustment::kLowerMp:
+      stats.currentMp =
+          static_cast<std::int16_t>(std::max(0, stats.currentMp - kMpStep));
+      return {};
+    case EncounterAdjustment::kRestoreMp:
+      stats.currentMp = stats.maxMp;
+      return {};
+    case EncounterAdjustment::kRaiseRisk:
+      stats.risk =
+          static_cast<u_short>(std::min(kMaxRisk, stats.risk + kRiskStep));
+      return {};
+    default:
+      break;
+  }
+  const auto parameter =
+      kAdjustments[static_cast<std::size_t>(adjustment)].status_parameter;
+  if (Battle_statusEffectParams[parameter].statusFlags == 0) {
+    return std::unexpected("STATUS DEFINITIONS NOT LOADED");
+  }
+  Battle_HitResult hit{};
+  hit.target.targetActor = 0;
+  if (Battle_QueueApplicableStatusChanges(parameter, &hit) == 0) {
+    return std::unexpected("STATUS ALREADY ACTIVE, BLOCKED OR IMMUNE");
+  }
+  // These original hit-result names are inverted: inflictStatuses cures;
+  // removeStatuses applies. Use the same order as production hit resolution.
+  if (hit.inflictStatuses != 0) {
+    Battle_RemoveActorStatuses(hit.inflictStatuses, &stats);
+  }
+  if (hit.removeStatuses != 0) {
+    Battle_InflictActorStatuses(hit.removeStatuses, &stats);
+  }
+  return {};
+}
+void LearnProfileSpells(bool all_spells) {
+  for (unsigned spell_class = 0;
+       spell_class < std::size(Battle_spellClassCounts); ++spell_class) {
+    if (Battle_spellClassCounts[spell_class] == 0 ||
+        Battle_spellClassSpellIds[spell_class] == nullptr) {
+      throw std::runtime_error("encounter profile spell table is unavailable");
+    }
+    const unsigned count =
+        all_spells ? Battle_spellClassCounts[spell_class] : 1;
+    for (unsigned index = 0; index < count; ++index) {
+      const unsigned action = Battle_spellClassSpellIds[spell_class][index];
+      LearnAction(action);
+      // MAINMENU/2D10.c and MENU0/84.c use four consecutive action IDs per
+      // rank.
+      constexpr unsigned kSpellRanks = 4;
+      if (all_spells && action >= Battle_WarlockSpell_Explosion &&
+          action <= Battle_WarlockSpell_Meteor &&
+          (action - Battle_WarlockSpell_Explosion) % kSpellRanks == 0) {
+        for (unsigned rank = 1; rank < kSpellRanks; ++rank) {
+          LearnAction(action + rank);
+        }
+      }
+    }
+  }
+  Battle_ApplyLearnedActionUnlocks();
+}
 }  // namespace
 
 const char* EncounterProfileId(EncounterProfile profile) {
@@ -182,6 +344,14 @@ const char* EncounterProfileId(EncounterProfile profile) {
       return "post-prologue";
     case EncounterProfile::kPostMinotaur:
       return "post-minotaur";
+    case EncounterProfile::kAllItemsA:
+      return "all-items-a";
+    case EncounterProfile::kAllItemsB:
+      return "all-items-b";
+    case EncounterProfile::kAllSpells:
+      return "all-spells";
+    case EncounterProfile::kCount:
+      break;
   }
   throw std::runtime_error("invalid encounter Ashley profile");
 }
@@ -194,6 +364,11 @@ void InitializeEncounterPlayerProfile(EncounterProfile profile) {
   constexpr unsigned kPostPrologueMenus = 0x120;
   Audio_Seq_unusedStateFlags.introState = kPostPrologueStage;
   Input_settings.menuFlags |= kPostPrologueMenus;
+  if (profile == EncounterProfile::kAllItemsA ||
+      profile == EncounterProfile::kAllItemsB) {
+    StockEncounterItems(profile);
+  }
+  const bool all_spells = profile == EncounterProfile::kAllSpells;
   if (profile == EncounterProfile::kPostMinotaur) {
     constexpr unsigned kMappedAbilities = 3;
     for (unsigned slot = 0; slot < kMappedAbilities; ++slot) {
@@ -206,21 +381,15 @@ void InitializeEncounterPlayerProfile(EncounterProfile profile) {
       Input_settings.mappedChainAbilities[slot] = static_cast<char>(chain);
       Input_settings.mappedDefenseAbilities[slot] = static_cast<char>(defense);
     }
-    for (unsigned spell_class = 0;
-         spell_class < std::size(Battle_spellClassCounts); ++spell_class) {
-      if (Battle_spellClassCounts[spell_class] == 0 ||
-          Battle_spellClassSpellIds[spell_class] == nullptr) {
-        throw std::runtime_error(
-            "encounter profile spell table is unavailable");
-      }
-      LearnAction(Battle_spellClassSpellIds[spell_class][0]);
-    }
     LearnAction(EquippedBreakArt());
-    Battle_ApplyLearnedActionUnlocks();
   }
-  VS_LOG_INFO("encounter.profile", "Ashley={} representative_test_actions={}",
+  if (profile == EncounterProfile::kPostMinotaur || all_spells) {
+    LearnProfileSpells(all_spells);
+  }
+  VS_LOG_INFO("encounter.profile",
+              "Ashley={} representative_test_actions={} all_spells={}",
               EncounterProfileId(profile),
-              profile == EncounterProfile::kPostMinotaur);
+              profile == EncounterProfile::kPostMinotaur, all_spells);
 }
 
 std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
@@ -255,8 +424,45 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
   stop_requested = false;
   entered = false;
   room_prepared = false;
+  player_stats_initialized = false;
   configured = true;
   return {};
+}
+
+void InitializeEncounterPlayerStats(const EncounterStatOverrides& overrides) {
+  if (!overrides.Valid()) {
+    throw std::runtime_error("Ashley stat overrides must be in 1..999");
+  }
+  if (overrides == EncounterStatOverrides{}) return;
+  auto* actor = Battle_actors[0];
+  if (actor == nullptr || actor->stats == nullptr) {
+    throw std::runtime_error("Ashley is unavailable for encounter stat setup");
+  }
+  auto& stats = *actor->stats;
+  if (overrides.max_hp) {
+    stats.currentHp = stats.maxHp =
+        static_cast<std::int16_t>(*overrides.max_hp);
+  }
+  if (overrides.max_mp) {
+    stats.currentMp = stats.maxMp =
+        static_cast<std::int16_t>(*overrides.max_mp);
+  }
+  if (overrides.strength) {
+    stats.strength = stats.totalStrength =
+        static_cast<u_short>(*overrides.strength);
+  }
+  if (overrides.intelligence) {
+    stats.intelligence = stats.totalIntelligence =
+        static_cast<u_short>(*overrides.intelligence);
+  }
+  if (overrides.agility) {
+    stats.agility = stats.totalAgility =
+        static_cast<u_short>(*overrides.agility);
+  }
+  VS_LOG_INFO("encounter.stats",
+              "starting HP={}/{} MP={}/{} STR={} INT={} AGI={}",
+              stats.currentHp, stats.maxHp, stats.currentMp, stats.maxMp,
+              stats.strength, stats.intelligence, stats.agility);
 }
 
 void RunEncounter() {
@@ -275,6 +481,45 @@ void RunEncounter() {
 
 void RequestEncounterStop() { stop_requested = true; }
 
+const char* EncounterAdjustmentName(EncounterAdjustment adjustment) {
+  return kAdjustments.at(static_cast<std::size_t>(adjustment)).name;
+}
+
+std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
+    EncounterAdjustment adjustment) {
+  const auto reject = [](const char* reason)
+      -> std::expected<EncounterAdjustmentResult, std::string> {
+    VS_LOG_WARN("encounter.adjust", "rejected: {}", reason);
+    return std::unexpected(reason);
+  };
+  if (static_cast<std::size_t>(adjustment) >= kAdjustments.size()) {
+    return reject("UNKNOWN LAB ADJUSTMENT");
+  }
+  if (!active || !room_prepared || stop_requested.load()) {
+    return reject("NO READY COMBAT LAB ENCOUNTER");
+  }
+  constexpr int kFieldControl = 1;
+  if (Field_controlMode != kFieldControl || Battle_actionFlowMode != 0 ||
+      Menu_Framework_menuState.currentMenu !=
+          Menu_Framework_MenuState_NoneClosed) {
+    return reject("RETURN TO IDLE FIELD BEFORE ADJUSTING ASHLEY");
+  }
+  auto* actor = Battle_actors[0];
+  if (actor == nullptr || actor->stats == nullptr || actor->defeated ||
+      actor->stats->currentHp <= 0 || Audio_Seq_unusedStateFlags.gameOver) {
+    return reject("ASHLEY IS NOT ALIVE AND READY");
+  }
+  EncounterAdjustmentResult result{InspectActor(0, *actor), {}};
+  if (const auto applied = ApplyAdjustment(adjustment, *actor->stats);
+      !applied) {
+    return reject(applied.error().c_str());
+  }
+  result.after = InspectActor(0, *actor);
+  VS_LOG_INFO("encounter.adjust", "applied: {}",
+              EncounterAdjustmentName(adjustment));
+  return result;
+}
+
 EncounterState InspectEncounter() {
   EncounterState state;
   state.ready = active && room_prepared && Field_controlMode != 0;
@@ -286,18 +531,26 @@ EncounterState InspectEncounter() {
   state.field_rendering_enabled = Field_isFieldRenderingEnabled != 0;
   state.menu_state =
       static_cast<unsigned char>(Menu_Framework_menuState.currentMenu);
+  if (state.menu_state != Menu_Framework_MenuState_NoneClosed &&
+      Menu_Framework_itemsText != nullptr) {
+    state.menu_highlighted_row = Menu_Framework_HighlightedRow();
+  }
   state.frame_buffer = Render_frameBuf;
   state.transition = Field_screenTransitionStep;
   state.native_buttons = Input_buttonsState;
   state.native_pressed = Input_buttonsPressed.allButtons;
   state.action_phase = Battle_actionFlowMode;
+  for (unsigned action = 0; action < std::size(Battle_actionDefinitions);
+       ++action) {
+    if (Battle_actionDefinitions[action].unlocked) {
+      state.learned_actions.push_back(static_cast<int>(action));
+    }
+  }
   constexpr int kLootFlag = 0xAB;
   constexpr int kLootAvailable = 3;
   state.rewards_available = State_ScriptFlag(kLootFlag) >= kLootAvailable;
   if (Battle_actionState != nullptr) {
-    state.action = Battle_actionState->selection.actionId;
-    state.source_actor = Battle_actionState->sourceActorId;
-    state.target_count = Battle_actionState->selection.targetCount;
+    InspectTargeting(state, *Battle_actionState);
   }
   for (int slot = 0; slot < EncounterLimits::kActorSlots; ++slot) {
     const auto* actor = Battle_actors[slot];
@@ -325,6 +578,16 @@ EncounterState InspectEncounter() {
       }
     }
     state.pending_loot.push_back(std::move(loot));
+  }
+  if (Field_roomData.floorTriggers != nullptr) {
+    const auto count = Field_roomData.header.floorTriggersLength /
+                       sizeof(*Field_roomData.floorTriggers);
+    for (std::size_t i = 0; i < count; ++i) {
+      const auto& trigger = Field_roomData.floorTriggers[i];
+      state.floor_triggers.push_back(
+          {trigger.kind, trigger.tileX, trigger.tileZ, trigger.activation,
+           static_cast<unsigned char>(trigger.markerFade)});
+    }
   }
   return state;
 }
@@ -357,6 +620,11 @@ extern "C" int Boot_EncounterLoadRoomEvents() {
 
 extern "C" void Boot_EncounterPollStop() {
   if (VS::Game::active) {
+    if (!VS::Game::player_stats_initialized) {
+      VS::Game::InitializeEncounterPlayerStats(
+          VS::Game::configuration.stat_overrides);
+      VS::Game::player_stats_initialized = true;
+    }
     VS::Game::room_prepared = true;
     if (VS::Game::stop_requested.load()) Boot_ResetToTitle();
   }

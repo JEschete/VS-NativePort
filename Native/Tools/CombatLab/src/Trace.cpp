@@ -20,6 +20,49 @@ Game::EncounterPosition DecodePosition(const nlohmann::json& value) {
   return {value.at("x").get<int>(), value.at("z").get<int>(),
           value.value("elevation", 0), value.value("direction", 0)};
 }
+
+nlohmann::json EncodeStats(const Game::EncounterStatOverrides& stats) {
+  if (!stats.Valid()) {
+    throw std::runtime_error("Ashley stat overrides must be in 1..999");
+  }
+  auto json = nlohmann::json::object();
+  if (stats.max_hp) json["max_hp"] = *stats.max_hp;
+  if (stats.max_mp) json["max_mp"] = *stats.max_mp;
+  if (stats.strength) json["strength"] = *stats.strength;
+  if (stats.intelligence) json["intelligence"] = *stats.intelligence;
+  if (stats.agility) json["agility"] = *stats.agility;
+  return json;
+}
+
+Game::EncounterStatOverrides DecodeStats(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    throw std::runtime_error("ashley_stats must be an object");
+  }
+  Game::EncounterStatOverrides stats;
+  for (const auto& [key, value] : json.items()) {
+    if (!value.is_number_integer() ||
+        value < Game::EncounterLimits::kMinPlayerStat ||
+        value > Game::EncounterLimits::kMaxPlayerStat) {
+      throw std::runtime_error(
+          std::format("Ashley {} must be an integer in 1..999", key));
+    }
+    const int amount = value.get<int>();
+    if (key == "max_hp") {
+      stats.max_hp = amount;
+    } else if (key == "max_mp") {
+      stats.max_mp = amount;
+    } else if (key == "strength") {
+      stats.strength = amount;
+    } else if (key == "intelligence") {
+      stats.intelligence = amount;
+    } else if (key == "agility") {
+      stats.agility = amount;
+    } else {
+      throw std::runtime_error(std::format("unknown Ashley stat: {}", key));
+    }
+  }
+  return stats;
+}
 }  // namespace
 
 Trace::Trace(const std::filesystem::path& parent) {
@@ -90,32 +133,46 @@ void Trace::Event(std::string_view category, const nlohmann::json& details,
   }
 }
 
+nlohmann::json EncodeActor(const Game::EncounterActorState& actor) {
+  return {{"slot", actor.slot},
+          {"hp", actor.hp},
+          {"mp", actor.mp},
+          {"max_hp", actor.max_hp},
+          {"max_mp", actor.max_mp},
+          {"risk", actor.risk},
+          {"strength", actor.strength},
+          {"intelligence", actor.intelligence},
+          {"agility", actor.agility},
+          {"total_strength", actor.total_strength},
+          {"total_intelligence", actor.total_intelligence},
+          {"total_agility", actor.total_agility},
+          {"walk_speed", actor.walk_speed},
+          {"run_speed", actor.run_speed},
+          {"statuses", actor.statuses},
+          {"status_timers", actor.status_timers},
+          {"command", actor.command},
+          {"command_state", actor.command_state},
+          {"weapon_drawn", actor.weapon_drawn},
+          {"actor_flags", actor.actor_flags},
+          {"recovery", actor.recovery},
+          {"spawn_index", actor.spawn_index},
+          {"defeated", actor.defeated},
+          {"awareness_marker", actor.awareness_marker},
+          {"ai",
+           {{"present", actor.ai_present},
+            {"target", actor.ai_target},
+            {"candidates", actor.ai_candidates},
+            {"engagement_frames", actor.ai_engagement_frames},
+            {"movement_mode", actor.ai_movement_mode},
+            {"destination", {actor.ai_destination_x, actor.ai_destination_z}}}},
+          {"position", {actor.x, actor.y, actor.z}}};
+}
+
 void Trace::Frame(std::uint64_t tick, const Input::PadState& input,
                   const Game::EncounterState& state) {
   auto actors = nlohmann::json::array();
   for (const auto& actor : state.actors) {
-    actors.push_back(
-        {{"slot", actor.slot},
-         {"hp", actor.hp},
-         {"mp", actor.mp},
-         {"risk", actor.risk},
-         {"statuses", actor.statuses},
-         {"command", actor.command},
-         {"command_state", actor.command_state},
-         {"weapon_drawn", actor.weapon_drawn},
-         {"actor_flags", actor.actor_flags},
-         {"recovery", actor.recovery},
-         {"spawn_index", actor.spawn_index},
-         {"defeated", actor.defeated},
-         {"awareness_marker", actor.awareness_marker},
-         {"ai",
-          {{"present", actor.ai_present},
-           {"target", actor.ai_target},
-           {"candidates", actor.ai_candidates},
-           {"engagement_frames", actor.ai_engagement_frames},
-           {"movement_mode", actor.ai_movement_mode},
-           {"destination", {actor.ai_destination_x, actor.ai_destination_z}}}},
-         {"position", {actor.x, actor.y, actor.z}}});
+    actors.push_back(EncodeActor(actor));
   }
   auto pending_loot = nlohmann::json::array();
   for (const auto& loot : state.pending_loot) {
@@ -131,6 +188,20 @@ void Trace::Frame(std::uint64_t tick, const Input::PadState& input,
   for (const auto& item : state.items) {
     items.push_back(
         {{"slot", item.slot}, {"id", item.id}, {"count", item.count}});
+  }
+  auto floor_triggers = nlohmann::json::array();
+  for (const auto& trigger : state.floor_triggers) {
+    floor_triggers.push_back({{"kind", trigger.kind},
+                              {"tile_x", trigger.tile_x},
+                              {"tile_z", trigger.tile_z},
+                              {"activation", trigger.activation},
+                              {"marker_fade", trigger.marker_fade}});
+  }
+  auto target_previews = nlohmann::json::array();
+  for (const auto& target : state.target_previews) {
+    target_previews.push_back({{"actor", target.actor},
+                               {"limb", target.limb},
+                               {"position", target.position}});
   }
   Event("frame",
         {{"input",
@@ -149,6 +220,7 @@ void Trace::Frame(std::uint64_t tick, const Input::PadState& input,
          {"game_over", state.game_over},
          {"field_rendering_enabled", state.field_rendering_enabled},
          {"menu_state", state.menu_state},
+         {"menu_highlighted_row", state.menu_highlighted_row},
          {"frame_buffer", state.frame_buffer},
          {"transition", state.transition},
          {"native_buttons", state.native_buttons},
@@ -157,9 +229,13 @@ void Trace::Frame(std::uint64_t tick, const Input::PadState& input,
          {"action", state.action},
          {"source_actor", state.source_actor},
          {"target_count", state.target_count},
+         {"area_center", state.area_center},
+         {"target_previews", target_previews},
          {"rewards_available", state.rewards_available},
          {"pending_loot", pending_loot},
          {"items", items},
+         {"learned_actions", state.learned_actions},
+         {"floor_triggers", floor_triggers},
          {"actors", actors}},
         tick);
 }
@@ -175,6 +251,7 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
           {"room", setup.room},
           {"seed", setup.seed},
           {"ashley_profile", Game::EncounterProfileId(setup.profile)},
+          {"ashley_stats", EncodeStats(setup.stat_overrides)},
           {"player", EncodePosition(setup.player)},
           {"enemies", enemies},
           {"room_events", "isolated"},
@@ -201,10 +278,19 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
     setup.profile = Game::EncounterProfile::kPostPrologue;
   } else if (profile == "post-minotaur") {
     setup.profile = Game::EncounterProfile::kPostMinotaur;
+  } else if (profile == "all-items-a") {
+    setup.profile = Game::EncounterProfile::kAllItemsA;
+  } else if (profile == "all-items-b") {
+    setup.profile = Game::EncounterProfile::kAllItemsB;
+  } else if (profile == "all-spells") {
+    setup.profile = Game::EncounterProfile::kAllSpells;
   } else {
     throw std::runtime_error("unknown encounter Ashley profile");
   }
   setup.player = DecodePosition(json.at("player"));
+  if (json.contains("ashley_stats")) {
+    setup.stat_overrides = DecodeStats(json.at("ashley_stats"));
+  }
   const auto& enemies = json.at("enemies");
   if (!enemies.is_array() || enemies.size() > Game::EncounterLimits::kEnemies) {
     throw std::runtime_error("preset exceeds the primary actor budget");

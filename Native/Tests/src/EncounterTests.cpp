@@ -7,6 +7,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/Encounter.hpp"
+#include "CombatLab/Editor.hpp"
+#include "CombatLab/Trace.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 
 extern "C" {
@@ -49,6 +51,13 @@ EncounterSetup TestSetup(int count = 1, int enemy = 0) {
   }
   return setup;
 }
+
+void EditorPress(VS::combat_lab::Editor& editor, std::uint32_t button,
+                 int times = 1) {
+  VS::Input::PadState pad{};
+  pad.pressed = button;
+  for (int index = 0; index < times; ++index) editor.Update(pad, false);
+}
 }  // namespace
 
 TEST_CASE("Encounter validation reserves real primary and auxiliary slots",
@@ -77,8 +86,157 @@ TEST_CASE("Encounter validation rejects overlaps and invalid content",
   SECTION("unknown enemy") { setup.enemies[0].enemy = 30; }
   SECTION("missing assets") { setup.enemies[0].enemy = 2; }
   SECTION("room unavailable") { zone.rooms[0].unavailable_reason = "bad data"; }
-  SECTION("no enemies") { setup.enemies.clear(); }
   CHECK_FALSE(ValidateEncounter(setup, zone).empty());
+}
+
+TEST_CASE("Solo encounters retain Ashley placement and profile validation",
+          "[combat][encounter]") {
+  const auto zone = TestZone();
+  auto setup = TestSetup(0);
+  CHECK(ValidateEncounter(setup, zone).empty());
+  setup.profile = VS::Game::EncounterProfile::kAllItemsB;
+  CHECK(ValidateEncounter(setup, zone).empty());
+  setup.profile = VS::Game::EncounterProfile::kAllSpells;
+  CHECK(ValidateEncounter(setup, zone).empty());
+  setup.player.x = -1;
+  CHECK_FALSE(ValidateEncounter(setup, zone).empty());
+  setup.player.x = 4;
+  setup.profile = VS::Game::EncounterProfile::kCount;
+  CHECK_FALSE(ValidateEncounter(setup, zone).empty());
+}
+
+TEST_CASE("Combat Lab editor preserves solo presets and group selection",
+          "[combat][encounter][editor]") {
+  VS::combat_lab::Editor editor({TestZone()});
+  CHECK(editor.Setup().enemies.size() == 1);
+  SECTION("quantity zero and room reset") {
+    EditorPress(editor, VS::Input::Down, 3);
+    EditorPress(editor, VS::Input::Left, 2);
+    CHECK(editor.Setup().enemies.empty());
+    EditorPress(editor, VS::Input::Up, 2);
+    EditorPress(editor, VS::Input::Right);
+    CHECK(editor.Setup().enemies.empty());
+  }
+  SECTION("explicit groups are not replaced by quantity zero") {
+    editor.Load(TestSetup(2));
+    EditorPress(editor, VS::Input::Down, 3);
+    EditorPress(editor, VS::Input::Left);
+    CHECK(editor.Setup().enemies.size() == 2);
+    EditorPress(editor, VS::Input::Down, 11);
+    EditorPress(editor, VS::Input::Circle);
+    CHECK(editor.Setup().enemies.empty());
+  }
+}
+
+TEST_CASE("Combat Lab editor selects and wraps the all-spells profile",
+          "[combat][encounter][editor][spells]") {
+  VS::combat_lab::Editor editor({TestZone()});
+  EditorPress(editor, VS::Input::Down, 11);
+  EditorPress(editor, VS::Input::Left);
+  CHECK(editor.Setup().profile == VS::Game::EncounterProfile::kAllSpells);
+  const auto setup = editor.Setup();
+  editor.Load(VS::combat_lab::DecodeSetup(VS::combat_lab::EncodeSetup(setup)));
+  CHECK(editor.Setup().profile == setup.profile);
+  EditorPress(editor, VS::Input::Right);
+  CHECK(editor.Setup().profile == VS::Game::EncounterProfile::kPrologue);
+}
+
+TEST_CASE("Combat Lab editor loads empty and populated presets",
+          "[combat][encounter][editor]") {
+  VS::combat_lab::Editor editor({TestZone()});
+  SECTION("loaded solo survives save, group add and clear") {
+    auto setup = TestSetup(0);
+    setup.profile = VS::Game::EncounterProfile::kAllItemsB;
+    editor.Load(
+        VS::combat_lab::DecodeSetup(VS::combat_lab::EncodeSetup(setup)));
+    CHECK(editor.Setup().enemies.empty());
+    CHECK(editor.Setup().profile == setup.profile);
+    EditorPress(editor, VS::Input::Down, 13);
+    EditorPress(editor, VS::Input::Circle);
+    CHECK(editor.Setup().enemies.empty());
+    EditorPress(editor, VS::Input::Down);
+    EditorPress(editor, VS::Input::Circle);
+    CHECK(editor.Setup().enemies.empty());
+  }
+  SECTION("non-solo loading restores current selection after clearing") {
+    editor.Load(TestSetup(0));
+    editor.Load(TestSetup(2));
+    EditorPress(editor, VS::Input::Down, 14);
+    EditorPress(editor, VS::Input::Circle);
+    CHECK(editor.Setup().enemies.size() == 1);
+  }
+}
+
+TEST_CASE("Combat Lab Ashley stats editor preserves defaults and limits",
+          "[combat][encounter][editor][stats]") {
+  VS::combat_lab::Editor editor({TestZone()});
+  EditorPress(editor, VS::Input::Down, 12);
+  EditorPress(editor, VS::Input::Circle);
+  EditorPress(editor, VS::Input::Left);
+  CHECK(editor.Setup().stat_overrides.max_hp == 999);
+  EditorPress(editor, VS::Input::Right);
+  CHECK(editor.Setup().stat_overrides.max_hp == 999);
+  EditorPress(editor, VS::Input::Down);
+  EditorPress(editor, VS::Input::Left);
+  CHECK(editor.Setup().stat_overrides.max_mp == 999);
+  VS::Input::PadState pad{};
+  pad.pressed = VS::Input::Left;
+  pad.held = VS::Input::R1;
+  editor.Update(pad, false);
+  CHECK(editor.Setup().stat_overrides.max_mp == 899);
+  pad.held = VS::Input::L1;
+  editor.Update(pad, false);
+  CHECK(editor.Setup().stat_overrides.max_mp == 889);
+  CHECK_FALSE(editor.Setup().stat_overrides.strength.has_value());
+}
+
+TEST_CASE("Combat Lab Ashley stats editor saves and clears overrides",
+          "[combat][encounter][editor][stats]") {
+  VS::combat_lab::Editor editor({TestZone()});
+  auto setup = TestSetup();
+  setup.stat_overrides.max_hp = 999;
+  setup.stat_overrides.max_mp = 889;
+  editor.Load(setup);
+  EditorPress(editor, VS::Input::Down, 12);
+  EditorPress(editor, VS::Input::Circle);
+  EditorPress(editor, VS::Input::Down);
+  EditorPress(editor, VS::Input::Circle);
+  CHECK_FALSE(editor.Setup().stat_overrides.max_mp.has_value());
+  EditorPress(editor, VS::Input::Right);
+  EditorPress(editor, VS::Input::Left);
+  CHECK(editor.Setup().stat_overrides.max_mp == 1);
+  EditorPress(editor, VS::Input::Cross);
+  EditorPress(editor, VS::Input::Down, 3);
+  CHECK(editor.Update({}, true) == VS::combat_lab::Editor::Action::kStart);
+  const auto saved =
+      VS::combat_lab::DecodeSetup(VS::combat_lab::EncodeSetup(editor.Setup()));
+  editor.Load(saved);
+  CHECK(editor.Setup().stat_overrides == saved.stat_overrides);
+  EditorPress(editor, VS::Input::Up, 3);
+  EditorPress(editor, VS::Input::Circle);
+  EditorPress(editor, VS::Input::Down, 5);
+  EditorPress(editor, VS::Input::Circle);
+  CHECK(editor.Setup().stat_overrides == VS::Game::EncounterStatOverrides{});
+  EditorPress(editor, VS::Input::Down);
+  EditorPress(editor, VS::Input::Circle);
+  CHECK(ValidateEncounter(editor.Setup(), editor.Zone()).empty());
+}
+
+TEST_CASE("Encounter setup validates every Ashley stat override",
+          "[combat][encounter][stats]") {
+  const auto zone = TestZone();
+  auto setup = TestSetup(0);
+  using Stats = VS::Game::EncounterStatOverrides;
+  for (const auto member : {&Stats::max_hp, &Stats::max_mp, &Stats::strength,
+                            &Stats::intelligence, &Stats::agility}) {
+    for (const int value : {-1, 0, 1000}) {
+      setup.stat_overrides = {};
+      setup.stat_overrides.*member = value;
+      CHECK_FALSE(ValidateEncounter(setup, zone).empty());
+    }
+  }
+  setup.stat_overrides = {999, 999, 999, 999, 999};
+  CHECK(ValidateEncounter(setup, zone).empty());
 }
 
 TEST_CASE("Independent encounter definitions retain per-instance positions",

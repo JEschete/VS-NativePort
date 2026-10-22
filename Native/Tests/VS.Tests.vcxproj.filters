@@ -153,6 +153,9 @@
     <ClCompile Include="src\SequenceTests.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\StatusBehaviorTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\TerrainHeightTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -163,6 +166,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp">
+      <Filter>..\Tools\CombatLab\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\CombatLab\src\Editor.cpp">
       <Filter>..\Tools\CombatLab\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp">

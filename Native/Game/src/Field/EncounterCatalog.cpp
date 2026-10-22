@@ -401,11 +401,24 @@ std::expected<std::vector<EncounterZone>, std::string> ReadEncounterCatalog() {
   return zones;
 }
 
+bool EncounterStatOverrides::Valid() const {
+  for (const auto value : {max_hp, max_mp, strength, intelligence, agility}) {
+    if (value && (*value < EncounterLimits::kMinPlayerStat ||
+                  *value > EncounterLimits::kMaxPlayerStat)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
                                            const EncounterZone& zone) {
   std::vector<std::string> errors;
+  if (!setup.stat_overrides.Valid()) {
+    errors.emplace_back("ASHLEY STAT OVERRIDES MUST BE IN 1..999");
+  }
   if (setup.profile < EncounterProfile::kPrologue ||
-      setup.profile > EncounterProfile::kPostMinotaur) {
+      setup.profile >= EncounterProfile::kCount) {
     errors.emplace_back("unsupported Ashley profile");
   }
   if (setup.zone != zone.id) errors.emplace_back("zone does not match catalog");
@@ -455,7 +468,6 @@ std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
   };
   check_position(setup.player, "ASHLEY");
   std::array<bool, EncounterLimits::kActorSlots> slots{};
-  if (setup.enemies.empty()) errors.emplace_back("add at least one enemy");
   for (std::size_t index = 0; index < setup.enemies.size(); ++index) {
     const auto& spawn = setup.enemies[index];
     check_position(spawn.position, std::format("ENEMY {}", index + 1));
