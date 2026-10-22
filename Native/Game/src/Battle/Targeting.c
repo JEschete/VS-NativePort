@@ -21,6 +21,7 @@
 #include "Battle/Hit.h"
 #include "Battle/Hud.h"
 #include "Battle/Sphere.h"
+#include "Battle/SphereTerrain.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"

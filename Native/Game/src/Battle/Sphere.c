@@ -1380,12 +1380,6 @@ void Battle_CacheSphereTerrainRow(SVECTOR* position, u_int row)
     }
 }
 
-// decomp: BATTLE.PRG func_800C2E24 (src/BATTLE/BATTLE.PRG/5A624.s:0) [asm-file: not yet ported]
-void Battle_DrawSphereTerrainIntersection(SVECTOR*, MATRIX*, int)
-{
-    VS_UNPORTED("Battle::DrawSphereTerrainIntersection");
-}
-
 // decomp: BATTLE.PRG func_800C4650 (src/BATTLE/BATTLE.PRG/5BE50.c:65)
 void Battle_UpdateSphereTargetHighlights(Battle_TargetLabelLine* arg0, int arg1)
 {

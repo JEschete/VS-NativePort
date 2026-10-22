@@ -153,6 +153,9 @@
     <ClCompile Include="src\SequenceTests.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SphereTerrainTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\StatusBehaviorTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

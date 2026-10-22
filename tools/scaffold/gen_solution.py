@@ -120,6 +120,7 @@ def needs_c_headers(project: str, path: str) -> bool:
             or project == "VS.CombatLab"
             or project == "VS.Game" and path in (
                 r"src\Boot\Encounter.cpp",
+                r"src\Battle\SphereTerrain.cpp",
                 r"src\Field\EncounterCatalog.cpp",
                 r"src\Field\MinimapScene.cpp",
                 r"src\Battle\Ai\PlanningPrimitives.cpp",

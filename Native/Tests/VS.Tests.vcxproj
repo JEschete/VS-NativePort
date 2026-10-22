@@ -120,6 +120,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\SphereTerrainTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
     <ClCompile Include="src\TerrainHeightTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />

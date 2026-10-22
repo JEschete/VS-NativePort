@@ -55,7 +55,6 @@ void Battle_BuildSphereWireframe(int type);
 void* Battle_BuildSphereCameraBasis(void);
 void Battle_DrawSpherePositionCursor(SVECTOR* position, int arg1);
 void Battle_CacheSphereTerrainRow(SVECTOR* position, u_int row);
-void Battle_DrawSphereTerrainIntersection(SVECTOR*, MATRIX*, int);
 void Battle_UpdateSphereTargetHighlights(Battle_TargetLabelLine* arg0, int arg1);
 int Battle_SphereInteractionMode(void);
 

@@ -522,6 +522,9 @@
     <ClInclude Include="src\Battle\Sphere.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\SphereTerrain.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\StatusEffects.c">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -2032,6 +2035,9 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Enemy.h">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\SphereTerrain.h">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Boot\GameApp.hpp">

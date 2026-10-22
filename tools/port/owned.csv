@@ -1,4 +1,5 @@
 id,kind,name,path,header,since,notes
+F01309,function,Battle_DrawSphereTerrainIntersection,Native\Game\src\Battle\SphereTerrain.cpp,Native\Game\include\Battle\SphereTerrain.h,2026-10-22,Terrain-clipped elevation slice with native scanline storage and packet handles; original 5A624.s
 F03198,function,Audio_Seq_ReleaseSavedVoiceConflicts,Native\Engine\src\Audio\MusicState.cpp,Native\Engine\include\Audio\MusicState.h,2026-10-21,Detach displaced saved-layer voices while preserving active SFX and stream reservations
 F03144,function,Audio_Control_SetDiscMixVolume,Native\Engine\src\Audio\XaPlayback.cpp,Native\Engine\include\Audio\XaPlayback.h,2026-10-21,Apply original stereo or attenuated mono gains to native XA PCM
 F03262,function,Audio_Seq_WriteDiscVolume,Native\Engine\src\Audio\XaPlayback.cpp,Native\Engine\include\Audio\XaPlayback.h,2026-10-21,Publish sequencer CD volume and fades without hardware register writes
