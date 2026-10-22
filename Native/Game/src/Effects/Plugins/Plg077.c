@@ -3,10 +3,10 @@
 #include "Effects/Plugins/Plg077.h"
 
 // decomp: D_800FD908 (D_800FD908@EFFECT/PLG077.BIN)
-SVECTOR Effects_Plg077_mesh10Vertices[]; /* contents: module image (ModuleData.c) */
+SVECTOR Effects_Plg077_mesh10Vertices[10]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FD958 (D_800FD958@EFFECT/PLG077.BIN)
-u_char Effects_Plg077_mesh10Faces[][6]; /* contents: module image (ModuleData.c) */
+u_char Effects_Plg077_mesh10Faces[16][6]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FD9B8 (D_800FD9B8@EFFECT/PLG077.BIN)
 u_char Effects_Plg077_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */

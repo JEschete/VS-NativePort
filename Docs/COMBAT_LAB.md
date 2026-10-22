@@ -451,6 +451,67 @@ Commands/evidence on `a320c82e` plus the scoped dirty worktree:
   `build\quality\live-break-art-menus-*.json`; logs:
   `build\quality\break-art-menu-*` and the run directories above.
 
+### Mesh10 import and live Sword execution checkpoint (2026-10-22)
+
+[#121](https://github.com/JEschete/VS-NativePort/issues/121) exposed a Release
+Cherry Ronde crash in the shared Mesh10 renderer. The seven plugin bindings
+(069, 077, 129, 137, 153, 154 and 260) had unresolved source sizes: their
+tentative native arrays reserved one element and their source data was not
+imported. A regression failed for all **14 missing destinations** before the
+repair. The original template consumes **10 eight-byte vertices** and
+**16 six-byte triangles**. Correcting those existing ledger extents produces
+complete storage and module imports without altering the renderer or masking
+invalid indices. Original declaration/provenance and verification/promotion
+status remain separate.
+
+The content tests check every module name, source offset, import size and
+native capacity. With local extracted data available, they compare all loaded
+bytes to the original modules, check color selectors, vertex indices and UV
+offsets, and repeat the import. These checks do not require committed assets.
+
+Actual controller verification uses speed1, seed1, Zone12 room0, the
+`all-break-arts` profile, original Fandango, HP/MP999, Ashley(9,10), and a
+Minotaur Zombie at(9,11):
+
+| Configuration/action | Run | Acceptance |
+| --- | --- | --- |
+| Debug Cherry Ronde190 | `1792696331113100-0` | Three encounters, four casts including one zero-damage result and retry; HP55 per cast; positive damage2/3/4 |
+| Release Cherry Ronde190 | `1792696162985589-0` | Three encounters and casts; HP55 each; damage2/4/2 |
+| Release Papillon Reel191 | `1792696417809149-0` | HP75, damage1, normal recovery |
+
+Both Cherry Ronde runs include two F10 exits with both actors alive and fresh
+re-entry in the same host. Every cast checks actual HP payment, reported
+damage against the target HP delta, and return of control. MP/Risk, inventory,
+learned actions and unrelated progression remain unchanged. All three logs
+end with `trace_failed:false` and no errors. This repairs the reproduced
+Mesh10 crash; it does not reproduce or close the broader intermittent #82.
+
+Validation on `dded4994` plus the scoped Mesh10 changes and separate #11
+acquisition tests:
+
+- Standard Debug/Release solution builds; final test-project rebuilds and
+  full `VS.Tests.exe` suites: **458 cases / 1,082,195 assertions** each.
+- Focused `[content][module]`: **6 cases / 1,831 assertions** each.
+- Two `copy_to_native.py` runs: stable second manifest; existing owned paths
+  preserved. `test_encounter_fixups.py`: **11 tests pass**.
+- `quality-native.cmd --files Native\Tests\src\ContentTests.cpp
+  Native\Tests\src\CombatTestCases.cpp --tidy`: **four existing findings,
+  zero new**. No baseline or suppression changes.
+- `build\quality\live-restart-check.ps1 -Configuration Debug|Release
+  -Art 190 -ArtRuns 3`, then `-Configuration Release -Art 191`.
+  Local evidence: `build\quality\mesh10-*`, `live-break-art-*.json`, and
+  the run directories above. The two #11 acquisition tests separately cover
+  qualifying lethal actions and thirteen rejection/cap gates:
+  **2 cases / 1,860 assertions**.
+
+All four Sword arts have now completed through actual controls in both
+configurations. This is not all-forty execution or positive Poison acceptance:
+the Zombie did not demonstrate Vile Scar's Poison. Shared tiled-ring color
+imports remain defective and are tracked separately in
+[#122](https://github.com/JEschete/VS-NativePort/issues/122). Neither this
+storage repair nor those successful actions establish complete visual parity
+or close the particle-path/trail acceptance in #76.
+
 ### Original art inventory and acquisition requirements
 
 The resident action table (`SLUS_010.40`, file offset0x3C1DC, 52-byte records)

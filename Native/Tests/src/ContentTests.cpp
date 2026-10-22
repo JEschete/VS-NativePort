@@ -4,17 +4,32 @@
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+#include <catch2/generators/catch_generators_range.hpp>
 
 #include "Content/DataAccess.h"
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
 #include "Content/ModuleData.h"
+#include "Legacy/Psx.h"
 #include "Movie/MoviePlayer.h"
 #include "Render/PageSpace.hpp"
+
+extern "C" {
+#include "Effects/Plugins/Plg069.h"
+#include "Effects/Plugins/Plg077.h"
+#include "Effects/Plugins/Plg129.h"
+#include "Effects/Plugins/Plg137.h"
+#include "Effects/Plugins/Plg153.h"
+#include "Effects/Plugins/Plg154.h"
+#include "Effects/Plugins/Plg260.h"
+}
 
 using VS::u16;
 using VS::u32;
@@ -30,6 +45,25 @@ extern "C" int TestsDiscReadSizeContract(void);
 extern "C" int CheckMenuDiscStringsLoaded(void);
 
 namespace {
+constexpr auto kMesh10Data = std::to_array<Content_ModuleDataEntry>({
+    {"EFFECT/PLG069.BIN", 0x3C24, 80, Effects_Plg069_mesh10Vertices, 80},
+    {"EFFECT/PLG069.BIN", 0x3C74, 96, Effects_Plg069_mesh10Faces, 96},
+    {"EFFECT/PLG077.BIN", 0x4108, 80, Effects_Plg077_mesh10Vertices, 80},
+    {"EFFECT/PLG077.BIN", 0x4158, 96, Effects_Plg077_mesh10Faces, 96},
+    {"EFFECT/PLG129.BIN", 0x3DE8, 80, Effects_Plg129_mesh10Vertices, 80},
+    {"EFFECT/PLG129.BIN", 0x3E38, 96, Effects_Plg129_mesh10Faces, 96},
+    {"EFFECT/PLG137.BIN", 0x478C, 80, Effects_Plg137_mesh10Vertices, 80},
+    {"EFFECT/PLG137.BIN", 0x47DC, 96, Effects_Plg137_mesh10Faces, 96},
+    {"EFFECT/PLG153.BIN", 0x3504, 80, Effects_Plg153_mesh10Vertices, 80},
+    {"EFFECT/PLG153.BIN", 0x3554, 96, Effects_Plg153_mesh10Faces, 96},
+    {"EFFECT/PLG154.BIN", 0x1A9C, 80, Effects_Plg154_mesh10Vertices, 80},
+    {"EFFECT/PLG154.BIN", 0x1AEC, 96, Effects_Plg154_mesh10Faces, 96},
+    {"EFFECT/PLG260.BIN", 0xB2C, 80, Effects_Plg260_mesh10Vertices, 80},
+    {"EFFECT/PLG260.BIN", 0xB7C, 96, Effects_Plg260_mesh10Faces, 96},
+});
+
+void CheckMesh10Reloads();
+
 std::filesystem::path FindRepoDisc() {
   for (auto dir = std::filesystem::current_path();
        dir.has_parent_path() && dir != dir.parent_path();
@@ -142,6 +176,7 @@ TEST_CASE(
   }
   REQUIRE(Content::DataStore::Open(root).has_value());
   REQUIRE(Content_LoadModuleData() == 0);
+  CheckMesh10Reloads();
   CHECK(Tests_ActionDefinitionsLoaded() == 1);
   CHECK(Tests_DefaultEffectPackageLoaded() == 1);
   CHECK(CheckMenuDiscStringsLoaded() == 1);
@@ -300,4 +335,65 @@ TEST_CASE("Manifest sector rounding preserves empty and partial entries",
   }
   entry.size = 2049;
   CHECK(entry.SectorCount() == 2);
+}
+
+namespace {
+void CheckMesh10Binding(const Content_ModuleDataEntry& expected) {
+  INFO(expected.module << " offset " << expected.offset);
+  const std::span entries(Content_moduleData, Content_moduleDataCount);
+  const auto found = std::ranges::find(entries, expected.target,
+                                       &Content_ModuleDataEntry::target);
+  REQUIRE(found != entries.end());
+  CHECK(std::string_view(found->module) == expected.module);
+  CHECK(found->offset == expected.offset);
+  REQUIRE(found->size == expected.size);
+  REQUIRE(found->capacity == expected.capacity);
+}
+
+void CheckMesh10Indices(const Content_ModuleDataEntry& expected,
+                        bool vertices) {
+  if (vertices) {
+    const std::span values(static_cast<const SVECTOR*>(expected.target), 10);
+    for (usize index = 0; index < values.size(); ++index) {
+      CHECK(values[index].pad == (index < 4 ? 0 : 1));
+    }
+  } else {
+    const std::span values(static_cast<const u8*>(expected.target), 96);
+    for (usize index = 0; index < values.size(); ++index) {
+      const bool valid = index % 6 < 3
+                             ? values[index] < 10
+                             : values[index] <= 10 && values[index] % 2 == 0;
+      CHECK(valid);
+    }
+  }
+}
+
+void CheckLoadedMesh10Data(const Content::DataStore& store) {
+  for (usize index = 0; index < kMesh10Data.size(); ++index) {
+    const auto& expected = kMesh10Data[index];
+    INFO(expected.module << " offset " << expected.offset);
+    CheckMesh10Binding(expected);
+    const auto* file = store.Find(expected.module);
+    REQUIRE(file != nullptr);
+    std::array<u8, 96> source{};
+    const auto source_bytes = std::span(source).first(expected.size);
+    REQUIRE(store.Read(*file, expected.offset, source_bytes));
+    const std::span native_bytes(static_cast<const u8*>(expected.target),
+                                 expected.size);
+    CHECK(std::ranges::equal(native_bytes, source_bytes));
+    CheckMesh10Indices(expected, index % 2 == 0);
+  }
+}
+
+void CheckMesh10Reloads() {
+  CheckLoadedMesh10Data(*Content::DataStore::Get());
+  REQUIRE(Content_LoadModuleData() == 0);
+  CheckLoadedMesh10Data(*Content::DataStore::Get());
+}
+}  // namespace
+
+TEST_CASE("Every Mesh10 instance imports complete vertex and triangle tables",
+          "[content][module][mesh10]") {
+  const unsigned index = GENERATE(Catch::Generators::range(0u, 14u));
+  CheckMesh10Binding(kMesh10Data[index]);
 }

@@ -61,6 +61,7 @@
 #include "Effects/Plugins/Plg148.h"
 #include "Effects/Plugins/Plg150.h"
 #include "Effects/Plugins/Plg153.h"
+#include "Effects/Plugins/Plg154.h"
 #include "Effects/Plugins/Plg156.h"
 #include "Effects/Plugins/Plg158.h"
 #include "Effects/Plugins/Plg161.h"
@@ -74,6 +75,7 @@
 #include "Effects/Plugins/Plg232.h"
 #include "Effects/Plugins/Plg242.h"
 #include "Effects/Plugins/Plg255.h"
+#include "Effects/Plugins/Plg260.h"
 #include "Effects/Plugins/Plg263.h"
 #include "Effects/Plugins/Plg265.h"
 #include "Effects/Plugins/Plg266.h"
@@ -361,8 +363,12 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"EFFECT/PLG057.BIN", 0x61BC, sizeof Effects_Plg057_trailEmissionCounter2, &Effects_Plg057_trailEmissionCounter2, sizeof Effects_Plg057_trailEmissionCounter2}, // G00647 D_800FF9BC
     {"EFFECT/PLG061.BIN", 0x3290, sizeof Effects_Plg061_surfaceVertices, &Effects_Plg061_surfaceVertices, sizeof Effects_Plg061_surfaceVertices}, // G00648 D_800FCA90
     {"EFFECT/PLG065.BIN", 0x4174, sizeof Effects_Plg065_particleEmissionCounter, &Effects_Plg065_particleEmissionCounter, sizeof Effects_Plg065_particleEmissionCounter}, // G00653 D_800FD974
+    {"EFFECT/PLG069.BIN", 0x3C24, sizeof Effects_Plg069_mesh10Vertices, &Effects_Plg069_mesh10Vertices, sizeof Effects_Plg069_mesh10Vertices}, // G00654 D_800FD424
+    {"EFFECT/PLG069.BIN", 0x3C74, sizeof Effects_Plg069_mesh10Faces, &Effects_Plg069_mesh10Faces, sizeof Effects_Plg069_mesh10Faces}, // G00655 D_800FD474
     {"EFFECT/PLG069.BIN", 0x3CD4, sizeof Effects_Plg069_trailEmissionCounter, &Effects_Plg069_trailEmissionCounter, sizeof Effects_Plg069_trailEmissionCounter}, // G00656 D_800FD4D4
     {"EFFECT/PLG073.BIN", 0x577C, sizeof Effects_Plg073_trailEmissionCounter, &Effects_Plg073_trailEmissionCounter, sizeof Effects_Plg073_trailEmissionCounter}, // G00660 D_800FEF7C
+    {"EFFECT/PLG077.BIN", 0x4108, sizeof Effects_Plg077_mesh10Vertices, &Effects_Plg077_mesh10Vertices, sizeof Effects_Plg077_mesh10Vertices}, // G00661 D_800FD908
+    {"EFFECT/PLG077.BIN", 0x4158, sizeof Effects_Plg077_mesh10Faces, &Effects_Plg077_mesh10Faces, sizeof Effects_Plg077_mesh10Faces}, // G00662 D_800FD958
     {"EFFECT/PLG077.BIN", 0x41D8, sizeof Effects_Plg077_surfaceVertices, &Effects_Plg077_surfaceVertices, sizeof Effects_Plg077_surfaceVertices}, // G00664 D_800FD9D8
     {"EFFECT/PLG082.BIN", 0x3888, sizeof Effects_Plg082_particleEmissionCounter, &Effects_Plg082_particleEmissionCounter, sizeof Effects_Plg082_particleEmissionCounter}, // G00668 D_800FD088
     {"EFFECT/PLG086.BIN", 0x4BB0, sizeof Effects_Plg086_trailEmissionCounter, &Effects_Plg086_trailEmissionCounter, sizeof Effects_Plg086_trailEmissionCounter}, // G00672 D_800FE3B0
@@ -374,9 +380,13 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"EFFECT/PLG128.BIN", 0x6CF0, sizeof Effects_Plg128_surfaceVertices, &Effects_Plg128_surfaceVertices, sizeof Effects_Plg128_surfaceVertices}, // G00679 D_801004F0
     {"EFFECT/PLG128.BIN", 0x6F90, sizeof Effects_Plg128_surfaceVertices2, &Effects_Plg128_surfaceVertices2, sizeof Effects_Plg128_surfaceVertices2}, // G00681 D_80100790
     {"EFFECT/PLG128.BIN", 0x7210, sizeof Effects_Plg128_trailEmissionCounter, &Effects_Plg128_trailEmissionCounter, sizeof Effects_Plg128_trailEmissionCounter}, // G00682 D_80100A10
+    {"EFFECT/PLG129.BIN", 0x3DE8, sizeof Effects_Plg129_mesh10Vertices, &Effects_Plg129_mesh10Vertices, sizeof Effects_Plg129_mesh10Vertices}, // G00684 D_800FD5E8
+    {"EFFECT/PLG129.BIN", 0x3E38, sizeof Effects_Plg129_mesh10Faces, &Effects_Plg129_mesh10Faces, sizeof Effects_Plg129_mesh10Faces}, // G00685 D_800FD638
     {"EFFECT/PLG129.BIN", 0x3E98, sizeof Effects_Plg129_surfaceVertices, &Effects_Plg129_surfaceVertices, sizeof Effects_Plg129_surfaceVertices}, // G00686 D_800FD698
     {"EFFECT/PLG134.BIN", 0x316C, sizeof Effects_Plg134_trailEmissionCounter, &Effects_Plg134_trailEmissionCounter, sizeof Effects_Plg134_trailEmissionCounter}, // G00688 D_800FC96C
     {"EFFECT/PLG135.BIN", 0x318C, sizeof Effects_Plg135_trailEmissionCounter, &Effects_Plg135_trailEmissionCounter, sizeof Effects_Plg135_trailEmissionCounter}, // G00691 D_800FC98C
+    {"EFFECT/PLG137.BIN", 0x478C, sizeof Effects_Plg137_mesh10Vertices, &Effects_Plg137_mesh10Vertices, sizeof Effects_Plg137_mesh10Vertices}, // G00692 D_800FDF8C
+    {"EFFECT/PLG137.BIN", 0x47DC, sizeof Effects_Plg137_mesh10Faces, &Effects_Plg137_mesh10Faces, sizeof Effects_Plg137_mesh10Faces}, // G00693 D_800FDFDC
     {"EFFECT/PLG137.BIN", 0x483C, sizeof Effects_Plg137_trailEmissionCounter, &Effects_Plg137_trailEmissionCounter, sizeof Effects_Plg137_trailEmissionCounter}, // G00694 D_800FE03C
     {"EFFECT/PLG141.BIN", 0x2200, sizeof Effects_Plg141_trailEmissionCounter, &Effects_Plg141_trailEmissionCounter, sizeof Effects_Plg141_trailEmissionCounter}, // G00698 D_800FBA00
     {"EFFECT/PLG146.BIN", 0x609C, sizeof Effects_Plg146_mirrorSurfaceVertices, &Effects_Plg146_mirrorSurfaceVertices, sizeof Effects_Plg146_mirrorSurfaceVertices}, // G00704 D_800FF89C
@@ -385,7 +395,11 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"EFFECT/PLG147.BIN", 0x2330, sizeof Effects_Plg147_particleEmissionCounter, &Effects_Plg147_particleEmissionCounter, sizeof Effects_Plg147_particleEmissionCounter}, // G00709 D_800FBB30
     {"EFFECT/PLG148.BIN", 0x30F8, sizeof Effects_Plg148_trailEmissionCounter, &Effects_Plg148_trailEmissionCounter, sizeof Effects_Plg148_trailEmissionCounter}, // G00710 D_800FC8F8
     {"EFFECT/PLG150.BIN", 0x323C, sizeof Effects_Plg150_surfaceVertices, &Effects_Plg150_surfaceVertices, sizeof Effects_Plg150_surfaceVertices}, // G00714 D_800FCA3C
+    {"EFFECT/PLG153.BIN", 0x3504, sizeof Effects_Plg153_mesh10Vertices, &Effects_Plg153_mesh10Vertices, sizeof Effects_Plg153_mesh10Vertices}, // G00716 D_800FCD04
+    {"EFFECT/PLG153.BIN", 0x3554, sizeof Effects_Plg153_mesh10Faces, &Effects_Plg153_mesh10Faces, sizeof Effects_Plg153_mesh10Faces}, // G00717 D_800FCD54
     {"EFFECT/PLG153.BIN", 0x35D4, sizeof Effects_Plg153_particleEmissionCounter, &Effects_Plg153_particleEmissionCounter, sizeof Effects_Plg153_particleEmissionCounter}, // G00719 D_800FCDD4
+    {"EFFECT/PLG154.BIN", 0x1A9C, sizeof Effects_Plg154_mesh10Vertices, &Effects_Plg154_mesh10Vertices, sizeof Effects_Plg154_mesh10Vertices}, // G00720 D_800FB29C
+    {"EFFECT/PLG154.BIN", 0x1AEC, sizeof Effects_Plg154_mesh10Faces, &Effects_Plg154_mesh10Faces, sizeof Effects_Plg154_mesh10Faces}, // G00721 D_800FB2EC
     {"EFFECT/PLG156.BIN", 0x291C, sizeof Effects_Plg156_particleEmissionCounter, &Effects_Plg156_particleEmissionCounter, sizeof Effects_Plg156_particleEmissionCounter}, // G00723 D_800FC11C
     {"EFFECT/PLG158.BIN", 0x3638, sizeof Effects_Plg158_surfaceVertices, &Effects_Plg158_surfaceVertices, sizeof Effects_Plg158_surfaceVertices}, // G00724 D_800FCE38
     {"EFFECT/PLG158.BIN", 0x38B8, sizeof Effects_Plg158_mirrorSurfaceVertices, &Effects_Plg158_mirrorSurfaceVertices, sizeof Effects_Plg158_mirrorSurfaceVertices}, // G00725 D_800FD0B8
@@ -403,6 +417,8 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"EFFECT/PLG242.BIN", 0x3C80, sizeof Effects_Plg242_trailEmissionCounter, &Effects_Plg242_trailEmissionCounter, sizeof Effects_Plg242_trailEmissionCounter}, // G00756 D_800FD480
     {"EFFECT/PLG255.BIN", 0x38EC, sizeof Effects_Plg255_trailEmissionCounter, &Effects_Plg255_trailEmissionCounter, sizeof Effects_Plg255_trailEmissionCounter}, // G00758 D_800FD0EC
     {"EFFECT/PLG255.BIN", 0x38F0, sizeof Effects_Plg255_particleEmissionCounter, &Effects_Plg255_particleEmissionCounter, sizeof Effects_Plg255_particleEmissionCounter}, // G00759 D_800FD0F0
+    {"EFFECT/PLG260.BIN", 0xB2C, sizeof Effects_Plg260_mesh10Vertices, &Effects_Plg260_mesh10Vertices, sizeof Effects_Plg260_mesh10Vertices}, // G00760 D_800FA32C
+    {"EFFECT/PLG260.BIN", 0xB7C, sizeof Effects_Plg260_mesh10Faces, &Effects_Plg260_mesh10Faces, sizeof Effects_Plg260_mesh10Faces}, // G00761 D_800FA37C
     {"EFFECT/PLG263.BIN", 0x44B0, sizeof Effects_Plg263_surfaceVertices, &Effects_Plg263_surfaceVertices, sizeof Effects_Plg263_surfaceVertices}, // G00762 D_800FDCB0
     {"EFFECT/PLG263.BIN", 0x4770, sizeof Effects_Plg263_particleEmissionCounter, &Effects_Plg263_particleEmissionCounter, sizeof Effects_Plg263_particleEmissionCounter}, // G00765 D_800FDF70
     {"EFFECT/PLG265.BIN", 0x65B8, sizeof Effects_Plg265_particleEmissionCounter, &Effects_Plg265_particleEmissionCounter, sizeof Effects_Plg265_particleEmissionCounter}, // G00767 D_800FFDB8
