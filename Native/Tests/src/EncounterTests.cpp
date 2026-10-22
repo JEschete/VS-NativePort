@@ -98,6 +98,8 @@ TEST_CASE("Solo encounters retain Ashley placement and profile validation",
   CHECK(ValidateEncounter(setup, zone).empty());
   setup.profile = VS::Game::EncounterProfile::kAllSpells;
   CHECK(ValidateEncounter(setup, zone).empty());
+  setup.profile = VS::Game::EncounterProfile::kAllAbilities;
+  CHECK(ValidateEncounter(setup, zone).empty());
   setup.player.x = -1;
   CHECK_FALSE(ValidateEncounter(setup, zone).empty());
   setup.player.x = 4;
@@ -128,15 +130,23 @@ TEST_CASE("Combat Lab editor preserves solo presets and group selection",
   }
 }
 
-TEST_CASE("Combat Lab editor selects and wraps the all-spells profile",
-          "[combat][encounter][editor][spells]") {
+TEST_CASE("Combat Lab editor selects and wraps the all-action profiles",
+          "[combat][encounter][editor][spells][abilities]") {
   VS::combat_lab::Editor editor({TestZone()});
   EditorPress(editor, VS::Input::Down, 11);
+  EditorPress(editor, VS::Input::Left);
+  CHECK(editor.Setup().profile == VS::Game::EncounterProfile::kAllAbilities);
+  const auto abilities = editor.Setup();
+  editor.Load(
+      VS::combat_lab::DecodeSetup(VS::combat_lab::EncodeSetup(abilities)));
+  CHECK(editor.Setup().profile == abilities.profile);
   EditorPress(editor, VS::Input::Left);
   CHECK(editor.Setup().profile == VS::Game::EncounterProfile::kAllSpells);
   const auto setup = editor.Setup();
   editor.Load(VS::combat_lab::DecodeSetup(VS::combat_lab::EncodeSetup(setup)));
   CHECK(editor.Setup().profile == setup.profile);
+  EditorPress(editor, VS::Input::Right);
+  CHECK(editor.Setup().profile == VS::Game::EncounterProfile::kAllAbilities);
   EditorPress(editor, VS::Input::Right);
   CHECK(editor.Setup().profile == VS::Game::EncounterProfile::kPrologue);
 }

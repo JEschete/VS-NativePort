@@ -308,6 +308,33 @@ std::expected<void, std::string> ApplyAdjustment(EncounterAdjustment adjustment,
   }
   return {};
 }
+void LearnProfileBattleAbilities(bool all_abilities) {
+  constexpr unsigned kMappedAbilities = 3;
+  // Original BATTLE.PRG 5BF94.c:3657 scans 14 entries in each ability list.
+  constexpr unsigned kAbilityCount = 14;
+  constexpr unsigned kFirstChainAbility = 22;
+  constexpr unsigned kFirstDefenseAbility = 40;
+  constexpr unsigned kAfterLastDefenseAbility = 54;
+  const unsigned count = all_abilities ? kAbilityCount : kMappedAbilities;
+  for (unsigned slot = 0; slot < count; ++slot) {
+    const auto chain =
+        static_cast<unsigned char>(Battle_chainAbilityActionIds[slot]);
+    const auto defense =
+        static_cast<unsigned char>(Battle_defenseAbilityActionIds[slot]);
+    if (chain < kFirstChainAbility || chain >= kFirstDefenseAbility ||
+        defense < kFirstDefenseAbility || defense >= kAfterLastDefenseAbility) {
+      throw std::runtime_error(
+          "encounter profile ability table is unavailable");
+    }
+    LearnAction(chain);
+    LearnAction(defense);
+    if (slot < kMappedAbilities) {
+      Input_settings.mappedChainAbilities[slot] = static_cast<char>(chain);
+      Input_settings.mappedDefenseAbilities[slot] = static_cast<char>(defense);
+    }
+  }
+}
+
 void LearnProfileSpells(bool all_spells) {
   for (unsigned spell_class = 0;
        spell_class < std::size(Battle_spellClassCounts); ++spell_class) {
@@ -350,6 +377,8 @@ const char* EncounterProfileId(EncounterProfile profile) {
       return "all-items-b";
     case EncounterProfile::kAllSpells:
       return "all-spells";
+    case EncounterProfile::kAllAbilities:
+      return "all-abilities";
     case EncounterProfile::kCount:
       break;
   }
@@ -369,27 +398,22 @@ void InitializeEncounterPlayerProfile(EncounterProfile profile) {
     StockEncounterItems(profile);
   }
   const bool all_spells = profile == EncounterProfile::kAllSpells;
-  if (profile == EncounterProfile::kPostMinotaur) {
-    constexpr unsigned kMappedAbilities = 3;
-    for (unsigned slot = 0; slot < kMappedAbilities; ++slot) {
-      const auto chain =
-          static_cast<unsigned char>(Battle_chainAbilityActionIds[slot]);
-      const auto defense =
-          static_cast<unsigned char>(Battle_defenseAbilityActionIds[slot]);
-      LearnAction(chain);
-      LearnAction(defense);
-      Input_settings.mappedChainAbilities[slot] = static_cast<char>(chain);
-      Input_settings.mappedDefenseAbilities[slot] = static_cast<char>(defense);
-    }
-    LearnAction(EquippedBreakArt());
+  const bool all_abilities = profile == EncounterProfile::kAllAbilities;
+  if (profile == EncounterProfile::kPostMinotaur || all_abilities) {
+    LearnProfileBattleAbilities(all_abilities);
+    if (!all_abilities) LearnAction(EquippedBreakArt());
   }
   if (profile == EncounterProfile::kPostMinotaur || all_spells) {
     LearnProfileSpells(all_spells);
+  } else if (all_abilities) {
+    Battle_ApplyLearnedActionUnlocks();
   }
   VS_LOG_INFO("encounter.profile",
-              "Ashley={} representative_test_actions={} all_spells={}",
+              "Ashley={} representative_test_actions={} all_spells={} "
+              "all_abilities={}",
               EncounterProfileId(profile),
-              profile == EncounterProfile::kPostMinotaur, all_spells);
+              profile == EncounterProfile::kPostMinotaur, all_spells,
+              all_abilities);
 }
 
 std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,

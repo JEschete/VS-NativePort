@@ -106,7 +106,7 @@ position. Enemy IDs are local to the selected zone.
 ### Ashley testing profiles
 
 The **ASHLEY** row selects `prologue`, `post-prologue`, `post-minotaur`,
-`all-items-a`, `all-items-b` or `all-spells`.
+`all-items-a`, `all-items-b`, `all-spells` or `all-abilities`.
 These are isolated testing configurations, not imported saves or claims of
 completed story events. The default remains the original New Game equipment,
 inventory and action set. Normal game startup is unchanged.
@@ -132,6 +132,13 @@ inventory and action set. Normal game startup is unchanged.
   starting HP/MP and F8 for MP refill. This is a learned-casting fixture, not
   grimoire-learning evidence; it does not grant the story/save-point Teleport
   feature or bypass door/event requirements.
+- **All-abilities:** post-prologue menu gates and all 14 offensive chain
+  abilities plus all 14 defenses from the production lists. The usual first
+  three of each list are mapped initially; use the normal Battle Abilities
+  menus to change them. Inventory, equipment, resources, spells, Break Arts
+  and story/progression counters are not expanded. This is a fixture for
+  [#10](https://github.com/JEschete/VS-NativePort/issues/10), not evidence that
+  all ability effects or timing windows have been verified.
 
 Profiles retain the real weapon, resource, status and target restrictions.
 In particular, draw the weapon before selecting a Break Art; its menu entry
@@ -149,6 +156,58 @@ Other options: `--data <directory>`, `--frames <ticks>`, `--speed <1..64>`,
 `--capture <bmp-path>`, `--catalog-only`, `--scripted` (ignore gameplay devices),
 and `--press <tick:Button[,tick:Button...]>`. A scripted press lasts two ticks;
 `+` combines buttons. Host function keys remain available during scripted runs.
+
+## Ability-profile acceptance checkpoint (2026-10-22)
+
+The `all-abilities` fixture supports ongoing
+[#10](https://github.com/JEschete/VS-NativePort/issues/10); it does not close that
+issue. The original action definitions and the two production ability lists
+contain these 28 named abilities. Each list has 14 entries, not the 16 bytes
+reserved for its native array. Offensive IDs 33, 36, 38 and 39 are unnamed holes.
+Risk below is the definition's base cost, not a claim of verified live charging.
+
+| Offensive ID / name | Risk | Defensive ID / name | Risk |
+| --- | ---: | --- | ---: |
+| 22 Heavy Shot | 1 | 40 Ward | 1 |
+| 23 Gain Life | 2 | 41 Siphon Soul | 6 |
+| 24 Mind Assault | 1 | 42 Reflect Magic | 2 |
+| 25 Gain Magic | 2 | 43 Reflect Damage | 2 |
+| 26 Raging Ache | 1 | 44 Absorb Magic | 4 |
+| 27 Mind Ache | 1 | 45 Absorb Damage | 4 |
+| 28 Temper | 2 | 46 Impact Guard | 4 |
+| 29 Crimson Pain | 2 | 47 Windbreak | 4 |
+| 30 Instill | 1 | 48 Fireproof | 4 |
+| 31 Phantom Pain | 3 | 49 Terra Ward | 4 |
+| 32 Paralysis Pulse | 3 | 50 Aqua Ward | 4 |
+| 34 Numbing Claw | 3 | 51 Shadow Guard | 4 |
+| 35 Dulling Impact | 3 | 52 Demonscale | 4 |
+| 37 Snake Venom | 3 | 53 Phantom Shield | 6 |
+
+Debug run `1792684051521630-0` and Release run `1792684131131669-0` use
+zone 12 / room 0, Ashley at (9,10), Minotaur Zombie definition 1 at (9,11),
+999 starting HP/MP, isolated events, speed 1 and ordinary keyboard input.
+They verify all 14 rows in both production menus, scrolling, assigning the last
+entry to Circle, moving it to Triangle (clearing Circle), and unassigning it.
+Story/acquisition counters stay unchanged. F10 and a fresh encounter restore
+the initial three mappings in each list; switching back to Prologue removes
+the advanced grants/mappings and restores the original inventory and gates.
+Both sessions finalize normally with no error events and `trace_failed=false`.
+
+The local driver waits for `transition == 0`, not just field control mode 1.
+An earlier diagnostic sent L2 during room-entry transition 4; this was an early
+test input, not a demonstrated shortcut defect. The trace's `learned_actions`
+also includes intrinsic/NPC/item actions: compare the ability family separately
+and preserve that intrinsic set across profile changes.
+
+Evidence uses `60c5bd3d` plus the five fixture code-file changes, with unrelated
+dirty files preserved. Debug and Release builds pass; each focused
+`[profile],[encounter],[editor]` run passes 45 cases / 1,861 assertions and each
+full native suite passes 420 cases / 1,060,980 assertions. Focused quality and the
+changed-header clang-tidy gate report zero final findings, with no baseline
+changes. Local commands/evidence are `build\quality\live-restart-check.ps1
+-Configuration Debug|Release -Abilities`, `build\quality\abilities-*`, and the
+two configurations' `combat-lab\runs` directories. This does not verify every
+ability's effect, timing, Risk, acquisition or combat-sequence termination.
 
 ## Learned-spell acceptance checkpoint (2026-10-22)
 

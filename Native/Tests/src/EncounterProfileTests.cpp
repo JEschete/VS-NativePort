@@ -27,6 +27,7 @@ namespace {
 struct ProfileFixture {
   decltype(Input_settings) saved_settings = Input_settings;
   decltype(Audio_Seq_unusedStateFlags) saved_flags = Audio_Seq_unusedStateFlags;
+  decltype(Audio_Seq_unusedArtsStatus) saved_arts = Audio_Seq_unusedArtsStatus;
   decltype(Audio_Seq_unusedInventory) saved_inventory =
       Audio_Seq_unusedInventory;
   decltype(Audio_Seq_unusedInventoryIndices) saved_indices =
@@ -66,6 +67,7 @@ struct ProfileFixture {
   ~ProfileFixture() {
     Input_settings = saved_settings;
     Audio_Seq_unusedStateFlags = saved_flags;
+    Audio_Seq_unusedArtsStatus = saved_arts;
     Audio_Seq_unusedInventory = saved_inventory;
     Audio_Seq_unusedInventoryIndices = saved_indices;
     std::copy(saved_learned.begin(), saved_learned.end(),
@@ -151,6 +153,18 @@ std::set<unsigned> BindFullSpellClasses(
                     classes[index].begin() + counts[index]);
   }
   for (unsigned action = 106; action <= 133; ++action) expected.insert(action);
+  return expected;
+}
+
+std::set<unsigned> BindFullBattleAbilities() {
+  const std::array<char, 16> chains{22, 23, 24, 25, 26, 27, 28, 29,
+                                    30, 31, 32, 34, 35, 37, 97, 98};
+  const std::array<char, 16> defenses{40, 41, 42, 43, 44, 45, 46, 47,
+                                      48, 49, 50, 51, 52, 53, 96, 60};
+  std::copy(chains.begin(), chains.end(), Battle_chainAbilityActionIds);
+  std::copy(defenses.begin(), defenses.end(), Battle_defenseAbilityActionIds);
+  std::set<unsigned> expected(chains.begin(), chains.begin() + 14);
+  expected.insert(defenses.begin(), defenses.begin() + 14);
   return expected;
 }
 }  // namespace
@@ -269,6 +283,84 @@ TEST_CASE("All-spells profile rejects missing production spell tables",
   SECTION("unbound class") { Battle_spellClassSpellIds[0] = nullptr; }
   CHECK_THROWS(VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllSpells));
+}
+
+TEST_CASE("All-abilities profile grants the original 28 abilities only",
+          "[combat][profile][abilities]") {
+  ProfileFixture fixture;
+  const auto expected = BindFullBattleAbilities();
+  REQUIRE(expected.size() == 28);
+  VS::Game::InitializeEncounterPlayerProfile(
+      VS::Game::EncounterProfile::kAllAbilities);
+  for (unsigned action = 0; action < std::size(Battle_actionDefinitions);
+       ++action) {
+    CAPTURE(action);
+    CHECK(Battle_actionDefinitions[action].unlocked ==
+          expected.contains(action));
+  }
+  for (unsigned slot = 0; slot < 3; ++slot) {
+    CHECK(Input_settings.mappedChainAbilities[slot] ==
+          Battle_chainAbilityActionIds[slot]);
+    CHECK(Input_settings.mappedDefenseAbilities[slot] ==
+          Battle_defenseAbilityActionIds[slot]);
+  }
+}
+
+TEST_CASE("All-abilities profile preserves resources and story progression",
+          "[combat][profile][abilities]") {
+  ProfileFixture fixture;
+  StatFixture actor;
+  BindFullBattleAbilities();
+  Audio_Seq_unusedStateFlags.opaqueB5 = 1;
+  Audio_Seq_unusedStateFlags.magicUsed = 1;
+  Audio_Seq_unusedArtsStatus.artsLearned[0] = 2;
+  Audio_Seq_unusedArtsStatus.kills.totalKills = 321;
+  Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[0] = 7;
+  Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked = 4;
+  auto expected_flags = Audio_Seq_unusedStateFlags;
+  expected_flags.introState = 3;
+  const auto arts = Audio_Seq_unusedArtsStatus;
+  const auto inventory = Audio_Seq_unusedInventory;
+  const auto indices = Audio_Seq_unusedInventoryIndices;
+  const auto stats = actor.stats;
+  VS::Game::InitializeEncounterPlayerProfile(
+      VS::Game::EncounterProfile::kAllAbilities);
+  CHECK(std::memcmp(&expected_flags, &Audio_Seq_unusedStateFlags,
+                    sizeof expected_flags) == 0);
+  CHECK(std::memcmp(&arts, &Audio_Seq_unusedArtsStatus, sizeof arts) == 0);
+  CHECK(std::memcmp(&inventory, &Audio_Seq_unusedInventory, sizeof inventory) ==
+        0);
+  CHECK(std::memcmp(&indices, &Audio_Seq_unusedInventoryIndices,
+                    sizeof indices) == 0);
+  CHECK(std::memcmp(&stats, &actor.stats, sizeof stats) == 0);
+  CHECK(Input_settings.menuFlags == 0x3F8);
+}
+
+TEST_CASE("All-abilities profile supports repeat entry and saved presets",
+          "[combat][profile][abilities]") {
+  ProfileFixture fixture;
+  BindFullBattleAbilities();
+  VS::Game::InitializeEncounterPlayerProfile(
+      VS::Game::EncounterProfile::kAllAbilities);
+  const auto learned = std::to_array(State_learnedActionFlags);
+  VS::Game::InitializeEncounterPlayerProfile(
+      VS::Game::EncounterProfile::kAllAbilities);
+  CHECK(std::to_array(State_learnedActionFlags) == learned);
+  VS::Game::EncounterSetup setup;
+  setup.profile = VS::Game::EncounterProfile::kAllAbilities;
+  const auto json = VS::combat_lab::EncodeSetup(setup);
+  CHECK(json.at("ashley_profile") == "all-abilities");
+  CHECK(VS::combat_lab::DecodeSetup(json).profile == setup.profile);
+}
+
+TEST_CASE("All-abilities profile rejects missing production ability tables",
+          "[combat][profile][abilities]") {
+  ProfileFixture fixture;
+  BindFullBattleAbilities();
+  SECTION("chain table") { Battle_chainAbilityActionIds[0] = 0; }
+  SECTION("defense table") { Battle_defenseAbilityActionIds[0] = 0; }
+  CHECK_THROWS(VS::Game::InitializeEncounterPlayerProfile(
+      VS::Game::EncounterProfile::kAllAbilities));
 }
 
 TEST_CASE(
