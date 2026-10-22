@@ -35,6 +35,7 @@ venv/
 /resources/rood-reverseWin/data/
 /resources/rood-reverseWin/disks/
 /resources/rood-reverseWin/tools/old-gcc/
+# Optional local reference checkout; not a parent-repository submodule.
 /resources/rood-reverse-noprompt/
 /resources/rood-reverse/
 /resources/rood-boi/
