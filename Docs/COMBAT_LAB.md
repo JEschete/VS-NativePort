@@ -67,6 +67,9 @@ Rebuild and restart the lab to pick up that correction; no data re-extraction is
   field control, not while loading, in menus or resolving actions. Item use
   itself still goes through normal menus/targets/results. Every adjustment
   records before/after actor state or an explicit rejection in the run files.
+  Frames identify the acting actor slot in `source_actor`, not the
+  target-selection mode. Logs before the #117 repair mislabeled that mode
+  as an actor; use their source revision when interpreting earlier evidence.
   Targeting frames also record the real area center and target-preview
   coordinates, allowing area-spell input and selected enemies to be checked.
   No main-game bindings are changed.

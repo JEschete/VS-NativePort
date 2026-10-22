@@ -55,6 +55,16 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("*temp_s6 = LegacyGpu_Handle(prim);", menu)
         self.assertNotIn("*temp_s6 = ((u_int)prim << 8) >> 8;", menu)
 
+    def test_encounter_trace_uses_action_actor_not_targeting_mode(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Boot/Encounter.cpp").read_text()
+        inspect = source.split("void InspectTargeting(", 1)[1].split("\n}", 1)[0]
+        self.assertIn(
+            "state.source_actor = action.selection.primaryTarget.target.targetActor;",
+            inspect,
+        )
+        self.assertNotIn("state.source_actor = action.sourceActorId;", inspect)
+
     def test_preview_weapon_alias_uses_real_model_slots(self):
         root = Path(__file__).resolve().parents[2]
         preview = (root / "Native/Game/src/Menu/Framework/ActorPreview.c").read_text()

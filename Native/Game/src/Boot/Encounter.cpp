@@ -154,7 +154,7 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
 
 void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
   state.action = action.selection.actionId;
-  state.source_actor = action.sourceActorId;
+  state.source_actor = action.selection.primaryTarget.target.targetActor;
   state.target_count = action.selection.targetCount;
   constexpr unsigned kTargetingControl = 2;
   constexpr unsigned kFirstTargetPhase = 1, kLastTargetPhase = 3;
