@@ -6,6 +6,7 @@
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
+#include "Audio/SequencerOutput.h"
 #include "Core/Memory/Copy.h"
 
 // decomp: D_80036770 (D_80036770@SLUS_010.40)
@@ -255,31 +256,6 @@ int Audio_Samples_LoadDeclaredBank(void* arg0, int arg1)
         Audio_Samples_UploadBank(arg0, arg1, ((int*)arg0)[6], ((int*)arg0)[4]);
         return 0;
     }
-    return -1;
-}
-
-// decomp: SLUS_010.40 func_800135D8 (src/SLUS_010.40/25AC.c:1033)
-int Audio_Samples_UploadBank(void* in_Data, int in_Wait, int in_FirstInstrument, int in_SpuAddr)
-{
-    Audio_AkaoSequenceFile* header;
-    Audio_Instrument* instruments;
-
-    Audio_Driver_WaitForSampleTransfer();
-    if (Audio_Samples_SequenceMagicDifference(in_Data) == 0) {
-        header = in_Data;
-        SpuSetTransferStartAddr(in_SpuAddr);
-        in_Data = header->payload;
-        instruments = in_Data;
-        in_Data = instruments + header->instrumentDataOffset;
-        Audio_Driver_WriteSampleMemory(in_Data, header->sampleBankId);
-        Audio_Samples_CopyRelocatedInstruments(instruments,
-            &Audio_Samples_instruments[in_FirstInstrument], in_SpuAddr, header->instrumentDataOffset);
-        if (in_Wait != 0) {
-            Audio_Driver_WaitForSampleTransfer();
-        }
-        return 0;
-    }
-    Audio_Cutscene_legacySpuTransferBusy = -1;
     return -1;
 }
 

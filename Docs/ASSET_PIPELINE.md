@@ -80,11 +80,14 @@ Native\data\
   events\<id>.json                 (EVT event scripts as decoded command lists; text by string id)
   effects\<id>.json + textures     (EFFECT .P/.FBT/.FBC data)
   audio\
-    samples\<bank>\<n>.wav         (16-bit PCM, `smpl` loop chunk)
-    banks\<bank>.sfz               (sfizz instrument regions over the decoded WAV samples)
+    banks\<bank>\bank.json         (versioned instrument metadata and original provenance)
+    banks\<bank>\<n>.wav + <n>.sfz  (16-bit PCM and an explicit sfizz loop region)
     music\<id>.seq.json            (decoded AKAO event list per track)
     sfx\<id>.seq.json              (sound-effect sequences)
-    streams\<name>\<channel>.flac  (XA streams: ENDING.XA, voice)
+    streams\index.json             (effect/XA source locations and native assets)
+    streams\akao\<id>\stream.json  (bounded effect-stream metadata and source header)
+    streams\akao\<id>\<n>.wav + <n>.sfz
+    streams\xa\<disc path>.flac    (lossless decoded XA, e.g. ENDING\ENDING.XA.flac)
   movies\<name>.mkv                (AV1 video + FLAC audio)
 ```
 
@@ -212,21 +215,175 @@ The game plays music and sound effects by sequencing sampled instruments at runt
 
 | Piece | Format | Detail |
 |---|---|---|
-| Samples | `audio\samples\<bank>\<n>.wav` | PS1 4-bit ADPCM decoded once to **16-bit PCM** (the decode is deterministic, so this is lossless with respect to what the console plays). The loop start/end go in the WAV `smpl` chunk; the original sample rate is kept. |
-| Instrument banks | `audio\banks\<bank>.sfz` | SFZ regions map samples, key ranges, root key, fine tune, loop points, envelope, volume and pan for sfizz (owner decision D23); any original values not represented by SFZ must remain available to the event/asset conversion path. |
-| Music | `audio\music\<id>.seq.json` | the AKAO byte stream decoded into an event list per track: `{tick, op, args}` with op names taken from the decomp's sequencer opcode table (note on/off, tempo, volume, pan, program change, loop markers, jumps, vibrato/tremolo, reverb, …). Jumps target event indices, not byte offsets. |
-| Sound effects | `audio\sfx\<id>.seq.json` | same event format; banks are shared or embedded as the original does |
-| Index | `catalogs\music.json`, `catalogs\sfx.json` | `music.<name>` / `sfx.<name>` IDs → files, with `legacyId` (the original track/SE number) |
+| Samples (implemented first slice) | `audio\banks\<bank>\<n>.wav` | 4-bit ADPCM decoded to mono PCM16 at 44.1 kHz. Predictor, nibble order, saturation, termination and loop bounds have synthetic tests; console waveform parity is not yet established. |
+| Instruments | `audio\banks\<bank>\<n>.sfz`, `bank.json` | SFZ supplies a sample/loop region to sfizz. Version-1 JSON retains original sample/loop offsets, tuning, ADSR, availability and optional `source_record` bytes (16 or 64). The existing sequencer computes pitch/pan; native envelopes run separately, so SFZ key/velocity tracking and envelope shaping are neutral. Pitch bend has no smoothing and spans 12 octaves in either direction. |
+| Music (planned) | `audio\music\<id>.seq.json` | Decoded AKAO `{tick, op, args}` events with semantic jump targets; currently the original bytecode still drives the ported sequencer. |
+| Sound effects (planned) | `audio\sfx\<id>.seq.json` | Same future event format; current effects retain original AKAO programs and native sample-bank bindings. |
+| Index (planned) | `catalogs\music.json`, `catalogs\sfx.json` | Semantic IDs with original track/SE provenance. |
 
-- **The event format is documented** in `Native\Content\schemas\akao-seq.schema.json`. An encoder exists for the round-trip test (`decode → JSON → encode == original bytes`), and that encoder is also the modding path for new songs.
+- The semantic event schema/round-trip encoder remains planned, not implemented by the sample importer.
+- **Current import:** `VS.Extract audio Native\data\disc Native\data` converts all **83 nonempty banks**
+  on the supported disc; 18 one-byte files are placeholders. Optional numeric wave-file IDs select a subset.
+  Exact-end records and equal start/loop offsets in erased, final DMA padding are explicitly unavailable,
+  not fabricated silence. Active ADPCM remains strictly validated. WAVE0032's older 64-byte articulation
+  is recognized by its payload layout, pitch table and envelope fields. Q20 base pitch is converted to
+  native root/fine tuning; the complete twelve-pitch table and unpacked envelope survive in `source_record`.
+  Its all-zero pitch tables are unavailable records. Original data/provenance remain import sources,
+  not a new authoring-format requirement. Two complete imports produced identical hashes for 5,993 files.
+  Reimport after upgrading: existing SFZ files need the unsmoothed, extended pitch-bend range for FM.
 - **Mixer/voices:** behavioral, at the envelope level, at 48 kHz (plan §6.3), never SPU registers.
+  Final dry+wet output (after any Mono fold-down) saturates to the original signed-PCM range,
+  [-1, 32767/32768], before delivery to SDL. Quiet mixes remain additive; source voice gains are
+  unchanged, including the deliberately doubled mono-stream pair. This is not normalization or
+  compression, and intentional source overload may still sound distorted. Independent XA/movie
+  sources are not part of this primary-mix boundary.
+- **Current clock/ownership:** the existing 240-Hz sequencer publishes complete, ordered 200-frame control
+  ticks through a bounded single-producer/single-consumer queue. SDL demand renders the native voices at
+  48 kHz, so active samples/envelopes continue while gameplay stalls; the callback never runs the sequencer.
+  Instrument files are loaded into separate sfizz programs on the control thread, then ownership transfers
+  to the renderer. Consumed queue cells return retired programs to the control thread for destruction.
+  A failed load stops the requested voice explicitly; queue exhaustion is a logged fatal error.
+  Pending-note envelope feedback prevents voice allocation from mistaking queued notes for finished voices.
+  Reset invalidates queued controls before clearing/repriming the native stream, without touching movies.
+  The device must stop its callback before the voice engine is destroyed.
+  VSync advances counter 2 using the host clock's exact 60000/1001 field-rate ratio,
+  retaining fractional clocks in an integer remainder. Assuming 60 fields/s instead produced only
+  about 47,952 frames/s and gradually exhausted the 48-kHz output buffer. Stop/resume preserves the
+  remainder; counter setup resets it. A production VSync regression covers 60,000 fields (1,001 seconds).
+  SFZ loading remains synchronous for gameplay, not for the renderer. Long stalls can delay new musical
+  events; active samples continue rather than exhausting pre-rendered PCM. Tick boundaries are retained
+  when queued controls catch up, not collapsed or rendered simultaneously.
+  Open/reset retains 2,400 frames (50 ms) of native-stream priming. No file I/O, instrument loading,
+  logging or control-thread waits occur in the render callback. Debug logs report shortages, rendered
+  frames, callback duration and control-thread gaps. Native postmix tests verify a full second without
+  control-thread progress, plus independent program replacement, reset and reopen.
+  Accelerated desktop replays (`--speed > 1`) retain synchronous rendering and the 250-ms stale-output
+  cap; real-time listening acceptance applies at speed 1.
+  `VS_AUDIO_CAPTURE` records rendered native PCM through a two-second bounded staging buffer, drained
+  on the control thread. Overflow explicitly fails capture, not playback. Captures exclude queue padding,
+  physical output gaps and independent movie/XA sources; their length follows device demand, not logical tick count.
+- **Music state:** G00248-G00250 are views of G00246's `Field_ZoneContext` fields, not separate storage.
+  This lets normal zone initialization/load and opcode `0x92` reach the populated music slot.
+  Save/layer/crossfade/restore use complete native config/channel objects, not PS1 byte extents.
+  Saved-layer conflict resolution detaches displaced assignments while protecting active SFX and stream voices.
+- **In-game menus:** the five owned wrappers dispatch original open/invalid/leave/select/change effects
+  (10/7/6/5/4), preserving channel tags, centered pan and volume. These differ from the existing title-menu calls.
+- **Effect streams:** `VS.Extract streams disks\SLUS-01040.cue Native\data` imports block 13 from
+  all 113 shipped stream-bearing effect packages (112 mono, one stereo). The 64-byte source header,
+  native frame loop and source pitch remain in `stream.json`; the ID is a stable FNV content identity,
+  not an authenticity check. Stereo uses separate predictor histories and 0x800-byte source-channel chunks.
+  Buffer-end ADPCM flags are not treated as logical sample endpoints. Runtime binding validates the bounded
+  source and native assets, uses canonical room slot 3, and preserves native command-pointer width.
+  The existing sfizz engine supplies the original reserved voice pair, controls, pause/resume, fades,
+  completion and cleanup. A paused voice remains active even before its first rendered sample.
+- **Fidelity modes:** a shared 44.1-kHz noise sequence uses the original clock/parity rules, independently
+  of voice pitch. FM changes sfizz sample pitch using the preceding voice's envelope-scaled, pre-pan signal;
+  voice zero is not modulated, pitch is bounded to the original range, and zero pitch holds sample position.
+  Noise-only notes require no sample file. Mode changes, envelopes and effect controls share complete-tick
+  publication and renderer reset semantics.
+  Reverb uses all ten original presets, named native delay/filter state and signed stereo wet gains.
+  Its 22.05-kHz reflection/comb/all-pass network uses the documented 39-tap input/output filters;
+  linear interpolation bridges the 44.1-kHz filter clock and 48-kHz mixer. Disabling writes preserves
+  existing reads/tails; preset changes clear the delay state and reset wet depth as the original SDK did.
+  Tails continue after voice stops and are cleared by playback reset. The network uses floating-point
+  arithmetic, not bit-exact SPU rounding, register storage or sample RAM.
+  The existing Mono choice folds down the complete dry+wet output at the same control-tick boundary,
+  not just per-voice pan. Stereo delay state is retained when switching back. Actual Sound-menu PCM
+  verifies exact channel equality in both mono windows and restored separation in stereo.
+- **Limits:** complete bank/effect-stream import is not all-track or all-scene listening acceptance.
+  Every music/scene transition, perceptual reference parity and 5.1 remain separate acceptance work.
+  Unused DMA/refill APIs, the unused actor interpolation wrapper and unproduced stream slots 1/2 are
+  not promoted to supported runtime paths by the new stream implementation.
+  sfizz interpolation and the float effect network are not claims of bit-identical console output.
+  See [HANDOFF.md](HANDOFF.md) for measured evidence.
+- **Format/DSP sources:** [PSX-SPX SPU documentation](https://psx-spx.consoledev.net/soundprocessingunitspu/)
+  and [AKAO articulation format research](https://github.com/vgmtrans/vgmtrans/blob/master/src/main/formats/Akao/AkaoInstr.cpp);
+  preset ordering and control/reset semantics were checked against the read-only original libspu source.
 - **Rendered previews:** none (owner choice). Phase 2 can add a `--render-previews` flag if wanted.
 
 ### 6.6 XA streams → FLAC
-- **Source:** `ENDING\ENDING.XA` (77 MB, interleaved channels: ending music/voice). XA is read from the raw mode-2 form-2 sectors. It cannot come from the ISO-extracted `SLUS-01040\` folder, because that drops the subheaders.
-- **Decode:** each channel (file/channel subheader) is decoded from XA ADPCM to PCM at its native rate (37.8 or 18.9 kHz, mono or stereo).
-- **Output:** one **FLAC** file per channel (lossless) in `audio\streams\ending\<ch>.flac`, plus `streams.json` (channel → use, length, loop).
-- **Runtime:** `Audio::StreamPlayer` decodes the FLAC (dr_flac or libFLAC) and resamples it to the 48 kHz mixer.
+- **Source:** the shipped standalone XA track is `ENDING\ENDING.XA`. Raw mode-2 sectors are required;
+  a cooked ISO-extracted folder loses the necessary subheaders. Original playback selects file 1/channel 0
+  at 75 sectors/s. The second `BeginXaStream` argument is initial CD volume, not a byte count.
+- **Decode:** the `streams` command (also called by `extract`) validates sector/subheader bounds,
+  coding and playback cadence before using the existing FFmpeg XA decoder and FLAC encoder.
+  This track repeats each stereo payload four times. Concatenating all copies would incorrectly produce
+  1774.08 seconds; selecting one per playback period produces **443.52 seconds, 37800 Hz, stereo, 16-bit**.
+  Consecutive identical playback periods are retained; this is cadence selection, not content deduplication.
+  Missing channels/timing gaps, changing coding, mismatched redundant payloads and partial periods fail explicitly.
+- **Output:** `audio\streams\xa\ENDING\ENDING.XA.flac`; `audio\streams\index.json` records its source
+  LBA/extent, selected file/channel and rate. The legacy `files.tsv` row remains `stream`: it describes
+  sector-addressed data access, not availability of the separate native audio asset. Decoder PCM hashes
+  match the uncompressed import exactly. All 250 effect/XA outputs are stable on repeated imports.
+- **Runtime:** the owned `XaPlayback` service uses the existing dr_flac dependency to decode on the
+  control thread, then supplies an independent SDL source on demand. This shipped track occupies about
+  67 MB of PCM while playing; there is no callback file I/O, decoder work or gameplay-thread refill.
+  Signed CD gain, fades and original stereo/attenuated-mono mixing feed that source. EOF, requested stop,
+  driver/disc reset, device close and re-entry release its buffers and update the disc-request state.
+  Missing/malformed/truncated assets become logged disc errors, not a successful silent completion.
+- **Acceptance boundary:** unit tests inspect actual SDL postmix, including a full second without
+  control-thread progress. When the installed ending FLAC is available, a disc-conditional regression
+  also verifies audible initial playback, a 30-second seek, stop/re-entry and natural final-sector
+  EOF/drain through the production disc queue and output. Full ending-scene/reference listening
+  remains distinct from this API coverage.
+
+#### Audio producer and cleanup audit (#7)
+
+| Surface | Production route | Evidence and boundary |
+| --- | --- | --- |
+| Title and in-game menus | Title calls and `Menu/Sounds.cpp` -> centered SFX commands -> AKAO/sfizz | Original IDs/tags tested; real open/change/select/leave/refusal and re-entry recorded. |
+| Music and event transitions | `Event/ScriptAudio.c`, `Audio/Music.c`, zone state and `MusicState.cpp` | MUSIC016/110/054, native-sized save/restore/swap and 1536 saved-voice conflict combinations; not every scene crossfade. |
+| Actor clips, weapon sounds and footsteps | Actor animation/movement commands -> actor/model/surface SFX helpers -> `Audio/Sfx.c` | Prologue and combat recordings use these production routes; no new speech synthesis or claim of voiced text dialogue. |
+| Room, weather, doors and interactions | `Field/Environment.c`, `RoomEffects.c`, `Doors.c`, `Interactions.c` -> ordinary/bank SFX, pan and fades | Existing producer paths retain the common renderer; every weather/room variant has not been replayed. |
+| Event sound commands | `Event/ScriptAudio.c` -> bank loading, play/stop, pitch/pan/volume slides and saved music | Native-width stream parameters and typed callbacks preserve the shared dispatcher; no second sequencer. |
+| Effect-package streams | Block 13 -> room slot 3 -> effect timeline -> `StreamPlayback.cpp` | All 113 payloads import; real E044 Solid Shock binds/starts/stops; pause, EOF, reset, unbind and re-entry have regressions. |
+| Movies | Matroska/FLAC -> existing `MoviePlayer` -> independent SDL source | Native-mix clear/reset leaves independent sources intact; primary-mix capture is not movie-output evidence. |
+| Ending credits | Credits start/stop -> disc queue -> `XaPlayback.cpp` -> independent SDL source | Source duration/lossless import, installed-asset postmix start/seek/EOF and synthetic lifecycle tests; full credits navigation/listening is not established. |
+
+Cleanup is exercised at voice stop/EOF, package unbind, driver/disc reset and device close.
+The existing unused `Audio_UpdateActorSoundTransition` has no discovered producer/caller and is
+marked unused upstream. Stream slots 1/2 have no discovered producers; shipped effects use slot 3.
+The unused generic `Audio_FreeCutsceneStreamSlot` still assumes owned storage: it must not be
+called on borrowed slot-3 package data. Normal production effects use the tested unbind route.
+These unused APIs and DMA/IRQ helpers remain explicit EC-02 migration debt, not demonstrated
+gameplay failures or claims of completed compatibility retirement. General discontinuous/multichannel
+XA, all-content perceptual parity and 5.1 are outside this bounded acceptance.
+
+#### Functional acceptance evidence (#7, 2026-10-21)
+
+- Debug and Release full suites: **379 cases / 991,535 assertions** each.
+  Release `[audio],[clock]`: **72 cases / 163,008 assertions**.
+  Complete changed-header quality: **313 existing findings, zero new**;
+  no baselines or suppressions changed. Commands are in BUILDING.md and QUALITY.md.
+- Final speed-1 controller replays cover all five in-game menu sound actions,
+  simultaneous music/SFX, the unskipped opening scene (only the intro movie is
+  skipped), and E044 Solid Shock. The unavailable L2+Circle shortcut produces
+  the invalid-action sound at tick 5404 without opening a spell menu.
+- Isolated Combat Lab run `1792631613651010-0` binds E044 at tick 515, starts
+  voices 22/23 at 607, stops at 691, then reuses them for menu audio at 1143.
+  This run contains one cast, not two. The earlier float mix exceeded full
+  scale; the final source-backed signed-PCM boundary yields [-1, 32767/32768]
+  without altering original stream gains. Saturation is not a claim that
+  intentional source overload sounds undistorted.
+- Final menu/opening captures peak at -5.826359/-2.462624 dBFS. They and the
+  isolated combat capture contain no NaNs/Infs or post-startup stream shortages.
+  Initial pre-attachment shortages remain explicitly outside steady playback.
+- The installed ending FLAC passes actual SDL postmix at sectors 270000 and
+  272250, stop/re-entry and natural EOF/drain from 303214. The missing-asset
+  control explicitly skips that case while ordinary clock tests pass.
+- Two complete imports retain 5,993 bank files; two effect/XA imports retain
+  250 files. Two source/project generations after ledger reconciliation retain
+  966 files. All 17 port-generator tests pass.
+- Local evidence is under `build\quality\audio-output-*` and `audio-ending-*`.
+  Paired menu/opening reference auditions and isolated combat are
+  `audio-listen-*.wav`. Reference windows match scene/action state rather than
+  equal wall-clock timestamps; the portable reference recording is AAC-derived,
+  not lossless or sample-synchronized. No subjective parity approval is claimed.
+  Disc-derived audio/captures are not committed or attached to issues.
+
+Issue #7 owns functional output acceptance, not EC-02 retirement. Full credits
+navigation/listening, every effect/track in context, bit-exact DSP parity and
+5.1 are not established by these bounded results.
 
 ### 6.7 Movies (STR → AV1 Matroska) (owner choice: **AV1**)
 - **Source:** `MOV\TITLE.STR` (26 MB, raw mode-2 sectors: MDEC video + interleaved XA audio). It is read from the `.bin`, like XA. Whether it holds more than one movie (intro, attract) is settled from the decomp's movie code (`_initIntroMovie`, `_playIntroMovie`) and recorded in CONTENT_LEDGER.

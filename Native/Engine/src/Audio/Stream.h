@@ -41,8 +41,6 @@ void Audio_StopCutsceneStream(void);
 int Audio_PlayCutsceneStreamSlot(int arg0, int arg1, int arg2);
 void Audio_PlayCutsceneStreamSlotCentered(int arg0);
 int Audio_FreeCutsceneStreamSlot(int arg0);
-int Audio_BindRoomCutsceneStream(uintptr_t arg0);
-int Audio_UnbindRoomCutsceneStream(void);
 void Audio_SetXaVolumeMaximum(void);
 
 #endif // VS_AUDIO_STREAM_H_DECLS

@@ -10,8 +10,11 @@
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/MusicSequence.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
+#include "Audio/StreamPlayback.h"
+#include "Audio/XaPlayback.h"
 #include "Core/Memory/Copy.h"
 
 // decomp: D_8002F54C (D_8002F54C@SLUS_010.40)
@@ -56,14 +59,6 @@ Audio_FadeTimer Audio_Seq_masterFade;
 // decomp: g_Sound_LfoPhase (g_Sound_LfoPhase@SLUS_010.40)
 int Audio_Seq_randomPitchPhase;
 
-// decomp: SLUS_010.40 UpdateCdVolume (src/SLUS_010.40/25AC.c:3958)
-void Audio_Seq_WriteDiscVolume(void)
-{
-    int v = Audio_Seq_discVolumeLevel;
-    *CD_VOL_L = v;
-    *CD_VOL_R = v;
-}
-
 // decomp: SLUS_010.40 func_8001924C (src/SLUS_010.40/25AC.c:4024)
 void Audio_Seq_UpdateGlobalSlides(void)
 {
@@ -79,27 +74,7 @@ void Audio_Seq_UpdateGlobalSlides(void)
         Audio_Seq_discVolume += Audio_Seq_discVolumeFadeStep;
         Audio_Seq_WriteDiscVolume();
     }
-    if ((Audio_Cutscene_streamState.voiceMask != 0)
-        && (Audio_Cutscene_streamState.volumeFadeTicksLeft != 0)) {
-        --Audio_Cutscene_streamState.volumeFadeTicksLeft;
-        temp_s1 = Audio_Cutscene_streamState.volume
-                + Audio_Cutscene_streamState.volumeFadeStep;
-        if ((temp_s1 & 0xFF00) != (Audio_Cutscene_streamState.volume & 0xFF00)) {
-            if (Audio_Driver_mixBehavior & 2) {
-                int temp_s0 = (Audio_Cutscene_streamState.volume * Audio_Mixer_kCenterPanGain) >> 0x10;
-                Audio_Driver_SetVoiceVolume(
-                    Audio_Cutscene_streamState.voiceIndex, temp_s0, temp_s0, 0);
-                Audio_Driver_SetVoiceVolume(
-                    Audio_Cutscene_streamState.voiceIndex + 1, temp_s0, temp_s0, 0);
-            } else {
-                int temp_s0 = (temp_s1 << 0xF) >> 0x10;
-                Audio_Driver_SetVoiceVolume(Audio_Cutscene_streamState.voiceIndex, temp_s0, 0, 0);
-                Audio_Driver_SetVoiceVolume(
-                    Audio_Cutscene_streamState.voiceIndex + 1, 0, temp_s0, 0);
-            }
-        }
-        Audio_Cutscene_streamVolume = temp_s1 & 0xFFFF;
-    }
+    Audio_Native_UpdateCutsceneStream();
     if (Audio_Mixer_tempoScaleSlideLength != 0) {
         --Audio_Mixer_tempoScaleSlideLength;
         Audio_Mixer_tempoScale += Audio_Mixer_tempoScaleStep;
@@ -470,6 +445,7 @@ long Audio_Seq_TickPlayback(void)
     Audio_Driver_recentTickCosts[2] = Audio_Driver_recentTickCosts[3];
     Audio_Driver_recentTickCosts[3] = var_s5;
     Audio_Driver_recentTickCostTotal = Audio_Driver_recentTickCosts[0] + Audio_Driver_recentTickCosts[1] + Audio_Driver_recentTickCosts[2] + Audio_Driver_recentTickCosts[3];
+    Audio_Native_Tick();
     return var_s5;
 }
 

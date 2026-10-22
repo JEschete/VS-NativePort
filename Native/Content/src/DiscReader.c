@@ -8,6 +8,7 @@
 
 #include <limits.h>
 
+#include "Audio/XaPlayback.h"
 #include "Content/DataAccess.h"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
@@ -58,15 +59,28 @@ void Content_UpdateDiscCommands(void) {
       Content_discDriveState.state = Content_DiscDriveState_Idle;
       break;
     case Content_DiscDriveState_ReadXaInit:
-      // XA audio streams (dialogue, some music) are played by the audio backend
-      // from converted files
-      VS_UNPORTED("Content::UpdateDiscCommands: XA stream");
-      Content_discDriveState.state = Content_DiscDriveState_Idle;
+      if (!Audio_Native_StartXaStream(Content_discDriveState.startSector,
+                                      Content_discDriveState.byteCount)) {
+        ++Content_discDriveState.failureCount;
+        Content_discDriveState.state = Content_DiscDriveState_ReadError;
+        break;
+      }
+      Content_discDriveState.xaModeMarker = 0;
+      Content_discDriveState.position.minute = 0;
+      Content_discDriveState.state = Content_DiscDriveState_StreamXa;
       break;
+    case Content_DiscDriveState_StreamXa: {
+      const int status = Audio_Native_XaStreamStatus();
+      if (status < 0) {
+        ++Content_discDriveState.failureCount;
+        Content_discDriveState.state = Content_DiscDriveState_ReadError;
+      } else if (status == 0) {
+        Audio_Native_StopXaStream();
+      }
+      break;
+    }
     case Content_DiscDriveState_StreamXaEnd:
-      Content_discDriveState.xaModeMarker = kInactiveXaMarker;
-      Content_discDriveState.position.minute = kInactiveXaMarker;
-      Content_discDriveState.state = Content_DiscDriveState_Idle;
+      Audio_Native_StopXaStream();
       break;
     default:
       break;
@@ -76,6 +90,7 @@ void Content_UpdateDiscCommands(void) {
 // decomp: SLUS_010.40 _diskReset (src/SLUS_010.40/main.c:9385)
 void Content_ResetDiscDrive(void) {
   enum { kModeChangeTicks = 3 };
+  Audio_Native_StopXaStream();
   Content_discDriveState.xaModeMarker = kInactiveXaMarker;
   Content_discDriveState.position.minute = kInactiveXaMarker;
   Content_discDriveState.reserved2 = 0;

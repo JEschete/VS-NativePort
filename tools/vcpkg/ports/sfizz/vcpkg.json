@@ -1,0 +1,14 @@
+{
+  "name": "sfizz",
+  "version": "1.2.3",
+  "description": "SFZ sample synthesizer for the native AKAO output path",
+  "homepage": "https://sfz.tools/sfizz/",
+  "license": "BSD-2-Clause",
+  "supports": "windows & x64",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    }
+  ]
+}

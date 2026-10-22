@@ -473,8 +473,11 @@ What the slice needed beyond the shims:
   original offsets; copied C is compiled with unsigned `char` (`/J`, as the original `-funsigned-char`).
 
 Open, by phase:
-- **1b remainder:** menu sound effects: the sound driver's tick (the root counter 2 event, 240 Hz) is not driven
-  yet and voices are not rendered (sfizz, D23). Memory card calls are unported.
+- **1b audio update:** the 240-Hz sequencer callback now drives a native dry sample path through sfizz and SDL.
+  Title-menu navigation and stereo/mono changes have captured PCM evidence. The M5 follow-ups below add
+  all-bank import, native reverb/noise/FM and supported effect/XA streams.
+  Full-content/reference parity remains unverified.
+  Memory card calls remain unported.
 - **1c:** New Game and the idle attract demos enter gameplay and stop in actor loading. 12 module globals are
   structs holding pointers and are not relocated yet. 84 effect-plugin arrays have no size in the ledger. Battle
   pointer tables still have entries without a native symbol.
@@ -520,7 +523,9 @@ These are target designs, not an implemented-feature inventory. See §0.2 and th
   - SDL3 output receives the native float mix at 48 kHz. Audio-thread ownership, buffering and the simulation-to-sample clock are part of M5's acceptance.
   - Reverb presets and unsupported noise/FM behavior must be explicitly mapped or listed; no success-shaped hardware-register shim.
   - `StreamPlayer` plays the FLAC streams converted from XA.
-- **Sequencer:** the decomp's AKAO sequence interpreter (in `Audio`, 254 rows) is copied and becomes `Audio::Seq`. It reads the decoded `*.seq.json` event lists (music stays sequenced, D18) and emits events to the selected synth.
+- **Sequencer:** the decomp's AKAO sequence interpreter (in `Audio`, 254 rows) is copied and becomes `Audio::Seq`.
+  The first-sound implementation retains its bytecode and ordering while binding native sample assets and voice
+  controls. Decoded `*.seq.json` event lists remain planned; no second event sequencer was introduced.
 - **Absorbs:** libspu (36), libsnd (2) via typed native sample, voice, mixer and stream APIs; SPU register and RAM compatibility surfaces are retired as their callers migrate.
 - **Phase 2:** better resampling, optional interpolation modes, volume channels, replacement music hooks.
 - **Backend:** owner decision D23 selects SFZ + WAV instruments played by sfizz through the ported AKAO sequencer. M5 defines the supported fidelity and explicitly lists unsupported behaviors.
@@ -994,6 +999,52 @@ remaining audio consumers migrate, with a defined source/clock contract availabl
 
 **Scope/files:** `Tools/Extract`, Content movie assets, `Engine/src/Movie/MoviePlayer.cpp`, `Intro/Player.c`,
 `Legacy/Movie/LibPress.cpp`, Render and Audio interfaces; EC-04/08.
+
+**First-sound implementation:** WAVE0000/0005/0200 import to versioned JSON plus per-instrument WAV/SFZ. The existing
+sequencer commits typed controls to sfizz in 200-frame ticks at 48 kHz.
+The initial simulation-thread renderer is superseded by demand-driven rendering below. Native envelope, pitch/gain,
+loop/release/reset tests and real stereo/mono menu captures established this bounded path. The initially dry
+output and stopped FM/noise voices are superseded by the fidelity follow-up below. Synchronous first-use
+loading, full music/stream transitions and reference listening remain open.
+
+**Music/scheduling follow-up:** G00248-G00250 now share the canonical zone-context music fields.
+Normal New Game events load MUSIC016/WAVE0069 and produce overlapping music/SFX PCM. A 50-ms native-stream
+prime/rebuffer removed post-New-Game shortages in the matched 5,100-tick replay; startup/movie-load shortages
+remain. The longer replay exposed a separate 60-versus-59.94 Hz counter mismatch: counter advancement now
+uses the host's rational field rate and an integer remainder, producing 240,240 callbacks over 60,000 fields
+(1,001 seconds). A later measured 135-ms host stall exceeded the 50-ms headroom, motivating the following
+rendering boundary rather than a larger buffer.
+
+**Demand-driven voice output:** the simulation owns the AKAO sequencer and program preparation. Complete
+200-frame control ticks are published through a bounded SPSC queue; the SDL callback owns active sfizz
+programs and renders on demand. Retired programs return to the control thread. File I/O, logging, instrument
+loading and control-thread waits stay out of the callback. Active voices continue during host stalls,
+while newly produced events can still be late; no competing event sequencer is introduced. A one-second
+control-thread stall test inspects actual SDL postmix output, with a push-only negative control. Reset,
+partial-tick publication, pending envelopes, program replacement, source isolation and reopen are covered.
+Accelerated desktop replay keeps synchronous output. Native capture is staged outside the callback and
+does not measure physical output gaps. This is not M5 completion or blanket reference-fidelity acceptance.
+See HANDOFF and ASSET_PIPELINE.
+
+**Native fidelity follow-up:** all 83 nonempty disc banks import, including WAVE0032's older articulation
+and exact-end/erased-padding unavailable records. Source articulation bytes remain in versioned metadata.
+Shared noise follows the original clock/parity rules; preceding-voice FM uses the envelope-scaled signal
+before speaker gain and drives unsmoothed sfizz pitch. Zero pitch holds sample position.
+All ten reverb presets use native reflection/comb/all-pass delay state, original effect/filter rates and
+signed stereo wet depth. Preset changes and reset clear tails; write-disable preserves the original read
+behavior. Mono folds down the complete dry+wet mix while preserving stereo tail state for re-entry.
+Controls migrate through copy fixups to typed native APIs, not SDK register shims.
+The effect network is float, not bit-exact SPU arithmetic; complete import coverage does not prove every
+track/transition or reference listening parity. No second sequencer or custom comparison tool was added.
+
+**Menu/stream follow-up:** all five in-game menu wrappers now dispatch their original effects.
+All 113 shipped effect streams import to WAV/SFZ and use the existing sfizz voice engine, with native-width
+commands, voice reservation, pause/resume, pan/volume, fades, EOF and cleanup. Ending XA imports to FLAC
+as specified by D18; its four redundant sector copies are validated and reduced by playback cadence,
+not by deduplicating adjacent audio. Native XA playback uses dr_flac and a separate SDL source, with
+control-thread decoding and callback demand feeding. Saved music layers now copy/swap complete native
+objects and resolve voice conflicts without releasing SFX/stream reservations. These changes do not
+retire unused SDK/DMA helpers or establish full-content/reference-listening acceptance.
 
 1. Implement the agreed STR conversion and versioned movie metadata, including frame count/rate, duration and audio.
    Validate supported input and conversion failure; external-tool absence must produce a usable diagnostic.

@@ -59,13 +59,13 @@ PROJECTS = [
     Project("VS.Engine", "Engine", refs=[], see=["VS.Content"], folders=ENGINE_SYSTEMS, legacy=True),
     Project("VS.Content", "Content", refs=["VS.Engine"], legacy=True),
     Project("VS.Game", "Game", refs=["VS.Engine", "VS.Content"], folders=GAME_MODULES),
-    Project("VS.Desktop", "Desktop", kind="exe", refs=["VS.Engine", "VS.Content", "VS.Game"], libs=["sdl3", "movie"]),
+    Project("VS.Desktop", "Desktop", kind="exe", refs=["VS.Engine", "VS.Content", "VS.Game"], libs=["sdl3", "movie", "audio"]),
     Project("VS.CombatLab", "Tools\\CombatLab", kind="exe",
-            refs=["VS.Engine", "VS.Content", "VS.Game"], libs=["sdl3", "movie"]),
+            refs=["VS.Engine", "VS.Content", "VS.Game"], libs=["sdl3", "movie", "audio"]),
     Project("VS.Extract", "Tools\\Extract", kind="exe", console=True, refs=["VS.Engine", "VS.Content"],
             libs=["sdl3"]),
     Project("VS.Tests", "Tests", kind="exe", console=True, refs=["VS.Engine", "VS.Content", "VS.Game"],
-            libs=["sdl3", "catch2", "movie"], whole_archive=["VS.Engine", "VS.Content", "VS.Game"],
+            libs=["sdl3", "catch2", "movie", "audio"], whole_archive=["VS.Engine", "VS.Content", "VS.Game"],
             see=["VS.CombatLab"], extra_sources=[
                 r"Tools\CombatLab\src\Canvas.cpp",
                 r"Tools\CombatLab\src\Trace.cpp"]),
@@ -75,6 +75,7 @@ BY_NAME = {p.name: p for p in PROJECTS}
 # Import libraries per vcpkg package (vcpkg's lib\*.lib autolink does not reach the link line here).
 VCPKG_LIBS = {
     "sdl3": {"Debug": ["SDL3.lib"], "Release": ["SDL3.lib"]},
+    "audio": {"Debug": ["sfizz.lib"], "Release": ["sfizz.lib"]},
     "catch2": {"Debug": ["Catch2d.lib"], "Release": ["Catch2.lib"]},
     # Engine\Movie: AV1 decoding and Matroska demuxing (dr_flac is header-only)
     "movie": {"Debug": ["dav1d.lib", "webm.lib"], "Release": ["dav1d.lib", "webm.lib"]},
@@ -108,6 +109,12 @@ def files_of(p: Project) -> list[tuple[str, str]]:
 def needs_c_headers(project: str, path: str) -> bool:
     path = path.replace("/", "\\")
     return (path.endswith(".c") or "\\Legacy\\" in "\\" + path
+            or project == "VS.Engine" and path in (
+                r"src\Audio\SequencerOutput.cpp",
+                r"src\Audio\StreamPlayback.cpp",
+                r"src\Audio\XaPlayback.cpp",
+                r"src\Audio\MusicState.cpp",
+            )
             or project == "VS.Tests"
             or project == "VS.CombatLab"
             or project == "VS.Game" and path in (
@@ -125,6 +132,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Effects\ParticleRender.cpp",
                 r"src\Battle\Ai\GroundNavigation.cpp",
                 r"src\Field\TerrainHeight.cpp",
+                r"src\Menu\Sounds.cpp",
             ))
 
 

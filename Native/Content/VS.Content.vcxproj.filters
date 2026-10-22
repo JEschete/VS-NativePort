@@ -21,6 +21,12 @@
     <ClInclude Include="src\ActorAssets.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClCompile Include="src\AudioBank.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AudioStream.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\CdDrive.c">
       <Filter>src</Filter>
     </ClCompile>
@@ -83,6 +89,12 @@
     </ClCompile>
     <ClInclude Include="src\SystemResources.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\AudioBank.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\AudioStream.hpp">
+      <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\DataAccess.h">
       <Filter>include\Content</Filter>

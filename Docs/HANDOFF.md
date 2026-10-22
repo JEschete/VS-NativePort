@@ -1,6 +1,45 @@
 # Handoff: prologue entry and shared rendering
 
-## Current checkpoint
+## Native audio functional acceptance (2026-10-21)
+
+This revision implements the bounded functional scope of
+[#7](https://github.com/JEschete/VS-NativePort/issues/7). The existing AKAO
+sequencer drives sfizz/SFZ/WAV and SDL without a competing sequencer or synth.
+All 83 nonempty banks and 113 effect streams import; noise, preceding-voice FM,
+ten reverb presets, Stereo/Mono and ending XA playback are connected.
+All five in-game menu wrappers dispatch their original effects. Native-sized
+music state and reserved stream voice lifecycle replace incomplete bridges.
+
+Debug and Release full suites each pass **379 cases / 991,535 assertions**.
+Release `[audio],[clock]` passes **72 cases / 163,008 assertions**. Full
+changed-header quality reports **313 existing findings, zero new** without
+baseline/suppression changes. Source/project and import repeatability checks
+are recorded in [ASSET_PIPELINE.md](ASSET_PIPELINE.md).
+
+Actual controller replays cover simultaneous music/SFX, scene/menu transitions,
+all five menu sound actions, Stereo/Mono, skip/re-entry and Solid Shock. Isolated
+Combat Lab run `1792631613651010-0` binds E044 at tick 515, starts its pair at
+607, stops at 691 and reuses the voices at 1143. The installed ending FLAC
+passes production SDL postmix at start/30-second seek and natural EOF/drain.
+The final mix restores the original signed-PCM saturation boundary without
+changing source stream gains; this is not normalization or a claim of no
+intentional overload distortion.
+
+Local evidence: `build\quality\audio-output-*`, `audio-ending-*`, and paired
+`audio-listen-*.wav` menu/opening auditions. The reference windows are matched
+by scene/action state, not sample-synchronized; recordings are AAC-derived.
+No subjective parity approval is claimed. Disc-derived captures/data remain
+local. Full credits navigation/listening, every stream/track in context,
+bit-exact DSP and 5.1 are outside this bounded acceptance.
+
+Publication, exact fixing revision, CI and closure evidence belong to #7.
+EC-02 retirement remains separate. After #7, the next ordered priority in
+[#4](https://github.com/JEschete/VS-NativePort/issues/4) is item use #8.
+Unrelated local documentation/reference cleanup is not part of this audio
+publication. The sections below retain earlier checkpoint evidence, not
+current implementation or priority claims.
+
+## Historical checkpoint
 
 The ordered work tracker is [#4](https://github.com/JEschete/VS-NativePort/issues/4).
 The maintained-production quality pass in [#5](https://github.com/JEschete/VS-NativePort/issues/5)

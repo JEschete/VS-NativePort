@@ -68,28 +68,6 @@ int Audio_FreeCutsceneStreamSlot(int arg0)
     return 0;
 }
 
-// decomp: SLUS_010.40 func_80046608 (src/SLUS_010.40/main.c:10339)
-int Audio_BindRoomCutsceneStream(uintptr_t arg0)
-{
-    if (Audio_soundState.musicHandles[22] == 0) {
-        Audio_soundState.musicHandles[22] = arg0;
-        return 3;
-    }
-    return 0;
-}
-
-// decomp: SLUS_010.40 func_80046634 (src/SLUS_010.40/main.c:10348)
-int Audio_UnbindRoomCutsceneStream(void)
-{
-
-    if (Audio_soundState.musicHandles[22] != 0) {
-        Audio_Control_StopCutsceneStream();
-        Audio_soundState.musicHandles[22] = 0;
-        return 1;
-    }
-    return 0;
-}
-
 // decomp: SLUS_010.40 func_800468DC (src/SLUS_010.40/main.c:10450)
 void Audio_SetXaVolumeMaximum(void) { Audio_Control_SetDiscVolume(0x7FFF); }
 

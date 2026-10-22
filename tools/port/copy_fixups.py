@@ -13,6 +13,24 @@ so a stale fix is noticed.
 from __future__ import annotations
 
 NATIVE_HELPER_HEADERS = {
+    **{name: r"Native\Engine\include\Audio\MusicState.h"
+       for name in (
+           "Audio_Native_SaveMusicSnapshot",
+           "Audio_Native_RestoreMusicSnapshot",
+       )},
+    **{name: r"Native\Engine\include\Audio\StreamPlayback.h"
+       for name in (
+           "Audio_Native_UpdateCutsceneStream",
+           "Audio_Native_ResetCutsceneStream",
+       )},
+    **{name: r"Native\Engine\include\Audio\SequencerOutput.h"
+       for name in (
+           "Audio_Native_Reset", "Audio_Native_Tick",
+           "Audio_Native_ConfigureChannel", "Audio_Native_Envelope",
+           "Audio_Native_SetNoiseClock",
+           "Audio_Native_ReverbMode", "Audio_Native_SetReverbMode",
+           "Audio_Native_SetReverbDepth", "Audio_Native_EnableReverb",
+       )},
     **{name: r"Native\Game\src\Battle\EncounterHooks.h"
        for name in (
            "Boot_EncounterRoomPlacements",
@@ -72,6 +90,120 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F03210": [
+        ("""    if (in_SwapWithSavedState == 0) {
+        Core_Memory_CopyWords(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig, 0x80);
+        Core_Memory_CopyWords(Audio_Seq_savedMusicChannels, Audio_Seq_musicChannels, 0x2200);
+    } else {
+        Core_Memory_SwapWords(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig, 0x80);
+        Core_Memory_SwapWords(Audio_Seq_savedMusicChannels, Audio_Seq_musicChannels, 0x2200);
+    }""", "    Audio_Native_RestoreMusicSnapshot(in_SwapWithSavedState);",
+         "restore complete native objects instead of PS1-sized byte ranges"),
+    ],
+    "F03213": [
+        ("""Core_Memory_CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
+        Core_Memory_CopyWords(Audio_Seq_musicChannels, (Audio_MusicConfig*)Audio_Seq_savedMusicChannels, 0x2200);""",
+         "Audio_Native_SaveMusicSnapshot();",
+         "save every native channel and config field"),
+    ],
+    "F03214": [
+        ("""Core_Memory_CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
+        Core_Memory_CopyWords(Audio_Seq_musicChannels,
+            (Audio_MusicConfig*)Audio_Seq_secondaryMusicChannels, 0x2200);""",
+         "Audio_Native_SaveMusicSnapshot();",
+         "layer snapshots use the same complete native state"),
+    ],
+    "F03215": [
+        ("""Core_Memory_CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
+            Core_Memory_CopyWords(Audio_Seq_musicChannels,
+                (Audio_MusicConfig*)Audio_Seq_secondaryMusicChannels, 0x2200);""",
+         "Audio_Native_SaveMusicSnapshot();",
+         "crossfade snapshots use the same complete native state"),
+    ],
+    "F02438": [
+        (" // Partial playback?", "",
+         "the XA request argument is initial CD volume rather than a byte count"),
+    ],
+    "F01611": [
+        ("(void* arg0)", "(void* arg0, size_t byte_count)",
+         "carry the containing effect block extent into stream validation"),
+        ("Audio_BindRoomCutsceneStream((uintptr_t)arg0)",
+         "Audio_BindRoomCutsceneStream(arg0, byte_count)",
+         "bind native stream assets instead of a PS1 array-offset alias"),
+    ],
+    "F01626": [
+        ("Effects_BindEffectAuxiliarySoundBank(arg0->blocks);",
+         "Effects_BindEffectAuxiliarySoundBank(\n"
+         "                arg0->blocks, (meta & 0xFFFF) - sizeof(u_int));",
+         "the stream payload excludes the four-byte package block header"),
+    ],
+    "F03265": [
+        ("""    if ((Audio_Cutscene_streamState.voiceMask != 0)
+        && (Audio_Cutscene_streamState.volumeFadeTicksLeft != 0)) {
+        --Audio_Cutscene_streamState.volumeFadeTicksLeft;
+        temp_s1 = Audio_Cutscene_streamState.volume
+                + Audio_Cutscene_streamState.volumeFadeStep;
+        if ((temp_s1 & 0xFF00) != (Audio_Cutscene_streamState.volume & 0xFF00)) {
+            if (Audio_Driver_mixBehavior & 2) {
+                int temp_s0 = (Audio_Cutscene_streamState.volume * Audio_Mixer_kCenterPanGain) >> 0x10;
+                Audio_Driver_SetVoiceVolume(
+                    Audio_Cutscene_streamState.voiceIndex, temp_s0, temp_s0, 0);
+                Audio_Driver_SetVoiceVolume(
+                    Audio_Cutscene_streamState.voiceIndex + 1, temp_s0, temp_s0, 0);
+            } else {
+                int temp_s0 = (temp_s1 << 0xF) >> 0x10;
+                Audio_Driver_SetVoiceVolume(Audio_Cutscene_streamState.voiceIndex, temp_s0, 0, 0);
+                Audio_Driver_SetVoiceVolume(
+                    Audio_Cutscene_streamState.voiceIndex + 1, 0, temp_s0, 0);
+            }
+        }
+        Audio_Cutscene_streamVolume = temp_s1 & 0xFFFF;
+    }""", "    Audio_Native_UpdateCutsceneStream();",
+         "native completion and fades preserve mono/stereo layout and exact targets"),
+    ],
+    "F03554": [
+        ("void Audio_ResetSoundSlots(void)\n{",
+         "void Audio_ResetSoundSlots(void)\n{\n"
+         "    Audio_Native_ResetCutsceneStream();",
+         "slot reset must release native voices and borrowed stream bindings"),
+    ],
+    "F03161": [
+        ("    SpuStart();\n"
+         "    SpuSetTransferStartAddr(0x1010);\n"
+         "    Audio_Driver_WriteSampleMemory(Audio_Driver_legacySpuFlushBytes, 64);\n"
+         "    Audio_Driver_WaitForSampleTransfer();\n", "",
+         "native voice reset owns silence; no SPU sample-memory initialization"),
+    ],
+    "F03162": [
+        ("    if (Audio_Cutscene_legacySpuTransferBusy == 1) {\n"
+         "        Audio_Driver_WriteSampleMemory(Audio_Driver_legacySpuFlushBytes, 64);\n"
+         "        Audio_Driver_WaitForSampleTransfer();\n"
+         "    }\n", "",
+         "native bank loads are synchronous asset bindings, not hardware transfers"),
+        ("    Audio_Driver_KeyOffVoices(0xFFFFFF);", "    Audio_Native_Reset();",
+         "teardown must clear release tails and queued native output"),
+    ],
+    "F03186": [
+        ("Audio_Driver_WriteVoiceParameters(in_pChannel->voice.assignedVoice,\n"
+         "                            &in_pChannel->voice,\n"
+         "                            in_pChannel->voice.volumeScale);",
+         "Audio_Native_ConfigureChannel(in_pChannel);",
+         "pass the musical instrument identity and controls to native output"),
+        ("Audio_Driver_WriteDirtyVoiceParameters(\n"
+         "                            in_pChannel->voice.assignedVoice,\n"
+         "                            &in_pChannel->voice, in_pChannel->updateFlags);",
+         "Audio_Native_ConfigureChannel(in_pChannel);",
+         "native control updates replace register writes"),
+    ],
+    "F03189": [
+        ("SpuGetVoiceEnvelope(i, &pVoice->envelopeLevel);",
+         "pVoice->envelopeLevel = Audio_Native_Envelope(i);",
+         "voice stealing observes the actual native envelope"),
+    ],
+    "F03269": [
+        ("    return var_s5;", "    Audio_Native_Tick();\n    return var_s5;",
+         "commit 200-frame control ticks; native output renders on device demand"),
+    ],
     "F01563": [
         ("(*(u_int*)((char*)arg0 + 0x14) & 0xF800) == 0",
          "arg0->childCount == 0",
@@ -421,6 +553,11 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          f"(Audio_Seq_secondaryMusicConfig != NULL ? Audio_Seq_secondaryMusicConfig->{field} : 0)",
          "BuildVoiceModeMask accepts no saved layer; do not eagerly read the null optional config")
         for field in ("noiseChannels", "reverbChannels", "fmChannels")
+    ] + [
+        ("Audio_Driver_WriteDirtyVoiceParameters(pChannel->voice.assignedVoice,\n"
+         "                        &pChannel->voice, pChannel->updateFlags);",
+         "Audio_Native_ConfigureChannel(pChannel);",
+         "sound effects share the same native voice engine as music"),
     ],
     "F00975": [
         ("    frame = Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15;",
@@ -916,6 +1053,20 @@ FIXES["F00798"] += [
 ]
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    (r"^Audio::", r"\bSpuSetNoiseClock\b", "Audio_Native_SetNoiseClock",
+     "native noise clock controls replace the SDK register setter"),
+    (r"^Audio::", r"\bSpuSetReverbModeDepth\b", "Audio_Native_SetReverbDepth",
+     "native wet gains replace the SDK reverb depth setter"),
+    (r"^Audio::", r"SpuGetReverbModeType\(&curMode\)", "curMode = Audio_Native_ReverbMode()",
+     "read initialized native preset state instead of the unported SDK getter"),
+    (r"^Audio::", r"SpuSetReverbModeType\(in_ReverbMode \| SPU_REV_MODE_CLEAR_WA\)",
+     "Audio_Native_SetReverbMode(in_ReverbMode)", "native preset changes clear owned delay state"),
+    (r"^Audio::", r"\bSpuSetReverb\b", "Audio_Native_EnableReverb",
+     "native reverb processing enable replaces the SDK register setter"),
+    (r"^Boot::", r"SsUtReverbOff\(\)", "Audio_Native_EnableReverb(0)",
+     "boot suspension freezes reverb writes through the native output API"),
+    (r"^Boot::", r"SsUtReverbOn\(\)", "Audio_Native_EnableReverb(1)",
+     "boot resume enables the native effect processor"),
     (r"^Menu::", r"&Menu_textBoxOrderingTables\b", "Menu_textBoxOrderingTables",
      "textbox ordering storage is a bounded array, not a scalar address"),
     (r"^(Actors|Render)::", r"\(void\*\)\(\(uintptr_t\)Core_ScratchBase\(\) \+ 0x35C\)",

@@ -1,12 +1,32 @@
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "Audio/Control/SoundControl.h"
 #include "Audio/Cutscene/Stream.h"
+#include "Audio/Driver/PlaybackReset.h"
 #include "Audio/Driver/SoundDriver.h"
+#include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Music.h"
+#include "Audio/MusicState.h"
+#include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
+#include "Audio/Seq/MusicSequence.h"
+#include "Audio/Seq/Sequencer.h"
+#include "Audio/SequencerOutput.h"
+#include "Audio/Sfx.h"
+#include "Audio/SoundBanks.h"
+#include "Audio/Stream.h"
+#include "Audio/StreamPlayback.h"
 #include "Battle/Ai/RoomState.h"
 #include "Boot/Session.h"
 #include "Core/Memory/WordCopy.h"
+#include "DiscQueue.h"
+#include "DiscReader.h"
+#include "Effects/EffectResources.h"
+#include "Effects/Runtime.h"
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
@@ -14,12 +34,407 @@
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomEffects.h"
+#include "Field/RoomLoading.h"
 #include "Legacy/Psx.h"
+#include "Menu/Sounds.h"
 #include "Render/RoomLighting.h"
 
 static int sessionTitleCalls;
 static int sessionBattleCalls;
 static int sessionFallthrough;
+static Audio_CommandParams menuSoundObserved;
+static int menuSoundCalls;
+static int16_t savedStreamPan[256];
+static Audio_CommandHandler savedStreamCommands[7];
+static Audio_CommandHandler savedXaCommands[3];
+static Content_DiscDrive savedXaDrive;
+static const int kStreamCommandIds[] = {0xE0, 0xE2, 0xE4, 0xE5,
+                                        0xE6, 0x9E, 0x9F};
+
+int TestsSavedMusicVoiceConflicts(void) {
+  Audio_MusicConfig current = {0};
+  Audio_MusicConfig saved = {0};
+  Audio_SeqChannel channels[32] = {0};
+  Audio_MusicConfig* original_current = Audio_Seq_activeMusicConfig;
+  Audio_MusicConfig* original_saved = Audio_Seq_secondaryMusicConfig;
+  Audio_SeqChannel* original_channels = Audio_Seq_secondaryMusicChannels;
+  Audio_VoiceScheduler original_scheduler = Audio_Mixer_voiceScheduler;
+  int original_streams = Audio_Cutscene_streamVoices;
+  int failures = 0;
+  unsigned flags, voice, reservation, channel;
+  Audio_Seq_activeMusicConfig = &current;
+  Audio_Seq_secondaryMusicConfig = &saved;
+  Audio_Seq_secondaryMusicChannels = channels;
+  for (flags = 0; flags < 16; ++flags) {
+    const int conflict =
+        (flags & 1) && (!(flags & 4) || ((flags & 2) && !(flags & 8)));
+    for (voice = 0; voice < 24; ++voice) {
+      const int bit = 1 << voice;
+      current.allocatedVoices = flags & 1 ? bit : 0;
+      current.keyedVoices = flags & 2 ? bit : 0;
+      saved.allocatedVoices = flags & 4 ? bit : 0;
+      saved.keyedVoices = flags & 8 ? bit : 0;
+      for (reservation = 0; reservation < 4; ++reservation) {
+        for (channel = 0; channel < 32; ++channel) {
+          channels[channel].voice.assignedVoice = channel < 2 ? voice : 24;
+        }
+        Audio_Mixer_voiceScheduler.activeVoices = reservation & 1 ? bit : 0;
+        Audio_Cutscene_streamVoices = reservation & 2 ? bit : 0;
+        Audio_Mixer_voiceScheduler.pendingKeyOff = 1U << 25;
+        Audio_Seq_ReleaseSavedVoiceConflicts();
+        for (channel = 0; channel < 32; ++channel) {
+          const unsigned expected = channel < 2 && !conflict ? voice : 24;
+          failures += channels[channel].voice.assignedVoice != expected;
+        }
+        failures += Audio_Mixer_voiceScheduler.pendingKeyOff !=
+                    ((1U << 25) | (conflict && reservation == 0 ? bit : 0));
+      }
+    }
+  }
+  Audio_Seq_secondaryMusicConfig = NULL;
+  Audio_Mixer_voiceScheduler.pendingKeyOff = 1;
+  Audio_Seq_ReleaseSavedVoiceConflicts();
+  failures += Audio_Mixer_voiceScheduler.pendingKeyOff != 1;
+  Audio_Seq_activeMusicConfig = original_current;
+  Audio_Seq_secondaryMusicConfig = original_saved;
+  Audio_Seq_secondaryMusicChannels = original_channels;
+  Audio_Mixer_voiceScheduler = original_scheduler;
+  Audio_Cutscene_streamVoices = original_streams;
+  return failures;
+}
+
+int TestsNativeMusicSnapshot(void) {
+  const Audio_MusicConfig original_primary = Audio_Seq_primaryMusicConfig;
+  const Audio_MusicConfig original_saved = Audio_Seq_savedMusicConfig;
+  Audio_MusicConfig* original_active = Audio_Seq_activeMusicConfig;
+  Audio_MusicConfig* original_secondary = Audio_Seq_secondaryMusicConfig;
+  const Audio_VoiceScheduler original_scheduler = Audio_Mixer_voiceScheduler;
+  const unsigned original_updates = Audio_Driver_controlLatches.updateFlags;
+  Audio_SeqChannel original_channels[32];
+  Audio_SeqChannel original_saved_channels[32];
+  Audio_AkaoSequenceFile sequence = {0};
+  u_short keymap = 0;
+  unsigned channel;
+  int result, swap;
+  memcpy(original_channels, Audio_Seq_musicChannels, sizeof(original_channels));
+  memcpy(original_saved_channels, Audio_Seq_savedMusicChannels,
+         sizeof(original_saved_channels));
+  memset(&Audio_Seq_primaryMusicConfig, 0,
+         sizeof(Audio_Seq_primaryMusicConfig));
+  memset(&Audio_Seq_savedMusicConfig, 0, sizeof(Audio_Seq_savedMusicConfig));
+  memset(Audio_Seq_musicChannels, 0, sizeof(Audio_Seq_musicChannels));
+  memset(Audio_Seq_savedMusicChannels, 0, sizeof(Audio_Seq_savedMusicChannels));
+  Audio_Seq_activeMusicConfig = &Audio_Seq_primaryMusicConfig;
+  Audio_Seq_primaryMusicConfig.activeChannels = 1;
+  Audio_Seq_primaryMusicConfig.musicId = 0x1234;
+  Audio_Seq_primaryMusicConfig.timerTop = 0x4321;
+  for (channel = 0; channel < 32; ++channel) {
+    Audio_Seq_musicChannels[channel].voice.assignedVoice = channel % 24;
+    Audio_Seq_musicChannels[channel].voice.dirtyFlags = 0x123400 + channel;
+  }
+  Audio_Seq_SaveCurrentMusic();
+  result = Audio_Seq_savedMusicConfig.activeChannels == 1 &&
+           Audio_Seq_savedMusicConfig.musicId == 0x1234 &&
+           Audio_Seq_savedMusicConfig.timerTop == 0x4321;
+  {
+    int channels_saved = 1;
+    for (channel = 0; channel < 32; ++channel) {
+      channels_saved &=
+          Audio_Seq_savedMusicChannels[channel].voice.assignedVoice ==
+              channel % 24 &&
+          Audio_Seq_savedMusicChannels[channel].voice.dirtyFlags ==
+              0x123400 + channel;
+    }
+    result |= channels_saved << 1;
+  }
+  Audio_Seq_secondaryMusicConfig = NULL;
+  for (swap = 0; swap < 2; ++swap) {
+    int restored;
+    memset(&Audio_Seq_savedMusicConfig, 0, sizeof(Audio_Seq_savedMusicConfig));
+    memset(&Audio_Seq_primaryMusicConfig, 0,
+           sizeof(Audio_Seq_primaryMusicConfig));
+    Audio_Seq_primaryMusicConfig.timerTop = 0x1111;
+    Audio_Seq_savedMusicConfig.timerTop = 0x2222;
+    Audio_Seq_savedMusicConfig.sequenceBase = (uintptr_t)&sequence;
+    Audio_Seq_savedMusicConfig.patchTable = &sequence;
+    Audio_Seq_savedMusicConfig.keymapTable = &keymap;
+    for (channel = 0; channel < 32; ++channel) {
+      Audio_Seq_savedMusicChannels[channel].voice.dirtyFlags = 0x100 + channel;
+      Audio_Seq_musicChannels[channel].voice.dirtyFlags = 0x200 + channel;
+    }
+    Audio_Seq_RestoreMusicSequence(&sequence, swap);
+    restored = Audio_Seq_primaryMusicConfig.timerTop == 0x2222;
+    for (channel = 0; channel < 32; ++channel) {
+      restored &=
+          Audio_Seq_musicChannels[channel].voice.dirtyFlags == 0x100 + channel;
+      if (swap) {
+        restored &= Audio_Seq_savedMusicChannels[channel].voice.dirtyFlags ==
+                    0x200 + channel;
+      }
+    }
+    if (swap) restored &= Audio_Seq_savedMusicConfig.timerTop == 0x1111;
+    result |= restored << (swap + 2);
+  }
+  Audio_Seq_primaryMusicConfig = original_primary;
+  Audio_Seq_savedMusicConfig = original_saved;
+  Audio_Seq_activeMusicConfig = original_active;
+  Audio_Seq_secondaryMusicConfig = original_secondary;
+  Audio_Mixer_voiceScheduler = original_scheduler;
+  Audio_Driver_controlLatches.updateFlags = original_updates;
+  memcpy(Audio_Seq_musicChannels, original_channels, sizeof(original_channels));
+  memcpy(Audio_Seq_savedMusicChannels, original_saved_channels,
+         sizeof(original_saved_channels));
+  return result;
+}
+
+void TestsPrepareXaPlayback(void) {
+  const Audio_CommandHandler handlers[] = {Audio_Seq_SetDiscVolume,
+                                           Audio_Seq_FadeDiscVolume,
+                                           Audio_Seq_FadeDiscVolumeFrom};
+  int index;
+  savedXaDrive = Content_discDriveState;
+  Audio_Driver_ResetPlaybackState();
+  memset(&Content_discDriveState, 0, sizeof(Content_discDriveState));
+  for (index = 0; index < 3; ++index) {
+    savedXaCommands[index] = Audio_Mixer_kCommandHandlers[0xC8 + index];
+    Audio_Mixer_kCommandHandlers[0xC8 + index] = handlers[index];
+  }
+}
+
+void TestsRestoreXaPlayback(void) {
+  int index;
+  Audio_Native_Reset();
+  Content_discDriveState = savedXaDrive;
+  for (index = 0; index < 3; ++index) {
+    Audio_Mixer_kCommandHandlers[0xC8 + index] = savedXaCommands[index];
+  }
+}
+
+int TestsXaCommand(int command, int first, int second, int third) {
+  switch (command) {
+    case 0:
+      return Audio_BeginXaStream(first, second);
+    case 1:
+      Content_UpdateDiscCommands();
+      return Content_discDriveState.state;
+    case 2:
+      return Audio_RequestXaStreamStop();
+    case 3:
+      Audio_Control_SetDiscVolume(first);
+      break;
+    case 4:
+      Audio_Control_FadeDiscVolume(first, second);
+      break;
+    case 5:
+      Audio_Control_FadeDiscVolumeFrom((void*)(intptr_t)first, second, third);
+      break;
+    case 6:
+      return Audio_Seq_discVolumeLevel;
+    case 7:
+      Audio_Native_Reset();
+      break;
+    case 8:
+      Content_ResetDiscDrive();
+      break;
+    case 9:
+      return Content_discDriveState.failureCount;
+    default:
+      fprintf(stderr, "unexpected XA test command: %d\n", command);
+      abort();
+  }
+  return Content_discDriveState.state;
+}
+
+void TestsPrepareStreamPlayback(void) {
+  Audio_CommandHandler handlers[] = {
+      Audio_Cutscene_ReplaceStream,   Audio_Cutscene_StopStream,
+      Audio_Cutscene_SetStreamVolume, Audio_Cutscene_SlideStreamVolume,
+      Audio_Cutscene_SetStreamPan,    Audio_Cutscene_ResumeStream,
+      Audio_Cutscene_PauseStream};
+  int index;
+  Audio_Driver_ResetPlaybackState();
+  memcpy(savedStreamPan, Audio_Mixer_kPanGains, sizeof(savedStreamPan));
+  memset(Audio_Mixer_kPanGains, 0, sizeof(savedStreamPan));
+  Audio_Mixer_kPanGains[0] = 32767;
+  Audio_Mixer_kPanGains[127] = 23170;
+  Audio_Mixer_kPanGains[128] = 23170;
+  for (index = 0; index < 7; ++index) {
+    savedStreamCommands[index] =
+        Audio_Mixer_kCommandHandlers[kStreamCommandIds[index]];
+    Audio_Mixer_kCommandHandlers[kStreamCommandIds[index]] = handlers[index];
+  }
+}
+
+void TestsRestoreStreamPlayback(void) {
+  int index;
+  Audio_Native_Reset();
+  memcpy(Audio_Mixer_kPanGains, savedStreamPan, sizeof(savedStreamPan));
+  for (index = 0; index < 7; ++index) {
+    Audio_Mixer_kCommandHandlers[kStreamCommandIds[index]] =
+        savedStreamCommands[index];
+  }
+}
+
+int TestsBindEffectStream(void* bytes) {
+  Effects_EffectPackage package = {0};
+  Effects_EffectPackage* saved = Effects_package;
+  Effects_package = &package;
+  Effects_BindEffectPackageBlocks(bytes);
+  Effects_package = saved;
+  return package.auxiliarySoundHandle;
+}
+
+int TestsPlayStreamSlot(int slot, int pan, int volume) {
+  return Audio_PlayCutsceneStreamSlot(slot, pan, volume);
+}
+
+void TestsAdvanceStreamTick(void) {
+  Audio_Seq_UpdateGlobalSlides();
+  Audio_Mixer_CommitPlaybackVoices();
+  Audio_Native_Tick();
+}
+
+void TestsStreamControl(int command, int value, int target) {
+  switch (command) {
+    case 0:
+      Audio_Control_SetCutsceneVolume(value);
+      break;
+    case 1:
+      Audio_Control_FadeCutsceneVolume(value, target);
+      break;
+    case 2:
+      Audio_Control_SetCutscenePan(value);
+      break;
+    case 3:
+      Audio_Mixer_DispatchCommand(value ? 0x9F : 0x9E);
+      break;
+    case 4:
+      Audio_Control_StopCutsceneStream();
+      break;
+    case 5:
+      Audio_Driver_ResetPlaybackState();
+      break;
+    case 6:
+      Audio_ResetSoundSlots();
+      break;
+    default:
+      fprintf(stderr, "unexpected stream test command: %d\n", command);
+      abort();
+  }
+}
+
+unsigned TestsStreamVoiceMask(void) {
+  return Audio_Cutscene_streamState.voiceMask;
+}
+
+unsigned TestsStreamVolume(void) { return Audio_Cutscene_streamState.volume; }
+
+int TestsStreamSlotIsEmpty(void) {
+  return Audio_soundState.sfxStreamData[2] == NULL;
+}
+
+static void CaptureMenuSound(Audio_CommandParams* params) {
+  menuSoundObserved = *params;
+  ++menuSoundCalls;
+}
+
+int TestsMenuSoundDispatch(void) {
+  u_int offsets[12] = {0};
+  u_short selectors[12] = {0};
+  u_int* saved_offsets = Audio_Playback_soundEffectProgramOffsets;
+  u_short* saved_selectors = Audio_Playback_soundEffectBankSelectors;
+  const Audio_CommandHandler saved_handler = Audio_Mixer_kCommandHandlers[0x20];
+  const Audio_CommandArguments saved_arguments = Audio_Driver_commandArguments;
+  const Audio_CommandParams saved_params = Audio_Mixer_commandParams;
+  const int saved_group = Audio_nextSfxChannelGroup7E;
+  void (*const play[])(void) = {Menu_PlayOpenSound, Menu_PlayInvalidSound,
+                                Menu_PlayLeaveSound, Menu_PlaySelectSound,
+                                Menu_PlayChangeSound};
+  const int ids[] = {10, 7, 6, 5, 4};
+  int result = 0;
+  int index;
+  Audio_Playback_soundEffectProgramOffsets = offsets;
+  Audio_Playback_soundEffectBankSelectors = selectors;
+  Audio_Mixer_kCommandHandlers[0x20] = CaptureMenuSound;
+  Audio_nextSfxChannelGroup7E = 2;
+  for (index = 0; index < 5; ++index) {
+    selectors[ids[index]] = 0x8000;
+    menuSoundCalls = 0;
+    play[index]();
+    if (menuSoundCalls == 1 &&
+        menuSoundObserved.param1 == (uintptr_t)ids[index] &&
+        menuSoundObserved.param2 == (2 << index) &&
+        menuSoundObserved.param3 == 0x80 && menuSoundObserved.param4 == 0x7F) {
+      result |= 1 << index;
+    }
+  }
+  Audio_Playback_soundEffectProgramOffsets = saved_offsets;
+  Audio_Playback_soundEffectBankSelectors = saved_selectors;
+  Audio_Mixer_kCommandHandlers[0x20] = saved_handler;
+  Audio_Driver_commandArguments = saved_arguments;
+  Audio_Mixer_commandParams = saved_params;
+  Audio_nextSfxChannelGroup7E = saved_group;
+  return result;
+}
+
+void TestsNativeNoiseChannel(void) {
+  Audio_SeqChannel channel = {0};
+  channel.voice.sampleStart = 0x1010;
+  channel.voice.sampleRate = 4096;
+  channel.voice.volume.left = 0x1000;
+  channel.voice.volume.right = 0x1000;
+  channel.voice.adsrLower = 0x00FF;
+  channel.voice.adsrUpper = 0x5FC4;
+  Audio_Driver_ResetPlaybackState();
+  Audio_Native_ConfigureChannel(&channel);
+  Audio_Native_SetNoiseClock(63);
+  Audio_Driver_SetVoiceNoiseMask(1);
+  Audio_Native_SetReverbMode(4);
+  Audio_Native_SetReverbDepth(0x3FFF, 0x3FFF);
+  Audio_Native_EnableReverb(1);
+  Audio_Driver_SetVoiceReverbMask(1);
+  Audio_Driver_KeyOnVoices(1);
+  Audio_Native_Tick();
+}
+
+void TestsNativeMonoOutput(int enabled) {
+  if (enabled) {
+    Audio_Mixer_EnableMonoOutput(NULL);
+  } else {
+    Audio_Mixer_EnableStereoOutput(NULL);
+  }
+  Audio_Native_Tick();
+}
+
+int TestsZoneMusicStateAliases(void) {
+  const int saved_id = Field_zoneContext.musicId;
+  const int saved_slot = Field_zoneContext.musicSlot;
+  const int saved_enabled = Field_zoneContext.isMusicFadeEnabled;
+  const int saved_alias_id = Field_zoneSoundFileId;
+  const int saved_alias_slot = Field_roomMusicSlot;
+  const int saved_alias_enabled = Audio_zoneMusicSwitchEnabled;
+  int passed = 0;
+  if (&Field_zoneSoundFileId == &Field_zoneContext.musicId) passed |= 1;
+  if (&Field_roomMusicSlot == &Field_zoneContext.musicSlot) passed |= 2;
+  if (&Audio_zoneMusicSwitchEnabled == &Field_zoneContext.isMusicFadeEnabled) {
+    passed |= 4;
+  }
+  Field_zoneContext.musicId = 16;
+  Field_zoneContext.musicSlot = 3;
+  Field_zoneContext.isMusicFadeEnabled = 1;
+  if (Field_ZoneSoundFileId() == 16) passed |= 8;
+  if (Field_roomMusicSlot == 3) passed |= 16;
+  if (Audio_zoneMusicSwitchEnabled == 1) passed |= 32;
+  Audio_SetZoneMusicSwitchEnabled(0);
+  if (Field_zoneContext.isMusicFadeEnabled == 0) passed |= 64;
+  Field_zoneSoundFileId = saved_alias_id;
+  Field_roomMusicSlot = saved_alias_slot;
+  Audio_zoneMusicSwitchEnabled = saved_alias_enabled;
+  Field_zoneContext.musicId = saved_id;
+  Field_zoneContext.musicSlot = saved_slot;
+  Field_zoneContext.isMusicFadeEnabled = saved_enabled;
+  return passed;
+}
 
 int Tests_RoomLightingSamples(void) {
   struct {

@@ -7,6 +7,7 @@
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 
@@ -560,18 +561,14 @@ void Audio_Mixer_ApplyMusicChannelVoices(
                         }
                     }
                     if (in_pChannel->voice.assignedVoice < 0x18) {
-                        Audio_Driver_WriteVoiceParameters(in_pChannel->voice.assignedVoice,
-                            &in_pChannel->voice,
-                            in_pChannel->voice.volumeScale);
+                        Audio_Native_ConfigureChannel(in_pChannel);
                         Audio_Mixer_voiceOwners[in_pChannel->voice
                                 .assignedVoice] = Audio_Seq_activeMusicConfig;
                         Audio_Driver_controlLatches.updateFlags |= 0x100;
                     }
                 } else {
                     if (in_pChannel->voice.assignedVoice < 0x18) {
-                        Audio_Driver_WriteDirtyVoiceParameters(
-                            in_pChannel->voice.assignedVoice,
-                            &in_pChannel->voice, in_pChannel->updateFlags);
+                        Audio_Native_ConfigureChannel(in_pChannel);
                     }
                 }
             }
@@ -648,7 +645,7 @@ void Audio_Mixer_RefreshVoiceAvailability(u_int in_ReservedVoices)
             pVoice->envelopeLevel = 0x7FFF;
             continue;
         }
-        SpuGetVoiceEnvelope(i, &pVoice->envelopeLevel);
+        pVoice->envelopeLevel = Audio_Native_Envelope(i);
         if (pVoice->envelopeLevel == 0) {
             Audio_Mixer_UnassignVoice(Audio_Seq_musicChannels, i);
         } else if (Audio_Seq_activeMusicConfig->keyedVoices != 0) {
@@ -784,8 +781,7 @@ void Audio_Mixer_CommitPlaybackVoices(void)
             if (Flags & Voices) {
                 Audio_Mixer_UpdateSoundEffectModulation(pChannel, Voices);
                 if (pChannel->voice.dirtyFlags != 0) {
-                    Audio_Driver_WriteDirtyVoiceParameters(pChannel->voice.assignedVoice,
-                        &pChannel->voice, pChannel->updateFlags);
+                    Audio_Native_ConfigureChannel(pChannel);
                 }
                 Flags &= ~Voices;
             }
@@ -795,15 +791,15 @@ void Audio_Mixer_CommitPlaybackVoices(void)
 
     Flags = Audio_Driver_controlLatches.updateFlags;
     if (Flags & 0x80) {
-        SpuSetReverbModeDepth(
+        Audio_Native_SetReverbDepth(
             Audio_Seq_activeMusicConfig->reverbDepth >> 12, Audio_Seq_activeMusicConfig->reverbDepth >> 12);
         Audio_Driver_controlLatches.updateFlags &= ~0x80;
     }
     if (Flags & 0x10) {
         if (Audio_Mixer_voiceScheduler.activeVoices != 0) {
-            SpuSetNoiseClock(Audio_Mixer_voiceScheduler.noiseClock);
+            Audio_Native_SetNoiseClock(Audio_Mixer_voiceScheduler.noiseClock);
         } else {
-            SpuSetNoiseClock(Audio_Seq_activeMusicConfig->noiseClock);
+            Audio_Native_SetNoiseClock(Audio_Seq_activeMusicConfig->noiseClock);
         }
         Audio_Driver_controlLatches.updateFlags &= ~0x10;
     }

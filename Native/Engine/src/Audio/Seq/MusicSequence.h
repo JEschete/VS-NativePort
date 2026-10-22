@@ -13,7 +13,6 @@
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
 
-void Audio_Seq_ReleaseSavedVoiceConflicts(void);
 void Audio_Seq_ResetSoundEffectChannel(Audio_SeqChannel* arg0, char* arg1);
 u_int Audio_Seq_AssignedVoiceMask(Audio_SeqChannel* arg0, u_int arg1);
 void Audio_Seq_LoadMusicSequence(Audio_AkaoSequenceFile* in_Sequence);

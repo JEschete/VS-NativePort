@@ -88,12 +88,6 @@
 // decomp: _zoneContext (_zoneContext@BATTLE/BATTLE.PRG)
 Field_ZoneContext Field_zoneContext;
 
-// decomp: D_800F18A8 (D_800F18A8@BATTLE/BATTLE.PRG)
-int Field_zoneSoundFileId;
-
-// decomp: D_800F18AC (D_800F18AC@BATTLE/BATTLE.PRG)
-int Field_roomMusicSlot;
-
 // decomp: D_800F18C8 (D_800F18C8@BATTLE/BATTLE.PRG)
 Field_RoomLoadResetBlock Field_roomLoadResetBlock;
 

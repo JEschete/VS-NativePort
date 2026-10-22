@@ -4,6 +4,12 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: D_800F18A8 (D_800F18A8@BATTLE/BATTLE.PRG): a view into another global
+#define Field_zoneSoundFileId (*(int*)(&Field_zoneContext.musicId))
+
+// decomp: D_800F18AC (D_800F18AC@BATTLE/BATTLE.PRG): a view into another global
+#define Field_roomMusicSlot (*(int*)(&Field_zoneContext.musicSlot))
+
 #endif // VS_FIELD_ROOMLOADING_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_ROOMLOADING_H_DECLS)
@@ -21,8 +27,6 @@
 #include "Render/Palette.h"
 
 extern Field_ZoneContext Field_zoneContext;
-extern int Field_zoneSoundFileId;
-extern int Field_roomMusicSlot;
 extern Field_RoomLoadResetBlock Field_roomLoadResetBlock;
 extern int Field_isRoomActorSpawnEnabled;
 extern void* Field_roomCleanupBuffer;

@@ -1021,6 +1021,15 @@
     <Filter Include="tools\test">
       <UniqueIdentifier>{CFC2A27F-C605-5647-897F-AF632ED41495}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tools\vcpkg">
+      <UniqueIdentifier>{22DA2905-33B5-5A0E-A704-DFAE90A21354}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tools\vcpkg\ports">
+      <UniqueIdentifier>{EDA80DE0-2138-517B-867A-6DACFE614EE0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tools\vcpkg\ports\sfizz">
+      <UniqueIdentifier>{7A93475D-3363-5013-BF4E-E32FC670A11C}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\.clang-format">
@@ -5312,6 +5321,9 @@
     </None>
     <None Include="..\..\test\run_native.ps1">
       <Filter>tools\test</Filter>
+    </None>
+    <None Include="..\..\vcpkg\ports\sfizz\vcpkg.json">
+      <Filter>tools\vcpkg\ports\sfizz</Filter>
     </None>
     <None Include="..\..\windows.py">
       <Filter>tools</Filter>

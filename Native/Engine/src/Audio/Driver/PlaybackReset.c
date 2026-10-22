@@ -16,23 +16,16 @@
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Legacy/Psx.h"
-
-// SPU registers the reset writes (LibSpu.h register block; offsets from
-// 0x1F801C00)
-#define SPU_MAIN_VOLUME_LEFT \
-  ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x180))
-#define SPU_MAIN_VOLUME_RIGHT \
-  ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x182))
-#define SPU_CONTROL ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x1AA))
 
 // decomp: SLUS_010.40 func_8001369C (src/SLUS_010.40/25AC.c:1058)
 void Audio_Driver_ResetPlaybackState(void) {
   Audio_SeqChannel* channel;
-  u_short spu_control;
   int i;
 
+  Audio_Native_Reset();
   Audio_Seq_activeMusicConfig = &Audio_Seq_primaryMusicConfig;
   Audio_Seq_secondaryMusicConfig = NULL;
   // the original also stores &musicChannels in D_800377FC, which nothing reads
@@ -68,12 +61,6 @@ void Audio_Driver_ResetPlaybackState(void) {
   Audio_Seq_primaryMusicConfig.reverbChannels = 0;  // +0x50
   Audio_Mixer_voiceScheduler.fmVoices = 0;          // +0x24
 
-  spu_control = *SPU_CONTROL;
-  *SPU_MAIN_VOLUME_LEFT = 0x3FFF;
-  *SPU_MAIN_VOLUME_RIGHT = 0x3FFF;
-  *CD_VOL_L = 0x7FFF;
-  *CD_VOL_R = 0x7FFF;
-
   Audio_Seq_musicLoopsRemaining = 0;
   Audio_Mixer_mutedMusicChannels = 0;
   Audio_Cutscene_streamControlFlags = 0;
@@ -87,10 +74,6 @@ void Audio_Driver_ResetPlaybackState(void) {
   Audio_Mixer_voiceModes.fm = 0;
   Audio_Mixer_voiceModes.noise = 0;
   Audio_Mixer_voiceModes.reverb = 0;
-  // SPU control: CD audio on (bit 0), CD audio reverb off (bit 2)
-  enum { kCdAudioResetMask = 0xFFFA, kCdAudioEnable = 1 };
-  *SPU_CONTROL = (spu_control & kCdAudioResetMask) | kCdAudioEnable;
-
   // the 32 music channels: no voice assigned (24 = none)
   for (i = 0, channel = Audio_Seq_musicChannels; i < 32; ++i, ++channel) {
     channel->updateFlags = 0;           // +0x34
@@ -124,5 +107,5 @@ void Audio_Driver_ResetPlaybackState(void) {
   Audio_Seq_activeMusicConfig->reverbDepthSlideLength = 0;  // +0x6A
   Audio_Driver_controlLatches.updateFlags |= 0x80;
   Audio_Mixer_SetReverbMode(4);
-  SpuSetReverb(1);
+  Audio_Native_EnableReverb(1);
 }

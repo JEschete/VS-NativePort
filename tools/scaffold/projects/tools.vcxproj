@@ -1454,6 +1454,7 @@
     <None Include="..\..\test\duckstation_capture.ps1" />
     <None Include="..\..\test\duckstation_setup.ps1" />
     <None Include="..\..\test\run_native.ps1" />
+    <None Include="..\..\vcpkg\ports\sfizz\vcpkg.json" />
     <None Include="..\..\windows.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

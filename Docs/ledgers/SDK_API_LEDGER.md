@@ -20,6 +20,13 @@ Strategy totals: R=86, T=149, D=52.
 Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), Texture/VRAM-page cache, framebuffer readback API
 
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
+The 2026-10-21 audio fidelity checkpoint migrates the noise clock, four
+reverb-control surfaces and boot reverb enable/disable consumers to native
+APIs (seven function rows marked `[M]`). Their SDK declarations/stubs remain;
+this is not `[x]` retirement or EC-02 completion. See
+[the audio contract and audit](../ASSET_PIPELINE.md)
+for behavior evidence and the distinction from C++ ownership/promotion.
+
 |---|---|---|---|---:|---:|---|
 | [ ] | T | `getTPage` | macro | 212 | 14 | MENUF.PRG (133), BATTLE.PRG (27), TITLE.PRG (12), MENU5.PRG (11), ENDING.PRG (9), MENU7.PRG (9), MENU9.PRG (4), MENUE.PRG (3), include (2), INITBTL.PRG (1), renderTextures.h (1) |
 | [ ] | T | `getClut` | macro | 161 | 13 | MENUF.PRG (136), BATTLE.PRG (7), MAINMENU.PRG (3), MENU0.PRG (3), MENU4.PRG (3), ENDING.PRG (2), MENU9.PRG (2), include (1), MENU5.PRG (1), MENU7.PRG (1), renderTextures.h (1), TITLE.PRG (1) |
@@ -273,8 +280,8 @@ Target: VS.Audio: Voice/SampleBank/Mixer/Reverb API (no SPU registers or SPU RAM
 | [ ] | T | `SPU_VOICE_ADSR_SR` | constant | 2 | 1 | include (2) |
 | [ ] | T | `SpuSetCommonMasterVolume` | function | 2 | 1 | TITLE.PRG (2) |
 | [ ] | D | `SpuSetIRQAddr` | function | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | T | `SpuSetNoiseClock` | function | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | T | `SpuSetReverb` | function | 2 | 1 | SLUS_010.40 (2) |
+| [M] | T | `SpuSetNoiseClock` | function | 2 | 1 | SLUS_010.40 (2) |
+| [M] | T | `SpuSetReverb` | function | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | D | `SpuSetTransferMode` | function | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | T | `SPU_MALLOC_RECSIZ` | constant | 1 | 1 | include (1) |
 | [ ] | T | `SPU_ON` | constant | 1 | 1 | SLUS_010.40 (1) |
@@ -285,12 +292,12 @@ Target: VS.Audio: Voice/SampleBank/Mixer/Reverb API (no SPU registers or SPU RAM
 | [ ] | T | `SPU_VOICE_VOLL` | constant | 1 | 1 | include (1) |
 | [ ] | T | `SPU_VOICE_VOLR` | constant | 1 | 1 | include (1) |
 | [ ] | T | `SPU_VOICE_WDSA` | constant | 1 | 1 | include (1) |
-| [ ] | T | `SpuGetReverbModeType` | function | 1 | 1 | SLUS_010.40 (1) |
+| [M] | T | `SpuGetReverbModeType` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | T | `SpuGetVoiceEnvelope` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | D | `SpuInitMalloc` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | T | `SpuRead` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | T | `SpuSetReverbModeDepth` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | T | `SpuSetReverbModeType` | function | 1 | 1 | SLUS_010.40 (1) |
+| [M] | T | `SpuSetReverbModeDepth` | function | 1 | 1 | SLUS_010.40 (1) |
+| [M] | T | `SpuSetReverbModeType` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | T | `SpuStart` | function | 1 | 1 | SLUS_010.40 (1) |
 
 ## libapi â†’ Platform (24 symbols, 77 uses)
@@ -396,8 +403,8 @@ Target: VS.Audio: SequencePlayer / SfxPlayer API
 
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
-| [ ] | T | `SsUtReverbOff` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | T | `SsUtReverbOn` | function | 1 | 1 | SLUS_010.40 (1) |
+| [M] | T | `SsUtReverbOff` | function | 1 | 1 | SLUS_010.40 (1) |
+| [M] | T | `SsUtReverbOn` | function | 1 | 1 | SLUS_010.40 (1) |
 
 ## libcd â†’ Content (1 symbols, 1 uses)
 

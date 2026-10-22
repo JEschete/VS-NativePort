@@ -29,6 +29,19 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(new.strip(), "Boot_InitializePlayerSettings();")
         self.assertIn("Boot_InitializePlayerSettings", copy_fixups.NATIVE_HELPER_HEADERS)
 
+    def test_native_audio_preserves_optional_layer_guard_and_connects_sfx(self):
+        fixes = copy_fixups.FIXES["F03192"]
+        self.assertEqual(len(fixes), 4)
+        root = Path(__file__).resolve().parents[2]
+        mixer = (root / "Native/Engine/src/Audio/Mixer/VoiceMixer.c").read_text()
+        self.assertEqual(mixer.count("Audio_Native_ConfigureChannel("), 3)
+        self.assertNotIn("Audio_Driver_WriteDirtyVoiceParameters(", mixer)
+        self.assertNotIn("Audio_Driver_WriteVoiceParameters(", mixer)
+        self.assertIn("Audio_Native_Envelope(i)", mixer)
+        self.assertIn("Audio_Seq_secondaryMusicConfig != NULL ?", mixer)
+        sequencer = (root / "Native/Engine/src/Audio/Seq/Sequencer.c").read_text()
+        self.assertEqual(sequencer.count("Audio_Native_Tick();"), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

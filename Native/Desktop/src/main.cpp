@@ -303,7 +303,7 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings) {
     VS_LOG_ERROR("boot", "{}", r.error());
     return 1;
   }
-  Audio::AudioDevice audio;
+  Audio::AudioDevice audio(settings.speed == 1);
   if (auto r = audio.Open(); !r) {
     VS_LOG_WARN("boot", "{} (continuing without audio)", r.error());
   }

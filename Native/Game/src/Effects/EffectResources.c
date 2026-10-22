@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Audio/SoundBanks.h"
-#include "Audio/Stream.h"
+#include "Audio/StreamPlayback.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Math/Interpolation.h"
@@ -183,10 +183,10 @@ void Effects_BindEffectSoundBank(void* arg0)
 }
 
 // decomp: BATTLE.PRG _parsePfileBlock13 (src/BATTLE/BATTLE.PRG/6F014.c:543)
-void Effects_BindEffectAuxiliarySoundBank(void* arg0)
+void Effects_BindEffectAuxiliarySoundBank(void* arg0, size_t byte_count)
 {
     Effects_package->block13Data = arg0;
-    Effects_package->auxiliarySoundHandle = Audio_BindRoomCutsceneStream((uintptr_t)arg0);
+    Effects_package->auxiliarySoundHandle = Audio_BindRoomCutsceneStream(arg0, byte_count);
 }
 
 // decomp: BATTLE.PRG _loadfile (src/BATTLE/BATTLE.PRG/6F014.c:549)
@@ -450,7 +450,8 @@ void Effects_BindEffectPackageBlocks(Effects_PackageFile* arg0)
             break;
 
         case 0xD0000:
-            Effects_BindEffectAuxiliarySoundBank(arg0->blocks);
+            Effects_BindEffectAuxiliarySoundBank(
+                arg0->blocks, (meta & 0xFFFF) - sizeof(u_int));
             break;
         }
 

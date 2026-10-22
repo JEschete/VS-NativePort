@@ -96,6 +96,37 @@ TEST_CASE(
   StopRCnt(RCntCNT2);
 }
 
+TEST_CASE("VSync keeps the sound counter at 240 Hz across NTSC fields",
+          "[core][clock][audio][audio-clock]") {
+  static int calls = 0;
+  calls = 0;
+  REQUIRE(SetRCnt(RCntCNT2, 17640, RCntMdINTR) == 1);
+  REQUIRE(StartRCnt(RCntCNT2) == 1);
+  const auto event = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, [] {
+    ++calls;
+    return 0L;
+  });
+  REQUIRE(event == 1);
+  EnableEvent(event);
+  const std::array<std::array<int, 2>, 3> intervals{
+      {{250, 1001}, {750, 4004}, {59000, 240240}}};
+  for (const auto& [fields, expected] : intervals) {
+    VSync(fields);
+    CHECK(calls == expected);
+  }
+  StopRCnt(RCntCNT2);
+  VSync(1000);
+  CHECK(calls == 240240);
+  StartRCnt(RCntCNT2);
+  VSync(250);
+  CHECK(calls == 241241);
+  SetRCnt(RCntCNT2, 17640, RCntMdINTR);
+  VSync(250);
+  CHECK(calls == 242242);
+  CloseEvent(event);
+  StopRCnt(RCntCNT2);
+}
+
 TEST_CASE("Fixed multiply preserves the original signed product bits",
           "[core][math]") {
   for (int left :

@@ -64,7 +64,6 @@ void Audio_Samples_CopyRelocatedInstruments(Audio_Instrument* in_A,
     Audio_Instrument* in_B, int in_AddrOffset, int in_Count);
 int Audio_Samples_SequenceMagicDifference(int* data);
 int Audio_Samples_LoadDeclaredBank(void* arg0, int arg1);
-int Audio_Samples_UploadBank(void* in_Data, int in_Wait, int in_FirstInstrument, int in_SpuAddr);
 u_short Audio_Samples_MapInstrumentToAlternateBank(u_int in_Flags, Audio_SeqChannel* in_pChannel);
 u_short Audio_Samples_MapInstrumentToBaseBank(u_int in_Flags, Audio_SeqChannel* in_Channel);
 int Audio_Samples_SoundEffectBankSlot(int flags);

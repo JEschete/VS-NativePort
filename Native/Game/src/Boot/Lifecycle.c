@@ -3,6 +3,7 @@
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Samples/SampleBanks.h"
+#include "Audio/SequencerOutput.h"
 #include "Audio/SoundBanks.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
@@ -162,7 +163,7 @@ void Boot_InitializePlatformServices(void)
     PadStartCom();
     Input_UnlockAnalogModeSwitch();
     Input_ResetVibrationPatterns();
-    SsUtReverbOff();
+    Audio_Native_EnableReverb(0);
     DsInit();
     Core_Random_InitializeShuffleTable();
     Boot_isSoftResetEnabled = 1;
@@ -179,7 +180,7 @@ void Boot_InitializeTitleSession(void)
 
     ClearImage(&rect2, 0, 0, 0);
     Render_ShowLoadingScreen();
-    SsUtReverbOn();
+    Audio_Native_EnableReverb(1);
     VSyncCallback(Core_IgnoreCall);
     Core_Memory_InitializeHeap((Core_HeapBlockHeader*)Core_GameHeapArena(), CORE_GAME_HEAP_SIZE);
     Content_InitializeDiscQueue();

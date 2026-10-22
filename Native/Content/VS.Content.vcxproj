@@ -45,6 +45,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\AudioBank.cpp" />
+    <ClCompile Include="src\AudioStream.cpp" />
     <ClCompile Include="src\CdDrive.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -117,6 +119,8 @@
     <ClInclude Include="src\OverlayWorkspace.h" />
     <ClInclude Include="src\PFile.h" />
     <ClInclude Include="src\SystemResources.h" />
+    <ClInclude Include="include\Content\AudioBank.hpp" />
+    <ClInclude Include="include\Content\AudioStream.hpp" />
     <ClInclude Include="include\Content\DataAccess.h" />
     <ClInclude Include="include\Content\DataStore.hpp" />
     <ClInclude Include="include\Content\Disc.hpp" />

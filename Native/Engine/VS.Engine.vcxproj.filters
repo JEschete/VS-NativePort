@@ -192,12 +192,18 @@
     <ClInclude Include="src\Audio\Music.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\MusicState.cpp">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Playback\SoundPlayback.c">
       <Filter>src\Audio\Playback</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Playback\SoundPlayback.h">
       <Filter>src\Audio\Playback</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\Reverb.cpp">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Samples\SampleBanks.c">
       <Filter>src\Audio\Samples</Filter>
     </ClCompile>
@@ -243,6 +249,9 @@
     <ClInclude Include="src\Audio\Seq\Sequencer.h">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\SequencerOutput.cpp">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Sfx.c">
       <Filter>src\Audio</Filter>
     </ClCompile>
@@ -267,9 +276,18 @@
     <ClInclude Include="src\Audio\Stream.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\StreamPlayback.cpp">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\VoiceEngine.cpp">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
     <ClInclude Include="src\Audio\Voices.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\XaPlayback.cpp">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
     <ClCompile Include="src\Core\Arena.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -655,6 +673,24 @@
       <Filter>src\Save</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\AudioDevice.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\MusicState.h">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\Reverb.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SequencerOutput.h">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\StreamPlayback.h">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\VoiceEngine.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\XaPlayback.h">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Arena.h">

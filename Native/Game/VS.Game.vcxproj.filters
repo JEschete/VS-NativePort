@@ -1902,7 +1902,7 @@
     <ClInclude Include="src\Menu\Setup\SetupScreen.h">
       <Filter>src\Menu\Setup</Filter>
     </ClInclude>
-    <ClCompile Include="src\Menu\Sounds.c">
+    <ClCompile Include="src\Menu\Sounds.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
     <ClInclude Include="src\Menu\Sounds.h">

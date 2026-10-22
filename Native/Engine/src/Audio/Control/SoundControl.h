@@ -50,7 +50,6 @@ void Audio_Control_FadeMusicTempoAndPitch(void* arg0, int arg1);
 void Audio_Control_FadeMusicTempoAndPitchFrom(void* arg0, int arg1, int arg2);
 void Audio_Control_StopAllMusic(void);
 void Audio_Control_StopSceneSoundEffects(void);
-int Audio_Control_SetDiscMixVolume(u_int arg0);
 void Audio_Control_StartCutsceneStream(void* arg0, int arg1, int arg2);
 void Audio_Control_StopCutsceneStream(void);
 void Audio_Control_SetCutsceneVolume(int arg0);

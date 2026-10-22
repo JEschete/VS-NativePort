@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdint>
 
+#include "Core/FrameClock.hpp"
 #include "Core/Unported.h"
 #include "Platform/GameFiber.hpp"
 
@@ -19,6 +20,7 @@ void (*g_vblankCallback)(void) = nullptr;
 Clock::time_point g_rcnt2Start = Clock::now();
 unsigned g_rcnt2Target = 0;
 std::uint64_t g_rcnt2Clocks = 0;
+std::uint64_t g_rcnt2_field_remainder = 0;
 bool g_rcnt2Running = false;
 bool g_rcnt2Enabled = false;
 long (*g_rcnt2Callback)(void) = nullptr;
@@ -29,7 +31,15 @@ constexpr double Rcnt2Hz = 33868800.0 / 8.0;
 void WaitOneFrame() {
   VS::Platform::GameFiber::YieldToHost();
   ++g_ticks;
-  Legacy_AdvanceCounter2(33868800u / 8u / 60u);
+  if (g_rcnt2Running && g_rcnt2Target != 0) {
+    // Carry fractional clocks at the host's field rate, not an assumed 60 Hz.
+    g_rcnt2_field_remainder += static_cast<std::uint64_t>(Rcnt2Hz) *
+                               VS::Core::FrameClock::kTickRateDenominator;
+    const auto elapsed =
+        g_rcnt2_field_remainder / VS::Core::FrameClock::kTickRateNumerator;
+    g_rcnt2_field_remainder %= VS::Core::FrameClock::kTickRateNumerator;
+    Legacy_AdvanceCounter2(static_cast<unsigned>(elapsed));
+  }
   if (g_vblankCallback != nullptr) {
     g_vblankCallback();
   }
@@ -70,6 +80,7 @@ long SetRCnt(unsigned long spec, unsigned short target, long mode) {
   if (spec == RCntCNT2) {
     g_rcnt2Target = target == 0 ? 65536u : target;
     g_rcnt2Clocks = 0;
+    g_rcnt2_field_remainder = 0;
   }
   return 1;
 }

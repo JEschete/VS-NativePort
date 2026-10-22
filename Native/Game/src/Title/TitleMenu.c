@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Audio/Control/SoundControl.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
+#include "Audio/XaPlayback.h"
 #include "Battle/Feedback.h"
 #include "Boot/GameLoop.h"
 #include "Boot/PlayerSettings.h"

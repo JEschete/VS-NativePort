@@ -51,16 +51,11 @@ typedef struct Audio_CutsceneStreamState {
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_CUTSCENE_STREAM_H_DECLS)
 #define VS_AUDIO_CUTSCENE_STREAM_H_DECLS
-#include "Audio/Mixer/MixControl.h"
 
 extern volatile int Audio_Cutscene_legacySpuTransferBusy;
 extern Audio_CutsceneStreamState Audio_Cutscene_streamState;
-void Audio_Cutscene_PauseStream(Audio_CommandParams* in_Params __attribute__((unused)));
-void Audio_Cutscene_ResumeStream(Audio_CommandParams* in_Params __attribute__((unused)));
-void Audio_Cutscene_StopStreamVoices(void);
 int Audio_Cutscene_FindFreeVoicePair(void);
 void Audio_Cutscene_UploadSecondMonoBuffer(void);
-void Audio_Cutscene_StartStream(u_int* arg0, int arg1, int arg2);
 void Audio_Cutscene_InitializeStreamVoice(
     int in_Voice, int in_PanMode, int in_StartAddr, int in_RepeatAddr);
 void Audio_Cutscene_BeginStreamPlayback(
@@ -73,10 +68,5 @@ void Audio_Cutscene_RefillMonoFirstBuffer(void);
 void Audio_Cutscene_RefillMonoSecondBuffer(void);
 void Audio_Cutscene_RefillStereoFirstBuffer(void);
 void Audio_Cutscene_RefillStereoSecondBuffer(void);
-void Audio_Cutscene_ReplaceStream(int* arg0);
-void Audio_Cutscene_StopStream(void);
-void Audio_Cutscene_SetStreamVolume(Audio_CommandParams* in_Params);
-void Audio_Cutscene_SlideStreamVolume(Audio_CommandParams* in_Params);
-void Audio_Cutscene_SetStreamPan(int* arg0);
 
 #endif // VS_AUDIO_CUTSCENE_STREAM_H_DECLS

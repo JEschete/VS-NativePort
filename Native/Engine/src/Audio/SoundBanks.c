@@ -1,11 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Audio/Control/SoundControl.h"
 #include "Audio/LegacyFiles.h"
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
+#include "Audio/StreamPlayback.h"
+#include "Audio/XaPlayback.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
@@ -301,6 +302,7 @@ void Audio_InitializeMenuSoundBanks(void)
 // decomp: SLUS_010.40 vs_main_resetSound (src/SLUS_010.40/main.c:10480)
 void Audio_ResetSoundSlots(void)
 {
+    Audio_Native_ResetCutsceneStream();
     int i;
 
     Audio_soundState.currentMusicSlot = 0;

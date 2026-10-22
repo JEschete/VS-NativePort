@@ -51,7 +51,7 @@ and a dependency boundary. No such new approval is implied by this audit.
 | ID | Area | Current classification | Owning systems | Plan packages |
 |---|---|---|---|---|
 | EC-01 | GPU packets, ordering tables and page image | Behavioral emulation | Engine/Render | M3, M4, M7, M10 |
-| EC-02 | SPU registers, sample memory and transfers | Partial device-state emulation; incomplete output integration | Engine/Audio | M5, M10 |
+| EC-02 | SPU registers, sample memory and transfers | Native sample/noise/FM/reverb/effect/XA output connected; unused DMA and other device-shaped consumers remain | Engine/Audio | M5, M10 |
 | EC-03 | Stateful GTE-style math interface | Native arithmetic with coprocessor-style compatibility | Engine/Core, Render, Game/Actors | M4, M7, M10 |
 | EC-04 | Sector requests and module-address relocation | Storage adapter plus original data-layout coupling | Content, Game/Boot | M1, M4-M9, M10 |
 | EC-05 | Scratchpad and overlapping overlay storage | Memory-layout compatibility | Engine/Core, Game/Boot and resource owners | M1, M3, M7, M9, M10 |
@@ -88,17 +88,37 @@ backend, if later approved, must not make the modern path depend on it.
 `Native/Engine/src/Audio/Driver/SoundDriver.h`, `Driver/PlaybackReset.c`, `SoundEffects/SoundEffects.c`, and
 `Native/Engine/src/Audio/AudioDevice.cpp`.
 
-Register offsets are redirected into an ordinary memory block. Sample transfers use a 512 KiB SPU-shaped block and
-invoke completion callbacks synchronously. Noise, envelopes and reverb still include unported operations. The native
-output wrapper now also provides `OpenSource`; inspection found no callers of `AudioDevice::Submit`, so that method
-alone is not evidence of sequencer-to-output integration. Reassess all source streams when playback is connected.
+Remaining compatibility operations redirect register offsets into an ordinary memory block and use a 512 KiB
+SPU-shaped transfer block. The first native slice instead binds imported sample assets and connects music/SFX
+channel commits to typed `VoiceEngine` controls, sfizz rendering and `AudioDevice::Submit`. Real menu actions
+produce captured PCM, including stereo/mono changes. Canonical zone-music field views (G00248-G00250 within
+G00246) now let normal prologue events load MUSIC016/WAVE0069 and produce music alongside SFX. The native
+stream retains 50 ms of priming, while SDL demand now renders active voices independently of gameplay stalls.
+The sequencer publishes complete control ticks; program loading and retirement remain on the control thread,
+and the renderer never runs the sequencer. Final-postmix stall tests and movie-source isolation tests cover
+that boundary. Native capture is not a capture of physical device gaps. Native ADSR runs separately from sfizz sample playback.
+Counter 2 now advances at the host's exact NTSC field-rate ratio, removing the long-run 60-versus-59.94 Hz
+underproduction. This repairs existing timing debt; it does not retire the counter bridge.
+F03159, F03163-F03169 and F03178 are owned C++ bridges; this is not full behavior verification or EC retirement.
+Native noise and preceding-voice FM now render rather than stopping their voices. Reverb uses the original
+presets and a native float delay network. Mixer noise/depth/preset controls and boot reverb enable/disable
+call typed native APIs through generator fixups; the uninitialized SDK preset getter is no longer a consumer.
+All 83 nonempty disc banks import, including the older articulation and explicit unused records.
+Effect-package streams now use imported WAV/SFZ assets, canonical bindings, native-width commands and
+the existing reserved voice pair. Owned lifecycle/control callbacks replace their production DMA/IRQ
+start path. Ending XA uses lossless FLAC and an independent demand-fed SDL source, including CD gain,
+fades, stereo/mono, EOF and reset/close. Saved music uses native-sized snapshots and source-backed
+conflict release instead of its former no-op.
+Unused chunk-upload/refill APIs, other device-shaped consumers and broader reference acceptance remain
+migration debt. Unused SDK stubs have not been deleted; EC-02 remains open. Behavior coverage, owned C++
+promotion and compatibility retirement are separate gates.
 
 **Issue:** copied voice control still communicates through physical voice bits, register offsets and sample addresses.
 A register block plus successful transfers is neither a completed synthesizer nor verified music playback.
 
 **Retain:** AKAO sequencing, priorities, cancellation, tempo changes, pitch/volume slides, loops and transition rules.
 **Replace:** driver register writes with typed voice operations, decoded sample handles and a defined mixer/output
-contract. Select a synthesis backend explicitly; do not accidentally build both a full SPU emulator and a second mixer.
+contract. D23 selects sfizz/SFZ+WAV; do not build a competing SPU synthesizer or a second event sequencer.
 
 **Retirement gate:** supported music/SFX paths make no SPU register or sample-RAM accesses. Event traces and audible
 output cover simultaneous effects/music, voice release/stealing, loops, fades and reverb decisions. Unsupported features
@@ -130,7 +150,9 @@ contexts do not interfere with one another.
 
 Regular disc files are extracted into a file tree and indexed by original LBA/size. The game still requests sectors;
 module data is copied into globals and original addresses are resolved into native symbols. Desktop startup still opens
-a disc as well as the extracted data. STR/XA entries are listed but not converted by the current extractor.
+a disc as well as the extracted data. STR converts to Matroska (AV1/FLAC); effect streams convert to WAV/SFZ
+and ending XA to FLAC under `audio/streams`. The original XA `files.tsv` row remains `stream` for
+sector-addressed lookup, separately from the native asset index.
 
 **Issue:** extraction is not yet conversion to the typed/versioned assets in plan D18. Interior-pointer resolution adds
 an original byte offset to a native object; that is valid only where layout identity is established. Pointer-table extents,

@@ -1362,7 +1362,7 @@ void Ending_Credits_BeginFrame(void)
 // decomp: ENDING.PRG func_8006B9B4 (src/ENDING/ENDING.PRG/D4.c:1563)
 void Ending_Credits_StartMusic(void)
 {
-    Audio_BeginXaStream(VS_ENDING_XA_LBA, 0x7FFF); // Partial playback?
+    Audio_BeginXaStream(VS_ENDING_XA_LBA, 0x7FFF);
 }
 
 // decomp: ENDING.PRG _checkStreamXaEnd (src/ENDING/ENDING.PRG/D4.c:1568)

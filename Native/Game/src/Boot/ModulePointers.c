@@ -35,6 +35,7 @@
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Music.h"
+#include "Audio/MusicState.h"
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/AkaoFormat.h"
@@ -44,10 +45,13 @@
 #include "Audio/Seq/Modulation.h"
 #include "Audio/Seq/MusicSequence.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Audio/SequencerOutput.h"
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
+#include "Audio/StreamPlayback.h"
+#include "Audio/XaPlayback.h"
 #include "Battle/Abilities.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
@@ -2303,9 +2307,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1874u, 4u, (void*)&Boot_gameplayResetWordOne, sizeof Boot_gameplayResetWordOne, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1880u, 108u, (void*)&Field_zoneContext, sizeof Field_zoneContext, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F188Cu, 4u, (void*)&Actors_zoneCharacterInitData, sizeof Actors_zoneCharacterInitData, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F18A8u, 4u, (void*)&Field_zoneSoundFileId, sizeof Field_zoneSoundFileId, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F18ACu, 4u, (void*)&Field_roomMusicSlot, sizeof Field_roomMusicSlot, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F18B0u, 4u, (void*)&Audio_zoneMusicSwitchEnabled, sizeof Audio_zoneMusicSwitchEnabled, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F18C8u, 24u, (void*)&Field_roomLoadResetBlock, sizeof Field_roomLoadResetBlock, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F18E0u, 4u, (void*)&Field_isRoomActorSpawnEnabled, sizeof Field_isRoomActorSpawnEnabled, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F18E4u, 4u, (void*)&Field_roomCleanupBuffer, sizeof Field_roomCleanupBuffer, 0u, 0u},

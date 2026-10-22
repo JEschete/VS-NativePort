@@ -3,8 +3,12 @@
   "name": "vagrant-story-native",
   "version-string": "0.1.0",
   "builtin-baseline": "b3ae22aef2b857af6e80d756c13f15db12be4e8a",
+  "vcpkg-configuration": {
+    "overlay-ports": ["tools/vcpkg/ports"]
+  },
   "dependencies": [
     "sdl3",
+    "sfizz",
     "catch2",
     "nlohmann-json",
     "dav1d",

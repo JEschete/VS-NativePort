@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Audio/SoundBanks.h"
-#include "Audio/Stream.h"
+#include "Audio/StreamPlayback.h"
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
 #include "Core/Memory/Heap.h"

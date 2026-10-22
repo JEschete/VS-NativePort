@@ -15,13 +15,14 @@
 #include "Core/Memory/Heap.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
+#include "Field/Mpd.h"
+#include "Field/RoomLoading.h"
+#include "Field/Znd.h"
+#include "Field/Zone.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
 #include "State/PlayTime.h"
-
-// decomp: D_800F18B0 (D_800F18B0@BATTLE/BATTLE.PRG)
-int Audio_zoneMusicSwitchEnabled;
 
 // decomp: BATTLE.PRG func_8007BE10 (src/BATTLE/BATTLE.PRG/146C.c:8579)
 int Audio_SetZoneMusicSwitchEnabled(int arg0) { return Audio_zoneMusicSwitchEnabled = arg0; }

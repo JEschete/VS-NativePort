@@ -314,21 +314,6 @@ void Audio_Control_StopAllMusic(void) { Audio_Mixer_DispatchCommand(240); }
 // decomp: SLUS_010.40 func_80012B98 (src/SLUS_010.40/25AC.c:717)
 void Audio_Control_StopSceneSoundEffects(void) { Audio_Mixer_DispatchCommand(241); }
 
-// decomp: SLUS_010.40 vs_sound_setCdVol (src/SLUS_010.40/25AC.c:913)
-int Audio_Control_SetDiscMixVolume(u_int arg0)
-{
-    if (Audio_Driver_mixBehavior & 2) {
-        Audio_Control_legacyDiscMixAttenuation.val0 = Audio_Control_legacyDiscMixAttenuation.val2 = Audio_Control_legacyDiscMixAttenuation.val1 = Audio_Control_legacyDiscMixAttenuation.val3 =
-            (arg0 * 0xB570) >> 0x11;
-    } else {
-        Audio_Control_legacyDiscMixAttenuation.val2 = arg0;
-        Audio_Control_legacyDiscMixAttenuation.val0 = arg0;
-        Audio_Control_legacyDiscMixAttenuation.val3 = 0;
-        Audio_Control_legacyDiscMixAttenuation.val1 = 0;
-    }
-    return 0;
-}
-
 // decomp: SLUS_010.40 func_800132C4 (src/SLUS_010.40/25AC.c:928)
 void Audio_Control_StartCutsceneStream(void* arg0, int arg1, int arg2)
 {

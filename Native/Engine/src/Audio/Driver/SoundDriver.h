@@ -15,9 +15,6 @@ typedef struct Audio_DriverFlags Audio_DriverFlags;
 // decomp: src/include/hw.h:7
 #define VOICE_00_LEFT_RIGHT ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x000))
 
-// decomp: src/include/hw.h:8
-#define VOICE_00_ADPCM_SAMPLE_RATE ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x004))
-
 // decomp: src/include/hw.h:9
 #define VOICE_00_ADPCM_START_ADDR ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x006))
 
@@ -29,36 +26,6 @@ typedef struct Audio_DriverFlags Audio_DriverFlags;
 
 // decomp: src/include/hw.h:12
 #define VOICE_00_ADPCM_REPEAT_ADDR ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x00E))
-
-// decomp: src/include/hw.h:13
-#define SPU_VOICE_KEY_ON_LO ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x188))
-
-// decomp: src/include/hw.h:14
-#define SPU_VOICE_KEY_ON_HI ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x18A))
-
-// decomp: src/include/hw.h:15
-#define SPU_VOICE_KEY_OFF_LO ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x18C))
-
-// decomp: src/include/hw.h:16
-#define SPU_VOICE_KEY_OFF_HI ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x18E))
-
-// decomp: src/include/hw.h:17
-#define SPU_VOICE_CHN_FM_MODE_LO ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x190))
-
-// decomp: src/include/hw.h:18
-#define SPU_VOICE_CHN_FM_MODE_HI ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x192))
-
-// decomp: src/include/hw.h:19
-#define SPU_VOICE_CHN_NOISE_MODE_LO ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x194))
-
-// decomp: src/include/hw.h:20
-#define SPU_VOICE_CHN_NOISE_MODE_HI ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x196))
-
-// decomp: src/include/hw.h:21
-#define SPU_VOICE_CHN_REVERB_MODE_LO ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x198))
-
-// decomp: src/include/hw.h:22
-#define SPU_VOICE_CHN_REVERB_MODE_HI ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x19A))
 
 // decomp: src/include/sound.h:14
 #define VOICE_PARAM_VOLUME_L (1 << 0) /* volume (left) */
@@ -126,13 +93,6 @@ void Audio_Driver_ReadSampleMemory(char* data, u_int len);
 void Audio_Driver_WaitForSampleTransfer(void);
 void Audio_Driver_Start(void);
 void Audio_Driver_Stop(void);
-void Audio_Driver_KeyOnVoices(u_int in_KeyOn);
-void Audio_Driver_KeyOffVoices(u_int in_KeyOff);
-void Audio_Driver_SetVoiceReverbMask(u_int in_ReverbMode);
-void Audio_Driver_SetVoiceNoiseMask(u_int in_NoiseMode);
-void Audio_Driver_SetVoiceFrequencyModulationMask(u_int in_FmMode);
-void Audio_Driver_SetVoiceVolume(int in_VoiceIndex, u_int in_VolL, u_int in_VolR, u_int in_VolumeScale);
-void Audio_Driver_SetVoiceSampleRate(int in_VoiceIndex, int in_SampleRate);
 void Audio_Driver_SetVoiceStartAddress(int in_VoiceIndex, u_int in_Addr);
 void Audio_Driver_SetVoiceLoopAddress(int in_VoiceIndex, u_int in_Addr);
 void Audio_Driver_SetVoiceEnvelopeLower(int in_VoiceIndex, u_short in_Register);
@@ -143,8 +103,6 @@ void Audio_Driver_SetVoiceDecayRate(int in_VoiceIndex, int in_DecayRate);
 void Audio_Driver_SetVoiceSustainLevel(int in_VoiceIndex, int in_SustainLevel);
 void Audio_Driver_SetVoiceSustainRateAndMode(
     int in_VoiceIndex, int in_SustainRate, u_int in_SustainDirection);
-void Audio_Driver_SetVoiceReleaseRateAndMode(
-    int in_VoiceIndex, int in_ReleaseRate, u_int in_ReleaseMode);
 void Audio_Driver_WriteVoiceParameters(
     int in_VoiceIndex, Audio_VoiceParams* in_VoiceParams, int in_VolumeScale);
 void Audio_Driver_WriteDirtyVoiceParameters(u_int in_VoiceIndex, Audio_VoiceParams* in_VoiceParams,

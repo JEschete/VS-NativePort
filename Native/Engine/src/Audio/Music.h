@@ -4,12 +4,14 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: D_800F18B0 (D_800F18B0@BATTLE/BATTLE.PRG): a view into another global
+#define Audio_zoneMusicSwitchEnabled (*(int*)(&Field_zoneContext.isMusicFadeEnabled))
+
 #endif // VS_AUDIO_MUSIC_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_MUSIC_H_DECLS)
 #define VS_AUDIO_MUSIC_H_DECLS
 
-extern int Audio_zoneMusicSwitchEnabled;
 int Audio_SetZoneMusicSwitchEnabled(int arg0);
 void Audio_PlayActorScriptSound(int arg0, int arg1);
 int Audio_MusicBeatPosition(void);

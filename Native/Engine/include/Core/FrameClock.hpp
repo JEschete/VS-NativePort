@@ -9,7 +9,10 @@ namespace VS::Core {
 // step every 2nd/3rd tick.
 class FrameClock {
  public:
-  static constexpr double TicksPerSecond = 60000.0 / 1001.0;
+  static constexpr u32 kTickRateNumerator = 60000;
+  static constexpr u32 kTickRateDenominator = 1001;
+  static constexpr double TicksPerSecond =
+      static_cast<double>(kTickRateNumerator) / kTickRateDenominator;
   static constexpr u32 kDefaultCatchUpTicks = 4;
 
   // Feed real elapsed seconds; returns how many logical ticks to run now

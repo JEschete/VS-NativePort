@@ -10,6 +10,7 @@
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/MusicSequence.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 #include "Core/Memory/Copy.h"
@@ -400,11 +401,11 @@ void Audio_Mixer_SetReverbMode(int in_ReverbMode)
 {
     long curMode;
 
-    SpuGetReverbModeType(&curMode);
+    curMode = Audio_Native_ReverbMode();
     if (curMode != in_ReverbMode) {
-        SpuSetReverb(SPU_OFF);
-        SpuSetReverbModeType(in_ReverbMode | SPU_REV_MODE_CLEAR_WA);
-        SpuSetReverb(SPU_ON);
+        Audio_Native_EnableReverb(SPU_OFF);
+        Audio_Native_SetReverbMode(in_ReverbMode);
+        Audio_Native_EnableReverb(SPU_ON);
     }
 }
 

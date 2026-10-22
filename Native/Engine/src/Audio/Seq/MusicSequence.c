@@ -5,20 +5,16 @@
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/MusicState.h"
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/MusicSequence.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
-#include "Core/Memory/Copy.h"
-
-// decomp: SLUS_010.40 func_80015BAC (src/SLUS_010.40/25AC.c:2326) [INCLUDE_ASM: not yet ported]
-void Audio_Seq_ReleaseSavedVoiceConflicts(void)
-{
-    VS_UNPORTED("Audio::Seq::ReleaseSavedVoiceConflicts");
-}
+#include "Audio/XaPlayback.h"
 
 // decomp: SLUS_010.40 func_80015C9C (src/SLUS_010.40/25AC.c:2330)
 void Audio_Seq_ResetSoundEffectChannel(Audio_SeqChannel* arg0, char* arg1)
@@ -242,13 +238,7 @@ void Audio_Seq_RestoreMusicSequence(Audio_AkaoSequenceFile* in_Sequence, int in_
     Audio_SeqChannel* pChannel;
     Audio_MusicConfig* pConfig;
 
-    if (in_SwapWithSavedState == 0) {
-        Core_Memory_CopyWords(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig, 0x80);
-        Core_Memory_CopyWords(Audio_Seq_savedMusicChannels, Audio_Seq_musicChannels, 0x2200);
-    } else {
-        Core_Memory_SwapWords(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig, 0x80);
-        Core_Memory_SwapWords(Audio_Seq_savedMusicChannels, Audio_Seq_musicChannels, 0x2200);
-    }
+    Audio_Native_RestoreMusicSnapshot(in_SwapWithSavedState);
 
     Audio_Seq_activeMusicConfig->statusFlags &= ~0x60;
     Audio_Seq_activeMusicConfig->statusFlags |=
@@ -346,8 +336,7 @@ void Audio_Seq_SaveCurrentMusic(void)
 
     if (Audio_Seq_activeMusicConfig->activeChannels != 0) {
         Audio_SeqChannel* c;
-        Core_Memory_CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
-        Core_Memory_CopyWords(Audio_Seq_musicChannels, (Audio_MusicConfig*)Audio_Seq_savedMusicChannels, 0x2200);
+        Audio_Native_SaveMusicSnapshot();
         for (i = 0, c = Audio_Seq_savedMusicChannels; i < 32; ++i, ++c) {
             Audio_Samples_MapInstrumentToBaseBank(Audio_Seq_savedMusicConfig.statusFlags, c);
         }
@@ -361,9 +350,7 @@ void Audio_Seq_StartMusicLayer(Audio_CommandParams* arg0)
         && ((Audio_Seq_secondaryMusicConfig == NULL) || (Audio_Seq_secondaryMusicConfig->musicId == 0))) {
         Audio_Seq_secondaryMusicConfig = &Audio_Seq_savedMusicConfig;
         Audio_Seq_secondaryMusicChannels = Audio_Seq_savedMusicChannels;
-        Core_Memory_CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
-        Core_Memory_CopyWords(Audio_Seq_musicChannels,
-            (Audio_MusicConfig*)Audio_Seq_secondaryMusicChannels, 0x2200);
+        Audio_Native_SaveMusicSnapshot();
     }
     Audio_Seq_LoadMusicSequence((Audio_AkaoSequenceFile*)arg0->param1);
     Audio_Seq_activeMusicConfig->masterVolume = (arg0->extParam1 & 0x7F) << 0x10;
@@ -386,9 +373,7 @@ void Audio_Seq_CrossfadeMusicLayers(Audio_CommandParams* arg0)
             && ((Audio_Seq_secondaryMusicConfig == NULL) || (Audio_Seq_secondaryMusicConfig->musicId == 0))) {
             Audio_Seq_secondaryMusicConfig = &Audio_Seq_savedMusicConfig;
             Audio_Seq_secondaryMusicChannels = Audio_Seq_savedMusicChannels;
-            Core_Memory_CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
-            Core_Memory_CopyWords(Audio_Seq_musicChannels,
-                (Audio_MusicConfig*)Audio_Seq_secondaryMusicChannels, 0x2200);
+            Audio_Native_SaveMusicSnapshot();
         }
         Audio_Seq_LoadMusicSequence((Audio_AkaoSequenceFile*)arg0->param1);
         Audio_Seq_activeMusicConfig->musicId = arg0->param3;

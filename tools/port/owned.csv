@@ -1,4 +1,32 @@
 id,kind,name,path,header,since,notes
+F03198,function,Audio_Seq_ReleaseSavedVoiceConflicts,Native\Engine\src\Audio\MusicState.cpp,Native\Engine\include\Audio\MusicState.h,2026-10-21,Detach displaced saved-layer voices while preserving active SFX and stream reservations
+F03144,function,Audio_Control_SetDiscMixVolume,Native\Engine\src\Audio\XaPlayback.cpp,Native\Engine\include\Audio\XaPlayback.h,2026-10-21,Apply original stereo or attenuated mono gains to native XA PCM
+F03262,function,Audio_Seq_WriteDiscVolume,Native\Engine\src\Audio\XaPlayback.cpp,Native\Engine\include\Audio\XaPlayback.h,2026-10-21,Publish sequencer CD volume and fades without hardware register writes
+F03393,function,Audio_Cutscene_StopStream,Native\Engine\src\Audio\StreamPlayback.cpp,Native\Engine\include\Audio\StreamPlayback.h,2026-10-21,Stop native streams through the correctly typed command callback
+F03257,function,Audio_Cutscene_PauseStream,Native\Engine\src\Audio\StreamPlayback.cpp,Native\Engine\include\Audio\StreamPlayback.h,2026-10-21,Pause native stream sample position and envelope without holding a DC sample
+F03258,function,Audio_Cutscene_ResumeStream,Native\Engine\src\Audio\StreamPlayback.cpp,Native\Engine\include\Audio\StreamPlayback.h,2026-10-21,Resume native stream voices without restarting them
+F03379,function,Audio_Cutscene_StopStreamVoices,Native\Engine\src\Audio\StreamPlayback.cpp,Native\Engine\include\Audio\StreamPlayback.h,2026-10-21,Release stream voices and their reservation without SPU interrupts
+F03382,function,Audio_Cutscene_StartStream,Native\Engine\src\Audio\StreamPlayback.cpp,Native\Engine\include\Audio\StreamPlayback.h,2026-10-21,Play validated imported mono or stereo stream assets through sfizz
+F03392,function,Audio_Cutscene_ReplaceStream,Native\Engine\src\Audio\StreamPlayback.cpp,Native\Engine\include\Audio\StreamPlayback.h,2026-10-21,Dispatch native-width stream command parameters
+F03394,function,Audio_Cutscene_SetStreamVolume,Native\Engine\src\Audio\StreamPlayback.cpp,Native\Engine\include\Audio\StreamPlayback.h,2026-10-21,Apply native stream volume respecting channel layout and output mode
+F03395,function,Audio_Cutscene_SlideStreamVolume,Native\Engine\src\Audio\StreamPlayback.cpp,Native\Engine\include\Audio\StreamPlayback.h,2026-10-21,Schedule bounded native stream volume fades
+F03396,function,Audio_Cutscene_SetStreamPan,Native\Engine\src\Audio\StreamPlayback.cpp,Native\Engine\include\Audio\StreamPlayback.h,2026-10-21,Dispatch native-width pan commands and update voice gains
+F03545,function,Audio_BindRoomCutsceneStream,Native\Engine\src\Audio\StreamPlayback.cpp,Native\Engine\include\Audio\StreamPlayback.h,2026-10-21,Bind bounded effect stream data to validated native assets in canonical slot three
+F03546,function,Audio_UnbindRoomCutsceneStream,Native\Engine\src\Audio\StreamPlayback.cpp,Native\Engine\include\Audio\StreamPlayback.h,2026-10-21,Release stream bindings without freeing externally owned package data
+F04194,function,Menu_PlayOpenSound,Native\Game\src\Menu\Sounds.cpp,Native\Game\src\Menu\Sounds.h,2026-10-21,Original menu open effect through production native audio
+F04195,function,Menu_PlayInvalidSound,Native\Game\src\Menu\Sounds.cpp,Native\Game\src\Menu\Sounds.h,2026-10-21,Original invalid-choice effect through production native audio
+F04196,function,Menu_PlayLeaveSound,Native\Game\src\Menu\Sounds.cpp,Native\Game\src\Menu\Sounds.h,2026-10-21,Original menu leave effect through production native audio
+F04197,function,Menu_PlaySelectSound,Native\Game\src\Menu\Sounds.cpp,Native\Game\src\Menu\Sounds.h,2026-10-21,Original menu select effect through production native audio
+F04198,function,Menu_PlayChangeSound,Native\Game\src\Menu\Sounds.cpp,Native\Game\src\Menu\Sounds.h,2026-10-21,Original cursor change effect through production native audio
+F03159,function,Audio_Samples_UploadBank,Native\Engine\src\Audio\SequencerOutput.cpp,Native\Engine\include\Audio\SequencerOutput.h,2026-10-21,Bind extracted native bank assets instead of SPU sample transfers
+F03163,function,Audio_Driver_KeyOnVoices,Native\Engine\src\Audio\SequencerOutput.cpp,Native\Engine\include\Audio\SequencerOutput.h,2026-10-21,Start native sample voices from sequencer allocation
+F03164,function,Audio_Driver_KeyOffVoices,Native\Engine\src\Audio\SequencerOutput.cpp,Native\Engine\include\Audio\SequencerOutput.h,2026-10-21,Release native sample voices
+F03165,function,Audio_Driver_SetVoiceReverbMask,Native\Engine\src\Audio\SequencerOutput.cpp,Native\Engine\include\Audio\SequencerOutput.h,2026-10-21,Route native voice sends to the original reverb preset network
+F03166,function,Audio_Driver_SetVoiceNoiseMask,Native\Engine\src\Audio\SequencerOutput.cpp,Native\Engine\include\Audio\SequencerOutput.h,2026-10-21,Select the shared native clocked noise source
+F03167,function,Audio_Driver_SetVoiceFrequencyModulationMask,Native\Engine\src\Audio\SequencerOutput.cpp,Native\Engine\include\Audio\SequencerOutput.h,2026-10-21,Modulate native sample pitch from the preceding envelope-scaled voice
+F03168,function,Audio_Driver_SetVoiceVolume,Native\Engine\src\Audio\SequencerOutput.cpp,Native\Engine\include\Audio\SequencerOutput.h,2026-10-21,Apply native independent left and right gains
+F03169,function,Audio_Driver_SetVoiceSampleRate,Native\Engine\src\Audio\SequencerOutput.cpp,Native\Engine\include\Audio\SequencerOutput.h,2026-10-21,Apply native playback rate
+F03178,function,Audio_Driver_SetVoiceReleaseRateAndMode,Native\Engine\src\Audio\SequencerOutput.cpp,Native\Engine\include\Audio\SequencerOutput.h,2026-10-21,Update native release envelope
 F03474,function,Content_BeginDiscRead,Native\Content\src\DiscReader.c,Native\Content\src\DiscReader.h,2026-10-17,from Native\Content\src\CdDrive.c
 F03475,function,Content_UpdateDiscCommands,Native\Content\src\DiscReader.c,Native\Content\src\DiscReader.h,2026-10-17,from Native\Content\src\CdDrive.c
 F03479,function,Content_ResetDiscDrive,Native\Content\src\DiscReader.c,Native\Content\src\DiscReader.h,2026-10-17,from Native\Content\src\CdDrive.c

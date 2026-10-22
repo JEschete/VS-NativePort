@@ -6,6 +6,7 @@
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Envelope.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Audio/SequencerOutput.h"
 
 // decomp: _soundEvent (_soundEvent@SLUS_010.40)
 int Audio_Driver_legacySpuEvent; /* contents: module image (ModuleData.c) */
@@ -72,10 +73,6 @@ void Audio_Driver_Start(void)
 {
     int event;
 
-    SpuStart();
-    SpuSetTransferStartAddr(0x1010);
-    Audio_Driver_WriteSampleMemory(Audio_Driver_legacySpuFlushBytes, 64);
-    Audio_Driver_WaitForSampleTransfer();
     Audio_Driver_ResetPlaybackState();
     while (SetRCnt(RCntCNT2, 0x44E8, RCntMdINTR) == 0)
         ;
@@ -92,84 +89,14 @@ void Audio_Driver_Start(void)
 // decomp: SLUS_010.40 StopSound (src/SLUS_010.40/25AC.c:1085)
 void Audio_Driver_Stop(void)
 {
-    if (Audio_Cutscene_legacySpuTransferBusy == 1) {
-        Audio_Driver_WriteSampleMemory(Audio_Driver_legacySpuFlushBytes, 64);
-        Audio_Driver_WaitForSampleTransfer();
-    }
     while (StopRCnt(RCntCNT2) == 0)
         ;
     while (DisableEvent(Audio_Driver_legacySpuEvent) == 0)
         ;
     while (CloseEvent(Audio_Driver_legacySpuEvent) == 0)
         ;
-    Audio_Driver_KeyOffVoices(0xFFFFFF);
+    Audio_Native_Reset();
 }
-
-// decomp: SLUS_010.40 SetVoiceKeyOn (src/SLUS_010.40/25AC.c:1102)
-void Audio_Driver_KeyOnVoices(u_int in_KeyOn)
-{
-    *SPU_VOICE_KEY_ON_LO = in_KeyOn;
-    *SPU_VOICE_KEY_ON_HI = (in_KeyOn >> 0x10);
-}
-
-// decomp: SLUS_010.40 SetVoiceKeyOff (src/SLUS_010.40/25AC.c:1108)
-void Audio_Driver_KeyOffVoices(u_int in_KeyOff)
-{
-    *SPU_VOICE_KEY_OFF_LO = in_KeyOff;
-    *SPU_VOICE_KEY_OFF_HI = (in_KeyOff >> 0x10);
-}
-
-// decomp: SLUS_010.40 SetVoiceReverbMode (src/SLUS_010.40/25AC.c:1114)
-void Audio_Driver_SetVoiceReverbMask(u_int in_ReverbMode)
-{
-    *SPU_VOICE_CHN_REVERB_MODE_LO = in_ReverbMode;
-    *SPU_VOICE_CHN_REVERB_MODE_HI = (in_ReverbMode >> 0x10);
-}
-
-// decomp: SLUS_010.40 SetVoiceNoiseMode (src/SLUS_010.40/25AC.c:1120)
-void Audio_Driver_SetVoiceNoiseMask(u_int in_NoiseMode)
-{
-    *SPU_VOICE_CHN_NOISE_MODE_LO = in_NoiseMode;
-    *SPU_VOICE_CHN_NOISE_MODE_HI = (in_NoiseMode >> 0x10);
-}
-
-// decomp: SLUS_010.40 SetVoiceFmMode (src/SLUS_010.40/25AC.c:1126)
-void Audio_Driver_SetVoiceFrequencyModulationMask(u_int in_FmMode)
-{
-    *SPU_VOICE_CHN_FM_MODE_LO = in_FmMode;
-    *SPU_VOICE_CHN_FM_MODE_HI = (in_FmMode >> 0x10);
-}
-
-// decomp: src/SLUS_010.40/25AC.c:14
-#define SPU_VOICE_INDEX_STRIDE                                                           \
-    8 // u16s to skip per voice when indexing voice register arrays
-// decomp: SLUS_010.40 SetVoiceVolume (src/SLUS_010.40/25AC.c:1132)
-void Audio_Driver_SetVoiceVolume(int in_VoiceIndex, u_int in_VolL, u_int in_VolR, u_int in_VolumeScale)
-{
-    SpuVolume* pVolume;
-
-    if (in_VolumeScale != 0) {
-        in_VolL = in_VolL * in_VolumeScale;
-        in_VolR = in_VolR * in_VolumeScale;
-        in_VolL = in_VolL >> 7;
-        in_VolR = in_VolR >> 7;
-    }
-
-    pVolume = (SpuVolume*)&VOICE_00_LEFT_RIGHT[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE];
-    pVolume->left = in_VolL & 0x7FFF;
-    pVolume->right = in_VolR & 0x7FFF;
-}
-#undef SPU_VOICE_INDEX_STRIDE
-
-// decomp: src/SLUS_010.40/25AC.c:14
-#define SPU_VOICE_INDEX_STRIDE                                                           \
-    8 // u16s to skip per voice when indexing voice register arrays
-// decomp: SLUS_010.40 SetVoiceSampleRate (src/SLUS_010.40/25AC.c:1148)
-void Audio_Driver_SetVoiceSampleRate(int in_VoiceIndex, int in_SampleRate)
-{
-    VOICE_00_ADPCM_SAMPLE_RATE[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE] = in_SampleRate;
-}
-#undef SPU_VOICE_INDEX_STRIDE
 
 // decomp: src/SLUS_010.40/25AC.c:14
 #define SPU_VOICE_INDEX_STRIDE                                                           \
@@ -286,28 +213,6 @@ void Audio_Driver_SetVoiceSustainRateAndMode(
 #undef ADSR_SUSTAIN_DIRECTION
 #undef ADSR_SUSTAIN_STEP_POS
 #undef ADSR_SUSTAIN_DIRECTION_BIT
-#undef SPU_VOICE_INDEX_STRIDE
-
-// decomp: src/SLUS_010.40/25AC.c:14
-#define SPU_VOICE_INDEX_STRIDE                                                           \
-    8 // u16s to skip per voice when indexing voice register arrays
-// decomp: src/SLUS_010.40/25AC.c:1218
-#define ADSR_RELEASE_MODE_BIT 5
-// decomp: src/SLUS_010.40/25AC.c:1219
-#define ADSR_RELEASE_SHIFT_POS 0 // 5 bits (4-0)
-// decomp: SLUS_010.40 SetVoiceAdsrReleaseRateAndMode (src/SLUS_010.40/25AC.c:1301)
-void Audio_Driver_SetVoiceReleaseRateAndMode(
-    int in_VoiceIndex, int in_ReleaseRate, u_int in_ReleaseMode)
-{
-    u_short* AdsrUpper =
-        &VOICE_00_ADPCM_ADSR_UPPER[in_VoiceIndex * SPU_VOICE_INDEX_STRIDE];
-    u_short ReleaseMode = (in_ReleaseMode >> 2) << ADSR_RELEASE_MODE_BIT;
-    u_short ReleaseRate = in_ReleaseRate << ADSR_RELEASE_SHIFT_POS;
-    u_short Masked = *AdsrUpper & 0xFFC0;
-    *AdsrUpper = Masked | (ReleaseMode | ReleaseRate);
-}
-#undef ADSR_RELEASE_SHIFT_POS
-#undef ADSR_RELEASE_MODE_BIT
 #undef SPU_VOICE_INDEX_STRIDE
 
 // decomp: src/SLUS_010.40/25AC.c:14

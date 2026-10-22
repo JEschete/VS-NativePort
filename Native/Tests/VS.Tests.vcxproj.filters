@@ -33,6 +33,9 @@
     <ClCompile Include="src\AiPlanningTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AudioTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AwarenessMarkerTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

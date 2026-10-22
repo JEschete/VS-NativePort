@@ -42,7 +42,7 @@ void Effects_BindParticleAnimationTable(Effects_PackageBlock2* block);
 void* Effects_ParticleAnimationData(int arg0);
 void Effects_BindEffectSoundSequences(u_char* arg0);
 void Effects_BindEffectSoundBank(void* arg0);
-void Effects_BindEffectAuxiliarySoundBank(void* arg0);
+void Effects_BindEffectAuxiliarySoundBank(void* arg0, size_t byte_count);
 int Effects_PollEffectResourceRead(int lba, int size, void* buf);
 int Effects_LoadEffectPurgeOverlay(void);
 int Effects_LoadEffectPackage(void);
