@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -226,21 +227,32 @@ TEST_CASE("Particle rendering fits exactly at the native frame buffer boundary",
   CHECK(fixture.storage.back() == 0xDEADBEEF);
 }
 
-TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
-          "[effects][particle-emission]") {
-  ParticleFixture fixture;
+namespace {
+struct EmissionFixture : ParticleFixture {
   struct Definitions {
     int reserved;
     Effects_ParticleDefinition entries[1];
   } definitions{};
-  STATIC_REQUIRE(offsetof(Definitions, entries) ==
-                 sizeof(Effects_PackageBlock5));
   std::array<u_short, 8> programs{1, 0, 8, 0, 0, 8, 0, 0x3000};
-  fixture.package.block5Data =
-      reinterpret_cast<Effects_PackageBlock5*>(&definitions);
-  fixture.package.block2Data = programs.data();
-  auto& definition = definitions.entries[0];
-  definition.intervalRange[0] = definition.intervalRange[1] = 1;
+
+  EmissionFixture() {
+    package.block5Data = reinterpret_cast<Effects_PackageBlock5*>(&definitions);
+    package.block2Data = programs.data();
+    auto& definition = definitions.entries[0];
+    definition.intervalRange[0] = definition.intervalRange[1] = 1;
+    definition.countRange[0] = definition.countRange[1] = 1;
+    Effects_usedParticleCount = 0;
+    Effects_freeParticles = &particle;
+  }
+};
+}  // namespace
+
+TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
+          "[effects][particle-emission]") {
+  EmissionFixture fixture;
+  STATIC_REQUIRE(offsetof(EmissionFixture::Definitions, entries) ==
+                 sizeof(Effects_PackageBlock5));
+  auto& definition = fixture.definitions.entries[0];
   const int requested = GENERATE(0, 1, 5);
   definition.countRange[0] = definition.countRange[1] =
       static_cast<std::int16_t>(requested);
@@ -262,7 +274,7 @@ TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
   } else {
     CHECK(static_cast<unsigned char>(fixture.particle.age) == 255);
     CHECK(fixture.particle.textureAnimation.program ==
-          reinterpret_cast<u_char*>(programs.data()) + 8);
+          reinterpret_cast<u_char*>(fixture.programs.data()) + 8);
   }
   Core_Random_Seed(1);
 }
@@ -437,5 +449,47 @@ TEST_CASE(
   renderer(&fixture.definition, &fixture.scratch, &fixture.instance,
            &fixture.ribbons);
   fixture.CheckSamples(initial_width, half_width);
+  Core_Random_Seed(1);
+}
+
+TEST_CASE("Cone emission preserves original zero-height quotient and RNG",
+          "[effects][particle-emission][particle-cone]") {
+  EmissionFixture fixture;
+  const auto height = GENERATE(0, 32, -32);
+  const auto mode = GENERATE(0u, 0x800u, 0x1000u);
+  const auto seed = GENERATE(1u, 1234u);
+  CAPTURE(height, mode, seed);
+  auto& definition = fixture.definitions.entries[0];
+  definition.flags = 16 | mode;
+  definition.extentRange[0] = definition.extentRange[1] = 32;
+  definition.extentRange[2] = definition.extentRange[3] =
+      static_cast<std::int16_t>(height);
+  definition.extentRange[4] = definition.extentRange[5] = 48;
+  definition.innerExtentRange[0] = definition.innerExtentRange[1] = 4096;
+  VS::Core::Rand15 expected(seed);
+  const auto angle = expected.Next();
+  int vertical = 0;
+  if (height != 0) {
+    const int low = expected.Next();
+    const int high = expected.Next();
+    vertical = static_cast<int>(
+        std::sqrt((low + (high << 16)) % (height * height + 1)));
+  }
+  const int x = height == 0
+                    ? -1
+                    : (((32 * Core_Gte_Cos(angle)) >> 12) * vertical) / height;
+  const int z = height == 0
+                    ? -1
+                    : (((48 * Core_Gte_Sin(angle)) >> 12) * vertical) / height;
+  Core_Random_Seed(seed);
+
+  Effects_EmitParticleEvent(&fixture.instance, 0, 0, 0, nullptr);
+
+  fixture.CheckEmissionPool(true);
+  const auto& position = fixture.particle.motion.position;
+  const std::array actual_position{position.vx, position.vy, position.vz};
+  const std::array expected_position{x * 4096, vertical * 4096, z * 4096};
+  CHECK(actual_position == expected_position);
+  CHECK(Core_Random_Rand() == expected.Next());
   Core_Random_Seed(1);
 }

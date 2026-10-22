@@ -7,6 +7,16 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_particle_cone_preserves_original_zero_height_quotient(self):
+        _, new, _ = copy_fixups.FIXES["F01515"][1]
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Effects/Particles.c").read_text()
+        self.assertTrue(new in source, "cone fix missing from generated particle emitter")
+        self.assertIn("scratch->vector.vx = scratch->vector.vz = -1;", new)
+        self.assertIn("0x800D34BC/0x800D34F8", new)
+        self.assertEqual(new.count("/ scratch->extent.vy;"), 2)
+        self.assertNotIn("Core_Random_Rand", new)
+
     def test_particle_ribbon_preserves_original_zero_divisor_remainder(self):
         old, new, _ = copy_fixups.FIXES["F01867"][0]
         root = Path(__file__).resolve().parents[2]

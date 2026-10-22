@@ -760,6 +760,65 @@ documentation, solution/tool projects and reference state preserved):
 This does not establish all forty arts, positive secondary effects, complete
 particle visual parity (#76), or resolution of the intermittent #82 report.
 
+### Iron Ripper cone-emission repair
+
+On published `8d66cf88`, Greataxe 202 (Iron Ripper) crashed at tick907 in
+Debug run `1792704517072958-0`, in `Effects_EmitParticleEvent` (#125).
+This is a different path from #124: cone sampling divides its radial
+coordinates by the interpolated height, which can be zero.
+
+Original BATTLE.PRG `func_800D2ADC` loads that height from scratch+0xAC.
+At `0x800D33F4`, zero squared height skips the two wide-range RNG calls and
+passes zero to the square root. Both subsequent dividends are therefore zero.
+Raw signed DIV/MFLO at `0x800D34BC` and `0x800D34F8` has no exception guard;
+original 0/0 leaves -1 in LO. F01515's producer fix preserves the original
+(-1,0,-1) spawn vector for zero height, not a height clamp or skipped emission.
+Nonzero scaling and the RNG sequence are unchanged.
+
+The new native regression first reproduces the divide-by-zero. It then checks
+all three cone sampling modes, heights0/32/-32 and two seeds, including exact
+final Q12 particle positions, allocation/list state and RNG progression.
+The existing empty/full-capacity regression shares the same emission fixture.
+Original disassembly remains local-only:
+`build/quality/iron-ripper-emitter-original.asm`.
+
+Further ordinary-controller runs use the same original equipment/room/target
+and starting stats as the preceding tables:
+
+| Action / HP cost | Debug run / damage | Release run / damage |
+|---|---|---|
+| Sword 189 / 40 | `1792704155505905-0` / 2 | `1792704263778625-0` / 5 |
+| Sword 190 / 55 | `1792704180944698-0` / 4 | `1792704288864676-0` / 4 |
+| Sword 191 / 75 | `1792704210885933-0` / 1 | `1792704318464012-0` / 1 |
+| Axe/Mace 197 / 40 | `1792704385777127-0` / 2 | `1792704438830729-0` / 2 |
+| Axe/Mace 199 / 75 | `1792704411812390-0` / 3 | `1792704464690623-0` / 3 |
+| Greataxe 201 / 40 | `1792704491491807-0` / 5 | `1792705469391615-0` / 5 |
+| Greataxe 202 / 55 | `1792705287321021-0` / 5, 3 | `1792705333411997-0` / 1, 3 |
+| Greataxe 203 / 75 | `1792705442707695-0` / 3 | `1792705494631337-0` / 3 |
+
+Iron Ripper adds `-ArtRuns 2`: each configuration includes two completed casts
+and F10 re-entry with actors alive. Debug effect/control-return ticks are
+909/1027 and2141/2259; Release907/1025 and2136/2256. All rows verify original
+HP costs, exact positive HP damage and recovery. All sixteen accepted traces
+have final `session.end`, `trace_failed:false` and no error-level records.
+Sword/Axe-Mace and the first Debug201 runs use published `8d66cf88` native code;
+Iron Ripper and the remaining Greataxe runs use that base plus the scoped #125
+changes. Unrelated dirty documentation/projects/reference state is preserved.
+
+Debug/Release solution builds pass. `[effects]` passes **16 cases /13,507
+assertions**, and each full suite passes **468 cases /1,095,000 assertions**.
+Fourteen producer regressions pass; second generation is stable and preserves
+owned sources. Scoped format/cpplint/Ruff/clones/tidy for the test and two
+producer/regression files has **zero findings/new findings**, with no baseline
+changes. Evidence uses `build/quality/iron-ripper-{debug,release}-{build,tests,full,live}.log`,
+`iron-ripper-cone-before.log`, `iron-ripper-generation*.log`,
+`iron-ripper-quality.log`, `iron-ripper-trace-audit.log`, and the run directories.
+
+Positive execution coverage is now **24/40 arts** in both configurations.
+MP damage, positive secondary effects, remaining arts and eligibility/target
+gates still require #11 acceptance. This repair does not establish complete
+visual parity, C++ promotion, compatibility retirement, or resolution of #82.
+
 ## Learned-spell acceptance checkpoint (2026-10-22)
 
 This closes the bounded representative acceptance of

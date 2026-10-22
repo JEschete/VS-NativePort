@@ -464,12 +464,18 @@ void Effects_EmitParticleEvent(
             scale16:
                 scratch->vector.vy = Core_Math_SquareRootInteger(
                     RAND_UNIFORM_WIDE(scratch->extent.vy * scratch->extent.vy, 0));
-                scratch->vector.vx =
-                    (((scratch->vector.vx * scratch->cosAngle0) >> 12) * scratch->vector.vy)
-                    / scratch->extent.vy;
-                scratch->vector.vz =
-                    (((scratch->vector.vz * scratch->sinAngle0) >> 12) * scratch->vector.vy)
-                    / scratch->extent.vy;
+                if (scratch->extent.vy == 0) {
+                    // BATTLE.PRG, DIV at 0x800D34BC/0x800D34F8:
+                    // zero height makes both dividends zero; the original LO is -1.
+                    scratch->vector.vx = scratch->vector.vz = -1;
+                } else {
+                    scratch->vector.vx =
+                        (((scratch->vector.vx * scratch->cosAngle0) >> 12) * scratch->vector.vy)
+                        / scratch->extent.vy;
+                    scratch->vector.vz =
+                        (((scratch->vector.vz * scratch->sinAngle0) >> 12) * scratch->vector.vy)
+                        / scratch->extent.vy;
+                }
                 break;
             }
             Effects_SetParticleSpawnPosition(scratch, node);

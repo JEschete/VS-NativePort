@@ -235,6 +235,26 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          '    }\n\n'
          '    for (i = 0; i < count; ++i) {\n        node = Effects_AllocateEffectParticle(arg0);',
          "zero/full-capacity bursts have no first particle; avoid the copied C's uninitialized node"),
+        ("""                scratch->vector.vx =
+                    (((scratch->vector.vx * scratch->cosAngle0) >> 12) * scratch->vector.vy)
+                    / scratch->extent.vy;
+                scratch->vector.vz =
+                    (((scratch->vector.vz * scratch->sinAngle0) >> 12) * scratch->vector.vy)
+                    / scratch->extent.vy;""",
+         """                if (scratch->extent.vy == 0) {
+                    // BATTLE.PRG, DIV at 0x800D34BC/0x800D34F8:
+                    // zero height makes both dividends zero; the original LO is -1.
+                    scratch->vector.vx = scratch->vector.vz = -1;
+                } else {
+                    scratch->vector.vx =
+                        (((scratch->vector.vx * scratch->cosAngle0) >> 12) * scratch->vector.vy)
+                        / scratch->extent.vy;
+                    scratch->vector.vz =
+                        (((scratch->vector.vz * scratch->sinAngle0) >> 12) * scratch->vector.vy)
+                        / scratch->extent.vy;
+                }""",
+         "Preserve the original cone's nontrapping 0/0 quotient when its height is zero, "
+         "without changing nonzero scaling, particle emission or RNG consumption."),
     ],
     "F01535": [
         ("    /* The original caller supplies arguments to this argument-free wrapper. */\n", "",
