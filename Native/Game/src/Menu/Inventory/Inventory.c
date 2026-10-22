@@ -10,6 +10,7 @@
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
+#include "Actors/WeaponModel.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
 #include "Battle/Abilities.h"
@@ -1856,8 +1857,8 @@ int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
         Core_Memory_CopyAlignedWords(&temp_s1->blendPose, &temp_s1->pose, sizeof temp_s1->blendPose);
 
         for (i = 0; i < 2; ++i) {
-            if (Battle_unusedGlobal1[i] != NULL) {
-                Battle_unusedGlobal1[i]->opaque11 = 0;
+            if (Actors_weaponModels[i + 2] != NULL) {
+                Actors_weaponModels[i + 2]->reserved11 = 0;
             }
         }
 

@@ -14,7 +14,6 @@
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
-#include "Battle/StatusEffects.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
 #include "Field/Actors.h"
@@ -123,8 +122,8 @@ void Menu_Framework_ResetActorPreviewPose(void)
     temp_s0 = Actors_actorRecords[1];
 
     for (i = 0; i < 2; ++i) {
-        if (Battle_unusedGlobal1[i] != NULL) {
-            Battle_unusedGlobal1[i]->opaque8 |= 0x10;
+        if (Actors_weaponModels[i + 2] != NULL) {
+            Actors_weaponModels[i + 2]->reserved08Bit4 = 1;
         }
     }
 

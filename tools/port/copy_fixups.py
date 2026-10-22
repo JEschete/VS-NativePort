@@ -457,6 +457,20 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("Core_Memory_AllocateFromLowEnd(0x1900)", "Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord))",
          "menu actor and companion clones need complete native record storage"),
     ],
+    "F02465": [
+        ("Battle_unusedGlobal1[i]->opaque8 |= 0x10;",
+         "Actors_weaponModels[i + 2]->reserved08Bit4 = 1;",
+         "D_800F4590 is the preview pair at vs_battle_wepModels+8, not independent pose storage"),
+        ("Battle_unusedGlobal1[i]", "Actors_weaponModels[i + 2]",
+         "check the real preview weapon/shield slots using native pointer stride"),
+    ],
+    "F02637": [
+        ("Battle_unusedGlobal1[i]->opaque11 = 0;",
+         "Actors_weaponModels[i + 2]->reserved11 = 0;",
+         "MENU3/68C4.c resets the preview weapon fade at byte 0x11 of the same model"),
+        ("Battle_unusedGlobal1[i]", "Actors_weaponModels[i + 2]",
+         "D_800F4590 aliases vs_battle_wepModels[2], including its second preview slot"),
+    ],
     "F00195": [
         ("Battle_cameraEaseMode", "Field_sphericalCamera.delta.mode",
          "D_800F19EC aliases the spherical camera mode at +0x1C"),

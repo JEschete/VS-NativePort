@@ -1818,10 +1818,10 @@ T00253.011,T00253,D_800F4538_unkC54,11,unk548_18,1,int,14,,,reservedBits,Not rea
 T00253.012,T00253,D_800F4538_unkC54,12,unk54C,1,int,,,,reserved54C,Not read,low,declaration-only;source:3A1A0.h:67
 T00254.000,T00254,D_800F4590_t,0,unk0,1,int,,,,reserved0,Not read by decompiled code,low,source:224.c:118
 T00254.001,T00254,D_800F4590_t,1,unk4,1,int,,,,reserved4,Not read by decompiled code,low,declaration-only;source:30DB0.h:13
-T00254.002,T00254,D_800F4590_t,2,unk8,1,int,,,,opaque8,"Used, but its meaning is not established",low,source:224.c:112
+T00254.002,T00254,D_800F4590_t,2,unk8,1,int,,,,opaque8,Partial weapon-model flags view; bit4 enables preview weapon drawing.,high,source:224.c:112;G00409 aliases vs_battle_wepModels[2];native F02465 uses Actors_WeaponModel.reserved08Bit4;issue116
 T00254.003,T00254,D_800F4590_t,3,unkC,1,int,,,,reservedC,Not read by decompiled code,low,declaration-only;source:30DB0.h:15
 T00254.004,T00254,D_800F4590_t,4,unk10,1,char,,,,reserved10,Not read by decompiled code,low,declaration-only;source:30DB0.h:16
-T00254.005,T00254,D_800F4590_t,5,unk11,1,char,,,,opaque11,"Used, but its meaning is not established",low,source:68C4.c:67
+T00254.005,T00254,D_800F4590_t,5,unk11,1,char,,,,opaque11,Weapon fade-start value reset during preview equipment replacement.,high,source:68C4.c:67;G00409 aliases vs_battle_wepModels[2];native F02637 uses Actors_WeaponModel.reserved11;issue116
 T00255.000,T00255,D_800F45E0_t,0,unk0,1,char,,,,boneCount,SHP bone count; zero for a free slot,med,source:30DB0.c:416
 T00255.001,T00255,D_800F45E0_t,1,unk1,1,char,,,,reserved1,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:453
 T00255.002,T00255,D_800F45E0_t,2,unk2,1,char,,,,reserved2,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:454

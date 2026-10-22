@@ -29,19 +29,6 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(new.strip(), "Boot_InitializePlayerSettings();")
         self.assertIn("Boot_InitializePlayerSettings", copy_fixups.NATIVE_HELPER_HEADERS)
 
-    def test_native_audio_preserves_optional_layer_guard_and_connects_sfx(self):
-        fixes = copy_fixups.FIXES["F03192"]
-        self.assertEqual(len(fixes), 4)
-        root = Path(__file__).resolve().parents[2]
-        mixer = (root / "Native/Engine/src/Audio/Mixer/VoiceMixer.c").read_text()
-        self.assertEqual(mixer.count("Audio_Native_ConfigureChannel("), 3)
-        self.assertNotIn("Audio_Driver_WriteDirtyVoiceParameters(", mixer)
-        self.assertNotIn("Audio_Driver_WriteVoiceParameters(", mixer)
-        self.assertIn("Audio_Native_Envelope(i)", mixer)
-        self.assertIn("Audio_Seq_secondaryMusicConfig != NULL ?", mixer)
-        sequencer = (root / "Native/Engine/src/Audio/Seq/Sequencer.c").read_text()
-        self.assertEqual(sequencer.count("Audio_Native_Tick();"), 1)
-
     def test_misc_shortcut_reserves_all_native_text_pointers(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Menu/Inventory/Inventory.c").read_text()
@@ -67,6 +54,31 @@ class EncounterFixupTests(unittest.TestCase):
         menu = menu.split("int Menu_Magic_UpdateShamanMenu(", 1)[0]
         self.assertIn("*temp_s6 = LegacyGpu_Handle(prim);", menu)
         self.assertNotIn("*temp_s6 = ((u_int)prim << 8) >> 8;", menu)
+
+    def test_preview_weapon_alias_uses_real_model_slots(self):
+        root = Path(__file__).resolve().parents[2]
+        preview = (root / "Native/Game/src/Menu/Framework/ActorPreview.c").read_text()
+        reset = preview.split("void Menu_Framework_ResetActorPreviewPose(", 1)[1]
+        reset = reset.split("void Menu_Framework_ReleaseActorPreview(", 1)[0]
+        self.assertIn("Actors_weaponModels[i + 2] != NULL", reset)
+        self.assertIn("Actors_weaponModels[i + 2]->reserved08Bit4 = 1;", reset)
+        self.assertNotIn("Battle_unusedGlobal1", reset)
+        inventory = (root / "Native/Game/src/Menu/Inventory/Inventory.c").read_text()
+        self.assertIn("Actors_weaponModels[i + 2]->reserved11 = 0;", inventory)
+        self.assertNotIn("Battle_unusedGlobal1", inventory)
+
+    def test_native_audio_preserves_optional_layer_guard_and_connects_sfx(self):
+        fixes = copy_fixups.FIXES["F03192"]
+        self.assertEqual(len(fixes), 4)
+        root = Path(__file__).resolve().parents[2]
+        mixer = (root / "Native/Engine/src/Audio/Mixer/VoiceMixer.c").read_text()
+        self.assertEqual(mixer.count("Audio_Native_ConfigureChannel("), 3)
+        self.assertNotIn("Audio_Driver_WriteDirtyVoiceParameters(", mixer)
+        self.assertNotIn("Audio_Driver_WriteVoiceParameters(", mixer)
+        self.assertIn("Audio_Native_Envelope(i)", mixer)
+        self.assertIn("Audio_Seq_secondaryMusicConfig != NULL ?", mixer)
+        sequencer = (root / "Native/Engine/src/Audio/Seq/Sequencer.c").read_text()
+        self.assertEqual(sequencer.count("Audio_Native_Tick();"), 1)
 
 
 if __name__ == "__main__":

@@ -348,8 +348,8 @@ T00248.000,opaque,1,Menu::Framework::PreviewPoseBytes.opaque0Bit0,unk0_0,0x0.0,"
 T00248.001,opaque,1,Menu::Framework::PreviewPoseBytes.opaque1Bit0,unk0_8,0x1.0,"Used, but its meaning is not established",Menu::Framework::ResetActorPreviewPose@800F9CB0,,
 T00248.002,opaque,1,Menu::Framework::PreviewPoseBytes.opaque2Bit0,unk0_16,0x2.0,"Used, but its meaning is not established",Menu::Framework::ResetActorPreviewPose@800F9CB0,,
 T00248.003,opaque,1,Menu::Framework::PreviewPoseBytes.opaque3Bit0,unk0_24,0x3.0,"Used, but its meaning is not established",Menu::Framework::ResetActorPreviewPose@800F9CB0,,
-T00254.005,opaque,1,Menu::Framework::PreviewPoseState.opaque11,unk11,0x11,"Used, but its meaning is not established",Menu::Inventory::ReloadEquipmentModels,*Battle::unusedGlobal1+0x11,
-T00254.002,opaque,1,Menu::Framework::PreviewPoseState.opaque8,unk8,0x8,"Used, but its meaning is not established",Menu::Framework::ResetActorPreviewPose@800F9CB0,*Battle::unusedGlobal1+0x8,
+T00254.005,opaque,1,Menu::Framework::PreviewPoseState.opaque11,unk11,0x11,Weapon fade-start field; native consumer now uses canonical model slot.,Menu::Inventory::ReloadEquipmentModels,*Battle::unusedGlobal1+0x11,G00409 aliases preview weapon slots2/3;issue116;legacy declaration retained
+T00254.002,opaque,1,Menu::Framework::PreviewPoseState.opaque8,unk8,0x8,Weapon flags bit4 enables preview drawing; native consumer uses canonical model slot.,Menu::Framework::ResetActorPreviewPose@800F9CB0,*Battle::unusedGlobal1+0x8,G00409 aliases preview weapon slots2/3;issue116;legacy declaration retained
 T00316.002,opaque,1,Menu::Loot::LootListItem.opaque2,unk2,0x2,"Used, but its meaning is not established",Menu::Loot::UpdateStackConsolidation Menu::Loot::AppendLootRow Menu::Loot::RenderLootRows Menu::Loot::UpdateLootSelection,,
 T00310.001,opaque,1,Menu::Score::Row.opaque1,unk1,0x1,"Used, but its meaning is not established",Menu::Score::CreateTitleRows Menu::Score::RenderTitles Menu::Score::CreateStatisticRows Menu::Score::CreateTimeTrialRows,,
 T00349.002,opaque,1,Menu::Score::ZudHeader.opaque2,unk2,0x2,"Used, but its meaning is not established",Menu::Score::LoadEnemyModelParts,,
@@ -875,7 +875,7 @@ T00221,type,3,Field::RoomLoadResetBlock,D_800F18C8_t,size 0x18,Holds a block of 
 T00681,type,3,Items::WeaponReservedBlock,vs_battle_uiWeapon_unk,size 0x30,Declares 24 reserved halfwords of a weapon's statistics; not read.,,,State
 T00585,type,3,Menu::Files::PrimitiveBuffer,primBuf_t,size 0x40,Holds one tagged file menu primitive.,,,Packet
 T00248,type,3,Menu::Framework::PreviewPoseBytes,D_800F4538_unk58_3,size 0x4,Views four bytes of an actor record while the preview pose is reset.,,,State
-T00254,type,3,Menu::Framework::PreviewPoseState,D_800F4590_t,size 0x14,Holds the actor preview pose state reset when models reload.,,Battle::unusedGlobal1=0x800F4590,State
+T00254,type,3,Menu::Framework::PreviewPoseState,D_800F4590_t,size 0x14,Original partial weapon-model view rather than independent pose state.,,Battle::unusedGlobal1=0x800F4590,G00409 aliases preview weapon slots2/3;issue116;legacy declaration retained
 T00317,type,3,Menu::Manual::BackgroundChunkWidths,_menuBgChunkWidths_t,size 0xC,Gives the widths of the manual background's scroll-fade chunks.,,,Value
 T00318,type,3,Menu::Manual::BackgroundTransparencies,_menuBgTransparencies_t,size 0x10,Gives the transparencies of the manual background's scroll-fade chunks.,,,Value
 T00405,type,3,Render::ModelScratchpadCameraView,cameraTransformScratch,size 0x9C,Views the model scratchpad's matrix and scale; not read.,,,State
