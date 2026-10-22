@@ -106,7 +106,7 @@ position. Enemy IDs are local to the selected zone.
 ### Ashley testing profiles
 
 The **ASHLEY** row selects `prologue`, `post-prologue`, `post-minotaur`,
-`all-items-a`, `all-items-b`, `all-spells` or `all-abilities`.
+`all-items-a`, `all-items-b`, `all-spells`, `all-abilities` or `all-break-arts`.
 These are isolated testing configurations, not imported saves or claims of
 completed story events. The default remains the original New Game equipment,
 inventory and action set. Normal game startup is unchanged.
@@ -139,6 +139,15 @@ inventory and action set. Normal game startup is unchanged.
   and story/progression counters are not expanded. This is a fixture for
   [#10](https://github.com/JEschete/VS-NativePort/issues/10), not evidence that
   all ability effects or timing windows have been verified.
+- **All-Break-Arts:** post-prologue menu gates and the original 40 arts
+  (IDs 184-223): four for each of nine weapon families and bare hands.
+  Only the currently equipped category is usable; other learned categories
+  remain viewable through **View Arts**. Equipment, inventory, HP/MP, chain
+  mappings, spells and acquisition/story counters are unchanged. Use
+  **ASHLEY STATS** for starting HP; arts still require more HP than their
+  nominal cost (25/40/55/75), leaving at least 1 HP after payment.
+  This supports [#11](https://github.com/JEschete/VS-NativePort/issues/11),
+  not a claim that every art or acquisition path is already verified.
 
 Profiles retain the real weapon, resource, status and target restrictions.
 In particular, draw the weapon before selecting a Break Art; its menu entry
@@ -380,6 +389,97 @@ The real-input driver selections are
 and `-ChainDefeat` / `-Acquire`. These results do not promote C++ ownership,
 retire compatibility bridges, or certify the separate real-story/save gates
 in #17/#18.
+
+## Break Art menus and resource checkpoint (2026-10-22)
+
+[#120](https://github.com/JEschete/VS-NativePort/issues/120) fixes the
+four-art normal menu writing/reading its fifth **View Arts** ID outside
+G01005. The unfixed production-menu regression returned action **5** instead
+of navigation **0xFFFF**, failing 20 assertions across all ten categories.
+F02610's copy fixup now reserves five entries before static hoisting, so
+both storage and reload initialization agree. Original source dimensions
+remain recorded separately in the data ledger; generated output was not
+patched manually.
+
+The maintained tests cover every category, normal/shortcut menus,
+equipped/unequipped restrictions, both Cursor Memory settings, the fourth
+art, and fifth navigation row. All forty original art IDs also exercise
+HP 0 / cost-1 / cost / cost+1 / 999, preview nonmutation, rejection without
+payment, and payment leaving at least 1 HP. MP, Risk and weapon PP are not
+charged. Eligibility checks distinguish unlearned/sheathed/Paralysis,
+recovery and insufficient HP from Silence (which does not block arts).
+These are component contracts, not execution of every damage/secondary
+effect.
+
+Actual window/controller navigation at speed 1 uses the new **all-break-arts**
+solo profile in Zone12 room0, seed1, Ashley(9,10), HP/MP999:
+
+| Configuration | Run | Fourth-art no-target preview / menu return | Shortcut fourth-art cancel / field return |
+| --- | --- | --- | --- |
+| Debug | `1792693091210881-0` | 3730 / 3864 | 4134 / 4325 |
+| Release | `1792693210368049-0` | 3712 / 3846 | 4118 / 4307 |
+
+Both runs open the normal five-row menu and navigate **View Arts** through
+all ten categories. Four Sword rows are enabled; all four rows in each
+unequipped category remain disabled, while its navigation row stays usable.
+The fourth Sword art is correctly action191 (Papillon Reel). Confirming an
+empty target selection returns without execution; the shortcut has exactly
+four rows and target cancellation restores field control. HP/MP remain999,
+Risk0, and acquisition/story counters stay unchanged. F10, fresh all-art
+entry, and return to Prologue preserve inventory and remove advanced grants.
+Both logs end normally with `trace_failed:false` and no errors.
+
+The first diagnostic attempt sent Triangle during the weapon-draw animation;
+the second incorrectly moved past the first unlocked root row into Inventory.
+The accepted driver waits for drawing and checks the actual root selection.
+Neither diagnostic established a native menu defect.
+
+Commands/evidence on `a320c82e` plus the scoped dirty worktree:
+
+- Standard Debug/Release MSBuild commands and both `VS.Tests.exe` full suites:
+  **455 cases / 1,078,556 assertions** each.
+- `.venv-3\Scripts\python.exe tools\port\copy_to_native.py` twice:
+  second manifest unchanged and all **86** registered owned paths preserved.
+- `.venv-3\Scripts\python.exe tools\port\test_encounter_fixups.py`:
+  **11 tests pass**.
+- Focused `quality-native.cmd --files ... --tidy` checks cover the changed
+  profile/menu/test C++ surfaces and both maintained Python files. The final
+  amended `CombatTestCases.cpp` recheck reports **one existing finding,
+  zero new**; no baseline or suppression changes.
+- `build\quality\live-restart-check.ps1 -Configuration Debug|Release -ArtMenus`.
+  Local fixture: `build\quality\all-break-arts-solo.json`; observations:
+  `build\quality\live-break-art-menus-*.json`; logs:
+  `build\quality\break-art-menu-*` and the run directories above.
+
+### Original art inventory and acquisition requirements
+
+The resident action table (`SLUS_010.40`, file offset0x3C1DC, 52-byte records)
+and original MENU1 category ordering define the following forty arts.
+Tier costs are **25 / 40 / 55 / 75 HP** for every category. Thresholds are
+the original cumulative weapon-category kill counts at resident0x405E4.
+
+| Category / IDs | Tier 1 | Tier 2 | Tier 3 | Tier 4 | Thresholds |
+| --- | --- | --- | --- | --- | --- |
+| Dagger / 184-187 | Whistle Sting | Shadoweave | Double Fang | Wyrm Scorn | 20/90/235/425 |
+| Sword / 188-191 | Rending Gale | Vile Scar | Cherry Ronde | Papillon Reel | 25/110/260/485 |
+| Greatsword / 192-195 | Sunder | Thunderwave | Swallow Slash | Advent Sign | 18/80/210/420 |
+| Axe/Mace / 196-199 | Mistral Edge | Glacial Gale | Killer Mantis | Black Nebula | 20/100/245/465 |
+| Greataxe / 200-203 | Bear Claw | Accursed Umbra | Iron Ripper | Emetic Bomb | 15/90/215/410 |
+| Staff / 204-207 | Sirocco | Riskbreak | Gravis Aether | Trinity Pulse | 20/95/205/385 |
+| Heavy Mace / 208-211 | Bonecrusher | Quickshock | Ignis Wheel | Hex Flux | 15/95/220/405 |
+| Polearm / 212-215 | Ruination | Scythe Wind | Giga Tempest | Spiral Scourge | 20/95/230/430 |
+| Crossbow / 216-219 | Brimstone Hail | Heaven's Scorn | Death Wail | Sanctus Flare | 30/105/250/460 |
+| Bare hands / 220-223 | Lotus Palm | Vertigo | Vermillion Aura | Retribution | 10/65/175/340 |
+
+Qualifying BaseAttack/Ability/BreakArt kills count once, excluding Ashley,
+dummy actors and already-counted deaths. The original Minotaur script flag
+must be at least10; each category stops at its pending threshold or four
+unlocks. Bare hands is category10 but counter index0. Normal reward handling
+grants `184 + (category - 1) * 4 + tier`. These gates/thresholds have component
+coverage; the Lab grants do not advance or certify them in a real campaign.
+[#11](https://github.com/JEschete/VS-NativePort/issues/11) still requires broader
+actual art execution, damage/secondary effects and target/range coverage;
+real-story/save acceptance remains separately tracked in #17/#18.
 
 ## Learned-spell acceptance checkpoint (2026-10-22)
 

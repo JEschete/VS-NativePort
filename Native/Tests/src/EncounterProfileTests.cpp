@@ -7,6 +7,7 @@
 #include <string_view>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Encounter.hpp"
 #include "CombatLab/Trace.hpp"
@@ -167,6 +168,12 @@ std::set<unsigned> BindFullBattleAbilities() {
   expected.insert(defenses.begin(), defenses.begin() + 14);
   return expected;
 }
+
+void BindBreakArts() {
+  for (unsigned action = 184; action < 224; ++action) {
+    Battle_actionDefinitions[action].type = Battle_ActionType_BreakArt;
+  }
+}
 }  // namespace
 
 TEST_CASE("Prologue Lab profiles preserve normal starting restrictions",
@@ -306,11 +313,14 @@ TEST_CASE("All-abilities profile grants the original 28 abilities only",
   }
 }
 
-TEST_CASE("All-abilities profile preserves resources and story progression",
-          "[combat][profile][abilities]") {
+TEST_CASE("Ability profiles preserve resources and story progression",
+          "[combat][profile][abilities][break-arts]") {
+  const auto profile = GENERATE(VS::Game::EncounterProfile::kAllAbilities,
+                                VS::Game::EncounterProfile::kAllBreakArts);
   ProfileFixture fixture;
   StatFixture actor;
   BindFullBattleAbilities();
+  BindBreakArts();
   Audio_Seq_unusedStateFlags.opaqueB5 = 1;
   Audio_Seq_unusedStateFlags.magicUsed = 1;
   Audio_Seq_unusedArtsStatus.artsLearned[0] = 2;
@@ -323,8 +333,7 @@ TEST_CASE("All-abilities profile preserves resources and story progression",
   const auto inventory = Audio_Seq_unusedInventory;
   const auto indices = Audio_Seq_unusedInventoryIndices;
   const auto stats = actor.stats;
-  VS::Game::InitializeEncounterPlayerProfile(
-      VS::Game::EncounterProfile::kAllAbilities);
+  VS::Game::InitializeEncounterPlayerProfile(profile);
   CHECK(std::memcmp(&expected_flags, &Audio_Seq_unusedStateFlags,
                     sizeof expected_flags) == 0);
   CHECK(std::memcmp(&arts, &Audio_Seq_unusedArtsStatus, sizeof arts) == 0);
@@ -361,6 +370,52 @@ TEST_CASE("All-abilities profile rejects missing production ability tables",
   SECTION("defense table") { Battle_defenseAbilityActionIds[0] = 0; }
   CHECK_THROWS(VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllAbilities));
+}
+
+TEST_CASE("All-Break-Arts profile grants all forty original arts only",
+          "[combat][profile][break-arts]") {
+  ProfileFixture fixture;
+  BindBreakArts();
+  VS::Game::InitializeEncounterPlayerProfile(
+      VS::Game::EncounterProfile::kAllBreakArts);
+  for (unsigned action = 0; action < std::size(Battle_actionDefinitions);
+       ++action) {
+    CAPTURE(action);
+    CHECK(Battle_actionDefinitions[action].unlocked ==
+          (action >= 184 && action < 224));
+  }
+  const auto learned = std::to_array(State_learnedActionFlags);
+  VS::Game::InitializeEncounterPlayerProfile(
+      VS::Game::EncounterProfile::kAllBreakArts);
+  CHECK(std::to_array(State_learnedActionFlags) == learned);
+  VS::Game::EncounterSetup setup;
+  setup.profile = VS::Game::EncounterProfile::kAllBreakArts;
+  const auto json = VS::combat_lab::EncodeSetup(setup);
+  CHECK(json.at("ashley_profile") == "all-break-arts");
+  CHECK(VS::combat_lab::DecodeSetup(json).profile == setup.profile);
+}
+
+TEST_CASE("All-Break-Arts profile rejects an incomplete original action table",
+          "[combat][profile][break-arts]") {
+  ProfileFixture fixture;
+  BindBreakArts();
+  Battle_actionDefinitions[223].type = Battle_ActionType_Item;
+  CHECK_THROWS(VS::Game::InitializeEncounterPlayerProfile(
+      VS::Game::EncounterProfile::kAllBreakArts));
+}
+
+TEST_CASE("All-Break-Arts profile preserves existing ability mappings",
+          "[combat][profile][break-arts]") {
+  ProfileFixture fixture;
+  BindBreakArts();
+  Input_settings.mappedChainAbilities[0] = 22;
+  Input_settings.mappedDefenseAbilities[0] = 40;
+  const auto chain = std::to_array(Input_settings.mappedChainAbilities);
+  const auto defense = std::to_array(Input_settings.mappedDefenseAbilities);
+  VS::Game::InitializeEncounterPlayerProfile(
+      VS::Game::EncounterProfile::kAllBreakArts);
+  CHECK(std::to_array(Input_settings.mappedChainAbilities) == chain);
+  CHECK(std::to_array(Input_settings.mappedDefenseAbilities) == defense);
 }
 
 TEST_CASE(

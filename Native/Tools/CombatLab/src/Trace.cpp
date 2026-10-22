@@ -286,6 +286,8 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
     setup.profile = Game::EncounterProfile::kAllSpells;
   } else if (profile == "all-abilities") {
     setup.profile = Game::EncounterProfile::kAllAbilities;
+  } else if (profile == "all-break-arts") {
+    setup.profile = Game::EncounterProfile::kAllBreakArts;
   } else {
     throw std::runtime_error("unknown encounter Ashley profile");
   }

@@ -407,6 +407,11 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("((u_int)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
          "MENU0/84.c rank selector must link its final frame packet with a native handle; truncation hides the lower UI chain"),
     ],
+    "F02610": [
+        ("static u_short Menu_BreakArts_artListActionIds[4];",
+         "static u_short Menu_BreakArts_artListActionIds[5];",
+         "MENU1/30.c weapon arts need four action IDs plus View Arts; adapt before hoisting so the reload initializer has the same extent"),
+    ],
     "F02662": [
         ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
          "Status limb indicator packets retain native link handles"),

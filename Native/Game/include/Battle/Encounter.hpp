@@ -72,6 +72,7 @@ enum class EncounterProfile {
   kAllItemsB,
   kAllSpells,
   kAllAbilities,
+  kAllBreakArts,
   kCount
 };
 const char* EncounterProfileId(EncounterProfile profile);

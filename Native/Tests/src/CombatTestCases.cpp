@@ -448,6 +448,63 @@ TEST_CASE("All battle abilities charge original Risk with chain growth and cap",
   }
 }
 
+TEST_CASE("All forty Break Arts require surviving their original HP cost",
+          "[combat][break-arts][cost]") {
+  AbilityFixture fixture;
+  const int action_id = GENERATE(Catch::Generators::range(184, 224));
+  const int boundary = GENERATE(0, 1, 2, 3, 4);
+  constexpr std::array<int, 4> kCosts{25, 40, 55, 75};
+  const int cost = kCosts[(action_id - 184) % 4];
+  const std::array<int, 5> health{0, cost - 1, cost, cost + 1, 999};
+  const int hp = health[boundary];
+  const bool affordable = hp > cost;
+  auto& definition = Battle_actionDefinitions[action_id];
+  definition.type = Battle_ActionType_BreakArt;
+  definition.cost = cost;
+  auto& actor = fixture.stats[0];
+  actor.currentHp = static_cast<decltype(actor.currentHp)>(hp);
+  actor.risk = 7;
+  actor.weapon.currentPp = 35;
+  const int expected = (affordable ? 1 << 24 : 0) +
+                       (Battle_ActionType_BreakArt << 16) + cost +
+                       (affordable ? 0 : 1);
+  CHECK(Battle_ActionCostAndAvailability(action_id, &actor, 0) == expected);
+  CHECK(actor.currentHp == hp);
+  CHECK(Battle_ActionCostAndAvailability(action_id, &actor, 1) == expected);
+  CHECK(actor.currentHp == (affordable ? hp - cost : hp));
+  CHECK(actor.currentMp == 120);
+  CHECK(actor.risk == 7);
+  CHECK(actor.weapon.currentPp == 35);
+}
+
+TEST_CASE(
+    "Break Art menu eligibility preserves weapon status and resource gates",
+    "[combat][break-arts][eligibility]") {
+  AbilityFixture fixture;
+  const int action_id = GENERATE(Catch::Generators::range(184, 224));
+  const int gate = GENERATE(0, 1, 2, 3, 4, 5, 6);
+  constexpr std::array<int, 4> kCosts{25, 40, 55, 75};
+  const int cost = kCosts[(action_id - 184) % 4];
+  auto& definition = Battle_actionDefinitions[action_id];
+  definition.type = Battle_ActionType_BreakArt;
+  definition.cost = cost;
+  definition.unlocked = gate != 1;
+  fixture.actors[0].weaponDrawn = gate != 2;
+  auto& actor = fixture.stats[0];
+  actor.statuses = gate == 3 ? 0x2000 : (gate == 4 ? 0x1000 : 0);
+  actor.actionRecoveryTimer = gate == 5 ? 1 : 0;
+  actor.currentHp =
+      static_cast<decltype(actor.currentHp)>(gate == 6 ? cost : 999);
+  actor.currentMp = 0;
+  constexpr std::array<int, 7> kFlags{0, 4, 4, 4, 0, 1, 2};
+  const auto before = actor;
+  CHECK(Battle_ActorActionRestrictionFlags(0, action_id) == kFlags[gate]);
+  CHECK(actor.currentHp == before.currentHp);
+  CHECK(actor.currentMp == before.currentMp);
+  CHECK(actor.statuses == before.statuses);
+  CHECK(actor.actionRecoveryTimer == before.actionRecoveryTimer);
+}
+
 TEST_CASE("Ability eligibility requires mapped input",
           "[combat][abilities][eligibility]") {
   AbilityFixture fixture;

@@ -55,6 +55,14 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("*temp_s6 = LegacyGpu_Handle(prim);", menu)
         self.assertNotIn("*temp_s6 = ((u_int)prim << 8) >> 8;", menu)
 
+    def test_break_art_menu_reserves_navigation_and_matching_reset_storage(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Menu/BreakArts.c").read_text()
+        self.assertIn("static u_short Menu_BreakArts_artListActionIds[5];", source)
+        reset = source.split("void Menu_BreakArts_ResetMenu1Statics(", 1)[1]
+        self.assertIn("static const u_short initial[5];", reset)
+        self.assertNotIn("static const u_short initial[4];", reset)
+
     def test_encounter_trace_uses_action_actor_not_targeting_mode(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Boot/Encounter.cpp").read_text()

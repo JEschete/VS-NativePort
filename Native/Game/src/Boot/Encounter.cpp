@@ -379,6 +379,8 @@ const char* EncounterProfileId(EncounterProfile profile) {
       return "all-spells";
     case EncounterProfile::kAllAbilities:
       return "all-abilities";
+    case EncounterProfile::kAllBreakArts:
+      return "all-break-arts";
     case EncounterProfile::kCount:
       break;
   }
@@ -399,21 +401,34 @@ void InitializeEncounterPlayerProfile(EncounterProfile profile) {
   }
   const bool all_spells = profile == EncounterProfile::kAllSpells;
   const bool all_abilities = profile == EncounterProfile::kAllAbilities;
+  const bool all_break_arts = profile == EncounterProfile::kAllBreakArts;
+  if (all_break_arts) {
+    // Original MENU1/30.c: ten categories, four consecutive arts each.
+    constexpr unsigned kBreakArtCount = 40;
+    for (unsigned index = 0; index < kBreakArtCount; ++index) {
+      const unsigned action = Battle_ActionId_DaggerArtOne + index;
+      if (Battle_actionDefinitions[action].type != Battle_ActionType_BreakArt) {
+        throw std::runtime_error(
+            "encounter profile requires valid Break Art definitions");
+      }
+      LearnAction(action);
+    }
+  }
   if (profile == EncounterProfile::kPostMinotaur || all_abilities) {
     LearnProfileBattleAbilities(all_abilities);
     if (!all_abilities) LearnAction(EquippedBreakArt());
   }
   if (profile == EncounterProfile::kPostMinotaur || all_spells) {
     LearnProfileSpells(all_spells);
-  } else if (all_abilities) {
+  } else if (all_abilities || all_break_arts) {
     Battle_ApplyLearnedActionUnlocks();
   }
   VS_LOG_INFO("encounter.profile",
               "Ashley={} representative_test_actions={} all_spells={} "
-              "all_abilities={}",
+              "all_abilities={} all_break_arts={}",
               EncounterProfileId(profile),
               profile == EncounterProfile::kPostMinotaur, all_spells,
-              all_abilities);
+              all_abilities, all_break_arts);
 }
 
 std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,

@@ -34,7 +34,7 @@ static char Menu_BreakArts_setHpCostDigitBuffer[16];
 u_short Menu_BreakArts_strings[2151]; /* contents: disc string table (ModuleData.c) */
 
 // decomp: local static of _weaponArtsMenu, at file scope so the module reset reaches it
-static u_short Menu_BreakArts_artListActionIds[4];
+static u_short Menu_BreakArts_artListActionIds[5];
 
 // decomp: local static of _weaponArtsMenu, at file scope so the module reset reaches it
 static int Menu_BreakArts_artListForceCursorMemory = 0;
@@ -500,7 +500,7 @@ void Menu_BreakArts_ResetMenu1Statics(void)
         memcpy((void*)&Menu_BreakArts_setHpCostDigitBuffer, &initial, sizeof Menu_BreakArts_setHpCostDigitBuffer);
     }
     {
-        static const u_short initial[4];
+        static const u_short initial[5];
         memcpy((void*)&Menu_BreakArts_artListActionIds, &initial, sizeof Menu_BreakArts_artListActionIds);
     }
     {

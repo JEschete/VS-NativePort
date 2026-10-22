@@ -100,6 +100,8 @@ TEST_CASE("Solo encounters retain Ashley placement and profile validation",
   CHECK(ValidateEncounter(setup, zone).empty());
   setup.profile = VS::Game::EncounterProfile::kAllAbilities;
   CHECK(ValidateEncounter(setup, zone).empty());
+  setup.profile = VS::Game::EncounterProfile::kAllBreakArts;
+  CHECK(ValidateEncounter(setup, zone).empty());
   setup.player.x = -1;
   CHECK_FALSE(ValidateEncounter(setup, zone).empty());
   setup.player.x = 4;
@@ -131,24 +133,25 @@ TEST_CASE("Combat Lab editor preserves solo presets and group selection",
 }
 
 TEST_CASE("Combat Lab editor selects and wraps the all-action profiles",
-          "[combat][encounter][editor][spells][abilities]") {
+          "[combat][encounter][editor][spells][abilities][break-arts]") {
   VS::combat_lab::Editor editor({TestZone()});
   EditorPress(editor, VS::Input::Down, 11);
-  EditorPress(editor, VS::Input::Left);
-  CHECK(editor.Setup().profile == VS::Game::EncounterProfile::kAllAbilities);
-  const auto abilities = editor.Setup();
-  editor.Load(
-      VS::combat_lab::DecodeSetup(VS::combat_lab::EncodeSetup(abilities)));
-  CHECK(editor.Setup().profile == abilities.profile);
-  EditorPress(editor, VS::Input::Left);
-  CHECK(editor.Setup().profile == VS::Game::EncounterProfile::kAllSpells);
-  const auto setup = editor.Setup();
-  editor.Load(VS::combat_lab::DecodeSetup(VS::combat_lab::EncodeSetup(setup)));
-  CHECK(editor.Setup().profile == setup.profile);
-  EditorPress(editor, VS::Input::Right);
-  CHECK(editor.Setup().profile == VS::Game::EncounterProfile::kAllAbilities);
-  EditorPress(editor, VS::Input::Right);
-  CHECK(editor.Setup().profile == VS::Game::EncounterProfile::kPrologue);
+  for (const auto profile : {VS::Game::EncounterProfile::kAllBreakArts,
+                             VS::Game::EncounterProfile::kAllAbilities,
+                             VS::Game::EncounterProfile::kAllSpells}) {
+    EditorPress(editor, VS::Input::Left);
+    CHECK(editor.Setup().profile == profile);
+    const auto setup = editor.Setup();
+    editor.Load(
+        VS::combat_lab::DecodeSetup(VS::combat_lab::EncodeSetup(setup)));
+    CHECK(editor.Setup().profile == profile);
+  }
+  for (const auto profile : {VS::Game::EncounterProfile::kAllAbilities,
+                             VS::Game::EncounterProfile::kAllBreakArts,
+                             VS::Game::EncounterProfile::kPrologue}) {
+    EditorPress(editor, VS::Input::Right);
+    CHECK(editor.Setup().profile == profile);
+  }
 }
 
 TEST_CASE("Combat Lab editor loads empty and populated presets",
