@@ -52,6 +52,14 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("menuText = buf + 0x1900;", source)
         self.assertNotIn("Core_Memory_AllocateFromHighEnd(0x1B00)", source)
 
+    def test_plugin_table_never_binds_the_development_dispatcher(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Effects/PurgeTables.c").read_text()
+        table = source.split("Effects_EffectRenderer Effects_effectEntryPoints[] = {", 1)[1]
+        table = table.split("};", 1)[0]
+        self.assertNotIn("Effects_InvokeAllPluginUpdates", table)
+        self.assertIn("Effects_Plg198_Ring", table)
+
 
 if __name__ == "__main__":
     unittest.main()

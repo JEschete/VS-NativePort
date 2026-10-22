@@ -676,7 +676,11 @@ class Copier:
                 pos = off + n
                 continue
             t = self.pick(target, overlay)
-            new = self.plugin_ref.get(off) if t.startswith("plugin:") and rel == self.EFFPURGE else self.target_text(t)
+            # An address shared with EFFPURGE's dev routine can be labelled F01889
+            # in refs.json. The slot's plugin is authoritative, not that symbol.
+            new = self.plugin_ref.get(off) if rel == self.EFFPURGE else None
+            if new is None:
+                new = self.target_text(t)
             if new is None:
                 self.report["unrenamed"].append(f"{rel}@{off}: {target}")
                 continue
