@@ -243,6 +243,9 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         (r'"MISC\00000|0xF8|"',
          r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"',
          "C48.c:485 pragma vsstring encodes MISC then E7 termination; preserve reset bytes and avoid runaway glyph packets"),
+        ("Core_Memory_AllocateFromHighEnd(0x1B00)",
+         "Core_Memory_AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
+         "C48.c:546 scratch ends with 128 text pointers; reserve native pointer width, not the PS1 512 bytes"),
     ],
     "F03669": [
         ("    memset(&Input_settings, 0, sizeof Input_settings);\n"

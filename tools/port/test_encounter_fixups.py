@@ -42,6 +42,16 @@ class EncounterFixupTests(unittest.TestCase):
         sequencer = (root / "Native/Engine/src/Audio/Seq/Sequencer.c").read_text()
         self.assertEqual(sequencer.count("Audio_Native_Tick();"), 1)
 
+    def test_misc_shortcut_reserves_all_native_text_pointers(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Menu/Inventory/Inventory.c").read_text()
+        self.assertIn(
+            "Core_Memory_AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
+            source,
+        )
+        self.assertIn("menuText = buf + 0x1900;", source)
+        self.assertNotIn("Core_Memory_AllocateFromHighEnd(0x1B00)", source)
+
 
 if __name__ == "__main__":
     unittest.main()

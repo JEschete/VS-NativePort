@@ -206,7 +206,7 @@ void Menu_Inventory_UpdateMiscItemShortcut(int initialize)
         break;
 
     case Menu_Inventory_MiscItemShortcutState_InitItemRows:
-        buf = Core_Memory_AllocateFromHighEnd(0x1B00);
+        buf = Core_Memory_AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText));
         rowCount = 0;
 
         Items_Inventory_RebuildDisplayIndices(Items_ItemCategory_Misc);
