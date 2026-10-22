@@ -1045,6 +1045,9 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
                ("actor->equipmentModels[1] = (void*)((char*)actor + 0x289C);",
                 "actor->equipmentModels[1] = (void*)&((Actors_ActorAllocation*)actor)->modelSlots[1];",
                 "second slot"),
+               ("Actors_zoneCharacterInitData[zudIndex].characterKind",
+                "Field_zoneContext.zndEnemies[zudIndex].recordBytes[2]",
+                "D_800F188C aliases _zoneContext+0xC; use the same live table as the primary body"),
                ("*(Actors_SpawnSettings*)((char*)actor + 0x30) =",
                 "*(Actors_SpawnSettings*)((char*)&actor->reserved34 - 4) =", "spawn settings at 0x30")],
     # 30DB0.c:1508 reads the actor's sequence table through `(char*)actor + 0x5F4` (+0x70 sectors, +0xA0 sizes).

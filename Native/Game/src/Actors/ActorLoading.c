@@ -649,7 +649,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
             if (Actors_usesSecondaryBodyModel[(u_char)init->characterKind]) {
                 object.assetKind = 1;
                 object.targetSlot = id + 4;
-                object.modelId = (u_char)Actors_zoneCharacterInitData[zudIndex].characterKind + 1;
+                object.modelId = (u_char)Field_zoneContext.zndEnemies[zudIndex].recordBytes[2] + 1;
                 object.destination = actor->equipmentModels[0];
                 object.subKind = id;
                 object.textureSlot = 0xFC;

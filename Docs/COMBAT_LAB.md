@@ -295,6 +295,22 @@ remain unreviewed. Four ranked uses must share an encounter, with all four
 learned flags retained afterward. The training dummy suppresses magic effects
 and is not a valid offensive-spell acceptance target.
 
+Use the original enemy class rather than its displayed name to select fixtures:
+Mandel (zone9, definition0) is Undead; Sackheim (zone9, definition6) is Human
+and has MP. Drains reject Undead, while Exorcism requires Undead. Ghost
+(zone13, definition0) is an eligible Banish target, not its only eligible class.
+Area books require three confirmations: height, horizontal area position, then
+the final target list. Check the actual target-preview point against the chosen
+area; an adjacent root tile alone does not guarantee inclusion. After defeating
+the final enemy, confirm the ordinary loot dialog before checking field return.
+
+Ghost's secondary-body model now comes from the same live zone table as its
+primary body (#118), preserving the original model index and companion offset.
+Debug/Release real-input checks load models26/27, use Banish to defeat the Ghost
+67 -> 0, consume one book, charge25MP, learn action105 and return through loot.
+Separate three-encounter checks stop/re-enter with the Ghost alive in both builds.
+These checks do not reproduce or close the separate F10 crash report #82.
+
 ## Combined combat/action checkpoint (2026-10-21)
 
 Source: `fd291cfe29b45656e00ff1e198f53e7730b59a19` plus pending native

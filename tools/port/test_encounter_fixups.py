@@ -65,6 +65,17 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertNotIn("state.source_actor = action.sourceActorId;", inspect)
 
+    def test_secondary_body_uses_the_live_zone_character_table(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Actors/ActorLoading.c").read_text()
+        spawn = source.split("Battle_Actor* Actors_SpawnRoomEnemy(", 1)[1]
+        spawn = spawn.split("\n}\n", 1)[0]
+        self.assertIn(
+            "object.modelId = (u_char)Field_zoneContext.zndEnemies[zudIndex].recordBytes[2] + 1;",
+            spawn,
+        )
+        self.assertNotIn("Actors_zoneCharacterInitData[", spawn)
+
     def test_preview_weapon_alias_uses_real_model_slots(self):
         root = Path(__file__).resolve().parents[2]
         preview = (root / "Native/Game/src/Menu/Framework/ActorPreview.c").read_text()
