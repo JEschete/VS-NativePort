@@ -97,6 +97,14 @@ _Static_assert(offsetof(Battle_TargetSphereLabelView, opaque990) ==
 
 // An actor record placed at core.model (Content_ParseActorModel) must end
 // before the weapon model slots.
+_Static_assert(sizeof(Actors_ActorModelSlot) >= sizeof(Actors_WeaponModel),
+               "equipment slot must fit a native weapon model");
+_Static_assert(_Alignof(Actors_ActorModelSlot) >= _Alignof(Actors_WeaponModel),
+               "equipment slot must align a native weapon model");
+_Static_assert(offsetof(Actors_ActorAllocation, modelSlots) %
+                       _Alignof(Actors_ActorRecord) ==
+                   0,
+               "secondary body record must be aligned");
 _Static_assert(offsetof(Actors_ActorAllocation, modelSlots) -
                        offsetof(Actors_ActorAllocation, core.model) >=
                    sizeof(Actors_ActorRecord),

@@ -48,7 +48,7 @@ _Static_assert(sizeof(Actors_AirborneTickAccumulator) == 0x4, "Actors_AirborneTi
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_ACTORS_MOVEMENT_H_DECLS)
 #define VS_ACTORS_MOVEMENT_H_DECLS
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorModelSlot.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Location.h"

@@ -175,6 +175,16 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertNotIn("Battle_unusedGlobal2", inventory)
 
+    def test_equipment_slot_storage_is_owned_and_native_sized(self):
+        root = Path(__file__).resolve().parents[2]
+        allocation = (root / "Native/Game/src/Actors/ActorAllocation.h").read_text()
+        slot = (root / "Native/Game/src/Actors/ActorModelSlot.h").read_text()
+        self.assertIn('#include "Actors/ActorModelSlot.h"', allocation)
+        self.assertNotIn("storage[0x5E8]", allocation)
+        self.assertIn("Actors_WeaponModel weapon;", slot)
+        registry = (root / "tools/port/owned.csv").read_text()
+        self.assertIn("T00633,type,Actors_ActorModelSlot,", registry)
+
     def test_native_audio_preserves_optional_layer_guard_and_connects_sfx(self):
         fixes = copy_fixups.FIXES["F03192"]
         self.assertEqual(len(fixes), 4)

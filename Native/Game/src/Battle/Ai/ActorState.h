@@ -8,7 +8,7 @@
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_ACTORSTATE_H_DECLS)
 #define VS_BATTLE_AI_ACTORSTATE_H_DECLS
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorModelSlot.h"
 #include "Actors/ModelInstance.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiState.h"

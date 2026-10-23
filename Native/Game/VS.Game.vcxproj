@@ -1706,6 +1706,7 @@
   <ItemGroup>
     <ClInclude Include="src\Actors\ActorAllocation.h" />
     <ClInclude Include="src\Actors\ActorLoading.h" />
+    <ClInclude Include="src\Actors\ActorModelSlot.h" />
     <ClInclude Include="src\Actors\ActorRecord.h" />
     <ClInclude Include="src\Actors\ActorState.h" />
     <ClInclude Include="src\Actors\Animation.h" />
@@ -2025,6 +2026,7 @@
     <ClInclude Include="src\Menu\Legacy.h" />
     <ClInclude Include="src\Menu\Loot\LootInventory.h" />
     <ClInclude Include="src\Menu\Loot\LootScreen.h" />
+    <ClInclude Include="src\Menu\Loot\Paging.h" />
     <ClInclude Include="src\Menu\Magic.h" />
     <ClInclude Include="src\Menu\Manual.h" />
     <ClInclude Include="src\Menu\Map.h" />

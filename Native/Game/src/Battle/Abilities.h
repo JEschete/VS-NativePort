@@ -8,7 +8,7 @@
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_ABILITIES_H_DECLS)
 #define VS_BATTLE_ABILITIES_H_DECLS
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorModelSlot.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"

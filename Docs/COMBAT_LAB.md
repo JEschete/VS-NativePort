@@ -1283,6 +1283,108 @@ at tick802 (run `1792724088133050-0`), or tick800 with `--scripted`
 menu route at speed1 succeeds (`1792724167571071-0`); equipment work uses
 speed1. No accelerated-audio repair or new #7 acceptance is claimed.
 
+## Native equipment storage repair (#131; parent #14)
+
+On `1837e1363a68344fcc51c9369741cee5df1a1e5d`, real-controller Debug run
+`1792725454239918-0` acquired the original Zombie Knight shield132 through
+Fireball and ordinary loot pickup. Equipping it beside Fandango worked, but
+unequipping/re-equipping Fandango changed source and preview shield headers
+to model0/material0 while the loadout still specified model101.
+
+T00633 retained the original1512-byte, alignment1 runtime reserve.
+`Actors_WeaponModel` is1528 bytes, alignment8 on native x64, so its full-size
+clear/copy overwrote16 bytes of the next slot. The new registered owned C
+`Actors_ActorModelSlot` contains the actual weapon model. Native allocation
+size, array stride and alignment now follow that type; original source size
+remains provenance, not an on-disk or native-storage contract. Secondary-body
+allocation remains separately sized for an actor record. This is not C++
+promotion, compatibility retirement or a new root-cause claim for #82.
+
+The pre-fix regression fails both size/alignment checks without performing an
+out-of-bounds write. Final tests cover each slot and clear/copy path with a
+byte-exact expected allocation, including adjacent storage, padding and guards.
+C assertions also cover capacity, alignment and the secondary-body start.
+
+Final hosts, based on1837e136 plus this scoped repair:
+
+- Debug SHA256 `7268bd6bc2abd3f2cade7168444c2642d9183b9876004005228cc1164f84a89d`.
+- Release SHA256 `f7f6195b87a0af0a1f8e1e4d3b357acc8d6541d9688717050a0a93329b5458f2`.
+
+| Acceptance | Debug run | Release run |
+|---|---|---|
+| Fandango/shield, two repeated swaps | `1792726450701178-0` | `1792726859832488-0` |
+| All seven equipped stock slots, cancel/NONE/round-trip | `1792726969363175-0` | `1792727088894880-0` |
+| Greatsword/shield, two repeated exclusive swaps | `1792729029518758-0` | `1792729093152495-0` |
+| Ghost secondary body, three live-enemy exits/two re-entries | `1792727583786915-0` | `1792727598752178-0` |
+
+The causal one-handed replay retains shield model101/material5/texture1 in
+source and preview after each weapon reload; source slot stride is1528.
+Field return retains source models0/1 and releases previews2/3. Greatsword
+selection removes the shield, shield selection removes the greatsword, and
+field return retains only the greatsword source model. Stock cycles preserve
+component properties and ownership, reject NONE, and restore the original
+loadout at tick6657. All eight sessions close normally without error-level
+engine records or trace failures.
+
+Live commands use the ignored `build\quality\equipment14-check.ps1`, speed1:
+
+```powershell
+build\quality\equipment14-check.ps1 -Configuration Debug `
+  -Weapon default -Mode loot-shield -Seed 5
+build\quality\equipment14-check.ps1 -Configuration Release `
+  -Weapon default -Mode loot-shield -Seed 10
+build\quality\equipment14-check.ps1 -Configuration Debug -Mode stock-cycle
+build\quality\equipment14-check.ps1 -Configuration Release -Mode stock-cycle
+build\quality\equipment14-check.ps1 -Configuration Debug `
+  -Weapon greatsword -Mode replay-shield -Seed 42 `
+  -ReplayEvidence D:\Dev\NativePort\VS-NativePort\build\quality\equipment14-Debug-greatsword-loot-shield-seed42
+build\quality\equipment14-check.ps1 -Configuration Release `
+  -Weapon greatsword -Mode replay-shield -Seed 4 `
+  -ReplayEvidence D:\Dev\NativePort\VS-NativePort\build\quality\equipment14-Release-greatsword-loot-shield-seed4
+build\quality\live-restart-check.ps1 -Configuration Debug -GhostRestart
+build\quality\live-restart-check.ps1 -Configuration Release -GhostRestart
+```
+
+The exact replays reconstruct recorded held-button intervals through the
+existing `--scripted --press` interface, not memory writes or synthesized loot.
+They use the previous successful controller timelines after many fresh
+original32/255 shield rolls produced none. No rates, enemy HP, inventory
+capacities or loot flags were changed. The original evidence remains separate;
+new records use `equipment131-*`. One early replay attempt failed in the
+observer's JSON-array handling and is not acceptance.
+
+A second observer failure was reproduced exactly: Release seed8888 changed
+shield affinity index2 from3 to4 during Fireball. Run `1792729273006787-0`
+records precombat3, defeat-time4, pending4 and unchanged claimed properties.
+The observer now compares loot with the defeat-time source and retains the
+precombat snapshot separately. This was not a native loot-corruption defect;
+ignoring combat adaptation would reject correct instance preservation.
+
+Validation, with unrelated owner edits preserved and no baseline changes:
+
+- Rebuild tests and Combat Lab in Debug/Release using the documented MSBuild
+  command, `/nodeReuse:false /p:VcpkgManifestInstall=false`.
+- Each final `[menu][equipment]` selection:6 cases/300 assertions.
+  Each final full suite:500 cases/1,785,023 assertions.
+- `.\.venv-3\Scripts\python.exe tools\port\test_encounter_fixups.py`:19 pass.
+- Final repeated `copy_to_native.py` runs preserve751 generated outputs and
+  all87 existing owned source/header paths. All70 changed manifest hashes
+  match output bytes;69 consumers change only include providers, with the
+  remaining generated header relinquishing T00633 to the owned type.
+- Header-triggered quality/tidy initially identified two guard-style and two
+  typed-padding-comparison findings. All four were repaired. Final
+  `quality-native.cmd --files Native\Tests\src\EquipmentDetailTests.cpp --tidy`
+  reports0 findings/0 new; final style checks over the owned header, equipment
+  tests, layout assertions and copier test report3 existing/0 new.
+- Only the Game project/filter were regenerated with the existing scaffold
+  renderers, adding the owned header and the already-published loot paging
+  header. Owner-dirty solution/tools projects were not regenerated.
+
+Local evidence is `build\quality\equipment131-*`, the native run directories
+above, and the preserved broad `equipment131-tidy-first-report.json`.
+This closes the storage-specific behavior gate, not broader #14 derived-value,
+legal-category and progression/restriction acceptance.
+
 ## Equipment-drop and staging acceptance (#13; #128)
 
 The initial, pre-repair checkpoint used

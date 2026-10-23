@@ -108,6 +108,9 @@
     <ClInclude Include="src\Actors\ActorLoading.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClInclude Include="src\Actors\ActorModelSlot.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
     <ClInclude Include="src\Actors\ActorRecord.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
@@ -1819,6 +1822,9 @@
       <Filter>src\Menu\Loot</Filter>
     </ClCompile>
     <ClInclude Include="src\Menu\Loot\LootScreen.h">
+      <Filter>src\Menu\Loot</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Menu\Loot\Paging.h">
       <Filter>src\Menu\Loot</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Magic.c">

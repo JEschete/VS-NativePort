@@ -5,24 +5,18 @@
 
 typedef struct Actors_ActorAllocation Actors_ActorAllocation;
 typedef struct Actors_ActorCore Actors_ActorCore;
-typedef struct Actors_ActorModelSlot Actors_ActorModelSlot;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
 #define VS_ACTORS_ACTORALLOCATION_H_SET_TYPES_ONLY
 #endif
+#include "Actors/ActorModelSlot.h"
 #include "Actors/ModelInstance.h"
 #include "Battle/Actor.h"
 #ifdef VS_ACTORS_ACTORALLOCATION_H_SET_TYPES_ONLY
 #undef VS_TYPES_ONLY
 #undef VS_ACTORS_ACTORALLOCATION_H_SET_TYPES_ONLY
 #endif
-
-// decomp: vs_battle_actor4 (src/BATTLE/BATTLE.PRG/146C.h:440)
-typedef struct Actors_ActorModelSlot {
-    char storage[0x5E8];
-} Actors_ActorModelSlot;
-_Static_assert(sizeof(Actors_ActorModelSlot) == 0x5E8, "Actors_ActorModelSlot must keep its PS1 layout");
 
 // decomp: vs_battle_actor_dat2 (src/BATTLE/BATTLE.PRG/146C.h:615)
 typedef struct Actors_ActorCore {

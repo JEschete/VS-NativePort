@@ -9,6 +9,7 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_ACTORS_ACTORLOADING_H_DECLS)
 #define VS_ACTORS_ACTORLOADING_H_DECLS
 #include "Actors/ActorAllocation.h"
+#include "Actors/ActorModelSlot.h"
 #include "Actors/CharacterInit.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"

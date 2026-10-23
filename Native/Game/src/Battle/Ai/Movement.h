@@ -32,7 +32,7 @@ _Static_assert(sizeof(Battle_Ai_ArenaOrbitState) == 0x20, "Battle_Ai_ArenaOrbitS
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_MOVEMENT_H_DECLS)
 #define VS_BATTLE_AI_MOVEMENT_H_DECLS
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorModelSlot.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"

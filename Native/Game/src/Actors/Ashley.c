@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
-#include "Actors/ActorAllocation.h"
 #include "Actors/ActorLoading.h"
+#include "Actors/ActorModelSlot.h"
 #include "Actors/Animation.h"
 #include "Actors/Ashley.h"
 #include "Actors/CharacterInit.h"

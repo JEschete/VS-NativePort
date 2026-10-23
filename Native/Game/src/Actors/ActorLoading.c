@@ -3,6 +3,7 @@
 #include "ActorAssets.h"
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorLoading.h"
+#include "Actors/ActorModelSlot.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"

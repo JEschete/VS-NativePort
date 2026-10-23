@@ -130,7 +130,7 @@ typedef struct Items_LootListNode {
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_ITEMS_LOOT_H_DECLS)
 #define VS_ITEMS_LOOT_H_DECLS
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorModelSlot.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"

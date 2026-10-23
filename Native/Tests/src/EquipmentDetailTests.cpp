@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -10,12 +11,14 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
+#include "Core/Memory/WordCopy.h"
 #include "Event/ScriptVm.h"
 #include "Menu/Framework/EquipmentDetails.h"
 #include "Menu/Inventory/Inventory.h"
@@ -272,4 +275,42 @@ TEST_CASE("Equipment reload releases shields through the actual preview slot",
   CHECK(Actors_weaponModels[3] ==
         (has_preview ? &fixture.preview_shield : nullptr));
   CHECK(Render_legacyWeaponTextureSlots[0].referenceCount == (release ? 1 : 2));
+}
+
+TEST_CASE("Actor equipment slots contain complete aligned native models",
+          "[menu][equipment][model-storage]") {
+  CHECK(sizeof(Actors_ActorModelSlot) >= sizeof(Actors_WeaponModel));
+  CHECK(alignof(Actors_ActorModelSlot) >= alignof(Actors_WeaponModel));
+  if (sizeof(Actors_ActorModelSlot) < sizeof(Actors_WeaponModel) ||
+      alignof(Actors_ActorModelSlot) < alignof(Actors_WeaponModel)) {
+    return;
+  }
+  const int index = GENERATE(0, 1);
+  const bool clear = GENERATE(false, true);
+  struct GuardedAllocation {
+    Actors_ActorAllocation actor;
+    std::array<unsigned char, 64> guard;
+  } allocation{};
+  std::memset(&allocation, 0xA5, sizeof allocation);
+  std::array<unsigned char, sizeof allocation> expected{};
+  std::memcpy(expected.data(), &allocation, sizeof allocation);
+  Actors_WeaponModel model{};
+  if (!clear) {
+    model.modelId = 101;
+    model.material = 5;
+    model.boneCount = 1;
+    model.reserved5E4 = 0x12345678;
+  }
+  const auto offset = offsetof(Actors_ActorAllocation, modelSlots) +
+                      index * sizeof(Actors_ActorModelSlot);
+  std::memcpy(expected.data() + offset, &model, sizeof model);
+  auto* slot = &allocation.actor.modelSlots[index];
+  if (clear) {
+    Core_Memory_ZeroAlignedWords(slot, sizeof model);
+  } else {
+    Core_Memory_CopyAlignedWords(slot, &model, sizeof model);
+  }
+  std::array<unsigned char, sizeof allocation> actual{};
+  std::memcpy(actual.data(), &allocation, sizeof allocation);
+  CHECK(actual == expected);
 }

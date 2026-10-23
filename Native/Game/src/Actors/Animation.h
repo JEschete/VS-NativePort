@@ -44,7 +44,7 @@ _Static_assert(sizeof(Actors_SeqAnimationBank) == 0x8, "Actors_SeqAnimationBank 
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_ACTORS_ANIMATION_H_DECLS)
 #define VS_ACTORS_ANIMATION_H_DECLS
-#include "Actors/ActorAllocation.h"
+#include "Actors/ActorModelSlot.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
