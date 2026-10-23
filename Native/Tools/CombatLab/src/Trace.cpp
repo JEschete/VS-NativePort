@@ -1,11 +1,14 @@
 #include "CombatLab/Trace.hpp"
 
+#include <charconv>
 #include <chrono>
 #include <cstdio>
 #include <format>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace VS::combat_lab {
 namespace {
@@ -102,6 +105,9 @@ Trace::Trace(const std::filesystem::path& parent) {
 
 Trace::~Trace() try {
   Core::SetLogObserver(std::move(previous_observer_));
+  if (script_stream_.is_open()) {
+    EndScript(0, {{"status", "interrupted"}, {"reason", "host terminated"}});
+  }
   Event("session.end", {{"trace_failed", Failed()}});
   Core::SetLogFlushEachMessage(previous_flush_policy_);
   Core::SetConsoleLogLevel(previous_console_level_);
@@ -110,27 +116,174 @@ Trace::~Trace() try {
   std::fputs("Combat Lab trace finalization failed\n", stderr);
 }
 
+std::filesystem::path Trace::BeginScript(std::size_t number,
+                                         std::uint64_t tick) {
+  const auto path = directory_ / std::format("script-{:04}", number);
+  {
+    std::lock_guard lock(mutex_);
+    if (script_stream_.is_open()) {
+      throw std::runtime_error("previous script trace is still open");
+    }
+    if (!std::filesystem::create_directory(path)) {
+      throw std::runtime_error("script trace directory already exists");
+    }
+    script_stream_.open(path / "events.jsonl");
+    if (!script_stream_) throw std::runtime_error("cannot create script trace");
+    script_number_ = number;
+    script_start_tick_ = tick;
+    WriteRecord("session.begin", {{"schema", 1}, {"trace", "full"}}, tick);
+  }
+  return path;
+}
+
+void Trace::EndScript(std::uint64_t tick, const nlohmann::json& result) {
+  std::lock_guard lock(mutex_);
+  WriteRecord("session.end", {{"trace_failed", Failed()}, {"result", result}},
+              tick);
+  script_stream_.flush();
+  if (!script_stream_) failed_ = true;
+  script_stream_.close();
+  script_number_ = 0;
+}
+
 void Trace::Event(std::string_view category, const nlohmann::json& details,
                   std::uint64_t tick) noexcept {
   try {
     std::lock_guard lock(mutex_);
-    stream_ << nlohmann::json({{"sequence", ++sequence_},
-                               {"tick", tick},
-                               {"category", category},
-                               {"data", details}})
-                   .dump()
-            << '\n';
-    const bool boundary =
-        category != "engine" || details.at("level").get<int>() >=
-                                    static_cast<int>(Core::LogLevel::Error);
-    if (boundary) {
-      stream_.flush();
-      if (!Core::FlushLogFile()) failed_ = true;
-    }
-    if (!stream_) failed_ = true;
+    WriteRecord(category, details, tick);
   } catch (...) {
     failed_ = true;
   }
+}
+
+void Trace::WriteRecord(std::string_view category,
+                        const nlohmann::json& details, std::uint64_t tick) {
+  const auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(
+                           std::chrono::steady_clock::now() - started_)
+                           .count();
+  nlohmann::json record{{"sequence", ++sequence_},
+                        {"tick", tick},
+                        {"elapsed_us", elapsed},
+                        {"category", category},
+                        {"data", details}};
+  if (script_number_ != 0) {
+    record["script"] = script_number_;
+    record["script_tick"] =
+        tick >= script_start_tick_ ? tick - script_start_tick_ : 0;
+  }
+  const auto line = record.dump();
+  stream_ << line << '\n';
+  if (script_stream_.is_open()) script_stream_ << line << '\n';
+  const bool boundary =
+      category != "engine" ||
+      details.at("level").get<int>() >= static_cast<int>(Core::LogLevel::Error);
+  if (category == "engine" && details.at("level").get<int>() >=
+                                  static_cast<int>(Core::LogLevel::Error)) {
+    ++errors_;
+  }
+  if (boundary) {
+    stream_.flush();
+    if (script_stream_.is_open()) script_stream_.flush();
+    if (!Core::FlushLogFile()) failed_ = true;
+  }
+  if (!stream_ || (script_stream_.is_open() && !script_stream_)) failed_ = true;
+}
+
+std::uint64_t ParseTick(std::string_view value) {
+  std::uint64_t result = 0;
+  const auto parsed =
+      std::from_chars(value.data(), value.data() + value.size(), result);
+  if (value.empty() || parsed.ec != std::errc() ||
+      parsed.ptr != value.data() + value.size()) {
+    throw std::runtime_error("invalid nonnegative integer: " +
+                             std::string(value));
+  }
+  return result;
+}
+
+std::vector<ScriptPress> DecodePresses(std::string_view value) {
+  std::vector<ScriptPress> result;
+  while (!value.empty()) {
+    const auto comma = value.find(',');
+    const auto item = value.substr(0, comma);
+    const auto colon = item.find(':');
+    if (colon == std::string_view::npos) {
+      throw std::runtime_error("press expects tick:Button entries");
+    }
+    auto names = item.substr(colon + 1);
+    std::uint32_t buttons = 0;
+    do {
+      const auto plus = names.find('+');
+      const auto button = Input::ParseButtons(names.substr(0, plus));
+      if (button == 0) throw std::runtime_error("unknown scripted button");
+      buttons |= button;
+      if (plus == std::string_view::npos) break;
+      names.remove_prefix(plus + 1);
+    } while (true);
+    result.push_back({ParseTick(item.substr(0, colon)), buttons});
+    if (comma == std::string_view::npos) break;
+    value.remove_prefix(comma + 1);
+    if (value.empty()) throw std::runtime_error("empty press entry");
+  }
+  return result;
+}
+
+std::vector<EncounterScript> ReadScriptSequence(
+    const std::filesystem::path& path) {
+  std::ifstream file(path);
+  if (!file) throw std::runtime_error("cannot open sequence: " + path.string());
+  const auto document = nlohmann::json::parse(file);
+  if (!document.is_object() || !document.contains("version") ||
+      !document.at("version").is_number_integer() ||
+      document.at("version") != 1 || !document.contains("scripts") ||
+      !document.at("scripts").is_array() || document.at("scripts").empty()) {
+    throw std::runtime_error(
+        "sequence requires version 1 and nonempty scripts");
+  }
+  for (const auto& [key, unused] : document.items()) {
+    (void)unused;
+    if (key != "version" && key != "scripts") {
+      throw std::runtime_error("unknown sequence field: " + key);
+    }
+  }
+  std::vector<EncounterScript> scripts;
+  for (const auto& entry : document.at("scripts")) {
+    if (!entry.is_object() || !entry.contains("frames") ||
+        !entry.at("frames").is_number_integer() || entry.at("frames") <= 0 ||
+        entry.at("frames") >
+            std::numeric_limits<std::uint64_t>::max() - kScriptStopGraceTicks) {
+      throw std::runtime_error(
+          "each script requires a positive integer frames");
+    }
+    for (const auto& [key, unused] : entry.items()) {
+      (void)unused;
+      if (key != "name" && key != "scenario" && key != "frames" &&
+          key != "press") {
+        throw std::runtime_error("unknown script field: " + key);
+      }
+    }
+    EncounterScript script;
+    script.scenario = (std::filesystem::absolute(path).parent_path() /
+                       entry.at("scenario").get<std::string>())
+                          .lexically_normal();
+    script.name = entry.value("name", script.scenario.stem().string());
+    if (script.name.empty()) throw std::runtime_error("script name is empty");
+    script.frames = entry.at("frames").get<std::uint64_t>();
+    script.presses = DecodePresses(entry.value("press", std::string{}));
+    for (const auto& press : script.presses) {
+      if (press.tick >= script.frames) {
+        throw std::runtime_error("script press lies outside its frame budget");
+      }
+    }
+    std::ifstream preset(script.scenario);
+    if (!preset) {
+      throw std::runtime_error("cannot open script scenario: " +
+                               script.scenario.string());
+    }
+    script.setup = DecodeSetup(nlohmann::json::parse(preset));
+    scripts.push_back(std::move(script));
+  }
+  return scripts;
 }
 
 nlohmann::json EncodeActor(const Game::EncounterActorState& actor) {

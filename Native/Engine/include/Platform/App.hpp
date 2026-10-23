@@ -20,6 +20,8 @@ struct WindowDesc {
   i32 width = kDefaultWidth;  // 4:3 by default (the original is 320x240)
   i32 height = kDefaultHeight;
   bool resizable = true;
+  // Hosts can present loading feedback before device discovery.
+  bool initialize_devices = true;
 };
 
 // Owns SDL initialization and the main window. Every other system receives the
@@ -32,6 +34,7 @@ class App {
   App& operator=(const App&) = delete;
 
   std::expected<void, std::string> Init(const WindowDesc& desc);
+  std::expected<void, std::string> InitDevices(bool gamepads = true);
   void Shutdown();
 
   // Pumps OS events and forwards each to `handler`. Returns false once quit was

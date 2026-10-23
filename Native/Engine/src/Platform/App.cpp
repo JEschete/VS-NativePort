@@ -13,7 +13,9 @@ namespace VS::Platform {
 App::~App() { Shutdown(); }
 
 std::expected<void, std::string> App::Init(const WindowDesc& desc) {
-  if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD)) {
+  const SDL_InitFlags devices =
+      desc.initialize_devices ? SDL_INIT_AUDIO | SDL_INIT_GAMEPAD : 0;
+  if (!SDL_Init(SDL_INIT_VIDEO | devices)) {
     return std::unexpected(std::string("SDL_Init failed: ") + SDL_GetError());
   }
   sdl_initialized_ = true;
@@ -29,6 +31,19 @@ std::expected<void, std::string> App::Init(const WindowDesc& desc) {
   }
   VS_LOG_INFO("platform", "SDL {}.{}.{} window {}x{}", SDL_MAJOR_VERSION,
               SDL_MINOR_VERSION, SDL_MICRO_VERSION, desc.width, desc.height);
+  return {};
+}
+
+std::expected<void, std::string> App::InitDevices(bool gamepads) {
+  if (!sdl_initialized_) {
+    return std::unexpected("initialize the application before its devices");
+  }
+  const SDL_InitFlags flags =
+      SDL_INIT_AUDIO | (gamepads ? SDL_INIT_GAMEPAD : 0);
+  if (!SDL_InitSubSystem(flags)) {
+    return std::unexpected(std::string("SDL device initialization failed: ") +
+                           SDL_GetError());
+  }
   return {};
 }
 

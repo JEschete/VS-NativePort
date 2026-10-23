@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <array>
-#include <charconv>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -48,21 +47,17 @@ constexpr std::array<Game::EncounterAdjustment, 9> kTestConditions = {
     Game::EncounterAdjustment::kEquipmentDown,
 };
 
-struct Press {
-  std::uint64_t tick;
-  std::uint32_t buttons;
-};
-
 struct Options {
   fs::path data;
   fs::path scenario;
+  fs::path sequence;
   fs::path capture;
   std::uint64_t frames = 0;
   int speed = 1;
   bool start = false;
   bool catalog_only = false;
   bool devices = true;
-  std::vector<Press> presses;
+  std::vector<ScriptPress> presses;
 };
 
 struct PhaseTiming {
@@ -96,16 +91,6 @@ struct PhaseTiming {
             {"over_33_333_ms", over_frame_budget}};
   }
 };
-
-std::uint64_t Number(std::string_view value) {
-  std::uint64_t result = 0;
-  const auto parsed =
-      std::from_chars(value.data(), value.data() + value.size(), result);
-  if (parsed.ec != std::errc() || parsed.ptr != value.data() + value.size()) {
-    throw std::runtime_error("invalid nonnegative integer option");
-  }
-  return result;
-}
 
 fs::path FindData() {
   for (auto path = Platform::ExecutableDir(); !path.empty();) {
@@ -142,34 +127,32 @@ Options Parse(int argc, char** argv) {
       options.data = value;
     } else if (argument == "--scenario") {
       options.scenario = value;
+    } else if (argument == "--sequence") {
+      options.sequence = value;
     } else if (argument == "--capture") {
       options.capture = value;
     } else if (argument == "--frames") {
-      options.frames = Number(value);
+      options.frames = ParseTick(value);
     } else if (argument == "--speed") {
-      const auto speed = Number(value);
+      const auto speed = ParseTick(value);
       constexpr std::uint64_t kMaximumSpeed = 64;
       if (speed < 1 || speed > kMaximumSpeed) {
         throw std::runtime_error("speed must be 1-64");
       }
       options.speed = static_cast<int>(speed);
     } else if (argument == "--press") {
-      auto remaining = value;
-      while (!remaining.empty()) {
-        const auto comma = remaining.find(',');
-        const auto item = remaining.substr(0, comma);
-        const auto colon = item.find(':');
-        if (colon == std::string_view::npos) {
-          throw std::runtime_error("press expects tick:Button entries");
-        }
-        const auto mask = Input::ParseButtons(item.substr(colon + 1));
-        if (mask == 0) throw std::runtime_error("unknown scripted button");
-        options.presses.push_back({Number(item.substr(0, colon)), mask});
-        if (comma == std::string_view::npos) break;
-        remaining.remove_prefix(comma + 1);
-      }
+      const auto presses = DecodePresses(value);
+      options.presses.insert(options.presses.end(), presses.begin(),
+                             presses.end());
     } else {
       throw std::runtime_error("unknown option: " + std::string(argument));
+    }
+    if (!options.sequence.empty() &&
+        (!options.scenario.empty() || options.start || options.catalog_only ||
+         options.frames != 0 || !options.presses.empty())) {
+      throw std::runtime_error(
+          "--sequence cannot combine with --scenario/--start/--frames/--press/"
+          "--catalog-only; put frame limits and presses in each script");
     }
   }
   if (options.data.empty()) options.data = FindData();
@@ -212,14 +195,17 @@ void Capture(const fs::path& path, const std::vector<std::uint32_t>& pixels,
   }
 }
 
-std::vector<Game::EncounterZone> LoadCatalog(const Options& options,
-                                             Trace& trace) {
+void LoadData(const Options& options) {
   if (const auto opened = Content::DataStore::Open(options.data); !opened) {
     throw std::runtime_error(opened.error());
   }
   if (Content_LoadModuleData() != 0) {
     throw std::runtime_error("required production module data failed to load");
   }
+}
+
+std::vector<Game::EncounterZone> LoadCatalog(const Options& options,
+                                             Trace& trace) {
   auto catalog = Game::ReadEncounterCatalog();
   if (!catalog) throw std::runtime_error(catalog.error());
   auto catalog_json = nlohmann::json::array();
@@ -253,16 +239,90 @@ std::vector<Game::EncounterZone> LoadCatalog(const Options& options,
   return std::move(*catalog);
 }
 
+bool ShowLoading(Platform::App& app, Render::Device& gpu, Canvas& canvas,
+                 Input::InputSystem& input, Trace& trace,
+                 std::string_view message, bool first = false) {
+  if (!app.PumpEvents(
+          [&input](const SDL_Event& event) { input.HandleEvent(event); })) {
+    trace.Event("startup.cancelled", {{"reason", "window_closed"}});
+    return false;
+  }
+  canvas.Clear();
+  constexpr int kLeft = 32, kHeadingTop = 48, kMessageTop = 92;
+  canvas.Text(kLeft, kHeadingTop, "COMBAT LAB");
+  canvas.Text(kLeft, kMessageTop, message);
+  if ((SDL_GetWindowFlags(app.Window()) &
+       (SDL_WINDOW_MINIMIZED | SDL_WINDOW_HIDDEN)) != 0) {
+    return true;
+  }
+  if (!gpu.PresentImage(canvas.Pixels(), Canvas::kWidth, Canvas::kHeight)) {
+    throw std::runtime_error("cannot present the Combat Lab loading screen");
+  }
+  if (first) {
+    trace.Event("startup.first_present", {{"content", "readable_loading"}});
+  }
+  return true;
+}
+
+void InitializeWindow(Platform::App& app, Render::Device& gpu, Trace& trace) {
+  Platform::WindowDesc window;
+  window.title = "Vagrant Story - Combat Lab";
+  window.initialize_devices = false;
+  trace.Event("startup.stage", {{"stage", "window.begin"}});
+  if (const auto initialized = app.Init(window); !initialized) {
+    throw std::runtime_error(initialized.error());
+  }
+  trace.Event("startup.stage", {{"stage", "window.end"}});
+  trace.Event("host.window", {{"id", SDL_GetWindowID(app.Window())}});
+  trace.Event("startup.stage", {{"stage", "gpu.begin"}});
+  if (const auto initialized = gpu.Init(app.Window(), true); !initialized) {
+    throw std::runtime_error(initialized.error());
+  }
+  trace.Event("startup.stage", {{"stage", "gpu.end"}});
+}
+
+void WriteManifest(const Options& options, Trace& trace, std::size_t scripts) {
+  WriteJson(trace.Directory() / "manifest.json",
+            {{"schema", 1},
+             {"revision", GitOutput("rev-parse", "HEAD")},
+             {"worktree", GitOutput("status", "--porcelain")},
+             {"data_root", fs::absolute(options.data).string()},
+             {"configuration", scripts == 0 ? "standalone isolated encounter"
+                                            : "single-window script sequence"},
+             {"frames", options.frames},
+             {"sequence", options.sequence.string()},
+             {"scripts", scripts},
+             {"speed", options.speed},
+             {"devices", options.devices}});
+}
+
+void ValidateScripts(const std::vector<EncounterScript>& scripts,
+                     const std::vector<Game::EncounterZone>& catalog) {
+  for (const auto& script : scripts) {
+    const auto zone =
+        std::ranges::find(catalog, script.setup.zone, &Game::EncounterZone::id);
+    if (zone == catalog.end()) {
+      throw std::runtime_error("script " + script.name + ": zone is missing");
+    }
+    const auto errors = Game::ValidateEncounter(script.setup, *zone);
+    if (!errors.empty()) {
+      throw std::runtime_error("script " + script.name + ": " + errors.front());
+    }
+  }
+}
+
 class LiveSession {
  public:
   LiveSession(const Options& options, Trace& trace,
-              std::vector<Game::EncounterZone> catalog)
+              std::vector<Game::EncounterZone> catalog,
+              std::vector<EncounterScript> scripts, Canvas canvas,
+              Input::InputSystem& input)
       : options_(options),
         trace_(trace),
-        canvas_(),
+        canvas_(std::move(canvas)),
         editor_(std::move(catalog)),
-        input_(),
-        watchdog_(options.frames != 0),
+        input_(input),
+        watchdog_(options.frames != 0 || !scripts.empty()),
         fiber_(),
         ticks_(0),
         encounter_number_(0),
@@ -270,16 +330,28 @@ class LiveSession {
         confirm_(false),
         paused_(false),
         step_(false),
-        rejected_(false) {
+        rejected_(false),
+        scripts_(std::move(scripts)) {
     input_.SetDevicesEnabled(options_.devices);
     if (!options_.scenario.empty()) {
       std::ifstream file(options_.scenario);
       if (!file) throw std::runtime_error("cannot open encounter preset");
       editor_.Load(DecodeSetup(nlohmann::json::parse(file)));
     }
+    if (!scripts_.empty()) {
+      for (const auto& script : scripts_) {
+        results_.push_back({{"name", script.name},
+                            {"scenario", script.scenario.string()},
+                            {"frames", script.frames},
+                            {"status", "not_run"}});
+      }
+      LoadScript();
+    }
   }
 
   int Run(Platform::App& app, Render::Device& gpu) {
+    window_ = app.Window();
+    UpdateWindowTitle();
     Core::FrameClock clock;
     previous_ = app.NowSeconds();
     const auto handle_event = [this](const SDL_Event& event) { Handle(event); };
@@ -298,6 +370,10 @@ class LiveSession {
       Present(gpu);
       if (Finished()) break;
     }
+    if (!scripts_.empty() && !sequence_done_) {
+      CancelSequence("window_closed");
+      while (fiber_) Tick();
+    }
     Capture(options_.capture, pixels_, width_, height_);
     trace_.Event("performance.summary",
                  {{"simulation", simulation_timing_.Summary()},
@@ -312,7 +388,7 @@ class LiveSession {
         ticks_);
     fiber_.reset();
     Movie_PlayerClose();
-    return rejected_ ? 2 : 0;
+    return rejected_ || sequence_failed_ || sequence_cancelled_ ? 2 : 0;
   }
 
  private:
@@ -320,7 +396,7 @@ class LiveSession {
   Trace& trace_;
   Canvas canvas_;
   Editor editor_;
-  Input::InputSystem input_;
+  Input::InputSystem& input_;
   Platform::ProgressWatchdog watchdog_;
   std::unique_ptr<Platform::GameFiber> fiber_;
   std::vector<std::uint32_t> pixels_;
@@ -333,6 +409,20 @@ class LiveSession {
   bool paused_;
   bool step_;
   bool rejected_;
+  std::vector<EncounterScript> scripts_;
+  std::size_t script_index_ = 0;
+  fs::path script_directory_;
+  nlohmann::json results_ = nlohmann::json::array();
+  std::uint64_t script_start_tick_ = 0;
+  std::uint64_t script_stop_tick_ = 0;
+  std::uint64_t script_start_errors_ = 0;
+  bool script_initialized_ = false;
+  bool script_stopping_ = false;
+  bool sequence_done_ = false;
+  bool sequence_failed_ = false;
+  bool sequence_cancelled_ = false;
+  std::string script_stop_reason_;
+  SDL_Window* window_ = nullptr;
   bool help_ = false;
   bool paused_before_help_ = false;
   std::size_t condition_ = 0;
@@ -345,9 +435,124 @@ class LiveSession {
   PhaseTiming frame_interval_timing_;
   std::uint64_t previous_presentation_ = 0;
 
+  void UpdateWindowTitle() {
+    if (!scripts_.empty() && !sequence_done_ && window_ != nullptr) {
+      const auto title =
+          std::format("Combat Lab - {}/{}: {}", script_index_ + 1,
+                      scripts_.size(), scripts_.at(script_index_).name);
+      if (!SDL_SetWindowTitle(window_, title.c_str())) {
+        throw std::runtime_error(SDL_GetError());
+      }
+    }
+  }
+
+  void SaveSequence() {
+    WriteJson(trace_.Directory() / "sequence-results.json",
+              {{"schema", 1},
+               {"status", sequence_cancelled_ ? "cancelled"
+                          : sequence_failed_  ? "failed"
+                          : sequence_done_    ? "completed"
+                                              : "running"},
+               {"scripts", results_}});
+  }
+
+  void LoadScript() {
+    const auto& script = scripts_.at(script_index_);
+    editor_.Load(script.setup);
+    script_start_tick_ = ticks_;
+    script_start_errors_ = trace_.Errors();
+    script_stop_tick_ = 0;
+    script_initialized_ = script_stopping_ = false;
+    script_stop_reason_.clear();
+    input_.Inject(0);
+    input_.Step(0, 1);
+    script_directory_ = trace_.BeginScript(script_index_ + 1, ticks_);
+    WriteJson(script_directory_ / "encounter.json", EncodeSetup(script.setup));
+    std::ifstream manifest(trace_.Directory() / "manifest.json");
+    if (!manifest) throw std::runtime_error("run manifest is missing");
+    auto metadata = nlohmann::json::parse(manifest);
+    metadata["frames"] = script.frames;
+    metadata["script"] = script_index_ + 1;
+    metadata["scenario"] = script.scenario.string();
+    WriteJson(script_directory_ / "manifest.json", metadata);
+    results_[script_index_]["status"] = "running";
+    results_[script_index_]["trace"] = script_directory_.filename().string();
+    SaveSequence();
+    trace_.Event("sequence.script.begin", results_[script_index_], ticks_);
+    start_ = true;
+    UpdateWindowTitle();
+  }
+
+  void RequestScriptStop(std::string reason) {
+    if (script_stopping_) return;
+    script_stopping_ = true;
+    script_stop_tick_ = ticks_;
+    script_stop_reason_ = std::move(reason);
+    paused_ = help_ = false;
+    Game::RequestEncounterStop();
+    trace_.Event("control.stop", {{"reason", script_stop_reason_}}, ticks_);
+  }
+
+  void FinishScript() {
+    const auto errors = trace_.Errors() - script_start_errors_;
+    const bool complete = script_initialized_ && errors == 0 &&
+                          script_stop_reason_ == "frame_budget";
+    auto& result = results_[script_index_];
+    result["status"] = sequence_cancelled_ ? "cancelled"
+                       : complete          ? "completed"
+                                           : "failed";
+    result["initialized"] = script_initialized_;
+    result["engine_errors"] = errors;
+    result["ticks"] = ticks_ - script_start_tick_;
+    result["end_reason"] = script_stop_reason_.empty() ? "encounter_ended_early"
+                                                       : script_stop_reason_;
+    result["teardown_complete"] = fiber_ == nullptr;
+    WriteJson(script_directory_ / "result.json", result);
+    trace_.Event("sequence.script.end", result, ticks_);
+    trace_.EndScript(ticks_, result);
+    sequence_failed_ |= !complete && !sequence_cancelled_;
+    ++script_index_;
+    sequence_done_ = sequence_failed_ || sequence_cancelled_ ||
+                     script_index_ == scripts_.size();
+    SaveSequence();
+    if (!sequence_done_) LoadScript();
+  }
+
+  void CancelSequence(std::string reason) {
+    sequence_cancelled_ = true;
+    if (fiber_) {
+      if (script_stopping_) script_stop_reason_ = reason;
+      RequestScriptStop(std::move(reason));
+    } else {
+      script_stop_reason_ = std::move(reason);
+      FinishScript();
+    }
+  }
+
+  void UpdateScript(const Game::EncounterState& state) {
+    if (scripts_.empty()) return;
+    const auto& script = scripts_.at(script_index_);
+    script_initialized_ |= state.ready && state.zone == script.setup.zone &&
+                           state.room == script.setup.room;
+    if (trace_.Errors() != script_start_errors_) {
+      RequestScriptStop("engine_error");
+    }
+    if (ticks_ - script_start_tick_ >= script.frames) {
+      RequestScriptStop("frame_budget");
+    }
+    if (script_stopping_ &&
+        ticks_ - script_stop_tick_ > kScriptStopGraceTicks) {
+      throw std::runtime_error("script encounter teardown exceeded 600 ticks");
+    }
+  }
+
   void Handle(const SDL_Event& event) {
     input_.HandleEvent(event);
     if (event.type != SDL_EVENT_KEY_DOWN || event.key.repeat) return;
+    if (!scripts_.empty() && !sequence_done_ && event.key.key == SDLK_F10) {
+      CancelSequence("F10");
+      return;
+    }
     if (!fiber_ && event.key.key == SDLK_RETURN) confirm_ = true;
     if (fiber_ && HandleLabKey(event.key.key)) return;
     if (fiber_ && event.key.key == SDLK_F10) {
@@ -454,7 +659,12 @@ class LiveSession {
         editor_.Message(configured.error());
         trace_.Event("encounter.rejected", {{"reason", configured.error()}},
                      ticks_);
-        rejected_ = options_.start;
+        rejected_ = options_.start || !scripts_.empty();
+        if (!scripts_.empty()) {
+          script_stop_reason_ = "encounter_rejected: " + configured.error();
+          sequence_failed_ = true;
+          FinishScript();
+        }
       } else {
         ++encounter_number_;
         WriteJson(
@@ -474,8 +684,13 @@ class LiveSession {
     watchdog_.Pulse(ticks_);
     Core::SetLogTick(ticks_);
     std::uint32_t injected = 0;
-    for (const auto& press : options_.presses) {
-      if (ticks_ >= press.tick && ticks_ - press.tick < 2) {
+    const auto& presses = scripts_.empty() ? options_.presses
+                                           : scripts_.at(script_index_).presses;
+    const auto input_tick =
+        scripts_.empty() ? ticks_ : ticks_ - script_start_tick_;
+    for (const auto& press : presses) {
+      if (!script_stopping_ && input_tick >= press.tick &&
+          input_tick - press.tick < 2) {
         injected |= press.buttons;
       }
     }
@@ -495,11 +710,13 @@ class LiveSession {
       const auto trace_start = SDL_GetTicksNS();
       trace_.Frame(ticks_, pad, state);
       trace_timing_.Record(trace_start);
+      UpdateScript(state);
       if (!running) {
         fiber_.reset();
         help_ = paused_ = false;
         trace_.Event("encounter.end", {{"number", encounter_number_}}, ticks_);
         editor_.Message("ENCOUNTER ENDED - READY TO CONFIGURE OR RESTART");
+        if (!scripts_.empty()) FinishScript();
       }
     }
     if (trace_.Failed()) {
@@ -521,7 +738,8 @@ class LiveSession {
              Game::EncounterAdjustmentName(kTestConditions[condition_])),
          "F5  APPLY SELECTED CONDITION", "F8  RESTORE MP TO CURRENT MAXIMUM",
          "F6  PAUSE / RESUME    F7  SINGLE TICK (CLOSE HELP FIRST)",
-         "F10 RETURN TO ENCOUNTER BUILDER",
+         scripts_.empty() ? "F10 RETURN TO ENCOUNTER BUILDER"
+                          : "F10 CANCEL SCRIPT SEQUENCE",
          "ADJUSTMENTS REQUIRE LIVING ASHLEY IN IDLE FIELD.",
          "MENUS / ACTIONS: CLOSE OR FINISH THEM FIRST.",
          "ITEM SELECTION AND EFFECTS USE PRODUCTION GAMEPLAY.",
@@ -553,6 +771,10 @@ class LiveSession {
           canvas_.Pixels() + std::ptrdiff_t{Canvas::kWidth} * Canvas::kHeight);
       gpu.PresentImage(pixels_.data(), width_, height_);
     }
+    if (presentation_timing_.count == 0) {
+      trace_.Event("startup.interactive_present",
+                   {{"content", "editor_or_encounter"}});
+    }
     presentation_timing_.Record(presentation_start);
     if (previous_presentation_ != 0) {
       frame_interval_timing_.Record(previous_presentation_);
@@ -561,7 +783,8 @@ class LiveSession {
   }
 
   bool Finished() const {
-    return rejected_ || (options_.frames != 0 && ticks_ >= options_.frames);
+    return rejected_ || sequence_done_ ||
+           (options_.frames != 0 && ticks_ >= options_.frames);
   }
 };
 
@@ -571,35 +794,56 @@ int Run(int argc, char** argv) {
     Platform::InstallCrashHandler();
     VS_LOG_INFO("combat-lab", "log files: {}", trace.Directory().string());
     const auto options = Parse(argc, argv);
-    auto catalog = LoadCatalog(options, trace);
-    if (options.catalog_only) return trace.Failed() ? 1 : 0;
+    auto scripts = options.sequence.empty()
+                       ? std::vector<EncounterScript>{}
+                       : ReadScriptSequence(options.sequence);
+    trace.Event("startup.stage", {{"stage", "data.begin"}});
+    LoadData(options);
+    trace.Event("startup.stage", {{"stage", "data.end"}});
+    if (options.catalog_only) {
+      LoadCatalog(options, trace);
+      return trace.Failed() ? 1 : 0;
+    }
 
     Platform::App app;
-    Platform::WindowDesc window;
-    window.title = "Vagrant Story - Combat Lab";
-    if (const auto result = app.Init(window); !result) {
-      throw std::runtime_error(result.error());
-    }
-    WriteJson(trace.Directory() / "manifest.json",
-              {{"schema", 1},
-               {"revision", GitOutput("rev-parse", "HEAD")},
-               {"worktree", GitOutput("status", "--porcelain")},
-               {"data_root", fs::absolute(options.data).string()},
-               {"configuration", "standalone isolated encounter"},
-               {"frames", options.frames},
-               {"speed", options.speed},
-               {"devices", options.devices}});
     Render::Device gpu;
-    if (const auto result = gpu.Init(app.Window(), true); !result) {
-      throw std::runtime_error(result.error());
+    InitializeWindow(app, gpu, trace);
+    Input::InputSystem input;
+    input.SetDevicesEnabled(options.devices);
+    Canvas canvas;
+    if (!ShowLoading(app, gpu, canvas, input, trace,
+                     "READING ENCOUNTER CATALOG", true)) {
+      return scripts.empty() ? 0 : 2;
     }
+    trace.Event("startup.stage", {{"stage", "catalog.begin"}});
+    auto catalog = LoadCatalog(options, trace);
+    ValidateScripts(scripts, catalog);
+    trace.Event("startup.stage", {{"stage", "catalog.end"}});
+    if (!ShowLoading(app, gpu, canvas, input, trace,
+                     "INITIALIZING AUDIO AND CONTROLLERS")) {
+      return scripts.empty() ? 0 : 2;
+    }
+    trace.Event("startup.stage", {{"stage", "devices.begin"}});
+    if (const auto devices = app.InitDevices(options.devices); !devices) {
+      throw std::runtime_error(devices.error());
+    }
+    trace.Event("startup.stage", {{"stage", "devices.end"}});
+    if (!ShowLoading(app, gpu, canvas, input, trace,
+                     "RECORDING RUN CONFIGURATION")) {
+      return scripts.empty() ? 0 : 2;
+    }
+    WriteManifest(options, trace, scripts.size());
+    trace.Event("startup.stage", {{"stage", "audio.begin"}});
     Audio::AudioDevice audio(options.speed == 1);
     VS_LOG_INFO("audio", "Combat Lab native mix timing: {}",
                 audio.IsRealtime() ? "device-demand" : "sequencer-driven");
     if (const auto result = audio.Open(); !result) {
       VS_LOG_WARN("audio", "{}", result.error());
     }
-    LiveSession session(options, trace, std::move(catalog));
+    trace.Event("startup.stage", {{"stage", "audio.end"}});
+    LiveSession session(options, trace, std::move(catalog), std::move(scripts),
+                        std::move(canvas), input);
+    trace.Event("startup.stage", {{"stage", "session.ready"}});
     return session.Run(app, gpu);
   } catch (const std::exception& error) {
     trace.Event("fatal", {{"message", error.what()}});
@@ -614,7 +858,14 @@ int main(int argc, char** argv) try {
   return VS::combat_lab::Run(argc, argv);
 } catch (const std::exception& error) {
   VS_LOG_ERROR("combat-lab", "{}", error.what());
-  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Combat Lab", error.what(),
-                           nullptr);
+  const bool noninteractive =
+      std::any_of(argv + 1, argv + argc, [](std::string_view argument) {
+        return argument == "--sequence" || argument == "--scripted" ||
+               argument == "--catalog-only";
+      });
+  if (!noninteractive) {
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Combat Lab", error.what(),
+                             nullptr);
+  }
   return 1;
 }

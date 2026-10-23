@@ -1,12 +1,16 @@
 #include <chrono>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "CombatLab/Trace.hpp"
+#include "Platform/App.hpp"
 
 namespace {
 struct TraceScope {
@@ -18,11 +22,27 @@ struct TraceScope {
   std::filesystem::path run;
   std::filesystem::path events;
   std::filesystem::path log;
+  std::vector<std::filesystem::path> files;
+  std::vector<std::filesystem::path> directories;
+
+  std::filesystem::path Write(std::string_view name,
+                              const nlohmann::json& value) {
+    std::filesystem::create_directories(parent);
+    const auto path = parent / name;
+    files.push_back(path);
+    std::ofstream stream(path);
+    stream << value.dump();
+    stream.flush();
+    if (!stream) throw std::runtime_error("cannot write test sequence fixture");
+    return path;
+  }
 
   ~TraceScope() {
     VS::Core::SetLogLevel(VS::Core::LogLevel::Info);
     VS::Core::SetLogChannels("");
     std::error_code error;
+    for (const auto& path : files) std::filesystem::remove(path, error);
+    for (const auto& path : directories) std::filesystem::remove(path, error);
     if (!events.empty()) std::filesystem::remove(events, error);
     if (!log.empty()) std::filesystem::remove(log, error);
     if (!run.empty()) std::filesystem::remove(run, error);
@@ -83,6 +103,40 @@ void CheckItemAttributes(const nlohmann::json& snapshot) {
   CHECK(snapshot.at("total_agility") == 99);
   CHECK(snapshot.at("walk_speed") == 4);
   CHECK(snapshot.at("run_speed") == 6);
+}
+
+nlohmann::json DescribeScript(const VS::combat_lab::EncounterScript& script) {
+  return {{"name", script.name},
+          {"scenario", script.scenario.filename().string()},
+          {"setup", VS::combat_lab::EncodeSetup(script.setup)},
+          {"frames", script.frames},
+          {"press_count", script.presses.size()}};
+}
+
+bool CompleteScriptLog(const std::filesystem::path& path, std::size_t number) {
+  std::ifstream stream(path);
+  if (!stream) throw std::runtime_error("script trace is missing");
+  std::string line;
+  bool frame = false;
+  bool ended = false;
+  bool first = true;
+  std::int64_t previous_elapsed = 0;
+  while (std::getline(stream, line)) {
+    const auto record = nlohmann::json::parse(line);
+    const auto elapsed = record.at("elapsed_us").get<std::int64_t>();
+    if (record.at("script") != number || elapsed < previous_elapsed ||
+        (first && record.at("category") != "session.begin")) {
+      return false;
+    }
+    first = false;
+    previous_elapsed = elapsed;
+    if (record.at("category") == "frame") {
+      if (record.at("script_tick") != 2) return false;
+      frame = true;
+    }
+    ended = record.at("category") == "session.end";
+  }
+  return frame && ended;
 }
 }  // namespace
 
@@ -196,4 +250,121 @@ TEST_CASE("Combat Lab trace records item effect observables",
   CHECK(snapshot.at("statuses") == 0x4000);
   CHECK(snapshot.at("status_timers").at(5) == 30);
   CHECK(data.at("learned_actions") == nlohmann::json::array({54, 97}));
+}
+
+TEST_CASE("Combat Lab scripts retain relative controller inputs",
+          "[combat][encounter][sequence]") {
+  const auto presses = VS::combat_lab::DecodePresses("2:Circle,7:Up+Cross");
+  REQUIRE(presses.size() == 2);
+  CHECK(presses[0].tick == 2);
+  CHECK(presses[0].buttons == VS::Input::Circle);
+  CHECK(presses[1].tick == 7);
+  CHECK(presses[1].buttons == (VS::Input::Up | VS::Input::Cross));
+  CHECK(VS::combat_lab::DecodePresses("").empty());
+  for (const auto* invalid :
+       {"-1:Circle", "1:Unknown", "1:Circle+Unknown", "1:Circle+", "1:Circle,",
+        ":Circle", "3", "18446744073709551616:Cross"}) {
+    CHECK_THROWS(VS::combat_lab::DecodePresses(invalid));
+  }
+}
+
+TEST_CASE("Combat Lab sequences resolve presets beside their manifest",
+          "[combat][encounter][sequence]") {
+  TraceScope scope;
+  VS::Game::EncounterSetup setup;
+  setup.zone = 9;
+  setup.room = 2;
+  setup.seed = 17;
+  const auto first =
+      scope.Write("first.json", VS::combat_lab::EncodeSetup(setup));
+  scope.Write("second.json", VS::combat_lab::EncodeSetup(setup));
+  const auto path = scope.Write(
+      "sequence.json", {{"version", 1},
+                        {"scripts",
+                         {{{"name", "first pass"},
+                           {"scenario", "first.json"},
+                           {"frames", 60},
+                           {"press", "2:Circle,7:Up+Cross"}},
+                          {{"scenario", "second.json"}, {"frames", 1}}}}});
+  const auto scripts = VS::combat_lab::ReadScriptSequence(path);
+  REQUIRE(scripts.size() == 2);
+  CHECK(scripts[0].scenario == first);
+  CHECK((DescribeScript(scripts[0]) ==
+         nlohmann::json{{"name", "first pass"},
+                        {"scenario", "first.json"},
+                        {"setup", VS::combat_lab::EncodeSetup(setup)},
+                        {"frames", 60},
+                        {"press_count", 2}}));
+  CHECK((DescribeScript(scripts[1]) ==
+         nlohmann::json{{"name", "second"},
+                        {"scenario", "second.json"},
+                        {"setup", VS::combat_lab::EncodeSetup(setup)},
+                        {"frames", 1},
+                        {"press_count", 0}}));
+}
+
+TEST_CASE("Combat Lab sequences reject malformed or unfinished script inputs",
+          "[combat][encounter][sequence]") {
+  TraceScope scope;
+  scope.Write("room.json", VS::combat_lab::EncodeSetup({}));
+  const nlohmann::json good{{"scenario", "room.json"}, {"frames", 60}};
+  auto invalid_entries = nlohmann::json::array();
+  for (const auto& frames : nlohmann::json::array({0, -1, 0.5, true, "60"})) {
+    auto entry = good;
+    entry["frames"] = frames;
+    invalid_entries.push_back(entry);
+  }
+  for (const auto* press : {"60:Circle", "1:Unknown", "1:Circle+Unknown"}) {
+    auto entry = good;
+    entry["press"] = press;
+    invalid_entries.push_back(entry);
+  }
+  invalid_entries.push_back({{"scenario", "missing.json"}, {"frames", 60}});
+  invalid_entries.push_back(
+      {{"scenario", "room.json"}, {"frames", 60}, {"typo", true}});
+  for (const auto& entry : invalid_entries) {
+    const auto path =
+        scope.Write("invalid.json", {{"version", 1}, {"scripts", {entry}}});
+    CHECK_THROWS(VS::combat_lab::ReadScriptSequence(path));
+  }
+  for (const auto& document : nlohmann::json::array(
+           {{{"version", 2}, {"scripts", {good}}},
+            {{"version", 1}, {"scripts", nlohmann::json::array()}},
+            {{"scripts", {good}}}})) {
+    const auto path = scope.Write("invalid.json", document);
+    CHECK_THROWS(VS::combat_lab::ReadScriptSequence(path));
+  }
+}
+
+TEST_CASE(
+    "Combat Lab sequence traces separate scripts and preserve error counts",
+    "[combat][encounter][sequence][trace]") {
+  TraceScope scope;
+  {
+    VS::combat_lab::Trace trace(scope.parent);
+    scope.run = trace.Directory();
+    scope.events = scope.run / "events.jsonl";
+    scope.log = scope.run / "session.log";
+    for (std::size_t number = 1; number <= 2; ++number) {
+      const auto path = trace.BeginScript(number, number * 10);
+      scope.directories.push_back(path);
+      scope.files.push_back(path / "events.jsonl");
+      trace.Frame(number * 10 + 2, {}, SampleState());
+      if (number == 2) VS_LOG_ERROR("combat.test", "intentional script error");
+      trace.EndScript(number * 10 + 3, {{"status", "test"}});
+      CHECK(CompleteScriptLog(path / "events.jsonl", number));
+    }
+    CHECK(trace.Errors() == 1);
+    CHECK_FALSE(trace.Failed());
+  }
+}
+
+TEST_CASE(
+    "Deferred device initialization preserves ordinary application defaults",
+    "[platform][startup][combat-lab]") {
+  CHECK(VS::Platform::WindowDesc{}.initialize_devices);
+  VS::Platform::App app;
+  const auto initialized = app.InitDevices();
+  REQUIRE_FALSE(initialized);
+  CHECK(initialized.error() == "initialize the application before its devices");
 }

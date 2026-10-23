@@ -202,6 +202,125 @@ Other options: `--data <directory>`, `--frames <ticks>`, `--speed <1..64>`,
 and `--press <tick:Button[,tick:Button...]>`. A scripted press lasts two ticks;
 `+` combines buttons. Host function keys remain available during scripted runs.
 
+### Single-window script sequences
+
+Use `--sequence <json-path>` instead of launching a new process for each preset.
+One window, renderer, audio device and encounter catalog remain alive for the
+whole sequence. Each entry still uses a fresh production encounter; reaching
+its frame budget requests the normal stop and waits for teardown before the
+next entry starts. This does not retain live enemies, modified inventory or
+resources from the previous encounter.
+
+Save a manifest beside the existing preset files, for example:
+
+```json
+{
+  "version": 1,
+  "scripts": [
+    {
+      "name": "first encounter",
+      "scenario": "last-scenario.json",
+      "frames": 900,
+      "press": "200:Triangle,300:Cross"
+    },
+    {
+      "name": "repeat with a fresh world",
+      "scenario": "last-scenario.json",
+      "frames": 900
+    }
+  ]
+}
+```
+
+```powershell
+.\build\Debug\VS.CombatLab.exe --sequence build\Debug\combat-lab\sequence.json --speed 8 --scripted
+```
+
+Preset paths are relative to the manifest, not the working directory. Each
+script requires a positive integer `frames`; `name` and `press` are optional.
+Input ticks restart for each script and include room loading, just like a
+standalone `--press` run. Unknown buttons, malformed entries, missing presets,
+invalid setups and presses outside their budget are errors, not skipped cases.
+Use `--speed 1` for listening and interactive fidelity checks.
+
+Do not combine `--sequence` with `--scenario`, `--start`, `--frames`, `--press`
+or `--catalog-only`: frame budgets and button schedules belong in the manifest.
+`--data`, `--speed`, `--scripted` and the normal pause/step controls remain
+available. **F10 cancels the sequence**, tears down the current encounter and
+leaves later scripts unrun. The ordinary editor's F10 behavior is unchanged.
+Closing the window also cancels a sequence. Cancellation returns a nonzero
+exit code; no later script is reported as completed.
+
+The run directory retains the master engine log, structured trace and
+`sequence-results.json`. Each `script-0001`, `script-0002`, etc. directory has
+its own full `events.jsonl`, setup, manifest and result. Records include both
+the host tick and the script-relative `script_tick`. A completed result means
+that initialization, the requested observation budget and normal teardown
+finished without engine errors; it is **not** evidence of victory or complete
+gameplay correctness. Rejection, engine errors and failed teardown stop the
+sequence rather than silently advancing.
+
+### Startup feedback and timing
+
+The Lab presents a readable loading screen before catalog scanning, audio/
+controller discovery and Git provenance collection. These stages stay on the
+owning thread; no background worker accesses legacy gameplay state. Scripted
+runs do not initialize or open physical gamepads. Ordinary interactive runs
+still initialize audio and controllers after the first loading presentation.
+
+`startup.stage`, `startup.first_present` and `startup.interactive_present`
+records include monotonic `elapsed_us` timestamps. They distinguish the first
+visible loading frame from the editor/encounter presentation and identify slow
+device, catalog or renderer initialization. A loading screen does not turn a
+failed initialization into success; errors remain logged and abort startup.
+
+### Sequence acceptance checkpoint (#143, 2026-10-23)
+
+Debug run `1792780995004927-0` used one process, one visible HWND `66322990`,
+one renderer/audio lifetime and one catalog for four scripts:
+
+| Entry | Budget | Observed ready frames | Total ticks including teardown |
+|---|---:|---:|---:|
+| Solo, all-items A, HP222/MP333 | 600 | 566 | 612 |
+| Original Lich24/7, living-enemy stop | 900 | 858 | 911 |
+| Repeat solo with fresh state | 600 | 566 | 612 |
+| Repeat Lich with fresh state | 900 | 858 | 911 |
+
+Both solo entries deliver Triangle at script tick200 and Cross at300, despite
+different host ticks. Their initial resources, positions, models, inventory
+and learned actions match exactly. Both Lich entries likewise match initial
+state, retain a living enemy at the stop, produce six actual combat-result
+records and complete normal teardown. All four results are initialized/
+completed, with zero engine errors and complete, separate session traces.
+No live HP, event flags or process memory were edited.
+
+Release run `1792781463758439-0` uses actual F10 input: the current entry
+is cancelled at188 ticks with normal teardown and zero engine errors, the
+second entry stays `not_run`, and the host returns2. Ordinary controller
+discovery still connects the existing DualSense; scripted mode alone omits
+physical gamepad initialization. The observer records one HWND `96865202`.
+
+The local roster driver now generates one sequence and launches one native
+process, rather than one per case. A no-window mock verifies three selected
+cases cause exactly one launch and retain three correctly addressed results.
+The owner-stopped all-definition corpus was **not** restarted.
+
+Validation uses Debug/Release x64, source `5a2d0866` plus the scoped sequence/
+platform changes and separately uncommitted Score/perception work. Full
+worktree suites pass556 cases /1804672 assertions each; the focused
+sequence/startup selection and every direct application-header consumer
+pass the scoped quality check with zero new findings. The Desktop consumer
+also builds without opening it. No quality baseline is refreshed.
+
+Local evidence: `build\quality\lab-sequence-*-observation.json`,
+`lab-sequence-{Debug,Release}-full.log`, `lab-sequence-quality-final.log`,
+and `lab-sequence-source-audit.json`. The four-entry and cancellation manifests
+and presets remain under `build\quality`. The same live runs measure readable
+loading presentation at414ms Debug /373ms Release, before deferred device/
+provenance work. The owner's entire ten-second delay is not claimed reproduced;
+further startup investigation is deprioritized as requested. Publication and
+exact-revision CI are recorded on #143; wider gameplay coverage remains #16.
+
 ## Ability-profile acceptance checkpoint (2026-10-22)
 
 The `all-abilities` fixture supports ongoing
