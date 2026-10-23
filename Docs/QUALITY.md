@@ -57,6 +57,23 @@ owned C++ minimap implementation that consumes the existing C ABI.
 Exit codes are 0 for no new findings, 1 for new findings, and 2 for tool/configuration
 failures. Commands never rewrite source or update the baseline automatically.
 
+## Running CI explicitly
+
+The Source Quality workflow runs on pushes and pull requests and can also be
+dispatched manually. If a published commit has no run, request the same checks
+without rewriting history or creating an empty commit:
+
+```powershell
+gh workflow run quality.yml --ref work
+gh run list --workflow quality.yml --branch work --event workflow_dispatch --limit 5 --json databaseId,headSha,status,conclusion
+gh run watch <run-id> --exit-status
+```
+
+Check that `headSha` is the intended published revision before using the result
+to close an issue. A previous revision's passing run is not a substitute.
+Manual dispatch uses the same Windows job, permissions and quality baselines
+as the automatic triggers.
+
 ## Scope And Baseline
 
 The default scope includes hand-maintained native sources and first-party Python
