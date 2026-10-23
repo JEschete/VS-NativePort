@@ -3367,7 +3367,7 @@ T00381.003,T00381,actorEvaluationState,3,dead,0,unsigned char,,,,isDead,Set when
 T00381.004,T00381,actorEvaluationState,4,pad1C,1,char[108],,,,reserved1C,Not read through this view,low,declaration-only;source:74088.c:1529
 T00381.005,T00381,actorEvaluationState,5,id,0,unsigned char,,,,actorId,Actor id,high,source:74088.c:1565
 T00381.006,T00381,actorEvaluationState,6,pad89,1,char[17],,,,reserved89,Not read through this view,low,declaration-only;source:74088.c:1531
-T00381.007,T00381,actorEvaluationState,7,timer,0,unsigned short,,,,opaque9A,"Used, but its meaning is not established",low,source:74088.c:1568
+T00381.007,T00381,actorEvaluationState,7,timer,0,unsigned short,,,,reengagementGraceFrames,Post-disengagement grace window allowing immediate ready reengagement,high,source:74088.c:1568;source:73700.c:487;#148 canonical AI-state offset0x9A
 T00381.008,T00381,actorEvaluationState,8,pad9C,1,char[75],,,,reserved9C,Not read through this view,low,declaration-only;source:74088.c:1533
 T00381.009,T00381,actorEvaluationState,9,fE7,0,unsigned char,,,,opaqueE7,"Used, but its meaning is not established",low,source:74088.c:1563
 T00381.010,T00381,actorEvaluationState,10,fE8,0,unsigned char,,,,opaqueE8,"Used, but its meaning is not established",low,source:74088.c:1562
@@ -3657,11 +3657,11 @@ T00399.041,T00399,actorUpdateState,41,unk116,1,char[10],,,,reserved116,Not read 
 T00399.042,T00399,actorUpdateState,42,unk120,1,u_int,,,,opaque120,"Used, but its meaning is not established",low,source:6FC00.c:1101
 T00399.043,T00399,actorUpdateState,43,unk124,1,u_char,,,,opaque124,"Used, but its meaning is not established",low,source:6FC00.c:1092
 T00399.044,T00399,actorUpdateState,44,unk125,1,char[5],,,,reserved125,Not read through this view,low,declaration-only;source:6FC00.c:941
-T00399.045,T00399,actorUpdateState,45,unk12A,1,u_char,,,,opaque12A,"Used, but its meaning is not established",low,source:6FC00.c:1050
+T00399.045,T00399,actorUpdateState,45,unk12A,1,u_char,,,,awarenessFramesRemaining,Remaining lifetime of the temporary awareness marker,high,source:6FC00.c:1050;source:6FA60.c:410;#148 canonical AI-state offset0x12A
 T00399.046,T00399,actorUpdateState,46,unk12B,1,char[6],,,,reserved12B,Not read through this view,low,declaration-only;source:6FC00.c:943
 T00399.047,T00399,actorUpdateState,47,unk131,1,u_char,,,,actionStatus,Status of the selected action,low,source:6FC00.c:1157
 T00399.048,T00399,actorUpdateState,48,unk132,1,char[6],,,,reserved132,Not read through this view,low,declaration-only;source:6FC00.c:945
-T00399.049,T00399,actorUpdateState,49,unk138,1,u_short,,,,opaque138,"Used, but its meaning is not established",low,source:6FC00.c:1050
+T00399.049,T00399,actorUpdateState,49,unk138,1,u_short,,,,awarenessMarker,Temporary awareness marker selected until its frame counter expires,high,source:6FC00.c:1050;source:6FA60.c:409;#148 canonical AI-state offset0x138
 T00399.050,T00399,actorUpdateState,50,unk13A,1,char[28],,,,reserved13A,Not read through this view,low,declaration-only;source:6FC00.c:947
 T00399.051,T00399,actorUpdateState,51,unk156,1,u_short,,,,opaque156,"Used, but its meaning is not established",low,source:6FC00.c:1162
 T00399.052,T00399,actorUpdateState,52,unk158,1,char[52],,,,reserved158,Not read through this view,low,declaration-only;source:6FC00.c:949
@@ -4718,12 +4718,12 @@ T00532.050,T00532,func_800E78F4_t,50,unk84,1,char[4],,,,reserved84,Not read thro
 T00532.051,T00532,func_800E78F4_t,51,unk88,1,u_char,,,,actorId,Actor id,high,source:73700.c:479
 T00532.052,T00532,func_800E78F4_t,52,unk89,1,char[3],,,,reserved89,Not read through this view,low,declaration-only;source:6F014.c:169
 T00532.053,T00532,func_800E78F4_t,53,unk8C,1,u_short,,,layout:upstream,moveAttempts,Destination attempts; gives up at 6,med,source:upstream:6E644.c:3090
-T00532.054,T00532,func_800E78F4_t,54,unk8E,1,u_short,,,engagementTimer,opaque8E,"Used, but its meaning is not established",low,source:73700.c:465
+T00532.054,T00532,func_800E78F4_t,54,unk8E,1,u_short,,,engagementTimer,engagementFrames,Active engagement buildup ready at32 and expires after120 AI updates,high,source:73700.c:465;source:6FA6C.s:10;#148
 T00532.055,T00532,func_800E78F4_t,55,unk90,1,char[2],,,,reserved90,Not read through this view,low,source:6FC00.c:1017
 T00532.056,T00532,func_800E78F4_t,56,unk92,1,u_short,,,layout:upstream,radius,Actor radius,high,source:upstream:6E644.c:2844
 T00532.057,T00532,func_800E78F4_t,57,unk94,1,char[4],,,layout:upstream,reserved94,Not read through this view,low,declaration-only;source:upstream:6E644.c:226
-T00532.058,T00532,func_800E78F4_t,58,unk98,1,u_short,,,engagementCooldown,opaque98,"Used, but its meaning is not established",low,source:73700.c:495
-T00532.059,T00532,func_800E78F4_t,59,unk9A,1,u_short,,,alertTimer,opaque9A,"Used, but its meaning is not established",low,source:73700.c:487
+T00532.058,T00532,func_800E78F4_t,58,unk98,1,u_short,,,engagementCooldown,engagementCooldownFrames,Frames preventing new engagement after leaving a multi-enemy engagement,high,source:73700.c:495;source:6FA6C.s:59;#148
+T00532.059,T00532,func_800E78F4_t,59,unk9A,1,u_short,,,alertTimer,reengagementGraceFrames,Post-disengagement grace window allowing immediate ready reengagement,high,source:73700.c:487;source:6FA6C.s:99;#148
 T00532.060,T00532,func_800E78F4_t,60,unk9C,1,char[23],,,,reserved9C,Not read through this view,low,declaration-only;source:6F014.c:174
 T00532.061,T00532,func_800E78F4_t,61,unkB3,1,u_char,,,,maxRange,Reach in units of 32,high,source:71618.c:793
 T00532.062,T00532,func_800E78F4_t,62,unkB4,1,int,,,,moveDistance,Distance of the current move,med,source:upstream:6E644.c:3068;use cited by sanity pass;source:6F014.c:176
@@ -4754,7 +4754,7 @@ T00532.086,T00532,func_800E78F4_t,86,unk10D,1,char[11],,,layout:upstream,reserve
 T00532.087,T00532,func_800E78F4_t,87,unk118,1,u_char[4],,,layout:upstream,detourDirections,Directions tried by the detour,high,source:upstream:6E644.c:1568
 T00532.088,T00532,func_800E78F4_t,88,unk11C,1,vs_battle_movementPosition,,,layout:upstream,goal,Wander goal tile,med,source:upstream:6E644.c:3232
 T00532.089,T00532,func_800E78F4_t,89,unk120,1,char[10],,,layout:upstream,reserved120,Not read through this view,low,declaration-only;source:upstream:6E644.c:258
-T00532.090,T00532,func_800E78F4_t,90,unk12A,1,u_char,,,indicatorTimer,opaque12A,"Used, but its meaning is not established",low,source:6FA60.c:410
+T00532.090,T00532,func_800E78F4_t,90,unk12A,1,u_char,,,indicatorTimer,awarenessFramesRemaining,Remaining lifetime of the temporary awareness marker,high,source:6FA60.c:410;source:6FA6C.s:23;#148
 T00532.091,T00532,func_800E78F4_t,91,unk12B,1,char[2],,,,reserved12B,Not read through this view,low,declaration-only;source:6F014.c:182
 T00532.092,T00532,func_800E78F4_t,92,unk12D,1,u_char,,,movementBehavior | layout:upstream,behaviorMode,"Behavior mode (1 reacting, 2 wandering)",low,source:upstream:6E644.c:2020
 T00532.093,T00532,func_800E78F4_t,93,unk12E,1,u_char,,,actionMovementMode | layout:upstream,planMode,"Plan mode of the queued action (1 approach, 2 planned tile, 7 retreat)",med,source:upstream:6E644.c:1037
@@ -4763,7 +4763,7 @@ T00532.095,T00532,func_800E78F4_t,95,unk130,1,signed char,,,,opaque130,"Used, bu
 T00532.096,T00532,func_800E78F4_t,96,unk131,1,u_char,,,candidateReadiness,actionStatus,Status of the selected action,low,source:71618.c:620
 T00532.097,T00532,func_800E78F4_t,97,unk132,1,char[2],,,,reserved132,Not read through this view,low,declaration-only;source:6F014.c:186
 T00532.098,T00532,func_800E78F4_t,98,unk134,1,vs_battle_movementPosition,,,layout:upstream,plannedTile,Tile the plan moves to,high,source:upstream:6E644.c:1093
-T00532.099,T00532,func_800E78F4_t,99,unk138,1,u_short,,,temporaryIndicator,opaque138,"Used, but its meaning is not established",low,source:6FA60.c:409
+T00532.099,T00532,func_800E78F4_t,99,unk138,1,u_short,,,temporaryIndicator,awarenessMarker,Temporary awareness marker selected until its frame counter expires,high,source:6FA60.c:409;source:6FA6C.s:23;#148
 T00532.100,T00532,func_800E78F4_t,100,unk13A,1,u_short,,,,opaque13A,"Used, but its meaning is not established",low,source:upstream:6E644.c:3494;use cited by sanity pass;source:6F014.c:188
 T00532.101,T00532,func_800E78F4_t,101,unk13C,1,u_short,,,layout:upstream,opaque13C,"Used, but its meaning is not established",low,source:upstream:6E644.c:3535
 T00532.102,T00532,func_800E78F4_t,102,unk13E,1,char,,,layout:upstream,reserved13E,Not read through this view,low,declaration-only;source:upstream:6E644.c:271

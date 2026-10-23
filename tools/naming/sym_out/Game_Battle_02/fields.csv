@@ -342,7 +342,7 @@ T00381.003,isDead,Set when the actor's HP is zero,high,source:74088.c:1574
 T00381.004,reserved1C,Not read through this view,low,declaration-only;source:74088.c:1529
 T00381.005,actorId,Actor id,high,source:74088.c:1565
 T00381.006,reserved89,Not read through this view,low,declaration-only;source:74088.c:1531
-T00381.007,opaque9A,"Used, but its meaning is not established",low,source:74088.c:1568
+T00381.007,reengagementGraceFrames,Post-disengagement grace window allowing immediate ready reengagement,high,source:74088.c:1568;source:73700.c:487;#148 canonical AI-state offset0x9A
 T00381.008,reserved9C,Not read through this view,low,declaration-only;source:74088.c:1533
 T00381.009,opaqueE7,"Used, but its meaning is not established",low,source:74088.c:1563
 T00381.010,opaqueE8,"Used, but its meaning is not established",low,source:74088.c:1562
@@ -619,11 +619,11 @@ T00399.041,reserved116,Not read through this view,low,declaration-only;source:6F
 T00399.042,opaque120,"Used, but its meaning is not established",low,source:6FC00.c:1101
 T00399.043,opaque124,"Used, but its meaning is not established",low,source:6FC00.c:1092
 T00399.044,reserved125,Not read through this view,low,declaration-only;source:6FC00.c:941
-T00399.045,opaque12A,"Used, but its meaning is not established",low,source:6FC00.c:1050
+T00399.045,awarenessFramesRemaining,Remaining lifetime of the temporary awareness marker,high,source:6FC00.c:1050;source:6FA60.c:410;#148 canonical AI-state offset0x12A
 T00399.046,reserved12B,Not read through this view,low,declaration-only;source:6FC00.c:943
 T00399.047,actionStatus,Status of the selected action,low,source:6FC00.c:1157
 T00399.048,reserved132,Not read through this view,low,declaration-only;source:6FC00.c:945
-T00399.049,opaque138,"Used, but its meaning is not established",low,source:6FC00.c:1050
+T00399.049,awarenessMarker,Temporary awareness marker selected until its frame counter expires,high,source:6FC00.c:1050;source:6FA60.c:409;#148 canonical AI-state offset0x138
 T00399.050,reserved13A,Not read through this view,low,declaration-only;source:6FC00.c:947
 T00399.051,opaque156,"Used, but its meaning is not established",low,source:6FC00.c:1162
 T00399.052,reserved158,Not read through this view,low,declaration-only;source:6FC00.c:949

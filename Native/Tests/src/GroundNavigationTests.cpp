@@ -569,8 +569,8 @@ TEST_CASE(
   candidate.targetId = 1;
   fixture.states[0].actionDelay = 1;
   fixture.states[0].relations[1].active = branch == 2 ? 0 : 1;
-  fixture.states[0].opaque8E = branch == 0 ? 1 : 0;
-  fixture.states[0].opaque98 = branch == 1 ? 1 : 0;
+  fixture.states[0].engagementFrames = branch == 0 ? 1 : 0;
+  fixture.states[0].engagementCooldownFrames = branch == 1 ? 1 : 0;
   fixture.room.engagementLimit = 1;
   fixture.room.approachMoves = branch == 3 ? 2 : 0;
   fixture.room.engagedCount = branch == 6 ? 1 : 2;

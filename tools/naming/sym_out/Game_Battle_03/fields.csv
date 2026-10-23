@@ -441,12 +441,12 @@ T00532.050,reserved84,Not read through this view,low,declaration-only;source:6F0
 T00532.051,actorId,Actor id,high,source:73700.c:479
 T00532.052,reserved89,Not read through this view,low,declaration-only;source:6F014.c:169
 T00532.053,moveAttempts,Destination attempts; gives up at 6,med,source:upstream:6E644.c:3090
-T00532.054,opaque8E,"Used, but its meaning is not established",low,source:73700.c:465
+T00532.054,engagementFrames,Active engagement buildup ready at32 and expires after120 AI updates,high,source:73700.c:465;source:6FA6C.s:10;#148
 T00532.055,reserved90,Not read through this view,low,source:6FC00.c:1017
 T00532.056,radius,Actor radius,high,source:upstream:6E644.c:2844
 T00532.057,reserved94,Not read through this view,low,declaration-only;source:upstream:6E644.c:226
-T00532.058,opaque98,"Used, but its meaning is not established",low,source:73700.c:495
-T00532.059,opaque9A,"Used, but its meaning is not established",low,source:73700.c:487
+T00532.058,engagementCooldownFrames,Frames preventing new engagement after leaving a multi-enemy engagement,high,source:73700.c:495;source:6FA6C.s:59;#148
+T00532.059,reengagementGraceFrames,Post-disengagement grace window allowing immediate ready reengagement,high,source:73700.c:487;source:6FA6C.s:99;#148
 T00532.060,reserved9C,Not read through this view,low,declaration-only;source:6F014.c:174
 T00532.061,maxRange,Reach in units of 32,high,source:71618.c:793
 T00532.062,moveDistance,Distance of the current move,med,source:upstream:6E644.c:3068;use cited by sanity pass;source:6F014.c:176
@@ -477,7 +477,7 @@ T00532.086,reserved10D,Not read through this view,low,declaration-only;source:up
 T00532.087,detourDirections,Directions tried by the detour,high,source:upstream:6E644.c:1568
 T00532.088,goal,Wander goal tile,med,source:upstream:6E644.c:3232
 T00532.089,reserved120,Not read through this view,low,declaration-only;source:upstream:6E644.c:258
-T00532.090,opaque12A,"Used, but its meaning is not established",low,source:6FA60.c:410
+T00532.090,awarenessFramesRemaining,Remaining lifetime of the temporary awareness marker,high,source:6FA60.c:410;source:6FA6C.s:23;#148
 T00532.091,reserved12B,Not read through this view,low,declaration-only;source:6F014.c:182
 T00532.092,behaviorMode,"Behavior mode (1 reacting, 2 wandering)",low,source:upstream:6E644.c:2020
 T00532.093,planMode,"Plan mode of the queued action (1 approach, 2 planned tile, 7 retreat)",med,source:upstream:6E644.c:1037
@@ -486,7 +486,7 @@ T00532.095,opaque130,"Used, but its meaning is not established",low,source:upstr
 T00532.096,actionStatus,Status of the selected action,low,source:71618.c:620
 T00532.097,reserved132,Not read through this view,low,declaration-only;source:6F014.c:186
 T00532.098,plannedTile,Tile the plan moves to,high,source:upstream:6E644.c:1093
-T00532.099,opaque138,"Used, but its meaning is not established",low,source:6FA60.c:409
+T00532.099,awarenessMarker,Temporary awareness marker selected until its frame counter expires,high,source:6FA60.c:409;source:6FA6C.s:23;#148
 T00532.100,opaque13A,"Used, but its meaning is not established",low,source:upstream:6E644.c:3494;use cited by sanity pass;source:6F014.c:188
 T00532.101,opaque13C,"Used, but its meaning is not established",low,source:upstream:6E644.c:3535
 T00532.102,reserved13E,Not read through this view,low,declaration-only;source:upstream:6E644.c:271

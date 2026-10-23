@@ -150,7 +150,7 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   if (ai != nullptr) {
     snapshot.ai_present = true;
     snapshot.ai_candidates = ai->candidateCount;
-    snapshot.ai_engagement_frames = ai->opaque8E;
+    snapshot.ai_engagement_frames = ai->engagementFrames;
     snapshot.ai_movement_mode = ai->requestedMovementMode;
     snapshot.ai_destination_x = ai->destination.tile.tileX;
     snapshot.ai_destination_z = ai->destination.tile.tileZ;

@@ -41,7 +41,7 @@ void PrepareActors(Battle_Ai_EvaluationContextView* context) {
     Battle_Ai_SelectFallbackAction(Battle_Ai_actorAiStates[actor->id]);
     if (context != nullptr && !context->opaque44 &&
         context->id == state->actorId) {
-      state->opaque9A = 0;
+      state->reengagementGraceFrames = 0;
     }
   }
 }

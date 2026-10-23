@@ -35,6 +35,20 @@ _Static_assert(
         offsetof(Field_GimmickInstance, reserved178),
     "The auxiliary actor allocation must own the native gimmick prefix");
 
+_Static_assert(
+    offsetof(Battle_Ai_ActorAiState, engagementFrames) == 170,
+    "Renamed engagement state must retain its verified native layout");
+_Static_assert(offsetof(Battle_Ai_ActorAiState, engagementCooldownFrames) ==
+                   180,
+               "Engagement cooldown layout changed");
+_Static_assert(offsetof(Battle_Ai_ActorAiState, reengagementGraceFrames) == 182,
+               "Reengagement grace layout changed");
+_Static_assert(offsetof(Battle_Ai_ActorAiState, awarenessFramesRemaining) ==
+                   326,
+               "Awareness duration layout changed");
+_Static_assert(offsetof(Battle_Ai_ActorAiState, awarenessMarker) == 340,
+               "Awareness marker layout changed");
+
 int TestsRoomSfxBankBinding(void) {
   const Audio_SoundState saved_state = Audio_soundState;
   Audio_soundState = (Audio_SoundState){0};
