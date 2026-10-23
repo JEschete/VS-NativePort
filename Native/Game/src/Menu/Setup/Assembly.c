@@ -263,7 +263,7 @@ int Menu_Setup_SelectAssemblyBlade(int params)
     int bladeCount;
     int i;
     void* textBuf;
-    char** menuText;
+    char* menuText[2 * 17];
     int itemId;
     Items_InventoryBlade* blade = NULL;
     Items_InventoryGrip* grip = NULL;
@@ -287,7 +287,7 @@ int Menu_Setup_SelectAssemblyBlade(int params)
     case 0:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
             textBuf = Core_Memory_AllocateFromHighEnd(0x72C);
-            menuText = textBuf + 0x6A4;
+
             if (blade == NULL) {
                 menuText[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_blades];
                 menuText[1] =
@@ -377,7 +377,7 @@ int Menu_Setup_SelectAssemblyGrip(int params)
     int gripCount;
     int i;
     void* textBuf;
-    char** menuText;
+    char* menuText[2 * 17];
     int itemId;
 
     Items_InventoryGrip* grip = NULL;
@@ -401,7 +401,7 @@ int Menu_Setup_SelectAssemblyGrip(int params)
     case 0:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
             textBuf = Core_Memory_AllocateFromHighEnd(0x72CU);
-            menuText = textBuf + 0x6A4;
+
             if (grip == NULL) {
                 menuText[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_grips];
                 menuText[1] =
@@ -492,7 +492,7 @@ int Menu_Setup_SelectGem(int params)
     int itemId;
     int gemCount;
     void* textBuf;
-    char** menuText;
+    char* menuText[2 * 49];
 
     Items_InventoryGem* gem = NULL;
 
@@ -513,7 +513,7 @@ int Menu_Setup_SelectGem(int params)
     case 0:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
             textBuf = Core_Memory_AllocateFromHighEnd(0x14AC);
-            menuText = textBuf + 0x1324;
+
 
             if (gem == NULL) {
                 menuText[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_gems];

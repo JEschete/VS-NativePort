@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstdint>
+#include <cstring>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -13,15 +15,24 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Battle/Targeting.h"
 #include "Core/Memory.h"
 #include "Core/Memory/Heap.h"
+#include "Field/Mpd.h"
+#include "Field/Room.h"
 #include "Input/Controller.h"
+#include "Items/Inventory.h"
 #include "Menu/BreakArts.h"
+#include "Menu/Framework/EquipmentDetails.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/MenuRows.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Options.h"
+#include "Menu/Setup/Assembly.h"
+#include "Menu/Setup/Combination.h"
+#include "Menu/Setup/SetupScreen.h"
 #include "State/StateFlags.h"
 }
 
@@ -215,7 +226,248 @@ struct EquipmentGateFixture {
     Menu_Framework_actionRestrictions = saved_restrictions;
   }
 };
+
+struct WorkshopGateFixture {
+  CursorFixture rows;
+  decltype(Audio_Seq_unusedInventory) saved_inventory =
+      Audio_Seq_unusedInventory;
+  u_short* saved_text = Menu_Framework_menu12Text;
+  int* saved_types = Menu_Framework_rowTypeBuf;
+  Field_MpdEnvironment* saved_environment = Field_roomData.environment;
+  u_char saved_workshop = Menu_Setup_currentWorkshop;
+  std::array<u_short, 1024> strings{};
+  Field_MpdEnvironment environment{};
+
+  WorkshopGateFixture(int workshop, int weapon_count, bool cursor_memory) {
+    Menu_Setup_SetupScreen_ResetMenucStatics();
+    std::fill(strings.begin(), strings.end(), 0xE7E7);
+    std::fill_n(strings.begin(), 16, 32);
+    Menu_Framework_menu12Text = strings.data();
+    Menu_Framework_rowTypeBuf = rows.row_types.data();
+    Field_roomData.environment = &environment;
+    Audio_Seq_unusedInventory = {};
+    environment.isWorkshop = static_cast<char>(workshop);
+    Input_settings.cursorMemory = static_cast<char>(cursor_memory);
+    for (int index = 0; index < weapon_count; ++index) {
+      Audio_Seq_unusedInventory.weapons[index].index =
+          static_cast<char>(index + 1);
+      Audio_Seq_unusedInventory.weapons[index].blade =
+          static_cast<u_char>(index + 1);
+    }
+  }
+
+  ~WorkshopGateFixture() {
+    Menu_Setup_SetupScreen_ResetMenucStatics();
+    Audio_Seq_unusedInventory = saved_inventory;
+    Menu_Framework_menu12Text = saved_text;
+    Menu_Framework_rowTypeBuf = saved_types;
+    Field_roomData.environment = saved_environment;
+    Menu_Setup_currentWorkshop = saved_workshop;
+  }
+
+  const Menu_Framework_ItemText* Open() {
+    u_char state = 2;
+    REQUIRE(Menu_Setup_Update(&state) == 0);
+    REQUIRE(state == 3);
+    REQUIRE(Menu_Framework_subMenuRowCount == 6);
+    const auto* items = reinterpret_cast<const Menu_Framework_ItemText*>(
+        Menu_Framework_itemsText);
+    REQUIRE(items != nullptr);
+    return items;
+  }
+};
+
+struct WorkshopChoicesFixture {
+  WorkshopGateFixture setup{6, 0, false};
+  decltype(Audio_Seq_unusedInventoryIndices) saved_indices =
+      Audio_Seq_unusedInventoryIndices;
+  decltype(Battle_stringContext) saved_context = Battle_stringContext;
+  decltype(Menu_Framework_itemNames) saved_names = Menu_Framework_itemNames;
+  u_short* saved_help = Menu_Framework_itemHelp;
+  decltype(Menu_Framework_shields) saved_shields = Menu_Framework_shields;
+  u_short* saved_list = Menu_Setup_itemsList;
+  char saved_count = Menu_Setup_itemCount;
+  int saved_selection = Menu_Setup_itemsListSelection;
+  char saved_state = Menu_Setup_itemsListState;
+  char saved_window = Menu_Setup_itemsListWindow;
+  char saved_info = Menu_Setup_rowInfoUnused;
+  decltype(std::to_array(Menu_Setup_availableItems)) saved_available =
+      std::to_array(Menu_Setup_availableItems);
+  decltype(std::to_array(Menu_Setup_combiningBladeIds)) saved_blades =
+      std::to_array(Menu_Setup_combiningBladeIds);
+  decltype(std::to_array(Menu_Setup_combiningArmorIds)) saved_armor =
+      std::to_array(Menu_Setup_combiningArmorIds);
+  decltype(std::to_array(Menu_Setup_itemsToCombine)) saved_combining =
+      std::to_array(Menu_Setup_itemsToCombine);
+  std::array<u_short, 2048> strings{};
+  std::array<u_short, 16384> help{};
+  char names[512][24]{};
+  std::array<int, 49> types{};
+
+  WorkshopChoicesFixture() {
+    std::fill(strings.begin(), strings.end(), 0xE7E7);
+    std::fill_n(strings.begin(), 128, 128);
+    std::fill(help.begin(), help.end(), 0xE7E7);
+    std::fill_n(help.begin(), 768, 1024);
+    for (auto& name : names) {
+      std::fill_n(name, std::size(name), static_cast<char>(0xE7));
+      name[0] = 10;
+    }
+    Menu_Framework_menu12Text = strings.data();
+    Menu_Framework_itemHelp = help.data();
+    Menu_Framework_itemNames = names;
+    Menu_Framework_rowTypeBuf = types.data();
+    Menu_Framework_shields = Audio_Seq_unusedInventory.shields;
+    Menu_Setup_itemsList = nullptr;
+    Menu_Setup_currentWorkshop = 6;
+    Audio_Seq_unusedInventoryIndices = {};
+    std::fill_n(Menu_Setup_combiningBladeIds, saved_blades.size(), 0);
+    std::fill_n(Menu_Setup_combiningArmorIds, saved_armor.size(), 0);
+    std::fill_n(Menu_Setup_itemsToCombine, saved_combining.size(), 0);
+    FillParts();
+    FillProtection();
+    for (int category = 1; category <= 5; ++category) {
+      Items_Inventory_RebuildDisplayIndices(category);
+    }
+  }
+
+  ~WorkshopChoicesFixture() {
+    if (Menu_Setup_itemsList != nullptr) {
+      Core_Memory_FreeFromHighEnd(Menu_Setup_itemsList);
+    }
+    Menu_Setup_itemsList = saved_list;
+    Menu_Setup_itemCount = saved_count;
+    Menu_Setup_itemsListSelection = saved_selection;
+    Menu_Setup_itemsListState = saved_state;
+    Menu_Setup_itemsListWindow = saved_window;
+    Menu_Setup_rowInfoUnused = saved_info;
+    Audio_Seq_unusedInventoryIndices = saved_indices;
+    Battle_stringContext = saved_context;
+    Menu_Framework_itemNames = saved_names;
+    Menu_Framework_itemHelp = saved_help;
+    Menu_Framework_shields = saved_shields;
+    std::copy(saved_available.begin(), saved_available.end(),
+              Menu_Setup_availableItems);
+    std::copy(saved_blades.begin(), saved_blades.end(),
+              Menu_Setup_combiningBladeIds);
+    std::copy(saved_armor.begin(), saved_armor.end(),
+              Menu_Setup_combiningArmorIds);
+    std::copy(saved_combining.begin(), saved_combining.end(),
+              Menu_Setup_itemsToCombine);
+  }
+
+  void FillParts() {
+    for (int index = 0; index < 16; ++index) {
+      auto& blade = Audio_Seq_unusedInventory.blades[index];
+      blade.id = 1;
+      blade.index = static_cast<char>(index + 1);
+      blade.category = blade.damageType = 1;
+      blade.material = 3;
+      auto& grip = Audio_Seq_unusedInventory.grips[index];
+      grip.id = 97;
+      grip.index = static_cast<u_short>(index + 1);
+      grip.category = 1;
+    }
+    for (int index = 0; index < 48; ++index) {
+      auto& gem = Audio_Seq_unusedInventory.gems[index];
+      gem.id = 261;
+      gem.index = static_cast<int16_t>(index + 1);
+    }
+  }
+
+  void FillProtection() {
+    for (int index = 0; index < 16; ++index) {
+      auto& armor = Audio_Seq_unusedInventory.armor[index];
+      armor.id = 161;
+      armor.index = static_cast<u_char>(index + 1);
+      armor.category = 1;
+      armor.material = 3;
+      armor.maxDp = 1000;
+      if (index < 8) {
+        auto& shield = Audio_Seq_unusedInventory.shields[index];
+        shield.base.id = 132;
+        shield.base.material = 3;
+        shield.base.maxDp = 1000;
+      }
+    }
+  }
+
+  std::array<std::byte, sizeof(Items_Inventory)> InventoryBytes() const {
+    std::array<std::byte, sizeof(Items_Inventory)> bytes{};
+    std::memcpy(bytes.data(), &Audio_Seq_unusedInventory, bytes.size());
+    return bytes;
+  }
+
+  void Open(int (*select)(int), int initial, int capacity) {
+    REQUIRE(select(initial) == 0);
+    for (auto& row : setup.rows.workspace.rows) row.state = 1;
+    // InitializeHeap excludes its final header from the usable span.
+    std::array<std::byte, sizeof(Core_HeapBlockHeader)> before{}, after{};
+    std::memcpy(before.data(), &setup.rows.heap.back(), before.size());
+    REQUIRE(select(0) == 0);
+    std::memcpy(after.data(), &setup.rows.heap.back(), after.size());
+    CHECK(before == after);
+    REQUIRE(Menu_Setup_itemCount == capacity + 1);
+    REQUIRE(Menu_Setup_itemsList != nullptr);
+  }
+
+  void CheckRows(int capacity) const {
+    const auto* items =
+        reinterpret_cast<const Menu_Framework_ItemText*>(Menu_Setup_itemsList);
+    CHECK((items[0].menuRowFlags & 1) == 1);
+    for (int row = 1; row <= capacity; ++row) {
+      CAPTURE(row);
+      CHECK(Menu_Setup_availableItems[row] == row);
+      CHECK((items[row].menuRowFlags & 1) == 0);
+      CHECK(items[row].name[0] == 0xE70A);
+    }
+  }
+};
 }  // namespace
+
+TEST_CASE("Workshop selectors copy full stock-capacity component lists",
+          "[menu][equipment][workshop][choices]") {
+  struct Selector {
+    int (*select)(int);
+    int initial;
+    int capacity;
+  };
+  constexpr std::array kSelectors{
+      Selector{Menu_Setup_SelectAssemblyBlade, 0x80, 16},
+      Selector{Menu_Setup_SelectAssemblyGrip, 0x80, 16},
+      Selector{Menu_Setup_SelectGem, 11, 48},
+      Selector{Menu_Setup_SelectCombinationBlade, 1, 16},
+      Selector{Menu_Setup_SelectCombinationShield, 1, 8},
+      Selector{Menu_Setup_SelectCombinationArmor, 1, 16}};
+  const auto index = GENERATE(0, 1, 2, 3, 4, 5);
+  CAPTURE(index);
+  const auto& selector = kSelectors[index];
+  WorkshopChoicesFixture fixture;
+  const auto inventory = fixture.InventoryBytes();
+  fixture.Open(selector.select, selector.initial, selector.capacity);
+  fixture.CheckRows(selector.capacity);
+  CHECK(inventory == fixture.InventoryBytes());
+}
+
+TEST_CASE("Setup actions obey original workshop and weapon-capacity gates",
+          "[menu][equipment][workshop]") {
+  const int workshop = GENERATE(0, 1, 2, 3, 4, 5, 6);
+  const int weapon_count = GENERATE(0, 1, 7, 8);
+  const bool cursor_memory = GENERATE(false, true);
+  CAPTURE(workshop, weapon_count, cursor_memory);
+  WorkshopGateFixture fixture(workshop, weapon_count, cursor_memory);
+  REQUIRE(Items_Inventory_CountItems(0, nullptr) == weapon_count);
+  const auto* rows = fixture.Open();
+  REQUIRE(Menu_Setup_currentWorkshop == workshop);
+  CHECK(Input_settings.cursorMemory == cursor_memory);
+  for (int row = 0; row < 6; ++row) {
+    CAPTURE(row);
+    const bool disabled = (row == 0 && (workshop == 0 || weapon_count == 8)) ||
+                          (row == 3 && weapon_count == 0) ||
+                          ((row == 4 || row == 5) && workshop == 0);
+    CHECK((rows[row].menuRowFlags & 1) == disabled);
+  }
+}
 
 TEST_CASE("Equipment management obeys progression tarnish and action gates",
           "[menu][equipment][restrictions]") {

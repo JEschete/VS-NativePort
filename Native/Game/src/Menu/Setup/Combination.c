@@ -230,7 +230,7 @@ int Menu_Setup_SelectCombinationBlade(int arg0)
     int count;
     int i;
     char* textBuf;
-    char** menuText;
+    char* menuText[2 * 17];
     int temp_a0;
     int itemId;
     Items_InventoryBlade* blade = NULL;
@@ -254,7 +254,7 @@ int Menu_Setup_SelectCombinationBlade(int arg0)
         }
 
         textBuf = Core_Memory_AllocateFromHighEnd(0x72C);
-        menuText = (char**)(textBuf + 0x6A4);
+
 
         if (blade == NULL) {
             menuText[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_blade];
@@ -819,7 +819,7 @@ int Menu_Setup_SelectCombinationShield(int arg0)
     static char Menu_Setup_combinationShieldState;
     static char Menu_Setup_combinationShieldSlot;
 
-    char** menuText;
+    char* menuText[2 * 9];
     int rowType;
     int i;
     void* stringBuf;
@@ -849,7 +849,7 @@ int Menu_Setup_SelectCombinationShield(int arg0)
 
             stringBuf = Core_Memory_AllocateFromHighEnd(0x3CC);
 
-            menuText = stringBuf + 0x384;
+
 
             if (shield == NULL) {
                 menuText[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_shield];
@@ -1392,7 +1392,7 @@ int Menu_Setup_SelectCombinationArmor(int arg0)
     static char Menu_Setup_combinationArmorStep;
     static char Menu_Setup_combinationArmorSlot;
 
-    char** sp10;
+    char* sp10[2 * 17];
     int var_s4;
     int i;
     char* temp_v0;
@@ -1418,7 +1418,7 @@ int Menu_Setup_SelectCombinationArmor(int arg0)
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
             s0_2 = itemId;
             temp_v0 = Core_Memory_AllocateFromHighEnd(0x72CU);
-            sp10 = (char**)(temp_v0 + 0x6A4);
+
             if (var_s2 == NULL) {
                 sp10[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_armor];
                 sp10[1] =

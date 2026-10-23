@@ -1385,6 +1385,109 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Workshop gates and native selector storage (#15; #132)
+
+Checkpoint source is `b45dfd3c5468adac115fdbff5f3c48cd31a5337d` with the
+six-selector generator repair and two maintained workshop regressions
+uncommitted. Unrelated owner edits remain excluded. The rebuilt x64 Lab
+host SHA256 values are:
+
+- Debug: `fec120654324f08620b01df4145686a90733bde0371e526b60344c1d74d6fea6`.
+- Release: `82c759c2089560236dd5279a5d59e81a70efd3570f325fe230fe4453da331cd8`.
+
+Original MENUC Setup logic and MPD environment records establish the location
+gate: Assemble, Repair and Combine require a workshop; Gems, Disassemble and
+Rename do not. Eight assembled weapons additionally disable Assemble, and
+zero weapons disable Rename. The workshop value is an ID1..6, not a boolean;
+its material masks are0x0E/0x18/0x38/0xC0/0x3E/0xFE.
+
+The maintained gate regression drives production row construction for
+workshop0..6, weapon counts0/1/7/8 and both cursor-memory settings:
+56 combinations/728 assertions. The original stock inventory is not expanded.
+Actual-controller gate runs use original room0 in each workshop:
+
+| Zone / MPD / workshop | Supported tile x,z | Debug run | Release run |
+|---|---|---|---|
+| 42 / MAP205 / 1 | 3,4 | `1792731828447323-0` | `1792732217645121-0` |
+| 43 / MAP206 / 2 | 3,4 | `1792731892746478-0` | `1792732238555652-0` |
+| 44 / MAP207 / 3 | 5,2 | `1792732106334829-0` | `1792732259425243-0` |
+| 45 / MAP208 / 4 | 4,3 | `1792732127312756-0` | `1792732280255764-0` |
+| 46 / MAP209 / 5 | 4,3 | `1792732148284289-0` | `1792732301141392-0` |
+| 47 / MAP210 / 6 | 3,5 | `1792732169167698-0` | `1792732322213352-0` |
+| 12 / outside workshop | Existing solo preset | `1792731800597321-0` | `1792732189922137-0` |
+
+These gate-only runs precede the selector repair. Outside the workshop,
+confirmation of all three unavailable rows is rejected without inventory
+changes. All runs return to field. Zone44's initial rejected tile5,3 had no
+complete floor support; original collision data identified supported tile5,2.
+This placement rejection was not a gameplay crash.
+
+#132 was logged before repair. Six selectors embedded two native pointers per
+row in unaligned PS1-sized temporary text allocations. At full legal capacity,
+blade/grip/armor tables overran by136 bytes, shields by72 and gems by392.
+The first396 row/content/inventory assertions passed despite corruption.
+Adding a byte guard over the allocator's reserved final header produced
+six failures, one for each production selector, out of402 assertions.
+All six generated-source checks also failed before repair.
+
+The copy generator now gives F02886/F02887/F02888/F02903/F02909/F02913 local
+`char*` arrays of34/34/98/34/18/34 entries. Original text allocations,
+capacities, component filtering, material rules and free calls are unchanged.
+`Menu_Setup_BuildItemList` synchronously copies both strings into owned rows,
+so it retains no pointer to these local arrays. Repaired full-capacity tests
+pass402 assertions: counts, slot order, copied text, disabled placeholder,
+enabled components, byte-exact inventory preservation and heap-tail guard.
+
+Rebuilt hosts additionally pass first-workshop entry/return (Debug
+`1792733485635319-0`, Release `1792733506585846-0`) and repeated real chooser
+browsing (Debug `1792733764298314-0`, Release `1792733836872489-0`).
+Each browse run opens/cancels blade, grip and armor-combination choosers twice.
+The stock assembled weapon leaves only the disabled empty blade/grip row;
+confirmation rejects it. Armor exposes six rows including the placeholder.
+Every cancellation releases the copied list, restores Setup and preserves
+inventory; both runs return to field at tick3827 with a null list pointer.
+The observer was corrected to select the absolute combination category:
+relative Down presses selected the wrong category on repeat entry because
+cursor memory retained the previous category. No production change was needed.
+
+Commands (repeat the build and live commands for Release):
+
+```powershell
+& 'C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe' `
+  Native\Tests\VS.Tests.vcxproj /m /nodeReuse:false `
+  /p:Configuration=Debug /p:Platform=x64 /p:VcpkgManifestInstall=false
+build\Debug\VS.Tests.exe "[menu][equipment]"
+build\Debug\VS.Tests.exe
+build\quality\equipment14-check.ps1 -Configuration Debug `
+  -Mode workshop-gate -Zone 42 -WorkshopAction browse
+.\.venv-3\Scripts\python.exe tools\port\copy_to_native.py
+.\.venv-3\Scripts\python.exe tools\port\test_encounter_fixups.py
+. .venv-3\Scripts\Activate.ps1
+.\quality-native.cmd --files Native\Tests\src\CursorMemoryTests.cpp `
+  tools\port\copy_fixups.py tools\port\test_encounter_fixups.py --tidy
+```
+
+Final Debug/Release full suites each pass503 cases/1,786,633 assertions after
+the fixture's final type/naming edits. The preceding focused equipment suites
+pass9 cases/1,910 assertions. Copier tests pass20 cases; a second generation
+preserves all751 output hashes and all87 owned source/header files.
+Maintained quality/tidy reports0 findings/0 new, with77 intentional fixture
+literals listed separately. No baseline or suppression changed.
+
+Evidence remains local under `build\quality\workshop15-*` and
+`build\quality\workshop132-*`. `workshop132-final-audit.json` checks all18
+accepted gate/browse sessions: normal `session.end`, zero error-level engine
+records and no trace failure. Red/green tests, generation audit, quality,
+scenarios, run pointers and read-only observations are retained there.
+No process-memory writes establish acceptance; no captured gameplay crash
+is claimed for #132.
+
+This checkpoint verifies bounded native selector storage and workshop access,
+not #15's modification transactions, exhaustive material/result tables,
+C++ promotion or compatibility retirement. Stock Fandango has full DP and
+a zero-gem-slot grip: a no-op repair or empty gem menu would not establish
+durability restoration or gem-attachment acceptance. Those remain #15 work.
+
 ## Equipment-menu acceptance (#14)
 
 Final acceptance uses `add47793bd3820b8d2859a6338a4dc9f8fca8e37` with the

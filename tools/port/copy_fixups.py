@@ -712,6 +712,42 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("Battle_unusedGlobal1[i]", "Actors_weaponModels[i + 2]",
          "D_800F4590 aliases vs_battle_wepModels[2], including its second preview slot"),
     ],
+    "F02886": [
+        ("char** menuText;", "char* menuText[2 * 17];",
+         "MENUC assembly blade choices need two native pointers per stock slot plus the current row"),
+        ("            menuText = textBuf + 0x6A4;", "",
+         "Keep native pointers out of the unaligned PS1-sized temporary text allocation"),
+    ],
+    "F02887": [
+        ("char** menuText;", "char* menuText[2 * 17];",
+         "MENUC assembly grip choices need two native pointers per stock slot plus the current row"),
+        ("            menuText = textBuf + 0x6A4;", "",
+         "Keep native pointers out of the unaligned PS1-sized temporary text allocation"),
+    ],
+    "F02888": [
+        ("char** menuText;", "char* menuText[2 * 49];",
+         "MENUC gem choices need two native pointers per stock slot plus the current row"),
+        ("            menuText = textBuf + 0x1324;", "",
+         "BuildItemList copies gem text before this native pointer array leaves scope"),
+    ],
+    "F02903": [
+        ("char** menuText;", "char* menuText[2 * 17];",
+         "MENUC combination blade choices need a native pointer array for all stock slots"),
+        ("        menuText = (char**)(textBuf + 0x6A4);", "",
+         "BuildItemList copies text before the native pointer array leaves scope"),
+    ],
+    "F02909": [
+        ("char** menuText;", "char* menuText[2 * 9];",
+         "MENUC combination shield choices need a native pointer array for all stock slots"),
+        ("            menuText = stringBuf + 0x384;", "",
+         "BuildItemList copies text before the native pointer array leaves scope"),
+    ],
+    "F02913": [
+        ("char** sp10;", "char* sp10[2 * 17];",
+         "MENUC combination armor choices need a native pointer array for all stock slots"),
+        ("            sp10 = (char**)(temp_v0 + 0x6A4);", "",
+         "BuildItemList copies text before the native pointer array leaves scope"),
+    ],
     "F00195": [
         ("Battle_cameraEaseMode", "Field_sphericalCamera.delta.mode",
          "D_800F19EC aliases the spherical camera mode at +0x1C"),

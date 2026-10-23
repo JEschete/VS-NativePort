@@ -7,6 +7,29 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_workshop_choices_use_native_pointer_arrays(self):
+        root = Path(__file__).resolve().parents[2]
+        root = root / "Native" / "Game" / "src" / "Menu" / "Setup"
+        selectors = (
+            ("Assembly.c", "SelectAssemblyBlade", "menuText", 17),
+            ("Assembly.c", "SelectAssemblyGrip", "menuText", 17),
+            ("Assembly.c", "SelectGem", "menuText", 49),
+            ("Combination.c", "SelectCombinationBlade", "menuText", 17),
+            ("Combination.c", "SelectCombinationShield", "menuText", 9),
+            ("Combination.c", "SelectCombinationArmor", "sp10", 17),
+        )
+        for filename, function, variable, rows in selectors:
+            with self.subTest(function=function):
+                source = (root / filename).read_text()
+                body = source.split(f"int Menu_Setup_{function}(", 1)[1]
+                body = body.split("\n}\n", 1)[0]
+                self.assertTrue(f"char* {variable}[2 * {rows}];" in body,
+                                f"{function} needs aligned native pointer storage")
+                self.assertNotIn(f"char** {variable};", body)
+                self.assertNotRegex(body, rf"{variable}\s*=\s*.*0x(?:6A4|384|1324)")
+                self.assertIn("Menu_Setup_BuildItemList(", body)
+                self.assertIn("Core_Memory_FreeFromHighEnd(", body)
+
     def test_loot_staging_uses_last_slots_and_preflights_composites(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Menu/Loot/LootInventory.c").read_text()
