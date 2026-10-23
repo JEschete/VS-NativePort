@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <span>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -23,7 +24,9 @@ extern "C" {
 #include "Effects/Templates/ParticleRender.h"
 #include "Effects/Templates/TrailInit.h"
 #include "Effects/Templates/TrailNineInit.h"
+#include "Effects/Templates/TrailNineRender.h"
 #include "Effects/Templates/TrailNineUpdate.h"
+#include "Effects/Templates/TrailRender.h"
 #include "Effects/Templates/TrailUpdate.h"
 #include "Effects/Timeline.h"
 #include "Render/Camera.h"
@@ -681,4 +684,160 @@ TEST_CASE("Nine-sample trails preserve source trajectory and separate history",
   state.trailCount = 2;
   CheckTrailReferencePath<Effects_Trail9>(state, Effects_Plg057_TrailNineInit,
                                           Effects_Plg057_TrailNineUpdate);
+}
+
+namespace {
+void CheckTrailReferenceQuad(const POLY_GT4& quad, int x, int y, int fade,
+                             int samples) {
+  CHECK(quad.tag == 0xE1000000);
+  CHECK(quad.code == Render_LegacyPrimitiveCode_PolyGt4SemiTrans);
+  const std::array<int, 8> positions{quad.x0, quad.y0, quad.x1, quad.y1,
+                                     quad.x2, quad.y2, quad.x3, quad.y3};
+  const std::array expected_positions{x, y - 4, x + 8, y - 4,
+                                      x, y + 4, x + 8, y + 4};
+  CHECK(positions == expected_positions);
+  const auto u0 = 16 + 8 * fade / (samples - 1);
+  const auto u1 = 16 + 8 * (fade - 1) / (samples - 1);
+  const std::array<int, 8> texture{quad.u0, quad.v0, quad.u1, quad.v1,
+                                   quad.u2, quad.v2, quad.u3, quad.v3};
+  const std::array expected_texture{u0, 32, u1, 32, u0, 40, u1, 40};
+  CHECK(texture == expected_texture);
+  const auto start = (fade + 1) * 8;
+  const auto end = fade * 8;
+  const std::array<int, 12> colors{quad.r0, quad.g0, quad.b0, quad.r1,
+                                   quad.g1, quad.b1, quad.r2, quad.g2,
+                                   quad.b2, quad.r3, quad.g3, quad.b3};
+  const std::array expected_colors{start, start, start, end, end, end,
+                                   start, start, start, end, end, end};
+  CHECK(colors == expected_colors);
+  CHECK(quad.clut == 0x1234);
+  CHECK(quad.tpage == 0x567);
+}
+
+template <class Trail>
+void InitializeTrailRenderHistory(std::array<Trail, 2>& trails,
+                                  std::size_t count, std::size_t current) {
+  constexpr auto kSamples = std::size(Trail{}.splineSamples);
+  for (std::size_t actor = 0; actor < trails.size(); ++actor) {
+    auto& trail = trails[actor];
+    trail.splineSampleCount = static_cast<u_char>(count);
+    trail.trailCollapseCounter = static_cast<u_char>(count - 1);
+    trail.currentSplineSample = static_cast<u_char>(current);
+    for (std::size_t index = 0; index < kSamples; ++index) {
+      trail.splineSamples[(current + kSamples - index) % kSamples] = {
+          static_cast<std::int16_t>(index * 32),
+          static_cast<std::int16_t>(actor * 64), 1024, 0};
+    }
+  }
+}
+
+void CheckTrailReferenceRenderState(
+    const Effects_ParticleTextureAnimation& animation,
+    const ParticleFixture& fixture, const u_long* end) {
+  CHECK(animation.cursor == 4);
+  CHECK(animation.frameTimer == 8);
+  CHECK(Render_frameScratch.primitiveCursor == end);
+  CHECK(fixture.storage.front() == 0xDEADBEEF);
+  CHECK(fixture.storage.back() == 0xDEADBEEF);
+}
+
+template <class Trail, class Packet, class ReadQuad>
+void CheckTrailReferencePackets(const u_long* begin, std::size_t trail_count,
+                                std::size_t count, int origin_x,
+                                ReadQuad read_quad) {
+  constexpr auto kPacketWords = sizeof(Packet) / sizeof(u_long);
+  constexpr auto kSamples = std::size(Trail{}.splineSamples);
+  for (std::size_t actor = 0; actor < trail_count; ++actor) {
+    for (std::size_t segment = 0; segment < count - 1; ++segment) {
+      const auto packet_index = actor * (count - 1) + segment;
+      Packet packet{};
+      std::memcpy(&packet, begin + packet_index * kPacketWords, sizeof(packet));
+      const auto& quad = read_quad(packet);
+      const auto x = origin_x + static_cast<int>(segment * 8);
+      const auto y = 120 + static_cast<int>(actor * 16);
+      CHECK(packet.wordCount == 14);
+      CHECK(packet.drawMode == 0xE1000200);
+      const auto fade = count - 1 - segment;
+      CheckTrailReferenceQuad(quad, x, y, static_cast<int>(fade),
+                              static_cast<int>(kSamples));
+    }
+  }
+}
+
+template <class Trail, class Packet, class State, class Render, class ReadQuad>
+void CheckTrailReferenceRendering(State& state,
+                                  Effects_ParticleTextureAnimation& animation,
+                                  std::span<u_char> transparency, Render render,
+                                  ReadQuad read_quad) {
+  constexpr auto kSamples = std::size(Trail{}.splineSamples);
+  const bool attached = GENERATE(false, true);
+  const bool clipped = GENERATE(false, true);
+  const bool at_boundary = GENERATE(false, true);
+  const auto count = GENERATE_COPY(std::size_t{1}, std::size_t{2}, kSamples);
+  const auto current = GENERATE_COPY(std::size_t{0}, kSamples - 1);
+  ParticleFixture fixture;
+  std::array<Trail, 2> trails{};
+  InitializeTrailRenderHistory(trails, count, current);
+  state.trails = trails.data();
+  animation.program = reinterpret_cast<u_char*>(fixture.script.data());
+  for (std::size_t index = 0; index < transparency.size(); ++index) {
+    transparency[index] = static_cast<u_char>((index + 1) * 8);
+  }
+  Effects_ParticleDefinition definition{};
+  definition.vectorRanges[4][0] = definition.vectorRanges[4][1] = 8;
+  definition.transformIndex = 1;
+  Effects_ParticleEmitterScratch scratch{};
+  scratch.flags = attached ? 0x20000 : 0;
+  Render_frameScratch.viewMatrix.t[0] = -64;
+  fixture.instance.transforms[1].view = Render_frameScratch.viewMatrix;
+  fixture.instance.transforms[1].view.t[0] = 128;
+  Render_nearClip = clipped ? 256 : 255;
+  constexpr auto kPacketWords = sizeof(Packet) / sizeof(u_long);
+  const auto packets = trails.size() * (count - 1);
+  auto* begin = fixture.storage.data() + 1;
+  if (at_boundary) begin += 0x8000 - packets * kPacketWords;
+  Render_frameScratch.primitiveCursor = begin;
+  render(&definition, &scratch, &fixture.instance, &state);
+  CheckTrailReferenceRenderState(
+      animation, fixture, begin + (clipped ? 0 : packets * kPacketWords));
+  if (clipped || count == 1) return;
+
+  // trails5.h:449 / trails9.h:456: horizontal samples at Z1024 project at
+  // one quarter scale; width8 gives +/-4 pixels and SZ3/4 gives depth256.
+  CheckTrailReferencePackets<Trail, Packet>(begin, trails.size(), count,
+                                            attached ? 192 : 144, read_quad);
+  const auto* last = begin + (packets - 1) * kPacketWords;
+  CHECK((fixture.ordering[16 + 256] & 0xFFFFFF) ==
+        (LegacyGpu_Handle(last) & 0xFFFFFF));
+}
+}  // namespace
+
+TEST_CASE("Five-sample trail ribbons retain source geometry and render spaces",
+          "[effects][trails][reference][trail-render]") {
+  struct Storage {
+    Effects_TrailQuadSet state{};
+    std::array<u_char, 5> transparency{};
+  } storage;
+  static_assert(offsetof(Storage, transparency) ==
+                offsetof(Effects_TrailQuadSet, sampledTransparencyCurve));
+  storage.state.trailcount = 2;
+  CheckTrailReferenceRendering<Effects_Trail, Render_EffectGouraudQuadPacket>(
+      storage.state, storage.state.textureAnimation, storage.transparency,
+      Effects_Plg057_TrailRender,
+      [](const auto& packet) -> const POLY_GT4& { return packet.opaque4; });
+}
+
+TEST_CASE("Nine-sample trail ribbons retain source geometry and render spaces",
+          "[effects][trails][reference][trail-render]") {
+  struct Storage {
+    Effects_Trail9State state{};
+    std::array<u_char, 9> transparency{};
+  } storage;
+  static_assert(offsetof(Storage, transparency) ==
+                offsetof(Effects_Trail9State, sampledTransparencyCurve));
+  storage.state.trailCount = 2;
+  CheckTrailReferenceRendering<Effects_Trail9, Render_Trail9Packet>(
+      storage.state, storage.state.texture, storage.transparency,
+      Effects_Plg057_TrailNineRender,
+      [](const auto& packet) -> const POLY_GT4& { return packet.poly; });
 }

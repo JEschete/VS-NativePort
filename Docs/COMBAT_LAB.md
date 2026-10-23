@@ -1544,6 +1544,58 @@ attachments, camera spaces and representative live original-frame fidelity
 remain separate #76 gates. No C++ promotion or compatibility retirement is
 claimed. Publication and exact CI are recorded on #76.
 
+## Five-/nine-sample ribbon rendering reference (#76, bounded)
+
+Source is `9d43d9cb7e33f8a2ebc2c0c4d5f6c42a8b6c3052` plus two appended
+maintained render cases. Native runtime/generator code and trajectories are
+unchanged; unrelated owner edits remain dirty/excluded. The read-only
+`rood-reverse` revision5163208b supplies original `trails5.h:449` and
+`trails9.h:456` render behavior.
+
+The actual PLG057 render entry points run96 generated configurations across
+both families. Each contains two independent ribbons and checks:
+
+- World-camera versus selected effect-view projection, with transform index1
+  and distinct translations so the wrong matrix cannot pass accidentally.
+- Both history origins, wrapped five-/nine-sample traversal, full history,
+  two-sample collapse and the one-sample no-ribbon state.
+- Every emitted vertex, UV, RGB component, palette/page, semitransparent
+  command, packet length, draw-mode restoration and depth256 ordering link.
+  Horizontal32-unit samples at Z1024 project8 pixels apart; width8 yields
+  +/-4-pixel edges. Transparency and texture coordinates follow the original
+  distinct4-/8-segment denominators.
+- Exact strict near clipping: depth256 renders with near255, not near256.
+  Texture animation still advances when clipped or no ribbon is emitted.
+- Normal allocation and exact final-buffer fits, checking cursor movement
+  and both adjacent canaries for both native packet families.
+
+The first fixture incorrectly expected texture timer7. Reading original
+`func_800D6D24` confirms initial timer8, followed by2-unit decrements on later
+calls; only the test expectation was corrected. No native timing change or
+new production defect was established. Assertion arrays retain all exact
+vertex/texture/color comparisons while keeping helpers within existing
+maintained quality limits; no baseline or check was relaxed.
+
+Final Debug and Release builds use the existing
+`Native\Tests\VS.Tests.vcxproj` MSBuild command with
+`/m /nodeReuse:false /p:Platform=x64 /p:VcpkgManifestInstall=false` and each
+configuration. `VS.Tests.exe "[effects][trails][reference]"` passes **3036
+assertions / 4 cases** in each build: the earlier508 trajectory assertions
+plus2528 render assertions. Full suites pass **541 cases / 1802392
+assertions** each, also checking shared renderer-state restoration. Scoped
+`quality-native.cmd --files Native\Tests\src\ParticleRenderTests.cpp --tidy`
+reports **0 findings / 0 new**; exact fixture literals remain separately
+classified, not a refreshed baseline.
+
+Local build/selection/full-suite/quality logs use
+`build\quality\trail76-render-*`. Combat Lab binaries remain the #139 hashes;
+this checkpoint is source/component evidence, not a new live effect replay
+or aligned original-game frame comparison. Non-horizontal joins, complete
+origin/target attachment callbacks, live opacity/trail appearance and all
+representative original scenes remain broader #76 gates. No C++ promotion,
+compatibility retirement, arbitrary clamp or blanket #76/#16 completion is
+claimed. Publication and exact CI are recorded on #76.
+
 ## Native particle attraction field repair (#138; supporting #76)
 
 Source: `d0002768` plus the scoped copier adaptation, generated F01554 and
