@@ -33,9 +33,6 @@ short Field_enteredDoorId;
 // decomp: D_800F1CC8 (D_800F1CC8@BATTLE/BATTLE.PRG)
 Field_MpdDoorRecord Field_entranceDoorRecord;
 
-// decomp: D_800F1D08 (D_800F1D08@BATTLE/BATTLE.PRG)
-Field_DoorMatchList Field_matchingDoorRecords;
-
 // decomp: BATTLE.PRG vs_battle_setDoorEntered (src/BATTLE/BATTLE.PRG/146C.c:15751)
 void Field_StoreEntranceDoorForReload(void)
 {
@@ -100,37 +97,6 @@ void Field_FindEntranceDoorNearTile(int arg0, int arg1, int arg2)
         Core_Memory_ZeroAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
         Field_enteredDoorId = -1;
     }
-}
-
-// decomp: BATTLE.PRG func_8008BAC8 (src/BATTLE/BATTLE.PRG/146C.c:16185)
-Field_DoorMatchList* Field_TransitionDoorsAtTile(int arg0, int arg1, int arg2)
-{
-    Field_MpdDoorRecord* var_s0;
-    int temp_s1;
-    int i;
-    Field_MpdDoorRecord* new_var;
-
-    if (Field_roomData.doors != NULL) {
-        var_s0 = Field_roomData.doors;
-        Field_matchingDoorRecords.count = 0;
-        temp_s1 = Field_roomData.header.doorsLength / 12;
-
-        Audio_Seq_unusedStateFlags.opaqueAC[7] = Core_Random_Rand();
-
-        for (i = 0; i < temp_s1; ++i, ++var_s0) {
-            new_var = var_s0;
-            if (((arg2 >= 2) && ((&new_var->tileLocation)->floorLayer == arg2))
-                || (((((&var_s0->tileLocation)->tileX) == arg0))
-                    && ((((&var_s0->tileLocation)->tileZ)) == arg1)
-                    && ((((&var_s0->tileLocation)->floorLayer)) == arg2))) {
-                do {
-                    Field_matchingDoorRecords.records[Field_matchingDoorRecords.count++] = var_s0;
-                } while (0);
-            }
-        }
-        return &Field_matchingDoorRecords;
-    }
-    return NULL;
 }
 
 // decomp: BATTLE.PRG func_8008BC04 (src/BATTLE/BATTLE.PRG/146C.c:16215)

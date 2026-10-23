@@ -1,5 +1,6 @@
 """Regressions for encounter and effect source adaptations, without game assets."""
 
+import csv
 import unittest
 from pathlib import Path
 
@@ -7,6 +8,24 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_door_queries_keep_owned_native_pointer_storage(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / "tools/port/owned.csv").open(newline="") as file:
+            owned = {row["id"]: row for row in csv.DictReader(file)}
+        for item in ("T00232", "G00330", "F00579"):
+            with self.subTest(item=item):
+                self.assertIn(item, owned)
+                self.assertEqual(owned[item]["header"],
+                                 r"Native\Game\src\Field\DoorMatches.h")
+        source = (root / "Native/Game/src/Field/Doors.c").read_text()
+        caller = (root / "Native/Game/src/Field/Interactions.c").read_text()
+        self.assertIn('"Field/DoorMatches.h"', caller)
+        self.assertNotIn("Field_DoorMatchList Field_matchingDoorRecords;", source)
+        self.assertNotIn("Field_TransitionDoorsAtTile(int", source)
+        owned_header = (root / "Native/Game/src/Field/DoorMatches.h").read_text()
+        self.assertIn("Field_MpdDoorRecord** records;", owned_header)
+        self.assertNotIn("records[0]", owned_header)
+
     def test_weapon_naming_draw_links_use_native_handles(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Menu/Rename.c").read_text()

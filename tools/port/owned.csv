@@ -1,4 +1,7 @@
 id,kind,name,path,header,since,notes
+T00232,type,Field_DoorMatchList,Native\Game\src\Field\DoorMatches.h,Native\Game\src\Field\DoorMatches.h,2026-10-23,Native borrowed door-query view backed by owned pointer storage; not an inline PS1 BSS tail
+G00330,global,Field_matchingDoorRecords,Native\Game\src\Field\DoorMatches.cpp,Native\Game\src\Field\DoorMatches.h,2026-10-23,Native query result metadata with separately owned pointer-list backing
+F00579,function,Field_TransitionDoorsAtTile,Native\Game\src\Field\DoorMatches.cpp,Native\Game\src\Field\DoorMatches.h,2026-10-23,Owned native door matches preserve original tile/platform order and raw RNG update without flexible-tail writes
 T00633,type,Actors_ActorModelSlot,Native\Game\src\Actors\ActorModelSlot.h,Native\Game\src\Actors\ActorModelSlot.h,2026-10-22,Native-sized and aligned weapon-model storage; original vs_battle_actor4 runtime reserve
 F01309,function,Battle_DrawSphereTerrainIntersection,Native\Game\src\Battle\SphereTerrain.cpp,Native\Game\include\Battle\SphereTerrain.h,2026-10-22,Terrain-clipped elevation slice with native scanline storage and packet handles; original 5A624.s
 F03198,function,Audio_Seq_ReleaseSavedVoiceConflicts,Native\Engine\src\Audio\MusicState.cpp,Native\Engine\include\Audio\MusicState.h,2026-10-21,Detach displaced saved-layer voices while preserving active SFX and stream reservations

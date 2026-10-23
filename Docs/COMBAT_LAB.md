@@ -1385,6 +1385,112 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Native door-query storage and real repair acceptance (#135; #134)
+
+Checkpoint source is `deb6c5b88d9ffa90e71d875fba715821c8da52cc` with the
+registered owned door query uncommitted; unrelated owner edits remain
+excluded. The placement-scope repair in that source has successful exact
+Source Quality39917867716. This checkpoint completes the previously blocked
+Debug/Release live route, pending scoped publication and exact-revision CI.
+
+#135 confirms an independent allocation defect: generated T00232 used
+`records[0]`, and G00330's compiled native object was only8 bytes. F00579 wrote
+matching pointers beyond that object. Its red native regression fails both
+storage assertions without deliberately executing an out-of-bounds write.
+Read-only original MPD inspection finds at most8 doors per room and2 eligible
+matches per query; the repair does not impose either as an arbitrary cap.
+
+The registered owned implementation is `Field/DoorMatches.cpp` with its
+C-compatible native view in `DoorMatches.h`. A native vector owns the pointer
+list; returned record pointers borrow current-room records until the next
+query/room unload. Original matching order, exact tile/layer rules, platform
+layer matching and one raw RNG update are preserved. Empty/absent-room
+queries reset the view safely, with no RNG draw for absent rooms. Partial
+record lengths explicitly log an error and reject the query. No on-disc
+layout, inventory capacity or story flag is changed.
+
+Three `[field][doors][storage]` cases pass122 assertions in both full native
+suites: allocated type/view, ordered single/multiple matches, repeated/empty
+queries,40-record platform lists, raw RNG/opaque-byte behavior, absent rooms
+and malformed lengths. Full Debug/Release each pass522 cases/1,790,782
+assertions. The generator regression verifies owned F00579/G00330/T00232
+registration, consumer includes and absence of regenerated implementations.
+All22 copier tests pass; second generation is stable across751 outputs with
+89 owned source/header files preserved.
+
+Final maintained quality/tidy reports1 existing scaffold tooling finding and
+0 new; native findings are0. The existing `gen_solution.py` SIM102 advisory is
+not changed or suppressed.112 intentional fixture literals are reported
+separately. The initial new native literal-index finding was corrected with
+a named door-query random-byte index; no baseline was refreshed.
+
+Only the clean Game project/filter files were regenerated through the
+existing scaffold's `files_of`/`vcxproj`/`filters` functions. Its normal
+`needs_c_headers` selection now includes the owned implementation. The full
+solution generator was deliberately not run over the owner's dirty solution
+and tool projects; the solution's pre/post SHA256 is unchanged. No project
+file was hand-edited. A second Game-only generation is stable, and
+`door135-scaffold-audit.json` also checks the owner's tool project/filter
+hashes remain unchanged.
+
+Rebuilt x64 Combat Lab host SHA256:
+
+- Debug: `4f47064e2303aa7d4eb0ebd18c71de7f7db4ca9d7e2ea0c3ba52550f1abf17bd`.
+- Release: `b879154fb534fd33018b3a84bba8560354b05388018eba1d008cc3c8125b73b9`.
+
+| Real combat-to-workshop repair | Debug | Release |
+|---|---|---|
+| Accepted run | `1792741749151138-0` | `1792741827685837-0` |
+| Actual worn weapon DP before transition | 12598/12600 | 12598/12600 |
+| DP after original repair confirmation | 12600/12600 | 12600/12600 |
+| Final field return tick | 4184 | 4168 |
+
+Each run makes a real low-STR melee attack against original Zombie Knight18
+in zone13 room12, defeats it through Fireball and claims normal loot. It
+stows the weapon, opens the original door with Cross, walks into workshop42
+and retains all3840 inventory bytes across the ZND change. The destination
+log says `using original placements zone=42 room=0`, not source-enemy injection.
+Repair cancellation preserves the worn inventory. Confirmation restores
+actual DP, applies the original all-part PP calculation, refreshes equipped
+runtime DP and returns to field with the exact expected inventory. No F10,
+memory writes, forced HP/DP, event flags or synthesized loot establish this.
+
+The formerly blocked Release doorway now passes this same bounded route
+with owned storage, including a preceding successful Release pass before the
+final pair. This verifies the reported route, not every campaign door.
+An initial route probe used the wrong camera-relative direction; another
+used compact menu row1 instead of original Items ID3. These observer errors
+were corrected rather than logged as gameplay defects.
+
+Commands use the existing ignored controller/read-only harness:
+
+```powershell
+build\Debug\VS.Tests.exe "[doors][storage]"
+build\Debug\VS.Tests.exe
+build\quality\equipment14-check.ps1 -Configuration Debug -Mode workshop-gate `
+  -Zone 13 -WorkshopAction wear
+# Repeat builds/tests/live commands in Release x64.
+.\.venv-3\Scripts\python.exe tools\port\copy_to_native.py
+.\.venv-3\Scripts\python.exe tools\port\test_encounter_fixups.py
+. .venv-3\Scripts\Activate.ps1
+.\quality-native.cmd --files Native\Game\src\Field\DoorMatches.h `
+  Native\Game\src\Field\DoorMatches.cpp Native\Tests\src\EncounterTests.cpp `
+  tools\port\test_encounter_fixups.py tools\scaffold\gen_solution.py --tidy
+```
+
+Local `build\quality\door135-live-audit.json` verifies the final two sessions:
+normal `session.end`, no error-level engine records or trace failure, original
+destination placement selection, actual worn/restored DP and field menu63.
+Build/test, original-capacity, ownership/generation and controller evidence
+remain under `build\quality\door135-*`; captures/assets are not committed.
+F00579/G00330/T00232 locations and bounded evidence are updated separately
+from promotion/compatibility-retirement status. DoorIds and broader typed
+room ownership remain migration work, not claims of this repair.
+
+The real worn-equipment repair gate for #15 is now demonstrated. Live
+blade/shield combination consumption still remains; #15 is not closed by
+this checkpoint.
+
 ## Cross-zone placement repair checkpoint (#134)
 
 The real wear-to-workshop route reproduced a separate Lab crash on

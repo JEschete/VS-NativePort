@@ -122,6 +122,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Boot\Encounter.cpp",
                 r"src\Battle\SphereTerrain.cpp",
                 r"src\Field\EncounterCatalog.cpp",
+                r"src\Field\DoorMatches.cpp",
                 r"src\Field\MinimapScene.cpp",
                 r"src\Battle\Ai\PlanningPrimitives.cpp",
                 r"src\Battle\Ai\DecisionPrimitives.cpp",

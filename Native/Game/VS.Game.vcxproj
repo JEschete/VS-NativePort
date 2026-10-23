@@ -1228,6 +1228,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Field\DoorMatches.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\Doors.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1966,6 +1969,7 @@
     <ClInclude Include="src\Field\Camera.h" />
     <ClInclude Include="src\Field\Collision.h" />
     <ClInclude Include="src\Field\CollisionSampling.h" />
+    <ClInclude Include="src\Field\DoorMatches.h" />
     <ClInclude Include="src\Field\Doors.h" />
     <ClInclude Include="src\Field\EncounterSpawnProfile.hpp" />
     <ClInclude Include="src\Field\Environment.h" />

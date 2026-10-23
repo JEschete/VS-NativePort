@@ -1,7 +1,9 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
+#include <span>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -9,12 +11,18 @@
 #include "Battle/Encounter.hpp"
 #include "CombatLab/Editor.hpp"
 #include "CombatLab/Trace.hpp"
+#include "Core/BiosRand.h"
+#include "Core/Random.hpp"
+#include "Field/DoorMatches.h"
 #include "Field/EncounterSpawnProfile.hpp"
 
 extern "C" {
+#include "Audio/Seq/Channel.h"
 #include "Battle/EncounterHooks.h"
 #include "Boot/PlayerSettings.h"
 #include "Field/CollisionSampling.h"
+#include "Field/Gimmicks.h"
+#include "Field/Room.h"
 #include "Input/Controller.h"
 }
 
@@ -59,6 +67,36 @@ void EditorPress(VS::combat_lab::Editor& editor, std::uint32_t button,
   pad.pressed = button;
   for (int index = 0; index < times; ++index) editor.Update(pad, false);
 }
+
+struct DoorQueryFixture {
+  Field_RoomRecord saved_room = Field_roomData;
+  char saved_random = Audio_Seq_unusedStateFlags.opaqueAC[7];
+  std::array<Field_MpdDoorRecord, 40> doors{};
+
+  DoorQueryFixture() {
+    Field_roomData = {};
+    Field_roomData.doors = doors.data();
+    Field_roomData.header.doorsLength = sizeof(doors);
+  }
+
+  ~DoorQueryFixture() {
+    Field_roomData.doors = nullptr;
+    Field_TransitionDoorsAtTile(0, 0, 0);
+    Field_roomData = saved_room;
+    Audio_Seq_unusedStateFlags.opaqueAC[7] = saved_random;
+    Core_Random_Seed(1);
+  }
+
+  void Check(int x, int z, int layer, std::span<const int> expected) {
+    auto* result = Field_TransitionDoorsAtTile(x, z, layer);
+    REQUIRE(result == &Field_matchingDoorRecords);
+    REQUIRE(result->count == static_cast<int>(expected.size()));
+    for (std::size_t index = 0; index < expected.size(); ++index) {
+      CAPTURE(index);
+      CHECK(result->records[index] == &doors[expected[index]]);
+    }
+  }
+};
 }  // namespace
 
 TEST_CASE("Encounter validation reserves real primary and auxiliary slots",
@@ -99,6 +137,64 @@ TEST_CASE("Inactive encounter hooks preserve original room placements",
   Boot_EncounterRoomPlacements(&data, &size);
   CHECK(data == nullptr);
   CHECK(size == 0);
+}
+
+TEST_CASE("Door query results have actual native pointer-list storage",
+          "[field][doors][storage]") {
+  CHECK(std::is_pointer_v<decltype(Field_DoorMatchList::records)>);
+  CHECK(sizeof(Field_DoorMatchList) >=
+        sizeof(int) + sizeof(Field_MpdDoorRecord*));
+}
+
+TEST_CASE("Door queries preserve ordered tile and platform matches on repeat",
+          "[field][doors][storage]") {
+  DoorQueryFixture fixture;
+  fixture.doors[0].tileLocation.tileX = fixture.doors[1].tileLocation.tileX = 4;
+  fixture.doors[0].tileLocation.tileZ = fixture.doors[1].tileLocation.tileZ = 7;
+  fixture.doors[2].tileLocation.tileX = 8;
+  fixture.doors[2].tileLocation.tileZ = 9;
+  fixture.doors[3].tileLocation = fixture.doors[0].tileLocation;
+  fixture.doors[3].tileLocation.floorLayer = 1;
+  for (int repeat = 0; repeat < 2; ++repeat) {
+    fixture.Check(4, 7, 0, std::array{0, 1});
+    fixture.Check(8, 9, 0, std::array{2});
+    fixture.Check(4, 7, 1, std::array{3});
+    fixture.Check(31, 31, 0, std::span<const int>{});
+  }
+  std::array<int, 40> expected{};
+  for (std::size_t index = 0; index < fixture.doors.size(); ++index) {
+    auto& tile = fixture.doors[index].tileLocation;
+    tile.tileX = static_cast<u_short>(index % 32);
+    tile.tileZ = static_cast<u_short>(index / 32);
+    tile.floorLayer = 2;
+    expected[index] = static_cast<int>(index);
+  }
+  fixture.Check(-1, -1, 2, expected);
+  fixture.Check(0, 0, 3, std::span<const int>{});
+  fixture.Check(0, 0, 2, expected);
+}
+
+TEST_CASE("Door queries retain raw RNG semantics and reject malformed data",
+          "[field][doors][storage]") {
+  DoorQueryFixture fixture;
+  Core_Random_Seed(1234);
+  VS::Core::Rand15 expected(1234);
+  SECTION("present room consumes one raw draw even without a match") {
+    fixture.Check(31, 31, 0, std::span<const int>{});
+    CHECK(static_cast<unsigned char>(Audio_Seq_unusedStateFlags.opaqueAC[7]) ==
+          static_cast<unsigned char>(expected.Next()));
+  }
+  SECTION("absent room consumes no raw draw") {
+    Field_roomData.doors = nullptr;
+    CHECK(Field_TransitionDoorsAtTile(0, 0, 0) == nullptr);
+    CHECK(Field_matchingDoorRecords.count == 0);
+  }
+  SECTION("partial record bytes are rejected before traversal") {
+    --Field_roomData.header.doorsLength;
+    CHECK(Field_TransitionDoorsAtTile(0, 0, 0) == nullptr);
+    CHECK(Field_matchingDoorRecords.count == 0);
+  }
+  CHECK(Core_Random_Rand() == expected.Next());
 }
 
 TEST_CASE("Encounter validation rejects overlaps and invalid content",

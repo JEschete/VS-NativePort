@@ -171,6 +171,7 @@
 #include "Field/Camera.h"
 #include "Field/Collision.h"
 #include "Field/CollisionSampling.h"
+#include "Field/DoorMatches.h"
 #include "Field/Doors.h"
 #include "Field/Environment.h"
 #include "Field/GameMode.h"
@@ -2382,7 +2383,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1CDCu, 4u, (void*)&Field_roomAnimationTicks, sizeof Field_roomAnimationTicks, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1CE0u, 32u, (void*)&Field_backgroundReferenceVectors, sizeof Field_backgroundReferenceVectors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1D00u, 4u, (void*)&Field_isRoomEffectSoundRestored, sizeof Field_isRoomEffectSoundRestored, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1D08u, 4u, (void*)&Field_matchingDoorRecords, sizeof Field_matchingDoorRecords, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1D28u, 64u, (void*)&Field_gimmickAnimationQueue, sizeof Field_gimmickAnimationQueue, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1D68u, 4u, (void*)&Field_platformFreezeFrames, sizeof Field_platformFreezeFrames, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1D6Cu, 4u, (void*)&Field_triggerMarkerFrameTicks, sizeof Field_triggerMarkerFrameTicks, 1u, 1u},

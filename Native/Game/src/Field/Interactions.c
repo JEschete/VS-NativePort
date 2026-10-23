@@ -25,6 +25,7 @@
 #include "Event/Triggers.h"
 #include "Field/Camera.h"
 #include "Field/Collision.h"
+#include "Field/DoorMatches.h"
 #include "Field/Doors.h"
 #include "Field/GameMode.h"
 #include "Field/Gimmicks.h"
