@@ -4,7 +4,8 @@ This file is the single source of truth for getting from a fresh clone to a play
 **Keep it current:** any change to prerequisites, scripts, dependencies, output layout or the extraction
 step must update this file in the same commit (plan D19).
 
-> **Current state (shared rendering slice).** Debug and Release build and pass the full test suite.
+> **Recorded state (shared rendering slice).** Earlier checkpoints built Debug and Release and passed their full test suites;
+> these are historical results, not verification of a fresh checkout. Run the commands in sections 4 and 7 for your revision.
 > After the extraction step (§5), `VS.Desktop`
 > runs the original boot and title code: NOW LOADING, the publisher and developer logos, the intro movie with the
 > opening music, the title screen and its menu (New Game / Continue / Vibration / Sound), driven by gamepad or
@@ -37,6 +38,11 @@ step must update this file in the same commit (plan D19).
 | FFmpeg | 6.0+ with `libsvtav1` and the `psxstr` demuxer | Needed only by the extractor, to convert the intro movie (ASSET_PIPELINE §6.7); found on `PATH` or given with `--ffmpeg`. `winget install Gyan.FFmpeg` gives a suitable build. It is never linked or shipped. |
 
 Tested configuration: VS 2026 Community 18.10, MSVC 14.51, Windows SDK 10.0.28000, ffmpeg 8.1.1.
+
+An MSBuild-only installation is insufficient: the selected VS instance must also
+contain the C++ MSBuild targets, Windows SDK and ClangCL components above.
+The build wrapper selects the latest instance advertising MSBuild; it does not
+currently verify that instance's C++ components before invoking it.
 
 ### 1.2 Only for working on the port itself (not needed to play)
 
@@ -88,12 +94,26 @@ the ending audio live in raw form-2 sectors.
 ### 4.1 Command line
 
 ```cmd
-build-native.cmd            :: Debug
+build-native.cmd
 build-native.cmd Release
 ```
 
 `build-native.cmd` finds MSBuild with `vswhere`, restores the vcpkg packages (into `vcpkg_installed\`), and builds
-`VagrantStory.Native.sln` for x64. Any extra arguments are passed to MSBuild.
+`VagrantStory.Native.sln` for x64. The default configuration is Debug. Up to four
+additional arguments after the configuration are passed to MSBuild.
+In PowerShell, prefix repository scripts with `.\`: use `.\build-native.cmd`
+and `.\test-native.cmd`.
+
+If the wrapper selects an MSBuild-only instance while a complete C++ instance is
+also installed, invoke the latter directly. For example, for the documented
+Community installation (adjust the path to your actual complete instance):
+
+```powershell
+& 'C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe' .\VagrantStory.Native.sln /m /restore /p:Configuration=Debug /p:Platform=x64
+```
+
+This does not bypass missing prerequisites; the selected instance must have the
+C++ targets, ClangCL, Windows SDK and bundled vcpkg components from section 1.
 
 ### 4.2 Visual Studio
 
@@ -143,7 +163,7 @@ claim that all enemies, items, spells or abilities are complete.
 **Planned ⏭ (Docs\ASSET_PIPELINE.md):**
 
 ```cmd
-extract-native-assets.cmd                      :: uses disks\SLUS-01040.cue, writes Native\data\
+extract-native-assets.cmd
 extract-native-assets.cmd --disc D:\path\to\SLUS-01040.cue --ffmpeg C:\path\to\ffmpeg.exe
 ```
 
@@ -157,7 +177,7 @@ extract-native-assets.cmd --disc D:\path\to\SLUS-01040.cue --ffmpeg C:\path\to\f
 ```cmd
 build\Debug\VS.Extract.exe extract disks\SLUS-01040.cue Native\data
 build\Debug\VS.Extract.exe extract disks\SLUS-01040.cue Native\data --ffmpeg C:\path\to\ffmpeg.exe
-build\Debug\VS.Extract.exe list    disks\SLUS-01040.cue          :: diagnostic: the disc's files
+build\Debug\VS.Extract.exe list    disks\SLUS-01040.cue
 ```
 
 - Writes `Native\data\disc\<disc path>` for every file and `Native\data\files.tsv` (sector, size, form, path).
@@ -165,6 +185,31 @@ build\Debug\VS.Extract.exe list    disks\SLUS-01040.cue          :: diagnostic: 
   FLAC, form `mkv`). Effect and ending audio are imported separately under `audio\streams`;
   the ending's legacy sector-data row remains `stream`, not a raw readable disc file.
 - Takes about a minute. Run it again after an extractor change; the converters replace one `raw` form at a time.
+
+### 5.1 Native audio assets
+
+Run the separate bank import after ordinary extraction. For an existing data directory,
+the stream command updates effect/XA assets without reconverting the movie:
+
+```cmd
+build\Debug\VS.Extract.exe audio   Native\data\disc Native\data
+build\Debug\VS.Extract.exe streams disks\SLUS-01040.cue Native\data
+```
+
+- `audio` imports all 83 nonempty wave banks into versioned JSON, mono PCM16 WAV
+  and SFZ under `Native\data\audio\banks`. WAVE0069 supplies MUSIC016, WAVE0091
+  supplies MUSIC110, and WAVE0011 supplies MUSIC054 on dungeon entry; menu banks
+  alone do not supply these tracks. Missing banks are reported, not fabricated.
+  Optional numbers are wave-file IDs, not instrument IDs. Reimport after audio
+  converter changes. Successful import is not full-content listening evidence.
+- `streams` imports 113 effect streams as WAV/SFZ plus metadata and the ending XA
+  as FLAC. Full `extract` also runs this stream step. XA requires the original
+  raw-sector disc and FFmpeg on PATH (or `--ffmpeg <path>`); an extracted folder
+  cannot supply the ending's raw form-2 audio sectors. The importer preserves
+  the original 443.52-second cadence. Missing/invalid assets are reported.
+- sfizz 1.2.3 is pinned in `tools\vcpkg\ports\sfizz`. vcpkg builds its DLL with
+  MSVC; native projects retain ClangCL and consume the C API. The overlay
+  statically includes bundled WavPack. No separate sfizz checkout is needed.
 
 **Planned ⏭:** `extract-native-assets.cmd` wrapping this, with every file in its modern format (JSON, glTF, PNG,
 WAV, FLAC) and `--force` / incremental runs.
@@ -181,7 +226,7 @@ build\Release\VS.Desktop.exe
 |---|---|
 | `--disc <path>` | Use this disc (`.cue` or extracted folder). By default the exe looks for the `VS_DISC` environment variable, then for `disks\SLUS-01040.cue` (or `SLUS-01040\`) in its own folder or any parent folder, which finds the repo copy in a dev build. |
 | `--data <dir>` | The extracted data (§5). By default `Native\data` in the exe's folder or any parent folder. |
-| `--frames <n>` | Stop after `n` logical ticks (60 per second). |
+| `--frames <n>` | Stop after `n` logical ticks (NTSC fields: 60000/1001, approximately 59.94 per second). |
 | `--capture <dir> --at <t1,t2,...>` | Write the picture at those ticks as `frame_<t>.bmp` (reference comparisons). |
 | `--press <t:Buttons,...>` | Scripted presses, each held 3 ticks, e.g. `3400:Down,3500:Circle` (names: Up Down Left Right Cross Circle Square Triangle L1 R1 L2 R2 L3 R3 Start Select, joined with `+`). |
 | `--scripted` | Ignore keyboard and gamepad (only `--press` input). |
@@ -205,31 +250,25 @@ intro movie**, so test runs press it: `--press 1000:Start` puts the menu up by t
 `tools\test\duckstation_capture.ps1` makes the matching DuckStation reference (see `.github\copilot-instructions.md`
 for the emulator and BIOS locations).
 
-build\Debug\VS.Extract.exe audio   Native\data\disc Native\data
-build\Debug\VS.Extract.exe streams disks\SLUS-01040.cue Native\data
 The game reads only `Native\data\` (⏭ plus `Native\Content\patches\` and `mods\`). The disc is optional at run
 time; if it is found, its label is logged. If `Native\data\` is missing, the game stops with a message that says to
 run the extractor.
 
-### Controls (today)
+### 6.1 Audio diagnostics
 
-- The separate `audio` command imports all 83 nonempty wave banks into versioned JSON, mono PCM16 WAV
-  and SFZ under `Native\data\audio\banks`. Use it after the ordinary extraction, including for an existing
-  data directory. WAVE0069 supplies MUSIC016, WAVE0091 supplies MUSIC110, and WAVE0011 supplies MUSIC054
-  on entry to the dungeon; menu banks alone do not supply these music tracks.
-  Missing banks are reported, not replaced with fabricated audio.
-  Optional numbers are **wave-file IDs**, not instrument IDs. The older WAVE0032 articulation layout,
-  exact-end records and erased final DMA padding are supported; unavailable slots are logged explicitly.
-  Reimport after the fidelity update so SFZ pitch-bend range/smoothing matches native FM rendering.
-  Successful import is not evidence that every music track has been listened to.
-- The `streams` command updates existing installations without reconverting the movie. It imports
-  113 effect streams as WAV/SFZ plus metadata, and the ending XA as FLAC. It requires the original
-  raw-sector disc for XA and FFmpeg on PATH (or `--ffmpeg <path>`). Full `extract` also runs this step.
-  The XA importer preserves the original 443.52-second cadence rather than concatenating duplicate
-  sectors. Missing or invalid native stream assets are reported at playback.
-- sfizz 1.2.3 is pinned in `tools\vcpkg\ports\sfizz`. vcpkg builds its DLL with MSVC; native projects retain
-  ClangCL and consume the C API. The overlay statically includes its bundled WavPack dependency.
-  No separate sfizz checkout or standalone dependency-build experiment is required.
+For a local native-mix recording, set `VS_AUDIO_CAPTURE` to an absolute file path
+before launching. The file is raw **48,000 Hz, two-channel f32le** PCM submitted
+to SDL; it excludes independently bound movie and XA sources. For example,
+`ffmpeg -f f32le -ar 48000 -ac 2 -i capture.f32 capture.wav` converts it for
+listening. Remove the environment variable afterward. Captures and disc-derived
+assets must remain uncommitted.
+
+Output is stereo or dual-mono, not 5.1. Native noise, preceding-voice FM and
+original reverb presets are implemented; bit-exact output and full-content
+listening parity remain unverified.
+
+### 6.2 Controls (today)
+
 | Input | Notes |
 |---|---|
 | Any SDL3-supported gamepad | Mapped to the PlayStation pad layout (Cross/Circle/…). |
@@ -240,9 +279,32 @@ run the extractor.
 ## 7. Test
 
 ```cmd
-test-native.cmd             :: builds Debug, then runs VS.Tests.exe
+test-native.cmd
 test-native.cmd Release
-test-native.cmd Debug "[core]"   :: any Catch2 arguments after the config ([core], [input], [content], [disc], ...)
+test-native.cmd Debug "[core]"
+test-native.cmd Release "[audio],[clock]"
+```
+
+The default configuration is Debug. The wrapper builds before running tests;
+up to four Catch2 arguments follow the configuration. Inspect available cases
+with `build\Debug\VS.Tests.exe --list-tests` after a successful build. Skipped
+disc-dependent cases are not release acceptance evidence.
+
+Audio tests include actual SDL postmix, stream/XA lifecycle and native music-state
+regressions. The `[audio][xa-playback][disc]` case also exercises the installed
+`Native\data\audio\streams\xa\ENDING\ENDING.XA.flac` through production SDL output:
+initial playback, a 30-second sector seek, stop/re-entry and natural EOF/drain.
+It skips explicitly if the converted asset is absent; synthetic XA tests still
+run. This is audio-path coverage, not a complete ending-credit navigation replay.
+
+`Native\Tests\data\audio` contains original synthetic FLAC fixtures, not disc
+audio. Tests locate them relative to the standard `build\<Config>` executable
+directory. To reproduce them with FFmpeg, use fresh destination files (`-n`
+refuses to overwrite existing fixtures):
+
+```powershell
+ffmpeg -hide_banner -loglevel error -n -f lavfi -i 'sine=frequency=400:sample_rate=37800:duration=3' -af 'volume=3,pan=stereo|c0=c0|c1=-0.5*c0' -sample_fmt s16 -c:a flac -compression_level 12 -fflags +bitexact -flags:a +bitexact -map_metadata -1 Native\Tests\data\audio\stereo-tone.flac
+ffmpeg -hide_banner -loglevel error -n -f lavfi -i 'sine=frequency=400:sample_rate=37800:duration=0.2' -af 'volume=3' -sample_fmt s16 -c:a flac -compression_level 12 -fflags +bitexact -flags:a +bitexact -map_metadata -1 Native\Tests\data\audio\mono-tone.flac
 ```
 
 ⏭ The round-trip tests for the extractor are tagged `[extract]` and need the disc (ASSET_PIPELINE §7).
@@ -256,12 +318,6 @@ These scripts regenerate committed files. They are not part of the build.
 | Command | What it does |
 |---|---|
 | `python tools\ledger\build_ledgers.py` | Rebuild `Docs\ledgers\` from the decomp (it keeps the status columns you filled in) |
-For a local native-mix recording, set `VS_AUDIO_CAPTURE` to an absolute file path before launching.
-The file is raw **48,000 Hz, two-channel f32le** PCM submitted to SDL; it excludes the independently bound
-movie and XA sources. For example, `ffmpeg -f f32le -ar 48000 -ac 2 -i capture.f32 capture.wav` converts it for listening.
-Remove the environment variable afterward. Captures and disc-derived assets must remain uncommitted.
-The current output is stereo or dual-mono, not 5.1. Native noise, preceding-voice FM and the original
-reverb presets are implemented; bit-exact console output and full-content listening parity remain unverified.
 | `python tools\port\decomp_index.py` | libclang index of the decomp → `build\port\index.json` |
 | `python tools\port\data_inventory.py` | Global data inventory → `build\port\data.json` |
 | `python tools\port\gen_decomp_headers.py [--data Native\data]` | Generated headers that `decomp_index.py` and the copy need (disc layout; string-table offsets read from the extracted data) |
@@ -280,6 +336,7 @@ earlier, abandoned emulator-style port (VS 2022/CMake, `vagrant-native.exe`). Th
 | Symptom | Fix |
 |---|---|
 | `MSBuild not found` | Install VS 2026 with the **Desktop development with C++** workload. |
+| `MSB4019`, `Microsoft.Cpp.Default.props` not found | The selected VS/Build Tools instance lacks C++ targets, or an environment override points to the wrong targets. Add the C++ workload, ClangCL components and Windows SDK to that instance through Visual Studio Installer; check `VCTargetsPath` if explicitly set. With multiple instances, invoke MSBuild from a fully provisioned instance directly. Do not hand-edit generated project imports. Restore warnings such as `NU1503` may accompany this prerequisite failure; they do not establish a source-code compile defect. |
 | `The build tools for ClangCL cannot be found` | Add the two Clang components from §1.1 in the Visual Studio Installer. |
 | `SDL3/SDL.h` not found, or vcpkg errors | Add the **vcpkg package manager** component, check the internet connection, delete `vcpkg_installed\`, and build again. |
 | `no disc found` in `vs-native.log` | Put the files at `disks\SLUS-01040.cue/.bin`, or pass `--disc`. |
@@ -293,23 +350,14 @@ earlier, abandoned emulator-style port (VS 2022/CMake, `vagrant-native.exe`). Th
 ## 10. Clean
 
 ```cmd
-rmdir /s /q build             :: binaries, intermediates, build\port tool output
-rmdir /s /q vcpkg_installed   :: forces the dependencies to be restored again
-test-native.cmd Release "[audio],[clock]"
+rem Binaries, intermediates and port-tool output:
+rmdir /s /q build
+rem Dependency cache; the next build must restore it:
+rmdir /s /q vcpkg_installed
+rem Extracted game data; extraction must be repeated:
+rmdir /s /q Native\data
 ```
 
-Audio tests include actual SDL postmix, stream/XA lifecycle and native music-state regressions.
-The `[audio][xa-playback][disc]` case also exercises the installed
-`Native\data\audio\streams\xa\ENDING\ENDING.XA.flac` through production SDL output:
-initial playback, a 30-second sector seek, stop/re-entry and natural EOF/drain.
-It skips explicitly if the converted asset is absent; synthetic XA tests still run.
-This is audio-path coverage, not a complete ending-credit navigation replay.
-`Native\Tests\data\audio` contains original synthetic FLAC fixtures, not disc audio. Tests locate
-them relative to the standard `build\<Config>` executable directory. To reproduce their PCM
-and lossless encoding with the existing FFmpeg installation (use fresh destination files):
-
-```powershell
-ffmpeg -hide_banner -loglevel error -n -f lavfi -i 'sine=frequency=400:sample_rate=37800:duration=3' -af 'volume=3,pan=stereo|c0=c0|c1=-0.5*c0' -sample_fmt s16 -c:a flac -compression_level 12 -fflags +bitexact -flags:a +bitexact -map_metadata -1 Native\Tests\data\audio\stereo-tone.flac
-ffmpeg -hide_banner -loglevel error -n -f lavfi -i 'sine=frequency=400:sample_rate=37800:duration=0.2' -af 'volume=3' -sample_fmt s16 -c:a flac -compression_level 12 -fflags +bitexact -flags:a +bitexact -map_metadata -1 Native\Tests\data\audio\mono-tone.flac
-rmdir /s /q Native\data       :: extracted game data (re-run the extractor)
-```
+These are optional destructive cleanup commands, not build or test prerequisites.
+Do not remove local captures, extracted assets or dependency caches merely to
+run verification. Rebuild and re-extract the corresponding outputs after cleaning.
