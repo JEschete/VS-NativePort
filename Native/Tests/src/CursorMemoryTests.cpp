@@ -3,6 +3,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <string_view>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -10,6 +14,7 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/Abilities.h"
 #include "Battle/ActionTable.h"
@@ -20,7 +25,9 @@ extern "C" {
 #include "Core/Memory/Heap.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
+#include "Input/Buttons.h"
 #include "Input/Controller.h"
+#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Menu/BreakArts.h"
 #include "Menu/Framework/EquipmentDetails.h"
@@ -33,6 +40,7 @@ extern "C" {
 #include "Menu/Setup/Assembly.h"
 #include "Menu/Setup/Combination.h"
 #include "Menu/Setup/SetupScreen.h"
+#include "Menu/TextBox.h"
 #include "State/StateFlags.h"
 }
 
@@ -291,6 +299,7 @@ struct WorkshopChoicesFixture {
   char saved_state = Menu_Setup_itemsListState;
   char saved_window = Menu_Setup_itemsListWindow;
   char saved_info = Menu_Setup_rowInfoUnused;
+  u_char saved_combining_item = Menu_Setup_combiningItem;
   decltype(std::to_array(Menu_Setup_availableItems)) saved_available =
       std::to_array(Menu_Setup_availableItems);
   decltype(std::to_array(Menu_Setup_combiningBladeIds)) saved_blades =
@@ -341,6 +350,7 @@ struct WorkshopChoicesFixture {
     Menu_Setup_itemsListState = saved_state;
     Menu_Setup_itemsListWindow = saved_window;
     Menu_Setup_rowInfoUnused = saved_info;
+    Menu_Setup_combiningItem = saved_combining_item;
     Audio_Seq_unusedInventoryIndices = saved_indices;
     Battle_stringContext = saved_context;
     Menu_Framework_itemNames = saved_names;
@@ -423,7 +433,554 @@ struct WorkshopChoicesFixture {
     }
   }
 };
+
+struct WorkshopRepairFixture {
+  WorkshopChoicesFixture setup;
+  u_int* saved_sfx_offsets = Audio_Playback_soundEffectProgramOffsets;
+  u_short* saved_sfx_selectors = Audio_Playback_soundEffectBankSelectors;
+  decltype(Input_buttonsPressed) saved_pressed = Input_buttonsPressed;
+  int saved_repeat = Input_buttonRepeat;
+  Menu_TextBoxState saved_box = Menu_textBoxes[7];
+  Battle_Actor* saved_character = Battle_characterState;
+  Battle_Actor* saved_actor = Battle_actors[0];
+  Battle_Actor actor{};
+  Battle_ActorStats stats{};
+  std::array<u_int, 0x180> sfx_offsets{};
+  std::array<u_short, 0x180> sfx_selectors{};
+
+  WorkshopRepairFixture(int missing_dp, int pp) {
+    sfx_offsets.fill(UINT32_MAX);
+    Audio_Playback_soundEffectProgramOffsets = sfx_offsets.data();
+    Audio_Playback_soundEffectBankSelectors = sfx_selectors.data();
+    auto& inventory = Audio_Seq_unusedInventory;
+    inventory = {};
+    auto initialize = [missing_dp, pp](auto& item, int id) {
+      item.id = static_cast<decltype(item.id)>(id);
+      item.maxDp = 10000;
+      item.currentDp = static_cast<u_short>(10000 - missing_dp);
+      item.maxPp = 200;
+      item.currentPp = static_cast<u_short>(pp);
+    };
+    initialize(inventory.blades[0], 14);
+    inventory.blades[0].index = 1;
+    initialize(inventory.shields[0].base, 132);
+    inventory.shields[0].index = 1;
+    initialize(inventory.armor[0], 161);
+    inventory.armor[0].index = 1;
+    inventory.armor[0].category = 3;
+    initialize(inventory.armor[1], 223);
+    inventory.armor[1].index = 2;
+    inventory.armor[1].category = 7;
+    for (int category : {1, 3, 4}) {
+      Items_Inventory_RebuildDisplayIndices(category);
+    }
+    Input_buttonRepeat = 0;
+  }
+
+  ~WorkshopRepairFixture() {
+    Audio_Playback_soundEffectProgramOffsets = saved_sfx_offsets;
+    Audio_Playback_soundEffectBankSelectors = saved_sfx_selectors;
+    Input_buttonsPressed = saved_pressed;
+    Input_buttonRepeat = saved_repeat;
+    Menu_textBoxes[7] = saved_box;
+    Battle_characterState = saved_character;
+    Battle_actors[0] = saved_actor;
+  }
+
+  int Tick() {
+    for (auto& row : setup.setup.rows.workspace.rows) row.state = 1;
+    return Menu_Setup_UpdateRepair(0);
+  }
+
+  void Equip() {
+    auto& inventory = Audio_Seq_unusedInventory;
+    Battle_characterState = Battle_actors[0] = &actor;
+    actor.stats = &stats;
+    inventory.weapons[0].index = 1;
+    inventory.weapons[0].blade = inventory.weapons[0].grip = 1;
+    inventory.weapons[0].isEquipped = 1;
+    inventory.blades[0].assembledWeaponIndex = 1;
+    inventory.blades[0].category = 2;
+    inventory.grips[0].id = 96;
+    inventory.grips[0].category = 1;
+    inventory.grips[0].index = inventory.grips[0].assembledWeaponIndex = 1;
+    inventory.shields[0].isEquipped = 1;
+    inventory.armor[0].limb = 1;
+    Items_Inventory_RebuildDisplayIndices(0);
+    Items_EquipAshleyWeapon(&inventory.weapons[0]);
+    Items_EquipAshleyShield(&inventory.shields[0]);
+    Items_EquipAshleyArmor(0, &inventory.armor[0]);
+  }
+
+  void Prompt(int button) {
+    REQUIRE(Menu_Setup_UpdateRepair(1) == 0);
+    Input_buttonsPressed.allButtons = static_cast<u_short>(button);
+    for (int step = 0; step < 5; ++step) {
+      CAPTURE(step);
+      REQUIRE(Tick() == 0);
+    }
+  }
+};
+
+struct WorkshopRecipeFixture {
+  char* saved_combinations = Menu_Setup_combinationResults;
+  char* saved_materials = Menu_Setup_materialResults;
+  void* saved_blades = Menu_Setup_bladeCombinationInitData;
+  Menu_Setup_CombinedArmorRecord* saved_shields =
+      Menu_Setup_shieldCombinationInitData;
+  Menu_Setup_CombinedArmorRecord* saved_armor = Menu_Setup_combinationInitData;
+  std::array<char, sizeof(Audio_Seq_unusedMaterialModifiers)> saved_modifiers{};
+  alignas(Menu_Setup_SydHeader) std::array<unsigned char, 14000> bytes{};
+  static constexpr int kCombinations = 12;
+  static constexpr int kMaterials = 10000;
+  static constexpr int kRecords = 12000;
+
+  WorkshopRecipeFixture() {
+    std::memcpy(saved_modifiers.data(), Audio_Seq_unusedMaterialModifiers,
+                saved_modifiers.size());
+    std::memset(Audio_Seq_unusedMaterialModifiers, 0, saved_modifiers.size());
+    Menu_Setup_SydHeader header{};
+    header.combinationsOffset = kCombinations;
+    header.materialsOffset = kMaterials;
+    header.initDataOffset = kRecords;
+    std::memcpy(bytes.data(), &header, sizeof(header));
+    Audio_Seq_unusedMaterialModifiers[5][24] = 3;
+    Audio_Seq_unusedMaterialModifiers[5][26] = -2;
+    Audio_Seq_unusedMaterialModifiers[5][28] = -4;
+  }
+
+  ~WorkshopRecipeFixture() {
+    Menu_Setup_combinationResults = saved_combinations;
+    Menu_Setup_materialResults = saved_materials;
+    Menu_Setup_bladeCombinationInitData = saved_blades;
+    Menu_Setup_shieldCombinationInitData = saved_shields;
+    Menu_Setup_combinationInitData = saved_armor;
+    std::memcpy(Audio_Seq_unusedMaterialModifiers, saved_modifiers.data(),
+                saved_modifiers.size());
+  }
+
+  void ArmorRecipe(bool shield, int second_material) {
+    const int combination = shield ? 6 * 17 + 7 : (65 - 16) * 65 + 66 - 16;
+    const int material = shield ? 3 * 8 + second_material
+                                : 3 * 128 + 3 * 32 + second_material * 4 + 2;
+    bytes[kCombinations + combination] = 12;
+    bytes[kMaterials + material] = 5;
+    const Menu_Setup_CombinedArmorRecord record{0, 9, 4, 3, 10, -5, 2, 0};
+    std::memcpy(bytes.data() + kRecords + 12 * sizeof(record), &record,
+                sizeof(record));
+  }
+
+  void CheckArmor(const Items_InventoryArmor& result, bool shield) const {
+    const std::array<int, 16> actual{
+        result.id,       result.subId,     result.material,
+        result.category, result.strength,  result.intelligence,
+        result.agility,  result.maxDp,     result.currentDp,
+        result.maxPp,    result.currentPp, result.gemSlots,
+        result.wepId,    result.index,     result.limb,
+        result.types[0]};
+    const std::array<int, 16> expected{138,
+                                       12,
+                                       5,
+                                       4,
+                                       13,
+                                       -7,
+                                       -2,
+                                       1501,
+                                       1501,
+                                       shield ? 151 : 101,
+                                       shield ? 61 : 41,
+                                       shield ? 3 : 0,
+                                       shield ? 9 : 0,
+                                       7,
+                                       2,
+                                       7};
+    for (std::size_t index = 0; index < actual.size(); ++index) {
+      CAPTURE(index);
+      CHECK(actual[index] == expected[index]);
+    }
+  }
+
+  void CheckBlade(const Items_InventoryBlade& result,
+                  const std::array<unsigned char, 16>& record) const {
+    const std::array<int, 18> actual{
+        result.id,
+        result.subId,
+        result.wepId,
+        result.category,
+        result.material,
+        result.strength,
+        result.intelligence,
+        result.agility,
+        static_cast<unsigned char>(result.damageType) & 3,
+        static_cast<unsigned char>(result.costType) & 7,
+        result.cost,
+        result.opaque12,
+        result.maxDp,
+        result.currentDp,
+        result.maxPp,
+        result.currentPp,
+        result.index,
+        result.assembledWeaponIndex};
+    const std::array<int, 18> expected{31, 31, 35, 4,    5,    13,  4,  -2, 2,
+                                       5,  7,  9,  1501, 1501, 151, 61, 7,  2};
+    for (std::size_t index = 0; index < actual.size(); ++index) {
+      CAPTURE(index);
+      CHECK(actual[index] == expected[index]);
+    }
+    CHECK(std::memcmp(&result.range, record.data() + 12,
+                      sizeof(result.range)) == 0);
+  }
+};
+
+std::vector<unsigned char> ReadWorkshopRecipe(std::string_view file) {
+  for (auto directory = std::filesystem::current_path();
+       directory != directory.parent_path();
+       directory = directory.parent_path()) {
+    const auto path = directory / "Native" / "data" / "disc" / "MENU" / file;
+    if (!std::filesystem::exists(path)) continue;
+    std::ifstream input(path, std::ios::binary);
+    REQUIRE(input);
+    std::vector<unsigned char> bytes(std::filesystem::file_size(path));
+    input.read(reinterpret_cast<char*>(bytes.data()),
+               static_cast<std::streamsize>(bytes.size()));
+    REQUIRE(input.good());
+    return bytes;
+  }
+  SKIP("Extracted original workshop recipe is unavailable");
+}
 }  // namespace
+
+TEST_CASE("Workshop repair restores DP with original rounded PP cost",
+          "[menu][equipment][workshop][repair]") {
+  const int missing = GENERATE(0, 1, 99, 100, 101, 9999, 10000);
+  const int pp = GENERATE(0, 1, 50, 200);
+  CAPTURE(missing, pp);
+  WorkshopRepairFixture fixture(missing, pp);
+  const auto original = Audio_Seq_unusedInventory;
+  fixture.Prompt(PADRdown);
+  CHECK(std::memcmp(&original, &Audio_Seq_unusedInventory, sizeof(original)) ==
+        0);
+  REQUIRE(fixture.Tick() == -1);
+  auto expected = original;
+  auto repaired = [missing, pp](auto& item) {
+    item.currentDp = item.maxDp;
+    item.currentPp = static_cast<u_short>(std::max(0, pp - missing / 100));
+  };
+  repaired(expected.blades[0]);
+  repaired(expected.shields[0].base);
+  repaired(expected.armor[0]);
+  for (int repeat = 0; repeat < 2; ++repeat) {
+    fixture.Prompt(PADRright);
+    REQUIRE(fixture.Tick() == 0);
+    CHECK(std::memcmp(&expected, &Audio_Seq_unusedInventory,
+                      sizeof(expected)) == 0);
+    REQUIRE(fixture.Tick() == 0);
+    REQUIRE(fixture.Tick() == -1);
+  }
+}
+
+TEST_CASE("Workshop armor recipes retain original ownership and result rules",
+          "[menu][equipment][workshop][recipes]") {
+  const bool shield = GENERATE(false, true);
+  const int second_material = GENERATE(3, 4);
+  CAPTURE(shield, second_material);
+  WorkshopRecipeFixture fixture;
+  fixture.ArmorRecipe(shield, second_material);
+  Items_InventoryArmor first{}, second{}, result{};
+  first.id = 191;
+  first.subId = static_cast<char>(shield ? 6 : 65);
+  first.category = 5;
+  first.material = 3;
+  first.index = 7;
+  first.limb = 2;
+  first.maxDp = 1001;
+  first.currentDp = 123;
+  first.maxPp = 101;
+  first.currentPp = 41;
+  first.types[0] = 7;
+  second.subId = static_cast<char>(shield ? 7 : 66);
+  second.category = 4;
+  second.material = static_cast<u_short>(second_material);
+  second.maxDp = 2002;
+  second.maxPp = 202;
+  second.currentPp = 82;
+  const auto saved_first = first, saved_second = second;
+  const auto build =
+      shield ? Menu_Setup_BuildCombinedShield : Menu_Setup_BuildCombinedArmor;
+  REQUIRE(build(&first, &second, &result, fixture.bytes.data()) == &result);
+  fixture.CheckArmor(result, shield);
+  CHECK(std::memcmp(&first, &saved_first, sizeof(first)) == 0);
+  CHECK(std::memcmp(&second, &saved_second, sizeof(second)) == 0);
+}
+
+TEST_CASE("Workshop repair refreshes equipped runtime DP and PP",
+          "[menu][equipment][workshop][repair]") {
+  const int missing = GENERATE(101, 9999);
+  const int pp = GENERATE(0, 50, 200);
+  WorkshopRepairFixture fixture(missing, pp);
+  fixture.Equip();
+  REQUIRE(fixture.stats.weapon.currentDp == 10000 - missing);
+  REQUIRE(fixture.stats.shield.currentDp == 10000 - missing);
+  REQUIRE(fixture.stats.limbs[0].armor.currentDp == 10000 - missing);
+  fixture.Prompt(PADRright);
+  REQUIRE(fixture.Tick() == 0);
+  const std::array<int, 5> actual{
+      fixture.stats.weapon.currentDp, fixture.stats.shield.currentDp,
+      fixture.stats.limbs[0].armor.currentDp, fixture.stats.weapon.currentPp,
+      fixture.stats.shield.currentPp};
+  const int remaining_pp = std::max(0, pp - missing / 100);
+  const std::array<int, 5> expected{10000, 10000, 10000, remaining_pp,
+                                    remaining_pp};
+  CHECK(actual == expected);
+  CHECK(Audio_Seq_unusedInventory.weapons[0].isEquipped == 1);
+  CHECK(Audio_Seq_unusedInventory.shields[0].isEquipped == 1);
+  CHECK(Audio_Seq_unusedInventory.armor[0].limb == 1);
+}
+
+TEST_CASE("Workshop blade recipes use ordered IDs materials and native stats",
+          "[menu][equipment][workshop][recipes]") {
+  const int second_material = GENERATE(3, 4);
+  WorkshopRecipeFixture fixture;
+  fixture.bytes[fixture.kCombinations + 14 * 96 + 26] = 31;
+  fixture.bytes[fixture.kMaterials + 3 * 50 + (second_material - 3) * 10 + 4] =
+      5;
+  const std::array<unsigned char, 16> record{31, 35, 4, 2, 5, 7, 9, 0,
+                                             10, 6,  2, 0, 1, 2, 3, 4};
+  std::copy(record.begin(), record.end(),
+            fixture.bytes.data() + fixture.kRecords + 31 * record.size());
+  Items_InventoryBlade first{}, second{}, result{};
+  first.id = 14;
+  first.category = 3;
+  first.material = 3;
+  first.index = 7;
+  first.assembledWeaponIndex = 2;
+  first.maxDp = 1001;
+  first.currentDp = 123;
+  first.maxPp = 101;
+  first.currentPp = 41;
+  second.id = 26;
+  second.category = 4;
+  second.material = static_cast<u_short>(second_material);
+  second.maxDp = 2002;
+  second.maxPp = 202;
+  second.currentPp = 82;
+  const auto saved_first = first, saved_second = second;
+  REQUIRE(Menu_Setup_BuildCombinedBlade(&first, &second, &result,
+                                        fixture.bytes.data()) == &result);
+  fixture.CheckBlade(result, record);
+  CHECK(std::memcmp(&first, &saved_first, sizeof(first)) == 0);
+  CHECK(std::memcmp(&second, &saved_second, sizeof(second)) == 0);
+}
+
+TEST_CASE("Workshop stat fusion preserves extrema truncation and bounds",
+          "[menu][equipment][workshop][recipes]") {
+  const int different = GENERATE(0, 1);
+  const int affinities = GENERATE(0, 1);
+  const std::array<signed char, 7> values{100, 99, -99, -100, 4, -4, 3};
+  auto first = values, second = values;
+  std::array<signed char, 8> result{};
+  result.fill(77);
+  Menu_Setup_CombineClassOrAffinityValues(first.data(), second.data(),
+                                          result.data(), different, affinities);
+  const int scaled = different ? 5 : 6;
+  const std::array<int, 8> expected{
+      100, 100, -100, -100, scaled, -scaled, affinities ? 4 : 77, 77};
+  for (std::size_t index = 0; index < result.size(); ++index) {
+    CAPTURE(index);
+    CHECK(result[index] == expected[index]);
+  }
+  CHECK(first == values);
+  CHECK(second == values);
+}
+
+TEST_CASE("Original blade recipe produces the inspected ordered result",
+          "[menu][equipment][workshop][recipes][disc]") {
+  WorkshopRecipeFixture fixture;
+  auto bytes = ReadWorkshopRecipe("BLADE.SYD");
+  REQUIRE(bytes.size() == 13264);
+  Items_InventoryBlade first{}, second{}, result{};
+  first.id = 14;
+  first.category = 2;
+  first.material = 3;
+  first.maxDp = 1001;
+  second.id = 25;
+  second.category = 3;
+  second.material = 4;
+  second.maxDp = 2002;
+  REQUIRE(Menu_Setup_BuildCombinedBlade(&first, &second, &result,
+                                        bytes.data()) == &result);
+  const std::array<int, 10> actual{
+      result.id,       result.subId,    result.wepId,        result.category,
+      result.material, result.strength, result.intelligence, result.agility,
+      result.maxDp,    result.currentDp};
+  const std::array<int, 10> expected{13, 13, 14, 2, 4, 5, 0, -1, 1501, 1501};
+  CHECK(actual == expected);
+}
+
+TEST_CASE(
+    "Original shield and armor recipes use their distinct material tables",
+    "[menu][equipment][workshop][recipes][disc]") {
+  const bool shield = GENERATE(false, true);
+  WorkshopRecipeFixture fixture;
+  auto bytes = ReadWorkshopRecipe(shield ? "SHIELD.SYD" : "ARMOR.SYD");
+  REQUIRE(bytes.size() == (shield ? 504 : 5912));
+  Items_InventoryArmor first{}, second{}, result{};
+  first.subId = static_cast<u_char>(shield ? 6 : 65);
+  second.subId = static_cast<u_char>(shield ? 7 : 66);
+  first.category = second.category = 5;
+  first.material = static_cast<u_short>(shield ? 3 : 2);
+  second.material = static_cast<u_short>(shield ? 4 : 3);
+  first.maxDp = 1001;
+  second.maxDp = 2002;
+  const auto build =
+      shield ? Menu_Setup_BuildCombinedShield : Menu_Setup_BuildCombinedArmor;
+  REQUIRE(build(&first, &second, &result, bytes.data()) == &result);
+  const std::array<int, 9> actual{
+      result.id,       result.subId,    result.category,
+      result.material, result.strength, result.intelligence,
+      result.agility,  result.maxDp,    result.currentDp};
+  const std::array<int, 9> expected{shield ? 134 : 192,
+                                    shield ? 8 : 66,
+                                    shield ? 1 : 5,
+                                    shield ? 5 : 3,
+                                    shield ? 17 : 2,
+                                    shield ? 11 : 4,
+                                    shield ? -6 : 0,
+                                    1501,
+                                    1501};
+  CHECK(actual == expected);
+}
+
+TEST_CASE("Workshop physical fusion preserves sentinel type and signed bounds",
+          "[menu][equipment][workshop][recipes]") {
+  const int different = GENERATE(0, 1);
+  const int same_type = GENERATE(0, 1);
+  std::array<signed char, 4> types1{7, 100, -90, 9};
+  std::array<signed char, 4> types2{8, -90, 100, -4};
+  if (same_type) types2 = types1;
+  std::array<signed char, 4> types_result{77, 77, 77, 77};
+  Menu_Setup_CombinePhysicalTypeValues(types1.data(), types2.data(),
+                                       types_result.data(), different);
+  CHECK(types_result[0] == 77);
+  const int factor = different ? (same_type ? 6 : 4) : (same_type ? 8 : 6);
+  for (int index = 1; index < 4; ++index) {
+    const int expected =
+        std::clamp((types1[index] + types2[index]) * factor / 10, -100, 100);
+    CHECK(types_result[index] == expected);
+  }
+}
+
+TEST_CASE("Assembly and disassembly preserve parts and release gem ownership",
+          "[menu][equipment][workshop][ownership]") {
+  const int slots = GENERATE(0, 1, 2, 3);
+  WorkshopChoicesFixture fixture;
+  auto& inventory = Audio_Seq_unusedInventory;
+  inventory.weapons[2].index = 3;
+  inventory.grips[0].gemSlots = static_cast<char>(slots);
+  Menu_Setup_combiningItem = 2;
+  auto expected = inventory;
+  auto& weapon = expected.weapons[2];
+  weapon.blade = weapon.grip = 1;
+  std::fill_n(weapon.name, std::size(weapon.name), static_cast<char>(0xE7));
+  expected.blades[0].assembledWeaponIndex = 3;
+  expected.grips[0].assembledWeaponIndex = 3;
+  for (int index = 0; index < slots; ++index) {
+    weapon.gems[index] = static_cast<u_char>(index + 1);
+    expected.gems[index].setItemIndex = 3;
+  }
+  for (int repeat = 0; repeat < 2; ++repeat) {
+    Menu_Setup_AssembleWeapon(0, 0, 0x030201);
+    CHECK(std::memcmp(&inventory, &expected, sizeof(inventory)) == 0);
+  }
+  expected.weapons[2] = {};
+  expected.weapons[2].index = 3;
+  expected.blades[0].assembledWeaponIndex = 0;
+  expected.grips[0].assembledWeaponIndex = 0;
+  for (int index = 0; index < slots; ++index) {
+    expected.gems[index].setItemIndex = 0;
+  }
+  Menu_Setup_DisassembleWeapon(2);
+  CHECK(std::memcmp(&inventory, &expected, sizeof(inventory)) == 0);
+  Menu_Setup_DisassembleWeapon(2);
+  CHECK(std::memcmp(&inventory, &expected, sizeof(inventory)) == 0);
+}
+
+TEST_CASE("Shield disassembly releases only its attached gem ownership",
+          "[menu][equipment][workshop][ownership]") {
+  const int slots = GENERATE(0, 1, 2, 3);
+  WorkshopChoicesFixture fixture;
+  auto& inventory = Audio_Seq_unusedInventory;
+  inventory.shields[4].base.gemSlots = static_cast<char>(slots);
+  for (int index = 0; index < slots; ++index) {
+    inventory.shields[4].gems[index] = static_cast<u_char>(index + 1);
+    inventory.gems[index].setItemIndex = 0x85;
+  }
+  auto expected = inventory;
+  std::fill_n(expected.shields[4].gems, slots, 0);
+  for (int index = 0; index < slots; ++index) {
+    expected.gems[index].setItemIndex = 0;
+  }
+  Menu_Setup_DetachShieldGems(4);
+  CHECK(std::memcmp(&inventory, &expected, sizeof(inventory)) == 0);
+}
+
+TEST_CASE("Workshop combination choices enforce original material masks",
+          "[menu][equipment][workshop][choices]") {
+  const int workshop = GENERATE(0, 1, 2, 3, 4, 5, 6);
+  const int material = GENERATE(1, 2, 3, 4, 5, 6, 7);
+  const int category = GENERATE(0, 1, 2);
+  CAPTURE(workshop, material, category);
+  WorkshopChoicesFixture fixture;
+  Menu_Setup_currentWorkshop = static_cast<u_char>(workshop);
+  for (auto& blade : Audio_Seq_unusedInventory.blades) {
+    blade.material = static_cast<u_short>(material);
+  }
+  for (auto& shield : Audio_Seq_unusedInventory.shields) {
+    shield.base.material = static_cast<u_short>(material);
+  }
+  for (auto& armor : Audio_Seq_unusedInventory.armor) {
+    armor.material = static_cast<u_short>(material);
+  }
+  constexpr std::array kSelectors{Menu_Setup_SelectCombinationBlade,
+                                  Menu_Setup_SelectCombinationShield,
+                                  Menu_Setup_SelectCombinationArmor};
+  const int capacity = category == 1 ? 8 : 16;
+  const auto original = fixture.InventoryBytes();
+  fixture.Open(kSelectors[category], 1, capacity);
+  constexpr std::array kMasks{0, 0x0E, 0x18, 0x38, 0xC0, 0x3E, 0xFE};
+  const bool disabled = (kMasks[workshop] & (1 << material)) == 0;
+  const auto* rows =
+      reinterpret_cast<const Menu_Framework_ItemText*>(Menu_Setup_itemsList);
+  for (int row = 1; row <= capacity; ++row) {
+    CHECK((rows[row].menuRowFlags & 1) == disabled);
+  }
+  CHECK(original == fixture.InventoryBytes());
+}
+
+TEST_CASE("Combination choices exclude the other ingredient and accessories",
+          "[menu][equipment][workshop][choices]") {
+  const int category = GENERATE(0, 1, 2);
+  WorkshopChoicesFixture fixture;
+  Menu_Setup_combiningBladeIds[0] = Menu_Setup_combiningArmorIds[0] = 1;
+  Menu_Setup_itemsToCombine[0] = 1;
+  Menu_Setup_combiningBladeIds[1] = Menu_Setup_combiningArmorIds[1] = 2;
+  Menu_Setup_itemsToCombine[1] = 2;
+  Audio_Seq_unusedInventory.armor[15].category = 7;
+  const int capacity = category == 1 ? 6 : (category == 2 ? 13 : 14);
+  constexpr std::array kSelectors{Menu_Setup_SelectCombinationBlade,
+                                  Menu_Setup_SelectCombinationShield,
+                                  Menu_Setup_SelectCombinationArmor};
+  const auto original = fixture.InventoryBytes();
+  fixture.Open(kSelectors[category], 1, capacity);
+  CHECK(Menu_Setup_availableItems[0] == 1);
+  const auto* rows =
+      reinterpret_cast<const Menu_Framework_ItemText*>(Menu_Setup_itemsList);
+  CHECK((rows[0].menuRowFlags & 1) == 0);
+  for (int row = 1; row <= capacity; ++row) {
+    CHECK(Menu_Setup_availableItems[row] == row + 2);
+  }
+  CHECK(original == fixture.InventoryBytes());
+}
 
 TEST_CASE("Workshop selectors copy full stock-capacity component lists",
           "[menu][equipment][workshop][choices]") {

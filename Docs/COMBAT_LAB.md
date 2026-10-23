@@ -1385,6 +1385,125 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Workshop operations checkpoint (#15)
+
+Source is `6df50baa79bc7e77e09c6fcaed57005b03e3a8e6` with new maintained
+workshop regressions uncommitted. Production hosts are unchanged from the
+#133 hashes below. Unrelated owner edits are present and excluded. No
+additional production repair, inventory expansion or process-memory write
+was needed for these operations.
+
+| Actual-controller operation | Debug run | Release run |
+|---|---|---|
+| Armor preview, two cancellation cycles, confirmed combination and field return | `1792736280778761-0` | `1792736381577351-0` |
+| Original gem-bearing loot, repeated detach/rollback/confirm/reattach | `1792736537534046-0` | `1792736675536155-0` |
+| Stock repair cancellation/confirmation and field return | `1792737561023068-0` | `1792737599664594-0` |
+
+The armor transaction uses the two original equipped leather Bandage pieces
+(ID191). Original `MENU/ARMOR.SYD` maps the ordered pair65/65 and leather/
+leather to subID65/material2. Preview preserves all inventory bytes. Both
+cancel/undo cycles preserve the originals. Confirmation consumes both source
+slots, writes the preview result to the first with the correct index, clears
+the second while retaining its index, and unequips both original limbs.
+All3840 inventory bytes match the expected transaction through field return.
+
+The gem runs select original zone40 Grissom (definition1), preserving his
+original weapon, rates and MPD spawn loot. A real Fireball defeats him; the
+normal loot screen delivers weapon slot2 and its attached gem263. The
+guaranteed misc entries440/451 and optional347 are independently checked.
+Outside a workshop, two cycles verify staged gem removal, cancellation
+rollback, confirmed removal and confirmed reattachment to the original
+weapon. Byte-exact checks include the gem's owner2/free transitions; final
+inventory equals the post-loot original. Assemble/Repair/Combine still reject
+confirmation outside the workshop. This is real gem use, not injected loot.
+
+Stock repair runs exercise two cancel/confirm cycles, preserve inventory,
+refresh matching derived equipment values and return to field. Stock gear
+starts at full DP: these runs are **not** evidence of live durability
+restoration. Meaningful restoration is demonstrated separately by the
+production repair-state-machine regression below.
+
+Six additional inspected captures show readable armor result/stats, gem
+slots/components and the original repair Yes/No prompt:
+
+| Menu preview | Debug run | Release run |
+|---|---|---|
+| Armor combination | `1792737777255146-0` | `1792737877218440-0` |
+| Gem attachment after removal | `1792737809478904-0` | `1792737909200525-0` |
+| Repair confirmation | `1792737857022713-0` | `1792737956512786-0` |
+
+Maintained component coverage adds twelve cases to the existing two workshop
+cases:
+
+- Repair:28 combinations of missing DP0/1/99/100/101/9999/10000 and PP0/1/50/200.
+  The production confirmation state machine rejects Cross without mutation,
+  then restores blade/shield/armor DP, spends integer `missingDp / 100` PP
+  clamped at zero, excludes accessories, preserves every other inventory byte,
+  and repeats idempotently. Six equipped cases additionally verify refreshed
+  runtime weapon/shield/armor DP, weapon/shield PP and retained equipment links.
+- Assembly/disassembly: zero through three gem slots, repeated assembly and
+  disassembly at a non-first weapon slot, exact inventory/part preservation,
+  component ownership, cleared names and gem-owner release. Shield gem
+  detachment covers all four slot counts without destroying the shield.
+- Recipe builders: asymmetric synthetic ordered ID/material tables, same and
+  different materials, signed base/material modifiers, packed damage/cost
+  fields, model/category/range, averaged maximum DP/PP, current PP, untouched
+  sources and retained preview metadata. Armor intentionally retains PP from
+  the first source; blade/shield average it, matching original MENUC.
+- Original local `BLADE.SYD`, `SHIELD.SYD` and `ARMOR.SYD` representative pairs
+  additionally produce the independently inspected IDs13/134/192 and
+  materials4/5/3. Modifier signs are controlled synthetic fixture values;
+  this does not claim exhaustive original recipe/content coverage.
+- Class/affinity extrema, signed truncation, upper/lower bounds, six versus
+  seven entries; physical dominant-type/material factors and untouched entry0.
+- All147 combinations of three selectors, workshop0..6 and material1..7,
+  plus exclusion of an already selected ingredient and accessory armor.
+  These are original masks/filtering rules, not a new authoring format.
+
+Final Debug/Release `[workshop]` selections each pass14 cases/5,108 assertions;
+full suites pass517 cases/1,790,641 assertions each. Scoped maintained
+quality/tidy reports0 findings/0 new, with191 intentional fixture literals
+reported separately. No suppression or baseline changed. No generator changed
+in this checkpoint, so the #133 stable751-output/87-owned audit still applies.
+
+Initial synthetic repair testing faulted on prompt feedback because its sound
+bank selectors were unbound. The fixture now follows the existing empty-slot
+menu test pattern and restores those bindings; this was not a gameplay defect.
+Blade tests also now check the stored signed2/3-bit representations by masks,
+not an incorrect positive signed value. Neither required a production change.
+
+Commands, repeated for Release:
+
+```powershell
+& 'C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe' `
+  Native\Tests\VS.Tests.vcxproj /m /nodeReuse:false `
+  /p:Configuration=Debug /p:Platform=x64 /p:VcpkgManifestInstall=false
+build\Debug\VS.Tests.exe "[workshop]"
+build\Debug\VS.Tests.exe
+build\quality\equipment14-check.ps1 -Configuration Debug -Mode workshop-gate `
+  -Zone 42 -WorkshopAction armor
+build\quality\equipment14-check.ps1 -Configuration Debug -Mode workshop-gate `
+  -Zone 40 -WorkshopAction gems
+build\quality\equipment14-check.ps1 -Configuration Debug -Mode workshop-gate `
+  -Zone 42 -WorkshopAction repair
+# Add -CaptureWorkshop to stop at the inspected menu preview.
+. .venv-3\Scripts\Activate.ps1
+.\quality-native.cmd --files Native\Tests\src\CursorMemoryTests.cpp --tidy
+```
+
+Local evidence is `build\quality\workshop15-*`, including scenarios, controller
+traces, before/after bytes, original-data inspection, build/test/quality logs
+and captures. `workshop15-operations-audit.json` verifies all twelve accepted
+sessions end normally with no error-level engine records or trace failures.
+No disc-derived captures or assets are committed.
+
+#15 remains open: these results do not replace live worn-equipment repair or
+live blade/shield combination consumption. The native rule/repair tests are
+substantive component evidence, not substitutes mislabeled as those live
+transactions. The next observation is a lawful retained-inventory route from
+real combat wear/loot into a workshop; F10 starts a fresh encounter and cannot
+satisfy that route. There is no C++ promotion or compatibility-retirement claim.
+
 ## Weapon naming rendering (#133)
 
 The owner reported a background-only screen after confirming workshop
