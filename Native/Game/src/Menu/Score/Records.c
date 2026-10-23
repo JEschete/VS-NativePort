@@ -12,6 +12,8 @@
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
 #include "Render/Font.h"
+#include "Render/Render.h"
+#include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
@@ -162,14 +164,14 @@ void Menu_Score_RenderTitles(int animState)
 // decomp: MENU9.PRG _renderTitleNo (src/MENU/MENU9.PRG/238.c:1835)
 void Menu_Score_DrawTitleNumber(int x, int y, int titleNo, int dimmed)
 {
-    char digits[2];
+    char digits[sizeof "00"];
     int i;
     POLY_FT4* poly;
 
     sprintf(digits, "%02d", titleNo);
 
     x += 19;
-    poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);
+    poly = Render_frameScratch.primitiveCursor;
 
     for (i = 1; i >= 0; --i, x -= 5) {
 
@@ -190,10 +192,10 @@ void Menu_Score_DrawTitleNumber(int x, int y, int titleNo, int dimmed)
             setClut(poly, 832, 223);
         }
 
-        AddPrim(*(void**)((uintptr_t)Core_ScratchBase() + 0x008), poly++);
+        AddPrim(Render_frameScratch.overlayOrderingTable, poly++);
     }
 
-    *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;
+    Render_frameScratch.primitiveCursor = poly;
 }
 
 // decomp: MENU9.PRG _setStatText (src/MENU/MENU9.PRG/238.c:2201)

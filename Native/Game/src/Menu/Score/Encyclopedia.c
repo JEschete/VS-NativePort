@@ -9,6 +9,7 @@
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
+#include "Actors/WeaponModel.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
@@ -29,6 +30,7 @@
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
+#include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "State/Progress.h"
 
@@ -215,14 +217,14 @@ void Menu_Score_ShowEnemyDescription(void)
 // decomp: MENU9.PRG _renderEnemyNo (src/MENU/MENU9.PRG/238.c:1878)
 void Menu_Score_DrawEnemyNumber(int x, int y, int enemyNo, int dimmed)
 {
-    char digits[2];
+    char digits[sizeof "000"];
     int i;
     POLY_FT4* poly;
 
     sprintf(digits, "%03d", enemyNo);
 
     x += 0x18;
-    poly = *(void**)Core_ScratchAddr(0);
+    poly = Render_frameScratch.primitiveCursor;
 
     for (i = 2; i >= 0; --i, x -= 5) {
 
@@ -242,10 +244,10 @@ void Menu_Score_DrawEnemyNumber(int x, int y, int enemyNo, int dimmed)
             setClut(poly, 832, 223);
         }
 
-        AddPrim(*(void**)Core_ScratchAddr(2), poly++);
+        AddPrim(Render_frameScratch.overlayOrderingTable, poly++);
     }
 
-    *(void**)Core_ScratchAddr(0) = poly;
+    Render_frameScratch.primitiveCursor = poly;
 }
 
 // decomp: MENU9.PRG _initEnemyList (src/MENU/MENU9.PRG/238.c:1916)
@@ -402,7 +404,7 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
     MATRIX sp30;
     Render_ScreenOffset sp50;
     Render_ScreenOffset sp58;
-    char sp60[12];
+    char sp60[sizeof "NO.   000/000"];
     int temp_s0;
     int temp_s2;
     int temp_s4;
@@ -581,42 +583,42 @@ void Menu_Score_InitializeAshleyPreviewPose(void)
 }
 
 // decomp: MENU9.PRG vs_menu9_loadZudFile (src/MENU/MENU9.PRG/592C.c:171)
-void Menu_Score_QueueEnemyModelRead(int id)
+void Menu_Score_QueueEnemyModelRead(int zudId)
 {
     static int Menu_Score_queueEnemyModelReadZudId;
 
-    Content_DiscFile cdFile;
-    int i;
+    Content_DiscFile sourceFile;
+    int variantIndex;
 
-    cdFile.lba = Menu_Score_zudLbas[id];
-    Menu_Score_queueEnemyModelReadZudId = id;
-    cdFile.size = Menu_Score_zudSizes[id];
-    Menu_Score_zudCdSlot = Content_AllocateDiscRequest(&cdFile);
-    Menu_Score_zudData = Core_Memory_AllocateFromHighEnd(cdFile.size);
+    sourceFile.lba = Menu_Score_zudLbas[zudId];
+    Menu_Score_queueEnemyModelReadZudId = zudId;
+    sourceFile.size = Menu_Score_zudSizes[zudId];
+    Menu_Score_zudCdSlot = Content_AllocateDiscRequest(&sourceFile);
+    Menu_Score_zudData = Core_Memory_AllocateFromHighEnd(sourceFile.size);
 
     Content_EnqueuePriorityDiscRequest(Menu_Score_zudCdSlot, Menu_Score_zudData);
 
-    Menu_Score_paletteFlag = Menu_Score_paletteFlags[id];
+    Menu_Score_paletteFlag = Menu_Score_paletteFlags[zudId];
     Menu_Score_modelVariant = 0;
 
-    for (i = 0; i < 6; ++i) {
-        if (id == Menu_Score_modelVariants[i]) {
-            Menu_Score_modelVariant = i;
+    for (variantIndex = 0; variantIndex < 6; ++variantIndex) {
+        if (zudId == Menu_Score_modelVariants[variantIndex]) {
+            Menu_Score_modelVariant = variantIndex;
             break;
         }
     }
 
     if (Menu_Score_modelVariant != 0) {
-        Menu_Score_zudBuffer = Core_Memory_AllocateFromLowEnd(0x3200);
+        Menu_Score_zudBuffer = Core_Memory_AllocateFromLowEnd(2 * sizeof(Actors_ActorRecord));
     } else {
-        Menu_Score_zudBuffer = Core_Memory_AllocateFromLowEnd(0x24D0);
+        Menu_Score_zudBuffer = Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord) + 2 * sizeof(Actors_WeaponModel));
     }
 }
 
 // decomp: MENU9.PRG vs_menu9_parseZudFile (src/MENU/MENU9.PRG/592C.c:203)
 int Menu_Score_LoadEnemyModelParts(void)
 {
-    Content_ActorAssetRequest slot;
+    Content_ActorAssetRequest request = {0};
 
     if (Menu_Score_zudCdSlot != NULL) {
         if (Menu_Score_zudCdSlot->state != Content_DiscRequestState_Loaded) {
@@ -626,68 +628,68 @@ int Menu_Score_LoadEnemyModelParts(void)
         Content_ReleaseDiscRequest(Menu_Score_zudCdSlot);
         Menu_Score_zudCdSlot = NULL;
 
-        slot.assetKind = 2;
-        slot.targetSlot = 1;
-        slot.dataAddress = Menu_Score_zudData->shpOffset + (uintptr_t)Menu_Score_zudData;
-        slot.modelId = Menu_Score_zudData->characterId;
-        slot.destination = Menu_Score_zudBuffer;
-        slot.subKind = 0xFF;
-        slot.variant = Menu_Score_paletteFlag & 1;
-        slot.material = Menu_Score_zudData->defaultMaterial;
-        Content_QueueActorAssetRequest(&slot);
+        request.assetKind = 2;
+        request.targetSlot = 1;
+        request.dataAddress = Menu_Score_zudData->shpOffset + (uintptr_t)Menu_Score_zudData;
+        request.modelId = Menu_Score_zudData->characterId;
+        request.destination = Menu_Score_zudBuffer;
+        request.subKind = 0xFF;
+        request.variant = Menu_Score_paletteFlag & 1;
+        request.material = Menu_Score_zudData->defaultMaterial;
+        Content_QueueActorAssetRequest(&request);
 
         if (Menu_Score_modelVariant != 0) {
-            slot.assetKind = 1;
-            slot.targetSlot = 16;
-            slot.modelId = Menu_Score_variantMap[Menu_Score_modelVariant];
-            slot.destination = Menu_Score_zudBuffer + 0x1900;
-            slot.subKind = 1;
-            slot.textureSlot = 0xFC;
-            slot.variant = 0;
-            Content_QueueActorAssetRequest(&slot);
+            request.assetKind = 1;
+            request.targetSlot = 16;
+            request.modelId = Menu_Score_variantMap[Menu_Score_modelVariant];
+            request.destination = (u_char*)Menu_Score_zudBuffer + sizeof(Actors_ActorRecord);
+            request.subKind = 1;
+            request.textureSlot = 0xFC;
+            request.variant = 0;
+            Content_QueueActorAssetRequest(&request);
         } else {
 
             if (Menu_Score_zudData->weapon != 0) {
-                slot.assetKind = 4;
-                slot.targetSlot = 2;
-                slot.dataAddress = Menu_Score_zudData->weaponWepOffset + (uintptr_t)Menu_Score_zudData;
-                slot.modelId = Menu_Score_zudData->weapon;
-                slot.destination = Menu_Score_zudBuffer + 0x1900;
-                slot.subKind = 1;
-                slot.textureSlot = 0xF0;
-                slot.material = Menu_Score_zudData->weaponMaterial;
-                Content_QueueActorAssetRequest(&slot);
+                request.assetKind = 4;
+                request.targetSlot = 2;
+                request.dataAddress = Menu_Score_zudData->weaponWepOffset + (uintptr_t)Menu_Score_zudData;
+                request.modelId = Menu_Score_zudData->weapon;
+                request.destination = (u_char*)Menu_Score_zudBuffer + sizeof(Actors_ActorRecord);
+                request.subKind = 1;
+                request.textureSlot = 0xF0;
+                request.material = Menu_Score_zudData->weaponMaterial;
+                Content_QueueActorAssetRequest(&request);
             }
 
             if (Menu_Score_zudData->shield != 0) {
-                slot.assetKind = 4;
-                slot.targetSlot = 3;
-                slot.dataAddress = Menu_Score_zudData->shieldWepOffset + (uintptr_t)Menu_Score_zudData;
-                slot.modelId = Menu_Score_zudData->shield;
-                slot.destination = Menu_Score_zudBuffer + 0x1EE8;
-                slot.subKind = 1;
-                slot.textureSlot = 0xF1;
-                slot.material = Menu_Score_zudData->shieldMaterial;
-                Content_QueueActorAssetRequest(&slot);
+                request.assetKind = 4;
+                request.targetSlot = 3;
+                request.dataAddress = Menu_Score_zudData->shieldWepOffset + (uintptr_t)Menu_Score_zudData;
+                request.modelId = Menu_Score_zudData->shield;
+                request.destination = (u_char*)Menu_Score_zudBuffer + sizeof(Actors_ActorRecord) + sizeof(Actors_WeaponModel);
+                request.subKind = 1;
+                request.textureSlot = 0xF1;
+                request.material = Menu_Score_zudData->shieldMaterial;
+                Content_QueueActorAssetRequest(&request);
             }
         }
 
         if (Menu_Score_zudData->battleSeqLen != 0) {
-            slot.assetKind = 8;
-            slot.targetSlot = 1;
-            slot.dataAddress = Menu_Score_zudData->battleSeqOffset + (uintptr_t)Menu_Score_zudData;
-            slot.subKind = 0;
-            slot.modelId = Menu_Score_zudData->opaque2;
-            Content_QueueActorAssetRequest(&slot);
+            request.assetKind = 8;
+            request.targetSlot = 1;
+            request.dataAddress = Menu_Score_zudData->battleSeqOffset + (uintptr_t)Menu_Score_zudData;
+            request.subKind = 0;
+            request.modelId = Menu_Score_zudData->opaque2;
+            Content_QueueActorAssetRequest(&request);
         }
 
         if (Menu_Score_zudData->commonSeqLen != 0) {
-            slot.assetKind = 8;
-            slot.targetSlot = 1;
-            slot.dataAddress = Menu_Score_zudData->commonSeqOffset + (uintptr_t)Menu_Score_zudData;
-            slot.subKind = 0;
-            slot.modelId = 0;
-            Content_QueueActorAssetRequest(&slot);
+            request.assetKind = 8;
+            request.targetSlot = 1;
+            request.dataAddress = Menu_Score_zudData->commonSeqOffset + (uintptr_t)Menu_Score_zudData;
+            request.subKind = 0;
+            request.modelId = 0;
+            Content_QueueActorAssetRequest(&request);
         }
         return 1;
     }

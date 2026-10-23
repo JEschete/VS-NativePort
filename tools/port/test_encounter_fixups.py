@@ -9,6 +9,32 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_score_preview_requests_use_initialized_native_record_storage(self):
+        source = """Content_ActorAssetRequest slot;
+slot.destination = Menu_Score_zudBuffer + 0x1900;
+slot.destination = Menu_Score_zudBuffer + 0x1900;
+slot.destination = Menu_Score_zudBuffer + 0x1EE8;
+"""
+        for old, new, _ in copy_fixups.FIXES["F02840"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+            if re.search(row, "Menu::Score::LoadEnemyModelParts"):
+                source = re.sub(pattern, replacement, source)
+        self.assertIn("Content_ActorAssetRequest request = {0};", source)
+        self.assertEqual(source.count("sizeof(Actors_ActorRecord)"), 3)
+        self.assertIn("sizeof(Actors_WeaponModel)", source)
+        self.assertNotIn("0x1900", source)
+        self.assertNotIn("0x1EE8", source)
+        allocation = """Core_Memory_AllocateFromLowEnd(0x3200);
+Core_Memory_AllocateFromLowEnd(0x24D0);
+"""
+        for old, new, _ in copy_fixups.FIXES["F02839"]:
+            self.assertIn(old, allocation)
+            allocation = allocation.replace(old, new)
+        self.assertIn("2 * sizeof(Actors_ActorRecord)", allocation)
+        self.assertIn("2 * sizeof(Actors_WeaponModel)", allocation)
+
     def test_geometry_copy_preserves_offsets_and_verified_parameter_names(self):
         source = """void* Content_CopyModelGeometry(int* arg0, void* arg1, int arg2)
 {
@@ -46,6 +72,67 @@ Core_Memory_CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], 0x17
         )
         self.assertNotIn("sizeof(Field_GimmickInstance)", source)
         self.assertNotIn("0x178", source)
+
+    def test_score_viewer_banner_uses_native_frame_pointers(self):
+        source = """    void** scratch = (void**)Core_ScratchAddr(0);
+
+    line = scratch[0];
+AddPrim(*((void**)Core_ScratchAddr(1)) + 0x1C, line++);
+    scratch = (void**)Core_ScratchAddr(0);
+
+    AddPrim(scratch[1] + 0x1C, poly++);
+
+    scratch[0] = (void*)poly;
+"""
+        for old, new, _ in copy_fixups.FIXES["F02810"]:
+            self.assertEqual(source.count(old), 1)
+            source = source.replace(old, new)
+        self.assertEqual(source.count("Render_frameScratch.orderingTable + 0x1C"), 2)
+        self.assertIn("Render_frameScratch.primitiveCursor = poly;", source)
+        self.assertNotIn("Core_ScratchAddr", source)
+
+    def test_score_scroll_links_keep_the_original_byte_displacement(self):
+        source = """before = Render_frameScratch.overlayOrderingTable + 8;
+*before = ((u_long)prim << 8) >> 8;
+"""
+        for old, new, _ in copy_fixups.FIXES["F02799"]:
+            self.assertEqual(source.count(old), 1)
+            source = source.replace(old, new)
+        self.assertIn("*before = LegacyGpu_Handle(prim);", source)
+        self.assertIn("Render_frameScratch.overlayOrderingTable + 8;", source)
+        self.assertNotIn("((u_long)prim", source)
+
+    def test_score_number_buffers_include_all_digits_and_terminators(self):
+        cases = (
+            ("F02816", 'char digits[2];\nsprintf(digits, "%02d", titleNo);',
+             'char digits[sizeof "00"];', '"%02d"'),
+            ("F02817", 'char digits[2];\nsprintf(digits, "%03d", enemyNo);',
+             'char digits[sizeof "000"];', '"%03d"'),
+            ("F02820", 'char sp60[12];\nsprintf(sp60, "NO.   %03d/%03d", selected + 1, 78);',
+             'char sp60[sizeof "NO.   000/000"];', '"NO.   %03d/%03d"'),
+        )
+        for function, source, declaration, format_string in cases:
+            with self.subTest(function=function):
+                if function == "F02816":
+                    source += """
+poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);
+AddPrim(*(void**)((uintptr_t)Core_ScratchBase() + 0x008), poly++);
+*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;
+"""
+                elif function == "F02817":
+                    source += """
+poly = *(void**)Core_ScratchAddr(0);
+AddPrim(*(void**)Core_ScratchAddr(2), poly++);
+*(void**)Core_ScratchAddr(0) = poly;
+"""
+                for old, new, _ in copy_fixups.FIXES[function]:
+                    self.assertEqual(source.count(old), 1)
+                    source = source.replace(old, new)
+                self.assertIn(declaration, source)
+                self.assertIn(format_string, source)
+                if function != "F02820":
+                    self.assertIn("AddPrim(Render_frameScratch.overlayOrderingTable, poly++);", source)
+                    self.assertNotIn("Core_Scratch", source)
 
     def test_npc_area_filter_keeps_geometry_without_creating_player_ui(self):
         source = """    Battle_actionState->areaOrigin = Battle_actionState->savedAreaCenter;

@@ -189,8 +189,8 @@ Profiles retain the real weapon, resource, status and target restrictions.
 In particular, draw the weapon before selecting a Break Art; its menu entry
 is unavailable with the weapon sheathed. These profiles do not implement a
 loadout editor or complete the wider spell/ability/equipment trackers.
-Enabling a menu gate does not repair that submenu: the known Score crash
-remains tracked by #65.
+Enabling a menu gate does not repair that submenu. The reproduced Score crashes
+and their bounded native repair are documented in the #65 checkpoint below.
 
 Presets and encounter logs include `ashley_profile`. Existing version-1 presets
 without that key still select `prologue`; unknown profile names are rejected.
@@ -380,6 +380,69 @@ Local evidence: `build\quality\gimmick145-{Debug,Release}-live.json`,
 `gimmick145-reference-index.log`, `gimmick145-generation-*.log`, and
 `gimmick145-live.ps1`. Disc data and captures stay local. Publication and exact
 revision CI are recorded on #145. #146/#147's D'tok reports are separate.
+
+### Score submenu and encyclopedia preview repair (#65, 2026-10-23)
+
+Ordinary controller navigation reproduces the TITLE stack-buffer failure;
+actually defeating the original Zombie then opening its unlocked encyclopedia
+entry reproduces a second crash in actor placement. No entries are unlocked by
+editing flags, HP or inventory. The fixes are generator-owned, with original
+MENU9 source provenance retained:
+
+- F02816/F02817 reserve the terminator for two-/three-digit numbers. F02820
+  retains the complete fourteen-byte `NO.   000/000` header.
+- Digit/banner renderers use typed native frame cursors and ordering pointers,
+  not PS1 scratch-word offsets into widened pointers. F02799 retains full-width
+  primitive handles. Its regression counts the original reachable packets,
+  rather than accepting merely valid but disconnected links.
+- F02839 allocates either two native actor records or one actor plus two
+  equipment records. F02840 starts with a zero-initialized request and matching
+  `sizeof`-based destinations. Original request kinds, target slots, disc-queue
+  ownership and preview variant selection are unchanged. There is no null
+  platform fallback: indeterminate placement bits are fixed at the producer.
+
+The request regression fails five of twenty assertions before the producer
+fix: arbitrary placement bits, two actor-boundary errors and two shield-boundary
+errors across ordinary/companion cases. Native actor/equipment strides are
+6440/1528, replacing serialized 6400/1512 assumptions. Preview allocations are
+9496/12880 instead of9424/12800. The final Score selection passes2200 assertions
+in five cases, including the request, complete headers, packet reachability and
+native banner cursor controls.
+
+Fresh live runs use **one window per configuration** for all four actual
+submenus: TITLE, GAZETTE, RECORD TIME and ENCYCLOPAEDIA. Each enters twice,
+scrolls up/down across its boundary and returns through the original controls.
+Two real Fireball casts defeat the original zone9/actor2 Zombie; its genuine
+unlock then permits two viewer entries with L2 rotation/R2 zoom inputs.
+
+| Configuration / run | First viewer | Re-entered viewer | Engine errors |
+|---|---:|---:|---:|
+| Debug `1792788396368047-0` | 4557 | 5091 | 0 |
+| Release `1792788491009214-0` | 4564 | 5101 | 0 |
+
+Captures show the loaded original Zombie, readable complete identification and
+original rotation/zoom prompts. Both traces end without trace failure; closing
+the host while the second viewer remains open is recorded as encounter
+interruption, not an F10/encounter-teardown acceptance claim. This does not
+verify every encyclopedia model or the unrelated D'tok reports.
+
+Validation: Debug/Release x64 full worktree559 cases /1804706 assertions each;
+copier32 tests; two stable generation passes; focused maintained quality0 new.
+Evidence source is local parent971c21dd plus these Score changes and separately
+uncommitted AI field-name/perception work. No C++ promotion or compatibility
+retirement is inferred. Binary SHA256:
+
+- Debug `e50a77154db23f764696206419b258ead8804744fe461a99c691ed6aac3eacf0`.
+- Release `30c8a7f4b632083cb2536f27246c60cac0c83d6bb5c5b7ac96670716fbee2aaa`.
+
+Commands: build Tests/CombatLab/Desktop for Debug and Release x64 with the
+standard MSBuild settings; `VS.Tests.exe "[menu][score]"`, then the full suites;
+`python -m unittest discover -s tools\port -p test_encounter_fixups.py`;
+`python tools\port\copy_to_native.py` twice. Local controller driver:
+`build\quality\score65-live.ps1 -Configuration Debug -Row 3 -Scroll -Viewer -AllRows`
+(repeat with Release). JSON observations, traces and captures remain local in
+`build\quality\score65-*` and the named Combat Lab run directories. Scoped
+publication and exact-revision CI are recorded on #65 before closure.
 
 ## Ability-profile acceptance checkpoint (2026-10-22)
 

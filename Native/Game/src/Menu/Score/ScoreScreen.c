@@ -239,7 +239,7 @@ void Menu_Score_RenderScrollableRow(Menu_Framework_MenuRow* menuItem)
         prim[5] = ((xy + w - 1) & 0xFFFF) | ((xy >> 0x10) << 0x10);
         prim[6] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_Off);
 
-        *before = ((u_long)prim << 8) >> 8;
+        *before = LegacyGpu_Handle(prim);
         prim += 7;
         xy += vs_getXY(0, 1);
     }
@@ -1421,9 +1421,7 @@ void Menu_Score_DrawEnemyBanner(int x, int y, int w, int h, int color)
     LINE_G2* line;
     POLY_F4* poly;
 
-    void** scratch = (void**)Core_ScratchAddr(0);
-
-    line = scratch[0];
+    line = Render_frameScratch.primitiveCursor;
 
     for (i = y, var_s7 = w; i < ((y + h) - 1); ++i, --var_s7) {
         setLineG2(line);
@@ -1433,7 +1431,7 @@ void Menu_Score_DrawEnemyBanner(int x, int y, int w, int h, int color)
         setRGB1(line, Menu_Score_kBgColorStops1[color].r, Menu_Score_kBgColorStops1[color].g,
             Menu_Score_kBgColorStops1[color].b);
 
-        AddPrim(*((void**)Core_ScratchAddr(1)) + 0x1C, line++);
+        AddPrim(Render_frameScratch.orderingTable + 0x1C, line++);
     }
 
     x += 2;
@@ -1444,11 +1442,9 @@ void Menu_Score_DrawEnemyBanner(int x, int y, int w, int h, int color)
     setXY4(poly, x, y, (x + w) - 1, y, x, (y + h) - 1, (x + w) - h, (y + h) - 1);
     setRGB0(poly, 0, 0, 0);
 
-    scratch = (void**)Core_ScratchAddr(0);
+    AddPrim(Render_frameScratch.orderingTable + 0x1C, poly++);
 
-    AddPrim(scratch[1] + 0x1C, poly++);
-
-    scratch[0] = (void*)poly;
+    Render_frameScratch.primitiveCursor = poly;
 
     _insertTPage(7, getTPage(0, 3, 0, 0));
 }

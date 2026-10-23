@@ -31,7 +31,7 @@ void Menu_Score_UpdateEnemyNavigation(int direction);
 int Menu_Score_LoadEnemyPreview(int zudId);
 void Menu_Score_FreeEnemyPreview(void);
 void Menu_Score_InitializeAshleyPreviewPose(void);
-void Menu_Score_QueueEnemyModelRead(int id);
+void Menu_Score_QueueEnemyModelRead(int zudId);
 int Menu_Score_LoadEnemyModelParts(void);
 void Menu_Score_FreeEnemyModelBuffer(void);
 void Menu_Score_Encyclopedia_ResetMenu9Statics(void);
