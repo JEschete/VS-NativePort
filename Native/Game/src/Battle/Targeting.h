@@ -61,6 +61,8 @@ void Battle_AimActionBehindSource(Battle_ActionRequest* arg0);
 void Battle_SetSingleActionTarget(void);
 void Battle_SetAllActionTargets(void);
 void Battle_CollectEnvironmentActionTargets(void);
+#include "Battle/TargetPages.h"
+
 void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)));
 void Battle_CollectDirectActionTargets(int arg0);
 void Battle_CollectGroundAreaActionTargets(int arg0);

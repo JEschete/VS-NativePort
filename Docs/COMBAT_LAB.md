@@ -1385,6 +1385,96 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Extended native targeting and planning storage (#136; #137)
+
+Source: `813acea0` plus the scoped targeting/planning changes; unrelated owner
+documentation, project and reference edits remain excluded. This is a native
+runtime-capacity change, not an inventory expansion or an on-disc layout change.
+
+The original eight-enemy city setup produces forty limb candidates. Candidate31
+of the old23-entry preview array landed exactly on `Core_ScratchBase()` and
+replaced the render cursor with a bone-position vector. The copied producer now
+checks every append against the native255-entry index domain; `0xFF` remains
+cancel. Action requests retain the same capacity. Allocation and clearing use
+the actual native types rather than `0x2C10`/`0x84C`.
+
+The visible sphere list still has24 slots. Registered owned F01296 keeps whole
+actor groups together and provides L1/R1 pages only when necessary; the original
+single-page behavior remains unchanged. Camera shoulder orbit is gated only
+while extended target selection owns those buttons; Select zoom is preserved.
+The compact `L1 n/n R1` hint is rendered in the actual game view. Structured Lab
+frames retain all `target_previews` and expose `target_page` total/page/pages/
+first/visible/selected metadata, with absolute selection indices.
+
+During acceptance, the enlarged result clearer exposed the AI planner's fixed
+7884-byte scratch allocation and offsets. It overwrote the cached original ZUD
+header during actor4's AI initialization: battle-animation size17352 became0.
+Later instances therefore had no battle sequence and stalled after real damage
+while awaiting defeat animation. This coupled defect is tracked as #137.
+Registered owned F01718 now owns a typed call-local action result, three
+16-candidate passes, the16x256 exclusion table and16 fallback candidates.
+Borrowed compatibility pointers are cleared before return. Existing AI views
+remain tracked migration debt; this does not retire the broader MA-19/MA-21
+contracts.
+
+Fresh Debug/Release acceptance uses the actual native window/controller:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File build\quality\equipment14-check.ps1 `
+  -Configuration Debug -Mode workshop-gate -Zone 32 `
+  -WorkshopAction city -Seed 42
+```
+
+Repeat with `-Configuration Release`. The ignored observer resolves PDB type
+names rather than stale numeric record IDs, retaining its offset/size guards.
+The scene is original MAP148/zone32 room1: Ashley8,16, Sarjik1 at8,17,
+Bejart2 at7,17, and six original Crimson Blade4 definitions on the other
+neighboring tiles. All-spells Ashley uses HP/MP/STR/INT/AGI999. No process writes,
+forced HP/outcomes, injected loot, event-flag edits or stock-capacity changes
+establish acceptance.
+
+- Debug run `1792751783466397-0`: forty candidates, two whole-actor pages of20;
+  R1/L1/R1 preserves camera yaw, cancellation clears the borrowed view, and
+  re-entry starts on page1. Absolute preview20 commits actor6/limb0 and applies
+  1287HP damage. All eight enemies then defeat normally, loot is claimed through
+  the production menu, and gameplay returns at tick9259.
+- Release run `1792751783218080-0`: the same paging/cancel/re-entry/absolute-index
+  gates, actor6 takes1286HP damage, and all eight real defeats and original
+  loot delivery pass; gameplay returns at tick9257. Different RNG
+  consumption/outcomes are not normalized.
+- Fresh inspected page2 captures: Debug `1792751680887233-0` and Release
+  `1792751680777154-0`. Actual F10 while all nine actors remain alive in the
+  forty-candidate selection returns normally to the editor in Debug
+  `1792751765252629-0` and Release `1792751765143641-0`; native page bindings are
+  explicitly reset at encounter exit. No same-preset editor restart is claimed.
+- Both traces end normally with `trace_failed:false`, no error/critical engine
+  records and14 pre-existing unported warnings each. Source paths, logs,
+  observer JSON and captures remain under `build\quality\sphere136-*`,
+  `build\quality\sphere136-137-*`, and each configuration's
+  `combat-lab\runs` directory. Do not upload disc-derived evidence.
+- Exact tested host SHA-256: Debug
+  `3ec703c30332d078fefaad2c79ca3aad70eb145ec63eaf07635395c25e93d830`;
+  Release
+  `8f28ce860c2da2eff3d150232718d986db129fd4c408f6e5a58dc84006de3156`.
+- Full Debug/Release suites pass **530 cases / 1790939 assertions** each after
+  building the test and Combat Lab projects with the documented MSBuild x64
+  commands and `/p:VcpkgManifestInstall=false`. Regressions cover native result
+  clear boundaries, adjacent AI buffers, complete-actor pages, absolute indices,
+  cancel/reset, shoulder ownership and direct label rendering.
+- `tools\port\test_encounter_fixups.py`: **24 cases pass**. Second generation
+  retains all **751 outputs / 93 registered owned files** byte-for-byte.
+  Game-only project generation is stable;13 other solution/project files retain
+  their pre-generation hashes. Temporary cursor/spawn instrumentation is absent.
+  Scoped maintained quality/tidy passes with0 native findings and0 new
+  findings; the scaffold's one existing SIM102 advisory remains unchanged.
+  Publication and exact pushed quality evidence are recorded on #136/#137.
+
+This does not close #78/#80/#81/#76 by association, nor prove #15's remaining
+live blade/shield combination transactions. The lawful seed42 runs supplied
+both guaranteed original boss blades and two/zero loose shields in
+Debug/Release; no combination is claimed from acquiring those components.
+
 ## Native door-query storage and real repair acceptance (#135; #134)
 
 Checkpoint source is `deb6c5b88d9ffa90e71d875fba715821c8da52cc` with the

@@ -300,6 +300,9 @@
     <ClCompile Include="src\Battle\Ai\PlanningPrimitives.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\PlanningWorkspace.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\Relations.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -392,6 +395,9 @@
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Battle\TargetPages.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\TextBoxes.c">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -2068,9 +2074,11 @@
     <ClInclude Include="src\Title\TitleMenu.h" />
     <ClInclude Include="src\Title\TitleScreen.h" />
     <ClInclude Include="include\Battle\Action.h" />
+    <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp" />
     <ClInclude Include="include\Battle\Encounter.hpp" />
     <ClInclude Include="include\Battle\Enemy.h" />
     <ClInclude Include="include\Battle\SphereTerrain.h" />
+    <ClInclude Include="include\Battle\TargetPages.h" />
     <ClInclude Include="include\Boot\GameApp.hpp" />
     <ClInclude Include="include\Items\Equipment.h" />
     <ClInclude Include="include\Items\Inventory.h" />

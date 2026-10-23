@@ -9,7 +9,7 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
-#include "Battle/Ai/ActionPlanning.h"
+#include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"

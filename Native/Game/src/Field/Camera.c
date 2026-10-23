@@ -312,10 +312,12 @@ void Field_TrackCameraLookAtWithinDeadZone(VECTOR* arg0)
 #define CAMERA_INPUT_LOCKED()                                                           \
     ((Field_controlMode == 3) || ((Field_controlMode == 2) && ((Battle_actionFlowMode == 4) || (Battle_actionFlowMode == 11))))
 // decomp: BATTLE.PRG func_8006E158 (src/BATTLE/BATTLE.PRG/146C.c:2641)
+#include "Battle/TargetPages.h"
+
 void Field_UpdateCameraOrbitInput(void)
 {
     if (Field_sphericalCamera.delta.yaw == 0) {
-        if (!CAMERA_INPUT_LOCKED()) {
+        if (!CAMERA_INPUT_LOCKED() && !Battle_TargetPagesUseShoulders()) {
             if ((Input_previousButtons & (PADL1 | PADR1)) == PADR1) {
                 Field_sphericalCamera.delta.yaw = 1;
                 Field_sphericalCamera.delta.pitch =
@@ -334,7 +336,7 @@ void Field_UpdateCameraOrbitInput(void)
             if (Field_sphericalCamera.values.yaw
                 <= Field_sphericalCamera.delta.pitch + 0x78) {
                 if (((Input_previousButtons & (PADL1 | PADR1)) == PADR1)
-                    && !CAMERA_INPUT_LOCKED()) {
+                    && !CAMERA_INPUT_LOCKED() && !Battle_TargetPagesUseShoulders()) {
                     Field_sphericalCamera.delta.pitch =
                         (Field_sphericalCamera.delta.pitch - 0x200) & ~0x1FF;
                 }
@@ -360,7 +362,7 @@ void Field_UpdateCameraOrbitInput(void)
             if (Field_sphericalCamera.values.yaw
                 >= Field_sphericalCamera.delta.pitch - 0x78) {
                 if (((Input_previousButtons & (PADL1 | PADR1)) == PADL1)
-                    && !CAMERA_INPUT_LOCKED()) {
+                    && !CAMERA_INPUT_LOCKED() && !Battle_TargetPagesUseShoulders()) {
                     Field_sphericalCamera.delta.pitch =
                         (Field_sphericalCamera.delta.pitch + 0x200) & ~0x1FF;
                 }

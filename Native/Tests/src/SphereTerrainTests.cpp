@@ -1,16 +1,27 @@
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <cstring>
+#include <type_traits>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/SphereTerrain.h"
+#include "Battle/TargetPages.h"
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Battle/Action.h"
+#include "Battle/ActionFlow.h"
+#include "Battle/ActionResolution.h"
 #include "Battle/Sphere.h"
+#include "Field/Interactions.h"
+#include "Input/Controller.h"
 #include "Render/Render.h"
+#include "Render/Text/CompactFont.h"
 #include "Render/UiPrimitives.h"
 }
 
@@ -21,6 +32,8 @@ struct SliceFixture {
   Battle_TargetSphereSetupView storage{};
   Battle_TargetSphereSetupView* saved_sphere = Battle_targetSphere;
   Render_FrameScratch saved_frame = Render_frameScratch;
+  u_int saved_control = Field_controlMode;
+  u_int saved_action_mode = Battle_actionFlowMode;
   std::array<u_long, 2050> ordering{};
   std::vector<u_long> packets = std::vector<u_long>(65538, kGuard);
   SVECTOR center{64, -64, 64, 0};
@@ -34,8 +47,11 @@ struct SliceFixture {
   }
 
   ~SliceFixture() {
+    Battle_ResetTargetPages();
     Battle_targetSphere = saved_sphere;
     Render_frameScratch = saved_frame;
+    Field_controlMode = saved_control;
+    Battle_actionFlowMode = saved_action_mode;
     Core_Gte_Reset();
   }
 
@@ -118,6 +134,68 @@ struct SliceFixture {
   }
 };
 
+struct SphereLabelFixture {
+  SliceFixture slice;
+  std::array<u_char, 92> saved_widths =
+      std::to_array(Render_compactGlyphWidths);
+  std::array<u_char, 60> saved_indices =
+      std::to_array(Render_compactGlyphIndices);
+  std::array<u_char, 264> saved_trim =
+      std::to_array(Render_compactGlyphLeftTrim);
+  std::array<u_long, 2200> ordering{};
+
+  SphereLabelFixture() {
+    std::fill_n(Render_compactGlyphWidths, saved_widths.size(), 0x66);
+    std::fill_n(Render_compactGlyphIndices, saved_indices.size(), 0);
+    std::fill_n(Render_compactGlyphLeftTrim, saved_trim.size(), 0);
+    Render_frameScratch = {};
+    for (int axis = 0; axis < 3; ++axis) {
+      Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
+    }
+    Render_frameScratch.viewMatrix.t[2] = 2048;
+    Render_frameScratch.orderingTable = ordering.data() + 64;
+    Render_frameScratch.overlayOrderingTable = ordering.data() + 32;
+    Render_frameScratch.primitiveCursor = slice.packets.data() + 1;
+    ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+  }
+
+  ~SphereLabelFixture() {
+    std::copy(saved_widths.begin(), saved_widths.end(),
+              Render_compactGlyphWidths);
+    std::copy(saved_indices.begin(), saved_indices.end(),
+              Render_compactGlyphIndices);
+    std::copy(saved_trim.begin(), saved_trim.end(),
+              Render_compactGlyphLeftTrim);
+  }
+
+  void Labels(int count) {
+    static char text[] = "TARGET";
+    for (int index = 0; index < count; ++index) {
+      auto& label = slice.Sphere().labels[index];
+      label.state = 1;
+      label.depth = 1;
+      label.screenX = static_cast<int16_t>(index % 2 ? 248 : -4);
+      label.offsetY = static_cast<char>(index % 8 * 11);
+      label.ringSize = 20;
+      label.worldPosition = {1083, -650, 2008, 0};
+      label.text = text;
+    }
+  }
+};
+
+struct ExtendedPageFixture : SliceFixture {
+  std::array<Battle_TargetPreview, 40> entries{};
+
+  ExtendedPageFixture() {
+    for (std::size_t index = 0; index < entries.size(); ++index) {
+      entries[index].actorId = static_cast<char>(2 + index / 5);
+      entries[index].limb = static_cast<char>(index % 5);
+    }
+    Battle_SetSphereTargets(static_cast<int>(entries.size()), entries.data(),
+                            0);
+  }
+};
+
 int Coverage(const std::vector<u_long>& lines) {
   int pixels = 0;
   for (std::size_t index = 0; index < lines.size(); index += 2) {
@@ -127,6 +205,142 @@ int Coverage(const std::vector<u_long>& lines) {
   return pixels;
 }
 }  // namespace
+
+TEST_CASE("Native action buffers cover every supported actor limb",
+          "[combat][targeting][capacity]") {
+  constexpr int kActorLimbDomain = 16 * 6;
+  CHECK(std::extent_v<decltype(Battle_ActionState::previews)> >=
+        kActorLimbDomain);
+  CHECK(std::extent_v<decltype(Battle_ActionRequest::targets)> >=
+        kActorLimbDomain);
+  CHECK(Battle_ValidateTargetPreviewIndex(254) == 254);
+  CHECK(Battle_TargetPreviewIndexIsValid(254) == 1);
+  CHECK(Battle_TargetPreviewIndexIsValid(255) == 0);
+  CHECK(Battle_TargetPreviewIndexIsValid(-1) == 0);
+}
+
+TEST_CASE("Extended target pages retain complete actors and absolute indices",
+          "[combat][targeting][pages]") {
+  ExtendedPageFixture fixture;
+  auto first = Battle_GetTargetPageInfo();
+  CHECK(first.total == 40);
+  CHECK(first.pages == 2);
+  CHECK(first.visible == 20);
+  CHECK(Battle_MapTargetPageIndex(19) == 19);
+  fixture.Sphere().selectedTarget = -1;
+  REQUIRE(Battle_AdvanceTargetPage(1) == 1);
+  const auto second = Battle_GetTargetPageInfo();
+  CHECK(second.first == 20);
+  CHECK(second.visible == 20);
+  CHECK(fixture.Sphere().targetLists[0] == fixture.entries.data() + 20);
+}
+
+TEST_CASE(
+    "Extended pages map absolute indices and reverse without losing targets",
+    "[combat][targeting][pages]") {
+  ExtendedPageFixture fixture;
+  REQUIRE(Battle_AdvanceTargetPage(1) == 1);
+  CHECK(Battle_MapTargetPageIndex(0) == 20);
+  CHECK(Battle_MapTargetPageIndex(19) == 39);
+  CHECK(Battle_MapTargetPageIndex(255) == 255);
+  fixture.Sphere().selectedTarget = -1;
+  REQUIRE(Battle_AdvanceTargetPage(-1) == 1);
+  CHECK(Battle_GetTargetPageInfo().first == 0);
+}
+
+TEST_CASE("Native action result clearing covers the entire native capacity",
+          "[combat][targeting][capacity]") {
+  struct GuardedRequest {
+    u_long before;
+    Battle_ActionRequest request;
+    u_long after;
+  } storage{};
+  storage.before = storage.after = kGuard;
+  std::memset(&storage.request, 0xA5, sizeof storage.request);
+  Battle_ClearActionResult(&storage.request);
+  std::array<unsigned char, sizeof(Battle_ActionRequest)> cleared{};
+  CHECK(std::memcmp(&storage.request, cleared.data(), cleared.size()) == 0);
+  CHECK(storage.before == kGuard);
+  CHECK(storage.after == kGuard);
+}
+
+TEST_CASE("AI planning result clearing preserves every adjacent native buffer",
+          "[combat][targeting][capacity][ai]") {
+  VS::Game::ai::PlanningWorkspace workspace;
+  std::memset(&workspace.result, 0xA5, sizeof workspace.result);
+  std::memset(workspace.candidates, 0xA5, sizeof workspace.candidates);
+  std::memset(workspace.exclusions, 0xA5, sizeof workspace.exclusions);
+  std::memset(workspace.fallback, 0xA5, sizeof workspace.fallback);
+  Battle_ClearActionResult(&workspace.result);
+  std::array<unsigned char, sizeof(Battle_ActionRequest)> cleared{};
+  CHECK(std::memcmp(&workspace.result, cleared.data(), cleared.size()) == 0);
+  const auto untouched = [](const auto& buffer) {
+    const auto* bytes = reinterpret_cast<const unsigned char*>(&buffer);
+    return std::all_of(bytes, bytes + sizeof buffer,
+                       [](unsigned char value) { return value == 0xA5; });
+  };
+  CHECK(untouched(workspace.candidates));
+  CHECK(untouched(workspace.exclusions));
+  CHECK(untouched(workspace.fallback));
+}
+
+TEST_CASE("Small target lists preserve the original single visible page",
+          "[combat][targeting][pages]") {
+  SliceFixture fixture;
+  std::array<Battle_TargetPreview, 24> entries{};
+  for (std::size_t index = 0; index < entries.size(); ++index) {
+    entries[index].actorId = static_cast<char>(index / 6);
+  }
+  Battle_SetSphereTargets(static_cast<int>(entries.size()), entries.data(), 0);
+  CHECK(Battle_GetTargetPageInfo().pages == 1);
+  CHECK(Battle_GetTargetPageInfo().visible == 24);
+  CHECK(Battle_MapTargetPageIndex(23) == 23);
+  CHECK(Battle_AdvanceTargetPage(1) == 0);
+  Battle_SetSphereTargets(0, nullptr, 0);
+  CHECK(Battle_GetTargetPageInfo().total == 0);
+  CHECK(Battle_GetTargetPageInfo().selected == -1);
+}
+
+TEST_CASE("Paged target lists own shoulders only during target selection",
+          "[combat][targeting][pages]") {
+  SliceFixture fixture;
+  std::array<Battle_TargetPreview, 40> entries{};
+  for (std::size_t index = 0; index < entries.size(); ++index) {
+    entries[index].actorId = static_cast<char>(index / 5);
+  }
+  Battle_SetSphereTargets(static_cast<int>(entries.size()), entries.data(), 0);
+  Field_controlMode = 2;
+  Battle_actionFlowMode = 1;
+  CHECK(Battle_TargetPagesUseShoulders() == 1);
+  Battle_actionFlowMode = 2;
+  CHECK(Battle_TargetPagesUseShoulders() == 0);
+  Battle_actionFlowMode = 3;
+  CHECK(Battle_TargetPagesUseShoulders() == 1);
+  Field_controlMode = 1;
+  CHECK(Battle_TargetPagesUseShoulders() == 0);
+}
+
+TEST_CASE("Sphere labels and wireframes preserve the native frame cursor",
+          "[render][sphere][labels]") {
+  const int labels = GENERATE(0, 1, 8, 24);
+  const int kind = GENERATE(0, 1, 3, 5, 7);
+  SphereLabelFixture fixture;
+  fixture.Labels(labels);
+  auto& volume = fixture.slice.Sphere().volumes[0];
+  volume.kind = static_cast<u_char>(kind);
+  volume.scale.extents[0] = volume.scale.extents[2] = 16;
+  volume.scale.extents[1] = 24;
+  volume.scale.extents[3] = 32;
+  Battle_DrawSphere();
+  auto* cursor = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+  REQUIRE(cursor >= fixture.slice.packets.data() + 1);
+  REQUIRE(cursor < fixture.slice.packets.data() + fixture.slice.packets.size());
+  CHECK(Render_frameScratch.orderingTable == fixture.ordering.data() + 64);
+  CHECK(Render_frameScratch.overlayOrderingTable ==
+        fixture.ordering.data() + 32);
+  CHECK(fixture.slice.packets.front() == kGuard);
+  CHECK(fixture.slice.packets.back() == kGuard);
+}
 
 TEST_CASE("Spell elevation slice uses visible native-linked scanlines",
           "[render][sphere][terrain]") {

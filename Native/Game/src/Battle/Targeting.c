@@ -23,6 +23,7 @@
 #include "Battle/Sphere.h"
 #include "Battle/SphereTerrain.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/TargetPages.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
@@ -357,6 +358,8 @@ void Battle_CollectEnvironmentActionTargets(void)
 }
 
 // decomp: BATTLE.PRG func_800719FC (src/BATTLE/BATTLE.PRG/146C.c:4086)
+#include "Battle/TargetPages.h"
+
 void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)))
 {
     SVECTOR origin;
@@ -412,30 +415,30 @@ void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)))
                     int part = Actors_FindActorBoneTag(i, limb, 2);
 
                     if (part >= 0) {
-                        Actors_ActorLowGroupBonePosition(i, limb, &Battle_actionState->previews[count].position, 0);
+                        Actors_ActorLowGroupBonePosition(i, limb, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
                         if (Battle_IsPointInTargetVolume((void*)&Battle_actionState->areaShape,
-                                (void*)&Battle_actionState->previews[count])) {
-                            Battle_actionState->previews[count].kind = Actors_ActorBoneTag(i, part, 0);
-                            Battle_actionState->previews[count].limb = limb;
-                            Battle_actionState->previews[count].actorId = i;
+                                (void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)])) {
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = Actors_ActorBoneTag(i, part, 0);
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = limb;
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
                             Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor,
                                 i, limb, &result);
                             Battle_PopulateActionTargetPreview(
-                                &Battle_actionState->previews[count], &result, &result.targets[0]);
+                                &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)], &result, &result.targets[0]);
                             ++count;
                         }
                     }
                 }
             } else {
-                Actors_ActorTaggedBonePosition(i, 255, &Battle_actionState->previews[count].position, 0);
+                Actors_ActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
                 if (Battle_IsPointInTargetVolume((void*)&Battle_actionState->areaShape,
-                        (void*)&Battle_actionState->previews[count])) {
-                    Battle_actionState->previews[count].kind = 16;
-                    Battle_actionState->previews[count].limb = -1;
-                    Battle_actionState->previews[count].actorId = i;
+                        (void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)])) {
+                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = 16;
+                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = -1;
+                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
                     Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor, i,
                         Battle_actors[i]->stats->defaultTargetLimb, &result);
-                    Battle_PopulateActionTargetPreview(&Battle_actionState->previews[count], &result, &result.targets[0]);
+                    Battle_PopulateActionTargetPreview(&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)], &result, &result.targets[0]);
                     ++count;
                 }
             }
@@ -501,32 +504,32 @@ void Battle_CollectDirectActionTargets(int arg0)
                     int part = Actors_FindActorBoneTag(i, j, 2);
 
                     if (part >= 0) {
-                        Actors_ActorLowGroupBonePosition(i, j, &Battle_actionState->previews[count].position, 0);
+                        Actors_ActorLowGroupBonePosition(i, j, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
 
                         if (Battle_IsPointInTargetVolume((void*)&Battle_actionState->rangeShape,
-                                (void*)&Battle_actionState->previews[count])) {
-                            Battle_actionState->previews[count].kind = Actors_ActorBoneTag(i, part, 0);
-                            Battle_actionState->previews[count].limb = j;
-                            Battle_actionState->previews[count].actorId = i;
+                                (void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)])) {
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = Actors_ActorBoneTag(i, part, 0);
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = j;
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
                             Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor,
                                 i, j, &result);
                             Battle_PopulateActionTargetPreview(
-                                &Battle_actionState->previews[count], &result, &result.targets[0]);
+                                &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)], &result, &result.targets[0]);
                             ++count;
                         }
                     }
                 }
             } else {
-                Actors_ActorTaggedBonePosition(i, 255, &Battle_actionState->previews[count].position, 0);
+                Actors_ActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
 
                 if (Battle_IsPointInTargetVolume((void*)&Battle_actionState->rangeShape,
-                        (void*)&Battle_actionState->previews[count])) {
-                    Battle_actionState->previews[count].kind = 16;
-                    Battle_actionState->previews[count].limb = -1;
-                    Battle_actionState->previews[count].actorId = i;
+                        (void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)])) {
+                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = 16;
+                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = -1;
+                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
                     Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor, i,
                         Battle_actors[i]->stats->defaultTargetLimb, &result);
-                    Battle_PopulateActionTargetPreview(&Battle_actionState->previews[count], &result, &result.targets[0]);
+                    Battle_PopulateActionTargetPreview(&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)], &result, &result.targets[0]);
                     ++count;
                 }
             }
@@ -537,16 +540,16 @@ void Battle_CollectDirectActionTargets(int arg0)
         Items_TreasureChest* room = Items_RoomTreasureChests(&i);
 
         for (j = 0; j < i; ++j) {
-            Battle_actionState->previews[count].position.vx = room[j].tileX * 128 + 64;
-            Battle_actionState->previews[count].position.vz = room[j].tileZ * 128 + 64;
-            Battle_actionState->previews[count].position.vy =
+            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position.vx = room[j].tileX * 128 + 64;
+            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position.vz = room[j].tileZ * 128 + 64;
+            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position.vy =
                 (Field_FloorHeightAt((room[j].tileX << 7) | 64, (room[j].tileZ << 7) | 64) << 17)
                 >> 17;
 
             if (room[j].openedFlag < 64
                 && Battle_IsPointInTargetVolume(
-                    (void*)&Battle_actionState->rangeShape, (void*)&Battle_actionState->previews[count])) {
-                Battle_TargetPreview* target = &Battle_actionState->previews[count];
+                    (void*)&Battle_actionState->rangeShape, (void*)&Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)])) {
+                Battle_TargetPreview* target = &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)];
 
                 target->kind = 16;
                 target->limb = 16;
@@ -578,10 +581,10 @@ void Battle_CollectDirectActionTargets(int arg0)
 
     if (Battle_actionState->selection.primaryTarget.target.targetActor) {
         for (count = 0; count < Battle_actionState->previewCount; ++count) {
-            if (Battle_actionState->previews[count].actorId
+            if (Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId
                     == Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]
                         ->commandArg1.halves[0]
-                && Battle_actionState->previews[count].limb
+                && Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb
                        == Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]
                            ->commandArg1.halves[1]) {
                 Battle_actionState->selectedPreview = count;
@@ -589,7 +592,7 @@ void Battle_CollectDirectActionTargets(int arg0)
         }
         if (Battle_actionState->selectedPreview == 0xFF) {
             for (count = 0; count < Battle_actionState->previewCount; ++count) {
-                if (Battle_actionState->previews[count].actorId
+                if (Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId
                     == Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]
                         ->commandArg1.halves[0]) {
                     Battle_actionState->selectedPreview = count;
@@ -654,17 +657,17 @@ void Battle_CollectGroundAreaActionTargets(int arg0)
                         int part = Actors_FindActorBoneTag(i, limb, 2);
 
                         if (part >= 0) {
-                            Actors_ActorLowGroupBonePosition(i, limb, &Battle_actionState->previews[count].position, 0);
-                            Battle_actionState->previews[count].kind = Actors_ActorBoneTag(i, part, 0);
-                            Battle_actionState->previews[count].limb = limb;
-                            Battle_actionState->previews[count].actorId = i;
+                            Actors_ActorLowGroupBonePosition(i, limb, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].kind = Actors_ActorBoneTag(i, part, 0);
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = limb;
+                            Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
                             ++count;
                         }
                     }
                 } else {
-                    Actors_ActorTaggedBonePosition(i, 255, &Battle_actionState->previews[count].position, 0);
-                    Battle_actionState->previews[count].limb = -1;
-                    Battle_actionState->previews[count].actorId = i;
+                    Actors_ActorTaggedBonePosition(i, 255, &Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position, 0);
+                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].limb = -1;
+                    Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].actorId = i;
                     ++count;
                 }
             }
@@ -769,7 +772,7 @@ void Battle_BeginActorActionSelection(int arg0, u_short arg1)
     Battle_Actor* temp_a0;
 
     Field_controlMode = 2;
-    Core_Memory_ZeroAlignedWords(&Battle_actionState->selection, 0x84C);
+    Core_Memory_ZeroAlignedWords(&Battle_actionState->selection, sizeof Battle_actionState->selection);
     Battle_actionState->selection.primaryTarget.targetsPosition = 0;
     Battle_actionState->selection.primaryTarget.target.targetActor = arg0;
     Battle_actionState->selection.actionId = arg1;
@@ -1322,6 +1325,10 @@ int Battle_UpdateTargetSelectionMenu(u_char* target)
             }
             goto nextState;
         case 19:
+            if (Battle_HandleTargetPageButtons()) {
+                *target = 0xFF;
+                return 0;
+            }
             if (++(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D].opaque1[2] == 0x22) {
                 (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D].opaque1[2] = 0x12;
             }
@@ -1333,7 +1340,7 @@ int Battle_UpdateTargetSelectionMenu(u_char* target)
                 Battle_targetSelectionStep = 21;
                 break;
             }
-            *target = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D;
+            *target = Battle_MapTargetPageIndex((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D);
             if (Input_buttonsPressed.allButtons & 0x20) {
                 Battle_DismissTargetSelectionRows();
                 Battle_targetSelectionStep = 20;
@@ -1509,7 +1516,7 @@ int Battle_UpdateTargetSelectionMenu(u_char* target)
             Menu_SetTextBoxText(7, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->textBuffer);
             break;
         case 20:
-            *target = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D;
+            *target = Battle_MapTargetPageIndex((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D);
             // fallthrough
         case 21:
             Menu_DismissTextBox(7);

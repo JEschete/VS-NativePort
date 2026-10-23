@@ -19,8 +19,6 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/ConditionSnapshot.h"
 #include "Battle/Ai/DecisionPrimitives.h"
-#include "Battle/Ai/Engagement.h"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
@@ -828,55 +826,5 @@ void Battle_Ai_ReconcileCompletedActionPlan(Battle_Ai_ReactionRecord* arg0)
     }
 
     Battle_Ai_RememberAiActionTarget(entry);
-}
-
-// decomp: BATTLE.PRG func_800DEC88 (src/BATTLE/BATTLE.PRG/74088.c:1547)
-int Battle_Ai_RebuildActorActionPlans(void* arg0)
-{
-    Battle_Ai_EvaluationContextView* context = arg0;
-    Battle_Ai_EvaluationActorView* actor;
-    Battle_Ai_PlanEvaluationView* state;
-    Battle_Ai_roomAiState->readinessLevel = 0;
-    Battle_Ai_planningWorkspace = Core_Memory_AllocateFromHighEnd(0x1ECC);
-    Battle_Ai_planningPassCandidates = (void*)((char*)Battle_Ai_planningWorkspace + 0x9CC);
-    Battle_Ai_candidateExclusions = (void*)((char*)Battle_Ai_planningWorkspace + 0xD8C);
-    Battle_Ai_fallbackCandidates = (void*)((char*)Battle_Ai_planningWorkspace + 0x1D8C);
-    if (Battle_Ai_planningWorkspace) {
-        Battle_Ai_ReconcileCompletedActionPlan((void*)context);
-        for (actor = (Battle_Ai_EvaluationActorView*)Battle_actors[0]; actor;
-            actor = actor->next) {
-            state = (Battle_Ai_PlanEvaluationView*)Battle_Ai_actorAiStates[actor->id];
-            state->opaqueE8 = 0;
-            state->opaqueE7 = 0;
-            state->opaque19A = 0;
-            Battle_Ai_SetActorVerticalMovementSteps(state->actorId, actor->stats->opaque31, actor->stats->opaque33);
-            Battle_Ai_SelectFallbackAction((Battle_Ai_ActionChoiceView*)state);
-            if (context && !context->opaque44 && context->id == state->actorId) {
-                state->opaque9A = 0;
-            }
-        }
-        Battle_Ai_ApplyActionRelationshipChanges((void*)context);
-        for (actor = (Battle_Ai_EvaluationActorView*)Battle_actors[0]; actor;
-            actor = actor->next) {
-            ((Battle_Ai_PlanEvaluationView*)Battle_Ai_actorAiStates[actor->id])->isDead = actor->stats->hp == 0;
-        }
-        for (actor = (Battle_Ai_EvaluationActorView*)Battle_actors[0]; actor;
-            actor = actor->next) {
-            state = (Battle_Ai_PlanEvaluationView*)Battle_Ai_actorAiStates[actor->id];
-            Battle_Ai_BuildActorActionPlan((Battle_Ai_ActionPlanView*)state);
-            if (state->usesRoomActionDelay) {
-                if (actor->opaque8 & 32) {
-                    Battle_Ai_ResetActorAwarenessIndicator(state);
-                } else {
-                    Battle_Ai_SetActorAwarenessIndicator(state->actorId, 128);
-                }
-            }
-        }
-        Battle_Ai_roomAiState->readinessLevel = 0;
-        if (Battle_Ai_planningWorkspace) {
-            Core_Memory_FreeFromHighEnd(Battle_Ai_planningWorkspace);
-        }
-    }
-    return 0;
 }
 

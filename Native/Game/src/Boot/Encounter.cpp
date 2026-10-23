@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include "Battle/TargetPages.h"
 #include "Core/Log.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Legacy/Psx.h"
@@ -164,6 +165,9 @@ void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
   state.action = action.selection.actionId;
   state.source_actor = action.selection.primaryTarget.target.targetActor;
   state.target_count = action.selection.targetCount;
+  const auto page = Battle_GetTargetPageInfo();
+  state.target_page = {page.total, page.page,    page.pages,
+                       page.first, page.visible, page.selected};
   constexpr unsigned kTargetingControl = 2;
   constexpr unsigned kFirstTargetPhase = 1, kLastTargetPhase = 3;
   if (state.control_mode != kTargetingControl ||
@@ -582,6 +586,7 @@ void RunEncounter() {
   active = true;
   Boot_InitializePlatformServices();
   Boot_RunSessionLoop(EnterOrFinishEncounter, ResumeEncounter);
+  Battle_ResetTargetPages();
   active = false;
   configured = false;
   room_prepared = false;

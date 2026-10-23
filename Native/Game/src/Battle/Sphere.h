@@ -26,6 +26,8 @@ extern int Battle_positionCursorSpriteTexCoords[116];
 extern u_char Battle_positionCursorBlinkFrame;
 extern u_char Battle_reuseSphereVolumes;
 extern Battle_TargetSphereSetupView* Battle_targetSphere;
+#include "Battle/TargetPages.h"
+
 void Battle_InitSphere(void);
 void Battle_FreeSphere(void);
 void Battle_SetSphereVolumes(Battle_TargetSphereSpec* arg0, Battle_TargetSphereSpec* arg1, u_char arg2, Battle_TargetPreview* arg3);
@@ -42,7 +44,6 @@ int Battle_IsPointInTargetCylinder(Battle_TargetVolume* arg0, u_short* arg1, int
 int Battle_IsPointInTargetCone(Battle_TargetVolume* arg0, u_short* arg1, int arg2);
 int Battle_IsPointInTargetPrism(Battle_TargetVolume* shape, u_short* position, int angled);
 int Battle_IsPointInTargetVolume(Battle_TargetVolume* arg0, u_short* arg1);
-void Battle_SetSphereTargets(int arg0, Battle_TargetPreview* arg1, int arg2);
 void Battle_ClearSphereTargets(void);
 void Battle_DrawRightTargetLabelLink(int x0, int x1, int count);
 void Battle_DrawLeftTargetLabelLink(int x0, int x1, int count);

@@ -85,6 +85,8 @@ int Field_ComputeCameraTrackingStep(SVECTOR* targetPos, VECTOR* outStep,
     VECTOR* outDisplacement, int clampToZone, int maxSpeed);
 int Field_StepCameraLookAtTowardTarget(SVECTOR* targetPos, int transformFlag, int maxSpeed);
 void Field_TrackCameraLookAtWithinDeadZone(VECTOR* arg0);
+#include "Battle/TargetPages.h"
+
 void Field_UpdateCameraOrbitInput(void);
 void Field_TrackActionCameraTarget(int arg0);
 int Field_UpdateAshleyFollowCamera(void);

@@ -279,7 +279,7 @@ void Battle_ApplyActionHitEffect(
 }
 
 // decomp: BATTLE.PRG func_800856F8 (src/BATTLE/BATTLE.PRG/146C.c:13058)
-void Battle_ClearActionResult(void* arg0) { Core_Memory_ZeroAlignedWords(arg0, 0x84C); }
+void Battle_ClearActionResult(void* arg0) { Core_Memory_ZeroAlignedWords(arg0, sizeof(Battle_ActionRequest)); }
 
 // decomp: BATTLE.PRG func_80085718 (src/BATTLE/BATTLE.PRG/146C.c:13060)
 void Battle_InitializeHitResult(Battle_HitResult* arg0)

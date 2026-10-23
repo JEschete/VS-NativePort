@@ -8,6 +8,37 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_native_target_capacity_is_not_a_ps1_allocation_or_visible_limit(self):
+        root = Path(__file__).resolve().parents[2]
+        action = (root / "Native/Game/include/Battle/Action.h").read_text()
+        self.assertIn("Battle_TargetPreview previews[255];", action)
+        self.assertIn("Battle_HitResult targets[255];", action)
+        boot = (root / "Native/Game/src/Boot/GameLoop.c").read_text()
+        self.assertIn("AllocateFromHighEnd(sizeof *Battle_actionState)", boot)
+        self.assertNotIn("0x2C10", boot)
+        targeting = (root / "Native/Game/src/Battle/Targeting.c").read_text()
+        self.assertIn("sizeof Battle_actionState->selection", targeting)
+        self.assertNotIn("0x84C", targeting)
+        self.assertIn("Battle_ValidateTargetPreviewIndex(count)", targeting)
+        self.assertIn("Battle_MapTargetPageIndex(", targeting)
+        self.assertIn("Battle_HandleTargetPageButtons()", targeting)
+        self.assertNotIn("sphere-cursor", targeting)
+
+    def test_ai_planning_owns_the_full_native_action_result(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / "tools/port/owned.csv").open(newline="") as file:
+            owned = {row["id"]: row for row in csv.DictReader(file)}
+        self.assertEqual(
+            owned["F01718"]["path"],
+            r"Native\Game\src\Battle\Ai\PlanningWorkspace.cpp",
+        )
+        source = (root / "Native/Game/src/Battle/Ai/ActionPlanning.c").read_text()
+        self.assertNotIn("int Battle_Ai_RebuildActorActionPlans(", source)
+        for offset in ("0x1ECC", "0x9CC", "0xD8C", "0x1D8C"):
+            self.assertNotIn(offset, source)
+        spawning = (root / "Native/Game/src/Actors/ActorLoading.c").read_text()
+        self.assertNotIn("spawn137", spawning)
+
     def test_door_queries_keep_owned_native_pointer_storage(self):
         root = Path(__file__).resolve().parents[2]
         with (root / "tools/port/owned.csv").open(newline="") as file:

@@ -47,6 +47,5 @@ int Battle_Ai_SnapshotPlanningActorStats(void);
 void Battle_Ai_RestorePlanningActorStats(void);
 void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state);
 void Battle_Ai_ReconcileCompletedActionPlan(Battle_Ai_ReactionRecord* arg0);
-int Battle_Ai_RebuildActorActionPlans(void* arg0);
 
 #endif // VS_BATTLE_AI_ACTIONPLANNING_H_DECLS

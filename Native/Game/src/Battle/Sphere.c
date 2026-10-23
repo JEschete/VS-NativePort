@@ -63,8 +63,11 @@ u_char Battle_reuseSphereVolumes; /* contents: module image (ModuleData.c) */
 Battle_TargetSphereSetupView* Battle_targetSphere; /* data: contents loaded in Step 5 */
 
 // decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/573B8.c:363)
+#include "Battle/TargetPages.h"
+
 void Battle_InitSphere(void)
 {
+    Battle_ResetTargetPages();
     int index;
     int x;
     int y;
@@ -139,6 +142,7 @@ void Battle_InitSphere(void)
 // decomp: BATTLE.PRG func_800C05B4 (src/BATTLE/BATTLE.PRG/573B8.c:436)
 void Battle_FreeSphere(void)
 {
+    Battle_ResetTargetPages();
     if (Battle_targetSphere != NULL) {
         Core_Memory_FreeFromLowEnd(Battle_targetSphere);
         Battle_targetSphere = NULL;
@@ -408,6 +412,7 @@ void Battle_DrawSphere(void)
         Battle_DrawSphereVolumeWireframe(shape, color);
     }
     Battle_UpdateSphereTargetLabels();
+    Battle_DrawTargetPageHint();
 }
 
 // decomp: BATTLE.PRG func_800C0FA8 (src/BATTLE/BATTLE.PRG/58578.c:170)
@@ -692,34 +697,10 @@ int Battle_IsPointInTargetVolume(Battle_TargetVolume* arg0, u_short* arg1)
     return ret;
 }
 
-// decomp: BATTLE.PRG func_800C1664 (src/BATTLE/BATTLE.PRG/58578.c:446)
-void Battle_SetSphereTargets(int arg0, Battle_TargetPreview* arg1, int arg2)
-{
-    int var_a0;
-    int var_v0;
-
-    var_a0 = arg0;
-    if ((*(Battle_TargetSphere* (*))&Battle_targetSphere) != NULL) {
-        if (var_a0 >= 0x19) {
-            var_a0 = 0x18;
-        }
-        (*(Battle_TargetSphere* (*))&Battle_targetSphere)->targetCount = var_a0;
-        (*(Battle_TargetSphere* (*))&Battle_targetSphere)->targetLists[0] = arg1;
-        if ((*(Battle_TargetSphere* (*))&Battle_targetSphere)->selectedTarget >= var_a0) {
-            var_v0 = 0;
-            if (var_a0 == 0) {
-                var_v0 = 0xFF;
-            }
-            (*(Battle_TargetSphere* (*))&Battle_targetSphere)->selectedTarget = var_v0;
-        }
-        (*(Battle_TargetSphere* (*))&Battle_targetSphere)->targetMode = arg2;
-        Battle_UpdateTargetSelectionMenu(0);
-    }
-}
-
 // decomp: BATTLE.PRG func_800C16DC (src/BATTLE/BATTLE.PRG/58578.c:470)
 void Battle_ClearSphereTargets(void)
 {
+    Battle_ResetTargetPages();
     if ((*(Battle_TargetSphere* (*))&Battle_targetSphere) != NULL) {
         (*(Battle_TargetSphere* (*))&Battle_targetSphere)->targetCount = 0;
     }

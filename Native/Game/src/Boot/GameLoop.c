@@ -19,10 +19,10 @@
 #include "Battle/ActionExecution.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
 #include "Battle/Feedback.h"
@@ -683,8 +683,8 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     }
 
     Actors_SpawnAshleyWithEquipment();
-    (*(void* (*))&Battle_actionState) = Core_Memory_AllocateFromHighEnd(0x2C10);
-    Core_Memory_ZeroAlignedWords((*(void* (*))&Battle_actionState), 0x2C10);
+    (*(void* (*))&Battle_actionState) = Core_Memory_AllocateFromHighEnd(sizeof *Battle_actionState);
+    Core_Memory_ZeroAlignedWords((*(void* (*))&Battle_actionState), sizeof *Battle_actionState);
     Field_isFieldRenderingEnabled = 1;
     Boot_gameplayResetWordTwo = 0;
     Render_ConfigureFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);

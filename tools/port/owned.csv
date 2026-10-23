@@ -1,4 +1,6 @@
 id,kind,name,path,header,since,notes
+F01718,function,Battle_Ai_RebuildActorActionPlans,Native\Game\src\Battle\Ai\PlanningWorkspace.cpp,Native\Game\include\Battle\Ai\PlanningWorkspace.hpp,2026-10-23,Typed call-local planning result and candidate buffers replace fixed PS1 allocation and offsets; borrowed compatibility views remain scoped to the call
+F01296,function,Battle_SetSphereTargets,Native\Game\src\Battle\TargetPages.cpp,Native\Game\include\Battle\TargetPages.h,2026-10-23,Native whole-actor pages preserve every candidate while the original visible target list remains bounded
 T00232,type,Field_DoorMatchList,Native\Game\src\Field\DoorMatches.h,Native\Game\src\Field\DoorMatches.h,2026-10-23,Native borrowed door-query view backed by owned pointer storage; not an inline PS1 BSS tail
 G00330,global,Field_matchingDoorRecords,Native\Game\src\Field\DoorMatches.cpp,Native\Game\src\Field\DoorMatches.h,2026-10-23,Native query result metadata with separately owned pointer-list backing
 F00579,function,Field_TransitionDoorsAtTile,Native\Game\src\Field\DoorMatches.cpp,Native\Game\src\Field\DoorMatches.h,2026-10-23,Owned native door matches preserve original tile/platform order and raw RNG update without flexible-tail writes

@@ -487,6 +487,70 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "                    ot = Render_legacyOrderingTables[Render_frameBuf];",
          "native encounter hosts can stop at a production frame boundary; inactive for normal sessions"),
     ],
+    "F00077": [
+        ("void Field_UpdateCameraOrbitInput(void)",
+         '#include "Battle/TargetPages.h"\n\nvoid Field_UpdateCameraOrbitInput(void)',
+         "Paged target lists explicitly own shoulder buttons while the ordinary field camera remains unchanged"),
+        ("    if (Field_sphericalCamera.delta.yaw == 0) {\n        if (!CAMERA_INPUT_LOCKED()) {",
+         "    if (Field_sphericalCamera.delta.yaw == 0) {\n"
+         "        if (!CAMERA_INPUT_LOCKED() && !Battle_TargetPagesUseShoulders()) {",
+         "Do not initiate orbit rotation from a target-page command"),
+        ("&& !CAMERA_INPUT_LOCKED())", "&& !CAMERA_INPUT_LOCKED() && !Battle_TargetPagesUseShoulders())",
+         "Do not extend an existing orbit from held page-navigation buttons"),
+    ],
+    "F00112": [
+        ("previews[count]", "previews[Battle_ValidateTargetPreviewIndex(count)]",
+         "Check native candidate capacity before every direct actor/limb/chest preview write"),
+    ],
+    "F00116": [
+        ("&Battle_actionState->selection, 0x84C",
+         "&Battle_actionState->selection, sizeof Battle_actionState->selection",
+         "Clear the complete native action request after widening native target capacity"),
+    ],
+    "F00508": [
+        ("arg0, 0x84C", "arg0, sizeof(Battle_ActionRequest)",
+         "Clear the complete native action result including all supported targets"),
+    ],
+    "F00111": [
+        ("void Battle_CollectSourceAreaActionTargets(",
+         '#include "Battle/TargetPages.h"\n\nvoid Battle_CollectSourceAreaActionTargets(',
+         "Expose the shared native target-capacity and paging API to the target collector translation unit"),
+        ("previews[count]", "previews[Battle_ValidateTargetPreviewIndex(count)]",
+         "Check native candidate capacity before source-area preview writes"),
+    ],
+    "F00113": [
+        ("previews[count]", "previews[Battle_ValidateTargetPreviewIndex(count)]",
+         "Check native candidate capacity before ground-area preview writes"),
+    ],
+    "F01323": [
+        ("        case 19:",
+         "        case 19:\n"
+         "            if (Battle_HandleTargetPageButtons()) {\n"
+         "                *target = 0xFF;\n"
+         "                return 0;\n"
+         "            }",
+         "L1/R1 change whole-actor pages only after the original target-list animation has settled"),
+        ("*target = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D;",
+         "*target = Battle_MapTargetPageIndex((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D);",
+         "Return the absolute preview index while each original visible page keeps local indices"),
+    ],
+    "F01279": [
+        ("void Battle_InitSphere(void)",
+         '#include "Battle/TargetPages.h"\n\nvoid Battle_InitSphere(void)',
+         "Expose native page lifetime hooks to the sphere translation unit"),
+        ("    int index;", "    Battle_ResetTargetPages();\n    int index;",
+         "New sphere entry clears any previous action page view"),
+    ],
+    "F01280": [
+        ("    if (Battle_targetSphere != NULL) {",
+         "    Battle_ResetTargetPages();\n    if (Battle_targetSphere != NULL) {",
+         "Free/re-entry cannot retain a borrowed page pointer into an old action state"),
+    ],
+    "F01297": [
+        ("    if ((*(Battle_TargetSphere* (*))&Battle_targetSphere) != NULL) {",
+         "    Battle_ResetTargetPages();\n    if ((*(Battle_TargetSphere* (*))&Battle_targetSphere) != NULL) {",
+         "Clearing target selection invalidates the native page view"),
+    ],
     "F00539": [
         ("    if (dataLen != 0) {",
          "    Boot_EncounterRoomPlacements(&data, &dataLen);\n"
@@ -812,6 +876,12 @@ int Menu_Loot_AdvanceStagedInventory(void)
     "F01301": [
         ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
          "target-label backdrop uses native ordering links"),
+    ],
+    "F01289": [
+        ("    Battle_UpdateSphereTargetLabels();",
+         "    Battle_UpdateSphereTargetLabels();\n"
+         "    Battle_DrawTargetPageHint();",
+         "Only extended native target lists display a readable page indicator"),
     ],
     "F01302": [
         ("    for (var_s3 = 0; var_s3 < 24; ++var_s3, var_s0 += 10, ++var_s1) {",
@@ -1454,8 +1524,25 @@ ONDISC_OFFSETS: dict[str, str] = {
     "T00474.001": "SEQ animation map (Actors::SeqAnimationBank views a SEQ buffer)",
 }
 
+FIXES["F01858"].append(
+    ("0x2C10", "sizeof *Battle_actionState",
+     "Allocate and initialize the actual native action state rather than its PS1 byte count")
+)
+
 # Reviewed fixes to copied type definitions: type id -> [(old, new, reason)]. Checked by Native\Tests\src\LayoutAsserts.c.
 TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "T00225": [
+        ("Battle_TargetPreview previews[23];", "Battle_TargetPreview previews[255];",
+         "Native preview indices reserve FF for cancellation; keep all actor/limb candidates outside the PS1-sized inline limit"),
+    ],
+    "T00226": [
+        ("Battle_HitResult targets[30];", "Battle_HitResult targets[255];",
+         "Execution/result requests must accommodate the same native target domain as candidate collection"),
+    ],
+    "T00218": [
+        ("char offsetY;", "u_char offsetY;",
+         "The target-row producer stores unsigned pixel offsets including rows below 127"),
+    ],
     "T00271": [
         ("char reservedB[9];",
          "union {\n        char reservedB[9];\n        struct {\n"

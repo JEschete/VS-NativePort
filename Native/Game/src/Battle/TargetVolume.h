@@ -111,7 +111,7 @@ typedef struct Battle_SphereTargetLabel {
     char gradient;
     char ringSize;
     short screenX;
-    char offsetY;
+    u_char offsetY;
     char fade;
     SVECTOR worldPosition;
     char* text;

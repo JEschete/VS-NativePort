@@ -7,6 +7,9 @@
     <Filter Include="include\Battle">
       <UniqueIdentifier>{D01075AB-3FA6-535F-AAEC-111A4A297F29}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Battle\Ai">
+      <UniqueIdentifier>{8820A75F-B723-5A63-A2B3-DF2FCFB369F3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Boot">
       <UniqueIdentifier>{722EFB4F-0880-558D-8955-C5662D446503}</UniqueIdentifier>
     </Filter>
@@ -441,6 +444,9 @@
     <ClInclude Include="src\Battle\Ai\PlanningSort.hpp">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\PlanningWorkspace.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\Relations.c">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -546,6 +552,9 @@
     <ClInclude Include="src\Battle\TargetingDraw.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\TargetPages.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClInclude Include="src\Battle\TargetVolume.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
@@ -2043,6 +2052,9 @@
     <ClInclude Include="include\Battle\Action.h">
       <Filter>include\Battle</Filter>
     </ClInclude>
+    <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
     <ClInclude Include="include\Battle\Encounter.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
@@ -2050,6 +2062,9 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\SphereTerrain.h">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\TargetPages.h">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Boot\GameApp.hpp">

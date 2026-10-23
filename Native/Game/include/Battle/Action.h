@@ -66,7 +66,7 @@ typedef struct Battle_ActionRequest {
     Battle_HitResult primaryTarget;
     u_short animationParameter;
     u_short targetCount;
-    Battle_HitResult targets[30];
+    Battle_HitResult targets[255];
     SVECTOR focusPosition;
 } Battle_ActionRequest;
 
@@ -100,7 +100,7 @@ typedef struct Battle_ActionState {
     char areaZ;
     char areaAngle;
     SVECTOR areaOrigin;
-    Battle_TargetPreview previews[23];
+    Battle_TargetPreview previews[255];
     int reserved2BE8;
     int reserved2BEC;
     int reserved2BF0;

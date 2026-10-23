@@ -195,6 +195,15 @@ struct EncounterTargetState {
   std::array<int, EncounterLimits::kPositionAxes> position{};
 };
 
+struct EncounterTargetPageState {
+  int total = 0;
+  int page = 0;
+  int pages = 0;
+  int first = 0;
+  int visible = 0;
+  int selected = -1;
+};
+
 struct EncounterState {
   bool ready = false;
   int zone = 0;
@@ -214,6 +223,7 @@ struct EncounterState {
   int target_count = 0;
   std::array<int, EncounterLimits::kPositionAxes> area_center{};
   std::vector<EncounterTargetState> target_previews;
+  EncounterTargetPageState target_page;
   bool rewards_available = false;
   std::vector<EncounterActorState> actors;
   std::vector<int> learned_actions;
