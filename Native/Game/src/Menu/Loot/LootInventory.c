@@ -9,6 +9,7 @@
 #include "Menu/Framework/Framework.h"
 #include "Menu/Loot/LootInventory.h"
 #include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/Paging.h"
 #include "State/Flags.h"
 #include "State/StateFlags.h"
 
@@ -21,7 +22,7 @@ int Menu_Loot_StageBlade(Items_InventoryBlade* source, int weapon)
     while (blade->id != 0) {
         ++blade;
         ++index;
-        if (index == 16) {
+        if (index > 16) {
             return 0;
         }
     }
@@ -42,7 +43,7 @@ int Menu_Loot_StageGrip(Items_InventoryGrip* source, int weaponIndex)
     while (grip->id != 0) {
         ++grip;
         ++index;
-        if (index == 16) {
+        if (index > 16) {
             return 0;
         }
     }
@@ -63,7 +64,7 @@ int Menu_Loot_StageGem(Items_InventoryGem* source, int item)
     while (gem->id != 0) {
         ++gem;
         ++index;
-        if (index == 0x30) {
+        if (index > 0x30) {
             return 0;
         }
     }
@@ -81,10 +82,21 @@ int Menu_Loot_StageWeapon(Items_LootedWeapon* arg0)
     int i;
     Items_InventoryWeapon* slot = Menu_Loot_inventory->weapons;
     int index = 1;
+    int gems = 0;
+
+    for (i = 0; i < 3; ++i) {
+        gems += arg0->gems[i].id != 0;
+    }
+    if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Weapon, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Blade, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Grip, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Gem, gems)) {
+        return 0;
+    }
 
     while (slot->blade != 0) {
         ++slot;
-        if (++index == 8) {
+        if (++index > 8) {
             return 0;
         }
     }
@@ -115,7 +127,7 @@ int Menu_Loot_StageArmor(Items_InventoryArmor* source)
     while (armor->id != 0) {
         ++armor;
         ++index;
-        if (index == 16) {
+        if (index > 16) {
             return 0;
         }
     }
@@ -133,11 +145,20 @@ int Menu_Loot_StageShield(Items_LootedShield* arg0)
 
     Items_InventoryShield* shield = Menu_Loot_inventory->shields;
     int index = 1;
+    int gems = 0;
+
+    for (i = 0; i < 3; ++i) {
+        gems += arg0->gems[i].id != 0;
+    }
+    if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Shield, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Gem, gems)) {
+        return 0;
+    }
 
     while (shield->base.id != 0) {
         ++shield;
         ++index;
-        if (index == 8) {
+        if (index > 8) {
             return 0;
         }
     }
@@ -165,7 +186,7 @@ int Menu_Loot_StageMiscItem(Items_LootedItem* arg0)
     while (item->id != 0) {
         ++index;
         ++item;
-        if (index == 64) {
+        if (index > 64) {
             return 0;
         }
     }
@@ -279,42 +300,42 @@ void Menu_Loot_StageDropRecord(Items_BattleLoot* arg0)
 {
     int i;
 
-    if (Menu_Loot_IsDropAllowed(arg0->weapon.difficultyFlags) != 0) {
-        Menu_Loot_AppendLootRow(Items_ItemCategory_Weapon, Menu_Loot_StageWeapon(&arg0->weapon));
+    if (Menu_Loot_CanStageDrop(&arg0->weapon.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&arg0->weapon.difficultyFlags, Items_ItemCategory_Weapon, Menu_Loot_StageWeapon(&arg0->weapon));
     }
 
-    if (Menu_Loot_IsDropAllowed(arg0->blade.difficultyFlags) != 0) {
-        Menu_Loot_AppendLootRow(Items_ItemCategory_Blade, Menu_Loot_StageBlade(&arg0->blade.blade, 0));
+    if (Menu_Loot_CanStageDrop(&arg0->blade.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&arg0->blade.difficultyFlags, Items_ItemCategory_Blade, Menu_Loot_StageBlade(&arg0->blade.blade, 0));
     }
 
-    if (Menu_Loot_IsDropAllowed(arg0->grip.difficultyFlags) != 0) {
-        Menu_Loot_AppendLootRow(Items_ItemCategory_Grip, Menu_Loot_StageGrip(&arg0->grip.grip, 0));
+    if (Menu_Loot_CanStageDrop(&arg0->grip.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&arg0->grip.difficultyFlags, Items_ItemCategory_Grip, Menu_Loot_StageGrip(&arg0->grip.grip, 0));
     }
 
-    if (Menu_Loot_IsDropAllowed(arg0->shield.difficultyFlags) != 0) {
-        Menu_Loot_AppendLootRow(Items_ItemCategory_Shield, Menu_Loot_StageShield(&arg0->shield));
+    if (Menu_Loot_CanStageDrop(&arg0->shield.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&arg0->shield.difficultyFlags, Items_ItemCategory_Shield, Menu_Loot_StageShield(&arg0->shield));
     }
 
     for (i = 0; i < 2; ++i) {
-        if (Menu_Loot_IsDropAllowed(arg0->armor[i].difficultyFlags) != 0) {
-            Menu_Loot_AppendLootRow(
+        if (Menu_Loot_CanStageDrop(&arg0->armor[i].difficultyFlags) != 0) {
+            Menu_Loot_AppendStagedDrop(&arg0->armor[i].difficultyFlags,
                 Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->armor[i].armor));
         }
     }
 
-    if (Menu_Loot_IsDropAllowed(arg0->accessory.difficultyFlags) != 0) {
-        Menu_Loot_AppendLootRow(
+    if (Menu_Loot_CanStageDrop(&arg0->accessory.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&arg0->accessory.difficultyFlags,
             Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->accessory.accessory));
     }
 
-    if (Menu_Loot_IsDropAllowed(arg0->gem.difficultyFlags) != 0) {
-        Menu_Loot_AppendLootRow(Items_ItemCategory_Gem, Menu_Loot_StageGem(&arg0->gem.gem, 0));
+    if (Menu_Loot_CanStageDrop(&arg0->gem.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&arg0->gem.difficultyFlags, Items_ItemCategory_Gem, Menu_Loot_StageGem(&arg0->gem.gem, 0));
     }
 
     for (i = 0; i < 3; ++i) {
-        if ((Menu_Loot_IsDropAllowed(arg0->misc[i].difficultyFlags) != 0)
+        if ((Menu_Loot_CanStageDrop(&arg0->misc[i].difficultyFlags) != 0)
             && (arg0->misc[i].itemId != 0) && (arg0->misc[i].count != 0)) {
-            Menu_Loot_AppendLootRow(Items_ItemCategory_Misc, Menu_Loot_StageMiscItem(&arg0->misc[i]));
+            Menu_Loot_AppendStagedDrop(&arg0->misc[i].difficultyFlags, Items_ItemCategory_Misc, Menu_Loot_StageMiscItem(&arg0->misc[i]));
         }
     }
 
@@ -324,6 +345,7 @@ void Menu_Loot_StageDropRecord(Items_BattleLoot* arg0)
 // decomp: MENUB.PRG _applyAllLootLists (src/MENU/MENUB.PRG/260.c:1174)
 void Menu_Loot_BuildStagedInventory(Items_LootListNode* node)
 {
+    Menu_Loot_BeginPaging(node);
     Core_Memory_ZeroWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);
 
     if (node != NULL) {
@@ -334,6 +356,73 @@ void Menu_Loot_BuildStagedInventory(Items_LootListNode* node)
     } else {
         Menu_Loot_StageDropRecord(Menu_Framework_lootEntry);
     }
+}
+
+/* Native batching for MENUB 260.c:1124/1174; original bag capacities remain unchanged. */
+static struct {
+    Items_LootListNode* nodes;
+    char* stagedFlags[kMenuLootRowCapacity];
+    int count;
+    int deferred;
+} Menu_Loot_paging;
+
+void Menu_Loot_ResetPaging(void)
+{
+    Core_Memory_ZeroAlignedWords(&Menu_Loot_paging, sizeof Menu_Loot_paging);
+}
+
+void Menu_Loot_BeginPaging(Items_LootListNode* nodes)
+{
+    Menu_Loot_ResetPaging();
+    Menu_Loot_paging.nodes = nodes;
+    Menu_Loot_lootListCount = 0;
+    Menu_Loot_lootListOffset = 0;
+    Menu_Loot_selectedLoot = 0;
+}
+
+int Menu_Loot_HasStagingSpace(int category, int quantity)
+{
+    return Items_Inventory_CountItems(category, Menu_Loot_inventory) + quantity
+        <= Items_Inventory_inventoryItemCapacities[category];
+}
+
+int Menu_Loot_CanStageDrop(char* difficulty_flags)
+{
+    if (Menu_Loot_IsDropAllowed(*difficulty_flags) == 0) {
+        return 0;
+    }
+    if (Menu_Loot_paging.count == kMenuLootRowCapacity) {
+        Menu_Loot_paging.deferred = 1;
+        return 0;
+    }
+    return 1;
+}
+
+void Menu_Loot_AppendStagedDrop(char* difficulty_flags, int category, int index)
+{
+    if (index == 0) {
+        Menu_Loot_paging.deferred = 1;
+        return;
+    }
+    Menu_Loot_AppendLootRow(category, index);
+    Menu_Loot_paging.stagedFlags[Menu_Loot_paging.count++] = difficulty_flags;
+}
+
+int Menu_Loot_AdvanceStagedInventory(void)
+{
+    int i;
+    Items_LootListNode* nodes = Menu_Loot_paging.nodes;
+    if (Menu_Loot_paging.deferred == 0) {
+        return 0;
+    }
+    /* Called only after claims finish or the existing leave confirmation accepts this batch. */
+    for (i = 0; i < Menu_Loot_paging.count; ++i) {
+        *Menu_Loot_paging.stagedFlags[i] = 0;
+    }
+    Menu_Loot_BuildStagedInventory(nodes);
+    Menu_Loot_lootListOffset = 0;
+    Menu_Loot_selectedLoot = 0;
+    return Menu_Loot_lootListCount != 0;
 }
 
 // decomp: MENUB.PRG _setKeyFlag (src/MENU/MENUB.PRG/260.c:2108)

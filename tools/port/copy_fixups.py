@@ -39,6 +39,13 @@ NATIVE_HELPER_HEADERS = {
            "Boot_EncounterPollStop",
        )},
     "Boot_InitializePlayerSettings": r"Native\Game\src\Boot\PlayerSettings.h",
+    **{name: r"Native\Game\src\Menu\Loot\Paging.h"
+       for name in (
+           "kMenuLootRowCapacity", "Menu_Loot_HasStagingSpace",
+           "Menu_Loot_CanStageDrop", "Menu_Loot_AppendStagedDrop",
+           "Menu_Loot_BeginPaging", "Menu_Loot_AdvanceStagedInventory",
+           "Menu_Loot_ResetPaging",
+       )},
 }
 
 NATIVE_FUNCTION_REDIRECTS = {
@@ -90,6 +97,185 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    **{fid: [(f"if (index == {capacity})", f"if (index > {capacity})",
+              "The staging index is one-based; inspect the final valid slot before rejecting a full array.")]
+       for fid, capacity in (
+           ("F02846", "16"), ("F02847", "16"), ("F02848", "0x30"),
+           ("F02850", "16"), ("F02852", "64"),
+       )},
+    "F02849": [
+        ("if (++index == 8)", "if (++index > 8)",
+         "Use all eight original temporary weapon slots."),
+        ("    int index = 1;\n\n    while",
+         """    int index = 1;
+    int gems = 0;
+
+    for (i = 0; i < 3; ++i) {
+        gems += arg0->gems[i].id != 0;
+    }
+    if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Weapon, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Blade, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Grip, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Gem, gems)) {
+        return 0;
+    }
+
+    while""",
+         "Reject a composite staging attempt before reserving its parent or any component."),
+    ],
+    "F02851": [
+        ("if (index == 8)", "if (index > 8)",
+         "Use all eight original temporary shield slots."),
+        ("    int index = 1;\n\n    while",
+         """    int index = 1;
+    int gems = 0;
+
+    for (i = 0; i < 3; ++i) {
+        gems += arg0->gems[i].id != 0;
+    }
+    if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Shield, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Gem, gems)) {
+        return 0;
+    }
+
+    while""",
+         "Reject a shield before staging a partial set of mounted gems."),
+    ],
+    "F02858": [
+        *[(f"Menu_Loot_IsDropAllowed(arg0->{member}.difficultyFlags)",
+           f"Menu_Loot_CanStageDrop(&arg0->{member}.difficultyFlags)",
+           "Track eligible overflow separately from successfully staged drops.")
+          for member in ("weapon", "blade", "grip", "shield", "armor[i]", "accessory", "gem", "misc[i]")],
+        *[(f"Menu_Loot_AppendLootRow({category},",
+           f"Menu_Loot_AppendStagedDrop(&arg0->{member}.difficultyFlags, {category},",
+           "Never append a zero staging result; retain the complete source for the next batch.")
+          for member, category in (
+              ("weapon", "Items_ItemCategory_Weapon"), ("blade", "Items_ItemCategory_Blade"),
+              ("grip", "Items_ItemCategory_Grip"), ("shield", "Items_ItemCategory_Shield"),
+              ("gem", "Items_ItemCategory_Gem"), ("misc[i]", "Items_ItemCategory_Misc"),
+          )],
+        ("Menu_Loot_AppendLootRow(\n                Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->armor[i].armor));",
+         "Menu_Loot_AppendStagedDrop(&arg0->armor[i].difficultyFlags,\n"
+         "                Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->armor[i].armor));",
+         "Retain each deferred limb armor independently."),
+        ("Menu_Loot_AppendLootRow(\n            Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->accessory.accessory));",
+         "Menu_Loot_AppendStagedDrop(&arg0->accessory.difficultyFlags,\n"
+         "            Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->accessory.accessory));",
+         "Accessories share armor storage but retain their own source entry."),
+    ],
+    "F02859": [
+        ("    Core_Memory_ZeroWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);",
+         "    Menu_Loot_BeginPaging(node);\n"
+         "    Core_Memory_ZeroWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);",
+         "Start each batch with independent row indices and no stale source pointers."),
+        ("\n}", """
+}
+
+/* Native batching for MENUB 260.c:1124/1174; original bag capacities remain unchanged. */
+static struct {
+    Items_LootListNode* nodes;
+    char* stagedFlags[kMenuLootRowCapacity];
+    int count;
+    int deferred;
+} Menu_Loot_paging;
+
+void Menu_Loot_ResetPaging(void)
+{
+    Core_Memory_ZeroAlignedWords(&Menu_Loot_paging, sizeof Menu_Loot_paging);
+}
+
+void Menu_Loot_BeginPaging(Items_LootListNode* nodes)
+{
+    Menu_Loot_ResetPaging();
+    Menu_Loot_paging.nodes = nodes;
+    Menu_Loot_lootListCount = 0;
+    Menu_Loot_lootListOffset = 0;
+    Menu_Loot_selectedLoot = 0;
+}
+
+int Menu_Loot_HasStagingSpace(int category, int quantity)
+{
+    return Items_Inventory_CountItems(category, Menu_Loot_inventory) + quantity
+        <= Items_Inventory_inventoryItemCapacities[category];
+}
+
+int Menu_Loot_CanStageDrop(char* difficulty_flags)
+{
+    if (Menu_Loot_IsDropAllowed(*difficulty_flags) == 0) {
+        return 0;
+    }
+    if (Menu_Loot_paging.count == kMenuLootRowCapacity) {
+        Menu_Loot_paging.deferred = 1;
+        return 0;
+    }
+    return 1;
+}
+
+void Menu_Loot_AppendStagedDrop(char* difficulty_flags, int category, int index)
+{
+    if (index == 0) {
+        Menu_Loot_paging.deferred = 1;
+        return;
+    }
+    Menu_Loot_AppendLootRow(category, index);
+    Menu_Loot_paging.stagedFlags[Menu_Loot_paging.count++] = difficulty_flags;
+}
+
+int Menu_Loot_AdvanceStagedInventory(void)
+{
+    int i;
+    Items_LootListNode* nodes = Menu_Loot_paging.nodes;
+    if (Menu_Loot_paging.deferred == 0) {
+        return 0;
+    }
+    /* Called only after claims finish or the existing leave confirmation accepts this batch. */
+    for (i = 0; i < Menu_Loot_paging.count; ++i) {
+        *Menu_Loot_paging.stagedFlags[i] = 0;
+    }
+    Menu_Loot_BuildStagedInventory(nodes);
+    Menu_Loot_lootListOffset = 0;
+    Menu_Loot_selectedLoot = 0;
+    return Menu_Loot_lootListCount != 0;
+}""",
+         "Keep excess source entries alive and expose them only after the current batch is resolved."),
+    ],
+    "F02864": [
+        ("""            } else {
+                return i;
+            }""",
+         """            } else if (Menu_Loot_AdvanceStagedInventory()) {
+                Menu_Loot_controlsEnabled = 0;
+                Menu_Loot_showLoot = 1;
+                Menu_Loot_lootSelectionState = Menu_Loot_LootSelectionState_Init;
+            } else {
+                return i;
+            }""",
+         "Claims or confirmed departure resolve only the visible batch; cancel and key protection stay original."),
+    ],
+    "F02865": [
+        (" * 160", " * kMenuLootRowCapacity",
+         "Reserve metadata for every original inventory slot, including rows created by disassembly."),
+        ("        Core_Memory_FreeFromHighEnd(Menu_Loot_inventory);",
+         "        Menu_Loot_ResetPaging();\n"
+         "        Core_Memory_FreeFromHighEnd(Menu_Loot_inventory);",
+         "Discard page source references before the working inventory and pending nodes are released."),
+    ],
+    "F02844": [
+        ("160 * sizeof", "kMenuLootRowCapacity * sizeof",
+         "Disassembly backup/restore must use the complete native row allocation."),
+    ],
+    "F02845": [
+        ("160 * sizeof", "kMenuLootRowCapacity * sizeof",
+         "Consolidation backup uses the same row allocation as the live screen."),
+        ("sizeof *Menu_Loot_lootList * 160", "sizeof *Menu_Loot_lootList * kMenuLootRowCapacity",
+         "Consolidation restoration includes every supported row."),
+    ],
+    "F00549": [
+        ("    Items_LootListNode* var_a0 = Items_lootListHead;",
+         "    Items_LootListNode* var_a0 = Items_lootListHead;\n\n"
+         "    Menu_Loot_ResetPaging();",
+         "Room exit and Combat Lab stop invalidate page references before freeing their source nodes."),
+    ],
     "F01867": [
         ("            curveSamples[segment] = segment * 0x600 + Core_Random_Rand() % width - width / 2;",
          """            int sampleJitter = Core_Random_Rand();

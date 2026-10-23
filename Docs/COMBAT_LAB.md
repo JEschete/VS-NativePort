@@ -1227,6 +1227,175 @@ does not certify every enemy/room permutation, original boss-story scripts,
 door traversal with the acquired key, equipment drops #13 or C++/compatibility
 retirement. Isolated Lab boss-retention policy is documented separately above.
 
+## Equipment-drop and staging acceptance (#13; #128)
+
+The initial, pre-repair checkpoint used
+`bc76bfc68d36424d972f623f34bdb531b26f68ff`, unchanged from
+`a3a8cf1e`, with uncommitted equipment tests. Eight `[equipment-drops]`
+cases pass547,962 assertions in Debug and Release. Full native suites at that
+checkpoint pass490 cases/1,780,182 assertions each. Scoped quality/tidy reports
+one existing finding, zero new, without changing baselines.
+
+Coverage includes every roll0..254 against rates0/equal/next/255 for weapon,
+shield, armor and accessory; source ownership; independently checked IDs,
+models, materials, DP/PP, signed modifiers, types, six classes/seven affinities,
+ranges, gem effects/slots and24-byte names. The original drop writers use
+embedded component DP/PP, not the aggregate battle-worn loadout values; the
+reference C distinguishes this from storing player equipment. Tests preserve
+that contract. All six eligible limb rolls still occur after the original
+two armor outputs fill.1080 weapon/shield capacity combinations cover zero to
+three gems, exact last-slot claims, full component bags, query/rejected-write
+immutability and rewritten component ownership. Armor/accessory tests cover
+their shared16-slot bag; staged rows cover both difficulty masks and
+availability refresh as space runs out.
+
+The pre-repair live input used all-spells Ashley, HP/MP/INT999 and AGI200, real Fireball
+selection/casting and Square/take-all. Enemy definitions, rates and equipment
+are original. PDB-checked observation only reads memory: it compares actor
+component properties to pending loot, then claimed inventory and owner
+indices. It never edits enemy HP, inventory, random state or event flags.
+Source inspection used the read-only Workshop disc session and extracted
+original ZND/MPD records; the session closed with no changes.
+
+| Enemy / original definition | Debug run; return ticks | Release run; return ticks |
+|---|---|---|
+| Mandel, zone9/0 | `1792718882365880-0`;1203/2619 | `1792719195631906-0`;1203/2610 |
+| Minotaur Zombie, zone12/1 | `1792718948158223-0`;1309/2829 | `1792719324190495-0`;1307/2828 |
+| Lizardman, zone14/0 | `1792719030173223-0`;1207/2634 | `1792719411874537-0`;1207/2624 |
+| Dullahan, zone11/0 | `1792718758997320-0`;1213 | `1792719507770480-0`;1205 |
+| Zombie Knight, zone40/10, seed42 | `1792719644198662-0`;1205 | `1792719733695916-0`;1201 |
+
+Mandel delivers weapon blade15/grip96/material3. Lizardman delivers weapon
+blade71/grip116/material4 and armor162/material2, plus original key467.
+Minotaur Zombie delivers accessory224, plus items324x3/349x1. Dullahan's
+weapon rate0 delivers no equipment. Knight's original shield132 rate32/255
+delivers that shield with material5 in Debug; Release seed42 instead delivers
+armor164/180. Different timed input runs are not asserted to consume identical
+random draws. Debug Knight seed1 (`1792719117691360-0`, three encounters) and
+seed2 (`1792719282697110-0`, one encounter) deliver no equipment. These are
+twenty real defeats across twelve sessions, including fresh F10/re-entry.
+Live attached-gem delivery and live full-player-bag rejection are not claimed;
+their coverage is component-level.
+
+Host hashes remain the #12 hashes listed above. Exact commands use the
+documented test-project builds/full executables, `[equipment-drops]`, and:
+
+```powershell
+build\quality\live-restart-check.ps1 -Configuration Debug `
+  -DropScenario build\quality\drop13-mandel.json -ObserveEquipment -DropRuns 2
+```
+
+Repeat for Release. The Minotaur Zombie preset adds
+`-DropExpected '324:3,349:1'`; Lizardman adds `'467:1'`; Dullahan uses the
+existing `drop12-dullahan.json` and `'349:1,350:1,391:1'`. Knight presets use
+`-DropOptional '332:32'`, which permits only the original optional item at
+count1 and still rejects unexpected IDs/counts. Evidence is
+`build\quality\equipment13-*`, `live-equipment13-*.json`, the ignored bounded
+observer `equipment13-observe.ps1` and the native run folders. The first new
+Dullahan observer result is named `live-equipment13-drop12-dullahan-Debug.json`;
+the earlier #12 Dullahan run itself remains in its original native run folder.
+
+The subsequently added `[staging-capacity]` regression initially failed:
+1 case/366 assertions,14 failures, exit42, recorded in
+`equipment13-staging-red.log`. Each staging helper rejects its final valid
+slot; the caller appends a zero staging result as an invalid item index.
+#128 records this before repair. Correcting only those bounds is insufficient:
+component staging must be atomic, and batches exceeding temporary storage
+must retain excess loot without silent loss or duplication. Original Lich/
+Lich Lord records can yield two armors plus an accessory; eight supported Lab
+enemies can exceed the temporary16 armor slots. No live crash was deliberately
+triggered or claimed. #128 was logged before repair.
+
+### Bounded staging repair
+
+The copier now uses every original staging slot and preflights complete
+weapon/shield component storage before writing. Failed staging never emits
+an invalid row. Excess records remain pending for successive batches;
+**player bag capacities and temporary item arrays are unchanged**.
+
+Taking all rows advances to the next batch after claim processing finishes.
+With rows remaining, the existing positive END confirmation discards only
+the visible batch and then presents the next batch. Cancel leaves the current
+batch intact. Existing mandatory-key protection still prevents abandonment.
+Each new batch starts on its first row. Source references are reset before
+source nodes or working storage are freed. Single-page fallback chest data
+remains unchanged when the menu is abandoned.
+
+Only row metadata and its matching organization backups grow from160 to176
+entries, covering the original physical slots even after disassembly. This
+is a bounded compatibility repair, not #58's native inventory modernization,
+C++ promotion, bridge retirement or permission to enlarge player inventories.
+
+Final local verification used `bc76bfc6` plus this scoped dirty repair,
+preserving unrelated documentation/project/reference edits:
+
+- Debug and Release:27 cases/688,244 assertions with
+  `[equipment-drops],[staging-capacity],[drop-rules],[inventory-capacity]`.
+- Full native suites:498 cases/1,784,771 assertions each.
+- All seven final-slot/full-rejection cases and1080 composite-staging
+  combinations pass. A24-armor source batch surfaces every ID exactly once
+  across16+8 rows without extra RNG draws. Claim and confirmed-discard variants
+  are separate; discarded records are not counted as delivered.
+- Three `[loot-paging-ui]` component cases call the production menu state
+  machine for cancel, positive leave, take-all, key protection and first-row
+  reset. They caught and fixed a next-page cursor error after skipped source
+  records. These are not live-controller overflow replays: animation readiness
+  is supplied by the fixture, and freeing bag space between batches is a
+  component precondition rather than a tested organization-menu interaction.
+- 18 copier regressions pass. A second generation is byte-stable across751
+  outputs and preserves87 maintained paths, including the new paging header.
+- Scoped format/cpplint/Ruff/clone/tidy validation reports one existing finding
+  and zero new; no baseline was changed. Paging-header style also passes.
+
+Commands use the documented Debug/Release test-project and Combat Lab
+MSBuild invocations with `/nodeReuse:false /p:VcpkgManifestInstall=false`.
+Additional checks:
+
+```powershell
+.\.venv-3\Scripts\python.exe -m unittest discover -s tools\port -p test_encounter_fixups.py
+.\.venv-3\Scripts\python.exe tools\port\copy_to_native.py
+.\.venv-3\Scripts\python.exe tools\lint\quality.py --files Native\Tests\src\CombatTestCases.cpp tools\port\copy_fixups.py tools\port\test_encounter_fixups.py --tidy
+.\.venv-3\Scripts\python.exe tools\lint\quality.py --files Native\Game\src\Menu\Loot\Paging.h
+```
+
+Evidence is under `build\quality\staging128-*`. Final rebuilt Combat Lab
+SHA-256 values:
+
+- Debug:`a959e115b467f9b553cf9f5694a50413b3c255ff155f77043adad1a83f2a5a3a`.
+- Release:`b137b23347345bd7054f81bcf38f59b9f7b33cac1ad4cc425fb91a6fd0476f0c`.
+
+The earlier equipment-run table above belongs to the pre-repair hosts, not
+these binaries. Final-host ordinary-controller acceptance passed20 real
+Fireball defeats across12 sessions:
+
+| Scenario / menu operation | Debug run; return ticks | Release run; return ticks |
+| --- | --- | --- |
+| Mandel: END, cancel, take-all; F10/re-entry | `1792722824230910-0`;1325/2861 | `1792723097018253-0`;1315/2843 |
+| Mandel: positively leave equipment behind | `1792722879802372-0`;1267 | `1792723152301108-0`;1263 |
+| Lizardman: key-protected END, cancel, take-all; F10/re-entry | `1792722908823420-0`;1331/2876 | `1792723181002783-0`;1323/2860 |
+| Minotaur Zombie: accessory take-all; F10/re-entry | `1792722964672507-0`;1303/2815 | `1792723236325913-0`;1301/2813 |
+| Dullahan: zero-rate equipment plus ordinary items | `1792723019540287-0`;1203 | `1792723291052989-0`;1199 |
+| Zombie Knight seed42: probabilistic outcomes; F10/re-entry | `1792723047527643-0`;1197/2489 | `1792723318866241-0`;1197/2609 |
+
+Read-only observations validate the compiled layouts, original actor component
+properties, pending records, newly occupied inventory slots and ownership links.
+Cancel retains pending equipment; positive leave delivers none. Key467 is
+claimed exactly once and its acquisition flag changes only on pickup. All
+owned hosts exit. No enemy HP/rate/loot flags were edited to obtain this
+acceptance. Timed seeds do not guarantee identical rolls between builds:
+the final Debug Knight first encounter yields a weapon and its second no
+equipment; Release yields armor then no equipment. The earlier shield132
+pickup remains pre-repair evidence, not a new final-host shield replay.
+
+The ignored driver uses `-ObserveEquipment -DropChoice cancel -DropRuns 2`
+for Mandel/Lizardman, `-DropChoice leave` for the single Mandel discard, and
+normal claims for the remaining cases. Expected misc entries remain
+`467:1`, `324:3,349:1`, and `349:1,350:1,391:1` respectively; Knight allows only
+its original optional `332:32` candidate. Evidence is in
+`staging128-live-*.log`, `live-staging128-*.json` and the native run folders.
+See #13/#128 for the published revision and exact-revision CI; no issue is
+closed on local test results alone.
+
 ## Learned-spell acceptance checkpoint (2026-10-22)
 
 This closes the bounded representative acceptance of

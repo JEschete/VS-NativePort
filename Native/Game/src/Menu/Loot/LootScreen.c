@@ -27,6 +27,7 @@
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Loot/LootInventory.h"
 #include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/Paging.h"
 #include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
@@ -286,7 +287,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
     if (itemIndex != 0) {
 
         Core_Memory_CopyHalfwordBlocks(
-            Menu_Loot_lootListWorkingCopy, Menu_Loot_lootList, 160 * sizeof *Menu_Loot_lootListWorkingCopy);
+            Menu_Loot_lootListWorkingCopy, Menu_Loot_lootList, kMenuLootRowCapacity * sizeof *Menu_Loot_lootListWorkingCopy);
 
         Menu_Loot_showLoot = 0;
         Menu_Loot_disassemblyLootCount = Menu_Loot_lootListCount;
@@ -457,7 +458,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
         Menu_Loot_lootListCount = Menu_Loot_disassemblyLootCount;
 
         Core_Memory_CopyHalfwordBlocks(
-            Menu_Loot_lootList, Menu_Loot_lootListWorkingCopy, 160 * sizeof *Menu_Loot_lootListWorkingCopy);
+            Menu_Loot_lootList, Menu_Loot_lootListWorkingCopy, kMenuLootRowCapacity * sizeof *Menu_Loot_lootListWorkingCopy);
         Menu_Loot_RefreshClaimableRows();
 
         Menu_Loot_lootLeftEdge = 10;
@@ -496,7 +497,7 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
     if (lootIndex != 0) {
 
         Core_Memory_CopyHalfwordBlocks(
-            Menu_Loot_lootListWorkingCopy, Menu_Loot_lootList, 160 * sizeof *Menu_Loot_lootListWorkingCopy);
+            Menu_Loot_lootListWorkingCopy, Menu_Loot_lootList, kMenuLootRowCapacity * sizeof *Menu_Loot_lootListWorkingCopy);
         Core_Memory_CopyHalfwordBlocks(Menu_Loot_inventoryBackup, Menu_Loot_inventory, sizeof *Menu_Loot_inventory);
 
         Menu_Loot_showLoot = 0;
@@ -704,7 +705,7 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
 
             Menu_Loot_lootListCount = Menu_Loot_stackConsolidationLootCount;
 
-            Core_Memory_CopyHalfwordBlocks(Menu_Loot_lootList, Menu_Loot_lootListWorkingCopy, sizeof *Menu_Loot_lootList * 160);
+            Core_Memory_CopyHalfwordBlocks(Menu_Loot_lootList, Menu_Loot_lootListWorkingCopy, sizeof *Menu_Loot_lootList * kMenuLootRowCapacity);
             Core_Memory_CopyHalfwordBlocks(Menu_Loot_inventory, Menu_Loot_inventoryBackup, sizeof *Menu_Loot_inventory);
 
             Menu_Loot_lootLeftEdge = 10;
@@ -1413,6 +1414,10 @@ int Menu_Loot_UpdateLootSelection(int initialize)
         if (i != 0) {
             if (i < 0) {
                 Menu_Loot_lootSelectionState = Menu_Loot_LootSelectionState_WaitForTopMenu;
+            } else if (Menu_Loot_AdvanceStagedInventory()) {
+                Menu_Loot_controlsEnabled = 0;
+                Menu_Loot_showLoot = 1;
+                Menu_Loot_lootSelectionState = Menu_Loot_LootSelectionState_Init;
             } else {
                 return i;
             }
@@ -1561,13 +1566,13 @@ int Menu_Loot_Update(u_char* state)
         }
 
         buf = Core_Memory_AllocateFromHighEnd(
-            sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup + sizeof *Menu_Loot_lootList * 160 * 2);
+            sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup + sizeof *Menu_Loot_lootList * kMenuLootRowCapacity * 2);
 
         Menu_Loot_inventory = buf;
         Menu_Loot_inventoryBackup = buf + sizeof *Menu_Loot_inventory;
         Menu_Loot_lootList = buf + sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup;
         Menu_Loot_lootListWorkingCopy =
-            buf + sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup + sizeof *Menu_Loot_lootList * 160;
+            buf + sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup + sizeof *Menu_Loot_lootList * kMenuLootRowCapacity;
         Menu_Loot_lootClaimed = 0;
         Menu_Loot_lootListCount = 0;
         Menu_Loot_lootListOffset = 0;
@@ -1642,6 +1647,7 @@ int Menu_Loot_Update(u_char* state)
             break;
         }
 
+        Menu_Loot_ResetPaging();
         Core_Memory_FreeFromHighEnd(Menu_Loot_inventory);
 
         if (Menu_Framework_lootLists != 0) {

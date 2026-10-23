@@ -28,6 +28,7 @@
 #include "Items/TreasureChests.h"
 #include "Items/Weapons.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Loot/Paging.h"
 #include "Render/Palette.h"
 #include "State/Flags.h"
 
@@ -266,6 +267,8 @@ void Items_PresentScriptedLoot(int id0, int count0, int id1, int count1)
 void Items_ClearRoomLootList(void)
 {
     Items_LootListNode* var_a0 = Items_lootListHead;
+
+    Menu_Loot_ResetPaging();
 
     while (var_a0 != 0) {
         Items_LootListNode* temp_s0 = var_a0->next;

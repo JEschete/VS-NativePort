@@ -1,8 +1,10 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <iterator>
 #include <utility>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -14,7 +16,9 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
+#include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
+#include "Audio/Sfx.h"
 #include "Battle/Abilities.h"
 #include "Battle/ActionEffects.h"
 #include "Battle/ActionFlow.h"
@@ -27,6 +31,7 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/HitChance.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/Targeting.h"
 #include "Core/Memory.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Random.h"
@@ -37,13 +42,22 @@ extern "C" {
 #include "Field/Interactions.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
+#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Loot.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/ItemRows.h"
+#include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Loot/LootInventory.h"
 #include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/Paging.h"
+#include "Menu/TextBox.h"
+#include "Render/Display.h"
+#include "Render/Frame.h"
+#include "Render/Render.h"
+#include "Render/UiPrimitives.h"
 #include "State/Flags.h"
 #include "State/Progress.h"
 #include "State/Settings.h"
@@ -529,13 +543,14 @@ struct EnemyLootFixture : LootInventoryFixture {
   Items_LootListNode* saved_head = Items_lootListHead;
   Battle_Actor* saved_actor = Battle_actors[1];
   Items_Inventory* saved_staging = Menu_Loot_inventory;
+  Items_BattleLoot* saved_entry = Menu_Framework_lootEntry;
   Menu_Loot_LootListItem* saved_rows = Menu_Loot_lootList;
   u_char saved_count = Menu_Loot_lootListCount;
   u_char saved_offset = Menu_Loot_lootListOffset;
   char saved_selection = Menu_Loot_selectedLoot;
   char saved_difficulty = Audio_Seq_unusedStateFlags.difficulty;
   std::array<Core_HeapBlockHeader, 256> heap{};
-  std::array<Menu_Loot_LootListItem, 64> rows{};
+  std::array<Menu_Loot_LootListItem, kMenuLootRowCapacity> rows{};
   Battle_Actor enemy{};
   Battle_ActorStats stats{};
   unsigned initial_free_units = 0;
@@ -551,6 +566,7 @@ struct EnemyLootFixture : LootInventoryFixture {
     Audio_Seq_unusedInventory = {};
     source = {};
     Menu_Loot_inventory = &source;
+    Menu_Framework_lootEntry = nullptr;
     Menu_Loot_lootList = rows.data();
     Menu_Loot_lootListCount = 0;
     Menu_Loot_lootListOffset = 0;
@@ -565,6 +581,7 @@ struct EnemyLootFixture : LootInventoryFixture {
     Items_lootListHead = saved_head;
     Battle_actors[1] = saved_actor;
     Menu_Loot_inventory = saved_staging;
+    Menu_Framework_lootEntry = saved_entry;
     Menu_Loot_lootList = saved_rows;
     Menu_Loot_lootListCount = saved_count;
     Menu_Loot_lootListOffset = saved_offset;
@@ -615,6 +632,637 @@ struct EnemyLootFixture : LootInventoryFixture {
     CHECK(Items_lootListHead == nullptr);
     CHECK(Core_legacyHeapList.next == Core_legacyHeapList.prev);
     CHECK(Core_legacyHeapList.next->blockSize == initial_free_units);
+  }
+};
+
+Items_EquipmentPartStats EquipmentDropPart(u_short id) {
+  Items_EquipmentPartStats part{};
+  part.id = id;
+  part.subId = 7;
+  part.weaponModelId = 44;
+  part.category = 2;
+  part.strength = 12;
+  part.intelligence = -5;
+  part.agility = 6;
+  part.currentDp = 1234;
+  part.maxDp = 9876;
+  part.currentPp = 345;
+  part.maxPp = 654;
+  part.damageType = 7;
+  part.costType = 15;
+  part.cost = 11;
+  part.material = 5;
+  part.opaque14 = 0x42;
+  part.gemSlots = 3;
+  part.gemEffects = 5;
+  part.range = {5, 7, 9, 2, 13};
+  for (int index = 0; index < 4; ++index) {
+    part.types[index] = static_cast<signed char>(index * 7 - 21);
+  }
+  for (int index = 0; index < 8; ++index) {
+    part.classes[index] = static_cast<signed char>(index * 11 - 33);
+    part.affinities[index] = static_cast<signed char>(index * 13 - 39);
+  }
+  return part;
+}
+
+template <typename Item>
+void CheckDropIdentity(const Item& item, const Items_EquipmentPartStats& part) {
+  CHECK(item.id == part.id);
+  CHECK(static_cast<std::uint8_t>(item.subId) ==
+        static_cast<std::uint8_t>(part.subId));
+  CHECK(item.strength == part.strength);
+  CHECK(item.intelligence == part.intelligence);
+  CHECK(item.agility == part.agility);
+}
+
+template <typename Item>
+void CheckDropDurability(const Item& item,
+                         const Items_EquipmentPartStats& part) {
+  CHECK(item.wepId == part.weaponModelId);
+  CHECK(static_cast<std::uint8_t>(item.category) ==
+        static_cast<std::uint8_t>(part.category));
+  CHECK(item.currentDp == part.currentDp);
+  CHECK(item.maxDp == part.maxDp);
+  CHECK(item.currentPp == part.currentPp);
+  CHECK(item.maxPp == part.maxPp);
+  CHECK(item.material == part.material);
+}
+
+template <typename Item>
+void CheckDropAffinities(const Item& item,
+                         const Items_EquipmentPartStats& part) {
+  for (int index = 0; index < 8; ++index) {
+    CHECK(item.classes[index] == (index < 6 ? part.classes[index] : 0));
+    CHECK(item.affinities[index] == (index < 7 ? part.affinities[index] : 0));
+  }
+}
+
+template <typename Item>
+void CheckDropTypes(const Item& item, const Items_EquipmentPartStats& part) {
+  for (int index = 0; index < 4; ++index) {
+    CHECK(item.types[index] == part.types[index]);
+  }
+}
+
+template <typename Item>
+void CheckZeroedDrop(const Item& item) {
+  const Item empty{};
+  CHECK(std::memcmp(&item, &empty, sizeof(item)) == 0);
+}
+
+void CheckBladeDrop(const Items_InventoryBlade& item,
+                    const Items_EquipmentPartStats& part) {
+  CheckDropIdentity(item, part);
+  CheckDropDurability(item, part);
+  CheckDropAffinities(item, part);
+  CHECK(item.cost == part.cost);
+  // Copied C uses unsigned bitfields; compare their wire bits in C++.
+  CHECK((item.damageType & 3) == (part.damageType & 3));
+  CHECK((item.costType & 7) == (part.costType & 7));
+  CHECK(item.opaque12 == part.opaque14);
+  CHECK(std::memcmp(&item.range, &part.range, sizeof(item.range)) == 0);
+}
+
+void CheckGripDrop(const Items_InventoryGrip& item,
+                   const Items_EquipmentPartStats& part) {
+  CheckDropIdentity(item, part);
+  CheckDropTypes(item, part);
+  CHECK(static_cast<std::uint8_t>(item.category) ==
+        static_cast<std::uint8_t>(part.category));
+  CHECK(item.gemSlots == part.gemSlots);
+}
+
+void CheckArmorDrop(const Items_InventoryArmor& item,
+                    const Items_EquipmentPartStats& part) {
+  CheckDropIdentity(item, part);
+  CheckDropDurability(item, part);
+  CheckDropTypes(item, part);
+  CheckDropAffinities(item, part);
+  CHECK(item.gemSlots == part.gemSlots);
+}
+
+template <typename Loadout>
+void PrepareDropGems(Loadout& source) {
+  source.gems[0] = EquipmentDropPart(300);
+  source.gems[2] = EquipmentDropPart(302);
+}
+
+template <typename Drop, typename Loadout>
+void CheckDropGems(const Drop& drop, const Loadout& source) {
+  for (int index = 0; index < 3; ++index) {
+    const auto& gem = drop.gems[index];
+    const auto& part = source.gems[index];
+    if (part.id == 0) {
+      CheckZeroedDrop(gem);
+    } else {
+      CheckDropIdentity(gem, part);
+      CheckDropAffinities(gem, part);
+      CHECK(gem.gemEffects == part.gemEffects);
+    }
+  }
+}
+
+void PrepareEquipmentDrop(Items_WeaponLoadout& source) {
+  source.blade = EquipmentDropPart(14);
+  source.grip = EquipmentDropPart(96);
+  PrepareDropGems(source);
+  source.currentDp = 9;
+  source.currentPp = 8;
+  for (int index = 0; index < 23; ++index) {
+    source.name[index] = static_cast<char>(10 + index);
+  }
+  source.name[23] = static_cast<char>(0xE7);
+}
+
+void PrepareEquipmentDrop(Items_ShieldLoadout& source) {
+  source.base = EquipmentDropPart(147);
+  PrepareDropGems(source);
+  source.currentDp = 9;
+  source.currentPp = 8;
+}
+
+void PrepareEquipmentDrop(Items_ArmorLoadout& source) {
+  source.armor = EquipmentDropPart(149);
+  source.currentDp = 9;
+}
+
+void PrepareEquipmentDrop(Items_AccessorySpawnLoadout& source) {
+  source.accessory = EquipmentDropPart(237);
+}
+
+void CheckEquipmentDrop(const Items_LootedWeapon& drop,
+                        const Items_WeaponLoadout& source) {
+  CHECK(drop.difficultyFlags == 3);
+  CheckBladeDrop(drop.blade, source.blade);
+  CheckGripDrop(drop.grip, source.grip);
+  CheckDropGems(drop, source);
+  CHECK(std::memcmp(drop.name, source.name, sizeof(drop.name)) == 0);
+}
+
+void CheckEquipmentDrop(const Items_LootedShield& drop,
+                        const Items_ShieldLoadout& source) {
+  CHECK(drop.difficultyFlags == 3);
+  CheckArmorDrop(drop.shield, source.base);
+  CheckDropGems(drop, source);
+}
+
+void CheckEquipmentDrop(const Items_LootedArmor& drop,
+                        const Items_ArmorLoadout& source) {
+  CHECK(drop.difficultyFlags == 3);
+  CheckArmorDrop(drop.armor, source.armor);
+}
+
+void CheckEquipmentDrop(const Items_LootedAccessory& drop,
+                        const Items_AccessorySpawnLoadout& source) {
+  CHECK(drop.difficultyFlags == 3);
+  CheckArmorDrop(drop.accessory, source.accessory);
+}
+
+template <typename Drop, typename Loadout>
+void CheckEquipmentRoll(int roll, int rate, int (*drop)(Drop*, Loadout*)) {
+  LootRandomFixture random;
+  random.ForceFirstRoll(roll);
+  Loadout source{};
+  PrepareEquipmentDrop(source);
+  source.dropRate = static_cast<decltype(source.dropRate)>(rate);
+  const auto before = source;
+  std::array<Drop, 2> result{};
+  CHECK(drop(result.data(), &source) == (roll < rate));
+  if (roll < rate) {
+    CheckEquipmentDrop(result[0], source);
+    result[0] = {};
+  }
+  CheckZeroedDrop(result);
+  CHECK(std::memcmp(&source, &before, sizeof(source)) == 0);
+  random.CheckOneForcedDraw();
+}
+
+struct EquipmentCapacity {
+  int parents;
+  int blades;
+  int grips;
+  int gems;
+};
+
+template <typename Loadout>
+void EnableEquipmentDrop(Loadout& source) {
+  PrepareEquipmentDrop(source);
+  source.dropRate = static_cast<decltype(source.dropRate)>(255);
+}
+
+template <typename Item, typename Loadout>
+void CheckClaimedGems(const Item& item, const Loadout& source, int parent) {
+  for (int index = 0; index < 3; ++index) {
+    const int slot = item.gems[index];
+    const auto& part = source.gems[index];
+    CHECK((slot != 0) == (part.id != 0));
+    CHECK(slot <= 48);
+    if (slot > 0 && slot <= 48) {
+      const auto& gem = Audio_Seq_unusedInventory.gems[slot - 1];
+      CheckDropIdentity(gem, part);
+      CheckDropAffinities(gem, part);
+      CHECK(gem.gemEffects == part.gemEffects);
+      CHECK(gem.index == slot);
+      CHECK(gem.setItemIndex == parent);
+    }
+  }
+}
+
+struct EquipmentStagingFixture : EnemyLootFixture {
+  void CollectArmorPage(std::vector<int>& seen, bool claim) {
+    for (int index = 0; index < Menu_Loot_lootListCount; ++index) {
+      const auto& row = rows[index];
+      REQUIRE(row.itemCategory == Items_ItemCategory_Armor);
+      if (row.itemIndex < 0 || row.itemIndex >= 16) {
+        FAIL("Staged armor row points outside the original capacity");
+        return;
+      }
+      seen.push_back(source.armor[row.itemIndex].id);
+      if (claim) {
+        CHECK(row.state == 1);
+        CHECK(Items_Inventory_CopyItem(0x14, &Audio_Seq_unusedInventory,
+                                       row.itemIndex, &source) != 0);
+      }
+    }
+  }
+
+  void AdvanceArmorPage(bool first_claimed) {
+    Menu_Loot_lootListCount = 0;
+    REQUIRE(Menu_Loot_AdvanceStagedInventory() == 1);
+    REQUIRE(Menu_Loot_lootListCount == 8);
+    for (int index = 0; index < 8; ++index) {
+      CHECK(rows[index].state == !first_claimed);
+    }
+    Audio_Seq_unusedInventory = {};
+    Menu_Loot_RefreshClaimableRows();
+  }
+
+  void CheckArmorBatchComplete(std::vector<int>& seen) {
+    std::sort(seen.begin(), seen.end());
+    REQUIRE(seen.size() == 24);
+    for (int index = 0; index < 24; ++index) CHECK(seen[index] == 149 + index);
+    Menu_Loot_lootListCount = 0;
+    CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+    VS::Core::Random expected;
+    for (int index = 0; index < 40; ++index) expected.Next(255);
+    random.CheckSequence(expected);
+    CheckCleared();
+    CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+  }
+
+  void QueueArmorBatch() {
+    for (int actor = 0; actor < 8; ++actor) {
+      enemy.id = actor + 1;
+      EnableEquipmentDrop(stats.limbs[0].armor);
+      EnableEquipmentDrop(stats.limbs[1].armor);
+      EnableEquipmentDrop(stats.accessory);
+      stats.limbs[0].armor.armor.id = static_cast<u_short>(149 + actor * 3);
+      stats.limbs[1].armor.armor.id = static_cast<u_short>(150 + actor * 3);
+      stats.accessory.accessory.id = static_cast<u_short>(151 + actor * 3);
+      Items_QueueEnemyLoot(&enemy);
+    }
+  }
+
+  void Stage(int flags) {
+    EnableEquipmentDrop(stats.weapon);
+    EnableEquipmentDrop(stats.shield);
+    EnableEquipmentDrop(stats.accessory);
+    EnableEquipmentDrop(stats.limbs[0].armor);
+    EnableEquipmentDrop(stats.limbs[1].armor);
+    stats.limbs[1].armor.armor.id = 153;
+    Items_QueueEnemyLoot(&enemy);
+    REQUIRE(Items_lootListHead != nullptr);
+    auto& loot = Items_lootListHead->loot;
+    loot.weapon.difficultyFlags = static_cast<char>(flags);
+    loot.shield.difficultyFlags = static_cast<char>(flags);
+    loot.accessory.difficultyFlags = static_cast<char>(flags);
+    for (auto& armor : loot.armor) {
+      armor.difficultyFlags = static_cast<char>(flags);
+    }
+    Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  }
+
+  static void CheckRow(const Menu_Loot_LootListItem& row, int index,
+                       bool fits) {
+    const std::array categories{
+        Items_ItemCategory_Weapon, Items_ItemCategory_Shield,
+        Items_ItemCategory_Armor, Items_ItemCategory_Armor,
+        Items_ItemCategory_Armor};
+    CHECK(row.itemCategory == categories[index]);
+    CHECK(row.itemIndex == (index < 2 ? 0 : index - 2));
+    CHECK(row.opaque2 == 0);
+    CHECK(row.state == fits);
+  }
+
+  void Claim(int armor_count) {
+    const auto source_before = source;
+    int claimed_armor = 0;
+    for (int index = 0; index < 5; ++index) {
+      const auto& row = rows[index];
+      const bool fits = index < 2 || armor_count + claimed_armor < 16;
+      CheckRow(row, index, fits);
+      const int flags = static_cast<int>(row.itemCategory) |
+                        static_cast<int>(Menu_Framework_CopyItemFlag_Write);
+      const int result = Items_Inventory_CopyItem(
+          flags, &Audio_Seq_unusedInventory, row.itemIndex, &source);
+      CHECK(result ==
+            (fits ? (index < 2 ? 1 : armor_count + claimed_armor + 1) : 0));
+      if (index >= 2 && fits) ++claimed_armor;
+      Menu_Loot_RefreshClaimableRows();
+    }
+    CHECK(std::memcmp(&source, &source_before, sizeof(source)) == 0);
+    CheckClaimedArmor(armor_count, claimed_armor);
+  }
+
+  void CheckClaimedArmor(int armor_count, int claimed_armor) const {
+    for (int index = 0; index < claimed_armor; ++index) {
+      const auto& expected = index < 2 ? stats.limbs[index].armor.armor
+                                       : stats.accessory.accessory;
+      const auto& armor = Audio_Seq_unusedInventory.armor[armor_count + index];
+      CheckArmorDrop(armor, expected);
+      CHECK(armor.index == armor_count + index + 1);
+      CHECK(armor.limb == 0);
+    }
+  }
+
+  void CheckWeaponParts() {
+    const auto& inventory = Audio_Seq_unusedInventory;
+    const auto& weapon = inventory.weapons[0];
+    CHECK(weapon.index == 1);
+    CHECK(weapon.blade == 1);
+    CHECK(weapon.grip == 1);
+    CHECK(weapon.isEquipped == 0);
+    CHECK(std::memcmp(weapon.name, stats.weapon.name, sizeof(weapon.name)) ==
+          0);
+    CheckBladeDrop(inventory.blades[0], stats.weapon.blade);
+    CheckGripDrop(inventory.grips[0], stats.weapon.grip);
+    CHECK(inventory.blades[0].assembledWeaponIndex == 1);
+    CHECK(inventory.grips[0].assembledWeaponIndex == 1);
+    CheckClaimedGems(weapon, stats.weapon, 1);
+  }
+
+  void CheckShieldParts() {
+    const auto& shield = Audio_Seq_unusedInventory.shields[0];
+    CHECK(shield.index == 1);
+    CHECK(shield.isEquipped == 0);
+    CheckArmorDrop(shield.base, stats.shield.base);
+    CheckClaimedGems(shield, stats.shield, 0x81);
+    CHECK(Items_Inventory_CountItems(Items_ItemCategory_Gem,
+                                     &Audio_Seq_unusedInventory) == 4);
+  }
+};
+
+struct LootPagingMenuFixture : EquipmentStagingFixture {
+  u_int* saved_sfx_offsets = Audio_Playback_soundEffectProgramOffsets;
+  u_short* saved_sfx_selectors = Audio_Playback_soundEffectBankSelectors;
+  State_Settings saved_settings = Input_settings;
+  decltype(Input_buttonsPressed) saved_buttons = Input_buttonsPressed;
+  decltype(Input_buttonRepeat) saved_repeat = Input_buttonRepeat;
+  Menu_Framework_MenuRow* saved_menu_rows = Menu_Framework_menuItems;
+  decltype(Menu_Framework_itemNames) saved_names = Menu_Framework_itemNames;
+  decltype(Battle_stringContext) saved_string_context = Battle_stringContext;
+  Menu_TextBoxState saved_box = Menu_textBoxes[7];
+  Render_FrameScratch saved_frame = Render_frameScratch;
+  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  int saved_framebuffer = Render_frameBuf;
+  int saved_sound_group = Audio_nextSfxChannelGroup7E;
+  decltype(Menu_Loot_lootClaimed) saved_claimed = Menu_Loot_lootClaimed;
+  decltype(Menu_Loot_controlsEnabled) saved_controls =
+      Menu_Loot_controlsEnabled;
+  decltype(Menu_Loot_showLoot) saved_show = Menu_Loot_showLoot;
+  decltype(Menu_Loot_previewedLoot) saved_preview = Menu_Loot_previewedLoot;
+  decltype(Menu_Loot_lootLeftEdge) saved_edge = Menu_Loot_lootLeftEdge;
+  std::array<Menu_Framework_MenuRow, 40> menu_rows{};
+  char item_names[512][24]{};
+  std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4 + 2);
+  std::array<u_long, 32> ordering{};
+  std::array<u_int, 0x180> sfx_offsets{};
+  std::array<u_short, 0x180> sfx_selectors{};
+
+  LootPagingMenuFixture() {
+    Menu_Framework_menuItems = menu_rows.data();
+    Menu_Framework_itemNames = item_names;
+    Menu_textBoxes[7] = {};
+    Menu_InitInformationTextBox(Menu_InformationBoxHeader_Information);
+    sfx_offsets.fill(UINT32_MAX);
+    Audio_Playback_soundEffectProgramOffsets = sfx_offsets.data();
+    Audio_Playback_soundEffectBankSelectors = sfx_selectors.data();
+    Input_settings.information = 0;
+    Menu_Loot_lootClaimed = 0;
+    Menu_Loot_lootLeftEdge = 0;
+    Render_frameBuf = 0;
+    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
+    Render_frameScratch.primitiveCursor = storage.data() + 1;
+    Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
+    ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+    Menu_Loot_UpdateLootSelection(1);
+  }
+
+  ~LootPagingMenuFixture() {
+    Audio_Playback_soundEffectProgramOffsets = saved_sfx_offsets;
+    Audio_Playback_soundEffectBankSelectors = saved_sfx_selectors;
+    Input_settings = saved_settings;
+    Input_buttonsPressed = saved_buttons;
+    Input_buttonRepeat = saved_repeat;
+    Menu_Framework_menuItems = saved_menu_rows;
+    Menu_Framework_itemNames = saved_names;
+    Battle_stringContext = saved_string_context;
+    Menu_textBoxes[7] = saved_box;
+    Render_frameScratch = saved_frame;
+    Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    Render_frameBuf = saved_framebuffer;
+    Audio_nextSfxChannelGroup7E = saved_sound_group;
+    Menu_Loot_lootClaimed = saved_claimed;
+    Menu_Loot_controlsEnabled = saved_controls;
+    Menu_Loot_showLoot = saved_show;
+    Menu_Loot_previewedLoot = saved_preview;
+    Menu_Loot_lootLeftEdge = saved_edge;
+  }
+
+  static int Tick(int buttons = 0) {
+    Input_buttonsPressed.allButtons = static_cast<u_short>(buttons);
+    Input_buttonRepeat = static_cast<u_short>(buttons);
+    return Menu_Loot_UpdateLootSelection(0);
+  }
+
+  static void Step(int buttons = 0) { CHECK(Tick(buttons) == 0); }
+
+  static void CheckClaims(int claimed, int bag_count) {
+    CHECK(Menu_Loot_lootClaimed == claimed);
+    CHECK(Items_Inventory_CountItems(Items_ItemCategory_Armor, nullptr) ==
+          bag_count);
+  }
+
+  static void CheckNextArmorPage() {
+    CHECK(Menu_Loot_lootListCount == 8);
+    CHECK(Menu_Loot_selectedLoot == 0);
+    CHECK(Menu_Loot_lootListOffset == 0);
+    CHECK(Menu_Loot_controlsEnabled == 0);
+    CHECK(Menu_Loot_showLoot == 1);
+  }
+
+  void OpenLeaveConfirmation() {
+    Step(PADRdown);
+    Step();
+    Step();
+    SettleRows();
+    Step();
+  }
+
+  void SettleRows() {
+    for (auto& row : menu_rows) {
+      if (row.state > 1) row.state = 1;
+    }
+  }
+};
+
+struct EquipmentLootFixture : LootInventoryFixture {
+  bool shield;
+  int attached;
+  EquipmentCapacity occupied;
+
+  EquipmentLootFixture(bool is_shield, int gem_count, EquipmentCapacity counts)
+      : shield(is_shield), attached(gem_count), occupied(counts) {
+    Audio_Seq_unusedInventory = {};
+    source = {};
+    PrepareSource();
+    FillTarget(Audio_Seq_unusedInventory, shield, occupied);
+  }
+
+  void PrepareSource() {
+    if (shield) {
+      auto part = EquipmentDropPart(147);
+      Items_WriteInventoryArmorStats(&source.shields[0].base, &part);
+      source.shields[0].index = 1;
+      source.shields[0].isEquipped = 1;
+      source.shields[0].base.limb = 1;
+    } else {
+      auto blade = EquipmentDropPart(14);
+      auto grip = EquipmentDropPart(96);
+      Items_WriteInventoryBladeStats(&source.blades[0], &blade);
+      Items_WriteInventoryGripStats(&source.grips[0], &grip);
+      source.blades[0].index = 1;
+      source.blades[0].assembledWeaponIndex = 1;
+      source.grips[0].index = 1;
+      source.grips[0].assembledWeaponIndex = 1;
+      source.weapons[0].index = 1;
+      source.weapons[0].isEquipped = 1;
+      source.weapons[0].blade = 1;
+      source.weapons[0].grip = 1;
+      for (int index = 0; index < 23; ++index) {
+        source.weapons[0].name[index] = static_cast<char>(10 + index);
+      }
+      source.weapons[0].name[23] = static_cast<char>(0xE7);
+    }
+    for (int index = 0; index < attached; ++index) {
+      auto gem = EquipmentDropPart(static_cast<u_short>(300 + index));
+      Items_WriteInventoryGemStats(&source.gems[index], &gem);
+      source.gems[index].index = static_cast<std::int16_t>(index + 1);
+      source.gems[index].setItemIndex = shield ? 0x81 : 1;
+      auto& slots = shield ? source.shields[0].gems : source.weapons[0].gems;
+      slots[index] = static_cast<u_char>(index + 1);
+    }
+  }
+
+  static void FillTarget(Items_Inventory& target, bool shield,
+                         EquipmentCapacity occupied) {
+    for (int index = 0; index < occupied.parents; ++index) {
+      if (shield) {
+        target.shields[index].base.id = 147;
+        target.shields[index].index = static_cast<char>(index + 1);
+      } else {
+        target.weapons[index].blade = static_cast<u_char>(index + 1);
+        target.weapons[index].grip = static_cast<u_char>(index + 1);
+        target.weapons[index].index = static_cast<char>(index + 1);
+      }
+    }
+    for (int index = 0; index < occupied.blades; ++index) {
+      target.blades[index].id = 14;
+      target.blades[index].index = static_cast<char>(index + 1);
+      if (!shield && index < occupied.parents) {
+        target.blades[index].assembledWeaponIndex =
+            static_cast<char>(index + 1);
+      }
+    }
+    for (int index = 0; index < occupied.grips; ++index) {
+      target.grips[index].id = 96;
+      target.grips[index].index = static_cast<u_short>(index + 1);
+      if (!shield && index < occupied.parents) {
+        target.grips[index].assembledWeaponIndex =
+            static_cast<u_short>(index + 1);
+      }
+    }
+    for (int index = 0; index < occupied.gems; ++index) {
+      target.gems[index].id = 300;
+      target.gems[index].index = static_cast<std::int16_t>(index + 1);
+    }
+  }
+
+  int CopyEquipment(bool write) {
+    const int category =
+        shield ? Items_ItemCategory_Shield : Items_ItemCategory_Weapon;
+    const int flags =
+        category |
+        (write ? static_cast<int>(Menu_Framework_CopyItemFlag_Write) : 0);
+    return Items_Inventory_CopyItem(flags, &Audio_Seq_unusedInventory, 0,
+                                    &source);
+  }
+
+  Items_Inventory ExpectedInventory(const Items_Inventory& before) const {
+    auto expected = before;
+    const int parent = occupied.parents + 1;
+    if (shield) {
+      expected.shields[occupied.parents] = source.shields[0];
+      expected.shields[occupied.parents].index = static_cast<char>(parent);
+      expected.shields[occupied.parents].isEquipped = 0;
+    } else {
+      auto& weapon = expected.weapons[occupied.parents];
+      weapon = source.weapons[0];
+      weapon.index = static_cast<char>(parent);
+      weapon.isEquipped = 0;
+      weapon.blade = static_cast<u_char>(occupied.blades + 1);
+      weapon.grip = static_cast<u_char>(occupied.grips + 1);
+      auto& blade = expected.blades[occupied.blades];
+      blade = source.blades[0];
+      blade.index = static_cast<char>(occupied.blades + 1);
+      blade.assembledWeaponIndex = static_cast<char>(parent);
+      auto& grip = expected.grips[occupied.grips];
+      grip = source.grips[0];
+      grip.index = static_cast<u_short>(occupied.grips + 1);
+      grip.assembledWeaponIndex = static_cast<u_short>(parent);
+    }
+    for (int index = 0; index < attached; ++index) {
+      const int slot = occupied.gems + index;
+      expected.gems[slot] = source.gems[index];
+      expected.gems[slot].index = static_cast<std::int16_t>(slot + 1);
+      expected.gems[slot].setItemIndex =
+          static_cast<u_short>(parent | (shield ? 0x80 : 0));
+      auto& slots = shield ? expected.shields[occupied.parents].gems
+                           : expected.weapons[occupied.parents].gems;
+      slots[index] = static_cast<u_char>(slot + 1);
+    }
+    return expected;
+  }
+
+  static void CheckInventory(const Items_Inventory& actual,
+                             const Items_Inventory& expected) {
+    CHECK(std::memcmp(&actual, &expected, sizeof(actual)) == 0);
+  }
+
+  void CheckTransfer() {
+    const auto before = Audio_Seq_unusedInventory;
+    const auto source_before = source;
+    const bool fits = occupied.parents < 8 && occupied.gems + attached <= 48 &&
+                      (shield || (occupied.blades < 16 && occupied.grips < 16));
+    const int result = fits ? occupied.parents + 1 : 0;
+    CHECK(CopyEquipment(false) == result);
+    CheckInventory(Audio_Seq_unusedInventory, before);
+    CheckInventory(source, source_before);
+    CHECK(CopyEquipment(true) == result);
+    CheckInventory(source, source_before);
+    CheckInventory(Audio_Seq_unusedInventory,
+                   fits ? ExpectedInventory(before) : before);
   }
 };
 
@@ -1714,4 +2362,345 @@ TEST_CASE("Prologue progression suppresses presentation without losing loot",
   CHECK(Items_lootListHead == queued);
   if (queued != nullptr) fixture.CheckQueued(1, false, false);
   fixture.CheckCleared();
+}
+
+TEST_CASE("Composite equipment loot respects component capacities atomically",
+          "[combat][loot][equipment-drops]") {
+  const bool shield = GENERATE(false, true);
+  const int parents = GENERATE(0, 7, 8);
+  const int blades = GENERATE_COPY(shield ? 0 : parents, 15, 16);
+  const int grips = GENERATE_COPY(shield ? 0 : parents, 15, 16);
+  const int gems = GENERATE(0, 45, 46, 47, 48);
+  const int attached = GENERATE(0, 1, 2, 3);
+  EquipmentLootFixture fixture(shield, attached,
+                               {parents, blades, grips, gems});
+  fixture.CheckTransfer();
+}
+
+TEST_CASE("Weapon drops preserve properties at every original rate boundary",
+          "[combat][loot][equipment-drops]") {
+  const int roll = GENERATE(Catch::Generators::range(0, 255));
+  const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
+  CheckEquipmentRoll(roll, rate, Items_RollEnemyWeaponDrop);
+}
+
+TEST_CASE("Shield drops preserve properties at every original rate boundary",
+          "[combat][loot][equipment-drops]") {
+  const int roll = GENERATE(Catch::Generators::range(0, 255));
+  const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
+  CheckEquipmentRoll(roll, rate, Items_RollEnemyShieldDrop);
+}
+
+TEST_CASE("Armor drops preserve properties at every original rate boundary",
+          "[combat][loot][equipment-drops]") {
+  const int roll = GENERATE(Catch::Generators::range(0, 255));
+  const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
+  CheckEquipmentRoll(roll, rate, Items_RollEnemyArmorDrop);
+}
+
+TEST_CASE("Accessory drops preserve properties at every original rate boundary",
+          "[combat][loot][equipment-drops]") {
+  const int roll = GENERATE(Catch::Generators::range(0, 255));
+  const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
+  CheckEquipmentRoll(roll, rate, Items_RollEnemyAccessoryDrop);
+}
+
+TEST_CASE("Six limb rolls retain only the first two successful armor drops",
+          "[combat][loot][equipment-drops]") {
+  const int present = GENERATE(0, 1, 2, 3, 0x15, 0x3F);
+  const int eligible = GENERATE(0, 0x2A, 0x3F);
+  EnemyLootFixture fixture;
+  VS::Core::Random expected;
+  for (int index = 0; index < 3; ++index) expected.Next(255);
+  std::vector<int> selected;
+  for (int index = 0; index < 6; ++index) {
+    auto& source = fixture.stats.limbs[index].armor;
+    if ((present & (1 << index)) != 0) {
+      source.armor = EquipmentDropPart(static_cast<u_short>(149 + index));
+      expected.Next(255);
+    }
+    if ((eligible & (1 << index)) != 0) {
+      source.dropRate = static_cast<char>(255);
+      if (source.armor.id != 0 && selected.size() < 2) {
+        selected.push_back(index);
+      }
+    }
+  }
+  Items_QueueEnemyLoot(&fixture.enemy);
+  CHECK((Items_lootListHead != nullptr) == !selected.empty());
+  if (Items_lootListHead != nullptr) {
+    const auto& loot = Items_lootListHead->loot;
+    for (std::size_t index = 0; index < selected.size(); ++index) {
+      CheckEquipmentDrop(loot.armor[index],
+                         fixture.stats.limbs[selected[index]].armor);
+    }
+    if (selected.size() == 1) CheckZeroedDrop(loot.armor[1]);
+  }
+  fixture.random.CheckSequence(expected);
+  fixture.CheckCleared();
+}
+
+TEST_CASE("Armor and accessory claims honor the original shared bag capacity",
+          "[combat][loot][equipment-drops]") {
+  const int count = GENERATE(0, 15, 16);
+  const int id = GENERATE(149, 237);
+  LootInventoryFixture fixture;
+  Audio_Seq_unusedInventory = {};
+  fixture.source = {};
+  auto part = EquipmentDropPart(static_cast<u_short>(id));
+  Items_WriteInventoryArmorStats(&fixture.source.armor[0], &part);
+  fixture.source.armor[0].index = 1;
+  for (int index = 0; index < count; ++index) {
+    Audio_Seq_unusedInventory.armor[index].id = 150;
+    Audio_Seq_unusedInventory.armor[index].index =
+        static_cast<u_char>(index + 1);
+  }
+  auto expected = Audio_Seq_unusedInventory;
+  const auto source_before = fixture.source;
+  CHECK(Items_Inventory_CopyItem(
+            Items_ItemCategory_Armor, &Audio_Seq_unusedInventory, 0,
+            &fixture.source) == (count < 16 ? count + 1 : 0));
+  EquipmentLootFixture::CheckInventory(Audio_Seq_unusedInventory, expected);
+  CHECK(Items_Inventory_CopyItem(
+            static_cast<int>(Items_ItemCategory_Armor) |
+                static_cast<int>(Menu_Framework_CopyItemFlag_Write),
+            &Audio_Seq_unusedInventory, 0,
+            &fixture.source) == (count < 16 ? count + 1 : 0));
+  if (count < 16) {
+    expected.armor[count] = fixture.source.armor[0];
+    expected.armor[count].index = static_cast<u_char>(count + 1);
+    expected.armor[count].limb = 0;
+  }
+  EquipmentLootFixture::CheckInventory(Audio_Seq_unusedInventory, expected);
+  EquipmentLootFixture::CheckInventory(fixture.source, source_before);
+}
+
+TEST_CASE(
+    "Equipment loot staging preserves rows and refreshes bag availability",
+    "[combat][loot][equipment-drops]") {
+  const int difficulty = GENERATE(0, 1);
+  const int flags = GENERATE(0, 1, 2, 3);
+  const int armor_count = GENERATE(0, 15, 16);
+  EquipmentStagingFixture fixture;
+  Audio_Seq_unusedStateFlags.difficulty = static_cast<char>(difficulty);
+  for (int index = 0; index < armor_count; ++index) {
+    Audio_Seq_unusedInventory.armor[index].id = 150;
+    Audio_Seq_unusedInventory.armor[index].index =
+        static_cast<u_char>(index + 1);
+  }
+  fixture.Stage(flags);
+  const bool allowed = (flags & (difficulty + 1)) != 0;
+  REQUIRE(Menu_Loot_lootListCount == (allowed ? 5 : 0));
+  if (allowed) {
+    fixture.Claim(armor_count);
+    fixture.CheckWeaponParts();
+    fixture.CheckShieldParts();
+  } else {
+    CheckZeroedDrop(fixture.source);
+  }
+  VS::Core::Random expected;
+  for (int index = 0; index < 5; ++index) expected.Next(255);
+  fixture.random.CheckSequence(expected);
+  fixture.CheckCleared();
+}
+
+TEST_CASE("Loot staging uses every slot of the original inventory capacities",
+          "[combat][loot][staging-capacity]") {
+  const int category = GENERATE(0, 1, 2, 3, 4, 5, 6);
+  const std::array capacities{8, 16, 16, 8, 16, 48, 64};
+  EnemyLootFixture fixture;
+  Items_BattleLoot loot{};
+  loot.weapon.blade.id = 14;
+  loot.weapon.grip.id = 96;
+  loot.blade.blade.id = 14;
+  loot.grip.grip.id = 96;
+  loot.shield.shield.id = 147;
+  loot.armor[0].armor.id = 149;
+  loot.gem.gem.id = 300;
+  loot.misc[0].itemId = 323;
+  loot.misc[0].count = 1;
+  const std::array<int (*)(Items_BattleLoot&), 7> stage{
+      [](Items_BattleLoot& value) {
+        return Menu_Loot_StageWeapon(&value.weapon);
+      },
+      [](Items_BattleLoot& value) {
+        return Menu_Loot_StageBlade(&value.blade.blade, 0);
+      },
+      [](Items_BattleLoot& value) {
+        return Menu_Loot_StageGrip(&value.grip.grip, 0);
+      },
+      [](Items_BattleLoot& value) {
+        return Menu_Loot_StageShield(&value.shield);
+      },
+      [](Items_BattleLoot& value) {
+        return Menu_Loot_StageArmor(&value.armor[0].armor);
+      },
+      [](Items_BattleLoot& value) {
+        return Menu_Loot_StageGem(&value.gem.gem, 0);
+      },
+      [](Items_BattleLoot& value) {
+        return Menu_Loot_StageMiscItem(&value.misc[0]);
+      }};
+  for (int index = 0; index < capacities[category]; ++index) {
+    CAPTURE(category, index);
+    CHECK(stage[category](loot) == index + 1);
+    CHECK(Items_Inventory_CountItems(category, &fixture.source) == index + 1);
+  }
+  const auto full = fixture.source;
+  CHECK(stage[category](loot) == 0);
+  EquipmentLootFixture::CheckInventory(fixture.source, full);
+}
+
+TEST_CASE("Composite loot staging preflights all component storage",
+          "[combat][loot][staging-capacity]") {
+  const bool shield = GENERATE(false, true);
+  const int parents = GENERATE(0, 7, 8);
+  const int blades = GENERATE_COPY(shield ? 0 : parents, 15, 16);
+  const int grips = GENERATE_COPY(shield ? 0 : parents, 15, 16);
+  const int gems = GENERATE(0, 45, 46, 47, 48);
+  const int attached = GENERATE(0, 1, 2, 3);
+  EnemyLootFixture fixture;
+  EquipmentLootFixture::FillTarget(fixture.source, shield,
+                                   {parents, blades, grips, gems});
+  Items_BattleLoot loot{};
+  auto part = EquipmentDropPart(14);
+  Items_WriteInventoryBladeStats(&loot.weapon.blade, &part);
+  part.id = 96;
+  Items_WriteInventoryGripStats(&loot.weapon.grip, &part);
+  part.id = 147;
+  Items_WriteInventoryArmorStats(&loot.shield.shield, &part);
+  for (int index = 0; index < attached; ++index) {
+    part.id = static_cast<u_short>(300 + index);
+    Items_WriteInventoryGemStats(&loot.weapon.gems[index], &part);
+    Items_WriteInventoryGemStats(&loot.shield.gems[index], &part);
+  }
+  const auto before = fixture.source;
+  const auto input_before = loot;
+  const bool fits = parents < 8 && gems + attached <= 48 &&
+                    (shield || (blades < 16 && grips < 16));
+  const int result = shield ? Menu_Loot_StageShield(&loot.shield)
+                            : Menu_Loot_StageWeapon(&loot.weapon);
+  CHECK(result == (fits ? parents + 1 : 0));
+  CHECK(std::memcmp(&loot, &input_before, sizeof(loot)) == 0);
+  if (!fits) EquipmentLootFixture::CheckInventory(fixture.source, before);
+  CHECK(Items_Inventory_CountItems(Items_ItemCategory_Gem, &fixture.source) ==
+        gems + (fits ? attached : 0));
+}
+
+TEST_CASE(
+    "Oversized enemy armor batches retain deferred loot without duplicates",
+    "[combat][loot][staging-capacity]") {
+  const bool claim_first = GENERATE(false, true);
+  EquipmentStagingFixture fixture;
+  fixture.QueueArmorBatch();
+  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  REQUIRE(Menu_Loot_lootListCount == 16);
+  std::vector<int> seen;
+  fixture.CollectArmorPage(seen, claim_first);
+  fixture.AdvanceArmorPage(claim_first);
+  fixture.CollectArmorPage(seen, true);
+  fixture.CheckArmorBatchComplete(seen);
+}
+
+TEST_CASE("Pending loot pages reset safely before source release and reopen",
+          "[combat][loot][staging-capacity]") {
+  EquipmentStagingFixture fixture;
+  fixture.QueueArmorBatch();
+  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  REQUIRE(Menu_Loot_lootListCount == 16);
+  const auto first = Items_lootListHead->loot;
+  Menu_Loot_ResetPaging();
+  CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+  CHECK(std::memcmp(&Items_lootListHead->loot, &first, sizeof(first)) == 0);
+  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  REQUIRE(Menu_Loot_lootListCount == 16);
+  fixture.CheckCleared();
+  CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+
+  fixture.stats = {};
+  fixture.SetGuaranteed(1);
+  Items_QueueEnemyLoot(&fixture.enemy);
+  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  fixture.DeliverRows(1);
+  CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+  fixture.CheckCleared();
+}
+
+TEST_CASE("Single chest loot remains intact when staging is abandoned",
+          "[combat][loot][staging-capacity]") {
+  EnemyLootFixture fixture;
+  Items_BattleLoot chest{};
+  chest.misc[0] = {323, 3, 2};
+  chest.misc[1] = {467, 3, 1};
+  Menu_Framework_lootEntry = &chest;
+  const auto before = chest;
+  Menu_Loot_BuildStagedInventory(nullptr);
+  REQUIRE(Menu_Loot_lootListCount == 2);
+  CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+  Menu_Loot_ResetPaging();
+  CHECK(std::memcmp(&chest, &before, sizeof(chest)) == 0);
+  Menu_Loot_BuildStagedInventory(nullptr);
+  fixture.DeliverRows(2);
+  CHECK(std::memcmp(&chest, &before, sizeof(chest)) == 0);
+}
+
+TEST_CASE("Loot menu cancellation retains the page until positive confirmation",
+          "[combat][loot][staging-capacity][loot-paging-ui]") {
+  LootPagingMenuFixture fixture;
+  fixture.QueueArmorBatch();
+  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  const auto before = fixture.source;
+  const auto queued = Items_lootListHead->loot;
+  fixture.OpenLeaveConfirmation();
+  fixture.Step(PADRdown);
+  CHECK(Menu_Loot_lootListCount == 16);
+  EquipmentLootFixture::CheckInventory(fixture.source, before);
+  CHECK(std::memcmp(&Items_lootListHead->loot, &queued, sizeof(queued)) == 0);
+  fixture.SettleRows();
+  fixture.Step();
+  fixture.OpenLeaveConfirmation();
+  fixture.Step(PADLup);
+  fixture.Step(PADRright);
+  fixture.CheckNextArmorPage();
+}
+
+TEST_CASE("Loot menu take-all advances only after the current claims finish",
+          "[combat][loot][staging-capacity][loot-paging-ui]") {
+  LootPagingMenuFixture fixture;
+  fixture.QueueArmorBatch();
+  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  fixture.Step(PADRleft);
+  CHECK(Menu_Loot_lootListCount == 16);
+  for (int tick = 0; tick < 10 && Menu_Loot_lootListCount != 8; ++tick) {
+    fixture.Step();
+  }
+  REQUIRE(Menu_Loot_lootListCount == 8);
+  fixture.CheckClaims(16, 16);
+  Audio_Seq_unusedInventory = {};
+  Menu_Loot_RefreshClaimableRows();
+  fixture.Step(PADRleft);
+  int result = 0;
+  for (int tick = 0; tick < 10 && result == 0; ++tick) {
+    result = fixture.Tick();
+  }
+  CHECK(result == 1);
+  fixture.CheckClaims(24, 8);
+}
+
+TEST_CASE("Loot menu cannot abandon a key while another page is pending",
+          "[combat][loot][staging-capacity][loot-paging-ui]") {
+  LootPagingMenuFixture fixture;
+  fixture.QueueArmorBatch();
+  Items_lootListHead->loot.misc[0] = {467, 3, 1};
+  Menu_Loot_BuildStagedInventory(Items_lootListHead);
+  REQUIRE(Menu_Loot_lootListCount == 17);
+  const auto before = fixture.source;
+  const auto queued = Items_lootListHead->loot;
+  CHECK(fixture.Tick(PADRdown) == 0);
+  CHECK(fixture.Tick() == 0);
+  CHECK(fixture.Tick(PADRdown) == 0);
+  CHECK(Menu_Loot_lootListCount == 17);
+  EquipmentLootFixture::CheckInventory(fixture.source, before);
+  CHECK(std::memcmp(&Items_lootListHead->loot, &queued, sizeof(queued)) == 0);
+  CHECK(Menu_Loot_lootClaimed == 0);
 }

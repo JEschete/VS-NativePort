@@ -7,6 +7,41 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_loot_staging_uses_last_slots_and_preflights_composites(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Menu/Loot/LootInventory.c").read_text()
+        for fid in ("F02846", "F02847", "F02848", "F02849", "F02850", "F02851", "F02852"):
+            for old, new, _ in copy_fixups.FIXES[fid]:
+                self.assertIn(new, source)
+                self.assertNotIn(old, source)
+        self.assertIn("Items_ItemCategory_Grip, 1", source)
+        self.assertIn("Items_ItemCategory_Gem, gems", source)
+
+    def test_loot_overflow_never_appends_a_failed_staging_index(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Menu/Loot/LootInventory.c").read_text()
+        stage = source.split("void Menu_Loot_StageDropRecord(", 1)[1]
+        stage = stage.split("// decomp:", 1)[0]
+        self.assertNotIn("Menu_Loot_AppendLootRow(", stage)
+        self.assertEqual(stage.count("Menu_Loot_AppendStagedDrop("), 8)
+        append = source.split("void Menu_Loot_AppendStagedDrop(", 1)[1]
+        append = append.split("int Menu_Loot_AdvanceStagedInventory(", 1)[0]
+        self.assertLess(append.index("if (index == 0)"), append.index("Menu_Loot_AppendLootRow("))
+        self.assertIn("Menu_Loot_paging.deferred = 1;", append)
+
+    def test_loot_pages_share_row_capacity_and_reset_before_source_release(self):
+        root = Path(__file__).resolve().parents[2]
+        screen = (root / "Native/Game/src/Menu/Loot/LootScreen.c").read_text()
+        self.assertNotIn("160 * sizeof", screen)
+        self.assertNotIn("sizeof *Menu_Loot_lootList * 160", screen)
+        self.assertEqual(screen.count("kMenuLootRowCapacity"), 6)
+        selection = screen.split("int Menu_Loot_UpdateLootSelection(", 1)[1]
+        self.assertIn("} else if (Menu_Loot_AdvanceStagedInventory()) {", selection)
+        cleanup = (root / "Native/Game/src/Items/Loot.c").read_text()
+        cleanup = cleanup.split("void Items_ClearRoomLootList(", 1)[1]
+        self.assertLess(cleanup.index("Menu_Loot_ResetPaging();"),
+                        cleanup.index("Core_Memory_FreeFromHighEnd("))
+
     def test_misc_inventory_write_checks_capacity_before_mutation(self):
         old, new, _ = copy_fixups.FIXES["F02511"][0]
         root = Path(__file__).resolve().parents[2]
