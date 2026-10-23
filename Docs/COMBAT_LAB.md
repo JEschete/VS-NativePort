@@ -444,6 +444,79 @@ standard MSBuild settings; `VS.Tests.exe "[menu][score]"`, then the full suites;
 `build\quality\score65-*` and the named Combat Lab run directories. Scoped
 publication and exact-revision CI are recorded on #65 before closure.
 
+### Fire Breath script-register repair (#146, bounded, 2026-10-23)
+
+The full original prologue reproduces D'tok's action148 announcements without
+any damage results. A separate source-backed zone6 Wyvern fixture isolates the
+same model58 / `3ASP00.SEQ` / `E095.P` production path. Actual F6/F7 controls
+and compiled-layout-guarded **read-only** observations establish that the
+91-frame special animation already advances, including timed events30/64/90.
+Animation255 is the valid `0xFF` special-bank selector, not a missing animation.
+Sixty-one distinct pose, blended-pose and rendered bone-matrix hashes rule out
+a frozen-pose workaround. The native-pointer output repair in #64 is retained.
+
+The broken producer is F01531's combined operand reads:
+`registers[ReadByte(instance)] = ReadHalfword(instance)`. Native assignment
+evaluation reads the halfword first. The original MIPS explicitly reads the
+index first at800D4AFC, the halfword at800D4B08, then stores one byte at800D4B18.
+E095's three entries should set register1 to0/1/2; instead they all leave it0,
+so every stage loads the small first timeline. F01532's companion comparison
+now also uses explicit ordered operands and the original unsigned-byte load.
+The instance/registerIndex/value names are verified, generator-owned and
+documented without changing signatures or serialized layouts.
+
+Do **not** relax F01540's apparently suspicious `id < count` remap. Original
+800D4E28/800D4E2C confirms the strict bound. E095's IDs `[1,2,5,0]` and five
+timelines intentionally use raw register2 when the final remap is excluded.
+Changing the bound would select the wrong stage. No effect IDs, timing,
+animation events, targeting, HP or script flags are forced.
+
+Direct native register/branch regressions cover all four registers, byte
+truncation, comparison operands and taken/untaken branches. Before the fix:
+46 failed /248 assertions; after:248 pass in two cases. Copier33 tests pass;
+two generation passes are stable. Full Debug/Release suites561 cases /
+1804954 assertions each pass; complete maintained quality has498 existing /
+0 new findings, without a baseline update.
+
+After the fix, Release Lab run `1792791081079977-0` loads timeline0/1/2 with
+1/9/10 tracks at990/1118/1170. Action148 produces five original limb results
+at1190:11/10/10/0/9 HP, with the zero result retaining impact6. Ashley's
+observed HP falls997 ->957. The corresponding capture shows the real fiery
+impact and damage numbers, not an injected result.
+
+Fresh full-prologue controller replays, one window per configuration, use the
+retained839-input schedule with **only Start1000**, not the story skip:
+
+| Configuration | Ticks / captures | Complete breath actions / limb results | Exit / errors |
+|---|---:|---:|---|
+| Debug | 48000 /22 | 14 /70 | 0 /0 |
+| Release | 48000 /22 | 10 /50 | 0 /0 |
+
+First real results occur36992 Debug /38712 Release. Capture/loader timing
+differs; action counts are observations, not an asserted parity threshold.
+Release capture45900 shows GAME OVER and47900 shows the original Continue
+path driven by the retained inputs. Restored HP after Continue is not a live
+memory edit. Neither replay defeats the boss or verifies #147's death fade.
+Source is parenta04a048d plus this dirty scoped repair and separate uncommitted
+perception tests/owner documentation. Desktop binary SHA256:
+
+- Debug `c781a3b69ef2aed2fc988236c4c063241956b30141f79c31e72be311187c0601`.
+- Release `da45a8287f5b0598c61b25af658739c068dd8bf8362a5e9e7008ee997d9dbd99`.
+
+Local evidence: `build\quality\dtok146-fixed-debug` and
+`build\quality\dtok146-fixed-release`, their arguments/results/logs/captures, and
+`dtok146-full-prologue-evidence.json`. Original source-order disassembly is
+local in `dtok146-original-script-assembly.txt`; no disc bytes or images are
+committed. The focused observer and preset are `dtok146-live.ps1/.json`;
+the stepped pose report is `dtok146-pose-Release.json`.
+
+An additional Debug visual observer exited normally during startup with
+zero gameplay ticks and no logged error; it is excluded, not a passing check.
+Do not automatically reopen game windows. A clear active flame-stream visual
+check remains before blanket #146 acceptance; the unsafe appearance-tail
+contract found during #147 investigation is recorded separately. Publication
+and exact CI are recorded on the issues, not inferred from these local runs.
+
 ## Ability-profile acceptance checkpoint (2026-10-22)
 
 The `all-abilities` fixture supports ongoing

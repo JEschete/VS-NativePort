@@ -9,6 +9,23 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_effect_register_consumers_preserve_original_operand_order(self):
+        for function_id, function_name in (
+            ("F01531", "Effects::SetEffectScriptRegister"),
+            ("F01532", "Effects::BranchIfEffectRegisterEqual"),
+        ):
+            old, replacement, _ = copy_fixups.FIXES[function_id][0]
+            source = old.replace(old, replacement)
+            for row, pattern, value, _ in copy_fixups.REGEX_FIXES:
+                if re.search(row, function_name):
+                    source = re.sub(pattern, value, source)
+            self.assertIn("registerIndex = Effects_ReadScriptByte(instance)", source)
+            self.assertIn("value = Effects_ReadScriptHalfword(instance)", source)
+            self.assertLess(source.index("registerIndex ="), source.index("value ="))
+            self.assertNotIn("arg0", source)
+            self.assertEqual(source.count("Effects_ReadScript"), 2)
+        self.assertIn("(u_char)instance.registers", source.replace("->", "."))
+
     def test_score_preview_requests_use_initialized_native_record_storage(self):
         source = """Content_ActorAssetRequest slot;
 slot.destination = Menu_Score_zudBuffer + 0x1900;
