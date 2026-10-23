@@ -1385,6 +1385,68 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Cross-zone placement repair checkpoint (#134)
+
+The real wear-to-workshop route reproduced a separate Lab crash on
+`799d88545f40cef1f53fafaeff6aa07f0dcf3104` with the unchanged #133 hosts.
+Debug run `1792738861766246-0` uses original zone13 room12, Zombie Knight18,
+Ashley tile14,13 and enemy14,14; HP/MP999, STR1, INT999, AGI200, seed42.
+A real melee attack wears the weapon, Fireball defeats the enemy and normal
+loot is claimed. Camera-relative movement and Cross open the original door
+to workshop42. At tick2261, after ZONE042/MAP205 load, the Lab reinserts the
+source enemy18. `Field_SpawnRoomActors` faults at `RoomLoading.c:396`, reading
+0x4F0A through the destination's empty character table.
+
+The native placement hook now injects configured enemies only when both
+current zone and room match their configured source. Other rooms retain
+their supplied original placements, with an explicit log; inactive sessions
+remain untouched. Readiness is invalidated on every active room load and
+restored through the existing post-load path. This does not disable real
+destination enemies or manufacture empty rooms.
+
+Two focused `[placements]` regressions pass19 assertions in Debug/Release:
+source, changed-zone, changed-room, both changed and source re-entry for
+solo/one/eight enemies; inactive original-pointer/size and empty preservation.
+Full suites pass519 cases/1,790,660 assertions each. Scoped maintained
+quality/tidy is0 findings/0 new, with88 intentional fixture literals listed
+separately. No baseline changed. Rebuilt host SHA256:
+
+- Debug: `f38364c278b27a1d26a74de0da7454d2ca3f981ada300ef54a1dc0ffbe545191`.
+- Release: `29cfe7659fad9f39bc932f419d0d90173e4423ba4f80e8337498266a36c2b91b`.
+
+Debug `1792739660623754-0` now carries actual weapon DP12598/12600 through the
+door, cancels repair without mutation, confirms repair to12600, refreshes
+equipped runtime DP and returns to field with the exact expected inventory.
+The initially wrong compact/root menu index was corrected to original Items
+ID3; the weapon must be stowed to use equipment management. Updated PDB type
+indices preserve all existing compiled offset checks; no guard was removed.
+
+**Final live acceptance remains open.** Release reaches the opened doorway
+but can stop at1856,0,1980 rather than transitioning, including a sustained
+controller hold in `1792739974174070-0`. This is not bypassed or counted as a
+successful transition. Investigation identified a separately confirmed
+unallocated `Field_DoorMatchList.records[0]` native tail, logged as #135;
+its relationship to this Release observation is not yet established.
+
+Evidence is local under `build\quality\placement134-*`, plus the pre-fix
+`workshop15-Debug-zone13-gate-wear-toward-door-*` scenario/run pointer.
+Use the existing ignored harness with `-Mode workshop-gate -Zone 13
+-WorkshopAction wear`, after rebuilding Tests and CombatLab in the selected
+x64 configuration as above. Maintained checks:
+
+```powershell
+build\Debug\VS.Tests.exe "[placements]"
+build\Debug\VS.Tests.exe
+. .venv-3\Scripts\Activate.ps1
+.\quality-native.cmd --files Native\Game\src\Field\EncounterSpawnProfile.hpp `
+  Native\Game\src\Field\EncounterCatalog.cpp Native\Game\src\Boot\Encounter.cpp `
+  Native\Tests\src\EncounterTests.cpp --tidy
+```
+
+This is a scoped safety checkpoint, not closure of #134/#135/#15, C++ promotion
+or compatibility retirement. No process-memory writes, forced HP/DP, scene
+flags, F10 inventory resets or copied disc-derived artifacts establish it.
+
 ## Workshop operations checkpoint (#15)
 
 Source is `6df50baa79bc7e77e09c6fcaed57005b03e3a8e6` with new maintained

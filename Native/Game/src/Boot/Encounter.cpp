@@ -704,10 +704,17 @@ EncounterState InspectEncounter() {
 
 extern "C" void Boot_EncounterRoomPlacements(void** data, unsigned int* size) {
   if (!VS::Game::active) return;
+  VS::Game::room_prepared = false;
+  if (!VS::Game::UsesConfiguredEncounterPlacements(VS::Game::configuration,
+                                                   Field_zoneContext.zndId,
+                                                   Field_zoneContext.mapId)) {
+    VS_LOG_DEBUG("encounter.spawn", "using original placements zone={} room={}",
+                 Field_zoneContext.zndId, Field_zoneContext.mapId);
+    return;
+  }
   *data = VS::Game::placements.data();
   *size = static_cast<unsigned int>(VS::Game::configuration.enemies.size() *
                                     sizeof(Field_MpdEnemySpawn));
-  VS::Game::room_prepared = false;
   VS_LOG_DEBUG("encounter.spawn", "installing {} room placements",
                VS::Game::configuration.enemies.size());
 }

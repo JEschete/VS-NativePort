@@ -305,6 +305,11 @@ bool IsEncounterHostileSpawn(const Field_MpdEnemySpawn& source) {
   return source.kind == 0 && source.facing == 2;
 }
 
+bool UsesConfiguredEncounterPlacements(const EncounterSetup& setup, int zone,
+                                       int room) {
+  return setup.zone == zone && setup.room == room;
+}
+
 std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
     const EncounterEnemy& enemy) {
   const auto* store = Content::DataStore::Get();

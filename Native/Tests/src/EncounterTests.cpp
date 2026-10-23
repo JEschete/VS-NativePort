@@ -12,6 +12,7 @@
 #include "Field/EncounterSpawnProfile.hpp"
 
 extern "C" {
+#include "Battle/EncounterHooks.h"
 #include "Boot/PlayerSettings.h"
 #include "Field/CollisionSampling.h"
 #include "Input/Controller.h"
@@ -70,6 +71,34 @@ TEST_CASE("Encounter validation reserves real primary and auxiliary slots",
   auto mixed = TestSetup(5);
   mixed.enemies[0].enemy = 1;
   CHECK(ValidateEncounter(mixed, zone).empty());
+}
+
+TEST_CASE("Configured enemy placements belong only to their source room",
+          "[combat][encounter][placements]") {
+  for (int count : {0, 1, 8}) {
+    const auto setup = TestSetup(count);
+    CAPTURE(count);
+    CHECK(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0));
+    CHECK_FALSE(VS::Game::UsesConfiguredEncounterPlacements(setup, 42, 0));
+    CHECK_FALSE(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 1));
+    CHECK_FALSE(VS::Game::UsesConfiguredEncounterPlacements(setup, 42, 1));
+    CHECK(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0));
+  }
+}
+
+TEST_CASE("Inactive encounter hooks preserve original room placements",
+          "[combat][encounter][placements]") {
+  std::array<Field_MpdEnemySpawn, 2> original{};
+  void* data = original.data();
+  unsigned int size = sizeof(original);
+  Boot_EncounterRoomPlacements(&data, &size);
+  CHECK(data == original.data());
+  CHECK(size == sizeof(original));
+  data = nullptr;
+  size = 0;
+  Boot_EncounterRoomPlacements(&data, &size);
+  CHECK(data == nullptr);
+  CHECK(size == 0);
 }
 
 TEST_CASE("Encounter validation rejects overlaps and invalid content",

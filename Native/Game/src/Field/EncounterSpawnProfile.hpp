@@ -20,6 +20,9 @@ std::expected<std::vector<EncounterFloor>, std::string> ReadEncounterFloor(
 
 bool IsEncounterHostileSpawn(const Field_MpdEnemySpawn& source);
 
+bool UsesConfiguredEncounterPlacements(const EncounterSetup& setup, int zone,
+                                       int room);
+
 std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
     const EncounterEnemy& enemy);
 
