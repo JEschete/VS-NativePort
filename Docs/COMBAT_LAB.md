@@ -1386,6 +1386,129 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Original key and sigil lock acceptance (#139; supporting #16)
+
+Source is published `63beaf26819b3f73a801baa0506cc70b051223f5`, with no
+native/generator changes for this verification. Unrelated owner edits remain
+dirty/excluded. All32 named IDs458-489 already fit the stock `all-items-b`
+inventory; `all-items-a` supplies the missing-item controls. No extra equipment,
+inventory capacity, stat override, synthetic lock, process write, forced flag
+or event-policy change is used.
+
+Original MPD records contain76 ordinary locks covering31 named IDs. Chest
+Key465 instead uses the separate original container layout, with five matching
+chests. The chosen32 approaches come from81 supported source candidates and
+retain the production floor/facing rules: ordinary locks allow63 height units;
+chests require Ashley at floor+96. Event-marked approach tiles use the existing
+`room_events:"isolated"` policy, not a new story bypass.
+
+The actual production interaction is **Cross while facing the lock**, not
+selecting a key in the consumable menu. Each matching run first turns away and
+presses Cross, verifies no lock/count/flag/inventory mutation, then faces the
+original target and presses Cross. Dialog confirmations are bounded by the
+actual interaction state; they are not blind extra Circle presses in the field.
+
+- All seven ordinary keys458-464 open their matching lock and remain at10.
+- All24 sigils466-489 open their matching lock, consume exactly10 ->9 and set
+  the original persistent unlock flag at `item+0x1B6` to2.
+- Chest Key465 opens the original MAP124 chest, remains at10 and sets flag903
+  to1. Chest contents may legitimately alter other inventory, so this branch
+  does not claim the door runs' full-inventory identity check.
+- Every ordinary matching lock compares all3840 inventory bytes with the
+  expected snapshot: no changes for a reusable key; only its count byte for
+  a sigil. Missing-item controls preserve the complete original inventory.
+- Missing ordinary key, Chest Key and sigil controls retain locked1/open0,
+  count0 and flag0 in both configurations.
+- Repeating Cross on the opened sigil lock leaves count9/flag2. Actual F10,
+  editor Start selection and Enter restart the same preset: locked1/open0,
+  count10/flag0 and the complete original stock inventory are restored.
+
+All72 accepted sessions finalize with `session.end`, `trace_failed:false` and
+zero error/critical engine or trace-failure records. This is64 matching runs,
+six representative missing controls and two repeat/reset runs. The completed
+all-named matrix has no unsupported or untested named item.
+
+Original fixture and accepted matching runs follow. Scene is zone/room,
+original MPD and zero-based record row; coordinates are tile X/Z. Row0 for465
+is a container, not an ordinary-lock row. Spawn elevation/direction are0; turn
+from the start tile toward the target. Seed1, speed1, solo Ashley and the
+existing isolated-event policy apply throughout.
+
+| Item | Scene; source; row | Start X,Z | Target X,Z | Debug run | Release run |
+| --- | --- | --- | --- | --- | --- |
+| 458 | 49/0; MAP247; 1 | 3,14 | 3,15 | `1792762910989695-0` | `1792763007910736-0` |
+| 459 | 28/13; MAP118; 0 | 2,13 | 2,14 | `1792763793655338-0` | `1792764267675859-0` |
+| 460 | 30/4; MAP143; 1 | 17,16 | 17,17 | `1792763809940447-0` | `1792764282909149-0` |
+| 461 | 29/2; MAP126; 0 | 6,7 | 6,8 | `1792763825671681-0` | `1792764298143745-0` |
+| 462 | 55/17; MAP376; 0 | 2,1 | 2,0 | `1792763841208606-0` | `1792764313352356-0` |
+| 463 | 55/16; MAP375; 0 | 2,1 | 2,0 | `1792763857473134-0` | `1792764328573820-0` |
+| 464 | 28/0; MAP105; 0 | 5,7 | 6,7 | `1792763873101689-0` | `1792764343849488-0` |
+| 465 | 29/0; MAP124; 0 | 2,8 | 2,7 | `1792762941668264-0` | `1792763037832322-0` |
+| 466 | 9/4; MAP013; 0 | 3,13 | 3,14 | `1792762975939303-0` | `1792763071630341-0` |
+| 467 | 13/12; MAP040; 0 | 20,8 | 21,8 | `1792763888810056-0` | `1792764359046529-0` |
+| 468 | 55/1; MAP360; 0 | 5,1 | 5,0 | `1792763906072301-0` | `1792764374950105-0` |
+| 469 | 28/17; MAP122; 0 | 4,13 | 4,14 | `1792763922416991-0` | `1792764391116951-0` |
+| 470 | 50/9; MAP269; 1 | 9,1 | 9,0 | `1792763938734392-0` | `1792764407160764-0` |
+| 471 | 50/20; MAP280; 0 | 11,12 | 11,13 | `1792763955087413-0` | `1792764423326802-0` |
+| 472 | 53/1; MAP312; 1 | 6,1 | 6,0 | `1792763971449457-0` | `1792764439337590-0` |
+| 473 | 53/12; MAP323; 0 | 8,14 | 8,15 | `1792763988543215-0` | `1792764455375751-0` |
+| 474 | 53/21; MAP332; 0 | 9,1 | 9,0 | `1792764005591247-0` | `1792764472303964-0` |
+| 475 | 23/4; MAP077; 2 | 1,12 | 0,12 | `1792764021885317-0` | `1792764488471159-0` |
+| 476 | 24/5; MAP084; 2 | 9,25 | 9,26 | `1792764038265629-0` | `1792764505204055-0` |
+| 477 | 24/11; MAP090; 4 | 9,1 | 9,0 | `1792764054547433-0` | `1792764521981729-0` |
+| 478 | 24/12; MAP091; 0 | 4,1 | 4,0 | `1792764070974684-0` | `1792764538149464-0` |
+| 479 | 29/3; MAP127; 1 | 6,7 | 6,8 | `1792764087255578-0` | `1792764554080328-0` |
+| 480 | 29/3; MAP127; 2 | 6,1 | 6,0 | `1792764103749886-0` | `1792764570266079-0` |
+| 481 | 29/4; MAP128; 0 | 6,7 | 6,8 | `1792764120046859-0` | `1792764586263318-0` |
+| 482 | 29/4; MAP128; 1 | 6,1 | 6,0 | `1792764136466670-0` | `1792764602378612-0` |
+| 483 | 29/5; MAP129; 0 | 6,7 | 6,8 | `1792764152856989-0` | `1792764618496555-0` |
+| 484 | 29/5; MAP129; 1 | 6,1 | 6,0 | `1792764169096710-0` | `1792764634440455-0` |
+| 485 | 29/6; MAP130; 0 | 6,7 | 6,8 | `1792764185460570-0` | `1792764650582583-0` |
+| 486 | 29/6; MAP130; 1 | 6,1 | 6,0 | `1792764202405687-0` | `1792764666776089-0` |
+| 487 | 9/17; MAP409; 0 | 2,8 | 2,9 | `1792764218630892-0` | `1792764683121169-0` |
+| 488 | 32/17; MAP164; 0 | 1,3 | 0,3 | `1792764235086541-0` | `1792764699164627-0` |
+| 489 | 32/11; MAP158; 0 | 14,2 | 14,3 | `1792764251503413-0` | `1792764715426148-0` |
+
+| Additional control | Debug run | Release run |
+| --- | --- | --- |
+| Missing458 | `1792762926615461-0` | `1792763023137733-0` |
+| Missing465 | `1792762958005501-0` | `1792763053915958-0` |
+| Missing466 | `1792762993030762-0` | `1792763087634385-0` |
+| Repeat466 / F10 / fresh reset | `1792764752246225-0` | `1792764775422319-0` |
+
+Local reproduction commands, with the retained controller/read-only observer
+helpers in `build\quality`, are:
+
+```powershell
+python build\quality\key139-fixtures.py
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File build\quality\key139-live.ps1 -Configuration Debug -Item 489 -FixtureFile build\quality\key139-fixtures\489.json
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File build\quality\key139-live.ps1 -Configuration Debug -Item 465 -Missing
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File build\quality\key139-live.ps1 -Configuration Debug -Item 466 -Repeat
+```
+
+Repeat with `-Configuration Release`; the all-named batch uses each458-489
+fixture. Helpers/presets, observations, screenshots, console logs and final
+72-run audit remain local under `build\quality\key139-*`; native traces remain
+under each configuration's `combat-lab\runs`. The table also permits manual
+editor reproduction without the local observer.
+
+Current noninstrumented Combat Lab SHA-256: Debug
+`840827e8ef5779bd68ab4c7c12452ce38a9dd939f93e6baa91662957b602159c`,
+Release `1598c04e8094e30e32fed4f2b9ba526ac37c3d95de2d628bd30130e36dfb0480`.
+Temporary fixture diagnostics were removed through the generator before
+acceptance; native/copier sources are unchanged from the published revision.
+The source's full539-case/1799864-assertion suites,25 copier tests and exact
+green CI39959691765 are the preceding baseline, not a new suite execution for
+this documentation-only acceptance.
+
+The rejected lower-stair Bronze fixture in MAP160 correctly failed the
+original63-unit height guard (observed71); it is not a native bug and the guard
+was not weakened. This checkpoint verifies one original matching fixture for
+every named item, not every duplicate lock, full campaign progression,
+save/load persistence, C++ promotion or compatibility retirement. No new
+production defect or key-policy change was needed. Publication and exact CI
+are recorded on #139; broader #16/#76/#80 remain separate.
+
 ## Five-/nine-sample source trajectory regression (#76, bounded)
 
 After #138, the existing PLG057 five- and nine-sample initialization/update
@@ -3036,8 +3159,9 @@ Quality run39787313511 reports195 existing findings and zero new. No baseline
 or production behavior was changed to pass these observations. Local command:
 `build\quality\live-restart-check.ps1 -Configuration <Debug|Release>` with
 `-Book 444`, `-Book 447`, `-Recovery`, or `-Book 388 -GateChecks`.
-Positive matching-key/sigil door use remains an additional owner-requested
-follow-up; these checks do not establish that, #82's root cause, all learned
+Positive matching-key/sigil door use was an additional owner-requested
+follow-up, now verified in the [#139 checkpoint](#original-key-and-sigil-lock-acceptance-139-supporting-16)
+above. These earlier checks do not establish #82's root cause, all learned
 spell fidelity, native save persistence or compatibility retirement.
 
 ## Combined combat/action checkpoint (2026-10-21)
