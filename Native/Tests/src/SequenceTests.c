@@ -585,7 +585,68 @@ int Tests_ActorPoseHierarchy(void) {
   return passed;
 }
 
-int Tests_ModelPolygonPackets(int colored, int split) {
+typedef struct ModelPacketOptions {
+  int colored;
+  int split;
+  int limb;
+  unsigned pulse_mask;
+} ModelPacketOptions;
+
+static void BuildModelPacketFixture(Actors_ShpModel* model,
+                                    Actors_ModelInstance* instance,
+                                    const ModelPacketOptions* options) {
+  instance->triangleCount = 1;
+  instance->uvLayout = options->colored != 0;
+  instance->palettePulse.kind = (u_char)options->pulse_mask;
+  if ((unsigned)options->limb < 8) {
+    const u_short count = 1;
+    const size_t group =
+        (options->split != 0 ? 32 : 0) + (size_t)options->limb * 2;
+    memcpy(model->header + group, &count, sizeof count);
+  }
+  model->polygonSection = 64;
+  unsigned char* polygon = (unsigned char*)model + 64;
+  const unsigned short indices[3] = {0, 4, 8};
+  memcpy(polygon + (options->colored ? 0 : 4), indices, sizeof indices);
+  if (options->colored) {
+    polygon[11] = 0x34;
+    polygon[8] = 32;
+    polygon[12] = 64;
+    polygon[16] = 96;
+    polygon[6] = 50;
+    polygon[7] = 60;
+    polygon[20] = 10;
+    polygon[21] = 20;
+    polygon[22] = 30;
+    polygon[23] = 40;
+  } else {
+    polygon[0] = 0x24;
+    polygon[1] = 16;
+    polygon[10] = 50;
+    polygon[11] = 60;
+    polygon[12] = 10;
+    polygon[13] = 20;
+    polygon[14] = 30;
+    polygon[15] = 40;
+  }
+  if (options->split != 0) {
+    Actors_modelRenderContext.projectedVertexCount = 4;
+    Actors_modelRenderContext.projectedVertices[3] = (160 << 16) | 160;
+    Actors_modelRenderContext.vertexDepths[3] = 1024 + options->split * 128;
+    instance->triangleCount = 0;
+    instance->otherPolygonCount = 1;
+    polygon[0] = 0x2C;
+    polygon[1] = 20;
+    polygon[2] = 3;
+    const unsigned short quadIndices[4] = {0, 4, 8, 12};
+    memcpy(polygon + 4, quadIndices, sizeof quadIndices);
+    const unsigned char coordinates[8] = {10, 20, 30, 40, 50, 60, 70, 80};
+    memcpy(polygon + 12, coordinates, sizeof coordinates);
+  }
+}
+
+static int ModelPolygonPackets(int colored, int split, int limb,
+                               unsigned pulse_mask) {
   enum {
     kTriangleCorners = 3,
     kVertexPacketWords = 3,
@@ -596,6 +657,7 @@ int Tests_ModelPolygonPackets(int colored, int split) {
   unsigned modelWords[32] = {0};
   Actors_ShpModel* model = (void*)modelWords;
   Actors_ModelInstance instance = {0};
+  const ModelPacketOptions options = {colored, split, limb, pulse_mask};
   const Actors_ModelRenderContext savedContext = Actors_modelRenderContext;
   Render_FrameScratch* frame = Core_ScratchBase();
   const Render_FrameScratch savedFrame = *frame;
@@ -622,48 +684,12 @@ int Tests_ModelPolygonPackets(int colored, int split) {
   for (int index = 0; index < kTriangleCorners; ++index) {
     Actors_modelRenderContext.vertexDepths[index] = kVertexDepth;
   }
-  instance.triangleCount = 1;
-  model->polygonSection = 64;
-  unsigned char* polygon = (void*)(modelWords + 16);
-  const unsigned short indices[3] = {0, 4, 8};
-  memcpy(polygon + (colored ? 0 : 4), indices, sizeof indices);
-  if (colored) {
-    polygon[11] = 0x34;
-    polygon[8] = 32;
-    polygon[12] = 64;
-    polygon[16] = 96;
-    polygon[6] = 50;
-    polygon[7] = 60;
-    polygon[20] = 10;
-    polygon[21] = 20;
-    polygon[22] = 30;
-    polygon[23] = 40;
-  } else {
-    polygon[0] = 0x24;
-    polygon[1] = 16;
-    polygon[10] = 50;
-    polygon[11] = 60;
-    polygon[12] = 10;
-    polygon[13] = 20;
-    polygon[14] = 30;
-    polygon[15] = 40;
-  }
-  if (split != 0) {
-    Actors_modelRenderContext.projectedVertexCount = 4;
-    Actors_modelRenderContext.projectedVertices[3] = (160 << 16) | 160;
-    Actors_modelRenderContext.vertexDepths[3] = 1024 + split * 128;
-    instance.triangleCount = 0;
-    instance.otherPolygonCount = 1;
-    polygon[0] = 0x2C;
-    polygon[1] = 20;
-    polygon[2] = 3;
-    const unsigned short quadIndices[4] = {0, 4, 8, 12};
-    memcpy(polygon + 4, quadIndices, sizeof quadIndices);
-    const unsigned char coordinates[8] = {10, 20, 30, 40, 50, 60, 70, 80};
-    memcpy(polygon + 12, coordinates, sizeof coordinates);
-  }
+  BuildModelPacketFixture(model, &instance, &options);
   CVECTOR tint = {128, 96, 64, 0};
-  if (colored) {
+  if (pulse_mask != 0) {
+    Render_DrawActorPolygons(&Actors_modelRenderContext, &instance, &tint,
+                             model);
+  } else if (colored) {
     Render_DrawModelGouraudPolygons(&Actors_modelRenderContext, &instance,
                                     &tint, model);
   } else {
@@ -671,10 +697,14 @@ int Tests_ModelPolygonPackets(int colored, int split) {
                                  model);
   }
   const u_long* packet = (void*)(memory + 8);
+  const unsigned palette =
+      0x1234 +
+      ((unsigned)limb < 8 && (pulse_mask & (0x80u >> limb)) != 0 ? 0x480 : 0);
+  const unsigned first_uv = (palette << 16) | 0x140A;
   int passed =
       frame->primitiveCursor == memory + 8 + (colored ? 40 : 32) &&
-      (packet[1] >> 24) == (colored ? 0x34u : 0x24u) &&
-      packet[3] == 0x1234140Au && packet[colored ? 6 : 5] == 0x0015281Eu &&
+      (packet[1] >> 24) == (colored ? 0x34u : 0x24u) && packet[3] == first_uv &&
+      packet[colored ? 6 : 5] == 0x0015281Eu &&
       packet[colored ? 9 : 7] == 0x3C32u && nextPrim(&ordering[254]) == packet;
   if (colored) {
     passed = passed && (packet[1] & UINT8_MAX) == kFirstRed &&
@@ -684,8 +714,8 @@ int Tests_ModelPolygonPackets(int colored, int split) {
     const u_long* second = packet + 8;
     passed =
         frame->primitiveCursor == memory + 72 && (packet[1] >> 24) == 0x24 &&
-        (second[1] >> 24) == 0x24 && packet[3] == 0x1234140Au &&
-        packet[5] == 0x0015281Eu &&
+        (second[1] >> 24) == 0x24 && packet[3] == first_uv &&
+        second[3] >> 16 == palette && packet[5] == 0x0015281Eu &&
         packet[7] == (split > 0 ? 0x3C32u : 0x5046u) &&
         packet[6] == (u_long)Actors_modelRenderContext
                          .projectedVertices[split > 0 ? 2 : 3] &&
@@ -702,6 +732,15 @@ int Tests_ModelPolygonPackets(int colored, int split) {
   Render_legacyPrimitiveBuffers[0] = savedBuffer;
   free(memory);
   return passed;
+}
+
+int Tests_ModelPolygonPackets(int colored, int split) {
+  return ModelPolygonPackets(colored, split, 8, 0);
+}
+
+int TestsModelLimbPalettePackets(int colored, int split, int limb,
+                                 unsigned pulse_mask) {
+  return ModelPolygonPackets(colored, split, limb, pulse_mask);
 }
 
 int Tests_ModelProjectionGroups(void) {

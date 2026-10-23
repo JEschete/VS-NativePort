@@ -311,14 +311,8 @@ void Actors_DrawActorModel(void* actor_data, MATRIX* camera, char companion) {
   }
   CVECTOR color = geometry->instance.baseColor;
   if (companion == 1) memcpy(&color, &actor->companionColor, sizeof color);
-  if (geometry->instance.uvLayout) {
-    Render_DrawModelGouraudPolygons(&Actors_modelRenderContext,
-                                    &geometry->instance, &color,
-                                    workspace->model);
-  } else {
-    Render_DrawModelFlatPolygons(&Actors_modelRenderContext,
-                                 &geometry->instance, &color, workspace->model);
-  }
+  Render_DrawActorPolygons(&Actors_modelRenderContext, &geometry->instance,
+                           &color, workspace->model);
 }
 
 // decomp: BATTLE.PRG func_800A141C (src/BATTLE/BATTLE.PRG/38C1C.c:39) [C: not

@@ -74,6 +74,9 @@ enum {
   kDepthBiasMask = 3,
   kDepthBiasStep = 4,
   kModelOrderingLimit = 0x7C0,
+  kLimbPaletteGroups = 8,
+  kFirstLimbPaletteBit = 0x80,
+  kPulsedClutOffset = 0x480,
   kNeutralTint = 0x808080
 };
 
@@ -267,6 +270,7 @@ typedef struct ProjectedModelPolygon {
   unsigned flags;
   int depth;
   unsigned tint;
+  unsigned palette;
 } ProjectedModelPolygon;
 
 static int WriteModelPolygon(const ProjectedModelPolygon* polygon,
@@ -316,7 +320,7 @@ static int WriteModelPolygon(const ProjectedModelPolygon* polygon,
       ((polygon->flags & kSemiTransparencyFlag) != 0 ? 2u : 0u);
   if (!colored) packet[1] = polygon->tint & kColorMask;
   packet[1] |= command << kCommandShift;
-  packet[kClutPacketWord] |= (unsigned)workspace->palette << kCoordinateBits;
+  packet[kClutPacketWord] |= polygon->palette << kCoordinateBits;
   packet[colored ? kGouraudPagePacketWord : kFlatPagePacketWord] |=
       page << kCoordinateBits;
   setlen(packet, words - 1);
@@ -328,7 +332,7 @@ static int WriteModelPolygon(const ProjectedModelPolygon* polygon,
 static int QueueModelPolygon(Actors_ModelRenderContext* context,
                              const unsigned char* data, int corners,
                              int colored, unsigned flags, int bias,
-                             unsigned tint, uintptr_t limit) {
+                             unsigned tint, unsigned palette, uintptr_t limit) {
   uint16_t indices[kQuadCorners];
   memcpy(indices, data + (colored ? 0 : sizeof(uint32_t)),
          (size_t)corners * sizeof indices[0]);
@@ -360,7 +364,7 @@ static int QueueModelPolygon(Actors_ModelRenderContext* context,
     for (int part = 0; part < 2; ++part) {
       const int result =
           QueueModelPolygon(context, triangles[part], kTriangleCorners, 0, 0,
-                            kNormalDepthBias, tint, limit);
+                            kNormalDepthBias, tint, palette, limit);
       if (result < 0) return result;
       emitted += result;
     }
@@ -387,14 +391,36 @@ static int QueueModelPolygon(Actors_ModelRenderContext* context,
                                          .colored = colored,
                                          .flags = flags,
                                          .depth = depth,
-                                         .tint = tint};
+                                         .tint = tint,
+                                         .palette = palette};
   return WriteModelPolygon(&polygon, limit);
+}
+
+// 4B16C.s: func_800B516C / func_800B5C30 select the pulsed CLUT only
+// inside the eight per-limb ranges; any remaining faces keep the base CLUT.
+static unsigned ModelPolygonPalette(const Actors_ShpModel* model, int part,
+                                    unsigned face, unsigned mask,
+                                    unsigned base_palette) {
+  unsigned end = 0;
+  for (int limb = 0; limb < kLimbPaletteGroups; ++limb) {
+    uint16_t count;
+    const size_t offset =
+        ((size_t)part * kLimbPaletteGroups + limb) * sizeof count;
+    memcpy(&count, model->header + offset, sizeof count);
+    end += count;
+    if (face < end) {
+      return base_palette + ((mask & (kFirstLimbPaletteBit >> limb)) != 0
+                                 ? kPulsedClutOffset
+                                 : 0);
+    }
+  }
+  return base_palette;
 }
 
 static void DrawModelPolygons(Actors_ModelRenderContext* context,
                               Actors_ModelInstance* instance,
                               const CVECTOR* tint, Actors_ShpModel* model_data,
-                              int colored) {
+                              int colored, unsigned pulse_mask) {
   if (context == NULL || instance == NULL || model_data == NULL ||
       context->projectedVertexCount == 0) {
     return;
@@ -414,6 +440,23 @@ static void DrawModelPolygons(Actors_ModelRenderContext* context,
   if (tint != NULL) memcpy(&color, tint, sizeof color);
   const unsigned counts[kPolygonGroupCount] = {header.triangles, header.quads,
                                                header.other};
+  if (pulse_mask != 0) {
+    for (int part = 0; part < kPolygonGroupCount; ++part) {
+      unsigned sum = 0;
+      for (int limb = 0; limb < kLimbPaletteGroups; ++limb) {
+        uint16_t count;
+        const size_t offset =
+            ((size_t)part * kLimbPaletteGroups + limb) * sizeof count;
+        memcpy(&count, model->header + offset, sizeof count);
+        sum += count;
+      }
+      if (sum > counts[part]) {
+        Core_Debugf("render", "Invalid model limb polygon ranges");
+        return;
+      }
+    }
+  }
+  const unsigned base_palette = Render_ModelWorkspace()->palette;
   for (int part = 0; part < kPolygonGroupCount; ++part) {
     for (unsigned face = 0; face < counts[part]; ++face) {
       const unsigned command = colored ? polygon[11] : polygon[0];
@@ -425,10 +468,14 @@ static void DrawModelPolygons(Actors_ModelRenderContext* context,
       }
       const unsigned flags =
           part == kSpecialPolygonGroup ? polygon[colored ? 19 : 2] : 0;
+      const unsigned palette =
+          pulse_mask == 0 ? base_palette
+                          : ModelPolygonPalette(model, part, face, pulse_mask,
+                                                base_palette);
       if (QueueModelPolygon(context, polygon, corners, colored, flags,
                             part == kSpecialPolygonGroup ? kSpecialDepthBias
                                                          : kNormalDepthBias,
-                            color, base + kPrimitiveBufferBytes) < 0) {
+                            color, palette, base + kPrimitiveBufferBytes) < 0) {
         return;
       }
       polygon += PolygonBytes(command);
@@ -440,12 +487,23 @@ static void DrawModelPolygons(Actors_ModelRenderContext* context,
 void Render_DrawModelFlatPolygons(Actors_ModelRenderContext* context,
                                   void* instance, CVECTOR* tint,
                                   void* model_data) {
-  DrawModelPolygons(context, instance, tint, model_data, 0);
+  DrawModelPolygons(context, instance, tint, model_data, 0, 0);
 }
 
 // decomp: BATTLE.PRG func_800B4594 (src/BATTLE/BATTLE.PRG/4B16C.s:835).
 void Render_DrawModelGouraudPolygons(Actors_ModelRenderContext* context,
                                      void* instance, void* tint,
                                      void* model_data) {
-  DrawModelPolygons(context, instance, tint, model_data, 1);
+  DrawModelPolygons(context, instance, tint, model_data, 1, 0);
+}
+
+void Render_DrawActorPolygons(Actors_ModelRenderContext* context,
+                              Actors_ModelInstance* instance,
+                              const CVECTOR* tint, Actors_ShpModel* model) {
+  if (instance == NULL) {
+    Core_Debugf("render", "Missing actor instance for polygon submission");
+    return;
+  }
+  DrawModelPolygons(context, instance, tint, model, instance->uvLayout,
+                    instance->palettePulse.kind);
 }

@@ -1385,6 +1385,93 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Selected-part palette glow acceptance (#81)
+
+Source: `65ef4dee` plus the scoped owned model-renderer/caller and packet-test
+changes. The original actor CLUT pulse producer and its selected-limb mask were
+already active. Fresh baseline Debug run `1792756849456949-0` uses real
+Fireball target controls to select soldier actor6's right arm, left arm and
+head. Read-only compiled-layout observation shows masks128/64/32 and animated
+palette values, but all175 body polygons keep the original CLUT and none use
+the pulsed CLUT. This independently reproduces the owner's report.
+
+The maintained actor-draw path submitted every polygon through the uniform
+palette renderer. Original `4B16C.s` F01269/F01270 override routines use the
+SHP header's eight per-limb counts for each triangle/quad/special partition.
+Only faces belonging to an enabled mask bit use `baseCLUT+0x480`; unselected
+and unpartitioned remainder faces retain the base palette.
+
+`Render_DrawActorPolygons` now applies that rule to the typed actor instance.
+The existing flat/colored entry points remain uniform and do not reinterpret
+weapon-model matrices as an actor's pulse state. Adaptive split triangles
+inherit their source polygon's selected palette. Malformed group totals are
+logged and rejected rather than tinting all geometry. The actor caller reuses
+its existing model, pose, palette animation and tint producers; this is not a
+whole-enemy tint substitute or a new palette animation.
+
+Red packet regression: **32 failures / 50 assertions**. Green tests cover all
+eight limb bits, selected versus unrelated masks, flat and colored triangles,
+both adaptive split orientations, unpartitioned remainders, exact UV/order/
+color preservation and primitive-buffer guards. The tests retain pre-existing
+Catch case identities; no expectations or quality baselines were weakened.
+
+Final actual-window/controller commands:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File build\quality\equipment14-check.ps1 `
+  -Configuration Debug -Mode workshop-gate -Zone 32 `
+  -WorkshopAction city -Seed 42 -HighlightProbe
+```
+
+Repeat with `Release`, and replace `-HighlightProbe` with
+`-HighlightComposite` for the original zone13/room12 Ghost3. The latter
+retains its original auxiliary model in slot6, rather than substituting an
+ordinary single model. Ashley uses all-spells and the established
+HP/MP/STR/INT/AGI999 test setup. No process writes, HP/flag manipulation or
+forced outcomes establish acceptance.
+
+| Configuration / model | Final run | Pulsed faces, arm/arm/head | Original-palette faces |
+| --- | --- | --- | --- |
+| Debug soldier | `1792758009859446-0` | 25 / 27 / 45 | 150 / 148 / 130 |
+| Release soldier | `1792758084997631-0` | 25 / 27 / 45 | 150 / 148 / 130 |
+| Debug two-model Ghost | `1792758053402526-0` | 18 / 17 / 17 | 56 / 57 / 57 |
+| Release two-model Ghost | `1792758128007604-0` | 14 / 20 / 16 | 61 / 55 / 59 |
+
+These are read-only submitted-packet observations, not assumed pixel areas.
+Normal controls change selected limbs and, for the extended list, target-page
+actors. The old actor's mask clears, the new actor's mask is active, cancellation
+clears every live model slot's pulse, and re-entry restores the selected part.
+Both model cases then commit real Fireball, apply lethal damage, reach ordinary
+post-defeat/loot flow and clear target-page bindings. All four sessions end
+normally with `trace_failed:false`, no error/critical records and no malformed
+model-range rejection. Selected/cancelled captures are inspected locally.
+
+- Full final Debug/Release suites: **533 cases / 1791001 assertions** each.
+  Focused model cases:58 assertions/6 cases. Commands use the documented
+  MSBuild test/Combat Lab projects with `/p:VcpkgManifestInstall=false`, then
+  `VS.Tests.exe` and the actual-controller commands above.
+- Maintained quality/tidy for both renderer/caller and test translation units
+  reports0 native findings and **0 new** findings. The131 pre-existing test
+  findings remain tracked separately; no baseline edits. The initial
+  header-wide analysis ran before correcting the six new findings, then
+  focused translation-unit analysis verifies all corrections.
+- Copier24 tests pass; all751 generated outputs and93 owned files are
+  unchanged on a generation run, preserving the owned implementation.
+- Final host SHA-256: Debug
+  `1983e5e51d425eadae31cd19ddf420dd18ee70bc6fd04e1676668bb459df9711`;
+  Release
+  `9d5b6abce4f7cb174ebbf8444f1580ca19a6e1e731e92cb94ce1400912576780`.
+  Unrelated owner edits remain dirty and excluded.
+
+Local-only evidence: `build\quality\issue81-*`,
+`workshop15-{Debug,Release}-city-seed42-render-highlight*` and each run
+directory. Do not commit/upload disc-derived data, packet dumps or captures.
+This is bounded selected-part glow acceptance, not every model/appearance
+override, C++ promotion, compatibility retirement or #80/#76 completion.
+The unrelated action-state override stubs remain tracked debt. Exact
+publication and pushed CI are recorded on #81.
+
 ## Eight-Minotaur overflow and repeat-entry acceptance (#78)
 
 The historical fresh-process crash is

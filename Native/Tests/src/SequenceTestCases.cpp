@@ -13,6 +13,8 @@ extern "C" int Tests_BlendSequencePose(int mode);
 extern "C" int Tests_ModelWorkspaceIsolation(void);
 extern "C" int Tests_ModelProjectionGroups(void);
 extern "C" int Tests_ModelPolygonPackets(int colored, int split);
+extern "C" int TestsModelLimbPalettePackets(int colored, int split, int limb,
+                                            unsigned pulse_mask);
 extern "C" int Tests_ActorPoseHierarchy(void);
 extern "C" int Tests_ProjectedBoneEndpoints(void);
 extern "C" int Tests_RoomSpawnCountGuard(void);
@@ -232,4 +234,20 @@ TEST_CASE("Battle animation queries retain native header outputs",
       }
     }
   }
+}
+
+TEST_CASE("Selected limb polygons use only their own pulsed palette",
+          "[actors][model][targeting][palette]") {
+  for (int limb = 0; limb < 8; ++limb) {
+    const unsigned selected = 0x80u >> limb;
+    const unsigned other = 0x80u >> ((limb + 1) % 8);
+    CHECK(TestsModelLimbPalettePackets(0, 0, limb, selected) == 1);
+    CHECK(TestsModelLimbPalettePackets(1, 0, limb, selected) == 1);
+    CHECK(TestsModelLimbPalettePackets(0, 1, limb, selected) == 1);
+    CHECK(TestsModelLimbPalettePackets(0, -1, limb, selected) == 1);
+    CHECK(TestsModelLimbPalettePackets(0, 0, limb, other) == 1);
+    CHECK(TestsModelLimbPalettePackets(1, 0, limb, other) == 1);
+  }
+  CHECK(TestsModelLimbPalettePackets(0, 0, 8, 0xFF) == 1);
+  CHECK(TestsModelLimbPalettePackets(1, 0, 8, 0xFF) == 1);
 }

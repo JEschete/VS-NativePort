@@ -26,6 +26,9 @@ void Render_DrawModelFlatPolygons(Actors_ModelRenderContext* context,
 void Render_DrawModelGouraudPolygons(Actors_ModelRenderContext* context,
                                      void* instance, void* tint,
                                      void* model_data);
+void Render_DrawActorPolygons(Actors_ModelRenderContext* context,
+                              Actors_ModelInstance* instance,
+                              const CVECTOR* tint, Actors_ShpModel* model);
 
 #ifdef __cplusplus
 }
