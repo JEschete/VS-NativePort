@@ -1,6 +1,7 @@
 """Regressions for encounter and effect source adaptations, without game assets."""
 
 import csv
+import re
 import unittest
 from pathlib import Path
 
@@ -8,6 +9,44 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_geometry_copy_preserves_offsets_and_verified_parameter_names(self):
+        source = """void* Content_CopyModelGeometry(int* arg0, void* arg1, int arg2)
+{
+    if (arg0 == NULL) {
+        arg0 = Core_Memory_AllocateFromLowEnd(arg2);
+    }
+    memcpy(arg0, arg1, arg2);
+    arg0[12] += (u_long)arg0;
+    arg0[13] += (u_long)arg0;
+    arg0[14] += (u_long)arg0;
+    arg0[15] += (u_long)arg0;
+    return arg0;
+}
+"""
+        for old, new, _ in copy_fixups.FIXES["F00786"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+            if re.search(row, "Content::CopyModelGeometry"):
+                source = re.sub(pattern, replacement, source)
+        self.assertIn("int* destination, void* source, int byteCount", source)
+        self.assertIn("memcpy(destination, source, byteCount);", source)
+        self.assertNotIn("(u_long)", source)
+        self.assertNotRegex(source, r"\barg\d+\b")
+
+    def test_gimmick_copy_uses_only_the_native_owned_runtime_prefix(self):
+        source = """memset(s1, 0, 0x178);
+Core_Memory_CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], 0x178);
+"""
+        for old, new, _ in copy_fixups.FIXES["F00782"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertEqual(
+            source.count("offsetof(Field_GimmickInstance, reserved178)"), 2
+        )
+        self.assertNotIn("sizeof(Field_GimmickInstance)", source)
+        self.assertNotIn("0x178", source)
+
     def test_npc_area_filter_keeps_geometry_without_creating_player_ui(self):
         source = """    Battle_actionState->areaOrigin = Battle_actionState->savedAreaCenter;
     ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);

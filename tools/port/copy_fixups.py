@@ -97,6 +97,23 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F00786": [
+        ("    arg0[12] += (u_long)arg0;\n"
+         "    arg0[13] += (u_long)arg0;\n"
+         "    arg0[14] += (u_long)arg0;\n"
+         "    arg0[15] += (u_long)arg0;\n",
+         "",
+         "SHP section members remain serialized offsets; VS_ONDISC resolves them from the native model base"),
+    ],
+    "F00782": [
+        ("memset(s1, 0, 0x178);",
+         "memset(s1, 0, offsetof(Field_GimmickInstance, reserved178));",
+         "Clear the native runtime prefix, not the PS1 prefix or the larger actor-compatibility view"),
+        ("Core_Memory_CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], 0x178);",
+         "Core_Memory_CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], "
+         "offsetof(Field_GimmickInstance, reserved178));",
+         "Shared gimmicks copy their complete native prefix including the object-info tail"),
+    ],
     **{fid: [(f"if (index == {capacity})", f"if (index > {capacity})",
               "The staging index is one-based; inspect the final valid slot before rejecting a full array.")]
        for fid, capacity in (
@@ -1448,6 +1465,17 @@ FIXES["F00798"] += [
 ]
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    *[(r"^Content::CopyModelGeometry$", rf"\b{old}\b", new,
+       "30DB0.c:507 verified geometry-copy parameter meaning")
+      for old, new in (("arg0", "destination"), ("arg1", "source"),
+                       ("arg2", "byteCount"))],
+    *[(r"^Content::OffsetModelTextureCoordinates$", rf"\b{old}\b", new,
+       "30DB0.c:445 verified flat/Gouraud UV-walker parameter and local meaning")
+      for old, new in (("arg0", "polygonData"), ("arg1", "polygonCount"),
+                       ("arg2", "colored"), ("arg3", "uOffset"),
+                       ("arg4", "vOffset"), ("p", "cursor"),
+                       ("i", "polygonIndex"), ("j", "vertexIndex"),
+                       ("count", "remainingUvPairs"))],
     (r"^Audio::", r"\bSpuSetNoiseClock\b", "Audio_Native_SetNoiseClock",
      "native noise clock controls replace the SDK register setter"),
     (r"^Audio::", r"\bSpuSetReverbModeDepth\b", "Audio_Native_SetReverbDepth",

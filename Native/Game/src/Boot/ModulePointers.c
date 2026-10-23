@@ -1092,7 +1092,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80099D6Cu, 0u, (void*)&Field_ReleaseGimmickInstance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80099E7Cu, 0u, (void*)&Content_OffsetModelTextureCoordinates, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80099FA8u, 0u, (void*)&Content_FindSharedWeaponModel, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009A028u, 0u, (void*)&Content_CopyRelocatedModelGeometry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8009A028u, 0u, (void*)&Content_CopyModelGeometry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009A0B8u, 0u, (void*)&Content_UpdateWeaponModelLoad, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009A2E8u, 0u, (void*)&Content_ParseWeaponModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009A98Cu, 0u, (void*)&Content_LoadWeaponMaterialPalette, 0u, 0u, 0u},

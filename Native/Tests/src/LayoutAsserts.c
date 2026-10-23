@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "Actors/ActorAllocation.h"
 #include "Actors/ActorLoading.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelRendering.h"
@@ -28,6 +29,11 @@
 #include "Field/GimmickMotion.h"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
+
+_Static_assert(
+    sizeof(Actors_ActorCore) - offsetof(Actors_ActorCore, model) >=
+        offsetof(Field_GimmickInstance, reserved178),
+    "The auxiliary actor allocation must own the native gimmick prefix");
 
 int TestsRoomSfxBankBinding(void) {
   const Audio_SoundState saved_state = Audio_soundState;

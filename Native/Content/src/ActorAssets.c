@@ -178,45 +178,45 @@ found:
 }
 
 // decomp: BATTLE.PRG func_80099E7C (src/BATTLE/BATTLE.PRG/30DB0.c:445)
-void Content_OffsetModelTextureCoordinates(void* arg0, int arg1, int arg2, int arg3, int arg4)
+void Content_OffsetModelTextureCoordinates(void* polygonData, int polygonCount, int colored, int uOffset, int vOffset)
 {
-    u_char* p = arg0;
-    int i;
-    int j;
-    int count;
+    u_char* cursor = polygonData;
+    int polygonIndex;
+    int vertexIndex;
+    int remainingUvPairs;
 
-    if (arg2 == 0) {
-        for (i = 0; i < arg1; ++i) {
-            if (*p == 0x24) {
-                p += 0xA;
-                count = 3;
+    if (colored == 0) {
+        for (polygonIndex = 0; polygonIndex < polygonCount; ++polygonIndex) {
+            if (*cursor == 0x24) {
+                cursor += 0xA;
+                remainingUvPairs = 3;
             } else {
-                p += 0xC;
-                count = 4;
+                cursor += 0xC;
+                remainingUvPairs = 4;
             }
 
-            for (j = 0; j < count; ++j) {
-                p[0] += arg3;
-                p[1] += arg4;
-                p += 2;
+            for (vertexIndex = 0; vertexIndex < remainingUvPairs; ++vertexIndex) {
+                cursor[0] += uOffset;
+                cursor[1] += vOffset;
+                cursor += 2;
             }
         }
     } else {
-        for (i = 0; i < arg1; ++i) {
-            if (p[11] == 0x34) {
-                p[6] += arg3;
-                p[7] += arg4;
-                p += 0x14;
-                count = 2;
+        for (polygonIndex = 0; polygonIndex < polygonCount; ++polygonIndex) {
+            if (cursor[11] == 0x34) {
+                cursor[6] += uOffset;
+                cursor[7] += vOffset;
+                cursor += 0x14;
+                remainingUvPairs = 2;
             } else {
-                p += 0x18;
-                count = 4;
+                cursor += 0x18;
+                remainingUvPairs = 4;
             }
 
-            for (j = 0; j < count; ++j) {
-                p[0] += arg3;
-                p[1] += arg4;
-                p += 2;
+            for (vertexIndex = 0; vertexIndex < remainingUvPairs; ++vertexIndex) {
+                cursor[0] += uOffset;
+                cursor[1] += vOffset;
+                cursor += 2;
             }
         }
     }
@@ -242,20 +242,16 @@ int Content_FindSharedWeaponModel(Content_ActorAssetRequest* objData)
 }
 
 // decomp: BATTLE.PRG func_8009A028 (src/BATTLE/BATTLE.PRG/30DB0.c:507)
-void* Content_CopyRelocatedModelGeometry(int* arg0, void* arg1, int arg2)
+void* Content_CopyModelGeometry(int* destination, void* source, int byteCount)
 {
-    if (arg0 == NULL) {
-        arg0 = Core_Memory_AllocateFromLowEnd(arg2);
+    if (destination == NULL) {
+        destination = Core_Memory_AllocateFromLowEnd(byteCount);
     }
 
-    memcpy(arg0, arg1, arg2);
+    memcpy(destination, source, byteCount);
 
-    arg0[12] += (u_long)arg0;
-    arg0[13] += (u_long)arg0;
-    arg0[14] += (u_long)arg0;
-    arg0[15] += (u_long)arg0;
 
-    return arg0;
+    return destination;
 }
 
 // decomp: BATTLE.PRG _loadWep (src/BATTLE/BATTLE.PRG/30DB0.c:523)

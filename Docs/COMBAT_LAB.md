@@ -321,6 +321,66 @@ provenance work. The owner's entire ten-second delay is not claimed reproduced;
 further startup investigation is deprioritized as requested. Publication and
 exact-revision CI are recorded on #143; wider gameplay coverage remains #16.
 
+### Original room-transition geometry repair (#145, 2026-10-23)
+
+The owner-reported Desktop crash is reproduced through ordinary controller
+movement on the same production room-loading path. Original SCEN001.ARM names
+and embedded MPD tags identify **Worker's Breakroom** as zone9/room16
+(`MAP027.MPD`) and **Hall of Struggle** as zone9/room3 (`MAP012.MPD`).
+Scene room numbers are one-based; native room indices are zero-based.
+
+Pre-fix Release run `1792784893231810-0`, host SHA256
+`e87eaef5e0b2a1b2929e8834a2fcd2f075b0b01fd8527a895323ab684ff3cf32`,
+crashes at254 after walking from Worker tile3,9 through its original door3,10.
+The recovered stack matches the owner: UV offsetting, gimmick creation, actor
+asset queue, auxiliary actor creation and normal room loading.
+
+F00786 previously added a truncated host pointer to four serialized SHP
+section offsets. Its consumer then used `VS_ONDISC`, adding the base again.
+The native helper is now **Content_CopyModelGeometry**: geometry copies retain
+their relative offsets. F00784's flat/Gouraud triangle/quad byte strides,
+unsigned UV wrapping and original spread of UV changes are unchanged.
+Verified parameter/local names survive the copy generator; the original
+decomp symbol and source location remain in provenance. Naming output
+`BATTLE_06` and `FUNCTION_CATALOG` agree, so regeneration cannot undo the name.
+
+The coupled gimmick clear/shared-copy now uses the owned prefix boundary,
+`offsetof(Field_GimmickInstance, reserved178)`. Compiled evidence is380 bytes,
+inside the384 bytes owned after `Actors_ActorCore.model`; the entire6320-byte
+actor-compatibility view is **not** cleared or allocated. A static assertion
+guards that relationship.
+
+Actual fixed routes in one window per configuration:
+
+| Configuration / run | Worker -> Hall | Hall -> Worker | Worker -> Hall again |
+|---|---:|---:|---:|
+| Debug `1792785151378647-0` | 318 | 543 | 765 |
+| Release `1792785174815286-0` | 316 | 543 | 765 |
+
+Both target-room loads use the original spawn records, not fabricated actors.
+Read-only, compiled-layout-guarded observations while F6-paused verify the two
+kind4 gimmicks retain source offsets `[356,96,100,164]`, with the same source
+model size356 on both entries. The sound section legitimately starts at the
+end of an empty section; it is not clamped into the model. No runtime memory,
+HP, door flags or terrain guards were edited. The initial solo setup isolates
+the approach; after entering the unconfigured Hall the production loader uses
+the original room actors. Original room event scripts remain isolated in Lab;
+this is not a full story-event or every-gimmick acceptance claim.
+
+Focused model-copy/header/guard and exact UV-format controls pass; full
+Debug/Release worktree suites558 cases /1804686 assertions each pass. Copier
+tests, second-generation stability, naming batch validation and the refreshed
+full reference index pass:138 translation units,100172 identifier occurrences,
+zero unresolved and zero text mismatches. The wider #148 symbol sweep remains
+open; compiling or renaming does not imply C++ promotion or compatibility
+retirement.
+
+Local evidence: `build\quality\gimmick145-{Debug,Release}-live.json`,
+`gimmick145-*-tests.log`, `gimmick145-*-full.log`,
+`gimmick145-reference-index.log`, `gimmick145-generation-*.log`, and
+`gimmick145-live.ps1`. Disc data and captures stay local. Publication and exact
+revision CI are recorded on #145. #146/#147's D'tok reports are separate.
+
 ## Ability-profile acceptance checkpoint (2026-10-22)
 
 The `all-abilities` fixture supports ongoing

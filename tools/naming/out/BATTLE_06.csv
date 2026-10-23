@@ -9,7 +9,7 @@ F00782,Field::CreateGimmickInstance,Native\Game\src\Field\Gimmicks.c,"Initialize
 F00783,Field::ReleaseGimmickInstance,Native\Game\src\Field\Gimmicks.c,Releases a Gimmick's geometry when unshared and removes its room collision registration.,high,
 F00784,Content::OffsetModelTextureCoordinates,Native\Content\src\ActorAssets.c,Offsets polygon texture coordinates for flat or Gouraud model primitives.,high,
 F00785,Content::FindSharedWeaponModel,Native\Content\src\ActorAssets.c,Finds a loaded WEP model that can supply geometry for a weapon asset request.,high,
-F00786,Content::CopyRelocatedModelGeometry,Native\Content\src\ActorAssets.c,Copies model geometry into a buffer and rebases its four section pointers.,high,
+F00786,Content::CopyModelGeometry,Native\Content\src\ActorAssets.c,Copies serialized model geometry while retaining model-relative section offsets for native resolution.,high,#145 native section offsets must not contain truncated host pointers;#148 verified destination/source/byteCount names
 F00787,Content::UpdateWeaponModelLoad,Native\Content\src\ActorAssets.c,Loads a WEP from disc or a shared model slot and advances its staged parser.,high,
 F00788,Content::ParseWeaponModel,Native\Content\src\ActorAssets.c,"Builds a WEP instance, uploads its textures and palettes, and binds its attachment bone.",high,
 F00789,Content::LoadWeaponMaterialPalette,Native\Content\src\ActorAssets.c,Selects the weapon material palette and uploads the WEP instance's combined Clut.,high,

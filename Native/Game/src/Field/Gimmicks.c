@@ -902,7 +902,7 @@ int Field_CreateGimmickInstance(Content_ActorAssetRequest* arg0)
         return -2;
     }
 
-    memset(s1, 0, 0x178);
+    memset(s1, 0, offsetof(Field_GimmickInstance, reserved178));
 
     for (i = 0; i < 16; ++i) {
         if ((i != arg0->targetSlot) && (Field_gimmickInstances[i] != NULL)
@@ -915,13 +915,13 @@ int Field_CreateGimmickInstance(Content_ActorAssetRequest* arg0)
     var_v0_2 = 0;
 exit:
     if (var_v0_2 != 0) {
-        Core_Memory_CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], 0x178);
+        Core_Memory_CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], offsetof(Field_GimmickInstance, reserved178));
     } else {
         temp_v1_2 = Field_gimmickModelTemplates[Field_gimmickTemplateIndices[arg0->subKind]];
         *(int*)&s1->boneCount = temp_v1_2->instanceFlags;
         s1->reserved4 = temp_v1_2->instanceWord4;
         temp_s0 = temp_v1_2->recolorCount;
-        s1->model = Content_CopyRelocatedModelGeometry(NULL, temp_v1_2 + 1, temp_v1_2->modelDataSize);
+        s1->model = Content_CopyModelGeometry(NULL, temp_v1_2 + 1, temp_v1_2->modelDataSize);
 
         if (s1->model == NULL) {
             return -2;

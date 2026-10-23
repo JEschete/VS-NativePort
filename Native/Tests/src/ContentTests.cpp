@@ -22,6 +22,7 @@
 #include "Render/PageSpace.hpp"
 
 extern "C" {
+#include "ActorAssets.h"
 #include "Effects/Plugins/Plg044.h"
 #include "Effects/Plugins/Plg049.h"
 #include "Effects/Plugins/Plg069.h"
@@ -449,4 +450,57 @@ TEST_CASE("Every tiled ring imports all eight transparency color modes",
           "[content][module][tiled-ring]") {
   const unsigned index = GENERATE(Catch::Generators::range(0u, 13u));
   CheckTemplateBinding(kTiledRingData[index]);
+}
+
+TEST_CASE("Copied model geometry keeps serialized section offsets relative",
+          "[content][model-geometry][offsets]") {
+  std::array<int, 32> source{};
+  for (std::size_t word = 0; word < source.size(); ++word) {
+    source[word] = static_cast<int>(word * 3);
+  }
+  source[12] = GENERATE(0, 128);
+  source[13] = 64;
+  source[14] = 80;
+  source[15] = 96;
+  struct {
+    std::array<int, 2> before{17, 19};
+    std::array<int, 32> model{};
+    std::array<int, 2> after{23, 29};
+  } destination;
+  const auto original = source;
+  CHECK(Content_CopyModelGeometry(destination.model.data(), source.data(),
+                                  sizeof source) == destination.model.data());
+  CHECK(destination.model == source);
+  CHECK(source == original);
+  CHECK(destination.before == std::array<int, 2>{17, 19});
+  CHECK(destination.after == std::array<int, 2>{23, 29});
+}
+
+TEST_CASE("Model UV offsets preserve primitive strides and byte wrapping",
+          "[content][model-geometry][uv]") {
+  const bool colored = GENERATE(false, true);
+  const bool reverse = GENERATE(false, true);
+  std::array<u8, 72> bytes{};
+  bytes.fill(0xA5);
+  auto expected = bytes;
+  std::size_t start = 4;
+  for (int primitive = 0; primitive < 2; ++primitive) {
+    const bool triangle = (primitive == 0) != reverse;
+    bytes[start + (colored ? 11 : 0)] = expected[start + (colored ? 11 : 0)] =
+        static_cast<u8>(colored ? (triangle ? 0x34 : 0x3C)
+                                : (triangle ? 0x24 : 0x2C));
+    const auto pairs = colored ? (triangle ? std::vector<int>{6, 20, 22}
+                                           : std::vector<int>{24, 26, 28, 30})
+                               : (triangle ? std::vector<int>{10, 12, 14}
+                                           : std::vector<int>{12, 14, 16, 18});
+    for (const auto offset : pairs) {
+      bytes[start + offset] = 250;
+      bytes[start + offset + 1] = 3;
+      expected[start + offset] = 4;
+      expected[start + offset + 1] = 252;
+    }
+    start += colored ? (triangle ? 24 : 32) : (triangle ? 16 : 20);
+  }
+  Content_OffsetModelTextureCoordinates(bytes.data() + 4, 2, colored, 10, -7);
+  CHECK(bytes == expected);
 }
