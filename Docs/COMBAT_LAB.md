@@ -512,10 +512,17 @@ the stepped pose report is `dtok146-pose-Release.json`.
 
 An additional Debug visual observer exited normally during startup with
 zero gameplay ticks and no logged error; it is excluded, not a passing check.
-Do not automatically reopen game windows. A clear active flame-stream visual
-check remains before blanket #146 acceptance; the unsafe appearance-tail
-contract found during #147 investigation is recorded separately. Publication
-and exact CI are recorded on the issues, not inferred from these local runs.
+After the owner requested autonomous completion, Release live run
+`1792793560646680-0` directly captured the active flame jet leaving the
+original model's mouth. The native320x240 framebuffer and DPI-aware,
+owned-window-only capture agree at special-pose frame~76, after the original
+frame64 trigger. No desktop coordinates, injected effect events or damage
+writes are needed. Evidence: `build\quality\dtok146-active-native.png`,
+`dtok-Release-active-flame.png`, `dtok146-visual-pose.json` and the named run.
+This completes the active-stream gate in addition to the full-prologue
+Debug/Release damage proof. The unsafe appearance-tail/material contracts
+found during #147 investigation are separate. Publication and exact CI are
+recorded on the issues, not inferred from local runs.
 
 ## Ability-profile acceptance checkpoint (2026-10-22)
 
