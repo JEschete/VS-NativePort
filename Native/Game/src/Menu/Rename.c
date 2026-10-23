@@ -221,7 +221,7 @@ void Menu_Rename_DrawFrame(int xOffset)
             prim[5] = ((-xOffset - v1) & 0xFFFF) | (j + 20 + i * 16) << 16;
             prim[6] = vs_getTpage(0, 0, 0, 0, 0);
 
-            *sp18 = ((u_long)prim << 8) >> 8;
+            *sp18 = LegacyGpu_Handle(prim);
 
             prim += 7;
         }
@@ -302,7 +302,7 @@ void Menu_Rename_DrawFrame(int xOffset)
         prim[8] = 0;
         prim[9] = vs_getRGB888(0, 1, 30);
 
-        ((u_long*)Render_frameScratch.overlayOrderingTable)[0] = ((u_long)prim << 8) >> 8;
+        ((u_long*)Render_frameScratch.overlayOrderingTable)[0] = LegacyGpu_Handle(prim);
         Render_frameScratch.primitiveCursor = prim + 10;
 
         if (++Menu_Rename_unusedFrameCycle >= 12) {
@@ -336,7 +336,7 @@ void Menu_Rename_DrawFrame(int xOffset)
         prim[8] = vs_getRGB888(0, 5, 51);
         prim[9] = xOffset + Menu_Rename_frameBackgroundHexCoords[j + 3];
 
-        *sp18 = ((u_long)prim << 8) >> 8;
+        *sp18 = LegacyGpu_Handle(prim);
         Render_frameScratch.primitiveCursor = (u_long*)(prim + 10);
     }
 }
@@ -361,7 +361,7 @@ void Menu_Rename_DrawSelectionBox(int x, int y, int w, int h)
     temp_t0[8] = vs_getRGB888(128, 160, 192);
     temp_t0[9] = (x + w) | ((y + h) << 16);
 
-    *temp_t4 = ((u_long)temp_t0 << 8) >> 8;
+    *temp_t4 = LegacyGpu_Handle(temp_t0);
     Render_frameScratch.primitiveCursor = temp_t0 + 10;
 }
 

@@ -1385,6 +1385,100 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Weapon naming rendering (#133)
+
+The owner reported a background-only screen after confirming workshop
+assembly. Reproduced on `cd2f911f9b88e88e5d87b500c43d47493d611574`: the
+Debug controller capture at tick2866 contains only the original background.
+MENU8 state and successful name/inventory writes were not evidence that the
+editor rendered. This checkpoint adds explicit visual acceptance.
+
+Original `MENU8.PRG/21A0.c` builds the command gradients, name/grid backdrop
+and selection highlight using linked packets. Generated F02781/F02782 still
+truncated native pointers to raw24-bit addresses. The copy generator now uses
+the existing registered `LegacyGpu_Handle` links for those two producers.
+Original strings, grid layout, animation, input, confirmation and name rules
+are unchanged. No reference source or generated output was manually patched.
+
+The new production renderer regression fails14 of26 assertions before repair:
+no131 synthetic command/name/grid glyphs,48 command-gradient packets or4/5
+backdrop packets are reachable, and the selection highlight breaks the lower
+UI chain. Fixed Debug/Release pass30 assertions in two cases, including
+offsets0/32/320, native addresses above32 bits, complete lower-chain traversal
+and allocation guards. The two generated-source checks also fail before
+repair and pass afterward.
+
+Rebuilt Lab hosts, with the repair uncommitted on cd2f911f and unrelated owner
+edits present, have SHA256:
+
+- Debug: `92eacff6490e03c762bc3d03f3b19f8e564b595f8898a3bef537801c67f9dad9`.
+- Release: `5f049e1e7c0c0f40c6bcfac2e384928cced96ac2963700a07cbaece7599d9d52`.
+
+The following actual-controller captures were inspected, not inferred from
+menu state. All show readable command labels, name field, full character grid
+and selection cursor/highlight. Edited captures change Fandango to Aandango
+in the buffer and move the grid selection down/right before capture.
+
+| Rendered screen | Debug run | Release run |
+|---|---|---|
+| Assembly naming | `1792734975110326-0` | `1792735055683383-0` |
+| Explicit Setup Rename | `1792735031754241-0` | `1792735112015359-0` |
+| Edited name and moved selection | `1792735659331107-0` | `1792735685545071-0` |
+
+Repeated complete transactions also pass: Debug `1792735242277701-0` and
+Release `1792735466351908-0`. Each performs two cycles of disassembly
+confirmation cancellation, actual disassembly of the equipped stock weapon,
+provisional assembly cancellation, confirmed assembly through naming,
+explicit rename cancellation, typed-name confirmation and re-equipping.
+Empty assembly naming correctly assigns the blade's default Scimitar name;
+explicit naming restores the original Fandango name. Component properties,
+ownership and expected inventory bytes are checked at every transaction.
+All3840 inventory bytes equal the initial state on final field return
+(Debug tick12908; Release tick12854); copied selector lists are released.
+
+The first rename-confirmation observer returned early because it consumed
+queued frames preceding the latest input during fast typing. The final
+round-trip observer acknowledges the actual pressed-button frame before
+settling. This was a harness timing error, not a naming-input repair.
+No process-memory writes, forced gameplay state or inventory expansion
+establish acceptance.
+
+Commands, repeated in Debug and Release x64:
+
+```powershell
+& 'C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe' `
+  Native\Tests\VS.Tests.vcxproj /m /nodeReuse:false `
+  /p:Configuration=Debug /p:Platform=x64 /p:VcpkgManifestInstall=false
+build\Debug\VS.Tests.exe "[rename]"
+build\Debug\VS.Tests.exe
+# Build Native\Tools\CombatLab\VS.CombatLab.vcxproj with the same settings.
+build\quality\equipment14-check.ps1 -Configuration Debug -Mode workshop-gate `
+  -Zone 42 -WorkshopAction roundtrip -CaptureNaming assembly
+# Repeat with -CaptureNaming rename and -CaptureNaming edited.
+build\quality\equipment14-check.ps1 -Configuration Debug -Mode workshop-gate `
+  -Zone 42 -WorkshopAction roundtrip
+.\.venv-3\Scripts\python.exe tools\port\copy_to_native.py
+.\.venv-3\Scripts\python.exe tools\port\test_encounter_fixups.py
+. .venv-3\Scripts\Activate.ps1
+.\quality-native.cmd --files Native\Tests\src\EquipmentDetailTests.cpp `
+  tools\port\copy_fixups.py tools\port\test_encounter_fixups.py --tidy
+```
+
+Final full native suites pass505 cases/1,786,663 assertions each. All21 copier
+tests pass; second generation is stable across751 outputs with87 owned
+source/header files preserved. Maintained quality/tidy is0 findings/0 new,
+with60 intentional fixture literals reported separately; no baseline changed.
+The eight accepted sessions have normal final records, zero error-level
+engine entries and no trace failures. Evidence and captures stay local under
+`build\quality\naming133-*`; `naming133-final-audit.json` additionally identifies
+the two `workshop15-*-zone42-gate-roundtrip` sessions. The pre-fix capture is
+`naming133-Debug-red-assembly.png`.
+
+This establishes the bounded #133 rendering/editing acceptance and stock
+assembly/rename round trips. #15 remains open for gem attachment/removal,
+meaningful durability repair and representative material/result combination
+transactions. This is not C++ promotion or compatibility retirement.
+
 ## Workshop gates and native selector storage (#15; #132)
 
 Checkpoint source is `b45dfd3c5468adac115fdbff5f3c48cd31a5337d` with the

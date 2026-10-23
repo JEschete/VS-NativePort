@@ -18,10 +18,14 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
+#include "Content/StringTables.h"
 #include "Core/Memory/WordCopy.h"
+#include "Core/Text/TextCode.h"
 #include "Event/ScriptVm.h"
 #include "Menu/Framework/EquipmentDetails.h"
+#include "Menu/Framework/Framework.h"
 #include "Menu/Inventory/Inventory.h"
+#include "Menu/Rename.h"
 #include "Render/Display.h"
 #include "Render/Font.h"
 #include "Render/Frame.h"
@@ -162,6 +166,61 @@ struct EquipmentFixture {
   }
 };
 
+struct RenameFrameFixture {
+  EquipmentFixture frame{0};
+  Menu_Framework_MenuRow* saved_rows = Menu_Framework_menuItems;
+  decltype(std::to_array(Menu_Rename_renderRenameMenuStrings)) saved_strings =
+      std::to_array(Menu_Rename_renderRenameMenuStrings);
+  decltype(std::to_array(Menu_Rename_stringBuf)) saved_name =
+      std::to_array(Menu_Rename_stringBuf);
+  u_char saved_action = Menu_Rename_selectedControllerAction;
+  char saved_pulse = Menu_Rename_navIconPulseRequest;
+  char saved_animation = Menu_Rename_nameNavIconAnim;
+  std::array<Menu_Framework_MenuRow, 40> rows{};
+
+  RenameFrameFixture() {
+    Menu_Framework_menuItems = rows.data();
+    Render_frameScratch.orderingTable = frame.ordering.data() + 24;
+    Render_frameScratch.overlayOrderingTable = frame.ordering.data() + 8;
+    std::fill_n(Menu_Rename_renderRenameMenuStrings, saved_strings.size(),
+                0xE7E7);
+    for (int index = Text_Menu8_rename_Index_ok;
+         index <= Text_Menu8_rename_Index_insert; ++index) {
+      Menu_Rename_renderRenameMenuStrings[index] = 150;
+    }
+    Menu_Rename_renderRenameMenuStrings[150] = 0xE70A;
+    auto* grid =
+        reinterpret_cast<unsigned char*>(Menu_Rename_renderRenameMenuStrings +
+                                         Text_Menu8_rename_Offset_charTable);
+    std::fill_n(grid, 15 * 9, 10);
+    std::fill_n(Menu_Rename_stringBuf, saved_name.size(), Core_TextCode_Space);
+    Menu_Rename_stringBuf[0] = 10;
+    Menu_Rename_selectedControllerAction = 0;
+  }
+
+  ~RenameFrameFixture() {
+    Menu_Framework_menuItems = saved_rows;
+    std::copy(saved_strings.begin(), saved_strings.end(),
+              Menu_Rename_renderRenameMenuStrings);
+    std::copy(saved_name.begin(), saved_name.end(), Menu_Rename_stringBuf);
+    Menu_Rename_selectedControllerAction = saved_action;
+    Menu_Rename_navIconPulseRequest = saved_pulse;
+    Menu_Rename_nameNavIconAnim = saved_animation;
+  }
+
+  std::vector<const u_long*> Packets() const {
+    std::vector<const u_long*> packets;
+    const void* packet = &frame.ordering.back();
+    for (unsigned count = 0; packet != nullptr && count < 2048; ++count) {
+      if (!frame.Owns(packet)) break;
+      const auto* words = static_cast<const u_long*>(packet);
+      if ((*words >> 24) != 0) packets.push_back(words);
+      packet = isendprim(packet) ? nullptr : nextPrim(packet);
+    }
+    return packets;
+  }
+};
+
 struct EquipmentReloadFixture {
   Actors_ActorRecord* saved_preview = Actors_actorRecords[1];
   decltype(std::to_array(Actors_weaponModels)) saved_models =
@@ -212,6 +271,48 @@ TEST_CASE("Equipment page headers interpret encoded font controls as controls",
   EquipmentFixture fixture(GENERATE(0, 1, 2));
   Menu_Framework_DrawEquipmentStatPage(0);
   CHECK(fixture.HeaderGlyphs() == 19);
+}
+
+TEST_CASE("Weapon naming frame retains its grid name commands and backdrops",
+          "[render][menu][equipment][rename]") {
+  const int offset = GENERATE(0, 32, 320);
+  RenameFrameFixture fixture;
+  REQUIRE(reinterpret_cast<std::uintptr_t>(fixture.frame.storage.data()) >
+          UINT32_MAX);
+  Menu_Rename_DrawFrame(offset);
+  CHECK(fixture.frame.ReachesLastEntry());
+  const auto packets = fixture.Packets();
+  const auto glyphs =
+      std::count_if(packets.begin(), packets.end(), [](const u_long* packet) {
+        return (*packet >> 24) == 5 && packet[5] == 0x000C000C;
+      });
+  const auto lines =
+      std::count_if(packets.begin(), packets.end(), [](const u_long* packet) {
+        return (*packet >> 24) == 6 && (packet[2] >> 24) == 0x50;
+      });
+  const auto backdrops =
+      std::count_if(packets.begin(), packets.end(), [](const u_long* packet) {
+        return (*packet >> 24) == 9 && (packet[2] >> 24) == 0x38;
+      });
+  CHECK(glyphs == 9 * 14 + 4 + 1);
+  CHECK(lines == 48);
+  CHECK(backdrops == (offset == 0 ? 5 : 4));
+  CHECK(fixture.rows[29].selected == 1);
+  CHECK(fixture.frame.storage.front() == 0xDEADBEEF);
+  CHECK(fixture.frame.storage.back() == 0xDEADBEEF);
+}
+
+TEST_CASE("Weapon naming selection highlight retains the lower UI chain",
+          "[render][menu][equipment][rename]") {
+  RenameFrameFixture fixture;
+  Menu_Rename_DrawSelectionBox(128, 76, 10, 18);
+  CHECK(fixture.frame.ReachesLastEntry());
+  const auto packets = fixture.Packets();
+  REQUIRE(packets.size() == 1);
+  CHECK(packets[0][3] == vs_getXY_2(128, 76));
+  CHECK(packets[0][9] == vs_getXY_2(138, 94));
+  CHECK(fixture.frame.storage.front() == 0xDEADBEEF);
+  CHECK(fixture.frame.storage.back() == 0xDEADBEEF);
 }
 
 TEST_CASE(

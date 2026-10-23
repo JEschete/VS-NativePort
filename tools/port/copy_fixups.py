@@ -712,6 +712,14 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("Battle_unusedGlobal1[i]", "Actors_weaponModels[i + 2]",
          "D_800F4590 aliases vs_battle_wepModels[2], including its second preview slot"),
     ],
+    "F02781": [
+        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
+         "MENU8/21A0.c rename commands and backdrops must preserve native packet links"),
+    ],
+    "F02782": [
+        ("((u_long)temp_t0 << 8) >> 8", "LegacyGpu_Handle(temp_t0)",
+         "MENU8/21A0.c name and grid highlights must preserve the lower UI chain"),
+    ],
     "F02886": [
         ("char** menuText;", "char* menuText[2 * 17];",
          "MENUC assembly blade choices need two native pointers per stock slot plus the current row"),

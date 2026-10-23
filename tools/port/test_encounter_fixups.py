@@ -7,6 +7,17 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_weapon_naming_draw_links_use_native_handles(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Menu/Rename.c").read_text()
+        for function, variable in (("DrawFrame", "prim"),
+                                   ("DrawSelectionBox", "temp_t0")):
+            with self.subTest(function=function):
+                body = source.split(f"void Menu_Rename_{function}(", 1)[1]
+                body = body.split("\n}\n", 1)[0]
+                self.assertNotIn(f"((u_long){variable} << 8) >> 8", body)
+                self.assertIn(f"LegacyGpu_Handle({variable})", body)
+
     def test_workshop_choices_use_native_pointer_arrays(self):
         root = Path(__file__).resolve().parents[2]
         root = root / "Native" / "Game" / "src" / "Menu" / "Setup"
