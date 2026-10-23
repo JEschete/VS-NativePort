@@ -47,8 +47,8 @@ int Battle_Ai_candidateEngagedThisUpdate;
 // decomp: BATTLE.PRG func_800D8260 (src/BATTLE/BATTLE.PRG/6FA60.c:407)
 void Battle_Ai_SetTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* arg0, int arg1, int arg2)
 {
-    arg0->opaque138 = arg1;
-    arg0->opaque12A = arg2;
+    arg0->awarenessMarker = arg1;
+    arg0->awarenessFramesRemaining = arg2;
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/6FC00.c:644
@@ -343,7 +343,7 @@ void Battle_Ai_UpdateActorPerception(void)
         }
         *(int*)((uintptr_t)&Battle_Ai_FrameState()->lastBudgetTick) = arg;
         if (state->opaque18) {
-            if (state->opaque12A != 0 && state->opaque138 == 6) {
+            if (state->awarenessFramesRemaining != 0 && state->awarenessMarker == 6) {
             idle:
                 Battle_Ai_RefreshAiTargetTileWhenTracking(state);
                 goto skip;
@@ -503,20 +503,20 @@ void Battle_Ai_UnlinkEngagedActor(Battle_Ai_ActorAiState* arg0)
 // decomp: BATTLE.PRG func_800DBFE4 (src/BATTLE/BATTLE.PRG/73700.c:463)
 void Battle_Ai_UpdateEngagementBuildup(Battle_Ai_ActorAiState* arg0)
 {
-    if (arg0->opaque8E != 0 && ++arg0->opaque8E != 0) {
+    if (arg0->engagementFrames != 0 && ++arg0->engagementFrames != 0) {
         int frame;
 
-        if (arg0->opaque8E < 8) {
+        if (arg0->engagementFrames < 8) {
             frame = 0;
-        } else if (arg0->opaque8E < 16) {
+        } else if (arg0->engagementFrames < 16) {
             frame = 1;
-        } else if (arg0->opaque8E < 24) {
+        } else if (arg0->engagementFrames < 24) {
             frame = 2;
         } else {
             frame = 3;
         }
 
-        if (arg0->opaque8E <= 120) {
+        if (arg0->engagementFrames <= 120) {
             Battle_Ai_SetActorAwarenessIndicator(arg0->actorId, frame + 1);
             return;
         }
@@ -525,16 +525,16 @@ void Battle_Ai_UpdateEngagementBuildup(Battle_Ai_ActorAiState* arg0)
         Battle_Ai_DisengageActor(arg0);
     }
 
-    if (arg0->opaque9A != 0) {
-        if (--arg0->opaque9A != 0) {
+    if (arg0->reengagementGraceFrames != 0) {
+        if (--arg0->reengagementGraceFrames != 0) {
             Battle_Ai_SetActorAwarenessIndicator(arg0->actorId, 4);
         } else {
             Battle_Ai_SetActorAwarenessIndicator(arg0->actorId, 0);
         }
     }
 
-    if (arg0->opaque98 != 0) {
-        --arg0->opaque98;
+    if (arg0->engagementCooldownFrames != 0) {
+        --arg0->engagementCooldownFrames;
     }
 }
 
@@ -722,7 +722,7 @@ void Battle_Ai_NotifyActionRelationshipChanges(Battle_Ai_ReactionRecord* arg0)
             Battle_Ai_ActorAiState* entry = Battle_Ai_actorAiStates[arg0->opaque4.opaque0];
 
             if (entry != NULL) {
-                entry->opaque9A = 0;
+                entry->reengagementGraceFrames = 0;
             }
         }
 

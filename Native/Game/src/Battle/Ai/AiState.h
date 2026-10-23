@@ -298,7 +298,7 @@ typedef struct Battle_Ai_PlanEvaluationView {
     char reserved1C_6C[28];
     unsigned char actorId;
     char reserved89[17];
-    unsigned short opaque9A;
+    unsigned short reengagementGraceFrames;
     char reserved9C[75];
     unsigned char opaqueE7;
     unsigned char opaqueE8;
@@ -572,11 +572,11 @@ typedef struct Battle_Ai_PerceptionUpdateView {
     u_int opaque120;
     u_char opaque124;
     char reserved125[5];
-    u_char opaque12A;
+    u_char awarenessFramesRemaining;
     char reserved12B[6];
     u_char actionStatus;
     char reserved132[6];
-    u_short opaque138;
+    u_short awarenessMarker;
     char reserved13A[0x1C];
     u_short opaque156;
     char reserved158[0x34];
@@ -931,7 +931,7 @@ typedef struct Battle_Ai_ActorAiState {
         };
     };
     /* 0x8C */ u_short moveAttempts;
-    /* 0x8E */ u_short opaque8E;
+    /* 0x8E */ u_short engagementFrames;
     /* 0x90 */ union {
         char reserved90[2];
         u_short actionDelay;
@@ -944,8 +944,8 @@ typedef struct Battle_Ai_ActorAiState {
             u_char reserved96[2];
         };
     };
-    /* 0x98 */ u_short opaque98;
-    /* 0x9A */ u_short opaque9A;
+    /* 0x98 */ u_short engagementCooldownFrames;
+    /* 0x9A */ u_short reengagementGraceFrames;
     /* 0x9C */ union {
         char reserved9C[23];
         struct {
@@ -1015,7 +1015,7 @@ typedef struct Battle_Ai_ActorAiState {
             u_char reserved126[4];
         };
     };
-    /* 0x12A */ u_char opaque12A;
+    /* 0x12A */ u_char awarenessFramesRemaining;
     /* 0x12B */ union {
         char reserved12B[2];
         struct {
@@ -1036,7 +1036,7 @@ typedef struct Battle_Ai_ActorAiState {
         };
     };
     /* 0x134 */ Battle_Ai_TilePosition plannedTile;
-    /* 0x138 */ u_short opaque138;
+    /* 0x138 */ u_short awarenessMarker;
     /* 0x13A */ u_short opaque13A;
     /* 0x13C */ u_short opaque13C;
     /* 0x13E */ char reserved13E;

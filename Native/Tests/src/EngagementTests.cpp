@@ -95,7 +95,7 @@ TEST_CASE("AI engagement becomes ready at exactly thirty-two buildup frames",
           "[ai][engagement]") {
   const uint16_t timer = GENERATE(0, 1, 31, 32, 33, 65535);
   Battle_Ai_ActorAiState state{};
-  state.opaque8E = timer;
+  state.engagementFrames = timer;
   CHECK(Battle_Ai_IsEngagementReady(&state) == (timer >= 32));
 }
 
@@ -104,7 +104,7 @@ TEST_CASE(
     "[ai][engagement]") {
   EngagementFixture fixture;
   CHECK(Battle_Ai_TryEngageActor(&fixture.states[1]) == 1);
-  CHECK(fixture.states[1].opaque8E == 1);
+  CHECK(fixture.states[1].engagementFrames == 1);
   CHECK(fixture.states[1].engagementRequest == 0);
   fixture.CheckSingleMember(1);
   CHECK(Battle_Ai_TryEngageActor(&fixture.states[2]) == 1);
@@ -120,7 +120,7 @@ TEST_CASE(
     "[ai][engagement]") {
   const auto blocked = GENERATE(0, 1, 2);
   EngagementFixture fixture;
-  if (blocked == 0) fixture.states[1].opaque98 = 1;
+  if (blocked == 0) fixture.states[1].engagementCooldownFrames = 1;
   if (blocked == 1) Battle_Ai_candidateEngagedThisUpdate = 1;
   if (blocked == 2) {
     fixture.room.engagementLimit = 0;
@@ -129,7 +129,7 @@ TEST_CASE(
   const auto count = fixture.room.engagedCount;
   const auto mask = fixture.Mask();
   CHECK(Battle_Ai_TryEngageActor(&fixture.states[1]) == 0);
-  CHECK(fixture.states[1].opaque8E == 0);
+  CHECK(fixture.states[1].engagementFrames == 0);
   CHECK(fixture.states[1].engagementRequest == 7);
   CHECK(fixture.room.engagedCount == count);
   CHECK(fixture.Mask() == mask);
@@ -139,9 +139,9 @@ TEST_CASE(
     "AI recent-leave state rejoins at ready threshold without a fresh warmup",
     "[ai][engagement]") {
   EngagementFixture fixture;
-  fixture.states[1].opaque9A = 1;
+  fixture.states[1].reengagementGraceFrames = 1;
   CHECK(Battle_Ai_TryEngageActor(&fixture.states[1]) == 1);
-  CHECK(fixture.states[1].opaque8E == 32);
+  CHECK(fixture.states[1].engagementFrames == 32);
   CHECK(Battle_Ai_IsEngagementReady(&fixture.states[1]) == 1);
 }
 
@@ -152,7 +152,7 @@ TEST_CASE("AI existing buildup consumer advances a real join to readiness",
   for (int tick = 0; tick < 30; ++tick) {
     Battle_Ai_UpdateEngagementBuildup(&fixture.states[1]);
   }
-  CHECK(fixture.states[1].opaque8E == 31);
+  CHECK(fixture.states[1].engagementFrames == 31);
   CHECK(Battle_Ai_IsEngagementReady(&fixture.states[1]) == 0);
   Battle_Ai_UpdateEngagementBuildup(&fixture.states[1]);
   CHECK(Battle_Ai_IsEngagementReady(&fixture.states[1]) == 1);
@@ -167,9 +167,9 @@ TEST_CASE(
   if (two_actors) fixture.actors[1].next = nullptr;
   REQUIRE(Battle_Ai_TryEngageActor(&fixture.states[1]) == 1);
   Battle_Ai_DisengageActor(&fixture.states[1]);
-  CHECK(fixture.states[1].opaque8E == 0);
-  CHECK(fixture.states[1].opaque98 == (two_actors ? 0 : 48));
-  CHECK(fixture.states[1].opaque9A == 90);
+  CHECK(fixture.states[1].engagementFrames == 0);
+  CHECK(fixture.states[1].engagementCooldownFrames == (two_actors ? 0 : 48));
+  CHECK(fixture.states[1].reengagementGraceFrames == 90);
   fixture.CheckEmpty();
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
   Battle_Ai_DisengageActor(&fixture.states[1]);
@@ -212,11 +212,11 @@ TEST_CASE(
   Battle_Ai_SetTemporaryAwarenessIndicator(&state, 7, 2);
   auto* view = reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state);
   Battle_Ai_UpdateTemporaryAwarenessIndicator(view);
-  CHECK(state.opaque12A == 1);
+  CHECK(state.awarenessFramesRemaining == 1);
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x87);
   Battle_Ai_UpdateTemporaryAwarenessIndicator(view);
-  CHECK(state.opaque12A == 0);
+  CHECK(state.awarenessFramesRemaining == 0);
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
   Battle_Ai_UpdateTemporaryAwarenessIndicator(view);
-  CHECK(state.opaque138 == 7);
+  CHECK(state.awarenessMarker == 7);
 }

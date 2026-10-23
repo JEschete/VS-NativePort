@@ -74,27 +74,29 @@ void Battle_Ai_ResetActorAwarenessIndicator(
 // decomp: func_800D826C (src/BATTLE/BATTLE.PRG/6FA6C.s:10).
 int Battle_Ai_IsEngagementReady(Battle_Ai_ActorAiState* state) {
   Require(state != nullptr, "AI engagement readiness requires state");
-  return state->opaque8E >= kReadyFrames;
+  return state->engagementFrames >= kReadyFrames;
 }
 
 // decomp: func_800D8280 (src/BATTLE/BATTLE.PRG/6FA6C.s:23).
 void Battle_Ai_UpdateTemporaryAwarenessIndicator(
     Battle_Ai_PerceptionUpdateView* state) {
   Require(state != nullptr, "AI temporary marker requires state");
-  if (state->opaque12A == 0) return;
+  if (state->awarenessFramesRemaining == 0) return;
   Require(state->actor != nullptr, "AI temporary marker requires an actor");
-  --state->opaque12A;
+  --state->awarenessFramesRemaining;
   Battle_Ai_SetActorAwarenessIndicator(
-      state->actor->id, state->opaque12A == 0 ? 0 : state->opaque138);
+      state->actor->id,
+      state->awarenessFramesRemaining == 0 ? 0 : state->awarenessMarker);
 }
 
 // decomp: func_800D836C (src/BATTLE/BATTLE.PRG/6FA6C.s:99).
 int Battle_Ai_TryEngageActor(Battle_Ai_ActorAiState* state) {
   Require(state != nullptr, "AI engagement request requires state");
   RequireActorId(state->actorId);
-  if (state->opaque8E != 0) return 1;
+  if (state->engagementFrames != 0) return 1;
   auto& room = Room();
-  if (room.engagedCount > room.engagementLimit || state->opaque98 != 0 ||
+  if (room.engagedCount > room.engagementLimit ||
+      state->engagementCooldownFrames != 0 ||
       Battle_Ai_candidateEngagedThisUpdate != 0) {
     return 0;
   }
@@ -105,7 +107,8 @@ int Battle_Ai_TryEngageActor(Battle_Ai_ActorAiState* state) {
       room, static_cast<std::uint16_t>(VS::Battle::ai::EngagedMask(room) |
                                        (1u << state->actorId)));
   ++room.engagedCount;
-  state->opaque8E = state->opaque9A != 0 ? kReadyFrames : 1;
+  state->engagementFrames =
+      state->reengagementGraceFrames != 0 ? kReadyFrames : 1;
   if (room.engagedHead == nullptr) room.engagedTail = state;
   state->nextEngaged = room.engagedHead;
   room.engagedHead = state;
@@ -125,11 +128,11 @@ void Battle_Ai_DisengageActor(Battle_Ai_ActorAiState* state) {
           "AI disengagement requires actor context");
   VS::Battle::ai::StoreEngagedMask(room,
                                    static_cast<std::uint16_t>(mask & ~bit));
-  state->opaque8E = 0;
+  state->engagementFrames = 0;
   const auto* second = Battle_actors[0]->next;
-  state->opaque98 =
+  state->engagementCooldownFrames =
       second != nullptr && second->next == nullptr ? 0 : kLeaveCooldown;
-  state->opaque9A = kRejoinFrames;
+  state->reengagementGraceFrames = kRejoinFrames;
   Battle_Ai_UnlinkEngagedActor(state);
   --room.engagedCount;
   Battle_Ai_SetActorAwarenessIndicator(state->actorId, 0);

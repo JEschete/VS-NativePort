@@ -245,8 +245,8 @@ int Battle_Ai_CanApproachEngagedTarget(Battle_Ai_ActorAiState* state,
   Require(state != nullptr && candidate != nullptr,
           "AI approach gate requires state and a candidate");
   (void)Battle_Ai_IsActionCooldownReady(state, candidate);
-  if (state->opaque8E != 0) return 1;
-  if (state->opaque98 != 0) return 0;
+  if (state->engagementFrames != 0) return 1;
+  if (state->engagementCooldownFrames != 0) return 0;
   if (!state->relations[candidate->targetId].active) return 0;
   Require(Battle_Ai_roomAiState != nullptr && state->actorId < kActorSlots,
           "AI approach gate requires room state and a valid actor ID");
