@@ -1386,6 +1386,97 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## NPC area filtering without player sphere UI (#140)
+
+Source is `a37ac5a087a97295c7bbfe13b39e64c0aa9ae78c` plus the scoped F00103
+copier adaptation, generated targeting code and regressions. Unrelated owner
+edits remain dirty/excluded. The new source-backed roster corpus reached34
+clean Release initialization cases before original Lich definition7 crashed.
+Initialization/movement observations are not all-enemy behavior acceptance.
+
+Original fixture: zone24 room1, `MAP080`, source hostile row0, Lich definition7
+at tile5,7 facing0; Ashley5,4 facing0; seed1, `post-minotaur`, starting
+`max_hp:999/max_mp:999`, existing isolated room events. Enemy definitions,
+AI/actions, inventory, source assets and story flags are not edited.
+
+Before-fix Release `1792768167460696-0` and Debug `1792768368479320-0` exit
+`0xC0000005`. At tick361, `Battle_FilterAreaActionTargets` calls
+`Battle_SetSecondarySphereVolume` with no player sphere, writing address0x10.
+A new direct NPC-filter regression also fails with SIGSEGV before the fix.
+The preceding ordinary attack1 legitimately deals75HP at231.
+
+`Battle_BeginActorActionSelection` intentionally creates the renderer only
+for `isPlayerAction`. Other NPC-capable collectors already gate visual-volume
+updates on that flag; target binding/drawing also tolerate the absent optional
+renderer. F00103 alone unconditionally updated it. The copier now gates that
+UI update on `isPlayerAction`, retaining the area origin, geometric filtering,
+preview computation, every retained target and normal phase transition.
+It does not allocate an NPC targeting UI, add a fake renderer, return early
+from filtering, guard only a raw dereference, or emulate writes to address0.
+
+After-fix Debug `1792768984618836-0` and Release `1792768986232195-0`
+complete1800 ticks identically:
+
+| Action | Tick | Limb damage | Actual Ashley HP | Enemy MP debit |
+| --- | --- | --- | --- | --- |
+| Normal1 | 231 | limb0:75 | 999 ->924 | none |
+| Area130 | 829 | 0:79;1:76;2:83;3:81;4:79 | 924 ->526; sum398 | 103 ->65 once at363 |
+| Area126 | 1579 | 0:76;1:78;2:80;3:82;4:76 | 527 ->135; sum392 | 65 ->27 once at1115 |
+
+All damage sums match the exact preceding/following native frames. Natural
+HP regeneration explains526 ->527 between impacts; native MP regeneration
+later changes27 ->28 at1741. These are not memory/HP/MP edits or five resource
+charges for five limbs. Normal field control returns after the real casts
+(including frame1788); no victory or complete Lich behavior claim is made.
+
+Actual speed1 keyboard lifecycle sessions:
+
+| Build | Run | First area field return | Mid-effect F10 | Third-entry area return |
+| --- | --- | --- | --- | --- |
+| Debug | `1792769467702248-0` | 1057 | 1830 | 2891 |
+| Release | `1792769524387582-0` | 1057 | 1830 | 2894 |
+
+Each performs three Start entries/three F10 ends, including cancellation
+while the living Lich is casting area130. Fresh seeded HP/MP, source slots,
+weapon/model fields and positions match on every entry. Both first and third
+entries actually apply all five limb hits and return normally to the field.
+All four accepted autonomous/live sessions end normally with zero engine
+error/critical/trace failures. Frame-limited autonomous sessions remain
+interrupted encounters, not defeated-enemy/loot evidence.
+
+The earlier observer run `1792769290342565-0` is excluded: its copied `Ready`
+helper lacked the expected-actor-count variable and waited while genuine
+combat continued to game over. Correcting the observer to expect two actors
+did not change native behavior or weaken the acceptance checks.
+
+Commands use the standard Debug/Release MSBuild test and Combat Lab projects,
+`/m /nodeReuse:false /p:Platform=x64 /p:VcpkgManifestInstall=false`, followed by:
+
+```powershell
+build\Debug\VS.Tests.exe "[battle][sphere][area-target]"
+.\.venv-3\Scripts\python.exe tools\port\test_encounter_fixups.py
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File build\quality\lich140-live.ps1 -Configuration Debug
+```
+
+Repeat with Release. Final focused tests pass **14 assertions / 2 cases**;
+full suites pass **543 cases / 1802406 assertions** each; copier tests pass26.
+Repeated generation preserves **751 outputs / 93 owned paths**, changes only
+generated `Targeting.c` and has identical second-run hashes. Maintained
+quality/tidy for the sphere tests and two copier files reports **0 findings /
+0 new**. Generated output is checked through generation/build/tests, not the
+quality command's unsupported hand-maintained-only file selector. No quality
+baseline is changed.
+
+Fixed host SHA-256: Debug
+`476b8ecb447a4a78b34dbccf592e49bba9171b8ee5fbad265bc7a8ba201e0af5`,
+Release `d8d2d46eeeb2c1d6519d80d15d8c0e34cfb61a50179f4bd73cb1f62d094b362c`.
+Before-fix hashes are the #139 checkpoint's hosts. Local evidence is
+`build\quality\lich140-*`, source presets/results under
+`build\quality\arena16-roster`, and the native run directories above. Do not
+commit/upload disc-derived data or captures. Broader #16/#76/#80 and the
+separately observed Wyvern148 effect wait remain open; no C++ promotion or
+compatibility retirement is claimed. Publication/exact CI are recorded on #140.
+
 ## Original key and sigil lock acceptance (#139; supporting #16)
 
 Source is published `63beaf26819b3f73a801baa0506cc70b051223f5`, with no

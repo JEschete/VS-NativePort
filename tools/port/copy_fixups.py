@@ -555,6 +555,13 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    Battle_ResetTargetPages();\n    if (Battle_targetSphere != NULL) {",
          "Free/re-entry cannot retain a borrowed page pointer into an old action state"),
     ],
+    "F00103": [
+        ("    ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);",
+         "    if (Battle_actionState->isPlayerAction != 0) {\n"
+         "        ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);\n"
+         "    }",
+         "NPC area filtering retains action geometry without requiring the optional player sphere renderer"),
+    ],
     "F01297": [
         ("    if ((*(Battle_TargetSphere* (*))&Battle_targetSphere) != NULL) {",
          "    Battle_ResetTargetPages();\n    if ((*(Battle_TargetSphere* (*))&Battle_targetSphere) != NULL) {",

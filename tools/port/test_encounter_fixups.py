@@ -8,6 +8,21 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_npc_area_filter_keeps_geometry_without_creating_player_ui(self):
+        source = """    Battle_actionState->areaOrigin = Battle_actionState->savedAreaCenter;
+    ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);
+    kept = 0;
+    Battle_IsPointInTargetVolume(&Battle_actionState->areaShape, position);
+"""
+        for old, new, _ in copy_fixups.FIXES["F00103"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertIn("if (Battle_actionState->isPlayerAction != 0)", source)
+        self.assertIn("Battle_SetSecondarySphereVolume", source)
+        self.assertIn("    kept = 0;\n    Battle_IsPointInTargetVolume", source)
+        self.assertNotIn("Battle_InitSphere", source)
+        self.assertNotIn("return;", source)
+
     def test_native_target_capacity_is_not_a_ps1_allocation_or_visible_limit(self):
         root = Path(__file__).resolve().parents[2]
         action = (root / "Native/Game/include/Battle/Action.h").read_text()

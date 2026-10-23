@@ -461,3 +461,57 @@ TEST_CASE("Spell elevation clipping handles stepped terrain across camera yaw",
     fixture.Draw();
   }
 }
+
+namespace {
+struct AreaActionFixture {
+  Battle_ActionState storage{};
+  Battle_ActionState* saved = Battle_actionState;
+
+  AreaActionFixture() { Battle_actionState = &storage; }
+  ~AreaActionFixture() { Battle_actionState = saved; }
+};
+}  // namespace
+
+TEST_CASE("NPC area filtering does not require a player targeting sphere",
+          "[battle][sphere][area-target]") {
+  SliceFixture sphere;
+  AreaActionFixture action;
+  Battle_targetSphere = nullptr;
+  action.storage.areaCenter = {64, -32, 96, 0};
+  action.storage.areaShape = 2;
+  action.storage.areaKind = 3;
+  action.storage.areaX = 4;
+  action.storage.areaY = 6;
+  action.storage.areaZ = 8;
+  Battle_FilterAreaActionTargets();
+  CHECK(Battle_targetSphere == nullptr);
+  CHECK(action.storage.previewCount == 0);
+  CHECK(Battle_actionFlowMode == 3);
+  const auto& origin = action.storage.areaOrigin;
+  const std::array<int, 3> position{origin.vx, origin.vy, origin.vz};
+  CHECK(position == std::array{64, -32, 96});
+  const std::array<int, 5> shape{action.storage.areaShape,
+                                 action.storage.areaKind, action.storage.areaX,
+                                 action.storage.areaY, action.storage.areaZ};
+  const std::array expected_shape{2, 3, 4, 6, 8};
+  CHECK(shape == expected_shape);
+}
+
+TEST_CASE("Player secondary sphere updates preserve complete volume state",
+          "[battle][sphere][area-target]") {
+  SliceFixture sphere;
+  Battle_TargetSphereSpec volume{2, 3, 4, 5, 128, -64, 256};
+  sphere.storage.primaryVolume.kind = 7;
+  sphere.storage.wireShape = 15;
+  Battle_SetSecondarySphereVolume(&volume);
+  const auto& actual = sphere.storage.secondaryVolume;
+  CHECK(actual.kind == 2);
+  CHECK(actual.reserved1 == 3);
+  CHECK(actual.reserved2 == 4);
+  CHECK(actual.reserved3 == 5);
+  CHECK(actual.reserved4 == 128);
+  CHECK(actual.reserved8 == -64);
+  CHECK(actual.reservedC == 256);
+  CHECK(sphere.storage.wireShape == 0);
+  CHECK(sphere.storage.primaryVolume.kind == 7);
+}

@@ -195,7 +195,9 @@ void Battle_FilterAreaActionTargets(void)
 
     action = Battle_actionState->selection.actionId;
     Battle_actionState->areaOrigin = Battle_actionState->savedAreaCenter;
-    ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);
+    if (Battle_actionState->isPlayerAction != 0) {
+        ((void (*)(void*))Battle_SetSecondarySphereVolume)(&Battle_actionState->areaShape);
+    }
     kept = 0;
 
     for (i = 0; i < Battle_actionState->previewCount; ++i) {
