@@ -153,16 +153,20 @@ int Effects_LoadActionVariantRegister(Effects_EffectInstance* arg0)
 }
 
 // decomp: BATTLE.PRG func_800D4AEC (src/BATTLE/BATTLE.PRG/5BF94.c:7633)
-int Effects_SetEffectScriptRegister(Effects_EffectInstance* arg0)
+int Effects_SetEffectScriptRegister(Effects_EffectInstance* instance)
 {
-    arg0->registers[Effects_ReadScriptByte(arg0)] = Effects_ReadScriptHalfword(arg0);
+    u_char registerIndex = Effects_ReadScriptByte(instance);
+    u_short value = Effects_ReadScriptHalfword(instance);
+    instance->registers[registerIndex] = value;
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800D4B34 (src/BATTLE/BATTLE.PRG/5BF94.c:7639)
-int Effects_BranchIfEffectRegisterEqual(Effects_EffectInstance* arg0)
+int Effects_BranchIfEffectRegisterEqual(Effects_EffectInstance* instance)
 {
-    Effects_BranchEffectScriptIf(arg0->registers[Effects_ReadScriptByte(arg0)] == (Effects_ReadScriptHalfword(arg0)), arg0);
+    u_char registerIndex = Effects_ReadScriptByte(instance);
+    u_short value = Effects_ReadScriptHalfword(instance);
+    Effects_BranchEffectScriptIf((u_char)instance->registers[registerIndex] == value, instance);
     return 1;
 }
 

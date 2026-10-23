@@ -459,6 +459,22 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "Preserve the original cone's nontrapping 0/0 quotient when its height is zero, "
          "without changing nonzero scaling, particle emission or RNG consumption."),
     ],
+    "F01531": [
+        ("arg0->registers[Effects_ReadScriptByte(arg0)] = Effects_ReadScriptHalfword(arg0);",
+         "u_char registerIndex = Effects_ReadScriptByte(arg0);\n"
+         "    u_short value = Effects_ReadScriptHalfword(arg0);\n"
+         "    arg0->registers[registerIndex] = value;",
+         "5BF94.c:7633 / 800D4AFC..800D4B18 reads the index before the halfword; "
+         "native assignment evaluation must not reorder the shared cursor"),
+    ],
+    "F01532": [
+        ("Effects_BranchEffectScriptIf(arg0->registers[Effects_ReadScriptByte(arg0)] == "
+         "(Effects_ReadScriptHalfword(arg0)), arg0);",
+         "u_char registerIndex = Effects_ReadScriptByte(arg0);\n"
+         "    u_short value = Effects_ReadScriptHalfword(arg0);\n"
+         "    Effects_BranchEffectScriptIf((u_char)arg0->registers[registerIndex] == value, arg0);",
+         "5BF94.c:7639 / 800D4B44..800D4B74 preserves ordered operands and the original lbu comparison"),
+    ],
     "F01535": [
         ("    /* The original caller supplies arguments to this argument-free wrapper. */\n", "",
          "the retained assembly renderer now has an explicit native particle-list contract"),
@@ -1536,6 +1552,9 @@ FIXES["F00798"] += [
 ]
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    (r"^Effects::(?:SetEffectScriptRegister|BranchIfEffectRegisterEqual)$",
+     r"\barg0\b", "instance",
+     "5BF94.c:7633/7639 verified effect-instance stream and register ownership"),
     *[(r"^Menu::Score::QueueEnemyModelRead$", rf"\b{old}\b", new,
        "592C.c:171 verified source-file and palette-variant selection meanings")
       for old, new in (("id", "zudId"), ("cdFile", "sourceFile"),
