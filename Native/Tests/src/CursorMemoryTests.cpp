@@ -19,6 +19,8 @@ extern "C" {
 #include "Menu/BreakArts.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuRows.h"
+#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/ItemList.h"
 #include "Menu/Options.h"
 #include "State/StateFlags.h"
 }
@@ -40,7 +42,7 @@ struct CursorFixture {
   char saved_list_row = Menu_Framework_itemsListRow;
   u_char saved_id = Menu_Framework_subMenuId;
   u_short saved_count = Menu_Framework_subMenuRowCount;
-  std::array<Core_HeapBlockHeader, 256> heap{};
+  std::array<Core_HeapBlockHeader, 512> heap{};
   struct {
     std::array<Menu_Framework_MenuRow, 40> rows{};
     std::array<std::byte, 0x124> scratch{};
@@ -176,7 +178,65 @@ struct BreakArtMenuFixture {
     return Menu_BreakArts_UpdateArtList(0);
   }
 };
+
+struct EquipmentGateFixture {
+  CursorFixture rows;
+  decltype(std::to_array(Menu_Inventory_menuText)) saved_strings =
+      std::to_array(Menu_Inventory_menuText);
+  decltype(Audio_Seq_unusedStateFlags) saved_flags = Audio_Seq_unusedStateFlags;
+  decltype(Audio_Seq_unusedInventory) saved_inventory =
+      Audio_Seq_unusedInventory;
+  decltype(Audio_Seq_unusedInventoryIndices) saved_indices =
+      Audio_Seq_unusedInventoryIndices;
+  Battle_Actor* saved_character = Battle_characterState;
+  decltype(Menu_Framework_actionRestrictions) saved_restrictions =
+      Menu_Framework_actionRestrictions;
+  Battle_Actor actor{};
+  Battle_ActorStats stats{};
+
+  EquipmentGateFixture() {
+    Menu_Inventory_ItemList_ResetMenu3Statics();
+    std::fill_n(Menu_Inventory_menuText, saved_strings.size(), 0xE7E7);
+    std::fill_n(Menu_Inventory_menuText, 128, 128);
+    Audio_Seq_unusedInventory = {};
+    Audio_Seq_unusedInventoryIndices = {};
+    actor.stats = &stats;
+    Battle_characterState = &actor;
+  }
+
+  ~EquipmentGateFixture() {
+    Menu_Inventory_ItemList_ResetMenu3Statics();
+    std::copy(saved_strings.begin(), saved_strings.end(),
+              Menu_Inventory_menuText);
+    Audio_Seq_unusedStateFlags = saved_flags;
+    Audio_Seq_unusedInventory = saved_inventory;
+    Audio_Seq_unusedInventoryIndices = saved_indices;
+    Battle_characterState = saved_character;
+    Menu_Framework_actionRestrictions = saved_restrictions;
+  }
+};
 }  // namespace
+
+TEST_CASE("Equipment management obeys progression tarnish and action gates",
+          "[menu][equipment][restrictions]") {
+  const int intro = GENERATE(0, 1, 2, 3, 4);
+  const bool tarnished = GENERATE(false, true);
+  const int restrictions = GENERATE(0, 1, 2, 4, 7, 8, 0x80, 0x200);
+  EquipmentGateFixture fixture;
+  Audio_Seq_unusedStateFlags.introState = static_cast<char>(intro);
+  fixture.stats.statuses = tarnished ? 0x80000 : 0;
+  Menu_Framework_actionRestrictions = restrictions;
+  REQUIRE(Menu_Inventory_UpdateItemList(1) == 0);
+  REQUIRE(Menu_Inventory_UpdateItemList(0) == 0);
+  REQUIRE(Menu_Framework_subMenuRowCount == 2);
+  REQUIRE(Menu_Framework_itemsText != nullptr);
+  const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(
+      Menu_Framework_itemsText);
+  const bool disabled = intro < 3 || tarnished || (restrictions & 7) != 0;
+  for (int row = 0; row < 2; ++row) {
+    CHECK(((rows[row].menuRowFlags & 1) != 0) == disabled);
+  }
+}
 
 TEST_CASE("Cursor Memory controls the actual root selection consumer",
           "[menu][options][cursor]") {

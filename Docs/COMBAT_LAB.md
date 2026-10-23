@@ -1385,6 +1385,105 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Equipment-menu acceptance (#14)
+
+Final acceptance uses `add47793bd3820b8d2859a6338a4dc9f8fca8e37` with the
+new restriction regression uncommitted. The Combat Lab hosts are unchanged:
+their SHA256 values match the #131 checkpoint above. Unrelated owner edits
+remain present and are excluded from the acceptance commit. No further
+production repair was required after #130 and #131.
+
+| Acceptance | Debug run | Release run |
+|---|---|---|
+| All loose stock categories, cancel/NONE, restoration and derived values | `1792730072518340-0` | `1792730197982907-0` |
+| One-handed weapon/shield repeated swaps and derived values | `1792730991139942-0` | `1792731069056081-0` |
+| Two-handed weapon/shield exclusive swaps and derived values | `1792731146211280-0` | `1792731210087534-0` |
+| Original prologue main-menu restriction | `1792730872129654-0` | `1792730902503424-0` |
+| Actual Equipment Down management restriction | `1792730883257330-0` | `1792730913153035-0` |
+
+The category matrix removes all seven stock pieces before checking all eight
+equipment slots, so incompatible loose categories are present simultaneously.
+Both arm slots offer both arm pieces; head, body, legs and accessory offer
+only their matching category. The empty shield slot rejects NONE. Cancel
+does not mutate inventory; re-equipping restores the exact original instances
+and returns to field at tick7007. Earlier #131 stock cycles additionally
+verify each individual unequip/cancel/NONE/re-equip round trip.
+
+Every matrix/replay snapshot checks the nine equipment contribution blocks
+(weapon, shield, accessory and six limbs), current/base STR/INT/AGI where
+applicable, and the packed attack range. Fandango's current10/1/-4 becomes
+0/0/0 when removed and returns to10/1/-4 when restored; its unsigned base
+agility representation is65532. Accessory INT contributes1 independently.
+Actor `totalStrength` is not an equipment-inclusive total: damage calculation
+adds the separate equipment values. The original `vs_battle_nop0` callback
+is intentionally empty, not an unimplemented recalculation.
+
+The shield replays repeat both swap directions twice. One-handed equipment
+keeps the shield; greatsword and shield selections exclude one another.
+Source/preview model identities, material/texture headers, native slot stride,
+instance ownership and properties remain intact. Field return releases
+preview slots2/3 without losing the surviving source models.
+
+The original prologue profile rejects Triangle without changing inventory.
+In the all-spells profile, F4 eight times and F5 apply the actual Equipment
+Down mask0x80000 through the existing Lab control. Both management rows are
+disabled; confirmation is rejected; cancellation returns to field with the
+same inventory. The effect remains active at every observed step. The new
+maintained `[menu][equipment][restrictions]` test exercises production
+`Menu_Inventory_UpdateItemList` initialization and update for80 combinations:
+intro stages0..4, Tarnish absent/present, and restriction masks
+0/1/2/4/7/8/0x80/0x200. Both Equip and Setup rows follow the original
+`intro < 3 || tarnish || (restrictions & 7)` rule.
+
+Two rejected harness assumptions were corrected, not treated as game bugs:
+the closed-menu sentinel is63, not0; and reading a fixed number of queued
+frames after F5 could still observe a frame preceding application. The final
+observer waits for the actual `control.adjust` event and a subsequent frame.
+No process-memory writes or changed gameplay flags establish acceptance.
+
+Commands use the existing ignored harness at speed1. Run each in Debug and
+Release:
+
+```powershell
+build\quality\equipment14-check.ps1 -Configuration Debug -Mode category-matrix
+build\quality\equipment14-check.ps1 -Configuration Debug `
+  -Mode restriction-gate -Gate prologue
+build\quality\equipment14-check.ps1 -Configuration Debug `
+  -Mode restriction-gate -Gate tarnish
+```
+
+Run `-Mode replay-shield` with the following existing recorded-controller
+inputs, supplying the absolute `build\quality\` prefix to `-ReplayEvidence`:
+
+| Configuration | Weapon | Seed | Evidence prefix |
+|---|---|---|---|
+| Debug | default | 5 | `equipment131-Debug-default-loot-shield-seed5` |
+| Release | default | 10 | `equipment131-Release-default-loot-shield-seed10` |
+| Debug | greatsword | 42 | `equipment14-Debug-greatsword-loot-shield-seed42` |
+| Release | greatsword | 4 | `equipment14-Release-greatsword-loot-shield-seed4` |
+
+Final validation:
+
+- Rebuild `Native\Tests\VS.Tests.vcxproj` in Debug/Release x64 using MSBuild,
+  `/m /nodeReuse:false /p:VcpkgManifestInstall=false`; execute each resulting
+  `build\<configuration>\VS.Tests.exe`. Each full suite passes501 cases and
+  1,785,503 assertions, including480 new gate assertions. This also exercises
+  shared cursor-fixture allocation and global-state cleanup.
+- After activating `.venv-3`, run
+  `quality-native.cmd --files Native\Tests\src\CursorMemoryTests.cpp --tidy`:
+  0 findings/0 new. Initial line-length/format findings were fixed; no baseline
+  or suppression changed.
+- All ten accepted sessions end with `session.end`, zero error-level engine
+  records and no trace failures. Audit: `build\quality\equipment14-final-audit.json`.
+  Console logs, scenarios, run pointers and observations are retained under
+  `build\quality\equipment14-final-*`; quality evidence is
+  `equipment14-gates-quality-report.json`.
+
+This establishes the bounded #14 criteria, not exhaustive equipment-content
+coverage, C++ promotion, compatibility retirement, the separate comparison
+presentation request #112, or workshop modification #15. Accelerated-audio
+#83 and particle parity #76 remain separate.
+
 ## Equipment-drop and staging acceptance (#13; #128)
 
 The initial, pre-repair checkpoint used
