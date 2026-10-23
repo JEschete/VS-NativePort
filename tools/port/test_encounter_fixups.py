@@ -169,6 +169,11 @@ class EncounterFixupTests(unittest.TestCase):
         inventory = (root / "Native/Game/src/Menu/Inventory/Inventory.c").read_text()
         self.assertIn("Actors_weaponModels[i + 2]->reserved11 = 0;", inventory)
         self.assertNotIn("Battle_unusedGlobal1", inventory)
+        self.assertIn(
+            "Actors_weaponModels[3] != NULL && Menu_Inventory_IsTwoHandedWeapon(category)",
+            inventory,
+        )
+        self.assertNotIn("Battle_unusedGlobal2", inventory)
 
     def test_native_audio_preserves_optional_layer_guard_and_connects_sfx(self):
         fixes = copy_fixups.FIXES["F03192"]

@@ -10,13 +10,20 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
+#include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Battle/StatusEffects.h"
+#include "Event/ScriptVm.h"
 #include "Menu/Framework/EquipmentDetails.h"
+#include "Menu/Inventory/Inventory.h"
 #include "Render/Display.h"
 #include "Render/Font.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 }
 
@@ -151,6 +158,41 @@ struct EquipmentFixture {
     return count;
   }
 };
+
+struct EquipmentReloadFixture {
+  Actors_ActorRecord* saved_preview = Actors_actorRecords[1];
+  decltype(std::to_array(Actors_weaponModels)) saved_models =
+      std::to_array(Actors_weaponModels);
+  Render_TextureSlot saved_texture = Render_legacyWeaponTextureSlots[0];
+  decltype(Event_playbackPhase) saved_event_phase = Event_playbackPhase;
+  char saved_reload = Menu_Inventory_equipmentModelLoadStep;
+  int saved_alias = Battle_unusedGlobal2;
+  Actors_ActorRecord preview{};
+  Actors_WeaponModel shield{};
+  Actors_WeaponModel preview_shield{};
+
+  EquipmentReloadFixture(int category, bool has_preview, int unused_alias) {
+    Actors_actorRecords[1] = &preview;
+    preview.sequenceModelId = static_cast<u_char>(category);
+    std::fill_n(Actors_weaponModels, saved_models.size(), nullptr);
+    shield.boneCount = 1;
+    Actors_weaponModels[1] = &shield;
+    Actors_weaponModels[3] = has_preview ? &preview_shield : nullptr;
+    Render_legacyWeaponTextureSlots[0].referenceCount = 2;
+    Event_playbackPhase = 0;
+    Menu_Inventory_equipmentModelLoadStep = 0;
+    Battle_unusedGlobal2 = unused_alias;
+  }
+
+  ~EquipmentReloadFixture() {
+    Actors_actorRecords[1] = saved_preview;
+    std::copy(saved_models.begin(), saved_models.end(), Actors_weaponModels);
+    Render_legacyWeaponTextureSlots[0] = saved_texture;
+    Event_playbackPhase = saved_event_phase;
+    Menu_Inventory_equipmentModelLoadStep = saved_reload;
+    Battle_unusedGlobal2 = saved_alias;
+  }
+};
 }  // namespace
 
 TEST_CASE("Equipment stat pages preserve every lower UI ordering entry",
@@ -212,4 +254,22 @@ TEST_CASE("Primary comparison columns apply actor and accessory values once",
       weapon ? std::array{110 + modifier, 102 + modifier, 96 + modifier}
              : std::array{100 + modifier, 101 + modifier, 100 + modifier};
   CHECK(equipped == expected);
+}
+
+TEST_CASE("Equipment reload releases shields through the actual preview slot",
+          "[menu][equipment][reload]") {
+  const int category = GENERATE(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+  const bool has_preview = GENERATE(false, true);
+  const int unused_alias = GENERATE(0, 1);
+  EquipmentReloadFixture fixture(category, has_preview, unused_alias);
+  const bool two_handed = category == 3 || category == 5 || category == 7 ||
+                          category == 8 || category == 9;
+  const bool release = has_preview && two_handed;
+  CHECK(Menu_Inventory_IsTwoHandedWeapon(category) == two_handed);
+  CHECK(Menu_Inventory_ReloadEquipmentModels(category, 0, 0) == 1);
+  CHECK(Menu_Inventory_equipmentModelLoadStep == 1);
+  CHECK(Actors_weaponModels[1] == (release ? nullptr : &fixture.shield));
+  CHECK(Actors_weaponModels[3] ==
+        (has_preview ? &fixture.preview_shield : nullptr));
+  CHECK(Render_legacyWeaponTextureSlots[0].referenceCount == (release ? 1 : 2));
 }

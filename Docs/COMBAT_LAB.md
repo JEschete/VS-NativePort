@@ -1227,6 +1227,62 @@ does not certify every enemy/room permutation, original boss-story scripts,
 door traversal with the acquired key, equipment drops #13 or C++/compatibility
 retirement. Isolated Lab boss-retention policy is documented separately above.
 
+## Equipment-menu shield-model repair (#130; parent #14)
+
+On source revision `e4d006694a188e996d66c390e2cb1ca23dd140a5`, the first-entry
+Fandango preview is visible in the real Items -> Equip -> Weapon route.
+Debug solo all-spells ZONE012/room0 run `1792724245959463-0` uses
+`--start --scripted --speed 1 --frames 1700` and
+`--press 800:Triangle,920:Down,1040:Circle,1250:Circle,1460:Circle`.
+The local capture is `build\quality\equip14-first.png`. This does not establish
+every preview transition or close #14.
+
+A separate production-entry regression exposed a remaining model alias:
+F02637 (`MENU3/68C4.c:12`) tested the independent `Battle_unusedGlobal2` integer
+instead of the original preview shield pointer at `vs_battle_wepModels[3]`.
+G00410's original address0x800F4594 is slot3 of the table at0x800F4588.
+Consequently a two-handed selection could leave the previous source shield
+and its texture reference loaded even though the equipment state unequips it.
+The copier now reads `Actors_weaponModels[3]`; the independent declaration
+remains inert compatibility debt, not a retired bridge.
+
+`[menu][equipment][reload]` covers10 weapon categories, preview present/absent
+and detached placeholder zero/nonzero:40 combinations and240 assertions.
+Before repair it fails20 assertions (exit42); afterward the source-model
+release, untouched preview ownership, texture reference count, one-handed
+and bare-hands controls all pass. The test isolates reload phase0 with no
+queued model/animation load; it is not a full live equipment swap.
+
+Validation of this scoped change, with unrelated owner edits preserved:
+
+- Build `Native\Tests\VS.Tests.vcxproj` and
+  `Native\Tools\CombatLab\VS.CombatLab.vcxproj` in Debug and Release using the
+  documented MSBuild command with `/nodeReuse:false` and
+  `/p:VcpkgManifestInstall=false`.
+- Each configuration: `VS.Tests.exe "[menu][equipment]"` passes5 cases/
+  288 assertions; the full executable passes499 cases/1,785,011 assertions.
+- `.\.venv-3\Scripts\python.exe tools\port\test_encounter_fixups.py` passes18
+  regressions, including the canonical shield-slot check.
+- A second `copy_to_native.py` run is byte-stable across751 generated outputs
+  and preserves all86 existing unique owned paths enumerated from `owned.csv`.
+- With the retained environment active,
+  `quality-native.cmd --files Native\Tests\src\EquipmentDetailTests.cpp tools\port\copy_fixups.py tools\port\test_encounter_fixups.py --tidy`
+  reports zero findings and zero new findings; no baseline changes.
+
+Logs are local under `build\quality\equipment130-*`; the red regression uses
+`equipment14-red-*`. The attempted live greatsword/shield cycle only reached
+the unselectable NONE row: the stock New Game bag has no shield. Its
+`equipment14-Debug-greatsword-shield-cycle-*` observations are an unsuccessful
+setup attempt, not acceptance. A real shield acquisition followed by menu
+swaps, broader equipment categories/properties, cancellation and restrictions
+remain required for #14.
+
+Accelerated runs also reconfirmed existing #83: speed8 aborts the audio queue
+at tick802 (run `1792724088133050-0`), or tick800 with `--scripted`
+(`1792724143538041-0`). Scripted input does not disable audio. The same initial
+menu route at speed1 succeeds (`1792724167571071-0`); equipment work uses
+speed1. No accelerated-audio repair or new #7 acceptance is claimed.
+
 ## Equipment-drop and staging acceptance (#13; #128)
 
 The initial, pre-repair checkpoint used

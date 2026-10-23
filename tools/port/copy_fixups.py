@@ -704,6 +704,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "check the real preview weapon/shield slots using native pointer stride"),
     ],
     "F02637": [
+        ("Battle_unusedGlobal2 &&", "Actors_weaponModels[3] != NULL &&",
+         "D_800F4594 aliases vs_battle_wepModels[3]; two-handed changes release the real shield"),
         ("Battle_unusedGlobal1[i]->opaque11 = 0;",
          "Actors_weaponModels[i + 2]->reserved11 = 0;",
          "MENU3/68C4.c resets the preview weapon fade at byte 0x11 of the same model"),

@@ -20,7 +20,6 @@
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
-#include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
@@ -1826,7 +1825,7 @@ int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
 
             Content_ReleaseWeaponModel(0);
 
-            if (Battle_unusedGlobal2 && Menu_Inventory_IsTwoHandedWeapon(category)) {
+            if (Actors_weaponModels[3] != NULL && Menu_Inventory_IsTwoHandedWeapon(category)) {
                 Content_ReleaseWeaponModel(1);
             }
         }
