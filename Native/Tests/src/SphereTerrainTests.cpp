@@ -235,6 +235,40 @@ TEST_CASE("Extended target pages retain complete actors and absolute indices",
   CHECK(fixture.Sphere().targetLists[0] == fixture.entries.data() + 20);
 }
 
+TEST_CASE("Minotaur preview index thirty-one stays inside native storage",
+          "[combat][targeting][capacity]") {
+  using PreviewBuffer = decltype(Battle_ActionState::previews);
+  struct GuardedPreviews {
+    PreviewBuffer entries{};
+    u_long guard = kGuard;
+  } storage;
+  REQUIRE(std::size(storage.entries) > 31);
+  const int index = Battle_ValidateTargetPreviewIndex(31);
+  storage.entries[index].position = {1531, -308, 1367, 0};
+  CHECK(storage.entries[index].position.vx == 1531);
+  CHECK(storage.entries[index].position.vy == -308);
+  CHECK(storage.entries[index].position.vz == 1367);
+  CHECK(storage.guard == kGuard);
+}
+
+TEST_CASE("Six-part target groups retain every candidate beyond one page",
+          "[combat][targeting][pages]") {
+  SliceFixture fixture;
+  std::array<Battle_TargetPreview, 36> entries{};
+  for (std::size_t index = 0; index < entries.size(); ++index) {
+    entries[index].actorId = static_cast<char>(2 + index / 6);
+    entries[index].limb = static_cast<char>(index % 6);
+  }
+  Battle_SetSphereTargets(static_cast<int>(entries.size()), entries.data(), 0);
+  CHECK(Battle_GetTargetPageInfo().total == 36);
+  CHECK(Battle_GetTargetPageInfo().visible == 24);
+  REQUIRE(Battle_AdvanceTargetPage(1) == 1);
+  CHECK(Battle_GetTargetPageInfo().first == 24);
+  CHECK(Battle_GetTargetPageInfo().visible == 12);
+  CHECK(Battle_MapTargetPageIndex(7) == 31);
+  CHECK(Battle_MapTargetPageIndex(11) == 35);
+}
+
 TEST_CASE(
     "Extended pages map absolute indices and reverse without losing targets",
     "[combat][targeting][pages]") {

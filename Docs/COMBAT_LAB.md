@@ -1385,6 +1385,85 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Eight-Minotaur overflow and repeat-entry acceptance (#78)
+
+The historical fresh-process crash is
+`build\Debug\combat-lab\runs\1792578930835602-0`, tick209:
+`SetDrawArea <- Field_DrawRoomScene <- Boot_RunGameLoop`, reading
+`0x557FECC05FB`. The final preceding frame has Ashley plus all eight configured
+Minotaur Zombies, immediately before their first action starts. It is not just
+an inherited post-defeat state.
+
+Current matched source-backed startup controls use zone12/room0, seed1,
+post-minotaur Ashley9,10 and definition1 at5..12,11. No stat overrides or
+gameplay input are added. Fresh450-tick runs:
+
+| Configuration | One enemy | Eight enemies |
+| --- | --- | --- |
+| Debug | `1792755693404643-0` | `1792755708739732-0` |
+| Release | `1792755724407105-0` | `1792755739581297-0` |
+
+All retain the configured2/9 actors, execute a real enemy attack and end
+normally without engine error records. This negative reproduction alone was
+not treated as root-cause proof.
+
+A temporary generator-based producer trace then measures the first eight-enemy
+normal attack, source actor9/action1: **36** candidates, with preview31 exactly
+`SVECTOR{1531,-308,1367,0}` (Debug diagnostic run `1792756208327969-0`, tick214).
+Packed as the native pointer that vector is **`0x557FECC05FB`**, byte-for-byte
+the historical invalid render cursor. The original23-entry producer and
+index31 scratch alias are the same contract independently proven in #136.
+This aligns the action/state rather than pretending the changed startup
+timestamps are identical. The repair is `073d58c5`; this checkpoint adds
+explicit boundary/paging regressions and fresh #78 acceptance rather than a
+second unrelated renderer fix.
+
+The temporary `target78` hook is removed through the generator before final
+builds. No temporary cursor/spawn diagnostics or old action-size clears remain.
+Maintained regressions use the native preview type for the31 boundary/canary
+and36 six-part candidates across24+12 visible pages, including absolute31/35
+mapping. They do not reduce configured actors or change PS1/original data.
+
+Final actual-controller observer:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File build\quality\issue78-live.ps1 -Configuration Debug
+```
+
+Repeat with `Release`. The ignored scenario is
+`build\quality\issue78-eight-native.json`. All three entries retain Ashley and
+primary slots2..9, their original weapon models and source spawn indices;
+the same seed reproduces every fresh HP/MP/max/model/slot value. No auxiliary
+slot is substituted or actor silently omitted.
+
+- Debug `1792756376145405-0`: real96HP enemy hit at306, F10 after recovery
+  at392; exact eight-enemy re-entry at684; actual F6/F7 pause/single-step during
+  live phase7, then F10 at840; third entry at927 and another real96HP hit at1159,
+  followed by normal stop at1245.
+- Release `1792756431965231-0`: the same control sequence; real hits at306/1157,
+  stops392/837/1243 and fresh entries680/925. The paused step advances exactly
+  one logical tick. Both runs log three normal encounter starts/ends and
+  `trace_failed:false`, with no error/critical engine record.
+- Final full Debug/Release suites: **532 cases / 1790951 assertions** each,
+  built with the documented MSBuild test-project command and
+  `/p:VcpkgManifestInstall=false`;24 copier tests pass. Scoped
+  `quality-native.cmd --files Native\Tests\src\SphereTerrainTests.cpp --tidy`
+  reports **0 findings / 0 new** without baseline edits.
+- Exact final host SHA-256: Debug
+  `e3f23d55540aac33608a800a55555b794e15e33e4530782b2df592c0ea95bc36`;
+  Release
+  `12c6d8c63b7b74560103a393dd3acb4569b2eeb49ed00fb845993e9544afdffc`.
+  Native source is `a1dff228`/`073d58c5` plus only the new maintained tests;
+  unrelated owner work remains dirty and excluded.
+
+Local evidence uses `build\quality\issue78-*`, including the producer log,
+startup audit, final lifecycle audit and both live observations, plus the
+configuration's run directories. No disc-derived evidence is committed or
+uploaded. This verifies the reported startup/cancel/re-entry contract, not
+full Minotaur loot/defeat, every large group, multi-part spell fidelity or
+#80/#81/#76 acceptance. Exact publication/CI is recorded on #78.
+
 ## Live original blade and shield combination acceptance (#15)
 
 Native source: published `073d58c5680772beb7910a225d5439bde8305135`, exact Source
