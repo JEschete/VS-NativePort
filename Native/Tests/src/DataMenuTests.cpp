@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cstdint>
 #include <format>
 #include <string>
@@ -12,11 +13,19 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "ActorAssets.h"
+#include "Actors/ActorRecord.h"
+#include "Actors/WeaponModel.h"
 #include "Audio/Playback/SoundPlayback.h"
 #include "Core/Random.h"
+#include "Core/Text/TextCode.h"
+#include "DiscQueue.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Menu/Files.h"
+#include "Menu/Score/Encyclopedia.h"
+#include "Menu/Score/Records.h"
+#include "ModelLoading.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -136,14 +145,14 @@ struct ClockFixture {
     Render_frameScratch.primitiveCursor = storage.data() + 1;
   }
 
-  std::string Clock() const {
+  std::string Clock(int y = 200) const {
     std::vector<std::pair<int16_t, char>> glyphs;
     const void* packet = &ordering.back();
     for (size_t count = 0; packet != nullptr && count < 4096; ++count) {
       const auto* tag = static_cast<const P_TAG*>(packet);
       if (tag->len == 4) {
         const auto* words = static_cast<const u_long*>(packet);
-        if ((words[2] >> 16) == 200) {
+        if ((words[2] >> 16) == static_cast<unsigned>(y)) {
           const unsigned uv = words[3];
           const unsigned index = (uv & 0xFE) + (((uv >> 8) & 0xFF) == 86);
           glyphs.emplace_back(static_cast<int16_t>(words[2] & 0xFFFF),
@@ -218,4 +227,211 @@ TEST_CASE("Empty Load summaries remain unavailable and can be cancelled",
   Input_buttonsPressed.allButtons = PADRdown;
   CHECK(Menu_Files_UpdateLoadFiles(0) == -1);
   CHECK(Menu_Files_selectCursorXy == 0);
+}
+
+TEST_CASE("Score list numbers retain every original digit and native link",
+          "[render][menu][score][digits]") {
+  const bool enemy = GENERATE(false, true);
+  const bool dimmed = GENERATE(false, true);
+  ClockFixture fixture;
+  const int digits = enemy ? 3 : 2;
+  const int rows = enemy ? 78 : 32;
+  for (int number = 1; number <= rows; ++number) {
+    fixture.ResetPackets();
+    const auto* first =
+        static_cast<const POLY_FT4*>(Render_frameScratch.primitiveCursor);
+    const void* initial_next = nextPrim(fixture.ordering.data() + 2);
+    if (enemy) {
+      Menu_Score_DrawEnemyNumber(100, 50, number, dimmed);
+    } else {
+      Menu_Score_DrawTitleNumber(100, 50, number, dimmed);
+    }
+    CHECK(Render_frameScratch.primitiveCursor == first + digits);
+    CHECK(nextPrim(fixture.ordering.data() + 2) == first + digits - 1);
+    const auto text =
+        enemy ? std::format("{:03}", number) : std::format("{:02}", number);
+    for (int index = 0; index < digits; ++index) {
+      const auto& packet = first[index];
+      const int u = (text[digits - index - 1] - '0') * 6;
+      const int x = 100 + (enemy ? 24 : 19) - index * 5;
+      const int shade = dimmed ? 32 : 128;
+      CHECK((std::array<int, 14>{packet.code, packet.r0, packet.g0, packet.b0,
+                                 packet.x0, packet.y0, packet.x3, packet.y3,
+                                 packet.u0, packet.v0, packet.u3, packet.v3,
+                                 packet.clut, packet.tpage} ==
+             std::array<int, 14>{0x2E, shade, shade, shade, x, 46, x + 6, 56, u,
+                                 0, u + 6, 10, getClut(dimmed ? 880 : 832, 223),
+                                 getTPage(0, dimmed ? 1 : 0, 768, 0)}));
+      CHECK(nextPrim(&packet) ==
+            (index == 0 ? initial_next : first + index - 1));
+    }
+  }
+  CHECK(fixture.storage.front() == 0xDEADBEEF);
+  CHECK(fixture.storage.back() == 0xDEADBEEF);
+}
+
+TEST_CASE("Score scroll fades keep every packet in its native ordering chain",
+          "[render][menu][score][scroll]") {
+  ClockFixture fixture;
+  Menu_Framework_MenuRow row{};
+  row.text[0] = static_cast<char>(Core_TextCode_PrintString);
+  row.x = 60;
+  row.y = 80;
+  row.w = 100;
+  row.backgroundWidth = 100;
+  row.state = GENERATE(0, 1);
+  row.isScrollable = GENERATE(1, 2);
+  row.gradientState = GENERATE(0, 8);
+  Menu_Score_RenderScrollableRow(&row);
+  const auto begin = reinterpret_cast<uintptr_t>(fixture.storage.data() + 1);
+  const auto end =
+      reinterpret_cast<uintptr_t>(Render_frameScratch.primitiveCursor);
+  const auto table = reinterpret_cast<uintptr_t>(fixture.ordering.data());
+  const void* packet = &fixture.ordering.back();
+  size_t visited = 0;
+  size_t linked_packets = 0;
+  while (packet != nullptr && visited++ < 256) {
+    const auto address = reinterpret_cast<uintptr_t>(packet);
+    if (address >= begin && address < end) ++linked_packets;
+    REQUIRE(((address >= begin && address < end) ||
+             (address >= table && address < table + sizeof fixture.ordering)));
+    packet = isendprim(packet) ? nullptr : nextPrim(packet);
+  }
+  CHECK(packet == nullptr);
+  CHECK(linked_packets == 24u + (row.isScrollable == 1) + (row.state == 1));
+  CHECK(fixture.storage.front() == 0xDEADBEEF);
+  CHECK(fixture.storage.back() == 0xDEADBEEF);
+}
+
+namespace {
+struct ScoreViewerFixture : ClockFixture {
+  decltype(Menu_Framework_menuItems) saved_items = Menu_Framework_menuItems;
+  decltype(Menu_Score_monBinData) saved_enemies = Menu_Score_monBinData;
+  decltype(Menu_Score_selectedEnemy) saved_selected = Menu_Score_selectedEnemy;
+  decltype(Menu_Score_hideUi) saved_hidden = Menu_Score_hideUi;
+  std::array<Menu_Framework_MenuRow, 40> items{};
+  std::array<Menu_Score_EnemyEntry, 78> enemies{};
+
+  ScoreViewerFixture() {
+    Menu_Framework_menuItems = items.data();
+    Menu_Score_monBinData = enemies.data();
+    Menu_Score_hideUi = 0;
+    for (auto& enemy : enemies) {
+      enemy.name[2] = static_cast<char>(Core_TextCode_PrintString);
+    }
+  }
+
+  ~ScoreViewerFixture() {
+    Menu_Framework_menuItems = saved_items;
+    Menu_Score_monBinData = saved_enemies;
+    Menu_Score_selectedEnemy = saved_selected;
+    Menu_Score_hideUi = saved_hidden;
+  }
+};
+}  // namespace
+
+TEST_CASE("Score encyclopedia viewer retains the complete original ID header",
+          "[render][menu][score][viewer]") {
+  const int selected = GENERATE(0, 77);
+  ScoreViewerFixture fixture;
+  Menu_Score_selectedEnemy = static_cast<int16_t>(selected);
+  fixture.enemies[selected].classId = GENERATE(0, 1, 2, 3, 4, 5);
+  Menu_Score_RenderEnemyViewer(8, 3);
+  CHECK(fixture.Clock(160) == std::format("NO.   {:03}/078", selected + 1));
+  CHECK(fixture.storage.front() == 0xDEADBEEF);
+  CHECK(fixture.storage.back() == 0xDEADBEEF);
+}
+
+TEST_CASE("Score viewer banners use the native main ordering pointer",
+          "[render][menu][score][banner]") {
+  ClockFixture fixture;
+  const auto* first =
+      static_cast<const LINE_G2*>(Render_frameScratch.primitiveCursor);
+  Menu_Score_DrawEnemyBanner(8, 18, 96, 12, 3);
+  const size_t bytes =
+      11 * sizeof(LINE_G2) + sizeof(POLY_F4) + 3 * sizeof(u_long);
+  CHECK(Render_frameScratch.primitiveCursor ==
+        reinterpret_cast<const u_char*>(first) + bytes);
+  CHECK(nextPrim(fixture.ordering.data() + 25) ==
+        reinterpret_cast<const u_char*>(first) + bytes - 3 * sizeof(u_long));
+  CHECK(fixture.storage.front() == 0xDEADBEEF);
+  CHECK(fixture.storage.back() == 0xDEADBEEF);
+}
+
+namespace {
+struct ScoreAssetFixture {
+  decltype(std::to_array(Content_legacyActorAssetRequests)) saved_requests =
+      std::to_array(Content_legacyActorAssetRequests);
+  decltype(Menu_Score_zudCdSlot) saved_disc = Menu_Score_zudCdSlot;
+  decltype(Menu_Score_zudData) saved_data = Menu_Score_zudData;
+  decltype(Menu_Score_zudBuffer) saved_buffer = Menu_Score_zudBuffer;
+  int saved_variant = Menu_Score_modelVariant;
+  int saved_palette = Menu_Score_paletteFlag;
+  Content_DiscQueueSlot disc{};
+  Menu_Score_ZudHeader header{};
+  alignas(Actors_ActorRecord)
+      std::array<u_char, 2 * sizeof(Actors_ActorRecord)> storage{};
+
+  explicit ScoreAssetFixture(bool companion) {
+    std::fill_n(Content_legacyActorAssetRequests, saved_requests.size(),
+                Content_ActorAssetRequest{});
+    disc.state = Content_DiscRequestState_Loaded;
+    header.characterId = 13;
+    header.weapon = 17;
+    header.shield = 27;
+    header.shpOffset = 48;
+    header.weaponWepOffset = 128;
+    header.shieldWepOffset = 256;
+    header.battleSeqOffset = 384;
+    header.commonSeqOffset = 512;
+    header.battleSeqLen = header.commonSeqLen = 1;
+    Menu_Score_zudCdSlot = &disc;
+    Menu_Score_zudData = &header;
+    Menu_Score_zudBuffer = storage.data();
+    Menu_Score_modelVariant = companion ? 1 : 0;
+    Menu_Score_paletteFlag = 1;
+  }
+
+  void CheckBodyRequest() {
+    const auto& body = Content_legacyActorAssetRequests[0];
+    CHECK(body.destination == storage.data());
+    CHECK(std::bit_cast<u_int>(body.placement) == 0);
+  }
+
+  void CheckAttachmentRequests(bool companion) {
+    const auto& attachment = Content_legacyActorAssetRequests[1];
+    CHECK(attachment.destination ==
+          storage.data() + sizeof(Actors_ActorRecord));
+    CHECK(attachment.assetKind == (companion ? 1 : 4));
+    CHECK(attachment.targetSlot == (companion ? 16 : 2));
+    if (!companion) {
+      const auto& shield = Content_legacyActorAssetRequests[2];
+      CHECK(shield.destination == storage.data() + sizeof(Actors_ActorRecord) +
+                                      sizeof(Actors_WeaponModel));
+      CHECK(shield.targetSlot == 3);
+    }
+  }
+
+  ~ScoreAssetFixture() {
+    std::copy(saved_requests.begin(), saved_requests.end(),
+              Content_legacyActorAssetRequests);
+    Menu_Score_zudCdSlot = saved_disc;
+    Menu_Score_zudData = saved_data;
+    Menu_Score_zudBuffer = saved_buffer;
+    Menu_Score_modelVariant = saved_variant;
+    Menu_Score_paletteFlag = saved_palette;
+  }
+};
+}  // namespace
+
+TEST_CASE("Score model requests use native record strides and fresh placement",
+          "[menu][score][assets]") {
+  const bool companion = GENERATE(false, true);
+  ScoreAssetFixture fixture(companion);
+  REQUIRE(Menu_Score_LoadEnemyModelParts() == 1);
+  REQUIRE(Content_FindFreeActorAssetRequest() == (companion ? 4 : 5));
+  fixture.CheckBodyRequest();
+  fixture.CheckAttachmentRequests(companion);
+  CHECK(fixture.disc.state == Content_DiscRequestState_Free);
+  CHECK(Menu_Score_zudCdSlot == nullptr);
 }

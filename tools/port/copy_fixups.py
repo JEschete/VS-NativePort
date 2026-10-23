@@ -479,6 +479,77 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("*nextPrim = ((u_long)prim << 8) >> 8;", "*nextPrim = LegacyGpu_Handle(prim);",
          "260.c:3504 game-over fade links must store the native packet handle, not a truncated host address"),
     ],
+    "F02799": [
+        ("*before = ((u_long)prim << 8) >> 8;",
+         "*before = LegacyGpu_Handle(prim);",
+         "238.c:54 retain every Score scroll-fade packet in the native ordering chain"),
+    ],
+    "F02810": [
+        ("    void** scratch = (void**)Core_ScratchAddr(0);\n\n"
+         "    line = scratch[0];",
+         "    line = Render_frameScratch.primitiveCursor;",
+         "238.c:1552 Score viewer banners borrow the typed native packet cursor"),
+        ("AddPrim(*((void**)Core_ScratchAddr(1)) + 0x1C, line++);",
+         "AddPrim(Render_frameScratch.orderingTable + 0x1C, line++);",
+         "PS1 scratch word1 must not read a native pointer at byte4"),
+        ("    scratch = (void**)Core_ScratchAddr(0);\n\n"
+         "    AddPrim(scratch[1] + 0x1C, poly++);\n\n"
+         "    scratch[0] = (void*)poly;",
+         "    AddPrim(Render_frameScratch.orderingTable + 0x1C, poly++);\n\n"
+         "    Render_frameScratch.primitiveCursor = poly;",
+         "Publish viewer banner and shadow packets through native frame fields"),
+    ],
+    "F02816": [
+        ("char digits[2];", 'char digits[sizeof "00"];',
+         "238.c:1835 two title digits also need the native sprintf terminator"),
+        ("poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);",
+         "poly = Render_frameScratch.primitiveCursor;",
+         "Title digits use the typed native packet cursor"),
+        ("AddPrim(*(void**)((uintptr_t)Core_ScratchBase() + 0x008), poly++);",
+         "AddPrim(Render_frameScratch.overlayOrderingTable, poly++);",
+         "PS1 scratch offset8 is the overlay ordering pointer, not native offset8"),
+        ("*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;",
+         "Render_frameScratch.primitiveCursor = poly;",
+         "Publish the advanced title-digit cursor through the native frame"),
+    ],
+    "F02817": [
+        ("char digits[2];", 'char digits[sizeof "000"];',
+         "238.c:1878 three encyclopedia digits also need the native sprintf terminator"),
+        ("poly = *(void**)Core_ScratchAddr(0);",
+         "poly = Render_frameScratch.primitiveCursor;",
+         "Encyclopedia digits use the typed native packet cursor"),
+        ("AddPrim(*(void**)Core_ScratchAddr(2), poly++);",
+         "AddPrim(Render_frameScratch.overlayOrderingTable, poly++);",
+         "PS1 scratch word2 is the overlay ordering pointer, not native word2"),
+        ("*(void**)Core_ScratchAddr(0) = poly;",
+         "Render_frameScratch.primitiveCursor = poly;",
+         "Publish the advanced encyclopedia-digit cursor through the native frame"),
+    ],
+    "F02820": [
+        ("char sp60[12];", 'char sp60[sizeof "NO.   000/000"];',
+         "238.c:2069 preserve the complete valid encyclopedia header and its terminator"),
+    ],
+    "F02839": [
+        ("Core_Memory_AllocateFromLowEnd(0x3200)",
+         "Core_Memory_AllocateFromLowEnd(2 * sizeof(Actors_ActorRecord))",
+         "592C.c:171 companion previews own two native actor records"),
+        ("Core_Memory_AllocateFromLowEnd(0x24D0)",
+         "Core_Memory_AllocateFromLowEnd(sizeof(Actors_ActorRecord) + "
+         "2 * sizeof(Actors_WeaponModel))",
+         "Normal previews own a native actor plus two native equipment records"),
+    ],
+    "F02840": [
+        ("Content_ActorAssetRequest slot;",
+         "Content_ActorAssetRequest slot = {0};",
+         "592C.c:203 deterministic preview placement must not inherit moving-platform bits from the stack"),
+        ("Menu_Score_zudBuffer + 0x1900",
+         "(u_char*)Menu_Score_zudBuffer + sizeof(Actors_ActorRecord)",
+         "Companion and first equipment records follow the complete native actor record"),
+        ("Menu_Score_zudBuffer + 0x1EE8",
+         "(u_char*)Menu_Score_zudBuffer + sizeof(Actors_ActorRecord) + "
+         "sizeof(Actors_WeaponModel)",
+         "Shield storage follows the complete native weapon record without overlap"),
+    ],
     "F02553": [
         (r'"MISC\00000|0xF8|"',
          r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"',
@@ -1465,6 +1536,12 @@ FIXES["F00798"] += [
 ]
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    *[(r"^Menu::Score::QueueEnemyModelRead$", rf"\b{old}\b", new,
+       "592C.c:171 verified source-file and palette-variant selection meanings")
+      for old, new in (("id", "zudId"), ("cdFile", "sourceFile"),
+                       ("i", "variantIndex"))],
+    (r"^Menu::Score::LoadEnemyModelParts$", r"\bslot\b", "request",
+     "592C.c:203 the local is an asset request, not a queue slot"),
     *[(r"^Content::CopyModelGeometry$", rf"\b{old}\b", new,
        "30DB0.c:507 verified geometry-copy parameter meaning")
       for old, new in (("arg0", "destination"), ("arg1", "source"),
