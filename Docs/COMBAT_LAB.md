@@ -1386,6 +1386,41 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Five-/nine-sample source trajectory regression (#76, bounded)
+
+After #138, the existing PLG057 five- and nine-sample initialization/update
+implementations were checked against the read-only original
+`EFFECT/trails5.h:380/407`, `EFFECT/trails9.h:387/414` and the fixed-point
+Lagrange coefficients in `BATTLE/BATTLE.PRG/5BF94.c:6388`. No production trail
+algorithm or buffer count is changed.
+
+Two maintained cases perform two complete12-step paths and collapse/re-entry
+cycles per family, with two independent trails and an adjacent storage guard.
+They verify exact spline progress/speed/coordinates, distinct5/9 history
+capacities and modulo indices, bounded sample counts, collapse counters,
+zero-path independence and complete repeat initialization. The12 coordinate
+goldens were calculated independently from the original recurrence and
+coefficient shifts, not read back from the implementation under test.
+
+The original `ONE*2/3` truncation is preserved: the final sample is511/0/255
+for a512/0/256 control endpoint, and intermediate cubic samples can overshoot
+the control-point box. These source-defined values are not arbitrarily
+clamped or snapped to make a path look tighter.
+
+Focused `VS.Tests.exe "[effects][trails][reference]"` passes **508 assertions /
+2 cases**. Full Debug/Release suites pass **539 cases / 1799864 assertions**
+each after the standard test-project MSBuild commands with
+`/p:VcpkgManifestInstall=false`. Scoped maintained quality/tidy for
+`ParticleRenderTests.cpp` reports **0 findings / 0 new**. Source is
+`f13f144d` plus only the new trail regressions; unrelated owner edits remain
+dirty/excluded. Local logs: `build\quality\trail76-*`.
+
+This adds source-trajectory/history evidence, not a new runtime defect or an
+original-game frame comparison. Trail rendering, opacity, source/target
+attachments, camera spaces and representative live original-frame fidelity
+remain separate #76 gates. No C++ promotion or compatibility retirement is
+claimed. Publication and exact CI are recorded on #76.
+
 ## Native particle attraction field repair (#138; supporting #76)
 
 Source: `d0002768` plus the scoped copier adaptation, generated F01554 and

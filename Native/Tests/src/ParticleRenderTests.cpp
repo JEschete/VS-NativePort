@@ -21,6 +21,10 @@ extern "C" {
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/ParticleRender.h"
+#include "Effects/Templates/TrailInit.h"
+#include "Effects/Templates/TrailNineInit.h"
+#include "Effects/Templates/TrailNineUpdate.h"
+#include "Effects/Templates/TrailUpdate.h"
 #include "Effects/Timeline.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
@@ -568,4 +572,113 @@ TEST_CASE("Linked particles retain independent native attraction state",
   CHECK(second.motion.force.vy == 0);
   CHECK(second.motion.force.vz == 4096);
   CHECK(fixture.particle.next == &second);
+}
+
+namespace {
+struct TrailGolden {
+  int progress;
+  int speed;
+  std::array<std::int16_t, 3> point;
+};
+
+// Original trails5/9 recurrence and 5BF94.c:6388 fixed-point coefficients,
+// including the original ONE*2/3 truncation rather than endpoint snapping.
+constexpr std::array<TrailGolden, 12> kTrailGolden{{
+    {699050, 699050, {22, -12, -12}},
+    {2091373, 1392323, {63, -32, -32}},
+    {4170037, 2078664, {115, -55, -52}},
+    {6926568, 2756531, {169, -75, -64}},
+    {10350375, 3423807, {216, -84, -59}},
+    {14427840, 4077465, {247, -76, -28}},
+    {19140806, 4712966, {259, -49, 32}},
+    {24463853, 5323047, {256, -7, 116}},
+    {30358851, 5894998, {251, 42, 211}},
+    {36762250, 6403399, {269, 78, 291}},
+    {43546949, 6784699, {344, 73, 319}},
+    {50331648, 6784699, {511, 0, 255}},
+}};
+
+template <class Trail>
+void CheckTrailInitialState(const Trail& trail) {
+  CHECK(trail.stepCount == 12);
+  CHECK(trail.splineSampleCount == 1);
+  CHECK(trail.trailCollapseCounter == std::size(trail.splineSamples) - 1);
+  CHECK(trail.currentSplineSample == 0);
+  CHECK(trail.splineProgress == 0);
+  CHECK(trail.speed == 0);
+}
+
+template <class Trail>
+void CheckTrailReferenceStep(const std::array<Trail, 2>& entries,
+                             std::size_t frame) {
+  const auto& trail = entries[0];
+  const auto samples = std::size(trail.splineSamples);
+  CHECK(trail.splineProgress == kTrailGolden[frame].progress);
+  CHECK(trail.speed == kTrailGolden[frame].speed);
+  CHECK(trail.currentSplineSample == (frame + 1) % samples);
+  CHECK(trail.splineSampleCount == std::min(frame + 2, samples));
+  const auto& point = trail.splineSamples[trail.currentSplineSample];
+  const std::array actual{point.vx, point.vy, point.vz};
+  CHECK(actual == kTrailGolden[frame].point);
+  const auto& separate = entries[1];
+  const auto& zero = separate.splineSamples[separate.currentSplineSample];
+  CHECK(zero.vx == 0);
+  CHECK(zero.vy == 0);
+  CHECK(zero.vz == 0);
+}
+
+template <class Trail, class State, class Initialize, class Update>
+void CheckTrailReferencePath(State& state, Initialize initialize,
+                             Update update) {
+  constexpr u_long kGuard = 0xA1B2C3D4;
+  struct Storage {
+    std::array<Trail, 2> entries{};
+    u_long guard = kGuard;
+  } storage;
+  auto& trail = storage.entries[0];
+  constexpr std::array<SVECTOR, 4> kPoints{
+      {{0, 0, 0, 0}, {256, -64, 0, 0}, {256, 64, 256, 0}, {512, 0, 256, 0}}};
+  std::ranges::copy(kPoints, trail.splinePoints);
+  state.trails = storage.entries.data();
+  Effects_ParticleDefinition definition{};
+  std::ranges::fill(definition.pairRanges[4], 12);
+  Effects_ParticleEmitterScratch scratch{};
+  Effects_EffectInstance instance{};
+  const auto samples = std::size(trail.splineSamples);
+  for (int cycle = 0; cycle < 2; ++cycle) {
+    state.curveSampleDistance = 0;
+    initialize(&definition, &scratch, &instance, &state);
+    CheckTrailInitialState(trail);
+    for (std::size_t frame = 0; frame < kTrailGolden.size(); ++frame) {
+      state.curveSampleDistance = static_cast<int>(frame);
+      update(&definition, &scratch, &instance, &state);
+      CheckTrailReferenceStep(storage.entries, frame);
+      CHECK(storage.guard == kGuard);
+    }
+    for (std::size_t tail = 0; tail < samples - 1; ++tail) {
+      state.curveSampleDistance = 12 + static_cast<int>(tail);
+      update(&definition, &scratch, &instance, &state);
+      CHECK(trail.trailCollapseCounter == samples - 2 - tail);
+      CHECK(storage.guard == kGuard);
+    }
+    CHECK(trail.splineSampleCount == 1);
+  }
+}
+}  // namespace
+
+TEST_CASE(
+    "Five-sample trails preserve source trajectory and repeat-entry state",
+    "[effects][trails][reference]") {
+  Effects_TrailQuadSet state{};
+  state.trailcount = 2;
+  CheckTrailReferencePath<Effects_Trail>(state, Effects_Plg057_TrailInit,
+                                         Effects_Plg057_TrailUpdate);
+}
+
+TEST_CASE("Nine-sample trails preserve source trajectory and separate history",
+          "[effects][trails][reference]") {
+  Effects_Trail9State state{};
+  state.trailCount = 2;
+  CheckTrailReferencePath<Effects_Trail9>(state, Effects_Plg057_TrailNineInit,
+                                          Effects_Plg057_TrailNineUpdate);
 }
