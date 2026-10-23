@@ -645,14 +645,29 @@ static void BuildModelPacketFixture(Actors_ShpModel* model,
   }
 }
 
+static int ModelPacketColorsMatch(const u_long* packet, int colored,
+                                  unsigned blend, const CVECTOR* tint) {
+  enum { kVertexPacketWords = 3, kTriangleCorners = 3 };
+  if (!colored) return 1;
+  if (blend == 0) {
+    return (packet[1] & UINT8_MAX) == 32 &&
+           (packet[1 + kVertexPacketWords] & UINT8_MAX) == 64;
+  }
+  const unsigned uniform =
+      tint->r | (unsigned)tint->g << 8 | (unsigned)tint->b << 16;
+  for (int corner = 0; corner < kTriangleCorners; ++corner) {
+    if ((packet[1 + corner * kVertexPacketWords] & 0xFFFFFF) != uniform) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
 static int ModelPolygonPackets(int colored, int split, int limb,
-                               unsigned pulse_mask) {
+                               unsigned pulse_mask, unsigned appearance) {
   enum {
     kTriangleCorners = 3,
-    kVertexPacketWords = 3,
     kVertexDepth = 1024,
-    kFirstRed = 32,
-    kSecondRed = 64
   };
   unsigned modelWords[32] = {0};
   Actors_ShpModel* model = (void*)modelWords;
@@ -685,8 +700,9 @@ static int ModelPolygonPackets(int colored, int split, int limb,
     Actors_modelRenderContext.vertexDepths[index] = kVertexDepth;
   }
   BuildModelPacketFixture(model, &instance, &options);
+  instance.actionAnimationState = appearance;
   CVECTOR tint = {128, 96, 64, 0};
-  if (pulse_mask != 0) {
+  if (pulse_mask != 0 || appearance != 0) {
     Render_DrawActorPolygons(&Actors_modelRenderContext, &instance, &tint,
                              model);
   } else if (colored) {
@@ -701,21 +717,28 @@ static int ModelPolygonPackets(int colored, int split, int limb,
       0x1234 +
       ((unsigned)limb < 8 && (pulse_mask & (0x80u >> limb)) != 0 ? 0x480 : 0);
   const unsigned first_uv = (palette << 16) | 0x140A;
-  int passed =
-      frame->primitiveCursor == memory + 8 + (colored ? 40 : 32) &&
-      (packet[1] >> 24) == (colored ? 0x34u : 0x24u) && packet[3] == first_uv &&
-      packet[colored ? 6 : 5] == 0x0015281Eu &&
-      packet[colored ? 9 : 7] == 0x3C32u && nextPrim(&ordering[254]) == packet;
-  if (colored) {
-    passed = passed && (packet[1] & UINT8_MAX) == kFirstRed &&
-             (packet[1 + kVertexPacketWords] & UINT8_MAX) == kSecondRed;
-  }
+  const int appearance_override =
+      pulse_mask != 0 ||
+      (appearance >= 4 && appearance < 9 && appearance != 6) ||
+      appearance == 15;
+  const unsigned blend = appearance_override && appearance != 0
+                             ? (appearance < 7 ? 0x40 : 0x20)
+                             : 0;
+  const unsigned command_bit = blend != 0 ? 2 : 0;
+  const unsigned page_uv = ((0x15 | blend) << 16) | 0x281E;
+  int passed = frame->primitiveCursor == memory + 8 + (colored ? 40 : 32) &&
+               (packet[1] >> 24) == ((colored ? 0x34u : 0x24u) | command_bit) &&
+               packet[3] == first_uv && packet[colored ? 6 : 5] == page_uv &&
+               packet[colored ? 9 : 7] == 0x3C32u &&
+               nextPrim(&ordering[254]) == packet;
+  passed = passed && ModelPacketColorsMatch(packet, colored, blend, &tint);
   if (split != 0) {
     const u_long* second = packet + 8;
     passed =
-        frame->primitiveCursor == memory + 72 && (packet[1] >> 24) == 0x24 &&
-        (second[1] >> 24) == 0x24 && packet[3] == first_uv &&
-        second[3] >> 16 == palette && packet[5] == 0x0015281Eu &&
+        frame->primitiveCursor == memory + 72 &&
+        (packet[1] >> 24) == (0x24 | command_bit) &&
+        (second[1] >> 24) == (0x24 | command_bit) && packet[3] == first_uv &&
+        second[3] >> 16 == palette && packet[5] == page_uv &&
         packet[7] == (split > 0 ? 0x3C32u : 0x5046u) &&
         packet[6] == (u_long)Actors_modelRenderContext
                          .projectedVertices[split > 0 ? 2 : 3] &&
@@ -735,12 +758,17 @@ static int ModelPolygonPackets(int colored, int split, int limb,
 }
 
 int Tests_ModelPolygonPackets(int colored, int split) {
-  return ModelPolygonPackets(colored, split, 8, 0);
+  return ModelPolygonPackets(colored, split, 8, 0, 0);
 }
 
 int TestsModelLimbPalettePackets(int colored, int split, int limb,
                                  unsigned pulse_mask) {
-  return ModelPolygonPackets(colored, split, limb, pulse_mask);
+  return ModelPolygonPackets(colored, split, limb, pulse_mask, 0);
+}
+
+int TestsModelAppearancePackets(int colored, int split, unsigned state,
+                                unsigned pulse_mask) {
+  return ModelPolygonPackets(colored, split, 8, pulse_mask, state);
 }
 
 int Tests_ModelProjectionGroups(void) {

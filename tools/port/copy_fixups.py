@@ -1289,6 +1289,15 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
     # func_800AEF94 / 44F14.c:923: room actor slots are sparse, including an absent companion in slot 1.
     "F01008": [
+        ("((void (*)(void*))Actors_UpdateActorAppearanceTransition)(actor);",
+         "Actors_UpdateActorAppearanceTransition(actor);",
+         "44F14.c:923 use the owning native actor appearance API"),
+        ("((void (*)(void*))Actors_UpdateActorAppearanceTransition)(attached);",
+         "Actors_UpdateActorAppearanceTransition(attached);",
+         "Attached actors share actor ownership, not a gimmick compatibility layout"),
+        ("((void (*)(void*))Actors_UpdateActorAppearanceTransition)((Actors_ActorRecord*)object);",
+         "Field_UpdateGimmickAppearanceTransition(object);",
+         "Gimmicks retain a separate typed appearance entry point"),
         ("if ((*previous)->modelId == texture)", "if (*previous != NULL && (*previous)->modelId == texture)",
          "empty actor slots cannot share texture animation"),
         ("if ((*previousAttached)->modelId == texture)",
@@ -1671,6 +1680,10 @@ FIXES["F01858"].append(
 
 # Reviewed fixes to copied type definitions: type id -> [(old, new, reason)]. Checked by Native\Tests\src\LayoutAsserts.c.
 TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "T00255": [
+        ("u_char pulsedPalette[32];", "u_short pulsedPalette[16];",
+         "3A1A0.h:521 / 40564.c:1710; T00255.072 and T00469.006 agree on sixteen 16-bit CLUT entries"),
+    ],
     "T00225": [
         ("Battle_TargetPreview previews[23];", "Battle_TargetPreview previews[255];",
          "Native preview indices reserve FF for cancellation; keep all actor/limb candidates outside the PS1-sized inline limit"),

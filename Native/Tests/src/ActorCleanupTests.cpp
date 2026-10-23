@@ -2,6 +2,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <memory>
 #include <type_traits>
 
@@ -11,6 +12,8 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Actors/ActorRecord.h"
+#include "Actors/AppearanceTransition.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
@@ -23,6 +26,9 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Core/Memory.h"
 #include "Core/Memory/Heap.h"
+#include "Field/Gimmicks.h"
+#include "Render/Palette.h"
+#include "State/Timers.h"
 }
 
 namespace {
@@ -249,4 +255,106 @@ TEST_CASE("AI special orbit teardown releases shared ownership once",
   Battle_Ai_FreeActorAiState(&fixture.actors[1]);
   CHECK(Battle_Ai_arenaOrbit == nullptr);
   CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+}
+namespace {
+struct AppearanceFixture {
+  decltype(std::to_array(Actors_weaponModels)) saved_weapons =
+      std::to_array(Actors_weaponModels);
+  int saved_speed = State_tickSpeed;
+  Actors_ActorRecord actor{};
+
+  AppearanceFixture() {
+    std::fill_n(Actors_weaponModels, saved_weapons.size(), nullptr);
+    State_tickSpeed = 2;
+    actor.instance.isParsed = -1;
+    actor.instance.baseColor = {128, 128, 128, 0};
+    actor.instance.actionAnimationState = 4;
+    actor.fadeRed = 30;
+  }
+
+  ~AppearanceFixture() {
+    std::copy(saved_weapons.begin(), saved_weapons.end(), Actors_weaponModels);
+    State_tickSpeed = saved_speed;
+  }
+};
+}  // namespace
+
+TEST_CASE("Actor disappearance changes the owning fade byte, not a legacy view",
+          "[actors][appearance]") {
+  AppearanceFixture fixture;
+  std::array<u_char, sizeof(Actors_ActorRecord)> expected;
+  std::memcpy(expected.data(), &fixture.actor, expected.size());
+  const auto color = offsetof(Actors_ActorRecord, instance) +
+                     offsetof(Actors_ModelInstance, baseColor);
+  expected[color] = expected[color + 1] = expected[color + 2] = 124;
+  expected[offsetof(Actors_ActorRecord, fadeRed)] = 32;
+  Actors_UpdateActorAppearanceTransition(&fixture.actor);
+  std::array<u_char, sizeof(Actors_ActorRecord)> actual;
+  std::memcpy(actual.data(), &fixture.actor, actual.size());
+  CHECK(fixture.actor.fadeRed == 32);
+  CHECK(actual == expected);
+}
+
+TEST_CASE("Actor appearance palettes use their owning selected rows",
+          "[actors][appearance]") {
+  const int state = GENERATE(2, 3, 6, 7, 9, 10, 12, 14);
+  const bool full_palette = GENERATE(false, true);
+  AppearanceFixture fixture;
+  auto& actor = fixture.actor;
+  actor.instance.actionAnimationState = state;
+  actor.textureHeaderBit = full_palette ? 1 : 0;
+  actor.fadeGreen = 10;
+  std::fill_n(actor.basePalette, 160, 0x1234);
+  std::fill_n(actor.basePalette + 160, 160, 0x7FFF);
+  std::fill_n(actor.currentPalette, 160, 0xA55A);
+  std::array<u_short, 160> expected;
+  expected.fill(0x7FFF);
+  const int count = full_palette ? 160 : 16;
+  const int skip = full_palette ? 1 : 0;
+  const int mode = state == 2                 ? 0
+                   : state == 3 || state == 7 ? 1
+                   : state == 6               ? 3
+                   : state == 9               ? 2
+                   : state == 10              ? 4
+                   : state == 12              ? 5
+                                              : 6;
+  const int changed = Render_ApplyPaletteTransition(
+      expected.data() + skip, count - skip, 1, mode, actor.basePalette + skip);
+  if (state == 3 && changed == 0) {
+    Render_ApplyPaletteTransition(expected.data() + skip, count - skip, 1, 2,
+                                  actor.basePalette + skip);
+  }
+  Actors_UpdateActorAppearanceTransition(&actor);
+  for (int index = 0; index < 160; ++index) {
+    CHECK(actor.basePalette[index] == 0x1234);
+    CHECK(actor.basePalette[index + 160] == expected[index]);
+    CHECK(actor.currentPalette[index] == 0xA55A);
+  }
+}
+
+TEST_CASE("Gimmick palette fades stay on their own typed path",
+          "[actors][appearance][gimmick]") {
+  STATIC_REQUIRE(
+      std::extent_v<decltype(Field_GimmickInstance::pulsedPalette)> == 16);
+  STATIC_REQUIRE(sizeof(Field_GimmickInstance::pulsedPalette) == 32);
+  AppearanceFixture fixture;
+  Field_GimmickInstance object{};
+  object.motionState = GENERATE(2, 3);
+  std::fill_n(object.basePalette, 16, 0x1234);
+  std::fill_n(object.pulsedPalette, 16, 0x7FFF);
+  std::array<u_short, 16> expected;
+  expected.fill(0x7FFF);
+  const int speed = object.motionState == 2 ? 2 : 1;
+  const int mode = object.motionState == 2 ? 0 : 1;
+  const int changed = Render_ApplyPaletteTransition(expected.data(), 16, speed,
+                                                    mode, object.basePalette);
+  if (object.motionState == 3 && changed == 0) {
+    Render_ApplyPaletteTransition(expected.data(), 16, speed, 2,
+                                  object.basePalette);
+  }
+  Field_UpdateGimmickAppearanceTransition(&object);
+  for (int index = 0; index < 16; ++index) {
+    CHECK(object.pulsedPalette[index] == expected[index]);
+    CHECK(object.basePalette[index] == 0x1234);
+  }
 }

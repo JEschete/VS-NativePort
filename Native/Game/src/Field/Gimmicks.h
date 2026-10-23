@@ -132,7 +132,7 @@ typedef struct Field_GimmickInstance {
     /* 0x10C */ SVECTOR rotationOffset;
     /* 0x114 */ u_char reserved114[24];
     /* 0x12C */ u_short basePalette[16];
-    /* 0x14C */ u_char pulsedPalette[32];
+    /* 0x14C */ u_short pulsedPalette[16];
     /* 0x16C */ Field_GimmickObjectInfo objectInfo;
     /* 0x178 */ u_char reserved178[1076];
     /* 0x5AC */ u_int reserved5ACBits0 : 3;

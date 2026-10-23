@@ -1894,7 +1894,7 @@ T00255.068,T00255,D_800F45E0_t,68,unk6C,1,MATRIX[5],,,,matrices,Model matrices; 
 T00255.069,T00255,D_800F45E0_t,69,unk10C,1,SVECTOR,,,,rotationOffset,Rotation added when drawing,med,source:49268.c:81
 T00255.070,T00255,D_800F45E0_t,70,unk114,1,u_char[24],,,,reserved114,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:519
 T00255.071,T00255,D_800F45E0_t,71,unk12C,1,u_short[16],,,,basePalette,Palette before effects,high,source:30DB0.c:346
-T00255.072,T00255,D_800F45E0_t,72,unk14C,1,u_short[16],,,,pulsedPalette,Palette uploaded with the pulse applied,med,source:upstream:40564.c:1710;use cited by sanity pass;source:3A1A0.h:521
+T00255.072,T00255,D_800F45E0_t,72,unk14C,1,u_short[16],,,,pulsedPalette,Palette uploaded with the pulse applied,high,source:upstream:40564.c:1710;source:3A1A0.h:521;native:#147 restores ledger element width in canonical copied type without changing the32-byte span or native offset336
 T00255.073,T00255,D_800F45E0_t,73,unk16C,1,D_800F4538_t2,,,,objectInfo,"Object id, material and durability",med,source:30DB0.c:280
 T00255.074,T00255,D_800F45E0_t,74,unk178,1,u_char[1076],,,,reserved178,Not read by the decompiled users,low,declaration-only;source:3A1A0.h:523
 T00255.075,T00255,D_800F45E0_t,75,unk5AC_0,1,u_int,3,,,reserved5ACBits0,Not read by the decompiled users,low,source:30DB0.c:4093
