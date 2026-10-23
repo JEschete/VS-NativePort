@@ -18,6 +18,7 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
@@ -46,6 +47,7 @@ void Battle_Ai_FreeRoomAiState(void) {
       Battle_Ai_FreeActorAiState(Battle_actors[index]);
     }
   }
+  memset(Battle_Ai_FrameState(), 0, sizeof *Battle_Ai_FrameState());
   if (Battle_Ai_roomAiState != NULL) {
     Core_Memory_FreeFromLowEnd(Battle_Ai_roomAiState);
   }
@@ -177,6 +179,8 @@ void Battle_Ai_InitializeRoomAiMap(void) {
       auxiliary != NULL
           ? (Battle_Ai_RouteGateEnd*)(auxiliary + kRouteGatesOffset)
           : NULL;
+  // Actor creation can query terrain before the first AI update.
+  Battle_Ai_CacheActorAiWorkingState();
   Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
   Battle_Ai_UpdateRouteGateAvailability();
 }

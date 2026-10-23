@@ -1386,6 +1386,92 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Early flying-actor terrain context (#142)
+
+Source is `13531f550ac08789c2cc79f84613987e118a20b1` plus the owned room-lifecycle
+fix and regressions. The published parent is merge `3a9ed355`; its native tree
+matches13531f55. Unrelated owner edits remain dirty/excluded.
+
+The all-definition corpus reached356 successful pre-fix initialization
+records before Gremlin97/2 aborted. Those historical records are not fresh
+verification of this changed lifecycle. The source-backed matrix contains368
+eligible definitions and87 explicit unavailable definitions; eleven variants
+after the abort still had no record at this checkpoint.
+
+Original failing fixture: zone97 room0, `MAP428`, Gremlin definition2/source
+hostile row1, Ashley9,10 and enemy9,13, elevation/layer0, seed1, `post-minotaur`,
+starting maxHP/MP999 and the existing isolated-event policy. No source asset,
+enemy/stat/AI definition, runtime memory, HP or story flag is edited.
+
+Before-fix Release `1792773773981507-0` and Debug `1792774027535234-0` abort
+with code3 at46, before any ready frame. Initial hover intent12 calls
+`Field_GroundHeightAtWorldPosition` through `Battle_Ai_IssueActorCommand`.
+The diagnostic reports tile9,13: valid coordinates, but the cached native
+frame height map is null. This is not an out-of-bounds tile, missing source
+floor, a reason to enlarge the grid, or permission to return height0.
+
+The owned room map already publishes authoritative terrain globals before
+actor creation, but the native frame view was not populated until the first
+AI update. Room initialization now snapshots the existing context immediately
+after publishing all room pointers, before dependent terrain/gate callbacks
+or actor creation. Teardown frees actor AI states, invalidates the borrowed
+frame view, then frees room storage. It does not refresh/reset working RNG in
+the middle of an issued command or change height mathematics/hover payloads.
+Original map initialization/free ordering was read in `7E05C.s`; the existing
+native query equations retain the source `7B5DC.s` behavior.
+
+Two new direct regressions fail before the fix on null/unpublished terrain.
+Afterward they verify an actual hover command before any AI update, correct
+height/position payloads, live working-RNG preservation, global RNG
+preservation, complete pointer/cache invalidation and two successive rooms.
+The final selection `VS.Tests.exe "[ai][room-context]"` passes **20 assertions /
+2 cases** in Debug and Release; full suites pass **545 cases / 1802426
+assertions** each. Scoped maintained quality/tidy for `RoomState.c` and
+`ActorCommandTests.cpp` reports **0 findings / 0 new**, without baseline edits.
+Copier tests remain26/26; repeated generation preserves all751 generated
+outputs and93 owned paths without output drift. The three directly related
+ledger locations/stub-presence markers now reflect their existing registered
+owned C implementations, not a new C++ promotion or full behavior gate.
+
+| Build | Autonomous7200-tick run | Normal-speed three-entry/F10 run |
+| --- | --- | --- |
+| Debug | `1792775021061322-0` | `1792775386956705-0` |
+| Release | `1792775009541767-0` | `1792775405766255-0` |
+
+Each normal-speed session reaches ready at46 and genuine hover/movement at136.
+Subsequent fresh/movement ticks are396/486 and545/635 in Debug,395/485 and545/635
+in Release. Actual F10 and editor Start give three begins/three ends per
+build, with identical seeded HP191/MP88, source slots, model/weapon fields and
+positions on each entry. All four accepted sessions finalize normally with
+zero engine error/critical/trace failures.
+
+An initial accelerated Release controller attempt `1792775262731783-0` is
+excluded: the editor reached its explicit18000-tick budget during navigation,
+logged `host.exit` at18000 and exited0. Repeating the same acceptance at normal
+speed fixes that observer budget mismatch; no native limit or behavior was
+weakened.
+
+The long autonomous windows prove stable initialization and ongoing movement,
+not offensive Gremlin fidelity: no combat-result record was observed in7200
+ticks. That remaining behavior stays under #16 rather than being invented
+into a fix or claimed complete. The startup abort is the bounded #142 defect.
+
+Builds use the standard test/Combat Lab projects in both configurations with
+`/m /nodeReuse:false /p:Platform=x64 /p:VcpkgManifestInstall=false`. Local commands:
+
+```powershell
+.\.venv-3\Scripts\python.exe build\quality\arena16-roster.py run --configuration Debug --all-definitions --tag z097-d02 --frames 7200 --speed 8
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File build\quality\gremlin142-live.ps1 -Configuration Debug
+```
+
+Repeat with Release. Local evidence uses `build\quality\gremlin142-*`,
+`arena16-roster` and the native run directories. Fixed host SHA-256: Debug
+`b4d269dc947ddbbb981c368a05448ff6bc2f4480e1b28d2bf7ecf3b6f6e83fb3`,
+Release `63b0a769192fbc22f648ceeb4b47b4eb5f95f89d02135c4f85a7f890310bafab`.
+Do not upload/commit disc-derived assets, captures or dumps. Existing AI
+compatibility views remain migration debt; no C++ promotion or broad
+compatibility retirement is claimed. Publication/exact CI are recorded on #142.
+
 ## NPC area filtering without player sphere UI (#140)
 
 Source is `a37ac5a087a97295c7bbfe13b39e64c0aa9ae78c` plus the scoped F00103
@@ -1395,9 +1481,13 @@ clean Release initialization cases before original Lich definition7 crashed.
 Initialization/movement observations are not all-enemy behavior acceptance.
 
 Original fixture: zone24 room1, `MAP080`, source hostile row0, Lich definition7
-at tile5,7 facing0; Ashley5,4 facing0; seed1, `post-minotaur`, starting
+at tile5,7; Ashley5,4; elevation0 and preset `direction:0` for both; seed1, `post-minotaur`, starting
 `max_hp:999/max_mp:999`, existing isolated room events. Enemy definitions,
 AI/actions, inventory, source assets and story flags are not edited.
+
+The legacy-named position `direction` is the production floor-layer selector
+(0/1), not a cardinal facing override. `Actors_PlaceActorInRoom` uses it for
+`currentTileLayer`; heading still follows normal initialization/AI/controls.
 
 Before-fix Release `1792768167460696-0` and Debug `1792768368479320-0` exit
 `0xC0000005`. At tick361, `Battle_FilterAreaActionTargets` calls

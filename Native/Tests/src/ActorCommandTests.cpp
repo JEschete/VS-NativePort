@@ -13,9 +13,15 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCommands.h"
+#include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/RoomState.h"
 #include "Battle/Damage.h"
+#include "Core/Memory.h"
+#include "Core/Memory/Heap.h"
+#include "Field/RoomLoading.h"
 }
 
 namespace {
@@ -201,4 +207,106 @@ TEST_CASE(
   CHECK(fixture.actor.commandArg1.word == 192512);
   Battle_Ai_IssueActorCommand(&fixture.state, 7);
   CHECK(fixture.actor.commandOpcode == 9);
+}
+
+namespace {
+struct RoomCommandFixture : CommandFixture {
+  Core_HeapBlockHeader saved_heap = Core_legacyHeapList;
+  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
+  decltype(std::to_array(Battle_actors)) saved_actors =
+      std::to_array(Battle_actors);
+  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
+      std::to_array(Battle_Ai_actorAiStates);
+  Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
+  decltype(Battle_Ai_specialTerrainHeights) saved_heights =
+      Battle_Ai_specialTerrainHeights;
+  decltype(Battle_Ai_roomHasWaypoints) saved_auxiliary =
+      Battle_Ai_roomHasWaypoints;
+  decltype(Battle_Ai_patrolRoutes) saved_routes = Battle_Ai_patrolRoutes;
+  decltype(Battle_Ai_roomWaypoints) saved_waypoints = Battle_Ai_roomWaypoints;
+  decltype(Battle_Ai_routeGates) saved_gates = Battle_Ai_routeGates;
+  int saved_random = Battle_Ai_savedMovementRandomState;
+  Field_RoomRecord saved_data = Field_roomData;
+  Field_MpdCollisionHeader dimensions{2, 2, 0, 4};
+  std::array<Core_HeapBlockHeader, 2048> heap{};
+
+  RoomCommandFixture() {
+    Core_Memory_InitializeHeap(heap.data(), sizeof heap);
+    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
+    Battle_actors[2] = &actor;
+    Battle_Ai_roomAiState = nullptr;
+    Battle_Ai_tileFlagMap = nullptr;
+    Battle_Ai_specialTerrainHeights = nullptr;
+    Battle_Ai_roomHasWaypoints = nullptr;
+    Battle_Ai_patrolRoutes = nullptr;
+    Battle_Ai_roomWaypoints = nullptr;
+    Battle_Ai_routeGates = nullptr;
+    Field_roomData = {};
+    Field_roomData.collisionMap = &dimensions;
+    *Battle_Ai_FrameState() = {};
+    state.nextTile.word = 0x00010001;
+    Battle_Ai_savedMovementRandomState = 0x12345678;
+  }
+
+  ~RoomCommandFixture() {
+    Battle_Ai_FreeRoomAiState();
+    Core_legacyHeapList = saved_heap;
+    Core_legacySecondaryHeapList = saved_secondary;
+    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_states.begin(), saved_states.end(),
+              Battle_Ai_actorAiStates);
+    Battle_Ai_roomAiState = saved_room;
+    Battle_Ai_specialTerrainHeights = saved_heights;
+    Battle_Ai_roomHasWaypoints = saved_auxiliary;
+    Battle_Ai_patrolRoutes = saved_routes;
+    Battle_Ai_roomWaypoints = saved_waypoints;
+    Battle_Ai_routeGates = saved_gates;
+    Battle_Ai_savedMovementRandomState = saved_random;
+    Field_roomData = saved_data;
+  }
+};
+}  // namespace
+
+TEST_CASE("Room terrain supports hover before the first AI update",
+          "[ai][actor-commands][room-context]") {
+  RoomCommandFixture fixture;
+  Battle_Ai_InitializeRoomAiMap();
+  auto* frame = Battle_Ai_FrameState();
+  REQUIRE(frame->heightMap != nullptr);
+  CHECK(frame->heightMap == Battle_Ai_specialTerrainHeights);
+  CHECK(frame->tileFlags == Battle_Ai_tileFlagMap);
+  CHECK(frame->room == Battle_Ai_roomAiState);
+  frame->heightMap[1][1] = 2;
+  frame->randomState = 0x87654321;
+  Battle_Ai_IssueActorCommand(&fixture.state, 12);
+  CHECK(fixture.actor.commandArg0 == (144 << 16 | 192));
+  CHECK((fixture.actor.commandArg1.word & 0xFFFF) == 192);
+  CHECK(frame->randomState == 0x87654321);
+  CHECK(Battle_Ai_savedMovementRandomState == 0x12345678);
+}
+
+TEST_CASE("Room teardown retires frame pointers before another room",
+          "[ai][actor-commands][room-context]") {
+  RoomCommandFixture fixture;
+  for (int world = 1; world <= 2; ++world) {
+    Battle_Ai_InitializeRoomAiMap();
+    auto* frame = Battle_Ai_FrameState();
+    REQUIRE(frame->heightMap == Battle_Ai_specialTerrainHeights);
+    REQUIRE(frame->heightMap != nullptr);
+    CHECK(frame->randomState == 0x12345678);
+    frame->heightMap[1][1] = static_cast<u_short>(world);
+    Battle_Ai_IssueActorCommand(&fixture.state, 12);
+    CHECK((fixture.actor.commandArg0 >> 16) == world * 64 + 16);
+    frame->actors[0] = &fixture.state;
+    frame->walk_valid = 1;
+    Battle_Ai_FreeRoomAiState();
+    const std::array retired{
+        frame->heightMap == nullptr, frame->tileFlags == nullptr,
+        frame->room == nullptr, frame->actors[0] == nullptr,
+        frame->walk_valid == 0};
+    const std::array expected_retired{true, true, true, true, true};
+    CHECK(retired == expected_retired);
+    CHECK(Battle_Ai_savedMovementRandomState == 0x12345678);
+  }
 }
