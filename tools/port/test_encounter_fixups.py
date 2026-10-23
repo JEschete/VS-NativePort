@@ -9,6 +9,24 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_gimmick_palette_matches_ledger_element_width_without_growth(self):
+        source = "u_char pulsedPalette[32];"
+        for old, new, _ in copy_fixups.TYPE_FIXES["T00255"]:
+            source = source.replace(old, new)
+        self.assertEqual(source, "u_short pulsedPalette[16];")
+
+    def test_room_rendering_dispatches_typed_appearance_owners(self):
+        source = """((void (*)(void*))Actors_UpdateActorAppearanceTransition)(actor);
+((void (*)(void*))Actors_UpdateActorAppearanceTransition)(attached);
+((void (*)(void*))Actors_UpdateActorAppearanceTransition)((Actors_ActorRecord*)object);
+"""
+        for old, new, _ in copy_fixups.FIXES["F01008"]:
+            source = source.replace(old, new)
+        self.assertIn("Actors_UpdateActorAppearanceTransition(actor);", source)
+        self.assertIn("Actors_UpdateActorAppearanceTransition(attached);", source)
+        self.assertIn("Field_UpdateGimmickAppearanceTransition(object);", source)
+        self.assertNotIn("void (*)(void*)", source)
+
     def test_effect_register_consumers_preserve_original_operand_order(self):
         for function_id, function_name in (
             ("F01531", "Effects::SetEffectScriptRegister"),

@@ -4,6 +4,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Appearance.h"
+#include "Actors/AppearanceTransition.h"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelDrawing.h"
 #include "Actors/ModelInstance.h"
@@ -101,7 +102,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                 ((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(actor, NULL, 0);
             }
             if (actor->instance.actionAnimationState) {
-                ((void (*)(void*))Actors_UpdateActorAppearanceTransition)(actor);
+                Actors_UpdateActorAppearanceTransition(actor);
             }
             actor->instance.wasDrawn = 0;
             if (actor->instance.isFrozen) {
@@ -166,7 +167,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                             ((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(attached, NULL, 0);
                         }
                         if (attached->instance.actionAnimationState) {
-                            ((void (*)(void*))Actors_UpdateActorAppearanceTransition)(attached);
+                            Actors_UpdateActorAppearanceTransition(attached);
                         }
                         if (actor->instance.isFrozen) {
                             if ((attached->soundEffect.kind == 1)
@@ -278,7 +279,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                 ((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(NULL, (Actors_ActorRecord*)object, 0);
             }
             if (object->motionState) {
-                ((void (*)(void*))Actors_UpdateActorAppearanceTransition)((Actors_ActorRecord*)object);
+                Field_UpdateGimmickAppearanceTransition(object);
             }
             Actors_DrawGimmickModel(object, camera);
         }

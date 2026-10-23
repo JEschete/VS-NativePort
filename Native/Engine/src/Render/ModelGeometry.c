@@ -57,6 +57,16 @@ enum {
   kGouraudQuadUvOffset = 24,
   kBlendModeMask = 0x60,
   kSemiTransparencyFlag = 0x10,
+  kAppearanceMaterialMask = 0xF0,
+  kAppearanceSubtractiveBlend = 0x40,
+  kAppearanceAdditiveBlend = 0x20,
+  kAppearanceFadeFirstState = 4,
+  kAppearanceFadeEndState = 9,
+  kAppearanceOpaqueState = 6,
+  kAppearanceBlendBoundary = 7,
+  kAppearanceForcedOverride = 15,
+  kGouraudSpecialFlagsOffset = 19,
+  kFlatSpecialFlagsOffset = 2,
   kQuadCommandFlag = 8,
   kCommandShift = 3 * CHAR_BIT,
   kClutPacketWord = 3,
@@ -271,6 +281,7 @@ typedef struct ProjectedModelPolygon {
   int depth;
   unsigned tint;
   unsigned palette;
+  int uniform_color;
 } ProjectedModelPolygon;
 
 static int WriteModelPolygon(const ProjectedModelPolygon* polygon,
@@ -306,11 +317,13 @@ static int WriteModelPolygon(const ProjectedModelPolygon* polygon,
     packet[xy_word] = (u_long)polygon->screen[corner];
     packet[xy_word + 1] = uv;
     if (colored) {
-      unsigned color;
-      memcpy(&color,
-             polygon->data + 2 * sizeof(uint32_t) +
-                 (size_t)corner * sizeof(uint32_t),
-             sizeof color);
+      unsigned color = polygon->tint;
+      if (!polygon->uniform_color) {
+        memcpy(&color,
+               polygon->data + 2 * sizeof(uint32_t) +
+                   (size_t)corner * sizeof(uint32_t),
+               sizeof color);
+      }
       packet[xy_word - 1] = color & kColorMask;
     }
   }
@@ -332,7 +345,8 @@ static int WriteModelPolygon(const ProjectedModelPolygon* polygon,
 static int QueueModelPolygon(Actors_ModelRenderContext* context,
                              const unsigned char* data, int corners,
                              int colored, unsigned flags, int bias,
-                             unsigned tint, unsigned palette, uintptr_t limit) {
+                             unsigned tint, unsigned palette, int uniform_color,
+                             uintptr_t limit) {
   uint16_t indices[kQuadCorners];
   memcpy(indices, data + (colored ? 0 : sizeof(uint32_t)),
          (size_t)corners * sizeof indices[0]);
@@ -363,8 +377,9 @@ static int QueueModelPolygon(Actors_ModelRenderContext* context,
     int emitted = 0;
     for (int part = 0; part < 2; ++part) {
       const int result =
-          QueueModelPolygon(context, triangles[part], kTriangleCorners, 0, 0,
-                            kNormalDepthBias, tint, palette, limit);
+          QueueModelPolygon(context, triangles[part], kTriangleCorners, 0,
+                            flags & kAppearanceMaterialMask, kNormalDepthBias,
+                            tint, palette, uniform_color, limit);
       if (result < 0) return result;
       emitted += result;
     }
@@ -392,7 +407,8 @@ static int QueueModelPolygon(Actors_ModelRenderContext* context,
                                          .flags = flags,
                                          .depth = depth,
                                          .tint = tint,
-                                         .palette = palette};
+                                         .palette = palette,
+                                         .uniform_color = uniform_color};
   return WriteModelPolygon(&polygon, limit);
 }
 
@@ -420,7 +436,8 @@ static unsigned ModelPolygonPalette(const Actors_ShpModel* model, int part,
 static void DrawModelPolygons(Actors_ModelRenderContext* context,
                               Actors_ModelInstance* instance,
                               const CVECTOR* tint, Actors_ShpModel* model_data,
-                              int colored, unsigned pulse_mask) {
+                              int colored, unsigned pulse_mask,
+                              unsigned appearance_material) {
   if (context == NULL || instance == NULL || model_data == NULL ||
       context->projectedVertexCount == 0) {
     return;
@@ -466,8 +483,13 @@ static void DrawModelPolygons(Actors_ModelRenderContext* context,
         Core_Debugf("render", "Invalid model polygon command 0x%X", command);
         return;
       }
-      const unsigned flags =
-          part == kSpecialPolygonGroup ? polygon[colored ? 19 : 2] : 0;
+      unsigned flags = part == kSpecialPolygonGroup
+                           ? polygon[colored ? kGouraudSpecialFlagsOffset
+                                             : kFlatSpecialFlagsOffset]
+                           : 0;
+      if (appearance_material != 0) {
+        flags = (flags & ~kAppearanceMaterialMask) | appearance_material;
+      }
       const unsigned palette =
           pulse_mask == 0 ? base_palette
                           : ModelPolygonPalette(model, part, face, pulse_mask,
@@ -475,7 +497,8 @@ static void DrawModelPolygons(Actors_ModelRenderContext* context,
       if (QueueModelPolygon(context, polygon, corners, colored, flags,
                             part == kSpecialPolygonGroup ? kSpecialDepthBias
                                                          : kNormalDepthBias,
-                            color, palette, base + kPrimitiveBufferBytes) < 0) {
+                            color, palette, appearance_material != 0,
+                            base + kPrimitiveBufferBytes) < 0) {
         return;
       }
       polygon += PolygonBytes(command);
@@ -487,14 +510,14 @@ static void DrawModelPolygons(Actors_ModelRenderContext* context,
 void Render_DrawModelFlatPolygons(Actors_ModelRenderContext* context,
                                   void* instance, CVECTOR* tint,
                                   void* model_data) {
-  DrawModelPolygons(context, instance, tint, model_data, 0, 0);
+  DrawModelPolygons(context, instance, tint, model_data, 0, 0, 0);
 }
 
 // decomp: BATTLE.PRG func_800B4594 (src/BATTLE/BATTLE.PRG/4B16C.s:835).
 void Render_DrawModelGouraudPolygons(Actors_ModelRenderContext* context,
                                      void* instance, void* tint,
                                      void* model_data) {
-  DrawModelPolygons(context, instance, tint, model_data, 1, 0);
+  DrawModelPolygons(context, instance, tint, model_data, 1, 0, 0);
 }
 
 void Render_DrawActorPolygons(Actors_ModelRenderContext* context,
@@ -504,6 +527,22 @@ void Render_DrawActorPolygons(Actors_ModelRenderContext* context,
     Core_Debugf("render", "Missing actor instance for polygon submission");
     return;
   }
-  DrawModelPolygons(context, instance, tint, model, instance->uvLayout,
-                    instance->palettePulse.kind);
+  // 800B3680..800B38E0 selects the override renderer; 800B51DC..800B51FC
+  // chooses its original subtractive/additive page mode. 800B5DD4..800B5DE0
+  // also repeats the supplied tint at each Gouraud vertex.
+  const unsigned state = instance->actionAnimationState;
+  const unsigned pulse = instance->palettePulse.kind;
+  const int override =
+      pulse != 0 ||
+      (state >= kAppearanceFadeFirstState && state < kAppearanceFadeEndState &&
+       state != kAppearanceOpaqueState) ||
+      state == kAppearanceForcedOverride;
+  unsigned material = 0;
+  if (override && state != 0) {
+    material = kSemiTransparencyFlag |
+               (state < kAppearanceBlendBoundary ? kAppearanceSubtractiveBlend
+                                                 : kAppearanceAdditiveBlend);
+  }
+  DrawModelPolygons(context, instance, tint, model, instance->uvLayout, pulse,
+                    material);
 }

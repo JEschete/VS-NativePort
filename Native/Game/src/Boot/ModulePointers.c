@@ -8,6 +8,7 @@
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/Appearance.h"
+#include "Actors/AppearanceTransition.h"
 #include "Actors/CharacterInit.h"
 #include "Actors/Lifecycle.h"
 #include "Actors/Location.h"

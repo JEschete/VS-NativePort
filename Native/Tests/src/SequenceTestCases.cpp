@@ -15,6 +15,8 @@ extern "C" int Tests_ModelProjectionGroups(void);
 extern "C" int Tests_ModelPolygonPackets(int colored, int split);
 extern "C" int TestsModelLimbPalettePackets(int colored, int split, int limb,
                                             unsigned pulse_mask);
+extern "C" int TestsModelAppearancePackets(int colored, int split,
+                                           unsigned state, unsigned pulse_mask);
 extern "C" int Tests_ActorPoseHierarchy(void);
 extern "C" int Tests_ProjectedBoneEndpoints(void);
 extern "C" int Tests_RoomSpawnCountGuard(void);
@@ -250,4 +252,16 @@ TEST_CASE("Selected limb polygons use only their own pulsed palette",
   }
   CHECK(TestsModelLimbPalettePackets(0, 0, 8, 0xFF) == 1);
   CHECK(TestsModelLimbPalettePackets(1, 0, 8, 0xFF) == 1);
+}
+TEST_CASE("Actor appearance materials preserve original blend dispatch",
+          "[actors][appearance][render]") {
+  for (unsigned state = 0; state < 16; ++state) {
+    for (unsigned pulse : {0U, 0xFFU}) {
+      CAPTURE(state, pulse);
+      CHECK(TestsModelAppearancePackets(0, 0, state, pulse) == 1);
+      CHECK(TestsModelAppearancePackets(1, 0, state, pulse) == 1);
+      CHECK(TestsModelAppearancePackets(0, 1, state, pulse) == 1);
+      CHECK(TestsModelAppearancePackets(0, -1, state, pulse) == 1);
+    }
+  }
 }

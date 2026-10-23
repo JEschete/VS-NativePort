@@ -16,7 +16,6 @@
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
-#include "Field/Gimmicks.h"
 #include "Render/Palette.h"
 
 extern VECTOR Actors_roomActorScale;
@@ -32,7 +31,6 @@ int Actors_SetActorFadeParameters(int arg0, Render_ColorCode* arg1);
 int Actors_ActorTint(int arg0, Render_ColorCode* arg1);
 int Actors_SetActorTint(int arg0, Render_ColorCode* arg1);
 void Actors_UpdateActorPalettePulse(Actors_ActorRecord* actor, Actors_PalettePulseView* object, int arg2);
-void Actors_UpdateActorAppearanceTransition(Field_GimmickInstance* arg0);
 void Actors_StartActorAppearanceTransition(int arg0, int arg1);
 
 #endif // VS_ACTORS_APPEARANCE_H_DECLS

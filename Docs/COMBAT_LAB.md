@@ -524,6 +524,82 @@ Debug/Release damage proof. The unsafe appearance-tail/material contracts
 found during #147 investigation are separate. Publication and exact CI are
 recorded on the issues, not inferred from local runs.
 
+### Original death-fade ownership and material repair (#147, 2026-10-23)
+
+A real Fireball defeats the original zone6 Wyvern/model58 in the live Lab.
+Pre-fix run `1792793719462282-0` reproduces the solid silhouette: appearance
+states1/2/3/4/5 advance, but the actor's actual fade bytes remain zero while
+the old compatibility-view byte increments. This is not a manufactured death
+or a claim that another successful process exit proves the presentation.
+
+F00980 is now registered owned **C**, with separate typed actor/companion and
+gimmick entry points. Actors use their own fade bytes and selected palette rows:
+the first160 entries of `basePalette` are the reference, the second160 are the
+transition row. `currentPalette` is a separate pulse buffer. The former generic
+gimmick view addresses actor fadeGreen/fadeRed24 bytes early and palette rows at
+the wrong native locations. Original palette modes, state order, equipment
+uploads, motion helpers and carried-object release behavior are retained.
+F01008 calls the typed entries directly rather than hiding mismatches in
+void-function casts.
+
+The coupled canonical gimmick pulse field now agrees with existing ledger
+rows T00255.072/T00469.006: sixteen16-bit CLUT colors, not thirty-two8-bit
+elements. Its32-byte span/native offset336 and owned-prefix bounds do not grow.
+Both the actor16/160-color cases and the separate gimmick path have guard
+regressions. This does not retire every hardware-shaped gimmick view or
+promote the implementation to C++.
+
+Correct state ownership alone did **not** fix the image. The native renderer
+also omitted original appearance-material dispatch. Source-binary evidence:
+
+- 800B3680..800B38E0 selects override drawing for states4/5/7/8/15, with
+  palette-pulse overrides retaining their original behavior.
+- 800B51DC..800B51FC chooses subtractive page mode0x40 for nonzero states<7,
+  additive0x20 otherwise. Polygon semi-transparency is enabled, including
+  both adaptive split orientations.
+- 800B5DD4..800B5DE0 repeats the supplied fade tint at every Gouraud vertex;
+  retaining the original per-vertex colors incorrectly leaves a solid shape.
+  Ordinary colored faces and companion mode1 retain their normal path.
+
+No arbitrary alpha curve replaces this behavior. Exact packet controls cover
+all16 appearance states with pulse/no-pulse, flat/Gouraud and both adaptive
+splits. Missing blend dispatch is red80/128; missing uniform Gouraud tint is
+independently red20/128. The owning actor byte/whole-record guard is red2/2.
+Final combined appearance selection passes7878 assertions in four cases.
+
+Fresh controller defeats and F10 cleanup/re-entry use **one window per
+configuration**, not separate hosts for every observation:
+
+| Configuration / run | Lethal Fireball result / first entry | Second entry | Normal cleanup |
+|---|---:|---:|---:|
+| Release `1792797118662852-0` | 1868 /94HP | 4167 /93HP | 2310 /4609 |
+| Debug `1792797363044415-0` | 1866 /96HP | 4162 /93HP | 2306 /4604 |
+
+All four genuine defeats pass through states1..5; actual fadeRed advances0..64,
+the old-view tail stays untouched, and per-run captures show the floor becoming
+visible through the source-defined subtractive silhouette before disappearance.
+Every re-entry restores Ashley999HP/999MP and the original enemy at full rolled
+HP. Its observed86HP is valid: original146C.c:6128 applies base85 plus an
+averaged[-10,+10] roll. Catalog85 is not a valid exact runtime-HP assertion.
+No HP, MP, RNG, position or event memory is edited after setup. Both sessions
+have two normal encounter ends, one window and zero engine/trace errors.
+
+Full Debug/Release suites pass565 cases /1812832 assertions each; copier35
+tests and repeat-generation/owned-file preservation pass. Final owned appearance
+quality is0 findings; the related scoped checks introduce no baseline changes.
+The original-reference index and exact published CI are recorded with #147.
+The source includes the scoped appearance/material repair on parent7a33fe33
+and separately dirty owner documentation/perception tests. Actor palettes,
+opaque and appearance packet controls remain independently verified.
+
+Local evidence: `build\quality\dtok147-final-evidence.json`,
+`dtok147-repeat-{Release,Debug}-pose.json`, the named run directories and their
+`captures\entry-0` / `captures\entry-1` images, original disassembly in
+`dtok147-material-*.txt` / `dtok147-override-*.txt`, and
+`dtok147-{red,material-red,material-color-red}-*.log`. Source-derived images and
+binary data stay local. This verifies the production model's defeat/fade path,
+not completion of prologue story-event victory or all remaining rendering debt.
+
 ## Ability-profile acceptance checkpoint (2026-10-22)
 
 The `all-abilities` fixture supports ongoing
