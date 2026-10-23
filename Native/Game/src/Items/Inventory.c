@@ -565,6 +565,12 @@ int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
         Items_InventoryMisc* target = targetInventory->misc;
         int count = source->count;
 
+        /* Probe before merging: rejected claims retain their whole loot row. */
+        if ((write != 0) && (Items_Inventory_CopyItem(Items_ItemCategory_Misc,
+                targetInventory, sourceItemIndex, sourceInventory) == 0)) {
+            return 0;
+        }
+
         Items_Inventory_RebuildDisplayIndices(6);
 
         for (i = 0; i < 0x40; ++i) {

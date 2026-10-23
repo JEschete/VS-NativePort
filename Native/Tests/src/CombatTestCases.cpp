@@ -32,7 +32,10 @@ extern "C" {
 #include "Effects/Templates/Ring.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
+#include "Items/Inventory.h"
 #include "Menu/BattleAbilities.h"
+#include "Menu/Framework/Framework.h"
+#include "Menu/Inventory/ItemList.h"
 #include "State/Flags.h"
 #include "State/Progress.h"
 #include "State/Settings.h"
@@ -388,6 +391,83 @@ struct ArtResolutionFixture : AbilityEffectFixture {
     CHECK(cancelled.targets[0].target.hp == 0);
     CHECK(cancelled.targets[0].target.impactKind == 4);
     target = resolved.targets[0];
+  }
+};
+
+struct LootInventoryFixture {
+  Items_Inventory saved_inventory = Audio_Seq_unusedInventory;
+  Items_InventoryIndices saved_indices = Audio_Seq_unusedInventoryIndices;
+  std::uint8_t saved_capacity = Items_Inventory_inventoryItemCapacities[6];
+  std::uint8_t* saved_index_pointer = Menu_Inventory_inventoryIndices[6];
+  Items_Inventory source{};
+
+  LootInventoryFixture() {
+    Audio_Seq_unusedInventory = {};
+    Audio_Seq_unusedInventoryIndices = {};
+    Items_Inventory_inventoryItemCapacities[6] = 64;
+    Menu_Inventory_inventoryIndices[6] = Audio_Seq_unusedInventoryIndices.misc;
+    for (auto& item : Audio_Seq_unusedInventory.misc) {
+      item.id = 324;
+      item.count = 100;
+    }
+    Audio_Seq_unusedInventory.misc[0].id = 323;
+    Audio_Seq_unusedInventory.misc[0].count = 99;
+    source.misc[0].id = 323;
+    source.misc[0].count = 2;
+  }
+
+  ~LootInventoryFixture() {
+    Audio_Seq_unusedInventory = saved_inventory;
+    Audio_Seq_unusedInventoryIndices = saved_indices;
+    Items_Inventory_inventoryItemCapacities[6] = saved_capacity;
+    Menu_Inventory_inventoryIndices[6] = saved_index_pointer;
+  }
+
+  int Copy(bool write) {
+    const int flags =
+        static_cast<int>(Items_ItemCategory_Misc) |
+        (write ? static_cast<int>(Menu_Framework_CopyItemFlag_Write) : 0);
+    return Items_Inventory_CopyItem(flags, &Audio_Seq_unusedInventory, 0,
+                                    &source);
+  }
+
+  static int Quantity(int id) {
+    int quantity = 0;
+    for (const auto& item : Audio_Seq_unusedInventory.misc) {
+      if (item.id == id) quantity += item.count;
+    }
+    return quantity;
+  }
+
+  static void CheckUnchanged(
+      const decltype(std::to_array(Audio_Seq_unusedInventory.misc))& before) {
+    for (std::size_t slot = 0; slot < before.size(); ++slot) {
+      CHECK(Audio_Seq_unusedInventory.misc[slot].id == before[slot].id);
+      CHECK(Audio_Seq_unusedInventory.misc[slot].count == before[slot].count);
+    }
+  }
+
+  void CheckQueryUnchanged(int expected) {
+    const auto before = std::to_array(Audio_Seq_unusedInventory.misc);
+    CHECK(Copy(false) == expected);
+    CheckUnchanged(before);
+  }
+
+  void CheckWrite(int expected) {
+    const auto inventory_before = std::to_array(Audio_Seq_unusedInventory.misc);
+    const int before = Quantity(323);
+    const int other = Quantity(324);
+    const auto incoming = source.misc[0].count;
+    CHECK(Copy(true) == expected);
+    if (expected == 0) CheckUnchanged(inventory_before);
+    CHECK(Quantity(323) == before + (expected != 0 ? incoming : 0));
+    CHECK(Quantity(324) == other);
+    CHECK(source.misc[0].id == 323);
+    CHECK(source.misc[0].count == incoming);
+    for (const auto& item : Audio_Seq_unusedInventory.misc) {
+      CHECK(item.count >= 0);
+      CHECK(item.count <= 100);
+    }
   }
 };
 
@@ -1223,4 +1303,59 @@ TEST_CASE("Armor-wearing arts saturate both original DP application stages",
     }
   }
   fixture.CheckResources(600, 100, 780, 200);
+}
+
+TEST_CASE("Rejected loot transfers leave partial misc stacks unchanged",
+          "[combat][loot][inventory-capacity]") {
+  LootInventoryFixture fixture;
+  CHECK(fixture.Copy(false) == 0);
+  CHECK(static_cast<int>(Audio_Seq_unusedInventory.misc[0].count) == 99);
+  CHECK(fixture.Copy(true) == 0);
+  CHECK(static_cast<int>(Audio_Seq_unusedInventory.misc[0].count) == 99);
+  CHECK(fixture.source.misc[0].count == 2);
+  Audio_Seq_unusedInventory.misc[63] = {};
+  CHECK(fixture.Copy(true) == 64);
+  CHECK(Audio_Seq_unusedInventory.misc[0].count +
+            Audio_Seq_unusedInventory.misc[63].count ==
+        101);
+}
+
+TEST_CASE("Misc loot capacity queries and writes preserve stack limits",
+          "[combat][loot][inventory-capacity]") {
+  const bool free_slot = GENERATE(false, true);
+  const int first = GENERATE(1, 98, 99, 100);
+  const int second = GENERATE(-1, 1, 99, 100);
+  const int incoming = GENERATE(1, 2, 100);
+  LootInventoryFixture fixture;
+  auto& inventory = Audio_Seq_unusedInventory;
+  inventory.misc[0].count =
+      static_cast<decltype(inventory.misc[0].count)>(first);
+  if (second >= 0) {
+    inventory.misc[1].id = 323;
+    inventory.misc[1].count =
+        static_cast<decltype(inventory.misc[1].count)>(second);
+  }
+  if (free_slot) inventory.misc[63] = {};
+  fixture.source.misc[0].count =
+      static_cast<decltype(fixture.source.misc[0].count)>(incoming);
+  const int stack_space = 100 - first + (second >= 0 ? 100 - second : 0);
+  const int capacity = stack_space + (free_slot ? 100 : 0);
+  const int expected =
+      incoming <= stack_space ? 1 : (incoming <= capacity ? 64 : 0);
+  fixture.CheckQueryUnchanged(expected);
+  fixture.CheckWrite(expected);
+}
+
+TEST_CASE("Unmatched misc loot uses only available stock slots",
+          "[combat][loot][inventory-capacity]") {
+  const int occupied = GENERATE(0, 1, 63, 64);
+  LootInventoryFixture fixture;
+  Audio_Seq_unusedInventory = {};
+  for (int slot = 0; slot < occupied; ++slot) {
+    Audio_Seq_unusedInventory.misc[slot].id = 324;
+    Audio_Seq_unusedInventory.misc[slot].count = 100;
+  }
+  const int expected = occupied < 64 ? occupied + 1 : 0;
+  fixture.CheckQueryUnchanged(expected);
+  fixture.CheckWrite(expected);
 }

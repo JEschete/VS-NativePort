@@ -432,6 +432,17 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "        }",
          "5BF94.c:vs_battle_loadMenuPrg MAINMENU reload restores C48.c:_quitDelay and other initialized menu statics"),
     ],
+    "F02511": [
+        ("        int count = source->count;\n\n        Items_Inventory_RebuildDisplayIndices(6);",
+         "        int count = source->count;\n\n"
+         "        /* Probe before merging: rejected claims retain their whole loot row. */\n"
+         "        if ((write != 0) && (Items_Inventory_CopyItem(Items_ItemCategory_Misc,\n"
+         "                targetInventory, sourceItemIndex, sourceInventory) == 0)) {\n"
+         "            return 0;\n"
+         "        }\n\n"
+         "        Items_Inventory_RebuildDisplayIndices(6);",
+         "misc-item writes must preserve inventory when the whole stack cannot fit; reuse the non-writing capacity query before mutation"),
+    ],
     "F02535": [
         ("((u_long)poly << 8) >> 8", "LegacyGpu_Handle(poly)",
          "action-cost panel packets retain native handles"),

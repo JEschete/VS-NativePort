@@ -1056,6 +1056,67 @@ particle/trail visual parity (#76) remains open. GitHub records the separate
 F10 report (#82) as closed at2026-10-22T21:58:16Z, independently of this
 acceptance; these gates establish no new F10 root cause or lifecycle fix.
 
+## Loot-transfer capacity checkpoint (#127)
+
+While tracing #12, a maintained regression reproduced a rejected miscellaneous
+loot claim changing an existing99 stack to100, then duplicating that item on
+retry: after freeing one slot, the total was102 instead of101. The original
+64 slots and100-per-stack limit are unchanged. The original decomp has the same
+mutation order; this is a native transactional correction, not a claimed
+assembly-translation mismatch.
+
+F02511 (`vs_mainMenu_copyItem`, `MENU/MAINMENU.PRG/2D10.c:1334`) now probes the
+existing non-writing capacity path before merging a write. A rejected claim
+therefore leaves every stack untouched and its source loot row intact. The
+repair is in `tools/port/copy_fixups.py`, not a manual generated-C edit.
+Equipment copying and drop selection/RNG are unchanged.
+
+Acceptance uses source `98cdc051` plus the scoped generator repair/tests,
+preserving unrelated dirty documentation, project files and reference state:
+
+- Before repair: `[inventory-capacity]` failed2 of7 assertions, measuring both
+  the rejected mutation and the duplicated retry.
+- After repair: **3 cases /28,767 assertions** in both Debug and Release.
+  Coverage includes96 combinations of partial/full matching stacks, incoming
+  counts and free capacity; four unmatched-item occupancy cases; and the
+  original reject/free/retry regression. Queries and rejected writes preserve
+  every slot, successful copies conserve quantity, source stacks remain owned
+  by the caller, and successful one-based return indices are checked.
+- Debug and Release solution builds and full suites pass **474 cases /
+  1,125,294 assertions** each. Scoped quality/tidy has one existing finding,
+  zero new findings; no baseline or suppression changes.
+- `copy_to_native.py` regenerates only the intended inventory implementation.
+  All86 owned files are unchanged; a second generation preserves all751 output
+  hashes. All15 `test_encounter_fixups.py` regressions pass.
+
+Real controller replays use zone9/room0, seed1, the original Zombie definition2,
+`all-abilities`, HP/MP999, Ashley(4,9) and Zombie(4,10). Heavy Shot ends an actual
+nine-window chain, then Square/take-all delivers item323 x2 through the ordinary
+loot screen, increasing inventory10->12:
+
+| Configuration | Run | Defeat tick | Field-return tick |
+|---|---|---:|---:|
+| Debug | `1792714592030967-0` |1279|1613|
+| Release | `1792714659101918-0` |1273|1605|
+
+Both traces have one normal final record, `trace_failed:false`, no error-level
+engine entries and normally closed hosts. No HP, loot or event flags were
+written to manufacture defeat or collection. These runs verify successful
+live delivery; full-capacity rejection/retry is component coverage, not a
+claimed live full-inventory replay. Wider original-drop acceptance remains #12.
+
+Commands: the documented solution build in each configuration,
+`build\<configuration>\VS.Tests.exe "[inventory-capacity]"`, the full test
+executable, `python -m unittest discover -s tools\port -p test_encounter_fixups.py`,
+and `build\quality\live-restart-check.ps1 -Configuration <Debug|Release> -ChainDefeat`.
+Scoped quality selects `Native\Tests\src\CombatTestCases.cpp`,
+`tools\port\copy_fixups.py` and `tools\port\test_encounter_fixups.py` with `--tidy`.
+Build/test/generation/quality logs are `build\quality\loot127-*`; controller
+results are `live-chain-defeat-{Debug,Release}.json`. Host SHA-256 values:
+
+- Debug: `c0bf2b0f3ee1214f05f5a7f7fb275679cfcae940408d4d6d918093953684936b`.
+- Release: `9984fb32ff715e64bce1df2f1bd3d500e13054af6fc8b24bd68a22211e0cd7c1`.
+
 ## Learned-spell acceptance checkpoint (2026-10-22)
 
 This closes the bounded representative acceptance of

@@ -7,6 +7,17 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_misc_inventory_write_checks_capacity_before_mutation(self):
+        old, new, _ = copy_fixups.FIXES["F02511"][0]
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native" / "Game" / "src" / "Items" / "Inventory.c").read_text()
+        self.assertIn(new, source)
+        self.assertNotIn(old, source)
+        self.assertIn("write != 0", new)
+        self.assertIn("Items_Inventory_CopyItem(Items_ItemCategory_Misc,", new)
+        self.assertIn("targetInventory, sourceItemIndex, sourceInventory) == 0", new)
+        self.assertLess(source.index(new), source.index("int space_left ="))
+
     def test_particle_cone_preserves_original_zero_height_quotient(self):
         _, new, _ = copy_fixups.FIXES["F01515"][1]
         root = Path(__file__).resolve().parents[2]
