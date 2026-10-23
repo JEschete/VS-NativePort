@@ -862,11 +862,11 @@ void Effects_IntegrateParticleMotion(Effects_Particle* node)
         state->vz = (state->vz * damping + (state->fz << 12)) / node->motion.mass
                   + ((gravityZ * state->gravityScale) >> 12);
         state->z += state->vz;
-        damping = ((Effects_ParticleAttractionView*)node)->attraction;
+        damping = node->attraction;
         if (damping != 0) {
-            direction.vx = ((Effects_ParticleAttractionView*)node)->targetX - (state->x >> 12);
-            direction.vy = ((Effects_ParticleAttractionView*)node)->targetY - (state->y >> 12);
-            direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 12);
+            direction.vx = node->attractionTarget[0] - (state->x >> 12);
+            direction.vy = node->attractionTarget[1] - (state->y >> 12);
+            direction.vz = node->attractionTarget[2] - (state->z >> 12);
             if (direction.vx != 0 || direction.vy != 0 || direction.vz != 0) {
                 Core_Gte_VectorNormal(&direction, &direction);
                 direction.vx = (direction.vx * damping) >> 12;

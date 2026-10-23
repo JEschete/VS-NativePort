@@ -493,3 +493,79 @@ TEST_CASE("Cone emission preserves original zero-height quotient and RNG",
   CHECK(Core_Random_Rand() == expected.Next());
   Core_Random_Seed(1);
 }
+
+namespace {
+struct ParticleMotionFixture {
+  int saved_drag = Effects_particleDrag;
+  Effects_ParticleGravity saved_gravity = Effects_particleGravity;
+  Effects_Particle particle{};
+
+  ParticleMotionFixture() {
+    Effects_particleDrag = 0;
+    Effects_particleGravity = {};
+    particle.motion.mass = 4096;
+  }
+  ~ParticleMotionFixture() {
+    Effects_particleDrag = saved_drag;
+    Effects_particleGravity = saved_gravity;
+  }
+};
+}  // namespace
+
+TEST_CASE("Particle rendering flags cannot invent target attraction",
+          "[effects][particle-motion][native-attraction]") {
+  ParticleMotionFixture fixture;
+  auto& particle = fixture.particle;
+  particle.emitFlags = GENERATE(0, 1, 0x40, 0x20000, 0x40000, 0x80000);
+  std::array<u_char, 4> program{};
+  Effects_PackageTextureInfo texture{};
+  particle.textureAnimation.program = program.data();
+  particle.textureAnimation.textureInfo = &texture;
+  particle.motion.velocity.vx = 4096;
+  Effects_IntegrateParticleMotion(&particle);
+  CHECK(particle.motion.position.vx == 4096);
+  CHECK(particle.motion.position.vy == 0);
+  CHECK(particle.motion.position.vz == 0);
+  CHECK(particle.motion.force.vx == 0);
+  CHECK(particle.motion.force.vy == 0);
+  CHECK(particle.motion.force.vz == 0);
+  CHECK(particle.textureAnimation.program == program.data());
+  CHECK(particle.textureAnimation.textureInfo == &texture);
+}
+
+TEST_CASE("Particle attraction uses its native target and signed strength",
+          "[effects][particle-motion][native-attraction]") {
+  ParticleMotionFixture fixture;
+  const auto axis = GENERATE(0, 1, 2);
+  auto& particle = fixture.particle;
+  particle.attractionTarget[axis] = 32;
+  particle.attraction = GENERATE(-4096, 0, 4096);
+  Effects_IntegrateParticleMotion(&particle);
+  const std::array force{particle.motion.force.vx, particle.motion.force.vy,
+                         particle.motion.force.vz};
+  for (int component = 0; component < 3; ++component) {
+    CHECK(force[component] == (component == axis ? particle.attraction : 0));
+  }
+  CHECK(particle.motion.position.vx == 0);
+  CHECK(particle.motion.position.vy == 0);
+  CHECK(particle.motion.position.vz == 0);
+}
+
+TEST_CASE("Linked particles retain independent native attraction state",
+          "[effects][particle-motion][native-attraction]") {
+  ParticleMotionFixture fixture;
+  Effects_Particle second{};
+  second.motion.mass = 4096;
+  second.attraction = 4096;
+  second.attractionTarget[2] = 32;
+  fixture.particle.emitFlags = 0x20000;
+  fixture.particle.next = &second;
+  Effects_IntegrateParticleMotion(&fixture.particle);
+  CHECK(fixture.particle.motion.force.vx == 0);
+  CHECK(fixture.particle.motion.force.vy == 0);
+  CHECK(fixture.particle.motion.force.vz == 0);
+  CHECK(second.motion.force.vx == 0);
+  CHECK(second.motion.force.vy == 0);
+  CHECK(second.motion.force.vz == 4096);
+  CHECK(fixture.particle.next == &second);
+}

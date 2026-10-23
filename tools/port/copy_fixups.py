@@ -511,6 +511,15 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("arg0, 0x84C", "arg0, sizeof(Battle_ActionRequest)",
          "Clear the complete native action result including all supported targets"),
     ],
+    "F01554": [
+        ("((Effects_ParticleAttractionView*)node)->attraction",
+         "node->attraction",
+         "Read native attraction strength rather than emitter flags at the old PS1 offset"),
+        *[(f"((Effects_ParticleAttractionView*)node)->target{axis}",
+           f"node->attractionTarget[{index}]",
+           "Read the native particle target rather than texture-animation pointer bytes")
+          for index, axis in enumerate("XYZ")],
+    ],
     "F00111": [
         ("void Battle_CollectSourceAreaActionTargets(",
          '#include "Battle/TargetPages.h"\n\nvoid Battle_CollectSourceAreaActionTargets(',

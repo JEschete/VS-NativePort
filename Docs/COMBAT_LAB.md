@@ -1386,6 +1386,98 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Native particle attraction field repair (#138; supporting #76)
+
+Source: `d0002768` plus the scoped copier adaptation, generated F01554 and
+motion regressions. No emitter definition, random distribution, spread,
+velocity, mass, gravity, drag or original arithmetic/order is changed.
+
+The PS1 `Effects_ParticleAttractionView` overlaid a complete120-byte particle.
+The native particle is152 bytes after pointer widening. Compiled PDB evidence:
+
+| Field | Stale PS1 view | Native particle |
+| --- | --- | --- |
+| Target X/Y/Z | 98 / 100 / 102 | 124 / 126 / 128 |
+| Attraction strength | 112 | 140 |
+| Native emitter flags | not the attraction field | 112 |
+
+F01554 therefore used emitter flags as attraction strength and read target
+coordinates from texture-animation pointer bytes. Its relative scalar motion
+view still matches the pointer-free motion subobject; that is not the failing
+absolute whole-node contract. The generator now uses the typed native
+`attraction` and `attractionTarget[0..2]` fields. The historical view declaration
+remains source provenance, not a valid native overlay or a retired EC claim.
+
+Three new production-integrator regressions fail **15 / 109 assertions** before
+repair. They prove that render/attachment flags must not invent attraction,
+actual signed strength and per-axis native targets must affect force, and
+linked particles must retain independent attraction state. Fixed focused
+motion/emission/render coverage passes **355 assertions / 13 cases**; full
+Debug/Release suites pass **537 cases / 1799356 assertions** each.
+
+Original E094/Hellhound breath data provides a concrete live fixture: its12
+particle definitions have nonzero flags but zero attraction ranges. The
+original block traversal and source integration routine
+`BATTLE/BATTLE.PRG/5BF94.c:7830` establish that, for these existing particles,
+each force component should advance by its acceleration alone. The disc was
+also inspected read-only through VS-Workshop: E094's11 actual sprite programs
+are not a reconstruction of runtime emitter/world/camera behavior. That tool
+was used only for original source inspection; its overlay remained clean and
+the session was closed without changes.
+
+Actual-window/controller observer:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File build\quality\particle138-live.ps1 -Configuration Debug -Fixed
+```
+
+Repeat with Release; add `-DelayFrames 64` for the later flame burst. The
+ignored scenario uses the owner's original zone11/room0, seed1, Prologue
+Ashley8,12 and eight source-backed Hellhound3 definitions at5..12,13. No stat/
+HP/event edits, process writes, fake live particles or forced outcomes are used.
+Ordinary enemy AI starts breath147/E094. Actual F6/F7 pause and advance one
+logical frame at a time, while a read-only observer compares stable particle
+identities/ages and their original zero-attraction force increments.
+
+| Configuration / window | Run | Component comparisons | Spurious-force mismatches |
+| --- | --- | --- | --- |
+| Debug before repair, ticks459-467 | `1792760032010956-0` | 90 | 89 |
+| Release before repair, ticks459-467 | `1792760055612119-0` | 90 | 89 |
+| Debug fixed, ticks459-467 | `1792760103122030-0` | 90 | 0 |
+| Release fixed, ticks459-467 | `1792760126849209-0` | 90 | 0 |
+| Debug fixed, later flame burst | `1792760262016302-0` | 1272 | 0 |
+| Release fixed, later flame burst | `1792760287240181-0` | 1236 | 0 |
+
+One measured native node has flags135216 and actual attraction0: before
+repair it invents force64669/118710/-232 despite zero acceleration; the
+fixed corresponding node retains force0/0/0. These are computational producer/
+consumer comparisons, not guessed corrections from the appearance of a flame.
+The actual effects complete and return normally to the field. All six final
+paired/later sessions end normally with `trace_failed:false` and no engine
+error/critical record. Inspected later captures show the original flame
+program directed from the Hellhound toward Ashley; no replacement flash or
+arbitrary particle clamp is used.
+
+The native fixed host SHA-256 is Debug
+`3f48f0ba0c3d410dcc1065f2151e91d167dd3b2f23f402eb352db088b195b093`
+and Release
+`1598c04e8094e30e32fed4f2b9ba526ac37c3d95de2d628bd30130e36dfb0480`.
+Before-fix hosts match the #83 final hashes in the checkpoint below. Unrelated
+owner work remains dirty/excluded. Standard MSBuild test/Combat Lab project
+builds use `/p:VcpkgManifestInstall=false`; maintained
+`quality-native.cmd --files` for the particle tests and copier files with
+`--tidy` reports **0 findings / 0 new**. The copier suite passes **25 cases**;
+second generation retains **751 outputs / 93 owned source/header files**.
+
+Local evidence: `build\quality\particle138-*`, including both-window PNGs,
+particle snapshots, live audit and build/test/quality logs, plus each native
+run directory. Do not commit/upload disc-derived assets, pointer dumps or
+captures. This resolves the concrete attraction alias, not all of #76:
+aligned original-game visual reference, every emitter/attachment space and
+the separate five-/nine-sample trail paths still require their own evidence.
+Publication and exact CI are recorded on #138.
+
 ## Accelerated native audio timing (#83)
 
 Fresh before-fix Debug run `1792758315183981-0` reproduces the reported

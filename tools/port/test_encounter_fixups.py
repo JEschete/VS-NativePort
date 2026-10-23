@@ -39,6 +39,23 @@ class EncounterFixupTests(unittest.TestCase):
         spawning = (root / "Native/Game/src/Actors/ActorLoading.c").read_text()
         self.assertNotIn("spawn137", spawning)
 
+    def test_particle_attraction_uses_native_fields_after_pointer_widening(self):
+        source = """damping = ((Effects_ParticleAttractionView*)node)->attraction;
+direction.vx = ((Effects_ParticleAttractionView*)node)->targetX - (state->x >> 12);
+direction.vy = ((Effects_ParticleAttractionView*)node)->targetY - (state->y >> 12);
+direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 12);
+"""
+        for old, new, _ in copy_fixups.FIXES["F01554"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertIn("damping = node->attraction;", source)
+        for index, axis in enumerate("xyz"):
+            self.assertIn(
+                f"direction.v{axis} = node->attractionTarget[{index}] - (state->{axis} >> 12);",
+                source,
+            )
+        self.assertNotIn("Effects_ParticleAttractionView", source)
+
     def test_door_queries_keep_owned_native_pointer_storage(self):
         root = Path(__file__).resolve().parents[2]
         with (root / "tools/port/owned.csv").open(newline="") as file:
