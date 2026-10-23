@@ -1117,6 +1117,116 @@ results are `live-chain-defeat-{Debug,Release}.json`. Host SHA-256 values:
 - Debug: `c0bf2b0f3ee1214f05f5a7f7fb275679cfcae940408d4d6d918093953684936b`.
 - Release: `9984fb32ff715e64bce1df2f1bd3d500e13054af6fc8b24bd68a22211e0cd7c1`.
 
+## Enemy-item drop acceptance checkpoint (#12)
+
+Enemy miscellaneous loot comes from each original MPD spawn, not a universal
+enemy-ID table. `Actors_SpawnRoomEnemy` copies the two guaranteed ID/count pairs
+and the third ID/rate into actor stats. Within each40-byte spawn, the IDs are
+at offsets0x1A/0x1C/0x1E, the guaranteed counts at0x20/0x21, and the third
+**rate**, not quantity, at0x22. A successful third entry contributes one item.
+
+Read-only Workshop inspection of the supplied SLUS-01040 disc and the native
+catalog's original spawn provenance agree on these representative entries:
+
+| Definition | Original source | Guaranteed entries | Optional entry/rate |
+|---|---|---|---|
+| Zombie, zone9 definition2 | `MAP011.MPD`, spawn1 |323 x2|none|
+| Bat, zone9 definition5 | `MAP009.MPD`, spawn0 |none|none|
+| Dullahan, zone11 definition0 | `MAP025.MPD`, spawn0 |349 x1;350 x1|391 /255|
+| Minotaur, zone12 definition0 | `MAP026.MPD`, spawn0 |466 x1;425 x1|432 /255|
+
+The Workshop session closed with zero changes. No asset bytes, disc files,
+captures or dumps are published. Lab placement retains the original items,
+rates, stats, equipment and AI; only Ashley's documented test profile/stat
+overrides and encounter placement are configured.
+
+### Original contracts and deterministic coverage
+
+Eight new `[drop-rules]` cases cover **106,926 assertions**:
+
+- Both guaranteed entries preserve their individual counts and consume no RNG.
+- For every possible roll0..254, test rate0, the equal threshold, the next
+  threshold and255. Success is strictly `roll < rate`; rate0 never succeeds,
+  rate255 always succeeds, and an absent ID consumes no draw. Failed candidates
+  retain an ID in scratch but have zero count/flags and never become claimable.
+- Queue order consumes weapon, shield and accessory rolls even for blank/rate0
+  loadouts, then one roll per nonempty limb armor, then the optional item roll.
+  Compare against the existing native C++ random sequence, including the
+  following raw draw; test zero/one/three/six armored limbs and zero/one/two
+  guaranteed entries.
+- Staging filters missing IDs, zero counts and both difficulty masks, then
+  transfers accepted rows through the shared inventory producer. No-drop,
+  single and multiple miscellaneous entries are covered.
+- `Battle_ResolveEnemyDefeat` rejects spawn0x80 and repeated defeat before RNG,
+  including actors retained for a story event. A direct duplicate queue call
+  has different original behavior: it rolls first, rejects the duplicate node,
+  and releases that allocation. Distinct actors retain separate nodes.
+- Prologue progression0..2 suppresses presentation without discarding queued
+  loot. Clearing the list restores all allocated heap units and is repeatable.
+
+The copied C uses the existing `/J` unsigned-char configuration; test-side
+high-bit rate assignments preserve those serialized byte patterns. Their
+passing0..255 behavior is not evidence of a signed-rate defect.
+
+Together with #127's capacity/retry checks, the focused selection
+`"[drop-rules],[inventory-capacity]"` passes **11 cases /135,693 assertions**
+in Debug and Release. Full suites pass **482 cases /1,232,220 assertions** each.
+Scoped quality/tidy has one existing finding and zero new findings, without
+baseline or suppression changes. Equipment success/composite ownership and
+capacity acceptance remain #13; these tests cover their RNG consumption only.
+
+### Fresh controller acceptance
+
+Production code and host hashes are unchanged from the preceding #127
+checkpoint (`a3a8cf1e`); this checkpoint adds tests, ledger notes and evidence,
+with unrelated dirty work preserved. Zombie's real weapon/Heavy Shot defeat
+and Square/take-all runs are recorded above.
+
+The following six sessions add twelve real Fireball defeats, one F10/re-entry
+per session, original drop collection and field return. Ashley uses
+`all-spells`, HP/MP/INT999 and AGI200; enemy data is unmodified. Dullahan uses
+Ashley(8,13)/enemy(8,14) in zone11/room0; Minotaur uses(9,10)/(9,12) in
+zone12/room0; Bat uses(4,9)/(4,10) in zone9/room0. All use seed1 and isolated
+room events. A flying target must descend into range before opening the real
+selector; the driver does not move it or bypass eligibility.
+
+| Enemy | Debug run; field-return ticks | Release run; field-return ticks |
+|---|---|---|
+| Minotaur | `1792716281788772-0`;1343/2899 | `1792716433466051-0`;1343/2895 |
+| Dullahan | `1792716338442156-0`;1205/2618 | `1792716489889274-0`;1203/2616 |
+| Bat | `1792716596414869-0`;1063/2337 | `1792716700327985-0`;1063/2338 |
+
+Each boss delivers exactly the three entries in the source table, once per
+encounter. Minotaur's item466 changes its original acquisition flag904 from0
+to1 in both fresh instances. Bat delivers no miscellaneous items and leaves
+that inventory unchanged. Every returned frame has an empty pending-loot list.
+All six traces have exactly one normal final record, no trace failure and no
+error-level engine entries; all hosts close normally.
+
+Commands: the documented test-project builds and full test executables in
+both configurations; the focused selection above; quality/tidy selecting
+`Native\Tests\src\CombatTestCases.cpp`; and the ignored live driver:
+
+```powershell
+build\quality\live-restart-check.ps1 -Configuration Debug `
+  -DropScenario build\quality\drop12-minotaur.json `
+  -DropExpected '466:1,425:1,432:1' -DropRuns 2
+```
+
+Repeat for Release. Dullahan uses `drop12-dullahan.json` and
+`'349:1,350:1,391:1'`; Bat uses `drop12-bat.json` without `-DropExpected`.
+Evidence is `build\quality\drop12-*`, `live-drop12-*-{Debug,Release}.json` and
+the corresponding native run directories. `drop12-live-audit.json` records
+the six audited sessions. Initial attempts exposed harness assumptions
+(requiring living enemies after victory, integer JSON keys, opening the
+selector before Bat descended), not demonstrated native defects.
+
+This completes #12's item-selection/delivery criteria with original data,
+deterministic rules and representative ordinary/special/boss encounters. It
+does not certify every enemy/room permutation, original boss-story scripts,
+door traversal with the acquired key, equipment drops #13 or C++/compatibility
+retirement. Isolated Lab boss-retention policy is documented separately above.
+
 ## Learned-spell acceptance checkpoint (2026-10-22)
 
 This closes the bounded representative acceptance of

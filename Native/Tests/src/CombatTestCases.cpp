@@ -8,6 +8,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
+#include "Core/Random.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -26,19 +27,27 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/HitChance.h"
 #include "Battle/StatusEffects.h"
+#include "Core/Memory.h"
+#include "Core/Memory/Heap.h"
+#include "Core/Random.h"
 #include "Effects/EffectResources.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/Ring.h"
+#include "Field/Interactions.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Inventory.h"
+#include "Items/Loot.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Inventory/ItemList.h"
+#include "Menu/Loot/LootInventory.h"
+#include "Menu/Loot/LootScreen.h"
 #include "State/Flags.h"
 #include "State/Progress.h"
 #include "State/Settings.h"
+#include "State/StateFlags.h"
 #include "State/Timers.h"
 }
 
@@ -468,6 +477,173 @@ struct LootInventoryFixture {
       CHECK(item.count >= 0);
       CHECK(item.count <= 100);
     }
+  }
+};
+
+struct LootRandomFixture {
+  decltype(std::to_array(Core_randomShuffleTable)) saved_table =
+      std::to_array(Core_randomShuffleTable);
+  int saved_index = Core_randomShuffleIndex;
+
+  LootRandomFixture() { Core_Random_InitializeShuffleTable(); }
+
+  ~LootRandomFixture() {
+    std::copy(saved_table.begin(), saved_table.end(), Core_randomShuffleTable);
+    Core_randomShuffleIndex = saved_index;
+    Core_Random_Seed(1);
+  }
+
+  static void CheckSequence(VS::Core::Random& expected) {
+    CHECK(Core_Random_NextBounded(255) == expected.Next(255));
+    CHECK(Core_Random_Rand() == expected.Raw());
+  }
+
+  static void ForceFirstRoll(int roll) {
+    std::fill_n(Core_randomShuffleTable, 97, 0);
+    Core_randomShuffleIndex = 96;
+    Core_randomShuffleTable[0] = 32767 - (roll * 32768 + 254) / 255;
+    Core_Random_Seed(1234);
+  }
+
+  static void CheckOneForcedDraw() {
+    VS::Core::Rand15 expected(1234);
+    CHECK(Core_randomShuffleIndex == 0);
+    CHECK(Core_randomShuffleTable[0] == expected.Next());
+    CHECK(Core_Random_Rand() == expected.Next());
+    for (int index = 1; index < 97; ++index) {
+      CHECK(Core_randomShuffleTable[index] == 0);
+    }
+  }
+};
+
+void CheckLootItem(const Items_LootedItem& item, int id, int count, int flags) {
+  CHECK(item.itemId == id);
+  CHECK(static_cast<int>(item.count) == count);
+  CHECK(static_cast<int>(item.difficultyFlags) == flags);
+}
+
+struct EnemyLootFixture : LootInventoryFixture {
+  LootRandomFixture random;
+  Core_HeapBlockHeader saved_heap = Core_legacyHeapList;
+  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
+  Items_LootListNode* saved_head = Items_lootListHead;
+  Battle_Actor* saved_actor = Battle_actors[1];
+  Items_Inventory* saved_staging = Menu_Loot_inventory;
+  Menu_Loot_LootListItem* saved_rows = Menu_Loot_lootList;
+  u_char saved_count = Menu_Loot_lootListCount;
+  u_char saved_offset = Menu_Loot_lootListOffset;
+  char saved_selection = Menu_Loot_selectedLoot;
+  char saved_difficulty = Audio_Seq_unusedStateFlags.difficulty;
+  std::array<Core_HeapBlockHeader, 256> heap{};
+  std::array<Menu_Loot_LootListItem, 64> rows{};
+  Battle_Actor enemy{};
+  Battle_ActorStats stats{};
+  unsigned initial_free_units = 0;
+
+  EnemyLootFixture() {
+    Core_Memory_InitializeHeap(heap.data(), sizeof(heap));
+    initial_free_units = Core_legacyHeapList.next->blockSize;
+    Items_lootListHead = nullptr;
+    enemy.id = 1;
+    enemy.roomSpawnIndex = 1;
+    enemy.stats = &stats;
+    Battle_actors[1] = &enemy;
+    Audio_Seq_unusedInventory = {};
+    source = {};
+    Menu_Loot_inventory = &source;
+    Menu_Loot_lootList = rows.data();
+    Menu_Loot_lootListCount = 0;
+    Menu_Loot_lootListOffset = 0;
+    Menu_Loot_selectedLoot = 0;
+    Audio_Seq_unusedStateFlags.difficulty = 0;
+  }
+
+  ~EnemyLootFixture() {
+    Items_ClearRoomLootList();
+    Core_legacyHeapList = saved_heap;
+    Core_legacySecondaryHeapList = saved_secondary;
+    Items_lootListHead = saved_head;
+    Battle_actors[1] = saved_actor;
+    Menu_Loot_inventory = saved_staging;
+    Menu_Loot_lootList = saved_rows;
+    Menu_Loot_lootListCount = saved_count;
+    Menu_Loot_lootListOffset = saved_offset;
+    Menu_Loot_selectedLoot = saved_selection;
+    Audio_Seq_unusedStateFlags.difficulty = saved_difficulty;
+  }
+
+  void SetGuaranteed(int count) {
+    if (count > 0) {
+      stats.dropItem.id = 323;
+      stats.dropItem.count = 2;
+    }
+    if (count > 1) {
+      stats.secondDropItem.id = 324;
+      stats.secondDropItem.count = 3;
+    }
+  }
+
+  void CheckQueued(int guaranteed, bool candidate, bool success) {
+    REQUIRE(Items_lootListHead != nullptr);
+    CHECK(Items_lootListHead->droppedMask == enemy.id);
+    CHECK(Items_lootListHead->next == nullptr);
+    const auto& loot = Items_lootListHead->loot;
+    CheckLootItem(loot.misc[0], guaranteed > 0 ? 323 : 0,
+                  guaranteed > 0 ? 2 : 0, guaranteed > 0 ? 3 : 0);
+    CheckLootItem(loot.misc[1], guaranteed > 1 ? 324 : 0,
+                  guaranteed > 1 ? 3 : 0, guaranteed > 1 ? 3 : 0);
+    CheckLootItem(loot.misc[2], candidate ? 325 : 0, success ? 1 : 0,
+                  success ? 3 : 0);
+  }
+
+  void DeliverRows(int count) {
+    REQUIRE(Menu_Loot_lootListCount == count);
+    for (int index = 0; index < count; ++index) {
+      const auto& row = rows[index];
+      CHECK(row.itemCategory == Items_ItemCategory_Misc);
+      CHECK(row.state == 1);
+      CHECK(row.opaque2 == 0);
+      const int flags = static_cast<int>(row.itemCategory) |
+                        static_cast<int>(Menu_Framework_CopyItemFlag_Write);
+      CHECK(Items_Inventory_CopyItem(flags, &Audio_Seq_unusedInventory,
+                                     row.itemIndex, &source) != 0);
+    }
+  }
+
+  void CheckCleared() {
+    Items_ClearRoomLootList();
+    CHECK(Items_lootListHead == nullptr);
+    CHECK(Core_legacyHeapList.next == Core_legacyHeapList.prev);
+    CHECK(Core_legacyHeapList.next->blockSize == initial_free_units);
+  }
+};
+
+struct LootPresentationFixture : EnemyLootFixture {
+  char saved_intro = State_ScriptFlag(0xAB);
+  u_int saved_control = Field_controlMode;
+  u_int saved_flow = Battle_actionFlowMode;
+  Actors_ActorRecord* saved_player = Actors_actorRecords[0];
+  Items_LootListNode* saved_menu_list = Menu_Framework_lootLists;
+  Items_BattleLoot* saved_menu_entry = Menu_Framework_lootEntry;
+  Actors_ActorRecord locked_player_pose{};
+
+  LootPresentationFixture() {
+    // A locked pose keeps this presentation-gate test independent of model I/O.
+    locked_player_pose.animationId = 0x63;
+    Actors_actorRecords[0] = &locked_player_pose;
+    Menu_Framework_lootLists = nullptr;
+    Menu_Framework_lootEntry = nullptr;
+    Field_controlMode = 1;
+    Battle_actionFlowMode = 11;
+  }
+
+  ~LootPresentationFixture() {
+    State_SetScriptFlag(0xAB, saved_intro);
+    Field_controlMode = saved_control;
+    Battle_actionFlowMode = saved_flow;
+    Actors_actorRecords[0] = saved_player;
+    Menu_Framework_lootLists = saved_menu_list;
+    Menu_Framework_lootEntry = saved_menu_entry;
   }
 };
 
@@ -1358,4 +1534,184 @@ TEST_CASE("Unmatched misc loot uses only available stock slots",
   const int expected = occupied < 64 ? occupied + 1 : 0;
   fixture.CheckQueryUnchanged(expected);
   fixture.CheckWrite(expected);
+}
+
+TEST_CASE("Guaranteed enemy items retain both entries without random draws",
+          "[combat][loot][drop-rules]") {
+  const int present = GENERATE(0, 1, 2, 3);
+  LootRandomFixture fixture;
+  VS::Core::Random expected;
+  std::array<Items_MiscItemStack, 2> source{};
+  source[0].id = (present & 1) != 0 ? 323 : 0;
+  source[0].count = 2;
+  source[1].id = (present & 2) != 0 ? 324 : 0;
+  source[1].count = 3;
+  Items_BattleLoot loot{};
+  loot.misc[2].itemId = 325;
+  loot.misc[2].count = 1;
+  loot.misc[2].difficultyFlags = 2;
+  CHECK(Items_CopyGuaranteedEnemyItemDrops(&loot, source.data()) ==
+        (present != 0));
+  CheckLootItem(loot.misc[0], source[0].id, source[0].id != 0 ? 2 : 0,
+                source[0].id != 0 ? 3 : 0);
+  CheckLootItem(loot.misc[1], source[1].id, source[1].id != 0 ? 3 : 0,
+                source[1].id != 0 ? 3 : 0);
+  CheckLootItem(loot.misc[2], 325, 1, 2);
+  fixture.CheckSequence(expected);
+}
+
+TEST_CASE("Random enemy items use the strict original 255-value threshold",
+          "[combat][loot][drop-rules]") {
+  const int roll = GENERATE(Catch::Generators::range(0, 255));
+  const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
+  LootRandomFixture fixture;
+  fixture.ForceFirstRoll(roll);
+  Items_MiscItemDrop source{};
+  source.id = 325;
+  source.dropRate = static_cast<decltype(source.dropRate)>(rate);
+  Items_BattleLoot loot{};
+  const bool success = roll < rate;
+  CHECK(Items_RollEnemyItemDrop(&loot, &source) == success);
+  CheckLootItem(loot.misc[2], 325, success ? 1 : 0, success ? 3 : 0);
+  fixture.CheckOneForcedDraw();
+}
+
+TEST_CASE("Absent random enemy items consume no draw",
+          "[combat][loot][drop-rules]") {
+  LootRandomFixture fixture;
+  VS::Core::Random expected;
+  Items_MiscItemDrop source{};
+  source.dropRate = static_cast<decltype(source.dropRate)>(255);
+  Items_BattleLoot loot{};
+  CHECK(Items_RollEnemyItemDrop(&loot, &source) == 0);
+  CheckLootItem(loot.misc[2], 0, 0, 0);
+  fixture.CheckSequence(expected);
+}
+
+TEST_CASE("Enemy loot rolls equipment before its optional item candidate",
+          "[combat][loot][drop-rules]") {
+  const int guaranteed = GENERATE(0, 1, 2);
+  const bool candidate = GENERATE(false, true);
+  const int armor_count = GENERATE(0, 1, 3, 6);
+  const int above_roll = GENERATE(0, 1);
+  EnemyLootFixture fixture;
+  fixture.SetGuaranteed(guaranteed);
+  for (int index = 0; index < armor_count; ++index) {
+    fixture.stats.limbs[index].armor.armor.id = 1;
+  }
+  VS::Core::Random expected;
+  for (int index = 0; index < 3 + armor_count; ++index) expected.Next(255);
+  if (candidate) {
+    fixture.stats.randomDropItem.id = 325;
+    fixture.stats.randomDropItem.dropRate =
+        static_cast<decltype(fixture.stats.randomDropItem.dropRate)>(
+            expected.Next(255) + above_roll);
+  }
+  const bool success = candidate && above_roll != 0;
+  Items_QueueEnemyLoot(&fixture.enemy);
+  CHECK((Items_lootListHead != nullptr) == (guaranteed != 0 || success));
+  if (Items_lootListHead != nullptr) {
+    fixture.CheckQueued(guaranteed, candidate, success);
+    Menu_Loot_BuildStagedInventory(Items_lootListHead);
+    fixture.DeliverRows(guaranteed + (success ? 1 : 0));
+  }
+  CHECK(LootInventoryFixture::Quantity(323) == (guaranteed > 0 ? 2 : 0));
+  CHECK(LootInventoryFixture::Quantity(324) == (guaranteed > 1 ? 3 : 0));
+  CHECK(LootInventoryFixture::Quantity(325) == (success ? 1 : 0));
+  fixture.CheckCleared();
+  fixture.CheckCleared();
+  fixture.random.CheckSequence(expected);
+}
+
+TEST_CASE("Defeat eligibility prevents repeat item rewards and random draws",
+          "[combat][loot][drop-rules]") {
+  const int guard = GENERATE(0, 1, 2);
+  const int guaranteed = GENERATE(0, 1);
+  const bool retained = GENERATE(false, true);
+  EnemyLootFixture fixture;
+  fixture.SetGuaranteed(guaranteed);
+  fixture.enemy.retainAfterDefeat = retained ? 1 : 0;
+  fixture.enemy.roomSpawnIndex = guard == 1 ? 0x80 : 1;
+  fixture.enemy.defeated = guard == 2 ? 1 : 0;
+  VS::Core::Random expected;
+  if (guard == 0) {
+    for (int index = 0; index < 3; ++index) expected.Next(255);
+  }
+  Battle_ResolveEnemyDefeat(0, 1, 0);
+  auto* const first = Items_lootListHead;
+  Battle_ResolveEnemyDefeat(0, 1, 0);
+  CHECK(Items_lootListHead == first);
+  CHECK((first != nullptr) == (guard == 0 && guaranteed != 0));
+  CHECK(fixture.enemy.defeated == (guard != 1));
+  fixture.random.CheckSequence(expected);
+  fixture.CheckCleared();
+}
+
+TEST_CASE("Direct duplicate loot queues release rejected nodes after rolling",
+          "[combat][loot][drop-rules]") {
+  EnemyLootFixture fixture;
+  fixture.SetGuaranteed(1);
+  VS::Core::Random expected;
+  Items_QueueEnemyLoot(&fixture.enemy);
+  REQUIRE(Items_lootListHead != nullptr);
+  auto* const first = Items_lootListHead;
+  const auto free_units = Core_legacyHeapList.next->blockSize;
+  Items_QueueEnemyLoot(&fixture.enemy);
+  CHECK(Items_lootListHead == first);
+  CHECK(first->next == nullptr);
+  CHECK(Core_legacyHeapList.next->blockSize == free_units);
+  auto second_enemy = fixture.enemy;
+  second_enemy.id = 2;
+  Items_QueueEnemyLoot(&second_enemy);
+  REQUIRE(Items_lootListHead != first);
+  CHECK(Items_lootListHead->droppedMask == 2);
+  CHECK(Items_lootListHead->next == first);
+  for (int index = 0; index < 9; ++index) expected.Next(255);
+  fixture.random.CheckSequence(expected);
+  fixture.CheckCleared();
+}
+
+TEST_CASE("Loot staging filters difficulty and incomplete misc candidates",
+          "[combat][loot][drop-rules]") {
+  const int difficulty = GENERATE(0, 1);
+  const int flags = GENERATE(0, 1, 2, 3);
+  const bool has_id = GENERATE(false, true);
+  const bool has_count = GENERATE(false, true);
+  EnemyLootFixture fixture;
+  Audio_Seq_unusedStateFlags.difficulty = static_cast<char>(difficulty);
+  Items_BattleLoot loot{};
+  loot.misc[0].itemId = has_id ? 323 : 0;
+  loot.misc[0].count = has_count ? 2 : 0;
+  loot.misc[0].difficultyFlags = static_cast<char>(flags);
+  loot.misc[1].itemId = 324;
+  loot.misc[1].count = 3;
+  loot.misc[1].difficultyFlags = 3;
+  loot.misc[2].itemId = 325;
+  const bool eligible = has_id && has_count && (flags & (difficulty + 1)) != 0;
+  Menu_Loot_StageDropRecord(&loot);
+  fixture.DeliverRows(eligible ? 2 : 1);
+  CHECK(LootInventoryFixture::Quantity(323) == (eligible ? 2 : 0));
+  CHECK(LootInventoryFixture::Quantity(324) == 3);
+  CHECK(LootInventoryFixture::Quantity(325) == 0);
+  VS::Core::Random expected;
+  fixture.random.CheckSequence(expected);
+}
+
+TEST_CASE("Prologue progression suppresses presentation without losing loot",
+          "[combat][loot][drop-rules]") {
+  const int intro = GENERATE(0, 1, 2);
+  const int guaranteed = GENERATE(0, 1);
+  LootPresentationFixture fixture;
+  fixture.SetGuaranteed(guaranteed);
+  State_SetScriptFlag(0xAB, static_cast<char>(intro));
+  Items_QueueEnemyLoot(&fixture.enemy);
+  auto* const queued = Items_lootListHead;
+  Items_OpenPendingEnemyLoot();
+  CHECK(Field_controlMode == 12);
+  CHECK(Battle_actionFlowMode == 0);
+  CHECK(Menu_Framework_lootLists == nullptr);
+  CHECK(Menu_Framework_lootEntry == nullptr);
+  CHECK(Items_lootListHead == queued);
+  if (queued != nullptr) fixture.CheckQueued(1, false, false);
+  fixture.CheckCleared();
 }
