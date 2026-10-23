@@ -1385,6 +1385,112 @@ above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
 
+## Live original blade and shield combination acceptance (#15)
+
+Native source: published `073d58c5680772beb7910a225d5439bde8305135`, exact Source
+Quality39940975312 green. These runs use the same Debug/Release host hashes
+recorded in the #136/#137 checkpoint below; unrelated owner edits remain
+uncommitted. No native code, original data, inventory limits, event flags or
+process memory are changed to obtain these results.
+
+The ignored actual-controller observer is
+`build\quality\equipment14-check.ps1`. Blade commands:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File build\quality\equipment14-check.ps1 `
+  -Configuration Debug -Mode workshop-gate -Zone 32 `
+  -WorkshopAction city -Seed 42 -CombineCityLoot
+```
+
+Release uses `-Configuration Release -Seed 43`. Both start with the original
+Sarjik/Bejart definitions plus six original Crimson Blades on supported MAP148
+floor, Ashley8,16/all-spells/HP-MP-STR-INT-AGI999. Ordinary spell controls defeat
+the enemies and normal loot delivery supplies the two guaranteed original
+weapons. Normal movement and Cross open the original8,13 door to workshop43.
+The complete3840-byte inventory is unchanged by that transition.
+
+| Gate | Debug | Release |
+| --- | --- | --- |
+| Blade run | `1792752847953340-0` | `1792752847807210-0` |
+| Actual blade confirmation | tick14721 | tick14205 |
+| Repeated menu return / field | tick15554 | tick15042 |
+| Shield run | `1792753985429352-0` | `1792753985229923-0` |
+| Actual shield confirmation | tick7700 | tick7678 |
+| Repeated menu return / field | tick8542 | tick8506 |
+
+For blades, actual native selection combines the original iron Sabre15 and
+bronze Rapier51 into bronze Guisarme64, matching the independently inspected
+ordered SYD recipe. Two complete preview/confirmation-cancel/leave/re-enter
+cycles preserve all inventory bytes. Actual confirmation then clears both
+source blades, disassembles their two unequipped owning weapons, releases their
+unchanged grips, and stores the complete preview in the first blade slot with
+the correct loose ownership/index. Independent durability-average checks and
+byte-exact expected inventory mutation pass. The equipped weapon and unrelated
+properties/items remain unchanged. These bounded source weapons have no gems;
+gem ownership has separate operation coverage below.
+
+Shield acquisition uses eight original Crimson Blade4 definitions, seed47 in
+both configurations. The original disc scan finds no guaranteed shield template;
+their unmodified shield rate is26/255. Actual rank controls select ExplosionIV,
+the original elevation/horizontal selectors retain the real area-filtered
+targets, and ordinary Fireball finishes the out-of-range survivor. Ashley's
+normal damage/cost and every original drop/result remain active. Both accepted
+runs obtain two genuine loose bronze Bucklers127 through the loot menu, then
+carry them through the same original workshop door. Nothing is injected.
+
+Shield commands replace `-CombineCityLoot` with `-ShieldCityLoot` and use
+`-Seed 47`. The original127/material3 pair previews127/material3. Two complete
+cancel/re-entry cycles preserve all3840 bytes. Confirmation consumes both
+source records, preserves the first index, and stores the full preview and
+independently checked averaged DP. The exact inventory expectation, unchanged
+unrelated equipment and two subsequent menu/workshop-to-field returns pass.
+
+All four accepted runs end with `trace_failed:false`, no error/critical engine
+records and no trace failures. Paths:
+`build\quality\workshop15-{Debug,Release}-blade-accepted-*`,
+`workshop15-{Debug,Release}-shield-accepted-run.txt`,
+`workshop15-{Debug,Release}-city-seed47-render-shields-*`, and the corresponding
+configuration's `combat-lab\runs` directories. Captures remain local. Shield
+preview/return captures are inspected at physical client resolution; the
+earlier blade captures had an observer DPI crop, not a claimed native UI fault.
+No result is inferred from screenshots alone.
+
+This completes the previously missing representative live combination
+transactions. The other operation/location gates were also refreshed on this
+same native revision, rather than relying on earlier checkpoints:
+
+| Fresh gate | Debug run | Release run |
+| --- | --- | --- |
+| Two complete disassemble/assemble/name/re-equip cycles | `1792754279623919-0` | `1792754279455889-0` |
+| Original stock armor cancel/combination | `1792754507618342-0` | `1792754506677457-0` |
+| Real Grissom gem loot and two detach/rollback/reattach cycles | `1792754949053119-0` | `1792754588240947-0` |
+| Real melee wear / original door / cancel / repair / field return | `1792755080588332-0` | `1792754721224865-0` |
+
+Use the same observer command with `-WorkshopAction roundtrip`/`armor` in
+zone42, `gems` in zone40, and `wear` in zone13, in each configuration.
+Actual worn DP is12592/12600 in Debug and12598/12600 in Release; cancellation
+preserves the worn inventory, confirmation restores12600, and the equipped
+runtime DP refresh is checked. The different real hit/wear outcomes are not
+normalized. The first concurrent Debug gem attempt timed out in shortcut
+readiness and is discarded; the accepted isolated replay above passes without
+changing data, state, tests or expected results.
+
+Fresh `-Mode workshop-gate` / `-WorkshopAction none` runs in zones12 and42-47
+verify outside-workshop rejection plus all six original workshop identities.
+Their exact run IDs and the operation IDs above are collected in
+`build\quality\workshop15-final-operation-audit.json`: all **26** accepted
+sessions end normally, report no trace failure, and contain no error/critical
+engine record. Console logs use `workshop15-final-{Debug,Release}-*`;
+wear observer data retains its earlier `door135-*-zone13-gate-wear-held-*`
+prefix. No evidence files or disc-derived captures are committed.
+
+The earlier checkpoints below retain their independent source/limits. Full current
+Debug/Release suites pass530 cases/1790939 assertions each; no C++ promotion,
+compatibility retirement, exhaustive recipe coverage or broader #16/#76/#78/
+#80/#81 acceptance is inferred from these operations. Publication and final
+issue closure remain gated on exact-revision CI.
+
 ## Extended native targeting and planning storage (#136; #137)
 
 Source: `813acea0` plus the scoped targeting/planning changes; unrelated owner
