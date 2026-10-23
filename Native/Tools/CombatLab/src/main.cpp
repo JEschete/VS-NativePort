@@ -593,7 +593,9 @@ int Run(int argc, char** argv) {
     if (const auto result = gpu.Init(app.Window(), true); !result) {
       throw std::runtime_error(result.error());
     }
-    Audio::AudioDevice audio;
+    Audio::AudioDevice audio(options.speed == 1);
+    VS_LOG_INFO("audio", "Combat Lab native mix timing: {}",
+                audio.IsRealtime() ? "device-demand" : "sequencer-driven");
     if (const auto result = audio.Open(); !result) {
       VS_LOG_WARN("audio", "{}", result.error());
     }

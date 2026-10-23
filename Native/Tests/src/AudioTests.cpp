@@ -137,7 +137,7 @@ struct AudioDeviceFixture {
   std::unique_ptr<SDL_AudioStream, decltype(&Audio::AudioDevice::CloseSource)>
       source{nullptr, Audio::AudioDevice::CloseSource};
 
-  AudioDeviceFixture() {
+  explicit AudioDeviceFixture(bool realtime = true) : device(realtime) {
     REQUIRE(subsystem.ready);
     REQUIRE(device.Open());
     Pause();
@@ -1840,4 +1840,34 @@ TEST_CASE("Missing SFZ fails instead of replaying the previous instrument",
   StartVoice(engine, 0, fixture.Controls());
   RenderTick(engine, frames);
   CHECK(Energy(frames, 0) > 0.01);
+}
+
+TEST_CASE("Accelerated native audio drains every tick and bounds speaker PCM",
+          "[audio][device][accelerated]") {
+  bool stereo = false;
+  SECTION("mono source") {}
+  SECTION("stereo source") { stereo = true; }
+  AudioDeviceFixture output(false);
+  StreamFixture fixture(stereo, true);
+  CHECK_FALSE(output.device.IsRealtime());
+  fixture.BindAndPlay();
+  constexpr int kTicks = 4096;
+  VS::i32 maximum_queued = 0;
+  for (int tick = 0; tick < kTicks; ++tick) {
+    StreamFixture::Tick();
+    const auto queued = output.device.QueuedBytes();
+    REQUIRE(queued >= 0);
+    maximum_queued = std::max(maximum_queued, queued);
+  }
+  constexpr usize kMaximumFrames =
+      Audio::AudioDevice::SampleRate / 4 + Audio::VoiceEngine::kFramesPerTick;
+  constexpr auto kMaximumBytes =
+      static_cast<VS::i32>(kMaximumFrames * kFrameBytes);
+  CHECK(maximum_queued <= kMaximumBytes);
+  CHECK(Audio_Native_VoiceActive(22));
+  CHECK(Audio_Native_VoiceActive(23));
+  OutputProbe probe(output.source.get());
+  probe.Wait();
+  CHECK(Energy(probe.samples, 0) > 0.1);
+  CHECK(Energy(probe.samples, 1) > 0.1);
 }

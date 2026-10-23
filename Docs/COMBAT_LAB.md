@@ -119,8 +119,9 @@ Rebuild and restart the lab to pick up that correction; no data re-extraction is
   inventory counts and actual target results. Restore MP with F8 between uses
   and provide a valid enemy for offensive spells. Restart only between books,
   not between ranks; consumption or learning alone does not prove the effect.
-  Use normal speed (`--speed 1`) while the accelerated-audio queue failure in
-  [#83](https://github.com/JEschete/VS-NativePort/issues/83) remains unresolved.
+  Use normal speed (`--speed 1`) for listening/fidelity acceptance. Accelerated
+  native audio uses the bounded speaker-output policy documented in the
+  [#83 checkpoint](#accelerated-native-audio-timing-83), not full listening parity.
 - Closing the window or reaching `--frames` interrupts the session; this is not
   victory or gameplay-completion evidence.
 
@@ -1384,6 +1385,96 @@ Local evidence is `build\quality\equipment131-*`, the native run directories
 above, and the preserved broad `equipment131-tidy-first-report.json`.
 This closes the storage-specific behavior gate, not broader #14 derived-value,
 legal-category and progression/restriction acceptance.
+
+## Accelerated native audio timing (#83)
+
+Fresh before-fix Debug run `1792758315183981-0` reproduces the reported
+speed4 failure at tick1132: `native voice command queue exhausted`. This is
+the same producer/consumer clock mismatch as the original #83 report, not
+the separate F10 lifecycle path.
+
+The desktop host already constructs `AudioDevice(speed == 1)`. Combat Lab
+incorrectly always requested a realtime device, so faster sequencer commands
+accumulated behind the real-time device callback. The Lab now uses the existing
+desktop policy and logs the chosen mode:
+
+- **Speed1:** unchanged device-demand rendering. The audio callback sustains
+  voices while the game/control thread waits; existing stereo/mono controls,
+  sample cadence and normal listening behavior remain in use.
+- **Speed2-64:** sequencer-driven native PCM. Every control tick renders through
+  the existing synth/envelope/reverb/noise/FM/stream path before the next tick;
+  voice commands are not dropped and the command queue is not enlarged.
+  Speaker playback remains at its physical rate. The existing device discards
+  already-rendered stale speaker PCM once its250ms watermark is exceeded,
+  explicitly logging the removal and restoring its50ms scheduling headroom.
+  Maximum queued output is the250ms watermark plus one200-frame block
+  (**97600 bytes / 254.17ms** at48kHz float stereo), not unbounded latency.
+  Raw native mix capture is written before stale speaker output is removed.
+
+This reuses an established native timing mode, not a new pitch-shifting or
+time-stretch engine. Fast-forward listening can skip obsolete already-rendered
+segments; use speed1 for auditory parity. Requested speed is a simulation
+multiplier, not a promise that synth/render/trace CPU cost can deliver64x.
+Movie/other independently bound device streams are not newly synchronized
+or certified by this change.
+
+Append-only maintained regression: a paused physical device receives4096
+production stream/control ticks for both mono and stereo looping sources.
+Every tick is consumed synchronously, live voices remain active, the actual
+SDL PCM queue stays within97600 bytes, and resulting device samples are
+audible in both channels. Existing normal-speed demand-versus-push negative
+controls still prove that device demand sustains voices through a one-second
+control-thread stall.
+
+Reproduction/acceptance commands:
+
+```powershell
+build\Debug\VS.CombatLab.exe --data Native\data `
+  --scenario build\quality\cure-books.json --start --scripted `
+  --frames 1800 --speed 4
+```
+
+Repeat with Release, speeds1/64 and a second fresh-process speed4 run. The
+ignored preset is original zone9/room0, all-items-a Ashley4,9, seed1, solo and
+isolated events. These are music/queue tests, not consumable-effect acceptance.
+`VS_AUDIO_CAPTURE` points each process to a local `.f32` mix file.
+
+| Configuration | Speed1 | Speed4 first | Speed4 repeat | Speed64 |
+| --- | --- | --- | --- | --- |
+| Debug | `1792758810856954-0` | `1792758851152579-0` | `1792758884498092-0` | `1792758917675740-0` |
+| Release | `1792758951074111-0` | `1792758991422506-0` | `1792759008481651-0` | `1792759025689446-0` |
+
+All eight exact final-host runs complete1800 ticks, log the intended mode,
+end with `trace_failed:false`, and contain no engine error/critical record or
+command overflow. Speed1 has no stale-output warnings. Accelerated runs
+explicitly log their expected stale speaker PCM removal.
+
+All captured samples are finite and audible on both channels. Each accelerated
+capture contains1436600 stereo frames (29.92917s); both speed4 repetitions and
+speed64 are byte-identical within each configuration:
+
+- Debug PCM SHA-256:
+  `22b39895e941f1cd474980f92b9b72ecaf79a7b55a0858053b09ca121ec86e05`.
+- Release PCM SHA-256:
+  `6647e6c77b603b9dcda4c7e0e67584cf03ad666055d03cacb3158a5eaec54cd6`.
+
+Normal-speed device-demand capture has its own callback timing and is not
+asserted byte-identical to offline simulation output. Full final native suites
+pass **534 cases / 1799247 assertions** each; focused accelerated plus unchanged
+demand/stall cases pass **9463 assertions / 4 cases**. Scoped maintained
+quality/tidy for the Lab and audio tests reports **0 findings / 0 new**.
+No baseline, queue capacity, voice event, dependency or production sequencer
+implementation is changed.
+
+Final host SHA-256: Debug
+`1a9dc68aa3e251ae71a67a2dbbf3d920834395bda63078cea115ab3397998476`;
+Release
+`09589642af8f5681da2e3ab788e33f682a9533276dc5d4b016c26ead07f27197`.
+Source is `4bd0a3e7` plus the scoped Lab constructor/log and audio-regression
+changes; unrelated owner edits remain dirty/excluded. Exact commands, audit
+JSON, build/test/quality logs and raw PCM stay under `build\quality\issue83-*`
+and the configuration's run directories. Do not commit/upload disc-derived
+mixes or assets. Publication and exact pushed CI belong on #83.
 
 ## Selected-part palette glow acceptance (#81)
 
