@@ -1052,8 +1052,9 @@ passed every step. Host SHA-256 values:
 Together with the all-category menu/equipment checks, all40 cost/eligibility
 and acquisition contracts, positive damage/recovery runs and secondary-effect
 coverage above, this completes #11's bounded functional acceptance. Full
-particle/trail visual parity (#76) and the intermittent F10 report (#82)
-remain open; these gates do not claim to resolve them.
+particle/trail visual parity (#76) remains open. GitHub records the separate
+F10 report (#82) as closed at2026-10-22T21:58:16Z, independently of this
+acceptance; these gates establish no new F10 root cause or lifecycle fix.
 
 ## Learned-spell acceptance checkpoint (2026-10-22)
 
