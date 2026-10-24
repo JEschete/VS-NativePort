@@ -1,12 +1,15 @@
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <chrono>
 #include <cstdint>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -23,6 +26,7 @@
 
 extern "C" {
 #include "ActorAssets.h"
+#include "Audio/Seq/Sequencer.h"
 #include "Effects/Plugins/Plg044.h"
 #include "Effects/Plugins/Plg049.h"
 #include "Effects/Plugins/Plg069.h"
@@ -175,7 +179,8 @@ TEST_CASE("Pointer table relocation preserves destinations on invalid input",
   const std::span<const unsigned char> image{
       reinterpret_cast<const unsigned char*>(addresses.data()),
       sizeof addresses};
-  Content_ModulePointerTable table{"fixture", 0, 3, destination.data(), 3};
+  Content_ModulePointerTable table{"fixture",          0, 3,
+                                   destination.data(), 3, nullptr};
   REQUIRE(Content::RelocateModulePointerTable(table, image, symbols));
   CHECK(destination == std::array<void*, 3>{&values[0], nullptr, &values[1]});
   const auto saved = destination;
@@ -503,4 +508,168 @@ TEST_CASE("Model UV offsets preserve primitive strides and byte wrapping",
   }
   Content_OffsetModelTextureCoordinates(bytes.data() + 4, 2, colored, 10, -7);
   CHECK(bytes == expected);
+}
+
+TEST_CASE("LFO relocation imports source data instead of host code pointers",
+          "[content][module][lfo-source]") {
+  std::array<std::int16_t, 5> samples{1000, -1000, 0, 0, -2};
+  std::array<unsigned, 66> addresses{};
+  addresses[65] = 0x1000;
+  std::array<void*, 66> destination{};
+  int host_code = 7;
+  const Content_ModuleSymbol code{"fixture", 0x1000, 0, &host_code, 0, 0, 0};
+  const Content_ModuleSymbol source{
+      "fixture", 0x1000, sizeof samples, samples.data(), sizeof samples, 2, 2};
+  const std::span<const unsigned char> image{
+      reinterpret_cast<const unsigned char*>(addresses.data()),
+      sizeof addresses};
+  Content_ModulePointerTable table{"fixture",          0,  66,
+                                   destination.data(), 66, &source};
+  REQUIRE(
+      Content::RelocateModulePointerTable(table, image, std::span(&code, 1)));
+  CHECK(destination[65] == samples.data());
+  CHECK(destination[0] == nullptr);
+}
+
+TEST_CASE("Native LFO catalogue covers the encoded unsigned byte domain",
+          "[content][module][lfo-source]") {
+  CHECK(std::size(Audio_Seq_kLfoWaveforms) == 256);
+}
+
+TEST_CASE(
+    "Unbounded source LFO programs remain unavailable rather than fabricated",
+    "[content][module][lfo-source]") {
+  std::array<std::int16_t, 8> samples{1000, -1000, 0, 0, -2, 0, 0, 32767};
+  std::array<unsigned, 2> addresses{0x1000, 0x100A};
+  std::array<void*, 2> destination{};
+  const Content_ModuleSymbol source{
+      "fixture", 0x1000, sizeof samples, samples.data(), sizeof samples, 2, 2};
+  const std::span<const unsigned char> image{
+      reinterpret_cast<const unsigned char*>(addresses.data()),
+      sizeof addresses};
+  Content_ModulePointerTable table{"fixture",          0, 2,
+                                   destination.data(), 2, &source};
+  REQUIRE(Content::RelocateModulePointerTable(table, image, {}));
+  CHECK(destination[0] == samples.data());
+  CHECK(destination[1] == nullptr);
+}
+
+TEST_CASE(
+    "Invalid LFO source ownership preserves the complete destination table",
+    "[content][module][lfo-source]") {
+  std::array<std::int16_t, 5> samples{1000, -1000, 0, 0, -2};
+  std::array<unsigned, 2> addresses{0x1000, 0x1001};
+  int sentinel = 7;
+  std::array<void*, 2> destination{&sentinel, &sentinel};
+  const auto saved = destination;
+  Content_ModuleSymbol source{
+      "fixture", 0x1000, sizeof samples, samples.data(), sizeof samples, 2, 2};
+  const std::span<const unsigned char> image{
+      reinterpret_cast<const unsigned char*>(addresses.data()),
+      sizeof addresses};
+  Content_ModulePointerTable table{"fixture",          0, 2,
+                                   destination.data(), 2, &source};
+  CHECK_FALSE(Content::RelocateModulePointerTable(table, image, {}));
+  CHECK(destination == saved);
+  addresses[1] = 0x1000;
+  source.nativeSize = 1;
+  CHECK_FALSE(Content::RelocateModulePointerTable(table, image, {}));
+  CHECK(destination == saved);
+}
+
+namespace {
+void LoadOriginalLfoModules() {
+  const auto cue = FindRepoDisc();
+  if (cue.empty()) SKIP("Repository disc location is unavailable");
+  const auto root = cue.parent_path().parent_path() / "Native" / "data";
+  if (!std::filesystem::exists(root / Content::DataStore::ManifestName)) {
+    SKIP("Extracted Native/data is unavailable");
+  }
+  REQUIRE(Content::DataStore::Open(root).has_value());
+  REQUIRE(Content_LoadModuleData() == 0);
+}
+
+std::vector<u8> ReadOriginalLfoImage() {
+  const auto* store = Content::DataStore::Get();
+  REQUIRE(store != nullptr);
+  const auto* entry = store->Find("SLUS_010.40");
+  REQUIRE(entry != nullptr);
+  auto image = store->ReadAll(*entry);
+  REQUIRE(image.has_value());
+  return std::move(*image);
+}
+
+const Content_ModuleSymbol& LoadedLfoOwner() {
+  const std::span tables(Content_modulePointers, Content_modulePointerCount);
+  const auto found = std::ranges::find(
+      tables, reinterpret_cast<void**>(Audio_Seq_kLfoWaveforms),
+      &Content_ModulePointerTable::target);
+  REQUIRE(found != tables.end());
+  REQUIRE(found->sampleSource != nullptr);
+  return *found->sampleSource;
+}
+
+void CheckOriginalLfoOwner(const Content_ModuleSymbol& owner,
+                           std::span<const u8> image) {
+  REQUIRE(owner.address == 0x80010000);
+  REQUIRE(owner.size == 0x52000);
+  REQUIRE(owner.nativeSize == owner.size);
+  CHECK(std::memcmp(owner.target, image.data() + 0x800, owner.size) == 0);
+}
+
+std::int16_t ReadOriginalLfoSample(std::span<const u8> image,
+                                   std::uint32_t address) {
+  REQUIRE(address >= 0x80010000);
+  const auto offset = std::uint64_t{0x800} + address - 0x80010000;
+  REQUIRE(offset + 2 <= image.size());
+  const auto word = static_cast<std::uint16_t>(
+      image[offset] | (static_cast<unsigned>(image[offset + 1]) << 8));
+  return std::bit_cast<std::int16_t>(word);
+}
+
+std::int16_t AdvanceOriginalLfo(std::span<const u8> image,
+                                std::uint32_t& address) {
+  if (ReadOriginalLfoSample(image, address) == 0 &&
+      ReadOriginalLfoSample(image, address + 2) == 0) {
+    const auto delta = ReadOriginalLfoSample(image, address + 4);
+    address = static_cast<std::uint32_t>(static_cast<std::int64_t>(address) +
+                                         static_cast<std::int64_t>(delta) * 2);
+  }
+  const auto value = ReadOriginalLfoSample(image, address);
+  address += 2;
+  return value;
+}
+
+void CheckOriginalLfoProgram(std::span<const u8> image,
+                             const Content_ModuleSymbol& owner,
+                             unsigned selector) {
+  const auto offset = std::size_t{0x209A0} + selector * sizeof(std::uint32_t);
+  std::uint32_t address = 0;
+  std::memcpy(&address, image.data() + offset, sizeof address);
+  auto* cursor = Audio_Seq_kLfoWaveforms[selector];
+  REQUIRE(reinterpret_cast<const u8*>(cursor) ==
+          static_cast<const u8*>(owner.target) + (address - owner.address));
+  for (int sample = 0; sample < 1024; ++sample) {
+    const auto expected = AdvanceOriginalLfo(image, address);
+    if (cursor[0] == 0 && cursor[1] == 0) cursor += cursor[2];
+    CHECK(*cursor++ == expected);
+  }
+}
+}  // namespace
+
+TEST_CASE("Original LFO source aliases retain every bounded sample and loop",
+          "[content][module][lfo-source][disc]") {
+  LoadOriginalLfoModules();
+  const auto image = ReadOriginalLfoImage();
+  const auto& owner = LoadedLfoOwner();
+  CheckOriginalLfoOwner(owner, image);
+  REQUIRE(Audio_Seq_kLfoWaveforms[65] != nullptr);
+  unsigned supported = 0;
+  for (unsigned selector = 0; selector < 256; ++selector) {
+    if (Audio_Seq_kLfoWaveforms[selector] != nullptr) {
+      CheckOriginalLfoProgram(image, owner, selector);
+      ++supported;
+    }
+  }
+  CHECK(supported == 231);
 }

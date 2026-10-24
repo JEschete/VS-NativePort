@@ -2051,6 +2051,10 @@ void Actors_MoveActorToTileAtRate(int arg0, Actors_TileTarget* arg1, int arg2, i
     int angle;
 
     Actors_ActorRecord* actor = Actors_actorRecords[arg0];
+    if (actor == NULL) {
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+        return;
+    }
 
     if (arg2 == 0 && arg3 == 0) {
 
@@ -2102,7 +2106,10 @@ void Actors_MoveActorToTileAtRate(int arg0, Actors_TileTarget* arg1, int arg2, i
 void Actors_MoveActorToPositionAtRate(int id, SVECTOR* target, int arg2, int arg3)
 {
     Actors_ActorRecord* actor = Actors_actorRecords[id];
-    if (actor == NULL) Core_Debugf("actors", "movement references missing actor %d", id);
+    if (actor == NULL) {
+        Core_Debugf("actors", "movement skips absent actor=%d", id);
+        return;
+    }
     int angle;
     int dz;
 
@@ -2191,6 +2198,10 @@ void Actors_MoveActorToPositionAtRate(int id, SVECTOR* target, int arg2, int arg
 void Actors_TranslateActorToTileAtRate(int arg0, Actors_TileTarget* arg1, int arg2)
 {
     Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0];
+    if (temp_s0 == NULL) {
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+        return;
+    }
 
     if (arg2 == -1) {
         Actors_SetActorTileTranslation(arg0, arg1, -1, temp_s0->moveRate);
@@ -2207,6 +2218,10 @@ void Actors_TranslateActorToTileAtRate(int arg0, Actors_TileTarget* arg1, int ar
 void Actors_TurnActorTowardTileAtRate(int arg0, Actors_TileTarget* arg1, int arg2)
 {
     Actors_ActorRecord* new_var = Actors_actorRecords[arg0];
+    if (new_var == NULL) {
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+        return;
+    }
 
     if (arg2 == -1) {
         Actors_SetActorTileTurn(arg0, arg1, -1, new_var->turnRate);
@@ -2220,6 +2235,10 @@ void Actors_TranslateActorByAtRate(int arg0, SVECTOR* arg1, int arg2)
 {
     u_short temp_s0;
     Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
+    if (temp_s1 == NULL) {
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+        return;
+    }
 
     if (arg2 == -1) {
         Actors_SetActorTranslation(arg0, arg1, -1);
@@ -2240,6 +2259,10 @@ void Actors_TranslateActorToAtRate(int arg0, SVECTOR* arg1, int arg2)
     SVECTOR sp10;
     u_short temp_s0;
     Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
+    if (temp_s1 == NULL) {
+        Core_Debugf("actors", "absolute slide skips absent actor=%d", arg0);
+        return;
+    }
 
     sp10.vx = arg1->vx - temp_s1->instance.position.vx;
     sp10.vy = arg1->vy - temp_s1->instance.position.vy;
@@ -2263,6 +2286,10 @@ void Actors_TurnActorByAtRate(int arg0, short arg1, int arg2)
 {
     u_short temp_s0;
     Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
+    if (temp_s1 == NULL) {
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+        return;
+    }
 
     if (arg2 == -1) {
         Actors_SetActorYawTurn(arg0, arg1, -1);
@@ -2282,6 +2309,10 @@ void Actors_TurnActorToAtRate(int arg0, short arg1, int arg2)
 {
     u_short temp_s0;
     Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
+    if (temp_s1 == NULL) {
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+        return;
+    }
 
     arg1 -= temp_s1->instance.facing;
 

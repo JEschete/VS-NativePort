@@ -96,6 +96,36 @@ std::string EnemyName(std::span<const char> encoded) {
   return result;
 }
 
+std::vector<EncounterDoor> ReadRoomDoors(
+    Bytes bytes, std::uint64_t offset,
+    const std::array<std::uint32_t, kRoomSectionCount>& sections) {
+  constexpr std::size_t kDoorsSection = 3;
+  for (std::size_t i = 0; i < kDoorsSection; ++i) offset += sections[i];
+  const auto data = Section(bytes, offset, sections[kDoorsSection]);
+  if (data.size() % sizeof(Field_MpdDoorRecord) != 0) {
+    throw std::runtime_error("invalid room door table stride");
+  }
+  std::vector<EncounterDoor> doors;
+  for (std::size_t i = 0; i < data.size() / sizeof(Field_MpdDoorRecord); ++i) {
+    const auto record =
+        Read<Field_MpdDoorRecord>(data, i * sizeof(Field_MpdDoorRecord));
+    doors.push_back(
+        {static_cast<int>(i),
+         record.destinationZoneId,
+         record.destinationRoomId,
+         record.tileLocation.tileX,
+         record.tileLocation.tileZ,
+         record.tileLocation.floorLayer,
+         {record.entryTileX, record.entryTileZ, record.entryElevation,
+          record.tileLocation.entryDirection},
+         record.requiredFlagId,
+         record.requiredFlagValue,
+         record.doorId,
+         record.hasEntryStep != 0});
+  }
+  return doors;
+}
+
 EncounterRoom ReadRoom(const Content::DataStore& store, int index,
                        std::uint32_t sector,
                        std::vector<SpawnProfile>& profiles) {
@@ -121,6 +151,8 @@ EncounterRoom ReadRoom(const Content::DataStore& store, int index,
     std::uint64_t total = sizeof(sections);
     for (const auto length : sections) total += length;
     Section(*bytes, header.roomSectionOffset, static_cast<std::int64_t>(total));
+    room.doors = ReadRoomDoors(
+        *bytes, header.roomSectionOffset + sizeof(sections), sections);
     if (sections[1] < sizeof(Field_MpdCollisionHeader)) {
       throw std::runtime_error("room has no collision grid");
     }
@@ -307,7 +339,8 @@ bool IsEncounterHostileSpawn(const Field_MpdEnemySpawn& source) {
 
 bool UsesConfiguredEncounterPlacements(const EncounterSetup& setup, int zone,
                                        int room) {
-  return setup.zone == zone && setup.room == room;
+  return setup.room_policy == EncounterRoomPolicy::kIsolatedCombat &&
+         setup.zone == zone && setup.room == room;
 }
 
 std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
@@ -377,7 +410,8 @@ std::expected<Field_MpdEnemySpawn, std::string> PrepareEncounterSpawn(
   return placement;
 }
 
-std::expected<std::vector<EncounterZone>, std::string> ReadEncounterCatalog() {
+std::expected<std::vector<EncounterZone>, std::string> ReadEncounterCatalog(
+    bool strict) {
   const auto* store = Content::DataStore::Get();
   if (store == nullptr) return std::unexpected("extracted data is not open");
   std::vector<EncounterZone> zones;
@@ -398,6 +432,7 @@ std::expected<std::vector<EncounterZone>, std::string> ReadEncounterCatalog() {
     try {
       zones.push_back(ReadZone(*store, entry, id));
     } catch (const std::exception& error) {
+      if (strict) return std::unexpected(entry.path + ": " + error.what());
       VS_LOG_WARN("encounter.catalog", "{}: {}", entry.path, error.what());
     }
   }
@@ -478,9 +513,17 @@ std::expected<Items_WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
   }
 }
 
-std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
-                                           const EncounterZone& zone) {
+namespace {
+std::vector<std::string> ValidateEncounterOptions(const EncounterSetup& setup) {
   std::vector<std::string> errors;
+  if (setup.room_policy != EncounterRoomPolicy::kIsolatedCombat &&
+      setup.room_policy != EncounterRoomPolicy::kOriginalRoom) {
+    errors.emplace_back("unsupported encounter room policy");
+  }
+  if (setup.room_policy == EncounterRoomPolicy::kOriginalRoom &&
+      !setup.enemies.empty()) {
+    errors.emplace_back("production rooms cannot override original actors");
+  }
   if (!setup.stat_overrides.Valid()) {
     errors.emplace_back("ASHLEY STAT OVERRIDES MUST BE IN 1..999");
   }
@@ -492,6 +535,13 @@ std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
       setup.weapon >= EncounterWeapon::kCount) {
     errors.emplace_back("unsupported Ashley weapon");
   }
+  return errors;
+}
+}  // namespace
+
+std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
+                                           const EncounterZone& zone) {
+  auto errors = ValidateEncounterOptions(setup);
   if (setup.zone != zone.id) errors.emplace_back("zone does not match catalog");
   const auto room =
       std::ranges::find(zone.rooms, setup.room, &EncounterRoom::index);

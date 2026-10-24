@@ -1,5 +1,314 @@
 # Handoff: prologue entry and shared rendering
 
+## Crash and transition checkpoint (2026-10-24)
+
+### Latest source and next observation
+
+- Owner pause/commit checkpoint: all owned replay windows are stopped.
+  Exact-history diagnostic rerun1792852943838401-0 ended by a graceful close,
+  normal exit2:32 passed/7 blocked/one cancelled/501 unrun. It did not reach
+  the #167 failing history, so it is not a crash fix or a reproduction failure.
+  #167 remains unresolved; the earlier run's actual renderer failure and
+  frozen ACFD8139/5B64FBA0 exe/PDB remain the next investigation source.
+  Local dump capture is smoke-tested; the SDK reader can inspect memory and
+  label raw stack symbol candidates, but its automatic stack unwind was
+  incomplete on the smoke fixture and must not be called a verified call chain.
+  Publication is now authorized; preserve the owner's independent documentation,
+  Skeleton test and reference edits when committing this crash-work checkpoint.
+- Current autonomous crash work is local/unpublished on `508b4bd7` plus the
+  preserved dirty worktree. #150's original Bat/gimmick endpoint fix and shared
+  Desktop logging remain local; #151 now inventories all **1,001 directed door
+  records / 255 ZNDs / 421 room references** and runs production room/entry
+  events through one persistent Combat Lab window. See [COMBAT_LAB](COMBAT_LAB.md) for CLI,
+  strict pass definition, per-case checkpoints and explicit blocked/unrun
+  outcomes. Do not interpret the full inventory as 1,001 executed scenes.
+- The matrix exposed independently tracked #152 optional movement, #153
+  auxiliary perception ownership, #154 mutable-kind AI retirement, #155
+  post-arena-reset AI invalidation, #156 empty gimmick stack top, #157 SFX bank
+  underflow, and #158 missing required scripted-effect target. Generator changes
+  remain in the copier; owned cleanup/session implementations retain their
+  separate lifetimes. No flags, actors, HP or event completion were forced.
+  All issues stay open pending their publication/CI and acceptance gates.
+- #158's actual 9/17 ->12/0 entry targets model53/E222 while only Ashley exists.
+  Original Minotaur spawn requires flag1==1 and flag130==8; the fixed profile
+  does not satisfy that. F01170 now errors/yields before changing effect
+  playback rather than binding sentinel1 and crashing F00882. Four present
+  model/direct/object controls and six refused-binding controls pass, including
+  a different-model sentinel collision and unsupported reference tags.
+  This is explicit failed-fixture handling, not verified Minotaur cutscene
+  completion. Other nullable bone-matrix consumers still need their own audit.
+- Exploratory run1792819424667543-0 continued beyond that refusal (33 passed,
+  two failed/two blocked before real F10 cancellation), but predates tightened
+  acceptance. Red lifecycle tests found eight failed assertions: pending-only
+  self-loops and interrupted restored-control intervals could pass incorrectly.
+  The runner now requires readiness revocation and 120 uninterrupted settled
+  ticks. **Use only the new acceptance revision for final runtime counts.**
+  Debug run1792819672204643-0 stopped at case136, after87 passed/46 blocked/
+  two failed cases, at the independently reproduced #159 bank-lifetime crash.
+  Original event28 releases bank3 before a later room-change idle restoration
+  tries to undo its outstanding vertex edits through that detached bank.
+- #159 now preflights borrowers, unwinds live vertex events, retires borrowed
+  cache/event bindings and then releases Content storage without replacing the
+  frozen skeletal pose. Native unwind/release return statuses are propagated
+  to existing callers; unavailable restoration retains the original obligation.
+  Real opcode36 X11->10, unrelated/two-owner/atomic-refusal controls pass.
+  Fresh replay1792822646791332-0 reaches32/1 with zero engine errors/completed
+  teardown, but uses event0 rather than the failing history's event28:
+  **it does not verify the old branch**. Replay the full prefix/history without
+  forced scene/story flags before claiming the crash acceptance. Its65-case
+  tail stopped after33 passed/15 blocked, with16 still unrun, at a new
+  ClosedRing renderer AV in z023-r004-d002. Do not call this full cutscene or
+  final matrix acceptance.
+- #159's full original prefix1792823796837457-0 is complete:87 passed/
+  47 blocked/two known failed, normal exit2/all136 finished. Case136 actually
+  observes event28/source1 in32/0, releases bank3 at142903 and crosses the old
+  idle/vertex fault into32/1 still in event28, zero errors/complete teardown.
+  The longer entry chain stays blocked at3,600 ticks, not passed cutscene/door
+  acceptance. Command/frozen-image hash/scenes/release steps/result are in
+  `build\quality\sequence159-aligned-evidence.json`. Release original-prefix
+  replay1792829725153757-0 now independently matches those counts, event28 in
+  both32/0 and32/1, and the bank3 release at142903, with zero target errors
+  and complete teardown. Its exact image/command/scene proof is
+  `build\quality\sequence159-aligned-Release-evidence.json`. Both longer entry
+  chains remain blocked; publication/CI are still open.
+- New #160 is a PLG053 closed-ring low-pointer read in E084 at24/15, native
+  RVA36F1B1. The pointer is0x74 and dataIndex is read at+2 (fault0x76), not a
+  large field offset on a null struct. Original MIPS binder/consumer both use
+  table base0x98; no index-base change is justified. Read-only original E084
+  has one texture table and15 nonempty sprite programs. A read-only debugger
+  snapshot independently establishes definition16/lifetime30/age0, table1,
+  program1 and info0x74. Do not infer this index from arbitrary stack words
+  or invent a default texture.
+- A separate confirmed #160 safety defect is repaired locally: F01590 clears
+  only32 original bytes, leaving the native40-byte texture state's final
+  pointer uninitialized. Poison/canary regression was7/8 then8/8. Its body now
+  clears the typed native object, retaining the existing C entry signature
+  as migration debt. Missing-table initialization diagnostics record context,
+  request/instance effect and packed ring definition without changing playback.
+- With the reset repair and initialization diagnostics now built, fresh
+  matched E084 run1792825963767984-0 still faults at low pointer0x74 (+2 read),
+  RVA36F48F. The reset defect alone is NOT the render-crash fix. The earlier
+  absence of persisted initialization diagnostics was a buffering defect,
+  not evidence that those diagnostics did not execute.
+- #161 repairs that separate durability defect: Core and shared GameplayTrace
+  flush Warn+ even while ordinary messages remain buffered; Error counters
+  still count only Error+. Four live-file red assertions now pass, together
+  with a separate Core-only/no-observer control (112 assertions/15 cases).
+  Actual AV run1792827063353609-0 persists all four texture records in both
+  complete JSONL streams and session text before RVA36F8F3/read0x76. At tick1508
+  the table is already unavailable at birth: primary package84, definition16,
+  packed0x101E, table1/program1, count1, frame word0x0002001D. The reported
+  instance effect56 is not package ownership proof: primary instance creation
+  does not initialize that secondary-only field. No context-switch fix is
+  justified by that value.
+- Read-only original bytes confirm PLG084 is identical to PLG053, including
+  its CA/CB texture selectors. Original E084 definitions15-18 also contain1/1,
+  its renderer keys select those definitions, and its texture binder only
+  populates table0. Thus the native root is not yet resolved by a source-only
+  index or renderer substitution. Next discriminating observation is the
+  original running scene's table1 binding and texture-frame consumption.
+  Keep #160 open; no missing-table/default-frame fallback has been introduced.
+- The temporary texture probes no longer read primary instances' uninitialized
+  secondary-only effect IDs; provenance selects the primary/secondary request
+  matching the resource context. Red generator tests caught all three readers.
+  The same bounded #148 batch names five verified parameter/local bindings in
+  F01590-F01592 (`storage`, `animation`, `programIndex`, `command`) through the
+  existing copier regex rules, including generated declarations. Copier51 and
+  a second stable generation pass; all1,015 selected native source/project
+  files and the manifest are unchanged on the second run. Full Debug605/
+  1,813,310 and scoped Python quality0/0 pass after this diagnostic/name change.
+- Current full suites after warning durability are **605 / 1,813,310** in both
+  configurations. Actual particle-render/reset/lifetime selection is94/12;
+  do not use `[particle]` alone for the older renderer tests (`[particle-render]`
+  is their tag). Texture fixture/tooling quality0/0; copier49 passes. None of
+  this establishes that the actual E084 crash is fixed. Read-only Workshop
+  session52c3c765d52d4f7884055c0b701ac804 was closed with zero staged changes.
+- Continuing after #160 exposed distinct #162: five records passed, then
+  z024-r000-d000 crashed during its original24/0/E265 source entry, leaving94
+  selected records unrun. F01592 read program+cursor at0xFEDF, reached through
+  PLG265's particle-ribbon renderer. The source left the first line-only
+  dispatcher's `VS_PARTICLE_UNTEXTURED` option active for its second, textured
+  dispatcher. Original MIPS independently shows the first allocates0x10 while
+  the second allocates0x30 and initializes the texture stream. The copier now
+  applies F02351's instance correction, retaining the genuine line variant.
+  Its native prefix request also uses `offsetof` rather than16: current heap
+  rounding already covered the24-byte line prefix, so that control was not a
+  demonstrated overflow. The textured red control had capacity24 <64.
+- #162's exact six-case history now passes6/6 in both Debug1792830601020715-0
+  and Release1792830661742875-0. Each records604 original E265 active-effect
+  frames in24/0/event0, then24/3/control restored/159 destination ticks,
+  zero target errors and complete teardown. Evidence:
+  `build\quality\particle162-actual-evidence.json`. This verifies the bounded
+  loader/entry/control case, not complete visual or all-cutscene parity.
+  Final suites607/1,813,347 each, copier52, affected fixture/tooling tidy0/0;
+  copier module23 existing/0 new. Second generation preserves1,015 selected
+  native source/project files plus manifest. Both Desktop/Lab configs build.
+  The100-case persistent Debug continuation1792830723227930-0 outcome follows;
+  #160 itself remains unresolved and explicitly excluded by the resume start.
+- That continuation completed26 passed/one blocked, then exposed #163 at
+  z024-r008-d003 (24/8 ->39/0), leaving72 selected records unrun. The new
+  C0000094/RVA1E5C0A is event-camera interpolation, not particle rendering.
+  Single-edge1792830988376901-0 reproduces it; diagnostic1792831225654460-0
+  captures a zero-duration look-at track at1078 from special operationB7/09.
+  The original orbit-return commands are four bytes `D4 10 10 55` and three
+  bytes `C2 01 55`, but G00130/G00131 were isolated scalar opcodes. Their
+  missing payloads, not an authored zero duration, caused the divide.
+- #163 restores complete command arrays, generated module-data/symbol
+  capacities and proper array-decay callers through the copier/data ledger.
+  Interpolation math and original85-frame timing are unchanged. Native tests
+  first fail all three extent assertions, then pass35/2 using synthetic module
+  images through actual registered loader entries plus85-step track completion.
+  Fixed Debug1792831568527363-0 and Release1792831616664973-0 both execute the
+  same39/0/event0/scene30 B7/09 branch at1078, start easing1/duration85, restore
+  control and pass, zero errors/complete teardown/no zero-duration warnings.
+  Exact proof is `build\quality\camera163-actual-evidence.json`.
+- Latest full suites609/1,813,382 each, copier54, camera fixture/tooling
+  quality/tidy0/0, stable second generation across1,015 selected native files
+  plus manifest; both Desktop/Lab configurations build. Matching100-case Debug
+  continuation1792831745328564-0 is active. Earlier stopped runs are not
+  completed coverage; #160 remains excluded and unresolved. No new issue has
+  been closed or source published.
+- That100-case continuation finished62 passed/nine blocked, then crashed in
+  active z028-r003-d000 (28/3 ->28/4), with28 records unrun. New #164 is
+  F01384's null text-pointer write at native RVA238D12/address6. G00211 was
+  already marked drop/replaced-by G00614, but the renderer still consumed it;
+  G00614 was also const despite digit writes. The copier now supplies writable
+  nine-byte storage and the renderer uses it directly. Native packet/format/
+  glyph/ordering/terminator/guard/show-hide controls retain the original
+  four-byte preceding ordering slot, independently confirmed in MIPS.
+- Actual readable timer rendering exposed separate #165: the original packed
+  timer word G01934 is the time-field subobject at G01933+4, but native storage
+  was independent of `State_sceneTimer`. The HUD now consumes a typed const
+  scene-clock pointer and its sole production caller supplies the authoritative
+  clock, without copied state or a new packed-pointer bridge. The data ledger's
+  original-subobject note is provenance, not a generated `view-of` directive;
+  an explicit regression prevents recreating that bridge. Dormant G00211/
+  G01934 compatibility declarations remain retirement debt.
+- Final timer/binding/pause/reset selection370 assertions/five cases and full
+  **614 cases / 1,813,753 assertions** pass in both configurations. Copier56
+  and a second stable generation preserve1,015 selected native source/project
+  files plus manifest. Scoped timer/camera fixture/tooling quality/tidy is
+  eight existing/zero new, with no baseline change; both Desktop/Lab configs
+  build. The red ownership control originally had five failures/40 assertions.
+- Post-fix live Debug1792834573551820-0 and Release1792834651270755-0 each
+  execute164 timer draws in28/4/event0/scene23, display00:30:00 through
+  00:26:92 with every minute/second matching that record's source fields, then
+  restore control/pass701 ticks/zero errors/complete teardown. Owned-window
+  captures visibly show the readable00:29 countdown. They wait for a real
+  `hud.timer` record and never focus another window or modify gameplay state.
+  Per-run capture paths, exact commands/image hashes/results and validated
+  source/text pairs are in `build\quality\timer165-actual-evidence.json`.
+  Ordinary sequence-end `--capture` shows the editor after teardown and is
+  NOT evidence of timer visibility. No puzzle-win or reference-pixel claim.
+- Persistent Debug1792834906085352-0 completed67 passed/ten blocked, then
+  crashed in active z028-r005-d002 (28/5 ->32/6), with122 of200 unrun.
+  The original #164 history case passes695 ticks/zero errors/complete teardown.
+  New #166 is audio auto-pan, not a timer regression: its resolved function
+  is `Audio_Mixer_UpdateMusicChannelModulation`, old native RVA27C8D2, reading
+  pointer012600DB00960060. Single-edge reproduction is deterministic.
+- #166's frozen PDB/read-only snapshot proves primary music channel6, native
+  width312, rate2/shape65/depth0/flags1044, with all16 nominal waveform pointers
+  valid. Original MUSIC172 channel6 really contains `BC 02 41`; original
+  dispatch and operand lengths prove that boundary. Original table[65] aliases
+  adjacent pointer entries to80018BD8, whose source bytes form a bounded
+  16-state LFO cycle. They are data here, not native executable pointers.
+  The native16-entry inference was wrong. A source-role importer/256-selector
+  repair is implemented locally: explicit sample owner, bounded program validation,
+  full immutable resident payload as short data, unsigned enable operands,
+  checked lookup/atomic refusal. The25 source paths leaving that image stay
+  explicitly unavailable, not fabricated samples.
+- #166 validation now includes1024 exact original/native samples for EACH
+  of231 bounded source programs, source-data/host-code collision controls,
+  unsigned byte/rate0/128/255, zero-depth phase, looping, disable/re-enable,
+  atomic refusal and existing audio reset controls. Final full suites pass
+  **622 cases / 3,150,240 assertions** each; focused audio/data1,507,745/85.
+  Copier58 and stable second generation preserve1,016 selected native files/
+  projects plus manifest. Main scoped quality26 existing/zero new; headers
+  zero/zero. No baseline/suppression changes. Engine project generation added
+  only the new native LFO header after checking existing owner edits.
+- The original32/6 event0 -> event42 chain needs more than3,600 or7,200 ticks:
+  those were honestly blocked, with script-PC progress measured before
+  extending observation. Final Debug1792841911523801-0 and
+  Release1792841730609451-0 both complete in7,832 ticks with restored control,
+  zero errors and complete teardown. Each has1,248 actual note-on records,
+  source65 binds mapped to the explicit immutable sample owner at original
+  offset0x8BD8, and no forced skip. Exact commands, executable hashes, source/
+  owner correlation and complete results are in
+  `build\quality\music166-actual-evidence.json`. No HP/flags/timers were edited;
+  only real waiting-dialogue Circle input was used. This is not complete
+  reference PCM parity or support for undefined source-memory paths.
+- Old #166 fault image hash26D9F3335F2144772F5B4ADF00414F0255794CD60A021529A835CF400BE44240
+  and exact shape/table/program snapshot are in
+  `build\quality\music166-state-Debug-replay.log`. The debugger's frozen-layout
+  probes are now opt-in (`--frozen-music166` / `--frozen-texture160`); never
+  enable them for a newly linked image merely because an RVA happens to match.
+  Debug1792842259573600-0 selected200 cases from z028-r005-d002 with an
+  explicit9,000-tick budget in one window. The outer two-hour debugger budget
+  expired normally as a harness limit (exit124), without a native exception:
+  161 passed/38 blocked/one interrupted z040-r008-d000 (inventory index460,
+  zero-based). All199 completed rows have zero engine errors and complete
+  teardown. Blocked:20 fixture defeats,8 destination events unsettled,
+  9 source events unsettled,1 unavailable destination. This is not200 complete
+  cases or full door acceptance. Exact evidence is
+  `build\quality\door151-matrix166-partial-evidence.json`. PID47920 has exited.
+  The separately named local `door151-long-debug.exe` extends only the outer
+  diagnostic deadline to six hours, smoke-tested with a normal child exit;
+  per-case acceptance is unchanged. Resume inclusively at the interrupted ID
+  with the ordinary3,600-tick case budget now that the known7,832-tick music
+  entry has completed in the preceding run. Do not aggregate revisions.
+  Continuation Debug1792849529393328-0 selected the remaining541
+  records inclusively from z040-r008-d000 (`--door-limit 600 --speed 64
+  --frames 3600`), same frozen ACFD8139/5B64FBA0 exe/PDB, attached shell
+  `door151-tail-debug`, owned game PID2908 (wrapper64100, both exited).
+  The previously interrupted first record passes. New confirmed #167 stops
+  this run:94 passed/37 blocked, active script132 z048-r006-d000,
+  409 unrun, exitE06D7363. Its original events reach32/17/event0/phase4/
+  scene30/control3; last complete tick167126/script_tick1050, thread0 PC+233.
+  Tick167127 reports malformed0x34 packet56 words/offset53, first00221915,
+  native game heap+45138, then unhandled C++ exception. Full per-script JSONL
+  parses; both render errors persist. Related #26 packet corruption root is
+  not established. No renderer skip/guard or product fix has been added.
+  Matching-image standalone, last-two and last-eleven controls do not crash;
+  standalone1792852476217916-0 remains honestly blocked through3,600 ticks,
+  not a passing door. Persistent history must be retained until localized.
+  The local wrapper now captures C++ first/second-chance stacks and writes an
+  ignored unique full-memory dump only on unhandled exceptions, without
+  frozen-offset probes. An owned throwing smoke fixture verified both chances,
+  expected exit and a10MB dump. Dumps remain local; do not commit or upload.
+  Current exact-history rerun Debug1792852943838401-0 uses the same unchanged
+  Lab image/PDB and command; shell `packet167-history-debug`, gamePID73268,
+  wrapper59308. Window responsiveness and actual trace progress verified.
+  Capture stack/dump before any Debug Lab relink. The helper's6h deadline
+  does not alter3,600-tick case acceptance.
+  #160 remains an explicit excluded blocker. All new work remains local/
+  unpublished; publication/CI/closure gates are open.
+- While that image remains frozen, bounded #148 naming work replaces17 verified
+  bindings in owned FlightTerrain.c and its public declarations: AI state,
+  movement angle, neighboring tile/height, segment endpoints/steps and sample
+  index. Meanings match original771A8.c:942 and7E05C.s:187, plus all movement
+  callers. An identifier-aware comparison proves no changed member names,
+  signature types, constants, operators or control flow. Debug and Release
+  `[ground-query],[flight]` each pass103 assertions/13 cases; scoped format/lint/
+  clones and source clang-tidy are zero/zero. Commands/results are in
+  `build\quality\symbols148-flight-{proof,Release-build,Release-tests,tidy}.log`.
+  Matching Debug build/test logs use the same prefix and Debug configuration.
+  Debug Lab exe/PDB hashes remain ACFD8139/5B64FBA0; do not attribute these
+  naming changes to the already-running matrix image. No promotion, retirement
+  or new gameplay acceptance is claimed.
+- A second bounded #148 batch names17 bindings in F00670-F00675 through copier
+  regex rules: room geometry group indices/count/header array, complete flag
+  swap and signed upper-halfword depth bias. Original2842C.c:550-606 plus event,
+  gimmick and renderer callers verify the roles. The entire generated
+  RoomEffects.c/header is token-identical outside those names; function symbols,
+  types, stride, bounds, masks and arithmetic are unchanged. Six red generator
+  controls are now green, with an unrelated-scope negative control; all59 pass.
+  Both Debug/Release `[render][room],[ground-query],[flight]` selections pass155
+  assertions/17 cases. Scoped copier/test quality is zero/zero; stable generation
+  covers1,016 native source/template/project files plus the manifest and preserves
+  owned edits. Evidence uses `build\quality\symbols148-room-*.log`. The frozen
+  running Lab image predates both naming batches; no fresh gameplay claim is
+  assigned to those edits.
+
 ## Native audio functional acceptance (2026-10-21)
 
 This revision implements the bounded functional scope of

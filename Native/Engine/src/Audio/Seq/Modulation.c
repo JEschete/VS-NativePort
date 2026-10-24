@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Audio/Driver/SoundDriver.h"
+#include "Audio/LfoWaveforms.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Modulation.h"
-#include "Audio/Seq/Sequencer.h"
 
 // decomp: SLUS_010.40 SoundVM_B4_Vibrato (src/SLUS_010.40/25AC.c:5462)
 void Audio_Seq_EnableVibrato(
@@ -18,26 +18,31 @@ void Audio_Seq_EnableVibrato(
     int VibratoRatePhase;
     int new_var;
 
+    short* nativeWave = Audio_Seq_LfoWaveform((u_char)in_pChannel->programCounter[2]);
+    if (nativeWave == NULL) {
+        in_pChannel->programCounter += 3;
+        return;
+    }
     in_pChannel->updateFlags |= 1;
 
     if (in_pChannel->type != 0) {
         in_pChannel->vibratoDelay = 0;
-        VibratoDepth = *in_pChannel->programCounter++;
+        VibratoDepth = (u_char)*in_pChannel->programCounter++;
         if (VibratoDepth != 0) {
             in_pChannel->vibratoDepth = VibratoDepth << 8;
         }
     } else {
-        in_pChannel->vibratoDelay = *in_pChannel->programCounter++;
+        in_pChannel->vibratoDelay = (u_char)*in_pChannel->programCounter++;
     }
 
-    VibratoRatePhase = *in_pChannel->programCounter++;
+    VibratoRatePhase = (u_char)*in_pChannel->programCounter++;
     in_pChannel->vibratoRate = VibratoRatePhase;
 
     if (VibratoRatePhase == 0) {
         in_pChannel->vibratoRate = 0x100;
     }
 
-    in_pChannel->vibratoShape = *in_pChannel->programCounter++;
+    in_pChannel->vibratoShape = (u_char)*in_pChannel->programCounter++;
     PitchBase = in_pChannel->pitchBase;
     new_var = PitchBase;
     DepthHigh = (in_pChannel->vibratoDepth & 0x7F00) >> 8;
@@ -48,7 +53,7 @@ void Audio_Seq_EnableVibrato(
         VibratoBase = DepthHigh * new_var;
     }
     in_pChannel->vibratoBase = VibratoBase >> 7;
-    in_pChannel->vibratoWave = Audio_Seq_kLfoWaveforms[in_pChannel->vibratoShape];
+    in_pChannel->vibratoWave = nativeWave;
     in_pChannel->vibratoDelayLeft = in_pChannel->vibratoDelay;
     in_pChannel->vibratoRateCounter = 1;
 }
@@ -124,8 +129,13 @@ void Audio_Seq_EnableTremolo(
     int Delay;
     int Rate;
 
+    short* nativeWave = Audio_Seq_LfoWaveform((u_char)in_pChannel->programCounter[2]);
+    if (nativeWave == NULL) {
+        in_pChannel->programCounter += 3;
+        return;
+    }
     in_pChannel->updateFlags |= SOUND_UPDATE_TREMOLO;
-    Delay = *in_pChannel->programCounter++;
+    Delay = (u_char)*in_pChannel->programCounter++;
     if (in_pChannel->type != 0) {
         in_pChannel->tremoloDelay = 0;
         if (Delay != 0) {
@@ -135,15 +145,15 @@ void Audio_Seq_EnableTremolo(
         in_pChannel->tremoloDelay = Delay;
     }
 
-    Rate = *in_pChannel->programCounter++;
+    Rate = (u_char)*in_pChannel->programCounter++;
     in_pChannel->tremoloRate = Rate;
 
     if (Rate == 0) {
         in_pChannel->tremoloRate = 0x100;
     }
 
-    in_pChannel->tremoloShape = *in_pChannel->programCounter++;
-    in_pChannel->tremoloWave = Audio_Seq_kLfoWaveforms[in_pChannel->tremoloShape];
+    in_pChannel->tremoloShape = (u_char)*in_pChannel->programCounter++;
+    in_pChannel->tremoloWave = nativeWave;
     in_pChannel->tremoloDelayLeft = in_pChannel->tremoloDelay;
     in_pChannel->tremoloRateCounter = 1;
 }
@@ -190,16 +200,21 @@ void Audio_Seq_EnableAutoPan(
 {
     int Rate;
 
+    short* nativeWave = Audio_Seq_LfoWaveform((u_char)in_pChannel->programCounter[1]);
+    if (nativeWave == NULL) {
+        in_pChannel->programCounter += 2;
+        return;
+    }
     in_pChannel->updateFlags |= SOUND_UPDATE_PAN_LFO;
-    Rate = *in_pChannel->programCounter++;
+    Rate = (u_char)*in_pChannel->programCounter++;
     in_pChannel->autoPanRate = Rate;
 
     if (Rate == 0) {
         in_pChannel->autoPanRate = 0x100;
     }
 
-    in_pChannel->autoPanShape = *in_pChannel->programCounter++;
-    in_pChannel->autoPanWave = Audio_Seq_kLfoWaveforms[in_pChannel->autoPanShape];
+    in_pChannel->autoPanShape = (u_char)*in_pChannel->programCounter++;
+    in_pChannel->autoPanWave = nativeWave;
     in_pChannel->autoPanRateCounter = 1;
 }
 

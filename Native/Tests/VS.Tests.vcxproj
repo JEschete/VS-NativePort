@@ -47,9 +47,11 @@
   <ItemGroup>
     <ClCompile Include="src\ActorCleanupTests.cpp" />
     <ClCompile Include="src\ActorCommandTests.cpp" />
+    <ClCompile Include="src\AiAuxiliaryPerceptionTests.cpp" />
     <ClCompile Include="src\AiDecisionTests.cpp" />
     <ClCompile Include="src\AiLayoutTests.cpp" />
     <ClCompile Include="src\AiPlanningTests.cpp" />
+    <ClCompile Include="src\AiSessionResetTests.cpp" />
     <ClCompile Include="src\AudioTests.cpp" />
     <ClCompile Include="src\AwarenessMarkerTests.cpp" />
     <ClCompile Include="src\CombatLabCanvasTests.cpp" />
@@ -65,6 +67,7 @@
     <ClCompile Include="src\CoreTests.cpp" />
     <ClCompile Include="src\CursorMemoryTests.cpp" />
     <ClCompile Include="src\DataMenuTests.cpp" />
+    <ClCompile Include="src\DoorTransitionTests.cpp" />
     <ClCompile Include="src\EffectTimelineTests.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -120,12 +123,14 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\SfxBankSelectionTests.cpp" />
     <ClCompile Include="src\SphereTerrainTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
     <ClCompile Include="src\TerrainHeightTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />
     <ClCompile Include="src\ViewportBoundsTests.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp" />
+    <ClCompile Include="..\Tools\CombatLab\src\DoorTests.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Editor.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp" />
   </ItemGroup>

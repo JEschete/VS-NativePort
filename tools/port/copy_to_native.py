@@ -1656,6 +1656,7 @@ class Copier:
             block = (f"// decomp: {r['overlay']} {r['name']} (src/{r['file']}:{r['line']}): {macro}, "
                      f"instance of {include_spelling(inl)}\n" + "\n".join(defs) + "\n"
                      f'#include "{include_spelling(inl)}"\n' + "".join(f"#undef {n}\n" for n in undefs))
+            block = self.apply_fixups(r, block)
             loc = r["final_location"].strip()
             self.out(loc).items.append(Item("function", block, name, r["id"], d["need"],
                                             (2, r["file"], int(r["line"]))))
@@ -1886,6 +1887,13 @@ class Copier:
     SPLAT_ARTIFACTS = dx.DECOMP / "build" / "splat-artifacts"
     MODULE_POINTERS = r"Native\Game\src\Boot\ModulePointers.c"
 
+    @staticmethod
+    def module_blob_declaration(name: str, size: int) -> tuple[str, int]:
+        storage, width = cf.MODULE_DATA_BLOB_TYPES.get(name, ("unsigned int", 4))
+        if size <= 0 or size % width != 0:
+            raise ValueError(f"Invalid source-data extent for {name}: {size}")
+        return f"{storage} {name}[{size // width}]", width
+
     def copy_module_pointers(self) -> None:
         """Pointer tables kept in the module images (handler tables, string and data pointer arrays): the loader
         reads their PS1 addresses from the user's disc and resolves each through the map of the module's symbols
@@ -1896,8 +1904,10 @@ class Copier:
                 self.report["module-pointers-size"].append(f"{r['id']} {r['final_name']} ({r['size']} < {count}*4)")
                 continue
             module, offset = self.module_data_source(r, pointers=True)
+            sample = cf.MODULE_SAMPLE_POINTERS.get(r["id"])
+            owner = f"&{sample}Source" if sample else "NULL"
             tables.append(f'    {{"{module}", 0x{offset:X}, {count}u, (void**){name}, '
-                          f'sizeof {name} / sizeof {name}[0]}}, // {r["id"]} {r["name"]}')
+                          f'sizeof {name} / sizeof {name}[0], {owner}}}, // {r["id"]} {r["name"]}')
             modules.add(module)
         if modules:
             modules.add("SLUS_010.40")  # the resident module, reachable from every overlay
@@ -1957,13 +1967,21 @@ class Copier:
             if name not in emitted_fns or name not in self.provider:
                 raise ValueError(f"Missing reviewed module entry {fid}: {name}")
             symbols.append(f'    {{"{module}", 0x{address:08X}u, 0u, (void*)&{name}, 0u, 0u, 0u}},')
-        declarations = []
+        declarations, sample_sources = [], []
         for module, _, address, size, name, _ in cf.MODULE_DATA_BLOBS:
-            declarations.append(f"extern unsigned int {name}[{size // 4}];")
-            symbols.append(f'    {{"{module}", 0x{address:08X}u, {size}u, (void*){name}, '
-                   f'sizeof {name}, 1u, 1u}},')
+            declaration, width = self.module_blob_declaration(name, size)
+            declarations.append(f"extern {declaration};")
+            if name in cf.MODULE_SAMPLE_POINTERS.values():
+                sample_sources.append(
+                    f'static const Content_ModuleSymbol {name}Source = '
+                    f'{{"{module}", 0x{address:08X}u, {size}u, (void*){name}, '
+                    f'sizeof {name}, {width}u, {width}u}};')
+            else:
+                symbols.append(f'    {{"{module}", 0x{address:08X}u, {size}u, (void*){name}, '
+                       f'sizeof {name}, 1u, 1u}},')
         text = ("// Pointer tables in the module images and the symbol map that relocates them (splat_symbols.csv).\n"
             '#include "Content/ModuleData.h"\n\n' + "\n".join(declarations) + "\n\n"
+                + "\n".join(sample_sources) + "\n\n"
                 "const Content_ModuleSymbol Content_moduleSymbols[] = {\n" + "\n".join(symbols) + "\n};\n"
                 "const unsigned Content_moduleSymbolCount = sizeof Content_moduleSymbols / sizeof Content_moduleSymbols[0];\n\n"
                 "const Content_ModulePointerTable Content_modulePointers[] = {\n" + "\n".join(tables) + "\n};\n"
@@ -1986,8 +2004,8 @@ class Copier:
             rows.append(f'    {{"{module}", 0x{offset:X}, {size}, &{name}, sizeof {name}}}, // {r["id"]} {r["name"]}')
         definitions = []
         for module, offset, _, size, name, evidence in cf.MODULE_DATA_BLOBS:
-            assert size % 4 == 0
-            definitions.append(f"// decomp: {module} {evidence}\nunsigned int {name}[{size // 4}];")
+            declaration, _ = self.module_blob_declaration(name, size)
+            definitions.append(f"// decomp: {module} {evidence}\n{declaration};")
             rows.append(f'    {{"{module}", 0x{offset:X}, {size}u, {name}, sizeof {name}}},')
         text = ("// Globals whose contents are in the module images (DATA_LEDGER segment data/rodata/asset, no pointers).\n"
             '#include "Content/ModuleData.h"\n\n' + "\n".join(definitions) + "\n\n"

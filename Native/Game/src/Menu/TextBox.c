@@ -26,6 +26,7 @@
 #include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
+#include "State/SceneTimer.h"
 #include "State/StateFlags.h"
 #include "State/Timers.h"
 
@@ -376,7 +377,7 @@ void Menu_UpdateTextBoxes(void)
     ClearOTag(Menu_activeTextBoxOrderingTable, 34);
 
     if (Battle_lowerScreenUiState == 1) {
-        Battle_DrawPuzzleTimer(&Battle_puzzleTimer);
+        Battle_DrawPuzzleTimer(&State_sceneTimer);
     }
 
     Effects_DrawScreenEffectOverlay();

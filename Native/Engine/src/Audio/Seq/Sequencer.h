@@ -35,7 +35,7 @@ extern u_int Audio_Seq_kIdleProgram;
 extern u_int Audio_Seq_kSemitonePitches[88];
 extern char Audio_Seq_kNoteRemapTables[304];
 extern char Audio_Seq_kRandomPitchOffsets[256];
-extern short* Audio_Seq_kLfoWaveforms[16];
+extern short* Audio_Seq_kLfoWaveforms[256];
 extern void (*Audio_Seq_kOpcodeHandlers[96])(Audio_SeqChannel*, int);
 extern void (*Audio_Seq_kExtendedOpcodeHandlers[32])(Audio_SeqChannel*, int);
 extern Audio_CommandParams Audio_Seq_embeddedSoundEffectParams;

@@ -78,7 +78,7 @@ void Actors_QueueActorBaseSequenceLoad(Battle_Actor* arg0 __attribute__((unused)
 void Actors_QueueActorWeaponSequenceLoad(char* arg0, int arg1, int arg2, int arg3);
 void Actors_InterruptActorAction(int arg0, int arg1);
 void Actors_QueueSharedSequenceLoad(int index, int wepId);
-void Actors_UnloadSharedSequence(int arg0);
+int Actors_UnloadSharedSequence(int bankId);
 void Actors_QueueSharedSequenceWithTextures(int index, int wepId, int arg2);
 void Actors_QueueSequenceEffectTextures(int index, int wepId, int arg2);
 void Actors_ReleaseSequenceEffectTextures(int arg0);
@@ -116,7 +116,7 @@ void Actors_InitializeActorAnimationPose(Actors_ActorRecord* actor, Actors_Anima
 intptr_t Actors_FindActorAnimationHeader(void* arg0, int arg1, u_short** arg2);
 int Actors_RunAnimationEvents(Actors_ActorRecord* actor, Actors_AnimationPose* state, int mode);
 void Actors_IgnoreAnimationEvent(void);
-void Actors_RestartActorAnimationEvents(Actors_ActorRecord* arg0);
+int Actors_RestartActorAnimationEvents(Actors_ActorRecord* arg0);
 void Actors_BlendActorPoseHalfway(Actors_AnimationPose* dst, Actors_AnimationPose* src, int count);
 void Actors_UpdateActorAnimationBlend(Actors_ActorRecord* arg0);
 void Actors_AlignPoseRotationBranches(SVECTOR* dst, SVECTOR* src, int count);

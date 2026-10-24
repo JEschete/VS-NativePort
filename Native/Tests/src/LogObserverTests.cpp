@@ -8,6 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Core/Diagnostics.h"
 #include "Core/Log.hpp"
 
 namespace {
@@ -35,6 +36,16 @@ struct ObserverScope {
     Core::SetLogLevel(Core::LogLevel::Info);
     Core::SetLogChannels("*");
     Core::SetLogTick(0);
+  }
+};
+
+struct BufferedSinkScope {
+  LogFileScope primary;
+  LogFileScope mirror;
+  bool previous_flush = Core::SetLogFlushEachMessage(false);
+  ~BufferedSinkScope() {
+    Core::SetLogMirrorFile("");
+    Core::SetLogFlushEachMessage(previous_flush);
   }
 };
 }  // namespace
@@ -89,4 +100,44 @@ TEST_CASE("Log observers can be replaced and restored without affecting sinks",
   CHECK(text.find("test: replacement") != std::string::npos);
   CHECK(text.find("test: restored") != std::string::npos);
   CHECK(text.find("test: detached") != std::string::npos);
+}
+
+TEST_CASE("Buffered Core sinks persist warnings without a trace observer",
+          "[core][log][warning-persistence]") {
+  ObserverScope observer;
+  BufferedSinkScope sinks;
+  REQUIRE(Core::SetLogFile(sinks.primary.path.string().c_str()));
+  REQUIRE(Core::SetLogMirrorFile(sinks.mirror.path.string().c_str()));
+  Core::SetLogLevel(Core::LogLevel::Trace);
+  Core::SetLogChannels("*");
+  VS_LOG_WARN("effects.texture", "durable warning without observer");
+  for (const auto& path : {sinks.primary.path, sinks.mirror.path}) {
+    CAPTURE(path.string());
+    std::ifstream input(path);
+    const std::string contents((std::istreambuf_iterator<char>(input)), {});
+    CHECK(contents.find("durable warning without observer") !=
+          std::string::npos);
+  }
+}
+
+TEST_CASE(
+    "Native C warnings and errors retain severity filtering and tick context",
+    "[core][log][native-diagnostics]") {
+  ObserverScope scope;
+  std::vector<Core::LogLevel> levels;
+  std::vector<std::string> messages;
+  std::vector<std::uint64_t> ticks;
+  Core::SetLogLevel(Core::LogLevel::Info);
+  REQUIRE(Core::SetLogChannels("unrelated"));
+  Core::SetLogTick(73);
+  Core::SetLogObserver([&](const Core::LogRecord& record) {
+    levels.push_back(record.level);
+    messages.emplace_back(record.message);
+    ticks.push_back(record.tick);
+  });
+  Core_Warnf("native", "bank=%u", 0U);
+  Core_Errorf("native", "slot=%d", -1);
+  CHECK((levels == std::vector{Core::LogLevel::Warn, Core::LogLevel::Error}));
+  CHECK((messages == std::vector<std::string>{"bank=0", "slot=-1"}));
+  CHECK((ticks == std::vector<std::uint64_t>{73, 73}));
 }

@@ -21,6 +21,7 @@
 #include "Content/Disc.hpp"
 #include "Core/FrameClock.hpp"
 #include "Core/Log.hpp"
+#include "Diagnostics/GameplayTrace.hpp"
 #include "Input/Pad.hpp"
 #include "Movie/MoviePlayer.h"
 #include "Platform/App.hpp"
@@ -43,37 +44,42 @@ namespace Render = VS::Render;
 
 namespace {
 
-bool ConfigureLogging(int argc, char** argv) {
+// Set false and rebuild to retain normal, lightweight Desktop logging.
+constexpr bool kEnableDetailedGameLogging = true;
+
+bool ConfigureLogging(int argc, char** argv, Game::GameplayTrace* trace) {
+  const auto reject = [trace](const std::string& message) {
+    std::fprintf(stderr, "%s\n", message.c_str());
+    if (trace != nullptr) {
+      trace->Event("startup.error", {{"message", message}});
+    }
+    return false;
+  };
   for (int i = 1; i < argc; ++i) {
     const std::string_view option = argv[i];
     if (option != "--log-level" && option != "--log-channels") {
       continue;
     }
     if (i + 1 == argc || std::string_view(argv[i + 1]).starts_with("--")) {
-      std::fprintf(stderr, "%s requires a value\n", argv[i]);
-      return false;
+      return reject(std::format("{} requires a value", argv[i]));
     }
     const std::string_view value = argv[++i];
     if (option == "--log-level") {
       const auto level = Core::ParseLogLevel(value);
       if (!level) {
-        std::fprintf(
-            stderr,
-            "--log-level expects trace, debug, info, warn, error, or off\n");
-        return false;
+        return reject(
+            "--log-level expects trace, debug, info, warn, error, or off");
       }
       Core::SetLogLevel(*level);
     } else if (!Core::SetLogChannels(value)) {
-      std::fprintf(
-          stderr,
-          "--log-channels expects comma-separated names (no spaces), or *\n");
-      return false;
+      return reject(
+          "--log-channels expects comma-separated names (no spaces), or *");
     }
   }
-  if (!Core::SetLogFile(
+  if (trace == nullptr &&
+      !Core::SetLogFile(
           (Platform::ExecutableDir() / "vs-native.log").string().c_str())) {
-    std::fprintf(stderr, "cannot open vs-native.log\n");
-    return false;
+    return reject("cannot open vs-native.log");
   }
   return true;
 }
@@ -288,7 +294,8 @@ RunSettings ParseRunSettings(int argc, char** argv) {
   return settings;
 }
 
-int RunGame(const Content::Disc* disc, const RunSettings& settings) {
+int RunGame(const Content::Disc* disc, const RunSettings& settings,
+            Game::GameplayTrace* trace) {
   VS_LOG_INFO("boot", "run: tick limit={}, speed={}, scripted presses={}",
               settings.max_ticks, settings.speed,
               settings.script.presses.size());
@@ -307,6 +314,9 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings) {
   if (auto r = audio.Open(); !r) {
     VS_LOG_WARN("boot", "{} (continuing without audio)", r.error());
   }
+  struct MovieScope {
+    ~MovieScope() { Movie_PlayerClose(); }
+  } movie_scope;
 
   Input::InputSystem input;
   if (!settings.devices) {
@@ -340,6 +350,14 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings) {
         VS_LOG_INFO("input", "pressed {}", Input::DescribeButtons(pad.pressed));
       }
       game.Tick(pad, true);
+      if (trace != nullptr) {
+        const auto state = Game::InspectGameplay();
+        trace->Frame(game.Ticks(), pad, state,
+                     Game::InspectGameplayScene(state));
+        if (trace->Failed()) {
+          throw std::runtime_error("detailed gameplay trace failed");
+        }
+      }
       shown = Render::GamePages().Present(frame, frame_w, frame_h);
       VS_LOG_TRACE("frame", "end tick; presented={}, image={}x{}", shown,
                    frame_w, frame_h);
@@ -360,15 +378,15 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings) {
       break;
     }
   }
-  Movie_PlayerClose();  // its soundtrack source must go before the audio device
-                        // and SDL
+  if (trace != nullptr) {
+    trace->Event("host.exit",
+                 {{"ticks", game.Ticks()}, {"game_finished", game.Finished()}},
+                 game.Ticks());
+  }
   return 0;
 }
 
-}  // namespace
-
-int main(int argc, char** argv) try {
-  if (!ConfigureLogging(argc, argv)) return 1;
+int RunDesktop(int argc, char** argv, Game::GameplayTrace* trace) {
   Platform::InstallCrashHandler();
   std::unique_ptr<Content::Disc> disc;
   if (auto disc_path = LocateDisc(argc, argv)) {
@@ -391,8 +409,56 @@ int main(int argc, char** argv) try {
     VS_LOG_ERROR("boot", "{}", result.error());
     return 1;
   }
-  return RunGame(disc.get(), ParseRunSettings(argc, argv));
+  if (trace != nullptr) {
+    trace->Event("content.data",
+                 {{"data_root", fs::absolute(*data_root).string()}});
+  }
+  return RunGame(disc.get(), ParseRunSettings(argc, argv), trace);
+}
+
+}  // namespace
+
+int main(int argc, char** argv) try {
+  std::unique_ptr<Game::GameplayTrace> trace;
+  if (kEnableDetailedGameLogging) {
+    const auto directory = Platform::ExecutableDir();
+    trace = std::make_unique<Game::GameplayTrace>(
+        directory / "game-logs", "desktop", directory / "vs-native.log");
+    const auto source = Game::TraceSourceProvenance(directory);
+    Game::WriteTraceManifest(
+        trace->Directory(),
+        {{"schema", 1},
+         {"host", "desktop"},
+         {"detailed_logging", true},
+         {"build", __DATE__ " " __TIME__},
+         {"revision", source.at("revision")},
+         {"worktree", source.at("worktree")},
+         {"source_status", source.at("status")},
+         {"arguments", std::vector<std::string>(argv, argv + argc)},
+         {"compatibility_log", (directory / "vs-native.log").string()}});
+  }
+  int result = 1;
+  try {
+    if (ConfigureLogging(argc, argv, trace.get())) {
+      if (trace != nullptr) {
+        VS_LOG_INFO("diagnostics", "detailed logs: {}",
+                    trace->Directory().string());
+        trace->Event("host.start", {{"detailed_logging", true}});
+      }
+      result = RunDesktop(argc, argv, trace.get());
+    }
+  } catch (const std::exception& error) {
+    VS_LOG_ERROR("boot", "{}", error.what());
+    if (trace != nullptr) trace->Event("fatal", {{"message", error.what()}});
+  }
+  if (trace != nullptr) {
+    trace->Event("host.result",
+                 {{"exit_code", result}, {"engine_errors", trace->Errors()}});
+    if (trace->Failed()) return 1;
+  }
+  return result;
 } catch (const std::exception& error) {
-  VS_LOG_ERROR("boot", "{}", error.what());
+  std::fprintf(stderr, "Cannot initialize game diagnostics: %s\n",
+               error.what());
   return 1;
 }

@@ -1,8 +1,12 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <cstdint>
+#include <cstring>
 #include <functional>
 #include <map>
+#include <optional>
+#include <set>
 #include <span>
 #include <string>
 #include <string_view>
@@ -136,6 +140,77 @@ int LoadData(Modules& modules) {
   return failed;
 }
 
+class SamplePrograms {
+ public:
+  explicit SamplePrograms(const Content_ModuleSymbol& source)
+      : source_(source) {}
+
+  bool Valid(std::string_view module) const {
+    return source_.module != nullptr && module == source_.module &&
+           source_.target != nullptr && source_.size >= sizeof(std::int16_t) &&
+           source_.size <= source_.nativeSize && source_.address % 2 == 0 &&
+           reinterpret_cast<std::uintptr_t>(source_.target) %
+                   alignof(std::int16_t) ==
+               0 &&
+           source_.sourceElementSize == sizeof(std::int16_t) &&
+           source_.nativeElementSize == sizeof(std::int16_t);
+  }
+
+  bool Contains(std::int64_t address) const {
+    const auto offset = address - static_cast<std::int64_t>(source_.address);
+    return offset >= 0 && offset % kSampleBytes == 0 &&
+           static_cast<u64>(offset) + sizeof(std::int16_t) <= source_.size;
+  }
+
+  void* Resolve(u32 address, unsigned selector) {
+    const auto [entry, inserted] = bounded_.try_emplace(address, false);
+    if (inserted) entry->second = Bounded(address);
+    if (!entry->second) {
+      VS_LOG_DEBUG("content",
+                   "LFO selector {} at 0x{:08X} leaves source sample data; "
+                   "selection is unavailable",
+                   selector, address);
+      return nullptr;
+    }
+    return static_cast<u8*>(source_.target) + (address - source_.address);
+  }
+
+ private:
+  std::optional<std::int16_t> Read(std::int64_t address) const {
+    if (!Contains(address)) return std::nullopt;
+    std::int16_t value = 0;
+    const auto offset = static_cast<usize>(address - source_.address);
+    std::memcpy(&value, static_cast<const u8*>(source_.target) + offset,
+                sizeof value);
+    return value;
+  }
+
+  bool Bounded(u32 address) const {
+    std::set<std::int64_t> visited;
+    std::int64_t cursor = address;
+    while (visited.insert(cursor).second) {
+      const auto first = Read(cursor);
+      if (!first) return false;
+      if (*first == 0) {
+        const auto second = Read(cursor + kSampleBytes);
+        if (!second) return false;
+        if (*second == 0) {
+          const auto jump = Read(cursor + 2 * kSampleBytes);
+          if (!jump) return false;
+          cursor += static_cast<std::int64_t>(*jump) * kSampleBytes;
+        }
+      }
+      if (!Read(cursor)) return false;
+      cursor += kSampleBytes;
+    }
+    return true;
+  }
+
+  static constexpr std::int64_t kSampleBytes = 2;
+  const Content_ModuleSymbol& source_;
+  std::map<u32, bool> bounded_;
+};
+
 bool RelocateTable(const Content_ModulePointerTable& table,
                    std::span<const u8> image, const SymbolMap& symbols) {
   if (table.module == nullptr ||
@@ -151,6 +226,15 @@ bool RelocateTable(const Content_ModulePointerTable& table,
         table.capacity);
     return false;
   }
+  std::optional<SamplePrograms> samples;
+  if (table.sampleSource != nullptr) {
+    samples.emplace(*table.sampleSource);
+    if (!samples->Valid(table.module)) {
+      VS_LOG_ERROR("content", "LFO table {} has an invalid sample-data owner",
+                   table.module);
+      return false;
+    }
+  }
   std::vector<void*> resolved(table.count);
   unsigned unresolved = 0;
   for (unsigned index = 0; index < table.count; ++index) {
@@ -160,8 +244,23 @@ bool RelocateTable(const Content_ModulePointerTable& table,
                       sizeof(u32)),
         address_bytes.begin());
     const u32 address = std::bit_cast<u32>(address_bytes);
-    resolved[index] =
-        address != 0 ? symbols.Resolve(table.module, address) : nullptr;
+    if (address == 0) {
+      resolved[index] = nullptr;
+      continue;
+    }
+    if (samples) {
+      if (!samples->Contains(address)) {
+        VS_LOG_ERROR("content",
+                     "LFO table {} selector {} address 0x{:08X} is outside "
+                     "source sample data",
+                     table.module, index, address);
+        ++unresolved;
+      } else {
+        resolved[index] = samples->Resolve(address, index);
+      }
+      continue;
+    }
+    resolved[index] = symbols.Resolve(table.module, address);
     if (address != 0 && resolved[index] == nullptr) {
       VS_LOG_ERROR(
           "content",

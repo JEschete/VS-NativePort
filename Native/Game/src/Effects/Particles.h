@@ -290,8 +290,8 @@ int Effects_TickEffectParticles(Effects_EffectInstance* arg0);
 void Effects_SetParticleGravity(Effects_ParticleGravity* arg0);
 void Effects_SetParticleDrag(int* arg0);
 void Effects_IntegrateParticleMotion(Effects_Particle* node);
-void Effects_ClearParticleTextureState(int* arg0);
-void Effects_InitializeParticleTextureAnimation(Effects_ParticleTextureAnimation* arg0, int textureIndex, int arg2);
-void Effects_AdvanceParticleTextureAnimation(Effects_ParticleTextureAnimation* arg0);
+void Effects_ClearParticleTextureState(int* storage);
+void Effects_InitializeParticleTextureAnimation(Effects_ParticleTextureAnimation* animation, int textureIndex, int programIndex);
+void Effects_AdvanceParticleTextureAnimation(Effects_ParticleTextureAnimation* animation);
 
 #endif // VS_EFFECTS_PARTICLES_H_DECLS

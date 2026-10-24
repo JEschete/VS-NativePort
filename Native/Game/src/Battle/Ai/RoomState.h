@@ -16,6 +16,7 @@
 #include "Render/Palette.h"
 
 void Battle_Ai_FreeRoomAiState(void);
+void Battle_Ai_InvalidateSessionBindings(void);
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Shadow.h"

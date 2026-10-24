@@ -22,6 +22,7 @@ _Static_assert(sizeof(Battle_HudHighlightWord) == 0x4, "Battle_HudHighlightWord 
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
+#include "State/SceneTimer.h"
 
 extern char* Battle_limbNames[20];
 extern char Battle_hudStatusIconsHidden;
@@ -54,7 +55,7 @@ extern u_int Battle_limbDisplaySpriteTexCoords[13];
 extern u_short Battle_battleModeIndicatorWobble;
 extern char* Battle_puzzleTimerTextPointer;
 extern char Battle_lowerScreenUiState;
-extern char const Battle_puzzleTimerText[];
+extern char Battle_puzzleTimerText[9];
 extern int Battle_puzzleTimer;
 int Battle_SetGameplayHudHidden(int arg0);
 void Battle_DrawHudStatGauge(int colorIndex, int current, int max);
@@ -68,7 +69,7 @@ void Battle_DrawShortcutHud(void);
 void Battle_DrawBattleHud(void);
 void Battle_ShowPuzzleTimer(void);
 void Battle_HidePuzzleTimer(void);
-void Battle_DrawPuzzleTimer(int* value);
+void Battle_DrawPuzzleTimer(const State_SceneTimer* timer);
 void Battle_SetHudHidden(int arg0);
 void Battle_SetHudBattleMode(int arg0);
 

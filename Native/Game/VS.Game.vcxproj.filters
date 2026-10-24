@@ -13,6 +13,9 @@
     <Filter Include="include\Boot">
       <UniqueIdentifier>{722EFB4F-0880-558D-8955-C5662D446503}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Diagnostics">
+      <UniqueIdentifier>{BA6EB3B9-90AD-5335-8089-7F3CE11BFBBA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Items">
       <UniqueIdentifier>{1D41767F-4F50-54FF-BE39-1D5F1897B58C}</UniqueIdentifier>
     </Filter>
@@ -39,6 +42,9 @@
     </Filter>
     <Filter Include="src\Boot">
       <UniqueIdentifier>{0748C621-8807-5D09-9758-B3EC1411DDDB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Diagnostics">
+      <UniqueIdentifier>{A5A3F453-053D-5BAE-8924-A7F0585CCBE6}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Effects">
       <UniqueIdentifier>{8B8D1C81-72C5-5E61-A692-1E99EC59640E}</UniqueIdentifier>
@@ -621,6 +627,9 @@
     <ClInclude Include="src\Boot\Session.h">
       <Filter>src\Boot</Filter>
     </ClInclude>
+    <ClCompile Include="src\Diagnostics\GameplayTrace.cpp">
+      <Filter>src\Diagnostics</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\ActionEffects.c">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -2075,6 +2084,9 @@
     </ClInclude>
     <ClInclude Include="include\Boot\GameApp.hpp">
       <Filter>include\Boot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Diagnostics\GameplayTrace.hpp">
+      <Filter>include\Diagnostics</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\Equipment.h">
       <Filter>include\Items</Filter>

@@ -9,6 +9,7 @@
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/SoundBanks.h"
+#include "Battle/EncounterHooks.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
@@ -38,22 +39,27 @@ static int session_active;
 int Boot_RunSessionLoop(Boot_SessionEntry title, Boot_SessionEntry battle) {
   if (session_active || title == NULL || battle == NULL) return -1;
   session_active = 1;
+  Boot_ResetGameplayInspection();
   const int destination = setjmp(session_boundary);
   const int result = destination == 2 ? battle() : title();
   session_active = 0;
+  Boot_ResetGameplayInspection();
   return result;
 }
 
 static void RequestSession(int destination) {
   if (!session_active) abort();
+  Boot_ResetGameplayInspection();
   Core_Debugf("boot", "native session transition: %s",
               destination == 1 ? "title" : "battle");
   longjmp(session_boundary, destination);
 }
 
 static int RunLoadedBattle(void) {
+  Boot_ResetGameplayInspection();
   Boot_isGameplayActive = 1;
   Boot_RunGameLoop();
+  Boot_ResetGameplayInspection();
   SetDispMask(0);
   Audio_StopAndFreeCurrentMusic();
   return 0;

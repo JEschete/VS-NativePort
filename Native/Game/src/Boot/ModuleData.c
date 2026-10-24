@@ -154,8 +154,8 @@ unsigned int Content_battleLimbNameBytes[38];
 unsigned int Content_battleGimmickTemplateBytes[455];
 // decomp: BATTLE/BATTLE.PRG 5BF94.c:textbox frame vertices; nine styles precede D_800EB588
 unsigned int Content_battleTextboxFrameBytes[631];
-// decomp: SLUS_010.40 25AC.c:SoundVM_B4_Vibrato; sixteen short waveform sequences precede g_Sound_LfoTable
-unsigned int Content_residentLfoSamples[513];
+// decomp: SLUS_010.40 25AC.c:LFO selectors include source-code bytes as sample/control data; original PS-X EXE payload, never host code
+short Content_residentLfoSamples[167936];
 
 const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x41C, sizeof Field_legacyBackgroundGradientPackets, &Field_legacyBackgroundGradientPackets, sizeof Field_legacyBackgroundGradientPackets}, // G00012 D_80068C1C
@@ -543,7 +543,7 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x1060, 152u, Content_battleLimbNameBytes, sizeof Content_battleLimbNameBytes},
     {"BATTLE/BATTLE.PRG", 0x80B0C, 1820u, Content_battleGimmickTemplateBytes, sizeof Content_battleGimmickTemplateBytes},
     {"BATTLE/BATTLE.PRG", 0x823AC, 2524u, Content_battleTextboxFrameBytes, sizeof Content_battleTextboxFrameBytes},
-    {"SLUS_010.40", 0x2019C, 2052u, Content_residentLfoSamples, sizeof Content_residentLfoSamples},
+    {"SLUS_010.40", 0x800, 335872u, Content_residentLfoSamples, sizeof Content_residentLfoSamples},
 };
 const unsigned Content_moduleDataCount = sizeof Content_moduleData / sizeof Content_moduleData[0];
 

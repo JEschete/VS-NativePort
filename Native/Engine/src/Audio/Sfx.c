@@ -4,6 +4,7 @@
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
+#include "Core/Diagnostics.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
 #include "Render/Render.h"
@@ -90,7 +91,20 @@ void Audio_PlaySfx(int arg0, long id, int arg2, int arg3)
         break;
 
     case 0xFF000:
+        if (Audio_soundState.currentSfxBank == 0) {
+            Core_Warnf("audio.sfx", "private SFX id=%ld skipped: no selected bank", id);
+            return;
+        }
+        if (Audio_soundState.currentSfxBank >
+            sizeof Audio_soundState.sfxBankData / sizeof Audio_soundState.sfxBankData[0]) {
+            Core_Errorf("audio.sfx", "invalid selected SFX bank=%u", Audio_soundState.currentSfxBank);
+            return;
+        }
         var_s0_2 = Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];
+        if (var_s0_2 == NULL || id < 0) {
+            Core_Errorf("audio.sfx", "unavailable SFX bank=%u or invalid id=%ld", Audio_soundState.currentSfxBank, id);
+            return;
+        }
         var_s0_2 += *((int*)var_s0_2 + id + 1);
         if (Audio_Playback_UsesSoundEffectTags(var_s0_2) != 0) {
             Audio_PlaySfxProgramChannel(var_s0_2, Audio_nextSfxChannelGroupFF000, arg2, arg3);
@@ -105,6 +119,14 @@ void Audio_PlaySfx(int arg0, long id, int arg2, int arg3)
 
     case 0xF00000:
         var_s0_2 = Audio_soundState.sfxBankData[2];
+        if (var_s0_2 == NULL) {
+            Core_Warnf("audio.sfx", "room SFX id=%ld skipped: no room bank", id);
+            return;
+        }
+        if (id < 0) {
+            Core_Errorf("audio.sfx", "invalid room SFX id=%ld", id);
+            return;
+        }
         var_s0_2 += *((int*)var_s0_2 + id + 1);
         if (Audio_Playback_UsesSoundEffectTags(var_s0_2) != 0) {
             Audio_PlaySfxProgramChannel(var_s0_2, Audio_nextSfxChannelGroupF00000, arg2, arg3);

@@ -3,6 +3,7 @@
 #include "Actors/ActorState.h"
 #include "Actors/Location.h"
 #include "Actors/Skeleton.h"
+#include "Core/Diagnostics.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Math/Matrix.h"
 #include "Core/Math/ScalarMath.h"
@@ -35,10 +36,10 @@ u_char Event_fieldCameraReturnCommands[276]; /* contents: module image (ModuleDa
 short Event_kOrbitReturnHeightOffsets[134]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9C28 (D_800E9C28@BATTLE/BATTLE.PRG)
-u_char Event_kOrbitReturnFirstCommand; /* contents: module image (ModuleData.c) */
+u_char Event_kOrbitReturnFirstCommand[4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800E9C2C (D_800E9C2C@BATTLE/BATTLE.PRG)
-u_char Event_kOrbitReturnSecondCommand; /* contents: module image (ModuleData.c) */
+u_char Event_kOrbitReturnSecondCommand[3]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800F4BA0 (D_800F4BA0@BATTLE/BATTLE.PRG)
 char Event_skipNextFieldCameraRestore;
@@ -309,6 +310,10 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         c->elapsedFrames = 0;
         c->easingPrimary = script[1];
         c->durationFrames = script[2];
+        Core_Debugf("event.camera", "start track=%s mode=%u easing=%u duration=%u",
+            c == &Event_camera->eye ? "eye" : "look_at",
+            (unsigned)c->motionMode, (unsigned)c->easingPrimary,
+            (unsigned)c->durationFrames);
         Core_Math_CopyVector(&c->startPosition, &c->currentPosition);
         Core_Math_SubtractVectors(&c->displacement, &c->destination, &c->currentPosition);
         return 0;
@@ -317,6 +322,10 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         c->elapsedFrames = 0;
         c->easingPrimary = script[1];
         c->durationFrames = script[2];
+        Core_Debugf("event.camera", "start track=%s mode=%u easing=%u duration=%u",
+            c == &Event_camera->eye ? "eye" : "look_at",
+            (unsigned)c->motionMode, (unsigned)c->easingPrimary,
+            (unsigned)c->durationFrames);
         Core_Math_CopyVector(&c->startPosition, &c->currentPosition);
         Core_Math_SubtractVectors(&c->displacement, &c->destination, &c->currentPosition);
         c->motionScalar = Core_Math_FixedVectorMagnitude(
@@ -437,6 +446,10 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         c->elapsedFrames = 0;
         c->easingPrimary = 0;
         c->durationFrames = script[2];
+        Core_Debugf("event.camera", "start track=%s mode=%u easing=%u duration=%u",
+            c == &Event_camera->eye ? "eye" : "look_at",
+            (unsigned)c->motionMode, (unsigned)c->easingPrimary,
+            (unsigned)c->durationFrames);
         Core_Math_SubtractVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &c->partnerPosition, &c->currentPosition);
         Core_Math_DirectionRotationMatrix((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
         s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
@@ -479,6 +492,12 @@ void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other
 {
     if (c->motionMode == 15) {
         return;
+    }
+    if (c->durationFrames == 0 && c->motionMode != 11) {
+        Core_Warnf("event.camera", "zero duration track=%s mode=%u easing=%u elapsed=%u tick_speed=%u",
+            c == &Event_camera->eye ? "eye" : "look_at",
+            (unsigned)c->motionMode, (unsigned)c->easingPrimary,
+            (unsigned)c->elapsedFrames, (unsigned)State_tickSpeed);
     }
     if (c->motionMode != 11) {
         c->elapsedFrames += State_tickSpeed >> 1;
@@ -1170,8 +1189,8 @@ void Event_StartEventCameraOrbitReturn(char arg0)
     Core_Math_CopyVector(&Event_camera->eye.destination, &sp40);
     Core_Math_CopyVector(&Event_camera->lookAt.destination, &sp20);
 
-    Event_CommandCameraMotion(&Event_kOrbitReturnFirstCommand, 0);
-    Event_CommandCameraMotion(&Event_kOrbitReturnSecondCommand, 0);
+    Event_CommandCameraMotion(Event_kOrbitReturnFirstCommand, 0);
+    Event_CommandCameraMotion(Event_kOrbitReturnSecondCommand, 0);
 }
 
 // decomp: BATTLE.PRG func_800BE53C (src/BATTLE/BATTLE.PRG/4A0A8.c:4074)

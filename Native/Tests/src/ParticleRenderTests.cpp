@@ -16,11 +16,14 @@
 
 extern "C" {
 #include "Core/BiosRand.h"
+#include "Core/Memory.h"
+#include "Core/Memory/Heap.h"
 #include "Effects/EffectResources.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
+#include "Effects/Templates/ParticleDispatch.h"
 #include "Effects/Templates/ParticleRender.h"
 #include "Effects/Templates/TrailInit.h"
 #include "Effects/Templates/TrailNineInit.h"
@@ -139,6 +142,25 @@ struct ParticleFixture {
 };
 }  // namespace
 
+TEST_CASE("Particle texture reset clears native pointer tails without overflow",
+          "[particle][texture-state]") {
+  struct {
+    std::uint64_t before = 0x123456789ABCDEF0;
+    Effects_ParticleTextureAnimation animation;
+    std::uint64_t after = 0x0FEDCBA987654321;
+  } fixture;
+  std::memset(&fixture.animation, 0xCD, sizeof fixture.animation);
+  Effects_ClearParticleTextureState(reinterpret_cast<int*>(&fixture.animation));
+  CHECK(fixture.before == 0x123456789ABCDEF0);
+  CHECK(fixture.after == 0x0FEDCBA987654321);
+  CHECK(fixture.animation.program == nullptr);
+  CHECK(fixture.animation.textureInfo == nullptr);
+  CHECK(fixture.animation.cursor == 0);
+  CHECK(fixture.animation.frameTimer == 0);
+  CHECK(fixture.animation.frameOffsetX == 0);
+  CHECK(fixture.animation.frameOffsetY == 0);
+}
+
 TEST_CASE("Particle wrappers forward the real native list and texture program",
           "[effects][particle-render]") {
   ParticleFixture fixture;
@@ -251,8 +273,89 @@ struct EmissionFixture : ParticleFixture {
     Effects_usedParticleCount = 0;
     Effects_freeParticles = &particle;
   }
+
+  void CheckTexture(const Effects_ParticleQuadSet& state) const {
+    CHECK(state.textureAnimation.program ==
+          reinterpret_cast<const u_char*>(programs.data()) + 8);
+    CHECK(state.textureAnimation.textureInfo == nullptr);
+    CHECK(state.textureAnimation.frameTimer == 0);
+    CHECK(state.textureAnimation.cursor == 0);
+    CHECK(state.textureAnimation.textureIndex == 0);
+  }
+};
+
+struct DispatchHeap {
+  Core_HeapBlockHeader saved = Core_legacyHeapList;
+  Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
+  std::array<Core_HeapBlockHeader, 256> storage{};
+  unsigned free_units = 0;
+
+  DispatchHeap() {
+    Core_Memory_InitializeHeap(storage.data(), sizeof storage);
+    free_units = Core_legacyHeapList.next->blockSize;
+  }
+
+  ~DispatchHeap() {
+    Core_legacyHeapList = saved;
+    Core_legacySecondaryHeapList = saved_secondary;
+  }
+
+  static std::size_t Capacity(void* allocation) {
+    const auto* header = static_cast<Core_HeapBlockHeader*>(allocation) - 1;
+    return (header->blockSize - 1) * sizeof(Core_HeapBlockHeader);
+  }
+
+  static void CheckPrefix(const Effects_ParticleQuadSet& state) {
+    CHECK(state.opaque0 == 30);
+    CHECK(state.definitionIndex == 0);
+    CHECK(state.age == 0);
+    REQUIRE(state.controlPoints != nullptr);
+  }
 };
 }  // namespace
+
+TEST_CASE("Textured ribbon dispatchers allocate and initialize native textures",
+          "[effects][particle-dispatch]") {
+  EmissionFixture fixture;
+  DispatchHeap heap;
+  Effects_RendererSlot renderer{};
+  fixture.package.block1TableCount = 1;
+  fixture.package.block2Count = 1;
+  const auto dispatch = GENERATE(Effects_Plg045_ParticleDispatch,
+                                 Effects_Plg265_ParticleDispatch2);
+  REQUIRE(dispatch(&renderer, 1, 30) == 1);
+  REQUIRE(renderer.rendererState != nullptr);
+  const auto capacity = DispatchHeap::Capacity(renderer.rendererState);
+  CHECK(capacity >= sizeof(Effects_ParticleQuadSet));
+  auto* state = static_cast<Effects_ParticleQuadSet*>(renderer.rendererState);
+  DispatchHeap::CheckPrefix(*state);
+  if (capacity >= sizeof(Effects_ParticleQuadSet)) {
+    fixture.CheckTexture(*state);
+  }
+  CHECK(dispatch(&renderer, 4, 0) == 0);
+  Core_Memory_FreeFromHighEnd(renderer.rendererState);
+  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+}
+
+TEST_CASE("Untextured line dispatchers retain only the complete native prefix",
+          "[effects][particle-dispatch]") {
+  EmissionFixture fixture;
+  DispatchHeap heap;
+  Effects_RendererSlot renderer{};
+  REQUIRE(Effects_Plg265_ParticleDispatch(&renderer, 1, 30) == 1);
+  const auto prefix = offsetof(Effects_ParticleQuadSet, textureAnimation);
+  const auto rounded = (prefix + sizeof(Core_HeapBlockHeader) - 1) /
+                       sizeof(Core_HeapBlockHeader) *
+                       sizeof(Core_HeapBlockHeader);
+  CHECK(DispatchHeap::Capacity(renderer.rendererState) == rounded);
+  const auto* state =
+      static_cast<Effects_ParticleQuadSet*>(renderer.rendererState);
+  DispatchHeap::CheckPrefix(*state);
+  CHECK(state->opaque8 == 0);
+  CHECK(Effects_Plg265_ParticleDispatch(&renderer, 4, 0) == 0);
+  Core_Memory_FreeFromHighEnd(renderer.rendererState);
+  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+}
 
 TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
           "[effects][particle-emission]") {

@@ -37,72 +37,72 @@ char Field_textureEffectCount;
 char Field_roomEffectScriptCount;
 
 // decomp: BATTLE.PRG func_8009195C (src/BATTLE/BATTLE.PRG/2842C.c:550)
-void* Field_FindRoomGeometryGroup(int arg0)
+void* Field_FindRoomGeometryGroup(int group_index)
 {
     if (Field_roomData.geometry != NULL) {
-        int v1 = *Field_roomData.geometry;
-        int* a1 = Field_roomData.geometry + 1;
-        if ((arg0 >= 0) && (arg0 < v1)) {
-            return a1 + (arg0 * 16);
+        int group_count = *Field_roomData.geometry;
+        int* groups = Field_roomData.geometry + 1;
+        if ((group_index >= 0) && (group_index < group_count)) {
+            return groups + (group_index * 16);
         }
     }
     return NULL;
 }
 
 // decomp: BATTLE.PRG func_80091998 (src/BATTLE/BATTLE.PRG/2842C.c:562)
-int Field_ShowRoomGeometryGroup(int arg0)
+int Field_ShowRoomGeometryGroup(int group_index)
 {
-    int* temp_v0 = Field_FindRoomGeometryGroup(arg0);
-    if (temp_v0 != NULL) {
-        *temp_v0 &= ~0x100;
+    int* group = Field_FindRoomGeometryGroup(group_index);
+    if (group != NULL) {
+        *group &= ~0x100;
         return 1;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800919D8 (src/BATTLE/BATTLE.PRG/2842C.c:572)
-int Field_HideRoomGeometryGroup(int arg0)
+int Field_HideRoomGeometryGroup(int group_index)
 {
-    int* temp_v0 = Field_FindRoomGeometryGroup(arg0);
-    if (temp_v0 != NULL) {
-        *temp_v0 |= 0x100;
+    int* group = Field_FindRoomGeometryGroup(group_index);
+    if (group != NULL) {
+        *group |= 0x100;
         return 1;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80091A1C (src/BATTLE/BATTLE.PRG/2842C.c:582)
-int Field_SwapRoomGeometryGroupFlags(int arg0, int arg1)
+int Field_SwapRoomGeometryGroupFlags(int first_group_index, int second_group_index)
 {
-    int* temp_s0 = Field_FindRoomGeometryGroup(arg0);
-    int* temp_a1 = Field_FindRoomGeometryGroup(arg1);
+    int* first_group = Field_FindRoomGeometryGroup(first_group_index);
+    int* second_group = Field_FindRoomGeometryGroup(second_group_index);
 
-    if ((temp_s0 != NULL) && (temp_a1 != NULL)) {
-        int temp_a0 = *temp_s0;
-        *temp_s0 = *temp_a1;
-        *temp_a1 = temp_a0;
+    if ((first_group != NULL) && (second_group != NULL)) {
+        int saved_flags = *first_group;
+        *first_group = *second_group;
+        *second_group = saved_flags;
         return 1;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80091A78 (src/BATTLE/BATTLE.PRG/2842C.c:596)
-int Field_AddRoomGeometryDepthBias(int arg0, int arg1)
+int Field_AddRoomGeometryDepthBias(int group_index, int depth_bias)
 {
-    u_short* temp_v0 = Field_FindRoomGeometryGroup(arg0);
-    if (temp_v0 != NULL) {
-        temp_v0[1] = (u_short)(temp_v0[1] + arg1);
+    u_short* group_halfwords = Field_FindRoomGeometryGroup(group_index);
+    if (group_halfwords != NULL) {
+        group_halfwords[1] = (u_short)(group_halfwords[1] + depth_bias);
         return 1;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80091AC0 (src/BATTLE/BATTLE.PRG/2842C.c:606)
-int Field_DisableRoomGeometryGroup(int arg0)
+int Field_DisableRoomGeometryGroup(int group_index)
 {
-    int* temp_v0 = Field_FindRoomGeometryGroup(arg0);
-    if (temp_v0 != NULL) {
-        *temp_v0 |= 0x1000;
+    int* group = Field_FindRoomGeometryGroup(group_index);
+    if (group != NULL) {
+        *group |= 0x1000;
         return 1;
     }
     return 0;

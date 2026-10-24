@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
@@ -10,7 +12,25 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "CombatLab/Trace.hpp"
+#include "Legacy/Psx.h"
 #include "Platform/App.hpp"
+
+extern "C" {
+#include "Actors/ActorRecord.h"
+#include "Actors/Skeleton.h"
+#include "Battle/Action.h"
+#include "Battle/ActionFlow.h"
+#include "Battle/Actor.h"
+#include "Battle/Damage.h"
+#include "Battle/EncounterHooks.h"
+#include "Boot/GameLoop.h"
+#include "Event/ScriptVm.h"
+#include "Field/GameMode.h"
+#include "Field/Interactions.h"
+#include "Field/Mpd.h"
+#include "Items/Loot.h"
+#include "Menu/Framework/Framework.h"
+}
 
 namespace {
 struct TraceScope {
@@ -367,4 +387,233 @@ TEST_CASE(
   const auto initialized = app.InitDevices();
   REQUIRE_FALSE(initialized);
   CHECK(initialized.error() == "initialize the application before its devices");
+}
+
+namespace {
+void CheckMirroredLog(const std::filesystem::path& primary_path,
+                      const std::filesystem::path& mirror_path) {
+  std::ifstream primary(primary_path);
+  std::ifstream compatibility(mirror_path);
+  const std::string text((std::istreambuf_iterator<char>(primary)), {});
+  const std::string copy((std::istreambuf_iterator<char>(compatibility)), {});
+  CHECK(text == copy);
+  CHECK(text.find("diagnostic opcode test") != std::string::npos);
+}
+
+void CheckDesktopFrame(const std::filesystem::path& path) {
+  std::ifstream stream(path);
+  std::string line;
+  bool frame = false;
+  while (std::getline(stream, line)) {
+    const auto record = nlohmann::json::parse(line);
+    if (record.at("category") != "frame") continue;
+    frame = true;
+    CHECK(record.at("data").at("actors").at(0).at("hp") == 0);
+    CHECK(record.at("data").at("pending_loot").size() == 1);
+    CHECK(record.at("data").at("scene").at("event").at("id") == 7);
+  }
+  CHECK(frame);
+}
+}  // namespace
+
+TEST_CASE("Desktop diagnostics retain Lab frame data and a live text mirror",
+          "[diagnostics][trace]") {
+  TraceScope scope;
+  const auto mirror = scope.parent / "vs-native.log";
+  scope.files.push_back(mirror);
+  {
+    VS::Game::GameplayTrace trace(scope.parent, "desktop", mirror);
+    scope.run = trace.Directory();
+    scope.events = scope.run / "events.jsonl";
+    scope.log = scope.run / "session.log";
+    scope.files.push_back(scope.run / "manifest.json");
+    VS::Game::WriteTraceManifest(scope.run, {{"detailed_logging", true}});
+    VS_LOG_DEBUG("event-step", "diagnostic opcode test");
+    trace.Frame(42, {}, SampleState(),
+                {{"available", true}, {"event", {{"id", 7}}}});
+    REQUIRE_FALSE(trace.Failed());
+    CheckMirroredLog(scope.log, mirror);
+  }
+  CheckDesktopFrame(scope.events);
+}
+
+TEST_CASE("Warning provenance is durable before any later trace boundary",
+          "[diagnostics][trace][warning-persistence]") {
+  TraceScope scope;
+  const auto mirror = scope.parent / "vs-native.log";
+  scope.files.push_back(mirror);
+  {
+    VS::Game::GameplayTrace trace(scope.parent, "desktop", mirror);
+    scope.run = trace.Directory();
+    scope.events = scope.run / "events.jsonl";
+    scope.log = scope.run / "session.log";
+    const auto script = trace.BeginScript(1, 0);
+    scope.directories.push_back(script);
+    scope.files.push_back(script / "events.jsonl");
+    VS_LOG_WARN("effects.texture", "warning must survive an immediate crash");
+    for (const auto& path :
+         {scope.events, script / "events.jsonl", scope.log, mirror}) {
+      CAPTURE(path.string());
+      std::ifstream input(path);
+      const std::string contents((std::istreambuf_iterator<char>(input)), {});
+      CHECK(contents.find("warning must survive an immediate crash") !=
+            std::string::npos);
+    }
+    CHECK(trace.Errors() == 0);
+    CHECK_FALSE(trace.Failed());
+  }
+}
+
+TEST_CASE("Detailed runs preserve previous evidence and report invalid output",
+          "[diagnostics][trace]") {
+  TraceScope scope;
+  std::filesystem::path first;
+  {
+    VS::Game::GameplayTrace trace(scope.parent, "desktop");
+    first = trace.Directory();
+    scope.directories.push_back(first);
+    scope.files.push_back(first / "events.jsonl");
+    scope.files.push_back(first / "session.log");
+    trace.Event("test.first", {{"retained", true}});
+  }
+  {
+    VS::Game::GameplayTrace trace(scope.parent, "desktop");
+    scope.run = trace.Directory();
+    scope.events = scope.run / "events.jsonl";
+    scope.log = scope.run / "session.log";
+    CHECK(scope.run != first);
+    trace.Event("invalid", {{"text", std::string(1, static_cast<char>(0xFF))}});
+    CHECK(trace.Failed());
+    CHECK_THROWS(VS::Game::WriteTraceManifest(scope.run / "missing-directory",
+                                              {{"test", true}}));
+  }
+  std::ifstream saved(first / "events.jsonl");
+  const std::string retained((std::istreambuf_iterator<char>(saved)), {});
+  CHECK(retained.find("test.first") != std::string::npos);
+}
+
+namespace {
+struct GameplayInspectionFixture {
+  int saved_gameplay = Boot_isGameplayActive;
+  decltype(Field_controlMode) saved_control = Field_controlMode;
+  decltype(Battle_actionState) saved_action = Battle_actionState;
+  decltype(Items_lootListHead) saved_loot = Items_lootListHead;
+  decltype(Field_roomData.floorTriggers) saved_triggers =
+      Field_roomData.floorTriggers;
+  decltype(Menu_Framework_itemsText) saved_text = Menu_Framework_itemsText;
+  decltype(std::to_array(Battle_actors)) saved_actors =
+      std::to_array(Battle_actors);
+  decltype(std::to_array(Actors_actorRecords)) saved_models =
+      std::to_array(Actors_actorRecords);
+  decltype(std::to_array(Event_isTextBoxAwaitingClose)) saved_waits =
+      std::to_array(Event_isTextBoxAwaitingClose);
+  Actors_ActorRecord model{};
+
+  GameplayInspectionFixture() {
+    Boot_ResetGameplayInspection();
+    Boot_isGameplayActive = 1;
+    Field_controlMode = 1;
+    Battle_actionState = nullptr;
+    Items_lootListHead = nullptr;
+    Field_roomData.floorTriggers = nullptr;
+    Menu_Framework_itemsText = nullptr;
+    std::fill_n(Battle_actors, saved_actors.size(), nullptr);
+    std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
+    model.modelId = 58;
+    model.pose.frame = 7;
+    model.animationLength = 91;
+    Actors_actorRecords[2] = &model;
+    std::fill_n(Event_isTextBoxAwaitingClose, saved_waits.size(), 1);
+    for (std::size_t box = 0; box < 8; ++box) {
+      Event_isTextBoxAwaitingClose[box] = static_cast<char>(box % 2);
+    }
+  }
+
+  ~GameplayInspectionFixture() {
+    Boot_ResetGameplayInspection();
+    Boot_isGameplayActive = saved_gameplay;
+    Field_controlMode = saved_control;
+    Battle_actionState = saved_action;
+    Items_lootListHead = saved_loot;
+    Field_roomData.floorTriggers = saved_triggers;
+    Menu_Framework_itemsText = saved_text;
+    std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
+    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+    std::copy(saved_waits.begin(), saved_waits.end(),
+              Event_isTextBoxAwaitingClose);
+  }
+};
+
+void CheckEventScene(const nlohmann::json& event) {
+  const auto& waits = event.at("dialogue_waits");
+  REQUIRE(waits.size() == 8);
+  for (std::size_t box = 0; box < waits.size(); ++box) {
+    CHECK(waits.at(box) == (box % 2 != 0));
+  }
+  const auto& threads = event.at("threads");
+  REQUIRE(threads.size() == 4);
+  for (std::size_t index = 0; index < threads.size(); ++index) {
+    CHECK(threads.at(index).at("thread") == index);
+    CHECK(threads.at(index).contains("wait_frames"));
+    CHECK(threads.at(index).contains("dialogue_wait"));
+  }
+}
+
+void CheckReadyScene(const VS::Game::EncounterState& state,
+                     const Actors_ActorRecord& model) {
+  REQUIRE(state.ready);
+  CHECK_FALSE(VS::Game::InspectEncounter().ready);
+  const auto scene = VS::Game::InspectGameplayScene(state);
+  REQUIRE(scene.at("models").size() == 1);
+  CHECK(scene.at("models").at(0).at("model") == 58);
+  CHECK(scene.at("models").at(0).at("frame") == 7);
+  const auto& camera = scene.at("camera");
+  CHECK(camera.at("view_rotation").size() == 3);
+  CHECK(camera.at("view_rotation").at(0).size() == 3);
+  CHECK(camera.at("view_translation").size() == 3);
+  CheckEventScene(scene.at("event"));
+  CHECK(model.pose.frame == 7);
+}
+}  // namespace
+
+TEST_CASE("Normal-game inspection observes scene models only in a ready field",
+          "[diagnostics][inspection]") {
+  GameplayInspectionFixture fixture;
+  CHECK_FALSE(VS::Game::InspectGameplay().ready);
+  Boot_EncounterPollStop();
+  CheckReadyScene(VS::Game::InspectGameplay(), fixture.model);
+  Boot_ResetGameplayInspection();
+  const auto loading = VS::Game::InspectGameplay();
+  CHECK_FALSE(loading.ready);
+  CHECK_FALSE(VS::Game::InspectGameplayScene(loading).contains("models"));
+  Boot_isGameplayActive = 0;
+  Boot_EncounterPollStop();
+  CHECK_FALSE(VS::Game::InspectGameplay().ready);
+}
+
+TEST_CASE("Detailed log initialization rejects an unwritable mirror path",
+          "[diagnostics][trace]") {
+  TraceScope scope;
+  const auto blocked = scope.Write("regular-file", {{"not", "a directory"}});
+  CHECK_THROWS(VS::Game::GameplayTrace(scope.parent, "desktop",
+                                       blocked / "vs-native.log"));
+  for (const auto& entry : std::filesystem::directory_iterator(scope.parent)) {
+    if (!entry.is_directory()) continue;
+    scope.run = entry.path();
+    scope.events = scope.run / "events.jsonl";
+    scope.log = scope.run / "session.log";
+  }
+  CHECK_FALSE(scope.run.empty());
+}
+
+TEST_CASE("A cached ready snapshot cannot inspect a released gameplay scene",
+          "[diagnostics][inspection]") {
+  GameplayInspectionFixture fixture;
+  Boot_EncounterPollStop();
+  const auto before = VS::Game::InspectGameplay();
+  REQUIRE(before.ready);
+  Boot_ResetGameplayInspection();
+  CHECK_FALSE(
+      VS::Game::InspectGameplayScene(before).at("available").get<bool>());
+  CHECK_FALSE(VS::Game::InspectGameplayScene(before).contains("models"));
 }

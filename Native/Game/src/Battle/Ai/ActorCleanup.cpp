@@ -56,7 +56,8 @@ void ClearLinkedActorReferences(int id) {
 
 void DetachActorReferences(Battle_Actor* actor) {
   const int id = actor->id;
-  if ((actor->kind & kAttributeKindFlags) != 0) {
+  if ((id > 0 && id < kActorSlots) ||
+      (actor->kind & kAttributeKindFlags) != 0) {
     RequireActorId(id);
     Battle_Ai_attributeActorMask = static_cast<int>(
         static_cast<unsigned>(Battle_Ai_attributeActorMask) & ~(1u << id));
@@ -181,9 +182,11 @@ void Battle_Ai_FreeActorAiState(Battle_Actor* actor) {
               static_cast<std::size_t>(actor->id) < std::size(Battle_actors),
           "AI teardown actor is out of bounds");
   DetachActorReferences(actor);
-  if ((actor->kind & kAiKindFlags) == 0) return;
+  // Script classification may change without retiring the owned AI allocation.
+  auto* state =
+      actor->id < kActorSlots ? Battle_Ai_actorAiStates[actor->id] : nullptr;
+  if (state == nullptr && (actor->kind & kAiKindFlags) == 0) return;
   RequireActorId(actor->id);
-  auto* state = Battle_Ai_actorAiStates[actor->id];
   Battle_Ai_FreeActorNavigationOverride(actor->id);
   if (state != nullptr) Battle_Ai_ReleaseActorAiReservations(state);
   if (actor->id == 0) return;
@@ -202,8 +205,9 @@ void Battle_Ai_FreeActorAiState(Battle_Actor* actor) {
     Battle_Ai_ResetActorAwarenessIndicator(
         reinterpret_cast<Battle_Ai_PlanEvaluationView*>(state));
     Battle_Ai_UnlinkEngagedActor(state);
-    Battle_Ai_actorAiStates[actor->id] = nullptr;
-    Core_Memory_FreeFromLowEnd(state);
   }
+  Battle_Ai_actorAiStates[actor->id] = nullptr;
+  Battle_Ai_FrameState()->actors[actor->id] = nullptr;
+  if (state != nullptr) Core_Memory_FreeFromLowEnd(state);
   ReleaseOrbitStorage(*actor);
 }

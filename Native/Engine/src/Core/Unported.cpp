@@ -10,6 +10,7 @@
 #include <string_view>
 #include <vector>
 
+#include "Core/Diagnostics.h"
 #include "Core/Log.hpp"
 
 namespace VS::Core {
@@ -76,14 +77,35 @@ extern "C" void Core_Tracef(const char* format, ...) {
   VS_LOG_TRACE("trace", "{}", line);
 }
 
-extern "C" void Core_Debugf(const char* channel, const char* format, ...) {
-  if (!VS::Core::IsLogEnabled(VS::Core::LogLevel::Debug, channel)) {
+namespace {
+void WriteFormatted(VS::Core::LogLevel level, const char* channel,
+                    const char* format, va_list args) {
+  if (!VS::Core::IsLogEnabled(level, channel)) {
     return;
   }
   char line[VS::Core::kDiagnosticLineBytes]{};
+  std::vsnprintf(line, sizeof line, format, args);
+  VS::Core::LogWrite(level, channel, line);
+}
+}  // namespace
+
+extern "C" void Core_Debugf(const char* channel, const char* format, ...) {
   va_list args;
   va_start(args, format);
-  std::vsnprintf(line, sizeof line, format, args);
+  WriteFormatted(VS::Core::LogLevel::Debug, channel, format, args);
   va_end(args);
-  VS_LOG_DEBUG(channel, "{}", line);
+}
+
+extern "C" void Core_Warnf(const char* channel, const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+  WriteFormatted(VS::Core::LogLevel::Warn, channel, format, args);
+  va_end(args);
+}
+
+extern "C" void Core_Errorf(const char* channel, const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+  WriteFormatted(VS::Core::LogLevel::Error, channel, format, args);
+  va_end(args);
 }

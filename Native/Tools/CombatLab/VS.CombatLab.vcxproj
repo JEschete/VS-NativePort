@@ -47,6 +47,9 @@
     <ClCompile Include="src\Canvas.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\DoorTests.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Editor.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -59,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\CombatLab\Canvas.hpp" />
+    <ClInclude Include="include\CombatLab\DoorTests.hpp" />
     <ClInclude Include="include\CombatLab\Editor.hpp" />
     <ClInclude Include="include\CombatLab\Trace.hpp" />
   </ItemGroup>

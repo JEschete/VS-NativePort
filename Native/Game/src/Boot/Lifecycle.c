@@ -5,6 +5,7 @@
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/SequencerOutput.h"
 #include "Audio/SoundBanks.h"
+#include "Battle/Ai/RoomState.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
 #include "Boot/Session.h"
@@ -183,6 +184,7 @@ void Boot_InitializeTitleSession(void)
     Audio_Native_EnableReverb(1);
     VSyncCallback(Core_IgnoreCall);
     Core_Memory_InitializeHeap((Core_HeapBlockHeader*)Core_GameHeapArena(), CORE_GAME_HEAP_SIZE);
+    Battle_Ai_InvalidateSessionBindings();
     Content_InitializeDiscQueue();
     Content_ResetDiscDrive();
     Audio_InitializeMenuSoundBanks();

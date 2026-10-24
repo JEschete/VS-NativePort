@@ -121,7 +121,7 @@ void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id)
         Battle_Ai_PerceivedObjectView* targetObject;
 
         if (target) {
-            targetObject = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[id];
+            targetObject = (Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model;
             if ((targetObject->opaque8.word & 0x180000)
                 && targetObject->position.vy > state->position.vy) {
                 height = -target->bodyHeight;
@@ -229,7 +229,7 @@ void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id)
             continue;
         }
         {
-            Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[candidate];
+            Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)actor->model;
             angle = Core_Gte_Atan2(object->position.vx - x, object->position.vz - z) - heading;
         }
         if (Core_Gte_Cos(angle) < 0) {
