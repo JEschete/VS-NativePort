@@ -1989,6 +1989,9 @@
     <ClInclude Include="src\Save\NativeContainer.h">
       <Filter>src\Save</Filter>
     </ClInclude>
+    <ClCompile Include="src\Save\NativeFilePresentation.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
     <ClCompile Include="src\Save\NativeFiles.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
@@ -2141,6 +2144,9 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Framework\ActionSelection.h">
       <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\NativeFilePresentation.hpp">
+      <Filter>include\Save</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\NativeFiles.hpp">
       <Filter>include\Save</Filter>

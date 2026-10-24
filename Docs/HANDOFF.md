@@ -9,6 +9,44 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #18 save/load UI correction follows the owner's original Save/Load screenshots,
+  not the rejected thin `SAVE NATIVE` rows. Data Save, Data Load and title Continue
+  share three original-style cards with ARM room names, original location artwork,
+  NO./MAP/SAVE/CLEAR, HP/MP values and bars, and HH:MM:SS. Native files use the
+  truthful `LOCAL SAVES` breadcrumb instead of claiming a PS1 memory-card slot.
+  Original atlas controller symbols replace spelled-out button names. Up/Down
+  scrolls all100 files and selects vertical Yes/No; confirmations still default
+  No, Cross cancels, and Left/Right does not navigate or grant consent.
+  The renderer consumes typed snapshots, not synthesized card/save-image headers.
+  Successful saves immediately refresh the committed file's card.
+  - Original MAP014 save-point component profile, zone9/room5 at1,8: real
+    Down/Circle/Up/Circle saves slot2 generation1 and displays its summary
+    immediately (`save18-original-ui-write-new.png`). No live HP, position,
+    inventory or progression edits were used to claim the controller operation.
+  - Separate Debug Continue loads slot2 at1532/applies1571; Data Load then
+    selects slot1 at2603/applies2642. Header/card/confirmation captures:
+    `build/quality/save18-original-ui-data-load/`.
+  - Recovery testing caught a WIP-only32-character prompt incorrectly constrained
+    by an obsolete32-byte row element: red exit0xE06D7363 at1380. The footer now
+    owns its full288-pixel/48-glyph line independently; all generic row elements
+    remain inactive. Green `save18-original-ui-recovery-green` explicitly loads
+    backup generation1 without changing invalid-primary SHA256. Separate real
+    Data Save `save18-original-ui-recovery-overwrite` explicitly replaces it with
+    generation2 and preserves backup1; its recovery badge clears after commit.
+  - Release visually verifies vertical wrap to file100 and cancellation. A
+    separate `save18-original-ui-release-continue` loads controller-created
+    slot2 at1532/applies1571. The first combined cancel/reentry script returned
+    to the original title animation before its next inputs; it is not claimed
+    as a successful repeated Continue. Unit reentry/lifetime controls pass.
+  Full linked Debug/Release each pass697 cases/3,163,196 assertions, serial;
+  UI/presentation selection14/1,288; production frontend tidy zero findings.
+  Copier63 controls pass and second source/project generations are stable.
+  Validation uses cb4fe8b3 plus this UI worktree, with isolated test save roots;
+  prior source slot1 SHA256 remains unchanged. Captures, logs and native saves
+  stay local under `build/quality/save18-original-ui-*`, not in commits/issues.
+  Backend schema3, overwrite/recovery protections and typed bank ownership are
+  unchanged. #18 remains open for its separate import/migration/clear-save,
+  transient-state, legitimate story campaign and EC-retirement gates.
 - #171 bounded jump-entry checkpoint: F04178/F04179/F01024 are now owned in
   `Actors/MotionRequests.cpp`, following `4A0A8.c:340-410`. Command11/12,
   airborne14 and navigation18 retain original flag/branch/animation ordering,
@@ -21,6 +59,8 @@ verification of the current worktree.
   still never descends to ground. New diagnostic source was not in that
   replay and needs the next production run. Evidence and exact layout/source
   comparisons: `build/quality/jump171-entry/consumer-investigation.json`.
+  Published cb4fe8b322146d9f6188db8456a5c57464973cb7 has successful exact
+  Source Quality40141256823; Debug/Release entry selection10/7,627 each.
   Owner save-UI correction has priority; keep #171 open. The separate F00989
   gimmick/actor placement-offset defect is confirmed by a layout probe, not
   proven causal for descent, and must be separately tracked before fixing.

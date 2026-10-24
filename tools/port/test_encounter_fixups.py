@@ -9,6 +9,22 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_native_file_cards_draw_after_footer_and_before_fade(self):
+        for fid, prefix, title in (("F02757", "Menu_Files", 0),
+                                   ("F03624", "Title", 1)):
+            with self.subTest(fid=fid):
+                old, new, _ = copy_fixups.FIXES[fid][0]
+                fade = f"    if ({prefix}_fileMenuScreenFade != 0) {{"
+                self.assertEqual(old, fade)
+                self.assertEqual(
+                    new,
+                    f"    Save_NativeDrawFileOverlay({title});\n{fade}",
+                )
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS["Save_NativeDrawFileOverlay"],
+            r"Native\Game\include\Save\NativeMenu.h",
+        )
+
     def test_trigger_marker_import_owns_the_complete_geometry_definition(self):
         blob = next(
             item for item in copy_fixups.MODULE_DATA_BLOBS

@@ -20,6 +20,7 @@
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
+#include "Save/NativeMenu.h"
 #include "State/Ashley.h"
 #include "State/GameTime.h"
 #include "State/PlayTime.h"
@@ -727,6 +728,7 @@ void Title_SaveFiles_DrawFrame(int framebuf)
     if (Title_memoryCardMessage != NULL) {
         Menu_Files_DrawText(Title_memoryCardMessage, 16, 192, 0);
     }
+    Save_NativeDrawFileOverlay(1);
     if (Title_fileMenuScreenFade != 0) {
         Title_fileMenuPrimitiveBuffer.tag = vs_getTag(Title_fileMenuPrimitiveBuffer.prim.tileTpage, Render_LegacyPrimitiveAddress_Null);
         Title_fileMenuPrimitiveBuffer.prim.tileTpage.texturePageCommand =

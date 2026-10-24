@@ -22,6 +22,14 @@ isolated replay root or intentional cross-host testing. Native saves are not
 PS1 card images; import/migration and full gameplay round-trip acceptance
 remain open. Do not point automated tests at owner files.
 
+Save, Load and Continue use three original-style file cards with room artwork,
+names and snapshot summaries. Up/Down scrolls all100 native files; Circle
+opens confirmation and Cross returns. Confirmations are vertical Yes/No,
+defaulting to No: use Up/Down and Circle, not Left/Right. The footer shows the
+original controller symbols. Recovered files are explicitly marked and require
+separate affirmative consent to replace an invalid primary. Normal Save still
+requires an enabled original save point; the Lab is not a save-eligibility bypass.
+
 The menu uses the extracted SYSTEM.DAT font. Select zone, room, enemy, quantity,
 Ashley tile/elevation, group offsets, spacing and RNG seed. Add multiple groups
 for mixed enemy definitions; clear groups to return to the current selection.

@@ -913,6 +913,7 @@ void Menu_Files_DrawFrame(int framebuf)
     if (Menu_Files_memoryCardMessage != 0) {
         Menu_Files_DrawText(Menu_Files_memoryCardMessage, 16, 192, 0);
     }
+    Save_NativeDrawFileOverlay(0);
     if (Menu_Files_fileMenuScreenFade != 0) {
         Menu_Files_primBuf.tag = vs_getTag(Menu_Files_primBuf.prim.tileTpage, Render_LegacyPrimitiveAddress_Null);
         Menu_Files_primBuf.prim.tileTpage.texturePageCommand =

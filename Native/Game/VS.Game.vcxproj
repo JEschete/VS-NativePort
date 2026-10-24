@@ -1646,6 +1646,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Save\NativeFilePresentation.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Save\NativeFiles.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -2130,6 +2133,7 @@
     <ClInclude Include="include\Items\KeyItems.h" />
     <ClInclude Include="include\Items\Loadout.h" />
     <ClInclude Include="include\Menu\Framework\ActionSelection.h" />
+    <ClInclude Include="include\Save\NativeFilePresentation.hpp" />
     <ClInclude Include="include\Save\NativeFiles.hpp" />
     <ClInclude Include="include\Save\NativeMenu.h" />
     <ClInclude Include="include\Save\NativeMenu.hpp" />

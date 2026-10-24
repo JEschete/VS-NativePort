@@ -14,6 +14,7 @@ from __future__ import annotations
 
 NATIVE_HELPER_HEADERS = {
     "Save_NativeInitialTitleSelection": r"Native\Game\include\Save\NativeMenu.h",
+    "Save_NativeDrawFileOverlay": r"Native\Game\include\Save\NativeMenu.h",
     **{name: r"Native\Game\include\Save\NativeResume.h"
        for name in (
            "Save_NativeResumePending", "Save_NativeFinishResume",
@@ -1463,6 +1464,18 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("    menuItem = Save_MemoryCard_AnySaveFileExists();",
          "    menuItem = Save_NativeInitialTitleSelection();",
          "22C.c:4491 choose title focus from native slots without probing card BIOS"),
+    ],
+    "F02757": [
+        ("    if (Menu_Files_fileMenuScreenFade != 0) {",
+         "    Save_NativeDrawFileOverlay(0);\n"
+         "    if (Menu_Files_fileMenuScreenFade != 0) {",
+         "260.c:1951 draw typed native file cards after the message background and before the screen fade"),
+    ],
+    "F03624": [
+        ("    if (Title_fileMenuScreenFade != 0) {",
+         "    Save_NativeDrawFileOverlay(1);\n"
+         "    if (Title_fileMenuScreenFade != 0) {",
+         "22C.c:1784 Continue shares native cards without installing memory-card save headers"),
     ],
     "G00497": [("u_long Menu_textBoxOrderingTables", "u_long Menu_textBoxOrderingTables[102]",
                  "5BF94.c:4044-4046; three 34-word textbox ordering tables")],

@@ -144,6 +144,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Save\NativeFiles.cpp",
                 r"src\Save\NativeResume.cpp",
                 r"src\Save\NativeMenu.cpp",
+                r"src\Save\NativeFilePresentation.cpp",
             ))
 
 

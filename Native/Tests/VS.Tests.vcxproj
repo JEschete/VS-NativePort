@@ -113,6 +113,7 @@
     <ClCompile Include="src\MinimapTests.cpp" />
     <ClCompile Include="src\MotionRequestsTests.cpp" />
     <ClCompile Include="src\MovementBehaviorTests.cpp" />
+    <ClCompile Include="src\NativeFilePresentationTests.cpp" />
     <ClCompile Include="src\NativeMenuTests.cpp" />
     <ClCompile Include="src\NativeSnapshotTests.cpp" />
     <ClCompile Include="src\ParticleRenderTests.cpp" />
