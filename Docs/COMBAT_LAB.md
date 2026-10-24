@@ -911,6 +911,18 @@ uncommitted; #150 remains open pending authorized publication and exact CI.
 
 ### Owner pause: door coverage limits and next failure
 
+Source fixes are committed in `7b6fb81e` and published through the
+non-rewriting integration `309f8c78`. Exact
+[Source Quality run40104975781](https://github.com/JEschete/VS-NativePort/actions/runs/40104975781)
+passes. The stopping-checkpoint full suites pass622 cases/3,150,240 assertions
+in each configuration; copier59 and full quality195 existing/zero new.
+Verified defect tickets #150, #152, #153, #154, #155, #157, #158, #159,
+#161, #162, #163, #164, #165 and #166 are closed with individual evidence.
+#156 remains open: both original-prefix observations restore control at3572
+but end before120 settled ticks, so its repair is not labeled complete door
+acceptance. #151, #160, #167, the remaining #148 sweep and #149 cutscene work
+remain open. Independent owner edits are not included in these commits.
+
 The Debug binary through #166 (SHA256
 `ACFD8139CAF681DECA9F508716F107A7BF817EB9945A0F1C405A031DF9005A07`)
 completed199 of200 selected records in run1792842259573600-0:
