@@ -9,6 +9,28 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #169 map-boundary repair is published in f1bba2b0 with exact green
+  Source Quality40111624104. The matching full-story event4 handoff remains
+  open for verification; native save/load #18 is now the owner-prioritized work.
+- Initial #18 milestone is native-only versioned JSON, with Game semantic
+  validation and Engine recoverable storage; PS1 import is explicitly deferred.
+  Engine SaveStore storage is being implemented/tested first, not advertised as
+  working in-game saving yet. It validates every incoming/current/backup payload
+  through a mandatory Game callback, returns explicit recovery provenance,
+  preserves the prior valid backup, bounds file sizes and uses same-directory
+  flushed temporary writes/commit plus OS-released per-slot write locks.
+  Game snapshot schema, Data/save-point menu integration and repeated title
+  Continue still require implementation and actual round-trip verification.
+- The #18 storage subpackage now passes12 focused cases/249 assertions in
+  Debug/Release, full636/3,150,535 each, full quality195 existing/zero new
+  and source tidy zero/zero. Tests exercise actual OS-sharing commit failures,
+  failed backup replacement, per-slot exclusion, valid-backup recovery,
+  invalid/oversized/missing files, uncommitted temporaries, Unicode roots and
+  exact embedded-byte preservation. No owner saves or memory-card files are
+  touched. Scoped test-project generation is stable and leaves the solution/
+  external tool projects untouched. This does not claim abrupt-power-loss
+  simulation or working production save menus; the next subpackage is Game
+  semantic snapshots and their validated application.
 - Active owner follow-up (the pause notes below are historical): #169 is the
   first-lever-room crash; #170 Gust reveal, #171 ground-enemy ledge descent and
   #172 selected-box texture are separate reports. Owner requests native

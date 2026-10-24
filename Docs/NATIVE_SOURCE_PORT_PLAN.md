@@ -572,7 +572,7 @@ These are target designs, not an implemented-feature inventory. See §0.2 and th
 - **Tests:** a decoder round-trip for every format against the GodHands / Unity-parser interpretations; the converter round-trips (ASSET_PIPELINE §7); catalog round-trip (§9.8).
 
 ### 6.7 Save (`Engine\Save`)
-- **Model:** a versioned JSON (or binary + schema) save with string IDs for every item/location, plus an import of PS1 `.mcd`/`.mcr` saves via a decoder.
+- **Model:** a versioned JSON save with string IDs for every item/location. The initial native milestone implements native save/load first; PS1 `.mcd`/`.mcr` import remains a separate decoder and is not yet supported.
 - **Absorbs:** libcard (4), libapi card events, `Save` (68 rows).
 - **Tests:** save → load round-trip; import of a known PS1 save gives the expected inventory.
 
@@ -856,8 +856,10 @@ The checkmarks below record earlier work, not fresh validation of the current tr
 - **Q5 Audio backend:** backend selection is resolved by owner decision D23 (sfizz with SFZ+WAV instruments driven by
   the existing AKAO sequencer). M5 still defines the supported fidelity rules and unsupported modes; no competing
   synthesis backend is authorized.
-- **Q6 Save encoding and migration:** decide the native versioned representation and supported PS1 import variants
-  before M9 persistence work; §6.7 currently leaves JSON versus schema-backed binary open.
+- **Q6 Save encoding and migration:** the initial native-only milestone uses versioned JSON with semantic
+  Game-owned fields, strict validation and explicit version handling. Engine storage remains payload-agnostic.
+  Supported PS1 import variants and migration fixtures remain undecided and block import implementation,
+  not the native-only milestone; no memory-card-image runtime or native-struct serialization is authorized.
 - **Q7 Reference evidence:** select extractable canonical fields and reference checkpoints in M2. Do not assume a
   comparable original-game state hash already exists because the roadmap names it.
 
@@ -1099,7 +1101,8 @@ uncovered abilities/enemies/effects for M10; one encounter is not proof of full 
 ### M9 — Menus, inventory and recoverable persistence
 
 **Scope/files:** `Game/Menu`, `Items`, `State`, `Title` Continue flow, `Engine/Save`, `Legacy/Save/LibCard.cpp`; EC-04/05/07/09.
-Deliver menu/inventory and persistence as separately verified subpackages; Q6 blocks save-format implementation.
+Deliver menu/inventory and persistence as separately verified subpackages. Q6 selects versioned JSON for the
+initial native-only milestone; PS1 import remains gated on supported variants and separate decoder fixtures.
 
 1. Cover each menu family: navigation, equipment/inventory changes, storage, workshops, rename and options. Test
    repeated open/close and cancellation; replace reload-dependent statics with owned screen state.
