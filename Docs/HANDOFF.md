@@ -4,6 +4,15 @@
 
 ### Latest source and next observation
 
+- Publication checkpoint: source fix `7b6fb81e` is published through
+  non-rewriting integration `309f8c78`; exact Source Quality40104975781 passes.
+  Debug/Release full suites622/3,150,240 each, copier59, full quality195
+  existing/zero new. Closed with individual evidence: #150, #152-#155,
+  #157-#159, #161-#166. #156 stays open because the observed control return
+  at3572 leaves fewer than120 settled ticks before the3,600 budget; no complete
+  door claim. #151, #160, #167 and broader #148/#149 remain open.
+  All owned replay processes are stopped. Owner documentation reorganization,
+  Skeleton tests, solution/tool projects and reference edits remain independent.
 - Owner pause/commit checkpoint: all owned replay windows are stopped.
   Exact-history diagnostic rerun1792852943838401-0 ended by a graceful close,
   normal exit2:32 passed/7 blocked/one cancelled/501 unrun. It did not reach
@@ -15,9 +24,9 @@
   incomplete on the smoke fixture and must not be called a verified call chain.
   Publication is now authorized; preserve the owner's independent documentation,
   Skeleton test and reference edits when committing this crash-work checkpoint.
-- Current autonomous crash work is local/unpublished on `508b4bd7` plus the
-  preserved dirty worktree. #150's original Bat/gimmick endpoint fix and shared
-  Desktop logging remain local; #151 now inventories all **1,001 directed door
+- The following notes preserve pre-publication observations on `508b4bd7` plus
+  the dirty worktree. #150's original Bat/gimmick endpoint fix and shared
+  Desktop logging were verified locally; #151 inventories all **1,001 directed door
   records / 255 ZNDs / 421 room references** and runs production room/entry
   events through one persistent Combat Lab window. See [COMBAT_LAB](COMBAT_LAB.md) for CLI,
   strict pass definition, per-case checkpoints and explicit blocked/unrun
