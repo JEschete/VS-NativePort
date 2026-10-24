@@ -9,6 +9,29 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #170 Gust reveal repair: owner trace identifies zone9/room6 tile15,9 kind3.
+  Activation and fade already changed correctly; rendering used detached native
+  globals as one PS1 record (`tail-0x58`) and copied a scratch-shaped matrix.
+  Owned F00617/F00618 now import the complete original116-byte marker definition,
+  construct a call-local typed group/quad and use the native view matrix,
+  preserving material/texture animation/fade. No synthetic texture or reveal/
+  story flag edits. Legacy G00039/40/41 remain module-binding debt, not render
+  consumers; no C++ promotion or full render compatibility retirement claimed.
+  Debug red1792877380886271-0 and Release red1792877773230749-0 reproduce actual
+  walking activation with no marker; Debug green1792878534119518-0 and Release
+  green1792878700310722-0 show the original revealed marker, including walking
+  away in Release. Persistent fresh-room sequences1792878999681209-0 Debug and
+  1792879031351581-0 Release each pass reveal/hidden-control/reveal-again with
+  complete teardown and no errors; assertions verify fresh0/fade0, hidden0 and
+  repeated1/fade128. Full suites each683 cases/3,154,382 assertions; focused
+  marker8/203; copier62; fast quality195 existing/zero new.
+  Evidence: `build/quality/trap170/`, `trap170-gust-*-green.png`,
+  `trap170/reentry-evidence.json`. Concurrent owner commit18d715a8 captured and
+  published the marker source changes alongside the owner's license work;
+  its exact CI40135991604 passes. The subsequent owner revision2e3f1db4 also has
+  green CI40136015635. Those owner commits are preserved without rewriting.
+  This follow-up records the measured ledgers/acceptance; #170 is eligible
+  for closure. #171 ledge descent and #172 targeted-box texture remain queued.
 - #18 native runtime/menu checkpoint324438d948ef2b2fa4f0ca1f43bdd6c3b5536d98 is
   published; exact Source Quality40131160959 passes. Additional actual-controller
   acceptance on that clean revision, with isolated roots:
