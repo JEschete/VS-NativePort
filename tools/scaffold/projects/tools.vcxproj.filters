@@ -5322,6 +5322,9 @@
     <None Include="..\..\test\run_native.ps1">
       <Filter>tools\test</Filter>
     </None>
+    <None Include="..\..\vcpkg\ports\sfizz\portfile.cmake">
+      <Filter>tools\vcpkg\ports\sfizz</Filter>
+    </None>
     <None Include="..\..\vcpkg\ports\sfizz\vcpkg.json">
       <Filter>tools\vcpkg\ports\sfizz</Filter>
     </None>

@@ -20,6 +20,7 @@ extern "C" {
 #include "Battle/Ai/ActorStateHelpers.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Battle/Targeting.h"
 #include "Field/Gimmicks.h"
@@ -374,4 +375,89 @@ TEST_CASE(
   CHECK(Battle_CalculateActionRangeSquared(
             reinterpret_cast<Battle_Ai_ActionRangeView*>(&fixture.state), 42) ==
         25600);
+}
+
+namespace {
+struct PerceptionFixture : DecisionFixture {
+  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
+      std::to_array(Battle_Ai_actorAiStates);
+  Battle_Ai_ActorAiState player{};
+  u_short flags[32][32]{};
+
+  PerceptionFixture() {
+    std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
+    auto& frame = *Battle_Ai_FrameState();
+    std::fill_n(frame.actors, kAiFrameActorSlots, nullptr);
+    frame.actors[0] = Battle_Ai_actorAiStates[0] = &player;
+    frame.actors[2] = Battle_Ai_actorAiStates[2] = &state;
+    frame.tileFlags = flags;
+    actors[0].model = &records[0].instance;
+    actors[1].model = &records[1].instance;
+    actors[1].next = nullptr;
+    state.model = reinterpret_cast<Battle_Ai_AiModelView*>(&records[1]);
+    state.position = records[1].instance.position = {64, 0, 96, 0};
+    records[0].instance.position = {64, 0, 32, 0};
+    View().nearDistanceSquared = View().farDistanceSquared = 768 * 768;
+    View().viewCosine = 3850;
+    state.relations[0].classification = 3;
+    candidate.targetId = 0;
+    candidate.distanceSquared = 192 * 192;
+  }
+
+  ~PerceptionFixture() {
+    std::copy(saved_states.begin(), saved_states.end(),
+              Battle_Ai_actorAiStates);
+  }
+
+  Battle_Ai_PerceptionView& View() {
+    return *reinterpret_cast<Battle_Ai_PerceptionView*>(&state);
+  }
+
+  Battle_Ai_TargetRelation Relation() const {
+    return std::bit_cast<Battle_Ai_TargetRelation>(state.relations[0]);
+  }
+
+  void Update() { Battle_Ai_UpdateTargetPerception(&View(), 0); }
+
+  int CanExecute() {
+    return Battle_Ai_CanExecuteActionCandidate(&state, &candidate);
+  }
+};
+}  // namespace
+
+TEST_CASE("AI perception connects the original narrow FOV to execution",
+          "[ai][perception][reference]") {
+  const int heading = GENERATE(0, 227, 228, 2048);
+  PerceptionFixture fixture;
+  fixture.records[1].instance.facing = static_cast<int16_t>(heading);
+  fixture.Update();
+  const bool in_view = heading <= 227;
+  CHECK(fixture.state.distancesSquared[0] == 64 * 64);
+  CHECK(fixture.Relation().bits.inView == in_view);
+  CHECK(fixture.Relation().bits.active == in_view);
+  CHECK(fixture.Relation().bits.visible == 1);
+  CHECK(fixture.Relation().bits.onMarkedTile == in_view);
+  CHECK(fixture.CanExecute() == in_view);
+}
+
+TEST_CASE("AI marked tiles and awareness timers retain original readiness",
+          "[ai][perception][reference]") {
+  const bool marked = GENERATE(false, true);
+  PerceptionFixture fixture;
+  fixture.records[1].instance.facing = 2048;
+  fixture.flags[0][0] = marked ? 0x2000 : 0;
+  auto relation = fixture.Relation();
+  relation.bits.timer = 1;
+  fixture.state.relations[0] = std::bit_cast<Battle_Ai_RelationWord>(relation);
+  fixture.Update();
+  CHECK(
+      (std::array<int, 5>{
+           fixture.Relation().bits.inView, fixture.Relation().bits.timer,
+           fixture.Relation().bits.active, fixture.Relation().bits.onMarkedTile,
+           fixture.CanExecute()} == std::array<int, 5>{0, 0, 1, 1, 1}));
+  fixture.Update();
+  CHECK((std::array<int, 4>{
+             fixture.Relation().bits.active, fixture.Relation().bits.visible,
+             fixture.Relation().bits.onMarkedTile, fixture.CanExecute()} ==
+         std::array<int, 4>{0, 1, marked, marked}));
 }

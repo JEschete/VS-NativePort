@@ -9,6 +9,7 @@
 - Keep `resources\rood-reverseWin` and the upstream reference read-only. Native implementations belong in the existing systems; do not include or link reference code from `resources\`.
 - Keep function/data/type status in the existing [ledgers](../Docs/ledgers/). Track behavior verification, C++ promotion and compatibility retirement separately; compiling or renaming a file does not establish all three.
 - Treat existing hardware-shaped compatibility bridges as tracked migration debt. Follow the plan's typed native APIs and EC retirement gates rather than extending those bridges as the destination.
+- Future architecture direction for VS-NativePort: unpack legacy ZND, MPD, and related asset formats into editable, modern native data definitions so adding or modifying enemies does not require repacking PS1 formats. Preserve original data/provenance and treat legacy formats as import sources rather than the authoring format. This is deferred work, not authorization to implement it now. The owner prefers relational data for items and spells, lossless image storage with relevant depth data preserved, and editable native room/model/animation definitions rather than requiring legacy MPD/ZND/SHP/WEP/SEQ repacking. Specific replacement formats and implementation timing remain to be decided.
 
 ## Issue Tracking and Verification
 - Use https://github.com/JEschete/VS-NativePort/issues/4 as the ordered work tracker. Complete maintained-code quality work before the listed gameplay priorities, and do not silently reorder them.
@@ -18,6 +19,7 @@
 - Inspect failed GitHub Actions quality checks on pushed commits when starting or resuming work and after any authorized push. Track and repair failures instead of refreshing the baseline to hide them. Keep CI issues open until the pushed fixing revision has a confirmed successful run.
 - The owner authorizes commits and pushes for work through the remaining issues in ordered tracker #4 and related defects discovered during that work. Use the owner's configured identity with no additional attribution. Preserve unrelated edits; do not force-push or rewrite history without separate authorization.
 - For each issue, implement and verify the acceptance criteria, commit and push the scoped fix, confirm the relevant CI checks, then close with the fixing commit and evidence. Continue to the next ordered issue; log new defects before fixing them. Stop only for a genuine blocker or an owner pause, recording the evidence and next observation needed.
+- Make intermittent commits per issue. 
 
 ## Working Loop and Productivity
 - Start from the current worktree, ordered issue, affected handoff/plan sections and ledger IDs. Preserve unrelated edits. Define a bounded behavior change and measurable acceptance criteria before implementation.
@@ -43,6 +45,11 @@
 - **Reference captures:** `tools\test\duckstation_capture.ps1 -SkipIntro -Keys '40:Down,42:X' -Seconds 45,50 -Out build\ds_x` (keys briefly take focus; Z = Cross, X = Circle, Return = Start).
 - **Native test runs:** `tools\test\run_native.ps1 -NoCopy -SkipIntro -Frames 1800 -At '1500' -Press '1200:Down,1300:Circle'`. Ticks are 1/60 s. **Skip the intro movie by pressing Start (`-SkipIntro` = `--press 1000:Start`)**: the title menu is then up by tick ~1100 instead of ~3300. Crash stacks are in `build\Debug\vs-native.log`.
 - **Menu testing:** use the original prologue skip: Start during the opening, then Start again at the A. J. Durai quote. Verified replay inputs are `--press 1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle`: MAP009 loads at tick 4058 and MAINMENU.PRG at 7005. Avoid repeated Circle presses, which can toggle the battle sphere. Use the full prologue for combat troubleshooting and implementation; skipping it is not combat verification.
+
+## Combat Testing Tooling
+- Create a live, interactive combat sandbox where the user can control the character, fight selectable enemies or multiple enemies, and use items, spells, and abilities through the production gameplay code. Automated/headless pass-fail tests are not the primary requested experience.
+- Persist extensive logs to files in the Combat Lab, not only display them in a console or debugger. 
+- Ensure Combat Lab menus remain clearly readable; the current game-asset font rendering produces illegible solid glyphs and is not acceptable.
 
 ## Code Translation Guidelines
 - When translating assembly into native implementations, add provenance comments identifying the original decomp symbol and source/assembly location so future upstream decomp progress can be cross-referenced. Use meaningful semantic names and preserve traceability.

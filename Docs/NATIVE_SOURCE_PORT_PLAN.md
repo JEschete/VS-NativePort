@@ -226,12 +226,21 @@ Dependency direction:
 
 The owner requirement is a VERY detailed list of what is done and not done. The ledgers are that list. They are **generated from the decomp** (so nothing is missed) and **hand/agent-filled** for status (preserved on regeneration).
 
-Numeric counts below include historical snapshots. Regenerate and record the revision before using counts as a
-completion claim. The EC audit records subsystem architecture debt that function/SDK name counts alone cannot detect.
+Numeric counts below are historical reference-inventory snapshots, not current
+completion totals. See [ledgers/SUMMARY.md](ledgers/SUMMARY.md) for a reconciled
+report of the persisted ledgers and ownership registry, including stale or
+unrecorded status markers. A source rescan is not a status refresh; preserve
+stable IDs, merged fields and local edits before intentional regeneration.
+The EC audit records subsystem architecture debt that function/SDK name counts
+alone cannot detect.
 
 ### 4.1 FUNCTION_CATALOG.csv (master list)
 
-One row per game function: **3,679 rows**. There are 2,918 C functions, 480 effect template instantiations, 191 asm-only, 37 in headers, 28 template bodies and 25 `INCLUDE_ASM`. 2,231 still have generic names. 442 SDK library functions are excluded because they are replaced, not copied.
+Historical inventory: **3,679 game rows**, plus 442 excluded SDK rows. That
+snapshot contained 2,918 C functions, 480 effect template instantiations, 191
+asm-only, 37 in headers, 28 template bodies and 25 `INCLUDE_ASM`. Its 2,231
+generic names describe original decomp symbols, not current native names.
+Current counts and separate status gates are reported in the linked summary.
 
 | Column | Meaning |
 |---|---|
@@ -991,15 +1000,6 @@ rules and explicitly lists unsupported SPU modes; no competing synthesis backend
    Define missing noise/FM/reverb behavior explicitly rather than returning success for unsupported operations.
 5. Verify event traces plus decoded output for one title track, menu SFX, overlapping voices, fades and battle transition.
 
-**Gate:** required title audio is audible and reference-checked; supported paths no longer read/write SPU register or
-sample-memory blocks. Output-device creation and sample-transfer completion are insufficient. Close EC-02 after all
-remaining audio consumers migrate, with a defined source/clock contract available to M6.
-
-### M6 — Converted movie playback and soundtrack lifetime
-
-**Scope/files:** `Tools/Extract`, Content movie assets, `Engine/src/Movie/MoviePlayer.cpp`, `Intro/Player.c`,
-`Legacy/Movie/LibPress.cpp`, Render and Audio interfaces; EC-04/08.
-
 **First-sound implementation:** WAVE0000/0005/0200 import to versioned JSON plus per-instrument WAV/SFZ. The existing
 sequencer commits typed controls to sfizz in 200-frame ticks at 48 kHz.
 The initial simulation-thread renderer is superseded by demand-driven rendering below. Native envelope, pitch/gain,
@@ -1045,6 +1045,15 @@ not by deduplicating adjacent audio. Native XA playback uses dr_flac and a separ
 control-thread decoding and callback demand feeding. Saved music layers now copy/swap complete native
 objects and resolve voice conflicts without releasing SFX/stream reservations. These changes do not
 retire unused SDK/DMA helpers or establish full-content/reference-listening acceptance.
+
+**Gate:** required title audio is audible and reference-checked; supported paths no longer read/write SPU register or
+sample-memory blocks. Output-device creation and sample-transfer completion are insufficient. Close EC-02 after all
+remaining audio consumers migrate, with a defined source/clock contract available to M6.
+
+### M6 — Converted movie playback and soundtrack lifetime
+
+**Scope/files:** `Tools/Extract`, Content movie assets, `Engine/src/Movie/MoviePlayer.cpp`, `Intro/Player.c`,
+`Legacy/Movie/LibPress.cpp`, Render and Audio interfaces; EC-04/08.
 
 1. Implement the agreed STR conversion and versioned movie metadata, including frame count/rate, duration and audio.
    Validate supported input and conversion failure; external-tool absence must produce a usable diagnostic.

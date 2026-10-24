@@ -7,6 +7,12 @@ through a **temporary adapter** (see the plan, Â§7); the row only closes when 
 
 Status legend: `[ ]` not started, `[A]` temporary shim exists, `[M]` all call sites migrated, `[x]` shim deleted and 0 uses.
 
+The inventory and strategy counts below describe reference-source usage, not
+current native consumer counts or completed retirement. The opening description
+is the target policy, not a claim that hardware-shaped adapters are already gone.
+Cross-check [SUMMARY.md](SUMMARY.md) and the source-backed
+[EC audit](../EMULATION_COMPATIBILITY_AUDIT.md) before changing a retirement gate.
+
 Strategy: **R** rewrite call sites directly to the modern API during the copy (no shim ever exists);
 **T** temporary shim in `Native/<System>/Legacy/`, translating to the modern API, deleted at 0 uses;
 **D** delete the call (no meaning without PS1 hardware: sync, IRQs, kernel events, debug font...).
@@ -14,12 +20,6 @@ Strategy: **R** rewrite call sites directly to the modern API during the copy (n
 **287 SDK symbols are referenced by game code.**
 Strategy totals: R=86, T=149, D=52.
 
-
-## libgpu â†’ Graphics (78 symbols, 1742 uses)
-
-Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), Texture/VRAM-page cache, framebuffer readback API
-
-| Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 The 2026-10-21 audio fidelity checkpoint migrates the noise clock, four
 reverb-control surfaces and boot reverb enable/disable consumers to native
 APIs (seven function rows marked `[M]`). Their SDK declarations/stubs remain;
@@ -27,6 +27,12 @@ this is not `[x]` retirement or EC-02 completion. See
 [the audio contract and audit](../ASSET_PIPELINE.md)
 for behavior evidence and the distinction from C++ ownership/promotion.
 
+
+## libgpu â†’ Graphics (78 symbols, 1742 uses)
+
+Target: VS.Render: PrimitiveList adapter -> RenderQueue (sprites/meshes/quads), Texture/VRAM-page cache, framebuffer readback API
+
+| Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
 | [ ] | T | `getTPage` | macro | 212 | 14 | MENUF.PRG (133), BATTLE.PRG (27), TITLE.PRG (12), MENU5.PRG (11), ENDING.PRG (9), MENU7.PRG (9), MENU9.PRG (4), MENUE.PRG (3), include (2), INITBTL.PRG (1), renderTextures.h (1) |
 | [ ] | T | `getClut` | macro | 161 | 13 | MENUF.PRG (136), BATTLE.PRG (7), MAINMENU.PRG (3), MENU0.PRG (3), MENU4.PRG (3), ENDING.PRG (2), MENU9.PRG (2), include (1), MENU5.PRG (1), MENU7.PRG (1), renderTextures.h (1), TITLE.PRG (1) |

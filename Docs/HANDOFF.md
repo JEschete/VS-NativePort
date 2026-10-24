@@ -1,6 +1,11 @@
-# Handoff: prologue entry and shared rendering
+# Current handoff
 
-## Crash and transition checkpoint (2026-10-24)
+Updated 2026-10-24. This is a short entry point, not another work tracker.
+Detailed checkpoint evidence, commands and replay paths are preserved in
+[HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
+verification of the current worktree.
+
+## Work order and current state
 
 ### Latest source and next observation
 
@@ -317,1762 +322,1251 @@
   owned edits. Evidence uses `build\quality\symbols148-room-*.log`. The frozen
   running Lab image predates both naming batches; no fresh gameplay claim is
   assigned to those edits.
-
-## Native audio functional acceptance (2026-10-21)
-
-This revision implements the bounded functional scope of
-[#7](https://github.com/JEschete/VS-NativePort/issues/7). The existing AKAO
-sequencer drives sfizz/SFZ/WAV and SDL without a competing sequencer or synth.
-All 83 nonempty banks and 113 effect streams import; noise, preceding-voice FM,
-ten reverb presets, Stereo/Mono and ending XA playback are connected.
-All five in-game menu wrappers dispatch their original effects. Native-sized
-music state and reserved stream voice lifecycle replace incomplete bridges.
-
-Debug and Release full suites each pass **379 cases / 991,535 assertions**.
-Release `[audio],[clock]` passes **72 cases / 163,008 assertions**. Full
-changed-header quality reports **313 existing findings, zero new** without
-baseline/suppression changes. Source/project and import repeatability checks
-are recorded in [ASSET_PIPELINE.md](ASSET_PIPELINE.md).
-
-Actual controller replays cover simultaneous music/SFX, scene/menu transitions,
-all five menu sound actions, Stereo/Mono, skip/re-entry and Solid Shock. Isolated
-Combat Lab run `1792631613651010-0` binds E044 at tick 515, starts its pair at
-607, stops at 691 and reuses the voices at 1143. The installed ending FLAC
-passes production SDL postmix at start/30-second seek and natural EOF/drain.
-The final mix restores the original signed-PCM saturation boundary without
-changing source stream gains; this is not normalization or a claim of no
-intentional overload distortion.
-
-Local evidence: `build\quality\audio-output-*`, `audio-ending-*`, and paired
-`audio-listen-*.wav` menu/opening auditions. The reference windows are matched
-by scene/action state, not sample-synchronized; recordings are AAC-derived.
-No subjective parity approval is claimed. Disc-derived captures/data remain
-local. Full credits navigation/listening, every stream/track in context,
-bit-exact DSP and 5.1 are outside this bounded acceptance.
-
-Publication, exact fixing revision, CI and closure evidence belong to #7.
-EC-02 retirement remains separate. After #7, the next ordered priority in
-[#4](https://github.com/JEschete/VS-NativePort/issues/4) is item use #8.
-Unrelated local documentation/reference cleanup is not part of this audio
-publication. The sections below retain earlier checkpoint evidence, not
-current implementation or priority claims.
-
-## Historical checkpoint
-
-The ordered work tracker is [#4](https://github.com/JEschete/VS-NativePort/issues/4).
-The maintained-production quality pass in [#5](https://github.com/JEschete/VS-NativePort/issues/5)
-is verified locally. The Guildenstern textbox fix in
-[#1](https://github.com/JEschete/VS-NativePort/issues/1) is now verified locally.
-The menu-rendering/lifecycle checkpoints now cover those owner-reported text,
-equipment/Status, Map/Data and Options gaps. The owner approves the menu-first
-split: #39 retains actual combat/audio/cleared-puzzle consumer acceptance rather
-than blocking the rendering/lifecycle gate on later ordered work. Final gate CI
-and closure are recorded in #2. Issue #6's AI, initial-drop, encounter
-progression and defeat-flow acceptance is now verified and closed; the next
-ordered implementation is sound functionality #7. Menu shortcuts and setting
-values are not combat verification.
-Preserve the original dialogue pause and button advance; do not shorten the scene delay.
-
-The later Quick Manual report is repaired and verified below (#66). Its scoped
-publication/CI record belongs in that issue. The newly reproduced Score submenu
-fast-fail remains #65; sound functionality #7 is the next ordered gameplay
-implementation after #6's verified closure.
-
-### Owner playtest and shared-runtime repairs (2026-10-21, stopping checkpoint)
-
-Owner feedback on the `df748add` build confirms ground-enemy pathing/rotation
-are solved and the prologue is fully playable apart from the listed gaps.
-This is fresh owner evidence, not a new automated all-content/reference pass.
-Stutter #70 is closed. Sound outside the opening FMV remains #7.
-
-Two further fixes are implemented locally; publication/CI evidence belongs on
-their issues rather than being inferred from the older `df748add` CI:
-
-- **#75 Hellhound breath:** G00576 (`0x800F5798`) is the request field at original
-  offset `0xD0` inside G00575 (`0x800F56C8`), not independent storage. The data
-  ledger now makes it a canonical native field view. Four binding assertions
-  failed before the fix; all seven pass afterward. The child-track completion
-  guard also uses `childCount`, not original byte offset `0x14`.
-  Real speed-1 eight-Hellhound runs
-  `1792577241138340-0` (Debug) / `1792577275397935-0` (Release) pass 1600 ticks,
-  matching every snapshot and all 6586 RNG records. Breath 147 damages limbs
-  0/1/3/4 at tick 534 (24/28/20/27 HP), returns control at 664, and attacks again
-  at 1572. No HP/progression edits or replacement effect were used.
-- **#79 post-defeat arena:** the old Game Over event VM resumed in the next
-  healthy encounter. Before repair, menu 63/game-over false changed to menu
-  7/game-over true, then field rendering was disabled despite HP 250.
-  Gameplay event initialization now resets playback/start/finished state,
-  native thread cursors and wait timers. The initializer regression failed
-  with phase 4 before repair and now passes. Actual Minotaur defeat at tick 658,
-  F6/F7/F10 and same-room restart pass in Debug `1792578734686541-0` /
-  Release `1792578765217479-0`; captures show a real arena, not Continue/Title
-  on black. Same-room followed by a different zone (9) also passes in
-  `1792580129571764-0` / `1792580170367914-0`.
-
-Read-only frame diagnostics now include game-over state, active menu, field
-rendering enable and frame-buffer index. The state was measured before choosing
-the reset fix; no fake story transition or forced health restoration was added.
-Evidence and exact validation commands are in [COMBAT_LAB.md](COMBAT_LAB.md).
-Stopping validation passes both full builds and suites: **306 cases / 828512
-assertions per configuration**. Focused changed-code tidy reports zero findings
-and zero new findings. Native views check 621 fields / zero mismatches; event
-dispatch checks 179 / zero errors; audit/fixup regressions pass 13 and 3 tests.
-Two copier/scaffolder passes preserve 70 owned paths and 775 generated/project
-paths. Exact pushed-revision CI and closure evidence will be recorded on #75/#79;
-the source-wide shared-header gate is not inferred from the focused local gate.
-The owner authorized committing/pushing this bounded checkpoint before stopping.
-
-Remaining owner findings are tracked, not claimed fixed:
-
-| Finding | Tracker / next observation |
-| --- | --- |
-| Birds spawn/path incorrectly; missing window god rays; generally scattered particles | #76; identify aligned original/native effect-space cases. |
-| D'tok fire breath does nothing | #75 follow-up; prologue/Lab and missing VFX/damage distinction still unspecified. |
-| Bat flight terrain | #77 is closed after commit `155a7438`, four 5000-frame Debug/Release Combat Lab replays, 310-case suites, zero-new-findings quality, and green exact-revision CI `39599618892`. |
-| Eight Minotaur Zombies crash | #78; independently reproduced even in a fresh process after the reset repair. Frame cursor is already corrupt on entry to room drawing at tick 209. |
-| Suspected multi-part abilities | #80; Hellhound's four-limb case now works, other exact action/target cases remain unspecified. |
-| Selected body-part glow | #81; reported, not independently repaired. |
-| Equip paper-doll weapon missing on first entry | #14; reported first-entry/re-equip distinction preserved. |
-| Intro-controlled bosses unavailable | #16; intentional source-profile gate remains a roster limitation; do not fabricate hostile metadata or disable validation. |
-
-### Bat flight terrain bounds (#77, 2026-10-21)
-
-The Bat crash came from `Battle_Ai_LowestReachableGroundHeight` passing the
-packed tile word (including its `0x40` search/status byte) as the X coordinate
-to `Field_GroundHeightAtTile`; the failing word `0x400D0008` therefore became
-X=`1074593800`. The owned implementation now derives X and Z separately from
-the typed tile coordinates and direction delta. The two flight helpers reached
-on this path are also implemented from their assembly: the segment query samples
-16 signed ground heights, and the room-ceiling query returns the configured
-value or zero when the room navigation context is absent.
-
-`Field_TryGroundHeightAtTile` reports unavailable terrain/bounds without
-changing the output value; the existing required-height query retains its
-explicit diagnostic and abort guard. Regression coverage checks a valid
-negative-height neighbor, a room-edge direction that must not sample outside
-the grid, 16-point segment sampling, the configured/missing ceiling, and
-valid/edge/missing-height-map results.
-
-Production Combat Lab replays at normal speed use the original single-Bat and
-eight-Bat scenarios with no player input (`--scripted`). Debug runs
-`1792584773462606-0` / `1792584773457949-0` and Release runs
-`1792584856381806-0` / `1792584856370509-0` each complete all 5000 frames.
-The Bat actors select Ashley, their positions change during the encounter, and
-Ashley reaches real HP 0/Game Over; no terrain-height abort is logged. These
-four scenarios provide bounded Bat evidence, not full flight-roster coverage.
-Both full test suites pass **310 cases / 828541 assertions**; changed-code tidy
-reports **0 new findings**. Two copier and two scaffold passes are stable, and
-the owned flight source survives regeneration. Commit `155a7438` passed exact-
-revision Source Quality CI `39599618892`, and #77 is closed. #6 remains open
-for its wider acceptance.
-
-### #6 AI, initial drop and defeat-flow acceptance (2026-10-21)
-
-F02771 (`MENU/MENU7.PRG/260.c:3504`) linked the negative-fade tile by
-truncating its host pointer into the renderer's 24-bit link field. The native
-renderer uses `LegacyGpu_Handle` IDs for that field. The new regression failed
-before the fix (`LegacyGpu_Pointer` returned null for raw link `0x9f13a4`,
-instead of resolving the fade packet); the copier fix now uses the native
-handle and the test passes.
-
-Current Debug and Release Combat Lab runs `1792588127503092-0` and
-`1792588245223129-0` use the original Zone 9 Zombie definition and 32 ordinary
-Circle inputs at 40-tick intervals. The Zombie moves toward Ashley, targets
-actor 0 and executes attacks that lower Ashley's HP from 250 to 230. Its HP
-falls from 121 to 49 by tick 1100 and 0 by 1150; actor 2 is removed by 1350,
-when its real source drop (item 323, count 2) is queued. Ashley survives. The
-New Game reward gate remains false and inventory unchanged, so this verifies
-the initial drop queue, not inventory delivery or full drop-table coverage.
-Exact args, manifests and traces are in the Combat Lab run folders.
-
-Fresh full New Game prologue controller replays use 839 scheduled controls and
-only Start at tick 1000 to skip the intro. Debug and Release each complete
-48000 ticks / 22 captures with exit 0; logs load MAP004 then MAP005 (Debug
-20425/23120; Release 22561/25240), and the final captures remain in the live
-battle. Neither route edits HP, position, RNG, events or progression.
-
-Fresh Debug/Release defeat-flow replays each complete 26000 ticks / eight
-captures with exit 0. The real Game Over menu appears after natural combat
-damage; Down at 21000 and Start at 21100 select Title, with the native title
-transition at 21177. Exact inputs, manifests, logs and captures for both replay
-groups are under `build/quality/issue6-final-{victory,gameover}-<config>/`.
-
-Both configurations pass **311 cases / 828561 assertions**. Changed-code tidy
-reports **0 new findings** (6 baseline), and a second copier pass is stable.
-The F02771 fix in `ae2e30e1` passed exact-revision Source Quality CI
-`39603967134`; documentation revision `b7f97ce0` also passed CI
-`39604755566`. #6 is closed with its explicit acceptance verified. Complete
-item/equipment drop-table coverage remains at priorities 09 and 10; broader
-roster coverage remains separately tracked.
-
-For #78, temporary stage tracing in run `1792579333054718-0` showed a valid
-cursor at tick 207, then `0x00000557FECC05FB` before any room-render stage at
-209. The write producer is not established. Next useful observation is a native
-write watchpoint on `Render_frameScratch.primitiveCursor` during that pre-draw
-action/camera update; do not assume packet capacity or solve it by reducing
-enemy count. Temporary probes were removed from both generator and output.
-The owner was unavailable for the D'tok/multi-part clarification; do not invent
-expected damage or modify a scripted sequence on that basis.
-
-### Combat Lab profiles, awareness and particles (2026-10-21)
-
-The combined worktree based on `fd291cfe` now has selectable Prologue,
-Post-Prologue and representative Post-Minotaur Ashley profiles. Normal startup
-is unchanged. Presets/logs persist the profile; legacy presets default to
-Prologue. The advanced profile learns/maps real table entries, not every action.
-Weapon/resource/status restrictions still apply, including drawing the weapon
-before Break Arts. The stage-3 gate enables Map/Score, not a new Setup root menu.
-
-Actual speed-1 inputs in Debug/Release execute Solid Shock (97), Heavy Shot
-chaining (22), the equipped art (188), and Cure Root (224). The item capture
-is during the original particle animation, not after it ends. Natural awareness
-markers now render through native links and a native frame matrix. Testing
-also exposed/repaired full-pool emission UB (#73) and a one-element renderer
-table overwriting the effect package (#74). Live pause, single-step, F10 return,
-restart and switching back to a genuinely limited Prologue menu pass.
-
-Full Debug/Release suites: 302 cases / 828486 assertions each. Focused action/
-rendering regressions: 15 / 1006. Two generator runs preserve 70 owned paths and
-775 generated/project paths; native views check 621 fields with zero mismatches,
-event dispatch checks 179 with zero errors. Exact commands, source/dirty-state
-limits, run IDs, captures, timing and generation hashes are in
-[COMBAT_LAB.md](COMBAT_LAB.md), not inferred from successful exits.
-Publication/CI evidence belongs on #69, #71, #72, #73 and #74.
-The full changed-source/shared-header tidy gate passes with zero new findings
-(316 existing); no baseline was changed.
-
-The owner confirms stutter is solved and live combat feels natural; #70 is now
-closed. Console/file batching retains full Trace/RNG files and improves
-the matched normal-speed run, but Debug still exceeds the 16.667 ms simulation
-budget on 41/600 ticks. Final four-wolf Release simulation is 1.910 ms mean /
-4.863 ms maximum; maximum presentation interval is 26.526 ms. Redraw-throttling
-experiments worsened pacing and were removed. These measurements are diagnostic
-history, not an outstanding stutter blocker.
-
-The owner's new Hellhound fire-breath crash is reproduced as #75 at `df748add`,
-Release speed 1, zone 11/room 0, Prologue Ashley (8,12), eight definition-3
-Hellhounds at (5..12,13), seed 1. With no injected gameplay input, action 147
-loads effect 94 and faults reading `0x2` at tick 482 in shared
-`Effects_TickChildEffectTrack` (F01563, Timeline.c:168). Local owner/repro runs:
-`1792572817191067-0` / `1792573135209075-0`. The failing expression reads
-`Effects_package->request->count`; its producer was unknown at this initial
-triage. The later canonical-request repair is documented above. The scattered-particle report
-is tracked separately as #76 pending a measured spatial/reference comparison.
-Specials/magic share action records, target/result processing and the effect VM/
-timeline, with actor-specific assets and effect-specific plugins. Do not invent
-an independent Hellhound-only fire-breath implementation to bypass the fault.
-
-The pending ground-navigation/motion/cleanup work and older actual defeat,
-queued-drop, Game Over and ordinary prologue victories are documented separately
-in that checkpoint. They do not establish complete roster behavior, delivered
-reward coverage, every ability, C++ promotion or compatibility retirement.
-#6, #16 and #42 retain those wider acceptance limits; the gap report has 50
-C-backed entries remaining. Do not reorder #4 based on easy closures.
-
-### Standalone Combat Lab checkpoint (2026-10-20)
-
-Owner-requested tooling for #16 now launches independently as `VS.CombatLab.exe`;
-no entry was added to the normal game menu. [COMBAT_LAB.md](COMBAT_LAB.md) records
-the exact local configurations, inputs, evidence paths and limits. Source was
-`69a88618` plus lab edits and pre-existing dirty AI work; none of those results
-should be relabeled as clean-revision verification.
-
-Real two-enemy attacks/retaliation matched across all 1500 Debug/Release frame
-snapshots. Real item inputs consumed one Cure Root and restored HP after enemy
-damage. Live pause/single-step/stop/restart restored initial actor HP/MP.
-Full suites pass 271 cases / 827297 assertions in each configuration; scoped
-tidy has zero new findings and repeated generation preserves owned files/output.
-The lab also exposed and repaired omitted player-settings initialization and
-the unencoded G00917 item-shortcut label (F02553), including its reset initializer.
-
-The host is an initial same-zone, source-profile-backed slice. Full roster,
-loadout editing, spell/ability coverage, collision-aware placement, defeat/rewards,
-sound and reference parity remain open. #16, M8 and the ordered gameplay
-priorities are not closed by this checkpoint. Publication/CI evidence belongs
-in the issue separately from these dirty-worktree tests.
-
-The later lab-only publication snapshot excludes the dirty AI changes. It builds
-in Debug/Release and passes 239 cases / 827068 assertions per configuration.
-Fresh combat, item consumption/healing and live lifecycle runs succeed independently;
-both log files persist real results. Startup parse errors are now logged too.
-See the isolated-publication section of COMBAT_LAB.md for exact runs and differences
-from the earlier combined worktree. #16 remains open for full coverage.
-
-### Combat Lab font readability (#67, 2026-10-20)
-
-The owner screenshot exposed unreadable solid menu glyphs. Canvas treated every
-nonzero 4-bit index as the same bright foreground color, so black outlines and
-gray antialiasing filled in the letters. The fix reads the checked compact-font
-CLUT at (864,223) from SYSTEM.DAT's first interface block, uploaded to (832,0)
-by BATTLE/5BF94.c:3484. The image0 font remains on page (768,0); paletteOffset
-is a different palette. Transparency is tested after lookup, including opaque
-black 0x8000, and each RGB555 shade is tinted without flattening it.
-
-Four asset-free Canvas regressions cover shading, tint, zero/nonzero-index
-transparency, clipping and malformed image/palette offsets (66 assertions).
-The solution generator compiles the actual Canvas source into VS.Tests; no
-game-library dependency on the lab executable was added. Two generation runs
-preserved project hashes. Scoped tidy reports zero new findings, no baseline edits.
-
-Verification is based on `30cf4dde` plus this fix. Full Debug/Release combined
-worktree suites pass 275 cases / 827368 assertions, including unrelated dirty AI
-work. The isolated publication worktree excludes that AI work; full Debug/Release
-suites pass 243 cases / 827134 assertions each and its editor capture matches the
-combined-worktree Debug/Release output byte-for-byte (SHA-256
-`30ED2C791662CF763ABF54768F4BAF0D69A43CC24088CE5220AED8D24D70B7E2`).
-The isolated CI-equivalent quality gate also passes with zero new findings.
-
-Local evidence: `build/quality/issue67/`, including `editor-before.bmp`,
-`editor-after.bmp`, `editor-debug-after.bmp`, `editor-publish.bmp`, the corresponding
-Windows OCR text, build/test logs/XML and quality reports. Capture command:
-`VS.CombatLab.exe --frames 2 --scripted --capture <path>`; the isolated run also
-passes the original extracted data root via `--data`. Before-capture OCR returned
-no text; the corrected capture recognizes the title, actions, warnings and controls.
-This is editor-readability evidence, not gameplay completion. Assets/captures
-remain local and are not committed. Pushed revision and CI/closure evidence belong
-on #67; #16 remains open for the wider combat audit.
-
-### Combat Lab unsupported placement (#68, 2026-10-21)
-
-The owner's four-Silver-Wolf setup allocated four actors, not two. In zone 9,
-room 0, the line at (1,12), (3,12), (5,12), (7,12) puts the outer actors on an
-invalid floor profile and a blocked tile respectively; later support queries
-reach -3000. Original local run: `1792560287160365-0`, first ready tick 1928.
-MPD tile-cell section is index 2, not index 3. Do not infer invalidity from a
-negative Y alone: valid raised terrain is explicitly covered by the tests.
-
-The lab now classifies complete static tiles with the existing collision decoder,
-using isolated map bytes and normalizing the disc profile count as the loader
-does. It marks supported tiles green and rejects unsafe starts with actor/tile
-reasons, without relocating actors or changing production collision. It is a
-conservative preflight, not footprint/ceiling/dynamic-support/path verification.
-
-Use F10 to return to the builder, including while paused. A supported four-wolf
-layout is Ashley (4,9), enemy 4, quantity 4, offset (-2,+3), spacing 1; clear
-existing groups first. Rebuild and restart after ending the active debugger
-session; the initial workspace build could not update that running process.
-
-Isolated `0a074f32` plus this scoped fix passes Debug/Release full builds and
-248 cases / 827175 assertions each, excluding unrelated AI work. Scoped tidy
-has no new findings and no baseline edits. Both configurations reject the unsafe
-setup before spawning and retain four supported enemies through 599 ready frames.
-Release run `1792561359130756-0` verifies F6 at ready tick 57, F10 return at 68,
-editor restart at 221 and another F10 return at 368. Debug/Release previews match.
-Exact commands, local presets,
-replay evidence and limits are in COMBAT_LAB.md and `build/quality/issue68/`.
-Do not relabel the isolated wolf placement runs as verified AI or combat.
-Publication and CI evidence belong on #68; #16 and ordered gameplay work stay open.
-
-### Guildenstern window dialogue (2026-10-19)
-
-Verification used `35618ef2` plus the feedback-link fix and renderer regression.
-The original line is **"...Where are you, Sydney?"**, not "Where are you hiding Sydney?".
-
-- A hardware write watch identified F02456, `Effects_ScreenDistortion_DrawFeedbackTiles`
-  (`SCREFF2.PRG func_800F986C`, `src/GIM/SCREFF2.PRG/0.c`), writing native address bits
-  into ordering entry 143. The invalid link terminated rendering before the textbox chain.
-  Both the feedback and framebuffer-restore links now use `LegacyGpu_Handle`, through
-  `copy_fixups.py`. The original effect, event delay and controller wait are unchanged.
-- The regression in the existing GIM renderer tests checks both framebuffer buffers,
-  feedback depths 1, 2 and 128, both links, packet-buffer guards and complete traversal
-  through a lower dialogue packet. `[render][text][feedback]` passes all six combinations;
-  all 19 `[render]` cases pass (200 assertions) in Debug and Release. The complete Debug
-  suite passes 96 cases / 30713 assertions.
-- Clean Debug New Game replay: `VS.Desktop.exe --frames 10000 --speed 16 --press
-  1000:Start,1300:Circle,3800:Circle,3980:Circle,4160:Circle,4340:Circle,4520:Circle,
-  4700:Circle,4880:Circle,5060:Circle,5240:Circle,6400:Circle --capture
-  build/quality/issue1-window-final --at 6000,6300,6450,7000,8500,9900 --scripted
-  --log-level debug --log-channels boot,input,content,render`. Join the wrapped
-  `--press` list without whitespace. The line is visibly present at 6000 and 6300;
-  Circle at 6400 advances into ZONE002 at 6450 and MAP002 at 6486. Later ZONE003/MAP003
-  loads at 8757/8793. Exit 0. No event flags or timing were bypassed.
-- Logs: `build/Debug/issue1-window-final.log` and `-stderr.log`; rendered captures:
-  `build/quality/issue1-window-final/`. Earlier before/fixed captures and the write-watch
-  stack remain under `build/quality/issue1-window-*` and
-  `build/Debug/issue1-dialog-write-watch-stderr.log`. Temporary probes are removed.
-- Release repeats the same input schedule with `--frames 7000 --capture
-  build/quality/issue1-window-release --at 6000,6300,6990`; the line is visually verified
-  at 6300 and the same Circle-driven ZONE002/MAP002 transition occurs at 6450/6486.
-  Exit 0; logs are `build/Debug/issue1-window-release.log` and `-stderr.log`.
-- A second `copy_to_native.py` run preserves manifest SHA-256
-  `D52C8D3AE62F712540F2499CAB05D74EE96E8558CDB7790B3AF2D8041111E5E3`.
-- `quality-native.cmd --changed --tidy`: zero new findings; no baseline refresh.
-  Existing uninitialized actor-dialog `texture` warning is separate and not claimed fixed.
-  This verifies the window dialogue, not full scene-rendering parity or the prologue.
-- Latest pushed Source Quality run `39239821866` is successful for `35618ef2`.
-  The fixing commit and closure evidence are recorded in #1. No push was performed for
-  the window-dialogue fix.
-
-### Menu copy helpers and quick test route (2026-10-19)
-
-Issue #19 supports the active menu-rendering issue #2. Verification used `5694a3d3`
-plus the owned halfword-copy implementations and memory regressions.
-
-- F04188/F04189 are implemented in `Core/Memory/WordCopy.c`, not generated output.
-  Original `573B8.c:242-269` copies leading halfwords, then loads four halfwords before
-  storing each eight-byte block. The native code preserves that forward overlap order,
-  halfword alignment and full native pointer bytes. Nonpositive sizes are no-ops;
-  incomplete halfwords/blocks are ignored rather than entering invalid assembly loops.
-  The header declarations now have C linkage for native C++ consumers.
-- Before repair, the new direct copy tests failed 25 assertions in three cases, leaving
-  destinations unchanged: `build/Debug/issue19-before-test.log`. After repair,
-  `[core][memory]` passes six cases / 141 assertions in Debug and Release. The complete
-  Debug suite passes 100 cases / 30805 assertions. Changed-source quality with tidy
-  reports zero new findings; no baseline refresh.
-- Use real Start presses to skip the opening and the A. J. Durai quote for menu testing:
-  `--press 1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle` loads MAP009 at
-  4058 and MAINMENU.PRG at 7005. Start at 1500 is too early in this replay. Repeated
-  Circle inputs can open/close the battle sphere instead of testing the main menu.
-  Keep the complete prologue for combat troubleshooting and verification.
-- Menu/preview replay in both configurations: `--frames 10000 --speed 16 --press
-  1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle,7600:Circle,8200:Down,8500:Circle
-  --at 7500,7900,8400,9000,9900 --scripted`. Debug captures/logs use
-  `issue19-firstroom-preview`; Release uses `issue19-firstroom-preview-release`
-  (Release captures at 7500,8400,9900). Captures are under `build/quality/`; logs are
-  under `build/Debug/`, including `-stderr.log`. Both exit 0. The item preview renders
-  Ashley without the observed companion-slot corruption; the trace remains at slot 1.
-- Main menu text/graphics still render as black bars and are NOT claimed fixed.
-  Issue #2 remains active. The copy-helper fixing commit and CI/closure evidence are
-  recorded in #19; the main-menu renderer is the next controlling path to inspect.
-
-### Native menu rendering and workspace (2026-10-19)
-
-Verification used pushed `e4442056` plus the pending row/workspace changes. #2 is
-still active; its native workspace defect is #27 and the Status crash is #28.
-
-- F01348 used PS1 scratch offset `+0x008`, which is the scene ordering pointer in the
-  native frame rather than the overlay pointer. It now accesses the native fields and
-  uses a packet handle. F02548's scrolling gradient also now uses a native handle.
-  Root menu labels/gradients, setup labels and return to gameplay are visually verified.
-- #27: F01367 allocates `40 * sizeof(Menu_Framework_MenuRow) + 0x124`, places string
-  scratch after the forty rows, then row-type scratch 96 bytes later. F01349 clears the
-  same native-sized workspace. Original PS1 `0xB24/+0xA00/+0xA60` sizes overlapped the
-  native rows after pointer growth. Fixes are in the copier, not direct generated edits.
-- Existing GIM render tests check normal and scrolling link traversal, separate scene
-  and overlay tables, packet bounds, and real menu initialization of the final native
-  row and all scratch bytes with two guards. `[render][menu]`: two cases / three checks.
-  Release `[render]`: 21 cases / 203 assertions. Full Debug: 102 cases / 30808 assertions.
-  Changed-source quality with tidy: zero new findings; no baseline refresh.
-- Debug menu/item/setup/return inputs: `1000:Start,1300:Circle,3000:Start,4000:Start,
-  7000:Triangle,7600:Circle,8200:Down,8500:Circle,9200:Cross,9600:Cross,10000:Triangle`.
-  Both configurations complete 11500 ticks at speed 16, with stable preview companion
-  slot 1. Debug captures: `build/quality/issue2-items-row-after`; Release captures:
-  `build/quality/issue27-release-menu-return`; corresponding logs are in `build/Debug/`.
-  Root-only restored capture: `build/quality/issue2-mainmenu-row-after/frame_8100.png`.
-- Second copier run is stable: manifest SHA-256
-  `8887CF7992242337205C67EDDA97A0F69906119AE435A740E3906E19A6D39E4F`.
-- Remaining: item overview/category row/detail text is still absent despite visible
-  category icons and Ashley preview. Status entry (`7500:Down,7800:Circle` after the
-  same menu-open inputs) crashes in nested `Render_FormatEncodedText` at tick 7833;
-  logged before repair as #28, evidence `build/Debug/issue2-status-release-stderr.log`.
-  Passing unit tests and root-menu screenshots do not establish completion of #2.
-  Fixing commit/CI and closure evidence for the narrower workspace repair are in #27.
-
-### Status crash and embedded menu strings (2026-10-19)
-
-#27 is closed in pushed `599d3037`, green Source Quality run `39270071612`.
-#28 verification used that revision plus the following pending changes; #2 remains active.
-
-- The copier treated `.vsString` source includes as one-word zero initializers and did
-  not register them with the module loader. It now uses the original source include
-  path and splat asset extents, allocates rounded `u_short` capacity, and loads the exact
-  source byte count (including valid odd-byte tables without reading the next asset).
-  Unresolved assets fail generation. Twenty-four embedded menu text arrays are bound;
-  startup now loads 358 globals from 61 modules, 19 pointer tables, zero failures.
-- Status source table: MENU4.PRG `0x4C48`, 3520 bytes / 1760 words. Inventory menu text:
-  MENU3.PRG `0x6BB8`, 944 bytes / 472 words. The real Status format is valid nested text;
-  its previous zero template led the formatter outside the table at tick 7833.
-- F02682 also enabled Status drawing before its actor-switch producer loaded preview
-  slot 1. Drawing is now enabled after that producer runs. F02662/F02663/F02677/F02678
-  now retain native packet handles for indicators, leader lines, fades and backgrounds.
-  No downstream null guard or scene bypass substitutes for those corrections.
-- Existing content tests check the actual loaded Status/inventory tables and odd-byte
-  destination padding. A guarded Status packet regression traverses the entire ordering
-  chain under both background orders. Clean Debug suite: 103 cases / 30813 assertions.
-  Release `[content][module],[render]`: 27 cases / 257 assertions. Changed-source quality
-  with tidy: zero new findings, no baseline refresh. All temporary probes are removed.
-- Clean Debug/Release replay: `--frames 10500 --speed 16 --press
-  1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle,7500:Down,7800:Circle,
-  8400:Down,8700:Right,9000:Left,9500:Cross,9800:Cross --at 8200,8800,9300,10300
-  --scripted`. Both exit 0. Evidence labels `issue28-status-final-debug` and
-  `issue28-status-final-release` under `build/quality/` and `build/Debug/` (including
-  `-stderr.log`). Prior failing stacks: `issue2-status-release` and `issue28-status-bound`.
-- Copier second generation is stable: SHA-256
-  `58C0CAE0B7E0B320CD7CBABFE325AF479AF37886A86B0951DB96076C0F28487A`.
-- Status now visibly draws Ashley, gauges and limb lines and returns to the root menu;
-  some labels/numeric text and inventory category/detail text are still missing. #2 is
-  not complete. Do not treat the #28 crash repair as complete menu or combat parity.
-  Fixing commit and pushed CI/closure evidence for #28 are recorded on that issue.
-
-### Assembly-only gap census (2026-10-20)
-
-The requested full inventory is complete; conversion has resumed using the
-located C counterparts, checked against the original assembly. See
-[ASSEMBLY_GAPS.md](ASSEMBLY_GAPS.md) and its complete CSV links.
-All 4,207 catalog rows / 3,762 port targets are reconciled against actual native
-bodies, aliases and template implementations, plus four read-only references.
-The initial census was 185 stubs and one partial native entry: 145 had C counterparts,
-31 have assembly but no located matching C, and 10 PLG074 `INCLUDE_ASM` entries
-have no locally extracted listing. C counterparts are not assumed correct or
-ABI-compatible; most PC references still use guest pointers/offsets.
-
-The tagged `7E05C.s` has 21 entries: six implemented, 14 open with C references,
-and one assembly-only gap, F01833 `Field::IsPointOutsideSolidVolumes`.
-Candidate copy/append/sort/readiness C already exists in read-only rood-boi;
-check it against assembly before modernizing instead of treating it as absent.
-Preserve the existing `// decomp: ... (src/...:line)` comment above each future
-implementation. The auditor itself changes no Native or resource code. Re-run
-`python tools\port\audit_assembly_gaps.py --publish` after an authorized reference
-update; the report records revisions/fingerprints for assumption reconciliation.
-
-### C-backed AI planning primitives (#6/#42, 2026-10-20)
-
-Owned C++ [planning primitives](../Native/Game/src/Battle/Ai/PlanningPrimitives.cpp)
-replace eight stubs: F01684-F01688 and F01794-F01796. This covers complete and
-overlapping candidate copies, bounded append/exclusion bookkeeping, signed
-descending candidate ordering with the original midpoint partition's tie order,
-clamped simulated stat deltas, selective planning-stat snapshots, action resource
-usability, target eligibility and the condition flags consumed by targeting.
-No guest pointer accessors or original AI-state byte offsets were imported.
-Reference symbols/assembly paths are above each implementation; donor attribution
-and the pinned CC0 reference are in [THIRD_PARTY.md](../THIRD_PARTY.md).
-
-Assembly/C comparison also exposed a coupled existing F01825 error:
-`SetActorVerticalMovementSteps` selected the minimum instead of the maximum.
-An independent regression failed for both argument orders before the correction;
-signed comparisons and pre-truncation byte packing are covered. The older
-layout fixture's matching minimum assumption was corrected too.
-
-The first batch reduced the inventory to **178 remaining entries**: 177 stubs and one
-partial; **137 have C counterparts**, 31 have only located assembly, and ten
-still lack a locally extracted listing. #42 retains the original 186-entry
-checklist; do not remove completed IDs from that historical baseline.
-
-The actual full prologue reaches MAP003 and the 22,000-tick limit in both builds
-with all requested captures and no logged errors. This is integration/regression
-evidence, not an enemy-action, damage, defeat or drop completion claim. Remaining
-scoring, cooldown/execution, randomized selection and movement stubs still block
-#6's encounter acceptance criteria; neither #6 nor #42 is closed by this batch.
-
-Debug and Release full suites each pass **159 cases / 364,083 assertions**.
-The audit's 12 tests, 620 native-view fields and 179 event-dispatch signatures
-pass; copier output and owned implementations are idempotent. New C++/header/test
-quality checks report zero findings without changing the quality baseline.
-
-### Continued C-backed fills and native weapon reach (#6/#42, 2026-10-20)
-
-Nineteen further entries are implemented, bringing the original C-backed
-checklist to **27 of 145**; **118 C-backed gaps remain**. The current complete
-inventory has **159 gaps** (158 stubs and one partial): 118 C-backed, 31
-assembly-only, and ten missing local listings.
-
-- [Decision primitives](../Native/Game/src/Battle/Ai/DecisionPrimitives.cpp):
-  F01674-F01677, F01683, F01690-F01693 and F01770. These cover execution and
-  cooldown gates, signed-halfword condition scoring, action/target classes,
-  fallback caching, weight-capped randomized promotion with exact draw ordering,
-  and the actor random accumulator.
-- [Terrain height](../Native/Game/src/Field/TerrainHeight.cpp):
-  F01759-F01764. All 65,536 terrain-cell encodings are tested through tile,
-  packed-tile and world-coordinate consumers, including retained collision flags,
-  signed 15-bit heights and final-grid-cell bounds.
-- [Navigation primitives](../Native/Game/src/Battle/Ai/NavigationPrimitives.cpp):
-  F01775/F01789. Neighbor-step checks use signed direction deltas and reject
-  closed grid boundaries; reservation preserves all other navigation bits.
-- [Actor commands](../Native/Game/src/Battle/Ai/ActorCommands.cpp): F01720.
-  All 18 intent cases now produce real native actor-command packets, including
-  attack targeting, turning, gait choice, jump/drop selection, position staging,
-  reservation and one-per-tile collision slides. Typed packet and movement
-  helpers replace the monolithic assembly dispatch.
-
-The native command/scoring paths deliberately do not recreate unused GTE
-scratch-register clobbers or the proximity routine's guest pointer-array
-pseudo-node. Meaningful arithmetic, packet fields, ordering and RNG consumption
-remain covered; resources stay read-only.
-
-Live read-only PDB observations also exposed an existing coupled range bug:
-T00529 `ActionRangeView` was missing from native AI-view rebasing. Its stats
-pointer was at offset 96, while canonical `ActorAiState.stats` is at 104.
-An independent offset regression failed before the fix; the actual
-`CalculateActionRangeSquared` consumer now returns the expected 25,600 in its
-fixture, and live enemy candidates changed from zero reach to **65,536**.
-The registered mapping repair increases checked native-view fields to **621**.
-
-Debug and Release full suites each pass **187 cases / 760,898 assertions**.
-The native view/dispatch contracts and 12 audit tests pass, with no quality
-baseline changes. Ordinary controller input (after cancelling a stale attack
-menu) now provides a measured in-range replay: Ashley moves from `(1216,0,576)`
-to `(1272,0,1273)`, within squared distance 9,077 of actor 3. Both builds complete
-all 24,000 ticks and ten read-only observations/captures with no logged errors.
-Enemy action selection remains unproven: the engagement-ready/try-engage stubs
-are the next live blockers, alongside the remaining pursuit/navigation work.
-Do not close #6 or treat these checkpoints as completion of #42.
-
-### Active engagement, enemy damage and real prologue victories (#6/#42)
-
-Seven more C-backed entries are implemented in
-[Engagement.cpp](../Native/Game/src/Battle/Ai/Engagement.cpp):
-F01628/F01629 and F01631-F01635. The native room membership mask/count and
-engaged-list links now drive actual join, 32-frame readiness, leave/rejoin
-cooldowns and awareness markers. Existing buildup and actor-command consumers
-are exercised by [EngagementTests.cpp](../Native/Tests/src/EngagementTests.cpp).
-The original return value of `TryEngageActor` is restored as an integer result;
-existing callers may still discard it.
-
-The C-backed total is now **34 of 145**, with **111** remaining. The complete
-inventory has **152** open entries. Both complete builds pass **196 cases /
-760,994 assertions**; native-view/dispatch contracts, audit tests, targeted tidy,
-quality baselines and copier idempotence pass.
-
-Ordinary-input replays now demonstrate actual enemy command opcode 24 and
-player damage, not merely populated plans. The Debug close-range observation
-records Ashley HP **250 -> 240 -> 217 -> 0**, with the native defeat flag
-`0x20`; Release also executes real enemy attacks and damage. This does not by
-itself assert the complete subsequent game-over UI.
-
-A separate normal-input Debug fight defeats both original enemies: actor 3 is
-HP 0/defeat flag `0x20` at tick 19,000, actor 2 at 19,900, while Ashley survives.
-The real prologue then advances to **MAP004 at 20,441** and **MAP005 at 23,120**.
-No HP, position, RNG or progression memory was patched. All 24,000 ticks and ten
-requested read-only observations/captures complete with exit 0 and no errors.
-An initial real item-drop consumer and autonomous pursuit/movement are still
-unverified; #6 remains open. The observed actor cleanup stub is the next
-continuation, not an excuse to stop at another function-count checkpoint.
-
-### Native actor teardown and navigation-override ownership
-
-Five more entries are implemented in
-[ActorCleanup.cpp](../Native/Game/src/Battle/Ai/ActorCleanup.cpp):
-F01790, F01804, F01822/F01823 and F01842. Cleanup now releases reservation and
-override storage, detaches linked/special actors and encounter membership,
-clears marker/list references, releases actor AI storage and handles shared
-orbiting-boss ownership. Ashley's original persistent AI lifetime is retained.
-Room bounds and gate-mask operations retain the verified original byte semantics.
-
-The prerequisite navigation-override pointer at original `0x18C` was also
-missing from native rebasing. A new independent view-width regression failed
-**4 == 8** before repair. All AI views now reserve that full native pointer;
-perception's former integer presence test is a pointer, and later view fields
-remain aligned with canonical storage. Real high-end heap allocation/free tests
-use addresses above 4 GiB and verify complete heap recovery and repeat cleanup.
-Shared encounter-mask access is extracted rather than duplicated.
-
-The C-backed total is **39 of 145**, with **106** remaining; **147** total gaps
-remain. Full Debug/Release suites each pass **203 cases / 761,040 assertions**,
-with 621 native-view fields, 179 dispatch contracts, 12 audit tests, idempotence
-and zero new quality findings. Both ordinary-input victory replays still
-complete all 24,000 ticks/captures without errors and preserve the real
-MAP003 -> MAP004 -> MAP005 transition. Initial drop evidence and autonomous
-pursuit remain outstanding; work continues instead of declaring the tracker done.
-
-### Canonical native math reuse and packed tile distance
-
-Eight further C-backed entries are complete. F01771 now has a typed owned C++
-[packed-tile distance](../Native/Engine/src/Core/Math/TileDistance.cpp)
-implementation. F03397/F03398/F03407/F03410/F03411/F03412/F03413 are deliberately
-redirected by the copy generator to the existing canonical native GTE/math API,
-not duplicated as another PS1 implementation. The missing wide-to-short vector
-normalizer is added to that shared API; short-to-short normalization reuses it.
-Original symbols/assembly paths remain above the generated aliases.
-
-The audit verifies both the exact emitted alias and a real implemented native
-target body before counting a redirect. Wrong/commented aliases, declarations
-without definitions and redirected stubs remain gaps. Its expanded 13-test suite
-checks these failure cases.
-
-The original C-backed set is now **47 of 145**, with **98** remaining
-(**139** total gaps). Both complete suites pass **211 cases / 826,703 assertions**.
-Tests cover exact alias function addresses/native pointer return types,
-translation retention, distinct mixed XYZ/YXZ orders, Q12 cross products and
-square roots, normalization output shapes/pads/in-place use, and all 65,536
-unsigned packed tile-coordinate combinations. Copy idempotence and all native
-contracts pass without changing quality baselines. The ordinary-input Debug
-victory/progression replay also completes cleanly.
-
-### D'Tok crash investigation and native animation outputs (#63/#64)
-
-The owner's null-model perception failure is reproduced on untouched
-`d357de4f`: actor/model slots contain only 0 and 2, but AI slot 3 still contains
-the earlier guard. At tick 35,909, perception reads address `0x8`. Actor AI
-teardown was still a stub in that revision. Existing fix `6eae802d` releases
-that state; current replays have no orphan AI at the same boss transition.
-The owner's exact revision is unknown; do not infer it from the report.
-
-A separate current failure was confirmed after tick 36,500 on `c98afc09`.
-A private Windows debugger, attached only after capture 33,900, recorded
-`0xC0000409`, fast-fail code 2 (stack-cookie check). Local PDB public symbols
-and disassembly locate `__report_gsfailure+0xA`, called from
-`Battle_PlaySpecialActionAnimation+0x41E`. This was not a hang or the historical
-perception AV. The old October 19 hang log is unrelated.
-
-`FindActorAnimationHeader` writes a native `u_short*`, but special-action,
-Break Art and spell consumers supplied four-byte integer locals through
-incompatible function-pointer casts. The generator now emits real pointer
-locals and direct declared calls. Enemy pose tests the complete pointer rather
-than its low word; death and locomotion callers also use the declared contract.
-The current upstream reference agrees with the special-action pointer type;
-all reference trees remain read-only.
-
-The independent `[animation-headers]` real-consumer test first exited
-`0xC0000409`. After repair, all 16 absent/present, stage and consumer
-combinations pass. Animation locking isolates lookup, fallback-facing/pitch
-and optional follow-up behavior from pose decoding. Debug and Release each
-pass **212 cases / 826,719 assertions**. Generator idempotence, 621 native
-view fields, 179 dispatch contracts and changed-source quality pass without
-baseline changes.
-
-Both configurations then complete the full-prologue ordinary-input route
-through **48,000 ticks / 22 captures**, exit 0, no logged errors and no orphan
-AI. Captures show the live boss encounter beyond the old failures. The
-retained route does not defeat this boss: Ashley remains out of attack range.
-This verifies these crashes, not autonomous pursuit, boss victory, drops,
-complete defeat flow, audio or the remaining #6 acceptance criteria.
-Evidence stays local under `build/quality/issue63/` and
-`build/quality/issue6/dtok-fixed-{debug,release}-encounter/`; no gameplay
-memory writes or progression bypasses were used. The gap count remains
-**47/145** C-backed complete, **98** remaining.
-
-### Quick Manual frame pointers and deferred text lifetime (#66, 2026-10-20)
-
-Verification uses `26d74433` plus the scoped Manual generator/test changes.
-The original topic page crashed at tick 9011 in
-`Menu_Manual_DrawControlsBackground`: manual producers treated the native
-frame as two four-byte scratch words. Generator fixes for F04163, F02997,
-F03000-F03005 and F03007 use the typed native frame cursor/ordering fields.
-The independent panel regression first faulted with a packet buffer above
-4 GiB, then passed exact byte/count, bounded link traversal and guard checks.
-
-The no-crash replay exposed a separate blank-text defect in F02995:
-`CopyPageText` passed a stack array to the deferred textbox consumer. Its
-generator fix retains the 1024-byte page buffer for that consumer's lifetime;
-the shared non-owning textbox API is unchanged. A regression failed after
-reusing the returned stack before repair; full ten-line and partial final-page
-encoded output now pass. Original `494.c:325-397,531-575` supplies the paging,
-return, line-offset and control-code semantics; references remain read-only.
-
-- Full Debug and Release suites each pass **214 cases / 826,757 assertions**.
-  Focused `[menu][manual]` coverage is two cases / 38 assertions.
-  `check_native_views.py`: 621 fields, zero mismatches;
-  `check_event_dispatch.py`: 179 signatures, zero errors.
-- `quality-native.cmd --changed --tidy`: zero new findings, no baseline refresh.
-  The second copier run preserves manifest SHA-256
-  `21B918C14B721015F11C76E92BAB3B732CE9D2387E94F24613942CAE1A6911C3`.
-- Both configurations complete 18,000 ticks, 16 requested captures, exit 0 and
-  no logged errors. The menu-only replay uses speed 16, scripted input and:
-  `1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle,7600:Down,7700:Down,
-  7800:Down,7900:Down,8000:Down,8100:Down,8300:Circle,9000:Circle,10100:Down,
-  10198:Square,10200:Square+Down,10400:Circle,10800:Cross,11200:Cross,12000:Triangle,
-  12700:Circle,13300:Circle,13800:Start,13900:Up,14400:Start,14900:Circle,
-  15300:Down,15600:Circle,16200:Down,16600:Circle,17000:Cross,17400:Cross`.
-  Join the wrapped press list without whitespace. Capture ticks are
-  `8750,9500,10300,10700,11100,11500,12500,13000,13700,14200,14700,16000,
-  16400,16900,17300,17900`.
-- Visually checked text/illustrations on page 1 and page 2, remembered re-entry,
-  the final Basic Controls page 22/22, Start returning to page 1, a second
-  Game Modes topic, topic/root back and the final field return. Local captures
-  and logs: `build/quality/issue66-final-{debug,release}/`; full test/build logs
-  and `issue66-quality-accepted.log` are alongside them.
-- Portable DuckStation attempts in `issue66-reference` and
-  `issue66-reference-confirm` did not reach the matching Manual scene. They
-  are not visual parity evidence. This verifies native content/navigation
-  against the original data and source semantics, not pixel-perfect reference
-  rendering or all fourteen topics.
-
-An earlier re-entry schedule mistakenly navigated the remembered root selection
-to SCORE. Selecting its first TITLE submenu produced `0xC0000409` after tick
-13700; the actual route, capture and exit are recorded in #65. It is not a
-Manual regression or an assumed unimplemented cause. Neither #65 nor the
-remaining combat/audio/save acceptance is closed by this repair.
-
-### Native pursuit modes and tracked target producers (#6/#42, 2026-10-20)
-
-After the #66 publication/CI gate, ordered #6 resumes from `23fdeab9` plus
-the owned [movement behavior implementation](../Native/Game/src/Battle/Ai/MovementBehavior.cpp).
-Five C-backed entries are implemented: F01661/F01662 and
-F01779/F01780/F01786. This brings the original C-backed checklist to
-**52 of 145**, with **93** remaining; the complete audit has **134** open
-entries (133 stubs and one partial), including 31 assembly-only and ten
-missing local listings.
-
-- All seven movement modes preserve the original return values, mode-specific
-  resets, one-byte/two-byte-stride counters and no-op re-entry behavior.
-  Patrol selects enabled waypoints by Manhattan distance and retains the first
-  tie. The four-row bound comes from actor initialization's two-bit row selector.
-  Cooldown refresh retains unrelated navigation bits and the signed enable flag.
-- Native aliases expose the original mode, patrol and navigation fields without
-  changing ownership or recreating scratch memory. The navigation word is named
-  only after widening its adjacent override pointer. The view verifier records
-  original locations for these new aliases; independent native pointer/patrol
-  offset checks and all existing view contracts pass.
-- Real model fields supply current/planned target tiles and moving-platform
-  waypoint gates. Assembly confirms that the planned X coordinate is the signed
-  low halfword of `supportOffset`, not its whole integer. The implementation
-  preserves that width, current/planned tile padding, support-branch retained
-  bytes, target-cache zero distinction and the original intermediate OR-combined
-  target word. No donor guest-pointer helpers or address offsets were imported.
-- Focused `[ai][movement-behavior],[ai][pursuit-targets]`: **17 cases /
-  256 assertions**. Both full suites pass **231 cases / 827,013 assertions**.
-  `check_native_views.py`: 621 fields / zero mismatches;
-  `check_event_dispatch.py`: 179 signatures / zero errors. The 13 gap-audit
-  tests and 24 quality positive controls pass; use `.venv-3\Scripts\python.exe`
-  for the latter's installed tools. Do not run positive controls concurrently
-  with quality analysis: both generate the same compiler database.
-- `quality-native.cmd --changed --tidy`: zero new findings, no baseline refresh.
-  Second-generation manifest SHA-256 is
-  `CFF00291602B60A29016539B31A6808F6A63E45F8B9401D5C1C4194D11794AA7`.
-  Owned files survive regeneration; projects come from `gen_solution.py`.
-- Both full-prologue controller replays finish 48,000 ticks, all 22 captures,
-  exit 0 and no logged errors. Debug enters MAP004/MAP005 at 20,441/23,120;
-  Release at 20,761/23,440. The previous Release route was 20,763/23,440;
-  configuration-dependent encounter timing is not newly claimed deterministic.
-  Both final captures retain the live boss encounter, not a return to title.
-  No HP, actor position, RNG or progression memory was patched.
-- Exact 839-input schedules, capture selections and arguments are retained in
-  `build/quality/issue6-pursuit-{debug,release}-encounter/arguments.json`,
-  with captures and `vs-native.log` alongside. Corresponding full build/test
-  logs and `issue6-pursuit-final-quality.log` are in `build/quality/`.
-
-The live continuation is now **F01799 `DispatchAiLocomotionMode`**, reached at
-tick 19,481 in Debug and 19,845 in Release. Its ground destinations
-F01784/F01785 and directional resolver F01752 remain unimplemented; follow the
-original six-entry table, route-gate continuation, recovery and actor-command
-consumers rather than declaring pursuit complete. Autonomous movement, an
-initial real item drop, complete player-defeat flow and boss victory remain
-unverified. #6 and #42 stay open; these are verified producer contracts and
-integration regressions, not completed encounter acceptance.
-
-### Menu-only Options acceptance gate (#2/#39, 2026-10-20)
-
-Following the explicit owner-approved menu-first split, all nine Options now
-have verified menu selection/return coverage. #39's five remaining real
-consumer criteria stay open; this section does not mark them implemented.
-
-- Beyond the completed Simple Map, Information, Cursor Memory and Vibration
-  cases, Debug and Release each complete 36,000 ticks / 41 observed stages for
-  Ability Timing, Weapon Status, Armor Status and Sound. Each exercises both
-  applied values, choice re-entry, a cancelled pending value, submenu/root back,
-  real field return and subsequent Triangle-driven re-entry.
-- Actual packed bits 5/6/7 change 1 -> 0 -> 1 and remain unchanged on cancel.
-  Sound changes Stereo 0 -> Mono 1 -> Stereo 0, preserving the value on cancel.
-  The other packed flags, Cursor Memory byte and menu-enable word are checked
-  against each case's baseline. No unrelated prefix byte changes occur.
-- Puzzle Mode is legitimately available in this fresh scene: the disabled
-  flag is zero without any override. Both configurations complete 15,900 ticks
-  / 11 stages. Setting bit 3 changes 0 -> 1 -> 0; the original puzzleMode state
-  synchronizes to its inverse, stays unchanged on cancellation and survives
-  field return/re-entry. The original message explicitly says this mode only
-  affects cleared levels; no cleared-level puzzle result is claimed here.
-- A persistent UI regression presents both legitimate availability states in
-  an isolated fixture. Only Puzzle Mode's row is disabled when required, all
-  other rows remain enabled, and the temporary Cursor Memory override restores
-  the caller's value. It does not force a progression flag in a live game.
-- Actual screenshots retain all nine labels, the selection arrow, encoded
-  instant contextual text and the expected applied/highlight distinction.
-  Field-return observations require menu state 63 and no bound rows, not merely
-  a clean process exit or moving logical ticks.
-- Related `[menu]` tests pass 16 cases / 214 assertions in both configurations.
-  Complete suites pass 145 cases / 360,614 assertions each after the new gate
-  fixture. Focused quality with tidy has zero new findings, no baseline changes.
-  Arguments, settings/selection observations and captures are retained under
-  `build/quality/issue39/menu-matrix-debug`, `menu-matrix-release`,
-  `puzzle-menu-debug`, and `puzzle-menu-release`; no assets are uploaded.
-- This closes the reported menu rendering/lifecycle slice after its fixing
-  revisions and final regression CI succeed. Actual timing indicators,
-  weapon/armor combat feedback, stereo/mono output parity and cleared-puzzle
-  effects remain #39 work in their ordered stages. Save persistence remains
-  #18, item effects/crash #8/#32, and actual equipment operations #14.
-  Resume #6 with the full prologue and real battle/defeat routes, not menu skips.
-
-### Working vibration output and safe stopping (#39, 2026-10-20)
-
-The owned libpad bridge no longer discards `PadSetAct`'s mutable table. The
-original `_padResetDefaults` registers it once; `vs_main_setVibrateParams`
-subsequently writes its bytes. The host reads those live bytes each input tick,
-mapping the binary small motor to SDL high frequency and the 8-bit large motor
-to low frequency. Only the game's canonical actuator alignment is advertised.
-
-- Vibration Off, scripted input, a missing/disconnected pad and pad reset mute
-  output. This also suppresses stale registered bytes while the original
-  pattern updater is disabled. Device removal and shutdown explicitly stop
-  active motors. SDL requests last 250 ms and refresh every 100 ms while active;
-  redundant logical-tick commands are avoided. Unsupported/failed SDK requests
-  produce warnings, not success-shaped fallbacks. Shutdown uses SDL's C logger
-  for a failed stop so cleanup cannot throw through the formatting logger.
-- The T00581 copier fix gives each native slot two complete six-word envelopes,
-  rather than `channels[10]` aliasing the next slot or overrunning the second.
-  Original MIPS at 80043450/8004346C confirms the overlapping PS1 tail and
-  0x38 stride; this is independent native runtime storage, not an on-disc
-  layout change. The ledgers' original layout-conflict notes remain valid.
-- Three real SDL virtual-controller cases failed before wiring output. A
-  separate producer storage guard failed 10 != 12 before the copier fix.
-  Original pattern parsing, both slots mixing/clamping, full-range intensities,
-  live-table changes, Off/mute/reset, disconnect, destruction and a sustained
-  refresh interval now pass. `[input]`: 11 cases / 116 assertions in both builds.
-  The existing copied-C `/J` already preserves unsigned pattern bytes; the
-  initially suspected signed-byte defect was disproven and not patched.
-- Debug and Release each complete 20,500 scripted menu ticks with 72
-  captures/read-only observations. The real On-confirm preset produces motor
-  commands (28 positive samples in Debug, 25 in Release), followed by On/Off,
-  cancellation, root return, field recovery and re-entry. Scripted runs
-  intentionally do not activate physical devices.
-- With explicit owner approval, hidden `[.hardware-rumble]` selects exactly one
-  device matching `VS_NATIVE_RUMBLE_DEVICE`. A 320 ms, 25%-command large-motor
-  check goes through the same owned input/registered-table bridge and explicit
-  stop. Both attempts pass 27 SDK assertions; the first was missed, and only
-  the ready-coordinated repeat has owner confirmation: felt it and stopped
-  cleanly. The selected device is DualSense Edge Wireless Controller.
-  This is not a claim that the owner felt the scripted game-menu preview.
-- Real-device tests are never part of normal input/full-suite execution.
-  Run the hidden tag only after consent, with the exact device name in the
-  environment, and remove that variable afterward. Logs and game-menu/preset
-  evidence remain under `build/quality/issue39/`; no assets are uploaded.
-- A second copy preserves manifest SHA-256
-  `CADEA2A54F52923034FB2DA5B308AC36198021B690404DD13EFEB546B797CAD5`.
-  Complete Debug and Release suites each pass 144 cases / 360,588 assertions;
-  the explicit physical opt-in is absent. Native view contracts check 620
-  runtime fields with zero mismatches.
-  The fixing commit, final checks and exact pushed CI are recorded in #39.
-  This completes neither combat/audio/progression consumers nor all Options.
-
-### Menu-first Options and Cursor Memory (#39, 2026-10-20)
-
-The owner explicitly approves finishing menu/device checks now and verifying
-combat/audio/progression consumers in their ordered stages. Keep #39 open for
-those real effects; assess #2's rendering/lifecycle acceptance separately.
-The decision is recorded on #4 and #39, not a silent work-order change.
-
-- Cursor Memory requires no speculative production patch: the actual shared
-  root/row consumers already implement the original semantics.
-  `CursorMemoryTests.cpp` now covers root reset/remember with all entries and
-  the real 0x3F8 enabled mask, repeat visits, shared row/scroll restoration,
-  close/re-entry and a remembered position invalidated by fewer rows.
-- Both Debug and Release complete 24,000 scripted ticks with 17 retained
-  screenshots/read-only PDB observations each. On -> Off -> On -> cancelled
-  Off -> Off applies 1/0/1/1/0, respectively, without changing progression.
-  Field returns have menu state 63 and unbound rows; subsequent Triangle
-  presses really re-open the root menu.
-- Off resets the root to the first enabled entry (internal ID 3, Items),
-  and Options to row 0. On remembers Options (root ID 7) and Cursor Memory
-  (Options row 4). Cancel preserves the applied value but remembers the
-  highlighted choice: Off is still highlighted on the next choice entry.
-  With memory Off the choice instead starts at row 0, On, even while Off is
-  the applied value. Do not confuse the applied marker with the cursor.
-- Initial observer attempts were corrected for Windows' not-yet-populated
-  loader module list, visible versus internal root IDs, and that choice
-  highlight rule. These are retained diagnostic failures, not gameplay
-  regressions or passing runs. No gameplay patch was made to fit an oracle.
-- Focused Cursor Memory coverage passes three cases / 52 assertions; related
-  `[menu]` coverage passes 15 cases / 188 assertions in both configurations.
-  Changed-source quality with tidy has zero new findings; existing legacy
-  advisories are not baselined away.
-- Local arguments, completed logs, screenshots and observed settings/consumer
-  states are under `build/quality/issue39/cursor-debug` and `cursor-release`.
-  This proves session behavior, not save persistence.
-- The earlier device finding was that owned `Legacy/Input/LibPad.cpp::PadSetAct`
-  discarded the registered mutable actuator table, and `InputSystem` had no SDL
-  rumble output. The original registers once and then updates those bytes.
-  The implementation/verification above supersedes that recorded gap, not the
-  deferred combat/audio/progression acceptance.
-
-### Late-attract reproduction blocker (#26, 2026-10-20)
-
-The original cyclic chains and malformed packet remain recorded evidence, but
-the corrupt producer is not established. #26 remains open, not claimed fixed.
-
-- Current `70cd21e0` Debug and Release each complete 36,000 attract ticks, with
-  only `1000:Start`, all ten requested captures and no packet errors.
-- Reversing only the two F02456 feedback-link fixes makes the focused regression
-  fail, but still does not reproduce the long-attract failure. Normal sources,
-  manifest and default binaries were restored before that experimental replay.
-- Unchanged source archives of `2d64d275` and tracing checkpoint `35618ef2` each
-  build privately and complete the same 36,000-tick interval with all seven
-  requested captures. Existing installed dependencies and unchanged manifests
-  were used; no main-tree source or reference changes were needed.
-- The first historical run was manually closed by the owner at tick 14,464.
-  Its zero exit is an interrupted attempt, not a passing replay. The subsequent
-  complete runs require captures and the explicit tick-limit stop.
-- Evidence is under `build/quality/issue26/`: `current-attract-debug`,
-  `current-attract-release`, `without-feedback-link-fix`, `historical-2d64d275`,
-  and `historical-35618ef2`. Original failure logs remain untouched.
-- These results establish neither a tracing artifact nor F02456 as #26's cause.
-  Next useful observation is the first invalid link/write in a repeatable
-  failing binary/layout, not another guard that skips a bad command.
-
-### Viewport boundaries and New Game mansion (#41, 2026-10-20)
-
-The owner identifies the reported scene as the mansion immediately after New
-Game and explicitly confirms that the artifact no longer occurs in the latest
-build. This is separate from the Bardorba bedroom texture report.
-
-- Current `70cd21e0` Debug and Release each complete 36,000 ticks of the existing
-  Off/Frame/Simple selection, exit, field recovery and re-entry route.
-  Eleven actual client/full-window pairs per configuration cover physical
-  client sizes 320x240, 640x480, 853x637 and 960x720.
-- The exact mansion route uses only `1000:Start,1300:Circle`, without either
-  prologue skip. MAP001 and ENKEI.GIM load at 1398/1462. Both configurations
-  complete 3,600 ticks and four more client/full-window resize captures.
-  Native mansion frames at 1808, 2304, 2816 and 3328 are byte-identical between
-  Debug and Release.
-- Portable DuckStation's delayed 65-second capture confirms the same mansion
-  view and caption. The initial reference attempt ended during loading/black
-  transition frames and is excluded from scene-parity evidence.
-- Native, 2x and 3x client images match a captured presented frame exactly.
-  Fractional-scale differences are confined to source-coordinate integer
-  sampling ties at the centre row/column and equal the adjacent nearest texel;
-  no unexplained pixels or nonblack pixels outside the destination remain.
-  The analysis retains these differences rather than hiding them in an error
-  tolerance. Intentional minimap Frame borders and black letterboxing remain.
-- Every matched presented image reconstructs exactly from a raw 320x224
-  rectangle at page X=0 or 320, Y=0, with eight black output rows above/below.
-  These are horizontal framebuffers, as initialized by `Render/Display.c`;
-  assuming vertical buffers was an initial diagnostic-oracle error.
-- Historical `2d64d275` mansion captures are retained for comparison, but the
-  old owner artifact was not independently recovered. Do not claim that the
-  known #34 top-left fix is proven to be this report's producer merely because
-  it is included in the verified current revision.
-- `ViewportBoundsTests.cpp` guards the exact output dimensions and all pixels
-  with poisoned surrounding page storage, both framebuffer origins, drawing
-  offsets/clipping and mask on/off. The focused case passes 307,220 assertions;
-  related `[render][gpu]` coverage passes six cases / 314,723 assertions in
-  both configurations. Existing raster/atlas regressions remain unchanged.
-- Local arguments, raw pages, source frames, client/full-window PNGs and pixel
-  results are under `build/quality/issue41/`. No disc-derived evidence is
-  uploaded. The verification/regression commit and its CI are recorded in #41.
-
-### Bardorba bedroom window atlas seams (#34)
-
-The owner identified the affected view as Bardorba lying in bed speaking to
-Rosencrantz, **not** the earlier Guildenstern window. Reproduce with
-`1000:Start,1300:Circle,3000:Start`, then let the quote finish without a second
-Start. MAP008 contains the quote; the actual bedroom is **ZONE018 / MAP062**
-(loads at 4561/5075), followed by `ENKEI2.GIM` at 5130. The first bedside
-caption/window is stable at 5500.
-
-The source image was not corrupt. All three uploaded texture sheets
-(255/255/135 rows) and the entire 256-color palette match the original asset
-byte-for-byte. Matching-PDB reads confirm the actual layer uses 8bpp, page 26,
-a 5x16 grid, offset (20,-20), scale 2688 and draw routine 0. Targeted temporary
-packet/pixel diagnostics also ruled out texture-window state and subsequent
-room-geometry overwrites; all instrumentation was removed before final tests.
-
-The first invalid producer is the owned `PageSpace::Triangle` coverage bias.
-For screen coordinates with Y increasing downward, its purported top-left
-rule instead included bottom/right edges and excluded top/left. The scaled
-64x15 GIM quads from F01393 (`5BF94.c:4056`) therefore sampled lower/right UV
-endpoints from unrelated neighboring atlas tiles. This produced the brick-like
-stripes across the distant skyline. Reversing the two edge comparisons restores
-the original half-open polygon coverage; no GIM/MPD/disc data, palette, loader,
-event delay or input wait was changed.
-
-Three new synthetic 8bpp atlas/coverage tests first fail **1,076 of 7,412
-assertions**, then pass all of them after the fix. They cover both windings,
-inclusive draw-area clipping, poisoned atlas borders, horizontally/vertically
-adjacent tiles in reverse draw order, and shared translucent diagonals shaded
-exactly once. Full Debug and Release suites pass **131 cases / 53,206
-assertions** each. Changed-source tidy quality has zero new findings, with no
-baseline refresh; generated test-project registration is stable on regeneration.
-
-Both builds complete **24,000 ticks / 21 captures** with Circle every 600 ticks
-from 6000 through 18600. The entire bedroom conversation ends normally, then
-the original script loads `JYO.GIM` at 18622, ZONE033/MAP172 at 19686/19692 and
-ZONE010/MAP211 at 22403/22411. The subsequent arrival dialogue remains waiting
-for input; this is **not** a full interactive prologue/combat verification or
-the later MAP009 first room, which remains separate under #6.
-
-The portable original comparison was driven from observed title/opening/quote
-states, avoiding unreliable wall-clock-only scene assumptions. It confirms the
-continuous skyline in the exact bedside shot and the subsequent conversation
-camera. The aligned window crop's mean absolute RGB difference drops from
-**6.20 to 2.27**. Release and **normal-speed Release** reproduce the corrected
-Debug window pixels exactly. The normal-speed route completes **7,200 ticks /
-four captures**. A separate Release **15,400-tick / four-capture** Map, Data,
-Options and field-return smoke replay passes. No accepted runtime logs an
-error or crash.
-
-Exact argv, before/fixed/original captures and diagnostics stay local under
-`build\quality\issue34`, notably `bedroom-before-debug`, `bedroom-final-debug`,
-`bedroom-final-release`, `bedroom-normal-release`, `menu-regression-release`
-and `reference-live`. The fixing revision and successful pushed CI are recorded
-on #34 before closure. #41's separately reported client-border artifacts and
-the remaining #2/#39 acceptance are not claimed resolved by this repair.
-
-### Data entry and safe no-card lifecycle (#38)
-
-The exact first-room Data entry at pushed `9af8a50e` crashed at tick **7713**,
-before any card or file confirmation. F02777, `Menu_Files_DrawPlayTime`
-(`MENU7.PRG/260.c:4157`), overwrote digits through a static pointer to a
-read-only string literal. The copier now emits an owned mutable array before
-local-static hoisting. The generated Menu7 reset therefore restores the whole
-12-byte buffer, not a pointer to read-only storage. The original clock, timing
-and 100-hour overflow display are unchanged.
-
-`DataMenuTests.cpp` adds **80 assertions / two cases**: emitted clock glyphs
-at 0/12/99/100 hours, reset/reentry, unchanged global play time and packet
-guards; five empty summaries on each card port remain unavailable, Circle
-never starts a load while paging through them, and Cross returns cancellation.
-The input fixture binds an empty SFX bank, as required by the existing feedback
-API, and restores its pointers and all borrowed public UI/input state. No
-card-readiness result or successful save/load is fabricated.
-
-Both Debug and Release complete **27,800-tick / 18-capture** recorded routes:
-Data entry, Load, both real no-card errors, dismissal, slot/Data/root-menu back,
-three entries, Triangle return, disabled-Save rejection and resumed field
-movement. Read-only matching-PDB observations at ticks 19500/22800/27400
-verify normal control mode, unpaused interaction, menu 63, action 0, no menu
-rows and restored soft reset. At all six observations the card UI allocation
-is back in the real heap freelist and free space is unchanged at **16,267,104
-bytes**, with no accumulating allocation across the repeated exits. The
-existing resource-release path retires the card UI resources; legacy card
-event calls remain unsupported, not a new native callback/persistence backend.
-A separate **normal-speed Release** route completes **11,200 ticks / five
-captures**, including the changing clock, both back steps and field movement.
-No runtime run logs an error or crash.
-
-Portable original-game `reference-data` captures establish the same disabled
-Save/Load root and clock placement (132 seconds), slot 1 and slot 2 no-card
-messages (146/167), dismissal and complete cancellation back to the field.
-Only the portable emulator was used, with both cards `None`. Native output
-matches these semantics after accounting for its eight-pixel presentation
-margin. Empty-slot coverage is a synthetic summary/UI regression, **not**
-working native card enumeration or actual file I/O.
-
-Full Debug and Release suites pass **128 cases / 45,794 assertions** each.
-Changed-source quality with tidy has zero new findings, without a baseline
-refresh; copier, manifest and project output are stable on a second generation.
-Exact argv, pre-fix stack, replay logs, captures and cleanup observations stay
-local under `build\quality\issue38` (`data-entry-before-debug`,
-`data-lifecycle-*`, `data-observed-*`, `normal-data-release`, `reference-data`).
-The fixing revision and successful pushed CI are recorded on #38 before
-closure. Actual persistence, import/format decisions and save/load behavior
-remain scoped to #18; no owner save files were used or overwritten.
-
-### Full Map entry and lifecycle (#37, 2026-10-19)
-
-The first-room Map crash was independently reproduced at tick 7747 in
-`Menu_Map_DrawControlBackdrop`, not inferred from a minimap warning. F02703
-(`MENU5.PRG/4D8.c:1965`) read an eight-byte ordering pointer through original
-scratch word 1, now the middle of the native primitive pointer. It now uses
-the native frame ordering field. Related Map consumers are corrected through
-the copier:
-
-- F02699 (`4D8.c:1788`) no longer truncates framebuffer-strip cursors or reads
-  the ordering table through two 32-bit scratch words. Both native framebuffer
-  strip chains remain intact.
-- F04150/F04151 use `Render_frameScratch.camera.angles.vy` for initial/reset
-  heading instead of obsolete scratch word 22.
-- F04153 (`4D8.c:1112`) uses a local 256-entry XY/depth/fog workspace for the
-  format's byte-indexed vertices instead of the 96-entry shared scratch tail.
-  The already-bounded scene decoder remains the input-validation boundary;
-  no original room/visited flags or room lists are fabricated.
-
-Three focused tests cover control backdrops at edge/minimal dimensions in
-both framebuffers, both native darkening strip/page chains, and a validated
-256-vertex room referencing the last vertex. Exact projected coordinates,
-complete ordering traversal, packet guards and unchanged scratch beyond the
-native frame are checked. Full Debug and Release suites pass **126 cases /
-45,714 assertions** each; changed-source quality with tidy has **zero new
-findings**, with no baseline refresh.
-
-The identical formerly crashing Map entry now renders the original Wine
-Cellar / "Entrance to Darkness" room. Both configurations complete recorded
-**22,300-tick** routes with all **17 captures**: pan, L2 rotation, R2 zoom,
-Start reset, previous/next visited room, the real visited-area menu and cancel,
-UI hide/show, Cross/back and Triangle/direct return, three entries and resumed
-field movement. No run reports a render error or crash. A separate
-**normal-speed Release** route completes **11,200 ticks / five captures**,
-including entry, back, field return and movement.
-
-Portable original-game `reference-map` captures at 132/139 seconds establish
-initial/reset room geometry, heading, compass, labels and controls; 143/146
-cover real area selection/cancel, and 164 repeats entry after returning to the
-field. Native output matches those menu/room semantics, accounting for its
-eight-pixel presentation margin. This is not full-renderer or full-playthrough
-parity.
-
-Local evidence and exact argv are under `build\quality\issue37`:
-`map-entry-after-debug`, `map-lifecycle-debug`, `map-lifecycle-release`,
-`normal-map-release` and `reference-map`; the pre-fix stack remains under
-`build\quality\issue40\map-entry-before`. The fixing revision and successful
-pushed CI are recorded on #37 before closure. Data-menu persistence support
-and the other remaining #2/#39 acceptance gates stay separate.
-
-### Equipment details, Status Square and correct comparison values (#31/#33/#35/#36, 2026-10-19)
-
-The blank weapon chooser, item-detail pages and Status Square subview share
-F02555 `_renderStatPage` (`MENU/MAINMENU.PRG/C48.c:673`). Its stat-bar link at
-ordering entry 15 stored truncated pointer bits, terminating traversal before
-lower titles, rows, values and information. DP/PP and the preview survived
-because they occupied higher entries. The copier now uses a native link handle.
-The same function's local `pragma vsstring` header also remained literal ASCII:
-its 29-byte loop and color operands at 1/11/24 require the original encoded
-CLASS/AFFINITY/TYPE bytes. Those controls are now encoded, not drawn as glyphs.
-
-The newly visible comparison panel exposed the independent #35 data defect.
-Original `D_80102488[4]` and the adjacent eight-byte `D_80102490` region were two
-views of delta/index and total halfwords. Native globals are separate, but
-F02561/F02562 still accessed `comparisonStatDeltas[4..6]` outside its four
-elements, corrupting comparison accessory state. Public-API fixtures reproduced
-the exact wrong values: Status 200/200/200 instead of 100/101/100, and Fandango
-210/201/196 instead of 110/102/96. G00864 now contains four signed halfwords
-in the same eight bytes, and every total write/subtraction/comparison read
-explicitly uses that buffer. No actor formula, original equipment definition,
-game-state bypass or hardcoded subtraction changed.
-
-Evidence:
-
-- Isolated link/header regressions fail before the fix on all three pages and
-  pass afterward, checking complete lower-UI traversal, bounded packet storage
-  and 19 visible header glyphs rather than printed controls. Comparison
-  regressions fail with the exact original report before the typed-buffer fix;
-  both Status and equipment-preview modes now pass with positive, zero and
-  negative actor modifiers and accessory contributions applied exactly once.
-- Full Debug and Release suites pass **123 cases / 45,677 assertions** each.
-  Changed-source quality with tidy reports **zero new findings**, with no
-  baseline refresh.
-- Both configurations complete three recorded input routes: **22,000 ticks**
-  for all equipment stat pages, an actually empty Shield slot, cancellation
-  and repeated entry (**14 captures**); **18,000 ticks** for repeated Status
-  Square/Affinity/Type/navigation/back/re-entry (**13 captures**); and **21,200
-  ticks** with Information Off in the deep weapon and Status views (**13
-  captures**). All 40 requested captures per configuration exist, every run
-  reaches its tick limit, and no log reports a crash, cyclic chain or render
-  error.
-- Native now matches the fresh original's Status ORG 100/100/100 and EQP
-  100/101/100, and Fandango ORG 10/1/-4 with EQP 110/102/96. Original and native
-  show the real Fandango/component rows, matching Class values, encoded page
-  headers and contextual information. Empty Shield shows NONE / "Nothing
-  equipped.", not invented inventory. With Information Off, the body/header
-  disappears but equipment labels, stat values and Status limb rows remain.
-- Portable DuckStation reference `reference-chooser-status` captures original
-  Equip->Weapon at 138/141 seconds, normal Status at 164/166, and Square at
-  171/173. These are real menu inputs in the same fresh-room/default-loadout
-  state. Native actor animation/presentation differences are not represented
-  as full-scene parity.
-
-Exact argv, before/after logs and local captures remain under
-`build\quality\issue33` and `build\quality\issue36`. The final route folders are
-`equipment-cycle-final-<config>`, `status-cycle-final-<config>` and
-`information-off-deep-final-<config>`. The fixing revision and successful
-pushed CI are recorded on #31/#33/#35/#36 before closure. The remaining #39
-Options effects, actual equip/unequip implementation #14 and the Map/Data
-crashes are not completed by these view/comparison fixes.
-
-### Contextual information and first-visible-frame text (#30/#31, 2026-10-19, earlier checkpoint)
-
-The shared F02524 `vs_mainmenu_setInformationMessage` producer
-(`MENU/MAINMENU.PRG/58EC.c:475`) still contained literal ASCII `|!0|` from a
-`pragma vsstring` initializer. The original encoder proves this prefix is
-**F8 00**: instantaneous text, not printable glyphs. The helper copies 96
-payload bytes starting at byte two. Thus the unencoded leading pair survived:
-repeatedly rebound Equip/Setup messages spent every frame's initial character
-budget on that pair instead of their body, while one-shot empty-category
-messages revealed progressively with a stray glyph.
-
-The copier now emits the exact encoded prefix, zero-glyph payload storage,
-both original E7 guards and the C terminator. No global text speed, dialogue
-wait, help string, progression gate or Information option semantics changed.
-
-Verification:
-
-- A first-visible-frame regression failed before the repair and passed after.
-  Isolated `InformationTests.cpp` now covers the exact prefix/payload/tail,
-  complete first-frame output despite repeated rebinding, immediate replacement
-  with empty text, ordinary dialogue still revealing one glyph, and Information
-  Off hiding normal help while preserving required cautions. Existing legacy
-  renderer tests were left unchanged rather than reformatting/baselining them.
-- Full Debug and Release suites pass **119 cases / 45,629 assertions** each.
-  Changed-source quality with tidy reports **zero new findings**, without
-  refreshing any baseline.
-- Both configurations complete **26,500-tick** controller replays toggling
-  Information On->Off->On through Options, returning to Items/Equip/Setup and
-  the equipment-category overview, cancelling and re-entering, then returning to the
-  field. All **18 requested captures per configuration** exist. The actual
-  information panel/body disappears when Off and the original contextual
-  messages return when On; this verifies a consumer effect, not merely a bit.
-- Debug's category replay and Release's dense-sampled repeat exercise weapons,
-  blades, grips, empty Shields, back/forward selection, Equip/Setup, chooser
-  details, cancellation and re-entry. Release's first complete new Shields
-  sample is tick **10316** (after the category transition); its body remains
-  byte-identical in all subsequent samples through 10600. The first rendered
-  message is complete, not a gradually revealed string.
-- Portable DuckStation comparison `reference-help-b` uses real title/prologue
-  skips and menu/category inputs. Captures at 128/133/138 seconds cover original
-  Equip/Setup; 158/160 cover empty Shields. Native messages match "Choose items
-  to equip.", the original assembly/disassembly/repair description, and "You
-  have no items in this category." without a leading glyph. An earlier
-  wall-clock reference attempt missed its intended boot state and is retained
-  as an unsuccessful comparison, not evidence.
-
-Exact argv/logs and local captures are under `build\quality\issue30`:
-`help-after-debug`, `categories-after-debug`, `categories-final-release`,
-`information-toggle-debug`, `information-toggle-release`, and
-`reference-help-b`. A deeper 14,800-tick Debug item-detail/actions replay and
-13,900-tick Release Equip->Weapon replay confirm that action cautions and
-cancellation work, but the weapon-detail/chooser view still loses its labels
-and information together (#33). Do not represent those blank views as help
-completion. #30 can close on its verified control/timing repair; #31's root
-Equip/Setup messages are restored, but its deeper-context acceptance remains
-linked to #33 until those views render. Fixing revision and successful pushed
-CI are recorded on the issues. #39 still has other Options effects outstanding;
-this does not complete equipment-changing semantics, the Status Square
-subview or overall #2.
-
-### Working minimap scenes (#40, 2026-10-19)
-
-This completes the missing minimap functionality after the shared exit-hang fix
-`ef559a2e`. The resolver and renderer are owned implementations, traced to
-`BATTLE.PRG/2EA3C.s:2085-2489`, not edits to generated output or reference code.
-
-- Scene room records remain **12-byte file records**. The resolver validates the
-  entire section before replacing payload lengths with record-relative offsets;
-  the copier applies the existing `VS_ONDISC` pattern to every native consumer.
-  MPD and ARM callers supply their actual section/file extents. Native pointers
-  are never written into packed scene bytes.
-- The renderer projects visited rooms, draws the current room's fills and dim
-  edges, other visited-room connections, and the original gated/blinking door
-  markers. It validates vertex/primitive indices and reserves bounded packet
-  capacity before writing. Ordering links use native handles. Projection-center
-  accessors now work, including original high-halfword semantics; the field
-  caller restores its rotation, translation and projection center afterward.
-- Synthetic tests cover truncated/malformed scenes without mutation, packed
-  strides/offsets, projected coordinates, colors, command order, both frame
-  buffers, unvisited rooms, entry blinking, locked-door gates, capacity guards
-  and projection restoration/wrapping. Disc-configured tests validate **all 31
-  ARM scenes and all 367 MPD minimap sections**; `SCEN031.ARM` intentionally has
-  no name tail. All MPD minimaps draw within packet guards using test-owned
-  copies. Full Debug and Release suites pass **115 cases / 45,580 assertions**
-  each.
-- Fresh Debug and Release replays each complete **54,000 ticks**, all **36
-  captures**, the full nine-transition Frame/Simple/Off matrix, Cross and
-  Triangle cancellation, movement and menu re-entry. Read-only PDB-based samples
-  confirm every applied setting and actual resumed field state: mode 1,
-  unpaused, current menu 63, selection status 0 and released rows. A fresh
-  **speed-1 Release** Frame->Off->Simple replay completes **18,000 ticks**, all
-  nine captures and the same applied-setting/resume checks.
-- Original-game comparison uses only the portable DuckStation copy and the
-  real two-Start menu-test route. Local `reference-minimap-a` captures at 95 and
-  124 seconds establish Frame's border and Simple's retained room geometry
-  without that border, after real option confirmation and Cross/back exit.
-  Native/reference projected room outline, fill and marker placement agree
-  after accounting for the native capture's eight-pixel presentation margin.
-  This is minimap verification, not whole-scene rendering or combat parity.
-- Evidence, exact replay argv and state observations remain local under
-  `build\quality\issue40\minimap-final-debug`, `minimap-final-release`,
-  `minimap-final-normal-release`, `reference-minimap-a` and the minimap test logs.
-  No captures, disc data or memory dumps are committed/uploaded.
-- Native-view checks cover **620 fields with zero mismatches**; all **179 event
-  handler signatures/dispatch checks** pass. All **24 quality positive
-  controls** pass; changed-source quality with tidy reports **zero new
-  findings**, with no baseline refresh. Copier regeneration is stable, manifest
-  SHA-256 `3C1BAEC71675262FADF0532D30519FBC6076E0D179E295B9FB8C21B593EBC0A5`.
-
-The fixing revision and successful pushed CI are recorded on #40 before closure.
-#39 still owns the remaining eight Options' real effects; #2 remains the menu
-acceptance gate. The separate full Map issue #37 still reproduces a crash in
-`Menu_Map_DrawControlBackdrop` at tick 7747; fixing packed scene records alone
-does not complete that screen.
-
-### Repeated Options exit freeze (#39/#40, 2026-10-19, earlier checkpoint)
-
-Verification used `2cdc8100` plus the scoped F01342 copier change. No reference,
-disc data, progression flags, quality baseline or hardware-shaped renderer was
-changed.
-
-The first Frame/Simple/Off visit could return normally, but a second Options
-visit froze field control even with Frame unchanged. Read-only samples through
-the matching local PDB showed `Field_controlMode=5`, interaction paused,
-`currentMenu=31` (closing), `menuStatus=1` and allocated menu rows while logical
-ticks continued. Thus a field screenshot or clean bounded process exit was not
-proof of recovery.
-
-The original MAINMENU `C48.c:_quitDelay` completes only on its fifth call. Native
-execution retained its counter across visits: the copier generated the intended
-MAINMENU reset, but no runtime caller invoked it. F01342
-`vs_battle_loadMenuPrg` (`5BF94.c:2576`, native
-`Menu_Framework_LoadMenuOverlay`) now calls the existing
-`Boot_ResetMainMenuStatics` only after a MAINMENU load completes. Already-loaded
-polls do not reset the delay. This restores the original reload boundary rather
-than forcing Map Off, skipping cleanup or weakening the fifth-call condition.
-
-Evidence:
-
-- The public-API regression "Menu reloads restore the original five-tick closing
-  delay" fails before the fix and passes afterward. It exercises three completed
-  load/close cycles, including already-loaded polls, and requires completion on
-  exactly the fifth closing call.
-- Debug and Release each pass all **106 cases / 30,816 assertions**. The focused
-  `[render],[content][module]` selection passes **30 cases / 260 assertions** in
-  both configurations.
-- Both configurations complete **54,000-tick**, speed-16 input replays covering
-  Frame->Frame, Frame->Simple, Simple->Simple, Simple->Off, Off->Off, Off->Simple,
-  Simple->Frame, Frame->Off and Off->Frame, then Cross/back cancellation and
-  Triangle/direct cancellation of an unconfirmed change. All **36 captures per
-  configuration** are present. Direct state reads confirm applied values 3/1/0,
-  unmodified settings on cancellation, root/selector re-entry and actual field
-  recovery (`mode=1`, not paused, `currentMenu=63`, `menuStatus=0`, no retained
-  menu rows). Final movement and another menu open/close remain responsive.
-- A separate **normal-speed Release** Frame->Off->Simple replay completes
-  **18,000 ticks**, all nine requested captures, applied-mode/state checks,
-  movement and menu re-entry. The owner-confirmed manual close of the earlier
-  normal-speed attempt remains an incomplete attempt, not a reproduced crash.
-- Local exact argv, observations and logs are under
-  `build\quality\issue40\matrix-fixed-quiet-debug`,
-  `build\quality\issue40\matrix-fixed-release` and
-  `build\quality\issue40\normal-off-simple-fixed-release`. An earlier Debug
-  trace-heavy matrix timed out at tick 37173 after 240 seconds; the completed
-  reduced-log Debug repeat took 352.9 seconds within its 480-second bound.
-- Changed-source quality with `--tidy` reports **0 new findings**, with no baseline
-  refresh. Second copier generation is stable: manifest SHA-256
-  `A5B925DAF78C5BE11D48602FD1E152670F4B02BEBC9C2E06A06AEF2C7C33AC10`.
-
-This earlier checkpoint repaired only the shared repeated-exit hang. Its
-then-unported minimap resolver/drawer/projection accessors are completed in the
-newer checkpoint above. The other eight Options' real effects remain #39 work,
-and #2 still blocks #6. Do not infer complete Options or menu parity from this
-earlier exit-only evidence.
-
-### Restored Submenu Text And Names (2026-10-19)
-
-Verification used pushed `f991796c` plus the final shared panel/name fixes. #28 is
-closed after successful pushed Source Quality run `39275882740`.
-
-- The remaining missing submenu labels were a shared F02536 prompt-background link
-  at ordering entry 15, not a hidden-row flag or stale frame buffer. Runtime traversal
-  reached entries 15 and above but skipped 0-14 and executed zero variable-width glyphs.
-  Native handles in F02536 and adjacent action-cost F02535 restore all low entries and
-  72 glyph packets in the same Status frame. Normal root, inventory and Status labels,
-  counts, information panels and preview now visibly render.
-- #29: G00620's default names retained unprocessed `#pragma vsstring` ASCII/markup.
-  Original read-only `encode_raw` confirms the encoded actor name, spacing opcode and
-  terminator, and encoded weapon name. Scoped copier literals preserve those exact
-  semantics; the before-fix name regression fails and passes after repair. Status now
-  visibly displays "Ashley Riot" rather than accented glyphs/zeros.
-- Public-API panel regressions traverse the complete lower chain and guard the packet
-  storage. Default-name regression checks original bytes. Full Debug: 105 cases /
-  30815 assertions; Release `[render],[content][module]`: 29 cases / 259 assertions.
-  Clean Debug menu selection: five cases / seven assertions. Final quality with tidy:
-  zero new findings, no baseline refresh. Temporary row/GPU/companion probes removed.
-- Clean Release Status entry/navigation/exit: same input schedule as the #28 section;
-  10500 ticks, exit 0. Evidence `build/quality/issue2-final-status-release` (8800 shows
-  readable names/limb status/stats). Inventory/preview/return uses
-  `1000:Start,1300:Circle,3000:Start,4000:Start,7000:Triangle,7600:Circle,8200:Right,
-  8500:Circle,9200:Cross,9600:Cross,10000:Triangle`, 11500 ticks, exit 0. Evidence
-  `build/quality/issue2-final-items-release` (9000 inventory, 11000 gameplay).
-  Debug equivalents and regression logs use `issue2-inventory-prompt-final`,
-  `issue2-status-prompt-after`, `issue29-status-names-after`, `issue29-names-before`.
-  Logs are under `build/Debug/`; captures stay local.
-- #2 covers the reported missing menu text/black bars and preview corruption. Item use,
-  spells, chains, Break Arts, drops and equipment operations remain ordered #8-#15;
-  readable menus do not establish those gameplay features. #6 needs the full prologue,
-  not the efficient menu-only skip. Fixing commit and pushed CI/closure evidence for
-  #2/#29 are recorded on those issues.
-- #26 remains open: a clean Debug 35500-tick attract attempt hit the 120-second runner
-  limit without target captures. Last content log was 14464, not proof of a tick stall.
-  No long-attract success or original-34609 corruption repair is claimed. Next useful
-  observation is intermediate capture/tick progress at 15000/20000/25000.
-
-### Quality verification (2026-10-19)
-
-Verification used `work` at `3c0a1311` plus the pending retained-code cleanup. No baseline
-refresh was used, and no commits were pushed during this work.
-
-- Full `tools/lint/quality.py --tidy`: **zero actionable native-production findings** and
-  zero new findings. Remaining counts are 332 test-harness, 154 tooling and 13 legacy
-  SDK-name/signature/null-spelling diagnostics. Test/tooling follow-up is #25; compatibility
-  retirement remains #18. Exact fixture literals and replacement-only style are reported
-  separately, not described as fixed code. See [QUALITY.md](QUALITY.md) for the explicit policy.
-- Complete Debug and Release solution builds pass. Each full `VS.Tests.exe --reporter compact`
-  run passes **95 test cases / 30707 assertions**. All **23 quality-tool controls** pass.
-- `check_native_views.py`, `layout_check.py` and `check_event_dispatch.py` pass. Running
-  `copy_to_native.py` again leaves the copier manifest SHA-256 unchanged.
-- Release replay: `--frames 14000 --speed 16 --press 1000:Start --capture
-  build/quality/final-release-replay --at 1500,6000,13900 --scripted --log-level info` completes
-  and produces all captures. A corresponding Debug frame at tick 13900 was visually inspected:
-  actor geometry and dialogue are visible. This is regression evidence, not complete gameplay parity.
-- Evidence is under `build/Debug/issue5-final-*` and `build/quality/`. Release logs also live
-  under `build/Debug/` because the bounded runner uses that common log directory.
-
-### Verified defects and remaining limits
-
-- #20: SEQ decoder int-alias/alignment defect, fixed in `7da0da5b`; halfword-aligned vectors,
-  packed signed deltas and rotation/cursor rules are tested.
-- #21: unrepresentable disc-read byte counts, fixed in `c8516e00`; rejection preserves request state.
-- #22: signed squared-length overflow in normalization, reproduced before fixing in `5ab86b63`;
-  full-range positive/negative vectors, zero input, aliasing and padding are tested.
-- #23: manifest sector-range overflow, fixed in `4dfd783b`; synthetic boundary entries avoid
-  large-file allocations and share the same arithmetic as real lookup/read paths.
-- #24: GPU upload byte-count overflow and partial resize ownership, fixed in `3c0a1311`;
-  CPU boundary tests and real presentation pass. Allocation failure handling was reviewed,
-  not fault-injected.
-- #3: pushed Source Quality failure at `54290b05` is fixed locally by `c41dd5b2`; it remains
-  recorded historically. Fresh inspection confirms successful run `39239821866` for
-  pushed `35618ef2`. No commits were pushed during the window-dialogue fix. Commit
-  permission does not imply push permission.
-- #19: the two owned halfword-copy helpers are implemented and verified as recorded
-  above. This resolves a dependency of #2, not the remaining missing menu graphics.
-- Enemy combat completion, sound, item/spell use, chains, Break Arts, drops, equipment and
-  final arena coverage remain open in #6-#16. Follow #4's order rather than treating this
-  quality checkpoint as gameplay completion.
-
-## Previous prologue checkpoint (superseded)
-
-Prologue combat entry and remaining intro regressions are the active priority. The older
-tick-5751 stopping point below is historical, not the current runtime baseline.
-
-- Debug and Release desktop/test targets build. Both full suites pass **66 tests / 30505 assertions**.
-- Required module initialization reports **334 data entries, 19 pointer tables, 2991 symbols,
-  50 modules, zero failures**. Copies and relocations validate source extents, destination capacities,
-  and reviewed native element strides; unresolved required data prevents startup.
-- Native views: **590 fields, zero mismatches**. Layout check: **514 types, zero pointer-free
-  mismatches, 78 pointer-bearing differences, zero parse errors**. Event dispatch: **179 signatures,
-  zero errors**, including both 256-entry tables. A second copier run leaves all generated content
-  hashes unchanged.
-- Shared room/sky and normal actor geometry now render. Owned scalar/matrix math, native model
-  workspace, bone transforms/projection, encoded text, and native ordering links have focused tests.
-  Packet decoding rejects truncated commands and cyclic lists instead of reading beyond packets.
-- Facial ETM loading/release now uses `Actors_sharedSequenceBankTexturePages[slot - 1]`. Original
-  `D_800F244F[slot]` and `D_800F2450[slot - 1]` name the same byte; independent native arrays broke
-  the loader-to-animation hand-off. Public slots are checked before the one-based conversion.
-  Tests cover 4-bit/8-bit frame rectangles, uploaded texels, a nonzero blink frame, frame-zero
-  restoration on bank switching/release, and page retirement. Both hand-off and bank-switch tests
-  failed before their respective corrections.
-- Shared-bank selection now reads named actor fields, not PS1 offsets. The three row bytes read
-  by `func_8009CE9C` at actor+0x183E are represented by a union: the third byte retains its original
-  overlap with `momentumDistance` at +0x1840. The actor extent and subsequent field offsets are
-  unchanged; regression coverage switches to both alternate banks and checks the overlap.
-- The second-demo sword-draw stall was an audio-volume wait. Counter 2's callback was discarded by
-  the removed `OpenEvent` implementation. It now runs at 240 Hz from logical frames; fades advance
-  every fourth callback. The newly reached mixer path also handles an absent saved music layer.
-- Room AI allocation and its native-sized flag/height tables are initialized before enemy metadata.
-  The two-layer collision sampler now decodes real 4-by-4 patterns and surface flags. The later
-  `ActorStatusConditionScore` fault came from the stubbed condition snapshot: the owned producer now
-  fills actor IDs, HP, MP, statuses, and equipment DP before scoring. A poisoned-table fixture checks it.
-- The first basic attack reproduced a null-menu access in `Battle_CommitSelectedAction` at tick 12621.
-  G01904 (`Battle_actionDefinitions`) was excluded from startup loading by incorrect pointer metadata
-  and the anonymous hit-record spelling. Its reviewed 52-byte records now load from SLUS offset
-  `0x3C1DC`; basic attack 1 has category 14 and body-part targeting, not zero-filled environment targeting.
-  Native layout assertions and the real-disc module test check its decoded fields and targeting policy.
-- G00229 (`Effects_emptyPackage`, the existing label for the embedded default package) had only its
-  four-byte header allocated. The parser walked into unrelated native memory; a relink exposed a
-  watchdog stall at tick 1372. It now owns all `0x5200` bytes from BATTLE offset `0x83CBC`: nine tagged
-  blocks and the zero terminator at `+0x51FC`. The module regression binds the real package and checks
-  texture, animation, timeline, curve, particle, program, parameter, transform, and sound-table data.
-- GIM rendering and event views now share the two-byte flag header and native pointer stride.
-  `ENKEI.GIM` fills the manor splash rather than displaying a small image over the room. Captures
-  at ticks 1600/1800 in `build/new-game-actors` match the supplied full-illustration composition.
-- On-disc room-effect command headers remain four bytes, fixing shifted motion/rotation operands.
-  Gimmick views expose their native model pointer and use the canonical room scale. Room triangle/quad
-  subdivision, adaptive special-model quads, GPU mask packets, and room-light color sampling now have
-  focused tests. Actor drawing preserves the update-owned flag and applies signed tint adjustments.
-- Debug and Release New Game replays reach **19000 ticks** with dialogue, basic-attack, and directional
-  button inputs without the reproduced crash. The final Debug log is `build/Debug/prologue-debug-replay.log`;
-  captures and the preserved user playthrough log are in `build/new-game-actors/prologue-input`.
-  Release also completes **43000 ticks** across both demos and returns to title. Its event trace is
-  `build/Debug/window-event-replay.log`, with captures in `build/facial-textures/window-pause`.
-  These accelerated runs are not proof of complete combat or normal-speed timing parity.
-- The null-actor movement dump in `Pasted text.md` matched a detached room-spawn alias. The shared
-  caller now reads `Field_zoneContext.mpdEnemyCount`; both current binaries contain that correction.
-
-## Reference update review
-
-- Reviewed `resources/rood-reverse` at `2a589e01`, including the latest pull after `c37e3eb2`.
-  That batch adds shared trail/ring implementations, effect relinking, ending refactors, and image tools.
-  Its battle-path changes rename screen dimensions without changing behavior.
-- Actor dispatch already has the native label `Actors_ExecuteQueuedActorCommands` (F00161), and the
-  pinned snapshot already includes C implementations of it and shared trail routines. Do not duplicate
-  these implementations or replace established native types with another snapshot's layouts.
-- `RunActorAiUpdateStages`, `SetActorVerticalMovementSteps`, and `SetDirectMovement` remain assembly-backed
-  in the updated upstream on the inspected paths. The local `rood-reverse-noprompt` snapshot also retains
-  assembly for those entry points. No reference snapshot was changed or bulk-imported during this review.
+- Fresh Debug and Release full suites each pass **599 cases / 1,813,261
+  assertions** before the final exact-shape/binding expansion; current full
+  totals after #159 are **602 / 1,813,292** each. The independent hidden original-disc door selection passes
+  **41,459 assertions / one case** in each configuration. Copier tests47 pass.
+  A second copy generation preserves all1,023 native tracked/untracked source/
+  project files and the manifest. Scoped Engine/Tests/Lab project generation
+  is stable twice, preserving owner-dirty root solution/tool projects. Both
+  Desktop configurations build with detailed logging enabled. The broad audit
+  caught 18 new quality findings in the added fixtures/preview code, repaired
+  without baseline changes; final affected-file quality/tidy is131 existing/
+  0 new. Scene diagnostics now record four actual VM threads and eight logical
+  dialogue waits, not their overbroad legacy declaration extents.
+  Logs are `build\quality\door151-current-*`; reference/disc material remains
+  local and uncommitted. #149's all-cutscene investigation remains open.
+- Owner stopped the per-process roster because repeated windows were disruptive.
+  Do not restart it in that form. #143's native single-window script sequence
+  is published/closed. The owner permanently closed #144 as NOT_PLANNED:
+  do not revisit startup investigation.
+  Four-script Debug
+  run1792780995004927-0 preserves HWND66322990, fresh repeat resources/inventory/
+  models and normal living-Lich teardown; actual Release F10 run1792781463758439-0
+  preserves an unrun tail and returns2. Full worktree556/1804672 each, scoped
+  quality0 new, Desktop build passes. New sequence CLI and per-script logging are
+  documented in COMBAT_LAB; local roster driver now launches one sequence host.
+  Sequence publication excludes #141's original-behavior question. The
+  subsequently completed Score work is described below.
+- #65 is verified/closed: scoped47fdbc17982e7878033fa40f4527954472ffa441,
+  published ddf8171a5e39d609c7c8342d75240bc17261e94c, exact CI40023077559 green.
+  All four actual Score submenus enter twice in one window/configuration.
+  Real Zombie defeat unlocks the original model; Debug1792788396368047-0
+  viewer4557/5091 and Release1792788491009214-0 viewer4564/5101 render and
+  accept rotation/zoom controls with0 engine errors. No fake flags or platform
+  fallbacks. Score2200/5; copier32; full worktree559/1804706 each, including
+  separately uncommitted AI naming/perception tests; full quality498 existing/
+  0 new. Commands/hashes/limits are in COMBAT_LAB. Final host close while
+  viewing is intentionally interrupted, not claimed F10 teardown.
+- #145 is verified/closed: scoped971c21dd, published4ceceda5, exact
+  CI40016804261 green. Actual Worker -> Hall -> Worker -> Hall controller
+  routes and original gimmicks pass Debug/Release; source relative offsets
+  and owned-prefix bounds are retained. This is not a null-check workaround.
+- #148's published batch a04a048d (merge8330fddc) renames five verified AI fields,
+  with exact CI40023536123 green, shared
+  by-offset source tables, eight canonical/fork ledger rows and five native
+  offset assertions. Debug AI401006/124 and the current full suites pass.
+  Refreshed index:138 TUs/100172 occurrences/0 unresolved/0 mismatches;
+  22 existing error TUs remain explicit. No old five field names remain.
+  This naming-only batch is separate from Score; keep #148 open for the broader
+  25710-occurrence/2550 file-identifier-pair/393-file candidate inventory.
+  No guessed names, behavior fix, C++ promotion or retirement claim.
+- #146's proven operand-order repair is now scopedcb6e12a2, publishedaa09cef8,
+  exact CI40030529880 green. Original MIPS reads register index BEFORE its
+  halfword; native F01531 evaluated the assignment's RHS first, so E095's
+  three stages all selected timeline0. F01531/F01532 now sequence their
+  reads explicitly, preserving byte truncation/unsigned comparison and
+  verified local names. Red46/248 ->green248/2. Copier33; stable second
+  generation; full Debug/Release561/1804954 each; maintained498 existing/0 new.
+  Do NOT change the strict F01540 remap bound: original800D4E28 confirms it.
+- Fixed full-prologue runs reach48000/22 captures each, normal exits/0 errors:
+  Debug655s has14 real breaths/70 limb results; Release122s has10/50.
+  Native timing/Continue differs; counts are observations, not parity.
+  Original839 inputs/only Start1000, no state writes. Lab1792791081079977-0
+  proves timeline0/1/2 with1/9/10 tracks and actual HP997->957 at1190.
+  Animation255 is VALID;91-frame bank/event dispatch and61+ changing pose/
+  rendered-matrix hashes already worked. Source/assembly/commands/hashes and
+  local evidence are in COMBAT_LAB and build\quality\dtok146-fixed-*.
+  #146 is now CLOSED: subsequent1792793560646680-0 directly captures the active
+  mouth flame jet in the native framebuffer. Acceptance7a33fe33/438c8edc,
+  exact CI40035907684 green. No boss-victory claim.
+- Owner requested autonomous completion after the zero-tick visual observer.
+  Targeted sessions resumed, not the disruptive per-case roster. Captures now
+  use DPI-aware PrintWindow on only the owned client and per-run/entry folders,
+  not desktop coordinates or stale shared filenames.
+- #147 is now CLOSED: scoped508b4bd79d58e37421fdd9c693c92937f2b5de0e,
+  published421d444090aede716f557c2536b7e589f38ba3a9, exact CI40040775242 green.
+  F00980 is registered owned C with typed actor/companion and separate gimmick
+  callers. Actual fade bytes and the two selected160-color basePalette rows
+  are used; currentPalette remains pulse-only. Canonical gimmick CLUT element
+  width now agrees with existing ledgers without span/offset growth.
+- Correcting state ownership alone left the image solid. Original assembly
+  also requires appearance material selection, semi-transparency, subtractive/
+  additive page modes and uniform Gouraud fade tint. Native ModelGeometry now
+  preserves those rules, pulse/ordinary controls, adaptive splits and companion
+  mode1. Red ownership2/2, blend80/128 and Gouraud20/128 controls become green;
+  combined7878/4. This is not an arbitrary alpha fade or full EC retirement.
+- Four genuine lethal Fireballs and normal F10 cleanup/re-entry pass in ONE
+  window/config: Release1792797118662852-0 (hits1868/4167, ends2310/4609);
+  Debug1792797363044415-0 (hits1866/4162, ends2306/4604). States1..5, actual
+  fade0..64, old-view byte unchanged, floor visibly revealed before removal.
+  Fresh999HP/999MP restored; original enemy HP86 is valid base85 +/-10 from
+  146C.c:6128. Both0 engine/trace errors. Evidence dtok147-final-evidence.json,
+  per-run captures and committed COMBAT_LAB; no live state writes. No prologue
+  story-event victory or all-model acceptance claimed.
+- Final Debug/Release full565/1812832 each; copier35; stable regeneration and
+  ownership; scoped quality131 existing/0 new, owned implementation0 findings.
+  Full original-reference index138/100172/0 unresolved/0 mismatches with22
+  existing error TUs explicit. Only Game projects were regenerated via the
+  existing scaffolder APIs; owner-dirty solution/tool projects were preserved.
+- Broader #148/#16/#76/#80/#141 remain separately tracked. Naming batches and
+  residual unknowns are documented; do not invent names, force readiness or
+  infer C++ promotion/compatibility retirement from these fixes.
+- Local HEAD deliberately remains508b4bd7. A concurrent owner Audit0933950e
+  changed BUILDING plus a new report while BUILDING was already owner-dirty.
+  Initial push was rejected; normal virtual merges most recently published
+  01bf7884/a258dfdf/4ceceda5/ddf8171a/8330fddc/aa09cef8/438c8edc/421d4440 without
+  stash/reset/rebase/force-push or touching any working file/local branch.
+  Native/copier/scoped evidence trees match the scoped fixing commits;25 dirty/
+  untracked paths were preserved before updating these owned handoff notes.
+  Metadata: lab-sequence-{header-,}integration.json, gimmick145-integration.json
+  and score65-integration/preservation.json. Thirty owner/independent entries
+  were hash-checked unchanged for the Score publication before these owned
+  handoff notes were updated.
+  Initial CI40008528885 caught a missing direct <string> include; it was fixed,
+  not baselined away, and exact follow-up40009015714 passed.
+  Preserve this state; do not overwrite owner docs just to align branches.
+- #15/#65/#78/#81/#83/#136/#137/#138/#139/#140/#142/#143/#145/#146/#147 are verified and closed. Current ordered
+  parent is #16. Broad #76 original-frame/space/trail fidelity and #80's
+  owner-reported unspecified multi-part case remain separate/open.
+- #139's original key/sigil acceptance is complete locally on63beaf268:
+  all32 named items in Debug/Release, wrong-facing controls in each positive,
+  six missing controls and two actual repeat/F10/restart controls. All72
+  sessions end normally with0 engine/trace errors. Reusable keys stay10;
+  sigils10->9/flag2; Chest Key10/flag903=1; fresh entry resets10/locked/flag0.
+  Full door inventory preservation passes. Debug/Release host hashes are
+  840827e8ef5779bd68ab4c7c12452ce38a9dd939f93e6baa91662957b602159c /
+  1598c04e8094e30e32fed4f2b9ba526ac37c3d95de2d628bd30130e36dfb0480.
+  Native/generator sources are unchanged; temporary fixture diagnostics are
+  removed. COMBAT_LAB and three function notes are published in9d43d9cb;
+  exact CI39968889070 green and #139 closed. Evidence: build\quality\key139-final-audit.json;
+  repeats1792764752246225-0/1792764775422319-0. No stock expansion, writes,
+  synthetic locks or event-policy changes. The MAP160 height71 fixture
+  rejection preserves the original63 guard and is not a native bug.
+- No MCP disc changes, reference checkouts or installed tools were modified.
+  The read-only disc session is closed. Preserve unrelated dirty files and
+  leave this mixed owner handoff uncommitted.
+- Further bounded #76 ribbon component evidence is published ina37ac5a0,
+  exact CI39972483524 green: two PLG057 render cases cover96 configurations,
+  matrix selection, exact geometry/UV/RGB/commands/OT, history wrap/collapse,
+  strict depth256 near255/256 clipping and exact buffer fits. Final combined
+  trail selection3036/4; Debug/Release full suites541/1802392 each; maintained
+  quality0/0. Source9d43d9cb plus tests/docs/two function notes only; no runtime
+  or generator change. Original texture timer8 was confirmed before correcting
+  an initial fixture expectation7. Evidence: build\quality\trail76-render-*.
+  Original-frame visual alignment and full source/target attachment callbacks
+  still prevent blanket #76 completion; #80 still lacks the exact owner
+  failing action/enemy (working147/source9 four-hit99HP evidence is on #80).
+- Read-only branch-aware upstream check: local rood-reverse5163208b is ahead
+  of origin/main e0875ad8 (a differing remote HEAD was not a newer revision).
+  noprompt/rood-reverse decomp/verified-functions94a9e90d adds two commits to
+  local39821e4f: the same19-function5163208b change and its merge, not an extra
+  trail algorithm. noprompt/rood-boi81388794 adds five commits to localb2c3fede;
+  wave2 has566 files (all pages inspected for metadata) and172 battle ports,
+  not a new trail renderer. F01600 gravity/drag was identified as the relevant
+  particle-adjacent entry; this was not a complete behavior audit of172 ports.
+  New upstream room-entry null-LFO fix f2920efc affects15/0 and48/3. Native
+  already initializes pending waveform counters to1, preserving slides until
+  actual enable/sample; existing music/effect x vibrato/tremolo/pan regression
+  passes6 assertions in each build. No PS1-address fallback was imported.
+  Logs: build\quality\reference-update-{Debug,Release}-modulation.log;
+  metadata: reference-boi-wave2-files.json. No reference fetch/checkout/edit.
+- Current #16 corpus prepared368 supported source definitions /93 distinct
+  names and87 explicit unavailable definitions; it stopped after34 clean
+  Release initialization cases at confirmed Lich crash #140, logged before
+  repair. Before Release1792768167460696-0/Debug1792768368479320-0 write0x10
+  from F00103's unconditional optional-UI update. The scoped generator gate
+  keeps all NPC geometry/results while updating UI only for isPlayerAction;
+  other NPC collectors already follow this contract.
+  Fix is now published/closed in13531f55 via3a9ed355, exact CI39980344884 green:
+  final full543/1802406 each,
+  focused14/2, copier26,751 generated/93 owned stable, maintained quality0/0.
+  Fixed automatic Debug1792768984618836-0/Release1792768986232195-0 apply
+  area130 five hits totaling398 and area126 five hits totaling392, with
+  exact HP deltas and one38MP debit each; natural regen is recorded separately.
+  Live Debug1792769467702248-0/Release1792769524387582-0 each perform3 exact
+  seeded entries/3 F10 stops, including live area-effect cancellation and
+  actual first/third-entry five-hit field returns. Four accepted traces are
+  normal/0 errors; observer1792769290342565-0 is excluded for missing expected
+  actor count, not a native failure. Audit build\quality\lich140-final-audit.json.
+  Root sourcea37ac5a0 plus scoped changes; do not stage this mixed handoff.
+  Roster resume now requires matching host/input hashes and frame/speed limits,
+  so old initialization records cannot silently stand in for the fixed host.
+  The earlier900-tick Wyvern quiet period was NOT a confirmed stall. Longer
+  Debug1792770140866236-0/Release1792770170565795-0 reach field at902 and Bite3
+  damage at3446, with normal3600-tick endings. Breath148 hit/visual fidelity
+  remains unverified; do not invent a stall fix. The remaining93-name corpus
+  is being refreshed on the fixed host, with exact runtime revision/dirty
+  state now read from each native manifest rather than stale catalog metadata.
+- Fixed-host Release distinct-name pass is complete:93/93 initialization
+  records,89 with selected native actions/combat results, minimum845 ready
+  frames, all normal/no errors and exact source-profile traces/input hashes.
+  Audit build\quality\arena16-roster\Release-names-audit.{json,csv}.
+  Additional Debug3600 controls prove Zombie/Ghoul Normal1 hits begin1711/1793;
+  Dummy is intentionally inert. Plain Skeleton remains an explicit #141
+  verification gap, not a guessed native bug: default3600, adjacent2400 and
+  low-defense2400 controls select no action. Original ZUD has14816 battle
+  animation bytes, not a missing on-disk sequence. Guarded actual-F6 read-only
+  probe at1208: weight40, threshold6/readiness579, range36864/distance25188,
+  delay0, relation400000E4 missing execution-ready bit31. Later1216 probe:
+  viewCos3850, near/far589824, facing1018/offset0, pos208,0,784 vs player320,0,832.
+  Initial88 probe still has uncomputed distance0/relationC0 and facing0.
+  Next observation is the original/native perception/FOV/readiness producer,
+  not forcing relation bits, range, timers or attacks.
+- The all368-definition Release corpus ended. All368 supported definitions
+  have initialization records:356 historical pre-#142 and12 on the fixed host.
+  This is not fresh all368 verification or proof of all actions/defeats.
+  Resume requires exact host/input/frame/speed matches and stop-on-error.
+  No batch remains running. Work resumed after the owner pause with #141's
+  original/native perception producer, without changing readiness conditions.
+- Fixture wording correction: preset position `direction` is the production
+  floor-layer selector0/1, not a cardinal facing override (ActorState.c
+  PlaceActorInRoom). COMBAT_LAB's Lich fixture wording is corrected locally.
+  No native field/API or actor facing was changed.
+- All-definition pass stopped at #142 after356 pre-fix initialization passes:
+  Gremlin97/2, MAP428/source row1, valid tile9,13 aborts before ready at46
+  (Release1792773773981507-0/Debug1792774027535234-0). Cached frame heightMap
+  was null during initial hover12; authoritative room map was already valid.
+  Owned RoomState now publishes context before map callbacks/actor creation
+  and clears borrowed context after actor teardown/before room free. No height
+  math/bounds bypass, fake floor or in-command RNG refresh. Fix5a2d0866 is
+  published in20ab4126, exact CI39993700195 green and #142 closed:
+  focused20/2, full545/1802426 each, quality0/0.
+  Debug7200 run1792775021061322-0/Release1792775009541767-0 initialize/move cleanly
+  but have no offensive results; do not claim complete Gremlin AI. Actual
+  normal-speed3-entry/F10 runs1792775386956705-0/1792775405766255-0 match seeded
+  resources/models/positions and retire each world normally; four traces0 errors.
+  Release observer1792775262731783-0 is excluded: clean18000-tick editor budget
+  exit, not a product failure. Audit gremlin142-final-audit.json.
+  The final11 definitions subsequently initialized cleanly on the fixed host.
+  The356 historical passes are not fresh verification of this changed
+  lifecycle; do not resume under a stale-host success assumption.
+
+### Recent checkpoint notes
+
+- #136/#137 target/planner repair is published in
+  `073d58c5680772beb7910a225d5439bde8305135`; both issues are closed after
+  exact Source Quality39940975312 passed. Native preview/result buffers retain255
+  entries; whole-actor pages preserve40 candidates in20-entry visible slices.
+  The coupled fixed7884-byte AI scratch overflow is replaced by typed call-local
+  storage, preserving later instances' ZUD battle-animation data. Final Debug
+  `1792751783466397-0` and Release `1792751783218080-0` exercise paging,
+  cancellation/re-entry, absolute20->actor6 real hits, all eight defeats and
+  normal loot/gameplay return. Two fresh page captures and two actual F10
+  live-target stops also pass explicit trace/error audits. Full suites530 cases/
+  1790939 assertions each;24 copier tests;751 outputs/93 owned files stable;
+  quality/tidy0 new with one existing scaffold advisory. See the #136/#137
+  checkpoint in [COMBAT_LAB.md](COMBAT_LAB.md). Current #15 work is the original
+  city-to-workshop43 route plus live blade/shield transactions. Final Debug
+  acquired two original loose bronze shields; Release acquired none. No
+  combination acceptance is inferred from those targeting runs, and no
+  same-preset editor restart is claimed. Keep this
+  mixed owner handoff uncommitted.
+- #15's final missing live blade/shield transactions now pass on073d58c5.
+  Debug/Release blade runs1792752847953340-0/1792752847807210-0 use actual
+  guaranteed Sabre/Rapier loot and original door43, two cancellation cycles and
+  actual bronze Guisarme64 consumption with all3840 inventory bytes checked.
+  Original seed47 shield drops are acquired through ExplosionIV plus Fireball;
+  runs1792753985429352-0/1792753985229923-0 verify two bronze Buckler sources,
+  cancel/re-entry, actual consumption and field/menu returns. No injected loot.
+  Fresh assembly/naming, armor, gem, wear and all seven location gates also pass:
+ 26 accepted sessions on the current native revision have normal ends and0
+  engine error/critical/trace-failure records. Current wear12592/12598 repairs
+  to12600 with equipped refresh. Detailed IDs/commands are in COMBAT_LAB and
+  `build\quality\workshop15-final-operation-audit.json`. Native binaries are
+  unchanged. Acceptance is published ina1dff2281e929c7237d5fe4c416298250cfe0086;
+  exact Source Quality39947119197 is green and #15 is closed. Current ordered
+  work is #16 with its separate #78/#80/#81/#76/#83 limits.
+- #78 root is now precisely aligned with #136, not just a guessed association:
+  the current source9/Normal1 producer emits36 candidates; candidate31 is
+  `{1531,-308,1367,0}`, exactly historical invalid pointer0x557FECC05FB.
+  Temporary trace run1792756208327969-0 is retained locally and its generator
+  hook removed. Final noninstrumented Debug1792756376145405-0 and
+  Release1792756431965231-0 each run three exact eight-Minotaur entries, real
+  96HP attacks, F6/F7 one-step during active phase7 and F10 stops/restarts.
+  Seeded HP/MP/models/source indices match across entries; all nine actors
+  remain, no errors or trace failures. Both full suites532/1790951; copier24;
+  scoped test quality0/0. Explicit boundary/canary and36-target24+12-page tests
+  are uncommitted with the COMBAT_LAB checkpoint, pending scoped publication/
+  exact CI and #78 closure. Broader #80/#81/#76 remains unverified.
+- #78 acceptance is now published in65ef4deef211a05ae162fcf54beada751d0b3244,
+  exact CI39949550123 green, issue closed. Current #81 is implemented locally:
+  correct mask/palette animation was already produced but all175 body faces
+  used original CLUT. Typed actor polygon submission now applies original8
+  per-limb face ranges and +0x480 only to selected groups; weapon entry points
+  remain uniform and unrelated appearance stubs remain debt. Red32/50,
+  green packet50 assertions. Final533/1791001 full suites each; quality0
+  native/0 new with131 existing test findings; copier24 and751/93 stable.
+  Actual final Debug soldier1792758009859446-0/Ghost1792758053402526-0 and
+  Release soldier1792758084997631-0/Ghost1792758128007604-0 verify masks128/64/32,
+  selected versus original submitted CLUT faces, page actor change, all-model
+  cancellation clearing, re-entry and real lethal Fireball/normal post-defeat
+  flow. All four final traces clean; original Ghost auxiliary slot6 retained.
+  Pending scoped native/test/docs/ledger commit, push, exact CI and #81 closure.
+- #81 is now published/closed in4bd0a3e7f8f3c9770d7588ef24f0e4c864366cd9,
+  exact CI39953055128 green. Current #83 repair reuses Desktop's established
+  `AudioDevice(speed==1)` policy: Lab formerly always chose realtime and current
+  speed4 aborts at1132 (run1792758315183981-0). Accelerated native ticks now render
+  synchronously; only already-rendered stale speaker PCM is explicitly discarded
+  past250ms (bounded97600 bytes including one block). No voice command drop or
+  larger queue. Eight final Debug/Release speed1/4/repeat4/64 runs finish1800
+  ticks with clean traces; accelerated captures1436600 frames byte-identical
+  across repeats/speeds per build, finite audible stereo. Both full suites
+  534/1799247; focused mono/stereo4096-tick queue bounds plus existing speed1
+  demand/stall9463 assertions/4 cases; quality0/0. Docs/COMBAT_LAB checkpoint
+  contains exact8 run IDs, hashes/commands/limits. Native Lab/test/docs changes
+  uncommitted, pending scoped publication/exactCI/#83 closure; then #80/#76
+  broader multi-part/reference-particle gates under #16.
+- #83 is published/closed ind00027688ff9a2f608c95a2c082627c7324a16ff,
+  exact CI39954919516 green. Current #138 is a confirmed supporting #76 defect:
+  compiled native particle152 bytes; stale whole-node view reads emitter flags112
+  as strength and pointer bytes98/100/102 as target, rather than strength140/
+  target124. Red15/109; generator4-field fix preserves original arithmetic and
+  distributions. Debug/Release before-live E09489/90 false-force components at
+  ticks459-467 becomes0/90 after fix. Fixed later flame-burst comparisons1272/
+  1236 all pass. Final live fixed runs1792760103122030-0/1792760126849209-0 and
+  later1792760262016302-0/1792760287240181-0 return normally; no errors/trace
+  failures. Actual source-backed Hellhound147, no memory/HP/event edits. Full
+  suites537/1799356 each; focused355/13; copier25 and751/93 stable;quality0/0.
+  VS-Workshop read-only disc inspection kept0 changes and its session is closed;
+  sprite-program preview is explicitly not full runtime trajectory reference.
+  Native/generated/copier/tests/docs/ledgers are uncommitted, pending scoped
+  publication/exactCI/#138 closure. #76 stays open for complete original-frame/
+  attachment/trail acceptance; do not infer full fidelity from this one repair.
+- #138 is now published/closed inf13f144d90eb6c54d9056eb94a3aa0b8b34fc19f,
+  exact CI39957776285 green. Follow-up5/9 trail source-golden regression adds
+  508 assertions/2 cases covering two12-step paths, exact original coefficients,
+  independent histories, wrap, collapse, adjacent guard and repeat reset. Both
+  full suites539/1799864 and scopedquality0/0 pass; no production trail change
+  was justified. Unit/source evidence is not live original-frame fidelity.
+  ParticleRenderTests.cpp, COMBAT_LAB and four function notes are uncommitted,
+  pending scoped publication/CI while #76 remains open. No portable DuckStation
+  save state/card was found for an aligned original combat reference.
+
+- [#4](https://github.com/JEschete/VS-NativePort/issues/4) remains the ordered
+  tracker. Quality prerequisites #3/#5, dialogue #1, menu rendering/lifecycle #2,
+  and AI/initial drops/defeat flow #6 are closed. Sound #7 is now closed against
+  its bounded functional criteria. Item use #8 is now closed; learned-spell
+  use #9 is now closed against its bounded representative criteria. #10's
+  all offensive/defensive chain ability acceptance is now closed. #11's full
+  forty-art functional acceptance is also closed. #12's original item-drop
+  selection/delivery acceptance is now closed. Equipment-drop acceptance #13
+  and bounded staging repair #128 are closed. Equipment-menu acceptance #14
+  is closed. Workshop-gated modification #15 is also verified and closed.
+  Current ordered gameplay work is the comprehensive arena audit #16.
+  The owner's read-only reference
+  particle/path/trail refresh is complete; see the reference checkpoint below.
+  GitHub already records #82 closed at2026-10-22T21:58:16Z. Its existing
+  comments still describe bounded successful replays without an independently
+  captured fault; do not mistake that separate closure for a new root-cause
+  verification in this work.
+- Current published revision: `63beaf26819b3f73a801baa0506cc70b051223f5`,
+  pushed to `work`; exact Source Quality39959691765 is green. Native
+  target/planner defects #136/#137 are closed. Native door-query storage #135 is verified and closed
+  after exact Source Quality39921522813 passed. Placement-scope repair #134
+  in `deb6c5b8` is also verified and closed with the combined live gate.
+  Bounded workshop-operation verification in799d8854 is published
+  after exact-revision Source Quality39914001594 passed; final #15 acceptance
+  later closed after a1dff228 and exact Source Quality39947119197.
+  Weapon naming-render repair #133 in6df50baa is verified and closed
+  after exact-revision Source Quality39909886880 passed.
+  Workshop selector-storage repair #132 incd2f911f is verified and
+  closed after exact-revision Source Quality39907208600 passed.
+  Equipment-menu acceptance #14 inb45dfd3c is verified and closed
+  after exact-revision Source Quality39903038043 passed. Native model-storage
+  repair #131 inadd47793 is verified and closed
+  after exact-revision Source Quality39900130928 passed. Canonical
+  preview-shield repair #130 is closed in1837e136 after
+  Source Quality39893247389 passed. Earlier revision
+  `e4d006694a188e996d66c390e2cb1ca23dd140a5` restored manual CI. Its Source Quality
+  [manual run 39891724186](https://github.com/JEschete/VS-NativePort/actions/runs/39891724186)
+  and [push run 39891724472](https://github.com/JEschete/VS-NativePort/actions/runs/39891724472)
+  passed every step on that exact revision. #120's full Break Art menu repair
+  and the shared Mesh10/tiled-ring import repairs #121/#122 are closed;
+  original-equipment Lab selection is published and empty-slot materials #123
+  is now verified and closed. Thunderwave's original zero-width remainder
+  repair #124 and Iron Ripper's cone-emission repair #125 are also published,
+  verified and closed. Heaven's Scorn's pending audio-modulation initialization
+  repair #126 is also published, verified and closed. The forty-art damage/
+  secondary-effect checkpoint and two maintained regressions are published
+  in `f432f475`, followed by the60-encounter/400-gate acceptance matrix in
+  `b59a6a7a`; both exact-revision CI runs passed and #11 is closed. No baseline or
+  suppression was changed. #119 is now fixed in its own metadata commit:
+  the orphan gitlink was removed while its ignored local reference checkout
+  remains clean at `39821e4f`. CI checkout cleanup no longer emits the
+  missing-URL/exit128 warning. Unrelated edits were not included.
+- Six issue-scoped commits publish the verified item/Lab/rendering fixes:
+  `af771c69` (#32), `d33b3f43` (#84), `fa794fab` (#115 and Lab fixtures),
+  `65f3c8f1` (#85), `5aa6adab` (#86), and `9745ac35` (#116).
+  Those six tickets are closed with individual fixing commits and replay
+  evidence. Additional fixes `b6e0a84a` (#117, actual caster telemetry) and
+  `ad6b2adb` (#118, Ghost secondary-body loading) are also pushed and closed
+  after exact-revision CI and real-input acceptance.
+  Unrelated documentation rewrites and local reference changes remain
+  untouched/uncommitted. The orphan submodule removal was deliberately
+  published separately for #119 in `a320c82e`.
+  Disc-derived assets, captures and local diagnostics stay out of commits.
+
+## Current workshop checkpoint
+
+#15 remains open. All six original workshops and outside-room rejection pass
+actual-controller gates in Debug/Release. The maintained gate regression covers
+56 workshop/capacity/cursor combinations. #132 was logged before repairing six
+unaligned PS1-sized temporary pointer tables through the generator. Its red
+production regression corrupts the reserved heap-tail guard in all six
+selectors; fixed full-capacity rows and inventory checks pass402 assertions.
+No independent gameplay crash is claimed.
+
+The #132 repair is published in cd2f911f and closed after exact-revision
+Source Quality39907208600 passed. Final rebuilt full suites
+pass503 cases/1,786,633 assertions each;20 copier tests pass; second generation
+preserves751 outputs and87 owned files; maintained quality/tidy is0 findings/0
+new. Repaired live Debug1792733764298314-0 and Release1792733836872489-0 repeat
+blade/grip/armor chooser entry/cancel twice, release copied lists, preserve
+inventory and return to field. All18 final gate/browse sessions pass the
+explicit error/trace audit. See
+[COMBAT_LAB.md](COMBAT_LAB.md#workshop-gates-and-native-selector-storage-15-132)
+and local `build\quality\workshop132-*`.
+
+The owner then reported the blank assembly naming editor, logged as #133.
+Its generated F02781/F02782 raw pointer links are repaired in6df50baa. Red renderer
+tests fail14/26 assertions; fixed Debug/Release pass30 assertions. Inspected
+captures show the assembly/explicit naming editor and actual edited name/grid
+selection in both builds. Two complete disassembly/assembly/rename/re-equip
+cycles per build restore all3840 inventory bytes. Final suites pass505 cases/
+1,786,663 assertions each;21 copier tests and751/87 generation audit pass;
+quality/tidy0/0. Eight accepted sessions pass explicit trace/error audits.
+See [COMBAT_LAB.md](COMBAT_LAB.md#weapon-naming-rendering-133) and local
+`build\quality\naming133-*`. #133 is published and closed after exact-revision
+Source Quality39909886880 passed.
+
+#15's next checkpoint now verifies actual Grissom gem loot/removal/rollback/
+reattachment and stock Bandage armor combination in both configurations.
+Two repeated stock repair UI cycles pass but are explicitly no-op durability
+coverage. Twelve new component cases cover meaningful DP/PP repair, equipped
+runtime refresh, ownership, ordered synthetic/original recipes and material
+filters. Focused14 cases/5,108 assertions and full517 cases/1,790,641 assertions
+pass per configuration; quality/tidy0/0. Twelve actual-operation/preview
+sessions have normal/error-free traces. See
+[COMBAT_LAB.md](COMBAT_LAB.md#workshop-operations-checkpoint-15) and local
+`build\quality\workshop15-*`. This checkpoint is published in799d8854 and
+Source Quality39914001594 is green.
+
+The lawful route reproduced #134: the active Lab reinserted source enemy18
+after changing to workshop42, faulting in Field_SpawnRoomActors at tick2261
+(red1792738861766246-0). The native hook is repaired locally to scope injection
+to both source zone and room, preserving original destination placements.
+Focused19 assertions and full519 cases/1,790,660 assertions per build pass;
+quality/tidy0/0. Debug1792739660623754-0 now retains actual melee wear12598/12600,
+repairs it to12600 and returns to field. Release can stop at the opened door
+even with sustained input (1792739974174070-0); no Release transition claim.
+See [COMBAT_LAB.md](COMBAT_LAB.md#cross-zone-placement-repair-checkpoint-134).
+
+#135 is published in813acea0 with registered owned F00579/G00330/T00232 in
+`Field/DoorMatches.cpp/.h`: a native vector backs the borrowed query view.
+Red storage assertions fail2/2; fixed122 assertions cover order/40-record
+platform lists/repeats/empty/RNG/malformed lengths. Full Debug/Release522
+cases/1,790,782 assertions pass;22 copier tests pass;751 outputs stable and89
+owned files preserved. Only the Game project/filter were regenerated via the
+existing scaffold functions; owner's solution hash is unchanged.
+
+The repaired final Debug1792741749151138-0 and Release1792741827685837-0 now both
+make real melee wear12598/12600, cross the original doorway with the exact
+inventory, cancel repair, confirm12600 and return to field. Both final traces
+are normal/error-free and explicitly use original workshop placements. See
+[COMBAT_LAB.md](COMBAT_LAB.md#native-door-query-storage-and-real-repair-acceptance-135-134)
+and `build\quality\door135-live-audit.json`. Final maintained quality has1
+existing scaffold tooling finding/0 new, native0; no baseline changed.
+Exact813acea0 Source Quality39921522813 passed; #134/#135 are closed with the
+fixing commits and actual evidence. #15 still needs live blade/shield
+combination consumption. Do not close it from recipe tests alone.
+
+Original MAP205's room-section door record leads
+from workshop42 tile3,0 to zone13 room12 (MAP040); its top-level door section
+contains event data and must not be parsed as transition records.
+The active Lab placement hook currently reuses configured placements on every
+room load; cross-zone consequences are not reproduced or established as a bug.
+Stock Fandango starts at
+full DP with a zero-slot grip, so no-op repair/empty gem browsing is not
+acceptance. No inventory-capacity expansion or process-memory writes are
+authorized as a substitute. Keep this mixed owner handoff out of scoped commits.
+
+## Current enemy-drop checkpoint
+
+#12 is now closed. Original MPD spawns supply two guaranteed item/count entries
+and one item/rate entry; there is no universal enemy-item table. A confirmed
+capacity defect was logged as #127 before repair: a rejected99+2 claim changed
+99->100, then retry after freeing a slot produced102 instead of101.
+
+The published F02511 generator fix preflights misc writes through the existing
+query path. Original64 slots/100-per-stack and source ownership are unchanged.
+The red test failed2 of7 assertions; repaired Debug/Release focused tests pass
+3 cases/28,767 assertions and full suites pass474 cases/1,125,294 assertions.
+Scoped quality: one existing finding, zero new, no baseline changes. Both
+generations preserve86 owned files; the second preserves751 generated hashes;
+all15 copier regressions pass. The function ledger records bounded misc-copy
+coverage only, not equipment acceptance, C++ promotion or bridge retirement.
+
+Live Debug `1792714592030967-0` and Release `1792714659101918-0` defeat the original
+Zombie through a nine-window controller chain and take item323 x2 through the
+normal loot screen,10->12. Each trace has one normal final record, no trace
+failure/error-level engine entry, and a normally closed host. Full-capacity
+reject/retry remains component evidence, not a live full-inventory claim.
+See [COMBAT_LAB.md](COMBAT_LAB.md#loot-transfer-capacity-checkpoint-127) and
+`build\quality\loot127-*`. #127 is closed after scoped publication in `a3a8cf1e`
+and successful exact-revision Source Quality39877581259. The subsequent
+checkpoint completes #12's original rates/RNG order and bounded encounter
+acceptance.
+
+The subsequent #12 acceptance checkpoint is published in `bc76bfc6`:
+eight new drop-rule cases pass106,926 assertions; together with capacity checks,
+11 cases/135,693 assertions pass in both configurations. Full suites pass
+482 cases/1,232,220 assertions each; quality has one existing finding, zero new.
+The original two guaranteed MPD entries and optional third ID/rate are checked,
+including every roll0..254, exact RNG order, difficulty/count staging filters,
+ordinary/retained eligibility, repeated defeat, prologue suppression0..2 and
+heap/list cleanup. No further production change was needed after #127.
+
+Read-only Workshop source inspection agrees with native catalog provenance.
+Six new live sessions verify two defeats each for Minotaur, Dullahan and Bat in
+Debug/Release, including real F10/re-entry, exact original drops, empty pending
+lists on return and Minotaur key466's flag904 changing0->1 in each instance.
+All end normally without trace failures or error-level engine records. See
+[COMBAT_LAB.md](COMBAT_LAB.md#enemy-item-drop-acceptance-checkpoint-12) and
+`build\quality\drop12-live-audit.json`. The Workshop session is closed with no
+changes; no owned host remains. Original boss-story scripts/key-door traversal
+and equipment #13 are not claimed. Exact-revision Source Quality39881313511
+passed; #12 is closed and #4 is updated. #13 is now current. In F02511's shield
+branch the local names `source` and
+`target` are reversed, but the actual inventory copy direction is correct.
+Do not log that naming alone as a defect. Keep unrelated dirty files out of
+scoped commits.
+
+### Equipment-drop verification and staging repair #128
+
+The initial tests in `CombatTestCases.cpp` added eight equipment cases: all255
+rolls at strict probability boundaries for four equipment kinds, independent
+property checks, the two-armor-output limit with six limb draws,1080 composite
+capacity combinations, shared armor/accessory capacity, and difficulty/row/
+claimability staging. Debug/Release pass547,962 focused assertions and
+490 cases/1,780,182 full-suite assertions **before** the subsequently added red
+staging-boundary case. Quality/tidy at that green checkpoint reports one
+existing finding and zero new. Those are pre-repair results.
+
+Twenty real Fireball defeats across twelve native sessions exercise Mandel
+weapons, Lizardman weapon/armor, Minotaur Zombie accessory, Dullahan equipment
+rate0, and Zombie Knight probabilistic equipment. The Debug seed42 Knight
+delivers shield132; Release seed42 delivers armor164/180 instead, so do not
+claim identical outcomes across timed controller runs. PDB-checked read-only
+observations compare initial actor component properties to pending loot and
+then delivered inventory, including ownership indices. Evidence and limits
+are in [COMBAT_LAB.md](COMBAT_LAB.md#equipment-drop-and-staging-acceptance-13-128),
+`build\quality\equipment13-*`, `live-equipment13-*.json` and native run folders.
+The observer is `build\quality\equipment13-observe.ps1`, loaded by the existing
+live driver with `-ObserveEquipment`. All owned hosts and the read-only
+Workshop session are closed.
+
+**Original red reproducer:** `[staging-capacity]` failed14 of366
+assertions. All seven `Menu_Loot_Stage*` helpers rejected the final valid slot
+(8/16/16/8/16/48/64). #128 was opened before any production repair. Their caller
+unconditionally appends the zero result, yielding an invalid item index;
+composite staging also lacks complete component-space preflight. No actual
+crash is claimed. Eight allowed Lab enemies can reach these boundaries.
+Original available Lich/Lich Lord records in zones48/56 can additionally drop
+two limb armors plus an accessory, so a full batch can exceed even a corrected
+16-slot temporary armor array. A mere off-by-one edit or silently skipping
+failed rows is not a complete repair.
+
+The repair now uses bounded successive batches through copier fixups and a
+small compatibility-private `Menu\Loot\Paging.h`. Complete component preflight
+prevents partial weapon/shield staging; failed stages defer instead of
+appending invalid indices. Source flags are consumed only when a batch is
+claimed or positively discarded. Cancel and mandatory-key protection retain
+their existing behavior. Cleanup resets source pointers before freeing them.
+Only row metadata/backups grow160->176, not item arrays or player capacity.
+
+Final Debug/Release focused selection is27 cases/688,244 assertions;
+full suites are498 cases/1,784,771 assertions each. Production menu-state
+component tests caught and fixed a cursor reset error on deferred pages, and
+cover take-all, cancel, positive leave and keys. The24-armor multi-page test
+is component evidence, not a real-controller overflow replay; bag-space
+release between pages is a fixture precondition, not organization-menu proof.
+Copier regressions pass18 cases; second generation preserves751 generated
+outputs and87 maintained paths. Scoped quality/tidy has one existing finding
+and zero new, without baseline changes. See the Combat Lab section for exact
+commands, final host hashes and evidence paths.
+
+Final-host ordinary-controller acceptance passes20 defeats across12 sessions,
+including cancel/take-all, confirmed discard, key protection and F10/re-entry
+on both configurations. Pending/delivered properties and ownership are checked
+read-only. Final Knight outcomes differ between builds; shield132 remains
+pre-repair evidence, not a newly repeated final-host pickup. All owned hosts
+and the read-only Workshop session are closed. Details/run IDs are in the
+Combat Lab table and `staging128-live-*` / `live-staging128-*.json`.
+Published implementation:
+`536d18114718edb768ae68ccb2b513933f719db2` on `work`. The scoped commit includes
+production/copier/tests, `COMBAT_LAB.md` and function-ledger notes; this mixed
+handoff and unrelated edits remain uncommitted.
+
+**Publication gate resolved:** the first push returned `remote: fatal error in
+commit_refs` / remote rejected, but both `git ls-remote --heads origin work`
+and the GitHub ref API independently show536d1811. A non-forced retry succeeds
+with `Everything up-to-date`. No Actions run or check suite exists for that
+SHA; `gh run list --branch work --commit 536d18114718edb768ae68ccb2b513933f719db2`
+returned `[]`. #129 added `workflow_dispatch` and exact-head recovery instructions
+in e4d00669, without changing existing triggers/jobs/checks or rewriting history.
+Both manual39891724186 and push39891724472 passed on that exact descendant.
+`git diff --quiet 536d1811 HEAD -- Native tools` confirms native/tool source
+is unchanged from the locally verified implementation. #129, #128 and #13 are
+closed with fixing commits and evidence; #4 is updated.
+
+#14 is now claimed in order. Its acceptance covers real-menu equip/unequip,
+legal slots/handedness, derived values, instance preservation, model/texture
+and preview lifecycle, restrictions/cancellation, empty slots and repeated
+changes. First-entry Fandango was visible in run1792724245959463-0; the older
+missing-weapon observation was not reproduced on that build. Combat Lab setup
+overrides alone do not demonstrate game-menu acceptance.
+
+#130 is published/closed in1837e136. #131 replaces a1512-byte, alignment1
+model reserve with the actual1528-byte, alignment8 native weapon model.
+Final Debug/Release suites pass500 cases/1,785,023 assertions each, focused
+equipment6/300 and19 copier regressions pass. Repeated generation preserves
+751 outputs/87 existing owned source/header paths. Broad quality's four new
+findings were repaired; final targeted tidy/style have zero new findings.
+Real one-handed and greatsword shield cycles, all stock slots and Ghost
+secondary-body F10/re-entry pass on the final hosts. Evidence and hashes are
+in [COMBAT_LAB.md](COMBAT_LAB.md#native-equipment-storage-repair-131-parent-14).
+The seed8888 shield comparison failure was observer error: Fireball changes
+affinity index2 from3 to4 before loot is copied. Exact replay verifies
+defeat-time4 -> pending4 -> claimed4; no native loot fix is warranted.
+The scoped repair is published inadd47793; exact-revision CI39900130928
+passed and #131 is closed.
+#14's remaining local acceptance now passes. The all-stock-loose category
+matrix, one-/two-handed exact controller replays and prologue/Tarnish gates
+pass in Debug and Release. All ten final traces close normally with no
+engine errors or trace failures. Equipment contributions and packed range
+are checked separately from actor totalStrength. The two gate harness
+failures were observer assumptions (closed sentinel63; stale pre-F5 frames),
+not native defects. The new maintained gate regression passes480 assertions;
+each full suite passes501 cases/1,785,503 assertions. Scoped quality/tidy is
+0 findings/0 new. See COMBAT_LAB.md's equipment-menu checkpoint and
+build\quality\equipment14-final-audit.json. The scoped tests/docs/ledger notes
+are published inb45dfd3c; exact-revision Source Quality39903038043 passed and
+#14 is closed. #15 is claimed next, beginning with original room/workshop
+state and material permissions before testing actual modification operations.
+
+## Current Break Art checkpoint
+
+#120 corrected G01005 through the F02610 copy fixup: four art IDs plus
+View Arts, with the matching reload extent. Original layout provenance is
+retained. That menu checkpoint passed **455 cases / 1,078,556 assertions**;
+generation is stable, 86 owned paths are unchanged, and 11 copier tests pass.
+Focused quality/tidy has one existing finding, zero new.
+
+Debug `1792693091210881-0` and Release `1792693210368049-0` verify actual
+five-row navigation through all ten categories, equipped-category restrictions,
+four-row shortcuts, fourth Sword art191 selection, no-target rejection and
+cancellation without spending resources, plus F10/re-entry/Prologue reset.
+The new `all-break-arts` profile grants IDs184-223 without changing equipment,
+inventory or progression counters. The forty original names, costs and
+acquisition thresholds are listed in [COMBAT_LAB.md](COMBAT_LAB.md).
+
+#11's enumeration criterion is checked. Wider actual art execution, damage,
+secondary effects and target/range acceptance remain open. Initial source
+tracing maps secondary mediators to Paralysis, Poison, Numbness, Curse,
+equipment reduction, armor wear, MP damage and Risk reduction; do not infer
+their behavior from names alone. No all-forty effect certification yet.
+
+The current scoped #121 repair corrects fourteen Mesh10 ledger extents and
+regenerates complete storage/imports for all seven shared instances. The new
+regression failed fourteen assertions before the fix. All loaded bytes,
+selectors, indices, UV offsets and repeat imports now pass. Final Debug and
+Release suites pass **458 cases / 1,082,195 assertions**, including the
+separate #11 kill-point qualification tests in `b18ec9e7` (2 cases / 1,860
+assertions). Focused quality across both test files has four existing
+findings, zero new; no baseline/suppression changes. Second generation is
+stable and all eleven copier regressions pass.
+
+Cherry Ronde190 completes three encounters per host with two F10/re-entry
+cycles: Debug `1792696331113100-0` (four casts including one zero-damage
+result/retry), Release `1792696162985589-0` (three casts). Every cast pays
+HP55, applies the actual reported damage and recovers control. Release
+Papillon Reel191 also passes in `1792696417809149-0` (HP75, damage1).
+All three traces end normally without errors. #121 is published in `25831e66`
+and closed after successful exact-revision CI. This does not close #82 or
+establish visual parity.
+
+#122 is now closed with the verified repair in `5272b755` for all thirteen missing
+tiled-ring color imports. Each extent is32 bytes, following the original
+eight-CVECTOR definition and0-7 selector. All thirteen destinations failed
+the regression first. The tests now cover exact source bytes, bounds and
+reloads, plus the byte-identical PLG085/139 shared binding and initialized
+PLG044 control: fifteen renderer instances total.
+
+Debug/Release builds and full suites pass **459 cases / 1,082,480 assertions**
+each; focused module tests pass7 cases /2,116 assertions. Focused quality:
+three existing findings, zero new; second generation stable, all eleven
+copier regressions pass. Live Release `1792697927456019-0` and Debug
+`1792698004510448-0` each cast Cherry Ronde in three encounters with two F10
+re-entries. Read-only PDB-based sampling observes the actual tiled-ring age
+advance1-39 and exact original colors throughout all entries. Every cast
+pays55 HP and applies its actual reported damage, then recovers control.
+Both traces end normally without errors. The first two new observer attempts
+failed in PowerShell reporting, not in the native renderer.
+Exact-revision Source Quality39842559519 passed; #122 is published and closed.
+This still does not prove visual parity or explain the smoke paths; #76 and
+broader #11 remain open.
+
+The current all-art profile retains Fandango by design. Wider #11 acceptance
+needs legitimate equipment setup for the remaining families, not category or
+action-ID edits. The production path reads inventory blade/grip data in
+`Items_LoadInventoryWeaponStats` and equips through `Items_EquipAshleyWeapon`;
+Ashley spawning also derives the visible model from the equipped inventory.
+The owner was unavailable for the selector-versus-profiles choice, so the
+recommended Lab-only selector was implemented in the existing Ashley setup
+submenu. It uses nine original ZND blade/grip records plus bare hands, preserves
+stock capacity and campaign defaults, and applies equipment before profile
+grants and normal spawning. JSON and frame logs distinguish requested choice
+from actual category/parts/model. See COMBAT_LAB.md's weapon-family checkpoint.
+
+Current scoped changes at base `5272b755` pass Debug/Release builds and 466 tests /
+1,082,778 assertions each. All ten first-tier arts have positive controller
+execution in both configurations, with original 25-HP cost and exact target HP
+delta. Most use explicit starting AGI200; default-AGI bare hands missed twice
+and then the replay lost a shortcut to enemy activity, so that run is excluded.
+Greatsword/bare-hands live-enemy F10 re-entry and actual editor reset to Fandango
+also pass. This is not completion of all forty arts or secondary effects.
+
+#123 was logged before fixing F01856's uninitialized empty-slot material
+arguments through the producer. Its regression failed before and twelve copier
+cases pass after, with stable regeneration and owned-source preservation.
+The checkpoint is published in `91f446c6`, exact-revision Source Quality
+39851702872 passed every step, and #123 is closed. No baseline was changed.
+Debug Dagger185/186/187 subsequently passed real controller execution in
+`1792702041304012-0`, `1792702066934572-0`, `1792702088383033-0`, with costs40/55/75
+and positive HP damage5/3/3. Release also passed in `1792702200811712-0`,
+`1792702226323079-0`, `1792702252692436-0` (damage5/7/1). Debug Shadoweave185
+did not apply Paralysis to the Zombie; positive secondary effects remain
+pending. Do not close #11 on these partial results.
+
+### Thunderwave #124 repair, published and closed
+
+Thunderwave193 crashed with `0xC0000094` at tick851 in Debug
+`1792702303877631-0`. Original PLG045 confirms that width reuse is intentional:
+`DIV`/`MFHI` at `0x800FAA74`/`0x800FAA78` leaves the random dividend in HI for
+a zero divisor. Do not split/re-clamp the width. F01867's maintained fix
+preserves this remainder and one RNG call per sample. Shared template copying
+now invokes the existing reviewed-fixup pass; the new producer regression
+caught the missing hook. References were not modified.
+
+Scoped changes on `91f446c6` pass Debug/Release builds, 15 effects cases /
+13,381 assertions, full 467 cases /1,094,874 assertions, thirteen copier
+regressions, stable second generation and owned-source preservation.
+Final scoped tidy/format/lint/clones: zero new findings, 23 existing tooling
+findings; no baseline changes. The native regression first failed with the
+original divide-by-zero; it now checks all12 instances, sample-derived UVs,
+RNG progression, packets/links and guards.
+
+Real Thunderwave casts and live-enemy F10 re-entry pass twice per configuration:
+Debug `1792703376728435-0` (damage2/4), Release `1792703466908989-0` (5/5),
+each with cost40 and control recovery. Greatsword194/195 also pass:
+Debug `1792703589953818-0` / `1792703614501626-0`, Release
+`1792703739938947-0` / `1792703764325378-0`, costs55/75 and damage3 each.
+All twelve new Dagger/Greatsword traces have final session.end, trace_failed:false
+and no error-level records. Exact commands/evidence are in COMBAT_LAB.md.
+The scoped fix is published in `8d66cf88`; exact-revision Source Quality
+39856301304 passed every step and #124 is closed with the commit and evidence.
+This mixed handoff and unrelated edits were kept out of that commit.
+#11/#76/#82 remain open; continue the remaining arts and secondary effects.
+
+### Iron Ripper #125, published and closed
+
+Greataxe202 crashed on `8d66cf88` in run `1792704517072958-0`, tick907,
+`Effects_EmitParticleEvent` case16 cone scaling by zero height. #125 was logged
+before implementation. Original BATTLE.PRG DIV/MFLO at 0x800D34BC/0x800D34F8
+returns -1 for both 0/0 quotients; zero height also skips the wide-range RNG
+pair and gives sqrt(0). F01515's producer repair preserves (-1,0,-1), emission
+and RNG, rather than clamping height or skipping particles.
+
+The focused native regression failed before the fix and now covers all three
+cone modes, heights0/32/-32, two seeds, final positions, allocation/list state
+and RNG. Debug/Release builds, 16 effects cases/13,507 assertions, full468
+cases/1,095,000 assertions, fourteen producer regressions, stable repeat
+generation and owned-source preservation pass. Scoped quality: zero findings/
+new findings; no baseline changes. Exact commands follow the #124 patterns;
+evidence prefix is build/quality/iron-ripper-*.
+
+Actual Iron Ripper twice plus live-enemy F10 re-entry passes in Debug
+`1792705287321021-0` (damage5/3) and Release `1792705333411997-0` (1/3), cost55
+and control recovery. The remaining higher Sword/Axe-Mace/Greataxe actions
+also passed, bringing positive execution coverage to24/40 arts in both builds.
+All16 additional run final records are audited clean. COMBAT_LAB.md contains
+the complete table. The scoped fix is published in `54c62f9a`; exact-revision
+Source Quality39860088352 passed every step and #125 is closed. This mixed
+handoff/unrelated edits remain uncommitted.
+
+### Further effects and Heaven's Scorn #126
+
+Staff206/207 and Heavy Mace209-211 now pass both builds with audited final
+traces. Separate all-break-arts Sackheim fixtures (zone9 room0 definition6,
+HP150/MP15, Ashley4,9 and target4,11) demonstrate Killer Mantis198 HP49/MP13
+damage in both builds. Riskbreak205 uses actual F3 to establish Risk25 and
+reduces it to24 for damage3. Its source effect occurs four ticks after target
+damage; the first harness check was premature, not a native defect.
+Shadoweave185, Vile Scar189, Accursed Umbra201, Quickshock209 and Vertigo221
+all newly apply their original status flags and timers on Sackheim in both
+builds. COMBAT_LAB.md has every run ID and exact result.
+
+Heaven's Scorn217 revealed #126 on54c62f9a: Debug1792707252049210-0 crashes
+at tick928 in Audio_Mixer_UpdateChannelSlidesAndDelays. Read-only channel
+observation in1792707507227388-0 confirms voice15's null auto-pan waveform
+and counter0 before the original DF4801 depth slide (E164.P+0x173B), without
+prior auto-pan enable. Original resident0x8001427C-0x80014318 dereferences
+that pointer. The owned reset now initializes only unconfigured oscillators
+to the original enable-command pending phase1; cached waveforms/phases stay
+unchanged. No sound, depth slide or enabled modulation is skipped.
+
+The six-mode regression fails before the fix and passes afterward, including
+all44 channels, exact depth progression and enabled modulation, cached-state
+preservation and repeated reset. Debug/Release builds, audio71 cases/162977
+assertions and full469 cases/1095006 assertions pass. Scoped quality has0 new
+findings,38 existing test findings; no baseline changes. No generator changes.
+Actual art217 twice with live-enemy F10 re-entry passes in Debug
+1792707904346821-0 (damage4/5) and Release1792708067805725-0 (8/5), with cost40,
+control recovery and clean final traces. Published in07953575; exact-revision
+Source Quality39865971299 passed every step and #126 is closed.
+
+Current positive execution coverage:40/40 in BOTH builds; all accepted final
+records audited clean. These latest runs are published in COMBAT_LAB.md:
+
+| Art | Debug run / damage | Release run / damage |
+|---|---|---|
+|214|1792707195424468-0 /1|1792708623983606-0 /5|
+|215|1792707221602121-0 /1|1792708649879492-0 /1|
+|218|1792708513516595-0 /9|1792708680207524-0 /9|
+|219|1792708540704239-0 /9|1792708707225182-0 /9|
+|222|1792708569135588-0 /2|1792708735568615-0 /8|
+|223|1792708596134006-0 /3|1792708762333533-0 /3|
+|193 +Paralysis|1792708900706133-0 /54|1792708973838771-0 /55|
+|197 +Numbness|1792708925480198-0 /47|1792708998430754-0 /48|
+|213 +equipment-down|1792708950350244-0 /49|1792709023262919-0 /46|
+
+The last three rows use the separate living fixture; original status19 is
+mask0x80000 and timer slot2=15. The ignored RequireSecondary whitelist now
+also covers193/197/213.
+
+Armor-wear202/214 now passes in both builds, with all four final traces
+audited clean. Iron Ripper: Debug1792709260707089-0 /
+Release1792709350998616-0, damage54, limb3446->3230, shield5296->5188.
+Giga Tempest: Debug1792709325935945-0 / Release1792709375332840-0,
+damage48, limb3452->3260, shield5302->5206. The PDB-checked read-only observer
+samples after ordinary equipment wear and before impact. Effect35's two
+original application stages give 4*damage selected-limb / 2*damage shield
+loss, saturating at zero; this is not a guessed 2*damage limb contract.
+
+Two new maintained art-effect tests cover all nine two-hit arts through the
+actual preview resolver (including canceled-target prerequisites), exact
+per-hit arithmetic/aggregation and committed HP, plus both armor-wear stages
+at saturation boundaries for all six limbs. Debug/Release full suites pass
+471 cases /1,096,527 assertions; the two cases contribute1,521 assertions.
+Scoped quality has0 new findings and1 existing test finding. No production
+change or baseline weakening. Full details are in COMBAT_LAB.md.
+
+The ignored driver now has ArtGate solo/range/cancel. Solo checks all four
+arts' no-target confirmation, target cancellation and low-HP rejection
+using actual F1 inputs. Natural field HP regeneration must be observed, not
+assumed absent; the insufficient-HP replay is <=25, while exact cost
+boundaries for all40 remain in maintained tests. Valid-target cancellation
+allows normal enemy turns after leaving the menu. Initial timing/regen/
+post-menu driver failures were harness assumptions, not native defects.
+The all-family sweep is complete:60 encounters /400 gate selections, covering
+all40 arts in BOTH configurations for empty-target confirmation/cancellation,
+insufficient HP (all live checks at1), far-target rejection and valid-target
+cancellation. Every final trace is clean and every result file contains the
+required four action IDs per phase. Full matrix and host hashes are in
+COMBAT_LAB.md; the ignored audited index is build/quality/art-gates-batch.json.
+No background gate command or owned host remains. #11 closed against
+b59a6a7a after exact-revision Source Quality39874136697 passed every step.
+Preserve this mixed handoff and unrelated edits. #76 remains open; #82 is
+already closed separately in GitHub, without new root-cause evidence here.
+
+## Current ability checkpoint
+
+#10 is closed after published verification and exact-revision CI. The Lab-only
+`all-abilities` profile grants the original
+14 offensive and 14 defensive abilities, maps the first three of each list,
+and preserves inventory, equipment, resources, spells, Break Arts and unrelated
+progression. The five code files and profile documentation are published in
+`3cc999c3`; that initial step established enumeration/menu behavior only.
+See [the bounded fixture evidence](COMBAT_LAB.md#ability-profile-acceptance-checkpoint-2026-10-22).
+
+Debug `1792684051521630-0` and Release `1792684131131669-0` verify both 14-row
+menus, scrolling, assign/move/unassign, F10/re-entry, and restoration of Prologue
+grants/mappings/inventory. The earlier rejected shortcut was sent during room
+transition 4; waiting for transition 0 fixes the diagnostic without a game-code
+change. Both sessions finalize normally without error events. Both full suites
+pass **420 cases / 1,060,980 assertions**; focused tests pass **45 / 1,861**.
+Builds, focused quality and changed-header tidy pass without baseline changes.
+Those fixture/menu checks alone do not establish effects, timing, costs,
+acquisition restrictions or chain termination; later evidence follows.
+
+The following published step adds cost/eligibility/timing regressions to
+`Native\Tests\src\CombatTestCases.cpp`: all 28 base costs, chain-cost growth,
+Risk cap 100, exact three-button timing boundaries, input priority and score
+saturation. Final Debug/Release full suites pass **430 / 1,067,689**;
+focused quality/tidy has **one existing finding, zero new**, no baseline
+changes. Eight real-input runs now verify Heavy Shot's 70% damage formula,
+one Risk per attempt, early/late rejection and cancellation in both builds.
+Two legitimate charged misses precede Release's positive hit. See the
+[timing/Risk evidence](COMBAT_LAB.md#ability-timing-and-risk-checkpoint).
+These tests/docs are published in `2d231c81`.
+
+Tests published in `e80a94a2` cover all 28 ability effect contracts, resource
+capacity/drain clamps, the action-ID >=54 timing rule, all22 original ability
+thresholds, all10 weapon/four-tier Break Art thresholds, priority and
+non-mutating/capped acquisition gates. Both final builds/full suites pass
+**448 cases / 1,074,484 assertions**; focused quality/tidy retains **one
+existing finding, zero new**, without baseline changes.
+
+Live Ward passes Debug `1792687747745849-0` and Release `1792687763174288-0`:
+real enemy damage999->903, Paralysis cured before expiry, Risk+1 and original
+defensive acquisition point+1. The lethal chain passes Debug
+`1792688551760571-0` and Release `1792688605774947-0`: alternating Heavy Shot /
+Gain Life kills the original121-HP Zombie with Heavy Shot, ordinary Square
+take-all increases item323 from10 to12, and field control/recovery return
+normally after actor removal. The earlier post-defeat timeout was an
+unacknowledged normal loot menu, not a combat deadlock.
+See [the effect and live-combat evidence](COMBAT_LAB.md#ability-effects-defense-and-defeat-checkpoint).
+
+Acquisition now passes Debug `1792689722375744-0` and Release
+`1792690148434786-0`. Twenty-one real Ward defenses demonstrate points0->20,
+cap20 pending selection, unchanged learned actions and no premature unlock.
+The profile's actual learned spell97 kills the ranged Minotaur Zombie with
+1254 damage, spending25MP. Normal loot controls lead into the original reward
+menu; cancelling/reselecting grants only Gain Magic25, reserves exactly one
+unlock, preserves prior learned actions and unrelated counters, and returns
+to normal combat. Failed diagnostic assumptions (melee proximity, spell99,
+40-ms input shorter than a four-tick sampling interval) are retained separately.
+No HP/progression/event flags are written by the driver. Exact story and save
+acceptance remain separate under #17/#18. Publication and exact-revision
+CI39823762991 are complete, and #10 is closed with this evidence.
+
+## Current item-use and Combat Lab checkpoint
+
+#8 is closed after scoped fixes, actual item-use acceptance and pushed CI.
+Published [acceptance evidence](COMBAT_LAB.md#item-use-acceptance-checkpoint-2026-10-22)
+separates those bounded criteria from #9, save/load and extra key/sigil fixtures.
+The two all-items
+Ashley profiles retain the 64-slot inventory, with 58 distinct stacks each.
+Solo rooms and Lab-only resource/status controls are available. Startup
+**ASHLEY STATS** overrides now support HP, MP, STR, INT and AGI, independently
+defaultable and persisted in presets. HP/MP start full, overrides apply once
+per encounter, and F8 refills current MP without altering its maximum.
+See [COMBAT_LAB.md](COMBAT_LAB.md) for the controls and preset contract.
+
+The item-use checkpoint's Debug and Release full suites each pass **416 cases / 1,060,702
+assertions** after the spell-rendering and status-mechanics changes below.
+Focused quality on all six affected C++ units passes with **zero findings**.
+The complete changed-header gate passes with **328 existing findings, zero
+new**. A final poison-test refinement additionally passes targeted quality;
+it distinguishes current-HP damage from maximum-HP damage and separates the
+last-HP boundary case. No baseline or suppression was changed.
+Real scripted-editor replays verify all five overrides, depletion without
+continuous reapplication, MP refill, F10/re-entry, and resetting to normal
+250 HP / 50 MP / 100 base attributes. The new setup avoids trying to raise
+maximum MP with consumables while the test enemy attacks.
+
+With 999 starting HP/MP, Explosion's grimoire has now completed **four uses in
+one encounter**, selecting actions 106-109, consuming 10 -> 6 copies,
+retaining all four learned ranks and producing positive real enemy damage
+at every rank. MP costs were 36/44/52/60, with F8 refills between uses.
+Thunderburst also passed all four ranks in one encounter. The remaining five
+ranked grimoires were tested by the owner. Broad automated item sweeps remain
+paused at the owner's request; do not take over or restart an owner's Lab run.
+
+The completed owner-driven Debug run `1792659407129820-0` has now been read
+through its normal trace finalization: **462,588 consecutive events, two
+encounters, 66 uses of 49 distinct items**, one copy consumed per use and
+return to idle, no error-level events, `trace_failed=false`. All four Flame
+Sphere, Gaea Strike, Avalanche, Radial Surge and Meteor ranks are accounted
+for. Together with Explosion/Thunderburst, all **seven ranked books** have
+four-use, same-instance evidence. Meteor IV consumed at 47631, damaged the
+enemy 527 -> 518 at 48115, cost 62 MP and returned at 48447.
+The combined consumption matrix now covers **84 of 84** named consumables/books.
+The owner run lacked a chest, but corrected-facing Debug replay
+`1792668279581682-0` used Clef (446) on the real MAP176 chest: lock2 -> 0,
+two uses consumed10 -> 8, action92 learned, 3 MP per cast. Read-only process
+observation verified the actual lock; no memory or progression flags were written.
+Consumption and learning still do not establish every effect. Fireball,
+Exorcism, Banish, Drain Heart, Drain Mind, Degenerate, Stun Cloud, Poison Mist
+and Curse now have positive eligible-target evidence in both Debug and Release.
+The drains transfer real resources; Degenerate/Curse change actual attributes;
+the negative books apply their real conditions; Exorcism/Banish defeat eligible
+enemies and return through the normal loot dialog. Original enemy class matters:
+Mandel is Undead despite its human name; use Sackheim for positive drains.
+Area books need height, horizontal-position and final-target confirmations.
+The four previously unqualified cure books now
+pass with real matching ailments in Debug and Release: paralysis, poison,
+curse, and combined paralysis/poison/numbness are removed at their actual
+effect frames. Blessing restores current STR/INT/AGI90 ->100; Clearance
+restores walk/run4/9 ->9/18. Each consumes one copy, charges its original
+MP cost and learns the spell.
+Fixate now holds a genuinely moving MAP014 platform while its timer decreases
+with ordinary room/platform updates unpaused, then lets it resume. Eureka reveals
+the real MAP015 trap. Both pass in Debug/Release with original costs and learning.
+Uncapped329/335 recovery matches exact result amounts and original95..105
+variance;344 cures INT Down and separately AGI+Equipment Down while preserving
+Poison. First/repeated Fireball retains only its own unlock, preserves intro and
+Teleport gates and sets the real magic-used flag. Cancellation/zero-effect
+consumption semantics are reconciled with the original commit boundary.
+All eight final traces end normally without errors. Keys/sigils remain an
+owner-requested follow-up, not evidence established by consuming the books.
+
+All ten permanent-stat consumables previously passed actual base/max-stat
+comparisons in Debug and Release, using normal starting stats below the cap.
+Earlier recovery/Risk/status runs have now been reconciled against the exact
+effect frames, separating item effects from passive changes. The detailed
+checkpoint records the measured amounts, caps, condition removal and remaining
+eligibility/uncapped-recovery gaps. The owner's item 336 uses additionally
+verify full HP/MP restoration to the larger 999 setup maxima.
+Published repairs address the native-width shortcut allocation (#32) and scoped
+effect-plugin binding (#84). Both issues are closed after acceptance and
+exact-revision CI. F10/re-entry #82 and accelerated-audio
+queue exhaustion #83 remain open. Use speed 1.
+
+Detailed commands and evidence are in the
+[item checkpoint](HANDOFF_HISTORY.md#combat-lab-item-profiles-and-starting-stat-overrides-local-2026-10-22).
+#8's bounded acceptance is complete. Native save persistence, comprehensive
+learned-spell fidelity and compatibility retirement are not claimed. The optional
+final combined .cmd test filter selected no tests, and a direct retry could not
+obtain tool approval; neither is counted as a pass. The completed full suites
+and real replays cover the unchanged native code. See the
+[final item checkpoint](HANDOFF_HISTORY.md#environmental-recovery-and-progression-acceptance-2026-10-22)
+for exact evidence, fixture corrections and remaining limits.
+The owner explicitly resumed autonomous work. The focused selection now passes
+in Debug and Release: 55 cases / 2,098 assertions each, using the native
+executable with separate stdout/stderr redirection and checked process exit.
+Expected warnings in negative tests must not be mistaken for failed assertions
+by PowerShell's native stderr handling. #9 is now closed after18 accepted
+Debug/Release real-input sessions and exact-revision CI. See the
+[learned-spell checkpoint](COMBAT_LAB.md#learned-spell-acceptance-checkpoint-2026-10-22)
+for exact costs, effect boundaries, all four Flame Sphere ranks, five negative
+cases and the64 direct-entry IDs not individually exercised. Full #17
+story-boundary verification and #76 particle fidelity remain open.
+
+Next ordered #10 investigation identifies14 named offensive and14 defensive
+abilities in the original action definitions. Untitled entries33,36,38,39 are
+not additional offensive abilities. Both production unlock-list consumers
+iterate14 entries; do not infer the count from their padded16-byte arrays.
+
+### Ghost loading and current validation
+
+#118 was a fresh-start Ghost crash, not the reported F10 fault. Original
+`D_800F188C` aliases `_zoneContext+0xC`; F00176 now reads the live enemy table
+for the secondary model, retaining the same ZUD index and model+1. Debug and
+Release load models26/27, use Banish to change Ghost HP67 ->0, consume10 ->9,
+charge25MP, learn action105 and return normally. Three live-Ghost F10 stops
+and fresh entries also pass in each configuration. All four traces finalize
+without errors. The independent alias declaration remains compatibility debt.
+
+After this repair, both builds and full native suites pass416 cases /
+1,060,702 assertions each; all23 copier tests pass. Two generations retain751
+stable generated files and86 unchanged owned files. Focused generator quality
+has zero findings; the pushed full gate has zero new findings. No baseline
+changed. Existing generated actor-view pointer warnings remain.
+Commands, run IDs, fixture corrections and remaining limits are in the
+[positive-book/Ghost checkpoint](HANDOFF_HISTORY.md#positive-book-effects-caster-identity-and-ghost-loading-2026-10-22).
+
+## Spell rendering and status follow-up
+
+- **All-spells Ashley** grants 50 battle spells / 71 learned actions, including
+  every rank, without changing normal inventory/equipment/resources or story
+  gates. Use the existing startup overrides and F8 for MP.
+- **#86:** the blank rank menu was independently reproduced. F02604's final
+  packet link still truncated the pointer to 24 bits; the registered copier
+  fix now uses `LegacyGpu_Handle`. Debug/Release real-input replays select
+  Flame Sphere actions 114-117 and charge 36/44/52/60 MP. Cancellation,
+  re-entry and returning to rank I are logged. Two actual book uses also
+  produce a readable LV1/LV2 selector with locked `--` placeholders.
+- **#85:** F01309 was an unported stub. Its owned C++ implementation follows
+  original `5A624.s` terrain, wall/corner clipping and scanline rendering,
+  using native interval storage and packet links. Before/after captures
+  show the missing and restored green height plane; ordinary Up inputs
+  change the selected elevation. Regression coverage includes guards,
+  native links, clipping, stepped terrain and 32 camera yaw angles.
+  GTE/packet compatibility remains; no frame-aligned reference-pixel parity
+  or EC retirement is claimed.
+- Ten production-mechanics tests verify real stat changes/restoration,
+  Curse policy, Numbness/Quicken speeds and AI steps, silence/paralysis action
+  restrictions, poison/regeneration cadence and HP changes, equipment
+  reduction and immunity. These are mechanics-unit evidence, not a claim
+  that every cure or offensive grimoire has passed live acceptance.
+- **#115:** the former Lab SLOW entry was actually the injured-leg flag,
+  immediately cleared for healthy legs. It was removed from F4; Numbness
+  remains the timed half-speed ailment. Main-game injury rules are unchanged.
+- **Keys/sigils/Clef:** correction to the earlier blocker: event isolation
+  removes door/script events, not ordinary `lockTriggers` or `containers`.
+  Clef now unlocks the real chest through production gameplay. Keys/sigils
+  still need matching-lock replays; no broad event-policy change is justified.
+- **Enemy Status weapon (#116):** the missing Minotaur-Zombie axe was
+  reproduced. Original `D_800F4590` aliases weapon pointer slots2/3, but the
+  generator had created independent one-element storage. F02465/F02637
+  now address canonical weapon visibility/fade fields. Debug shows Ashley's
+  blade; Release `1792668067114499-0` shows the enemy axe after switching,
+  cancellation and re-entry, with no error events. Release
+  `1792668480343311-0` also shows the Skeleton's weapon. Debug
+  `1792669671662902-0` and Release `1792669671662303-0` show source-equipped
+  Sackheim holding both sword and shield. Normal Fandango unequip/re-equip
+  replays also verify model removal and restoration in both builds.
+  Both full suites still pass
+  416 cases / 1,060,702 assertions; 21 copier tests and generator quality pass.
+- **F10/re-entry (#82):** additional Debug/Release five-encounter checks cover
+  living-enemy action-phase7 interruption, pause/single-step, profile A -> B
+  and fresh re-entry. All pass without reproducing the reported fault.
+  This is not a root-cause fix: keep #82 open for a failing configuration,
+  action phase and crash stack rather than weakening its acceptance criteria.
+
+The bounded rendering/fixture defects #85/#86/#115/#116 are now closed after
+acceptance, scoped publication and exact-revision CI. Commands, run IDs and limits are in the
+[follow-up checkpoint](HANDOFF_HISTORY.md#spell-rendering-and-status-mechanics-local-2026-10-22).
+
+Six-issue publication checks: both Debug/Release x64 MSBuild invocations pass;
+`test-native.cmd Debug` and `test-native.cmd Release` each pass 416 cases /
+1,060,702 assertions; the copier suite passes 21 tests. `quality-native.cmd`
+reports 195 existing findings and zero new findings, with no baseline changes.
+Logs: `build\quality\item-closeout-{debug,release}-{build,tests}.log` and
+`build\quality\item-closeout-quality.log`. Committed native source, generators,
+project files and affected ledgers exactly match the validated worktree.
+
+The three requested reference trees were reviewed read-only for particles and
+trails. Latest upstream PLG057 work is already represented by native templates,
+including separate five-/nine-sample state. Rood-boi's newer whole-request
+initialization fixes unused-byte determinism; it is not a demonstrated cure
+for scattered particles. No blanket reference import or #76 closure is justified.
+The post-#11 read-only refresh confirms ser-pounce/rood-reverse remains at
+`5163208b`, while the configured JEschete fork remains at `e0875ad8`.
+The verified-functions remote remains `94a9e90d`, ahead of local `39821e4f`
+by the same PLG057 merge. No checkout was fetched, switched or altered.
+F01930-F01948 already have native instances; G00645-G00647 retain distinct
+particle/nine-/five-sample counters. There is no newer shared trajectory
+implementation in these two upstreams.
+
+Rood-boi's remote advanced three commits beyond the untouched local
+`b2c3fede`, to `fdbb5e410351f91959a4a795275420e3016ac777`:
+menu labels/menu-camera controls, room-entry audio/credits wipe, and a
+cutscene replay/step/scrub/capture tool. The44-file comparison contains no
+new particle/trail integration algorithm. The replay tool records controller,
+camera and scanline-budget input alongside snapshots of guest RAM, scratch,
+I/O, overlays, native statics, stack, SPU and VRAM. It is useful reference
+workflow research, not a native drop-in subsystem or a tool run performed here.
+Its catalogue explicitly limits story-flag/event/door/movie coverage.
+
+The upstream room-entry sound repair `f2920efc` addresses the same
+never-enabled-LFO depth-slide family as #126 (zones15/0 and48/3). It substitutes
+an emulated RAM-base pointer for a null wave. Do not import that hardware
+bridge into the native mixer: `07953575` establishes the pending phase at
+initialization instead, with dedicated slide/enable tests. Those two room
+entries have not been separately replayed here, and neither audio fix proves
+particle placement parity.
+Fresh findings are recorded in
+[#76](https://github.com/JEschete/VS-NativePort/issues/76#issuecomment-6347104530).
+Revisions, concrete differences and next observation are in the
+[closeout/reference checkpoint](HANDOFF_HISTORY.md#item-follow-up-closeout-and-reference-review-local-2026-10-22).
+
+## Latest audio checkpoint
+
+The [menu/stream acceptance checkpoint](HANDOFF_HISTORY.md#native-audio-menu-streams-and-output-acceptance-local-2026-10-21)
+restores all five in-game menu sound wrappers, imports all **113 effect streams**,
+and connects their native voice lifecycle. Ending XA imports to a **443.52-second**
+FLAC and plays through an independent SDL source. Native-sized music snapshots
+and saved-voice conflict handling replace incomplete original-layout assumptions.
+The producer/cleanup audit is in [ASSET_PIPELINE.md](ASSET_PIPELINE.md#audio-producer-and-cleanup-audit-7).
+The prior 83-bank/noise/FM/reverb implementation remains in place.
+
+Final Debug/Release builds and full tests each pass **379 cases /
+991,535 assertions**. Release `[audio],[clock]` passes **72 cases / 163,008
+assertions**. The complete changed-header quality gate passes: **313 existing
+findings, zero new**, with no baseline/suppression changes. Before the final
+mixer repair, two source/project generations retained 966 identical files and
+two effect/XA imports retained 250 identical files; all 17 port-generator tests passed.
+
+Final real-input Release replays exercise menu open/change/select/leave/invalid,
+the opening scene without skipping the prologue, and Solid Shock's E044 stream.
+The latter binds at tick 515, starts both voices at 607, stops at 691, then reuses
+those voices for menu audio at 1143. Only one cast occurred; do not claim two.
+Its earlier float capture reached **+6.774167 dBFS**. A failing coherent-voice
+regression exposed the omitted final signed-PCM boundary. Dry+wet output now
+saturates to [-1, 32767/32768] after Mono fold-down, preserving the original
+stream pair gains and quiet additive mixes. The isolated final combat capture
+stays within those bounds with no NaNs/Infs. Saturation is not proof of perceptual
+parity or removal of intentional overload distortion.
+
+Post-commit Debug/Release builds and full suites pass the same totals above.
+Fresh Combat Lab run `1792633974201305-0` records the fixing revision and
+unrelated dirty state, repeats the E044 lifecycle above, and produces bounded
+PCM without NaNs/Infs or shortages after six pre-attachment requests.
+Current evidence: `build\quality\audio-published-*`, `audio-output-*`; audition WAVs:
+`build\quality\audio-listen-*`. Menu/opening native/reference excerpts use matched
+scene states rather than equal wall-clock offsets. Reference recordings are AAC,
+not lossless. No subjective owner-listening approval is claimed. Full credits
+navigation/listening, every effect stream, all-content parity and 5.1 are not
+verified. Primary PCM capture excludes independent movie/XA sources and physical
+device gaps. Gameplay stalls can still delay new events.
+
+The installed ending FLAC now also passes a production disc-queue/SDL-postmix
+regression in both configurations: audible stereo at the start and after a
+30-second sector seek, stop/re-entry, then natural EOF/drain from the last
+50 sectors. This is real-asset audio-path coverage, not full credits navigation.
+The test skips explicitly when the converted asset is absent. Latest test logs:
+`build\quality\audio-ending-*`.
+
+**#7 is closed; EC-02 remains open.** Publication used the original authorization
+for this ongoing task; the earlier request for a second approval was unnecessary.
+The issue records exact fixing-commit CI, real controller/postmix evidence and
+all unsupported limits. Closing functional output does not establish subjective
+parity or compatibility retirement. No custom comparison tool was added.
 
 ## Remaining limits
 
-- The user confirmed that lighting fixes resolved the doubled faces and restored title cards resolved
-  the apparent early staging/repeated entrance. Door motion and the full wyvern sequence remain unverified.
-  The companion rendering pass is enabled. Material overrides, full lighting/shadows, and broad
-  camera/pose parity remain incomplete. The model workspace is sequential and not reentrant.
-- The reported extended Guildenstern window pause was not reproduced as a hard stall in the accelerated
-  demo trace; the window scene advances and the demos finish. Normal-speed duration and the recording's
-  exact interval remain unverified. Do not shorten original script delays or claim this pause fixed.
-- `func_800B3A68` does not read its third argument in the original assembly either. The unused native
-  `nearOffset` parameter alone is not evidence of a missing clipping operation. Texture scrolling's
-  incoming-register comparison also exists in the original assembly; its intended semantics remain
-  unresolved and were not guessed during the facial fix.
-- The title/battle boundary uses C `setjmp`/`longjmp` after existing cleanup. It must not bypass live
-  C++ destructors. Earlier runs observed title re-entry, but this is not complete lifecycle ownership.
-- The two human encounters and D'tok are interactive prologue gameplay, not skippable demo segments.
-  Validation must drive actual controller actions and check combat/scene state. No enemy defeat,
-  HP edit, event-flag bypass, or combat completion was used or claimed in these replays. Higher-level
-  navigation, planning, and combat routines still include stubs. The live handoff reaches the unported
-  `RunActorAiUpdateStages`, `SetDirectMovement`, and `DrawSphereVolumeWireframe` paths; completing these
-  and validating actual target selection/action execution is still required for a playable encounter.
-- No full playthrough, collision/combat completion, save support, audio/timing parity, or final
-  asset-format conversion is claimed. VS Workshop informs asset layouts but does not execute ETM
-  facial overlays or establish runtime visual parity.
+- Actual Options consumers remain under #39; menu visibility is not evidence
+  of combat/audio/puzzle behavior.
+- Open owner findings include Score submenu crashes (#65), particle placement
+  (#76), eight-Minotaur-Zombie termination (#78), suspected multi-part targeting
+  (#80), selected-body-part glow (#81), equipment behavior (#14) and broader
+  Combat Lab coverage (#16). Their issues own acceptance and next observations.
+- Hellhound breath #75, Bat terrain #77 and post-defeat restart #79 are closed;
+  their historical open/local-only wording is superseded by issue evidence.
+- Full-content/reference parity, native save/load and compatibility retirement
+  are not established by the completed bounded gameplay fixes.
 
-## Diagnostics
+## Sources of truth and separate gates
 
-- `--capture <dir> --at <ticks> --capture-pages` also writes a 1024-by-512 page-space image and raw
-  little-endian 16-bit words for each presented capture. `tools/test/decode_pages.ps1` decodes a selected
-  4-bit, 8-bit, or direct-color region with its runtime CLUT. Coordinates X/Y are page-space words/rows;
-  Width/Height are decoded pixels.
-- Optional `texture` and `event-step` debug channels report facial copy selections and event commands.
-  Frame presentation may happen on alternating ticks; inspect adjacent render ticks when correlating logs.
-- Portable DuckStation captures were collected under `build/ds-render-parity-20261018`; the installed
-  emulator and BIOS were not modified. These do not constitute a complete matched-sequence comparison.
+| Question | Authoritative record |
+| --- | --- |
+| What is next? | #4 and its existing child issues |
+| Architecture and owner decisions? | [Native source port plan](NATIVE_SOURCE_PORT_PLAN.md) |
+| Who maintains a migrated implementation? | [Ownership registry](../tools/port/owned.csv); [copy manifest](../tools/port/copy_manifest.json) protects generated output |
+| What do the ledgers currently record? | [Reconciled summary](ledgers/SUMMARY.md), with raw status limitations stated explicitly |
+| Compilation and source quality? | Revision/configuration-specific build and quality results; [QUALITY.md](QUALITY.md) |
+| Which behavior was exercised? | Issue acceptance evidence and [historical checkpoints](HANDOFF_HISTORY.md), including exact inputs and limits |
+| Is a compatibility bridge retired? | [EC audit](EMULATION_COMPATIBILITY_AUDIT.md) and #18; not ownership, a filename change or a passing build |
 
-## Historical checkpoint
+## Local working state
 
-The notes below describe the earlier native-layout/dispatch follow-up based on `218a9b5f`.
-Read with `.github/copilot-instructions.md` (rules, machine paths),
-[BUILDING.md](BUILDING.md), [PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §2/§5/§9 and
-[NATIVE_SOURCE_PORT_PLAN.md](NATIVE_SOURCE_PORT_PLAN.md) §6.8.1.
+Use the retained `.venv-3` environment; see [BUILDING.md](BUILDING.md#12-only-for-working-on-the-port-itself-not-needed-to-play).
+`resources\rood-reverse-noprompt` is an ignored, local-only reference checkout,
+not a parent-repository submodule. Its files, own Git history and edits are retained.
 
-## Rules (owner)
-
-- Never edit generated files. Fixes go into `tools\port\copy_to_native.py` or `tools\port\copy_fixups.py`; hand
-  ports go through `python tools\port\own.py <id> --to Native\<Project>\src\<Area>\<File>.c`.
-- Never commit a BIOS. x64 layouts: **option B** (per-site fixes, 64-bit pointer members kept).
-- Actor/sequence/room work stays on the shared path (plan §6.8.1): Content `ActorAssets.c` (SHP/SEQ/WEP loader),
-  `Actors\ActorLoading.c`/`ActorState` (actor handler), `Actors\Animation.c` (sequence handler). Every fix is a
-  copy-tool rule on those shared functions, so it applies to every actor.
-
-## Done
-
-- 1b title slice: logos, intro movie, title, menu, load screen (CAUTION label fixed), controller input.
-- Tools and `C:\Tools` in the solution (Tools folder); DuckStation/BIOS paths logged; test scripts in `tools\test\`.
-- Attract path (commit `d9664700`): on-disc offsets via `VS_ONDISC`, `SIG_RETYPE`, `TYPE_FIXES`, actor record and
-  allocation fixes, module pointer tables resolve, debug aids (`Core_Tracef`, `Platform::LogCallStack`,
-  `Platform_WatchWrites`, null-call stack reporting), `--speed`.
-- After it: `Render::QueueSprite`, `QueueSpriteWithTexturePage`, `QueueDefaultSprite`, `LoadFrameViewMatrix`
-  hand-ported from inline assembly (owned, `Native\Engine\src\Render\Sprites.c`). This fixed the
-  `Battle_DrawBattleHud` crash (a stub returned null).
-- Toggleable logging: `--log-level trace|debug|info|warn|error|off`, `--log-channels ai,actors,...`, and logical
-  tick stamps. C diagnostics use `Core_Debugf`; existing `Core_Tracef` is trace-level. See BUILDING §6.
-- `Core_Memory_ClearAlignedWords` (F01758 / BATTLE `func_800E4288`, `7B5DC.s:344-367`) is now an owned port in
-  `Engine\src\Core\Memory\WordCopy.c`, with assembly provenance and bounds/full-size tests. Unlike SLUS's
-  `ZeroAlignedWords`, it does not truncate the size to 16 bits. Nonpositive sizes are a documented native no-op.
-- Shared actor/AI views: `tools\port\native_views.py` exposes native pointer slots hidden in PS1 padding,
-  including the canonical AI state's position/tile sources and decision callback. Corrected the linked-actor
-  byte's MSVC bitfield storage, model-pointer view, and two misleadingly named view families. File layouts are
-  unchanged. `check_native_views.py` checks 532 selected non-padding field offsets: **0 mismatches**.
-- AI creation (F01818): allocates/clears the full `Battle_Ai_ActorAiState` (1264 native bytes, not the partial
-  creation view), uses `RoomAiState.specialActors`, and calls the real tagged-bone signature with `SVECTOR`.
-  G00579 has **16 slots** in both definition and header: the next BSS symbol is `tileFlagMap` at 0x800F58B8,
-  0x40 bytes after the table at 0x800F5878 (`7E05C.s:541-575`). `0x10` is a linked-actor sentinel, not a slot.
-  The copier now applies reviewed fixups to globals synthesized from extern declarations too.
-- Effect timelines (F01557/F01589): allocate native-sized tracks and index `timeline->tracks[i]`, instead of
-  assuming 16-byte PS1 records. Native stride is 24 bytes; the old sound-track crash at tick 5483 is cleared.
-- Event dispatch: all 179 distinct normal/skip handlers (182 catalog rows), tables and interpreter result use `intptr_t`. This includes
-  saved-address returns and control-code-only handlers; no incompatible function-pointer casts were added.
-  The skip table allocation/copy uses its complete native size (256 pointers), not 0x400 bytes. Actual branches
-  at tick 5485 now retain their full native addresses. Debug channels `effects` and `event` log these boundaries.
-- Layout/dispatch baseline: Debug and Release each passed **19 tests / 30141 assertions**. Tests cover guarded full AI
-  storage and cross-view pointers, two-track timeline indexing, normal/skip branch dispatch, saved returns,
-  conditional/backward jumps and thread starts. Release build log: `build\ai-release-build.log`.
-- `check_event_dispatch.py` verifies the complete normal/skip handler set and compatible argument/return types
-  against the extracted BATTLE.PRG and generated skip initializer: 179 distinct signatures, zero errors.
-- Final 1800-tick scripted title/menu run with Down at 1200 and Circle at 1300 exits 0 and produced captures at
-  1500/1700 (`build\ai-final-title`); log: `build\ai-final-title.log` (git-ignored).
-- CLI smoke checks reject invalid/missing logging values with exit 1; `off` leaves an empty log and still
-  captures tick 30; `trace`/`frame` emits begin/end records through tick 30 without info-channel leakage.
-- GIM tiles (F01393 / BATTLE `func_800CBBCC`, `5BF94.c:4056`): copy-tool fixes replace the computed PS1 scratch
-  address with two native 256-entry coordinate arrays (byte dimensions plus the final boundary), reject grids
-  exceeding the 250-entry tile payload, and use `LegacyGpu_Handle` for scaled-quad ordering links. Fixed-point
-  coordinate formulas and the shared tile/fade API are unchanged. No generated source was patched by hand.
-- GIM follow-up: Debug and Release builds and **25 tests / 30178 assertions** pass. Six new tests exercise
-  coordinate rounding, clipping, dimension/tile-table bounds, shared-scratch isolation, packet-buffer guards,
-  native links, framebuffer fades and wipe/crossfade fast paths. Regeneration is stable; native-view, layout and
-  event-dispatch checks pass. Release build log: `build\gim-release-build.log`.
-- Fresh 1800-tick title/menu regression exits 0 with captures at 1500/1700 in
-  `build\gim-title-20261018-011630`; log: `build\gim-title-20261018-011630.log`.
-
-## Historical stopping point (superseded)
-
-Run: `tools\test\run_native.ps1 -NoCopy -SkipIntro -Speed 8 -Frames 8000 -At '1500,5400,5500,7900' -LogLevel debug -LogChannels 'ai,actors,effects,event,boot,input,content,render'`
-(the demo starts about tick 5300).
-Latest log: `build\gim-attract-20261018-011630.log`; captures at 1500/5400/5500 in
-`build\gim-attract-20261018-011630`. The former tick-5487 GIM fault is cleared, with no GIM grid-rejection
-diagnostics in this run. The tick-7900 capture is still not reached.
-Ashley initialization returns at tick 5363; scripted actors 2/3/4 report matching native/view IDs at
-5371/5381/5391. They now take the intended no-AI path according to their actor flags. Loads ZONE020.ZND,
-MAP213.MPD, HEADQUAT.GIM and E229.P; playback now advances to **tick 5751**:
-
-```text
-access violation reading 0xFFFFFFFFFFFFFFFF
-#0 Actors_FindActorAnimationHeader Game\src\Actors\Animation.c:1247
-#1 Actors_PlayActorAnimation       Game\src\Actors\Animation.c:759
-#2 Event_ScriptPlayActorAnimation  Game\src\Event\ScriptActors.c:116
-#3 Event_ExecuteScriptThread       Game\src\Event\ScriptVm.c:964
-```
-
-**Next investigation:** the shared actor/SEQ animation-header lookup. The failing read is
-`VS_ONDISC(p, animationMap, u_char *)[idx]`; trace the selected sequence pointer, on-disc offset and index before
-choosing a fix. This later animation failure was not repaired as part of the GIM work.
-
-The runner correctly rejects this run with exit `-1073741819` (0xC0000005); the requested tick-7900 capture is
-not reached. Wrappers that catch this expected exception may exit 0: that is **not** gameplay success.
-The earlier actor-ID, effect-stride, event-return and GIM scratch failures are cleared; **the attract run still fails**.
-
-Validation limits: the 532-field checker audits selected offsets, not all widths/strides or every runtime view.
-The model-family slot list covers only the reviewed early model/sequence region, not the entire ActorRecord.
-`layout_check.py` reports 519 checked types, zero pointer-free mismatches, 80 expected pointer-bearing layout
-differences and zero parse errors. No full AI simulation, visual-fidelity comparison or real-time A/V validation
-is claimed. AI room/relations/locomotion prerequisites remain stubs; downstream planning workspace offsets
-remain unreviewed. The initialization log's height 65397 is the creation view's unsigned representation of -139,
-not proof of correct collision behavior. No further assembly functions were ported in this layout slice.
-
-## Stubs reached at the historical checkpoint
-
-From the log (`[warn] [tick=N] unported:`). Assembly lives in `resources\rood-reverseWin\src\...` (`.s` files) or the
-`INCLUDE_ASM` splat output under `resources\rood-reverseWin\build\splat-artifacts\`.
-
-| Stub | Catalog | Assembly | Size |
-| --- | --- | --- | --- |
-| `Core::ElapsedFrameCounterTicks` | SLUS | root counter (hardware): modernize to a frame timer; returns 0 now = always within AI budget | tiny |
-| `Core::Math::MultiplyMatrixIntoRight` | F03415 | `SLUS_010.40\32154.s` | small (GTE) |
-| `Field::SampleCollisionHeightCode` | F00772 | `BATTLE\BATTLE.PRG\2EA3C.s` | small |
-| `Render::SetRoomPolygonNearClip` | F00753 | `2EA3C.s` | small |
-| `Render::BuildRoomGeometryViewMatrix` | F00759 | `2EA3C.s` | medium |
-| `Render::DrawSkyDome` | F00757 | `2EA3C.s` | medium |
-| `Battle::Ai::InitializeRoomAiMap` | F01838 | `BATTLE\BATTLE.PRG\7E05C.s` | medium |
-| `Battle::Ai::InitializeActorAiExtensionHook` | F01835 | `7E05C.s` | small |
-| `Battle::Ai::UpdateActorNavigationOverrides` | — | `Battle\Ai\Navigation.c:856` stub | ? |
-| `Actors::DrawActorModel` | F01023 | `func_800B28A8.s` (INCLUDE_ASM) | ~1150 lines |
-
-Room/actor geometry was not implemented at that checkpoint. The current shared normal-material path and its
-remaining limitations are described above. Raw offsets still in code reached later are listed in
-PORTING_WATCHLIST §2 (Option B).
-
-## Reference
-
-- DuckStation reference of the attract scene: `tools\test\duckstation_capture.ps1` (demo at about 100 s, VKP
-  Headquarters / Valnain); earlier captures in `build\ds_attract`.
-- Regression before each commit:
-  - Debug and Release builds:
-    `& 'C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe' VagrantStory.Native.sln /m /nologo /v:minimal /p:Configuration=<Debug|Release> /p:Platform=x64`
-  - Tests: `test-native.cmd Debug`
-  - Title, menu and load screen: `tools\test\run_native.ps1 -NoCopy -SkipIntro -Frames 1600 -At 1590 -Press '1200:Down,1300:Circle'`
-- After new files: `python tools\scaffold\gen_solution.py`. After copy-tool changes: `python tools\port\copy_to_native.py --report`.
-- Layout gates: `python tools\port\check_native_views.py`, `python tools\port\layout_check.py`, and
-  `python tools\port\check_event_dispatch.py` (requires the extracted US BATTLE.PRG).
-  Visual Studio currently does not discover this Catch2 suite; run `build\Debug\VS.Tests.exe` and
-  `build\Release\VS.Tests.exe` (or `test-native.cmd <configuration>`).
-
-  ### AI reaction-delay reset (F01791, #6; 2026-10-21)
-
-  `Battle_Ai_ResetActorAiReactionDelay` is now an owned native implementation, traced
-  to `func_800E4C64` in `BATTLE.PRG/7BDD4.s:571`. It ignores Ashley (actor 0) and
-  missing AI states, and resets each present non-player state's minimum action delay
-  to the source value of 30 frames. Out-of-range actor IDs are logged and rejected.
-  The regression covers the player slot, all non-player slots, and a missing state.
-
-  Validation on the current worktree: `test-native.cmd Debug` and
-  `test-native.cmd Release` each pass 307 test cases / 828528 assertions.
-  `quality-native.cmd --changed --tidy` exits successfully with 0 new findings
-  (304 total baseline findings; format, cpplint, Ruff and clone checks each report
-  zero findings). A repeat `python tools\scaffold\gen_solution.py` leaves generated
-  project files byte-identical. `git diff --check` passes on the implementation's
-  scoped files. The worktree also contains unrelated edits to
-  `.github/copilot-instructions.md` and the `resources` repository pointers; those
-  were preserved. #6 remains open: this slice does not establish flight, defeat,
-  reward, or the broader gameplay acceptance criteria.
+Existing build outputs, captures, logs, presets and extracted/user-owned data
+remain in place. Follow the [retention rules](BUILDING.md#46-local-state-and-evidence-retention):
+rebuildable objects are not the same as replay evidence or crash symbols.

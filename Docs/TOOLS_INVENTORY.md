@@ -17,6 +17,12 @@ The backbone sources of truth are, in priority order:
 3. `resources\DataCrystal\` — file format and RAM documentation.
 4. `C:\Tools\RE_Docs\` — prior research notes (`VS_NATIVEPORT_CONTEXT.md`, `Native_Ports\VAGRANT_STORY_TOOLING.md`, `SDL3.md`, `TRACY.md`, `RENDERDOC.md`, `DW4_TOOLING.md`).
 
+`resources\rood-reverse-noprompt` is an additional **REFERENCE**, kept as an
+ignored local-only checkout, not a submodule of this repository. Its own Git
+metadata, history and local changes are retained. Existing audit citations pin
+the revision they inspected; removing parent registration does not update those
+snapshots or authorize reference-code edits.
+
 ---
 
 ## 1. Repositories downloaded in this session (`tools\PSX\`)

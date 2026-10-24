@@ -22,10 +22,13 @@ decompilation provenance when migrating code; naming changes require caller revi
 
 ## Setup
 
-Use the project's Python environment and Node.js 22 or newer:
+Use the retained `.venv-3` Python environment and Node.js 22 or newer.
+Create the environment only on a fresh clone; see [BUILDING.md](BUILDING.md).
+Activate it in each new shell before running Python-based commands:
 
 ```powershell
-python -m pip install -r tools/requirements.txt
+.\.venv-3\Scripts\Activate.ps1
+python -m pip install -r tools\requirements.txt
 npm ci --prefix tools/lint --ignore-scripts --no-audit --no-fund
 ```
 

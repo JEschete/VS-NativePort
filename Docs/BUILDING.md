@@ -4,7 +4,10 @@ This file is the single source of truth for getting from a fresh clone to a play
 **Keep it current:** any change to prerequisites, scripts, dependencies, output layout or the extraction
 step must update this file in the same commit (plan D19).
 
-> **Current state (shared rendering slice).** Debug and Release build and pass the full test suite.
+> **Recorded checkpoint, not a fresh build claim.** See [HANDOFF.md](HANDOFF.md)
+> for the source revision, uncommitted work, validation scope and current priority.
+> Debug/Release results and exact replay procedures are retained in
+> [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md).
 > After the extraction step (§5), `VS.Desktop`
 > runs the original boot and title code: NOW LOADING, the publisher and developer logos, the intro movie with the
 > opening music, the title screen and its menu (New Game / Continue / Vibration / Sound), driven by gamepad or
@@ -42,11 +45,30 @@ Tested configuration: VS 2026 Community 18.10, MSVC 14.51, Windows SDK 10.0.2800
 
 | Requirement | Used by |
 |---|---|
-| Python 3.10+ and `pip install -r tools\requirements.txt` | Port tools and pinned Google-style/static-analysis checks; see [QUALITY.md](QUALITY.md) |
+| Python 3.10+ with the `.venv-3` environment and `python -m pip install -r tools\requirements.txt` | Port tools and pinned Google-style/static-analysis checks; see [QUALITY.md](QUALITY.md) |
 | Node.js 22+ and `npm ci --prefix tools/lint --ignore-scripts` | Pinned first-party clone detection |
 | `resources\rood-reverseWin` (in the repo) | Read-only reference that those tools parse. The build never uses it. |
 | Optional: `git submodule update --init` | Fetches `resources\rood-reverse` (upstream decomp) and the Ghidra PSX loader. Neither is needed to build. |
 | Optional: external reference tools | See [TOOLS_INVENTORY.md](TOOLS_INVENTORY.md) |
+
+The retained environment on this development machine is `.venv-3` (Python
+3.14.3). Reuse it rather than creating `.venv`, `.venv-1` or `.venv-2`:
+
+```powershell
+.\.venv-3\Scripts\Activate.ps1
+python --version
+```
+
+Activation affects only that shell. Without activation, invoke
+`.\.venv-3\Scripts\python.exe` explicitly for Python tooling. On a fresh clone
+only, create it with `python -m venv .venv-3`, then install the documented
+requirements. Select the same interpreter in VS Code; do not recreate it if
+it already exists.
+
+`resources\rood-reverse-noprompt` is an optional, ignored local-only reference
+checkout. It is not a submodule and is not fetched by the command above; its
+own Git history and local edits are retained. Neither it nor the registered
+references are runtime dependencies.
 
 ---
 
@@ -136,6 +158,30 @@ title/prologue. Combat uses the shared production code. See
 verified scenarios and current same-zone/loadout/coverage limits. This is not a
 claim that all enemies, items, spells or abilities are complete.
 
+### 4.6 Local state and evidence retention
+
+The existing `build\` tree contains both reproducible outputs and retained
+evidence. It is not a disposable directory as a whole. This cleanup leaves
+its contents and existing evidence paths unchanged.
+
+| Local contents | Retention rule |
+| --- | --- |
+| `build\Debug\obj`, `build\Release\obj`, compiler intermediates | Rebuildable when no build/debug/run is using them; never clean an active configuration. |
+| Executables, DLLs and PDBs under `build\<Config>` | Rebuildable, but retain the matching binary/symbol set for unresolved crashes or evidence that cannot be reproduced from its recorded revision and dirty state. |
+| `build\port` and module-data/index outputs | Regenerable tooling state, not an excuse to regenerate over conflicting edits; preserve inputs and finish active generator work first. |
+| `build\quality`, named replay/capture directories and reference captures | Retain cited logs, manifests, metrics, PCM/images and before/after failure evidence with revision, configuration and inputs. A passing run does not make earlier failure evidence disposable. |
+| `build\<Config>\combat-lab` | Retain per-run logs and user presets, including `last-scenario.json`; these are not compiler intermediates. |
+| `build\duckstation` | Local portable reference setup, settings and possible captures/state; do not confuse it with a throwaway compiler cache or modify the installed emulator. |
+| `Native\data`, `disks`, `SLUS-01040`, local reference checkouts and mods | User-owned/imported data or references; not part of build-output cleanup. |
+| `vcpkg_installed` and package caches | Restorable dependency outputs, but leave them intact during active audio/build work. |
+
+Use a dedicated `build\scratch\<experiment>` path for future explicitly
+disposable runs, separate from named evidence runs. Before removing an older
+run, check its citations in [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md),
+[COMBAT_LAB.md](COMBAT_LAB.md) and the relevant issue. Preserve or deliberately
+archive referenced evidence first; unknown provenance means retain it.
+Do not commit or attach disc-derived captures, audio, dumps or BIOS files.
+
 ---
 
 ## 5. Convert the game data (asset extraction)
@@ -158,6 +204,8 @@ extract-native-assets.cmd --disc D:\path\to\SLUS-01040.cue --ffmpeg C:\path\to\f
 build\Debug\VS.Extract.exe extract disks\SLUS-01040.cue Native\data
 build\Debug\VS.Extract.exe extract disks\SLUS-01040.cue Native\data --ffmpeg C:\path\to\ffmpeg.exe
 build\Debug\VS.Extract.exe list    disks\SLUS-01040.cue          :: diagnostic: the disc's files
+build\Debug\VS.Extract.exe audio   Native\data\disc Native\data
+build\Debug\VS.Extract.exe streams disks\SLUS-01040.cue Native\data
 ```
 
 - Writes `Native\data\disc\<disc path>` for every file and `Native\data\files.tsv` (sector, size, form, path).
@@ -165,6 +213,23 @@ build\Debug\VS.Extract.exe list    disks\SLUS-01040.cue          :: diagnostic: 
   FLAC, form `mkv`). Effect and ending audio are imported separately under `audio\streams`;
   the ending's legacy sector-data row remains `stream`, not a raw readable disc file.
 - Takes about a minute. Run it again after an extractor change; the converters replace one `raw` form at a time.
+- The separate `audio` command imports all 83 nonempty wave banks into versioned JSON, mono PCM16 WAV
+  and SFZ under `Native\data\audio\banks`. Use it after the ordinary extraction, including for an existing
+  data directory. WAVE0069 supplies MUSIC016, WAVE0091 supplies MUSIC110, and WAVE0011 supplies MUSIC054
+  on entry to the dungeon; menu banks alone do not supply these music tracks.
+  Missing banks are reported, not replaced with fabricated audio.
+  Optional numbers are **wave-file IDs**, not instrument IDs. The older WAVE0032 articulation layout,
+  exact-end records and erased final DMA padding are supported; unavailable slots are logged explicitly.
+  Reimport after the fidelity update so SFZ pitch-bend range/smoothing matches native FM rendering.
+  Successful import is not evidence that every music track has been listened to.
+- The `streams` command updates existing installations without reconverting the movie. It imports
+  113 effect streams as WAV/SFZ plus metadata, and the ending XA as FLAC. It requires the original
+  raw-sector disc for XA and FFmpeg on PATH (or `--ffmpeg <path>`). Full `extract` also runs this step.
+  The XA importer preserves the original 443.52-second cadence rather than concatenating duplicate
+  sectors. Missing or invalid native stream assets are reported at playback.
+- sfizz 1.2.3 is pinned in `tools\vcpkg\ports\sfizz`. vcpkg builds its DLL with MSVC; native projects retain
+  ClangCL and consume the C API. The overlay statically includes its bundled WavPack dependency.
+  No separate sfizz checkout or standalone dependency-build experiment is required.
 
 **Planned ⏭:** `extract-native-assets.cmd` wrapping this, with every file in its modern format (JSON, glTF, PNG,
 WAV, FLAC) and `--force` / incremental runs.
@@ -191,6 +256,12 @@ build\Release\VS.Desktop.exe
 
 Logs go to the console and `build\<Config>\vs-native.log` (truncated each run, including an empty log with `off`).
 Each line includes `[tick=N]`: zero is startup, otherwise the logical simulation tick, not elapsed wall time.
+For a local native-mix recording, set `VS_AUDIO_CAPTURE` to an absolute file path before launching.
+The file is raw **48,000 Hz, two-channel f32le** PCM submitted to SDL; it excludes the independently bound
+movie and XA sources. For example, `ffmpeg -f f32le -ar 48000 -ac 2 -i capture.f32 capture.wav` converts it for listening.
+Remove the environment variable afterward. Captures and disc-derived assets must remain uncommitted.
+The current output is stereo or dual-mono, not 5.1. Native noise, preceding-voice FM and the original
+reverb presets are implemented; bit-exact console output and full-content listening parity remain unverified.
 For AI diagnosis use `--log-level debug --log-channels ai,actors,boot,input,content`.
 `--log-level trace --log-channels frame,trace` enables per-tick begin/end markers and legacy C trace sites;
 this is intentionally verbose. Disabled messages skip formatting. C ports can use `Core_Debugf(channel, format, ...)`;
@@ -205,31 +276,12 @@ intro movie**, so test runs press it: `--press 1000:Start` puts the menu up by t
 `tools\test\duckstation_capture.ps1` makes the matching DuckStation reference (see `.github\copilot-instructions.md`
 for the emulator and BIOS locations).
 
-build\Debug\VS.Extract.exe audio   Native\data\disc Native\data
-build\Debug\VS.Extract.exe streams disks\SLUS-01040.cue Native\data
 The game reads only `Native\data\` (⏭ plus `Native\Content\patches\` and `mods\`). The disc is optional at run
 time; if it is found, its label is logged. If `Native\data\` is missing, the game stops with a message that says to
 run the extractor.
 
 ### Controls (today)
 
-- The separate `audio` command imports all 83 nonempty wave banks into versioned JSON, mono PCM16 WAV
-  and SFZ under `Native\data\audio\banks`. Use it after the ordinary extraction, including for an existing
-  data directory. WAVE0069 supplies MUSIC016, WAVE0091 supplies MUSIC110, and WAVE0011 supplies MUSIC054
-  on entry to the dungeon; menu banks alone do not supply these music tracks.
-  Missing banks are reported, not replaced with fabricated audio.
-  Optional numbers are **wave-file IDs**, not instrument IDs. The older WAVE0032 articulation layout,
-  exact-end records and erased final DMA padding are supported; unavailable slots are logged explicitly.
-  Reimport after the fidelity update so SFZ pitch-bend range/smoothing matches native FM rendering.
-  Successful import is not evidence that every music track has been listened to.
-- The `streams` command updates existing installations without reconverting the movie. It imports
-  113 effect streams as WAV/SFZ plus metadata, and the ending XA as FLAC. It requires the original
-  raw-sector disc for XA and FFmpeg on PATH (or `--ffmpeg <path>`). Full `extract` also runs this step.
-  The XA importer preserves the original 443.52-second cadence rather than concatenating duplicate
-  sectors. Missing or invalid native stream assets are reported at playback.
-- sfizz 1.2.3 is pinned in `tools\vcpkg\ports\sfizz`. vcpkg builds its DLL with MSVC; native projects retain
-  ClangCL and consume the C API. The overlay statically includes its bundled WavPack dependency.
-  No separate sfizz checkout or standalone dependency-build experiment is required.
 | Input | Notes |
 |---|---|
 | Any SDL3-supported gamepad | Mapped to the PlayStation pad layout (Cross/Circle/…). |
@@ -243,6 +295,22 @@ run the extractor.
 test-native.cmd             :: builds Debug, then runs VS.Tests.exe
 test-native.cmd Release
 test-native.cmd Debug "[core]"   :: any Catch2 arguments after the config ([core], [input], [content], [disc], ...)
+test-native.cmd Release "[audio],[clock]"
+```
+
+Audio tests include actual SDL postmix, stream/XA lifecycle and native music-state regressions.
+The `[audio][xa-playback][disc]` case also exercises the installed
+`Native\data\audio\streams\xa\ENDING\ENDING.XA.flac` through production SDL output:
+initial playback, a 30-second sector seek, stop/re-entry and natural EOF/drain.
+It skips explicitly if the converted asset is absent; synthetic XA tests still run.
+This is audio-path coverage, not a complete ending-credit navigation replay.
+`Native\Tests\data\audio` contains original synthetic FLAC fixtures, not disc audio. Tests locate
+them relative to the standard `build\<Config>` executable directory. To reproduce their PCM
+and lossless encoding with the existing FFmpeg installation (use fresh destination files):
+
+```powershell
+ffmpeg -hide_banner -loglevel error -n -f lavfi -i 'sine=frequency=400:sample_rate=37800:duration=3' -af 'volume=3,pan=stereo|c0=c0|c1=-0.5*c0' -sample_fmt s16 -c:a flac -compression_level 12 -fflags +bitexact -flags:a +bitexact -map_metadata -1 Native\Tests\data\audio\stereo-tone.flac
+ffmpeg -hide_banner -loglevel error -n -f lavfi -i 'sine=frequency=400:sample_rate=37800:duration=0.2' -af 'volume=3' -sample_fmt s16 -c:a flac -compression_level 12 -fflags +bitexact -flags:a +bitexact -map_metadata -1 Native\Tests\data\audio\mono-tone.flac
 ```
 
 ⏭ The round-trip tests for the extractor are tagged `[extract]` and need the disc (ASSET_PIPELINE §7).
@@ -256,12 +324,6 @@ These scripts regenerate committed files. They are not part of the build.
 | Command | What it does |
 |---|---|
 | `python tools\ledger\build_ledgers.py` | Rebuild `Docs\ledgers\` from the decomp (it keeps the status columns you filled in) |
-For a local native-mix recording, set `VS_AUDIO_CAPTURE` to an absolute file path before launching.
-The file is raw **48,000 Hz, two-channel f32le** PCM submitted to SDL; it excludes the independently bound
-movie and XA sources. For example, `ffmpeg -f f32le -ar 48000 -ac 2 -i capture.f32 capture.wav` converts it for listening.
-Remove the environment variable afterward. Captures and disc-derived assets must remain uncommitted.
-The current output is stereo or dual-mono, not 5.1. Native noise, preceding-voice FM and the original
-reverb presets are implemented; bit-exact console output and full-content listening parity remain unverified.
 | `python tools\port\decomp_index.py` | libclang index of the decomp → `build\port\index.json` |
 | `python tools\port\data_inventory.py` | Global data inventory → `build\port\data.json` |
 | `python tools\port\gen_decomp_headers.py [--data Native\data]` | Generated headers that `decomp_index.py` and the copy need (disc layout; string-table offsets read from the extracted data) |
@@ -295,21 +357,5 @@ earlier, abandoned emulator-style port (VS 2022/CMake, `vagrant-native.exe`). Th
 ```cmd
 rmdir /s /q build             :: binaries, intermediates, build\port tool output
 rmdir /s /q vcpkg_installed   :: forces the dependencies to be restored again
-test-native.cmd Release "[audio],[clock]"
-```
-
-Audio tests include actual SDL postmix, stream/XA lifecycle and native music-state regressions.
-The `[audio][xa-playback][disc]` case also exercises the installed
-`Native\data\audio\streams\xa\ENDING\ENDING.XA.flac` through production SDL output:
-initial playback, a 30-second sector seek, stop/re-entry and natural EOF/drain.
-It skips explicitly if the converted asset is absent; synthetic XA tests still run.
-This is audio-path coverage, not a complete ending-credit navigation replay.
-`Native\Tests\data\audio` contains original synthetic FLAC fixtures, not disc audio. Tests locate
-them relative to the standard `build\<Config>` executable directory. To reproduce their PCM
-and lossless encoding with the existing FFmpeg installation (use fresh destination files):
-
-```powershell
-ffmpeg -hide_banner -loglevel error -n -f lavfi -i 'sine=frequency=400:sample_rate=37800:duration=3' -af 'volume=3,pan=stereo|c0=c0|c1=-0.5*c0' -sample_fmt s16 -c:a flac -compression_level 12 -fflags +bitexact -flags:a +bitexact -map_metadata -1 Native\Tests\data\audio\stereo-tone.flac
-ffmpeg -hide_banner -loglevel error -n -f lavfi -i 'sine=frequency=400:sample_rate=37800:duration=0.2' -af 'volume=3' -sample_fmt s16 -c:a flac -compression_level 12 -fflags +bitexact -flags:a +bitexact -map_metadata -1 Native\Tests\data\audio\mono-tone.flac
 rmdir /s /q Native\data       :: extracted game data (re-run the extractor)
 ```

@@ -19,6 +19,7 @@ Improve the native port's presentation, controls, reliability, performance, and 
 9. **Reduce loading stalls.** Optimize asset loading and room transitions without cutting, skipping, or shortening story scenes or gameplay animations.
 10. **Scale performance to modest PCs.** Provide reliable performance on lower-end hardware through efficient rendering and clear, non-destructive graphics options.
 11. **Resize and display cleanly.** Support windowed, borderless, and fullscreen play, with correct aspect ratio and UI layout when the window or display changes.
+Extra. Look at adding options for backend renderer, such as Vulkan, DirectX, or OpenGL, to improve performance and compatibility across different hardware configurations. Look into raytraced lighting for enhanced visual fidelity without altering the original assets. Look into filters that enhance image quality, such as anti-aliasing, bloom, or color grading, while preserving the original artistic intent.
 
 ### Controls and input
 
