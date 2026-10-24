@@ -17,6 +17,23 @@ build-native.cmd Release
 build\Release\VS.Desktop.exe
 ```
 
+## Credits
+
+This project builds on the work of:
+
+1. **[ser-pounce/rood-reverse](https://github.com/ser-pounce/rood-reverse)** - the foundational
+   *Vagrant Story* decompilation project. Special thanks to its top three contributors,
+   [ser-pounce](https://github.com/ser-pounce), [lil-sassy](https://github.com/lil-sassy) and
+   [noprompt](https://github.com/noprompt), by
+   [GitHub contributor commit count](https://github.com/ser-pounce/rood-reverse/graphs/contributors)
+   as of 2026-10-24, and to everyone who has contributed to the decompilation.
+2. **[noprompt/rood-reverse](https://github.com/noprompt/rood-reverse)** - additional decompilation
+   and verified-function work incorporated into our source reference.
+3. **[noprompt/rood-boi](https://github.com/noprompt/rood-boi)** - native-port implementation
+   references, including the CC0 counterparts adapted by our native systems.
+
+See [THIRD_PARTY.md](THIRD_PARTY.md) for implementation-specific provenance and licensing.
+
 ## License
 
 Except where otherwise noted, the project's original contributions are free software: you can redistribute
