@@ -9,6 +9,21 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #171 bounded jump-entry checkpoint: F04178/F04179/F01024 are now owned in
+  `Actors/MotionRequests.cpp`, following `4A0A8.c:340-410`. Command11/12,
+  airborne14 and navigation18 retain original flag/branch/animation ordering,
+  four packed target bytes, alias behavior and signed-low16 facing; all use
+  the existing shared arc consumer. The `actors.jump` channel records requested
+  targets and resulting phase/destination/velocity/countdown without changing
+  route permissions. Entry/real-arc controls pass actual linked Debug/Release.
+  This is **not a resolution of #171**: autonomous wolf red1792880185015402-0
+  stays high; patched1792880646195190-0 removes the stub and makes arcs but
+  still never descends to ground. New diagnostic source was not in that
+  replay and needs the next production run. Evidence and exact layout/source
+  comparisons: `build/quality/jump171-entry/consumer-investigation.json`.
+  Owner save-UI correction has priority; keep #171 open. The separate F00989
+  gimmick/actor placement-offset defect is confirmed by a layout probe, not
+  proven causal for descent, and must be separately tracked before fixing.
 - #170 Gust reveal repair: owner trace identifies zone9/room6 tile15,9 kind3.
   Activation and fade already changed correctly; rendering used detached native
   globals as one PS1 record (`tail-0x58`) and copied a scratch-shaped matrix.
@@ -30,8 +45,8 @@ verification of the current worktree.
   published the marker source changes alongside the owner's license work;
   its exact CI40135991604 passes. The subsequent owner revision2e3f1db4 also has
   green CI40136015635. Those owner commits are preserved without rewriting.
-  This follow-up records the measured ledgers/acceptance; #170 is eligible
-  for closure. #171 ledge descent and #172 targeted-box texture remain queued.
+  Follow-up e9faac8d has green CI40136907763 and #170 is closed with measured
+  evidence. #171 ledge descent and #172 targeted-box texture remain open.
 - #18 native runtime/menu checkpoint324438d948ef2b2fa4f0ca1f43bdd6c3b5536d98 is
   published; exact Source Quality40131160959 passes. Additional actual-controller
   acceptance on that clean revision, with isolated roots:

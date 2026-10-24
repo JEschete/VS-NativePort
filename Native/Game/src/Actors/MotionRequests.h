@@ -10,6 +10,11 @@
 extern "C" {
 #endif
 
+void Actors_BeginTileJump(int actor_id, int* target, int speed, int facing);
+void Actors_BeginAirborneTileJump(int actor_id, int* target, int speed,
+                                  int facing);
+void Actors_BeginNavigationJump(int actor_id, int* target, int speed,
+                                int facing);
 void Actors_TurnNavigationActor(int actor_id, int facing);
 void Actors_TurnActorAtSpeed(int actor_id, int16_t facing, int speed);
 void Actors_QueueGroundOffset(int actor_id, SVECTOR* step);

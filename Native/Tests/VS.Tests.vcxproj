@@ -96,6 +96,7 @@
     <ClCompile Include="src\GroundNavigationTests.cpp" />
     <ClCompile Include="src\InformationTests.cpp" />
     <ClCompile Include="src\InputTests.cpp" />
+    <ClCompile Include="src\JumpEntryTests.cpp" />
     <ClCompile Include="src\LayoutAsserts.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>

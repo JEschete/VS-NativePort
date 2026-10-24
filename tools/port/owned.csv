@@ -192,6 +192,9 @@ F01655,function,Battle_Ai_UpdatePatrolCombatBehavior,Native\Game\src\Battle\Ai\D
 F01671,function,Battle_Ai_CanApproachEngagedTarget,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,Native\Game\src\Battle\Ai\DecisionPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\Behavior.c
 F01797,function,Battle_Ai_IsAiTargetBeyondNearRadius,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,Native\Game\src\Battle\Ai\DecisionPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\ActionSelection.c
 F01026,function,Actors_TurnNavigationActor,Native\Game\src\Actors\MotionRequests.cpp,Native\Game\src\Actors\MotionRequests.h,2026-10-21,from Native\Game\src\Actors\Movement.c
+F04178,function,Actors_BeginTileJump,Native\Game\src\Actors\MotionRequests.cpp,Native\Game\src\Actors\MotionRequests.h,2026-10-24,func_800B63AC 4A0A8.c:340 selects original jump entry flags before the shared arc consumer
+F04179,function,Actors_BeginAirborneTileJump,Native\Game\src\Actors\MotionRequests.cpp,Native\Game\src\Actors\MotionRequests.h,2026-10-24,func_800B6404 4A0A8.c:368 preserves packed target and narrows facing for the shared arc consumer
+F01024,function,Actors_BeginNavigationJump,Native\Game\src\Actors\MotionRequests.cpp,Native\Game\src\Actors\MotionRequests.h,2026-10-24,func_800B6438 4A0A8.c:383 starts navigation animation before the shared arc consumer
 F04181,function,Actors_QueueGroundOffset,Native\Game\src\Actors\MotionRequests.cpp,Native\Game\src\Actors\MotionRequests.h,2026-10-21,from Native\Game\src\Actors\Movement.c
 F04182,function,Actors_QueueMovementVector,Native\Game\src\Actors\MotionRequests.cpp,Native\Game\src\Actors\MotionRequests.h,2026-10-21,from Native\Game\src\Actors\Movement.c
 F04183,function,Actors_QueueFlightMovement,Native\Game\src\Actors\MotionRequests.cpp,Native\Game\src\Actors\MotionRequests.h,2026-10-21,from Native\Game\src\Actors\Movement.c
