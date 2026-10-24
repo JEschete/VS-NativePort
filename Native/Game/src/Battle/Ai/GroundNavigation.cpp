@@ -168,12 +168,7 @@ bool RegionBlocked(const Battle_Ai_ActorAiState& state, int direction) {
   Require(direction < kAiDirectionBytes && frame.terrainRegions != nullptr,
           "AI region query requires native direction and region data");
   const auto tile = Unpack(state.tile.word);
-  const auto width = frame.roomBounds & kByteMask;
-  const auto index =
-      static_cast<std::size_t>(tile.z) * width + static_cast<unsigned>(tile.x);
-  Require(index < frame.terrain_region_count,
-          "AI region query exceeds the validated room bitmap");
-  return ((frame.terrainRegions[index] >> direction) & 1) != 0;
+  return ((*Battle_Ai_TerrainRegionCell(tile.x, tile.z) >> direction) & 1) != 0;
 }
 
 struct Bounds {

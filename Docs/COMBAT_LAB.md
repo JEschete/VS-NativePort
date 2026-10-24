@@ -909,6 +909,42 @@ Other evidence: `build\quality\bat150-debugger-{worker,addresses}.log`,
 `bat150-quality-final.log` and `bat150-copier-tests.log`. The fix is local and
 uncommitted; #150 remains open pending authorized publication and exact CI.
 
+### Short authored AI direction tails (#169)
+
+The first-lever-room owner crash is an AI-map validation abort, not an
+established sfizz fault. Clean Desktop6de0a140, run1792855828990222-0, follows
+original9/11 event4 into scripted19/0 (MAP212): load51834, abort51835.
+Original MAP212 and MAP214 contain308 direction bytes after the0x498-byte
+auxiliary header despite32x32 and13x25 collision dimensions. Original MIPS
+initialization does not consume a complete direction grid at this boundary.
+
+The native builder now validates the actual fixed header. Direction consumers
+share checked, mutable native cells bounded by the real source tail; missing
+bytes error/refuse explicitly, without fabricated padding or a success-shaped
+direction fallback. Route, wander and temporary height-filter accesses are
+rewritten through strict copier adaptations. Existing ordinary-ground behavior,
+temporary-byte restoration and native frame cleanup remain unchanged.
+
+Red shape regressions fail2/2. Pre-fix production run1792858131205962-0
+loads MAP212 at40 and aborts41. Fixed Debug1792858558711300-0 and
+Release1792858778063531-0 each observe1170 ready frames in original19/0,
+repeat19/0 and companion21/0, zero errors and complete teardown. These are
+direct original-room loader controls, not completed cutscenes: control remains3.
+The ordinary9/11 control remains safe. A Circle interaction attempt does not
+start event4, and two Up exit attempts1792858944213004-0 stay9/11 under
+the post-prologue profile. Neither is claimed as the owner's actual transition.
+The exact legitimate story/event context is still required before closing #169.
+
+Both full suites pass624 cases/3,150,286 assertions. Copier60, stable
+1,016 native source/template/project files plus manifest, and focused source
+tidy zero findings/zero new pass. Controls cover both short-tail shapes, actual
+mutable source pointers, last available/first missing bytes, negative/edge/null
+queries, unchanged output pointers on refusal and adjacent canaries. The older
+one-byte tail-shortening check now permits load, while missing-cell access
+remains explicitly rejected; malformed fixed headers still fail.
+Evidence: `build\quality\room169-actual-evidence.json` and `room169-*.log`.
+No flags, HP, scene completion or resource data were patched.
+
 ### Owner pause: door coverage limits and next failure
 
 Source fixes are committed in `7b6fb81e` and published through the

@@ -696,7 +696,7 @@ int Tests_RoomAiMapStorage(void) {
            map.state.defaultActionDelay == 99 &&
            map.state.allowsNonSpellActions == 1;
   Field_roomData.header.section6Length--;
-  passed = passed && Battle_Ai_BuildRoomAiMap(&map) == 0;
+  passed = passed && Battle_Ai_BuildRoomAiMap(&map) == 1;
   Field_roomData.header.section6Length = 0x497;
   passed = passed && Battle_Ai_BuildRoomAiMap(&map) == 0;
   int samples[16];

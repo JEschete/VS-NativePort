@@ -702,17 +702,13 @@ u_char Battle_Ai_FilterDirectionsByGroundHeight(u_char arg0, u_int arg1, int arg
     return arg0;
 }
 
-// decomp: src/BATTLE/BATTLE.PRG/771A8.c:1509
-#define TERRAIN_TILE_MASK (*(unsigned char**)((uintptr_t)&Battle_Ai_FrameState()->terrainRegions))
-// decomp: src/BATTLE/BATTLE.PRG/771A8.c:1510
-#define TERRAIN_MAP_WIDTH (*(unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->roomBounds))
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1511
 #define TERRAIN_MOVE_RESULT (*(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult))
 // decomp: BATTLE.PRG func_800E1908 (src/BATTLE/BATTLE.PRG/771A8.c:1517)
 void Battle_Ai_MoveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* state)
 {
     unsigned char* tile =
-        &TERRAIN_TILE_MASK[state->tile.tile.tileZ * TERRAIN_MAP_WIDTH + state->tile.tile.tileX];
+        Battle_Ai_TerrainRegionCell(state->tile.tile.tileX, state->tile.tile.tileZ);
     int old = *tile;
     Battle_Ai_TerrainMoveActorView* actor = state->actor;
     int mode;
@@ -733,8 +729,6 @@ void Battle_Ai_MoveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* state
     }
 }
 #undef TERRAIN_MOVE_RESULT
-#undef TERRAIN_MAP_WIDTH
-#undef TERRAIN_TILE_MASK
 
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1627
 #define WANDER_DIRECTIONS ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))
@@ -770,9 +764,7 @@ int Battle_Ai_ChooseNextWanderTile(Battle_Ai_WanderView* state, unsigned int til
             Battle_Ai_DirectionDelta offset;
             if ((Battle_Ai_FrameState()->roomData != NULL)) {
                 candidate.tile.tag =
-                    (*(unsigned char**)((uintptr_t)&Battle_Ai_FrameState()->terrainRegions))[state->goal.tile.tileZ
-                                                       * (*(unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->roomBounds))
-                                                   + state->goal.tile.tileX]
+                    (*Battle_Ai_TerrainRegionCell(state->goal.tile.tileX, state->goal.tile.tileZ))
                         >> i * 2
                     & 1;
             } else {

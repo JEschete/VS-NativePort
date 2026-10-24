@@ -9,6 +9,37 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Active owner follow-up (the pause notes below are historical): #169 is the
+  first-lever-room crash; #170 Gust reveal, #171 ground-enemy ledge descent and
+  #172 selected-box texture are separate reports. Owner requests native
+  saving/loading under #18 next after the current crash repair checkpoint.
+- Actual Desktop1792855828990222-0 is clean6de0a140: original9/11 event4
+  issues68/zone19/room0, then MAP212 loads51834 and RoomState aborts51835.
+  The sfizz destructor stack is secondary to the logged runtime abort.
+  Original MAP212 has32x32 collision cells but308 direction bytes; MAP214 has
+  13x25 and308. Original initialization reads only the fixed0x498-byte header.
+  Native validation incorrectly required a full collision-grid direction tail.
+- Local #169 repair retains fixed-header checks and bounds every actual mutable/
+  read-only direction-byte access via a shared checked native cell. Missing
+  bytes explicitly error/refuse rather than inventing directions. Strict copier
+  fixes cover route/wander/temporary-filter consumers; owned corner/ground
+  consumers share the same checks. The old short-tail test changes acceptance
+  only because these original rooms demonstrate the valid format; independent
+  missing-cell/negative/edge/null/canary and atomic-refusal controls remain.
+- Red native shape controls fail2/2; actual pre-fix MAP212 run1792858131205962-0
+  reads the asset40 and aborts41 (later scripts unrun). Fixed Debug
+  1792858558711300-0/Release1792858778063531-0 each retain1170 ready frames
+  for original19/0, repeat19/0 and21/0, zero errors and full teardown.
+  Those cutscene fixtures remain control3, not completed story scenes. The
+  Circle interaction control did not start event4; two Up exit attempts in
+  Debug1792858944213004-0 stayed9/11. Do not call either a matching door pass.
+  Next actual-story observation needs the legitimate owner progression/event4
+  context; no flags/HP/event completion were forced.
+- Current #169 source passes full Debug/Release624 cases/3,150,286 assertions,
+  copier60, stable1,016 native files plus manifest, and source tidy zero/zero.
+  Exact commands/hashes/results/limits: `build\quality\room169-actual-evidence.json`.
+  Keep #169 open pending the actual event4 handoff even after publishing the
+  verified map-boundary repair. Preserve owner VTune results and debug.log.
 - Publication checkpoint: source fix `7b6fb81e` is published through
   non-rewriting integration `309f8c78`; exact Source Quality40104975781 passes.
   Debug/Release full suites622/3,150,240 each, copier59, full quality195

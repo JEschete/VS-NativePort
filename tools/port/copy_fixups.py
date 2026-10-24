@@ -13,6 +13,7 @@ so a stale fix is noticed.
 from __future__ import annotations
 
 NATIVE_HELPER_HEADERS = {
+    "Battle_Ai_TerrainRegionCell": r"Native\Game\src\Battle\Ai\FrameUpdate.h",
     "Audio_Seq_LfoWaveform": r"Native\Engine\include\Audio\LfoWaveforms.h",
     **{name: r"Native\Engine\include\Audio\MusicState.h"
        for name in (
@@ -1822,6 +1823,25 @@ int Menu_Loot_AdvanceStagedInventory(void)
     # 771A8.c:942 adds a direction delta to `arg0->unk34`, an int in the pinned view; the merged layout of
     # T00532 has the packed tile word as Battle::Ai::TilePosition (union of the word and its bytes).
     "F01731": [("arg0->tile + ", "arg0->tile.word + ", "packed tile word arithmetic (771A8.c:950)")],
+    "F01728": [
+        ("(*(u_char**)((uintptr_t)Core_ScratchBase() + 0x3C4))"
+         "[position.tile.tileZ * *(u_char*)((uintptr_t)Core_ScratchBase() + 0x3DC) + position.tile.tileX]",
+         "(*Battle_Ai_TerrainRegionCell(position.tile.tileX, position.tile.tileZ))",
+         "771A8.c:587 validate route direction access against the authored payload"),
+    ],
+    "F01739": [
+        ("&TERRAIN_TILE_MASK[state->tile.tile.tileZ * TERRAIN_MAP_WIDTH + state->tile.tile.tileX]",
+         "Battle_Ai_TerrainRegionCell(state->tile.tile.tileX, state->tile.tile.tileZ)",
+         "771A8.c:1517 retain bounded mutable direction-byte ownership"),
+    ],
+    "F01742": [
+        ("(*(unsigned char**)((uintptr_t)Core_ScratchBase() + 0x3C4))"
+         "[state->goal.tile.tileZ\n"
+         "                                                       * (*(unsigned char*)((uintptr_t)Core_ScratchBase() + 0x3DC))\n"
+         "                                                   + state->goal.tile.tileX]",
+         "(*Battle_Ai_TerrainRegionCell(state->goal.tile.tileX, state->goal.tile.tileZ))",
+         "771A8.c:1638 validate wander direction access against the authored payload"),
+    ],
     # TITLE 22C.c _packageGameSaveData copies the inventory blocks with `savedata->unkXXX`, char arrays in its
     # view of the save record; the ledger type has them as Items::Inventory / Items::InventoryIndices structs.
     "F03601": [

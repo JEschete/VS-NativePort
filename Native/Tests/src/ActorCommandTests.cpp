@@ -310,3 +310,60 @@ TEST_CASE("Room teardown retires frame pointers before another room",
     CHECK(Battle_Ai_savedMovementRandomState == 0x12345678);
   }
 }
+
+TEST_CASE("Original cutscene rooms allow shorter AI direction payloads",
+          "[ai][room-map169]") {
+  RoomCommandFixture fixture;
+  const int shape = GENERATE(0, 1);
+  fixture.dimensions.width = shape == 0 ? 32 : 13;
+  fixture.dimensions.height = shape == 0 ? 32 : 25;
+  std::array<std::uint8_t, 0x498 + 308> auxiliary{};
+  auxiliary[0x494] = 17;
+  auxiliary[0x495] = 16;
+  Field_roomData.section6 = auxiliary.data();
+  Field_roomData.header.section6Length = auxiliary.size();
+  const auto original = auxiliary;
+  Battle_Ai_RoomAiMap map{};
+  REQUIRE(Battle_Ai_BuildRoomAiMap(&map) == 1);
+  CHECK(map.state.maxTileX == 17);
+  CHECK(map.state.maxTileZ == 16);
+  CHECK(map.flags[31][31] == 0x8000);
+  CHECK(auxiliary == original);
+}
+
+namespace {
+void CheckMissingDirectionCell(int x, int z, std::uint8_t** cell) {
+  const auto* original = *cell;
+  CHECK_FALSE(Battle_Ai_TryTerrainRegionCell(x, z, cell));
+  CHECK(*cell == original);
+}
+}  // namespace
+
+TEST_CASE(
+    "AI direction access preserves mutable cells and rejects missing bytes",
+    "[ai][room-map169]") {
+  RoomCommandFixture fixture;
+  std::array<std::uint8_t, 310> guarded{};
+  guarded.front() = 0xA5;
+  guarded.back() = 0x5A;
+  auto& frame = *Battle_Ai_FrameState();
+  frame.terrainRegions = guarded.data() + 1;
+  frame.terrain_region_count = 308;
+  frame.roomBounds = GENERATE(0x2020u, 0x190Du);
+  const int width = static_cast<int>(frame.roomBounds & 0xFFu);
+  auto* cell = guarded.data();
+  REQUIRE(Battle_Ai_TryTerrainRegionCell(307 % width, 307 / width, &cell));
+  CHECK(cell == guarded.data() + 308);
+  *cell = 0xD2;
+  CHECK(*Battle_Ai_TerrainRegionCell(307 % width, 307 / width) == 0xD2);
+  CheckMissingDirectionCell(308 % width, 308 / width, &cell);
+  CheckMissingDirectionCell(-1, 0, &cell);
+  CheckMissingDirectionCell(width, 0, &cell);
+  CheckMissingDirectionCell(0, -1, &cell);
+  CheckMissingDirectionCell(0, 32, &cell);
+  CHECK_FALSE(Battle_Ai_TryTerrainRegionCell(0, 0, nullptr));
+  frame.terrainRegions = nullptr;
+  CheckMissingDirectionCell(0, 0, &cell);
+  CHECK(guarded.front() == 0xA5);
+  CHECK(guarded.back() == 0x5A);
+}

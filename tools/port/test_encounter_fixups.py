@@ -9,6 +9,21 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_ai_direction_queries_keep_bounded_mutable_source_cells(self):
+        for fid in ("F01728", "F01739", "F01742"):
+            with self.subTest(fid=fid):
+                fixes = copy_fixups.FIXES[fid]
+                self.assertEqual(len(fixes), 1)
+                old, new, _ = fixes[0]
+                self.assertIn("tile.tileZ", old)
+                self.assertIn("Battle_Ai_TerrainRegionCell", new)
+                self.assertNotIn("Core_ScratchBase", new)
+                self.assertNotIn("TERRAIN_TILE_MASK", new)
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS["Battle_Ai_TerrainRegionCell"],
+            r"Native\Game\src\Battle\Ai\FrameUpdate.h",
+        )
+
     def test_room_geometry_names_preserve_index_flags_and_bias_roles(self):
         examples = (
             ("Field::FindRoomGeometryGroup",

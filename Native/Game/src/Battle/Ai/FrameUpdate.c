@@ -43,6 +43,34 @@ static Battle_Ai_FrameContext frame_context;
 
 Battle_Ai_FrameContext* Battle_Ai_FrameState(void) { return &frame_context; }
 
+int Battle_Ai_TryTerrainRegionCell(int tile_x, int tile_z, u_char** cell) {
+  const unsigned width = frame_context.roomBounds & 0xFFu;
+  const unsigned height = (frame_context.roomBounds >> 8) & 0xFFu;
+  if (cell == NULL || frame_context.terrainRegions == NULL || width == 0 ||
+      width > kAiFrameGridSide || height == 0 || height > kAiFrameGridSide ||
+      (unsigned)tile_x >= width || (unsigned)tile_z >= height) {
+    Core_Errorf("ai", "Invalid AI direction cell: tile=%d,%d grid=%u,%u",
+                tile_x, tile_z, width, height);
+    return 0;
+  }
+  const size_t index = (size_t)tile_z * width + (unsigned)tile_x;
+  if (index >= frame_context.terrain_region_count) {
+    Core_Errorf("ai",
+                "AI direction cell exceeds source payload: tile=%d,%d "
+                "index=%zu bytes=%zu",
+                tile_x, tile_z, index, frame_context.terrain_region_count);
+    return 0;
+  }
+  *cell = frame_context.terrainRegions + index;
+  return 1;
+}
+
+u_char* Battle_Ai_TerrainRegionCell(int tile_x, int tile_z) {
+  u_char* cell = NULL;
+  if (!Battle_Ai_TryTerrainRegionCell(tile_x, tile_z, &cell)) abort();
+  return cell;
+}
+
 // decomp: BATTLE.PRG func_800E65DC (src/BATTLE/BATTLE.PRG/7DDDC.s:8).
 int Battle_Ai_CacheActorAiWorkingState(void) {
   enum { kTerrainRegionOffset = 0x498 };

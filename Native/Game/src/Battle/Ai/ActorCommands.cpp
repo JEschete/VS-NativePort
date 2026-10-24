@@ -191,7 +191,7 @@ bool CornerBlocked(const Battle_Ai_ActorAiState& state, int dx, int dz) {
       (frame.heightMap[z][x] >> kTerrainLayerShift) & kTerrainLayerMask;
   const auto next = (frame.heightMap[z + dz][x + dx] >> kTerrainLayerShift) &
                     kTerrainLayerMask;
-  return ((frame.terrainRegions[width * z + x] >> *direction) & 1u) != 0 ||
+  return ((*Battle_Ai_TerrainRegionCell(x, z) >> *direction) & 1u) != 0 ||
          current < next;
 }
 

@@ -128,17 +128,15 @@ int Battle_Ai_BuildRoomAiMap(Battle_Ai_RoomAiMap* map) {
       (dimensions != NULL &&
        (dimensions->width < 0 || dimensions->width > kMapSide ||
         dimensions->height < 0 || dimensions->height > kMapSide))) {
+    Core_Errorf("ai", "Invalid room AI header: auxiliary_bytes=%u",
+                Field_roomData.header.section6Length);
     return 0;
   }
   memset(map, 0, sizeof *map);
   const uint16_t bounds =
       (uint16_t)((Field_CollisionMapDimensions(0) & 0xFFFF) >> 4 |
                  (unsigned)Field_CollisionMapDimensions(0) >> 12);
-  const size_t region_count = (size_t)(bounds & 0xFFu) * (bounds >> 8);
-  if (auxiliary != NULL && Field_roomData.header.section6Length <
-                               kRoomAuxiliaryHeaderBytes + region_count) {
-    return 0;
-  }
+  // Original MAP212/MAP214 have shorter direction tails; bound actual accesses.
   memcpy(&map->state.maxTileX, &bounds, sizeof bounds);
   memcpy(map->state.reserved4, &bounds, sizeof bounds);
   map->state.flightCeiling =
@@ -186,8 +184,13 @@ int Battle_Ai_BuildRoomAiMap(Battle_Ai_RoomAiMap* map) {
 // decomp: BATTLE.PRG func_800E6F9C (src/BATTLE/BATTLE.PRG/7E05C.s:582).
 void Battle_Ai_InitializeRoomAiMap(void) {
   Battle_Ai_RoomAiMap* map = Core_Memory_AllocateFromLowEnd(sizeof *map);
-  if (map == NULL || !Battle_Ai_BuildRoomAiMap(map)) {
-    Core_Debugf("ai", "Invalid room AI data or allocation failure");
+  if (map == NULL) {
+    Core_Errorf("ai", "Room AI allocation failed: bytes=%zu", sizeof *map);
+    abort();
+  }
+  if (!Battle_Ai_BuildRoomAiMap(map)) {
+    Core_Memory_FreeFromLowEnd(map);
+    Core_Errorf("ai", "Room AI initialization rejected the room header");
     abort();
   }
   Battle_Ai_roomAiState = &map->state;

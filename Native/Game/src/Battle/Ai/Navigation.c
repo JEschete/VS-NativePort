@@ -367,7 +367,7 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
         if ((*(u_short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->heightMap))[candidate.tile.tileZ][candidate.tile.tileX] & 0x1C00) {
             goto stop;
         }
-        if (((*(u_char**)((uintptr_t)&Battle_Ai_FrameState()->terrainRegions))[position.tile.tileZ * *(u_char*)((uintptr_t)&Battle_Ai_FrameState()->roomBounds) + position.tile.tileX]
+        if (((*Battle_Ai_TerrainRegionCell(position.tile.tileX, position.tile.tileZ))
                 >> *direction)
             & 1) {
             goto stop;
