@@ -9,6 +9,15 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Runtime-source audit identifies original G00254 as G00246+0x68: the low-ten-bit
+  scene/area identity, not an independently written native value. Boot restores
+  it through savedEntryDoor.requiredFlagId; Field_CurrentSceneId reads the room
+  environment and drives actor-area/visited-area state. Native persistence must
+  capture canonical Field_zoneContext.currentSceneId, not the detached alias.
+  Schema2 adds explicit stable scene identity. Pre-integration schema1 is
+  rejected by the standalone codec instead of guessing scene0; an application
+  migration could derive it from validated room content, but none is claimed.
+  These helper-only milestones have not created owner native save files.
 - #18 storage checkpoint31b4247e has exact green Source Quality40113479363.
   The schema subpackage adds the Game-owned v1 JSON codec: named inventory/
   storage/settings/stats/limbs/arts/score/trial/room-cache fields, logical script

@@ -125,6 +125,7 @@ Save::Document SampleDocument() {
   auto& state = result.state;
   state.location.zone = 9;
   state.location.room = 11;
+  state.location.scene = 37;
   state.location.position = {448, -128, 1600};
   state.location.facing = 2048;
   state.location.camera_yaw = 1024;
@@ -188,6 +189,7 @@ void CheckProgress(const Save::Snapshot& state,
   CHECK(state.learned_actions[97]);
   CHECK(state.learned_actions.back());
   CHECK(state.location.position == original.location.position);
+  CHECK(state.location.scene == original.location.scene);
   CHECK(state.random.shuffle == original.random.shuffle);
   CHECK(state.room_cache[3].actors[7].currentHp == 123);
 }
@@ -233,6 +235,7 @@ TEST_CASE("Native save identifiers and glyph names have fixed wire shapes",
   const auto& state = document.at("state");
   CHECK(state.at("location").at("zone") == "zone/9");
   CHECK(state.at("location").at("room") == "room/11");
+  CHECK(state.at("location").at("scene") == "scene/37");
   CHECK(state.at("inventory").at("blades")[15].at("definition") == "blade/14");
   CHECK(state.at("inventory").at("gems")[47].at("definition") == "gem/282");
   CHECK(state.at("learned_actions") ==
@@ -251,7 +254,12 @@ TEST_CASE("Native save corruption and unsupported formats fail explicitly",
     CheckRejected(document, "/checksum");
   }
   SECTION("future version") {
-    document["version"] = 2;
+    document["version"] = document.at("version").get<std::uint32_t>() + 1;
+    CheckRejected(document, "/version");
+  }
+  SECTION("old scene-less version") {
+    document["version"] = 1;
+    document["state"]["location"].erase("scene");
     CheckRejected(document, "/version");
   }
   SECTION("foreign source") {

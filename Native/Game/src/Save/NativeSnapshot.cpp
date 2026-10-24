@@ -29,7 +29,7 @@ namespace {
 using Json = nlohmann::json;
 constexpr std::string_view kFormat = "vs-nativeport-save";
 constexpr std::string_view kSource = "SLUS-01040";
-constexpr std::uint32_t kVersion = 1;
+constexpr std::uint32_t kVersion = 2;
 constexpr int kMaximumDepth = 64;
 constexpr unsigned kWordBits = 32;
 constexpr std::int32_t kMaximumAngle = 4095;
@@ -45,6 +45,7 @@ constexpr std::uint32_t kFiveBitMask = 0x1F;
 constexpr std::uint32_t kSevenBitMask = 0x7F;
 constexpr std::uint32_t kTwentyFourBitMask = 0xFFFFFF;
 constexpr auto kMaximumLocationId = std::numeric_limits<std::uint8_t>::max();
+constexpr std::uint16_t kMaximumSceneId = 1023;
 
 struct Reference {
   std::string_view prefix;
@@ -395,6 +396,7 @@ template <class V>
 void Fields(Location& r, V&& v) {
   Id(v, "zone", "zone", r.zone);
   Id(v, "room", "room", r.room);
+  Id(v, "scene", "scene", r.scene);
   v("position", r.position);
   v("facing", r.facing);
   v("camera_yaw", r.camera_yaw);
@@ -689,9 +691,11 @@ std::expected<void, std::string> ValidateModel(const Document& document) {
     return std::unexpected("/saved_unix_ms: timestamp is beyond year 9999");
   }
   if (state.location.zone == 0 || state.location.zone > kMaximumLocationId ||
-      state.location.room > kMaximumLocationId || state.location.facing < 0 ||
+      state.location.room > kMaximumLocationId ||
+      state.location.scene > kMaximumSceneId || state.location.facing < 0 ||
       state.location.facing > kMaximumAngle) {
-    return std::unexpected("/state/location: invalid zone, room or facing");
+    return std::unexpected(
+        "/state/location: invalid zone, room, scene or facing");
   }
   if (state.room_cache_slot >= state.room_cache.size() ||
       state.play_ticks > kMaximumPlayTicks) {

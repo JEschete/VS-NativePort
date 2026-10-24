@@ -22,6 +22,7 @@ namespace VS::Game::Save {
 struct Location {
   std::uint16_t zone = 0;
   std::uint16_t room = 0;
+  std::uint16_t scene = 0;
   std::array<std::int32_t, 3> position{};
   std::int32_t facing = 0;
   std::int32_t camera_yaw = 0;
