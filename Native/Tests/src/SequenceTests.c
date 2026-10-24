@@ -16,11 +16,18 @@
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionExecution.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/Damage.h"
 #include "Battle/Sphere.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/TargetingDraw.h"
 #include "CdDrive.h"
+#include "Effects/Camera.h"
+#include "Effects/Runtime.h"
+#include "Event/ScriptActors.h"
+#include "Event/ScriptEffects.h"
+#include "Event/ScriptVm.h"
 #include "Field/Camera.h"
+#include "Field/Gimmicks.h"
 #include "Field/RoomLoading.h"
 #include "Field/Zone.h"
 #include "Legacy/Psx.h"
@@ -91,6 +98,211 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   Actors_actorRecords[kActorId] = saved_actor;
   Actors_lastResolvedSequenceIndex = saved_index;
   Battle_specialActionPitch = saved_pitch;
+  return passed;
+}
+
+typedef struct MorphAnimationFixture {
+  Actors_ActorRecord actor;
+  unsigned model[64];
+  unsigned sequence[128];
+} MorphAnimationFixture;
+
+static void InitializeMorphAnimation(MorphAnimationFixture* fixture,
+                                     int animation) {
+  memset(fixture, 0, sizeof *fixture);
+  Actors_ShpModel* model = (void*)fixture->model;
+  Actors_SeqAnimationBank* bank = (void*)fixture->sequence;
+  const u_char events[] = {0, 36, 2, 0, 0xFF, 0xFF};
+  bank->animationMap = 32;
+  bank->animationData = 128;
+  memset((u_char*)bank + bank->animationMap, 0xFF, 64);
+  ((u_char*)bank)[bank->animationMap +
+                  (animation >= 220 ? animation - 220 : animation)] = 0;
+  bank->headers[0] = 16;
+  bank->headers[2] = 1;
+  memcpy((u_char*)bank + bank->animationData + 1, events, sizeof events);
+  model->vertexSection = 128;
+  SVECTOR* vertex = VS_ONDISC(model, vertexSection, SVECTOR*);
+  *vertex = (SVECTOR){11, 22, 33, 44};
+  fixture->actor.instance.model = model;
+  fixture->actor.instance.slot = 3;
+  fixture->actor.poseOverrideActive = 1;
+  fixture->actor.animationId = animation;
+  fixture->actor.animationLength = 16;
+  fixture->actor.animationHeader = (intptr_t)bank;
+  fixture->actor.sequenceFlags = 64;
+  fixture->actor.commonSequence = bank;
+  fixture->actor.sharedSequences[2] = bank;
+  fixture->actor.pose.eventScript = (u_char*)bank + bank->animationData + 2;
+  fixture->actor.blendPose.eventScript = fixture->actor.pose.eventScript;
+  fixture->actor.pose.boneKeys[0] = (SVECTOR){101, 202, 303, 0};
+}
+
+typedef struct MorphBindingScope {
+  Actors_ActorRecord* actors[17];
+  int bank;
+  u_char length;
+  u_char page;
+  void* data;
+  char resolved;
+  char skip;
+} MorphBindingScope;
+
+static void BeginMorphBindings(MorphBindingScope* scope) {
+  scope->bank = Actors_sharedSequenceBankIndex;
+  scope->length = Actors_animationEventLengths[36];
+  scope->page = Actors_sharedSequenceBankTexturePages[2];
+  scope->data = Actors_sharedSequenceData[2];
+  scope->resolved = Actors_lastResolvedSequenceIndex;
+  scope->skip = Event_skipState;
+  for (int i = 0; i < 17; ++i) {
+    scope->actors[i] = Actors_actorRecords[i];
+    Actors_actorRecords[i] = NULL;
+  }
+  Actors_sharedSequenceBankIndex = 2;
+  Actors_animationEventLengths[36] = 3;
+  Actors_sharedSequenceBankTexturePages[2] = 0;
+  Actors_sharedSequenceData[2] = NULL;
+  Event_skipState = 0;
+}
+
+static void EndMorphBindings(const MorphBindingScope* scope) {
+  for (int i = 0; i < 17; ++i) {
+    Actors_actorRecords[i] = scope->actors[i];
+  }
+  Actors_sharedSequenceBankIndex = scope->bank;
+  Actors_animationEventLengths[36] = scope->length;
+  Actors_sharedSequenceBankTexturePages[2] = scope->page;
+  Actors_sharedSequenceData[2] = scope->data;
+  Actors_lastResolvedSequenceIndex = scope->resolved;
+  Event_skipState = scope->skip;
+}
+
+static int MorphIsRetired(const MorphAnimationFixture* fixture) {
+  const SVECTOR* vertex =
+      VS_ONDISC(fixture->actor.instance.model, vertexSection, SVECTOR*);
+  return vertex->vx == 10 && vertex->vy == 22 && vertex->vz == 33 &&
+         vertex->pad == 44 && !fixture->actor.poseOverrideActive &&
+         fixture->actor.animationHeader == 0 &&
+         fixture->actor.sharedSequences[2] == NULL &&
+         fixture->actor.pose.eventScript == NULL &&
+         fixture->actor.blendPose.eventScript == NULL &&
+         fixture->actor.pose.nextEventFrame == 0xFFFF &&
+         fixture->actor.blendPose.nextEventFrame == 0xFFFF &&
+         fixture->actor.pose.boneKeys[0].vx == 101 &&
+         fixture->actor.pose.boneKeys[0].vy == 202 &&
+         fixture->actor.pose.boneKeys[0].vz == 303;
+}
+
+int TestSharedSequenceRetirement(void) {
+  enum { kBank = 2 };
+  MorphAnimationFixture fixture;
+  InitializeMorphAnimation(&fixture, 222);
+  MorphBindingScope scope;
+  BeginMorphBindings(&scope);
+  Actors_actorRecords[3] = &fixture.actor;
+  Actors_UnloadSharedSequence(kBank + 1);
+  const int passed =
+      MorphIsRetired(&fixture) && Actors_AnimationBattleWindowFrame(3) == 0;
+  EndMorphBindings(&scope);
+  return passed;
+}
+
+int TestSharedSequenceRetirementControl(int scenario) {
+  MorphAnimationFixture first;
+  MorphAnimationFixture second;
+  MorphBindingScope scope;
+  InitializeMorphAnimation(&first, 222);
+  InitializeMorphAnimation(&second, 222);
+  second.actor.instance.slot = 4;
+  BeginMorphBindings(&scope);
+  Actors_actorRecords[3] = &first.actor;
+  Actors_actorRecords[4] = &second.actor;
+  if (scenario == 1) {
+    first.actor.animationHeader = (intptr_t)second.sequence;
+    first.actor.pose.eventScript = second.actor.pose.eventScript;
+    first.actor.blendPose.eventScript = second.actor.blendPose.eventScript;
+    Actors_actorRecords[4] = NULL;
+  }
+  if (scenario == 4 || scenario == 5) {
+    MorphAnimationFixture* invalid = scenario == 4 ? &first : &second;
+    Actors_SeqAnimationBank* bank = (void*)invalid->sequence;
+    ((u_char*)bank)[bank->animationMap + 2] = 0xFF;
+  }
+  const intptr_t expected_header = first.actor.animationHeader;
+  int status;
+  if (scenario == 4) {
+    u_char instruction[] = {0x82, 3};
+    status = (int)Event_ScriptReleaseObjectModel(instruction, 0);
+  } else {
+    status = Actors_UnloadSharedSequence(scenario == 3 ? 0 : 3);
+  }
+  const SVECTOR* vertex =
+      VS_ONDISC(first.actor.instance.model, vertexSection, SVECTOR*);
+  int passed;
+  if (scenario >= 3) {
+    passed = status == (scenario == 4 ? 1 : -1) && vertex->vx == 11 &&
+             first.actor.poseOverrideActive &&
+             first.actor.animationHeader == expected_header &&
+             first.actor.sharedSequences[2] != NULL &&
+             first.actor.pose.eventScript != NULL;
+  } else if (scenario == 1) {
+    passed = status == 0 && vertex->vx == 11 &&
+             first.actor.poseOverrideActive &&
+             first.actor.animationHeader == expected_header &&
+             first.actor.pose.eventScript == second.actor.pose.eventScript &&
+             first.actor.sharedSequences[2] == NULL;
+  } else {
+    passed = status == 0 && MorphIsRetired(&first) && MorphIsRetired(&second);
+  }
+  EndMorphBindings(&scope);
+  return passed;
+}
+
+int TestAnimationEventUnwind(int scenario) {
+  enum { kMorphOpcode = 36, kSlot = 3, kUnchangedFrame = 77 };
+  MorphAnimationFixture fixture;
+  InitializeMorphAnimation(&fixture, scenario == 1 ? 222 : 1);
+  Actors_ActorRecord* saved_actor = Actors_actorRecords[kSlot];
+  const int saved_bank = Actors_sharedSequenceBankIndex;
+  const u_char saved_length = Actors_animationEventLengths[kMorphOpcode];
+  const char saved_resolved = Actors_lastResolvedSequenceIndex;
+  Actors_actorRecords[kSlot] = &fixture.actor;
+  Actors_sharedSequenceBankIndex = 2;
+  Actors_animationEventLengths[kMorphOpcode] = 3;
+  fixture.actor.blendPose.nextEventFrame = kUnchangedFrame;
+  fixture.actor.pose.frame = 9;
+  u_char* expected_script = fixture.actor.blendPose.eventScript;
+  Actors_SeqAnimationBank* bank = (void*)fixture.sequence;
+  if (scenario == 2 || scenario >= 6) fixture.actor.commonSequence = NULL;
+  if (scenario == 3) ((u_char*)bank)[bank->animationMap + 1] = 0xFF;
+  if (scenario == 4 || scenario == 5) bank->headers[2] = 0;
+  if (scenario == 4) fixture.actor.poseOverrideActive = 0;
+  int result = 0;
+  if (scenario == 6) {
+    result = Actors_PlayActorAnimation(kSlot, 1, 0, 0);
+  } else if (scenario == 7) {
+    Actors_InitializeActorAnimationPose(&fixture.actor, &fixture.actor.pose);
+  } else {
+    result = Actors_RestartActorAnimationEvents(&fixture.actor);
+  }
+  const SVECTOR* vertex =
+      VS_ONDISC(fixture.actor.instance.model, vertexSection, SVECTOR*);
+  const int successful = scenario < 2;
+  int passed = vertex->vx == (successful ? 10 : 11);
+  if (successful) {
+    passed &= result == 0 && fixture.actor.blendPose.nextEventFrame == 510;
+  } else {
+    passed &= result == (scenario == 4 || scenario == 7 ? 0 : -1) &&
+              fixture.actor.poseOverrideActive == (scenario != 4) &&
+              fixture.actor.blendPose.nextEventFrame == kUnchangedFrame &&
+              fixture.actor.blendPose.eventScript == expected_script &&
+              fixture.actor.pose.frame == 9;
+  }
+  Actors_actorRecords[kSlot] = saved_actor;
+  Actors_sharedSequenceBankIndex = saved_bank;
+  Actors_animationEventLengths[kMorphOpcode] = saved_length;
+  Actors_lastResolvedSequenceIndex = saved_resolved;
   return passed;
 }
 
@@ -484,6 +696,281 @@ int Tests_RoomSpawnCountGuard(void) {
   Field_zoneContext = saved;
   Field_isRoomActorSpawnEnabled = savedAlias;
   return passed;
+}
+
+int TestGimmickStackTop(int scenario) {
+  enum { kActorSlots = 17, kGimmickSlots = 16, kRoot = 3, kMember = 4 };
+  Actors_ActorRecord* saved_actors[kActorSlots];
+  Field_GimmickInstance* saved_objects[kGimmickSlots];
+  Actors_ActorRecord actor = {0};
+  Field_GimmickInstance root = {0};
+  Field_GimmickInstance member = {0};
+  const int skipped = scenario == 0;
+  const int has_actor = scenario != 0;
+  const int has_member = scenario == 2;
+  for (int i = 0; i < kActorSlots; ++i) {
+    saved_actors[i] = Actors_actorRecords[i];
+    Actors_actorRecords[i] = NULL;
+  }
+  for (int i = 0; i < kGimmickSlots; ++i) {
+    saved_objects[i] = Field_gimmickInstances[i];
+    Field_gimmickInstances[i] = NULL;
+  }
+  root.tileX = root.tileZ = member.tileX = member.tileZ = 2;
+  root.parent = root.objectInfo.carrier = 0xFF;
+  member.parent = member.objectInfo.carrier = 0xFF;
+  root.isSkipped = skipped;
+  root.slot = kRoot;
+  member.slot = kMember;
+  member.positionY = -128;
+  member.velocityY = 77;
+  Field_gimmickInstances[kRoot] = &root;
+  if (has_member) Field_gimmickInstances[kMember] = &member;
+  if (has_actor) {
+    actor.instance.slot = 2;
+    actor.instance.currentTileX = actor.instance.currentTileZ = 2;
+    actor.instance.position = (SVECTOR){320, -128, 320, 0};
+    actor.instance.rootMotion = (SVECTOR){1, 2, 3, 4};
+    Actors_actorRecords[2] = &actor;
+  }
+  Field_DropUnsupportedGimmickStack(kRoot);
+  int passed = root.objectInfo.isFalling == 1;
+  if (has_actor) {
+    passed &= actor.instance.movementMode == 3 &&
+              actor.instance.jumpCountdown == 4 && actor.destinationMode == 1 &&
+              actor.destinationX == 2 && actor.destinationZ == 2 &&
+              actor.instance.rootMotion.vx == 0 &&
+              actor.instance.rootMotion.vy == 0 &&
+              actor.instance.rootMotion.vz == 0 && actor.supportGimmick == 0;
+  }
+  if (has_member) passed &= member.mode == 0xFC && member.velocityY == 0;
+  for (int i = 0; i < kActorSlots; ++i) {
+    Actors_actorRecords[i] = saved_actors[i];
+  }
+  for (int i = 0; i < kGimmickSlots; ++i) {
+    Field_gimmickInstances[i] = saved_objects[i];
+  }
+  return passed;
+}
+
+int TestOptionalMovementWrapper(int operation, int rate) {
+  enum { kSlot = 4 };
+  Actors_ActorRecord* saved_actor = Actors_actorRecords[kSlot];
+  SVECTOR target = {117, -384, 370, 0};
+  Actors_TileTarget tile = {0};
+  int valid = 1;
+  Actors_actorRecords[kSlot] = NULL;
+  switch (operation) {
+    case 0:
+      Actors_MoveActorToPositionAtRate(kSlot, &target, rate, rate);
+      break;
+    case 1:
+      Actors_MoveActorToTileAtRate(kSlot, &tile, rate, rate);
+      break;
+    case 2:
+      Actors_TranslateActorToTileAtRate(kSlot, &tile, rate);
+      break;
+    case 3:
+      Actors_TurnActorTowardTileAtRate(kSlot, &tile, rate);
+      break;
+    case 4:
+      Actors_TranslateActorByAtRate(kSlot, &target, rate);
+      break;
+    case 5:
+      Actors_TranslateActorToAtRate(kSlot, &target, rate);
+      break;
+    case 6:
+      Actors_TurnActorByAtRate(kSlot, 0, rate);
+      break;
+    case 7:
+      Actors_TurnActorToAtRate(kSlot, 0, rate);
+      break;
+    default:
+      valid = 0;
+      break;
+  }
+  const int passed = valid && Actors_actorRecords[kSlot] == NULL;
+  Actors_actorRecords[kSlot] = saved_actor;
+  return passed;
+}
+
+int TestOptionalActorScriptSlide(int present, int rate, int skip) {
+  enum { kSlot = 4, kDefaultRate = 3 };
+  Actors_ActorRecord actor = {0};
+  Actors_ActorRecord* saved_actor = Actors_actorRecords[kSlot];
+  const char saved_control = Event_scriptControlledActors[kSlot];
+  const char saved_skip = Event_skipState;
+  u_char instruction[] = {0x28, kSlot, 0x10, 234, 0, 128, 254, 114, 1, 0};
+  instruction[9] = (u_char)rate;
+  Actors_actorRecords[kSlot] = present ? &actor : NULL;
+  actor.moveRate = kDefaultRate;
+  actor.instance.position = (SVECTOR){100, 200, 300, 0};
+  Event_skipState = skip ? 2 : 0;
+  Event_scriptControlledActors[kSlot] = 0;
+  const intptr_t status = Event_ScriptSlideActorToWorldPos(instruction, 0);
+  int passed = status == 0 && Event_scriptControlledActors[kSlot] == 1;
+  if (present) {
+    passed &= actor.moveRate == kDefaultRate;
+    passed &= actor.instance.rootMotion.vx == 17 &&
+              actor.instance.rootMotion.vy == -584 &&
+              actor.instance.rootMotion.vz == 70;
+    if (rate == 0 || skip) {
+      passed &= actor.instance.position.vx == 117 &&
+                actor.instance.position.vy == -384 &&
+                actor.instance.position.vz == 370;
+    } else {
+      passed &= actor.instance.position.vx == 100 &&
+                actor.instance.position.vy == 200 &&
+                actor.instance.position.vz == 300 &&
+                actor.instance.currentAnimation > 0;
+    }
+  }
+  Actors_actorRecords[kSlot] = saved_actor;
+  Event_scriptControlledActors[kSlot] = saved_control;
+  Event_skipState = saved_skip;
+  return passed;
+}
+
+enum { kScriptedEffectSlot = 3, kScriptedEffectModel = 53 };
+
+static u_short ScriptedEffectSelector(int scenario) {
+  switch (scenario) {
+    case 0:
+    case 3:
+    case 6:
+    case 7:
+      return kScriptedEffectModel;
+    case 5:
+      return 0x101F;
+    case 8:
+      return 0x2000;
+    case 9:
+      return 0x3000;
+    default:
+      return 0x1000 | kScriptedEffectSlot;
+  }
+}
+
+int TestScriptedEffectTargetBinding(int scenario) {
+  enum { kEffect = 222, kSlots = 16 };
+  Actors_ActorRecord actor = {0};
+  Field_GimmickInstance object = {0};
+  Battle_Actor battle_actor = {0};
+  Battle_Actor* saved_battle[kSlots];
+  Actors_ActorRecord* saved_actor[kSlots];
+  Field_GimmickInstance* saved_object[kSlots];
+  const Effects_ActionEffectRequest saved_request = Effects_actionRequest;
+  const Effects_EffectCamera saved_camera = Effects_effectCamera;
+  const Effects_EffectCamera saved_action_camera = Effects_savedActionCamera;
+  Effects_EffectPackage* saved_package = Effects_package;
+  const u_int saved_phase = Effects_primaryPhase;
+  const char saved_token = Effects_primaryToken;
+  int saved_bitmaps[4];
+  u_char request_before[sizeof Effects_actionRequest];
+  u_char request_after[sizeof Effects_actionRequest];
+  memcpy(request_before, &Effects_actionRequest, sizeof request_before);
+  for (int i = 0; i < kSlots; ++i) {
+    saved_battle[i] = Battle_actors[i];
+    saved_actor[i] = Actors_actorRecords[i];
+    saved_object[i] = Field_gimmickInstances[i];
+    Battle_actors[i] = NULL;
+    Actors_actorRecords[i] = NULL;
+    Field_gimmickInstances[i] = NULL;
+  }
+  memcpy(saved_bitmaps, Effects_tokenBitmaps, sizeof saved_bitmaps);
+  memset(Effects_tokenBitmaps, 0, sizeof saved_bitmaps);
+  const int present = scenario < 3 || scenario == 7;
+  const int slot = scenario == 6 || scenario == 7 ? 1 : kScriptedEffectSlot;
+  if (present || scenario == 6) {
+    Battle_actors[slot] = &battle_actor;
+    battle_actor.modelId =
+        scenario == 6 ? kScriptedEffectModel + 1 : kScriptedEffectModel;
+    if (scenario == 2) {
+      Field_gimmickInstances[slot] = &object;
+    } else {
+      Actors_actorRecords[slot] = &actor;
+    }
+  }
+  const u_short selector = ScriptedEffectSelector(scenario);
+  u_char instruction[] = {0xA0, kEffect, 0, (u_char)selector,
+                          (u_char)(selector >> 8)};
+  Effects_primaryPhase = 3;
+  const intptr_t result = Event_CommandPlayActorEffect(instruction, 0);
+  memcpy(request_after, &Effects_actionRequest, sizeof request_after);
+  int passed = result == (present ? 0 : 1);
+  if (present) {
+    passed &= Effects_primaryPhase == 6 &&
+              Effects_actionRequest.effectId == kEffect &&
+              Effects_actionRequest.count == 1 &&
+              Effects_actionRequest.targets[0].type == 4 &&
+              Effects_actionRequest.targets[0].value.actor.actor == slot;
+  } else {
+    passed &=
+        Effects_primaryPhase == 3 && Effects_primaryToken == saved_token &&
+        memcmp(request_before, request_after, sizeof request_before) == 0 &&
+        Effects_package == saved_package;
+    for (int i = 0; i < 4; ++i) {
+      passed &= Effects_tokenBitmaps[i] == 0;
+    }
+  }
+  for (int i = 0; i < kSlots; ++i) {
+    Battle_actors[i] = saved_battle[i];
+    Actors_actorRecords[i] = saved_actor[i];
+    Field_gimmickInstances[i] = saved_object[i];
+  }
+  memcpy(Effects_tokenBitmaps, saved_bitmaps, sizeof saved_bitmaps);
+  Effects_actionRequest = saved_request;
+  Effects_effectCamera = saved_camera;
+  Effects_savedActionCamera = saved_action_camera;
+  Effects_package = saved_package;
+  Effects_primaryPhase = saved_phase;
+  Effects_primaryToken = saved_token;
+  return passed;
+}
+
+int TestBoneEndpointOwner(int owner, int endpoint) {
+  enum { kSlot = 3, kModelWords = 20, kBoneLength = 128 };
+  Actors_ActorRecord actor = {0};
+  Field_GimmickInstance object = {0};
+  unsigned model_bytes[kModelWords] = {0};
+  Actors_ShpModel* model = (void*)model_bytes;
+  Actors_ActorRecord* saved_actor = Actors_actorRecords[kSlot];
+  Field_GimmickInstance* saved_object = Field_gimmickInstances[kSlot];
+  const MATRIX saved_matrix = Actors_boneMatrixScratch;
+  const Render_ModelScratchpad saved_workspace = *Render_ModelWorkspace();
+  Actors_actorRecords[kSlot] = owner == 0 || owner == 2 ? &actor : NULL;
+  Field_gimmickInstances[kSlot] = owner == 1 || owner == 2 ? &object : NULL;
+  actor.instance.model = object.model = model;
+  actor.instance.boneCount = object.boneCount = 1;
+  model->bones[0].length = kBoneLength;
+  Actors_boneMatrixScratch = (MATRIX){0};
+  for (int axis = 0; axis < kSpatialDimensions; ++axis) {
+    Actors_boneMatrixScratch.m[axis][axis] = kFixedPointOne;
+    Actors_boneMatrixScratch.t[axis] = (axis + 1) * 10;
+    actor.boneMatrices[0].m[axis][axis] = kFixedPointOne;
+    object.matrices[0].m[axis][axis] = kFixedPointOne;
+    actor.boneMatrices[0].t[axis] = (axis + 1) * 110;
+    object.matrices[0].t[axis] = actor.boneMatrices[0].t[axis] + 100;
+  }
+  Core_Gte_Reset();
+  SVECTOR result = {1, 2, 3, 77};
+  const int status =
+      Actors_ActorBoneEndpointPosition(kSlot, 0, &result, endpoint);
+  const int offset = owner == 1 ? 100 : 0;
+  const int length = endpoint == 0   ? 0
+                     : endpoint == 1 ? kBoneLength
+                                     : kBoneLength / 2;
+  const int passed =
+      owner == 3
+          ? status == -1 && result.vx == 1 && result.vy == 2 && result.vz == 3
+          : status == 0 && result.vx == 100 + offset - length &&
+                result.vy == 200 + offset && result.vz == 300 + offset;
+  Actors_actorRecords[kSlot] = saved_actor;
+  Field_gimmickInstances[kSlot] = saved_object;
+  Actors_boneMatrixScratch = saved_matrix;
+  *Render_ModelWorkspace() = saved_workspace;
+  Core_Gte_Reset();
+  return passed && result.pad == 77;
 }
 
 int Tests_ProjectedBoneEndpoints(void) {

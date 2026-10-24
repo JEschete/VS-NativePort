@@ -39,6 +39,17 @@
 #include "Legacy/Psx.h"
 #include "Render/Palette.h"
 
+static void ClearRoomAiBindings(void) {
+  memset(Battle_Ai_FrameState(), 0, sizeof *Battle_Ai_FrameState());
+  Battle_Ai_roomAiState = NULL;
+  Battle_Ai_tileFlagMap = NULL;
+  Battle_Ai_specialTerrainHeights = NULL;
+  Battle_Ai_roomHasWaypoints = 0;
+  Battle_Ai_patrolRoutes = NULL;
+  Battle_Ai_roomWaypoints = NULL;
+  Battle_Ai_routeGates = NULL;
+}
+
 // decomp: BATTLE.PRG func_800E6F1C (src/BATTLE/BATTLE.PRG/7E05C.s:541).
 void Battle_Ai_FreeRoomAiState(void) {
   for (size_t index = 0; index < sizeof Battle_actors / sizeof Battle_actors[0];
@@ -47,17 +58,32 @@ void Battle_Ai_FreeRoomAiState(void) {
       Battle_Ai_FreeActorAiState(Battle_actors[index]);
     }
   }
-  memset(Battle_Ai_FrameState(), 0, sizeof *Battle_Ai_FrameState());
   if (Battle_Ai_roomAiState != NULL) {
     Core_Memory_FreeFromLowEnd(Battle_Ai_roomAiState);
   }
-  Battle_Ai_roomAiState = NULL;
-  Battle_Ai_tileFlagMap = NULL;
-  Battle_Ai_specialTerrainHeights = NULL;
-  Battle_Ai_roomHasWaypoints = 0;
-  Battle_Ai_patrolRoutes = NULL;
-  Battle_Ai_roomWaypoints = NULL;
-  Battle_Ai_routeGates = NULL;
+  ClearRoomAiBindings();
+}
+
+void Battle_Ai_InvalidateSessionBindings(void) {
+  // The arena was already reset: never dereference or free its former bindings.
+  ClearRoomAiBindings();
+  for (size_t slot = 0; slot < sizeof Battle_Ai_actorAiStates /
+                                   sizeof Battle_Ai_actorAiStates[0];
+       ++slot) {
+    Battle_Ai_actorAiStates[slot] = NULL;
+  }
+  Battle_Ai_attributeActorMask = 0;
+  Battle_Ai_secondPerceptionTarget = 0;
+  Battle_Ai_arenaOrbit = NULL;
+  Battle_Ai_planningStatsSnapshot = NULL;
+  Battle_Ai_planningWorkspace = NULL;
+  Battle_Ai_planningPassCandidates = NULL;
+  Battle_Ai_candidateExclusions = NULL;
+  Battle_Ai_fallbackCandidates = NULL;
+  Battle_Ai_fallbackCandidateCount = 0;
+  Battle_Ai_unusedPlanCounter = 0;
+  Battle_Ai_candidateEngagedThisUpdate = 0;
+  Core_Debugf("ai.lifecycle", "invalidated AI bindings after game-arena reset");
 }
 
 enum {

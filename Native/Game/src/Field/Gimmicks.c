@@ -1115,6 +1115,11 @@ void Field_DropUnsupportedGimmickStack(int arg0)
         }
     }
 
+    if (Field_gimmickInstances[temp_s4] == NULL) {
+        Core_Debugf("gimmick", "no eligible stack top while removing slot=%d", arg0);
+        return;
+    }
+
     i = 0;
 
     while ((temp_v0_2 = Field_FindActorAboveGimmick(Field_gimmickInstances[temp_s4], i))) {

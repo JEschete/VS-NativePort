@@ -675,6 +675,9 @@
     <ClInclude Include="include\Audio\AudioDevice.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="include\Audio\LfoWaveforms.h">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
     <ClInclude Include="include\Audio\MusicState.h">
       <Filter>include\Audio</Filter>
     </ClInclude>
@@ -707,6 +710,9 @@
     </ClInclude>
     <ClInclude Include="include\Core\Core\WordPair.h">
       <Filter>include\Core\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Diagnostics.h">
+      <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\FrameClock.hpp">
       <Filter>include\Core</Filter>

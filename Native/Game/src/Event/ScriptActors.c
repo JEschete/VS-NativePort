@@ -590,7 +590,9 @@ intptr_t Event_ScriptReleaseObjectModel(u_char* arg0, short arg1)
     if (arg0[1] & 4) {
         Actors_ReleaseSequenceEffectTextures(arg0[1] & 3);
     } else {
-        Actors_UnloadSharedSequence(arg0[1]);
+        if (Actors_UnloadSharedSequence(arg0[1]) < 0) {
+            return 1;
+        }
     }
     return (Event_skipState == 2) * 4;
 }

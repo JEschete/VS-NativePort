@@ -24,6 +24,7 @@
 #include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
+#include "State/SceneTimer.h"
 #include "State/StateFlags.h"
 #include "State/Timers.h"
 
@@ -121,7 +122,7 @@ char* Battle_puzzleTimerTextPointer; /* data: contents loaded in Step 5 */
 char Battle_lowerScreenUiState;
 
 // decomp: D_80069998 (D_80069998@BATTLE/BATTLE.PRG)
-char const Battle_puzzleTimerText[] = "00:00:00";
+char Battle_puzzleTimerText[9] = "00:00:00";
 
 // decomp: D_8005046C (D_8005046C@SLUS_010.40)
 int Battle_puzzleTimer;
@@ -543,12 +544,11 @@ void Battle_ShowPuzzleTimer(void) { Battle_lowerScreenUiState = 1; }
 void Battle_HidePuzzleTimer(void) { Battle_lowerScreenUiState = 0; }
 
 // decomp: BATTLE.PRG _renderTimer (src/BATTLE/BATTLE.PRG/5BF94.c:3844)
-void Battle_DrawPuzzleTimer(int* value)
+void Battle_DrawPuzzleTimer(const State_SceneTimer* timer)
 {
-    char sp10[4];
+    char sp10[4] = {0, timer->seconds, timer->minutes, timer->hours};
     int i;
 
-    *(int*)sp10 = *value;
     sp10[0] = Audio_Seq_unusedStateFlags.puzzleTimerHundredths;
 
     if (sp10[3] != 0) {
@@ -559,11 +559,13 @@ void Battle_DrawPuzzleTimer(int* value)
 
     for (i = 0; i < 3; ++i) {
         int bcd = Core_Math_SplitDecimalDigit(sp10[i]);
-        Battle_puzzleTimerTextPointer[6 - i * 3] = (bcd >> 4) + '0';
-        Battle_puzzleTimerTextPointer[7 - i * 3] = (bcd & 0xF) + '0';
+        Battle_puzzleTimerText[6 - i * 3] = (bcd >> 4) + '0';
+        Battle_puzzleTimerText[7 - i * 3] = (bcd & 0xF) + '0';
     }
 
-    Render_DrawCompactText(Battle_puzzleTimerTextPointer, vs_getXY(128, 200), Render_frameScratch.orderingTable - 4);
+    Core_Debugf("hud.timer", "text=%s seconds=%d minutes=%d hours=%d frames=%d",
+        Battle_puzzleTimerText, timer->seconds, timer->minutes, timer->hours, timer->frames);
+    Render_DrawCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), Render_frameScratch.orderingTable - 4);
 }
 
 // decomp: BATTLE.PRG func_800CB654 (src/BATTLE/BATTLE.PRG/5BF94.c:3867)

@@ -70,6 +70,19 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
         effect = &Effects_package->block5Data->definitions[state->effect];
         Effects_ClearParticleTextureState((int*)&state->texture);
         Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);
+        Core_Debugf("effects.texture", "closed ring init definition=%u parameter=0x%X table=%u program=%u context=%s request_effect=%u tables=%d",
+            (unsigned)state->effect, (unsigned)arg2,
+            (unsigned)effect->ringSegments, (unsigned)effect->ringPositions,
+            Effects_package == &Effects_actionPackage ? "primary" : "secondary",
+            (unsigned)(Effects_package == &Effects_actionPackage ?
+                Effects_actionRequest.effectId : Effects_secondaryRequest.effectId),
+            Effects_package->block1TableCount);
+        if (effect->ringSegments >= Effects_package->block1TableCount ||
+            effect->ringSegments >= 4 || Effects_package->textureInfoTable[effect->ringSegments] == NULL) {
+            Core_Debugf("effects.texture", "closed ring definition=%u parameter=0x%X table=%u program=%u",
+                (unsigned)state->effect, (unsigned)arg2,
+                (unsigned)effect->ringSegments, (unsigned)effect->ringPositions);
+        }
         break;
 
     case 2:

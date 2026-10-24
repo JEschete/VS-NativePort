@@ -76,6 +76,43 @@ std::size_t Cycle(std::size_t index, std::size_t count, int direction) {
   if (count == 0) return 0;
   return (index + count + direction) % count;
 }
+
+void DrawPlacementGrid(Canvas& canvas, const Game::EncounterRoom& room,
+                       const Game::EncounterSetup& setup) {
+  if (room.width <= 0 || room.depth <= 0) return;
+  const int cell = std::max(1, std::min(220 / room.width, 210 / room.depth));
+  const int left = 390;
+  const int top = 125;
+  for (int z = 0; z < room.depth; ++z) {
+    for (int x = 0; x < room.width; ++x) {
+      const auto index = static_cast<std::size_t>(z) * room.width + x;
+      if (index < room.floor.size() &&
+          room.floor[index] == Game::EncounterFloor::kSupported) {
+        canvas.Rectangle(left + x * cell, top + z * cell, cell, cell,
+                         kSupportedFloor);
+      }
+    }
+  }
+  for (int x = 0; x <= room.width; ++x) {
+    canvas.Rectangle(left + x * cell, top, 1, room.depth * cell, kHighlight);
+  }
+  for (int z = 0; z <= room.depth; ++z) {
+    canvas.Rectangle(left, top + z * cell, room.width * cell, 1, kHighlight);
+  }
+  const auto marker = [&](const Game::EncounterPosition& position,
+                          std::uint32_t color) {
+    if (position.x < 0 || position.x >= room.width || position.z < 0 ||
+        position.z >= room.depth) {
+      return;
+    }
+    canvas.Rectangle(left + position.x * cell + 1, top + position.z * cell + 1,
+                     std::max(1, cell - 2), std::max(1, cell - 2), color);
+  };
+  marker(setup.player, kPlayerMarker);
+  for (const auto& enemy : setup.enemies) {
+    marker(enemy.position, kEnemyMarker);
+  }
+}
 }  // namespace
 
 Editor::Editor(std::vector<Game::EncounterZone> catalog)
@@ -105,7 +142,8 @@ void Editor::ResetRoom() {
 
 Game::EncounterSetup Editor::Setup() const {
   auto setup = setup_;
-  if (setup.enemies.empty() && !Zone().enemies.empty()) {
+  if (setup.room_policy == Game::EncounterRoomPolicy::kIsolatedCombat &&
+      setup.enemies.empty() && !Zone().enemies.empty()) {
     for (int index = 0; index < quantity_; ++index) {
       auto position = setup.player;
       position.x += offset_x_ + index * spacing_;
@@ -136,6 +174,10 @@ void Editor::Load(const Game::EncounterSetup& setup) {
 }
 
 void Editor::AddGroup() {
+  if (setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom) {
+    message_ = "ORIGINAL ROOM ACTORS - GROUP EDITING DISABLED";
+    return;
+  }
   if (quantity_ == 0) {
     message_ = "QUANTITY 0 - NO GROUP ADDED";
     return;
@@ -156,6 +198,12 @@ void Editor::AddGroup() {
 }
 
 void Editor::Change(int direction) {
+  if (setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom &&
+      (row_ == kEnemy || row_ == kQuantity || row_ == kOffsetX ||
+       row_ == kOffsetZ || row_ == kSpacing)) {
+    message_ = "ORIGINAL ROOM ACTORS - GROUP EDITING DISABLED";
+    return;
+  }
   switch (row_) {
     case kZone:
       zone_index_ = Cycle(zone_index_, catalog_.size(), direction);
@@ -227,7 +275,9 @@ Editor::Action Editor::Update(const Input::PadState& pad, bool confirm) {
       break;
     case kClearGroups:
       setup_.enemies.clear();
-      message_ = quantity_ == 0
+      message_ = setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom
+                     ? "ORIGINAL ROOM ACTORS RETAINED"
+                 : quantity_ == 0
                      ? "GROUPS CLEARED - SOLO ASHLEY"
                      : "GROUPS CLEARED - CURRENT SELECTION WILL BE USED";
       break;
@@ -333,8 +383,11 @@ void Editor::Draw(Canvas& canvas) const {
     return;
   }
   canvas.Text(kLabelX, kTitleY, "VAGRANT STORY - COMBAT LAB");
+  const bool original =
+      setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom;
   canvas.Text(kLabelX, kSubtitleY,
-              "STANDALONE ENCOUNTER BUILDER - PRODUCTION GAMEPLAY");
+              original ? "ORIGINAL ROOM - PRODUCTION ENTRY EVENTS"
+                       : "STANDALONE ENCOUNTER BUILDER - PRODUCTION GAMEPLAY");
   const auto& zone = Zone();
   const auto& room = zone.rooms[room_index_];
   const auto enemy_name =
@@ -348,8 +401,11 @@ void Editor::Draw(Canvas& canvas) const {
   const std::array<std::string, kRowCount> rows = {
       std::format("ZONE: {}", zone.id),
       std::format("ROOM: {} {}", room.index, room.asset),
-      std::format("ENEMY: {}", enemy_name),
-      std::format("QUANTITY: {}{}", quantity_, quantity_ == 0 ? " (SOLO)" : ""),
+      original ? "ENEMIES: ORIGINAL ROOM PLACEMENTS"
+               : std::format("ENEMY: {}", enemy_name),
+      original ? "QUANTITY: ORIGINAL ROOM"
+               : std::format("QUANTITY: {}{}", quantity_,
+                             quantity_ == 0 ? " (SOLO)" : ""),
       std::format("ASHLEY TILE X: {}", setup_.player.x),
       std::format("ASHLEY TILE Z: {}", setup_.player.z),
       std::format("ELEVATION: {}", setup_.player.elevation),
@@ -360,8 +416,8 @@ void Editor::Draw(Canvas& canvas) const {
       std::format("ASHLEY: {}", Game::EncounterProfileId(setup_.profile)),
       default_stats ? "ASHLEY SETUP: DEFAULT (ENTER TO EDIT)"
                     : "ASHLEY SETUP: CUSTOM (ENTER TO EDIT)",
-      "ADD GROUP",
-      "CLEAR GROUPS",
+      original ? "ADD GROUP (ISOLATED MODE ONLY)" : "ADD GROUP",
+      original ? "KEEP ORIGINAL ROOM ACTORS" : "CLEAR GROUPS",
       "START ENCOUNTER",
       "SAVE PRESET"};
   for (int index = 0; index < kRowCount; ++index) {
@@ -374,44 +430,13 @@ void Editor::Draw(Canvas& canvas) const {
   }
   const auto setup = Setup();
   canvas.Text(kPreviewX, kFirstRowY,
-              std::format("{} ENEMIES", setup.enemies.size()));
-  canvas.Text(kPreviewX, kLegendY, "BLUE: ASHLEY / RED: ENEMY");
+              original ? "ORIGINAL ACTORS (NOT PREVIEWED)"
+                       : std::format("{} ENEMIES", setup.enemies.size()));
+  canvas.Text(kPreviewX, kLegendY,
+              original ? "BLUE: ASHLEY / ACTORS NOT PREVIEWED"
+                       : "BLUE: ASHLEY / RED: ENEMY");
   canvas.Text(kPreviewX, kLayoutLabelY, "GREEN: FLOOR / DARK: UNSUPPORTED");
-  if (room.width > 0 && room.depth > 0) {
-    const int cell = std::max(1, std::min(220 / room.width, 210 / room.depth));
-    const int left = 390;
-    const int top = 125;
-    for (int z = 0; z < room.depth; ++z) {
-      for (int x = 0; x < room.width; ++x) {
-        const auto index = static_cast<std::size_t>(z) * room.width + x;
-        if (index < room.floor.size() &&
-            room.floor[index] == Game::EncounterFloor::kSupported) {
-          canvas.Rectangle(left + x * cell, top + z * cell, cell, cell,
-                           kSupportedFloor);
-        }
-      }
-    }
-    for (int x = 0; x <= room.width; ++x) {
-      canvas.Rectangle(left + x * cell, top, 1, room.depth * cell, kHighlight);
-    }
-    for (int z = 0; z <= room.depth; ++z) {
-      canvas.Rectangle(left, top + z * cell, room.width * cell, 1, kHighlight);
-    }
-    const auto marker = [&](const Game::EncounterPosition& position,
-                            std::uint32_t color) {
-      if (position.x < 0 || position.x >= room.width || position.z < 0 ||
-          position.z >= room.depth) {
-        return;
-      }
-      canvas.Rectangle(left + position.x * cell + 1,
-                       top + position.z * cell + 1, std::max(1, cell - 2),
-                       std::max(1, cell - 2), color);
-    };
-    marker(setup.player, kPlayerMarker);
-    for (const auto& enemy : setup.enemies) {
-      marker(enemy.position, kEnemyMarker);
-    }
-  }
+  DrawPlacementGrid(canvas, room, setup);
   const auto errors = Game::ValidateEncounter(setup, zone);
   canvas.Text(
       kLabelX, kValidationY,

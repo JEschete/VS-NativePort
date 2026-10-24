@@ -19,6 +19,14 @@ extern "C" int TestsModelAppearancePackets(int colored, int split,
                                            unsigned state, unsigned pulse_mask);
 extern "C" int Tests_ActorPoseHierarchy(void);
 extern "C" int Tests_ProjectedBoneEndpoints(void);
+extern "C" int TestBoneEndpointOwner(int owner, int endpoint);
+extern "C" int TestScriptedEffectTargetBinding(int scenario);
+extern "C" int TestSharedSequenceRetirement(void);
+extern "C" int TestSharedSequenceRetirementControl(int scenario);
+extern "C" int TestAnimationEventUnwind(int scenario);
+extern "C" int TestOptionalActorScriptSlide(int present, int rate, int skip);
+extern "C" int TestOptionalMovementWrapper(int operation, int rate);
+extern "C" int TestGimmickStackTop(int scenario);
 extern "C" int Tests_RoomSpawnCountGuard(void);
 extern "C" int Tests_ActorTextureFrameRectangles(int wide, int fallback,
                                                  unsigned* command);
@@ -264,4 +272,76 @@ TEST_CASE("Actor appearance materials preserve original blend dispatch",
       CHECK(TestsModelAppearancePackets(0, -1, state, pulse) == 1);
     }
   }
+}
+
+TEST_CASE("Shared sequence retirement unwinds vertex edits before detaching",
+          "[actors][animation][sequence-retirement]") {
+  CHECK(TestSharedSequenceRetirement() == 1);
+}
+
+TEST_CASE("Animation event unwind preserves unavailable pose obligations",
+          "[actors][animation][sequence-retirement]") {
+  for (int scenario = 0; scenario < 8; ++scenario) {
+    CAPTURE(scenario);
+    CHECK(TestAnimationEventUnwind(scenario) == 1);
+  }
+}
+
+TEST_CASE("Shared bank retirement preserves unrelated and failed borrowers",
+          "[actors][animation][sequence-retirement]") {
+  for (int scenario = 1; scenario < 6; ++scenario) {
+    CAPTURE(scenario);
+    CHECK(TestSharedSequenceRetirementControl(scenario) == 1);
+  }
+}
+
+TEST_CASE(
+    "Scripted actor effects wait for their required binding before playback",
+    "[event][effects][effect-binding]") {
+  for (int scenario = 0; scenario < 10; ++scenario) {
+    CAPTURE(scenario);
+    CHECK(TestScriptedEffectTargetBinding(scenario) == 1);
+  }
+}
+
+TEST_CASE(
+    "Bone endpoints resolve actor and gimmick owners before reading models",
+    "[actors][gimmick][model][bone-owner]") {
+  for (int index = 0; index < 24; ++index) {
+    const int owner = (index / 3) % 4;
+    const int endpoint = index % 3;
+    CAPTURE(index, owner, endpoint);
+    CHECK(TestBoneEndpointOwner(owner, endpoint) == 1);
+  }
+}
+
+TEST_CASE("Scripted world slides preserve optional actor bindings and rates",
+          "[event][actors][optional-actor]") {
+  constexpr int kRates[] = {-1, 0, 3};
+  for (int index = 0; index < 12; ++index) {
+    const int present = index < 6;
+    const int rate = kRates[(index / 2) % 3];
+    const int skip = index % 2;
+    CAPTURE(present, rate, skip);
+    CHECK(TestOptionalActorScriptSlide(present, rate, skip) == 1);
+  }
+}
+
+TEST_CASE("Optional actor movement wrappers preserve absent binding no-ops",
+          "[event][actors][optional-movement]") {
+  constexpr int kRates[] = {-1, 0, 3};
+  for (int index = 0; index < 24; ++index) {
+    const int operation = index / 3;
+    const int rate = kRates[index % 3];
+    CAPTURE(operation, rate);
+    CHECK(TestOptionalMovementWrapper(operation, rate) == 1);
+  }
+}
+
+TEST_CASE(
+    "Gimmick stack teardown accepts no top and retains supported fall behavior",
+    "[gimmick][stack-top]") {
+  CHECK(TestGimmickStackTop(0) == 1);
+  CHECK(TestGimmickStackTop(1) == 1);
+  CHECK(TestGimmickStackTop(2) == 1);
 }

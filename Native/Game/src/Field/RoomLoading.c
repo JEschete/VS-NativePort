@@ -627,6 +627,7 @@ void Field_QueueRoomLoad(int id)
 // decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15272)
 void Field_FinishRoomLoad(int arg0)
 {
+    Boot_ResetGameplayInspection();
     VECTOR sp20;
     VECTOR lookAt;
     Actors_ActorLocationQuery sp40;
@@ -850,6 +851,7 @@ void Field_RemoveRoomActors(void)
 // decomp: BATTLE.PRG func_8008A3A0 (src/BATTLE/BATTLE.PRG/146C.c:15489)
 void Field_UnloadCurrentRoom(void)
 {
+    Boot_ResetGameplayInspection();
     int i;
 
     for (i = 0; i < 2; ++i) {

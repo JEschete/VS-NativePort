@@ -44,6 +44,7 @@ struct CleanupFixture {
   Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
   decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
   Battle_Ai_ArenaOrbitState* saved_orbit = Battle_Ai_arenaOrbit;
+  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
   int saved_attribute = Battle_Ai_attributeActorMask;
   int saved_busy = Battle_Ai_candidateEngagedThisUpdate;
   std::array<Core_HeapBlockHeader, 2048> heap{};
@@ -86,6 +87,7 @@ struct CleanupFixture {
     Battle_Ai_roomAiState = saved_room;
     Battle_Ai_tileFlagMap = saved_flags;
     Battle_Ai_arenaOrbit = saved_orbit;
+    *Battle_Ai_FrameState() = saved_frame;
     Battle_Ai_attributeActorMask = saved_attribute;
     Battle_Ai_candidateEngagedThisUpdate = saved_busy;
   }
@@ -103,6 +105,17 @@ struct CleanupFixture {
     return state;
   }
 };
+
+void CheckRetiredAiOwnership(const CleanupFixture& fixture,
+                             const Battle_Ai_ActorAiState* peer) {
+  CHECK(Battle_Ai_actorAiStates[2] == nullptr);
+  CHECK(Battle_Ai_FrameState()->actors[2] == nullptr);
+  CHECK(Battle_Ai_attributeActorMask == (1 << 5));
+  CHECK(fixture.room.engagedCount == 0);
+  CHECK(Battle_Ai_actorAiStates[5] == peer);
+  CHECK(Battle_Ai_FrameState()->actors[5] == peer);
+  CHECK(peer->linkedActor == 16);
+}
 }  // namespace
 
 TEST_CASE("Reaction requests draw before checking full-width route ownership",
@@ -357,4 +370,57 @@ TEST_CASE("Gimmick palette fades stay on their own typed path",
     CHECK(object.pulsedPalette[index] == expected[index]);
     CHECK(object.basePalette[index] == 0x1234);
   }
+}
+
+TEST_CASE("AI retirement follows allocation ownership after kind changes",
+          "[ai][cleanup][ownership-mask]") {
+  const auto kind = GENERATE(0, 1, 2, 4, 8, 0x10, 0x80, 0xFF);
+  CleanupFixture fixture;
+  auto* removed = fixture.AllocateState(1);
+  auto* peer = fixture.AllocateState(2);
+  peer->linkedActor = 2;
+  removed->nativePointer18C = Core_Memory_AllocateFromHighEnd(128);
+  REQUIRE(removed->nativePointer18C != nullptr);
+  REQUIRE(Battle_Ai_TryEngageActor(removed) == 1);
+  Battle_Ai_FrameState()->actors[2] = removed;
+  Battle_Ai_FrameState()->actors[5] = peer;
+  fixture.actors[1].kind = static_cast<u_short>(kind);
+  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+  CheckRetiredAiOwnership(fixture, peer);
+  fixture.actors[1].kind = 4;
+  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+  Battle_Ai_FreeActorAiState(&fixture.actors[2]);
+  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+}
+
+TEST_CASE(
+    "Ashley retains owned state while temporary routes retire after kind "
+    "changes",
+    "[ai][cleanup][ownership-mask]") {
+  const auto kind = GENERATE(0, 1, 4, 0x10);
+  CleanupFixture fixture;
+  auto* state = fixture.AllocateState(0);
+  state->nativePointer18C = Core_Memory_AllocateFromHighEnd(128);
+  REQUIRE(state->nativePointer18C != nullptr);
+  Battle_Ai_FrameState()->actors[0] = state;
+  fixture.actors[0].kind = static_cast<u_short>(kind);
+  Battle_Ai_FreeActorAiState(&fixture.actors[0]);
+  CHECK(Battle_Ai_actorAiStates[0] == state);
+  CHECK(Battle_Ai_FrameState()->actors[0] == state);
+  CHECK(state->nativePointer18C == nullptr);
+  Core_Memory_FreeFromLowEnd(state);
+  Battle_Ai_actorAiStates[0] = nullptr;
+}
+
+TEST_CASE("Non-AI slots outside the perception mask do not retire live peers",
+          "[ai][cleanup][ownership-mask]") {
+  CleanupFixture fixture;
+  auto* peer = fixture.AllocateState(1);
+  Battle_Actor preview{};
+  preview.id = 20;
+  Battle_actors[20] = &preview;
+  Battle_Ai_FreeActorAiState(&preview);
+  CHECK(Battle_Ai_actorAiStates[2] == peer);
+  CHECK(Battle_Ai_attributeActorMask == (1 << 2));
+  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
 }

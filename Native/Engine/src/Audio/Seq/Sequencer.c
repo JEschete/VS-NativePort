@@ -3,6 +3,7 @@
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Driver/SoundDriver.h"
+#include "Audio/LfoWaveforms.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Samples/SampleBanks.h"
@@ -42,7 +43,7 @@ char Audio_Seq_kNoteRemapTables[304]; /* contents: module image (ModuleData.c) *
 char Audio_Seq_kRandomPitchOffsets[256]; /* contents: module image (ModuleData.c) */
 
 // decomp: g_Sound_LfoTable (g_Sound_LfoTable@SLUS_010.40)
-short* Audio_Seq_kLfoWaveforms[16]; /* contents: module image, relocated (ModulePointers.c) */
+short* Audio_Seq_kLfoWaveforms[256]; /* contents: module image, relocated (ModulePointers.c) */
 
 // decomp: D_800305E0 (D_800305E0@SLUS_010.40)
 void (*Audio_Seq_kOpcodeHandlers[96])(Audio_SeqChannel*, int); /* contents: module image, relocated (ModulePointers.c) */
@@ -942,13 +943,17 @@ void Audio_Seq_ExecuteChannelStep(Audio_SeqChannel* arg0, int arg1)
                                             : (temp_v1_6 * temp_a2_2))
                                  >> 7;
                 if (!(arg0->playModes & 2)) {
-                    arg0->vibratoWave = Audio_Seq_kLfoWaveforms[arg0->vibratoShape];
+                    short* vibratoProgram = Audio_Seq_LfoWaveform(arg0->vibratoShape);
+                    if (vibratoProgram == NULL) return;
+                    arg0->vibratoWave = vibratoProgram;
                     arg0->vibratoDelayLeft = arg0->vibratoDelay;
                     arg0->vibratoRateCounter = 1;
                 }
             }
             if ((temp_s0 & 2) && !(arg0->playModes & 2)) {
-                arg0->tremoloWave = Audio_Seq_kLfoWaveforms[arg0->tremoloShape];
+                short* tremoloProgram = Audio_Seq_LfoWaveform(arg0->tremoloShape);
+                if (tremoloProgram == NULL) return;
+                arg0->tremoloWave = tremoloProgram;
                 arg0->tremoloDelayLeft = arg0->tremoloDelay;
                 arg0->tremoloRateCounter = 1;
             }

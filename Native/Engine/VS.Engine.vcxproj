@@ -632,6 +632,7 @@
     <ClInclude Include="src\Save\MemoryCard\Resources.h" />
     <ClInclude Include="src\Save\Snapshot.h" />
     <ClInclude Include="include\Audio\AudioDevice.hpp" />
+    <ClInclude Include="include\Audio\LfoWaveforms.h" />
     <ClInclude Include="include\Audio\MusicState.h" />
     <ClInclude Include="include\Audio\Reverb.hpp" />
     <ClInclude Include="include\Audio\SequencerOutput.h" />
@@ -643,6 +644,7 @@
     <ClInclude Include="include\Core\BiosRand.h" />
     <ClInclude Include="include\Core\Core\IntPair.h" />
     <ClInclude Include="include\Core\Core\WordPair.h" />
+    <ClInclude Include="include\Core\Diagnostics.h" />
     <ClInclude Include="include\Core\FrameClock.hpp" />
     <ClInclude Include="include\Core\Gte.h" />
     <ClInclude Include="include\Core\Handle.hpp" />

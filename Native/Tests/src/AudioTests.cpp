@@ -4,6 +4,7 @@
 #include <array>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -28,7 +29,14 @@
 #include "Content/AudioBank.hpp"
 #include "Content/AudioStream.hpp"
 #include "Content/DataStore.hpp"
+#include "Core/Log.hpp"
+#include "Legacy/Psx.h"
 #include "nlohmann/json.hpp"
+
+extern "C" {
+#include "Audio/LfoWaveforms.h"
+#include "Audio/Seq/Modulation.h"
+}
 
 extern "C" int TestsZoneMusicStateAliases(void);
 extern "C" void TestsNativeNoiseChannel(void);
@@ -1870,4 +1878,168 @@ TEST_CASE("Accelerated native audio drains every tick and bounds speaker PCM",
   probe.Wait();
   CHECK(Energy(probe.samples, 0) > 0.1);
   CHECK(Energy(probe.samples, 1) > 0.1);
+}
+
+namespace {
+struct LfoSourceFixture {
+  decltype(std::to_array(Audio_Seq_kLfoWaveforms)) saved =
+      std::to_array(Audio_Seq_kLfoWaveforms);
+  Audio_MusicConfig* saved_config = Audio_Seq_activeMusicConfig;
+  VS::Core::LogObserver saved_observer = VS::Core::SetLogObserver({});
+  Audio_MusicConfig config{};
+  Audio_SeqChannel channel{};
+  std::array<std::int16_t, 5> wave{1000, -1000, 0, 0, -2};
+  std::array<unsigned char, 3> command{};
+
+  LfoSourceFixture() {
+    config.masterVolume = 0x7F0000;
+    Audio_Seq_activeMusicConfig = &config;
+    for (const int shape : {65, 128, 255}) {
+      Audio_Seq_kLfoWaveforms[shape] = wave.data();
+    }
+    Reset();
+  }
+
+  ~LfoSourceFixture() {
+    std::copy(saved.begin(), saved.end(), Audio_Seq_kLfoWaveforms);
+    Audio_Seq_activeMusicConfig = saved_config;
+    VS::Core::SetLogObserver(std::move(saved_observer));
+  }
+
+  void Reset() {
+    channel = {};
+    channel.volume = 0x40000000;
+    channel.volumeBalance = 0x7F00;
+    channel.pitchBase = 0x1000;
+    channel.vibratoDepth = 0x4000;
+  }
+
+  void Enable(int kind, int shape, int rate) {
+    command = {255, static_cast<unsigned char>(rate),
+               static_cast<unsigned char>(shape)};
+    if (kind == 2) {
+      command = {static_cast<unsigned char>(rate),
+                 static_cast<unsigned char>(shape), 0};
+    }
+    channel.programCounter = reinterpret_cast<char*>(command.data());
+    if (kind == 0) {
+      Audio_Seq_EnableVibrato(&channel, 1);
+    } else if (kind == 1) {
+      Audio_Seq_EnableTremolo(&channel, 1);
+    } else {
+      Audio_Seq_EnableAutoPan(&channel, 1);
+    }
+  }
+
+  std::array<int, 4> Settings(int kind) const {
+    if (kind == 0) {
+      return {channel.vibratoDelay, channel.vibratoRate,
+              channel.vibratoRateCounter, channel.vibratoShape};
+    }
+    if (kind == 1) {
+      return {channel.tremoloDelay, channel.tremoloRate,
+              channel.tremoloRateCounter, channel.tremoloShape};
+    }
+    return {0, channel.autoPanRate, channel.autoPanRateCounter,
+            channel.autoPanShape};
+  }
+
+  std::int16_t* Cursor(int kind) const {
+    if (kind == 0) return channel.vibratoWave;
+    if (kind == 1) return channel.tremoloWave;
+    return channel.autoPanWave;
+  }
+
+  void CheckEnabled(int kind, int shape, int rate) const {
+    const std::array<int, 4> expected{kind == 2 ? 0 : 255,
+                                      rate == 0 ? 256 : rate, 1, shape};
+    CHECK(Settings(kind) == expected);
+    CHECK(Cursor(kind) == wave.data());
+    CHECK(channel.updateFlags == (1u << kind));
+    CHECK(channel.programCounter ==
+          reinterpret_cast<const char*>(command.data()) + (kind == 2 ? 2 : 3));
+  }
+
+  void CheckRefused(int kind, const std::array<int, 4>& before,
+                    std::int16_t* cursor) const {
+    CHECK(Settings(kind) == before);
+    CHECK(Cursor(kind) == cursor);
+    CHECK(channel.updateFlags == 0x1000);
+    CHECK(channel.programCounter ==
+          reinterpret_cast<const char*>(command.data()) + (kind == 2 ? 2 : 3));
+  }
+
+  void Step() { Audio_Mixer_UpdateMusicChannelModulation(&channel, 1); }
+
+  void CheckPhase(int step, int depth) const {
+    CHECK(channel.autoPanWave == wave.data() + ((step & 1) ? 2 : 1));
+    CHECK(channel.autoPanOffset == (depth == 0 ? 0 : ((step & 1) ? -4 : 3)));
+  }
+
+  void CheckDisabled() {
+    auto* cursor = channel.autoPanWave;
+    Audio_Seq_DisableAutoPan(&channel, 1);
+    CHECK((channel.updateFlags & SOUND_UPDATE_PAN_LFO) == 0);
+    CHECK(channel.autoPanOffset == 0);
+    Step();
+    CHECK(channel.autoPanWave == cursor);
+  }
+};
+}  // namespace
+
+TEST_CASE("All LFO enables preserve unsigned byte selectors and timing",
+          "[audio][modulation][lfo-source]") {
+  LfoSourceFixture fixture;
+  const int parameters[][2] = {{65, 0}, {128, 128}, {255, 255}};
+  for (int kind = 0; kind < 3; ++kind) {
+    for (const auto& parameter : parameters) {
+      CAPTURE(kind, parameter[0], parameter[1]);
+      fixture.Reset();
+      fixture.Enable(kind, parameter[0], parameter[1]);
+      fixture.CheckEnabled(kind, parameter[0], parameter[1]);
+    }
+  }
+}
+
+TEST_CASE(
+    "LFO loops retain phase at zero depth and across disable and re-enable",
+    "[audio][modulation][lfo-source]") {
+  LfoSourceFixture fixture;
+  int depth = 0;
+  SECTION("zero depth still advances the original cursor") {}
+  SECTION("nonzero depth retains the actual sample signal") { depth = 127; }
+  fixture.Enable(2, 65, 1);
+  fixture.channel.autoPanDepth = static_cast<std::uint16_t>(depth << 8);
+  for (int step = 0; step < 8; ++step) {
+    fixture.Step();
+    fixture.CheckPhase(step, depth);
+  }
+  fixture.CheckDisabled();
+  fixture.Enable(2, 65, 1);
+  fixture.CheckEnabled(2, 65, 1);
+}
+
+TEST_CASE("Unavailable LFO selections error before changing active modulation",
+          "[audio][modulation][lfo-source]") {
+  int errors = 0;
+  LfoSourceFixture fixture;
+  VS::Core::SetLogObserver([&errors](const VS::Core::LogRecord& record) {
+    if (record.channel == "audio.lfo" &&
+        record.level == VS::Core::LogLevel::Error) {
+      ++errors;
+    }
+  });
+  Audio_Seq_kLfoWaveforms[65] = nullptr;
+  for (int kind = 0; kind < 3; ++kind) {
+    fixture.Reset();
+    fixture.channel.updateFlags = 0x1000;
+    fixture.channel.vibratoWave = fixture.channel.tremoloWave =
+        fixture.channel.autoPanWave = fixture.wave.data() + 1;
+    const auto before = fixture.Settings(kind);
+    auto* cursor = fixture.Cursor(kind);
+    fixture.Enable(kind, 65, 1);
+    fixture.CheckRefused(kind, before, cursor);
+  }
+  CHECK(Audio_Seq_LfoWaveform(256) == nullptr);
+  CHECK(errors == 4);
 }

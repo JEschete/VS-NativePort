@@ -42,7 +42,8 @@ EncounterZone TestZone() {
        {4, 2, 0, 0},
        {},
        std::vector<VS::Game::EncounterFloor>(
-           std::size_t{32} * 32, VS::Game::EncounterFloor::kSupported)});
+           std::size_t{32} * 32, VS::Game::EncounterFloor::kSupported),
+       {}});
   zone.enemies.push_back({0, "primary", 100, 10, false, {}, {}, -1});
   zone.enemies.push_back({1, "secondary", 200, 20, true, {}, {}, -1});
   zone.enemies.push_back(
@@ -255,6 +256,26 @@ TEST_CASE("Combat Lab editor preserves solo presets and group selection",
     EditorPress(editor, VS::Input::Circle);
     CHECK(editor.Setup().enemies.empty());
   }
+}
+
+TEST_CASE("Original-room editor cannot replace production actors with groups",
+          "[combat][encounter][editor][doors]") {
+  VS::combat_lab::Editor editor({TestZone()});
+  auto setup = TestSetup(0);
+  setup.room_policy = VS::Game::EncounterRoomPolicy::kOriginalRoom;
+  editor.Load(setup);
+  EditorPress(editor, VS::Input::Down, 3);
+  EditorPress(editor, VS::Input::Right, 2);
+  CHECK(editor.Setup().enemies.empty());
+  EditorPress(editor, VS::Input::Down, 10);
+  EditorPress(editor, VS::Input::Circle);
+  CHECK(editor.Setup().enemies.empty());
+  EditorPress(editor, VS::Input::Down);
+  EditorPress(editor, VS::Input::Circle);
+  CHECK(editor.Setup().enemies.empty());
+  CHECK(editor.Setup().room_policy ==
+        VS::Game::EncounterRoomPolicy::kOriginalRoom);
+  CHECK(VS::Game::ValidateEncounter(editor.Setup(), editor.Zone()).empty());
 }
 
 TEST_CASE("Combat Lab editor selects and wraps the all-action profiles",
@@ -659,4 +680,21 @@ TEST_CASE("Encounter validation rejects unsupported equipment choices",
   auto setup = TestSetup(0);
   setup.weapon = VS::Game::EncounterWeapon::kCount;
   CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
+}
+
+TEST_CASE("Production room presets retain original actors and event policy",
+          "[combat][encounter][doors][production]") {
+  auto setup = TestSetup(0);
+  setup.room_policy = VS::Game::EncounterRoomPolicy::kOriginalRoom;
+  CHECK(ValidateEncounter(setup, TestZone()).empty());
+  CHECK_FALSE(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0));
+  const auto encoded = VS::combat_lab::EncodeSetup(setup);
+  CHECK(encoded.at("room_events") == "production");
+  const auto restored = VS::combat_lab::DecodeSetup(encoded);
+  CHECK(restored.room_policy == setup.room_policy);
+  setup.enemies = TestSetup().enemies;
+  CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
+  auto invalid = encoded;
+  invalid["room_events"] = "unknown";
+  CHECK_THROWS(VS::combat_lab::DecodeSetup(invalid));
 }

@@ -282,7 +282,9 @@ extern unsigned int Content_battleAiHesitationLengths[1];
 extern unsigned int Content_battleLimbNameBytes[38];
 extern unsigned int Content_battleGimmickTemplateBytes[455];
 extern unsigned int Content_battleTextboxFrameBytes[631];
-extern unsigned int Content_residentLfoSamples[513];
+extern short Content_residentLfoSamples[167936];
+
+static const Content_ModuleSymbol Content_residentLfoSamplesSource = {"SLUS_010.40", 0x80010000u, 335872u, (void*)Content_residentLfoSamples, sizeof Content_residentLfoSamples, 2u, 2u};
 
 const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80068BECu, 14u, (void*)&Field_kPlatformBounceOffsets, 0u, 0u, 0u},
@@ -296,7 +298,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069134u, 16u, (void*)&Battle_kStatusLabelColors, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80069144u, 56u, (void*)&Battle_kStatChangeFirstWordRects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006917Cu, 104u, (void*)&Battle_kStatChangeSecondWordRects, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80069998u, 9u, (void*)&Battle_puzzleTimerText, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80069998u, 9u, (void*)&Battle_puzzleTimerText, sizeof Battle_puzzleTimerText, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069BBCu, 1376u, (void*)&Battle_Ai_kTimedStatusFlags, sizeof Battle_Ai_kTimedStatusFlags, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C08u, 4u, (void*)&Battle_Ai_kFlags34Bit14Values, sizeof Battle_Ai_kFlags34Bit14Values, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C18u, 1284u, (void*)&Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values, 1u, 1u},
@@ -2955,7 +2957,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8002F66Cu, 304u, (void*)&Audio_Seq_kNoteRemapTables, sizeof Audio_Seq_kNoteRemapTables, 1u, 1u},
     {"SLUS_010.40", 0x8002F69Cu, 256u, (void*)&Audio_Seq_kRandomPitchOffsets, sizeof Audio_Seq_kRandomPitchOffsets, 1u, 1u},
     {"SLUS_010.40", 0x8002F79Cu, 512u, (void*)&Audio_Mixer_kPanGains, sizeof Audio_Mixer_kPanGains, 1u, 1u},
-    {"SLUS_010.40", 0x800301A0u, 64u, (void*)&Audio_Seq_kLfoWaveforms, sizeof Audio_Seq_kLfoWaveforms, 4u, sizeof Audio_Seq_kLfoWaveforms[0]},
+    {"SLUS_010.40", 0x800301A0u, 1024u, (void*)&Audio_Seq_kLfoWaveforms, sizeof Audio_Seq_kLfoWaveforms, 4u, sizeof Audio_Seq_kLfoWaveforms[0]},
     {"SLUS_010.40", 0x800301E0u, 1024u, (void*)&Audio_Mixer_kCommandHandlers, sizeof Audio_Mixer_kCommandHandlers, 4u, sizeof Audio_Mixer_kCommandHandlers[0]},
     {"SLUS_010.40", 0x800305E0u, 384u, (void*)&Audio_Seq_kOpcodeHandlers, sizeof Audio_Seq_kOpcodeHandlers, 4u, sizeof Audio_Seq_kOpcodeHandlers[0]},
     {"SLUS_010.40", 0x80030760u, 128u, (void*)&Audio_Seq_kExtendedOpcodeHandlers, sizeof Audio_Seq_kExtendedOpcodeHandlers, 4u, sizeof Audio_Seq_kExtendedOpcodeHandlers[0]},
@@ -3264,30 +3266,29 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069860u, 152u, (void*)Content_battleLimbNameBytes, sizeof Content_battleLimbNameBytes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E930Cu, 1820u, (void*)Content_battleGimmickTemplateBytes, sizeof Content_battleGimmickTemplateBytes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EABACu, 2524u, (void*)Content_battleTextboxFrameBytes, sizeof Content_battleTextboxFrameBytes, 1u, 1u},
-    {"SLUS_010.40", 0x8002F99Cu, 2052u, (void*)Content_residentLfoSamples, sizeof Content_residentLfoSamples, 1u, 1u},
 };
 const unsigned Content_moduleSymbolCount = sizeof Content_moduleSymbols / sizeof Content_moduleSymbols[0];
 
 const Content_ModulePointerTable Content_modulePointers[] = {
-    {"BATTLE/BATTLE.PRG", 0x7FA34, 8u, (void**)Battle_hitFunctions, sizeof Battle_hitFunctions / sizeof Battle_hitFunctions[0]}, // G00028 _hitFunctions
-    {"BATTLE/BATTLE.PRG", 0x7FA54, 40u, (void**)Battle_attackPrerequisiteFunctions, sizeof Battle_attackPrerequisiteFunctions / sizeof Battle_attackPrerequisiteFunctions[0]}, // G00029 _attackPrerequisiteFunctions
-    {"BATTLE/BATTLE.PRG", 0x7FB0C, 27u, (void**)Battle_statCalculators, sizeof Battle_statCalculators / sizeof Battle_statCalculators[0]}, // G00031 _statCalculators
-    {"BATTLE/BATTLE.PRG", 0x7FB78, 70u, (void**)Battle_actionEffectMediators, sizeof Battle_actionEffectMediators / sizeof Battle_actionEffectMediators[0]}, // G00032 _actionEffectMediators
-    {"BATTLE/BATTLE.PRG", 0x7FDCC, 7u, (void**)Field_kTextureEffectHandlers, sizeof Field_kTextureEffectHandlers / sizeof Field_kTextureEffectHandlers[0]}, // G00044 D_800E85CC
-    {"BATTLE/BATTLE.PRG", 0x7FDE8, 13u, (void**)Field_kRoomEffectOpcodeHandlers, sizeof Field_kRoomEffectOpcodeHandlers / sizeof Field_kRoomEffectOpcodeHandlers[0]}, // G00045 D_800E85E8
-    {"BATTLE/BATTLE.PRG", 0x807B4, 5u, (void**)Field_gimmickModelTemplates, sizeof Field_gimmickModelTemplates / sizeof Field_gimmickModelTemplates[0]}, // G00072 D_800E8FB4
-    {"BATTLE/BATTLE.PRG", 0x81530, 256u, (void**)Event_kOpcodeHandlers, sizeof Event_kOpcodeHandlers / sizeof Event_kOpcodeHandlers[0]}, // G00133 _opcodeFunctionTable
-    {"BATTLE/BATTLE.PRG", 0x81E20, 20u, (void**)Battle_limbNames, sizeof Battle_limbNames / sizeof Battle_limbNames[0]}, // G00138 vs_battle_limbNames
-    {"BATTLE/BATTLE.PRG", 0x82D88, 16u, (void**)Event_textBoxFrameStyles, sizeof Event_textBoxFrameStyles / sizeof Event_textBoxFrameStyles[0]}, // G00148 D_800EB588
-    {"BATTLE/BATTLE.PRG", 0x835AC, 4u, (void**)Battle_spellClassSpellIds, sizeof Battle_spellClassSpellIds / sizeof Battle_spellClassSpellIds[0]}, // G00206 _spellIds
-    {"BATTLE/BATTLE.PRG", 0x83A5C, 4u, (void**)Render_kGimLayerDrawRoutines, sizeof Render_kGimLayerDrawRoutines / sizeof Render_kGimLayerDrawRoutines[0]}, // G00212 D_800EC25C
-    {"BATTLE/BATTLE.PRG", 0x83B24, 2u, (void**)Effects_scriptRenderers, sizeof Effects_scriptRenderers / sizeof Effects_scriptRenderers[0]}, // G00222 D_800EC324
-    {"BATTLE/BATTLE.PRG", 0x83BF4, 49u, (void**)Effects_scriptOpcodeHandlers, sizeof Effects_scriptOpcodeHandlers / sizeof Effects_scriptOpcodeHandlers[0]}, // G00227 D_800EC3F4
-    {"BATTLE/BATTLE.PRG", 0x88F90, 9u, (void**)Battle_Ai_decisionCallbacks, sizeof Battle_Ai_decisionCallbacks / sizeof Battle_Ai_decisionCallbacks[0]}, // G00233 D_800F1790
-    {"SLUS_010.40", 0x209A0, 16u, (void**)Audio_Seq_kLfoWaveforms, sizeof Audio_Seq_kLfoWaveforms / sizeof Audio_Seq_kLfoWaveforms[0]}, // G01840 g_Sound_LfoTable
-    {"SLUS_010.40", 0x209E0, 256u, (void**)Audio_Mixer_kCommandHandlers, sizeof Audio_Mixer_kCommandHandlers / sizeof Audio_Mixer_kCommandHandlers[0]}, // G01841 D_800301E0
-    {"SLUS_010.40", 0x20DE0, 96u, (void**)Audio_Seq_kOpcodeHandlers, sizeof Audio_Seq_kOpcodeHandlers / sizeof Audio_Seq_kOpcodeHandlers[0]}, // G01842 D_800305E0
-    {"SLUS_010.40", 0x20F60, 32u, (void**)Audio_Seq_kExtendedOpcodeHandlers, sizeof Audio_Seq_kExtendedOpcodeHandlers / sizeof Audio_Seq_kExtendedOpcodeHandlers[0]}, // G01843 D_80030760
+    {"BATTLE/BATTLE.PRG", 0x7FA34, 8u, (void**)Battle_hitFunctions, sizeof Battle_hitFunctions / sizeof Battle_hitFunctions[0], NULL}, // G00028 _hitFunctions
+    {"BATTLE/BATTLE.PRG", 0x7FA54, 40u, (void**)Battle_attackPrerequisiteFunctions, sizeof Battle_attackPrerequisiteFunctions / sizeof Battle_attackPrerequisiteFunctions[0], NULL}, // G00029 _attackPrerequisiteFunctions
+    {"BATTLE/BATTLE.PRG", 0x7FB0C, 27u, (void**)Battle_statCalculators, sizeof Battle_statCalculators / sizeof Battle_statCalculators[0], NULL}, // G00031 _statCalculators
+    {"BATTLE/BATTLE.PRG", 0x7FB78, 70u, (void**)Battle_actionEffectMediators, sizeof Battle_actionEffectMediators / sizeof Battle_actionEffectMediators[0], NULL}, // G00032 _actionEffectMediators
+    {"BATTLE/BATTLE.PRG", 0x7FDCC, 7u, (void**)Field_kTextureEffectHandlers, sizeof Field_kTextureEffectHandlers / sizeof Field_kTextureEffectHandlers[0], NULL}, // G00044 D_800E85CC
+    {"BATTLE/BATTLE.PRG", 0x7FDE8, 13u, (void**)Field_kRoomEffectOpcodeHandlers, sizeof Field_kRoomEffectOpcodeHandlers / sizeof Field_kRoomEffectOpcodeHandlers[0], NULL}, // G00045 D_800E85E8
+    {"BATTLE/BATTLE.PRG", 0x807B4, 5u, (void**)Field_gimmickModelTemplates, sizeof Field_gimmickModelTemplates / sizeof Field_gimmickModelTemplates[0], NULL}, // G00072 D_800E8FB4
+    {"BATTLE/BATTLE.PRG", 0x81530, 256u, (void**)Event_kOpcodeHandlers, sizeof Event_kOpcodeHandlers / sizeof Event_kOpcodeHandlers[0], NULL}, // G00133 _opcodeFunctionTable
+    {"BATTLE/BATTLE.PRG", 0x81E20, 20u, (void**)Battle_limbNames, sizeof Battle_limbNames / sizeof Battle_limbNames[0], NULL}, // G00138 vs_battle_limbNames
+    {"BATTLE/BATTLE.PRG", 0x82D88, 16u, (void**)Event_textBoxFrameStyles, sizeof Event_textBoxFrameStyles / sizeof Event_textBoxFrameStyles[0], NULL}, // G00148 D_800EB588
+    {"BATTLE/BATTLE.PRG", 0x835AC, 4u, (void**)Battle_spellClassSpellIds, sizeof Battle_spellClassSpellIds / sizeof Battle_spellClassSpellIds[0], NULL}, // G00206 _spellIds
+    {"BATTLE/BATTLE.PRG", 0x83A5C, 4u, (void**)Render_kGimLayerDrawRoutines, sizeof Render_kGimLayerDrawRoutines / sizeof Render_kGimLayerDrawRoutines[0], NULL}, // G00212 D_800EC25C
+    {"BATTLE/BATTLE.PRG", 0x83B24, 2u, (void**)Effects_scriptRenderers, sizeof Effects_scriptRenderers / sizeof Effects_scriptRenderers[0], NULL}, // G00222 D_800EC324
+    {"BATTLE/BATTLE.PRG", 0x83BF4, 49u, (void**)Effects_scriptOpcodeHandlers, sizeof Effects_scriptOpcodeHandlers / sizeof Effects_scriptOpcodeHandlers[0], NULL}, // G00227 D_800EC3F4
+    {"BATTLE/BATTLE.PRG", 0x88F90, 9u, (void**)Battle_Ai_decisionCallbacks, sizeof Battle_Ai_decisionCallbacks / sizeof Battle_Ai_decisionCallbacks[0], NULL}, // G00233 D_800F1790
+    {"SLUS_010.40", 0x209A0, 256u, (void**)Audio_Seq_kLfoWaveforms, sizeof Audio_Seq_kLfoWaveforms / sizeof Audio_Seq_kLfoWaveforms[0], &Content_residentLfoSamplesSource}, // G01840 g_Sound_LfoTable
+    {"SLUS_010.40", 0x209E0, 256u, (void**)Audio_Mixer_kCommandHandlers, sizeof Audio_Mixer_kCommandHandlers / sizeof Audio_Mixer_kCommandHandlers[0], NULL}, // G01841 D_800301E0
+    {"SLUS_010.40", 0x20DE0, 96u, (void**)Audio_Seq_kOpcodeHandlers, sizeof Audio_Seq_kOpcodeHandlers / sizeof Audio_Seq_kOpcodeHandlers[0], NULL}, // G01842 D_800305E0
+    {"SLUS_010.40", 0x20F60, 32u, (void**)Audio_Seq_kExtendedOpcodeHandlers, sizeof Audio_Seq_kExtendedOpcodeHandlers / sizeof Audio_Seq_kExtendedOpcodeHandlers[0], NULL}, // G01843 D_80030760
 };
 const unsigned Content_modulePointerCount = sizeof Content_modulePointers / sizeof Content_modulePointers[0];
 

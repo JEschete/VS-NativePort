@@ -42,6 +42,20 @@ struct EncounterEnemy {
 
 enum class EncounterFloor { kSupported, kBlocked, kPit, kNoFloor };
 
+struct EncounterDoor {
+  int index = 0;
+  int destination_zone = 0;
+  int destination_room = 0;
+  int tile_x = 0;
+  int tile_z = 0;
+  int layer = 0;
+  EncounterPosition destination;
+  int required_flag = 0;
+  int required_value = 0;
+  int door_id = 0;
+  bool entry_step = false;
+};
+
 struct EncounterRoom {
   int index = 0;
   std::string asset;
@@ -50,6 +64,7 @@ struct EncounterRoom {
   EncounterPosition entrance;
   std::string unavailable_reason;
   std::vector<EncounterFloor> floor;
+  std::vector<EncounterDoor> doors;
 };
 
 struct EncounterZone {
@@ -111,6 +126,8 @@ struct EncounterStatOverrides {
 // Lab startup only, after Ashley's normal actor/equipment initialization.
 void InitializeEncounterPlayerStats(const EncounterStatOverrides& overrides);
 
+enum class EncounterRoomPolicy { kIsolatedCombat, kOriginalRoom };
+
 struct EncounterSetup {
   int zone = 0;
   int room = 0;
@@ -120,13 +137,24 @@ struct EncounterSetup {
   EncounterProfile profile = EncounterProfile::kPrologue;
   EncounterStatOverrides stat_overrides;
   EncounterWeapon weapon = EncounterWeapon::kDefault;
+  EncounterRoomPolicy room_policy = EncounterRoomPolicy::kIsolatedCombat;
 };
 
 // Reads the same extracted ZND/MPD definitions consumed by the room loader.
 // Does not initialize gameplay or modify content files.
-std::expected<std::vector<EncounterZone>, std::string> ReadEncounterCatalog();
+std::expected<std::vector<EncounterZone>, std::string> ReadEncounterCatalog(
+    bool strict = false);
 std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
                                            const EncounterZone& zone);
+
+enum class EncounterDoorRequestStatus { kAccepted, kBusy, kBlocked, kInvalid };
+struct EncounterDoorRequest {
+  EncounterDoorRequestStatus status;
+  std::string reason;
+};
+// Queue a gated loader handoff on the game fiber, without changing progress
+// flags. Diagnostic original-room sessions only, not physical traversal proof.
+EncounterDoorRequest RequestEncounterDoorTransition(int index);
 
 struct EncounterActorState {
   int slot = 0;
@@ -231,6 +259,10 @@ struct EncounterState {
   std::vector<EncounterLootState> pending_loot;
   std::vector<EncounterFloorTriggerState> floor_triggers;
 };
+
+// Shared read-only field inspection. Empty while loading, outside gameplay,
+// or after room/session teardown; does not require a Combat Lab setup.
+EncounterState InspectGameplay();
 
 enum class EncounterAdjustment {
   kLowerHp,

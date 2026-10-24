@@ -13,13 +13,16 @@
 
 #include "Battle/TargetPages.h"
 #include "Core/Log.hpp"
+#include "Diagnostics/GameplayTrace.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
+#include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
@@ -37,7 +40,13 @@ extern "C" {
 #include "Boot/Session.h"
 #include "Core/BiosRand.h"
 #include "Core/Random.h"
+#include "Core/Scratch.h"
+#include "Effects/Runtime.h"
+#include "Event/ScriptActors.h"
+#include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
+#include "Field/Camera.h"
+#include "Field/Doors.h"
 #include "Field/GameMode.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
@@ -52,6 +61,8 @@ extern "C" {
 #include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Render/Display.h"
+#include "Render/Render.h"
+#include "Render/UiPrimitives.h"
 #include "State/Flags.h"
 #include "State/Location.h"
 #include "State/Progress.h"
@@ -67,7 +78,11 @@ bool configured = false;
 bool active = false;
 bool entered = false;
 bool room_prepared = false;
+bool gameplay_inspection_ready = false;
 bool player_stats_initialized = false;
+int pending_door = -1;
+int pending_door_zone = 0;
+int pending_door_room = 0;
 
 int ResumeEncounter() {
   Boot_isGameplayActive = 1;
@@ -538,6 +553,7 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
   entered = false;
   room_prepared = false;
   player_stats_initialized = false;
+  pending_door = -1;
   configured = true;
   return {};
 }
@@ -588,6 +604,8 @@ void RunEncounter() {
   Boot_RunSessionLoop(EnterOrFinishEncounter, ResumeEncounter);
   Battle_ResetTargetPages();
   active = false;
+  pending_door = -1;
+  gameplay_inspection_ready = false;
   configured = false;
   room_prepared = false;
   VS_LOG_INFO("encounter", "session finished; no normal title entry invoked");
@@ -635,8 +653,14 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
 }
 
 EncounterState InspectEncounter() {
+  if (!active || !room_prepared) return {};
+  return InspectGameplay();
+}
+
+EncounterState InspectGameplay() {
   EncounterState state;
-  state.ready = active && room_prepared && Field_controlMode != 0;
+  state.ready = gameplay_inspection_ready && Boot_isGameplayActive != 0 &&
+                Field_controlMode != 0;
   if (!state.ready) return state;
   state.zone = Field_zoneContext.zndId;
   state.room = Field_zoneContext.mapId;
@@ -705,6 +729,173 @@ EncounterState InspectEncounter() {
   }
   return state;
 }
+
+namespace {
+nlohmann::json InspectThreads() {
+  auto threads = nlohmann::json::array();
+  const auto base = reinterpret_cast<std::uintptr_t>(Event_scriptBuffer);
+  for (std::size_t index = 0; index < std::size(Event_threadWaitFrames);
+       ++index) {
+    const auto pc =
+        reinterpret_cast<std::uintptr_t>(Event_threadCursors[index]);
+    nlohmann::json thread{{"thread", index}, {"pc", pc}};
+    if (base != 0 && pc >= base) thread["script_base_delta"] = pc - base;
+    thread["wait_frames"] = Event_threadWaitFrames[index];
+    thread["dialogue_wait"] = Event_isTextBoxAwaitingClose[index];
+    threads.push_back(std::move(thread));
+  }
+  return threads;
+}
+
+nlohmann::json InspectModels() {
+  auto models = nlohmann::json::array();
+  for (std::size_t slot = 0; slot < std::size(Actors_actorRecords); ++slot) {
+    const auto* actor = Actors_actorRecords[slot];
+    if (actor == nullptr) continue;
+    models.push_back(
+        {{"slot", slot},
+         {"model", actor->modelId},
+         {"bones", actor->instance.boneCount},
+         {"position",
+          {actor->instance.position.vx, actor->instance.position.vy,
+           actor->instance.position.vz}},
+         {"facing", actor->instance.facing},
+         {"animation", actor->animationId},
+         {"animation_set", actor->animationSet},
+         {"frame", actor->pose.frame},
+         {"length", actor->animationLength},
+         {"queued_animation", actor->queuedAnimation},
+         {"holding_last_frame", actor->pose.holdingLastFrame != 0},
+         {"animation_locked", actor->animationLocked != 0},
+         {"appearance",
+          static_cast<unsigned>(actor->instance.actionAnimationState)}});
+  }
+  return models;
+}
+}  // namespace
+
+nlohmann::json InspectGameplayScene(const EncounterState& state) {
+  const bool available = state.ready && gameplay_inspection_ready &&
+                         Boot_isGameplayActive != 0 && Field_controlMode != 0;
+  nlohmann::json scene{{"available", available},
+                       {"in_game", Boot_isGameplayActive != 0}};
+  if (!available) return scene;
+  const auto& camera = Field_sphericalCamera;
+  scene["id"] = Field_zoneContext.currentSceneId;
+  scene["event"] = {
+      {"id", Event_eventId},
+      {"source", Event_eventSource},
+      {"phase", Event_playbackPhase},
+      {"script_buffer", reinterpret_cast<std::uintptr_t>(Event_scriptBuffer)},
+      {"skip_state", Event_skipState},
+      {"forced_skip", Event_isSkipForced != 0},
+      {"main_thread_finished", Event_isMainThreadFinished != 0},
+      {"threads", InspectThreads()}};
+  auto waits = nlohmann::json::array();
+  // The legacy declaration spans 80 bytes; the event VM owns eight boxes.
+  constexpr std::size_t kScriptTextBoxes = 8;
+  for (std::size_t box = 0; box < kScriptTextBoxes; ++box) {
+    waits.push_back(Event_isTextBoxAwaitingClose[box] != 0);
+  }
+  scene["event"]["dialogue_waits"] = std::move(waits);
+  scene["camera"] = {{"yaw", camera.values.yaw},
+                     {"pitch", camera.values.pitch},
+                     {"distance", camera.values.distance},
+                     {"mode", camera.values.mode},
+                     {"delta_yaw", camera.delta.yaw},
+                     {"delta_pitch", camera.delta.pitch},
+                     {"delta_distance", camera.delta.distance}};
+  const auto& view = Render_frameScratch.viewMatrix;
+  scene["camera"]["view_rotation"] = {
+      {view.m[0][0], view.m[0][1], view.m[0][2]},
+      {view.m[1][0], view.m[1][1], view.m[1][2]},
+      {view.m[2][0], view.m[2][1], view.m[2][2]}};
+  scene["camera"]["view_translation"] = {view.t[0], view.t[1], view.t[2]};
+  scene["effects"] = {{"busy", Effects_effectBusyFlags},
+                      {"phase", Effects_primaryPhase},
+                      {"tracks", Effects_trackCount},
+                      {"started_tracks", Effects_startedTrackCount},
+                      {"pending_tracks", Effects_pendingTracks}};
+  scene["models"] = InspectModels();
+  return scene;
+}
+
+namespace {
+EncounterDoorRequest CheckDoorRequest(int index) {
+  if (!active ||
+      configuration.room_policy != EncounterRoomPolicy::kOriginalRoom) {
+    return {EncounterDoorRequestStatus::kInvalid,
+            "original-room session required"};
+  }
+  if (!gameplay_inspection_ready || !room_prepared || Field_controlMode != 1 ||
+      Event_playbackPhase != 0 || Field_ScreenTransitionPhase() != 0 ||
+      Actors_actorRecords[0] == nullptr) {
+    return {EncounterDoorRequestStatus::kBusy,
+            "source event/transition still active"};
+  }
+  if (Field_roomData.header.doorsLength % sizeof(Field_MpdDoorRecord) != 0 ||
+      Field_roomData.doors == nullptr || index < 0 ||
+      static_cast<unsigned>(index) >=
+          Field_roomData.header.doorsLength / sizeof(Field_MpdDoorRecord)) {
+    return {EncounterDoorRequestStatus::kInvalid,
+            "door index/storage does not match inventory"};
+  }
+  auto& door = Field_roomData.doors[index];
+  const auto value = static_cast<unsigned char>(
+      State_ScriptFlag(static_cast<std::int16_t>(door.requiredFlagId)));
+  if (value < door.requiredFlagValue) {
+    return {EncounterDoorRequestStatus::kBlocked,
+            std::format("flag {} is {} but requires {}",
+                        static_cast<unsigned>(door.requiredFlagId), value,
+                        static_cast<unsigned>(door.requiredFlagValue))};
+  }
+  return {EncounterDoorRequestStatus::kAccepted, {}};
+}
+
+void ApplyPendingDoorRequest() {
+  if (pending_door < 0 || !gameplay_inspection_ready || !room_prepared) return;
+  if (Field_zoneContext.zndId != pending_door_zone ||
+      Field_zoneContext.mapId != pending_door_room) {
+    VS_LOG_ERROR("field.door-test",
+                 "source changed before queued door {} executed", pending_door);
+    pending_door = -1;
+    return;
+  }
+  const auto checked = CheckDoorRequest(pending_door);
+  if (checked.status == EncounterDoorRequestStatus::kBusy) return;
+  const int index = std::exchange(pending_door, -1);
+  if (checked.status != EncounterDoorRequestStatus::kAccepted) {
+    VS_LOG_WARN("field.door-test", "queued door {} rejected: {}", index,
+                checked.reason);
+    return;
+  }
+  auto& door = Field_roomData.doors[index];
+  VS_LOG_INFO("field.door-test", "begin source={}/{} door={} destination={}/{}",
+              pending_door_zone, pending_door_room, index,
+              door.destinationZoneId, door.destinationRoomId);
+  // Same handoff as Field_CheckActorTriggers (146C.c), after its door gate.
+  constexpr int kTransitionSpeed = 8;
+  if (door.destinationZoneId == Field_zoneContext.zndId) {
+    Field_BeginRoomTransition(&door, 0, kTransitionSpeed);
+  } else {
+    Field_BeginZoneTransition(&door, 0, kTransitionSpeed);
+  }
+  Actors_ResetActorRunMomentum(0);
+  Field_SetEntranceDoorRecord(reinterpret_cast<char (*)[sizeof(door)]>(&door));
+}
+}  // namespace
+
+EncounterDoorRequest RequestEncounterDoorTransition(int index) {
+  if (pending_door >= 0) {
+    return {EncounterDoorRequestStatus::kBusy, "door request already pending"};
+  }
+  const auto checked = CheckDoorRequest(index);
+  if (checked.status != EncounterDoorRequestStatus::kAccepted) return checked;
+  pending_door = index;
+  pending_door_zone = Field_zoneContext.zndId;
+  pending_door_room = Field_zoneContext.mapId;
+  return {EncounterDoorRequestStatus::kAccepted, {}};
+}
 }  // namespace VS::Game
 
 extern "C" void Boot_EncounterRoomPlacements(void** data, unsigned int* size) {
@@ -725,7 +916,8 @@ extern "C" void Boot_EncounterRoomPlacements(void** data, unsigned int* size) {
 }
 
 extern "C" int Boot_EncounterUsesRoomEvents() {
-  return VS::Game::active ? 0 : 1;
+  return !VS::Game::active || VS::Game::configuration.room_policy ==
+                                  VS::Game::EncounterRoomPolicy::kOriginalRoom;
 }
 
 extern "C" int Boot_EncounterLoadRoomEvents() {
@@ -740,13 +932,24 @@ extern "C" int Boot_EncounterLoadRoomEvents() {
 }
 
 extern "C" void Boot_EncounterPollStop() {
+  VS::Game::gameplay_inspection_ready = true;
   if (VS::Game::active) {
     if (!VS::Game::player_stats_initialized) {
       VS::Game::InitializeEncounterPlayerStats(
           VS::Game::configuration.stat_overrides);
       VS::Game::player_stats_initialized = true;
     }
+
     VS::Game::room_prepared = true;
-    if (VS::Game::stop_requested.load()) Boot_ResetToTitle();
+    if (VS::Game::stop_requested.load()) {
+      VS::Game::pending_door = -1;
+      Boot_ResetToTitle();
+    } else {
+      VS::Game::ApplyPendingDoorRequest();
+    }
   }
+}
+
+extern "C" void Boot_ResetGameplayInspection() {
+  VS::Game::gameplay_inspection_ready = false;
 }

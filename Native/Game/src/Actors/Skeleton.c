@@ -450,7 +450,7 @@ int Actors_ActorBoneEndpointPosition(int actorId, int bone, SVECTOR* result, int
     SVECTOR local;
     VECTOR transformed;
     Actors_ActorRecord* actor = Actors_actorRecords[actorId];
-    Actors_ShpModel* model = actor->instance.model;
+    Actors_ShpModel* model;
     MATRIX* matrix;
 
     if (actor == NULL) {
@@ -460,9 +460,9 @@ int Actors_ActorBoneEndpointPosition(int actorId, int bone, SVECTOR* result, int
             return -1;
         }
 
-        model = actor->instance.model;
     }
 
+    model = actor->instance.model;
     matrix = Actors_ActorBoneWorldTransform(actorId, bone, &Actors_boneMatrixScratch);
 
     if (endpoint == 0) {

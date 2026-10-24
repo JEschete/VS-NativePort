@@ -23,7 +23,7 @@ int VS_PARTICLE_DISPATCH_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int ar
     case 1:
 #ifdef VS_PARTICLE_UNTEXTURED
         /* This variant uses only the state prefix, without texture animation. */
-        temp_s1 = Core_Memory_AllocateFromHighEnd(0x10);
+        temp_s1 = Core_Memory_AllocateFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation));
 #else
         temp_s1 = Core_Memory_AllocateFromHighEnd(sizeof(Effects_ParticleQuadSet));
 #endif

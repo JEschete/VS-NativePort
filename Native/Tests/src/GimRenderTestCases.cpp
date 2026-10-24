@@ -1,4 +1,21 @@
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <string_view>
+#include <type_traits>
+
 #include <catch2/catch_test_macros.hpp>
+
+#include "Legacy/Psx.h"
+
+extern "C" {
+#include "Audio/Seq/Channel.h"
+#include "Battle/Hud.h"
+#include "Render/Render.h"
+#include "Render/Text/CompactFont.h"
+#include "Render/UiPrimitives.h"
+#include "State/Timers.h"
+}
 
 extern "C" int Tests_GimEventLayerLayout(void);
 extern "C" int Tests_EncodedTextFormatting(void);
@@ -150,4 +167,172 @@ extern "C" int CheckDefaultLoadoutNames(void);
 TEST_CASE("Default actor and weapon names retain encoded glyphs and controls",
           "[render][menu][names]") {
   REQUIRE(CheckDefaultLoadoutNames() == 1);
+}
+
+namespace {
+struct PuzzleTimerFixture {
+  Render_FrameScratch saved_frame = Render_frameScratch;
+  decltype(std::to_array(Render_compactGlyphWidths)) saved_widths =
+      std::to_array(Render_compactGlyphWidths);
+  decltype(std::to_array(Render_compactGlyphIndices)) saved_indices =
+      std::to_array(Render_compactGlyphIndices);
+  decltype(std::to_array(Battle_puzzleTimerText)) saved_text =
+      std::to_array(Battle_puzzleTimerText);
+  char* saved_pointer = Battle_puzzleTimerTextPointer;
+  char saved_visible = Battle_lowerScreenUiState;
+  char saved_hundredths = Audio_Seq_unusedStateFlags.puzzleTimerHundredths;
+  char saved_seconds = Audio_Seq_unusedStateFlags.puzzleTimerSeconds;
+  char saved_minutes = Audio_Seq_unusedStateFlags.puzzleTimerMins;
+  char saved_hours = Audio_Seq_unusedStateFlags.puzzleSetMaxTimer;
+  State_SceneTimer saved_timer = State_sceneTimer;
+  int saved_packed_timer = Battle_puzzleTimer;
+  std::array<u_long, 256> storage{};
+  std::array<u_long, 16> ordering{};
+
+  PuzzleTimerFixture() {
+    Battle_puzzleTimerTextPointer = nullptr;
+    std::fill_n(Render_compactGlyphWidths + 8, 6, 0x66);
+    for (int glyph = 0; glyph < 11; ++glyph) {
+      Render_compactGlyphIndices[16 + glyph] = static_cast<u_char>(glyph * 2);
+    }
+  }
+
+  ~PuzzleTimerFixture() {
+    Render_frameScratch = saved_frame;
+    std::copy(saved_widths.begin(), saved_widths.end(),
+              Render_compactGlyphWidths);
+    std::copy(saved_indices.begin(), saved_indices.end(),
+              Render_compactGlyphIndices);
+    std::copy(saved_text.begin(), saved_text.end(), Battle_puzzleTimerText);
+    Battle_puzzleTimerTextPointer = saved_pointer;
+    Battle_lowerScreenUiState = saved_visible;
+    Audio_Seq_unusedStateFlags.puzzleTimerHundredths = saved_hundredths;
+    Audio_Seq_unusedStateFlags.puzzleTimerSeconds = saved_seconds;
+    Audio_Seq_unusedStateFlags.puzzleTimerMins = saved_minutes;
+    Audio_Seq_unusedStateFlags.puzzleSetMaxTimer = saved_hours;
+    State_sceneTimer = saved_timer;
+    Battle_puzzleTimer = saved_packed_timer;
+  }
+
+  void DrawCounter(const State_SceneTimer& timer, int hundredths) {
+    storage.fill(0);
+    storage.front() = storage.back() = 0xC0FFEE00;
+    ordering.fill(0xFFFFFF);
+    Render_frameScratch.primitiveCursor = storage.data() + 1;
+    Render_frameScratch.orderingTable = ordering.data() + 1;
+    Audio_Seq_unusedStateFlags.puzzleTimerHundredths =
+        static_cast<char>(hundredths);
+    Battle_DrawPuzzleTimer(&timer);
+  }
+
+  void Draw(int packed_timer, int hundredths) {
+    State_SceneTimer timer{};
+    timer.frames = static_cast<signed char>(packed_timer & 0xFF);
+    timer.seconds = static_cast<signed char>((packed_timer >> 8) & 0xFF);
+    timer.minutes = static_cast<signed char>((packed_timer >> 16) & 0xFF);
+    timer.hours = static_cast<signed char>((packed_timer >> 24) & 0xFF);
+    DrawCounter(timer, hundredths);
+  }
+
+  void DrawCurrent(int hundredths) {
+    DrawCounter(State_sceneTimer, hundredths);
+  }
+
+  void CheckGlyph(std::size_t glyph, char character) const {
+    const auto* sprite = storage.data() + 3 + glyph * 5;
+    CHECK(sprite[1] == 0x64808080);
+    CHECK(sprite[2] == static_cast<u_long>((128 + glyph * 6) | (200 << 16)));
+    CHECK(sprite[4] == 0x000A0006);
+    CHECK((sprite[3] & 0xFF) == static_cast<u_long>((character - '0') * 2));
+  }
+
+  void CheckGuards() const {
+    CHECK(storage.front() == 0xC0FFEE00);
+    CHECK(storage.back() == 0xC0FFEE00);
+    CHECK(Battle_puzzleTimerTextPointer == nullptr);
+    CHECK(Battle_puzzleTimerText[8] == '\0');
+  }
+
+  void CheckRendering(std::string_view expected) const {
+    CHECK(std::string_view(Battle_puzzleTimerText, 8) == expected);
+    CHECK(Render_frameScratch.primitiveCursor == storage.data() + 44);
+    CHECK(LegacyGpu_WalkList(ordering.data()) == 11);
+    for (std::size_t glyph = 0; glyph < 8; ++glyph) {
+      CheckGlyph(glyph, expected[glyph]);
+    }
+    CheckGuards();
+  }
+
+  void CheckClockState(int mode, int visible, int minutes, int seconds) const {
+    CHECK(State_sceneTimer.mode == mode);
+    CHECK(Battle_lowerScreenUiState == visible);
+    CHECK(State_sceneTimer.minutes == minutes);
+    CHECK(State_sceneTimer.seconds == seconds);
+  }
+};
+}  // namespace
+
+TEST_CASE("Puzzle timer owns a complete writable native text buffer",
+          "[render][puzzle-timer]") {
+  CHECK_FALSE(
+      std::is_const_v<std::remove_extent_t<decltype(Battle_puzzleTimerText)>>);
+  CHECK(std::extent_v<decltype(Battle_puzzleTimerText)> == 9);
+}
+
+TEST_CASE(
+    "Puzzle timer formats and renders every digit without a pointer bridge",
+    "[render][puzzle-timer]") {
+  PuzzleTimerFixture fixture;
+  fixture.Draw((12 << 16) | (34 << 8) | 99, 56);
+  fixture.CheckRendering("12:34:56");
+  fixture.Draw((59 << 16) | (59 << 8), 99);
+  fixture.CheckRendering("59:59:99");
+  fixture.Draw(1 << 24, 17);
+  fixture.CheckRendering("59:59:99");
+  fixture.Draw(0, 0);
+  fixture.CheckRendering("00:00:00");
+}
+
+TEST_CASE("Puzzle timer hide and show preserve repeatable native rendering",
+          "[render][puzzle-timer]") {
+  PuzzleTimerFixture fixture;
+  for (int repeat = 0; repeat < 2; ++repeat) {
+    Battle_ShowPuzzleTimer();
+    CHECK(Battle_lowerScreenUiState == 1);
+    fixture.Draw(0, 12);
+    fixture.CheckRendering("00:00:12");
+    Battle_HidePuzzleTimer();
+    CHECK(Battle_lowerScreenUiState == 0);
+  }
+}
+
+TEST_CASE("Puzzle HUD reads the authoritative clock without copying its alias",
+          "[render][puzzle-timer][timer-binding]") {
+  PuzzleTimerFixture fixture;
+  State_sceneTimer = {};
+  State_sceneTimer.minutes = 12;
+  State_sceneTimer.seconds = 34;
+  Battle_puzzleTimer = 0;
+  fixture.DrawCurrent(56);
+  fixture.CheckRendering("12:34:56");
+  CHECK(Battle_puzzleTimer == 0);
+}
+
+TEST_CASE("Scene timer pause and reset preserve HUD visibility and clock state",
+          "[render][puzzle-timer][timer-binding]") {
+  PuzzleTimerFixture fixture;
+  State_sceneTimer = {};
+  State_sceneTimer.mode = 1;
+  State_sceneTimer.minutes = 1;
+  State_sceneTimer.seconds = 2;
+  State_SetSceneTimerPaused(1);
+  fixture.CheckClockState(0, 0, 1, 2);
+  fixture.DrawCurrent(56);
+  fixture.CheckRendering("01:02:56");
+  State_SetSceneTimerPaused(0);
+  fixture.CheckClockState(1, 1, 1, 2);
+  State_ResetSceneTimer();
+  fixture.CheckClockState(0, 0, 0, 0);
+  fixture.DrawCurrent(0);
+  fixture.CheckRendering("00:00:00");
 }

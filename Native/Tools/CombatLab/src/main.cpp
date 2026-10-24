@@ -57,6 +57,10 @@ struct Options {
   bool start = false;
   bool catalog_only = false;
   bool devices = true;
+  bool door_transitions = false;
+  std::string door_case;
+  std::string door_from;
+  std::uint64_t door_limit = 0;
   std::vector<ScriptPress> presses;
 };
 
@@ -105,73 +109,95 @@ fs::path FindData() {
   throw std::runtime_error("extracted data not found; pass --data <directory>");
 }
 
+void ParseValue(Options& options, std::string_view argument,
+                std::string_view value) {
+  if (argument == "--data") {
+    options.data = value;
+  } else if (argument == "--scenario") {
+    options.scenario = value;
+  } else if (argument == "--sequence") {
+    options.sequence = value;
+  } else if (argument == "--door-case") {
+    options.door_case = value;
+  } else if (argument == "--door-from") {
+    options.door_from = value;
+  } else if (argument == "--capture") {
+    options.capture = value;
+  } else if (argument == "--frames") {
+    options.frames = ParseTick(value);
+  } else if (argument == "--door-limit") {
+    options.door_limit = ParseTick(value);
+    if (options.door_limit == 0) {
+      throw std::runtime_error("--door-limit must be positive");
+    }
+  } else if (argument == "--speed") {
+    const auto speed = ParseTick(value);
+    constexpr std::uint64_t kMaximumSpeed = 64;
+    if (speed < 1 || speed > kMaximumSpeed) {
+      throw std::runtime_error("speed must be 1-64");
+    }
+    options.speed = static_cast<int>(speed);
+  } else if (argument == "--press") {
+    const auto presses = DecodePresses(value);
+    options.presses.insert(options.presses.end(), presses.begin(),
+                           presses.end());
+  } else {
+    throw std::runtime_error("unknown option: " + std::string(argument));
+  }
+}
+
+void ValidateOptions(Options& options) {
+  if (!options.sequence.empty() &&
+      (!options.scenario.empty() || options.start || options.catalog_only ||
+       options.frames != 0 || !options.presses.empty())) {
+    throw std::runtime_error(
+        "--sequence cannot combine with "
+        "scenario/start/frames/press/catalog-only");
+  }
+  if (!options.door_transitions) {
+    if (!options.door_case.empty() || !options.door_from.empty() ||
+        options.door_limit) {
+      throw std::runtime_error("door selectors require --door-transitions");
+    }
+    return;
+  }
+  if (!options.scenario.empty() || !options.sequence.empty() ||
+      !options.presses.empty() || options.start ||
+      (!options.door_case.empty() && !options.door_from.empty())) {
+    throw std::runtime_error(
+        "door tests cannot combine with scenario/sequence/start/press or both "
+        "door selectors");
+  }
+  constexpr std::uint64_t kDefaultDoorFrameBudget = 3600;
+  options.devices = false;
+  if (options.frames == 0) options.frames = kDefaultDoorFrameBudget;
+  if (options.frames > UINT64_MAX - kScriptStopGraceTicks) {
+    throw std::runtime_error("door frame budget exceeds supported tick range");
+  }
+}
+
 Options Parse(int argc, char** argv) {
   Options options;
   for (int index = 1; index < argc; ++index) {
     const std::string_view argument = argv[index];
     if (argument == "--start") {
       options.start = true;
-      continue;
-    }
-    if (argument == "--catalog-only") {
+    } else if (argument == "--catalog-only") {
       options.catalog_only = true;
-      continue;
-    }
-    if (argument == "--scripted") {
+    } else if (argument == "--scripted") {
       options.devices = false;
-      continue;
-    }
-    if (++index == argc) throw std::runtime_error("option is missing a value");
-    const std::string_view value = argv[index];
-    if (argument == "--data") {
-      options.data = value;
-    } else if (argument == "--scenario") {
-      options.scenario = value;
-    } else if (argument == "--sequence") {
-      options.sequence = value;
-    } else if (argument == "--capture") {
-      options.capture = value;
-    } else if (argument == "--frames") {
-      options.frames = ParseTick(value);
-    } else if (argument == "--speed") {
-      const auto speed = ParseTick(value);
-      constexpr std::uint64_t kMaximumSpeed = 64;
-      if (speed < 1 || speed > kMaximumSpeed) {
-        throw std::runtime_error("speed must be 1-64");
-      }
-      options.speed = static_cast<int>(speed);
-    } else if (argument == "--press") {
-      const auto presses = DecodePresses(value);
-      options.presses.insert(options.presses.end(), presses.begin(),
-                             presses.end());
+    } else if (argument == "--door-transitions") {
+      options.door_transitions = true;
     } else {
-      throw std::runtime_error("unknown option: " + std::string(argument));
-    }
-    if (!options.sequence.empty() &&
-        (!options.scenario.empty() || options.start || options.catalog_only ||
-         options.frames != 0 || !options.presses.empty())) {
-      throw std::runtime_error(
-          "--sequence cannot combine with --scenario/--start/--frames/--press/"
-          "--catalog-only; put frame limits and presses in each script");
+      if (++index == argc) {
+        throw std::runtime_error("option is missing a value");
+      }
+      ParseValue(options, argument, argv[index]);
     }
   }
+  ValidateOptions(options);
   if (options.data.empty()) options.data = FindData();
   return options;
-}
-
-std::string GitOutput(const char* command, const char* argument) {
-  const auto directory = Platform::ExecutableDir().string();
-  const char* argv[] = {"git",   "-C",     directory.c_str(),
-                        command, argument, nullptr};
-  const std::unique_ptr<SDL_Process, decltype(&SDL_DestroyProcess)> process(
-      SDL_CreateProcess(argv, true), SDL_DestroyProcess);
-  if (!process) return "unavailable";
-  std::size_t size = 0;
-  int exit_code = 0;
-  const std::unique_ptr<void, decltype(&SDL_free)> output(
-      SDL_ReadProcess(process.get(), &size, &exit_code), SDL_free);
-  if (!output || exit_code != 0) return "unavailable";
-  return std::string(static_cast<const char*>(output.get()), size);
 }
 
 void WriteJson(const fs::path& path, const nlohmann::json& value) {
@@ -206,7 +232,7 @@ void LoadData(const Options& options) {
 
 std::vector<Game::EncounterZone> LoadCatalog(const Options& options,
                                              Trace& trace) {
-  auto catalog = Game::ReadEncounterCatalog();
+  auto catalog = Game::ReadEncounterCatalog(options.door_transitions);
   if (!catalog) throw std::runtime_error(catalog.error());
   auto catalog_json = nlohmann::json::array();
   for (const auto& zone : *catalog) {
@@ -282,10 +308,12 @@ void InitializeWindow(Platform::App& app, Render::Device& gpu, Trace& trace) {
 }
 
 void WriteManifest(const Options& options, Trace& trace, std::size_t scripts) {
+  const auto source = Game::TraceSourceProvenance(Platform::ExecutableDir());
   WriteJson(trace.Directory() / "manifest.json",
             {{"schema", 1},
-             {"revision", GitOutput("rev-parse", "HEAD")},
-             {"worktree", GitOutput("status", "--porcelain")},
+             {"revision", source.at("revision")},
+             {"worktree", source.at("worktree")},
+             {"source_status", source.at("status")},
              {"data_root", fs::absolute(options.data).string()},
              {"configuration", scripts == 0 ? "standalone isolated encounter"
                                             : "single-window script sequence"},
@@ -296,9 +324,65 @@ void WriteManifest(const Options& options, Trace& trace, std::size_t scripts) {
              {"devices", options.devices}});
 }
 
+void WriteDoorInventory(Trace& trace,
+                        const std::vector<Game::EncounterZone>& catalog,
+                        const std::vector<DoorTestCase>& tests) {
+  auto cases = nlohmann::json::array();
+  for (const auto& test : tests) cases.push_back(EncodeDoorTest(test));
+  auto unavailable = nlohmann::json::array();
+  std::size_t rooms = 0;
+  for (const auto& zone : catalog) {
+    rooms += zone.rooms.size();
+    for (const auto& room : zone.rooms) {
+      if (!room.unavailable_reason.empty()) {
+        unavailable.push_back({{"zone", zone.id},
+                               {"room", room.index},
+                               {"reason", room.unavailable_reason}});
+      }
+    }
+  }
+  WriteJson(trace.Directory() / "door-inventory.json",
+            {{"schema", 1},
+             {"coverage", "loader_entry_event"},
+             {"zones", catalog.size()},
+             {"rooms", rooms},
+             {"directed_doors", tests.size()},
+             {"unavailable_rooms", unavailable},
+             {"cases", cases}});
+}
+
+std::vector<EncounterScript> BuildDoorScripts(
+    const Options& options, Trace& trace,
+    const std::vector<Game::EncounterZone>& catalog) {
+  auto tests = EnumerateDoorTests(catalog);
+  WriteDoorInventory(trace, catalog, tests);
+  const auto selector =
+      options.door_case.empty() ? options.door_from : options.door_case;
+  auto first = selector.empty()
+                   ? tests.begin()
+                   : std::ranges::find(tests, selector, &DoorTestCase::id);
+  if (first == tests.end()) {
+    throw std::runtime_error("door selector has no inventory match");
+  }
+  std::vector<EncounterScript> scripts;
+  for (auto test = first; test != tests.end(); ++test) {
+    if (!options.door_case.empty() && test->id != options.door_case) break;
+    if (options.door_limit && scripts.size() >= options.door_limit) break;
+    EncounterScript script;
+    script.name = test->id;
+    script.scenario = trace.Directory() / "door-inventory.json";
+    script.setup = test->setup;
+    script.frames = options.frames;
+    script.door = *test;
+    scripts.push_back(std::move(script));
+  }
+  return scripts;
+}
+
 void ValidateScripts(const std::vector<EncounterScript>& scripts,
                      const std::vector<Game::EncounterZone>& catalog) {
   for (const auto& script : scripts) {
+    if (script.door && !script.door->unavailable.empty()) continue;
     const auto zone =
         std::ranges::find(catalog, script.setup.zone, &Game::EncounterZone::id);
     if (zone == catalog.end()) {
@@ -344,6 +428,9 @@ class LiveSession {
                             {"scenario", script.scenario.string()},
                             {"frames", script.frames},
                             {"status", "not_run"}});
+        if (script.door) {
+          results_.back()["door"] = EncodeDoorTest(*script.door);
+        }
       }
       LoadScript();
     }
@@ -422,6 +509,7 @@ class LiveSession {
   bool sequence_failed_ = false;
   bool sequence_cancelled_ = false;
   std::string script_stop_reason_;
+  std::optional<DoorTrial> door_trial_;
   SDL_Window* window_ = nullptr;
   bool help_ = false;
   bool paused_before_help_ = false;
@@ -447,18 +535,30 @@ class LiveSession {
   }
 
   void SaveSequence() {
-    WriteJson(trace_.Directory() / "sequence-results.json",
-              {{"schema", 1},
-               {"status", sequence_cancelled_ ? "cancelled"
-                          : sequence_failed_  ? "failed"
-                          : sequence_done_    ? "completed"
-                                              : "running"},
-               {"scripts", results_}});
+    nlohmann::json summary = {{"schema", 1},
+                              {"status", sequence_cancelled_ ? "cancelled"
+                                         : sequence_failed_  ? "failed"
+                                         : sequence_done_    ? "completed"
+                                                             : "running"},
+                              {"scripts", results_}};
+    if (options_.door_transitions) {
+      nlohmann::json counts = nlohmann::json::object();
+      for (const auto& result : results_) {
+        const auto status = result.at("status").get<std::string>();
+        counts[status] = counts.value(status, 0) + 1;
+      }
+      summary["coverage"] = "loader_entry_event";
+      summary["selected_cases"] = scripts_.size();
+      summary["counts"] = std::move(counts);
+    }
+    WriteJson(trace_.Directory() / "sequence-results.json", summary);
   }
 
   void LoadScript() {
     const auto& script = scripts_.at(script_index_);
-    editor_.Load(script.setup);
+    door_trial_.reset();
+    if (script.door) door_trial_.emplace(*script.door);
+    if (!door_trial_ || !door_trial_->Finished()) editor_.Load(script.setup);
     script_start_tick_ = ticks_;
     script_start_errors_ = trace_.Errors();
     script_stop_tick_ = 0;
@@ -495,12 +595,24 @@ class LiveSession {
 
   void FinishScript() {
     const auto errors = trace_.Errors() - script_start_errors_;
+    if (door_trial_ && (!door_trial_->Finished() || errors != 0)) {
+      door_trial_->Fail(script_stop_reason_.empty()
+                            ? "encounter ended before transition acceptance"
+                            : script_stop_reason_);
+    }
+    const bool door_case = scripts_.at(script_index_).door.has_value();
+    const auto door_result =
+        door_trial_ ? door_trial_->Result() : nlohmann::json{};
     const bool complete = script_initialized_ && errors == 0 &&
-                          script_stop_reason_ == "frame_budget";
+                          (door_trial_ ? door_result.at("status") == "passed"
+                                       : script_stop_reason_ == "frame_budget");
     auto& result = results_[script_index_];
     result["status"] = sequence_cancelled_ ? "cancelled"
-                       : complete          ? "completed"
-                                           : "failed";
+                       : door_trial_
+                           ? door_result.at("status").get<std::string>()
+                       : complete ? "completed"
+                                  : "failed";
+    if (door_trial_) result["door"] = door_result;
     result["initialized"] = script_initialized_;
     result["engine_errors"] = errors;
     result["ticks"] = ticks_ - script_start_tick_;
@@ -512,7 +624,7 @@ class LiveSession {
     trace_.EndScript(ticks_, result);
     sequence_failed_ |= !complete && !sequence_cancelled_;
     ++script_index_;
-    sequence_done_ = sequence_failed_ || sequence_cancelled_ ||
+    sequence_done_ = (!door_case && sequence_failed_) || sequence_cancelled_ ||
                      script_index_ == scripts_.size();
     SaveSequence();
     if (!sequence_done_) LoadScript();
@@ -529,7 +641,40 @@ class LiveSession {
     }
   }
 
-  void UpdateScript(const Game::EncounterState& state) {
+  void UpdateDoorTrial(DoorTrial& trial, const DoorTestCase& test,
+                       const Game::EncounterState& state,
+                       const nlohmann::json& scene) {
+    const auto& script = scripts_.at(script_index_);
+    const bool idle =
+        scene.value("available", false) && scene.at("event").at("phase") == 0;
+    const bool dialogue =
+        scene.value("available", false) &&
+        std::ranges::any_of(
+            scene.at("event").at("dialogue_waits"),
+            [](const auto& wait) { return wait.template get<bool>(); });
+    if (trial.Observe(state, idle, ticks_ - script_start_tick_, dialogue)) {
+      const auto request =
+          Game::RequestEncounterDoorTransition(test.door.index);
+      trial.Requested(request, ticks_ - script_start_tick_);
+      if (request.status != Game::EncounterDoorRequestStatus::kBusy) {
+        trace_.Event(
+            "door.request",
+            {{"id", script.name},
+             {"accepted",
+              request.status == Game::EncounterDoorRequestStatus::kAccepted},
+             {"reason", request.reason}},
+            ticks_);
+      }
+    }
+    if (ticks_ - script_start_tick_ >= script.frames) trial.Timeout();
+    if (trial.Finished()) {
+      const auto status = trial.Result().at("status").get<std::string>();
+      RequestScriptStop("door_" + status);
+    }
+  }
+
+  void UpdateScript(const Game::EncounterState& state,
+                    const nlohmann::json& scene) {
     if (scripts_.empty()) return;
     const auto& script = scripts_.at(script_index_);
     script_initialized_ |= state.ready && state.zone == script.setup.zone &&
@@ -537,7 +682,12 @@ class LiveSession {
     if (trace_.Errors() != script_start_errors_) {
       RequestScriptStop("engine_error");
     }
-    if (ticks_ - script_start_tick_ >= script.frames) {
+    if (door_trial_ && !script_stopping_) {
+      if (!script.door) {
+        throw std::logic_error("door trial has no inventory case");
+      }
+      UpdateDoorTrial(*door_trial_, *script.door, state, scene);
+    } else if (!door_trial_ && ticks_ - script_start_tick_ >= script.frames) {
       RequestScriptStop("frame_budget");
     }
     if (script_stopping_ &&
@@ -590,6 +740,16 @@ class LiveSession {
   }
 
   bool HandleLabKey(SDL_Keycode key) {
+    if (options_.door_transitions &&
+        (key == SDLK_F1 || key == SDLK_F2 || key == SDLK_F3 || key == SDLK_F4 ||
+         key == SDLK_F5 || key == SDLK_F8)) {
+      trace_.Event(
+          "control.rejected",
+          {{"reason",
+            "automated door fixtures prohibit live stat/status adjustments"}},
+          ticks_);
+      return true;
+    }
     if (key == SDLK_F11) {
       help_ = !help_;
       if (help_) {
@@ -639,6 +799,11 @@ class LiveSession {
   }
 
   void UpdateEditor(const Input::PadState& pad) {
+    if (door_trial_ && door_trial_->Finished()) {
+      script_stop_reason_ = "door_blocked";
+      FinishScript();
+      return;
+    }
     const auto action = editor_.Update(pad, std::exchange(confirm_, false));
     if (pad.pressed != 0) {
       trace_.Event("editor.input", {{"buttons", pad.pressed}}, ticks_);
@@ -688,6 +853,9 @@ class LiveSession {
                                            : scripts_.at(script_index_).presses;
     const auto input_tick =
         scripts_.empty() ? ticks_ : ticks_ - script_start_tick_;
+    if (door_trial_ && !script_stopping_) {
+      injected |= door_trial_->Input(input_tick);
+    }
     for (const auto& press : presses) {
       if (!script_stopping_ && input_tick >= press.tick &&
           input_tick - press.tick < 2) {
@@ -708,9 +876,10 @@ class LiveSession {
       const auto state = Game::InspectEncounter();
       inspection_timing_.Record(inspection_start);
       const auto trace_start = SDL_GetTicksNS();
-      trace_.Frame(ticks_, pad, state);
+      const auto scene = Game::InspectGameplayScene(state);
+      trace_.Frame(ticks_, pad, state, scene);
       trace_timing_.Record(trace_start);
-      UpdateScript(state);
+      UpdateScript(state, scene);
       if (!running) {
         fiber_.reset();
         help_ = paused_ = false;
@@ -783,8 +952,9 @@ class LiveSession {
   }
 
   bool Finished() const {
-    return rejected_ || sequence_done_ ||
-           (options_.frames != 0 && ticks_ >= options_.frames);
+    return (rejected_ && !options_.door_transitions) || sequence_done_ ||
+           (scripts_.empty() && options_.frames != 0 &&
+            ticks_ >= options_.frames);
   }
 };
 
@@ -801,7 +971,8 @@ int Run(int argc, char** argv) {
     LoadData(options);
     trace.Event("startup.stage", {{"stage", "data.end"}});
     if (options.catalog_only) {
-      LoadCatalog(options, trace);
+      const auto catalog = LoadCatalog(options, trace);
+      if (options.door_transitions) BuildDoorScripts(options, trace, catalog);
       return trace.Failed() ? 1 : 0;
     }
 
@@ -817,6 +988,9 @@ int Run(int argc, char** argv) {
     }
     trace.Event("startup.stage", {{"stage", "catalog.begin"}});
     auto catalog = LoadCatalog(options, trace);
+    if (options.door_transitions) {
+      scripts = BuildDoorScripts(options, trace, catalog);
+    }
     ValidateScripts(scripts, catalog);
     trace.Event("startup.stage", {{"stage", "catalog.end"}});
     if (!ShowLoading(app, gpu, canvas, input, trace,
@@ -861,7 +1035,7 @@ int main(int argc, char** argv) try {
   const bool noninteractive =
       std::any_of(argv + 1, argv + argc, [](std::string_view argument) {
         return argument == "--sequence" || argument == "--scripted" ||
-               argument == "--catalog-only";
+               argument == "--catalog-only" || argument == "--door-transitions";
       });
   if (!noninteractive) {
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Combat Lab", error.what(),

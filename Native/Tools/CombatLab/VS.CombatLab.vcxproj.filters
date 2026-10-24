@@ -15,6 +15,9 @@
     <ClCompile Include="src\Canvas.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\DoorTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\Editor.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -25,6 +28,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="include\CombatLab\Canvas.hpp">
+      <Filter>include\CombatLab</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CombatLab\DoorTests.hpp">
       <Filter>include\CombatLab</Filter>
     </ClInclude>
     <ClInclude Include="include\CombatLab\Editor.hpp">

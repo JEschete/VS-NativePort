@@ -1,6 +1,17 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
+#include "Actors/ActorModelSlot.h"
+#include "Actors/ActorRecord.h"
+#include "Actors/ActorState.h"
+#include "Actors/Animation.h"
+#include "Actors/ModelInstance.h"
+#include "Actors/Movement.h"
+#include "Actors/Shadow.h"
+#include "Actors/Skeleton.h"
+#include "Actors/TextureAnimation.h"
+#include "Battle/Actor.h"
 #include "Core/Compatibility.h"
+#include "Core/Diagnostics.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
@@ -16,9 +27,13 @@
 #include "Event/Splash.h"
 #include "Event/Weather.h"
 #include "Field/Environment.h"
+#include "Field/Gimmicks.h"
 #include "Input/Controller.h"
+#include "Items/Inventory.h"
+#include "Items/Loadout.h"
 #include "Render/Display.h"
 #include "Render/Images.h"
+#include "Render/Palette.h"
 #include "State/Timers.h"
 
 // decomp: D_800F4B20 (D_800F4B20@BATTLE/BATTLE.PRG)
@@ -33,8 +48,19 @@ void* Event_vibrationPatternBuffer;
 // decomp: BATTLE.PRG func_800BA8BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2454)
 intptr_t Event_CommandPlayActorEffect(u_char* arg0, short arg1)
 {
-    Effects_StartScriptedActorEffect(
-        Core_Memory_ReadUnalignedShort(arg0 + 1), Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3)));
+    const int effect = Core_Memory_ReadUnalignedShort(arg0 + 1);
+    const u_short selector = Core_Memory_ReadUnalignedShort(arg0 + 3);
+    const unsigned referenceType = selector >> 12;
+    const int actor = referenceType <= 1 ? Event_ResolveScriptActorReference(selector) : -1;
+    const Battle_Actor* target = (unsigned)actor < 16 ? Actors_ActorAtSlot(actor) : NULL;
+    if ((unsigned)actor >= 16 ||
+        (referenceType == 0 && (target == NULL || target->modelId != selector)) ||
+        (Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL)) {
+        Core_Errorf("event", "effect=%d awaits unavailable actor selector=0x%04X slot=%d",
+            effect, (unsigned)selector, actor);
+        return 1;
+    }
+    Effects_StartScriptedActorEffect(effect, actor);
     return 0;
 }
 

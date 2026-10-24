@@ -12,6 +12,7 @@
 // The copied boot entry (vs_main_exec): the original's endless loop, run on the
 // game fiber.
 extern "C" void Boot_RunGame(void);
+extern "C" void Boot_ResetGameplayInspection(void);
 
 namespace VS::Game {
 
@@ -48,7 +49,7 @@ GameApp::GameApp(Services services) : m_services_(services) {
   m_runner_ = std::make_unique<Runner>();
 }
 
-GameApp::~GameApp() = default;
+GameApp::~GameApp() { Boot_ResetGameplayInspection(); }
 
 bool GameApp::Finished() const { return m_runner_->fiber.Finished(); }
 

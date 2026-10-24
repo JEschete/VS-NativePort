@@ -24,6 +24,9 @@
     <ClCompile Include="src\ActorCommandTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AiAuxiliaryPerceptionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AiDecisionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -31,6 +34,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\AiPlanningTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AiSessionResetTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\AudioTests.cpp">
@@ -61,6 +67,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\DataMenuTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DoorTransitionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\EffectTimelineTests.c">
@@ -153,6 +162,9 @@
     <ClCompile Include="src\SequenceTests.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SfxBankSelectionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SphereTerrainTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -169,6 +181,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp">
+      <Filter>..\Tools\CombatLab\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\CombatLab\src\DoorTests.cpp">
       <Filter>..\Tools\CombatLab\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\CombatLab\src\Editor.cpp">

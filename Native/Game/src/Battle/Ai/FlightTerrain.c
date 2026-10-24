@@ -52,31 +52,31 @@ enum {
 };
 
 // decomp: BATTLE.PRG func_800E0850 (src/BATTLE/BATTLE.PRG/771A8.c:942).
-int Battle_Ai_LowestReachableGroundHeight(Battle_Ai_ActorAiState* arg0,
-                                          u_int arg1) {
-  int min = 0;
-  int count = 1;
+int Battle_Ai_LowestReachableGroundHeight(Battle_Ai_ActorAiState* state,
+                                          u_int movement_angle) {
+  int minimum_height = 0;
+  int remaining_directions = 1;
   int direction;
 
-  if (arg1 & kFlightAngleFractionMask) {
-    count = kFlightDiagonalDirectionCount;
+  if (movement_angle & kFlightAngleFractionMask) {
+    remaining_directions = kFlightDiagonalDirectionCount;
   }
-  direction =
-      (int)((arg1 >> kFlightDirectionShift) & kFlightCardinalDirectionMask);
-  while (--count != -1) {
-    if (Battle_Ai_CanFlyInDirection((void*)arg0, direction) != 0) {
-      Battle_Ai_DirectionDelta* directions =
+  direction = (int)((movement_angle >> kFlightDirectionShift) &
+                    kFlightCardinalDirectionMask);
+  while (--remaining_directions != -1) {
+    if (Battle_Ai_CanFlyInDirection((void*)state, direction) != 0) {
+      Battle_Ai_DirectionDelta* direction_deltas =
           (Battle_Ai_DirectionDelta*)Battle_Ai_FrameState()->directions;
-      int x = arg0->tile.tile.tileX + directions[direction].dx;
-      int z = arg0->tile.tile.tileZ + directions[direction].dz;
-      int h = Field_GroundHeightAtTile(x, z);
-      if (h < min) {
-        min = h;
+      int tile_x = state->tile.tile.tileX + direction_deltas[direction].dx;
+      int tile_z = state->tile.tile.tileZ + direction_deltas[direction].dz;
+      int ground_height = Field_GroundHeightAtTile(tile_x, tile_z);
+      if (ground_height < minimum_height) {
+        minimum_height = ground_height;
       }
     }
     direction = (direction + 1) & kFlightDirectionMask;
   }
-  return min;
+  return minimum_height;
 }
 
 static int SignedNavigationGroundHeight(int height) {
@@ -87,23 +87,23 @@ static int SignedNavigationGroundHeight(int height) {
 }
 
 // decomp: BATTLE.PRG func_800E6A6C (src/BATTLE/BATTLE.PRG/7E05C.s:187).
-int Battle_Ai_MinimumAiGroundHeightAlongSegment(int x1, int z1, int x2,
-                                                int z2) {
-  int dx = (x2 - x1) >> kSegmentSampleShift;
-  int dz = (z2 - z1) >> kSegmentSampleShift;
-  int minimum = 0;
-  int index;
+int Battle_Ai_MinimumAiGroundHeightAlongSegment(int start_x, int start_z,
+                                                int end_x, int end_z) {
+  int step_x = (end_x - start_x) >> kSegmentSampleShift;
+  int step_z = (end_z - start_z) >> kSegmentSampleShift;
+  int minimum_height = 0;
+  int sample_index;
 
-  for (index = 0; index < kSegmentSampleCount; ++index) {
-    x1 += dx;
-    z1 += dz;
-    int height = SignedNavigationGroundHeight(
-        Field_GroundHeightFlagsAtWorldPosition(x1, z1));
-    if (height < minimum) {
-      minimum = height;
+  for (sample_index = 0; sample_index < kSegmentSampleCount; ++sample_index) {
+    start_x += step_x;
+    start_z += step_z;
+    int ground_height = SignedNavigationGroundHeight(
+        Field_GroundHeightFlagsAtWorldPosition(start_x, start_z));
+    if (ground_height < minimum_height) {
+      minimum_height = ground_height;
     }
   }
-  return minimum;
+  return minimum_height;
 }
 
 // decomp: BATTLE.PRG func_800E75EC (src/BATTLE/BATTLE.PRG/7E05C.s:1041).

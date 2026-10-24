@@ -19,7 +19,9 @@ The menu uses the extracted SYSTEM.DAT font. Select zone, room, enemy, quantity,
 Ashley tile/elevation, group offsets, spacing and RNG seed. Add multiple groups
 for mixed enemy definitions; clear groups to return to the current selection.
 Set **QUANTITY: 0 (SOLO)** and clear any explicit groups to enter with Ashley
-alone. An empty-enemy preset stays solo when loaded.
+alone. An empty-enemy preset stays solo when loaded in the default isolated
+mode. Explicit production-room presets instead retain the original room actors
+and events; their editor labels say **ORIGINAL ROOM**, not **SOLO**.
 The grid shows starting tiles over a conservative static-floor preview: green
 tiles have complete floor support; dark tiles are blocked/partial, pits, missing
 support or unavailable data. Invalid starts identify the actor, tile and reason.
@@ -202,6 +204,90 @@ Other options: `--data <directory>`, `--frames <ticks>`, `--speed <1..64>`,
 and `--press <tick:Button[,tick:Button...]>`. A scripted press lasts two ticks;
 `+` combines buttons. Host function keys remain available during scripted runs.
 
+### Detailed logging in the actual Desktop game
+
+The normal game and Combat Lab now use the same shared gameplay trace writer
+and frame/actor encoding. In
+[`Native/Desktop/src/main.cpp`](../Native/Desktop/src/main.cpp), set:
+
+```cpp
+constexpr bool kEnableDetailedGameLogging = true;
+```
+
+This bool is near the top of the file. It defaults to **true** for failure
+investigation in both Debug and Release; change it to **false and rebuild**
+for the previous lightweight Desktop logging behavior. No new runtime option
+is required.
+
+When enabled, each actual-game launch creates its own
+`build\<Configuration>\game-logs\<run-id>` directory:
+
+- `manifest.json`: build, source revision/dirty status (or explicit unavailable
+  provenance), full arguments and compatibility-log location.
+- `session.log`: shared engine messages, at Trace/all channels by default.
+- `events.jsonl`: monotonically sequenced, tick/elapsed-time-correlated engine
+  events and the same per-tick input, actor resources/status/AI, targeting,
+  menus, inventory and room state used by Combat Lab.
+- Actual-game frames additionally contain `scene`: event/thread cursors and
+  waits, dialogue wait state, camera parameters/view matrix, effect progress
+  and model/animation pose state, including cutscene actors without combat
+  statistics.
+
+The current session's text is also mirrored to the existing `vs-native.log`
+beside the executable, preserving existing replay/error tools. That convenience
+mirror is replaced on launch, **but prior run directories are not overwritten**.
+Read the run folder for retained evidence. Existing crash errors/symbolized
+stacks go through the same logger; the watchdog's dedicated `vs-native-hang.log`
+retains its existing executable-directory location.
+
+Structured frames flush the JSONL and both text sinks. Write/flush failures are
+explicitly reported and the Desktop returns a failure result. Startup argument
+errors, fatal exceptions and host results have their own records. CLI
+`--log-level` / `--log-channels` still filter engine messages if deliberately
+specified; they do not disable the bool-controlled structured snapshots.
+
+Snapshots are read-only. Title/loading/unload/reset/teardown frames mark scene
+data unavailable rather than dereferencing released room/actor storage. The
+build-time false path does not create run folders or inspect gameplay state;
+normal Info logging and existing CLI filtering remain available.
+
+Detailed traces are high-volume and add disk/inspection overhead. They are
+diagnostic evidence, not proof that a scene completed correctly. This supplies
+normal-game logging parity and useful scene state; #149's complete cutscene
+inventory/playback mode and acceptance remain separate.
+
+#### Local logging verification
+
+Verified on local `508b4bd79d58e37421fdd9c693c92937f2b5de0e` with these
+logging changes and preserved owner edits **uncommitted**. Per-run manifests
+retain the actual dirty-file list; this is not published-revision CI evidence.
+
+- Built `Native\Desktop\VS.Desktop.vcxproj`,
+  `Native\Tools\CombatLab\VS.CombatLab.vcxproj` and
+  `Native\Tests\VS.Tests.vcxproj` for Debug and Release, using the documented
+  MSBuild with `/m /nodeReuse:false /p:Configuration=<Configuration>
+  /p:Platform=x64 /p:VcpkgManifestInstall=false`.
+- Final `build\<Configuration>\VS.Tests.exe
+  "[trace],[sequence],[diagnostics]" --reporter compact`: **176 assertions /
+  21 cases pass in each configuration**, including cached-snapshot rejection
+  after teardown. Copier tests: **36 pass**; repeat generation stable. Scoped
+  format/cpplint/ruff/clones/tidy: **0 findings / 0 new**.
+- Final Debug `VS.Desktop.exe --frames 2400 --speed 32 --scripted --press
+  1000:Start,1300:Circle`: **2400 frames / 986 ready / 0 errors**, valid changing
+  camera matrices, complete session and byte-identical live text mirror.
+  Run: `build\Debug\game-logs\1792803286381062-0`; summary:
+  `build\quality\desktop-trace-final-enabled-evidence.json`.
+- Release lifecycle replay: **7800 frames / 6367 ready / 0 errors**, including
+  rooms `1/0 -> 8/0 -> 9/0` and menu entry. Evidence:
+  `build\quality\desktop-trace-release-lifecycle.json`. This is logging/lifecycle
+  evidence, not acceptance of skipped story scenes.
+- A real Debug build with the bool false created **no detailed session**,
+  retained prior run files and kept default Info logging. Both final Desktop
+  builds were restored to true. Evidence:
+  `build\quality\desktop-trace-disabled-evidence.json`.
+- Missing-data and invalid-log-level probes exited **1** with retained failure
+  records: `build\quality\desktop-trace-failure-evidence.json`.
+
 ### Single-window script sequences
 
 Use `--sequence <json-path>` instead of launching a new process for each preset.
@@ -259,6 +345,382 @@ that initialization, the requested observation budget and normal teardown
 finished without engine errors; it is **not** evidence of victory or complete
 gameplay correctness. Rejection, engine errors and failed teardown stop the
 sequence rather than silently advancing.
+
+### Every directed door: persistent loader/entry-event tests (#151)
+
+```powershell
+build\Debug\VS.CombatLab.exe --door-transitions --catalog-only
+build\Debug\VS.CombatLab.exe --door-transitions --speed 64
+build\Debug\VS.CombatLab.exe --door-transitions --door-case z009-r005-d001 --speed 64
+build\Debug\VS.CombatLab.exe --door-transitions --door-from z009-r017-d003 --door-limit 20 --frames 3600 --speed 64
+```
+
+Use Release equivalents to test that configuration. `--door-case` selects one
+stable source-zone/room/record ID; `--door-from` resumes inclusively in inventory
+order, and `--door-limit` bounds the selected range. Invalid IDs and conflicting
+scenario, sequence, input or selector options fail explicitly. `--frames` is a
+per-case budget (default **3,600 logical ticks**), not a successful outcome.
+
+The original local-disc inventory contains **1,001 directed door records** in
+**255 ZNDs / 421 room references**. Aliases, duplicate links, conditional doors,
+self-loops and cross-zone doors retain their original record identity.
+`door-inventory.json` always contains the complete inventory, even when runtime
+selection is filtered. Unavailable destinations, unsupported source fixtures
+and unreadable catalog data are reported, not silently omitted. The initial
+inventory has 27 preflight-blocked records; runtime story prerequisites can
+block additional cases.
+
+This is **loader + production entry-event + restored-control coverage**. It
+does not prove physical controller approach, locks, switches or campaign
+reachability. A case starts with the post-prologue profile on a supported
+non-door source tile, retaining original actor placements and event scripts.
+It never writes story flags, injects missing actors or forces event completion.
+The requested door gate must actually be satisfied.
+
+The request API accepts an original door index only in an idle ready field. It
+queues the index and source IDs, not a borrowed pointer into room storage. The
+game fiber rechecks source ownership and gates, then uses the production
+room/zone handoff and entrance placement. A stop request takes precedence;
+reset/unload revokes diagnostic readiness and pending requests.
+
+A **pass** requires an observed loss of readiness during loading, the exact
+destination, an idle original entry event, field control restored, and **120
+uninterrupted observation ticks**. A pending transition bit alone cannot pass a
+self-loop. Restarted events, taken control or revoked readiness restart the
+observation interval. Actual defeat, an unmet gate or an unsettled event does
+not become success when the budget expires.
+
+The runner uses one persistent window for the selected range, with production
+stop/cleanup between cases. It continues after nonfatal failed/blocked cases.
+Physical gameplay devices and stat/status adjustment hotkeys cannot alter
+automated trials. F6/F7 still pause/step; F10 cancels the remaining sequence.
+Only an actual waiting dialogue box receives brief Circle confirmations
+(two ticks every 30); **Start/scene skipping is never injected**. Scene JSON
+contains exactly the event VM's eight logical `dialogue_waits` values, not the
+legacy declaration's overbroad 80-byte extent.
+Likewise, thread snapshots contain the four dispatched VM threads, using their
+four-entry wait-frame table rather than the six-entry legacy cursor extent.
+
+Each run saves the full inventory, selected `sequence-results.json`, per-case
+text/JSONL traces and manifests. Results start as `not_run`, then record the
+active case and final `passed`, `blocked` or `failed` state, reason, request/
+arrival/control ticks, destination observation count, dialogue pulses and last
+room/control state. A fatal process crash leaves the active/unrun checkpoint;
+resume using its ID after investigating the failure. An interrupted batch is
+not full coverage. Any blocked/failed/cancelled selection returns **2**;
+configuration/tool errors return **1**. Engine errors terminate the current
+case as failed before the next production cleanup.
+
+Presets may explicitly set `"room_events": "production"` for interactive
+original-room investigation. Omission or `"isolated"` preserves ordinary
+Combat Lab behavior. Production policy rejects nonempty custom enemy lists;
+group editing is disabled and the editor does not mislabel unpreviewed
+original placements as zero enemies or solo Ashley.
+
+Asset-independent parser/planner, lifecycle, input, editor and native-request
+regressions run with the regular suite. The opt-in disc test independently
+decodes and compares every original door field:
+
+```powershell
+build\Debug\VS.Tests.exe '[doors]'
+build\Debug\VS.Tests.exe '[disc-door-inventory]'
+```
+
+The latter requires local extracted data and is hidden from ordinary CI:
+**41,459 assertions / one case** validate all 1,001 records, not runtime
+execution of their scenes. Do not commit or attach the original assets.
+
+#### Local repairs exposed by the matrix
+
+All following work is local to `508b4bd7` plus the recorded dirty worktree;
+publication/CI/issue-closure gates remain open. Earlier historical suite totals
+are not fresh verification of the final source.
+
+| Issue | Reproduced defect and bounded repair |
+| --- | --- |
+| #152 | The original 9/6 entry script references an optional absent slot4. Movement wrappers now diagnose/no-op before dereferencing, preserving valid movement, rate and skip behavior. Original 9/5-to-9/6 entry/control restoration was replayed in Debug/Release. |
+| #153 | Perception treated auxiliary actors as ordinary actor-record owners. Target/occluder queries now use their authoritative `Battle_Actor::model` prefixes; separate red target and blocker controls became green. |
+| #154 | Mutable actor kind left perception membership and allocated AI state alive at retirement. Cleanup now retires actual tracked membership/allocation and cached aliases, retaining Ashley and wider non-AI lifetime rules. |
+| #155 | Session heap reset reclaimed allocations without invalidating native AI globals. Post-reset invalidation clears bindings without freeing/dereferencing expired storage. A history-dependent six-door crash reproducer then completed all six cases. |
+| #156 | Gimmick teardown scanned above a missing stack top. It now finishes that scan after preserving preceding member updates. Missing-top, actor-fall and remaining-member controls pass; the unported AI occupant-removal warning remains explicit. |
+| #157 | Private animation SFX with no selected bank underflowed an unsigned selector and indexed 32 GiB beyond its table. Unselected/optional-missing banks warn without unrelated fallback; invalid selection/IDs report errors before lookup. Valid routing/channel rotation and C diagnostic severity/tick/filter controls pass; audible parity is not claimed. |
+| #158 | E222 was queued for missing model53, resolved to reserved sentinel1, then dereferenced a null bone matrix. The event command now validates reference kind and model ownership, then diagnoses/yields before changing playback state. Four valid actor/object controls (including a genuinely matching slot1) and six refused-binding controls pass. A separately red sentinel-collision control proves that a different model in slot1 cannot satisfy a missing model reference. The original 12/0 Minotaur spawn requires scene flag1==1 and story flag130==8: the no-write fixture does not meet these prerequisites. Its explicit engine-error failure is **not** completed cutscene acceptance. Nullable matrix consumers outside this producer remain a separate audit limit. |
+| #159 | Original event28 unloads shared bank3 before a later scripted room handoff restores Ashley's idle pose. The outstanding vertex override then restarted through a null bank. The Game release boundary now preflights borrowers, undoes real vertex events while storage is live, retires event/cache bindings, and only then releases Content storage, retaining skeletal pose. Unwind/release failures propagate rather than clearing obligations or advancing the event. Standard/private/missing/empty streams, two owners, unrelated owners, atomic refusal, invalid IDs and timing queries after retirement are covered. |
+
+Acceptance tests also caught two runner false positives (eight failed
+assertions before repair): accepting a self-loop from a pending bit without
+loading, and counting an interrupted control interval as settled observation.
+Both now have direct lifecycle regressions. The full-disc inventory is
+exhaustive; runtime batches are still being investigated and must retain every
+blocked, failed and unrun record. This does not close #149's broader cutscene
+inventory/playback/reference work.
+
+Current local validation: Debug/Release full suites each **599 cases /
+1,813,278 assertions**; hidden original-disc inventory **41,459 / one** each;
+copier **44 tests**. Both Desktop configurations and Release Combat Lab build.
+The broad maintained audit found 18 new findings in the new test/preview code;
+typed pointer save/restore, same-object byte snapshots and bounded rendering/
+assertion helpers repair them without baseline changes. Final affected-file
+quality/tidy reports **131 existing / zero new**. Invalid zero door limits and
+unknown selectors were checked with waited GUI-subsystem processes: both
+return1 with explicit diagnostics and no modal windows. Runtime matrix
+coverage remains incomplete and separately checkpointed.
+
+#### Shared-bank lifetime checkpoint (#159)
+
+The first strict-acceptance batch, `1792819672204643-0`, finished **87 passed /
+46 blocked / two failed** records before crashing in active case136,
+`z015-r010-d002` (15/10 to32/0); 64 of its 200 selected cases were still unrun.
+Fault image SHA-256 and symbolized stack are preserved in
+`build\quality\sequence159-original-symbols.log`. RVA215718 is F00998's null
+header read, reached through a real event-script room change, not the queued
+test request itself. Event28's bank-release opcode82 at142903 precedes the
+crashing idle/vertex restoration. Original code has the same release-before-
+relookup lifetime shape; native code must not depend on low-address reads.
+
+The new retirement regression was red before repair. Its valid stream runs
+actual animation opcode36 and verifies the applied vertex X11 returns to10
+before detachment, while Y/Z/pad and the frozen bone pose remain unchanged.
+Additional controls retain all borrowers if a later preflight fails, preserve
+an unrelated current bank, unwind two actors, and make the EVM release yield
+on failure. Missing lookup/entry/event cases preserve the outstanding override
+and pose in both existing unwind callers. Native release and unwind APIs now
+return explicit status; generated headers/callers are rebuilt together.
+
+Current Debug/Release full suites pass **602 cases / 1,813,292 assertions**
+each, with hidden disc inventory **41,459 / one** each. Focused animation,
+sequence, door, scene and effect selections pass **437 / 32**; scoped maintained
+quality/tidy is **131 existing / zero new**. These are local results, not
+published CI or C++/compatibility retirement.
+
+Fresh Debug replay `1792822646791332-0` re-enters the same door record and reaches
+scripted room32/1 with **zero engine errors and completed teardown**, but uses
+entry event0 rather than the failing history's event28. It therefore **does not
+verify the old failure branch**. Its entry chain does not settle before3,600
+ticks, so its outcome remains **blocked**, not passed. A state-aligned full
+prefix/history replay is still required; do not force scene/story flags to
+manufacture that state. The one-window run continues the remaining65-case
+tail; keep its live checkpoint separate from prior-revision totals.
+
+The full original prefix was then replayed unmodified in
+`1792823796837457-0`: **87 passed / 47 blocked / two known failed**, normal
+exit2, all136 selected cases finished. Crucially, case136 actually observes
+event28/source1 in32/0, successfully releases bank3 at142903, passes the former
+idle/vertex-unwind fault and reaches32/1 still in event28. It has **zero engine
+errors and completed teardown**, but remains blocked because the longer scene
+has not settled by3,600 ticks. This is state-aligned Debug crash acceptance,
+not full scene/door acceptance. Exact command, frozen-image hash, scene tuples,
+release records and outcome are in
+`build\quality\sequence159-aligned-evidence.json`. No flags or Start skipping
+were used.
+
+Release original-prefix run1792829725153757-0 independently matches87 passed /
+47 blocked / two known failed. Its target observes event28 in32/0, releases
+bank3 at142903 and crosses the old fault into32/1 still in event28, with zero
+target errors and complete teardown. The longer entry chain remains blocked,
+not passed cutscene acceptance. Exact frozen image/command/scenes/results are
+in `build\quality\sequence159-aligned-Release-evidence.json`.
+
+The earlier65-case resumed tail stopped at its49th record after33 passed /
+15 blocked, with16 unrun, at separately tracked #160 (23/4 ->24/15, E084).
+PLG053's ring dereferences texture-info pointer0x74 at dataIndex+2. Original
+MIPS confirms both texture-table producer and consumer base0x98, definition
+stride204 and texture selector bytesCA/CB; do not guess a one-based index fix.
+A separately confirmed native reset-width defect is repaired: the original
+32-byte clear left the40-byte native state's last pointer uninitialized.
+Poison/canary regression was7/8 then8/8; the existing C entry signature remains
+tracked migration debt. Full suites now603/1,813,300 each, actual
+particle-render/reset/lifetime selection94/12, copier49, scoped texture
+fixture/tooling quality0/0.
+
+That reset repair **does not by itself fix #160**: matching fresh Debug
+run1792825963767984-0 still reaches E084/24/15/event0 and the same low-pointer
+read. Missing persisted initialization diagnostics were not proof that they
+did not execute: #161 exposed buffered warnings lost immediately before an AV.
+
+Core text sinks and the shared Desktop/Lab tracer now flush Warn+ while
+retaining ordinary-message buffering and Error-only error counters. The red
+regression failed all four live-file checks before any frame, destructor or
+script boundary; the corrected selection passes112 assertions/15 cases,
+including a separate Core-only/no-observer check. Full Debug/Release suites
+pass605 cases/1,813,310 assertions each; scoped warning quality is0/0.
+
+Actual AV run1792827063353609-0 persists all four `effects.texture` records in
+both complete JSONL streams and session text before RVA36F8F3/read0x76. Birth
+already selects missing table1/program1, definition16, packed0x101E under
+primary package84/count1; frame word0x0002001D produces info0x74. Primary
+instance creation does not initialize the logged secondary-only effect field,
+so its value56 does not demonstrate wrong package ownership.
+
+Original PLG084 and PLG053 are byte-identical; original E084 definitions15-18
+contain selectors1/1 and its renderer tracks select those same definitions.
+The original binder populates only table0. The next discriminating observation
+is the original running scene's table1 binding/frame consumption. This remains
+an unresolved #160 gate, not justification for a fallback texture, zero-info
+struct, changed index base, substituted renderer or success-shaped skipped
+draw.
+
+#### E265 textured-dispatch checkpoint (#162)
+
+The next persistent tail1792830197070889-0 passed five records, then crashed
+during z024-r000-d000's original24/0 source entry, leaving94 selected records
+unrun. This was a different F01592 failure: program+cursor read0xFEDF in the
+PLG265 particle-ribbon renderer, not #160's unavailable texture-info frame.
+
+Original PLG265 MIPS shows its first, line-only dispatcher allocating0x10 and
+its second, textured dispatcher allocating0x30 and initializing texture state.
+The reference source leaves `VS_PARTICLE_UNTEXTURED` active between them.
+The copier now applies a source-backed F02351 instance correction before
+emitting bindings, rather than editing generated code or the reference.
+The genuine line dispatcher requests its complete native prefix through
+`offsetof`; current heap rounding already covered that24-byte prefix, so no
+line-path overflow is claimed. The textured red control demonstrates actual
+capacity24 instead of required64; the corrected allocation/texture-init,
+ordinary textured renderer and genuine line controls pass.
+
+Exact six-record histories pass6/6 in Debug1792830601020715-0 and
+Release1792830661742875-0. Both retain604 original E265 active-effect frames
+in24/0/event0, then arrive24/3, restore control and retain159 destination
+observation ticks, with zero errors and complete teardown. Exact command,
+image hashes and results are in `build\quality\particle162-actual-evidence.json`.
+No flags, HP or scene completion were forced. This is bounded loader/entry/
+control acceptance, not full cutscene or visual parity.
+
+Final Debug/Release suites pass607 cases/1,813,347 assertions each. Copier52
+tests and a stable second generation preserve1,015 selected native source/
+project files plus manifest. Affected fixture/tooling quality/tidy is0/0;
+the copier module retains23 existing/0 new findings, with no baseline changes.
+All new repairs remain local/unpublished; #160 remains a separate open gate.
+
+#### Orbit-return command extent checkpoint (#163)
+
+The repaired E265 continuation1792830723227930-0 completed26 passed / one
+blocked, then stopped at z024-r008-d003 (24/8 ->39/0), with72 records unrun.
+The exception was C0000094 at native RVA1E5C0A in event interpolation. Single
+edge1792830988376901-0 reproduced it. Durable camera-track diagnostics then
+showed special operationB7/09 starting a zero-duration look-at track at1078.
+
+The producer, not the divisor, was wrong: original orbit-return commands at
+800E9C28/800E9C2C contain four and three bytes respectively, but G00130/G00131
+were copied as separate scalar opcodes. The generated module loader could not
+copy their missing easing/duration payloads. The copier/data ledger now retain
+complete command objects and properly decayed array callers. Interpolation
+math, event flags and original85-frame timing are unchanged; no denominator
+clamp, forced endpoint or skipped event was added.
+
+Native extent controls fail3/3 before repair. The corrected35-assertion/
+two-case selection exercises the real registered module-loader entries from
+synthetic source images, validates full payloads, then runs85 native camera
+steps. Fixed Debug1792831568527363-0 and Release1792831616664973-0 both reach
+the same39/0/event0/scene30 B7/09 branch at1078, log easing1/duration85,
+restore control and pass with zero errors, no zero-duration warning and
+complete teardown. Exact commands/image hashes/scene steps/results:
+`build\quality\camera163-actual-evidence.json`.
+
+Latest full Debug/Release suites pass609 cases/1,813,382 assertions each;
+copier54, camera fixture/tooling quality/tidy0/0, second generation stable
+across1,015 selected native source/project files plus manifest. Both gameplay
+hosts build in both configurations. A fresh persistent100-case continuation
+uses the same history; this is not yet all1,001-door or all-cutscene coverage.
+The unrelated E084/#160 blocker remains open.
+
+#### Puzzle HUD storage and authoritative clock (#164/#165)
+
+Continuation1792831745328564-0 completed62 passed / nine blocked, then
+crashed in active z028-r003-d000 (28/3 ->28/4), leaving28 records unrun.
+F01384 wrote through null G00211 at native RVA238D12/address6. The ledger
+already replaced that pointer with G00614, but the native renderer still used
+the pointer and the backing text was const. Native rendering now owns and
+directly uses a complete mutable nine-byte buffer, following the existing
+Files-clock ownership pattern. No null-pointer fallback or hidden timer was
+introduced; the unused compatibility declaration remains tracked debt.
+
+Visible timer verification then exposed a different ownership defect, #165:
+the original packed word G01934 is the time-field subobject of G01933, but
+was separate native storage. The HUD now reads `const State_SceneTimer*`
+from its sole production caller instead of a detached alias. No packed pointer
+view or copied counter was added. A regression rejects generating such a view
+from the ledger; the original subobject is recorded as provenance only.
+
+The combined370-assertion/five-case selection checks writable storage, exact
+digit strings and all eight glyph packets/coordinates/UVs/native links,
+overflow formatting, separators/terminator/buffer guards, repeated hide/show,
+authoritative counter ownership and real pause/reset behavior. The original
+ordering offset is four **bytes**, independently checked against MIPS.
+The ownership red control produced five failures/40 assertions before repair.
+
+Final live Debug1792834573551820-0 and Release1792834651270755-0 both observe
+the same28/4/event0/scene23 timer entry, execute164 timer renders and pass
+with restored control in701 ticks, zero errors and complete teardown. Every
+logged minute/second matches its typed source clock, from00:30:00 through
+00:26:92; hundredths/frame bounds are checked too. Owned-window captures taken
+only after a real `hud.timer` record visibly show the readable00:29 countdown.
+No gameplay flags, HP, timer values or event completion were forced.
+
+Exact commands, source revision/dirty state, executable and capture hashes,
+validated source/text pairs, per-run capture paths and results are local in
+`build\quality\timer165-actual-evidence.json`. Sequence-end `--capture` shows
+the editor after teardown, not the live timer; it is not timer evidence.
+This verifies the bounded entry/render/control case, not puzzle victory or
+reference-pixel parity.
+
+Full Debug/Release suites pass614 cases/1,813,753 assertions each; copier56
+and stable second generation preserve1,015 selected native source/project
+files plus manifest. Scoped timer/camera fixture/tooling quality/tidy is eight
+existing/zero new, with no baseline edits. Both Desktop/Lab configurations
+build. The persistent200-case continuation retains original history and
+honest blocked/unrun outcomes; #160 remains explicitly excluded and open.
+
+#### Original music source-data waveform aliases (#166)
+
+The next200-case continuation1792834906085352-0 completed67 passed / ten
+blocked, then stopped at active z028-r005-d002 (28/5 ->32/6), with122 records
+unrun. Native auto-pan read noncanonical012600DB00960060. A frozen PDB/read-only
+snapshot identifies primary music channel6, shape65/rate2/depth0, not a missing
+waveform initialization or #126's pending depth-slide phase.
+
+Original MUSIC172 channel6 actually contains `BC 02 41`. Original dispatch,
+operand lengths and header-relative track offsets establish that boundary.
+The byte selector is not limited to the sixteen named curves: original slot65
+reads adjacent source pointer entries and refers to80018BD8. The original
+reader treats those bytes as short sample/control data in a bounded16-state
+cycle. Native import must not index past a16-entry array or sample host
+executable functions.
+
+The catalogue now covers the encoded unsigned-byte domain. An explicit sample
+owner imports the original immutable resident payload as data, separate from
+normal native symbol/function relocation. Signed loop jumps are validated
+before publication.231 programs are bounded and cyclic;25 would leave the
+defined source image and remain explicitly unavailable. Selecting one reports
+an error before mutating modulation state, not fabricated samples or silently
+disabled audio. LBU operands, cached retriggers, zero-depth phase and normal
+disable/re-enable behavior are retained. No guest RAM execution or reference
+code is included/linked.
+
+Independent original-disc controls compare1024 actual native/source samples
+for EACH of231 bounded programs. Synthetic data-role/code-label collisions,
+ownership/stride/bounds/atomic publication, byte selectors, rate0/128/255,
+phase/loop/disable/re-enable and invalid-selection refusal are covered.
+Full Debug/Release suites pass622 cases/3,150,240 assertions each; focused
+audio/data is1,507,745/85. Copier58 and stable second generation preserve1,016
+selected native source/project files plus manifest. Scoped main quality is26
+existing/zero new; headers0/0, with no baseline/suppression changes.
+
+The original entry remains active beyond3,600 and7,200 ticks; those runs were
+blocked, not successful completion. After confirming script-PC progress,
+18,000-tick controls finish the same event0 -> event42 chain in7,832 ticks:
+Debug1792841911523801-0 and Release1792841730609451-0, restored control,
+zero errors and complete teardown. Each records1,248 actual note-ons and three
+source65 binds to the immutable sample owner at original offset0x8BD8, with no
+forced skip. Only actual waiting dialogue receives Circle; HP, flags, timers
+and event completion are untouched. Exact commands, executable hashes,
+source/data-owner correlation and results:
+`build\quality\music166-actual-evidence.json`.
+
+This verifies the original long entry/music path, not complete reference PCM
+parity or undefined source-memory behavior. Current persistent continuation
+uses an explicit9,000-tick budget and retains blocked/unrun checkpoints.
+All new source remains local/unpublished; publication/CI gates stay open.
 
 ### Startup feedback and timing
 
@@ -380,6 +842,106 @@ Local evidence: `build\quality\gimmick145-{Debug,Release}-live.json`,
 `gimmick145-reference-index.log`, `gimmick145-generation-*.log`, and
 `gimmick145-live.ps1`. Disc data and captures stay local. Publication and exact
 revision CI are recorded on #145. #146/#147's D'tok reports are separate.
+
+### Hall of Struggle Bat encounter crash (#150, 2026-10-23)
+
+The owner's actual Desktop session
+`build\Debug\game-logs\1792803538655350-0` ends at72233 in zone9/room3,
+175 ticks after entry from Worker's Breakroom. The Bat is model41/slot2,
+37HP and targeting Ashley. There is no persisted exception or normal shutdown
+record. This is distinct from #77's flight-height abort and #145's load-time
+geometry repair.
+
+A bounded native-debugger replay reproduces the crash through the actual
+Worker-to-Hall door, using the original Hall actor/gimmick spawns. A separately
+configured Bat control survives real attacks to Ashley's defeat, so an isolated
+enemy fixture alone does not cover this failure.
+
+The fault is **F00887 / Actors_ActorBoneEndpointPosition**, native Debug
+RVA`0x29D8A5` before repair: reading address`0x68` while resolving slot3.
+That slot has a gimmick, not an `Actors_actorRecords` entry. The copied helper
+reads `actor->instance.model` before checking for null and selecting the
+existing gimmick fallback. Original `BATTLE.PRG` instructions at`800A1C50`
+perform the early low-address read; `800A1C54` and`800A1C68..800A1C78` then
+resolve the fallback. The unused low-address read is not a valid native access.
+
+The copy-generator adaptation now reads the model only after resolving a
+present actor or gimmick. Missing owners retain the original `-1` result;
+actor priority and origin/tip/midpoint transforms are unchanged. No enemy
+filter, terrain guard, HP, RNG or event flag is altered. This is a bounded
+behavior repair, not C++ promotion or compatibility retirement.
+
+Fresh local verification on `508b4bd79d58e37421fdd9c693c92937f2b5de0e` plus
+uncommitted logging/repair and preserved owner edits:
+
+- Before repair, direct owner regression: **SIGSEGV on gimmick origin after
+  three passing actor controls**. After repair,24 owner/endpoint/re-entry
+  controls pass, including absent owners without output writes.
+- Debug and Release Desktop, Lab and test builds pass. Full suites:
+  **571 cases /1812885 assertions each**. Copier: **37 tests pass**;
+  second generation retains manifest SHA256
+  `c013d67cabd96c4e85289e6a623b7aefab616b365066542fc09cc61687829cd2`.
+  Scoped format/cpplint/ruff/clones/tidy: **131 existing /0 new**.
+- One persistent Lab window per configuration runs two fresh Worker-to-Hall
+  encounters under the native debugger. Each script has2000 logical ticks
+  plus12 teardown ticks,1748 ready Hall frames,50 distinct Bat positions,
+  actual attacks reducing Ashley250->103HP,0 engine errors and completed
+  teardown. No fault is reported on any of the four entries.
+- Debug run`1792805870299289-0`; Release`1792805931587671-0`.
+  The fixture starts solo at Worker tile3,9 with the unmodified post-prologue
+  profile. Scripted Up is held at180..229 and340..439; crossing the original
+  door loads the original Hall actors. Sequence inputs and summaries:
+  `build\quality\bat150-sequence.json` and
+  `build\quality\bat150-fixed-live-evidence.json`. This verifies the faulting
+  production room/actor path and reset, not full story-event/prologue coverage.
+
+The missing exception record is reproducible under a debugger:
+[Windows only invokes the top-level exception filter when not debugged](https://learn.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-setunhandledexceptionfilter).
+A separate no-window intentional fault probe, using the production trace and
+crash handler without a debugger, persists the exception and eight stack
+records in both text/JSONL. Local evidence:
+`build\quality\bat150-crash-probe\1792806144620444-0`.
+The owner's exact debugger/termination path remains unconfirmed; no logging
+workaround or speculative first-chance exception interception was added.
+
+Other evidence: `build\quality\bat150-debugger-{worker,addresses}.log`,
+`bat150-red-test.log`, `bat150-{Debug,Release}-full.log`,
+`bat150-quality-final.log` and `bat150-copier-tests.log`. The fix is local and
+uncommitted; #150 remains open pending authorized publication and exact CI.
+
+### Owner pause: door coverage limits and next failure
+
+The Debug binary through #166 (SHA256
+`ACFD8139CAF681DECA9F508716F107A7BF817EB9945A0F1C405A031DF9005A07`)
+completed199 of200 selected records in run1792842259573600-0:
+161 passed/38 blocked/one interrupted when its outer two-hour debugger budget
+expired. Every completed row has zero engine errors and complete teardown.
+This is a harness budget, not a native exception. The known long32/6 entry
+completes in7,832 ticks; the observation budget was explicitly9,000 per case.
+
+Continuation1792849529393328-0 selected the remaining541 records with the
+ordinary3,600-tick case budget. It completed94 passed/37 blocked, then failed
+at script132 `z048-r006-d000`;409 remain unrun. The original event follows
+its authored changes into32/17/event0/source1/phase4/scene30. At167127 the
+renderer reports a truncated0x34 command in a56-word packet at offset53,
+then exits with unhandled C++ exception E06D7363. This is tracked in #167;
+a relationship to #26 is not established. Standalone, two-record and
+eleven-record controls do not reproduce it and remain blocked observations.
+No renderer skip, default packet or product fix was introduced.
+
+The owner paused the exact-history diagnostic rerun1792852943838401-0 before
+it reached that scene:32 passed/7 blocked/one cancelled/501 unrun, graceful
+exit2. All owned replay windows are stopped. These cohorts are not a fresh
+complete1,001-door acceptance run; #151 and #160 remain open.
+
+Two later naming-only batches verify34 bindings in owned flight-terrain
+queries and generated geometry-group commands. Exact source/header comparisons
+preserve function types, constants, operators, bounds and behavior. Both
+Debug/Release combined room-render/ground/flight controls pass155 assertions/
+17 cases; copier59 passes and1,016 native source/template/project files plus
+the manifest are stable on repeated generation. The frozen runtime image
+predates those names. Current source, naming, behavior, promotion and
+compatibility-retirement gates remain distinct.
 
 ### Score submenu and encyclopedia preview repair (#65, 2026-10-23)
 

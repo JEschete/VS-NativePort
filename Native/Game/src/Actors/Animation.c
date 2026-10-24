@@ -22,6 +22,7 @@
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Damage.h"
 #include "Core/Core/IntPair.h"
+#include "Core/Diagnostics.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Memory/WordCopy.h"
 #include "Effects/ActionEffects.h"
@@ -133,7 +134,52 @@ void Actors_QueueSharedSequenceLoad(int index, int wepId)
 }
 
 // decomp: BATTLE.PRG func_8007CBBC (src/BATTLE/BATTLE.PRG/146C.c:9008)
-void Actors_UnloadSharedSequence(int arg0) { Content_ReleaseActorSequence(arg0, 1); }
+int Actors_UnloadSharedSequence(int bankId)
+{
+    int slot;
+    int result;
+    if (bankId < 1 || bankId > 3) {
+        Core_Errorf("actors.sequence", "invalid shared bank retirement=%d", bankId);
+        return -1;
+    }
+    for (slot = 0; slot < 17; ++slot) {
+        Actors_ActorRecord* actor = Actors_actorRecords[slot];
+        u_short* entry;
+        if (actor == NULL || actor->sharedSequences[bankId - 1] == NULL ||
+            actor->animationHeader != (intptr_t)actor->sharedSequences[bankId - 1] ||
+            !actor->poseOverrideActive) {
+            continue;
+        }
+        if (Actors_FindActorAnimationHeader(actor, actor->animationId, &entry) != actor->animationHeader ||
+            entry == NULL || entry[2] == 0) {
+            Core_Errorf("actors.sequence", "bank=%d cannot unwind actor=%d animation=%d",
+                bankId, slot, actor->animationId);
+            return -1;
+        }
+    }
+    for (slot = 0; slot < 17; ++slot) {
+        Actors_ActorRecord* actor = Actors_actorRecords[slot];
+        if (actor == NULL || actor->sharedSequences[bankId - 1] == NULL ||
+            actor->animationHeader != (intptr_t)actor->sharedSequences[bankId - 1]) {
+            continue;
+        }
+        if (actor->poseOverrideActive && Actors_RestartActorAnimationEvents(actor) < 0) {
+            return -1;
+        }
+        actor->poseOverrideActive = 0;
+        actor->animationHeader = 0;
+        actor->animationSet = 0xFF;
+        actor->pose.eventScript = NULL;
+        actor->pose.nextEventFrame = 0xFFFF;
+        actor->blendPose.eventScript = NULL;
+        actor->blendPose.nextEventFrame = 0xFFFF;
+    }
+    result = Content_ReleaseActorSequence(bankId, 1);
+    if (result < 0) {
+        Core_Errorf("actors.sequence", "shared bank=%d retirement failed status=%d", bankId, result);
+    }
+    return result;
+}
 
 // decomp: BATTLE.PRG func_8007CBDC (src/BATTLE/BATTLE.PRG/146C.c:9010)
 void Actors_QueueSharedSequenceWithTextures(int index, int wepId, int arg2)
@@ -539,6 +585,9 @@ int Actors_AnimationBattleWindowFrame(int arg0)
     int temp_s1;
     Actors_AnimationPose* s0 = &Actors_actorRecords[arg0]->pose;
 
+    if (s0->eventScript == NULL) {
+        return 0;
+    }
     temp_s1 = s0->nextEventFrame;
     temp_s2 = s0->eventScript;
     temp_v0 = Actors_RunAnimationEvents(Actors_actorRecords[arg0], s0, 3);
@@ -684,10 +733,10 @@ int Actors_PlayActorAnimation(int actorId, int animation, int arg2, int blendFra
     if (actor->animationLocked) {
         return 0;
     }
-    actor->animationEventFlag = 0;
-    if (actor->poseOverrideActive) {
-        Actors_RestartActorAnimationEvents(actor);
+    if (actor->poseOverrideActive && Actors_RestartActorAnimationEvents(actor) < 0) {
+        return -1;
     }
+    actor->animationEventFlag = 0;
     actor->poseOverrideActive = 0;
     keepFlag15 = 0;
     if (animation == 25 || animation == 26) {
@@ -1099,8 +1148,8 @@ void Actors_InitializeActorAnimationPose(Actors_ActorRecord* actor, Actors_Anima
     int frame;
     int i;
 
-    if (actor->poseOverrideActive) {
-        Actors_RestartActorAnimationEvents(actor);
+    if (actor->poseOverrideActive && Actors_RestartActorAnimationEvents(actor) < 0) {
+        return;
     }
     actor->poseOverrideActive = 0;
     pose->frame = 0;
@@ -1700,14 +1749,23 @@ check:
 void Actors_IgnoreAnimationEvent(void) { }
 
 // decomp: BATTLE.PRG func_800AE47C (src/BATTLE/BATTLE.PRG/44F14.c:610)
-void Actors_RestartActorAnimationEvents(Actors_ActorRecord* arg0)
+int Actors_RestartActorAnimationEvents(Actors_ActorRecord* arg0)
 {
     u_short* sp10;
     int var_v1;
     void* var_a3;
 
     Actors_SeqAnimationBank* v0 = (Actors_SeqAnimationBank*)Actors_FindActorAnimationHeader(arg0, arg0->animationId, &sp10);
-    u_char* temp_a3 = VS_ONDISC(v0, animationData, u_char*);
+    u_char* temp_a3;
+    if (v0 == NULL || sp10 == NULL || (sp10[2] == 0 && arg0->poseOverrideActive)) {
+        Core_Errorf("actors.sequence", "cannot unwind actor=%u animation=%u: unavailable events",
+            (unsigned)arg0->instance.slot, (unsigned)arg0->animationId);
+        return -1;
+    }
+    if (sp10[2] == 0) {
+        return 0;
+    }
+    temp_a3 = VS_ONDISC(v0, animationData, u_char*);
     temp_a3 += sp10[2];
 
     var_v1 = temp_a3[0];
@@ -1725,6 +1783,7 @@ void Actors_RestartActorAnimationEvents(Actors_ActorRecord* arg0)
     /* The decoder reads state->unk544 itself; this caller passes an ignored fourth
      * argument. */
     ((void (*)())Actors_RunAnimationEvents)(arg0, &arg0->blendPose, 2, var_a3);
+    return 0;
 }
 
 // decomp: BATTLE.PRG func_800AE980 (src/BATTLE/BATTLE.PRG/44F14.c:781)

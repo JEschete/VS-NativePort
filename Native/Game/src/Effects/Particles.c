@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Actors/Skeleton.h"
+#include "Core/Diagnostics.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Matrix.h"
 #include "Core/Math/ScalarMath.h"
@@ -885,54 +886,67 @@ void Effects_IntegrateParticleMotion(Effects_Particle* node)
 }
 
 // decomp: BATTLE.PRG func_800D6CCC (src/BATTLE/BATTLE.PRG/5BF94.c:8501)
-void Effects_ClearParticleTextureState(int* arg0)
+void Effects_ClearParticleTextureState(int* storage)
 {
-    arg0[0] = 0;
-    arg0[1] = 0;
-    arg0[2] = 0;
-    arg0[3] = 0;
-    arg0[4] = 0;
-    arg0[5] = 0;
-    arg0[6] = 0;
-    arg0[7] = 0;
+    Effects_ParticleTextureAnimation* state = (Effects_ParticleTextureAnimation*)storage;
+    *state = (Effects_ParticleTextureAnimation){0};
 }
 
 // decomp: BATTLE.PRG func_800D6CF0 (src/BATTLE/BATTLE.PRG/5BF94.c:8513)
-void Effects_InitializeParticleTextureAnimation(Effects_ParticleTextureAnimation* arg0, int textureIndex, int arg2)
+void Effects_InitializeParticleTextureAnimation(Effects_ParticleTextureAnimation* animation, int textureIndex, int programIndex)
 {
-    arg0->textureIndex = textureIndex;
-    arg0->program = (u_char*)Effects_package->block2Data + Effects_package->block2Data[arg2 + 2];
-    arg0->cursor = 0;
-    arg0->frameTimer = 0;
+    if (textureIndex < 0 || textureIndex >= Effects_package->block1TableCount ||
+        textureIndex >= 4 || Effects_package->textureInfoTable[textureIndex] == NULL) {
+        Core_Debugf("effects.texture", "unbound texture=%d tables=%d program=%d context=%s request_effect=%u",
+            textureIndex, Effects_package->block1TableCount, programIndex,
+            Effects_package == &Effects_actionPackage ? "primary" : "secondary",
+            (unsigned)(Effects_package == &Effects_actionPackage ?
+                Effects_actionRequest.effectId : Effects_secondaryRequest.effectId));
+    }
+    animation->textureIndex = textureIndex;
+    animation->program = (u_char*)Effects_package->block2Data + Effects_package->block2Data[programIndex + 2];
+    animation->cursor = 0;
+    animation->frameTimer = 0;
 }
 
 // decomp: BATTLE.PRG func_800D6D24 (src/BATTLE/BATTLE.PRG/5BF94.c:8521)
-void Effects_AdvanceParticleTextureAnimation(Effects_ParticleTextureAnimation* arg0)
+void Effects_AdvanceParticleTextureAnimation(Effects_ParticleTextureAnimation* animation)
 {
-    if (arg0->frameTimer != 0) {
-        arg0->frameTimer -= 2;
-        if (arg0->frameTimer != 0) {
+    if (animation->frameTimer != 0) {
+        animation->frameTimer -= 2;
+        if (animation->frameTimer != 0) {
             return;
         }
     }
 
     while (1) {
-        int w = *(int*)(arg0->program + arg0->cursor);
+        int command = *(int*)(animation->program + animation->cursor);
 
-        switch (w & 0xF0000000) {
+        switch (command & 0xF0000000) {
         case 0:
-            arg0->textureInfo =
-                Effects_package->textureInfoTable[arg0->textureIndex] + (w & 0xFFFF);
-            *(short*)&arg0->frameTimer = (w >> 16) & 0x3FFF;
-            arg0->cursor += 4;
+            if (animation->textureIndex >= 4 ||
+                animation->textureIndex >= Effects_package->block1TableCount ||
+                Effects_package->textureInfoTable[animation->textureIndex] == NULL) {
+                Core_Warnf("effects.texture", "unbound frame table=%u tables=%d cursor=%u word=0x%08X context=%s request_effect=%u program=%p previous=%p",
+                    (unsigned)animation->textureIndex, Effects_package->block1TableCount,
+                    (unsigned)animation->cursor, (unsigned)command,
+                    Effects_package == &Effects_actionPackage ? "primary" : "secondary",
+                    (unsigned)(Effects_package == &Effects_actionPackage ?
+                        Effects_actionRequest.effectId : Effects_secondaryRequest.effectId),
+                    (void*)animation->program, (void*)animation->textureInfo);
+            }
+            animation->textureInfo =
+                Effects_package->textureInfoTable[animation->textureIndex] + (command & 0xFFFF);
+            *(short*)&animation->frameTimer = (command >> 16) & 0x3FFF;
+            animation->cursor += 4;
             return;
         case 0x10000000:
-            arg0->frameOffsetX = (w << 18) >> 18;
-            arg0->frameOffsetY = (w << 4) >> 18;
-            arg0->cursor += 4;
+            animation->frameOffsetX = (command << 18) >> 18;
+            animation->frameOffsetY = (command << 4) >> 18;
+            animation->cursor += 4;
             break;
         case 0x20000000:
-            arg0->cursor = 0;
+            animation->cursor = 0;
             break;
         case 0x30000000:
             return;

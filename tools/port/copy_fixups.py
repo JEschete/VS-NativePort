@@ -13,6 +13,7 @@ so a stale fix is noticed.
 from __future__ import annotations
 
 NATIVE_HELPER_HEADERS = {
+    "Audio_Seq_LfoWaveform": r"Native\Engine\include\Audio\LfoWaveforms.h",
     **{name: r"Native\Engine\include\Audio\MusicState.h"
        for name in (
            "Audio_Native_SaveMusicSnapshot",
@@ -39,6 +40,9 @@ NATIVE_HELPER_HEADERS = {
            "Boot_EncounterPollStop",
        )},
     "Boot_InitializePlayerSettings": r"Native\Game\src\Boot\PlayerSettings.h",
+    "Battle_Ai_InvalidateSessionBindings": r"Native\Game\src\Battle\Ai\RoomState.h",
+    **{name: r"Native\Engine\include\Core\Diagnostics.h"
+       for name in ("Core_Warnf", "Core_Errorf")},
     **{name: r"Native\Game\src\Menu\Loot\Paging.h"
        for name in (
            "kMenuLootRowCapacity", "Menu_Loot_HasStagingSpace",
@@ -85,9 +89,12 @@ MODULE_DATA_BLOBS = (
      "30DB0.c:_loadGimmick; three 16-byte headers plus modelDataSize payloads"),
     ("BATTLE/BATTLE.PRG", 0x823AC, 0x800EABAC, 0x9DC, "Content_battleTextboxFrameBytes",
      "5BF94.c:textbox frame vertices; nine styles precede D_800EB588"),
-    ("SLUS_010.40", 0x2019C, 0x8002F99C, 0x804, "Content_residentLfoSamples",
-     "25AC.c:SoundVM_B4_Vibrato; sixteen short waveform sequences precede g_Sound_LfoTable"),
+    ("SLUS_010.40", 0x800, 0x80010000, 0x52000, "Content_residentLfoSamples",
+     "25AC.c:LFO selectors include source-code bytes as sample/control data; original PS-X EXE payload, never host code"),
 )
+
+MODULE_DATA_BLOB_TYPES = {"Content_residentLfoSamples": ("short", 2)}
+MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 
 MODULE_FUNCTION_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800DBA4C, "F04203"),
@@ -97,6 +104,11 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F00545": [
+        ("void Field_UnloadCurrentRoom(void)\n{",
+         "void Field_UnloadCurrentRoom(void)\n{\n    Boot_ResetGameplayInspection();",
+         "146C.c:15489 revoke diagnostic readiness before any teardown yield/free"),
+    ],
     "F00786": [
         ("    arg0[12] += (u_long)arg0;\n"
          "    arg0[13] += (u_long)arg0;\n"
@@ -678,6 +690,9 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "explicit encounter definitions replace room placements before the production spawn/cache lifecycle"),
     ],
     "F00543": [
+        ("void Field_FinishRoomLoad(int arg0)\n{",
+         "void Field_FinishRoomLoad(int arg0)\n{\n    Boot_ResetGameplayInspection();",
+         "146C.c:15272 do not inspect partially replaced room actors/sections"),
         ("        temp_s4 = Event_LoadRoomEventSections((void*)(arg0),",
          "        if (!Boot_EncounterUsesRoomEvents()) {\n"
          "            temp_s4 = Boot_EncounterLoadRoomEvents();\n"
@@ -1088,6 +1103,205 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1]",
          "publish the ETM page to the same bank table read by facial animation"),
     ],
+    "F01221": [
+        ("        c->durationFrames = script[2];",
+         "        c->durationFrames = script[2];\n"
+         '        Core_Debugf("event.camera", "start track=%s mode=%u easing=%u duration=%u",\n'
+         '            c == &Event_camera->eye ? "eye" : "look_at",\n'
+         "            (unsigned)c->motionMode, (unsigned)c->easingPrimary,\n"
+         "            (unsigned)c->durationFrames);",
+         "record actual camera-track producers when investigating zero-duration interpolation"),
+    ],
+    "F01223": [
+        ("    if (c->motionMode != 11) {",
+         "    if (c->durationFrames == 0 && c->motionMode != 11) {\n"
+         '        Core_Warnf("event.camera", "zero duration track=%s mode=%u easing=%u elapsed=%u tick_speed=%u",\n'
+         '            c == &Event_camera->eye ? "eye" : "look_at",\n'
+         "            (unsigned)c->motionMode, (unsigned)c->easingPrimary,\n"
+         "            (unsigned)c->elapsedFrames, (unsigned)State_tickSpeed);\n"
+         "    }\n"
+         "    if (c->motionMode != 11) {",
+         "capture active zero-duration track provenance before the original interpolation operation"),
+    ],
+    "F01238": [
+        ("&Event_kOrbitReturnFirstCommand", "Event_kOrbitReturnFirstCommand",
+         "4A0A8.c:4068 consumes the complete four-byte eye-orbit command"),
+        ("&Event_kOrbitReturnSecondCommand", "Event_kOrbitReturnSecondCommand",
+         "4A0A8.c:4069 consumes the complete three-byte look-at tween command"),
+    ],
+    "F01384": [
+        ("int* value", "const State_SceneTimer* timer",
+         "read the authoritative native scene clock through a typed const contract"),
+        ("    char sp10[4];",
+         "    char sp10[4] = {0, timer->seconds, timer->minutes, timer->hours};",
+         "format named clock fields without reinterpreting an independent packed alias"),
+        ("    *(int*)sp10 = *value;\n", "",
+         "the HUD no longer copies the detached PS1 timer-word view"),
+        ("Battle_puzzleTimerTextPointer", "Battle_puzzleTimerText",
+         "5BF94.c:3844 the native timer owns its writable buffer instead of depending on a dropped PS1 pointer binding"),
+        ("    Render_DrawCompactText(Battle_puzzleTimerText,",
+         '    Core_Debugf("hud.timer", "text=%s seconds=%d minutes=%d hours=%d frames=%d",\n'
+         "        Battle_puzzleTimerText, timer->seconds, timer->minutes, timer->hours, timer->frames);\n"
+         "    Render_DrawCompactText(Battle_puzzleTimerText,",
+         "retain exact per-render timer text in detailed gameplay diagnostics"),
+    ],
+    "F01392": [
+        ("Battle_DrawPuzzleTimer(&Battle_puzzleTimer);",
+         "Battle_DrawPuzzleTimer(&State_sceneTimer);",
+         "SLUS 0x8005046C is the time-field subobject of the authoritative timer at 0x80050468, not independent native storage"),
+    ],
+    "F01590": [
+        ("    arg0[0] = 0;\n    arg0[1] = 0;\n    arg0[2] = 0;\n"
+         "    arg0[3] = 0;\n    arg0[4] = 0;\n    arg0[5] = 0;\n"
+         "    arg0[6] = 0;\n    arg0[7] = 0;",
+         "    Effects_ParticleTextureAnimation* state = (Effects_ParticleTextureAnimation*)arg0;\n"
+         "    *state = (Effects_ParticleTextureAnimation){0};",
+         "func_800D6CCC: retain the existing C entry contract but clear the complete native texture state, including widened pointers"),
+    ],
+    "F01591": [
+        ("    arg0->textureIndex = textureIndex;",
+         "    if (textureIndex < 0 || textureIndex >= Effects_package->block1TableCount ||\n"
+         "        textureIndex >= 4 || Effects_package->textureInfoTable[textureIndex] == NULL) {\n"
+         '        Core_Debugf("effects.texture", "unbound texture=%d tables=%d program=%d context=%s request_effect=%u",\n'
+         "            textureIndex, Effects_package->block1TableCount, arg2,\n"
+         '            Effects_package == &Effects_actionPackage ? "primary" : "secondary",\n'
+         "            (unsigned)(Effects_package == &Effects_actionPackage ?\n"
+         "                Effects_actionRequest.effectId : Effects_secondaryRequest.effectId));\n"
+         "    }\n    arg0->textureIndex = textureIndex;",
+         "record unavailable texture-group provenance before investigating malformed frames; no fallback or changed playback"),
+    ],
+    "F01865": [
+        ("Core_Memory_AllocateFromHighEnd(0x10)",
+         "Core_Memory_AllocateFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation))",
+         "particleDispatch.h: allocate the complete native untextured prefix instead of its PS1 byte extent"),
+    ],
+    "F02351": [
+        ("#define VS_PARTICLE_UNTEXTURED\n", "",
+         "PLG265 original 0x800FFB7C allocates 0x30 and initializes texture state; do not inherit the preceding line dispatcher's option"),
+        ("#undef VS_PARTICLE_UNTEXTURED\n", "",
+         "remove the matching inherited option cleanup from the textured PLG265 instance"),
+    ],
+    "F01861": [
+        ("        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);",
+         "        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);\n"
+         '        Core_Debugf("effects.texture", "closed ring init definition=%u parameter=0x%X table=%u program=%u context=%s request_effect=%u tables=%d",\n'
+         "            (unsigned)state->effect, (unsigned)arg2,\n"
+         "            (unsigned)effect->ringSegments, (unsigned)effect->ringPositions,\n"
+         '            Effects_package == &Effects_actionPackage ? "primary" : "secondary",\n'
+         "            (unsigned)(Effects_package == &Effects_actionPackage ?\n"
+         "                Effects_actionRequest.effectId : Effects_secondaryRequest.effectId),\n"
+         "            Effects_package->block1TableCount);\n"
+         "        if (effect->ringSegments >= Effects_package->block1TableCount ||\n"
+         "            effect->ringSegments >= 4 || Effects_package->textureInfoTable[effect->ringSegments] == NULL) {\n"
+         '            Core_Debugf("effects.texture", "closed ring definition=%u parameter=0x%X table=%u program=%u",\n'
+         "                (unsigned)state->effect, (unsigned)arg2,\n"
+         "                (unsigned)effect->ringSegments, (unsigned)effect->ringPositions);\n"
+         "        }",
+         "capture the exact closed-ring definition and packed arguments for an unavailable texture group without changing rendering"),
+    ],
+    "F01592": [
+        ("        case 0:\n            arg0->textureInfo =",
+         "        case 0:\n"
+         "            if (arg0->textureIndex >= 4 ||\n"
+         "                arg0->textureIndex >= Effects_package->block1TableCount ||\n"
+         "                Effects_package->textureInfoTable[arg0->textureIndex] == NULL) {\n"
+         '                Core_Warnf("effects.texture", "unbound frame table=%u tables=%d cursor=%u word=0x%08X context=%s request_effect=%u program=%p previous=%p",\n'
+         "                    (unsigned)arg0->textureIndex, Effects_package->block1TableCount,\n"
+         "                    (unsigned)arg0->cursor, (unsigned)w,\n"
+         '                    Effects_package == &Effects_actionPackage ? "primary" : "secondary",\n'
+         "                    (unsigned)(Effects_package == &Effects_actionPackage ?\n"
+         "                        Effects_actionRequest.effectId : Effects_secondaryRequest.effectId),\n"
+         "                    (void*)arg0->program, (void*)arg0->textureInfo);\n"
+         "            }\n"
+         "            arg0->textureInfo =",
+         "capture an unavailable frame table at consumption time to distinguish context changes from initial binding"),
+    ],
+    "F00279": [
+        ("void Actors_UnloadSharedSequence(int arg0) { Content_ReleaseActorSequence(arg0, 1); }",
+         """int Actors_UnloadSharedSequence(int bankId)
+{
+    int slot;
+    int result;
+    if (bankId < 1 || bankId > 3) {
+        Core_Errorf("actors.sequence", "invalid shared bank retirement=%d", bankId);
+        return -1;
+    }
+    for (slot = 0; slot < 17; ++slot) {
+        Actors_ActorRecord* actor = Actors_actorRecords[slot];
+        u_short* entry;
+        if (actor == NULL || actor->sharedSequences[bankId - 1] == NULL ||
+            actor->animationHeader != (intptr_t)actor->sharedSequences[bankId - 1] ||
+            !actor->poseOverrideActive) {
+            continue;
+        }
+        if (Actors_FindActorAnimationHeader(actor, actor->animationId, &entry) != actor->animationHeader ||
+            entry == NULL || entry[2] == 0) {
+            Core_Errorf("actors.sequence", "bank=%d cannot unwind actor=%d animation=%d",
+                bankId, slot, actor->animationId);
+            return -1;
+        }
+    }
+    for (slot = 0; slot < 17; ++slot) {
+        Actors_ActorRecord* actor = Actors_actorRecords[slot];
+        if (actor == NULL || actor->sharedSequences[bankId - 1] == NULL ||
+            actor->animationHeader != (intptr_t)actor->sharedSequences[bankId - 1]) {
+            continue;
+        }
+        if (actor->poseOverrideActive && Actors_RestartActorAnimationEvents(actor) < 0) {
+            return -1;
+        }
+        actor->poseOverrideActive = 0;
+        actor->animationHeader = 0;
+        actor->animationSet = 0xFF;
+        actor->pose.eventScript = NULL;
+        actor->pose.nextEventFrame = 0xFFFF;
+        actor->blendPose.eventScript = NULL;
+        actor->blendPose.nextEventFrame = 0xFFFF;
+    }
+    result = Content_ReleaseActorSequence(bankId, 1);
+    if (result < 0) {
+        Core_Errorf("actors.sequence", "shared bank=%d retirement failed status=%d", bankId, result);
+    }
+    return result;
+}""",
+         "func_8007CBBC: undo live vertex edits and retire borrowed event/cache bindings before releasing a shared bank; retain the skeletal pose"),
+    ],
+    "F00836": [
+        ("    i = 0;\n\n    while ((temp_v0_2 = Field_FindActorAboveGimmick",
+         "    if (Field_gimmickInstances[temp_s4] == NULL) {\n"
+         '        Core_Debugf("gimmick", "no eligible stack top while removing slot=%d", arg0);\n'
+         "        return;\n    }\n\n    i = 0;\n\n"
+         "    while ((temp_v0_2 = Field_FindActorAboveGimmick",
+         "the top search can have no object; retain preceding stack updates before ending the actor scan"),
+    ],
+    "F00887": [
+        ("    Actors_ShpModel* model = actor->instance.model;",
+         "    Actors_ShpModel* model;",
+         "func_800A1C10: the original low-address model read precedes the gimmick fallback; defer it natively"),
+        ("        model = actor->instance.model;\n    }\n\n"
+         "    matrix = Actors_ActorBoneWorldTransform",
+         "    }\n\n    model = actor->instance.model;\n"
+         "    matrix = Actors_ActorBoneWorldTransform",
+         "resolve the actor or gimmick owner before the sole model read"),
+    ],
+    "F01170": [
+        ("    Effects_StartScriptedActorEffect(\n"
+         "        Core_Memory_ReadUnalignedShort(arg0 + 1), Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3)));",
+         "    const int effect = Core_Memory_ReadUnalignedShort(arg0 + 1);\n"
+         "    const u_short selector = Core_Memory_ReadUnalignedShort(arg0 + 3);\n"
+         "    const unsigned referenceType = selector >> 12;\n"
+         "    const int actor = referenceType <= 1 ? Event_ResolveScriptActorReference(selector) : -1;\n"
+         "    const Battle_Actor* target = (unsigned)actor < 16 ? Actors_ActorAtSlot(actor) : NULL;\n"
+         "    if ((unsigned)actor >= 16 ||\n"
+         "        (referenceType == 0 && (target == NULL || target->modelId != selector)) ||\n"
+         "        (Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL)) {\n"
+         '        Core_Errorf("event", "effect=%d awaits unavailable actor selector=0x%04X slot=%d",\n'
+         "            effect, (unsigned)selector, actor);\n"
+         "        return 1;\n"
+         "    }\n"
+         "    Effects_StartScriptedActorEffect(effect, actor);",
+         "func_800BA8BC: validate reference kind and model ownership; do not bind a missing-model sentinel or advance past the required effect"),
+    ],
     "F00536": [("Field_isRoomActorSpawnEnabled", "Field_zoneContext.mpdEnemyCount",
                  "D_800F18E0 aliases _zoneContext +0x60 (mpdEnemyCount), not an independent enable flag")],
     "F00275": [("    if (arg0 < 16) {",
@@ -1102,8 +1316,52 @@ int Menu_Loot_AdvanceStagedInventory(void)
                  "completed actor-load result and installed record diagnostics")],
     "F00947": [("    Actors_ActorRecord* actor = Actors_actorRecords[id];",
                  "    Actors_ActorRecord* actor = Actors_actorRecords[id];\n"
-                 '    if (actor == NULL) Core_Debugf("actors", "movement references missing actor %d", id);',
-                 "identify a failed script actor binding before the required movement operation")],
+                 "    if (actor == NULL) {\n"
+                 '        Core_Debugf("actors", "movement skips absent actor=%d", id);\n'
+                 "        return;\n    }",
+                 "retain optional actor no-op before world-route position/facing access")],
+    "F00951": [
+        ("    Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];",
+         "    Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];\n"
+         "    if (temp_s1 == NULL) {\n"
+         '        Core_Debugf("actors", "absolute slide skips absent actor=%d", arg0);\n'
+         "        return;\n    }",
+         "func_800A9D90: retain the primitive's optional-actor no-op contract before position/rate access"),
+    ],
+    "F01640": [
+        ("targetObject = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[id];",
+         "targetObject = (Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model;",
+         "valid auxiliary AI targets own model prefixes without an actor-record table entry"),
+        ("Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[candidate];",
+         "Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)actor->model;",
+         "resolve auxiliary occluders through the current Battle_Actor owner like distance/FOV paths"),
+    ],
+    "F03515": [
+        ("    case 0xFF000:\n"
+         "        var_s0_2 = Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];",
+         "    case 0xFF000:\n"
+         "        if (Audio_soundState.currentSfxBank == 0) {\n"
+         '            Core_Warnf("audio.sfx", "private SFX id=%ld skipped: no selected bank", id);\n'
+         "            return;\n        }\n"
+         "        if (Audio_soundState.currentSfxBank >\n"
+         "            sizeof Audio_soundState.sfxBankData / sizeof Audio_soundState.sfxBankData[0]) {\n"
+         '            Core_Errorf("audio.sfx", "invalid selected SFX bank=%u", Audio_soundState.currentSfxBank);\n'
+         "            return;\n        }\n"
+         "        var_s0_2 = Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];\n"
+         "        if (var_s0_2 == NULL || id < 0) {\n"
+         '            Core_Errorf("audio.sfx", "unavailable SFX bank=%u or invalid id=%ld", Audio_soundState.currentSfxBank, id);\n'
+         "            return;\n        }",
+         "no selection is an optional disabled state; validate selection before unsigned indexing and report inconsistent banks"),
+        ("    case 0xF00000:\n        var_s0_2 = Audio_soundState.sfxBankData[2];",
+         "    case 0xF00000:\n        var_s0_2 = Audio_soundState.sfxBankData[2];\n"
+         "        if (var_s0_2 == NULL) {\n"
+         '            Core_Warnf("audio.sfx", "room SFX id=%ld skipped: no room bank", id);\n'
+         "            return;\n        }\n"
+         "        if (id < 0) {\n"
+         '            Core_Errorf("audio.sfx", "invalid room SFX id=%ld", id);\n'
+         "            return;\n        }",
+         "room banks are optional and must be present before dereferencing their serialized program offsets"),
+    ],
     "F01860": [(f"(*(int (*)[])&Actors_sharedSequenceData)[{index}] = 0;",
                   f"Actors_sharedSequenceData[{index}] = NULL;", "reset whole native SEQ bank pointers")
                  for index in range(3)],
@@ -1286,6 +1544,14 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("    int found;", "    intptr_t found;", "preserve the resolved bank pointer"),
         ("found = ((intptr_t (*)(Actors_ActorRecord*, int, int*))Actors_FindActorAnimationHeader)(actor, anim, (int*)&frames);",
          "found = Actors_FindActorAnimationHeader(actor, anim, &frames);", "use the declared header output type"),
+        ("    actor->animationEventFlag = 0;\n"
+         "    if ((*(int*)((char*)actor + 0x5AC)) & 0x800000) {\n"
+         "        Actors_RestartActorAnimationEvents(actor);\n"
+         "    }\n    actor->poseOverrideActive = 0;",
+         "    if (actor->poseOverrideActive && Actors_RestartActorAnimationEvents(actor) < 0) {\n"
+         "        return -1;\n    }\n"
+         "    actor->animationEventFlag = 0;\n    actor->poseOverrideActive = 0;",
+         "do not erase the outstanding vertex-override obligation when its event stream cannot be restored"),
     ],
     # func_800AEF94 / 44F14.c:923: room actor slots are sparse, including an absent companion in slot 1.
     "F01008": [
@@ -1317,12 +1583,45 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
         "F01006": [("*(MATRIX*)&source", "*source", "44F14.c:853; copy the supplied camera matrix, not pointer-stack bytes")],
     # func_800AE47C / 44F14.c:610: the SEQ header starts with offsets, not a native pointer.
+    "F00840": [
+        ("    temp_s1 = s0->nextEventFrame;",
+         "    if (s0->eventScript == NULL) {\n        return 0;\n    }\n"
+         "    temp_s1 = s0->nextEventFrame;",
+         "a pose whose bank was retired has no battle timing marker to scan"),
+    ],
+    "F00992": [
+        ("    if (*(int*)((u_char*)actor + 0x5AC) & 0x800000) {\n"
+         "        Actors_RestartActorAnimationEvents(actor);\n    }",
+         "    if (actor->poseOverrideActive && Actors_RestartActorAnimationEvents(actor) < 0) {\n"
+         "        return;\n    }",
+         "keep the original pose and vertex-override obligation when event unwind is unavailable"),
+    ],
+    "F01081": [
+        ("        Actors_UnloadSharedSequence(arg0[1]);",
+         "        if (Actors_UnloadSharedSequence(arg0[1]) < 0) {\n"
+         "            return 1;\n        }",
+         "yield rather than advancing the script after a failed shared-bank retirement"),
+    ],
     "F00998": [
+        ("void Actors_RestartActorAnimationEvents(",
+         "int Actors_RestartActorAnimationEvents(",
+         "native event-unwind failure is explicit to all three callers"),
         ("u_char** v0 = ((u_char** (*)(Actors_ActorRecord*, u_char, u_short**))Actors_FindActorAnimationHeader)(arg0, arg0->animationId, &sp10);",
          "Actors_SeqAnimationBank* v0 = (Actors_SeqAnimationBank*)Actors_FindActorAnimationHeader(arg0, arg0->animationId, &sp10);",
          "typed on-disc sequence header"),
-        ("u_char* temp_a3 = *v0;", "u_char* temp_a3 = VS_ONDISC(v0, animationData, u_char*);",
-         "resolve the event stream's 32-bit offset"),
+        ("u_char* temp_a3 = *v0;",
+         "u_char* temp_a3;\n"
+         "    if (v0 == NULL || sp10 == NULL || (sp10[2] == 0 && arg0->poseOverrideActive)) {\n"
+         '        Core_Errorf("actors.sequence", "cannot unwind actor=%u animation=%u: unavailable events",\n'
+         "            (unsigned)arg0->instance.slot, (unsigned)arg0->animationId);\n"
+         "        return -1;\n    }\n"
+         "    if (sp10[2] == 0) {\n        return 0;\n    }\n"
+         "    temp_a3 = VS_ONDISC(v0, animationData, u_char*);",
+         "validate the nullable lookup before resolving the event stream's on-disc offset"),
+        ("((void (*)())Actors_RunAnimationEvents)(arg0, &arg0->blendPose, 2, var_a3);",
+         "((void (*)())Actors_RunAnimationEvents)(arg0, &arg0->blendPose, 2, var_a3);\n"
+         "    return 0;",
+         "report successful event unwind without changing its original decoder mode"),
     ],
     # F01393 / BATTLE func_800CBBCC, 5BF94.c:4056: GIM grid coordinates are temporary, not guest memory.
     "F01393": [
@@ -1367,11 +1666,77 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
     # Actor IDs are 0..15 (146C.c:8936); 0x10 is the linked-actor sentinel, not a table index.
     # 7E05C.s:541-575 identifies the next BSS symbol, tileFlagMap at 0x800F58B8: 0x40 bytes after D_800F5878.
+    "F03317": [
+        ("    in_pChannel->updateFlags |= 1;",
+         "    short* nativeWave = Audio_Seq_LfoWaveform((u_char)in_pChannel->programCounter[2]);\n"
+         "    if (nativeWave == NULL) {\n"
+         "        in_pChannel->programCounter += 3;\n"
+         "        return;\n"
+         "    }\n"
+         "    in_pChannel->updateFlags |= 1;",
+         "validate imported sample/control data before changing vibrato state"),
+        ("*in_pChannel->programCounter++", "(u_char)*in_pChannel->programCounter++",
+         "SoundVM_B4 uses LBU for its byte operands"),
+        ("Audio_Seq_kLfoWaveforms[in_pChannel->vibratoShape]", "nativeWave",
+         "reuse the validated original-source waveform"),
+    ],
+    "F03321": [
+        ("    in_pChannel->updateFlags |= SOUND_UPDATE_TREMOLO;",
+         "    short* nativeWave = Audio_Seq_LfoWaveform((u_char)in_pChannel->programCounter[2]);\n"
+         "    if (nativeWave == NULL) {\n"
+         "        in_pChannel->programCounter += 3;\n"
+         "        return;\n"
+         "    }\n"
+         "    in_pChannel->updateFlags |= SOUND_UPDATE_TREMOLO;",
+         "validate imported sample/control data before changing tremolo state"),
+        ("*in_pChannel->programCounter++", "(u_char)*in_pChannel->programCounter++",
+         "SoundVM_B8 uses LBU for its byte operands"),
+        ("Audio_Seq_kLfoWaveforms[in_pChannel->tremoloShape]", "nativeWave",
+         "reuse the validated original-source waveform"),
+    ],
+    "F03325": [
+        ("    in_pChannel->updateFlags |= SOUND_UPDATE_PAN_LFO;",
+         "    short* nativeWave = Audio_Seq_LfoWaveform((u_char)in_pChannel->programCounter[1]);\n"
+         "    if (nativeWave == NULL) {\n"
+         "        in_pChannel->programCounter += 2;\n"
+         "        return;\n"
+         "    }\n"
+         "    in_pChannel->updateFlags |= SOUND_UPDATE_PAN_LFO;",
+         "validate imported sample/control data before changing auto-pan state"),
+        ("*in_pChannel->programCounter++", "(u_char)*in_pChannel->programCounter++",
+         "SoundVM_BC uses LBU for both byte operands"),
+        ("Audio_Seq_kLfoWaveforms[in_pChannel->autoPanShape]", "nativeWave",
+         "source selector65 is data, not an out-of-array native code pointer"),
+    ],
+    "F03276": [
+        ("                    arg0->vibratoWave = Audio_Seq_kLfoWaveforms[arg0->vibratoShape];",
+         "                    short* vibratoProgram = Audio_Seq_LfoWaveform(arg0->vibratoShape);\n"
+         "                    if (vibratoProgram == NULL) return;\n"
+         "                    arg0->vibratoWave = vibratoProgram;",
+         "retrigger only a supported imported vibrato program"),
+        ("                arg0->tremoloWave = Audio_Seq_kLfoWaveforms[arg0->tremoloShape];",
+         "                short* tremoloProgram = Audio_Seq_LfoWaveform(arg0->tremoloShape);\n"
+         "                if (tremoloProgram == NULL) return;\n"
+         "                arg0->tremoloWave = tremoloProgram;",
+         "retrigger only a supported imported tremolo program"),
+    ],
+    "G00130": [
+        ("Event_kOrbitReturnFirstCommand", "Event_kOrbitReturnFirstCommand[4]",
+         "BATTLE.PRG 0x800E9C28 stores D4 10 10 55; preserve the complete camera command payload"),
+    ],
+    "G00131": [
+        ("Event_kOrbitReturnSecondCommand", "Event_kOrbitReturnSecondCommand[3]",
+         "BATTLE.PRG 0x800E9C2C stores C2 01 55; preserve the complete camera command payload"),
+    ],
     "G00574": [
         ("Effects_effectRenderers[]", "Effects_effectRenderers[8]",
          "eight native function pointers occupy the original table range 0x800F56A8..0x800F56C8"),
     ],
     "G00579": [("Battle_Ai_actorAiStates[]", "Battle_Ai_actorAiStates[16]", "AI actor pointer table extent")],
+    "G00614": [
+        ("char const Battle_puzzleTimerText[]", "char Battle_puzzleTimerText[9]",
+         "5BF94.c:3842 the timer rewrites six digits; retain nine bytes of mutable native storage, including separators and terminator"),
+    ],
     "G00623": [
         ("Effects_effectEntryPointIndices[]", "Effects_effectEntryPointIndices[400]",
          "publish the catalogued 400-index plugin slice boundary for bounded native consumers"),
@@ -1424,8 +1789,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "5BF94.c:func_800D51D8; forty-nine US handlers precede effect resource data"),
         ("G00233", "Battle_Ai_decisionCallbacks", 9,
          "7CD68.c:decision callback selection; nine US function addresses precede AI constants"),
-        ("G01840", "Audio_Seq_kLfoWaveforms", 16,
-         "25AC.c:LFO selection; sixteen waveform addresses precede D_800301E0"),
+        ("G01840", "Audio_Seq_kLfoWaveforms", 256,
+         "25AC.c:LBU selector covers a byte; original MUSIC172 selects65 and aliases adjacent source pointer entries as sample data"),
         ("G01841", "Audio_Mixer_kCommandHandlers", 256,
          "25AC.c:SoundCommand; byte command table ends at D_800305E0"),
         ("G01842", "Audio_Seq_kOpcodeHandlers", 96,
@@ -1561,6 +1926,32 @@ FIXES["F00798"] += [
 ]
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    (r"^Field::(?:Find|Show|Hide|Disable)RoomGeometryGroup$|^Field::AddRoomGeometryDepthBias$",
+     r"\barg0\b", "group_index",
+     "2842C.c:550-606 verified geometry group index from event/gimmick/render callers"),
+    (r"^Field::(?:Show|Hide|Disable)RoomGeometryGroup$", r"\btemp_v0\b", "group",
+     "2842C.c:562/572/606 points at the geometry group's complete flags word"),
+    *[(r"^Field::FindRoomGeometryGroup$", rf"\b{old}\b", new,
+       "2842C.c:550 verified counted array of sixteen-word geometry group headers")
+      for old, new in (("v1", "group_count"), ("a1", "groups"))],
+    *[(r"^Field::SwapRoomGeometryGroupFlags$", rf"\b{old}\b", new,
+       "2842C.c:582 verified two group indices and whole-word flag swap")
+      for old, new in (("arg0", "first_group_index"),
+                       ("arg1", "second_group_index"),
+                       ("temp_s0", "first_group"), ("temp_a1", "second_group"),
+                       ("temp_a0", "saved_flags"))],
+    *[(r"^Field::AddRoomGeometryDepthBias$", rf"\b{old}\b", new,
+       "2842C.c:596 and event signed-byte operand verify upper-halfword depth bias")
+      for old, new in (("arg1", "depth_bias"), ("temp_v0", "group_halfwords"))],
+    (r"^Effects::ClearParticleTextureState$", r"\barg0\b", "storage",
+     "5BF94.c:8501 existing C entry receives native texture-state storage"),
+    (r"^Effects::(?:Initialize|Advance)ParticleTextureAnimation$",
+     r"\barg0\b", "animation",
+     "5BF94.c:8513/8521 verified texture-animation state ownership"),
+    (r"^Effects::InitializeParticleTextureAnimation$", r"\barg2\b", "programIndex",
+     "5BF94.c:8513 verified block2 halfword program-offset selection"),
+    (r"^Effects::AdvanceParticleTextureAnimation$", r"\bw\b", "command",
+     "5BF94.c:8521 verified frame/offset/loop/end command word"),
     (r"^Effects::(?:SetEffectScriptRegister|BranchIfEffectRegisterEqual)$",
      r"\barg0\b", "instance",
      "5BF94.c:7633/7639 verified effect-instance stream and register ownership"),
@@ -1863,6 +2254,29 @@ FIXES["F00793"] = FIXES["F00793"] + [
      "    actor->modelDataSize = (unsigned)size;",
      "retain allocation bounds and reject allocation failure before copying the SHP"),
 ]
+
+FIXES["F03437"] = FIXES["F03437"] + [
+    ("    Content_InitializeDiscQueue();",
+     "    Battle_Ai_InvalidateSessionBindings();\n    Content_InitializeDiscQueue();",
+     "native AI bindings must not outlive the game-arena reset in _sysReinit"),
+]
+
+for _row, _variable in (
+    ("F00946", "actor"),
+    ("F00948", "temp_s0"),
+    ("F00949", "new_var"),
+    ("F00950", "temp_s1"),
+    ("F00952", "temp_s1"),
+    ("F00953", "temp_s1"),
+):
+    _declaration = f"    Actors_ActorRecord* {_variable} = Actors_actorRecords[arg0];"
+    FIXES.setdefault(_row, []).append((
+        _declaration,
+        _declaration + f"\n    if ({_variable} == NULL) {{\n"
+        '        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);\n'
+        "        return;\n    }",
+        "retain the guarded movement primitive's optional actor contract in its rate wrapper",
+    ))
 
 # The WEP header (Actors::WeaponModelData, 30DB0.c:598): four section offsets, relocated in place by _parseWep and
 # re-based when a loaded model is copied to another slot.

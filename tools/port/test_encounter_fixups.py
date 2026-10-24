@@ -9,6 +9,413 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_room_geometry_names_preserve_index_flags_and_bias_roles(self):
+        examples = (
+            ("Field::FindRoomGeometryGroup",
+             "void* find(int arg0) { int v1; int* a1; return arg0 < v1 ? a1 + arg0 * 16 : NULL; }",
+             "void* find(int group_index) { int group_count; int* groups; return group_index < group_count ? groups + group_index * 16 : NULL; }"),
+            ("Field::ShowRoomGeometryGroup",
+             "int show(int arg0) { int* temp_v0 = find(arg0); *temp_v0 &= ~0x100; }",
+             "int show(int group_index) { int* group = find(group_index); *group &= ~0x100; }"),
+            ("Field::HideRoomGeometryGroup",
+             "int hide(int arg0) { int* temp_v0 = find(arg0); *temp_v0 |= 0x100; }",
+             "int hide(int group_index) { int* group = find(group_index); *group |= 0x100; }"),
+            ("Field::SwapRoomGeometryGroupFlags",
+             "int swap(int arg0, int arg1) { int* temp_s0 = find(arg0); int* temp_a1 = find(arg1); int temp_a0 = *temp_s0; *temp_s0 = *temp_a1; *temp_a1 = temp_a0; }",
+             "int swap(int first_group_index, int second_group_index) { int* first_group = find(first_group_index); int* second_group = find(second_group_index); int saved_flags = *first_group; *first_group = *second_group; *second_group = saved_flags; }"),
+            ("Field::AddRoomGeometryDepthBias",
+             "int bias(int arg0, int arg1) { u_short* temp_v0 = find(arg0); temp_v0[1] = (u_short)(temp_v0[1] + arg1); }",
+             "int bias(int group_index, int depth_bias) { u_short* group_halfwords = find(group_index); group_halfwords[1] = (u_short)(group_halfwords[1] + depth_bias); }"),
+            ("Field::DisableRoomGeometryGroup",
+             "int disable(int arg0) { int* temp_v0 = find(arg0); *temp_v0 |= 0x1000; }",
+             "int disable(int group_index) { int* group = find(group_index); *group |= 0x1000; }"),
+            ("Field::UnrelatedGeometryCommand",
+             "void untouched(int arg0) { int temp_v0 = arg0; }",
+             "void untouched(int arg0) { int temp_v0 = arg0; }"),
+        )
+        for name, source, expected in examples:
+            with self.subTest(name=name):
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                self.assertEqual(source, expected)
+
+    def test_lfo_catalogue_preserves_unsigned_byte_source_data_references(self):
+        source = "short* Audio_Seq_kLfoWaveforms[];"
+        for old, new, _ in copy_fixups.FIXES["G01840"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertEqual(source, "short* Audio_Seq_kLfoWaveforms[256];")
+        self.assertEqual(
+            copy_fixups.MODULE_SAMPLE_POINTERS["G01840"],
+            "Content_residentLfoSamples",
+        )
+        blob = next(
+            item for item in copy_fixups.MODULE_DATA_BLOBS
+            if item[4] == "Content_residentLfoSamples"
+        )
+        self.assertEqual(blob[:4], ("SLUS_010.40", 0x800, 0x80010000, 0x52000))
+        self.assertEqual(
+            copy_fixups.MODULE_DATA_BLOB_TYPES[blob[4]], ("short", 2)
+        )
+
+    def test_lfo_enables_preflight_before_mutation_and_decode_unsigned_operands(self):
+        for fid, flag, member, count in (
+            ("F03317", "1", "vibratoShape", 3),
+            ("F03321", "SOUND_UPDATE_TREMOLO", "tremoloShape", 3),
+            ("F03325", "SOUND_UPDATE_PAN_LFO", "autoPanShape", 2),
+        ):
+            source = (
+                f"    in_pChannel->updateFlags |= {flag};\n"
+                f"    in_pChannel->{member} = *in_pChannel->programCounter++;\n"
+                f"    wave = Audio_Seq_kLfoWaveforms[in_pChannel->{member}];"
+            )
+            for old, new, _ in copy_fixups.FIXES[fid]:
+                self.assertIn(old, source)
+                source = source.replace(old, new)
+            self.assertLess(source.index("Audio_Seq_LfoWaveform"),
+                            source.index("updateFlags"))
+            self.assertIn(f"programCounter += {count}", source)
+            self.assertIn("(u_char)*in_pChannel->programCounter++", source)
+            self.assertNotIn("Audio_Seq_kLfoWaveforms[", source)
+
+    def test_hud_timer_retirement_does_not_add_a_packed_pointer_view(self):
+        ledger = (
+            Path(__file__).resolve().parents[2]
+            / "Docs"
+            / "ledgers"
+            / "DATA_LEDGER.csv"
+        )
+        with ledger.open(encoding="utf-8", newline="") as stream:
+            row = next(item for item in csv.DictReader(stream) if item["id"] == "G01934")
+        self.assertEqual(row["disposition"], "drop")
+        self.assertNotIn("view-of:", row["notes"])
+
+    def test_puzzle_timer_uses_owned_mutable_text_instead_of_pointer_binding(self):
+        source = 'char const Battle_puzzleTimerText[] = "00:00:00";'
+        for old, new, _ in copy_fixups.FIXES["G00614"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertEqual(source, 'char Battle_puzzleTimerText[9] = "00:00:00";')
+        source = (
+            "void Battle_DrawPuzzleTimer(int* value)\n{\n"
+            "    char sp10[4];\n"
+            "    *(int*)sp10 = *value;\n"
+            "Battle_puzzleTimerTextPointer[6 - i * 3] = digit;\n"
+            "    Render_DrawCompactText(Battle_puzzleTimerTextPointer, xy, ordering);"
+            "\n}"
+        )
+        for old, new, _ in copy_fixups.FIXES["F01384"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertNotIn("Battle_puzzleTimerTextPointer", source)
+        self.assertIn("Render_DrawCompactText(Battle_puzzleTimerText,", source)
+        self.assertLess(source.index("Core_Debugf"), source.index("Render_DrawCompactText"))
+        self.assertIn("const State_SceneTimer* timer", source)
+        self.assertIn("timer->seconds, timer->minutes, timer->hours", source)
+        self.assertNotIn("*(int*)sp10", source)
+        source = "Battle_DrawPuzzleTimer(&Battle_puzzleTimer);"
+        for old, new, _ in copy_fixups.FIXES["F01392"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertEqual(source, "Battle_DrawPuzzleTimer(&State_sceneTimer);")
+
+    def test_orbit_return_globals_preserve_complete_command_objects(self):
+        for gid, name, extent in (
+            ("G00130", "Event_kOrbitReturnFirstCommand", 4),
+            ("G00131", "Event_kOrbitReturnSecondCommand", 3),
+        ):
+            source = f"u_char {name};"
+            for old, new, _ in copy_fixups.FIXES[gid]:
+                self.assertIn(old, source)
+                source = source.replace(old, new)
+            self.assertEqual(source, f"u_char {name}[{extent}];")
+        source = (
+            "Event_CommandCameraMotion(&Event_kOrbitReturnFirstCommand, 0);\n"
+            "Event_CommandCameraMotion(&Event_kOrbitReturnSecondCommand, 0);"
+        )
+        for old, new, _ in copy_fixups.FIXES["F01238"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertNotIn("&Event_kOrbitReturn", source)
+
+    def test_camera_track_diagnostics_preserve_duration_and_update_order(self):
+        source = "        c->durationFrames = script[2];"
+        for old, new, _ in copy_fixups.FIXES["F01221"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertTrue(source.startswith("        c->durationFrames = script[2];"))
+        self.assertIn("Core_Debugf", source)
+        source = "    if (c->motionMode != 11) {"
+        for old, new, _ in copy_fixups.FIXES["F01223"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertIn("Core_Warnf", source)
+        self.assertNotIn("return", source)
+        self.assertTrue(source.endswith("    if (c->motionMode != 11) {"))
+
+    def test_particle_dispatch_preserves_native_prefix_and_textured_variant(self):
+        source = "temp_s1 = Core_Memory_AllocateFromHighEnd(0x10);"
+        for old, new, _ in copy_fixups.FIXES["F01865"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertIn("offsetof(Effects_ParticleQuadSet, textureAnimation)", source)
+        source = (
+            "#define VS_PARTICLE_DISPATCH_FUNCTION Effects_Plg265_ParticleDispatch2\n"
+            "#define VS_PARTICLE_UNTEXTURED\n"
+            '#include "Effects/Templates/ParticleDispatch.inl"\n'
+            "#undef VS_PARTICLE_UNTEXTURED\n"
+        )
+        for old, new, _ in copy_fixups.FIXES["F02351"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertNotIn("VS_PARTICLE_UNTEXTURED", source)
+        self.assertIn("Effects_Plg265_ParticleDispatch2", source)
+        copier = Path(__file__).with_name("copy_to_native.py").read_text()
+        templates = copier.split("    def copy_templates(", 1)[1].split(
+            "    # ---", 1
+        )[0]
+        self.assertIn("block = self.apply_fixups(r, block)", templates)
+
+    def test_texture_reset_uses_the_complete_native_state(self):
+        source = "\n".join(f"    arg0[{index}] = 0;" for index in range(8))
+        for old, new, _ in copy_fixups.FIXES["F01590"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertIn("*state = (Effects_ParticleTextureAnimation){0};", source)
+        self.assertNotIn("arg0[", source)
+
+    def test_unbound_texture_diagnostics_do_not_invent_a_frame(self):
+        source = "    arg0->textureIndex = textureIndex;"
+        for old, new, _ in copy_fixups.FIXES["F01591"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertIn("Core_Debugf", source)
+        self.assertIn("request_effect=%u", source)
+        self.assertNotIn("Effects_currentInstance->context.effectId", source)
+        self.assertNotIn("return", source)
+        self.assertTrue(source.endswith("arg0->textureIndex = textureIndex;"))
+        source = "        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);"
+        for old, new, _ in copy_fixups.FIXES["F01861"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertIn("closed ring definition=%u parameter=0x%X", source)
+        self.assertNotIn("return", source)
+
+    def test_texture_provenance_does_not_read_secondary_only_instance_metadata(self):
+        for fid in ("F01591", "F01592", "F01861"):
+            with self.subTest(fid=fid):
+                replacement = "\n".join(new for _, new, _ in copy_fixups.FIXES[fid])
+                self.assertNotIn("Effects_currentInstance", replacement)
+                self.assertIn("Effects_secondaryRequest.effectId", replacement)
+                self.assertIn("Effects_actionRequest.effectId", replacement)
+
+    def test_texture_names_preserve_state_and_stream_roles(self):
+        examples = (
+            ("Effects::ClearParticleTextureState",
+             "void clear(int* arg0) { state = arg0; }",
+             "void clear(int* storage) { state = storage; }"),
+            ("Effects::InitializeParticleTextureAnimation",
+             "void init(State* arg0, int textureIndex, int arg2) { arg0->program = table[arg2 + 2]; }",
+             "void init(State* animation, int textureIndex, int programIndex) { animation->program = table[programIndex + 2]; }"),
+            ("Effects::AdvanceParticleTextureAnimation",
+             "void advance(State* arg0) { int w = read(arg0); switch (w & 0xF0000000) {} }",
+             "void advance(State* animation) { int command = read(animation); switch (command & 0xF0000000) {} }"),
+        )
+        for name, source, expected in examples:
+            with self.subTest(name=name):
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                self.assertEqual(source, expected)
+
+    def test_shared_bank_retirement_unwinds_before_detaching_and_freeing(self):
+        source = "void Actors_UnloadSharedSequence(int arg0) { Content_ReleaseActorSequence(arg0, 1); }"
+        for old, new, _ in copy_fixups.FIXES["F00279"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertTrue(source.startswith("int Actors_UnloadSharedSequence"))
+        self.assertLess(source.index("Actors_RestartActorAnimationEvents"),
+                        source.index("actor->animationHeader = 0"))
+        self.assertLess(source.index("actor->blendPose.eventScript = NULL"),
+                        source.index("Content_ReleaseActorSequence"))
+        self.assertIn("return -1;", source)
+        self.assertIn("return result;", source)
+
+    def test_animation_event_unwind_has_an_explicit_nullable_contract(self):
+        source = """void Actors_RestartActorAnimationEvents(Actors_ActorRecord* arg0)
+{
+    u_char** v0 = ((u_char** (*)(Actors_ActorRecord*, u_char, u_short**))Actors_FindActorAnimationHeader)(arg0, arg0->animationId, &sp10);
+    u_char* temp_a3 = *v0;
+    ((void (*)())Actors_RunAnimationEvents)(arg0, &arg0->blendPose, 2, var_a3);
+}
+"""
+        for old, new, _ in copy_fixups.FIXES["F00998"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertTrue(source.startswith("int Actors_RestartActorAnimationEvents"))
+        self.assertLess(source.index("v0 == NULL || sp10 == NULL"),
+                        source.index("VS_ONDISC"))
+        self.assertIn("return -1;", source)
+        self.assertIn("return 0;", source)
+        self.assertIn("Core_Errorf", source)
+        for fid in ("F00856", "F00992", "F01081"):
+            self.assertTrue(any("return -1;" in new or "return 1;" in new or
+                                "return;" in new
+                                for _, new, _ in copy_fixups.FIXES[fid]))
+
+    def test_unwind_callers_match_pre_normalization_flag_expressions(self):
+        for fid, expression in (
+            ("F00856", "((*(int*)((char*)actor + 0x5AC)) & 0x800000)"),
+            ("F00992", "(*(int*)((u_char*)actor + 0x5AC) & 0x800000)"),
+        ):
+            guard = f"    if {expression} {{\n"
+            source = (("    actor->animationEventFlag = 0;\n"
+                       if fid == "F00856" else "") +
+                      guard +
+                      "        Actors_RestartActorAnimationEvents(actor);\n"
+                      "    }\n" +
+                      ("    actor->poseOverrideActive = 0;"
+                       if fid == "F00856" else ""))
+            replacements = [(old, new) for old, new, _ in copy_fixups.FIXES[fid]
+                            if "Actors_RestartActorAnimationEvents" in old]
+            self.assertEqual(len(replacements), 1)
+            old, new = replacements[0]
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+            self.assertIn("Actors_RestartActorAnimationEvents(actor) < 0",
+                          source)
+
+    def test_scripted_effect_requires_its_actor_before_starting_playback(self):
+        source = """    Effects_StartScriptedActorEffect(
+        Core_Memory_ReadUnalignedShort(arg0 + 1), Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3)));
+    return 0;
+"""
+        for old, new, _ in copy_fixups.FIXES["F01170"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertLess(source.index("(unsigned)actor >= 16"),
+                        source.index("Actors_actorRecords[actor]"))
+        self.assertLess(source.index("return 1;"),
+                        source.index("Effects_StartScriptedActorEffect"))
+        self.assertIn("Field_gimmickInstances[actor] == NULL", source)
+        self.assertIn("referenceType <= 1 ? Event_ResolveScriptActorReference",
+                      source)
+        self.assertIn("target->modelId != selector", source)
+        self.assertIn("Core_Errorf", source)
+
+    def test_sfx_selection_is_checked_before_pointer_table_lookup(self):
+        source = """    case 0xFF000:
+        var_s0_2 = Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];
+    case 0xF00000:
+        var_s0_2 = Audio_soundState.sfxBankData[2];
+"""
+        for old, new, _ in copy_fixups.FIXES["F03515"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertLess(source.index("currentSfxBank == 0"),
+                        source.index("currentSfxBank - 1]"))
+        self.assertIn("Core_Warnf", source)
+        self.assertIn("Core_Errorf", source)
+        self.assertIn("var_s0_2 == NULL", source)
+        self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS["Core_Errorf"],
+                         r"Native\Engine\include\Core\Diagnostics.h")
+
+    def test_empty_stack_top_is_checked_after_remaining_member_updates(self):
+        source = """    UpdateRemainingMembers();
+    i = 0;
+
+    while ((temp_v0_2 = Field_FindActorAboveGimmick(object, i))) {}
+"""
+        for old, new, _ in copy_fixups.FIXES["F00836"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        guard = source.index("if (Field_gimmickInstances[temp_s4] == NULL)")
+        self.assertLess(source.index("UpdateRemainingMembers"), guard)
+        self.assertLess(guard, source.index("while ("))
+        self.assertIn("no eligible stack top", source)
+
+    def test_title_arena_reset_invalidates_native_ai_before_new_allocations(self):
+        source = """    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000);
+    Content_InitializeDiscQueue();
+"""
+        for old, new, _ in copy_fixups.FIXES["F03437"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertLess(source.index("Core_Memory_InitializeHeap"),
+                        source.index("Battle_Ai_InvalidateSessionBindings"))
+        self.assertLess(source.index("Battle_Ai_InvalidateSessionBindings"),
+                        source.index("Content_InitializeDiscQueue"))
+        self.assertEqual(source.count("Battle_Ai_InvalidateSessionBindings"), 1)
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS["Battle_Ai_InvalidateSessionBindings"],
+            r"Native\Game\src\Battle\Ai\RoomState.h")
+
+    def test_perception_uses_owned_model_prefixes_for_auxiliary_targets(self):
+        source = """targetObject = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[id];
+Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[candidate];
+"""
+        for old, new, _ in copy_fixups.FIXES["F01640"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertIn("Battle_actors[id]->model", source)
+        self.assertIn("actor->model", source)
+        self.assertNotIn("Actors_actorRecords", source)
+
+    def test_optional_actor_wrappers_diagnose_and_return_before_dereferencing(self):
+        for key in ("F00946", "F00947", "F00948", "F00949", "F00950", "F00952", "F00953"):
+            old, new, _ = copy_fixups.FIXES[key][0]
+            self.assertIn("Actors_actorRecords[", old)
+            self.assertIn("== NULL", new)
+            self.assertIn("Core_Debugf", new)
+            self.assertIn("return;", new)
+
+    def test_optional_absolute_slide_checks_actor_before_position_access(self):
+        source = """    Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
+    sp10.vx = arg1->vx - temp_s1->instance.position.vx;
+"""
+        for old, new, _ in copy_fixups.FIXES["F00951"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertLess(source.index("if (temp_s1 == NULL)"),
+                        source.index("sp10.vx"))
+        self.assertLess(source.index("return;"), source.index("sp10.vx"))
+        self.assertIn("absolute slide skips absent actor=%d", source)
+
+    def test_bone_endpoints_resolve_owner_before_model_access(self):
+        source = """    Actors_ShpModel* model = actor->instance.model;
+    MATRIX* matrix;
+    if (actor == NULL) {
+        actor = (Actors_ActorRecord*)Field_gimmickInstances[actorId];
+        if (actor == NULL) {
+            return -1;
+        }
+
+        model = actor->instance.model;
+    }
+
+    matrix = Actors_ActorBoneWorldTransform(actorId, bone, &Actors_boneMatrixScratch);
+"""
+        for old, new, _ in copy_fixups.FIXES["F00887"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertEqual(source.count("actor->instance.model"), 1)
+        self.assertLess(source.index("return -1;"),
+                        source.index("model = actor->instance.model;"))
+        self.assertLess(source.index("model = actor->instance.model;"),
+                        source.index("matrix = Actors_ActorBoneWorldTransform"))
+
+    def test_room_lifetimes_revoke_diagnostic_readiness(self):
+        for key, header in (
+            ("F00543", "void Field_FinishRoomLoad(int arg0)\n{"),
+            ("F00545", "void Field_UnloadCurrentRoom(void)\n{"),
+        ):
+            source = header + "\n    OriginalRoomWork();\n}"
+            for old, new, _ in copy_fixups.FIXES[key]:
+                source = source.replace(old, new)
+            self.assertLess(source.index("Boot_ResetGameplayInspection();"),
+                            source.index("OriginalRoomWork();"))
+
     def test_gimmick_palette_matches_ledger_element_width_without_growth(self):
         source = "u_char pulsedPalette[32];"
         for old, new, _ in copy_fixups.TYPE_FIXES["T00255"]:
