@@ -1,4 +1,5 @@
 id,kind,name,path,header,since,notes
+F03634,function,Menu_Files_UpdateSaveMenu,Native\Game\src\Save\NativeMenu.cpp,Native\Game\include\Save\NativeMenu.h,2026-10-24,TITLE22C.c:2880 explicit native clear-save gate until ending-state conversion is modeled
 F01718,function,Battle_Ai_RebuildActorActionPlans,Native\Game\src\Battle\Ai\PlanningWorkspace.cpp,Native\Game\include\Battle\Ai\PlanningWorkspace.hpp,2026-10-23,Typed call-local planning result and candidate buffers replace fixed PS1 allocation and offsets; borrowed compatibility views remain scoped to the call
 F01296,function,Battle_SetSphereTargets,Native\Game\src\Battle\TargetPages.cpp,Native\Game\include\Battle\TargetPages.h,2026-10-23,Native whole-actor pages preserve every candidate while the original visible target list remains bounded
 T00232,type,Field_DoorMatchList,Native\Game\src\Field\DoorMatches.h,Native\Game\src\Field\DoorMatches.h,2026-10-23,Native borrowed door-query view backed by owned pointer storage; not an inline PS1 BSS tail
@@ -202,3 +203,11 @@ F01731,function,Battle_Ai_LowestReachableGroundHeight,Native\Game\src\Battle\Ai\
 F01830,function,Battle_Ai_MinimumAiGroundHeightAlongSegment,Native\Game\src\Battle\Ai\FlightTerrain.c,Native\Game\src\Battle\Ai\FlightTerrain.h,2026-10-21,from Native\Game\src\Battle\Ai\Navigation.c
 F01843,function,Battle_Ai_RoomNavigationCeilingHeight,Native\Game\src\Battle\Ai\FlightTerrain.c,Native\Game\src\Battle\Ai\FlightTerrain.h,2026-10-21,from Native\Game\src\Battle\Ai\Navigation.c
 F00980,function,Actors_UpdateActorAppearanceTransition,Native\Game\src\Actors\AppearanceTransition.c,Native\Game\src\Actors\AppearanceTransition.h,2026-10-23,from Native\Game\src\Actors\Appearance.c
+F02764,function,Menu_Files_UpdateDataSaveMenu,Native\Game\src\Save\NativeMenu.cpp,Native\Game\include\Save\NativeMenu.h,2026-10-24,Native semantic save picker retaining original save-point eligibility and file-element rendering
+F02767,function,Menu_Files_UpdateDataLoadMenu,Native\Game\src\Save\NativeMenu.cpp,Native\Game\include\Save\NativeMenu.h,2026-10-24,Native validated load picker; nonlocal boot transition stays in C parent
+F03628,function,Menu_Files_UpdateLoadMenu,Native\Game\src\Save\NativeMenu.cpp,Native\Game\include\Save\NativeMenu.h,2026-10-24,Native Continue picker with explicit corruption and recovery consent
+F02776,function,Menu_Files_UpdateContainerSave,Native\Game\src\Save\NativeContainer.c,Native\Game\src\Save\NativeContainer.h,2026-10-24,from Native\Game\src\Menu\Files.c
+F02737,function,Save_MemoryCard_InitializeMenuResourcesStep,Native\Game\src\Save\MenuAssets.c,Native\Game\src\Save\MenuAssets.h,2026-10-24,from Native\Engine\src\Save\MemoryCard\GameFiles.c
+F02738,function,Save_MemoryCard_ReleaseMenuResources,Native\Game\src\Save\MenuAssets.c,Native\Game\src\Save\MenuAssets.h,2026-10-24,from Native\Engine\src\Save\MemoryCard\GameFiles.c
+F03604,function,Save_MemoryCard_InitializeResourcesStep,Native\Game\src\Save\MenuAssets.c,Native\Game\src\Save\MenuAssets.h,2026-10-24,from Native\Engine\src\Save\MemoryCard\GameFiles.c
+F03605,function,Save_MemoryCard_ReleaseResources,Native\Game\src\Save\MenuAssets.c,Native\Game\src\Save\MenuAssets.h,2026-10-24,from Native\Engine\src\Save\MemoryCard\GameFiles.c

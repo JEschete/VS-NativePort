@@ -2,7 +2,6 @@
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/SoundBanks.h"
-#include "Boot/Lifecycle.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Copy.h"
@@ -17,11 +16,9 @@
 #include "Items/Weapons.h"
 #include "Menu/Files.h"
 #include "Menu/Framework/Framework.h"
-#include "Render/Font.h"
-#include "Render/TextureAnimation.h"
-#include "Render/Textures.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
+#include "Save/MenuAssets.h"
 #include "Save/Snapshot.h"
 #include "State/Ashley.h"
 #include "State/GameTime.h"
@@ -811,102 +808,6 @@ int Save_MemoryCard_WriteSaveStep(int portFile)
     return Title_saveWriteErrorCount == 3 ? -1 : 0;
 }
 
-// decomp: MENU7.PRG _initMemcard (src/MENU/MENU7.PRG/260.c:1080)
-int Save_MemoryCard_InitializeMenuResourcesStep(int init)
-{
-    enum Save_ResourceInitState {
-        Save_ResourceInitState_None = 0,
-        Save_ResourceInitState_QueueReady = 1,
-        Save_ResourceInitState_Enqueued = 2,
-    };
-
-    static u_short Save_MemoryCard_legacyEventSpecifications[] = { EvSpIOE, EvSpERROR, EvSpTIMOUT, EvSpNEW };
-    static char Save_MemoryCard_resourceLoadPhase;
-    static char Save_MemoryCard_initializeMenuResourcesStepLayoutPadding[3] __attribute__((unused));
-    static Content_DiscQueueSlot* Save_MemoryCard_resourceDiscRequest;
-
-    Content_DiscFile cdFile;
-    int i;
-    u_int event;
-
-    if (init != 0) {
-        Render_ReserveTexturePageRange(0x1D, 3, 6);
-        Title_memoryCardUiResource = Core_Memory_AllocateFromLowEnd(VS_SPMCIMG_BIN_SIZE);
-        Save_MemoryCard_uiResources = (Save_CardUiResources*)(Title_memoryCardUiResource + sizeof(Save_GameSaveImage) * 3);
-        Menu_Files_textTable = Save_MemoryCard_uiResources->textTable;
-        Title_saveFileSummaries = Save_MemoryCard_uiResources->fileHeaders;
-        Title_cardDirectoryEntryBuffer = &Save_MemoryCard_uiResources->directoryEntry;
-        cdFile.lba = VS_SPMCIMG_BIN_LBA;
-        cdFile.size = VS_SPMCIMG_BIN_SIZE;
-        Save_MemoryCard_resourceDiscRequest = Content_AllocateDiscRequest(&cdFile);
-        Content_EnqueueDiscRequest(Save_MemoryCard_resourceDiscRequest, Title_memoryCardUiResource);
-        Save_MemoryCard_resourceLoadPhase = Save_ResourceInitState_None;
-        return 0;
-    }
-
-    switch (Save_MemoryCard_resourceLoadPhase) {
-    case Save_ResourceInitState_None:
-        if (Save_MemoryCard_resourceDiscRequest->state == Content_DiscRequestState_Loaded) {
-            Content_ReleaseDiscRequest(Save_MemoryCard_resourceDiscRequest);
-            Render_UploadPackedRectangle(vs_getXY(800, 256), Title_memoryCardUiResource, vs_getWH(224, 256));
-            Save_MemoryCard_resourceLoadPhase = Save_ResourceInitState_QueueReady;
-        }
-        return 0;
-    case Save_ResourceInitState_QueueReady:
-        cdFile.lba = VS_MCDATA_BIN_LBA; // MCMAN.BIN must immediately follow MCDATA.BIN on
-                                        // the disk
-        cdFile.size = VS_MCDATA_BIN_SIZE + VS_MCMAN_BIN_SIZE;
-        Save_MemoryCard_resourceDiscRequest = Content_AllocateDiscRequest(&cdFile);
-        Content_EnqueueDiscRequest(Save_MemoryCard_resourceDiscRequest, Save_MemoryCard_uiResources);
-        Save_MemoryCard_resourceLoadPhase = Save_ResourceInitState_Enqueued;
-        break;
-    case Save_ResourceInitState_Enqueued:
-        break;
-    default:
-        return 0;
-    }
-
-    if (Save_MemoryCard_resourceDiscRequest->state == Content_DiscRequestState_Loaded) {
-        Content_ReleaseDiscRequest(Save_MemoryCard_resourceDiscRequest);
-        Boot_SetSoftResetEnabled(0);
-
-        for (i = 0; i < 8; ++i) {
-            event = SwCARD;
-            if (i & 4) {
-                event = HwCARD;
-            }
-            Title_cardEventDescriptors[i] =
-                OpenEvent(event, Save_MemoryCard_legacyEventSpecifications[i & 3], EvMdNOINTR, 0);
-        }
-
-
-        for (i = 0; i < 8; ++i) {
-            EnableEvent(Title_cardEventDescriptors[i]);
-        }
-        return 1;
-    }
-    return 0;
-}
-
-// decomp: MENU7.PRG _shutdownMemcard (src/MENU/MENU7.PRG/260.c:1161)
-void Save_MemoryCard_ReleaseMenuResources(void)
-{
-    int i;
-
-    for (i = 0; i < 8; ++i) {
-        DisableEvent(Title_cardEventDescriptors[i]);
-    }
-
-
-    for (i = 0; i < 8; ++i) {
-        CloseEvent(Title_cardEventDescriptors[i]);
-    }
-
-    Boot_SetSoftResetEnabled(1);
-    Core_Memory_FreeFromLowEnd(Title_memoryCardUiResource);
-    Render_RetireTexturePageRange(0x1D, 3, 6);
-}
-
 // decomp: MENU7.PRG _loadIntroSaveFile (src/MENU/MENU7.PRG/260.c:3315)
 int Save_MemoryCard_LoadIntroSnapshotStep(int action)
 {
@@ -1082,100 +983,6 @@ void Save_MemoryCard_PackageClearSave(int targetFile)
         i < (int)sizeof(Save_GameSaveImage); ++i) {
         Title_memoryCardUiResource[i] += Save_MemoryCard_NextCipherBits(8);
     }
-}
-
-// decomp: TITLE.PRG _initMemcard (src/TITLE/TITLE.PRG/22C.c:940)
-int Save_MemoryCard_InitializeResourcesStep(int init)
-{
-    enum Save_ResourceInitState {
-        Save_ResourceInitState_None = 0,
-        Save_ResourceInitState_QueueReady = 1,
-        Save_ResourceInitState_Enqueued = 2,
-    };
-
-    static u_short Save_MemoryCard_legacyEventSpecifications[] = { EvSpIOE, EvSpERROR, EvSpTIMOUT, EvSpNEW };
-    static char Save_MemoryCard_resourceLoadPhase;
-    static char Title_cardInitializationPadding[3] __attribute__((unused));
-    static Content_DiscQueueSlot* Save_MemoryCard_resourceDiscRequest;
-
-    Content_DiscFile cdFile;
-    int i;
-    u_int event;
-
-    if (init != 0) {
-        Title_memoryCardUiResource = Core_Memory_AllocateFromLowEnd(VS_SPMCIMG_BIN_SIZE);
-        Save_MemoryCard_uiResources = (Save_CardUiResources*)(Title_memoryCardUiResource + sizeof(Save_GameSaveImage) * 3);
-        Title_saveMenuText = Save_MemoryCard_uiResources->textTable;
-        Title_saveFileSummaries = Save_MemoryCard_uiResources->fileHeaders;
-        Title_cardDirectoryEntryBuffer = &Save_MemoryCard_uiResources->directoryEntry;
-        cdFile.lba = VS_SPMCIMG_BIN_LBA;
-        cdFile.size = VS_SPMCIMG_BIN_SIZE;
-        Save_MemoryCard_resourceDiscRequest = Content_AllocateDiscRequest(&cdFile);
-        Content_EnqueueDiscRequest(Save_MemoryCard_resourceDiscRequest, Title_memoryCardUiResource);
-        Save_MemoryCard_resourceLoadPhase = Save_ResourceInitState_None;
-        return 0;
-    }
-
-    switch (Save_MemoryCard_resourceLoadPhase) {
-    case Save_ResourceInitState_None:
-        if (Save_MemoryCard_resourceDiscRequest->state == Content_DiscRequestState_Loaded) {
-            Content_ReleaseDiscRequest(Save_MemoryCard_resourceDiscRequest);
-            Render_UploadPackedRectangle(vs_getXY(800, 256), Title_memoryCardUiResource, vs_getWH(224, 256));
-            Save_MemoryCard_resourceLoadPhase = Save_ResourceInitState_QueueReady;
-        }
-        return 0;
-    case Save_ResourceInitState_QueueReady:
-        cdFile.lba = VS_MCDATA_BIN_LBA; // MCMAN.BIN must immediately follow MCDATA.BIN on
-                                        // the disk
-        cdFile.size = VS_MCDATA_BIN_SIZE + VS_MCMAN_BIN_SIZE;
-        Save_MemoryCard_resourceDiscRequest = Content_AllocateDiscRequest(&cdFile);
-        Content_EnqueueDiscRequest(Save_MemoryCard_resourceDiscRequest, Save_MemoryCard_uiResources);
-        Save_MemoryCard_resourceLoadPhase = Save_ResourceInitState_Enqueued;
-        break;
-    case Save_ResourceInitState_Enqueued:
-        break;
-    default:
-        return 0;
-    }
-
-    if (Save_MemoryCard_resourceDiscRequest->state == Content_DiscRequestState_Loaded) {
-        Content_ReleaseDiscRequest(Save_MemoryCard_resourceDiscRequest);
-        Boot_SetSoftResetEnabled(0);
-
-        for (i = 0; i < 8; ++i) {
-            event = SwCARD;
-            if (i & 4) {
-                event = HwCARD;
-            }
-            Title_cardEventDescriptors[i] =
-                OpenEvent(event, Save_MemoryCard_legacyEventSpecifications[i & 3], EvMdNOINTR, NULL);
-        }
-
-
-        for (i = 0; i < 8; ++i) {
-            EnableEvent(Title_cardEventDescriptors[i]);
-        }
-        return 1;
-    }
-    return 0;
-}
-
-// decomp: TITLE.PRG _shutdownMemcard (src/TITLE/TITLE.PRG/22C.c:1017)
-void Save_MemoryCard_ReleaseResources(void)
-{
-    int i;
-
-    for (i = 0; i < 8; ++i) {
-        DisableEvent(Title_cardEventDescriptors[i]);
-    }
-
-
-    for (i = 0; i < 8; ++i) {
-        CloseEvent(Title_cardEventDescriptors[i]);
-    }
-
-    Boot_SetSoftResetEnabled(1);
-    Core_Memory_FreeFromLowEnd(Title_memoryCardUiResource);
 }
 
 // decomp: TITLE.PRG _saveFileExists (src/TITLE/TITLE.PRG/22C.c:3189)

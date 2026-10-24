@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "Core/Log.hpp"
@@ -83,13 +84,15 @@ std::filesystem::path ExecutableDir() {
   return base ? std::filesystem::path(base) : std::filesystem::current_path();
 }
 
-std::filesystem::path UserDataDir() {
+std::expected<std::filesystem::path, std::string> UserDataDir() {
   const std::unique_ptr<char, decltype(&SDL_free)> pref(
       SDL_GetPrefPath("VS-NativePort", "VagrantStory"), SDL_free);
   if (!pref) {
-    return std::filesystem::current_path() / "userdata";
+    return std::unexpected(std::string("User data directory is unavailable: ") +
+                           SDL_GetError());
   }
-  return std::filesystem::path(pref.get());
+  const std::string_view path(pref.get());
+  return std::filesystem::path(std::u8string(path.begin(), path.end()));
 }
 
 std::expected<int, std::string> RunProcess(

@@ -2,6 +2,7 @@
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
+#include "Battle/Feedback.h"
 #include "Battle/Targeting.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Copy.h"
@@ -21,7 +22,6 @@
 #include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
-#include "Save/MemoryCard/GameFiles.h"
 #include "State/Settings.h"
 
 // decomp: local static of _assembleMenu, at file scope so the module reset reaches it

@@ -13,6 +13,12 @@ so a stale fix is noticed.
 from __future__ import annotations
 
 NATIVE_HELPER_HEADERS = {
+    "Save_NativeInitialTitleSelection": r"Native\Game\include\Save\NativeMenu.h",
+    **{name: r"Native\Game\include\Save\NativeResume.h"
+       for name in (
+           "Save_NativeResumePending", "Save_NativeFinishResume",
+           "Save_NativeCancelResume", "Save_NativeResetSession",
+       )},
     "Battle_Ai_TerrainRegionCell": r"Native\Game\src\Battle\Ai\FrameUpdate.h",
     "Audio_Seq_LfoWaveform": r"Native\Engine\include\Audio\LfoWaveforms.h",
     **{name: r"Native\Engine\include\Audio\MusicState.h"
@@ -703,6 +709,28 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("            Boot_gameEntryMode == new_var);",
          "            Boot_gameEntryMode == new_var);\n        }",
          "close the explicit room-event policy branch"),
+        ("    if ((temp_s4 << 0x10) != 0) {",
+         "    if (Save_NativeResumePending() && !Save_NativeFinishResume()) {\n"
+         "        Boot_JumpToTitle(NULL);\n"
+         "        return;\n"
+         "    }\n\n"
+         "    if ((temp_s4 << 0x10) != 0) {",
+         "146C.c:15272 restore the native checkpoint after camera/display setup, before event dispatch"),
+    ],
+    "F00533": [
+        ("    if (Boot_gameEntryMode == 1) {\n"
+         "        State_ResetZoneScriptFlags(1);\n"
+         "    } else {\n"
+         "        State_ResetZoneScriptFlags(0);\n"
+         "    }",
+         "    if (!Save_NativeResumePending()) {\n"
+         "        if (Boot_gameEntryMode == 1) {\n"
+         "            State_ResetZoneScriptFlags(1);\n"
+         "        } else {\n"
+         "            State_ResetZoneScriptFlags(0);\n"
+         "        }\n"
+         "    }",
+         "146C.c:14826 preserve restored zone flags only during the initial native resume"),
     ],
     "F02777": [
         ('static char* Menu_Files_playTime = "00:00:00:00";',
@@ -1417,8 +1445,23 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
     **{fid: [("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
               "shared primitive helpers use the native link table")] for fid in ("F01405", "F01406")},
-    "F03423": [("    while (DsControlB(DslPause, NULL, NULL) == 0)\n        ;\n", "",
-                 "main.c:8119; native extracted-file reads have no CD transport to pause")],
+    "F03423": [
+        ("    while (DsControlB(DslPause, NULL, NULL) == 0)\n        ;\n", "",
+         "main.c:8119; native extracted-file reads have no CD transport to pause"),
+        ("void Boot_ResetToTitle(void)\n{",
+         "void Boot_ResetToTitle(void)\n{\n    Save_NativeResetSession();",
+         "main.c:8119 cancel staged native resume before resetting live services"),
+    ],
+    "F03673": [
+        ("void Title_InitializeNewGameData(void)\n{",
+         "void Title_InitializeNewGameData(void)\n{\n    Save_NativeResetSession();",
+         "22C.c:4698 New Game abandons any staged native resume"),
+    ],
+    "F03670": [
+        ("    menuItem = Save_MemoryCard_AnySaveFileExists();",
+         "    menuItem = Save_NativeInitialTitleSelection();",
+         "22C.c:4491 choose title focus from native slots without probing card BIOS"),
+    ],
     "G00497": [("u_long Menu_textBoxOrderingTables", "u_long Menu_textBoxOrderingTables[102]",
                  "5BF94.c:4044-4046; three 34-word textbox ordering tables")],
     "F01331": [
@@ -2279,6 +2322,9 @@ FIXES["F03437"] = FIXES["F03437"] + [
     ("    Content_InitializeDiscQueue();",
      "    Battle_Ai_InvalidateSessionBindings();\n    Content_InitializeDiscQueue();",
      "native AI bindings must not outlive the game-arena reset in _sysReinit"),
+    ("void Boot_InitializeTitleSession(void)\n{",
+     "void Boot_InitializeTitleSession(void)\n{\n    Save_NativeResetSession();",
+     "main.c:8309 discard staged native state before heap/module initialization"),
 ]
 
 for _row, _variable in (

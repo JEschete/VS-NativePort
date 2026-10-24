@@ -9,6 +9,59 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #18 runtime/UI checkpoint now owns the three Data/Continue picker entries,
+  the container transaction and original UI-asset loading/release. Native files
+  use the existing readable game font,100 slots, explicit overwrite/recovery
+  confirmation and persistent `save` logs; normal Save retains the original
+  save-point check. Container data lives in typed session storage across UI
+  resource release, not offsets into a save image. Clear-save conversion is
+  explicitly unavailable rather than routed to card stubs. Builtin attract
+  snapshots still use their separate original apply path.
+  Pending-resume hooks preserve initial zone flags, finish after camera/display
+  setup before event dispatch, and cancel before title/reset/session teardown.
+  Desktop/Lab accept `--save-dir`; defaults are separate per-user `saves` and
+  `combat-lab-saves`. UserDataDir now returns explicit failure and handles UTF8
+  without a cwd fallback.
+- Current acceptance is bounded: full production-linked Debug and Release
+  each pass675 cases/3,154,179 assertions, run serially. The linked focused
+  persistence selection passed46 cases/3,628 assertions before the final
+  content-ownership cases. Full fast quality195
+  existing/zero new; host/picker/file/resume source tidy zero findings.
+  Second source render is stable751 files, plus Game/Tests project/filter
+  stability without rewriting owner files. Actual Desktop controller probes
+  verified Continue/paging/cancel, readable footer/error text, corrupt-file
+  rejection with unchanged SHA256, directory failure, explicit process exits,
+  Unicode root fidelity and a missing-directory-value exit1. Local evidence:
+  `build/quality/save18-menu-*`, `save18-invalid-*`, `save18-directory-*`,
+  `save18-unicode-root-*`, `save18-hosts-tidy.log`.
+- The original zone9/room5 MAP014 save point is tile1,8/layer0, activation2.
+  Lab run1792871002843960-0 used default post-prologue stats, no enemies or live
+  HP/event-flag edits, then actual inputs
+  `250:Triangle,350:Down,380:Down,410:Down,450:Circle,600:Circle,700:Circle,730:Left,760:Circle`.
+  Its initial tick762 rejection exposed lazy/partial inventory display order,
+  not dangling items; that source-backed case is now accepted without rebuilding
+  live globals, retaining duplicate/dangling/identity checks. The next rejection
+  exposed valid sector-rounded MPD requests: MAP014's65,904 actual bytes have a
+  67,584-byte request. Exact/rounded requests are accepted while parsing stays
+  bounded to actual bytes. Runtime fixtures now reset production momentum and
+  use exclusive per-process/per-fixture directories. DataStore::ScopedOverride
+  restores the exact prior instance, including borrowed references, rather than
+  reopening a possibly deleted previous fixture or substituting an empty store.
+  Mono output is synchronized on prepare/finish and restored on cancellation.
+- Actual successful save: Lab1792874300176365-0, same original save-point
+  controller replay, tick762 creates slot00 generation1,448,473 bytes,
+  zone9/room5/scene1 at[192,-384,1088]. Process-restart Desktop Continue
+  1792874360784383-0 prepares1532, applies1571 before event dispatch, then has992
+  uninterrupted exploration frames. First-ready position, HP250/MP50/STR100 and
+  yaw2048/pitch-384/distance1536 match the native document. Evidence:
+  `build/quality/save18-first-roundtrip-evidence.json`, actual captures under
+  `save18-desktop-first-continue`. This is a Lab-profile component save followed
+  by production Desktop Continue, not legitimate story progression. Same-process
+  changed-state load, live container transfers, overwrite/recovery controller
+  acceptance and further repeated Continue remain pending. Moving supports,
+  active motion, first-person/non-orbit cameras and unfinished transitions are
+  explicitly rejected rather than guessed. Import, older-schema migration,
+  clear-save conversion and broader EC retirement remain open; do not close #18.
 - #18 schema3 codec checkpoint adds explicit static collision-layer0/1,
   previous/saved placement and settled orbit-camera state. Actual pitch is
   separate from Ashley's historical cameraPitch/preferred-yaw field. V1/v2
@@ -17,11 +70,10 @@ verification of the current worktree.
   each pass12 cases/168 assertions; focused codec/test tidy reports zero new
   production findings. Evidence: `build/quality/save18-schema3-codec-tidy.log`.
   This checkpoint only publishes the DTO/codec extension, not the uncommitted
-  runtime/menu integration. Linked runtime tests currently expose a static-floor
-  fixture/production mismatch in two cases, and its synthetic content directory
-  needs per-process ownership before parallel runs. Full gameplay saving,
-  loading/restart, container transfers and repeated Continue remain unverified;
-  keep #18 open. Verification was against17288c76 plus the dirty integration
+  runtime/menu integration. Its then-observed linked static-floor fixture and
+  directory-ownership failures are repaired in the newer checkpoint above.
+  Full gameplay/container/compatibility acceptance remains open.
+  Verification was against17288c76 plus the dirty integration
   worktree; only the codec files/tests and this handoff belong to this milestone.
 - Runtime-source audit identifies original G00254 as G00246+0x68: the low-ten-bit
   scene/area identity, not an independently written native value. Boot restores

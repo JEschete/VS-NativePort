@@ -27,6 +27,9 @@
 #include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
+#include "Save/MenuAssets.h"
+#include "Save/NativeMenu.h"
+#include "Save/NativeResume.h"
 #include "State/Ashley.h"
 #include "State/GameTime.h"
 #include "State/Location.h"
@@ -1072,7 +1075,7 @@ int Title_Run(void)
     Title_InitializeSettings();
     Movie_Intro_isPlaying = 0;
     ++Title_titleScreenVisitCount;
-    menuItem = Save_MemoryCard_AnySaveFileExists();
+    menuItem = Save_NativeInitialTitleSelection();
 
     do {
         for (i = 7; i >= 0; --i) {
@@ -1253,6 +1256,7 @@ int Title_PresentGameFrame(u_long* ot)
 // decomp: TITLE.PRG _initGameData (src/TITLE/TITLE.PRG/22C.c:4698)
 void Title_InitializeNewGameData(void)
 {
+    Save_NativeResetSession();
     int i;
     int j;
     char* v0;

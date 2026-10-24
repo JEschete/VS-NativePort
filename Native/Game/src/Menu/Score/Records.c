@@ -3,6 +3,7 @@
 #include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
+#include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
 #include "Core/String/GameText.h"
@@ -14,7 +15,6 @@
 #include "Render/Font.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
 

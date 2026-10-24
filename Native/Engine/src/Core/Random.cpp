@@ -66,3 +66,5 @@ extern "C" void Core_Random_Seed(unsigned int seed) {
   g_bios_rand.Seed(seed);
   VS_LOG_TRACE("rng", "seed={}", seed);
 }
+
+extern "C" unsigned int Core_Random_State(void) { return g_bios_rand.State(); }

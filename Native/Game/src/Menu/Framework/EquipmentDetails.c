@@ -8,6 +8,7 @@
 #include "Battle/Abilities.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Battle/Feedback.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/WordCopy.h"
@@ -30,7 +31,6 @@
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 
 // decomp: local static of vs_mainMenu_drawClassAffinityType, at file scope so the module reset reaches it
 static int Menu_Framework_statPagePanelDirection = 0;

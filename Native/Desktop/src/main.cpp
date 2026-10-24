@@ -273,6 +273,7 @@ struct RunSettings {
   bool devices = true;
   Capture capture;
   InputScript script;
+  std::optional<fs::path> save_directory;
 };
 
 RunSettings ParseRunSettings(int argc, char** argv) {
@@ -287,6 +288,15 @@ RunSettings ParseRunSettings(int argc, char** argv) {
   }
   settings.capture = ParseCapture(argc, argv);
   settings.script = ParseInputScript(argc, argv);
+  for (int i = 1; i < argc; ++i) {
+    if (std::string_view(argv[i]) != "--save-dir") continue;
+    if (i + 1 == argc || std::string_view(argv[i + 1]).empty() ||
+        std::string_view(argv[i + 1]).starts_with("--")) {
+      throw std::runtime_error("--save-dir requires a directory");
+    }
+    const std::string_view path = argv[++i];
+    settings.save_directory = fs::path(std::u8string(path.begin(), path.end()));
+  }
   settings.devices =
       std::none_of(argv + 1, argv + argc, [](const char* argument) {
         return std::string_view(argument) == "--scripted";
@@ -323,7 +333,7 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
     input.SetDevicesEnabled(false);
     VS_LOG_INFO("input", "--scripted: keyboard and gamepad ignored");
   }
-  Game::GameApp game({disc});
+  Game::GameApp game({disc, settings.save_directory});
   Platform::ProgressWatchdog watchdog(settings.max_ticks != 0);
   Core::FrameClock clock;
   double last = app.NowSeconds();

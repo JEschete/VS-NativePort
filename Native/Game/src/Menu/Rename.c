@@ -26,7 +26,6 @@
 #include "Render/Render.h"
 #include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 
 // decomp: D_80105DB0 (D_80105DB0@src/MENU/MENU8.PRG/21A0.c)
 char Menu_Rename_navIconPulseRequest = 0;

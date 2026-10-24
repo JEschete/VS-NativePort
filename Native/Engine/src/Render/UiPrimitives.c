@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
+#include "Battle/Feedback.h"
 #include "Core/Math/FixedPoint.h"
 #include "Render/Font.h"
 #include "Render/Frame.h"
@@ -9,7 +10,6 @@
 #include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
 #include "Render/Upload.h"
-#include "Save/MemoryCard/GameFiles.h"
 
 // decomp: D_800EBC04 (D_800EBC04@BATTLE/BATTLE.PRG)
 int Render_kStatGaugeColors[4]; /* contents: module image (ModuleData.c) */

@@ -144,6 +144,9 @@
     <ClCompile Include="src\MovementBehaviorTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\NativeMenuTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\NativeSnapshotTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -154,6 +157,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\RasterBoundsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RuntimeSnapshotTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\SaveStoreTests.cpp">

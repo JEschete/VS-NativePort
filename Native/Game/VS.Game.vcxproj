@@ -1628,7 +1628,31 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Save\MenuAssets.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Save\NativeContainer.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Save\NativeFiles.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Save\NativeMenu.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Save\NativeResume.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Save\NativeSnapshot.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Save\RuntimeSnapshot.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\State\Ashley.c">
@@ -2066,6 +2090,8 @@
     <ClInclude Include="src\Menu\Status\ActorStatus.h" />
     <ClInclude Include="src\Menu\Status\EquipmentDetails.h" />
     <ClInclude Include="src\Menu\TextBox.h" />
+    <ClInclude Include="src\Save\MenuAssets.h" />
+    <ClInclude Include="src\Save\NativeContainer.h" />
     <ClInclude Include="src\State\Ashley.h" />
     <ClInclude Include="src\State\Flags.h" />
     <ClInclude Include="src\State\Location.h" />
@@ -2097,7 +2123,12 @@
     <ClInclude Include="include\Items\KeyItems.h" />
     <ClInclude Include="include\Items\Loadout.h" />
     <ClInclude Include="include\Menu\Framework\ActionSelection.h" />
+    <ClInclude Include="include\Save\NativeFiles.hpp" />
+    <ClInclude Include="include\Save\NativeMenu.h" />
+    <ClInclude Include="include\Save\NativeMenu.hpp" />
+    <ClInclude Include="include\Save\NativeResume.h" />
     <ClInclude Include="include\Save\NativeSnapshot.hpp" />
+    <ClInclude Include="include\Save\RuntimeSnapshot.hpp" />
     <ClInclude Include="include\State\GameTime.h" />
     <ClInclude Include="include\State\Progress.h" />
   </ItemGroup>

@@ -30,6 +30,7 @@
 #include "Platform/GameFiber.hpp"
 #include "Render/Device.hpp"
 #include "Render/PageSpace.hpp"
+#include "Save/NativeMenu.hpp"
 
 namespace VS::combat_lab {
 namespace {
@@ -52,6 +53,7 @@ struct Options {
   fs::path scenario;
   fs::path sequence;
   fs::path capture;
+  fs::path save_directory;
   std::uint64_t frames = 0;
   int speed = 1;
   bool start = false;
@@ -123,6 +125,12 @@ void ParseValue(Options& options, std::string_view argument,
     options.door_from = value;
   } else if (argument == "--capture") {
     options.capture = value;
+  } else if (argument == "--save-dir") {
+    if (value.empty() || value.starts_with("--")) {
+      throw std::runtime_error("--save-dir requires a directory");
+    }
+    options.save_directory =
+        fs::path(std::u8string(value.begin(), value.end()));
   } else if (argument == "--frames") {
     options.frames = ParseTick(value);
   } else if (argument == "--door-limit") {
@@ -979,6 +987,13 @@ int Run(int argc, char** argv) {
     Platform::App app;
     Render::Device gpu;
     InitializeWindow(app, gpu, trace);
+    if (!options.save_directory.empty()) {
+      Game::Save::ConfigureDirectory(options.save_directory);
+    } else {
+      const auto root = Platform::UserDataDir();
+      if (!root) throw std::runtime_error(root.error());
+      Game::Save::ConfigureDirectory(*root / "combat-lab-saves");
+    }
     Input::InputSystem input;
     input.SetDevicesEnabled(options.devices);
     Canvas canvas;
@@ -1017,6 +1032,9 @@ int Run(int argc, char** argv) {
     trace.Event("startup.stage", {{"stage", "audio.end"}});
     LiveSession session(options, trace, std::move(catalog), std::move(scripts),
                         std::move(canvas), input);
+    struct FileMenuScope {
+      ~FileMenuScope() { Game::Save::ShutdownFileMenus(); }
+    } file_menu_scope;
     trace.Event("startup.stage", {{"stage", "session.ready"}});
     return session.Run(app, gpu);
   } catch (const std::exception& error) {

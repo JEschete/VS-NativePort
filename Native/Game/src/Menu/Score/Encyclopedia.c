@@ -31,7 +31,6 @@
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 #include "State/Progress.h"
 
 // decomp: _enemyNavigationState (_enemyNavigationState@src/MENU/MENU9.PRG/238.c)

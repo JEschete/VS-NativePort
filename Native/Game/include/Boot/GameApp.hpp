@@ -1,6 +1,8 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
+#include <optional>
 
 #include "Core/Types.hpp"
 
@@ -32,6 +34,7 @@ class IModule {
 
 struct Services {
   const Content::Disc* disc = nullptr;
+  std::optional<std::filesystem::path> save_directory = std::nullopt;
 };
 
 class GameApp {

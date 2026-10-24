@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
+#include "Battle/Feedback.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
@@ -27,7 +28,6 @@
 #include "Render/Render.h"
 #include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 #include "State/Settings.h"
 
 // decomp: local static of _gripNavigation, at file scope so the module reset reaches it

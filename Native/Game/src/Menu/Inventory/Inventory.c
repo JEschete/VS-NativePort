@@ -51,7 +51,6 @@
 #include "Menu/Sounds.h"
 #include "Render/Font.h"
 #include "Render/Palette.h"
-#include "Save/MemoryCard/GameFiles.h"
 #include "State/Settings.h"
 
 // decomp: _ashleyRenderState (_ashleyRenderState@src/MENU/items1.h)

@@ -38,7 +38,6 @@
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 #include "State/Settings.h"
 
 // decomp: _itemCount (_itemCount@src/MENU/MENUC.PRG/168.c)

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
+#include "Battle/Feedback.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
@@ -16,7 +17,6 @@
 #include "Render/Sprites.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 
 // decomp: D_800EB9BC (D_800EB9BC@BATTLE/BATTLE.PRG)
 Event_SplashLayerView* Render_gimLayers; /* data: contents loaded in Step 5 */

@@ -10,6 +10,7 @@ extern "C" {
 
 int Core_Random_Rand(void);
 void Core_Random_Seed(unsigned int seed);
+unsigned int Core_Random_State(void);
 
 #ifdef __cplusplus
 }

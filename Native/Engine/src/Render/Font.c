@@ -2,6 +2,7 @@
 #include "Legacy/Psx.h"
 #include "Actors/TextureAnimation.h"
 #include "Audio/Sfx.h"
+#include "Battle/Feedback.h"
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
 #include "Core/Memory/Heap.h"
@@ -19,7 +20,6 @@
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 #include "State/Timers.h"
 
 // decomp: D_800EB98C (D_800EB98C@BATTLE/BATTLE.PRG)

@@ -21,6 +21,7 @@
 #include "Input/Controller.h"
 #include "Input/Controllers.h"
 #include "Render/Display.h"
+#include "Save/NativeResume.h"
 #include "Save/Snapshot.h"
 #include "State/Ashley.h"
 #include "State/GameTime.h"
@@ -99,6 +100,7 @@ void Boot_LoadEndingOverlay(void)
 // decomp: SLUS_010.40 vs_main_resetGame (src/SLUS_010.40/main.c:8119)
 void Boot_ResetToTitle(void)
 {
+    Save_NativeResetSession();
     SetDispMask(0);
     Input_SetMotorCommand(0, 0, 0);
     Input_SetMotorCommand(0, 1, 0);
@@ -174,6 +176,7 @@ void Boot_InitializePlatformServices(void)
 // decomp: SLUS_010.40 _sysReinit (src/SLUS_010.40/main.c:8309)
 void Boot_InitializeTitleSession(void)
 {
+    Save_NativeResetSession();
     int i;
     RECT rect0 __attribute__((unused));
     RECT rect1 __attribute__((unused)) = { .x = 819, .y = 819, .w = 819, .h = 0 };

@@ -26,9 +26,6 @@ typedef struct Save_SaveSlotBase Save_SaveSlotBase;
 #undef VS_SAVE_MEMORYCARD_GAMEFILES_H_SET_TYPES_ONLY
 #endif
 
-// decomp: src/include/gpu.h:95
-#define vs_getXY(x, y) (((y) << 16) | ((x) & 0xFFFF))
-
 // decomp: _findCurrentSave_e (src/MENU/MENU7.PRG/260.c:1561)
 enum Save_FindSaveResult {
     Save_FindSaveResult_Timeout = -2,
@@ -183,13 +180,9 @@ int Save_MemoryCard_ValidateAndApplyLoadedSave(int write);
 void Save_MemoryCard_PackageGameSave(int targetFile);
 int Save_MemoryCard_ReadSaveStep(int portFileno);
 int Save_MemoryCard_WriteSaveStep(int portFile);
-int Save_MemoryCard_InitializeMenuResourcesStep(int init);
-void Save_MemoryCard_ReleaseMenuResources(void);
 int Save_MemoryCard_LoadIntroSnapshotStep(int action);
 u_int Save_MemoryCard_NextCipherBits(int value);
 void Save_MemoryCard_PackageClearSave(int targetFile);
-int Save_MemoryCard_InitializeResourcesStep(int init);
-void Save_MemoryCard_ReleaseResources(void);
 int Save_MemoryCard_AnySaveFileExists(void);
 void Save_MemoryCard_GameFiles_ResetTitleStatics(void);
 

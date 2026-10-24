@@ -9,6 +9,7 @@
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
+#include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
 #include "Content/StringTables.h"
 #include "Core/Math/FixedPoint.h"
@@ -33,7 +34,6 @@
 #include "Render/Sprites.h"
 #include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
 

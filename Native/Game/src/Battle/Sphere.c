@@ -7,6 +7,7 @@
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Battle/BattleTypes.h"
+#include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
@@ -30,7 +31,6 @@
 #include "Render/Sprites.h"
 #include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 
 // decomp: D_800EA234 (D_800EA234@BATTLE/BATTLE.PRG)
 short Battle_sphereArcBases[502]; /* contents: module image (ModuleData.c) */

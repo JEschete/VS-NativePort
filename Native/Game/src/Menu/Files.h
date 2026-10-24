@@ -150,10 +150,8 @@ int Menu_Files_UpdateOverwritePrompt(int arg0);
 int Menu_Files_UpdateFormatPrompt(int initPort);
 int Menu_Files_UpdateSaveFiles(int initPort);
 int Menu_Files_UpdateSaveCard(int initPort);
-int Menu_Files_UpdateDataSaveMenu(int initState);
 int Menu_Files_UpdateLoadFiles(int initPort);
 long Menu_Files_UpdateLoadCard(int initPort);
-int Menu_Files_UpdateDataLoadMenu(int initFadeout);
 int Menu_Files_LoadGameOverAssetsStep(int arg0);
 void Menu_Files_BlendGameOverTextClut(
     short* clut, int textBlendFactor, u_short* clut0, u_short* clut1);
@@ -163,12 +161,9 @@ int Menu_Files_UpdateContainerConfirmation(int initParams);
 void* Menu_Files_ContainerIndexSection(int section, Items_ContainerIndices* indices);
 void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_ContainerData* source,
     Items_ContainerIndices* toCopy);
-int Menu_Files_UpdateContainerSave(u_char* state);
 void Menu_Files_DrawPlayTime(void);
 int Menu_Files_UpdateDataMenu(u_char* state);
 int Menu_Files_FindCurrentSaveStep(int init);
-int Menu_Files_UpdateLoadMenu(int initFadeout);
-int Menu_Files_UpdateSaveMenu(int initState);
 void Menu_Files_InitializeDisplay(void);
 void Menu_Files_SwapBuffers(void);
 int Menu_Files_UpdateClearSaveReminder(int init);

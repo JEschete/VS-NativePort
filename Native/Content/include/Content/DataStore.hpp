@@ -2,6 +2,7 @@
 
 #include <expected>
 #include <filesystem>
+#include <memory>
 #include <span>
 #include <string>
 #include <string_view>
@@ -19,6 +20,26 @@ namespace VS::Content {
 // that still addresses the disc by sector finds it.
 class DataStore {
  public:
+  // Exclusive, stack-nested override of the process-wide service. Keeps the
+  // exact previous instance alive (including borrowed Entry pointers), then
+  // restores ownership without reopening its files. Not concurrent with Open,
+  // other overrides, or readers whose current-store lifetime is not guarded.
+  class ScopedOverride {
+   public:
+    ScopedOverride();
+    ~ScopedOverride();
+    ScopedOverride(const ScopedOverride&) = delete;
+    ScopedOverride& operator=(const ScopedOverride&) = delete;
+    ScopedOverride(ScopedOverride&&) = delete;
+    ScopedOverride& operator=(ScopedOverride&&) = delete;
+
+    void Restore() noexcept;
+
+   private:
+    std::unique_ptr<DataStore> m_previous_;
+    bool m_active_ = true;
+  };
+
   static constexpr u32 kDataSectorBytes = 2048;
   struct Entry {
     std::string path;  // disc path, e.g. "TITLE/TITLE.PRG"

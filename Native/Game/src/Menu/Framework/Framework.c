@@ -87,7 +87,7 @@
 #include "Render/TextureAnimation.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
+#include "Save/NativeContainer.h"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
 

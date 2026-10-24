@@ -9,6 +9,22 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_native_resume_hooks_precede_event_and_reset_mutation(self):
+        finish = copy_fixups.FIXES["F00543"][-1]
+        self.assertIn("Boot_JumpToTitle(NULL)", finish[1])
+        self.assertLess(finish[1].index("Save_NativeFinishResume"),
+                        finish[1].index("if ((temp_s4"))
+        zone = copy_fixups.FIXES["F00533"][0]
+        self.assertTrue(zone[1].startswith("    if (!Save_NativeResumePending())"))
+        for fid in ("F03423", "F03437", "F03673"):
+            with self.subTest(fid=fid):
+                reset = copy_fixups.FIXES[fid][-1]
+                self.assertIn("{\n    Save_NativeResetSession();", reset[1])
+        for name in ("Save_NativeResumePending", "Save_NativeFinishResume",
+                     "Save_NativeResetSession"):
+            self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[name],
+                             r"Native\Game\include\Save\NativeResume.h")
+
     def test_ai_direction_queries_keep_bounded_mutable_source_cells(self):
         for fid in ("F01728", "F01739", "F01742"):
             with self.subTest(fid=fid):
@@ -351,14 +367,19 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("no eligible stack top", source)
 
     def test_title_arena_reset_invalidates_native_ai_before_new_allocations(self):
-        source = """    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000);
+        source = """void Boot_InitializeTitleSession(void)
+{
+    Core_Memory_InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000);
     Content_InitializeDiscQueue();
+}
 """
         for old, new, _ in copy_fixups.FIXES["F03437"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertLess(source.index("Core_Memory_InitializeHeap"),
                         source.index("Battle_Ai_InvalidateSessionBindings"))
+        self.assertLess(source.index("Save_NativeResetSession"),
+                        source.index("Core_Memory_InitializeHeap"))
         self.assertLess(source.index("Battle_Ai_InvalidateSessionBindings"),
                         source.index("Content_InitializeDiscQueue"))
         self.assertEqual(source.count("Battle_Ai_InvalidateSessionBindings"), 1)

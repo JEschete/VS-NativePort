@@ -8,6 +8,7 @@
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
 #include "Platform/GameFiber.hpp"
+#include "Save/NativeMenu.hpp"
 
 // The copied boot entry (vs_main_exec): the original's endless loop, run on the
 // game fiber.
@@ -39,6 +40,9 @@ struct GameApp::Runner {
 };
 
 GameApp::GameApp(Services services) : m_services_(services) {
+  if (m_services_.save_directory) {
+    Save::ConfigureDirectory(*m_services_.save_directory);
+  }
   if (const int failed = Content_LoadModuleData(); failed != 0) {
     VS_LOG_ERROR("boot",
                  "{} required module data entries failed; game execution was "
@@ -49,7 +53,10 @@ GameApp::GameApp(Services services) : m_services_(services) {
   m_runner_ = std::make_unique<Runner>();
 }
 
-GameApp::~GameApp() { Boot_ResetGameplayInspection(); }
+GameApp::~GameApp() {
+  Save::ShutdownFileMenus();
+  Boot_ResetGameplayInspection();
+}
 
 bool GameApp::Finished() const { return m_runner_->fiber.Finished(); }
 

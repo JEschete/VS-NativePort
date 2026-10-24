@@ -32,6 +32,18 @@ bool ParseU32(std::string_view s, u32& out) {
 
 }  // namespace
 
+DataStore::ScopedOverride::ScopedOverride() {
+  m_previous_ = std::move(Instance());
+}
+
+DataStore::ScopedOverride::~ScopedOverride() { Restore(); }
+
+void DataStore::ScopedOverride::Restore() noexcept {
+  if (!m_active_) return;
+  Instance() = std::move(m_previous_);
+  m_active_ = false;
+}
+
 u32 DataStore::Entry::SectorCount() const {
   const u64 rounded =
       (static_cast<u64>(size) + kDataSectorBytes - 1) / kDataSectorBytes;

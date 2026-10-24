@@ -1971,7 +1971,31 @@
     <ClInclude Include="src\Menu\TextBox.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Save\MenuAssets.c">
+      <Filter>src\Save</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Save\MenuAssets.h">
+      <Filter>src\Save</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Save\NativeContainer.c">
+      <Filter>src\Save</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Save\NativeContainer.h">
+      <Filter>src\Save</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Save\NativeFiles.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Save\NativeMenu.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Save\NativeResume.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
     <ClCompile Include="src\Save\NativeSnapshot.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Save\RuntimeSnapshot.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
     <ClCompile Include="src\State\Ashley.c">
@@ -2112,7 +2136,22 @@
     <ClInclude Include="include\Menu\Framework\ActionSelection.h">
       <Filter>include\Menu\Framework</Filter>
     </ClInclude>
+    <ClInclude Include="include\Save\NativeFiles.hpp">
+      <Filter>include\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\NativeMenu.h">
+      <Filter>include\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\NativeMenu.hpp">
+      <Filter>include\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\NativeResume.h">
+      <Filter>include\Save</Filter>
+    </ClInclude>
     <ClInclude Include="include\Save\NativeSnapshot.hpp">
+      <Filter>include\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\RuntimeSnapshot.hpp">
       <Filter>include\Save</Filter>
     </ClInclude>
     <ClInclude Include="include\State\GameTime.h">

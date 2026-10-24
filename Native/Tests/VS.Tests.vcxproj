@@ -112,10 +112,12 @@
     <ClCompile Include="src\MinimapTests.cpp" />
     <ClCompile Include="src\MotionRequestsTests.cpp" />
     <ClCompile Include="src\MovementBehaviorTests.cpp" />
+    <ClCompile Include="src\NativeMenuTests.cpp" />
     <ClCompile Include="src\NativeSnapshotTests.cpp" />
     <ClCompile Include="src\ParticleRenderTests.cpp" />
     <ClCompile Include="src\PursuitTargetsTests.cpp" />
     <ClCompile Include="src\RasterBoundsTests.cpp" />
+    <ClCompile Include="src\RuntimeSnapshotTests.cpp" />
     <ClCompile Include="src\SaveStoreTests.cpp" />
     <ClCompile Include="src\SdkMathGapTests.cpp" />
     <ClCompile Include="src\SequenceTestCases.cpp" />

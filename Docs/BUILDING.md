@@ -292,6 +292,7 @@ build\Release\VS.Desktop.exe
 |---|---|
 | `--disc <path>` | Use this disc (`.cue` or extracted folder). By default the exe looks for the `VS_DISC` environment variable, then for `disks\SLUS-01040.cue` (or `SLUS-01040\`) in its own folder or any parent folder, which finds the repo copy in a dev build. |
 | `--data <dir>` | The extracted data (§5). By default `Native\data` in the exe's folder or any parent folder. |
+| `--save-dir <dir>` | Override the native save directory. Use a dedicated ignored directory for tests; the default is `saves` inside SDL's per-user VagrantStory directory. Failure to obtain that directory is an explicit error, never a current-directory fallback. |
 | `--frames <n>` | Stop after `n` logical ticks (NTSC fields: 60000/1001, approximately 59.94 per second). |
 | `--capture <dir> --at <t1,t2,...>` | Write the picture at those ticks as `frame_<t>.bmp` (reference comparisons). |
 | `--press <t:Buttons,...>` | Scripted presses, each held 3 ticks, e.g. `3400:Down,3500:Circle` (names: Up Down Left Right Cross Circle Square Triangle L1 R1 L2 R2 L3 R3 Start Select, joined with `+`). |
@@ -299,6 +300,16 @@ build\Release\VS.Desktop.exe
 | `--speed <n>` | Run `n` logical ticks per real tick (e.g. 8 to reach the title attract scenes, about tick 5300, quickly). |
 | `--log-level <level>` | Minimum severity: `trace`, `debug`, `info` (default), `warn`, `error`, or `off`. `off` suppresses all normal logging, including crash messages. Invalid/missing values fail startup. |
 | `--log-channels <names>` | Exact, case-sensitive comma-separated channels, without spaces; default `*` selects all. Filters trace/debug/info only; warnings/errors remain visible unless excluded by severity or `off`. |
+
+Native file-menu integration remains under verification in #18. Native slots
+are `slot00.vssave` through `slot99.vssave`, with recoverable `.bak` files;
+these are versioned semantic JSON, not PS1 memory-card images. Import and old
+schema migration are not implemented. Recovery/replacement requires explicit
+confirmation, and invalid files without a valid backup are not overwritten.
+Ending clear-save conversion is not modeled yet; that entry reports its limit
+instead of invoking the old card backend or writing a fabricated checkpoint.
+Do not use owner saves for replay tests or treat an empty-picker test as a
+successful gameplay round trip.
 
 Logs go to the console and `build\<Config>\vs-native.log` (truncated each run, including an empty log with `off`).
 Each line includes `[tick=N]`: zero is startup, otherwise the logical simulation tick, not elapsed wall time.

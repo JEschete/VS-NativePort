@@ -15,6 +15,13 @@ Build using [BUILDING.md](BUILDING.md), with extracted `Native/data` available.
 Run `build\Debug\VS.CombatLab.exe` (or the Release equivalent). The default opens
 the encounter editor; a physical gamepad or keyboard remains active.
 
+Native save-menu integration is tracked separately in #18. The Lab uses
+`combat-lab-saves` inside SDL's per-user VagrantStory directory, separate from
+Desktop's `saves` directory. Pass `--save-dir <directory>` for an explicitly
+isolated replay root or intentional cross-host testing. Native saves are not
+PS1 card images; import/migration and full gameplay round-trip acceptance
+remain open. Do not point automated tests at owner files.
+
 The menu uses the extracted SYSTEM.DAT font. Select zone, room, enemy, quantity,
 Ashley tile/elevation, group offsets, spacing and RNG seed. Add multiple groups
 for mixed enemy definitions; clear groups to return to the current selection.

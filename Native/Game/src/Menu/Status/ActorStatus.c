@@ -43,7 +43,6 @@
 #include "Render/Render.h"
 #include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 
 // decomp: local static of vs_menu4_exec, at file scope so the module reset reaches it
 static int Menu_Status_limbCursorAnimation = 0;

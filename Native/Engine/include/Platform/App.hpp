@@ -53,7 +53,7 @@ class App {
 std::filesystem::path ExecutableDir();
 
 // Per-user writable directory (saves, config). Created on first call.
-std::filesystem::path UserDataDir();
+std::expected<std::filesystem::path, std::string> UserDataDir();
 
 std::expected<int, std::string> RunProcess(
     std::span<const std::string> arguments);

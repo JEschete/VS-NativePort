@@ -25,6 +25,7 @@
 #include "Input/Controllers.h"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
+#include "Save/NativeResume.h"
 #include "Save/Snapshot.h"
 #include "State/Ashley.h"
 #include "State/GameTime.h"
@@ -42,6 +43,7 @@ int Boot_RunSessionLoop(Boot_SessionEntry title, Boot_SessionEntry battle) {
   Boot_ResetGameplayInspection();
   const int destination = setjmp(session_boundary);
   const int result = destination == 2 ? battle() : title();
+  Save_NativeResetSession();
   session_active = 0;
   Boot_ResetGameplayInspection();
   return result;
@@ -88,6 +90,7 @@ void Boot_RunGame(void) {
 // decomp: SLUS_010.40 vs_overlay_jumpToTitle (src/SLUS_010.40/overlay.c:20).
 void Boot_JumpToTitle(int* legacy_stack) {
   (void)legacy_stack;
+  Save_NativeResetSession();
   RequestSession(1);
 }
 

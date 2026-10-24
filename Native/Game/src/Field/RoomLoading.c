@@ -28,6 +28,7 @@
 #include "Battle/StatusEffects.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
+#include "Boot/Session.h"
 #include "CdDrive.h"
 #include "Core/Compatibility.h"
 #include "Core/Memory/Heap.h"
@@ -76,6 +77,7 @@
 #include "Render/Render.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
+#include "Save/NativeResume.h"
 #include "State/Flags.h"
 #include "State/PlayTime.h"
 #include "State/RoomCache.h"
@@ -207,10 +209,12 @@ void Field_FinishZoneLoad(int id)
     Core_Memory_FreeFromHighEnd(header);
     Field_zoneContext.zndData = NULL;
 
-    if (Boot_gameEntryMode == 1) {
-        State_ResetZoneScriptFlags(1);
-    } else {
-        State_ResetZoneScriptFlags(0);
+    if (!Save_NativeResumePending()) {
+        if (Boot_gameEntryMode == 1) {
+            State_ResetZoneScriptFlags(1);
+        } else {
+            State_ResetZoneScriptFlags(0);
+        }
     }
 
     if (Audio_CurrentMusicId() != musicId) {
@@ -812,6 +816,11 @@ void Field_FinishRoomLoad(int arg0)
     Render_ResetFramebufferEffect();
     Render_CommitClutBuffer();
     Render_ConfigureFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);
+
+    if (Save_NativeResumePending() && !Save_NativeFinishResume()) {
+        Boot_JumpToTitle(NULL);
+        return;
+    }
 
     if ((temp_s4 << 0x10) != 0) {
         Effects_InitializeRoomWeather(1);

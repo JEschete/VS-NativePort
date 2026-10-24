@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
+#include "Battle/Feedback.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Inventory.h"
@@ -18,7 +19,6 @@
 #include "Render/Render.h"
 #include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
 
 // decomp: local static of _itemStatusDispatcher, at file scope so the module reset reaches it
 static int (*Menu_Inventory_itemDetailsStatusViewDispatch[])(int) = { Menu_Inventory_UpdateWeaponDetails, Menu_Inventory_UpdateBladeDetails,
