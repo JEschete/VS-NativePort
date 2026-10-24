@@ -7,8 +7,8 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **91** (90 stubs and 1 partial implementations).
-- Matching C/C++ reference bodies located: **50**.
+- Open native entries: **80** (80 stubs and 0 partial implementations).
+- Matching C/C++ reference bodies located: **39**.
 - Assembly located, but no matching C body located: **31**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
@@ -81,7 +81,7 @@ to an ignored build directory first.
 
 ## Tagged file: BATTLE/BATTLE.PRG/7E05C.s
 
-All **21** catalog entries are accounted for: **8 already implemented**, **12 open with C counterparts**, and **1 open with assembly only**.
+All **21** catalog entries are accounted for: **10 already implemented**, **10 open with C counterparts**, and **1 open with assembly only**.
 
 | ID | Original symbol | Native status | Source availability |
 | --- | --- | --- | --- |
@@ -89,7 +89,7 @@ All **21** catalog entries are accounted for: **8 already implemented**, **12 op
 | F01826 | `func_800E6898` | stub | c-or-cpp-body-available |
 | F01827 | `func_800E68A0` | stub | c-or-cpp-body-available |
 | F01828 | `func_800E68EC` | stub | c-or-cpp-body-available |
-| F01830 | `func_800E6A6C` | stub | c-or-cpp-body-available |
+| F01830 | `func_800E6A6C` | implemented | c-or-cpp-body-available |
 | F01831 | `func_800E6B24` | stub | c-or-cpp-body-available |
 | F01832 | `func_800E6B4C` | stub | c-or-cpp-body-available |
 | F01835 | `func_800E6EAC` | stub | c-or-cpp-body-available |
@@ -100,7 +100,7 @@ All **21** catalog entries are accounted for: **8 already implemented**, **12 op
 | F01840 | `func_800E72D0` | implemented | c-or-cpp-body-available |
 | F01841 | `func_800E7370` | implemented | c-or-cpp-body-available |
 | F01842 | `func_800E7454` | implemented | c-or-cpp-body-available |
-| F01843 | `func_800E75EC` | stub | c-or-cpp-body-available |
+| F01843 | `func_800E75EC` | implemented | c-or-cpp-body-available |
 | F01844 | `func_800E7608` | implemented | c-or-cpp-body-available |
 | F01845 | `func_800E7660` | stub | c-or-cpp-body-available |
 | F01829 | `func_800E6974` | stub | c-or-cpp-body-available |
@@ -143,10 +143,10 @@ as behaviorally complete. No native gameplay issue is closed by this audit.
 
 | Reference | Revision | Production source files scanned | Source SHA-256 |
 | --- | --- | --- | --- |
-| `rood-reverseWin` | `fd291cfe29b45656e00ff1e198f53e7730b59a19` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
-| `rood-reverse` | `d4f7285631e6bc68e213fa304c662228240bfee7` | 382 | `611d70a7f4feba067403989b80c4acb06ab3dd396191a449128fcd49a5b8d17a` |
-| `rood-reverse-noprompt` | `7339d4e86d99d5e848468ed1a5955b9782ec6ff5` | 389 | `12a7572a90a7007de6aab831b54fd90227230bbdd664390c85a1cea8fa415803` |
-| `rood-boi` | `af51d41ceef7b1b9c3f9ecef152742ae8e97ca40` | 723 | `02fd12720a5b45b84f1b210f6085490656ae2374a5d40425cc58d1382fd3af59` |
+| `rood-reverseWin` | `0aa0e7366ce81b9bd279fefbe2036187e96e8ff4` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
+| `rood-reverse` | `5163208b363660881f3139612ed042897ce95b10` | 382 | `f95c01dc6d18c6d2b16b7a780560e8590926e1dfed55010ed4591130ec6af6ab` |
+| `rood-reverse-noprompt` | `39821e4fc0353dc89855f5f29fd678d71545daa2` | 389 | `e3e5d73ccd7c08971c9558baad6e6a2df2e2fe0bcd9b8961e133476e86db7a8c` |
+| `rood-boi` | `b2c3fedefbeb05e912ef281688598a963def6a39` | 746 | `71210f4b83c2156d10939cc7b718c9d5e71bad6d440e42b10225d8f2cfabfc1e` |
 
 `rood-reverseWin` is a tracked tree inside the parent repository; its
 listed revision is the parent revision, not an independent submodule HEAD.
