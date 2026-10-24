@@ -96,6 +96,8 @@ MODULE_DATA_BLOBS = (
      "30DB0.c:_loadGimmick; three 16-byte headers plus modelDataSize payloads"),
     ("BATTLE/BATTLE.PRG", 0x823AC, 0x800EABAC, 0x9DC, "Content_battleTextboxFrameBytes",
      "5BF94.c:textbox frame vertices; nine styles precede D_800EB588"),
+    ("BATTLE/BATTLE.PRG", 0x7FD48, 0x800E8548, 116, "Content_battleTriggerMarkerBytes",
+     "146C.c:func_8008E19C complete one-group/one-quad marker definition; G00039-G00041 are interior aliases"),
     ("SLUS_010.40", 0x800, 0x80010000, 0x52000, "Content_residentLfoSamples",
      "25AC.c:LFO selectors include source-code bytes as sample/control data; original PS-X EXE payload, never host code"),
 )

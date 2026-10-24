@@ -361,8 +361,6 @@ void Field_FreezeMovingPlatforms(int arg0);
 void Field_BeginSwitchToggle(Field_MpdLockTrigger* arg0);
 void Field_ToggleRoomSwitch(Field_MpdLockTrigger* arg0);
 void Field_SetRoomTriggerEnabled(Field_MpdFloorTrigger* arg0, int arg1);
-void Field_DrawRoomTriggerMarkers(void);
-void Field_DrawRoomTriggerMarker(int arg0, int arg1, short arg2, u_int arg3);
 void Field_SetMovingPlatformVisibility(int arg0, int arg1);
 void* Field_MovingPlatformTargetWaypoint(int arg0);
 u_int Field_MovingPlatformDwellTicks(int arg0);

@@ -1,5 +1,11 @@
 # Third-party implementation references
 
+The project's original contributions, including original modifications to adapted implementations, are
+licensed under **GPL-3.0-or-later**, except where otherwise noted; see [LICENSE](LICENSE) and the
+[project licensing notice](README.md#license). Upstream material retains its respective license or
+public-domain dedication. These notices preserve provenance and do not revoke upstream permissions
+or grant rights held by the original game's rights holders.
+
 ## rood-boi battle AI counterparts
 
 The owned [AI planning primitives](Native/Game/src/Battle/Ai/PlanningPrimitives.cpp)

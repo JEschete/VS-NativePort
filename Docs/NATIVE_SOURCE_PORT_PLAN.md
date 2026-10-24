@@ -794,8 +794,13 @@ Fixed-step simulation, the original RNG sequence, no wall-clock in game logic, a
 
 ## 11. Licensing
 
-- The decomp (rood-reverse) is CC0. Copying its code into `Native\` is allowed. Provenance comments keep attribution traceable.
+- Original project contributions are licensed under **GPL-3.0-or-later**, except where otherwise noted.
+  See the [project licensing notice](../README.md#license) and full [license](../LICENSE).
+- The decomp (rood-reverse) declares CC0 for rights held by its contributors. Preserve its license and
+  provenance when adapting code; that declaration does not grant rights held by the original game's rights holders.
 - rood-boi (CC0) and PsyCross (MIT) may be lifted with attribution in `THIRD_PARTY.md`. SDL3 is zlib. Runtime libraries are permissive: dav1d (BSD-2), libwebm (BSD-3), libFLAC (BSD-3), nlohmann-json (MIT), lodepng (zlib).
+- Third-party material retains its respective license or public-domain dedication. The GPL grant for
+  original project contributions does not revoke upstream permissions or grant rights in the original game's code, assets or trademarks.
 - ffmpeg is used **only as an external executable at extract time**. It is never linked or shipped.
 - GPL / non-commercial / unlicensed tools (see TOOLS_INVENTORY) are **reference only**. We read them to understand formats and never copy code.
 - **No game data is committed.** Disc contents, extracted catalogs and captures stay git-ignored. Users supply their own disc.

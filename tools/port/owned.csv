@@ -211,3 +211,5 @@ F02737,function,Save_MemoryCard_InitializeMenuResourcesStep,Native\Game\src\Save
 F02738,function,Save_MemoryCard_ReleaseMenuResources,Native\Game\src\Save\MenuAssets.c,Native\Game\src\Save\MenuAssets.h,2026-10-24,from Native\Engine\src\Save\MemoryCard\GameFiles.c
 F03604,function,Save_MemoryCard_InitializeResourcesStep,Native\Game\src\Save\MenuAssets.c,Native\Game\src\Save\MenuAssets.h,2026-10-24,from Native\Engine\src\Save\MemoryCard\GameFiles.c
 F03605,function,Save_MemoryCard_ReleaseResources,Native\Game\src\Save\MenuAssets.c,Native\Game\src\Save\MenuAssets.h,2026-10-24,from Native\Engine\src\Save\MemoryCard\GameFiles.c
+F00617,function,Field_DrawRoomTriggerMarkers,Native\Game\src\Field\RoomTriggerMarkers.c,Native\Game\src\Field\RoomTriggerMarkers.h,2026-10-24,from Native\Game\src\Field\Gimmicks.c
+F00618,function,Field_DrawRoomTriggerMarker,Native\Game\src\Field\RoomTriggerMarkers.c,Native\Game\src\Field\RoomTriggerMarkers.h,2026-10-24,from Native\Game\src\Field\Gimmicks.c

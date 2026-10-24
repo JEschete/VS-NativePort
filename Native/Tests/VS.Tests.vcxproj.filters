@@ -159,6 +159,9 @@
     <ClCompile Include="src\RasterBoundsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\RoomTriggerMarkerTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\RuntimeSnapshotTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -19,6 +19,7 @@
 #include "Field/Room.h"
 #include "Field/RoomEffects.h"
 #include "Field/RoomRendering.h"
+#include "Field/RoomTriggerMarkers.h"
 #include "Field/Zone.h"
 #include "Input/Controller.h"
 #include "Items/Inventory.h"

@@ -196,6 +196,7 @@
 #include "Field/RoomLoading.h"
 #include "Field/RoomRendering.h"
 #include "Field/RoomState.h"
+#include "Field/RoomTriggerMarkers.h"
 #include "Field/Transitions.h"
 #include "Field/Traps.h"
 #include "Field/TriggerMarkers.h"
@@ -282,6 +283,7 @@ extern unsigned int Content_battleAiHesitationLengths[1];
 extern unsigned int Content_battleLimbNameBytes[38];
 extern unsigned int Content_battleGimmickTemplateBytes[455];
 extern unsigned int Content_battleTextboxFrameBytes[631];
+extern unsigned int Content_battleTriggerMarkerBytes[29];
 extern short Content_residentLfoSamples[167936];
 
 static const Content_ModuleSymbol Content_residentLfoSamplesSource = {"SLUS_010.40", 0x80010000u, 335872u, (void*)Content_residentLfoSamples, sizeof Content_residentLfoSamples, 2u, 2u};
@@ -3266,6 +3268,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069860u, 152u, (void*)Content_battleLimbNameBytes, sizeof Content_battleLimbNameBytes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E930Cu, 1820u, (void*)Content_battleGimmickTemplateBytes, sizeof Content_battleGimmickTemplateBytes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EABACu, 2524u, (void*)Content_battleTextboxFrameBytes, sizeof Content_battleTextboxFrameBytes, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8548u, 116u, (void*)Content_battleTriggerMarkerBytes, sizeof Content_battleTriggerMarkerBytes, 1u, 1u},
 };
 const unsigned Content_moduleSymbolCount = sizeof Content_moduleSymbols / sizeof Content_moduleSymbols[0];
 

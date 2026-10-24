@@ -154,6 +154,8 @@ unsigned int Content_battleLimbNameBytes[38];
 unsigned int Content_battleGimmickTemplateBytes[455];
 // decomp: BATTLE/BATTLE.PRG 5BF94.c:textbox frame vertices; nine styles precede D_800EB588
 unsigned int Content_battleTextboxFrameBytes[631];
+// decomp: BATTLE/BATTLE.PRG 146C.c:func_8008E19C complete one-group/one-quad marker definition; G00039-G00041 are interior aliases
+unsigned int Content_battleTriggerMarkerBytes[29];
 // decomp: SLUS_010.40 25AC.c:LFO selectors include source-code bytes as sample/control data; original PS-X EXE payload, never host code
 short Content_residentLfoSamples[167936];
 
@@ -543,6 +545,7 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x1060, 152u, Content_battleLimbNameBytes, sizeof Content_battleLimbNameBytes},
     {"BATTLE/BATTLE.PRG", 0x80B0C, 1820u, Content_battleGimmickTemplateBytes, sizeof Content_battleGimmickTemplateBytes},
     {"BATTLE/BATTLE.PRG", 0x823AC, 2524u, Content_battleTextboxFrameBytes, sizeof Content_battleTextboxFrameBytes},
+    {"BATTLE/BATTLE.PRG", 0x7FD48, 116u, Content_battleTriggerMarkerBytes, sizeof Content_battleTriggerMarkerBytes},
     {"SLUS_010.40", 0x800, 335872u, Content_residentLfoSamples, sizeof Content_residentLfoSamples},
 };
 const unsigned Content_moduleDataCount = sizeof Content_moduleData / sizeof Content_moduleData[0];

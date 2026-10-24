@@ -9,6 +9,29 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_trigger_marker_import_owns_the_complete_geometry_definition(self):
+        blob = next(
+            item for item in copy_fixups.MODULE_DATA_BLOBS
+            if item[4] == "Content_battleTriggerMarkerBytes"
+        )
+        self.assertEqual(
+            blob[:4], ("BATTLE/BATTLE.PRG", 0x7FD48, 0x800E8548, 116)
+        )
+        self.assertNotIn(blob[4], copy_fixups.MODULE_DATA_BLOB_TYPES)
+        registry = Path(__file__).resolve().with_name("owned.csv")
+        with registry.open(encoding="utf-8", newline="") as stream:
+            owned = {row["id"]: row for row in csv.DictReader(stream)}
+        for fid in ("F00617", "F00618"):
+            with self.subTest(fid=fid):
+                self.assertEqual(
+                    owned[fid]["path"],
+                    r"Native\Game\src\Field\RoomTriggerMarkers.c",
+                )
+                self.assertEqual(
+                    owned[fid]["header"],
+                    r"Native\Game\src\Field\RoomTriggerMarkers.h",
+                )
+
     def test_native_resume_hooks_precede_event_and_reset_mutation(self):
         finish = copy_fixups.FIXES["F00543"][-1]
         self.assertIn("Boot_JumpToTitle(NULL)", finish[1])

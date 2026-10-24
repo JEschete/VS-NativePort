@@ -20,7 +20,6 @@
 #include "Core/Memory/WordCopy.h"
 #include "Effects/Weather.h"
 #include "Field/Actors.h"
-#include "Field/Camera.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/GimmickMotion.h"
@@ -39,7 +38,6 @@
 #include "Render/ModelDraw.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 #include "State/StateFlags.h"
 #include "State/Timers.h"
@@ -683,87 +681,6 @@ void Field_SetRoomTriggerEnabled(Field_MpdFloorTrigger* arg0, int arg1)
     } else {
         arg0->activation = arg1;
     }
-}
-
-// decomp: BATTLE.PRG func_8008DF14 (src/BATTLE/BATTLE.PRG/146C.c:17164)
-void Field_DrawRoomTriggerMarkers(void)
-{
-    Field_MpdFloorTrigger* var_s3;
-    int count;
-    int j;
-    int var_s2;
-    int i;
-
-    if (Field_roomData.floorTriggers != NULL) {
-        var_s3 = Field_roomData.floorTriggers;
-        var_s2 = 1;
-        count =
-            Field_roomData.header.floorTriggersLength / sizeof *Field_roomData.floorTriggers;
-
-        for (i = 0; i < count; ++i, ++var_s3) {
-            if ((Audio_Seq_unusedStateFlags.opaque20 == 0) && (Audio_Seq_unusedStateFlags.opaque40 == 0)
-                && (var_s3->activation != 0)) {
-                for (j = 0; j < (State_tickSpeed * 2); ++j) {
-                    if ((signed char)var_s3->markerFade >= 0) {
-                        ++var_s3->markerFade;
-                    }
-                }
-            } else {
-                for (j = 0; j < State_tickSpeed; ++j) {
-                    if (var_s3->markerFade != 0) {
-                        --var_s3->markerFade;
-                    }
-                }
-            }
-
-            if ((var_s3->markerFade != 0) && (var_s3->kind < 0x10)) {
-                if (var_s2 != 0) {
-                    Core_Memory_CopyAlignedWords(&Field_triggerMarkerMatrix, (void*)((uintptr_t)Core_ScratchBase() + 0x014), sizeof Field_triggerMarkerMatrix);
-                    Field_triggerMarkerFrameTicks += State_tickSpeed;
-                    if (Field_triggerMarkerFrameTicks >= 8) {
-                        Field_triggerMarkerFrameTicks -= 8;
-                        var_s2 = (Field_roomAnimationTicks >> 3) % 5;
-                        Field_triggerMarkerTextureSource.x = (var_s2 * 8) + 0x48;
-                        Field_triggerMarkerPaletteSource.x = (var_s2 * 4) + 4;
-                        MoveImage(&Field_triggerMarkerTextureSource, 0x40, 0x180);
-                        MoveImage(&Field_triggerMarkerPaletteSource, 0, 0x140);
-                    }
-                    var_s2 = 0;
-                }
-                j = Field_FloorHeightAt(var_s3->tileX << 7, var_s3->tileZ << 7) << 0x11;
-                Field_DrawRoomTriggerMarker(
-                    var_s3->tileX << 7, var_s3->tileZ << 7, j >> 0x11, var_s3->markerFade);
-            }
-        }
-    }
-}
-
-// decomp: BATTLE.PRG func_8008E19C (src/BATTLE/BATTLE.PRG/146C.c:17216)
-void Field_DrawRoomTriggerMarker(int arg0, int arg1, short arg2, u_int arg3)
-{
-    int i;
-    char (*var_t0)[4];
-    void* p;
-
-    Field_triggerMarkerVertex.positionX = arg0 + 0x80;
-    Field_triggerMarkerVertex.positionZ = arg1 + 0x80;
-    Field_triggerMarkerVertex.height = arg2;
-
-    var_t0 = Field_triggerMarkerVertex.vertexShades;
-    for (i = 0; i < 3;) {
-        ++i;
-        (*var_t0)[0] = arg3;
-        (*var_t0)[1] = arg3;
-        (*var_t0)[2] = arg3;
-        ++var_t0;
-    }
-    var_t0 += 3;
-
-    (*var_t0)[0] = arg3;
-    (*var_t0)[1] = arg3;
-    (*var_t0)[2] = arg3;
-    p = Field_triggerMarkerRecordTail;
-    Render_DrawRoomGeometry(p - 0x58, Field_roomGeometryDrawMode);
 }
 
 // decomp: BATTLE.PRG func_8008E224 (src/BATTLE/BATTLE.PRG/146C.c:17243)
