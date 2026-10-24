@@ -132,6 +132,22 @@ void CheckRefusedWrite(const SaveStore& store, int slot,
   REQUIRE_FALSE(result);
   CHECK_FALSE(result.error().empty());
 }
+
+void WriteTwoGenerations(const SaveStore& store, int slot) {
+  REQUIRE(store.Save(slot, "v1:first", Validate));
+  REQUIRE(store.Save(slot, "v1:second", Validate));
+}
+
+void CheckRecoveryWrite(const SaveStore& store, int slot,
+                        const fs::path& primary) {
+  if (fs::exists(primary)) {
+    CheckRefusedWrite(store, slot, "v1:third");
+    REQUIRE(store.Save(slot, "v1:third", Validate,
+                       VS::Save::WriteConsent::kReplaceRecovered));
+  } else {
+    REQUIRE(store.Save(slot, "v1:third", Validate));
+  }
+}
 }  // namespace
 
 TEST_CASE("Save storage reports invalid roots rather than changing location",
@@ -223,8 +239,7 @@ TEST_CASE("Corrupt or missing primary saves explicitly recover valid backups",
   REQUIRE(store);
   const auto path = store->SlotPath(2);
   REQUIRE(path);
-  REQUIRE(store->Save(2, "v1:first", Validate));
-  REQUIRE(store->Save(2, "v1:second", Validate));
+  WriteTwoGenerations(*store, 2);
   SECTION("corrupt primary") { Put(*path, "corrupt"); }
   SECTION("missing primary") { REQUIRE(fs::remove(*path)); }
   SECTION("oversized primary") {
@@ -232,7 +247,7 @@ TEST_CASE("Corrupt or missing primary saves explicitly recover valid backups",
   }
   CheckPresence(*store, 2, true);
   CheckLoaded(*store, 2, "v1:first", true);
-  REQUIRE(store->Save(2, "v1:third", Validate));
+  CheckRecoveryWrite(*store, 2, *path);
   CHECK(Get(*path) == "v1:third");
   CHECK(Get(Backup(*path)) == "v1:first");
 }
@@ -250,6 +265,8 @@ TEST_CASE("Invalid primary and backup never become successful empty saves",
   REQUIRE_FALSE(loaded);
   CHECK(loaded.error().find("unsupported") != std::string::npos);
   CHECK_FALSE(store->Save(1, "v1:new", Validate));
+  CHECK_FALSE(store->Save(1, "v1:new", Validate,
+                          VS::Save::WriteConsent::kReplaceRecovered));
   CHECK(Get(*path) == "invalid current");
   CHECK(Get(Backup(*path)) == "invalid backup");
   CheckNoTemporaryFiles(directory.root);
@@ -339,4 +356,25 @@ TEST_CASE("Save storage refuses non-file slots and preserves their contents",
   CHECK_FALSE(store->Save(8, "v1:first", Validate));
   CHECK(Get(*path / "keep") == "owned fixture");
   CheckNoTemporaryFiles(directory.root);
+}
+
+TEST_CASE(
+    "Unverified current saves are not overwritten through backup recovery",
+    "[save-store][save-overwrite]") {
+  TemporaryDirectory directory;
+  const auto store = SaveStore::Open(directory.root);
+  REQUIRE(store);
+  const auto path = store->SlotPath(9);
+  REQUIRE(path);
+  WriteTwoGenerations(*store, 9);
+  Put(*path, "v2:unsupported newer save");
+  CheckLoaded(*store, 9, "v1:first", true);
+  const auto overwritten = store->Save(9, "v1:third", Validate);
+  CHECK_FALSE(overwritten);
+  CHECK(Get(*path) == "v2:unsupported newer save");
+  CHECK(Get(Backup(*path)) == "v1:first");
+  REQUIRE(store->Save(9, "v1:third", Validate,
+                      VS::Save::WriteConsent::kReplaceRecovered));
+  CHECK(Get(*path) == "v1:third");
+  CHECK(Get(Backup(*path)) == "v1:first");
 }

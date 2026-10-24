@@ -9,6 +9,30 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #18 storage checkpoint31b4247e has exact green Source Quality40113479363.
+  The schema subpackage adds the Game-owned v1 JSON codec: named inventory/
+  storage/settings/stats/limbs/arts/score/trial/room-cache fields, logical script
+  flags, stable item/location/action IDs, source glyph-byte arrays, clocks and
+  BIOS/interface/shuffle/movement random-state staging. It does not dump native objects or serialize
+  pointers/padding/transient load markers. Integrity uses canonical-JSON FNV-1a64
+  for accidental corruption, not authentication. Unknown keys, wrong types,
+  extents, duplicate keys/IDs, excessive nesting and unsupported versions fail.
+- Schema work exposed a coupled storage-policy bug: Save silently overwrote an
+  unverified current file via its valid backup. The new future-format red case
+  failed2/14 before repair. Default Save now refuses that replacement until
+  explicit WriteConsent::kReplaceRecovered; both-invalid files remain protected.
+  A missing primary can still be re-created without destroying existing bytes.
+  Actual Windows failure/recovery controls and codec controls pass together:
+  24 cases/400 assertions each configuration. Full Debug/Release648/
+  3,150,686 pass; full quality195 existing/zero new; source tidy zero new.
+  Game/Tests scoped project generation is stable. Logs: `save18-schema-*`,
+  `save18-consent-*`, `save18-schema-generation-stability.log` in build/quality.
+- Codec decoding stages data only. Live content-reference/cross-slot validation,
+  safe gameplay capture/application, session storage ownership, actual Data/
+  save-point/title Continue wiring and real process-restart round trips remain
+  unfinished. Do not call this functional in-game save/load or close #18.
+  Native UserDataDir currently falls back silently if SDL_GetPrefPath fails;
+  that must become an explicit error before connecting production save roots.
 - #169 map-boundary repair is published in f1bba2b0 with exact green
   Source Quality40111624104. The matching full-story event4 handoff remains
   open for verification; native save/load #18 is now the owner-prioritized work.

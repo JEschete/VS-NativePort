@@ -17,6 +17,8 @@ struct LoadedSave {
   std::string recovery_reason;
 };
 
+enum class WriteConsent { kNormal, kReplaceRecovered };
+
 class SaveStore {
  public:
   static constexpr int kSlotCount = 100;
@@ -29,8 +31,9 @@ class SaveStore {
   std::expected<bool, std::string> SlotExists(int slot) const;
   std::expected<LoadedSave, std::string> Load(int slot,
                                               Validator validate) const;
-  std::expected<void, std::string> Save(int slot, std::string_view data,
-                                        Validator validate) const;
+  std::expected<void, std::string> Save(
+      int slot, std::string_view data, Validator validate,
+      WriteConsent consent = WriteConsent::kNormal) const;
 
  private:
   explicit SaveStore(std::filesystem::path root);

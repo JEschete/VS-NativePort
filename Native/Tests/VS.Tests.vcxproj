@@ -112,6 +112,7 @@
     <ClCompile Include="src\MinimapTests.cpp" />
     <ClCompile Include="src\MotionRequestsTests.cpp" />
     <ClCompile Include="src\MovementBehaviorTests.cpp" />
+    <ClCompile Include="src\NativeSnapshotTests.cpp" />
     <ClCompile Include="src\ParticleRenderTests.cpp" />
     <ClCompile Include="src\PursuitTargetsTests.cpp" />
     <ClCompile Include="src\RasterBoundsTests.cpp" />

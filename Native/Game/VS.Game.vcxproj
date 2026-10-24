@@ -1628,6 +1628,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Save\NativeSnapshot.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\State\Ashley.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2094,6 +2097,7 @@
     <ClInclude Include="include\Items\KeyItems.h" />
     <ClInclude Include="include\Items\Loadout.h" />
     <ClInclude Include="include\Menu\Framework\ActionSelection.h" />
+    <ClInclude Include="include\Save\NativeSnapshot.hpp" />
     <ClInclude Include="include\State\GameTime.h" />
     <ClInclude Include="include\State\Progress.h" />
   </ItemGroup>

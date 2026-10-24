@@ -214,7 +214,8 @@ std::expected<LoadedSave, std::string> SaveStore::Load(
 
 std::expected<void, std::string> SaveStore::Save(int slot,
                                                  std::string_view data,
-                                                 Validator validate) const {
+                                                 Validator validate,
+                                                 WriteConsent consent) const {
   const auto path = SlotPath(slot);
   if (!path) return std::unexpected(path.error());
   if (validate == nullptr) return std::unexpected("Save validator is missing");
@@ -234,8 +235,15 @@ std::expected<void, std::string> SaveStore::Save(int slot,
   if (*current_exists || *backup_exists) {
     const auto previous = Load(slot, validate);
     if (!previous) return std::unexpected(previous.error());
-    const auto backed_up = WriteAtomic(BackupPath(*path), previous->data);
-    if (!backed_up) return std::unexpected(backed_up.error());
+    if (previous->recovered_from_backup) {
+      if (*current_exists && consent != WriteConsent::kReplaceRecovered) {
+        return std::unexpected("Confirm replacement of the current save: " +
+                               previous->recovery_reason);
+      }
+    } else {
+      const auto backed_up = WriteAtomic(BackupPath(*path), previous->data);
+      if (!backed_up) return std::unexpected(backed_up.error());
+    }
   }
   return WriteAtomic(*path, data);
 }

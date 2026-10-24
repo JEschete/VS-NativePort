@@ -575,6 +575,7 @@ These are target designs, not an implemented-feature inventory. See §0.2 and th
 - **Model:** a versioned JSON save with string IDs for every item/location. The initial native milestone implements native save/load first; PS1 `.mcd`/`.mcr` import remains a separate decoder and is not yet supported.
 - **Absorbs:** libcard (4), libapi card events, `Save` (68 rows).
 - **Tests:** save → load round-trip; import of a known PS1 save gives the expected inventory.
+- **Native-only implementation checkpoint (2026-10-24):** Engine slot storage is payload-agnostic and requires Game validation, bounded reads, recoverable writes and explicit replacement consent for an unverified primary. The Game v1 JSON codec encodes named semantic fields and stable string references, not native object bytes; source glyph buffers remain byte arrays. Its canonical-JSON FNV-1a64 checksum detects accidental corruption, not tampering. Schema/integrity decoding is staging only: content resolution, cross-reference checks and safe runtime application are separate required gates before production load. Working helper/codec tests do not establish Data-menu or Continue completion.
 
 ### 6.8 Game modules (`VS.Game`)
 

@@ -139,6 +139,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\Ai\GroundNavigation.cpp",
                 r"src\Field\TerrainHeight.cpp",
                 r"src\Menu\Sounds.cpp",
+                r"src\Save\NativeSnapshot.cpp",
             ))
 
 

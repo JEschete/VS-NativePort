@@ -25,6 +25,9 @@
     <Filter Include="include\Menu\Framework">
       <UniqueIdentifier>{EC2E19C3-730C-5083-A87C-1AC3D1CA2E85}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Save">
+      <UniqueIdentifier>{D7A69607-1CF4-5C9C-B0F8-B7A2F2245DCE}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\State">
       <UniqueIdentifier>{5C6F0E0E-46C9-5E7B-9E34-5D22414E35BA}</UniqueIdentifier>
     </Filter>
@@ -99,6 +102,9 @@
     </Filter>
     <Filter Include="src\Menu\Status">
       <UniqueIdentifier>{87250127-6DC0-58B9-8A20-FA87A1430593}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Save">
+      <UniqueIdentifier>{071E8949-9F08-501E-B3B6-5F71A23680F5}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\State">
       <UniqueIdentifier>{3A39455F-5F22-57B3-888A-EFC812F4D87D}</UniqueIdentifier>
@@ -1965,6 +1971,9 @@
     <ClInclude Include="src\Menu\TextBox.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Save\NativeSnapshot.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
     <ClCompile Include="src\State\Ashley.c">
       <Filter>src\State</Filter>
     </ClCompile>
@@ -2102,6 +2111,9 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Framework\ActionSelection.h">
       <Filter>include\Menu\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\NativeSnapshot.hpp">
+      <Filter>include\Save</Filter>
     </ClInclude>
     <ClInclude Include="include\State\GameTime.h">
       <Filter>include\State</Filter>
