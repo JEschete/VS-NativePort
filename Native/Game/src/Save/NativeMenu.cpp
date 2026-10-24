@@ -553,18 +553,21 @@ int InitialTitleSelection() {
 
 }  // namespace VS::Game::Save
 
-// MENU7.PRG _dataSaveMenu/_dataLoadMenu, 260.c; TITLE.PRG _loadMenu,22C.c.
 // Boot transitions remain in the original C callers, after these frames return.
+// F02764 _showSaveMenu, MENU/MENU7.PRG/260.c:2673.
 extern "C" int Menu_Files_UpdateDataSaveMenu(int init_state) {
   return VS::Game::Save::Update(init_state, true, false);
 }
+// F02767 _loadFileMenu, MENU/MENU7.PRG/260.c:3187.
 extern "C" int Menu_Files_UpdateDataLoadMenu(int init_fadeout) {
   return VS::Game::Save::Update(init_fadeout, false, false);
 }
+// F03628 _loadFileMenu, TITLE/TITLE.PRG/22C.c:2213.
 extern "C" int Menu_Files_UpdateLoadMenu(int init_fadeout) {
   return VS::Game::Save::Update(init_fadeout, false, true);
 }
 
+// F03634 _showSaveMenu, TITLE/TITLE.PRG/22C.c:2880; clear-save gate only.
 extern "C" int Menu_Files_UpdateSaveMenu(int init_state) {
   return VS::Game::Save::ClearSave(init_state);
 }

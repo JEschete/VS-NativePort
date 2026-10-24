@@ -576,6 +576,14 @@ These are target designs, not an implemented-feature inventory. See §0.2 and th
 - **Absorbs:** libcard (4), libapi card events, `Save` (68 rows).
 - **Tests:** save → load round-trip; import of a known PS1 save gives the expected inventory.
 - **Native-only implementation checkpoint (2026-10-24):** Engine slot storage is payload-agnostic and requires Game validation, bounded reads, recoverable writes and explicit replacement consent for an unverified primary. The Game v1 JSON codec encodes named semantic fields and stable string references, not native object bytes; source glyph buffers remain byte arrays. Its canonical-JSON FNV-1a64 checksum detects accidental corruption, not tampering. Schema/integrity decoding is staging only: content resolution, cross-reference checks and safe runtime application are separate required gates before production load. Working helper/codec tests do not establish Data-menu or Continue completion.
+- **Native runtime/menu checkpoint:** schema3, content validation and staged resume are connected to Data Save/Load and title Continue in324438d9 (green CI40131160959).
+  Actual controller replays cover original save-point writes, process restart, changed-position Data Load,
+  repeated Continue after the original soft-reset chord, explicit backup recovery/replacement and Windows
+  failed-commit/retry without double-counting saves. A live storage-chest Store/Remove round trip persists
+  item323 count10 across process restart; discarding a staged bank transaction restores live inventory and
+  leaves the file unchanged. Full Debug/Release675 cases/3,154,179 assertions pass. See HANDOFF for local
+  commands/evidence and component-profile limits. PS1 import, old-schema migration, clear saves, unsupported
+  transient/support states and final card-adapter retirement remain open; this is not the complete M9 gate.
 
 ### 6.8 Game modules (`VS.Game`)
 

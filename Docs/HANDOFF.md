@@ -9,6 +9,32 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #18 native runtime/menu checkpoint324438d948ef2b2fa4f0ca1f43bdd6c3b5536d98 is
+  published; exact Source Quality40131160959 passes. Additional actual-controller
+  acceptance on that clean revision, with isolated roots:
+  - Changed-state Data Load1792874843480989-0 moves Z1106 to1124, reloads1106
+    through the original C-only battle transition and has591 settled frames.
+  - Repeated title Continue uses the original reset chord at2000, title jump2011,
+    second prepare3752 and apply3791, without a process restart or error.
+  - Explicit backup recovery loads generation1 and leaves the corrupt primary's
+    SHA256 unchanged. A separate affirmative replacement commits generation2
+    while preserving backup1. Windows deny-delete sharing produces a visible
+    commit failure and unchanged primary; releasing the lock and retrying in
+    the same session increments generation/game/cumulative saves exactly once.
+  - Original MAP014 storage chest at1,15/layer0/facing2 is reached from1,14 by
+    actual Up/Cross. Lab1792876112998915-0 stores item323 count10 through production
+    menus, commits generation4 at2602 and removes it from the saved gadget bag.
+    Desktop restart loads that bank, removes the same stack through production
+    menus and commits generation5 at4253: bank empty, gadget bag count10.
+    Discard run1792876444690926-0 restores the complete live item list
+    (1700==5000) and preserves the primary's SHA256.
+  Evidence: `build/quality/save18-same-process-load-evidence.json`,
+  `save18-repeat-title-continue-desktop.log`, `save18-recovery-*`,
+  `save18-write-retry-*`, `save18-container-store-evidence.json`,
+  `save18-container-remove-restart-*`, `save18-container-cancel-final-*`.
+  These remain original-content component profiles, not a legitimate full-story
+  save campaign. Clear saves, import/migrations, unsupported transient/support
+  states and final EC retirement remain open; #18 is not closed.
 - #18 runtime/UI checkpoint now owns the three Data/Continue picker entries,
   the container transaction and original UI-asset loading/release. Native files
   use the existing readable game font,100 slots, explicit overwrite/recovery
@@ -58,7 +84,7 @@ verification of the current worktree.
   `save18-desktop-first-continue`. This is a Lab-profile component save followed
   by production Desktop Continue, not legitimate story progression. Same-process
   changed-state load, live container transfers, overwrite/recovery controller
-  acceptance and further repeated Continue remain pending. Moving supports,
+  acceptance and further repeated Continue are now covered above. Moving supports,
   active motion, first-person/non-orbit cameras and unfinished transitions are
   explicitly rejected rather than guessed. Import, older-schema migration,
   clear-save conversion and broader EC retirement remain open; do not close #18.
