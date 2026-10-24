@@ -29,7 +29,7 @@ namespace {
 using Json = nlohmann::json;
 constexpr std::string_view kFormat = "vs-nativeport-save";
 constexpr std::string_view kSource = "SLUS-01040";
-constexpr std::uint32_t kVersion = 2;
+constexpr std::uint32_t kVersion = 3;
 constexpr int kMaximumDepth = 64;
 constexpr unsigned kWordBits = 32;
 constexpr std::int32_t kMaximumAngle = 4095;
@@ -393,6 +393,19 @@ void Fields(RoomCache& r, V&& v) {
 }
 
 template <class V>
+void Fields(TileAddress& r, V&& v) {
+  v("x", r.x);
+  v("z", r.z);
+  v("layer", r.layer);
+}
+
+template <class V>
+void Fields(GroundedPlacement& r, V&& v) {
+  v("tile", r.tile);
+  v("facing", r.facing);
+}
+
+template <class V>
 void Fields(Location& r, V&& v) {
   Id(v, "zone", "zone", r.zone);
   Id(v, "room", "room", r.room);
@@ -400,6 +413,23 @@ void Fields(Location& r, V&& v) {
   v("position", r.position);
   v("facing", r.facing);
   v("camera_yaw", r.camera_yaw);
+  v("floor_layer", r.floor_layer);
+  v("previous_tile", r.previous_tile);
+  v("previous_facing", r.previous_facing);
+  v("saved_placement", r.saved_placement);
+}
+
+template <class V>
+void Fields(OrbitCamera& r, V&& v) {
+  v("pitch", r.pitch);
+  v("distance", r.distance);
+  v("mode", r.mode);
+  v("rotation_step", r.rotation_step);
+  v("zoom_mode", r.zoom_mode);
+  v("zoom_velocity", r.zoom_velocity);
+  v("tracking_speed", r.tracking_speed);
+  v("look_at", r.look_at);
+  v("view_angles", r.view_angles);
 }
 
 template <class V>
@@ -448,6 +478,7 @@ void Fields(Snapshot& r, V&& v) {
   v("play_ticks", r.play_ticks);
   v("scene_timer", r.scene_timer);
   v("random", r.random);
+  v("camera", r.camera);
   v("location", r.location);
 }
 
@@ -696,6 +727,12 @@ std::expected<void, std::string> ValidateModel(const Document& document) {
       state.location.facing > kMaximumAngle) {
     return std::unexpected(
         "/state/location: invalid zone, room, scene or facing");
+  }
+  if (state.location.floor_layer > 1 ||
+      state.location.previous_tile.layer > 1 ||
+      state.location.saved_placement.tile.layer > 1) {
+    return std::unexpected(
+        "/state/location: unsupported static collision layer");
   }
   if (state.room_cache_slot >= state.room_cache.size() ||
       state.play_ticks > kMaximumPlayTicks) {

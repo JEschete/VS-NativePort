@@ -19,6 +19,17 @@ extern "C" {
 
 namespace VS::Game::Save {
 
+struct TileAddress {
+  std::uint8_t x = 0;
+  std::uint8_t z = 0;
+  std::uint8_t layer = 0;
+};
+
+struct GroundedPlacement {
+  TileAddress tile{};
+  std::uint8_t facing = 0;
+};
+
 struct Location {
   std::uint16_t zone = 0;
   std::uint16_t room = 0;
@@ -26,6 +37,24 @@ struct Location {
   std::array<std::int32_t, 3> position{};
   std::int32_t facing = 0;
   std::int32_t camera_yaw = 0;
+  std::uint8_t floor_layer = 0;
+  TileAddress previous_tile{};
+  std::int16_t previous_facing = 0;
+  GroundedPlacement saved_placement{};
+};
+
+struct OrbitCamera {
+  // Current yaw is Location::camera_yaw; preferred yaw/initial distance retain
+  // their original Ashley cameraPitch/cameraDistance fields.
+  std::int32_t pitch = 0;
+  std::int32_t distance = 0;
+  std::int32_t mode = 0;
+  std::int32_t rotation_step = 0;
+  std::int32_t zoom_mode = 0;
+  std::int32_t zoom_velocity = 0;
+  std::int32_t tracking_speed = 0;
+  std::array<std::int32_t, 3> look_at{};
+  std::array<std::int32_t, 3> view_angles{};
 };
 
 struct RoomCache {
@@ -61,6 +90,7 @@ struct Snapshot {
   State_SceneTimer scene_timer{};
   RandomState random{};
   Location location{};
+  OrbitCamera camera{};
 };
 
 struct Document {

@@ -129,6 +129,19 @@ Save::Document SampleDocument() {
   state.location.position = {448, -128, 1600};
   state.location.facing = 2048;
   state.location.camera_yaw = 1024;
+  state.location.floor_layer = 1;
+  state.location.previous_tile = {3, 12, 1};
+  state.location.previous_facing = 2032;
+  state.location.saved_placement = {{3, 12, 1}, 128};
+  state.camera.pitch = -768;
+  state.camera.distance = 2304;
+  state.camera.mode = 7;
+  state.camera.rotation_step = 24;
+  state.camera.zoom_mode = 3;
+  state.camera.zoom_velocity = 64;
+  state.camera.tracking_speed = 32;
+  state.camera.look_at = {1234567, -7654321, 3456789};
+  state.camera.view_angles = {-764, 1024, 0};
   state.script_flags[187] = 28;
   state.script_flags.back() = 255;
   state.learned_actions[1] = true;
@@ -194,6 +207,20 @@ void CheckProgress(const Save::Snapshot& state,
   CHECK(state.room_cache[3].actors[7].currentHp == 123);
 }
 
+void CheckCameraAndPlacement(const Save::Snapshot& state,
+                             const Save::Snapshot& original) {
+  CHECK(state.location.floor_layer == original.location.floor_layer);
+  CHECK(state.location.previous_tile.layer == 1);
+  CHECK(state.location.previous_facing == 2032);
+  CHECK(state.location.saved_placement.tile.layer == 1);
+  CHECK(state.camera.look_at == original.camera.look_at);
+  CHECK(state.camera.pitch == -768);
+  CHECK(state.camera.distance == 2304);
+  CHECK(state.camera.mode == 7);
+  CHECK(state.camera.rotation_step == 24);
+  CHECK(state.camera.zoom_velocity == 64);
+}
+
 void CheckGlyphNames(const Json& state) {
   const auto& glyphs = state.at("inventory").at("weapons")[7].at("name_glyphs");
   REQUIRE(glyphs.is_array());
@@ -227,11 +254,13 @@ TEST_CASE("Native snapshots encode semantic state rather than native objects",
   CHECK(*repeated == *encoded);
   CheckInventory(decoded->state);
   CheckProgress(decoded->state, original.state);
+  CheckCameraAndPlacement(decoded->state, original.state);
 }
 
 TEST_CASE("Native save identifiers and glyph names have fixed wire shapes",
           "[native-snapshot]") {
   const auto document = EncodedSample();
+  CHECK(document.at("version") == 3);
   const auto& state = document.at("state");
   CHECK(state.at("location").at("zone") == "zone/9");
   CHECK(state.at("location").at("room") == "room/11");
@@ -257,9 +286,15 @@ TEST_CASE("Native save corruption and unsupported formats fail explicitly",
     document["version"] = document.at("version").get<std::uint32_t>() + 1;
     CheckRejected(document, "/version");
   }
-  SECTION("old scene-less version") {
-    document["version"] = 1;
-    document["state"]["location"].erase("scene");
+  SECTION("old schemas lack explicit layer and camera state") {
+    const auto version = GENERATE(1, 2);
+    document["version"] = version;
+    if (version == 1) document["state"]["location"].erase("scene");
+    document["state"]["location"].erase("floor_layer");
+    document["state"]["location"].erase("previous_tile");
+    document["state"]["location"].erase("previous_facing");
+    document["state"]["location"].erase("saved_placement");
+    document["state"].erase("camera");
     CheckRejected(document, "/version");
   }
   SECTION("foreign source") {
@@ -281,6 +316,28 @@ TEST_CASE("Native save scalars reject booleans fractions and signed overflow",
   document["state"]["script_flags"][0] = invalid;
   Recheck(document);
   CheckRejected(document, "/state/script_flags/0");
+}
+
+TEST_CASE("Schema3 static layers and camera fields are explicit and bounded",
+          "[native-snapshot]") {
+  auto document = EncodedSample();
+  const auto invalid = GENERATE(0, 1, 2, 3, 4, 5);
+  if (invalid == 0) document["state"]["location"]["floor_layer"] = 2;
+  if (invalid == 1) document["state"]["location"]["previous_tile"]["layer"] = 2;
+  if (invalid == 2) {
+    document["state"]["location"]["saved_placement"]["tile"]["layer"] = 2;
+  }
+  if (invalid == 3) document["state"]["camera"]["pitch"] = true;
+  if (invalid == 4) {
+    document["state"]["camera"]["view_angles"][0] =
+        std::numeric_limits<std::int64_t>::max();
+  }
+  if (invalid == 5) {
+    document["state"]["camera"]["look_at"][0] =
+        std::numeric_limits<std::uint64_t>::max();
+  }
+  Recheck(document);
+  CheckRejected(document, "/state/");
 }
 
 TEST_CASE("Native unsigned generations cannot wrap negative JSON integers",
@@ -308,6 +365,10 @@ TEST_CASE("Native reference kinds extents and uniqueness are validated",
     document["state"]["inventory"]["weapons"].erase(0);
   }
   SECTION("missing field") { document["state"]["ashley"].erase("hp"); }
+  SECTION("missing schema3 camera") { document["state"].erase("camera"); }
+  SECTION("missing schema3 floor layer") {
+    document["state"]["location"].erase("floor_layer");
+  }
   SECTION("unknown field") {
     document["state"]["ashley"]["native_pointer"] = 1234;
   }

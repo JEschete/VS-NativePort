@@ -9,6 +9,20 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #18 schema3 codec checkpoint adds explicit static collision-layer0/1,
+  previous/saved placement and settled orbit-camera state. Actual pitch is
+  separate from Ashley's historical cameraPitch/preferred-yaw field. V1/v2
+  are explicitly rejected; no migration or invented camera/layer defaults is
+  claimed. Linked Debug and Release `VS.Tests.exe '[native-snapshot]'`
+  each pass12 cases/168 assertions; focused codec/test tidy reports zero new
+  production findings. Evidence: `build/quality/save18-schema3-codec-tidy.log`.
+  This checkpoint only publishes the DTO/codec extension, not the uncommitted
+  runtime/menu integration. Linked runtime tests currently expose a static-floor
+  fixture/production mismatch in two cases, and its synthetic content directory
+  needs per-process ownership before parallel runs. Full gameplay saving,
+  loading/restart, container transfers and repeated Continue remain unverified;
+  keep #18 open. Verification was against17288c76 plus the dirty integration
+  worktree; only the codec files/tests and this handoff belong to this milestone.
 - Runtime-source audit identifies original G00254 as G00246+0x68: the low-ten-bit
   scene/area identity, not an independently written native value. Boot restores
   it through savedEntryDoor.requiredFlagId; Field_CurrentSceneId reads the room
