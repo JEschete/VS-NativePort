@@ -86,8 +86,6 @@ int Field_GimmickSupportHeight(int arg0, int arg1);
 int Field_MovingPlatformContactHeight(int arg0, int arg1, int arg2, int arg3);
 int Field_CalcActorLedgeOffset(Actors_ActorRecord* actor, SVECTOR* offset);
 int Field_GimmickSupportHeightBelow(int arg0, int arg1, int arg2);
-int Field_IsPositionAboveGround();
-int Field_IsTerrainSegmentBlocked(SVECTOR*, SVECTOR*, int, int);
 int Field_IsPointOutsideSolidVolumes();
 int Field_TraceActorAndTerrainCollision(SVECTOR*, SVECTOR*, SVECTOR*, int);
 

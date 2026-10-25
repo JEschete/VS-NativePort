@@ -12,6 +12,7 @@ extern "C" {
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitives.h"
+#include "Field/Collision.h"
 #include "Field/TerrainHeight.h"
 }
 
@@ -71,6 +72,92 @@ TEST_CASE("Packed height decoding ignores both non-coordinate bytes",
     CHECK(Field_GroundHeightFlagsAtPackedTile(0xAB09CD11) == raw);
     CHECK(Field_GroundHeightAtPackedTile(0xAB09CD11) == ground);
   }
+}
+
+TEST_CASE("Original terrain occlusion blocks equality and below-ground rays",
+          "[ai][terrain][occlusion]") {
+  const int height = GENERATE(-1, 0, 1);
+  TerrainFixture fixture;
+  SVECTOR from{64, static_cast<std::int16_t>(height), 64, 0};
+  SVECTOR to{576, static_cast<std::int16_t>(height), 64, 0};
+  CHECK(Field_IsTerrainSegmentBlocked(&from, &to, 0, 0) == (height >= 0));
+}
+
+TEST_CASE("Original terrain occlusion detects every one of sixteen samples",
+          "[ai][terrain][occlusion]") {
+  const int blocked =
+      GENERATE(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+  TerrainFixture fixture;
+  for (auto& row : fixture.heights) {
+    std::fill_n(row, kAiFrameGridSide, 1023);
+  }
+  SVECTOR from{64, -128, 64, 0};
+  SVECTOR to{2112, -128, 64, 0};
+  CHECK(Field_IsTerrainSegmentBlocked(&from, &to, 0, 0) == 0);
+  fixture.heights[0][blocked] = 1022;
+  CHECK(Field_IsTerrainSegmentBlocked(&from, &to, 0, 0) == 1);
+}
+
+TEST_CASE("Original terrain ray adjusts extents before testing the surface",
+          "[ai][terrain][occlusion]") {
+  TerrainFixture fixture;
+  SVECTOR from{64, 64, 64, 0};
+  SVECTOR to{576, 64, 64, 0};
+  CHECK(Field_IsTerrainSegmentBlocked(&from, &to, 128, 128) == 0);
+  CHECK(Field_IsTerrainSegmentBlocked(&from, &to, 128, 0) == 1);
+  CHECK(Field_IsTerrainSegmentBlocked(&from, &to, 0, 128) == 1);
+}
+
+TEST_CASE("Original above-ground comparison covers every encoded terrain cell",
+          "[ai][terrain][occlusion]") {
+  TerrainFixture fixture;
+  for (unsigned cell = 0; cell < 65536; ++cell) {
+    fixture.heights[9][17] = static_cast<u_short>(cell);
+    const int decoded = ReferenceHeights(cell).second;
+    const int ground = (cell & 0x2000) != 0 ? 0 : decoded;
+    CAPTURE(cell);
+    CHECK(Field_IsPositionAboveGround(2240, ground - 1, 1216) == 1);
+    CHECK(Field_IsPositionAboveGround(2240, ground, 1216) == 0);
+    CHECK(Field_IsPositionAboveGround(2240, ground + 1, 1216) == 0);
+  }
+}
+
+TEST_CASE("Terrain ray preserves the original zero-ground flag semantics",
+          "[ai][terrain][occlusion]") {
+  TerrainFixture fixture;
+  for (auto& row : fixture.heights) {
+    std::fill_n(row, kAiFrameGridSide, 1023);
+  }
+  SVECTOR from{64, -128, 64, 0};
+  SVECTOR to{576, -128, 64, 0};
+  fixture.heights[0][2] = 1021;
+  CHECK(Field_IsTerrainSegmentBlocked(&from, &to, 0, 0) == 1);
+  fixture.heights[0][2] |= 0x2000;
+  CHECK(Field_IsTerrainSegmentBlocked(&from, &to, 0, 0) == 0);
+}
+
+TEST_CASE(
+    "Terrain ray keeps arithmetic step rounding and endpoint quantization",
+    "[ai][terrain][occlusion]") {
+  TerrainFixture fixture;
+  for (auto& row : fixture.heights) {
+    std::fill_n(row, kAiFrameGridSide, 1023);
+  }
+  fixture.heights[0][1] = 1022;
+  SVECTOR from{256, -128, 64, 0};
+  SVECTOR to{241, -128, 64, 0};
+  CHECK(Field_IsTerrainSegmentBlocked(&from, &to, 0, 0) == 1);
+  from.vx = 127;
+  to.vx = 142;
+  CHECK(Field_IsTerrainSegmentBlocked(&from, &to, 0, 0) == 0);
+}
+
+TEST_CASE("Terrain ray advances before testing its first point",
+          "[ai][terrain][occlusion]") {
+  TerrainFixture fixture;
+  SVECTOR from{64, 1, 64, 0};
+  SVECTOR to{64, -1023, 64, 0};
+  CHECK(Field_IsTerrainSegmentBlocked(&from, &to, 0, 0) == 0);
 }
 
 TEST_CASE("World height decoding selects the tile before decoding its cell",

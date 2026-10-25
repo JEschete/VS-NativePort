@@ -9,6 +9,47 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42/#178 reference occlusion subpackage: F01767/F01768 no longer return stub0.
+  Owned `TerrainHeight` reuses the validated native32x32 decoder and implements
+  original7B5DC.s:527/563 (C counterparts510/524): bit0x2000 ground0, signed
+  15-bit height, unsigned16 X, endpoint extents, arithmetic delta>>4 and16
+  advances-before-probe samples. It preserves endpoint quantization rather than
+  replacing it with an intuitive exact-endpoint ray. Missing grids/bounds/null
+  endpoints/source arithmetic overflow are diagnosed, not treated as clear.
+  Red3 cases/12 assertions has7 failures; green occlusion7/196,651 and terrain
+  selection21/660,233 each Debug/Release pass. Full serial743/3,388,537 each;
+  all hosts build, copier68 controls, stable regeneration/owned preservation,
+  selected tidy0 plus64 fixture literals and fast195/0 new. The old six
+  terrain helpers' stale ledger locations/stub flags are reconciled separately
+  from the two new implementations; no whole C++/EC promotion is claimed.
+  Closed #171 behavior is preserved: Debug1792906593542606-0 and
+  Release1792906702259646-0 still descend512+128 toground0 at223 and damage
+  Ashley250->181. Existing128 climb controls1792906670059507-0 /
+  1792906760909191-0 jump from-320 (arc-485) to-448 and damage250->231
+  (regen232), with no runtime coordinates/flags/HP/ranges changed.
+- #178 direct-height eligibility is now demonstrated with original occlusion,
+  not inferred from a jump followed by same-floor attacks. Canonical Sackheim6
+  uses original288-unit sword reach82944 and signed aim offsets-131/-139.
+  Higher NPC at-448 versus Ashley-320: Debug1792905791514310-0 and
+  Release1792906061641007-0 attack597/599 frames and naturally reduce HP250
+  to159 while the128-unit difference remains throughout every grounded attack.
+  Higher Ashley-448 versus NPC-320:1792905872776981-0 /
+  1792906111806198-0 attack586/587 frames and reduce250->152, still128 apart.
+  Distances30784/31265 are within82944. The source out-of-reach control
+  1792905981808998-0 /1792906154560166-0 keeps Ashley-640/NPC0, squared
+  distance448985, zero attack frames and HP250. All six runs have zero engine
+  errors; strict `build/quality/height178-verified.json` checks actual source
+  action1 damage, no airborne proxy, signed aim/range and original permissions.
+  There is no blanket same-floor ban and no arbitrary reach/LOS weakening.
+  This is not every enemy/action/terrain combination; #175 remains separate.
+  Local `height178-*`/`occlusion42-*` retain commands, captures, PDB checks and
+  records. Evidence is7b8f82b7 plus this scoped occlusion package and unrelated
+  owner ignore/solution edits. Publish/exact green CI remains the closure gate.
+  #42 also has three stale unchecked jump entries F01024/F04178/F04179 whose
+  prior #171 closure has exact greenf368cbd5/40148851247. After this package's
+  CI, reconcile only those3 plus the2 occlusion entries, preserving all186 IDs/
+  order and previous106 checkmarks:111 implemented/75 remain (C-backed111/145,
+  34 remaining; other41 open). Do not close broad #42 from that inventory update.
 - #172 wooden-box targeting repair is verified. Original F00979 accepted the
   PS1-sized T00469 palette view on a real native gimmick: source/output offsets
   300/332 instead of304/336 after its model pointer widens. Partial CPU-array
@@ -40,7 +81,7 @@ verification of the current worktree.
   ignore/solution edits. This verifies the common renderer/root defect, not a
   fresh exact Fine Vintage Vault story replay or C++/whole-compatibility
   retirement. T00469's legacy declaration is retained for provenance; its live
-  palette cast is retired. Exact scoped publication/CI is the closure gate.
+  palette cast is retired. Published7b8f82b7/exact green40163900452; #172 is closed.
 - #179 interrupted-scene reentry defect is repaired and closed after acceptance
   checkpoint2b2a175b/exact green40155513890. It was confirmed and logged before
   repair. Debug1792893835821337-0 stops the first chain while event81 box4/5

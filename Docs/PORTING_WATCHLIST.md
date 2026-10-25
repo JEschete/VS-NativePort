@@ -48,6 +48,11 @@ The copied code compiles for x64, but some of it assumes 32-bit pointers or fixe
   appear correct, but the CLUT upload used the wrong indices and missed the
   final two colors. Use the owning native record, not extra padding on a PS1
   compatibility view; verify actual upload rows, neighbors and reentry (#172).
+- **Keep fixed-step ray semantics.** Original F01768 samples16 arithmetic
+  delta>>4 steps after advancing, not an exact endpoint. Preserve unsigned16 X,
+  signed Y/Z, extent subtraction, equality-as-blocked, the signed15 ground
+  decoder and special bit0x2000 ground0. Checked native arithmetic must not turn
+  unavailable terrain or source overflow into a fabricated clear path (#42/#178).
 - 286 pointer/integer casts in 151 functions;
 - literal sizes for structs that contain pointers (`memset(s1, 0, 0x178)`, `vs_main_memcpy(..., 0x7800)`,
   `vs_main_allocHeapR(0x178)`). On x64 those structs are larger.

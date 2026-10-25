@@ -2,6 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 #ifndef VS_OWNED_FIELD_TERRAINHEIGHT_H
 #define VS_OWNED_FIELD_TERRAINHEIGHT_H
+#include "Legacy/Psx.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,6 +20,11 @@ int Field_GroundHeightFlagsAtPackedTile(unsigned int);
 int Field_GroundHeightFlagsAtWorldPosition(int, int);
 
 int Field_GroundHeightFlagsAtTile(int, int);
+
+int Field_IsPositionAboveGround(int x, int y, int z);
+
+int Field_IsTerrainSegmentBlocked(const SVECTOR* from, const SVECTOR* to,
+                                  int from_height, int to_height);
 
 #ifdef __cplusplus
 }

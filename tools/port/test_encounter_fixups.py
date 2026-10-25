@@ -9,6 +9,25 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_original_occlusion_queries_use_the_owned_terrain_decoder(self):
+        registry = Path(__file__).resolve().with_name("owned.csv")
+        with registry.open(encoding="utf-8", newline="") as stream:
+            owned = {row["id"]: row for row in csv.DictReader(stream)}
+        for fid, name in (
+            ("F01767", "Field_IsPositionAboveGround"),
+            ("F01768", "Field_IsTerrainSegmentBlocked"),
+        ):
+            with self.subTest(fid=fid):
+                self.assertEqual(owned[fid]["name"], name)
+                self.assertEqual(
+                    owned[fid]["path"],
+                    r"Native\Game\src\Field\TerrainHeight.cpp",
+                )
+                self.assertEqual(
+                    owned[fid]["header"],
+                    r"Native\Game\src\Field\TerrainHeight.h",
+                )
+
     def test_palette_pulse_uses_the_native_gimmick_owner(self):
         registry = Path(__file__).resolve().with_name("owned.csv")
         with registry.open(encoding="utf-8", newline="") as stream:

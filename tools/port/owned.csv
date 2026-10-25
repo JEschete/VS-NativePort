@@ -132,6 +132,8 @@ F01761,function,Field_GroundHeightAtTile,Native\Game\src\Field\TerrainHeight.cpp
 F01762,function,Field_GroundHeightFlagsAtPackedTile,Native\Game\src\Field\TerrainHeight.cpp,Native\Game\src\Field\TerrainHeight.h,2026-10-20,from Native\Game\src\Field\Collision.c
 F01763,function,Field_GroundHeightFlagsAtWorldPosition,Native\Game\src\Field\TerrainHeight.cpp,Native\Game\src\Field\TerrainHeight.h,2026-10-20,from Native\Game\src\Field\Collision.c
 F01764,function,Field_GroundHeightFlagsAtTile,Native\Game\src\Field\TerrainHeight.cpp,Native\Game\src\Field\TerrainHeight.h,2026-10-20,from Native\Game\src\Field\Collision.c
+F01767,function,Field_IsPositionAboveGround,Native\Game\src\Field\TerrainHeight.cpp,Native\Game\src\Field\TerrainHeight.h,2026-10-25,7B5DC.s:527 original decoded terrain predicate
+F01768,function,Field_IsTerrainSegmentBlocked,Native\Game\src\Field\TerrainHeight.cpp,Native\Game\src\Field\TerrainHeight.h,2026-10-25,7B5DC.s:563 original sixteen-sample extent-adjusted occlusion
 F01789,function,Battle_Ai_ReserveAiDestinationTile,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,Native\Game\src\Battle\Ai\NavigationPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
 F01775,function,Battle_Ai_IsAdjacentTileStepBlocked,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,Native\Game\src\Battle\Ai\NavigationPrimitives.h,2026-10-20,from Native\Game\src\Battle\Ai\Navigation.c
 F01720,function,Battle_Ai_IssueActorCommand,Native\Game\src\Battle\Ai\ActorCommands.cpp,Native\Game\src\Battle\Ai\ActorCommands.h,2026-10-20,from Native\Game\src\Battle\Ai\Behavior.c
