@@ -9,6 +9,26 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #179 new interrupted-scene reentry defect is confirmed and logged before
+  repair. Debug1792893835821337-0 stops the first chain while event81 box4/5
+  dialogue is still active; normal teardown completes, but the fresh entry
+  crashes at24126 in progressive text rendering after its new event buffer
+  overwrites the previous borrowed string. This is distinct from #174's parent
+  matrix fault. Original interface initialization clears only textbox0
+  (matching800CAA9C); broad font-pointer suppression is not a lifetime fix.
+  Owned native session entry, normal return and title/battle jumps now clear
+  all eight textbox borrows, formatting pointers, selector/wait state and
+  notification references before the next initialization replaces the heap.
+  No backing storage is individually freed and ordinary in-scene closes are
+  unchanged. Red3 cases/8 failed assertions becomes green15 focused cases/
+  100 assertions in each config; full serial Debug/Release725 cases/
+  3,164,578 assertions each pass. Selected quality is0 findings/0 new.
+  Local evidence: `build/quality/scene179-*`, `family174-reentry-Debug.*`.
+  Fresh repeated same-window chains plus ordinary-mode controls are running;
+  #179/#174 remain open pending live gates and exact fixing-revision CI.
+  The controller now holds Circle until production native-buttons acknowledge
+  it, then releases;40ms pulses were often lost between slow Debug host polls.
+  Inputs remain original dialogue actions, never Start or state mutation.
 - #149/#174 source-aligned component playback is now opt-in via an isolated,
   empty-enemy preset's `external_event`. Initial entry is isolated; after the
   direct event starts, original actor/room-event handoffs resume. It does not

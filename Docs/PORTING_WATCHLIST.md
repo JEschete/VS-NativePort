@@ -28,6 +28,16 @@ the function: `Menu::Status::animateActorSwitchState` and `Menu::BreakArts::weap
 values) and the two inventory sort tables (built from other local statics, never written). During development, any
 bug that shows up "the second time a screen opens" should first be checked against this list.
 
+Native session boundaries also invalidate borrowed scene UI before the next
+title/battle initialization replaces the game heap. This covers all eight
+textboxes, formatting-string pointers, selection/wait state and notification
+storage; it does not free that storage individually or change ordinary in-scene
+closing animations. The original interface initializer clears only textbox0
+(`5BF94.c:3484`, matching800CAA9C), which is insufficient after an interrupted
+native scene retains a higher-numbered textbox. Do not replace that lifetime
+repair with a font null-pointer fallback or assume original zero-initialized
+globals are reloaded.
+
 ## 2. 64-bit and layout assumptions (handled during modernization)
 
 The copied code compiles for x64, but some of it assumes 32-bit pointers or fixed struct sizes:

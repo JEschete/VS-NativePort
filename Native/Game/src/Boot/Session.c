@@ -3,6 +3,7 @@
 
 #include <setjmp.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Music.h"
@@ -10,6 +11,7 @@
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/SoundBanks.h"
 #include "Battle/EncounterHooks.h"
+#include "Battle/Targeting.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
@@ -21,9 +23,11 @@
 #include "DiscQueue.h"
 #include "DiscReader.h"
 #include "Ending/Credits/StaffRoll.h"
+#include "Event/ScriptVm.h"
 #include "Input/Controller.h"
 #include "Input/Controllers.h"
 #include "Legacy/Psx.h"
+#include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Save/NativeResume.h"
 #include "Save/Snapshot.h"
@@ -35,14 +39,28 @@
 static jmp_buf session_boundary;
 static int session_active;
 
+// Native sessions can interrupt original event text. Drop UI borrows before
+// title/battle initialization replaces the game heap (SLUS main.c:8119/8344).
+static void InvalidateSceneUiBindings(void) {
+  memset(Menu_textBoxes, 0, sizeof Menu_textBoxes);
+  memset(&Menu_textBoxSelector, 0, sizeof Menu_textBoxSelector);
+  memset(&Battle_stringContext, 0, sizeof Battle_stringContext);
+  memset(Event_isTextBoxAwaitingClose, 0, sizeof Event_isTextBoxAwaitingClose);
+  Menu_sceneNotificationBuffer = NULL;
+  Menu_sceneNotificationTimer = 0;
+  Menu_sceneNotificationTimed = 0;
+}
+
 // Nonlocal transitions stay inside the copied C call graph; the platform owns
 // the surrounding fiber.
 int Boot_RunSessionLoop(Boot_SessionEntry title, Boot_SessionEntry battle) {
   if (session_active || title == NULL || battle == NULL) return -1;
+  InvalidateSceneUiBindings();
   session_active = 1;
   Boot_ResetGameplayInspection();
   const int destination = setjmp(session_boundary);
   const int result = destination == 2 ? battle() : title();
+  InvalidateSceneUiBindings();
   Save_NativeResetSession();
   session_active = 0;
   Boot_ResetGameplayInspection();
@@ -51,6 +69,7 @@ int Boot_RunSessionLoop(Boot_SessionEntry title, Boot_SessionEntry battle) {
 
 static void RequestSession(int destination) {
   if (!session_active) abort();
+  InvalidateSceneUiBindings();
   Boot_ResetGameplayInspection();
   Core_Debugf("boot", "native session transition: %s",
               destination == 1 ? "title" : "battle");
