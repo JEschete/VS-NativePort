@@ -42,9 +42,16 @@ verification of the current worktree.
   Two real copier runs preserve all751 generated files byte-for-byte and305
   protected files. Audio/Engine_01/Game_Battle_02/Game_Menu_01 comparisons route
   all writes to isolated sinks and preserve all11 CSV outputs; live ledgers
-  remain unchanged. Game_Battle_01 is blocked even BEFORE these changes:
-  T00271 D_800F58BC_t's unkB declaration cannot be cited. Do not guess a source
-  line or hide this #148 validation limit.
+  remain unchanged. Game_Battle_01 initially fails even BEFORE those changes:
+  its adopted upstream padding incorrectly falls back to pinned declarations.
+  The bounded #148 follow-up explicitly cites T00271.008 and
+  T00273.004/.012 from unique live upstream declarations in6E644.c (377,392,400
+  at this reference revision). It retains reserved names, types and low
+  confidence; no guessed meaning or hardcoded generated line number.
+  The real batch now writes all3 isolated CSVs, verifies those exact fields
+  and citations, preserves live ledgers, and is identical on its second run.
+  Thirty-one naming tests pass; the remaining repository-wide #148 sweep is
+  not completed by this three-field provenance repair.
   Full fast now reports106 existing/0 new (105 Python plus the C17 textbox
   member `string` IWYU suggestion). No baseline update, C++ string header in C,
   or generic suppression was used. Current Skeleton follow-up
