@@ -135,8 +135,8 @@ std::optional<fs::path> LocateData(int argc, char** argv) {
       .transform([](const fs::path& p) { return p.parent_path(); });
 }
 
-// --capture <dir> --at <tick,tick,...>: writes the presented frame at those
-// ticks (for reference comparisons).
+// --capture <dir> --at <tick,first:last,...>: writes the presented frame at
+// selected ticks (for reference comparisons).
 std::optional<u64> ParseTick(std::string_view text) {
   u64 value = 0;
   const char* end = text.data() + text.size();
@@ -150,10 +150,28 @@ std::optional<u64> ParseTick(std::string_view text) {
 struct Capture {
   fs::path dir;
   std::vector<u64> ticks;
+  std::vector<Render::EffectPathTraceRange> ranges;
   bool pages = false;
 
+  bool Selects(u64 tick) const {
+    return std::ranges::binary_search(ticks, tick) ||
+           std::ranges::any_of(ranges, [tick](const auto& range) {
+             return tick >= range.first && tick <= range.last;
+           });
+  }
+
+  void WriteClear(u64 tick) const {
+    if (dir.empty() || !Selects(tick)) return;
+    constexpr i32 kClearWidth = 320;
+    constexpr i32 kClearHeight = 240;
+    constexpr u32 kOpaqueBlack = 0xFF000000u;
+    const std::vector<u32> black(static_cast<usize>(kClearWidth) * kClearHeight,
+                                 kOpaqueBlack);
+    Write(tick, black, kClearWidth, kClearHeight);
+  }
+
   void Write(u64 tick, const std::vector<u32>& rgba, i32 w, i32 h) const {
-    if (dir.empty() || !std::ranges::binary_search(ticks, tick)) {
+    if (dir.empty() || !Selects(tick)) {
       return;
     }
     fs::create_directories(dir);
@@ -220,9 +238,17 @@ Capture ParseCapture(int argc, char** argv) {
     while (!list.empty()) {
       const usize comma = list.find(',');
       const std::string_view item = list.substr(0, comma);
-      const auto tick = ParseTick(item);
-      if (!tick) throw std::runtime_error("--at contains an invalid tick");
-      c.ticks.push_back(*tick);
+      if (item.find(':') != std::string_view::npos) {
+        const auto range = Render::EffectPathTraceRange::Parse(item);
+        if (!range) {
+          throw std::runtime_error("--at: " + range.error());
+        }
+        c.ranges.push_back(*range);
+      } else {
+        const auto tick = ParseTick(item);
+        if (!tick) throw std::runtime_error("--at contains an invalid tick");
+        c.ticks.push_back(*tick);
+      }
       list = comma == std::string_view::npos ? std::string_view{}
                                              : list.substr(comma + 1);
     }
@@ -410,6 +436,8 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
                    frame_w, frame_h);
       if (shown) {
         settings.capture.Write(game.Ticks(), frame, frame_w, frame_h);
+      } else {
+        settings.capture.WriteClear(game.Ticks());
       }
     }
     if (ticks == 0) {

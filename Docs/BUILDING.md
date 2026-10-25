@@ -294,7 +294,7 @@ build\Release\VS.Desktop.exe
 | `--data <dir>` | The extracted data (§5). By default `Native\data` in the exe's folder or any parent folder. |
 | `--save-dir <dir>` | Override the native save directory. Use a dedicated ignored directory for tests; the default is `saves` inside SDL's per-user VagrantStory directory. Failure to obtain that directory is an explicit error, never a current-directory fallback. |
 | `--frames <n>` | Stop after `n` logical ticks (NTSC fields: 60000/1001, approximately 59.94 per second). |
-| `--capture <dir> --at <t1,t2,...>` | Write the picture at those ticks as `frame_<t>.bmp` (reference comparisons). |
+| `--capture <dir> --at <t1,first:last,...>` | Write `frame_<t>.bmp` at individual ticks or every tick in positive inclusive ranges, e.g. `--at 100,200:500`. Ranges are stored without expanding the command line or allocating one entry per tick. A selected tick with no display image records the host's black presentation instead of silently omitting the frame. For continuous comparisons use `--speed 1`; large selections produce one BMP per selected tick, so bound the run and preserve verified lossless video before removing redundant frames. |
 | `--press <t:Buttons,...>` | Scripted presses, each held 3 ticks, e.g. `3400:Down,3500:Circle` (names: Up Down Left Right Cross Circle Square Triangle L1 R1 L2 R2 L3 R3 Start Select, joined with `+`). |
 | `--scripted` | Ignore keyboard and gamepad (only `--press` input). |
 | `--speed <n>` | Run `n` logical ticks per real tick (e.g. 8 to reach the title attract scenes, about tick 5300, quickly). |
