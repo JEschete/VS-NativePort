@@ -767,6 +767,10 @@ nlohmann::json InspectModels() {
          {"queued_animation", actor->queuedAnimation},
          {"holding_last_frame", actor->pose.holdingLastFrame != 0},
          {"animation_locked", actor->animationLocked != 0},
+         {"attached", actor->instance.isAttached != 0},
+         {"attachment_parent",
+          static_cast<unsigned>(actor->instance.attachParent)},
+         {"attachment_bone", static_cast<unsigned>(actor->instance.attachBone)},
          {"appearance",
           static_cast<unsigned>(actor->instance.actionAnimationState)}});
   }

@@ -154,8 +154,10 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                 Actors_PrepareActorRootTransform(actor);
             }
             if (actor->instance.isAttached) {
-                Actors_DrawActorModel(
-                    actor, &entries[actor->instance.attachParent]->boneMatrices[actor->instance.attachBone], 0U);
+                MATRIX* parent_matrix = Actors_ResolveAttachmentParentMatrix(actor);
+                if (parent_matrix != NULL) {
+                    Actors_DrawActorModel(actor, parent_matrix, 0U);
+                }
             } else {
                 Actors_DrawActorModel(actor, camera, 0U);
                 attachmentId = actor->companionSlot;

@@ -9,6 +9,22 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_attached_draw_requires_a_resident_parent_matrix(self):
+        old, new, _ = next(
+            fix for fix in copy_fixups.FIXES["F01008"]
+            if "entries[actor->instance.attachParent]->boneMatrices" in fix[0]
+        )
+        self.assertIn("entries[actor->instance.attachParent]->boneMatrices", old)
+        self.assertIn("Actors_ResolveAttachmentParentMatrix(actor)", new)
+        self.assertIn("if (parent_matrix != NULL)", new)
+        self.assertNotIn("entries[", new)
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS[
+                "Actors_ResolveAttachmentParentMatrix"
+            ],
+            r"Native\Game\src\Actors\ModelDrawing.h",
+        )
+
     def test_grounded_history_uses_the_actor_native_layout(self):
         registry = Path(__file__).resolve().with_name("owned.csv")
         with registry.open(encoding="utf-8", newline="") as stream:

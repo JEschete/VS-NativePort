@@ -18,6 +18,7 @@
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
+#include "Core/Diagnostics.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Event/ScriptVm.h"
@@ -63,6 +64,44 @@ static unsigned char ModelColorChannel(unsigned char base,
   if (value < 0) return 0;
   if (value > UINT8_MAX) return UINT8_MAX;
   return (unsigned char)value;
+}
+
+// Parent slots can be released before independently owned props in EVENT82.
+// The original 44F14.c:1010 draw assumes the borrowed bone matrix is resident.
+MATRIX* Actors_ResolveAttachmentParentMatrix(const Actors_ActorRecord* actor) {
+  const unsigned actor_count =
+      sizeof Actors_actorRecords / sizeof Actors_actorRecords[0];
+  if (actor == NULL) {
+    Core_Errorf("actors.attachment", "Cannot resolve a null child actor");
+    return NULL;
+  }
+  const unsigned parent_slot = actor->instance.attachParent;
+  const unsigned bone = actor->instance.attachBone;
+  if (parent_slot >= actor_count) {
+    Core_Errorf("actors.attachment",
+                "Invalid parent actor=%u parent=%u bone=%u",
+                (unsigned)actor->instance.slot, parent_slot, bone);
+    return NULL;
+  }
+  Actors_ActorRecord* parent = Actors_actorRecords[parent_slot];
+  if (parent == NULL || parent->instance.model == NULL ||
+      parent->instance.boneCount == 0) {
+    Core_Debugf("actors.attachment",
+                "Deferred draw actor=%u parent=%u bone=%u: parent unavailable",
+                (unsigned)actor->instance.slot, parent_slot, bone);
+    return NULL;
+  }
+  const unsigned bone_capacity =
+      sizeof parent->boneMatrices / sizeof parent->boneMatrices[0];
+  if (parent->instance.boneCount > bone_capacity ||
+      bone >= parent->instance.boneCount) {
+    Core_Errorf("actors.attachment",
+                "Invalid bone actor=%u parent=%u bone=%u parent_bones=%u",
+                (unsigned)actor->instance.slot, parent_slot, bone,
+                (unsigned)parent->instance.boneCount);
+    return NULL;
+  }
+  return &parent->boneMatrices[bone];
 }
 
 static void TransformBonePosition(const MATRIX* parent, const SVECTOR* local,

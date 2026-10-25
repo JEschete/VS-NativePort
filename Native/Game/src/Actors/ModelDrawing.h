@@ -20,6 +20,7 @@ extern "C" {
 #endif
 
 int Actors_BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera);
+MATRIX* Actors_ResolveAttachmentParentMatrix(const Actors_ActorRecord* actor);
 void Actors_DrawActorModel(void* actor_data, MATRIX* camera, char companion);
 int Actors_ProjectActorBoneEndpoint(int actor_id, int bone, int* output,
                                     int endpoint);

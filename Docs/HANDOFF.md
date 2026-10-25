@@ -9,6 +9,29 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #174 family-cutscene attachment fault: owner run1792884331707681-0 reaches
+  external event82 in zone19/room0/MAP212. Its original script attaches prop
+  model171/slot7 to model7/slot2 bone2, then removes parent slot2 after the
+  final observed wait. The unchecked renderer forms camera0xB0 from that null
+  parent, matching the reported scalar-matrix AV. The typed parent-matrix
+  resolver now defers only this dependent draw while the borrowed parent/model/
+  bone is unavailable. It does not fabricate a world/identity camera, delete
+  the independent prop, clear its attachment or prevent later parent reuse.
+  Invalid slots/bone bounds are explicitly diagnosed. Original valid-parent
+  rendering and all nonattached paths remain unchanged; generator F01008 owns
+  the copied call-site correction. Scene model telemetry now includes attached,
+  parent slot and bone to expose these dependencies in future owner traces.
+  Actual linked Debug/Release attachment selection passes4 cases/18 assertions,
+  including whole-child preservation and released-parent replacement.
+  The6200-tick production-room Lab attempt1792886263923605-0 runs embedded
+  room events (source1/id0) and returns to9/12; it does not reproduce external
+  event82's attachment handoff and is **not** full-scene acceptance. #174 stays
+  open for a source-aligned external82 replay/owner confirmation. No HP,
+  progression flags, fake event completion or math null fallback was used.
+  Original scene82's three text entries are control-only strings, despite
+  executing dialogue commands; their zero-glyph flashes are separately #176.
+  Evidence: `build/quality/owner-reports-20261024-193314/`,
+  `family174-*` and the retained unique owner run.
 - #18 sound/cache follow-up: native file selection and affirmative confirmation
   now play their original selection sound; No/Cross/invalid/completion follow
   the corresponding original menu cues. Bounded per-picker previews avoid

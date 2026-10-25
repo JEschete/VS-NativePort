@@ -13,6 +13,7 @@ so a stale fix is noticed.
 from __future__ import annotations
 
 NATIVE_HELPER_HEADERS = {
+    "Actors_ResolveAttachmentParentMatrix": r"Native\Game\src\Actors\ModelDrawing.h",
     "Actors_SaveActorGroundedTransform": r"Native\Game\src\Actors\MotionRequests.h",
     "Save_NativeInitialTitleSelection": r"Native\Game\include\Save\NativeMenu.h",
     "Save_NativeDrawFileOverlay": r"Native\Game\include\Save\NativeMenu.h",
@@ -1655,6 +1656,13 @@ int Menu_Loot_AdvanceStagedInventory(void)
             "gimmick depth shifts the ordering table without touching the primitive pointer"),
            ("frame->depth = (int)(frame->depth - 0x10);",
             "frame->orderingTable = (u_char*)frame->orderingTable - 0x10;", "restore the gimmick ordering-table base"),
+        ("                Actors_DrawActorModel(\n"
+         "                    actor, &entries[actor->instance.attachParent]->boneMatrices[actor->instance.attachBone], 0U);",
+         "                MATRIX* parent_matrix = Actors_ResolveAttachmentParentMatrix(actor);\n"
+         "                if (parent_matrix != NULL) {\n"
+         "                    Actors_DrawActorModel(actor, parent_matrix, 0U);\n"
+         "                }",
+         "44F14.c:1010 defer an independently owned prop draw while its borrowed parent matrix is unavailable"),
     ],
         "F01006": [("*(MATRIX*)&source", "*source", "44F14.c:853; copy the supplied camera matrix, not pointer-stack bytes")],
     # func_800AE47C / 44F14.c:610: the SEQ header starts with offsets, not a native pointer.
