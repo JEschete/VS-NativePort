@@ -482,6 +482,79 @@ struct EmissionFixture : ParticleFixture {
   }
 };
 
+enum class ChildTrigger { kTick, kLifetimeEnd, kTextureEnd };
+
+struct ChildEmissionFixture : EmissionFixture {
+  Effects_ParticleGravity saved_gravity = Effects_particleGravity;
+  int saved_drag = Effects_particleDrag;
+  int saved_sample = Effects_curveSamples[0];
+  std::array<Effects_Particle, 2> nodes{};
+  std::array<u_long, 1> terminal{0x30000000u};
+
+  explicit ChildEmissionFixture(ChildTrigger trigger) {
+    package.block1TableCount = 1;
+    package.block2Count = 1;
+    auto& definition = definitions.entries[0];
+    definition.flags = 4;
+    std::ranges::fill(definition.pairRanges[0], 1);
+    std::ranges::fill(definition.pairRanges[4], 10);
+    Effects_curveSamples[0] = 0;
+    Effects_particleGravity = {};
+    Effects_particleDrag = 0;
+    nodes[0] = particle;
+    auto& parent = nodes[0];
+    parent.motion.mass = 1;
+    parent.motion.position = {100 << 12, -20 * 4096, 1024 << 12};
+    parent.transparency = 12;
+    parent.opaque61Bit0 = 3;
+    parent.lifetime = 8;
+    if (trigger == ChildTrigger::kTick) {
+      parent.tickEvent = 1;
+    } else {
+      parent.endEvent = 1;
+      parent.lifetime = trigger == ChildTrigger::kLifetimeEnd ? 1 : -1;
+    }
+    if (trigger == ChildTrigger::kTextureEnd) {
+      parent.textureAnimation.program =
+          reinterpret_cast<u_char*>(terminal.data());
+      parent.textureAnimation.textureInfo = &info;
+    }
+    Effects_particlePool = nodes.data();
+    Effects_particleCapacity = static_cast<int>(nodes.size());
+    Effects_usedParticleCount = 1;
+    Effects_freeParticles = &nodes[1];
+    instance.particles = &parent;
+    instance.particleCount = 1;
+  }
+
+  ~ChildEmissionFixture() {
+    Effects_particleGravity = saved_gravity;
+    Effects_particleDrag = saved_drag;
+    Effects_curveSamples[0] = saved_sample;
+  }
+
+  void CheckChildCoordinates() const {
+    const auto& child = nodes[1];
+    CHECK(child.motion.position.vx == 100 * 4096);
+    CHECK(child.motion.position.vy == -20 * 4096);
+    CHECK(child.motion.position.vz == 1024 * 4096);
+  }
+
+  void CheckChildAppearance() const {
+    const auto& child = nodes[1];
+    CHECK(child.transparency == 12);
+    CHECK(child.opaque61Bit0 == 3);
+    CHECK(child.lifetime == 10);
+  }
+
+  void CheckChildPopulation(ChildTrigger trigger) const {
+    const bool retained = trigger == ChildTrigger::kTick;
+    CHECK(instance.particleCount == (retained ? 2 : 1));
+    CHECK(Effects_usedParticleCount == (retained ? 2 : 1));
+    CHECK(Effects_freeParticles == (retained ? nullptr : &nodes[0]));
+  }
+};
+
 struct DispatchHeap {
   Core_HeapBlockHeader saved = Core_legacyHeapList;
   Core_HeapBlockHeader saved_secondary = Core_legacySecondaryHeapList;
@@ -511,6 +584,19 @@ struct DispatchHeap {
   }
 };
 }  // namespace
+
+TEST_CASE(
+    "Child particle events inherit native parent coordinates and appearance",
+    "[effects][particle-emission][particle-parent]") {
+  const auto trigger = GENERATE(ChildTrigger::kTick, ChildTrigger::kLifetimeEnd,
+                                ChildTrigger::kTextureEnd);
+  ChildEmissionFixture fixture(trigger);
+  REQUIRE(Effects_TickEffectParticles(&fixture.instance) == 1);
+  REQUIRE(fixture.instance.particles == &fixture.nodes[1]);
+  fixture.CheckChildCoordinates();
+  fixture.CheckChildAppearance();
+  fixture.CheckChildPopulation(trigger);
+}
 
 TEST_CASE("Textured ribbon dispatchers allocate and initialize native textures",
           "[effects][particle-dispatch]") {

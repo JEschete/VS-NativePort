@@ -505,6 +505,19 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("((void (*)())Effects_DrawEffectParticleList)(arg0->particles, (void*)((uintptr_t)Core_ScratchBase() + 0x15C));",
          "Effects_DrawEffectParticleList(arg0->particles);",
          "forward native particle ownership through a type-checked call"),
+        ("        ++node->age;\n",
+         "        ++node->age;\n"
+         "        Effects_PluginEffectState parent = {0};\n"
+         "        parent.position.vx = node->motion.position.vx;\n"
+         "        parent.position.vy = node->motion.position.vy;\n"
+         "        parent.position.vz = node->motion.position.vz;\n"
+         "        parent.transparency = node->transparency;\n"
+         "        parent.variant = node->opaque61Bit0;\n",
+         "project native particle fields into the existing child-emission context; "
+         "the original PS1 prefix alias no longer matches after pointer widening"),
+        ("(void*)node", "&parent",
+         "tick, lifetime-end and texture-end emissions must not reinterpret "
+         "native particle links and texture pointers as parent coordinates or appearance"),
     ],
     "F00876": [
         ("(MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014)",

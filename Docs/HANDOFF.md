@@ -9,6 +9,42 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #76/#168 native child-emission origin fix is implemented through copier
+  adaptation F01535, not a hand edit of generated output. The original PS1
+  particle prefix and fixed-layout plugin-parent context overlap on 32-bit;
+  native particle links/texture pointers widen and move its actual fields.
+  Tick, lifetime-end and texture-end events now project position, size/mode
+  inheritance into a typed parent value instead of reading pointer bytes.
+  Valid synthetic regressions first failed coordinates/appearance, then pass
+  all 33 assertions across the three lifecycle paths. Generated runtime changes
+  are limited to Effects/Particles.c; protected owned/owner files were preserved
+  and a second generation is byte-identical. This is not C++ promotion or
+  compatibility retirement of the existing parent-context type.
+  The owner's fresh run 1792944731133000-0 confirms grimoire 425 consumption and
+  Heal/action 96 learning at 38186. The reported celebration is common secondary
+  effect 20, not the preceding E043 item/spell effect. Actual all-items-a Lab
+  controls consume 425 from 10 to 9 and learn 96 at 1392 in both configurations,
+  without live HP/learned-bit edits or direct effect injection. Matched Release
+  before/after runs retain all 4205 mastery-particle records and identical action
+  timing. Parent-relative children move from erroneous world bounds
+  x[-59,72],y[-60,24568],z[193,450] to x[200,452],y[-246,55],z[437,702]
+  around Ashley at 320,0,576; active captures show the restored gold burst.
+  Standard Debug/Release builds of all three hosts and full 759 cases/
+  3,389,624 assertions each pass; affected maintained sources have 0 new tidy/
+  style findings and full fast remains 182 existing/0 new, no baseline changes.
+  Verification source is 6f62dad5 plus this scoped fix and its tests/docs;
+  owner ignore, solution and updated reference-pointer edits are preserved.
+  Isolated-output full-suite attempts failed only because their relative audio
+  fixture paths were wrong; the passing full results use standard build paths.
+  Missing ignored decls/hazards caches were restored using existing indexers;
+  the existing MPD/SHP offset fixups were not weakened. Read-only reference
+  review includes owner-updated rood-boi e59320ca and rood-reverse 4edbdbf5.
+  The solo external-event 7 Lab component is invalid: camera code requires the
+  Dtok actor context and fails at 165 before E211. It is not gameplay evidence.
+  Full 1x production replay now targets 40500..45000 rather than stopping at 42000;
+  new owner run 1792943077312380-0 locates actual E211 at 62724..63840, after the
+  prior clip's assumed boundary. Do not close #168 before that production
+  placement/progression verification and exact-revision publication/CI.
 - #168 bounded path instrumentation is now implemented for both native hosts:
   `--trace-effect-paths first:last`, off by default, positive inclusive host
   ticks and normal speed 1 required. Generic particles log local/world/projection

@@ -9,6 +9,24 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_particle_child_events_project_native_parent_fields(self):
+        source = """        ++node->age;
+        Effects_EmitParticleEvent(arg0, node->tickEvent - 1, 0, 0, (void*)node);
+        Effects_EmitParticleEvent(arg0, node->endEvent - 1, 0, 0, (void*)node);
+        Effects_EmitParticleEvent(arg0, node->endEvent - 1, 0, 0, (void*)node);"""
+        for old, new, _ in copy_fixups.FIXES["F01535"]:
+            source = source.replace(old, new)
+        self.assertIn("Effects_PluginEffectState parent = {0};", source)
+        for axis in "xyz":
+            self.assertIn(
+                f"parent.position.v{axis} = node->motion.position.v{axis};",
+                source,
+            )
+        self.assertIn("parent.transparency = node->transparency;", source)
+        self.assertIn("parent.variant = node->opaque61Bit0;", source)
+        self.assertEqual(source.count("&parent"), 3)
+        self.assertNotIn("(void*)node", source)
+
     def test_original_occlusion_queries_use_the_owned_terrain_decoder(self):
         registry = Path(__file__).resolve().with_name("owned.csv")
         with registry.open(encoding="utf-8", newline="") as stream:

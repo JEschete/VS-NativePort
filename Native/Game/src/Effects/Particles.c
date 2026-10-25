@@ -813,19 +813,25 @@ int Effects_TickEffectParticles(Effects_EffectInstance* arg0)
     while (next != NULL) {
         next = node->next;
         ++node->age;
+        Effects_PluginEffectState parent = {0};
+        parent.position.vx = node->motion.position.vx;
+        parent.position.vy = node->motion.position.vy;
+        parent.position.vz = node->motion.position.vz;
+        parent.transparency = node->transparency;
+        parent.variant = node->opaque61Bit0;
         if (node->tickEvent != 0) {
-            Effects_EmitParticleEvent(arg0, node->tickEvent - 1, 0, 0, (void*)node);
+            Effects_EmitParticleEvent(arg0, node->tickEvent - 1, 0, 0, &parent);
         }
         if (node->lifetime == -1) {
             if (node->textureAnimation.frameTimer == 0) {
                 if (node->endEvent != 0) {
-                    Effects_EmitParticleEvent(arg0, node->endEvent - 1, 0, 0, (void*)node);
+                    Effects_EmitParticleEvent(arg0, node->endEvent - 1, 0, 0, &parent);
                 }
                 Effects_ReleaseEffectParticle(node, arg0);
             }
         } else if (--node->lifetime == 0) {
             if (node->endEvent != 0) {
-                Effects_EmitParticleEvent(arg0, node->endEvent - 1, 0, 0, (void*)node);
+                Effects_EmitParticleEvent(arg0, node->endEvent - 1, 0, 0, &parent);
             }
             Effects_ReleaseEffectParticle(node, arg0);
         }

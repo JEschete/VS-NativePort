@@ -97,6 +97,14 @@ every pointer-to-4-byte-integer cast and where its value goes):
 Types that hold pointers (111) differ from the PS1 layout by design. Code that reaches their members by literal
 offsets, or reads them from disc, is where the remaining §2 work is.
 
+**Runtime-prefix aliases:** the pointer-free layout check does not prove that a
+fixed PS1 view still overlays a pointer-bearing native record. F01535 particle
+tick/expiration events previously cast a native `Effects_Particle` to
+`Effects_PluginEffectState`; widened links and texture pointers made position
+and appearance reads land in unrelated storage. Project the actual fields into
+the child-emission context by value instead. This fixes the shared parent-origin
+contract; it does not retire that remaining compatibility-context type.
+
 **Option B (owner, 1b attract path):** per-site fixes, keeping 64-bit pointer members (not `__ptr32` with
 `/LARGEADDRESSAWARE:NO`). Mechanisms, all in the copy tool (`tools\port\copy_fixups.py`), so they hold for every
 actor and room:

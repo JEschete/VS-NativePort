@@ -424,6 +424,32 @@ state; do not discard the transient interval with a pose filter or relocate a
 flare from one selected screenshot. Room/model effects without particle
 instances have primitive paths but not an invented particle/world origin.
 
+#### Post-learning particle origins
+
+The gold celebration after **Mastered the spell** is common secondary effect 20
+(`Effects_SpawnAbilityLearnedEffect`), not the preceding spell/item effect.
+For a repeatable production-menu fixture, use original zone 9/room 17, seed 1,
+empty enemies, Ashley at tile 2,4 and profile `all-items-a`. That profile stocks
+Heal grimoire 425 without pre-learning Heal. Hold L2 and press Up to open the
+original Items/MISC shortcut; choose **Grimoire Guerir**, confirm Ashley as the
+target and let the normal item/result/learning sequence finish. Do not invoke
+Heal directly or toggle its learned bit to test this burst.
+
+The native parent-particle prefix correction in F01535 is covered by exact
+position/appearance assertions for tick, lifetime and texture expiration.
+Actual Debug/Release Lab runs consume 425 from 10 to 9 and learn action 96 at 1392.
+Matched-seed Release before/after traces preserve all 4205 effect-20 records and
+the same learning timing; parent-relative children now inherit Ashley's real
+particle coordinates instead of widened link/texture-pointer bytes. The
+active fixed capture restores the gold burst around Ashley without suppressing
+particles, clamping their spread or changing the earlier E043 effect.
+
+Local evidence is `learn20-*` in session files, including active before/after
+captures and exact trajectory reports. These are Lab fixtures, not imported
+saves or claims of campaign progression. The related E211 window effect still
+requires a source-aligned production prologue check: a solo external-event7
+fixture omits Dtok's required actor context and is not an equivalent control.
+
 #### Local logging verification
 
 Verified on local `508b4bd79d58e37421fdd9c693c92937f2b5de0e` with these
