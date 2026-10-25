@@ -45,7 +45,9 @@ extern "C" {
 #include "Core/Random.h"
 #include "Field/Camera.h"
 #include "Field/Doors.h"
+#include "Field/GameMode.h"
 #include "Field/Gimmicks.h"
+#include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomLoading.h"
@@ -264,6 +266,8 @@ struct RuntimeFixture {
   int near_clip = Render_nearClip;
   int projection = Render_projectionDistance;
   int first_person = Field_isFirstPersonViewEnabled;
+  unsigned control_mode = Field_controlMode;
+  int interaction_paused = Field_isInteractionPaused;
   Field_CameraTransition* transition = Field_cameraTransition;
   unsigned scratch = Actors_stateFlagsScratch;
   Audio_DriverFlags audio_flags = Audio_Driver_controlLatches;
@@ -365,6 +369,8 @@ struct RuntimeFixture {
   }
 
   void SetWorld() {
+    Field_controlMode = 1;
+    Field_isInteractionPaused = 0;
     Field_isFirstPersonViewEnabled = 0;
     Field_cameraTransition = nullptr;
     Field_zoneContext = {};
@@ -596,6 +602,8 @@ struct RuntimeFixture {
     Render_nearClip = near_clip;
     Render_projectionDistance = projection;
     Field_isFirstPersonViewEnabled = first_person;
+    Field_controlMode = control_mode;
+    Field_isInteractionPaused = interaction_paused;
     Field_cameraTransition = transition;
     Actors_stateFlagsScratch = scratch;
     Audio_Driver_controlLatches = audio_flags;
@@ -639,6 +647,8 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, Field_zoneContext);
   Append(bytes, Field_roomData);
   Append(bytes, Field_isFirstPersonViewEnabled);
+  Append(bytes, Field_controlMode);
+  Append(bytes, Field_isInteractionPaused);
   Append(bytes, Field_cameraTransition != nullptr);
   Append(bytes, Render_nearClip);
   Append(bytes, Render_projectionDistance);
@@ -1163,6 +1173,52 @@ TEST_CASE("Runtime capture does not repair corrupt display references",
   const auto state = Save::Capture(fixture.storage);
   REQUIRE_FALSE(state.has_value());
   CHECK(state.error().find("inventory_order.misc") != std::string::npos);
+  CHECK(LiveFingerprint(fixture) == before);
+}
+
+TEST_CASE("Runtime capture accepts horizontal motion frozen by a field menu",
+          "[save][runtime-snapshot]") {
+  RuntimeFixture fixture;
+  Field_controlMode = GENERATE(5, 6);
+  Field_isInteractionPaused = 1;
+  fixture.player_model.instance.turnFrames = 11;
+  fixture.player_model.instance.rootMotion.vx = -18;
+  fixture.player_model.instance.rootMotion.vz = 3;
+  fixture.player_model.momentumDistance = 18;
+  const auto before = LiveFingerprint(fixture);
+  const auto state = fixture.Capture();
+  CHECK(LiveFingerprint(fixture) == before);
+  CheckCapturedLocation(state);
+  const auto encoded = Save::Encode({1, 0, state});
+  REQUIRE(encoded.has_value());
+  const auto decoded = Save::Decode(*encoded);
+  REQUIRE(decoded.has_value());
+  CHECK(Save::ValidateContent(decoded->state).has_value());
+}
+
+TEST_CASE("Menu-paused capture still rejects airborne and supported motion",
+          "[save][runtime-snapshot]") {
+  RuntimeFixture fixture;
+  Field_controlMode = GENERATE(5, 6);
+  Field_isInteractionPaused = 1;
+  const auto defect = GENERATE(6, 7, 11, 12, 13, 14, 16, 18, 20, 21, 31, 32);
+  InvalidateLiveFixture(fixture, defect);
+  if (defect == 32) fixture.player_model.instance.rootMotion.vy = 1;
+  const auto before = LiveFingerprint(fixture);
+  CHECK_FALSE(Save::Capture(fixture.storage).has_value());
+  CHECK(LiveFingerprint(fixture) == before);
+}
+
+TEST_CASE("Only an actually paused field menu permits residual walking",
+          "[save][runtime-snapshot]") {
+  RuntimeFixture fixture;
+  const auto defect = GENERATE(0, 1, 2, 3);
+  Field_controlMode = defect == 0 ? 1 : (defect == 1 ? 3 : 5);
+  Field_isInteractionPaused = defect == 3 ? 0 : 1;
+  fixture.player_model.instance.rootMotion.vx = 18;
+  if (defect == 2) fixture.player_model.supportGimmick = 1;
+  const auto before = LiveFingerprint(fixture);
+  CHECK_FALSE(Save::Capture(fixture.storage).has_value());
   CHECK(LiveFingerprint(fixture) == before);
 }
 

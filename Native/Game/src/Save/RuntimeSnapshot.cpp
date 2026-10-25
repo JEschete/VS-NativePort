@@ -39,7 +39,9 @@ extern "C" {
 #include "Boot/GameLoop.h"
 #include "Core/Random.h"
 #include "Field/Camera.h"
+#include "Field/GameMode.h"
 #include "Field/Gimmicks.h"
+#include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomLoading.h"
@@ -1206,18 +1208,23 @@ void ApplyClock(std::uint64_t ticks) {
 
 Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
   const auto& model = actor.instance;
+  // func_8006C39C (146C.c:1893) freezes ordinary walk/turn intent in menus.
+  // Resume rebuilds an idle actor at this position, not that transient intent.
+  const bool menu_paused = Field_isInteractionPaused != 0 &&
+                           (Field_controlMode == 5 || Field_controlMode == 6);
+  const bool horizontal_motion =
+      model.turnFrames != 0 || model.rootMotion.vx != 0 ||
+      model.rootMotion.vz != 0 || actor.momentumDistance != 0;
   // supportLayer/placementLayer are platform bindings, not collision floor1.
   // Actors_PlaceActorInRoom (3A1A0.c:274) uses ids>=2 for moving supports.
   if (model.currentTileLayer > 1 || model.supportLayer != 0 ||
       model.placementLayer != 0 || model.isAttached || model.movementPending ||
       model.movementMode != 0 || model.locomotionState != 0 ||
       model.motionLocked || model.isJumping || model.jumpCountdown != 0 ||
-      model.turnFrames != 0 || model.currentAnimation != 0 ||
-      model.rootMotion.vx != 0 || model.rootMotion.vy != 0 ||
-      model.rootMotion.vz != 0 || actor.supportGimmick != 0 ||
+      (!menu_paused && horizontal_motion) || model.currentAnimation != 0 ||
+      model.rootMotion.vy != 0 || actor.supportGimmick != 0 ||
       actor.routePhase != 0 || actor.destinationMode != 0 ||
-      actor.jumpFrames != 0 || actor.momentumDistance != 0 ||
-      actor.transitionFrames != 0) {
+      actor.jumpFrames != 0 || actor.transitionFrames != 0) {
     return std::unexpected(std::format(
         "schema3 requires a static floor and quiescent unattached actor: "
         "tileLayer={} supportLayer={} placementLayer={} attached={} "

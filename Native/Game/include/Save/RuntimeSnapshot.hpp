@@ -10,8 +10,11 @@ namespace VS::Game::Save {
 // Game-fiber only. This does not grant save-point eligibility: callers must
 // retain Field_CurrentSavePointId's floor-trigger and actor-state checks.
 // Schema3 supports static collision layers0/1 and quiescent orbit cameras.
-// Moving supports, attachment, active actor/camera motion, first-person,
-// non-orbit/custom projection and unfinished transitions remain unsupported.
+// A field menu may freeze horizontal walk/turn intent; only its position and
+// facing are saved, and the normal room spawn resumes idle. Capture is
+// read-only. Moving supports, attachment, active actor/camera motion,
+// first-person, non-orbit/custom projection and unfinished transitions remain
+// unsupported.
 std::expected<Snapshot, std::string> Capture(
     const Items_ContainerData& storage);
 // No application/mutation. Requires stable DataStore and module-table lifetime;

@@ -597,6 +597,13 @@ These are target designs, not an implemented-feature inventory. See §0.2 and th
   explicit; saved-file content validation still rejects dead references. Actual post-boss Heal learning,
   save and process-restart restoration are verified in Debug/Release; this does not relax static-actor,
   camera or moving-support capture gates, nor establish the full campaign milestone.
+- **Paused grounded capture (#181):** original field-menu pause intentionally freezes ordinary horizontal
+  walking/turning intent. Capture accepts that intent only with control5/6 and actual interaction pause,
+  saves the current static position/facing without changing live state, and resumes through normal idle
+  room spawn. Active movement, vertical motion, jump, attachment, moving-support, route, transition,
+  placement and camera gates remain. Actual movement/menu/save and separate process restoration pass at
+  zone9/room5 and zone13/room0 in both configurations; this is bounded component acceptance, not complete
+  campaign or transient/support serialization. Schema and persisted-file validation are unchanged.
 
 ### 6.8 Game modules (`VS.Game`)
 

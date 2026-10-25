@@ -9,7 +9,44 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
-- #180 post-Minotaur Heal save failure is reproduced and repaired locally.
+- #181 later save-point rejection is traced to source-consistent menu pause.
+  Original146C.c:1893 / Field_PauseFieldForMenu freezes ordinary walking/turning
+  without clearing turnFrames, horizontal root motion or momentum distance.
+  Actual Left2250, Left+Triangle2253, Command > Data > Save/Yes3203 reproduces
+  rejection in Debug1792921380918706-0: turnFrames11, rootMotion[-18,0,0],
+  momentum18, with every jump/support/attachment/route/movement-mode field0.
+  A settled approach saves, so waiting inside the paused menu is not a fix.
+  Capture now accepts only that horizontal intent under control5/6 AND actual
+  interaction pause, without mutating the live actor or saving transient intent.
+  Normal room spawn resumes idle at the saved static position/facing. Active
+  movement, vertical motion, jumps, attachment, platform/support, route,
+  transition, placement and camera guards remain; no schema change or broader
+  transient-state support is claimed. Red3/778 has2 failures; focused78/6,446
+  and full752/3,389,521 each Debug/Release pass. All three hosts build both;
+  affected-TU tidy/header quality0 new and full fast195 existing/0 new.
+  Fresh focused reruns after log cleanup retain78/6,446 each.
+  Actual identical MAP014 input writes generation2 at3203 in
+  Debug1792921665506788-0 / Release1792921709645065-0, position[174,-384,1088].
+  Separate restarts1792922035343375-0 /1792922047434690-0 preserve that position,
+  HP/MP/maxima, primary stats, risk/status timers, weapon identities, inventory
+  and learned actions for322 consecutive normal frames1679..2000 each.
+  Zone13/0 moving-menu component writes generation1 at1102 in Lab
+  Debug1792922006084449-0 / Release1792922095417863-0, position[1618,-128,1600].
+  Serialized Desktop restarts1792922115045814-0 /1792922125884581-0 retain the
+  same values for323 normal frames1678..2000 each. All eight runs have zero
+  engine errors; a wrong-location restart is explicitly rejected by verification.
+  These are original save-point component placements, not a new campaign replay
+  or exact reproduction of every field from the older owner binary.
+  Replay source is8d5c47aa plus the three boundary/header/test edits; unrelated
+  owner ignore/solution edits remain separate. Small strict trace report and
+  source are retained in session files as `save181-trace-verified.json` and
+  `save181-trace-verify.py`; surviving unique per-run roots above are authoritative.
+  Earlier `build/quality` save-file/backup copies and captures disappeared before
+  requested log trimming; their bytes are not reverified by this trace report.
+  Mistakenly concurrent GPU attempts were stopped and excluded. Publication/CI
+  and closure evidence are recorded in #181; #18's broad remaining gates stay open.
+- #180 post-Minotaur Heal save failure is fixed in8d5c47aa,
+  exact green40181602003, and closed.
   Owner Debug1792918396645912-0 saves at23411, consumes original Grimoires425/432
   and learns Heal/action96 plus action54, then cannot save to either an existing
   or empty file: display reference11 points to the consumed slot.
@@ -35,14 +72,14 @@ verification of the current worktree.
   byte-identical to generation3. Separate process restarts1792921065248414-0 /
   1792921077125704-0 restore HP133/MP45 at1645 and both learned actions, followed
   by318 consecutive normal frames1683..2000 with ordinary regeneration.
-  Strict report: `build/quality/save180-verified.json`; exact commands, captures,
-  manifests and preserved owner diagnostics are in `save180-*` and
-  `save-heal-owner-1792918396645912-0`. Owner files remain byte-identical.
+  Historical strict report was `build/quality/save180-verified.json`; that
+  report/copy/capture directory no longer exists. Unique green Desktop run roots
+  above and actual owner Debug1792918396645912-0 survive requested log trimming.
+  Owner files were byte-identical throughout those isolated tests.
   Later owner failures at50948 (9/5) and75644 (13/0) hit a separate static-actor
-  capture boundary, not this inventory error. Their rejecting field/root cause
-  remains unobserved; do not claim those repaired or broaden safe capture
-  acceptance speculatively. #18's full-story/transient/import/EC gates remain open.
-  Scoped publication/exact CI and issue reconciliation are the next gate.
+  capture boundary, not this inventory error; #181's bounded source-backed
+  reproduction/repair is described above. #18's full-story/transient/import/EC
+  gates remain open.
 - #169's actual first-lever handoff is now verified, not only direct MAP212
   loading. Original MAP020 event4 requires local flag48==1, tile3,13 and normal
   grounded actor state. The supported upper static floor6,12 resolves-512,
