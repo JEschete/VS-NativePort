@@ -18,7 +18,8 @@ verification of the current worktree.
   includes it so double-buffer flips cannot masquerade as motion. IDs are
   pool/slot/instance/age/context, not globally unique lifetime identities.
   Initial real speed 1 run Release1792935010474425-0 defeats Dtok at 38142 and
-  traverses the entire window scene 39011..40673 into zone 8. All 4,201 selected
+  traverses zone 7's window-opening/city-view sequence at 39011..40673 into
+  zone 8. All 4,201 selected
   path-frame markers 37800..42000 exist exactly once; 43,428 particle and 57,893
   primitive records parse. All 3,501 consecutive captures 38500..42000 were
   recorded; a lossless 60fps clip retains all 3,501 frames / 58.350s, no frame
@@ -27,7 +28,9 @@ verification of the current worktree.
   its raw records retain draw offsets for unambiguous normalization.
   The app exits 0 at 44557, but the helper correctly fails its stricter full
   prologue/120-normal-frame criterion: do not claim that criterion for this run.
-  It verifies the complete effect interval, not a native flare-position fix.
+  It records that entire zone 7 interval plus early zone 8; identifying the
+  owner's actual optical subshot/producer and its complete lifetime remains
+  separate. This is not a native flare-position fix.
   Local evidence is `flare168-normal-*` plus `effect-path-*` in session files.
   Final source builds all three hosts in Debug/Release; full 758 cases/
   3,389,591 assertions each pass. Affected-TU tidy 0 new and full fast 182
@@ -40,6 +43,36 @@ verification of the current worktree.
   complete lossless clip, hashes and raw trajectory logs remain. Logging is
   published b5e0ae5e, exact Source Quality 40200550100 green; #168 stays open
   for the actual placement/producer diagnosis.
+- #168 follow-up observation limits: the owner-supplied interior closed-window
+  pose is not yet tied to a specific logged event or assigned a backend role.
+  Restricting analysis to zone 7 was an assumption, not identification of the
+  reported flare. That exact interval has 1,663 frame markers, 465 translucent
+  primitive records and no generic-particle records. Later zone 8 loads
+  E214.P; its decoded sprite is a bird, not a flare. Do not "correct" its
+  unusual world coordinates or call reused context IDs package filenames.
+  Original normal-speed replay `rays168-reference-normal9` does defeat Dtok
+  through controls, enter zone 7 and reach zone 8. Its full-content PrintWindow
+  video decodes to 1,353 frames / 23.083s, with a measured maximum capture gap
+  of 33.853ms; timestamps preserve elapsed time, not accelerated playback.
+  However, recording starts about 7.5s after zone 7 entry and stops at zone 8
+  entry. It therefore does not verify every candidate optical interval.
+  GDI capture probes showed a stale Qt game-list surface and are excluded;
+  PrintWindow flags 3 was checked against actual game pixels. The wrapper
+  exits 1 despite its actual capture/zone-8 success because a private status
+  assignment incorrectly set a timeout failure during every live iteration.
+  Original logs are unchanged; a focused AST red/green contract verifies the
+  helper correction, not a retrospectively passing wrapper. The prior
+  `normal8` attempt genuinely exhausted its 900s bound in Dtok's intro;
+  neither attempt is a passed whole-prologue or placement comparison.
+  An additional native speed-1 candidate observation, Release1792940899292622-0
+  on fa94d19c plus owner ignore/solution edits, records all 2,801 ticks/
+  captures 6400..9200: 16,136 primitive and 2,095 particle records, exit 0.
+  The lossless early clip preserves every RGB frame/order; this is candidate
+  localization evidence, not matched screenshot or flare parity. All reference
+  processes/encoders ended and portable settings restore to 558A5842 exactly.
+  Next observation must identify the actual reported subshot and source-backed
+  producer, retaining its whole interval rather than stopping at an assumed
+  room boundary or matching selected background poses.
 - #168 methodology correction from the owner's2026-10-25 screenshots: the
   reported defect is the transient lens-flare source and colored ghost/ring
   placement, not merely the window/sky background. Earlier selected-pose and
