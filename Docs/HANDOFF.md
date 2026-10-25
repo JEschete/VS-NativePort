@@ -9,6 +9,45 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #171 fresh height investigation: `ai.move` now logs queued from/to/rise,
+  threshold and capability flags; `ai.edge` logs the actual branch result
+  (bounds, tile flags/area, actor blocker, step distance/height, approach radius
+  or destination distance) without changing permissions or return values.
+  The old4,6 wolf fixture remains blocked: destination8,4, y-493..-320 and
+  no ground frames. Actual spawned slot is2, not the prior run's3. Trace
+  1792889290807340-0 shows eastward climbs exceeding the original130 threshold
+  and north/south tile/area barriers; its128-unit detours do work.
+  Do not make that fixture pass by weakening original traversal rules.
+  Source-permitted controls, with only static preset starting positions:
+  - Top5,6: Debug1792889378477502-0 and Release1792889627280654-0 each
+    autonomously drop512 then128 units, reach ground0 at223, remain there2178
+    frames, run attack command24 for1582 frames and reduce Ashley HP250 to181.
+  - Uphill4,10 toward4,9: Debug1792889738902996-0 and Release1792889784999073-0
+    climb128 units (y range-485..-320), then attack756 frames and reduce HP250
+    to220. First attack195 and hit241 occur after reaching the target height;
+    this is not cross-height attack-range acceptance.
+  No runtime coordinates/HP/readiness/event/jump commands were forced.
+  AI/entry/history selection145 cases/409,827 assertions passes each config;
+  affected-source tidy is zero. Original actual MIPS confirms the unusual
+  negative-delta arithmetic; it is not being intuitively corrected.
+  Live unported hooks are not assumed causal: observed contact requests use
+  base layer0, and special-terrain stack setup is distinct from the base height
+  sampler. #171 stays open for owner natural-room/cross-height controls.
+  Local profiles persist in the session `files/ledge171-wolf*.json`; traces
+  and captures are under `build/quality/ledge171-*` and the listed run dirs.
+- #175/#177 reference audit limits: box attacks are conditional, not a direct
+  beeline. Original73460.s requires a nearby hostile actor at tile squared
+  distance below3, attacker box range and allowed action-delay state before
+  candidates compete; a controlled live rare-box selection is pending.
+  Owner's roulette loads MENUF at11609. Native reel initialization, three
+  weighted16-entry tables, acceleration/deceleration and stop selection match
+  original MENUF source; BIOS Rand15 golden controls and owner raw RNG advance.
+  /J keeps the selected byte unsigned. No simple RNG defect is established,
+  and no guessed uniform reroll was introduced. Exact stop/update cadence and
+  award application still need aligned live observation. Reference
+  `rood-boi` movement file is unchanged from the pinned counterpart; the
+  `rood-reverseWin` snapshot is not an independent Git root, so a git log there
+  must not be mistaken for upstream changes.
 - #176 zero-glyph transition repair: original matching `_renderTextImmediate`
   assembly at800C81DC/81E4/8274 uses encoded0xE5, space0x8F and subtracts0xE5.
   Copied F01337 instead used ASCII form-feed/space, so end0xE7 did not terminate
@@ -24,6 +63,8 @@ verification of the current worktree.
   each config pass; generator66 controls pass. Local evidence:
   `build/quality/text176-*`. This verifies the encoded transition defect, not
   the whole external event82 story sequence or the separate #174 end handoff.
+  Published72139df384ad5ce26f024592ce24584df6d8a48c has successful exact
+  Source Quality40147008544; scene replay confirmation remains tracked.
 - #174 family-cutscene attachment fault: owner run1792884331707681-0 reaches
   external event82 in zone19/room0/MAP212. Its original script attaches prop
   model171/slot7 to model7/slot2 bone2, then removes parent slot2 after the

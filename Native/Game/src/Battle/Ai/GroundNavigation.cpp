@@ -289,11 +289,24 @@ int Step(Battle_Ai_ActorAiState& state, unsigned from, unsigned to,
          int direction) {
   Delta(direction);
   const auto source = Unpack(from), target = Unpack(to);
-  if (state.movementDisabled || !InGrid(source) || !InGrid(target)) return 0;
+  const auto result = [&](int value, const char* reason) {
+    Core_Debugf("ai.edge",
+                "actor=%u from=%08X to=%08X direction=%d result=%d reason=%s "
+                "flags=%04X area=%u stuck=%u height_filter=%u",
+                static_cast<unsigned>(state.actorId), from, to, direction,
+                value, reason, static_cast<unsigned>(state.movementFlags),
+                static_cast<unsigned>(state.ground_area),
+                static_cast<unsigned>(state.isStuck),
+                static_cast<unsigned>(state.opaque3));
+    return value;
+  };
+  if (state.movementDisabled || !InGrid(source) || !InGrid(target)) {
+    return result(0, "disabled-or-bounds");
+  }
   const auto cell = Cell(target);
   if ((cell & kNoStepFlags) != 0 ||
       (state.isStuck == 0 && (cell & kAreaMask) != state.ground_area)) {
-    return 0;
+    return result(0, "cell-flags-or-area");
   }
   const int dx = target.x - source.x;
   int dz = target.z - source.z;
@@ -303,19 +316,21 @@ int Step(Battle_Ai_ActorAiState& state, unsigned from, unsigned to,
                    Field_GroundHeightAtTile(source.x, source.z);
   bool checked = false;
   if (dx < 2 && dz < 2) {
-    if (Blocker(state, direction) != 0) return 0;
+    if (Blocker(state, direction) != 0) return result(0, "actor-blocker");
     checked = !(state.opaque3 != 0 || rise < 1);
   }
   if (!checked) {
-    if (state.reservedB2 < dx + dz) return 0;
+    if (state.reservedB2 < dx + dz) return result(0, "step-distance");
     std::uint16_t limit;
     std::memcpy(&limit, state.step_height_bytes, sizeof(limit));
     if ((state.movementFlags & kExtendedStep) != 0) {
       limit = kExtendedStepHeight;
     }
-    if ((state.opaque3 != 0 && rise > limit) || rise < -limit) return 0;
+    if ((state.opaque3 != 0 && rise > limit) || rise < -limit) {
+      return result(0, "step-height");
+    }
   }
-  if (state.opaque5 == 0) return 1;
+  if (state.opaque5 == 0) return result(1, "no-target-distance-filter");
   if (state.requestedMovementMode == 1) {
     const auto& approach =
         *reinterpret_cast<const Battle_Ai_TargetApproachView*>(&state);
@@ -330,10 +345,14 @@ int Step(Battle_Ai_ActorAiState& state, unsigned from, unsigned to,
         target.z * (1 << kTileShift) + kTileCenter - position.vz);
     const auto radius =
         static_cast<std::int64_t>(approach.range) - kApproachMargin;
-    if (dx_world * dx_world + dz_world * dz_world < radius * radius) return -1;
+    if (dx_world * dx_world + dz_world * dz_world < radius * radius) {
+      return result(-1, "target-approach-radius");
+    }
   }
-  return Core_Math_SquaredTileDistance(Pack(target), state.destination.word) <
-         Core_Math_SquaredTileDistance(from, state.destination.word);
+  return result(
+      Core_Math_SquaredTileDistance(Pack(target), state.destination.word) <
+          Core_Math_SquaredTileDistance(from, state.destination.word),
+      "destination-distance");
 }
 }  // namespace
 

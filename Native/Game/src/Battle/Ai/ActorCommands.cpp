@@ -324,6 +324,11 @@ void StepToTile(Battle_Ai_ActorAiState& state, Battle_Actor& actor) {
                             Field_GroundHeightAtPackedTile(state.tile.word));
   std::uint16_t threshold = 0;
   std::memcpy(&threshold, state.step_height_bytes, sizeof(threshold));
+  Core_Debugf("ai.move",
+              "step actor=%d from=%08X to=%08X rise=%d threshold=%u flags=%02X",
+              actor.id, state.tile.word, tile, rise,
+              static_cast<unsigned>(threshold),
+              static_cast<unsigned>(state.movementFlags));
   auto opcode = Opcode::kStep;
   if (rise >= threshold) {
     if ((state.movementFlags & kWalkInsteadOfStep) != 0) {
