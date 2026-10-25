@@ -1,18 +1,25 @@
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <span>
+#include <stdexcept>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Core/Log.hpp"
 #include "Core/Random.hpp"
 #include "Effects/ParticleRender.h"
 #include "Legacy/Psx.h"
+#include "Render/PageSpace.hpp"
+#include "nlohmann/json.hpp"
 
 extern "C" {
 #include "Core/BiosRand.h"
@@ -41,6 +48,44 @@ extern "C" {
 }
 
 namespace {
+struct EffectTraceScope {
+  VS::Render::PageSpace& pages;
+  std::vector<std::pair<std::uint64_t, std::string>> records;
+  VS::Core::LogObserver previous;
+
+  explicit EffectTraceScope(VS::Render::PageSpace& value)
+      : pages(value),
+        previous(
+            VS::Core::SetLogObserver([this](const VS::Core::LogRecord& record) {
+              if (record.channel == "effect-path") {
+                records.emplace_back(record.tick, record.message);
+              }
+            })) {
+    VS::Core::SetLogLevel(VS::Core::LogLevel::Trace);
+    VS::Core::SetLogChannels("*");
+  }
+
+  ~EffectTraceScope() {
+    pages.ConfigureEffectPathTrace(std::nullopt);
+    VS::Core::SetLogObserver(std::move(previous));
+    VS::Core::SetLogLevel(VS::Core::LogLevel::Info);
+    VS::Core::SetLogTick(0);
+  }
+
+  void CheckQuadRecord(std::size_t index, const VS::u32* command) const {
+    const auto record = nlohmann::json::parse(records[index].second);
+    CHECK(record.at("kind") == "primitive");
+    CHECK(record.at("command_address") ==
+          reinterpret_cast<std::uintptr_t>(command));
+    CHECK(record.at("vertices").size() == 4);
+    CHECK(record.at("vertices").at(0).at("screen") ==
+          nlohmann::json::array({10, 20}));
+    CHECK(record.at("vertices").at(0).at("raster") ==
+          nlohmann::json::array({13, 24}));
+    CHECK(record.at("draw_offset") == nlohmann::json::array({3, 4}));
+  }
+};
+
 struct ParticleFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
@@ -139,8 +184,161 @@ struct ParticleFixture {
     CHECK(storage.front() == 0xDEADBEEF);
     CHECK(storage.back() == 0xDEADBEEF);
   }
+
+  void CheckPathPositions(const nlohmann::json& record) const {
+    CHECK(record.at("local_point") == nlohmann::json::array({64, 32, 1024}));
+    CHECK(record.at("world_point") == nlohmann::json::array({164, 232, 1024}));
+    CHECK(record.at("screen") == nlohmann::json::array({180, 128}));
+  }
+
+  void CheckPathIdentity(const nlohmann::json& record) const {
+    CHECK(record.at("kind") == "particle");
+    CHECK(record.at("slot") == 0);
+    CHECK(record.at("attached") == true);
+    CHECK(record.at("outcome") == "draw");
+  }
 };
 }  // namespace
+
+TEST_CASE("Effect path intervals reject missing reversed and unbounded ticks",
+          "[effects][effect-path]") {
+  using VS::Render::EffectPathTraceRange;
+  for (const auto invalid : {"", "12", ":12", "12:", "0:12", "12:1", "1:2:3",
+                             "-1:2", "1:18446744073709551616"}) {
+    CHECK_FALSE(EffectPathTraceRange::Parse(invalid).has_value());
+  }
+  const auto range = EffectPathTraceRange::Parse("10:11");
+  REQUIRE(range);
+  CHECK(range->first == 10);
+  CHECK(range->last == 11);
+  VS::Render::PageSpace pages;
+  CHECK_FALSE(pages.IsEffectPathTraceEnabled());
+  CHECK_THROWS_AS(pages.ConfigureEffectPathTrace(EffectPathTraceRange{5, 4}),
+                  std::invalid_argument);
+}
+
+TEST_CASE("Effect primitive paths are opt-in bounded and observational",
+          "[effects][effect-path]") {
+  VS::Render::PageSpace traced;
+  VS::Render::PageSpace baseline;
+  EffectTraceScope scope(traced);
+  const std::array<VS::u32, 5> quad{0x2A0000FF, 10 | (20u << 16),
+                                    14 | (20u << 16), 10 | (24u << 16),
+                                    14 | (24u << 16)};
+  traced.SetDrawOffset(3, 4);
+  baseline.SetDrawOffset(3, 4);
+  traced.ConfigureEffectPathTrace(VS::Render::EffectPathTraceRange{10, 11});
+  for (std::uint64_t tick : {9, 10, 11, 12}) {
+    VS::Core::SetLogTick(tick);
+    traced.SetEffectPathTraceTick(tick);
+    REQUIRE(traced.Execute(quad) == quad.size());
+    REQUIRE(baseline.Execute(quad) == quad.size());
+  }
+  REQUIRE(scope.records.size() == 4);
+  for (std::size_t index : {1u, 3u}) {
+    CHECK(scope.records[index].first == (index == 1 ? 10 : 11));
+    scope.CheckQuadRecord(index, quad.data());
+  }
+  CHECK(std::ranges::equal(traced.Pixels(), baseline.Pixels()));
+  CHECK_FALSE(traced.IsEffectPathTraceEnabled());
+}
+
+TEST_CASE("Particle paths join local world projection and emitted primitives",
+          "[effects][particle-render][effect-path]") {
+  ParticleFixture fixture;
+  auto& pages = VS::Render::GamePages();
+  EffectTraceScope scope(pages);
+  pages.ConfigureEffectPathTrace(VS::Render::EffectPathTraceRange{10, 10});
+  VS::Core::SetLogTick(10);
+  pages.SetEffectPathTraceTick(10);
+  fixture.particle.emitFlags = 0x20000;
+  fixture.particle.motion.position.vx = 64 << 12;
+  fixture.particle.motion.position.vy = 32 << 12;
+  fixture.instance.transforms[0].world.t[0] = 100;
+  fixture.instance.transforms[0].world.t[1] = 200;
+  fixture.instance.transforms[0].view.t[0] = 16;
+  fixture.texture.clut = std::bit_cast<std::int16_t>(std::uint16_t{0x9234});
+  const auto motion = fixture.particle.motion;
+  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
+  REQUIRE(scope.records.size() == 2);
+  const auto particle = nlohmann::json::parse(scope.records.back().second);
+  fixture.CheckPathPositions(particle);
+  fixture.CheckPathIdentity(particle);
+  DrawPrim(fixture.storage.data() + 4);
+  REQUIRE(scope.records.size() == 3);
+  const auto primitive = nlohmann::json::parse(scope.records.back().second);
+  CHECK(particle.at("command_addresses").at(0) ==
+        primitive.at("command_address"));
+  CHECK(primitive.at("vertices").at(0).at("screen") ==
+        nlohmann::json::array({176, 124}));
+  CHECK(std::memcmp(&motion, &fixture.particle.motion, sizeof motion) == 0);
+}
+
+TEST_CASE("Effect paths do not mistake framebuffer flips for particle motion",
+          "[effects][effect-path]") {
+  VS::Render::PageSpace pages;
+  EffectTraceScope scope(pages);
+  pages.ConfigureEffectPathTrace(VS::Render::EffectPathTraceRange{10, 11});
+  const std::array<VS::u32, 3> sprite{0x620000FF, 10 | (20u << 16),
+                                      5 | (6u << 16)};
+  for (std::uint64_t tick : {10, 11}) {
+    VS::Core::SetLogTick(tick);
+    pages.SetEffectPathTraceTick(tick);
+    pages.SetDrawOffset(0, tick == 10 ? 0 : 256);
+    REQUIRE(pages.Execute(sprite) == sprite.size());
+  }
+  REQUIRE(scope.records.size() == 4);
+  for (std::size_t index : {1u, 3u}) {
+    const auto record = nlohmann::json::parse(scope.records[index].second);
+    CHECK(record.at("vertices").at(0).at("screen") ==
+          nlohmann::json::array({10, 20}));
+    CHECK(record.at("vertices").at(0).at("raster") ==
+          nlohmann::json::array({10, index == 1 ? 20 : 276}));
+  }
+}
+
+TEST_CASE("Effect sprite and line paths include final raster coordinates",
+          "[effects][effect-path]") {
+  VS::Render::PageSpace pages;
+  EffectTraceScope scope(pages);
+  pages.ConfigureEffectPathTrace(VS::Render::EffectPathTraceRange{10, 10});
+  VS::Core::SetLogTick(10);
+  pages.SetEffectPathTraceTick(10);
+  const std::array<VS::u32, 3> sprite{0x620000FF, 10 | (20u << 16),
+                                      5 | (6u << 16)};
+  REQUIRE(pages.Execute(sprite) == sprite.size());
+  const std::array<VS::u32, 3> line{0x420000FF, 10 | (20u << 16),
+                                    15 | (26u << 16)};
+  REQUIRE(pages.Execute(line) == line.size());
+  REQUIRE(scope.records.size() == 3);
+  const auto rectangle = nlohmann::json::parse(scope.records[1].second);
+  CHECK(rectangle.at("vertices").size() == 4);
+  CHECK(rectangle.at("vertices").at(3).at("screen") ==
+        nlohmann::json::array({15, 26}));
+  const auto segment = nlohmann::json::parse(scope.records[2].second);
+  CHECK(segment.at("vertices").size() == 2);
+  CHECK(segment.at("vertices").at(1).at("screen") ==
+        nlohmann::json::array({15, 26}));
+}
+
+TEST_CASE("Culled particle paths explain absent screen geometry",
+          "[effects][particle-render][effect-path]") {
+  ParticleFixture fixture;
+  auto& pages = VS::Render::GamePages();
+  EffectTraceScope scope(pages);
+  pages.ConfigureEffectPathTrace(VS::Render::EffectPathTraceRange{10, 10});
+  VS::Core::SetLogTick(10);
+  pages.SetEffectPathTraceTick(10);
+  fixture.particle.emitFlags = 0x80000;
+  fixture.particle.motion.position.vy = 4 << 12;
+  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
+  REQUIRE(scope.records.size() == 2);
+  const auto record = nlohmann::json::parse(scope.records.back().second);
+  CHECK(record.at("outcome") == "below-ground");
+  CHECK(record.at("screen").is_null());
+  CHECK(record.at("command_addresses").empty());
+  CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data() + 1);
+}
 
 TEST_CASE("Particle texture reset clears native pointer tails without overflow",
           "[particle][texture-state]") {
@@ -859,7 +1057,7 @@ void CheckTrailReferencePackets(const u_long* begin, std::size_t trail_count,
       const auto x = origin_x + static_cast<int>(segment * 8);
       const auto y = 120 + static_cast<int>(actor * 16);
       CHECK(packet.wordCount == 14);
-      CHECK(packet.drawMode == 0xE1000200);
+      CHECK(static_cast<std::uint32_t>(packet.drawMode) == 0xE1000200u);
       const auto fade = count - 1 - segment;
       CheckTrailReferenceQuad(quad, x, y, static_cast<int>(fade),
                               static_cast<int>(kSamples));

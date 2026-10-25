@@ -12,8 +12,12 @@
 #include <cstring>
 #include <iterator>
 #include <limits>
+#include <utility>
 
+#include "Core/Log.hpp"
 #include "Legacy/Psx.h"
+#include "Render/PageSpace.hpp"
+#include "nlohmann/json.hpp"
 
 extern "C" {
 #include "Effects/Curves.h"
@@ -25,6 +29,7 @@ extern "C" {
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 }
 
@@ -55,6 +60,7 @@ constexpr unsigned kSemiTransparentQuad = 0x2E000000;
 constexpr u_long kEnableTextureWindow = 0xE1000200;
 constexpr u_long kRestoreDrawMode = 0xE1000000;
 constexpr std::size_t kQuadVertices = 4;
+constexpr std::size_t kSpatialDimensions = 3;
 constexpr int kMaximumDepth = 2048;
 constexpr int kForegroundSlots = 16;
 
@@ -148,7 +154,7 @@ unsigned Color(const Effects_Particle& node) {
 }
 
 bool Project(Effects_Particle& node, SVECTOR& point, Core_GteWord& xy,
-             Core_GteWord& depth) {
+             Core_GteWord& depth, Core_GteWord& projection_flags) {
   point = {Half((node.motion.position.vx >> kFixedShift) +
                 node.textureAnimation.frameOffsetX),
            Half((node.motion.position.vy >> kFixedShift) +
@@ -176,9 +182,88 @@ bool Project(Effects_Particle& node, SVECTOR& point, Core_GteWord& xy,
   }
   Core_Gte_SetRotMatrix(matrix);
   Core_Gte_SetTransMatrix(matrix);
-  Core_GteWord p, flags;
-  depth = Core_Gte_RotTransPers(&point, &xy, &p, &flags);
+  Core_GteWord p;
+  depth = Core_Gte_RotTransPers(&point, &xy, &p, &projection_flags);
   return true;
+}
+
+void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
+                   Core_GteWord depth, Core_GteWord flags,
+                   std::string_view outcome, const u_long* first_quad = nullptr,
+                   unsigned quad_count = 0) {
+  if (!VS::Render::GamePages().IsEffectPathTraceEnabled() ||
+      !VS::Core::IsLogEnabled(VS::Core::LogLevel::Trace, "effect-path")) {
+    return;
+  }
+  const bool attached = (node.emitFlags & kAttached) != 0;
+  const auto matrix = [](const MATRIX& value) -> nlohmann::json {
+    return {{"rotation",
+             {{value.m[0][0], value.m[0][1], value.m[0][2]},
+              {value.m[1][0], value.m[1][1], value.m[1][2]},
+              {value.m[2][0], value.m[2][1], value.m[2][2]}}},
+            {"translation", {value.t[0], value.t[1], value.t[2]}}};
+  };
+  const MATRIX* view = &Render_frameScratch.viewMatrix;
+  std::array<std::int64_t, kSpatialDimensions> world{point.vx, point.vy,
+                                                     point.vz};
+  nlohmann::json transform = nullptr;
+  if (attached) {
+    const auto& slot = Effects_currentInstance->transforms[node.transformIndex];
+    view = &slot.view;
+    transform = matrix(slot.world);
+    const std::array<int, kSpatialDimensions> local{point.vx, point.vy,
+                                                    point.vz};
+    for (std::size_t row = 0; row < world.size(); ++row) {
+      std::int64_t value = 0;
+      for (std::size_t axis = 0; axis < local.size(); ++axis) {
+        value += std::int64_t{slot.world.m[row][axis]} * local[axis];
+      }
+      world[row] = (value >> kFixedShift) + slot.world.t[row];
+    }
+  }
+  auto commands = nlohmann::json::array();
+  for (unsigned index = 0; index < quad_count; ++index) {
+    commands.push_back(reinterpret_cast<std::uintptr_t>(
+        first_quad + std::size_t{index} * kQuadWords + 1));
+  }
+  Render_ScreenOffset offset{};
+  Render_GetProjectionScreenOffset(&offset);
+  nlohmann::json record{
+      {"kind", "particle"},
+      {"pool", reinterpret_cast<std::uintptr_t>(Effects_particlePool)},
+      {"slot", &node - Effects_particlePool},
+      {"instance", reinterpret_cast<std::uintptr_t>(Effects_currentInstance)},
+      {"effect_id",
+       Effects_currentInstance
+           ? nlohmann::json(Effects_currentInstance->context.effectId)
+           : nlohmann::json(nullptr)},
+      {"age", node.age},
+      {"lifetime", node.lifetime},
+      {"emit_flags", node.emitFlags},
+      {"attached", attached},
+      {"transform_index", node.transformIndex},
+      {"position_q12",
+       {node.motion.position.vx, node.motion.position.vy,
+        node.motion.position.vz}},
+      {"velocity_raw",
+       {node.motion.velocity.vx, node.motion.velocity.vy,
+        node.motion.velocity.vz}},
+      {"local_point", {point.vx, point.vy, point.vz}},
+      {"world_point", world},
+      {"world_transform", std::move(transform)},
+      {"view_transform", matrix(*view)},
+      {"camera_transform", matrix(Render_frameScratch.viewMatrix)},
+      {"projection_distance", Render_projectionDistance},
+      {"projection_offset", {offset.x, offset.y}},
+      {"screen",
+       outcome == "below-ground"
+           ? nlohmann::json(nullptr)
+           : nlohmann::json::array({Half(xy), Half(xy >> kHalfShift)})},
+      {"depth", depth},
+      {"projection_flags", flags},
+      {"outcome", outcome},
+      {"command_addresses", std::move(commands)}};
+  VS_LOG_TRACE("effect-path", "{}", record.dump());
 }
 
 int Bucket(const Effects_Particle& node, Core_GteWord projected_depth) {
@@ -305,10 +390,16 @@ void Effects_DrawAnimatedSpriteParticles(Effects_Particle* head) {
     ++visited;
     Effects_AdvanceParticleTextureAnimation(&node->textureAnimation);
     SVECTOR point{};
-    Core_GteWord xy, depth;
-    if (!Project(*node, point, xy, depth)) continue;
+    Core_GteWord xy = 0, depth = 0, flags = 0;
+    if (!Project(*node, point, xy, depth, flags)) {
+      TraceParticle(*node, point, xy, depth, flags, "below-ground");
+      continue;
+    }
     const int bucket = Bucket(*node, depth);
-    if (bucket >= kMaximumDepth) continue;
+    if (bucket >= kMaximumDepth) {
+      TraceParticle(*node, point, xy, depth, flags, "depth-clip");
+      continue;
+    }
     Require(bucket >= -kForegroundSlots &&
                 node->textureAnimation.textureInfo != nullptr,
             "Particle rendering has no texture frame or ordering bucket");
@@ -318,6 +409,10 @@ void Effects_DrawAnimatedSpriteParticles(Effects_Particle* head) {
     auto* ordering =
         static_cast<u_long*>(Render_frameScratch.orderingTable) + bucket;
     Mode(kEnableTextureWindow, ordering);
+    TraceParticle(
+        *node, point, xy, depth, flags, "draw",
+        static_cast<const u_long*>(Render_frameScratch.primitiveCursor),
+        info.reserved0);
     const auto projection =
         static_cast<std::int64_t>(Render_projectionDistance) *
         (1 << kProjectionShift) / depth;

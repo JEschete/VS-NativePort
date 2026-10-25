@@ -1,12 +1,23 @@
 #pragma once
 
 #include <array>
+#include <expected>
+#include <optional>
 #include <span>
+#include <string>
+#include <string_view>
 #include <vector>
 
 #include "Core/Types.hpp"
 
 namespace VS::Render {
+
+struct EffectPathTraceRange {
+  u64 first;
+  u64 last;
+  static std::expected<EffectPathTraceRange, std::string> Parse(
+      std::string_view text);
+};
 
 // The PS1 game addresses every image, palette and frame by coordinates in one
 // 1024x512 space of 16-bit pixels (owner decision 2026-10-17: one page image,
@@ -57,6 +68,10 @@ class PageSpace {
   // tag). Returns words consumed.
   usize Execute(std::span<const u32> words);
 
+  void ConfigureEffectPathTrace(std::optional<EffectPathTraceRange> range);
+  void SetEffectPathTraceTick(u64 tick);
+  bool IsEffectPathTraceEnabled() const { return m_effectTrace; }
+
   // ---- display
   Display& DisplayState() { return m_display; }
   const Display& DisplayState() const { return m_display; }
@@ -85,6 +100,8 @@ class PageSpace {
   void Rectangle(i32 x, i32 y, i32 w, i32 h, i32 u, i32 v, u32 color,
                  const Prim& p);
   void Line(Vertex a, Vertex b, const Prim& p);
+  void TracePrimitive(const u32* command, std::span<const Vertex> vertices,
+                      const Prim& primitive) const;
   void Plot(i32 x, i32 y, i32 r, i32 g, i32 b, i32 u, i32 v, const Prim& p,
             bool dither);
   u16 Texel(i32 u, i32 v, u16 clut) const;
@@ -97,6 +114,8 @@ class PageSpace {
   bool m_maskSet = false, m_maskCheck = false;
   u32 m_winMaskX = 0, m_winMaskY = 0, m_winOffX = 0, m_winOffY = 0;
   Display m_display;
+  std::optional<EffectPathTraceRange> m_effectTraceRange;
+  bool m_effectTrace = false;
 };
 
 // The page space the copied game draws into (libgpu shims) and the host

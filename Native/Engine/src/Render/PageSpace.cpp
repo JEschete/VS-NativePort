@@ -1,7 +1,11 @@
 #include "Render/PageSpace.hpp"
 
 #include <algorithm>
+#include <charconv>
 #include <cstdlib>
+#include <stdexcept>
+
+#include "Core/Log.hpp"
 
 namespace VS::Render {
 
@@ -26,6 +30,75 @@ u32 Expand(u16 c) {
 }  // namespace
 
 PageSpace::PageSpace() : m_px(static_cast<usize>(Width) * Height, 0) {}
+
+std::expected<EffectPathTraceRange, std::string> EffectPathTraceRange::Parse(
+    std::string_view text) {
+  const auto colon = text.find(':');
+  EffectPathTraceRange range{};
+  const auto number = [](std::string_view value, u64& output) {
+    const auto parsed =
+        std::from_chars(value.data(), value.data() + value.size(), output);
+    return parsed.ec == std::errc{} &&
+           parsed.ptr == value.data() + value.size();
+  };
+  if (colon == std::string_view::npos ||
+      !number(text.substr(0, colon), range.first) ||
+      !number(text.substr(colon + 1), range.last) || range.first == 0 ||
+      range.last < range.first) {
+    return std::unexpected(
+        "--trace-effect-paths requires first:last positive logical ticks");
+  }
+  return range;
+}
+
+void PageSpace::ConfigureEffectPathTrace(
+    std::optional<EffectPathTraceRange> range) {
+  if (range && (range->first == 0 || range->last < range->first)) {
+    throw std::invalid_argument("Invalid effect-path trace range");
+  }
+  m_effectTraceRange = range;
+  m_effectTrace = false;
+}
+
+void PageSpace::SetEffectPathTraceTick(u64 tick) {
+  m_effectTrace = m_effectTraceRange && tick >= m_effectTraceRange->first &&
+                  tick <= m_effectTraceRange->last;
+  if (m_effectTrace) {
+    VS_LOG_TRACE("effect-path", "{{\"kind\":\"frame\",\"logical_tick\":{}}}",
+                 tick);
+  }
+}
+
+void PageSpace::TracePrimitive(const u32* command,
+                               std::span<const Vertex> vertices,
+                               const Prim& primitive) const {
+  if (!m_effectTrace || !primitive.semi ||
+      !Core::IsLogEnabled(Core::LogLevel::Trace, "effect-path")) {
+    return;
+  }
+  std::string points;
+  for (const auto& vertex : vertices) {
+    if (!points.empty()) points += ',';
+    points += std::format(
+        "{{\"screen\":[{},{}],\"raster\":[{},{}],"
+        "\"uv\":[{},{}],\"rgb\":[{},{},{}]}}",
+        vertex.x - m_offX, vertex.y - m_offY, vertex.x, vertex.y, vertex.u,
+        vertex.v, vertex.r, vertex.g, vertex.b);
+  }
+  VS_LOG_TRACE(
+      "effect-path",
+      "{{\"kind\":\"primitive\",\"command_address\":{},\"opcode\":{},"
+      "\"textured\":{},\"raw\":{},\"clut\":{},\"texture_page\":[{},{}],"
+      "\"texture_depth\":{},\"blend\":{},\"draw_offset\":[{},{}],"
+      "\"draw_area\":[{},{},{},{}],\"display\":[{},{},{},{}],"
+      "\"display_lines\":[{},{}],"
+      "\"vertices\":[{}]}}",
+      reinterpret_cast<std::uintptr_t>(command), *command >> 24,
+      primitive.textured, primitive.raw, primitive.clut, m_pageX, m_pageY,
+      m_depth, m_semiMode, m_offX, m_offY, m_areaX1, m_areaY1, m_areaX2,
+      m_areaY2, m_display.area.x, m_display.area.y, m_display.area.w,
+      m_display.area.h, m_display.screenY, m_display.screenH, points);
+}
 
 PageSpace& GamePages() {
   static PageSpace pages;
@@ -173,6 +246,7 @@ usize PageSpace::Execute(std::span<const u32> w) {
         }
       }
     }
+    TracePrimitive(w.data(), std::span(v, static_cast<usize>(n)), p);
     Triangle(v[0], v[1], v[2], p);
     if (quad) {
       Triangle(v[1], v[2], v[3], p);
@@ -205,6 +279,10 @@ usize PageSpace::Execute(std::span<const u32> w) {
         break;
       }
       Vertex next = vertexAt(w[i++], col);
+      if (m_effectTrace && p.semi) {
+        const std::array segment{prev, next};
+        TracePrimitive(w.data(), segment, p);
+      }
       Line(prev, next, p);
       prev = next;
       if (!poly) {
@@ -249,8 +327,20 @@ usize PageSpace::Execute(std::span<const u32> w) {
         rw = rh = 16;
         break;
     }
-    Rectangle(Sext11(xy) + m_offX, Sext11(xy >> 16) + m_offY, rw, rh, u, v, col,
-              p);
+    const auto origin = vertexAt(xy, col);
+    if (m_effectTrace && p.semi) {
+      std::array<Vertex, 4> corners{origin, origin, origin, origin};
+      corners[1].x += rw;
+      corners[2].y += rh;
+      corners[3].x += rw;
+      corners[3].y += rh;
+      for (usize corner = 0; corner < corners.size(); ++corner) {
+        corners[corner].u = u + ((corner & 1) ? rw : 0);
+        corners[corner].v = v + ((corner & 2) ? rh : 0);
+      }
+      TracePrimitive(w.data(), corners, p);
+    }
+    Rectangle(origin.x, origin.y, rw, rh, u, v, col, p);
     return i;
   }
   if (cmd == 0x80 && w.size() >= 4) {  // copy within the page space

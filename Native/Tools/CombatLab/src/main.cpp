@@ -64,6 +64,7 @@ struct Options {
   std::string door_from;
   std::uint64_t door_limit = 0;
   std::vector<ScriptPress> presses;
+  std::optional<Render::EffectPathTraceRange> effect_paths;
 };
 
 struct PhaseTiming {
@@ -149,12 +150,19 @@ void ParseValue(Options& options, std::string_view argument,
     const auto presses = DecodePresses(value);
     options.presses.insert(options.presses.end(), presses.begin(),
                            presses.end());
+  } else if (argument == "--trace-effect-paths") {
+    const auto range = Render::EffectPathTraceRange::Parse(value);
+    if (!range) throw std::runtime_error(range.error());
+    options.effect_paths = *range;
   } else {
     throw std::runtime_error("unknown option: " + std::string(argument));
   }
 }
 
 void ValidateOptions(Options& options) {
+  if (options.effect_paths && options.speed != 1) {
+    throw std::runtime_error("--trace-effect-paths requires normal --speed 1");
+  }
   if (!options.sequence.empty() &&
       (!options.scenario.empty() || options.start || options.catalog_only ||
        options.frames != 0 || !options.presses.empty())) {
@@ -330,6 +338,11 @@ void WriteManifest(const Options& options, Trace& trace, std::size_t scripts) {
        {"sequence", options.sequence.string()},
        {"scripts", scripts},
        {"speed", options.speed},
+       {"effect_path_trace",
+        options.effect_paths
+            ? nlohmann::json{{"first", options.effect_paths->first},
+                             {"last", options.effect_paths->last}}
+            : nlohmann::json(nullptr)},
        {"devices", options.devices}});
 }
 
@@ -857,6 +870,7 @@ class LiveSession {
     ++ticks_;
     watchdog_.Pulse(ticks_);
     Core::SetLogTick(ticks_);
+    Render::GamePages().SetEffectPathTraceTick(ticks_);
     std::uint32_t injected = 0;
     const auto& presses = scripts_.empty() ? options_.presses
                                            : scripts_.at(script_index_).presses;
@@ -973,6 +987,13 @@ int Run(int argc, char** argv) {
     Platform::InstallCrashHandler();
     VS_LOG_INFO("combat-lab", "log files: {}", trace.Directory().string());
     const auto options = Parse(argc, argv);
+    if (options.effect_paths &&
+        !Core::IsLogEnabled(Core::LogLevel::Trace, "effect-path")) {
+      throw std::runtime_error(
+          "effect-path tracing requires trace logging and the effect-path "
+          "channel");
+    }
+    Render::GamePages().ConfigureEffectPathTrace(options.effect_paths);
     auto scripts = options.sequence.empty()
                        ? std::vector<EncounterScript>{}
                        : ReadScriptSequence(options.sequence);

@@ -382,6 +382,48 @@ diagnostic evidence, not proof that a scene completed correctly. This supplies
 normal-game logging parity and useful scene state; #149's complete cutscene
 inventory/playback mode and acceptance remain separate.
 
+#### Bounded effect and particle motion paths
+
+Both Desktop and Combat Lab accept `--trace-effect-paths first:last`, an
+inclusive range of positive **host logical ticks**. It is off by default and
+requires normal `--speed 1`; malformed ranges and accelerated runs fail
+explicitly. Trace-level logging and the `effect-path` channel must be enabled
+(the normal detailed-log defaults already do this).
+
+```powershell
+.\build\Release\VS.Desktop.exe --speed 1 --trace-effect-paths 37800:42000
+.\build\Debug\VS.CombatLab.exe --speed 1 --trace-effect-paths 1:1200
+```
+
+The regular run `session.log` and engine records in `events.jsonl` receive
+JSON messages on `effect-path`:
+
+- `frame`: an explicit marker for every selected logical tick, including ticks
+  with no particle or translucent draw.
+- `particle`: pool/slot/instance, effect ID, age/lifetime, emission flags,
+  attachment index, raw fixed-point position/velocity, local and world points,
+  attachment/view/camera matrices, projection offset/distance/flags, projected
+  center/depth, culling outcome and emitted command addresses.
+- `primitive`: final translucent polygon, sprite/rectangle and line vertices,
+  texture coordinates/colors/page/palette/blend, clipping/draw offset and display
+  state. This catches screen-space effects that do not use the generic particle
+  pool. `screen` is the GPU command coordinate before framebuffer draw offset;
+  `raster` is the page-space coordinate after that offset. Buffer flips must not
+  be mistaken for effect movement.
+
+Join particle `command_addresses` to primitive `command_address` **within the
+same run/tick** to follow local/world motion through actual emitted geometry.
+Pool slots, instance addresses and packet storage can be reused; these are not
+globally unique lifetime IDs. Use effect context, age/lifetime and the adjacent
+samples when distinguishing reuse. Asset filenames remain in the existing
+content-load messages; a numeric effect ID is not a guessed asset path.
+
+Recording paths does not prove flare placement correct. Observe the whole
+effect at normal speed, retain continuous frames/video and align event/camera
+state; do not discard the transient interval with a pose filter or relocate a
+flare from one selected screenshot. Room/model effects without particle
+instances have primitive paths but not an invented particle/world origin.
+
 #### Local logging verification
 
 Verified on local `508b4bd79d58e37421fdd9c693c92937f2b5de0e` with these

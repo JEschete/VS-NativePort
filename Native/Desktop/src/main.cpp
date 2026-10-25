@@ -274,6 +274,7 @@ struct RunSettings {
   Capture capture;
   InputScript script;
   std::optional<fs::path> save_directory;
+  std::optional<Render::EffectPathTraceRange> effect_paths;
 };
 
 RunSettings ParseRunSettings(int argc, char** argv) {
@@ -289,6 +290,15 @@ RunSettings ParseRunSettings(int argc, char** argv) {
   settings.capture = ParseCapture(argc, argv);
   settings.script = ParseInputScript(argc, argv);
   for (int i = 1; i < argc; ++i) {
+    if (std::string_view(argv[i]) == "--trace-effect-paths") {
+      if (i + 1 == argc) {
+        throw std::runtime_error("--trace-effect-paths requires first:last");
+      }
+      const auto range = Render::EffectPathTraceRange::Parse(argv[++i]);
+      if (!range) throw std::runtime_error(range.error());
+      settings.effect_paths = *range;
+      continue;
+    }
     if (std::string_view(argv[i]) != "--save-dir") continue;
     if (i + 1 == argc || std::string_view(argv[i + 1]).empty() ||
         std::string_view(argv[i + 1]).starts_with("--")) {
@@ -301,11 +311,39 @@ RunSettings ParseRunSettings(int argc, char** argv) {
       std::none_of(argv + 1, argv + argc, [](const char* argument) {
         return std::string_view(argument) == "--scripted";
       });
+  if (settings.effect_paths &&
+      ParseTick(Option(argc, argv, "--speed").value_or("1")) != 1) {
+    throw std::runtime_error("--trace-effect-paths requires normal --speed 1");
+  }
   return settings;
+}
+
+void ConfigureEffectPathTrace(const RunSettings& settings,
+                              Game::GameplayTrace* trace) {
+  if (settings.effect_paths &&
+      !Core::IsLogEnabled(Core::LogLevel::Trace, "effect-path")) {
+    throw std::runtime_error(
+        "effect-path tracing requires trace logging and the effect-path "
+        "channel");
+  }
+  Render::GamePages().ConfigureEffectPathTrace(settings.effect_paths);
+  if (settings.effect_paths && trace != nullptr) {
+    trace->Event("effect.paths.settings",
+                 {{"first", settings.effect_paths->first},
+                  {"last", settings.effect_paths->last},
+                  {"speed", 1}});
+  }
+}
+
+void BeginLogicalTick(u64 tick) {
+  Core::SetLogTick(tick);
+  Render::GamePages().SetEffectPathTraceTick(tick);
+  VS_LOG_TRACE("frame", "begin tick");
 }
 
 int RunGame(const Content::Disc* disc, const RunSettings& settings,
             Game::GameplayTrace* trace) {
+  ConfigureEffectPathTrace(settings, trace);
   VS_LOG_INFO("boot", "run: tick limit={}, speed={}, scripted presses={}",
               settings.max_ticks, settings.speed,
               settings.script.presses.size());
@@ -352,8 +390,7 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
                                           game.Ticks() < settings.max_ticks);
          ++index) {
       watchdog.Pulse(game.Ticks() + 1);
-      Core::SetLogTick(game.Ticks() + 1);
-      VS_LOG_TRACE("frame", "begin tick");
+      BeginLogicalTick(game.Ticks() + 1);
       input.Inject(settings.script.MaskAt(game.Ticks() + 1));
       const auto& pad = input.Update();
       if (pad.pressed) {
