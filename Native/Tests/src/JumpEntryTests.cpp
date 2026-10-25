@@ -47,6 +47,39 @@ ActorBytes Bytes(const Actors_ActorRecord& actor) {
   return bytes;
 }
 
+void CheckGroundedSnapshot(Actors_ActorRecord& actor) {
+  Actors_ActorRecord expected;
+  std::memcpy(&expected, &actor, sizeof(expected));
+  const auto& instance = actor.instance;
+  const auto tile =
+      static_cast<std::uint32_t>(instance.currentTileX) |
+      (static_cast<std::uint32_t>(instance.currentTileLayer) << 8) |
+      (static_cast<std::uint32_t>(instance.currentTileZ) << 16) |
+      (static_cast<std::uint32_t>(instance.reserved5F) << 24);
+  expected.instance.previousTileX = instance.currentTileX;
+  expected.instance.previousTileLayer = instance.currentTileLayer;
+  expected.instance.previousTileZ = instance.currentTileZ;
+  expected.instance.reserved63 = instance.reserved5F;
+  const auto xy = static_cast<std::uint32_t>(
+                      static_cast<std::uint16_t>(instance.position.vx)) |
+                  (static_cast<std::uint32_t>(
+                       static_cast<std::uint16_t>(instance.position.vy))
+                   << 16);
+  expected.instance.supportOffset = std::bit_cast<std::int32_t>(xy);
+  expected.instance.reserved50 = instance.position.vz;
+  expected.instance.previousFacing = instance.facing;
+  if (instance.supportLayer == 0) {
+    expected.savedPlacement = std::bit_cast<std::int32_t>(tile);
+  }
+
+  Actors_SaveActorGroundedTransform(&actor);
+  CHECK(actor.savedPlacement == expected.savedPlacement);
+  CHECK(actor.instance.supportOffset == expected.instance.supportOffset);
+  CHECK(actor.instance.reserved50 == expected.instance.reserved50);
+  CHECK(actor.instance.previousFacing == expected.instance.previousFacing);
+  CHECK(std::memcmp(&actor, &expected, sizeof(actor)) == 0);
+}
+
 struct JumpFixture {
   Actors_ActorRecord* saved_actor = Actors_actorRecords[0];
   Field_RoomRecord saved_room = Field_roomData;
@@ -213,6 +246,70 @@ void CheckStartedJumpLog(const std::vector<std::string>& messages) {
       std::string::npos);
 }
 }  // namespace
+
+TEST_CASE("Grounded snapshots write only the actual actor history fields",
+          "[grounded-transform]") {
+  const auto layer =
+      GENERATE(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+  const auto packed = GENERATE(0U, 0x00060004U, 0x80FE7FFFU, 0xFFFFFFFFU);
+  constexpr std::array<SVECTOR, 3> kPositions{{
+      {576, -448, 832, 0x1234},
+      {-32768, 32767, -32768, -1},
+      {32767, -32768, 32767, 0},
+  }};
+  const auto position = GENERATE(0, 1, 2);
+  Actors_ActorRecord actor{};
+  actor.instance.position = kPositions[position];
+  actor.instance.currentTileX = static_cast<u_char>(packed);
+  actor.instance.currentTileLayer = static_cast<u_char>(packed >> 8);
+  actor.instance.currentTileZ = static_cast<u_char>(packed >> 16);
+  actor.instance.reserved5F = static_cast<u_char>(packed >> 24);
+  actor.instance.supportLayer = static_cast<u_char>(layer);
+  actor.instance.placementLayer = static_cast<u_char>(15 - layer);
+  actor.instance.facing = -12345;
+  actor.instance.previousTileX = 0x11;
+  actor.instance.previousTileLayer = 0x22;
+  actor.instance.previousTileZ = 0x33;
+  actor.instance.reserved63 = 0x44;
+  actor.instance.supportOffset = 0x55667788;
+  actor.instance.reserved50 = -77;
+  actor.instance.previousFacing = 0x1234;
+  actor.savedPlacement = 0x11223344;
+  actor.runFrames = 0x55;
+  actor.runTurns = 0x66;
+  actor.opaque1860 = 0x77;
+  actor.reserved1861 = 0x88;
+  actor.reserved1862 = 0x99;
+  actor.reserved1863 = 0xAA;
+  CheckGroundedSnapshot(actor);
+}
+
+TEST_CASE("Grounded history preserves its anchor on supports and refreshes",
+          "[grounded-transform]") {
+  Actors_ActorRecord actor{};
+  actor.instance.currentTileX = 4;
+  actor.instance.currentTileZ = 6;
+  actor.instance.position = {576, -448, 832, 0x1234};
+  actor.instance.facing = -2345;
+  actor.savedPlacement = 0x11223344;
+  CheckGroundedSnapshot(actor);
+  CHECK(actor.savedPlacement == 0x00060004);
+
+  actor.instance.supportLayer = 2;
+  actor.instance.currentTileX = 20;
+  actor.instance.currentTileLayer = 3;
+  actor.instance.currentTileZ = 30;
+  actor.instance.reserved5F = 0xFF;
+  actor.instance.position = {-128, 256, -384, -1};
+  actor.instance.facing = 0x4321;
+  CheckGroundedSnapshot(actor);
+  CHECK(actor.savedPlacement == 0x00060004);
+
+  actor.instance.supportLayer = 0;
+  CheckGroundedSnapshot(actor);
+  CHECK(actor.savedPlacement ==
+        std::bit_cast<std::int32_t>(std::uint32_t{0xFF1E0314}));
+}
 
 TEST_CASE(
     "Jump entries preserve every unrelated byte and jumping wins priority",

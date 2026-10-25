@@ -9,6 +9,7 @@
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
+#include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlayback.h"
 #include "Actors/Shadow.h"
@@ -21,7 +22,6 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Damage.h"
-#include "Core/Core/IntPair.h"
 #include "Core/Diagnostics.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Memory/WordCopy.h"
@@ -1994,12 +1994,7 @@ void Actors_UpdateMotionAndLookAt(Actors_ActorRecord* actor, int arg1)
     }
     Actors_TransformActorRootOffset(actor);
     if (!(*(int*)((char*)actor + 8) & 0x3F0000)) {
-        *(int*)&actor->instance.previousTileX = *(int*)&actor->instance.currentTileX;
-        *(Core_IntPair*)&actor->instance.supportOffset = *(Core_IntPair*)&actor->instance.position;
-        if (actor->instance.supportLayer == 0) {
-            *(int*)&actor->savedPlacement = *(int*)&actor->instance.currentTileX;
-        }
-        actor->instance.previousFacing = actor->instance.facing;
+        Actors_SaveActorGroundedTransform(actor);
     }
 
     if (actor->headTrackTarget != -2) {

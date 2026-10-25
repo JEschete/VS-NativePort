@@ -13,6 +13,7 @@ so a stale fix is noticed.
 from __future__ import annotations
 
 NATIVE_HELPER_HEADERS = {
+    "Actors_SaveActorGroundedTransform": r"Native\Game\src\Actors\MotionRequests.h",
     "Save_NativeInitialTitleSelection": r"Native\Game\include\Save\NativeMenu.h",
     "Save_NativeDrawFileOverlay": r"Native\Game\include\Save\NativeMenu.h",
     **{name: r"Native\Game\include\Save\NativeResume.h"
@@ -1476,6 +1477,21 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    Save_NativeDrawFileOverlay(1);\n"
          "    if (Title_fileMenuScreenFade != 0) {",
          "22C.c:1784 Continue shares native cards without installing memory-card save headers"),
+    ],
+    "F00988": [
+        ("Actors_SaveActorGroundedTransform((Field_GimmickInstance*)actor)",
+         "Actors_SaveActorGroundedTransform(actor)",
+         "40564.c:2519 landing snapshots use the typed actor history API rather than a gimmick view"),
+    ],
+    "F04130": [
+        ("        *(int*)&actor->instance.previousTileX = *(int*)&actor->instance.currentTileX;\n"
+         "        *(Core_IntPair*)&actor->instance.supportOffset = *(Core_IntPair*)&actor->instance.position;\n"
+         "        if (actor->instance.supportLayer == 0) {\n"
+         "            *(int*)&actor->savedPlacement = *(int*)&actor->instance.currentTileX;\n"
+         "        }\n"
+         "        actor->instance.previousFacing = actor->instance.facing;",
+         "        Actors_SaveActorGroundedTransform(actor);",
+         "44F14.c:1565-1571 reuse the same native grounded history contract under the original motion-state guard"),
     ],
     "G00497": [("u_long Menu_textBoxOrderingTables", "u_long Menu_textBoxOrderingTables[102]",
                  "5BF94.c:4044-4046; three 34-word textbox ordering tables")],

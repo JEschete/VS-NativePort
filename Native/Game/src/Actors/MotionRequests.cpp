@@ -3,6 +3,7 @@
 // revision 3be5ba38b008cad919a2b1ca196432c8d4817335 (CC0-1.0).
 #include "Actors/MotionRequests.h"
 
+#include <array>
 #include <bit>
 #include <cstdint>
 #include <cstdlib>
@@ -93,6 +94,29 @@ void QueueFlight(Actors_ActorRecord& actor, const SVECTOR& step, int speed,
   SetMode(actor.turnState, mode);
 }
 }  // namespace
+
+// F00989 func_800ACF54, BATTLE/BATTLE.PRG/40564.c:2548-2560.
+void Actors_SaveActorGroundedTransform(Actors_ActorRecord* actor) {
+  if (actor == nullptr) {
+    Core_Debugf("actors", "Grounded transform requires an actor");
+    std::abort();
+  }
+  auto& instance = actor->instance;
+  const std::array tile{instance.currentTileX, instance.currentTileLayer,
+                        instance.currentTileZ, instance.reserved5F};
+  instance.previousTileX = tile[0];
+  instance.previousTileLayer = tile[1];
+  instance.previousTileZ = tile[2];
+  instance.reserved63 = tile.back();
+  // Original 0x4C/0x50 history packs X/Y then Z; 0x52 stores facing.
+  instance.supportOffset = std::bit_cast<std::int32_t>(
+      std::array{instance.position.vx, instance.position.vy});
+  instance.reserved50 = instance.position.vz;
+  if (instance.supportLayer == 0) {
+    actor->savedPlacement = std::bit_cast<std::int32_t>(tile);
+  }
+  instance.previousFacing = instance.facing;
+}
 
 // decomp: BATTLE.PRG func_800B63AC (src/BATTLE/BATTLE.PRG/4A0A8.c:340).
 void Actors_BeginTileJump(int actor_id, int* target, int speed, int facing) {

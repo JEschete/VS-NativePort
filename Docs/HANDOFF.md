@@ -9,6 +9,26 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #173 actor grounded-history repair: original `40564.c:2548-2560` was copied
+  through `Field_GimmickInstance*`, writing native offset6308 instead of actor
+  `savedPlacement`6332. Asset-free red preserves the actor sentinel11223344
+  instead of expected00060004 and corrupts neighboring state. Two exact
+  regression cases reproduce31 failures/978 assertions before repair.
+  Owned F00989 now accepts `Actors_ActorRecord*`, preserves all four tile bytes,
+  packed X/Y, Z and facing, and updates the ground anchor only for support0.
+  All16 support layers, high-bit tile bytes, signed position extrema and
+  release/reentry whole-object controls pass Debug/Release; entry/history
+  selection is12 cases/8,605 assertions in each. The five original
+  callers are actors; the identical `44F14.c:1565-1571` inline block now reuses
+  this API under its unchanged motion-state guard. No real gimmick caller was
+  found in original or native references.
+  Source-backed packing verification is separate from C++ promotion/EC removal.
+  This does not establish autonomous enemy ascent/descent or cross-height
+  attacks in #171. Local red/green evidence: `build/quality/grounded173-*`,
+  `jump171-entry/consumer-investigation.json`; related full dirty-worktree suites
+  (also containing #174/save-audio controls) pass712/3,164,525 in each config.
+  Owner's new family-cutscene hard crash takes priority for playback; keep
+  remaining #171 gameplay gates separate.
 - #18 save/load UI correction follows the owner's original Save/Load screenshots,
   not the rejected thin `SAVE NATIVE` rows. Data Save, Data Load and title Continue
   share three original-style cards with ARM room names, original location artwork,
@@ -61,9 +81,11 @@ verification of the current worktree.
   comparisons: `build/quality/jump171-entry/consumer-investigation.json`.
   Published cb4fe8b322146d9f6188db8456a5c57464973cb7 has successful exact
   Source Quality40141256823; Debug/Release entry selection10/7,627 each.
-  Owner save-UI correction has priority; keep #171 open. The separate F00989
-  gimmick/actor placement-offset defect is confirmed by a layout probe, not
-  proven causal for descent, and must be separately tracked before fixing.
+  #171 was accidentally auto-closed by a negated closing phrase in cb4fe8b3;
+  the GitHub timeline proves that commit caused the closure. It is reopened:
+  owner now reports both ascent/descent and cross-height attack failures.
+  Separate F00989 corruption is tracked by #173 above, not proven causal to
+  the full enemy behavior.
 - #170 Gust reveal repair: owner trace identifies zone9/room6 tile15,9 kind3.
   Activation and fade already changed correctly; rendering used detached native
   globals as one PS1 record (`tail-0x58`) and copied a scratch-shaped matrix.

@@ -8,6 +8,7 @@
 #include "Actors/Lifecycle.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
+#include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"

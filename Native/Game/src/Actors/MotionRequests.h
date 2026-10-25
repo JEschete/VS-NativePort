@@ -6,6 +6,8 @@
 
 #include "Legacy/Psx.h"
 
+typedef struct Actors_ActorRecord Actors_ActorRecord;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -15,6 +17,7 @@ void Actors_BeginAirborneTileJump(int actor_id, int* target, int speed,
                                   int facing);
 void Actors_BeginNavigationJump(int actor_id, int* target, int speed,
                                 int facing);
+void Actors_SaveActorGroundedTransform(Actors_ActorRecord* actor);
 void Actors_TurnNavigationActor(int actor_id, int facing);
 void Actors_TurnActorAtSpeed(int actor_id, int16_t facing, int speed);
 void Actors_QueueGroundOffset(int actor_id, SVECTOR* step);

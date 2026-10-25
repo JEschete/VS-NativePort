@@ -9,6 +9,30 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_grounded_history_uses_the_actor_native_layout(self):
+        registry = Path(__file__).resolve().with_name("owned.csv")
+        with registry.open(encoding="utf-8", newline="") as stream:
+            owned = {row["id"]: row for row in csv.DictReader(stream)}
+        self.assertEqual(
+            owned["F00989"]["header"],
+            r"Native\Game\src\Actors\MotionRequests.h",
+        )
+        landing = copy_fixups.FIXES["F00988"][0]
+        self.assertIn("Field_GimmickInstance", landing[0])
+        self.assertEqual(landing[1], "Actors_SaveActorGroundedTransform(actor)")
+        motion = copy_fixups.FIXES["F04130"][0]
+        self.assertIn("instance.previousTileX", motion[0])
+        self.assertIn("actor->savedPlacement", motion[0])
+        self.assertEqual(
+            motion[1], "        Actors_SaveActorGroundedTransform(actor);"
+        )
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS[
+                "Actors_SaveActorGroundedTransform"
+            ],
+            owned["F00989"]["header"],
+        )
+
     def test_native_file_cards_draw_after_footer_and_before_fade(self):
         for fid, prefix, title in (("F02757", "Menu_Files", 0),
                                    ("F03624", "Title", 1)):

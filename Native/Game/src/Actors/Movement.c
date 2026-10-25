@@ -25,7 +25,6 @@
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/Targeting.h"
-#include "Core/Core/WordPair.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Runtime.h"
 #include "Effects/ActionEffects.h"
@@ -3141,7 +3140,7 @@ void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor)
             actor->instance.motionLocked = 0;
             actor->instance.isJumping = 0;
         }
-        Actors_SaveActorGroundedTransform((Field_GimmickInstance*)actor);
+        Actors_SaveActorGroundedTransform(actor);
         actor->instance.jumpCountdown -= State_tickSpeed / 2;
         if ((signed char)actor->instance.jumpCountdown < 0) {
             actor->instance.jumpCountdown = 0;
@@ -3163,20 +3162,6 @@ void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor)
         }
         break;
     }
-}
-
-// decomp: BATTLE.PRG func_800ACF54 (src/BATTLE/BATTLE.PRG/40564.c:2548)
-void Actors_SaveActorGroundedTransform(Field_GimmickInstance* arg0)
-{
-
-    arg0->savedTile = *(int*)&arg0->tileX;
-    *(Core_WordPair*)&arg0->savedPosition = *(Core_WordPair*)&arg0->positionX;
-
-    if (!(arg0->supportLayer)) {
-        arg0->savedPlacement = *(int*)&arg0->tileX;
-    }
-
-    arg0->savedRotationY = arg0->rotationY;
 }
 
 // decomp: BATTLE.PRG func_800AF960 (src/BATTLE/BATTLE.PRG/44F14.c:1225)

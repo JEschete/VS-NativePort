@@ -137,7 +137,6 @@ void Actors_ScaleActorToOverTime(int arg0, SVECTOR* arg1, int arg2);
 void Actors_UpdateActorRoute(int arg0, Actors_ActorRecord* arg1);
 int Actors_ActorJumpAnimationProfile(Actors_ActorRecord* actor);
 void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor);
-void Actors_SaveActorGroundedTransform(Field_GimmickInstance* arg0);
 void Actors_UpdateActorAuxiliaryMotion(Field_GimmickInstance* arg0);
 void Actors_BeginTeleport(int, int*, int);
 void Actors_BeginTileTravel(int, int*, int);
