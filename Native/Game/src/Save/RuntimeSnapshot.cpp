@@ -626,6 +626,49 @@ bool Occupied(const Items_InventoryWeapon& item) { return item.blade != 0; }
 bool Occupied(const Items_InventoryShield& item) { return item.base.id != 0; }
 
 template <typename T, std::size_t N>
+Result CaptureOrder(const T (&items)[N], unsigned char (&order)[N],
+                    std::string_view category) {
+  std::array<bool, N> seen{};
+  std::size_t count = 0;
+  // Original consumption (5BF94.c:4454) leaves stale display rows until
+  // 2D10.c:1254 rebuilds them. Project its ordered survivors on the copy.
+  for (std::size_t row = 0; row < N; ++row) {
+    const auto reference = order[row];
+    if (reference == 0) continue;
+    if (reference > N) {
+      return ItemError(
+          "inventory_order", category, row,
+          std::format("reference {} exceeds capacity {}", reference, N));
+    }
+    if (seen[reference - 1]) {
+      return ItemError("inventory_order", category, row,
+                       std::format("duplicate reference {}", reference));
+    }
+    seen[reference - 1] = true;
+    if (Occupied(items[reference - 1])) order[count++] = reference;
+  }
+  std::fill(order + count, order + N, 0);
+  return {};
+}
+
+Result CaptureInventoryOrder(Snapshot& state) {
+#define VS_SAVE_CAPTURE_ORDER(category)                                     \
+  if (auto valid = CaptureOrder(state.inventory.category,                   \
+                                state.inventory_order.category, #category); \
+      !valid)                                                               \
+  return valid
+  VS_SAVE_CAPTURE_ORDER(weapons);
+  VS_SAVE_CAPTURE_ORDER(blades);
+  VS_SAVE_CAPTURE_ORDER(grips);
+  VS_SAVE_CAPTURE_ORDER(shields);
+  VS_SAVE_CAPTURE_ORDER(armor);
+  VS_SAVE_CAPTURE_ORDER(gems);
+  VS_SAVE_CAPTURE_ORDER(misc);
+#undef VS_SAVE_CAPTURE_ORDER
+  return {};
+}
+
+template <typename T, std::size_t N>
 Result ValidateOrder(const T (&items)[N], const unsigned char (&order)[N],
                      std::string_view category) {
   std::array<bool, N> seen{};
@@ -1175,8 +1218,21 @@ Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
       actor.routePhase != 0 || actor.destinationMode != 0 ||
       actor.jumpFrames != 0 || actor.momentumDistance != 0 ||
       actor.transitionFrames != 0) {
-    return std::unexpected(
-        "schema3 requires a static floor and quiescent unattached actor");
+    return std::unexpected(std::format(
+        "schema3 requires a static floor and quiescent unattached actor: "
+        "tileLayer={} supportLayer={} placementLayer={} attached={} "
+        "movementPending={} movementMode={} locomotionState={} "
+        "motionLocked={} jumping={} jumpCountdown={} turnFrames={} "
+        "animation={} rootMotion={},{},{} supportGimmick={} routePhase={} "
+        "destinationMode={} jumpFrames={} momentumDistance={} "
+        "transitionFrames={}",
+        model.currentTileLayer, model.supportLayer, model.placementLayer,
+        model.isAttached, model.movementPending, model.movementMode,
+        model.locomotionState, model.motionLocked, model.isJumping,
+        model.jumpCountdown, model.turnFrames, model.currentAnimation,
+        model.rootMotion.vx, model.rootMotion.vy, model.rootMotion.vz,
+        actor.supportGimmick, actor.routePhase, actor.destinationMode,
+        actor.jumpFrames, actor.momentumDistance, actor.transitionFrames));
   }
   if (model.currentTileX != model.position.vx / kTileUnits ||
       model.currentTileZ != model.position.vz / kTileUnits) {
@@ -1278,6 +1334,8 @@ std::expected<Snapshot, std::string> Capture(
   state.storage = storage;
   CaptureAshley(state, *Battle_characterState);
   auto valid = OverlayEquipped(state, *Battle_characterState->stats);
+  if (!valid) return std::unexpected(valid.error());
+  valid = CaptureInventoryOrder(state);
   if (!valid) return std::unexpected(valid.error());
   const auto& model = Actors_actorRecords[0]->instance;
   state.location.zone = static_cast<std::uint16_t>(Field_zoneContext.zndId);

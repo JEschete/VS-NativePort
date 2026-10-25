@@ -53,6 +53,7 @@ extern "C" {
 #include "Input/Controller.h"
 #include "Items/Categories.h"
 #include "Items/EquipmentStats.h"
+#include "Items/Inventory.h"
 #include "Render/Camera.h"
 #include "Render/UiPrimitives.h"
 #include "State/Flags.h"
@@ -1070,6 +1071,98 @@ TEST_CASE(
   REQUIRE_FALSE(result.has_value());
   CHECK(result.error().find(invalid < 4 ? "gems/slot " : "weapons/slot ") !=
         std::string::npos);
+  CHECK(LiveFingerprint(fixture) == before);
+}
+
+namespace {
+void ConsumeOrderedMiscItems() {
+  auto& items = Audio_Seq_unusedInventory.misc;
+  auto& order = Audio_Seq_unusedInventoryIndices.misc;
+  items[9].id = 425;
+  items[9].index = 10;
+  items[9].count = 1;
+  items[10].id = 432;
+  items[10].index = 11;
+  items[10].count = 1;
+  items[11].id = 323;
+  items[11].index = 12;
+  items[11].count = 2;
+  order[0] = 11;
+  order[1] = 12;
+  order[2] = 10;
+  REQUIRE(Items_ConsumeMiscItem(432) == 1);
+  REQUIRE(Items_ConsumeMiscItem(323) == 1);
+}
+
+void CheckNoStaleDisplayRows(const Save::Snapshot& state) {
+  CHECK(state.inventory_order.weapons[7] == 0);
+  CHECK(state.inventory_order.blades[15] == 0);
+  CHECK(state.inventory_order.grips[15] == 0);
+  CHECK(state.inventory_order.shields[7] == 0);
+  CHECK(state.inventory_order.armor[15] == 0);
+  CHECK(state.inventory_order.gems[47] == 0);
+  CHECK(state.inventory_order.misc[63] == 0);
+  CHECK(state.inventory_order.armor[1] == 2);
+}
+
+void CheckConsumedMiscResume(const Save::Snapshot& state) {
+  const auto encoded = Save::Encode({1, 0, state});
+  REQUIRE(encoded.has_value());
+  const auto decoded = Save::Decode(*encoded);
+  REQUIRE(decoded.has_value());
+  REQUIRE(Save::PrepareResume(*decoded).has_value());
+  CHECK(Audio_Seq_unusedInventoryIndices.misc[0] == 12);
+  CHECK(Audio_Seq_unusedInventoryIndices.misc[1] == 10);
+  CHECK(Audio_Seq_unusedInventory.misc[10].id == 0);
+}
+}  // namespace
+
+TEST_CASE("Runtime capture projects consumed misc items out of display order",
+          "[save][runtime-snapshot]") {
+  RuntimeFixture fixture;
+  ConsumeOrderedMiscItems();
+  const auto before = LiveFingerprint(fixture);
+  const auto state = fixture.Capture();
+  CHECK(LiveFingerprint(fixture) == before);
+  CHECK(state.inventory.misc[10].id == 0);
+  CHECK(state.inventory.misc[11].count == 1);
+  CHECK(state.inventory_order.misc[0] == 12);
+  CHECK(state.inventory_order.misc[1] == 10);
+  CHECK(state.inventory_order.misc[2] == 0);
+  CheckConsumedMiscResume(state);
+}
+
+TEST_CASE("Runtime capture removes stale display rows in every category",
+          "[save][runtime-snapshot]") {
+  RuntimeFixture fixture;
+  auto& order = Audio_Seq_unusedInventoryIndices;
+  const auto add_stale = [](auto& category) {
+    category[std::size(category) - 1] = std::size(category);
+  };
+  add_stale(order.weapons);
+  add_stale(order.blades);
+  add_stale(order.grips);
+  add_stale(order.shields);
+  add_stale(order.armor);
+  add_stale(order.gems);
+  add_stale(order.misc);
+  const auto before = LiveFingerprint(fixture);
+  const auto state = fixture.Capture();
+  CHECK(LiveFingerprint(fixture) == before);
+  CheckNoStaleDisplayRows(state);
+}
+
+TEST_CASE("Runtime capture does not repair corrupt display references",
+          "[save][runtime-snapshot]") {
+  RuntimeFixture fixture;
+  auto& order = Audio_Seq_unusedInventoryIndices.misc;
+  const auto defect = GENERATE(0, 1);
+  order[0] = 64;
+  order[1] = defect == 0 ? 65 : 64;
+  const auto before = LiveFingerprint(fixture);
+  const auto state = Save::Capture(fixture.storage);
+  REQUIRE_FALSE(state.has_value());
+  CHECK(state.error().find("inventory_order.misc") != std::string::npos);
   CHECK(LiveFingerprint(fixture) == before);
 }
 

@@ -9,6 +9,40 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #180 post-Minotaur Heal save failure is reproduced and repaired locally.
+  Owner Debug1792918396645912-0 saves at23411, consumes original Grimoires425/432
+  and learns Heal/action96 plus action54, then cannot save to either an existing
+  or empty file: display reference11 points to the consumed slot.
+  Original5BF94.c:4454 intentionally leaves display rows stale after consumption;
+  2D10.c:1254 removes them on inventory reentry. Native capture wrongly required
+  that lazy live cache to already satisfy canonical file validation.
+  Capture now projects ordered occupied survivors on its own snapshot copy for
+  all seven categories. Missing lazy entries stay missing; live order/inventory
+  are not mutated. Out-of-range and duplicate references still fail, including
+  duplicates of deleted slots; external file-content validation remains strict.
+  Static/support/camera capture limits are unchanged, with all rejecting actor
+  fields now included in the diagnostic rather than an undifferentiated message.
+  Focused red3/106 has2 failures; green75/5,648 and full serial749/3,388,723 each
+  Debug/Release pass. All three hosts build both; affected-TU tidy0 new and
+  full fast195 existing/0 new, no baseline changes.
+  Actual pre-fix Desktop1792920840234145-0 reproduces the exact failure at5103.
+  Identical green Debug1792920927472590-0 / Release1792920905225737-0 learn
+  Heal96 at2767 and action54 at3643 through actual controller actions, then
+  Command > Data > Save/Yes writes generation4 at5103. The seed is an unchanged
+  isolated copy of the owner's legitimate post-boss generation3; this is not a
+  newly replayed boss victory. Both consumed items are absent, survivor order
+  stays1..9, position[411,0,569]/9,17/scene1 is preserved, and the backup is
+  byte-identical to generation3. Separate process restarts1792921065248414-0 /
+  1792921077125704-0 restore HP133/MP45 at1645 and both learned actions, followed
+  by318 consecutive normal frames1683..2000 with ordinary regeneration.
+  Strict report: `build/quality/save180-verified.json`; exact commands, captures,
+  manifests and preserved owner diagnostics are in `save180-*` and
+  `save-heal-owner-1792918396645912-0`. Owner files remain byte-identical.
+  Later owner failures at50948 (9/5) and75644 (13/0) hit a separate static-actor
+  capture boundary, not this inventory error. Their rejecting field/root cause
+  remains unobserved; do not claim those repaired or broaden safe capture
+  acceptance speculatively. #18's full-story/transient/import/EC gates remain open.
+  Scoped publication/exact CI and issue reconciliation are the next gate.
 - #169's actual first-lever handoff is now verified, not only direct MAP212
   loading. Original MAP020 event4 requires local flag48==1, tile3,13 and normal
   grounded actor state. The supported upper static floor6,12 resolves-512,
@@ -34,10 +68,11 @@ verification of the current worktree.
   and120 consecutive living/normal return frames. A clean-exit no-handoff
   control is explicitly rejected. It is registered in maintained Python scope.
   Core fix remains f1bba2b0/exact green40111624104; current native code is
-  c470fd26 with only owner ignore/solution edits plus this test package.
+  c470fd26 with only owner ignore/solution edits plus that test package.
   Evidence: `build/quality/lever169-sequence-*-verified.json`, adaptive/static
-  runs and `lever169-*`. Acceptance publication/exact CI is the remaining gate;
-  this is not full campaign completion, every-door coverage or visual parity.
+  runs and `lever169-*`. Acceptance publishedc8b2d13b6b726de02f593f35291ecea509e69b64,
+  exact green40176464045; #169 is closed. This is not full campaign completion,
+  every-door coverage or visual parity.
 - #18 measured cold-preview/load repair retains validated native documents.
   Actual speed1 Desktop timing on the449,036-byte isolated owner-save copy
   identifies duplicate Decode plus two Encode/self-Decode comparison passes,

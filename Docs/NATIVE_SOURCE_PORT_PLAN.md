@@ -591,6 +591,12 @@ These are target designs, not an implemented-feature inventory. See §0.2 and th
   checksum. No schema/version change, asynchronous lifetime or cached load/overwrite consent is introduced.
   Stage timings and primary/recovery controller evidence are in HANDOFF; remaining cold latency is separate
   from the measured duplicate parsing/serialization removed here.
+- **Lazy inventory-cache capture (#180):** original item consumption clears an exhausted slot without
+  rebuilding menu display indices. Semantic capture projects only ordered occupied survivors on its owned
+  copy, preserving lazy missing entries and leaving live gameplay unchanged. Range/duplicate errors remain
+  explicit; saved-file content validation still rejects dead references. Actual post-boss Heal learning,
+  save and process-restart restoration are verified in Debug/Release; this does not relax static-actor,
+  camera or moving-support capture gates, nor establish the full campaign milestone.
 
 ### 6.8 Game modules (`VS.Game`)
 
