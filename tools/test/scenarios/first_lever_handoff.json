@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "scripts": [
+    {
+      "name": "first-lever-original-handoff",
+      "scenario": "first_lever_room.json",
+      "frames": 6000,
+      "press": "99:Circle,101:Circle,103:Circle,130:Circle,160:Circle,189:Circle,191:Circle,220:Circle,250:Circle,280:Circle,563:Cross,589:Up,591:Up,593:Up,595:Up,597:Up,599:Up,601:Up,603:Up,605:Up,607:Up,609:Up,611:Up,613:Up,615:Left,617:Left,618:Up,645:Cross,1408:Circle,1802:Down,1804:Down,1806:Down,1808:Down,1810:Down,1812:Down,1814:Down,1816:Down,1818:Down,1820:Down,1822:Down,1824:Down,1826:Down,1828:Down,1830:Down,1832:Down,1834:Down,1836:Down,1838:Down,1840:Down,1842:Down,1844:Down,1846:Down,1848:Down,1850:Down,1852:Down,1854:Down,1856:Down,1858:Down,1860:Left,1862:Left,1864:Left,1866:Left,1868:Left,1870:Left,1872:Left,1874:Left,1876:Left,1878:Left,1880:Left,1882:Left,1884:Left,1886:Left,1888:Left,1890:Left,1892:Left,1894:Left,1896:Left,1898:Left,1900:Left,1902:Left,1904:Left,1906:Left,1908:Left,1910:Left,1912:Left,1914:Left,1916:Left,1918:Left,1920:Up,1922:Up,1924:Up,1926:Up,1928:Up,1930:Up,1932:Up,1934:Up,1936:Up,1938:Up,1940:Up,1942:Up,1944:Up,1946:Up,1948:Up,1950:Up,1952:Up,1954:Up,1956:Up,1958:Up,1960:Up,1962:Up,1964:Up,1966:Up,1968:Up"
+    },
+    {
+      "name": "first-lever-fresh-world-reentry",
+      "scenario": "first_lever_room.json",
+      "frames": 6000,
+      "press": "99:Circle,101:Circle,103:Circle,130:Circle,160:Circle,189:Circle,191:Circle,220:Circle,250:Circle,280:Circle,563:Cross,589:Up,591:Up,593:Up,595:Up,597:Up,599:Up,601:Up,603:Up,605:Up,607:Up,609:Up,611:Up,613:Up,615:Left,617:Left,618:Up,645:Cross,1408:Circle,1802:Down,1804:Down,1806:Down,1808:Down,1810:Down,1812:Down,1814:Down,1816:Down,1818:Down,1820:Down,1822:Down,1824:Down,1826:Down,1828:Down,1830:Down,1832:Down,1834:Down,1836:Down,1838:Down,1840:Down,1842:Down,1844:Down,1846:Down,1848:Down,1850:Down,1852:Down,1854:Down,1856:Down,1858:Down,1860:Left,1862:Left,1864:Left,1866:Left,1868:Left,1870:Left,1872:Left,1874:Left,1876:Left,1878:Left,1880:Left,1882:Left,1884:Left,1886:Left,1888:Left,1890:Left,1892:Left,1894:Left,1896:Left,1898:Left,1900:Left,1902:Left,1904:Left,1906:Left,1908:Left,1910:Left,1912:Left,1914:Left,1916:Left,1918:Left,1920:Up,1922:Up,1924:Up,1926:Up,1928:Up,1930:Up,1932:Up,1934:Up,1936:Up,1938:Up,1940:Up,1942:Up,1944:Up,1946:Up,1948:Up,1950:Up,1952:Up,1954:Up,1956:Up,1958:Up,1960:Up,1962:Up,1964:Up,1966:Up,1968:Up"
+    }
+  ]
+}

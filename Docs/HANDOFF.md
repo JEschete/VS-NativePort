@@ -9,6 +9,35 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #169's actual first-lever handoff is now verified, not only direct MAP212
+  loading. Original MAP020 event4 requires local flag48==1, tile3,13 and normal
+  grounded actor state. The supported upper static floor6,12 resolves-512,
+  within original marker2 interaction reach; lower5,11 is512 below it. Real
+  Cross and the original Pull Lever selector establish the timed state.
+  Earlier routes physically reached the tile only after event2 closed it;
+  those clean exits/failures are not accepted as progression.
+  Real crossbow action1 defeats original bat4 HP41->0, leaving wolf3 at76HP.
+  Then normal sheathing, lever interaction/confirmation and movement reach
+  embedded event4 before closure. Debug1792914639045805-0 /
+  Release1792914784653033-0 load actual MAP212 at2190, enter19/0 at2191,
+  naturally load9/12 at3900 and return normal control4666. No HP/flags/position
+  edits, direct event request or forced skip; zero engine errors.
+  Maintained `tools/test/scenarios/first_lever_handoff.json` repeats the whole
+  controller path twice in one window. Debug1792915518582016-0 and
+  Release1792915856293931-0 pass both real source/destination entries:
+  event4 at1970/7982, MAP212 ready2191/8203, normal9/12 return4666/10678 and
+  longest consecutive normal intervals126 each. Both cases complete normal
+  teardown without errors. Second MAP212 entry correctly reuses cached data;
+  physical-read absence is not missing logical room initialization.
+  `tools/test/verify_first_lever.py` verifies actual attack, retained wolf,
+  original trigger, catalog-backed MAP212 identity, ordering, unforced scenes
+  and120 consecutive living/normal return frames. A clean-exit no-handoff
+  control is explicitly rejected. It is registered in maintained Python scope.
+  Core fix remains f1bba2b0/exact green40111624104; current native code is
+  c470fd26 with only owner ignore/solution edits plus this test package.
+  Evidence: `build/quality/lever169-sequence-*-verified.json`, adaptive/static
+  runs and `lever169-*`. Acceptance publication/exact CI is the remaining gate;
+  this is not full campaign completion, every-door coverage or visual parity.
 - #18 measured cold-preview/load repair retains validated native documents.
   Actual speed1 Desktop timing on the449,036-byte isolated owner-save copy
   identifies duplicate Decode plus two Encode/self-Decode comparison passes,

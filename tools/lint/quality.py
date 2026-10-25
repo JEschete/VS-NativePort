@@ -26,7 +26,7 @@ BASELINE = HERE / "baseline.json"
 OUTPUT = ROOT / "build" / "quality"
 NATIVE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx", ".inl"}
 SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx"}
-PYTHON_FOLDERS = ("lint", "port", "scaffold", "ledger", "naming")
+PYTHON_FOLDERS = ("lint", "port", "scaffold", "ledger", "naming", "test")
 RETIRING_NATIVE = {
     "Native/Engine/src/Audio/Driver/PlaybackReset.c": "EC-02",
     "Native/Engine/src/Audio/Driver/PlaybackReset.h": "EC-02",

@@ -83,6 +83,8 @@ The default scope includes hand-maintained native sources and first-party Python
 tooling. It reads the copier manifest and ownership registry to exclude generated
 native output. Reference repositories, extracted data, vendor packages, and tool
 collections under `tools/PSX` and `tools/Base` are not project-style targets.
+Python replay validators under `tools/test` are maintained tooling too; native
+sequence fixtures are exercised by their runtime and semantic verification steps.
 
 ```cmd
 quality-native.cmd --list

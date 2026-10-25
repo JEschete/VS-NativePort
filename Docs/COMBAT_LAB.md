@@ -1059,7 +1059,8 @@ direct original-room loader controls, not completed cutscenes: control remains3.
 The ordinary9/11 control remains safe. A Circle interaction attempt does not
 start event4, and two Up exit attempts1792858944213004-0 stay9/11 under
 the post-prologue profile. Neither is claimed as the owner's actual transition.
-The exact legitimate story/event context is still required before closing #169.
+The exact legitimate story/event context was still required at that checkpoint;
+the later authored-input regression below now establishes it.
 
 Both full suites pass624 cases/3,150,286 assertions. Copier60, stable
 1,016 native source/template/project files plus manifest, and focused source
@@ -1070,6 +1071,54 @@ one-byte tail-shortening check now permits load, while missing-cell access
 remains explicitly rejected; malformed fixed headers still fail.
 Evidence: `build\quality\room169-actual-evidence.json` and `room169-*.log`.
 No flags, HP, scene completion or resource data were patched.
+
+#### Authored first-lever handoff and reentry (2026-10-25)
+
+The maintained [room preset](../tools/test/scenarios/first_lever_room.json)
+retains original production actors/events. Its existing crossbow setup is a
+controlled equipment precondition, not an HP/range/progression override. Actual
+action1 defeats bat4 HP41->0; wolf3 remains alive at76HP. Real sheathing, facing
+and Cross open the original **Pull Lever** selector, and Circle accepts it.
+The natural upper floor is-512; attempting interaction from the lower floor
+would violate the original +/-128 vertical limit.
+
+Original MAP020's embedded event4 requires local flag48==1, Ashley tile3,13 and
+not-busy/grounded state. The flag comes from the original lever script. Earlier
+routes reached the tile after the automatic closing event had cleared it and
+are explicitly failed controls. Removing the bat's actual interference through
+combat allows the recorded movement to reach the original timed trigger.
+No script flag, live position, HP or completion state is written by the replay.
+
+Run the two-entry [sequence](../tools/test/scenarios/first_lever_handoff.json)
+and then its [semantic checker](../tools/test/verify_first_lever.py):
+
+```powershell
+.\build\Debug\VS.CombatLab.exe --data Native\data `
+    --sequence tools\test\scenarios\first_lever_handoff.json --speed 1 --scripted
+.\.venv-3\Scripts\python.exe tools\test\verify_first_lever.py `
+    build\Debug\combat-lab\runs\<run-id> --revision <full-source-revision>
+```
+
+Use the Release paths for the other configuration. Each6000-tick case begins
+a fresh world through normal teardown in the same window. Process completion
+alone is not acceptance: the checker requires the real bat attack, unchanged
+living wolf, source event4 at its actual tile, the catalog's32x32 MAP212
+destination, natural9/12 progression and at least120 consecutive ordinary
+living/control frames, with no engine errors or forced skip.
+
+Debug1792915518582016-0 / Release1792915856293931-0 verify both entries.
+Event4 starts1970/7982; MAP212 is ready2191/8203; normal9/12 control returns
+4666/10678, with consecutive intervals126 frames each. Both cases have complete
+teardown and zero errors. The first case physically reads MAP212 at2190; the
+second correctly reuses cached asset data. The checker records that distinction
+instead of requiring a redundant physical read. It rejects a clean-exit trace
+that never performs the handoff.
+
+Core bounds fix is f1bba2b0; this acceptance uses current native c470fd26 plus
+the scoped test files and unrelated owner ignore/solution edits. Immutable
+reports are `build\quality\lever169-sequence-*-verified.json`; captures/assets
+stay local. This establishes the reported scripted loader boundary and repeat
+entry, not every campaign door, all cutscene fidelity, or compatibility retirement.
 
 ### Owner pause: door coverage limits and next failure
 

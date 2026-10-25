@@ -276,6 +276,7 @@ class BaselineTests(unittest.TestCase):
     def test_scope_excludes_copied_and_external_sources(self) -> None:
         native, python = quality.discover_files()
         self.assertIn("Native/Engine/src/Core/FrameClock.cpp", native)
+        self.assertIn("tools/test/verify_first_lever.py", python)
         self.assertNotIn("Native/Game/src/Battle/Targeting.c", native)
         self.assertTrue(all(path.startswith("Native/") for path in native))
         self.assertFalse(

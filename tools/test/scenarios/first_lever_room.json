@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "zone": 9,
+  "room": 11,
+  "seed": 1,
+  "ashley_profile": "post-prologue",
+  "ashley_weapon": "crossbow",
+  "player": {"x": 6, "z": 10, "elevation": 0, "direction": 0},
+  "enemies": [],
+  "room_events": "production"
+}
