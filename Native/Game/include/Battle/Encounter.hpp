@@ -234,6 +234,16 @@ struct EncounterTargetPageState {
   int selected = -1;
 };
 
+struct EncounterRouletteState {
+  int entry_phase = 0;
+  int screen_state = 0;
+  int timer = 0;
+  unsigned animation = 0;
+  int reel = 0;
+  unsigned selection = 0;
+  std::uint32_t bios_state = 0;
+};
+
 struct EncounterState {
   bool ready = false;
   int zone = 0;
@@ -243,6 +253,7 @@ struct EncounterState {
   bool field_rendering_enabled = false;
   int menu_state = -1;
   int menu_highlighted_row = -1;
+  std::optional<EncounterRouletteState> roulette;
   int frame_buffer = 0;
   std::uint32_t transition = 0;
   std::uint32_t native_buttons = 0;

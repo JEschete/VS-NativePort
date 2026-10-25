@@ -4667,6 +4667,14 @@ Read-only snapshots now persist `game_over`, `menu_state`,
 `field_rendering_enabled` and `frame_buffer`, so healthy player initialization
 is distinguishable from a stale menu/event taking over afterward.
 
+Post-boss game-clear MENUF also exposes optional `roulette` data: entry phase,
+screen state/timer, animation speed, reel index, selection byte and full BIOS
+random state. It is absent while inspection is unavailable, for other MENUF
+subtypes and after the results menu closes. Sampling neither advances RNG nor
+changes UI/award state. Compare these raw per-frame counters with the host tick
+and actual controller edges when auditing stop cadence; do not infer logic-call
+timing from presentation FPS alone.
+
 **Bat flight #77:** the failing lowest-reachable-ground query used the packed
 tile word as X, so `0x400D0008` reached the terrain guard as X=`1074593800`.
 The owned fix uses distinct tile X/Z and direction-delta values. The assembly-

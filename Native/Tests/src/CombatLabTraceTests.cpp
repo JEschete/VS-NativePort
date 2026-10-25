@@ -18,18 +18,23 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Skeleton.h"
+#include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
 #include "Boot/GameLoop.h"
+#include "Core/BiosRand.h"
 #include "Event/ScriptVm.h"
 #include "Field/GameMode.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Items/Loot.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/MenuItems.h"
+#include "Menu/Results/Results.h"
+#include "Menu/Results/TimeAttack.h"
 }
 
 namespace {
@@ -501,6 +506,17 @@ struct GameplayInspectionFixture {
   decltype(Field_roomData.floorTriggers) saved_triggers =
       Field_roomData.floorTriggers;
   decltype(Menu_Framework_itemsText) saved_text = Menu_Framework_itemsText;
+  decltype(Menu_Framework_menuState) saved_menu = Menu_Framework_menuState;
+  decltype(Audio_Seq_unusedStateFlags.menuFSubmenu) saved_results_kind =
+      Audio_Seq_unusedStateFlags.menuFSubmenu;
+  std::array<char, 16> saved_submenus =
+      std::to_array(Menu_Framework_submenuStates);
+  int saved_results_state = Menu_Results_screenState;
+  int saved_results_timer = Menu_Results_screenTimer;
+  u_int saved_results_animation = Menu_Results_elementAnimationState;
+  int saved_results_reel = Menu_Results_buffReelIndex;
+  u_int saved_results_selection = Menu_Results_buffReelSelection;
+  unsigned saved_random = Core_Random_State();
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
   decltype(std::to_array(Actors_actorRecords)) saved_models =
@@ -517,6 +533,7 @@ struct GameplayInspectionFixture {
     Items_lootListHead = nullptr;
     Field_roomData.floorTriggers = nullptr;
     Menu_Framework_itemsText = nullptr;
+    Menu_Framework_menuState.currentMenu = Menu_Framework_MenuState_NoneClosed;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
     model.modelId = 58;
@@ -537,12 +554,32 @@ struct GameplayInspectionFixture {
     Items_lootListHead = saved_loot;
     Field_roomData.floorTriggers = saved_triggers;
     Menu_Framework_itemsText = saved_text;
+    Menu_Framework_menuState = saved_menu;
+    Audio_Seq_unusedStateFlags.menuFSubmenu = saved_results_kind;
+    std::copy(saved_submenus.begin(), saved_submenus.end(),
+              Menu_Framework_submenuStates);
+    Menu_Results_screenState = saved_results_state;
+    Menu_Results_screenTimer = saved_results_timer;
+    Menu_Results_elementAnimationState = saved_results_animation;
+    Menu_Results_buffReelIndex = saved_results_reel;
+    Menu_Results_buffReelSelection = saved_results_selection;
+    Core_Random_Seed(saved_random);
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_waits.begin(), saved_waits.end(),
               Event_isTextBoxAwaitingClose);
   }
 };
+
+void CheckRouletteSample(const VS::Game::EncounterRouletteState& reel) {
+  CHECK(reel.entry_phase == 2);
+  CHECK(reel.screen_state == 1);
+  CHECK(reel.timer == 490);
+  CHECK(reel.animation == 35);
+  CHECK(reel.reel == 2);
+  CHECK(reel.selection == 248);
+  CHECK(reel.bios_state == 0xFEEDC0DEu);
+}
 
 void CheckEventScene(const nlohmann::json& event) {
   const auto& waits = event.at("dialogue_waits");
@@ -616,4 +653,72 @@ TEST_CASE("A cached ready snapshot cannot inspect a released gameplay scene",
   CHECK_FALSE(
       VS::Game::InspectGameplayScene(before).at("available").get<bool>());
   CHECK_FALSE(VS::Game::InspectGameplayScene(before).contains("models"));
+}
+
+TEST_CASE("Shared trace records optional raw roulette state without truncation",
+          "[diagnostics][trace][roulette-trace]") {
+  TraceScope absent;
+  CHECK_FALSE(
+      FlushedFrame(absent, SampleState()).at("data").contains("roulette"));
+  auto state = SampleState();
+  state.roulette = VS::Game::EncounterRouletteState{.entry_phase = 2,
+                                                    .screen_state = 1,
+                                                    .timer = 490,
+                                                    .animation = 35,
+                                                    .reel = 2,
+                                                    .selection = 248,
+                                                    .bios_state = 0xFEEDC0DEu};
+  TraceScope present;
+  const auto data = FlushedFrame(present, state).at("data").at("roulette");
+  CHECK(data == nlohmann::json{{"entry_phase", 2},
+                               {"screen_state", 1},
+                               {"timer", 490},
+                               {"animation", 35},
+                               {"reel", 2},
+                               {"selection", 248},
+                               {"bios_state", 0xFEEDC0DEu}});
+}
+
+TEST_CASE(
+    "Gameplay roulette inspection reads the original state without changes",
+    "[diagnostics][inspection][roulette-trace]") {
+  GameplayInspectionFixture fixture;
+  Menu_Framework_menuState.currentMenu = 15;
+  Audio_Seq_unusedStateFlags.menuFSubmenu = 0;
+  Menu_Framework_submenuStates[15] = 2;
+  Menu_Results_screenState = 1;
+  Menu_Results_screenTimer = 490;
+  Menu_Results_elementAnimationState = 35;
+  Menu_Results_buffReelIndex = 2;
+  Menu_Results_buffReelSelection = 248;
+  Core_Random_Seed(0xFEEDC0DEu);
+  Boot_EncounterPollStop();
+  const auto state = VS::Game::InspectGameplay();
+  if (state.roulette) {
+    CheckRouletteSample(*state.roulette);
+  } else {
+    FAIL("Active game-clear roulette was not captured");
+  }
+  CHECK(Core_Random_State() == 0xFEEDC0DEu);
+  CHECK(Menu_Results_screenTimer == 490);
+  CHECK(Menu_Results_buffReelSelection == 248);
+}
+
+TEST_CASE(
+    "Roulette inspection excludes loading other submenus and closed menus",
+    "[diagnostics][inspection][roulette-trace]") {
+  GameplayInspectionFixture fixture;
+  Menu_Framework_menuState.currentMenu = 15;
+  Audio_Seq_unusedStateFlags.menuFSubmenu = 0;
+  CHECK_FALSE(VS::Game::InspectGameplay().roulette);
+  Boot_EncounterPollStop();
+  REQUIRE(VS::Game::InspectGameplay().roulette.has_value());
+  Audio_Seq_unusedStateFlags.menuFSubmenu = 1;
+  CHECK_FALSE(VS::Game::InspectGameplay().roulette);
+  Audio_Seq_unusedStateFlags.menuFSubmenu = 0;
+  Menu_Framework_menuState.currentMenu = Menu_Framework_MenuState_NoneClosed;
+  CHECK_FALSE(VS::Game::InspectGameplay().roulette);
+  Menu_Framework_menuState.currentMenu = 15;
+  Boot_ResetGameplayInspection();
+  CHECK_FALSE(VS::Game::InspectGameplay().roulette);
 }

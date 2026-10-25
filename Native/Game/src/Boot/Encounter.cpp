@@ -66,6 +66,8 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/MenuItems.h"
+#include "Menu/Results/Results.h"
+#include "Menu/Results/TimeAttack.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -87,6 +89,21 @@ bool room_prepared = false;
 bool gameplay_inspection_ready = false;
 bool player_stats_initialized = false;
 bool external_event_started = false;
+
+std::optional<EncounterRouletteState> InspectRoulette(int menu) {
+  constexpr int kResultsMenu = 15;
+  if (menu != kResultsMenu || Audio_Seq_unusedStateFlags.menuFSubmenu != 0) {
+    return std::nullopt;
+  }
+  return EncounterRouletteState{
+      .entry_phase = Menu_Framework_submenuStates[kResultsMenu],
+      .screen_state = Menu_Results_screenState,
+      .timer = Menu_Results_screenTimer,
+      .animation = Menu_Results_elementAnimationState,
+      .reel = Menu_Results_buffReelIndex,
+      .selection = Menu_Results_buffReelSelection,
+      .bios_state = Core_Random_State()};
+}
 constexpr int kDirectEventTrigger = 0x40;
 int pending_door = -1;
 int pending_door_zone = 0;
@@ -702,6 +719,7 @@ EncounterState InspectGameplay() {
       Menu_Framework_itemsText != nullptr) {
     state.menu_highlighted_row = Menu_Framework_HighlightedRow();
   }
+  state.roulette = InspectRoulette(state.menu_state);
   state.frame_buffer = Render_frameBuf;
   state.transition = Field_screenTransitionStep;
   state.native_buttons = Input_buttonsState;

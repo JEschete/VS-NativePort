@@ -289,6 +289,16 @@ void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
       {"learned_actions", state.learned_actions},
       {"floor_triggers", floor_triggers},
       {"actors", actors}};
+  if (state.roulette) {
+    const auto& reel = *state.roulette;
+    data["roulette"] = {{"entry_phase", reel.entry_phase},
+                        {"screen_state", reel.screen_state},
+                        {"timer", reel.timer},
+                        {"animation", reel.animation},
+                        {"reel", reel.reel},
+                        {"selection", reel.selection},
+                        {"bios_state", reel.bios_state}};
+  }
   if (!scene.is_null()) data["scene"] = scene;
   Event("frame", data, tick);
 }

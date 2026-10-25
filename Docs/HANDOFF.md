@@ -144,6 +144,28 @@ verification of the current worktree.
   stats, not real boss-award evidence. Live stop/host-call cadence, reel chooser
   initialization and repeated boss/reward/save-resume observation remain open.
   Local commands/results: `build/quality/roulette177-*`.
+  Shared Desktop/Lab frame diagnostics now have optional read-only `roulette`
+  state for menu15/game-clear only: entry phase, screen state/timer, animation,
+  reel, selection and full BIOS state. It is absent during unavailable inspection,
+  other subtypes and after menu closure; it does not draw a random number.
+  Three new serialization/read-only/lifecycle cases pass within full serial
+  Debug/Release733 cases/3,191,786 assertions each. All hosts build in each
+  config; selected production/test tidy0 plus59 fixture literals, fast195/0 new.
+  This is source e360fbea plus the scoped diagnostics package, not live cadence
+  acceptance.
+  Authentic live preconditions are now recovered: the owner's unmodified
+  generation2 save is zone9/room17, flag0x82=8. A byte-identical isolated copy
+  is under `build/quality/roulette177-owner-save-copy`; the owner file was not
+  written. Normal title Load/Yes, actual chest Square/take-all, directional
+  movement and Cross/door interaction reach arena12/0 without flag/HP edits.
+  Debug1792899215445070-0 completes the original embedded intro at3790:
+  Ashley250 at954,-384,300; original boss actor2 HP277 at960,0,1486.
+  Inputs/captures are in `roulette177-authentic-arena-entry-Debug*`.
+  The actual owner roulette producer is external21 after defeat/event10.
+  Empty-actor21 probe1792898671214282-0 lacks its camera actor and faults at118
+  in tagged-bone position; exclude it rather than fabricating a parent/actor.
+  Next: actual combat from the authentic save, then record real stop input,
+  per-frame reel cadence and award through that original21 producer.
 - #176 zero-glyph transition repair: original matching `_renderTextImmediate`
   assembly at800C81DC/81E4/8274 uses encoded0xE5, space0x8F and subtracts0xE5.
   Copied F01337 instead used ASCII form-feed/space, so end0xE7 did not terminate
