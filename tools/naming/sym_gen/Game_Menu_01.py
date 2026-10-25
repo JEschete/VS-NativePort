@@ -41,7 +41,7 @@ def enumerators(tid: str, strip_suffix: str = "") -> list[tuple]:
         while all(len(w) > common + 1 and w[common].lower() == split[0][common].lower() for w in split):
             common += 1
     out = []
-    for n, w in zip(names, split):
+    for n, w in zip(names, split, strict=True):
         rest = [x for x in w[common:] if x != "_"]
         if strip_suffix and rest and rest[-1] == strip_suffix:
             rest = rest[:-1]

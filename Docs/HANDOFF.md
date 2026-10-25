@@ -9,6 +9,23 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #25 paired-length checkpoint makes six audited B905 contracts explicit:
+  four shared Gen member/spec pairs and both menu name/token pairs. Existing
+  duplicate-length and exact member-order guards remain; layout and token
+  producers already require full alignment, not intentional prefix truncation.
+  Eight source-independent contract tests expose4 malformed-pair subtest
+  failures before the guards;128 maintained tests pass afterward. The exact
+  naming selection passes23 tests without analysis caches and is now included
+  in the Windows Source Quality workflow. Four complete actual generators
+  (Battle01/02, Menu01/02) retain all12 CSV byte hashes before/after/repeat:
+  316 types,2,411 fields,38 globals. Canonical ledger hashes remain unchanged;
+  output is private and no native/owned implementation was regenerated.
+  Full fast188 ->182 existing/0 new (41 test-harness,141 tooling), no baseline
+  or suppression updates. Remaining23 B905 sites are not blanket-certified;
+  malformed internal fixtures do not establish a current campaign/cache defect.
+  Evidence: private `quality25-pairs-*` reports, red/green/exact-CI selections
+  and output probe. Source800a44ec plus the scoped helpers/tests/CI edits;
+  publication/CI are recorded in #25. The broad issue remains open.
 - #25 first-party unused-binding batch removes six retained F401/F841 findings
   across naming/port tools, plus the related generator import-order finding.
   `cite_declaration_only` still validates every field row identity before

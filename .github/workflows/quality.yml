@@ -32,6 +32,8 @@ jobs:
         run: python -m unittest discover -s tools/lint -p test_quality.py -v
       - name: Verify encounter source adaptations
         run: python tools/port/test_encounter_fixups.py
+      - name: Verify naming contracts
+        run: python -m unittest discover -s tools\naming -p test_*.py -v
       - name: Reject new source-quality findings
         run: .\quality-native.cmd
       - name: Preserve reports

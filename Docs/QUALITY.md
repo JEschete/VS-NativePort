@@ -77,6 +77,16 @@ to close an issue. A previous revision's passing run is not a substitute.
 Manual dispatch uses the same Windows job, permissions and quality baselines
 as the automatic triggers.
 
+The Windows job also checks symbol-ledger merge and member-pairing contracts:
+
+```powershell
+.\.venv-3\Scripts\python.exe -m unittest discover -s tools\naming -p test_*.py -v
+```
+
+These tests use isolated fixtures, not disc data, reference indexes or live
+ledgers. Actual generator-output correctness, ownership preservation and repeat
+generation are separate required checks when changing generator behavior.
+
 ## Scope And Baseline
 
 The default scope includes hand-maintained native sources and first-party Python

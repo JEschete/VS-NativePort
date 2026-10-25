@@ -38,7 +38,7 @@ def enum_specs(tid, name, conf):
         while all(len(w) > common + 1 and w[common].lower() == split[0][common].lower() for w in split):
             common += 1
     out = []
-    for n, w in zip(names, split):
+    for n, w in zip(names, split, strict=True):
         rest = [x for x in w[common:] if x != "_"]
         final = "".join(x[0].upper() + x[1:] for x in rest)
         out.append((n, final, f"{name.rsplit('::', 1)[1]} {final}", conf))

@@ -164,7 +164,7 @@ class Gen:
             if [m["name"] for m in self.members[tid]] != corig and "different member spellings" not in why:
                 sys.exit(f"{tid}: member names differ from {canonical}; pass why='... different member spellings ...'")
             self.TYPES.append([tid, trow[1], trow[2], trow[3], trow[4], trow[5], f"same-as:{canonical};{why};{trow[6]}"])
-            for m, cf in zip(self.members[tid], cfields):
+            for m, cf in zip(self.members[tid], cfields, strict=True):
                 self.FIELDS.append([m["id"], cf[1], cf[2], cf[3], cf[4]])
 
     def applied(self, tid: str) -> tuple[dict, list[dict]]:
@@ -218,7 +218,7 @@ class Gen:
         """Used member: keep a meaningful fork name (med) or opaque<Off> (low); unread member: reserved<Off> (low)."""
         overrides = overrides or {}
         out, seen = [], set()
-        for m, bit in zip(self.members[tid], self.member_offsets(tid)):
+        for m, bit in zip(self.members[tid], self.member_offsets(tid), strict=True):
             n = m["name"]
             off = f"{bit // 8:X}" + (f"Bit{bit % 8}" if m.get("bits") else "")
             if n in overrides:
@@ -246,7 +246,7 @@ class Gen:
             lay, ms = self.layout(t), self.members[t]
             offs = [f["offset"] for f in lay["fields"]]
             out = []
-            for i, (m, f) in enumerate(zip(ms, lay["fields"])):
+            for i, (m, f) in enumerate(zip(ms, lay["fields"], strict=True)):
                 width = int(m["bits"]) if m.get("bits") else (
                     ((offs[i + 1] if i + 1 < len(offs) else lay["size"] * 8) - offs[i]))
                 out.append(((f["offset"], width), m))
@@ -265,7 +265,7 @@ class Gen:
         order = self.members[tid]
         if [o["name"] for o in order] != [sp[0] for sp in specs]:
             sys.exit(f"{tid}: member order\n  ledger {[o['name'] for o in order]}\n  specs  {[sp[0] for sp in specs]}")
-        for o, sp in zip(order, specs):
+        for o, sp in zip(order, specs, strict=True):
             orig, final, meaning, fconf = sp[:4]
             cite_ = sp[4] if len(sp) > 4 else None
             upstream = "layout:upstream" in o.get("hints", "") or self.types[tid]["files"].startswith("upstream:")
