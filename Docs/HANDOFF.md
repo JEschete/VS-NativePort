@@ -9,6 +9,27 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 now has114/186 original entries implemented and72 remaining
+  (31 C/C++ references,31 assembly-only,10 listings not located). F00995 and
+  F01007 are two catalog occurrences of one function, func_800AEEC4.
+  Its owned C++ actor-state leaf restores the original void(actor*) ABI and
+  centralizes the already-working actor/companion inline interpolation.
+  Original44F14.c:886 and MIPS800AEEC4-800AEF90 verify unsigned pan/volume
+  bytes, signed truncation, min(tickSpeed/2,remaining), guards and timer
+  consumption. Existing frozen-render conditions and producers are unchanged.
+  The new implementation stays with Game-owned state in Actors/SoundOverrides;
+  the Audio prefix preserves source traceability.
+  Red ABI compilation exposes the old int() stub. Full-range, idle, odd/zero,
+  clamped, completion/retarget/reset controls cover the typed leaf; no new
+  audible gameplay fix, whole audio-state promotion or retirement is claimed.
+  Two copier runs preserve300 protected files and repeat identically, changing
+  only ActorSound.c/.h, ModelRendering.c and ModulePointers.c. Only the affected
+  Game/Tests projects are rendered through the existing scaffold API, preserving
+  the dirty owner solution. Build and analyzer share the C-interop predicate.
+  Exact test/quality/publication evidence is recorded on#42; local
+  `actor-sound-transition-*` reports retain the commands and limits.
+  Full Debug/Release771 cases/3,390,847 assertions each and87 port/29 quality
+  tool tests pass; focused implementation/test TU tidy and default quality are0/0.
 - #80's general multi-body-part hypothesis now has a current player-side
   conformance check: Debug1792968266440918-0 and Release1792968266549016-0
   use normal controls at speed1 to cast ExplosionIV109 on all six original
@@ -50,8 +71,8 @@ verification of the current worktree.
   perception predicates are unchanged. Existing memory expiration/forgetting
   and fresh-session reset remain active.
   Function/field notes and generated assembly inventories are reconciled:
-  F01792 is no longer a stub;112/186 original entries are complete,74 remain
-  (33 C/C++ references,31 assembly-only,10 listings not located). No whole
+  F01792's milestone reached112/186 entries; the sound leaf above advances
+  current completion to114/186 with72 remaining. No whole
   AI-state C++ promotion or compatibility retirement is claimed. Exact fixing
   publication/CI and closure are tracked in#141/#42. Evidence
   `ai-target-memory-*` in session files.
@@ -80,7 +101,7 @@ verification of the current worktree.
   numbers are excluded too. #76 is closed at the owner's explicit request:
   shared-origin repair e939db22 and its published evidence stand, and any new
   observed particle defect gets a separate concrete issue.
-  #18/#42/#148 retain distinct retirement/import,74-native-gap and semantic-naming
+  #18/#42/#148 retain distinct retirement/import,72-native-gap and semantic-naming
   work. Current #80 conformance and #141 acquisition evidence are above.
   #149/#151 have delivered logging/playback/inventory tooling but are not
   all-scene/all-door certification. #160/#167 are not established as repaired

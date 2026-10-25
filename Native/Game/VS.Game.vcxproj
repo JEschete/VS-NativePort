@@ -126,6 +126,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Actors\SoundOverrides.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Actors\Spawning.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1781,6 +1784,7 @@
     <ClInclude Include="src\Actors\SequencePlayback.h" />
     <ClInclude Include="src\Actors\Shadow.h" />
     <ClInclude Include="src\Actors\Skeleton.h" />
+    <ClInclude Include="src\Actors\SoundOverrides.h" />
     <ClInclude Include="src\Actors\Spawn.h" />
     <ClInclude Include="src\Actors\Spawning.h" />
     <ClInclude Include="src\Actors\Stats.h" />

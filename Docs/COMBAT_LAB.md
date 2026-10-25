@@ -313,6 +313,42 @@ new gameplay fix. This is bounded current conformance, not every-action or
 original-game visual parity certification. A new failing action/enemy needs
 its own concrete reproduction.
 
+### Actor sound-override native leaf (#42, 2026-10-25)
+
+F00995/F01007 are two catalog occurrences of original `func_800AEEC4`,
+not two new audible defects. Production actor/companion rendering already
+contained equivalent inline arithmetic. Both copies now call the registered
+owned `Audio_UpdateActorSoundTransition` with the correct `void(actor*)` ABI;
+the old untyped `int()` stub is removed. Their surrounding frozen-render
+conditions and the original override producer/reset paths are unchanged.
+
+The source-backed leaf lives with its Game-owned actor state in
+[`SoundOverrides.cpp`](../Native/Game/src/Actors/SoundOverrides.cpp).
+Original44F14.c:886 and MIPS800AEEC4-800AEF90 specify unsigned-byte pan/volume,
+signed division toward zero, `min(tickSpeed/2, remaining)` and consuming the
+timer even when both values already match. No source offsets, raw addresses,
+hardware output or new effect/state format is introduced.
+
+The original API fails the new compile-time signature and call controls.
+Fixed `[sound-transition]` controls verify modes0/1/2, zero timer/speed,
+odd speed, increasing/decreasing values and fractional rounding, large-step
+clamping, final endpoints, replacement targets and fresh reset. A full255-tick
+control checks every intermediate unsigned timer/pan/volume value, including
+both byte boundaries. Target state and an unrelated actor field stay intact.
+All three focused cases pass292 assertions in each configuration. Full native
+suites pass771 cases/3,390,847 assertions each;87 port and29 quality-tool
+contracts pass, with0 new focused tidy or maintained default findings.
+This is component/caller-contract verification, not a new listening or full
+actor-sound/reference-parity certification.
+
+Generator ownership, stable repeated output, preserved owner edits and the
+shared scaffold/analyzer C-header rule are checked separately. The original
+186-entry inventory advances only these two IDs to114 complete/72 remaining.
+The source remains a typed C ABI over the compatibility actor record; whole
+audio/actor-state C++ promotion and compatibility retirement are not claimed.
+Local `actor-sound-transition-*` commands, ABI-red output and proof reports
+remain in session evidence; publication and exact CI are recorded on#42.
+
 ### Ashley testing profiles
 
 The **ASHLEY** row selects `prologue`, `post-prologue`, `post-minotaur`,

@@ -234,6 +234,12 @@
     <ClInclude Include="src\Actors\Skeleton.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClCompile Include="src\Actors\SoundOverrides.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\SoundOverrides.h">
+      <Filter>src\Actors</Filter>
+    </ClInclude>
     <ClInclude Include="src\Actors\Spawn.h">
       <Filter>src\Actors</Filter>
     </ClInclude>

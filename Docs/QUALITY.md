@@ -56,7 +56,8 @@ so duplication with an unchanged file is still caught.
 The runner generates compile commands from the solution generator's project table
 and shared compiler properties; do not hand-maintain a second include-path list.
 The generator and analyzer share the C-header interop predicate, including the
-owned C++ minimap implementation that consumes the existing C ABI.
+owned C++ minimap and actor sound-override implementations that consume the
+existing C ABI.
 Exit codes are 0 for no new findings, 1 for new findings, and 2 for tool/configuration
 failures. Commands never rewrite source or update the baseline automatically.
 

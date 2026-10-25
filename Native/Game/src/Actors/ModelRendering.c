@@ -13,6 +13,7 @@
 #include "Actors/Palette.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
+#include "Actors/SoundOverrides.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
@@ -106,26 +107,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
             }
             actor->instance.wasDrawn = 0;
             if (actor->instance.isFrozen) {
-                if ((actor->soundEffect.kind == 1) && actor->soundEffect.parameter != 0) {
-                    int delta;
-                    step = State_tickSpeed / 2;
-                    if (actor->soundEffect.parameter < step) {
-                        step = actor->soundEffect.parameter;
-                    }
-                    delta = actor->soundEffectTarget.flags - actor->soundEffect.flags;
-                    if (delta != 0) {
-                        delta *= step;
-                        delta /= actor->soundEffect.parameter;
-                        actor->soundEffect.flags = actor->soundEffect.flags + delta;
-                    }
-                    delta = actor->soundEffectTarget.level - actor->soundEffect.level;
-                    if (delta != 0) {
-                        delta *= step;
-                        delta /= actor->soundEffect.parameter;
-                        actor->soundEffect.level = actor->soundEffect.level + delta;
-                    }
-                    actor->soundEffect.parameter -= step;
-                }
+                Audio_UpdateActorSoundTransition(actor);
                 step = 0;
                 if (i > 0) {
                     int texture = actor->modelId;
@@ -172,29 +154,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                             Actors_UpdateActorAppearanceTransition(attached);
                         }
                         if (actor->instance.isFrozen) {
-                            if ((attached->soundEffect.kind == 1)
-                                && attached->soundEffect.parameter != 0) {
-                                int delta;
-                                step = State_tickSpeed / 2;
-                                if (attached->soundEffect.parameter < step) {
-                                    step = attached->soundEffect.parameter;
-                                }
-                                delta = attached->soundEffectTarget.flags - attached->soundEffect.flags;
-                                if (delta != 0) {
-                                    delta *= step;
-                                    delta /= attached->soundEffect.parameter;
-                                    attached->soundEffect.flags =
-                                        attached->soundEffect.flags + delta;
-                                }
-                                delta = attached->soundEffectTarget.level - attached->soundEffect.level;
-                                if (delta != 0) {
-                                    delta *= step;
-                                    delta /= attached->soundEffect.parameter;
-                                    attached->soundEffect.level =
-                                        attached->soundEffect.level + delta;
-                                }
-                                attached->soundEffect.parameter -= step;
-                            }
+                            Audio_UpdateActorSoundTransition(attached);
                             step = 0;
                             if (i > 0) {
                                 int texture = attached->modelId;

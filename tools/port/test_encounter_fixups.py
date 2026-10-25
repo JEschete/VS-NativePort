@@ -10,6 +10,28 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_actor_sound_transition_owns_both_catalog_occurrences_and_callers(self):
+        with Path(__file__).resolve().with_name("owned.csv").open(
+            encoding="utf-8", newline=""
+        ) as stream:
+            owned = {row["id"]: row for row in csv.DictReader(stream)}
+        for identifier in ("F00995", "F01007"):
+            self.assertEqual(owned[identifier]["name"], "Audio_UpdateActorSoundTransition")
+            self.assertEqual(
+                owned[identifier]["path"], r"Native\Game\src\Actors\SoundOverrides.cpp"
+            )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Game\src\Actors\ModelRendering.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Audio_UpdateActorSoundTransition(actor);", source)
+        self.assertIn("Audio_UpdateActorSoundTransition(attached);", source)
+        self.assertNotIn("soundEffect.parameter -= step;", source)
+        header = (root / r"Native\Engine\src\Audio\ActorSound.h").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("int Audio_UpdateActorSoundTransition()", header)
+
     def test_ai_target_memory_aliases_preserve_the_original_prefix(self):
         old, new, _ = next(
             fix for fix in copy_fixups.TYPE_FIXES["T00532"]

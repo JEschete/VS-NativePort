@@ -13,6 +13,7 @@ so a stale fix is noticed.
 from __future__ import annotations
 
 NATIVE_HELPER_HEADERS = {
+    "Audio_UpdateActorSoundTransition": r"Native\Game\src\Actors\SoundOverrides.h",
     "Actors_ResolveAttachmentParentMatrix": r"Native\Game\src\Actors\ModelDrawing.h",
     "Actors_SaveActorGroundedTransform": r"Native\Game\src\Actors\MotionRequests.h",
     "Save_NativeInitialTitleSelection": r"Native\Game\include\Save\NativeMenu.h",
@@ -2107,6 +2108,12 @@ FIXES["F00798"] += [
 ]
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    (r"^Actors::UpdateAndDrawRoomActors$",
+     r"(?s)if \(\((actor|attached)->soundEffect\.kind == 1\)\s*"
+     r"&& \1->soundEffect\.parameter != 0\) \{.*?"
+     r"\1->soundEffect\.parameter -= step;\s*\}",
+     r"Audio_UpdateActorSoundTransition(\1);",
+     "44F14.c:923 actor and companion inline copies share the source-backed typed sound transition"),
     (r"^Field::(?:Find|Show|Hide|Disable)RoomGeometryGroup$|^Field::AddRoomGeometryDepthBias$",
      r"\barg0\b", "group_index",
      "2842C.c:550-606 verified geometry group index from event/gimmick/render callers"),

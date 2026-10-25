@@ -58,13 +58,6 @@ void Audio_ActorSoundPanAndVolume(int arg0, int* arg1, int* arg2)
     }
 }
 
-// decomp: BATTLE.PRG func_800AEEC4 (src/BATTLE/BATTLE.PRG/44F14.c:110) [C: not yet ported]
-int Audio_UpdateActorSoundTransition()
-{
-    VS_UNPORTED("Audio::UpdateActorSoundTransition");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800AE4FC (src/BATTLE/BATTLE.PRG/44F14.c:637)
 void Audio_PlayActorModelSound(Actors_ModelInstance* arg0, int arg1)
 {
