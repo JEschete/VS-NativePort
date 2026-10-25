@@ -9,6 +9,31 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #168 now has real original New Game/dragon/window evidence rather than attract
+  mode. Title22C.c:3189 returns menu0 when neither card has a save; adding Down
+  selected the wrong entry. Reference `rays168-ref-live6` uses real controller
+  input, entry_mode0, guard damage70 ->20 ->0 /61 ->16 ->0, then Dtok/model58
+  damage84 ->58 ->33 ->7 ->0. No guest memory writes, HP/flag/position edits or
+  story skip. It captures zone7/event7/phase4 with Ashley[1140,9,2629], view
+  translation[-1040,-140,-2321] and local image/matrix provenance.
+  Fresh native Release1792929268622554-0 likewise plays the real prologue,
+  defeats Dtok at38048, traverses7 ->8 ->18 ->33 ->10 ->9/14 ->9/0 and returns
+  to120 consecutive ready/normal/idle-event frames before closing at68432.
+  The earlier80000-frame probe1792928609925047-0 returned normally but its
+  controller kept toggling the sphere, preventing its own120-frame criterion;
+  input stops only after observed ready/control1/action0/event-phase0 now.
+  At native40060, actor position matches the original exactly and measured
+  view rotation differs by at most13/4096, translation by at most8 units.
+  The early window beam visually agrees at that aligned state. This does NOT
+  establish whole-window parity or resolve the owner's misplaced-ray report:
+  subsequent native camera poses show a much larger window-region polygon.
+  The next observation is aligned original imagery across that later camera
+  motion, not a guessed beam offset or hiding geometry. Full native dense
+  window evidence and original captures stay local in `rays168-*` session files.
+  Portable reference processes/listeners end after each attempt and settings
+  restore byte-identically to the newly restored copy's558A5842 baseline;
+  installed emulator/BIOS/reference worktrees remain untouched. Replay source
+  is81c81f4e with only owner ignore/solution edits; no native ray change yet.
 - #25 paired-length checkpoint makes six audited B905 contracts explicit:
   four shared Gen member/spec pairs and both menu name/token pairs. Existing
   duplicate-length and exact member-order guards remain; layout and token
