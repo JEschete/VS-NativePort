@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -519,7 +520,7 @@ int Tests_FacialTextureBankHandoff(void) {
       *(Render_FrameScratch*)Core_ScratchBase();
   void* savedOrdering = Render_legacyCurrentOrderingTable;
   const unsigned char savedPhase = Content_legacyEtmLoadPhase;
-  unsigned short* savedImage = Content_legacyEtmFileBuffer;
+  uint16_t* saved_image = Content_legacyEtmFileBuffer;
   Content_DiscQueueSlot* savedRequest = Content_legacyEtmDiscRequest;
   const unsigned char savedPage = Actors_sharedSequenceBankTexturePages[0];
   const unsigned char savedLegacyPage = Actors_sequenceTexturePagesOneBased[1];
@@ -554,7 +555,7 @@ int Tests_FacialTextureBankHandoff(void) {
   actor.textureAnimationSlots[1].mode = 1;
   Actors_secondarySlotSequences[1][0] = (Actors_TextureAnimationKey){2, 5};
   Actors_sharedSequenceBankIndex = 0;
-  const short origin[2] = {4, 0};
+  const int16_t origin[2] = {4, 0};
   memcpy(Actors_textureSlotOrigins, origin, sizeof origin);
   Actors_textureSlotRowOffsets[0] = 1;
   u_long ordering[0x822];
@@ -609,7 +610,7 @@ int Tests_FacialTextureBankHandoff(void) {
   *(Render_FrameScratch*)Core_ScratchBase() = savedFrame;
   Render_legacyCurrentOrderingTable = savedOrdering;
   Content_legacyEtmLoadPhase = savedPhase;
-  Content_legacyEtmFileBuffer = savedImage;
+  Content_legacyEtmFileBuffer = saved_image;
   Content_legacyEtmDiscRequest = savedRequest;
   Actors_sharedSequenceBankTexturePages[0] = savedPage;
   Actors_sequenceTexturePagesOneBased[1] = savedLegacyPage;
@@ -645,7 +646,7 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
   ((Render_FrameScratch*)Core_ScratchBase())->primitiveCursor = &guarded.packet;
   Actors_sharedSequenceBankIndex = 0;
   Actors_sharedSequenceBankTexturePages[0] = 0x1A;
-  const short origin[2] = {4, 0};
+  const int16_t origin[2] = {4, 0};
   memcpy(Actors_textureSlotOrigins, origin, sizeof origin);
   Actors_textureSlotRowOffsets[0] = 1;
   actor.textureHeaderBit = wide;
@@ -993,9 +994,9 @@ int Tests_ProjectedBoneEndpoints(void) {
   int passed = Actors_ProjectActorBoneEndpoint(0, 0, output, 0) == 0 &&
                output[0] == ((120 << 16) | 160) && output[1] == 1024;
   passed = passed && Actors_ProjectActorBoneEndpoint(0, 0, output, 1) == 0 &&
-           (short)output[0] == 128 && output[1] == 1024;
+           (int16_t)output[0] == 128 && output[1] == 1024;
   passed = passed && Actors_ProjectActorBoneEndpoint(0, 0, output, 2) == 0 &&
-           (short)output[0] == 144;
+           (int16_t)output[0] == 144;
   passed = passed && Actors_ProjectActorBoneEndpoint(0, 1, output, 0) == -4 &&
            Actors_ProjectActorBoneEndpoint(-1, 0, output, 0) == -1;
   Actors_actorRecords[0] = saved;
@@ -1042,7 +1043,7 @@ int Tests_ActorPoseHierarchy(void) {
   model->groupSection = 96;
   model->vertexSection = 100;
   model->polygonSection = 108;
-  unsigned short* group = (void*)((unsigned char*)file + 96);
+  uint16_t* group = (void*)((unsigned char*)file + 96);
   group[0] = 0;
   group[1] = 1;
   setVector(&Render_ModelWorkspace()->rootOffset, 0, 0, 1024);
@@ -1093,7 +1094,7 @@ static void BuildModelPacketFixture(Actors_ShpModel* model,
   }
   model->polygonSection = 64;
   unsigned char* polygon = (unsigned char*)model + 64;
-  const unsigned short indices[3] = {0, 4, 8};
+  const uint16_t indices[3] = {0, 4, 8};
   memcpy(polygon + (options->colored ? 0 : 4), indices, sizeof indices);
   if (options->colored) {
     polygon[11] = 0x34;
@@ -1125,8 +1126,8 @@ static void BuildModelPacketFixture(Actors_ShpModel* model,
     polygon[0] = 0x2C;
     polygon[1] = 20;
     polygon[2] = 3;
-    const unsigned short quadIndices[4] = {0, 4, 8, 12};
-    memcpy(polygon + 4, quadIndices, sizeof quadIndices);
+    const uint16_t quad_indices[4] = {0, 4, 8, 12};
+    memcpy(polygon + 4, quad_indices, sizeof quad_indices);
     const unsigned char coordinates[8] = {10, 20, 30, 40, 50, 60, 70, 80};
     memcpy(polygon + 12, coordinates, sizeof coordinates);
   }
@@ -1267,7 +1268,7 @@ int Tests_ModelProjectionGroups(void) {
   model->groupSection = 96;
   model->vertexSection = 104;
   model->polygonSection = 128;
-  unsigned short* groups = (void*)((unsigned char*)file + 96);
+  uint16_t* groups = (void*)((unsigned char*)file + 96);
   groups[0] = 0;
   groups[1] = 1;
   groups[2] = 1;
@@ -1288,9 +1289,9 @@ int Tests_ModelProjectionGroups(void) {
   int passed =
       Render_ProjectModelVertices(&instance, matrices, -32, model) == 1024 &&
       Actors_modelRenderContext.projectedVertexCount == 3 &&
-      (short)Actors_modelRenderContext.projectedVertices[0] == 144 &&
-      (short)Actors_modelRenderContext.projectedVertices[1] == 192 &&
-      (short)Actors_modelRenderContext.projectedVertices[2] == 208 &&
+      (int16_t)Actors_modelRenderContext.projectedVertices[0] == 144 &&
+      (int16_t)Actors_modelRenderContext.projectedVertices[1] == 192 &&
+      (int16_t)Actors_modelRenderContext.projectedVertices[2] == 208 &&
       Actors_modelRenderContext.vertexDepths[2] == 1024;
   groups[2] = 2;
   passed = passed &&
@@ -1364,8 +1365,8 @@ int Tests_SharedSequenceOffsets(void) {
   Content_ActorAssetRequest request = {0};
   Actors_ActorRecord* savedActors[17];
   void* savedData = Actors_sharedSequenceData[0];
-  short savedIds[16];
-  short savedParams[16];
+  int16_t saved_ids[16];
+  int16_t saved_params[16];
   char* savedEntries[16];
   u_char savedPage = Actors_sharedSequenceBankTexturePages[0];
   u_char savedBank = Actors_sharedSequenceBankIndex;
@@ -1376,8 +1377,9 @@ int Tests_SharedSequenceOffsets(void) {
   int passed;
 
   memcpy(savedActors, Actors_actorRecords, sizeof savedActors);
-  memcpy(savedIds, Actors_sharedSequenceAnimationIds[0], sizeof savedIds);
-  memcpy(savedParams, Actors_sharedSequenceEntryParams[0], sizeof savedParams);
+  memcpy(saved_ids, Actors_sharedSequenceAnimationIds[0], sizeof saved_ids);
+  memcpy(saved_params, Actors_sharedSequenceEntryParams[0],
+         sizeof saved_params);
   memcpy(savedEntries, Actors_sharedSequenceAnimationData[0],
          sizeof savedEntries);
   memset(Actors_actorRecords, 0, sizeof savedActors);
@@ -1417,8 +1419,9 @@ int Tests_SharedSequenceOffsets(void) {
   }
 
   memcpy(Actors_actorRecords, savedActors, sizeof savedActors);
-  memcpy(Actors_sharedSequenceAnimationIds[0], savedIds, sizeof savedIds);
-  memcpy(Actors_sharedSequenceEntryParams[0], savedParams, sizeof savedParams);
+  memcpy(Actors_sharedSequenceAnimationIds[0], saved_ids, sizeof saved_ids);
+  memcpy(Actors_sharedSequenceEntryParams[0], saved_params,
+         sizeof saved_params);
   memcpy(Actors_sharedSequenceAnimationData[0], savedEntries,
          sizeof savedEntries);
   Actors_sharedSequenceData[0] = savedData;

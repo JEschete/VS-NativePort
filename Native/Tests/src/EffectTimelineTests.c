@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <string.h>
 
 #include "Effects/Runtime.h"
@@ -8,7 +9,7 @@
 // native tracks.
 int Tests_EffectTimelineTrackStride(void) {
   union {
-    unsigned long long alignment;
+    uint64_t alignment;
     unsigned char bytes[sizeof(Effects_EffectTimeline) +
                         2 * sizeof(Effects_TimelineTrack)];
   } storage;

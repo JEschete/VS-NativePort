@@ -18,8 +18,8 @@ TEST_CASE("AI distances preserve signed GTE components and vertical offsets",
   CHECK(Core_Math_SquaredVectorLength(-3, 4, 12) == 169);
   CHECK(Core_Math_SquaredVectorLength(0x10003, 0x10004, -0x1000C) == 169);
   CHECK(Core_Math_SquaredVectorLength(-32768, -32768, -32768) == 0xC0000000u);
-  short source[3] = {10, 20, 30};
-  short target[3] = {13, 24, 30};
+  std::int16_t source[3] = {10, 20, 30};
+  std::int16_t target[3] = {13, 24, 30};
   CHECK(Core_Math_SquaredDistanceWithHeightOffsets(source, target, 0, 0) == 25);
   CHECK(Core_Math_SquaredDistanceWithHeightOffsets(source, target, 9, 3) == 13);
 }
@@ -70,9 +70,9 @@ TEST_CASE(
   calls = 0;
   REQUIRE(SetRCnt(RCntCNT2, 0x44E8, RCntMdINTR) == 1);
   REQUIRE(StartRCnt(RCntCNT2) == 1);
-  const long event = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, []() -> long {
+  const auto event = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, [] {
     ++calls;
-    return 0;
+    return 0L;
   });
   REQUIRE(event == 1);
   Legacy_AdvanceCounter2(70560);

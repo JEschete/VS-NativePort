@@ -2,6 +2,7 @@
 // (tools/port/copy_fixups.py TYPE_FIXES and FIXES). A failure here means a fix
 // no longer holds after a ledger or decomp change.
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "Actors/ActorAllocation.h"
@@ -315,7 +316,7 @@ int Tests_TargetSphereViews(void) {
          labels->opaque40 == (void*)&targets[0] &&
          labels->opaque44 == (void*)&targets[1] &&
          labels->opaque990[23].limbName == text &&
-         ((short*)sphere->wireEdges)[769] == 0x1234;
+         ((int16_t*)sphere->wireEdges)[769] == 0x1234;
 }
 
 int Tests_AiFrameStages(void) {
@@ -539,9 +540,9 @@ int Tests_AiViewsRoundTrip(void) {
   const uint64_t guard_pattern = UINT64_C(0xA5A5A5A5A5A5A5A5);
   enum { kCollisionHeight = 124 };
   struct {
-    unsigned long long before;
+    uint64_t before;
     Battle_Ai_ActorAiState state;
-    unsigned long long after;
+    uint64_t after;
   } guarded;
   Battle_Actor actor = {0};
   Actors_ActorRecord model = {0};

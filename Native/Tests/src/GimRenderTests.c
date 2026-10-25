@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -69,7 +70,7 @@ int Tests_EncodedTextFormatting(void) {
 int Tests_GimEventLayerLayout(void) {
   Render_GimLayer layers[3] = {0};
   Event_SplashLayerView* eventLayers = (void*)layers;
-  unsigned short file = 7;
+  uint16_t file = 7;
   for (unsigned index = 0; index < 3; ++index) {
     layers[index].fileData = &file;
     eventLayers[index].isVisible = 1;
@@ -217,15 +218,15 @@ int Tests_ScaledDialogueGlyphs(void) {
 
 // F01393 / BATTLE func_800CBBCC, 5BF94.c:4056: preserve fixed-point rounding
 // and native packet links.
-static short Coordinate(int index, int count, int scale, int offset,
-                        int vertical) {
+static int16_t Coordinate(int index, int count, int scale, int offset,
+                          int vertical) {
   int value = (index * 2 - count) * scale * (vertical ? 15 : 1);
   int divisor = vertical ? 8192 : 128;
   int rounded = value / divisor - (value % divisor < 0);
-  return (short)(rounded + offset + (vertical ? 120 : 160));
+  return (int16_t)(rounded + offset + (vertical ? 120 : 160));
 }
 
-static u_long Position(short x, short y) {
+static u_long Position(int16_t x, int16_t y) {
   return (u_long)(u_short)x | ((u_long)(u_short)y << 16);
 }
 
@@ -263,9 +264,9 @@ int Tests_GimTilePackets(int columns, int rows, int scale, int offsetX,
 
   image.columns = (u_char)columns;
   image.rows = (u_char)rows;
-  image.offsetX = (short)offsetX;
-  image.offsetY = (short)offsetY;
-  image.scaleAndOrder = (short)scale;
+  image.offsetX = (int16_t)offsetX;
+  image.offsetY = (int16_t)offsetY;
+  image.scaleAndOrder = (int16_t)scale;
   image.brightness = (char)brightness;
   image.vramPage = 18;
   image.textureMode = 1;
@@ -300,14 +301,14 @@ int Tests_GimTilePackets(int columns, int rows, int scale, int offsetX,
 
   if (columns * rows <= 250) {
     for (j = 0; j < rows; ++j) {
-      short top = Coordinate(j, rows, scale & 0x3FFF, offsetY, 1);
-      short bottom = Coordinate(j + 1, rows, scale & 0x3FFF, offsetY, 1);
+      int16_t top = Coordinate(j, rows, scale & 0x3FFF, offsetY, 1);
+      int16_t bottom = Coordinate(j + 1, rows, scale & 0x3FFF, offsetY, 1);
       if (top >= 240 || bottom < 0) {
         continue;
       }
       for (i = 0; i < columns; ++i) {
-        short left = Coordinate(i, columns, scale & 0x3FFF, offsetX, 0);
-        short right = Coordinate(i + 1, columns, scale & 0x3FFF, offsetX, 0);
+        int16_t left = Coordinate(i, columns, scale & 0x3FFF, offsetX, 0);
+        int16_t right = Coordinate(i + 1, columns, scale & 0x3FFF, offsetX, 0);
         int tile = i + j * columns + 1;
         int u = (tile * 64) & 0xC0;
         int v = ((tile * 64) & 0x1F00) * 15;

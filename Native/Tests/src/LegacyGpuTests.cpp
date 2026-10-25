@@ -1,4 +1,5 @@
 #include <array>
+#include <cstdint>
 #include <cstring>
 #include <limits>
 #include <vector>
@@ -154,7 +155,8 @@ TEST_CASE("Room transforms use native camera layout and camera-facing groups",
   for (int axis = 0; axis < 3; ++axis) {
     frame->viewMatrix.m[axis][axis] = 4096;
     frame->viewMatrix.t[axis] = 10 * (axis + 1);
-    geometry.groups[0].bounds[axis][0] = static_cast<short>(100 * (axis + 1));
+    geometry.groups[0].bounds[axis][0] =
+        static_cast<std::int16_t>(100 * (axis + 1));
   }
   frame->camera.farClip = 4096;
   frame->camera.angles.vz = 1024;
@@ -193,7 +195,7 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   geometry.group.polygonOffset = 4 + sizeof geometry.group;
   for (int axis = 0; axis < 3; ++axis) geometry.group.view.m[axis][axis] = 4096;
   geometry.group.view.t[2] = 1024;
-  const short anchor[3]{-64, -64, 0};
+  const std::int16_t anchor[3]{-64, -64, 0};
   std::memcpy(geometry.polygon, anchor, sizeof anchor);
   geometry.polygon[6] = geometry.polygon[10] = 127;
   geometry.polygon[32] = geometry.polygon[33] = 127;

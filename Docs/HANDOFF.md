@@ -9,6 +9,33 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Owner resumed review/repair of all open non-MA issues on2026-10-25. The
+  inventory is13 issues, including umbrella#4; titles combining several MA
+  numbers are excluded too. #76 is closed at the owner's explicit request:
+  shared-origin repair e939db22 and its published evidence stand, and any new
+  observed particle defect gets a separate concrete issue.
+  #18/#42/#148 retain distinct retirement/import,75-stub and semantic-naming
+  work. #80/#141 still need their exact targeting/acquisition observations.
+  #149/#151 have delivered logging/playback/inventory tooling but are not
+  all-scene/all-door certification. #160/#167 are not established as repaired
+  by today's origin/audio/credit fixes.
+  Fresh #156 persistent3-edge controls Debug1792959985239224-0 and
+  Release1792960053430781-0 execute the repaired no-top path twice with0 engine
+  errors and complete teardown; two neighboring edges pass in each window.
+  Target9/7->9/6 remains blocked at4800: its event is idle, but live enemy
+  combat interrupts field control (longest ordinary interval110, below120).
+  This is not another null-top crash or a reason to blindly extend budgets;
+  the remaining acceptance requires ordinary combat/defensive handling.
+  Maintained quality#25 stays first in the work order. A coherent test-only
+  batch replaces40 ambiguous integer-width findings with exact-width types,
+  retaining native callback ABI via the existing auto/0L pattern. Five touched
+  locals also use the required naming style. Full Debug/Release764 cases/
+  3,390,300 assertions each pass; scoped tidy228 existing/0 new. No assertion,
+  fixture byte, generated runtime, vendor/reference file or quality baseline
+  changed. The remaining C17 textbox member `string` IWYU warning and141
+  first-party Python findings need separate review; do not add a C++ string
+  header to C or erase these findings from the baseline. Local evidence is
+  `non-ma-audit-*` and `quality25-fixed-width-*` in session files.
 - #183 owner-requested lethal chain credit is implemented through copier F00099.
   The copied original146C.c:3420 also coupled offensive credit to target
   survival; this is an explicit owner behavior change, not an invented x64
@@ -105,9 +132,10 @@ verification of the current worktree.
   camera/hero position, max rotation delta7/4096 and translation delta0.
   Source/ghost placement agrees; no whole-body/pixel/every-guest-VSync claim.
   Portable settings restored exactly; owned emulators/recorders ended.
-  Owner acceptance and closure of #168 are recorded2026-10-25. #76 remains
-  broader than these verified shared-origin paths; #149 cutscene coverage
-  remains separate. The following diagnostic milestones retain their original
+  Owner acceptance and closure of #168 are recorded2026-10-25. #76 is also
+  closed at the owner's explicit request; newly observed particle problems
+  get separate issues. #149 cutscene coverage remains separate.
+  The following diagnostic milestones retain their original
   failed-attempt and observation limits, not current open/closed status.
 - #168 historical bounded path instrumentation for both native hosts:
   `--trace-effect-paths first:last`, off by default, positive inclusive host

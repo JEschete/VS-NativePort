@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Battle/Action.h"
@@ -18,7 +20,7 @@ int Tests_CombatTargetResults(void) {
   Battle_Actor* savedTarget = Battle_actors[2];
   Actors_ActorRecord* savedModel = Actors_actorRecords[2];
   Battle_FloatingLabel(*savedLabels)[32] = Battle_floatingLabels;
-  const short savedLabelCount = Battle_floatingLabelCount;
+  const int16_t saved_label_count = Battle_floatingLabelCount;
   target.id = 2;
   target.roomSpawnIndex = 0x80;
   target.stats = &stats;
@@ -67,6 +69,6 @@ int Tests_CombatTargetResults(void) {
   Battle_actors[2] = savedTarget;
   Actors_actorRecords[2] = savedModel;
   Battle_floatingLabels = savedLabels;
-  Battle_floatingLabelCount = savedLabelCount;
+  Battle_floatingLabelCount = saved_label_count;
   return passed;
 }

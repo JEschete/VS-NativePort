@@ -601,8 +601,8 @@ int Tests_RoomLightingSamples(void) {
   struct {
     unsigned ambient, floorCount, ceilingCount;
     struct {
-      short bounds[4];
-      short points[3][2];
+      int16_t bounds[4];
+      int16_t points[3][2];
       unsigned colors[3];
     } triangles[2];
   } lighting = {0x00332211,
@@ -668,8 +668,8 @@ int Tests_RoomEffectCommandLayout(void) {
 int Tests_CollisionHeightPatterns(void) {
   struct {
     Field_MpdCollisionHeader header;
-    unsigned short floor[2];
-    unsigned short ceiling[2];
+    uint16_t floor[2];
+    uint16_t ceiling[2];
     signed char patterns[2][16];
   } collision = {{2, 1, 0, 2}, {0x0800, 0x1801}, {0x5001, 0xF800}, {{0}}};
   collision.patterns[0][0] = -2;
@@ -808,7 +808,7 @@ int Tests_NativeSessionTransitions(void) {
 
 // 573B8.c:67 mixes control codes with addresses; every dispatch boundary must
 // retain native pointer width.
-typedef intptr_t (*TestOpcodeHandler)(u_char*, short);
+typedef intptr_t (*TestOpcodeHandler)(u_char*, int16_t);
 _Static_assert(_Generic(Event_kOpcodeHandlers[0],
                    TestOpcodeHandler: 1,
                    default: 0),
