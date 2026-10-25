@@ -44,6 +44,20 @@ verification of the current worktree.
   this scoped package and unrelated owner ignore/solution edits. Owner files
   were not the replay save root. Broader #18 import/migration/clear-save,
   transient/story and EC gates remain open.
+  Published579a9aa243c98a2e385458d2e924abd963c70126; exact green40170087562.
+  Fresh pushed primary timings and original reset/repeated Continue are also
+  verified. Debug1792911133357885-0 / Release1792911271664146-0 restore exact
+  owner-copy position[462,0,570], HP250/MP50 and9/17 twice: normal-control
+  windows1678..1999 (322 frames) and3828..4299 (472). Actual six-button reset
+  at2000 returns to title2010; second prepare3752/apply3790, no forced jumps.
+  Fresh original MAP014 save-point component writes in both configurations
+  create generation1/448,473 bytes and both save counts1. Separate Desktop
+  restart1792911625826237-0 /1792911710233527-0 loads those new files, restores
+  [192,-384,1088]/HP250/MP50/9/5 and sustains222 normal frames1679..1900.
+  Strict reports: `save18-retained-pushed-verified.json`,
+  `save18-retained-repeat-verified.json`, `save18-retained-write-restart-verified.json`.
+  #18's initial native-only checklist item is verified, not its remaining
+  compatibility/import/campaign gates; the parent remains open.
 - #42/#178 reference occlusion subpackage: F01767/F01768 no longer return stub0.
   Owned `TerrainHeight` reuses the validated native32x32 decoder and implements
   original7B5DC.s:527/563 (C counterparts510/524): bit0x2000 ground0, signed
