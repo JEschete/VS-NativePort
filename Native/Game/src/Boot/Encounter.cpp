@@ -4,6 +4,8 @@
 #include <array>
 #include <atomic>
 #include <bit>
+#include <cstdlib>
+#include <format>
 #include <ranges>
 #include <sstream>
 #include <stdexcept>
@@ -12,6 +14,7 @@
 #include <vector>
 
 #include "Battle/TargetPages.h"
+#include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
@@ -38,10 +41,13 @@ extern "C" {
 #include "Boot/Lifecycle.h"
 #include "Boot/PlayerSettings.h"
 #include "Boot/Session.h"
+#include "Content/DiscLayout.h"
 #include "Core/BiosRand.h"
+#include "Core/Diagnostics.h"
 #include "Core/Random.h"
 #include "Core/Scratch.h"
 #include "Effects/Runtime.h"
+#include "Event/Cutscene.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
@@ -80,6 +86,8 @@ bool entered = false;
 bool room_prepared = false;
 bool gameplay_inspection_ready = false;
 bool player_stats_initialized = false;
+bool external_event_started = false;
+constexpr int kDirectEventTrigger = 0x40;
 int pending_door = -1;
 int pending_door_zone = 0;
 int pending_door_room = 0;
@@ -525,6 +533,25 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
     for (const auto& error : errors) message << error << "; ";
     return std::unexpected(message.str());
   }
+  if (setup.external_event) {
+    const auto* store = Content::DataStore::Get();
+    const auto path = std::format("EVENT/{:04}.EVT", *setup.external_event);
+    const auto* entry = store ? store->Find(path) : nullptr;
+    constexpr unsigned kSectorsPerEvent =
+        VS_0000_EVT_SIZE / Content::DataStore::kDataSectorBytes;
+    if (entry == nullptr || entry->form != "raw" ||
+        entry->size != VS_0000_EVT_SIZE ||
+        entry->lba !=
+            VS_0000_EVT_LBA + static_cast<unsigned>(*setup.external_event) *
+                                  kSectorsPerEvent) {
+      return std::unexpected(
+          "External event is unavailable or has an invalid "
+          "original disc layout: " +
+          path);
+    }
+    const auto bytes = store->ReadAll(*entry);
+    if (!bytes) return std::unexpected(bytes.error());
+  }
   if (setup.weapon >= EncounterWeapon::kDagger &&
       setup.weapon <= EncounterWeapon::kCrossbow) {
     const auto weapon = ReadEncounterWeapon(setup.weapon);
@@ -553,6 +580,7 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
   entered = false;
   room_prepared = false;
   player_stats_initialized = false;
+  external_event_started = false;
   pending_door = -1;
   configured = true;
   return {};
@@ -604,6 +632,7 @@ void RunEncounter() {
   Boot_RunSessionLoop(EnterOrFinishEncounter, ResumeEncounter);
   Battle_ResetTargetPages();
   active = false;
+  external_event_started = false;
   pending_door = -1;
   gameplay_inspection_ready = false;
   configured = false;
@@ -905,9 +934,9 @@ EncounterDoorRequest RequestEncounterDoorTransition(int index) {
 extern "C" void Boot_EncounterRoomPlacements(void** data, unsigned int* size) {
   if (!VS::Game::active) return;
   VS::Game::room_prepared = false;
-  if (!VS::Game::UsesConfiguredEncounterPlacements(VS::Game::configuration,
-                                                   Field_zoneContext.zndId,
-                                                   Field_zoneContext.mapId)) {
+  if (!VS::Game::UsesConfiguredEncounterPlacements(
+          VS::Game::configuration, Field_zoneContext.zndId,
+          Field_zoneContext.mapId, VS::Game::external_event_started)) {
     VS_LOG_DEBUG("encounter.spawn", "using original placements zone={} room={}",
                  Field_zoneContext.zndId, Field_zoneContext.mapId);
     return;
@@ -920,8 +949,9 @@ extern "C" void Boot_EncounterRoomPlacements(void** data, unsigned int* size) {
 }
 
 extern "C" int Boot_EncounterUsesRoomEvents() {
-  return !VS::Game::active || VS::Game::configuration.room_policy ==
-                                  VS::Game::EncounterRoomPolicy::kOriginalRoom;
+  return !VS::Game::active ||
+         VS::Game::UsesEncounterRoomEvents(VS::Game::configuration,
+                                           VS::Game::external_event_started);
 }
 
 extern "C" int Boot_EncounterLoadRoomEvents() {
@@ -950,6 +980,26 @@ extern "C" void Boot_EncounterPollStop() {
       Boot_ResetToTitle();
     } else {
       VS::Game::ApplyPendingDoorRequest();
+      if (VS::Game::configuration.external_event &&
+          !VS::Game::external_event_started && Event_playbackPhase == 0 &&
+          Field_controlMode == 1) {
+        const int event = *VS::Game::configuration.external_event;
+        // Original 4A0A8.c:4302 direct-event request; no story flag mutation.
+        const int result = Event_EvaluateRoomEventTriggers(
+            VS::Game::kDirectEventTrigger, event, nullptr, 0);
+        if (result != 1) {
+          Core_Errorf("encounter.event",
+                      "Cannot queue external event %d: result=%d", event,
+                      result);
+          std::abort();
+        }
+        VS::Game::external_event_started = true;
+        VS_LOG_INFO("encounter.event",
+                    "Starting external event {} in zone {} room {}; "
+                    "component fixture, not story progression",
+                    event, Field_zoneContext.zndId, Field_zoneContext.mapId);
+        Event_BeginQueuedCutscene();
+      }
     }
   }
 }

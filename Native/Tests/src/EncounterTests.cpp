@@ -11,6 +11,7 @@
 #include "Battle/Encounter.hpp"
 #include "CombatLab/Editor.hpp"
 #include "CombatLab/Trace.hpp"
+#include "Content/DataStore.hpp"
 #include "Core/BiosRand.h"
 #include "Core/Random.hpp"
 #include "Field/DoorMatches.h"
@@ -697,4 +698,93 @@ TEST_CASE("Production room presets retain original actors and event policy",
   auto invalid = encoded;
   invalid["room_events"] = "unknown";
   CHECK_THROWS(VS::combat_lab::DecodeSetup(invalid));
+}
+
+TEST_CASE("External event components roundtrip without changing older presets",
+          "[combat][encounter][event-component]") {
+  auto setup = TestSetup(0);
+  const auto original = VS::combat_lab::EncodeSetup(setup);
+  CHECK_FALSE(original.contains("external_event"));
+  CHECK_FALSE(VS::combat_lab::DecodeSetup(original).external_event);
+  setup.external_event = 82;
+  REQUIRE(ValidateEncounter(setup, TestZone()).empty());
+  const auto encoded = VS::combat_lab::EncodeSetup(setup);
+  CHECK(encoded.at("external_event") == 82);
+  const auto restored = VS::combat_lab::DecodeSetup(encoded);
+  CHECK(restored.external_event == setup.external_event);
+  CHECK(restored.room_policy == VS::Game::EncounterRoomPolicy::kIsolatedCombat);
+  CHECK(restored.enemies.empty());
+}
+
+TEST_CASE(
+    "External event components reject ambiguous entry and actor ownership",
+    "[combat][encounter][event-component]") {
+  auto setup = TestSetup(0);
+  setup.external_event = 82;
+  setup.room_policy = VS::Game::EncounterRoomPolicy::kOriginalRoom;
+  CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
+  setup.room_policy = VS::Game::EncounterRoomPolicy::kIsolatedCombat;
+  setup.enemies = TestSetup(1).enemies;
+  CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
+  setup.enemies.clear();
+  setup.external_event = -1;
+  CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
+  setup.external_event = 10000;
+  CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
+  setup.external_event = 0;
+  CHECK(ValidateEncounter(setup, TestZone()).empty());
+}
+
+TEST_CASE("External event preset numbers are explicit integers",
+          "[combat][encounter][event-component]") {
+  auto preset = VS::combat_lab::EncodeSetup(TestSetup(0));
+  for (const auto& invalid :
+       {nlohmann::json(nullptr), nlohmann::json("82"), nlohmann::json(true),
+        nlohmann::json(82.5), nlohmann::json(-1), nlohmann::json(10000)}) {
+    preset["external_event"] = invalid;
+    CHECK_THROWS(VS::combat_lab::DecodeSetup(preset));
+  }
+}
+
+TEST_CASE("External event editor retains script-owned actors",
+          "[combat][encounter][event-component][editor]") {
+  VS::combat_lab::Editor editor({TestZone()});
+  auto setup = TestSetup(0);
+  setup.external_event = 82;
+  editor.Load(setup);
+  EditorPress(editor, VS::Input::Down, 3);
+  EditorPress(editor, VS::Input::Right, 2);
+  CHECK(editor.Setup().enemies.empty());
+  CHECK(editor.Setup().external_event == 82);
+  CHECK(ValidateEncounter(editor.Setup(), editor.Zone()).empty());
+}
+
+TEST_CASE("External event components fail preflight without original data",
+          "[combat][encounter][event-component]") {
+  VS::Content::DataStore::ScopedOverride content;
+  auto setup = TestSetup(0);
+  setup.external_event = 82;
+  const auto configured = VS::Game::ConfigureEncounter(setup, TestZone());
+  REQUIRE_FALSE(configured);
+  CHECK(configured.error().find("External event is unavailable") !=
+        std::string::npos);
+}
+
+TEST_CASE(
+    "External components preserve production handoffs after isolated entry",
+    "[combat][encounter][event-component]") {
+  auto setup = TestSetup(0);
+  CHECK_FALSE(VS::Game::UsesEncounterRoomEvents(setup, false));
+  CHECK_FALSE(VS::Game::UsesEncounterRoomEvents(setup, true));
+  CHECK(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0, true));
+  setup.external_event = 80;
+  CHECK_FALSE(VS::Game::UsesEncounterRoomEvents(setup, false));
+  CHECK(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0, false));
+  CHECK(VS::Game::UsesEncounterRoomEvents(setup, true));
+  CHECK_FALSE(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0, true));
+  CHECK_FALSE(VS::Game::UsesConfiguredEncounterPlacements(setup, 19, 0, true));
+  setup.external_event.reset();
+  setup.room_policy = VS::Game::EncounterRoomPolicy::kOriginalRoom;
+  CHECK(VS::Game::UsesEncounterRoomEvents(setup, false));
+  CHECK(VS::Game::UsesEncounterRoomEvents(setup, true));
 }

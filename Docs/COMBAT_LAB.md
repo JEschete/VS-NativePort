@@ -30,6 +30,41 @@ original controller symbols. Recovered files are explicitly marked and require
 separate affirmative consent to replace an invalid primary. Normal Save still
 requires an enabled original save point; the Lab is not a save-eligibility bypass.
 
+### External event components
+
+An isolated, empty-enemy preset may specify `"external_event": 80` to request
+that original external EVT through the production direct-event and cutscene
+APIs after the room is ready. The editor labels this **COMPONENT PLAYBACK** and
+locks override groups: the event owns its scripted actors. The normal window
+and controller input remain interactive; sequence presets support the same
+field for bounded reset/reentry checks.
+
+Only initial room entry is isolated. Once the external event starts, its normal
+room-event and actor handoffs use production policies, including chained scenes
+and returns to the initial room. An earlier event may be required to establish
+the original audio or actor context; a file number alone does not certify those
+preconditions.
+
+This mode does not assign story flags, simulate a boss defeat or claim legitimate
+story progression. The room/profile/event must be source-aligned by the caller.
+It cannot be combined with production MPD entry events or explicit enemy groups.
+The exact original sequential disc location, raw format and fixed event size
+are checked, and the file is read before startup; unavailable files are errors.
+Existing presets without this field retain their previous behavior.
+
+For the post-Minotaur component, event80 in zone12/room0 (Ashley7,2) establishes
+SEP26/WAVE99 before the original room scripts hand off to event82 in zone19/room0
+and event81 back in zone12/room0. Starting82 alone omits those audio prerequisites.
+This is component coverage, not evidence of defeating the boss. Release replay
+1792893708848660-0 uses only real Circle presses at original dialogue waits:
+event82 releases parent2 while prop7 still borrows bone2;72 dependent draws are
+deferred, then the chain returns normal control at14468 and remains settled
+through24000. No forced skip or engine error occurs. Speed8 audio queue warnings
+are not a listening/fidelity test. Local evidence:
+`build/quality/family174-through81-Release.*`.
+
+### Encounter setup
+
 The menu uses the extracted SYSTEM.DAT font. Select zone, room, enemy, quantity,
 Ashley tile/elevation, group offsets, spacing and RNG seed. Add multiple groups
 for mixed enemy definitions; clear groups to return to the current selection.

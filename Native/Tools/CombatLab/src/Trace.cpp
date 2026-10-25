@@ -171,20 +171,23 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
     enemies.push_back({{"definition", enemy.enemy},
                        {"position", EncodePosition(enemy.position)}});
   }
-  return {{"version", 1},
-          {"zone", setup.zone},
-          {"room", setup.room},
-          {"seed", setup.seed},
-          {"ashley_profile", Game::EncounterProfileId(setup.profile)},
-          {"ashley_stats", EncodeStats(setup.stat_overrides)},
-          {"ashley_weapon", Game::EncounterWeaponId(setup.weapon)},
-          {"player", EncodePosition(setup.player)},
-          {"enemies", enemies},
-          {"room_events",
-           setup.room_policy == Game::EncounterRoomPolicy::kOriginalRoom
-               ? "production"
-               : "isolated"},
-          {"position_units", "tiles; elevation steps of 64 native units"}};
+  auto result = nlohmann::json{
+      {"version", 1},
+      {"zone", setup.zone},
+      {"room", setup.room},
+      {"seed", setup.seed},
+      {"ashley_profile", Game::EncounterProfileId(setup.profile)},
+      {"ashley_stats", EncodeStats(setup.stat_overrides)},
+      {"ashley_weapon", Game::EncounterWeaponId(setup.weapon)},
+      {"player", EncodePosition(setup.player)},
+      {"enemies", enemies},
+      {"room_events",
+       setup.room_policy == Game::EncounterRoomPolicy::kOriginalRoom
+           ? "production"
+           : "isolated"},
+      {"position_units", "tiles; elevation steps of 64 native units"}};
+  if (setup.external_event) result["external_event"] = *setup.external_event;
+  return result;
 }
 
 Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
@@ -197,6 +200,15 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
     setup.room_policy = Game::EncounterRoomPolicy::kOriginalRoom;
   } else if (policy != "isolated") {
     throw std::runtime_error("unknown encounter room event policy");
+  }
+  if (json.contains("external_event")) {
+    const auto& event = json.at("external_event");
+    if (!event.is_number_integer() || event < 0 ||
+        event > Game::EncounterLimits::kLastExternalEvent) {
+      throw std::runtime_error(
+          "external_event must be an integer asset number in 0..9999");
+    }
+    setup.external_event = event.get<int>();
   }
   setup.zone = json.at("zone").get<int>();
   setup.room = json.at("room").get<int>();

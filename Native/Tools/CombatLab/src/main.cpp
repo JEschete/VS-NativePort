@@ -317,19 +317,20 @@ void InitializeWindow(Platform::App& app, Render::Device& gpu, Trace& trace) {
 
 void WriteManifest(const Options& options, Trace& trace, std::size_t scripts) {
   const auto source = Game::TraceSourceProvenance(Platform::ExecutableDir());
-  WriteJson(trace.Directory() / "manifest.json",
-            {{"schema", 1},
-             {"revision", source.at("revision")},
-             {"worktree", source.at("worktree")},
-             {"source_status", source.at("status")},
-             {"data_root", fs::absolute(options.data).string()},
-             {"configuration", scripts == 0 ? "standalone isolated encounter"
-                                            : "single-window script sequence"},
-             {"frames", options.frames},
-             {"sequence", options.sequence.string()},
-             {"scripts", scripts},
-             {"speed", options.speed},
-             {"devices", options.devices}});
+  WriteJson(
+      trace.Directory() / "manifest.json",
+      {{"schema", 1},
+       {"revision", source.at("revision")},
+       {"worktree", source.at("worktree")},
+       {"source_status", source.at("status")},
+       {"data_root", fs::absolute(options.data).string()},
+       {"configuration", scripts == 0 ? "standalone production-gameplay lab"
+                                      : "single-window script sequence"},
+       {"frames", options.frames},
+       {"sequence", options.sequence.string()},
+       {"scripts", scripts},
+       {"speed", options.speed},
+       {"devices", options.devices}});
 }
 
 void WriteDoorInventory(Trace& trace,

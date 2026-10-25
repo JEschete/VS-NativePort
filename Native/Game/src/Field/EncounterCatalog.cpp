@@ -338,9 +338,16 @@ bool IsEncounterHostileSpawn(const Field_MpdEnemySpawn& source) {
 }
 
 bool UsesConfiguredEncounterPlacements(const EncounterSetup& setup, int zone,
-                                       int room) {
+                                       int room, bool external_event_started) {
   return setup.room_policy == EncounterRoomPolicy::kIsolatedCombat &&
-         setup.zone == zone && setup.room == room;
+         setup.zone == zone && setup.room == room &&
+         !(setup.external_event && external_event_started);
+}
+
+bool UsesEncounterRoomEvents(const EncounterSetup& setup,
+                             bool external_event_started) {
+  return setup.room_policy == EncounterRoomPolicy::kOriginalRoom ||
+         (setup.external_event && external_event_started);
 }
 
 std::expected<Field_MpdEnemySpawn, std::string> ReadEncounterSpawnProfile(
@@ -523,6 +530,18 @@ std::vector<std::string> ValidateEncounterOptions(const EncounterSetup& setup) {
   if (setup.room_policy == EncounterRoomPolicy::kOriginalRoom &&
       !setup.enemies.empty()) {
     errors.emplace_back("production rooms cannot override original actors");
+  }
+  if (setup.external_event) {
+    if (*setup.external_event < 0 ||
+        *setup.external_event > EncounterLimits::kLastExternalEvent) {
+      errors.emplace_back("external event must be a four-digit asset number");
+    }
+    if (setup.room_policy != EncounterRoomPolicy::kIsolatedCombat ||
+        !setup.enemies.empty()) {
+      errors.emplace_back(
+          "external event components require isolated entry and no enemy "
+          "overrides");
+    }
   }
   if (!setup.stat_overrides.Valid()) {
     errors.emplace_back("ASHLEY STAT OVERRIDES MUST BE IN 1..999");

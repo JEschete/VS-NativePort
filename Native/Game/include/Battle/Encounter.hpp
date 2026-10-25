@@ -16,6 +16,7 @@ struct EncounterLimits {
   static constexpr int kElevations = 4;
   static constexpr int kEnemyIdEnd = 127;
   static constexpr int kLastZone = 255;
+  static constexpr int kLastExternalEvent = 9999;
   static constexpr int kStatusTimers = 8;
   static constexpr int kPositionAxes = 3;
   static constexpr int kMinPlayerStat = 1;
@@ -138,6 +139,7 @@ struct EncounterSetup {
   EncounterStatOverrides stat_overrides;
   EncounterWeapon weapon = EncounterWeapon::kDefault;
   EncounterRoomPolicy room_policy = EncounterRoomPolicy::kIsolatedCombat;
+  std::optional<int> external_event;
 };
 
 // Reads the same extracted ZND/MPD definitions consumed by the room loader.

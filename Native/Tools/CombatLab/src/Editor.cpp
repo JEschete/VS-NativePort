@@ -174,8 +174,11 @@ void Editor::Load(const Game::EncounterSetup& setup) {
 }
 
 void Editor::AddGroup() {
-  if (setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom) {
-    message_ = "ORIGINAL ROOM ACTORS - GROUP EDITING DISABLED";
+  if (setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom ||
+      setup_.external_event) {
+    message_ = setup_.external_event
+                   ? "EXTERNAL EVENT ACTORS - GROUP EDITING DISABLED"
+                   : "ORIGINAL ROOM ACTORS - GROUP EDITING DISABLED";
     return;
   }
   if (quantity_ == 0) {
@@ -198,10 +201,13 @@ void Editor::AddGroup() {
 }
 
 void Editor::Change(int direction) {
-  if (setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom &&
+  if ((setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom ||
+       setup_.external_event) &&
       (row_ == kEnemy || row_ == kQuantity || row_ == kOffsetX ||
        row_ == kOffsetZ || row_ == kSpacing)) {
-    message_ = "ORIGINAL ROOM ACTORS - GROUP EDITING DISABLED";
+    message_ = setup_.external_event
+                   ? "EXTERNAL EVENT ACTORS - GROUP EDITING DISABLED"
+                   : "ORIGINAL ROOM ACTORS - GROUP EDITING DISABLED";
     return;
   }
   switch (row_) {
@@ -275,11 +281,12 @@ Editor::Action Editor::Update(const Input::PadState& pad, bool confirm) {
       break;
     case kClearGroups:
       setup_.enemies.clear();
-      message_ = setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom
-                     ? "ORIGINAL ROOM ACTORS RETAINED"
-                 : quantity_ == 0
-                     ? "GROUPS CLEARED - SOLO ASHLEY"
-                     : "GROUPS CLEARED - CURRENT SELECTION WILL BE USED";
+      message_ =
+          setup_.external_event ? "EVENT OWNS ACTORS - NO OVERRIDE GROUPS"
+          : setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom
+              ? "ORIGINAL ROOM ACTORS RETAINED"
+          : quantity_ == 0 ? "GROUPS CLEARED - SOLO ASHLEY"
+                           : "GROUPS CLEARED - CURRENT SELECTION WILL BE USED";
       break;
     case kStart:
       return Action::kStart;
@@ -386,8 +393,12 @@ void Editor::Draw(Canvas& canvas) const {
   const bool original =
       setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom;
   canvas.Text(kLabelX, kSubtitleY,
-              original ? "ORIGINAL ROOM - PRODUCTION ENTRY EVENTS"
-                       : "STANDALONE ENCOUNTER BUILDER - PRODUCTION GAMEPLAY");
+              setup_.external_event
+                  ? std::format("EXTERNAL EVENT {} - COMPONENT PLAYBACK",
+                                *setup_.external_event)
+              : original
+                  ? "ORIGINAL ROOM - PRODUCTION ENTRY EVENTS"
+                  : "STANDALONE ENCOUNTER BUILDER - PRODUCTION GAMEPLAY");
   const auto& zone = Zone();
   const auto& room = zone.rooms[room_index_];
   const auto enemy_name =
@@ -401,11 +412,13 @@ void Editor::Draw(Canvas& canvas) const {
   const std::array<std::string, kRowCount> rows = {
       std::format("ZONE: {}", zone.id),
       std::format("ROOM: {} {}", room.index, room.asset),
-      original ? "ENEMIES: ORIGINAL ROOM PLACEMENTS"
-               : std::format("ENEMY: {}", enemy_name),
-      original ? "QUANTITY: ORIGINAL ROOM"
-               : std::format("QUANTITY: {}{}", quantity_,
-                             quantity_ == 0 ? " (SOLO)" : ""),
+      setup_.external_event ? "ENEMIES: SCRIPT-OWNED ACTORS"
+      : original            ? "ENEMIES: ORIGINAL ROOM PLACEMENTS"
+                            : std::format("ENEMY: {}", enemy_name),
+      setup_.external_event ? "QUANTITY: SCRIPT-OWNED"
+      : original            ? "QUANTITY: ORIGINAL ROOM"
+                            : std::format("QUANTITY: {}{}", quantity_,
+                                          quantity_ == 0 ? " (SOLO)" : ""),
       std::format("ASHLEY TILE X: {}", setup_.player.x),
       std::format("ASHLEY TILE Z: {}", setup_.player.z),
       std::format("ELEVATION: {}", setup_.player.elevation),

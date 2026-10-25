@@ -9,6 +9,22 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #149/#174 source-aligned component playback is now opt-in via an isolated,
+  empty-enemy preset's `external_event`. Initial entry is isolated; after the
+  direct event starts, original actor/room-event handoffs resume. It does not
+  assign story flags or simulate a boss defeat. Release1792893708848660-0
+  plays80 ->82 ->81 with original SEP26/WAVE99 setup and real dialogue Circle
+  input, no Start/forced skip. Parent2 removal produces72 deferred prop7/bone2
+  draws at8573..8715, not the reported0xB0 access. Original return reaches
+  zone12/room0, phase0/control1 at14468 and stays settled through24000, with
+  zero engine errors. Speed8 audio scheduling warnings are not fidelity proof.
+  Six component/compatibility tests bring full serial Debug/Release suites to
+  722 cases/3,164,568 assertions each; fast quality remains195 existing/0 new.
+  Changed production-source tidy is zero. Evidence is based on d9f4a876 plus
+  this scoped component work; unrelated ignore/solution edits are preserved.
+  Local `build/quality/family174-through81-Release.*` and `scene149-*` retain
+  commands/results. Single-window reset/reentry and Debug full-chain acceptance
+  are still in progress; #174 remains open until those and exact-revision CI.
 - #171 fresh height investigation: `ai.move` now logs queued from/to/rise,
   threshold and capability flags; `ai.edge` logs the actual branch result
   (bounds, tile flags/area, actor blocker, step distance/height, approach radius
