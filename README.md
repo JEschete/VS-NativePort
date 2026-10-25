@@ -36,18 +36,23 @@ See [THIRD_PARTY.md](THIRD_PARTY.md) for implementation-specific provenance and 
 
 ## License
 
-Except where otherwise noted, the project's original contributions are free software: you can redistribute
-them and/or modify them under the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later version
-(`GPL-3.0-or-later`). See [LICENSE](LICENSE) for the full terms.
+Except where otherwise noted, the project's original contributions are dedicated to the public domain
+under **CC0 1.0 Universal** (`CC0-1.0`), to the extent the project contributors hold the relevant rights
+and applicable law permits. Where the waiver is ineffective, CC0's public license fallback applies.
+See [LICENSE](LICENSE) for the full legal text.
 
-This project is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+You may copy, modify, distribute and use those contributions for any purpose, including commercial
+and closed-source uses, without attribution or source-disclosure requirements under CC0. Credit is
+appreciated but is not a condition of using those contributions.
 
-Third-party code, dependencies and reference repositories retain their respective licenses. This includes
-upstream CC0 material; the GPL grant for original project contributions does not revoke those upstream
-permissions. See [THIRD_PARTY.md](THIRD_PARTY.md) and [Docs/TOOLS_INVENTORY.md](Docs/TOOLS_INVENTORY.md).
+The work is provided as-is, without warranties, to the fullest extent permitted by law.
 
-This grant covers only rights held by the project contributors. It does not grant rights held by the
-original game's rights holders in its code, assets, names or trademarks. Game data is not included;
-you must supply your own copy of the game.
+Third-party code, dependencies and reference repositories retain their respective licenses, notices
+and requirements. This dedication does not replace or revoke those upstream terms.
+See [THIRD_PARTY.md](THIRD_PARTY.md) and [Docs/TOOLS_INVENTORY.md](Docs/TOOLS_INVENTORY.md).
+
+This dedication covers only rights held by the project contributors. CC0 does not waive or grant
+patent or trademark rights, or grant rights held by the original game's rights holders in its code,
+assets, names or trademarks. Game data is not included; you must supply your own copy of the game.
+
+Copies previously distributed under GPL-3.0-or-later retain the permissions already granted under that license.

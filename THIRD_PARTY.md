@@ -1,10 +1,11 @@
 # Third-party implementation references
 
 The project's original contributions, including original modifications to adapted implementations, are
-licensed under **GPL-3.0-or-later**, except where otherwise noted; see [LICENSE](LICENSE) and the
-[project licensing notice](README.md#license). Upstream material retains its respective license or
-public-domain dedication. These notices preserve provenance and do not revoke upstream permissions
-or grant rights held by the original game's rights holders.
+dedicated to the public domain under **CC0 1.0 Universal (CC0-1.0)**, except where otherwise noted and
+only to the extent the project contributors hold the relevant rights; see [LICENSE](LICENSE) and the
+[project licensing notice](README.md#license). Upstream material retains its respective license,
+public-domain dedication and required notices. These notices preserve provenance and do not revoke
+upstream permissions or grant rights held by the original game's rights holders.
 
 ## rood-boi battle AI counterparts
 
