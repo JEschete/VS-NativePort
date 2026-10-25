@@ -27,6 +27,9 @@ verification of the current worktree.
   Ashley250->181. Existing128 climb controls1792906670059507-0 /
   1792906760909191-0 jump from-320 (arc-485) to-448 and damage250->231
   (regen232), with no runtime coordinates/flags/HP/ranges changed.
+  Published e2c8b6ee66006b5271c9cd5f5e3f162a14b18bb8; exact Source
+  Quality40166549728 passed. The always-clear stubs were a confirmed missing
+  behavior, not the demonstrated cause of the owner's initial height refusal.
 - #178 direct-height eligibility is now demonstrated with original occlusion,
   not inferred from a jump followed by same-floor attacks. Canonical Sackheim6
   uses original288-unit sword reach82944 and signed aim offsets-131/-139.
@@ -43,13 +46,24 @@ verification of the current worktree.
   There is no blanket same-floor ban and no arbitrary reach/LOS weakening.
   This is not every enemy/action/terrain combination; #175 remains separate.
   Local `height178-*`/`occlusion42-*` retain commands, captures, PDB checks and
-  records. Evidence is7b8f82b7 plus this scoped occlusion package and unrelated
-  owner ignore/solution edits. Publish/exact green CI remains the closure gate.
-  #42 also has three stale unchecked jump entries F01024/F04178/F04179 whose
-  prior #171 closure has exact greenf368cbd5/40148851247. After this package's
-  CI, reconcile only those3 plus the2 occlusion entries, preserving all186 IDs/
-  order and previous106 checkmarks:111 implemented/75 remain (C-backed111/145,
-  34 remaining; other41 open). Do not close broad #42 from that inventory update.
+  records. Run evidence is7b8f82b7 plus this scoped occlusion package and unrelated
+  owner ignore/solution edits. Published e2c8b6ee/exact green40166549728 satisfies
+  the closure gate; #178 is closed with the bounded source/range evidence.
+  #42's refreshed assembly reports now contain75 gaps (34 C-backed,31
+  assembly-only,10 instruction listings not located). All13 audit controls pass
+  and repeated publication is byte-stable. Exact comparison with the original
+  186-entry tracker finds only five newly implemented entries: F01767/F01768
+  and the three previously verified jump entries F01024/F04178/F04179
+  (f368cbd5/exact green40148851247). All previous106 checkmarks remain valid:
+  111 implemented/75 remain, C-backed111/145 and the other41 still open.
+  Evidence: `build/quality/issue42-20261025-occlusion`, `occlusion42-audit-*`.
+  These are implementation counts, not additional gameplay defects or whole
+  C++/EC promotion. Broad #42 remains open.
+  Restoring terrain rays did not establish a #175 box-attack repair:
+  Debug1792907051462897-0 still selects ordinary Ashley attacks first (actual
+  player/box6 squared distances24443/19974, both within50176), reduces250HP
+  to192, and leaves the original boxes at1HP. A supported original cover/
+  high-ground control is still needed; do not manufacture aggression or range.
 - #172 wooden-box targeting repair is verified. Original F00979 accepted the
   PS1-sized T00469 palette view on a real native gimmick: source/output offsets
   300/332 instead of304/336 after its model pointer widens. Partial CPU-array
