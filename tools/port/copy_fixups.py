@@ -364,6 +364,11 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "Audio_Native_SaveMusicSnapshot();",
          "crossfade snapshots use the same complete native state"),
     ],
+    "F03246": [
+        ("*(int*)&Audio_Seq_pendingMusicData.param1 = 0;",
+         "Audio_Seq_pendingMusicData.param1 = 0;",
+         "25AC.c:3591 cancels the entire sequence pointer; native param1 is uintptr_t, not a PS1 int"),
+    ],
     "F02438": [
         (" // Partial playback?", "",
          "the XA request argument is initial CD volume rather than a byte count"),

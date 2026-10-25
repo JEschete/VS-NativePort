@@ -446,9 +446,25 @@ particles, clamping their spread or changing the earlier E043 effect.
 
 Local evidence is `learn20-*` in session files, including active before/after
 captures and exact trajectory reports. These are Lab fixtures, not imported
-saves or claims of campaign progression. The related E211 window effect still
-requires a source-aligned production prologue check: a solo external-event7
-fixture omits Dtok's required actor context and is not an equivalent control.
+saves or claims of campaign progression. The related E211 window effect is
+verified in full production replays, not a solo external-event7 Lab fixture:
+that fixture omits Dtok's required actor context and is not an equivalent control.
+Published fix `e939db22` has green Source Quality 40217651083. Actual 1x Debug
+1792952304769540-0 and Release 1792949707855559-0 defeat Dtok at 38142, retain
+all 4501 optical ticks 40500..45000 and reach 120 consecutive normal-control
+frames, exiting 0 at 68612. All decoded video RGB frames match their source
+captures, and every Debug/Release frame matches. E211 phase4 is 42132..43243;
+cleanup ends at 43248.
+
+Original control `rays168-reference-normal11` uses actual New Game/combat,
+normal speed and a DPI-correct full physical client (849x655). Its 6509 decoded
+frames preserve 111.024 seconds; the maximum measured host capture gap is
+49.7464ms, not a guarantee of every guest VSync. At aligned camera/hero position,
+rotation differs by at most 7/4096 and translation by 0; source and colored
+ghosts agree at the window. This is not full body-pose or pixel-perfect scene
+parity. Local `window211-*` reports retain exact alignment and capture limits.
+The owner accepted #168 as resolved on 2026-10-25; broader #76/#149 scope remains
+separate.
 
 #### Local logging verification
 

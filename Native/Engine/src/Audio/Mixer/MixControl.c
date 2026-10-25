@@ -190,7 +190,7 @@ void Audio_Mixer_StopMusicAndCancelReplacement(void)
     }
 
     Audio_Seq_activeMusicConfig->statusFlags &= 0xFFFEFFFF;
-    *(int*)&Audio_Seq_pendingMusicData.param1 = 0;
+    Audio_Seq_pendingMusicData.param1 = 0;
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_11_StopAllMusic (src/SLUS_010.40/25AC.c:3594)

@@ -57,6 +57,26 @@ extern "C" int TestsXaCommand(int command, int first, int second, int third);
 extern "C" int TestsSavedMusicVoiceConflicts(void);
 extern "C" int TestsNativeMusicSnapshot(void);
 extern "C" int TestsPendingModulationSlides(int effect, int kind);
+extern "C" int TestsCancelQueuedMusic(int queued, int secondary);
+
+namespace {
+void CheckMusicCancellation(int result) {
+  for (int bit = 0; bit < 5; ++bit) {
+    CAPTURE(bit);
+    CHECK((result & (1 << bit)) != 0);
+  }
+}
+}  // namespace
+
+TEST_CASE("Music cancellation clears the entire native queued sequence pointer",
+          "[audio][music-state][music-cancel]") {
+  for (int queued = 0; queued < 2; ++queued) {
+    for (int secondary = 0; secondary < 2; ++secondary) {
+      CAPTURE(queued, secondary);
+      CheckMusicCancellation(TestsCancelQueuedMusic(queued, secondary));
+    }
+  }
+}
 
 TEST_CASE("Unconfigured modulation slides wait for their first waveform sample",
           "[audio][modulation]") {

@@ -53,6 +53,38 @@ static Content_DiscDrive savedXaDrive;
 static const int kStreamCommandIds[] = {0xE0, 0xE2, 0xE4, 0xE5,
                                         0xE6, 0x9E, 0x9F};
 
+int TestsCancelQueuedMusic(int queued, int secondary) {
+  const Audio_CommandParams original_pending = Audio_Seq_pendingMusicData;
+  Audio_MusicConfig* original_active = Audio_Seq_activeMusicConfig;
+  Audio_MusicConfig* original_secondary = Audio_Seq_secondaryMusicConfig;
+  Audio_MusicConfig current = {0};
+  Audio_MusicConfig saved = {0};
+  Audio_AkaoSequenceFile sequence = {0};
+  const Audio_CommandParams pending = {
+      queued ? (uintptr_t)&sequence : 0, 2, 3, 4, 5, 6};
+  int result;
+  current.statusFlags = 0x10062;
+  Audio_Seq_activeMusicConfig = &current;
+  Audio_Seq_secondaryMusicConfig = secondary ? &saved : NULL;
+  Audio_Seq_pendingMusicData = pending;
+  Audio_Mixer_StopMusicAndCancelReplacement();
+  result = Audio_Seq_pendingMusicData.param1 == 0;
+  result |= (current.statusFlags == 0x62) << 1;
+  result |= (Audio_Seq_pendingMusicData.param2 == pending.param2 &&
+             Audio_Seq_pendingMusicData.param3 == pending.param3 &&
+             Audio_Seq_pendingMusicData.param4 == pending.param4 &&
+             Audio_Seq_pendingMusicData.extParam1 == pending.extParam1 &&
+             Audio_Seq_pendingMusicData.extParam2 == pending.extParam2)
+            << 2;
+  result |= (!queued || (uintptr_t)&sequence > UINT32_MAX) << 3;
+  Audio_Mixer_StopMusicAndCancelReplacement();
+  result |= (Audio_Seq_pendingMusicData.param1 == 0) << 4;
+  Audio_Seq_pendingMusicData = original_pending;
+  Audio_Seq_activeMusicConfig = original_active;
+  Audio_Seq_secondaryMusicConfig = original_secondary;
+  return result;
+}
+
 int TestsSavedMusicVoiceConflicts(void) {
   Audio_MusicConfig current = {0};
   Audio_MusicConfig saved = {0};

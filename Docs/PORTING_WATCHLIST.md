@@ -105,6 +105,13 @@ and appearance reads land in unrelated storage. Project the actual fields into
 the child-emission context by value instead. This fixes the shared parent-origin
 contract; it does not retire that remaining compatibility-context type.
 
+**Partial pointer clears:** widening a field does not repair stores through an
+`int*` alias. F03246 cancelled queued music by clearing only the low 32 bits of
+`Audio_CommandParams.param1`; a bedroom Start skip left a non-null high word for
+the next sequencer tick to dereference (#182). Assign the whole native field,
+and test real above-4-GiB pointers, empty queues, saved layers and repeated
+cancellation. Do not hide the stale pointer with a playback null/default guard.
+
 **Option B (owner, 1b attract path):** per-site fixes, keeping 64-bit pointer members (not `__ptr32` with
 `/LARGEADDRESSAWARE:NO`). Mechanisms, all in the copy tool (`tools\port\copy_fixups.py`), so they hold for every
 actor and room:

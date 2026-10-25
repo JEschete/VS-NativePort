@@ -9,6 +9,27 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #182 bedroom Start-skip exception is reproduced and repaired through copier
+  F03246/func_8001852C (original SLUS_010.40/25AC.c:3582). The camera/thread
+  sequence was only the last logged work: the actual crash is
+  Audio_Seq_TickPlayback at Sequencer.c:371. The original int-alias cancellation
+  cleared only the low half of the widened pending-music pointer; assigning
+  its full uintptr_t field restores the original cancellation semantics.
+  Unfixed Release1792955307797622-0 enters zone18 at6157, receives actual Start
+  at6289 and crashes at6294 reading0x7FF600000004. The first attempt did not
+  reach the target skip and is excluded. The native regression first fails
+  4/20 assertions, then passes all20 for queued/empty, saved/no-saved and
+  repeated cancellation while preserving neighboring parameters/status flags.
+  Fixed Debug1792955857390338-0 and Release1792956026885654-0 replay the same
+  actual1x controls: zone9 at6689, event idle at6863, exit0 at10000. The
+  documented alternate skip/menu route also passes in Release1792956283015448-0:
+  zone9 at4058, 2768 idle field frames before Triangle, MAINMENU.PRG at7004.
+  No HP/story/PC writes or camera fallback. All three hosts build in both
+  configurations; full760 cases/3,389,644 assertions each pass. Copier contracts
+  70 pass; both generation runs change only MixControl.c plus its manifest,
+  preserve305 non-generated/owner files and produce identical second output.
+  Evidence is `bedroom-skip-*` in session files; exact fixing publication/CI is
+  tracked in #182. This is not C++ promotion or compatibility retirement.
 - #76/#168 native child-emission origin fix is implemented through copier
   adaptation F01535, not a hand edit of generated output. The original PS1
   particle prefix and fixed-layout plugin-parent context overlap on 32-bit;
@@ -32,7 +53,7 @@ verification of the current worktree.
   Standard Debug/Release builds of all three hosts and full 759 cases/
   3,389,624 assertions each pass; affected maintained sources have 0 new tidy/
   style findings and full fast remains 182 existing/0 new, no baseline changes.
-  Verification source is 6f62dad5 plus this scoped fix and its tests/docs;
+  Published fix is e939db22; exact Source Quality40217651083 is green;
   owner ignore, solution and updated reference-pointer edits are preserved.
   Isolated-output full-suite attempts failed only because their relative audio
   fixture paths were wrong; the passing full results use standard build paths.
@@ -41,11 +62,20 @@ verification of the current worktree.
   review includes owner-updated rood-boi e59320ca and rood-reverse 4edbdbf5.
   The solo external-event 7 Lab component is invalid: camera code requires the
   Dtok actor context and fails at 165 before E211. It is not gameplay evidence.
-  Full 1x production replay now targets 40500..45000 rather than stopping at 42000;
-  new owner run 1792943077312380-0 locates actual E211 at 62724..63840, after the
-  prior clip's assumed boundary. Do not close #168 before that production
-  placement/progression verification and exact-revision publication/CI.
-- #168 bounded path instrumentation is now implemented for both native hosts:
+  Full1x Debug1792952304769540-0 and Release1792949707855559-0 defeat Dtok at38142,
+  retain all4501 ticks40500..45000 and return to120 consecutive normal-control
+  frames, exit0 at68612. Every decoded video RGB frame matches its source and
+  all4501 Debug/Release images are identical. Actual E211 phase4 is42132..43243;
+  cleanup ends43248. DPI-correct original normal11 retains6509 full physical
+  client frames,849x655,111.024s; max host capture gap49.7464ms. At aligned
+  camera/hero position, max rotation delta7/4096 and translation delta0.
+  Source/ghost placement agrees; no whole-body/pixel/every-guest-VSync claim.
+  Portable settings restored exactly; owned emulators/recorders ended.
+  Owner acceptance and closure of #168 are recorded2026-10-25. #76 remains
+  broader than these verified shared-origin paths; #149 cutscene coverage
+  remains separate. The following diagnostic milestones retain their original
+  failed-attempt and observation limits, not current open/closed status.
+- #168 historical bounded path instrumentation for both native hosts:
   `--trace-effect-paths first:last`, off by default, positive inclusive host
   ticks and normal speed 1 required. Generic particles log local/world/projection
   context and command links; translucent polygons/sprites/lines log actual
@@ -77,9 +107,9 @@ verification of the current worktree.
   source frames exactly (unused BGR0 padding is not image data).
   Redundant BMPs were removed only after that pixel/order verification; the
   complete lossless clip, hashes and raw trajectory logs remain. Logging is
-  published b5e0ae5e, exact Source Quality 40200550100 green; #168 stays open
-  for the actual placement/producer diagnosis.
-- #168 follow-up observation limits: the owner-supplied interior closed-window
+  published b5e0ae5e, exact Source Quality 40200550100 green; at that milestone
+  #168 remained open for the actual placement/producer diagnosis.
+- #168 historical follow-up observation limits: the owner-supplied interior closed-window
   pose is not yet tied to a specific logged event or assigned a backend role.
   Restricting analysis to zone 7 was an assumption, not identification of the
   reported flare. That exact interval has 1,663 frame markers, 465 translucent

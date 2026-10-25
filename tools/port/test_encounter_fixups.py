@@ -1,4 +1,4 @@
-"""Regressions for encounter and effect source adaptations, without game assets."""
+"""Regressions for native source adaptations, without game assets."""
 
 import csv
 import re
@@ -9,6 +9,13 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_music_cancellation_clears_the_native_pointer_field(self):
+        source = "    *(int*)&Audio_Seq_pendingMusicData.param1 = 0;"
+        for old, new, _ in copy_fixups.FIXES["F03246"]:
+            self.assertIn(old, source)
+            source = source.replace(old, new)
+        self.assertEqual(source, "    Audio_Seq_pendingMusicData.param1 = 0;")
+
     def test_particle_child_events_project_native_parent_fields(self):
         source = """        ++node->age;
         Effects_EmitParticleEvent(arg0, node->tickEvent - 1, 0, 0, (void*)node);
