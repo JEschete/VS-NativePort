@@ -59,11 +59,33 @@ verification of the current worktree.
   Evidence: `build/quality/issue42-20261025-occlusion`, `occlusion42-audit-*`.
   These are implementation counts, not additional gameplay defects or whole
   C++/EC promotion. Broad #42 remains open.
-  Restoring terrain rays did not establish a #175 box-attack repair:
-  Debug1792907051462897-0 still selects ordinary Ashley attacks first (actual
-  player/box6 squared distances24443/19974, both within50176), reduces250HP
-  to192, and leaves the original boxes at1HP. A supported original cover/
-  high-ground control is still needed; do not manufacture aggression or range.
+- #175 now has actual supported-cover acceptance, not a speculative box fix.
+  Source71618.c:1093 tries ordinary ranked actions before its cached fallback
+  against registered special actors. In original production9/11/MAP020, real
+  Right+Square at120 during normal control, then Right123..228 every3 ticks,
+  climbs Ashley from[192,0,320] to[318,-384,320] on the original crate stack.
+  Earlier Square80 was startup-action locked and did not jump; it is not a
+  gameplay defect. No HP, coordinates, flags, ranges or readiness were written.
+  Debug1792907616391601-0 / Release1792907657305767-0: wolf3's actual action1
+  reduces original box6 HP1->0 at496, single-target phase7. Its cached fallback
+  target is6; Ashley's squared signed-aim distance209979 exceeds50176 while
+  box6 is19646 within reach/cap and box7 is67262 outside reach. Ashley and box
+  share the required tile neighborhood. Generic AI navigation target0 is not
+  the executed fallback target.
+  Extended Debug1792907737516702-0 / Release1792907776647105-0 reach1200:
+  destroyed6 leaves actor/special-target lists, box7 drops-256->-128, Ashley
+  settles-384->-256 and wolf3 climbs onto the remaining stack (actual command10
+  intermediate heights612..625, not a claimed jump arc). Normal control resumes.
+  All six runs have zero engine errors and normal host shutdown with explicit
+  interrupted encounters/trace_failed=false, not encounter-victory claims.
+  Ground controls1792907849223984-0 /1792907882485500-0 keep Ashley reachable,
+  naturally damage him, and leave both boxes at1HP through900. Ordinary actions
+  correctly win rather than unconditional box aggression.
+  Strict local proof `build/quality/box175-verified.json` covers all six modes;
+  `box175-*` and unique runs retain actual inputs, captures and PDB snapshots.
+  Source6db8d24d, owner-only ignore/solution dirty state, exact green40166918324.
+  No runtime change or newly demonstrated common defect; original occasional
+  fallback is verified. Broader enemy/terrain coverage remains separate.
 - #172 wooden-box targeting repair is verified. Original F00979 accepted the
   PS1-sized T00469 palette view on a real native gimmick: source/output offsets
   300/332 instead of304/336 after its model pointer widens. Partial CPU-array

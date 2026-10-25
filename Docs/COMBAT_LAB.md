@@ -211,6 +211,62 @@ Load it with `--scenario <path>`; add `--start` to enter immediately. Presets re
 zone/room, seed, player tile/elevation/direction and each enemy definition and
 position. Enemy IDs are local to the selected zone.
 
+### Original box-fallback control (#175)
+
+Original `71618.c:1093` tries ordinary ranked actions first. Only after those
+fail does it try its cached fallback against registered kind2/4 special actors,
+retaining nearby-hostile, range, cooldown, readiness and visibility conditions.
+Boxes do not compete randomly as equal-priority ordinary targets.
+
+The following local preset preserves original actors and crates. An isolated
+placement override would remove those props and is not an equivalent control.
+Save this JSON locally, for example as `build\quality\box-cover.json`:
+
+```json
+{
+  "version": 1,
+  "zone": 9,
+  "room": 11,
+  "seed": 1,
+  "ashley_profile": "post-prologue",
+  "player": {"x": 1, "z": 2, "elevation": 0, "direction": 0},
+  "enemies": [],
+  "room_events": "production"
+}
+```
+
+For the verified source6db8d24d, this actual-controller replay climbs the original
+stack without changing live actor state:
+
+```powershell
+$press = @('120:Right+Square')
+for ($tick = 123; $tick -le 228; $tick += 3) {
+    $press += ('{0}:Right' -f $tick)
+}
+& .\build\Debug\VS.CombatLab.exe --data Native\data `
+    --scenario build\quality\box-cover.json --start --frames 1200 `
+    --speed 1 --scripted --press ($press -join ',')
+```
+
+For interactive play, wait for normal field control, then jump right and keep
+moving toward the stack. Inputs during loading/action resolution are not a jump.
+Debug1792907616391601-0 and Release1792907657305767-0 establish Ashley on the
+stack at[318,-384,320]. His signed-aim distance209979 exceeds the original
+wolf's squared reach50176; original box6 is19646 within reach, while box7 is67262
+outside it. Wolf3's real single-target action1 damages box6 HP1->0 at496.
+The AI navigation target0 is not the cached/executed fallback target6.
+
+Extended Debug1792907737516702-0 / Release1792907776647105-0 continue through1200:
+destroyed6 deregisters, the upper box drops128 units, Ashley settles on it and
+the wolf climbs up through actual command10 movement at612..625 (not a claimed
+jump arc). Ground controls1792907849223984-0 /
+1792907882485500-0 omit the inputs: ordinary Ashley attacks succeed and both
+boxes remain intact through900. All six runs have zero engine errors and normal
+host shutdown with explicitly interrupted encounters, not victory/complete
+encounter claims. Local strict proof is `build\quality\box175-verified.json`.
+This is source-permitted occasional fallback acceptance, not a gameplay change
+or proof for every enemy/room/action combination.
+
 ### Ashley testing profiles
 
 The **ASHLEY** row selects `prologue`, `post-prologue`, `post-minotaur`,
