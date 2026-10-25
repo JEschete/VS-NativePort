@@ -1,6 +1,8 @@
 """Regression tests for aligned semantic symbol-generator rows."""
 from __future__ import annotations
 
+import ast
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -8,6 +10,108 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "sym_gen"))
 from common import Gen  # noqa: E402
+
+
+class ReviewedConsumerTests(unittest.TestCase):
+    root = Path(__file__).resolve().parents[2]
+
+    def tree(self, path):
+        return ast.parse((self.root / path).read_text(encoding="utf-8-sig"))
+
+    def function(self, path, name, namespace):
+        node = next(node for node in ast.walk(self.tree(path))
+                    if isinstance(node, ast.FunctionDef) and node.name == name)
+        exec(compile(ast.Module(body=[node], type_ignores=[]), path, "exec"), namespace)
+        return namespace[name]
+
+    def callbacks(self, argument, namespace):
+        return [
+            eval(compile(ast.Expression(body=node), "copy_to_native.py", "eval"), namespace)
+            for node in ast.walk(self.tree(r"tools\port\copy_to_native.py"))
+            if isinstance(node, ast.Lambda)
+            and any(arg.arg == argument for arg in node.args.args)
+        ]
+
+    def test_reviewed_one_to_one_consumers_use_strict_pairing(self):
+        paths = (
+            r"tools\naming\sanity_pass.py",
+            r"tools\naming\sym_gen\Audio.py",
+            r"tools\naming\sym_gen\Engine_01.py",
+            r"tools\naming\sym_gen\Game_Battle_01.py",
+            r"tools\naming\sym_gen\Game_Battle_02.py",
+            r"tools\naming\sym_gen\Game_Menu_01.py",
+            r"tools\naming\sym_gen\ai_state.py",
+            r"tools\naming\upstream_layout.py",
+            r"tools\port\check_native_views.py",
+            r"tools\port\copy_to_native.py",
+            r"tools\port\field_at.py",
+            r"tools\port\layout_check.py",
+            r"tools\port\ref_index.py",
+        )
+        count = 0
+        for path in paths:
+            calls = [node for node in ast.walk(self.tree(path))
+                     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                     and node.func.id == "zip"]
+            self.assertTrue(calls, path)
+            count += len(calls)
+            for call in calls:
+                with self.subTest(path=path, line=call.lineno):
+                    self.assertTrue(any(
+                        keyword.arg == "strict" and isinstance(keyword.value, ast.Constant)
+                        and keyword.value.value is True
+                        for keyword in call.keywords
+                    ))
+        self.assertEqual(count, 24)
+
+    def test_signature_callback_keeps_its_current_native_type(self):
+        namespace = {"t": "uintptr_t"}
+        callbacks = self.callbacks("native_type", namespace)
+        self.assertEqual(len(callbacks), 1)
+        namespace["t"] = "changed"
+        self.assertEqual(callbacks[0](re.match(r"(\s*)", "    ")), "    uintptr_t")
+
+    def test_global_callbacks_keep_each_current_symbol(self):
+        namespace = {"name": "Original"}
+        callbacks = self.callbacks("symbol_name", namespace)
+        self.assertEqual(len(callbacks), 2)
+        namespace["name"] = "Changed"
+        for callback in callbacks:
+            self.assertEqual(callback(re.match(r"(\w+)(.*)", "placeholder[2]")),
+                             "Original[2]")
+
+    def test_anonymous_type_callback_keeps_its_current_kind_and_name(self):
+        namespace = {"kw": "struct", "name": "Original"}
+        callbacks = self.callbacks("kind", namespace)
+        self.assertEqual(len(callbacks), 1)
+        namespace.update(kw="union", name="Changed")
+        self.assertEqual(callbacks[0](re.match(r"(typedef\s+)?", "typedef ")),
+                         "typedef struct Original {")
+
+    def test_asset_boundary_keeps_its_source_module(self):
+        namespace = {"module": "ORIGINAL", "known": {("ORIGINAL", "image_clut")}}
+        boundary = self.function(r"tools\port\copy_to_native.py", "boundary", namespace)
+        namespace["module"] = "CHANGED"
+        self.assertTrue(boundary("image"))
+        self.assertTrue(boundary(None))
+        self.assertFalse(boundary("other"))
+
+    def test_first_use_keeps_its_declaration_and_name_pattern(self):
+        namespace = {
+            "rel": "original.c", "ln": 1, "pattern": re.compile(r"\bvalue\b"), "re": re,
+            "lines": lambda unused: ["int value;", "value = 1;", "extern int value;"],
+        }
+        first_use = self.function(r"tools\naming\cite_globals.py", "first_use", namespace)
+        namespace.update(rel="changed.c", ln=2, pattern=re.compile("missing"))
+        self.assertEqual(first_use("original.c", 1, 3), 2)
+
+    def test_upstream_member_groups_preserve_boundary_members(self):
+        groups = self.function(r"tools\naming\upstream_layout.py", "groups", {})
+        pinned = [{"offset": offset} for offset in (0, 8, 16)]
+        upstream = [{"offset": offset} for offset in (0, 16)]
+        self.assertEqual(groups(pinned, upstream), [
+            (pinned[:2], upstream[:1]), (pinned[2:], upstream[1:]),
+        ])
 
 
 class MemberPairTests(unittest.TestCase):

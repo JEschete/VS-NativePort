@@ -43,7 +43,7 @@ def path_at(cp: "ct.Copier", tid: str, off: int, bit: int | None = None) -> str:
             lay = cp._gen.layout(tid)
         except KeyError:
             return out + f" +{off} (no layout)"
-        fields = list(zip(cp._gen.members[tid], lay["fields"]))
+        fields = list(zip(cp._gen.members[tid], lay["fields"], strict=True))
         total = int(lay.get("size") or 0) * 8
         want = off * 8 + (bit or 0)
         hit = None

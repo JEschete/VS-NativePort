@@ -153,7 +153,7 @@ def same_as_applied(canonical: str, duplicates: list[str]) -> None:
     for tid in duplicates:
         g.TYPES.append([tid, trow["role"], trow["final_name"], trow["final_location"], trow["purpose"], trow["confidence"],
                         f"same-as:{canonical};identical layout indexed through a different include path"])
-        for m, f in zip(g.members[tid], fields):
+        for m, f in zip(g.members[tid], fields, strict=True):
             g.FIELDS.append([m["id"], f["final_name"], f["meaning"], f["confidence"], f"same-as:{canonical}"])
 
 

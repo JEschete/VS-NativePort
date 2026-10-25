@@ -176,8 +176,11 @@ def groups(pf: list[dict], uf: list[dict]) -> list[tuple[list[dict], list[dict]]
     out = []
     for i, start in enumerate(common):
         end = common[i + 1] if i + 1 < len(common) else None
-        sel = lambda fs: [x for x in fs if x["offset"] >= start and (end is None or x["offset"] < end)]
-        out.append((sel(pf), sel(uf)))
+        def select_fields(fields, start_offset=start, end_offset=end):
+            return [field for field in fields if field["offset"] >= start_offset
+                    and (end_offset is None or field["offset"] < end_offset)]
+
+        out.append((select_fields(pf), select_fields(uf)))
     return out
 
 
@@ -188,7 +191,7 @@ def merge(pin: dict, up: dict, pinned: dict[str, list[dict]], upstream: dict[str
     is_union = pin["key"].startswith("union:")
     for pg, ug in groups(pin["fields"], up["fields"]) if not is_union else [(pin["fields"], up["fields"])]:
         if [(x["offset"], x.get("bits") or 0) for x in pg] == [(x["offset"], x.get("bits") or 0) for x in ug]:
-            for p, u in zip(pg, ug):
+            for p, u in zip(pg, ug, strict=True):
                 keep_pinned = GENERIC_FIELD.match(u["name"] or "") and not GENERIC_FIELD.match(p["name"] or "")
                 name = p["name"] if keep_pinned else u["name"]
                 source = "both" if p["name"] == u["name"] else "pinned+upstream-type" if keep_pinned else "upstream"

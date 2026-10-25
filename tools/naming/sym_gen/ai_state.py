@@ -121,7 +121,7 @@ def offsets(g, tid: str) -> list[tuple[int, int]]:
     lay = g.layout(tid)
     offs = [f["offset"] // 8 if f["offset"] is not None and f["offset"] >= 0 else -1 for f in lay["fields"]]
     sizes = [(offs[i + 1] if i + 1 < len(offs) else lay["size"]) - offs[i] for i in range(len(offs))]
-    return list(zip(offs, sizes))
+    return list(zip(offs, sizes, strict=True))
 
 
 def used(g, tid: str, member: str) -> bool:
@@ -153,7 +153,7 @@ def view_specs(g, tid: str, overrides: dict | None = None) -> list[tuple]:
     overrides = overrides or {}
     canon = canonical_sizes(g)
     out, seen = [], set()
-    for m, (off, size) in zip(g.members[tid], offsets(g, tid)):
+    for m, (off, size) in zip(g.members[tid], offsets(g, tid), strict=True):
         name = m["name"]
         filler = PLACEHOLDER.search(name) and re.fullmatch(r"(unsigned |signed )?char\[\d+\]", m["type"])
         fits = off in TABLE and canon.get(off, size) == size and not filler

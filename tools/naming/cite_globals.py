@@ -73,9 +73,11 @@ def main() -> int:
             lo = ln + 1  # a local static is only used after its declaration
         pattern = re.compile(r"\b" + re.escape(name) + r"\b")
 
-        def first_use(file: str, start: int, end: int) -> int | None:
+        def first_use(file: str, start: int, end: int, *, declaration_file=rel,
+                      declaration_line=ln, name_pattern=pattern) -> int | None:
             return next((i + 1 for i, l in enumerate(lines(file)) if start <= i + 1 <= end and not (
-                file == rel and i + 1 == ln) and pattern.search(l) and not l.lstrip().startswith("extern")
+                file == declaration_file and i + 1 == declaration_line) and name_pattern.search(l)
+                and not l.lstrip().startswith("extern")
                 and not re.match(r"\s*(enum|struct|typedef)\b", l)), None)
 
         use_file, use = rel, first_use(rel, lo, hi)

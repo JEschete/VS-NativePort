@@ -39,7 +39,7 @@ def T(tid, role, name, loc, purpose, conf, notes, flds):
     order = members[tid]
     if [o["name"] for o in order] != [f[0] for f in flds]:
         sys.exit(f"{tid}: member order mismatch {[o['name'] for o in order]} vs {[f[0] for f in flds]}")
-    for o, (orig, fname, meaning, fconf, fnotes) in zip(order, flds):
+    for o, (_original_name, fname, meaning, fconf, fnotes) in zip(order, flds, strict=True):
         fields.append([o["id"], fname, meaning, fconf, fnotes])
 
 
@@ -474,7 +474,7 @@ title_orig = [m["name"] for m in members["T00599"]]
 T("T00599", "OnDisc", "Save::GameSaveImage", S + "GameFiles.h", SAVE_PURPOSE, "high",
   "same-as:T00598;identical offsets in the Title overlay copy;source:22C.c:282", [
       (o, n, m, "low" if n.startswith("reserved") else "med", f"{DECL}source:22C.c:{264 + i};same layout as T00598")
-      for i, (o, (_, n, m)) in enumerate(zip(title_orig, SAVE_FIELDS))
+      for i, (o, (_, n, m)) in enumerate(zip(title_orig, SAVE_FIELDS, strict=True))
   ])
 
 T("T00600", "OnDisc", "Save::SaveCipherHeader", S + "GameFiles.h",

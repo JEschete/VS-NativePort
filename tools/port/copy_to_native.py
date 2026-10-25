@@ -248,10 +248,10 @@ def splat_asset_extents(known: set[tuple[str, str]] | None = None) -> dict[tuple
                     entries = 256 if depth and depth[1] == "8" else 16
                     clut_first[n[1]] = (int(cluts[1]) if cluts else 1) * entries * 2
                 starts.append((int(d[1], 0), n[1] if n else None))
-        def boundary(name: str | None) -> bool:
+        def boundary(name: str | None, module_name: str = module) -> bool:
             if name is None or known is None:
                 return True
-            return any((module, n) in known for n in (name, name + "_clut", name + "_header", name + "_data"))
+            return any((module_name, n) in known for n in (name, name + "_clut", name + "_header", name + "_data"))
 
         for k, (start, name) in enumerate(starts[:-1]):
             nxt = next((s for s, n in starts[k + 1:] if boundary(n)), starts[-1][0])
@@ -863,7 +863,8 @@ class Copier:
         for idx, t in keys.items():
             if idx == "ret" or idx >= len(params):
                 continue
-            new, n = re.subn(rf"^(\s*){self.BASE_INT}\b", lambda x: x[1] + t, params[idx], count=1)
+            new, n = re.subn(rf"^(\s*){self.BASE_INT}\b",
+                             lambda match, native_type=t: match[1] + native_type, params[idx], count=1)
             params[idx] = new
             self.report["signature-param-retyped" if n else "signature-param-not-retyped"].append(f"{fid}:{idx} {name}")
         return head + text[m.start():m.end()] + ",".join(params) + rest[end:]
@@ -1100,7 +1101,7 @@ class Copier:
             self.type_has_pointer(tid)  # builds self._gen
             try:
                 lay = self._gen.layout(tid)
-                for m, f in zip(self._gen.members[tid], lay["fields"]):
+                for m, f in zip(self._gen.members[tid], lay["fields"], strict=True):
                     if (f["offset"] or 0) == rem * 8 and not m.get("bits") and m["id"] in self.fields:
                         target = f"&{prefix}.{self.fields[m['id']]['final_name']}"
                         break
@@ -1149,7 +1150,8 @@ class Copier:
                 string_include = re.search(r'#\s*include\s+"build/assets/([^"]+)\.vsString"', original)
                 if not re.search(rf"\b{re.escape(name)}\b", decl):
                     # defined under a template binding macro (`static CVECTOR VS_CLOSED_RING_COLORS[] = ...`)
-                    decl = re.sub(r"\b(\w+)(\s*(?:\[[^\]]*\])*)\s*$", lambda m: f"{name}{m[2]}", decl, count=1)
+                    decl = re.sub(r"\b(\w+)(\s*(?:\[[^\]]*\])*)\s*$",
+                                  lambda match, symbol_name=name: f"{symbol_name}{match[2]}", decl, count=1)
                     text = decl + (f" = {init}" if init is not None else "")
                 if string_include is not None:
                     asset = Path(string_include[1])
@@ -1183,7 +1185,8 @@ class Copier:
                 decl = self.apply_fixups(r, decl)
                 if not re.search(rf"\b{re.escape(name)}\b", decl):
                     # declared in a template header under its binding macro (`extern CVECTOR VS_RING_COLORS[];`)
-                    decl = re.sub(r"\b(\w+)(\s*(?:\[[^\]]*\])*)\s*$", lambda m: f"{name}{m[2]}", decl, count=1)
+                    decl = re.sub(r"\b(\w+)(\s*(?:\[[^\]]*\])*)\s*$",
+                                  lambda match, symbol_name=name: f"{symbol_name}{match[2]}", decl, count=1)
                 if re.search(r"\[\s*\]", decl):
                     size = int(r["size"] or 0)
                     elem = e.get("elem_size") or 0
@@ -1305,7 +1308,7 @@ class Copier:
             return next((v for k, v in sizes.items() if re.search(rf"\b{k}\b", s)), 0)
 
         fields_all = lay["fields"]
-        for idx, (m, f) in enumerate(zip(g.members[r["id"]], fields_all)):
+        for idx, (m, f) in enumerate(zip(g.members[r["id"]], fields_all, strict=True)):
             t = self.spelled_type(f["type"]).strip()
             ft = (self.fields.get(m["id"]) or {}).get("type", "").strip()
             nxt = next((x["offset"] for x in fields_all[idx + 1:] if x["offset"] > f["offset"]), None)
@@ -1355,7 +1358,7 @@ class Copier:
             return True  # unknown layout: make no claim
         if any(m["id"] in self.ptr_fields for m in self._gen.members.get(tid, [])):
             return True
-        for m, f in zip(self._gen.members.get(tid, []), fields):
+        for m, f in zip(self._gen.members.get(tid, []), fields, strict=True):
             if m["id"] in cf.ONDISC_OFFSETS:
                 continue  # a 32-bit offset natively
             t = f.get("type") or ""
@@ -1395,7 +1398,7 @@ class Copier:
 
         # runs of consecutive bitfields as the emitted text declares them, at the PS1 offsets of the ledger layout
         runs, cur = [], []
-        for m, f in zip(members, lay["fields"]):
+        for m, f in zip(members, lay["fields"], strict=True):
             d = declared(self.fields[m["id"]]["final_name"]) if m["id"] in self.fields else None
             if d and f.get("offset") is not None:
                 cur.append((self.fields[m["id"]]["final_name"], d[0], d[1], f["offset"]))
@@ -1431,7 +1434,7 @@ class Copier:
             else:
                 self.report["bitfield-run-unfixable"].append(f"{tid} at bit {start}")
                 continue
-            for fname, t in zip(names, types):
+            for fname, t in zip(names, types, strict=True):
                 unsigned = t.startswith(("u_", "unsigned"))
                 unit = {1: ("u_char", "char"), 2: ("u_short", "short"), 4: ("u_int", "int")}[nbytes][0 if unsigned else 1]
                 text = re.sub(rf"(?m)^(\s*(?:/\*[^\n]*?\*/\s*)?)(?:unsigned\s+|signed\s+)?\w+(\s+{re.escape(fname)}\s*:)", rf"\g<1>{unit}\2",
@@ -1463,7 +1466,7 @@ class Copier:
                     text = text.replace(old, new)
                 if nv.pointer_slots(tid):
                     text = nv.rebase(tid, text, [(m["final_name"], f) for m, f in
-                                     zip(self._gen.members[tid], self._gen.layout(tid)["fields"])])
+                                     zip(self._gen.members[tid], self._gen.layout(tid)["fields"], strict=True)])
                     text = self.bitfield_units(tid, text)
                 text += self.size_assert(tid, name)
                 need = sorted({self._tid_by_name[n] for f in self._gen.layout(tid)["fields"]
@@ -1499,7 +1502,7 @@ class Copier:
                 text = self.bitfield_units(tid, text)
                 if nv.pointer_slots(tid):
                     text = nv.rebase(tid, text, [(m["final_name"], f) for m, f in
-                                     zip(self._gen.members[tid], self._gen.layout(tid)["fields"])])
+                                     zip(self._gen.members[tid], self._gen.layout(tid)["fields"], strict=True)])
                 # size_t was 32 bits on the PS1; a member of a layout keeps that width (SYSTEM.DAT header offsets)
                 text, n = re.subn(r"(?m)^(\s*)size_t(\s+\w+\s*(?:\[[^\]]*\]\s*)*;)", r"\1u_int\2", text)
                 if n:
@@ -1507,7 +1510,8 @@ class Copier:
             kw = {"struct": "struct", "union": "union", "enum": "enum"}.get(r["kind"])
             if kw:
                 # give anonymous definitions the tag, so pointers to them can be forward-declared
-                text = re.sub(rf"^(typedef\s+)?{kw}\s*{{", lambda m: f"{m[1] or ''}{kw} {name} {{", text, count=1)
+                text = re.sub(rf"^(typedef\s+)?{kw}\s*{{",
+                              lambda match, kind=kw, tag=name: f"{match[1] or ''}{kind} {tag} {{", text, count=1)
                 if not text.startswith("typedef"):
                     text += f";\ntypedef {kw} {name} {name}"
                 if kw != "enum":
@@ -1704,7 +1708,7 @@ class Copier:
         table = [(off, name, ov) for off, name, ov in slots if name != "NULL"]
         by_name = {(r["overlay"], r["name"]): r for r in self.cat}
         twins = self.plugin_twins()
-        for (off, name, ov), call in zip(table, calls or [None] * len(table)):
+        for (off, name, ov), call in zip(table, calls or [None] * len(table), strict=True):
             row = by_name.get((ov, name)) or by_name.get((twins.get(ov), name)) if ov else None
             if row is None and ov and name == "func_800F9800":
                 # every plugin's code starts at 0x800F9800: its first function (PLG044: vs_effect_solidShock)

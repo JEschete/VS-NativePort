@@ -25,7 +25,7 @@ def twin(tid: str, applied: str, why: str) -> None:
     t, fs = g.applied(applied)
     g.TYPES.append([tid, t["role"], t["final_name"], t["final_location"], t["purpose"], t["confidence"],
                     f"same-as:{applied};{why};{t['notes']}"])
-    for m, f in zip(g.members[tid], fs):
+    for m, f in zip(g.members[tid], fs, strict=True):
         g.FIELDS.append([m["id"], f["final_name"], f["meaning"], f["confidence"], f["notes"]])
 
 

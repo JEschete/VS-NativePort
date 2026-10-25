@@ -41,7 +41,7 @@ def main() -> int:
         record = native(tid)
         result = {}
         fields = {f.spelling: f for f in record.get_children() if f.kind == ci.CursorKind.FIELD_DECL}
-        for member, field in zip(gen.members[tid], gen.layout(tid)['fields']):
+        for member, field in zip(gen.members[tid], gen.layout(tid)['fields'], strict=True):
             name = member['final_name']
             cursor = fields.get(name)
             if cursor is None:
@@ -82,7 +82,7 @@ def main() -> int:
             if tid == canonical:
                 continue
             view = native(tid)
-            for member, field in zip(gen.members[tid], gen.layout(tid)['fields']):
+            for member, field in zip(gen.members[tid], gen.layout(tid)['fields'], strict=True):
                 name = member['final_name']
                 if name.startswith(('reserved', 'padding')):
                     continue

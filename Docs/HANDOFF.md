@@ -22,20 +22,36 @@ verification of the current worktree.
   Fresh #156 persistent3-edge controls Debug1792959985239224-0 and
   Release1792960053430781-0 execute the repaired no-top path twice with0 engine
   errors and complete teardown; two neighboring edges pass in each window.
-  Target9/7->9/6 remains blocked at4800: its event is idle, but live enemy
-  combat interrupts field control (longest ordinary interval110, below120).
-  This is not another null-top crash or a reason to blindly extend budgets;
-  the remaining acceptance requires ordinary combat/defensive handling.
+  #156 is closed as that verified crash repair and actual source re-entry.
+  Target9/7->9/6 remains explicitly blocked under#151 at4800: its event is idle,
+  but live enemy combat interrupts field control (longest ordinary interval110,
+  below120). It is not another null-top crash and is not relabeled passed.
+  The separate coverage case needs ordinary combat/defensive handling, not
+  blindly larger budgets or a weaker predicate.
   Maintained quality#25 stays first in the work order. A coherent test-only
   batch replaces40 ambiguous integer-width findings with exact-width types,
   retaining native callback ABI via the existing auto/0L pattern. Five touched
   locals also use the required naming style. Full Debug/Release764 cases/
   3,390,300 assertions each pass; scoped tidy228 existing/0 new. No assertion,
   fixture byte, generated runtime, vendor/reference file or quality baseline
-  changed. The remaining C17 textbox member `string` IWYU warning and141
-  first-party Python findings need separate review; do not add a C++ string
-  header to C or erase these findings from the baseline. Local evidence is
-  `non-ma-audit-*` and `quality25-fixed-width-*` in session files.
+  changed. Published c99a6f92 has exact green40231907155; default debt falls
+  from182 to142. The next coherent #25 review makes23 one-to-one zip contracts
+  explicit (24 guarded calls including one existing strict site), binds current
+  declaration/module/native-type values in callbacks and names one unused
+  original-field binding. Thirty naming and72 source-adaptation tests pass.
+  Two real copier runs preserve all751 generated files byte-for-byte and305
+  protected files. Audio/Engine_01/Game_Battle_02/Game_Menu_01 comparisons route
+  all writes to isolated sinks and preserve all11 CSV outputs; live ledgers
+  remain unchanged. Game_Battle_01 is blocked even BEFORE these changes:
+  T00271 D_800F58BC_t's unkB declaration cannot be cited. Do not guess a source
+  line or hide this #148 validation limit.
+  Full fast now reports106 existing/0 new (105 Python plus the C17 textbox
+  member `string` IWYU suggestion). No baseline update, C++ string header in C,
+  or generic suppression was used. Current Skeleton follow-up
+  Release1792961811405244-0 retains35960 ready frames/36000 ticks with no enemy
+  offensive selection,0 errors and complete teardown; #141 is still a quiet
+  fixture observation, not a proven original-game mismatch or a repaired bug.
+  Evidence is `non-ma-audit-*` and `quality25-*` in session files.
 - #183 owner-requested lethal chain credit is implemented through copier F00099.
   The copied original146C.c:3420 also coupled offensive credit to target
   survival; this is an explicit owner behavior change, not an invented x64

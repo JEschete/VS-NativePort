@@ -61,7 +61,7 @@ def main() -> int:
             continue
         out["checked"] += 1
         diffs = []
-        for f, want in zip(fields, ps1):
+        for f, want in zip(fields, ps1, strict=True):
             got = c.type.get_offset(f.spelling)
             if want is not None and want >= 0 and got != want:
                 diffs.append({"member": f.spelling, "ps1_bit": want, "x64_bit": got,

@@ -266,7 +266,7 @@ def T(tid, role, name, loc, purpose, conf, notes, end, specs, recv=None):
     order = members[tid]
     if [o["name"] for o in order] != [sp[0] for sp in specs]:
         sys.exit(f"{tid}: member order {[o['name'] for o in order]} != {[sp[0] for sp in specs]}")
-    for o, sp in zip(order, specs):
+    for o, sp in zip(order, specs, strict=True):
         orig, final, meaning, fconf = sp[:4]
         cite_ = sp[4] if len(sp) > 4 else None
         if cite_ is None and recv:

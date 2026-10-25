@@ -121,9 +121,12 @@ twin_t, twin_f = g.applied("T00200")
 g.TYPES.append(["T00401", twin_t["role"], twin_t["final_name"], twin_t["final_location"], twin_t["purpose"],
                 twin_t["confidence"], "same-as:T00200;identical scratch layout declared in another translation unit;"
                 + twin_t["notes"]])
-for _m, _f in zip(g.members["T00401"], twin_f):
-    g.FIELDS.append([_m["id"], _f["final_name"], _f["meaning"], _f["confidence"], _f["notes"]])
-
+for _m, _f in zip(g.members["T00401"], twin_f, strict=True):
+    g.FIELDS.append(
+        [_m["id"], _f["final_name"], _f["meaning"], _f["confidence"], _f["notes"]]
+    )
+
+
 # ---------------------------------------------------------------- group C: hit calculation and MPD geometry
 T("T00312", "State", "Battle::DamageCalculation", B + "Hit.h",
   "Holds the inputs of one damage or healing calculation: types, affinities, classes, stats and their factors.", "high",

@@ -230,7 +230,7 @@ class Ledgers:
             ms, fs = g.members[tid], lay["fields"]
             offs = [f["offset"] if f["offset"] is not None and f["offset"] >= 0 else 0 for f in fs]
             out = []
-            for i, (m, f) in enumerate(zip(ms, fs)):
+            for i, (m, f) in enumerate(zip(ms, fs, strict=True)):
                 nxt = next((o for o in offs[i + 1:] if o > offs[i]), lay["size"] * 8)
                 w = int(m["bits"]) if m.get("bits") else max(nxt - offs[i], 0)
                 out.append((offs[i], w, m["id"], f.get("type", "")))

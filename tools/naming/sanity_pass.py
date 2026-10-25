@@ -61,7 +61,7 @@ def main() -> int:
             return []
         ms, offs = by_type[tid], [f["offset"] for f in lay["fields"]]
         out = []
-        for i, (m, f) in enumerate(zip(ms, lay["fields"])):
+        for i, (m, f) in enumerate(zip(ms, lay["fields"], strict=True)):
             if f["offset"] is None or f["offset"] < 0:
                 continue
             width = int(m["bits"] or 0) or (
