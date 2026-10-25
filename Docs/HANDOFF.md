@@ -117,8 +117,7 @@ verification of the current worktree.
   retains fixtures/observer. Concurrent scouts stalled before GPU initialization
   and are excluded; serial probes worked, without a driver/root-cause claim.
 - #177 roulette audit limits: owner's roulette loads MENUF at11609. Native reel
-  initialization, three
-  weighted16-entry tables, acceleration/deceleration and stop selection match
+  initialization, three weighted16-entry tables, acceleration/deceleration and stop selection match
   original MENUF source; BIOS Rand15 golden controls and owner raw RNG advance.
   /J keeps the selected byte unsigned. No simple RNG defect is established,
   and no guessed uniform reroll was introduced. Exact stop/update cadence and
@@ -126,6 +125,25 @@ verification of the current worktree.
   `rood-boi` movement file is unchanged from the pinned counterpart; the
   `rood-reverseWin` snapshot is not an independent Git root, so a git log there
   must not be mistaken for upstream changes.
+  Fresh asset-free controls now call the actual native C update/award function:
+  all256 starting bytes decelerate from48 through8, accumulate125 units before
+  final alignment and stop after exactly40..55 calls on low nibble8, without
+  a new BIOS roll. All48 table slots apply only their intended permanent stat,
+  including high-byte slot indices and999 caps (96 normal/cap iterations).
+  Early Circle skips presentation to timer273 without stopping/rerolling;
+  full32-bit BIOS continuation survives seed restore. Original table slot
+  counts (STR/AGI/INT/HP/MP) are4/1/1/7/3,1/1/4/8/2,1/4/1/7/3:
+  HP-heavy tables, not a claimed uniform per-boss probability.
+  Debug/Release `[roulette] --reporter compact --rng-seed 177` each pass5 cases/
+  27,185 assertions; full serial730/3,191,763 each pass. Selected tidy has0
+  findings/0 new plus42 reported fixture literals; full fast quality195/0 new.
+  Project regeneration is stable on a second run and preserves the owner-edited
+  solution. Source remains eb485242 plus this test/project-only package and
+  unrelated owner ignore/solution edits; no gameplay RNG/formula is changed.
+  The fixture suppresses presentation/audio dependencies and uses local synthetic
+  stats, not real boss-award evidence. Live stop/host-call cadence, reel chooser
+  initialization and repeated boss/reward/save-resume observation remain open.
+  Local commands/results: `build/quality/roulette177-*`.
 - #176 zero-glyph transition repair: original matching `_renderTextImmediate`
   assembly at800C81DC/81E4/8274 uses encoded0xE5, space0x8F and subtracts0xE5.
   Copied F01337 instead used ASCII form-feed/space, so end0xE7 did not terminate

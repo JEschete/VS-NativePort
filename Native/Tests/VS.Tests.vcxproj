@@ -120,6 +120,7 @@
     <ClCompile Include="src\ParticleRenderTests.cpp" />
     <ClCompile Include="src\PursuitTargetsTests.cpp" />
     <ClCompile Include="src\RasterBoundsTests.cpp" />
+    <ClCompile Include="src\ResultsRouletteTests.cpp" />
     <ClCompile Include="src\RoomTriggerMarkerTests.cpp" />
     <ClCompile Include="src\RuntimeSnapshotTests.cpp" />
     <ClCompile Include="src\SaveStoreTests.cpp" />
