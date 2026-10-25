@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -23,6 +24,7 @@
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
+#include "Audio/Sfx.h"
 #include "Boot/GameLoop.h"
 #include "Core/Text/TextCode.h"
 #include "Field/Gimmicks.h"
@@ -38,9 +40,15 @@ constexpr int kRows = 3;
 constexpr int kUppercaseGlyph = 10;
 constexpr int kLowercaseGlyph = 36;
 constexpr int kSaveCountLimit = 9999;
+constexpr int kMenuChannelGroup = 0x7E;
 // The footer fits 288 pixels of six-pixel glyphs, not a 32-byte card label.
 constexpr std::size_t kFooterTextLimit = 48;
 enum class Phase { kInactive, kRead, kPick, kConfirm, kExecute, kNotice };
+
+struct FilePreview {
+  FileInfo file;
+  NativeFileSummary summary;
+};
 
 struct Picker {
   Phase phase = Phase::kInactive;
@@ -55,6 +63,8 @@ struct Picker {
   int notice_result = 0;
   std::array<FileInfo, kRows> files{};
   std::array<NativeFileSummary, kRows> summaries{};
+  std::array<std::unique_ptr<FilePreview>, VS::Save::SaveStore::kSlotCount>
+      previews{};
 };
 
 Picker picker;
@@ -130,6 +140,9 @@ std::expected<Files*, std::string> OpenFiles() {
 }
 
 void Notice(std::string_view text, std::string_view detail, int result = 0) {
+  // Notices leave the picker or offer a retry. Neither may reuse a preview
+  // captured before a failed write, changed file or content/storage error.
+  for (auto& preview : picker.previews) preview.reset();
   picker.phase = Phase::kNotice;
   picker.notice_result = result;
   Status(text);
@@ -152,28 +165,84 @@ void ReadFiles() {
     return;
   }
   for (int i = 0; i < kRows; ++i) {
-    const auto info = (*opened)->Inspect(picker.first_slot + i);
-    if (!info) {
-      Notice("Cannot read native saves", info.error(), -1);
-      return;
-    }
-    picker.files[i] = *info;
-    picker.summaries[i] = {};
-    if (info->document) {
-      const auto summary = DescribeNativeFile(*info->document);
-      if (!summary) {
-        Notice("Save summary unavailable", summary.error(), -1);
+    auto& preview = picker.previews[picker.first_slot + i];
+    if (!preview) {
+      auto info = (*opened)->Inspect(picker.first_slot + i);
+      if (!info) {
+        Notice("Cannot read native saves", info.error(), -1);
         return;
       }
-      picker.summaries[i] = *summary;
+      NativeFileSummary summary;
+      if (info->document) {
+        const auto described = DescribeNativeFile(*info->document);
+        if (!described) {
+          Notice("Save summary unavailable", described.error(), -1);
+          return;
+        }
+        summary = *described;
+      }
+      if (!info->message.empty()) {
+        VS_LOG_WARN("save", "Native slot {}: {}", info->slot, info->message);
+      }
+      // At most 100 owned previews, cleared on Begin/Notice/session reset.
+      // Sliding the three-card window does not decode unchanged saves again.
+      preview = std::make_unique<FilePreview>(std::move(*info), summary);
     }
-    if (!info->message.empty()) {
-      VS_LOG_WARN("save", "Native slot {}: {}", info->slot, info->message);
-    }
+    picker.files[i] = preview->file;
+    picker.summaries[i] = preview->summary;
   }
   picker.ready = true;
   picker.phase = Phase::kPick;
   PickStatus();
+}
+
+bool WindowCached() {
+  for (int row = 0; row < kRows; ++row) {
+    if (!picker.previews[picker.first_slot + row]) return false;
+  }
+  return true;
+}
+
+std::expected<bool, std::string> MatchesPreview(const FileInfo& current,
+                                                const FileInfo& preview) {
+  if (current.status != preview.status ||
+      current.document.has_value() != preview.document.has_value()) {
+    return false;
+  }
+  if (!current.document) return true;
+  const auto before = Encode(*preview.document);
+  if (!before) return std::unexpected(before.error());
+  const auto after = Encode(*current.document);
+  if (!after) return std::unexpected(after.error());
+  return *before == *after;
+}
+
+std::optional<FileInfo> ReadConfirmedSelection(const FileInfo& selected) {
+  // Previews are not load or overwrite consent for changed content. Inspect
+  // runs Files::Load's current primary/backup and content validation, including
+  // for an apparently empty container that appeared while browsing.
+  const auto opened = OpenFiles();
+  if (!opened) {
+    Notice("Cannot open native saves", opened.error(), -1);
+    return std::nullopt;
+  }
+  auto current = (*opened)->Inspect(selected.slot);
+  if (!current) {
+    Notice("Cannot read native saves", current.error());
+    return std::nullopt;
+  }
+  const auto matches = MatchesPreview(*current, selected);
+  if (!matches) {
+    Notice("Cannot verify selected save", matches.error());
+    return std::nullopt;
+  }
+  if (!*matches) {
+    Notice("File changed - select again",
+           current->message.empty() ? "Selected file content or status changed"
+                                    : current->message);
+    return std::nullopt;
+  }
+  return std::move(*current);
 }
 
 std::expected<void, std::string> WriteCurrent() {
@@ -256,6 +325,8 @@ void Execute() {
                                       : "load",
               selected.slot, static_cast<int>(selected.status),
               picker.container);
+  const auto current = ReadConfirmedSelection(selected);
+  if (!current) return;
   if (picker.select_container && selected.status == FileStatus::kEmpty) {
     staged_storage.emplace();
     Input_settings.containerEmpty = 1;
@@ -269,42 +340,32 @@ void Execute() {
       Menu_PlayInvalidSound();
       Notice("Save failed - see log", written.error());
     } else {
-      Menu_PlaySelectSound();
+      Audio_PlaySfxCentered(kMenuChannelGroup, VS_SFX_FILEOPCOMPLETE);
       Notice("Save complete", {}, 1);
     }
     return;
   }
-  const auto opened = OpenFiles();
-  if (!opened) {
-    Notice("Cannot open native saves", opened.error(), -1);
-    return;
-  }
-  auto loaded = (*opened)->Load(selected.slot);
-  if (!loaded) {
-    Notice("Load failed - game unchanged", loaded.error());
-    return;
-  }
-  if (loaded->recovered != (selected.status == FileStatus::kRecovered)) {
-    Notice("File changed - select again",
-           "Recovery status changed after confirmation");
+  if (!current->document) {
+    Notice("Load failed - game unchanged", "Selected file has no document");
     return;
   }
   if (picker.select_container) {
-    staged_storage = loaded->document.state.storage;
+    staged_storage = current->document->state.storage;
     Input_settings.containerEmpty = BankEmpty(*staged_storage);
     last_slot = selected.slot;
     picker.phase = Phase::kInactive;
     VS_LOG_INFO("save", "Opened native container in slot {} recovered {}",
-                selected.slot, loaded->recovered);
+                selected.slot, current->status == FileStatus::kRecovered);
     return;
   }
-  const auto prepared = PrepareResume(loaded->document);
+  const auto prepared = PrepareResume(*current->document);
   if (!prepared) {
     Notice("Load failed - game unchanged", prepared.error());
     return;
   }
   VS_LOG_INFO("save", "Prepared native slot {} generation {} recovered {}",
-              selected.slot, loaded->document.generation, loaded->recovered);
+              selected.slot, current->document->generation,
+              current->status == FileStatus::kRecovered);
   last_slot = selected.slot;
   picker.phase = Phase::kInactive;
 }
@@ -335,16 +396,21 @@ void Begin(int init, bool save, bool title, bool select_container) {
 }
 
 void Confirm(std::uint32_t buttons) {
+  // F02759/F03629 _promptConfirm: affirmative Circle selects; No or Cross
+  // leaves. Dispatch before Execute's next frame and the C-only load jump.
   if (buttons & PADRdown) {
+    Menu_PlayLeaveSound();
     picker.phase = Phase::kPick;
     PickStatus();
   } else if (buttons & PADRright) {
     if (picker.yes) {
+      Menu_PlaySelectSound();
       picker.phase = Phase::kExecute;
       Status(picker.select_container ? "Opening container"
              : picker.save           ? "Saving game"
                                      : "Loading game");
     } else {
+      Menu_PlayLeaveSound();
       picker.phase = Phase::kPick;
       PickStatus();
     }
@@ -370,9 +436,13 @@ int Pick(std::uint32_t buttons) {
     picker.row = slot - first;
     if (first != picker.first_slot) {
       picker.first_slot = first;
-      picker.ready = false;
-      picker.phase = Phase::kRead;
-      Status("Reading save files");
+      if (WindowCached()) {
+        ReadFiles();
+      } else {
+        picker.ready = false;
+        picker.phase = Phase::kRead;
+        Status("Reading save files");
+      }
     } else {
       PickStatus();
     }
@@ -385,6 +455,9 @@ int Pick(std::uint32_t buttons) {
       Menu_PlayInvalidSound();
       Notice("No usable native save", selected.message);
     } else {
+      // F02765/F03626 _showLoadFilesMenu and F02762/F03632 _showSaveFilesMenu
+      // play MENUSELECT on the accepted file, not just after a save succeeds.
+      Menu_PlaySelectSound();
       picker.yes = false;
       picker.phase = Phase::kConfirm;
       Status(
@@ -414,6 +487,7 @@ int Update(int init, bool save, bool title, bool select_container = false) {
       break;
     case Phase::kNotice:
       if (buttons & (PADRright | PADRdown)) {
+        Menu_PlayLeaveSound();
         const int result = picker.notice_result;
         picker.phase = result ? Phase::kInactive : Phase::kRead;
         return result;

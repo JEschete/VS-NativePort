@@ -2,19 +2,26 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <span>
 #include <string>
 #include <system_error>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/DataStore.hpp"
+#include "Content/ModuleData.h"
 #include "Core/Log.hpp"
 #include "Save/NativeFilePresentation.hpp"
 #include "Save/NativeMenu.h"
 #include "Save/NativeMenu.hpp"
+#include "Save/RuntimeSnapshot.hpp"
 
 extern "C" {
 #include "Audio/Driver/SoundDriver.h"
@@ -22,7 +29,11 @@ extern "C" {
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Sfx.h"
 #include "Boot/GameLoop.h"
+#include "Field/Map.h"
+#include "Field/Mpd.h"
+#include "Field/Znd.h"
 #include "Input/Controller.h"
+#include "Items/Categories.h"
 #include "Menu/Files.h"
 #include "Title/SaveFiles.h"
 }
@@ -31,13 +42,21 @@ namespace {
 namespace fs = std::filesystem;
 namespace Save = VS::Game::Save;
 
-void IgnoreSound(Audio_CommandParams*) {}
+constexpr std::size_t kSoundCount = 12;
+std::array<unsigned, kSoundCount>* sound_calls = nullptr;
+
+void CountSound(Audio_CommandParams* parameters) {
+  if (sound_calls != nullptr && parameters->param1 < sound_calls->size()) {
+    ++(*sound_calls)[parameters->param1];
+  }
+}
 
 struct MenuFixture {
   fs::path root;
   State_Settings settings = Input_settings;
   int active = Boot_isGameplayActive;
-  int pressed = Input_buttonsPressed.allButtons;
+  decltype(Input_buttonsPressed.allButtons) pressed =
+      Input_buttonsPressed.allButtons;
   int repeat = Input_buttonRepeat;
   std::array<u_int, 12> sound_offsets{};
   std::array<u_short, 12> sound_selectors{};
@@ -47,14 +66,17 @@ struct MenuFixture {
   Audio_CommandArguments sound_arguments = Audio_Driver_commandArguments;
   Audio_CommandParams sound_params = Audio_Mixer_commandParams;
   int sound_group = Audio_nextSfxChannelGroup7E;
+  std::array<unsigned, kSoundCount> sounds{};
+  std::array<unsigned, kSoundCount>* previous_calls = sound_calls;
 
   MenuFixture() {
     static std::atomic<unsigned> counter = 0;
     const auto tick =
         std::chrono::steady_clock::now().time_since_epoch().count();
-    root = fs::temp_directory_path() /
+    root = fs::current_path() / "build" / "quality" / "native-menu-tests" /
            ("vs-native-menu-" + std::to_string(tick) + "-" +
             std::to_string(counter.fetch_add(1)));
+    fs::create_directories(root.parent_path());
     REQUIRE(fs::create_directory(root));
     Save::ConfigureDirectory(root);
     Boot_isGameplayActive = 0;
@@ -63,29 +85,162 @@ struct MenuFixture {
     sound_selectors.fill(0x8000);
     Audio_Playback_soundEffectProgramOffsets = sound_offsets.data();
     Audio_Playback_soundEffectBankSelectors = sound_selectors.data();
-    Audio_Mixer_kCommandHandlers[0x20] = IgnoreSound;
+    Audio_Mixer_kCommandHandlers[0x20] = CountSound;
     Audio_nextSfxChannelGroup7E = 2;
+    sound_calls = &sounds;
   }
 
   ~MenuFixture() {
-    Save::ShutdownFileMenus();
-    Input_settings = settings;
-    Boot_isGameplayActive = active;
-    Input_buttonsPressed.allButtons = pressed;
-    Input_buttonRepeat = repeat;
-    Audio_Playback_soundEffectProgramOffsets = saved_offsets;
-    Audio_Playback_soundEffectBankSelectors = saved_selectors;
-    Audio_Mixer_kCommandHandlers[0x20] = sound_handler;
-    Audio_Driver_commandArguments = sound_arguments;
-    Audio_Mixer_commandParams = sound_params;
-    Audio_nextSfxChannelGroup7E = sound_group;
-    std::error_code error;
-    fs::remove_all(root, error);
-    if (error) {
-      VS_LOG_ERROR("test", "Cannot clean native menu fixture: {}",
-                   error.message());
+    try {
+      Save::ShutdownFileMenus();
+      Input_settings = settings;
+      Boot_isGameplayActive = active;
+      Input_buttonsPressed.allButtons = pressed;
+      Input_buttonRepeat = repeat;
+      Audio_Playback_soundEffectProgramOffsets = saved_offsets;
+      Audio_Playback_soundEffectBankSelectors = saved_selectors;
+      Audio_Mixer_kCommandHandlers[0x20] = sound_handler;
+      Audio_Driver_commandArguments = sound_arguments;
+      Audio_Mixer_commandParams = sound_params;
+      Audio_nextSfxChannelGroup7E = sound_group;
+      sound_calls = previous_calls;
+      std::error_code error;
+      fs::remove_all(root, error);
+      if (error) {
+        VS_LOG_ERROR("test", "Cannot clean native menu fixture: {}",
+                     error.message());
+        std::abort();
+      }
+    } catch (...) {
       std::abort();
     }
+  }
+};
+
+template <typename T>
+void Put(std::vector<std::uint8_t>& bytes, std::size_t offset, const T& value) {
+  if (bytes.size() < offset + sizeof(value)) {
+    bytes.resize(offset + sizeof(value));
+  }
+  std::memcpy(bytes.data() + offset, &value, sizeof(value));
+}
+
+struct MenuContentFixture {
+  VS::Content::DataStore::ScopedOverride service;
+  MenuFixture& menu;
+  std::array<unsigned, 8> previous_bounds{};
+  fs::path root;
+  std::string manifest = "lba\tsize\tform\tpath\n";
+
+  explicit MenuContentFixture(MenuFixture& fixture)
+      : menu(fixture), root(menu.root / "content") {
+    constexpr std::array<unsigned, 8> kBounds{96,  127, 254, 261,
+                                              308, 323, 458, 512};
+    std::copy_n(Items_itemCategoryUpperIds, previous_bounds.size(),
+                previous_bounds.begin());
+    std::copy(kBounds.begin(), kBounds.end(), Items_itemCategoryUpperIds);
+    std::vector<std::uint8_t> room;
+    Field_MpdHeader header{};
+    header.roomSectionOffset = sizeof(header);
+    std::array<std::uint32_t, 24> lengths{};
+    lengths[1] = sizeof(Field_MpdCollisionHeader) + 4 + 16;
+    lengths[10] = sizeof(Field_MpdEnvironment);
+    Put(room, sizeof(header), lengths);
+    const std::size_t collision = sizeof(header) + sizeof(lengths);
+    Put(room, collision, Field_MpdCollisionHeader{1, 1, 0, 1});
+    room.resize(collision + lengths[1]);
+    Field_MpdEnvironment environment{};
+    environment.sceneId = 1;
+    Put(room, room.size(), environment);
+    header.enemySectionOffset = static_cast<int>(room.size());
+    Put(room, 0, header);
+    Add("MAP/MAP009.MPD", room, 200);
+
+    std::vector<std::uint8_t> zone;
+    Put(zone, 0, Field_ZndHeader{28, 8, 0, 0, 0, 0, 0});
+    Put(zone, 28, std::uint32_t{200});
+    Put(zone, 32, static_cast<std::uint32_t>(room.size()));
+    Add("MAP/ZONE009.ZND", zone, 100);
+
+    std::vector<std::uint8_t> arm;
+    Put(arm, 0, std::uint32_t{1});
+    Put(arm, 4, Field_MapRoom{0, 24, 9, 1});
+    arm.resize(4 + sizeof(Field_MapRoom) + 24);
+    Field_MapRoomName name{};
+    name.name[0] = 10;
+    name.name[1] = static_cast<char>(0xE7);
+    Put(arm, arm.size(), name);
+    Add("SMALL/SCEN001.ARM", arm, 300);
+
+    bool found = false;
+    for (unsigned index = 0; index < Content_moduleDataCount; ++index) {
+      const auto& slice = Content_moduleData[index];
+      if (slice.target != &Items_itemCategoryUpperIds) continue;
+      std::vector<std::uint8_t> battle;
+      Put(battle, slice.offset, kBounds);
+      Add(slice.module, battle, 10000);
+      found = true;
+      break;
+    }
+    REQUIRE(found);
+    {
+      std::ofstream output(root / "files.tsv");
+      output << manifest;
+      REQUIRE(output.good());
+    }
+    const auto opened = VS::Content::DataStore::Open(root);
+    INFO((opened ? "content open" : opened.error()));
+    REQUIRE(opened.has_value());
+  }
+
+  ~MenuContentFixture() {
+    service.Restore();
+    std::copy(previous_bounds.begin(), previous_bounds.end(),
+              Items_itemCategoryUpperIds);
+  }
+
+  void Add(std::string_view name, std::span<const std::uint8_t> bytes,
+           unsigned sector) {
+    const auto path = root / "disc" / fs::path(name);
+    fs::create_directories(path.parent_path());
+    std::ofstream output(path, std::ios::binary);
+    output.write(reinterpret_cast<const char*>(bytes.data()),
+                 static_cast<std::streamsize>(bytes.size()));
+    REQUIRE(output.good());
+    manifest += std::to_string(sector) + "\t" + std::to_string(bytes.size()) +
+                "\traw\t" + std::string(name) + "\n";
+  }
+
+  static Save::Document Document() {
+    Save::Document document;
+    document.generation = 1;
+    document.saved_unix_ms = 1;
+    auto& state = document.state;
+    state.location.zone = 9;
+    state.location.scene = 1;
+    state.ashley.currentHp = 250;
+    state.ashley.maxHp = 250;
+    state.ashley.currentMp = 50;
+    state.ashley.maxMp = 50;
+    state.ashley.cameraDistance = 1536;
+    state.camera.distance = 1536;
+    state.camera.zoom_mode = 1;
+    state.room_cache[0].recency = 1;
+    state.room_cache[0].zone = 9;
+    return document;
+  }
+
+  void Store(const Save::Document& document,
+             std::string_view name = "slot00.vssave") {
+    const auto valid = Save::ValidateContent(document.state);
+    INFO((valid ? "valid content" : valid.error()));
+    REQUIRE(valid.has_value());
+    const auto encoded = Save::Encode(document);
+    INFO((encoded ? "encoded document" : encoded.error()));
+    REQUIRE(encoded.has_value());
+    std::ofstream output(menu.root / fs::path(name), std::ios::binary);
+    output << *encoded;
+    REQUIRE(output.good());
   }
 };
 
@@ -95,22 +250,23 @@ std::string Text(const char* text) {
   for (int i = 0; i < 49; ++i) {
     const auto c = static_cast<unsigned char>(text[i]);
     if (c == 0xE7) return result;
-    if (c < 10)
+    if (c < 10) {
       result += static_cast<char>('0' + c);
-    else if (c < 36)
+    } else if (c < 36) {
       result += static_cast<char>('A' + c - 10);
-    else if (c < 62)
+    } else if (c < 62) {
       result += static_cast<char>('a' + c - 36);
-    else if (c == 0x8F)
+    } else if (c == 0x8F) {
       result += ' ';
-    else if (c == 0x9E)
+    } else if (c == 0x9E) {
       result += ':';
-    else if (c == 0xA1)
+    } else if (c == 0xA1) {
       result += '/';
-    else if (c == 0xA7)
+    } else if (c == 0xA7) {
       result += '-';
-    else
+    } else {
       FAIL("Unexpected game glyph in native menu");
+    }
   }
   FAIL("Native file prompt is not terminated within its one-line buffer");
   return {};
@@ -151,6 +307,64 @@ void Move(int direction, int (*update)(int)) {
   REQUIRE(update(0) == 0);
   Buttons(0);
   REQUIRE(update(0) == 0);
+}
+
+void ChooseYes(int (*update)(int)) {
+  Buttons(PADRright);
+  REQUIRE(update(0) == 0);
+  REQUIRE(Screen().confirmation);
+  CHECK_FALSE(Screen().affirmative);
+  Move(PADLup, update);
+  REQUIRE(Screen().affirmative);
+  Buttons(PADRright);
+  REQUIRE(update(0) == 0);
+}
+
+void Tick(int (*update)(int)) { REQUIRE(update(0) == 0); }
+
+void BeginPicker(int (*update)(int), int init) {
+  REQUIRE(update(init) == 0);
+  Buttons(0);
+  Tick(update);
+}
+
+void Press(int buttons, int (*update)(int)) {
+  Buttons(buttons);
+  Tick(update);
+}
+
+void CheckSounds(const MenuFixture& fixture,
+                 std::array<unsigned, 5> menu_sounds) {
+  std::array<unsigned, kSoundCount> expected{};
+  std::copy(menu_sounds.begin(), menu_sounds.end(), expected.begin() + 4);
+  CHECK(fixture.sounds == expected);
+}
+
+void CheckStagedBank(const Items_ContainerData* bank) {
+  CHECK(Save_NativeContainerData() == bank);
+  CHECK(bank->misc[0].id == 323);
+  CHECK(bank->misc[0].count == 2);
+}
+
+void CheckSelectedSlot(int slot) { CHECK(SelectedSlot() == slot); }
+
+void CheckFirstTwoFiles(std::array<Save::FileStatus, 2> expected) {
+  const auto screen = Screen();
+  REQUIRE(screen.files.size() == 3);
+  CHECK(screen.files[0].status == expected[0]);
+  CHECK(screen.files[1].status == expected[1]);
+}
+
+void CheckFailedSave(const MenuFixture& fixture) {
+  REQUIRE(Text(Menu_Files_memoryCardMessage) == "Save failed - see log");
+  CHECK(fixture.sounds[8] == 0);
+  CHECK(Input_settings.cumulativeSaveCount ==
+        fixture.settings.cumulativeSaveCount);
+  CHECK(Input_settings.currentGameSaveCount ==
+        fixture.settings.currentGameSaveCount);
+  CHECK(Input_settings.saveFileGeneration ==
+        fixture.settings.saveFileGeneration);
+  CHECK_FALSE(fs::exists(fixture.root / "slot00.vssave"));
 }
 }  // namespace
 
@@ -342,4 +556,215 @@ TEST_CASE("Unmodeled native clear saves report the limit without card access",
   Buttons(PADRright);
   CHECK(Menu_Files_UpdateSaveMenu(0) == -1);
   CHECK(fs::is_empty(fixture.root));
+}
+
+TEST_CASE(
+    "Native Load dispatches selection sounds at file and affirmative consent",
+    "[save-menu]") {
+  MenuFixture fixture;
+  MenuContentFixture content(fixture);
+  content.Store(MenuContentFixture::Document());
+  BeginPicker(Menu_Files_UpdateLoadMenu, 2);
+  REQUIRE(Screen().files.front().status == Save::FileStatus::kValid);
+  CheckSounds(fixture, {});
+  Move(PADLleft, Menu_Files_UpdateLoadMenu);
+  Move(PADLright, Menu_Files_UpdateLoadMenu);
+  CheckSounds(fixture, {});
+  Press(PADRright, Menu_Files_UpdateLoadMenu);
+  CheckSounds(fixture, {0, 1, 0, 0, 0});
+  CHECK_FALSE(Screen().affirmative);
+  Move(PADLleft, Menu_Files_UpdateLoadMenu);
+  Move(PADLright, Menu_Files_UpdateLoadMenu);
+  CheckSounds(fixture, {0, 1, 0, 0, 0});
+  Move(PADLup, Menu_Files_UpdateLoadMenu);
+  CheckSounds(fixture, {1, 1, 0, 0, 0});
+  Press(PADRright, Menu_Files_UpdateLoadMenu);
+  // Both dispatches precede Execute and the C-only gameplay transition.
+  CheckSounds(fixture, {1, 2, 0, 0, 0});
+  CHECK_FALSE(Save::ResumePending());
+}
+
+TEST_CASE(
+    "Native confirmation No cancellation and invalid files use original sounds",
+    "[save-menu]") {
+  MenuFixture fixture;
+  BeginPicker(Save_NativeSelectContainer, 1);
+  Press(PADRright, Save_NativeSelectContainer);
+  CheckSounds(fixture, {0, 1, 0, 0, 0});
+  Press(PADRright, Save_NativeSelectContainer);
+  CHECK_FALSE(Screen().confirmation);
+  CheckSounds(fixture, {0, 1, 1, 0, 0});
+  Press(PADRright, Save_NativeSelectContainer);
+  Move(PADLup, Save_NativeSelectContainer);
+  Press(PADRdown, Save_NativeSelectContainer);
+  CHECK_FALSE(Screen().confirmation);
+  CheckSounds(fixture, {1, 2, 2, 0, 0});
+  Buttons(PADRdown);
+  REQUIRE(Save_NativeSelectContainer(0) == -1);
+  CheckSounds(fixture, {1, 2, 3, 0, 0});
+
+  BeginPicker(Menu_Files_UpdateDataLoadMenu, 1);
+  Press(PADRright, Menu_Files_UpdateDataLoadMenu);
+  CHECK(Text(Menu_Files_memoryCardMessage) == "No usable native save");
+  CheckSounds(fixture, {1, 2, 3, 1, 0});
+}
+
+TEST_CASE(
+    "Native wrap restores cached valid cards immediately and reentry is fresh",
+    "[save-menu]") {
+  MenuFixture fixture;
+  MenuContentFixture content(fixture);
+  content.Store(MenuContentFixture::Document());
+  BeginPicker(Menu_Files_UpdateLoadMenu, 2);
+  REQUIRE(Screen().files.front().status == Save::FileStatus::kValid);
+  REQUIRE(fs::remove(fixture.root / "slot00.vssave"));
+  Move(PADLup, Menu_Files_UpdateLoadMenu);
+  REQUIRE(SelectedSlot() == 99);
+  Buttons(0, PADLdown);
+  Tick(Menu_Files_UpdateLoadMenu);
+  // A reread would show Empty. Cached wrap must also avoid a blank read frame.
+  REQUIRE(Screen().files.size() == 3);
+  CheckSelectedSlot(0);
+  CHECK(Screen().files.front().status == Save::FileStatus::kValid);
+  CHECK(Text(Title_memoryCardMessage) == "Select a file");
+  Buttons(PADRdown);
+  REQUIRE(Menu_Files_UpdateLoadMenu(0) == -1);
+  BeginPicker(Menu_Files_UpdateLoadMenu, 2);
+  CHECK(Screen().files.front().status == Save::FileStatus::kEmpty);
+}
+
+TEST_CASE("Native revisits keep invalid and missing previews until fresh entry",
+          "[save-menu]") {
+  MenuFixture fixture;
+  {
+    std::ofstream invalid(fixture.root / "slot00.vssave");
+    invalid << "damaged";
+  }
+  BeginPicker(Menu_Files_UpdateLoadMenu, 2);
+  CheckFirstTwoFiles({Save::FileStatus::kInvalid, Save::FileStatus::kEmpty});
+  REQUIRE(fs::remove(fixture.root / "slot00.vssave"));
+  {
+    std::ofstream appeared(fixture.root / "slot01.vssave");
+    appeared << "new damaged file";
+  }
+  Move(PADLup, Menu_Files_UpdateLoadMenu);
+  Buttons(0, PADLdown);
+  Tick(Menu_Files_UpdateLoadMenu);
+  CheckFirstTwoFiles({Save::FileStatus::kInvalid, Save::FileStatus::kEmpty});
+  Buttons(PADRdown);
+  REQUIRE(Menu_Files_UpdateLoadMenu(0) == -1);
+  BeginPicker(Menu_Files_UpdateLoadMenu, 2);
+  CheckFirstTwoFiles({Save::FileStatus::kEmpty, Save::FileStatus::kInvalid});
+}
+
+TEST_CASE("Native browsing surfaces filesystem errors on uncached slots",
+          "[save-menu]") {
+  MenuFixture fixture;
+  BeginPicker(Menu_Files_UpdateLoadMenu, 2);
+  REQUIRE(fs::create_directory(fixture.root / "slot03.vssave"));
+  Move(PADLdown, Menu_Files_UpdateLoadMenu);
+  Move(PADLdown, Menu_Files_UpdateLoadMenu);
+  Move(PADLdown, Menu_Files_UpdateLoadMenu);
+  CHECK(Text(Title_memoryCardMessage) == "Cannot read native saves");
+  Buttons(PADRdown);
+  REQUIRE(Menu_Files_UpdateLoadMenu(0) == -1);
+}
+
+TEST_CASE(
+    "Native cached load consent rejects changed content and recovery status",
+    "[save-menu]") {
+  MenuFixture fixture;
+  MenuContentFixture content(fixture);
+  auto document = MenuContentFixture::Document();
+  bool recovered = false;
+  SECTION("A different document with unchanged generation is not consented") {
+    content.Store(document);
+  }
+  SECTION("Recovery consent is not consent to a newly valid primary") {
+    content.Store(document, "slot00.vssave.bak");
+    std::ofstream invalid(fixture.root / "slot00.vssave");
+    invalid << "damaged primary";
+    recovered = true;
+  }
+  BeginPicker(Menu_Files_UpdateLoadMenu, 2);
+  REQUIRE(Screen().files[0].status == (recovered ? Save::FileStatus::kRecovered
+                                                 : Save::FileStatus::kValid));
+  ChooseYes(Menu_Files_UpdateLoadMenu);
+  document.state.ashley.currentHp = 249;
+  content.Store(document);
+  Press(0, Menu_Files_UpdateLoadMenu);
+  CHECK(Text(Title_memoryCardMessage) == "File changed - select again");
+  CHECK_FALSE(Save::ResumePending());
+  CheckSounds(fixture, {1, 2, 0, 0, 0});
+  Press(PADRdown, Menu_Files_UpdateLoadMenu);
+  Press(0, Menu_Files_UpdateLoadMenu);
+  const auto refreshed = Screen().files[0].document;
+  REQUIRE(refreshed);
+  CHECK(Screen().files[0].status == Save::FileStatus::kValid);
+  if (refreshed) {
+    CHECK(refreshed->state.ashley.currentHp == 249);
+  }
+}
+
+TEST_CASE("Native empty container consent revalidates an appeared save",
+          "[save-menu]") {
+  MenuFixture fixture;
+  MenuContentFixture content(fixture);
+  BeginPicker(Save_NativeSelectContainer, 1);
+  REQUIRE(Screen().files[0].status == Save::FileStatus::kEmpty);
+  ChooseYes(Save_NativeSelectContainer);
+  content.Store(MenuContentFixture::Document());
+  Press(0, Save_NativeSelectContainer);
+  CHECK(Text(Menu_Files_memoryCardMessage) == "File changed - select again");
+  CHECK_FALSE(Save::ResumePending());
+}
+
+TEST_CASE("Native save retry refreshes previews without losing staged storage",
+          "[save-menu]") {
+  MenuFixture fixture;
+  BeginPicker(Save_NativeSelectContainer, 1);
+  ChooseYes(Save_NativeSelectContainer);
+  Buttons(0);
+  REQUIRE(Save_NativeSelectContainer(0) == 1);
+  auto* bank = Save_NativeContainerData();
+  bank->misc[0].id = 323;
+  bank->misc[0].count = 2;
+  BeginPicker(Menu_Files_UpdateDataSaveMenu, 2);
+  ConfirmSave();
+  CheckFailedSave(fixture);
+  {
+    std::ofstream appeared(fixture.root / "slot00.vssave");
+    appeared << "changed after failed write";
+  }
+  Press(PADRright, Menu_Files_UpdateDataSaveMenu);
+  Press(0, Menu_Files_UpdateDataSaveMenu);
+  CHECK(Screen().files[0].status == Save::FileStatus::kInvalid);
+  REQUIRE(fs::remove(fixture.root / "slot00.vssave"));
+  Press(PADRright, Menu_Files_UpdateDataSaveMenu);
+  REQUIRE(Text(Menu_Files_memoryCardMessage) == "No usable native save");
+  Press(PADRright, Menu_Files_UpdateDataSaveMenu);
+  Press(0, Menu_Files_UpdateDataSaveMenu);
+  REQUIRE(Screen().files[0].status == Save::FileStatus::kEmpty);
+  ConfirmSave();
+  CheckFailedSave(fixture);
+  CheckStagedBank(bank);
+  Save_NativeReleaseContainer();
+}
+
+TEST_CASE("Native cached previews cannot conceal missing load content",
+          "[save-menu]") {
+  MenuFixture fixture;
+  MenuContentFixture content(fixture);
+  content.Store(MenuContentFixture::Document());
+  BeginPicker(Menu_Files_UpdateLoadMenu, 2);
+  REQUIRE(Screen().files[0].status == Save::FileStatus::kValid);
+  REQUIRE(fs::remove(content.root / "disc" / "MAP" / "MAP009.MPD"));
+  ChooseYes(Menu_Files_UpdateLoadMenu);
+  Press(0, Menu_Files_UpdateLoadMenu);
+  CHECK(Text(Title_memoryCardMessage) == "File changed - select again");
+  CHECK_FALSE(Save::ResumePending());
+  Press(PADRdown, Menu_Files_UpdateLoadMenu);
+  Press(0, Menu_Files_UpdateLoadMenu);
+  CHECK(Screen().files[0].status == Save::FileStatus::kInvalid);
+  CHECK_FALSE(Screen().files[0].message.empty());
 }

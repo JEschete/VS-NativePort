@@ -9,6 +9,24 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #18 sound/cache follow-up: native file selection and affirmative confirmation
+  now play their original selection sound; No/Cross/invalid/completion follow
+  the corresponding original menu cues. Bounded per-picker previews avoid
+  decoding/revalidating already inspected files and blank read frames on a
+  cached wrap/revisit. Begin/reentry and notices invalidate previews; execution
+  freshly inspects content/status and rejects a changed confirmed document.
+  Successful saves update both the visible card and preview cache. Staged
+  container ownership remains separate from picker cache/reset.
+  Nine new controls cover cues, horizontal non-consent, cache/fresh reentry,
+  changed/appeared/recovered files and staged-bank retry lifetime.
+  UI/presentation Debug/Release each pass23 cases/1,621 assertions.
+  Actual speed1 Desktop `save18-audio-cache-realtime` verifies navigation
+  instrument19 and select/affirmative148 at the expected actions, zero logged
+  errors and successful Continue. Cached file100-to1 interval reports maximum
+  audio submit gap17.9636ms with zero starved requests/missing frames.
+  First uncached page visit still reports676.6735ms, and explicit load
+  revalidation752.1069ms; the cache fix is not claimed as complete cold-IO
+  latency removal. Local evidence: `build/quality/save18-audio-*`.
 - #173 actor grounded-history repair: original `40564.c:2548-2560` was copied
   through `Field_GimmickInstance*`, writing native offset6308 instead of actor
   `savedPlacement`6332. Asset-free red preserves the actor sentinel11223344
@@ -29,6 +47,8 @@ verification of the current worktree.
   (also containing #174/save-audio controls) pass712/3,164,525 in each config.
   Owner's new family-cutscene hard crash takes priority for playback; keep
   remaining #171 gameplay gates separate.
+  Published411d73a1ae6962f2d38e1e17208a4d434051a095 has exact successful
+  Source Quality40145646736; #173 is closed for the bounded placement defect.
 - #18 save/load UI correction follows the owner's original Save/Load screenshots,
   not the rejected thin `SAVE NATIVE` rows. Data Save, Data Load and title Continue
   share three original-style cards with ARM room names, original location artwork,
