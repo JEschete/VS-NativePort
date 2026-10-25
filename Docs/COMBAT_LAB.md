@@ -63,6 +63,17 @@ through24000. No forced skip or engine error occurs. Speed8 audio queue warnings
 are not a listening/fidelity test. Local evidence:
 `build/quality/family174-through81-Release.*`.
 
+Repeated full-chain controls: Debug1792894544327667-0 and
+Release1792895226944470-0 each complete two fresh80/82/81 chains in one window,
+then ordinary isolated and production presets. Each original return remains at
+normal control for over11000 ticks before teardown; each82 has exactly72
+dependent draws deferred after parent2 disappears. Bank99 is mapped and used
+on both entries, including cached content on the second. All four scripts
+complete normal teardown without engine errors, Start or forced skip.
+Local assertion reports are `build/quality/scene174-verified-<run-id>.json`;
+acknowledged dialogue inputs are retained in `family179-fixed-reentry-*`.
+The separate interrupted-box4 regression is tracked in #179.
+
 ### Encounter setup
 
 The menu uses the extracted SYSTEM.DAT font. Select zone, room, enemy, quantity,

@@ -24,27 +24,32 @@ verification of the current worktree.
   100 assertions in each config; full serial Debug/Release725 cases/
   3,164,578 assertions each pass. Selected quality is0 findings/0 new.
   Local evidence: `build/quality/scene179-*`, `family174-reentry-Debug.*`.
-  Fresh repeated same-window chains plus ordinary-mode controls are running;
-  #179/#174 remain open pending live gates and exact fixing-revision CI.
+  Published0338c030 has exact green Source Quality40154361448. Repeated full
+  chains plus ordinary-mode controls now pass both configurations; deliberate
+  event81 box4 interruption/reentry controls are running for #179.
   The controller now holds Circle until production native-buttons acknowledge
   it, then releases;40ms pulses were often lost between slow Debug host polls.
   Inputs remain original dialogue actions, never Start or state mutation.
-- #149/#174 source-aligned component playback is now opt-in via an isolated,
-  empty-enemy preset's `external_event`. Initial entry is isolated; after the
-  direct event starts, original actor/room-event handoffs resume. It does not
-  assign story flags or simulate a boss defeat. Release1792893708848660-0
-  plays80 ->82 ->81 with original SEP26/WAVE99 setup and real dialogue Circle
-  input, no Start/forced skip. Parent2 removal produces72 deferred prop7/bone2
-  draws at8573..8715, not the reported0xB0 access. Original return reaches
-  zone12/room0, phase0/control1 at14468 and stays settled through24000, with
-  zero engine errors. Speed8 audio scheduling warnings are not fidelity proof.
-  Six component/compatibility tests bring full serial Debug/Release suites to
-  722 cases/3,164,568 assertions each; fast quality remains195 existing/0 new.
-  Changed production-source tidy is zero. Evidence is based on d9f4a876 plus
-  this scoped component work; unrelated ignore/solution edits are preserved.
-  Local `build/quality/family174-through81-Release.*` and `scene149-*` retain
-  commands/results. Single-window reset/reentry and Debug full-chain acceptance
-  are still in progress; #174 remains open until those and exact-revision CI.
+- #174 source-aligned playback gate now passes. Debug1792894544327667-0 and
+  Release1792895226944470-0 each complete two fresh80 ->82 ->81 chains in one
+  window, then ordinary isolated/production cases with normal teardown and
+  zero engine errors. Typed snapshots confirm model171/slot7 attached to
+  model7/slot2 bone2, followed by parent removal and exactly72 deferred draws
+  per chain. Original SEP26/WAVE99 prelude is present; both entries map and
+  actually use bank99 before82, including cached content on reentry.
+  Debug normal control is11948..24011 and35964..48023; Release12212..24011
+  and35988..48023. No Start, forced skip, runtime HP/flag edits or artificial
+  completion. These are component fixtures, not boss-defeat verification,
+  whole-scene pixel/audio fidelity or all-cutscene completion; #149 stays open.
+  Repairb8e2e782, componentddcee133 and session0338c030 are published with exact
+  green runs40146187813,40153218937 and40154361448. Latest full suites are
+  725/3,164,578 each config. Debug's manifest is ddcee133 plus the then-dirty
+  Session/test/watchlist fix; Release is0338c030 with only unrelated owner
+  ignore/solution edits. Both use the original80 component preset, seed1,
+  post-minotaur profile, speed8 and enabled device input. Local assertion reports:
+  `build/quality/scene174-verified-1792894544327667-0.json` and
+  `scene174-verified-1792895226944470-0.json`; full logs and acknowledged inputs
+  remain in `family179-fixed-reentry-*` and the unique run directories.
 - #171 fresh height investigation: `ai.move` now logs queued from/to/rise,
   threshold and capability flags; `ai.edge` logs the actual branch result
   (bounds, tile flags/area, actor blocker, step distance/height, approach radius
@@ -126,15 +131,15 @@ verification of the current worktree.
   including whole-child preservation and released-parent replacement.
   The6200-tick production-room Lab attempt1792886263923605-0 runs embedded
   room events (source1/id0) and returns to9/12; it does not reproduce external
-  event82's attachment handoff and is **not** full-scene acceptance. #174 stays
-  open for a source-aligned external82 replay/owner confirmation. No HP,
+  event82's attachment handoff and is **not** full-scene acceptance. The later
+  source-aligned80/82/81 chains above now verify that gate. No HP,
   progression flags, fake event completion or math null fallback was used.
   Original scene82's three text entries are control-only strings, despite
   executing dialogue commands; their zero-glyph flashes are repaired by #176.
   Evidence: `build/quality/owner-reports-20261024-193314/`,
   `family174-*` and the retained unique owner run.
   Publishedb8e2e782908526abe79e38fd66ab816dec01475f has successful exact
-  Source Quality40146187813; #174 remains open for its playback gate.
+  Source Quality40146187813; its source-aligned playback gate is now verified.
 - #18 sound/cache follow-up: native file selection and affirmative confirmation
   now play their original selection sound; No/Cross/invalid/completion follow
   the corresponding original menu cues. Bounded per-picker previews avoid
