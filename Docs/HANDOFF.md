@@ -14,21 +14,34 @@ verification of the current worktree.
   survival; this is an explicit owner behavior change, not an invented x64
   diagnosis. Successful timing now earns the existing point even when the
   target died, while only a surviving target receives another queued attack
-  or increases the executed-chain count. Existing defensive credit is
-  unchanged. Story flag0x82>=10, cumulative thresholds and the22-unlock cap
-  remain intact. Points are global persistent progression, not attached to a
+  or increases the executed-chain count. Both offensive and defensive credit
+  now bank beyond a pending threshold, saturating the persistent ushort at65535
+  instead of discarding further successes before the next death. Story
+  flag0x82>=10, cumulative unlock thresholds and the22-unlock cap remain intact.
+  Points are global persistent progression, not attached to a
   victim; the existing recoveryMode2 enemy-death path gates learning, so
   threshold credit can wait for a later different target's death.
   Focused regression first fails22 lethal threshold assertions; repaired
-  Debug/Release ability/acquisition/Break Art selections each pass47 cases/
-  21,430 assertions, including194 new lethal-credit/non-kill-learning checks.
-  Source adaptation contracts71 pass; two generations change only Abilities.c
+  Debug/Release ability/acquisition/Break Art selections each pass48 cases/
+  21,892 assertions, including656 new lethal-credit/banking/non-kill checks.
+  Source adaptation contracts72 pass; two generations change only Abilities.c
   plus manifest, preserve302 non-generated Native files and are byte-stable.
-  Scoped tidy has1 existing/0 new. No new full campaign/controller acceptance
-  is claimed: the Lab's isolated initial story flag does not satisfy the
-  offensive progression gate, and must not be edited to fabricate that proof.
-  #183 retains that explicit live-acceptance limit. Evidence `chain-credit-*`
-  is local to session files; this is not C++ promotion or bridge retirement.
+  Scoped tidy has1 existing/0 new. A single complete Debug controller acceptance
+  uses an untouched copy of the owner's real post-Minotaur save, not fabricated
+  Lab story flags: run1792958740259860-0 earns25 points on the surviving9/17
+  dummy at5289 without learning, leaves through the original Cross-operated
+  door, kills a different9/12 enemy at8360 and learns action24 at8836.
+  Accepted lethal timing adds point46 at8390 while the victim is at0HP and the
+  sequence stops in phase9. Successful defenses add points26,47 and48.
+  All0..48 credit increments are retained; 120 normal-control frames follow,
+  exit0 at9313, no error/crash, and owner save hashes remain unchanged.
+  PDB observation only reads memory; all movement, attacks, timing, loot/menu
+  acknowledgment and learning use production input. The first extended probe
+  banked25 correctly but did not open the door; it is not kill/learning proof.
+  No extra full campaign or duplicate Release replay is claimed. Published
+  7b471a0e/green40227408982 is the initial lethal-credit milestone; the banked
+  follow-up's fixing revision and exact CI are tracked in #183. Evidence
+  `chain-credit-*` is local; no C++ promotion or bridge retirement.
 - #182 bedroom Start-skip exception is reproduced and repaired through copier
   F03246/func_8001852C (original SLUS_010.40/25AC.c:3582). The camera/thread
   sequence was only the last logged work: the actual crash is

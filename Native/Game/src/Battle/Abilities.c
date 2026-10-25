@@ -213,9 +213,7 @@ void Battle_AdvanceBattleAbilitySequence(void)
         }
         if (((u_char)State_ScriptFlag(0x82) >= 10)
             && (Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked < 22)
-            && (Audio_Seq_unusedArtsStatus.kills.totalKills
-                < Battle_battleAbilityPointRequirements[Audio_Seq_unusedArtsStatus.kills
-                        .battleAbilitiesUnlocked])) {
+            && (Audio_Seq_unusedArtsStatus.kills.totalKills < 0xFFFF)) {
             ++Audio_Seq_unusedArtsStatus.kills.totalKills;
         }
     } else if (Battle_actionState->abilityInputSucceeded == 2) {
@@ -258,9 +256,7 @@ void Battle_AdvanceBattleAbilitySequence(void)
         Battle_ResolveActionTargets(Input_settings.mappedDefenseAbilities[Battle_actionState->chainAbilitySlot - 1],
             action, &Battle_actionState->selection, 1);
         if ((Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked < 22)
-            && (Audio_Seq_unusedArtsStatus.kills.totalKills
-                < Battle_battleAbilityPointRequirements[Audio_Seq_unusedArtsStatus.kills
-                        .battleAbilitiesUnlocked])) {
+            && (Audio_Seq_unusedArtsStatus.kills.totalKills < 0xFFFF)) {
             ++Audio_Seq_unusedArtsStatus.kills.totalKills;
         }
     } else {

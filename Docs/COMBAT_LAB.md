@@ -314,15 +314,29 @@ inventory and action set. Normal game startup is unchanged.
 Battle-ability credit and learning are separate. Successful offensive timing
 retains its credit on a lethal hit (#183), without queuing another strike at a
 dead target. Successful defenses retain their existing credit path. Credit is
-global and capped at the next cumulative threshold; filling it on a surviving
-target does not learn an ability. The normal enemy-death reward can release
-that pending unlock after killing the same or a different target.
+global; filling a threshold on a surviving target does not learn an ability.
+Further successful inputs keep banking credit toward later abilities rather
+than being discarded while a reward is pending. The persistent 16-bit counter
+saturates at65535, and no further credit is needed once all22 unlocks are learned.
+The normal enemy-death reward can release pending unlocks after killing the
+same or a different target.
 
 The original offensive progression gate, story flag0x82>=10, still applies.
 These isolated Lab profiles do not manufacture completed story events to meet
 it. Defensive progress does not use that particular gate. Component tests
-cover all22 lethal thresholds and non-kill deferral; a Lab run below the story
-gate is not proof of eligible offensive-credit accumulation.
+cover all22 lethal thresholds, overflow banking, saturation and non-kill
+deferral; a Lab run below the story gate is not proof of eligible offensive
+credit accumulation.
+
+One original-game controller acceptance from an untouched copy of a real
+post-Minotaur save (Debug1792958740259860-0) earns25 points on the9/17 dummy
+without learning, then opens the authored door with Cross and defeats a
+different9/12 enemy at8360. Action24 is learned at8836. Successful lethal
+timing still adds point46 at8390 with the victim at0HP; defensive successes
+add26,47 and48. All48 increments are retained, followed by120 normal-control
+frames and exit0 at9313. No live HP, story, PC or progression edits were used;
+the owner's save is unchanged. This is a bounded Debug gameplay acceptance,
+not a claim of another full campaign or identical Release replay.
   This supports [#11](https://github.com/JEschete/VS-NativePort/issues/11),
   not a claim that every art or acquisition path is already verified.
 

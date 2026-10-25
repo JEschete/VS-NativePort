@@ -145,6 +145,11 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
             Battle_FinishBattleAbilitySequence();
         }""",
          "Owner rule #183: accepted lethal chain timing earns the existing point, but never queues an attack on a corpse; defense and kill-gated learning stay unchanged"),
+        ("""(Audio_Seq_unusedArtsStatus.kills.totalKills
+                < Battle_battleAbilityPointRequirements[Audio_Seq_unusedArtsStatus.kills
+                        .battleAbilitiesUnlocked])""",
+         "(Audio_Seq_unusedArtsStatus.kills.totalKills < 0xFFFF)",
+         "Owner rule #183 banks every successful chain/defense toward later abilities while learning waits for a death; saturate the persistent ushort instead of discarding threshold overflow"),
     ],
     "F00545": [
         ("void Field_UnloadCurrentRoom(void)\n{",

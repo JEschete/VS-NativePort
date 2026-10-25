@@ -24,6 +24,13 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("kills.totalKills", old)
         self.assertNotIn("kills.totalKills", new)
 
+    def test_both_credit_paths_bank_points_beyond_pending_thresholds(self):
+        old, new, _ = copy_fixups.FIXES["F00099"][1]
+        source = old + "\n" + old
+        source = source.replace(old, new)
+        self.assertEqual(source.count("kills.totalKills < 0xFFFF"), 2)
+        self.assertNotIn("Battle_battleAbilityPointRequirements", source)
+
     def test_music_cancellation_clears_the_native_pointer_field(self):
         source = "    *(int*)&Audio_Seq_pendingMusicData.param1 = 0;"
         for old, new, _ in copy_fixups.FIXES["F03246"]:

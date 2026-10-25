@@ -1518,14 +1518,14 @@ TEST_CASE("Successful lethal chain timing retains ability credit",
   fixture.CheckTerminated();
 }
 
-TEST_CASE("Lethal chain credit preserves failure story and threshold gates",
+TEST_CASE("Lethal chain credit preserves failure story and capacity gates",
           "[combat][abilities][acquisition][chain-credit]") {
   ChainCreditFixture fixture;
   const int gate = GENERATE(0, 1, 2, 3);
   if (gate == 0) fixture.action.abilityInputSucceeded = 0;
   if (gate == 1) State_SetScriptFlag(0x82, 9);
   if (gate == 2) {
-    Audio_Seq_unusedArtsStatus.kills.totalKills = kAbilityThresholds[0];
+    Audio_Seq_unusedArtsStatus.kills.totalKills = UINT16_MAX;
   }
   if (gate == 3) {
     Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked = 22;
@@ -1533,6 +1533,22 @@ TEST_CASE("Lethal chain credit preserves failure story and threshold gates",
   const auto before = Audio_Seq_unusedArtsStatus;
   Battle_AdvanceBattleAbilitySequence();
   CheckAbilityProgress(before);
+  fixture.CheckTerminated();
+}
+
+TEST_CASE("Pending ability rewards do not discard later chain credit",
+          "[combat][abilities][acquisition][chain-credit]") {
+  ChainCreditFixture fixture;
+  const int unlocked = GENERATE(Catch::Generators::range(0, 22));
+  const int extra = GENERATE(0, 1, 500);
+  auto& progress = Audio_Seq_unusedArtsStatus;
+  progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
+  progress.kills.totalKills =
+      static_cast<u_short>(kAbilityThresholds[unlocked] + extra);
+  auto expected = progress;
+  ++expected.kills.totalKills;
+  Battle_AdvanceBattleAbilitySequence();
+  CheckAbilityProgress(expected);
   fixture.CheckTerminated();
 }
 
