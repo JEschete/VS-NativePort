@@ -1648,6 +1648,15 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
     # func_800AEF94 / 44F14.c:923: room actor slots are sparse, including an absent companion in slot 1.
     "F01008": [
+        ("((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(actor, NULL, 0);",
+         "Actors_UpdateActorPalettePulse(actor, NULL, 0);",
+         "40564.c:1651 typed actor palette pulse entry"),
+        ("((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(attached, NULL, 0);",
+         "Actors_UpdateActorPalettePulse(attached, NULL, 0);",
+         "Attached actors retain the original actor palette path"),
+        ("((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(NULL, (Actors_ActorRecord*)object, 0);",
+         "Actors_UpdateActorPalettePulse(NULL, object, 0);",
+         "Use owning native gimmick palettes instead of a PS1-sized view"),
         ("((void (*)(void*))Actors_UpdateActorAppearanceTransition)(actor);",
          "Actors_UpdateActorAppearanceTransition(actor);",
          "44F14.c:923 use the owning native actor appearance API"),

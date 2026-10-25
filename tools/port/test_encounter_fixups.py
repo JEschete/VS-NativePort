@@ -9,6 +9,26 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_palette_pulse_uses_the_native_gimmick_owner(self):
+        registry = Path(__file__).resolve().with_name("owned.csv")
+        with registry.open(encoding="utf-8", newline="") as stream:
+            owned = {row["id"]: row for row in csv.DictReader(stream)}
+        self.assertEqual(
+            owned["F00979"]["header"],
+            r"Native\Game\src\Actors\AppearanceTransition.h",
+        )
+        source = """((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(actor, NULL, 0);
+((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(attached, NULL, 0);
+((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(NULL, (Actors_ActorRecord*)object, 0);"""
+        for old, new, _ in copy_fixups.FIXES["F01008"]:
+            source = source.replace(old, new)
+        self.assertEqual(
+            source,
+            """Actors_UpdateActorPalettePulse(actor, NULL, 0);
+Actors_UpdateActorPalettePulse(attached, NULL, 0);
+Actors_UpdateActorPalettePulse(NULL, object, 0);""",
+        )
+
     def test_transition_text_uses_original_encoded_controls_not_ascii(self):
         fixes = copy_fixups.FIXES["F01337"]
         replacements = {old: new for old, new, _ in fixes}

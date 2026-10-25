@@ -9,6 +9,38 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #172 wooden-box targeting repair is verified. Original F00979 accepted the
+  PS1-sized T00469 palette view on a real native gimmick: source/output offsets
+  300/332 instead of304/336 after its model pointer widens. Partial CPU-array
+  alignment could look correct, but the upload started two color entries early
+  and owning output colors14/15 were never updated. Nonzero preceding metadata
+  also overwrote source tail colors in synthetic controls.
+  F00979 is now registered in the existing owned appearance implementation and
+  uses `Field_GimmickInstance` fields directly; all three generated actor/
+  attached/gimmick callers use the typed API. Original blue pulse, transparency,
+  alpha, saturation,2/4-speed boundary ordering and16/160-color actor paths
+  remain intact. No texture, targeting or highlight is hidden/disabled.
+  Red2 cases/52 assertions has40 failures in the gimmick record/actual VRAM
+  CLUT checks; actor controls already pass. Green Debug/Release3 cases/
+  100 assertions covers complete records, actual CLUT indices/neighbors,
+  first/last slots and three select/cancel/reentry cycles. Appearance selection
+  is7/7,978 each; full serial736/3,191,886 each passes. Copier67 controls,
+  second-generation stability and owned-source preservation pass. Selected
+  tidy0 plus83 fixture literals; fast195 existing/0 new.
+  Original kind4 production crates in9/11/MAP020 were actually selected,
+  cancelled and reselected, not patched through a debugger. All16 owning pulse
+  colors now match the source formula and base palettes stay unchanged in all
+  eight Debug/Release modes; pre-fix live output missed colors14/15. Corrected
+  selected/reselected/cancelled images were reviewed locally. Debug runs:
+  baseline1792903888282972-0, selected1792903722631867-0,
+  cancelled1792903755402586-0, reselected1792903814974448-0; Release:
+  1792903906707392-0/1792903924231782-0/1792903944196085-0/1792903965393681-0.
+  Strict report `build/quality/box172-verified.json`, captures/logs `box172-*`.
+  Evidence is2cc1db5c plus this scoped palette package and unrelated owner
+  ignore/solution edits. This verifies the common renderer/root defect, not a
+  fresh exact Fine Vintage Vault story replay or C++/whole-compatibility
+  retirement. T00469's legacy declaration is retained for provenance; its live
+  palette cast is retired. Exact scoped publication/CI is the closure gate.
 - #179 interrupted-scene reentry defect is repaired and closed after acceptance
   checkpoint2b2a175b/exact green40155513890. It was confirmed and logged before
   repair. Debug1792893835821337-0 stops the first chain while event81 box4/5
@@ -119,7 +151,8 @@ verification of the current worktree.
   Retained reference audit: `rood-boi` movement is unchanged from the pinned
   counterpart; `rood-reverseWin` is not an independent Git root, so its apparent
   native-repository log must not be mistaken for upstream updates.
-- #177 roulette audit is verified without a gameplay RNG change. The original
+- #177 roulette audit is verified and closed after2cc1db5c/exact green40161617288,
+  without a gameplay RNG change. The original
   chooses one of three weighted16-entry tables, seeds the selection byte once,
   then advances/decelerates it with actual stop input rather than uniform rerolls.
   Slot counts (STR/AGI/INT/HP/MP) are4/1/1/7/3,1/1/4/8/2,1/4/1/7/3;

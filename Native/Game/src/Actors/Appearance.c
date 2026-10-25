@@ -7,14 +7,12 @@
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
-#include "Actors/Palette.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
 #include "Field/Gimmicks.h"
 #include "Render/Palette.h"
-#include "State/Timers.h"
 
 // decomp: D_800F4438 (D_800F4438@BATTLE/BATTLE.PRG)
 VECTOR Actors_roomActorScale;
@@ -227,128 +225,6 @@ int Actors_SetActorTint(int arg0, Render_ColorCode* arg1)
 
     return 0;
 }
-
-// decomp: src/BATTLE/BATTLE.PRG/40564.c:108
-#define getActorFlags(actor) (*((int*)&(actor)->sequenceFlags - 2))
-// decomp: BATTLE.PRG func_800AB788 (src/BATTLE/BATTLE.PRG/40564.c:1651)
-void Actors_UpdateActorPalettePulse(Actors_ActorRecord* actor, Actors_PalettePulseView* object, int arg2)
-{
-    Actors_ModelEffectSlot* state;
-    int count;
-    int value;
-    int i;
-    int _[2] __attribute__((unused));
-
-    if (actor == NULL) {
-        count = 16;
-        state = &object->pulse;
-    } else {
-        count = 160;
-
-        if (!(getActorFlags(actor) & 0x8000000)) {
-            count = 16;
-        }
-
-        state = &actor->instance.palettePulse;
-    }
-
-    value = state->level;
-
-    if (State_tickSpeed == 4) {
-        if (!(state->flags & 2)) {
-            value += 2;
-
-            if (value >= 16) {
-                state->flags |= 2;
-            }
-        } else {
-            value -= 2;
-
-            if (value <= 0) {
-                state->flags &= ~2;
-            }
-        }
-    }
-
-    if (!(state->flags & 2)) {
-        value += 2;
-
-        if (value >= 16) {
-            state->flags |= 2;
-        }
-    } else {
-        value -= 2;
-
-        if (value <= 0) {
-            state->flags &= ~2;
-        }
-    }
-
-    state->level = value;
-
-    for (i = 0; i < count; ++i) {
-        int r;
-        int g;
-        int b;
-        int color = (actor == NULL) ? object->basePalette[i] : actor->basePalette[i];
-
-        if (color == 0) {
-            continue;
-        }
-
-        r = color & 31;
-        g = (color >> 5) & 31;
-        b = (color >> 10) & 31;
-        color &= 0x8000;
-
-        if (value == 16) {
-            r += 8;
-
-            if (r > 31) {
-                r = 31;
-            }
-
-            g += 18;
-
-            if (g > 31) {
-                g = 31;
-            }
-
-            b += 30;
-        } else {
-            r -= value / 2;
-
-            if (r < 0) {
-                r = 0;
-            }
-
-            g += value / 2;
-
-            if (g > 31) {
-                g = 31;
-            }
-
-            b += value;
-        }
-
-        if (b > 31) {
-            b = 31;
-        }
-
-        if (actor == NULL) {
-            object->pulsedPalette[i] = color | (b << 10) | (g << 5) | r;
-        } else {
-            actor->currentPalette[i] = color | (b << 10) | (g << 5) | r;
-        }
-    }
-
-    if (actor == NULL) {
-        Render_LoadClutColors(object->pulsedPalette, 31, object->slot * 16, count);
-    } else {
-        Render_LoadClutColors(actor->currentPalette, actor->instance.slot + 22, 0, count);
-    }
-}
-#undef getActorFlags
 
 // decomp: BATTLE.PRG func_800AC37C (src/BATTLE/BATTLE.PRG/40564.c:2179)
 void Actors_StartActorAppearanceTransition(int arg0, int arg1)

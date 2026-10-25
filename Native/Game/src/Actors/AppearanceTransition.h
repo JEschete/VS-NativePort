@@ -16,5 +16,7 @@
 
 void Actors_UpdateActorAppearanceTransition(Actors_ActorRecord* actor);
 void Field_UpdateGimmickAppearanceTransition(Field_GimmickInstance* object);
+void Actors_UpdateActorPalettePulse(Actors_ActorRecord* actor,
+                                    Field_GimmickInstance* object, int unused);
 
 #endif  // VS_OWNED_ACTORS_APPEARANCETRANSITION_H

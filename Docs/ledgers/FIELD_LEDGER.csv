@@ -4172,8 +4172,8 @@ T00469.001,T00469,func_800AB788_t,1,unkF,1,u_char,,,,slot,Gimmick slot; selects 
 T00469.002,T00469,func_800AB788_t,2,unk10,1,u_char[84],,,,reserved10,Covered by the gimmick record,low,declaration-only;source:40564.c:37
 T00469.003,T00469,func_800AB788_t,3,unk64,1,D_800F4538_unk64,,,,pulse,Palette pulse state,high,source:40564.c:1661
 T00469.004,T00469,func_800AB788_t,4,unk68,1,u_char[196],,,,reserved68,Covered by the gimmick record,low,declaration-only;source:40564.c:39
-T00469.005,T00469,func_800AB788_t,5,unk12C,1,u_short[16],,,,basePalette,Palette before the pulse,high,source:40564.c:1710
-T00469.006,T00469,func_800AB788_t,6,unk14C,1,u_short[16],,,,pulsedPalette,Palette uploaded with the pulse applied,high,source:40564.c:1756
+T00469.005,T00469,func_800AB788_t,5,unk12C,1,u_short[16],,,,basePalette,Palette before the pulse,high,source:40564.c:1710;#172 original PS1 offset300 is not native owner304;runtime uses Field_GimmickInstance.basePalette and preserves all source entries
+T00469.006,T00469,func_800AB788_t,6,unk14C,1,u_short[16],,,,pulsedPalette,Palette uploaded with the pulse applied,high,source:40564.c:1756;#172 original PS1 offset332 is not native owner336;runtime uses owning destination and uploads all16colors at correct indices
 T00470.000,T00470,func_800AC690_contact_t,0,contact,0,u_int,4,,,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:40564.c:56
 T00470.001,T00470,func_800AC690_contact_t,1,unk4,1,u_int,28,,,reserved0Bit4,Not read by decompiled code,low,declaration-only;source:40564.c:57
 T00471.000,T00471,func_800AC690_flags_t,0,unk0,1,u_int,16,,,reserved0Bit0,Not read by decompiled code,low,declaration-only;source:40564.c:50

@@ -56,7 +56,19 @@ enum {
   kPaletteBrightenGreenBlue = 3,
   kPaletteRestore = 4,
   kPaletteSlowDarken = 5,
-  kPaletteBlack = 6
+  kPaletteBlack = 6,
+  kPulseActorClutRowBase = 22,
+  kPulsePeak = 16,
+  kPulseStep = 2,
+  kPulseDescending = 2,
+  kPulseDoubleTickSpeed = 4,
+  kPaletteChannelMaximum = 31,
+  kPaletteGreenShift = 5,
+  kPaletteBlueShift = 10,
+  kPaletteOpaqueBit = 0x8000,
+  kPulsePeakRed = 8,
+  kPulsePeakGreen = 18,
+  kPulsePeakBlue = 30
 };
 
 static int SignedByte(u_char value) {
@@ -77,6 +89,69 @@ typedef struct AppearanceTarget {
   int count;
   int skip;
 } AppearanceTarget;
+
+static int AdvancePalettePulse(Actors_ModelEffectSlot* pulse) {
+  int level = pulse->level;
+  const int steps = State_tickSpeed == kPulseDoubleTickSpeed ? 2 : 1;
+  for (int step = 0; step < steps; ++step) {
+    if ((pulse->flags & kPulseDescending) == 0) {
+      level += kPulseStep;
+      if (level >= kPulsePeak) pulse->flags |= kPulseDescending;
+    } else {
+      level -= kPulseStep;
+      if (level <= 0) pulse->flags &= ~kPulseDescending;
+    }
+  }
+  pulse->level = (u_char)level;
+  return level;
+}
+
+static int ClampPaletteChannel(int channel) {
+  if (channel < 0) return 0;
+  return channel > kPaletteChannelMaximum ? kPaletteChannelMaximum : channel;
+}
+
+static u_short PulsePaletteColor(u_short color, int level) {
+  const int red = color & kPaletteChannelMaximum;
+  const int green = (color >> kPaletteGreenShift) & kPaletteChannelMaximum;
+  const int blue = (color >> kPaletteBlueShift) & kPaletteChannelMaximum;
+  const int peak = level == kPulsePeak;
+  const int r = ClampPaletteChannel(red + (peak ? kPulsePeakRed : -level / 2));
+  const int g =
+      ClampPaletteChannel(green + (peak ? kPulsePeakGreen : level / 2));
+  const int b = ClampPaletteChannel(blue + (peak ? kPulsePeakBlue : level));
+  return (u_short)((color & kPaletteOpaqueBit) | r | (g << kPaletteGreenShift) |
+                   (b << kPaletteBlueShift));
+}
+
+// func_800AB788, BATTLE/40564.c:1651. PS1 palette offsets are not native
+// offsets after the gimmick's model pointer widens.
+void Actors_UpdateActorPalettePulse(Actors_ActorRecord* actor,
+                                    Field_GimmickInstance* object, int unused) {
+  (void)unused;
+  Actors_ModelEffectSlot* pulse =
+      actor != NULL ? &actor->instance.palettePulse : &object->palettePulse;
+  const u_short* source =
+      actor != NULL ? actor->basePalette : object->basePalette;
+  u_short* destination =
+      actor != NULL ? actor->currentPalette : object->pulsedPalette;
+  const int count = actor != NULL && actor->textureHeaderBit
+                        ? kPaletteColors
+                        : kSmallPaletteColors;
+  const int level = AdvancePalettePulse(pulse);
+  for (int index = 0; index < count; ++index) {
+    if (source[index] != 0) {
+      destination[index] = PulsePaletteColor(source[index], level);
+    }
+  }
+  if (actor != NULL) {
+    Render_LoadClutColors(
+        destination, actor->instance.slot + kPulseActorClutRowBase, 0, count);
+  } else {
+    Render_LoadClutColors(destination, kGimmickClutRow,
+                          object->slot * kSmallPaletteColors, count);
+  }
+}
 
 static int ApplyPalettes(AppearanceTarget* target, int mode) {
   int changed = Render_ApplyPaletteTransition(

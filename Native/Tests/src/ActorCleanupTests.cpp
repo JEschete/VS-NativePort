@@ -13,6 +13,7 @@
 
 extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/Appearance.h"
 #include "Actors/AppearanceTransition.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
@@ -274,10 +275,19 @@ struct AppearanceFixture {
   decltype(std::to_array(Actors_weaponModels)) saved_weapons =
       std::to_array(Actors_weaponModels);
   int saved_speed = State_tickSpeed;
+  decltype(std::to_array(Actors_actorRecords)) saved_models =
+      std::to_array(Actors_actorRecords);
+  decltype(std::to_array(Field_gimmickInstances)) saved_objects =
+      std::to_array(Field_gimmickInstances);
+  RECT palette_region{768, 224, 256, 32};
+  alignas(u_long) std::array<u_char, 16384> saved_cluts{};
   Actors_ActorRecord actor{};
 
   AppearanceFixture() {
+    StoreImage(&palette_region, reinterpret_cast<u_long*>(saved_cluts.data()));
     std::fill_n(Actors_weaponModels, saved_weapons.size(), nullptr);
+    std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
+    std::fill_n(Field_gimmickInstances, saved_objects.size(), nullptr);
     State_tickSpeed = 2;
     actor.instance.isParsed = -1;
     actor.instance.baseColor = {128, 128, 128, 0};
@@ -287,9 +297,65 @@ struct AppearanceFixture {
 
   ~AppearanceFixture() {
     std::copy(saved_weapons.begin(), saved_weapons.end(), Actors_weaponModels);
+    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+    std::copy(saved_objects.begin(), saved_objects.end(),
+              Field_gimmickInstances);
+    LoadImage(&palette_region, reinterpret_cast<u_long*>(saved_cluts.data()));
     State_tickSpeed = saved_speed;
   }
 };
+
+constexpr std::array<u_short, 16> kPulseColors = {
+    0,      0x001F, 0x03E0, 0x7C00, 0x8000, 0xFFFF, 0x4210, 0x1234,
+    0x2222, 0x3333, 0x4444, 0x5555, 0x6666, 0x7777, 0x1357, 0x2468,
+};
+
+u_short PulseColor(u_short color, int level) {
+  const int red = color & 31;
+  const int green = (color >> 5) & 31;
+  const int blue = (color >> 10) & 31;
+  const int r = std::clamp(red + (level == 16 ? 8 : -level / 2), 0, 31);
+  const int g = std::min(31, green + (level == 16 ? 18 : level / 2));
+  const int b = std::min(31, blue + (level == 16 ? 30 : level));
+  return static_cast<u_short>((color & 0x8000) | r | (g << 5) | (b << 10));
+}
+
+template <std::size_t Count>
+std::array<u_short, Count> PulseClut(int row, int offset) {
+  alignas(u_long) std::array<u_short, Count> colors{};
+  RECT area{static_cast<std::int16_t>(768 + offset),
+            static_cast<std::int16_t>(224 + row),
+            static_cast<std::int16_t>(Count), 1};
+  StoreImage(&area, reinterpret_cast<u_long*>(colors.data()));
+  return colors;
+}
+
+template <typename Record>
+std::array<u_char, sizeof(Record)> ObjectBytes(const Record& record) {
+  std::array<u_char, sizeof(Record)> bytes;
+  std::memcpy(bytes.data(), &record, bytes.size());
+  return bytes;
+}
+
+void CheckPulseCycle(Field_GimmickInstance& object,
+                     std::array<u_short, 256>& expected_row) {
+  const int slot = object.slot;
+  REQUIRE(Actors_EnableModelPalettePulse(slot, 0, 0) == 0);
+  CHECK(object.palettePulse.kind == 128);
+  CHECK(object.palettePulse.level == 0);
+  CHECK(PulseClut<16>(31, slot * 16) == kPulseColors);
+  Actors_UpdateActorPalettePulse(nullptr, &object, 0);
+  const auto offset = static_cast<std::size_t>(slot) * kPulseColors.size();
+  for (std::size_t color = 0; color < kPulseColors.size(); ++color) {
+    expected_row[offset + color] =
+        kPulseColors[color] == 0 ? 0 : PulseColor(kPulseColors[color], 2);
+  }
+  CHECK(PulseClut<256>(31, 0) == expected_row);
+  REQUIRE(Actors_DisableModelPalettePulse(slot, 0) == 0);
+  CHECK(object.palettePulse.kind == 0);
+  CHECK(
+      std::equal(kPulseColors.begin(), kPulseColors.end(), object.basePalette));
+}
 }  // namespace
 
 TEST_CASE("Actor disappearance changes the owning fade byte, not a legacy view",
@@ -369,6 +435,89 @@ TEST_CASE("Gimmick palette fades stay on their own typed path",
   for (int index = 0; index < 16; ++index) {
     CHECK(object.pulsedPalette[index] == expected[index]);
     CHECK(object.basePalette[index] == 0x1234);
+  }
+}
+
+TEST_CASE("Gimmick targeting pulses preserve native ownership and CLUT indices",
+          "[actors][appearance][gimmick][palette-pulse]") {
+  const int speed = GENERATE(2, 4);
+  const int phase = GENERATE(0, 1, 2, 3);
+  const int prefix = GENERATE(0, 0x65);
+  AppearanceFixture fixture;
+  State_tickSpeed = speed;
+  Field_GimmickInstance object{};
+  object.slot = 3;
+  std::fill_n(object.reserved114, sizeof object.reserved114, prefix);
+  std::copy(kPulseColors.begin(), kPulseColors.end(), object.basePalette);
+  std::fill_n(object.pulsedPalette, 16, 0x5A5A);
+  const std::array levels{0, 14, 16, 2};
+  const std::array slow{2, 16, 14, 0};
+  const std::array fast{4, 14, 12, 2};
+  const std::array directions{0, 2, 2, 0};
+  object.palettePulse.kind = 128;
+  object.palettePulse.level = static_cast<u_char>(levels[phase]);
+  object.palettePulse.flags = phase >= 2 ? 3 : 1;
+  Field_GimmickInstance expected;
+  std::memcpy(&expected, &object, sizeof object);
+  const int level = speed == 4 ? fast[phase] : slow[phase];
+  expected.palettePulse.level = static_cast<u_char>(level);
+  expected.palettePulse.flags = static_cast<u_char>(directions[phase] | 1);
+  for (std::size_t i = 0; i < kPulseColors.size(); ++i) {
+    if (kPulseColors[i] != 0) {
+      expected.pulsedPalette[i] = PulseColor(kPulseColors[i], level);
+    }
+  }
+  Actors_UpdateActorPalettePulse(nullptr, &object, 0);
+  CHECK(ObjectBytes(object) == ObjectBytes(expected));
+  CHECK(
+      std::equal(kPulseColors.begin(), kPulseColors.end(), object.basePalette));
+  const auto uploaded = PulseClut<16>(31, object.slot * 16);
+  CHECK(std::equal(uploaded.begin(), uploaded.end(), expected.pulsedPalette));
+}
+
+TEST_CASE(
+    "Actor targeting pulses retain their original small and full palettes",
+    "[actors][appearance][palette-pulse]") {
+  const bool full = GENERATE(false, true);
+  AppearanceFixture fixture;
+  auto& actor = fixture.actor;
+  actor.instance.slot = 2;
+  actor.textureHeaderBit = full ? 1 : 0;
+  actor.instance.palettePulse.kind = 128;
+  actor.instance.palettePulse.level = 0;
+  actor.instance.palettePulse.flags = 0;
+  for (int i = 0; i < 160; ++i) {
+    actor.basePalette[i] = kPulseColors[i % kPulseColors.size()];
+    actor.currentPalette[i] = 0x5A5A;
+  }
+  Actors_ActorRecord expected;
+  std::memcpy(&expected, &actor, sizeof actor);
+  expected.instance.palettePulse.level = 2;
+  const int count = full ? 160 : 16;
+  for (int i = 0; i < count; ++i) {
+    if (actor.basePalette[i] != 0) {
+      expected.currentPalette[i] = PulseColor(actor.basePalette[i], 2);
+    }
+  }
+  auto expected_row = PulseClut<256>(24, 0);
+  std::copy_n(expected.currentPalette, count, expected_row.begin());
+  Actors_UpdateActorPalettePulse(&actor, nullptr, 0);
+  CHECK(ObjectBytes(actor) == ObjectBytes(expected));
+  CHECK(PulseClut<256>(24, 0) == expected_row);
+}
+
+TEST_CASE(
+    "Gimmick pulse cancellation and reentry retain source colors and bounds",
+    "[actors][appearance][gimmick][palette-pulse]") {
+  const int slot = GENERATE(0, 15);
+  AppearanceFixture fixture;
+  Field_GimmickInstance object{};
+  object.slot = static_cast<u_char>(slot);
+  std::copy(kPulseColors.begin(), kPulseColors.end(), object.basePalette);
+  Field_gimmickInstances[slot] = &object;
+  auto expected_row = PulseClut<256>(31, 0);
+  for (int entry = 0; entry < 3; ++entry) {
+    CheckPulseCycle(object, expected_row);
   }
 }
 

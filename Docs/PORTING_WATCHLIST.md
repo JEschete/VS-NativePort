@@ -42,6 +42,12 @@ globals are reloaded.
 
 The copied code compiles for x64, but some of it assumes 32-bit pointers or fixed struct sizes:
 
+- **Opaque views can hide pointer widening.** F00979's palette view omitted a
+  gimmick model pointer and kept PS1 offsets300/332 while the native owner used
+  304/336. Shifting source and destination together made part of the CPU array
+  appear correct, but the CLUT upload used the wrong indices and missed the
+  final two colors. Use the owning native record, not extra padding on a PS1
+  compatibility view; verify actual upload rows, neighbors and reentry (#172).
 - 286 pointer/integer casts in 151 functions;
 - literal sizes for structs that contain pointers (`memset(s1, 0, 0x178)`, `vs_main_memcpy(..., 0x7800)`,
   `vs_main_allocHeapR(0x178)`). On x64 those structs are larger.

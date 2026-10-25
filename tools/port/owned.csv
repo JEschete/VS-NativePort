@@ -206,6 +206,7 @@ F01791,function,Battle_Ai_ResetActorAiReactionDelay,Native\Game\src\Battle\Ai\Ac
 F01731,function,Battle_Ai_LowestReachableGroundHeight,Native\Game\src\Battle\Ai\FlightTerrain.c,Native\Game\src\Battle\Ai\FlightTerrain.h,2026-10-21,from Native\Game\src\Battle\Ai\Movement.c
 F01830,function,Battle_Ai_MinimumAiGroundHeightAlongSegment,Native\Game\src\Battle\Ai\FlightTerrain.c,Native\Game\src\Battle\Ai\FlightTerrain.h,2026-10-21,from Native\Game\src\Battle\Ai\Navigation.c
 F01843,function,Battle_Ai_RoomNavigationCeilingHeight,Native\Game\src\Battle\Ai\FlightTerrain.c,Native\Game\src\Battle\Ai\FlightTerrain.h,2026-10-21,from Native\Game\src\Battle\Ai\Navigation.c
+F00979,function,Actors_UpdateActorPalettePulse,Native\Game\src\Actors\AppearanceTransition.c,Native\Game\src\Actors\AppearanceTransition.h,2026-10-25,typed native gimmick palettes;original40564.c:1651
 F00980,function,Actors_UpdateActorAppearanceTransition,Native\Game\src\Actors\AppearanceTransition.c,Native\Game\src\Actors\AppearanceTransition.h,2026-10-23,from Native\Game\src\Actors\Appearance.c
 F02764,function,Menu_Files_UpdateDataSaveMenu,Native\Game\src\Save\NativeMenu.cpp,Native\Game\include\Save\NativeMenu.h,2026-10-24,Native semantic save picker retaining original save-point eligibility and file-element rendering
 F02767,function,Menu_Files_UpdateDataLoadMenu,Native\Game\src\Save\NativeMenu.cpp,Native\Game\include\Save\NativeMenu.h,2026-10-24,Native validated load picker; nonlocal boot transition stays in C parent

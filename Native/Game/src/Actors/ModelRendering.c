@@ -99,7 +99,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
             && (actor->instance.attachBone != 0xFC)) {
             ((void (*)(void*))Actors_UpdateActorTextureAnimations)(actor);
             if (actor->instance.palettePulse.kind != 0) {
-                ((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(actor, NULL, 0);
+                Actors_UpdateActorPalettePulse(actor, NULL, 0);
             }
             if (actor->instance.actionAnimationState) {
                 Actors_UpdateActorAppearanceTransition(actor);
@@ -166,7 +166,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                         attached = entries[actor->companionSlot];
                         ((void (*)(void*))Actors_UpdateActorTextureAnimations)(attached);
                         if (attached->instance.palettePulse.kind != 0) {
-                            ((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(attached, NULL, 0);
+                            Actors_UpdateActorPalettePulse(attached, NULL, 0);
                         }
                         if (attached->instance.actionAnimationState) {
                             Actors_UpdateActorAppearanceTransition(attached);
@@ -278,7 +278,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
             *(int*)&objectScratch->rootOffset = packedPosition;
             objectScratch->rootOffset.vy += modelHeight / 2;
             if (object->palettePulse.kind != 0) {
-                ((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(NULL, (Actors_ActorRecord*)object, 0);
+                Actors_UpdateActorPalettePulse(NULL, object, 0);
             }
             if (object->motionState) {
                 Field_UpdateGimmickAppearanceTransition(object);
