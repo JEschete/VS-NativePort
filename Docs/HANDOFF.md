@@ -9,6 +9,26 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #183 owner-requested lethal chain credit is implemented through copier F00099.
+  The copied original146C.c:3420 also coupled offensive credit to target
+  survival; this is an explicit owner behavior change, not an invented x64
+  diagnosis. Successful timing now earns the existing point even when the
+  target died, while only a surviving target receives another queued attack
+  or increases the executed-chain count. Existing defensive credit is
+  unchanged. Story flag0x82>=10, cumulative thresholds and the22-unlock cap
+  remain intact. Points are global persistent progression, not attached to a
+  victim; the existing recoveryMode2 enemy-death path gates learning, so
+  threshold credit can wait for a later different target's death.
+  Focused regression first fails22 lethal threshold assertions; repaired
+  Debug/Release ability/acquisition/Break Art selections each pass47 cases/
+  21,430 assertions, including194 new lethal-credit/non-kill-learning checks.
+  Source adaptation contracts71 pass; two generations change only Abilities.c
+  plus manifest, preserve302 non-generated Native files and are byte-stable.
+  Scoped tidy has1 existing/0 new. No new full campaign/controller acceptance
+  is claimed: the Lab's isolated initial story flag does not satisfy the
+  offensive progression gate, and must not be edited to fabricate that proof.
+  #183 retains that explicit live-acceptance limit. Evidence `chain-credit-*`
+  is local to session files; this is not C++ promotion or bridge retirement.
 - #182 bedroom Start-skip exception is reproduced and repaired through copier
   F03246/func_8001852C (original SLUS_010.40/25AC.c:3582). The camera/thread
   sequence was only the last logged work: the actual crash is
@@ -28,8 +48,9 @@ verification of the current worktree.
   configurations; full760 cases/3,389,644 assertions each pass. Copier contracts
   70 pass; both generation runs change only MixControl.c plus its manifest,
   preserve305 non-generated/owner files and produce identical second output.
-  Evidence is `bedroom-skip-*` in session files; exact fixing publication/CI is
-  tracked in #182. This is not C++ promotion or compatibility retirement.
+  Published42cafc2aa27a30056f62156588dd7e092568119a has exact green Source
+  Quality40226404485; #182 is closed. Evidence is `bedroom-skip-*` in session
+  files. This is not C++ promotion or compatibility retirement.
 - #76/#168 native child-emission origin fix is implemented through copier
   adaptation F01535, not a hand edit of generated output. The original PS1
   particle prefix and fixed-layout plugin-parent context overlap on 32-bit;

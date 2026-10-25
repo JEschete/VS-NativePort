@@ -310,6 +310,19 @@ inventory and action set. Normal game startup is unchanged.
   mappings, spells and acquisition/story counters are unchanged. Use
   **ASHLEY SETUP** for starting HP; arts still require more HP than their
   nominal cost (25/40/55/75), leaving at least 1 HP after payment.
+
+Battle-ability credit and learning are separate. Successful offensive timing
+retains its credit on a lethal hit (#183), without queuing another strike at a
+dead target. Successful defenses retain their existing credit path. Credit is
+global and capped at the next cumulative threshold; filling it on a surviving
+target does not learn an ability. The normal enemy-death reward can release
+that pending unlock after killing the same or a different target.
+
+The original offensive progression gate, story flag0x82>=10, still applies.
+These isolated Lab profiles do not manufacture completed story events to meet
+it. Defensive progress does not use that particular gate. Component tests
+cover all22 lethal thresholds and non-kill deferral; a Lab run below the story
+gate is not proof of eligible offensive-credit accumulation.
   This supports [#11](https://github.com/JEschete/VS-NativePort/issues/11),
   not a claim that every art or acquisition path is already verified.
 

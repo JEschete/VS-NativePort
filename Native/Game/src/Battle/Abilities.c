@@ -196,17 +196,20 @@ void Battle_AdvanceBattleAbilitySequence(void)
         return;
     }
 
-    if ((Battle_actionState->abilityInputSucceeded == 1)
-        && (Battle_actors[action->targets[0].target.targetActor]->stats->currentHp != 0)) {
-        ((void (*)(Battle_ActionRequest*))Battle_Ai_NotifyActionRelationshipChanges)(action);
-        Battle_actionFlowMode = 8;
-        ++Battle_actionState->chainStep;
-        ++Battle_actionState->queueIndex;
-        Battle_ResolveActionTargets(Input_settings.mappedChainAbilities[Battle_actionState->chainAbilitySlot - 1],
-            &Battle_actionState->queue[Battle_actionState->queueIndex & 3], &Battle_actionState->selection, 1);
-        Battle_QueueChainCount(Battle_actionState->queueIndex);
-        if (Audio_Seq_unusedScoredata.maxChain < Battle_actionState->queueIndex) {
-            Audio_Seq_unusedScoredata.maxChain = Battle_actionState->queueIndex;
+    if (Battle_actionState->abilityInputSucceeded == 1) {
+        if (Battle_actors[action->targets[0].target.targetActor]->stats->currentHp != 0) {
+            ((void (*)(Battle_ActionRequest*))Battle_Ai_NotifyActionRelationshipChanges)(action);
+            Battle_actionFlowMode = 8;
+            ++Battle_actionState->chainStep;
+            ++Battle_actionState->queueIndex;
+            Battle_ResolveActionTargets(Input_settings.mappedChainAbilities[Battle_actionState->chainAbilitySlot - 1],
+                &Battle_actionState->queue[Battle_actionState->queueIndex & 3], &Battle_actionState->selection, 1);
+            Battle_QueueChainCount(Battle_actionState->queueIndex);
+            if (Audio_Seq_unusedScoredata.maxChain < Battle_actionState->queueIndex) {
+                Audio_Seq_unusedScoredata.maxChain = Battle_actionState->queueIndex;
+            }
+        } else {
+            Battle_FinishBattleAbilitySequence();
         }
         if (((u_char)State_ScriptFlag(0x82) >= 10)
             && (Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked < 22)

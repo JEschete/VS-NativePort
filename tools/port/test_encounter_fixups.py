@@ -9,6 +9,21 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_lethal_chain_success_keeps_credit_without_continuing(self):
+        old, new, _ = copy_fixups.FIXES["F00099"][0]
+        self.assertIn("abilityInputSucceeded == 1)", new.splitlines()[0])
+        self.assertIn("currentHp != 0", new.splitlines()[1])
+        self.assertIn("} else {\n            Battle_FinishBattleAbilitySequence();", new)
+        for operation in (
+            "++Battle_actionState->chainStep;",
+            "++Battle_actionState->queueIndex;",
+            "Battle_QueueChainCount(Battle_actionState->queueIndex);",
+        ):
+            self.assertEqual(old.count(operation), 1)
+            self.assertEqual(new.count(operation), 1)
+        self.assertNotIn("kills.totalKills", old)
+        self.assertNotIn("kills.totalKills", new)
+
     def test_music_cancellation_clears_the_native_pointer_field(self):
         source = "    *(int*)&Audio_Seq_pendingMusicData.param1 = 0;"
         for old, new, _ in copy_fixups.FIXES["F03246"]:

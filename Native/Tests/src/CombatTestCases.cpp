@@ -1329,6 +1329,34 @@ struct AbilityUnlockFixture : AbilityFixture {
   }
 };
 
+struct ChainCreditFixture : AbilityUnlockFixture {
+  char saved_story = State_ScriptFlag(0x82);
+  u_int saved_flow = Battle_actionFlowMode;
+  u_int saved_control = Field_controlMode;
+  int saved_reward = Battle_recoveryRewardMode;
+
+  ChainCreditFixture() {
+    State_SetScriptFlag(0x82, 10);
+    action.abilityInputSucceeded = 1;
+    action.chainAbilitySlot = 1;
+    stats[1].currentHp = 0;
+    records[0].animationId = 0x63;
+  }
+
+  ~ChainCreditFixture() {
+    State_SetScriptFlag(0x82, saved_story);
+    Battle_actionFlowMode = saved_flow;
+    Field_controlMode = saved_control;
+    Battle_recoveryRewardMode = saved_reward;
+  }
+
+  void CheckTerminated() const {
+    CHECK(Battle_actionFlowMode == 9);
+    CHECK(action.queueIndex == 0);
+    CHECK(action.chainStep == 0);
+  }
+};
+
 enum class KillGate {
   kPreview,
   kPositionSource,
@@ -1473,6 +1501,50 @@ TEST_CASE("Ability rewards use all original cumulative thresholds",
       static_cast<u_short>(kAbilityThresholds[unlocked] + delta);
   const auto before = progress;
   CHECK(Battle_PendingBattleAbilityUnlocks() == (delta >= 0 ? 1 : 0));
+  CheckAbilityProgress(before);
+}
+
+TEST_CASE("Successful lethal chain timing retains ability credit",
+          "[combat][abilities][acquisition][chain-credit]") {
+  ChainCreditFixture fixture;
+  const int unlocked = GENERATE(Catch::Generators::range(0, 22));
+  auto& progress = Audio_Seq_unusedArtsStatus;
+  progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
+  progress.kills.totalKills = kAbilityThresholds[unlocked] - 1;
+  auto expected = progress;
+  ++expected.kills.totalKills;
+  Battle_AdvanceBattleAbilitySequence();
+  CheckAbilityProgress(expected);
+  fixture.CheckTerminated();
+}
+
+TEST_CASE("Lethal chain credit preserves failure story and threshold gates",
+          "[combat][abilities][acquisition][chain-credit]") {
+  ChainCreditFixture fixture;
+  const int gate = GENERATE(0, 1, 2, 3);
+  if (gate == 0) fixture.action.abilityInputSucceeded = 0;
+  if (gate == 1) State_SetScriptFlag(0x82, 9);
+  if (gate == 2) {
+    Audio_Seq_unusedArtsStatus.kills.totalKills = kAbilityThresholds[0];
+  }
+  if (gate == 3) {
+    Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked = 22;
+  }
+  const auto before = Audio_Seq_unusedArtsStatus;
+  Battle_AdvanceBattleAbilitySequence();
+  CheckAbilityProgress(before);
+  fixture.CheckTerminated();
+}
+
+TEST_CASE("Pending chain credit alone does not trigger ability learning",
+          "[combat][abilities][acquisition][chain-credit]") {
+  ChainCreditFixture fixture;
+  Battle_recoveryRewardMode = GENERATE(0, 1);
+  Audio_Seq_unusedArtsStatus.kills.totalKills = kAbilityThresholds[0];
+  const auto before = Audio_Seq_unusedArtsStatus;
+  REQUIRE(Battle_PendingBattleAbilityUnlocks() == 1);
+  Battle_BeginPendingAbilityReward();
+  CHECK(Battle_actionFlowMode == 0);
   CheckAbilityProgress(before);
 }
 
