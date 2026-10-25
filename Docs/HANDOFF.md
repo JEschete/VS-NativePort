@@ -11,30 +11,35 @@ verification of the current worktree.
 
 - #168 bounded path instrumentation is now implemented for both native hosts:
   `--trace-effect-paths first:last`, off by default, positive inclusive host
-  ticks and normal speed1 required. Generic particles log local/world/projection
+  ticks and normal speed 1 required. Generic particles log local/world/projection
   context and command links; translucent polygons/sprites/lines log actual
   vertices, material and viewport state, including paths outside that pool.
   Final `screen` coordinates exclude framebuffer draw offset; `raster`
   includes it so double-buffer flips cannot masquerade as motion. IDs are
   pool/slot/instance/age/context, not globally unique lifetime identities.
-  Initial real speed1 run Release1792935010474425-0 defeats Dtok at38142 and
-  traverses the entire window scene39011..40673 into zone8. All4,201 selected
-  path-frame markers37800..42000 exist exactly once;43,428 particle and57,893
-  primitive records parse. All3,501 consecutive captures38500..42000 exist;
-  a lossless60fps clip retains all3,501 frames /58.350s, no frame dropping.
+  Initial real speed 1 run Release1792935010474425-0 defeats Dtok at 38142 and
+  traverses the entire window scene 39011..40673 into zone 8. All 4,201 selected
+  path-frame markers 37800..42000 exist exactly once; 43,428 particle and 57,893
+  primitive records parse. All 3,501 consecutive captures 38500..42000 were
+  recorded; a lossless 60fps clip retains all 3,501 frames / 58.350s, no frame
+  dropping.
   This initial capture precedes the final screen/raster naming clarification;
   its raw records retain draw offsets for unambiguous normalization.
-  The app exits0 at44557, but the helper correctly fails its stricter full
+  The app exits 0 at 44557, but the helper correctly fails its stricter full
   prologue/120-normal-frame criterion: do not claim that criterion for this run.
   It verifies the complete effect interval, not a native flare-position fix.
   Local evidence is `flare168-normal-*` plus `effect-path-*` in session files.
-  Final source builds all three hosts in Debug/Release; full758 cases/
-  3,389,591 assertions each pass. Affected-TU tidy0 new and full fast182
+  Final source builds all three hosts in Debug/Release; full 758 cases/
+  3,389,591 assertions each pass. Affected-TU tidy 0 new and full fast 182
   existing/0 new, no baseline changes. Final actual host smoke runs retain
-  Desktop1792936671129624-0 markers1..2 and Lab1792936674177743-0 markers
-  100..120 plus602 final-schema primitive records; screen+draw-offset equals
-  raster for every vertex. All3,501 decoded clip RGB hashes/order match the
+  Desktop1792936671129624-0 markers 1..2 and Lab1792936674177743-0 markers
+  100..120 plus 602 final-schema primitive records; screen+draw-offset equals
+  raster for every vertex. All 3,501 decoded clip RGB hashes/order match the
   source frames exactly (unused BGR0 padding is not image data).
+  Redundant BMPs were removed only after that pixel/order verification; the
+  complete lossless clip, hashes and raw trajectory logs remain. Logging is
+  published b5e0ae5e, exact Source Quality 40200550100 green; #168 stays open
+  for the actual placement/producer diagnosis.
 - #168 methodology correction from the owner's2026-10-25 screenshots: the
   reported defect is the transient lens-flare source and colored ghost/ring
   placement, not merely the window/sky background. Earlier selected-pose and
@@ -43,9 +48,9 @@ verification of the current worktree.
   insufficient. Use normal-speed continuous observation of the entire effect.
   Before path instrumentation, scene JSON recorded only effect flags/phases/
   track counts and particle output only node/quad totals. Asset-load filenames
-  are logged separately. Identify the actual flare
-  producer before adding scoped path diagnostics; do not assume it uses the
-  generic particle pool. Required trace points include source/resource identity,
+  are logged separately. Identify the actual flare producer next using the
+  new paths; do not assume it uses the generic particle pool. Producer-specific
+  trace points still need source/resource identity,
   lifetime, attachment/local/world coordinates, camera/projection/viewport and
   emitted screen centers/quads. User image snapshots remain read-only/local;
   no new native placement fix or verified flare parity is claimed.
