@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 2026-10-24. This is a short entry point, not another work tracker.
+Updated 2026-10-25. This is a short entry point, not another work tracker.
 Detailed checkpoint evidence, commands and replay paths are preserved in
 [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
 verification of the current worktree.
@@ -116,56 +116,64 @@ verification of the current worktree.
   PDB-checked evidence: `build/quality/box175-*`; session `files/box175-*`
   retains fixtures/observer. Concurrent scouts stalled before GPU initialization
   and are excluded; serial probes worked, without a driver/root-cause claim.
-- #177 roulette audit limits: owner's roulette loads MENUF at11609. Native reel
-  initialization, three weighted16-entry tables, acceleration/deceleration and stop selection match
-  original MENUF source; BIOS Rand15 golden controls and owner raw RNG advance.
-  /J keeps the selected byte unsigned. No simple RNG defect is established,
-  and no guessed uniform reroll was introduced. Exact stop/update cadence and
-  award application still need aligned live observation. Reference
-  `rood-boi` movement file is unchanged from the pinned counterpart; the
-  `rood-reverseWin` snapshot is not an independent Git root, so a git log there
-  must not be mistaken for upstream changes.
-  Fresh asset-free controls now call the actual native C update/award function:
+  Retained reference audit: `rood-boi` movement is unchanged from the pinned
+  counterpart; `rood-reverseWin` is not an independent Git root, so its apparent
+  native-repository log must not be mistaken for upstream updates.
+- #177 roulette audit is verified without a gameplay RNG change. The original
+  chooses one of three weighted16-entry tables, seeds the selection byte once,
+  then advances/decelerates it with actual stop input rather than uniform rerolls.
+  Slot counts (STR/AGI/INT/HP/MP) are4/1/1/7/3,1/1/4/8/2,1/4/1/7/3;
+  HP occupies7 or8 slots, not a claimed uniform per-boss outcome probability.
+  Native C asset-free controls verify the actual update/award function:
   all256 starting bytes decelerate from48 through8, accumulate125 units before
   final alignment and stop after exactly40..55 calls on low nibble8, without
   a new BIOS roll. All48 table slots apply only their intended permanent stat,
   including high-byte slot indices and999 caps (96 normal/cap iterations).
   Early Circle skips presentation to timer273 without stopping/rerolling;
-  full32-bit BIOS continuation survives seed restore. Original table slot
-  counts (STR/AGI/INT/HP/MP) are4/1/1/7/3,1/1/4/8/2,1/4/1/7/3:
-  HP-heavy tables, not a claimed uniform per-boss probability.
+  full32-bit BIOS continuation survives seed restore.
   Debug/Release `[roulette] --reporter compact --rng-seed 177` each pass5 cases/
-  27,185 assertions; full serial730/3,191,763 each pass. Selected tidy has0
-  findings/0 new plus42 reported fixture literals; full fast quality195/0 new.
+  27,185 assertions. The later diagnostics package brings full serial suites to
+  733/3,191,786 each; selected tidy0 plus59 fixture literals, fast195/0 new.
   Project regeneration is stable on a second run and preserves the owner-edited
-  solution. Source remains eb485242 plus this test/project-only package and
-  unrelated owner ignore/solution edits; no gameplay RNG/formula is changed.
-  The fixture suppresses presentation/audio dependencies and uses local synthetic
-  stats, not real boss-award evidence. Live stop/host-call cadence, reel chooser
-  initialization and repeated boss/reward/save-resume observation remain open.
-  Local commands/results: `build/quality/roulette177-*`.
+  solution. Equivalencee360fbea and diagnosticsddead640 are published with exact
+  green40157906333/40159724018; no gameplay RNG/formula is changed.
   Shared Desktop/Lab frame diagnostics now have optional read-only `roulette`
   state for menu15/game-clear only: entry phase, screen state/timer, animation,
   reel, selection and full BIOS state. It is absent during unavailable inspection,
   other subtypes and after menu closure; it does not draw a random number.
-  Three new serialization/read-only/lifecycle cases pass within full serial
-  Debug/Release733 cases/3,191,786 assertions each. All hosts build in each
-  config; selected production/test tidy0 plus59 fixture literals, fast195/0 new.
-  This is source e360fbea plus the scoped diagnostics package, not live cadence
-  acceptance.
-  Authentic live preconditions are now recovered: the owner's unmodified
+  Three serialization/read-only/lifecycle cases and all host builds pass.
+  Authentic live preconditions use the owner's unmodified
   generation2 save is zone9/room17, flag0x82=8. A byte-identical isolated copy
   is under `build/quality/roulette177-owner-save-copy`; the owner file was not
   written. Normal title Load/Yes, actual chest Square/take-all, directional
   movement and Cross/door interaction reach arena12/0 without flag/HP edits.
-  Debug1792899215445070-0 completes the original embedded intro at3790:
-  Ashley250 at954,-384,300; original boss actor2 HP277 at960,0,1486.
-  Inputs/captures are in `roulette177-authentic-arena-entry-Debug*`.
-  The actual owner roulette producer is external21 after defeat/event10.
-  Empty-actor21 probe1792898671214282-0 lacks its camera actor and faults at118
-  in tagged-bone position; exclude it rather than fabricating a parent/actor.
-  Next: actual combat from the authentic save, then record real stop input,
-  per-frame reel cadence and award through that original21 producer.
+  Real-time controller fights then naturally defeat the277-HP Minotaur:
+  - Debug1792900781496181-0: defeat6082; original10/21 initializes reel0 from
+    raw18281 to byte104. Actual Circle stops timer351/byte52 at7632 through
+    timer398/byte184 at7726:47 calls/94 host ticks. Slot11 gives HP+4 at7744,
+    actually67->71 and max250->254; other stat pairs stay unchanged.
+  - Release1792901413583068-0: defeat6218; raw6579 initializes byte184/reel0.
+    Different requested stop400 yields timer401/byte176 at7868 through
+    timer452/byte56 at7970:51 calls/102 ticks. Slot3 gives actual AGI100->101
+    at7988. Square claims original boss loot; phase0/control1/menu63 returns
+    at8212 and remains normal through26000 with no pending loot.
+  Every intermediate deceleration byte/speed and all31,460/31,874 captured
+  BIOS draws match the original arithmetic. Saved BIOS state is restored with
+  no arena/reward reseed; owner save bytes remain unchanged. Both manifests
+  are ddead640 plus only unrelated owner ignore/solution edits. No runtime HP,
+  stats, coordinates, AI settings, progress flags or completion state were forced.
+  Normal input really wins the fight and stops/confirms the original results.
+  Debug's controller omitted Square and waits at loot12; exclude that from
+  full return evidence. Release supplies the verified normal return. Neither
+  run claims a later family-scene trigger without the required player action.
+  A speed8 combat attempt died and is not acceptance; an empty-actor21 probe
+  lacks its original camera actor and is likewise excluded, not null-patched.
+  Strict local reports: `build/quality/roulette177-authentic-realtime-Debug-verified.json`
+  and `roulette177-authentic-realtime-Release-verified-return.json`. Full traces,
+  manifests and acknowledged inputs remain in the corresponding run directories
+  and `roulette177-*`; session files retain controller, verifier and route.
+  This verifies this audit, not all boss archetypes, scene fidelity or C++/EC
+  retirement. Broader cutscene/persistence gates remain #149/#18.
 - #176 zero-glyph transition repair: original matching `_renderTextImmediate`
   assembly at800C81DC/81E4/8274 uses encoded0xE5, space0x8F and subtracts0xE5.
   Copied F01337 instead used ASCII form-feed/space, so end0xE7 did not terminate
