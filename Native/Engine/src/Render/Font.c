@@ -728,11 +728,11 @@ void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* arg0, int arg1)
     Render_fontTableSelect = 1;
 
     while (1) {
-        u_int currentChar = *str++;
+        u_int currentChar = (u_char)*str++;
 
         if (currentChar < 0xEC) {
-            if (currentChar < '\f') {
-                if (currentChar != ' ') {
+            if (currentChar < Core_TextCode_NonPrinting) {
+                if (currentChar != Core_TextCode_Space) {
                     currentChar += Render_fontTableSelect * 21 * 9;
                     if (((width - 12) >= printX) && ((height - 12) >= printY)) {
                         Render_BlendGlyphIntoPixels(buf + ((printX + (printY * width))), currentChar,
@@ -741,7 +741,7 @@ void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* arg0, int arg1)
                 }
                 printX += Render_variableFontGlyphWidths[currentChar];
             } else {
-                switch (currentChar - '\f') {
+                switch (currentChar - Core_TextCode_NonPrinting) {
                 case 2:
                     if (Input_buttonsPressed.allButtons & PADRright) {
                         arg0->speed = 0xFFFF;
@@ -763,7 +763,7 @@ void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* arg0, int arg1)
                 }
             }
         } else {
-            u_int opcodeParam = *str++;
+            u_int opcodeParam = (u_char)*str++;
             switch (currentChar - 0xF8) {
             case 2:
                 currentChar = 256;

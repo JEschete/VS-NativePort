@@ -135,6 +135,7 @@
     <ClCompile Include="src\SphereTerrainTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
     <ClCompile Include="src\TerrainHeightTests.cpp" />
+    <ClCompile Include="src\TextTransitionTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />
     <ClCompile Include="src\ViewportBoundsTests.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp" />

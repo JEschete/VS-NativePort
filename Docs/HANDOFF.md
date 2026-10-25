@@ -9,6 +9,21 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #176 zero-glyph transition repair: original matching `_renderTextImmediate`
+  assembly at800C81DC/81E4/8274 uses encoded0xE5, space0x8F and subtracts0xE5.
+  Copied F01337 instead used ASCII form-feed/space, so end0xE7 did not terminate
+  and following zero padding rendered as digits. Event82's three string entries
+  are control-only, not readable dialogue words; their word-based offsets are
+  correct. The copy generator now uses the original encoded constants and
+  unsigned byte loads, with no guessed string-stride or text replacement.
+  Asset-free tests use the real framebuffer compositor, synthetic font pixels
+  and finite strings: red4/4 cases fail with6 pixel assertions; green Debug/
+  Release4 cases/10 assertions cover padding termination, visible letters,
+  spacing, newlines and repeated control-only rendering. Heap, font, input and
+  VRAM state are restored by the fixture. Full serial suites716/3,164,535 in
+  each config pass; generator66 controls pass. Local evidence:
+  `build/quality/text176-*`. This verifies the encoded transition defect, not
+  the whole external event82 story sequence or the separate #174 end handoff.
 - #174 family-cutscene attachment fault: owner run1792884331707681-0 reaches
   external event82 in zone19/room0/MAP212. Its original script attaches prop
   model171/slot7 to model7/slot2 bone2, then removes parent slot2 after the
@@ -32,6 +47,8 @@ verification of the current worktree.
   executing dialogue commands; their zero-glyph flashes are separately #176.
   Evidence: `build/quality/owner-reports-20261024-193314/`,
   `family174-*` and the retained unique owner run.
+  Publishedb8e2e782908526abe79e38fd66ab816dec01475f has successful exact
+  Source Quality40146187813; #174 remains open for its playback gate.
 - #18 sound/cache follow-up: native file selection and affirmative confirmation
   now play their original selection sound; No/Cross/invalid/completion follow
   the corresponding original menu cues. Bounded per-picker previews avoid

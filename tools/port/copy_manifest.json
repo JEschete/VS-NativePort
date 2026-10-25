@@ -118,7 +118,7 @@
 "Native\\Engine\\src\\Render\\Camera.h": "2592a2ab2e01fcd4f91e0f9355395af7e8d90a5ad3341684f983d1c8e7d97c9e",
 "Native\\Engine\\src\\Render\\Display.c": "48b6cc7e85f6569480a4f38f94fd0d71a72ecaa7b5c8dbc8b64bc7030d54242a",
 "Native\\Engine\\src\\Render\\Display.h": "5740765a9b9c4b545621999ba9e14b226041c10899eacd78e5b10bd71b6be8dc",
-"Native\\Engine\\src\\Render\\Font.c": "d812532e222111905fb30ec1fdfbc43301f94b477e830c3dcdfeb1e981d7d3f8",
+"Native\\Engine\\src\\Render\\Font.c": "765f6496e2fcb782a8fd65a918a47ecf1ef849836e3cd38c363011b4d58dbdfc",
 "Native\\Engine\\src\\Render\\Font.h": "5a37018f6e33277f51b9976b59cc47408019e13582756f2b660dc9a273e49ad2",
 "Native\\Engine\\src\\Render\\Frame.c": "e87241351e31effb36f2ad8a705435c36f9a576bf7cd5b2fb239f3a2be8ac6ee",
 "Native\\Engine\\src\\Render\\Frame.h": "c4fdfdbd928a1f24df6538a0155e63c0caabf318a935795b854e67f7588968b4",

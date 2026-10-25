@@ -9,6 +9,26 @@ import copy_fixups
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_transition_text_uses_original_encoded_controls_not_ascii(self):
+        fixes = copy_fixups.FIXES["F01337"]
+        replacements = {old: new for old, new, _ in fixes}
+        self.assertEqual(
+            replacements["currentChar < '\\f'"],
+            "currentChar < Core_TextCode_NonPrinting",
+        )
+        self.assertEqual(
+            replacements["currentChar - '\\f'"],
+            "currentChar - Core_TextCode_NonPrinting",
+        )
+        self.assertEqual(
+            replacements["currentChar != ' '"],
+            "currentChar != Core_TextCode_Space",
+        )
+        self.assertIn("(u_char)*str++",
+                      replacements["u_int currentChar = *str++;"])
+        self.assertIn("(u_char)*str++",
+                      replacements["u_int opcodeParam = *str++;"])
+
     def test_attached_draw_requires_a_resident_parent_matrix(self):
         old, new, _ = next(
             fix for fix in copy_fixups.FIXES["F01008"]

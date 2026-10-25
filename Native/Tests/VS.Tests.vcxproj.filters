@@ -198,6 +198,9 @@
     <ClCompile Include="src\TerrainHeightTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\TextTransitionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\VibrationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
