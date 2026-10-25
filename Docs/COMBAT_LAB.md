@@ -72,7 +72,16 @@ on both entries, including cached content on the second. All four scripts
 complete normal teardown without engine errors, Start or forced skip.
 Local assertion reports are `build/quality/scene174-verified-<run-id>.json`;
 acknowledged dialogue inputs are retained in `family179-fixed-reentry-*`.
-The separate interrupted-box4 regression is tracked in #179.
+Interrupted-box4 controls for #179: Debug1792895435337715-0 and
+Release1792895991286486-0 deliberately withhold further Circle input once81 box4
+is waiting, retain it through15011, then request normal budget teardown. Fresh
+80/82/81 playback in the same window completes and retains normal control through
+39023, followed by ordinary isolated/production cases. The strict reports verify
+that the first scene really is interrupted with box4 active, not already complete,
+and that the later chain has no crash, engine error, forced skip or adjustment.
+Session UI borrows are invalidated before heap replacement; original in-scene
+close behavior is unchanged. Evidence is in `family179-interrupted-reentry-*`
+and `scene174-verified-<run-id>.json` under `build/quality`.
 
 ### Encounter setup
 

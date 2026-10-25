@@ -24,9 +24,20 @@ verification of the current worktree.
   100 assertions in each config; full serial Debug/Release725 cases/
   3,164,578 assertions each pass. Selected quality is0 findings/0 new.
   Local evidence: `build/quality/scene179-*`, `family174-reentry-Debug.*`.
-  Published0338c030 has exact green Source Quality40154361448. Repeated full
-  chains plus ordinary-mode controls now pass both configurations; deliberate
-  event81 box4 interruption/reentry controls are running for #179.
+  Published0338c030 has exact green Source Quality40154361448. Deliberate box4
+  interruption/reentry now passes Debug1792895435337715-0 and
+  Release1792895991286486-0: withhold Circle from9035/9131, retain active81 box4
+  through15011, then stop normally and start a fresh80/82/81 in the same window.
+  The new chain reaches normal control at26972/27092 and stays there through
+  39023, followed by ordinary isolated/production controls. All four scripts
+  have complete teardown, zero engine errors and no forced skip/Start/adjustment.
+  Both scene82 instances reproduce the exact parent/bone lifecycle and72
+  deferred draws; reentry maps and actually uses cached bank99 before82.
+  Debug is0338c030, Release15c70c78; only unrelated ignore/solution edits are
+  dirty. Strict reports are `build/quality/scene174-verified-<run-id>.json`;
+  manifests, acknowledged inputs and logs are in `family179-interrupted-reentry-*`
+  and the unique runs. This establishes interrupted scene UI lifetime/reset,
+  not legitimate boss defeat or broader scene/fidelity completion.
   The controller now holds Circle until production native-buttons acknowledge
   it, then releases;40ms pulses were often lost between slow Debug host polls.
   Inputs remain original dialogue actions, never Start or state mutation.
@@ -41,7 +52,7 @@ verification of the current worktree.
   and35988..48023. No Start, forced skip, runtime HP/flag edits or artificial
   completion. These are component fixtures, not boss-defeat verification,
   whole-scene pixel/audio fidelity or all-cutscene completion; #149 stays open.
-  Repairb8e2e782, componentddcee133 and session0338c030 are published with exact
+  #174 is closed. Repairb8e2e782, componentddcee133 and session0338c030 have exact
   green runs40146187813,40153218937 and40154361448. Latest full suites are
   725/3,164,578 each config. Debug's manifest is ddcee133 plus the then-dirty
   Session/test/watchlist fix; Release is0338c030 with only unrelated owner
