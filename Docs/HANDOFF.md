@@ -32,7 +32,15 @@ verification of the current worktree.
   negative-delta arithmetic; it is not being intuitively corrected.
   Live unported hooks are not assumed causal: observed contact requests use
   base layer0, and special-terrain stack setup is distinct from the base height
-  sampler. #171 stays open for owner natural-room/cross-height controls.
+  sampler. Matched owner-room controls now verify the original missing-entry
+  failure: red1792855828990222-0 at4978 is NPCmodel147 taking command11 without
+  an arc. Original zone9/room5 definitions6/7 (Sackheim/Goodwin), the same
+  ledge approach, now climb0 to-128 (arc min-165), attack480/361 frames and
+  reduce Ashley HP250 to129 in Debug1792890531220286-0 and
+  Release1792890623179062-0. #171 is closed for verified jump execution and
+  pursuit using cb4fe8b3/411d73a1, latest verifiedf368cbd5/exact green40148851247.
+  Direct cross-height attack eligibility is separately #178, not claimed by
+  attacks that occur only after reaching Ashley's height.
   Local profiles persist in the session `files/ledge171-wolf*.json`; traces
   and captures are under `build/quality/ledge171-*` and the listed run dirs.
 - #175/#177 reference audit limits: box attacks are conditional, not a direct
@@ -64,7 +72,8 @@ verification of the current worktree.
   `build/quality/text176-*`. This verifies the encoded transition defect, not
   the whole external event82 story sequence or the separate #174 end handoff.
   Published72139df384ad5ce26f024592ce24584df6d8a48c has successful exact
-  Source Quality40147008544; scene replay confirmation remains tracked.
+  Source Quality40147008544; #176 is closed for the exact verified renderer
+  defect. Whole-scene confirmation remains in #174/#149.
 - #174 family-cutscene attachment fault: owner run1792884331707681-0 reaches
   external event82 in zone19/room0/MAP212. Its original script attaches prop
   model171/slot7 to model7/slot2 bone2, then removes parent slot2 after the
@@ -85,7 +94,7 @@ verification of the current worktree.
   open for a source-aligned external82 replay/owner confirmation. No HP,
   progression flags, fake event completion or math null fallback was used.
   Original scene82's three text entries are control-only strings, despite
-  executing dialogue commands; their zero-glyph flashes are separately #176.
+  executing dialogue commands; their zero-glyph flashes are repaired by #176.
   Evidence: `build/quality/owner-reports-20261024-193314/`,
   `family174-*` and the retained unique owner run.
   Publishedb8e2e782908526abe79e38fd66ab816dec01475f has successful exact
@@ -127,7 +136,7 @@ verification of the current worktree.
   `jump171-entry/consumer-investigation.json`; related full dirty-worktree suites
   (also containing #174/save-audio controls) pass712/3,164,525 in each config.
   Owner's new family-cutscene hard crash takes priority for playback; keep
-  remaining #171 gameplay gates separate.
+  remaining direct-height-range gate #178 separate.
   Published411d73a1ae6962f2d38e1e17208a4d434051a095 has exact successful
   Source Quality40145646736; #173 is closed for the bounded placement defect.
 - #18 save/load UI correction follows the owner's original Save/Load screenshots,
@@ -175,16 +184,18 @@ verification of the current worktree.
   the existing shared arc consumer. The `actors.jump` channel records requested
   targets and resulting phase/destination/velocity/countdown without changing
   route permissions. Entry/real-arc controls pass actual linked Debug/Release.
-  This is **not a resolution of #171**: autonomous wolf red1792880185015402-0
-  stays high; patched1792880646195190-0 removes the stub and makes arcs but
-  still never descends to ground. New diagnostic source was not in that
-  replay and needs the next production run. Evidence and exact layout/source
+  This entry-only checkpoint was not initially sufficient: autonomous wolf
+  red1792880185015402-0 stays high; patched1792880646195190-0 makes arcs but
+  does not descend from that blocked4,6 start. The later allowed/blocked and
+  matched owner-room controls above complete the jump scope without weakening
+  original permissions. Evidence and exact layout/source
   comparisons: `build/quality/jump171-entry/consumer-investigation.json`.
   Published cb4fe8b322146d9f6188db8456a5c57464973cb7 has successful exact
   Source Quality40141256823; Debug/Release entry selection10/7,627 each.
   #171 was accidentally auto-closed by a negated closing phrase in cb4fe8b3;
-  the GitHub timeline proves that commit caused the closure. It is reopened:
-  owner now reports both ascent/descent and cross-height attack failures.
+  the GitHub timeline proves that commit caused the closure. It was reopened
+  until the later concrete acceptance, then properly closed; direct
+  cross-height attack eligibility remains #178.
   Separate F00989 corruption is tracked by #173 above, not proven causal to
   the full enemy behavior.
 - #170 Gust reveal repair: owner trace identifies zone9/room6 tile15,9 kind3.
@@ -209,7 +220,8 @@ verification of the current worktree.
   its exact CI40135991604 passes. The subsequent owner revision2e3f1db4 also has
   green CI40136015635. Those owner commits are preserved without rewriting.
   Follow-up e9faac8d has green CI40136907763 and #170 is closed with measured
-  evidence. #171 ledge descent and #172 targeted-box texture remain open.
+  evidence. #171 jump execution is now verified; #172 targeted-box texture
+  remains open.
 - #18 native runtime/menu checkpoint324438d948ef2b2fa4f0ca1f43bdd6c3b5536d98 is
   published; exact Source Quality40131160959 passes. Additional actual-controller
   acceptance on that clean revision, with isolated roots:
@@ -357,7 +369,8 @@ verification of the current worktree.
   external tool projects untouched. This does not claim abrupt-power-loss
   simulation or working production save menus; the next subpackage is Game
   semantic snapshots and their validated application.
-- Active owner follow-up (the pause notes below are historical): #169 is the
+- Historical owner follow-up (the latest sections supersede this checkpoint):
+  #169 is the
   first-lever-room crash; #170 Gust reveal, #171 ground-enemy ledge descent and
   #172 selected-box texture are separate reports. Owner requests native
   saving/loading under #18 next after the current crash repair checkpoint.
