@@ -9,6 +9,26 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #80's general multi-body-part hypothesis now has a current player-side
+  conformance check: Debug1792968266440918-0 and Release1792968266549016-0
+  use normal controls at speed1 to cast ExplosionIV109 on all six original
+  Minotaur Zombie limbs. Six results include four original blocks/misses and
+  two damage values4/3; HP681->674 matches7 and MP999->939 is charged once.
+  Both return field control2431 with0 errors. A compiled-PDB-guarded,
+  read-only Debug request observation1792968898071584-0 proves intentional
+  six-limb-to-one-actor visual deduplication; Release cancellation retains
+  MP999 and applies no result. No target algorithm or runtime was changed.
+  Added24 boundary/filter/wrapped-queue combinations pass; full Debug/Release
+  suites are768 cases/3,390,555 assertions each, scoped tidy0 new.
+  See [the exact fixture, commands and limits](COMBAT_LAB.md#multi-body-part-verification-80-2026-10-25).
+  Publication/CI and disposition are recorded on#80. Local `multilimb80-*`.
+- #160 remains reproducible on current b2a29e6b: single original23/4->24/15
+  entry Debug1792966198610830-0 faults1508 during Gravity137 from model92.
+  E084 definition16 requests table1/program1 with only table0 bound. Original
+  disc EFFPURGE dispatch, timeline masks and PLG084 constructor all agree with
+  native; changing the renderer or decrementing selectors is not justified.
+  Next discriminating observation is original runtime ownership/history of
+  textureInfoTable[1] at that cast. No default texture or skipped draw added.
 - #141's quiet plain Skeleton has a source-backed native cause: missing
   F01792/func_800E4C8C, not a broken universal FOV predicate. Original
   7BDD4.s:585-614 and rood-boi e59320ca agree on first-ranked target, low24
@@ -56,12 +76,12 @@ verification of the current worktree.
   Published79d054d0 has exact green40236141416 and#25 is closed; remaining non-MA runtime
   and assembly-gap work follows #4. Local evidence `quality25-completion-*`.
 - Owner resumed review/repair of all open non-MA issues on2026-10-25. The
-  inventory is13 issues, including umbrella#4; titles combining several MA
+  initial inventory was13 issues, including umbrella#4; titles combining several MA
   numbers are excluded too. #76 is closed at the owner's explicit request:
   shared-origin repair e939db22 and its published evidence stand, and any new
   observed particle defect gets a separate concrete issue.
-  #18/#42/#148 retain distinct retirement/import,75-stub and semantic-naming
-  work. #80/#141 still need their exact targeting/acquisition observations.
+  #18/#42/#148 retain distinct retirement/import,74-native-gap and semantic-naming
+  work. Current #80 conformance and #141 acquisition evidence are above.
   #149/#151 have delivered logging/playback/inventory tooling but are not
   all-scene/all-door certification. #160/#167 are not established as repaired
   by today's origin/audio/credit fixes.

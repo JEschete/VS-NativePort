@@ -23,6 +23,7 @@ extern "C" {
 #include "Battle/ActionEffects.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
+#include "Battle/ActionResults.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
@@ -190,6 +191,40 @@ struct AbilityFixture {
     request.targetCount = 1;
     request.targets[0].target.targetActor = defense ? 0 : 1;
     action.abilityWindow = 100;
+  }
+
+  void PrepareLimbResults(int limb_count, unsigned queue_index,
+                          bool filtered_entries) {
+    Prepare(false, 1, queue_index);
+    Actors_actorRecords[1] = nullptr;
+    auto& target = stats[1];
+    target.currentHp = target.maxHp = 63;
+    target.currentMp = target.maxMp = 40;
+    for (auto& limb : target.limbs) {
+      limb.hp = limb.maxHp = 20;
+    }
+    auto& request = Request();
+    const int first_limb = filtered_entries ? 2 : 0;
+    request.targetCount = first_limb + limb_count;
+    if (filtered_entries) {
+      auto& other_actor = request.targets[0];
+      other_actor.target.targetActor = 0;
+      other_actor.target.hp = 50;
+      other_actor.hpEffect = 1;
+      auto& world_point = request.targets[1];
+      world_point = other_actor;
+      world_point.targetsPosition = 1;
+      world_point.target.targetActor = 1;
+    }
+    for (int limb = 0; limb < limb_count; ++limb) {
+      auto& hit = request.targets[first_limb + limb];
+      const auto amount = static_cast<std::int16_t>(limb + 1);
+      hit.target.targetActor = 1;
+      hit.target.targetLimb = static_cast<char>(limb);
+      hit.target.hp = hit.target.mp = amount;
+      hit.hpEffect = hit.mpEffect = 1;
+      hit.limbs[limb].effects.opaque0 = amount;
+    }
   }
 
   Battle_ActionRequest& Request() {
@@ -1474,6 +1509,30 @@ TEST_CASE(
     "Combat sandbox applies matching target HP and MP effects with clamping",
     "[combat][sandbox]") {
   REQUIRE(Tests_CombatTargetResults() == 1);
+}
+
+TEST_CASE("Every matching limb result contributes once to its actor",
+          "[combat][sandbox][multi-limb]") {
+  const int limb_count = GENERATE(0, 1, 2, 6);
+  const unsigned queue_index = GENERATE(0U, 5U, 7U);
+  const bool filtered_entries = GENERATE(false, true);
+  CAPTURE(limb_count, queue_index, filtered_entries);
+  AbilityFixture fixture;
+  fixture.PrepareLimbResults(limb_count, queue_index, filtered_entries);
+  auto& target = fixture.stats[1];
+  Battle_ApplyActionTargetEffects(1, nullptr);
+
+  const int total = limb_count * (limb_count + 1) / 2;
+  CHECK(target.currentHp == 63 - total);
+  CHECK(target.currentMp == 40 - total);
+  for (std::size_t limb = 0; limb < std::size(target.limbs); ++limb) {
+    const int damage = limb < static_cast<std::size_t>(limb_count)
+                           ? static_cast<int>(limb) + 1
+                           : 0;
+    CHECK(target.limbs[limb].hp == 20 - damage);
+  }
+  CHECK(fixture.stats[0].currentHp == 600);
+  CHECK(fixture.stats[0].currentMp == 120);
 }
 
 TEST_CASE("Stat item effects bind plugin-local renderers, not EFFPURGE",

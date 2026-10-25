@@ -267,6 +267,52 @@ encounter claims. Local strict proof is `build\quality\box175-verified.json`.
 This is source-permitted occasional fallback acceptance, not a gameplay change
 or proof for every enemy/room/action combination.
 
+### Multi-body-part verification (#80, 2026-10-25)
+
+Current runtime `b2a29e6b` passes a controller-only player case as well as the
+previously measured enemy breath147 and Lich130/126 cases. No target-expansion,
+damage or effect-selection change was needed for this verification.
+
+The isolated fixture is zone12/room0, seed1, original Minotaur Zombie
+definition1 at9,12 and Ashley9,10 with `all-spells`, HP/MP999 and unchanged
+default attributes/equipment. Normal-speed Debug1792968266440918-0 and
+Release1792968266549016-0 select Magic/Warlock/ExplosionIV (action109), adjust
+the original height/horizontal sphere controls to1216,-299,1585, and select
+exactly enemy2's six limbs0-5, not six different actors. All six receive result
+records at2251: four original blocked/missed results and two successful damage
+values4/3. Enemy HP681->674 exactly equals their sum7. Ashley is excluded;
+MP999->939 is charged once at1903 and remains939 through effect completion.
+Both builds restore ordinary control at2431, finish2700 ticks and report0
+engine errors. Four zero-damage results are not four omitted limbs.
+
+The exact schedule opens Triangle at140, Circle250/400, nine Down presses at
+550..950 in50-tick steps, Circle1100, Right1250/1300/1350, Circle1450, holds
+Up1500-1539, Circle1600, holds Up1650-1671, then Circle1750/1900.
+Use `--scenario <fixture> --start --scripted --frames 2700 --speed 1`;
+the held ranges are represented by consecutive two-tick scheduled presses.
+Bounded `--trace-effect-paths 2100:2400` records every rendered frame.
+Earlier menu scouts during entry fade or enemy combat are not acceptance.
+
+Read-only Debug1792968898071584-0 independently checks the actual effect
+request against compiled PDB member offsets and its232-byte size: E056,
+source0, count1, target actor2/whole actor, no others. Multiple limb results
+deliberately deduplicate to one actor-level visual request, matching original
+`func_8007138C`; they do not require six effect children. Release cancellation
+1792968751357217-0 uses Cross before commitment, returns to the Warlock list,
+retains999MP and produces no action109 result.
+
+`VS.Tests.exe "[combat][sandbox]"` covers24 result-list combinations:
+0/1/2/6 matching limbs, queue indices0/5/7, with/without another actor and a
+world-point entry. Every matching HP/MP/limb contribution is retained once,
+and nonmatches/empty results preserve resources. Both full suites pass768
+cases/3,390,555 assertions; targeted tidy has0 new findings. Local reports
+`multilimb80-verified.json`, `multilimb80-request-mapping-Debug.json` and
+`multilimb80-*` commands/logs remain in session evidence. The runtime was not
+changed; the dirty test/docs and unrelated owner edits are not recast as a
+new gameplay fix. This is bounded current conformance, not every-action or
+original-game visual parity certification. A new failing action/enemy needs
+its own concrete reproduction.
+
 ### Ashley testing profiles
 
 The **ASHLEY** row selects `prologue`, `post-prologue`, `post-minotaur`,
