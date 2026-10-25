@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <limits>
@@ -12,6 +13,8 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Actors/ActorRecord.h"
+#include "Actors/ActorState.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
@@ -60,6 +63,40 @@ struct PlanningFixture {
   }
 };
 
+struct TargetMemoryFixture {
+  decltype(std::to_array(Actors_actorRecords)) saved_models =
+      std::to_array(Actors_actorRecords);
+  Battle_Ai_ActorAiState state{};
+  Battle_Ai_ActionCandidate best{};
+  Battle_Ai_ActionCandidate alternate{};
+  Actors_ActorRecord model{};
+  Actors_ActorRecord alternate_model{};
+
+  explicit TargetMemoryFixture(unsigned target) {
+    best.targetId = target;
+    alternate.targetId = (target + 1) & 15;
+    state.candidateCount = 2;
+    state.candidateOrder[0] = &best;
+    state.candidateOrder[1] = &alternate;
+    state.previousTile = 0x12345678;
+    std::memset(state.reserved3C, 0xA5, sizeof(state.reserved3C));
+    Actors_actorRecords[target] = &model;
+    Actors_actorRecords[alternate.targetId] = &alternate_model;
+    const std::array<u_char, 4> tile{0xD4, 0xC3, 0xB2, 0xA1};
+    std::memcpy(&model.instance.currentTileX, tile.data(), tile.size());
+  }
+
+  ~TargetMemoryFixture() {
+    std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
+  }
+
+  auto Bytes() const {
+    std::array<std::byte, sizeof(state)> bytes{};
+    std::memcpy(bytes.data(), &state, bytes.size());
+    return bytes;
+  }
+};
+
 bool CopiedStatByte(std::size_t offset) {
   return (offset >= 0x18 && offset < 0x20) ||
          (offset >= 0x30 && offset < 0x34) ||
@@ -67,6 +104,47 @@ bool CopiedStatByte(std::size_t offset) {
          (offset >= 0x948 && offset < 0x94C);
 }
 }  // namespace
+
+TEST_CASE(
+    "AI remembers the first ranked target with the original tile and lifetime",
+    "[ai][planning][target-memory]") {
+  const unsigned target = GENERATE(0u, 1u, 15u);
+  const unsigned tile = GENERATE(0xF4ABCDEFu, 0xFFFFFFFFu, 0x00430201u);
+  TargetMemoryFixture fixture(target);
+  fixture.state.tile.word = tile;
+  auto expected = fixture.Bytes();
+  const unsigned origin = (target << 24) | (tile & 0xFFFFFFu);
+  const unsigned destination = 0xA1B2C3D4u;
+  const std::uint16_t frames = 900;
+  std::memcpy(expected.data() + offsetof(Battle_Ai_ActorAiState, previousTile),
+              &origin, sizeof(origin));
+  auto* memory = expected.data() + offsetof(Battle_Ai_ActorAiState, reserved3C);
+  std::memcpy(memory, &destination, sizeof(destination));
+  std::memcpy(memory + sizeof(destination), &frames, sizeof(frames));
+  Battle_Ai_RememberAiActionTarget(&fixture.state);
+  CHECK(fixture.Bytes() == expected);
+}
+
+TEST_CASE("AI target memory leaves empty and negative candidate sets untouched",
+          "[ai][planning][target-memory]") {
+  TargetMemoryFixture fixture(0);
+  fixture.state.candidateCount = GENERATE(-1, 0);
+  fixture.state.candidateOrder[0] = nullptr;
+  const auto expected = fixture.Bytes();
+  Battle_Ai_RememberAiActionTarget(&fixture.state);
+  CHECK(fixture.Bytes() == expected);
+}
+
+TEST_CASE("AI target memory preserves the original nonzero settings guard",
+          "[ai][planning][target-memory]") {
+  TargetMemoryFixture fixture(15);
+  fixture.state.settingsConstant19 = static_cast<char>(GENERATE(1, 255));
+  fixture.state.candidateCount = GENERATE(1, 16);
+  fixture.state.candidateOrder[0] = nullptr;
+  const auto expected = fixture.Bytes();
+  Battle_Ai_RememberAiActionTarget(&fixture.state);
+  CHECK(fixture.Bytes() == expected);
+}
 
 TEST_CASE("AI candidates copy the complete record including overlapping input",
           "[ai][planning]") {

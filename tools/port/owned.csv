@@ -1,4 +1,5 @@
 id,kind,name,path,header,since,notes
+F01792,function,Battle_Ai_RememberAiActionTarget,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,Native\Game\src\Battle\Ai\PlanningPrimitives.h,2026-10-25,7BDD4.s:585-614 first-ranked target and full model tile with900-frame memory; native typed fields preserve no-candidate and settings guards
 F03634,function,Menu_Files_UpdateSaveMenu,Native\Game\src\Save\NativeMenu.cpp,Native\Game\include\Save\NativeMenu.h,2026-10-24,TITLE22C.c:2880 explicit native clear-save gate until ending-state conversion is modeled
 F01718,function,Battle_Ai_RebuildActorActionPlans,Native\Game\src\Battle\Ai\PlanningWorkspace.cpp,Native\Game\include\Battle\Ai\PlanningWorkspace.hpp,2026-10-23,Typed call-local planning result and candidate buffers replace fixed PS1 allocation and offsets; borrowed compatibility views remain scoped to the call
 F01296,function,Battle_SetSphereTargets,Native\Game\src\Battle\TargetPages.cpp,Native\Game\include\Battle\TargetPages.h,2026-10-23,Native whole-actor pages preserve every candidate while the original visible target list remains bounded

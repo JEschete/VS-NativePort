@@ -7,8 +7,8 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **75** (75 stubs and 0 partial implementations).
-- Matching C/C++ reference bodies located: **34**.
+- Open native entries: **74** (74 stubs and 0 partial implementations).
+- Matching C/C++ reference bodies located: **33**.
 - Assembly located, but no matching C body located: **31**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
@@ -143,10 +143,10 @@ as behaviorally complete. No native gameplay issue is closed by this audit.
 
 | Reference | Revision | Production source files scanned | Source SHA-256 |
 | --- | --- | --- | --- |
-| `rood-reverseWin` | `e2c8b6ee66006b5271c9cd5f5e3f162a14b18bb8` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
-| `rood-reverse` | `5163208b363660881f3139612ed042897ce95b10` | 382 | `f95c01dc6d18c6d2b16b7a780560e8590926e1dfed55010ed4591130ec6af6ab` |
+| `rood-reverseWin` | `79d054d01772c4455e4ba9faacbd143a7ab33900` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
+| `rood-reverse` | `4edbdbf5a797c733dd7f33a52c400de69219401c` | 393 | `60b2ce44d09822a777e76caac7f2ef0236a8e73cb434b9da27c0bb8973f94096` |
 | `rood-reverse-noprompt` | `39821e4fc0353dc89855f5f29fd678d71545daa2` | 389 | `e3e5d73ccd7c08971c9558baad6e6a2df2e2fe0bcd9b8961e133476e86db7a8c` |
-| `rood-boi` | `b2c3fedefbeb05e912ef281688598a963def6a39` | 746 | `71210f4b83c2156d10939cc7b718c9d5e71bad6d440e42b10225d8f2cfabfc1e` |
+| `rood-boi` | `e59320caedba5855cb050f24f3ba007204faea78` | 758 | `fa68a5f07470a4f970c81453cc605ecad82f8d17fc274168e5bf5eeba5e9a1d8` |
 
 `rood-reverseWin` is a tracked tree inside the parent repository; its
 listed revision is the parent revision, not an independent submodule HEAD.

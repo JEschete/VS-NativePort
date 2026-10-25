@@ -904,7 +904,8 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x3C */ union {
         char reserved3C[8];
         struct {
-            u_char reserved3CPrefix[6];
+            u_int rememberedTargetTile;
+            u_short targetMemoryFrames;
             short savedRelationOptions;
         };
     };

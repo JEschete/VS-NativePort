@@ -4704,7 +4704,7 @@ T00532.036,T00532,func_800E78F4_t,36,unk30,1,u_char,,,layout:upstream,settingsBi
 T00532.037,T00532,func_800E78F4_t,37,unk31,1,char[3],,,layout:upstream,reserved31,Not read through this view,low,declaration-only;source:upstream:6E644.c:206
 T00532.038,T00532,func_800E78F4_t,38,unk34,1,vs_battle_movementPosition,,,,tile,Current tile word,high,source:771A8.c:953
 T00532.039,T00532,func_800E78F4_t,39,unk38,1,int,,,remembered target tile,previousTile,Previous tile word; -1 to forget,high,source:7C4E8.c:407
-T00532.040,T00532,func_800E78F4_t,40,unk3C,1,char[8],,,,reserved3C,Not read through this view,low,source:6FC00.c:1169
+T00532.040,T00532,func_800E78F4_t,40,unk3C,1,char[8],,,,reserved3C,Native aliases retain target-memory tile and timer plus saved relationship options,high,source:6FC00.c:1169;source:7BDD4.s:585-614;native-alias:rememberedTargetTile@0x3C and targetMemoryFrames@0x40;original field identity and size preserved
 T00532.041,T00532,func_800E78F4_t,41,unk44,1,u_char,,,layout:upstream,opaque44,"Used, but its meaning is not established",low,source:upstream:6E644.c:1345
 T00532.042,T00532,func_800E78F4_t,42,unk45,1,char[3],,,layout:upstream,reserved45,Not read through this view,low,declaration-only;source:upstream:6E644.c:211
 T00532.043,T00532,func_800E78F4_t,43,unk48,1,vs_battle_movementPosition,,,layout:upstream,savedDestination,Saved destination tile,med,source:upstream:6E644.c:3082

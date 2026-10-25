@@ -16,6 +16,8 @@ NATIVE_FIELD_ALIASES = {
     "T00532": {
         "ignore_floor_mask": 0x6,
         "terrain_reject_mask": 0x32,
+        "rememberedTargetTile": 0x3C,
+        "targetMemoryFrames": 0x40,
         "collision_radius": 0x94,
         "movementEnabled": 0x23,
         "requestedMovementMode": 0x89,

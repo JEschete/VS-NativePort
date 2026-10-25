@@ -6,9 +6,32 @@ import unittest
 from pathlib import Path
 
 import copy_fixups
+import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_ai_target_memory_aliases_preserve_the_original_prefix(self):
+        old, new, _ = next(
+            fix for fix in copy_fixups.TYPE_FIXES["T00532"]
+            if fix[0] == "char reserved3C[8];"
+        )
+        self.assertIn(old, new)
+        self.assertIn("u_int rememberedTargetTile;", new)
+        self.assertIn("u_short targetMemoryFrames;", new)
+        self.assertIn("short savedRelationOptions;", new)
+        aliases = native_views.NATIVE_FIELD_ALIASES["T00532"]
+        self.assertEqual(aliases["rememberedTargetTile"], 0x3C)
+        self.assertEqual(aliases["targetMemoryFrames"], 0x40)
+        with Path(__file__).resolve().with_name("owned.csv").open(
+            encoding="utf-8", newline=""
+        ) as stream:
+            owned = {row["id"]: row for row in csv.DictReader(stream)}
+        self.assertEqual(owned["F01792"]["name"], "Battle_Ai_RememberAiActionTarget")
+        self.assertEqual(
+            owned["F01792"]["path"],
+            r"Native\Game\src\Battle\Ai\PlanningPrimitives.cpp",
+        )
+
     def test_lethal_chain_success_keeps_credit_without_continuing(self):
         old, new, _ = copy_fixups.FIXES["F00099"][0]
         self.assertIn("abilityInputSucceeded == 1)", new.splitlines()[0])

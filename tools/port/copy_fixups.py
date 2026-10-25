@@ -2354,9 +2354,10 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
          "func_800E4F14 writes status/MP/HP condition bytes; func_800E4CF4 consumes their low bits"),
         ("char reserved3C[8];",
          "union {\n        char reserved3C[8];\n        struct {\n"
-         "            u_char reserved3CPrefix[6];\n            short savedRelationOptions;\n"
+         "            u_int rememberedTargetTile;\n            u_short targetMemoryFrames;\n"
+         "            short savedRelationOptions;\n"
          "        };\n    };",
-         "func_800E72D0 restores relationship options from original offset 0x42"),
+         "func_800E4C8C stores target tile/memory at0x3C/0x40; func_800E72D0 restores options at0x42"),
         ("char reserved120[10];",
          "union {\n        char reserved120[10];\n        struct {\n"
          "            u_char fine_x;\n            u_char fine_layer;\n"

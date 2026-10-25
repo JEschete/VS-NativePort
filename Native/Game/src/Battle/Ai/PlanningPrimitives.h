@@ -12,6 +12,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+void Battle_Ai_RememberAiActionTarget(Battle_Ai_ActorAiState*);
+
 void Battle_Ai_CopyActionCandidate(Battle_Ai_ActionCandidate*,
                                    Battle_Ai_ActionCandidate*);
 

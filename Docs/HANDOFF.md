@@ -9,6 +9,32 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #141's quiet plain Skeleton has a source-backed native cause: missing
+  F01792/func_800E4C8C, not a broken universal FOV predicate. Original
+  7BDD4.s:585-614 and rood-boi e59320ca agree on first-ranked target, low24
+  origin bits, full target-model tile and900-frame memory. The owned planning
+  primitive now implements that contract using typed native aliases and the
+  existing placement query, retaining no-candidate/nonzero-settings guards.
+  Red controls fail9/15 assertions; fixed planning/layout25 cases/3502 assertions
+  and full767 cases/3,390,315 assertions pass in each configuration. Two
+  generations preserve306 owned/owner files and repeat identically; generated
+  runtime changes are only ActionSelection.c/.h and AiState.h. All621 checked
+  runtime-view fields match. Targeted implementation/test TU tidy is0/0; an
+  overbroad header-triggered all-owned sweep was stopped, not claimed passed.
+  Before: current Release1792961811405244-0 selects no attack in36000 ticks.
+  After: same Release fixture1792964832686539-0 starts Normal1 at873, damages
+  Ashley999->955 at935 and begins23 ordinary attacks, endingHP738. Debug
+  1792965026988467-0 repeats fresh entries in one window: attacks873/4484,
+  actual damage935/4540,0 errors and complete teardown. No runtime writes to
+  HP, readiness, FOV, ranges, delays or actors; original stock data and
+  perception predicates are unchanged. Existing memory expiration/forgetting
+  and fresh-session reset remain active.
+  Function/field notes and generated assembly inventories are reconciled:
+  F01792 is no longer a stub;112/186 original entries are complete,74 remain
+  (33 C/C++ references,31 assembly-only,10 listings not located). No whole
+  AI-state C++ promotion or compatibility retirement is claimed. Exact fixing
+  publication/CI and closure are tracked in#141/#42. Evidence
+  `ai-target-memory-*` in session files.
 - #25's tracked maintained fast-quality debt is now fully repaired:0 actionable
   findings/0 new, all first-party Ruff checks pass, and the baseline is
   byte-identical. Imports, unused/ambiguous bindings and equivalent statements
@@ -27,7 +53,7 @@ verification of the current worktree.
   Native binaries and the last764/3,390,300 Debug/Release test evidence are not
   rebuilt or relabeled for these output-identical tooling changes. Scoped
   historical test-tidy/retirement style categories are not claimed eliminated.
-  Exact publication/CI and closure are recorded in#25; remaining non-MA runtime
+  Published79d054d0 has exact green40236141416 and#25 is closed; remaining non-MA runtime
   and assembly-gap work follows #4. Local evidence `quality25-completion-*`.
 - Owner resumed review/repair of all open non-MA issues on2026-10-25. The
   inventory is13 issues, including umbrella#4; titles combining several MA

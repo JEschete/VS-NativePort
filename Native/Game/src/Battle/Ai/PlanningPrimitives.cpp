@@ -15,6 +15,8 @@
 #include "Battle/Ai/PlanningSort.hpp"
 
 extern "C" {
+#include "Actors/ActorState.h"
+#include "Actors/Location.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
@@ -30,6 +32,9 @@ constexpr int kSpellBlockingStatus = 0x1000;
 constexpr int kSpellsAndAbilitiesOnlyStatus = 0x2000;
 constexpr int kResourceRestrictingStatuses = 0xE2B0;
 constexpr unsigned kPpActionType = 4;
+constexpr unsigned kRememberedTileMask = 0xFFFFFF;
+constexpr int kRememberedTargetShift = 24;
+constexpr std::uint16_t kTargetMemoryFrames = 900;
 
 void Require(bool valid, const char* message) {
   if (!valid) {
@@ -69,6 +74,29 @@ void SortCandidatePointers(std::span<Battle_Ai_CandidateEntryView*> entries) {
   SortCandidatePointers(entries.subspan(boundary + 1));
 }
 }  // namespace VS::Battle::ai
+
+// decomp: func_800E4C8C (src/BATTLE/BATTLE.PRG/7BDD4.s:585).
+// C reference: rood-boi battle_movement.c:1749, revision e59320ca (CC0-1.0).
+void Battle_Ai_RememberAiActionTarget(Battle_Ai_ActorAiState* state) {
+  Require(state != nullptr, "AI target memory requires state");
+  if (state->candidateCount <= 0 || state->settingsConstant19 != 0) return;
+  Require(state->candidateCount <=
+              static_cast<int>(std::size(state->candidateOrder)),
+          "AI target memory candidate count is out of bounds");
+  const auto* candidate = state->candidateOrder[0];
+  Require(candidate != nullptr, "AI target memory requires a ranked candidate");
+  const unsigned target = candidate->targetId;
+  Require(Actors_actorRecords[target] != nullptr,
+          "AI target memory requires a loaded target model");
+  Actors_ActorLocationQuery placement{};
+  Require(Actors_ActorPlacement(static_cast<int>(target), &placement) == 0,
+          "AI target memory cannot read its target placement");
+  state->previousTile =
+      static_cast<int>((target << kRememberedTargetShift) |
+                       (state->tile.word & kRememberedTileMask));
+  state->rememberedTargetTile = placement.location.packedTile.word;
+  state->targetMemoryFrames = kTargetMemoryFrames;
+}
 
 // decomp: func_800DC2E0 (src/BATTLE/BATTLE.PRG/73AE0.s).
 void Battle_Ai_CopyActionCandidate(Battle_Ai_ActionCandidate* destination,

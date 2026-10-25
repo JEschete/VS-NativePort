@@ -16,12 +16,6 @@
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 
-// decomp: BATTLE.PRG func_800E4C8C (src/BATTLE/BATTLE.PRG/7BDD4.s:0) [asm-file: not yet ported]
-void Battle_Ai_RememberAiActionTarget(Battle_Ai_ActorAiState*)
-{
-    VS_UNPORTED("Battle::Ai::RememberAiActionTarget");
-}
-
 // decomp: BATTLE.PRG func_800E4CE8 (src/BATTLE/BATTLE.PRG/7C4E8.c:407)
 void Battle_Ai_ForgetAiActionTarget(Battle_Ai_ActorAiState* arg0) { arg0->previousTile = -1; }
 
