@@ -159,6 +159,8 @@ void PickStatus() {
 }
 
 void ReadFiles() {
+  const auto started = std::chrono::steady_clock::now();
+  int cache_hits = 0;
   const auto opened = OpenFiles();
   if (!opened) {
     Notice("Cannot open native saves", opened.error(), -1);
@@ -167,7 +169,9 @@ void ReadFiles() {
   for (int i = 0; i < kRows; ++i) {
     auto& preview = picker.previews[picker.first_slot + i];
     if (!preview) {
+      const auto inspecting = std::chrono::steady_clock::now();
       auto info = (*opened)->Inspect(picker.first_slot + i);
+      const auto inspected = std::chrono::steady_clock::now();
       if (!info) {
         Notice("Cannot read native saves", info.error(), -1);
         return;
@@ -181,12 +185,23 @@ void ReadFiles() {
         }
         summary = *described;
       }
+      const auto summarized = std::chrono::steady_clock::now();
+      VS_LOG_DEBUG("save.perf", "Preview slot={} inspect_us={} summary_us={}",
+                   picker.first_slot + i,
+                   std::chrono::duration_cast<std::chrono::microseconds>(
+                       inspected - inspecting)
+                       .count(),
+                   std::chrono::duration_cast<std::chrono::microseconds>(
+                       summarized - inspected)
+                       .count());
       if (!info->message.empty()) {
         VS_LOG_WARN("save", "Native slot {}: {}", info->slot, info->message);
       }
       // At most 100 owned previews, cleared on Begin/Notice/session reset.
       // Sliding the three-card window does not decode unchanged saves again.
       preview = std::make_unique<FilePreview>(std::move(*info), summary);
+    } else {
+      ++cache_hits;
     }
     picker.files[i] = preview->file;
     picker.summaries[i] = preview->summary;
@@ -194,6 +209,11 @@ void ReadFiles() {
   picker.ready = true;
   picker.phase = Phase::kPick;
   PickStatus();
+  VS_LOG_DEBUG("save.perf", "ReadFiles first_slot={} cache_hits={} total_us={}",
+               picker.first_slot, cache_hits,
+               std::chrono::duration_cast<std::chrono::microseconds>(
+                   std::chrono::steady_clock::now() - started)
+                   .count());
 }
 
 bool WindowCached() {
@@ -210,11 +230,15 @@ std::expected<bool, std::string> MatchesPreview(const FileInfo& current,
     return false;
   }
   if (!current.document) return true;
-  const auto before = Encode(*preview.document);
-  if (!before) return std::unexpected(before.error());
-  const auto after = Encode(*current.document);
-  if (!after) return std::unexpected(after.error());
-  return *before == *after;
+  const auto started = std::chrono::steady_clock::now();
+  const auto same = SameDocument(*preview.document, *current.document);
+  VS_LOG_DEBUG("save.perf", "Compare slot={} semantic_us={} valid={}",
+               current.slot,
+               std::chrono::duration_cast<std::chrono::microseconds>(
+                   std::chrono::steady_clock::now() - started)
+                   .count(),
+               same.has_value());
+  return same;
 }
 
 std::optional<FileInfo> ReadConfirmedSelection(const FileInfo& selected) {
@@ -325,7 +349,14 @@ void Execute() {
                                       : "load",
               selected.slot, static_cast<int>(selected.status),
               picker.container);
+  const auto validating = std::chrono::steady_clock::now();
   const auto current = ReadConfirmedSelection(selected);
+  VS_LOG_DEBUG("save.perf", "Confirmed slot={} revalidate_us={} valid={}",
+               selected.slot,
+               std::chrono::duration_cast<std::chrono::microseconds>(
+                   std::chrono::steady_clock::now() - validating)
+                   .count(),
+               current.has_value());
   if (!current) return;
   if (picker.select_container && selected.status == FileStatus::kEmpty) {
     staged_storage.emplace();
@@ -358,7 +389,14 @@ void Execute() {
                 selected.slot, current->status == FileStatus::kRecovered);
     return;
   }
+  const auto preparing = std::chrono::steady_clock::now();
   const auto prepared = PrepareResume(*current->document);
+  VS_LOG_DEBUG("save.perf", "Prepare slot={} total_us={} valid={}",
+               selected.slot,
+               std::chrono::duration_cast<std::chrono::microseconds>(
+                   std::chrono::steady_clock::now() - preparing)
+                   .count(),
+               prepared.has_value());
   if (!prepared) {
     Notice("Load failed - game unchanged", prepared.error());
     return;

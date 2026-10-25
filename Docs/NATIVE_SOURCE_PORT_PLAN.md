@@ -584,6 +584,13 @@ These are target designs, not an implemented-feature inventory. See §0.2 and th
   leaves the file unchanged. Full Debug/Release675 cases/3,154,179 assertions pass. See HANDOFF for local
   commands/evidence and component-profile limits. PS1 import, old-schema migration, clear saves, unsupported
   transient/support states and final card-adapter retirement remain open; this is not the complete M9 gate.
+- **Validated-document ownership checkpoint (2026-10-25):** storage remains payload-agnostic. Synchronous
+  Game validation may retain the successfully decoded primary/backup document for that load; it is not
+  decoded again after acceptance. Confirmation still freshly validates schema, integrity and content, then
+  compares all modeled wire fields through the shared semantic encoder, not native padding or only a
+  checksum. No schema/version change, asynchronous lifetime or cached load/overwrite consent is introduced.
+  Stage timings and primary/recovery controller evidence are in HANDOFF; remaining cold latency is separate
+  from the measured duplicate parsing/serialization removed here.
 
 ### 6.8 Game modules (`VS.Game`)
 

@@ -65,7 +65,7 @@ std::expected<bool, std::string> Exists(const fs::path& path) {
 }
 
 std::expected<std::string, std::string> Read(const fs::path& path,
-                                             Validator validate) {
+                                             const Validator& validate) {
   const auto exists = Exists(path);
   if (!exists) return std::unexpected(exists.error());
   if (!*exists) {
@@ -199,10 +199,10 @@ std::expected<bool, std::string> SaveStore::SlotExists(int slot) const {
 }
 
 std::expected<LoadedSave, std::string> SaveStore::Load(
-    int slot, Validator validate) const {
+    int slot, const Validator& validate) const {
   const auto path = SlotPath(slot);
   if (!path) return std::unexpected(path.error());
-  if (validate == nullptr) return std::unexpected("Save validator is missing");
+  if (!validate) return std::unexpected("Save validator is missing");
   auto current = Read(*path, validate);
   if (current) return LoadedSave{std::move(*current), false, {}};
   auto backup = Read(BackupPath(*path), validate);
@@ -214,11 +214,11 @@ std::expected<LoadedSave, std::string> SaveStore::Load(
 
 std::expected<void, std::string> SaveStore::Save(int slot,
                                                  std::string_view data,
-                                                 Validator validate,
+                                                 const Validator& validate,
                                                  WriteConsent consent) const {
   const auto path = SlotPath(slot);
   if (!path) return std::unexpected(path.error());
-  if (validate == nullptr) return std::unexpected("Save validator is missing");
+  if (!validate) return std::unexpected("Save validator is missing");
   if (data.empty() || data.size() > kMaximumBytes) {
     return std::unexpected("Invalid save byte count");
   }

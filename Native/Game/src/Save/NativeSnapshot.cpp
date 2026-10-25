@@ -825,4 +825,17 @@ std::expected<void, std::string> Validate(std::string_view data) {
   if (!document) return std::unexpected(document.error());
   return {};
 }
+
+std::expected<bool, std::string> SameDocument(const Document& before,
+                                              const Document& current) {
+  const auto before_valid = ValidateModel(before);
+  if (!before_valid) return std::unexpected(before_valid.error());
+  const auto current_valid = ValidateModel(current);
+  if (!current_valid) return std::unexpected(current_valid.error());
+  if (before.generation != current.generation ||
+      before.saved_unix_ms != current.saved_unix_ms) {
+    return false;
+  }
+  return EncodeValue(before.state) == EncodeValue(current.state);
+}
 }  // namespace VS::Game::Save

@@ -9,6 +9,41 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #18 measured cold-preview/load repair retains validated native documents.
+  Actual speed1 Desktop timing on the449,036-byte isolated owner-save copy
+  identifies duplicate Decode plus two Encode/self-Decode comparison passes,
+  not slow disk I/O: baseline first ReadFiles323.821ms and explicit fresh
+  confirmation736.303ms; content checks1.4ms and PrepareResume1.6ms.
+  Engine validators now support synchronous per-load captures. Game keeps
+  only the successfully schema/integrity/content-validated primary or backup
+  document, rather than decoding those same bytes again. Missing callback
+  results are an explicit invariant error. Exact wire-field comparison reuses
+  the codec's semantic encoder without generating/checking two new save files;
+  it is not native-byte comparison or checksum-only consent. Fresh inspection,
+  content checks, recovered-status matching and default-No remain unchanged.
+  Same-input Debug first preview162.772ms (49.7% lower), confirmation203.217ms
+  (72.4% lower), semantic comparison42.912ms instead of406.672ms. Release:
+  preview8.627ms, confirmation12.058ms, cached100->1 window3us (Debug6us).
+  Valid primary loads decode once; explicit malformed-primary recovery tries
+  two candidates and retains the backup's own generation1 document. Both
+  configurations prepare generation2 primary/generation1 backup at1602 and
+  apply1640 with zero errors. Invalid primary text and backup SHA256 remain
+  unchanged. This is not elimination of every cold/audio gap or a whole-frame
+  timing guarantee; Debug still spends about200ms in explicit validation.
+  Three new cases preserve old canonical-wire equality (including ignored
+  transient/padding fields), invalid-model rejection and capture/recovery
+  lifetime. Focused72/5,521 and full serial746/3,388,596 each Debug/Release pass;
+  all three hosts build both. Focused six-TU tidy has zero new actionable
+  findings after reusing existing generation-fixture setup;181 fixture literals
+  remain separate. Header checks0; full fast195 existing/0 new, no baseline
+  changes. A header-selected tidy invocation expanded to every native TU and
+  was stopped; the actual six affected TUs were checked explicitly.
+  Evidence: `build/quality/save18-retained-*`, `save18-cold-stages-Debug*`;
+  strict `save18-retained-verified.json` checks measured reductions, decode
+  counts, cached wrap and actual explicit recovery. Replays used995939df plus
+  this scoped package and unrelated owner ignore/solution edits. Owner files
+  were not the replay save root. Broader #18 import/migration/clear-save,
+  transient/story and EC gates remain open.
 - #42/#178 reference occlusion subpackage: F01767/F01768 no longer return stub0.
   Owned `TerrainHeight` reuses the validated native32x32 decoder and implements
   original7B5DC.s:527/563 (C counterparts510/524): bit0x2000 ground0, signed
@@ -85,7 +120,8 @@ verification of the current worktree.
   `box175-*` and unique runs retain actual inputs, captures and PDB snapshots.
   Source6db8d24d, owner-only ignore/solution dirty state, exact green40166918324.
   No runtime change or newly demonstrated common defect; original occasional
-  fallback is verified. Broader enemy/terrain coverage remains separate.
+  fallback is verified. Acceptance995939df/exact green40167674588; #175 is
+  closed. Broader enemy/terrain coverage remains separate.
 - #172 wooden-box targeting repair is verified. Original F00979 accepted the
   PS1-sized T00469 palette view on a real native gimmick: source/output offsets
   300/332 instead of304/336 after its model pointer widens. Partial CPU-array

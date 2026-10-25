@@ -3,13 +3,15 @@
 #include <cstddef>
 #include <expected>
 #include <filesystem>
+#include <functional>
 #include <string>
 #include <string_view>
 
 namespace VS::Save {
 
 // Game supplies schema validation; storage never interprets gameplay state.
-using Validator = std::expected<void, std::string> (*)(std::string_view);
+using ValidationResult = std::expected<void, std::string>;
+using Validator = std::function<ValidationResult(std::string_view)>;
 
 struct LoadedSave {
   std::string data;
@@ -30,9 +32,9 @@ class SaveStore {
   std::expected<std::filesystem::path, std::string> SlotPath(int slot) const;
   std::expected<bool, std::string> SlotExists(int slot) const;
   std::expected<LoadedSave, std::string> Load(int slot,
-                                              Validator validate) const;
+                                              const Validator& validate) const;
   std::expected<void, std::string> Save(
-      int slot, std::string_view data, Validator validate,
+      int slot, std::string_view data, const Validator& validate,
       WriteConsent consent = WriteConsent::kNormal) const;
 
  private:

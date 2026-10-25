@@ -103,5 +103,9 @@ std::expected<std::string, std::string> Encode(const Document& document);
 // Schema/integrity checks do not replace content resolution before application.
 std::expected<Document, std::string> Decode(std::string_view data);
 std::expected<void, std::string> Validate(std::string_view data);
+// Compare wire-visible fields of validated documents, not native padding.
+// This does not replace schema/integrity or content validation before loading.
+std::expected<bool, std::string> SameDocument(const Document& before,
+                                              const Document& current);
 
 }  // namespace VS::Game::Save

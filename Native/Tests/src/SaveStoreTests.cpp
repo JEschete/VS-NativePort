@@ -16,6 +16,7 @@
 #include <new>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -230,6 +231,35 @@ TEST_CASE("Invalid writes and missing validators leave saved data unchanged",
   CHECK(Get(*path) == "v1:second");
   CHECK(Get(Backup(*path)) == "v1:first");
   CheckNoTemporaryFiles(directory.root);
+}
+
+TEST_CASE("Save validation retains per-load results through primary recovery",
+          "[save-store]") {
+  TemporaryDirectory directory;
+  const auto store = SaveStore::Open(directory.root);
+  REQUIRE(store);
+  const auto path = store->SlotPath(0);
+  REQUIRE(path);
+  WriteTwoGenerations(*store, 0);
+  const bool recover = GENERATE(false, true);
+  if (recover) Put(*path, "corrupt");
+  std::vector<std::string> attempted;
+  std::string accepted;
+  const auto loaded = store->Load(
+      0, [&](std::string_view data) -> std::expected<void, std::string> {
+        attempted.emplace_back(data);
+        const auto valid = Validate(data);
+        if (valid) accepted = data;
+        return valid;
+      });
+  REQUIRE(loaded);
+  CHECK(loaded->recovered_from_backup == recover);
+  CHECK(accepted == loaded->data);
+  const auto expected = recover
+                            ? std::vector<std::string>{"corrupt", "v1:first"}
+                            : std::vector<std::string>{"v1:second"};
+  CHECK(attempted == expected);
+  CHECK(accepted == (recover ? "v1:first" : "v1:second"));
 }
 
 TEST_CASE("Corrupt or missing primary saves explicitly recover valid backups",

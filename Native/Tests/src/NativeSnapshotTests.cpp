@@ -445,6 +445,56 @@ TEST_CASE("Native save generation location and time domains are bounded",
   CHECK_FALSE(encoded.error().empty());
 }
 
+TEST_CASE("Native document comparison preserves canonical wire equality",
+          "[native-snapshot]") {
+  const auto original = SampleDocument();
+  auto current = original;
+  const int change = GENERATE(0, 1, 2, 3, 4, 5, 6);
+  switch (change) {
+    case 0:
+      break;
+    case 1:
+      ++current.generation;
+      break;
+    case 2:
+      ++current.saved_unix_ms;
+      break;
+    case 3:
+      current.state.script_flags[0] ^= 1;
+      break;
+    case 4:
+      ++current.state.random.bios_state;
+      break;
+    case 5:
+      ++current.state.location.position[0];
+      break;
+    case 6:
+      current.state.ashley.isPending = 1;
+      current.state.inventory.blades[15].reserved11 = 123;
+      current.state.score.reserved10 = 0x12345678;
+      break;
+    default:
+      FAIL("Unknown semantic comparison case");
+  }
+  const auto before = Save::Encode(original);
+  const auto after = Save::Encode(current);
+  REQUIRE(before);
+  REQUIRE(after);
+  const auto same = Save::SameDocument(original, current);
+  REQUIRE(same);
+  CHECK(*same == (*before == *after));
+  CHECK(*same == (change == 0 || change == 6));
+}
+
+TEST_CASE("Native document comparison rejects invalid model metadata",
+          "[native-snapshot]") {
+  const auto original = SampleDocument();
+  auto invalid = original;
+  invalid.generation = 0;
+  CHECK_FALSE(Save::SameDocument(invalid, original));
+  CHECK_FALSE(Save::SameDocument(original, invalid));
+}
+
 TEST_CASE("Native save cache and random indices cannot escape native arrays",
           "[native-snapshot]") {
   auto document = SampleDocument();
