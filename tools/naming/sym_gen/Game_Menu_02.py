@@ -4,13 +4,12 @@ Function-local state enums are named after their declaring function (as in Game_
 prefix their enumerators share; structs go through common.Gen.generic_specs with overrides for members whose uses
 were read. Globals mostly keep meaningful fork names; address-named ones are named from their read uses.
 """
-import csv
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import Gen, LEDGERS  # noqa: E402
 import Game_Menu_01 as m1  # noqa: E402  (helpers only; its module-level rows go to its own Gen)
+from common import Gen  # noqa: E402
 
 g = Gen("Game_Menu_02")
 c, G = g.c, g.G

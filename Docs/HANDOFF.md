@@ -9,6 +9,29 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #25 first-party unused-binding batch removes six retained F401/F841 findings
+  across naming/port tools, plus the related generator import-order finding.
+  `cite_declaration_only` still validates every field row identity before
+  filtering; dropping its unused map must not silently accept malformed rows.
+  No native/generated runtime, canonical ledger, reference, baseline or
+  suppression changes. Full fast quality falls195 ->188 existing/0 new
+  (41 test-harness,147 tooling); #25 remains open for that remaining review.
+  Existing naming/port/audit/quality controls pass120 tests in one runner.
+  Actual Game_Menu_02 output63 types/582 fields/38 globals is byte-identical
+  before/after and on a second generation into private outputs. Naming checks,
+  title reachability and title reference indexing all exit0 with identical
+  output/semantics;5,483 occurrences have0 unresolved/mismatches. Valid rows
+  stay unchanged and a missing field identity is still explicitly rejected.
+  Baseline initially could not run because ignored `build/port` inputs were
+  absent. Existing analysis-only generators restored headers/index/inventory
+  and the full occurrence index:138 TUs,22 documented original compiler-leniency
+  error TUs,100,172 occurrences,0 unresolved/mismatches. Context generation ran
+  against a private ledger mirror, preserving IDs/human columns; all6 canonical
+  CSV files stayed byte-identical. No analysis error is presented as native
+  compilation or gameplay completion. Private `quality25-unused-*` reports and
+  `quality25-ledger-preservation.json` retain the bounded evidence. Replay
+  source9e44440f plus five scoped tooling edits; owner ignore/solution edits
+  remain separate. Publication/CI progress is recorded in #25.
 - #181 later save-point rejection is traced to source-consistent menu pause.
   Original146C.c:1893 / Field_PauseFieldForMenu freezes ordinary walking/turning
   without clearing turnFrames, horizontal root motion or momentum distance.

@@ -184,7 +184,8 @@ def cite_declaration_only(g: Gen, dry: bool) -> set[str]:
     """Replace `declaration-only` evidence with a use when libclang shows the member is referenced and the citing
     function references no other type with a member of that name (so the receiver cannot be another type)."""
     import re
-    owner = batches_with("fields")
+    # Validate row identities even when declaration-only filtering skips them.
+    batches_with("fields")
     fields = {}
     for d in OUTS.iterdir():
         p = d / "fields.csv"

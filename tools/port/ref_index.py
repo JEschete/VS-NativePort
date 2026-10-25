@@ -423,7 +423,6 @@ class RefIndex:
                 if dx.origin(f) in ("game", "gen"):
                     self.tu_macros[c.spelling].append((f, line))
         defs = {c.spelling: c for c in tu.cursor.get_children() if c.kind == K.FUNCTION_DECL and c.is_definition()}
-        L = self.L
         for c in tu.cursor.walk_preorder():
             k = c.kind
             loc_file = c.location.file
