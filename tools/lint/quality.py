@@ -591,6 +591,18 @@ def fixed_interface_advisory(item: Finding, interfaces: set[tuple[str, str]]) ->
     return bool(function and (item.path, function[1]) in interfaces)
 
 
+def inapplicable_cpp_header_advice(item: Finding) -> bool:
+    return (
+        item.tool == "cpplint"
+        and item.rule == "build/include_what_you_use"
+        and item.path.startswith("Native/")
+        and item.path.endswith(".c")
+        and item.message == "Add #include <string> for string"
+        and re.match(r"(?:[A-Za-z_]\w*\s*(?:\.|->)\s*)+string\s*=", item.context)
+        is not None
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -671,6 +683,12 @@ def main() -> int:
     findings = [
         item for item in findings if not fixed_interface_advisory(item, interfaces)
     ]
+    language_notes = [
+        item for item in findings if inapplicable_cpp_header_advice(item)
+    ]
+    findings = [
+        item for item in findings if not inapplicable_cpp_header_advice(item)
+    ]
     previous = (
         json.loads(BASELINE.read_text())
         if BASELINE.is_file()
@@ -697,6 +715,9 @@ def main() -> int:
                 ],
                 "fixed_interface_advisories": [
                     asdict(item) for item in interface_notes
+                ],
+                "language_advisories": [
+                    asdict(item) for item in language_notes
                 ],
                 "findings": [asdict(item) for item in findings],
                 "new": [asdict(item) for item in introduced],
@@ -737,6 +758,7 @@ def main() -> int:
     print(
         f"Registered C interface advisories reported separately: {len(interface_notes)}"
     )
+    print(f"Inapplicable C++ header advisories reported separately: {len(language_notes)}")
     print(
         f"Quality: {len(findings)} findings, {len(introduced)} new; report: build/quality/report.json"
     )

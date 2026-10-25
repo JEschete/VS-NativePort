@@ -122,15 +122,20 @@ def main() -> int:
         for t in ts:
             tw = 2 + 0.4 * len(f_by_type[t["id"]])
             if cur["t"] and w + tw > BUDGET:
-                chunks.append(cur); cur, w = {"g": [], "t": []}, 0.0
-            cur["t"].append(t); w += tw
+                chunks.append(cur)
+                cur, w = {"g": [], "t": []}, 0.0
+            cur["t"].append(t)
+            w += tw
         for g in gs:
             if (cur["g"] or cur["t"]) and w + 1.6 > BUDGET:
-                chunks.append(cur); cur, w = {"g": [], "t": []}, 0.0
-            cur["g"].append(g); w += 1.6
+                chunks.append(cur)
+                cur, w = {"g": [], "t": []}, 0.0
+            cur["g"].append(g)
+            w += 1.6
         if cur["g"] or cur["t"]:
             if chunks and w < BUDGET * 0.1:  # fold a tiny tail into the previous batch
-                chunks[-1]["g"] += cur["g"]; chunks[-1]["t"] += cur["t"]
+                chunks[-1]["g"] += cur["g"]
+                chunks[-1]["t"] += cur["t"]
             else:
                 chunks.append(cur)
         for n, c in enumerate(chunks, 1):

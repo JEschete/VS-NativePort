@@ -31,7 +31,8 @@ def main() -> int:
     funcs: dict[tuple[str, str], tuple[int, int]] = {}
     for fn in index["functions"].values():
         funcs[(fn["file"], fn["name"])] = (fn["line"], fn["end_line"])
-    data = {r["id"]: r for r in csv.DictReader(open(ROOT / "Docs" / "ledgers" / "DATA_LEDGER.csv", encoding="utf-8"))}
+    with (ROOT / "Docs" / "ledgers" / "DATA_LEDGER.csv").open(encoding="utf-8") as stream:
+        data = {r["id"]: r for r in csv.DictReader(stream)}
     context = json.loads((ROOT / "build" / "port" / "symbol_context.json").read_text(encoding="utf-8"))["globals"]
     path = ROOT / "tools" / "naming" / "sym_out" / a.batch / "globals.csv"
     with path.open(encoding="utf-8", newline="") as f:
@@ -75,10 +76,10 @@ def main() -> int:
 
         def first_use(file: str, start: int, end: int, *, declaration_file=rel,
                       declaration_line=ln, name_pattern=pattern) -> int | None:
-            return next((i + 1 for i, l in enumerate(lines(file)) if start <= i + 1 <= end and not (
-                file == declaration_file and i + 1 == declaration_line) and name_pattern.search(l)
-                and not l.lstrip().startswith("extern")
-                and not re.match(r"\s*(enum|struct|typedef)\b", l)), None)
+            return next((i + 1 for i, source_line in enumerate(lines(file)) if start <= i + 1 <= end and not (
+                file == declaration_file and i + 1 == declaration_line) and name_pattern.search(source_line)
+                and not source_line.lstrip().startswith("extern")
+                and not re.match(r"\s*(enum|struct|typedef)\b", source_line)), None)
 
         use_file, use = rel, first_use(rel, lo, hi)
         if use is None and not scope:

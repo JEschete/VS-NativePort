@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "sym_gen"))
-from common import Gen, ROOT  # noqa: E402
+from common import ROOT, Gen  # noqa: E402
 
 OUTS = ROOT / "tools" / "naming" / "sym_out"
 H, M, L = "high", "med", "low"
@@ -126,8 +126,9 @@ def batches_with(kind: str) -> dict[str, str]:
     for d in OUTS.iterdir():
         p = d / f"{kind}.csv"
         if p.exists():
-            for r in csv.DictReader(open(p, encoding="utf-8")):
-                out[r["id"]] = d.name
+            with p.open(encoding="utf-8") as stream:
+                for r in csv.DictReader(stream):
+                    out[r["id"]] = d.name
     return out
 
 
@@ -140,9 +141,10 @@ def patch(kind: str, fixes: dict, g: Gen, dry: bool) -> set[str]:
         for d in OUTS.iterdir():
             p = d / "types.csv"
             if p.exists():
-                for r in csv.DictReader(open(p, encoding="utf-8")):
-                    if "same-as:" in r["notes"]:
-                        dups.setdefault(r["notes"].split("same-as:")[1][:6], []).append(r["id"])
+                with p.open(encoding="utf-8") as stream:
+                    for r in csv.DictReader(stream):
+                        if "same-as:" in r["notes"]:
+                            dups.setdefault(r["notes"].split("same-as:")[1][:6], []).append(r["id"])
         for fid in list(fixes):
             tid, idx = fid.split(".")
             for dup in dups.get(tid, []):
@@ -152,7 +154,8 @@ def patch(kind: str, fixes: dict, g: Gen, dry: bool) -> set[str]:
         if not b:
             sys.exit(f"{rid}: no batch output contains it")
         p = OUTS / b / f"{kind}.csv"
-        rows = list(csv.DictReader(open(p, encoding="utf-8")))
+        with p.open(encoding="utf-8") as stream:
+            rows = list(csv.DictReader(stream))
         cols = list(rows[0].keys())
         r = next(x for x in rows if x["id"] == rid)
         if kind == "fields":
@@ -190,7 +193,8 @@ def cite_declaration_only(g: Gen, dry: bool) -> set[str]:
     for d in OUTS.iterdir():
         p = d / "fields.csv"
         if p.exists():
-            fields[d.name] = list(csv.DictReader(open(p, encoding="utf-8")))
+            with p.open(encoding="utf-8") as stream:
+                fields[d.name] = list(csv.DictReader(stream))
     members = {m["id"]: m for ms in g.members.values() for m in ms}
     by_member: dict[str, list[tuple]] = {}
     for p in ("", "upstream:"):

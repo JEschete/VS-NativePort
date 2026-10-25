@@ -1,5 +1,7 @@
 """Engine_01 types/fields from code read this session. Citations are resolved by exact text search, not typed."""
-import csv, re, sys
+import csv
+import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -28,8 +30,9 @@ def cites(*pairs):
 
 
 members = {}
-for r in csv.DictReader(open(ROOT / "Docs" / "ledgers" / "FIELD_LEDGER.csv", encoding="utf-8")):
-    members.setdefault(r["type_id"], []).append(r)
+with (ROOT / "Docs" / "ledgers" / "FIELD_LEDGER.csv").open(encoding="utf-8") as stream:
+    for r in csv.DictReader(stream):
+        members.setdefault(r["type_id"], []).append(r)
 
 types, fields = [], []
 
@@ -575,7 +578,7 @@ T("T00694", "State", "Content::DiscDrive", C + "DiscQueue.h",
 
 problems = []
 byid = {m["id"]: m for ms in members.values() for m in ms}
-for fid, fname, meaning, conf, notes in fields:
+for fid, _field_name, _meaning, _confidence, notes in fields:
     orig = byid[fid]["name"]
     ok = False
     for m in re.finditer(r"source:([^:;]+):(\d+)", notes):

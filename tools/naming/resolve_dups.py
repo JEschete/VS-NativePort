@@ -27,7 +27,14 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "ledger"))
 sys.path.insert(0, str(ROOT / "tools" / "naming"))
 from build_ledgers import load_sdk  # noqa: E402
-from merge_names import CATALOG, HEADER, OUTS, c_spelling, dup_target, read_csv  # noqa: E402
+from merge_names import (  # noqa: E402
+    CATALOG,
+    HEADER,
+    OUTS,
+    c_spelling,
+    dup_target,
+    read_csv,
+)
 
 # Bodies come from the libclang index (tools/port/decomp_index.py); the regex scanner in build_ledgers mis-pairs
 # bodies after `__attribute__((unused));` forward declarations.

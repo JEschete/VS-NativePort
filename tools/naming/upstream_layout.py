@@ -198,8 +198,10 @@ def merge(pin: dict, up: dict, pinned: dict[str, list[dict]], upstream: dict[str
                 fields.append({**u, "name": name, "source": source})
             size_from = "upstream" if ug else size_from
             continue
-        score = lambda fs, ix: (sum(leaves(x, ix) for x in fs),
-                                sum(1 for x in fs if not GENERIC_FIELD.match(x.get("name") or "")))
+        def score(members, index):
+            return (sum(leaves(member, index) for member in members),
+                    sum(1 for member in members if not GENERIC_FIELD.match(member.get("name") or "")))
+
         take_up = score(ug, upstream) >= score(pg, pinned)
         chosen = ug if take_up else pg
         upstream_groups += take_up

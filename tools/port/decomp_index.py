@@ -32,6 +32,7 @@ OUT = REPO / "build" / "port" / "index.json"
 sys.path.insert(0, str(REPO / "tools" / "ledger"))
 from build_ledgers import is_sdk_path  # noqa: E402
 
+
 def clang_args() -> list[str]:
     return [
         "-target", "mipsel-unknown-none", "-nostdinc",
@@ -292,7 +293,7 @@ class Index:
     def macros_per_function(self, files: list[Path], idx: ci.Index) -> None:
         """Second pass: attribute macro instantiations to functions by source range."""
         by_file = collections.defaultdict(list)
-        for uid, fn in self.functions.items():
+        for _uid, fn in self.functions.items():
             by_file[fn["file"]].append(fn)
         for path in files:
             r = rel(str(path))

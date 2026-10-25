@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import Gen, ROOT  # noqa: E402
+from common import ROOT, Gen  # noqa: E402
 
 g = Gen("Game_Effects_02")
 c, G = g.c, g.G
@@ -21,7 +21,8 @@ L, M, H = "low", "med", "high"
 E = "Native\\Game\\src\\Effects\\"
 GAP = ";inventory size is an address gap, not a capacity"
 SRC = ROOT / "resources" / "rood-reverseWin" / "src"
-ROWS = list(csv.DictReader(open(ROOT / "tools" / "naming" / "sym_batches" / "Game_Effects_02" / "globals.csv", encoding="utf-8")))
+with (ROOT / "tools" / "naming" / "sym_batches" / "Game_Effects_02" / "globals.csv").open(encoding="utf-8") as stream:
+    ROWS = list(csv.DictReader(stream))
 
 # macro: (member, disposition, purpose, template header, template line)
 MACROS = {

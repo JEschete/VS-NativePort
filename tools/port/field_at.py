@@ -35,7 +35,7 @@ def main() -> int:
     return 0
 
 
-def path_at(cp: "ct.Copier", tid: str, off: int, bit: int | None = None) -> str:
+def path_at(cp: ct.Copier, tid: str, off: int, bit: int | None = None) -> str:
     """Field path at byte `off` (and, inside a bitfield run, the field holding bit `bit` of the 32-bit word there)."""
     out = ""
     for _ in range(12):

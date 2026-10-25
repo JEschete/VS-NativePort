@@ -150,9 +150,12 @@ def main() -> int:
     index = json.loads((ROOT / "build" / "port" / "index.json").read_text(encoding="utf-8"))
     context = json.loads((ROOT / "build" / "port" / "symbol_context.json").read_text(encoding="utf-8"))
     funcs = {(f["file"], f["name"]): (f["line"], f["end_line"]) for f in index["functions"].values()}
-    data = {r["id"]: r for r in csv.DictReader(open(ROOT / "Docs" / "ledgers" / "DATA_LEDGER.csv", encoding="utf-8"))}
-    types = {r["id"]: r for r in csv.DictReader(open(ROOT / "Docs" / "ledgers" / "TYPE_LEDGER.csv", encoding="utf-8"))}
-    fields = [r for r in csv.DictReader(open(ROOT / "Docs" / "ledgers" / "FIELD_LEDGER.csv", encoding="utf-8"))]
+    with (ROOT / "Docs" / "ledgers" / "DATA_LEDGER.csv").open(encoding="utf-8") as stream:
+        data = {r["id"]: r for r in csv.DictReader(stream)}
+    with (ROOT / "Docs" / "ledgers" / "TYPE_LEDGER.csv").open(encoding="utf-8") as stream:
+        types = {r["id"]: r for r in csv.DictReader(stream)}
+    with (ROOT / "Docs" / "ledgers" / "FIELD_LEDGER.csv").open(encoding="utf-8") as stream:
+        fields = list(csv.DictReader(stream))
     only = {i.strip() for i in a.ids.split(",") if i.strip()}
     src = Source()
     upsrc = UpstreamSource()
@@ -171,7 +174,9 @@ def main() -> int:
                 yield label.split(" (")[0], m.group(3), rel, lo, hi
 
     if not a.types:
-        for row in csv.DictReader(open(BATCHES / a.batch / "globals.csv", encoding="utf-8")):
+        with (BATCHES / a.batch / "globals.csv").open(encoding="utf-8") as stream:
+            global_rows = list(csv.DictReader(stream))
+        for row in global_rows:
             gid = row["id"]
             if only and gid not in only:
                 continue
@@ -210,7 +215,9 @@ def main() -> int:
         members: dict[str, list[dict]] = {}
         for f in fields:
             members.setdefault(f["type_id"], []).append(f)
-        for row in csv.DictReader(open(BATCHES / a.batch / "types.csv", encoding="utf-8")):
+        with (BATCHES / a.batch / "types.csv").open(encoding="utf-8") as stream:
+            type_rows = list(csv.DictReader(stream))
+        for row in type_rows:
             tid = row["id"]
             if only and tid not in only:
                 continue
@@ -225,9 +232,9 @@ def main() -> int:
             else:
                 for rel in t["files"].split():
                     text = src.lines(f"src/{rel}")
-                    for i, l in enumerate(text):
-                        if re.search(r"\}\s*" + re.escape(t["name"]) + r"\s*;", l) or re.search(
-                                r"\b(struct|union|enum)\s+" + re.escape(t["name"]) + r"\s*\{", l):
+                    for i, source_line in enumerate(text):
+                        if re.search(r"\}\s*" + re.escape(t["name"]) + r"\s*;", source_line) or re.search(
+                                r"\b(struct|union|enum)\s+" + re.escape(t["name"]) + r"\s*\{", source_line):
                             decl = (f"src/{rel}", i + 1)
                             break
                     if decl:
@@ -240,7 +247,7 @@ def main() -> int:
                     out.append(f"   DECL {d}")
             out.extend(f"   {h}" for h in up.lines(t["name"]))
             labels = context["types"].get(tid, [])
-            for final, orig, rel, lo, hi in ref_functions(labels):
+            for _final, orig, _rel, _lo, _hi in ref_functions(labels):
                 out.extend(f"   [{orig}] {h}" for h in up.lines(orig))
             for f in members.get(tid, []):
                 mpat = re.compile(r"(->|\.)" + re.escape(f["name"]) + r"\b")

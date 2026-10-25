@@ -16,8 +16,9 @@ NOT_STATE = {"actorObject", "actionMetadataStats", "actorInitializationModel", "
              "actionSetupContext"}
 pix = json.loads((ROOT / "build/port/index.json").read_text(encoding="utf-8"))
 uix = json.loads((ROOT / "build/port/index_upstream.json").read_text(encoding="utf-8"))
-cat = {(r["file"].replace("\\", "/"), r["name"]): r["final_name"].split("::")[-1] or r["name"]
-       for r in csv.DictReader(open(ROOT / "Docs/ledgers/FUNCTION_CATALOG.csv", encoding="utf-8"))}
+with (ROOT / "Docs/ledgers/FUNCTION_CATALOG.csv").open(encoding="utf-8") as stream:
+    cat = {(r["file"].replace("\\", "/"), r["name"]): r["final_name"].split("::")[-1] or r["name"]
+           for r in csv.DictReader(stream)}
 
 
 def views():

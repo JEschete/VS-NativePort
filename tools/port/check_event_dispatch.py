@@ -13,7 +13,6 @@ import struct
 from pathlib import Path
 
 import clang.cindex as ci
-
 import copy_fixups as cf
 import copy_to_native as ct
 from layout_check import INCLUDES

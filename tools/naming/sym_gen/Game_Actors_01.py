@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import Gen, LEDGERS  # noqa: E402
+from common import LEDGERS, Gen  # noqa: E402
 
 g = Gen("Game_Actors_01")
 c, T = g.c, g.T
@@ -944,7 +944,8 @@ T("T00255", "State", "Field::GimmickInstance", FD + "Gimmicks.h",
   recv=r"object|arg0|s1|temp_\w+|D_800F45E0\[\w+\]|actor")
 
 # ---------------------------------------------------------------- placement word (same layout as Field::ActorPlacement)
-placement = next(r for r in csv.DictReader(open(LEDGERS / "TYPE_LEDGER.csv", encoding="utf-8")) if r["id"] == "T00444")
+with (LEDGERS / "TYPE_LEDGER.csv").open(encoding="utf-8") as stream:
+    placement = next(r for r in csv.DictReader(stream) if r["id"] == "T00444")
 T("T00660", "Value", placement["final_name"], placement["final_location"], placement["purpose"], "high",
   "same-as:T00444;" + c(("146C.c", "data.unk0_0 = enemy->x;"), ("146C.c", "data.unk0_24 = enemy->height * 64;")), [
       ("unk0_0", "tileX", "Tile X", "high"),

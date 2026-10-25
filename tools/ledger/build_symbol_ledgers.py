@@ -276,7 +276,7 @@ def main() -> int:
     hints = field_hints()
     old_f = load_existing(LEDGERS / "FIELD_LEDGER.csv", "id")
     t_rows, f_rows = [], []
-    for row_key, key, lh, decls, nlay in t_rows_src:
+    for row_key, key, _layout_hash, decls, nlay in t_rows_src:
         t = decls[0]
         m = merged.get(row_key)
         t_fields = m["fields"] if m else t["fields"]

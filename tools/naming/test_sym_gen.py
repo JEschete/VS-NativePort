@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import ast
+import csv
 import re
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -31,6 +33,42 @@ class ReviewedConsumerTests(unittest.TestCase):
             if isinstance(node, ast.Lambda)
             and any(arg.arg == argument for arg in node.args.args)
         ]
+
+    def test_ledger_reader_preserves_rows_and_closes_on_success_and_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "rows.csv").write_bytes(
+                b'id,note\r\n1,"with,comma"\r\n2,"line1\r\nline2"\r\n'
+            )
+            opened = []
+            original_open = Path.open
+
+            def track_open(path, *args, **kwargs):
+                stream = original_open(path, *args, **kwargs)
+                opened.append(stream)
+                return stream
+
+            for path, name in (
+                (r"tools\port\ref_index.py", "read_rows"),
+                (r"tools\naming\sym_gen\common.py", "ledger_rows"),
+            ):
+                with self.subTest(reader=name):
+                    opened.clear()
+                    reader = self.function(path, name, {"LEDGERS": root, "csv": csv})
+                    with patch.object(Path, "open", track_open):
+                        rows = reader("rows.csv")
+                    self.assertEqual(rows, [
+                        {"id": "1", "note": "with,comma"},
+                        {"id": "2", "note": "line1\nline2"},
+                    ])
+                    self.assertTrue(opened and all(stream.closed for stream in opened))
+                    with (
+                        patch.object(Path, "open", track_open),
+                        patch.object(csv, "DictReader", side_effect=ValueError("invalid rows")),
+                        self.assertRaisesRegex(ValueError, "invalid rows"),
+                    ):
+                        reader("rows.csv")
+                    self.assertTrue(all(stream.closed for stream in opened))
 
     def test_reviewed_one_to_one_consumers_use_strict_pairing(self):
         paths = (

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import json
 import subprocess
 import sys
@@ -14,6 +15,76 @@ import quality
 
 
 class BaselineTests(unittest.TestCase):
+    def tool_function(self, path, name, namespace):
+        tree = ast.parse((quality.ROOT / path).read_text(encoding="utf-8-sig"))
+        function = next(node for node in ast.walk(tree)
+                        if isinstance(node, ast.FunctionDef) and node.name == name)
+        exec(compile(ast.Module(body=[function], type_ignores=[]), path, "exec"), namespace)
+        return namespace[name]
+
+    def test_windows_capture_keeps_arguments_input_and_failure_contract(self) -> None:
+        run = self.tool_function(r"tools\windows.py", "run", {"subprocess": subprocess})
+        result = subprocess.CompletedProcess([], 0, stdout=b"output", stderr=b"diagnostic")
+        with patch.object(subprocess, "run", return_value=result) as execute:
+            self.assertEqual(run([Path("tool.exe"), 7], cwd="root", input_data=b"input"),
+                             b"output")
+        execute.assert_called_once_with(
+            ["tool.exe", "7"], cwd="root", input=b"input",
+            capture_output=True, check=True, timeout=300,
+        )
+        failure = subprocess.CalledProcessError(1, ["tool.exe"], stderr=b"failure")
+        with (
+            patch.object(subprocess, "run", side_effect=failure),
+            self.assertRaises(subprocess.CalledProcessError),
+        ):
+            run(["tool.exe"])
+
+    def test_solution_items_keep_windows_scope_order_and_existing_files(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            files = [
+                "README.md", "VagrantStory.Native.sln", r"Docs\BUILDING.md",
+                r".github\workflows\quality.yml", r"Native\Game\unlisted.c",
+                r"tools\unlisted.py",
+            ]
+            for relative in files:
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("fixture", encoding="utf-8")
+            select = self.tool_function(
+                r"tools\scaffold\gen_solution.py", "solution_item_files",
+                {"ROOT": root, "SOLUTION_ITEM_DIRS": ["Docs", ".github"]},
+            )
+            listing = "\0".join([*files, "README.md", "missing.md"])
+            result = subprocess.CompletedProcess([], 0, stdout=listing)
+            with patch.object(subprocess, "run", return_value=result):
+                self.assertEqual(select(), [
+                    r".github\workflows\quality.yml", r"Docs\BUILDING.md", "README.md",
+                ])
+
+    def test_cpp_header_advice_requires_an_exact_c_member_assignment(self) -> None:
+        advice = quality.Finding(
+            "cpplint", "build/include_what_you_use", "Native/Tests/Fixture.c", 1,
+            "Add #include <string> for string", "box.string = text;",
+        )
+        self.assertTrue(quality.inapplicable_cpp_header_advice(advice))
+        pointer = quality.Finding(
+            advice.tool, advice.rule, advice.path, 1, advice.message,
+            "owner->box.string = text;",
+        )
+        self.assertTrue(quality.inapplicable_cpp_header_advice(pointer))
+        for path, rule, message, context in (
+            ("Native/Tests/Fixture.cpp", advice.rule, advice.message, advice.context),
+            ("Native/Tests/Fixture.h", advice.rule, advice.message, advice.context),
+            (advice.path, "clang-analyzer-core.NullDereference", advice.message, advice.context),
+            (advice.path, advice.rule, "Add #include <vector> for vector", advice.context),
+            (advice.path, advice.rule, advice.message, "std::string text;"),
+            (advice.path, advice.rule, advice.message, 'const char* text = "box.string = text;";'),
+        ):
+            with self.subTest(path=path, rule=rule, context=context):
+                item = quality.Finding(advice.tool, rule, path, 1, message, context)
+                self.assertFalse(quality.inapplicable_cpp_header_advice(item))
+
     def test_cpp_scene_analysis_uses_the_builds_c_api_include_paths(self) -> None:
         with (
             tempfile.TemporaryDirectory() as directory,
@@ -330,6 +401,28 @@ class ToolControlTests(unittest.TestCase):
             source.write_text("void Test() { CHECK(value == 0); }\n", encoding="utf-8")
             findings = quality.check_cpplint([quality.relative(source)])
         self.assertFalse(any(item.rule == "readability/check" for item in findings))
+
+    def test_real_cpp_string_advice_stays_actionable(self) -> None:
+        path = self.source(
+            "missing_string.cc",
+            "void Example() { std::string text; }\n",
+        )
+        findings = quality.check_cpplint([path])
+        advice = [item for item in findings if item.rule == "build/include_what_you_use"]
+        self.assertTrue(advice)
+        self.assertFalse(any(quality.inapplicable_cpp_header_advice(item) for item in advice))
+
+    def test_real_c_member_advice_is_preserved_as_language_advice(self) -> None:
+        self.source("member_control.h", "typedef struct { char* string; } Message;\n")
+        path = self.source(
+            "member_control.c",
+            '#include "member_control.h"\n'
+            "void Example(char* text) {\n  Message box;\n  box.string = text;\n}\n",
+        )
+        findings = quality.check_cpplint([path])
+        advice = [item for item in findings if item.rule == "build/include_what_you_use"]
+        self.assertTrue(advice)
+        self.assertTrue(any(quality.inapplicable_cpp_header_advice(item) for item in advice))
 
     def test_clang_tidy_detects_an_unnamed_gameplay_number(self) -> None:
         path = self.source("number_control.cc", "int CalculateValue() { return 37; }\n")

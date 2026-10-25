@@ -8,8 +8,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import Gen  # noqa: E402
 import ai_state  # noqa: E402
+from common import Gen  # noqa: E402
 
 g = Gen("Game_Battle_03")
 c, T = g.c, g.T
@@ -142,7 +142,7 @@ for _tid, _name, _purpose, _ov in OTHER:
       "declaration-only;" + g.decl(_tid, g.members[_tid][0]["name"]), g.generic_specs(_tid, _ov), recv=ANYR)
 g.TYPES.append(["T00744", "Value", "Battle::Ai::PathTest", AI + "Navigation.h",
                 "Is the function type that tests whether a detour may step in a direction.", "med",
-                c(("771A8.c", "} movementPathTest;")) if any("} movementPathTest;" in l for l in g.trees[""].lines(g.trees[""].rel("771A8.c")))
+                c(("771A8.c", "} movementPathTest;")) if any("} movementPathTest;" in source_line for source_line in g.trees[""].lines(g.trees[""].rel("771A8.c")))
                 else "declaration-only;" + c(("771A8.c", "movementPathTest"))])
 
 if __name__ == "__main__":

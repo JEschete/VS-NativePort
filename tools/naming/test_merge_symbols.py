@@ -67,9 +67,11 @@ class BatchMergeTests(unittest.TestCase):
             )
 
     def run_merge(self, *args):
-        with patch.object(sys, "argv", ["merge_symbols.py", *args]):
-            with contextlib.redirect_stdout(io.StringIO()) as output:
-                result = merge.main()
+        with (
+            patch.object(sys, "argv", ["merge_symbols.py", *args]),
+            contextlib.redirect_stdout(io.StringIO()) as output,
+        ):
+            result = merge.main()
         return result, output.getvalue()
 
     def snapshots(self):

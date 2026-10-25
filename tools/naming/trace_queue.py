@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "sym_gen"))
-from common import Gen, ROOT, LEDGERS  # noqa: E402
+from common import LEDGERS, ROOT, Gen, ledger_rows  # noqa: E402
 
 OUT = LEDGERS / "TRACE_QUEUE.csv"
 PRIORITY = {"opaque": 1, "low-named": 2, "global": 2, "type": 3, "reserved": 4}
@@ -37,10 +37,11 @@ def function_addresses() -> dict[tuple[str, str], int]:
 
 def main() -> int:
     g = Gen("Shared")
-    F = list(csv.DictReader(open(LEDGERS / "FIELD_LEDGER.csv", encoding="utf-8")))
-    T = {r["id"]: r for r in csv.DictReader(open(LEDGERS / "TYPE_LEDGER.csv", encoding="utf-8"))}
-    G = list(csv.DictReader(open(LEDGERS / "DATA_LEDGER.csv", encoding="utf-8")))
-    cat = {(r["file"], r["name"]): r for r in csv.DictReader(open(LEDGERS / "FUNCTION_CATALOG.csv", encoding="utf-8"))}
+    F = ledger_rows("FIELD_LEDGER.csv")
+    T = {r["id"]: r for r in ledger_rows("TYPE_LEDGER.csv")}
+    G = ledger_rows("DATA_LEDGER.csv")
+    with (LEDGERS / "FUNCTION_CATALOG.csv").open(encoding="utf-8") as stream:
+        cat = {(r["file"], r["name"]): r for r in csv.DictReader(stream)}
     addrs = function_addresses()
     funcs = list(g.trees[""].ix["functions"].values())
 

@@ -68,15 +68,15 @@ def main() -> int:
             if not p.exists():
                 continue
             text = lines(p)
-            for i, l in enumerate(text):
-                if re.search(r"\}\s*" + re.escape(name) + r"\s*;", l):
+            for i, source_line in enumerate(text):
+                if re.search(r"\}\s*" + re.escape(name) + r"\s*;", source_line):
                     depth, j = 0, i
                     while j >= 0:
                         depth += text[j].count("}") - text[j].count("{")
                         if depth <= 0:
                             return p, j + 1, i + 1
                         j -= 1
-                if re.search(r"\b(struct|union|enum)\s+" + re.escape(name) + r"\s*\{", l):
+                if re.search(r"\b(struct|union|enum)\s+" + re.escape(name) + r"\s*\{", source_line):
                     depth = 0
                     for k in range(i, len(text)):
                         depth += text[k].count("{") - text[k].count("}")

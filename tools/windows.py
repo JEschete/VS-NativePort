@@ -4,14 +4,15 @@ import argparse
 import hashlib
 import json
 import os
-from pathlib import Path
-import shutil
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
-import zipfile
 import xml.etree.ElementTree as ET
+import zipfile
+from pathlib import Path
+
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +27,7 @@ SOURCE_PATHS = tuple(Path(folder) for folder in SOURCE_FOLDERS) + tuple(
 
 def run(arguments, *, cwd=None, input_data=None):
     return subprocess.run([str(argument) for argument in arguments], cwd=cwd,
-        input=input_data, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        input=input_data, capture_output=True,
         check=True, timeout=300).stdout
 
 

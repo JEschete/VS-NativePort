@@ -74,7 +74,7 @@ class Overlay:
                     named.append((Path(nm).name, off, vram - start, str(kind)))
         flat.sort()
         ends = sorted(set(seg_bounds + [f[0] for f in flat]))
-        for i, (off, delta, kind) in enumerate(flat):
+        for _index, (off, delta, kind) in enumerate(flat):
             nxt = next((e for e in ends if e > off), None)
             if nxt is None:
                 continue

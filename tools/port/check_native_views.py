@@ -9,7 +9,6 @@ import re
 import sys
 
 import clang.cindex as ci
-
 import copy_to_native as ct
 import native_views as nv
 from layout_check import INCLUDES

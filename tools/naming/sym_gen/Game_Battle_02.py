@@ -8,8 +8,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import Gen  # noqa: E402
 import ai_state  # noqa: E402
+from common import Gen  # noqa: E402
 
 g = Gen("Game_Battle_02")
 c, T = g.c, g.T

@@ -12,12 +12,13 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import Gen, LEDGERS  # noqa: E402
+from common import LEDGERS, Gen  # noqa: E402
 
 g = Gen("Game_Menu_01")
 c = g.c
 L, M, H = "low", "med", "high"
-FN = {r["final_name"]: r for r in csv.DictReader(open(LEDGERS / "FUNCTION_CATALOG.csv", encoding="utf-8")) if r["final_name"]}
+with (LEDGERS / "FUNCTION_CATALOG.csv").open(encoding="utf-8") as stream:
+    FN = {r["final_name"]: r for r in csv.DictReader(stream) if r["final_name"]}
 SAVE = "Native\\Engine\\src\\Save\\MemoryCard\\GameFiles.h"
 
 

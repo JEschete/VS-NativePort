@@ -105,9 +105,12 @@ def module_order(tu_rel: str) -> list[str]:
 
 class Ledgers:
     def __init__(self, index: dict) -> None:
-        rd = lambda n: list(csv.DictReader(open(LEDGERS / n, encoding="utf-8")))  # noqa: E731
+        def read_rows(name):
+            with (LEDGERS / name).open(encoding="utf-8") as stream:
+                return list(csv.DictReader(stream))
+
         # rows from split files the overlay's splat.yaml does not build (merge_names `not-linked`) are not code
-        cat = [r for r in rd("FUNCTION_CATALOG.csv") if "not-linked" not in r["notes"].split(";")]
+        cat = [r for r in read_rows("FUNCTION_CATALOG.csv") if "not-linked" not in r["notes"].split(";")]
         self.cat_by_file = {(r["file"], r["name"]): r["id"] for r in cat}
         self.cat_by_ov = collections.defaultdict(list)
         self.cat_by_name = collections.defaultdict(list)
@@ -116,12 +119,12 @@ class Ledgers:
             self.cat_by_name[r["name"]].append(r["id"])
         self.cat_ov = {r["id"]: r["overlay"] for r in cat}
         self.cat_final = {r["id"]: r["final_name"] for r in cat}
-        self.data = rd("DATA_LEDGER.csv")
+        self.data = read_rows("DATA_LEDGER.csv")
         self.g_by_key = {r["key"]: r["id"] for r in self.data}
         self.g_by_name = collections.defaultdict(list)
         for r in self.data:
             self.g_by_name[r["name"]].append(r)
-        types = rd("TYPE_LEDGER.csv")
+        types = read_rows("TYPE_LEDGER.csv")
         self.t_by_key = {norm_key(r["key"]): r["id"] for r in types}
         self.t_alias = {}
         for r in types:
@@ -129,7 +132,7 @@ class Ledgers:
                 self.t_alias[f"typedef:{a}"] = norm_key(r["key"].partition("#")[0])
         self.multi = {k.partition("#")[0] for k in self.t_by_key if "#" in k}
         self.fields = collections.defaultdict(dict)
-        for r in rd("FIELD_LEDGER.csv"):
+        for r in read_rows("FIELD_LEDGER.csv"):
             self.fields[r["type_id"]].setdefault(r["name"], r["id"])
         # layout hash of each indexed declaration, as build_symbol_ledgers.py computes it
         self.layout = {}

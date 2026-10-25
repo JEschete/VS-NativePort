@@ -44,8 +44,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import decomp_index as dx  # noqa: E402
 import copy_fixups as cf  # noqa: E402
+import decomp_index as dx  # noqa: E402
 import native_views as nv  # noqa: E402
 from ref_index import RESIDENT, overlay_of  # noqa: E402
 from ref_index import norm_key as rx_norm  # noqa: E402
@@ -808,7 +808,7 @@ class Copier:
                 raise SystemExit(f"copy_fixups: {r['id']} {r['final_name']}: '{old}' not found ({why})")
             text = text.replace(old, new)
             self.used_fixups.add((r["id"], old))
-        for row_rx, pat, rep, why in cf.REGEX_FIXES:
+        for row_rx, pat, rep, _reason in cf.REGEX_FIXES:
             if re.search(row_rx, r["final_name"]):
                 text, n = re.subn(pat, rep, text)
                 if n:
@@ -887,9 +887,9 @@ class Copier:
         c_body: dict[str, dict] = {}
         for r in self.cat:
             dup = note(r, "dup-of")
-            if dup and r["kind"] in ("C", "C-header") and dup not in c_body:
-                if self.cat_by_id[dup]["kind"] not in ("C", "C-header"):
-                    c_body[dup] = r
+            if (dup and r["kind"] in ("C", "C-header") and dup not in c_body
+                    and self.cat_by_id[dup]["kind"] not in ("C", "C-header")):
+                c_body[dup] = r
         for r in self.cat:
             if note(r, "dup-of") or r["kind"].startswith("template") or r["copy"] != "yes":
                 continue
@@ -985,7 +985,7 @@ class Copier:
     def block_extern(self, gid: str) -> dict | None:
         """A global whose only declaration is a block-scope `extern` inside a function: that line, as a declaration."""
         for rel, rows in self.src.refs.items():
-            for line, col, n, kind, target in rows:
+            for line, _column, _name, _kind, target in rows:
                 if gid not in re.findall(r"[GFT]\d{5}(?:\.\d{3})?", target):
                     continue
                 b = self.src.load(rel)
@@ -2047,7 +2047,7 @@ class Copier:
     def copy_macros(self) -> None:
         defs: dict[str, dict] = {}
         template_headers = {"src/" + r["file"] for r in self.cat if r["kind"] == "template-body"}
-        for key, m in sorted(self.macro_defs.items(), key=lambda kv: (kv[1]["file"].endswith(".c"), kv[0])):
+        for _key, m in sorted(self.macro_defs.items(), key=lambda kv: (kv[1]["file"].endswith(".c"), kv[0])):
             if dx.origin(m["file"]) != "game" or re.match(r"src/EFFECT/PLG\d+\.BIN/", m["file"]):
                 continue  # effect plugin .c files bind template parameters: copied with the templates
             if m["file"] in template_headers and m["name"].startswith("VS_"):
@@ -2098,7 +2098,7 @@ class Copier:
             self.provide(n, home)
         # a .c file's own definition of a name that a header also defines (MENU's mkCdFile takes the VS_ prefix)
         file_defs: dict[tuple[str, str], dict] = {}
-        for key, m in self.macro_defs.items():
+        for _key, m in self.macro_defs.items():
             if m["file"].endswith(".c") and m["name"] in texts and not defs[m["name"]]["file"].endswith(".c") \
                     and dx.origin(m["file"]) == "game" and not self.inside_function(m["file"], m["line"]):
                 file_defs[(m["file"], m["name"])] = m
@@ -2364,7 +2364,7 @@ def content_hash(data: bytes) -> str:
     return hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest()
 
 
-def write_output(cp: "Copier", rendered: dict[str, str]) -> None:
+def write_output(cp: Copier, rendered: dict[str, str]) -> None:
     """Write the generated files, refusing to touch hand work (see the module docstring)."""
     if MANIFEST.exists():
         old = json.loads(MANIFEST.read_text(encoding="utf-8"))

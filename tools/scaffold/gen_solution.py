@@ -285,9 +285,9 @@ def solution_item_files() -> list[str]:
     out = []
     for f in sorted({t.replace("/", "\\") for t in listed if t}):
         top = f.split("\\")[0]
-        if ("\\" not in f and not f.endswith(".sln")) or top in SOLUTION_ITEM_DIRS:
-            if (ROOT / f).is_file():
-                out.append(f)
+        if ((("\\" not in f and not f.endswith(".sln")) or top in SOLUTION_ITEM_DIRS)
+                and (ROOT / f).is_file()):
+            out.append(f)
     return out
 
 # Tool folders shown in Solution Explorer (no build). The repository's tools\ and the machine's external tool root

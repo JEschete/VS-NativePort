@@ -57,7 +57,9 @@ def main() -> int:
         # Same-overlay callers first, then shared-engine (SLUS) callers.
         cr = sorted(callers.get(r["name"], []), key=lambda x: (x[0] != r["overlay"], x[0], x[1]))
         crs = [n if o == r["overlay"] else f"{o}:{n}" for o, n in cr]
-        trim = lambda xs, n: " ".join(xs[:n]) + (f" (+{len(xs) - n})" if len(xs) > n else "")
+        def trim(items, limit):
+            return " ".join(items[:limit]) + (f" (+{len(items) - limit})" if len(items) > limit else "")
+
         return trim(crs, 10), trim(ce, 14)
 
     groups: dict[str, list[dict]] = collections.defaultdict(list)

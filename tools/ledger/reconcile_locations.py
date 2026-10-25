@@ -30,7 +30,8 @@ def root_dir(loc: str) -> str:
 
 def main() -> int:
     dry = "--dry-run" in sys.argv
-    cat = list(csv.DictReader(open(L / "FUNCTION_CATALOG.csv", encoding="utf-8")))
+    with (L / "FUNCTION_CATALOG.csv").open(encoding="utf-8") as stream:
+        cat = list(csv.DictReader(stream))
     by_fn = {(r["file"], r["name"]): r for r in cat if r["final_location"]}
     size = collections.Counter(r["final_location"] for r in cat if r["final_location"])
     files = set(size)
@@ -43,22 +44,23 @@ def main() -> int:
             for v in (f.get("refs") or {}).get("var", {}):
                 users_of[v].append((rel, row["final_location"]))
 
-    G = list(csv.DictReader(open(L / "DATA_LEDGER.csv", encoding="utf-8")))
+    with (L / "DATA_LEDGER.csv").open(encoding="utf-8") as stream:
+        G = list(csv.DictReader(stream))
     moves, unplaced = {}, []
     for r in G:
         loc = r["final_location"]
         if r["disposition"] not in CODE or not loc or loc in files:
             continue
         ov = r["overlay"]
-        locs = [l for rel, l in users_of.get(r["name"], [])
+        locs = [location for rel, location in users_of.get(r["name"], [])
                 if (ov == "SLUS_010.40" or rel.startswith(ov + "/")
                     or (rel.count("/") == 1 and rel.startswith(ov.split("/")[0] + "/")))  # shared unit header
-                and root_dir(l) == root_dir(loc)]
+                and root_dir(location) == root_dir(loc)]
         if not locs:
             unplaced.append(r)
             continue
         c = collections.Counter(locs)
-        best = max(c, key=lambda l: (c[l], size[l]))
+        best = max(c, key=lambda location: (c[location], size[location]))
         moves[r["id"]] = (loc, best)
 
     print(f"{len(moves)} code globals moved to a catalog file; {len(unplaced)} have no user under their root:")

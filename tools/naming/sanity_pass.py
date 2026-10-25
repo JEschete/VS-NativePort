@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "sym_gen"))
-from common import Gen, ROOT, LEDGERS  # noqa: E402
+from common import ROOT, Gen, ledger_rows  # noqa: E402
 
 OUT = ROOT / "tools" / "naming" / "sanity"
 GENERIC = re.compile(r"^(unk|pad|field|_|D_|func_|filler|dummy|var|temp|tmp)|^[a-z]$|_t\d*$|^(unk|pad)?[0-9A-Fa-f]+$",
@@ -44,9 +44,9 @@ def symbol_addrs(root: Path) -> dict[tuple[str, int], str]:
 
 def main() -> int:
     g = Gen("Shared")
-    F = list(csv.DictReader(open(LEDGERS / "FIELD_LEDGER.csv", encoding="utf-8")))
-    T = {r["id"]: r for r in csv.DictReader(open(LEDGERS / "TYPE_LEDGER.csv", encoding="utf-8"))}
-    G = list(csv.DictReader(open(LEDGERS / "DATA_LEDGER.csv", encoding="utf-8")))
+    F = ledger_rows("FIELD_LEDGER.csv")
+    T = {r["id"]: r for r in ledger_rows("TYPE_LEDGER.csv")}
+    G = ledger_rows("DATA_LEDGER.csv")
     by_type = collections.defaultdict(list)
     for f in F:
         by_type[f["type_id"]].append(f)

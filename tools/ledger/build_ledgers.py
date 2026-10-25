@@ -417,7 +417,7 @@ def main() -> int:
         "",
     ]
     strat_tot = collections.Counter()
-    for lib in sorted(by_lib, key=lambda l: -sum(u["uses"] for _, u in by_lib[l])):
+    for lib in sorted(by_lib, key=lambda library: -sum(u["uses"] for _, u in by_lib[library])):
         sysname, target = SDK_TARGET.get(lib, ("Platform", "VS.Platform"))
         items = sorted(by_lib[lib], key=lambda x: (-x[1]["uses"], x[0]))
         uses = sum(u["uses"] for _, u in items)

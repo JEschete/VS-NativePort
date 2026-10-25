@@ -9,6 +9,26 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #25's tracked maintained fast-quality debt is now fully repaired:0 actionable
+  findings/0 new, all first-party Ruff checks pass, and the baseline is
+  byte-identical. Imports, unused/ambiguous bindings and equivalent statements
+  are cleaned up; all35 CSV readers now close their streams explicitly.
+  Shared ledger loading removes duplication while preserving CSV order,
+  quoted commas and the prior newline behavior, including closure on errors.
+  The lone C17 `.string` member hint is retained as a `language_advisories`
+  record, not hidden or "fixed" with a C++ header. Classification requires the
+  exact cpplint rule/message and direct C member assignment; actual C++ missing
+  headers and safety diagnostics still fail positive controls.
+  Verification:29 quality/tool controls,32 naming contracts and85 port tests
+  pass. Two real copier runs retain all751 runtime outputs and306 protected
+  files; all14 CSV outputs from five real naming batches are unchanged and
+  repeat-identical in isolated sinks. Fifteen project/solution renders match
+  before/after and a second render without touching the dirty owner solution.
+  Native binaries and the last764/3,390,300 Debug/Release test evidence are not
+  rebuilt or relabeled for these output-identical tooling changes. Scoped
+  historical test-tidy/retirement style categories are not claimed eliminated.
+  Exact publication/CI and closure are recorded in#25; remaining non-MA runtime
+  and assembly-gap work follows #4. Local evidence `quality25-completion-*`.
 - Owner resumed review/repair of all open non-MA issues on2026-10-25. The
   inventory is13 issues, including umbrella#4; titles combining several MA
   numbers are excluded too. #76 is closed at the owner's explicit request:

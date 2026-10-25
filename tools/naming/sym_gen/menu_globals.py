@@ -19,7 +19,7 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import Gen, ROOT, LEDGERS  # noqa: E402
+from common import LEDGERS, ROOT, Gen  # noqa: E402
 
 SRC = ROOT / "resources" / "rood-reverseWin" / "src"
 L, M, H = "low", "med", "high"
@@ -46,7 +46,8 @@ OVERLAY_DEFAULT = {
 }
 
 _ix = json.loads((ROOT / "build" / "port" / "index.json").read_text(encoding="utf-8"))
-_cat = {(r["file"].replace("\\", "/"), r["name"]): r for r in csv.DictReader(open(LEDGERS / "FUNCTION_CATALOG.csv", encoding="utf-8"))}
+with (LEDGERS / "FUNCTION_CATALOG.csv").open(encoding="utf-8") as stream:
+    _cat = {(r["file"].replace("\\", "/"), r["name"]): r for r in csv.DictReader(stream)}
 FUNCS = [(f["file"].removeprefix("src/"), f["line"], f["end_line"], f["name"]) for f in _ix["functions"].values()]
 _files = sorted({p.relative_to(SRC).as_posix() for p in SRC.rglob("*") if p.suffix in (".c", ".h")})
 _lines: dict[str, list[str]] = {}
@@ -152,7 +153,7 @@ def from_pattern(name, us):
     """First use whose line (joined with the next one) matches a known role pattern."""
     for rx, role, meaning in PATTERNS:
         r = re.compile(rx.replace("NAME", re.escape(name)))
-        for k, (f, n, ln, fn) in enumerate(us):
+        for _index, (f, n, ln, fn) in enumerate(us):
             nxt = lines(f)[n].strip() if n < len(lines(f)) else ""
             if (r.search(ln) or r.search(ln + " " + nxt)) and fn:
                 return role, meaning, label(f, n), fn
@@ -162,11 +163,13 @@ def from_pattern(name, us):
 class MenuGlobals:
     def __init__(self, batch: str, manual: dict):
         self.g = Gen(batch)
-        self.rows = list(csv.DictReader(open(ROOT / "tools" / "naming" / "sym_batches" / batch / "globals.csv", encoding="utf-8")))
+        with (ROOT / "tools" / "naming" / "sym_batches" / batch / "globals.csv").open(encoding="utf-8") as stream:
+            self.rows = list(csv.DictReader(stream))
         self.manual = manual
         self.unresolved = []
         self.used_names: dict[str, str] = {}
-        self.ledger = list(csv.DictReader(open(LEDGERS / "DATA_LEDGER.csv", encoding="utf-8")))
+        with (LEDGERS / "DATA_LEDGER.csv").open(encoding="utf-8") as stream:
+            self.ledger = list(csv.DictReader(stream))
         mine = {r["id"] for r in self.rows}
         for x in self.ledger:
             if x["final_name"] and x["id"] not in mine and x["linkage"] != "local-static":
@@ -198,7 +201,7 @@ class MenuGlobals:
             ns_counts = Counter(fn.rsplit("::", 1)[0] for fn, _ in users if "::" in fn)
             if ns_counts:
                 ns = ns_counts.most_common(1)[0][0]
-                loc = Counter(l for fn, l in users if fn.rsplit("::", 1)[0] == ns).most_common(1)[0][0]
+                loc = Counter(location for fn, location in users if fn.rsplit("::", 1)[0] == ns).most_common(1)[0][0]
             owner = None
             if r["linkage"] == "local-static":
                 rel, fn = r["key"].split("@", 1)[1].removeprefix("src/").split(":")

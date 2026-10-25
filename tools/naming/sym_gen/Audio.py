@@ -1,5 +1,6 @@
 """Audio globals from code read directly. Citations are resolved by exact text search, never typed."""
 import csv
+import re
 import sys
 from pathlib import Path
 
@@ -204,7 +205,7 @@ G("G01937", "asset", "Audio::menuSoundEffects", BANKS, "Holds EFFECT00.DAT, the 
   "asset:audio/sfx/effect00.json;" + c(("main.c", "vs_main_diskLoadFile(VS_EFFECT00_DAT_LBA, VS_EFFECT00_DAT_SIZE, _sfxData);")) + ";converted path is a proposed destination")
 G("G01954", "state", "Audio::soundState", BANKS, "Tracks loaded music slots, sound-effect banks and the wave bank with their disc requests.", "high",
   c(("146C.c", "func_8004552C(vs_main_soundData.currentMusicSlot, 0, 0x78);"), ("main.h", "} soundData_t;")))
-for gid, var, mask, fn, init in [
+for gid, var, mask, _function, init in [
         ("G01974", "D_8005FE70", "0x1", "PlaySfxOnPrimaryChannel", "D_8005FE70 = 1;"),
         ("G01975", "D_8005FE74", "0x7E", "PlaySfx", "D_8005FE74 = 2;"),
         ("G01976", "D_8005FE78", "0x180", "PlayBankSfx", "D_8005FE78 = 0x80;"),
@@ -227,12 +228,11 @@ G("G02010", "catalog", "Audio::waveBankFileMap", BANKS, "Maps a sound-set id to 
 
 
 # ---------------------------------------------------------------- types and fields
-import re
-
 TYPES, FIELDS = [], []
 members = {}
-for r in csv.DictReader(open(ROOT / "Docs" / "ledgers" / "FIELD_LEDGER.csv", encoding="utf-8")):
-    members.setdefault(r["type_id"], []).append(r)
+with (ROOT / "Docs" / "ledgers" / "FIELD_LEDGER.csv").open(encoding="utf-8") as stream:
+    for r in csv.DictReader(stream):
+        members.setdefault(r["type_id"], []).append(r)
 DECL_END = {}
 
 
@@ -608,7 +608,7 @@ T("T00708", "OnDisc", "Audio::SfxProgramHeader", A + "Playback\\SoundPlayback.h"
 
 problems = []
 byfid = {m["id"]: m for ms in members.values() for m in ms}
-for fid, final, meaning, conf, notes in FIELDS:
+for fid, _final, _meaning, _confidence, notes in FIELDS:
     orig = byfid[fid]["name"]
     ok = False
     for m in re.finditer(r"source:([^:;]+):(\d+)", notes):
@@ -619,7 +619,8 @@ for fid, final, meaning, conf, notes in FIELDS:
         problems.append(f"{fid} {orig}: no cited line names the member ({notes})")
 if problems:
     sys.exit("\n".join(problems))
-torder = [r["id"] for r in csv.DictReader(open(ROOT / "tools" / "naming" / "sym_batches" / "Audio" / "types.csv", encoding="utf-8"))]
+with (ROOT / "tools" / "naming" / "sym_batches" / "Audio" / "types.csv").open(encoding="utf-8") as stream:
+    torder = [r["id"] for r in csv.DictReader(stream)]
 tby = {t[0]: t for t in TYPES}
 with open(OUT / "types.csv", "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f)
@@ -631,7 +632,8 @@ with open(OUT / "fields.csv", "w", newline="", encoding="utf-8") as f:
     w.writerows(FIELDS)
 print(len(TYPES), "types;", len(FIELDS), "fields")
 
-order = [r["id"] for r in csv.DictReader(open(ROOT / "tools" / "naming" / "sym_batches" / "Audio" / "globals.csv", encoding="utf-8"))]
+with (ROOT / "tools" / "naming" / "sym_batches" / "Audio" / "globals.csv").open(encoding="utf-8") as stream:
+    order = [r["id"] for r in csv.DictReader(stream)]
 byid = {r[0]: r for r in rows}
 missing = [i for i in order if i not in byid]
 OUT.mkdir(parents=True, exist_ok=True)

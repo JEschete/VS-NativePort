@@ -132,6 +132,15 @@ contracts must be preserved. Private helpers, conversions, bounds and lifetime
 diagnostics are not covered by this exception. Regression controls check both
 the registered path/name match and continued safety reporting.
 
+`language_advisories` retains cpplint's inapplicable C++ `<string>` suggestion
+for a direct `.string`/`->string` member assignment in a native C17 source.
+That field name does not make a C structure use `std::string`, and a C++
+standard header cannot repair C code. This classification is limited to that
+exact tool/rule/message and C member expression; C++ sources, headers, other
+include advice and safety diagnostics remain actionable. Real C/C++ tool
+controls verify both sides. The diagnostic stays visible in the report and
+does not require a baseline or source suppression.
+
 The positional-argument heuristic requires at least three identical-type
 arguments and does not group implicit conversions. This avoids redesigning
 ordinary two-value APIs solely for lint while still flagging ambiguous private

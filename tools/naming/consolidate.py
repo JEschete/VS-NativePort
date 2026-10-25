@@ -41,7 +41,7 @@ RULES: list[tuple[str, str | None, str, object]] = [
     ("Audio::Commands", None, "Audio::Mixer", "Native\\Engine\\src\\Audio\\Mixer\\MixControl.c"),
     ("Audio", "Native\\Engine\\src\\Audio\\ActorSounds.c", "Audio", "Native\\Engine\\src\\Audio\\ActorSound.c"),
     # Core: math, memory, random each get one namespace
-    ("Core", "Native\\Engine\\src\\Core\\Math.c", "Core::Math", lambda l: f"Native\\Engine\\src\\Core\\Math\\{core_math_file(l)}.c"),
+    ("Core", "Native\\Engine\\src\\Core\\Math.c", "Core::Math", lambda leaf: f"Native\\Engine\\src\\Core\\Math\\{core_math_file(leaf)}.c"),
     ("Core", "Native\\Engine\\src\\Core\\Matrix.c", "Core::Math", "Native\\Engine\\src\\Core\\Math\\Matrix.c"),
     ("Core", "Native\\Engine\\src\\Core\\Numbers.c", "Core::Math", "Native\\Engine\\src\\Core\\Math\\FixedPoint.c"),
     ("Core::FixedMath", None, "Core::Math", "Native\\Engine\\src\\Core\\Math\\Interpolation.c"),

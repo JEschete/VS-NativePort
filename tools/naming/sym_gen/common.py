@@ -29,6 +29,11 @@ LEDGERS = ROOT / "Docs" / "ledgers"
 LABEL = re.compile(r"\(([^:()]+):(\d+) (\w+)\)$")
 
 
+def ledger_rows(name: str) -> list[dict[str, str]]:
+    with (LEDGERS / name).open(encoding="utf-8") as stream:
+        return list(csv.DictReader(stream))
+
+
 class Tree:
     def __init__(self, prefix: str) -> None:
         self.prefix, self.root = prefix, TREES[prefix]
@@ -69,9 +74,9 @@ class Gen:
     def __init__(self, batch: str) -> None:
         self.batch = batch
         self.trees = {p: Tree(p) for p in TREES}
-        self.types = {r["id"]: r for r in csv.DictReader(open(LEDGERS / "TYPE_LEDGER.csv", encoding="utf-8"))}
+        self.types = {r["id"]: r for r in ledger_rows("TYPE_LEDGER.csv")}
         self.members: dict[str, list[dict]] = {}
-        for r in csv.DictReader(open(LEDGERS / "FIELD_LEDGER.csv", encoding="utf-8")):
+        for r in ledger_rows("FIELD_LEDGER.csv"):
             self.members.setdefault(r["type_id"], []).append(r)
         self.context = json.loads((ROOT / "build" / "port" / "symbol_context.json").read_text(encoding="utf-8"))
         self.TYPES: list[list[str]] = []
@@ -248,7 +253,7 @@ class Gen:
             out = []
             for i, (m, f) in enumerate(zip(ms, lay["fields"], strict=True)):
                 width = int(m["bits"]) if m.get("bits") else (
-                    ((offs[i + 1] if i + 1 < len(offs) else lay["size"] * 8) - offs[i]))
+                    (offs[i + 1] if i + 1 < len(offs) else lay["size"] * 8) - offs[i])
                 out.append(((f["offset"], width), m))
             return out
         src = {}
@@ -282,7 +287,7 @@ class Gen:
         problems = []
         orig_of = {m["id"]: m["name"] for ms in self.members.values() for m in ms}
         dup_types = {t[0] for t in self.TYPES if t[6].startswith("same-as:")}
-        for fid, final, meaning, conf, notes in self.FIELDS:
+        for fid, _final, _meaning, _confidence, notes in self.FIELDS:
             if fid.split(".")[0] in dup_types:
                 continue
             orig = orig_of[fid]
@@ -294,8 +299,10 @@ class Gen:
         batch_dir = ROOT / "tools" / "naming" / "sym_batches" / self.batch
         out = ROOT / "tools" / "naming" / "sym_out" / self.batch
         out.mkdir(parents=True, exist_ok=True)
-        torder = [r["id"] for r in csv.DictReader(open(batch_dir / "types.csv", encoding="utf-8"))]
-        gorder = [r["id"] for r in csv.DictReader(open(batch_dir / "globals.csv", encoding="utf-8"))]
+        with (batch_dir / "types.csv").open(encoding="utf-8") as stream:
+            torder = [r["id"] for r in csv.DictReader(stream)]
+        with (batch_dir / "globals.csv").open(encoding="utf-8") as stream:
+            gorder = [r["id"] for r in csv.DictReader(stream)]
         tby, gby = {t[0]: t for t in self.TYPES}, {g[0]: g for g in self.GLOBALS}
         fby = {f[0]: f for f in self.FIELDS}
         forder = [m["id"] for tid in torder for m in self.members.get(tid, [])]

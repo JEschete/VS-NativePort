@@ -283,7 +283,7 @@ class Hazards:
                     if pt:
                         targets.append(pt)
         del parent
-        for i, (value, lit) in lits:
+        for _index, (value, lit) in lits:
             for rec, count in targets:
                 size = rec.get_size()
                 if size <= 0 or not self.contains_pointer(rec):
