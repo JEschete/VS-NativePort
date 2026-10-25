@@ -9,7 +9,8 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
-- #179 new interrupted-scene reentry defect is confirmed and logged before
+- #179 interrupted-scene reentry defect is repaired and closed after acceptance
+  checkpoint2b2a175b/exact green40155513890. It was confirmed and logged before
   repair. Debug1792893835821337-0 stops the first chain while event81 box4/5
   dialogue is still active; normal teardown completes, but the fresh entry
   crashes at24126 in progressive text rendering after its new event buffer
@@ -95,11 +96,28 @@ verification of the current worktree.
   attacks that occur only after reaching Ashley's height.
   Local profiles persist in the session `files/ledge171-wolf*.json`; traces
   and captures are under `build/quality/ledge171-*` and the listed run dirs.
-- #175/#177 reference audit limits: box attacks are conditional, not a direct
-  beeline. Original73460.s requires a nearby hostile actor at tile squared
-  distance below3, attacker box range and allowed action-delay state before
-  candidates compete; a controlled live rare-box selection is pending.
-  Owner's roulette loads MENUF at11609. Native reel initialization, three
+- #175 fresh crate audit: original71618.c:1093 tries ordinary ranked actions
+  first, then cached fallback against four special actors only after those fail.
+  Original73460.s still requires nearby-hostile tile squared distance below3,
+  range, readiness, cooldown and visibility/blocked permissions. Isolated initial
+  room placement replacement removes original props, so empty isolated Hall is
+  not a valid box control. Production Hall1792896917883918-0 registers boxes3/4;
+  its behind-ledge control puts Ashley448 units lower and does not meet box reach.
+  Production9/11 original wolf/stack1792897672113021-0 has fallback action1/
+  weight128, room-delay0/cooldown0 and ready relations, but box6 distance79404
+  exceeds range50176; box7 distance127020 exceeds the0x19000 cap. West-side
+  1792897731306618-0 brings box6 to19974/50176 but ordinary Ashley attacks
+  succeed first (target0, natural HP250->209), correctly suppressing fallback.
+  No box attack/HP change or confirmed defect yet. Invalid tile2,1/height6 were
+  rejected, not forced; supported height3 settles to ground, not atop the stack.
+  Next observation: controller-established cover/high ground or a source single
+  box where ordinary Ashley actions fail while the box remains within reach.
+  No runtime stats/coordinates/flags/AI settings were written. Local read-only
+  PDB-checked evidence: `build/quality/box175-*`; session `files/box175-*`
+  retains fixtures/observer. Concurrent scouts stalled before GPU initialization
+  and are excluded; serial probes worked, without a driver/root-cause claim.
+- #177 roulette audit limits: owner's roulette loads MENUF at11609. Native reel
+  initialization, three
   weighted16-entry tables, acceleration/deceleration and stop selection match
   original MENUF source; BIOS Rand15 golden controls and owner raw RNG advance.
   /J keeps the selected byte unsigned. No simple RNG defect is established,
