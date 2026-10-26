@@ -124,6 +124,12 @@ def git_output(root: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
+def reference_revision(root: Path, git_root: str) -> str:
+    if root.resolve() != Path(git_root).resolve():
+        return "unversioned snapshot"
+    return git_output(root, "rev-parse", "HEAD")
+
+
 def symbol_map(root: Path) -> dict[tuple[str, str], int]:
     result = {}
     for path in sorted((root / "config").rglob("symbol_addrs.txt")):
@@ -343,9 +349,10 @@ def audit(output: Path, publish: bool = False) -> dict:
         after = git_output(root, "status", "--porcelain", "--", ".")
         if before != after:
             raise RuntimeError(f"Reference changed during audit: {name}")
+        git_root = git_output(root, "rev-parse", "--show-toplevel")
         metadata[name] = {
-            "git_root": git_output(root, "rev-parse", "--show-toplevel"),
-            "revision": git_output(root, "rev-parse", "HEAD"),
+            "git_root": git_root,
+            "revision": reference_revision(root, git_root),
             "status": before, "source_fingerprint_sha256": fingerprint,
             "source_files_scanned": source_count,
         }

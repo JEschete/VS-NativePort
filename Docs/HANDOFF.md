@@ -9,6 +9,15 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #189 fixes reference revision attribution in the assembly audit:
+  rood-reverseWin is an unversioned snapshot inside the native repository,
+  not a checkout at the enclosing native HEAD. Only a matching reference
+  repository root supplies a revision; copied snapshots are explicitly
+  labeled unversioned and retain their source SHA/discovered-root metadata.
+  Two isolated controls cover both branches without touching a repository.
+  Native code, gap/coverage CSVs, source fingerprints and53 actual stubs
+  remain unchanged; default quality has0 new findings. Private
+  `provenance189-*`; publication/exact CI and closure are on#189.
 - #42 F01845 now constructs the typed orbit motion state in the existing
   low arena, reaching133/186 original entries and53 gaps (18 C/C++
   references,25 assembly-only,10 missing listings). Original7E05C.s:

@@ -21,6 +21,29 @@ from tools.port.audit_assembly_gaps import (
 
 
 class AssemblyGapAuditTests(unittest.TestCase):
+    def test_reference_revision_does_not_attribute_an_enclosing_repository(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "snapshot"
+            root.mkdir()
+            with patch.object(audit_module, "git_output") as output:
+                self.assertEqual(
+                    audit_module.reference_revision(root, directory),
+                    "unversioned snapshot",
+                )
+                output.assert_not_called()
+
+    def test_reference_revision_records_the_reference_repository_head(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with patch.object(
+                audit_module, "git_output", return_value="reference-head"
+            ) as output:
+                self.assertEqual(
+                    audit_module.reference_revision(root, str(root)),
+                    "reference-head",
+                )
+                output.assert_called_once_with(root, "rev-parse", "HEAD")
+
     def test_redirect_requires_the_expected_macro_and_a_real_native_body(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
