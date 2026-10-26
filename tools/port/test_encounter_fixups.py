@@ -10,6 +10,16 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_dynamic_tile_marker_is_owned_with_existing_tile_primitives(self):
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F01828"]["path"],
+            r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
+        )
+        self.assertEqual(
+            owned["F01828"]["name"], "Battle_Ai_MarkAiTileDynamicObstacle"
+        )
+
     def test_room_screen_bounds_share_the_original_predicate(self):
         owned = self.owned_items()
         self.assertEqual(

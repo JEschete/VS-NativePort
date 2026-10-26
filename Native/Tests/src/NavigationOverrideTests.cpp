@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
@@ -52,6 +53,20 @@ struct NavigationOverrideFixture {
               Battle_Ai_actorAiStates);
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     Battle_Ai_tileFlagMap = saved_grid;
+  }
+
+  static void CheckCellValue(u_short actual, u_short expected) {
+    CHECK(actual == expected);
+  }
+
+  void CheckOtherCells(int x, int z, u_short expected) const {
+    for (int row = 0; row < 32; ++row) {
+      for (int column = 0; column < 32; ++column) {
+        if (row != z || column != x) {
+          CheckCellValue(grid[row][column], expected);
+        }
+      }
+    }
   }
 };
 
@@ -171,6 +186,54 @@ TEST_CASE(
   SetExpectedOverrideFields(expected, 4);
   Battle_Ai_CopyActorNavigationOverrideState(4, &fixture.route);
   CHECK(Snapshot(fixture.route) == Snapshot(expected));
+}
+
+TEST_CASE("Dynamic navigation marking preserves every source flag word",
+          "[ai][navigation][tile-marker]") {
+  const int x = GENERATE(0, 31);
+  const int z = GENERATE(0, 31);
+  NavigationOverrideFixture fixture;
+  constexpr u_short kCanary = 0xA15A;
+  for (auto& row : fixture.grid) std::ranges::fill(row, kCanary);
+  for (unsigned word = 0; word < 65536; ++word) {
+    fixture.grid[z][x] = static_cast<u_short>(word);
+    Battle_Ai_MarkAiTileDynamicObstacle(x, z);
+    REQUIRE(fixture.grid[z][x] == (word | 0x400u));
+    Battle_Ai_MarkAiTileDynamicObstacle(x, z);
+    CHECK(fixture.grid[z][x] == (word | 0x400u));
+  }
+  fixture.CheckOtherCells(x, z, kCanary);
+}
+
+TEST_CASE("Dynamic navigation marking reaches every native grid cell",
+          "[ai][navigation][tile-marker]") {
+  NavigationOverrideFixture fixture;
+  for (int z = 0; z < 32; ++z) {
+    for (int x = 0; x < 32; ++x) {
+      Battle_Ai_MarkAiTileDynamicObstacle(x, z);
+      CHECK(fixture.grid[z][x] == 0x400);
+    }
+  }
+}
+
+TEST_CASE("Dynamic navigation marking follows grid availability and rebinding",
+          "[ai][navigation][tile-marker]") {
+  NavigationOverrideFixture fixture;
+  fixture.grid[2][1] = 3;
+  Battle_Ai_tileFlagMap = nullptr;
+  Battle_Ai_MarkAiTileDynamicObstacle(-1, -1);
+  Battle_Ai_MarkAiTileDynamicObstacle(std::numeric_limits<int>::min(),
+                                      std::numeric_limits<int>::max());
+  CHECK(fixture.grid[2][1] == 3);
+  Battle_Ai_tileFlagMap = fixture.grid;
+  Battle_Ai_MarkAiTileDynamicObstacle(1, 2);
+  CHECK(fixture.grid[2][1] == 0x403);
+  u_short second[32][32]{};
+  second[2][1] = 0xA0;
+  Battle_Ai_tileFlagMap = second;
+  Battle_Ai_MarkAiTileDynamicObstacle(1, 2);
+  CHECK(second[2][1] == 0x4A0);
+  CHECK(fixture.grid[2][1] == 0x403);
 }
 
 TEST_CASE(

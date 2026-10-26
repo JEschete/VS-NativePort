@@ -20,6 +20,7 @@ namespace {
 constexpr unsigned kTileMask = 0xFF;
 constexpr int kTileZShift = 16;
 constexpr unsigned kReservedTileBit = 0x80;
+constexpr u_short kDynamicTileBit = 0x400;
 constexpr int kDirectionComponentMask = 3;
 constexpr int kDirectionZShift = 4;
 constexpr int kDirectionComponentModulus = 4;
@@ -56,6 +57,13 @@ void Battle_Ai_ReserveAiDestinationTile(int x, int z) {
   if (Battle_Ai_tileFlagMap == nullptr) return;
   RequireTile(x, z);
   Battle_Ai_tileFlagMap[z][x] |= kReservedTileBit;
+}
+
+// decomp: func_800E68EC (src/BATTLE/BATTLE.PRG/7E05C.s:72).
+void Battle_Ai_MarkAiTileDynamicObstacle(int x, int z) {
+  if (Battle_Ai_tileFlagMap == nullptr) return;
+  RequireTile(x, z);
+  Battle_Ai_tileFlagMap[z][x] |= kDynamicTileBit;
 }
 
 // decomp: func_800E4690 (src/BATTLE/BATTLE.PRG/7BDD4.s:72).

@@ -83,7 +83,6 @@ void Battle_Ai_BuildAiSpecialTerrainHeights(void);
 void Battle_Ai_InitializeRoomNavigation(void);
 void Battle_Ai_AddAiTileOccupant(void*);
 void Battle_Ai_RemoveAiTileOccupant(Field_GimmickInstance*);
-void Battle_Ai_MarkAiTileDynamicObstacle(int, int);
 int Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
 void Battle_Ai_ReleaseActorAiContactOccupancy(int);
 

@@ -9,6 +9,20 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01828 now performs the original guarded u16 tileFlagMap OR0x400
+  through NavigationPrimitives, reaching131/186 original entries and55
+  gaps (20 C/C++ references,25 assembly-only,10 missing listings).
+  Existing trap/interaction callers use the typed native grid and existing
+  32x32 bounds; missing-grid calls stay no-ops. Red3/1032 has1031 failures;
+  final3/529,408 covers all65536 words at four corner cells, idempotence,
+  all1024 coordinates, other-cell canaries, no-grid and rebind behavior.
+  Full Debug/Release803/4,061,842 each,98 copier controls and0-new
+  focused/default quality pass; both hosts link. Two generations preserve306
+  paths and repeat identically, changing only Navigation.c/.h and one
+  consumer include. Add/remove occupancy and workspace-builder stubs remain
+  separate and are not enabled. Bit-category semantics, full trap/AI
+  gameplay and compatibility retirement are not inferred. Private
+  `tilemarker42-*`; publication/exact CI are on#42.
 - #187/#42 F00756 now uses one signed16 native room clip rectangle in both
   ordinary/subdivided triangle/quad emitters, reaching130/186 original
   entries and56 gaps (21 C/C++ references,25 assembly-only,10 missing

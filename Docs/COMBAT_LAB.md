@@ -415,6 +415,33 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Exact dynamic navigation tile marker (#42, 2026-10-25)
+
+F01828 (`func_800E68EC`, original7E05C.s:72 and read-only
+battle_movement.c) now belongs to NavigationPrimitives. It guards on
+tileFlagMap availability, reuses the existing32x32 tile validation and
+sets exactly u16 bit0x400 with OR. Existing Field trap/interaction callers
+already supply this typed native API. No other flag is cleared or changed,
+and repeat calls are idempotent; this is not an occupancy counter.
+
+Red controls have3 failed cases/1031 failed assertions out of1032.
+Final3 cases/529,408 assertions cover every65536 source word at all
+four grid corners, repeat marking, untouched-cell canaries, all1024
+coordinates, missing-grid calls and live grid rebinding. The exact
+obstacle-category interpretation remains inferred; these tests establish
+the source-backed bit contract, not a new trap/AI gameplay fix.
+
+Full Debug/Release suites pass803 cases/4,061,842 assertions each;98
+copier/audit controls and focused/default quality pass with0 new findings.
+Both hosts link. Two copier runs preserve306 protected paths and repeat
+identically, changing only Navigation.c/.h and the existing interaction
+consumer include. Occupant add/remove and workspace-building stubs
+remain separate to avoid enabling an incomplete counting lifecycle.
+Private `tilemarker42-*` retains commands, red/green and ownership evidence.
+The original cohort advances131/186,55 remaining, with original order/
+prior130 checks preserved. No whole-state promotion or retirement is
+claimed; publication/exact CI are on#42.
+
 ### Shared native room screen rectangle (#187/#42, 2026-10-25)
 
 F00756 (`func_800981B8`, original2EA3C.s:1101) now updates one signed16

@@ -12,7 +12,7 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
