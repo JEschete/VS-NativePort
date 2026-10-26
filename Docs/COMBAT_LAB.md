@@ -415,6 +415,82 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Native script weapon-mode transition (#42/#148, 2026-10-26)
+
+F01130 (`func_800B9DB4`, original4A0A8.c:2158 and the matching
+800B9DB4-800B9F24 instruction listing) now belongs to Event/WeaponMode.
+The read-only rood-boi e59320ca C counterpart agrees with the instruction
+branches. The public decomp scratch returned403; implementation evidence
+comes from these local original instructions and C, not an assumed
+animation or visibility shortcut.
+
+The command retains the original state machine:
+
+- With no pending transition, story flag0xAC gates every actor change.
+  The operand indexes the existing native weapon-state table and calls
+  the production battle-mode/HUD helper. Bounds use that table's physical
+  extent, not an invented two-value logical domain.
+- No animation, or skipState2, applies exactly the original low16-bit
+  visibility mask: set/clear0x1800, preserve other low flags, then snap
+  both weapon visibility blends through the existing APIs.
+- Animated playback requests `(variant-1)*2 + (mode^1) +109` with10-frame
+  blending and the original draw/sheath sound helper, then yields while
+  the skeletal pose lacks public state bit0x80.
+- Normal completion requests idle101/6 and clears the pending byte without
+  forcing skip-only visibility or restarting an already-held identical
+  idle. Skipping a live transition clears the wait and snaps visibility
+  without replaying its animation or rechecking the entry-only story gate.
+
+Original D800F4C4E/G00473 is now named weaponTransitionPending. Its address,
+shared-byte behavior and existing event-initialization reset are preserved;
+the proposal output and low-confidence trace queue agree with the proven
+reader. Missing command/model/battle context, an out-of-bounds table index
+or an explicit animation failure logs and terminates. Returning a negative
+error to this VM would instead be interpreted as a branch address.
+
+Verification is from parent4c4e464d plus the scoped worktree and preserved
+owner edits; exact commands and local evidence are in `weaponmode42-*`:
+
+- Original stub red:5 cases/72 assertions,51 failures. A dependent VM test
+  precondition was corrected before this bounded red result was captured.
+- Debug/Release `build\<configuration>\VS.Tests.exe "[weapon-mode]"
+  --reporter compact`:7 cases/471 assertions each. Synthetic common/battle
+  sequence banks run through the real animation selection and skeletal
+  advancement code, never an animation-lock or forced-completion flag.
+- Exact timing covers synthetic length4 poses holding after5 advances.
+  Outside active event playback, variant2 retains the battle helper's
+  queued idle: after5 advances the idle starts at0 and the opcode must
+  still yield; it holds after10. Drawn idle101 already held at4 is not
+  restarted by the final identical animation request. These source-backed
+  distinctions corrected two overly narrow fixture assumptions, not
+  production timing or acceptance thresholds.
+- Actual normal/skip VM dispatch holds the original opcode cursor, then
+  advances to the production stop-context handler. The normal handler is
+  resolved through the real BATTLE800B9DB4 symbol registry; its interior
+  address is rejected. Tests also cover the entry gate, skip during a live
+  wait, both weapons' final blends, both playback phases and the last
+  physical state-table slot without claiming that slot is authored content.
+- Both x64 solution configurations link both hosts; full native suites
+  pass813 cases/4,078,771 assertions each. All104 port and32 naming
+  controls pass, with0-new focused/default quality and unchanged baselines.
+- Two native generations preserve owned/reference/owner inputs and repeat
+  identically, changing only ModulePointers.c, ScriptActors.c/.h and
+  ScriptVm.c/.h. Game/Tests projects render selectively and repeat without
+  rewriting the owner solution. Native C-header interop is registered for
+  the new translation unit.
+
+Full trace-queue regeneration exposed unrelated pre-existing drift:
+17 removals including G00473,7 additions and4 namespace-label changes.
+Its candidate output is retained privately and the discovery is on#148.
+This batch removes only the now-resolved G00473 entry, preserving every
+other queue record rather than folding unrelated semantic work into it.
+
+The original cohort reaches134/186,52 remaining (17 C/C++ references,
+25 assembly-only,10 missing listings). Preserve original IDs/order and
+prior133 checks. This is component/VM verification, not every authored
+cutscene, audible output parity, whole-state C++ promotion or compatibility
+retirement. Publication and exact-revision CI are on#42/#148.
+
 ### Typed orbit-state construction and teardown (#42, 2026-10-25)
 
 F01845 (`func_800E7660`, original7E05C.s:1080-1095 and read-only

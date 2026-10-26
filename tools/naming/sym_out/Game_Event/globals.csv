@@ -57,7 +57,7 @@ G00469,state,Event::playbackPhase,Native\Game\src\Event\ScriptVm.c,Sequences eve
 G00470,state,Event::threadCursors,Native\Game\src\Event\ScriptVm.c,Stores the current command position of the four event-script threads.,high,state:Event::ScriptState;source:4A0A8.c:4603
 G00471,state,Event::vibrationPatternBuffer,Native\Game\src\Event\ScriptEffects.c,Stores a copied vibration pattern played by a script command.,high,state:Event::ScriptState;source:4A0A8.c:2527
 G00472,state,Event::suspendedAmbientSoundId,Native\Game\src\Event\ScriptAudio.c,Stores the room ambient sound restored after a script suspension.,high,state:Event::ScriptState;source:4A0A8.c:2227
-G00473,state,Event::reservedResetByte,Native\Game\src\Event\ScriptVm.c,Retains a byte cleared at event initialization; no reader is identified.,low,meaning-unresolved;source:4A0A8.c:4608
+G00473,state,Event::weaponTransitionPending,Native\Game\src\Event\ScriptVm.c,Tracks Ashley's script weapon-mode animation wait until completion or skip.,high,state:Event::WeaponTransitionPending;reader:4A0A8.c:2158 func_800B9DB4;reset:4A0A8.c:4608
 G00474,state,Event::hasRoomEntryScript,Native\Game\src\Event\Triggers.c,Marks that the room has an entry script waiting to run.,high,state:Event::RoomEvents;source:4A0A8.c:4237
 G00475,state,Event::eventId,Native\Game\src\Event\ScriptVm.c,Identifies the event file or door event to load.,high,state:Event::PlaybackState;source:573B8.h:73;source:4A0A8.c:2847
 G00476,state,Event::isChainedEventLoaded,Native\Game\src\Event\ScriptVm.c,Marks that a chained event has been preloaded.,high,state:Event::PlaybackState;source:4A0A8.c:2778

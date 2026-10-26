@@ -1506,6 +1506,12 @@
     <ClInclude Include="src\Event\Triggers.h">
       <Filter>src\Event</Filter>
     </ClInclude>
+    <ClCompile Include="src\Event\WeaponMode.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\WeaponMode.h">
+      <Filter>src\Event</Filter>
+    </ClInclude>
     <ClInclude Include="src\Event\Weather.h">
       <Filter>src\Event</Filter>
     </ClInclude>

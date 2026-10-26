@@ -11,6 +11,36 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_script_weapon_mode_owns_its_original_opcode_and_named_wait_state(self):
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F01130"]["path"], r"Native\Game\src\Event\WeaponMode.cpp"
+        )
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"Docs\ledgers\DATA_LEDGER.csv").open(
+            encoding="utf-8-sig", newline=""
+        ) as handle:
+            row = next(row for row in csv.DictReader(handle) if row["id"] == "G00473")
+        self.assertEqual(row["final_name"], "Event::weaponTransitionPending")
+        self.assertEqual(row["confidence"], "high")
+        with (root / r"tools\naming\sym_out\Game_Event\globals.csv").open(
+            encoding="utf-8-sig", newline=""
+        ) as handle:
+            proposal = next(
+                row for row in csv.DictReader(handle) if row["id"] == "G00473"
+            )
+        for field in ("final_name", "purpose", "confidence", "notes"):
+            self.assertEqual(proposal[field], row[field])
+        with (root / r"Docs\ledgers\TRACE_QUEUE.csv").open(
+            encoding="utf-8-sig", newline=""
+        ) as handle:
+            self.assertNotIn("G00473", {item["id"] for item in csv.DictReader(handle)})
+        source = (root / r"Native\Game\src\Event\ScriptVm.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Event_weaponTransitionPending = 0;", source)
+        self.assertNotIn("Event_reservedResetByte", source)
+
     def test_owned_function_catalog_matches_the_registered_native_definition(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(

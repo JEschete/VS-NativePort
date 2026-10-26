@@ -720,7 +720,6 @@ T00403.002,low-named,2,Event::CameraTrackScratch.pad08,unk8,0x8,Unused scratch b
 T00403.006,low-named,2,Event::CameraTrackScratch.pad40,unk40,0x40,Unused scratch bytes,,,
 T00403.009,low-named,2,Event::CameraTrackScratch.pad60,unk60,0x60,Unused scratch bytes,,,
 G00125,global,2,Event::kSpecialOperationTenArguments,D_800E9C00,,Provides values passed by special operation ten.,Event::CommandSpecialOperation@800BB028,Event::kSpecialOperationTenArguments=0x800E9C00,constexpr
-G00473,global,2,Event::reservedResetByte,D_800F4C4E,,Retains a byte cleared at event initialization; no reader is identified.,Event::InitializeEventScriptData@800BF5F0,Event::reservedResetByte=0x800F4C4E,state
 T00199.002,low-named,2,Field::CollisionSampleScratch.pad15,pad15,0x15,Alignment padding,,,
 T00199.008,low-named,2,Field::CollisionSampleScratch.pad3D,pad3D,0x3D,Alignment padding,,,
 T00199.009,low-named,2,Field::CollisionSampleScratch.searchCeiling,unk40,0x40,Upper search offset,Field::ResolveActorTerrainMotion@800A76BC Field::ClassifyActorTerrainProbe@800A8B34,,

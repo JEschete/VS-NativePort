@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 2026-10-25. This is a short entry point, not another work tracker.
+Updated 2026-10-26. This is a short entry point, not another work tracker.
 Detailed checkpoint evidence, commands and replay paths are preserved in
 [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
 verification of the current worktree.
@@ -9,6 +9,25 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01130 now implements the original Ashley weapon-mode opcode through
+  typed native battle/animation/visibility APIs, reaching134/186 original
+  entries and52 gaps (17 C/C++ references,25 assembly-only,10 missing
+  listings). Original800B9DB4 and the read-only C counterpart establish
+  gateAC, immediate/skip visibility and the shared pending animation byte.
+  G00473 is now weaponTransitionPending, with its existing initialization
+  reset and original address preserved. Red5/72 has51 failures; final
+  7/471 drives real synthetic skeletal animation and both VM dispatch
+  paths, including exact5/10-step queued-idle gates, non-restarting held
+  idle, normal/skip completion, native table bounds and original-address
+  resolution. Full Debug/Release813/4,078,771 each,104 port and32 naming
+  controls pass; both hosts link and focused/default quality have0 new
+  findings without baseline changes. Native generation repeats identically
+  with five expected provider/global-binding outputs; selective Game/Tests
+  rendering preserves the owner solution. Only resolved G00473 is removed
+  from the trace queue; unrelated pre-existing regeneration drift is
+  preserved and logged on#148. No all-scene gameplay, audiovisual parity,
+  C++ promotion or compatibility-retirement claim. Private
+  `weaponmode42-*`; publication/exact CI are recorded on#42/#148.
 - #188 reconciles152 owned-function catalog rows against their actual
   registered definitions:146 obsolete provider paths and140 stale copied
   flags, with overlap. The regression checks all236 registered copy=yes

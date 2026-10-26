@@ -7,8 +7,8 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **53** (53 stubs and 0 partial implementations).
-- Matching C/C++ reference bodies located: **18**.
+- Open native entries: **52** (52 stubs and 0 partial implementations).
+- Matching C/C++ reference bodies located: **17**.
 - Assembly located, but no matching C body located: **25**.
 - Assembly-backed declarations with no local assembly located: **10**.
 

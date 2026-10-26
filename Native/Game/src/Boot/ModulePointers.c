@@ -169,6 +169,7 @@
 #include "Event/Sound.h"
 #include "Event/Splash.h"
 #include "Event/Triggers.h"
+#include "Event/WeaponMode.h"
 #include "Event/Weather.h"
 #include "Field/Actors.h"
 #include "Field/Background.h"

@@ -53,7 +53,6 @@ intptr_t Event_ScriptSetActorEquipmentModels(u_char* arg0, short arg1);
 intptr_t Event_ScriptSetActorYawOscillation(u_char* arg0, short arg1);
 intptr_t Event_ScriptClearAshleyStatusEffects(u_char* arg0, short arg1);
 intptr_t Event_ScriptSetActorRenderMode(u_char* arg0, short arg1);
-intptr_t Event_ScriptSetAshleyBattleMode(u_char*, short);
 intptr_t Event_CommandSetEnteredDoor(u_char* arg0, short arg1);
 intptr_t Event_CommandStoreActorRangeBearing(u_char* arg0, short arg1);
 intptr_t Event_CommandSetActorActivity(u_char* arg0, short arg1);

@@ -33,6 +33,7 @@
 #include "Event/ScriptVm.h"
 #include "Event/Splash.h"
 #include "Event/Triggers.h"
+#include "Event/WeaponMode.h"
 #include "Event/Weather.h"
 #include "Field/Camera.h"
 #include "Field/Gimmicks.h"
@@ -130,7 +131,7 @@ char Event_playbackPhase;
 u_char* Event_threadCursors[6];
 
 // decomp: D_800F4C4E (D_800F4C4E@BATTLE/BATTLE.PRG)
-char Event_reservedResetByte;
+char Event_weaponTransitionPending;
 
 // decomp: _evtFile (_evtFile@BATTLE/BATTLE.PRG)
 short Event_eventId;
@@ -815,7 +816,7 @@ void Event_InitializeEventScriptData(u_char* data)
     State_SetScriptFlag(168, 0);
     Event_threadWaitFrames[1] = Event_threadWaitFrames[2] = Event_threadWaitFrames[3] = 0;
     Event_isEffectWaitPending = 0;
-    Event_reservedResetByte = 0;
+    Event_weaponTransitionPending = 0;
     Event_isTextSelectionActive = 0;
     Event_isScanlineOverlayEnabled = 0;
     Event_isMenuTransitionActive = 0;

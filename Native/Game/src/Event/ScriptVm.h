@@ -38,7 +38,7 @@ extern void* Event_chainedEventBuffer;
 extern void* Event_scriptBuffer;
 extern char Event_playbackPhase;
 extern u_char* Event_threadCursors[6];
-extern char Event_reservedResetByte;
+extern char Event_weaponTransitionPending;
 extern short Event_eventId;
 extern short Event_isChainedEventLoaded;
 extern short Event_threadWaitFrames[4];

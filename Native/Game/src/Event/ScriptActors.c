@@ -698,13 +698,6 @@ intptr_t Event_ScriptSetActorRenderMode(u_char* arg0, short arg1)
     return 0;
 }
 
-// decomp: BATTLE.PRG func_800B9DB4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2158) [INCLUDE_ASM: not yet ported]
-intptr_t Event_ScriptSetAshleyBattleMode(u_char*, short)
-{
-    VS_UNPORTED("Event::ScriptSetAshleyBattleMode");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800BAC38 (src/BATTLE/BATTLE.PRG/4A0A8.c:2549)
 intptr_t Event_CommandSetEnteredDoor(u_char* arg0, short arg1)
 {

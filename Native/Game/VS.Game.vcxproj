@@ -1220,6 +1220,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Event\WeaponMode.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\Background.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2017,6 +2020,7 @@
     <ClInclude Include="src\Event\Sound.h" />
     <ClInclude Include="src\Event\Splash.h" />
     <ClInclude Include="src\Event\Triggers.h" />
+    <ClInclude Include="src\Event\WeaponMode.h" />
     <ClInclude Include="src\Event\Weather.h" />
     <ClInclude Include="src\Field\Actors.h" />
     <ClInclude Include="src\Field\Background.h" />
