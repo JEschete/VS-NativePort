@@ -101,6 +101,10 @@ AI_FRAME_FIELDS = {
 }
 
 MODULE_DATA_BLOBS = (
+    ("BATTLE/BATTLE.PRG", 0x81268, 0x800E9A68, 72, "Content_battleShadowVertices",
+     "4B16C.s:1208 eighteen packed signed16 X/Z vertices; imported source data only"),
+    ("BATTLE/BATTLE.PRG", 0x812D4, 0x800E9AD4, 96, "Content_battleShadowFaces",
+     "4B16C.s:1208 twenty-four triangles with byte offsets into projected shadow vertices"),
     ("BATTLE/BATTLE.PRG", 0x88F58, 0x800F1758, 4, "Content_battleAiHesitationLengths",
      "7B5DC.s:func_800E4180 indexed hesitation lengths; native module-owned data"),
     ("BATTLE/BATTLE.PRG", 0x1060, 0x80069860, 0x98, "Content_battleLimbNameBytes",

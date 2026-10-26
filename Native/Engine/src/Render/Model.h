@@ -10,6 +10,5 @@
 #define VS_RENDER_MODEL_H_DECLS
 
 void Render_PrepareActorCameraMatrices(MATRIX* source);
-int Render_DrawActorGroundShadow();
 
 #endif // VS_RENDER_MODEL_H_DECLS

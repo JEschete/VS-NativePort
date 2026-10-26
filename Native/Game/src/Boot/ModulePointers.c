@@ -281,6 +281,8 @@
 // Pointer tables in the module images and the symbol map that relocates them (splat_symbols.csv).
 #include "Content/ModuleData.h"
 
+extern unsigned int Content_battleShadowVertices[18];
+extern unsigned int Content_battleShadowFaces[24];
 extern unsigned int Content_battleAiHesitationLengths[1];
 extern unsigned int Content_battleLimbNameBytes[38];
 extern unsigned int Content_battleGimmickTemplateBytes[455];
@@ -3273,6 +3275,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DBA88u, 0u, (void*)&Battle_Ai_UpdateAdaptivePursuitBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBB98u, 0u, (void*)&Battle_Ai_UpdateSupportFollowBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBC0Cu, 0u, (void*)&Battle_Ai_UpdateEngagementApproachBehavior, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1758u, 4u, (void*)Content_battleAiHesitationLengths, sizeof Content_battleAiHesitationLengths, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069860u, 152u, (void*)Content_battleLimbNameBytes, sizeof Content_battleLimbNameBytes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E930Cu, 1820u, (void*)Content_battleGimmickTemplateBytes, sizeof Content_battleGimmickTemplateBytes, 1u, 1u},

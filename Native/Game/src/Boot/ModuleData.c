@@ -146,6 +146,10 @@
 // Globals whose contents are in the module images (DATA_LEDGER segment data/rodata/asset, no pointers).
 #include "Content/ModuleData.h"
 
+// decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 eighteen packed signed16 X/Z vertices; imported source data only
+unsigned int Content_battleShadowVertices[18];
+// decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 twenty-four triangles with byte offsets into projected shadow vertices
+unsigned int Content_battleShadowFaces[24];
 // decomp: BATTLE/BATTLE.PRG 7B5DC.s:func_800E4180 indexed hesitation lengths; native module-owned data
 unsigned int Content_battleAiHesitationLengths[1];
 // decomp: BATTLE/BATTLE.PRG 58578.c INCLUDE_RODATA D_80069860; strings end at jtbl_800698F8
@@ -541,6 +545,8 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"TITLE/TITLE.PRG", 0x54B68, sizeof Title_debugFontAtlas, &Title_debugFontAtlas, sizeof Title_debugFontAtlas}, // G02023 _debugFont
     {"TITLE/TITLE.PRG", 0x59A68, sizeof Title_saveMenuUiAtlas, &Title_saveMenuUiAtlas, sizeof Title_saveMenuUiAtlas}, // G02024 _uiTable
     {"TITLE/TITLE.PRG", 0x68A68, sizeof Title_saveMenuBackground, &Title_saveMenuBackground, sizeof Title_saveMenuBackground}, // G02089 _saveMenuBg_clut
+    {"BATTLE/BATTLE.PRG", 0x81268, 72u, Content_battleShadowVertices, sizeof Content_battleShadowVertices},
+    {"BATTLE/BATTLE.PRG", 0x812D4, 96u, Content_battleShadowFaces, sizeof Content_battleShadowFaces},
     {"BATTLE/BATTLE.PRG", 0x88F58, 4u, Content_battleAiHesitationLengths, sizeof Content_battleAiHesitationLengths},
     {"BATTLE/BATTLE.PRG", 0x1060, 152u, Content_battleLimbNameBytes, sizeof Content_battleLimbNameBytes},
     {"BATTLE/BATTLE.PRG", 0x80B0C, 1820u, Content_battleGimmickTemplateBytes, sizeof Content_battleGimmickTemplateBytes},

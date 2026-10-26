@@ -276,6 +276,52 @@ int Actors_BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
   return 1;
 }
 
+static void UpdateActorModelColors(Actors_ActorRecord* actor,
+                                   Actors_ActorRecord* geometry, char companion,
+                                   const SVECTOR* root_offset) {
+  if (!geometry->instance.uvLayout && companion != 1) {
+    if (!actor->customTint) {
+      if (actor->previewFlag) {
+        const unsigned packed =
+            (uint16_t)actor->instance.position.vx |
+            ((unsigned)(uint16_t)actor->instance.position.vz << 16);
+        Field_SampleRoomGroundColor((int)packed,
+                                    actor->instance.currentTileLayer,
+                                    &actor->instance.tint);
+      } else {
+        actor->instance.tint.red = actor->instance.tint.green =
+            actor->instance.tint.blue = kNeutralModelColor;
+      }
+    }
+    if (geometry->instance.actionAnimationState < kTintStateLimit) {
+      geometry->instance.baseColor.r =
+          ModelColorChannel(actor->instance.tint.red, geometry->fadeRed);
+      geometry->instance.baseColor.g =
+          ModelColorChannel(actor->instance.tint.green, geometry->fadeGreen);
+      geometry->instance.baseColor.b =
+          ModelColorChannel(actor->instance.tint.blue, geometry->fadeBlue);
+      unsigned char* shadow_color = (void*)&geometry->shadowBlend.reserved0;
+      shadow_color[0] = actor->instance.tint.red;
+      shadow_color[1] = actor->instance.tint.green;
+      shadow_color[2] = actor->instance.tint.blue;
+    }
+  } else if (geometry->instance.uvLayout &&
+             geometry->instance.actionAnimationState < kTintStateLimit) {
+    const unsigned packed =
+        (uint16_t)root_offset->vx | ((unsigned)(uint16_t)root_offset->vz << 16);
+    Render_ColorCode ground;
+    Field_SampleRoomGroundColor((int)packed, actor->instance.currentTileLayer,
+                                &ground);
+    unsigned char* shadow_color = (void*)&actor->shadowBlend.reserved0;
+    shadow_color[0] =
+        (unsigned char)((ground.red >> 1) + kNeutralModelColor / 2);
+    shadow_color[1] =
+        (unsigned char)((ground.green >> 1) + kNeutralModelColor / 2);
+    shadow_color[2] =
+        (unsigned char)((ground.blue >> 1) + kNeutralModelColor / 2);
+  }
+}
+
 // decomp: BATTLE.PRG func_800B28A8, material dispatch at 0x800B34CC
 // (49268/func_800B28A8.s).
 void Actors_DrawActorModel(void* actor_data, MATRIX* camera, char companion) {
@@ -318,36 +364,10 @@ void Actors_DrawActorModel(void* actor_data, MATRIX* camera, char companion) {
                                    -Render_nearClip * kProjectionDepthScale,
                                    workspace->model)) {
     actor->instance.isPreviewModel = 1;
-    return;
+    goto draw_shadow;
   }
   actor->instance.isPreviewModel = 0;
-  if (!geometry->instance.uvLayout && companion != 1) {
-    if (!actor->customTint) {
-      if (actor->previewFlag) {
-        const unsigned packed =
-            (uint16_t)actor->instance.position.vx |
-            ((unsigned)(uint16_t)actor->instance.position.vz << 16);
-        Field_SampleRoomGroundColor((int)packed,
-                                    actor->instance.currentTileLayer,
-                                    &actor->instance.tint);
-      } else {
-        actor->instance.tint.red = actor->instance.tint.green =
-            actor->instance.tint.blue = kNeutralModelColor;
-      }
-    }
-    if (geometry->instance.actionAnimationState < kTintStateLimit) {
-      geometry->instance.baseColor.r =
-          ModelColorChannel(actor->instance.tint.red, geometry->fadeRed);
-      geometry->instance.baseColor.g =
-          ModelColorChannel(actor->instance.tint.green, geometry->fadeGreen);
-      geometry->instance.baseColor.b =
-          ModelColorChannel(actor->instance.tint.blue, geometry->fadeBlue);
-      unsigned char* shadow_color = (void*)&geometry->shadowBlend.reserved0;
-      shadow_color[0] = actor->instance.tint.red;
-      shadow_color[1] = actor->instance.tint.green;
-      shadow_color[2] = actor->instance.tint.blue;
-    }
-  }
+  UpdateActorModelColors(actor, geometry, companion, &workspace->rootOffset);
   CVECTOR color = geometry->instance.baseColor;
   if (companion == 1) memcpy(&color, &actor->companionColor, sizeof color);
   if (companion == 1) {
@@ -363,6 +383,11 @@ void Actors_DrawActorModel(void* actor_data, MATRIX* camera, char companion) {
   } else {
     Render_DrawActorPolygons(&Actors_modelRenderContext, &geometry->instance,
                              &color, workspace->model);
+  }
+draw_shadow:
+  if (companion == 0 && actor->instance.soundEnabled) {
+    Render_DrawActorGroundShadow(actor, &Render_frameScratch.viewMatrix,
+                                 &workspace->rootOffset);
   }
 }
 

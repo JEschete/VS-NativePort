@@ -11,6 +11,26 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_actor_shadows_import_mesh_data_and_own_the_production_draw_entry(self):
+        expected = {
+            "Content_battleShadowVertices": (0x81268, 0x800E9A68, 72),
+            "Content_battleShadowFaces": (0x812D4, 0x800E9AD4, 96),
+        }
+        for name, values in expected.items():
+            blob = next(item for item in copy_fixups.MODULE_DATA_BLOBS if item[4] == name)
+            self.assertEqual(blob[:4], ("BATTLE/BATTLE.PRG", *values))
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F01268"]["path"], r"Native\Engine\src\Render\ModelGeometry.c"
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Game\src\Actors\ModelDrawing.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("companion == 0 && actor->instance.soundEnabled", source)
+        self.assertIn("Render_DrawActorGroundShadow(actor,", source)
+        self.assertIn("goto draw_shadow;", source)
+
     def test_room_euler_uses_the_source_staged_kernel_and_shared_octant_pair(self):
         owned = self.owned_items()
         for identity in ("F00761", "F00762"):

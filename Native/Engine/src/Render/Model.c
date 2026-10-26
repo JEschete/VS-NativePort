@@ -42,10 +42,3 @@ void Render_PrepareActorCameraMatrices(MATRIX* source)
     Actors_boneMatrixScratch.t[2] = source->t[2];
 }
 
-// decomp: BATTLE.PRG func_800B4B14 (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
-int Render_DrawActorGroundShadow()
-{
-    VS_UNPORTED("Render::DrawActorGroundShadow");
-    return 0;
-}
-

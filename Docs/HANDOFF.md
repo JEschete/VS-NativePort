@@ -9,6 +9,32 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #193/#42 restores F01268 as an actual production actor-shadow pass,
+  not an unused export. Original caller800B38FC..800B3924 proves
+  companion0/flag8000 gating; the native draw path had omitted it and
+  returned before it when body projection failed. Red1/14 has8 failures
+  (zero instead of24 packets and no projected anchor). The owned typed
+  actor/camera/root API now shares bounded native model packet storage,
+  samples real terrain, preserves source-width scale/color/depth rules
+  and imports18 vertices/24 faces through two runtime BATTLE bindings.
+  No asset payload or reference code is committed. New11/5,492 covers
+  production gates, absent body projection, actual two-axis/sloped and
+  rejected-steep terrain, signed fades/full upper color word,360 wrapped
+  scale tuples, three bands, winding/depth cutoffs, buffer exhaustion,
+  typed resolver calls and imported strides. Both hosts/full suites pass
+  Debug/Release857/5,490,819 each;112 port controls and focused/default
+  quality0 actionable/0 new pass with unchanged baselines. Two generations
+  preserve298 maintained/owner/reference/data files and repeat identically;
+  selective Tests project generation preserves the owner solution.
+  A normal-speed Release controller run1793013531362252-0 reaches
+  MAP009 (read4057), shows Ashley's ground shadow at5900, imports389
+  globals/2989 symbols with0 failures, and ends at6000 with0 engine
+  errors. An earlier Continue-menu run is explicitly excluded.
+  This is render/source-contract and one-view integration proof, not
+  combat, full-cutscene or all-room visual parity. Local cohort149/186,
+  37 gaps (12 C/C++ references,15 assembly-only,10 missing listings);
+  implementations3117/aliases150 stay separate. Private `actorshadow42-*`
+  and `actorshadow193-*`; scoped publication/exact CI are tracked on#193/#42.
 - #189's classifier/table repair is now reflected in the generated report
   prose too: a parent repository HEAD is never a copied snapshot's
   reference revision. An isolated publication fixture was red on the

@@ -3,6 +3,7 @@
 
 #include <limits.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "Actors/ActorRecord.h"
@@ -10,11 +11,13 @@
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
+#include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.h"
+#include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
 #include "Render/Camera.h"
@@ -91,6 +94,39 @@ enum {
   kWeaponPaletteMatrix = 2,
   kWeaponPaletteColumn = 2
 };
+
+enum {
+  kShadowVertices = 18,
+  kShadowFaces = 24,
+  kShadowBandFaces = 8,
+  kShadowPacketWords = 8,
+  kShadowGouraudCommand = 0x32000000,
+  kShadowGrayChannels = 0x010101,
+  kShadowFirstColorWord = 2,
+  kShadowVertexWords = 2,
+  kShadowSupportMode = 3,
+  kShadowFadeStep = 4,
+  kShadowMinimumExtent = 20,
+  kShadowSlopeLimit = 640,
+  kShadowHeightShift = 3,
+  kShadowExtentShift = 7,
+  kShadowFractionBits = 12,
+  kShadowNeutralLight = 64
+};
+
+static const uint32_t kShadowDrawMode = UINT32_C(0xE1000640);
+
+extern unsigned int Content_battleShadowVertices[kShadowVertices];
+extern unsigned int Content_battleShadowFaces[kShadowFaces];
+
+static uintptr_t ModelPrimitiveLimit(void) {
+  const uintptr_t base =
+      (uintptr_t)Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
+  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
+  return base != 0 && cursor >= base && cursor - base <= kPrimitiveBufferBytes
+             ? base + kPrimitiveBufferBytes
+             : 0;
+}
 
 static int PolygonCorners(unsigned command, int colored) {
   if (command ==
@@ -444,12 +480,8 @@ static void DrawModelPolygons(Actors_ModelRenderContext* context,
       context->projectedVertexCount == 0) {
     return;
   }
-  const uintptr_t base =
-      (uintptr_t)Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (base == 0 || cursor < base || cursor - base > kPrimitiveBufferBytes) {
-    return;
-  }
+  const uintptr_t limit = ModelPrimitiveLimit();
+  if (limit == 0) return;
   ModelHeader header;
   memcpy(&header, instance, sizeof header);
   const Actors_ShpModel* model = model_data;
@@ -500,12 +532,208 @@ static void DrawModelPolygons(Actors_ModelRenderContext* context,
                             part == kSpecialPolygonGroup ? kSpecialDepthBias
                                                          : kNormalDepthBias,
                             color, palette, appearance_material != 0,
-                            base + kPrimitiveBufferBytes) < 0) {
+                            limit) < 0) {
         return;
       }
       polygon += PolygonBytes(command);
     }
   }
+}
+
+static int ShadowOnPlatform(void) {
+  return (int8_t)(uint8_t)Actors_supportingPlatformLayer > 0;
+}
+
+static int ShadowSlopeAngle(int first, int second, uint16_t radius) {
+  const unsigned first_magnitude =
+      first < 0 ? 0u - (unsigned)first : (unsigned)first;
+  const unsigned second_magnitude =
+      second < 0 ? 0u - (unsigned)second : (unsigned)second;
+  const int angle = (int)Core_Gte_Atan2(
+      first_magnitude <= second_magnitude ? first : second, radius);
+  return angle >= -kShadowSlopeLimit && angle < kShadowSlopeLimit ? angle : 0;
+}
+
+static SVECTOR ShadowGroundRotation(Actors_ActorRecord* actor, int floor) {
+  const SVECTOR flat = {0};
+  SVECTOR slope = flat;
+  if (ShadowOnPlatform()) return slope;
+  const uint16_t radius = actor->shadowRadius;
+  SVECTOR* position = &actor->instance.position;
+  const int plus_x =
+      Field_SampleActorSupportHeight(position, radius, 0, kShadowSupportMode);
+  if (ShadowOnPlatform()) return slope;
+  const int minus_x =
+      Field_SampleActorSupportHeight(position, -radius, 0, kShadowSupportMode);
+  if (ShadowOnPlatform()) return slope;
+  if (plus_x != minus_x) {
+    slope.vz =
+        (int16_t)ShadowSlopeAngle(floor - minus_x, plus_x - floor, radius);
+  }
+  const int minus_z =
+      Field_SampleActorSupportHeight(position, 0, -radius, kShadowSupportMode);
+  if (ShadowOnPlatform()) return flat;
+  const int plus_z =
+      Field_SampleActorSupportHeight(position, 0, radius, kShadowSupportMode);
+  if (ShadowOnPlatform()) return flat;
+  if (plus_z != minus_z) {
+    slope.vx =
+        (int16_t)ShadowSlopeAngle(floor - plus_z, minus_z - floor, radius);
+  }
+  return slope;
+}
+
+static int ShadowColumnScale(uint32_t size, int16_t model_scale,
+                             uint16_t blend) {
+  // MULTU/MFLO truncates before each shift; LH then SRL retains the sign bits.
+  const uint32_t half_blend = (uint32_t)(int32_t)(int16_t)blend >> 1;
+  uint32_t value = (size * (uint16_t)model_scale) >> kShadowFractionBits;
+  value = (value * half_blend) >> kShadowFractionBits;
+  return (int)value;
+}
+
+static MATRIX BuildActorShadowMatrix(Actors_ActorRecord* actor,
+                                     const MATRIX* camera,
+                                     const SVECTOR* root_offset, int floor) {
+  SVECTOR slope = ShadowGroundRotation(actor, floor);
+  MATRIX terrain = {0}, rotation = {0};
+  Core_Gte_RotMatrixYXZ(&slope, &terrain);
+  MATRIX view = *camera;
+  Core_Math_MultiplyMatrixIntoRight(&view, &terrain);
+  SVECTOR angles = {actor->instance.rotationX,
+                    Core_Math_WrapSigned16((uint32_t)actor->instance.facing +
+                                           actor->shadowBlend.level),
+                    actor->instance.rotationZ, 0};
+  Core_Gte_RotMatrixYXZ(&angles, &rotation);
+  Core_Math_MultiplyMatrixIntoRight(&terrain, &rotation);
+  int extent =
+      ((root_offset->vy - floor) >> kShadowHeightShift) + actor->shadowRadius;
+  if (extent < kShadowMinimumExtent) extent = kShadowMinimumExtent;
+  const uint32_t size = (uint32_t)extent << kShadowExtentShift;
+  VECTOR scale = {ShadowColumnScale(size, actor->instance.scaleY,
+                                    actor->shadowBlend.radiusShrinkRate),
+                  actor->instance.scaleZ,
+                  ShadowColumnScale(size, actor->instance.scaleX,
+                                    actor->shadowBlend.radiusExpandRate),
+                  0};
+  Core_Math_ScaleMatrixColumns(&rotation, &scale);
+  SVECTOR anchor = *root_offset;
+  anchor.vy = Core_Math_WrapSigned16((uint32_t)floor);
+  VECTOR translated;
+  Core_GteWord flags;
+  Core_Gte_SetRotMatrix(camera);
+  Core_Gte_SetTransMatrix(camera);
+  Core_Gte_RotTrans(&anchor, &translated, &flags);
+  rotation.t[0] = translated.vx;
+  rotation.t[1] = translated.vy;
+  rotation.t[2] = translated.vz;
+  return rotation;
+}
+
+typedef struct ShadowProjection {
+  Core_GteWord screen[kShadowVertices];
+  unsigned depth[kShadowVertices];
+} ShadowProjection;
+
+static void QueueShadowFaces(const ShadowProjection* projected, unsigned light,
+                             uintptr_t limit) {
+  unsigned center = kShadowGouraudCommand | light * kShadowGrayChannels;
+  unsigned edge = (light >> 1) * kShadowGrayChannels;
+  for (unsigned face = 0; face < kShadowFaces; ++face) {
+    if (face == kShadowBandFaces) {
+      center = kShadowGouraudCommand | edge;
+      edge = 0;
+    } else if (face == 2 * kShadowBandFaces) {
+      edge = center;
+      center = kShadowGouraudCommand;
+    }
+    unsigned nearest = UINT16_MAX;
+    Core_GteWord screen[kTriangleCorners];
+    for (unsigned corner = 0; corner < kTriangleCorners; ++corner) {
+      const unsigned offset =
+          (Content_battleShadowFaces[face] >> (corner * CHAR_BIT)) & UINT8_MAX;
+      if (offset % sizeof(Core_GteWord) != 0 ||
+          offset / sizeof(Core_GteWord) >= kShadowVertices) {
+        Core_Debugf("render", "Invalid actor shadow vertex offset %u", offset);
+        abort();
+      }
+      const unsigned vertex = offset / sizeof(Core_GteWord);
+      screen[corner] = projected->screen[vertex];
+      if (projected->depth[vertex] < nearest) {
+        nearest = projected->depth[vertex];
+      }
+    }
+    const unsigned bucket = (nearest >> 2) - 2;
+    if (Core_Gte_NormalClip(screen[0], screen[1], screen[2]) > 0 ||
+        bucket >= kModelOrderingLimit) {
+      continue;
+    }
+    const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
+    if (cursor > limit ||
+        limit - cursor < kShadowPacketWords * sizeof(u_long)) {
+      Core_Debugf("render", "Actor shadow primitive buffer exhausted");
+      return;
+    }
+    u_long* packet = (void*)cursor;
+    packet[1] = kShadowDrawMode;
+    for (unsigned corner = 0; corner < kTriangleCorners; ++corner) {
+      const unsigned color_word =
+          kShadowFirstColorWord + corner * kShadowVertexWords;
+      packet[color_word] = corner == 0 ? center : edge;
+      packet[color_word + 1] = (u_long)screen[corner];
+    }
+    setlen(packet, kShadowPacketWords - 1);
+    AddPrim((u_long*)Render_frameScratch.orderingTable + bucket, packet);
+    Render_frameScratch.primitiveCursor = packet + kShadowPacketWords;
+  }
+}
+
+// decomp: BATTLE.PRG func_800B4B14 (src/BATTLE/BATTLE.PRG/4B16C.s:1208).
+void Render_DrawActorGroundShadow(Actors_ActorRecord* actor,
+                                  const MATRIX* camera,
+                                  const SVECTOR* root_offset) {
+  const uintptr_t limit = ModelPrimitiveLimit();
+  if (actor == NULL || camera == NULL || root_offset == NULL || limit == 0 ||
+      Render_frameScratch.orderingTable == NULL) {
+    Core_Debugf("render",
+                "Actor shadow requires actor, view and packet buffers");
+    abort();
+  }
+  int floor = Field_SampleActorSupportHeight(&actor->instance.position, 0, 0,
+                                             kShadowSupportMode);
+  if (actor->instance.position.vy > floor) floor = actor->instance.position.vy;
+  MATRIX matrix = BuildActorShadowMatrix(actor, camera, root_offset, floor);
+  Core_Gte_SetRotMatrix(&matrix);
+  Core_Gte_SetTransMatrix(&matrix);
+  ShadowProjection projected;
+  for (unsigned vertex = 0; vertex < kShadowVertices; ++vertex) {
+    const uint32_t packed = Content_battleShadowVertices[vertex];
+    SVECTOR position = {Core_Math_WrapSigned16(packed), 0,
+                        Core_Math_WrapSigned16(packed >> kCoordinateBits), 0};
+    Core_GteWord fog, flags;
+    VECTOR transformed;
+    Core_Gte_RotTransPers(&position, &projected.screen[vertex], &fog, &flags);
+    Core_Gte_StoreLvnl(&transformed);
+    projected.depth[vertex] =
+        (unsigned)(transformed.vz < 0            ? 0
+                   : transformed.vz > UINT16_MAX ? UINT16_MAX
+                                                 : transformed.vz);
+  }
+  actor->soundPosition.vx =
+      Core_Math_WrapSigned16((uint32_t)projected.screen[0]);
+  actor->soundPosition.vy =
+      Core_Math_WrapSigned16((uint32_t)projected.screen[0] >> kCoordinateBits);
+  actor->soundPosition.vz = Core_Math_WrapSigned16(projected.depth[0]);
+  actor->soundPosition.pad = 0;
+  const unsigned rgb = (unsigned)actor->shadowBlend.reserved0;
+  // The original blue addend is the upper halfword, not a masked byte.
+  int light = (int)(((rgb & UINT8_MAX) + ((rgb >> CHAR_BIT) & UINT8_MAX) * 2 +
+                     (rgb >> (2 * CHAR_BIT))) >>
+                    2) +
+              kShadowNeutralLight - (int8_t)actor->fadeRed * kShadowFadeStep;
+  if (light < 0) light = 0;
+  if (light > UINT8_MAX) light = UINT8_MAX;
+  QueueShadowFaces(&projected, (unsigned)light, limit);
 }
 
 static unsigned AppearanceMaterial(unsigned state) {

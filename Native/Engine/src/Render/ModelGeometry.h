@@ -35,6 +35,9 @@ void Render_DrawModelGouraudPolygonsWithOverrides(
 void Render_DrawActorPolygons(Actors_ModelRenderContext* context,
                               Actors_ModelInstance* instance,
                               const CVECTOR* tint, Actors_ShpModel* model);
+void Render_DrawActorGroundShadow(Actors_ActorRecord* actor,
+                                  const MATRIX* camera,
+                                  const SVECTOR* root_offset);
 
 #ifdef __cplusplus
 }

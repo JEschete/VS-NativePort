@@ -415,6 +415,82 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Production actor ground shadows (#193/#42, 2026-10-26)
+
+F01268 (`func_800B4B14`, original4B16C.s:1208-1640) is now an owned
+typed actor/camera/root-offset API in the existing native model renderer.
+The original caller at800B38FC..800B3924 requires companion0 and original
+flag8000 (currently named `soundEnabled`); native actor drawing had omitted
+the call entirely. It also returned on unavailable body projection, while
+the source still draws the ground shadow. A common tail now preserves both
+paths. The source's Gouraud ground-color producer is restored alongside
+the existing flat-color producer; geometry, visibility and companion
+behavior remain separate.
+
+The renderer queries actual actor support at the center and four radius
+offsets, retains source platform flattening and the half-open640 slope
+limit, combines existing SDK camera/actor/yaw transforms, and preserves
+32-bit low-product/logical-shift scale arithmetic before signed16 matrix
+inputs. Original blue intensity uses the upper halfword, not a masked
+byte; signed fades and all three color bands are preserved. Eighteen
+packed X/Z vertices and24 face records are imported from original BATTLE
+addresses800E9A68/800E9AD4 through existing runtime module storage. Only
+source offsets/extents are in code, not disc-derived mesh bytes.
+
+Projected anchor/depth still update when every face is culled. Winding
+accepts zero/negative area and uses the nearest depth, shifted by2 then
+biased-2, below ordering limit0x7C0. Each accepted packet is the original
+eight-word draw-mode/subtractive semi-transparent Gouraud triangle. Native
+buffer limits and the existing ordering-link encoder are reused; invalid
+inputs/indices terminate with diagnostics and exhausted space logs and
+stops without touching adjacent storage. No fixed guest scratch view,
+new register bridge or dynamic shadow-map/PBR system is introduced.
+
+Evidence is parent5b5ddeb7 plus this scoped worktree and four preserved
+owner paths. Private `actorshadow42-*` and `actorshadow193-*` retain commands,
+dirty state, source/binary hashes, original caller disassembly and logs:
+
+- The actual actor-draw regression is red1 case/14 assertions with8
+  failures: zero instead of24 packets, and unchanged zero anchors, both
+  with visible and unavailable body projection.
+- New11 cases/5,492 assertions cover those production paths; disabled,
+  hidden and companion gates; source packet mode/length, all three bands
+  and ordering buckets; all256 signed fade bytes across five packed color
+  patterns including poisoned upper words;360 radius/height/model/blend
+  tuples against independently widened-and-truncated products; depth
+  thresholds7/8 and7943/7944, reversed winding, exhausted-buffer canaries
+  and typed original-address/mesh-stride resolution.
+- Real synthetic collision grids exercise both slope axes and source
+  steep-angle flattening through the actual support sampler and renderer,
+  with independently expanded expected screen coordinates. Fixtures restore
+  room/probe/platform/Gimmick and render state after each case.
+- Both x64 solution builds link both hosts; full Debug/Release suites pass
+  857 cases/5,490,819 assertions each. All112 port/audit controls pass.
+  Focused/default quality has0 actionable/0 new findings with unchanged
+  baselines. Initial type/magic-number/fixture-size findings were fixed,
+  not suppressed; all byte/output checks remain.
+- Two native generations preserve298 maintained/owner/reference/data
+  files and repeat identically across749 outputs. Generated changes are
+  Model.c/.h and Boot ModuleData.c/ModulePointers.c. Only the Tests project/
+  filter is regenerated for its new test source; the owner solution stays
+  byte-identical.
+- Normal-speed Release run1793013531362252-0 uses actual presses
+  `1000:Start,1200:Up,1300:Circle,3000:Start,4000:Start`, reaches MAP009
+  (disc read4057), captures4500/5900 and stops normally at6000. Its actual
+  frame5900 shows Ashley's ground shadow; all389 globals/2989 symbols
+  import with0 failures and the complete log has0 engine errors.
+  Local captures are in `build\quality\actor-shadow193-newgame-normal-20261026`.
+  An earlier run without Up entered Continue because saves exist and is
+  excluded from shadow/path evidence.
+
+The local original cohort reaches149/186,37 gaps (12 C/C++ references,
+15 assembly-only,10 missing listings). Implementations3117 and aliases150
+remain separate; the original C-backed subset is133/145 complete.
+The skipped-prologue renderer run is not combat or full-cutscene acceptance;
+the component/one-view evidence does not establish all-room visual parity,
+modern asset authoring, C++ promotion or compatibility retirement. Scoped
+publication and exact CI are recorded on#193/#42 before closure/advance.
+
 ### Source-staged native room rotation (#192/#42, 2026-10-26)
 
 F00761 (`func_8009874C`, original2EA3C.s:1499) now has explicit
