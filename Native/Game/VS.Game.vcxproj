@@ -914,6 +914,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Effects\ScreenEffectState.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\ScriptVm.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1935,6 +1938,7 @@
     <ClInclude Include="src\Effects\Runtime.h" />
     <ClInclude Include="src\Effects\ScreenDistortion\ScreenDistortion.h" />
     <ClInclude Include="src\Effects\ScreenEffects.h" />
+    <ClInclude Include="src\Effects\ScreenEffectState.h" />
     <ClInclude Include="src\Effects\ScriptVm.h" />
     <ClInclude Include="src\Effects\Templates\ClosedRing.h" />
     <ClInclude Include="src\Effects\Templates\ClosedRing.inl" />

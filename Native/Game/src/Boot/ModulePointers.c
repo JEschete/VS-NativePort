@@ -144,6 +144,7 @@
 #include "Effects/ParticleRender.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
+#include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 #include "Effects/ScriptVm.h"
 #include "Effects/Timeline.h"
@@ -2394,6 +2395,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1CDCu, 4u, (void*)&Field_roomAnimationTicks, sizeof Field_roomAnimationTicks, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1CE0u, 32u, (void*)&Field_backgroundReferenceVectors, sizeof Field_backgroundReferenceVectors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1D00u, 4u, (void*)&Field_isRoomEffectSoundRestored, sizeof Field_isRoomEffectSoundRestored, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1D08u, 4u, (void*)&Field_matchingDoorRecords, sizeof Field_matchingDoorRecords, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1D28u, 64u, (void*)&Field_gimmickAnimationQueue, sizeof Field_gimmickAnimationQueue, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1D68u, 4u, (void*)&Field_platformFreezeFrames, sizeof Field_platformFreezeFrames, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1D6Cu, 4u, (void*)&Field_triggerMarkerFrameTicks, sizeof Field_triggerMarkerFrameTicks, 1u, 1u},
@@ -2538,7 +2540,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F4EA0u, 4u, (void*)&Menu_Framework_actionRestrictions, sizeof Menu_Framework_actionRestrictions, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4EA8u, 13u, (void*)&Menu_textBoxSelector, sizeof Menu_textBoxSelector, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4ED4u, 4u, (void*)&Menu_Framework_unusedInterfaceFlag, sizeof Menu_Framework_unusedInterfaceFlag, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4ED8u, 16u, (void*)&Effects_screenEffectDefaults, sizeof Effects_screenEffectDefaults, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4ED8u, 16u, (void*)&Effects_screenEffectDefaults, sizeof Effects_screenEffectDefaults, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4EE8u, 242u, (void*)&Menu_Framework_menuMemory, sizeof Menu_Framework_menuMemory, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4FE0u, 384u, (void*)&Menu_textBoxes, sizeof Menu_textBoxes, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5160u, 4u, (void*)&Battle_recoveryResetWord, sizeof Battle_recoveryResetWord, 1u, 1u},

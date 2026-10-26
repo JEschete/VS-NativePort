@@ -1098,6 +1098,12 @@
     <ClInclude Include="src\Effects\ScreenEffects.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\ScreenEffectState.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\ScreenEffectState.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
     <ClCompile Include="src\Effects\ScriptVm.c">
       <Filter>src\Effects</Filter>
     </ClCompile>

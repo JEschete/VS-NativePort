@@ -9,6 +9,34 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #194 replaces G00512's original16-byte short-array backing with an
+  owned, aligned native `Effects_ScreenEffectOverlay` object: native size24,
+  request pointer offset16. Original5BF94.c:3481/3919 aliases the defaults;
+  the old cast left the entire8-byte native pointer outside the object.
+  Reset/acquisition and warp dispatch now use typed members/address.
+  Red1/4 fails all storage/alignment/type checks without performing the
+  invalid write. New6/83 assertions exercise actual enqueue, repeated
+  acquire, release/reset/reentry, pointer canaries, parameter setters and
+  original base bindings. A coupled red resolver check exposed omitted
+  owned globals; G00512/G00330 now export opaque original bases with
+  actual native sizes and no guessed interior aliases. Source16/4-byte
+  extents remain separate. Both hosts/full Debug/Release863/5,490,902
+  each,113 port controls, shared build/analyzer interop control and
+  focused/default0-new quality pass. Two generations preserve301 files
+  and repeat identically; only ScreenEffects.c/.h and ModulePointers.c
+  change. No disc I/O completion, overlay execution, historical crash
+  cause, promotion or retirement claim. Private `screenstate194-*`;
+  publication/exact CI tracked on#194. Cohort stays149/186 with37 gaps.
+- F01769 timing remains gated under plan9.9/M2: deterministic simulation,
+  original RNG and no wall-clock in game logic. Owner was unavailable;
+  do not adopt the earlier live-monotonic suggestion. Next observation is
+  original counter mode/baseline and per-consumer work/timing calibration
+  before defining deterministic native costs and enabling navigation.
+  Independent F02458 warp tracing continues after#194: its inline
+  radius calculation has MIPS masked-shift/prefix-table behavior for
+  small radii, unlike ordinary SquareRootInteger. The required lookup
+  already lies in the imported resident arctangent/root region; do not
+  substitute ideal sqrt or commit copied table bytes.
 - #193/#42 restores F01268 as an actual production actor-shadow pass,
   not an unused export. Original caller800B38FC..800B3924 proves
   companion0/flag8000 gating; the native draw path had omitted it and

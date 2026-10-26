@@ -130,6 +130,21 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F01363": [
+        ("Effects_screenEffectDefaults[2] = 0x1000;",
+         "Effects_screenEffectDefaults.radialWarpArg0 = 0x1000;",
+         "G00512 owns the complete native overlay state; reset by typed member rather than PS1 short-array index"),
+    ],
+    "F01389": [
+        ("*(int*)&temp_s0->radialWarpArg0 != 0x1000",
+         "temp_s0->radialWarpArg0 != 0x1000 || temp_s0->radialWarpArg1 != 0",
+         "Compare the two typed warp parameters without aliasing adjacent shorts as int"),
+    ],
+    "F01390": [
+        ("(Effects_ScreenEffectOverlay*)Effects_screenEffectDefaults",
+         "&Effects_screenEffectDefaults",
+         "Default controller storage is a native overlay object including its widened request pointer"),
+    ],
     "F00896": [
         ("((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)(arg0->instance.slot, &arg0->routeTarget, 0);",
          "Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->routeTarget, 0);",

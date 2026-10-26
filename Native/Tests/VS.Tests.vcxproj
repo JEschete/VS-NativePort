@@ -132,6 +132,7 @@
     <ClCompile Include="src\RoomTriggerMarkerTests.cpp" />
     <ClCompile Include="src\RuntimeSnapshotTests.cpp" />
     <ClCompile Include="src\SaveStoreTests.cpp" />
+    <ClCompile Include="src\ScreenEffectStateTests.cpp" />
     <ClCompile Include="src\SdkMathGapTests.cpp" />
     <ClCompile Include="src\SequenceTestCases.cpp" />
     <ClCompile Include="src\SequenceTests.c">

@@ -11,6 +11,48 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_screen_effect_defaults_own_native_state_and_use_typed_access(self):
+        from tools.scaffold.gen_solution import needs_c_headers
+
+        self.assertTrue(
+            needs_c_headers("VS.Game", r"src\Effects\ScreenEffectState.cpp")
+        )
+        owned = self.owned_items()
+        self.assertEqual(owned["G00512"]["kind"], "global")
+        self.assertEqual(
+            owned["G00512"]["path"], r"Native\Game\src\Effects\ScreenEffectState.cpp"
+        )
+        for identity in ("F01363", "F01389", "F01390"):
+            self.assertEqual(len(copy_fixups.FIXES[identity]), 1)
+        self.assertIn(
+            "Effects_screenEffectDefaults.radialWarpArg0",
+            copy_fixups.FIXES["F01363"][0][1],
+        )
+        self.assertEqual(
+            copy_fixups.FIXES["F01390"][0][1], "&Effects_screenEffectDefaults"
+        )
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"Docs\ledgers\DATA_LEDGER.csv").open(
+            encoding="utf-8", newline=""
+        ) as stream:
+            row = next(row for row in csv.DictReader(stream) if row["id"] == "G00512")
+        self.assertEqual(
+            (row["address"], row["size"], row["type"]),
+            ("0x800F4ED8", "16", "short[8]"),
+        )
+        symbols = (root / r"Native\Game\src\Boot\ModulePointers.c").read_text(
+            encoding="utf-8"
+        )
+        for address, size, name in (
+            ("800F4ED8", 16, "Effects_screenEffectDefaults"),
+            ("800F1D08", 4, "Field_matchingDoorRecords"),
+        ):
+            self.assertIn(
+                f'{{"BATTLE/BATTLE.PRG", 0x{address}u, {size}u, '
+                f"(void*)&{name}, sizeof {name}, 0u, 0u}}",
+                symbols,
+            )
+
     def test_actor_shadows_import_mesh_data_and_own_the_production_draw_entry(self):
         expected = {
             "Content_battleShadowVertices": (0x81268, 0x800E9A68, 72),

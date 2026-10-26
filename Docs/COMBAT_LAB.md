@@ -415,6 +415,64 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Native screen-effect default storage (#194, 2026-10-26)
+
+Original5BF94.c:3481/3919 treats G00512's `short[8]` defaults as the
+16-byte PS1 overlay state. On x64 `Effects_ScreenEffectOverlay` is24 bytes,
+with its8-byte request pointer at offset16. The old native array was still
+16 bytes/alignment2, so assigning the queue slot through that cast wrote
+entirely outside the defaults object.
+
+The owned global now has the actual native overlay type/alignment. Its
+original G00512 address,16-byte extent and `short[8]` source declaration
+remain in the data ledger as provenance, not native capacity. Generator
+fixups reset the typed scale member, acquire the object's address and
+compare both warp members rather than aliasing two shorts as int.
+Queue ownership/poll/release behavior is otherwise unchanged.
+
+The first compiled resolver check also showed that registered owned
+globals disappeared from the original-address map because the generator
+required a generated data declaration. Both G00512 and existing G00330
+now retain their original bases as opaque native objects: native sizes
+are explicit, and no PS1 interior-field offsets are guessed. G00330's
+4-byte source extent remains source provenance, not its native list size.
+
+Evidence is parent819508da plus this scoped worktree; private
+`screenstate194-*` preserve exact commands, source/dirty state, hashes
+and outcomes:
+
+- Red1 case/4 assertions safely measures16 versus24 storage,2 versus8
+  alignment, an uncovered slot extent24 and the wrong array type.
+  It does not intentionally execute the invalid write.
+- New6 cases/83 assertions pass in Debug/Release. They cover full native
+  reset including the request pointer; actual allocation/enqueue to the
+  production overlay target; already-active acquisition without another
+  request; release/reset and two acquisitions into the same object;
+  guarded native slot writes; existing radial/vignette setters; original
+  base resolution, native/source extents and rejected interior aliases.
+  Fixtures restore queued requests/counts, workspace ownership, active
+  pointer and default state. They do not pump disc I/O or claim overlay
+  execution/load-completion verification.
+- Both solution builds link both hosts. Full suites pass863 cases/
+  5,490,902 assertions each; all113 port/audit controls and the shared
+  build/analyzer C-header interop test pass. The existing module loader
+  tests load389 globals/2990 symbols with0 failures.
+- Focused/default quality is0 actionable/0 new, with unchanged baselines.
+  Initial pointer-size-expression and test-size findings were repaired
+  without suppressing assertions. The new provider is registered through
+  the existing shared C-header predicate, not hand-edited project flags.
+- Two native generations preserve301 maintained/owner/reference files
+  and repeat identically across749 outputs. Generated changes are
+  ScreenEffects.c/.h and ModulePointers.c. Only Game/Tests project files
+  are selectively regenerated; the owner solution remains unchanged.
+  All function-catalog fields and source data sizes/types remain intact.
+
+This is a native storage/ownership and symbol-export repair, not another
+function-gap implementation: #42 remains149/186 with37 gaps. F02458's
+radial warp is still unimplemented. There is no new claim about historical
+#167 corruption, owner-closed #76, whole cutscenes, C++ promotion or
+compatibility retirement. Scoped publication/exact CI are tracked on#194.
+
 ### Production actor ground shadows (#193/#42, 2026-10-26)
 
 F01268 (`func_800B4B14`, original4B16C.s:1208-1640) is now an owned
@@ -479,6 +537,8 @@ dirty state, source/binary hashes, original caller disassembly and logs:
   (disc read4057), captures4500/5900 and stops normally at6000. Its actual
   frame5900 shows Ashley's ground shadow; all389 globals/2989 symbols
   import with0 failures and the complete log has0 engine errors.
+  Known AI terrain/route/navigation/clock stub diagnostics remain;
+  this supplemental renderer smoke is not a whole-game checkpoint gate.
   Local captures are in `build\quality\actor-shadow193-newgame-normal-20261026`.
   An earlier run without Up entered Continue because saves exist and is
   excluded from shadow/path evidence.

@@ -1951,13 +1951,21 @@ class Copier:
                         layout = "0u, 0u, 0u"
                     else:
                         r = data_by_key.get((module, s["name"]))
-                        if r is None or r["id"] not in self.emitted or r["id"] == SCRATCH_GLOBAL or \
+                        owned_global = (
+                            r is not None and r["id"] in self.owned
+                            and self.owned[r["id"]]["kind"].strip() == "global"
+                        )
+                        if r is None or (r["id"] not in self.emitted and not owned_global) or r["id"] == SCRATCH_GLOBAL or \
                                 r["id"] in self.views:
                             continue
                         cname = c_name(r["final_name"])
                         size = max(int(s["size"] or 0), int(r["size"] or 0))  # splat often reports a default 4
                         tid = self.canon_type(r["type_id"]) if r["type_id"] else ""
-                        if cname in incomplete_arrays:
+                        if owned_global:
+                            # Native ownership may replace an untyped source buffer.
+                            # Preserve its base, never guess an interior byte layout.
+                            layout = f"sizeof {cname}, 0u, 0u"
+                        elif cname in incomplete_arrays:
                             layout = "0u, 0u, 0u"
                         elif cname in pointer_arrays:
                             size = pointer_arrays[cname] * 4
