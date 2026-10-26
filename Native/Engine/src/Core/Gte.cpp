@@ -181,14 +181,17 @@ void Core_Gte_SetFarColor(long r, long gg, long b) {
 }
 
 void Core_Gte_SetFogNear(long a, long h) {
+  // decomp: SetFogNear (src/SLUS_010.40/32154.s:9), scale = 5 * 64.
   // Depth cueing starts at distance `a` with screen distance `h`: interpolation
   // reaches 0 at z = a.
   if (a <= 0) {
     g.dqa = 0, g.dqb = 0;
     return;
   }
-  g.dqa = static_cast<int16_t>(
-      std::clamp<long>(-(a * 0x100) / std::max<long>(h, 1), -0x8000, 0x7FFF));
+  constexpr int64_t kNearScale = 320;
+  g.dqa = static_cast<int16_t>(std::clamp<int64_t>(
+      -(static_cast<int64_t>(a) * kNearScale) / std::max<long>(h, 1), -0x8000,
+      0x7FFF));
   g.dqb = 0x1400000;
 }
 

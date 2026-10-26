@@ -9,6 +9,39 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #195/#42 fixes the existing map fog coefficient, not merely an export.
+  Original SetFogNear32154.s:9 uses320; native used256. Red1/6 has4
+  failures: at near768/projection320 the actual returned cue is1026
+  instead of0, dimming RGB160/80/40 to119/59/29. Native projection and
+  actual `Menu_Map_DrawRoom` triangles now retain their near-plane colors.
+  A64-bit product also prevents signed overflow for large native near
+  distances; existing disabled-fog, denominator-floor and saturation
+  policies remain unchanged. F03404/F03408 now alias the existing typed
+  native color/fog APIs; implementations stay3124, aliases151->153.
+  New11/17,012 covers576 depth/projection tuples, all4097 valid cue
+  factors, native policy/reentry/large distances, color aliases and
+  original bindings, including the actual map packet producer. Combined
+  fog/map14/17,049 and full Debug/Release920/7,164,627 each pass; both
+  hosts link. Port120/direct-CI104 and focused/default0-new quality
+  pass without baseline changes. Fixture ABI words/braces and C-header
+  inclusion are repaired, not suppressed.
+  Two generations preserve309 files/repeat identically across748 outputs.
+  Fully aliased Lighting.c disappears; selective Engine projects remove
+  that generated unit while Lighting.h and ModulePointers.c change.
+  Owner solution/edits/references remain unchanged. Local cohort159/186,
+  27 gaps (10 C/C++ references,7 assembly-only,10 missing).
+  This is numeric and actual map-render component evidence, not a
+  controller map-menu visual sweep, full GTE parity, promotion or
+  retirement claim. Private `fog195-*`; fixing revision/exact CI and
+  eligible closure are tracked on#195/#42.
+- Read-only upstream check during this scope: local rood-boi remains
+  e59320ca; remote default HEAD775d91cd adds3 commits (materials/relief/
+  open-sky shadow, player-state APIs and clipped ClearImage). Local
+  rood-reverse4edbdbf5 is63 commits ahead of remote default e0875ad8,
+  not a stale checkout to overwrite. No fetch/checkout/reference edit
+  occurs. Private `fog195-readonly-reference-updates.json` records
+  exact heads/comparison/file lists; no upstream feature is assumed
+  implemented in this project.
 - #42 F03405/F03414 now expose separately typed source reciprocal-root
   parts and vector normalization in ScalarMath.c. Owner was unavailable
   for the contract question; the conservative choice preserves #22's

@@ -7,9 +7,9 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **29** (29 stubs and 0 partial implementations).
+- Open native entries: **27** (27 stubs and 0 partial implementations).
 - Matching C/C++ reference bodies located: **10**.
-- Assembly located, but no matching C body located: **9**.
+- Assembly located, but no matching C body located: **7**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
 [ASSEMBLY_GAPS.csv](ASSEMBLY_GAPS.csv) contains **every open entry**, with its
@@ -33,8 +33,6 @@ and instantiation bindings rather than counted as missing C functions.
 | F00748 | `Render::SubdivideRoomTriangle` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:612` |
 | F00749 | `Render::SubdivideRoomQuad` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:752` |
 | F00752 | `Render::LinkRoomPolygonByDepth` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1036` |
-| F03404 | `Render::ApplyDepthCueColor` | `resources\rood-reverseWin\src\SLUS_010.40\32154.s:65` |
-| F03408 | `Render::SetFogNearDistance` | `resources\rood-reverseWin\src\SLUS_010.40\32154.s:9` |
 
 ## Assembly not locally extracted
 

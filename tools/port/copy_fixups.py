@@ -66,6 +66,8 @@ NATIVE_HELPER_HEADERS = {
 }
 
 NATIVE_FUNCTION_REDIRECTS = {
+    "F03404": ("Core_Gte_DpqColor", r"Native\Engine\src\Core\Gte.cpp"),
+    "F03408": ("Core_Gte_SetFogNear", r"Native\Engine\src\Core\Gte.cpp"),
     "F03399": ("Core_Math_LookupRotationSineCosine",
                r"Native\Engine\src\Core\Math\ScalarMath.c"),
     "F01017": ("Core_Math_LookupRotationSineCosine",
@@ -125,6 +127,8 @@ MODULE_DATA_BLOB_TYPES = {"Content_residentLfoSamples": ("short", 2)}
 MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 
 MODULE_FUNCTION_ENTRIES = (
+    ("SLUS_010.40", 0x80041A00, "F03404"),
+    ("SLUS_010.40", 0x80041954, "F03408"),
     ("SLUS_010.40", 0x80041A1C, "F03405"),
     ("SLUS_010.40", 0x80041AF4, "F03414"),
     ("SLUS_010.40", 0x80041104, "F03399"),

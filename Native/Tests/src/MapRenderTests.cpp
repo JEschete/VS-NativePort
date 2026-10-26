@@ -74,6 +74,11 @@ struct MapFixture {
     return packet == nullptr && last == ordering.data();
   }
 };
+
+std::array<unsigned char, 9> TriangleRgb(const POLY_G3& triangle) {
+  return {triangle.r0, triangle.g0, triangle.b0, triangle.r1, triangle.g1,
+          triangle.b1, triangle.r2, triangle.g2, triangle.b2};
+}
 }  // namespace
 
 TEST_CASE("Map control backdrops retain native cursor and ordering pointers",
@@ -137,5 +142,36 @@ TEST_CASE("Full Map projection handles all byte-indexed vertices off scratch",
   CHECK(std::equal(fixture.saved_tail.begin(), fixture.saved_tail.end(),
                    static_cast<const unsigned char*>(Core_ScratchBase()) +
                        sizeof(Render_FrameScratch)));
+  CHECK(fixture.CompleteChain());
+}
+
+TEST_CASE("Actual Map room triangles keep their color at the fog near plane",
+          "[render][map][fog]") {
+  MapFixture fixture;
+  Core_Gte_SetGeomScreen(320);
+  Core_Gte_SetFarColor(0, 0, 0);
+  const VECTOR translation{0, 0, 768, 0};
+  Core_Gte_SetTransVector(&translation);
+  const std::vector<u_long> room{3, 0,          0, 16, 0, 16 << 16, 0,
+                                 1, 0x00020100, 0, 0,  0, 0};
+  std::vector<u_long> scene{
+      1, 1, static_cast<u_long>(room.size() * sizeof(u_long)), 0x00010001};
+  scene.insert(scene.end(), room.begin(), room.end());
+  REQUIRE(Field_ValidateMapScene(scene.data(), scene.size() * sizeof(u_long)));
+  Field_ResolveSceneRoomData(scene.data(), scene.size() * sizeof(u_long));
+  const auto* map = reinterpret_cast<Field_MapScene*>(scene.data());
+  auto* data = VS_ONDISC(&map->rooms[0], dataAddress, void*);
+  constexpr std::array<unsigned char, 9> kExpected{0,   64, 128, 0,  64,
+                                                   128, 0,  64,  128};
+  Core_Gte_SetFogNear(0, 320);
+  auto* baseline =
+      reinterpret_cast<POLY_G3*>(Render_frameScratch.primitiveCursor);
+  REQUIRE(Menu_Map_DrawRoom(1, data, 1, 1) == 1);
+  CHECK(TriangleRgb(*baseline) == kExpected);
+  Core_Gte_SetFogNear(768, 320);
+  auto* fogged =
+      reinterpret_cast<POLY_G3*>(Render_frameScratch.primitiveCursor);
+  REQUIRE(Menu_Map_DrawRoom(1, data, 1, 1) == 1);
+  CHECK(TriangleRgb(*fogged) == kExpected);
   CHECK(fixture.CompleteChain());
 }

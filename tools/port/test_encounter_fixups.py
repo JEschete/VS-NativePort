@@ -12,6 +12,21 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_fog_and_depth_cue_share_the_existing_typed_native_helpers(self):
+        for identity, name, address in (
+            ("F03404", "Core_Gte_DpqColor", 0x80041A00),
+            ("F03408", "Core_Gte_SetFogNear", 0x80041954),
+        ):
+            self.assertEqual(
+                copy_fixups.NATIVE_FUNCTION_REDIRECTS[identity],
+                (name, r"Native\Engine\src\Core\Gte.cpp"),
+            )
+            self.assertIn(
+                ("SLUS_010.40", address, identity),
+                copy_fixups.MODULE_FUNCTION_ENTRIES,
+            )
+            self.assertNotIn(identity, self.owned_items())
+
     def test_source_root_and_normalization_keep_the_wide_native_api_separate(self):
         owned = self.owned_items()
         for identity in ("F03405", "F03414"):

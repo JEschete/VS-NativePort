@@ -415,6 +415,69 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Source-scaled map fog and typed color/fog exports (#195/#42, 2026-10-26)
+
+The existing native `Core_Gte_SetFogNear` used256 rather than the
+original SetFogNear32154.s:9-21 factor320 (`5 * 64`). With DQB0x1400000
+this moves the no-fog plane to0.8 times its requested distance.
+The actual map loader, `Menu_Map_LoadSceneMap`, requests near768 with
+the current projection distance; at projection320 the old native
+near-plane cue was1026 instead of0.
+
+The correction uses320 and a64-bit multiplication before division/
+signed16 saturation. Existing native nonpositive-near disable behavior,
+denominator floor and saturation policies are retained rather than
+silently changing unrelated native contracts. The arithmetic repair
+affects the already-live map path. F03404/F03408 separately alias the
+existing typed depth-cue color and fog APIs; they are not counted as
+two new native math implementations or full raw-GTE parity.
+
+Evidence is parentb066aacf plus this scoped worktree; private
+`fog195-*` retains exact commands, source/dirty state, protected files,
+binary hashes and outcomes:
+
+- Red `[fog]`:1 case/6 assertions,4 failures. Actual projection at
+  depth768/near768/screen320 returns cue1026; actual native color
+  interpolation dims RGB160/80/40 to119/59/29, not the unchanged input.
+- New11 cases/17,012 assertions include576 positive near/projection/
+  depth tuples, near/mid/far goldens, all4097 in-range color factors,
+  native disable/reentry and large-distance saturation without signed
+  multiply overflow, color aliases/code preservation and both typed
+  original resident bindings with rejected interior aliases.
+- Actual `Menu_Map_DrawRoom` emits synthetic room triangles through
+  production projection/color/packet code. At depth768 the corrected
+  fog path matches its fog-disabled control: all three vertex colors
+  remain RGB0/64/128, with a valid native ordering chain.
+  Combined `[fog],[map]`:14 cases/17,049 assertions.
+- Both x64 solution builds link both hosts. Full Debug/Release each
+  pass920 cases/7,164,627 assertions;120 port/audit and104 exact
+  direct-script CI controls pass. Focused/default quality is0
+  actionable/0 new with unchanged baselines. Fixture ABI-word types,
+  braces and Legacy C++-header ordering repair initial findings/build
+  errors; no numeric assertion or existing test is weakened.
+- Two generations preserve309 maintained/owner/reference files and
+  repeat identically across748 outputs. The fully aliased generated
+  Lighting.c unit is removed; Lighting.h and ModulePointers.c change.
+  Selective Engine project/filter regeneration removes that unit and
+  resolves the initial stale-project build error. Engine/Game/Tests
+  outputs are stable; the owner's dirty solution remains unchanged.
+- Only F03404/F03408 copied catalog fields change. Final audit:
+  4207 rows/3762 targets;27 gaps (10 C/C++ references,7 assembly-only,
+  10 missing listings),3124 implementations and153 aliases separately.
+  Original cohort159/186; original C-backed135/145, other24/41 complete.
+
+Read-only upstream metadata was also checked without fetching or
+changing the reference trees. Rood-boi local e59320ca versus remote
+775d91cd has3 new commits involving materials, shadow/relief, player-state
+APIs and clipped ClearImage. Rood-reverse local4edbdbf5 is63 commits
+ahead of remote default e0875ad8. These are reference observations,
+not imported features or an instruction to overwrite local references.
+
+No controller map-menu visual parity, full GTE emulation, historical
+particle/crash cause, C++ promotion or compatibility retirement is
+inferred. #195 closure and #42/#4 advancement require the pushed fixing
+revision's exact successful CI.
+
 ### Separate source-compatible normalization entries (#42, 2026-10-26)
 
 F03405 (`InvSquareRoot`, original32154.s:79-105) now takes an explicit
