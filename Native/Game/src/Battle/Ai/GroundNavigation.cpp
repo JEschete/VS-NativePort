@@ -349,10 +349,10 @@ int Step(Battle_Ai_ActorAiState& state, unsigned from, unsigned to,
       return result(-1, "target-approach-radius");
     }
   }
-  return result(
-      Core_Math_SquaredTileDistance(Pack(target), state.destination.word) <
-          Core_Math_SquaredTileDistance(from, state.destination.word),
-      "destination-distance");
+  return result(Core_Math_SquaredTileDistanceFromComponents(
+                    target.x, target.z, state.destination.word) <
+                    Core_Math_SquaredTileDistance(from, state.destination.word),
+                "destination-distance");
 }
 }  // namespace
 

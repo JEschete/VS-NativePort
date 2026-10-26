@@ -3275,6 +3275,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&Audio_Seq_unusedStateFlags, sizeof Audio_Seq_unusedStateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&Audio_Seq_unusedInventoryIndices, sizeof Audio_Seq_unusedInventoryIndices, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E4604u, 0u, (void*)&Core_Math_SquaredTileDistanceFromComponents, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6B4Cu, 0u, (void*)&Battle_Ai_BuildAiTerrainHeightsWithWorkspace, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6BA0u, 0u, (void*)&Field_IsPointOutsideSolidVolumes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6C34u, 0u, (void*)&Field_TraceActorAndTerrainCollision, 0u, 0u, 0u},

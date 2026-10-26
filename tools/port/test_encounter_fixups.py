@@ -12,6 +12,27 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_tile_component_entry_shares_native_width_helpers_and_callers(self):
+        self.assertEqual(
+            self.owned_items()["F01772"]["path"],
+            r"Native\Engine\src\Core\Math\TileDistance.cpp",
+        )
+        self.assertIn(
+            ("BATTLE/BATTLE.PRG", 0x800E4604, "F01772"),
+            copy_fixups.MODULE_FUNCTION_ENTRIES,
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (
+            root / r"Native\Engine\src\Core\Math\TileDistance.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertEqual(source.count("Core_Math_SquaredTileDistanceFromComponents("), 2)
+        self.assertIn("Core_Math_WrapSigned16", source)
+        self.assertIn("Core_Math_SquaredVectorLength(dx, 0, dz)", source)
+        caller = (
+            root / r"Native\Game\src\Battle\Ai\GroundNavigation.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Core_Math_SquaredTileDistanceFromComponents(", caller)
+
     def test_native_terrain_envelope_calls_the_existing_builder_without_guest_stack(self):
         self.assertEqual(
             self.owned_items()["F01832"]["path"],

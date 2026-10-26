@@ -112,6 +112,7 @@ def needs_c_headers(project: str, path: str) -> bool:
     path = path.replace("/", "\\")
     return (path.endswith(".c") or "\\Legacy\\" in "\\" + path
             or project == "VS.Engine" and path in (
+                r"src\Core\Math\TileDistance.cpp",
                 r"src\Audio\SequencerOutput.cpp",
                 r"src\Audio\StreamPlayback.cpp",
                 r"src\Audio\XaPlayback.cpp",

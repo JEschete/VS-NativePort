@@ -20,6 +20,7 @@ extern "C" {
 #include "Core/Math/ScalarMath.h"
 #include "Core/Math/TileDistance.h"
 #include "Core/Math/Trig.h"
+#include "Core/Math/Vector.h"
 #include "Core/Runtime.h"
 #include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
@@ -701,4 +702,75 @@ TEST_CASE(
     }
   }
   CHECK(Core_Math_SquaredTileDistance(0x00FF0000, 0x000000FF) == 130050);
+}
+
+TEST_CASE("Tile component distance exposes its former register inputs",
+          "[math][tile-components]") {
+  using NativeEntry = unsigned int (*)(int, int, unsigned int);
+  CHECK((std::is_same_v<decltype(&Core_Math_SquaredTileDistanceFromComponents),
+                        NativeEntry>));
+}
+
+TEST_CASE("Tile component entry shares every signed byte-distance result",
+          "[math][tile-components]") {
+  for (int dx = -255; dx <= 255; ++dx) {
+    for (int dz = -255; dz <= 255; ++dz) {
+      const int first_x = dx < 0 ? 0 : dx;
+      const int first_z = dz < 0 ? 0 : dz;
+      const auto second_x = static_cast<unsigned>(dx < 0 ? -dx : 0);
+      const auto second_z = static_cast<unsigned>(dz < 0 ? -dz : 0);
+      const auto first = 0xA5005A00u | static_cast<unsigned>(first_x) |
+                         (static_cast<unsigned>(first_z) << 16);
+      const auto second = 0xC3007E00u | second_x | (second_z << 16);
+      const auto expected = static_cast<unsigned>(dx * dx + dz * dz);
+      CHECK(Core_Math_SquaredTileDistanceFromComponents(first_x, first_z,
+                                                        second) == expected);
+      CHECK(Core_Math_SquaredTileDistance(first, second) == expected);
+    }
+  }
+}
+
+namespace {
+unsigned ReferenceTileComponentSquare(int first, unsigned second) {
+  const auto bits = (static_cast<unsigned>(first) - second) & 0xFFFF;
+  const int delta =
+      static_cast<int>(bits & 0x7FFF) - static_cast<int>(bits & 0x8000);
+  return static_cast<unsigned>(delta * delta);
+}
+
+void CheckTileComponentWidths(int x, int z, unsigned target) {
+  const auto expected = ReferenceTileComponentSquare(x, target & 0xFF) +
+                        ReferenceTileComponentSquare(z, (target >> 16) & 0xFF);
+  CHECK(Core_Math_SquaredTileDistanceFromComponents(x, z, target) == expected);
+}
+}  // namespace
+
+TEST_CASE("Tile component arithmetic retains the shared GTE halfword inputs",
+          "[math][tile-components]") {
+  constexpr std::array<int, 9> kComponents{-65536, -32768, -1,    0,    1,
+                                           32767,  32768,  65535, 65536};
+  constexpr std::array<unsigned, 5> kTargets{0, 0x00FF00FF, 0xFF00FF00,
+                                             0xA5815A7F, 0xFFFFFFFF};
+  for (const int x : kComponents) {
+    for (const int z : kComponents) {
+      for (const auto target : kTargets) {
+        CheckTileComponentWidths(x, z, target);
+      }
+    }
+  }
+}
+
+TEST_CASE("Tile component entry retains its original typed module address",
+          "[math][tile-components][redirect-binding]") {
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  auto* resolved = VS::Content::ResolveModuleAddress(
+      symbols, "BATTLE/BATTLE.PRG", 0x800E4604u);
+  REQUIRE(resolved != nullptr);
+  const auto distance =
+      reinterpret_cast<unsigned int (*)(int, int, unsigned int)>(resolved);
+  CHECK(distance == Core_Math_SquaredTileDistanceFromComponents);
+  CHECK(distance(3, 4, 0xA5005A00u) == 25);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800E4605u) == nullptr);
 }

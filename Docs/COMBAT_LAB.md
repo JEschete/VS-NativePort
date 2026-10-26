@@ -415,6 +415,56 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Explicit tile-distance component entry (#42, 2026-10-26)
+
+F01772 (`func_800E4604`, original7BDD4.s:35-44) now takes first X/Z
+components and the packed second tile explicitly, rather than relying
+on t0/t1 or a zero-argument native stub. It reuses the existing signed16
+wrapping and squared-vector scalar helpers. F01771 delegates after
+unpacking its coordinate bytes. The real AI edge pursuit filter also
+passes its already-unpacked target, matching original70D4C.s:248.
+The prior packed-coordinate implementation already computed correct
+distances; this is shared native ABI/math consolidation, not evidence
+of a newly fixed enemy behavior.
+
+Evidence is parentdfd197bf plus this scoped worktree; private
+`tilecomponents42-*` retains commands, source/dirty state, protected
+files, binary hashes and outcomes:
+
+- Red `[tile-components]`:1 case/1 failed assertion proves that the
+  original native stub has no explicit component inputs.
+- New4 cases/522,652 assertions check the native signature, all261,121
+  signed byte-delta pairs through both entries (metadata ignored),405
+  signed-halfword narrowing tuples using an independent bitwise oracle,
+  original800E4604 typed resolution and rejected interior alias.
+  `[tile-components],[ground-query]`:15 cases/522,750 assertions,
+  including the actual AI edge pursuit decisions.
+- Both x64 solution builds link both hosts. Full Debug/Release each
+  pass893 cases/6,225,403 assertions;117 port/audit controls,101 exact
+  direct-script CI controls and shared C-header build/analyzer control
+  pass. The initial Engine compile lacked Legacy/Psx.h after the new
+  scalar dependency; registering TileDistance.cpp in the existing
+  shared C-header predicate fixes both build and analysis consistently.
+  The existing interop control now includes that Engine consumer.
+- Focused/default quality is0 actionable/0 new with unchanged baselines.
+  Catch assertion expansion inside three nested fixture loops exceeded
+  the nesting limit; extracting the assertion/oracle helpers preserves
+  every tuple and expected result without suppressions.
+- Two native generations preserve308 maintained/owner/reference files
+  and repeat identically across749 outputs. Generated changes are
+  Vector.c/.h and ModulePointers.c. Only F01772 copied/final_location
+  ledger fields change. Selective Engine/Game/Tests project outputs
+  are stable and preserve the owner's dirty solution.
+- `tools\port\audit_assembly_gaps.py --output <session-files>\tilecomponents42-audit
+  --publish`:4207 rows/3762 targets;32 gaps (10 C/C++ references,12
+  assembly-only,10 missing listings),3122 implementations/150 aliases.
+  Original cohort154/186; original C-backed135/145, other19/41 complete.
+
+Known source callers supply tile coordinates. These tests do not claim
+guest CPU overflow-trap/register side-effect emulation, controller combat,
+all-room navigation parity, C++ promotion or compatibility retirement.
+Exact revision CI gates the public #42/#4 checklist advance.
+
 ### Native room-entry special-terrain build (#42, 2026-10-26)
 
 F01832 (`func_800E6B4C`, original7E05C.s:257-278) is an owned void

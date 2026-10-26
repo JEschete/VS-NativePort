@@ -9,6 +9,27 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01772 now has explicit native first-X/first-Z/packed-second inputs
+  in the existing TileDistance provider. Original7BDD4.s:35 consumes t0/t1
+  then shares the signed16 SQR entry. F01771 now delegates to this helper;
+  the actual AI edge pursuit consumer passes its already-unpacked target
+  coordinates, matching original70D4C.s:248. This consolidates an already
+  correct packed-distance path, not a newly fixed gameplay behavior.
+  Red1/1 proves the old zero-argument ABI; new4/522,652 cover all261,121
+  signed byte-delta pairs through both entries,405 halfword-width tuples,
+  metadata and the typed original binding. Combined ground queries
+  15/522,750 and full Debug/Release893/6,225,403 each pass; both hosts
+  link. Port117/direct-CI101 and shared Engine/Game C-header routing
+  control pass. Missing Engine legacy includes are fixed in the existing
+  shared generator/analyzer predicate, not ad-hoc build flags. Nested
+  fixture assertions are extracted without reducing coverage. Focused/
+  default quality is0 actionable/0 new with unchanged baselines.
+  Two generations preserve308 files/repeat identically; selective
+  Engine/Game/Tests outputs preserve the owner solution. Local cohort
+  154/186,32 gaps (10 C/C++ references,12 assembly-only,10 missing),
+  implementations3122/aliases150 separately. No controller combat,
+  C++ promotion or compatibility-retirement claim. Private
+  `tilecomponents42-*`; publication/exact CI are tracked on#42.
 - #42 F01832 now invokes the existing special-terrain height builder during
   actual room initialization. Original7E05C.s:257 allocates32KiB only to
   switch the guest stack; the owned void adapter validates native maps and

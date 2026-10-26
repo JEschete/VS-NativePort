@@ -20,6 +20,5 @@ void Core_Math_AddWideVectors(VECTOR* arg0, VECTOR* arg1, VECTOR* arg2);
 void Core_Math_AddWideAndShortVectors(VECTOR* arg0, SVECTOR* arg1, VECTOR* arg2);
 void Core_Math_WidenShortVector(SVECTOR* arg0, VECTOR* arg1);
 void Core_Math_NarrowWideVector(VECTOR* arg0, SVECTOR* arg1);
-int Core_Math_SquaredTileDistanceFromComponents();
 
 #endif // VS_CORE_MATH_VECTOR_H_DECLS

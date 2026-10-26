@@ -7,6 +7,9 @@
 extern "C" {
 #endif
 unsigned int Core_Math_SquaredTileDistance(unsigned int, unsigned int);
+unsigned int Core_Math_SquaredTileDistanceFromComponents(int first_x,
+                                                         int first_z,
+                                                         unsigned int second);
 
 #ifdef __cplusplus
 }
