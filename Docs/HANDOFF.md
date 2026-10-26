@@ -9,6 +9,24 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42's F01801/F01802/F01803 navigation leaves are now owned in the existing
+  NavigationPrimitives API. Original7C7E0.s:122-193 and read-only rood-boi
+  e59320ca actor_update.c:57-90 establish explicit actor IDs, missing2/
+  reached0/moving1 and the FF00FF horizontal mask. The prior catalog0/1 note
+  was inverted. The scripted-path consumer now forwards its actor ID through
+  the copier instead of depending on a preserved PS1 a0 register. Typed full
+  native state assignment preserves borrowed pointers and seven original
+  resets without a fixed0x484-byte copy. Red ABI checks reject all three old
+  int() exports. Final5 cases/183 assertions cover all16 native slots, masked
+  tile axes, missing grids/states/routes, self-copy, canaries, repeated resets
+  and the real reached-only collision-bypass consumer. Full Debug/Release785
+  cases/3,391,372 assertions each and90 copier contracts pass; scoped tidy
+  and default quality are0 new. Two generations preserve302 protected paths
+  and repeat identically, changing only Navigation.c/.h and Movement.c.
+  This reaches120/186 original entries,66 remaining (27 C/C++ references,
+  29 assembly-only,10 missing listings). Override request/frame-update stubs
+  remain; no complete scripted-path gameplay, whole-state promotion or
+  compatibility retirement is claimed. Private `navigation42-*`.
 - #151's combat-interrupted9/7->9/6 route now has separate actual Release
   controller acceptance on5671e3b5: normal production-room Lab1792978233864775-0
   opens the authored door with Cross, arrives9/6 at230, then ordinary weapon/

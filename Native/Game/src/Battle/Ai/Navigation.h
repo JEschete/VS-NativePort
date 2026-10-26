@@ -75,9 +75,6 @@ int Battle_Ai_SetNavigationAreaFromTile(Battle_Ai_AreaRouteView* state, Battle_A
 int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int index, int area);
 void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state);
 int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_PathTest test, int mask);
-int Battle_Ai_ActorNavigationOverrideStatus(void);
-int Battle_Ai_HasActorNavigationState();
-int Battle_Ai_CopyActorNavigationOverrideState();
 void Battle_Ai_SetActorNavigationOverride(int, int, int);
 void Battle_Ai_UpdateActorNavigationOverrides(void);
 void Battle_Ai_FloodFillAiTerrainHeights(int arg0, int arg1, int arg2);

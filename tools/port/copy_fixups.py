@@ -13,6 +13,8 @@ so a stale fix is noticed.
 from __future__ import annotations
 
 NATIVE_HELPER_HEADERS = {
+    "Battle_Ai_ActorNavigationOverrideStatus":
+        r"Native\Game\src\Battle\Ai\NavigationPrimitives.h",
     "Audio_UpdateActorSoundTransition": r"Native\Game\src\Actors\SoundOverrides.h",
     "Actors_ResolveAttachmentParentMatrix": r"Native\Game\src\Actors\ModelDrawing.h",
     "Actors_SaveActorGroundedTransform": r"Native\Game\src\Actors\MotionRequests.h",
@@ -117,6 +119,11 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F00298": [
+        ("Battle_Ai_ActorNavigationOverrideStatus()",
+         "Battle_Ai_ActorNavigationOverrideStatus(arg0)",
+         "7C7E0.s consumes the actor ID in a0; preserve it explicitly instead of relying on the caller's PS1 register"),
+    ],
     "F02461": [
         ("void** arg3", "u_long* arg3",
          "SCREFF2/5E8.c:23 receives one 32-bit ordering link, not native pointer storage"),

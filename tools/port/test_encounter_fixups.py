@@ -10,6 +10,25 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_navigation_leaves_own_typed_entries_and_forward_the_actor_id(self):
+        owned = self.owned_items()
+        for identifier, name in (
+            ("F01801", "Battle_Ai_ActorNavigationOverrideStatus"),
+            ("F01802", "Battle_Ai_HasActorNavigationState"),
+            ("F01803", "Battle_Ai_CopyActorNavigationOverrideState"),
+        ):
+            self.assertEqual(owned[identifier]["name"], name)
+            self.assertEqual(
+                owned[identifier]["path"],
+                r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
+            )
+        root = Path(__file__).resolve().parents[2]
+        caller = (root / r"Native\Game\src\Actors\Movement.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Battle_Ai_ActorNavigationOverrideStatus(arg0);", caller)
+        self.assertNotIn("Battle_Ai_ActorNavigationOverrideStatus();", caller)
+
     def test_vignette_producers_publish_one_encoded_ordering_word(self):
         for identifier, head, packet in (
             ("F02461", "arg3", "arg2"),

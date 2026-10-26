@@ -415,6 +415,42 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Navigation presence, status and copy leaves (#42, 2026-10-25)
+
+F01801/F01802/F01803 are now owned in the existing NavigationPrimitives API.
+Original7C7E0.s:122-193 and read-only rood-boi e59320ca
+actor_update.c:57-90 establish the two shared-entry contracts: boolean
+grid/state presence, or missing2/reached0/moving1 with only tile X/Z bytes
+compared through FF00FF. The old catalog note inverted0/1. Both native entry
+points require an explicit actor ID; the copied scripted-path consumer now
+forwards its argument instead of relying on a still-live PS1 a0 register.
+
+The copy helper uses the full typed native record, not a fixed0x484-byte
+PS1 memcpy. It preserves borrowed native pointers and untouched state, then
+sets actor ID, step height320, step distance3, navigation flags0, route
+marker0, settings bits3 and movement-enabled1. It remains valid without a
+grid, as the original copy routine does not gate on navigation availability.
+The existing16-slot native state bound and explicit contract errors are
+retained; no sentinel alias into adjacent globals is introduced.
+
+Red ABI compilation rejects all three old int() exports and typed calls.
+`VS.Tests.exe "[override]" --reporter compact` covers5 cases/183 assertions:
+all16 slots with present/absent grid/state, missing route, ignored layer/tag
+bytes, both horizontal mismatches, full native copy and borrowed pointer
+width, source/self aliases, canaries and repeated resets. A real
+`Actors_IsScriptedActorPathFinished(7)` control checks moving/reached/missing
+results and clears only the reached actor's script-collision bypass.
+Full Debug/Release suites pass785 cases/3,391,372 assertions each;90 copier
+contracts, focused compilation analysis and default quality are0 new.
+Two copier runs preserve302 protected paths and repeat identically, changing
+only Navigation.c/.h and the Movement.c caller. Source/commands and red/green
+reports are retained locally in `navigation42-*`; publication/CI are on#42.
+
+This advances the original cohort to120/186,66 remaining. It does not complete
+scripted navigation: F01805 request construction and F01806 frame updates
+remain separate stubs. No complete scene traversal, native AI-state C++
+promotion or compatibility retirement follows from these leaf contracts.
+
 ### Vignette ordering-link repair (#184, 2026-10-25)
 
 The unchanged failing Debug image4f30cd49/PDB331f0f8a repeats the original

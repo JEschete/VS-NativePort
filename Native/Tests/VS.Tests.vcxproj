@@ -118,6 +118,7 @@
     <ClCompile Include="src\NativeFilePresentationTests.cpp" />
     <ClCompile Include="src\NativeMenuTests.cpp" />
     <ClCompile Include="src\NativeSnapshotTests.cpp" />
+    <ClCompile Include="src\NavigationOverrideTests.cpp" />
     <ClCompile Include="src\ParticleRenderTests.cpp" />
     <ClCompile Include="src\PursuitTargetsTests.cpp" />
     <ClCompile Include="src\RasterBoundsTests.cpp" />

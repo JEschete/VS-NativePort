@@ -22,6 +22,7 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/Targeting.h"
@@ -622,7 +623,7 @@ void Actors_BeginScriptedActorPath(int arg0, SVECTOR* arg1)
 // decomp: BATTLE.PRG func_8007D03C (src/BATTLE/BATTLE.PRG/146C.c:9169)
 int Actors_IsScriptedActorPathFinished(int arg0)
 {
-    int temp_v0 = Battle_Ai_ActorNavigationOverrideStatus();
+    int temp_v0 = Battle_Ai_ActorNavigationOverrideStatus(arg0);
     if (temp_v0 == 0) {
         Field_SetActorCollisionBypass(arg0, Field_ActorCollisionBypass(arg0) & ~2);
         return 1;

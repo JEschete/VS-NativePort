@@ -653,27 +653,6 @@ done:
     return -1;
 }
 
-// decomp: BATTLE.PRG func_800E5154 (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
-int Battle_Ai_ActorNavigationOverrideStatus(void)
-{
-    VS_UNPORTED("Battle::Ai::ActorNavigationOverrideStatus");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E5158 (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
-int Battle_Ai_HasActorNavigationState()
-{
-    VS_UNPORTED("Battle::Ai::HasActorNavigationState");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E51C8 (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
-int Battle_Ai_CopyActorNavigationOverrideState()
-{
-    VS_UNPORTED("Battle::Ai::CopyActorNavigationOverrideState");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800E527C (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
 void Battle_Ai_SetActorNavigationOverride(int, int, int)
 {
