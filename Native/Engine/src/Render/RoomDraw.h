@@ -18,6 +18,14 @@ typedef struct Render_RoomGeometryGroup {
   MATRIX view;
 } Render_RoomGeometryGroup;
 
+// Projected native extrema, not a packed GPU packet.
+typedef struct Render_RoomScreenBounds {
+  int left;
+  int top;
+  int right;
+  int bottom;
+} Render_RoomScreenBounds;
+
 // Native subdivision workspace, not the packed MPD vertex layout.
 typedef struct Render_RoomVertex {
   SVECTOR position;
@@ -40,6 +48,7 @@ void Render_BuildRoomGeometryViewMatrix(VECTOR* position, VECTOR* angles,
 void Render_BuildScaleCompensatedRoomView(VECTOR* position, VECTOR* angles,
                                           MATRIX* output);
 void Render_DrawRoomGeometry(void* data, int mode);
+int Render_IsRoomPolygonOnScreen(const Render_RoomScreenBounds* projected);
 void Render_InterpolateRoomVertexMidpoint(const Render_RoomVertex* first,
                                           const Render_RoomVertex* second,
                                           Render_RoomVertex* output);

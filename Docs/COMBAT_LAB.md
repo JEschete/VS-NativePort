@@ -415,6 +415,50 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Shared native room screen predicate (#42, 2026-10-26)
+
+F00751 (`func_80098014`, original2EA3C.s:969) now receives explicit
+normalized projected extrema and returns int visibility instead of
+using implicit t0-t3 vertices and AT. The existing ordinary/subdivided
+room renderer calls the same predicate through its existing rejection
+wrapper. Original setter1101 patches signed16 instruction immediates;
+the native implementation instead reuses its existing configured bounds
+and signed16 setter, with no second viewport or code-patching state.
+Left/top are inclusive, right/bottom exclusive. This remains trivial
+half-space rejection, not an exact polygon/rectangle intersection test.
+
+Evidence is parentfc5438ab plus this scoped worktree and four preserved
+owner paths; exact commands/state/images are private `roomscreen42-*`:
+
+- New typed assertion/calls fail against the old int() stub. New2 cases/
+  131,099 assertions cover65,536 deterministic full-signed16 quad and
+  wrapped full-word configuration tuples against independently expanded
+  original per-vertex rejection, unchanged input bytes, each viewport
+  edge, signed extrema, a spanning quad without an inside vertex and
+  actual80098014 binding/interior rejection. Tuple samples are not an
+  exhaustive enumeration of all quads. Scoped fixtures reset existing
+  clip state after normal or exceptional test exit.
+- Debug/Release `build\<configuration>\VS.Tests.exe
+  "[room-screen],[room-midpoint],[room-tint],[render][room]"
+  --reporter compact` passes15 cases/786,740 assertions each, preserving
+  production ordinary/subdivided packet and field draw controls.
+  Both x64 solution builds link both hosts; full suites pass841 cases/
+  5,209,304 assertions each. All109 port/audit controls pass.
+- The initial focused check found the new constexpr fixture's naming
+  violation; it was fixed without changing assertions or baselines.
+  Final focused/default quality has0 actionable/0 new findings; focused
+  tidy retains seven existing advisories and100 exact literal reports.
+- Two native generations preserve297 maintained/owner paths and
+  original2EA3C.s, repeating identically. Only generated RoomGeometry.c/.h
+  change; there is no project/solution rewrite.
+
+The local original cohort reaches145/186,41 gaps (13 C/C++ references,
+18 assembly-only,10 missing listings). Implementations3114 and aliases149
+stay separate;13 of the other41 original entries are complete.
+This verifies the shared screen predicate, not all-room visual parity,
+renderer promotion or compatibility retirement. Publication/exact CI
+are recorded on#42 before its checkbox advances.
+
 ### Shared native room-subdivision midpoint (#42, 2026-10-26)
 
 F00750 (`func_80097F70`, original2EA3C.s:921-964) now has explicit typed

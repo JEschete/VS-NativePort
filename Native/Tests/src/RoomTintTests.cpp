@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <climits>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -26,12 +27,72 @@ using Vertex = Render_RoomVertex;
 using Midpoint = void (*)(const Vertex*, const Vertex*, Vertex*);
 static_assert(
     std::is_same_v<decltype(&Render_InterpolateRoomVertexMidpoint), Midpoint>);
+using ScreenBounds = Render_RoomScreenBounds;
+using Visibility = int (*)(const ScreenBounds*);
+static_assert(
+    std::is_same_v<decltype(&Render_IsRoomPolygonOnScreen), Visibility>);
+
+struct ResetRoomClip {
+  ~ResetRoomClip() { Render_SetRoomPolygonScreenBounds(0, 0, 320, 224); }
+};
+
+bool ReferenceVisibility(const std::array<DVECTOR, 4>& vertices,
+                         const ScreenBounds& clip) {
+  return !std::all_of(vertices.begin(), vertices.end(), [&](DVECTOR v) {
+    return v.vy >= clip.bottom;
+  }) && !std::all_of(vertices.begin(), vertices.end(), [&](DVECTOR v) {
+    return v.vy < clip.top;
+  }) && !std::all_of(vertices.begin(), vertices.end(), [&](DVECTOR v) {
+    return v.vx < clip.left;
+  }) && !std::all_of(vertices.begin(), vertices.end(), [&](DVECTOR v) {
+    return v.vx >= clip.right;
+  });
+}
 
 template <typename T>
 auto ObjectBytes(const T& object) {
   std::array<std::byte, sizeof object> bytes;
   std::memcpy(bytes.data(), &object, bytes.size());
   return bytes;
+}
+
+void CheckVisibility(const std::array<DVECTOR, 4>& vertices,
+                     const ScreenBounds& clip) {
+  ScreenBounds bounds{INT_MAX, INT_MAX, INT_MIN, INT_MIN};
+  for (const auto vertex : vertices) {
+    bounds.left = std::min(bounds.left, static_cast<int>(vertex.vx));
+    bounds.right = std::max(bounds.right, static_cast<int>(vertex.vx));
+    bounds.top = std::min(bounds.top, static_cast<int>(vertex.vy));
+    bounds.bottom = std::max(bounds.bottom, static_cast<int>(vertex.vy));
+  }
+  const auto before = ObjectBytes(bounds);
+  CHECK(Render_IsRoomPolygonOnScreen(&bounds) ==
+        ReferenceVisibility(vertices, clip));
+  CHECK(ObjectBytes(bounds) == before);
+}
+
+std::uint32_t NextScreenSample(std::uint32_t& state) {
+  state = state * 1664525u + 1013904223u;
+  return state;
+}
+
+void CheckScreenSample(std::uint32_t& state) {
+  std::array<int, 4> wide, wrapped;
+  for (std::size_t i = 0; i < wide.size(); ++i) {
+    const auto bits = NextScreenSample(state);
+    wide[i] = std::bit_cast<std::int32_t>(bits);
+    wrapped[i] = std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(bits));
+  }
+  Render_SetRoomPolygonScreenBounds(wide[0], wide[1], wide[2], wide[3]);
+  const ScreenBounds clip{wrapped[0], wrapped[1], wrapped[2], wrapped[3]};
+  std::array<DVECTOR, 4> vertices;
+  for (auto& vertex : vertices) {
+    vertex.vx = std::bit_cast<std::int16_t>(
+        static_cast<std::uint16_t>(NextScreenSample(state) >> 16));
+    vertex.vy = std::bit_cast<std::int16_t>(
+        static_cast<std::uint16_t>(NextScreenSample(state) >> 16));
+  }
+  CheckVisibility(vertices, clip);
 }
 
 Vertex ReferenceMidpoint(const Vertex& first, const Vertex& second,
@@ -181,6 +242,50 @@ struct TintPackets {
   }
 };
 }  // namespace
+
+TEST_CASE("Room screen predicate matches original per-vertex rejection",
+          "[render][room-screen]") {
+  const ResetRoomClip reset;
+  std::uint32_t state = 0x80098014u;
+  for (unsigned sample = 0; sample <= UINT16_MAX; ++sample) {
+    CheckScreenSample(state);
+  }
+}
+
+TEST_CASE("Room visibility keeps inclusive origins and exclusive extents",
+          "[render][room-screen]") {
+  const ResetRoomClip reset;
+  Render_SetRoomPolygonScreenBounds(0, 0, 320, 224);
+  constexpr std::array<DVECTOR, 10> kPoints{{{0, 0},
+                                             {319, 223},
+                                             {320, 223},
+                                             {319, 224},
+                                             {-1, 0},
+                                             {0, -1},
+                                             {INT16_MIN, 0},
+                                             {INT16_MAX, 0},
+                                             {0, INT16_MIN},
+                                             {0, INT16_MAX}}};
+  for (const auto point : kPoints) {
+    std::array<DVECTOR, 4> vertices;
+    vertices.fill(point);
+    CheckVisibility(vertices, {0, 0, 320, 224});
+  }
+  CheckVisibility({{{-1, -1}, {320, -1}, {-1, 224}, {320, 224}}},
+                  {0, 0, 320, 224});
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  auto* resolved = VS::Content::ResolveModuleAddress(
+      symbols, "BATTLE/BATTLE.PRG", 0x80098014u);
+  REQUIRE(resolved != nullptr);
+  const auto visible = reinterpret_cast<Visibility>(resolved);
+  CHECK(visible == Render_IsRoomPolygonOnScreen);
+  ScreenBounds inside{0, 0, 319, 223}, outside{320, 0, 320, 223};
+  CHECK(visible(&inside) == 1);
+  CHECK(visible(&outside) == 0);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80098015u) == nullptr);
+}
 
 TEST_CASE(
     "Room tint transforms GT3 and GT4 payloads without changing packet data",

@@ -37,13 +37,6 @@ int Render_SubdivideRoomQuad()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_80098014 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Render_IsRoomPolygonOnScreen()
-{
-    VS_UNPORTED("Render::IsRoomPolygonOnScreen");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800980F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
 int Render_LinkRoomPolygonByDepth()
 {

@@ -275,21 +275,27 @@ static int room_near_depth = kDefaultNearDepth;
 static int room_far_depth = kLastOrderingSlot;
 static unsigned room_lod_depth = kDefaultLodDepth;
 
-typedef struct RoomScreenBounds {
-  int left;
-  int top;
-  int right;
-  int bottom;
-} RoomScreenBounds;
+typedef Render_RoomScreenBounds RoomScreenBounds;
 
 static RoomScreenBounds room_screen_bounds = {0, 0, kViewportWidth,
                                               kViewportHeight};
 
+// decomp: BATTLE.PRG func_80098014 (src/BATTLE/BATTLE.PRG/2EA3C.s:969).
+int Render_IsRoomPolygonOnScreen(const Render_RoomScreenBounds* projected) {
+  if (projected == NULL || projected->left > projected->right ||
+      projected->top > projected->bottom) {
+    Core_Debugf("render",
+                "Room visibility requires normalized projected bounds");
+    abort();
+  }
+  return !(projected->right < room_screen_bounds.left ||
+           projected->bottom < room_screen_bounds.top ||
+           projected->left >= room_screen_bounds.right ||
+           projected->top >= room_screen_bounds.bottom);
+}
+
 static int OutsideScreenBounds(const RoomScreenBounds* projected) {
-  return projected->right < room_screen_bounds.left ||
-         projected->bottom < room_screen_bounds.top ||
-         projected->left >= room_screen_bounds.right ||
-         projected->top >= room_screen_bounds.bottom;
+  return !Render_IsRoomPolygonOnScreen(projected);
 }
 
 // decomp: BATTLE.PRG func_80097F70 (src/BATTLE/BATTLE.PRG/2EA3C.s:921).
