@@ -1950,17 +1950,3 @@ int Field_GimmickSupportHeightBelow(int arg0, int arg1, int arg2)
     return var_a3;
 }
 
-// decomp: BATTLE.PRG func_800E6BA0 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-int Field_IsPointOutsideSolidVolumes()
-{
-    VS_UNPORTED("Field::IsPointOutsideSolidVolumes");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800E6C34 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-int Field_TraceActorAndTerrainCollision(SVECTOR*, SVECTOR*, SVECTOR*, int)
-{
-    VS_UNPORTED("Field::TraceActorAndTerrainCollision");
-    return 0;
-}
-

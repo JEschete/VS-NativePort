@@ -1686,6 +1686,12 @@
     <ClInclude Include="src\Field\RoomTriggerMarkers.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\SegmentCollision.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\SegmentCollision.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClCompile Include="src\Field\TerrainHeight.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>

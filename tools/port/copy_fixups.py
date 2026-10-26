@@ -123,6 +123,8 @@ MODULE_DATA_BLOB_TYPES = {"Content_residentLfoSamples": ("short", 2)}
 MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 
 MODULE_FUNCTION_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x800E6BA0, "F01833"),
+    ("BATTLE/BATTLE.PRG", 0x800E6C34, "F01834"),
     ("GIM/SCREFF2.PRG", 0x800F9BD8, "F02458"),
     ("BATTLE/BATTLE.PRG", 0x800DBA4C, "F04203"),
     ("BATTLE/BATTLE.PRG", 0x800DBA88, "F04204"),
@@ -131,6 +133,14 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F00514": [
+        ("*(int*)&spec->recoveryDelay & 0x4000",
+         "spec->resetsHitResults",
+         "Action byte13 bit6 is the typed source interception flag; do not alias four bytes starting at recoveryDelay"),
+        ("&origin, &position, &impact, result->primaryTarget.target.targetActor);",
+         "&origin, &position, &impact, result->primaryTarget.target.targetActor) != NULL;",
+         "Native segment trace returns an output pointer; this caller consumes only collision truth"),
+    ],
     "F01363": [
         ("Effects_screenEffectDefaults[2] = 0x1000;",
          "Effects_screenEffectDefaults.radialWarpArg0 = 0x1000;",

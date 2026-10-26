@@ -1364,6 +1364,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Field\SegmentCollision.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\TerrainHeight.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -2059,6 +2062,7 @@
     <ClInclude Include="src\Field\RoomRendering.h" />
     <ClInclude Include="src\Field\RoomState.h" />
     <ClInclude Include="src\Field\RoomTriggerMarkers.h" />
+    <ClInclude Include="src\Field\SegmentCollision.h" />
     <ClInclude Include="src\Field\TerrainHeight.h" />
     <ClInclude Include="src\Field\Transitions.h" />
     <ClInclude Include="src\Field\Traps.h" />

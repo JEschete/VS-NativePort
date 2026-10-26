@@ -12,6 +12,27 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_segment_trace_owns_typed_geometry_and_the_live_boolean_consumer(self):
+        root = Path(__file__).resolve().parents[2]
+        scaffold = runpy.run_path(str(root / r"tools\scaffold\gen_solution.py"))
+        self.assertTrue(
+            scaffold["needs_c_headers"]("VS.Game", r"src\Field\SegmentCollision.cpp")
+        )
+        for identity in ("F01833", "F01834"):
+            self.assertEqual(
+                self.owned_items()[identity]["path"],
+                r"Native\Game\src\Field\SegmentCollision.cpp",
+            )
+        for address, identity in ((0x800E6BA0, "F01833"), (0x800E6C34, "F01834")):
+            self.assertIn(
+                ("BATTLE/BATTLE.PRG", address, identity),
+                copy_fixups.MODULE_FUNCTION_ENTRIES,
+            )
+        self.assertEqual(
+            copy_fixups.FIXES["F00514"][0][1], "spec->resetsHitResults"
+        )
+        self.assertIn("!= NULL;", copy_fixups.FIXES["F00514"][1][1])
+
     def test_screen_warp_owns_native_geometry_and_original_entry(self):
         root = Path(__file__).resolve().parents[2]
         scaffold = runpy.run_path(str(root / r"tools\scaffold\gen_solution.py"))

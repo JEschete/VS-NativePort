@@ -21,7 +21,7 @@
 #include "Battle/Targeting.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Memory/WordCopy.h"
-#include "Field/Collision.h"
+#include "Field/SegmentCollision.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -555,7 +555,7 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
             for (i = 0; i < result->targetCount; ++i) {
                 entry = &result->targets[i];
                 redirected = 0;
-                if (arg3 && (*(int*)&spec->recoveryDelay & 0x4000)) {
+                if (arg3 && (spec->resetsHitResults)) {
                     if (entry->targetsPosition == 0) {
                         Battle_ActionTargetLimbPosition(
                             entry->target.targetActor, entry->target.targetLimb, &position);
@@ -563,7 +563,7 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
                         position = *(SVECTOR*)&entry->target;
                     }
                     redirected = Field_TraceActorAndTerrainCollision(
-                        &origin, &position, &impact, result->primaryTarget.target.targetActor);
+                        &origin, &position, &impact, result->primaryTarget.target.targetActor) != NULL;
                     if (redirected) {
                         if (impact.pad == 0) {
                             entry->targetsPosition = 1;

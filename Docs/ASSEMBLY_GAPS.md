@@ -7,9 +7,9 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **36** (36 stubs and 0 partial implementations).
-- Matching C/C++ reference bodies located: **12**.
-- Assembly located, but no matching C body located: **14**.
+- Open native entries: **34** (34 stubs and 0 partial implementations).
+- Matching C/C++ reference bodies located: **11**.
+- Assembly located, but no matching C body located: **13**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
 [ASSEMBLY_GAPS.csv](ASSEMBLY_GAPS.csv) contains **every open entry**, with its
@@ -31,7 +31,6 @@ and instantiation bindings rather than counted as missing C functions.
 | F03405 | `Core::Math::InverseSquareRootParts` | `resources\rood-reverseWin\src\SLUS_010.40\32154.s:79` |
 | F03414 | `Core::Math::NormalizeVectorRegisters` | `resources\rood-reverseWin\src\SLUS_010.40\32154.s:162` |
 | F00766 | `Field::CallRoomEntryPoint` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1770` |
-| F01833 | `Field::IsPointOutsideSolidVolumes` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7E05C.s:283` |
 | F00745 | `Render::DrawRoomGeometryPolygons` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:104` |
 | F00746 | `Render::DecodeRoomPolygonVertices` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:506` |
 | F00747 | `Render::ProjectAndDecodeRoomPolygon` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:548` |
@@ -64,7 +63,7 @@ to an ignored build directory first.
 
 ## Tagged file: BATTLE/BATTLE.PRG/7E05C.s
 
-All **21** catalog entries are accounted for: **15 already implemented**, **5 open with C counterparts**, and **1 open with assembly only**.
+All **21** catalog entries are accounted for: **17 already implemented**, **4 open with C counterparts**, and **0 open with assembly only**.
 
 | ID | Original symbol | Native status | Source availability |
 | --- | --- | --- | --- |
@@ -87,8 +86,8 @@ All **21** catalog entries are accounted for: **15 already implemented**, **5 op
 | F01844 | `func_800E7608` | implemented | c-or-cpp-body-available |
 | F01845 | `func_800E7660` | implemented | c-or-cpp-body-available |
 | F01829 | `func_800E6974` | implemented | c-or-cpp-body-available |
-| F01833 | `func_800E6BA0` | stub | assembly-only |
-| F01834 | `func_800E6C34` | stub | c-or-cpp-body-available |
+| F01833 | `func_800E6BA0` | implemented | assembly-only |
+| F01834 | `func_800E6C34` | implemented | c-or-cpp-body-available |
 
 ## Provenance and modernization
 

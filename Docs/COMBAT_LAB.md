@@ -415,6 +415,73 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Native ranged segment collision (#42, 2026-10-26)
+
+F01833/F01834 (`func_800E6BA0`/`func_800E6C34`, original7E05C.s:283/
+331-508 and return continuation800E6EAC) now have typed native point/
+platform-span and const-endpoint/output APIs. The original helper's saved
+registers and fixed temporary stack are not recreated. Stable platform
+contacts are collected once into bounded native storage; the shared
+predicate keeps strict64x32x64 extents. Original platform X is unsigned16,
+height/Z signed16. The trace advances exactly32 signed-floor delta/32
+samples, not an exact-endpoint continuous ray.
+
+Canonical actor/model/Gimmick members replace original byte offsets.
+Actor kind byte maskEA, ignored slot, Gimmick priority/parent/mode-byte,
+reactions1/2 and animation lock retain their source guards. Actor X/Y are
+signed, actor Z retains the original unsigned-halfword load. Radius/half
+height comparisons are strict; the horizontal ahead-of-start dot product
+must be nonnegative. Actor order is original slot order, then platform
+volume, then signed15-bit floor comparison; floor equality collides.
+Hits write all four output halfwords (pad actor-id-plus-one or0), return
+the native output pointer and preserve miss output/input aliases.
+
+The live F00514 action resolver now consumes collision truth explicitly
+rather than narrowing a native output address into int. Its packed flag
+test is replaced by the existing typed byte13/bit6 member. Original action
+data inspection found no interception flags on trap definitions6..23;
+no guessed origin is added for unsupported position-caster combinations.
+The actual unit caller supplies a valid actor origin/action session.
+
+Evidence is parente55e39cf plus this scoped worktree; private
+`segment42-*` preserves commands, source/dirty state, hashes and outcomes:
+
+- Red1 case/7 assertions has5 failures: no actor interception and unchanged
+  output rather than the first strict sample104,-64,128/pad2.
+- New11 cases/1,673 assertions cover all256 actor kind bytes with poisoned
+  high words, all reactions, animation lock/ignore, Gimmick parent and
+  low mode byte, behind-start and unsigned-Z behavior, negative floor
+  steps/exactly32 samples,343 strict volume-edge tuples and unsigned-X/
+  signed-Z distinction, five-platform native storage, hidden contacts,
+  terrain equality, aliased input/output and both typed original bindings.
+- Actual `Battle_ResolveActionTargets` redirects a blocked positional
+  projectile through its real trace call: terrain marker MP80,
+  animation parameter1 and first-sample XY8,0. This is a unit/integration
+  fixture, not a controller-fired arrow or full combat acceptance.
+  The fixture's first crash was a missing global action session after
+  hit finalization. Installed LLDB could not start without python311.dll;
+  temporary repository symbolized exception diagnostics identified the
+  fixture defect. The owned probe was stopped and all probe code removed.
+- Both x64 solution builds link both hosts. Full Debug/Release suites
+  pass883 cases/5,701,697 assertions each;115 port/audit controls,
+  99 exact direct-script CI controls and shared C-header interop pass.
+  Focused/default quality is0 actionable/0 new with unchanged baselines.
+  Fixture extraction/type spelling and a named source stride repair
+  initial findings without suppressions or weaker expected outputs.
+- Two native generations preserve307 maintained/owner/reference files
+  and repeat identically across749 outputs. Generated changes are
+  Collision.c/.h, ActionResolution.c and ModulePointers.c. Selective
+  Game/Tests projects preserve the owner solution; all catalog fields
+  except the two entries' copied/final_location remain unchanged.
+
+The local original cohort reaches152/186,34 gaps (11 C/C++ references,
+13 assembly-only,10 missing listings). Implementations3120 and aliases150
+remain separate; original C-backed completion is134/145 and18 of the
+other41 entries are complete. AI timing/navigation remains gated.
+No all-room collision, controller combat, C++ promotion, native asset
+authoring or compatibility retirement is inferred. Scoped publication
+and exact CI are tracked on#42 before its original checklist advances.
+
 ### Native radial screen warp (#42, 2026-10-26)
 
 F02458 (`func_800F9BD8`, original3D8.s:9) now implements the live

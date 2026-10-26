@@ -213,6 +213,9 @@
     <ClCompile Include="src\SdkMathGapTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SegmentCollisionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SequenceTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>

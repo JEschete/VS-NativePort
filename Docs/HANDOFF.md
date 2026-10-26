@@ -9,6 +9,30 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01833/F01834 now implement typed solid-volume and32-sample
+  actor/terrain segment queries. Original7E05C.s:283/331-508 proves
+  strict extents, actor/Gimmick priority/filters, signed-floor steps,
+  ahead-of-start rejection, source15-bit terrain and id-plus-one pad.
+  Actor Z/platform X unsigned-halfword quirks are preserved through
+  typed members. Native contact storage replaces the original fixed
+  stack; the result is an actual native SVECTOR pointer, not a guest
+  address squeezed into int. F00514 consumes an explicit boolean and
+  the typed action byte13/bit6 flag. Red1/7 has5 failures; new11/1,673
+  verifies all256 kind bytes, reactions/locks, Gimmick mode-byte behavior,
+  32-step rounding,343 volume-boundary tuples, five-platform collection,
+  input/output aliases and both original bindings. Actual action resolution
+  redirects a terrain-blocked positional projectile and preserves the
+  source marker/animation path. Its fixture initially lacked the global
+  action session; repository crash diagnostics identified the missing
+  fixture context, and all temporary probes were removed.
+  Both hosts/full Debug/Release883/5,701,697 each,115 port/99 exact-CI
+  controls, shared interop and focused/default0-new quality pass with
+  unchanged baselines. Two generations preserve307 files and repeat
+  identically; four generated caller/header/symbol files change.
+  Local cohort152/186,34 gaps (11 C/C++ references,13 assembly-only,
+  10 missing listings); implementations3120/aliases150 stay separate.
+  No controller-arrow/combat, all-room collision, promotion or retirement
+  claim. Private `segment42-*`; publication/exact CI tracked on#42.
 - #42 F02458 now executes the existing production screen-overlay radial
   warp callback. Original3D8.s:9 builds444 halfword scales, mutates eight
   polygon layouts around160/112 and walks scene OT2046 (not sky2047).
