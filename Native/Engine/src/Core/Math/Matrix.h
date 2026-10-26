@@ -11,7 +11,6 @@
 
 void Core_Math_BuildLookAtOrientation(VECTOR* from, VECTOR* to, MATRIX* mat);
 int Core_Math_BuildEulerRotationMatrix();
-int Core_Math_MultiplyRotationMatrixInPlace();
 int Core_Math_LookupRotationTrigQuadrant();
 void Core_Math_DirectionRotationMatrix(VECTOR* arg0, MATRIX* arg1);
 void Core_Math_SetIdentityRotation(MATRIX* arg0);

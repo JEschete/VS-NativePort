@@ -16,6 +16,7 @@
 
 extern "C" {
 #include "Core/Math/FixedPoint.h"
+#include "Core/Math/Matrix.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Math/TileDistance.h"
 #include "Core/Math/Trig.h"
@@ -29,6 +30,8 @@ static_assert(
 static_assert(std::is_same_v<decltype(&Core_Math_Sine), int (*)(int)>);
 static_assert(std::is_same_v<decltype(&Core_Math_Cosine), int (*)(int)>);
 static_assert(std::is_same_v<decltype(&Core_Math_MultiplyMatrixIntoLeft),
+                             MATRIX* (*)(MATRIX*, MATRIX*)>);
+static_assert(std::is_same_v<decltype(&Core_Math_MultiplyRotationMatrixInPlace),
                              MATRIX* (*)(MATRIX*, MATRIX*)>);
 
 namespace {
@@ -86,6 +89,10 @@ void CheckMatrixDestinations(const MATRIX& first, const MATRIX& second) {
   CHECK(MatrixBytes(right) == MatrixBytes(second));
   std::memcpy(&left, &first, sizeof left);
   Core_Math_MultiplyMatrixIntoRight(&left, &right);
+  CHECK(MatrixBytes(right) == MatrixBytes(right_expected));
+  CHECK(MatrixBytes(left) == MatrixBytes(first));
+  std::memcpy(&right, &second, sizeof right);
+  REQUIRE(Core_Math_MultiplyRotationMatrixInPlace(&left, &right) == &right);
   CHECK(MatrixBytes(right) == MatrixBytes(right_expected));
   CHECK(MatrixBytes(left) == MatrixBytes(first));
 }
@@ -150,6 +157,9 @@ TEST_CASE(
     const auto expected = ReferenceProduct(first, first, first);
     REQUIRE(Core_Math_MultiplyMatrixIntoLeft(&self, &self) == &self);
     CHECK(MatrixBytes(self) == MatrixBytes(expected));
+    std::memcpy(&self, &first, sizeof self);
+    REQUIRE(Core_Math_MultiplyRotationMatrixInPlace(&self, &self) == &self);
+    CHECK(MatrixBytes(self) == MatrixBytes(expected));
   }
   MATRIX positive{}, negative{};
   for (auto& row : positive.m) {
@@ -176,6 +186,23 @@ TEST_CASE("Left matrix entry retains its original resident module binding",
   CHECK(product(&left, &right) == &left);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
                                           0x80041C61u) == nullptr);
+}
+
+TEST_CASE(
+    "BATTLE rotation product returns its right destination through its binding",
+    "[math][core-leaves]") {
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  auto* resolved = VS::Content::ResolveModuleAddress(
+      symbols, "BATTLE/BATTLE.PRG", 0x800989B8u);
+  REQUIRE(resolved != nullptr);
+  using Product = MATRIX* (*)(MATRIX*, MATRIX*);
+  const auto product = reinterpret_cast<Product>(resolved);
+  CHECK(product == Core_Math_MultiplyRotationMatrixInPlace);
+  MATRIX left{}, right{};
+  CHECK(product(&left, &right) == &right);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800989B9u) == nullptr);
 }
 
 TEST_CASE("Battle fixed trigonometry uses the canonical native implementations",

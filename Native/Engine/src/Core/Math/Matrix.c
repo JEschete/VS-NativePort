@@ -39,13 +39,6 @@ int Core_Math_BuildEulerRotationMatrix()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_800989B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Core_Math_MultiplyRotationMatrixInPlace()
-{
-    VS_UNPORTED("Core::Math::MultiplyRotationMatrixInPlace");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800B16F4 (src/BATTLE/BATTLE.PRG/48C7C.s:0) [asm-file: not yet ported]
 int Core_Math_LookupRotationTrigQuadrant()
 {

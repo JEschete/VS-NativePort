@@ -15,6 +15,7 @@ int16_t Core_Math_WrapSigned16(uint32_t value);
 
 void Core_Math_MultiplyMatrixIntoRight(MATRIX* left, MATRIX* right);
 MATRIX* Core_Math_MultiplyMatrixIntoLeft(MATRIX* left, MATRIX* right);
+MATRIX* Core_Math_MultiplyRotationMatrixInPlace(MATRIX* left, MATRIX* right);
 
 int Core_Math_SquareRootInteger(int value);
 

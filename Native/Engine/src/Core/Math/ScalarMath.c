@@ -71,6 +71,12 @@ MATRIX* Core_Math_MultiplyMatrixIntoLeft(MATRIX* left, MATRIX* right) {
   return left;
 }
 
+// decomp: BATTLE.PRG func_800989B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1664).
+MATRIX* Core_Math_MultiplyRotationMatrixInPlace(MATRIX* left, MATRIX* right) {
+  MultiplyRotationMatrices(left, right, right);
+  return right;
+}
+
 static unsigned IntegerSquareRoot(unsigned value) {
   unsigned result = 0;
   unsigned bit = 1u << (kWordBits - 2);

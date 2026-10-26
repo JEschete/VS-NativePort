@@ -9,6 +9,22 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F00763 now restores BATTLE's right-destination rotation product
+  through the same native Q12 kernel as the resident matrix entries.
+  Original2EA3C.s:1664 returns the right pointer and preserves every
+  byte after its nine rotation halfwords. New typed ABI assertions reject
+  the old int() stub;256 deterministic matrix pairs, both saturation
+  signs, fractional floors, full-byte tails/other operands, self aliases
+  and actual800989B8 binding pass. Combined core/trig11/44,164 and full
+  Debug/Release835/4,226,220 each, both hosts and109 port controls pass.
+  Focused/default quality is0 actionable/0 new, baselines unchanged.
+  Two generations preserve297 maintained/owner paths and original
+  assembly, repeating identically; only Matrix.c/.h change. Local
+  cohort142/186,44 gaps (13 C/C++ references,21 assembly-only,10 missing
+  listings); implementations3111 and aliases149 remain separate.
+  No new arithmetic implementation, hardware state, all-matrix promotion
+  or retirement claim. Private `battleproduct42-*`; exact publication/
+  CI are recorded on#42.
 - #42 F03406 now shares the native saturating Q12 rotation-product kernel
   with the existing right-destination entry; its typed API returns the
   left matrix and preserves all padding/translation bytes. Both operands

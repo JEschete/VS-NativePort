@@ -7,9 +7,9 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **45** (45 stubs and 0 partial implementations).
+- Open native entries: **44** (44 stubs and 0 partial implementations).
 - Matching C/C++ reference bodies located: **13**.
-- Assembly located, but no matching C body located: **22**.
+- Assembly located, but no matching C body located: **21**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
 [ASSEMBLY_GAPS.csv](ASSEMBLY_GAPS.csv) contains **every open entry**, with its
@@ -28,7 +28,6 @@ and instantiation bindings rather than counted as missing C functions.
 | --- | --- | --- |
 | F00761 | `Core::Math::BuildEulerRotationMatrix` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1499` |
 | F00762 | `Core::Math::LookupRotationSineCosine` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1597` |
-| F00763 | `Core::Math::MultiplyRotationMatrixInPlace` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1664` |
 | F01017 | `Core::Math::LookupRotationTrigQuadrant` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\48C7C.s:188` |
 | F01772 | `Core::Math::SquaredTileDistanceFromComponents` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7BDD4.s:35` |
 | F03399 | `Core::Math::LookupSineCosinePair` | `resources\rood-reverseWin\src\SLUS_010.40\31724.s:147` |

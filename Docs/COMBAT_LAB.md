@@ -415,6 +415,44 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Shared BATTLE rotation-product entry (#42, 2026-10-26)
+
+F00763 (`func_800989B8`, original2EA3C.s:1664-1736) now exposes the
+source's typed right-destination return and shares ScalarMath's existing
+copied-input, saturating Q12 rotation kernel. The assembly captures the
+left rotation and right columns before writing, returns the right
+pointer and stores only nine halfwords; no translation or padding is
+overwritten. No new hardware-state implementation is introduced.
+
+Evidence is parent9d02155c plus the scoped worktree and four preserved
+owner paths; exact commands, logs and image hashes are private
+`battleproduct42-*`:
+
+- The new ABI assertion/real calls reject the old int() stub at compile
+  time. Actual BATTLE800989B8 resolution invokes the typed function and
+  returns its output; an interior address is rejected.
+- Both configurations' `build\<configuration>\VS.Tests.exe
+  "[core-leaves],[fixed-trig]" --reporter compact` passes11 cases/
+  44,164 assertions. The BATTLE path adds1,290 assertions covering256
+  deterministic full-signed16 matrix pairs, both saturation signs,
+  independent signed division/floor, byte-exact destination tail and
+  other-operand preservation, self multiplication and module binding.
+  Existing resident-left/right and trig assertions remain intact.
+- Both x64 solution builds link both hosts; full suites pass835 cases/
+  4,226,220 assertions each. All109 port/audit controls pass.
+  Focused/default quality has0 actionable/0 new findings with unchanged
+  baselines; focused tidy retains five existing advisories and54 fixture
+  literal reports.
+- Two native generations preserve297 maintained/owner paths and original
+  2EA3C.s, repeating identically. Only generated Matrix.c/.h change;
+  there is no project/solution rewrite.
+
+The local original cohort reaches142/186,44 remaining (13 C/C++ references,
+21 assembly-only,10 missing listings); implementations3111 and aliases149
+stay separate. This establishes the BATTLE entry contract, not all SDK
+matrix behavior, C++ promotion or compatibility retirement. Publication
+and exact CI are recorded on#42 before advancing its one checkbox.
+
 ### Native idle hook and shared matrix destinations (#42, 2026-10-26)
 
 F03406 (`MulMatrix`, original32154.s:275) now returns its left destination
