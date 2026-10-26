@@ -6,7 +6,7 @@
 CVECTOR Effects_Plg073_tiledRingColorFactors[8]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FEF5C (D_800FEF5C@EFFECT/PLG073.BIN)
-u_char Effects_Plg073_ringColorFactors[][4]; /* contents: module image (ModuleData.c) */
+u_char Effects_Plg073_ringColorFactors[8][4]; /* contents: module image (ModuleData.c) */
 
 // decomp: D_800FEF7C (D_800FEF7C@EFFECT/PLG073.BIN)
 int Effects_Plg073_trailEmissionCounter; /* contents: module image (ModuleData.c) */

@@ -46,6 +46,7 @@ extern "C" {
 #include "Effects/Plugins/Plg242.h"
 #include "Effects/Plugins/Plg260.h"
 #include "Effects/Plugins/Plg265.h"
+#include "Effects/Templates/RadialSurge.h"
 }
 
 using VS::u16;
@@ -672,4 +673,56 @@ TEST_CASE("Original LFO source aliases retain every bounded sample and loop",
     }
   }
   CHECK(supported == 231);
+}
+
+namespace {
+void CheckPlg074CursorReload(std::span<const u8> image) {
+  const std::span entries(Content_moduleData, Content_moduleDataCount);
+  const auto cursor = std::ranges::find(
+      entries, static_cast<void*>(Content_plg074TrailEmissionCounter),
+      &Content_ModuleDataEntry::target);
+  REQUIRE(cursor != entries.end());
+  CHECK(std::string_view(cursor->module) == "EFFECT/PLG074.BIN");
+  CHECK(cursor->offset == 0x577C);
+  CHECK(cursor->size == 4);
+  CHECK(cursor->capacity == sizeof(int));
+  const auto saved_first = Effects_Plg073_trailEmissionCounter;
+  const auto saved_second = Content_plg074TrailEmissionCounter[0];
+  Effects_Plg073_trailEmissionCounter = 5;
+  Content_plg074TrailEmissionCounter[0] = 7;
+  CHECK(Content::CopyModuleDataEntry(*cursor, image));
+  CHECK(Content_plg074TrailEmissionCounter[0] == 0);
+  CHECK(Effects_Plg073_trailEmissionCounter == 5);
+  Effects_Plg073_trailEmissionCounter = saved_first;
+  Content_plg074TrailEmissionCounter[0] = saved_second;
+}
+}  // namespace
+
+TEST_CASE(
+    "PLG074 source sharing preserves identical code and independent state",
+    "[content][module][plg074][disc]") {
+  LoadOriginalLfoModules();
+  const auto* store = Content::DataStore::Get();
+  const auto* first = store->Find("EFFECT/PLG073.BIN");
+  const auto* second = store->Find("EFFECT/PLG074.BIN");
+  REQUIRE(first != nullptr);
+  REQUIRE(second != nullptr);
+  const auto original = store->ReadAll(*first);
+  const auto duplicate = store->ReadAll(*second);
+  REQUIRE(original.has_value());
+  REQUIRE(duplicate.has_value());
+  REQUIRE(original->size() == 22400);
+  CHECK(*original == *duplicate);
+  CheckPlg074CursorReload(*duplicate);
+}
+
+TEST_CASE("PLG073 and PLG074 import all eight ring-arc color rows",
+          "[content][module][plg074][ring-arc][disc]") {
+  const Content_ModuleDataEntry expected{"EFFECT/PLG073.BIN", 0x575C, 32,
+                                         Effects_Plg073_ringColorFactors, 32};
+  CheckTemplateBinding(expected);
+  LoadOriginalLfoModules();
+  CheckTemplateSourceBytes(*Content::DataStore::Get(), expected);
+  REQUIRE(Content_LoadModuleData() == 0);
+  CheckTemplateSourceBytes(*Content::DataStore::Get(), expected);
 }

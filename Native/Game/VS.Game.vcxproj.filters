@@ -768,12 +768,6 @@
     <ClInclude Include="src\Effects\Plugins\Plg073.h">
       <Filter>src\Effects\Plugins</Filter>
     </ClInclude>
-    <ClCompile Include="src\Effects\Plugins\Plg074.c">
-      <Filter>src\Effects\Plugins</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Plugins\Plg074.h">
-      <Filter>src\Effects\Plugins</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Plugins\Plg077.c">
       <Filter>src\Effects\Plugins</Filter>
     </ClCompile>
@@ -1204,6 +1198,12 @@
       <Filter>src\Effects\Templates</Filter>
     </ClInclude>
     <ClInclude Include="src\Effects\Templates\ParticleTarget.inl">
+      <Filter>src\Effects\Templates</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Effects\Templates\RadialSurge.c">
+      <Filter>src\Effects\Templates</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\Templates\RadialSurge.h">
       <Filter>src\Effects\Templates</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Templates\Ring.c">

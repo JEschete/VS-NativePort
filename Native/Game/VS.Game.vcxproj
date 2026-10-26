@@ -584,12 +584,6 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Effects\Plugins\Plg074.c">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Effects\Plugins\Plg077.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -981,6 +975,12 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Effects\Templates\ParticleTarget.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Effects\Templates\RadialSurge.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1889,7 +1889,6 @@
     <ClInclude Include="src\Effects\Plugins\Plg065.h" />
     <ClInclude Include="src\Effects\Plugins\Plg069.h" />
     <ClInclude Include="src\Effects\Plugins\Plg073.h" />
-    <ClInclude Include="src\Effects\Plugins\Plg074.h" />
     <ClInclude Include="src\Effects\Plugins\Plg077.h" />
     <ClInclude Include="src\Effects\Plugins\Plg081.h" />
     <ClInclude Include="src\Effects\Plugins\Plg082.h" />
@@ -1967,6 +1966,7 @@
     <ClInclude Include="src\Effects\Templates\ParticleRender.inl" />
     <ClInclude Include="src\Effects\Templates\ParticleTarget.h" />
     <ClInclude Include="src\Effects\Templates\ParticleTarget.inl" />
+    <ClInclude Include="src\Effects\Templates\RadialSurge.h" />
     <ClInclude Include="src\Effects\Templates\Ring.h" />
     <ClInclude Include="src\Effects\Templates\Ring.inl" />
     <ClInclude Include="src\Effects\Templates\RotatingSurface.h" />

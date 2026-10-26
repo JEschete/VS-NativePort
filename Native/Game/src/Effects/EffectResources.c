@@ -14,7 +14,6 @@
 #include "Effects/Particles.h"
 #include "Effects/Plugins/Plg005.h"
 #include "Effects/Plugins/Plg052.h"
-#include "Effects/Plugins/Plg074.h"
 #include "Effects/Plugins/Plg128.h"
 #include "Effects/Plugins/Plg162.h"
 #include "Effects/Plugins/Plg300.h"
@@ -25,6 +24,7 @@
 #include "Effects/Templates/Mesh10.h"
 #include "Effects/Templates/MirrorSurface.h"
 #include "Effects/Templates/ParticleDispatch.h"
+#include "Effects/Templates/RadialSurge.h"
 #include "Effects/Templates/Ring.h"
 #include "Effects/Templates/RotatingSurface.h"
 #include "Effects/Templates/Surface.h"
@@ -544,10 +544,10 @@ int Effects_InvokeAllPluginUpdates(Effects_RendererSlot* arg0, u_int arg1, int a
     Effects_Plg073_TrailDispatch(NULL, 2, 0);
     Effects_Plg073_RotatingSurface(NULL, 2, 0);
     Effects_Plg073_Grid(NULL, 2, 0);
-    Effects_Plg074_UpdateTiledRing(NULL, 2, 0);
-    Effects_Plg074_UpdateRingArc(NULL, 2, 0);
+    Effects_Plg073_TiledRing(NULL, 2, 0);
+    Effects_Plg073_Ring(NULL, 2, 0);
     Effects_Plg074_UpdateTrailEmitter(NULL, 2, 0);
-    Effects_Plg074_UpdateRotatingSurface(NULL, 2, 0);
+    Effects_Plg073_RotatingSurface(NULL, 2, 0);
     Effects_Plg005_UpdateAnalyzeGrid(NULL, 2, 0);
     Effects_Plg073_TiledRing(NULL, 2, 0);
     Effects_Plg073_Ring(NULL, 2, 0);

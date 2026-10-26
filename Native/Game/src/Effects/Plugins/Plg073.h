@@ -10,7 +10,7 @@
 #define VS_EFFECTS_PLUGINS_PLG073_H_DECLS
 
 extern CVECTOR Effects_Plg073_tiledRingColorFactors[8];
-extern u_char Effects_Plg073_ringColorFactors[][4];
+extern u_char Effects_Plg073_ringColorFactors[8][4];
 extern int Effects_Plg073_trailEmissionCounter;
 
 #endif // VS_EFFECTS_PLUGINS_PLG073_H_DECLS

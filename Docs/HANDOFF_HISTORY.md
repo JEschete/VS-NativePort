@@ -11,6 +11,97 @@ Use [HANDOFF.md](HANDOFF.md) for the current checkpoint and
 Keep the commands, revisions, limits and local evidence paths below; archival
 does not establish fresh verification or authorize deleting the referenced data.
 
+## PLG074 template integration and ring-arc import (2026-10-26)
+
+Owner scope: integrate F01986-F01995 individually, check regressions between
+entries, retain native naming/provenance, and mark the ten off in #42.
+Publication was explicitly requested again during this work. Source parent:
+`87d6858a91365f7478e0230869a3542ad22034ef`; verification used the dirty native
+worktree, while publication excludes the earlier unfinished Ashley-alliance
+changes, owner asset documentation, solution edits and reference submodule.
+
+The original PLG073 and PLG074 images both contain 22,400 bytes and have SHA-256
+`542228ed077cedbbfd70b3f96f965a6d63cc67f9a5f43f7e31d7e981ce83f0dd`.
+Every instruction and data byte agrees. Updated read-only `rood-reverse`
+`99bf0429` binds the ten entries through `tiledRings.h`, `rings.h`,
+`trails5.h`/`trailEffect.h` and `rotatingSurfaces.h`. Native code uses the
+existing renamed native templates, never includes or links reference code.
+
+- F01986/F01987 and F01989-F01993/F01995 reuse the corresponding typed PLG073
+  implementation through the existing `dup-of` mechanism.
+- F01988 and F01994 are owned native template instances. Their origin cursor
+  is imported separately from PLG074 offset `0x577C`, address `0x800FEF7C`;
+  it never aliases PLG073 mutable state. The emitter explicitly calls this
+  PLG074 origin stage.
+- All ten original module-address bindings and production renderer slots
+  87-90 are verified. Catalog `INCLUDE_ASM` provenance is retained; the audit
+  validates owned `native-template` bindings against the real shared body.
+  It still rejects missing bindings and unported template bodies.
+- The two `.inl` includes have narrow `build/include` annotations: cpplint
+  compares repository-relative package names against project-relative include
+  roots and incorrectly treats these same-directory templates as foreign
+  implementation files. No quality baseline or safety diagnostic was disabled.
+
+The ten missing entry contracts failed first (10 cases/10 assertions).
+After each individual integration, generation, Debug build, all existing
+effects/module regressions and all already-integrated PLG074 cases passed.
+Coverage includes exact ring/surface packet geometry, seams, UVs and colors;
+three anchor spaces; independent corner cursors; target and spline controls;
+zero/maximum durations; exact source recurrence and circular histories;
+attached/world ribbon rendering and clipping; the sixteen-trail limit;
+finite/infinite lifetimes, cancellation, repeat entry and complete heap
+reclamation through the production renderer list.
+
+Final source-data inspection found and logged #196 before repair. G00659
+was size `-1`, producing a tentative one-row ring-color array and no module
+import. The source selects eight four-byte rows. Its proven original extent
+is `0x575C..0x577B`, directly before the cursor. A new import/capacity test
+failed (1 case/1 assertion), then passed after resolving the producer ledger
+to 32 bytes / `u_char[8][4]`. Native rendering exercises all eight modes, and
+the content test checks original bytes and reloads. The intermediate mode
+fixture initially wrote the 26-bit `flags` field rather than the adjacent
+`transparencyCurve` bitfield; correcting that fixture preserved the original
+packed definition contract, rather than changing the renderer.
+
+Final commands and evidence:
+
+- `MSBuild.exe VagrantStory.Native.sln /m /p:Configuration=Debug /p:Platform=x64`
+  and the corresponding Release build; desktop, Combat Lab and tests link.
+- `build\Debug\VS.Tests.exe "[plg074]" --reporter compact`:
+  **13 cases / 3,642 assertions**.
+- `build\Debug\VS.Tests.exe --reporter compact` and the Release equivalent:
+  **957 cases / 7,764,092 assertions each**, including pre-existing local AI
+  tests. These are dirty-worktree results, not a claim that AI edits shipped.
+- `python -m unittest discover -s tools\port -p test_*.py`:
+  **124 controls pass on the exact staged source**. The ordinary dirty tree
+  retains two pre-existing F01681/F01682 catalog/ownership failures.
+- `python -m unittest discover -s tools\naming -p test_*.py`: **32 pass**.
+- Focused `quality-native.cmd --files` selection covers the owned native
+  source, both changed test files and the four changed port/audit tools,
+  with `--tidy`: **3 existing test findings / 0 new**.
+- Default quality on the isolated staged worktree: **0 findings / 0 new**.
+  Dirty-tree default findings belong only to the excluded AI edits.
+- Two successive generator runs preserve **117 owned files** and repeat
+  identically across **746 generated files**. Only the Game projects are
+  regenerated; the owner's solution remains untouched.
+
+Private evidence is under
+`C:\Users\judee\.copilot\session-state\b7c4a10d-7c4c-4355-a674-dd8737f2f0ec\files\`,
+using `plg074-*` and `ring196-*`. The isolated `plg074-scoped` checkout verifies
+the exact staged code without moving or reverting owner changes. Its audit
+retains **13 gaps** (10 C-backed / 3 assembly-only), **3,128 ordinary
+implementations**, **161 aliases**, **432 template instances**, and the
+original ten PLG074 coverage records. The reference snapshot fingerprint in
+that report reflects the isolated checkout's line endings; the original
+reference directories were not changed. The two unfinished AI implementations
+are not counted as completed by this checkpoint.
+
+The ten advance the fixed #42 cohort from **163/186 to 173/186**. Publication
+revision, exact CI run and eligible #196 closure are recorded on #42/#196.
+The broader unresolved ring-template data warnings are not silently repaired.
+No full Radial Surge controller/visual-parity sweep, whole-state C++ promotion,
+hardware-shaped bridge retirement or broader particle completion is claimed.
+
 ## Learned spell and rank acceptance (2026-10-22)
 
 The owner resumed autonomous work after the earlier unavailable approval form.

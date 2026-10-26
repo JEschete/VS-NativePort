@@ -148,6 +148,15 @@
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 #include "Effects/ScriptVm.h"
+#include "Effects/Templates/RadialSurge.h"
+#include "Effects/Templates/Ring.h"
+#include "Effects/Templates/RotatingSurface.h"
+#include "Effects/Templates/TiledRing.h"
+#include "Effects/Templates/TrailControl.h"
+#include "Effects/Templates/TrailInit.h"
+#include "Effects/Templates/TrailRender.h"
+#include "Effects/Templates/TrailTarget.h"
+#include "Effects/Templates/TrailUpdate.h"
 #include "Effects/Timeline.h"
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
@@ -284,6 +293,7 @@
 // Pointer tables in the module images and the symbol map that relocates them (splat_symbols.csv).
 #include "Content/ModuleData.h"
 
+extern int Content_plg074TrailEmissionCounter[1];
 extern unsigned int Content_battleShadowVertices[18];
 extern unsigned int Content_battleShadowFaces[24];
 extern unsigned int Content_battleAiHesitationLengths[1];
@@ -3275,6 +3285,16 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&Audio_Seq_unusedStateFlags, sizeof Audio_Seq_unusedStateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&Audio_Seq_unusedInventoryIndices, sizeof Audio_Seq_unusedInventoryIndices, 1u, 1u},
+    {"EFFECT/PLG074.BIN", 0x800F98F8u, 0u, (void*)&Effects_Plg073_TiledRing, 0u, 0u, 0u},
+    {"EFFECT/PLG074.BIN", 0x800FA7F0u, 0u, (void*)&Effects_Plg073_Ring, 0u, 0u, 0u},
+    {"EFFECT/PLG074.BIN", 0x800FB414u, 0u, (void*)&Effects_Plg074_GenerateTrailOrigins, 0u, 0u, 0u},
+    {"EFFECT/PLG074.BIN", 0x800FBBB0u, 0u, (void*)&Effects_Plg073_TrailTarget, 0u, 0u, 0u},
+    {"EFFECT/PLG074.BIN", 0x800FBDC8u, 0u, (void*)&Effects_Plg073_TrailControl, 0u, 0u, 0u},
+    {"EFFECT/PLG074.BIN", 0x800FC28Cu, 0u, (void*)&Effects_Plg073_TrailInit, 0u, 0u, 0u},
+    {"EFFECT/PLG074.BIN", 0x800FC404u, 0u, (void*)&Effects_Plg073_TrailUpdate, 0u, 0u, 0u},
+    {"EFFECT/PLG074.BIN", 0x800FC590u, 0u, (void*)&Effects_Plg073_TrailRender, 0u, 0u, 0u},
+    {"EFFECT/PLG074.BIN", 0x800FCFECu, 0u, (void*)&Effects_Plg074_UpdateTrailEmitter, 0u, 0u, 0u},
+    {"EFFECT/PLG074.BIN", 0x800FD534u, 0u, (void*)&Effects_Plg073_RotatingSurface, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800980F8u, 0u, (void*)&Render_LinkRoomPolygonByDepth, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80097AECu, 0u, (void*)&Render_SubdivideRoomTriangle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80097CF0u, 0u, (void*)&Render_SubdivideRoomQuad, 0u, 0u, 0u},
@@ -3293,6 +3313,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DBA88u, 0u, (void*)&Battle_Ai_UpdateAdaptivePursuitBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBB98u, 0u, (void*)&Battle_Ai_UpdateSupportFollowBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBC0Cu, 0u, (void*)&Battle_Ai_UpdateEngagementApproachBehavior, 0u, 0u, 0u},
+    {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1758u, 4u, (void*)Content_battleAiHesitationLengths, sizeof Content_battleAiHesitationLengths, 1u, 1u},

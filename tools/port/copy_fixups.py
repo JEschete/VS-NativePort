@@ -105,6 +105,9 @@ AI_FRAME_FIELDS = {
 }
 
 MODULE_DATA_BLOBS = (
+    ("EFFECT/PLG074.BIN", 0x577C, 0x800FEF7C, 4,
+     "Content_plg074TrailEmissionCounter",
+     "PLG074 trailEffect.h origin cursor; original image matches PLG073 but mutable state remains overlay-local"),
     ("BATTLE/BATTLE.PRG", 0x81268, 0x800E9A68, 72, "Content_battleShadowVertices",
      "4B16C.s:1208 eighteen packed signed16 X/Z vertices; imported source data only"),
     ("BATTLE/BATTLE.PRG", 0x812D4, 0x800E9AD4, 96, "Content_battleShadowFaces",
@@ -123,10 +126,23 @@ MODULE_DATA_BLOBS = (
      "25AC.c:LFO selectors include source-code bytes as sample/control data; original PS-X EXE payload, never host code"),
 )
 
-MODULE_DATA_BLOB_TYPES = {"Content_residentLfoSamples": ("short", 2)}
+MODULE_DATA_BLOB_TYPES = {
+    "Content_residentLfoSamples": ("short", 2),
+    "Content_plg074TrailEmissionCounter": ("int", 4),
+}
 MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 
 MODULE_FUNCTION_ENTRIES = (
+    ("EFFECT/PLG074.BIN", 0x800F98F8, "F01986"),
+    ("EFFECT/PLG074.BIN", 0x800FA7F0, "F01987"),
+    ("EFFECT/PLG074.BIN", 0x800FB414, "F01988"),
+    ("EFFECT/PLG074.BIN", 0x800FBBB0, "F01989"),
+    ("EFFECT/PLG074.BIN", 0x800FBDC8, "F01990"),
+    ("EFFECT/PLG074.BIN", 0x800FC28C, "F01991"),
+    ("EFFECT/PLG074.BIN", 0x800FC404, "F01992"),
+    ("EFFECT/PLG074.BIN", 0x800FC590, "F01993"),
+    ("EFFECT/PLG074.BIN", 0x800FCFEC, "F01994"),
+    ("EFFECT/PLG074.BIN", 0x800FD534, "F01995"),
     ("BATTLE/BATTLE.PRG", 0x800980F8, "F00752"),
     ("BATTLE/BATTLE.PRG", 0x80097AEC, "F00748"),
     ("BATTLE/BATTLE.PRG", 0x80097CF0, "F00749"),

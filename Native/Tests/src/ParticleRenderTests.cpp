@@ -14,6 +14,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/ModuleData.h"
 #include "Core/Log.hpp"
 #include "Core/Random.hpp"
 #include "Effects/ParticleRender.h"
@@ -28,15 +29,25 @@ extern "C" {
 #include "Effects/EffectResources.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
+#include "Effects/Plugins/Plg073.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
+#include "Effects/ScriptVm.h"
 #include "Effects/Templates/ParticleDispatch.h"
 #include "Effects/Templates/ParticleRender.h"
+#include "Effects/Templates/RadialSurge.h"
+#include "Effects/Templates/Ring.h"
+#include "Effects/Templates/RotatingSurface.h"
+#include "Effects/Templates/TiledRing.h"
+#include "Effects/Templates/TrailControl.h"
+#include "Effects/Templates/TrailDispatch.h"
 #include "Effects/Templates/TrailInit.h"
 #include "Effects/Templates/TrailNineInit.h"
 #include "Effects/Templates/TrailNineRender.h"
 #include "Effects/Templates/TrailNineUpdate.h"
+#include "Effects/Templates/TrailOrigin.h"
 #include "Effects/Templates/TrailRender.h"
+#include "Effects/Templates/TrailTarget.h"
 #include "Effects/Templates/TrailUpdate.h"
 #include "Effects/Timeline.h"
 #include "Render/Camera.h"
@@ -1227,4 +1238,456 @@ TEST_CASE("Nine-sample trail ribbons retain source geometry and render spaces",
       storage.state, storage.state.texture, storage.transparency,
       Effects_Plg057_TrailNineRender,
       [](const auto& packet) -> const POLY_GT4& { return packet.poly; });
+}
+
+namespace {
+template <class Function>
+Function Plg074Entry(unsigned address, Function expected) {
+  auto* actual = VS::Content::ResolveModuleAddress(
+      {Content_moduleSymbols, Content_moduleSymbolCount}, "EFFECT/PLG074.BIN",
+      address);
+  REQUIRE(actual == reinterpret_cast<void*>(expected));
+  return reinterpret_cast<Function>(actual);
+}
+
+struct Plg074Fixture : EmissionFixture {
+  int saved_sample = Effects_curveSamples[0];
+  int saved_corner = Effects_Plg073_trailEmissionCounter;
+  int saved_plg074_corner = Content_plg074TrailEmissionCounter[0];
+  SVECTOR saved_origin = Effects_effectOrigin[0];
+  Effects_ActionEffectRequest saved_request = Effects_actionRequest;
+  std::array<CVECTOR, 8> saved_colors{};
+  std::array<std::array<u_char, 4>, 8> saved_arc_colors{};
+  Effects_ParticleEmitterScratch scratch{};
+  std::array<Effects_Trail, 16> trails{};
+  Effects_TrailQuadSet trail_state{};
+
+  Plg074Fixture() {
+    package.block1TableCount = 1;
+    package.block2Count = 1;
+    Effects_curveSamples[0] = 0;
+    Effects_Plg073_trailEmissionCounter = 0;
+    Content_plg074TrailEmissionCounter[0] = 0;
+    Effects_effectOrigin[0] = {100, -200, 300, 0};
+    Effects_actionRequest.position = {400, -500, 600, 0};
+    std::ranges::copy(Effects_Plg073_tiledRingColorFactors,
+                      saved_colors.begin());
+    std::memcpy(saved_arc_colors.data(), Effects_Plg073_ringColorFactors,
+                sizeof saved_arc_colors);
+    Effects_Plg073_tiledRingColorFactors[0] = {32, 64, 96, 0};
+    for (int mode = 0; mode < 8; ++mode) {
+      for (int row = 0; row < 3; ++row) {
+        Effects_Plg073_ringColorFactors[mode][row] =
+            static_cast<u_char>(32 * (row + 1) + mode);
+      }
+    }
+    instance.transforms[0].world.t[0] = 700;
+    instance.transforms[0].world.t[1] = -800;
+    instance.transforms[0].world.t[2] = 900;
+    trail_state.trails = trails.data();
+    trail_state.trailcount = 8;
+  }
+
+  ~Plg074Fixture() {
+    Effects_curveSamples[0] = saved_sample;
+    Effects_Plg073_trailEmissionCounter = saved_corner;
+    Content_plg074TrailEmissionCounter[0] = saved_plg074_corner;
+    Effects_effectOrigin[0] = saved_origin;
+    Effects_actionRequest = saved_request;
+    std::ranges::copy(saved_colors, Effects_Plg073_tiledRingColorFactors);
+    std::memcpy(Effects_Plg073_ringColorFactors, saved_arc_colors.data(),
+                sizeof saved_arc_colors);
+  }
+
+  Effects_ParticleDefinition& Definition() { return definitions.entries[0]; }
+
+  void ConfigureRing() {
+    auto& definition = Definition();
+    std::ranges::copy(std::array<std::int16_t, 6>{0, 0, 0, 0, 1024, 1024},
+                      definition.positionRange);
+    std::ranges::copy(std::array<std::int16_t, 6>{128, 128, 64, 64, 128, 128},
+                      definition.extentRange);
+    std::ranges::fill(definition.innerExtentRange, 2048);
+    definition.vectorRanges[0][0] = definition.vectorRanges[0][1] = 1024;
+    definition.vectorRanges[1][0] = definition.vectorRanges[1][1] = 4096;
+  }
+
+  void ResetPackets() {
+    Render_frameScratch.primitiveCursor = storage.data() + 1;
+    ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+  }
+
+  void CheckGuards() const {
+    CHECK(storage.front() == 0xDEADBEEF);
+    CHECK(storage.back() == 0xDEADBEEF);
+  }
+};
+
+template <class State>
+void CheckPlg074RingInitialState(const State& state) {
+  CHECK(state.age == 0);
+  CHECK(state.angle == 0);
+  CHECK(state.radiusSpeed == 0);
+  CHECK(state.heightSpeed == 0);
+}
+
+template <class State>
+void StopPlg074Ring(Effects_EffectRenderer renderer,
+                    Effects_RendererSlot& slot) {
+  auto* state = static_cast<State*>(slot.rendererState);
+  CHECK(renderer(&slot, 3, 0) == 1);
+  CHECK(renderer(&slot, 2, 0) == 0);
+  CHECK(state->age == 2);
+  CHECK(state->lifetime == 0);
+  CHECK(renderer(&slot, 4, 0) == 0);
+}
+
+template <class State>
+void CheckPlg074RingLifecycle(Effects_EffectRenderer renderer,
+                              Plg074Fixture& fixture) {
+  DispatchHeap heap;
+  for (const int lifetime : {2, 0}) {
+    Effects_RendererSlot slot{};
+    REQUIRE(renderer(&slot, 1, lifetime) == 1);
+    REQUIRE(slot.rendererState != nullptr);
+    REQUIRE(DispatchHeap::Capacity(slot.rendererState) >= sizeof(State));
+    auto* state = static_cast<State*>(slot.rendererState);
+    CheckPlg074RingInitialState(*state);
+    REQUIRE(renderer(&slot, 2, 0) == 1);
+    CHECK(state->age == 1);
+    CHECK(state->lifetime == (lifetime == 0 ? 0 : 1));
+    fixture.ResetPackets();
+    StopPlg074Ring<State>(renderer, slot);
+    Core_Memory_FreeFromHighEnd(state);
+    CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+    fixture.ResetPackets();
+  }
+}
+
+void CheckPlg074TiledRingPackets(const Render_TiledRingPacket* packets) {
+  for (int index = 0; index < 32; ++index) {
+    const auto& quad = packets[index].poly;
+    CHECK(quad.u0 == 16);
+    CHECK(quad.u1 == 24);
+    CHECK(quad.v0 == (index < 16 ? 32 : 36));
+    CHECK(quad.v2 == (index < 16 ? 36 : 40));
+    CHECK(quad.r0 == (index < 16 ? 32 : 64));
+    CHECK(quad.r2 == (index < 16 ? 64 : 96));
+    CHECK(quad.clut == 0x1234);
+    CHECK(quad.tpage == 0x567);
+    CHECK(quad.code == Render_LegacyPrimitiveCode_PolyGt4SemiTrans);
+  }
+}
+
+void CheckPlg074TiledRingGeometry(const Render_TiledRingPacket* packets) {
+  CHECK(packets[0].poly.x0 == 192);
+  CHECK(packets[0].poly.y0 == 120);
+  CHECK(packets[0].poly.y2 == 128);
+  CHECK(packets[15].poly.x1 == packets[0].poly.x0);
+  CHECK(packets[15].poly.y1 == packets[0].poly.y0);
+}
+
+void CheckPlg074RingArcPackets(const Render_RingPacket* packets, int mode) {
+  for (int index = 0; index < 16; ++index) {
+    const auto& quad = packets[index].poly;
+    CHECK(quad.u0 == 16 + index % 8);
+    CHECK(quad.u1 == 17 + index % 8);
+    CHECK(quad.v0 == (index < 8 ? 32 : 36));
+    CHECK(quad.v2 == (index < 8 ? 36 : 40));
+    CHECK(quad.r0 == (index < 8 ? 32 : 64) + mode);
+    CHECK(quad.r2 == (index < 8 ? 64 : 96) + mode);
+  }
+}
+}  // namespace
+
+TEST_CASE("PLG074 F01986 draws tiled rings through the production slot",
+          "[effects][plg074][f01986]") {
+  const auto entry = Plg074Entry(0x800F98F8, Effects_Plg073_TiledRing);
+  REQUIRE(Effects_effectEntryPoints[87] == entry);
+  Plg074Fixture fixture;
+  fixture.ConfigureRing();
+  DispatchHeap heap;
+  Effects_RendererSlot slot{};
+  REQUIRE(entry(&slot, 1, 2) == 1);
+  REQUIRE(entry(&slot, 2, 0) == 1);
+  const auto* packets = reinterpret_cast<const Render_TiledRingPacket*>(
+      fixture.storage.data() + 1);
+  CHECK(Render_frameScratch.primitiveCursor == packets + 32);
+  CheckPlg074TiledRingGeometry(packets);
+  CheckPlg074TiledRingPackets(packets);
+  fixture.CheckGuards();
+  Core_Memory_FreeFromHighEnd(slot.rendererState);
+  fixture.ResetPackets();
+  CheckPlg074RingLifecycle<Effects_TiledRingState>(entry, fixture);
+}
+
+TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
+          "[effects][plg074][f01987]") {
+  const auto entry = Plg074Entry(0x800FA7F0, Effects_Plg073_Ring);
+  REQUIRE(Effects_effectEntryPoints[88] == entry);
+  const auto mode = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
+  Plg074Fixture fixture;
+  fixture.ConfigureRing();
+  fixture.Definition().transparencyCurve = static_cast<u_int>(mode);
+  DispatchHeap heap;
+  Effects_RendererSlot slot{};
+  REQUIRE(entry(&slot, 1, 2) == 1);
+  REQUIRE(entry(&slot, 2, 0) == 1);
+  const auto* packets =
+      reinterpret_cast<const Render_RingPacket*>(fixture.storage.data() + 1);
+  CHECK(Render_frameScratch.primitiveCursor == packets + 16);
+  CheckPlg074RingArcPackets(packets, mode);
+  CHECK(packets[0].poly.x0 == 192);
+  CHECK(packets[0].poly.y0 == 120);
+  CHECK(packets[7].poly.x1 == packets[0].poly.x0);
+  fixture.CheckGuards();
+  Core_Memory_FreeFromHighEnd(slot.rendererState);
+  fixture.ResetPackets();
+  CheckPlg074RingLifecycle<Effects_RingState>(entry, fixture);
+}
+
+TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
+          "[effects][plg074][f01988]") {
+  const auto entry =
+      Plg074Entry(0x800FB414, Effects_Plg074_GenerateTrailOrigins);
+  const int anchor = GENERATE(0, 1, 2);
+  Plg074Fixture fixture;
+  auto& definition = fixture.Definition();
+  std::ranges::copy(std::array<std::int16_t, 6>{10, 10, 20, 20, 30, 30},
+                    definition.extentRange);
+  fixture.scratch.flags = 0x1008 | anchor;
+  Effects_Plg073_trailEmissionCounter = 5;
+  const std::array offsets{std::array{0, 0, 0}, std::array{100, -200, 300},
+                           std::array{700, -800, 900}};
+  for (int cycle = 0; cycle < 2; ++cycle) {
+    entry(&definition, &fixture.scratch, &fixture.instance,
+          &fixture.trail_state);
+    for (int index = 0; index < 8; ++index) {
+      const auto& point = fixture.trails[index].splinePoints[0];
+      const int corner = index + 1;
+      CHECK(point.vx == offsets[anchor][0] + (corner & 1 ? 10 : -10));
+      CHECK(point.vy == offsets[anchor][1] + (corner & 2 ? 20 : -20));
+      CHECK(point.vz == offsets[anchor][2] + (corner & 4 ? 30 : -30));
+    }
+    CHECK(Content_plg074TrailEmissionCounter[0] == 0);
+    CHECK(Effects_Plg073_trailEmissionCounter == 5);
+    CHECK(fixture.trails[8].splinePoints[0].vx == 0);
+  }
+}
+
+TEST_CASE("PLG074 F01989 targets world request and actor anchors",
+          "[effects][plg074][f01989]") {
+  const auto entry = Plg074Entry(0x800FBBB0, Effects_Plg073_TrailTarget);
+  const unsigned anchor = GENERATE(0u, 0x80u, 0xC0u);
+  Plg074Fixture fixture;
+  auto& definition = fixture.Definition();
+  std::ranges::copy(std::array<std::int16_t, 6>{10, 10, -20, -20, 30, 30},
+                    definition.vectorRanges[6]);
+  fixture.scratch.flags = anchor;
+  entry(&definition, &fixture.scratch, &fixture.instance, &fixture.trail_state);
+  const auto offset = anchor == 0x80   ? std::array{400, -500, 600}
+                      : anchor == 0xC0 ? std::array{700, -800, 900}
+                                       : std::array{0, 0, 0};
+  for (int index = 0; index < 8; ++index) {
+    const auto& point = fixture.trails[index].splinePoints[3];
+    CHECK(point.vx == offset[0] + 10);
+    CHECK(point.vy == offset[1] - 20);
+    CHECK(point.vz == offset[2] + 30);
+    CHECK(fixture.trails[index].splinePoints[0].vx == 0);
+  }
+  CHECK(fixture.trails[8].splinePoints[3].vx == 0);
+}
+
+TEST_CASE("PLG074 F01990 builds axial spline controls without moving endpoints",
+          "[effects][plg074][f01990]") {
+  const auto entry = Plg074Entry(0x800FBDC8, Effects_Plg073_TrailControl);
+  Plg074Fixture fixture;
+  fixture.trail_state.trailcount = 1;
+  auto& points = fixture.trails[0].splinePoints;
+  points[0] = {10, 20, 30, 0};
+  points[3] = {10, 20, 1054, 0};
+  std::ranges::copy(std::array<std::int16_t, 4>{64, 64, -64, -64},
+                    fixture.Definition().pairRanges[2]);
+  entry(&fixture.Definition(), &fixture.scratch, &fixture.instance,
+        &fixture.trail_state);
+  CHECK(points[1].vx == 10);
+  CHECK(points[1].vy == 20);
+  CHECK(points[1].vz == 286);
+  CHECK(points[2].vx == 10);
+  CHECK(points[2].vy == 20);
+  CHECK(points[2].vz == 798);
+  CHECK(points[0].vz == 30);
+  CHECK(points[3].vz == 1054);
+  CHECK(fixture.trails[1].splinePoints[1].vz == 0);
+}
+
+namespace {
+void CheckPlg074TrailInitialization(const Effects_Trail& trail, int steps) {
+  CHECK(trail.stepCount == steps);
+  CHECK(trail.splineSampleCount == 1);
+  CHECK(trail.trailCollapseCounter == 4);
+  CHECK(trail.currentSplineSample == 0);
+  CHECK(trail.splineProgress == 0);
+  CHECK(trail.speed == 8192);
+  CHECK(trail.opaque54 == 0x06000000 / (steps * steps) - 16384 / steps);
+}
+
+void CheckPlg074EmitterInitialization(const Effects_TrailQuadSet& state,
+                                      int count) {
+  CHECK(state.trailcount == std::min(count, 16));
+  CHECK(state.curveSampleDistance == 0);
+  CHECK(state.opaque3 == 0);
+  CHECK(state.sampledTransparencyCurve[0] == 128);
+  CHECK(state.sampledTransparencyCurve[4] == 128);
+}
+
+void CheckPlg074EmitterTick(const Effects_TrailQuadSet& state, int count,
+                            int cycle) {
+  CHECK(state.opaque3 == 1);
+  CHECK(state.curveSampleDistance == 1);
+  CHECK(Content_plg074TrailEmissionCounter[0] ==
+        ((cycle + 1) * std::min(count, 16)) % 8);
+  CHECK(Effects_Plg073_trailEmissionCounter == 0);
+}
+
+void StopPlg074Emitter(Effects_EffectRenderer entry, Effects_RendererSlot& slot,
+                       bool cancel) {
+  if (cancel) {
+    CHECK(entry(&slot, 4, 0) == 0);
+  } else {
+    CHECK(entry(&slot, 3, 0) == 1);
+    CHECK(entry(&slot, 2, 0) == 0);
+  }
+}
+
+void CheckPlg074SurfacePackets(const Render_RotatingSurfacePacket* packets) {
+  for (std::size_t row = 0; row < 4; ++row) {
+    const auto& quad = packets[row * 16].poly;
+    CHECK(quad.x0 == 192);
+    CHECK(quad.y0 == 120 + row * 16);
+    CHECK(quad.y2 == 136 + row * 16);
+    CHECK(quad.r0 == 255);
+    CHECK(quad.r2 == 255);
+    CHECK(quad.u0 == 16);
+    CHECK(quad.v0 == 32 + row * 2);
+    CHECK(quad.v2 == 34 + row * 2);
+  }
+}
+}  // namespace
+
+TEST_CASE(
+    "PLG074 F01991 initializes bounded trail histories and zero durations",
+    "[effects][plg074][f01991]") {
+  const auto entry = Plg074Entry(0x800FC28C, Effects_Plg073_TrailInit);
+  const std::int16_t duration = GENERATE(0, 1, 12, 255);
+  Plg074Fixture fixture;
+  std::ranges::fill(fixture.Definition().pairRanges[4], duration);
+  std::ranges::fill(fixture.Definition().innerExtentRange, 2);
+  fixture.trails[0].splinePoints[0] = {10, 20, 30, 0};
+  entry(&fixture.Definition(), &fixture.scratch, &fixture.instance,
+        &fixture.trail_state);
+  for (int index = 0; index < 8; ++index) {
+    const auto& trail = fixture.trails[index];
+    const int steps = duration == 0 ? 1 : duration;
+    CheckPlg074TrailInitialization(trail, steps);
+    CHECK(trail.splineSamples[0].vx == (index == 0 ? 10 : 0));
+  }
+  CHECK(fixture.trails[8].stepCount == 0);
+}
+
+TEST_CASE("PLG074 F01992 matches the source recurrence and tail collapse",
+          "[effects][plg074][f01992]") {
+  const auto entry = Plg074Entry(0x800FC404, Effects_Plg073_TrailUpdate);
+  Effects_TrailQuadSet state{};
+  state.trailcount = 2;
+  CheckTrailReferencePath<Effects_Trail>(state, Effects_Plg073_TrailInit,
+                                         entry);
+}
+
+TEST_CASE(
+    "PLG074 F01993 preserves ribbon packets clipping and circular history",
+    "[effects][plg074][f01993]") {
+  const auto entry = Plg074Entry(0x800FC590, Effects_Plg073_TrailRender);
+  struct Storage {
+    Effects_TrailQuadSet state{};
+    std::array<u_char, 5> transparency{};
+  } storage;
+  static_assert(offsetof(Storage, transparency) ==
+                offsetof(Effects_TrailQuadSet, sampledTransparencyCurve));
+  storage.state.trailcount = 2;
+  CheckTrailReferenceRendering<Effects_Trail, Render_EffectGouraudQuadPacket>(
+      storage.state, storage.state.textureAnimation, storage.transparency,
+      entry,
+      [](const auto& packet) -> const POLY_GT4& { return packet.opaque4; });
+}
+
+TEST_CASE("PLG074 F01994 owns trail buffers across expiry cancel and reentry",
+          "[effects][plg074][f01994]") {
+  const auto entry = Plg074Entry(0x800FCFEC, Effects_Plg074_UpdateTrailEmitter);
+  REQUIRE(Effects_effectEntryPoints[89] == entry);
+  const std::int16_t count = GENERATE(0, 1, 16, 20);
+  const bool cancel = GENERATE(false, true);
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  fixture.Definition().intervalRange[0] = count;
+  fixture.Definition().flags = 0x1008;
+  std::ranges::fill(fixture.Definition().pairRanges[4], 12);
+  for (int cycle = 0; cycle < 2; ++cycle) {
+    Effects_RendererSlot slot{};
+    REQUIRE(entry(&slot, 1, 2) == 1);
+    auto* state = static_cast<Effects_TrailQuadSet*>(slot.rendererState);
+    REQUIRE(state != nullptr);
+    CheckPlg074EmitterInitialization(*state, count);
+    REQUIRE(entry(&slot, 2, 0) == 1);
+    CheckPlg074EmitterTick(*state, count, cycle);
+    StopPlg074Emitter(entry, slot, cancel);
+    Core_Memory_FreeFromHighEnd(state);
+    CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+    fixture.ResetPackets();
+  }
+}
+
+TEST_CASE("PLG074 F01995 draws five accelerating surface rows",
+          "[effects][plg074][f01995]") {
+  const auto entry = Plg074Entry(0x800FD534, Effects_Plg073_RotatingSurface);
+  REQUIRE(Effects_effectEntryPoints[90] == entry);
+  Plg074Fixture fixture;
+  fixture.ConfigureRing();
+  std::ranges::fill(fixture.Definition().vectorRanges[1], 0);
+  DispatchHeap heap;
+  Effects_RendererSlot slot{};
+  REQUIRE(entry(&slot, 1, 2) == 1);
+  REQUIRE(entry(&slot, 2, 0) == 1);
+  const auto* packets = reinterpret_cast<const Render_RotatingSurfacePacket*>(
+      fixture.storage.data() + 1);
+  CHECK(Render_frameScratch.primitiveCursor == packets + 64);
+  CheckPlg074SurfacePackets(packets);
+  fixture.CheckGuards();
+  Core_Memory_FreeFromHighEnd(slot.rendererState);
+  fixture.ResetPackets();
+  CheckPlg074RingLifecycle<Effects_RotatingSurfaceState>(entry, fixture);
+}
+
+TEST_CASE(
+    "PLG074 production renderer lists expire and release every allocation",
+    "[effects][plg074][plg074-lifecycle]") {
+  Plg074Fixture fixture;
+  fixture.ConfigureRing();
+  DispatchHeap heap;
+  for (int cycle = 0; cycle < 3; ++cycle) {
+    for (int index = 87; index <= 90; ++index) {
+      auto* slot = Effects_AttachEffectRenderer(
+          &fixture.instance, Effects_effectEntryPoints[index], 2);
+      REQUIRE(slot != nullptr);
+      REQUIRE(slot->rendererState != nullptr);
+    }
+    CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
+    REQUIRE(fixture.instance.context.renderer != nullptr);
+    fixture.ResetPackets();
+    CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
+    CHECK(fixture.instance.context.renderer == nullptr);
+    CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+    fixture.CheckGuards();
+    fixture.ResetPackets();
+  }
 }

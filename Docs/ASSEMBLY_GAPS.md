@@ -7,10 +7,10 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **23** (23 stubs and 0 partial implementations).
+- Open native entries: **13** (13 stubs and 0 partial implementations).
 - Matching C/C++ reference bodies located: **10**.
 - Assembly located, but no matching C body located: **3**.
-- Assembly-backed declarations with no local assembly located: **10**.
+- Assembly-backed declarations with no local assembly located: **0**.
 
 [ASSEMBLY_GAPS.csv](ASSEMBLY_GAPS.csv) contains **every open entry**, with its
 catalog ID, native status/location, source classification, original symbol,
@@ -40,16 +40,6 @@ to an ignored build directory first.
 
 | ID | Native name | Original declaration |
 | --- | --- | --- |
-| F01986 | `Effects::Plg074::UpdateTiledRing` | `src/EFFECT/PLG074.BIN/F8.c:3` |
-| F01987 | `Effects::Plg074::UpdateRingArc` | `src/EFFECT/PLG074.BIN/F8.c:5` |
-| F01988 | `Effects::Plg074::GenerateTrailOrigins` | `src/EFFECT/PLG074.BIN/F8.c:7` |
-| F01989 | `Effects::Plg074::GenerateTrailTargets` | `src/EFFECT/PLG074.BIN/F8.c:9` |
-| F01990 | `Effects::Plg074::GenerateTrailControlPoints` | `src/EFFECT/PLG074.BIN/F8.c:11` |
-| F01991 | `Effects::Plg074::InitializeTrails` | `src/EFFECT/PLG074.BIN/F8.c:13` |
-| F01992 | `Effects::Plg074::UpdateTrails` | `src/EFFECT/PLG074.BIN/F8.c:15` |
-| F01993 | `Effects::Plg074::RenderTrails` | `src/EFFECT/PLG074.BIN/F8.c:17` |
-| F01994 | `Effects::Plg074::UpdateTrailEmitter` | `src/EFFECT/PLG074.BIN/F8.c:19` |
-| F01995 | `Effects::Plg074::UpdateRotatingSurface` | `src/EFFECT/PLG074.BIN/F8.c:21` |
 
 ## Tagged file: BATTLE/BATTLE.PRG/7E05C.s
 
@@ -115,7 +105,7 @@ as behaviorally complete. No native gameplay issue is closed by this audit.
 
 | Reference | Revision | Production source files scanned | Source SHA-256 |
 | --- | --- | --- | --- |
-| `rood-reverseWin` | `unversioned snapshot` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
+| `rood-reverseWin` | `unversioned snapshot` | 383 | `f04ee5fc2468241373414f93e81fbfb5c1bd953fe19f8a229fd905646192bcc1` |
 | `rood-reverse` | `99bf0429a44684d3c1ec4340a04d0dad17e43e7e` | 538 | `9ca07109b9f86b444b2cc2d7c07791bcffe55b280707f7ae04c3fd18f8069a71` |
 | `rood-reverse-noprompt` | `39821e4fc0353dc89855f5f29fd678d71545daa2` | 389 | `e3e5d73ccd7c08971c9558baad6e6a2df2e2fe0bcd9b8961e133476e86db7a8c` |
 | `rood-boi` | `d3ec02d2d762eedc67c27eb8dbe2606aca3bd05a` | 763 | `29e55b67045233feca59d1da3f4cfe52257d5aa56b019e04a3c6db922edd14b8` |

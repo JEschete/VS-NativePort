@@ -175,7 +175,13 @@ def template_status(row: dict[str, str]) -> tuple[str, str]:
         implementation = path.with_suffix(".inl")
         macro = row["name"]
     else:
-        macro = row["kind"].rsplit(":", 1)[1]
+        if row["kind"].startswith("template:"):
+            macro = row["kind"].rsplit(":", 1)[1]
+        else:
+            binding = re.search(r"(?:^|;)native-template:(\w+)(?:;|$)", row["notes"])
+            if binding is None:
+                raise ValueError(f"Missing native template declaration for {row['id']}")
+            macro = binding[1]
         name = row["final_name"].replace("::", "_")
         match = re.search(rf"^\s*#define\s+{re.escape(macro)}\s+{re.escape(name)}\b",
                           text, re.MULTILINE)
@@ -305,7 +311,8 @@ def audit(output: Path, publish: bool = False) -> dict:
             continue
         if canonical_id(row, catalog) != row["id"]:
             continue
-        if row["kind"].startswith("template"):
+        if row["kind"].startswith("template") or re.search(
+                r"(?:^|;)native-template:", row["notes"]):
             states[row["id"]] = template_status(row)
             continue
         redirected = redirect_status(row)

@@ -12,6 +12,58 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_plg074_reuses_identical_code_without_merging_overlay_state(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(
+            encoding="utf-8", newline=""
+        ) as handle:
+            catalog = {row["id"]: row for row in csv.DictReader(handle)}
+        addresses = (
+            0x800F98F8, 0x800FA7F0, 0x800FB414, 0x800FBBB0, 0x800FBDC8,
+            0x800FC28C, 0x800FC404, 0x800FC590, 0x800FCFEC, 0x800FD534,
+        )
+        for offset, address in enumerate(addresses):
+            identity = f"F{1986 + offset:05}"
+            with self.subTest(id=identity):
+                row = catalog[identity]
+                self.assertIn(
+                    ("EFFECT/PLG074.BIN", address, identity),
+                    copy_fixups.MODULE_FUNCTION_ENTRIES,
+                )
+                self.assertEqual(row["copied"], "x")
+                if offset in (2, 8):
+                    self.assertEqual(
+                        audit_assembly_gaps.canonical_id(row, catalog), identity
+                    )
+                    self.assertEqual(
+                        audit_assembly_gaps.template_status(row)[0],
+                        "template-instance",
+                    )
+                else:
+                    self.assertEqual(
+                        audit_assembly_gaps.canonical_id(row, catalog),
+                        f"F{1975 + offset:05}",
+                    )
+        cursor = next(
+            blob for blob in copy_fixups.MODULE_DATA_BLOBS
+            if blob[4] == "Content_plg074TrailEmissionCounter"
+        )
+        self.assertEqual(cursor[:4], ("EFFECT/PLG074.BIN", 0x577C, 0x800FEF7C, 4))
+        source = (root / r"Native\Game\src\Effects\Templates\RadialSurge.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "#define VS_TRAIL_CORNER_STATE Content_plg074TrailEmissionCounter[0]",
+            source,
+        )
+        self.assertEqual(
+            source.count(
+                "#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg074_GenerateTrailOrigins"
+            ),
+            2,
+        )
+        self.assertNotIn("Effects_Plg073_trailEmissionCounter", source)
+
     def test_room_packet_linking_reuses_shared_depth_resolution_and_native_handles(self):
         self.assertEqual(
             self.owned_items()["F00752"]["path"],
@@ -396,15 +448,25 @@ class EncounterFixupTests(unittest.TestCase):
         definitions, paths = audit_assembly_gaps.native_definitions(rows, owned)
         for row in rows:
             with self.subTest(id=row["id"]):
-                bodies = [
-                    body
-                    for body in definitions[paths[row["id"]]]
-                    if body.name == row["final_name"].replace("::", "_")
-                ]
-                self.assertEqual(len(bodies), 1)
-                status = audit_assembly_gaps.native_status(bodies[0].body)
-                self.assertIn(status, ("implemented", "stub", "partial-unported"))
-                expected = "x" if status == "implemented" else "stub"
+                if row["kind"].startswith("template:") or re.search(
+                    r"(?:^|;)native-template:", row["notes"]
+                ):
+                    status, _ = audit_assembly_gaps.template_status(row)
+                    self.assertIn(
+                        status, ("template-instance", "stub", "partial-unported")
+                    )
+                else:
+                    bodies = [
+                        body
+                        for body in definitions[paths[row["id"]]]
+                        if body.name == row["final_name"].replace("::", "_")
+                    ]
+                    self.assertEqual(len(bodies), 1)
+                    status = audit_assembly_gaps.native_status(bodies[0].body)
+                    self.assertIn(status, ("implemented", "stub", "partial-unported"))
+                expected = (
+                    "x" if status in ("implemented", "template-instance") else "stub"
+                )
                 self.assertEqual(
                     (row["final_location"], row["copied"]),
                     (owned[row["id"]]["path"], expected),

@@ -9,6 +9,23 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01986-F01995 are integrated and component-verified, with a build and
+  cumulative effects/module regression gate between each entry. Original
+  PLG073/074 images are byte-identical. Eight stateless entries reuse the
+  established typed native templates; the origin and emitter have separate
+  PLG074 bindings and an independent imported emission cursor. Original
+  symbols, assembly provenance and all ten audit records remain intact.
+  #196 also repairs G00659's missing 32-byte ring-arc color import; all eight
+  modes are tested. Final focused selection: 13 cases/3,642 assertions.
+  Full dirty-worktree Debug and Release: 957 cases/7,764,092 assertions each.
+  Exact scoped source passes 124 port controls, 32 naming controls and default
+  quality with 0 new findings; focused static analysis has 0 new findings.
+  The published-scope audit has 13 gaps, not 11: the unfinished local
+  F01681/F01682 edits remain excluded. The fixed cohort advances to 173/186.
+  See the [PLG074 checkpoint](HANDOFF_HISTORY.md#plg074-template-integration-and-ring-arc-import-2026-10-26)
+  for commands, staging isolation, source/data evidence and remaining limits.
+  Fixing revision and exact-revision CI are recorded on #42/#196. This is not
+  whole-spell controller/visual parity, C++ promotion or EC retirement.
 - #42 F00752 now exposes a typed native packet-span/depth/bias link entry and
   reuses it for the existing room packet writer. Original
   `2EA3C.s:1036-1064` shifts projected depth by two, adds the signed high-halfword
@@ -22,13 +39,6 @@ verification of the current worktree.
   gaps, 3,128 implementations and 153 aliases separately. This is locally
   verified and published in `7f523452`; exact Source Quality run
   `40377510616` passed. The local gap cohort is now 163/186, with 23 open.
-- Read-only `rood-reverse` is now at `99bf0429`. Its PLG074 update replaces
-  `F8.c` assembly stubs with shared C implementations for tiled rings, ring
-  arcs, five-sample trails and rotating surfaces. This is new source evidence
-  relevant to F01986-F01995, not a native implementation. The open-gap audit
-  still reports those declarations as assembly-not-located; map the shared
-  template bodies to individual function IDs before changing their ledger
-  status or porting them.
 - #42 F00748/F00749 now expose bounded typed triangle/quad subdivision
   entries sharing the existing recursion. Original2EA3C.s:612/752
   proves four recursive children plus three triangle edges, and four

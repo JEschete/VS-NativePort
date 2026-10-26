@@ -188,8 +188,17 @@ extern "C" int target(int (*callback)(int)) noexcept {
                    "final_location": r"Native\Game\src\Effects\Unit.c"}
             with patch.object(audit_module, "REPO", root):
                 self.assertEqual(template_status(row)[0], "template-instance")
+                row["kind"] = "INCLUDE_ASM"
+                row["notes"] = "original source retained;native-template:MACRO"
+                self.assertEqual(template_status(row)[0], "template-instance")
                 body.write_text('void MACRO(void) { VS_UNPORTED("gap"); }', encoding="utf-8")
                 self.assertEqual(template_status(row)[0], "stub")
+                (source / "Unit.c").write_text(
+                    '#define WRONG Effects_Unit\n#include "Effects/Unit.inl"\n',
+                    encoding="utf-8",
+                )
+                with self.assertRaisesRegex(ValueError, "Missing template binding"):
+                    template_status(row)
 
     def test_probe_mocks_are_excluded_from_production_c_availability(self):
         with tempfile.TemporaryDirectory() as directory:

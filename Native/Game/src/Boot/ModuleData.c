@@ -146,6 +146,8 @@
 // Globals whose contents are in the module images (DATA_LEDGER segment data/rodata/asset, no pointers).
 #include "Content/ModuleData.h"
 
+// decomp: EFFECT/PLG074.BIN PLG074 trailEffect.h origin cursor; original image matches PLG073 but mutable state remains overlay-local
+int Content_plg074TrailEmissionCounter[1];
 // decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 eighteen packed signed16 X/Z vertices; imported source data only
 unsigned int Content_battleShadowVertices[18];
 // decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 twenty-four triangles with byte offsets into projected shadow vertices
@@ -379,6 +381,7 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"EFFECT/PLG069.BIN", 0x3CD4, sizeof Effects_Plg069_trailEmissionCounter, &Effects_Plg069_trailEmissionCounter, sizeof Effects_Plg069_trailEmissionCounter}, // G00656 D_800FD4D4
     {"EFFECT/PLG069.BIN", 0x3CD8, sizeof Effects_Plg069_tiledRingColorFactors, &Effects_Plg069_tiledRingColorFactors, sizeof Effects_Plg069_tiledRingColorFactors}, // G00657 D_800FD4D8
     {"EFFECT/PLG073.BIN", 0x573C, sizeof Effects_Plg073_tiledRingColorFactors, &Effects_Plg073_tiledRingColorFactors, sizeof Effects_Plg073_tiledRingColorFactors}, // G00658 D_800FEF3C
+    {"EFFECT/PLG073.BIN", 0x575C, sizeof Effects_Plg073_ringColorFactors, &Effects_Plg073_ringColorFactors, sizeof Effects_Plg073_ringColorFactors}, // G00659 D_800FEF5C
     {"EFFECT/PLG073.BIN", 0x577C, sizeof Effects_Plg073_trailEmissionCounter, &Effects_Plg073_trailEmissionCounter, sizeof Effects_Plg073_trailEmissionCounter}, // G00660 D_800FEF7C
     {"EFFECT/PLG077.BIN", 0x4108, sizeof Effects_Plg077_mesh10Vertices, &Effects_Plg077_mesh10Vertices, sizeof Effects_Plg077_mesh10Vertices}, // G00661 D_800FD908
     {"EFFECT/PLG077.BIN", 0x4158, sizeof Effects_Plg077_mesh10Faces, &Effects_Plg077_mesh10Faces, sizeof Effects_Plg077_mesh10Faces}, // G00662 D_800FD958
@@ -545,6 +548,7 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"TITLE/TITLE.PRG", 0x54B68, sizeof Title_debugFontAtlas, &Title_debugFontAtlas, sizeof Title_debugFontAtlas}, // G02023 _debugFont
     {"TITLE/TITLE.PRG", 0x59A68, sizeof Title_saveMenuUiAtlas, &Title_saveMenuUiAtlas, sizeof Title_saveMenuUiAtlas}, // G02024 _uiTable
     {"TITLE/TITLE.PRG", 0x68A68, sizeof Title_saveMenuBackground, &Title_saveMenuBackground, sizeof Title_saveMenuBackground}, // G02089 _saveMenuBg_clut
+    {"EFFECT/PLG074.BIN", 0x577C, 4u, Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter},
     {"BATTLE/BATTLE.PRG", 0x81268, 72u, Content_battleShadowVertices, sizeof Content_battleShadowVertices},
     {"BATTLE/BATTLE.PRG", 0x812D4, 96u, Content_battleShadowFaces, sizeof Content_battleShadowFaces},
     {"BATTLE/BATTLE.PRG", 0x88F58, 4u, Content_battleAiHesitationLengths, sizeof Content_battleAiHesitationLengths},
