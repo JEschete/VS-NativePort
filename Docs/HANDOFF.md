@@ -9,6 +9,31 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- New #184 is a confirmed cyclic-list defect, not assumed to share #167/#26's
+  producer. Current frozen Debug1792970616163501-0 completes the132-case prefix
+  with97 passed/34 blocked/one failed: script114 z046-r000-d000 enters scene30
+  and reports cycles at144918/144920, after2242/2651 entries. Its recorded
+  exe4f30cd49/PDB331f0f8a remain preserved in session files. A matched-image,
+  speed64/3600 standalone control does not reproduce; shorter/different-speed
+  controls are not evidence that the entire history dependency is localized.
+  Failure-only diagnostics now report repeated/incoming packet len/link,
+  primitive/ordering buffer addresses and symbol/heap-relative provenance.
+  They retain the existing error and return-1; no draw skip/default or product
+  repair is claimed. Full Debug/Release771/3,390,847 and focused cyclic-list
+  controls pass; scoped compile analysis is0 new. Next is the bounded original
+  114-case prefix with those diagnostics, then the owning writer/link mutation.
+- #167's original script132 truncation/termination is not reproduced by either
+  current full132-case history, but Debug's separate #184 failure prevents a
+  clean-cohort claim. Release1792970616137564-0 has97 passed/35 blocked,0
+  errors and complete teardown. Both reach original scene30/VM PC233,
+  wait70 at script_tick1050 with models0/170/169/10, and advance beyond it.
+  Entry-event completion remains blocked at3600. A distinct normal-speed
+  9000-tick single-entry observation advances scene30 toPC2865, returns to40/21
+  and remains in an active event without errors; this is not proof of a hang,
+  a successful door or a causal packet fix. Keep #167/#149/#151 open with those
+  limits. The isolated original-game setup has no save/state near Gravity;
+  owner unavailable, so #160 remains blocked on original table1 runtime content
+  rather than a guessed texture/selector change.
 - #42 now has114/186 original entries implemented and72 remaining
   (31 C/C++ references,31 assembly-only,10 listings not located). F00995 and
   F01007 are two catalog occurrences of one function, func_800AEEC4.

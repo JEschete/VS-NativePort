@@ -8,8 +8,13 @@
 
 #include "Core/Log.hpp"
 #include "Core/Unported.h"
+#include "Legacy/Psx.h"
 #include "Platform/CrashHandler.hpp"
 #include "Render/PageSpace.hpp"
+
+extern "C" {
+#include "Render/Frame.h"
+}
 
 // Transitional libgpu shims (plan §2.2): each call acts on the page space
 // (Render/PageSpace.hpp, owner decision "page-image") with the original
@@ -106,16 +111,30 @@ void* LegacyGpu_Pointer(u_long link) {
 
 int LegacyGpu_WalkList(const void* p) {
   int count = 0;
+  const P_TAG* previous = nullptr;
   std::unordered_set<const void*> visited;
   for (; p != nullptr;) {
+    const P_TAG* tag = static_cast<const P_TAG*>(p);
     if (!visited.insert(p).second) {
       VS_LOG_ERROR("render", "cyclic packet chain at {} after {} entries", p,
                    count);
+      VS_LOG_ERROR(
+          "render",
+          "cycle len={} link=0x{:X} previous={} previous_len={} "
+          "previous_link=0x{:X}; buffers={},{} tables={},{}",
+          static_cast<unsigned>(tag->len), static_cast<unsigned>(tag->addr),
+          static_cast<const void*>(previous),
+          previous != nullptr ? static_cast<unsigned>(previous->len) : 0,
+          previous != nullptr ? static_cast<unsigned>(previous->addr) : 0,
+          Render_legacyPrimitiveBuffers[0], Render_legacyPrimitiveBuffers[1],
+          Render_legacyOrderingTables[0], Render_legacyOrderingTables[1]);
+      VS::Platform::LogAddress(p);
+      if (previous != nullptr) VS::Platform::LogAddress(previous);
       return -1;
     }
-    const P_TAG* tag = static_cast<const P_TAG*>(p);
     SubmitPacket(tag);
     ++count;
+    previous = tag;
     p = tag->addr == LEGACY_GPU_LINK_END ? nullptr
                                          : LegacyGpu_Pointer(tag->addr);
   }
