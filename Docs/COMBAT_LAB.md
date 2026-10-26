@@ -451,6 +451,13 @@ scripted navigation: F01805 request construction and F01806 frame updates
 remain separate stubs. No complete scene traversal, native AI-state C++
 promotion or compatibility retirement follows from these leaf contracts.
 
+M2C51C8 independently recovers the copy and all seven resets. The original
+5158 listing ends before its `jr ra` delay slot, so a raw M2C attempt fails.
+A private derived input includes the exact following original instruction
+(`lui v1` at the51C8 entry); M2C then succeeds and agrees with both shared
+entry contracts. Raw diagnostics, derived input/hash and successful C remain
+in `navigation42-m2c-*`; no resource or runtime instruction was changed.
+
 ### Vignette ordering-link repair (#184, 2026-10-25)
 
 The unchanged failing Debug image4f30cd49/PDB331f0f8a repeats the original
@@ -482,7 +489,7 @@ Full native suites pass780 cases/3,391,189 assertions in each configuration;
 without new findings or baseline edits. Two copier runs are identical and
 preserve301 protected paths; generated changes are only ScreenDistortion.c/.h.
 
-Actual acceptance is still running at this checkpoint:
+Actual acceptance uses the original persistent history:
 
 ```powershell
 build\Debug\VS.CombatLab.exe --door-transitions --door-from z040-r008-d000 --door-limit 132 --frames 3600 --speed 64 --scripted
@@ -494,9 +501,35 @@ Debug1792982973682278-0 uses exe3ca80430/PDB8ecd4651; Release1792982973680555-0
 uses exea772e506/PDB2403d431. Private `vignette184-fixed-<configuration>*`
 records the full command, hashes, parent revision3c7982ee and dirty source
 state; `packet184-*` retains the unchanged-image graph proof.
-Keep #184 open until these histories and exact published CI are verified.
-Component controls do not prove normal-speed pixel parity, all-scene coverage
-or a causal repair of #167's distinct historical truncation.
+
+Debug completes the original114-case acceptance prefix:82 passed/32
+budget-blocked,0 engine errors and114 complete teardowns. Script114 now
+renders through3612 instead of failing306. Release completes all132:
+97 passed/35 blocked,0 errors/all teardowns. Both retain field rendering at
+original144918/144920 (script ticks294/296), scene30/event0/source1/phase4,
+thread0 PC233 and models0/170/169/10. Release script132 also matches the
+separately tracked #167 interval at1050/wait70, but that interval was already
+not reproduced by pre-fix controls; do not claim a causal #167 repair.
+Normal-speed Release1792983547181492-0 renders600 ticks with0 errors and
+complete teardown; event completion remains honestly budget-blocked.
+Root fixing260f121b has exact successful Source Quality40261350623.
+
+The full Debug132 selection is NOT clean: the next script115
+`z047-r000-d000` (47/0->48/26) faults at149109/script_tick873 with access
+violationC0000005, reading7FF66D81D670 at7FF66F3F4BA6. Its last durable frame
+is ready48/26/control1/transition0, scene19/event0/source1/phase0, models0/89/89.
+It remains running in the result file, with17 later cases unrun. This newly
+confirmed failure is #185, not a rewritten passing cohort or assumed shared
+root with #184/#167. A private watcher intended to request normal close after
+114 completion found no owned window after the native exit and sent no
+WM_CLOSE. No owned replay remains active.
+
+Strict reports `vignette184-verified-Debug.json` and
+`vignette184-verified-Release.json` distinguish the accepted prefix from the
+whole selection. The delivered #184 scope is the proven single-word vignette
+producer and original entry interval; it is not normal-speed pixel parity,
+all-scene/all-door completion or compatibility retirement. #185 next needs
+the module-relative fault and useful owning stack/packet/actor provenance.
 
 ### Ashley testing profiles
 

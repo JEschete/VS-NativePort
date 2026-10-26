@@ -69,11 +69,27 @@ verification of the current worktree.
   3,391,189 assertions each,89 copier contracts, focused tidy and default
   quality pass with0 new findings. Two generations preserve301 protected
   paths and repeat identically; only ScreenDistortion.c/.h change.
-  Original132-case fixed histories are running with3600/speed64 and7200-second
-  outer budgets: Debug1792982973682278-0 (exe3ca80430/PDB8ecd4651), Release
-  1792982973680555-0 (exea772e506/PDB2403d431). #184 remains open pending
-  actual acceptance and exact pushed CI; these component results do not close
-  #167 or certify visual parity. Private `vignette184-*` and `packet184-*`.
+  Fixed Debug1792982973682278-0 (exe3ca80430/PDB8ecd4651) completes the original
+  114-case prefix with82 passed/32 budget-blocked,0 errors/all114 teardowns;
+  the formerly failing case now renders through3612. Release1792982973680555-0
+  (exea772e506/PDB2403d431) completes all132 with97 passed/35 blocked,0 errors.
+  Both match scene30/event0/source1/phase4/PC233/models0/170/169/10 with field
+  rendering enabled at original144918/144920, rather than merely exiting.
+  Normal-speed Release1792983547181492-0 also renders600 ticks without errors.
+  Root fix260f121b has exact green40261350623; #184's bounded producer/entry
+  acceptance is complete. No full scene completion, pixel parity or causal
+  #167 fix is claimed. Private `vignette184-*` and `packet184-*`.
+- New #185 prevents a clean full-Debug-cohort claim: after the accepted114
+  prefix, script115 z047-r000-d000 (47/0->48/26) faults149109/script_tick873,
+  reading7FF66D81D670 at7FF66F3F4BA6 and exitsC0000005. Last durable frame872
+  is ready48/26/control1/transition0, scene19/event phase0, models0/89/89.
+  Script115 remains running and17 later entries are unrun. A bounded-close
+  watcher found no window after this native exit; it sent no WM_CLOSE.
+  This is not a successful full132 history, a controlled cancellation or proof
+  of a shared #184/#167 root. Stack symbols are unresolved and the logger
+  omitted raw frame addresses; next observation is module-relative fault and
+  owning packet/actor/stack provenance on the preserved matching image.
+  No owned replay remains running. Private `packet185-last-frame.json`.
 - #167's original script132 truncation/termination is not reproduced by either
   current full132-case history, but Debug's separate #184 failure prevents a
   clean-cohort claim. Release1792970616137564-0 has97 passed/35 blocked,0
