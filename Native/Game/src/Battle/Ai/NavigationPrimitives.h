@@ -12,6 +12,7 @@ void Battle_Ai_ReserveAiDestinationTile(int, int);
 
 int Battle_Ai_IsAdjacentTileStepBlocked(unsigned int, int);
 void Battle_Ai_MarkAiTileDynamicObstacle(int, int);
+void Battle_Ai_BuildAiTerrainHeightsWithWorkspace(void);
 
 int Battle_Ai_HasActorNavigationState(int);
 int Battle_Ai_ActorNavigationOverrideStatus(int);

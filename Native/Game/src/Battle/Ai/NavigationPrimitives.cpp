@@ -52,6 +52,18 @@ Battle_Ai_ActorAiState* ActorNavigationState(int actor_id) {
 }
 }  // namespace
 
+// decomp: func_800E6B4C (src/BATTLE/BATTLE.PRG/7E05C.s:257).
+// Its allocation held a temporary PS1 stack, not terrain data. The bounded
+// 32x32 builder uses the native game fiber's existing 16 MiB stack.
+void Battle_Ai_BuildAiTerrainHeightsWithWorkspace(void) {
+  if (Battle_Ai_tileFlagMap == nullptr ||
+      Battle_Ai_specialTerrainHeights == nullptr) {
+    Core_Debugf("ai", "Special terrain build requires active native maps");
+    std::abort();
+  }
+  Battle_Ai_BuildAiSpecialTerrainHeights();
+}
+
 // decomp: func_800E4C1C (src/BATTLE/BATTLE.PRG/7BDD4.s:542).
 void Battle_Ai_ReserveAiDestinationTile(int x, int z) {
   if (Battle_Ai_tileFlagMap == nullptr) return;

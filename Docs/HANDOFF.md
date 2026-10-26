@@ -9,6 +9,26 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01832 now invokes the existing special-terrain height builder during
+  actual room initialization. Original7E05C.s:257 allocates32KiB only to
+  switch the guest stack; the owned void adapter validates native maps and
+  uses the existing16MiB native game fiber, without a fake heap allocation
+  or host/guest SP manipulation. Red1/5 leaves all three connected cells
+  unchanged (3 failures). New6/1,054 includes the full1,023-cell connected
+  region on the game fiber, visited/high-bit preservation, unseeded regions,
+  typed original binding and two actual room entries with cleanup/frame
+  pointer checks. Combined special-terrain/room-context8/1,074 and full
+  Debug/Release889/5,702,751 each pass; both hosts link. Port116/direct-CI100
+  controls pass. Two generations preserve308 files and repeat identically;
+  selective project outputs preserve the owner solution. Focused/default
+  quality is0 actionable/0 new with unchanged baselines; publication
+  evidence is recorded under `specialterrain42-*`.
+  A fixture loop-index width finding is repaired rather than suppressed.
+  Local cohort153/186,33 gaps (10 C/C++ references,13 assembly-only,
+  10 missing listings); implementations3121/aliases150 remain separate.
+  This restores room terrain preparation, not controller-tested enemy
+  jumping, timing/navigation continuation, C++ promotion or compatibility
+  retirement. Scoped publication/exact CI are tracked on#42.
 - #42 F01833/F01834 now implement typed solid-volume and32-sample
   actor/terrain segment queries. Original7E05C.s:283/331-508 proves
   strict extents, actor/Gimmick priority/filters, signed-floor steps,

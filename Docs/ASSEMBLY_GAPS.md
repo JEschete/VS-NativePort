@@ -7,8 +7,8 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **34** (34 stubs and 0 partial implementations).
-- Matching C/C++ reference bodies located: **11**.
+- Open native entries: **33** (33 stubs and 0 partial implementations).
+- Matching C/C++ reference bodies located: **10**.
 - Assembly located, but no matching C body located: **13**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
@@ -63,7 +63,7 @@ to an ignored build directory first.
 
 ## Tagged file: BATTLE/BATTLE.PRG/7E05C.s
 
-All **21** catalog entries are accounted for: **17 already implemented**, **4 open with C counterparts**, and **0 open with assembly only**.
+All **21** catalog entries are accounted for: **18 already implemented**, **3 open with C counterparts**, and **0 open with assembly only**.
 
 | ID | Original symbol | Native status | Source availability |
 | --- | --- | --- | --- |
@@ -73,7 +73,7 @@ All **21** catalog entries are accounted for: **17 already implemented**, **4 op
 | F01828 | `func_800E68EC` | implemented | c-or-cpp-body-available |
 | F01830 | `func_800E6A6C` | implemented | c-or-cpp-body-available |
 | F01831 | `func_800E6B24` | implemented | c-or-cpp-body-available |
-| F01832 | `func_800E6B4C` | stub | c-or-cpp-body-available |
+| F01832 | `func_800E6B4C` | implemented | c-or-cpp-body-available |
 | F01835 | `func_800E6EAC` | implemented | c-or-cpp-body-available |
 | F01836 | `func_800E6EB0` | stub | c-or-cpp-body-available |
 | F01837 | `func_800E6F1C` | implemented | c-or-cpp-body-available |

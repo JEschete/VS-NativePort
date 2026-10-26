@@ -225,6 +225,9 @@
     <ClCompile Include="src\SfxBankSelectionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SpecialTerrainTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SphereTerrainTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

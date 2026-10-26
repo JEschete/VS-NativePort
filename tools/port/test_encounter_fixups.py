@@ -12,6 +12,23 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_native_terrain_envelope_calls_the_existing_builder_without_guest_stack(self):
+        self.assertEqual(
+            self.owned_items()["F01832"]["path"],
+            r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
+        )
+        self.assertIn(
+            ("BATTLE/BATTLE.PRG", 0x800E6B4C, "F01832"),
+            copy_fixups.MODULE_FUNCTION_ENTRIES,
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (
+            root / r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Battle_Ai_BuildAiSpecialTerrainHeights();", source)
+        self.assertNotIn("AllocateFromHighEnd", source)
+        self.assertNotIn("Core_ScratchBase", source)
+
     def test_segment_trace_owns_typed_geometry_and_the_live_boolean_consumer(self):
         root = Path(__file__).resolve().parents[2]
         scaffold = runpy.run_path(str(root / r"tools\scaffold\gen_solution.py"))

@@ -415,6 +415,61 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Native room-entry special-terrain build (#42, 2026-10-26)
+
+F01832 (`func_800E6B4C`, original7E05C.s:257-278) is an owned void
+adapter in NavigationPrimitives.cpp. The original allocation stores the
+old guest SP and supplies a32KiB temporary stack to recursive F01816;
+it is not terrain storage. The native game fiber already owns16MiB.
+Active tile/height maps are required explicitly, and the existing
+32x32 builder runs directly without guest SP emulation or a pointless
+HeapR allocation. Recursion visits each special cell at most once using
+the original2000 marker, so it is bounded by the1,024-cell map.
+
+The actual room initializer already allocates/builds the map, publishes
+its typed pointers and caches actor frame context before this call.
+Its previously stubbed envelope suppressed special-height preparation.
+The builder, source cardinal order, eligible-ground rule, marker and
+high-bit handling are unchanged; absent eligible ground stays unseeded.
+Room teardown continues to retire the published pointers.
+
+Evidence is parent1232cb84 plus this scoped worktree; private
+`specialterrain42-*` records the exact commands, source/dirty state,
+protected files, binary hashes and outcomes:
+
+- Red `[special-terrain]`:1 case/5 assertions,3 failures, all connected
+  special heights remain their initial values instead ofA802.
+- New6 cases/1,054 assertions cover connected cells, unrelated flags,
+  visited/reentry stability, a1,023-cell connected region on the actual
+  native game fiber, a completely unseeded region, original800E6B4C
+  typed void binding/rejected interior alias, and actual room initialization.
+  The latter decodes a synthetic pit tile, prepares height2002 before
+  actor commands, checks cached native pointers, frees and repeats.
+  Combined `[special-terrain],[room-context]`:8 cases/1,074 assertions.
+- Both x64 solution builds link both hosts; full Debug/Release each
+  pass889 cases/5,702,751 assertions. Source-adaptation/audit controls116
+  and exact `tools\port\test_encounter_fixups.py`100 pass. Focused/default
+  quality is0 actionable/0 new with unchanged baselines. Fixture pointer
+  indexing uses size_t after focused tidy caught implicit widening;
+  no expected value, baseline or check is weakened.
+- Two `tools\port\copy_to_native.py` generations preserve308 maintained/
+  owner/reference files and repeat identically across749 outputs.
+  Generated changes are Navigation.c/.h and ModulePointers.c; the
+  original stub disappears and its source-address export uses the typed
+  native provider. Only F01832 copied/final_location ledger fields change.
+  Selective Game/Tests project generation is stable and preserves the
+  owner's dirty solution. No reference code or asset payload is committed.
+- `tools\port\audit_assembly_gaps.py --output <session-files>\specialterrain42-audit
+  --publish`:4207 rows/3762 targets;33 gaps (10 C/C++ references,13 assembly-only,
+  10 missing listings),3121 implementations and150 aliases separately.
+  Original cohort153/186; original C-backed135/145, other18/41 complete.
+
+This is production room-initialization/component coverage, not controller
+enemy jumping or all-room terrain/navigation parity. AI clock and typed
+navigation-continuation gates remain unchanged. No broader C++ promotion,
+native asset migration or compatibility retirement is inferred. Exact
+revision CI gates the public #42/#4 checklist advance.
+
 ### Native ranged segment collision (#42, 2026-10-26)
 
 F01833/F01834 (`func_800E6BA0`/`func_800E6C34`, original7E05C.s:283/

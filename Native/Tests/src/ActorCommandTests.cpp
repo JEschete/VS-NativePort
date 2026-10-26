@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 
@@ -227,6 +228,8 @@ struct RoomCommandFixture : CommandFixture {
   decltype(Battle_Ai_routeGates) saved_gates = Battle_Ai_routeGates;
   int saved_random = Battle_Ai_savedMovementRandomState;
   Field_RoomRecord saved_data = Field_roomData;
+  decltype(std::to_array(Battle_Ai_directionDeltas)) saved_directions =
+      std::to_array(Battle_Ai_directionDeltas);
   Field_MpdCollisionHeader dimensions{2, 2, 0, 4};
   std::array<Core_HeapBlockHeader, 2048> heap{};
 
@@ -264,9 +267,46 @@ struct RoomCommandFixture : CommandFixture {
     Battle_Ai_routeGates = saved_gates;
     Battle_Ai_savedMovementRandomState = saved_random;
     Field_roomData = saved_data;
+    std::copy(saved_directions.begin(), saved_directions.end(),
+              Battle_Ai_directionDeltas);
   }
 };
 }  // namespace
+
+TEST_CASE(
+    "Room entry prepares special heights before actor commands and reentry",
+    "[ai][special-terrain][room-context]") {
+  RoomCommandFixture fixture;
+  alignas(Field_MpdCollisionHeader) std::array<unsigned char, 40> collision{};
+  const Field_MpdCollisionHeader header{2, 2, 16, 4};
+  std::memcpy(collision.data(), &header, sizeof header);
+  std::array<Field_MpdTileCell, 4> cells{};
+  cells[3].isPit = 1;
+  Field_roomData.collisionMap =
+      reinterpret_cast<Field_MpdCollisionHeader*>(collision.data());
+  Field_roomData.header.collisionMapLength = collision.size();
+  Field_roomData.tileCells = cells.data();
+  Field_roomData.header.tileCellsLength = sizeof cells;
+  constexpr std::array<int, 4> kX{0, 1, 0, -1};
+  constexpr std::array<int, 4> kZ{-1, 0, 1, 0};
+  for (std::size_t index = 0; index < kX.size(); ++index) {
+    Battle_Ai_directionDeltas[index * 2].dx =
+        static_cast<signed char>(kX[index]);
+    Battle_Ai_directionDeltas[index * 2].dz =
+        static_cast<signed char>(kZ[index]);
+  }
+  for (int entry = 0; entry < 2; ++entry) {
+    Battle_Ai_InitializeRoomAiMap();
+    REQUIRE(Battle_Ai_specialTerrainHeights != nullptr);
+    CHECK(Battle_Ai_tileFlagMap[1][1] == 0x20);
+    CHECK(Battle_Ai_specialTerrainHeights[1][1] == 0x2002);
+    CHECK(Battle_Ai_specialTerrainHeights[0][0] == 2);
+    CHECK(Battle_Ai_FrameState()->heightMap == Battle_Ai_specialTerrainHeights);
+    Battle_Ai_FreeRoomAiState();
+    CHECK(Battle_Ai_FrameState()->heightMap == nullptr);
+    CHECK(Battle_Ai_specialTerrainHeights == nullptr);
+  }
+}
 
 TEST_CASE("Room terrain supports hover before the first AI update",
           "[ai][actor-commands][room-context]") {

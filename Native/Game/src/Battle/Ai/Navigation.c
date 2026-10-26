@@ -735,13 +735,6 @@ void Battle_Ai_RemoveAiTileOccupant(Field_GimmickInstance*)
     VS_UNPORTED("Battle::Ai::RemoveAiTileOccupant");
 }
 
-// decomp: BATTLE.PRG func_800E6B4C (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-int Battle_Ai_BuildAiTerrainHeightsWithWorkspace()
-{
-    VS_UNPORTED("Battle::Ai::BuildAiTerrainHeightsWithWorkspace");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800E6EB0 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
 void Battle_Ai_ReleaseActorAiContactOccupancy(int)
 {
