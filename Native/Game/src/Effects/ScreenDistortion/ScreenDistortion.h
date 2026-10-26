@@ -12,7 +12,6 @@
 void Effects_ScreenDistortion_SetFeedbackLayer(int arg0);
 void Effects_ScreenDistortion_DrawFeedbackTiles(void);
 void Effects_ScreenDistortion_SetRadialWarp(short arg0, short arg1);
-void Effects_ScreenDistortion_WarpPolygonVertices(void);
 void Effects_ScreenDistortion_SetVignetteEnabled(int arg0);
 int Effects_ScreenDistortion_EllipsePoint(int arg0, int arg1);
 int* Effects_ScreenDistortion_AppendVignetteCorner(int arg0, int arg1, int* arg2, u_long* arg3);

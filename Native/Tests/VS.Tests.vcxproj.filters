@@ -207,6 +207,9 @@
     <ClCompile Include="src\ScreenEffectStateTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ScreenWarpTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SdkMathGapTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

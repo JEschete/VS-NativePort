@@ -415,6 +415,76 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Native radial screen warp (#42, 2026-10-26)
+
+F02458 (`func_800F9BD8`, original3D8.s:9) now implements the live
+`Effects_DrawScreenEffectOverlay` callback instead of logging unported.
+The original444-entry halfword scale table is local native storage, not
+guest scratch that overwrites frame/camera data. Base scale is read as
+unsigned16 and growth as signed16; each multiply keeps its low32 bits
+before arithmetic shifting. Final coordinate products also truncate before
+shifting and packing. Eight polygon layouts retain the original vertex
+counts/strides and command-prefix scan, including draw-mode-prefixed G3
+shadow packets. Non-polygons and all non-coordinate words stay unchanged.
+
+The source radius is not interchangeable with ideal sqrt or the SDK root
+entry: its masked variable right shift reads a resident-table prefix for
+small radii. The existing imported arctangent/root region beginning at
+80040A14 owns both prefix and root lookup (root relative offset516).
+All192 ordinary root entries were checked against their integer formula;
+no proprietary lookup bytes or machine code are committed. Signed16 IR
+narrowing and the sum80000000 corner are preserved. M2C diagnostics leave
+GTE operations/unset-register errors, so its output was not used as an
+implementation or evidence of successful translation.
+
+Scene traversal begins at OT2046, excludes sky2047 and preserves the
+original base word instead of temporarily rewriting a sentinel. Existing
+native links are resolved through their registered handles; allocation-free
+Floyd validation detects cycles. Missing controllers/tables/handles,
+out-of-region lookup or truncated polygon declarations log and terminate
+rather than silently returning a successful-looking unmodified frame.
+No new guest-register/scratch bridge or GPU submission occurs here.
+
+Evidence is parentab50511f plus this scoped worktree; private
+`screenwarp42-*` preserve exact commands, source/dirty state, original
+source/math checks, hashes and results:
+
+- The actual overlay dispatcher is red1 case/7 assertions, with3 unchanged
+  vertices instead of a half-scale transformation around160/112.
+- New9 cases/209,122 assertions cover all eight polygon groups,0/1/2
+  command prefixes and four flag variants (96 layouts), unchanged headers/
+  colors/UV data,4096 signed coefficient pairs with full-word products,
+  all65,536 halfword X/Y samples and the negative-sum IR corner, masked
+  near-center and clamped far radii, identity, two-polygon/state-command
+  chains, unchanged complete frame bytes, sky and resident data, plus the
+  explicit original GIM/SCREFF2.PRG800F9BD8 binding/interior rejection.
+  Reference arithmetic uses widened products, explicit low-word conversion,
+  divided floors and a sign-bit scan rather than the production shifts/
+  leading-bit intrinsic. Lookup fixtures are synthetic, not copied assets.
+- Debug/Release `VS.Tests.exe "[screen-warp],[screen-state]"
+  --reporter compact` passes15 cases/209,205 assertions each. Both solution
+  builds link both hosts; full suites pass872 cases/5,700,024 assertions
+  each. All114 port/audit controls,98 exact direct-script CI controls and
+  the shared build/analyzer interop control pass.
+- Focused/default quality is0 actionable/0 new with unchanged baselines.
+  An initial analyzer finding is fixed by explicitly masking the final
+  variable shift as MIPS does; braces and duplicate test blocks are fixed
+  without suppressing source findings or reducing output assertions.
+- Two native generations preserve304 maintained/owner/reference/data
+  files and repeat identically across749 outputs. Generated changes are
+  ScreenDistortion.c/.h, its ScreenEffects.c caller include and the original
+  ModulePointers.c binding. Only Game/Tests projects are selectively
+  regenerated and the owner solution remains unchanged.
+
+The local original cohort reaches150/186,36 gaps (12 C/C++ references,
+14 assembly-only,10 missing listings); implementations3118 and aliases150
+stay separate. The original C-backed subset remains133/145 complete;
+17 of the other41 original entries are complete. This is production-call
+and packet-output proof, not controller-triggered spell/cutscene visual
+acceptance, all-effect parity, native asset authoring, C++ promotion or
+compatibility retirement. Publication/exact CI are recorded on#42 before
+its checklist advances.
+
 ### Native screen-effect default storage (#194, 2026-10-26)
 
 Original5BF94.c:3481/3919 treats G00512's `short[8]` defaults as the

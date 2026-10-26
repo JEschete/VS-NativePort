@@ -9,6 +9,30 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F02458 now executes the existing production screen-overlay radial
+  warp callback. Original3D8.s:9 builds444 halfword scales, mutates eight
+  polygon layouts around160/112 and walks scene OT2046 (not sky2047).
+  Red1/7 has3 unchanged-coordinate failures. Owned native code preserves
+  MFLO32 truncation, signed-halfword IR inputs, MIPS masked shifts and
+  the original small-radius resident-prefix lookup, not ideal sqrt.
+  Existing arctangent/root import owns the needed lookup bytes;192
+  original root entries match the mathematical formula. Local arrays
+  replace guest scratch, and native handles/Floyd validation replace
+  guest pointer reconstruction without changing tags/root/frame state.
+  New9/209,122 covers96 polygon/prefix/flag layouts,4096 signed coefficient
+  tuples, all65,536 halfword coordinate samples plus the negative-sum
+  corner, near-center/far clamps, identity, linked commands, immutable
+  resident/frame/sky data and actual GIM800F9BD8 resolution. Combined
+  state/warp15/209,205 and full Debug/Release872/5,700,024 each pass;
+  both hosts,114 port/98 exact-CI controls and shared interop control
+  pass. Focused/default quality is0 actionable/0 new with unchanged
+  baselines; MIPS shift masking and fixture sharing fix initial findings.
+  Two generations preserve304 files and repeat identically; only four
+  generated caller/header/symbol files change. Local cohort150/186,
+  36 gaps (12 C/C++ references,14 assembly-only,10 missing listings);
+  implementations3118/aliases150 remain separate. No controller-triggered
+  spell/cutscene, all-effect visual parity, promotion or retirement claim.
+  Private `screenwarp42-*`; scoped publication/exact CI tracked on#42.
 - #194 replaces G00512's original16-byte short-array backing with an
   owned, aligned native `Effects_ScreenEffectOverlay` object: native size24,
   request pointer offset16. Original5BF94.c:3481/3919 aliases the defaults;
@@ -37,11 +61,9 @@ verification of the current worktree.
   do not adopt the earlier live-monotonic suggestion. Next observation is
   original counter mode/baseline and per-consumer work/timing calibration
   before defining deterministic native costs and enabling navigation.
-  Independent F02458 warp tracing continues after#194: its inline
-  radius calculation has MIPS masked-shift/prefix-table behavior for
-  small radii, unlike ordinary SquareRootInteger. The required lookup
-  already lies in the imported resident arctangent/root region; do not
-  substitute ideal sqrt or commit copied table bytes.
+  F02458's independent warp milestone above preserves the observed
+  small-radius lookup behavior, not ordinary SquareRootInteger; its
+  source table bytes stay imported and out of commits.
 - #193/#42 restores F01268 as an actual production actor-shadow pass,
   not an unused export. Original caller800B38FC..800B3924 proves
   companion0/flag8000 gating; the native draw path had omitted it and

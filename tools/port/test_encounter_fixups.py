@@ -12,6 +12,29 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_screen_warp_owns_native_geometry_and_original_entry(self):
+        root = Path(__file__).resolve().parents[2]
+        scaffold = runpy.run_path(str(root / r"tools\scaffold\gen_solution.py"))
+        self.assertTrue(
+            scaffold["needs_c_headers"](
+                "VS.Game", r"src\Effects\ScreenDistortion\RadialWarp.cpp"
+            )
+        )
+        self.assertEqual(
+            self.owned_items()["F02458"]["path"],
+            r"Native\Game\src\Effects\ScreenDistortion\RadialWarp.cpp",
+        )
+        self.assertIn(
+            ("GIM/SCREFF2.PRG", 0x800F9BD8, "F02458"),
+            copy_fixups.MODULE_FUNCTION_ENTRIES,
+        )
+        source = (
+            root / r"Native\Game\src\Effects\ScreenDistortion\RadialWarp.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("Core_ScratchBase", source)
+        self.assertNotIn("0x1F800", source)
+        self.assertIn("Core_Math_kArcTangentTable", source)
+
     def test_screen_effect_defaults_own_native_state_and_use_typed_access(self):
         root = Path(__file__).resolve().parents[2]
         scaffold = runpy.run_path(str(root / r"tools\scaffold\gen_solution.py"))

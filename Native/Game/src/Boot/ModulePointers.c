@@ -144,6 +144,7 @@
 #include "Effects/ParticleRender.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
+#include "Effects/ScreenDistortion/RadialWarp.h"
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 #include "Effects/ScriptVm.h"
@@ -3273,6 +3274,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&Audio_Seq_unusedStateFlags, sizeof Audio_Seq_unusedStateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&Audio_Seq_unusedInventoryIndices, sizeof Audio_Seq_unusedInventoryIndices, 1u, 1u},
+    {"GIM/SCREFF2.PRG", 0x800F9BD8u, 0u, (void*)&Effects_ScreenDistortion_WarpPolygonVertices, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBA4Cu, 0u, (void*)&Battle_Ai_UpdateFleeOrWanderBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBA88u, 0u, (void*)&Battle_Ai_UpdateAdaptivePursuitBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBB98u, 0u, (void*)&Battle_Ai_UpdateSupportFollowBehavior, 0u, 0u, 0u},

@@ -5,6 +5,7 @@
 #include "Content/DiscLayout.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
+#include "Effects/ScreenDistortion/RadialWarp.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"

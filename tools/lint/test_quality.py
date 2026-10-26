@@ -96,6 +96,7 @@ class BaselineTests(unittest.TestCase):
                     "Native/Game/src/Field/MinimapScene.cpp",
                     "Native/Game/src/Actors/SoundOverrides.cpp",
                     "Native/Game/src/Effects/ScreenEffectState.cpp",
+                    "Native/Game/src/Effects/ScreenDistortion/RadialWarp.cpp",
                 ]
             )
             commands = json.loads((database / "compile_commands.json").read_text())

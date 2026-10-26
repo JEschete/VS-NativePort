@@ -1086,6 +1086,12 @@
     <ClInclude Include="src\Effects\Runtime.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\ScreenDistortion\RadialWarp.cpp">
+      <Filter>src\Effects\ScreenDistortion</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\ScreenDistortion\RadialWarp.h">
+      <Filter>src\Effects\ScreenDistortion</Filter>
+    </ClInclude>
     <ClCompile Include="src\Effects\ScreenDistortion\ScreenDistortion.c">
       <Filter>src\Effects\ScreenDistortion</Filter>
     </ClCompile>

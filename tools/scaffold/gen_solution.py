@@ -138,6 +138,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Actors\SoundOverrides.cpp",
                 r"src\Event\WeaponMode.cpp",
                 r"src\Effects\ScreenEffectState.cpp",
+                r"src\Effects\ScreenDistortion\RadialWarp.cpp",
                 r"src\Effects\ParticleRender.cpp",
                 r"src\Battle\Ai\GroundNavigation.cpp",
                 r"src\Field\TerrainHeight.cpp",

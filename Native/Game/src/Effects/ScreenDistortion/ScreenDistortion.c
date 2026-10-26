@@ -124,12 +124,6 @@ void Effects_ScreenDistortion_SetRadialWarp(short arg0, short arg1)
     Effects_screenEffectOverlay->radialWarpArg1 = arg1;
 }
 
-// decomp: SCREFF2.PRG func_800F9BD8 (src/GIM/SCREFF2.PRG/3D8.s:0) [asm-file: not yet ported]
-void Effects_ScreenDistortion_WarpPolygonVertices(void)
-{
-    VS_UNPORTED("Effects::ScreenDistortion::WarpPolygonVertices");
-}
-
 // decomp: SCREFF2.PRG func_800F9DE8 (src/GIM/SCREFF2.PRG/5E8.c:8)
 void Effects_ScreenDistortion_SetVignetteEnabled(int arg0) { Effects_screenEffectOverlay->vignetteEnabled = arg0; }
 
