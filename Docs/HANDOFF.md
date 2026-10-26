@@ -9,6 +9,14 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #189's classifier/table repair is now reflected in the generated report
+  prose too: a parent repository HEAD is never a copied snapshot's
+  reference revision. An isolated publication fixture was red on the
+  contradictory footer; the correction preserves all38 gap records,
+  coverage rows and reference source fingerprints. No native runtime,
+  reference repository or quality baseline changes. Publication and
+  exact CI are tracked on#189; last native gameplay/math proof remains
+  the scoped3ee579a4 milestone below.
 - #192/#42 restores F00761's staged YXZ room rotation, not the distinct
   F01018 ZXY builder or a sequential SDK matrix product. The actual
   identity-camera room-view regression at angles123/234/345 was red:

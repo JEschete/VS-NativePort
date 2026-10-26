@@ -531,10 +531,12 @@ def publish_report(summary: dict, records: list[dict[str, str]],
         lines.append(f"| `{name}` | `{item['revision']}` | {item['source_files_scanned']} | "
                      f"`{item['source_fingerprint_sha256']}` |")
     lines += ["",
-              "`rood-reverseWin` is a tracked tree inside the parent repository; its",
-              "listed revision is the parent revision, not an independent submodule HEAD.",
-              "The other references are independent repositories. Restricted read-only",
-              "Git status was unchanged before/after inspection. No fetch or checkout ran.",
+              "A Git revision is recorded only for a reference repository whose",
+              "discovered Git top-level is that reference root itself. A snapshot nested",
+              "inside another repository is labelled `unversioned snapshot`; its enclosing",
+              "repository's HEAD is not a reference revision. Source SHA-256 values pin",
+              "the scanned source content in either case. Restricted read-only Git status",
+              "was unchanged before/after inspection. No fetch or checkout ran.",
               "",
               f"The raw source-assembly label check found **{labels['uncataloged_game_labels']} "
               "uncataloged game glabels**",

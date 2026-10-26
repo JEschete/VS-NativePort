@@ -132,10 +132,12 @@ as behaviorally complete. No native gameplay issue is closed by this audit.
 | `rood-reverse-noprompt` | `39821e4fc0353dc89855f5f29fd678d71545daa2` | 389 | `e3e5d73ccd7c08971c9558baad6e6a2df2e2fe0bcd9b8961e133476e86db7a8c` |
 | `rood-boi` | `e59320caedba5855cb050f24f3ba007204faea78` | 758 | `fa68a5f07470a4f970c81453cc605ecad82f8d17fc274168e5bf5eeba5e9a1d8` |
 
-`rood-reverseWin` is a tracked tree inside the parent repository; its
-listed revision is the parent revision, not an independent submodule HEAD.
-The other references are independent repositories. Restricted read-only
-Git status was unchanged before/after inspection. No fetch or checkout ran.
+A Git revision is recorded only for a reference repository whose
+discovered Git top-level is that reference root itself. A snapshot nested
+inside another repository is labelled `unversioned snapshot`; its enclosing
+repository's HEAD is not a reference revision. Source SHA-256 values pin
+the scanned source content in either case. Restricted read-only Git status
+was unchanged before/after inspection. No fetch or checkout ran.
 
 The raw source-assembly label check found **0 uncataloged game glabels**
 and **30 SDK/library labels**, excluded using the existing ledger rule.

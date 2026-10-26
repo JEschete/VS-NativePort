@@ -21,6 +21,40 @@ from tools.port.audit_assembly_gaps import (
 
 
 class AssemblyGapAuditTests(unittest.TestCase):
+    def test_published_report_does_not_claim_an_unversioned_pin_is_a_parent_head(self):
+        reference = {
+            "revision": "unversioned snapshot",
+            "source_files_scanned": 1,
+            "source_fingerprint_sha256": "snapshot-source-fingerprint",
+        }
+        summary = {
+            "catalog_rows": 0,
+            "port_target_rows": 0,
+            "gap_source_counts": {},
+            "source_label_coverage": {
+                "uncataloged_game_labels": 0,
+                "uncataloged_sdk_labels": 0,
+            },
+            "references": {"rood-reverseWin": reference},
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            docs = root / "Docs"
+            docs.mkdir()
+            with patch.object(audit_module, "REPO", root):
+                audit_module.publish_report(summary, [], [])
+            report = (docs / "ASSEMBLY_GAPS.md").read_text(encoding="utf-8")
+            self.assertIn(
+                "| `rood-reverseWin` | `unversioned snapshot` | 1 | "
+                "`snapshot-source-fingerprint` |",
+                report,
+            )
+            self.assertNotIn("listed revision is the parent revision", report)
+            self.assertIn(
+                "A Git revision is recorded only for a reference repository whose",
+                report,
+            )
+
     def test_reference_revision_does_not_attribute_an_enclosing_repository(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "snapshot"
