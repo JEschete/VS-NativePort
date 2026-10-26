@@ -11,6 +11,66 @@ Use [HANDOFF.md](HANDOFF.md) for the current checkpoint and
 Keep the commands, revisions, limits and local evidence paths below; archival
 does not establish fresh verification or authorize deleting the referenced data.
 
+## Moving-platform route availability (2026-10-26)
+
+F01694 continues the owner-directed non-MA work after
+`d3216ef1d6161218de3b9d0cd9886bfbe043c9f3`, exact green40397305088.
+Every open non-MA issue body/comment history was pulled: #4/#18/#42/#148/
+#149/#151/#160/#167. This checkpoint does not conclude that larger assignment.
+
+Original `73C84.s:149-243` calls `Field_CollectMovingPlatformPositions`, not a
+room-exit collector. It visits256 route words and8 endpoint pairs, modifies
+the two closed bits, and mutates selector registers across pair iterations.
+The native implementation uses the current room's bounded auxiliary section,
+typed platform output and copied endpoint records. It preserves the actual
+variable-shift/mask mutations instead of applying a simplified clean mask.
+
+The source's initial register value can be a stack address for a first-word
+second-only gate with active platforms. The read-only512-MPD audit classifies
+418 structurally valid auxiliary sections,3 rooms without auxiliary data and
+91 structurally unavailable/non-room tails. None of the418 uses that
+first-word case; the maximum original platform count is4. Native code
+diagnoses that unsupported stack-dependent input, rather than inventing a
+guest stack address. The original bounded thirteen-point output capacity,
+auxiliary ownership/length and endpoint binding are checked before use.
+
+Red1/3 has2 availability failures; a later original-entry control exposes a
+missing symbol-map binding before it is added. Final7/1,033 tests cover all16
+platform visibility masks and4 selectors, both endpoints, operand-mutation
+goldens, all256 words, visibility changes/re-entry, original13-point capacity,
+unbound auxiliary data and the original module entry. Three isolated hidden
+controls diagnose/exit3 for stack-dependent input, short room storage and
+excess platform output. Full Debug and Release suites each pass
+981/9,309,515, including actual room-AI initialization.
+
+Fresh compilation also exposed four incompatible-pointer warnings introduced
+by the earlier typed occupancy ABI: F01013 passes a native Gimmick physics
+view of the same owning record. A source-registered fixup now makes that
+owning-record conversion explicit; compile-time tile-prefix offset assertions
+and the existing621-field native-view check protect the alias. No generated
+output is manually patched and no opaque input or integer-address workaround
+is introduced.
+
+Focused `quality-native.cmd --files ... --tidy` and the default check have
+0 findings/0 new. The129 port controls and32 naming controls pass; two
+generations repeat across746 outputs and preserve117 owned paths. Pylance
+syntax validation of the source fixups is clean.
+
+The first standard smoke helper did not launch because the owner's current
+Desktop held `build\Debug\vs-native.log`. It is not counted as a run and
+that process was not terminated. Instead the current executable, matching
+PDB and runtime DLLs were frozen under ignored
+`build\quality\routegate42-native`; that copy has independent durable logs.
+Normal-speed/scripted Start1000/Up1200/Circle1300 reaches MAP001 at1403,
+captures1790 and exits1800 with0 errors. No input is injected into the live
+owner session. This is room-entry smoke, not platform traversal or audiovisual
+parity.
+
+Private evidence uses `routegate42-*` in the session files directory.
+The audit advances178->179/186, leaving7 gaps (4 C-backed/3 assembly-only),
+3134 ordinary implementations and161 aliases. The fixing revision/exact CI
+are on #42; owner edits and reference directories remain untouched.
+
 ## Gimmick and actor contact occupancy (2026-10-26)
 
 Continued #42 after publishing Ashley-alliance revision

@@ -23,6 +23,8 @@ extern "C" {
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
+#include "Field/Mpd.h"
+#include "Field/Room.h"
 }
 
 static_assert(
@@ -36,6 +38,10 @@ static_assert(std::is_same_v<decltype(&Battle_Ai_AddAiTileOccupant),
                              void (*)(const Field_GimmickInstance*)>);
 static_assert(std::is_same_v<decltype(&Battle_Ai_RemoveAiTileOccupant),
                              void (*)(const Field_GimmickInstance*)>);
+static_assert(offsetof(Field_GimmickPhysicsView, tileX) ==
+              offsetof(Field_GimmickInstance, tileX));
+static_assert(offsetof(Field_GimmickPhysicsView, tileZ) ==
+              offsetof(Field_GimmickInstance, tileZ));
 
 namespace {
 struct NavigationOverrideFixture {
@@ -103,6 +109,61 @@ struct GimmickOccupancyFixture : NavigationOverrideFixture {
   ~GimmickOccupancyFixture() {
     Battle_Ai_specialTerrainHeights = saved_heights;
     std::ranges::copy(saved_gimmicks, Field_gimmickInstances);
+  }
+};
+
+struct RouteAvailabilityFixture {
+  void* saved_auxiliary = Battle_Ai_roomHasWaypoints;
+  Battle_Ai_RouteGateEnd* saved_gates = Battle_Ai_routeGates;
+  Field_RoomRecord saved_room = Field_roomData;
+  std::array<u_char, 13> saved_bounce{};
+  alignas(u_int) std::array<u_char, 0x498> auxiliary{};
+  std::array<Field_MpdMovingPlatform, 13> platforms{};
+
+  RouteAvailabilityFixture() {
+    std::ranges::copy(
+        std::span(Field_platformBounceFrames, saved_bounce.size()),
+        saved_bounce.begin());
+    std::fill_n(Field_platformBounceFrames, saved_bounce.size(), 0);
+    Field_roomData = {};
+    Field_roomData.section6 = auxiliary.data();
+    Field_roomData.header.section6Length = auxiliary.size();
+    Field_roomData.movingPlatforms = platforms.data();
+    Field_roomData.header.movingPlatformsLength = sizeof platforms;
+    Battle_Ai_roomHasWaypoints = auxiliary.data();
+    Battle_Ai_routeGates =
+        reinterpret_cast<Battle_Ai_RouteGateEnd*>(auxiliary.data() + 0x454);
+    SetEnd(0, 3, 7);
+  }
+
+  ~RouteAvailabilityFixture() {
+    std::ranges::copy(saved_bounce, Field_platformBounceFrames);
+    Field_roomData = saved_room;
+    Battle_Ai_roomHasWaypoints = saved_auxiliary;
+    Battle_Ai_routeGates = saved_gates;
+  }
+
+  void SetEnd(std::size_t pair, unsigned x, unsigned z) {
+    Battle_Ai_RouteGateEnd end{};
+    end.tileX = static_cast<u_short>(x);
+    end.tileZ = static_cast<u_short>(z);
+    std::memcpy(auxiliary.data() + 0x454 + pair * 4, &end, sizeof end);
+  }
+
+  void SetVisible(unsigned mask) {
+    for (std::size_t index = 0; index < platforms.size(); ++index) {
+      platforms[index].isHidden = (mask & (1u << index)) == 0;
+    }
+  }
+
+  void SetWord(std::size_t index, u_int word) {
+    std::memcpy(auxiliary.data() + index * sizeof(word), &word, sizeof(word));
+  }
+
+  u_int Word(std::size_t index) const {
+    u_int word;
+    std::memcpy(&word, auxiliary.data() + index * sizeof(word), sizeof(word));
+    return word;
   }
 };
 auto Snapshot(const Battle_Ai_ActorAiState& state) {
@@ -431,4 +492,138 @@ TEST_CASE("Gimmick occupancy requires the active native height map",
   Battle_Ai_specialTerrainHeights = nullptr;
   Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
   FAIL("Missing active occupancy map was accepted");
+}
+
+TEST_CASE("Route availability connects both endpoints to visible platforms",
+          "[ai][route-availability][route-availability-red]") {
+  RouteAvailabilityFixture fixture;
+  fixture.SetVisible(1);
+  constexpr u_int kFirst = 0x400 | (3u << 5) | 7;
+  constexpr u_int kSecond = 0x04000000 | (3u << 21) | (7u << 16);
+  fixture.SetWord(1, kFirst);
+  fixture.SetWord(2, kSecond);
+  fixture.SetWord(3, kFirst | kSecond);
+  Battle_Ai_UpdateRouteGateAvailability();
+  CHECK(fixture.Word(1) == (kFirst | 0x80000000u));
+  CHECK(fixture.Word(2) == (kSecond | 0x8000));
+  CHECK(fixture.Word(3) == (kFirst | kSecond));
+}
+
+TEST_CASE("Route availability preserves every platform mask and selector",
+          "[ai][route-availability]") {
+  RouteAvailabilityFixture fixture;
+  constexpr u_int kFirst = 0x400 | (3u << 5) | 7;
+  constexpr u_int kSecond = 0x04000000 | (3u << 21) | (7u << 16);
+  for (unsigned mask = 0; mask < 16; ++mask) {
+    fixture.SetVisible(mask);
+    for (unsigned selector = 0; selector < 4; ++selector) {
+      const auto first = kFirst | (selector << 13);
+      const auto second = kSecond | (selector << 29);
+      fixture.SetWord(1, first);
+      fixture.SetWord(2, second);
+      fixture.SetWord(3, first | second);
+      fixture.SetWord(4, 0xA31D51A5u & ~0x04000400u);
+      Battle_Ai_UpdateRouteGateAvailability();
+      const bool visible = (mask & (1u << selector)) != 0;
+      CHECK(fixture.Word(1) == (first | (visible ? 0x80000000u : 0x80008000u)));
+      CHECK(fixture.Word(2) == (second | (visible ? 0x8000u : 0x80008000u)));
+      CHECK(fixture.Word(3) ==
+            ((first | second) | (visible ? 0u : 0x80008000u)));
+      CHECK(fixture.Word(4) == (0xA31D51A5u & ~0x04000400u));
+    }
+  }
+}
+
+TEST_CASE("Route availability retains mutated shift operands between pairs",
+          "[ai][route-availability]") {
+  RouteAvailabilityFixture fixture;
+  fixture.SetVisible(8);
+  fixture.SetEnd(0, 3, 6);
+  fixture.SetEnd(1, 3, 7);
+  constexpr u_int kFirst = 0x400 | (3u << 5) | 7 | (3u << 13);
+  constexpr u_int kSecond = 0x04000000 | (3u << 21) | (7u << 16) | (3u << 29);
+  fixture.SetWord(1, kFirst);
+  fixture.SetWord(2, kSecond);
+  Battle_Ai_UpdateRouteGateAvailability();
+  CHECK(fixture.Word(1) == (kFirst | 0x80008000u));
+  CHECK(fixture.Word(2) == (kSecond | 0x80008000u));
+}
+
+TEST_CASE(
+    "Route availability updates all words and reopens after visibility changes",
+    "[ai][route-availability]") {
+  RouteAvailabilityFixture fixture;
+  constexpr u_int kFirst = 0x400 | (3u << 5) | 7;
+  for (unsigned word = 0; word < 256; ++word) fixture.SetWord(word, kFirst);
+  for (unsigned mask : {1u, 0u, 1u}) {
+    fixture.SetVisible(mask);
+    Battle_Ai_UpdateRouteGateAvailability();
+    for (unsigned word = 0; word < 256; ++word) {
+      CHECK(fixture.Word(word) ==
+            (kFirst | (mask ? 0x80000000u : 0x80008000u)));
+    }
+  }
+}
+
+TEST_CASE("Route availability respects absent room auxiliary data",
+          "[ai][route-availability]") {
+  RouteAvailabilityFixture fixture;
+  fixture.SetWord(1, 0x400);
+  Battle_Ai_roomHasWaypoints = nullptr;
+  Battle_Ai_routeGates = nullptr;
+  Battle_Ai_UpdateRouteGateAvailability();
+  CHECK(fixture.Word(1) == 0x400);
+}
+
+TEST_CASE("Route availability retains the original thirteen-point capacity",
+          "[ai][route-availability]") {
+  RouteAvailabilityFixture fixture;
+  fixture.SetVisible(1u << 12);
+  constexpr u_int kFirst = 0x400 | (3u << 5) | 7;
+  fixture.SetWord(1, kFirst);
+  Battle_Ai_UpdateRouteGateAvailability();
+  CHECK(fixture.Word(1) == (kFirst | 0x80008000u));
+  fixture.SetVisible(1u << 4);
+  fixture.SetEnd(0, 3, 6);
+  fixture.SetEnd(1, 3, 7);
+  fixture.SetWord(1, kFirst | (2u << 13));
+  Battle_Ai_UpdateRouteGateAvailability();
+  CHECK(fixture.Word(1) == (kFirst | (2u << 13) | 0x80000000u));
+}
+
+TEST_CASE("Original route availability entry resolves to the native updater",
+          "[ai][route-availability]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800DC638) ==
+        reinterpret_cast<void*>(&Battle_Ai_UpdateRouteGateAvailability));
+}
+
+TEST_CASE("Route availability rejects source stack-dependent input",
+          "[.routegate-stack-input]") {
+  VS::Platform::InstallCrashHandler();
+  RouteAvailabilityFixture fixture;
+  fixture.SetVisible(1);
+  fixture.SetWord(0, 0x04000000);
+  Battle_Ai_UpdateRouteGateAvailability();
+  FAIL("Stack-register-dependent route input was accepted");
+}
+
+TEST_CASE("Route availability rejects a truncated room auxiliary section",
+          "[.routegate-room-bound]") {
+  VS::Platform::InstallCrashHandler();
+  RouteAvailabilityFixture fixture;
+  Field_roomData.header.section6Length = 0x497;
+  Battle_Ai_UpdateRouteGateAvailability();
+  FAIL("Truncated room route table was accepted");
+}
+
+TEST_CASE("Route availability rejects excess moving-platform output capacity",
+          "[.routegate-platform-bound]") {
+  VS::Platform::InstallCrashHandler();
+  RouteAvailabilityFixture fixture;
+  Field_roomData.header.movingPlatformsLength =
+      14 * sizeof(Field_MpdMovingPlatform);
+  Battle_Ai_UpdateRouteGateAvailability();
+  FAIL("Moving-platform output beyond the original buffer was accepted");
 }

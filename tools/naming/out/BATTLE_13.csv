@@ -99,7 +99,7 @@ F01690,Battle::Ai::IsActionHarmfulToActor,Native\Game\src\Battle\Ai\ActionPlanni
 F01691,Battle::Ai::IsActionBeneficialToActor,Native\Game\src\Battle\Ai\ActionPlanning.c,"Tests whether an action is beneficial to the target, including its target-class inversion.",high,asm
 F01692,Battle::Ai::CacheFallbackActionCandidate,Native\Game\src\Battle\Ai\ActionPlanning.c,Caches the first eligible fallback candidate for each configured action slot.,high,asm
 F01693,Battle::Ai::PromoteRandomizedActionCandidate,Native\Game\src\Battle\Ai\ActionPlanning.c,Randomly promotes a candidate according to its hit weight and sorts the remaining choices.,high,asm
-F01694,Battle::Ai::UpdateRouteGateAvailability,Native\Game\src\Battle\Ai\Navigation.c,Updates route gate availability from moving room objects and their current endpoints.,high,asm
+F01694,Battle::Ai::UpdateRouteGateAvailability,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,Updates route gate availability from moving room objects and their current endpoints.,high,asm;73C84.s:149-243;bounded native room table and original mutable selectors;unsupported first-word stack dependency diagnosed
 F01695,Battle::Ai::MakeTargetHostile,Native\Game\src\Battle\Ai\Perception.c,Changes an actor's relationship with a target to hostile and starts its reaction state.,high,asm
 F01696,Battle::Ai::ApplyActionRelationshipChanges,Native\Game\src\Battle\Ai\Perception.c,Applies action reactions to every actor and then propagates their changed relationships.,high,asm
 F01697,Battle::Ai::ApplySimulatedActionResults,Native\Game\src\Battle\Ai\ActionPlanning.c,"Applies projected action costs, stat changes, and status changes to the compact condition table.",high,

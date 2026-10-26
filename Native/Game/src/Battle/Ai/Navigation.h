@@ -54,7 +54,6 @@ extern u_short (*Battle_Ai_specialTerrainHeights)[32];
 extern Battle_Ai_RouteGateEnd* Battle_Ai_routeGates;
 unsigned int Battle_Ai_FindAdjacentMovementDestination(
     Battle_Ai_MoveTargetView* state, int first, int second, unsigned int direction);
-void Battle_Ai_UpdateRouteGateAvailability(void);
 unsigned int Battle_Ai_WaypointValue(unsigned short* row, int index);
 unsigned short* Battle_Ai_WaypointAddress(unsigned short* row, int index);
 void Battle_Ai_FindNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state, Battle_Ai_WaypointTile* destination);

@@ -105,12 +105,6 @@ done:
     return dest.word & 0xFFFF00FF;
 }
 
-// decomp: BATTLE.PRG func_800DC638 (src/BATTLE/BATTLE.PRG/73C84.s:0) [asm-file: not yet ported]
-void Battle_Ai_UpdateRouteGateAvailability(void)
-{
-    VS_UNPORTED("Battle::Ai::UpdateRouteGateAvailability");
-}
-
 // decomp: BATTLE.PRG nearestWaypointValue (src/BATTLE/BATTLE.PRG/74088.c:946)
 unsigned int Battle_Ai_WaypointValue(unsigned short* row, int index)
 {

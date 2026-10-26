@@ -133,6 +133,7 @@ MODULE_DATA_BLOB_TYPES = {
 MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 
 MODULE_FUNCTION_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x800DC638, "F01694"),
     ("BATTLE/BATTLE.PRG", 0x800E6EB0, "F01836"),
     ("EFFECT/PLG074.BIN", 0x800F98F8, "F01986"),
     ("EFFECT/PLG074.BIN", 0x800FA7F0, "F01987"),
@@ -165,6 +166,11 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F01013": [
+        ("Battle_Ai_AddAiTileOccupant(object);",
+         "Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);",
+         "the rebased physics view aliases the native owning Gimmick; pass its checked tile prefix explicitly"),
+    ],
     "F00514": [
         ("*(int*)&spec->recoveryDelay & 0x4000",
          "spec->resetsHitResults",

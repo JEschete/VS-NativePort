@@ -3,6 +3,8 @@
 // revision 3be5ba38b008cad919a2b1ca196432c8d4817335 (CC0-1.0).
 #include "Battle/Ai/NavigationPrimitives.h"
 
+#include <array>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <iterator>
@@ -15,6 +17,8 @@ extern "C" {
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
 #include "Field/Gimmicks.h"
+#include "Field/Platforms.h"
+#include "Field/Room.h"
 #include "Field/TerrainHeight.h"
 }
 
@@ -30,6 +34,83 @@ constexpr int kMaximumGroundStep = 64;
 constexpr unsigned kOccupancyCellBytes = sizeof(u_short);
 constexpr unsigned kOccupancyRowBytes = kOccupancyCellBytes * kAiFrameGridSide;
 constexpr unsigned kOccupancyMapBytes = kOccupancyRowBytes * kAiFrameGridSide;
+constexpr std::size_t kRouteWords = 256;
+constexpr std::size_t kRouteEndPairs = 8;
+constexpr std::size_t kRouteEnds = kRouteEndPairs * 2;
+constexpr unsigned kRouteEndOffset = 0x454;
+constexpr unsigned kRouteAuxiliaryBytes = 0x498;
+constexpr unsigned kFirstPlatformGate = 0x400;
+constexpr unsigned kSecondPlatformGate = 0x04000000;
+constexpr unsigned kFirstClosedGate = 0x8000;
+constexpr unsigned kSecondClosedGate = 0x80000000;
+constexpr unsigned kGateSelectorMask = 3;
+constexpr unsigned kGateCoordinateMask = 31;
+constexpr unsigned kGateCoordinateBits = 5;
+constexpr unsigned kSecondGateShift = 16;
+constexpr unsigned kGateSelectorShift = 13;
+constexpr unsigned kVariableShiftMask = 31;
+
+void RequireRouteAvailability(bool valid, const char* message) {
+  if (!valid) {
+    Core_Errorf("ai", "Route availability: %s", message);
+    std::abort();
+  }
+}
+
+unsigned VisiblePlatformMask() {
+  constexpr std::size_t kOriginalPlatformCapacity = 13;
+  if (Field_roomData.movingPlatforms == nullptr) return 0;
+  const auto bytes = Field_roomData.header.movingPlatformsLength;
+  RequireRouteAvailability(
+      bytes % sizeof(Field_MpdMovingPlatform) == 0 &&
+          bytes / sizeof(Field_MpdMovingPlatform) <= kOriginalPlatformCapacity,
+      "moving-platform count exceeds the original bounded buffer");
+  std::array<Field_PlatformContactPoint, kOriginalPlatformCapacity> points{};
+  const int count = Field_CollectMovingPlatformPositions(points.data());
+  RequireRouteAvailability(
+      count >= 0 && static_cast<std::size_t>(count) <= points.size(),
+      "moving-platform producer returned an invalid count");
+  unsigned mask = 0;
+  for (int index = count; index-- > 0;) {
+    mask |= 1u << (static_cast<unsigned>(points[index].platformIndex) &
+                   kVariableShiftMask);
+  }
+  return mask;
+}
+
+u_int AvailableRouteWord(
+    u_int word, const std::array<Battle_Ai_RouteGateEnd, kRouteEnds>& ends,
+    unsigned active) {
+  if ((word & (kFirstPlatformGate | kSecondPlatformGate)) == 0) return word;
+  word |= kFirstClosedGate | kSecondClosedGate;
+  const auto first_x = (word >> kGateCoordinateBits) & kGateCoordinateMask;
+  const auto first_z = word & kGateCoordinateMask;
+  const auto second_x =
+      (word >> (kSecondGateShift + kGateCoordinateBits)) & kGateCoordinateMask;
+  const auto second_z = (word >> kSecondGateShift) & kGateCoordinateMask;
+  auto first_bit = (word >> kGateSelectorShift) & kGateSelectorMask;
+  auto second_bit =
+      (word >> (kSecondGateShift + kGateSelectorShift)) & kGateSelectorMask;
+  for (std::size_t link_index = 0; link_index < kRouteEndPairs; ++link_index) {
+    const auto& end = ends[link_index * 2];
+    if ((word & kFirstPlatformGate) != 0 && first_x == end.tileX) {
+      first_bit = 1u << (first_bit & kVariableShiftMask);
+      if (first_z == end.tileZ) {
+        first_bit &= active;
+        if (first_bit != 0) word &= ~kFirstClosedGate;
+      }
+    }
+    // 73C84.s mutates both shift operands across pairs, not just their masks.
+    second_bit = 1u << (second_bit & kVariableShiftMask);
+    if ((word & kSecondPlatformGate) != 0) {
+      second_bit &= active;
+      if (second_x == end.tileX && second_z == end.tileZ && second_bit != 0) {
+        word &= ~kSecondClosedGate;
+      }
+    }
+  }
+  return word;
+}
 
 void RequireTile(int x, int z) {
   if (x < 0 || z < 0 || x >= kAiFrameGridSide || z >= kAiFrameGridSide) {
@@ -95,6 +176,33 @@ void Battle_Ai_BuildAiTerrainHeightsWithWorkspace(void) {
   Battle_Ai_BuildAiSpecialTerrainHeights();
 }
 
+// decomp: func_800DC638 (src/BATTLE/BATTLE.PRG/73C84.s:149-243).
+void Battle_Ai_UpdateRouteGateAvailability(void) {
+  const unsigned active = VisiblePlatformMask();
+  if (Battle_Ai_roomHasWaypoints == nullptr) return;
+  auto* auxiliary = static_cast<u_char*>(Battle_Ai_roomHasWaypoints);
+  RequireRouteAvailability(
+      auxiliary == Field_roomData.section6 &&
+          Field_roomData.header.section6Length >= kRouteAuxiliaryBytes &&
+          reinterpret_cast<const u_char*>(Battle_Ai_routeGates) ==
+              auxiliary + kRouteEndOffset,
+      "route table does not belong to the active room auxiliary section");
+  std::array<Battle_Ai_RouteGateEnd, kRouteEnds> ends{};
+  std::memcpy(ends.data(), Battle_Ai_routeGates, sizeof ends);
+  for (std::size_t index = 0; index < kRouteWords; ++index) {
+    auto* location = auxiliary + index * sizeof(u_int);
+    u_int word;
+    std::memcpy(&word, location, sizeof word);
+    // No original valid room has a first-word second-only platform gate.
+    RequireRouteAvailability(
+        index != 0 || active == 0 ||
+            (word & (kFirstPlatformGate | kSecondPlatformGate)) !=
+                kSecondPlatformGate,
+        "first route word depends on an original stack-register value");
+    word = AvailableRouteWord(word, ends, active);
+    std::memcpy(location, &word, sizeof word);
+  }
+}
 // decomp: func_800E4C1C (src/BATTLE/BATTLE.PRG/7BDD4.s:542).
 void Battle_Ai_ReserveAiDestinationTile(int x, int z) {
   if (Battle_Ai_tileFlagMap == nullptr) return;

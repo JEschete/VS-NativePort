@@ -1657,8 +1657,8 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
         return;
     } else if (mode == 0xFD) {
         if (!((int (*)())Field_UpdateGimmickReactionAnimation)(object)) {
-            Battle_Ai_AddAiTileOccupant(object);
-            Battle_Ai_AddAiTileOccupant(object);
+            Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
+            Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
             Battle_Ai_ReleaseAiDestinationTile(object->tileX, object->tileZ);
         }
         return;
@@ -1698,7 +1698,7 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
                             (*(int*)&object->material & ~0x30) | 0x10;
                         Audio_PlayWorldSfx(0x7E, 0x31, &object->position);
                         object->mode = 0;
-                        Battle_Ai_AddAiTileOccupant(object);
+                        Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
                         Battle_Ai_ReleaseAiDestinationTile(object->tileX, object->tileZ);
                     }
                     goto children;
@@ -1707,7 +1707,7 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
         }
         object->tileX = object->position.vx / 128;
         object->tileZ = object->position.vz / 128;
-        Battle_Ai_AddAiTileOccupant(object);
+        Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
         Battle_Ai_ReleaseAiDestinationTile(object->tileX, object->tileZ);
         if ((*(int*)&object->material & 7) == 1) {
             --object->durability;

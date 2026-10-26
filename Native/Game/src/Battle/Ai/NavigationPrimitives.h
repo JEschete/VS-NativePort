@@ -16,6 +16,7 @@ void Battle_Ai_RemoveAiTileOccupant(const Field_GimmickInstance* gimmick);
 int Battle_Ai_IsAdjacentTileStepBlocked(unsigned int, int);
 void Battle_Ai_MarkAiTileDynamicObstacle(int, int);
 void Battle_Ai_BuildAiTerrainHeightsWithWorkspace(void);
+void Battle_Ai_UpdateRouteGateAvailability(void);
 
 int Battle_Ai_HasActorNavigationState(int);
 int Battle_Ai_ActorNavigationOverrideStatus(int);

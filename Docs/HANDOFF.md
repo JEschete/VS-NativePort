@@ -9,6 +9,20 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01694 now updates native route availability from visible moving
+  platforms while retaining the original mutable shift operands. The source
+  domain audit finds418 valid room auxiliary sections and no authored
+  first-word second-only case requiring a source stack-register value; such
+  unsupported input is diagnosed explicitly. Focused7/1,033, full
+  Debug/Release981/9,309,515 each, three fatal controls,129 port/32 naming
+  controls, and focused/default quality0 new pass. Two generations repeat
+  across746 outputs and preserve117 owned paths;621 view fields match.
+  A frozen normal-speed Debug replay reaches MAP001/1800 ticks with0 errors,
+  leaving the owner's live Desktop and log untouched. Audit:179/186 complete,
+  7 gaps (4 C-backed/3 assembly-only),3134 implementations/161 aliases.
+  Revision/exact CI are on #42. Work continues through all non-MA issues;
+  this is not a stopping or whole-game acceptance checkpoint. See the
+  [route checkpoint](HANDOFF_HISTORY.md#moving-platform-route-availability-2026-10-26).
 - #42 F01826/F01827/F01836 now own typed gimmick height-grid occupancy and
   actor contact release. Original placement layer bits, aligned/bounded
   indexing, halfword wrap and command/support/contact gates are preserved.

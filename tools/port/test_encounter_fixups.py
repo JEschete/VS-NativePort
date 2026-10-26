@@ -12,6 +12,33 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_route_availability_keeps_original_shift_mutation_and_native_bounds(self):
+        root = Path(__file__).resolve().parents[2]
+        self.assertEqual(
+            self.owned_items()["F01694"]["path"],
+            r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
+        )
+        self.assertIn(
+            ("BATTLE/BATTLE.PRG", 0x800DC638, "F01694"),
+            copy_fixups.MODULE_FUNCTION_ENTRIES,
+        )
+        source = (
+            root / r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertIn("kOriginalPlatformCapacity = 13", source)
+        self.assertIn("first_bit = 1u << (first_bit & kVariableShiftMask)", source)
+        self.assertIn("second_bit = 1u << (second_bit & kVariableShiftMask)", source)
+        self.assertIn("auxiliary == Field_roomData.section6", source)
+        self.assertIn("Field_roomData.header.section6Length >= kRouteAuxiliaryBytes", source)
+        self.assertIn("first route word depends on an original stack-register value", source)
+        self.assertIn("std::memcpy(location, &word, sizeof word)", source)
+
+    def test_gimmick_physics_occupancy_calls_cross_the_explicit_native_view_boundary(self):
+        old, new, reason = copy_fixups.FIXES["F01013"][0]
+        self.assertEqual(old, "Battle_Ai_AddAiTileOccupant(object);")
+        self.assertIn("(const Field_GimmickInstance*)object", new)
+        self.assertIn("native owning Gimmick", reason)
+
     def test_occupancy_entries_use_typed_native_grids_and_shared_contact_helper(self):
         root = Path(__file__).resolve().parents[2]
         owned = self.owned_items()
