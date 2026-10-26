@@ -119,6 +119,21 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F00896": [
+        ("((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)(arg0->instance.slot, &arg0->routeTarget, 0);",
+         "Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->routeTarget, 0);",
+         "40564.c:661 takes an int actor ID; the conflicting narrow 3A1A0.c prototype leaves upper argument bits undefined on x64"),
+    ],
+    "F00897": [
+        ("((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)(arg0->instance.slot, &arg0->sharedSequences[4], 0);",
+         "Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->sharedSequences[4], 0);",
+         "Cancellation must use the same full-width typed tile-translation ABI as the actual implementation"),
+    ],
+    "F00898": [
+        ("((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)(arg0->instance.slot, &arg0->routeTarget, -1);",
+         "Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->routeTarget, -1);",
+         "Travel must promote the slot to the actual int parameter rather than call through an incompatible u_char function pointer"),
+    ],
     "F00298": [
         ("Battle_Ai_ActorNavigationOverrideStatus()",
          "Battle_Ai_ActorNavigationOverrideStatus(arg0)",

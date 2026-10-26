@@ -528,8 +528,51 @@ Strict reports `vignette184-verified-Debug.json` and
 `vignette184-verified-Release.json` distinguish the accepted prefix from the
 whole selection. The delivered #184 scope is the proven single-word vignette
 producer and original entry interval; it is not normal-speed pixel parity,
-all-scene/all-door completion or compatibility retirement. #185 next needs
-the module-relative fault and useful owning stack/packet/actor provenance.
+all-scene/all-door completion or compatibility retirement. The later #185
+failure is repaired below; its old cohort remains interrupted, not rewritten.
+
+### Full-width transition tile-translation calls (#185, 2026-10-25)
+
+History is not required: unchanged3ca80430/PDB8ecd4651 standalone
+1792985556391334-0 repeats the same access violation. A local Windows Debug
+API observer captures the first-chance fault, module base and private dump
+without gameplay memory writes or target code patches. RVA214BA6 resolves
+against the matching PDB to `Actors_TranslateActorToTileAtRate`; the
+unwind-layout-validated return2149F8 identifies
+`Actors_UpdateActorTeleportTransition`, not the ordinary event caller.
+
+Original3A1A0.c:31 locally declares this function as
+`u_int(u_char, void*, int)`, conflicting with its actual40564.c:661
+`void(int, Actors_TileTarget*, int)` definition. The copier preserves that
+wrong local view in three transition/cancel/travel function-pointer casts.
+Fault disassembly writes only CL from slot2, leaving upper argument bits
+undefined; the callee reads a full int and sign-extends it for indexing.
+Captured RCXFFFFFFFFFFBE1002 and actor-array base exactly explain the bad read.
+This is not a missing optional actor to skip or a bad ID to clamp.
+
+F00896/F00897/F00898 copier fixes call the existing typed function directly,
+with explicit packed-target data views. All three incompatible call casts
+are removed. The original motion/rate/facing/animation logic and optional
+binding behavior remain unchanged. A red source-contract test rejects the
+old casts and verifies all three direct calls. Final91 copier tests pass;
+two generations preserve302 protected paths and repeat identically, changing
+only Movement.c. Full native Debug/Release suites pass785 cases/3,391,372
+assertions each; default quality is0 new with the existing baseline unchanged.
+
+Actual fixed Debug1792986145027095-0 (exe832d086c/PDBbbfec8e0) and Release
+1792986145026276-0 (exe435e23f7/PDB9c5c1cdf) use the same single directed
+door selection,3600/speed64 and original scripted dialogue. Both arrive48/26
+at233, restore control797 and satisfy the unchanged120-tick readiness/
+scene-event quiet predicate917, then complete normal teardown929 with0
+engine errors. Recorded frames872/873/874/917 retain ready48/26, control1,
+transition0/event phase0 and real models0/89/89; the wolves continue moving.
+Commands, hashes, strict route results and boundary checks are private
+`actor185-*`; unchanged-image debugger/dump evidence is `packet185-*`.
+
+The old persistent Debug132 selection is still incomplete after script115;
+its counts are not rewritten. These bounded standalone results do not
+certify every door, cancellation/travel presentation, all scenes, C++
+promotion, compatibility retirement or a causal #167 repair.
 
 ### Ashley testing profiles
 

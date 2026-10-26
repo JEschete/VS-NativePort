@@ -10,6 +10,24 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_tile_translation_callers_preserve_the_full_actor_id_abi(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Game\src\Actors\Movement.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertFalse(
+            "((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)"
+            in source,
+            "Tile-translation callers must not narrow the int actor-ID ABI",
+        )
+        self.assertEqual(
+            source.count(
+                "Actors_TranslateActorToTileAtRate(arg0->instance.slot, "
+                "(Actors_TileTarget*)&"
+            ),
+            3,
+        )
+
     def test_navigation_leaves_own_typed_entries_and_forward_the_actor_id(self):
         owned = self.owned_items()
         for identifier, name in (

@@ -1010,7 +1010,7 @@ void Actors_UpdateActorTeleportTransition(Actors_ActorRecord* arg0)
 
         if (busy == 0) {
             arg0->instance.actionAnimationState = 9;
-            ((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)(arg0->instance.slot, &arg0->routeTarget, 0);
+            Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->routeTarget, 0);
             arg0->instance.facing = arg0->routeTarget.pad;
             Actors_PlayActorAnimation(arg0->instance.slot, 0x15, 0, 8);
             Actors_QueueActorAnimation(arg0->instance.slot, 0x16, 8, 0);
@@ -1051,7 +1051,7 @@ void Actors_UpdateActorTeleportTransition(Actors_ActorRecord* arg0)
 // decomp: BATTLE.PRG func_800A2C48 (src/BATTLE/BATTLE.PRG/3A1A0.c:153)
 void Actors_CancelActorTeleportTransition(Actors_ActorRecord* arg0)
 {
-    ((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)(arg0->instance.slot, &arg0->sharedSequences[4], 0);
+    Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->sharedSequences[4], 0);
     arg0->queuedAnimation = 0;
     arg0->instance.reactionState = 4;
     Actors_UpdateActorTeleportTransition(arg0);
@@ -1069,7 +1069,7 @@ void Actors_UpdateActorTravelTransition(Actors_ActorRecord* arg0)
     switch (arg0->instance.poseState) {
     case 1:
         Actors_PlayActorAnimation(arg0->instance.slot, 9, 0, 8);
-        ((u_int (*)(u_char, void*, int))Actors_TranslateActorToTileAtRate)(arg0->instance.slot, &arg0->routeTarget, -1);
+        Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->routeTarget, -1);
         ((void (*)())Actors_TurnActorToAtRate)(arg0->instance.slot, arg0->routeTarget.pad, 8);
         arg0->transitionFrames = arg0->instance.currentAnimation;
         arg0->instance.currentAnimation = 0;

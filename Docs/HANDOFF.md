@@ -79,17 +79,27 @@ verification of the current worktree.
   Root fix260f121b has exact green40261350623; #184's bounded producer/entry
   acceptance is complete. No full scene completion, pixel parity or causal
   #167 fix is claimed. Private `vignette184-*` and `packet184-*`.
-- New #185 prevents a clean full-Debug-cohort claim: after the accepted114
-  prefix, script115 z047-r000-d000 (47/0->48/26) faults149109/script_tick873,
-  reading7FF66D81D670 at7FF66F3F4BA6 and exitsC0000005. Last durable frame872
-  is ready48/26/control1/transition0, scene19/event phase0, models0/89/89.
-  Script115 remains running and17 later entries are unrun. A bounded-close
-  watcher found no window after this native exit; it sent no WM_CLOSE.
-  This is not a successful full132 history, a controlled cancellation or proof
-  of a shared #184/#167 root. Stack symbols are unresolved and the logger
-  omitted raw frame addresses; next observation is module-relative fault and
-  owning packet/actor/stack provenance on the preserved matching image.
-  No owned replay remains running. Private `packet185-last-frame.json`.
+- #185 is now a proven transition-call ABI defect, not a history requirement:
+  frozen3ca80430/PDB8ecd4651 standalone1792985556391334-0 repeats the same
+  fault as historical script115. External Windows debugger module/context/
+  stack evidence resolves RVA214BA6 to TranslateActorToTileAtRate and its real
+  caller to UpdateActorTeleportTransition. Original3A1A0.c:31 declares the
+  actual void(int,TileTarget*,int) implementation as u_int(u_char,void*,int);
+  three copied transition/cancel/travel casts therefore write only CL while
+  the callee consumes a full int. Captured RCXFFFFFFFFFFBE1002 explains the
+  exact bad actor-array address. Copier fixes now call the existing typed API
+  directly with explicit packed-target views; no invalid-ID clamp/skip.
+  Red source-contract control and actual unchanged-image AV become green91
+  copier tests and actual fixed Debug1792986145027095-0 / Release
+  1792986145026276-0: both arrive48/26 at233, restore control797, satisfy the
+  unchanged120-tick gate917 and tear down929 with0 errors. Both retain real
+  scene19/models0/89/89 through the original873 boundary and beyond.
+  Full Debug/Release785/3,391,372 and0-new default quality pass; two generations
+  preserve302 protected paths and repeat identically, changing only Movement.c.
+  The old full Debug history remains82 passed/32 blocked/one interrupted/
+  17 unrun; the repaired standalone route does not rewrite that cohort or
+  close #167. No owned replay remains active. Private `actor185-*` and
+  `packet185-*`; dump/observer remain private, not issue attachments.
 - #167's original script132 truncation/termination is not reproduced by either
   current full132-case history, but Debug's separate #184 failure prevents a
   clean-cohort claim. Release1792970616137564-0 has97 passed/35 blocked,0
