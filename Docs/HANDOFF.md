@@ -9,6 +9,19 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #188 reconciles152 owned-function catalog rows against their actual
+  registered definitions:146 obsolete provider paths and140 stale copied
+  flags, with overlap. The regression checks all236 registered copy=yes
+  function definitions. All4207 IDs/order and every other catalog field,
+  including compiles/understood/modernized/cpp/verified, are preserved.
+  F01758 was already implemented in WordCopy.c and is not a new gameplay
+  fix or an unchecked original#42 entry. Native code, the manifest, owned
+  registry, other ledgers and gap/coverage CSVs remain byte-identical;
+  two generations change no native output. The53 real gaps and133/186
+  cohort stay unchanged. Red has152 failures; all103 port/audit controls
+  and0-new default quality now pass. An unrelated report-revision failure
+  exposed the separately repaired provenance defect#189. Private
+  `catalog188-*`; publication/exact CI and closure are on#188.
 - #189 fixes reference revision attribution in the assembly audit:
   rood-reverseWin is an unversioned snapshot inside the native repository,
   not a checkout at the enclosing native HEAD. Only a matching reference

@@ -5,11 +5,44 @@ import re
 import unittest
 from pathlib import Path
 
+import audit_assembly_gaps
 import copy_fixups
 import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_owned_function_catalog_matches_the_registered_native_definition(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(
+            encoding="utf-8-sig", newline=""
+        ) as handle:
+            rows = list(csv.DictReader(handle))
+        owned = self.owned_items()
+        rows = [
+            row
+            for row in rows
+            if row["id"] in owned
+            and owned[row["id"]]["kind"] == "function"
+            and row["copy"] == "yes"
+        ]
+        self.assertTrue(rows)
+        definitions, paths = audit_assembly_gaps.native_definitions(rows, owned)
+        for row in rows:
+            with self.subTest(id=row["id"]):
+                bodies = [
+                    body
+                    for body in definitions[paths[row["id"]]]
+                    if body.name == row["final_name"].replace("::", "_")
+                ]
+                self.assertEqual(len(bodies), 1)
+                status = audit_assembly_gaps.native_status(bodies[0].body)
+                self.assertIn(status, ("implemented", "stub", "partial-unported"))
+                expected = "x" if status == "implemented" else "stub"
+                self.assertEqual(
+                    (row["final_location"], row["copied"]),
+                    (owned[row["id"]]["path"], expected),
+                )
+
     def test_orbit_constructor_shares_the_existing_owned_teardown(self):
         owned = self.owned_items()
         self.assertEqual(
