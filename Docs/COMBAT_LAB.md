@@ -415,6 +415,40 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Complete authored scene30 return chain (#151/#149, 2026-10-25)
+
+The3600-tick observation is not evidence of a permanent event hang:
+its thread PC progresses665->1031->1248 at2000/3000/3600. A separately
+bounded Release run1792989783417541-0 on runtime961cc1e8
+(documentation-only descendant af1435ce) retains original dialogue controls
+and grants enough observation time, without changing the acceptance gate:
+
+```powershell
+build\Release\VS.CombatLab.exe --door-transitions --door-from z048-r006-d000 --door-limit 1 --frames 36000 --speed 8 --scripted
+```
+
+Scene30 is at32/17/event phase4/PC233 at1050; by9000 its authored handoff
+has reached scene26 at40/21, still phase4. Normal field control returns13320.
+All121 recorded frames13320..13440 are ready40/21/control1/transition0/
+event phase0, satisfying the unchanged120-tick gate; normal teardown13452,
+0 engine errors and0 forced-skip frames. There are280 original waiting-
+dialogue confirmations, no Start skip and no actor/HP/story/PC writes.
+Inactive PC1481 remains populated at phase0 and is not an error.
+
+Strict `doors151-scene30-long-verified.json` retains the continuous gate
+interval and state-aligned1050/9000/13320/13440 observations. The original
+short-budget rows stay blocked. This is one current authored chain/door
+completion, not normal-speed audiovisual parity, an all-scene result or
+the original #167 ACFD matching-image persistent reproduction/producer fix.
+
+The other four reported event-budget cases need state-aware classification,
+not an assumed VM hang. Samples show49/1 phase0 with changing control1/2
+and later phase2 reentry,51/26 already hands off to51/4 with phase0 and
+changing control1/2, and53/10 likewise has phase0 with control1/2.
+`doors151-event-budget-observations.json` preserves these distinctions.
+Neither their reason strings nor a longer arbitrary timeout prove a defect;
+combat/entry acceptance remains open and no predicate is weakened.
+
 ### Final directed-door inventory slice (#151, 2026-10-25)
 
 Release run1792988508566012-0 uses a frozen e9f0dbab image

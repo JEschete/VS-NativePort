@@ -9,6 +9,20 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #151/#149 now have one complete authored scene30->26 chain observation,
+  not just a short-budget block. Release1792989783417541-0 on runtime
+  961cc1e8/docs af1435ce uses z048-r006-d000,36000 ticks/speed8 and280
+  original waiting-dialogue confirmations. Scene30/32/17/PC233 is present
+  at1050; authored scene26 is active at40/21 by9000. Field control13320
+  persists through13440 (all121 frames ready40/21/control1/transition0/
+  event phase0), then teardown13452,0 errors/forced skips. The unchanged
+  120-tick gate passes; no story/HP/PC changes or Start skip occur.
+  This does not rewrite the older3600/9000 rows or prove original #167
+  matching-image history/producer, visual parity or all cutscenes.
+  Other event-budget labels are not proof of frozen VMs: their sampled
+  event phase is0 with changing control1/2, and one source entry already
+  hands off to its destination. Private `doors151-event-budget-observations`
+  and `doors151-scene30-long-verified.json` retain the exact states.
 - #151's final original410-record Release slice is now observed separately:
   frozen e9f0dbab exe a0294afe/PDB10b89faa,
   run1792988508566012-0, exact inventory indices591..1000 starting
