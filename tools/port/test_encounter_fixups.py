@@ -12,6 +12,25 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_room_subdivision_entries_share_the_existing_bounded_recursion(self):
+        owned = self.owned_items()
+        for identity, address in (("F00748", 0x80097AEC), ("F00749", 0x80097CF0)):
+            self.assertEqual(
+                owned[identity]["path"], r"Native\Engine\src\Render\RoomDraw.c"
+            )
+            self.assertIn(
+                ("BATTLE/BATTLE.PRG", address, identity),
+                copy_fixups.MODULE_FUNCTION_ENTRIES,
+            )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("RoomSubdivisionLimit(", source)
+        self.assertIn("memcpy(captured, vertices, sizeof captured)", source)
+        self.assertIn("Render_SubdivideRoomTriangle(vertices, subdivision", source)
+        self.assertIn("Render_SubdivideRoomQuad(vertices, subdivision", source)
+
     def test_room_coordinate_decoder_uses_the_live_owned_polygon_pipeline(self):
         self.assertEqual(
             self.owned_items()["F00746"]["path"],

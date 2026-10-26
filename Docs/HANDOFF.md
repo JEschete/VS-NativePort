@@ -9,6 +9,28 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F00748/F00749 now expose bounded typed triangle/quad subdivision
+  entries sharing the existing recursion. Original2EA3C.s:612/752
+  proves four recursive children plus three triangle edges, and four
+  quad children plus four triangle edges. Native material state is
+  explicit, levels are bounded0..3 by the source flags, and frame spans
+  are checked against the active native arena. Input/material capture
+  protects overlapping packet writes. The actual polygon queue uses
+  these entries; recursive arithmetic/order remains unchanged.
+  Red1/2 proves both missing ABIs. New9/2,349 covers every valid level:
+  triangle1/7/31/127 and quad1/8/36/148 packets, exact lengths/CLUT/page,
+  midpoint position/color/UVs, aliases, empty/short capacities, far/bias/
+  off-screen rejection and both original bindings.
+  Both hosts/full Debug/Release935/7,756,945 each,122 port/106 direct-CI
+  pass. Focused quality has1 existing native finding/0 new; default0/0,
+  baselines unchanged. Fixture screen-bound cleanup is224 (not240);
+  restoring it fixes the intermediate legacy clipping regression.
+  Two generations preserve311 files/repeat identically across748 outputs;
+  selective projects preserve the owner solution. Local cohort162/186,
+  24 gaps (10 C/C++ references,4 assembly-only,10 missing),3127 native
+  implementations/153 aliases separately. No new visible feature,
+  all-room/controller parity, C++ promotion or retirement claim.
+  Private `roomsubdiv42-*`; publication/exact CI are tracked on#42.
 - #42 F00746 now owns a bounded packed-coordinate decoder in RoomDraw.c,
   reused by the real polygon queue for both triangles and quads. Original
   2EA3C.s:506-544 loads three packed words, signed-byte deltas and a

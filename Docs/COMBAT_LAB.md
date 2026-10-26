@@ -415,6 +415,66 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Bounded native room subdivision entries (#42, 2026-10-26)
+
+F00748/F00749 (`func_80097AEC`/`func_80097CF0`, original2EA3C.s:612/
+752) now expose explicit native vertices, packet material and available
+frame bytes. They share the existing production recursive routines
+rather than duplicating the renderer or recreating the guest scratch
+stack. The real polygon queue calls the checked entries.
+
+The original two-bit group field limits requested subdivision to0..3.
+Native wrappers require that range, an active frame/ordering table and
+a capacity inside the native arena. Zero or insufficient capacity
+returns the existing full-buffer status without a partial packet.
+Native input vertices/material are captured before packet emission so
+overlapping inputs cannot be destroyed by the first packet clear.
+The material structure is native state, not an MPD disk layout.
+
+Original ordering is retained: triangle recursion has four recursive
+children and three edge triangles; quad recursion has four quad
+children and four edge triangles. Midpoint arithmetic, projection,
+depth bias, clipping, color/UV/CLUT/page and ordering-table insertion
+remain in the existing implementation. This restores typed entries,
+not previously absent visible subdivision.
+
+Evidence is parent70b5a8f6 plus this scoped worktree; private
+`roomsubdiv42-*` records source/dirty state, commands, protected files,
+binary hashes and outcomes:
+
+- Red `[room-subdivision]`:1 case/2 failed ABI assertions.
+- Final focused9 cases/2,349 assertions cover all valid levels:
+  triangle counts1/7/31/127 and quad totals1/8/36/148, including
+  exact triangle/quad packet composition and byte counts. Packet
+  walks validate each declared length against the remaining span.
+- Tests check midpoint position/color/UV goldens, native input
+  preservation and overlap capture, empty/short capacities with
+  untouched canaries, source far-plane/signed-bias/off-screen rejection,
+  and both typed original resident bindings/interior rejection.
+- Both x64 solution builds link both hosts. Full Debug/Release each
+  pass935 cases/7,756,945 assertions;122 port/audit and106 direct-script
+  CI controls pass. Focused quality retains1 pre-existing native
+  finding/0 new; default quality0 actionable/0 new, baselines unchanged.
+  Packet/material helper extraction repairs the new fixture-size
+  finding without dropping checks.
+- The first combined fixture run exposed a test-state leak: it reset
+  room screen bounds to240 lines rather than the renderer's224.
+  Correcting constructor/cleanup to224 restores the existing clipping
+  tests. No production clip expectation or baseline is changed.
+- Two native generations preserve311 maintained/owner/reference files
+  and repeat identically across748 outputs. Generated changes are
+  RoomGeometry.c/.h and ModulePointers.c. Only F00748/F00749 copied/
+  final_location catalog fields change. Selective Engine/Game/Tests
+  project outputs are stable and preserve the owner's dirty solution.
+- Final audit:4207 rows/3762 targets;24 gaps (10 C/C++ references,
+  4 assembly-only,10 missing listings),3127 implementations and153
+  aliases separately. Original cohort162/186; original C-backed135/145,
+  other27/41 complete.
+
+No controller/all-room visual parity, native authoring migration, C++
+promotion or compatibility retirement is inferred. Exact pushed-revision
+CI gates the public #42/#4 checklist advance.
+
 ### Shared bounded room-coordinate decoder (#42, 2026-10-26)
 
 F00746 (`func_8009797C`, original2EA3C.s:506-544) now has explicit

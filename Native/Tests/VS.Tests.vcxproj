@@ -129,6 +129,7 @@
     <ClCompile Include="src\RasterBoundsTests.cpp" />
     <ClCompile Include="src\ResultsRouletteTests.cpp" />
     <ClCompile Include="src\RoomLightingTests.cpp" />
+    <ClCompile Include="src\RoomSubdivisionTests.cpp" />
     <ClCompile Include="src\RoomTintTests.cpp" />
     <ClCompile Include="src\RoomTriggerMarkerTests.cpp" />
     <ClCompile Include="src\RoomVertexDecodeTests.cpp" />

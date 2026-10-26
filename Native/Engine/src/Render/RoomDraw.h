@@ -10,7 +10,9 @@ enum {
   kRoomSpatialDimensions = 3,
   kRoomGeometryGroupBytes = 64,
   kRoomTriangleCoordinateBytes = 12,
-  kRoomTriangleVertexCount = 3
+  kRoomTriangleVertexCount = 3,
+  kRoomQuadVertexCount = 4,
+  kRoomMaximumSubdivisionLevels = 3
 };
 typedef struct Field_RoomTint Field_RoomTint;
 
@@ -38,6 +40,14 @@ typedef struct Render_RoomVertex {
   uint16_t uv;
 } Render_RoomVertex;
 
+// Native packet material state, not an on-disk MPD record.
+typedef struct Render_RoomPolygonMaterial {
+  unsigned flags;
+  unsigned command;
+  unsigned clut;
+  unsigned page;
+} Render_RoomPolygonMaterial;
+
 #ifdef __cplusplus
 static_assert(sizeof(Render_RoomGeometryGroup) == kRoomGeometryGroupBytes);
 extern "C" {
@@ -56,6 +66,12 @@ void Render_DrawRoomGeometry(void* data, int mode);
 void Render_DecodeRoomPolygonVertices(
     const void* data, size_t size, unsigned coordinate_shift,
     Render_RoomVertex vertices[kRoomTriangleVertexCount]);
+int Render_SubdivideRoomTriangle(
+    const Render_RoomVertex vertices[kRoomTriangleVertexCount], int levels,
+    const Render_RoomPolygonMaterial* material, size_t available_bytes);
+int Render_SubdivideRoomQuad(
+    const Render_RoomVertex vertices[kRoomQuadVertexCount], int levels,
+    const Render_RoomPolygonMaterial* material, size_t available_bytes);
 int Render_IsRoomPolygonOnScreen(const Render_RoomScreenBounds* projected);
 void Render_InterpolateRoomVertexMidpoint(const Render_RoomVertex* first,
                                           const Render_RoomVertex* second,

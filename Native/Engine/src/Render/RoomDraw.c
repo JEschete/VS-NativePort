@@ -26,7 +26,7 @@ enum {
   kViewportHeight = 224,
   kDrawHeight = 240,
   kTriangleCorners = kRoomTriangleVertexCount,
-  kQuadCorners = 4,
+  kQuadCorners = kRoomQuadVertexCount,
   kQuadCommandFlag = 8,
   kVertexPacketWords = 3,
   kLastOrderingSlot = 2047,
@@ -333,12 +333,7 @@ static RoomVertex Midpoint(const RoomVertex* first, const RoomVertex* second) {
   return midpoint;
 }
 
-typedef struct RoomPolygonMaterial {
-  unsigned flags;
-  unsigned command;
-  unsigned clut;
-  unsigned page;
-} RoomPolygonMaterial;
+typedef Render_RoomPolygonMaterial RoomPolygonMaterial;
 
 typedef struct ProjectedRoomPolygon {
   const RoomVertex* vertices;
@@ -484,6 +479,49 @@ static int SubdivideRoomQuad(const RoomVertex vertices[kQuadCorners],
   return emitted;
 }
 
+static uintptr_t RoomSubdivisionLimit(
+    const Render_RoomVertex* vertices, int levels,
+    const Render_RoomPolygonMaterial* material, size_t available_bytes) {
+  const uintptr_t base =
+      (uintptr_t)Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
+  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
+  if (vertices == NULL || material == NULL || levels < 0 ||
+      levels > kRoomMaximumSubdivisionLevels || base == 0 || cursor < base ||
+      cursor - base > kPrimitiveBufferBytes ||
+      available_bytes > kPrimitiveBufferBytes - (cursor - base) ||
+      Render_frameScratch.orderingTable == NULL) {
+    Core_Debugf("render",
+                "Room subdivision requires valid vertices, material, depth and "
+                "frame span");
+    abort();
+  }
+  return cursor + available_bytes;
+}
+
+// decomp: func_80097AEC (src/BATTLE/BATTLE.PRG/2EA3C.s:612-746).
+int Render_SubdivideRoomTriangle(
+    const Render_RoomVertex vertices[kRoomTriangleVertexCount], int levels,
+    const Render_RoomPolygonMaterial* material, size_t available_bytes) {
+  const uintptr_t limit =
+      RoomSubdivisionLimit(vertices, levels, material, available_bytes);
+  RoomVertex captured[kTriangleCorners];
+  const RoomPolygonMaterial captured_material = *material;
+  memcpy(captured, vertices, sizeof captured);
+  return SubdivideRoomTriangle(captured, levels, &captured_material, limit);
+}
+
+// decomp: func_80097CF0 (src/BATTLE/BATTLE.PRG/2EA3C.s:752).
+int Render_SubdivideRoomQuad(
+    const Render_RoomVertex vertices[kRoomQuadVertexCount], int levels,
+    const Render_RoomPolygonMaterial* material, size_t available_bytes) {
+  const uintptr_t limit =
+      RoomSubdivisionLimit(vertices, levels, material, available_bytes);
+  RoomVertex captured[kQuadCorners];
+  const RoomPolygonMaterial captured_material = *material;
+  memcpy(captured, vertices, sizeof captured);
+  return SubdivideRoomQuad(captured, levels, &captured_material, limit);
+}
+
 // decomp: func_8009797C (src/BATTLE/BATTLE.PRG/2EA3C.s:506-544).
 // Capturing all three packed words preserves source loads under native
 // aliasing.
@@ -598,9 +636,13 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
                                           .command = data[kRoomCommandOffset],
                                           .clut = clut,
                                           .page = page};
+    const size_t available_bytes =
+        (size_t)(limit - (uintptr_t)Render_frameScratch.primitiveCursor);
     return corners == kTriangleCorners
-               ? SubdivideRoomTriangle(vertices, subdivision, &material, limit)
-               : SubdivideRoomQuad(vertices, subdivision, &material, limit);
+               ? Render_SubdivideRoomTriangle(vertices, subdivision, &material,
+                                              available_bytes)
+               : Render_SubdivideRoomQuad(vertices, subdivision, &material,
+                                          available_bytes);
   }
   depth += (int16_t)(flags >> kPackedCoordinateBits);
   if (depth < room_near_depth || depth >= room_far_depth ||

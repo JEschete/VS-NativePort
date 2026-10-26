@@ -16,20 +16,6 @@ int Render_ProjectAndDecodeRoomPolygon()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_80097AEC (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Render_SubdivideRoomTriangle()
-{
-    VS_UNPORTED("Render::SubdivideRoomTriangle");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80097CF0 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Render_SubdivideRoomQuad()
-{
-    VS_UNPORTED("Render::SubdivideRoomQuad");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800980F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
 int Render_LinkRoomPolygonByDepth()
 {

@@ -7,9 +7,9 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **26** (26 stubs and 0 partial implementations).
+- Open native entries: **24** (24 stubs and 0 partial implementations).
 - Matching C/C++ reference bodies located: **10**.
-- Assembly located, but no matching C body located: **6**.
+- Assembly located, but no matching C body located: **4**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
 [ASSEMBLY_GAPS.csv](ASSEMBLY_GAPS.csv) contains **every open entry**, with its
@@ -29,8 +29,6 @@ and instantiation bindings rather than counted as missing C functions.
 | F00766 | `Field::CallRoomEntryPoint` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1770` |
 | F00745 | `Render::DrawRoomGeometryPolygons` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:104` |
 | F00747 | `Render::ProjectAndDecodeRoomPolygon` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:548` |
-| F00748 | `Render::SubdivideRoomTriangle` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:612` |
-| F00749 | `Render::SubdivideRoomQuad` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:752` |
 | F00752 | `Render::LinkRoomPolygonByDepth` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1036` |
 
 ## Assembly not locally extracted
