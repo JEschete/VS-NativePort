@@ -9,6 +9,21 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42's relocation constructors F04184/F04185/F04186 are now owned in the
+  existing MotionRequests API, reaching117/186 original entries complete and
+  69 remaining (28 C/C++ references,31 assembly-only,10 not located).
+  Original4A0A8.c:490-549 verifies four/eight route bytes, narrowed facing,
+  teleport idle admission/full reaction-byte reset, companion slot>=2 and
+  travel pose1/4 preserving reaction/drawn bits. Existing consuming FSMs and
+  command21/22/23 callers are retained; no raw record offsets are introduced.
+  Red controls fail17/69 assertions against the stubs. Final controls add
+  special/self/cyclic companion boundaries, busy-parent isolation and aliased
+  inputs; full Debug/Release777 cases/3,390,932 assertions pass with88 port
+  contracts and0 new focused compile findings. Two generations preserve300
+  protected paths and repeat identically, changing only Movement.c/.h.
+  This verifies request construction and native caller contracts, not full
+  teleport/travel gameplay, whole motion-state promotion or retirement.
+  Publication/CI remain recorded on#42; private `relocation42-*` evidence.
 - New #184 is a confirmed cyclic-list defect, not assumed to share #167/#26's
   producer. Current frozen Debug1792970616163501-0 completes the132-case prefix
   with97 passed/34 blocked/one failed: script114 z046-r000-d000 enters scene30
@@ -34,8 +49,8 @@ verification of the current worktree.
   limits. The isolated original-game setup has no save/state near Gravity;
   owner unavailable, so #160 remains blocked on original table1 runtime content
   rather than a guessed texture/selector change.
-- #42 now has114/186 original entries implemented and72 remaining
-  (31 C/C++ references,31 assembly-only,10 listings not located). F00995 and
+- The preceding #42 sound milestone reached114/186 entries with72 remaining.
+  F00995 and
   F01007 are two catalog occurrences of one function, func_800AEEC4.
   Its owned C++ actor-state leaf restores the original void(actor*) ABI and
   centralizes the already-working actor/companion inline interpolation.
@@ -97,7 +112,7 @@ verification of the current worktree.
   and fresh-session reset remain active.
   Function/field notes and generated assembly inventories are reconciled:
   F01792's milestone reached112/186 entries; the sound leaf above advances
-  current completion to114/186 with72 remaining. No whole
+  current completion first to114 and now117/186 with69 remaining. No whole
   AI-state C++ promotion or compatibility retirement is claimed. Exact fixing
   publication/CI and closure are tracked in#141/#42. Evidence
   `ai-target-memory-*` in session files.
@@ -126,7 +141,7 @@ verification of the current worktree.
   numbers are excluded too. #76 is closed at the owner's explicit request:
   shared-origin repair e939db22 and its published evidence stand, and any new
   observed particle defect gets a separate concrete issue.
-  #18/#42/#148 retain distinct retirement/import,72-native-gap and semantic-naming
+  #18/#42/#148 retain distinct retirement/import,69-native-gap and semantic-naming
   work. Current #80 conformance and #141 acquisition evidence are above.
   #149/#151 have delivered logging/playback/inventory tooling but are not
   all-scene/all-door certification. #160/#167 are not established as repaired

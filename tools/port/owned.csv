@@ -1,4 +1,7 @@
 id,kind,name,path,header,since,notes
+F04184,function,Actors_BeginTeleport,Native\Game\src\Actors\MotionRequests.cpp,Native\Game\src\Actors\MotionRequests.h,2026-10-25,4A0A8.c:490-520 original assembly admits idle reactions and propagates the packed tile/facing to companions
+F04185,function,Actors_BeginTileTravel,Native\Game\src\Actors\MotionRequests.cpp,Native\Game\src\Actors\MotionRequests.h,2026-10-25,4A0A8.c:522-549 shared assembly copies the complete route and replaces pose bits with tile-travel state1
+F04186,function,Actors_BeginTimedTravel,Native\Game\src\Actors\MotionRequests.cpp,Native\Game\src\Actors\MotionRequests.h,2026-10-25,4A0A8.c:531-549 shared assembly copies the complete route and replaces pose bits with timed-travel state4
 F00995,function,Audio_UpdateActorSoundTransition,Native\Game\src\Actors\SoundOverrides.cpp,Native\Game\src\Actors\SoundOverrides.h,2026-10-25,Declaration occurrence of func_800AEEC4; shared typed actor-state interpolation leaf with F01007
 F01007,function,Audio_UpdateActorSoundTransition,Native\Game\src\Actors\SoundOverrides.cpp,Native\Game\src\Actors\SoundOverrides.h,2026-10-25,44F14.c:886 and original MIPS preserve unsigned pan/volume values and timer clamp; existing actor/companion inline paths share the leaf
 F01792,function,Battle_Ai_RememberAiActionTarget,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,Native\Game\src\Battle\Ai\PlanningPrimitives.h,2026-10-25,7BDD4.s:585-614 first-ranked target and full model tile with900-frame memory; native typed fields preserve no-candidate and settings guards

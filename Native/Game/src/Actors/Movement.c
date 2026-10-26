@@ -3191,21 +3191,3 @@ void Actors_UpdateActorAuxiliaryMotion(Field_GimmickInstance* arg0)
     }
 }
 
-// decomp: BATTLE.PRG func_800B6580 (src/BATTLE/BATTLE.PRG/4A0A8.c:490) [inline-asm: not yet ported]
-void Actors_BeginTeleport(int, int*, int)
-{
-    VS_UNPORTED("Actors::BeginTeleport");
-}
-
-// decomp: BATTLE.PRG func_800B65E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:522) [inline-asm: not yet ported]
-void Actors_BeginTileTravel(int, int*, int)
-{
-    VS_UNPORTED("Actors::BeginTileTravel");
-}
-
-// decomp: BATTLE.PRG func_800B65F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:531) [inline-asm: not yet ported]
-void Actors_BeginTimedTravel(int, int*, int)
-{
-    VS_UNPORTED("Actors::BeginTimedTravel");
-}
-

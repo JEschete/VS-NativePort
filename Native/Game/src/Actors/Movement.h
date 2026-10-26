@@ -138,8 +138,5 @@ void Actors_UpdateActorRoute(int arg0, Actors_ActorRecord* arg1);
 int Actors_ActorJumpAnimationProfile(Actors_ActorRecord* actor);
 void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor);
 void Actors_UpdateActorAuxiliaryMotion(Field_GimmickInstance* arg0);
-void Actors_BeginTeleport(int, int*, int);
-void Actors_BeginTileTravel(int, int*, int);
-void Actors_BeginTimedTravel(int, int*, int);
 
 #endif // VS_ACTORS_MOVEMENT_H_DECLS

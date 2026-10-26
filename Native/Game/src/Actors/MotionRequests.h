@@ -17,6 +17,9 @@ void Actors_BeginAirborneTileJump(int actor_id, int* target, int speed,
                                   int facing);
 void Actors_BeginNavigationJump(int actor_id, int* target, int speed,
                                 int facing);
+void Actors_BeginTeleport(int actor_id, int* target, int facing);
+void Actors_BeginTileTravel(int actor_id, int* target, int facing);
+void Actors_BeginTimedTravel(int actor_id, int* target, int facing);
 void Actors_SaveActorGroundedTransform(Actors_ActorRecord* actor);
 void Actors_TurnNavigationActor(int actor_id, int facing);
 void Actors_TurnActorAtSpeed(int actor_id, int16_t facing, int speed);

@@ -7,6 +7,7 @@
 #include <bit>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <iterator>
 
 extern "C" {
@@ -17,6 +18,7 @@ extern "C" {
 
 namespace {
 enum class MotionMode : u_char { kGround = 2, kFlight = 3, kVector = 4 };
+enum class TravelPose : u_char { kTile = 1, kTimed = 4 };
 constexpr int kSmallTurnRate = 32;
 constexpr int kLargeTurnRate = 128;
 constexpr unsigned kLargeActorRadius = 128;
@@ -38,12 +40,27 @@ std::int16_t Half(int value) {
   return std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(value));
 }
 
-u_char* JumpTarget(int* target) {
+u_char* PackedTarget(int* target) {
   if (target == nullptr) {
-    Core_Debugf("actors", "Jump request requires a packed tile target");
+    Core_Debugf("actors", "Motion request requires a packed target");
     std::abort();
   }
   return reinterpret_cast<u_char*>(target);
+}
+
+SVECTOR Route(int* target, int facing, bool tile_only) {
+  SVECTOR route{};
+  std::memcpy(&route, PackedTarget(target),
+              tile_only ? sizeof(int) : sizeof(route));
+  route.pad = Half(facing);
+  return route;
+}
+
+void BeginTravel(int actor_id, int* target, int facing, TravelPose pose) {
+  auto& actor = Actor(actor_id);
+  const auto route = Route(target, facing, false);
+  actor.routeTarget = route;
+  actor.instance.poseState = static_cast<u_char>(pose);
 }
 
 void BeginJump(Actors_ActorRecord& actor, u_char* target, int speed, int facing,
@@ -126,7 +143,7 @@ void Actors_BeginTileJump(int actor_id, int* target, int speed, int facing) {
   } else if (actor.instance.motionLocked) {
     Actors_BeginNavigationJump(actor_id, target, speed, facing);
   } else {
-    auto* packed_target = JumpTarget(target);
+    auto* packed_target = PackedTarget(target);
     actor.jumpProfile = 1;
     BeginJump(actor, packed_target, speed, facing, "plain");
   }
@@ -136,7 +153,7 @@ void Actors_BeginTileJump(int actor_id, int* target, int speed, int facing) {
 void Actors_BeginAirborneTileJump(int actor_id, int* target, int speed,
                                   int facing) {
   auto& actor = Actor(actor_id);
-  auto* packed_target = JumpTarget(target);
+  auto* packed_target = PackedTarget(target);
   actor.instance.motionLocked = 0;
   actor.instance.isJumping = 1;
   BeginJump(actor, packed_target, speed, facing, "airborne");
@@ -146,12 +163,37 @@ void Actors_BeginAirborneTileJump(int actor_id, int* target, int speed,
 void Actors_BeginNavigationJump(int actor_id, int* target, int speed,
                                 int facing) {
   auto& actor = Actor(actor_id);
-  auto* packed_target = JumpTarget(target);
+  auto* packed_target = PackedTarget(target);
   actor.instance.motionLocked = 1;
   actor.instance.isJumping = 1;
   Actors_PlayActorAnimation(actor_id, kNavigationJumpAnimation, 0,
                             kNavigationJumpBlendFrames);
   BeginJump(actor, packed_target, speed, facing, "navigation");
+}
+
+// func_800B6580, BATTLE/BATTLE.PRG/4A0A8.c:490-520.
+void Actors_BeginTeleport(int actor_id, int* target, int facing) {
+  auto& actor = Actor(actor_id);
+  const auto route = Route(target, facing, true);
+  if (actor.instance.reactionState != 0) return;
+  actor.instance.turnFrames = 0;
+  actor.routeTarget = route;
+  actor.instance.reactionState = 1;
+  actor.instance.poseState = 0;
+  actor.instance.wasDrawn = 0;
+  if (actor.companionSlot >= 2) {
+    Actors_BeginTeleport(actor.companionSlot, target, facing);
+  }
+}
+
+// func_800B65E8, BATTLE/BATTLE.PRG/4A0A8.c:522-549 shared entry.
+void Actors_BeginTileTravel(int actor_id, int* target, int facing) {
+  BeginTravel(actor_id, target, facing, TravelPose::kTile);
+}
+
+// func_800B65F4, BATTLE/BATTLE.PRG/4A0A8.c:531-549 shared entry.
+void Actors_BeginTimedTravel(int actor_id, int* target, int facing) {
+  BeginTravel(actor_id, target, facing, TravelPose::kTimed);
 }
 
 // decomp: func_800B6500 (src/BATTLE/BATTLE.PRG/4A0A8.c:445).

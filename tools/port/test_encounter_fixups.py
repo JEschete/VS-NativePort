@@ -10,11 +10,33 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
-    def test_actor_sound_transition_owns_both_catalog_occurrences_and_callers(self):
+    @staticmethod
+    def owned_items():
         with Path(__file__).resolve().with_name("owned.csv").open(
             encoding="utf-8", newline=""
         ) as stream:
-            owned = {row["id"]: row for row in csv.DictReader(stream)}
+            return {row["id"]: row for row in csv.DictReader(stream)}
+
+    def test_relocation_entries_own_complete_existing_motion_requests(self):
+        owned = self.owned_items()
+        names = {
+            "F04184": "Actors_BeginTeleport",
+            "F04185": "Actors_BeginTileTravel",
+            "F04186": "Actors_BeginTimedTravel",
+        }
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Game\src\Actors\Movement.c").read_text(
+            encoding="utf-8"
+        )
+        for identifier, name in names.items():
+            self.assertEqual(owned[identifier]["name"], name)
+            self.assertEqual(
+                owned[identifier]["path"], r"Native\Game\src\Actors\MotionRequests.cpp"
+            )
+            self.assertNotIn(f"void {name}(", source)
+
+    def test_actor_sound_transition_owns_both_catalog_occurrences_and_callers(self):
+        owned = self.owned_items()
         for identifier in ("F00995", "F01007"):
             self.assertEqual(owned[identifier]["name"], "Audio_UpdateActorSoundTransition")
             self.assertEqual(
@@ -44,10 +66,7 @@ class EncounterFixupTests(unittest.TestCase):
         aliases = native_views.NATIVE_FIELD_ALIASES["T00532"]
         self.assertEqual(aliases["rememberedTargetTile"], 0x3C)
         self.assertEqual(aliases["targetMemoryFrames"], 0x40)
-        with Path(__file__).resolve().with_name("owned.csv").open(
-            encoding="utf-8", newline=""
-        ) as stream:
-            owned = {row["id"]: row for row in csv.DictReader(stream)}
+        owned = self.owned_items()
         self.assertEqual(owned["F01792"]["name"], "Battle_Ai_RememberAiActionTarget")
         self.assertEqual(
             owned["F01792"]["path"],

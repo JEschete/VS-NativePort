@@ -349,6 +349,38 @@ audio/actor-state C++ promotion and compatibility retirement are not claimed.
 Local `actor-sound-transition-*` commands, ABI-red output and proof reports
 remain in session evidence; publication and exact CI are recorded on#42.
 
+### Relocation request constructors (#42, 2026-10-25)
+
+F04184/F04185/F04186 now use the existing owned MotionRequests API instead of
+three no-op stubs. Original4A0A8.c:490-549 and its consumers establish relocation
+requests, despite a misleading turn description in the alternate reference.
+The original command21/22/23 callers and teleport/travel update/reset paths
+are unchanged.
+
+Teleport accepts only reaction0, clears turn frames and the complete original
+reaction/pose/drawn byte, stores the four-byte packed tile plus zero/facing
+tail, then propagates to companions>=2. Setting the reaction before recursion
+preserves the original self/cyclic-link termination. A busy parent does not
+start its companion; special slots0/1 are not traversed. Tile/timed travel
+capture all eight route bytes before replacing facing and setting pose1/4,
+preserving reaction/drawn bits and existing turn frames. Signed16-bit
+boundaries, packed high bytes and aliased target storage are retained.
+
+The initial four red cases fail17/69 assertions against the old stubs. Final
+controls additionally cover companion-slot boundaries, busy-parent isolation
+and both route aliases; full Debug/Release777 cases/3,390,932 assertions and88
+port contracts pass, with0 new focused compile findings. Static controls check
+the original adjacent command words and eight-byte vector contract. Two real
+copier runs preserve300 protected files and repeat identically; only generated
+Movement.c/.h changes. No project/source-file additions or owner-solution
+rewrites are needed.
+
+The original tracker advances only these three IDs to117/186,69 remaining.
+This is source-backed constructor/component verification, not acceptance of
+every teleport/travel animation, AI action or scene. No whole actor-motion C++
+promotion or compatibility retirement is claimed. Exact private commands and
+reports use `relocation42-*`; publication and CI are recorded on#42.
+
 ### Ashley testing profiles
 
 The **ASHLEY** row selects `prologue`, `post-prologue`, `post-minotaur`,
