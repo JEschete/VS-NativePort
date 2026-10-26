@@ -42,6 +42,9 @@ int Core_Math_SquaredDistanceWithHeightOffsets(int16_t* source, int16_t* target,
 
 unsigned int Core_Math_SquaredVectorLength(int delta_x, int delta_y,
                                            int delta_z);
+void Core_Math_InverseSquareRootParts(int value, int* mantissa, int* exponent);
+unsigned int Core_Math_NormalizeVectorRegisters(const VECTOR* input,
+                                                VECTOR* output);
 
 #ifdef __cplusplus
 }

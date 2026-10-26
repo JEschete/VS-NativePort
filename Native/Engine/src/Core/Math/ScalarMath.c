@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "Core/Math/FixedPoint.h"
 #include "Core/Math/Vector.h"
 #include "Legacy/Psx.h"
 
@@ -261,5 +262,98 @@ unsigned int Core_Math_SquaredVectorLength(int delta_x, int delta_y,
   for (unsigned axis = 0; axis < kVectorDimensions; ++axis) {
     squared += (unsigned int)(components[axis] * components[axis]);
   }
+  return squared;
+}
+
+static int32_t SignedWord(uint32_t bits) {
+  int32_t value;
+  memcpy(&value, &bits, sizeof value);
+  return value;
+}
+
+static unsigned CountLeadingSignBits(uint32_t value) {
+  const uint32_t bits =
+      value & (UINT32_C(1) << (kWordBits - 1)) ? ~value : value;
+  unsigned leading = 0;
+  for (uint32_t mask = UINT32_C(1) << (kWordBits - 1);
+       mask != 0 && (bits & mask) == 0; mask >>= 1) {
+    ++leading;
+  }
+  return leading;
+}
+
+static int ReadReciprocalRoot(uint32_t value, unsigned even_leading) {
+  enum {
+    // D_80040D98 lies inside the existing 80040A14 resident lookup import.
+    kReciprocalRootOffset = 900,
+    kNormalizedRootBias = 64,
+    kRootEntryBytes = sizeof(int16_t)
+  };
+  if (Core_Math_kArcTangentTable[kReciprocalRootOffset] != 0 ||
+      Core_Math_kArcTangentTable[kReciprocalRootOffset + 1] !=
+          ((1u << kFixedFractionBits) >> CHAR_BIT)) {
+    Core_Debugf("math",
+                "Source normalization requires the resident root table");
+    abort();
+  }
+  const int32_t normalized =
+      even_leading >= kNormalizedIndexShift
+          ? SignedWord(value << ((even_leading - kNormalizedIndexShift) &
+                                 (kWordBits - 1)))
+          : SignedWord(value) >>
+                ((kNormalizedIndexShift - even_leading) & (kWordBits - 1));
+  const int offset = kReciprocalRootOffset +
+                     (normalized - kNormalizedRootBias) * kRootEntryBytes;
+  if (offset < 0 ||
+      offset + kRootEntryBytes > (int)sizeof Core_Math_kArcTangentTable) {
+    Core_Debugf("math", "Source reciprocal-root index %d is outside the import",
+                normalized);
+    abort();
+  }
+  return Core_Math_WrapSigned16((uint32_t)Core_Math_kArcTangentTable[offset] |
+                                (uint32_t)Core_Math_kArcTangentTable[offset + 1]
+                                    << CHAR_BIT);
+}
+
+// decomp: InvSquareRoot (src/SLUS_010.40/32154.s:79-105).
+void Core_Math_InverseSquareRootParts(int value, int* mantissa, int* exponent) {
+  if (mantissa == NULL || exponent == NULL) {
+    Core_Debugf("math", "Source reciprocal root requires both output pointers");
+    abort();
+  }
+  const unsigned leading = CountLeadingSignBits((uint32_t)value);
+  // Zero and -1 branch to the original return without touching either output.
+  if (leading == kWordBits) return;
+  const unsigned even_leading = leading & ~1u;
+  const int sample = ReadReciprocalRoot((uint32_t)value, even_leading);
+  *exponent = (int)((kWordBits - 1 - even_leading) >> 1);
+  *mantissa = sample;
+}
+
+// decomp: func_80041AF4 (src/SLUS_010.40/32154.s:162-205).
+// This source-shaped kernel is separate from the accepted wide native
+// normalizer.
+unsigned int Core_Math_NormalizeVectorRegisters(const VECTOR* input,
+                                                VECTOR* output) {
+  if (input == NULL || output == NULL) {
+    Core_Debugf("math",
+                "Source normalization requires input and output vectors");
+    abort();
+  }
+  const int x = Core_Math_WrapSigned16((uint32_t)input->vx);
+  const int y = Core_Math_WrapSigned16((uint32_t)input->vy);
+  const int z = Core_Math_WrapSigned16((uint32_t)input->vz);
+  const unsigned squared = Core_Math_SquaredVectorLength(x, y, z);
+  if (squared == 0) {
+    output->vx = output->vy = output->vz = 0;
+    return 0;
+  }
+  const unsigned even_leading = CountLeadingSignBits(squared) & ~1u;
+  const int sample = ReadReciprocalRoot(squared, even_leading);
+  const unsigned exponent =
+      ((kWordBits - 1 - even_leading) >> 1) & (kWordBits - 1);
+  output->vx = (x * sample) >> exponent;
+  output->vy = (y * sample) >> exponent;
+  output->vz = (z * sample) >> exponent;
   return squared;
 }

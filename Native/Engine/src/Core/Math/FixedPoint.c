@@ -109,17 +109,3 @@ long Core_Math_ArcTangent2(long y, long x)
     return c;
 }
 
-// decomp: SLUS_010.40 InvSquareRoot (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
-int Core_Math_InverseSquareRootParts()
-{
-    VS_UNPORTED("Core::Math::InverseSquareRootParts");
-    return 0;
-}
-
-// decomp: SLUS_010.40 func_80041AF4 (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
-int Core_Math_NormalizeVectorRegisters()
-{
-    VS_UNPORTED("Core::Math::NormalizeVectorRegisters");
-    return 0;
-}
-

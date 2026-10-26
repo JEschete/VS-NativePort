@@ -415,6 +415,70 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Separate source-compatible normalization entries (#42, 2026-10-26)
+
+F03405 (`InvSquareRoot`, original32154.s:79-105) now takes an explicit
+native input and mantissa/exponent output pointers. F03414
+(`func_80041AF4`,32154.s:162-205) takes const input/output native vectors
+and returns the squared low word. Both are owned ScalarMath.c
+implementations, not guest register continuations.
+
+This scope deliberately preserves the accepted full-range native
+normalizer from #22. The owner was unavailable for the behavior question,
+so the conservative implementation adds separate source-shaped APIs
+without rerouting existing `Core_Gte_VectorNormal` or SDK-facing aliases.
+Source quantization is not an authorization to narrow full-range native
+inputs or weaken those earlier tests. Any future caller adoption remains
+an explicit behavior decision, not something inferred from clearing stubs.
+
+The original mantissa table at80040D98 is already inside the existing
+80040A14/1296-byte resident lookup import; no new table/payload is copied.
+All192 ordinary halfwords in the read-only resident image match
+`floor(sqrt(2^30 / index))`, index64..255. Source leading-sign counts,
+even normalization, signed shifts, negative prefix lookups and signed
+halfwords are retained. Missing resident data or out-of-range accesses
+are explicit logged errors. Zero/-1 reciprocal inputs leave both outputs
+unchanged; source-zero vectors write zero coordinates without requiring
+unused table data. Output alias ordering and vector padding are preserved.
+Squared sums use the existing native low-word helper; original CPU
+overflow traps and mutable GTE register side effects are not emulated.
+
+Evidence is parentd2fcbd49 plus this scoped worktree. Private
+`normalization-source-contract.json` records the read-only source/table
+study; `sourcenorm42-*` records commands, source/dirty state, protected
+files, binary hashes and outcomes:
+
+- Red `[source-normalization]`:2 cases/2 failed assertions prove the
+  missing native input/output signatures.
+- New13 cases/660,061 assertions cover192 ordinary entries across12
+  binary scales, small/signed-prefix inputs, zero/-1 unchanged outputs,
+  output-pointer alias order, all65,536 signed-halfword components and
+  independent high bits, vector aliases/padding, unchanged lookup data
+  and both typed original bindings/rejected interior aliases.
+- Actual component calls for4000,1000,0 produce original quantized
+  4000,1000,0 while the unchanged native API retains3973,993,0.
+  The full-range native INT32_MAX vector still produces2364 components.
+  These are separate contract checks, not proof of a gameplay defect.
+- Both x64 solution builds link both hosts. Full Debug/Release each
+  pass909 cases/7,147,615 assertions;119 port/audit and103 direct-script
+  CI controls pass. Focused/default quality is0 actionable/0 new with
+  unchanged baselines. Initial magic-number, optional-oracle and fixture
+  size findings are repaired through explicit contracts and smaller cases;
+  all numeric expected outputs/tuples remain covered.
+- Two native generations preserve309 maintained/owner/reference/data
+  files and repeat identically across749 outputs. Generated changes are
+  FixedPoint.c/.h and ModulePointers.c. Only the two entries'
+  copied/final_location ledger fields change. Selective Engine/Game/Tests
+  project outputs are stable and preserve the owner's dirty solution.
+- Final audit:4207 rows/3762 targets;29 gaps (10 C/C++ references,
+  9 assembly-only,10 missing listings),3124 implementations and151
+  aliases separately. Original cohort157/186; original C-backed135/145,
+  other22/41 complete.
+
+No gameplay caller is rerouted and no full GTE parity, live combat,
+C++ promotion, native asset migration or compatibility retirement is
+claimed. Exact revision CI gates the public #42/#4 checklist advance.
+
 ### Shared resident rotation trig pair (#42, 2026-10-26)
 
 F03399 (`func_80041104`, original resident31724.s:147-211) is redirected

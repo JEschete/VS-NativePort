@@ -12,6 +12,23 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_source_root_and_normalization_keep_the_wide_native_api_separate(self):
+        owned = self.owned_items()
+        for identity in ("F03405", "F03414"):
+            self.assertEqual(
+                owned[identity]["path"],
+                r"Native\Engine\src\Core\Math\ScalarMath.c",
+            )
+        for address, identity in ((0x80041A1C, "F03405"), (0x80041AF4, "F03414")):
+            self.assertIn(
+                ("SLUS_010.40", address, identity),
+                copy_fixups.MODULE_FUNCTION_ENTRIES,
+            )
+        self.assertEqual(
+            copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03411"],
+            ("Core_Gte_VectorNormal", r"Native\Engine\src\Core\Gte.cpp"),
+        )
+
     def test_resident_rotation_pair_redirects_to_the_existing_typed_kernel(self):
         self.assertEqual(
             copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03399"],

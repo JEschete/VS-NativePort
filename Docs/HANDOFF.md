@@ -9,6 +9,32 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F03405/F03414 now expose separately typed source reciprocal-root
+  parts and vector normalization in ScalarMath.c. Owner was unavailable
+  for the contract question; the conservative choice preserves #22's
+  accepted full-range native normalizer and all existing SDK-facing
+  redirects, with no gameplay caller rerouted. Original32154.s:79/162
+  supplies leading-sign counts, signed16 SQR/GPF components, imported
+  root/prefix lookups and output ordering. All192 ordinary reciprocal
+  entries match the integer formula in the read-only resident image.
+  Zero/-1 parts preserve outputs; source-zero vectors need no table.
+  Active lookups validate the existing resident import and bounds.
+  Red2/2 proves both old missing ABIs; new13/660,061 covers all ordinary
+  entries/scales, signed prefixes, every signed halfword/high bits,
+  aliases/padding, immutable lookup data and both original bindings.
+  Actual unit calls distinguish source4000,1000 from native3973,993
+  and retain native full-range2364 components. Both hosts/full
+  Debug/Release909/7,147,615 each,119 port/103 direct-CI and focused/
+  default0-new quality pass with unchanged baselines. Oracle guards/
+  fixture splitting repair initial findings without weakening outputs.
+  Two generations preserve309 files/repeat identically; selective
+  Engine/Game/Tests projects preserve the owner solution.
+  Local cohort157/186,29 gaps (10 C/C++ references,9 assembly-only,
+  10 missing); implementations3124/aliases151 separately.
+  No gameplay rerouting, original CPU overflow traps/register state,
+  live combat, C++ promotion or compatibility-retirement claim.
+  Private `sourcenorm42-*`/`normalization-source-contract.json`;
+  scoped publication/exact CI are tracked on#42.
 - #42 F03399 is a proven alias of the existing typed rotation trig-pair
   kernel, not another native math implementation. All63 instructions/
   eight octant blocks in resident31724.s:147-211 match BATTLE2EA3C.s

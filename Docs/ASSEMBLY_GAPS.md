@@ -7,9 +7,9 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **31** (31 stubs and 0 partial implementations).
+- Open native entries: **29** (29 stubs and 0 partial implementations).
 - Matching C/C++ reference bodies located: **10**.
-- Assembly located, but no matching C body located: **11**.
+- Assembly located, but no matching C body located: **9**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
 [ASSEMBLY_GAPS.csv](ASSEMBLY_GAPS.csv) contains **every open entry**, with its
@@ -26,8 +26,6 @@ and instantiation bindings rather than counted as missing C functions.
 
 | ID | Native name | Original source |
 | --- | --- | --- |
-| F03405 | `Core::Math::InverseSquareRootParts` | `resources\rood-reverseWin\src\SLUS_010.40\32154.s:79` |
-| F03414 | `Core::Math::NormalizeVectorRegisters` | `resources\rood-reverseWin\src\SLUS_010.40\32154.s:162` |
 | F00766 | `Field::CallRoomEntryPoint` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1770` |
 | F00745 | `Render::DrawRoomGeometryPolygons` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:104` |
 | F00746 | `Render::DecodeRoomPolygonVertices` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:506` |

@@ -57,7 +57,5 @@ VECTOR* Core_Math_ShortVectorToFixed(VECTOR* arg0, SVECTOR* arg1);
 void Core_Math_NormalizeFixedVector(VECTOR* arg0, VECTOR* arg1);
 int Core_Math_SplitDecimalDigit(int value);
 long Core_Math_ArcTangent2(long y, long x);
-int Core_Math_InverseSquareRootParts();
-int Core_Math_NormalizeVectorRegisters();
 
 #endif // VS_CORE_MATH_FIXEDPOINT_H_DECLS

@@ -144,6 +144,7 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\SfxBankSelectionTests.cpp" />
+    <ClCompile Include="src\SourceNormalizationTests.cpp" />
     <ClCompile Include="src\SpecialTerrainTests.cpp" />
     <ClCompile Include="src\SphereTerrainTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
