@@ -3,6 +3,7 @@
 
 #include <limits.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "Core/Math/Vector.h"
@@ -33,8 +34,12 @@ int Core_Math_MultiplyFixed(int left, int right) {
   return result;
 }
 
-// decomp: SLUS_010.40 func_80041C68 (src/SLUS_010.40/32154.s:280).
-void Core_Math_MultiplyMatrixIntoRight(MATRIX* left, MATRIX* right) {
+static void MultiplyRotationMatrices(const MATRIX* left, const MATRIX* right,
+                                     MATRIX* output) {
+  if (left == NULL || right == NULL || output == NULL) {
+    Core_Debugf("math", "Rotation matrix product requires all matrices");
+    abort();
+  }
   const MATRIX first = *left;
   const MATRIX second = *right;
   for (int row = 0; row < kVectorDimensions; ++row) {
@@ -50,9 +55,20 @@ void Core_Math_MultiplyMatrixIntoRight(MATRIX* left, MATRIX* right) {
       } else if (product < INT16_MIN) {
         product = INT16_MIN;
       }
-      right->m[row][column] = (int16_t)product;
+      output->m[row][column] = (int16_t)product;
     }
   }
+}
+
+// decomp: SLUS_010.40 func_80041C68 (src/SLUS_010.40/32154.s:280).
+void Core_Math_MultiplyMatrixIntoRight(MATRIX* left, MATRIX* right) {
+  MultiplyRotationMatrices(left, right, right);
+}
+
+// decomp: SLUS_010.40 MulMatrix (src/SLUS_010.40/32154.s:275).
+MATRIX* Core_Math_MultiplyMatrixIntoLeft(MATRIX* left, MATRIX* right) {
+  MultiplyRotationMatrices(left, right, left);
+  return left;
 }
 
 static unsigned IntegerSquareRoot(unsigned value) {

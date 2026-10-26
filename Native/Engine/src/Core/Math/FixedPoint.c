@@ -123,13 +123,6 @@ int Core_Math_InverseSquareRootParts()
     return 0;
 }
 
-// decomp: SLUS_010.40 MulMatrix (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
-int Core_Math_MultiplyMatrixIntoLeft()
-{
-    VS_UNPORTED("Core::Math::MultiplyMatrixIntoLeft");
-    return 0;
-}
-
 // decomp: SLUS_010.40 Square0 (src/SLUS_010.40/32154.s:0) [asm-file: not yet ported]
 int Core_Math_SquareVectorComponents()
 {

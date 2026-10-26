@@ -9,6 +9,25 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F03406 now shares the native saturating Q12 rotation-product kernel
+  with the existing right-destination entry; its typed API returns the
+  left matrix and preserves all padding/translation bytes. Both operands
+  are captured before writes, including self multiplication. F03568 is
+  an alias of the existing empty Core::IgnoreCall: original main.c:11661
+  is a static inline NOP, not a host sleep or a standalone fallthrough
+  routine. The old int() matrix ABI fails the new compile-time contract.
+  New4/1,812 controls cover noncommuting operands, both saturation signs,
+  fractional floor,256 deterministic full-width matrix pairs, aliases,
+  complete object bytes and the original80041C60 binding. Combined
+  core/trig10/42,874 and full Debug/Release834/4,224,930 each pass;
+  both hosts,109 port controls and0-new focused/default quality pass.
+  Two generations preserve297 maintained/owner paths and three original
+  reference files, repeating identically; only FixedPoint.c/.h and
+  Runtime.c/.h change. Local cohort141/186,45 gaps (13 C/C++ references,
+  22 assembly-only,10 missing listings); native implementations3110 and
+  aliases149 remain separate. No native timer policy, whole-matrix C++
+  promotion, audiovisual parity or compatibility retirement is claimed.
+  Private `coreleaves42-*`; publication/exact CI are recorded on#42.
 - #42 F01269 now shares the native ModelGeometry override kernel through
   typed weapon state, reaching139/186 original entries and47 gaps
   (13 C/C++ references,24 assembly-only,10 missing listings).

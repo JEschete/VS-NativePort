@@ -1,5 +1,8 @@
+#include <algorithm>
 #include <array>
+#include <bit>
 #include <cstdint>
+#include <cstring>
 #include <limits>
 #include <type_traits>
 
@@ -8,12 +11,15 @@
 
 #include "Content/ModuleData.h"
 #include "Core/Gte.h"
+#include "Core/Unported.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Math/TileDistance.h"
 #include "Core/Math/Trig.h"
+#include "Core/Runtime.h"
 }
 
 static_assert(
@@ -22,8 +28,68 @@ static_assert(
     std::is_same_v<decltype(&Core_Math_CosineFixedPoint), int (*)(int)>);
 static_assert(std::is_same_v<decltype(&Core_Math_Sine), int (*)(int)>);
 static_assert(std::is_same_v<decltype(&Core_Math_Cosine), int (*)(int)>);
+static_assert(std::is_same_v<decltype(&Core_Math_MultiplyMatrixIntoLeft),
+                             MATRIX* (*)(MATRIX*, MATRIX*)>);
 
 namespace {
+auto MatrixBytes(const MATRIX& matrix) {
+  std::array<std::byte, sizeof(matrix)> bytes{};
+  std::memcpy(bytes.data(), &matrix, bytes.size());
+  return bytes;
+}
+
+MATRIX ReferenceProduct(const MATRIX& first, const MATRIX& second,
+                        const MATRIX& destination) {
+  MATRIX result;
+  std::memcpy(&result, &destination, sizeof result);
+  for (int row = 0; row < 3; ++row) {
+    for (int column = 0; column < 3; ++column) {
+      std::int64_t sum = 0;
+      for (int index = 0; index < 3; ++index) {
+        sum += std::int64_t{first.m[row][index]} * second.m[index][column];
+      }
+      auto value = sum / 4096;
+      if (sum < 0 && sum % 4096 != 0) --value;
+      value = std::clamp<std::int64_t>(
+          value, std::numeric_limits<std::int16_t>::min(),
+          std::numeric_limits<std::int16_t>::max());
+      result.m[row][column] = static_cast<std::int16_t>(value);
+    }
+  }
+  return result;
+}
+
+MATRIX MatrixPattern(std::uint32_t& state) {
+  MATRIX matrix;
+  std::memset(&matrix, 0xA5, sizeof matrix);
+  for (auto& row : matrix.m) {
+    for (auto& value : row) {
+      state = state * 1664525u + 1013904223u;
+      value =
+          std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(state >> 16));
+    }
+  }
+  matrix.t[0] = 123;
+  matrix.t[1] = -456;
+  matrix.t[2] = 789;
+  return matrix;
+}
+
+void CheckMatrixDestinations(const MATRIX& first, const MATRIX& second) {
+  MATRIX left, right;
+  std::memcpy(&left, &first, sizeof left);
+  std::memcpy(&right, &second, sizeof right);
+  const auto left_expected = ReferenceProduct(first, second, first);
+  const auto right_expected = ReferenceProduct(first, second, second);
+  REQUIRE(Core_Math_MultiplyMatrixIntoLeft(&left, &right) == &left);
+  CHECK(MatrixBytes(left) == MatrixBytes(left_expected));
+  CHECK(MatrixBytes(right) == MatrixBytes(second));
+  std::memcpy(&left, &first, sizeof left);
+  Core_Math_MultiplyMatrixIntoRight(&left, &right);
+  CHECK(MatrixBytes(right) == MatrixBytes(right_expected));
+  CHECK(MatrixBytes(left) == MatrixBytes(first));
+}
+
 void CheckTrigBounds(int value) {
   CHECK(value >= -4096);
   CHECK(value <= 4096);
@@ -38,6 +104,79 @@ std::uint64_t HashFixedSample(std::uint64_t hash, int value) {
   return hash;
 }
 }  // namespace
+
+TEST_CASE("The original inline idle instruction is a native no-op",
+          "[core][core-leaves]") {
+  const auto hits = [] {
+    std::uint64_t count = 0;
+    for (const auto& entry : VS::Core::UnportedSnapshot()) {
+      if (entry.site == "Core::IdleInstruction") count = entry.count;
+    }
+    return count;
+  };
+  const auto before = hits();
+  Core_IdleInstruction();
+  Core_IdleInstruction();
+  CHECK(hits() == before);
+  CHECK(&Core_IdleInstruction == &Core_IgnoreCall);
+}
+
+TEST_CASE("Left matrix multiply returns its destination and preserves its tail",
+          "[math][core-leaves]") {
+  MATRIX left{{{4096, 0, 0}, {0, 0, -4096}, {0, 4096, 0}}, {11, -22, 33}};
+  MATRIX right{{{0, -4096, 0}, {4096, 0, 0}, {0, 0, 4096}}, {-44, 55, -66}};
+  const auto before_right = MatrixBytes(right);
+  const auto before_tail = MatrixBytes(left);
+  REQUIRE(Core_Math_MultiplyMatrixIntoLeft(&left, &right) == &left);
+  const std::array<std::int16_t, 9> expected{0,     -4096, 0, 0, 0,
+                                             -4096, 4096,  0, 0};
+  CHECK(std::memcmp(left.m, expected.data(), sizeof(left.m)) == 0);
+  const auto after = MatrixBytes(left);
+  CHECK(std::equal(after.begin() + sizeof(left.m), after.end(),
+                   before_tail.begin() + sizeof(left.m)));
+  CHECK(MatrixBytes(right) == before_right);
+}
+
+TEST_CASE(
+    "Both matrix destinations preserve original Q12 saturation and aliases",
+    "[math][core-leaves]") {
+  std::uint32_t random = 0x32154275;
+  for (int iteration = 0; iteration < 256; ++iteration) {
+    const auto first = MatrixPattern(random);
+    const auto second = MatrixPattern(random);
+    CheckMatrixDestinations(first, second);
+    MATRIX self;
+    std::memcpy(&self, &first, sizeof self);
+    const auto expected = ReferenceProduct(first, first, first);
+    REQUIRE(Core_Math_MultiplyMatrixIntoLeft(&self, &self) == &self);
+    CHECK(MatrixBytes(self) == MatrixBytes(expected));
+  }
+  MATRIX positive{}, negative{};
+  for (auto& row : positive.m) {
+    std::fill(std::begin(row), std::end(row), INT16_MAX);
+  }
+  for (auto& row : negative.m) {
+    std::fill(std::begin(row), std::end(row), INT16_MIN);
+  }
+  CheckMatrixDestinations(positive, positive);
+  CheckMatrixDestinations(positive, negative);
+}
+
+TEST_CASE("Left matrix entry retains its original resident module binding",
+          "[math][core-leaves]") {
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  auto* resolved =
+      VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", 0x80041C60u);
+  REQUIRE(resolved != nullptr);
+  using Product = MATRIX* (*)(MATRIX*, MATRIX*);
+  const auto product = reinterpret_cast<Product>(resolved);
+  CHECK(product == Core_Math_MultiplyMatrixIntoLeft);
+  MATRIX left{}, right{};
+  CHECK(product(&left, &right) == &left);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
+                                          0x80041C61u) == nullptr);
+}
 
 TEST_CASE("Battle fixed trigonometry uses the canonical native implementations",
           "[math][sdk-gaps][fixed-trig]") {

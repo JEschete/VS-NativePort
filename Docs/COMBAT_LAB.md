@@ -415,6 +415,58 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Native idle hook and shared matrix destinations (#42, 2026-10-26)
+
+F03406 (`MulMatrix`, original32154.s:275) now returns its left destination
+through a typed `MATRIX* (MATRIX*, MATRIX*)` API. Original80041C60 sets
+the destination to the left operand before entering the common body;
+80041C68 sets it to the right. Both native entries share one existing
+ScalarMath kernel, which captures both operands before writing, floors
+signed Q12 products, saturates to signed16 and writes only the nine
+rotation halfwords. Destination padding and translation remain unchanged.
+The right entry's public void signature and existing callers are unchanged.
+
+F03568 (`_asmNop`, original main.c:11661) redirects to the existing empty
+Core::IgnoreCall through the established native alias generator. The
+original static inline `.nop` has no game-visible operation; the single
+splat instruction is not a callable fallthrough routine. No host sleep,
+yield, timer bridge or timing/RNG policy is introduced. The production
+play-time caller uses the same header alias, without an unported report.
+
+Evidence is parentb0915bbf plus this scoped worktree and the four preserved
+owner paths. Exact logs/images/commands are private `coreleaves42-*`:
+
+- The Debug red build rejects the old int() matrix declaration at the
+  typed ABI assertion and real calls; no successful old-stub runtime
+  test is claimed.
+- `build\<configuration>\VS.Tests.exe
+  "[core-leaves],[fixed-trig]" --reporter compact` passes10 cases/
+  42,874 assertions in Debug and Release. New4/1,812 assertions cover
+  noncommuting golden matrices, deterministic full-signed16 operand
+  samples, positive/negative saturation, independent division/floor
+  reference math, both destinations, self aliases, whole-object byte
+  preservation, unchanged other operand, native no-op alias identity/
+  unported-hit counts and actual resident80041C60 binding/interior
+  rejection. This is not exhaustive enumeration of all matrices.
+- Both x64 solution builds link both hosts; full suites pass834 cases/
+  4,224,930 assertions each. All109 port/audit controls pass, including
+  ownership/catalog consistency and the new alias/shared-kernel contract.
+  Focused tidy/default quality have0 actionable/0 new findings with
+  unchanged baselines; focused output retains five existing advisories
+  and53 exact fixture-literal reports.
+- Two native generations preserve297 maintained/owner paths and original
+  main.c/32154.s/NOP listing hashes, repeating identically. Only generated
+  FixedPoint.c/.h and Runtime.c/.h change; no project/solution rewrite
+  is needed.
+
+The local original cohort reaches141/186 with45 gaps (13 C/C++ references,
+22 assembly-only,10 missing listings). The audit separately counts3110
+implementations and149 native aliases. Original C-backed completion
+remains132/145; nine of the other41 entries are complete. Publication
+and exact CI are recorded on#42 before advancing its two checkboxes.
+This verifies these native leaf contracts, not a frame-clock decision,
+all SDK matrix operations, complete C++ promotion or retirement.
+
 ### Source-layout weapon model overrides (#42, 2026-10-26)
 
 F01269 (`func_800B516C`, original4B16C.s:1646) now feeds the existing

@@ -11,6 +11,22 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_core_idle_and_matrix_entries_reuse_native_leaf_implementations(self):
+        self.assertEqual(
+            copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03568"],
+            ("Core_IgnoreCall", r"Native\Engine\src\Core\Runtime.c"),
+        )
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F03406"]["path"], r"Native\Engine\src\Core\Math\ScalarMath.c"
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Engine\src\Core\Math\ScalarMath.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("MultiplyRotationMatrices(left, right, right);", source)
+        self.assertIn("MultiplyRotationMatrices(left, right, left);", source)
+
     def test_weapon_override_reads_a_typed_matrix_member_not_native_guest_offset(self):
         owned = self.owned_items()
         self.assertEqual(
