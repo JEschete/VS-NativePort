@@ -140,6 +140,7 @@
     <ClCompile Include="src\TextTransitionTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />
     <ClCompile Include="src\ViewportBoundsTests.cpp" />
+    <ClCompile Include="src\VignetteRenderTests.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\DoorTests.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Editor.cpp" />

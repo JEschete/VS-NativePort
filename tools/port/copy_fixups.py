@@ -117,6 +117,24 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F02461": [
+        ("void** arg3", "u_long* arg3",
+         "SCREFF2/5E8.c:23 receives one 32-bit ordering link, not native pointer storage"),
+        ("(LegacyGpu_Handle(*arg3) & 0xFFFFFF)", "(*arg3 & 0xFFFFFF)",
+         "the existing ordering head is already an encoded link"),
+        ("*arg3 = (void*)(((uintptr_t)arg2 << 8) >> 8);",
+         "*arg3 = LegacyGpu_Handle(arg2);",
+         "publish a single-word packet handle without clobbering the adjacent ordering entry"),
+    ],
+    "F02462": [
+        ("void** temp_s4;", "u_long* temp_s4;",
+         "SCREFF2/5E8.c:41 shares the same single-word overlay ordering head"),
+        ("(LegacyGpu_Handle(*temp_s4) & 0xFFFFFF)", "(*temp_s4 & 0xFFFFFF)",
+         "retain the prior encoded head when linking shaded ring packets"),
+        ("*temp_s4 = (void*)(((uintptr_t)var_s2 << 8) >> 8);",
+         "*temp_s4 = LegacyGpu_Handle(var_s2);",
+         "ring packets must publish encoded 32-bit links, never raw x64 addresses"),
+    ],
     "F00099": [
         ("""    if ((Battle_actionState->abilityInputSucceeded == 1)
         && (Battle_actors[action->targets[0].target.targetActor]->stats->currentHp != 0)) {

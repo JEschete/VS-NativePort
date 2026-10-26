@@ -10,6 +10,21 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_vignette_producers_publish_one_encoded_ordering_word(self):
+        for identifier, head, packet in (
+            ("F02461", "arg3", "arg2"),
+            ("F02462", "temp_s4", "var_s2"),
+        ):
+            fixes = copy_fixups.FIXES[identifier]
+            old = "\n".join(item[0] for item in fixes)
+            new = "\n".join(item[1] for item in fixes)
+            self.assertIn(f"void** {head}", old)
+            self.assertIn(f"u_long* {head}", new)
+            self.assertIn(f"(*{head} & 0xFFFFFF)", new)
+            self.assertIn(f"*{head} = LegacyGpu_Handle({packet});", new)
+            self.assertNotIn(f"LegacyGpu_Handle(*{head})", new)
+            self.assertNotIn("uintptr_t", new)
+
     @staticmethod
     def owned_items():
         with Path(__file__).resolve().with_name("owned.csv").open(

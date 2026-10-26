@@ -36,19 +36,26 @@ verification of the current worktree.
   This verifies request construction and native caller contracts, not full
   teleport/travel gameplay, whole motion-state promotion or retirement.
   Publication/CI remain recorded on#42; private `relocation42-*` evidence.
-- New #184 is a confirmed cyclic-list defect, not assumed to share #167/#26's
-  producer. Current frozen Debug1792970616163501-0 completes the132-case prefix
-  with97 passed/34 blocked/one failed: script114 z046-r000-d000 enters scene30
-  and reports cycles at144918/144920, after2242/2651 entries. Its recorded
-  exe4f30cd49/PDB331f0f8a remain preserved in session files. A matched-image,
-  speed64/3600 standalone control does not reproduce; shorter/different-speed
-  controls are not evidence that the entire history dependency is localized.
-  Failure-only diagnostics now report repeated/incoming packet len/link,
-  primitive/ordering buffer addresses and symbol/heap-relative provenance.
-  They retain the existing error and return-1; no draw skip/default or product
-  repair is claimed. Full Debug/Release771/3,390,847 and focused cyclic-list
-  controls pass; scoped compile analysis is0 new. Next is the bounded original
-  114-case prefix with those diagnostics, then the owning writer/link mutation.
+- #184's owning writer is proven in unchanged4f30cd49/PDB331f0f8a history:
+  two replays repeat the original144918/144920 errors. Read-only coherent
+  snapshots resolve both raw overlay heads to the vignette's final ring packet
+  (E1000220/3AA0A0A0). F02461/F02462 write eight-byte pointers at OT+8, clobbering
+  the adjacent four-byte entry with0x7FF6; the39287-handle namespace resolves
+  that value to unrelated old packets, closing410-node cycles.
+  Copier corrections now use a `u_long*` ordering entry, retain the encoded
+  previous head directly and publish one `LegacyGpu_Handle(packet)` word.
+  No cycle guard, buffer size, packet geometry, draw admission or F02460 ellipse
+  arithmetic changes. Red controls fail two of three cases; fixed controls
+  pass257 assertions, preserving all16 triangles/64 ring packets,752 words,
+  canaries, prior tail and an82-node GPU walk. Full Debug/Release780 cases/
+  3,391,189 assertions each,89 copier contracts, focused tidy and default
+  quality pass with0 new findings. Two generations preserve301 protected
+  paths and repeat identically; only ScreenDistortion.c/.h change.
+  Original132-case fixed histories are running with3600/speed64 and7200-second
+  outer budgets: Debug1792982973682278-0 (exe3ca80430/PDB8ecd4651), Release
+  1792982973680555-0 (exea772e506/PDB2403d431). #184 remains open pending
+  actual acceptance and exact pushed CI; these component results do not close
+  #167 or certify visual parity. Private `vignette184-*` and `packet184-*`.
 - #167's original script132 truncation/termination is not reproduced by either
   current full132-case history, but Debug's separate #184 failure prevents a
   clean-cohort claim. Release1792970616137564-0 has97 passed/35 blocked,0

@@ -148,19 +148,19 @@ int Effects_ScreenDistortion_EllipsePoint(int arg0, int arg1)
 }
 
 // decomp: SCREFF2.PRG func_800F9EBC (src/GIM/SCREFF2.PRG/5E8.c:23)
-int* Effects_ScreenDistortion_AppendVignetteCorner(int arg0, int arg1, int* arg2, void** arg3)
+int* Effects_ScreenDistortion_AppendVignetteCorner(int arg0, int arg1, int* arg2, u_long* arg3)
 {
     int var_s2;
 
     for (var_s2 = arg1; var_s2 < arg1 + 4; ++var_s2) {
-        arg2[0] = (LegacyGpu_Handle(*arg3) & 0xFFFFFF) | 0x06000000;
+        arg2[0] = (*arg3 & 0xFFFFFF) | 0x06000000;
         arg2[1] = 0x32FFFFFF;
         arg2[2] = arg0;
         arg2[3] = 0xA0A0A0;
         arg2[4] = Effects_ScreenDistortion_EllipsePoint(var_s2 + 1, 0x80);
         arg2[5] = 0xA0A0A0;
         arg2[6] = Effects_ScreenDistortion_EllipsePoint(var_s2, 0x80);
-        *arg3 = (void*)(((uintptr_t)arg2 << 8) >> 8);
+        *arg3 = LegacyGpu_Handle(arg2);
         arg2 += 7;
     }
     return arg2;
@@ -171,7 +171,7 @@ void Effects_ScreenDistortion_DrawVignette(void)
 {
     int* var_s2;
     int i;
-    void** temp_s4;
+    u_long* temp_s4;
 
     temp_s4 = Render_frameScratch.overlayOrderingTable;
     var_s2 = Effects_ScreenDistortion_AppendVignetteCorner(0xE00140, 6, Render_frameScratch.primitiveCursor, temp_s4);
@@ -180,7 +180,7 @@ void Effects_ScreenDistortion_DrawVignette(void)
     var_s2 = Effects_ScreenDistortion_AppendVignetteCorner(0x140, 0x36, var_s2, temp_s4);
 
     for (i = 0; i < 0x40; ++i) {
-        var_s2[0] = (LegacyGpu_Handle(*temp_s4) & 0xFFFFFF) | 0x09000000;
+        var_s2[0] = (*temp_s4 & 0xFFFFFF) | 0x09000000;
         var_s2[1] = 0xE1000220;
         var_s2[2] = 0x3AA0A0A0;
         var_s2[3] = Effects_ScreenDistortion_EllipsePoint(i + 1, 0x80);
@@ -190,7 +190,7 @@ void Effects_ScreenDistortion_DrawVignette(void)
         var_s2[7] = Effects_ScreenDistortion_EllipsePoint(i + 1, 0x60);
         var_s2[8] = 0;
         var_s2[9] = Effects_ScreenDistortion_EllipsePoint(i, 0x60);
-        *temp_s4 = (void*)(((uintptr_t)var_s2 << 8) >> 8);
+        *temp_s4 = LegacyGpu_Handle(var_s2);
         var_s2 += 10;
     }
     Render_frameScratch.primitiveCursor = var_s2;

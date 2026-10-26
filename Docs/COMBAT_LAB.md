@@ -415,6 +415,53 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Vignette ordering-link repair (#184, 2026-10-25)
+
+The unchanged failing Debug image4f30cd49/PDB331f0f8a repeats the original
+persistent-history failures at144918/144920. Coherent query/read-only snapshots
+prove that both overlay entries at OT+8 contain native eight-byte pointers to
+the final vignette ring packet (E1000220/3AA0A0A0). The high word0x7FF6 overwrites
+the adjacent OT entry at+12. With39287 registered handles that becomes a valid
+unrelated old packet, closing the captured410-node cycles. The observer only
+briefly pauses its owned process for coherent reads; no code, actor, HP, story,
+PC or input writes establish this provenance.
+
+F02461/F02462 (`func_800F9EBC`/`func_800F9FB8`, original
+GIM/SCREFF2.PRG/5E8.c:23/41) incorrectly treat a four-byte ordering link as
+`void**` and re-register an already encoded previous head. The copier now
+emits `u_long*`, reads that encoded head directly and publishes exactly one
+`LegacyGpu_Handle(packet)` word. Existing error/return-1 cycle detection is
+unchanged; no skipped draw, default packet, buffer expansion or scene bypass
+is a repair. Original F02460 angle/radius arithmetic is already correct and
+is not changed.
+
+`VS.Tests.exe "[vignette]" --reporter compact` fails two of three cases before
+the producer correction and passes257 assertions afterward in Debug/Release.
+Controls cover all16 corner triangles and64 elliptical ring packets, every
+geometry/color/mode word,752-word cursor advance, packet/adjacent-entry
+canaries, previous-tail retention, reverse packet order/lengths and an actual
+82-node GPU walk. Fixed cardinal controls also preserve the original ellipse.
+Full native suites pass780 cases/3,391,189 assertions in each configuration;
+89 copier contracts, focused compilation analysis and default quality pass
+without new findings or baseline edits. Two copier runs are identical and
+preserve301 protected paths; generated changes are only ScreenDistortion.c/.h.
+
+Actual acceptance is still running at this checkpoint:
+
+```powershell
+build\Debug\VS.CombatLab.exe --door-transitions --door-from z040-r008-d000 --door-limit 132 --frames 3600 --speed 64 --scripted
+```
+
+Release uses the same selection, budget and predicates. The outer watchdog
+is7200 seconds, not the earlier insufficient900-second budget. Frozen fixed
+Debug1792982973682278-0 uses exe3ca80430/PDB8ecd4651; Release1792982973680555-0
+uses exea772e506/PDB2403d431. Private `vignette184-fixed-<configuration>*`
+records the full command, hashes, parent revision3c7982ee and dirty source
+state; `packet184-*` retains the unchanged-image graph proof.
+Keep #184 open until these histories and exact published CI are verified.
+Component controls do not prove normal-speed pixel parity, all-scene coverage
+or a causal repair of #167's distinct historical truncation.
+
 ### Ashley testing profiles
 
 The **ASHLEY** row selects `prologue`, `post-prologue`, `post-minotaur`,
