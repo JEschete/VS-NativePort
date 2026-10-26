@@ -8,7 +8,7 @@
 #include "Actors/RoomState.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Damage.h"
 #include "Core/Memory/WordCopy.h"
 #include "Items/Equipment.h"

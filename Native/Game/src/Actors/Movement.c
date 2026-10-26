@@ -19,7 +19,6 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
-#include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitives.h"

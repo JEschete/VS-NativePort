@@ -10,6 +10,28 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_ai_lifecycle_leaves_share_the_native_persistence_projection(self):
+        owned = self.owned_items()
+        for identifier, name in (
+            ("F01820", "Battle_Ai_PackActorAiPersistenceFlags"),
+            ("F01831", "Battle_Ai_ClearActorAiNavigationReset"),
+            ("F01835", "Battle_Ai_InitializeActorAiExtensionHook"),
+        ):
+            self.assertEqual(owned[identifier]["name"], name)
+            self.assertEqual(
+                owned[identifier]["path"],
+                r"Native\Game\src\Battle\Ai\ActorCleanup.cpp",
+            )
+        root = Path(__file__).resolve().parents[2]
+        snapshot = (root / r"Native\Game\src\Save\RuntimeSnapshot.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "found->aiFlags = Battle_Ai_PackActorAiPersistenceFlags(slot);",
+            snapshot,
+        )
+        self.assertNotIn("relation.previousClassification <<", snapshot)
+
     def test_every_native_redirect_retains_its_module_symbol_binding(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(

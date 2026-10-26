@@ -9,6 +9,23 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42's F01820/F01831/F01835 AI lifecycle leaves are owned in ActorCleanup,
+  reaching127/186 original entries and59 gaps (24 C/C++ references,
+  25 assembly-only,10 missing listings). The existing RuntimeSnapshot
+  persistence projection is now shared with room-cache writes rather than
+  duplicated beside a stub. Missing state remains-1; native save schema and
+  staging ownership are unchanged. Original7DE94.s:9-40 /7E05C.s:241-252,
+  504-512 also verify the single hold-byte clear and truly empty startup hook.
+  Red4/293 includes278 failures; final5/98,611 controls cover all8192 bit
+  patterns, ignored bits, full delay byte, slot boundaries, source immutability,
+  absent-state reset and repeated no-op calls with no false unported report.
+  Full Debug/Release796/3,531,045 each,94 copier controls and0-new focused/
+  default quality pass; both hosts link. Two generations preserve303 paths
+  and repeat identically, changing only ActorState.c/.h and the three
+  consumer include surfaces. No full room-cache gameplay, new save format,
+  whole AI-state C++ promotion or compatibility retirement is claimed.
+  Private `lifecycle42-*`; original186 order/prior124 checks retained;
+  publication/exact CI are on#42.
 - #42's resident SDK rcos/rsin F03400/F03401 now use the same canonical native
   scalar bodies, reaching124/186 original entries and62 gaps (27 C/C++
   references,25 assembly-only,10 missing listings). Their31724.s:9/12

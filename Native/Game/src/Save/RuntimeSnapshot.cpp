@@ -31,6 +31,7 @@ extern "C" {
 #include "Battle/Abilities.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
@@ -84,9 +85,6 @@ constexpr int kEquipmentGems = 3;
 constexpr int kGripCategoryCount = 5;
 constexpr int kArmorCategoryCount = 8;
 constexpr int kQuarterTurn = ONE / 4;
-constexpr unsigned kPreviousClassShift = 3;
-constexpr unsigned kRelationTimerShift = 6;
-constexpr unsigned kIdleBehaviorFlag = 0x20;
 constexpr unsigned kActiveAnimationEnd = 6;
 constexpr int kCameraLookAtHeight = 90;
 constexpr int kNearCameraDistance = 3 * ONE / 8;
@@ -1154,19 +1152,7 @@ Result CaptureActors(Snapshot& state) {
     const auto& stats = *actor->stats;
     found->spawnSlot = static_cast<unsigned char>(spawn);
     found->isHidden = 0;
-    // func_800E6694 (7DE94.s:9-40); the copied C entry is still a stub.
-    // Read the typed native AI state, never its guest-offset representation.
-    const auto* ai = Battle_Ai_actorAiStates[slot];
-    if (ai == nullptr) {
-      found->aiFlags = -1;
-    } else {
-      const auto& relation = ai->relations[0];
-      found->aiFlags = static_cast<std::int16_t>(
-          ai->usesRoomActionDelay | (relation.classification << 1) |
-          (relation.previousClassification << kPreviousClassShift) |
-          ((ai->behaviorMode == 0) ? kIdleBehaviorFlag : 0u) |
-          (relation.classificationTimer << kRelationTimerShift));
-    }
+    found->aiFlags = Battle_Ai_PackActorAiPersistenceFlags(slot);
     // Same 0x01000000 projection as Actors_ActorStateFlags, without mutating
     // its shared scratch word or touching unrelated weapon/model resources.
     const auto animation =

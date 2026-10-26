@@ -415,6 +415,44 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Shared AI persistence and lifecycle leaves (#42, 2026-10-25)
+
+F01820/F01831/F01835 now belong to the existing ActorCleanup API. Original
+7DE94.s:9-40 and the already-working native RuntimeSnapshot projection agree
+on the exact delay/relation/behavior packing. The copied room-cache export
+was still a zero-returning stub. Both native save staging and room-cache
+storage now use one typed int16 projection, preserving missing-state-1
+without mutating live AI state. Native save schema, cache ownership and
+save/apply consent are unchanged.
+
+Original7E05C.s:241-252 clears only actor hold byte0x1A; its native caller
+ignores the assembly return, so the owned API is void(int). Source
+7E05C.s:504-512 is an immediate-return hook whose delay slot changes only
+caller-saved t0: its native body is truly empty rather than falsely reporting
+an unported function. No incomplete navigation producer/updater is enabled.
+
+The red selection has4 failed cases/278 failed assertions out of293.
+Final `VS.Tests.exe "[lifecycle-leaves]" --reporter compact` passes5
+cases/98,611 assertions: all8192 persistence combinations across boundary
+slots, ignored relation bits, full8-bit delay data, missing-state sentinel,
+byte-for-byte source immutability, all16 present/absent reset slots and
+repeated no-op calls with no unported hit. Existing runtime-snapshot tests
+also retain their exact enemy AI flags under the shared helper.
+
+Full Debug/Release suites pass796 cases/3,531,045 assertions each;94
+copier/audit controls and focused/default quality are0 new. Both hosts
+link. Two generations preserve303 protected paths and repeat identically,
+changing ActorState.c/.h plus the existing Boot, movement and room-cache
+consumer includes. The hand-maintained snapshot replaces duplicate logic
+with the same canonical projection. Private `lifecycle42-*` retains exact
+commands and red/green/ownership evidence.
+
+This advances127/186 original entries,59 remaining, preserving original
+order and prior124 checks. Component/source/caller conformance is not
+full room-transition persistence gameplay, a new save-format milestone,
+whole AI-state C++ promotion or compatibility retirement. Publication
+and exact CI are recorded on#42.
+
 ### Resident SDK scalar trig exports (#42, 2026-10-25)
 
 F03400/F03401 (`rcos`/`rsin`, SLUS31724.s:9/12) have instruction bodies

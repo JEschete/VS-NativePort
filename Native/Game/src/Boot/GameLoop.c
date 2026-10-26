@@ -19,7 +19,7 @@
 #include "Battle/ActionExecution.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/PlanningWorkspace.hpp"

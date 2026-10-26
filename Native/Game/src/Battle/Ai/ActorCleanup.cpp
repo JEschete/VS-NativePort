@@ -126,6 +126,33 @@ void Battle_Ai_ClearActorAiLinksAndPlan(int actor_id) {
   if (state != nullptr) Battle_Ai_DisengageActor(state);
 }
 
+// decomp: func_800E6694 (src/BATTLE/BATTLE.PRG/7DE94.s:9-40).
+std::int16_t Battle_Ai_PackActorAiPersistenceFlags(int actor_id) {
+  RequireActorId(actor_id);
+  const auto* state = Battle_Ai_actorAiStates[actor_id];
+  if (state == nullptr) return -1;
+  constexpr unsigned kPreviousClassShift = 3;
+  constexpr unsigned kRelationTimerShift = 6;
+  constexpr unsigned kIdleBehaviorFlag = 0x20;
+  const auto& relation = state->relations[0];
+  return static_cast<std::int16_t>(
+      state->usesRoomActionDelay | (relation.classification << 1) |
+      (relation.previousClassification << kPreviousClassShift) |
+      ((state->behaviorMode == 0) ? kIdleBehaviorFlag : 0u) |
+      (relation.classificationTimer << kRelationTimerShift));
+}
+
+// decomp: func_800E6B24 (src/BATTLE/BATTLE.PRG/7E05C.s:241-252).
+void Battle_Ai_ClearActorAiNavigationReset(int actor_id) {
+  RequireActorId(actor_id);
+  auto* state = Battle_Ai_actorAiStates[actor_id];
+  if (state != nullptr) state->opaque1A = 0;
+}
+
+// decomp: func_800E6EAC (src/BATTLE/BATTLE.PRG/7E05C.s:504-512).
+// The original return delay slot only changes caller-saved t0.
+void Battle_Ai_InitializeActorAiExtensionHook(void) {}
+
 // decomp: func_800E4C28 (src/BATTLE/BATTLE.PRG/7BDD4.s:550).
 void Battle_Ai_ReleaseAiDestinationTile(int x, int z) {
   if (Battle_Ai_tileFlagMap == nullptr) return;
