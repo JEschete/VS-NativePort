@@ -415,6 +415,56 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Typed gimmick model overrides (#42, 2026-10-26)
+
+F01270 (`func_800B5C30`, original4B16C.s:2387 and read-only rood-boi
+actor_packets.c:167) now uses the existing owned ModelGeometry packet
+kernel. Native Field_GimmickInstance motionState and palettePulse.kind
+replace raw object-offset interpretation. The kernel reads the shared
+scalar renderer-count prefix as bytes rather than treating a gimmick as
+an actor object; tint input is likewise copied as its packed color word.
+
+The explicit override entry retains the original material selection:
+state0 keeps vertex colors/no forced blend; nonzero states use uniform
+supplied tint and semi-transparency, subtractive below7 and additive
+from7 onward. Per-group highlighted palettes retain their0x480 offset
+and the final ungrouped remainder keeps the base palette. A shared
+appearance-material helper also serves the already-working actor
+dispatcher without changing its separate dispatch predicate.
+
+This does not enable F01269 by casting a weapon to actor/gimmick state.
+Its original highlight read at0x64 lies in weapon matrix storage; that
+separate native ownership/meaning contract is not guessed here.
+
+Evidence is parent50128db9 plus the scoped worktree and preserved owner
+edits; commands/results are private `gimmickoverride42-*`:
+
+- Original stub red:1 case/432 assertions, all432 fail. The fixture
+  covers16 states, masks0/0x80/0xFF, eight limb groups and the remainder.
+- Debug/Release `build\<configuration>\VS.Tests.exe
+  "[gimmick-override],[targeting][palette],[appearance][render]"
+  --reporter compact` passes4 cases/613 assertions each. The new entry
+  and actual BATTLE800B5C30 address checks contribute2/435; existing
+  actor appearance/palette controls retain their178 assertions.
+- Emitted packet counts, command/semi-transparency bits, page blend,
+  palettes, UVs, depth links, uniform/vertex colors and buffer canaries
+  are checked, not just a successful return or empty draw.
+- Both x64 solution builds link both hosts. Full native suites pass828
+  cases/4,222,683 assertions each; all107 port controls pass.
+  Focused/default quality has0 new findings without baseline changes.
+  Splitting exact-check fixtures resolved two size findings while
+  preserving every432 state/group assertion.
+- Two native generations preserve297 maintained/owner paths and both
+  original instruction/C sources, repeating identically. Only generated
+  Model.c/.h change; no project or owner-solution regeneration is needed.
+
+The original cohort reaches138/186,48 remaining (14 C/C++ references,
+24 assembly-only,10 missing listings). Original IDs/order and prior137
+checks remain; only F01270 advances after exact-revision CI. This is
+native typed/packet verification, not every authored gimmick, all-model
+visual parity, whole renderer promotion or compatibility retirement.
+Publication and exact CI are recorded on#42.
+
 ### Native room tint postpass and public C linkage (#42/#191, 2026-10-26)
 
 F00769/F00770 (`func_80098D6C`/`func_80098E50`, original2EA3C.s:

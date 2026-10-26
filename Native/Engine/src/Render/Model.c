@@ -1,19 +1,13 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
 #include "Actors/ModelDraw.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Math/ScalarMath.h"
-#include "Field/Gimmicks.h"
 #include "Render/Camera.h"
 #include "Render/Model.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelWorkspace.h"
-#include "Render/Palette.h"
 #include "Render/Render.h"
 
 // decomp: BATTLE.PRG func_800AECA0 (src/BATTLE/BATTLE.PRG/44F14.c:853)
@@ -61,11 +55,5 @@ int Render_DrawActorGroundShadow()
 void Render_DrawModelFlatPolygonsWithOverrides(Actors_ModelRenderContext*, Actors_WeaponModel*, CVECTOR*, void*)
 {
     VS_UNPORTED("Render::DrawModelFlatPolygonsWithOverrides");
-}
-
-// decomp: BATTLE.PRG func_800B5C30 (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
-void Render_DrawModelGouraudPolygonsWithOverrides(Actors_ModelRenderContext*, Field_GimmickInstance*, int*, void*)
-{
-    VS_UNPORTED("Render::DrawModelGouraudPolygonsWithOverrides");
 }
 

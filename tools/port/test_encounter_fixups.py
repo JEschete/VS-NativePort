@@ -11,6 +11,19 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_gimmick_override_uses_the_existing_model_kernel_and_typed_state(self):
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F01270"]["path"], r"Native\Engine\src\Render\ModelGeometry.c"
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Engine\src\Render\ModelGeometry.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("AppearanceMaterial(object->motionState)", source)
+        self.assertIn("object->palettePulse.kind", source)
+        self.assertIn("override ? AppearanceMaterial(state) : 0", source)
+
     def test_room_tint_pass_shares_the_explicit_native_color_contract(self):
         owned = self.owned_items()
         for identity in ("F00769", "F00770"):

@@ -1151,8 +1151,25 @@ static int ModelPacketColorsMatch(const u_long* packet, int colored,
   return 1;
 }
 
+static void DrawGimmickOverrideFixture(const Actors_ModelInstance* instance,
+                                       const CVECTOR* tint,
+                                       Actors_ShpModel* model,
+                                       unsigned appearance,
+                                       unsigned pulse_mask) {
+  Field_GimmickInstance object = {0};
+  enum { kSharedRendererHeaderBytes = 8 };
+  memcpy(&object, instance, kSharedRendererHeaderBytes);
+  object.motionState = appearance;
+  object.palettePulse.kind = pulse_mask;
+  int packed_tint;
+  memcpy(&packed_tint, tint, sizeof packed_tint);
+  Render_DrawModelGouraudPolygonsWithOverrides(&Actors_modelRenderContext,
+                                               &object, &packed_tint, model);
+}
+
 static int ModelPolygonPackets(int colored, int split, int limb,
-                               unsigned pulse_mask, unsigned appearance) {
+                               unsigned pulse_mask, unsigned appearance,
+                               int gimmick_override) {
   enum {
     kTriangleCorners = 3,
     kVertexDepth = 1024,
@@ -1190,7 +1207,9 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   BuildModelPacketFixture(model, &instance, &options);
   instance.actionAnimationState = appearance;
   CVECTOR tint = {128, 96, 64, 0};
-  if (pulse_mask != 0 || appearance != 0) {
+  if (gimmick_override) {
+    DrawGimmickOverrideFixture(&instance, &tint, model, appearance, pulse_mask);
+  } else if (pulse_mask != 0 || appearance != 0) {
     Render_DrawActorPolygons(&Actors_modelRenderContext, &instance, &tint,
                              model);
   } else if (colored) {
@@ -1206,7 +1225,7 @@ static int ModelPolygonPackets(int colored, int split, int limb,
       ((unsigned)limb < 8 && (pulse_mask & (0x80u >> limb)) != 0 ? 0x480 : 0);
   const unsigned first_uv = (palette << 16) | 0x140A;
   const int appearance_override =
-      pulse_mask != 0 ||
+      gimmick_override || pulse_mask != 0 ||
       (appearance >= 4 && appearance < 9 && appearance != 6) ||
       appearance == 15;
   const unsigned blend = appearance_override && appearance != 0
@@ -1246,17 +1265,22 @@ static int ModelPolygonPackets(int colored, int split, int limb,
 }
 
 int Tests_ModelPolygonPackets(int colored, int split) {
-  return ModelPolygonPackets(colored, split, 8, 0, 0);
+  return ModelPolygonPackets(colored, split, 8, 0, 0, 0);
 }
 
 int TestsModelLimbPalettePackets(int colored, int split, int limb,
                                  unsigned pulse_mask) {
-  return ModelPolygonPackets(colored, split, limb, pulse_mask, 0);
+  return ModelPolygonPackets(colored, split, limb, pulse_mask, 0, 0);
 }
 
 int TestsModelAppearancePackets(int colored, int split, unsigned state,
                                 unsigned pulse_mask) {
-  return ModelPolygonPackets(colored, split, 8, pulse_mask, state);
+  return ModelPolygonPackets(colored, split, 8, pulse_mask, state, 0);
+}
+
+int TestsModelGimmickOverridePackets(unsigned state, unsigned pulse_mask,
+                                     int limb) {
+  return ModelPolygonPackets(1, 0, limb, pulse_mask, state, 1);
 }
 
 int Tests_ModelProjectionGroups(void) {

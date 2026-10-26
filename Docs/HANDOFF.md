@@ -9,6 +9,23 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01270 now adapts typed gimmick motion/highlight state to the existing
+  native ModelGeometry packet kernel, reaching138/186 original entries
+  and48 gaps (14 C/C++ references,24 assembly-only,10 missing listings).
+  Original4B16C.s:2387 establishes all16 material states, group palette
+  masks and uniform tint only for transparent overrides. Red1/432 fails
+  every case; new2/435 and combined actor/palette4/613 controls pass,
+  including all states, three masks, eight limb groups plus remainder
+  and actual original-address resolution. Full Debug/Release828/
+  4,222,683 each and107 port controls pass; both hosts link. Focused/
+  default quality has0 new findings with unchanged baselines; exact-check
+  fixture extraction retains all432 state/group checks. Two generations
+  preserve297 maintained/owner paths and reference sources, repeating
+  identically; only Model.c/.h lose the old stub/declaration. No new actor
+  renderer, guessed weapon mask, all-model visual parity or retirement
+  claim. F01269 remains separate: its original offset0x64 weapon read
+  lies in matrix storage and must not become a native actor-state cast.
+  Private `gimmickoverride42-*`; publication/exact CI are on#42.
 - #42 F00769/F00770 now share an explicit native room-packet tint kernel
   in RoomDraw, reaching137/186 original entries and49 gaps (15 C/C++
   references,24 assembly-only,10 missing listings). Original2EA3C.s:

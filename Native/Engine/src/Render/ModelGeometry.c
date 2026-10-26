@@ -434,9 +434,9 @@ static unsigned ModelPolygonPalette(const Actors_ShpModel* model, int part,
 }
 
 static void DrawModelPolygons(Actors_ModelRenderContext* context,
-                              Actors_ModelInstance* instance,
-                              const CVECTOR* tint, Actors_ShpModel* model_data,
-                              int colored, unsigned pulse_mask,
+                              const void* instance, const void* tint,
+                              Actors_ShpModel* model_data, int colored,
+                              unsigned pulse_mask,
                               unsigned appearance_material) {
   if (context == NULL || instance == NULL || model_data == NULL ||
       context->projectedVertexCount == 0) {
@@ -506,6 +506,13 @@ static void DrawModelPolygons(Actors_ModelRenderContext* context,
   }
 }
 
+static unsigned AppearanceMaterial(unsigned state) {
+  if (state == 0) return 0;
+  return kSemiTransparencyFlag |
+         (state < kAppearanceBlendBoundary ? kAppearanceSubtractiveBlend
+                                           : kAppearanceAdditiveBlend);
+}
+
 // decomp: BATTLE.PRG func_800B3CF0 (src/BATTLE/BATTLE.PRG/4B16C.s:254).
 void Render_DrawModelFlatPolygons(Actors_ModelRenderContext* context,
                                   void* instance, CVECTOR* tint,
@@ -518,6 +525,20 @@ void Render_DrawModelGouraudPolygons(Actors_ModelRenderContext* context,
                                      void* instance, void* tint,
                                      void* model_data) {
   DrawModelPolygons(context, instance, tint, model_data, 1, 0, 0);
+}
+
+// decomp: func_800B5C30 (src/BATTLE/BATTLE.PRG/4B16C.s:2387).
+void Render_DrawModelGouraudPolygonsWithOverrides(
+    Actors_ModelRenderContext* context, Field_GimmickInstance* object,
+    int* tint, void* model_data) {
+  if (context == NULL || object == NULL || tint == NULL || model_data == NULL) {
+    Core_Debugf("render",
+                "Gimmick polygon overrides require model and context");
+    return;
+  }
+  DrawModelPolygons(context, object, tint, model_data, 1,
+                    object->palettePulse.kind,
+                    AppearanceMaterial(object->motionState));
 }
 
 void Render_DrawActorPolygons(Actors_ModelRenderContext* context,
@@ -537,12 +558,7 @@ void Render_DrawActorPolygons(Actors_ModelRenderContext* context,
       (state >= kAppearanceFadeFirstState && state < kAppearanceFadeEndState &&
        state != kAppearanceOpaqueState) ||
       state == kAppearanceForcedOverride;
-  unsigned material = 0;
-  if (override && state != 0) {
-    material = kSemiTransparencyFlag |
-               (state < kAppearanceBlendBoundary ? kAppearanceSubtractiveBlend
-                                                 : kAppearanceAdditiveBlend);
-  }
+  const unsigned material = override ? AppearanceMaterial(state) : 0;
   DrawModelPolygons(context, instance, tint, model, instance->uvLayout, pulse,
                     material);
 }

@@ -2,10 +2,18 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <span>
+#include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/SequencePlayback.h"
+#include "Content/ModuleData.h"
+#include "Legacy/Psx.h"
+
+extern "C" {
+#include "Render/ModelGeometry.h"
+}
 
 extern "C" int Tests_SharedSequenceOffsets(void);
 extern "C" int Tests_AdvanceSequenceWithoutScratch(void);
@@ -13,6 +21,8 @@ extern "C" int Tests_BlendSequencePose(int mode);
 extern "C" int Tests_ModelWorkspaceIsolation(void);
 extern "C" int Tests_ModelProjectionGroups(void);
 extern "C" int Tests_ModelPolygonPackets(int colored, int split);
+extern "C" int TestsModelGimmickOverridePackets(unsigned state,
+                                                unsigned pulse_mask, int limb);
 extern "C" int TestsModelLimbPalettePackets(int colored, int split, int limb,
                                             unsigned pulse_mask);
 extern "C" int TestsModelAppearancePackets(int colored, int split,
@@ -272,6 +282,43 @@ TEST_CASE("Actor appearance materials preserve original blend dispatch",
       CHECK(TestsModelAppearancePackets(0, -1, state, pulse) == 1);
     }
   }
+}
+
+namespace {
+void CheckGimmickOverride(unsigned state, unsigned pulse) {
+  for (int limb = 0; limb < 9; ++limb) {
+    CAPTURE(state, pulse, limb);
+    CHECK(TestsModelGimmickOverridePackets(state, pulse, limb) == 1);
+  }
+}
+}  // namespace
+
+TEST_CASE("Gimmick overrides preserve every material state and limb palette",
+          "[actors][appearance][render][gimmick-override]") {
+  for (unsigned state = 0; state < 16; ++state) {
+    for (unsigned pulse : {0U, 0x80U, 0xFFU}) {
+      CheckGimmickOverride(state, pulse);
+    }
+  }
+}
+
+TEST_CASE(
+    "Original gimmick override address resolves to the typed native entry",
+    "[actors][appearance][render][gimmick-override]") {
+  using Renderer =
+      void (*)(Actors_ModelRenderContext*, Field_GimmickInstance*, int*, void*);
+  static_assert(
+      std::is_same_v<decltype(&Render_DrawModelGouraudPolygonsWithOverrides),
+                     Renderer>);
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  auto* resolved = VS::Content::ResolveModuleAddress(
+      symbols, "BATTLE/BATTLE.PRG", 0x800B5C30u);
+  REQUIRE(resolved != nullptr);
+  CHECK(reinterpret_cast<Renderer>(resolved) ==
+        Render_DrawModelGouraudPolygonsWithOverrides);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800B5C31u) == nullptr);
 }
 
 TEST_CASE("Shared sequence retirement unwinds vertex edits before detaching",
