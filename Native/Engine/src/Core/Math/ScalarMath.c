@@ -25,6 +25,21 @@ int16_t Core_Math_WrapSigned16(uint32_t value) {
   return result;
 }
 
+// decomp: SLUS_010.40 Square0 (src/SLUS_010.40/32154.s:24).
+VECTOR* Core_Math_SquareVectorComponents(const VECTOR* input, VECTOR* output) {
+  if (input == NULL || output == NULL) {
+    Core_Debugf("math", "Vector square requires input and output");
+    abort();
+  }
+  const int32_t x = Core_Math_WrapSigned16((uint32_t)input->vx);
+  const int32_t y = Core_Math_WrapSigned16((uint32_t)input->vy);
+  const int32_t z = Core_Math_WrapSigned16((uint32_t)input->vz);
+  output->vx = x * x;
+  output->vy = y * y;
+  output->vz = z * z;
+  return output;
+}
+
 // decomp: BATTLE.PRG _fixedPointMult (src/BATTLE/BATTLE.PRG/4A0A8.c:4163).
 int Core_Math_MultiplyFixed(int left, int right) {
   const uint32_t bits =

@@ -12,6 +12,7 @@ extern "C" {
 int Core_Math_MultiplyFixed(int left, int right);
 
 int16_t Core_Math_WrapSigned16(uint32_t value);
+VECTOR* Core_Math_SquareVectorComponents(const VECTOR* input, VECTOR* output);
 
 void Core_Math_MultiplyMatrixIntoRight(MATRIX* left, MATRIX* right);
 MATRIX* Core_Math_MultiplyMatrixIntoLeft(MATRIX* left, MATRIX* right);

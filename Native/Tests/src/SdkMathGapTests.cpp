@@ -33,6 +33,8 @@ static_assert(std::is_same_v<decltype(&Core_Math_MultiplyMatrixIntoLeft),
                              MATRIX* (*)(MATRIX*, MATRIX*)>);
 static_assert(std::is_same_v<decltype(&Core_Math_MultiplyRotationMatrixInPlace),
                              MATRIX* (*)(MATRIX*, MATRIX*)>);
+static_assert(std::is_same_v<decltype(&Core_Math_SquareVectorComponents),
+                             VECTOR* (*)(const VECTOR*, VECTOR*)>);
 
 namespace {
 auto MatrixBytes(const MATRIX& matrix) {
@@ -109,6 +111,38 @@ std::uint64_t HashFixedSample(std::uint64_t hash, int value) {
     hash = (hash ^ ((bits >> (byte * 8)) & 0xFF)) * kFnvPrime;
   }
   return hash;
+}
+std::int32_t SquareHalfword(std::uint32_t bits) {
+  const auto value = bits < 0x8000u ? static_cast<std::int32_t>(bits)
+                                    : static_cast<std::int32_t>(bits) - 65536;
+  return value * value;
+}
+
+void CheckVectorSquare(std::uint32_t bits) {
+  const auto second = bits ^ 0x8000u;
+  const auto third = bits ^ 0xFFFFu;
+  VECTOR input{std::bit_cast<std::int32_t>(0x5A5A0000u | bits),
+               std::bit_cast<std::int32_t>(0xA5A50000u | second),
+               std::bit_cast<std::int32_t>(0xFFFF0000u | third), 123456789};
+  const auto before = input;
+  struct GuardedVector {
+    std::uint32_t prefix;
+    VECTOR value;
+    std::uint32_t suffix;
+  };
+  GuardedVector actual{0x1234ABCDu, {11, 22, 33, -987654321}, 0xCDEF5678u};
+  const GuardedVector expected{actual.prefix,
+                               {SquareHalfword(bits), SquareHalfword(second),
+                                SquareHalfword(third), actual.value.pad},
+                               actual.suffix};
+  REQUIRE(Core_Math_SquareVectorComponents(&input, &actual.value) ==
+          &actual.value);
+  CHECK(std::memcmp(&actual, &expected, sizeof actual) == 0);
+  CHECK(std::memcmp(&input, &before, sizeof input) == 0);
+  VECTOR self_expected = expected.value;
+  self_expected.pad = input.pad;
+  REQUIRE(Core_Math_SquareVectorComponents(&input, &input) == &input);
+  CHECK(std::memcmp(&input, &self_expected, sizeof input) == 0);
 }
 }  // namespace
 
@@ -203,6 +237,35 @@ TEST_CASE(
   CHECK(product(&left, &right) == &right);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800989B9u) == nullptr);
+}
+
+TEST_CASE("Vector square keeps full products of every signed input halfword",
+          "[math][core-leaves]") {
+  for (std::uint32_t bits = 0; bits <= UINT16_MAX; ++bits) {
+    CheckVectorSquare(bits);
+  }
+}
+
+TEST_CASE(
+    "Vector square retains its typed resident entry and low-halfword golden",
+    "[math][core-leaves]") {
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  auto* resolved =
+      VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", 0x80041980u);
+  REQUIRE(resolved != nullptr);
+  using Square = VECTOR* (*)(const VECTOR*, VECTOR*);
+  const auto square = reinterpret_cast<Square>(resolved);
+  CHECK(square == Core_Math_SquareVectorComponents);
+  VECTOR input{65539, -65540, INT32_MIN, 321};
+  VECTOR output{1, 2, 3, -123};
+  CHECK(square(&input, &output) == &output);
+  CHECK(output.vx == 9);
+  CHECK(output.vy == 16);
+  CHECK(output.vz == 0);
+  CHECK(output.pad == -123);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
+                                          0x80041981u) == nullptr);
 }
 
 TEST_CASE("Battle fixed trigonometry uses the canonical native implementations",

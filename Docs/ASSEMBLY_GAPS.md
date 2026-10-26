@@ -7,9 +7,9 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **44** (44 stubs and 0 partial implementations).
+- Open native entries: **43** (43 stubs and 0 partial implementations).
 - Matching C/C++ reference bodies located: **13**.
-- Assembly located, but no matching C body located: **21**.
+- Assembly located, but no matching C body located: **20**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
 [ASSEMBLY_GAPS.csv](ASSEMBLY_GAPS.csv) contains **every open entry**, with its
@@ -32,7 +32,6 @@ and instantiation bindings rather than counted as missing C functions.
 | F01772 | `Core::Math::SquaredTileDistanceFromComponents` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7BDD4.s:35` |
 | F03399 | `Core::Math::LookupSineCosinePair` | `resources\rood-reverseWin\src\SLUS_010.40\31724.s:147` |
 | F03405 | `Core::Math::InverseSquareRootParts` | `resources\rood-reverseWin\src\SLUS_010.40\32154.s:79` |
-| F03409 | `Core::Math::SquareVectorComponents` | `resources\rood-reverseWin\src\SLUS_010.40\32154.s:24` |
 | F03414 | `Core::Math::NormalizeVectorRegisters` | `resources\rood-reverseWin\src\SLUS_010.40\32154.s:162` |
 | F02458 | `Effects::ScreenDistortion::WarpPolygonVertices` | `resources\rood-reverseWin\src\GIM\SCREFF2.PRG\3D8.s:9` |
 | F00766 | `Field::CallRoomEntryPoint` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1770` |

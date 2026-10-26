@@ -55,7 +55,6 @@ int Core_Math_SplitDecimalDigit(int value);
 int Core_Math_LookupSineCosinePair();
 long Core_Math_ArcTangent2(long y, long x);
 int Core_Math_InverseSquareRootParts();
-int Core_Math_SquareVectorComponents();
 int Core_Math_NormalizeVectorRegisters();
 
 #endif // VS_CORE_MATH_FIXEDPOINT_H_DECLS

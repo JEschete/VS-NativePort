@@ -415,6 +415,46 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Native signed-halfword vector squares (#42, 2026-10-26)
+
+F03409 (`Square0`, original32154.s:24-35) now narrows all three input
+words through the existing native signed16 helper, writes their full
+unshifted32-bit squares and returns the output vector. The source loads
+IR1/2/3 but stores MAC1/2/3: saturating the resulting products to IR's
+32767 limit or squaring full input words would be incorrect. The native
+implementation captures operands before writes, preserves output pad
+and supports in-place use without modifying unrelated input bytes.
+
+Evidence is parent47be03f7 plus the scoped worktree and four preserved
+owner paths; private `vectorsquare42-*` retains commands, source/dirty
+state and image hashes:
+
+- The typed API assertion/calls are compile-time red against the old
+  int() stub. New2 cases/327,688 assertions test every65,536 halfword on
+  every axis with differing poisoned upper words, both distinct-output
+  and self-alias paths, byte-exact guarded output/source preservation,
+  mixed wide-word golden results and the actual resident80041980
+  binding/interior rejection.
+- Debug/Release `build\<configuration>\VS.Tests.exe
+  "[core-leaves],[fixed-trig]" --reporter compact` passes13 cases/
+  371,852 assertions each; existing matrix/trig controls are unchanged.
+  Both x64 solution builds link both hosts; full suites pass837 cases/
+  4,553,908 assertions each. All109 port/audit controls pass.
+- Focused/default quality has0 actionable/0 new findings, unchanged
+  baselines; focused tidy retains five existing advisories and70 exact
+  fixture-literal reports. No tests/expected outputs were weakened.
+- Two native generations preserve297 maintained/owner paths and
+  original32154.s, repeating identically. Only generated FixedPoint.c/.h
+  change; there is no project/solution rewrite.
+
+The local original cohort reaches143/186,43 gaps (13 C/C++ references,
+20 assembly-only,10 missing listings). Implementations3112 and aliases149
+remain separate; the original C-backed subset stays132/145 and11 of the
+other41 entries are complete. This is the vector-square contract, not
+GTE register-state emulation, whole-math C++ promotion or compatibility
+retirement. Publication/exact CI are recorded on#42 before its checkbox
+advances.
+
 ### Shared BATTLE rotation-product entry (#42, 2026-10-26)
 
 F00763 (`func_800989B8`, original2EA3C.s:1664-1736) now exposes the
