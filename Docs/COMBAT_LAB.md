@@ -415,6 +415,67 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Native room tint postpass and public C linkage (#42/#191, 2026-10-26)
+
+F00769/F00770 (`func_80098D6C`/`func_80098E50`, original2EA3C.s:
+1944/2018) now belong to the existing owned RoomDraw implementation.
+The custom-register color helper has explicit typed native inputs.
+Its pure fixed-point math preserves original5:9:2 weighted luminance,
+signed16 strength, depth-cue saturation before signed offsets, final
+byte clamps and every high command/code byte, without changing GTE state.
+The postpass caches all parameters as the original does, applies the
+signed-byte offsets multiplied by4, and walks only the original GT3/GT4
+color locations and40/52-byte spans plus optional8-byte trailers.
+
+Valid empty spans remain no-ops and an unrelated packet length stops the
+pass as in the original. Invalid nonempty pointer ranges, missing
+parameters and truncated recognized packets log and terminate rather
+than continuing with unbounded writes. No ordering links, coordinates,
+UVs, palettes/pages, trailer bytes or other non-color data are changed.
+Field_SetRoomTint/Field_DrawRoomGeometry now exercise this production
+path instead of the former no-op stub.
+
+The integration also exposed #191: RoomDraw.h included Field/Room.h
+after closing its public extern-C block. A normal C++ include therefore
+gave the field primitive-range globals C++ linkage and failed to link.
+Keeping the transitive C header inside the existing block fixes the
+boundary, not just this test caller. The actual C++ field-draw integration
+now compiles, links and emits the expected tinted primitive in both
+configurations.
+
+Evidence is parent761c8b99 plus this scoped worktree, preserving the
+owner edits. Exact commands and results are private `roomtint42-*`:
+
+- Original tint-pass red:2 cases/5 assertions, all5 fail against the stub.
+- Debug/Release `build\<configuration>\VS.Tests.exe
+  "[room-tint],[room]" --reporter compact`:13 cases/131,346 assertions
+  each. The direct tint subset contributes7 cases/131,093; existing room
+  controls retain their outputs and add five real field-tint assertions.
+- Every65536 signed16 strength is tested for two asymmetric colors
+  against a separately expressed floor/clamp reference. Golden weighted
+  grayscale, partial fade, extreme offset and clamp-before-offset cases
+  preserve the code byte.
+- Mixed triangle/quad spans cover both trailer modes and the ignored low flag bit,
+  identity transforms and source stop behavior. Whole-buffer comparison
+  retains every non-color word/canary. The real BATTLE80098D6C/80098E50
+  resolver selects the explicit native contracts and rejects interiors.
+- Both x64 solution builds link both hosts; full native suites pass826
+  cases/4,222,248 assertions each. All106 port controls pass. Default and
+  focused checks have0 new findings; focused LegacyGpu retains its eight
+  existing findings with unchanged baselines.
+- Two native generations preserve297 maintained/owner paths and both
+  original reference sources, repeating identically. Only generated
+  RoomGeometry.c/.h and the Field/RoomRendering.c provider include change.
+  Tests projects render selectively and repeat without rewriting the
+  owner solution.
+
+The original cohort reaches137/186,49 remaining:15 C/C++ references,
+24 assembly-only and10 missing listings. Original order/prior135 checks
+are retained; only F00769/F00770 advance after exact-revision CI. This is
+verified native math/packet/field integration, not every authored tint,
+all-room visual parity, complete renderer promotion or compatibility
+retirement. Publication and #191 closure are recorded on#42/#191.
+
 ### Shared original-width room-light triangle kernel (#190/#42, 2026-10-26)
 
 F00768 (`func_80098C3C`, original2EA3C.s:1857) now exports the typed

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Field/Room.h"
 #include "Render/RoomGeometry.h"
 
 // decomp: BATTLE.PRG func_80097388 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
@@ -56,19 +55,6 @@ int Render_IsRoomPolygonOnScreen()
 int Render_LinkRoomPolygonByDepth()
 {
     VS_UNPORTED("Render::LinkRoomPolygonByDepth");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80098D6C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-void Render_TintRoomGeometryPrimitives(void*, void*, Field_RoomTint*, int)
-{
-    VS_UNPORTED("Render::TintRoomGeometryPrimitives");
-}
-
-// decomp: BATTLE.PRG func_80098E50 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Render_TintRoomPrimitiveColor()
-{
-    VS_UNPORTED("Render::TintRoomPrimitiveColor");
     return 0;
 }
 

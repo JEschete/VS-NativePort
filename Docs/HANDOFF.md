@@ -9,6 +9,25 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F00769/F00770 now share an explicit native room-packet tint kernel
+  in RoomDraw, reaching137/186 original entries and49 gaps (15 C/C++
+  references,24 assembly-only,10 missing listings). Original2EA3C.s:
+  1944/2018 establishes GT3/GT4 traversal, optional8-byte trailers,
+  signed-byte*4 offsets and fixed-point5:9:2 luminance with saturation
+  before offsets. Red2/5 fails all5; direct7/131,093 and real field/room
+  integration13/131,346 pass, including every signed16 strength for two
+  asymmetric colors, packet/code/UV/link canaries and both original
+  function addresses. Full Debug/Release826/4,222,248 each,106 port
+  controls, both hosts and0-new default/focused quality pass; focused
+  LegacyGpu retains8 existing findings, not a changed baseline.
+  Two generations preserve297 maintained/owner paths and reference
+  sources, repeating identically with three expected generated outputs.
+  #191 is the coupled public-header fix: transitive Field/Room.h now
+  stays inside RoomDraw's C linkage block, removing demonstrated C++
+  undefined symbols from the real field draw integration. No caller-only
+  redeclarations or casts hide it. No all-room visual parity or
+  compatibility-retirement claim. Private `roomtint42-*`; publication/
+  exact CI and #191 closure are recorded on#42/#191.
 - #190/#42 F00768 now exposes one typed room-light triangle kernel shared
   with the existing owned sampler, reaching135/186 original entries and51
   gaps (16 C/C++ references,25 assembly-only,10 missing listings).

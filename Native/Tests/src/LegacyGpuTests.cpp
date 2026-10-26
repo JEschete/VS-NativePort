@@ -13,6 +13,9 @@
 #include "Render/RoomDraw.h"
 
 extern "C" {
+#include "Field/Camera.h"
+#include "Field/Gimmicks.h"
+#include "Field/RoomRendering.h"
 #include "Render/RoomGeometry.h"
 }
 static_assert(
@@ -242,6 +245,35 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   Render_SetRoomPolygonNearClip(8);
   Render_SetRoomTextureLodDepth(512);
+  const auto saved_room = Field_roomData;
+  const auto saved_tint = Field_roomTint;
+  const auto saved_mode = Field_roomGeometryDrawMode;
+  const auto saved_start = Field_roomPrimitiveRangeStart;
+  const auto saved_end = Field_roomPrimitiveRangeEnd;
+  const auto saved_field_view = frame->viewMatrix;
+  for (int axis = 0; axis < 3; ++axis) {
+    frame->viewMatrix.m[axis][axis] = 4096;
+  }
+  frame->viewMatrix.t[2] = 1024;
+  Field_roomData.header.geometryLength = sizeof geometry;
+  Field_roomGeometryDrawMode = 0;
+  Render_ColorCode tint{1, 2, 3, 0};
+  Field_SetRoomTint(&tint, 0);
+  Field_DrawRoomGeometry(&geometry);
+  auto* tinted = reinterpret_cast<POLY_GT3*>(buffer);
+  CHECK(Field_roomPrimitiveRangeStart == buffer);
+  CHECK(Field_roomPrimitiveRangeEnd == buffer + sizeof(POLY_GT3));
+  CHECK(tinted->r0 == 132);
+  CHECK(tinted->g1 == 136);
+  CHECK(tinted->b2 == 140);
+  Field_roomData = saved_room;
+  Field_roomTint = saved_tint;
+  Field_roomGeometryDrawMode = saved_mode;
+  Field_roomPrimitiveRangeStart = saved_start;
+  Field_roomPrimitiveRangeEnd = saved_end;
+  frame->viewMatrix = saved_field_view;
+  ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+  frame->primitiveCursor = buffer;
   Render_DrawRoomGeometry(&geometry, 0);
   auto* triangle = reinterpret_cast<POLY_GT3*>(buffer);
   CHECK(frame->primitiveCursor == buffer + sizeof(POLY_GT3));

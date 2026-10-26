@@ -7,6 +7,7 @@
 #include "Render/Render.h"
 
 enum { kRoomSpatialDimensions = 3, kRoomGeometryGroupBytes = 64 };
+typedef struct Field_RoomTint Field_RoomTint;
 
 // decomp: _mpdGeometryHeader / 146C.h:31; transform access in 2EA3C.s:1265.
 typedef struct Render_RoomGeometryGroup {
@@ -37,13 +38,19 @@ void Render_SetRoomPolygonFarClip(int depth);
 void Render_SetRoomPolygonScreenBounds(int left, int top, int right,
                                        int bottom);
 void Render_SetRoomTextureLodDepth(int depth);
+uint32_t Render_TintRoomPrimitiveColor(uint32_t color, int16_t strength,
+                                       int16_t red_offset, int16_t green_offset,
+                                       int16_t blue_offset);
+void Render_TintRoomGeometryPrimitives(void* start, void* end,
+                                       Field_RoomTint* tint, int flags);
 void Render_DrawSkyDome(void* data);
 void Render_GetProjectionScreenOffset(Render_ScreenOffset* offset);
 void Render_SetProjectionScreenOffset(Render_ScreenOffset* offset);
 
+#include "Field/Room.h"
+
 #ifdef __cplusplus
 }
 #endif
-#include "Field/Room.h"
 
 #endif  // VS_OWNED_RENDER_ROOMDRAW_H

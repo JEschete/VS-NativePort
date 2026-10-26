@@ -30,7 +30,6 @@
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
-#include "Render/RoomGeometry.h"
 #include "Render/RoomLighting.h"
 #include "Render/UiPrimitives.h"
 #include "State/Settings.h"

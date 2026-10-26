@@ -189,6 +189,9 @@
     <ClCompile Include="src\RoomLightingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\RoomTintTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\RoomTriggerMarkerTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

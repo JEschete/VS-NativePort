@@ -7,9 +7,9 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **51** (51 stubs and 0 partial implementations).
-- Matching C/C++ reference bodies located: **16**.
-- Assembly located, but no matching C body located: **25**.
+- Open native entries: **49** (49 stubs and 0 partial implementations).
+- Matching C/C++ reference bodies located: **15**.
+- Assembly located, but no matching C body located: **24**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
 [ASSEMBLY_GAPS.csv](ASSEMBLY_GAPS.csv) contains **every open entry**, with its
@@ -48,7 +48,6 @@ and instantiation bindings rather than counted as missing C functions.
 | F00750 | `Render::InterpolateRoomVertexMidpoint` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:921` |
 | F00751 | `Render::IsRoomPolygonOnScreen` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:969` |
 | F00752 | `Render::LinkRoomPolygonByDepth` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1036` |
-| F00770 | `Render::TintRoomPrimitiveColor` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:2011` |
 | F03404 | `Render::ApplyDepthCueColor` | `resources\rood-reverseWin\src\SLUS_010.40\32154.s:65` |
 | F03408 | `Render::SetFogNearDistance` | `resources\rood-reverseWin\src\SLUS_010.40\32154.s:9` |
 

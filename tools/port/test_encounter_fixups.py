@@ -11,6 +11,26 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_room_tint_pass_shares_the_explicit_native_color_contract(self):
+        owned = self.owned_items()
+        for identity in ("F00769", "F00770"):
+            self.assertEqual(
+                owned[identity]["path"],
+                r"Native\Engine\src\Render\RoomDraw.c",
+            )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(source.count("Render_TintRoomPrimitiveColor("), 2)
+        self.assertIn("const int16_t strength = tint->strength;", source)
+        header = (root / r"Native\Engine\src\Render\RoomDraw.h").read_text(
+            encoding="utf-8"
+        )
+        dependency = header.index('#include "Field/Room.h"')
+        self.assertLess(header.index('extern "C" {'), dependency)
+        self.assertLess(dependency, header.index("\n}\n#endif"))
+
     def test_room_light_triangle_shares_the_existing_owned_sampler_kernel(self):
         owned = self.owned_items()
         self.assertEqual(

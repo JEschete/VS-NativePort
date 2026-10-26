@@ -3,6 +3,7 @@
 
 #include <limits.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "Core/Gte.h"
@@ -54,8 +55,107 @@ enum {
   kClutRecordOffset = 26,
   kPageRecordOffset = 30,
   kSkyGouraudCommand = 0x30000000,
-  kSkyPacketWords = sizeof(POLY_G3) / sizeof(u_long)
+  kSkyPacketWords = sizeof(POLY_G3) / sizeof(u_long),
+  kTintChannels = 3,
+  kTintChannelFractionBits = 4,
+  kTintLuminanceRed = 5,
+  kTintLuminanceGreen = 9,
+  kTintLuminanceBlue = 2,
+  kTintOffsetScale = 4,
+  kTintPaddingFlag = 2,
+  kTintPaddingWords = 2
 };
+
+static uint32_t ClampTintChannel(int64_t value) {
+  if (value < 0) return 0;
+  if (value > UINT8_MAX) return UINT8_MAX;
+  return (uint32_t)value;
+}
+
+// decomp: func_80098E50 (src/BATTLE/BATTLE.PRG/2EA3C.s:2018).
+// Original t6/t8/t0-t2 operands are explicit native values, not saved
+// registers.
+uint32_t Render_TintRoomPrimitiveColor(uint32_t color, int16_t strength,
+                                       int16_t red_offset, int16_t green_offset,
+                                       int16_t blue_offset) {
+  const int16_t offsets[kTintChannels] = {red_offset, green_offset,
+                                          blue_offset};
+  const int64_t luminance =
+      (color & UINT8_MAX) * kTintLuminanceRed +
+      ((color >> CHAR_BIT) & UINT8_MAX) * kTintLuminanceGreen +
+      ((color >> (2 * CHAR_BIT)) & UINT8_MAX) * kTintLuminanceBlue;
+  const int64_t channel_scale = 1 << kTintChannelFractionBits;
+  const int64_t blend_scale =
+      1 << (kFixedFractionBits + kTintChannelFractionBits);
+  uint32_t result = color & ~(uint32_t)kColorMask;
+  for (unsigned channel = 0; channel < kTintChannels; ++channel) {
+    const unsigned shift = channel * CHAR_BIT;
+    int64_t value = (color >> shift) & UINT8_MAX;
+    if (strength != 0) {
+      const int64_t numerator =
+          value * blend_scale + strength * (luminance - value * channel_scale);
+      value = ClampTintChannel(numerator <= 0 ? 0 : numerator / blend_scale);
+    }
+    result |= ClampTintChannel(value + offsets[channel]) << shift;
+  }
+  return result;
+}
+
+static void RequireTintSpan(int valid, const char* message) {
+  if (!valid) {
+    Core_Debugf("render", "%s", message);
+    abort();
+  }
+}
+
+// decomp: func_80098D6C (src/BATTLE/BATTLE.PRG/2EA3C.s:1944).
+void Render_TintRoomGeometryPrimitives(void* start, void* end,
+                                       Field_RoomTint* tint, int flags) {
+  if (start == end) return;
+  RequireTintSpan(start != NULL && end != NULL && tint != NULL,
+                  "Room tint requires a primitive span and parameters");
+  const uintptr_t first = (uintptr_t)start;
+  const uintptr_t last = (uintptr_t)end;
+  RequireTintSpan(first <= last && (last - first) % sizeof(uint32_t) == 0,
+                  "Room tint primitive span is invalid");
+  const int16_t red = (int16_t)(tint->red * kTintOffsetScale);
+  const int16_t green = (int16_t)(tint->green * kTintOffsetScale);
+  const int16_t blue = (int16_t)(tint->blue * kTintOffsetScale);
+  const int16_t strength = tint->strength;
+  const size_t padding =
+      (flags & kTintPaddingFlag) != 0 ? kTintPaddingWords : 0;
+  unsigned char* cursor = start;
+  size_t remaining = last - first;
+  while (remaining != 0) {
+    RequireTintSpan(remaining >= sizeof(uint32_t),
+                    "Room tint primitive header is truncated");
+    uint32_t header;
+    memcpy(&header, cursor, sizeof header);
+    const unsigned length = header >> kPacketCommandShift;
+    int corners;
+    if (length == kTriangleCorners * kVertexPacketWords) {
+      corners = kTriangleCorners;
+    } else if (length == kQuadCorners * kVertexPacketWords) {
+      corners = kQuadCorners;
+    } else {
+      return;
+    }
+    const size_t bytes =
+        (1 + (size_t)corners * kVertexPacketWords + padding) * sizeof(uint32_t);
+    RequireTintSpan(remaining >= bytes,
+                    "Room tint primitive payload is truncated");
+    for (int vertex = 0; vertex < corners; ++vertex) {
+      unsigned char* destination =
+          cursor + (1 + (size_t)vertex * kVertexPacketWords) * sizeof(uint32_t);
+      uint32_t color;
+      memcpy(&color, destination, sizeof color);
+      color = Render_TintRoomPrimitiveColor(color, strength, red, green, blue);
+      memcpy(destination, &color, sizeof color);
+    }
+    cursor += bytes;
+    remaining -= bytes;
+  }
+}
 
 int Render_ValidateRoomGeometry(const void* data, size_t size) {
   if (data == NULL || size < sizeof(unsigned)) {
