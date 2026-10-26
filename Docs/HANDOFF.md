@@ -20,8 +20,8 @@ verification of the current worktree.
   941 cases/7,760,407 assertions. The 123 port controls and default quality
   check pass with 0 new findings. The regenerated audit now records 23 open
   gaps, 3,128 implementations and 153 aliases separately. This is locally
-  verified; the issue tracker still needs the published revision and its exact
-  CI result before advancing #42.
+  verified and published in `7f523452`; exact Source Quality run
+  `40377510616` passed. The local gap cohort is now 163/186, with 23 open.
 - Read-only `rood-reverse` is now at `99bf0429`. Its PLG074 update replaces
   `F8.c` assembly stubs with shared C implementations for tiled rings, ring
   arcs, five-sample trails and rotating surfaces. This is new source evidence
