@@ -12,6 +12,24 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_room_packet_linking_reuses_shared_depth_resolution_and_native_handles(self):
+        self.assertEqual(
+            self.owned_items()["F00752"]["path"],
+            r"Native\Engine\src\Render\RoomDraw.c",
+        )
+        self.assertIn(
+            ("BATTLE/BATTLE.PRG", 0x800980F8, "F00752"),
+            copy_fixups.MODULE_FUNCTION_ENTRIES,
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(source.count("Render_LinkRoomPolygonByDepth("), 2)
+        self.assertIn("ResolveRoomPolygonDepth(", source)
+        self.assertIn("biased < 0", source)
+        self.assertIn("AddPrim((u_long*)Render_frameScratch.orderingTable + depth, packet)", source)
+
     def test_room_subdivision_entries_share_the_existing_bounded_recursion(self):
         owned = self.owned_items()
         for identity, address in (("F00748", 0x80097AEC), ("F00749", 0x80097CF0)):
@@ -441,7 +459,12 @@ class EncounterFixupTests(unittest.TestCase):
         source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
             encoding="utf-8"
         )
-        self.assertEqual(source.count("depth >= room_far_depth"), 2)
+        self.assertEqual(source.count("biased >= room_far_depth"), 1)
+        self.assertIn(
+            "ResolveRoomPolygonDepth(polygon->depth, polygon->material.flags)",
+            source,
+        )
+        self.assertEqual(source.count("return WriteRoomPolygon(&polygon, limit);"), 2)
         self.assertIn(
             "room_far_depth = Core_Math_WrapSigned16((uint32_t)depth);", source
         )

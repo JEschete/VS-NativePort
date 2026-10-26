@@ -7,9 +7,9 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **24** (24 stubs and 0 partial implementations).
+- Open native entries: **23** (23 stubs and 0 partial implementations).
 - Matching C/C++ reference bodies located: **10**.
-- Assembly located, but no matching C body located: **4**.
+- Assembly located, but no matching C body located: **3**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
 [ASSEMBLY_GAPS.csv](ASSEMBLY_GAPS.csv) contains **every open entry**, with its
@@ -29,7 +29,6 @@ and instantiation bindings rather than counted as missing C functions.
 | F00766 | `Field::CallRoomEntryPoint` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1770` |
 | F00745 | `Render::DrawRoomGeometryPolygons` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:104` |
 | F00747 | `Render::ProjectAndDecodeRoomPolygon` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:548` |
-| F00752 | `Render::LinkRoomPolygonByDepth` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1036` |
 
 ## Assembly not locally extracted
 
@@ -117,9 +116,9 @@ as behaviorally complete. No native gameplay issue is closed by this audit.
 | Reference | Revision | Production source files scanned | Source SHA-256 |
 | --- | --- | --- | --- |
 | `rood-reverseWin` | `unversioned snapshot` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
-| `rood-reverse` | `4edbdbf5a797c733dd7f33a52c400de69219401c` | 393 | `60b2ce44d09822a777e76caac7f2ef0236a8e73cb434b9da27c0bb8973f94096` |
+| `rood-reverse` | `99bf0429a44684d3c1ec4340a04d0dad17e43e7e` | 538 | `9ca07109b9f86b444b2cc2d7c07791bcffe55b280707f7ae04c3fd18f8069a71` |
 | `rood-reverse-noprompt` | `39821e4fc0353dc89855f5f29fd678d71545daa2` | 389 | `e3e5d73ccd7c08971c9558baad6e6a2df2e2fe0bcd9b8961e133476e86db7a8c` |
-| `rood-boi` | `e59320caedba5855cb050f24f3ba007204faea78` | 758 | `fa68a5f07470a4f970c81453cc605ecad82f8d17fc274168e5bf5eeba5e9a1d8` |
+| `rood-boi` | `d3ec02d2d762eedc67c27eb8dbe2606aca3bd05a` | 763 | `29e55b67045233feca59d1da3f4cfe52257d5aa56b019e04a3c6db922edd14b8` |
 
 A Git revision is recorded only for a reference repository whose
 discovered Git top-level is that reference root itself. A snapshot nested

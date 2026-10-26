@@ -72,6 +72,8 @@ int Render_SubdivideRoomTriangle(
 int Render_SubdivideRoomQuad(
     const Render_RoomVertex vertices[kRoomQuadVertexCount], int levels,
     const Render_RoomPolygonMaterial* material, size_t available_bytes);
+int Render_LinkRoomPolygonByDepth(void* packet, size_t packet_words,
+                                  Core_GteWord projected_depth, unsigned flags);
 int Render_IsRoomPolygonOnScreen(const Render_RoomScreenBounds* projected);
 void Render_InterpolateRoomVertexMidpoint(const Render_RoomVertex* first,
                                           const Render_RoomVertex* second,

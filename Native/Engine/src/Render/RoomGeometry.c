@@ -16,10 +16,3 @@ int Render_ProjectAndDecodeRoomPolygon()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_800980F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Render_LinkRoomPolygonByDepth()
-{
-    VS_UNPORTED("Render::LinkRoomPolygonByDepth");
-    return 0;
-}
-

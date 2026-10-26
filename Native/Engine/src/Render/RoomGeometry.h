@@ -11,6 +11,5 @@
 
 int Render_DrawRoomGeometryPolygons();
 int Render_ProjectAndDecodeRoomPolygon();
-int Render_LinkRoomPolygonByDepth();
 
 #endif // VS_RENDER_ROOMGEOMETRY_H_DECLS

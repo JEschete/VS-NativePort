@@ -344,9 +344,51 @@ typedef struct ProjectedRoomPolygon {
   int low_detail;
 } ProjectedRoomPolygon;
 
+static Core_GteWord ResolveRoomPolygonDepth(Core_GteWord projected_depth,
+                                            unsigned flags) {
+  if (projected_depth < room_near_depth) return -1;
+  const int64_t biased = (int64_t)projected_depth +
+                         Core_Math_WrapSigned16(flags >> kPackedCoordinateBits);
+  if (biased < 0 || biased < room_near_depth || biased >= room_far_depth ||
+      biased >= kLastOrderingSlot) {
+    return -1;
+  }
+  return (Core_GteWord)biased;
+}
+
+// decomp: func_800980F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1036-1064).
+// Native projection already returns quarter-depth; no guest SZ register input.
+int Render_LinkRoomPolygonByDepth(void* packet, size_t packet_words,
+                                  Core_GteWord projected_depth,
+                                  unsigned flags) {
+  const uintptr_t base =
+      (uintptr_t)Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
+  const uintptr_t address = (uintptr_t)packet;
+  if (packet == NULL || base == 0 ||
+      Render_frameScratch.orderingTable == NULL ||
+      (packet_words != 1 + kTriangleCorners * kVertexPacketWords &&
+       packet_words != 1 + kQuadCorners * kVertexPacketWords) ||
+      address < base || address - base > kPrimitiveBufferBytes ||
+      address % sizeof(u_long) != 0 ||
+      packet_words * sizeof(u_long) >
+          kPrimitiveBufferBytes - (address - base)) {
+    Core_Debugf("render",
+                "Room polygon linking requires a valid native packet span");
+    abort();
+  }
+  const Core_GteWord depth = ResolveRoomPolygonDepth(projected_depth, flags);
+  if (depth < 0) return 0;
+  setlen(packet, packet_words - 1);
+  AddPrim((u_long*)Render_frameScratch.orderingTable + depth, packet);
+  return 1;
+}
+
 static int WriteRoomPolygon(const ProjectedRoomPolygon* polygon,
                             uintptr_t limit) {
   enum { kLowDetailUvMask = 0x7F7F };
+  if (ResolveRoomPolygonDepth(polygon->depth, polygon->material.flags) < 0) {
+    return 0;
+  }
   const size_t words = 1 + (size_t)polygon->corners * kVertexPacketWords;
   const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
   if (cursor > limit || words * sizeof(u_long) > limit - cursor) return -1;
@@ -368,8 +410,10 @@ static int WriteRoomPolygon(const ProjectedRoomPolygon* polygon,
                << kPacketCommandShift;
   packet[kPalettePacketWord] |= polygon->material.clut << kPackedCoordinateBits;
   packet[kPagePacketWord] |= (unsigned)page << kPackedCoordinateBits;
-  setlen(packet, words - 1);
-  AddPrim((u_long*)Render_frameScratch.orderingTable + polygon->depth, packet);
+  if (!Render_LinkRoomPolygonByDepth(packet, words, polygon->depth,
+                                     polygon->material.flags)) {
+    return 0;
+  }
   Render_frameScratch.primitiveCursor = packet + words;
   return 1;
 }
@@ -396,11 +440,6 @@ static int EmitSubdividedPolygon(const RoomVertex* vertices, int corners,
   }
   const RoomScreenBounds projected = {left, top, right, bottom};
   if (OutsideScreenBounds(&projected) || depth < room_near_depth) {
-    return 0;
-  }
-  depth += (int16_t)(material->flags >> kPackedCoordinateBits);
-  if (depth < room_near_depth || depth >= room_far_depth ||
-      depth >= kLastOrderingSlot) {
     return 0;
   }
   ProjectedRoomPolygon polygon = {.vertices = vertices,
@@ -644,11 +683,8 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
                : Render_SubdivideRoomQuad(vertices, subdivision, &material,
                                           available_bytes);
   }
-  depth += (int16_t)(flags >> kPackedCoordinateBits);
-  if (depth < room_near_depth || depth >= room_far_depth ||
-      depth >= kLastOrderingSlot) {
-    return 0;
-  }
+  const Core_GteWord linked_depth = ResolveRoomPolygonDepth(depth, flags);
+  if (linked_depth < 0) return 0;
   uint16_t clut, page;
   memcpy(&clut, data + kClutRecordOffset, sizeof clut);
   memcpy(&page, data + kPageRecordOffset, sizeof page);
@@ -661,7 +697,7 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
                    .command = data[kRoomCommandOffset],
                    .clut = clut,
                    .page = page},
-      .low_detail = (uint32_t)depth >= room_lod_depth};
+      .low_detail = (uint32_t)linked_depth >= room_lod_depth};
   return WriteRoomPolygon(&polygon, limit);
 }
 

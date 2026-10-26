@@ -299,6 +299,18 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
     CHECK(coordinates == expected);
   }
   geometry.group.flags = 0x800;
+  Render_SetRoomTextureLodDepth(256);
+  for (int bias : {-1, 0, 1}) {
+    geometry.group.flags =
+        0x800u |
+        (static_cast<unsigned>(static_cast<std::uint16_t>(bias)) << 16);
+    ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+    frame->primitiveCursor = buffer;
+    Render_DrawRoomGeometry(&geometry, 0);
+    CHECK(triangle->u2 == (bias < 0 ? 50 : 25));
+    CHECK(triangle->tpage == (bias < 0 ? 0x15 : 0x14));
+  }
+  geometry.group.flags = 0x800;
   frame->primitiveCursor = buffer;
   Render_SetRoomTextureLodDepth(128);
   Render_DrawRoomGeometry(&geometry, 0);

@@ -9,6 +9,26 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F00752 now exposes a typed native packet-span/depth/bias link entry and
+  reuses it for the existing room packet writer. Original
+  `2EA3C.s:1036-1064` shifts projected depth by two, adds the signed high-halfword
+  bias, and rejects depths outside `[8, 0x7FF)` before linking the packet into
+  the ordering table. The native entry keeps the current quarter-depth input,
+  uses checked native packet spans and ordering-table pointers, and centralizes
+  the same clipping for base and subdivided polygons. Focused tests pass
+  6 cases/3,456 assertions; full Debug and Release suites each pass
+  941 cases/7,760,407 assertions. The 123 port controls and default quality
+  check pass with 0 new findings. The regenerated audit now records 23 open
+  gaps, 3,128 implementations and 153 aliases separately. This is locally
+  verified; the issue tracker still needs the published revision and its exact
+  CI result before advancing #42.
+- Read-only `rood-reverse` is now at `99bf0429`. Its PLG074 update replaces
+  `F8.c` assembly stubs with shared C implementations for tiled rings, ring
+  arcs, five-sample trails and rotating surfaces. This is new source evidence
+  relevant to F01986-F01995, not a native implementation. The open-gap audit
+  still reports those declarations as assembly-not-located; map the shared
+  template bodies to individual function IDs before changing their ledger
+  status or porting them.
 - #42 F00748/F00749 now expose bounded typed triangle/quad subdivision
   entries sharing the existing recursion. Original2EA3C.s:612/752
   proves four recursive children plus three triangle edges, and four
