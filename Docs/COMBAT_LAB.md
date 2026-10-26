@@ -415,6 +415,63 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Shared original-width room-light triangle kernel (#190/#42, 2026-10-26)
+
+F00768 (`func_80098C3C`, original2EA3C.s:1857) now exports the typed
+kernel used by the existing owned Render_SampleRoomLighting path.
+The imported triangle remains32 scalar bytes, with bounds separate from
+its three coordinate/color pairs. This removes the obsolete generated
+stub without introducing a second interpolation implementation.
+
+The original tests positive signed32 NCLIP MAC0 area and nonnegative
+wrapped sub-areas. Channel products/additions wrap unsigned32 before
+unsigned division and the original signed-result/byte clamps. Native
+math now preserves those widths without depending on hidden GTE register
+state. Geometric rejection leaves the direct output untouched; success
+writes only RGB. The room sampler retains its bounds, two-layer lookup,
+ambient fallback and complete fallback-word behavior.
+
+The prior64-bit kernel was observably different: a triangle spanning
+-32768..32767 has mathematical area4294836225 but original signed32
+MAC0 -131071. Original code rejects it; the old sampler accepted it,
+returning vertex55/66/77/code5A instead of ambient11/22/33/code0.
+The new native red fixture fails all4 assertions before the fix.
+Another golden case checks positive area1024000000: constant255 colors
+produce3 after original unsigned32 numerator wrap, not widened255.
+This is confirmed arithmetic conformance, not a demonstrated cause of
+an owner-visible lighting report.
+
+Verification is parent7a4ca39e plus the scoped worktree and preserved owner
+edits; exact commands/results are private `roomlight190-*`:
+
+- `build\<configuration>\VS.Tests.exe "[room-lighting],[lighting]"
+  --reporter compact` passes7 cases/12,380 assertions in Debug/Release.
+  The new direct tests contribute6 cases/12,379, with the existing sampler
+  case retaining both layers, interpolation and fallback behavior.
+- Corners and inclusive edges have independent golden RGB values.
+  Negative winding, degeneracy, outside points and the signed-area
+  overflow preserve rejected output. Guard words, code bytes and every
+  input-triangle byte stay unchanged where required.
+- 4096 deterministic signed16 tuples compare against independently
+  expanded determinants and explicit wide-sum-to32-bit narrowing.
+  Both accepted/rejected populations exceed128; this local generator
+  does not alter any gameplay RNG.
+- The actual BATTLE80098C3C resolver selects the typed shared kernel,
+  invokes it and rejects its interior address.
+- Both x64 host builds link; full Debug/Release suites pass819 cases/
+  4,091,150 assertions each. All105 port controls and0-new focused/default
+  quality pass, without changing baselines.
+- Two native generations preserve296 maintained/owner paths and both
+  original instruction/C sources, and repeat identically. Only generated
+  RoomGeometry.c/.h change. Tests projects render selectively and repeat,
+  leaving the owner solution untouched.
+
+The original cohort reaches135/186,51 remaining (16 C/C++ references,
+25 assembly-only,10 missing listings), preserving all IDs/order and
+prior134 checks. No all-room visual parity, complete renderer promotion
+or compatibility retirement is inferred. Publication and exact CI are
+recorded on#190/#42.
+
 ### Native script weapon-mode transition (#42/#148, 2026-10-26)
 
 F01130 (`func_800B9DB4`, original4A0A8.c:2158 and the matching

@@ -59,13 +59,6 @@ int Render_LinkRoomPolygonByDepth()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_80098C3C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Render_InterpolateRoomLightTriangle()
-{
-    VS_UNPORTED("Render::InterpolateRoomLightTriangle");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_80098D6C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
 void Render_TintRoomGeometryPrimitives(void*, void*, Field_RoomTint*, int)
 {

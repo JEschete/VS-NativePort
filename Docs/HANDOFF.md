@@ -9,6 +9,29 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #190/#42 F00768 now exposes one typed room-light triangle kernel shared
+  with the existing owned sampler, reaching135/186 original entries and51
+  gaps (16 C/C++ references,25 assembly-only,10 missing listings).
+  Original2EA3C.s:1857 uses signed32 NCLIP areas and unsigned32 weighted
+  sums. The former widened64 kernel wrongly accepted a full signed16
+  triangle whose original MAC0 area is -131071; red1/4 fails all4 checks.
+  Final direct6/12,379 and combined existing-layer7/12,380 controls cover
+  edges/corners/winding/degeneracy, both overflow widths,4096 signed16
+  tuples, unchanged output/input canaries and original-address resolution.
+  Full Debug/Release819/4,091,150 each,105 port controls, both hosts and
+  0-new focused/default quality pass without baseline changes. Two native
+  generations preserve296 maintained/owner paths and original reference
+  files, repeating identically; only RoomGeometry.c/.h lose their old
+  declaration/stub. Tests projects render selectively and repeat without
+  rewriting the owner solution. No demonstrated owner-visible lighting
+  cause, all-room visual parity, C++ promotion or retirement claim.
+  Private `roomlight190-*`; publication/exact CI are on#190/#42.
+- F01805/F01806 remain disabled as a coupled navigation package. The
+  updater still requires unported F01769 frame-work timing, which feeds
+  both AI budgets and RNG, plus a typed contract for cross-function
+  L800DF8A4. Do not ship the request producer with a zero timer or a
+  guest-register continuation fallback. The source/assembly trace is
+  recorded in the session dependency tasks; no navigation code changed.
 - #42 F01130 now implements the original Ashley weapon-mode opcode through
   typed native battle/animation/visibility APIs, reaching134/186 original
   entries and52 gaps (17 C/C++ references,25 assembly-only,10 missing

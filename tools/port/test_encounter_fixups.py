@@ -11,6 +11,18 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_room_light_triangle_shares_the_existing_owned_sampler_kernel(self):
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F00768"]["path"], r"Native\Engine\src\Render\RoomLighting.c"
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Engine\src\Render\RoomLighting.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(source.count("Render_InterpolateRoomLightTriangle("), 2)
+        self.assertIn("return SignedWord((uint32_t)area);", source)
+
     def test_script_weapon_mode_owns_its_original_opcode_and_named_wait_state(self):
         owned = self.owned_items()
         self.assertEqual(
