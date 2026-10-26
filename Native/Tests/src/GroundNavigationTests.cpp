@@ -6,6 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/MovementBehavior.h"
@@ -587,4 +588,72 @@ TEST_CASE("Near target gating preserves the actual strict hundred cutoff",
   fixture.states[0].distancesSquared[1] = distance;
   CHECK(Battle_Ai_IsAiTargetBeyondNearRadius(&fixture.states[0], 1, range) ==
         (distance > 100));
+}
+
+TEST_CASE("Actor contact release clears the reserved moving-platform bit",
+          "[ai][contact-release][occupancy-red]") {
+  GroundFixture fixture;
+  fixture.actors[1].commandOpcode = 11;
+  fixture.states[1].nextTile.word = 2u << 8;
+  fixture.models[1].instance.supportLayer = 0;
+  fixture.room.reservedEPrefix[0] = 0xFF;
+  Battle_Ai_ReleaseActorAiContactOccupancy(1);
+  CHECK(fixture.room.reservedEPrefix[0] == 0xFB);
+}
+
+namespace {
+u_char ExpectedContactRelease(unsigned command, unsigned layer, unsigned bit) {
+  constexpr unsigned kInitial = 0xA5;
+  if (((1u << (command & 31)) & 0x4800) == 0 || bit == 0 || layer != 0) {
+    return kInitial;
+  }
+  const auto mask = ~(1u << (bit & 31));
+  return static_cast<u_char>((mask & 0x80000000u) ? kInitial & mask
+                                                  : kInitial | mask);
+}
+
+void CheckActorContactBits(GroundFixture& fixture, unsigned command,
+                           unsigned layer) {
+  for (unsigned bit = 0; bit < 256; ++bit) {
+    fixture.states[1].nextTile.word = 0xA500005Au | (bit << 8);
+    fixture.room.reservedEPrefix[0] = 0xA5;
+    Battle_Ai_ReleaseActorAiContactOccupancy(1);
+    CHECK(fixture.room.reservedEPrefix[0] ==
+          ExpectedContactRelease(command, layer, bit));
+  }
+}
+}  // namespace
+
+TEST_CASE(
+    "Actor contact release retains every command contact and support gate",
+    "[ai][contact-release]") {
+  GroundFixture fixture;
+  for (unsigned command = 0; command < 256; ++command) {
+    fixture.actors[1].commandOpcode = static_cast<u_char>(command);
+    for (unsigned layer = 0; layer < 16; ++layer) {
+      fixture.models[1].instance.supportLayer = static_cast<u_char>(layer);
+      fixture.models[1].instance.placementLayer = 15;
+      CheckActorContactBits(fixture, command, layer);
+    }
+  }
+}
+
+TEST_CASE("Actor contact release preserves source no-state and no-room gates",
+          "[ai][contact-release]") {
+  GroundFixture fixture;
+  Battle_actors[1] = nullptr;
+  Battle_Ai_actorAiStates[1] = nullptr;
+  fixture.room.reservedEPrefix[0] = 0xA5;
+  Battle_Ai_ReleaseActorAiContactOccupancy(1);
+  CHECK(fixture.room.reservedEPrefix[0] == 0xA5);
+  Battle_actors[1] = &fixture.actors[1];
+  Battle_Ai_actorAiStates[1] = &fixture.states[1];
+  fixture.actors[1].commandOpcode = 11;
+  fixture.states[1].nextTile.word = 0x200;
+  Battle_Ai_roomAiState = nullptr;
+  Battle_Ai_ReleaseActorAiContactOccupancy(1);
+  CHECK(fixture.room.reservedEPrefix[0] == 0xA5);
+  Battle_Ai_roomAiState = &fixture.room;
+  Battle_Ai_ReleaseActorAiContactOccupancy(1);
+  CHECK(fixture.room.reservedEPrefix[0] == 0xA1);
 }

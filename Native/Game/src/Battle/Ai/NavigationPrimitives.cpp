@@ -7,12 +7,14 @@
 #include <cstring>
 #include <iterator>
 
+#include "Core/Diagnostics.h"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
+#include "Field/Gimmicks.h"
 #include "Field/TerrainHeight.h"
 }
 
@@ -25,6 +27,9 @@ constexpr int kDirectionComponentMask = 3;
 constexpr int kDirectionZShift = 4;
 constexpr int kDirectionComponentModulus = 4;
 constexpr int kMaximumGroundStep = 64;
+constexpr unsigned kOccupancyCellBytes = sizeof(u_short);
+constexpr unsigned kOccupancyRowBytes = kOccupancyCellBytes * kAiFrameGridSide;
+constexpr unsigned kOccupancyMapBytes = kOccupancyRowBytes * kAiFrameGridSide;
 
 void RequireTile(int x, int z) {
   if (x < 0 || z < 0 || x >= kAiFrameGridSide || z >= kAiFrameGridSide) {
@@ -49,6 +54,32 @@ Battle_Ai_ActorAiState* ActorNavigationState(int actor_id) {
   RequireActorId(actor_id);
   return Battle_Ai_tileFlagMap == nullptr ? nullptr
                                           : Battle_Ai_actorAiStates[actor_id];
+}
+
+void ChangeGimmickOccupancy(const Field_GimmickInstance* gimmick, int delta) {
+  if (gimmick == nullptr) {
+    Core_Errorf("ai", "Gimmick occupancy requires an instance");
+    std::abort();
+  }
+  if (Battle_Ai_tileFlagMap == nullptr) return;
+  const auto x = static_cast<u_char>(gimmick->tileX);
+  const auto layer = static_cast<u_char>(gimmick->tileLayer);
+  const auto z = static_cast<u_char>(gimmick->tileZ);
+  // 7E05C.s:57-63 forms a byte offset, including the upper layer bits.
+  const unsigned offset =
+      x * kOccupancyCellBytes + (layer >> 2) + z * kOccupancyRowBytes;
+  if (Battle_Ai_specialTerrainHeights == nullptr ||
+      offset > kOccupancyMapBytes - kOccupancyCellBytes ||
+      offset % kOccupancyCellBytes != 0) {
+    Core_Errorf("ai", "Gimmick occupancy placement (%u,%u,%u) is invalid",
+                static_cast<unsigned>(x), static_cast<unsigned>(layer),
+                static_cast<unsigned>(z));
+    std::abort();
+  }
+  const auto cell_index = offset / kOccupancyCellBytes;
+  auto& cell = Battle_Ai_specialTerrainHeights[cell_index / kAiFrameGridSide]
+                                              [cell_index % kAiFrameGridSide];
+  cell = static_cast<u_short>(static_cast<int>(cell) + delta);
 }
 }  // namespace
 
@@ -76,6 +107,16 @@ void Battle_Ai_MarkAiTileDynamicObstacle(int x, int z) {
   if (Battle_Ai_tileFlagMap == nullptr) return;
   RequireTile(x, z);
   Battle_Ai_tileFlagMap[z][x] |= kDynamicTileBit;
+}
+
+// decomp: func_800E6898 (src/BATTLE/BATTLE.PRG/7E05C.s:38-69).
+void Battle_Ai_AddAiTileOccupant(const Field_GimmickInstance* gimmick) {
+  ChangeGimmickOccupancy(gimmick, kDynamicTileBit);
+}
+
+// decomp: func_800E68A0 (src/BATTLE/BATTLE.PRG/7E05C.s:46-69).
+void Battle_Ai_RemoveAiTileOccupant(const Field_GimmickInstance* gimmick) {
+  ChangeGimmickOccupancy(gimmick, -static_cast<int>(kDynamicTileBit));
 }
 
 // decomp: func_800E4690 (src/BATTLE/BATTLE.PRG/7BDD4.s:72).

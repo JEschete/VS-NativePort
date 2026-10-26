@@ -14,6 +14,7 @@
 extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitives.h"
+#include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 }

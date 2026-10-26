@@ -43,15 +43,8 @@ typedef union Battle_Ai_TilePosition {
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_NAVIGATION_H_DECLS)
 #define VS_BATTLE_AI_NAVIGATION_H_DECLS
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Field/Gimmicks.h"
-#include "Render/Palette.h"
 
 extern Battle_Ai_DirectionDelta Battle_Ai_directionDeltas[8];
 extern u_char Battle_Ai_routeStepDirections[272];
@@ -81,8 +74,5 @@ void Battle_Ai_FloodFillAiTerrainHeights(int arg0, int arg1, int arg2);
 int Battle_Ai_FindAdjacentAiGroundHeight(int arg0, int arg1);
 void Battle_Ai_BuildAiSpecialTerrainHeights(void);
 void Battle_Ai_InitializeRoomNavigation(void);
-void Battle_Ai_AddAiTileOccupant(void*);
-void Battle_Ai_RemoveAiTileOccupant(Field_GimmickInstance*);
-void Battle_Ai_ReleaseActorAiContactOccupancy(int);
 
 #endif // VS_BATTLE_AI_NAVIGATION_H_DECLS

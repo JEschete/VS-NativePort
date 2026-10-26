@@ -11,6 +11,74 @@ Use [HANDOFF.md](HANDOFF.md) for the current checkpoint and
 Keep the commands, revisions, limits and local evidence paths below; archival
 does not establish fresh verification or authorize deleting the referenced data.
 
+## Gimmick and actor contact occupancy (2026-10-26)
+
+Continued #42 after publishing Ashley-alliance revision
+`8639dc81e532b477c75ea2c22a559e8be80c4799` and verifying its successful
+Source Quality run40394287382. Owner asset/solution/ignore/reference edits
+remain excluded from this checkpoint.
+
+F01826/F01827 own the two directions of the shared `7E05C.s:38-69` height-grid
+update. They take `const Field_GimmickInstance*`, use the named native
+placement fields and checked native map storage, and add/subtract1024 with
+defined unsigned-halfword wrap. The original byte-offset expression includes
+the upper layer bits: it is not simply X/Z, and it must not be replaced by
+the distinct tile-flag `OR0x400` obstacle setter. Out-of-range/unaligned
+placements and missing active height storage produce an explicit error and
+terminate instead of writing unrelated memory. Disabled navigation maps retain
+the source no-update gate.
+
+F01836 owns `7E05C.s:510-542` in `ActorCleanup.cpp`. It checks native actor
+identity, the command-byte shift/mask, byte1 of `nextTile`, and the model's
+typed `supportLayer`, then reuses the established room-contact-bit helper.
+Both missing actor/state records are an allowed no-op; inconsistent partial
+records are diagnosed rather than reading source low RAM. The original
+bit31/sign-test behavior of the shared room-bit helper is retained.
+The original contact symbol was absent from the generated symbol map;
+its explicit binding was added after the new binding control failed.
+
+The original missing-behavior controls failed2 cases/2 assertions before
+implementation. Final normal selection
+`build\Debug\VS.Tests.exe "[gimmick-occupancy],[contact-release]" --reporter compact`
+passes **10 cases /1,313,815 assertions**: all65,536 halfword inputs with
+both directions,32,768 aligned placement/layer combinations, all1,024 map
+cells, room rebinding, actual production gimmick release/re-entry, original
+bindings, and all256 command bytes x16 support layers x256 contact bytes.
+The one coupled compile failure from generator dependency cleanup was repaired
+by explicitly including the owning `Field/Gimmicks.h` in SpecialTerrainTests;
+no generated include was manually retained.
+
+Three explicitly selected hidden tests exercise invalid halfword alignment,
+the first offset beyond the2048-byte map, and an unavailable active height
+map. Each logs its required diagnostic and exits3 in an isolated child.
+The first child initially waited on the Windows CRT abort dialog; the
+existing `Platform::InstallCrashHandler` now disables dialogs and records the
+abort stack only for these fatal controls. The timed-out child was stopped;
+no default tests or runtime error policy were weakened.
+
+Full solution builds and suites pass **974 cases /9,308,482 assertions**
+each in Debug and Release. Focused `--tidy` and default quality each have
+**0 findings/0 new**; port controls **127 pass**, naming controls **32 pass**,
+native views **621 checked/0 mismatches**. Two generations preserve117 owned
+files and repeat identically across746 outputs. Pylance syntax validation of
+the changed port-control file is clean.
+
+One normal-speed Debug smoke reaches MAP001 at tick1403, MAP008 at3127,
+MAP009 at4057, captures tick5990 and exits normally at6000 with0 errors:
+
+`tools\test\run_native.ps1 -NoCopy -SkipIntro -Frames 6000 -At 5990 -Press "1200:Up,1300:Circle,3000:Start,4000:Start" -Cap build\occupancy42-newgame-debug`
+
+The preceding attempt omitted Up, selected Continue because native saves are
+present, and stayed in the load picker. It is not counted as room verification.
+All logs/captures remain local under the private session `files\occupancy42-*`
+and the named ignored build directories. The successful replay is a room-entry
+smoke only; skipping the prologue is not combat or moving-platform acceptance.
+
+The audit advances the fixed cohort175->178 of186, leaving8 gaps
+(5 C-backed/3 assembly-only),3133 ordinary implementations and161 aliases.
+Original source declarations and .cpp promotion/whole-state modernization
+remain distinct from these behavior checks. Revision/exact CI are on #42.
+
 ## Ashley alliance entry and exit (2026-10-26)
 
 Resumed the earlier unfinished F01681/F01682 work after owner direction to

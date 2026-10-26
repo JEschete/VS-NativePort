@@ -7,8 +7,11 @@ extern "C" {
 #endif
 
 typedef struct Battle_Ai_ActorAiState Battle_Ai_ActorAiState;
+typedef struct Field_GimmickInstance Field_GimmickInstance;
 
 void Battle_Ai_ReserveAiDestinationTile(int, int);
+void Battle_Ai_AddAiTileOccupant(const Field_GimmickInstance* gimmick);
+void Battle_Ai_RemoveAiTileOccupant(const Field_GimmickInstance* gimmick);
 
 int Battle_Ai_IsAdjacentTileStepBlocked(unsigned int, int);
 void Battle_Ai_MarkAiTileDynamicObstacle(int, int);

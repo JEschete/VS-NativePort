@@ -26,6 +26,7 @@ void Battle_Ai_SetActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView*,
                                            int value, int range);
 void Battle_Ai_MakeTargetHostile(Battle_Ai_ReactionView*, int target_id);
 void Battle_Ai_RefreshActorAiReservations(int actor_id);
+void Battle_Ai_ReleaseActorAiContactOccupancy(int actor_id);
 void Battle_Ai_ClearActorAiLinksAndPlan(int actor_id);
 int16_t Battle_Ai_PackActorAiPersistenceFlags(int actor_id);
 void Battle_Ai_ClearActorAiNavigationReset(int actor_id);

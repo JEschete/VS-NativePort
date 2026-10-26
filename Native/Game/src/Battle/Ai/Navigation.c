@@ -1,11 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
@@ -26,7 +22,6 @@
 #include "Field/TerrainHeight.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Render/Palette.h"
 
 // decomp: D_800F16EC (D_800F16EC@BATTLE/BATTLE.PRG)
 Battle_Ai_DirectionDelta Battle_Ai_directionDeltas[8]; /* contents: module image (ModuleData.c) */
@@ -722,22 +717,4 @@ void Battle_Ai_BuildAiSpecialTerrainHeights(void)
 
 // decomp: BATTLE.PRG func_800E6158 (src/BATTLE/BATTLE.PRG/7CD68.c:814)
 void Battle_Ai_InitializeRoomNavigation(void) { Battle_Ai_InitializeRoomAiMap(); }
-
-// decomp: BATTLE.PRG func_800E6898 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-void Battle_Ai_AddAiTileOccupant(void*)
-{
-    VS_UNPORTED("Battle::Ai::AddAiTileOccupant");
-}
-
-// decomp: BATTLE.PRG func_800E68A0 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-void Battle_Ai_RemoveAiTileOccupant(Field_GimmickInstance*)
-{
-    VS_UNPORTED("Battle::Ai::RemoveAiTileOccupant");
-}
-
-// decomp: BATTLE.PRG func_800E6EB0 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-void Battle_Ai_ReleaseActorAiContactOccupancy(int)
-{
-    VS_UNPORTED("Battle::Ai::ReleaseActorAiContactOccupancy");
-}
 

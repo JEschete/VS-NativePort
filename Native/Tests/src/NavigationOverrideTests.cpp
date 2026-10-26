@@ -4,20 +4,25 @@
 #include <cstdint>
 #include <cstring>
 #include <limits>
+#include <span>
 #include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
+#include "Platform/CrashHandler.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Movement.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Field/Collision.h"
+#include "Field/Gimmicks.h"
 }
 
 static_assert(
@@ -27,6 +32,10 @@ static_assert(std::is_same_v<decltype(&Battle_Ai_ActorNavigationOverrideStatus),
 static_assert(
     std::is_same_v<decltype(&Battle_Ai_CopyActorNavigationOverrideState),
                    void (*)(int, Battle_Ai_ActorAiState*)>);
+static_assert(std::is_same_v<decltype(&Battle_Ai_AddAiTileOccupant),
+                             void (*)(const Field_GimmickInstance*)>);
+static_assert(std::is_same_v<decltype(&Battle_Ai_RemoveAiTileOccupant),
+                             void (*)(const Field_GimmickInstance*)>);
 
 namespace {
 struct NavigationOverrideFixture {
@@ -70,6 +79,32 @@ struct NavigationOverrideFixture {
   }
 };
 
+struct GimmickOccupancyFixture : NavigationOverrideFixture {
+  decltype(Battle_Ai_specialTerrainHeights) saved_heights =
+      Battle_Ai_specialTerrainHeights;
+  decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
+      std::to_array(Field_gimmickInstances);
+  u_short heights[32][32]{};
+  Field_GimmickInstance gimmick{};
+  Field_GimmickInstance sibling{};
+
+  GimmickOccupancyFixture() {
+    Battle_Ai_specialTerrainHeights = heights;
+    std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
+    gimmick.tileX = 13;
+    gimmick.tileZ = 7;
+    gimmick.boneCount = 1;
+    gimmick.objectInfo.objectId = 1;
+    sibling.objectInfo.objectId = 1;
+    Field_gimmickInstances[0] = &gimmick;
+    Field_gimmickInstances[1] = &sibling;
+  }
+
+  ~GimmickOccupancyFixture() {
+    Battle_Ai_specialTerrainHeights = saved_heights;
+    std::ranges::copy(saved_gimmicks, Field_gimmickInstances);
+  }
+};
 auto Snapshot(const Battle_Ai_ActorAiState& state) {
   std::array<std::byte, sizeof(state)> bytes{};
   std::memcpy(bytes.data(), &state, bytes.size());
@@ -251,4 +286,149 @@ TEST_CASE(
   if (status == 2) fixture.source.nativePointer18C = nullptr;
   CHECK(Actors_IsScriptedActorPathFinished(7) == (status != 1));
   CHECK(Field_ActorCollisionBypass(7) == (status == 0 ? 1 : 3));
+}
+
+TEST_CASE("Gimmick occupancy adjusts the height grid instead of obstacle flags",
+          "[ai][navigation][gimmick-occupancy][occupancy-red]") {
+  GimmickOccupancyFixture fixture;
+  fixture.heights[7][13] = 5;
+  fixture.grid[7][13] = 0xA15A;
+  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  CHECK(fixture.heights[7][13] == 0x405);
+  CHECK(fixture.grid[7][13] == 0xA15A);
+  Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+  CHECK(fixture.heights[7][13] == 5);
+  CHECK(fixture.grid[7][13] == 0xA15A);
+}
+
+TEST_CASE("Gimmick occupancy preserves source halfword wrap for every value",
+          "[ai][navigation][gimmick-occupancy]") {
+  GimmickOccupancyFixture fixture;
+  for (unsigned word = 0; word < 65536; ++word) {
+    fixture.heights[7][13] = static_cast<u_short>(word);
+    Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+    REQUIRE(fixture.heights[7][13] == static_cast<u_short>(word + 0x400));
+    Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+    CHECK(fixture.heights[7][13] == word);
+    Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+    CHECK(fixture.heights[7][13] == static_cast<u_short>(word - 0x400));
+  }
+}
+
+TEST_CASE("Gimmick placement retains original layer bits and native row carry",
+          "[ai][navigation][gimmick-occupancy]") {
+  GimmickOccupancyFixture fixture;
+  for (unsigned layer = 0; layer < 256; ++layer) {
+    if ((layer >> 2) & 1) continue;
+    for (unsigned x = 0; x < 256; ++x) {
+      const unsigned placement = 0xFF030000u | (layer << 8) | x;
+      const unsigned offset = (placement & 255) * 2 + ((placement << 8) >> 18);
+      const auto index = offset / sizeof(u_short);
+      fixture.gimmick.tileX = static_cast<char>(x);
+      fixture.gimmick.tileZ = 3;
+      fixture.gimmick.tileLayer = static_cast<char>(layer);
+      fixture.gimmick.reserved5F = static_cast<char>(0xFF);
+      auto& cell = fixture.heights[index / 32][index % 32];
+      cell = 0xA15A;
+      Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+      CHECK(cell == 0xA55A);
+      Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+      CHECK(cell == 0xA15A);
+    }
+  }
+}
+
+TEST_CASE("Gimmick occupancy follows room map absence and rebinding",
+          "[ai][navigation][gimmick-occupancy]") {
+  GimmickOccupancyFixture fixture;
+  Battle_Ai_tileFlagMap = nullptr;
+  Battle_Ai_specialTerrainHeights = nullptr;
+  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+  Battle_Ai_tileFlagMap = fixture.grid;
+  Battle_Ai_specialTerrainHeights = fixture.heights;
+  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  u_short second[32][32]{};
+  Battle_Ai_specialTerrainHeights = second;
+  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+  CHECK(second[7][13] == 0);
+  CHECK(fixture.heights[7][13] == 0x400);
+}
+
+TEST_CASE("Gimmick occupancy reaches every cell of the bounded native map",
+          "[ai][navigation][gimmick-occupancy]") {
+  GimmickOccupancyFixture fixture;
+  for (int z = 0; z < 32; ++z) {
+    for (int x = 0; x < 32; ++x) {
+      fixture.gimmick.tileX = static_cast<char>(x);
+      fixture.gimmick.tileZ = static_cast<char>(z);
+      fixture.gimmick.tileLayer = 3;
+      fixture.heights[z][x] = 0x123;
+      Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+      REQUIRE(fixture.heights[z][x] == 0x523);
+      Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+      CHECK(fixture.heights[z][x] == 0x123);
+    }
+  }
+  for (const auto& row : fixture.heights) {
+    for (const auto cell : row) CHECK(cell == 0x123);
+  }
+}
+
+TEST_CASE("Production gimmick release balances one occupancy contribution",
+          "[ai][navigation][gimmick-occupancy][occupancy-release]") {
+  GimmickOccupancyFixture fixture;
+  fixture.heights[7][13] = 0x88;
+  for (int cycle = 0; cycle < 2; ++cycle) {
+    Field_gimmickInstances[0] = &fixture.gimmick;
+    Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+    CHECK(fixture.heights[7][13] == 0x488);
+    CHECK(Field_ReleaseGimmickInstance(0) == 0);
+    CHECK(Field_gimmickInstances[0] == nullptr);
+    CHECK(fixture.heights[7][13] == 0x88);
+    CHECK(Field_gimmickInstances[1] == &fixture.sibling);
+  }
+}
+
+TEST_CASE("Original gimmick occupancy entries resolve to native functions",
+          "[ai][navigation][gimmick-occupancy][occupancy-binding]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800E6898) ==
+        reinterpret_cast<void*>(&Battle_Ai_AddAiTileOccupant));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800E68A0) ==
+        reinterpret_cast<void*>(&Battle_Ai_RemoveAiTileOccupant));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800E6EB0) ==
+        reinterpret_cast<void*>(&Battle_Ai_ReleaseActorAiContactOccupancy));
+}
+
+TEST_CASE("Gimmick occupancy rejects an unaligned source halfword",
+          "[.occupancy-unaligned]") {
+  VS::Platform::InstallCrashHandler();
+  GimmickOccupancyFixture fixture;
+  fixture.gimmick.tileLayer = 4;
+  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  FAIL("Unaligned occupancy placement was accepted");
+}
+
+TEST_CASE("Gimmick occupancy rejects the first byte beyond its map",
+          "[.occupancy-bounds]") {
+  VS::Platform::InstallCrashHandler();
+  GimmickOccupancyFixture fixture;
+  fixture.gimmick.tileX = fixture.gimmick.tileZ = 31;
+  fixture.gimmick.tileLayer = 8;
+  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  FAIL("Out-of-bounds occupancy placement was accepted");
+}
+
+TEST_CASE("Gimmick occupancy requires the active native height map",
+          "[.occupancy-height-map]") {
+  VS::Platform::InstallCrashHandler();
+  GimmickOccupancyFixture fixture;
+  Battle_Ai_specialTerrainHeights = nullptr;
+  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  FAIL("Missing active occupancy map was accepted");
 }

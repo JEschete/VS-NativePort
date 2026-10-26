@@ -9,6 +9,18 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01826/F01827/F01836 now own typed gimmick height-grid occupancy and
+  actor contact release. Original placement layer bits, aligned/bounded
+  indexing, halfword wrap and command/support/contact gates are preserved.
+  Focused10/1,313,815 and full Debug/Release974/9,308,482 each pass.
+  Three isolated invalid-placement/map controls emit diagnostics and exit3.
+  Normal-speed Debug New Game reaches MAP001/008/009 and tick6000 with no
+  errors; this is room-entry smoke, not full prologue/combat acceptance.
+  Default/focused quality0 new,127 port/32 naming controls,621 native-view
+  fields0 mismatches, and two stable generations across746 outputs preserving
+  117 owned files pass. Audit:178/186 complete,8 gaps (5 C-backed/3
+  assembly-only),3133 implementations/161 aliases. Publication/exact CI are
+  on #42. See the [occupancy checkpoint](HANDOFF_HISTORY.md#gimmick-and-actor-contact-occupancy-2026-10-26).
 - #42 F01681/F01682 now own Ashley-alliance entry/exit in `Relations.c`.
   The original `7399C.s:11-85` controls BIOS RNG, a byte reaction counter,
   native callback save/restore, markers, relationship rebuild and recovery.

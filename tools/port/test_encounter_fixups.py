@@ -12,6 +12,39 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_occupancy_entries_use_typed_native_grids_and_shared_contact_helper(self):
+        root = Path(__file__).resolve().parents[2]
+        owned = self.owned_items()
+        for identity in ("F01826", "F01827"):
+            self.assertEqual(
+                owned[identity]["path"],
+                r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
+            )
+        self.assertEqual(
+            owned["F01836"]["path"], r"Native\Game\src\Battle\Ai\ActorCleanup.cpp"
+        )
+        self.assertIn(
+            ("BATTLE/BATTLE.PRG", 0x800E6EB0, "F01836"),
+            copy_fixups.MODULE_FUNCTION_ENTRIES,
+        )
+        grid = (
+            root / r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertIn("const Field_GimmickInstance* gimmick", grid)
+        self.assertIn("(layer >> 2)", grid)
+        self.assertIn("offset > kOccupancyMapBytes - kOccupancyCellBytes", grid)
+        self.assertIn("offset % kOccupancyCellBytes != 0", grid)
+        self.assertIn("static_cast<int>(cell) + delta", grid)
+        self.assertEqual(grid.count("ChangeGimmickOccupancy(gimmick,"), 2)
+        cleanup = (root / r"Native\Game\src\Battle\Ai\ActorCleanup.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("kContactCommands = 0x4800", cleanup)
+        self.assertIn("if (model->instance.supportLayer != 0) return;", cleanup)
+        self.assertIn(
+            "Battle_Ai_ClearAiContactOccupancy(static_cast<int>(contact))", cleanup
+        )
+
     def test_ashley_alliance_uses_native_callback_storage_without_shifting_views(self):
         self.assertEqual(
             native_views.NATIVE_FIELD_ALIASES["T00373"],

@@ -18,6 +18,7 @@ extern "C" {
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
@@ -144,6 +145,27 @@ void Battle_Ai_RefreshActorAiReservations(int actor_id) {
   }
   auto* state = Battle_Ai_actorAiStates[actor_id];
   if (state != nullptr) Battle_Ai_ReleaseActorAiReservations(state);
+}
+
+// decomp: func_800E6EB0 (src/BATTLE/BATTLE.PRG/7E05C.s:510-542).
+void Battle_Ai_ReleaseActorAiContactOccupancy(int actor_id) {
+  RequireActorId(actor_id);
+  const auto* actor = Battle_actors[actor_id];
+  const auto* state = Battle_Ai_actorAiStates[actor_id];
+  if (actor == nullptr && state == nullptr) return;
+  Require(actor != nullptr && state != nullptr,
+          "AI contact release requires matching actor and AI state");
+  constexpr unsigned kContactCommands = 0x4800;
+  if (((1u << (actor->commandOpcode & kShiftMask)) & kContactCommands) == 0) {
+    return;
+  }
+  constexpr unsigned kContactShift = 8;
+  const auto contact = (state->nextTile.word >> kContactShift) & kTileMask;
+  if (contact == 0) return;
+  Require(state->model != nullptr, "AI contact release requires actor model");
+  const auto* model = reinterpret_cast<const Actors_ActorRecord*>(state->model);
+  if (model->instance.supportLayer != 0) return;
+  Battle_Ai_ClearAiContactOccupancy(static_cast<int>(contact));
 }
 
 // decomp: func_800E7608 (src/BATTLE/BATTLE.PRG/7E05C.s:1052).
