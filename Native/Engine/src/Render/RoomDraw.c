@@ -25,7 +25,7 @@ enum {
   kViewportWidth = 320,
   kViewportHeight = 224,
   kDrawHeight = 240,
-  kTriangleCorners = 3,
+  kTriangleCorners = kRoomTriangleVertexCount,
   kQuadCorners = 4,
   kQuadCommandFlag = 8,
   kVertexPacketWords = 3,
@@ -484,12 +484,50 @@ static int SubdivideRoomQuad(const RoomVertex vertices[kQuadCorners],
   return emitted;
 }
 
+// decomp: func_8009797C (src/BATTLE/BATTLE.PRG/2EA3C.s:506-544).
+// Capturing all three packed words preserves source loads under native
+// aliasing.
+void Render_DecodeRoomPolygonVertices(
+    const void* data, size_t size, unsigned coordinate_shift,
+    Render_RoomVertex vertices[kRoomTriangleVertexCount]) {
+  if (data == NULL || vertices == NULL || size < kRoomTriangleCoordinateBytes) {
+    Core_Debugf("render",
+                "Room vertex decoding requires a complete coordinate prefix");
+    abort();
+  }
+  unsigned char packed[kRoomTriangleCoordinateBytes];
+  int16_t base[kRoomSpatialDimensions];
+  memcpy(packed, data, sizeof packed);
+  memcpy(base, packed, sizeof base);
+  coordinate_shift &= sizeof(uint32_t) * CHAR_BIT - 1;
+  for (int vertex = 0; vertex < kTriangleCorners; ++vertex) {
+    int16_t coordinates[kRoomSpatialDimensions];
+    for (int axis = 0; axis < kRoomSpatialDimensions; ++axis) {
+      int8_t delta = 0;
+      if (vertex != 0) {
+        const size_t offset = sizeof base +
+                              (size_t)(vertex - 1) * kRoomSpatialDimensions +
+                              (size_t)axis;
+        memcpy(&delta, packed + offset, sizeof delta);
+      }
+      const uint32_t shifted = (uint32_t)(int32_t)delta << coordinate_shift;
+      coordinates[axis] =
+          Core_Math_WrapSigned16((uint32_t)(int32_t)base[axis] + shifted);
+    }
+    vertices[vertex].position.vx = coordinates[0];
+    vertices[vertex].position.vy = coordinates[1];
+    vertices[vertex].position.vz = coordinates[2];
+  }
+}
+
 static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
                             int corners, int mode, uintptr_t limit) {
   RoomVertex vertices[kQuadCorners] = {0};
-  memcpy(&vertices[0].position, data, kRoomSpatialDimensions * sizeof(int16_t));
-  const int scale = (flags & 0x800) != 0 ? 1 : 8;
-  const unsigned delta_offsets[4] = {0, 6, 9, 32};
+  const unsigned coordinate_shift = (flags & 0x800) != 0 ? 0 : 3;
+  const int scale = 1 << coordinate_shift;
+  Render_DecodeRoomPolygonVertices(
+      data, corners == kTriangleCorners ? kRoomTriangleBytes : kRoomQuadBytes,
+      coordinate_shift, vertices);
   const unsigned color_offsets[4] = {12, 16, 20, 36};
   const unsigned u_offsets[4] = {24, 28, 19, 35};
   const unsigned v_offsets[4] = {25, 29, 23, 39};
@@ -499,9 +537,8 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
   int left = kProjectedCoordinateBound, top = kProjectedCoordinateBound;
   int right = -kProjectedCoordinateBound, bottom = -kProjectedCoordinateBound;
   for (int index = 0; index < corners; ++index) {
-    if (index != 0) {
-      const signed char* delta =
-          (const signed char*)data + delta_offsets[index];
+    if (index == kQuadCorners - 1) {
+      const signed char* delta = (const signed char*)data + kRoomTriangleBytes;
       vertices[index].position.vx =
           (int16_t)(vertices[0].position.vx + delta[0] * scale);
       vertices[index].position.vy =

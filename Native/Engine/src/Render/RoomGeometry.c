@@ -9,13 +9,6 @@ int Render_DrawRoomGeometryPolygons()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_8009797C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Render_DecodeRoomPolygonVertices()
-{
-    VS_UNPORTED("Render::DecodeRoomPolygonVertices");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_80097A10 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
 int Render_ProjectAndDecodeRoomPolygon()
 {

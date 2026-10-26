@@ -6,7 +6,12 @@
 #include "Legacy/Psx.h"
 #include "Render/Render.h"
 
-enum { kRoomSpatialDimensions = 3, kRoomGeometryGroupBytes = 64 };
+enum {
+  kRoomSpatialDimensions = 3,
+  kRoomGeometryGroupBytes = 64,
+  kRoomTriangleCoordinateBytes = 12,
+  kRoomTriangleVertexCount = 3
+};
 typedef struct Field_RoomTint Field_RoomTint;
 
 // decomp: _mpdGeometryHeader / 146C.h:31; transform access in 2EA3C.s:1265.
@@ -48,6 +53,9 @@ void Render_BuildRoomGeometryViewMatrix(VECTOR* position, VECTOR* angles,
 void Render_BuildScaleCompensatedRoomView(VECTOR* position, VECTOR* angles,
                                           MATRIX* output);
 void Render_DrawRoomGeometry(void* data, int mode);
+void Render_DecodeRoomPolygonVertices(
+    const void* data, size_t size, unsigned coordinate_shift,
+    Render_RoomVertex vertices[kRoomTriangleVertexCount]);
 int Render_IsRoomPolygonOnScreen(const Render_RoomScreenBounds* projected);
 void Render_InterpolateRoomVertexMidpoint(const Render_RoomVertex* first,
                                           const Render_RoomVertex* second,

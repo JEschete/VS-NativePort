@@ -9,6 +9,31 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F00746 now owns a bounded packed-coordinate decoder in RoomDraw.c,
+  reused by the real polygon queue for both triangles and quads. Original
+  2EA3C.s:506-544 loads three packed words, signed-byte deltas and a
+  masked variable shift; the caller selects0/3 for unit/eight-unit
+  coordinates. Native code captures all12 bytes before output writes,
+  preserves signed16 positions and leaves vertex padding/materials alone.
+  Red1/1 proves the missing typed ABI. New6/589,967 covers all256 byte
+  values/all32 shifts on both delta corners/all axes, high shift bits,
+  74 input/output overlaps, unaligned input, untouched fourth corner
+  and original binding. Two extra production packet goldens verify
+  actual unit/eight-unit projections; existing triangle/quad subdivision,
+  materials, clipping and capacity checks remain green.
+  Combined room selection12/590,222 and full Debug/Release926/7,754,596
+  each pass; both hosts link. Port121/direct-CI105 pass. Focused quality
+  has8 pre-existing legacy-test findings/0 new; default remains0/0,
+  baselines unchanged. Named count/type alias and explicit byte snapshots
+  repair initial new findings without weakening memory checks.
+  Two generations preserve310 files/repeat identically across748 outputs.
+  Only F00746 copied/final_location fields change; generated
+  RoomGeometry.c/.h and ModulePointers.c change. Local cohort160/186,
+  26 gaps (10 C/C++ references,6 assembly-only,10 missing),3125
+  implementations/153 aliases separately. This consolidates already-
+  working decoding, not a new gameplay or visual-parity fix, promotion
+  or compatibility retirement. Private `roomdecode42-*`; scoped
+  publication/exact CI are tracked on#42.
 - #195/#42 fixes the existing map fog coefficient, not merely an export.
   Original SetFogNear32154.s:9 uses320; native used256. Red1/6 has4
   failures: at near768/projection320 the actual returned cue is1026

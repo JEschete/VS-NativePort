@@ -12,6 +12,23 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_room_coordinate_decoder_uses_the_live_owned_polygon_pipeline(self):
+        self.assertEqual(
+            self.owned_items()["F00746"]["path"],
+            r"Native\Engine\src\Render\RoomDraw.c",
+        )
+        self.assertIn(
+            ("BATTLE/BATTLE.PRG", 0x8009797C, "F00746"),
+            copy_fixups.MODULE_FUNCTION_ENTRIES,
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(source.count("Render_DecodeRoomPolygonVertices("), 2)
+        self.assertIn("memcpy(packed, data, sizeof packed)", source)
+        self.assertIn("if (index == kQuadCorners - 1)", source)
+
     def test_fog_and_depth_cue_share_the_existing_typed_native_helpers(self):
         for identity, name, address in (
             ("F03404", "Core_Gte_DpqColor", 0x80041A00),

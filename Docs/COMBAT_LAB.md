@@ -415,6 +415,63 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Shared bounded room-coordinate decoder (#42, 2026-10-26)
+
+F00746 (`func_8009797C`, original2EA3C.s:506-544) now has explicit
+packed bytes/size, coordinate shift and existing native room-vertex
+outputs. The live polygon queue reuses it for the first three corners
+of both triangles and quads. Original group setup selects shift0 or3;
+the public entry preserves the source variable-shift mask for all32
+word shifts. Fourth-corner decoding, material/UV handling, projection,
+clipping, subdivision and packet limits remain in their existing paths.
+
+The existing renderer already decoded these positions correctly inline.
+This scope removes that duplication and the unused implicit-register
+stub; it does not claim a newly fixed visible room or gameplay behavior.
+The12-byte source prefix is captured before any output write, matching
+the three original word loads even when native input/output overlap.
+Source signed bytes and final signed16 coordinates are preserved while
+position padding, color, UV and unrelated vertex bytes remain untouched.
+Missing/short input is an explicit logged error.
+
+Evidence is parente92bc9fe plus this scoped worktree; private
+`roomdecode42-*` retains commands, source/dirty state, protected files,
+binary hashes and outcomes:
+
+- Red `[room-decode]`:1 case/1 failed assertion proves the missing
+  typed bounded-data API.
+- New6 cases/589,967 assertions cover all256 signed byte encodings,
+  all32 shifts, both delta corners/all axes, upper shift-bit masking,
+  signed16 wraps,74 source/output overlaps, unaligned source data,
+  preserved material/pad/fourth-corner bytes and typed original8009797C
+  resolution/rejected interior alias. Byte snapshots avoid relying
+  on struct padding equality or weakening the alias-preservation checks.
+- Two extra production assertions in the existing renderer fixture
+  verify both group coordinate scales: unit positions project to
+  (144,104)/(175,104)/(144,135), while eight-unit offsets project to
+  (144,104)/(398,104)/(144,358). Actual packet UVs, CLUT/page,
+  triangle/quad subdivision, screen/depth rejection and capacity checks
+  remain covered. Combined `[room-decode],[room]`:12/590,222.
+- Both x64 solution builds link both hosts. Full Debug/Release each
+  pass926 cases/7,754,596 assertions;121 port/audit and105 direct-script
+  CI controls pass. Expanded focused quality includes8 pre-existing
+  legacy-test findings/0 new; default quality remains0 actionable/0 new.
+  Baselines are unchanged. Named corner count, a typed binding alias
+  and explicit byte-array comparisons repair initial new findings.
+- Two native generations preserve310 maintained/owner/reference files
+  and repeat identically across748 outputs. Generated changes are
+  RoomGeometry.c/.h and ModulePointers.c. Only F00746 copied/
+  final_location catalog fields change; provenance and separate
+  promotion/verified flags remain unchanged.
+- Final audit:4207 rows/3762 targets;26 gaps (10 C/C++ references,
+  6 assembly-only,10 missing listings),3125 implementations and153
+  aliases separately. Original cohort160/186; original C-backed135/145,
+  other25/41 complete.
+
+No controller/all-room visual parity, native asset-authoring migration,
+C++ promotion or compatibility retirement is inferred. Exact revision
+CI gates the public #42/#4 checklist advance.
+
 ### Source-scaled map fog and typed color/fog exports (#195/#42, 2026-10-26)
 
 The existing native `Core_Gte_SetFogNear` used256 rather than the

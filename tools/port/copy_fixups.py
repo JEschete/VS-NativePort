@@ -127,6 +127,7 @@ MODULE_DATA_BLOB_TYPES = {"Content_residentLfoSamples": ("short", 2)}
 MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 
 MODULE_FUNCTION_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x8009797C, "F00746"),
     ("SLUS_010.40", 0x80041A00, "F03404"),
     ("SLUS_010.40", 0x80041954, "F03408"),
     ("SLUS_010.40", 0x80041A1C, "F03405"),

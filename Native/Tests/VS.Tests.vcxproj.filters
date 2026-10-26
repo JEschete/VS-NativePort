@@ -201,6 +201,9 @@
     <ClCompile Include="src\RoomTriggerMarkerTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\RoomVertexDecodeTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\RuntimeSnapshotTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

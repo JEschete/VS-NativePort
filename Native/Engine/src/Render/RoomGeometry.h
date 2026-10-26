@@ -10,7 +10,6 @@
 #define VS_RENDER_ROOMGEOMETRY_H_DECLS
 
 int Render_DrawRoomGeometryPolygons();
-int Render_DecodeRoomPolygonVertices();
 int Render_ProjectAndDecodeRoomPolygon();
 int Render_SubdivideRoomTriangle();
 int Render_SubdivideRoomQuad();
