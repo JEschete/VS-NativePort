@@ -32,20 +32,6 @@ void Core_Math_BuildLookAtOrientation(VECTOR* from, VECTOR* to, MATRIX* mat)
     mat->m[2][2] = sp30.vz;
 }
 
-// decomp: BATTLE.PRG func_8009874C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Core_Math_BuildEulerRotationMatrix()
-{
-    VS_UNPORTED("Core::Math::BuildEulerRotationMatrix");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_800B16F4 (src/BATTLE/BATTLE.PRG/48C7C.s:0) [asm-file: not yet ported]
-int Core_Math_LookupRotationTrigQuadrant()
-{
-    VS_UNPORTED("Core::Math::LookupRotationTrigQuadrant");
-    return 0;
-}
-
 // decomp: BATTLE.PRG _vecToRotMatrix (src/BATTLE/BATTLE.PRG/4A0A8.c:4179)
 void Core_Math_DirectionRotationMatrix(VECTOR* arg0, MATRIX* arg1)
 {

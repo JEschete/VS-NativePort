@@ -9,6 +9,29 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #192/#42 restores F00761's staged YXZ room rotation, not the distinct
+  F01018 ZXY builder or a sequential SDK matrix product. The actual
+  identity-camera room-view regression at angles123/234/345 was red:
+  m01=-1705 instead of the original-1704. Both normal and scale-compensated
+  production views now share the typed source-specific kernel; destination
+  translation/padding are untouched. F00762 returns explicit signed
+  sine/cosine values from the validated canonical native trig functions;
+  F01017's eight identical octant blocks redirect to the same pair.
+  New5/276,023 assertions cover staged mixed-angle references, octants,
+  all65,536 signed halfwords with poisoned upper words, source/output
+  bytes, both real camera producers and all three original bindings.
+  Combined room/math33/1,434,615 and full Debug/Release846/5,485,327
+  each pass; both hosts and110 port controls pass. Focused/default
+  quality is0 actionable/0 new; fixture findings were corrected
+  without relaxing byte checks or baselines.
+  Two generations preserve114 registered/owner/reference files,
+  including both original assemblies, and repeat identically; only
+  generated Matrix.c/.h and Trig.c/.h change. Local cohort148/186,
+  38 gaps (13 C/C++ references,15 assembly-only,10 missing listings);
+  implementations3116 and aliases150 stay separate. This proves a
+  numeric production-path correction, not an observed visual complaint,
+  all-room parity, promotion or retirement. Private `roomeuler42-*`;
+  publication and final quality/exact CI gates are recorded on#192/#42.
 - #42 F00751 now shares the production ordinary/subdivided room clipping
   predicate through explicit normalized projected bounds and an int
   visibility result, replacing original implicit t0-t3/AT operands.

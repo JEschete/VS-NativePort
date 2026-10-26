@@ -21,6 +21,8 @@ extern "C" {
 #include "Core/Math/TileDistance.h"
 #include "Core/Math/Trig.h"
 #include "Core/Runtime.h"
+#include "Render/RoomDraw.h"
+#include "Render/UiPrimitives.h"
 }
 
 static_assert(
@@ -35,6 +37,12 @@ static_assert(std::is_same_v<decltype(&Core_Math_MultiplyRotationMatrixInPlace),
                              MATRIX* (*)(MATRIX*, MATRIX*)>);
 static_assert(std::is_same_v<decltype(&Core_Math_SquareVectorComponents),
                              VECTOR* (*)(const VECTOR*, VECTOR*)>);
+static_assert(std::is_same_v<decltype(&Core_Math_BuildEulerRotationMatrix),
+                             MATRIX* (*)(const SVECTOR*, MATRIX*)>);
+static_assert(std::is_same_v<decltype(&Core_Math_LookupRotationSineCosine),
+                             Core_Math_RotationTrigPair (*)(int)>);
+static_assert(std::is_same_v<decltype(&Core_Math_LookupRotationTrigQuadrant),
+                             Core_Math_RotationTrigPair (*)(int)>);
 
 namespace {
 auto MatrixBytes(const MATRIX& matrix) {
@@ -144,6 +152,108 @@ void CheckVectorSquare(std::uint32_t bits) {
   REQUIRE(Core_Math_SquareVectorComponents(&input, &input) == &input);
   CHECK(std::memcmp(&input, &self_expected, sizeof input) == 0);
 }
+
+int FloorDivide(std::int64_t value, int divisor) {
+  return static_cast<int>(value / divisor -
+                          (value < 0 && value % divisor != 0));
+}
+
+void ReferenceRoomEuler(const SVECTOR& rotation, MATRIX& output) {
+  const int sx = Core_Gte_Sin(rotation.vx), cx = Core_Gte_Cos(rotation.vx);
+  const int sy = Core_Gte_Sin(rotation.vy), cy = Core_Gte_Cos(rotation.vy);
+  const int sz = Core_Gte_Sin(rotation.vz), cz = Core_Gte_Cos(rotation.vz);
+  // Original GPF(1) stages: IR0=2*sz, then 2*cz; IR1..3=2*sy,2*cy,cx.
+  const auto stage = [sy, cy, cx](int scalar) {
+    return std::array{FloorDivide(std::int64_t{scalar} * 2 * sy, 4096),
+                      FloorDivide(std::int64_t{scalar} * 2 * cy, 4096),
+                      FloorDivide(std::int64_t{scalar} * cx, 4096)};
+  };
+  const auto first = stage(2 * sz), second = stage(2 * cz);
+  const auto third = [sx](int value) {
+    return FloorDivide(std::int64_t{sx} * value, 4096);
+  };
+  output.m[0][0] =
+      static_cast<std::int16_t>(FloorDivide(third(first[0]) + second[1], 4));
+  output.m[0][1] =
+      static_cast<std::int16_t>(FloorDivide(third(second[0]) - first[1], 4));
+  output.m[0][2] =
+      static_cast<std::int16_t>(FloorDivide(std::int64_t{cx} * 2 * sy, 8192));
+  output.m[1][0] = static_cast<std::int16_t>(FloorDivide(first[2], 2));
+  output.m[1][1] = static_cast<std::int16_t>(FloorDivide(second[2], 2));
+  output.m[1][2] = static_cast<std::int16_t>(-sx);
+  output.m[2][0] =
+      static_cast<std::int16_t>(FloorDivide(third(first[1]) - second[0], 4));
+  output.m[2][1] =
+      static_cast<std::int16_t>(FloorDivide(third(second[1]) + first[0], 4));
+  output.m[2][2] =
+      static_cast<std::int16_t>(FloorDivide(std::int64_t{cx} * 2 * cy, 8192));
+}
+
+void CheckRoomEuler(const SVECTOR& rotation) {
+  struct GuardedMatrix {
+    std::uint32_t prefix;
+    MATRIX value;
+    std::uint32_t suffix;
+  } actual;
+  std::memset(&actual, 0xA5, sizeof actual);
+  GuardedMatrix expected;
+  std::memcpy(&expected, &actual, sizeof expected);
+  ReferenceRoomEuler(rotation, expected.value);
+  const auto input = rotation;
+  REQUIRE(Core_Math_BuildEulerRotationMatrix(&rotation, &actual.value) ==
+          &actual.value);
+  std::array<std::byte, sizeof actual> actual_bytes{}, expected_bytes{};
+  std::memcpy(actual_bytes.data(), &actual, actual_bytes.size());
+  std::memcpy(expected_bytes.data(), &expected, expected_bytes.size());
+  CHECK(actual_bytes == expected_bytes);
+  CHECK(std::memcmp(&rotation, &input, sizeof input) == 0);
+}
+
+void ReferenceRoomView(const MATRIX& view, int scale, bool compensated,
+                       MATRIX& output) {
+  const SVECTOR rotation{123, 234, 345, 0};
+  ReferenceRoomEuler(rotation, output);
+  MATRIX camera = view;
+  if (compensated) {
+    MATRIX inverse{};
+    inverse.m[0][0] = inverse.m[1][1] = inverse.m[2][2] =
+        static_cast<std::int16_t>(16777216 / scale);
+    camera = ReferenceProduct(inverse, camera, camera);
+  }
+  output = ReferenceProduct(camera, output, output);
+  const std::array<int, 3> coordinates{-32767, 123, 3};
+  for (int row = 0; row < 3; ++row) {
+    std::int64_t sum = 0;
+    for (int axis = 0; axis < 3; ++axis) {
+      sum += std::int64_t{camera.m[row][axis]} * coordinates[axis];
+    }
+    output.t[row] = FloorDivide(sum, 4096) + view.t[row];
+  }
+}
+
+void CheckRotationPairBinding(unsigned address) {
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  auto* entry =
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", address);
+  REQUIRE(entry != nullptr);
+  const auto pair =
+      reinterpret_cast<Core_Math_RotationTrigPair (*)(int)>(entry);
+  CHECK(pair == Core_Math_LookupRotationSineCosine);
+  CHECK(pair(1536).sine == 2896);
+  CHECK(pair(1536).cosine == -2896);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          address + 1) == nullptr);
+}
+
+struct RestoreRoomCamera {
+  MATRIX view = Render_frameScratch.viewMatrix;
+  int scale = Render_frameScratch.camera.farClip;
+  ~RestoreRoomCamera() {
+    Render_frameScratch.viewMatrix = view;
+    Render_frameScratch.camera.farClip = scale;
+  }
+};
 }  // namespace
 
 TEST_CASE("The original inline idle instruction is a native no-op",
@@ -274,6 +384,118 @@ TEST_CASE("Battle fixed trigonometry uses the canonical native implementations",
   CHECK(&Core_Math_CosineFixedPoint == &Core_Gte_Cos);
   CHECK(&Core_Math_Sine == &Core_Gte_Sin);
   CHECK(&Core_Math_Cosine == &Core_Gte_Cos);
+}
+
+TEST_CASE("Room view rotation retains the original staged YXZ precision",
+          "[math][room-rotation]") {
+  const RestoreRoomCamera restore;
+  Render_frameScratch.viewMatrix = {};
+  for (int axis = 0; axis < 3; ++axis) {
+    Render_frameScratch.viewMatrix.m[axis][axis] = 4096;
+  }
+  VECTOR position{}, angles{123, 234, 345, 0};
+  MATRIX output{};
+  Render_BuildRoomGeometryViewMatrix(&position, &angles, &output);
+  // Expanded original2EA3C.s:1499 stages, not successive matrix products.
+  constexpr std::array<std::int16_t, 9> kExpected{3446, -1704, 1413, 2031, 3472,
+                                                  -768, -880,  1347, 3766};
+  for (int row = 0; row < 3; ++row) {
+    for (int column = 0; column < 3; ++column) {
+      CAPTURE(row, column);
+      CHECK(output.m[row][column] == kExpected[row * 3 + column]);
+    }
+  }
+}
+
+TEST_CASE(
+    "Native room Euler stages preserve mixed angles and destination bytes",
+    "[math][room-rotation]") {
+  for (int x = 0; x < 4096; x += 512) {
+    for (int y = 0; y < 4096; y += 512) {
+      for (int z = 0; z < 4096; z += 512) {
+        CheckRoomEuler({static_cast<std::int16_t>(x),
+                        static_cast<std::int16_t>(y),
+                        static_cast<std::int16_t>(z), 123});
+      }
+    }
+  }
+  std::uint32_t state = 0x9874C;
+  const auto angle = [&state] {
+    state = state * 1664525u + 1013904223u;
+    return std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(state >> 16));
+  };
+  for (int index = 0; index < 4096; ++index) {
+    const SVECTOR rotation{angle(), angle(), angle(), -123};
+    CheckRoomEuler(rotation);
+  }
+}
+
+TEST_CASE("Both rotation octant entries retain signed pairs for every halfword",
+          "[math][room-rotation][fixed-trig]") {
+  for (std::uint32_t bits = 0; bits <= UINT16_MAX; ++bits) {
+    const int angle =
+        std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(bits));
+    const auto pair = Core_Math_LookupRotationSineCosine(angle);
+    CHECK(pair.sine == Core_Gte_Sin(angle));
+    CHECK(pair.cosine == Core_Gte_Cos(angle));
+    const int wide = std::bit_cast<std::int32_t>(bits | 0xA5A50000u);
+    const auto wrapped = Core_Math_LookupRotationTrigQuadrant(wide);
+    CHECK(wrapped.sine == pair.sine);
+    CHECK(wrapped.cosine == pair.cosine);
+  }
+  CHECK(&Core_Math_LookupRotationTrigQuadrant ==
+        &Core_Math_LookupRotationSineCosine);
+}
+
+TEST_CASE("Room view producers retain source stages with camera and scale",
+          "[math][room-rotation]") {
+  const RestoreRoomCamera restore;
+  std::uint32_t state = 0x985AC;
+  Render_frameScratch.viewMatrix = MatrixPattern(state);
+  Render_frameScratch.viewMatrix.t[0] = 321;
+  const auto before = MatrixBytes(Render_frameScratch.viewMatrix);
+  const auto scale = GENERATE(2048, 4096, 8192);
+  const auto compensated = GENERATE(false, true);
+  Render_frameScratch.camera.farClip = scale;
+  VECTOR position{0x12348001, -65413, 65539, -1};
+  VECTOR angles{0x1234007B, -65302, 65881, -2};
+  MATRIX actual;
+  std::memset(&actual, 0xA5, sizeof actual);
+  MATRIX expected;
+  std::memcpy(&expected, &actual, sizeof expected);
+  ReferenceRoomView(Render_frameScratch.viewMatrix, scale, compensated,
+                    expected);
+  if (compensated) {
+    Render_BuildScaleCompensatedRoomView(&position, &angles, &actual);
+  } else {
+    Render_BuildRoomGeometryViewMatrix(&position, &angles, &actual);
+  }
+  CHECK(MatrixBytes(actual) == MatrixBytes(expected));
+  CHECK(MatrixBytes(Render_frameScratch.viewMatrix) == before);
+  CHECK(Render_frameScratch.camera.farClip == scale);
+  CHECK(position.pad == -1);
+  CHECK(angles.pad == -2);
+}
+
+TEST_CASE("Native room rotation entries retain their original module bindings",
+          "[math][room-rotation][redirect-binding]") {
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  auto* resolved = VS::Content::ResolveModuleAddress(
+      symbols, "BATTLE/BATTLE.PRG", 0x8009874Cu);
+  REQUIRE(resolved != nullptr);
+  const auto build =
+      reinterpret_cast<MATRIX* (*)(const SVECTOR*, MATRIX*)>(resolved);
+  CHECK(build == Core_Math_BuildEulerRotationMatrix);
+  const SVECTOR angles{123, 234, 345, 0};
+  MATRIX output{};
+  CHECK(build(&angles, &output) == &output);
+  CHECK(output.m[0][1] == -1704);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8009874Du) == nullptr);
+  for (const auto address : {0x800988BCu, 0x800B16F4u}) {
+    CheckRotationPairBinding(address);
+  }
 }
 
 TEST_CASE(

@@ -66,6 +66,8 @@ NATIVE_HELPER_HEADERS = {
 }
 
 NATIVE_FUNCTION_REDIRECTS = {
+    "F01017": ("Core_Math_LookupRotationSineCosine",
+               r"Native\Engine\src\Core\Math\ScalarMath.c"),
     "F03568": ("Core_IgnoreCall", r"Native\Engine\src\Core\Runtime.c"),
     "F00764": ("Core_Gte_Cos", r"Native\Engine\src\Core\Gte.cpp"),
     "F00765": ("Core_Gte_Sin", r"Native\Engine\src\Core\Gte.cpp"),

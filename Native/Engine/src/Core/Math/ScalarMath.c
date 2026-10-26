@@ -133,6 +133,57 @@ int Core_Math_SquareRootInteger(int value) {
                kFixedFractionBits);
 }
 
+// decomp: BATTLE.PRG func_800988BC (src/BATTLE/BATTLE.PRG/2EA3C.s:1597).
+// func_800B16F4 (src/BATTLE/BATTLE.PRG/48C7C.s:188) has identical octant
+// blocks.
+Core_Math_RotationTrigPair Core_Math_LookupRotationSineCosine(int angle) {
+  const Core_Math_RotationTrigPair pair = {Core_Gte_Sin(angle),
+                                           Core_Gte_Cos(angle)};
+  return pair;
+}
+
+// decomp: BATTLE.PRG func_8009874C (src/BATTLE/BATTLE.PRG/2EA3C.s:1499).
+// Keep the GPF stages' two extra fractional bits until each final sum.
+MATRIX* Core_Math_BuildEulerRotationMatrix(const SVECTOR* rotation,
+                                           MATRIX* output) {
+  if (rotation == NULL || output == NULL) {
+    Core_Debugf("math", "Euler rotation requires input and output");
+    abort();
+  }
+  const Core_Math_RotationTrigPair x =
+      Core_Math_LookupRotationSineCosine(rotation->vx);
+  const Core_Math_RotationTrigPair y =
+      Core_Math_LookupRotationSineCosine(rotation->vy);
+  const Core_Math_RotationTrigPair z =
+      Core_Math_LookupRotationSineCosine(rotation->vz);
+  const int sin_z_sin_y =
+      Core_Math_MultiplyFixed(z.sine * kIntermediateScale, y.sine);
+  const int sin_z_cos_y =
+      Core_Math_MultiplyFixed(z.sine * kIntermediateScale, y.cosine);
+  const int cos_z_sin_y =
+      Core_Math_MultiplyFixed(z.cosine * kIntermediateScale, y.sine);
+  const int cos_z_cos_y =
+      Core_Math_MultiplyFixed(z.cosine * kIntermediateScale, y.cosine);
+  output->m[0][0] =
+      (int16_t)((Core_Math_MultiplyFixed(x.sine, sin_z_sin_y) + cos_z_cos_y) >>
+                2);
+  output->m[0][1] =
+      (int16_t)((Core_Math_MultiplyFixed(x.sine, cos_z_sin_y) - sin_z_cos_y) >>
+                2);
+  output->m[0][2] = (int16_t)Core_Math_MultiplyFixed(x.cosine, y.sine);
+  output->m[1][0] = (int16_t)Core_Math_MultiplyFixed(z.sine, x.cosine);
+  output->m[1][1] = (int16_t)Core_Math_MultiplyFixed(z.cosine, x.cosine);
+  output->m[1][2] = (int16_t)-x.sine;
+  output->m[2][0] =
+      (int16_t)((Core_Math_MultiplyFixed(x.sine, sin_z_cos_y) - cos_z_sin_y) >>
+                2);
+  output->m[2][1] =
+      (int16_t)((Core_Math_MultiplyFixed(x.sine, cos_z_cos_y) + sin_z_sin_y) >>
+                2);
+  output->m[2][2] = (int16_t)Core_Math_MultiplyFixed(x.cosine, y.cosine);
+  return output;
+}
+
 // decomp: BATTLE.PRG func_800B17F0 (src/BATTLE/BATTLE.PRG/48C7C.s:254).
 void Core_Math_BuildEulerRotationMatrixQuadrant(SVECTOR* rotation,
                                                 MATRIX* output) {

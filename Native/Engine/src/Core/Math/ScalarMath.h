@@ -20,6 +20,15 @@ MATRIX* Core_Math_MultiplyRotationMatrixInPlace(MATRIX* left, MATRIX* right);
 
 int Core_Math_SquareRootInteger(int value);
 
+typedef struct Core_Math_RotationTrigPair {
+  int sine;
+  int cosine;
+} Core_Math_RotationTrigPair;
+
+Core_Math_RotationTrigPair Core_Math_LookupRotationSineCosine(int angle);
+MATRIX* Core_Math_BuildEulerRotationMatrix(const SVECTOR* rotation,
+                                           MATRIX* output);
+
 void Core_Math_BuildEulerRotationMatrixQuadrant(SVECTOR* rotation,
                                                 MATRIX* output);
 

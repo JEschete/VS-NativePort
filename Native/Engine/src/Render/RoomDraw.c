@@ -205,7 +205,7 @@ static void BuildRoomView(VECTOR* position, VECTOR* angles, MATRIX* output,
   }
   SVECTOR rotation = {(int16_t)angles->vx, (int16_t)angles->vy,
                       (int16_t)angles->vz, 0};
-  Core_Gte_RotMatrixYXZ(&rotation, output);
+  Core_Math_BuildEulerRotationMatrix(&rotation, output);
   Core_Math_MultiplyMatrixIntoRight(&camera, output);
   const int16_t coordinates[kRoomSpatialDimensions] = {
       (int16_t)position->vx, (int16_t)position->vy, (int16_t)position->vz};

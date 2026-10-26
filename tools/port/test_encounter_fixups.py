@@ -11,6 +11,26 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_room_euler_uses_the_source_staged_kernel_and_shared_octant_pair(self):
+        owned = self.owned_items()
+        for identity in ("F00761", "F00762"):
+            self.assertEqual(
+                owned[identity]["path"], r"Native\Engine\src\Core\Math\ScalarMath.c"
+            )
+        self.assertEqual(
+            copy_fixups.NATIVE_FUNCTION_REDIRECTS["F01017"],
+            (
+                "Core_Math_LookupRotationSineCosine",
+                r"Native\Engine\src\Core\Math\ScalarMath.c",
+            ),
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Core_Math_BuildEulerRotationMatrix(&rotation, output);", source)
+        self.assertNotIn("Core_Gte_RotMatrixYXZ(", source)
+
     def test_core_idle_and_matrix_entries_reuse_native_leaf_implementations(self):
         self.assertEqual(
             copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03568"],

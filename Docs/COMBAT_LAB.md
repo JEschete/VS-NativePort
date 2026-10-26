@@ -415,6 +415,63 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Source-staged native room rotation (#192/#42, 2026-10-26)
+
+F00761 (`func_8009874C`, original2EA3C.s:1499) now has explicit
+SVECTOR input, MATRIX output and destination return instead of packed
+V0/T8/A1 arguments. Its Z/Y/X trig stages retain the two extra fractional
+bits through the final sums. This is YXZ, not F01018's distinct ZXY
+calculation, and is not numerically equivalent to successive SDK matrix
+products. F00762's original eight octant continuations become an explicit
+signed sine/cosine pair using the already validated canonical native trig
+functions; F01017's instruction-equivalent blocks redirect to that pair.
+No reference table bytes, guest continuation registers or new GTE state
+are introduced.
+
+The actual normal room-view regression is red on parentd2a0b71c:
+identity camera, zero position and angles123/234/345 produce m01=-1705,
+where original staged arithmetic gives-1704. Eight other matrix cells
+already match. Both normal and scale-compensated production view builders
+now use the source-specific kernel, including the existing room-group and
+background callers. The unrelated SDK helper and F01018 stay unchanged.
+
+Private `roomeuler42-*` retain the exact commands, source/dirty state,
+original hashes, binaries and logs:
+
+- New5 cases/276,023 assertions cover the original mixed-angle golden,
+  all512 octant combinations,4096 deterministic signed-angle triples
+  against independently divided original GPF stages, full guarded matrix
+  bytes/tail and unchanged source. Pair controls cover all65,536 signed
+  halfwords and poisoned upper words. Actual camera producers cover
+  normal/compensated construction at scales2048/4096/8192, wrapped
+  position/angle words, translation, unchanged camera state and output
+  padding. All three original module bindings resolve and invoke through
+  their proper typed APIs; interior addresses remain unresolved.
+- `build\<configuration>\VS.Tests.exe
+  "[room-rotation],[core-leaves],[fixed-trig],[room-tint],[room-screen],[room-midpoint],[render][room]"
+  --reporter compact` passes33 cases/1,434,615 assertions in Debug/Release.
+  Both x64 solution builds link both hosts; full suites pass846 cases/
+  5,485,327 assertions each. All110 port/audit controls pass.
+- Initial focused quality found fixture integer spelling, intentional
+  object-byte comparison and two oversized test bodies. Fixed-width
+  spellings, explicit byte arrays and extracted reference/binding helpers
+  preserve the assertions without suppressions or baseline changes.
+  Final focused/default quality is0 actionable/0 new; focused tidy
+  separately retains five existing advisories and114 fixture literals.
+- Two generations preserve114 registered/owner/reference files,
+  including both original assemblies, and repeat identically across749
+  outputs. Only generated Matrix.c/.h and Trig.c/.h change; the initial
+  guard rejected an alias assigned to an owned output header before
+  writing anything. Keeping its established generated Matrix.h location
+  while registering the actual shared provider resolves the conflict.
+
+The local original cohort reaches148/186,38 gaps (13 C/C++ references,
+15 assembly-only,10 missing listings). Implementations3116 and aliases150
+remain separate;16 of the other41 original entries are complete. No new
+owner-visible graphical complaint, all-room parity, whole-math promotion
+or compatibility retirement is claimed. Final quality and publication/
+exact CI gates are recorded on#192/#42 before closure/checklist advance.
+
 ### Shared native room screen predicate (#42, 2026-10-26)
 
 F00751 (`func_80098014`, original2EA3C.s:969) now receives explicit
