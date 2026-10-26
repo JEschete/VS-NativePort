@@ -257,18 +257,50 @@ TEST_CASE("AI teardown preserves the original Ashley state lifetime",
   CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
 }
 
-TEST_CASE("AI special orbit teardown releases shared ownership once",
-          "[ai][cleanup]") {
+TEST_CASE("AI orbit construction clears reused storage and sets its cooldown",
+          "[ai][orbit-state]") {
+  const bool supplied = GENERATE(false, true);
+  CleanupFixture fixture;
+  Battle_Ai_SettingsView input{};
+  std::array<unsigned char, sizeof(input)> before{};
+  std::memcpy(before.data(), &input, before.size());
+  auto* dirty =
+      Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ArenaOrbitState));
+  REQUIRE(dirty != nullptr);
+  std::memset(dirty, 0xA5, sizeof(Battle_Ai_ArenaOrbitState));
+  Core_Memory_FreeFromLowEnd(dirty);
+  Battle_Ai_AllocateOrbitingBossState(supplied ? &input : nullptr);
+  REQUIRE(Battle_Ai_arenaOrbit != nullptr);
+  CHECK(static_cast<void*>(Battle_Ai_arenaOrbit) == dirty);
+  std::array<unsigned char, sizeof(Battle_Ai_ArenaOrbitState)> actual{};
+  std::memcpy(actual.data(), Battle_Ai_arenaOrbit, actual.size());
+  auto expected = decltype(actual){};
+  expected[offsetof(Battle_Ai_ArenaOrbitState, cooldown)] = 0x84;
+  expected[offsetof(Battle_Ai_ArenaOrbitState, cooldown) + 1] = 0x03;
+  CHECK(actual == expected);
+  std::array<unsigned char, sizeof(input)> after{};
+  std::memcpy(after.data(), &input, after.size());
+  CHECK(after == before);
+  CHECK(Core_legacyHeapList.next->blockSize < fixture.free_units);
+  Core_Memory_FreeFromLowEnd(Battle_Ai_arenaOrbit);
+  Battle_Ai_arenaOrbit = nullptr;
+  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+}
+
+TEST_CASE("AI special orbit teardown releases reconstructed ownership once",
+          "[ai][cleanup][orbit-state]") {
   const auto type = GENERATE(0xAC, 0xAD);
   CleanupFixture fixture;
-  fixture.AllocateState(1);
-  fixture.actors[1].subType = static_cast<u_short>(type);
-  Battle_Ai_arenaOrbit = static_cast<Battle_Ai_ArenaOrbitState*>(
-      Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ArenaOrbitState)));
-  REQUIRE(Battle_Ai_arenaOrbit != nullptr);
-  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
-  CHECK(Battle_Ai_arenaOrbit == nullptr);
-  CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  for (int cycle = 0; cycle < 2; ++cycle) {
+    auto* state = fixture.AllocateState(1);
+    fixture.actors[1].subType = static_cast<u_short>(type);
+    Battle_Ai_AllocateOrbitingBossState(
+        reinterpret_cast<Battle_Ai_SettingsView*>(state));
+    REQUIRE(Battle_Ai_arenaOrbit != nullptr);
+    Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+    CHECK(Battle_Ai_arenaOrbit == nullptr);
+    CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
+  }
 }
 namespace {
 struct AppearanceFixture {

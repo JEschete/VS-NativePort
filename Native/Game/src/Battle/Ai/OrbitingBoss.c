@@ -37,12 +37,6 @@ int Battle_Ai_orbitHeightOffset;
 // decomp: D_800F5920 (D_800F5920@BATTLE/BATTLE.PRG)
 Battle_Ai_ArenaOrbitState* Battle_Ai_arenaOrbit;
 
-// decomp: BATTLE.PRG func_800E7660 (src/BATTLE/BATTLE.PRG/7E05C.s:0) [asm-file: not yet ported]
-void Battle_Ai_AllocateOrbitingBossState(Battle_Ai_SettingsView*)
-{
-    VS_UNPORTED("Battle::Ai::AllocateOrbitingBossState");
-}
-
 // decomp: BATTLE.PRG func_800E7698 (src/BATTLE/BATTLE.PRG/7EE98.c:506)
 int Battle_Ai_UpdateBossRadialRetreat(Battle_Ai_RadialRetreatView* state)
 {

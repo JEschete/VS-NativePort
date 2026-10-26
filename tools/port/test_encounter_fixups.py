@@ -10,6 +10,14 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_orbit_constructor_shares_the_existing_owned_teardown(self):
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F01845"]["path"],
+            r"Native\Game\src\Battle\Ai\ActorCleanup.cpp",
+        )
+        self.assertEqual(owned["F01845"]["name"], "Battle_Ai_AllocateOrbitingBossState")
+
     def test_hostility_transition_is_owned_with_existing_reaction_lifecycle(self):
         owned = self.owned_items()
         self.assertEqual(

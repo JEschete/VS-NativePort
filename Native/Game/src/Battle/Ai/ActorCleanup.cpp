@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
+#include <memory>
 
 #include "Battle/Ai/EngagementState.hpp"
 #include "Core/BiosRand.h"
@@ -35,6 +36,7 @@ constexpr unsigned kAiKindFlags = 5;
 constexpr unsigned kCommandModeMask = 0xFC;
 constexpr unsigned kOrbitTypeFirst = 0xAC;
 constexpr unsigned kOrbitTypeSecond = 0xAD;
+constexpr std::int16_t kOrbitSpecialCooldown = 900;
 constexpr unsigned kHostileClassification = 3;
 constexpr int kHostilityIndicator = 6;
 constexpr int kHostilityIndicatorFrames = 40;
@@ -225,6 +227,17 @@ void Battle_Ai_ForceReleaseActorAiReservations(int actor_id) {
   if (state == nullptr) return;
   Battle_Ai_ReleaseActorAiReservations(state);
   state->opaque1A = 1;
+}
+
+// decomp: func_800E7660 (src/BATTLE/BATTLE.PRG/7E05C.s:1080-1095).
+void Battle_Ai_AllocateOrbitingBossState(Battle_Ai_SettingsView*) {
+  auto* storage =
+      Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ArenaOrbitState));
+  Require(storage != nullptr, "AI orbit-state allocation failed");
+  auto* orbit =
+      std::construct_at(static_cast<Battle_Ai_ArenaOrbitState*>(storage));
+  orbit->cooldown = kOrbitSpecialCooldown;
+  Battle_Ai_arenaOrbit = orbit;
 }
 
 // decomp: func_800E7454 (src/BATTLE/BATTLE.PRG/7E05C.s:924).

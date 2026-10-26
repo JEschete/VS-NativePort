@@ -9,6 +9,22 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01845 now constructs the typed orbit motion state in the existing
+  low arena, reaching133/186 original entries and53 gaps (18 C/C++
+  references,25 assembly-only,10 missing listings). Original7E05C.s:
+  1080-1095 ignores its settings argument, clears the complete32-byte
+  record and sets cooldown900. Native value construction preserves that
+  contract, with an explicit allocation-failure error and the existing
+  AC/AD cleanup owning release. Red2/8 has4 failed assertions; poisoned
+  reused storage, every byte, unused input, both cleanup categories and
+  reconstruct/free cycles pass. Combined orbit/cleanup13/198 and full
+  Debug/Release806/4,078,300 each pass; both hosts link,100 port/audit
+  controls and0-new focused/default quality pass with unchanged baselines.
+  Two generations preserve292 maintained native/owner paths and the
+  original instruction/C reference files, repeating identically; only
+  OrbitingBoss.c/.h and one existing caller include change. Exact boss
+  identity, complete boss gameplay and compatibility retirement remain
+  unverified. Private `orbit42-*`; publication/exact CI are on#42.
 - #42 F01695 now performs the source-backed hostility transition through
   the existing owned reaction lifecycle, reaching132/186 original entries
   and54 gaps (19 C/C++ references,25 assembly-only,10 missing listings).

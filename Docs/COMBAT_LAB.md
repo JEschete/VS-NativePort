@@ -415,6 +415,51 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Typed orbit-state construction and teardown (#42, 2026-10-25)
+
+F01845 (`func_800E7660`, original7E05C.s:1080-1095 and read-only
+rood-boi battle_movement.c:1914 at e59320ca) now uses the existing owned
+ActorCleanup lifecycle. It allocates the native scalar motion record from
+the low arena, value-constructs the complete record and sets its cooldown
+to900. The settings argument remains unused, including a null argument.
+Allocation failure logs and terminates rather than publishing a usable-looking
+null record. The existing special-category AC/AD actor teardown releases
+this allocation and clears its shared binding.
+
+This is a fresh-state constructor, not a replacement for teardown or a
+promise that two live orbit owners are supported. The original shared
+ownership model is retained; neither an exact boss identity nor a complete
+boss fight is inferred from the source.
+
+Evidence is from parent20cd187f plus this scoped dirty worktree, preserving
+the owner edits. Exact commands and private results are in `orbit42-*`:
+
+- Debug red `build\Debug\VS.Tests.exe "[orbit-state]" --reporter compact`
+  fails both cases,4 of8 assertions, against the original constructor stub.
+- The constructor is tested after poisoning and freeing the exact reused
+  allocation. Every one of its32 bytes must match original zero-fill
+  plus the little-endian cooldown at0x0C; the unused caller input remains
+  byte-identical and the real low-heap capacity is recovered after release.
+- The existing special-category teardown test now calls the real
+  constructor, tests AC and AD, reconstructs after full release and checks
+  that the shared pointer clears and all heap units return on each cycle.
+- Debug/Release x64 solution builds link both hosts.
+  `build\<configuration>\VS.Tests.exe "[orbit-state],[cleanup]"
+  --reporter compact` passes13 cases/198 assertions in each configuration;
+  the full native suites pass806 cases/4,078,300 assertions each.
+- All100 port/audit controls pass. Focused native/tidy and default quality
+  have0 actionable/0 new findings, without changing baselines.
+- Two copier runs preserve292 tracked maintained-native/owner paths plus
+  both original instruction/C reference files, and repeat identically.
+  Only generated OrbitingBoss.c/.h and the existing ActorState.c consumer
+  include change. No solution/project regeneration is needed.
+
+The original186-entry cohort reaches133 implemented entries,53 remaining:
+18 C/C++ reference bodies,25 assembly-only and10 missing instruction
+listings. Existing order/prior132 checks are retained. Component ownership
+verification, whole-state C++ promotion and compatibility retirement stay
+separate; publication and exact CI are recorded on#42.
+
 ### Exact native hostility transition (#42, 2026-10-25)
 
 F01695 (`func_800DC784`, original73C84.s:246-284 and read-only
