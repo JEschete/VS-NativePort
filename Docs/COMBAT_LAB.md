@@ -415,6 +415,47 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Final directed-door inventory slice (#151, 2026-10-25)
+
+Release run1792988508566012-0 uses a frozen e9f0dbab image
+(exe a0294afe/PDB10b89faa), not the later lifecycle worktree.
+
+```powershell
+build\Release\VS.CombatLab.exe --door-transitions --door-from z048-r006-d000 --door-limit 410 --frames 3600 --speed 64 --scripted
+```
+
+The selected IDs/order exactly equal original inventory indices591..1000.
+All410 selections finish teardown:305 pass the unchanged production gate,
+105 remain honestly blocked,0 engine errors,0 failed and0 unrun.
+
+| Blocked reason | Records |
+| --- | ---: |
+| Fixture defeated before transition acceptance | 93 |
+| Destination entry event exceeds budget | 4 |
+| Source entry event exceeds budget | 1 |
+| Destination zone unavailable | 5 |
+| Destination room unavailable | 2 |
+
+The seven availability-blocked records are not initialized. Their raw
+destinations are0/255 for z048-r022-d003, z053-r030-d000,
+z069-r000-d000, z070-r000-d000 and z100-r000-d000; z250-r000-d000/
+d001 target254/0. They need separate source/availability classification,
+not an assumed unused-record exclusion, fabricated load or passing result.
+Combat defeats remain real defeats; no HP/story/readiness writes, skipped
+events or synthetic completion make them pass.
+
+All default trace logs and frames are retained under the frozen image's
+private run directory. The7200-second outer watchdog is distinct from
+the3600-tick per-case budget. An initial attempt added unsupported
+--log-level; startup rejected it before gameplay. The supported retry
+above uses full default logging, not a partially initialized game failure.
+
+Strict `doors151-remaining-release-verified.json` records counts, exact
+selection and all seven initialization limits. This is one Release slice,
+not a current all1001 result assembled from earlier revisions, normal-speed
+visual parity or the original #167 full persistent history. #151 and its
+remaining combat/event/availability acceptance stay open.
+
 ### Shared AI persistence and lifecycle leaves (#42, 2026-10-25)
 
 F01820/F01831/F01835 now belong to the existing ActorCleanup API. Original

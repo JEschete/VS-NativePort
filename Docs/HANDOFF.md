@@ -9,6 +9,20 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #151's final original410-record Release slice is now observed separately:
+  frozen e9f0dbab exe a0294afe/PDB10b89faa,
+  run1792988508566012-0, exact inventory indices591..1000 starting
+  z048-r006-d000. It completes305 passed/105 blocked,0 engine errors,
+  410 teardowns and no failed/unrun selection. Blocked reasons are93 fixture
+  defeats,4 destination-event budgets,1 source-event budget,5 unavailable
+  destination zones and2 unavailable destination rooms. Those7 unavailable
+  records are not initialized; do not claim410 initialized. Full default
+  trace/frames,3600/speed64/scripted,7200 outer; an initial unsupported
+  --log-level option was rejected before gameplay, then removed for the run.
+  This is not original #167 full-history reproduction, visual parity or a
+  mixed-source all1001 aggregation. Event/combat/availability acceptance
+  remains open. Strict private `doors151-remaining-release-verified.json`;
+  no owned replay remains active.
 - #42's F01820/F01831/F01835 AI lifecycle leaves are owned in ActorCleanup,
   reaching127/186 original entries and59 gaps (24 C/C++ references,
   25 assembly-only,10 missing listings). The existing RuntimeSnapshot
