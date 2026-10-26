@@ -10,6 +10,22 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_every_native_redirect_retains_its_module_symbol_binding(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(
+            encoding="utf-8", newline=""
+        ) as stream:
+            rows = {row["id"]: row for row in csv.DictReader(stream)}
+        source = (root / r"Native\Game\src\Boot\ModulePointers.c").read_text(
+            encoding="utf-8"
+        )
+        for identifier in copy_fixups.NATIVE_FUNCTION_REDIRECTS:
+            name = rows[identifier]["final_name"].replace("::", "_")
+            self.assertTrue(
+                f"(void*)&{name}," in source,
+                f"Native alias {identifier} must retain its original module binding",
+            )
+
     def test_fixed_trig_entries_redirect_to_existing_typed_native_bodies(self):
         for identifier, name in (
             ("F00764", "Core_Gte_Cos"),

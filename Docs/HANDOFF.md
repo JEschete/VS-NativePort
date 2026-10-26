@@ -9,6 +9,20 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #186 fixes the loader surface of native aliases: redirect macros were not
+  counted as emitted functions, so the copier omitted their original-address
+  module symbols. Actual production-resolver red controls return null for
+  BATTLE80098AB4/80098AB8 despite working source aliases. The function-symbol
+  set now includes configured redirect names, restoring all9 canonical
+  aliases without fake bodies or changing the resolver's exact-function/
+  interior-data rules. Native controls resolve/invoke both trig targets and
+  reject+1 interior function addresses; a copier control checks every
+  configured redirect. Full Debug/Release791/3,424,199 each,93 copier controls
+  and0-new focused/default quality pass. Two generations preserve302
+  protected paths and repeat identically, changing only ModulePointers.c.
+  This completes the wiring needed before #42's two new entries advance;
+  no particular gameplay symptom or compatibility retirement is inferred.
+  Private `redirect186-*`; publication and exact CI are recorded on#186.
 - #42's F00764/F00765 fixed cosine/sine now use the existing canonical native
   aliases, reaching122/186 original entries complete and64 remaining
   (27 C/C++ references,27 assembly-only,10 missing listings). Original

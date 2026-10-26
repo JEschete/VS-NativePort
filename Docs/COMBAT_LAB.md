@@ -415,6 +415,32 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Native redirect loader bindings (#186, 2026-10-25)
+
+The trig source aliases exposed a distinct loader regression: the copier's
+emitted-function set included generated bodies and owned functions, but not
+redirect macros. Original-address module symbols disappeared even though
+the alias targets were real native functions. Actual production
+`ResolveModuleAddress` calls over `Content_moduleSymbols` returned null for
+BATTLE80098AB4/80098AB8: one red case/two failed assertions. This is a
+demonstrated generator/resolver contract defect, not a guessed gameplay bug.
+
+The function-symbol set now includes every configured native redirect name.
+All9 original bindings are emitted through the existing providers/macros,
+without synthetic bodies or a new guest-memory model. Native controls
+resolve both trig entries to the correct canonical function, invoke them
+with the proper int ABI and reject an interior+1 function address. The
+resolver itself, data extents and ordinary unrelated symbols are unchanged.
+A copier regression requires a binding for every configured redirect.
+
+Full Debug/Release suites pass791 cases/3,424,199 assertions each;93
+copier/audit controls and focused/default quality are0 new. Both shipping
+hosts link. Two copier generations preserve302 protected paths and repeat
+identically, changing only ModulePointers.c. Private `redirect186-*`
+retains commands, red/green and ownership evidence; publication/exact CI
+are on#186. This completes the #42 alias wiring, but does not establish
+particular gameplay completion or whole compatibility-layer retirement.
+
 ### Canonical fixed trigonometry exports (#42, 2026-10-25)
 
 F00764/F00765 now use the established native-function redirect mechanism to

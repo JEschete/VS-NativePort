@@ -6,6 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/ModuleData.h"
 #include "Core/Gte.h"
 #include "Legacy/Psx.h"
 
@@ -40,6 +41,23 @@ TEST_CASE("Battle fixed trigonometry uses the canonical native implementations",
           "[math][sdk-gaps][fixed-trig]") {
   CHECK(&Core_Math_SineFixedPoint == &Core_Gte_Sin);
   CHECK(&Core_Math_CosineFixedPoint == &Core_Gte_Cos);
+}
+
+TEST_CASE(
+    "Native trig redirects remain available through original module addresses",
+    "[math][sdk-gaps][fixed-trig][redirect-binding]") {
+  const bool cosine = GENERATE(false, true);
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  void* resolved = VS::Content::ResolveModuleAddress(
+      symbols, "BATTLE/BATTLE.PRG", cosine ? 0x80098AB4u : 0x80098AB8u);
+  REQUIRE(resolved != nullptr);
+  const auto function = reinterpret_cast<int (*)(int)>(resolved);
+  CHECK(function == (cosine ? Core_Gte_Cos : Core_Gte_Sin));
+  CHECK(function(1024) == (cosine ? 0 : 4096));
+  CHECK(VS::Content::ResolveModuleAddress(
+            symbols, "BATTLE/BATTLE.PRG",
+            (cosine ? 0x80098AB4u : 0x80098AB8u) + 1) == nullptr);
 }
 
 TEST_CASE("Fixed trigonometry retains mathematical octants at Q12 scale",

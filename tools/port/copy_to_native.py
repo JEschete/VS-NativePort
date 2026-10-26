@@ -1917,6 +1917,10 @@ class Copier:
             modules.add("SLUS_010.40")  # the resident module, reachable from every overlay
         emitted_fns = {i.name for f in self.files.values() for i in f.items if i.kind == "function"}
         emitted_fns |= {o["name"].strip() for o in self.owned.values() if o["kind"].strip() == "function"}
+        emitted_fns |= {
+            c_name(self.cat_by_id[fid]["final_name"])
+            for fid in cf.NATIVE_FUNCTION_REDIRECTS
+        }
         fn_by_key = {(r["overlay"], r["name"]): r for r in self.cat_by_id.values()}
         fn_overlay = lambda m: m.split("/")[-1]  # noqa: E731  (catalog: "BATTLE.PRG"; ledger/splat: "BATTLE/BATTLE.PRG")
         data_by_key = {(r["overlay"], r["name"]): r for r in self.data}
