@@ -37,13 +37,6 @@ int Render_SubdivideRoomQuad()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_80097F70 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Render_InterpolateRoomVertexMidpoint()
-{
-    VS_UNPORTED("Render::InterpolateRoomVertexMidpoint");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_80098014 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
 int Render_IsRoomPolygonOnScreen()
 {

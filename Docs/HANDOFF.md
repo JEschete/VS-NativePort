@@ -9,6 +9,24 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F00750 now exposes the existing native room-subdivision midpoint
+  kernel through explicit workspace vertices, not saved registers or
+  packed MPD offsets. Original2EA3C.s:921 establishes signed floor
+  positions, unsigned RGB/UV averages and untouched remaining bytes.
+  Existing triangle/quad production callers share the same kernel.
+  Old int() ABI is compile-time red; new2/524,297 assertions cover every
+  byte pair in every RGB/UV channel,65,536 signed-position samples,
+  complete output/source/padding/canary bytes, all alias directions
+  and actual80097F70 binding. Direct/room/tint13/655,641 and full
+  Debug/Release839/5,078,205 each, both hosts and109 port controls pass.
+  Focused/default quality is0 actionable/0 new with unchanged baselines.
+  Two generations preserve297 maintained/owner paths and original
+  assembly, repeating identically; only RoomGeometry.c/.h change.
+  Local cohort144/186,42 gaps (13 C/C++ references,19 assembly-only,
+  10 missing listings); implementations3113 and aliases149 remain
+  separate. No packed-layout equivalence, all-room visual parity,
+  renderer promotion or retirement claim. Private `midpoint42-*`;
+  publication/exact CI are recorded on#42.
 - #42 F03409 now implements native vector squaring from original
   32154.s:24. Input words narrow through the existing signed16 helper;
   full unshifted MAC products, not saturated IR results, are written.

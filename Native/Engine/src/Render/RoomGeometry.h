@@ -14,7 +14,6 @@ int Render_DecodeRoomPolygonVertices();
 int Render_ProjectAndDecodeRoomPolygon();
 int Render_SubdivideRoomTriangle();
 int Render_SubdivideRoomQuad();
-int Render_InterpolateRoomVertexMidpoint();
 int Render_IsRoomPolygonOnScreen();
 int Render_LinkRoomPolygonByDepth();
 

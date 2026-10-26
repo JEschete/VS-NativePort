@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <limits>
 #include <span>
 #include <type_traits>
@@ -17,9 +18,105 @@
 extern "C" {
 #include "Field/Room.h"
 #include "Render/RoomDraw.h"
+#include "Render/RoomGeometry.h"
 }
 
 namespace {
+using Vertex = Render_RoomVertex;
+using Midpoint = void (*)(const Vertex*, const Vertex*, Vertex*);
+static_assert(
+    std::is_same_v<decltype(&Render_InterpolateRoomVertexMidpoint), Midpoint>);
+
+template <typename T>
+auto ObjectBytes(const T& object) {
+  std::array<std::byte, sizeof object> bytes;
+  std::memcpy(bytes.data(), &object, bytes.size());
+  return bytes;
+}
+
+Vertex ReferenceMidpoint(const Vertex& first, const Vertex& second,
+                         const Vertex& destination) {
+  Vertex result;
+  std::memcpy(&result, &destination, sizeof result);
+  result.position.vx = static_cast<std::int16_t>(
+      std::floor((first.position.vx + second.position.vx) / 2.0));
+  result.position.vy = static_cast<std::int16_t>(
+      std::floor((first.position.vy + second.position.vy) / 2.0));
+  result.position.vz = static_cast<std::int16_t>(
+      std::floor((first.position.vz + second.position.vz) / 2.0));
+  result.color &= 0xFF000000u;
+  for (unsigned shift = 0; shift < 24; shift += 8) {
+    result.color |=
+        (((first.color >> shift & 255) + (second.color >> shift & 255)) / 2)
+        << shift;
+  }
+  result.uv = static_cast<std::uint16_t>(
+      ((first.uv & 255) + (second.uv & 255)) / 2 +
+      (((first.uv >> 8) + (second.uv >> 8)) / 2) * 256);
+  return result;
+}
+
+void CheckMidpointOutput(const Vertex& first, const Vertex& second) {
+  struct GuardedVertex {
+    unsigned before;
+    Vertex value;
+    unsigned after;
+  };
+  GuardedVertex output;
+  std::memset(&output, 0xA5, sizeof output);
+  GuardedVertex expected;
+  std::memcpy(&expected, &output, sizeof expected);
+  const auto vertex = ReferenceMidpoint(first, second, output.value);
+  std::memcpy(&expected.value, &vertex, sizeof vertex);
+  const auto first_before = ObjectBytes(first);
+  const auto second_before = ObjectBytes(second);
+  Render_InterpolateRoomVertexMidpoint(&first, &second, &output.value);
+  CHECK(ObjectBytes(output) == ObjectBytes(expected));
+  CHECK(ObjectBytes(first) == first_before);
+  CHECK(ObjectBytes(second) == second_before);
+}
+
+void CheckMidpointAliases(const Vertex& first, const Vertex& second) {
+  Vertex output;
+  std::memcpy(&output, &first, sizeof output);
+  const auto first_expected = ReferenceMidpoint(first, second, first);
+  const auto second_before = ObjectBytes(second);
+  Render_InterpolateRoomVertexMidpoint(&output, &second, &output);
+  CHECK(ObjectBytes(output) == ObjectBytes(first_expected));
+  CHECK(ObjectBytes(second) == second_before);
+  std::memcpy(&output, &second, sizeof output);
+  const auto second_expected = ReferenceMidpoint(first, second, second);
+  const auto first_before = ObjectBytes(first);
+  Render_InterpolateRoomVertexMidpoint(&first, &output, &output);
+  CHECK(ObjectBytes(output) == ObjectBytes(second_expected));
+  CHECK(ObjectBytes(first) == first_before);
+  std::memcpy(&output, &first, sizeof output);
+  Render_InterpolateRoomVertexMidpoint(&output, &output, &output);
+  CHECK(ObjectBytes(output) == first_before);
+}
+
+void CheckMidpointSample(std::uint32_t bits) {
+  Vertex first, second;
+  std::memset(&first, 0x19, sizeof first);
+  std::memset(&second, 0xE2, sizeof second);
+  first.position.vx =
+      std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(bits));
+  first.position.vy =
+      std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(bits ^ 0x8000u));
+  first.position.vz = first.position.vx;
+  second.position.vx = INT16_MAX;
+  second.position.vy = INT16_MIN;
+  second.position.vz =
+      std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(bits * 7 + 13));
+  const auto low = bits & 255, high = bits >> 8;
+  first.color = 0x19000000u | low | ((255 - low) << 8) | (low << 16);
+  second.color = 0xE2000000u | high | (high << 8) | ((255 - high) << 16);
+  first.uv = static_cast<std::uint16_t>(high | ((255 - high) << 8));
+  second.uv = static_cast<std::uint16_t>(low | (low << 8));
+  CheckMidpointOutput(first, second);
+  CheckMidpointAliases(first, second);
+}
+
 using ColorTransform = std::uint32_t (*)(std::uint32_t, std::int16_t,
                                          std::int16_t, std::int16_t,
                                          std::int16_t);
@@ -96,6 +193,37 @@ TEST_CASE(
                                     packets.words.data() + packets.end, &tint,
                                     flags);
   CHECK(packets.words == expected);
+}
+
+TEST_CASE("Room vertex midpoint preserves signed floors and every byte pair",
+          "[render][room-midpoint]") {
+  for (std::uint32_t bits = 0; bits <= UINT16_MAX; ++bits) {
+    CheckMidpointSample(bits);
+  }
+}
+
+TEST_CASE(
+    "Room midpoint binding exposes native vertices without register context",
+    "[render][room-midpoint]") {
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  auto* resolved = VS::Content::ResolveModuleAddress(
+      symbols, "BATTLE/BATTLE.PRG", 0x80097F70u);
+  REQUIRE(resolved != nullptr);
+  const auto midpoint = reinterpret_cast<Midpoint>(resolved);
+  CHECK(midpoint == Render_InterpolateRoomVertexMidpoint);
+  Vertex first{{-1, INT16_MAX, INT16_MIN, 0}, 0xAA0000FFu, 0xFF00u};
+  Vertex second{{0, INT16_MIN, INT16_MAX, 0}, 0x55FF0000u, 0x00FFu};
+  Vertex output{{0, 0, 0, 123}, 0xCCFFFFFFu, 0};
+  midpoint(&first, &second, &output);
+  CHECK(output.position.vx == -1);
+  CHECK(output.position.vy == -1);
+  CHECK(output.position.vz == -1);
+  CHECK(output.position.pad == 123);
+  CHECK(output.color == 0xCC7F007Fu);
+  CHECK(output.uv == 0x7F7Fu);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80097F71u) == nullptr);
 }
 
 TEST_CASE("Room tint preserves the original stop at a non-room packet",

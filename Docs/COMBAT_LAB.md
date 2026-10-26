@@ -415,6 +415,51 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Shared native room-subdivision midpoint (#42, 2026-10-26)
+
+F00750 (`func_80097F70`, original2EA3C.s:921-964) now has explicit typed
+input/output vertices instead of original saved-register operands.
+The public Render_RoomVertex is the existing native subdivision
+workspace, not the packed12-byte MPD/source layout. Existing production
+triangle/quad subdivision and the public entry use one kernel.
+
+The source averages signed16 positions with negative floor, unsigned
+RGB and UV bytes independently, and writes no other destination bytes.
+The native kernel preserves destination color code, position pad and
+native tail padding, captures inputs before writes and supports all
+alias directions. Existing production midpoint construction remains
+zero-initialized, preserving its previous output semantics.
+
+Evidence is parentdef3c7b3 plus the scoped worktree and four preserved
+owner paths; exact commands/images/source state are private `midpoint42-*`:
+
+- New typed assertion/calls fail against the old int() stub. Direct
+  `build\<configuration>\VS.Tests.exe "[room-midpoint]" --reporter compact`
+  passes2 cases/524,297 assertions in both configurations: every256x256
+  byte pair on each RGB/UV channel,65,536 deterministic signed-position
+  samples, independent floor/division math, complete guarded output/
+  source bytes, destination metadata/padding, left/right/all-self aliases
+  and actual80097F70 binding/interior rejection. A mixed signed/UV/color
+  golden verifies negative halves and unchanged code/pad.
+- `"[room-midpoint],[room-tint],[render][room]"` passes13 cases/655,641
+  assertions each, including existing production packet/subdivision and
+  field draw controls. Both x64 solution builds link both hosts;
+  full Debug/Release suites pass839 cases/5,078,205 assertions each.
+  All109 port/audit controls pass.
+- Focused/default quality has0 actionable/0 new findings, unchanged
+  baselines; focused tidy retains three existing advisories and75 exact
+  fixture-literal reports.
+- Two native generations preserve297 maintained/owner paths and original
+  2EA3C.s, repeating identically. Only generated RoomGeometry.c/.h change;
+  there is no project/solution rewrite.
+
+The local original cohort reaches144/186,42 remaining (13 C/C++ references,
+19 assembly-only,10 missing listings). Implementations3113 and aliases149
+remain separate;12 of the other41 original entries are complete.
+This proves the shared midpoint contract, not packed/native layout
+equivalence, all-room visual parity, renderer C++ promotion or retirement.
+Publication/exact CI are recorded on#42 before its checkbox advances.
+
 ### Native signed-halfword vector squares (#42, 2026-10-26)
 
 F03409 (`Square0`, original32154.s:24-35) now narrows all three input

@@ -18,6 +18,13 @@ typedef struct Render_RoomGeometryGroup {
   MATRIX view;
 } Render_RoomGeometryGroup;
 
+// Native subdivision workspace, not the packed MPD vertex layout.
+typedef struct Render_RoomVertex {
+  SVECTOR position;
+  unsigned color;
+  uint16_t uv;
+} Render_RoomVertex;
+
 #ifdef __cplusplus
 static_assert(sizeof(Render_RoomGeometryGroup) == kRoomGeometryGroupBytes);
 extern "C" {
@@ -33,6 +40,9 @@ void Render_BuildRoomGeometryViewMatrix(VECTOR* position, VECTOR* angles,
 void Render_BuildScaleCompensatedRoomView(VECTOR* position, VECTOR* angles,
                                           MATRIX* output);
 void Render_DrawRoomGeometry(void* data, int mode);
+void Render_InterpolateRoomVertexMidpoint(const Render_RoomVertex* first,
+                                          const Render_RoomVertex* second,
+                                          Render_RoomVertex* output);
 void Render_SetRoomPolygonNearClip(int depth);
 void Render_SetRoomPolygonFarClip(int depth);
 void Render_SetRoomPolygonScreenBounds(int left, int top, int right,

@@ -269,11 +269,7 @@ void Render_BuildScaleCompensatedRoomView(VECTOR* position, VECTOR* angles,
 
 // decomp: BATTLE.PRG func_8009723C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file:
 // not yet ported]
-typedef struct RoomVertex {
-  SVECTOR position;
-  unsigned color;
-  uint16_t uv;
-} RoomVertex;
+typedef Render_RoomVertex RoomVertex;
 
 static int room_near_depth = kDefaultNearDepth;
 static int room_far_depth = kLastOrderingSlot;
@@ -296,25 +292,38 @@ static int OutsideScreenBounds(const RoomScreenBounds* projected) {
          projected->top >= room_screen_bounds.bottom;
 }
 
-// decomp: BATTLE.PRG func_80097F70 (src/BATTLE/BATTLE.PRG/2EA3C.s).
+// decomp: BATTLE.PRG func_80097F70 (src/BATTLE/BATTLE.PRG/2EA3C.s:921).
+void Render_InterpolateRoomVertexMidpoint(const Render_RoomVertex* first,
+                                          const Render_RoomVertex* second,
+                                          Render_RoomVertex* output) {
+  if (first == NULL || second == NULL || output == NULL) {
+    Core_Debugf("render", "Room midpoint requires two vertices and output");
+    abort();
+  }
+  const RoomVertex left = *first;
+  const RoomVertex right = *second;
+  output->position.vx =
+      (int16_t)(((int)left.position.vx + right.position.vx) >> 1);
+  output->position.vy =
+      (int16_t)(((int)left.position.vy + right.position.vy) >> 1);
+  output->position.vz =
+      (int16_t)(((int)left.position.vz + right.position.vz) >> 1);
+  unsigned color = output->color & ~(unsigned)kColorMask;
+  for (unsigned channel = 0; channel < kRoomSpatialDimensions; ++channel) {
+    const unsigned value = ((left.color >> (channel * CHAR_BIT)) & UINT8_MAX) +
+                           ((right.color >> (channel * CHAR_BIT)) & UINT8_MAX);
+    color |= (value >> 1) << (channel * CHAR_BIT);
+  }
+  output->color = color;
+  output->uv =
+      (uint16_t)((((left.uv & UINT8_MAX) + (right.uv & UINT8_MAX)) >> 1) |
+                 ((((left.uv >> CHAR_BIT) + (right.uv >> CHAR_BIT)) >> 1)
+                  << CHAR_BIT));
+}
+
 static RoomVertex Midpoint(const RoomVertex* first, const RoomVertex* second) {
   RoomVertex midpoint = {0};
-  midpoint.position.vx =
-      (int16_t)(((int)first->position.vx + second->position.vx) >> 1);
-  midpoint.position.vy =
-      (int16_t)(((int)first->position.vy + second->position.vy) >> 1);
-  midpoint.position.vz =
-      (int16_t)(((int)first->position.vz + second->position.vz) >> 1);
-  for (unsigned channel = 0; channel < kRoomSpatialDimensions; ++channel) {
-    const unsigned value =
-        ((first->color >> (channel * CHAR_BIT)) & UINT8_MAX) +
-        ((second->color >> (channel * CHAR_BIT)) & UINT8_MAX);
-    midpoint.color |= (value >> 1) << (channel * CHAR_BIT);
-  }
-  midpoint.uv =
-      (uint16_t)((((first->uv & UINT8_MAX) + (second->uv & UINT8_MAX)) >> 1) |
-                 ((((first->uv >> CHAR_BIT) + (second->uv >> CHAR_BIT)) >> 1)
-                  << CHAR_BIT));
+  Render_InterpolateRoomVertexMidpoint(first, second, &midpoint);
   return midpoint;
 }
 
