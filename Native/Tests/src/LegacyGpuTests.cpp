@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstring>
 #include <limits>
+#include <type_traits>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -10,6 +11,12 @@
 #include "Render/Device.hpp"
 #include "Render/PageSpace.hpp"
 #include "Render/RoomDraw.h"
+
+extern "C" {
+#include "Render/RoomGeometry.h"
+}
+static_assert(
+    std::is_same_v<decltype(&Render_SetRoomPolygonFarClip), void (*)(int)>);
 
 extern "C" void* Render_legacyPrimitiveBuffers[2];
 extern "C" int Render_frameBuf;
@@ -283,6 +290,50 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   frame->primitiveCursor = buffer + 0x20000 - 4;
   Render_DrawRoomGeometry(&geometry, 0);
   CHECK(frame->primitiveCursor == buffer + 0x20000 - 4);
+  CHECK(memory.front() == 0xA5);
+  CHECK(memory.back() == 0xA5);
+  struct FarDepthCase {
+    int requested;
+    int signed_halfword;
+  };
+  constexpr std::array kFarDepths{
+      FarDepthCase{255, 255},     FarDepthCase{256, 256},
+      FarDepthCase{257, 257},     FarDepthCase{258, 258},
+      FarDepthCase{-1, -1},       FarDepthCase{0x10100, 256},
+      FarDepthCase{0x10101, 257}, FarDepthCase{0x8000, -32768},
+      FarDepthCase{32767, 32767}};
+  for (bool is_quad : {false, true}) {
+    geometry.triangles = is_quad ? 0 : 1;
+    geometry.quads = is_quad ? 1 : 0;
+    geometry.polygon[15] = is_quad ? 0x3D : 0x35;
+    for (int mode : {0, 1}) {
+      const std::size_t emitted =
+          mode == 0 ? (is_quad ? sizeof(POLY_GT4) : sizeof(POLY_GT3))
+                    : (is_quad ? 4 * sizeof(POLY_GT4) + 4 * sizeof(POLY_GT3)
+                               : 7 * sizeof(POLY_GT3));
+      for (int bias : {-1, 0, 1}) {
+        geometry.group.flags =
+            0x800u | (mode ? 0x6000u : 0) |
+            (static_cast<unsigned>(static_cast<std::uint16_t>(bias)) << 16);
+        for (const auto& cutoff : kFarDepths) {
+          ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+          frame->primitiveCursor = buffer;
+          Render_SetRoomPolygonFarClip(cutoff.requested);
+          Render_DrawRoomGeometry(&geometry, mode);
+          const std::size_t bytes =
+              256 + bias < cutoff.signed_halfword ? emitted : 0;
+          CHECK(frame->primitiveCursor == buffer + bytes);
+        }
+      }
+      geometry.group.flags = 0x800u | (mode ? 0x6000u : 0) | (2047u << 16);
+      ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+      frame->primitiveCursor = buffer;
+      Render_SetRoomPolygonFarClip(32767);
+      Render_DrawRoomGeometry(&geometry, mode);
+      CHECK(frame->primitiveCursor == buffer);
+    }
+  }
+  Render_SetRoomPolygonFarClip(2047);
   CHECK(memory.front() == 0xA5);
   CHECK(memory.back() == 0xA5);
   Render_legacyPrimitiveBuffers[0] = savedBuffer;

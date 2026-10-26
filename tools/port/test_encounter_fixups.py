@@ -10,6 +10,20 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_room_far_depth_owns_both_packet_emission_paths(self):
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F00754"]["path"], r"Native\Engine\src\Render\RoomDraw.c"
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(source.count("depth >= room_far_depth"), 2)
+        self.assertIn(
+            "room_far_depth = Core_Math_WrapSigned16((uint32_t)depth);", source
+        )
+
     def test_native_pointer_sort_is_owned_and_shared_with_ai_ranking(self):
         owned = self.owned_items()
         self.assertEqual(

@@ -9,6 +9,21 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42's F00754 far-depth limit is now a typed native RoomDraw setting,
+  reaching129/186 original entries and57 gaps (22 C/C++ references,
+  25 assembly-only,10 missing listings). Original2EA3C.s:1078 patches a
+  signed16 comparison after material depth bias, not camera scale or LOD.
+  Both ordinary/subdivided emitters apply the exclusive cutoff and retain
+  the independent physical OT bound; default2047 is unchanged. Red ABI
+  rejects the old int() stub.114 added packet-count checks cover normal/
+  subdivided triangles/quads, below/equal/above thresholds, signed biases,
+  halfword wrapping, buffer limits and canaries; room6/168 controls pass
+  both builds. Full Debug/Release800/3,532,354 each,96 copier controls,
+  default0-new and focused8 existing/0-new findings pass. Two generations
+  preserve306 paths and repeat identically, changing only RoomGeometry.c/.h.
+  Near/LOD/camera/screen policy and F00756 are unchanged. Private
+  `farclip42-*`; no whole renderer promotion, visual parity or retirement
+  claim. Publication/exact CI are recorded on#42.
 - #42's F01829 pointer-key sort now has one Core-owned native kernel shared
   with the already-working typed AI ranking/promotion path, reaching128/186
   original entries and58 gaps (23 C/C++ references,25 assembly-only,

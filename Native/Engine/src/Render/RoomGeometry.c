@@ -59,13 +59,6 @@ int Render_LinkRoomPolygonByDepth()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_8009817C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Render_SetRoomPolygonFarClip()
-{
-    VS_UNPORTED("Render::SetRoomPolygonFarClip");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_800981B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
 int Render_SetRoomPolygonScreenBounds()
 {

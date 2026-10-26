@@ -415,6 +415,37 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Native room far-depth setting (#42, 2026-10-25)
+
+F00754 (`func_8009817C`, original2EA3C.s:1078) now updates the existing
+owned RoomDraw state through a void(int) API. Original halfword instruction
+patching means the cutoff is signed16; the native wrapping helper preserves
+that rule without modifying code. The exclusive comparison occurs after
+the material depth bias in ordinary and subdivided polygon emission.
+The independent physical ordering-buffer limit remains enforced even when
+the configured cutoff is larger. Default2047 and all existing near/LOD/
+camera-scale/screen behavior are unchanged; F00756 is separate work.
+
+Red ABI compilation rejects the old int() stub. Actual emitted packet
+counts receive114 additional checks across ordinary/subdivided triangles
+and quads: below/equal/above boundaries, signed biases-1/0/1, signed16
+truncation (including0x10100/0x10101/0x8000), physical-buffer rejection
+under a permissive cutoff and unchanged memory canaries. These are packet
+outputs, not just getter-state tests. The complete room selection passes
+6 cases/168 assertions in each configuration.
+
+Full Debug/Release suites pass800 cases/3,532,354 assertions each;96
+copier/audit controls pass. Default quality remains0 new; focused compile
+analysis retains8 existing LegacyGpuTests findings and adds0, without
+baseline changes. Both hosts link. Two copier runs preserve306 protected
+paths and repeat identically, changing only generated RoomGeometry.c/.h;
+owned RoomDraw code is not overwritten.
+
+This advances129/186 original entries,57 remaining, without a broad
+visual-fidelity, whole renderer C++ promotion or compatibility-retirement
+claim. Private `farclip42-*` retains source, exact commands, red/green
+and ownership evidence; publication/exact CI are recorded on#42.
+
 ### Shared native signed-key pointer sort (#42, 2026-10-25)
 
 F01829 (`func_800E6974`, original7E05C.s:114) is now an owned Core

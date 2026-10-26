@@ -176,6 +176,7 @@ typedef struct RoomVertex {
 } RoomVertex;
 
 static int room_near_depth = kDefaultNearDepth;
+static int room_far_depth = kLastOrderingSlot;
 static unsigned room_lod_depth = kDefaultLodDepth;
 
 // decomp: BATTLE.PRG func_80097F70 (src/BATTLE/BATTLE.PRG/2EA3C.s).
@@ -271,7 +272,10 @@ static int EmitSubdividedPolygon(const RoomVertex* vertices, int corners,
     return 0;
   }
   depth += (int16_t)(material->flags >> kPackedCoordinateBits);
-  if (depth < room_near_depth || depth >= kLastOrderingSlot) return 0;
+  if (depth < room_near_depth || depth >= room_far_depth ||
+      depth >= kLastOrderingSlot) {
+    return 0;
+  }
   ProjectedRoomPolygon polygon = {.vertices = vertices,
                                   .screen = screen,
                                   .corners = corners,
@@ -430,7 +434,8 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
                : SubdivideRoomQuad(vertices, subdivision, &material, limit);
   }
   depth += (int16_t)(flags >> kPackedCoordinateBits);
-  if (depth < room_near_depth || depth >= kLastOrderingSlot) {
+  if (depth < room_near_depth || depth >= room_far_depth ||
+      depth >= kLastOrderingSlot) {
     return 0;
   }
   uint16_t clut, page;
@@ -505,6 +510,11 @@ void Render_DrawRoomGeometry(void* data, int mode) {
 // not yet ported]
 void Render_SetRoomPolygonNearClip(int depth) {
   room_near_depth = (int16_t)depth;
+}
+
+// decomp: func_8009817C (src/BATTLE/BATTLE.PRG/2EA3C.s:1078).
+void Render_SetRoomPolygonFarClip(int depth) {
+  room_far_depth = Core_Math_WrapSigned16((uint32_t)depth);
 }
 
 // decomp: BATTLE.PRG func_80098194 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file:
