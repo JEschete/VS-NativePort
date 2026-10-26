@@ -4,12 +4,26 @@
 #include <stdlib.h>
 
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/DecisionCallbacks.h"
+#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
+#include "Core/BiosRand.h"
+#include "Core/Diagnostics.h"
 #include "Legacy/Psx.h"
+
+static void RequireAshleyAllianceState(Battle_Ai_ReactionView* state) {
+  if (state == NULL ||
+      state->actorId >=
+          sizeof Battle_Ai_actorAiStates / sizeof Battle_Ai_actorAiStates[0]) {
+    Core_Errorf("ai", "Ashley alliance requires a valid actor state");
+    abort();
+  }
+}
 
 // decomp: BATTLE.PRG func_800E7370; categories at 0x80069C0C (7E05C.s:857).
 void Battle_Ai_InitializeActorAiRelations(Battle_Ai_AiCreationView* view) {
@@ -53,6 +67,65 @@ void Battle_Ai_InitializeActorAiRelations(Battle_Ai_AiCreationView* view) {
       }
     }
   }
+}
+
+// decomp: BATTLE.PRG func_800DC19C (src/BATTLE/BATTLE.PRG/7399C.s:11).
+void Battle_Ai_EndAshleyAlliance(Battle_Ai_ReactionView* state) {
+  enum {
+    kClearAllianceMarker = 0x40,
+    kRecoveryMarker = 6,
+    kRecoveryFrames = 0x28,
+    kRecoveryCommand = 2,
+    kRecoveryRange = 0x80
+  };
+  RequireAshleyAllianceState(state);
+  Battle_Ai_ActorAiState* actor_state = (Battle_Ai_ActorAiState*)state;
+  Battle_Ai_SettingsView* settings = (Battle_Ai_SettingsView*)state;
+
+  state->allianceReactionCount = 0;
+  if (state->temporaryAshleyAlliance == 0) return;
+
+  state->temporaryAshleyAlliance = 0;
+  Battle_Ai_SetActorAwarenessIndicator(state->actorId, kClearAllianceMarker);
+  Battle_Ai_InitializeActorAiRelations((Battle_Ai_AiCreationView*)state);
+
+  int (*saved_callback)(Battle_Ai_ActorAiState*) =
+      settings->savedDecisionCallback;
+  settings->savedDecisionCallback = NULL;
+  if (saved_callback != NULL) {
+    settings->decisionCallback = saved_callback;
+  }
+
+  if (state->settingsBit25 != 0) return;
+  Battle_Ai_SetTemporaryAwarenessIndicator(actor_state, kRecoveryMarker,
+                                           kRecoveryFrames);
+  Battle_Ai_SetActorAiReactionWithDelay((Battle_Ai_PerceptionUpdateView*)state,
+                                        kRecoveryCommand, kRecoveryRange);
+}
+
+// decomp: BATTLE.PRG func_800DC210 (src/BATTLE/BATTLE.PRG/7399C.s:43).
+void Battle_Ai_TryBeginAshleyAlliance(Battle_Ai_ReactionView* state,
+                                      int forced) {
+  enum {
+    kRollMask = 0x7F,
+    kFavorableThreshold = 0x4C,
+    kRequiredReactions = 2,
+    kAllianceMarker = 0x80
+  };
+  RequireAshleyAllianceState(state);
+  if (forced == 0) {
+    if ((Core_Random_Rand() & kRollMask) >= kFavorableThreshold) return;
+    // 7399C.s stores the byte but tests the untruncated register value.
+    const unsigned reactions = (unsigned)state->allianceReactionCount + 1;
+    state->allianceReactionCount = (u_char)reactions;
+    if (reactions < kRequiredReactions) return;
+  }
+
+  Battle_Ai_SettingsView* settings = (Battle_Ai_SettingsView*)state;
+  state->temporaryAshleyAlliance = 1;
+  settings->savedDecisionCallback = settings->decisionCallback;
+  settings->decisionCallback = Battle_Ai_UpdateEngagementApproachBehavior;
+  Battle_Ai_SetActorAwarenessIndicator(state->actorId, kAllianceMarker);
 }
 
 // decomp: BATTLE.PRG func_800E72D0 (src/BATTLE/BATTLE.PRG/7E05C.s:810).

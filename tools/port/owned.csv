@@ -264,5 +264,7 @@ F03604,function,Save_MemoryCard_InitializeResourcesStep,Native\Game\src\Save\Men
 F03605,function,Save_MemoryCard_ReleaseResources,Native\Game\src\Save\MenuAssets.c,Native\Game\src\Save\MenuAssets.h,2026-10-24,from Native\Engine\src\Save\MemoryCard\GameFiles.c
 F00617,function,Field_DrawRoomTriggerMarkers,Native\Game\src\Field\RoomTriggerMarkers.c,Native\Game\src\Field\RoomTriggerMarkers.h,2026-10-24,from Native\Game\src\Field\Gimmicks.c
 F00618,function,Field_DrawRoomTriggerMarker,Native\Game\src\Field\RoomTriggerMarkers.c,Native\Game\src\Field\RoomTriggerMarkers.h,2026-10-24,from Native\Game\src\Field\Gimmicks.c
+F01681,function,Battle_Ai_EndAshleyAlliance,Native\Game\src\Battle\Ai\Relations.c,Native\Game\src\Battle\Ai\Relations.h,2026-10-26,from Native\Game\src\Battle\Ai\Perception.c
+F01682,function,Battle_Ai_TryBeginAshleyAlliance,Native\Game\src\Battle\Ai\Relations.c,Native\Game\src\Battle\Ai\Relations.h,2026-10-26,from Native\Game\src\Battle\Ai\Perception.c
 F01988,function,Effects_Plg074_GenerateTrailOrigins,Native\Game\src\Effects\Templates\RadialSurge.c,Native\Game\src\Effects\Templates\RadialSurge.h,2026-10-26,PLG074 func_800FB414; shared native five-sample template with independent imported emission cursor
 F01994,function,Effects_Plg074_UpdateTrailEmitter,Native\Game\src\Effects\Templates\RadialSurge.c,Native\Game\src\Effects\Templates\RadialSurge.h,2026-10-26,PLG074 func_800FCFEC; shared native five-sample dispatcher bound to the PLG074 origin stage

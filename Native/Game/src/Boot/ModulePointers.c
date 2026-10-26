@@ -89,6 +89,7 @@
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitives.h"
 #include "Battle/Ai/PlanningWorkspace.hpp"
+#include "Battle/Ai/Relations.h"
 #include "Battle/AttackPrerequisites.h"
 #include "Battle/BattleMode.h"
 #include "Battle/BattleTypes.h"

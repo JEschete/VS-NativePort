@@ -26,6 +26,7 @@
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitives.h"
+#include "Battle/Ai/Relations.h"
 #include "Battle/Damage.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Timing.h"
@@ -567,18 +568,6 @@ void Battle_Ai_AnimateEngagementPhase(void)
             state = state->nextEngaged;
         } while (state);
     }
-}
-
-// decomp: BATTLE.PRG func_800DC19C (src/BATTLE/BATTLE.PRG/7399C.s:0) [asm-file: not yet ported]
-void Battle_Ai_EndAshleyAlliance(Battle_Ai_ReactionView*)
-{
-    VS_UNPORTED("Battle::Ai::EndAshleyAlliance");
-}
-
-// decomp: BATTLE.PRG func_800DC210 (src/BATTLE/BATTLE.PRG/7399C.s:0) [asm-file: not yet ported]
-void Battle_Ai_TryBeginAshleyAlliance(Battle_Ai_ReactionView*, int)
-{
-    VS_UNPORTED("Battle::Ai::TryBeginAshleyAlliance");
 }
 
 // decomp: BATTLE.PRG func_800DD000 (src/BATTLE/BATTLE.PRG/74088.c:716)

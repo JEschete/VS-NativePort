@@ -12,6 +12,52 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_ashley_alliance_uses_native_callback_storage_without_shifting_views(self):
+        self.assertEqual(
+            native_views.NATIVE_FIELD_ALIASES["T00373"],
+            {"allianceReactionCount": 0x126, "temporaryAshleyAlliance": 0x13},
+        )
+        self.assertEqual(
+            native_views.NATIVE_FIELD_ALIASES["T00392"]["savedDecisionCallback"],
+            0x6C,
+        )
+        self.assertNotIn(0x6C, native_views.AI_POINTERS)
+        reaction = native_views.rebase(
+            "T00373",
+            "    unsigned char usesRoomActionDelay;\n"
+            "    char reserved89[164];\n",
+            [],
+        )
+        self.assertIn("u_char temporaryAshleyAlliance;", reaction)
+        self.assertIn("char reserved89Prefix[0x9D];", reaction)
+        self.assertIn("u_char allianceReactionCount;", reaction)
+        settings = native_views.rebase("T00392", "    char reserved6C[40];\n", [])
+        self.assertIn("char reserved6C[40];", settings)
+        self.assertIn(
+            "int (*savedDecisionCallback)(Battle_Ai_ActorAiState*);", settings
+        )
+        with self.assertRaisesRegex(ValueError, "reaction counter storage"):
+            native_views.rebase("T00373", "unsigned char usesRoomActionDelay;\n", [])
+        with self.assertRaisesRegex(ValueError, "saved decision callback slot"):
+            native_views.rebase("T00392", "char reserved6C[4];\n", [])
+
+    def test_ashley_alliance_ownership_and_source_integer_comparison(self):
+        root = Path(__file__).resolve().parents[2]
+        owned = self.owned_items()
+        for identity in ("F01681", "F01682"):
+            self.assertEqual(
+                owned[identity]["path"], r"Native\Game\src\Battle\Ai\Relations.c"
+            )
+        source = (root / r"Native\Game\src\Battle\Ai\Relations.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("(unsigned)state->allianceReactionCount + 1", source)
+        self.assertIn("state->allianceReactionCount = (u_char)reactions;", source)
+        self.assertIn("if (reactions < kRequiredReactions) return;", source)
+        self.assertIn("Battle_Ai_UpdateEngagementApproachBehavior", source)
+        self.assertIn("settings->savedDecisionCallback = NULL;", source)
+        self.assertNotIn("VS_UNPORTED", source)
+
     def test_plg074_reuses_identical_code_without_merging_overlay_state(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(

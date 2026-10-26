@@ -9,6 +9,20 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01681/F01682 now own Ashley-alliance entry/exit in `Relations.c`.
+  The original `7399C.s:11-85` controls BIOS RNG, a byte reaction counter,
+  native callback save/restore, markers, relationship rebuild and recovery.
+  The resumed draft's count255 truncation error is corrected using the
+  original full-register comparison. Focused10/230,618 and full
+  Debug/Release964/7,994,667 each pass, including real action-reaction and
+  saved-relation callers. Default/focused quality0 new;126 port/32 naming
+  controls;621 native view fields0 mismatches. Two stable generations
+  preserve117 owned files across746 outputs. Audit:175/186 cohort complete,
+  11 gaps (8 C-backed/3 assembly-only),3130 implementations/161 aliases.
+  Fixing revision and exact CI are recorded on #42. This is component and
+  production-caller evidence, not a live-combat alliance sweep, C++ promotion
+  or compatibility retirement. See the
+  [alliance checkpoint](HANDOFF_HISTORY.md#ashley-alliance-entry-and-exit-2026-10-26).
 - #42 F01986-F01995 are integrated and component-verified, with a build and
   cumulative effects/module regression gate between each entry. Original
   PLG073/074 images are byte-identical. Eight stateless entries reuse the

@@ -86,8 +86,8 @@ F01677,Battle::Ai::CanExecuteActionCandidate,Native\Game\src\Battle\Ai\ActionPla
 F01678,Battle::Ai::UnlinkEngagedActor,Native\Game\src\Battle\Ai\Perception.c,Removes an actor from the engagement linked list and clears its engagement phase flags.,high,fields:func_800E78F4_t.unk1A0=nextEngagedActor
 F01679,Battle::Ai::UpdateEngagementBuildup,Native\Game\src\Battle\Ai\Perception.c,Advances engagement indicators and cancels engagement after its timeout.,high,
 F01680,Battle::Ai::AnimateEngagementPhase,Native\Game\src\Battle\Ai\Perception.c,Animates the phase of one engaged actor and updates its actor display flags.,high,
-F01681,Battle::Ai::EndAshleyAlliance,Native\Game\src\Battle\Ai\Perception.c,Clears temporary allegiance to Ashley and restores the actor's original behavior.,high,asm;fields:func_800E78F4_t.unk13=temporaryAshleyAlliance
-F01682,Battle::Ai::TryBeginAshleyAlliance,Native\Game\src\Battle\Ai\Perception.c,Accumulates favorable reactions and switches the actor to temporary allegiance with Ashley.,high,asm;beneficial actions from Ashley can trigger the alliance
+F01681,Battle::Ai::EndAshleyAlliance,Native\Game\src\Battle\Ai\Relations.c,Clears temporary allegiance to Ashley and restores the actor's original behavior.,high,asm;7399C.s:11-42;native pointer-sized saved callback;rebuilds relations and queues recovery unless settingsBit25
+F01682,Battle::Ai::TryBeginAshleyAlliance,Native\Game\src\Battle\Ai\Relations.c,Accumulates favorable reactions and switches the actor to temporary allegiance with Ashley.,high,asm;7399C.s:43-85;BIOS RNG draw and untruncated counter comparison;forced entry preserves RNG
 F01683,Battle::Ai::ScoreActorCondition,Native\Game\src\Battle\Ai\ActionPlanning.c,"Combines status, Hp, Mp, and equipment Dp scores into the weighted actor condition value.",high,asm
 F01684,Battle::Ai::CopyActionCandidate,Native\Game\src\Battle\Ai\ActionPlanning.c,Copies one complete action candidate record.,high,asm
 F01685,Battle::Ai::ApplySimulatedStatDelta,Native\Game\src\Battle\Ai\ActionPlanning.c,Applies a projected damage or recovery amount and clamps the simulated stat to its valid range.,high,asm

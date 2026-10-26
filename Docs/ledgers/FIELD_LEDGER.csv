@@ -3296,7 +3296,7 @@ T00371.003,T00371,actionReactionAction,3,pad1C,1,char[24],,,,reserved1C,Not read
 T00372.000,T00372,actionReactionMotion,0,pad0,1,char[10],,,,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:710
 T00372.001,T00372,actionReactionMotion,1,flag,0,unsigned char,,,,isOrbiting,Cleared when the actor reacts (same byte as Battle::Ai::ArenaOrbitState.isOrbiting),med,source:74088.c:758
 T00373.000,T00373,actionReactionState,0,pad0,1,char[19],,,,reserved0,Not read through this view,low,declaration-only;source:74088.c:687
-T00373.001,T00373,actionReactionState,1,flag13,0,unsigned char,,,,usesRoomActionDelay,"When zero the room's default action delay applies, else 50",low,source:74088.c:749
+T00373.001,T00373,actionReactionState,1,flag13,0,unsigned char,,,temporaryAshleyAlliance,usesRoomActionDelay,"Room action-delay override; the same byte marks the temporary Ashley alliance",high,source:74088.c:749;source:7399C.s:11;source:7399C.s:37
 T00373.002,T00373,actionReactionState,2,pad14,1,char[12],,,,reserved14,Not read through this view,low,declaration-only;source:74088.c:689
 T00373.003,T00373,actionReactionState,3,flag20,0,unsigned char,,,,settingsBit26,Bit 26 of the AI settings word,low,source:74088.c:763
 T00373.004,T00373,actionReactionState,4,flag21,0,unsigned char,,,,settingsByte3Bit0,Bit 0 of settings byte 3,low,source:74088.c:810
@@ -3308,7 +3308,7 @@ T00373.009,T00373,actionReactionState,9,pad2D,1,char[3],,,,reserved2D,Not read t
 T00373.010,T00373,actionReactionState,10,flag30,0,unsigned char,,,,settingsBit25,Bit 25 of the AI settings word,low,source:74088.c:763
 T00373.011,T00373,actionReactionState,11,pad31,1,char[87],,,,reserved31,Not read through this view,low,declaration-only;source:74088.c:697
 T00373.012,T00373,actionReactionState,12,id,0,unsigned char,,,,actorId,Actor id,high,source:74088.c:725
-T00373.013,T00373,actionReactionState,13,pad89,1,char[164],,,,reserved89,Not read through this view,low,declaration-only;source:74088.c:699
+T00373.013,T00373,actionReactionState,13,pad89,1,char[164],,,,reserved89,Reserved bytes except the Ashley-alliance reaction counter at 0x126,high,source:74088.c:699;source:7399C.s:13;source:7399C.s:40
 T00373.014,T00373,actionReactionState,14,mode,0,unsigned char,,,,behaviorMode,"Behavior mode (1 reacting, 2 wandering)",low,source:74088.c:745
 T00373.015,T00373,actionReactionState,15,pad12E,1,char[118],,,,reserved12E,Not read through this view,low,declaration-only;source:74088.c:701
 T00373.016,T00373,actionReactionState,16,targets,0,actionReactionTarget[16],,,,relations,Relation word for each actor,high,source:74088.c:751
@@ -3549,7 +3549,7 @@ T00392.025,T00392,actorSettingsState,25,pad34,1,char[32],,,,reserved34,Not read 
 T00392.026,T00392,actorSettingsState,26,actor,0,actorSettingsActor *,,,,actor,Battle actor,med,source:7CD68.c:691
 T00392.027,T00392,actorSettingsState,27,pad58,1,char[16],,,,reserved58,Not read through this view,low,declaration-only;source:7CD68.c:645
 T00392.028,T00392,actorSettingsState,28,callback,0,int (*)(func_800E78F4_t *),,,,decisionCallback,Decision function chosen by the settings,med,source:7CD68.c:749
-T00392.029,T00392,actorSettingsState,29,pad6C,1,char[40],,,,reserved6C,Not read through this view,low,declaration-only;source:7CD68.c:647
+T00392.029,T00392,actorSettingsState,29,pad6C,1,char[40],,,,reserved6C,Includes the saved decision callback at original offset 0x6C; other bytes are reserved,high,source:7CD68.c:647;source:7399C.s:19-23
 T00392.030,T00392,actorSettingsState,30,collisionRadius,0,unsigned short,,,,collisionRadius,Collision radius,high,source:7CD68.c:719
 T00392.031,T00392,actorSettingsState,31,pad96,1,char[14],,,,reserved96,Not read through this view,low,declaration-only;source:7CD68.c:649
 T00392.032,T00392,actorSettingsState,32,limit,0,unsigned int,,,,nearDistanceSquared,Squared near range,med,source:7CD68.c:699

@@ -11,6 +11,70 @@ Use [HANDOFF.md](HANDOFF.md) for the current checkpoint and
 Keep the commands, revisions, limits and local evidence paths below; archival
 does not establish fresh verification or authorize deleting the referenced data.
 
+## Ashley alliance entry and exit (2026-10-26)
+
+Resumed the earlier unfinished F01681/F01682 work after owner direction to
+check issues and continue. Parent `2a2186bdcbfb97f0f575a975909a33c01632c4fa`
+had successful Source Quality run40389100383. The open non-MA issue list still
+contains #42/#148/#149/#151/#160/#167 and the separate #18 limits. This
+checkpoint follows the existing #42 work rather than opening a duplicate.
+
+Original `7399C.s:11-85` and the read-only `rood-boi` C body establish:
+
+- Every exit clears the favorable-reaction counter; inactive exit otherwise
+  preserves the whole actor state and both random streams.
+- Ordinary entry consumes one BIOS random value, accepts masked values0..75,
+  increments the counter and enters at two favorable reactions. The original
+  stores the low byte but compares the full register. At count255 it enters
+  while storing0; the resumed draft incorrectly compared the wrapped byte.
+  The regression failed with3 assertions before this correction.
+- Forced entry bypasses the BIOS draw. Both paths save a native function
+  pointer and install the existing typed engagement-approach callback.
+- Active exit clears only the alliance marker bit, rebuilds classifications,
+  clears/restores the saved callback, and queues marker6/40-frame recovery and
+  command2/range128 only when settingsBit25 permits. The existing actor RNG,
+  navigation override and decision-delay gates are reused unchanged.
+
+The owned implementation stays in `Battle\Ai\Relations.c`. Generator-created
+aliases expose the flag, counter and saved pointer in existing view storage;
+the callback is not added to every AI view's pointer slots, which would shift
+the canonical native layout. C++ offset/capacity assertions cover the saved
+pointer and counter. The native-view checker confirms621 existing fields
+without mismatches. Fresh AI creation still clears the native complete
+record. Original module bindings were already generated correctly by the
+ownership mechanism and are now tested; no duplicate binding was needed.
+
+Tests cover all128 masked BIOS rolls against all256 counter values, inactive
+exit preservation, native pointer restoration/null behavior,12 recovery/busy
+combinations, original entries, and actual helpful/harmful action-reaction and
+saved-relation callers. The initial production-caller fixture checked the
+classification timer instead of the distinct five-bit reaction timer; its
+expectation was corrected to the source's `timer=28`, without changing code.
+
+Commands from the repository root:
+
+- Debug and Release solution MSBuild with `/m /p:Platform=x64`; all native
+  desktop, Combat Lab and test targets link.
+- `build\Debug\VS.Tests.exe "[ashley-alliance]" --reporter compact`:
+  **10 cases /230,618 assertions**. Full Debug and Release suites each:
+  **964 cases /7,994,667 assertions**.
+- `python -m unittest discover -s tools\port -p test_*.py`: **126 pass**;
+  corresponding naming selection: **32 pass**.
+- Focused `quality-native.cmd --files` for Relations, lifecycle tests,
+  native-view producer and port controls, with `--tidy`: **0 findings/0 new**.
+  Repository default quality also has **0 findings/0 new**, without baseline
+  changes.
+- Two copier generations repeat identically across746 outputs and preserve
+  all117 owned paths. `check_native_views.py`: **621 fields/0 mismatches**.
+  Pylance reports no syntax errors in the native-view producer.
+
+Evidence uses `alliance42-*` under the private session `files` directory.
+The audit retains11 gaps (8 C-backed/3 assembly-only),3130 ordinary
+implementations and161 aliases. The fixed cohort advances173->175 of186.
+Revision/exact CI are on #42. Owner asset-pipeline, solution, ignore-file and
+reference edits remain uncommitted. This does not establish a new live combat
+alliance acceptance, C++ promotion or EC retirement.
+
 ## PLG074 template integration and ring-arc import (2026-10-26)
 
 Owner scope: integrate F01986-F01995 individually, check regressions between

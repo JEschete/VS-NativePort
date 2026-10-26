@@ -13,6 +13,13 @@ AI_VIEWS = frozenset(["T00351", "T00356", "T00362", "T00368", "T00370", "T00373"
 AI_POINTERS = (0x54, 0x58, 0x5C, 0x60, 0x64, 0x68, 0x18C, 0x1A0, 0x22C,
                *range(0x430, 0x470, 4))
 NATIVE_FIELD_ALIASES = {
+    "T00373": {
+        "allianceReactionCount": 0x126,
+        "temporaryAshleyAlliance": 0x13,
+    },
+    "T00392": {
+        "savedDecisionCallback": 0x6C,
+    },
     "T00532": {
         "ignore_floor_mask": 0x6,
         "terrain_reject_mask": 0x32,
@@ -127,6 +134,41 @@ def rebase(tid: str, text: str, fields: list[tuple[str, dict]]) -> str:
         text, count = re.subn(pattern, '\n'.join(pieces), text, count=1)
         if count != 1:
             raise ValueError(f'{tid}.{name}: cannot expose native pointer slots')
+    if tid == "T00373":
+        flag = r"(?m)^(\s*)unsigned char usesRoomActionDelay;$"
+        text, count = re.subn(
+            flag,
+            r"\1union { u_char usesRoomActionDelay; "
+            r"u_char temporaryAshleyAlliance; };",
+            text,
+        )
+        if count != 1:
+            raise ValueError("T00373: Ashley alliance flag not found")
+        padding = r"(?m)^(\s*)char reserved89\[(?:0x0*A4|164)\];$"
+        replacement = (
+            r"\1union {\n"
+            r"\1    char reserved89[0xA4];\n"
+            r"\1    struct {\n"
+            r"\1        char reserved89Prefix[0x9D];\n"
+            r"\1        u_char allianceReactionCount;\n"
+            r"\1        char reserved127[6];\n"
+            r"\1    };\n"
+            r"\1};"
+        )
+        text, count = re.subn(padding, replacement, text)
+        if count != 1:
+            raise ValueError("T00373: Ashley alliance reaction counter storage not found")
+    if tid == "T00392":
+        padding = "char reserved6C[40];"
+        if text.count(padding) != 1:
+            raise ValueError("T00392: saved decision callback slot not found")
+        text = text.replace(
+            padding,
+            "union {\n"
+            "        char reserved6C[40];\n"
+            "        int (*savedDecisionCallback)(Battle_Ai_ActorAiState*);\n"
+            "    };",
+        )
     if tid == 'T00532':
         # Name the navigation word after widening its adjacent pointer slot.
         padding = 'char reserved18C_190[10];'

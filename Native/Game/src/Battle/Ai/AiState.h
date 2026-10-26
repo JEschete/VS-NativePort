@@ -255,7 +255,7 @@ typedef struct Battle_Ai_ActionPlanView {
 // decomp: actionReactionState (src/BATTLE/BATTLE.PRG/74088.c:703)
 typedef struct Battle_Ai_ReactionView {
     char reserved0[0x13];
-    unsigned char usesRoomActionDelay;
+    union { u_char usesRoomActionDelay; u_char temporaryAshleyAlliance; };
     char reserved14[12];
     unsigned char settingsBit26, settingsByte3Bit0;
     char reserved22[5];
@@ -273,7 +273,14 @@ typedef struct Battle_Ai_ReactionView {
     void* nativePointer68; /* PS1 pointer slot 0x68 */
     char reserved31_6C[28];
     unsigned char actorId;
-    char reserved89[0xA4];
+    union {
+        char reserved89[0xA4];
+        struct {
+            char reserved89Prefix[0x9D];
+            u_char allianceReactionCount;
+            char reserved127[6];
+        };
+    };
     unsigned char behaviorMode;
     char reserved12E_12E[94];
     void* nativePointer18C; /* PS1 pointer slot 0x18C */
@@ -463,7 +470,10 @@ typedef struct Battle_Ai_SettingsView {
     void* nativePointer60; /* PS1 pointer slot 0x60 */
     void* nativePointer64; /* PS1 pointer slot 0x64 */
     int (*decisionCallback)(Battle_Ai_ActorAiState*);
-    char reserved6C[40];
+    union {
+        char reserved6C[40];
+        int (*savedDecisionCallback)(Battle_Ai_ActorAiState*);
+    };
     unsigned short collisionRadius;
     char reserved96[14];
     unsigned int nearDistanceSquared;

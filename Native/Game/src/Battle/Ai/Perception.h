@@ -44,8 +44,6 @@ void Battle_Ai_UpdateActorPerception(void);
 void Battle_Ai_UnlinkEngagedActor(Battle_Ai_ActorAiState* arg0);
 void Battle_Ai_UpdateEngagementBuildup(Battle_Ai_ActorAiState* arg0);
 void Battle_Ai_AnimateEngagementPhase(void);
-void Battle_Ai_EndAshleyAlliance(Battle_Ai_ReactionView*);
-void Battle_Ai_TryBeginAshleyAlliance(Battle_Ai_ReactionView*, int);
 void Battle_Ai_ApplyActorActionReaction(Battle_Ai_ReactionView* state, Battle_Ai_StatApplicationView* app);
 void Battle_Ai_PropagateActorRelationships(Battle_Ai_ReactionView* state);
 void Battle_Ai_NotifyActionRelationshipChanges(Battle_Ai_ReactionRecord* arg0);
