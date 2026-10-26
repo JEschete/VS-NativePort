@@ -9,6 +9,24 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01269 now shares the native ModelGeometry override kernel through
+  typed weapon state, reaching139/186 original entries and47 gaps
+  (13 C/C++ references,24 assembly-only,10 missing listings).
+  Original49268.c:240 proves the weapon-base argument;3A1A0.h places
+  its matrices at guest20, so original lbu64 reads matrix2 m02's low
+  byte. The native adapter preserves that quirk via the member, never
+  an actor cast or native byte64. Its logical rationale remains unknown.
+  Red1/432 fails all; new2/435 and combined weapon/gimmick/actor6/1,048
+  controls pass, including all states/group masks, a poisoned native-offset
+  alias, source-layout assertions and original-address binding. Full
+  Debug/Release830/4,223,118 each,108 port controls and both hosts pass.
+  Focused/default quality has0 new findings with unchanged baselines;
+  explicit bounded fixture assignments avoid implementation-defined
+  narrowing. Two generations preserve297 maintained/owner paths and
+  four original reference files, repeating identically; only Model.c/.h
+  change. No invented mask meaning, all-weapon visual parity, renderer
+  promotion or retirement claim. Private `weaponoverride42-*`;
+  publication/exact CI are recorded on#42.
 - #42 F01270 now adapts typed gimmick motion/highlight state to the existing
   native ModelGeometry packet kernel, reaching138/186 original entries
   and48 gaps (14 C/C++ references,24 assembly-only,10 missing listings).

@@ -1167,9 +1167,38 @@ static void DrawGimmickOverrideFixture(const Actors_ModelInstance* instance,
                                                &object, &packed_tint, model);
 }
 
+typedef struct SourceWeaponMatrixLayout {
+  unsigned char header[0x1C];
+  uint32_t offsets;
+  MATRIX matrices[4];
+} SourceWeaponMatrixLayout;
+_Static_assert(offsetof(SourceWeaponMatrixLayout, matrices) == 0x20,
+               "Original 3A1A0.h weapon matrix offset");
+_Static_assert(0x20 + 2 * sizeof(MATRIX) + 2 * sizeof(int16_t) == 0x64,
+               "Original mask byte is matrix2 m02");
+_Static_assert(offsetof(Actors_WeaponModel, boneWorldMatrices) != 0x20,
+               "Native weapon pointers must not use the guest matrix offset");
+
+static void DrawWeaponOverrideFixture(const Actors_ModelInstance* instance,
+                                      const CVECTOR* tint,
+                                      Actors_ShpModel* model,
+                                      unsigned appearance,
+                                      unsigned pulse_mask) {
+  Actors_WeaponModel weapon = {0};
+  enum { kSharedRendererHeaderBytes = 8 };
+  memcpy(&weapon, instance, kSharedRendererHeaderBytes);
+  weapon.ownerMotionState = appearance;
+  const int mask = (int)(pulse_mask & UINT8_MAX);
+  weapon.boneWorldMatrices[2].m[0][2] = (int16_t)(0x5A00 | mask);
+  weapon.boneWorldMatrices[1].t[2] = mask ^ UINT8_MAX;
+  CVECTOR color = *tint;
+  Render_DrawModelFlatPolygonsWithOverrides(&Actors_modelRenderContext, &weapon,
+                                            &color, model);
+}
+
 static int ModelPolygonPackets(int colored, int split, int limb,
                                unsigned pulse_mask, unsigned appearance,
-                               int gimmick_override) {
+                               int override_kind) {
   enum {
     kTriangleCorners = 3,
     kVertexDepth = 1024,
@@ -1207,8 +1236,10 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   BuildModelPacketFixture(model, &instance, &options);
   instance.actionAnimationState = appearance;
   CVECTOR tint = {128, 96, 64, 0};
-  if (gimmick_override) {
+  if (override_kind == 1) {
     DrawGimmickOverrideFixture(&instance, &tint, model, appearance, pulse_mask);
+  } else if (override_kind == 2) {
+    DrawWeaponOverrideFixture(&instance, &tint, model, appearance, pulse_mask);
   } else if (pulse_mask != 0 || appearance != 0) {
     Render_DrawActorPolygons(&Actors_modelRenderContext, &instance, &tint,
                              model);
@@ -1225,7 +1256,7 @@ static int ModelPolygonPackets(int colored, int split, int limb,
       ((unsigned)limb < 8 && (pulse_mask & (0x80u >> limb)) != 0 ? 0x480 : 0);
   const unsigned first_uv = (palette << 16) | 0x140A;
   const int appearance_override =
-      gimmick_override || pulse_mask != 0 ||
+      override_kind != 0 || pulse_mask != 0 ||
       (appearance >= 4 && appearance < 9 && appearance != 6) ||
       appearance == 15;
   const unsigned blend = appearance_override && appearance != 0
@@ -1281,6 +1312,11 @@ int TestsModelAppearancePackets(int colored, int split, unsigned state,
 int TestsModelGimmickOverridePackets(unsigned state, unsigned pulse_mask,
                                      int limb) {
   return ModelPolygonPackets(1, 0, limb, pulse_mask, state, 1);
+}
+
+int TestsModelWeaponOverridePackets(unsigned state, unsigned pulse_mask,
+                                    int limb) {
+  return ModelPolygonPackets(0, 0, limb, pulse_mask, state, 2);
 }
 
 int Tests_ModelProjectionGroups(void) {

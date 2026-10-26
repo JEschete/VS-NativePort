@@ -8,11 +8,8 @@
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_RENDER_MODEL_H_DECLS)
 #define VS_RENDER_MODEL_H_DECLS
-#include "Actors/ModelDraw.h"
-#include "Actors/WeaponModel.h"
 
 void Render_PrepareActorCameraMatrices(MATRIX* source);
 int Render_DrawActorGroundShadow();
-void Render_DrawModelFlatPolygonsWithOverrides(Actors_ModelRenderContext*, Actors_WeaponModel*, CVECTOR*, void*);
 
 #endif // VS_RENDER_MODEL_H_DECLS

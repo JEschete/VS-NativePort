@@ -11,6 +11,18 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_weapon_override_reads_a_typed_matrix_member_not_native_guest_offset(self):
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F01269"]["path"], r"Native\Engine\src\Render\ModelGeometry.c"
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Engine\src\Render\ModelGeometry.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("weapon->boneWorldMatrices[kWeaponPaletteMatrix]", source)
+        self.assertIn("AppearanceMaterial(weapon->ownerMotionState)", source)
+
     def test_gimmick_override_uses_the_existing_model_kernel_and_typed_state(self):
         owned = self.owned_items()
         self.assertEqual(

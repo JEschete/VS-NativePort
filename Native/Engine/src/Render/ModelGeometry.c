@@ -87,7 +87,9 @@ enum {
   kLimbPaletteGroups = 8,
   kFirstLimbPaletteBit = 0x80,
   kPulsedClutOffset = 0x480,
-  kNeutralTint = 0x808080
+  kNeutralTint = 0x808080,
+  kWeaponPaletteMatrix = 2,
+  kWeaponPaletteColumn = 2
 };
 
 static int PolygonCorners(unsigned command, int colored) {
@@ -518,6 +520,24 @@ void Render_DrawModelFlatPolygons(Actors_ModelRenderContext* context,
                                   void* instance, CVECTOR* tint,
                                   void* model_data) {
   DrawModelPolygons(context, instance, tint, model_data, 0, 0, 0);
+}
+
+// decomp: func_800B516C (src/BATTLE/BATTLE.PRG/4B16C.s:1646).
+void Render_DrawModelFlatPolygonsWithOverrides(
+    Actors_ModelRenderContext* context, Actors_WeaponModel* weapon,
+    CVECTOR* tint, void* model_data) {
+  if (context == NULL || weapon == NULL || tint == NULL || model_data == NULL) {
+    Core_Debugf("render", "Weapon polygon overrides require model and context");
+    return;
+  }
+  // Original 3A1A0.h places unk20[2].m[0][2] at byte0x64.
+  // Preserve that low-byte quirk through the member, not a native byte offset.
+  const unsigned mask =
+      (uint16_t)weapon->boneWorldMatrices[kWeaponPaletteMatrix]
+          .m[0][kWeaponPaletteColumn] &
+      UINT8_MAX;
+  DrawModelPolygons(context, weapon, tint, model_data, 0, mask,
+                    AppearanceMaterial(weapon->ownerMotionState));
 }
 
 // decomp: BATTLE.PRG func_800B4594 (src/BATTLE/BATTLE.PRG/4B16C.s:835).

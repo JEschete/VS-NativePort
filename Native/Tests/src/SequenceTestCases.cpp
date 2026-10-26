@@ -23,6 +23,8 @@ extern "C" int Tests_ModelProjectionGroups(void);
 extern "C" int Tests_ModelPolygonPackets(int colored, int split);
 extern "C" int TestsModelGimmickOverridePackets(unsigned state,
                                                 unsigned pulse_mask, int limb);
+extern "C" int TestsModelWeaponOverridePackets(unsigned state,
+                                               unsigned pulse_mask, int limb);
 extern "C" int TestsModelLimbPalettePackets(int colored, int split, int limb,
                                             unsigned pulse_mask);
 extern "C" int TestsModelAppearancePackets(int colored, int split,
@@ -291,6 +293,13 @@ void CheckGimmickOverride(unsigned state, unsigned pulse) {
     CHECK(TestsModelGimmickOverridePackets(state, pulse, limb) == 1);
   }
 }
+
+void CheckWeaponOverride(unsigned state, unsigned pulse) {
+  for (int limb = 0; limb < 9; ++limb) {
+    CAPTURE(state, pulse, limb);
+    CHECK(TestsModelWeaponOverridePackets(state, pulse, limb) == 1);
+  }
+}
 }  // namespace
 
 TEST_CASE("Gimmick overrides preserve every material state and limb palette",
@@ -319,6 +328,33 @@ TEST_CASE(
         Render_DrawModelGouraudPolygonsWithOverrides);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800B5C31u) == nullptr);
+}
+
+TEST_CASE("Weapon overrides preserve the source matrix-byte palette mask",
+          "[actors][appearance][render][weapon-override]") {
+  for (unsigned state = 0; state < 16; ++state) {
+    for (unsigned pulse : {0U, 0x80U, 0xFFU}) {
+      CheckWeaponOverride(state, pulse);
+    }
+  }
+}
+
+TEST_CASE("Original weapon override address resolves to the typed native entry",
+          "[actors][appearance][render][weapon-override]") {
+  using Renderer = void (*)(Actors_ModelRenderContext*, Actors_WeaponModel*,
+                            CVECTOR*, void*);
+  static_assert(
+      std::is_same_v<decltype(&Render_DrawModelFlatPolygonsWithOverrides),
+                     Renderer>);
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  auto* resolved = VS::Content::ResolveModuleAddress(
+      symbols, "BATTLE/BATTLE.PRG", 0x800B516Cu);
+  REQUIRE(resolved != nullptr);
+  CHECK(reinterpret_cast<Renderer>(resolved) ==
+        Render_DrawModelFlatPolygonsWithOverrides);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800B516Du) == nullptr);
 }
 
 TEST_CASE("Shared sequence retirement unwinds vertex edits before detaching",

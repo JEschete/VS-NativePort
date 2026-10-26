@@ -415,6 +415,57 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Source-layout weapon model overrides (#42, 2026-10-26)
+
+F01269 (`func_800B516C`, original4B16C.s:1646) now feeds the existing
+ModelGeometry packet kernel through typed Actors_WeaponModel fields.
+This restores the flat override without copying the unrelated actor or
+gimmick object layout.
+
+The previously unresolved0x64 read is preserved, not given an invented
+logical meaning. Original49268.c:240 passes the weapon base, and original
+3A1A0.h:402-449 puts its four32-byte matrices at0x20. Thus the byte read
+at0x64 is the low byte of matrix2 m02. The native pointer-expanded
+weapon moves that member, so reading native byte0x64 or actor palette
+state would be wrong. The adapter uses the typed matrix member and its
+low8 bits; the reason the original uses this value remains unknown.
+
+Native ownerMotionState supplies the original four-bit material mode.
+The same shared appearance-material helper and packet emitter used by
+actors/gimmicks retain uniform flat tint, selected group palettes,
+semi-transparency and subtractive/additive page modes.
+
+Evidence is parent8f92f2f6 plus the scoped worktree and preserved owner
+edits; exact commands/results are private `weaponoverride42-*`:
+
+- Original stub red:1 case/432 assertions, all432 fail.
+- Source-layout static assertions reproduce the original matrix member's
+  0x64 address and prove the native matrix offset differs. A separate
+  typed native matrix field is poisoned with the opposite mask so a
+  hardcoded native-offset implementation fails palette checks.
+- Debug/Release `build\<configuration>\VS.Tests.exe
+  "[weapon-override],[gimmick-override],[targeting][palette],[appearance][render]"
+  --reporter compact` passes6 cases/1,048 assertions each. New2/435
+  controls add all16 states, three masks, eight groups/remainder and the
+  actual BATTLE800B516C resolver/interior-rejection contract. Previous
+  actor/gimmick/palette613 assertions remain intact.
+- Both x64 solution builds link both hosts; full suites pass830 cases/
+  4,223,118 assertions each. All108 port controls pass; focused/default
+  quality has0 new findings with unchanged baselines. Fixture matrix
+  values use explicit bounded/fixed-width assignments, not
+  implementation-defined unsigned-to-signed conversions.
+- Two native generations preserve297 maintained/owner paths and all four
+  original type/caller/instruction/C-reference files, repeating identically.
+  Only generated Model.c/.h change; no project or owner-solution rewrite
+  is required.
+
+The original cohort reaches139/186,47 remaining (13 C/C++ references,
+24 assembly-only,10 missing listings), preserving all IDs/order and
+prior138 checks. This establishes the source quirk and native packet
+contract, not an explanation of its design, every authored weapon,
+all-model visual parity, complete renderer promotion or compatibility
+retirement. Publication and exact CI are recorded on#42.
+
 ### Typed gimmick model overrides (#42, 2026-10-26)
 
 F01270 (`func_800B5C30`, original4B16C.s:2387 and read-only rood-boi

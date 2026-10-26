@@ -1,8 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Actors/ModelDraw.h"
 #include "Actors/Skeleton.h"
-#include "Actors/WeaponModel.h"
 #include "Core/Math/ScalarMath.h"
 #include "Render/Camera.h"
 #include "Render/Model.h"
@@ -49,11 +47,5 @@ int Render_DrawActorGroundShadow()
 {
     VS_UNPORTED("Render::DrawActorGroundShadow");
     return 0;
-}
-
-// decomp: BATTLE.PRG func_800B516C (src/BATTLE/BATTLE.PRG/4B16C.s:0) [asm-file: not yet ported]
-void Render_DrawModelFlatPolygonsWithOverrides(Actors_ModelRenderContext*, Actors_WeaponModel*, CVECTOR*, void*)
-{
-    VS_UNPORTED("Render::DrawModelFlatPolygonsWithOverrides");
 }
 

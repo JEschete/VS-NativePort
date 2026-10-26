@@ -23,6 +23,9 @@ int Render_ValidateModelData(void* instance, const void* data, size_t size);
 void Render_DrawModelFlatPolygons(Actors_ModelRenderContext* context,
                                   void* instance, CVECTOR* tint,
                                   void* model_data);
+void Render_DrawModelFlatPolygonsWithOverrides(
+    Actors_ModelRenderContext* context, Actors_WeaponModel* weapon,
+    CVECTOR* tint, void* model_data);
 void Render_DrawModelGouraudPolygons(Actors_ModelRenderContext* context,
                                      void* instance, void* tint,
                                      void* model_data);
