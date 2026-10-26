@@ -381,6 +381,40 @@ every teleport/travel animation, AI action or scene. No whole actor-motion C++
 promotion or compatibility retirement is claimed. Exact private commands and
 reports use `relocation42-*`; publication and CI are recorded on#42.
 
+### Interactive combat-settled room entry (#151, 2026-10-25)
+
+Release1792978233864775-0 on5671e3b5 covers the previously combat-interrupted
+9/7->9/6 route through ordinary interactive production-room mode. Source9/7
+uses Ashley3,1, seed1, `post-prologue`, original equipment/stats/room actors/
+events and no overrides. Actual Cross input opens the authored door;9/6
+arrives at230. Circle draws the weapon, opens the sphere and confirms ordinary
+targets. Actor2 starts73HP and takes46/42 (73->27->0, clamped normally) at
+962/1272; actor3 starts42HP and takes54 to0 at1652. These are actual source0
+attack/result/death records, not edited health or animation-only inference.
+
+The original readiness/event/quiet predicate remains unchanged: available
+scene and event phase0, ready destination9/6, control1, transition0 for120 ticks.
+The measured interval is1840..10000; acceptance is first reached1960.
+There are0 engine errors, no forced skip and no live memory/story/readiness/
+result writes. Ashley survives and later recovers HP passively.
+
+The direct-request fixture's75/39 initial enemy HP is not substituted for this
+ordinary approach's actual RNG-dependent73/42 values. Inactive event PC337 is
+still populated at phase0. The first private controller's shutdown proxy
+incorrectly required every PC null, so it ran to10000; validation uses the exact
+existing `UpdateDoorTrial`/`DoorTrial::Observe` predicate and the recorded frames,
+not that proxy or a weakened game requirement.
+
+Deterministic `--door-transitions` intentionally disables live devices and
+rejects extra presses; a physical-key probe in that mode delivered no game input
+and is excluded. The successful run instead uses `--scenario <production-preset>
+--start --frames 10000 --speed 1` with real owned-window keyboard actions.
+The original automated row stays combat-blocked; this separate interactive
+Release result is not a blanket1001-door pass or a mixed-revision aggregation.
+Local `door151-room6-production-controller.json` retains all acknowledged
+actions/commands; `door151-room6-production-verified.json` contains strict
+HP, death, route and quiet-interval checks.
+
 ### Ashley testing profiles
 
 The **ASHLEY** row selects `prologue`, `post-prologue`, `post-minotaur`,

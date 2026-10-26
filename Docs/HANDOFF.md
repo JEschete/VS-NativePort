@@ -9,6 +9,18 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #151's combat-interrupted9/7->9/6 route now has separate actual Release
+  controller acceptance on5671e3b5: normal production-room Lab1792978233864775-0
+  opens the authored door with Cross, arrives9/6 at230, then ordinary weapon/
+  sphere controls defeat original actors2/3 at1272/1652. Queued46/42 damage
+  yields HP73->27->0, and54 yields42->0; no HP/story/actor edits or overrides.
+  Exact unchanged production gate (ready9/6, control1, transition0, available
+  scene/event phase0) holds1840..10000, crossing120 ticks at1960 with0 errors.
+  Inactive thread PC337 remains populated; requiring null PCs was an overstrict
+  private shutdown proxy, not the production predicate. The deterministic
+  device-free door runner remains honestly combat-blocked; its row is not
+  rewritten as passed. This is one Release interactive route, not all1001 doors
+  or a new Debug/global coverage aggregation. `door151-room6-production-*`.
 - #42's relocation constructors F04184/F04185/F04186 are now owned in the
   existing MotionRequests API, reaching117/186 original entries complete and
   69 remaining (28 C/C++ references,31 assembly-only,10 not located).
@@ -153,8 +165,9 @@ verification of the current worktree.
   Target9/7->9/6 remains explicitly blocked under#151 at4800: its event is idle,
   but live enemy combat interrupts field control (longest ordinary interval110,
   below120). It is not another null-top crash and is not relabeled passed.
-  The separate coverage case needs ordinary combat/defensive handling, not
-  blindly larger budgets or a weaker predicate.
+  The separate interactive Release acceptance above handles that combat
+  normally; the original deterministic cohort result remains blocked rather
+  than receiving a larger budget or weaker predicate.
   Maintained quality#25 stays first in the work order. A coherent test-only
   batch replaces40 ambiguous integer-width findings with exact-width types,
   retaining native callback ABI via the existing auto/0L pattern. Five touched
