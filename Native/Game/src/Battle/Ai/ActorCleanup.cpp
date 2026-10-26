@@ -9,6 +9,7 @@
 #include <iterator>
 
 #include "Battle/Ai/EngagementState.hpp"
+#include "Core/BiosRand.h"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -34,6 +35,11 @@ constexpr unsigned kAiKindFlags = 5;
 constexpr unsigned kCommandModeMask = 0xFC;
 constexpr unsigned kOrbitTypeFirst = 0xAC;
 constexpr unsigned kOrbitTypeSecond = 0xAD;
+constexpr unsigned kHostileClassification = 3;
+constexpr int kHostilityIndicator = 6;
+constexpr int kHostilityIndicatorFrames = 40;
+constexpr int kHostilityReaction = 2;
+constexpr int kHostilityRandomRange = 128;
 
 void Require(bool valid, const char* message) {
   if (!valid) {
@@ -95,6 +101,26 @@ void Battle_Ai_SetActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView* view,
   constexpr u_char kReactionDelay = 30;
   state.decisionDelay = kReactionDelay;
   actor->commandFlags = static_cast<u_char>(value);
+}
+
+// decomp: func_800DC784 (src/BATTLE/BATTLE.PRG/73C84.s:246-284).
+void Battle_Ai_MakeTargetHostile(Battle_Ai_ReactionView* view, int target_id) {
+  Require(view != nullptr, "AI hostility request requires state");
+  RequireActorId(target_id);
+  auto& state = *reinterpret_cast<Battle_Ai_ActorAiState*>(view);
+  auto& relation = state.relations[target_id];
+  if (relation.classification != kHostileClassification) {
+    // The original (rand() & 0x7F) < 0x80 always holds but draws BIOS RNG.
+    (void)Core_Random_Rand();
+    state.opaque18 = 1;
+    Battle_Ai_SetTemporaryAwarenessIndicator(&state, kHostilityIndicator,
+                                             kHostilityIndicatorFrames);
+    Battle_Ai_SetActorAiReactionWithDelay(
+        reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(view),
+        kHostilityReaction, kHostilityRandomRange);
+  }
+  relation.classification = kHostileClassification;
+  relation.counter = 0;
 }
 
 // decomp: func_800E6700 (src/BATTLE/BATTLE.PRG/7DE94.s:42).

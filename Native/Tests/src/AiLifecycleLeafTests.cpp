@@ -8,12 +8,17 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Core/BiosRand.h"
+#include "Core/Random.hpp"
 #include "Core/Unported.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/Perception.h"
+#include "Battle/Damage.h"
 }
 
 static_assert(std::is_same_v<decltype(&Battle_Ai_ClearActorAiNavigationReset),
@@ -31,6 +36,44 @@ struct AiLifecycleFixture {
 
   ~AiLifecycleFixture() {
     std::copy(saved.begin(), saved.end(), Battle_Ai_actorAiStates);
+  }
+};
+
+struct HostilityFixture {
+  unsigned saved_random = Core_Random_State();
+  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
+  Battle_Actor* saved_actor = Battle_actors[3];
+  Battle_Ai_ActorAiState state{};
+  Battle_Actor actor{};
+
+  HostilityFixture() {
+    state.actorId = 3;
+    Battle_actors[3] = &actor;
+  }
+
+  ~HostilityFixture() {
+    Core_Random_Seed(saved_random);
+    *Battle_Ai_FrameState() = saved_frame;
+    Battle_actors[3] = saved_actor;
+  }
+
+  void SetRelation(int target, std::uint32_t word) {
+    std::memcpy(&state.relations[target], &word, sizeof(word));
+  }
+
+  void MakeHostile(int target) {
+    Battle_Ai_MakeTargetHostile(
+        reinterpret_cast<Battle_Ai_ReactionView*>(&state), target);
+  }
+
+  void CheckInitialReaction(unsigned busy) const {
+    REQUIRE(state.relations[7].classification == 3);
+    CHECK(state.relations[7].counter == 0);
+    CHECK(state.opaque18 == 1);
+    CHECK(state.awarenessMarker == 6);
+    CHECK(state.awarenessFramesRemaining == 40);
+    CHECK(state.decisionDelay == (busy == 0 ? 30 : (busy & 1)));
+    CHECK(actor.commandFlags == (busy == 0 ? 2 : 0x5A));
   }
 };
 
@@ -74,7 +117,8 @@ TEST_CASE("AI persistence packs every original bit without mutating live state",
     fixture.state.usesRoomActionDelay = static_cast<u_char>(expected & 1);
     fixture.state.behaviorMode = (expected & 32) ? 0 : 0xA5;
     const auto before = StateBytes(fixture.state);
-    REQUIRE(Battle_Ai_PackActorAiPersistenceFlags(slot) == expected);
+    REQUIRE(Battle_Ai_PackActorAiPersistenceFlags(slot) ==
+            static_cast<int>(expected));
     CHECK(StateBytes(fixture.state) == before);
   }
 }
@@ -86,7 +130,7 @@ TEST_CASE("AI persistence preserves the complete original delay byte",
   fixture.state.behaviorMode = 1;
   for (unsigned delay = 0; delay < 256; ++delay) {
     fixture.state.usesRoomActionDelay = static_cast<u_char>(delay);
-    CHECK(Battle_Ai_PackActorAiPersistenceFlags(4) == delay);
+    CHECK(Battle_Ai_PackActorAiPersistenceFlags(4) == static_cast<int>(delay));
   }
 }
 
@@ -122,4 +166,79 @@ TEST_CASE("AI navigation reset clears only the original hold byte",
     Battle_Ai_ClearActorAiNavigationReset(slot);
     CHECK(StateBytes(fixture.state) == expected);
   }
+}
+
+TEST_CASE("AI hostility preserves relation bits and both original RNG streams",
+          "[ai][hostility]") {
+  const int target = GENERATE(0, 1, 7, 15);
+  const unsigned classification = GENERATE(0u, 1u, 2u, 3u);
+  const std::uint32_t noise = GENERATE(0u, 0xFFFF803Fu);
+  HostilityFixture fixture;
+  for (unsigned counter = 0; counter < 128; ++counter) {
+    fixture.state = {};
+    fixture.state.actorId = 3;
+    fixture.state.opaque18 = 0xA5;
+    fixture.state.awarenessMarker = 0x77;
+    fixture.state.awarenessFramesRemaining = 0x66;
+    for (int id = 0; id < 16; ++id) {
+      fixture.SetRelation(id, 0xA5C10000u | static_cast<unsigned>(id));
+    }
+    const auto word = noise | (classification << 6) | (counter << 8);
+    fixture.SetRelation(target, word);
+    fixture.actor.commandFlags = 0x5A;
+    auto expected = fixture.state;
+    const std::uint32_t hostile = (word & 0xFFFF803Fu) | 0xC0u;
+    std::memcpy(&expected.relations[target], &hostile, sizeof(hostile));
+    Core_Random_Seed(1234);
+    VS::Core::Rand15 expected_random(1234);
+    auto& frame = *Battle_Ai_FrameState();
+    frame.randomState = 0xFFFF8001u;
+    frame.lastBudgetTick = 7;
+    if (classification != 3) {
+      expected_random.Next();
+      expected.opaque18 = 1;
+      expected.awarenessMarker = 6;
+      expected.awarenessFramesRemaining = 40;
+      expected.decisionDelay = 30;
+    }
+    fixture.MakeHostile(target);
+    REQUIRE(StateBytes(fixture.state) == StateBytes(expected));
+    CHECK(Core_Random_State() == expected_random.State());
+    CHECK(frame.randomState ==
+          (classification == 3 ? 0xFFFF8001u : 0xFFFF8008u));
+    CHECK(fixture.actor.commandFlags == (classification == 3 ? 0x5A : 2));
+  }
+}
+
+TEST_CASE(
+    "AI hostility respects busy reactions and does not refresh on reentry",
+    "[ai][hostility]") {
+  const unsigned busy = GENERATE(0u, 1u, 2u, 3u);
+  HostilityFixture fixture;
+  fixture.state.decisionDelay = static_cast<u_char>(busy & 1);
+  fixture.state.nativePointer18C = (busy & 2) ? &fixture.actor : nullptr;
+  fixture.SetRelation(7, 0xABCD7F7Fu);
+  fixture.actor.commandFlags = 0x5A;
+  Core_Random_Seed(1234);
+  VS::Core::Rand15 expected_random(1234);
+  expected_random.Next();
+  auto& frame = *Battle_Ai_FrameState();
+  frame.randomState = 5;
+  frame.lastBudgetTick = 11;
+  fixture.MakeHostile(7);
+  fixture.CheckInitialReaction(busy);
+  CHECK(Core_Random_State() == expected_random.State());
+  CHECK(frame.randomState == 16);
+  fixture.state.opaque18 = 0xA5;
+  fixture.state.awarenessMarker = 0x77;
+  fixture.state.awarenessFramesRemaining = 0x66;
+  fixture.state.relations[7].counter = 127;
+  auto expected = fixture.state;
+  expected.relations[7].counter = 0;
+  frame.lastBudgetTick = 100;
+  fixture.MakeHostile(7);
+  CHECK(StateBytes(fixture.state) == StateBytes(expected));
+  CHECK(Core_Random_State() == expected_random.State());
+  CHECK(frame.randomState == 16);
+  CHECK(fixture.actor.commandFlags == (busy == 0 ? 2 : 0x5A));
 }

@@ -10,15 +10,21 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_hostility_transition_is_owned_with_existing_reaction_lifecycle(self):
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F01695"]["path"],
+            r"Native\Game\src\Battle\Ai\ActorCleanup.cpp",
+        )
+        self.assertEqual(owned["F01695"]["name"], "Battle_Ai_MakeTargetHostile")
+
     def test_dynamic_tile_marker_is_owned_with_existing_tile_primitives(self):
         owned = self.owned_items()
         self.assertEqual(
             owned["F01828"]["path"],
             r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
         )
-        self.assertEqual(
-            owned["F01828"]["name"], "Battle_Ai_MarkAiTileDynamicObstacle"
-        )
+        self.assertEqual(owned["F01828"]["name"], "Battle_Ai_MarkAiTileDynamicObstacle")
 
     def test_room_screen_bounds_share_the_original_predicate(self):
         owned = self.owned_items()
@@ -172,9 +178,12 @@ class EncounterFixupTests(unittest.TestCase):
 
     @staticmethod
     def owned_items():
-        with Path(__file__).resolve().with_name("owned.csv").open(
-            encoding="utf-8", newline=""
-        ) as stream:
+        with (
+            Path(__file__)
+            .resolve()
+            .with_name("owned.csv")
+            .open(encoding="utf-8", newline="") as stream
+        ):
             return {row["id"]: row for row in csv.DictReader(stream)}
 
     def test_relocation_entries_own_complete_existing_motion_requests(self):
@@ -198,7 +207,9 @@ class EncounterFixupTests(unittest.TestCase):
     def test_actor_sound_transition_owns_both_catalog_occurrences_and_callers(self):
         owned = self.owned_items()
         for identifier in ("F00995", "F01007"):
-            self.assertEqual(owned[identifier]["name"], "Audio_UpdateActorSoundTransition")
+            self.assertEqual(
+                owned[identifier]["name"], "Audio_UpdateActorSoundTransition"
+            )
             self.assertEqual(
                 owned[identifier]["path"], r"Native\Game\src\Actors\SoundOverrides.cpp"
             )
@@ -216,7 +227,8 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_ai_target_memory_aliases_preserve_the_original_prefix(self):
         old, new, _ = next(
-            fix for fix in copy_fixups.TYPE_FIXES["T00532"]
+            fix
+            for fix in copy_fixups.TYPE_FIXES["T00532"]
             if fix[0] == "char reserved3C[8];"
         )
         self.assertIn(old, new)
@@ -237,7 +249,9 @@ class EncounterFixupTests(unittest.TestCase):
         old, new, _ = copy_fixups.FIXES["F00099"][0]
         self.assertIn("abilityInputSucceeded == 1)", new.splitlines()[0])
         self.assertIn("currentHp != 0", new.splitlines()[1])
-        self.assertIn("} else {\n            Battle_FinishBattleAbilitySequence();", new)
+        self.assertIn(
+            "} else {\n            Battle_FinishBattleAbilitySequence();", new
+        )
         for operation in (
             "++Battle_actionState->chainStep;",
             "++Battle_actionState->queueIndex;",
@@ -334,14 +348,13 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
             replacements["currentChar != ' '"],
             "currentChar != Core_TextCode_Space",
         )
-        self.assertIn("(u_char)*str++",
-                      replacements["u_int currentChar = *str++;"])
-        self.assertIn("(u_char)*str++",
-                      replacements["u_int opcodeParam = *str++;"])
+        self.assertIn("(u_char)*str++", replacements["u_int currentChar = *str++;"])
+        self.assertIn("(u_char)*str++", replacements["u_int opcodeParam = *str++;"])
 
     def test_attached_draw_requires_a_resident_parent_matrix(self):
         old, new, _ = next(
-            fix for fix in copy_fixups.FIXES["F01008"]
+            fix
+            for fix in copy_fixups.FIXES["F01008"]
             if "entries[actor->instance.attachParent]->boneMatrices" in fix[0]
         )
         self.assertIn("entries[actor->instance.attachParent]->boneMatrices", old)
@@ -349,9 +362,7 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
         self.assertIn("if (parent_matrix != NULL)", new)
         self.assertNotIn("entries[", new)
         self.assertEqual(
-            copy_fixups.NATIVE_HELPER_HEADERS[
-                "Actors_ResolveAttachmentParentMatrix"
-            ],
+            copy_fixups.NATIVE_HELPER_HEADERS["Actors_ResolveAttachmentParentMatrix"],
             r"Native\Game\src\Actors\ModelDrawing.h",
         )
 
@@ -369,19 +380,14 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
         motion = copy_fixups.FIXES["F04130"][0]
         self.assertIn("instance.previousTileX", motion[0])
         self.assertIn("actor->savedPlacement", motion[0])
+        self.assertEqual(motion[1], "        Actors_SaveActorGroundedTransform(actor);")
         self.assertEqual(
-            motion[1], "        Actors_SaveActorGroundedTransform(actor);"
-        )
-        self.assertEqual(
-            copy_fixups.NATIVE_HELPER_HEADERS[
-                "Actors_SaveActorGroundedTransform"
-            ],
+            copy_fixups.NATIVE_HELPER_HEADERS["Actors_SaveActorGroundedTransform"],
             owned["F00989"]["header"],
         )
 
     def test_native_file_cards_draw_after_footer_and_before_fade(self):
-        for fid, prefix, title in (("F02757", "Menu_Files", 0),
-                                   ("F03624", "Title", 1)):
+        for fid, prefix, title in (("F02757", "Menu_Files", 0), ("F03624", "Title", 1)):
             with self.subTest(fid=fid):
                 old, new, _ = copy_fixups.FIXES[fid][0]
                 fade = f"    if ({prefix}_fileMenuScreenFade != 0) {{"
@@ -397,12 +403,11 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
 
     def test_trigger_marker_import_owns_the_complete_geometry_definition(self):
         blob = next(
-            item for item in copy_fixups.MODULE_DATA_BLOBS
+            item
+            for item in copy_fixups.MODULE_DATA_BLOBS
             if item[4] == "Content_battleTriggerMarkerBytes"
         )
-        self.assertEqual(
-            blob[:4], ("BATTLE/BATTLE.PRG", 0x7FD48, 0x800E8548, 116)
-        )
+        self.assertEqual(blob[:4], ("BATTLE/BATTLE.PRG", 0x7FD48, 0x800E8548, 116))
         self.assertNotIn(blob[4], copy_fixups.MODULE_DATA_BLOB_TYPES)
         registry = Path(__file__).resolve().with_name("owned.csv")
         with registry.open(encoding="utf-8", newline="") as stream:
@@ -421,18 +426,24 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
     def test_native_resume_hooks_precede_event_and_reset_mutation(self):
         finish = copy_fixups.FIXES["F00543"][-1]
         self.assertIn("Boot_JumpToTitle(NULL)", finish[1])
-        self.assertLess(finish[1].index("Save_NativeFinishResume"),
-                        finish[1].index("if ((temp_s4"))
+        self.assertLess(
+            finish[1].index("Save_NativeFinishResume"), finish[1].index("if ((temp_s4")
+        )
         zone = copy_fixups.FIXES["F00533"][0]
         self.assertTrue(zone[1].startswith("    if (!Save_NativeResumePending())"))
         for fid in ("F03423", "F03437", "F03673"):
             with self.subTest(fid=fid):
                 reset = copy_fixups.FIXES[fid][-1]
                 self.assertIn("{\n    Save_NativeResetSession();", reset[1])
-        for name in ("Save_NativeResumePending", "Save_NativeFinishResume",
-                     "Save_NativeResetSession"):
-            self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[name],
-                             r"Native\Game\include\Save\NativeResume.h")
+        for name in (
+            "Save_NativeResumePending",
+            "Save_NativeFinishResume",
+            "Save_NativeResetSession",
+        ):
+            self.assertEqual(
+                copy_fixups.NATIVE_HELPER_HEADERS[name],
+                r"Native\Game\include\Save\NativeResume.h",
+            )
 
     def test_ai_direction_queries_keep_bounded_mutable_source_cells(self):
         for fid in ("F01728", "F01739", "F01742"):
@@ -451,27 +462,41 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
 
     def test_room_geometry_names_preserve_index_flags_and_bias_roles(self):
         examples = (
-            ("Field::FindRoomGeometryGroup",
-             "void* find(int arg0) { int v1; int* a1; return arg0 < v1 ? a1 + arg0 * 16 : NULL; }",
-             "void* find(int group_index) { int group_count; int* groups; return group_index < group_count ? groups + group_index * 16 : NULL; }"),
-            ("Field::ShowRoomGeometryGroup",
-             "int show(int arg0) { int* temp_v0 = find(arg0); *temp_v0 &= ~0x100; }",
-             "int show(int group_index) { int* group = find(group_index); *group &= ~0x100; }"),
-            ("Field::HideRoomGeometryGroup",
-             "int hide(int arg0) { int* temp_v0 = find(arg0); *temp_v0 |= 0x100; }",
-             "int hide(int group_index) { int* group = find(group_index); *group |= 0x100; }"),
-            ("Field::SwapRoomGeometryGroupFlags",
-             "int swap(int arg0, int arg1) { int* temp_s0 = find(arg0); int* temp_a1 = find(arg1); int temp_a0 = *temp_s0; *temp_s0 = *temp_a1; *temp_a1 = temp_a0; }",
-             "int swap(int first_group_index, int second_group_index) { int* first_group = find(first_group_index); int* second_group = find(second_group_index); int saved_flags = *first_group; *first_group = *second_group; *second_group = saved_flags; }"),
-            ("Field::AddRoomGeometryDepthBias",
-             "int bias(int arg0, int arg1) { u_short* temp_v0 = find(arg0); temp_v0[1] = (u_short)(temp_v0[1] + arg1); }",
-             "int bias(int group_index, int depth_bias) { u_short* group_halfwords = find(group_index); group_halfwords[1] = (u_short)(group_halfwords[1] + depth_bias); }"),
-            ("Field::DisableRoomGeometryGroup",
-             "int disable(int arg0) { int* temp_v0 = find(arg0); *temp_v0 |= 0x1000; }",
-             "int disable(int group_index) { int* group = find(group_index); *group |= 0x1000; }"),
-            ("Field::UnrelatedGeometryCommand",
-             "void untouched(int arg0) { int temp_v0 = arg0; }",
-             "void untouched(int arg0) { int temp_v0 = arg0; }"),
+            (
+                "Field::FindRoomGeometryGroup",
+                "void* find(int arg0) { int v1; int* a1; return arg0 < v1 ? a1 + arg0 * 16 : NULL; }",
+                "void* find(int group_index) { int group_count; int* groups; return group_index < group_count ? groups + group_index * 16 : NULL; }",
+            ),
+            (
+                "Field::ShowRoomGeometryGroup",
+                "int show(int arg0) { int* temp_v0 = find(arg0); *temp_v0 &= ~0x100; }",
+                "int show(int group_index) { int* group = find(group_index); *group &= ~0x100; }",
+            ),
+            (
+                "Field::HideRoomGeometryGroup",
+                "int hide(int arg0) { int* temp_v0 = find(arg0); *temp_v0 |= 0x100; }",
+                "int hide(int group_index) { int* group = find(group_index); *group |= 0x100; }",
+            ),
+            (
+                "Field::SwapRoomGeometryGroupFlags",
+                "int swap(int arg0, int arg1) { int* temp_s0 = find(arg0); int* temp_a1 = find(arg1); int temp_a0 = *temp_s0; *temp_s0 = *temp_a1; *temp_a1 = temp_a0; }",
+                "int swap(int first_group_index, int second_group_index) { int* first_group = find(first_group_index); int* second_group = find(second_group_index); int saved_flags = *first_group; *first_group = *second_group; *second_group = saved_flags; }",
+            ),
+            (
+                "Field::AddRoomGeometryDepthBias",
+                "int bias(int arg0, int arg1) { u_short* temp_v0 = find(arg0); temp_v0[1] = (u_short)(temp_v0[1] + arg1); }",
+                "int bias(int group_index, int depth_bias) { u_short* group_halfwords = find(group_index); group_halfwords[1] = (u_short)(group_halfwords[1] + depth_bias); }",
+            ),
+            (
+                "Field::DisableRoomGeometryGroup",
+                "int disable(int arg0) { int* temp_v0 = find(arg0); *temp_v0 |= 0x1000; }",
+                "int disable(int group_index) { int* group = find(group_index); *group |= 0x1000; }",
+            ),
+            (
+                "Field::UnrelatedGeometryCommand",
+                "void untouched(int arg0) { int temp_v0 = arg0; }",
+                "void untouched(int arg0) { int temp_v0 = arg0; }",
+            ),
         )
         for name, source, expected in examples:
             with self.subTest(name=name):
@@ -491,13 +516,12 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
             "Content_residentLfoSamples",
         )
         blob = next(
-            item for item in copy_fixups.MODULE_DATA_BLOBS
+            item
+            for item in copy_fixups.MODULE_DATA_BLOBS
             if item[4] == "Content_residentLfoSamples"
         )
         self.assertEqual(blob[:4], ("SLUS_010.40", 0x800, 0x80010000, 0x52000))
-        self.assertEqual(
-            copy_fixups.MODULE_DATA_BLOB_TYPES[blob[4]], ("short", 2)
-        )
+        self.assertEqual(copy_fixups.MODULE_DATA_BLOB_TYPES[blob[4]], ("short", 2))
 
     def test_lfo_enables_preflight_before_mutation_and_decode_unsigned_operands(self):
         for fid, flag, member, count in (
@@ -513,21 +537,21 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
             for old, new, _ in copy_fixups.FIXES[fid]:
                 self.assertIn(old, source)
                 source = source.replace(old, new)
-            self.assertLess(source.index("Audio_Seq_LfoWaveform"),
-                            source.index("updateFlags"))
+            self.assertLess(
+                source.index("Audio_Seq_LfoWaveform"), source.index("updateFlags")
+            )
             self.assertIn(f"programCounter += {count}", source)
             self.assertIn("(u_char)*in_pChannel->programCounter++", source)
             self.assertNotIn("Audio_Seq_kLfoWaveforms[", source)
 
     def test_hud_timer_retirement_does_not_add_a_packed_pointer_view(self):
         ledger = (
-            Path(__file__).resolve().parents[2]
-            / "Docs"
-            / "ledgers"
-            / "DATA_LEDGER.csv"
+            Path(__file__).resolve().parents[2] / "Docs" / "ledgers" / "DATA_LEDGER.csv"
         )
         with ledger.open(encoding="utf-8", newline="") as stream:
-            row = next(item for item in csv.DictReader(stream) if item["id"] == "G01934")
+            row = next(
+                item for item in csv.DictReader(stream) if item["id"] == "G01934"
+            )
         self.assertEqual(row["disposition"], "drop")
         self.assertNotIn("view-of:", row["notes"])
 
@@ -550,7 +574,9 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
             source = source.replace(old, new)
         self.assertNotIn("Battle_puzzleTimerTextPointer", source)
         self.assertIn("Render_DrawCompactText(Battle_puzzleTimerText,", source)
-        self.assertLess(source.index("Core_Debugf"), source.index("Render_DrawCompactText"))
+        self.assertLess(
+            source.index("Core_Debugf"), source.index("Render_DrawCompactText")
+        )
         self.assertIn("const State_SceneTimer* timer", source)
         self.assertIn("timer->seconds, timer->minutes, timer->hours", source)
         self.assertNotIn("*(int*)sp10", source)
@@ -612,9 +638,9 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
         self.assertNotIn("VS_PARTICLE_UNTEXTURED", source)
         self.assertIn("Effects_Plg265_ParticleDispatch2", source)
         copier = Path(__file__).with_name("copy_to_native.py").read_text()
-        templates = copier.split("    def copy_templates(", 1)[1].split(
-            "    # ---", 1
-        )[0]
+        templates = copier.split("    def copy_templates(", 1)[1].split("    # ---", 1)[
+            0
+        ]
         self.assertIn("block = self.apply_fixups(r, block)", templates)
 
     def test_texture_reset_uses_the_complete_native_state(self):
@@ -652,15 +678,21 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
 
     def test_texture_names_preserve_state_and_stream_roles(self):
         examples = (
-            ("Effects::ClearParticleTextureState",
-             "void clear(int* arg0) { state = arg0; }",
-             "void clear(int* storage) { state = storage; }"),
-            ("Effects::InitializeParticleTextureAnimation",
-             "void init(State* arg0, int textureIndex, int arg2) { arg0->program = table[arg2 + 2]; }",
-             "void init(State* animation, int textureIndex, int programIndex) { animation->program = table[programIndex + 2]; }"),
-            ("Effects::AdvanceParticleTextureAnimation",
-             "void advance(State* arg0) { int w = read(arg0); switch (w & 0xF0000000) {} }",
-             "void advance(State* animation) { int command = read(animation); switch (command & 0xF0000000) {} }"),
+            (
+                "Effects::ClearParticleTextureState",
+                "void clear(int* arg0) { state = arg0; }",
+                "void clear(int* storage) { state = storage; }",
+            ),
+            (
+                "Effects::InitializeParticleTextureAnimation",
+                "void init(State* arg0, int textureIndex, int arg2) { arg0->program = table[arg2 + 2]; }",
+                "void init(State* animation, int textureIndex, int programIndex) { animation->program = table[programIndex + 2]; }",
+            ),
+            (
+                "Effects::AdvanceParticleTextureAnimation",
+                "void advance(State* arg0) { int w = read(arg0); switch (w & 0xF0000000) {} }",
+                "void advance(State* animation) { int command = read(animation); switch (command & 0xF0000000) {} }",
+            ),
         )
         for name, source, expected in examples:
             with self.subTest(name=name):
@@ -675,10 +707,14 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertTrue(source.startswith("int Actors_UnloadSharedSequence"))
-        self.assertLess(source.index("Actors_RestartActorAnimationEvents"),
-                        source.index("actor->animationHeader = 0"))
-        self.assertLess(source.index("actor->blendPose.eventScript = NULL"),
-                        source.index("Content_ReleaseActorSequence"))
+        self.assertLess(
+            source.index("Actors_RestartActorAnimationEvents"),
+            source.index("actor->animationHeader = 0"),
+        )
+        self.assertLess(
+            source.index("actor->blendPose.eventScript = NULL"),
+            source.index("Content_ReleaseActorSequence"),
+        )
         self.assertIn("return -1;", source)
         self.assertIn("return result;", source)
 
@@ -694,15 +730,19 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertTrue(source.startswith("int Actors_RestartActorAnimationEvents"))
-        self.assertLess(source.index("v0 == NULL || sp10 == NULL"),
-                        source.index("VS_ONDISC"))
+        self.assertLess(
+            source.index("v0 == NULL || sp10 == NULL"), source.index("VS_ONDISC")
+        )
         self.assertIn("return -1;", source)
         self.assertIn("return 0;", source)
         self.assertIn("Core_Errorf", source)
         for fid in ("F00856", "F00992", "F01081"):
-            self.assertTrue(any("return -1;" in new or "return 1;" in new or
-                                "return;" in new
-                                for _, new, _ in copy_fixups.FIXES[fid]))
+            self.assertTrue(
+                any(
+                    "return -1;" in new or "return 1;" in new or "return;" in new
+                    for _, new, _ in copy_fixups.FIXES[fid]
+                )
+            )
 
     def test_unwind_callers_match_pre_normalization_flag_expressions(self):
         for fid, expression in (
@@ -710,21 +750,23 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
             ("F00992", "(*(int*)((u_char*)actor + 0x5AC) & 0x800000)"),
         ):
             guard = f"    if {expression} {{\n"
-            source = (("    actor->animationEventFlag = 0;\n"
-                       if fid == "F00856" else "") +
-                      guard +
-                      "        Actors_RestartActorAnimationEvents(actor);\n"
-                      "    }\n" +
-                      ("    actor->poseOverrideActive = 0;"
-                       if fid == "F00856" else ""))
-            replacements = [(old, new) for old, new, _ in copy_fixups.FIXES[fid]
-                            if "Actors_RestartActorAnimationEvents" in old]
+            source = (
+                ("    actor->animationEventFlag = 0;\n" if fid == "F00856" else "")
+                + guard
+                + "        Actors_RestartActorAnimationEvents(actor);\n"
+                "    }\n"
+                + ("    actor->poseOverrideActive = 0;" if fid == "F00856" else "")
+            )
+            replacements = [
+                (old, new)
+                for old, new, _ in copy_fixups.FIXES[fid]
+                if "Actors_RestartActorAnimationEvents" in old
+            ]
             self.assertEqual(len(replacements), 1)
             old, new = replacements[0]
             self.assertIn(old, source)
             source = source.replace(old, new)
-            self.assertIn("Actors_RestartActorAnimationEvents(actor) < 0",
-                          source)
+            self.assertIn("Actors_RestartActorAnimationEvents(actor) < 0", source)
 
     def test_scripted_effect_requires_its_actor_before_starting_playback(self):
         source = """    Effects_StartScriptedActorEffect(
@@ -734,13 +776,15 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
         for old, new, _ in copy_fixups.FIXES["F01170"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
-        self.assertLess(source.index("(unsigned)actor >= 16"),
-                        source.index("Actors_actorRecords[actor]"))
-        self.assertLess(source.index("return 1;"),
-                        source.index("Effects_StartScriptedActorEffect"))
+        self.assertLess(
+            source.index("(unsigned)actor >= 16"),
+            source.index("Actors_actorRecords[actor]"),
+        )
+        self.assertLess(
+            source.index("return 1;"), source.index("Effects_StartScriptedActorEffect")
+        )
         self.assertIn("Field_gimmickInstances[actor] == NULL", source)
-        self.assertIn("referenceType <= 1 ? Event_ResolveScriptActorReference",
-                      source)
+        self.assertIn("referenceType <= 1 ? Event_ResolveScriptActorReference", source)
         self.assertIn("target->modelId != selector", source)
         self.assertIn("Core_Errorf", source)
 
@@ -753,13 +797,16 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
         for old, new, _ in copy_fixups.FIXES["F03515"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
-        self.assertLess(source.index("currentSfxBank == 0"),
-                        source.index("currentSfxBank - 1]"))
+        self.assertLess(
+            source.index("currentSfxBank == 0"), source.index("currentSfxBank - 1]")
+        )
         self.assertIn("Core_Warnf", source)
         self.assertIn("Core_Errorf", source)
         self.assertIn("var_s0_2 == NULL", source)
-        self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS["Core_Errorf"],
-                         r"Native\Engine\include\Core\Diagnostics.h")
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS["Core_Errorf"],
+            r"Native\Engine\include\Core\Diagnostics.h",
+        )
 
     def test_empty_stack_top_is_checked_after_remaining_member_updates(self):
         source = """    UpdateRemainingMembers();
@@ -785,16 +832,23 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
         for old, new, _ in copy_fixups.FIXES["F03437"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
-        self.assertLess(source.index("Core_Memory_InitializeHeap"),
-                        source.index("Battle_Ai_InvalidateSessionBindings"))
-        self.assertLess(source.index("Save_NativeResetSession"),
-                        source.index("Core_Memory_InitializeHeap"))
-        self.assertLess(source.index("Battle_Ai_InvalidateSessionBindings"),
-                        source.index("Content_InitializeDiscQueue"))
+        self.assertLess(
+            source.index("Core_Memory_InitializeHeap"),
+            source.index("Battle_Ai_InvalidateSessionBindings"),
+        )
+        self.assertLess(
+            source.index("Save_NativeResetSession"),
+            source.index("Core_Memory_InitializeHeap"),
+        )
+        self.assertLess(
+            source.index("Battle_Ai_InvalidateSessionBindings"),
+            source.index("Content_InitializeDiscQueue"),
+        )
         self.assertEqual(source.count("Battle_Ai_InvalidateSessionBindings"), 1)
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["Battle_Ai_InvalidateSessionBindings"],
-            r"Native\Game\src\Battle\Ai\RoomState.h")
+            r"Native\Game\src\Battle\Ai\RoomState.h",
+        )
 
     def test_perception_uses_owned_model_prefixes_for_auxiliary_targets(self):
         source = """targetObject = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[id];
@@ -808,7 +862,15 @@ Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_a
         self.assertNotIn("Actors_actorRecords", source)
 
     def test_optional_actor_wrappers_diagnose_and_return_before_dereferencing(self):
-        for key in ("F00946", "F00947", "F00948", "F00949", "F00950", "F00952", "F00953"):
+        for key in (
+            "F00946",
+            "F00947",
+            "F00948",
+            "F00949",
+            "F00950",
+            "F00952",
+            "F00953",
+        ):
             old, new, _ = copy_fixups.FIXES[key][0]
             self.assertIn("Actors_actorRecords[", old)
             self.assertIn("== NULL", new)
@@ -822,8 +884,7 @@ Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_a
         for old, new, _ in copy_fixups.FIXES["F00951"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
-        self.assertLess(source.index("if (temp_s1 == NULL)"),
-                        source.index("sp10.vx"))
+        self.assertLess(source.index("if (temp_s1 == NULL)"), source.index("sp10.vx"))
         self.assertLess(source.index("return;"), source.index("sp10.vx"))
         self.assertIn("absolute slide skips absent actor=%d", source)
 
@@ -845,10 +906,13 @@ Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_a
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertEqual(source.count("actor->instance.model"), 1)
-        self.assertLess(source.index("return -1;"),
-                        source.index("model = actor->instance.model;"))
-        self.assertLess(source.index("model = actor->instance.model;"),
-                        source.index("matrix = Actors_ActorBoneWorldTransform"))
+        self.assertLess(
+            source.index("return -1;"), source.index("model = actor->instance.model;")
+        )
+        self.assertLess(
+            source.index("model = actor->instance.model;"),
+            source.index("matrix = Actors_ActorBoneWorldTransform"),
+        )
 
     def test_room_lifetimes_revoke_diagnostic_readiness(self):
         for key, header in (
@@ -858,8 +922,10 @@ Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_a
             source = header + "\n    OriginalRoomWork();\n}"
             for old, new, _ in copy_fixups.FIXES[key]:
                 source = source.replace(old, new)
-            self.assertLess(source.index("Boot_ResetGameplayInspection();"),
-                            source.index("OriginalRoomWork();"))
+            self.assertLess(
+                source.index("Boot_ResetGameplayInspection();"),
+                source.index("OriginalRoomWork();"),
+            )
 
     def test_gimmick_palette_matches_ledger_element_width_without_growth(self):
         source = "u_char pulsedPalette[32];"
@@ -991,12 +1057,24 @@ AddPrim(*((void**)Core_ScratchAddr(1)) + 0x1C, line++);
 
     def test_score_number_buffers_include_all_digits_and_terminators(self):
         cases = (
-            ("F02816", 'char digits[2];\nsprintf(digits, "%02d", titleNo);',
-             'char digits[sizeof "00"];', '"%02d"'),
-            ("F02817", 'char digits[2];\nsprintf(digits, "%03d", enemyNo);',
-             'char digits[sizeof "000"];', '"%03d"'),
-            ("F02820", 'char sp60[12];\nsprintf(sp60, "NO.   %03d/%03d", selected + 1, 78);',
-             'char sp60[sizeof "NO.   000/000"];', '"NO.   %03d/%03d"'),
+            (
+                "F02816",
+                'char digits[2];\nsprintf(digits, "%02d", titleNo);',
+                'char digits[sizeof "00"];',
+                '"%02d"',
+            ),
+            (
+                "F02817",
+                'char digits[2];\nsprintf(digits, "%03d", enemyNo);',
+                'char digits[sizeof "000"];',
+                '"%03d"',
+            ),
+            (
+                "F02820",
+                'char sp60[12];\nsprintf(sp60, "NO.   %03d/%03d", selected + 1, 78);',
+                'char sp60[sizeof "NO.   000/000"];',
+                '"NO.   %03d/%03d"',
+            ),
         )
         for function, source, declaration, format_string in cases:
             with self.subTest(function=function):
@@ -1018,7 +1096,10 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
                 self.assertIn(declaration, source)
                 self.assertIn(format_string, source)
                 if function != "F02820":
-                    self.assertIn("AddPrim(Render_frameScratch.overlayOrderingTable, poly++);", source)
+                    self.assertIn(
+                        "AddPrim(Render_frameScratch.overlayOrderingTable, poly++);",
+                        source,
+                    )
                     self.assertNotIn("Core_Scratch", source)
 
     def test_npc_area_filter_keeps_geometry_without_creating_player_ui(self):
@@ -1091,8 +1172,9 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         for item in ("T00232", "G00330", "F00579"):
             with self.subTest(item=item):
                 self.assertIn(item, owned)
-                self.assertEqual(owned[item]["header"],
-                                 r"Native\Game\src\Field\DoorMatches.h")
+                self.assertEqual(
+                    owned[item]["header"], r"Native\Game\src\Field\DoorMatches.h"
+                )
         source = (root / "Native/Game/src/Field/Doors.c").read_text()
         caller = (root / "Native/Game/src/Field/Interactions.c").read_text()
         self.assertIn('"Field/DoorMatches.h"', caller)
@@ -1105,8 +1187,10 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
     def test_weapon_naming_draw_links_use_native_handles(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Menu/Rename.c").read_text()
-        for function, variable in (("DrawFrame", "prim"),
-                                   ("DrawSelectionBox", "temp_t0")):
+        for function, variable in (
+            ("DrawFrame", "prim"),
+            ("DrawSelectionBox", "temp_t0"),
+        ):
             with self.subTest(function=function):
                 body = source.split(f"void Menu_Rename_{function}(", 1)[1]
                 body = body.split("\n}\n", 1)[0]
@@ -1129,8 +1213,10 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
                 source = (root / filename).read_text()
                 body = source.split(f"int Menu_Setup_{function}(", 1)[1]
                 body = body.split("\n}\n", 1)[0]
-                self.assertTrue(f"char* {variable}[2 * {rows}];" in body,
-                                f"{function} needs aligned native pointer storage")
+                self.assertTrue(
+                    f"char* {variable}[2 * {rows}];" in body,
+                    f"{function} needs aligned native pointer storage",
+                )
                 self.assertNotIn(f"char** {variable};", body)
                 self.assertNotRegex(body, rf"{variable}\s*=\s*.*0x(?:6A4|384|1324)")
                 self.assertIn("Menu_Setup_BuildItemList(", body)
@@ -1139,7 +1225,15 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
     def test_loot_staging_uses_last_slots_and_preflights_composites(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Menu/Loot/LootInventory.c").read_text()
-        for fid in ("F02846", "F02847", "F02848", "F02849", "F02850", "F02851", "F02852"):
+        for fid in (
+            "F02846",
+            "F02847",
+            "F02848",
+            "F02849",
+            "F02850",
+            "F02851",
+            "F02852",
+        ):
             for old, new, _ in copy_fixups.FIXES[fid]:
                 self.assertIn(new, source)
                 self.assertNotIn(old, source)
@@ -1155,7 +1249,9 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         self.assertEqual(stage.count("Menu_Loot_AppendStagedDrop("), 8)
         append = source.split("void Menu_Loot_AppendStagedDrop(", 1)[1]
         append = append.split("int Menu_Loot_AdvanceStagedInventory(", 1)[0]
-        self.assertLess(append.index("if (index == 0)"), append.index("Menu_Loot_AppendLootRow("))
+        self.assertLess(
+            append.index("if (index == 0)"), append.index("Menu_Loot_AppendLootRow(")
+        )
         self.assertIn("Menu_Loot_paging.deferred = 1;", append)
 
     def test_loot_pages_share_row_capacity_and_reset_before_source_release(self):
@@ -1168,13 +1264,17 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         self.assertIn("} else if (Menu_Loot_AdvanceStagedInventory()) {", selection)
         cleanup = (root / "Native/Game/src/Items/Loot.c").read_text()
         cleanup = cleanup.split("void Items_ClearRoomLootList(", 1)[1]
-        self.assertLess(cleanup.index("Menu_Loot_ResetPaging();"),
-                        cleanup.index("Core_Memory_FreeFromHighEnd("))
+        self.assertLess(
+            cleanup.index("Menu_Loot_ResetPaging();"),
+            cleanup.index("Core_Memory_FreeFromHighEnd("),
+        )
 
     def test_misc_inventory_write_checks_capacity_before_mutation(self):
         old, new, _ = copy_fixups.FIXES["F02511"][0]
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native" / "Game" / "src" / "Items" / "Inventory.c").read_text()
+        source = (
+            root / "Native" / "Game" / "src" / "Items" / "Inventory.c"
+        ).read_text()
         self.assertIn(new, source)
         self.assertNotIn(old, source)
         self.assertIn("write != 0", new)
@@ -1186,7 +1286,9 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         _, new, _ = copy_fixups.FIXES["F01515"][1]
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Effects/Particles.c").read_text()
-        self.assertTrue(new in source, "cone fix missing from generated particle emitter")
+        self.assertTrue(
+            new in source, "cone fix missing from generated particle emitter"
+        )
         self.assertIn("scratch->vector.vx = scratch->vector.vz = -1;", new)
         self.assertIn("0x800D34BC/0x800D34F8", new)
         self.assertEqual(new.count("/ scratch->extent.vy;"), 2)
@@ -1195,7 +1297,9 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
     def test_particle_ribbon_preserves_original_zero_divisor_remainder(self):
         old, new, _ = copy_fixups.FIXES["F01867"][0]
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Effects/Templates/ParticleRender.inl").read_text()
+        source = (
+            root / "Native/Game/src/Effects/Templates/ParticleRender.inl"
+        ).read_text()
         self.assertIn(new, source)
         self.assertNotIn(old, source)
         self.assertEqual(new.count("Core_Random_Rand()"), 1)
@@ -1212,7 +1316,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_misc_shortcut_label_is_encoded_before_reset_capture(self):
         old, new, _ = copy_fixups.FIXES["F02553"][0]
-        declaration = 'static char Menu_Inventory_miscItemShortcutMisc[] = ' + old + ';'
+        declaration = "static char Menu_Inventory_miscItemShortcutMisc[] = " + old + ";"
         encoded = declaration.replace(old, new)
         self.assertIn(r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"', encoded)
         self.assertNotIn("MISC", encoded)
@@ -1222,7 +1326,9 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Menu/Inventory/Inventory.c").read_text()
         label = r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"'
-        self.assertIn("static char Menu_Inventory_miscItemShortcutMisc[] = " + label, source)
+        self.assertIn(
+            "static char Menu_Inventory_miscItemShortcutMisc[] = " + label, source
+        )
         self.assertIn("static const char initial[] = " + label, source)
         self.assertNotIn(r'"MISC\00000|0xF8|"', source)
 
@@ -1230,7 +1336,9 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         old, new, _ = copy_fixups.FIXES["F03669"][0]
         self.assertIn("Input_settings.menuFlags = 0x2D8;", old)
         self.assertEqual(new.strip(), "Boot_InitializePlayerSettings();")
-        self.assertIn("Boot_InitializePlayerSettings", copy_fixups.NATIVE_HELPER_HEADERS)
+        self.assertIn(
+            "Boot_InitializePlayerSettings", copy_fixups.NATIVE_HELPER_HEADERS
+        )
 
     def test_misc_shortcut_reserves_all_native_text_pointers(self):
         root = Path(__file__).resolve().parents[2]
@@ -1245,7 +1353,9 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
     def test_plugin_table_never_binds_the_development_dispatcher(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Effects/PurgeTables.c").read_text()
-        table = source.split("Effects_EffectRenderer Effects_effectEntryPoints[] = {", 1)[1]
+        table = source.split(
+            "Effects_EffectRenderer Effects_effectEntryPoints[] = {", 1
+        )[1]
         table = table.split("};", 1)[0]
         self.assertNotIn("Effects_InvokeAllPluginUpdates", table)
         self.assertIn("Effects_Plg198_Ring", table)

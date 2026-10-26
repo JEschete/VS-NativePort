@@ -9,6 +9,26 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01695 now performs the source-backed hostility transition through
+  the existing owned reaction lifecycle, reaching132/186 original entries
+  and54 gaps (19 C/C++ references,25 assembly-only,10 missing listings).
+  Original73C84.s:246-284 sets classification3 and clears only bits8-14
+  on every call. A newly hostile target additionally consumes one BIOS
+  RNG draw, sets byte0x18, shows indicator6 for40 ticks and requests
+  reaction2 through the existing actor-accumulator RNG/delay helper.
+  Those two RNG streams must not be substituted for one another.
+  Red2/68 has36 failed assertions; green hostility2/16,436 and combined
+  lifecycle7/115,047 cover all128 counter values, all classifications,
+  boundary/interior targets, other-bit/other-relation canaries, busy
+  routes/delays and repeat calls without refreshing reactions or RNG.
+  Full Debug/Release805/4,078,278 each and99 port/audit controls pass;
+  both hosts link. Focused native/tidy and default quality have0 new
+  findings with unchanged baselines. Exact-check helper extraction retains
+  all16,436 hostility assertions. Two generations preserve111 registered-owned/owner/
+  test paths and repeat identically, changing only Perception.c/.h.
+  Existing transient AI views remain migration debt; no full relationship
+  gameplay, whole-state C++ promotion or compatibility-retirement claim.
+  Private `hostility42-*`; publication/exact CI are recorded on#42.
 - #42 F01828 now performs the original guarded u16 tileFlagMap OR0x400
   through NavigationPrimitives, reaching131/186 original entries and55
   gaps (20 C/C++ references,25 assembly-only,10 missing listings).

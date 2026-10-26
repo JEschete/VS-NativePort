@@ -415,6 +415,63 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Exact native hostility transition (#42, 2026-10-25)
+
+F01695 (`func_800DC784`, original73C84.s:246-284 and read-only
+rood-boi battle_helpers.c at e59320ca) now belongs to the existing owned
+ActorCleanup reaction lifecycle. It sets the requested target's
+classification to3 and clears only the seven-bit counter at bits8-14,
+preserving every other bit and relation. This reset also applies to an
+already-hostile target.
+
+Only a newly hostile target consumes the original BIOS `rand()` draw;
+the following masked comparison always succeeds. The same branch sets
+byte0x18 to1, uses the existing temporary indicator API with6/40, and
+requests reaction2 with range128 through the existing delayed-reaction
+API. That second API advances the distinct signed-halfword actor RNG
+accumulator even when a live navigation override or decision delay
+prevents changing the actor command. An already-hostile target must not
+draw either RNG, restart the indicator, or request another reaction.
+The existing transient AI views are retained, not declared retired.
+
+The source revision is parent fe094c32 with the scoped hostility changes
+and the preserved owner edits listed by the worktree. Commands/evidence
+are retained privately as `hostility42-*`:
+
+- Debug red: `build\Debug\VS.Tests.exe "[hostility]" --reporter compact`
+  fails both cases,36 of68 assertions, against the original stub.
+- Debug green: `build\Debug\VS.Tests.exe
+  "[hostility],[lifecycle-leaves]" --reporter compact` passes7 cases/
+  115,047 assertions; the hostility subset adds2 cases/16,436 assertions.
+  Tests cover all128 counter values, four classifications, targets0/1/7/15,
+  complementary unaffected bits, whole-state and other-relation canaries,
+  independent BIOS/actor RNG state, all four busy-guard combinations and
+  repeat calls after changing the indicator and frame tick.
+- MSBuild Debug/Release x64 solution builds link both hosts;
+  `build\<configuration>\VS.Tests.exe --reporter compact` passes805
+  cases/4,078,278 assertions in each configuration.
+- `python -m unittest discover -s tools\port -p test_*.py` passes99
+  controls. The published assembly audit has54 stubs:19 C/C++ reference
+  bodies,25 assembly-only and10 missing instruction listings.
+- Focused native/tidy and default quality both have0 actionable/0 new
+  findings with unchanged baselines. Catch macro expansion initially
+  exceeded the busy-case function-size limit; extracting its exact checks
+  preserves all16,436 assertions. The final focused analysis selects
+  ActorCleanup.cpp, AiLifecycleLeafTests.cpp and test_encounter_fixups.py.
+  The unchanged public ABI is covered by both full builds and default
+  header checks, without repeating all-owned-TU analysis for a relocated
+  declaration.
+- Two copier runs start without generated-file conflicts, preserve111
+  registered-owned/owner/test paths and repeat identically. Only generated
+  Perception.c/.h change, removing the old stub/declaration in favor of the
+  owned provider; existing production action-reaction and relationship
+  propagation callers retain the same typed public ABI.
+
+The original cohort advances132/186,54 remaining, with prior131 entries
+and the original order preserved. This establishes the component contract,
+not all NPC relationship gameplay, whole-state promotion or compatibility
+retirement. Publication and exact-revision CI are recorded on#42.
+
 ### Exact dynamic navigation tile marker (#42, 2026-10-25)
 
 F01828 (`func_800E68EC`, original7E05C.s:72 and read-only

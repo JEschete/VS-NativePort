@@ -581,12 +581,6 @@ void Battle_Ai_TryBeginAshleyAlliance(Battle_Ai_ReactionView*, int)
     VS_UNPORTED("Battle::Ai::TryBeginAshleyAlliance");
 }
 
-// decomp: BATTLE.PRG func_800DC784 (src/BATTLE/BATTLE.PRG/73C84.s:0) [asm-file: not yet ported]
-void Battle_Ai_MakeTargetHostile(Battle_Ai_ReactionView*, int)
-{
-    VS_UNPORTED("Battle::Ai::MakeTargetHostile");
-}
-
 // decomp: BATTLE.PRG func_800DD000 (src/BATTLE/BATTLE.PRG/74088.c:716)
 void Battle_Ai_ApplyActorActionReaction(Battle_Ai_ReactionView* state, Battle_Ai_StatApplicationView* app)
 {
