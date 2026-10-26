@@ -4,18 +4,32 @@
 #include "Battle/Ai/NavigationPrimitives.h"
 
 #include <array>
+#include <bit>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <iterator>
+#include <memory>
 
 #include "Core/Diagnostics.h"
 #include "Legacy/Psx.h"
 
 extern "C" {
+#include "Actors/ActorRecord.h"
+#include "Actors/ActorState.h"
+#include "Battle/Ai/ActorCleanup.h"
+#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/GroundNavigation.h"
+#include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Perception.h"
+#include "Battle/Damage.h"
+#include "Core/Math/ScalarMath.h"
+#include "Core/Memory/Heap.h"
+#include "Core/Timing.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
@@ -49,6 +63,98 @@ constexpr unsigned kGateCoordinateBits = 5;
 constexpr unsigned kSecondGateShift = 16;
 constexpr unsigned kGateSelectorShift = 13;
 constexpr unsigned kVariableShiftMask = 31;
+constexpr unsigned kCoordinateHalfwordBits = 16;
+constexpr unsigned kCoordinateByteBits = 8;
+constexpr unsigned kCoordinateHalfwordMask = 0xFFFF;
+constexpr unsigned kHorizontalTileMask = 0xFF00FF;
+constexpr unsigned kScriptedWaitBits = 0xFE0;
+constexpr unsigned kScriptedWaitShift = 5;
+constexpr unsigned kScriptedWaitMask = 127;
+constexpr unsigned kSuspendedActorCommands = 0xC0;
+constexpr int kScriptedArrivalSquared = 1024;
+constexpr unsigned kFineCoordinateShift = 6;
+constexpr unsigned kFineCoordinateHighShift = 14;
+constexpr unsigned kTileCoordinateShift = 7;
+constexpr unsigned kGroundAreaMask = 15;
+constexpr u_char kNoMovementTarget = 16;
+
+void RequireScriptedNavigation(bool valid, const char* message) {
+  if (!valid) {
+    Core_Errorf("ai", "Scripted navigation: %s", message);
+    std::abort();
+  }
+}
+
+void PrepareScriptedRoute(Battle_Ai_ActorAiState& route,
+                          const Actors_ModelInstance& model) {
+  route.opaque19A = 0;
+  if (route.movement_wait != 0) --route.movement_wait;
+  unsigned wait =
+      (route.navigationFlags >> kScriptedWaitShift) & kScriptedWaitMask;
+  if (wait != 0) --wait;
+  route.navigationFlags = (route.navigationFlags & ~kScriptedWaitBits) |
+                          (wait << kScriptedWaitShift);
+  route.ignore_floor_mask = 1;
+  route.opaque1 = 0;
+  route.movementTarget = kNoMovementTarget;
+  route.isStuck = 0;
+  route.opaque3 = 0;
+  route.tile.word =
+      model.currentTileX |
+      (static_cast<unsigned>(model.currentTileLayer) << kCoordinateByteBits) |
+      (static_cast<unsigned>(model.currentTileZ) << kTileZShift) |
+      (static_cast<unsigned>(model.reserved5F)
+       << (kCoordinateHalfwordBits + kCoordinateByteBits));
+  route.position = model.position;
+  const unsigned x = static_cast<u_short>(model.position.vx);
+  const unsigned z = static_cast<u_short>(model.position.vz);
+  route.fine_x = static_cast<u_char>(x >> kFineCoordinateShift);
+  route.fine_layer = static_cast<u_char>(x >> kFineCoordinateHighShift);
+  route.fine_z = static_cast<u_char>(z >> kFineCoordinateShift);
+  route.fine_status = static_cast<u_char>(z >> kFineCoordinateHighShift);
+}
+
+void ContinueScriptedRoute(Battle_Ai_ActorAiState& route) {
+  if (route.route_gate != 0) {
+    Battle_Ai_MoveActorTowardDestinationTile(&route, 0);
+    return;
+  }
+  const unsigned x = route.scriptedTargetXZ & kCoordinateHalfwordMask;
+  const unsigned z = route.scriptedTargetXZ >> kCoordinateHalfwordBits;
+  route.moveX = static_cast<int>(x);
+  route.moveZ = static_cast<int>(z);
+  route.destination.word =
+      (x >> kTileCoordinateShift) |
+      ((z >> kTileCoordinateShift) << kCoordinateHalfwordBits);
+  Battle_Ai_UpdateNavigationAreaMovement(
+      reinterpret_cast<Battle_Ai_TerrainMoveView*>(&route));
+}
+
+bool ScriptedRouteReached(Battle_Ai_ActorAiState& route) {
+  const unsigned target = route.scriptedTargetXZ;
+  if (route.locomotionMode == 0) {
+    const int x = static_cast<int>(target & kCoordinateHalfwordMask);
+    const int z = static_cast<int>(target >> kCoordinateHalfwordBits);
+    const unsigned squared = Core_Math_SquaredVectorLength(
+        x - static_cast<u_short>(route.position.vx), 0,
+        z - static_cast<u_short>(route.position.vz));
+    if (std::bit_cast<std::int32_t>(squared) < kScriptedArrivalSquared) {
+      return true;
+    }
+    ContinueScriptedRoute(route);
+    return false;
+  }
+  if ((route.destination.word & kHorizontalTileMask) ==
+      (route.tile.word & kHorizontalTileMask)) {
+    return true;
+  }
+  route.destination.word =
+      ((target & kCoordinateHalfwordMask) >> kTileCoordinateShift) |
+      ((target >> (kCoordinateHalfwordBits + kTileCoordinateShift))
+       << kCoordinateHalfwordBits);
+  Battle_Ai_DispatchAiLocomotionMode(&route, 0, 0);
+  return false;
+}
 
 void RequireRouteAvailability(bool valid, const char* message) {
   if (!valid) {
@@ -305,4 +411,73 @@ void Battle_Ai_CopyActorNavigationOverrideState(
   destination->opaque19A = 0;
   destination->settingsBit14 = kOverrideSettings;
   destination->movementEnabled = 1;
+}
+
+// decomp: func_800E527C (src/BATTLE/BATTLE.PRG/7C7E0.s:216-256).
+void Battle_Ai_SetActorNavigationOverride(int actor_id, int x, int z) {
+  auto* state = ActorNavigationState(actor_id);
+  if (state == nullptr) return;
+  RequireScriptedNavigation(
+      state->actorId == actor_id && state->actor != nullptr &&
+          static_cast<void*>(state->actor) ==
+              static_cast<void*>(Battle_actors[actor_id]) &&
+          Battle_Ai_roomAiState != nullptr,
+      "path request requires matching actor and room state");
+  const unsigned target = static_cast<unsigned>(x) |
+                          (static_cast<unsigned>(z) << kCoordinateHalfwordBits);
+  Battle_Ai_DisengageActor(state);
+  Battle_Ai_ResetActorAwarenessIndicator(
+      reinterpret_cast<Battle_Ai_PlanEvaluationView*>(state));
+  Battle_Ai_UnlinkEngagedActor(state);
+  auto* destination = state;
+  if (state->nativePointer18C == nullptr) {
+    auto* storage = static_cast<Battle_Ai_ActorAiState*>(
+        Core_Memory_AllocateFromHighEnd(sizeof(Battle_Ai_ActorAiState)));
+    RequireScriptedNavigation(storage != nullptr, "route allocation failed");
+    destination = std::construct_at(storage);
+    state->nativePointer18C = destination;
+  }
+  // On repeat entry, the original copies onto the live base, not its old route.
+  Battle_Ai_CopyActorNavigationOverrideState(actor_id, destination);
+  destination->scriptedTargetXZ = target;
+}
+
+// decomp: func_800E5308 (src/BATTLE/BATTLE.PRG/7C7E0.s:260-421).
+void Battle_Ai_UpdateActorNavigationOverrides(void) {
+  Battle_Ai_CacheActorAiWorkingState();
+  auto& frame = *Battle_Ai_FrameState();
+  std::size_t visited = 0;
+  for (auto* actor = Battle_actors[0]; actor != nullptr; actor = actor->next) {
+    RequireScriptedNavigation(++visited <= std::size(Battle_actors),
+                              "actor list is cyclic or exceeds native storage");
+    if ((actor->commandState & kSuspendedActorCommands) != 0) continue;
+    RequireActorId(actor->id);
+    const auto* base = frame.actors[actor->id];
+    auto* route =
+        base != nullptr
+            ? static_cast<Battle_Ai_ActorAiState*>(base->nativePointer18C)
+            : nullptr;
+    frame.lastBudgetTick = Core_ElapsedFrameCounterTicks();
+    if (route == nullptr) continue;
+    const auto* model = Actors_actorRecords[actor->id];
+    RequireScriptedNavigation(
+        model != nullptr && frame.tileFlags != nullptr &&
+            route->actorId == actor->id,
+        "active route requires model, map and actor identity");
+    PrepareScriptedRoute(*route, model->instance);
+    RequireTile(model->instance.currentTileX, model->instance.currentTileZ);
+    const auto area =
+        static_cast<u_char>(frame.tileFlags[model->instance.currentTileZ]
+                                           [model->instance.currentTileX] &
+                            kGroundAreaMask);
+    route->ground_area = route->reserved154Area = area;
+    frame.directionCache[0] = 0;
+    // The source clears guest pointer tag bits at actor byte3, not native
+    // links.
+    if (ScriptedRouteReached(*route)) {
+      Battle_Ai_IssueActorCommand(route, 0);
+      Battle_Ai_FreeActorNavigationOverride(route->actorId);
+    }
+  }
+  Battle_Ai_SaveMovementRandomState();
 }

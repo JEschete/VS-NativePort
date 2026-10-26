@@ -21,6 +21,8 @@ void Battle_Ai_UpdateRouteGateAvailability(void);
 int Battle_Ai_HasActorNavigationState(int);
 int Battle_Ai_ActorNavigationOverrideStatus(int);
 void Battle_Ai_CopyActorNavigationOverrideState(int, Battle_Ai_ActorAiState*);
+void Battle_Ai_SetActorNavigationOverride(int actor_id, int x, int z);
+void Battle_Ai_UpdateActorNavigationOverrides(void);
 
 #ifdef __cplusplus
 }

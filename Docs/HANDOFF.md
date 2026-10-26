@@ -9,6 +9,19 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F01805/F01806's existing scripted-navigation draft is now source-reviewed
+  and locally verified against `7C7E0.s:216-421`. It preserves full native
+  allocation, original repeat-request base/route aliasing, countdowns,
+  signed arrival arithmetic, locomotion dispatch and route release.
+  Focused19/197,756 and full Debug/Release993/9,506,238 each pass; three
+  isolated invalid-identity/map/list controls diagnose and exit3.
+  Port130/naming32,621 view fields and focused/default quality0 new pass.
+  Two generations are stable across1,030 native source/header files.
+  Isolated normal-speed New Game reaches MAP001 and tick6000 with4,586
+  scripted-control frames,0 engine errors and complete tracing. This is
+  component/production-loop evidence, not all-cutscene movement parity.
+  The local audit has5 gaps; publication and exact CI remain separate gates.
+  See the [scripted-navigation checkpoint](HANDOFF_HISTORY.md#scripted-navigation-draft-verification-2026-10-26).
 - #42 F01694 now updates native route availability from visible moving
   platforms while retaining the original mutable shift operands. The source
   domain audit finds418 valid room auxiliary sections and no authored

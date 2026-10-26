@@ -4775,7 +4775,7 @@ T00532.107,T00532,func_800E78F4_t,107,unk15A,1,short,,,layout:upstream,targetZ,T
 T00532.108,T00532,func_800E78F4_t,108,unk15C,1,u_char,,,layout:upstream,movementTarget,Actor the movement heads for; 16 for none,med,source:upstream:6E644.c:1110
 T00532.109,T00532,func_800E78F4_t,109,unk15D,1,u_char,,,layout:upstream,opaque15D,"Used, but its meaning is not established",low,source:upstream:6E644.c:3231
 T00532.110,T00532,func_800E78F4_t,110,unk15E,1,u_short,,,layout:upstream,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:upstream:6E644.c:1042
-T00532.111,T00532,func_800E78F4_t,111,unk160,1,char[8],,,layout:upstream,reserved160,Not read through this view,low,declaration-only;source:upstream:6E644.c:280
+T00532.111,T00532,func_800E78F4_t,111,unk160,1,char[8],,,layout:upstream,reserved160,Packed scripted target X/Z in the first word; the remaining word is unresolved,high,source:upstream:6E644.c:280;source:7C7E0.s:250;native-alias:scriptedTargetXZ+0;remaining-word:unresolved
 T00532.112,T00532,func_800E78F4_t,112,unk168,1,vs_battle_movementPosition,,,layout:upstream,destination,Destination tile,high,source:upstream:6E644.c:1104
 T00532.113,T00532,func_800E78F4_t,113,unk16C,1,char[4],,,layout:upstream,reserved16C,Not read through this view,low,declaration-only;source:upstream:6E644.c:282
 T00532.114,T00532,func_800E78F4_t,114,unk170,1,vs_battle_movementPosition,,,layout:upstream,nextTile,Next tile on the way,high,source:upstream:6E644.c:3110

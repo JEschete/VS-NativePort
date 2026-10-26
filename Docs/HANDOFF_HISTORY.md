@@ -11,6 +11,54 @@ Use [HANDOFF.md](HANDOFF.md) for the current checkpoint and
 Keep the commands, revisions, limits and local evidence paths below; archival
 does not establish fresh verification or authorize deleting the referenced data.
 
+## Scripted-navigation draft verification (2026-10-26)
+
+Resumed from `d692407e08e462fe4048401ee7802c91c5ae55e7` with the owner's
+existing F01805/F01806 draft and unrelated asset-pipeline, solution, ignore
+and reference edits present. The draft's native implementations, callers,
+original module bindings, generator ownership, field alias and tests were
+reviewed against `7C7E0.s:216-421` and the read-only PC reference. The original
+repeat-request path copies onto the base state rather than the old route;
+this is deliberately retained. Guest pointer tag bits and scratch-stack
+switching are not applied to native pointers.
+
+Fresh commands/results:
+
+- `test-native.cmd Debug "[scripted-override],[navigation-override],[route-availability]"`
+  built all hosts, but the wrapper split the selection: no tests ran.
+  This attempt is not counted as test evidence.
+- `build\Debug\VS.Tests.exe "[scripted-override],[navigation-override],[route-availability]"`
+  passes19 cases/197,756 assertions. The middle tag has no matching cases;
+  the scripted-override and route-availability selections ran.
+- `build\Debug\VS.Tests.exe` and `test-native.cmd Release` each pass
+  993 cases/9,506,238 assertions.
+- Hidden `[.override-actor-identity]`, `[.override-missing-map]` and
+  `[.override-cyclic-list]` each emit the intended diagnostic and exit3.
+  An earlier misspelled cycle selector ran no tests and is excluded.
+- `quality-native.cmd --files Native\Game\src\Battle\Ai\NavigationPrimitives.cpp
+  Native\Tests\src\NavigationOverrideTests.cpp --tidy` and the default
+  `quality-native.cmd` both report0 findings/0 new.
+- Port unittest discovery passes130; naming discovery passes32;
+  `tools\port\check_native_views.py` checks621 fields with0 mismatches.
+- Two `copy_to_native.py` runs produce identical hashes across1,030 native
+  source/header files, preserving the60 distinct owned implementation paths
+  and the unrelated solution/ignore/asset-pipeline files.
+
+The matching Debug executable/PDB/DLLs were copied to the isolated ignored
+`build\quality\issue42-final\nav-native` directory. Actual arguments were
+`--disc <local cue> --data <Native\data> --scripted --speed 1 --frames 6000
+--press 1000:Start,1200:Up,1300:Circle`. The GUI launch initially returned
+before process termination; the existing PID was awaited, not relaunched.
+Session1793057955081624-0 reaches zone1/room0 at1415, executes4,586 frames
+in scripted-control mode3 and ends at6000 with exit0,0 engine errors and
+`trace_failed=false`. No live owner process or log was modified.
+
+Evidence stays under `build\quality\issue42-final`. This verifies the
+component and production-loop slice, not all-scene movement, visual parity
+or compatibility retirement. F01769's timing dependency remains separately
+open. The audit has181/186 implemented entries and5 gaps; issue checkboxes
+still require publication and exact-revision CI.
+
 ## Moving-platform route availability (2026-10-26)
 
 F01694 continues the owner-directed non-MA work after

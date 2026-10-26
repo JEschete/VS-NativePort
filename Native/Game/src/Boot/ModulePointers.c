@@ -3286,6 +3286,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&Audio_Seq_unusedStateFlags, sizeof Audio_Seq_unusedStateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&Audio_Seq_unusedInventoryIndices, sizeof Audio_Seq_unusedInventoryIndices, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E527Cu, 0u, (void*)&Battle_Ai_SetActorNavigationOverride, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E5308u, 0u, (void*)&Battle_Ai_UpdateActorNavigationOverrides, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC638u, 0u, (void*)&Battle_Ai_UpdateRouteGateAvailability, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6EB0u, 0u, (void*)&Battle_Ai_ReleaseActorAiContactOccupancy, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800F98F8u, 0u, (void*)&Effects_Plg073_TiledRing, 0u, 0u, 0u},

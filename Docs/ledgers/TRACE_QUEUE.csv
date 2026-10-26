@@ -1159,7 +1159,7 @@ T00532.097,reserved,4,Battle::Ai::ActorAiState.reserved132,unk132,0x132,Not read
 T00532.102,reserved,4,Battle::Ai::ActorAiState.reserved13E,unk13E,0x13E,Not read through this view,,*Battle::Ai::actorAiStates+0x13E,
 T00532.016,reserved,4,Battle::Ai::ActorAiState.reserved14,unk14,0x14,Not read through this view,,*Battle::Ai::actorAiStates+0x14,
 T00532.105,reserved,4,Battle::Ai::ActorAiState.reserved154,unk154,0x154,Not read through this view,,*Battle::Ai::actorAiStates+0x154,
-T00532.111,reserved,4,Battle::Ai::ActorAiState.reserved160,unk160,0x160,Not read through this view,,*Battle::Ai::actorAiStates+0x160,
+T00532.111,reserved,4,Battle::Ai::ActorAiState.reserved160,unk160,0x160,Packed scripted target X/Z in the first word; the remaining word is unresolved,,*Battle::Ai::actorAiStates+0x160,
 T00532.113,reserved,4,Battle::Ai::ActorAiState.reserved16C,unk16C,0x16C,Not read through this view,,*Battle::Ai::actorAiStates+0x16C,
 T00532.115,reserved,4,Battle::Ai::ActorAiState.reserved174,unk174,0x174,Not read through this view,,*Battle::Ai::actorAiStates+0x174,
 T00532.121,reserved,4,Battle::Ai::ActorAiState.reserved18C,unk18C,0x18C,Not read through this view,,*Battle::Ai::actorAiStates+0x18C,

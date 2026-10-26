@@ -498,7 +498,7 @@ T00532.107,targetZ,Target Z,med,source:upstream:6E644.c:3539
 T00532.108,movementTarget,Actor the movement heads for; 16 for none,med,source:upstream:6E644.c:1110
 T00532.109,opaque15D,"Used, but its meaning is not established",low,source:upstream:6E644.c:3231
 T00532.110,movementFlags,"Movement flags (bits 1-2 flight, bit 3 planned)",low,source:upstream:6E644.c:1042
-T00532.111,reserved160,Not read through this view,low,declaration-only;source:upstream:6E644.c:280
+T00532.111,reserved160,Packed scripted target X/Z in the first word; the remaining word is unresolved,high,source:upstream:6E644.c:280;source:7C7E0.s:250;native-alias:scriptedTargetXZ+0;remaining-word:unresolved
 T00532.112,destination,Destination tile,high,source:upstream:6E644.c:1104
 T00532.113,reserved16C,Not read through this view,low,declaration-only;source:upstream:6E644.c:282
 T00532.114,nextTile,Next tile on the way,high,source:upstream:6E644.c:3110

@@ -44,6 +44,7 @@ NATIVE_FIELD_ALIASES = {
         "fine_status": 0x123,
         "ground_area": 0x132,
         "movement_wait": 0x156,
+        "scriptedTargetXZ": 0x160,
         "navigationFlags": 0x190,
         "detour_tile_bytes": 0x194,
         "detour_repeats": 0x198,
@@ -170,6 +171,13 @@ def rebase(tid: str, text: str, fields: list[tuple[str, dict]]) -> str:
             "    };",
         )
     if tid == 'T00532':
+        padding = 'char reserved160[8];'
+        if text.count(padding) != 1:
+            raise ValueError('T00532: scripted path target storage not found')
+        text = text.replace(
+            padding,
+            'union { char reserved160[8]; u_int scriptedTargetXZ; };',
+        )
         # Name the navigation word after widening its adjacent pointer slot.
         padding = 'char reserved18C_190[10];'
         if text.count(padding) != 1:

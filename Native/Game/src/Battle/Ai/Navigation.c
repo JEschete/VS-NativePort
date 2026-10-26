@@ -642,18 +642,6 @@ done:
     return -1;
 }
 
-// decomp: BATTLE.PRG func_800E527C (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
-void Battle_Ai_SetActorNavigationOverride(int, int, int)
-{
-    VS_UNPORTED("Battle::Ai::SetActorNavigationOverride");
-}
-
-// decomp: BATTLE.PRG func_800E5308 (src/BATTLE/BATTLE.PRG/7C7E0.s:0) [asm-file: not yet ported]
-void Battle_Ai_UpdateActorNavigationOverrides(void)
-{
-    VS_UNPORTED("Battle::Ai::UpdateActorNavigationOverrides");
-}
-
 // decomp: BATTLE.PRG func_800E5EC0 (src/BATTLE/BATTLE.PRG/7CD68.c:760)
 void Battle_Ai_FloodFillAiTerrainHeights(int arg0, int arg1, int arg2)
 {

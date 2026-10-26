@@ -1066,7 +1066,7 @@ typedef struct Battle_Ai_ActorAiState {
     /* 0x15C */ u_char movementTarget;
     /* 0x15D */ u_char opaque15D;
     /* 0x15E */ u_short movementFlags;
-    /* 0x160 */ char reserved160[8];
+    /* 0x160 */ union { char reserved160[8]; u_int scriptedTargetXZ; };
     /* 0x168 */ Battle_Ai_TilePosition destination;
     /* 0x16C */ char reserved16C[4];
     /* 0x170 */ Battle_Ai_TilePosition nextTile;

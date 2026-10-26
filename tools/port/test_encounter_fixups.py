@@ -12,6 +12,33 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_scripted_navigation_uses_full_native_records_and_explicit_aliases(self):
+        root = Path(__file__).resolve().parents[2]
+        owned = self.owned_items()
+        for identity, address in (("F01805", 0x800E527C), ("F01806", 0x800E5308)):
+            self.assertEqual(
+                owned[identity]["path"],
+                r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
+            )
+            self.assertIn(
+                ("BATTLE/BATTLE.PRG", address, identity),
+                copy_fixups.MODULE_FUNCTION_ENTRIES,
+            )
+        self.assertEqual(
+            native_views.NATIVE_FIELD_ALIASES["T00532"]["scriptedTargetXZ"], 0x160
+        )
+        source = (
+            root / r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertIn("std::construct_at(storage)", source)
+        self.assertIn("Core_Memory_AllocateFromHighEnd(sizeof(Battle_Ai_ActorAiState))", source)
+        self.assertIn("auto* destination = state;", source)
+        self.assertIn("destination->scriptedTargetXZ = target;", source)
+        self.assertIn("std::bit_cast<std::int32_t>(squared)", source)
+        self.assertIn("Battle_Ai_FreeActorNavigationOverride(route->actorId)", source)
+        self.assertIn("Battle_Ai_SaveMovementRandomState();", source)
+        self.assertNotIn("actor[3]", source)
+
     def test_route_availability_keeps_original_shift_mutation_and_native_bounds(self):
         root = Path(__file__).resolve().parents[2]
         self.assertEqual(
@@ -304,9 +331,14 @@ class EncounterFixupTests(unittest.TestCase):
         source = (
             root / r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp"
         ).read_text(encoding="utf-8")
-        self.assertIn("Battle_Ai_BuildAiSpecialTerrainHeights();", source)
-        self.assertNotIn("AllocateFromHighEnd", source)
-        self.assertNotIn("Core_ScratchBase", source)
+        bodies = audit_assembly_gaps.definitions(
+            source, {"Battle_Ai_BuildAiTerrainHeightsWithWorkspace"}
+        )
+        self.assertEqual(len(bodies), 1)
+        body = bodies[0].body
+        self.assertIn("Battle_Ai_BuildAiSpecialTerrainHeights();", body)
+        self.assertNotIn("AllocateFromHighEnd", body)
+        self.assertNotIn("Core_ScratchBase", body)
 
     def test_segment_trace_owns_typed_geometry_and_the_live_boolean_consumer(self):
         root = Path(__file__).resolve().parents[2]

@@ -20,7 +20,6 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/GroundNavigation.h"
-#include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
