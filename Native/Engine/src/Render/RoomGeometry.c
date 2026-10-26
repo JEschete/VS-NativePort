@@ -59,13 +59,6 @@ int Render_LinkRoomPolygonByDepth()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_800981B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Render_SetRoomPolygonScreenBounds()
-{
-    VS_UNPORTED("Render::SetRoomPolygonScreenBounds");
-    return 0;
-}
-
 // decomp: BATTLE.PRG func_80098C3C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
 int Render_InterpolateRoomLightTriangle()
 {

@@ -415,6 +415,45 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Shared native room screen rectangle (#187/#42, 2026-10-25)
+
+F00756 (`func_800981B8`, original2EA3C.s:1101) now updates one signed16
+screen rectangle used by both ordinary and subdivided room polygon
+emitters. Source func80098014 compares half-open bounds with original
+default0/0/320/224. Actual red fixtures project all Y into224..255:
+ordinary triangle/quad paths wrongly emit40/52 bytes under their
+hardcoded240 bottom while the subdivided paths reject. That test has
+2 failed assertions out of148, not a guessed screenshot artifact.
+
+The ordinary-only default240 is intentionally corrected to the original
+224-row room clip. Physical framebuffer/sky/camera offsets and the near/
+far/LOD and memory-bound rules are unchanged. Callers may explicitly set
+a240-bottom rectangle; tests exercise that supported behavior too. The
+native setter wraps all four parameters exactly as original halfword
+instruction immediates, without modifying code or inventing fallback
+bounds. Both emitters call the same projected-bounds predicate.
+
+80 additional production packet checks cover all four edges and
+equalities, tight full windows, wholly hidden/overlapping windows,
+signed16 truncation (including negative halves), explicit alternate
+rectangles, default224 rejection and memory canaries across ordinary/
+subdivided triangles and quads. The full room selection passes6 cases/
+248 assertions in each configuration. These are emitted outputs, not
+only stored-state checks.
+
+Full Debug/Release suites pass800 cases/3,532,434 assertions each;97
+copier/audit controls pass. Default quality is0 new; focused analysis
+retains8 existing LegacyGpuTests findings and adds0, with no baseline
+change. Both hosts link. Two copier runs preserve306 protected paths
+and repeat identically, changing only generated RoomGeometry.c/.h.
+Private `clip187-*` retains original source, actual red/green and
+ownership evidence.
+
+This advances130/186 original entries,56 remaining. No owner-visible
+popping cause, every-scene audiovisual parity, whole renderer C++
+promotion or compatibility retirement is claimed. Publication and
+exact CI are recorded on#187/#42.
+
 ### Native room far-depth setting (#42, 2026-10-25)
 
 F00754 (`func_8009817C`, original2EA3C.s:1078) now updates the existing

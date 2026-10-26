@@ -34,6 +34,8 @@ void Render_BuildScaleCompensatedRoomView(VECTOR* position, VECTOR* angles,
 void Render_DrawRoomGeometry(void* data, int mode);
 void Render_SetRoomPolygonNearClip(int depth);
 void Render_SetRoomPolygonFarClip(int depth);
+void Render_SetRoomPolygonScreenBounds(int left, int top, int right,
+                                       int bottom);
 void Render_SetRoomTextureLodDepth(int depth);
 void Render_DrawSkyDome(void* data);
 void Render_GetProjectionScreenOffset(Render_ScreenOffset* offset);

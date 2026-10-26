@@ -10,6 +10,22 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_room_screen_bounds_share_the_original_predicate(self):
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F00756"]["path"], r"Native\Engine\src\Render\RoomDraw.c"
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(source.count("OutsideScreenBounds(&projected)"), 2)
+        for edge in ("left", "top", "right", "bottom"):
+            self.assertIn(
+                f"room_screen_bounds.{edge} = Core_Math_WrapSigned16((uint32_t){edge});",
+                source,
+            )
+
     def test_room_far_depth_owns_both_packet_emission_paths(self):
         owned = self.owned_items()
         self.assertEqual(

@@ -18,7 +18,6 @@ int Render_SubdivideRoomQuad();
 int Render_InterpolateRoomVertexMidpoint();
 int Render_IsRoomPolygonOnScreen();
 int Render_LinkRoomPolygonByDepth();
-int Render_SetRoomPolygonScreenBounds();
 int Render_InterpolateRoomLightTriangle();
 void Render_TintRoomGeometryPrimitives(void*, void*, Field_RoomTint*, int);
 int Render_TintRoomPrimitiveColor();

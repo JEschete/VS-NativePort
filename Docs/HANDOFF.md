@@ -9,6 +9,23 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #187/#42 F00756 now uses one signed16 native room clip rectangle in both
+  ordinary/subdivided triangle/quad emitters, reaching130/186 original
+  entries and56 gaps (21 C/C++ references,25 assembly-only,10 missing
+  listings). Original2EA3C.s:1101 patches the same half-open predicate in
+  func80098014. Red production fixture has2 failures/148 assertions:
+  ordinary40/52-byte packets escape default y224..255 while subdivision
+  rejects them. Original default320x224 is intentionally restored, correcting
+  ordinary-only240; physical framebuffer, sky/camera offsets, near/far/LOD
+  and memory bounds are unchanged.80 added packet checks cover all four
+  edges/equality, tight/overlapping/hidden rectangles, signed halfword wrap,
+  explicit240-bottom support and canaries; room6/248 passes both builds.
+  Full Debug/Release800/3,532,434 each,97 copier controls, default0-new and
+  focused8 existing/0-new quality pass. Two generations preserve306 paths
+  and repeat identically, changing only RoomGeometry.c/.h. Private
+  `clip187-*`; no owner-visible popping cause, every-scene parity, whole
+  renderer promotion or compatibility-retirement claim. Publication and
+  exact CI are on#187/#42.
 - #42's F00754 far-depth limit is now a typed native RoomDraw setting,
   reaching129/186 original entries and57 gaps (22 C/C++ references,
   25 assembly-only,10 missing listings). Original2EA3C.s:1078 patches a

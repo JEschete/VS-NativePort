@@ -17,6 +17,8 @@ extern "C" {
 }
 static_assert(
     std::is_same_v<decltype(&Render_SetRoomPolygonFarClip), void (*)(int)>);
+static_assert(std::is_same_v<decltype(&Render_SetRoomPolygonScreenBounds),
+                             void (*)(int, int, int, int)>);
 
 extern "C" void* Render_legacyPrimitiveBuffers[2];
 extern "C" int Render_frameBuf;
@@ -334,6 +336,80 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
     }
   }
   Render_SetRoomPolygonFarClip(2047);
+  geometry.group.view.t[1] = 480;
+  for (bool is_quad : {false, true}) {
+    geometry.triangles = is_quad ? 0 : 1;
+    geometry.quads = is_quad ? 1 : 0;
+    geometry.polygon[15] = is_quad ? 0x3D : 0x35;
+    for (int mode : {0, 1}) {
+      geometry.group.flags = 0x800u | (mode ? 0x6000u : 0);
+      ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+      frame->primitiveCursor = buffer;
+      Render_DrawRoomGeometry(&geometry, mode);
+      CHECK(frame->primitiveCursor == buffer);
+    }
+  }
+  geometry.group.view.t[1] = 0;
+  enum class ClipResult { kHidden, kOverlap, kFull };
+  struct ClipCase {
+    int left;
+    int top;
+    int right;
+    int bottom;
+    ClipResult expected;
+  };
+  constexpr std::array kClipCases{
+      ClipCase{0, 0, 320, 224, ClipResult::kFull},
+      ClipCase{144, 104, 176, 136, ClipResult::kFull},
+      ClipCase{175, 0, 320, 224, ClipResult::kOverlap},
+      ClipCase{176, 0, 320, 224, ClipResult::kHidden},
+      ClipCase{0, 0, 144, 224, ClipResult::kHidden},
+      ClipCase{0, 0, 145, 224, ClipResult::kOverlap},
+      ClipCase{0, 135, 320, 224, ClipResult::kOverlap},
+      ClipCase{0, 136, 320, 224, ClipResult::kHidden},
+      ClipCase{0, 0, 320, 104, ClipResult::kHidden},
+      ClipCase{0, 0, 320, 105, ClipResult::kOverlap},
+      ClipCase{0x10090, 0x10068, 0x100B0, 0x10088, ClipResult::kFull},
+      ClipCase{0x8000, 0x8000, 32767, 32767, ClipResult::kFull},
+      ClipCase{0, 0, 0x8000, 224, ClipResult::kHidden},
+      ClipCase{0, 0, 320, 0x8000, ClipResult::kHidden}};
+  for (bool is_quad : {false, true}) {
+    geometry.triangles = is_quad ? 0 : 1;
+    geometry.quads = is_quad ? 1 : 0;
+    geometry.polygon[15] = is_quad ? 0x3D : 0x35;
+    for (int mode : {0, 1}) {
+      geometry.group.flags = 0x800u | (mode ? 0x6000u : 0);
+      const std::size_t full_bytes =
+          mode == 0 ? (is_quad ? sizeof(POLY_GT4) : sizeof(POLY_GT3))
+                    : (is_quad ? 4 * sizeof(POLY_GT4) + 4 * sizeof(POLY_GT3)
+                               : 7 * sizeof(POLY_GT3));
+      for (const auto& clip : kClipCases) {
+        Render_SetRoomPolygonScreenBounds(clip.left, clip.top, clip.right,
+                                          clip.bottom);
+        ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+        frame->primitiveCursor = buffer;
+        Render_DrawRoomGeometry(&geometry, mode);
+        if (clip.expected == ClipResult::kFull) {
+          CHECK(frame->primitiveCursor == buffer + full_bytes);
+        } else if (clip.expected == ClipResult::kHidden) {
+          CHECK(frame->primitiveCursor == buffer);
+        } else {
+          const auto* cursor =
+              static_cast<unsigned char*>(frame->primitiveCursor);
+          CHECK(cursor > buffer);
+          CHECK(cursor <= buffer + full_bytes);
+        }
+      }
+      geometry.group.view.t[1] = 480;
+      Render_SetRoomPolygonScreenBounds(0, 0, 320, 240);
+      ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+      frame->primitiveCursor = buffer;
+      Render_DrawRoomGeometry(&geometry, mode);
+      CHECK(frame->primitiveCursor != buffer);
+      geometry.group.view.t[1] = 0;
+    }
+  }
+  Render_SetRoomPolygonScreenBounds(0, 0, 320, 224);
   CHECK(memory.front() == 0xA5);
   CHECK(memory.back() == 0xA5);
   Render_legacyPrimitiveBuffers[0] = savedBuffer;

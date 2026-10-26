@@ -179,6 +179,23 @@ static int room_near_depth = kDefaultNearDepth;
 static int room_far_depth = kLastOrderingSlot;
 static unsigned room_lod_depth = kDefaultLodDepth;
 
+typedef struct RoomScreenBounds {
+  int left;
+  int top;
+  int right;
+  int bottom;
+} RoomScreenBounds;
+
+static RoomScreenBounds room_screen_bounds = {0, 0, kViewportWidth,
+                                              kViewportHeight};
+
+static int OutsideScreenBounds(const RoomScreenBounds* projected) {
+  return projected->right < room_screen_bounds.left ||
+         projected->bottom < room_screen_bounds.top ||
+         projected->left >= room_screen_bounds.right ||
+         projected->top >= room_screen_bounds.bottom;
+}
+
 // decomp: BATTLE.PRG func_80097F70 (src/BATTLE/BATTLE.PRG/2EA3C.s).
 static RoomVertex Midpoint(const RoomVertex* first, const RoomVertex* second) {
   RoomVertex midpoint = {0};
@@ -267,8 +284,8 @@ static int EmitSubdividedPolygon(const RoomVertex* vertices, int corners,
     if (screen_y < top) top = screen_y;
     if (screen_y > bottom) bottom = screen_y;
   }
-  if (right < 0 || bottom < 0 || left >= kViewportWidth ||
-      top >= kViewportHeight || depth < room_near_depth) {
+  const RoomScreenBounds projected = {left, top, right, bottom};
+  if (OutsideScreenBounds(&projected) || depth < room_near_depth) {
     return 0;
   }
   depth += (int16_t)(material->flags >> kPackedCoordinateBits);
@@ -396,8 +413,8 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
     if (y < top) top = y;
     if (y > bottom) bottom = y;
   }
-  if (right < 0 || bottom < 0 || left >= kViewportWidth || top >= kDrawHeight ||
-      depth < room_near_depth) {
+  const RoomScreenBounds projected = {left, top, right, bottom};
+  if (OutsideScreenBounds(&projected) || depth < room_near_depth) {
     return 0;
   }
   const Core_GteWord winding =
@@ -515,6 +532,15 @@ void Render_SetRoomPolygonNearClip(int depth) {
 // decomp: func_8009817C (src/BATTLE/BATTLE.PRG/2EA3C.s:1078).
 void Render_SetRoomPolygonFarClip(int depth) {
   room_far_depth = Core_Math_WrapSigned16((uint32_t)depth);
+}
+
+// decomp: func_800981B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1101).
+void Render_SetRoomPolygonScreenBounds(int left, int top, int right,
+                                       int bottom) {
+  room_screen_bounds.left = Core_Math_WrapSigned16((uint32_t)left);
+  room_screen_bounds.top = Core_Math_WrapSigned16((uint32_t)top);
+  room_screen_bounds.right = Core_Math_WrapSigned16((uint32_t)right);
+  room_screen_bounds.bottom = Core_Math_WrapSigned16((uint32_t)bottom);
 }
 
 // decomp: BATTLE.PRG func_80098194 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file:
