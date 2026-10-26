@@ -7,9 +7,9 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **66** (66 stubs and 0 partial implementations).
+- Open native entries: **64** (64 stubs and 0 partial implementations).
 - Matching C/C++ reference bodies located: **27**.
-- Assembly located, but no matching C body located: **29**.
+- Assembly located, but no matching C body located: **27**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
 [ASSEMBLY_GAPS.csv](ASSEMBLY_GAPS.csv) contains **every open entry**, with its
@@ -30,8 +30,6 @@ and instantiation bindings rather than counted as missing C functions.
 | F00761 | `Core::Math::BuildEulerRotationMatrix` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1499` |
 | F00762 | `Core::Math::LookupRotationSineCosine` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1597` |
 | F00763 | `Core::Math::MultiplyRotationMatrixInPlace` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1664` |
-| F00764 | `Core::Math::CosineFixedPoint` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1731` |
-| F00765 | `Core::Math::SineFixedPoint` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1734` |
 | F01017 | `Core::Math::LookupRotationTrigQuadrant` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\48C7C.s:188` |
 | F01772 | `Core::Math::SquaredTileDistanceFromComponents` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\7BDD4.s:35` |
 | F03399 | `Core::Math::LookupSineCosinePair` | `resources\rood-reverseWin\src\SLUS_010.40\31724.s:147` |
@@ -141,7 +139,7 @@ as behaviorally complete. No native gameplay issue is closed by this audit.
 
 | Reference | Revision | Production source files scanned | Source SHA-256 |
 | --- | --- | --- | --- |
-| `rood-reverseWin` | `260f121b65f92d1893175b1698a9979e0806a13d` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
+| `rood-reverseWin` | `1b9284a0b0dc69f0942385d573f72ef5c85e1301` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
 | `rood-reverse` | `4edbdbf5a797c733dd7f33a52c400de69219401c` | 393 | `60b2ce44d09822a777e76caac7f2ef0236a8e73cb434b9da27c0bb8973f94096` |
 | `rood-reverse-noprompt` | `39821e4fc0353dc89855f5f29fd678d71545daa2` | 389 | `e3e5d73ccd7c08971c9558baad6e6a2df2e2fe0bcd9b8961e133476e86db7a8c` |
 | `rood-boi` | `e59320caedba5855cb050f24f3ba007204faea78` | 758 | `fa68a5f07470a4f970c81453cc605ecad82f8d17fc274168e5bf5eeba5e9a1d8` |

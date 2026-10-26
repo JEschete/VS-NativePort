@@ -66,6 +66,8 @@ NATIVE_HELPER_HEADERS = {
 }
 
 NATIVE_FUNCTION_REDIRECTS = {
+    "F00764": ("Core_Gte_Cos", r"Native\Engine\src\Core\Gte.cpp"),
+    "F00765": ("Core_Gte_Sin", r"Native\Engine\src\Core\Gte.cpp"),
     "F03397": ("Core_Gte_RotMatrixYXZ", r"Native\Engine\src\Core\Gte.cpp"),
     "F03398": ("Core_Gte_RotMatrix", r"Native\Engine\src\Core\Gte.cpp"),
     "F03407": ("Core_Gte_OuterProduct0", r"Native\Engine\src\Core\Gte.cpp"),

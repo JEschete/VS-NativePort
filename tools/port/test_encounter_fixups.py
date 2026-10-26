@@ -10,6 +10,22 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_fixed_trig_entries_redirect_to_existing_typed_native_bodies(self):
+        for identifier, name in (
+            ("F00764", "Core_Gte_Cos"),
+            ("F00765", "Core_Gte_Sin"),
+        ):
+            self.assertEqual(
+                copy_fixups.NATIVE_FUNCTION_REDIRECTS[identifier],
+                (name, r"Native\Engine\src\Core\Gte.cpp"),
+            )
+        root = Path(__file__).resolve().parents[2]
+        header = (root / r"Native\Engine\src\Core\Math\Trig.h").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("#define Core_Math_CosineFixedPoint Core_Gte_Cos", header)
+        self.assertIn("#define Core_Math_SineFixedPoint Core_Gte_Sin", header)
+
     def test_tile_translation_callers_preserve_the_full_actor_id_abi(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / r"Native\Game\src\Actors\Movement.c").read_text(

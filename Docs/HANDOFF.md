@@ -9,6 +9,24 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42's F00764/F00765 fixed cosine/sine now use the existing canonical native
+  aliases, reaching122/186 original entries complete and64 remaining
+  (27 C/C++ references,27 assembly-only,10 missing listings). Original
+  2EA3C.s:1731/1735-1766 establishes wrapping, cosine phase and signed32
+  negation. All4096 original signed sine/cosine pairs match the actual native
+  LE32 output fingerprint8E620CA359EB4481; no table payload is committed.
+  Red ABI checks reject both old int() stubs. Final5 cases/32,819 assertions
+  cover alias identity, fingerprint, octants, every angle's range/phase/sign/
+  period and extreme int wrapping. Full Debug/Release790/3,424,191 each,
+  92 copier controls and0-new focused/default quality pass; both hosts link.
+  Two generations preserve302 protected paths and repeat identically,
+  changing only Trig.c/.h and ModulePointers.c. M2C private inputs normalize
+  .nop spelling and preserve cosine fallthrough; its erroneous unsigned16
+  negative-result inference is rejected against MIPS and the existing ending
+  helper. No new trig algorithm, ending change, whole GTE C++ promotion,
+  computed-register matrix certification or compatibility retirement is
+  claimed. Private `trig42-*`; original186 IDs/order and prior120 checks are
+  retained. Publication and exact CI are recorded on#42.
 - #42's F01801/F01802/F01803 navigation leaves are now owned in the existing
   NavigationPrimitives API. Original7C7E0.s:122-193 and read-only rood-boi
   e59320ca actor_update.c:57-90 establish explicit actor IDs, missing2/

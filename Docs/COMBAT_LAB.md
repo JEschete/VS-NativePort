@@ -415,6 +415,45 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Canonical fixed trigonometry exports (#42, 2026-10-25)
+
+F00764/F00765 now use the established native-function redirect mechanism to
+alias the existing typed `Core_Gte_Cos`/`Core_Gte_Sin` bodies. Original
+2EA3C.s:1731/1735-1766 and Ending D4.c:187 establish the same12-bit angle
+wrapping, quarter-wave samples, cosine phase and signed32 negation.
+Read-only SLUS table bytes at199184 have SHA256
+5334d250971879c21613208379a26d7c3a66fee2ea6f2e797af707da3d992660.
+All4096 canonical samples match the existing native formula, so no duplicate
+lookup implementation or change to the working ending helper is warranted.
+
+Red ABI checks reject both old int() stubs. Actual native Debug/Release
+`VS.Tests.exe "[fixed-trig]" --reporter compact` passes5 cases/32,819
+assertions. This includes the full original signed-output fingerprint:
+all4096 ordered sine/cosine pairs, each signed32 little endian, yield
+FNV1a64 **8E620CA359EB4481**. Tests store only that non-reconstructive
+fingerprint, not a copied table or other disc-derived data. Additional
+controls cover alias identity, mathematical octants, every angle's range/
+phase/sign/period and minimum/maximum int wrapping without signed overflow.
+The computed-register rotation dispatchers remain separate unimplemented
+entries; they are not certified by these scalar controls.
+
+The raw M2C attempt ignores the reference's .nop spelling and reports a
+missing return delay slot. Private extraction normalizes it to nop and
+retains cosine's actual fallthrough. Both functions then decompile, but
+M2C incorrectly narrows the negated result to unsigned16. Original `negu`
+and the existing signed ending routine are authoritative; no blind M2C
+output is copied. Raw failure, derived inputs, successful C, source/table
+hashes and original-output fingerprint provenance are private `trig42-*`.
+
+Full Debug/Release suites pass790 cases/3,424,191 assertions each;92
+copier/audit controls and focused/default quality pass with0 new findings.
+Both shipping hosts link. Two copier runs preserve302 protected paths
+and repeat identically, changing only Trig.c/.h and ModulePointers.c.
+The original cohort advances122/186 with64 gaps remaining, preserving all
+prior120 checks and the original186 IDs/order. No every-scene fidelity,
+whole GTE C++ promotion or compatibility retirement follows from this
+bounded scalar-alias verification; publication and exact CI are on#42.
+
 ### Navigation presence, status and copy leaves (#42, 2026-10-25)
 
 F01801/F01802/F01803 are now owned in the existing NavigationPrimitives API.

@@ -9,20 +9,6 @@ int Core_Math_LookupRotationSineCosine()
     return 0;
 }
 
-// decomp: BATTLE.PRG func_80098AB4 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Core_Math_CosineFixedPoint()
-{
-    VS_UNPORTED("Core::Math::CosineFixedPoint");
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_80098AB8 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Core_Math_SineFixedPoint()
-{
-    VS_UNPORTED("Core::Math::SineFixedPoint");
-    return 0;
-}
-
 // decomp: BATTLE.PRG _atan2FixedPoint (src/BATTLE/BATTLE.PRG/4A0A8.c:4177)
 int Core_Math_FixedAtan2(int arg0, int arg1) { return Core_Gte_Atan2(arg0 >> 6, arg1 >> 6); }
 

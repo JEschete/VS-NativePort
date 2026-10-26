@@ -1076,8 +1076,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8009874Cu, 0u, (void*)&Core_Math_BuildEulerRotationMatrix, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800988BCu, 0u, (void*)&Core_Math_LookupRotationSineCosine, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800989B8u, 0u, (void*)&Core_Math_MultiplyRotationMatrixInPlace, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098AB4u, 0u, (void*)&Core_Math_CosineFixedPoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098AB8u, 0u, (void*)&Core_Math_SineFixedPoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098B1Cu, 0u, (void*)&Field_CallRoomEntryPoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098B38u, 0u, (void*)&Render_SampleRoomLighting, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098C3Cu, 0u, (void*)&Render_InterpolateRoomLightTriangle, 0u, 0u, 0u},
