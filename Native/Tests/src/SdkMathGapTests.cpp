@@ -774,3 +774,42 @@ TEST_CASE("Tile component entry retains its original typed module address",
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E4605u) == nullptr);
 }
+
+TEST_CASE("Resident octant entry returns an explicit sine and cosine pair",
+          "[math][resident-pair]") {
+  using NativePair = Core_Math_RotationTrigPair (*)(int);
+  CHECK(
+      (std::is_same_v<decltype(&Core_Math_LookupSineCosinePair), NativePair>));
+}
+
+TEST_CASE("Resident rotation pair shares every signed halfword and wide angle",
+          "[math][resident-pair]") {
+  for (std::uint32_t bits = 0; bits <= UINT16_MAX; ++bits) {
+    const int angle =
+        std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(bits));
+    const auto pair = Core_Math_LookupSineCosinePair(angle);
+    CHECK(pair.sine == Core_Gte_Sin(angle));
+    CHECK(pair.cosine == Core_Gte_Cos(angle));
+    const int wide = std::bit_cast<std::int32_t>(bits | 0xA5A50000u);
+    const auto wrapped = Core_Math_LookupSineCosinePair(wide);
+    CHECK(wrapped.sine == pair.sine);
+    CHECK(wrapped.cosine == pair.cosine);
+  }
+  CHECK(&Core_Math_LookupSineCosinePair == &Core_Math_LookupRotationSineCosine);
+}
+
+TEST_CASE("Resident rotation pair retains its original typed entry address",
+          "[math][resident-pair][redirect-binding]") {
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  auto* resolved =
+      VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", 0x80041104u);
+  REQUIRE(resolved != nullptr);
+  const auto pair =
+      reinterpret_cast<Core_Math_RotationTrigPair (*)(int)>(resolved);
+  CHECK(pair == Core_Math_LookupRotationSineCosine);
+  CHECK(pair(1536).sine == 2896);
+  CHECK(pair(1536).cosine == -2896);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
+                                          0x80041105u) == nullptr);
+}

@@ -12,6 +12,10 @@
 // Native replacement: shared SDK implementation, not a second legacy body.
 #define Core_Math_BuildRotationXyz Core_Gte_RotMatrix
 
+// decomp: SLUS_010.40 func_80041104 (src/SLUS_010.40/31724.s)
+// Native replacement: shared SDK implementation, not a second legacy body.
+#define Core_Math_LookupSineCosinePair Core_Math_LookupRotationSineCosine
+
 // decomp: SLUS_010.40 rcos (src/SLUS_010.40/31724.s)
 // Native replacement: shared SDK implementation, not a second legacy body.
 #define Core_Math_Cosine Core_Gte_Cos
@@ -52,7 +56,6 @@ int Core_Math_FixedVectorMagnitude(VECTOR* arg0);
 VECTOR* Core_Math_ShortVectorToFixed(VECTOR* arg0, SVECTOR* arg1);
 void Core_Math_NormalizeFixedVector(VECTOR* arg0, VECTOR* arg1);
 int Core_Math_SplitDecimalDigit(int value);
-int Core_Math_LookupSineCosinePair();
 long Core_Math_ArcTangent2(long y, long x);
 int Core_Math_InverseSquareRootParts();
 int Core_Math_NormalizeVectorRegisters();

@@ -12,6 +12,20 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_resident_rotation_pair_redirects_to_the_existing_typed_kernel(self):
+        self.assertEqual(
+            copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03399"],
+            (
+                "Core_Math_LookupRotationSineCosine",
+                r"Native\Engine\src\Core\Math\ScalarMath.c",
+            ),
+        )
+        self.assertIn(
+            ("SLUS_010.40", 0x80041104, "F03399"),
+            copy_fixups.MODULE_FUNCTION_ENTRIES,
+        )
+        self.assertNotIn("F03399", self.owned_items())
+
     def test_tile_component_entry_shares_native_width_helpers_and_callers(self):
         self.assertEqual(
             self.owned_items()["F01772"]["path"],

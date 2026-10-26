@@ -76,13 +76,6 @@ void Core_Math_NormalizeFixedVector(VECTOR* arg0, VECTOR* arg1)
 // decomp: BATTLE.PRG vs_battle_toBCD (src/BATTLE/BATTLE.PRG/5BF94.c:4494)
 int Core_Math_SplitDecimalDigit(int value) { return (value % 10) | ((value / 10) * 16); }
 
-// decomp: SLUS_010.40 func_80041104 (src/SLUS_010.40/31724.s:0) [asm-file: not yet ported]
-int Core_Math_LookupSineCosinePair()
-{
-    VS_UNPORTED("Core::Math::LookupSineCosinePair");
-    return 0;
-}
-
 // decomp: SLUS_010.40 ratan2 (src/SLUS_010.40/31B7C.c:6)
 long Core_Math_ArcTangent2(long y, long x)
 {

@@ -66,6 +66,8 @@ NATIVE_HELPER_HEADERS = {
 }
 
 NATIVE_FUNCTION_REDIRECTS = {
+    "F03399": ("Core_Math_LookupRotationSineCosine",
+               r"Native\Engine\src\Core\Math\ScalarMath.c"),
     "F01017": ("Core_Math_LookupRotationSineCosine",
                r"Native\Engine\src\Core\Math\ScalarMath.c"),
     "F03568": ("Core_IgnoreCall", r"Native\Engine\src\Core\Runtime.c"),
@@ -123,6 +125,7 @@ MODULE_DATA_BLOB_TYPES = {"Content_residentLfoSamples": ("short", 2)}
 MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 
 MODULE_FUNCTION_ENTRIES = (
+    ("SLUS_010.40", 0x80041104, "F03399"),
     ("BATTLE/BATTLE.PRG", 0x800E4604, "F01772"),
     ("BATTLE/BATTLE.PRG", 0x800E6B4C, "F01832"),
     ("BATTLE/BATTLE.PRG", 0x800E6BA0, "F01833"),

@@ -415,6 +415,51 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Shared resident rotation trig pair (#42, 2026-10-26)
+
+F03399 (`func_80041104`, original resident31724.s:147-211) is redirected
+to the existing typed `Core_Math_LookupRotationSineCosine` kernel.
+All63 instructions in its eight octant blocks match F00762
+(BATTLE2EA3C.s:1597-1661) and F01017 (48C7C.s:188-252), after normalizing
+only whitespace/nop spelling. The original callers use the same
+trig-table base, reverse-half base and octant/index selection.
+The native API returns the explicit sine/cosine pair rather than
+recreating t0/t1 outputs or t9 continuation mutation.
+
+This is alias restoration for already-working shared rotation math,
+not another math implementation or a newly fixed gameplay behavior.
+The catalog retains the generated FixedPoint location so its header
+publishes the alias; the real native provider remains ScalarMath.c.
+Only F03399's copied field changes, not provenance or promotion flags.
+
+Evidence is parent9c9c82a7 plus this scoped worktree; private
+`residentpair42-*` retains source comparison/fingerprints, commands,
+dirty state, protected files, binary hashes and outcomes:
+
+- Red `[resident-pair]`:1 case/1 failed assertion proves the missing
+  native angle/pair signature.
+- New3 cases/262,151 assertions cover all65,536 signed-halfword angles,
+  wide-input high-bit independence, sine/cosine values, canonical
+  function-pointer identity and typed resident80041104 resolution/
+  rejected interior alias.
+- Both x64 solution builds link both hosts. Full Debug/Release pass
+  896 cases/6,487,554 assertions each;118 port/audit and102 exact
+  direct-script CI controls pass. Focused/default quality is0
+  actionable/0 new with unchanged baselines.
+- Two native generations preserve309 maintained/owner/reference files
+  and repeat identically across749 outputs. Generated changes are
+  FixedPoint.c/.h and ModulePointers.c. No reference implementation,
+  instruction bytes, asset payload or copied math table is committed.
+- The final audit runs after generation:4207 rows/3762 targets,
+  31 gaps (10 C/C++ references,11 assembly-only,10 missing listings),
+  3122 implementations and151 aliases separately, with no missing
+  definitions. Original cohort155/186; original C-backed135/145,
+  other20/41 complete.
+
+No controller gameplay, all-rotation visual parity, C++ promotion or
+compatibility retirement is inferred. Exact revision CI gates the
+public #42/#4 checklist advance.
+
 ### Explicit tile-distance component entry (#42, 2026-10-26)
 
 F01772 (`func_800E4604`, original7BDD4.s:35-44) now takes first X/Z

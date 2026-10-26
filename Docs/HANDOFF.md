@@ -9,6 +9,23 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 F03399 is a proven alias of the existing typed rotation trig-pair
+  kernel, not another native math implementation. All63 instructions/
+  eight octant blocks in resident31724.s:147-211 match BATTLE2EA3C.s
+  F00762 and48C7C.s F01017 after normalizing nop spelling; caller table
+  setup is the same. The generator redirects its angle/pair API and
+  resident80041104 binding to the canonical provider. Red1/1 proves the
+  former missing ABI; new3/262,151 checks every signed halfword, wide
+  angle metadata, pointer identity and typed original address.
+  Full Debug/Release896/6,487,554 each,118 port/102 direct-CI controls
+  and focused/default0-new quality pass; both hosts link. Two generations
+  preserve309 files/repeat identically. Only F03399's copied catalog
+  field changes; generated FixedPoint.c/.h and ModulePointers.c change.
+  Local cohort155/186,31 gaps (10 C/C++ references,11 assembly-only,
+  10 missing); implementations stay3122 and aliases advance150->151.
+  Existing rotation gameplay stays unchanged; no controller parity,
+  C++ promotion or compatibility-retirement claim. Private
+  `residentpair42-*`; publication/exact CI are tracked on#42.
 - #42 F01772 now has explicit native first-X/first-Z/packed-second inputs
   in the existing TileDistance provider. Original7BDD4.s:35 consumes t0/t1
   then shares the signed16 SQR entry. F01771 now delegates to this helper;
