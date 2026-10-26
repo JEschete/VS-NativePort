@@ -551,6 +551,15 @@ short-budget rows stay blocked. This is one current authored chain/door
 completion, not normal-speed audiovisual parity, an all-scene result or
 the original #167 ACFD matching-image persistent reproduction/producer fix.
 
+Independent Debug1792992005781732-0 on6ab2aef8
+(exe557691c7/PDBdb76150f) uses the same36000/speed8 and original dialogue.
+It exactly matches control13320, quiet gate13440, teardown13452 and280
+confirmations, with0 errors/forced skips. Strict
+`scene30-debug-long-verified.json` verifies every frame of the same
+121-frame destination interval. Both builds therefore complete this
+current standalone authored chain; the unavailable original ACFD image/
+exception/owning-producer requirements remain separate.
+
 The other four reported event-budget cases need state-aware classification,
 not an assumed VM hang. Samples show49/1 phase0 with changing control1/2
 and later phase2 reentry,51/26 already hands off to51/4 with phase0 and

@@ -73,6 +73,11 @@ verification of the current worktree.
   event phase is0 with changing control1/2, and one source entry already
   hands off to its destination. Private `doors151-event-budget-observations`
   and `doors151-scene30-long-verified.json` retain the exact states.
+  Debug1792992005781732-0 on6ab2aef8 (exe557691c7/PDBdb76150f) independently
+  matches control13320/quiet13440/teardown13452 and280 confirmations with
+  0 errors/forced skips. `scene30-debug-long-verified.json` checks the same
+  continuous121-frame interval; this completes the current standalone chain
+  in both builds, not the old ACFD matching-image exception/producer gates.
 - #151's final original410-record Release slice is now observed separately:
   frozen e9f0dbab exe a0294afe/PDB10b89faa,
   run1792988508566012-0, exact inventory indices591..1000 starting
