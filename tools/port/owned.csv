@@ -1,4 +1,5 @@
 id,kind,name,path,header,since,notes
+F01829,function,Core_SortPointersByDescendingKey,Native\Engine\src\Core\PointerSort.cpp,Native\Engine\include\Core\PointerSort.h,2026-10-25,7E05C.s:114 midpoint descending signed-key quicksort with original tie identities; full native pointer strides and inclusive0..255 ranges; shared by typed AI candidate staging
 F01820,function,Battle_Ai_PackActorAiPersistenceFlags,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-25,7DE94.s:9-40 exact typed persistence projection shared by room cache and native snapshot; missing state returns-1 without mutation
 F01831,function,Battle_Ai_ClearActorAiNavigationReset,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-25,7E05C.s:241-252 clears only actor AI hold byte0x1A; void native slot ABI and missing-state no-op
 F01835,function,Battle_Ai_InitializeActorAiExtensionHook,Native\Game\src\Battle\Ai\ActorCleanup.cpp,Native\Game\src\Battle\Ai\ActorCleanup.h,2026-10-25,7E05C.s:504-512 original empty hook returns immediately; delay slot affects only caller-saved t0

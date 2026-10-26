@@ -67,6 +67,7 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\ContentTests.cpp" />
+    <ClCompile Include="src\CorePointerSortTests.cpp" />
     <ClCompile Include="src\CoreTests.cpp" />
     <ClCompile Include="src\CursorMemoryTests.cpp" />
     <ClCompile Include="src\DataMenuTests.cpp" />

@@ -7,8 +7,8 @@ native-code change, or resource-file write is performed.
 
 - Catalog rows checked: **4,207**.
 - Port-target rows reconciled: **3,762**.
-- Open native entries: **59** (59 stubs and 0 partial implementations).
-- Matching C/C++ reference bodies located: **24**.
+- Open native entries: **58** (58 stubs and 0 partial implementations).
+- Matching C/C++ reference bodies located: **23**.
 - Assembly located, but no matching C body located: **25**.
 - Assembly-backed declarations with no local assembly located: **10**.
 
@@ -75,7 +75,7 @@ to an ignored build directory first.
 
 ## Tagged file: BATTLE/BATTLE.PRG/7E05C.s
 
-All **21** catalog entries are accounted for: **12 already implemented**, **8 open with C counterparts**, and **1 open with assembly only**.
+All **21** catalog entries are accounted for: **13 already implemented**, **7 open with C counterparts**, and **1 open with assembly only**.
 
 | ID | Original symbol | Native status | Source availability |
 | --- | --- | --- | --- |
@@ -97,7 +97,7 @@ All **21** catalog entries are accounted for: **12 already implemented**, **8 op
 | F01843 | `func_800E75EC` | implemented | c-or-cpp-body-available |
 | F01844 | `func_800E7608` | implemented | c-or-cpp-body-available |
 | F01845 | `func_800E7660` | stub | c-or-cpp-body-available |
-| F01829 | `func_800E6974` | stub | c-or-cpp-body-available |
+| F01829 | `func_800E6974` | implemented | c-or-cpp-body-available |
 | F01833 | `func_800E6BA0` | stub | assembly-only |
 | F01834 | `func_800E6C34` | stub | c-or-cpp-body-available |
 
@@ -137,7 +137,7 @@ as behaviorally complete. No native gameplay issue is closed by this audit.
 
 | Reference | Revision | Production source files scanned | Source SHA-256 |
 | --- | --- | --- | --- |
-| `rood-reverseWin` | `e9f0dbabe2827b4b3630882a7e0214090c8d6a42` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
+| `rood-reverseWin` | `941e1d2a441d300e9a8a71fe21644c1cc37fc3dd` | 383 | `bf50c6066554b4d602d390f2494f91ec4aedaf41399352e7d62a227a31c76468` |
 | `rood-reverse` | `4edbdbf5a797c733dd7f33a52c400de69219401c` | 393 | `60b2ce44d09822a777e76caac7f2ef0236a8e73cb434b9da27c0bb8973f94096` |
 | `rood-reverse-noprompt` | `39821e4fc0353dc89855f5f29fd678d71545daa2` | 389 | `e3e5d73ccd7c08971c9558baad6e6a2df2e2fe0bcd9b8961e133476e86db7a8c` |
 | `rood-boi` | `e59320caedba5855cb050f24f3ba007204faea78` | 758 | `fa68a5f07470a4f970c81453cc605ecad82f8d17fc274168e5bf5eeba5e9a1d8` |

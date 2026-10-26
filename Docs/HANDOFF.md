@@ -9,6 +9,24 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42's F01829 pointer-key sort now has one Core-owned native kernel shared
+  with the already-working typed AI ranking/promotion path, reaching128/186
+  original entries and58 gaps (23 C/C++ references,25 assembly-only,
+  10 missing listings). Original7E05C.s:114 and the C counterpart establish
+  strict signed midpoint partitioning and tie identities; no std::sort or
+  stable-sort behavior change is introduced. Typed AI pointers stage through
+  a bounded16-entry void-pointer array without alias-punning or Game types
+  in Engine. The generic kernel supports original inclusive byte ranges,
+  full native strides and signed32 key reads without record mutation.
+  Red ABI rejects the old int() stub. Core4/1195 and combined ranking
+  21/4679 controls pass both builds; full Debug/Release800/3,532,240 each,
+  95 port controls and0-new focused/default quality pass. Two generations
+  preserve306 paths and repeat identically, removing only the obsolete
+  generated Containers.c/.h and switching the original module symbol's
+  provider. Selective Engine/Tests rendering preserves the owner solution.
+  M2C output retains guest32 pointer/recursive-register artifacts and is
+  evidence, not copied storage. Private `sort42-*`; no whole AI-state,
+  planning gameplay or compatibility retirement claim.
 - #151/#149 now have one complete authored scene30->26 chain observation,
   not just a short-budget block. Release1792989783417541-0 on runtime
   961cc1e8/docs af1435ce uses z048-r006-d000,36000 ticks/speed8 and280

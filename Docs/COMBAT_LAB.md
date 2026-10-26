@@ -415,6 +415,46 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Shared native signed-key pointer sort (#42, 2026-10-25)
+
+F01829 (`func_800E6974`, original7E05C.s:114) is now an owned Core
+implementation with one kernel shared by the existing native AI ranking
+and weighted-promotion sort. Prior Game code already implemented the exact
+midpoint partition while the exported Core entry remained an int() stub.
+The refactor removes that duplication rather than replacing the original
+tie ordering with std::sort/stable_sort.
+
+The typed native API sorts an inclusive pointer-array range within the
+original byte-index limits. Keys are signed32 first words read safely with
+memcpy; pointer strides and ownership are native, not PS1 words. It
+permutes only pointers. Empty/single ranges need no record read; invalid
+nonempty contracts are explicit errors, not success-shaped defaults.
+The AI adapter uses a bounded16-entry void-pointer staging array and
+compile-time key-layout/type checks, keeping Engine independent of Game
+without type-punning a typed pointer array.
+
+Red ABI compilation rejects the old int() export. Core pointer tests pass
+4 cases/1195 assertions: signed/tied identity order, outside-range
+canaries, empty/single cases, full256 entries, signed extrema, record/
+pointer preservation and every partial range of a16-entry list. Existing
+AI ranking/promotion controls retain tie ordering and RNG behavior;
+combined pointer/planning selection is21 cases/4679 assertions in both
+configurations. Full Debug/Release suites pass800 cases/3,532,240
+assertions each;95 copier/audit controls and focused/default quality
+are0 new, with both hosts linked.
+
+Two copier runs preserve306 protected paths and repeat identically.
+Obsolete generated Containers.c/.h disappear under registered ownership;
+the original module symbol keeps its binding via the new provider header.
+Only Engine/Tests projects are rendered with existing scaffold APIs,
+preserving the dirty owner solution. Original C, assembly and retained
+M2C output establish the algorithm; M2C's guest-pointer and recursive
+register artifacts are not copied into native storage.
+Private `sort42-*` retains commands, red/green and generation evidence.
+This advances128/186 original entries,58 remaining, without whole
+planning gameplay, AI-state C++ promotion or compatibility retirement.
+Publication and exact CI are recorded on#42.
+
 ### Complete authored scene30 return chain (#151/#149, 2026-10-25)
 
 The3600-tick observation is not evidence of a permanent event hang:

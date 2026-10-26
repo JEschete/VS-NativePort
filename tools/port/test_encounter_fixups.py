@@ -10,6 +10,18 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_native_pointer_sort_is_owned_and_shared_with_ai_ranking(self):
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F01829"]["path"], r"Native\Engine\src\Core\PointerSort.cpp"
+        )
+        root = Path(__file__).resolve().parents[2]
+        source = (root / r"Native\Game\src\Battle\Ai\PlanningPrimitives.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Core_SortPointersByDescendingKey(pointers.data()", source)
+        self.assertNotIn("SortCandidatePointers(entries.first(", source)
+
     def test_ai_lifecycle_leaves_share_the_native_persistence_projection(self):
         owned = self.owned_items()
         for identifier, name in (

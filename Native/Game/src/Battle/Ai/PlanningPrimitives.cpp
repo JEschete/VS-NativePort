@@ -4,15 +4,18 @@
 #include "Battle/Ai/PlanningPrimitives.h"
 
 #include <algorithm>
+#include <array>
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <iterator>
 #include <span>
-#include <utility>
+#include <type_traits>
 
 #include "Battle/Ai/PlanningSort.hpp"
+#include "Core/PointerSort.h"
 
 extern "C" {
 #include "Actors/ActorState.h"
@@ -23,6 +26,9 @@ extern "C" {
 }
 
 namespace {
+static_assert(offsetof(Battle_Ai_CandidateEntryView, reserved0) == 0);
+static_assert(std::is_same_v<decltype(Battle_Ai_CandidateEntryView::reserved0),
+                             std::int32_t>);
 constexpr int kLimbCount = 6;
 constexpr int kActionsPerLimb = 4;
 constexpr unsigned kRelationClassThree = 3;
@@ -62,16 +68,19 @@ namespace VS::Battle::ai {
 // Equal scores must retain the original midpoint partition's tie ordering.
 void SortCandidatePointers(std::span<Battle_Ai_CandidateEntryView*> entries) {
   if (entries.size() < 2) return;
-  std::swap(entries.front(), entries[(entries.size() - 1) / 2]);
-  std::size_t boundary = 0;
-  for (std::size_t index = 1; index < entries.size(); ++index) {
-    if (entries[index]->reserved0 > entries.front()->reserved0) {
-      std::swap(entries[++boundary], entries[index]);
-    }
+  constexpr std::size_t kMaximumCandidates = 16;
+  Require(entries.size() <= kMaximumCandidates,
+          "AI candidate sort exceeds the native candidate list");
+  std::array<void*, kMaximumCandidates> pointers{};
+  for (std::size_t index = 0; index < entries.size(); ++index) {
+    pointers[index] = entries[index];
   }
-  std::swap(entries.front(), entries[boundary]);
-  SortCandidatePointers(entries.first(boundary));
-  SortCandidatePointers(entries.subspan(boundary + 1));
+  Core_SortPointersByDescendingKey(pointers.data(), 0,
+                                   static_cast<int>(entries.size() - 1));
+  for (std::size_t index = 0; index < entries.size(); ++index) {
+    entries[index] =
+        static_cast<Battle_Ai_CandidateEntryView*>(pointers[index]);
+  }
 }
 }  // namespace VS::Battle::ai
 

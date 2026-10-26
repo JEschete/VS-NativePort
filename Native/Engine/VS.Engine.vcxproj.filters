@@ -303,12 +303,6 @@
     <ClInclude Include="src\Core\Compatibility.h">
       <Filter>src\Core</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Containers.c">
-      <Filter>src\Core</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Core\Containers.h">
-      <Filter>src\Core</Filter>
-    </ClInclude>
     <ClCompile Include="src\Core\FrameClock.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -396,6 +390,9 @@
     <ClInclude Include="src\Core\Overlays.h">
       <Filter>src\Core</Filter>
     </ClInclude>
+    <ClCompile Include="src\Core\PointerSort.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Core\Random.c">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -724,6 +721,9 @@
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Log.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\PointerSort.h">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Random.hpp">
