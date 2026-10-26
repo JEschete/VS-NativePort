@@ -466,6 +466,12 @@ and outcomes:
   ScreenEffects.c/.h and ModulePointers.c. Only Game/Tests project files
   are selectively regenerated; the owner solution remains unchanged.
   All function-catalog fields and source data sizes/types remain intact.
+- Initial publication4b0cf790 failed exact CI40322225799: CI runs the
+  source-adaptation test as a script, where its new package import could
+  not resolve the repository root. The follow-up uses the same explicit
+  file-path scaffold loader as the quality runner. Exact CI entry97 and
+  full113 controls pass, retaining every assertion. Native sources,
+  binary proof and quality baselines are unchanged by that harness fix.
 
 This is a native storage/ownership and symbol-export repair, not another
 function-gap implementation: #42 remains149/186 with37 gaps. F02458's

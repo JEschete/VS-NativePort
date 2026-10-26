@@ -2,6 +2,7 @@
 
 import csv
 import re
+import runpy
 import unittest
 from pathlib import Path
 
@@ -12,10 +13,10 @@ import native_views
 
 class EncounterFixupTests(unittest.TestCase):
     def test_screen_effect_defaults_own_native_state_and_use_typed_access(self):
-        from tools.scaffold.gen_solution import needs_c_headers
-
+        root = Path(__file__).resolve().parents[2]
+        scaffold = runpy.run_path(str(root / r"tools\scaffold\gen_solution.py"))
         self.assertTrue(
-            needs_c_headers("VS.Game", r"src\Effects\ScreenEffectState.cpp")
+            scaffold["needs_c_headers"]("VS.Game", r"src\Effects\ScreenEffectState.cpp")
         )
         owned = self.owned_items()
         self.assertEqual(owned["G00512"]["kind"], "global")
@@ -31,7 +32,6 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(
             copy_fixups.FIXES["F01390"][0][1], "&Effects_screenEffectDefaults"
         )
-        root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\DATA_LEDGER.csv").open(
             encoding="utf-8", newline=""
         ) as stream:

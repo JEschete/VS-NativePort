@@ -26,7 +26,12 @@ verification of the current worktree.
   and repeat identically; only ScreenEffects.c/.h and ModulePointers.c
   change. No disc I/O completion, overlay execution, historical crash
   cause, promotion or retirement claim. Private `screenstate194-*`;
-  publication/exact CI tracked on#194. Cohort stays149/186 with37 gaps.
+  initial4b0cf790 publication failed CI40322225799 because direct-script
+  execution lacked the new cross-directory package import. The follow-up
+  reuses the quality runner's file-path scaffold loader: exact CI entry97
+  and full113 controls pass with all assertions retained and no native
+  source/baseline changes. Final publication/exact CI tracked on#194.
+  Cohort stays149/186 with37 gaps.
 - F01769 timing remains gated under plan9.9/M2: deterministic simulation,
   original RNG and no wall-clock in game logic. Owner was unavailable;
   do not adopt the earlier live-monotonic suggestion. Next observation is
