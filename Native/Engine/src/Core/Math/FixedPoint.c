@@ -83,20 +83,6 @@ int Core_Math_LookupSineCosinePair()
     return 0;
 }
 
-// decomp: SLUS_010.40 rcos (src/SLUS_010.40/31724.s:0) [asm-file: not yet ported]
-int Core_Math_Cosine()
-{
-    VS_UNPORTED("Core::Math::Cosine");
-    return 0;
-}
-
-// decomp: SLUS_010.40 rsin (src/SLUS_010.40/31724.s:0) [asm-file: not yet ported]
-int Core_Math_Sine()
-{
-    VS_UNPORTED("Core::Math::Sine");
-    return 0;
-}
-
 // decomp: SLUS_010.40 ratan2 (src/SLUS_010.40/31B7C.c:6)
 long Core_Math_ArcTangent2(long y, long x)
 {

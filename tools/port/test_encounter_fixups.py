@@ -30,6 +30,8 @@ class EncounterFixupTests(unittest.TestCase):
         for identifier, name in (
             ("F00764", "Core_Gte_Cos"),
             ("F00765", "Core_Gte_Sin"),
+            ("F03400", "Core_Gte_Cos"),
+            ("F03401", "Core_Gte_Sin"),
         ):
             self.assertEqual(
                 copy_fixups.NATIVE_FUNCTION_REDIRECTS[identifier],

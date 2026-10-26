@@ -9,6 +9,21 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42's resident SDK rcos/rsin F03400/F03401 now use the same canonical native
+  scalar bodies, reaching124/186 original entries and62 gaps (27 C/C++
+  references,25 assembly-only,10 missing listings). Their31724.s:9/12
+  instruction bodies equal the BATTLE pair after label normalization; no
+  new algorithm is introduced. Red SDK int() ABI checks become green6
+  cases/41,062 assertions covering both exact original output fingerprints,
+  all4096 cross-family results, extreme wrapping and all four original
+  module-address resolution/invocation/interior-rejection paths. Full
+  Debug/Release791/3,432,434 each,93 copier controls and0-new focused quality
+  pass; both hosts link. Two generations preserve302 paths and repeat
+  identically, changing only FixedPoint.c/.h; the #186 loader fix keeps the
+  existing original-address rows unchanged. All11 configured native
+  redirects retain bindings. Private `resident-trig42-*`; prior122 checks
+  and original186 order are preserved. No whole GTE/matrix/ending promotion
+  or compatibility retirement is claimed.
 - #186 fixes the loader surface of native aliases: redirect macros were not
   counted as emitted functions, so the copier omitted their original-address
   module symbols. Actual production-resolver red controls return null for

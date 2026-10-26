@@ -20,6 +20,8 @@ static_assert(
     std::is_same_v<decltype(&Core_Math_SineFixedPoint), int (*)(int)>);
 static_assert(
     std::is_same_v<decltype(&Core_Math_CosineFixedPoint), int (*)(int)>);
+static_assert(std::is_same_v<decltype(&Core_Math_Sine), int (*)(int)>);
+static_assert(std::is_same_v<decltype(&Core_Math_Cosine), int (*)(int)>);
 
 namespace {
 void CheckTrigBounds(int value) {
@@ -41,23 +43,27 @@ TEST_CASE("Battle fixed trigonometry uses the canonical native implementations",
           "[math][sdk-gaps][fixed-trig]") {
   CHECK(&Core_Math_SineFixedPoint == &Core_Gte_Sin);
   CHECK(&Core_Math_CosineFixedPoint == &Core_Gte_Cos);
+  CHECK(&Core_Math_Sine == &Core_Gte_Sin);
+  CHECK(&Core_Math_Cosine == &Core_Gte_Cos);
 }
 
 TEST_CASE(
     "Native trig redirects remain available through original module addresses",
     "[math][sdk-gaps][fixed-trig][redirect-binding]") {
   const bool cosine = GENERATE(false, true);
+  const bool resident = GENERATE(false, true);
+  const char* module = resident ? "SLUS_010.40" : "BATTLE/BATTLE.PRG";
+  const unsigned address = resident ? (cosine ? 0x80040F24u : 0x80040F28u)
+                                    : (cosine ? 0x80098AB4u : 0x80098AB8u);
   const auto symbols =
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  void* resolved = VS::Content::ResolveModuleAddress(
-      symbols, "BATTLE/BATTLE.PRG", cosine ? 0x80098AB4u : 0x80098AB8u);
+  void* resolved = VS::Content::ResolveModuleAddress(symbols, module, address);
   REQUIRE(resolved != nullptr);
   const auto function = reinterpret_cast<int (*)(int)>(resolved);
   CHECK(function == (cosine ? Core_Gte_Cos : Core_Gte_Sin));
   CHECK(function(1024) == (cosine ? 0 : 4096));
-  CHECK(VS::Content::ResolveModuleAddress(
-            symbols, "BATTLE/BATTLE.PRG",
-            (cosine ? 0x80098AB4u : 0x80098AB8u) + 1) == nullptr);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, module, address + 1) ==
+        nullptr);
 }
 
 TEST_CASE("Fixed trigonometry retains mathematical octants at Q12 scale",
@@ -76,6 +82,8 @@ TEST_CASE("Every fixed-trig angle retains range phase sign and turn period",
     const int cosine = Core_Math_CosineFixedPoint(angle);
     CheckTrigBounds(sine);
     CheckTrigBounds(cosine);
+    CHECK(Core_Math_Sine(angle) == sine);
+    CHECK(Core_Math_Cosine(angle) == cosine);
     CHECK(sine == -Core_Math_SineFixedPoint(angle + 2048));
     CHECK(cosine == Core_Math_SineFixedPoint(angle + 1024));
     CHECK(sine == Core_Math_SineFixedPoint(angle - 4096));
@@ -87,12 +95,16 @@ TEST_CASE(
     "Every fixed-trig result matches the original signed table fingerprint",
     "[math][sdk-gaps][fixed-trig]") {
   std::uint64_t hash = 14695981039346656037ull;
+  std::uint64_t resident_hash = hash;
   for (int angle = 0; angle < 4096; ++angle) {
     hash = HashFixedSample(hash, Core_Math_SineFixedPoint(angle));
     hash = HashFixedSample(hash, Core_Math_CosineFixedPoint(angle));
+    resident_hash = HashFixedSample(resident_hash, Core_Math_Sine(angle));
+    resident_hash = HashFixedSample(resident_hash, Core_Math_Cosine(angle));
   }
   // Original sine/cosine pairs in angle order, each encoded as signed LE32.
   CHECK(hash == 0x8E620CA359EB4481ull);
+  CHECK(resident_hash == 0x8E620CA359EB4481ull);
 }
 
 TEST_CASE("Fixed-trig inputs wrap safely across the full signed integer range",
@@ -118,6 +130,8 @@ TEST_CASE("Fixed-trig inputs wrap safely across the full signed integer range",
     CHECK(Core_Math_SineFixedPoint(angle) == Core_Math_SineFixedPoint(phase));
     CHECK(Core_Math_CosineFixedPoint(angle) ==
           Core_Math_CosineFixedPoint(phase));
+    CHECK(Core_Math_Sine(angle) == Core_Math_SineFixedPoint(phase));
+    CHECK(Core_Math_Cosine(angle) == Core_Math_CosineFixedPoint(phase));
   }
 }
 

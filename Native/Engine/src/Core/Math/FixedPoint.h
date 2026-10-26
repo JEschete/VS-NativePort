@@ -12,6 +12,14 @@
 // Native replacement: shared SDK implementation, not a second legacy body.
 #define Core_Math_BuildRotationXyz Core_Gte_RotMatrix
 
+// decomp: SLUS_010.40 rcos (src/SLUS_010.40/31724.s)
+// Native replacement: shared SDK implementation, not a second legacy body.
+#define Core_Math_Cosine Core_Gte_Cos
+
+// decomp: SLUS_010.40 rsin (src/SLUS_010.40/31724.s)
+// Native replacement: shared SDK implementation, not a second legacy body.
+#define Core_Math_Sine Core_Gte_Sin
+
 // decomp: SLUS_010.40 OuterProduct0 (src/SLUS_010.40/32154.s)
 // Native replacement: shared SDK implementation, not a second legacy body.
 #define Core_Math_CrossProductFixed Core_Gte_OuterProduct0
@@ -45,8 +53,6 @@ VECTOR* Core_Math_ShortVectorToFixed(VECTOR* arg0, SVECTOR* arg1);
 void Core_Math_NormalizeFixedVector(VECTOR* arg0, VECTOR* arg1);
 int Core_Math_SplitDecimalDigit(int value);
 int Core_Math_LookupSineCosinePair();
-int Core_Math_Cosine();
-int Core_Math_Sine();
 long Core_Math_ArcTangent2(long y, long x);
 int Core_Math_InverseSquareRootParts();
 int Core_Math_MultiplyMatrixIntoLeft();

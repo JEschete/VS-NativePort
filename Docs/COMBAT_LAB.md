@@ -415,6 +415,34 @@ Local `door151-room6-production-controller.json` retains all acknowledged
 actions/commands; `door151-room6-production-verified.json` contains strict
 HP, death, route and quiet-interval checks.
 
+### Resident SDK scalar trig exports (#42, 2026-10-25)
+
+F03400/F03401 (`rcos`/`rsin`, SLUS31724.s:9/12) have instruction bodies
+identical to the BATTLE scalar pair after label normalization and use the
+same original table. They now use the existing canonical native alias
+mechanism too; no lookup/math algorithm or working ending implementation
+changes. Native declarations are checked as int(int), replacing old int()
+stubs. M2C private nop/fallthrough extraction and its known unsigned16
+negation inference limit are retained as `resident-trig42-*`, not copied
+into runtime semantics.
+
+Both Debug and Release pass6 cases/41,062 assertions. Both scalar families
+independently match the complete original signed-output fingerprint
+8E620CA359EB4481; all4096 results also compare across families. Extreme int
+inputs preserve low12 wrapping. Original resident80040F24/80040F28 entries,
+alongside the BATTLE entries, resolve to and invoke the correct typed
+canonical bodies and reject+1 interior function addresses.
+
+Full suites pass791 cases/3,432,434 assertions each;93 copier/audit controls
+and focused quality are0 new, with both hosts linked. Two copier runs
+preserve302 protected paths and repeat identically, changing only
+FixedPoint.c/.h. Existing loader rows remain unchanged because #186's
+generic fix already includes the two new macro aliases; all11 configured
+native redirects retain their original-address bindings. No original table
+payload is committed. This advances124/186 original entries,62 remaining,
+without whole GTE/matrix/ending promotion or compatibility retirement.
+Publication and exact CI are recorded on#42.
+
 ### Native redirect loader bindings (#186, 2026-10-25)
 
 The trig source aliases exposed a distinct loader regression: the copier's

@@ -70,6 +70,8 @@ NATIVE_FUNCTION_REDIRECTS = {
     "F00765": ("Core_Gte_Sin", r"Native\Engine\src\Core\Gte.cpp"),
     "F03397": ("Core_Gte_RotMatrixYXZ", r"Native\Engine\src\Core\Gte.cpp"),
     "F03398": ("Core_Gte_RotMatrix", r"Native\Engine\src\Core\Gte.cpp"),
+    "F03400": ("Core_Gte_Cos", r"Native\Engine\src\Core\Gte.cpp"),
+    "F03401": ("Core_Gte_Sin", r"Native\Engine\src\Core\Gte.cpp"),
     "F03407": ("Core_Gte_OuterProduct0", r"Native\Engine\src\Core\Gte.cpp"),
     "F03410": ("Core_Gte_SquareRoot12", r"Native\Engine\src\Core\Gte.cpp"),
     "F03411": ("Core_Gte_VectorNormal", r"Native\Engine\src\Core\Gte.cpp"),
