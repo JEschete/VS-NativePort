@@ -14,9 +14,12 @@ verification of the current worktree.
   retention justification. An unresolved inventory alone cannot close it.
   Scoped naming milestone `aec9a7be` has exact green Source Quality
   `40556560359`; Debug/Release each pass 41 cases/912 assertions.
-  A further local core-memory/RNG batch adds 13 verified bindings and four
-  justified retained names, with Debug/Release 42/719,587, stable generation,
-  121 preserved owned paths and focused quality zero new.
+  Core-memory/RNG milestone `5d439e3c` has exact green `40557984898`:
+  13 verified bindings and four justified retained names, Debug/Release
+  42/719,587, stable generation, 121 preserved owned paths and focused
+  quality zero new. A fresh complete reference index covers 138 translation
+  units/100,172 occurrences with zero unresolved/text mismatches and matches
+  the generation input exactly; it does not certify local-name meanings.
   The lexical snapshot still contains 2,131 file/name pairs in 365 files;
   that is not an individually reviewed count. See
   [semantic sweep evidence](NAMING_CONVENTIONS.md#116-native-semantic-sweep-148-2026-10-27).

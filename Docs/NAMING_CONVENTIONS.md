@@ -743,3 +743,17 @@ files, still subject to the same false-positive and binding-identity limits.
 All candidates in the reviewed input controller, memory-copy, random and
 runtime source/header files now have either verified replacements or specific
 retention evidence. Other files are not implicitly marked reviewed.
+
+The second batch is published as `5d439e3c`, with successful exact-revision
+Source Quality run `40557984898`; its isolated staged copier suite is 124/124.
+The final reference-index command is
+`.venv-3\Scripts\python.exe tools\port\ref_index.py --out
+build\quality\issue148-reviewed-refs.json`. On `5d439e3c` with unrelated dirty
+work retained, it visits all 138 original translation units and resolves
+100,172 occurrences across 215 source files: zero unresolved occurrences,
+zero text mismatches, and exact occurrence-map equality with
+`build\port\refs.json` used by generation. The 22 original error translation
+units remain the documented old-C parsing limitations, with zero unresolved
+references in them. Log: `build\quality\issue148-reference-index.log`.
+Resolving an occurrence to its ledger ID is not a semantic review of every
+local or parameter; #148's individual-review closure gate remains unmet.
