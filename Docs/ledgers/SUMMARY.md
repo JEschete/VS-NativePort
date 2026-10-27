@@ -70,6 +70,23 @@ notes without blanket verification or retirement claims.
 
 ## Inventory snapshots versus current status
 
+The separate [native symbol review](NATIVE_SYMBOL_REVIEW.csv), completed for
+#148 on 2026-10-27, records 570 individually justified binding/snapshot
+retentions. It complements the existing function/field evidence; it does not
+replace those ledgers or advance their status columns. Each record includes a
+specific binding, rationale, source evidence, normalized-LF source SHA-256 and
+exact identifier positions. Separate reviewed committed/dirty variants prevent
+owner edits from being included in a naming commit or silently approved.
+
+The expanded C/C++ inventory includes implementations, headers, modules and
+inline/template bodies, including all 28 current `.inl` producers. On the final
+dirty source snapshot, all 1,873 lexical occurrences in 362 file/name pairs
+have explicit decisions; the committed snapshot has 1,871 occurrences/361 pairs.
+This intentionally retains meaningful math/SDK names, unused formals,
+declaration-only artifacts and specifically justified mixed/unknown roles.
+It is not a claim that every short spelling or opaque field has a known meaning.
+See [the exact commands and limits](../NAMING_CONVENTIONS.md#116-native-semantic-sweep-148-2026-10-27).
+
 [SOURCE_FILE_LEDGER.md](SOURCE_FILE_LEDGER.md) and
 [SDK_API_LEDGER.md](SDK_API_LEDGER.md) retain reference-inventory counts and
 per-file/per-API gates. Their original-source counts and unchecked boxes are

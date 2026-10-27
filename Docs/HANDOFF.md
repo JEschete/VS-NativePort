@@ -9,24 +9,29 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
-- #148's owner clarified the closure gate: individually source-review every
-  remaining candidate, then give it a proven semantic name or a specific
-  retention justification. An unresolved inventory alone cannot close it.
-  Scoped naming milestone `aec9a7be` has exact green Source Quality
-  `40556560359`; Debug/Release each pass 41 cases/912 assertions.
-  Core-memory/RNG milestone `5d439e3c` has exact green `40557984898`:
-  13 verified bindings and four justified retained names, Debug/Release
-  42/719,587, stable generation, 121 preserved owned paths and focused
-  quality zero new. A fresh complete reference index covers 138 translation
-  units/100,172 occurrences with zero unresolved/text mismatches and matches
-  the generation input exactly; it does not certify local-name meanings.
-  The lexical snapshot still contains 2,131 file/name pairs in 365 files;
-  that is not an individually reviewed count. See
+- #148's exhaustive source-backed naming/retention review is complete for
+  the sweep scope, including all 28 inline-template producers. The 570
+  individual binding/snapshot records in
+  [NATIVE_SYMBOL_REVIEW.csv](ledgers/NATIVE_SYMBOL_REVIEW.csv) cover every
+  remaining lexical occurrence: 1,873 occurrences/362 file-name pairs in the
+  dirty tree and 1,871/361 in committed sources, with zero uncovered or extra
+  active positions. Unknown/mixed roles, unused formals and meaningful
+  SDK/math names have specific justifications, not blanket whitelists.
+  Published implementation checkpoints through lifecycle `b41e4343` have
+  exact green CI (`40592629849` for that revision). Latest Debug/Release
+  render tests each pass 150/1,804,142 and lifecycle tests 71/7,094;
+  all 742 generated and 121 owned paths are checked across stable repeats.
+  Final fresh reference indexing covers 138 translation units/100,172
+  occurrences with zero unresolved/text mismatches and exact generation-map
+  equality; 39 naming tests and focused inventory-tool quality pass.
+  Coupled copier/masking defects #219/#220/#221 are fixed and closed.
+  The maintained inventory command and per-cohort evidence are in
   [semantic sweep evidence](NAMING_CONVENTIONS.md#116-native-semantic-sweep-148-2026-10-27).
-  The following resumed-work entry is earlier dirty-tree context: its #148
-  unpublished status is superseded here. Save, scene-catalog, #218 and the
-  owner document deletion remain separate uncommitted work; do not stage them
-  with #148.
+  Final publication/CI and issue-closure evidence are recorded on #148.
+  Naming does not certify all gameplay, C++ promotion or compatibility
+  retirement. The following resumed-work entry is historical #148 context:
+  save, scene-catalog, #218, owner guidance and the owner document deletion
+  remain separate uncommitted work; do not stage them with #148.
 - Owner-directed #151 retry optimization now adds `--door-resume
   <sequence-results.json>`. Subsequent fix runs must reuse a checkpoint and
   select the broken case/from point, not replay the132-stage passed prefix.

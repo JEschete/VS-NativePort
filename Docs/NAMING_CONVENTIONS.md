@@ -1173,3 +1173,66 @@ and field batches independently verify all 742 manifest paths and 121 unchanged
 owned paths over stable repeat generations. Evidence:
 `build\quality\issue148-lifecycle-*`. These are naming/layout-preservation checks,
 not new certification of legacy card I/O, MDEC playback or compatibility retirement.
+
+The lifecycle milestone is published in `b41e4343`, exact green `40592629849`.
+The final explicit retention reconciliation is persisted in
+`Docs\ledgers\NATIVE_SYMBOL_REVIEW.csv`: 570 binding/snapshot records with
+specific rationale and source evidence, not an automatically accepted unresolved
+list. Each record is tied to exact identifier line/column positions and the
+SHA-256 of normalized-LF source text. Both committed and owner-dirty variants
+are recorded where required; an inactive variant grants no approval to changed
+source. Existing function/data/type/field status columns remain unchanged.
+
+The maintained command is:
+
+```powershell
+.\.venv-3\Scripts\python.exe -m tools.naming.native_symbol_inventory `
+  --review Docs\ledgers\NATIVE_SYMBOL_REVIEW.csv --check
+```
+
+Without `--review`, it only inventories candidates and grants no semantic
+approvals. `--check` requires explicit review data and fails on every uncovered
+occurrence or extra position in an active snapshot. Changed source hashes
+require fresh review; do not mechanically refresh them to conceal a failure.
+The outputs are `build\quality\native-symbol-inventory.csv` and
+`build\quality\native-symbol-review-report.json`. Comments and ordinary/raw/
+character literals are excluded while numeric separators and lexical false
+positives such as `speed`, `spec`, SDK UV members and `temp_directory_path`
+remain visible for contextual review.
+
+On source revision `b41e4343` with the preserved unrelated dirty work, the command
+scans 1,062 source/header/inline/module files. Every one of 1,873 remaining
+occurrences (362 file/name pairs, 176 files) is specifically covered, with zero
+unreviewed or extra active positions. This includes 184 occurrences in inline
+files; all 28 `.inl` producers are in scope. Independent committed-HEAD
+reconciliation covers all 1,871 occurrences (361 pairs, 175 files) in 1,059
+source files, also with zero uncovered/extra positions. The difference is
+reviewed owner work, not an exclusion or permission to commit it.
+Evidence: `build\quality\issue148-final-retention-verification.json`.
+
+The retained decisions distinguish individual SDK packet coordinates and
+vector inputs/outputs, each interpolation lambda attribute, unused ABI formals,
+uninitialized dead declarations, text budgets, spline progress and explicitly
+described compiler-coalesced lifetimes. Remaining uncertainty is stated in each
+binding's rationale rather than disguised as a guessed semantic name. These
+finite source-review decisions finish the sweep's naming/retention gate;
+they do not certify every gameplay path or retire any compatibility layer.
+
+Final validation on the same native source revision also passes all 39 naming
+tests (including seven inventory/review positive and negative controls), 18
+mask/audit tests and focused inventory-tool quality with zero new findings.
+The inventory and review report repeat byte-identically. The exact staged
+inventory tests and all 570 CSV records were separately checked.
+
+The final fresh reference-index command is
+`.venv-3\Scripts\python.exe tools\port\ref_index.py --out
+build\quality\issue148-final-refs.json`. It covers 138 translation units,
+215 source files and 100,172 occurrences, with zero unresolved occurrences,
+zero text mismatches and exact reference-map equality with
+`build\port\refs.json`. The 22 original diagnostic-bearing translation units
+remain explicitly reported, with zero unresolved references in them; this is
+not a claim that the original PS1 source compiles unmodified as native C++.
+Evidence: `build\quality\issue148-final-reference-index.log` and
+`build\quality\issue148-final-reference-verification.json`. No quality baseline,
+original reference source, owned implementation or unrelated owner work is
+changed by this final reconciliation.
